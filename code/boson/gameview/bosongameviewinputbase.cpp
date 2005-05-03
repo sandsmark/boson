@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,62 +17,87 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "bosonbigdisplayinputbase.h"
-#include "bosonbigdisplayinputbase.moc"
+#include "bosongameviewinputbase.h"
+#include "bosongameviewinputbase.moc"
 
-#include "bosonbigdisplaybase.h"
-
-#include "bosonconfig.h"
-#include "boselection.h"
-#include "bosoncanvas.h"
-#include "boitemlist.h"
+#include "../no_player.h"
+#include "../bosonconfig.h"
+#include "../boselection.h"
+#include "../bosoncanvas.h"
+#include "../boitemlist.h"
 #include "bodebug.h"
-#include "rtti.h"
-#include "player.h"
-#include "playerio.h"
-#include "unit.h"
+#include "../rtti.h"
+#include "../playerio.h"
+#include "../unit.h"
 #include "bosonlocalplayerinput.h"
-#include "items/bosonitem.h"
+#include "../items/bosonitem.h"
 
-#warning TODO: the input classes should touch PlayerIO only, not Player directly!
-
-BosonBigDisplayInputBase::BosonBigDisplayInputBase(BosonBigDisplayBase* parent) : QObject(parent)
+BosonGameViewInputBase::BosonGameViewInputBase()
+	: QObject()
 {
- BO_CHECK_NULL_RET(parent);
- mBigDisplay = parent;
- mCursorType = CursorDefault;
+ mSelection = 0;
+ mCursor = 0;
+ mCanvas = 0;
+ mLocalPlayerIO = 0;
+ mCursorCanvasVector = 0;
  mActionLocked = false;
  mActionType = ActionAttack; // dummy initialization
+ mCursorType = CursorDefault;
+ mPlacementFreePlacement = false;
+ mPlacementDisableCollisionDetection = false;
 }
 
-BosonBigDisplayInputBase::~BosonBigDisplayInputBase()
+BosonGameViewInputBase::~BosonGameViewInputBase()
 {
 }
 
-BoSelection* BosonBigDisplayInputBase::selection() const
+void BosonGameViewInputBase::setSelection(BoSelection* selection)
 {
- return bigDisplay()->selection();
+ mSelection = selection;
 }
 
-#include "boson.h"
-BosonCanvas* BosonBigDisplayInputBase::canvas() const
+BoSelection* BosonGameViewInputBase::selection() const
 {
-// return bigDisplay()->canvas();
- return boGame->canvasNonConst(); // FIXME: we need a non-const version here but dont have it in the big display
+ return mSelection;
 }
 
-BosonCollisions* BosonBigDisplayInputBase::collisions() const
+void BosonGameViewInputBase::setCursor(BosonCursor* c)
+{
+ mCursor = c;
+}
+
+BosonCursor* BosonGameViewInputBase::cursor() const
+{
+ return mCursor;
+}
+
+void BosonGameViewInputBase::setCanvas(const BosonCanvas* c)
+{
+ mCanvas = c;
+}
+
+const BosonCanvas* BosonGameViewInputBase::canvas() const
+{
+ return mCanvas;
+}
+
+const BosonCollisions* BosonGameViewInputBase::collisions() const
 {
  BO_CHECK_NULL_RET0(canvas());
  return canvas()->collisions();
 }
 
-PlayerIO* BosonBigDisplayInputBase::localPlayerIO() const
+void BosonGameViewInputBase::setLocalPlayerIO(PlayerIO* io)
 {
- return bigDisplay()->localPlayerIO();
+ mLocalPlayerIO = io;
 }
 
-BosonLocalPlayerInput* BosonBigDisplayInputBase::localPlayerInput() const
+PlayerIO* BosonGameViewInputBase::localPlayerIO() const
+{
+ return mLocalPlayerIO;
+}
+
+BosonLocalPlayerInput* BosonGameViewInputBase::localPlayerInput() const
 {
  if (!localPlayerIO()) {
 	return 0;
@@ -80,12 +105,17 @@ BosonLocalPlayerInput* BosonBigDisplayInputBase::localPlayerInput() const
  return (BosonLocalPlayerInput*)localPlayerIO()->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
 }
 
-const BoVector3Fixed& BosonBigDisplayInputBase::cursorCanvasVector() const
+void BosonGameViewInputBase::setCursorCanvasVector(const BoVector3Fixed* v)
 {
- return bigDisplay()->cursorCanvasVector();
+ mCursorCanvasVector = v;
 }
 
-void BosonBigDisplayInputBase::selectSingle(Unit* unit, bool replace)
+const BoVector3Fixed& BosonGameViewInputBase::cursorCanvasVector() const
+{
+ return *mCursorCanvasVector;
+}
+
+void BosonGameViewInputBase::selectSingle(Unit* unit, bool replace)
 {
  boDebug() << k_funcinfo << endl;
  BO_CHECK_NULL_RET(selection());
@@ -103,7 +133,7 @@ void BosonBigDisplayInputBase::selectSingle(Unit* unit, bool replace)
  selection()->selectUnit(unit, replace);
 }
 
-void BosonBigDisplayInputBase::selectArea(BoItemList* itemsInArea, bool replace)
+void BosonGameViewInputBase::selectArea(BoItemList* itemsInArea, bool replace)
 {
  BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(canvas());
@@ -168,7 +198,7 @@ void BosonBigDisplayInputBase::selectArea(BoItemList* itemsInArea, bool replace)
  }
 }
 
-void BosonBigDisplayInputBase::unselectArea(BoItemList* itemsInArea)
+void BosonGameViewInputBase::unselectArea(BoItemList* itemsInArea)
 {
  BO_CHECK_NULL_RET(selection());
  BO_CHECK_NULL_RET(itemsInArea);
@@ -182,10 +212,20 @@ void BosonBigDisplayInputBase::unselectArea(BoItemList* itemsInArea)
  }
 }
 
-void BosonBigDisplayInputBase::selectUnits(QPtrList<Unit> unitList, bool replace)
+void BosonGameViewInputBase::selectUnits(QPtrList<Unit> unitList, bool replace)
 {
  boDebug() << k_funcinfo << endl;
  BO_CHECK_NULL_RET(selection());
  selection()->selectUnits(unitList, replace);
 }
 
+void BosonGameViewInputBase::setPlacementFreePlacement(bool free)
+{
+ mPlacementFreePlacement = free;
+}
+
+
+void BosonGameViewInputBase::setPlacementDisableCollisions(bool disable)
+{
+ mPlacementDisableCollisionDetection = disable;
+}

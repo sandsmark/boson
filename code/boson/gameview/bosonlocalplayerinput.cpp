@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,15 +20,15 @@
 #include "bosonlocalplayerinput.h"
 #include "bosonlocalplayerinput.moc"
 
-#include "boaction.h"
-#include "unit.h"
-#include "player.h"
-#include "boselection.h"
-#include "bosonmessage.h"
+#include "../boaction.h"
+#include "../unit.h"
+#include "../player.h"
+#include "../boselection.h"
+#include "../bosonmessage.h"
 #include "bodebug.h"
-#include "bosonweapon.h"
-#include "boeventlistener.h"
-#include "boson.h"
+#include "../bosonweapon.h"
+#include "../boeventlistener.h"
+#include "../boson.h"
 
 #include <qptrlist.h>
 #include <qdatastream.h>
@@ -88,7 +88,7 @@ void BosonLocalPlayerInput::slotAction(const BoSpecificAction& action)
       layMine(action);
       break;
     default:
-      // Other actions will be handled in BosonBigDisplayInput
+      // Other actions will be handled in BosonGameViewInput
       boDebug() << k_funcinfo << "Emitting signalAction" << endl;
       emit signalAction(action);
       break;

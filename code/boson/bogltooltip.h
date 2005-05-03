@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2001-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,15 +19,25 @@
 #ifndef BOGLTOOLTIP_H
 #define BOGLTOOLTIP_H
 
+#include "bomath.h"
+
 #include <qobject.h>
 
-class BosonBigDisplayBase;
+// AB: note: this file does _not_ belong to gameview/ as it could (in theory)
+// one day get used for non-game tooltips as well
+
+class BoUfoWidget;
 class BosonItem;
 class QString;
 class BosonGLFont;
 class BoToolTipCreator;
 class BoUfoLabel;
+class BosonCanvas;
 class PlayerIO;
+template<class T> class BoVector2;
+template<class T> class BoVector3;
+typedef BoVector2<bofixed> BoVector2Fixed;
+typedef BoVector3<bofixed> BoVector3Fixed;
 
 class BoToolTipCreatorFactoryPrivate;
 /**
@@ -87,10 +97,11 @@ class BoGLToolTip : public QObject
 {
 	Q_OBJECT
 public:
-	BoGLToolTip(BosonBigDisplayBase*);
+	BoGLToolTip(BoUfoWidget*);
 	virtual ~BoGLToolTip();
 
 	void setPlayerIO(PlayerIO* io);
+	void setCanvas(BosonCanvas* c);
 	void setLabel(BoUfoLabel* label);
 
 	/**
@@ -123,8 +134,6 @@ public:
 	 **/
 	void setUpdatePeriod(int ms);
 
-	virtual bool eventFilter(QObject* o, QEvent* e);
-
 	/**
 	 * Ensure that @p item is <em>not</em> currently shown. This should
 	 * happen before the item is deleted.
@@ -132,6 +141,9 @@ public:
 	void unsetItem(BosonItem* item);
 
 	void hideTip();
+
+public slots:
+	void slotSetCursorCanvasVector(const BoVector3Fixed&);
 
 protected slots:
 	/**
@@ -162,18 +174,21 @@ protected slots:
 	 **/
 	void slotUpdate();
 
+	void slotMouseMoved(QMouseEvent*);
+
 protected:
 	void updateLabel();
 	void setCursorPos(const QPoint& pos);
 
 private:
 	BoGLToolTipPrivate* d;
-	BosonBigDisplayBase* mView;
+	BoUfoWidget* mView;
 	BoToolTipCreator* mCreator;
 	bool mShowTip;
 	int mUpdatePeriod;
 	BoUfoLabel* mLabel;
 	PlayerIO* mPlayerIO;
+	BosonCanvas* mCanvas;
 };
 
 #endif

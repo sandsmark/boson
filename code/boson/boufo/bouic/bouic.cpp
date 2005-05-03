@@ -155,7 +155,7 @@ bool writeDeclaration(QTextStream& header, const QDomElement& widgets, const QDo
  header << "\n";
 
  // AB: this is hardcoded and will probably stay like this
- header << "#include \"boufo/boufo.h\"\n";
+ header << "#include \"boufo.h\"\n";
  header << "\n";
 
  header << "class " << g_className << " : public " << widgets.namedItem("ClassName").toElement().text() << "\n{\n";

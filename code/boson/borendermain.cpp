@@ -41,6 +41,7 @@
 #include "bomeshrenderermanager.h"
 #include "boglstatewidget.h"
 #include "botexture.h"
+#include "bomousemovediff.h"
 #include "boufo/boufo.h"
 #include "boufo/boufoaction.h"
 #include "info/boinfo.h"

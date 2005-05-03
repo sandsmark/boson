@@ -1307,6 +1307,13 @@ void BoUfoWidget::init(ufo::UWidget* w)
  CONNECT_UFO_TO_QT(BoUfoWidget, mWidget, WidgetHidden);
  CONNECT_UFO_TO_QT(BoUfoWidget, mWidget, FocusGained);
  CONNECT_UFO_TO_QT(BoUfoWidget, mWidget, FocusLost);
+
+ // AB: note that disabling these does not influence the child widgets!
+ setMouseEventsEnabled(false, false);
+ setKeyEventsEnabled(false);
+
+ setFocusEventsEnabled(true);
+ setWidgetEventsEnabled(true);
 }
 
 void BoUfoWidget::invalidate()

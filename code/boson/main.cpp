@@ -17,13 +17,14 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "top.h"
-
+#include "bosonmainwidget.h"
+#include "bocheckinstallation.h"
 #include "bosonconfig.h"
 #include "boglobal.h"
 #include "boapplication.h"
 #include "boversion.h"
 #include "bodebug.h"
+#include "bodebugdcopiface.h"
 #include "bo3dtools.h"
 #include "boeventloop.h"
 #include <config.h>
@@ -116,7 +117,8 @@ int main(int argc, char **argv)
 //    app.dcopClient()->registerAs(app.name(), false);
 
  // make sure the data files are installed at the correct location
- QString errorMessage = TopWidget::checkInstallation();
+ BoCheckInstallation checkInstallation;
+ QString errorMessage = checkInstallation.checkInstallation();
  if (!errorMessage.isNull()) {
     boError() << k_funcinfo << errorMessage << endl;
     boError() << k_funcinfo << "check your installation!" << endl;
@@ -124,10 +126,23 @@ int main(int argc, char **argv)
     return 1;
  }
 
- TopWidget *top = new TopWidget;
- app.setMainWidget(top);
+ BoDebugDCOPIface* iface = 0;
+#if !BOSON_LINK_STATIC
+ // AB: if we build a static binary, we do not allow DCOP connections, so no
+ // need to construct this.
+ iface = new BoDebugDCOPIface;
+#endif
 
+ bool forceWantDirect = boConfig->boolValue("ForceWantDirect");
+ BosonMainWidget* top = new BosonMainWidget(0, forceWantDirect);
+ app.setMainWidget(top);
  top->show();
+
+ if (!top->preloadData()) {
+	boError() << k_funcinfo << "unable to preload some data" << endl;
+    KMessageBox::sorry(0, errorMessage, i18n("Check your installation"));
+    return 1;
+ }
 
  // pretend an old game was over. here we actually start
  top->slotGameOver();
@@ -172,17 +187,23 @@ int main(int argc, char **argv)
     boConfig->setBoolValue("ForceDisableModelLoading", true);
  }
  if (args->isSet("new")) {
-    top->slotNewGame(args);
+    top->slotShowNewGamePage(args);
  } else if (args->isSet("editor")) {
-    top->slotStartEditor(args);
+    top->slotShowStartEditorPage(args);
  } else if (args->isSet("load")) {
-    top->slotLoadGame(args);
+    top->slotShowLoadGamePage(args);
  } else if (args->isSet("load-from-log")) {
     QString file = args->getOption("load-from-log");
     top->slotLoadFromLog(file);
  }
  args->clear();
- return app.exec();
+
+ int ret = app.exec();
+
+ delete iface;
+ delete top;
+
+ return ret;
 }
 
 void postBosonConfigInit()

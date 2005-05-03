@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,14 +16,13 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef BOSONBIGDISPLAYINPUTBASE_H
-#define BOSONBIGDISPLAYINPUTBASE_H
+#ifndef BOSONGAMEVIEWINPUTBASE_H
+#define BOSONGAMEVIEWINPUTBASE_H
 
-#include "global.h"
+#include "../global.h"
 
 #include <qobject.h>
 
-class BosonBigDisplayBase;
 class BoSelection;
 class BosonCanvas;
 class BosonCollisions;
@@ -35,6 +34,7 @@ class UnitProperties;
 class BoItemList;
 class BoSpecificAction;
 class BosonLocalPlayerInput;
+class BosonCursor;
 class bofixed;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
@@ -45,19 +45,25 @@ typedef BoRect<bofixed> BoRectFixed;
 
 template<class T> class QPtrList;
 
-class BosonBigDisplayInputBase : public QObject
+class BosonGameViewInputBase : public QObject
 {
 	Q_OBJECT
 public:
-	BosonBigDisplayInputBase(BosonBigDisplayBase* parent);
-	virtual ~BosonBigDisplayInputBase();
+	BosonGameViewInputBase();
+	virtual ~BosonGameViewInputBase();
 
-	BosonBigDisplayBase* bigDisplay() const { return mBigDisplay; }
 	BoSelection* selection() const;
-	BosonCanvas* canvas() const;
-	BosonCollisions* collisions() const;
+	const BosonCanvas* canvas() const;
+	const BosonCollisions* collisions() const;
 	PlayerIO* localPlayerIO() const;
 	BosonLocalPlayerInput* localPlayerInput() const;
+	BosonCursor* cursor() const;
+
+	void setSelection(BoSelection*);
+	void setCursor(BosonCursor*);
+	void setCanvas(const BosonCanvas*);
+	void setLocalPlayerIO(PlayerIO*);
+	void setCursorCanvasVector(const BoVector3Fixed*);
 
 	const BoVector3Fixed& cursorCanvasVector() const;
 
@@ -74,11 +80,13 @@ public:
 	{
 		mActionLocked = false;
 		emit signalLockAction(mActionLocked);
+		emit signalLockAction(mActionLocked, ActionInvalid);
 	}
 	void lockAction()
 	{
 		mActionLocked = true;
 		emit signalLockAction(mActionLocked);
+		emit signalLockAction(mActionLocked, actionType());
 	}
 
 	void setCursorType(CursorType type) { mCursorType = type; }
@@ -104,6 +112,34 @@ public:
 	 * don't do expensive calculations here.
 	 **/
 	virtual void updatePlacementPreviewData() = 0;
+
+	/**
+	 * Call this to notify the input, that placements should happen in free
+	 * mode (i.e. the position is not aligned to any cell).
+	 *
+	 * This has an effect only, if @ref updatePlacementPreviewData is called
+	 * afterwards and if there is actually a placement in effect (i.e. @ref
+	 * actionType is @ref ActionPlacementPreview)
+	 **/
+	void setPlacementFreePlacement(bool free);
+	bool placementFreePlacement() const
+	{
+		return mPlacementFreePlacement;
+	}
+
+	/**
+	 * Call this to notify the input, that placements should happen with
+	 * collision detection disabled.
+	 *
+	 * This has an effect only, if @ref updatePlacementPreviewData is called
+	 * afterwards and if there is actually a placement in effect (i.e. @ref
+	 * actionType is @ref ActionPlacementPreview)
+	 **/
+	void setPlacementDisableCollisions(bool disable);
+	bool placementDisableCollisions() const
+	{
+		return mPlacementDisableCollisionDetection;
+	}
 
 	virtual void updateCursor() = 0;
 
@@ -140,12 +176,12 @@ public:
 	void selectUnits(QPtrList<Unit>, bool replace);
 
 	/**
-	 * See @ref EditorBigDisplayInput::placeUnit
+	 * See @ref EditorView::placeUnit
 	 **/
 	virtual void placeUnit(unsigned long int unitType, Player* owner) { Q_UNUSED(unitType); Q_UNUSED(owner); }
 
 	/**
-	 * See @ref EditorBigDisplayInput::placeGround
+	 * See @ref EditorView::placeGround
 	 **/
 	virtual void placeGround(unsigned int textureCount, unsigned char* alpha)
 	{
@@ -154,7 +190,7 @@ public:
 	}
 
 	/**
-	 * See @ref EditorBigDisplayInput::deleteSelectedUnits
+	 * See @ref EditorView::deleteSelectedUnits
 	 **/
 	virtual void deleteSelectedUnits() { }
 
@@ -165,6 +201,19 @@ signals:
 	 * action is locked now somewhere.
 	 **/
 	void signalLockAction(bool locked);
+
+	/**
+	 * @overload
+	 * This signal is just like the one above, but additionally includes the
+	 * @p actionType. The @ref actionType is valid only if @p locked
+	 * is TRUE, therefore the @p actionType parameter is always @ref
+	 * ActionInvalid if the action is not locked.
+	 **/
+	void signalLockAction(bool locked, int actionType);
+
+	void signalSetPlacementPreviewData(const UnitProperties* prop, bool canPlace, bool freePlacement, bool collisionDetection);
+	void signalSetPlacementCellPreviewData(unsigned int textureData, unsigned char* alpha, bool canPlace);
+
 
 public slots:
 	/**
@@ -195,10 +244,16 @@ protected:
 	virtual CanSelectUnit canSelect(Unit* unit) const = 0;
 
 private:
-	BosonBigDisplayBase* mBigDisplay;
+	BoSelection* mSelection;
+	BosonCursor* mCursor;
+	const BosonCanvas* mCanvas;
+	PlayerIO* mLocalPlayerIO;
+	const BoVector3Fixed* mCursorCanvasVector;
 	bool mActionLocked;
 	UnitAction mActionType;
 	CursorType mCursorType;
+	bool mPlacementFreePlacement;
+	bool mPlacementDisableCollisionDetection;
 };
 
 #endif

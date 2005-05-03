@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,21 +16,20 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef BOSONBIGDISPLAYINPUT_H
-#define BOSONBIGDISPLAYINPUT_H
+#ifndef BOSONGAMEVIEWINPUT_H
+#define BOSONGAMEVIEWINPUT_H
 
-#include "bosonbigdisplayinputbase.h"
+#include "bosongameviewinputbase.h"
 
-class BosonBigDisplayBase;
 class BoSelection;
 class BoSpecificAction;
 
-class BosonBigDisplayInput : public BosonBigDisplayInputBase
+class BosonGameViewInput : public BosonGameViewInputBase
 {
 	Q_OBJECT
 public:
-	BosonBigDisplayInput(BosonBigDisplayBase* parent);
-	~BosonBigDisplayInput();
+	BosonGameViewInput();
+	~BosonGameViewInput();
 
 	virtual void actionClicked(const BoMouseEvent& event);
 	virtual void updatePlacementPreviewData();

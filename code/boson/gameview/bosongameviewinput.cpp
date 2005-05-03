@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,41 +17,41 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "bosonbigdisplayinput.h"
-#include "bosonbigdisplayinput.moc"
+#include "bosongameviewinput.h"
+#include "bosongameviewinput.moc"
 
-#include "bosonbigdisplaybase.h"
-
-#include "boselection.h"
-#include "bosoncanvas.h"
-#include "bosonconfig.h"
-#include "bosonmessage.h"
-#include "boson.h"
-#include "bosoncursor.h"
-#include "playerio.h"
-#include "unitproperties.h"
-#include "pluginproperties.h"
-#include "unit.h"
-#include "unitplugins.h"
+#include "../no_player.h"
+#include "bosongameview.h"
+#include "../boselection.h"
+#include "../bosoncanvas.h"
+#include "../bosonconfig.h"
+#include "../bosonmessage.h"
+#include "../boson.h"
+#include "../bosoncursor.h"
+#include "../playerio.h"
+#include "../unitproperties.h"
+#include "../pluginproperties.h"
+#include "../unit.h"
+#include "../unitplugins.h"
 #include "bodebug.h"
-#include "boaction.h"
+#include "../boaction.h"
 #include "bosonlocalplayerinput.h"
-#include "bosonweapon.h"
-#include "no_player.h"
-#include "bo3dtools.h"
+#include "../bosonweapon.h"
+#include "../bo3dtools.h"
 
 #include <klocale.h>
 
-BosonBigDisplayInput::BosonBigDisplayInput(BosonBigDisplayBase* parent) : BosonBigDisplayInputBase(parent)
+BosonGameViewInput::BosonGameViewInput()
+	: BosonGameViewInputBase()
 {
  weaponId = -1;
 }
 
-BosonBigDisplayInput::~BosonBigDisplayInput()
+BosonGameViewInput::~BosonGameViewInput()
 {
 }
 
-void BosonBigDisplayInput::actionClicked(const BoMouseEvent& event)
+void BosonGameViewInput::actionClicked(const BoMouseEvent& event)
 {
  boDebug() << k_funcinfo << endl;
 // this method should not perform any tasks but rather send the input through
@@ -216,7 +216,7 @@ void BosonBigDisplayInput::actionClicked(const BoMouseEvent& event)
 }
 
 
-bool BosonBigDisplayInput::actionHarvest(const BoVector3Fixed& canvasVector)
+bool BosonGameViewInput::actionHarvest(const BoVector3Fixed& canvasVector)
 {
  if (!canvas()) {
 	BO_NULL_ERROR(canvas());
@@ -264,7 +264,7 @@ bool BosonBigDisplayInput::actionHarvest(const BoVector3Fixed& canvasVector)
  return taken;
 }
 
-bool BosonBigDisplayInput::actionMoveWithoutAttack(const BoVector3Fixed& canvasVector)
+bool BosonGameViewInput::actionMoveWithoutAttack(const BoVector3Fixed& canvasVector)
 {
  if (!selection()) {
 	BO_NULL_ERROR(selection());
@@ -287,7 +287,7 @@ bool BosonBigDisplayInput::actionMoveWithoutAttack(const BoVector3Fixed& canvasV
  return true;
 }
 
-bool BosonBigDisplayInput::actionMoveWithAttack(const BoVector3Fixed& canvasVector)
+bool BosonGameViewInput::actionMoveWithAttack(const BoVector3Fixed& canvasVector)
 {
  if (!localPlayerIO()) {
 	BO_NULL_ERROR(localPlayerIO());
@@ -310,7 +310,7 @@ bool BosonBigDisplayInput::actionMoveWithAttack(const BoVector3Fixed& canvasVect
  return true;
 }
 
-bool BosonBigDisplayInput::actionBuild(const BoVector3Fixed& canvasVector)
+bool BosonGameViewInput::actionBuild(const BoVector3Fixed& canvasVector)
 {
  if (!localPlayerIO()) {
 	BO_NULL_ERROR(localPlayerIO());
@@ -358,7 +358,7 @@ bool BosonBigDisplayInput::actionBuild(const BoVector3Fixed& canvasVector)
  return true;
 }
 
-bool BosonBigDisplayInput::actionAttack(const BoVector3Fixed& canvasVector)
+bool BosonGameViewInput::actionAttack(const BoVector3Fixed& canvasVector)
 {
  if (!localPlayerIO()) {
 	BO_NULL_ERROR(localPlayerIO());
@@ -385,7 +385,7 @@ bool BosonBigDisplayInput::actionAttack(const BoVector3Fixed& canvasVector)
  return true;
 }
 
-bool BosonBigDisplayInput::actionDropBomb(const BoVector3Fixed& canvasVector)
+bool BosonGameViewInput::actionDropBomb(const BoVector3Fixed& canvasVector)
 {
  if (!localPlayerIO()) {
 	BO_NULL_ERROR(localPlayerIO());
@@ -409,7 +409,7 @@ bool BosonBigDisplayInput::actionDropBomb(const BoVector3Fixed& canvasVector)
  return true;
 }
 
-bool BosonBigDisplayInput::actionRepair(const BoVector3Fixed& canvasVector)
+bool BosonGameViewInput::actionRepair(const BoVector3Fixed& canvasVector)
 {
  if (!selection()) {
 	BO_NULL_ERROR(selection());
@@ -441,7 +441,7 @@ bool BosonBigDisplayInput::actionRepair(const BoVector3Fixed& canvasVector)
  return true;
 }
 
-bool BosonBigDisplayInput::actionRefine(const BoVector3Fixed& canvasVector)
+bool BosonGameViewInput::actionRefine(const BoVector3Fixed& canvasVector)
 {
  if (!selection()) {
 	BO_NULL_ERROR(selection());
@@ -484,7 +484,7 @@ bool BosonBigDisplayInput::actionRefine(const BoVector3Fixed& canvasVector)
  return true;
 }
 
-bool BosonBigDisplayInput::actionFollow(const BoVector3Fixed& canvasVector)
+bool BosonGameViewInput::actionFollow(const BoVector3Fixed& canvasVector)
 {
  if (!localPlayerIO()) {
 	BO_NULL_ERROR(localPlayerIO());
@@ -511,12 +511,12 @@ bool BosonBigDisplayInput::actionFollow(const BoVector3Fixed& canvasVector)
  return true;
 }
 
-void BosonBigDisplayInput::updatePlacementPreviewData()
+void BosonGameViewInput::updatePlacementPreviewData()
 {
  BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(selection());
  BO_CHECK_NULL_RET(canvas());
- bigDisplay()->setPlacementPreviewData(0, false);
+ emit signalSetPlacementPreviewData(0, false, placementFreePlacement(), !placementDisableCollisions());
  if (!actionLocked() || actionType() != ActionPlacementPreview) {
 	return;
  }
@@ -538,11 +538,12 @@ void BosonBigDisplayInput::updatePlacementPreviewData()
  // note: this applies to mobiles as well as for facilities!
  // (mobiles are usually auto placed, but manual placement might get used if
  // auto-placement failed)
- bigDisplay()->setPlacementPreviewData(prop, canvas()->canPlaceUnitAt(prop, BoVector2Fixed(cursorCanvasVector().x(), cursorCanvasVector().y()), pp));
+ bool canPlace = canvas()->canPlaceUnitAt(prop, BoVector2Fixed(cursorCanvasVector().x(), cursorCanvasVector().y()), pp);
+ emit signalSetPlacementPreviewData(prop, canPlace, placementFreePlacement(), !placementDisableCollisions());
 
 }
 
-void BosonBigDisplayInput::action(const BoSpecificAction& action)
+void BosonGameViewInput::action(const BoSpecificAction& action)
 {
  boDebug() << k_funcinfo << endl;
  BO_CHECK_NULL_RET(localPlayerIO());
@@ -572,9 +573,9 @@ void BosonBigDisplayInput::action(const BoSpecificAction& action)
  lockAction();
 }
 
-void BosonBigDisplayInput::updateCursor()
+void BosonGameViewInput::updateCursor()
 {
- BosonCursor* c = bigDisplay()->cursor();
+ BosonCursor* c = cursor();
  if (!c) {
 	boError() << k_funcinfo << "NULL cursor!!" << endl;
 	return;
@@ -588,13 +589,11 @@ void BosonBigDisplayInput::updateCursor()
 	} else {
 		setCursorType(CursorDefault);
 		c->setCursor(cursorType());
-		c->setWidgetCursor(bigDisplay());
 		return;
 	}
  }
  if (actionLocked()) {
 	c->setCursor(cursorType());
-	c->setWidgetCursor(bigDisplay());
 	return;
  }
 
@@ -631,10 +630,9 @@ void BosonBigDisplayInput::updateCursor()
  }
 
  c->setCursor(cursorType());
- c->setWidgetCursor(bigDisplay());
 }
 
-BosonBigDisplayInputBase::CanSelectUnit BosonBigDisplayInput::canSelect(Unit* unit) const
+BosonGameViewInputBase::CanSelectUnit BosonGameViewInput::canSelect(Unit* unit) const
 {
  if (!unit) {
 	return CanSelectError;
@@ -652,7 +650,7 @@ BosonBigDisplayInputBase::CanSelectUnit BosonBigDisplayInput::canSelect(Unit* un
  return CanSelectMultipleOk;
 }
 
-bool BosonBigDisplayInput::selectAll(const UnitProperties* prop, bool replace)
+bool BosonGameViewInput::selectAll(const UnitProperties* prop, bool replace)
 {
  if (!localPlayerIO()) {
 	BO_NULL_ERROR(localPlayerIO());
@@ -681,7 +679,7 @@ bool BosonBigDisplayInput::selectAll(const UnitProperties* prop, bool replace)
  return false;
 }
 
-void BosonBigDisplayInput::slotMoveSelection(int cellX, int cellY)
+void BosonGameViewInput::slotMoveSelection(int cellX, int cellY)
 {
  BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(selection());

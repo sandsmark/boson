@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,24 +16,23 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef EDITORBIGDISPLAYINPUT_H
-#define EDITORBIGDISPLAYINPUT_H
+#ifndef EDITORVIEWINPUT_H
+#define EDITORVIEWINPUT_H
 
-#include "bosonbigdisplayinputbase.h"
+#include "bosongameviewinputbase.h"
 
-class BosonBigDisplayBase;
 class BoSelection;
 class BoSpecificAction;
 
-class EditorBigDisplayInputPrivate;
+class EditorViewInputPrivate;
 
 
-class EditorBigDisplayInput : public BosonBigDisplayInputBase
+class EditorViewInput : public BosonGameViewInputBase
 {
 	Q_OBJECT
 public:
-	EditorBigDisplayInput(BosonBigDisplayBase* parent);
-	~EditorBigDisplayInput();
+	EditorViewInput();
+	~EditorViewInput();
 
 
 	//AB: this should generate an error when owner != localPlayer()
@@ -64,7 +63,7 @@ public:
 
 	/**
 	 * In editor mode this does just nothing.
-	 * UPDATE: it calls @ref BosonCursor::setWidgetCursor() on the @ref
+	 * UPDATE: it calls @ref BosonCursor::setWidgetCursor() on the
 	 * bigDisplay.
 	 **/
 	virtual void updateCursor();
@@ -87,7 +86,7 @@ protected:
 	virtual CanSelectUnit canSelect(Unit* unit) const { Q_UNUSED(unit); return CanSelectMultipleOk; }
 
 private:
-	EditorBigDisplayInputPrivate* d;
+	EditorViewInputPrivate* d;
 };
 
 #endif

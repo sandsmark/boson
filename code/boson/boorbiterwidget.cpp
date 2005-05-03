@@ -23,6 +23,7 @@
 #include "bodebug.h"
 #include "bo3dtools.h"
 #include "bocamera.h"
+#include "bomousemovediff.h"
 #include "defines.h"
 #include <bogl.h>
 
