@@ -68,6 +68,7 @@ public:
 #endif
 
 		mProgress = new BoUfoProgress();
+		mProgress->setRange(0.0, 100.0);
 		mProgress->setOrientation(Horizontal);
 		addWidget(mProgress);
 	}
@@ -141,6 +142,7 @@ public:
 		layout->addStretch(1);
 #endif
 		mProgress = new BoUfoProgress();
+		mProgress->setRange(0.0, 100.0);
 		addWidget(mProgress);
 	}
 
