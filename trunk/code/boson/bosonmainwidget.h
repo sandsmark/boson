@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,80 +16,85 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef TOP_H
-#define TOP_H
+#ifndef BOSONMAINWIDGET_H
+#define BOSONMAINWIDGET_H
 
-#include <kmainwindow.h>
-#include <kdeversion.h>
+#include "defines.h"
+#include "bo3dtools.h"
 
-class QString;
-class Boson;
-class KPlayer;
-class Player;
-class Unit;
-class BosonItem;
+#include "bosonufoglwidget.h"
+
 class BosonCanvas;
-class BosonWidgetBase;
+class BosonCursor;
+class BoSelection;
+class Player;
+class PlayerIO;
+class Unit;
+class UnitProperties;
+class BoItemList;
+class BosonItem;
+class BoPixmapRenderer;
+class BoLight;
+class BoFontInfo;
+class BosonScript;
+class BoVisibleEffects;
+class BosonMap;
+class BosonEffect;
+class BoSpecificAction;
+class BoGLMatrices;
+class BoRenderItem;
+class BosonCursor;
+
+class KGameChat;
+class KGameIO;
+class QDomElement;
+template<class T> class QPtrList;
+template<class T> class QValueVector;
 class KCmdLineArgs;
-class KDialogBase;
-class KGamePropertyBase;
+
+class BosonMainWidgetPrivate;
+
 
 /**
- * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
+ * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class TopWidget : public KMainWindow
+class BosonMainWidget : public BosonUfoGLWidget
 {
 	Q_OBJECT
 public:
-	/**
-	 * These are the IDs of the startup widgets, as used by e.g. @ref
-	 * showStartupWidget.
-	 **/
-	enum StartupWidgetIds {
-		IdWelcome = 0,
-		IdNewGame = 1,
-		IdStartEditor = 2,
-		IdBosonWidget = 3,
-		IdNetwork = 4,
-		IdLoading = 5,
-		IdLoadSaveGame = 6
-	};
+	BosonMainWidget(QWidget* parent, bool wantDirect = true);
+	virtual ~BosonMainWidget();
+
 
 	/**
-	 * Default Constructor
+	 * Grab a frame for a movie. The returned @ref QByteArray contains
+	 * everything that is necessary to display one frame. At the moment that
+	 * is the whole screenshot, later we may use the positions of the units
+	 * only or something similar.
 	 **/
-	TopWidget();
+	QByteArray grabMovieFrame();
 
-	/**
-	 * Default Destructor
-	 **/
-	~TopWidget();
-
-	/**
-	 * Check the installation. The implementation of this method is free to
-	 * pre-load some data (e.g. parts of the playfields) while checking for
-	 * existence.
-	 *
-	 * This method is supposed to find out whether the data files are
-	 * installed in the expected path. A check for a single file should be
-	 * sufficient for this.
-	 *
-	 * @return An i18n'ed error string describing what went wrong (to be
-	 * displayed in a message box for example), or QString::null if no
-	 * problem was found.
-	 **/
-	static QString checkInstallation();
+	bool preloadData();
 
 public slots:
+	/**
+	 * This extends the original @ref BosonGLWidget::slotUpdateGL by an FPS
+	 * counter.
+	 **/
+	virtual void slotUpdateGL();
+
 	/**
 	 * Called when user clicks "start new game" button
 	 * This shows BosonStartGameWidget from where you can start new game
 	 **/
-	void slotNewGame(KCmdLineArgs* args = 0);
+	void slotShowNewGamePage(KCmdLineArgs* args = 0);
 
-	void slotStartEditor(KCmdLineArgs* args = 0);
-	void slotLoadGame(KCmdLineArgs* args = 0);
+	void slotShowStartEditorPage(KCmdLineArgs* args = 0);
+	void slotShowLoadGamePage(KCmdLineArgs* args = 0);
 	void slotLoadFromLog(const QString& logFile);
+
+	void slotAddLocalPlayer();
+	void slotResetGame();
 
 	/**
 	 * Starts a new game. Called when user clicks "Start game" button in
@@ -105,22 +110,19 @@ public slots:
 
 	void slotGameOver();
 
+	void slotSetUpdateInterval(unsigned int ms);
+
+
 protected:
-	/**
-	 * This function is called when it is time for the app to save its
-	 * properties for session management purposes.
-	 **/
-	void saveProperties(KConfig *);
+	virtual void initializeGL();
+	virtual void resizeGL(int w, int h);
+	virtual void paintGL();
 
-	/**
-	 * This function is called when this app is restored.  The KConfig
-	 * object points to the session management config file that was saved
-	 * with @ref saveProperties
-	 **/
-	void readProperties(KConfig *);
+	void renderUfo();
 
-	virtual bool queryClose();
-	virtual bool queryExit();
+	virtual bool eventFilter(QObject* o, QEvent* e);
+
+	void grabMovieFrameAndSave();
 
 	/**
 	 * End the game. All relevant classes are deleted. You
@@ -162,13 +164,11 @@ protected slots:
 	void slotLoadGame(const QString& fileName);
 	void slotSaveGame(const QString& fileName, const QString& description);
 
-	void slotSaveGame();
+	void slotShowSaveGamePage();
 
 	void slotGameStarted();
 	void slotStartingFailed();
 
-	void slotAddLocalPlayer();
-	void slotResetGame();
 
 	void slotEditorNewMap(const QByteArray&);
 
@@ -176,13 +176,27 @@ protected slots:
 	void slotLoadExternalStuffFromXML(const QDomElement& root);
 	void slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer);
 
+	void slotSkipFrame();
+
+	/**
+	 * See @ref BosonCursorCollection::signalSetWidgetCursor
+	 **/
+	void slotSetWidgetCursor(BosonCursor* c);
+
+
 private:
-	void initDisplayManager();
+	void init();
+	void initUfoGUI();
+	void initUfoActions(bool gameMode);
+	void initUfoGameActions();
+	void initUfoEditorActions();
+
 	void initBoson();
 
 private:
-	class TopWidgetPrivate;
-	TopWidgetPrivate* d;
+	BosonMainWidgetPrivate* d;
+
 };
 
 #endif
+

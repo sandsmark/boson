@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,30 +17,31 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "editorbigdisplayinput.h"
-#include "editorbigdisplayinput.moc"
+#include "editorviewinput.h"
+#include "editorviewinput.moc"
 
-#include "bosonbigdisplaybase.h"
-
-#include "boselection.h"
-#include "bosoncanvas.h"
-#include "bosonconfig.h"
-#include "bosonmessage.h"
-#include "bosongroundtheme.h"
-#include "boson.h"
-#include "bosonmap.h"
-#include "bosoncursor.h"
-#include "playerio.h"
-#include "unitproperties.h"
-#include "pluginproperties.h"
-#include "unit.h"
-#include "unitplugins.h"
-#include "cell.h"
+#include "bosongameview.h"
+#include "../boselection.h"
+#include "../bosoncanvas.h"
+#include "../bosonconfig.h"
+#include "../bosonmessage.h"
+#include "../bosongroundtheme.h"
+#include "../boson.h"
+#include "../bosonmap.h"
+#include "../bosoncursor.h"
+#include "../playerio.h"
+#include "../unitproperties.h"
+#include "../pluginproperties.h"
+#include "../unit.h"
+#include "../unitplugins.h"
+#include "../cell.h"
 #include "bodebug.h"
-#include "boaction.h"
+#include "../boaction.h"
 #include "bosonlocalplayerinput.h"
-#include "player.h" // FIXME: should not be here!
-//#include "no_player.h"
+
+#warning TODO: the input classes should touch PlayerIO only, not Player directly!
+#include "../player.h" // FIXME: should not be here!
+//#include "../no_player.h"
 
 #include <klocale.h>
 #include <kapplication.h>
@@ -153,27 +154,28 @@ private:
 	unsigned char* mTextureAlpha;
 };
 
-class EditorBigDisplayInputPrivate
+class EditorViewInputPrivate
 {
 public:
-	EditorBigDisplayInputPrivate()
+	EditorViewInputPrivate()
 	{
 	}
 	Placement mPlacement;
 };
 
-EditorBigDisplayInput::EditorBigDisplayInput(BosonBigDisplayBase* parent) : BosonBigDisplayInputBase(parent)
+EditorViewInput::EditorViewInput()
+	: BosonGameViewInputBase()
 {
- d = new EditorBigDisplayInputPrivate;
+ d = new EditorViewInputPrivate;
  setActionType(ActionPlacementPreview); // dummy initialization
 }
 
-EditorBigDisplayInput::~EditorBigDisplayInput()
+EditorViewInput::~EditorViewInput()
 {
  delete d;
 }
 
-void EditorBigDisplayInput::actionClicked(const BoMouseEvent& event)
+void EditorViewInput::actionClicked(const BoMouseEvent& event)
 {
  boDebug() << k_funcinfo << endl;
  BO_CHECK_NULL_RET(canvas());
@@ -191,7 +193,7 @@ void EditorBigDisplayInput::actionClicked(const BoMouseEvent& event)
  }
 }
 
-bool EditorBigDisplayInput::actionPlace(const BoVector3Fixed& canvasVector, bool exact, bool force)
+bool EditorViewInput::actionPlace(const BoVector3Fixed& canvasVector, bool exact, bool force)
 {
  boDebug() << k_funcinfo << endl;
  if (!canvas()) {
@@ -271,12 +273,12 @@ bool EditorBigDisplayInput::actionPlace(const BoVector3Fixed& canvasVector, bool
 	// too as all surrounding cells are affected when the corners are
 	// changed.
 
-	BosonMap* map = canvas()->map();
+	const BosonMap* map = canvas()->map();
 	if (!map) {
 		BO_NULL_ERROR(map);
 		return false;
 	}
-	BosonGroundTheme* groundTheme = map->groundTheme();
+	const BosonGroundTheme* groundTheme = map->groundTheme();
 	if (!groundTheme) {
 		BO_NULL_ERROR(groundTheme);
 		return false;
@@ -325,7 +327,7 @@ bool EditorBigDisplayInput::actionPlace(const BoVector3Fixed& canvasVector, bool
  return ret;
 }
 
-bool EditorBigDisplayInput::actionChangeHeight(const BoVector3Fixed& canvasVector, bool up)
+bool EditorViewInput::actionChangeHeight(const BoVector3Fixed& canvasVector, bool up)
 {
  boDebug() << k_funcinfo << endl;
  if (!localPlayerInput()) {
@@ -360,7 +362,7 @@ bool EditorBigDisplayInput::actionChangeHeight(const BoVector3Fixed& canvasVecto
 
 // the place*() methods get called when an item in (e.g.) the commandframe is
 // selected.
-void EditorBigDisplayInput::placeUnit(unsigned long int unitType, Player* owner)
+void EditorViewInput::placeUnit(unsigned long int unitType, Player* owner)
 {
  boDebug() << k_funcinfo << endl;
  if (!owner) {
@@ -375,7 +377,7 @@ void EditorBigDisplayInput::placeUnit(unsigned long int unitType, Player* owner)
  d->mPlacement.placeUnit(unitType, owner);
 }
 
-void EditorBigDisplayInput::placeGround(unsigned int textureCount, unsigned char* alpha)
+void EditorViewInput::placeGround(unsigned int textureCount, unsigned char* alpha)
 {
  boDebug() << k_funcinfo << endl;
  QString s;
@@ -386,7 +388,7 @@ void EditorBigDisplayInput::placeGround(unsigned int textureCount, unsigned char
  d->mPlacement.placeGround(textureCount, alpha);
 }
 
-void EditorBigDisplayInput::deleteSelectedUnits()
+void EditorViewInput::deleteSelectedUnits()
 {
  BO_CHECK_NULL_RET(selection());
  BO_CHECK_NULL_RET(canvas());
@@ -412,24 +414,24 @@ void EditorBigDisplayInput::deleteSelectedUnits()
  localPlayerInput()->sendInput(msg);
 }
 
-void EditorBigDisplayInput::updatePlacementPreviewData()
+void EditorViewInput::updatePlacementPreviewData()
 {
  BO_CHECK_NULL_RET(canvas());
  if (!d->mPlacement.isUnit() && !d->mPlacement.isGround()) {
-	bigDisplay()->setPlacementPreviewData(0, false);
+	emit signalSetPlacementPreviewData(0, false, placementFreePlacement(), !placementDisableCollisions());
 	return;
  }
  if (d->mPlacement.isUnit()) {
 	if (!d->mPlacement.owner()) {
 		boError() << k_funcinfo << "NULL owner" << endl;
-		bigDisplay()->setPlacementPreviewData(0, false);
+		emit signalSetPlacementPreviewData(0, false, placementFreePlacement(), !placementDisableCollisions());
 		return;
 	}
 #warning do NOT use Player here! use PlayerIO
 	const UnitProperties* prop = d->mPlacement.owner()->unitProperties(d->mPlacement.unitType());
 
 	bool canPlace = canvas()->canPlaceUnitAt(prop, BoVector2Fixed(cursorCanvasVector().x(), cursorCanvasVector().y()), 0);
-	bigDisplay()->setPlacementPreviewData(prop, canPlace);
+	emit signalSetPlacementPreviewData(prop, canPlace, placementFreePlacement(), !placementDisableCollisions());
  } else if (d->mPlacement.isGround()) {
 	if (d->mPlacement.textureCount() == 0) {
 		boError() << k_funcinfo << "no textures" << endl;
@@ -440,12 +442,12 @@ void EditorBigDisplayInput::updatePlacementPreviewData()
 		return;
 	}
 	bool canPlace = true; // we could use false if there is a unit or so?
-	bigDisplay()->setPlacementCellPreviewData(d->mPlacement.textureCount(),
+	emit signalSetPlacementCellPreviewData(d->mPlacement.textureCount(),
 			d->mPlacement.textureAlpha(), canPlace);
  }
 }
 
-void EditorBigDisplayInput::action(const BoSpecificAction& action)
+void EditorViewInput::action(const BoSpecificAction& action)
 {
  boDebug() << k_funcinfo << action.type() << endl;
  switch (action.type()) {
@@ -460,7 +462,7 @@ void EditorBigDisplayInput::action(const BoSpecificAction& action)
  }
 }
 
-bool EditorBigDisplayInput::selectAll(const UnitProperties* prop, bool replace)
+bool EditorViewInput::selectAll(const UnitProperties* prop, bool replace)
 {
  QPtrList<Unit> list;
  for (unsigned int i = 0; i < boGame->playerCount(); i++) {
@@ -481,7 +483,7 @@ bool EditorBigDisplayInput::selectAll(const UnitProperties* prop, bool replace)
  return false;
 }
 
-void EditorBigDisplayInput::slotMoveSelection(int cellX, int cellY)
+void EditorViewInput::slotMoveSelection(int cellX, int cellY)
 {
  BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(selection());
@@ -495,19 +497,13 @@ void EditorBigDisplayInput::slotMoveSelection(int cellX, int cellY)
  actionClicked(event);
 }
 
-void EditorBigDisplayInput::updateCursor()
+void EditorViewInput::updateCursor()
 {
- BO_CHECK_NULL_RET(bigDisplay());
- BosonCursor* c = bigDisplay()->cursor();
+ BosonCursor* c = cursor();
  BO_CHECK_NULL_RET(c);
 
- // AB: in editor mode we always use the default KDE cursor, so calling this
- // method does basically nothing at all.
- // but under certain rare circumstances it might happen that there is no cursor
- // set for a widget (i.e. a blank cursor). then we must revert to the default -
- // that is what we do here. for simplicity we simply revert to default whenever
- // this is called.
-
- c->setWidgetCursor(bigDisplay());
+ // AB: this especially calls setWidgetCursor(), this is necessary in case the
+ // cursor was hidden before
+ c->setCursor(CursorDefault);
 }
 

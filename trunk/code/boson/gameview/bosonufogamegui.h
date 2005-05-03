@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2004-2005 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,21 +16,21 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef BOSONUFOGAMEWIDGET_H
-#define BOSONUFOGAMEWIDGET_H
+#ifndef BOSONUFOGAMEGUI_H
+#define BOSONUFOGAMEGUI_H
 
-#include "boufo/boufo.h"
+#include "../boufo/boufo.h"
 #include <bogl.h>
 
 class BosonGLMiniMap;
 class BoSelection;
 class PlayerIO;
 class Player;
-class BosonBigDisplayBase;
 class BosonCanvas;
 class BoGameCamera;
 class BoMatrix;
 class BosonGroundTheme;
+class BosonGameFPSCounter;
 class bofixed;
 template<class T> class BoRect;
 template<class T> class BoVector2;
@@ -45,16 +45,23 @@ typedef BoVector3<float> BoVector3Float;
 typedef BoVector4<bofixed> BoVector4Fixed;
 typedef BoVector4<float> BoVector4Float;
 
-class BosonUfoGameWidgetPrivate;
+class BosonUfoGameGUIPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonUfoGameWidget : public BoUfoWidget
+class BosonUfoGameGUI : public BoUfoWidget
 {
 	Q_OBJECT
 public:
-	BosonUfoGameWidget(const BoMatrix& modelview, const BoMatrix& projection, const GLfloat* viewFrustum, const GLint* viewport, BosonBigDisplayBase* display);
-	virtual ~BosonUfoGameWidget();
+	BosonUfoGameGUI(const BoMatrix& modelview, const BoMatrix& projection, const GLfloat* viewFrustum, const GLint* viewport);
+	virtual ~BosonUfoGameGUI();
+
+	void setCursorWidgetPos(const QPoint* pos);
+	void setCursorCanvasVector(const BoVector3Fixed* v);
+	void setSelection(BoSelection* s);
+	void setCanvas(const BosonCanvas* c);
+	void setCamera(BoGameCamera* c);
+	void setGameFPSCounter(BosonGameFPSCounter* counter);
 
 	void setGLMiniMap(BosonGLMiniMap* m);
 	void setGroundTheme(BosonGroundTheme*);
@@ -73,17 +80,17 @@ public slots:
 	void slotShowPlaceGround();
 
 signals:
+	void signalSelectionChanged(BoSelection*);
 	void signalPlaceGround(unsigned int, unsigned char*);
 	void signalPlaceUnit(unsigned int, Player*);
 
 protected:
-	BosonBigDisplayBase* display() const;
-
 	/**
-	 * @return @ref BosonBigDisplayBase::selection
+	 * @return @ref BosonGameView::selection
 	 **/
 	BoSelection* selection() const;
 	const BosonCanvas* canvas() const;
+	const QPoint& cursorWidgetPos() const;
 	const BoVector3Fixed& cursorCanvasVector() const;
 	BoGameCamera* camera() const;
 
@@ -101,7 +108,7 @@ private:
 	void initUfoWidgets();
 
 private:
-	BosonUfoGameWidgetPrivate* d;
+	BosonUfoGameGUIPrivate* d;
 };
 
 

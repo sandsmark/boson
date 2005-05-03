@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2004-2005 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,38 +17,37 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "bosonufogamewidget.h"
-#include "bosonufogamewidget.moc"
+#include "bosonufogamegui.h"
+#include "bosonufogamegui.moc"
 
-#include "no_player.h"
-#include "bomath.h"
-#include "bo3dtools.h"
-#include "bosonconfig.h"
-#include "boson.h"
-#include "bosoncanvas.h"
-#include "bosoncanvasstatistics.h"
-#include "bogroundrenderer.h"
-#include "bogroundrenderermanager.h"
-#include "bomeshrenderermanager.h"
-#include "botexture.h"
-#include "bocamera.h"
-#include "bosonufochat.h"
-#include "bosonufominimap.h"
-#include "commandframe/bosoncommandframe.h"
-#include "bodebug.h"
-#include "bosonmessage.h"
-#include "boselection.h"
-#include "playerio.h"
-#include "bosonbigdisplaybase.h"
+#include "../no_player.h"
+#include "bosonufogameguihelper.h"
+#include "../bomath.h"
+#include "../bo3dtools.h"
+#include "../bosonconfig.h"
+#include "../boson.h"
+#include "../bosoncanvas.h"
+#include "../bosoncanvasstatistics.h"
+#include "../bogroundrenderer.h"
+#include "../bogroundrenderermanager.h"
+#include "../bomeshrenderermanager.h"
+#include "../botexture.h"
+#include "../bocamera.h"
+#include "../bosonufochat.h"
+#include "../bosonufominimap.h"
+#include "../commandframe/bosoncommandframe.h"
+#include "../bosonmessage.h"
+#include "../boselection.h"
+#include "../playerio.h"
 #include "bosonlocalplayerinput.h"
-#include "unit.h"
-#include "bosonpath.h"
-#include "cell.h"
-#include "bowater.h"
+#include "../unit.h"
+#include "../bosonpath.h"
+#include "../cell.h"
+#include "../bowater.h"
+#include "../bosonfpscounter.h"
+#include "bodebug.h"
 
 #include <klocale.h>
-
-#include <qcursor.h>
 
 /**
  * @return A string that displays @p plane. The plane consists of a normal
@@ -61,16 +60,21 @@ static QString planeDebugString(const float* plane)
 }
 
 
-class BosonUfoGameWidgetPrivate
+class BosonUfoGameGUIPrivate
 {
 public:
-	BosonUfoGameWidgetPrivate(const BoMatrix& modelview, const BoMatrix& projection,
+	BosonUfoGameGUIPrivate(const BoMatrix& modelview, const BoMatrix& projection,
 			const GLfloat* viewFrustum, const GLint* viewport)
 		: mModelviewMatrix(modelview), mProjectionMatrix(projection),
 		mViewFrustum(viewFrustum), mViewport(viewport)
 	{
-		mDisplay = 0;
+		mCursorCanvasVector = 0;
+		mCursorWidgetPos = 0;
+		mSelection = 0;
+		mCamera = 0;
+		mCanvas = 0;
 		mLocalPlayerIO = 0;
+		mFPSCounter = 0;
 
 		mResourcesBox = 0;
 		mMineralsLabel = 0;
@@ -86,6 +90,7 @@ public:
 		mMatricesDebugProjection = 0;
 		mMatricesDebugModelview = 0;
 		mMatricesDebugProjMod = 0;
+		mMatricesDebugText = 0;
 		mItemWorkStatistics = 0;
 		mOpenGLCamera = 0;
 		mRenderCounts = 0;
@@ -97,12 +102,17 @@ public:
 		mUfoCommandFrame = 0;
 	}
 
-	BosonBigDisplayBase* mDisplay;
+	const BoVector3Fixed* mCursorCanvasVector;
+	const QPoint* mCursorWidgetPos;
+	BoSelection* mSelection;
+	BoGameCamera* mCamera;
+	const BosonCanvas* mCanvas;
 	const BoMatrix& mModelviewMatrix;
 	const BoMatrix& mProjectionMatrix;
 	const GLfloat* mViewFrustum;
 	const GLint* mViewport;
 	PlayerIO* mLocalPlayerIO;
+	BosonGameFPSCounter* mFPSCounter;
 
 	BoUfoHBox* mResourcesBox;
 	BoUfoLabel* mMineralsLabel;
@@ -131,12 +141,11 @@ public:
 	BosonCommandFrame* mUfoCommandFrame;
 };
 
-BosonUfoGameWidget::BosonUfoGameWidget(const BoMatrix& modelview, const BoMatrix& projection,
-		const GLfloat* viewFrustum, const GLint* viewport, BosonBigDisplayBase* display)
+BosonUfoGameGUI::BosonUfoGameGUI(const BoMatrix& modelview, const BoMatrix& projection,
+		const GLfloat* viewFrustum, const GLint* viewport)
 	: BoUfoWidget()
 {
- d = new BosonUfoGameWidgetPrivate(modelview, projection, viewFrustum, viewport);
- d->mDisplay = display;
+ d = new BosonUfoGameGUIPrivate(modelview, projection, viewFrustum, viewport);
 
  QColor defaultColor = BoUfoLabel::defaultForegroundColor();
  BoUfoLabel::setDefaultForegroundColor(Qt::white);
@@ -144,13 +153,13 @@ BosonUfoGameWidget::BosonUfoGameWidget(const BoMatrix& modelview, const BoMatrix
  BoUfoLabel::setDefaultForegroundColor(defaultColor);
 }
 
-BosonUfoGameWidget::~BosonUfoGameWidget()
+BosonUfoGameGUI::~BosonUfoGameGUI()
 {
  delete d;
 }
 
 
-void BosonUfoGameWidget::initUfoWidgets()
+void BosonUfoGameGUI::initUfoWidgets()
 {
  // AB: note that BoUfo widgets differ from usual Qt widgets API-wise.
  // You need to create them without a parent and then add them to their parent
@@ -161,146 +170,85 @@ void BosonUfoGameWidget::initUfoWidgets()
 
  // A "UBorderLayout" layout requires it's children to have so-call
  // "constraints". These specify where the widget is placed (north, south, ...)
- setLayoutClass(BoUfoWidget::UBorderLayout);
+ setLayoutClass(BoUfoWidget::UVBoxLayout);
 
- BoUfoWidget* north = new BoUfoWidget();
- north->setConstraints("north");
- addWidget(north);
- north->setLayoutClass(BoUfoWidget::UBorderLayout);
+ BosonUfoGameGUIHelper* widget = new BosonUfoGameGUIHelper();
+ addWidget(widget);
 
- BoUfoVBox* south = new BoUfoVBox();
- south->setConstraints("south");
- addWidget(south);
+ // just pointers (no need to add to another widget, as they already are added)
+ d->mResourcesBox = widget->mResourcesBox;
+ d->mMineralsLabel = widget->mMineralsLabel;
+ d->mOilLabel = widget->mOilLabel;
+ d->mFPSLabel = widget->mFPSLabel;
+ d->mGroundRendererDebug = widget->mGroundRendererDebug;
+ d->mMapCoordinates = widget->mMapCoordinates;
+ d->mMapCoordinatesWorldLabel = widget->mMapCoordinatesWorldLabel;
+ d->mMapCoordinatesCanvasLabel = widget->mMapCoordinatesCanvasLabel;
+ d->mMapCoordinatesWindowLabel = widget->mMapCoordinatesWindowLabel;
+ d->mPathFinderDebug = widget->mPathFinderDebug;
+ d->mMatricesDebug = widget->mMatricesDebug;
+ d->mMatricesDebugText = widget->mMatricesDebugText;
+ d->mItemWorkStatistics = widget->mItemWorkStatistics;
+ d->mOpenGLCamera = widget->mOpenGLCamera;
+ d->mRenderCounts = widget->mRenderCounts;
+ d->mAdvanceCalls = widget->mAdvanceCalls;
+ d->mTextureMemory = widget->mTextureMemory;
+ d->mGamePaused = widget->mGamePaused;
 
- BoUfoVBox* center = new BoUfoVBox();
- center->setConstraints("center");
- addWidget(center);
-
- BoUfoVBox* northEast = new BoUfoVBox();
- northEast->setConstraints("east");
- north->addWidget(northEast);
-
- BoUfoVBox* northWest = new BoUfoVBox();
- northWest->setConstraints("west");
- north->addWidget(northWest);
-
- BoUfoVBox* northCenter = new BoUfoVBox();
- northCenter->setConstraints("center");
- north->addWidget(northCenter);
-
- // add your widgets to northEast, northWest or northCenter, not to north
- north = 0;
-
- d->mResourcesBox = new BoUfoHBox();
- BoUfoVBox* resourcesLabelsBox = new BoUfoVBox();
- BoUfoVBox* resourcesValuesBox = new BoUfoVBox();
- BoUfoLabel* mineralsLabel = new BoUfoLabel(i18n("Minerals:"));
- BoUfoLabel* oilLabel = new BoUfoLabel(i18n("Oil:"));
- d->mMineralsLabel = new BoUfoLabel();
- d->mOilLabel = new BoUfoLabel();
- resourcesLabelsBox->addWidget(mineralsLabel);
- resourcesLabelsBox->addWidget(oilLabel);
- resourcesValuesBox->addWidget(d->mMineralsLabel);
- resourcesValuesBox->addWidget(d->mOilLabel);
- d->mResourcesBox->addWidget(resourcesLabelsBox);
- d->mResourcesBox->addWidget(resourcesValuesBox);
- northEast->addWidget(d->mResourcesBox);
- BoUfoWidget* dummy = new BoUfoWidget();
- northEast->addWidget(dummy); // a "stretch" widget that takes additional space if available
-
- d->mFPSLabel = new BoUfoLabel();
- northEast->addWidget(d->mFPSLabel);
-
- d->mGroundRendererDebug = new BoUfoLabel();
- northEast->addWidget(d->mGroundRendererDebug);
-
- d->mMapCoordinates = new BoUfoVBox();
- d->mMapCoordinatesWorldLabel = new BoUfoLabel();
- d->mMapCoordinatesCanvasLabel = new BoUfoLabel();
- d->mMapCoordinatesWindowLabel = new BoUfoLabel();
- d->mMapCoordinates->addWidget(d->mMapCoordinatesWorldLabel);
- d->mMapCoordinates->addWidget(d->mMapCoordinatesCanvasLabel);
- d->mMapCoordinates->addWidget(d->mMapCoordinatesWindowLabel);
- northEast->addWidget(d->mMapCoordinates);
-
- d->mPathFinderDebug = new BoUfoLabel();
- northEast->addWidget(d->mPathFinderDebug);
 
  d->mUfoMiniMap = new BosonUfoMiniMap();
 // d->mUfoMiniMap->setMiniMap(d->mGLMiniMap);
- northWest->addWidget(d->mUfoMiniMap);
+ widget->mUfoMiniMapContainer->addWidget(d->mUfoMiniMap);
 
  d->mUfoCommandFrame = new BosonCommandFrame();
- connect(display(), SIGNAL(signalSelectionChanged(BoSelection*)),
+ connect(this, SIGNAL(signalSelectionChanged(BoSelection*)),
 		d->mUfoCommandFrame, SLOT(slotSelectionChanged(BoSelection*)));
- connect(d->mUfoCommandFrame, SIGNAL(signalSelectUnit(Unit*)),
-		selection(), SLOT(slotSelectSingleUnit(Unit*)));
  connect(d->mUfoCommandFrame, SIGNAL(signalPlaceGround(unsigned int, unsigned char*)),
 		this, SIGNAL(signalPlaceGround(unsigned int, unsigned char*)));
  connect(d->mUfoCommandFrame, SIGNAL(signalPlaceUnit(unsigned int, Player*)),
 		this, SIGNAL(signalPlaceUnit(unsigned int, Player*)));
  d->mUfoCommandFrame->slotSelectionChanged(selection());
+ widget->mUfoCommandFrameContainer->addWidget(d->mUfoCommandFrame);
 
- // TODO: move to somewhere more useful, not to northWest
- northWest->addWidget(d->mUfoCommandFrame);
 
- d->mMatricesDebug = new BoUfoVBox();
  d->mMatricesDebugProjection = new BoUfoMatrix();
  d->mMatricesDebugModelview = new BoUfoMatrix();
  d->mMatricesDebugProjMod = new BoUfoMatrix();
  d->mMatricesDebugProjModInv = new BoUfoMatrix();
- d->mMatricesDebugText = new BoUfoLabel();
- d->mMatricesDebug->addWidget(new BoUfoLabel(i18n("Projection matrix")));
- d->mMatricesDebug->addWidget(d->mMatricesDebugProjection);
- d->mMatricesDebug->addWidget(new BoUfoLabel(i18n("Modelview matrix")));
- d->mMatricesDebug->addWidget(d->mMatricesDebugModelview);
- d->mMatricesDebug->addWidget(new BoUfoLabel(i18n("Projection * Modelview")));
- d->mMatricesDebug->addWidget(d->mMatricesDebugProjMod);
- d->mMatricesDebug->addWidget(new BoUfoLabel(i18n("(Projection * Modelview)^(-1)")));
- d->mMatricesDebug->addWidget(d->mMatricesDebugProjModInv);
- d->mMatricesDebug->addWidget(d->mMatricesDebugText);
- northWest->addWidget(d->mMatricesDebug);
+ widget->mMatricesDebugProjectionContainer->addWidget(d->mMatricesDebugProjection);
+ widget->mMatricesDebugModelviewContainer->addWidget(d->mMatricesDebugModelview);
+ widget->mMatricesDebugProjModContainer->addWidget(d->mMatricesDebugProjMod);
+ widget->mMatricesDebugProjModInvContainer->addWidget(d->mMatricesDebugProjModInv);
 
- d->mItemWorkStatistics = new BoUfoLabel();
- northWest->addWidget(d->mItemWorkStatistics);
-
- d->mOpenGLCamera = new BoUfoLabel();
- northWest->addWidget(d->mOpenGLCamera);
-
- d->mRenderCounts = new BoUfoLabel();
- northWest->addWidget(d->mRenderCounts);
-
- d->mAdvanceCalls = new BoUfoLabel();
- northWest->addWidget(d->mAdvanceCalls);
-
- d->mTextureMemory = new BoUfoLabel();
- northWest->addWidget(d->mTextureMemory);
-
- // FIXME: this is supposed to be in the center of the screen, but the "center"
- // constraint on a UBorderLayout is not sufficient for that.
- d->mGamePaused = new BoUfoLabel(i18n("The game is paused"));
- center->addWidget(d->mGamePaused);
 
  d->mUfoChat = new BosonUfoChat();
- south->addWidget(d->mUfoChat);
  d->mUfoChat->setMessageId(BosonMessage::IdChat);
-
-
- // TODO: tooltips ?
-
+ widget->mUfoChatContainer->addWidget(d->mUfoChat);
 }
 
-void BosonUfoGameWidget::setGLMiniMap(BosonGLMiniMap* m)
+void BosonUfoGameGUI::setGLMiniMap(BosonGLMiniMap* m)
 {
  d->mUfoMiniMap->setMiniMap(m);
 }
 
-BoSelection* BosonUfoGameWidget::selection() const
+void BosonUfoGameGUI::setSelection(BoSelection* s)
 {
- return display()->selection();
+ if (d->mSelection) {
+	disconnect(d->mSelection, 0, d->mUfoCommandFrame, 0);
+ }
+ d->mSelection = s;
+ if (d->mSelection) {
+	connect(d->mUfoCommandFrame, SIGNAL(signalSelectUnit(Unit*)),
+			selection(), SLOT(slotSelectSingleUnit(Unit*)));
+ }
 }
 
-void BosonUfoGameWidget::setLocalPlayerIO(PlayerIO* io)
+BoSelection* BosonUfoGameGUI::selection() const
+{
+ return d->mSelection;
+}
+
+void BosonUfoGameGUI::setLocalPlayerIO(PlayerIO* io)
 {
  PlayerIO* previousPlayerIO = localPlayerIO();
  d->mLocalPlayerIO = io;
@@ -315,6 +263,7 @@ void BosonUfoGameWidget::setLocalPlayerIO(PlayerIO* io)
  if (!localPlayerIO()) {
 	return;
  }
+ d->mUfoChat->setFromPlayer((KPlayer*)localPlayerIO()->player());
 
  BosonLocalPlayerInput* i = (BosonLocalPlayerInput*)localPlayerIO()->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
  if (i) {
@@ -323,31 +272,35 @@ void BosonUfoGameWidget::setLocalPlayerIO(PlayerIO* io)
  }
 }
 
-PlayerIO* BosonUfoGameWidget::localPlayerIO() const
+PlayerIO* BosonUfoGameGUI::localPlayerIO() const
 {
  return d->mLocalPlayerIO;
 }
 
-void BosonUfoGameWidget::setGroundTheme(BosonGroundTheme* t)
+void BosonUfoGameGUI::setGroundTheme(BosonGroundTheme* t)
 {
  d->mUfoCommandFrame->slotSetGroundTheme(t);
 }
 
-BosonBigDisplayBase* BosonUfoGameWidget::display() const
+void BosonUfoGameGUI::setGameFPSCounter(BosonGameFPSCounter* counter)
 {
- return d->mDisplay;
+ d->mFPSCounter = counter;
 }
 
-void BosonUfoGameWidget::updateUfoLabels()
+void BosonUfoGameGUI::updateUfoLabels()
 {
  BO_CHECK_NULL_RET(localPlayerIO());
+ BO_CHECK_NULL_RET(d->mFPSCounter);
  QString minerals = QString::number(localPlayerIO()->minerals());
  QString oil = QString::number(localPlayerIO()->oil());
  d->mMineralsLabel->setText(minerals);
  d->mOilLabel->setText(oil);
  d->mResourcesBox->setVisible(boConfig->boolValue("show_resources"));
 
- d->mFPSLabel->setText(i18n("FPS: %1").arg(display()->fps()));
+ double fps;
+ double skippedFPS;
+ fps = d->mFPSCounter->cachedFps(&skippedFPS);
+ d->mFPSLabel->setText(i18n("FPS: %1\nSkipped FPS: %2").arg(fps, 0, 'f', 3).arg(skippedFPS, 0, 'f', 3));
  d->mFPSLabel->setVisible(boConfig->boolValue("debug_fps"));
 
  bool renderGroundRendererDebug = false;
@@ -368,16 +321,13 @@ void BosonUfoGameWidget::updateUfoLabels()
 
 
  if (boConfig->boolValue("debug_map_coordinates")) {
-	QPoint widgetPos;
-	GLfloat x = 0.0f, y = 0.0f, z = 0.0f;
-	display()->mapFromGlobal(QCursor::pos());
-	display()->mapCoordinates(widgetPos, &x, &y, &z);
-	BoVector3Fixed canvasVector(x, -y, z);
+	QPoint widgetPos = cursorWidgetPos();
+	BoVector3Fixed canvasVector = cursorCanvasVector();
 
 	QString world = QString::fromLatin1("World:  (%1,%2,%2)").
-			arg((double)x, 6, 'f', 3).
-			arg((double)y, 6, 'f', 3).
-			arg((double)z, 6, 'f', 3);
+			arg((double)canvasVector.x(), 6, 'f', 3).
+			arg((double)-canvasVector.y(), 6, 'f', 3).
+			arg((double)canvasVector.z(), 6, 'f', 3);
 	QString canvas = QString::fromLatin1("Canvas: (%1,%2)").
 			arg((double)canvasVector.x(), 6, 'f', 3).
 			arg((double)canvasVector.y(), 6, 'f', 3);
@@ -400,7 +350,7 @@ void BosonUfoGameWidget::updateUfoLabels()
  d->mGamePaused->setVisible(boGame->gamePaused());
 }
 
-void BosonUfoGameWidget::updateUfoLabelPathFinderDebug()
+void BosonUfoGameGUI::updateUfoLabelPathFinderDebug()
 {
  if (!boConfig->boolValue("debug_pf_data")) {
 	d->mPathFinderDebug->setVisible(false);
@@ -439,7 +389,7 @@ void BosonUfoGameWidget::updateUfoLabelPathFinderDebug()
  d->mPathFinderDebug->setText(text);
 }
 
-void BosonUfoGameWidget::updateUfoLabelMatricesDebug()
+void BosonUfoGameGUI::updateUfoLabelMatricesDebug()
 {
  if (!boConfig->boolValue("debug_matrices")) {
 	d->mMatricesDebug->setVisible(false);
@@ -459,7 +409,7 @@ void BosonUfoGameWidget::updateUfoLabelMatricesDebug()
  d->mMatricesDebugProjMod->setMatrix(projMod.data());
  d->mMatricesDebugProjModInv->setMatrix(projModInv.data());
 
- QPoint widgetPos = display()->mapFromGlobal(QCursor::pos());
+ QPoint widgetPos = cursorWidgetPos();
  GLint realy = d->mViewport[3] - (GLint)widgetPos.y() - 1;
  GLfloat depth = 0.0f;
  glReadPixels(widgetPos.x(), realy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
@@ -511,7 +461,7 @@ void BosonUfoGameWidget::updateUfoLabelMatricesDebug()
 		.arg(planes));
 }
 
-void BosonUfoGameWidget::updateUfoLabelItemWorkStatistics()
+void BosonUfoGameGUI::updateUfoLabelItemWorkStatistics()
 {
  if (!boConfig->boolValue("debug_works")) {
 	d->mItemWorkStatistics->setVisible(false);
@@ -540,7 +490,7 @@ void BosonUfoGameWidget::updateUfoLabelItemWorkStatistics()
  d->mItemWorkStatistics->setText(text);
 }
 
-void BosonUfoGameWidget::updateUfoLabelOpenGLCamera()
+void BosonUfoGameGUI::updateUfoLabelOpenGLCamera()
 {
  if (!boConfig->boolValue("debug_camera")) {
 	d->mOpenGLCamera->setVisible(false);
@@ -566,7 +516,7 @@ void BosonUfoGameWidget::updateUfoLabelOpenGLCamera()
  d->mOpenGLCamera->setText(text);
 }
 
-void BosonUfoGameWidget::updateUfoLabelRenderCounts()
+void BosonUfoGameGUI::updateUfoLabelRenderCounts()
 {
  if (!boConfig->boolValue("debug_rendercounts")) {
 	d->mRenderCounts->setVisible(false);
@@ -601,7 +551,7 @@ void BosonUfoGameWidget::updateUfoLabelRenderCounts()
  d->mRenderCounts->setText(text);
 }
 
-void BosonUfoGameWidget::updateUfoLabelAdvanceCalls()
+void BosonUfoGameGUI::updateUfoLabelAdvanceCalls()
 {
  if (!boConfig->boolValue("debug_advance_calls")) {
 	d->mAdvanceCalls->setVisible(false);
@@ -616,7 +566,7 @@ void BosonUfoGameWidget::updateUfoLabelAdvanceCalls()
  d->mAdvanceCalls->setText(text);
 }
 
-void BosonUfoGameWidget::updateUfoLabelTextureMemory()
+void BosonUfoGameGUI::updateUfoLabelTextureMemory()
 {
  if (!boConfig->boolValue("debug_texture_memory")) {
 	d->mTextureMemory->setVisible(false);
@@ -629,33 +579,58 @@ void BosonUfoGameWidget::updateUfoLabelTextureMemory()
  d->mTextureMemory->setText(text);
 }
 
-const BoVector3Fixed& BosonUfoGameWidget::cursorCanvasVector() const
+void BosonUfoGameGUI::setCursorCanvasVector(const BoVector3Fixed* v)
 {
- return display()->cursorCanvasVector();
+ d->mCursorCanvasVector = v;
 }
 
-const BosonCanvas* BosonUfoGameWidget::canvas() const
+void BosonUfoGameGUI::setCursorWidgetPos(const QPoint* pos)
 {
- return display()->canvas();
+ d->mCursorWidgetPos = pos;
 }
 
-BoGameCamera* BosonUfoGameWidget::camera() const
+const BoVector3Fixed& BosonUfoGameGUI::cursorCanvasVector() const
 {
- return display()->camera();
+ return *d->mCursorCanvasVector;
 }
 
-bool BosonUfoGameWidget::isChatVisible() const
+const QPoint& BosonUfoGameGUI::cursorWidgetPos() const
+{
+ return *d->mCursorWidgetPos;
+}
+
+void BosonUfoGameGUI::setCanvas(const BosonCanvas* c)
+{
+ d->mCanvas = c;
+}
+
+const BosonCanvas* BosonUfoGameGUI::canvas() const
+{
+ return d->mCanvas;
+}
+
+void BosonUfoGameGUI::setCamera(BoGameCamera* c)
+{
+ d->mCamera = c;
+}
+
+BoGameCamera* BosonUfoGameGUI::camera() const
+{
+ return d->mCamera;
+}
+
+bool BosonUfoGameGUI::isChatVisible() const
 {
  return d->mUfoChat->isVisible();
 }
 
-void BosonUfoGameWidget::setGameMode(bool mode)
+void BosonUfoGameGUI::setGameMode(bool mode)
 {
  d->mUfoCommandFrame->setGameMode(mode);
  d->mUfoChat->setKGame(boGame);
 }
 
-void BosonUfoGameWidget::slotShowPlaceFacilities(PlayerIO* io)
+void BosonUfoGameGUI::slotShowPlaceFacilities(PlayerIO* io)
 {
  if (boGame->gameMode()) {
 	boError() << k_funcinfo << "not in editor mode" << endl;
@@ -664,7 +639,7 @@ void BosonUfoGameWidget::slotShowPlaceFacilities(PlayerIO* io)
  d->mUfoCommandFrame->placeFacilities(io);
 }
 
-void BosonUfoGameWidget::slotShowPlaceMobiles(PlayerIO* io)
+void BosonUfoGameGUI::slotShowPlaceMobiles(PlayerIO* io)
 {
  if (boGame->gameMode()) {
 	boError() << k_funcinfo << "not in editor mode" << endl;
@@ -673,7 +648,7 @@ void BosonUfoGameWidget::slotShowPlaceMobiles(PlayerIO* io)
  d->mUfoCommandFrame->placeMobiles(io);
 }
 
-void BosonUfoGameWidget::slotShowPlaceGround()
+void BosonUfoGameGUI::slotShowPlaceGround()
 {
  if (boGame->gameMode()) {
 	boError() << k_funcinfo << "not in editor mode" << endl;
@@ -682,7 +657,7 @@ void BosonUfoGameWidget::slotShowPlaceGround()
  d->mUfoCommandFrame->placeGround();
 }
 
-void BosonUfoGameWidget::addChatMessage(const QString& message)
+void BosonUfoGameGUI::addChatMessage(const QString& message)
 {
  d->mUfoChat->addMessage(message);
 }

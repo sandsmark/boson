@@ -1,0 +1,592 @@
+/*
+    This file is part of the Boson game
+    Copyright (C) 1999-2000,2001-2005 The Boson Team (boson-devel@lists.sourceforge.net)
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+#ifndef BOSONGAMEVIEW_H
+#define BOSONGAMEVIEW_H
+
+#include "../boufo/boufo.h"
+#include "../bo3dtools.h"
+
+class BoGameCamera;
+class BoAutoGameCamera;
+class Unit;
+class BosonCanvas;
+class BosonCursor;
+class BoSelection;
+class Player;
+class PlayerIO;
+class BosonItem;
+class BosonScript;
+class BoLight;
+class BoFontInfo;
+class BoItemList;
+class BosonGameViewInputBase;
+class BoSpecificAction;
+class BoUfoActionCollection;
+class BosonGameFPSCounter;
+class KGameIO;
+class QDomElement;
+
+/**
+ * Small class that takes care of scrolling when the cursor is at the edge of
+ * the window
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoCursorEdgeScrolling : public QObject
+{
+	Q_OBJECT
+public:
+	BoCursorEdgeScrolling(QObject* parent);
+	~BoCursorEdgeScrolling();
+
+	void setCamera(BoGameCamera* camera) { mCamera = camera; }
+	BoGameCamera* camera() const { return mCamera; }
+	void setMatrices(const BoGLMatrices* matrices) { mMatrices = matrices; }
+	const BoGLMatrices* matrices() const { return mMatrices; }
+
+	void quitGame();
+
+protected:
+	virtual bool eventFilter(QObject* o, QEvent* e);
+
+protected slots:
+	void slotCursorEdgeTimeout();
+
+private:
+	BoGameCamera* mCamera;
+	const BoGLMatrices* mMatrices;
+	QTimer* mCursorEdgeTimer;
+	int mCursorEdgeCounter;
+};
+
+
+class SelectionRect : public QObject
+{
+	Q_OBJECT
+public:
+	SelectionRect();
+	void setMatrices(const BoGLMatrices* m)
+	{
+		mMatrices = m;
+	}
+
+	void widgetRect(QRect* rect) const;
+
+	void setStartWidgetPos(const QPoint& pos);
+	void setEndWidgetPos(const QPoint& pos);
+	const QPoint& startPos() const
+	{
+		return mStartPos;
+	}
+
+	bool isVisible() const
+	{
+		return mVisible;
+	}
+	void setVisible(bool v);
+
+	void quitGame();
+
+	/**
+	 * @return A list of items that are currently in the selection rect
+	 **/
+	BoItemList* items(const PlayerIO* localPlayerIO, const BosonCanvas* canvas, const BoGLMatrices& gameGLMatrices) const;
+
+signals:
+	void signalVisible(bool);
+	void signalChanged(const QRect&);
+
+private:
+	const BoGLMatrices* mMatrices;
+	QPoint mStartPos;
+	QPoint mEndPos;
+	bool mVisible;
+};
+
+
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de
+ **/
+class BoMouseEvent
+{
+public:
+	BoMouseEvent()
+	{
+		mX = 0.0;
+		mY = 0.0;
+		mZ = 0.0;
+		mControlButton = false;
+		mShiftButton = false;
+		mAltButton = false;
+	}
+
+	~BoMouseEvent()
+	{
+	}
+
+	void setQtWidgetPos(const QPoint& pos)
+	{
+		mQtWidgetPos = pos;
+	}
+	void setWidgetPos(const QPoint& pos)
+	{
+		mWidgetPos = pos;
+	}
+	const QPoint& qtWidgetPos() const
+	{
+		return mQtWidgetPos;
+	}
+	const QPoint& widgetPos() const
+	{
+		return mWidgetPos;
+	}
+	void setCanvasVector(const BoVector3Fixed& pos)
+	{
+		mCanvasVector = pos;
+		mCanvasPos = QPoint((int)pos.x(), (int)pos.y());
+	}
+
+	const QPoint& canvasPos() const
+	{
+		return mCanvasPos;
+	}
+	const BoVector3Fixed& canvasVector() const
+	{
+		return mCanvasVector;
+	}
+
+	void setWorldPos(GLfloat x, GLfloat y, GLfloat z)
+	{
+		mX = x;
+		mY = y;
+		mZ = z;
+	}
+
+	void worldPos(GLfloat* x, GLfloat* y, GLfloat* z) const
+	{
+		*x = mX;
+		*y = mY;
+		*z = mZ;
+	}
+
+	void setControlButton(bool b)
+	{
+		mControlButton = b;
+	}
+	bool controlButton() const
+	{
+		return mControlButton;
+	}
+	void setShiftButton(bool b)
+	{
+		mShiftButton = b;
+	}
+	bool shiftButton() const
+	{
+		return mShiftButton;
+	}
+	void setAltButton(bool b)
+	{
+		mAltButton = b;
+	}
+	bool altButton() const
+	{
+		return mAltButton;
+	}
+
+	bool forceAttack() const
+	{
+		// TODO: make configurable
+		return mControlButton;
+	}
+
+private:
+	QPoint mQtWidgetPos;
+	QPoint mWidgetPos;
+	QPoint mCanvasPos;
+	BoVector3Fixed mCanvasVector;
+	GLfloat mX;
+	GLfloat mY;
+	GLfloat mZ;
+
+	bool mControlButton;
+	bool mShiftButton;
+	bool mAltButton;
+};
+
+
+
+class BosonGameViewPrivate;
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BosonGameView : public BoUfoCustomWidget
+{
+	Q_OBJECT
+public:
+	BosonGameView();
+	virtual ~BosonGameView();
+
+	void setGameFPSCounter(BosonGameFPSCounter* counter);
+	BosonGameFPSCounter* gameFPSCounter() const;
+
+	void setDisplayInput(BosonGameViewInputBase* input);
+	BosonGameViewInputBase* displayInput() const;
+
+	bool isInputInitialized();
+	void setInputInitialized(bool initialized);
+
+	void setCanvas(BosonCanvas* canvas);
+	const BosonCanvas* canvas() const { return mCanvas; }
+	void setLocalPlayerIO(PlayerIO* p);
+	PlayerIO* localPlayerIO() const;
+	void setLocalPlayerScript(BosonScript* script);
+
+	void setActionCollection(BoUfoActionCollection*);
+	BoUfoActionCollection* actionCollection() const;
+
+
+	const QPoint& cursorWidgetPos() const;
+	const BoVector3Fixed& cursorCanvasVector() const;
+	BoSelection* selection() const { return mSelection; }
+	BoGameCamera* camera() const;
+	BoAutoGameCamera* autoCamera() const;
+	void advanceCamera();
+
+#warning FIXME: use BoUfo method
+	void setFont(const BoFontInfo& font);
+
+	void saveAsXML(QDomElement& root);
+	void loadFromXML(const QDomElement& root);
+
+	/**
+	 * Scroll by a certain distance.
+	 *
+	 * Note that these are pixel values, so depending on the current zoom
+	 * factor this may be a long or a short distance in world-coordinates
+	 **/
+	void scrollBy(int x, int y);//AB: kind of obsolete, since we don't support QCanvas anymore
+
+	void zoom(float delta);
+	void rotate(float delta);
+
+	void quitGame();
+
+	void setToolTipCreator(int type);
+	void setToolTipUpdatePeriod(int ms);
+
+	void addChatMessage(const QString& message);
+
+
+	BoLight* light(int id) const;
+	BoLight* newLight();
+	void removeLight(int id);
+
+	void updateOpenGLSettings();
+
+	virtual void paint();
+	virtual void paintWidget();
+
+public slots:
+	/**
+	 * @param pos the <em>cell</em>-coordinates of the centered position
+	 **/
+	void slotReCenterDisplay(const QPoint& pos);
+	void slotCenterHomeBase();
+
+	/**
+	 * In case the unit has been destroyed make sure that it's removed from
+	 * the local selection.
+	 *
+	 * Currently this does not do anything else, but we might add some
+	 * functionality in the future
+	 **/
+	void slotUnitChanged(Unit* unit);
+
+	void slotFog(int x, int y);
+	void slotUnfog(int x, int y);
+
+	void slotAction(const BoSpecificAction&);
+
+signals:
+	/**
+	 * Emitted when the selection for this big display has changed. See also
+	 * @ref BoSelection::signalSelectionChanged
+	 **/
+	void signalSelectionChanged(BoSelection* selection);
+	void signalCursorCanvasVectorChanged(const BoVector3Fixed&);
+
+	void signalToggleChatVisible();
+	void signalToggleStatusbar(bool);
+	void signalSaveGame();
+	void signalEndGame();
+	void signalQuit();
+	void signalEditorChangeLocalPlayer(Player*);
+	void signalSetUpdateInterval(unsigned int ms);
+
+	/**
+	 * See @ref BosonCursorCollection::signalSetWidgetCursor
+	 **/
+	void signalSetWidgetCursor(BosonCursor* c);
+
+protected:
+	/**
+	 * Update the @ref cursorCanvasVector according to the current cursor and
+	 * camera settings.
+	 *
+	 * This should be called whenever the mouse is moved (i.e. when a mouse
+	 * move event occurs) and whenever the camera is changed.
+	 *
+	 * @param qtWidgetPos The current position of the cursor, as it is
+	 * provided by Qt/X11 or by libufo.
+	 * @param widgetPos The current position of the cursor, as it is used in
+	 * Boson, i.e. with the y coordinate flipped. Note that the pos is
+	 * relative to the widget and therefore other widget like the menubar
+	 * must be taken into account when the y coordinate is being flipped.
+	 **/
+	void updateCursorCanvasVector(const QPoint& qtWidgetPos, const QPoint& widgetPos);
+
+	void setCamera(const BoGameCamera& c);
+	void cameraChanged();
+
+	/*
+	 * @param useRealDepth If TRUE this function will calculate the real
+	 * coordinates at @p pos, if FALSE it will calculate the coordinate at
+	 * @p pos with z=0.0. This is useful for e.g. @ref mapDistance, where
+	 * different z values could deliver wrong values.
+	 **/
+	bool mapCoordinates(const QPoint& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth = true) const;
+	bool mapCoordinatesToCell(const QPoint& pos, QPoint* cell);
+	bool mapDistance(int windowDistanceX, int windowDistanceY, GLfloat* dx, GLfloat* dy) const;
+
+	/**
+	 * Set a viewport. Basically the same as glViewport, but you should use
+	 * this instead the standard OpenGL function. The viewport values are
+	 * cached in boson, so that we can easily use it in @ref mapCoordinates.
+	 *
+	 * Note that the current matrix is not changed before glViewport is
+	 * calles, so you need to ensure that it is called at the correct
+	 * time/place.
+	 **/
+	void setViewport(int x, int y, GLsizei w, GLsizei h);
+
+	/**
+	 * Extract the frustum from both, modelview and projection matrices.
+	 * Credits for this function go to Mark Morley - see
+	 * http://www.markmorley.com/opengl/frustumculling.html
+	 *
+	 * We use pretty much of his code examples here so let me quote from the
+	 * article: "[...] Unless otherwise noted, you may use any and all code
+	 * examples provided herein in any way you want. [...]"
+	 **/
+	void extractFrustum();
+
+	void resetGameMode();
+	void setGameMode(bool);
+
+	/**
+	 * Move the selection rect. @ref selectionStart is still the start point
+	 * but @ref selectionEnd is now x,y,z
+	 **/
+	void moveSelectionRect(const QPoint& widgetPos);
+
+	/**
+	 * Remove a currently drawn selection rect and select all units inside
+	 * this rect.
+	 * @param replace If TRUE the current selection is replaced, otherwise
+	 * the selected units are added to the selection.
+	 * Usually when the player holds the shift key down while selecting.
+	 **/
+	void removeSelectionRect(bool replace);
+
+	/**
+	 * Here the defined action for a wheel event should happen. See
+	 * docs/mouse-big_display.txt for a list of actions that are allowed
+	 * here.
+	 * @param delta See QWheelEvent::delta. This is how much the wheel was
+	 * moved.
+	 * @param orientation Guess what? Yes! Horizontal or Vertical wheel.
+	 * @param action Information about the event (position, modifiers, ...).
+	 * See @ref BoMouseEvent
+	 **/
+	void mouseEventWheel(float delta, Qt::Orientation orientation, const BoMouseEvent& action);
+
+	/**
+	 * @param buttonState See @ref QMouseEvent::state. This tells you which
+	 * buttons are currently pressed.
+	 * @param action Information about the event (position, modifiers, ...).
+	 * See @ref BoMouseEvent
+	 **/
+	void mouseEventMove(int buttonState, const BoMouseEvent& action);
+
+	/**
+	 * This is the main event for actual actions. When a player clicks RMB
+	 * on an enemy unit and expects his selection to attack that unit, then
+	 * this action is started here. No action is allowed in mouse press
+	 * events.
+	 *
+	 * See docs/mouse-big_display.txt for further description and a list of
+	 * allowed actions here.
+	 * @param button Which button produced this event.
+	 * @param action Information about the event (position, modifiers, ...).
+	 * See @ref BoMouseEvent
+	 * @param stream Stream your action here, if it is network (i.e.
+	 * game-)relevant. Actions like zooming, rotating (i.e. chaging the
+	 * camera) or selecting units can be done immediately, but all that
+	 * requires units to do something must be streamed and sent using a
+	 * message.
+	 * @param send Set this to TRUE in order to actually send the @p stream
+	 **/
+	void mouseEventRelease(ButtonState button, const BoMouseEvent& action);
+
+	/**
+	 * @param button Which button produced this event.
+	 * @param action Information about the event (position, modifiers, ...).
+	 * See @ref BoMouseEvent
+	 * @param stream Stream your action here, if it is network (i.e.
+	 * game-)relevant. Actions like zooming, rotating (i.e. chaging the
+	 * camera) or selecting units can be done immediately, but all that
+	 * requires units to do something must be streamed and sent using a
+	 * message.
+	 * @param send Set this to TRUE in order to actually send the @p stream
+	 **/
+	void mouseEventReleaseDouble(ButtonState button, const BoMouseEvent& action);
+
+
+protected slots:
+	void slotResetViewProperties();
+
+	/**
+	 * Called when @ref BosonCanvas::signalRemovedItem is emitted. Note that
+	 * this usally happens from the @ref BosonItem destructor! So be careful
+	 * with calling function of @p item, they might crash the game (as they
+	 * dont exist anymore / their data doesnt exist anymore)
+	 **/
+	void slotRemovedItemFromCanvas(BosonItem* item);
+
+	void slotAdvance(unsigned int, bool);
+
+	void slotInitMiniMapFogOfWar();
+
+	void slotEditorDeleteSelectedUnits();
+	void slotEditorEditHeight(bool);
+	void slotEditorShowPlaceFacilities();
+	void slotEditorShowPlaceMobiles();
+	void slotEditorShowPlaceGround();
+
+	void slotShowLight0Widget();
+	void slotPreferencesApply();
+	void slotUpdateOpenGLSettings();
+
+	void slotScroll(int);
+
+	void slotWidgetResized();
+
+	void slotMouseEvent(QMouseEvent* e);
+	void slotWheelEvent(QWheelEvent* e);
+
+	void slotWidgetShown();
+
+private:
+	void init();
+	void initUfoGUI();
+
+private:
+	BosonGameViewPrivate* d;
+
+	BosonCanvas* mCanvas;
+	BosonCursor* mCursor;
+	BoSelection* mSelection;
+};
+
+
+
+/**
+ * This class connects to the relevant signals of @ref BosonScriptInterface. All
+ * communication between @ref BosonScript and @ref BosonGameView happens
+ * trough the interface class and this class.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BosonGameViewScriptConnector : public QObject
+{
+	Q_OBJECT
+public:
+	BosonGameViewScriptConnector(BosonGameView* parent);
+	~BosonGameViewScriptConnector();
+
+	/**
+	 * Make this object resond to the signals of @p script. Note that only
+	 * one slot is allowed to connect to one signal in @p script, as the
+	 * return values are retrieved through the slots.
+	 **/
+	void connectToScript(BosonScript* script);
+
+
+protected slots:
+	/*  Light  */
+	void slotAddLight(int* id);
+	void slotRemoveLight(int id);
+	void slotGetLightPos(int id, BoVector4Float*);
+	void slotGetLightAmbient(int id, BoVector4Float*);
+	void slotGetLightDiffuse(int id, BoVector4Float*);
+	void slotGetLightSpecular(int id, BoVector4Float*);
+	void slotGetLightAttenuation(int id, BoVector3Float*);
+	void slotGetLightEnabled(int id, bool*);
+	void slotSetLightPos(int id, const BoVector4Float&);
+	void slotSetLightAmbient(int id, const BoVector4Float&);
+	void slotSetLightDiffuse(int id, const BoVector4Float&);
+	void slotSetLightSpecular(int id, const BoVector4Float&);
+	void slotSetLightAttenuation(int id, const BoVector3Float&);
+	void slotSetLightEnabled(int id, bool);
+
+	/*  Camera  */
+	void slotGetCameraPos(BoVector3Float*);
+	void slotGetCameraLookAt(BoVector3Float*);
+	void slotGetCameraUp(BoVector3Float*);
+	void slotGetCameraRotation(float*);
+	void slotGetCameraRadius(float*);
+	void slotGetCameraZ(float*);
+	void slotSetUseCameraLimits(bool);
+	void slotSetCameraFreeMovement(bool);
+
+	/*  AutoCamera  */
+	void slotSetCameraPos(const BoVector3Float&);
+	void slotSetCameraLookAt(const BoVector3Float&);
+	void slotSetCameraUp(const BoVector3Float&);
+	void slotAddCameraPosPoint(const BoVector3Float&, float);
+	void slotAddCameraLookAtPoint(const BoVector3Float&, float);
+	void slotAddCameraUpPoint(const BoVector3Float&, float);
+	void slotSetCameraRotation(float);
+	void slotSetCameraRadius(float);
+	void slotSetCameraZ(float);
+	void slotSetCameraMoveMode(int);
+	void slotSetCameraInterpolationMode(int);
+	void slotCommitCameraChanges(int);
+	void slotSetAcceptUserInput(bool);
+
+protected:
+	void reconnect(const QObject*, const char*, const QObject*, const char*);
+
+private:
+	BosonGameView* mDisplay;
+};
+
+
+#endif
+

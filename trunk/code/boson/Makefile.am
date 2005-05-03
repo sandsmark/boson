@@ -12,7 +12,8 @@ SUBDIRS = \
 	info \
 	script \
 	meshrenderer \
-	groundrenderer
+	groundrenderer \
+	gameview
 
 noinst_LTLIBRARIES = \
 		libboson.la \
@@ -23,7 +24,7 @@ noinst_LTLIBRARIES = \
 		libbo3dsdebug.la
 bin_PROGRAMS = boson borender bounit boprofiling bocursor boinfo bo3dsdebug
 
-INCLUDES = -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl $(all_includes)
+INCLUDES = -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl -I$(top_srcdir)/boson/boufo $(all_includes)
 
 
 libboson_la_SOURCES = \
@@ -66,6 +67,7 @@ libboson_la_SOURCES = \
 	playerio.cpp \
 	bomatrixwidget.cpp \
 	bosonglwidget.cpp \
+	bomousemovediff.cpp \
 	bosonufoglwidget.cpp \
 	bocamera.cpp \
 	boautocamera.cpp \
@@ -140,17 +142,14 @@ libboson_la_LIBADD = \
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker -export-dynamic
 boson_LDADD = \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
+		$(top_builddir)/boson/gameview/libbosongameview.la \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/libboson.la \
 		$(LIB_BOMEMORY)
 boson_SOURCES = \
+		bosonfpscounter.cpp \
+		bosonmainwidget.cpp \
 		boufoactionext.cpp \
-		bosonufogamewidget.cpp \
-		bosonbigdisplaybase.cpp \
-		bosonbigdisplayinputbase.cpp \
-		bosonbigdisplayinput.cpp \
-		editorbigdisplayinput.cpp \
-		bosonmenuinput.cpp \
 		bogltooltip.cpp \
 		bosonglminimap.cpp \
 		bosonufominimap.cpp \
@@ -158,13 +157,12 @@ boson_SOURCES = \
 		optionswidgets.cpp \
 		bogroundrenderer.cpp \
 		bogroundrenderermanager.cpp \
-		top.cpp  \
-		bosonlocalplayerinput.cpp \
 		kgameunitdebug.cpp \
 		kgameadvancemessagesdebug.cpp \
 		kgameplayerdebug.cpp \
 		kgamecelldebug.cpp \
 		gameoverdialog.cpp \
+		bocheckinstallation.cpp \
 		main.cpp
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)

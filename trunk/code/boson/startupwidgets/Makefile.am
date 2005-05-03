@@ -1,4 +1,4 @@
-INCLUDES = -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl -I$(top_srcdir)/boson -I$(top_builddir)/boson/bosonwidgets $(all_includes)
+INCLUDES = -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl -I$(top_srcdir)/boson -I$(top_builddir)/boson/bosonwidgets -I$(top_srcdir)/boson/boufo $(all_includes)
 
 noinst_LTLIBRARIES = libbosonstartupwidgets.la
 

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2001-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,16 +21,15 @@
 
 #include "botooltipcreator.h"
 #include "bodebug.h"
-#include "bosonbigdisplaybase.h"
 #include "bosoncanvas.h"
 #include "items/bosonitem.h"
 #include "bosonconfig.h"
 #include "boufo/boufo.h"
 #include "playerio.h"
+#include "bo3dtools.h"
 
 #include <qmap.h>
 #include <qtimer.h>
-#include <qcursor.h>
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -210,26 +209,29 @@ public:
 	QTimer mTimer;
 	QTimer mUpdateTimer;
 	BoToolTip mToolTip;
+	BoVector3Fixed mCursorCanvasVector;
 
 };
 
-BoGLToolTip::BoGLToolTip(BosonBigDisplayBase* v) : QObject(v)
+BoGLToolTip::BoGLToolTip(BoUfoWidget* v) : QObject(v)
 {
  d = new BoGLToolTipPrivate;
  mView = v;
+ mCanvas = 0;
  mShowTip = false;
  mUpdatePeriod = 0;
  mCreator = 0;
  mPlayerIO = 0;
  mLabel = 0;
 
- kapp->setGlobalMouseTracking(true);
- kapp->installEventFilter(this);
  connect(&d->mTimer, SIGNAL(timeout()), this, SLOT(slotTimeOut()));
  connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdate()));
 
  setUpdatePeriod(boConfig->intValue("ToolTipUpdatePeriod"));
  setToolTipCreator(boConfig->intValue("ToolTipCreator"));
+
+ connect(mView, SIGNAL(signalMouseMoved(QMouseEvent*)),
+		this, SLOT(slotMouseMoved(QMouseEvent*)));
 }
 
 BoGLToolTip::~BoGLToolTip()
@@ -243,38 +245,20 @@ void BoGLToolTip::setPlayerIO(PlayerIO* io)
  mPlayerIO = io;
 }
 
+void BoGLToolTip::setCanvas(BosonCanvas* canvas)
+{
+ mCanvas = canvas;
+}
+
 void BoGLToolTip::setLabel(BoUfoLabel* l)
 {
  mLabel = l;
  updateLabel();
 }
 
-bool BoGLToolTip::eventFilter(QObject* o, QEvent* event)
+void BoGLToolTip::slotSetCursorCanvasVector(const BoVector3Fixed& v)
 {
- if (!o || !event) {
-	return false;
- }
- if (!o->isWidgetType()) {
-	return false;
- }
- if (((BosonGLWidget*)((QWidget*)o)) != mView) {
-	return false;
- }
- switch (event->type()) {
-	case QEvent::MouseMove:
-		hideTip();
-		d->mTimer.stop();
-		d->mTimer.start(toolTipDelay());
-		setCursorPos(mView->mapFromGlobal(QCursor::pos()));
-//		setCursorPos(QPoint(50, 50));
-		break;
-	// AB: well .. do we need to catch other events?
-	// such as when window lost focus? maybe hide tips then? or when the
-	// player clicked?
-	default:
-		break;
- }
- return false;
+ d->mCursorCanvasVector = v;
 }
 
 void BoGLToolTip::slotTimeOut()
@@ -284,11 +268,11 @@ void BoGLToolTip::slotTimeOut()
 	return;
  }
  BO_CHECK_NULL_RET(mLabel);
- if (!mView->canvas()) {
+ if (!mCanvas) {
 	// this is NOT an error
 	return;
  }
- if (!mView->hasMouse() || !mView->canvas()->onCanvas(mView->cursorCanvasVector())) {
+ if (!mView->hasMouse() || !mCanvas->onCanvas(d->mCursorCanvasVector)) {
 	hideTip();
 	return;
  }
@@ -296,7 +280,7 @@ void BoGLToolTip::slotTimeOut()
 
  // TODO: find out whether there is actually the canvas below the cursor and not
  // e.g. the command frame!
- BosonItem* item = mPlayerIO->findItemAt(mView->canvas(), mView->cursorCanvasVector());
+ BosonItem* item = mPlayerIO->findItemAt(mCanvas, d->mCursorCanvasVector);
  if (!item) {
 	hideTip();
 	return;
@@ -407,5 +391,14 @@ void BoGLToolTip::setCursorPos(const QPoint& pos)
 
  mLabel->setPos(x, y);
 }
+
+void BoGLToolTip::slotMouseMoved(QMouseEvent* e)
+{
+ hideTip();
+ d->mTimer.stop();
+ d->mTimer.start(toolTipDelay());
+ setCursorPos(e->pos());
+}
+
 
 
