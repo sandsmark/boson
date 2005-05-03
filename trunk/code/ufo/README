@@ -13,6 +13,7 @@ Patches applied currently (this list may not be complete):
 - Patch to fix index underflow in UFontMetrics::viewToModel()
 - Patch to ugl_image.cpp to enable blending for images with 4 components
 - Patch to uboboxlayout.cpp to make widgets use all remaining space
+- Patch to uboboxlayout.cpp to support stretching
 - Patch to ulayeredpane.cpp to insert new widgets at the beginning of a layer
   (which makes it the last widget that is painted), if not specified otherwise
 - Patch to gl/ugl_graphics.cpp, to fix setClipRect() for invalid rectangles
