@@ -25,6 +25,22 @@
 #include <qevent.h> // to avoid GLX/Qt conflicts
 #include <GL/glx.h>
 
+#ifndef GLX_NV_float_buffer
+#define GLX_NV_float_buffer 1
+#define GLX_FLOAT_COMPONENTS_NV         0x20B0
+#endif
+
+#ifndef GLX_SGIX_fbconfig
+#define GLX_SGIX_fbconfig 1
+typedef struct __GLXFBConfigRec *GLXFBConfigSGIX;
+#endif
+
+#ifndef GLX_SGIX_pbuffer
+#define GLX_SGIX_pbuffer 1
+#endif
+
 #include <boglx_decl_p.h>
 
-#endif
+
+
+#endif // BOGLX_H

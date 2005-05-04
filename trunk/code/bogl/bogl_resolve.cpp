@@ -663,6 +663,19 @@ extern "C" {
  _glXAllocateMemoryNV bo_glXAllocateMemoryNV;
  _glXFreeMemoryNV bo_glXFreeMemoryNV;
  _glXGetAGPOffsetMESA bo_glXGetAGPOffsetMESA;
+ // GLX_SGIX_fbconfig
+ _glXGetFBConfigAttribSGIX bo_glXGetFBConfigAttribSGIX;
+ _glXChooseFBConfigSGIX bo_glXChooseFBConfigSGIX;
+ _glXCreateGLXPixmapWithConfigSGIX bo_glXCreateGLXPixmapWithConfigSGIX;
+ _glXCreateContextWithConfigSGIX bo_glXCreateContextWithConfigSGIX;
+ _glXGetVisualFromFBConfigSGIX bo_glXGetVisualFromFBConfigSGIX;
+ _glXGetFBConfigFromVisualSGIX bo_glXGetFBConfigFromVisualSGIX;
+ //GLX_SGIX_pbuffer
+ _glXCreateGLXPbufferSGIX bo_glXCreateGLXPbufferSGIX;
+ _glXDestroyGLXPbufferSGIX bo_glXDestroyGLXPbufferSGIX;
+ _glXQueryGLXPbufferSGIX bo_glXQueryGLXPbufferSGIX;
+ _glXSelectEventSGIX bo_glXSelectEventSGIX;
+ _glXGetSelectedEventSGIX bo_glXGetSelectedEventSGIX;
 }; // extern "C"
 
 bool boglResolveGLSymbols()
@@ -1907,6 +1920,19 @@ static bool boglResolveGLXSymbols(QLibrary& gl)
  bo_glXAllocateMemoryNV = (_glXAllocateMemoryNV)gl.resolve("glXAllocateMemoryNV");
  bo_glXFreeMemoryNV = (_glXFreeMemoryNV)gl.resolve("glXFreeMemoryNV");
  bo_glXGetAGPOffsetMESA = (_glXGetAGPOffsetMESA)gl.resolve("glXGetAGPOffsetMESA");
+ // GLX_SGIX_fbconfig
+ bo_glXGetFBConfigAttribSGIX = (_glXGetFBConfigAttribSGIX)gl.resolve("glXGetFBConfigAttribSGIX");
+ bo_glXChooseFBConfigSGIX = (_glXChooseFBConfigSGIX)gl.resolve("glXChooseFBConfigSGIX");
+ bo_glXCreateGLXPixmapWithConfigSGIX = (_glXCreateGLXPixmapWithConfigSGIX)gl.resolve("glXCreateGLXPixmapWithConfigSGIX");
+ bo_glXCreateContextWithConfigSGIX = (_glXCreateContextWithConfigSGIX)gl.resolve("glXCreateContextWithConfigSGIX");
+ bo_glXGetVisualFromFBConfigSGIX = (_glXGetVisualFromFBConfigSGIX)gl.resolve("glXGetVisualFromFBConfigSGIX");
+ bo_glXGetFBConfigFromVisualSGIX = (_glXGetFBConfigFromVisualSGIX)gl.resolve("glXGetFBConfigFromVisualSGIX");
+ //GLX_SGIX_pbuffer
+ bo_glXCreateGLXPbufferSGIX = (_glXCreateGLXPbufferSGIX)gl.resolve("glXCreateGLXPbufferSGIX");
+ bo_glXDestroyGLXPbufferSGIX = (_glXDestroyGLXPbufferSGIX)gl.resolve("glXDestroyGLXPbufferSGIX");
+ bo_glXQueryGLXPbufferSGIX = (_glXQueryGLXPbufferSGIX)gl.resolve("glXQueryGLXPbufferSGIX");
+ bo_glXSelectEventSGIX = (_glXSelectEventSGIX)gl.resolve("glXSelectEventSGIX");
+ bo_glXGetSelectedEventSGIX = (_glXGetSelectedEventSGIX)gl.resolve("glXGetSelectedEventSGIX");
  return true;
 }
 
