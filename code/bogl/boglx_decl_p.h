@@ -82,6 +82,26 @@ typedef void* (*_glXGetProcAddressARB)(const GLubyte *procName);
 typedef void* (*_glXAllocateMemoryNV)(GLsizei size, GLfloat readfreq, GLfloat writefreq, GLfloat priority);
 typedef void* (*_glXFreeMemoryNV)(GLvoid *pointer);
 typedef GLuint (*_glXGetAGPOffsetMESA)(const GLvoid *pointer);
+// GLX_SGIX_fbconfig
+typedef int (*_glXGetFBConfigAttribSGIX)(Display *dpy, GLXFBConfigSGIX config,
+    int attribute, int *value_return);
+typedef GLXFBConfigSGIX* (*_glXChooseFBConfigSGIX)(Display *dpy, int screen,
+    const int *attrib_list, int *nelements);
+typedef GLXPixmap (*_glXCreateGLXPixmapWithConfigSGIX)(Display *dpy,
+    GLXFBConfigSGIX config, Pixmap pixmap);
+typedef GLXContext (*_glXCreateContextWithConfigSGIX)(Display *dpy,
+    GLXFBConfigSGIX config, int render_type, GLXContext share_list, Bool direct);
+typedef XVisualInfo* (*_glXGetVisualFromFBConfigSGIX)(Display *dpy, GLXFBConfigSGIX config);
+typedef GLXFBConfigSGIX (*_glXGetFBConfigFromVisualSGIX)(Display *dpy, XVisualInfo *vis);
+//GLX_SGIX_pbuffer
+typedef GLXPbuffer (*_glXCreateGLXPbufferSGIX)(Display *dpy, GLXFBConfig config,
+    unsigned int width, unsigned int height, const int *attrib_list);
+typedef void (*_glXDestroyGLXPbufferSGIX)(Display *dpy, GLXPbuffer pbuf);
+typedef void (*_glXQueryGLXPbufferSGIX)(Display *dpy, GLXPbuffer pbuf,
+    int attribute, unsigned int *value);
+typedef void (*_glXSelectEventSGIX)(Display *dpy, GLXDrawable drawable, unsigned long mask);
+typedef void (*_glXGetSelectedEventSGIX)(Display *dpy, GLXDrawable drawable, unsigned long *mask);
+
 
 // GLX function pointers
 extern _glXChooseVisual bo_glXChooseVisual;
@@ -132,6 +152,19 @@ extern _glXGetProcAddressARB bo_glXGetProcAddressARB;
 extern _glXAllocateMemoryNV bo_glXAllocateMemoryNV;
 extern _glXFreeMemoryNV bo_glXFreeMemoryNV;
 extern _glXGetAGPOffsetMESA bo_glXGetAGPOffsetMESA;
+// GLX_SGIX_fbconfig
+extern _glXGetFBConfigAttribSGIX bo_glXGetFBConfigAttribSGIX;
+extern _glXChooseFBConfigSGIX bo_glXChooseFBConfigSGIX;
+extern _glXCreateGLXPixmapWithConfigSGIX bo_glXCreateGLXPixmapWithConfigSGIX;
+extern _glXCreateContextWithConfigSGIX bo_glXCreateContextWithConfigSGIX;
+extern _glXGetVisualFromFBConfigSGIX bo_glXGetVisualFromFBConfigSGIX;
+extern _glXGetFBConfigFromVisualSGIX bo_glXGetFBConfigFromVisualSGIX;
+//GLX_SGIX_pbuffer
+extern _glXCreateGLXPbufferSGIX bo_glXCreateGLXPbufferSGIX;
+extern _glXDestroyGLXPbufferSGIX bo_glXDestroyGLXPbufferSGIX;
+extern _glXQueryGLXPbufferSGIX bo_glXQueryGLXPbufferSGIX;
+extern _glXSelectEventSGIX bo_glXSelectEventSGIX;
+extern _glXGetSelectedEventSGIX bo_glXGetSelectedEventSGIX;
 }; // extern "C"
 
 
@@ -184,6 +217,19 @@ extern _glXGetAGPOffsetMESA bo_glXGetAGPOffsetMESA;
 #define glXAllocateMemoryNV bo_glXAllocateMemoryNV
 #define glXFreeMemoryNV bo_glXFreeMemoryNV
 #define glXGetAGPOffsetMESA bo_glXGetAGPOffsetMESA
+// GLX_SGIX_fbconfig
+#define glXGetFBConfigAttribSGIX bo_glXGetFBConfigAttribSGIX
+#define glXChooseFBConfigSGIX bo_glXChooseFBConfigSGIX
+#define glXCreateGLXPixmapWithConfigSGIX bo_glXCreateGLXPixmapWithConfigSGIX
+#define glXCreateContextWithConfigSGIX bo_glXCreateContextWithConfigSGIX
+#define glXGetVisualFromFBConfigSGIX bo_glXGetVisualFromFBConfigSGIX
+#define glXGetFBConfigFromVisualSGIX bo_glXGetFBConfigFromVisualSGIX
+//GLX_SGIX_pbuffer
+#define glXCreateGLXPbufferSGIX bo_glXCreateGLXPbufferSGIX
+#define glXDestroyGLXPbufferSGIX bo_glXDestroyGLXPbufferSGIX
+#define glXQueryGLXPbufferSGIX bo_glXQueryGLXPbufferSGIX
+#define glXSelectEventSGIX bo_glXSelectEventSGIX
+#define glXGetSelectedEventSGIX bo_glXGetSelectedEventSGIX
 
 
 #endif // BOGLXDECL_P_H
