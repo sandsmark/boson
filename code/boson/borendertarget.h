@@ -66,7 +66,7 @@ class BoRenderTarget
      * Updates the texture of this render target.
      * You usually don't need to call this manually.
      **/
-    void updateTexture();
+    void updateTexture(BoTexture* tex = 0);
 
     bool valid() const  { return mValid; }
     Type type() const  { return mType; }
