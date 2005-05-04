@@ -17,7 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <ufo/ufo.hpp>
 #include <bogl.h>
 
 #include "bosonmainwidget.h"
