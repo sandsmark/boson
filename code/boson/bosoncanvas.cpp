@@ -156,22 +156,23 @@ private:
 
 void BoCanvasAdvance::advance(const BoItemList& allItems, const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount, bool advanceFlag)
 {
- boProfiling->advance(true, advanceCallsCount);
+ boProfiling->push(prof_funcinfo + " - Whole method");
 
  /*
   * Main part of this method. This is the most important, but unfortunately also
   * the most time consuming part.
   */
- boProfiling->advanceFunction(true);
+ boProfiling->push("Advance Items");
  advanceItems(allItems, animItems, advanceCallsCount, advanceFlag);
- boProfiling->advanceFunction(false);
+ boProfiling->pop(); // Advance Items
 
- boProfiling->advanceEffects(true);
+ boProfiling->push("Advance Effects");
  updateEffects(mCanvas->d->mEffects, 0.05);  // With default game speed, delay between advance messages is 1.0 / 20 = 0.05 sec
- boProfiling->advanceWater(true);
- boProfiling->advanceEffects(false);
+ boProfiling->pop(); // Advance Effects
+
+ boProfiling->push("Advance Water");
  boWaterManager->update(0.05);
- boProfiling->advanceWater(false);
+ boProfiling->pop(); // Advance Water
 
  /*
   * This contains some things that need to be done "sometimes" only - currently
@@ -180,17 +181,15 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, const QPtrList<BosonIt
   * These things are often very time consuming, but that hardly matters since it
   * is rarely done.
   */
- boProfiling->advanceMaximalAdvanceCount(true);
+ boProfiling->push("Advance Maximal Advance Count");
  maximalAdvanceCountTasks(advanceCallsCount);
- boProfiling->advanceMaximalAdvanceCount(false);
+ boProfiling->pop(); // Advance Maximal Advance Count
 
- boProfiling->advance(false, advanceCallsCount);
+ boProfiling->pop(); // Whole method
 }
 
 void BoCanvasAdvance::advanceItems(const BoItemList& allItems, const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount, bool advanceFlag)
 {
- static int profilingAdvance = boProfiling->requestEventId("Advance: BosonItem::advance()");
- static int profilingAdvanceFunctionAndMove = boProfiling->requestEventId("Advance: BosonItem::advanceFunction() and move()");
  mCanvas->lockAdvanceFunction();
  mCanvas->d->mStatistics->resetWorkCounts();
 
@@ -198,16 +197,16 @@ void BoCanvasAdvance::advanceItems(const BoItemList& allItems, const QPtrList<Bo
  // AB: profiling information will be inaccurate because of this... we are
  // collecting for every item advance() here, and below for some items
  // advanceFunction(). those will be listed as *different* items...
- boProfiling->start(profilingAdvance);
+ boProfiling->push("Advance: BosonItem::advance()");
  itemAdvance(allItems, animItems, advanceCallsCount);
- boProfiling->stop(profilingAdvance);
+ boProfiling->pop();
 
  // now the rest - mainly call BosonItem::advanceFunction().
  // this depends on in which list an item resides (changed when Unit::work()
  // changes). normal items are usually in -1.
- boProfiling->start(profilingAdvanceFunctionAndMove);
+ boProfiling->push("Advance: BosonItem::advanceFunction() and move()");
  advanceFunctionAndMove(advanceCallsCount, advanceFlag);
- boProfiling->stop(profilingAdvanceFunctionAndMove);
+ boProfiling->pop();
 
  // now we need to make sure that the correct advance function will be called in
  // the next advance call.
@@ -224,19 +223,16 @@ void BoCanvasAdvance::advanceItems(const BoItemList& allItems, const QPtrList<Bo
 // animate() and reload() only.
 void BoCanvasAdvance::itemAdvance(const BoItemList& allItems, const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount)
 {
- static int profilingAnimateReload = boProfiling->requestEventId("Advance: BosonItem::animate() and reload() (in itemAdvance() - whole method)");
- static int profilingAnimate = boProfiling->requestEventId("Advance: BosonItem::animate() (in itemAdvance())");
- static int profilingReload = boProfiling->requestEventId("Advance: BosonItem::reload() (in itemAdvance())");
- BosonProfiler profAnimateReload(profilingAnimateReload);
+ BosonProfiler profAnimateReload("Advance: BosonItem::animate() and reload() (in itemAdvance() - whole method)");
 
- BosonProfiler profAnimate(profilingAnimate);
+ BosonProfiler profAnimate("Advance: BosonItem::animate() (in itemAdvance())");
  QPtrListIterator<BosonItem> animIt(animItems);
  for (; animIt.current(); ++animIt) {
 	animIt.current()->animate(advanceCallsCount);
  }
- profAnimate.stop();
+ profAnimate.pop();
 
- BosonProfiler profReload(profilingReload);
+ BosonProfiler profReload("Advance: BosonItem::reload() (in itemAdvance())");
  const unsigned int interval = 5;
  if (advanceCallsCount % interval == 0) {
 	BoItemList::ConstIterator allIt;
@@ -245,7 +241,7 @@ void BoCanvasAdvance::itemAdvance(const BoItemList& allItems, const QPtrList<Bos
 		(*allIt)->reload(interval);
 	}
  }
- profReload.stop();
+ profReload.pop();
 }
 
 void BoCanvasAdvance::advanceFunctionAndMove(unsigned int advanceCallsCount, bool advanceFlag)
@@ -363,23 +359,17 @@ void BoCanvasAdvance::updateWork2AdvanceList()
 
 void BoCanvasAdvance::maximalAdvanceCountTasks(unsigned int advanceCallsCount)
 {
- static int profilingMaxAdvanceCount = boProfiling->requestEventId("Advance: special MAXIMAL_ADVANCE_COUNT tasks");
- BosonProfiler profiler(profilingMaxAdvanceCount); // measure _all_ advanceCallsCounts
+ BosonProfiler profiler("Advance: special MAXIMAL_ADVANCE_COUNT tasks"); // measure _all_ advanceCallsCounts
 
  const unsigned int MAXIMAL_ADVANCE_COUNT = 39;
  if (advanceCallsCount % MAXIMAL_ADVANCE_COUNT != 0) {
 	return;
  }
- static int profilingMaxAdvanceCountSum = boProfiling->requestEventId("Advance MAXIMAL_ADVANCE_COUNT: all tasks");
- static int profilingDeletionList = boProfiling->requestEventId("Advance MAXIMAL_ADVANCE_COUNT: construction of item deletion list");
- static int profilingRemoveFromDestroyed = boProfiling->requestEventId("Advance MAXIMAL_ADVANCE_COUNT: update destroyed list");
- static int profilingDeleteItems = boProfiling->requestEventId("Advance MAXIMAL_ADVANCE_COUNT: deleting items");
- static int profilingDeleteShots = boProfiling->requestEventId("Advance MAXIMAL_ADVANCE_COUNT: deleteUnusedShots()");
- BosonProfiler profiler2(profilingMaxAdvanceCountSum);
+ BosonProfiler profiler2("Advance MAXIMAL_ADVANCE_COUNT: all tasks");
  boDebug(300) << "MAXIMAL_ADVANCE_COUNT" << endl;
  QPtrListIterator<Unit> deletionIt(mCanvas->d->mDestroyedUnits);
  QPtrList<BosonItem> deleteList;
- boProfiling->start(profilingDeletionList);
+ boProfiling->push("Advance MAXIMAL_ADVANCE_COUNT: construction of item deletion list");
  while (deletionIt.current()) {
 	deletionIt.current()->increaseDeletionTimer();
 	if (deletionIt.current()->deletionTimer() >= REMOVE_WRECKAGES_TIME) {
@@ -387,33 +377,30 @@ void BoCanvasAdvance::maximalAdvanceCountTasks(unsigned int advanceCallsCount)
 	}
 	++deletionIt;
  }
- boProfiling->stop(profilingDeletionList);
+ boProfiling->pop();
 
- boProfiling->start(profilingRemoveFromDestroyed);
+ boProfiling->push("Advance MAXIMAL_ADVANCE_COUNT: update destroyed list");
  QPtrListIterator<BosonItem> destroyedIt(deleteList);
  while (destroyedIt.current()) {
 	mCanvas->d->mDestroyedUnits.removeRef((Unit*)destroyedIt.current());
 	++destroyedIt;
  }
- boProfiling->stop(profilingRemoveFromDestroyed);
+ boProfiling->pop();
 
 
- boProfiling->start(profilingDeleteItems);
+ boProfiling->push("Advance MAXIMAL_ADVANCE_COUNT: deleting items");
  mCanvas->deleteItems(deleteList);
- boProfiling->stop(profilingDeleteItems);
+ boProfiling->pop();
 
- boProfiling->start(profilingDeleteShots);
- boProfiling->advanceDeleteUnusedShots(true);
+ boProfiling->push("Advance MAXIMAL_ADVANCE_COUNT: deleteUnusedShots()");
  mCanvas->deleteUnusedShots();
- boProfiling->advanceDeleteUnusedShots(false);
- boProfiling->stop(profilingDeleteShots);
+ boProfiling->pop();
 }
 
 // AB: elapsed is unused
 void BoCanvasAdvance::updateEffects(QPtrList<BosonEffect>& effects, float elapsed)
 {
- static int profilingAdvanceEffects = boProfiling->requestEventId("Advance: updateEffects()");
- BosonProfiler profiler(profilingAdvanceEffects);
+ PROFILE_METHOD;
 /* int count = d->mParticles.count();
  if (count <= 0) {
 	return;
@@ -538,11 +525,14 @@ Cell* BosonCanvas::cells() const
 
 void BosonCanvas::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag)
 {
- static int profilingSlotAdvance = boProfiling->requestEventId("Advance: slotAdvance()");
- BosonProfiler profiler(profilingSlotAdvance);
+ boProfiling->pushStorage("Advance");
+ boProfiling->push("slotAdvance()");
 
  BoCanvasAdvance a(this);
  a.advance(d->mAllItems, d->mAnimList, advanceCallsCount, advanceFlag);
+
+ boProfiling->pop();
+ boProfiling->popStorage();
 }
 
 bool BosonCanvas::canGo(const UnitProperties* prop, const BoRectFixed& rect) const

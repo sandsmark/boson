@@ -1362,8 +1362,7 @@ QByteArray BosonNetworkSyncChecker::createCompleteSyncCheckLog(BosonCanvas* canv
 
 QByteArray BosonNetworkSyncChecker::createLongSyncCheckLog(BosonCanvas* canvas, unsigned int advanceMessageCounter, unsigned int interval) const
 {
- static int myProfilingId = boProfiling->requestEventId("CreateLongSyncCheckLog");
- BosonProfiler profiler(myProfilingId);
+ BosonProfiler profiler("CreateLongSyncCheckLog");
 
  BoLongSyncCheckMessage m;
  m.setGame(mGame);

@@ -311,9 +311,9 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntryBool("TextureCompression", DEFAULT_TEXTURE_COMPRESSION);
  addDynamicEntryBool("TextureColorMipmaps", false);
  addDynamicEntryInt("TextureAnisotropy", 1);
- addDynamicEntryUInt("MaxProfilingEventEntries", 4000);
- addDynamicEntryUInt("MaxProfilingAdvanceEntries", 1000);
- addDynamicEntryUInt("MaxProfilingRenderingEntries", 300);
+ addDynamicEntryUInt("MaxProfilingEntriesGL", 1000);
+ addDynamicEntryUInt("MaxProfilingEntriesAdvance", 200);
+ addDynamicEntryUInt("MaxProfilingEntries", 1000);
 
  // these are dynamic entries. usually they are added in the class where they
  // get used, but sometimes it is also handy to add them here (e.g. when it

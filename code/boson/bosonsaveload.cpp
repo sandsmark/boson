@@ -202,7 +202,7 @@ bool BosonSaveLoad::saveToFiles(QMap<QString, QByteArray>& files)
 	boError() << k_funcinfo << "NULL boson object" << endl;
 	return false;
  }
- BosonProfiler profiler(BosonProfiling::SaveGameToXML);
+ BosonProfiler profiler("SaveKGameToXML");
  if (!d->mPlayField) {
 	BO_NULL_ERROR(d->mPlayField);
 	return false;
@@ -211,30 +211,22 @@ bool BosonSaveLoad::saveToFiles(QMap<QString, QByteArray>& files)
 	boError() << k_funcinfo << "saving the playfield failed" << endl;
 	return false;
  }
- boProfiling->start(BosonProfiling::SaveKGameToXML);
  QByteArray kgameXML = saveKGameAsXML();
- boProfiling->stop(BosonProfiling::SaveKGameToXML);
  if (kgameXML.isNull()) {
 	return false;
  }
 
- boProfiling->start(BosonProfiling::SavePlayersToXML);
  QByteArray playersXML = savePlayersAsXML();
- boProfiling->stop(BosonProfiling::SavePlayersToXML);
  if (playersXML.isNull()) {
 	return false;
  }
 
- boProfiling->start(BosonProfiling::SaveCanvasToXML);
  QByteArray canvasXML = saveCanvasAsXML();
- boProfiling->stop(BosonProfiling::SaveCanvasToXML);
  if (canvasXML.isNull()) {
 	return false;
  }
 
- boProfiling->start(BosonProfiling::SaveExternalToXML);
  QByteArray externalXML = saveExternalAsXML();
- boProfiling->stop(BosonProfiling::SaveExternalToXML);
  if (externalXML.isNull()) {
 	return false;
  }
@@ -259,8 +251,7 @@ bool BosonSaveLoad::saveToFiles(QMap<QString, QByteArray>& files)
 bool BosonSaveLoad::savePlayFieldToFiles(QMap<QString, QByteArray>& files)
 {
  // first we save a complete game.
- static int profilingId = boProfiling->requestEventId("SavePlayFieldToFiles()");
- BosonProfiler prof(profilingId);
+ BosonProfiler prof("SavePlayFieldToFiles()");
  bool ret = saveToFiles(files);
  if (!ret) {
 	boError() << k_funcinfo << "saving failed" << endl;
@@ -273,7 +264,7 @@ bool BosonSaveLoad::savePlayFieldToFiles(QMap<QString, QByteArray>& files)
 bool BosonSaveLoad::saveToFile(const QMap<QString, QByteArray>& files, const QString& file)
 {
  boDebug() << k_funcinfo << file << endl;
- BosonProfiler writeProfiler(BosonProfiling::SaveGameToXMLWriteFile);
+ PROFILE_METHOD
  QByteArray kgameXML = files["kgame.xml"];
  QByteArray playersXML = files["players.xml"];
  QByteArray canvasXML = files["canvas.xml"];
@@ -376,6 +367,7 @@ bool BosonSaveLoad::saveToFile(const QMap<QString, QByteArray>& files, const QSt
 
 QCString BosonSaveLoad::saveKGameAsXML()
 {
+ PROFILE_METHOD
  QDomDocument doc(QString::fromLatin1("Boson"));
  QDomElement root = doc.createElement(QString::fromLatin1("Boson")); // XML file for the Boson object
  doc.appendChild(root);
@@ -406,6 +398,7 @@ QCString BosonSaveLoad::saveKGameAsXML()
 
 QCString BosonSaveLoad::savePlayersAsXML()
 {
+ PROFILE_METHOD
  QDomDocument doc(QString::fromLatin1("Players"));
  QDomElement root = doc.createElement(QString::fromLatin1("Players"));
  doc.appendChild(root);
@@ -434,6 +427,7 @@ QCString BosonSaveLoad::savePlayersAsXML()
 
 QCString BosonSaveLoad::saveCanvasAsXML()
 {
+ PROFILE_METHOD
  QDomDocument doc(QString::fromLatin1("Canvas"));
  QDomElement root = doc.createElement(QString::fromLatin1("Canvas")); // XML file for canvas
  doc.appendChild(root);
@@ -451,6 +445,7 @@ QCString BosonSaveLoad::saveCanvasAsXML()
 
 QCString BosonSaveLoad::saveExternalAsXML()
 {
+ PROFILE_METHOD
  QDomDocument doc(QString::fromLatin1("External"));
  QDomElement root = doc.createElement(QString::fromLatin1("External")); // XML file for external data
  doc.appendChild(root);
@@ -641,8 +636,7 @@ bool BosonSaveLoad::loadExternalFromXML(const QString& xml)
 
 bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
 {
- static int profilingId = boProfiling->requestEventId("convertSaveGameToPlayField()");
- BosonProfiler prof(profilingId);
+ BosonProfiler prof("convertSaveGameToPlayField()");
  // now we remove / change what does not belong there
  QDomDocument kgameDoc("Boson");
  if (!loadXMLDoc(&kgameDoc, QString(files["kgame.xml"]))) {

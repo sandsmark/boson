@@ -429,7 +429,7 @@ void BosonModel::loadModel(const QString& configfilename)
 	boError(100) << k_funcinfo << "No file has been specified for loading" << endl;
 	return;
  }
- BosonProfiler profiler(BosonProfiling::LoadModel);
+ BosonProfiler profiler("LoadModel");
 
  // Calculate MD5 hash of the original model file and it's config file
  QString fileName = d->mDirectory + d->mFile;
@@ -480,9 +480,9 @@ void BosonModel::loadModel(const QString& configfilename)
 	modelTextures.append(mat->textureName());
  }
 
- boProfiling->start(BosonProfiling::LoadModelTextures);
+ boProfiling->push("LoadModelTextures");
  loadTextures(modelTextures);
- boProfiling->stop(BosonProfiling::LoadModelTextures);
+ boProfiling->pop(); // LoadModelTextures
 
  if (!BoContext::currentContext()) {
 	boError(100) << k_funcinfo << "NULL current context" << endl;

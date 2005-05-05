@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,6 +19,16 @@
 #ifndef BOSONPROFILING_H
 #define BOSONPROFILING_H
 
+
+#include <sys/time.h>
+
+class QString;
+class QDataStream;
+template<class T> class QPtrList;
+template<class T> class QPtrStack;
+struct timeval;
+
+
 #define boProfiling BosonProfiling::bosonProfiling()
 
 #ifdef __GNUC__
@@ -32,8 +42,8 @@
  * the profiling values appear in the profiling dialog
  **/
 #define PROFILE_METHOD \
-	static int methodProfiler_id = boProfiling->requestEventId(prof_funcinfo); \
-	BosonProfiler methodProfiler(methodProfiler_id);
+	BosonProfiler methodProfiler(prof_funcinfo);
+
 /**
  * Same as above, but provides two parameters for advanced uses:
  * @param name The name of the @ref BosonProfiler object. You can use this to
@@ -42,61 +52,90 @@
  * (automatically added) method name.
  **/
 #define PROFILE_METHOD_2(name, desc) \
-	static int name##_id = boProfiling->requestEventId(prof_funcinfo + " - " + desc); \
-	BosonProfiler name(name##_id);
+	BosonProfiler name(prof_funcinfo + " - " + desc);
 
-class QString;
-class QDataStream;
-class ProfilingEntry;
-class BosonProfilingDialog;
-class RenderGLTimes;
-class ProfileSlotAdvance;
-struct timeval;
+class BosonProfilingItem
+{
+public:
+	BosonProfilingItem();
+	BosonProfilingItem(const QString& name);
+	~BosonProfilingItem();
+
+	BosonProfilingItem* clone() const;
+	const QPtrList<BosonProfilingItem>* children() const { return mChildren; }
+
+	/**
+	 * Finalize this profiling item by storing the current time as end time.
+	 * Once this has been called, @ref elapsed is valid.
+	 *
+	 * Note that you usually do not need to call this yourself, as @ref
+	 * BosonProfiling does it internally. If you use this class directly in
+	 * your code, you probably need @ref elapsedSinceStart only.
+	 **/
+	void stop();
+
+	/**
+	 * @return The time elapsed between constructing this object and calling
+	 * @ref stop. Undefined if @ref stop was not called yet, see @ref
+	 * elapsedSinceStart for this
+	 **/
+	long int elapsedTime() const;
+
+	/**
+	 * @return The time since constructing this object.
+	 **/
+	long int elapsedSinceStart() const;
+
+	/**
+	 * Add a child to this object. Note that this must not be done anymore
+	 * once @ref stop was called.
+	 **/
+	void addChild(BosonProfilingItem* child);
+
+	QString name() const;
+
+private:
+	QString* mName;
+	QPtrList<BosonProfilingItem>* mChildren;
+	bool mEnded;
+
+	struct timeval mStart;
+	struct timeval mEnd;
+};
+
+
+/**
+ * @internal
+ **/
+class BosonProfilingStorage
+{
+public:
+	BosonProfilingStorage(const QString& name, int maxEntries);
+	~BosonProfilingStorage();
+
+	const QString& name() const;
+	void setMaximalEntries(int max);
+	int maximalEntries() const;
+
+	void addItem(BosonProfilingItem* item);
+
+	QPtrList<BosonProfilingItem> cloneItems() const;
+
+private:
+	QString* mName;
+	QPtrList<BosonProfilingItem>* mItems;
+	int mMaximalEntries;
+};
+
 
 class BosonProfilingPrivate;
-// note that there are several workarounds in this class to reduce the number of
-// #includes as far as possible. i want to be able to place this header to about
-// every other class without increasing compile-time.
-// all QValueList,QMap,... #includes are in the .cpp file
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class BosonProfiling
 {
 public:
-	enum ProfilingEvent {
-		LoadGameData1 = 0, // currently unused
-		LoadTiles = 1,
-		LoadGameData3 = 2,
-		LoadModel = 3,
-		LoadModelTextures = 4,
-		LoadModelDisplayLists = 5,
-		LoadModelDummy = 6,
-		AddUnitsXML = 7,
-		BosonStartingStart = 8,
-		SaveGameToXML = 20,
-		SaveKGameToXML = 21,
-		SavePlayersToXML = 22,
-		SavePlayerToXML = 23,
-		SavePlayFieldToXML = 24,
-		SaveGameToXMLWriteFile = 25,
-		SaveCanvasToXML = 26,
-		SaveExternalToXML = 27,
-		PreLoadPlayFields = 40,
-		LoadPlayField = 41,
-		FindPath = 100,
-		WriteGameLog = 200,
-		SaveGameLogs = 201,
-		MakeGameLog = 202,
-		GenerateLOD = 300,
-		BuildLOD = 301,
-
-
-		LastFixedEventId = 5000000
-		// do not add any entries after this point
-	};
 	BosonProfiling();
-	BosonProfiling(const BosonProfiling& profiling);
 	~BosonProfiling();
 
 	/**
@@ -105,320 +144,134 @@ public:
 	static BosonProfiling* bosonProfiling();
 
 	/**
-	 * Change the OpenGL update interval. This value can be useful when
-	 * analyzing profiling logs.
-	 **/
-	void setGLUpdateInterval(unsigned int interval);
-
-	/**
-	 * @return The OpenGL update interval. Be careful with this value - when
-	 * the interval was changed then you can end up in one half of the
-	 * profiling log to be with the old interval, the second half with the
-	 * new interval - but only the new interval is recorded into the log.
-	 **/
-	unsigned int glUpdateInterval() const;
-
-	/**
-	 * Change the game speed. Can be useful for analyzing profiling logs.
-	 **/
-	void setGameSpeed(int gameSpeed);
-
-	/**
-	 * @return The game speed when the log was recorded. Be careful with
-	 * this value - the same problem as with @ref glUpdateInterval applies
-	 * to this one!
-	 **/
-	int gameSpeed() const;
-
-	/**
-	 * Sample use:
-	 * <pre>
-	 * static int myId = boProfiling->requestEventId("MyEvent");
-	 * boProfiling->start(myId);
-	 * doSomeStuff();
-	 * boProfiling->stop(myId);
-	 * </pre>
+	 * Start profiling something named @p name.
 	 *
-	 * Note that you should use static in your code for myId, so that it
-	 * will get only a single Id in the application. Calling requestEventId
-	 * twice will give you two totally different events, which is probably
-	 * not what you want.
-	 * @return A dynamic event Id for @ref start. Two different calls will
-	 * return two different ids.
-	 * @param name A name for the even that will be used for displaying it
-	 * in the dialog. Two different events with the same name are totally
-	 * valid
-	 **/
-	int requestEventId(const QString& name);
-
-	/**
-	 * @return The name for the event Id @p id, as provided to @ref
-	 * requestEventId or @ref QString::null if no such id was requested
-	 * before.
-	 **/
-	QString eventName(int id) const;
-
-	/**
-	 * Start the timer for profiling. Note that nesting timers <em>are</em>
-	 * possible, as long as you use different events. Example:
-	 * <pre>
-	 * boProfiling->start(0);
-	 * doSomething();
-	 * boProfiling->start(1);
-	 * doMore();
-	 * boProfiling->stop(1);
-	 * doTheRest();
-	 * boProfiling->stop(0);
-	 * </pre>
-	 * The two timers are completely independant of each other. However the
-	 * two timers <em>must</em> have different events.
-	 **/
-	void start(int event);
-
-	/**
-	 * @return The elapsed time since calling @ref start with this event
-	 * number (in usec). Undefined if @ref start has not yet been called
-	 * with this event number.
-	 **/
-	long int elapsed(int event) const;
-
-	/**
-	 * Stop the event timer and append the resulting time to the list. If
-	 * the list contains more than @ref maxEventEntries the first item is
-	 * removed. See also @ref start
+	 * All subsequent calls to this method add profiling items as child to
+	 * this item. So for example the calls push("foo"); push("bar"); pop();
+	 * push("end"); pop(); pop(); generate the following tree:
+	 * <code>
+	 * - foo
+	 * -- bar
+	 * -- end
+	 * </code>
 	 *
-	 * @param appendToList If TRUE (default) the resulting time will be
-	 * appended to the list for this event, and can be analyzed using @ref
-	 * BosonProfilingDialog. Otherwise the elapsed time is returned only.
+	 * Call @p pop to end profiling. Note that you always have exactly one
+	 * @ref pop call for every push call!
+	 **/
+	const BosonProfilingItem* push(const QString& name);
+
+	/**
+	 * End profiling a previously started (using @ref push) profiling item.
 	 *
-	 * @return See @ref elapsed (note: usec!)
+	 * Note that you must have exactly as many @ref pop calls as @ref push
+	 * calls. If you call @ref pop more often, you have stack underflows!
 	 **/
-	long int stop(int event, bool appendToList = true);
+	void pop();
 
-	void loadUnit();
-	void loadUnitDone(unsigned long int typeId);
+	void pushStorage(const QString& name);
+	void popStorage();
+
+	void switchStorage(const QString& name);
 
 	/**
-	 * Starts benchmark
-	 * During benchmark, all profiling info about advance calls and rendered
-	 * frames is logged and some statistics are printed out when you call
-	 * @ref endBenchmark()
+	 * Call @ref setMaximalEntries for all storages. See @ref switchStorage.
 	 **/
-	void startBenchmark();
+	void setMaximalEntriesAllStorages(int max);
+
 	/**
-	 * Ends benchmark and prints out some useful info about logged things.
+	 * Change the maximal number of items that get stored by @ref pop.
 	 *
-	 * @param name Optional name of the benchmark. If given it's printed out, so
-	 * you can later indentify your benchmark
+	 * Note that this number applies to toplevel items only, not to
+	 * children. I.e. by calling push("foo"); push("bar"); pop(); pop(); you
+	 * have only a single entry!
 	 **/
-	void endBenchmark(const QString& name);
-
-	// WARNING: do !NOT! call render*() or advance*() before you called
-	// render(true)/advance(true) or after render(false)/advance(false) !
-	// that would crash! (no NULL check in favor of performance)
-	void render(bool start); // always call this first, before any other render*()
-	// note that you must NOT use nested calls of render*()! e.g.
-	// renderCells(true); renderUnits(true); renderUnits(false); renderCells(false);
-	// would *NOT* work!
-	void renderClear(bool start);
-	void renderCells(bool start);
-	void renderUnits(bool start, unsigned int number = 0);
-	void renderMissiles(bool start);
-	void renderParticles(bool start);
-	void renderWater(bool start);
-	void renderFOW(bool start);
-	void renderText(bool start);
-	void renderUfo(bool start);
+	void setMaximalEntries(int max);
+	int maximalEntries() const;
 
 	/**
-	 * @return The number of recoreded frames
+	 * @overload
+	 * Changes the maximal number of stored items for @p storage. See also
+	 * @ref switchStorage.
 	 **/
-	unsigned int renderEntries() const;
-
-	// AB: the syntax of these is the same as for render() above. e.g. you
-	// mustn't call the advance*() stuff here recursive or so
-	void advance(bool start, unsigned int advanceCallsCount);
-	void advanceFunction(bool start);
-	void advanceDeleteUnusedShots(bool start);
-	void advanceEffects(bool start);
-	void advanceWater(bool start);
-	void advanceMaximalAdvanceCount(bool start); // in MAXIMAL_ADVANCE_COUNT we do some interesting stuff (especially deleting unused stuff - e.g. wreckages
-	// these are tricky now - they get called multiple times in every
-	// advance call (note that this is a pretty big overhead!)
-	void advanceItemStart(int rtti, unsigned int unitId, int work); // begin a new unit
-	void advanceItem(bool start);
-	void advanceItemFunction(bool start);
-	void advanceItemMove(bool start);
-	void advanceItemStop(); // complete a unit
+	void setMaximalEntries(const QString& storage, int max);
 
 	/**
-	 * Save The current profiling data to @p fileName.
+	 * @return A copy of all items currently stored. WARNING: you must
+	 * delete all items in this list to prevent a memory leak!
 	 **/
-	bool saveToFile(const QString& fileName);
-
-	/**
-	 * Save The current profiling data from @p fileName.
-	 **/
-	bool loadFromFile(const QString& fileName);
-
-	/**
-	 * Save the current profiling data to @p stream
-	 **/
-	bool save(QDataStream& stream) const;
-
-	/**
-	 * Load the current profiling data from @p stream, which must have been
-	 * saved using @ref save
-	 **/
-	bool load(QDataStream& stream);
-
-	void setMaxEventEntries(unsigned int max)
-	{
-		mMaxEventEntries = max;
-	}
-	void setMaxAdvanceEntries(unsigned int max)
-	{
-		mMaxAdvanceEntries = max;
-	}
-	void setMaxRenderingEntries(unsigned int max)
-	{
-		mMaxRenderingEntries = max;
-	}
-	inline unsigned int maxEventEntries() const
-	{
-		return mMaxEventEntries;
-	}
-	inline unsigned int maxAdvanceEntries() const
-	{
-		return mMaxAdvanceEntries;
-	}
-	inline unsigned int maxRenderingEntries() const
-	{
-		return mMaxRenderingEntries;
-	}
+	QPtrList<BosonProfilingItem> cloneItems() const;
+	QPtrList<BosonProfilingItem> cloneItems(const QString& storageName) const;
 
 private:
 	void init();
 
 private:
 	BosonProfilingPrivate* d;
-	friend class BosonProfilingDialog;
-	unsigned int mMaxEventEntries;
-	unsigned int mMaxRenderingEntries;
-	unsigned int mMaxAdvanceEntries;
 };
 
 unsigned long int compareTimes(const struct timeval& t1, const struct timeval& t2);
 unsigned long int compareTimes2(const struct timeval* t1); // takes an array of 2 and compares them
-QDataStream& operator<<(QDataStream& s, const struct timeval& t);
-QDataStream& operator>>(QDataStream& s, struct timeval& t);
-QDataStream& operator<<(QDataStream& s, const ProfilingEntry& e);
-QDataStream& operator>>(QDataStream& s, ProfilingEntry& e);
-QDataStream& operator<<(QDataStream& s, const RenderGLTimes& t);
-QDataStream& operator>>(QDataStream& s, RenderGLTimes& t);
-QDataStream& operator<<(QDataStream& s, const ProfileSlotAdvance& t);
-QDataStream& operator>>(QDataStream& s, ProfileSlotAdvance& t);
 
 
 /**
- * This class can help you to profile certaint events. You provide the number of
- * the event, just like you would do with @ref BosonProfiling::start. The
- * constructor of this class then calls @ref BosonProfiling::start and the
- * destructor will call @ref BosonProfiling::stop.
+ * This class aids in profiling methods, by calling @ref BosonProfiling::push on
+ * construction and @ref BosonProfiling::pop on destruction.
  *
- * This can be helpful if you have a few return statements in that function and
- * don't want to call @ref BosonProfiling::stop on your own whenever the
- * function returns. Create an object on the stack and it will get destroyed
- * once the functions returns. Example:
- * <pre>
- * void profileMe()
+ * You do not need this class if you don't want to use the push/pop feature.
+ * Just use @ref BosonProfilingItem directly.
+ *
+ * Sample use:
+ * <code>
+ * void foobar(bool foo)
  * {
- *  BosonProfiler profiler(MyProfilingEvent);
- *  doFunnyStuff();
- *  doEvenMoreStuff();
- *  if (weWantToReturn()) {
- *      return;
- *  }
- *  doAgainALotOfStuff();
+ *   BosonProfiler profiler("Profiling foobar()");
+ *   if (foo) {
+ *     // profiler.pop(); is not required here!
+ *     return;
+ *   }
+ *   doSomething();
+ *
+ *   // profiler.pop(); is not required here!
  * }
- * </pre>
- * The event MyProfilingEvent will now give useful data on the time spent in
- * profileMe().
- *
- * Note that MyProfilingEvent needs to be a constant number, i.e. it must always
- * be the same when calling the function multiple times. Also it must be unique
- * to this function. You can easily achieve this by the following code:
- * <pre>
- * static int MyProfilingEvent = boProfiling->requestEventId("My Event");
- * </pre>
- *
- * Often you don't want to save the whole event, but need the profiled time
- * only, i.e. you want to use @ref elapsed once and then forget it. This can
- * easily be done by the following code:
- * <pre>
- * static int eventid = -boProfiling->requestEventId("My Event"); // note the "-" !
- * BosonProfiler profiler(eventid);
- * doStuff();
- *
- * // display the elapsed time (warning: the boDebug() call takes much time, so the data may be inaccurate
- * boDebug() << profiler.elapsed() << endl;
- * </pre>
- *
- * @short Convenience class for profiling events
+ * </code>
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class BosonProfiler
 {
 public:
-	/**
-	 * Start profiling using @p event. This is equivalent to using @ref
-	 * BosonProfiling::start and @ref BosonProfiling::stop with that event
-	 * id, if it is >= 0.
-	 *
-	 * If @p event is negative, the profiling data are <em>not</em>saved on
-	 * destruction, i.e. the appendToList parameter of @ref
-	 * BosonProfiling::stop is false. This can be very useful if you don't
-	 * need to display the data in a dialog later, but need the value of
-	 * @ref elapsed once only.
-	 **/
-	BosonProfiler(int event)
-		: mEvent(event),
-		mEventStopped(false),
-		mAppendToList(event >= 0)
+	BosonProfiler(const QString& name)
+		: mPopped(false)
 	{
-		boProfiling->start(mEvent);
+		mItem = boProfiling->push(name);
 	}
 
 	~BosonProfiler()
 	{
-		if (!mEventStopped) {
-			stop();
+		pop();
+	}
+
+	void pop()
+	{
+		if (mPopped) {
+			return;
 		}
+		mPopped = true;
+		boProfiling->pop();
+	}
+	long int popElapsed()
+	{
+		pop();
+		return mItem->elapsedTime();
 	}
 
-	/**
-	 * This stops profiling the event immediately. The destructor will do
-	 * nothing when you call this.
-	 * @return See @ref BosonProfiling::stop
-	 **/
-	long int stop()
+	long int elapsedSinceStart() const
 	{
-		mEventStopped = true;
-		return boProfiling->stop(mEvent, mAppendToList);
-	}
-
-	/**
-	 * @return See @ref BosonProfiling::elapsed
-	 **/
-	long int elapsed() const
-	{
-		return boProfiling->elapsed(mEvent);
+		return mItem->elapsedSinceStart();
 	}
 
 private:
-	int mEvent;
-	bool mEventStopped;
-	bool mAppendToList;
+	bool mPopped;
+	const BosonProfilingItem* mItem;
 };
 
 

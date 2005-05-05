@@ -731,7 +731,7 @@ bool Player::advanceFlag() const
 
 bool Player::saveAsXML(QDomElement& root)
 {
- BosonProfiler profiler(BosonProfiling::SavePlayerToXML);
+ PROFILE_METHOD
  if (!game() || !game()->playerList()) {
 	boError() << k_funcinfo << "NULL game/playerlist" << endl;
 	return false;

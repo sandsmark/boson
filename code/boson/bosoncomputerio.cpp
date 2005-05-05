@@ -74,6 +74,6 @@ void BosonComputerIO::reaction()
  if (boConfig->doubleValue("AIDelay") == 0.0) {
 	return;
  }
- static int id = boProfiling->requestEventId("BosonComputerIO::reaction()");
- BosonProfiler p(id);
+ BosonProfiler p("BosonComputerIO::reaction()");
 }
+
