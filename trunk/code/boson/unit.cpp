@@ -36,6 +36,7 @@
 #include "bopointeriterator.h"
 #include "bodebug.h"
 #include "bo3dtools.h"
+#include "bosonprofiling.h"
 #include "items/bosonitemrenderer.h"
 
 #include <kgame/kgamepropertylist.h>
@@ -494,6 +495,7 @@ void Unit::advanceIdle(unsigned int advanceCallsCount)
  } else if (advanceCallsCount % 10 != 0) {
 	return;
  }
+ BosonProfiler profiler("advanceIdle");
 
  if (!unitProperties()->canShoot() ||!d->mWeapons[0]) {
 	// this unit does not have any weapons, so it will never shoot anyway.
@@ -507,6 +509,7 @@ void Unit::advanceIdle(unsigned int advanceCallsCount)
 
 bool Unit::attackEnemyUnitsInRange()
 {
+ PROFILE_METHOD
  if (!unitProperties()->canShoot()) {
 	return false;
  }
@@ -577,6 +580,7 @@ bool Unit::attackEnemyUnitsInRange()
 
 Unit* Unit::bestEnemyUnitInRange()
 {
+ PROFILE_METHOD
  // Return if unit can't shoot
  if (!unitProperties()->canShoot()) {
 	return 0;
@@ -656,6 +660,7 @@ void Unit::advanceAttack(unsigned int advanceCallsCount)
  if (advanceCallsCount % 5 != 0) {
 	return;
  }
+ BosonProfiler profiler("advanceAttack");
 
  boDebug(300) << k_funcinfo << endl;
  if (!target()) {
@@ -737,6 +742,7 @@ void Unit::advanceDestroyed(unsigned int advanceCallsCount)
  if (advanceCallsCount % 10 != 0) {
 	return;
  }
+ BosonProfiler profiler("advanceDestroyed");
  if (isVisible()) {
 	// Make unit slowly sink into ground
 #define MAXIMAL_ADVANCE_COUNT 19
@@ -747,6 +753,7 @@ void Unit::advanceDestroyed(unsigned int advanceCallsCount)
 
 void Unit::advancePlugin(unsigned int advanceCallsCount)
 {
+ BosonProfiler profiler("advancePlugin");
  if (!currentPlugin()) {
 	boWarning() << k_funcinfo << "NULL plugin!" << endl;
 	setWork(WorkIdle);
@@ -757,6 +764,7 @@ void Unit::advancePlugin(unsigned int advanceCallsCount)
 
 void Unit::advanceTurn(unsigned int)
 {
+ BosonProfiler profiler("advanceTurn");
  // Unit is still while turning
  setVelocity(0, 0, 0);
 
@@ -861,6 +869,7 @@ void Unit::resetPathInfo()
 
 void Unit::moveTo(const BoVector2Fixed& pos, bool attack)
 {
+ PROFILE_METHOD
  d->mTarget = 0;
 
  // We want unit's center point to be in the middle of the cell after moving.
@@ -935,6 +944,7 @@ bool Unit::moveTo(bofixed x, bofixed y, int range)
 
 void Unit::newPath()
 {
+ BosonProfiler profiler("newPath");
  boDebug(401) << k_funcinfo << "unit " << id() << endl;
  // Check if we can still go to cell (it may be that cell was fogged previously,
  //  so we couldn't check, but now it's unfogged)
@@ -1343,6 +1353,7 @@ void Unit::shootAt(BosonWeapon* w, Unit* target)
 
 BoItemList* Unit::unitsInRange(unsigned long int range) const
 {
+ PROFILE_METHOD
  // TODO: we use a *rect* for the range this is extremely bad.
  // ever heard about pythagoras ;-) ?
 
@@ -1381,6 +1392,7 @@ BoItemList* Unit::unitsInRange(unsigned long int range) const
 
 BoItemList* Unit::enemyUnitsInRange(unsigned long int range) const
 {
+ PROFILE_METHOD
  BoItemList* units = unitsInRange(range);
  BoItemList* enemy = new BoItemList();
  Unit* u;
@@ -1396,6 +1408,7 @@ BoItemList* Unit::enemyUnitsInRange(unsigned long int range) const
 
 QValueList<Unit*> Unit::unitCollisions(bool exact)
 {
+ PROFILE_METHOD
  QValueList<Unit*> units;
  boDebug(310) << k_funcinfo << endl;
  BoItemList* collisionList = collisions()->collisionsAtCells(cells(), (BosonItem*)this, exact);
@@ -1717,6 +1730,7 @@ bool MobileUnit::init()
 
 void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this actually needs to be called for every advanceCallsCount.
 {
+ BosonProfiler profiler("advanceMoveInternal");
  //boDebug(401) << k_funcinfo << endl;
 
  if (pathInfo()->waiting) {
@@ -1952,6 +1966,7 @@ bofixed MobileUnit::moveTowardsPoint(const BoVector2Fixed& p, bofixed x, bofixed
 
 void MobileUnit::advanceMoveCheck()
 {
+ BosonProfiler profiler("advanceMoveCheck");
  //boDebug(401) << k_funcinfo << endl;
 
  // Take special action if path is (was) blocked and we're waiting
@@ -2261,6 +2276,7 @@ void MobileUnit::advanceFollow(unsigned int advanceCallsCount)
  if (advanceCallsCount % 5 != 0) {
 	return;
  }
+ BosonProfiler profiler("advanceFollow");
  if (!target()) {
 	boWarning() << k_funcinfo << "cannot follow NULL unit" << endl;
 	stopAttacking();  // stopAttacking should maybe be renamed to stopEverything
@@ -2351,6 +2367,7 @@ void MobileUnit::stopMoving()
 
 bool MobileUnit::attackEnemyUnitsInRangeWhileMoving()
 {
+ PROFILE_METHOD
  // Don't attack other units unless work is WorkMove
  if (work() != WorkMove) {
 	return false;
@@ -2376,6 +2393,7 @@ void MobileUnit::newPath()
 
 bool MobileUnit::checkPathPoint(const BoVector2Fixed& p)
 {
+ BosonProfiler profiler("checkPathPoint");
  boDebug(401) << k_funcinfo << "p: (" << p.x() << "; " << p.y() << ")" << endl;
  // Check for special codes in path point
  if (p.x() != p.y()) {
@@ -2497,6 +2515,7 @@ void Facility::advanceConstruction(unsigned int advanceCallsCount)
  if (advanceCallsCount % 20 != 0) {
 	return;
  }
+ BosonProfiler profiler("advanceConstruction");
  if (isDestroyed()) {
 	boError() << k_funcinfo << "unit is already destroyed" << endl;
 	return;

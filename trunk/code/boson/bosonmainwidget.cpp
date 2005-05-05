@@ -171,7 +171,7 @@ void BosonMainWidget::init()
 
  boProfiling->setMaximalEntries("GL", boConfig->uintValue("MaxProfilingEntriesGL"));
  boProfiling->setMaximalEntries("Advance", boConfig->uintValue("MaxProfilingEntriesAdvance"));
- boProfiling->setMaximalEntries(QString::null, boConfig->uintValue("MaxProfilingEntries"));
+ boProfiling->setMaximalEntries("Default", boConfig->uintValue("MaxProfilingEntries"));
 }
 
 void BosonMainWidget::initializeGL()
@@ -349,11 +349,11 @@ void BosonMainWidget::slotUpdateGL()
 
 void BosonMainWidget::paintGL()
 {
+ BosonProfiler prof("paintGL");
  if (!isInitialized()) {
 	initGL();
 	return;
  }
- BosonProfiler prof("paintGL");
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error at start of " << k_funcinfo << endl;
@@ -406,7 +406,9 @@ void BosonMainWidget::renderUfo()
 	boTextureManager->invalidateCache();
 	glColor3ub(255, 255, 255);
 
+	boProfiling->push("dispatchEvents");
 	ufoManager()->dispatchEvents();
+	boProfiling->pop(); // "dispatchEvents"
 	ufoManager()->render();
  }
  if (Bo3dTools::checkError()) {

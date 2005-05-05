@@ -1993,6 +1993,7 @@ void BosonGameView::paint()
 	return;
  }
  BO_CHECK_NULL_RET(camera());
+ PROFILE_METHOD
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error at start of " << k_funcinfo << endl;
@@ -2055,7 +2056,9 @@ void BosonGameView::paint()
  d->mUfoGameGUI->updateUfoLabels();
 
  // the original implementation paints the children
+ boProfiling->push("BoUfoCustomWidget::paint()");
  BoUfoCustomWidget::paint();
+ boProfiling->pop(); // "BoUfoCustomWidget::paint()"
 
  glPopAttrib();
 
