@@ -186,6 +186,13 @@ void BoTexture::applyOptions()
   glTexParameteri(mType, GL_TEXTURE_MAG_FILTER, filtermag);
   glTexParameteri(mType, GL_TEXTURE_MIN_FILTER, filtermin);
 
+  // Set wrapping mode
+  if(mOptions & ClampToEdge)
+  {
+    glTexParameteri(mType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(mType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  }
+
   // Set anisotropy
   if(boTextureManager->supportsAnisotropicFiltering())
   {
@@ -260,12 +267,20 @@ void BoTexture::load(unsigned char* data, int width, int height, int side)
   }
 
   // Find out format
-  GLenum format = (mOptions & FormatRGB) ? GL_RGB : GL_RGBA;
+  GLenum format;
+  if(mOptions & FormatDepth)
+  {
+    format = GL_DEPTH_COMPONENT;
+  }
+  else
+  {
+    format = (mOptions & FormatRGB) ? GL_RGB : GL_RGBA;
+  }
 
   // Find out internal format
   GLenum internalFormat;
   // Check if we can use texture compression
-  if(boTextureManager->supportsTextureCompression() && boTextureManager->useTextureCompression() && !(mOptions & DontCompress))
+  if(boTextureManager->supportsTextureCompression() && boTextureManager->useTextureCompression() && !(mOptions & DontCompress) && !(mOptions & FormatDepth))
   {
     internalFormat = (mOptions & FormatRGB) ? GL_COMPRESSED_RGB_S3TC_DXT1_EXT : GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
   }
@@ -475,7 +490,7 @@ int BoTexture::memoryUsed() const
   // Find out bytes-per-pixel
   // FIXME: at least most NVidia's cards (dunno about others) internally still
   //  use 4 bpp, even if format is RGB.
-  int bpp = (mOptions & FormatRGB) ? 3 : 4;
+  int bpp = (mOptions & FormatDepth) ? 3 : ((mOptions & FormatRGB) ? 3 : 4);
 
   int bytes = pixels * bpp;
 
@@ -491,6 +506,10 @@ int BoTexture::memoryUsed() const
   // Compression
   if(boTextureManager->supportsTextureCompression() && boTextureManager->useTextureCompression())
   {
+    if(mOptions & FormatDepth)
+    {
+      // Depth textures aren't compressed
+    }
     if(mOptions & FormatRGB)
     {
       // GL_COMPRESSED_RGB_S3TC_DXT1_EXT format uses 64 bits (8 bytes) of image
