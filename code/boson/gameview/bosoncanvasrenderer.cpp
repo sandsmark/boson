@@ -98,11 +98,15 @@ class BoRenderItem
 {
 public:
 	BoRenderItem() { modelId = 0; item = 0; }
-	BoRenderItem(unsigned int _modelId, BosonItem* _item) { modelId = _modelId, item = _item; }
+	BoRenderItem(unsigned int _modelId, BosonItem* _item)
+	{
+		modelId = _modelId;
+		item = _item;
+	}
 
 	BosonItem* item;
 	unsigned int modelId;
- };
+};
 
 class BosonCanvasRendererPrivate
 {
@@ -234,6 +238,7 @@ void BosonCanvasRenderer::reset()
 
 void BosonCanvasRenderer::paintGL(const BosonCanvas* canvas)
 {
+ PROFILE_METHOD;
  BO_CHECK_NULL_RET(viewFrustum());
  BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(camera());
@@ -261,34 +266,26 @@ void BosonCanvasRenderer::paintGL(const BosonCanvas* canvas)
 
  renderFog(d->mVisibleEffects);
 
-// boProfiling->renderCells(true);
  renderGround(canvas->map());
-// boProfiling->renderCells(false);
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "after ground rendering" << endl;
  }
 
 
-// boProfiling->renderUnits(true);
  renderItems(canvas->allItems());
-// boProfiling->renderUnits(false, d->mRenderedItems);
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "after item rendering" << endl;
  }
 
-// boProfiling->renderWater(true);
  renderWater();
-// boProfiling->renderWater(false);
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "after water rendering" << endl;
  }
 
-// boProfiling->renderParticles(true);
  renderParticles(d->mVisibleEffects);
-// boProfiling->renderParticles(false);
 
  glDisable(GL_DEPTH_TEST);
  glDisable(GL_LIGHTING);
@@ -316,6 +313,7 @@ void BosonCanvasRenderer::paintGL(const BosonCanvas* canvas)
 
 void BosonCanvasRenderer::renderGround(const BosonMap* map)
 {
+ PROFILE_METHOD;
  BO_CHECK_NULL_RET(map);
  BoTextureManager::BoTextureBindCounter bindCounter(boTextureManager, &d->mTextureBindsCells);
  glEnable(GL_DEPTH_TEST);
@@ -417,6 +415,7 @@ void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* rende
 
 void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 {
+ PROFILE_METHOD;
  BoTextureManager::BoTextureBindCounter bindCounter(boTextureManager, &d->mTextureBindsItems);
  BosonItemRenderer::startItemRendering();
  if (boConfig->boolValue("debug_wireframes")) {
@@ -556,6 +555,7 @@ void BosonCanvasRenderer::createSelectionsList(BoItemList* selectedItems, const 
 
 void BosonCanvasRenderer::renderSelections(const BoItemList* selectedItems)
 {
+ PROFILE_METHOD;
  BO_CHECK_NULL_RET(d->mSelectBoxData);
  BoItemList::const_iterator it = selectedItems->begin();
  glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT);
@@ -633,6 +633,7 @@ void BosonCanvasRenderer::renderSelections(const BoItemList* selectedItems)
 
 void BosonCanvasRenderer::renderPathLines(const BosonCanvas* canvas, QValueList<QPoint>& path, bool isFlying, float _z)
 {
+ PROFILE_METHOD;
  // render a line from the current position of the unit to the
  // point it is moving to.
  // TODO: render one vertex per cell or so. this would fix
@@ -706,12 +707,14 @@ void BosonCanvasRenderer::createVisibleEffectsList(BoVisibleEffects* v, const QP
 
 void BosonCanvasRenderer::renderWater()
 {
+ PROFILE_METHOD;
  BoTextureManager::BoTextureBindCounter bindCounter(boTextureManager, &d->mTextureBindsWater);
  boWaterManager->render();
 }
 
 void BosonCanvasRenderer::renderFog(BoVisibleEffects& visible)
 {
+ PROFILE_METHOD;
  // TODO: support multiple fog effects (ATM only 1st one is rendered)
  if (!visible.mFogEffects.isEmpty()) {
 	BosonEffectFog* f = visible.mFogEffects.first();
@@ -728,6 +731,7 @@ void BosonCanvasRenderer::renderFog(BoVisibleEffects& visible)
 
 void BosonCanvasRenderer::renderParticles(BoVisibleEffects& visible)
 {
+ PROFILE_METHOD;
  BO_CHECK_NULL_RET(localPlayerIO());
  BoTextureManager::BoTextureBindCounter bindCounter(boTextureManager, &d->mTextureBindsParticles);
  if (Bo3dTools::checkError()) {
@@ -896,6 +900,7 @@ void BosonCanvasRenderer::renderParticles(BoVisibleEffects& visible)
 
 void BosonCanvasRenderer::renderBulletTrailEffects(BoVisibleEffects& visible)
 {
+ PROFILE_METHOD;
  if (!visible.mBulletEffects.isEmpty()) {
 	BosonEffectBulletTrail* b;
 	float currentwidth = -1.0f;
@@ -924,6 +929,7 @@ void BosonCanvasRenderer::renderBulletTrailEffects(BoVisibleEffects& visible)
 
 void BosonCanvasRenderer::renderFadeEffects(BoVisibleEffects& visible)
 {
+ PROFILE_METHOD;
  BO_CHECK_NULL_RET(d->mGameMatrices);
  if (!visible.mFadeEffects.isEmpty()) {
 	BosonEffectFade* f;

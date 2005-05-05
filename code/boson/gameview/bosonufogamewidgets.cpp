@@ -34,6 +34,7 @@
 #include "../unitproperties.h"
 #include "../bosoncursor.h"
 #include "../bosonconfig.h"
+#include "../bosonprofiling.h"
 #include "bodebug.h"
 
 class BosonUfoCanvasWidgetPrivate
@@ -102,6 +103,7 @@ void BosonUfoCanvasWidget::quitGame()
 
 void BosonUfoCanvasWidget::paintWidget()
 {
+ PROFILE_METHOD;
  d->mCanvasRenderer->setCamera(d->mCamera);
  d->mCanvasRenderer->setLocalPlayerIO(d->mLocalPlayerIO);
 
@@ -343,6 +345,7 @@ void BosonUfoPlacementPreviewWidget::quitGame()
 
 void BosonUfoPlacementPreviewWidget::paintWidget()
 {
+ PROFILE_METHOD;
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "GL error at the beginning of this method" << endl;
  }
@@ -596,6 +599,7 @@ const BosonCanvas* BosonUfoLineVisualizationWidget::canvas() const
 
 void BosonUfoLineVisualizationWidget::paintWidget()
 {
+ PROFILE_METHOD;
  BO_CHECK_NULL_RET(d->mGameGLMatrices);
  // Store the original libufo matrices and set our 3d matrices
  glMatrixMode(GL_PROJECTION);
@@ -722,6 +726,7 @@ BosonCursor* BosonUfoCursorWidget::cursor() const
 
 void BosonUfoCursorWidget::paintWidget()
 {
+ PROFILE_METHOD;
  BO_CHECK_NULL_RET(d->mCursorWidgetPos);
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error before method" << endl;
@@ -821,6 +826,7 @@ void BosonUfoSelectionRectWidget::slotSelectionRectChanged(const QRect& r)
 
 void BosonUfoSelectionRectWidget::paintWidget()
 {
+ PROFILE_METHOD;
  BO_CHECK_NULL_RET(d->mGameGLMatrices);
  if (!d->mSelectionRectVisible) {
 	return;
