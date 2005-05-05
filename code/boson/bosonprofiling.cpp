@@ -173,10 +173,12 @@ int BosonProfilingStorage::maximalEntries() const
 void BosonProfilingStorage::addItem(BosonProfilingItem* item)
 {
  mItems->append(item);
- if (maximalEntries() > 0 && mItems->count() > (unsigned int)maximalEntries()) {
-	// remove the oldest entry
-	BosonProfilingItem* item = mItems->take(0);
-	delete item;
+ if (maximalEntries() > 0) {
+	while (mItems->count() > (unsigned int)maximalEntries()) {
+		// remove the old entries
+		BosonProfilingItem* item = mItems->take(0);
+		delete item;
+	}
  }
 }
 
@@ -216,7 +218,7 @@ BosonProfiling::BosonProfiling()
 void BosonProfiling::init()
 {
  d = new BosonProfilingPrivate;
- d->mDefaultMaxEntries = 5000;
+ d->mDefaultMaxEntries = 1000;
  d->mCurrentStorage = new BosonProfilingStorage("Default", d->mDefaultMaxEntries);
  d->mStorages.insert(d->mCurrentStorage->name(), d->mCurrentStorage);
 }
@@ -317,7 +319,7 @@ void BosonProfiling::setMaximalEntries(const QString& storage, int max)
 {
  BO_CHECK_NULL_RET(d->mCurrentStorage);
  QString current = d->mCurrentStorage->name();
- switchStorage(current);
+ switchStorage(storage);
  setMaximalEntries(max);
  switchStorage(current);
 }
