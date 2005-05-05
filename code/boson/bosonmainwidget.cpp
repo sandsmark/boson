@@ -219,6 +219,7 @@ void BosonMainWidget::initializeGL()
  glHint(GL_CLIP_VOLUME_CLIPPING_HINT_EXT, GL_FASTEST);
 #endif
 
+ boglInit();
 
  d->mFPSCounter->reset();
 
