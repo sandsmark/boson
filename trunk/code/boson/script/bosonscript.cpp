@@ -1302,12 +1302,14 @@ float BosonScript::aiDelay()
 /*****  Other methods  *****/
 void BosonScript::startBenchmark()
 {
-  boProfiling->startBenchmark();
+// AB: benchmark feature got lost
+//  boProfiling->startBenchmark();
 }
 
 void BosonScript::endBenchmark(const QString& name)
 {
-  boProfiling->endBenchmark(name);
+// AB: benchmark feature got lost
+//  boProfiling->endBenchmark(name);
 }
 
 void BosonScript::setRandomSeed(long int seed)

@@ -345,11 +345,11 @@ bool BosonPath::findPath()
   // Slow method is the one used before. It should always find some path and it
   //  can find path around other units. It's at least about 10 times slower
   //  though (with a simple path)
-  BosonProfiler profiler(BosonProfiling::FindPath);
+  BosonProfiler profiler("FindPath");
   totalcalls++;
   if(findFastPath())
   {
-    long int elapsed = profiler.stop();
+    long int elapsed = profiler.popElapsed();
     totalelapsed += elapsed;
     boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (fast method): " << elapsed << " microsec." << endl;
     pathFast++;
@@ -359,14 +359,14 @@ bool BosonPath::findPath()
   {
     if(rangeCheck())
     {
-      long int elapsed = profiler.stop();
+      long int elapsed = profiler.popElapsed();
       totalelapsed += elapsed;
       boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (range method): " << elapsed << " microsec." << endl;
       pathRange++;
       return false;
     }
     bool ret = findSlowPath();
-    long int elapsed = profiler.stop();
+    long int elapsed = profiler.popElapsed();
     totalelapsed += elapsed;
     boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (slow method): " << elapsed << " microsec. nodes removed: " << mNodesRemoved << endl;
     pathSlow++;
@@ -1567,22 +1567,21 @@ BosonPath2::~BosonPath2()
 void BosonPath2::init()
 {
   boDebug(510) << k_funcinfo << endl;
-  static int profilerId = -boProfiling->requestEventId("Stupid profiling name");
-  BosonProfiler profiler(profilerId);
+  BosonProfilingItem profiler;
   initCellPassability();
   initSectors();
   initRegions();
   findRegionNeighbors(0, 0, mMap->width() - 1, mMap->height() - 1);
   initRegionCosts(mRegions);
   initRegionGroups(mRegions);
-  long int elapsed = profiler.stop();
+  long int elapsed = profiler.elapsedSinceStart();
   boDebug(510) << k_funcinfo << "END, elapsed: " << elapsed / 1000.0 << " ms" << endl;
 }
 
 void BosonPath2::findPath(BosonPathInfo* info)
 {
   boDebug(510) << k_funcinfo << endl;
-  BosonProfiler profiler(BosonProfiling::FindPath);
+  BosonProfiler profiler("FindPath");
   totalcalls++;
 
   if(info->flying)
@@ -1610,7 +1609,7 @@ void BosonPath2::findPath(BosonPathInfo* info)
     // We _must_ have start region. Otherwise something is very broken
     if(!info->startRegion)
     {
-      long int elapsed = profiler.stop();
+      long int elapsed = profiler.popElapsed();
       totalelapsed += elapsed;
       boDebug(500) << k_funcinfo << "ELAPSED (failed 1): " << elapsed << " microsec." << endl;
       boDebug(510) << k_funcinfo << "No start region!" << endl;
@@ -1622,7 +1621,7 @@ void BosonPath2::findPath(BosonPathInfo* info)
       // If range is not 0, we need to get exactly to that range. Otherwise we
       //  won't even search for path
       info->passable = false;
-      long int elapsed = profiler.stop();
+      long int elapsed = profiler.popElapsed();
       totalelapsed += elapsed;
       boDebug(500) << k_funcinfo << "ELAPSED (failed 2): " << elapsed << " microsec." << endl;
       return;
@@ -1633,7 +1632,7 @@ void BosonPath2::findPath(BosonPathInfo* info)
     if(!info->hlpath)
     {
       // No high-level path was found
-      long int elapsed = profiler.stop();
+      long int elapsed = profiler.popElapsed();
       totalelapsed += elapsed;
       boDebug(500) << k_funcinfo << "ELAPSED (failed 3): " << elapsed << " microsec." << endl;
       boError(510) << k_funcinfo << "No HL path found!" << endl;
@@ -1645,7 +1644,7 @@ void BosonPath2::findPath(BosonPathInfo* info)
     findLowLevelPath(info);
   }
 
-  long int elapsed = profiler.stop();
+  long int elapsed = profiler.popElapsed();
   totalelapsed += elapsed;
   boDebug(500) << k_funcinfo << "ELAPSED (success!!!): " << elapsed << " microsec." << endl;
 //  boDebug() << k_funcinfo << "ENDm Total time elapsed: " << totalelapsed / 1000000.0 << " sec; calls: " << totalcalls << endl;
@@ -1715,8 +1714,7 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
 {
   long int tm_initarea, tm_initmaps, tm_initmisc, tm_mainloop, tm_copypath = 0, tm_viz = 0, tm_uninit;
   boDebug(510) << k_funcinfo << "HL path has " << info->hlpath->path.count() << " steps, using step " << info->hlstep << " atm" << endl;
-  static int profilerId = -boProfiling->requestEventId("Stupid profiling name");
-  BosonProfiler pr(profilerId);
+  BosonProfilingItem pr;
   BosonPathRegion* currentregion = info->hlpath->path[info->hlstep];
   BosonPathRegion* nextRegion = 0;
   if(info->hlstep + 1 == info->hlpath->path.count())
@@ -1738,7 +1736,7 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
   int areay = QMAX(currentregion->sector->y - 1, 0);
   int areaw = QMIN(currentregion->sector->w + 2, (int)mMap->width() - areax);
   int areah = QMIN(currentregion->sector->h + 2, (int)mMap->height() - areay);
-  tm_initarea = pr.elapsed();
+  tm_initarea = pr.elapsedSinceStart();
 //  boDebug(510) << k_funcinfo << "Area is: (" << areax << "x" << areay << "+" << areaw << "x" << areah << ")" << endl;
   // Create list of nodes that are in visited and of those in open.
   // This is used for performance reasons, it's faster than seacrhing open for
@@ -1761,7 +1759,7 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
   // We don't init parentdirections, because for each visited cell, we set
   //  direction anyway, and we don't use directions for unvisited cells (unless
   //  there's a bug somewhere)
-  tm_initmaps = pr.elapsed();
+  tm_initmaps = pr.elapsedSinceStart();
 
 
   // Find cell that the unit is on atm.
@@ -1791,7 +1789,7 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
   // When range is 0 and we can't get exactly to destination point, we will go
   //  to nearest possible point
   BosonPathNode nearest = first;
-  tm_initmisc = pr.elapsed();
+  tm_initmisc = pr.elapsedSinceStart();
 
 
   // Main loop
@@ -1921,7 +1919,7 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
     }
   }
 
-  tm_mainloop = pr.elapsed();
+  tm_mainloop = pr.elapsedSinceStart();
 //  boDebug(510) << k_funcinfo << "path searching finished" << endl;
 
   // Traceback path
@@ -2014,7 +2012,7 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
 
     // Set passable flag to true
     info->passable = true;
-    tm_copypath = pr.elapsed();
+    tm_copypath = pr.elapsedSinceStart();
 
 
 #ifdef VISUALIZE_PATHS
@@ -2035,14 +2033,14 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
       BosonPathVisualization::pathVisualization()->addLineVisualization(points, color, pointSize, timeout, zOffset);
     }
 #endif
-    tm_viz = pr.elapsed();
+    tm_viz = pr.elapsedSinceStart();
   }
 
 //  boDebug(510) << k_funcinfo << "Deleting visited @ " << visited << endl;
   delete[] visited;
   delete[] inopen;
   delete[] parentdirections;
-  tm_uninit = pr.stop();
+  tm_uninit = pr.elapsedSinceStart();
 
   boDebug(510) << k_funcinfo << "Took " << tm_uninit << " usec:" << endl <<
       "    area init: " << tm_initarea << ";  maps init: " << tm_initmaps - tm_initarea << ";  misc init: " << tm_initmisc - tm_initmaps << endl <<
@@ -2067,7 +2065,7 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
   //  usually aren't too many flying units, it should be enough.
 
   long int tm_initarea, tm_initmaps, tm_initmisc, tm_mainloop, tm_copypath = 0, tm_viz = 0, tm_uninit;
-  BosonProfiler pr('P' + 'F' + '_' + 'T' + 'N' + 'G' + ' ' + 'l' + 'o' + 'f' + 'l' + 'y');
+  BosonProfilingItem pr;
 
   // List of open nodes
   BosonPathHeap<BosonPathFlyingNode> open;
@@ -2083,7 +2081,7 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
 //  int areah = QMIN(TNG_FLYING_STEPS * 2 + 1, (int)mMap->height() - areay);
   int areaw = QMIN(unitx + TNG_FLYING_STEPS + 1, (int)mMap->width()) - areax;
   int areah = QMIN(unity + TNG_FLYING_STEPS + 1, (int)mMap->height()) - areay;
-  tm_initarea = pr.elapsed();
+  tm_initarea = pr.elapsedSinceStart();
 //  boDebug(510) << k_funcinfo << "Area is: (" << areax << "x" << areay << "+" << areaw << "x" << areah << ")" << endl;
   // Create list of nodes that are in visited and of those in open.
   // This is used for performance reasons, it's faster than seacrhing open for
@@ -2106,7 +2104,7 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
   // We don't init parentdirections, because for each visited cell, we set
   //  direction anyway, and we don't use directions for unvisited cells (unless
   //  there's a bug somewhere)
-  tm_initmaps = pr.elapsed();
+  tm_initmaps = pr.elapsedSinceStart();
 
 
   // Find cell that the unit is on atm.
@@ -2133,7 +2131,7 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
   // When range is 0 and we can't get exactly to destination point, we will go
   //  to nearest possible point
   BosonPathFlyingNode nearest = first;
-  tm_initmisc = pr.elapsed();
+  tm_initmisc = pr.elapsedSinceStart();
 
   // Destination in cell coordinates
   int destcellx = (int)info->dest.x();
@@ -2281,7 +2279,7 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
     }
   }
 
-  tm_mainloop = pr.elapsed();
+  tm_mainloop = pr.elapsedSinceStart();
 //  boDebug(510) << k_funcinfo << "path searching finished" << endl;
 
   // Traceback path
@@ -2359,7 +2357,7 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
 
     // Set passable flag to true
     info->passable = true;
-    tm_copypath = pr.elapsed();
+    tm_copypath = pr.elapsedSinceStart();
 
 
 #ifdef VISUALIZE_PATHS
@@ -2380,14 +2378,14 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
       BosonPathVisualization::pathVisualization()->addLineVisualization(points, color, pointSize, timeout, zOffset);
     }
 #endif
-    tm_viz = pr.elapsed();
+    tm_viz = pr.elapsedSinceStart();
   }
 
 //  boDebug(510) << k_funcinfo << "Deleting visited @ " << visited << endl;
   delete[] visited;
   delete[] inopen;
   delete[] parentdirections;
-  tm_uninit = pr.stop();
+  tm_uninit = pr.elapsedSinceStart();
 
   boDebug(510) << k_funcinfo << "Took " << tm_uninit << " usec:" << endl <<
       "    area init: " << tm_initarea << ";  maps init: " << tm_initmaps - tm_initarea << ";  misc init: " << tm_initmisc - tm_initmaps << endl <<
@@ -2513,8 +2511,7 @@ void BosonPath2::cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2)
   boDebug(510) << k_funcinfo << "area: (" << x1 << "x" << y1 << "-" << x2 << "x" << y2 << ")" << endl;
   long int tm_calcsectorarea, tm_regionlist, tm_hlpathinvalidate, tm_regionreinit, tm_recalcneighbor,
       tm_regionlists2, tm_recalcregioncosts, tm_regiongroups, tm_end;
-  static int profilerId = -boProfiling->requestEventId("Stupid profiling name");
-  BosonProfiler profiler(profilerId);
+  BosonProfilingItem profiler;
 
   // Calculate changed area in sector coords
   int sx1, sy1, sx2, sy2;
@@ -2523,7 +2520,7 @@ void BosonPath2::cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2)
   sx2 = x2 / mSectorWidth;
   sy2 = y2 / mSectorHeight;
 //  boDebug(510) << k_funcinfo << "sector area: (" << sx1 << "x" << sy1 << "-" << sx2 << "x" << sy2 << ")" << endl;
-  tm_calcsectorarea = profiler.elapsed();
+  tm_calcsectorarea = profiler.elapsedSinceStart();
 
   // First we need to make list of all to-be-deleted regions to revalidate
   //  high-level paths later
@@ -2540,7 +2537,7 @@ void BosonPath2::cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2)
       }
     }
   }
-  tm_regionlist = profiler.elapsed();
+  tm_regionlist = profiler.elapsedSinceStart();
 
   // Validate high-level paths. If high-level path contains any of to-be-deleted
   //  regions, it will be considered to be invalid
@@ -2573,7 +2570,7 @@ void BosonPath2::cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2)
       delete p;
     }
   }
-  tm_hlpathinvalidate = profiler.elapsed();
+  tm_hlpathinvalidate = profiler.elapsedSinceStart();
 
   // Reinit regions in changed sectors
   // FIXME: probably this can be done _much_ faster, e.g. check first if
@@ -2588,7 +2585,7 @@ void BosonPath2::cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2)
       regionscount += sector(x, y)->regions.count();
     }
   }
-  tm_regionreinit = profiler.elapsed();
+  tm_regionreinit = profiler.elapsedSinceStart();
 
   // Recalculate region neighbors
   int nx1, ny1, nx2, ny2;
@@ -2606,7 +2603,7 @@ void BosonPath2::cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2)
 //  boDebug(510) << k_funcinfo << "finding neighbors in area: (" << nx1 << "x" << ny1 << "-" << nx2 << "x" << ny2 << ")" << endl;
   findRegionNeighbors(QMAX(sx1 * (int)mSectorWidth - 1, 0), QMAX(sy1 * (int)mSectorHeight - 1, 0),
       QMIN((sx2 + 1) * (int)mSectorWidth, (int)mMap->width() - 1), QMIN((sy2 + 1) * (int)mSectorHeight, (int)mMap->height() - 1));
-  tm_recalcneighbor = profiler.elapsed();
+  tm_recalcneighbor = profiler.elapsedSinceStart();
 
   // Recalculate neighbor costs
   QPtrVector<BosonPathRegion> regions(regionscount);  // All regions in affected sectors
@@ -2645,20 +2642,20 @@ void BosonPath2::cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2)
       }
     }
   }
-  tm_regionlists2 = profiler.elapsed();
+  tm_regionlists2 = profiler.elapsedSinceStart();
 //  boDebug(510) << k_funcinfo << "recalculating costs for regions" << endl;
   initRegionCosts(regions);
   initRegionCosts(neighbors);
-  tm_recalcregioncosts = profiler.elapsed();
+  tm_recalcregioncosts = profiler.elapsedSinceStart();
 
   // Reinit region groups info
   initRegionGroups(regions);
-  tm_regiongroups = profiler.elapsed();
+  tm_regiongroups = profiler.elapsedSinceStart();
 
   // Take care of eyecandy, too
 //  boDebug(510) << k_funcinfo << "recalculating colormap" << endl;
   colorizeRegions();
-  tm_end = profiler.stop();
+  tm_end = profiler.elapsedSinceStart();
   boDebug(510) << k_funcinfo << "END, took " <<  tm_end / 1000.0 << " ms in total:" << endl <<
       "sectarea: " << tm_calcsectorarea << ";  reglist: " << tm_regionlist - tm_calcsectorarea <<
       ";  hlpathinvalidate: " << tm_hlpathinvalidate - tm_regionlist << ";  regreinit: " << tm_regionreinit - tm_hlpathinvalidate << endl <<
@@ -2958,8 +2955,7 @@ void BosonPath2::initRegionCosts(QPtrVector<BosonPathRegion>& regions)
 void BosonPath2::colorizeRegions()
 {
   long int e1, e2, e3;
-  static int profilerId = -boProfiling->requestEventId("Stupid profiling name");
-  BosonProfiler p(profilerId);
+  BosonProfilingItem p;
   // We colorize regions with 6 colors
   const unsigned char colors[7][3] = {
     { 255,   0,   0 },
@@ -3024,7 +3020,7 @@ void BosonPath2::colorizeRegions()
 
   delete[] inserted;
 
-  e1 = p.elapsed();
+  e1 = p.elapsedSinceStart();
 
   // Step 2: dequeue regions and give them color that none of their neighbors
   //  has
@@ -3064,7 +3060,7 @@ void BosonPath2::colorizeRegions()
     }
   }
 
-  e2 = p.elapsed();
+  e2 = p.elapsedSinceStart();
 
   // Step 3: every region should have color now. So we take every cell and tell
   //  colorMap which color it should have
@@ -3102,7 +3098,7 @@ void BosonPath2::colorizeRegions()
 
   delete[] colorindices;
 
-  e3 = p.stop();
+  e3 = p.elapsedSinceStart();
 
 //  boDebug(510) << k_funcinfo << "DONE; total elapsed: " << e3 / 1000.0 << " ms (p1: " << e1 / 1000.0 <<
 //      " ms;  p2: " << (e2 - e1) / 1000.0 << " ms;  p3: " << (e3 - e2) / 1000.0 << " ms)" << endl;
@@ -3152,8 +3148,7 @@ void BosonPath2::searchHighLevelPath(BosonPathInfo* info)
 {
   boDebug(510) << k_funcinfo << endl;
   long int tm_initmaps, tm_initmisc, tm_mainloop, tm_copypath = 0, tm_viz = 0, tm_uninit;
-  static int profilerId = -boProfiling->requestEventId("Stupid profiling name");
-  BosonProfiler pr(profilerId);
+  BosonProfilingItem pr;
   // List of open nodes
   BosonPathHeap<BosonPathHighLevelNode> open;
 
@@ -3168,7 +3163,7 @@ void BosonPath2::searchHighLevelPath(BosonPathInfo* info)
     visited[i] = false;
     inopen[i] = false;
   }
-  tm_initmaps = pr.elapsed();
+  tm_initmaps = pr.elapsedSinceStart();
 
   BosonPathHighLevelNode n, n2;
   // Add starting node to open
@@ -3188,7 +3183,7 @@ void BosonPath2::searchHighLevelPath(BosonPathInfo* info)
   // When range is 0 and we can't get exactly to destination region, we will go
   //  to nearest region
   BosonPathHighLevelNode nearest = n;
-  tm_initmisc = pr.elapsed();
+  tm_initmisc = pr.elapsedSinceStart();
 
   // Main loop
   while(!open.isEmpty())
@@ -3286,7 +3281,7 @@ void BosonPath2::searchHighLevelPath(BosonPathInfo* info)
     }
   }
 
-  tm_mainloop = pr.elapsed();
+  tm_mainloop = pr.elapsedSinceStart();
 //  boDebug(510) << k_funcinfo << "path searching finished" << endl;
 
   // Traceback path
@@ -3347,7 +3342,7 @@ void BosonPath2::searchHighLevelPath(BosonPathInfo* info)
     info->hlstep = 0;
     info->passable = true;
     info->destRegion = n.region;
-    tm_copypath = pr.elapsed();
+    tm_copypath = pr.elapsedSinceStart();
 
 #ifdef VISUALIZE_PATHS
     // Add LineVisualization stuff
@@ -3365,12 +3360,12 @@ void BosonPath2::searchHighLevelPath(BosonPathInfo* info)
       BosonPathVisualization::pathVisualization()->addLineVisualization(points, pointSize, timeout, zOffset);
     }
 #endif
-    tm_viz = pr.elapsed();
+    tm_viz = pr.elapsedSinceStart();
   }
 
   delete[] visited;
   delete[] inopen;
-  tm_uninit = pr.stop();
+  tm_uninit = pr.elapsedSinceStart();
 
   boDebug(510) << k_funcinfo << "END, Took " << tm_uninit << " usec:" << endl <<
       "    maps init: " << tm_initmaps << ";  misc init: " << tm_initmisc - tm_initmaps << endl <<
@@ -3389,8 +3384,7 @@ void BosonPath2::findHighLevelGoal(BosonPathInfo* info)
     return;
   }
 //  info->destRegion = cellRegion(info->dest);
-  static int profilerId = -boProfiling->requestEventId("Stupid profiling name");
-  BosonProfiler pr(profilerId);
+  BosonProfilingItem pr;
   BosonPathRegionGroup* startGrp = info->startRegion->group;
 
   int destx = (int)info->dest.x();
@@ -3409,7 +3403,7 @@ void BosonPath2::findHighLevelGoal(BosonPathInfo* info)
   if(!info->flying && info->canMoveOnLand && info->canMoveOnWater)
   {
     // TODO: add support for such units
-//    boDebug() << k_funcinfo << "Took " << pr.stop() << " usec" << endl;
+//    boDebug() << k_funcinfo << "Took " << pr.elapsedSinceStart() << " usec" << endl;
     boError(510) << k_funcinfo << "Land units that can move on both water and land aren't supported yet!!!" << endl;
     return;
   }
@@ -3453,7 +3447,7 @@ void BosonPath2::findHighLevelGoal(BosonPathInfo* info)
   }
   if(!connected)
   {
-//    boDebug() << k_funcinfo << "Took " << pr.stop() << " usec" << endl;
+//    boDebug() << k_funcinfo << "Took " << pr.elapsedSinceStart() << " usec" << endl;
     boDebug(510) << k_funcinfo << "No path to destination area found!" << endl;
     return;
   }
@@ -3464,7 +3458,7 @@ void BosonPath2::findHighLevelGoal(BosonPathInfo* info)
     info->possibleDestRegions.insert(info->possibleDestRegions.count(), it.current());
     ++it;
   }
-//  boDebug() << k_funcinfo << "Took " << pr.stop() << " usec" << endl;
+//  boDebug() << k_funcinfo << "Took " << pr.elapsedSinceStart() << " usec" << endl;
   boDebug(510) << k_funcinfo << "Found " << info->possibleDestRegions.count() << " possible dest regions" << endl;
 }
 

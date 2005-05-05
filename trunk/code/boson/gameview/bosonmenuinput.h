@@ -51,9 +51,9 @@ signals:
 	void signalToggleMusic();
 	void signalToggleFullScreen(bool);
 	void signalToggleChatVisible();
-	void signalChangeMaxProfilingEventEntries();
+	void signalChangeMaxProfilingEntries();
 	void signalChangeMaxProfilingAdvanceEntries();
-	void signalChangeMaxProfilingRenderingEntries();
+	void signalChangeMaxProfilingGLEntries();
 	void signalProfiling();
 	void signalDebugKGame();
 	void signalBoDebugLogDialog();
@@ -184,9 +184,9 @@ protected slots:
 	void slotToggleSound();
 	void slotToggleMusic();
 	void slotToggleFullScreen(bool);
-	void slotChangeMaxProfilingEventEntries();
+	void slotChangeMaxProfilingEntries();
 	void slotChangeMaxProfilingAdvanceEntries();
-	void slotChangeMaxProfilingRenderingEntries();
+	void slotChangeMaxProfilingGLEntries();
 	void slotProfiling();
 	void slotDebugKGame();
 	void slotDebugRequestIdName(int msgid, bool userid, QString& name);

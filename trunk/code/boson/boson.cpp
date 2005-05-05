@@ -878,11 +878,6 @@ void Boson::slotPropertyChanged(KGamePropertyBase* p)
 				}
 			}
 		}
-		if (gamePaused()) {
-			boProfiling->setGameSpeed(0);
-		} else {
-			boProfiling->setGameSpeed(gameSpeed());
-		}
 		break;
 	case IdGamePaused:
 		boDebug() << k_funcinfo << "game paused changed! now=" << d->mGamePaused << endl;
@@ -893,11 +888,6 @@ void Boson::slotPropertyChanged(KGamePropertyBase* p)
 			boDebug() << k_funcinfo << "starting timer again" << endl;
 			slotAddChatSystemMessage(i18n("The game is not paused anymore"));
 			d->mGameTimer->start(advanceMessageInterval());
-		}
-		if (gamePaused()) {
-			boProfiling->setGameSpeed(0);
-		} else {
-			boProfiling->setGameSpeed(gameSpeed());
 		}
 		break;
 	default:
@@ -1339,12 +1329,14 @@ void Boson::killPlayer(Player* player)
 
 void Boson::makeGameLog()
 {
+ PROFILE_METHOD;
  QByteArray log;
  QTextStream ts(log, IO_WriteOnly);
  writeGameLog(ts);
 // boDebug() << k_funcinfo << "Log size: " << log.size() << endl;
- BosonProfiler p(BosonProfiling::MakeGameLog);
+ boProfiling->push("compress log");
  QByteArray comp = qCompress(log);
+ boProfiling->pop();
  d->mGameLogs.append(comp);
 // boDebug() << k_funcinfo << "Done, elapsed: " << p.stop() << endl;
 // boDebug() << k_funcinfo << "Compressed log size: " << comp.size() << endl;
@@ -1412,7 +1404,7 @@ void Boson::makeUnitLog()
 
 void Boson::writeGameLog(QTextStream& log)
 {
- BosonProfiler p(BosonProfiling::WriteGameLog);
+ PROFILE_METHOD;
 
  log << "Advance calls count: " << advanceCallsCount() << endl;
  QPtrListIterator<KPlayer> it(*playerList());
@@ -1430,7 +1422,7 @@ bool Boson::saveGameLogs(const QString& prefix)
  // AB: note that this could even be called _after_ boson has crashed!
  // try to avoid most methods/classes/pointers
  // (actually the profiling and boDebug stuff shouldnt be here, either)
- BosonProfiler p(BosonProfiling::SaveGameLogs);
+ BosonProfiler p("saveGameLogs");
 
  // this one can be used to reproduce a game.
  // therefore we start with this one, if everything else fails we still have it.
@@ -1484,7 +1476,7 @@ bool Boson::saveGameLogs(const QString& prefix)
  }
  netLog.close();
 
- boDebug() << k_funcinfo << "Done, elapsed: " << p.stop() << endl;
+ boDebug() << k_funcinfo << "Done, elapsed: " << p.elapsedSinceStart() << endl;
  return true;
 }
 

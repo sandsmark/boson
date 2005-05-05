@@ -1005,9 +1005,8 @@ void BoWaterManager::renderLake(BoLake* lake)
 
 void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float chunkdetail)
 {
-  static int eventid = -boProfiling->requestEventId("Water - renderchunk");
   long int tm_initinfo, tm_initenv, tm_texmatrix, tm_miscinit, tm_dirty, tm_renderinit, tm_render, tm_uninit;
-  BosonProfiler profiler(eventid);
+  BosonProfilingItem profiler;
 
   // Create new RenderInfo object
   RenderInfo* info = new RenderInfo;
@@ -1015,12 +1014,12 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
   info->chunk = chunk;
   info->detail = chunkdetail;
   info->texrepeat = 10;
-  tm_initinfo = profiler.elapsed();
+  tm_initinfo = profiler.elapsedSinceStart();
 
   // If nothing has been rendered yet, OpenGL stuff (e.g. textures) are
   //  uninited. Init them now.
   initRenderEnvironment();
-  tm_initenv = profiler.elapsed();
+  tm_initenv = profiler.elapsedSinceStart();
 
   // Set texture matrices. They make textures move slowly to create an illusion
   //  that water surface is moving.
@@ -1036,7 +1035,7 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
     glPushMatrix();
     glLoadMatrixf(texMatrix.data());
   }
-  tm_texmatrix = profiler.elapsed();
+  tm_texmatrix = profiler.elapsedSinceStart();
 
   // First find out which rendering tehniques to use for the chunk:
   // Check whether water's alpha in chunk is variable or constant.
@@ -1096,7 +1095,7 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
     float lightv[] = { info->lightvector.x(), info->lightvector.y(), info->lightvector.z(), 1.0f };
     glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, lightv);
   }
-  tm_miscinit = profiler.elapsed();
+  tm_miscinit = profiler.elapsedSinceStart();
 
 
   // Recalculate all the data if necessary
@@ -1115,7 +1114,7 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
 
     chunk->dirty = false;
   }
-  tm_dirty = profiler.elapsed();
+  tm_dirty = profiler.elapsedSinceStart();
 
 
   // Render all the cells in this chunk
@@ -1197,7 +1196,7 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
   {
     glNormal3f(0.0f, 0.0f, 1.0f);
   }
-  tm_renderinit = profiler.elapsed();
+  tm_renderinit = profiler.elapsedSinceStart();
 
   // Do the drawing
   if(mEnableVBO)
@@ -1211,7 +1210,7 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
   }
   mRenderedQuads += chunk->indices_count / 4;
   glPopClientAttrib();
-  tm_render = profiler.elapsed();
+  tm_render = profiler.elapsedSinceStart();
 
 
   if(mEnableBumpmapping && !mEnableShader)
@@ -1369,7 +1368,7 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
 
   delete info;
 
-  tm_uninit = profiler.elapsed();
+  tm_uninit = profiler.elapsedSinceStart();
 
   /*boDebug() << k_funcinfo << "Took " << tm_uninit << "us IN TOTAL" << endl << "   " <<
       " IInfo: " << tm_initinfo <<

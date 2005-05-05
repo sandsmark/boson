@@ -211,12 +211,12 @@ void BosonMenuInputData::initUfoActions(bool gameMode)
 		this, SIGNAL(signalToggleMusic()),
 		actionCollection(), "options_music");
  music->setChecked(boConfig->boolValue("Music"));
- (void)new BoUfoAction(i18n("Maximal entries per event..."), KShortcut(), this,
-		SIGNAL(signalChangeMaxProfilingEventEntries()), actionCollection(), "options_profiling_max_event_entries");
+ (void)new BoUfoAction(i18n("Maximal entries..."), KShortcut(), this,
+		SIGNAL(signalChangeMaxProfilingEntries()), actionCollection(), "options_profiling_max_event_entries");
  (void)new BoUfoAction(i18n("Maximal advance call entries..."), KShortcut(), this,
 		SIGNAL(signalChangeMaxProfilingAdvanceEntries()), actionCollection(), "options_profiling_max_advance_entries");
  (void)new BoUfoAction(i18n("Maximal rendering entries..."), KShortcut(), this,
-		SIGNAL(signalChangeMaxProfilingRenderingEntries()), actionCollection(), "options_profiling_max_rendering_entries");
+		SIGNAL(signalChangeMaxProfilingGLEntries()), actionCollection(), "options_profiling_max_rendering_entries");
 
 
  // Display
@@ -246,8 +246,8 @@ void BosonMenuInputData::initUfoActions(bool gameMode)
 
  (void)new BoUfoAction(i18n("&Grab Screenshot"), KShortcut(Qt::CTRL + Qt::Key_G),
 		this, SIGNAL(signalGrabScreenshot()), actionCollection(), "game_grab_screenshot");
- (void)new BoUfoAction(i18n("Grab &Profiling data"), KShortcut(Qt::CTRL + Qt::Key_P),
-		this, SIGNAL(signalGrabProfiling()), actionCollection(), "game_grab_profiling");
+// (void)new BoUfoAction(i18n("Grab &Profiling data"), KShortcut(Qt::CTRL + Qt::Key_P),
+//		this, SIGNAL(signalGrabProfiling()), actionCollection(), "game_grab_profiling");
  BoUfoToggleAction* movie = new BoUfoToggleAction(i18n("Grab &Movie"),
 		KShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_M), 0, 0, actionCollection(), "game_grab_movie");
  movie->setChecked(false);
@@ -726,12 +726,12 @@ void BosonMenuInput::initIO(KPlayer* player)
 		this, SLOT(slotToggleFullScreen(bool)));
  connect(mData, SIGNAL(signalToggleChatVisible()),
 		this, SIGNAL(signalToggleChatVisible()));
- connect(mData, SIGNAL(signalChangeMaxProfilingEventEntries()),
-		this, SLOT(slotChangeMaxProfilingEventEntries()));
+ connect(mData, SIGNAL(signalChangeMaxProfilingEntries()),
+		this, SLOT(slotChangeMaxProfilingEntries()));
  connect(mData, SIGNAL(signalChangeMaxProfilingAdvanceEntries()),
 		this, SLOT(slotChangeMaxProfilingAdvanceEntries()));
- connect(mData, SIGNAL(signalChangeMaxProfilingRenderingEntries()),
-		this, SLOT(slotChangeMaxProfilingRenderingEntries()));
+ connect(mData, SIGNAL(signalChangeMaxProfilingGLEntries()),
+		this, SLOT(slotChangeMaxProfilingGLEntries()));
  connect(mData, SIGNAL(signalProfiling()),
 		this, SLOT(slotProfiling()));
  connect(mData, SIGNAL(signalDebugKGame()),
@@ -911,42 +911,42 @@ void BosonMenuInput::slotToggleFullScreen(bool fullScreen)
  }
 }
 
-void BosonMenuInput::slotChangeMaxProfilingEventEntries()
+void BosonMenuInput::slotChangeMaxProfilingEntries()
 {
  bool ok = true;
- unsigned int max = boConfig->uintValue("MaxProfilingEventEntries");
- max = (unsigned int)QInputDialog::getInteger(i18n("Profiling event entries"),
-		i18n("Maximal number of profiling entries per event"),
+ unsigned int max = boConfig->uintValue("MaxProfilingEntries");
+ max = (unsigned int)QInputDialog::getInteger(i18n("Profiling entries"),
+		i18n("Maximal number of profiling entries"),
 		(int)max, 0, 100000, 1, &ok, 0);
  if (ok) {
-	boConfig->setUIntValue("MaxProfilingEventEntries", max);
-	boProfiling->setMaxEventEntries(boConfig->uintValue("MaxProfilingEventEntries"));
+	boConfig->setUIntValue("MaxProfilingEntries", max);
+	boProfiling->setMaximalEntries(QString::null, boConfig->uintValue("MaxProfilingEntries"));
  }
 }
 
 void BosonMenuInput::slotChangeMaxProfilingAdvanceEntries()
 {
  bool ok = true;
- unsigned int max = boConfig->uintValue("MaxProfilingAdvanceEntries");
+ unsigned int max = boConfig->uintValue("MaxProfilingEntriesAdvance");
  max = (unsigned int)QInputDialog::getInteger(i18n("Profiling advance entries"),
 		i18n("Maximal number of profiled advance calls"),
 		(int)max, 0, 100000, 1, &ok, 0);
  if (ok) {
-	boConfig->setUIntValue("MaxProfilingAdvanceEntries", max);
-	boProfiling->setMaxAdvanceEntries(boConfig->uintValue("MaxProfilingAdvanceEntries"));
+	boConfig->setUIntValue("MaxProfilingEntriesAdvance", max);
+	boProfiling->setMaximalEntries("Advance", boConfig->uintValue("MaxProfilingEntriesAdvance"));
  }
 }
 
-void BosonMenuInput::slotChangeMaxProfilingRenderingEntries()
+void BosonMenuInput::slotChangeMaxProfilingGLEntries()
 {
  bool ok = true;
- unsigned int max = boConfig->uintValue("MaxProfilingRenderingEntries");
+ unsigned int max = boConfig->uintValue("MaxProfilingEntriesGL");
  max = (unsigned int)QInputDialog::getInteger(i18n("Profiling rendering entries"),
 		i18n("Maximal number of profiled frames"),
 		(int)max, 0, 100000, 1, &ok, 0);
  if (ok) {
-	boConfig->setUIntValue("MaxProfilingRenderingEntries", max);
-	boProfiling->setMaxRenderingEntries(boConfig->uintValue("MaxProfilingRenderingEntries"));
+	boConfig->setUIntValue("MaxProfilingEntriesGL", max);
+	boProfiling->setMaximalEntries("GL", boConfig->uintValue("MaxProfilingEntriesGL"));
  }
 }
 
@@ -1095,6 +1095,8 @@ void BosonMenuInput::slotGrabScreenshot()
 
 void BosonMenuInput::slotGrabProfiling()
 {
+	boWarning() << k_funcinfo << "obsolete feature" << endl;
+#if 0
  QString file = findSaveFileName("boprofiling", "boprof");
  if (file.isNull()) {
 	boWarning() << k_funcinfo << "Can't find free filename???" << endl;
@@ -1109,6 +1111,7 @@ void BosonMenuInput::slotGrabProfiling()
  } else {
 	boGame->slotAddChatSystemMessage(i18n("Profiling log saved to %1").arg(file));
  }
+#endif
 }
 
 void BosonMenuInput::slotSetGrabMovie(bool grab)

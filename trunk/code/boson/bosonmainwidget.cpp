@@ -112,7 +112,6 @@ public:
 	QGuardedPtr<Player> mLocalPlayer;
 };
 
-// TODO: the ForceWantDirect query should be done by the constructing code!
 BosonMainWidget::BosonMainWidget(QWidget* parent, bool wantDirect)
 		: BosonUfoGLWidget(parent, "bigdisplay", wantDirect)
 {
@@ -169,6 +168,10 @@ void BosonMainWidget::init()
 
  qApp->setGlobalMouseTracking(true);
  qApp->installEventFilter(this);
+
+ boProfiling->setMaximalEntries("GL", boConfig->uintValue("MaxProfilingEntriesGL"));
+ boProfiling->setMaximalEntries("Advance", boConfig->uintValue("MaxProfilingEntriesAdvance"));
+ boProfiling->setMaximalEntries(QString::null, boConfig->uintValue("MaxProfilingEntries"));
 }
 
 void BosonMainWidget::initializeGL()
@@ -177,6 +180,7 @@ void BosonMainWidget::initializeGL()
 	// already called initializeGL()
 	return;
  }
+ BosonProfiler prof("initializeGL");
 
  // AB: WARNING you must _not_ assume this gets called once only!
  // this can get called once per context! i.e. when frames for the movie are
@@ -326,6 +330,9 @@ void BosonMainWidget::resizeGL(int w, int h)
 
 void BosonMainWidget::slotUpdateGL()
 {
+ boProfiling->pushStorage("GL");
+ boProfiling->push("slotUpdateGL");
+
  // AB: using the FPS counter here is most dependable and gives us some
  // additional information.
  // by doing this we can especially find out how much time _actually_ was spent
@@ -334,6 +341,9 @@ void BosonMainWidget::slotUpdateGL()
  d->mFPSCounter->startFrame();
  BosonUfoGLWidget::slotUpdateGL();
  d->mFPSCounter->endFrame();
+
+ boProfiling->pop();
+ boProfiling->popStorage();
 }
 
 void BosonMainWidget::paintGL()
@@ -342,6 +352,7 @@ void BosonMainWidget::paintGL()
 	initGL();
 	return;
  }
+ BosonProfiler prof("paintGL");
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error at start of " << k_funcinfo << endl;
@@ -358,7 +369,7 @@ void BosonMainWidget::paintGL()
 
  d->mUpdateTimer.stop();
 
- boProfiling->render(true);
+ boProfiling->push("Rendering");
 
  glPushMatrix();
 
@@ -368,13 +379,13 @@ void BosonMainWidget::paintGL()
  boTextureManager->disableTexturing();
  glDisable(GL_FOG);
 
- boProfiling->renderUfo(true);
+ boProfiling->push("renderUfo");
  renderUfo();
- boProfiling->renderUfo(false);
+ boProfiling->pop(); // "renderUfo"
 
  glPopMatrix();
 
- boProfiling->render(false);
+ boProfiling->pop(); // "Rendering"
 
  if (d->mUpdateInterval) {
 	d->mUpdateTimer.start(d->mUpdateInterval);
@@ -426,7 +437,6 @@ void BosonMainWidget::slotSetUpdateInterval(unsigned int ms)
 {
  boDebug() << k_funcinfo << ms << endl;
  d->mUpdateInterval = ms;
- boProfiling->setGLUpdateInterval(ms);
  QTimer::singleShot(d->mUpdateInterval, this, SLOT(slotUpdateGL()));
 }
 

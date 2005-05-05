@@ -93,7 +93,6 @@ BosonPlayFieldData::BosonPlayFieldData(const QString& mapFile, BosonPlayField* f
 
 bool BosonPlayFieldData::load()
 {
- BosonProfiler profiler(BosonProfiling::LoadPlayField);
  return true;
 }
 
@@ -277,7 +276,7 @@ bool BosonPlayField::preLoadAllPlayFields()
  boDebug() << k_funcinfo << endl;
 
  // TODO: ensure that UI doesn't block (i.e. call process events)
- BosonProfiler profiler(BosonProfiling::PreLoadPlayFields);
+ BosonProfiler profiler("Preload all playfields");
  if (BosonData::bosonData()->availablePlayFields().count() > 0) {
 	boWarning() << k_funcinfo << "playFields already loaded" << endl;
 	return true;

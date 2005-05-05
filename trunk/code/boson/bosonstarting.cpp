@@ -120,7 +120,7 @@ void BosonStarting::slotStart()
 
 bool BosonStarting::start()
 {
- BosonProfiler profiler(BosonProfiling::BosonStartingStart);
+ BosonProfiler profiler("BosonStarting::start()");
  d->mStartingCompleted.clear();
 
  // Reset progressbar
@@ -284,7 +284,7 @@ bool BosonStarting::loadTiles()
 	boError(270) << k_funcinfo << "NULL map" << endl;
 	return false;
  }
- boProfiling->start(BosonProfiling::LoadTiles);
+ boProfiling->push("LoadTiles");
 
  emit signalLoadingType(BosonLoadingWidget::LoadTiles);
  // just in case.. disconnect before connecting. the map should be newly
@@ -295,14 +295,14 @@ bool BosonStarting::loadTiles()
  // actually load the theme, including textures.
  BosonData::bosonData()->loadGroundTheme(QString::fromLatin1("earth"));
 
- boProfiling->stop(BosonProfiling::LoadTiles);
+ boProfiling->pop(); // LoadTiles
  return true;
 }
 
 bool BosonStarting::loadPlayerData()
 {
  boDebug(270) << k_funcinfo << endl;
- BosonProfiler profiler(BosonProfiling::LoadGameData3); // TODO rename to LoadPlayerData
+ BosonProfiler profiler("LoadPlayerData");
 
  // Load unit datas (pixmaps and sounds)
  QPtrListIterator<KPlayer> it(*(boGame->playerList()));
@@ -373,13 +373,12 @@ bool BosonStarting::startScenario(QMap<QString, QByteArray>& files)
  }
 
  // map player number (aka index, as used by .bsg/.bpf) to player Id
- static int profilingPlayerIds = boProfiling->requestEventId("FixPlayerIds");
- boProfiling->start(profilingPlayerIds);
+ boProfiling->push("FixPlayerIds");
  if (!fixPlayerIds(files)) {
 	boError(270) << k_funcinfo << "could not replace player numbers by real player ids" << endl;
 	return false;
  }
- boProfiling->stop(profilingPlayerIds);
+ boProfiling->pop();
 
  BosonSaveLoad* load = new BosonSaveLoad(boGame);
  if (!load->startFromFiles(files)) {

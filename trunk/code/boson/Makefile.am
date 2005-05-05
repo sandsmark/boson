@@ -17,12 +17,11 @@ SUBDIRS = \
 
 noinst_LTLIBRARIES = \
 		libboson.la \
-		libboprofiling.la \
 		libbocursor.la \
 		libborender.la \
 		libboinfo.la \
 		libbo3dsdebug.la
-bin_PROGRAMS = boson borender bounit boprofiling bocursor boinfo bo3dsdebug
+bin_PROGRAMS = boson borender bounit bocursor boinfo bo3dsdebug
 
 INCLUDES = -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl -I$(top_srcdir)/boson/boufo $(all_includes)
 
@@ -172,23 +171,6 @@ bounit_LDADD = \
 bounit_SOURCES = \
 		bounitmain.cpp bosonsearchpathswidget.ui \
 		bouniteditor.ui
-
-libboprofiling_la_SOURCES = \
-		boapplication.cpp \
-		boglobal.cpp \
-		bosonprofilingdialog.cpp \
-		bosonprofiling.cpp \
-		bosonconfig.cpp
-boprofiling_LDFLAGS = $(KDE_RPATH) $(all_libraries)
-boprofiling_LDADD = \
-		$(top_builddir)/boson/libboprofiling.la \
-		$(top_builddir)/bogl/libbogl.la \
-		$(top_builddir)/bodebug/libbodebug.la \
-		$(LIB_BOMEMORY) \
-		$(LIB_KDEUI) \
-		$(LIB_KIO)
-boprofiling_SOURCES = \
-		boprofilingmain.cpp
 
 libbocursor_la_SOURCES = \
 		boapplication.cpp \

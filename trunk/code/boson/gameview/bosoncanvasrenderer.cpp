@@ -261,35 +261,34 @@ void BosonCanvasRenderer::paintGL(const BosonCanvas* canvas)
 
  renderFog(d->mVisibleEffects);
 
- boProfiling->renderCells(true);
+// boProfiling->renderCells(true);
  renderGround(canvas->map());
- boProfiling->renderCells(false);
+// boProfiling->renderCells(false);
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "after ground rendering" << endl;
  }
 
 
- boProfiling->renderUnits(true);
+// boProfiling->renderUnits(true);
  renderItems(canvas->allItems());
- boProfiling->renderUnits(false, d->mRenderedItems);
+// boProfiling->renderUnits(false, d->mRenderedItems);
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "after item rendering" << endl;
  }
 
- boProfiling->renderWater(true);
+// boProfiling->renderWater(true);
  renderWater();
- boProfiling->renderWater(false);
+// boProfiling->renderWater(false);
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "after water rendering" << endl;
  }
 
- // Render particle systems
- boProfiling->renderParticles(true);
+// boProfiling->renderParticles(true);
  renderParticles(d->mVisibleEffects);
- boProfiling->renderParticles(false);
+// boProfiling->renderParticles(false);
 
  glDisable(GL_DEPTH_TEST);
  glDisable(GL_LIGHTING);
@@ -958,8 +957,7 @@ void BosonCanvasRenderer::renderFadeEffects(BoVisibleEffects& visible)
 
 static void updateEffects(BoVisibleEffects& v)
 {
- static int id = boProfiling->requestEventId("updateEffects(): doDelayedUpdates");
- BosonProfiler prof(id);
+ BosonProfiler prof("updateEffects(): doDelayedUpdates");
  QPtrListIterator<BosonEffect> it(v.mAll);
  while (it.current()) {
 	it.current()->doDelayedUpdates();

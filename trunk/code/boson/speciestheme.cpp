@@ -129,11 +129,10 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
 
 bool SpeciesTheme::loadUnit(unsigned long int type)
 {
- boProfiling->loadUnit();
+ BosonProfiler prof("LoadUnit");
  const UnitProperties* prop = unitProperties(type);
  if (!prop) {
 	boError() << "Could not load unit type " << type << endl;
-	boProfiling->loadUnitDone(type);
 	return false;
  }
  // once we load the overview pixmaps the teamcolor can't be changed anymore
@@ -151,7 +150,6 @@ bool SpeciesTheme::loadUnit(unsigned long int type)
  }
 
  if (!ret) {
-	boProfiling->loadUnitDone(type);
 	return false;
  }
  // Load unit sounds
@@ -176,7 +174,6 @@ bool SpeciesTheme::loadUnit(unsigned long int type)
 	}
  }
  mSound->addUnitSounds(themePath(), sounds);
- boProfiling->loadUnitDone(type);
  return true;
 }
 
