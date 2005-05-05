@@ -100,9 +100,12 @@ class BoTexture
       FormatAuto = 64,
       FormatRGB = 128,
       FormatRGBA = 256,
+      FormatDepth = 512,
       // Misc
       DontGenMipmaps = 1024,
-      DontCompress = 2048
+      DontCompress = 2048,
+      // Wrapping
+      ClampToEdge = 8192
     };
 
 
