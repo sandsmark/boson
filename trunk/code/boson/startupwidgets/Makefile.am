@@ -4,14 +4,9 @@ noinst_LTLIBRARIES = libbosonstartupwidgets.la
 
 # AB: rename! use bosonneweditorwidgetbase.ui
 libbosonstartupwidgets_la_SOURCES = \
-	bosonnewgamewidgetbase.ui \
 	bosonneweditorwidgetbase.ui \
 	bosonstartupnetwork.cpp \
-	bosonstartupwidget.cpp \
-	bosonwelcomewidget.cpp\
 	bosonnetworkoptionswidget.cpp \
-	bosonloadingwidget.cpp \
-	bosonnewgamewidget.cpp \
 	bosonneweditorwidget.cpp \
 	kloadsavegamewidget.cpp \
 	welcomewidget.boui \
