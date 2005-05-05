@@ -192,8 +192,7 @@ private:
 
 void CellListBuilder::copyHeightMap(float* heightMap, const BosonMap* map)
 {
- static int profiling_id = boProfiling->requestEventId("copyHeightMap");
- BosonProfiler prof(profiling_id);
+ BosonProfiler prof("copyHeightMap");
  if (mMinX < 0 || mMinY < 0) {
 	boError() << k_funcinfo << "minx=" << mMinX << " miny=" << mMinY << endl;
 	mMinX = mMinY = 0;
@@ -221,8 +220,7 @@ void CellListBuilder::copyHeightMap(float* heightMap, const BosonMap* map)
 
 void CellListBuilderTree::copyCustomHeightMap(float* heightMap, const BosonMap* map)
 {
- static int profiling_id = boProfiling->requestEventId("copyCustomHeightMap");
- BosonProfiler prof(profiling_id);
+ BosonProfiler prof("copyCustomHeightMap");
  if (mLeafs.size() <= 0) {
 	return;
  }
@@ -285,8 +283,7 @@ int* CellListBuilderTree::generateCellList(const BosonMap* map, int* origRenderC
 	BO_NULL_ERROR(map);
 	return origRenderCells;
  }
- static int profiling_id = boProfiling->requestEventId("generateCellList");
- BosonProfiler prof(profiling_id);
+ BosonProfiler prof("generateCellList");
  int* renderCells = origRenderCells;
  if (*renderCellsSize < (int)(map->width() * map->height())) {
 	// we don't know in advance how many cells we might need, so we allocate
@@ -297,8 +294,7 @@ int* CellListBuilderTree::generateCellList(const BosonMap* map, int* origRenderC
  if (mMap != map) {
 	mMap = 0;
 	boDebug() << k_funcinfo << "recreating map tree" << endl;
-	static int profTreeCreation = boProfiling->requestEventId("mapTreeGeneration");
-	BosonProfiler prof(profTreeCreation);
+	BosonProfiler prof("mapTreeGeneration");
 	recreateTree(map);
  }
  mMap = map;
