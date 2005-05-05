@@ -28,7 +28,7 @@
 #include "bosonmessage.h"
 #include "speciestheme.h"
 #include "bosonprofiling.h"
-#include "startupwidgets/bosonloadingwidget.h"
+#include "startupwidgets/boufoloadingwidget.h"
 #include "bosondata.h"
 #include "bosoncanvas.h"
 #include "bodebug.h"
@@ -148,7 +148,7 @@ bool BosonStarting::start()
  mDestPlayField = new BosonPlayField(0);
 
  // AB: Receiving the map is obsolete.
- emit signalLoadingType(BosonLoadingWidget::ReceiveMap);
+ emit signalLoadingType(BoUfoLoadingWidget::ReceiveMap);
 
  QMap<QString, QByteArray> files;
  if (!BosonPlayField::unstreamFiles(files, mNewGameData)) {
@@ -197,18 +197,18 @@ bool BosonStarting::start()
 	boGame->unlock();
 	return false;
  }
- emit signalLoadingType(BosonLoadingWidget::LoadEffects);
+ emit signalLoadingType(BoUfoLoadingWidget::LoadEffects);
  boEffectPropertiesManager->loadEffectProperties();
  if (!loadPlayerData()) {
 	boError(270) << k_funcinfo << "loading player data failed" << endl;
 	boGame->unlock();
 	return false;
  }
- emit signalLoadingType(BosonLoadingWidget::LoadWater);
+ emit signalLoadingType(BoUfoLoadingWidget::LoadWater);
  boWaterManager->loadNecessaryTextures();
 
- emit signalLoadingType(BosonLoadingWidget::InitGame); // obsolete
- emit signalLoadingType(BosonLoadingWidget::StartingGame);
+ emit signalLoadingType(BoUfoLoadingWidget::InitGame); // obsolete
+ emit signalLoadingType(BoUfoLoadingWidget::StartingGame);
  if (!startScenario(files)) {
 	boError(270) << k_funcinfo << "starting scenario failed" << endl;
 	boGame->unlock();
@@ -286,7 +286,7 @@ bool BosonStarting::loadTiles()
  }
  boProfiling->push("LoadTiles");
 
- emit signalLoadingType(BosonLoadingWidget::LoadTiles);
+ emit signalLoadingType(BoUfoLoadingWidget::LoadTiles);
  // just in case.. disconnect before connecting. the map should be newly
  // created, but i don't know if this will stay this way.
  disconnect(playField()->map(), 0, this, 0);
@@ -325,14 +325,14 @@ void BosonStarting::slotLoadPlayerData(Player* p) // FIXME: not a slot anymore
 
  boDebug(270) << k_funcinfo << p->id() << endl;
  // Order of calls below is very important!!! Don't change this unless you're sure you know what you're doing!!!
- emit signalLoadingType(BosonLoadingWidget::LoadActions);
+ emit signalLoadingType(BoUfoLoadingWidget::LoadActions);
  p->speciesTheme()->loadActions();
- emit signalLoadingType(BosonLoadingWidget::LoadObjects);
+ emit signalLoadingType(BoUfoLoadingWidget::LoadObjects);
  p->speciesTheme()->loadObjects();
- emit signalLoadingType(BosonLoadingWidget::LoadUnitConfigs);
+ emit signalLoadingType(BoUfoLoadingWidget::LoadUnitConfigs);
  p->speciesTheme()->readUnitConfigs();
  loadUnitDatas(p);
- emit signalLoadingType(BosonLoadingWidget::LoadTechnologies);
+ emit signalLoadingType(BoUfoLoadingWidget::LoadTechnologies);
  p->speciesTheme()->loadTechnologies();
 
  // AB: atm only the sounds of the local player are required, but I believe this
@@ -343,7 +343,7 @@ void BosonStarting::slotLoadPlayerData(Player* p) // FIXME: not a slot anymore
 void BosonStarting::loadUnitDatas(Player* p)
 {
  // This loads all unit datas for player p
- emit signalLoadingType(BosonLoadingWidget::LoadUnits);
+ emit signalLoadingType(BoUfoLoadingWidget::LoadUnits);
  checkEvents();
  // First get all id's of units
  QValueList<unsigned long int> unitIds = p->speciesTheme()->allFacilities();
