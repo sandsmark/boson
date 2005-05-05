@@ -1464,11 +1464,9 @@ void BoUfoWidget::setLayoutClass(LayoutClass layout)
 		break;
 	case UHBoxLayout:
 		setLayout(new ufo::UBoxLayout(ufo::UBoxLayout::XAxis));
-//		setLayout(new ufo::UBoBoxLayout(true));
 		break;
 	case UVBoxLayout:
 		setLayout(new ufo::UBoxLayout(ufo::UBoxLayout::YAxis));
-//		setLayout(new ufo::UBoBoxLayout(false));
 		break;
 	case UBorderLayout:
 		setLayout(new ufo::UBorderLayout());
@@ -2231,10 +2229,18 @@ void BoUfoPushButton::setIcon(const BoUfoImage& img)
  }
 }
 
-void BoUfoPushButton::setIconFile(const QString& file)
+void BoUfoPushButton::setIconFile(const QString& file_)
 {
- if (!file.isEmpty()) {
+ QString file = file_;
+ if (!file_.isEmpty()) {
 	QImage img;
+	if (KGlobal::_instance) { // NULL in boufodesigner
+		file = locate("data", "boson/" + file_);
+		if (file.isEmpty()) {
+			boDebug() << k_funcinfo << "file " << file_ << " not found" << endl;
+			file = file_;
+		}
+	}
 	if (!img.load(file)) {
 		boError() << k_funcinfo << file << " could not be loaded" << endl;
 		return;
@@ -2796,10 +2802,18 @@ void BoUfoLabel::setIcon(const BoUfoImage& img)
  }
 }
 
-void BoUfoLabel::setIconFile(const QString& file)
+void BoUfoLabel::setIconFile(const QString& file_)
 {
- if (!file.isEmpty()) {
+ QString file = file_;
+ if (!file_.isEmpty()) {
 	QImage img;
+	if (KGlobal::_instance) { // NULL in boufodesigner
+		file = locate("data", "boson/" + file_);
+		if (file.isEmpty()) {
+			boDebug() << k_funcinfo << "file " << file_ << " not found" << endl;
+			file = file_;
+		}
+	}
 	if (!img.load(file)) {
 		boError() << k_funcinfo << file << " could not be loaded" << endl;
 		return;
