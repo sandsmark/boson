@@ -2295,6 +2295,11 @@ void BoUfoLineEdit::setEditable(bool e)
  mLineEdit->setEditable(!e);
 }
 
+bool BoUfoLineEdit::isEditable() const
+{
+ return mLineEdit->isEditable();
+}
+
 void BoUfoLineEdit::uslotActivated(ufo::UActionEvent*)
 {
  emit signalActivated();
@@ -2331,6 +2336,11 @@ void BoUfoTextEdit::init()
 void BoUfoTextEdit::setEditable(bool e)
 {
  mTextEdit->setEditable(e);
+}
+
+bool BoUfoTextEdit::isEditable() const
+{
+ return mTextEdit->isEditable();
 }
 
 void BoUfoTextEdit::setOpaque(bool o)

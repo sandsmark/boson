@@ -22,7 +22,7 @@
     <preferredHeight/>
     <minimumHeight/>
     <opaque/>
-    <constraints></constraints>
+    <constraints/>
     <verticalAlignment/>
     <preferredWidth/>
     <horizontalAlignment/>
@@ -38,7 +38,7 @@
      <preferredHeight/>
      <minimumHeight/>
      <opaque/>
-     <constraints></constraints>
+     <constraints/>
      <verticalAlignment/>
      <preferredWidth/>
      <horizontalAlignment/>
@@ -224,6 +224,7 @@
         <minimumWidth/>
         <backgroundImageFile/>
         <stretch>1</stretch>
+        <editable>false</editable>
        </Properties>
       </Widget>
       <Widget>
@@ -271,7 +272,7 @@
      <preferredHeight/>
      <minimumHeight/>
      <opaque/>
-     <constraints></constraints>
+     <constraints/>
      <verticalAlignment/>
      <preferredWidth/>
      <horizontalAlignment/>
@@ -348,6 +349,7 @@
         <minimumWidth/>
         <backgroundImageFile/>
         <stretch/>
+        <editable/>
        </Properties>
       </Widget>
      </Widget>
@@ -575,7 +577,7 @@
     <preferredHeight/>
     <minimumHeight/>
     <opaque/>
-    <constraints></constraints>
+    <constraints/>
     <verticalAlignment/>
     <preferredWidth/>
     <horizontalAlignment/>
