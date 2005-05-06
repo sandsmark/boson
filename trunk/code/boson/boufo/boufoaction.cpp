@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2004-2005 Andreas Beckermann (b_mann@gmx.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -49,6 +49,7 @@
 #include <qdom.h>
 #include <qfile.h>
 #include <qvaluelist.h>
+#include <qguardedptr.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -931,27 +932,70 @@ class BoUfoActionCollectionPrivate
 public:
 	BoUfoActionCollectionPrivate()
 	{
+		mParentCollection = 0;
 		mAccel = 0;
+		mAccelWatchWidget = 0;
 	}
+	BoUfoActionCollection* mParentCollection;
+	QPtrList<BoUfoActionCollection> mChildCollections;
 	QDict<BoUfoAction> mActionDict;
 
 	KAccel* mAccel;
+	QGuardedPtr<QWidget> mAccelWatchWidget;
 };
 
 BoUfoActionCollection::BoUfoActionCollection(QObject* parent, const char* name)
 	: QObject(parent, name)
 {
- d = new BoUfoActionCollectionPrivate;
- d->mAccel = 0;
- d->mActionDict.setAutoDelete(true);
+ init();
+}
+
+BoUfoActionCollection::BoUfoActionCollection(BoUfoActionCollection* parentCollection, QObject* parent, const char* name)
+	: QObject(parent, name)
+{
+ init();
+ d->mParentCollection = parentCollection;
+ if (d->mParentCollection) {
+	d->mParentCollection->registerChildCollection(this);
+ }
 }
 
 BoUfoActionCollection::~BoUfoActionCollection()
 {
+ QPtrList<BoUfoActionCollection> children = d->mChildCollections;
+ QPtrListIterator<BoUfoActionCollection> it(children);
+ while (it.current()) {
+	it.current()->clearActions();
+	++it;
+ }
+ if (d->mParentCollection) {
+	d->mParentCollection->unregisterChildCollection(this);
+ }
  clearActions();
  d->mActionDict.clear();
  delete d->mAccel;
  delete d;
+}
+
+void BoUfoActionCollection::init()
+{
+ d = new BoUfoActionCollectionPrivate;
+ d->mAccel = 0;
+ d->mActionDict.setAutoDelete(true);
+ d->mParentCollection = 0;
+}
+
+void BoUfoActionCollection::registerChildCollection(BoUfoActionCollection* c)
+{
+ BO_CHECK_NULL_RET(c);
+ d->mChildCollections.append(c);
+ c->setAccelWidget(d->mAccelWatchWidget);
+}
+
+void BoUfoActionCollection::unregisterChildCollection(BoUfoActionCollection* c)
+{
+ BO_CHECK_NULL_RET(c);
+ d->mChildCollections.removeRef(c);
 }
 
 KAccel* BoUfoActionCollection::kaccel() const
@@ -966,11 +1010,13 @@ void BoUfoActionCollection::setAccelWidget(QWidget* widget)
 	delete d->mAccel;
 	d->mAccel = 0;
  }
- d->mAccel = new KAccel(widget, this, "BoUfoActionCollection-Accel");
- QDictIterator<BoUfoAction> it(d->mActionDict);
- while (it.current()) {
+ d->mAccelWatchWidget = widget;
+ d->mAccel = new KAccel(d->mAccelWatchWidget, this, "BoUfoActionCollection-Accel");
+ for (QDictIterator<BoUfoAction> it(d->mActionDict); it.current(); ++it) {
 	it.current()->insertToKAccel(d->mAccel);
-	++it;
+ }
+ for (QPtrListIterator<BoUfoActionCollection> it(d->mChildCollections); it.current(); ++it) {
+	it.current()->setAccelWidget(widget);
  }
 }
 
@@ -987,6 +1033,9 @@ void BoUfoActionCollection::insert(BoUfoAction* action)
 	return;
  }
  d->mActionDict.insert(name, action);
+ if (d->mParentCollection) {
+	d->mParentCollection->insert(action);
+ }
 }
 
 void BoUfoActionCollection::remove(BoUfoAction* action, bool deleteIt)
@@ -1003,6 +1052,9 @@ void BoUfoActionCollection::remove(BoUfoAction* action, bool deleteIt)
  if (!d->mActionDict[name]) {
 	return;
  }
+ if (d->mParentCollection) {
+	d->mParentCollection->remove(action, false);
+ }
  BoUfoAction* a = d->mActionDict.take(name);
  if (deleteIt) {
 	delete a;
@@ -1015,12 +1067,31 @@ void BoUfoActionCollection::clearActions()
 	BoUfoManager* m = (BoUfoManager*)parent();
 	m->setMenuBar(0);
  }
+ if (d->mParentCollection) {
+	QDictIterator<BoUfoAction> it(d->mActionDict);
+	while (it.current()) {
+		d->mParentCollection->remove(it.current(), false);
+		++it;
+	}
+ }
  d->mActionDict.clear();
 }
 
 BoUfoAction* BoUfoActionCollection::action(const QString& name) const
 {
- return d->mActionDict[name];
+ BoUfoAction* a = d->mActionDict[name];
+ if (a) {
+	return a;
+ }
+ QPtrListIterator<BoUfoActionCollection> it(d->mChildCollections);
+ while (it.current()) {
+	BoUfoAction* a = it.current()->action(name);
+	if (a) {
+		return a;
+	}
+	++it;
+ }
+ return 0;
 }
 
 bool BoUfoActionCollection::hasAction(const QString& name) const
@@ -1050,6 +1121,9 @@ bool BoUfoActionCollection::createGUI(const QString& file)
 
 bool BoUfoActionCollection::createGUI(const QStringList& fileList)
 {
+ if (d->mParentCollection) {
+	return d->mParentCollection->createGUI(fileList);
+ }
  if (!parent()) {
 	BO_NULL_ERROR(parent());
 	return false;
@@ -1059,6 +1133,7 @@ bool BoUfoActionCollection::createGUI(const QStringList& fileList)
 	return false;
  }
  BoUfoManager* m = (BoUfoManager*)parent();
+ m->setMenuBar(0);
  BoUfoMenuBar::initMenuBar(m);
  if (!m->menuBar()) {
 	BO_NULL_ERROR(m->menuBar());
