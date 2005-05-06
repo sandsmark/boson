@@ -187,9 +187,6 @@ protected slots:
 private:
 	void init();
 	void initUfoGUI();
-	void initUfoActions(bool gameMode);
-	void initUfoGameActions();
-	void initUfoEditorActions();
 
 	void initBoson();
 
