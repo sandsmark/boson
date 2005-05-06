@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2004-2005 Andreas Beckermann (b_mann@gmx.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -214,6 +214,7 @@ class BoUfoActionCollection : public QObject
 	Q_OBJECT
 public:
 	BoUfoActionCollection(QObject* parent, const char* name);
+	BoUfoActionCollection(BoUfoActionCollection* parentCollection, QObject* parent, const char* name);
 	~BoUfoActionCollection();
 
 	void insert(BoUfoAction* action);
@@ -232,6 +233,13 @@ public:
 	KAccel* kaccel() const;
 
 	static void initActionCollection(BoUfoManager* m);
+
+protected:
+	void registerChildCollection(BoUfoActionCollection* c);
+	void unregisterChildCollection(BoUfoActionCollection* c);
+
+private:
+	void init();
 
 private:
 	BoUfoActionCollectionPrivate* d;
