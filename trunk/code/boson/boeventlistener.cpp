@@ -350,9 +350,16 @@ void BoEventListener::deliverToConditions(const BoEvent* event)
 
 void BoEventListener::deliverToScript(const BoEvent* event)
 {
+ if (!d->mScript) {
+	if (d->mEventHandlers.count() > 0) {
+		boError() << k_funcinfo << "have eventhandlers, but d->mScript is NULL" << endl;
+	}
+	return;
+ }
  QIntDictIterator<BoEventHandlerInfo> it(d->mEventHandlers);
  for( ; it.current(); ++it) {
 	BoEventHandlerInfo* info = it.current();
+
 	if (info->eventname.latin1() == event->name()) {
 		d->mScript->callEventHandler(event, info->function, info->args);
 	}
