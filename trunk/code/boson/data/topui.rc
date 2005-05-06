@@ -7,11 +7,19 @@
   <DefineGroup name="settingsmenu" />
   <DefineGroup name="windowmenu" />
   <DefineGroup name="viewmenu" />
+  <Menu name="game" group="gamemenu"><text>&amp;Game</text>
+    <Action name="game_grab_screenshot" />
+    <Action name="game_grab_profiling" />
+  </Menu>
   <Menu name="debug" group="debugmenu"><text>&amp;Debug</text>
     <Action name="debug_kgame" />
     <Action name="debug_bodebuglog" />
     <Action name="debug_profiling" />
-    <Action name="debug_sleep_1s" />
+    <Action name="debug_show_opengl_states" />
+    <Menu name="weird"><text>&amp;Weird actions</text>
+      <Action name="debug_sleep_1s" />
+      <Action name="debug_crash_boson" />
+    </Menu>
     <MergeLocal />
   </Menu>
   <Menu name="settings" group="settingsmenu"><text>&amp;Settings</text>

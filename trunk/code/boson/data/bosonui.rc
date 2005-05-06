@@ -4,9 +4,7 @@
   <Menu name="game" group="gamemenu"><text>&amp;Game</text>
     <Action name="game_center_base" />
     <Action name="game_reset_view_properties" />
-    <Action name="game_grab_screenshot" />
     <Action name="game_grab_movie" />
-    <Action name="game_grab_profiling" />
   </Menu>
   <Menu name="debug" group="debugmenu"><text>&amp;Debug</text>
     <Action name="debug_sync_network" />

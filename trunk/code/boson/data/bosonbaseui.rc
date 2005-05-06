@@ -19,7 +19,6 @@
     <Action name="debug_fps" />
     <Action name="debug_gamelog" />
     <Action name="debug_light0" />
-    <Action name="debug_show_opengl_states" />
     <Action name="debug_advance_calls" />
     <Action name="debug_texture_memory" />
     <Menu name="debug_lazy"><text>&amp;Lazyness</text>
@@ -27,7 +26,6 @@
       <Action name="debug_lazy_reload_meshrenderer" />
       <Action name="debug_lazy_reload_groundrenderer" />
     </Menu>
-    <Action name="debug_crash_boson" />
     <Menu name="debug_colormap"><text>&amp;Color map</text>
       <Action name="debug_colormap_enable" />
     </Menu>
@@ -38,11 +36,6 @@
     <Action name="options_show_chat" append="show_merge" />
     <Action name="options_show_cmdframe" append="show_merge" />
     <Action name="options_zoom" />
-  </Menu>
-  <Menu name="window" append="settings_merge" group="windowmenu"><text>&amp;Window</text>
-    <Action name="splitviewh" />
-    <Action name="splitviewv" />
-    <Action name="removeview" />
   </Menu>
 </MenuBar>
 </kpartgui>
