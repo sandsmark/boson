@@ -240,7 +240,10 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 	}
 	case IdLoading:
 	{
+		QColor defaultColor = BoUfoLabel::defaultForegroundColor();
+		BoUfoLabel::setDefaultForegroundColor(Qt::white);
 		BoUfoLoadingWidget* loadingWidget = new BoUfoLoadingWidget();
+		BoUfoLabel::setDefaultForegroundColor(defaultColor);
 		w = loadingWidget;
 		break;
 	}
@@ -261,7 +264,10 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 	}
 	case IdNewGame:
 	{
+		QColor defaultColor = BoUfoLabel::defaultForegroundColor();
+		BoUfoLabel::setDefaultForegroundColor(Qt::white);
 		BoUfoNewGameWidget* startGame = new BoUfoNewGameWidget(networkInterface());
+		BoUfoLabel::setDefaultForegroundColor(defaultColor);
 		connect(startGame, SIGNAL(signalCancelled()),
 				this, SLOT(slotShowWelcomeWidget()));
 		connect(startGame, SIGNAL(signalShowNetworkOptions()),
