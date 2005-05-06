@@ -852,6 +852,7 @@ class BoUfoLineEdit : public BoUfoWidget
 {
 	Q_OBJECT
 	Q_PROPERTY(QString text READ text WRITE setText);
+	Q_PROPERTY(bool editable READ isEditable WRITE setEditable);
 public:
 	BoUfoLineEdit();
 
@@ -869,6 +870,7 @@ public:
 	virtual void setOpaque(bool o);
 
 	void setEditable(bool);
+	bool isEditable() const;
 
 signals:
 	void signalActivated();
@@ -889,6 +891,7 @@ class BoUfoTextEdit : public BoUfoWidget
 {
 	Q_OBJECT
 	Q_PROPERTY(QString text READ text WRITE setText);
+	Q_PROPERTY(bool editable READ isEditable WRITE setEditable);
 public:
 	BoUfoTextEdit();
 
@@ -906,6 +909,7 @@ public:
 	virtual void setOpaque(bool o);
 
 	void setEditable(bool);
+	bool isEditable() const;
 
 private:
 	void init();
