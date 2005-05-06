@@ -2292,7 +2292,7 @@ void BoUfoLineEdit::setOpaque(bool o)
 
 void BoUfoLineEdit::setEditable(bool e)
 {
- mLineEdit->setEditable(!e);
+ mLineEdit->setEditable(e);
 }
 
 bool BoUfoLineEdit::isEditable() const
