@@ -257,7 +257,7 @@ public:
 	PlayerIO* localPlayerIO() const;
 	void setLocalPlayerScript(BosonScript* script);
 
-	void setActionCollection(BoUfoActionCollection*);
+	void createActionCollection(BoUfoActionCollection* parent);
 	BoUfoActionCollection* actionCollection() const;
 
 

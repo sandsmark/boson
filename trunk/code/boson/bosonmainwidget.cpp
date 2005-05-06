@@ -276,7 +276,7 @@ void BosonMainWidget::initUfoGUI()
 		this, SLOT(slotCancelLoadSave()));
 
  d->mGameView = new BosonGameView();
- d->mGameView->setActionCollection(ufoManager()->actionCollection());
+ d->mGameView->createActionCollection(ufoManager()->actionCollection());
  connect(d->mGameView, SIGNAL(signalEditorChangeLocalPlayer(Player*)),
 		this, SLOT(slotChangeLocalPlayer(Player*)));
  connect(d->mGameView, SIGNAL(signalEndGame()),
