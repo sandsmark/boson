@@ -148,6 +148,7 @@ boson_LDADD = \
 boson_SOURCES = \
 		bosonfpscounter.cpp \
 		bosonmainwidget.cpp \
+		bosonmainwidgetmenuinput.cpp \
 		boufoactionext.cpp \
 		bogltooltip.cpp \
 		bosonglminimap.cpp \

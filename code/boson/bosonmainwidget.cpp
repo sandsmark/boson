@@ -46,6 +46,7 @@
 #include "bosonplayfield.h"
 #include "bosoncursor.h"
 #include "bosonfpscounter.h"
+#include "bosonmainwidgetmenuinput.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -82,6 +83,7 @@ public:
 		mWidgetStack = 0;
 		mStartup = 0;
 		mGameView = 0;
+		mMenuInput = 0;
 
 		mFPSCounter = 0;
 
@@ -96,6 +98,7 @@ public:
 	BoUfoWidgetStack* mWidgetStack;
 	BoUfoStartupWidget* mStartup;
 	BosonGameView* mGameView;
+	BosonMainWidgetMenuInput* mMenuInput;
 
 	BosonFPSCounter* mFPSCounter;
 
@@ -137,6 +140,7 @@ BosonMainWidget::~BosonMainWidget()
  }
  boConfig->save(editor);
  endGame();
+ delete d->mMenuInput;
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
 }
@@ -254,6 +258,7 @@ void BosonMainWidget::initUfoGUI()
 
  BoUfoActionCollection::initActionCollection(ufoManager());
  ufoManager()->actionCollection()->setAccelWidget(this);
+ d->mMenuInput = new BosonMainWidgetMenuInput(ufoManager()->actionCollection(), this);
 
  BoUfoWidget* contentWidget = ufoManager()->contentWidget();
  contentWidget->setLayoutClass(BoUfoWidget::UFullLayout);
@@ -298,6 +303,8 @@ void BosonMainWidget::initUfoGUI()
  d->mWidgetStack->insertWidget(d->mGameView);
 
  d->mGameView->setMouseEventsEnabled(true, true);
+
+ ufoManager()->actionCollection()->createGUI();
 
  glPopAttrib();
 }
