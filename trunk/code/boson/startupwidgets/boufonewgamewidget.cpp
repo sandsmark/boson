@@ -786,12 +786,12 @@ void BoUfoNewGameWidget::slotPlayerSelected(int first, int last)
  Q_UNUSED(first);
  Q_UNUSED(last);
  int selected = mConnectedPlayersList->selectedItem();
- slotPlayerSelected(first);
+ slotPlayerSelected(selected);
 }
 
 void BoUfoNewGameWidget::slotPlayerSelected(int index)
 {
- boDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << index << endl;
  if (d->mItem2Player.contains(index)) {
    mSelectedPlayer = (Player*)d->mItem2Player[index];
  } else {
@@ -815,14 +815,14 @@ void BoUfoNewGameWidget::slotPlayerSelected(int index)
  }
 
  // Enable/disable some stuff
- bool canchange = false;
+ bool canChange = false;
  if (boGame->isAdmin() || !mSelectedPlayer->isVirtual()) {
-    canchange = true;
+    canChange = true;
  }
- mPlayerName->setEditable(canchange);
- mPlayerColor->setEnabled(canchange);
- mPlayerSpecies->setEnabled(canchange);
- mRemovePlayer->setEnabled(canchange && (mSelectedPlayer != localPlayer()));
+ mPlayerName->setEditable(canChange);
+ mPlayerColor->setEnabled(canChange);
+ mPlayerSpecies->setEnabled(canChange);
+ mRemovePlayer->setEnabled(canChange && (mSelectedPlayer != localPlayer()));
 }
 
 /*****  Other stuff  *****/
