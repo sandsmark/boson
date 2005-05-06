@@ -447,6 +447,7 @@ BosonGameView::~BosonGameView()
  boDebug() << k_funcinfo << endl;
 
  quitGame();
+ delete d->mActionCollection;
  delete d->mSelectionRect;
  delete d->mScriptConnector;
  delete d->mSelectionGroups;
@@ -1209,9 +1210,11 @@ PlayerIO* BosonGameView::localPlayerIO() const
  return d->mLocalPlayerIO;
 }
 
-void BosonGameView::setActionCollection(BoUfoActionCollection* c)
+void BosonGameView::createActionCollection(BoUfoActionCollection* parent)
 {
- d->mActionCollection = c;
+ BO_CHECK_NULL_RET(parent);
+ delete d->mActionCollection;
+ d->mActionCollection = new BoUfoActionCollection(parent, this, "gameview_actioncollection");
 }
 
 BoUfoActionCollection* BosonGameView::actionCollection() const
