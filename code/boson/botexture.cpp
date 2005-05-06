@@ -747,6 +747,20 @@ BoTextureManager::BoTextureManager()
 
   mUsedTextureMemory = 0;
   mTextureBinds = 0;
+
+  mActiveTextureUnit = 0;
+  mActiveTextureType = 0;
+  mActiveTexture = 0;
+
+  mSupportsTexture3D = false;
+  mSupportsTextureCube = false;
+  mSupportsGenerateMipmap = false;
+  mSupportsTextureCompressionS3TC = false;
+  mMaxTextureSize = 0;
+  mMax3DTextureSize = 0;
+  mMaxCubeTextureSize = 0;
+  mTextureUnits = 0;
+  mMaxAnisotropy = 0;
 }
 
 BoTextureManager::~BoTextureManager()
@@ -882,6 +896,10 @@ void BoTextureManager::bindTexture(BoTexture* texture, int textureUnit)
 
 void BoTextureManager::bindTexture(BoTexture* texture)
 {
+  if(!mActiveTextureType)
+  {
+    return;
+  }
   if(mActiveTextureType[mActiveTextureUnit] != texture->type())
   {
     // Disable current texture type and enable new one.
@@ -909,7 +927,11 @@ void BoTextureManager::unbindTexture(int textureUnit)
 
 void BoTextureManager::unbindTexture()
 {
-  if(mActiveTexture[mActiveTextureUnit] != 0)
+  if(!mActiveTextureType)
+  {
+    return;
+  }
+  if(mActiveTextureType[mActiveTextureUnit] != 0)
   {
     glBindTexture(mActiveTextureType[mActiveTextureUnit], 0);
     mActiveTexture[mActiveTextureUnit] = 0;
@@ -919,6 +941,10 @@ void BoTextureManager::unbindTexture()
 
 void BoTextureManager::disableTexturing()
 {
+  if(!mActiveTextureType)
+  {
+    return;
+  }
   if(mActiveTextureType[mActiveTextureUnit] != 0)
   {
     glDisable(mActiveTextureType[mActiveTextureUnit]);
