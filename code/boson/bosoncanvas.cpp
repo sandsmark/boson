@@ -246,6 +246,7 @@ void BoCanvasAdvance::itemAdvance(const BoItemList& allItems, const QPtrList<Bos
 
 void BoCanvasAdvance::advanceFunctionAndMove(unsigned int advanceCallsCount, bool advanceFlag)
 {
+ PROFILE_METHOD;
  // FIXME: the mWork2AdvanceList map should be a parameter
  QMap<int, QPtrList<BosonItem> >::Iterator it;
  for (it = mCanvas->d->mWork2AdvanceList.begin(); it != mCanvas->d->mWork2AdvanceList.end(); ++it) {
@@ -305,6 +306,7 @@ void BoCanvasAdvance::advanceFunctionAndMove(unsigned int advanceCallsCount, boo
 	if (skip) {
 		continue;
 	}
+	BosonProfiler profiler(QString("advanceFunction() and moveBy() for work==%1").arg(work));
 //	boDebug() << "advancing " << (*it).count() << " items with advanceWork=" << work << endl;
 	QPtrListIterator<BosonItem> itemIt(*it);
 	for (; itemIt.current(); ++itemIt) {
