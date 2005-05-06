@@ -933,12 +933,15 @@ public:
 	BoUfoActionCollectionPrivate()
 	{
 		mParentCollection = 0;
+
 		mAccel = 0;
 		mAccelWatchWidget = 0;
 	}
 	BoUfoActionCollection* mParentCollection;
 	QPtrList<BoUfoActionCollection> mChildCollections;
+
 	QDict<BoUfoAction> mActionDict;
+	QStringList mGUIFiles; // ui.rc files
 
 	KAccel* mAccel;
 	QGuardedPtr<QWidget> mAccelWatchWidget;
@@ -1112,17 +1115,33 @@ void BoUfoActionCollection::setActionEnabled(const QString& name, bool enabled)
  a->setEnabled(enabled);
 }
 
+void BoUfoActionCollection::setGUIFiles(const QStringList& fileList)
+{
+ d->mGUIFiles = fileList;
+}
+
+const QStringList& BoUfoActionCollection::guiFiles() const
+{
+ return d->mGUIFiles;
+}
+
 bool BoUfoActionCollection::createGUI(const QString& file)
 {
  QStringList list;
  list.append(file);
- return createGUI(list);
+ return createGUI(file);
 }
 
 bool BoUfoActionCollection::createGUI(const QStringList& fileList)
 {
+ setGUIFiles(fileList);
+ return createGUI();
+}
+
+bool BoUfoActionCollection::createGUI()
+{
  if (d->mParentCollection) {
-	return d->mParentCollection->createGUI(fileList);
+	return d->mParentCollection->createGUI();
  }
  if (!parent()) {
 	BO_NULL_ERROR(parent());
@@ -1143,6 +1162,17 @@ bool BoUfoActionCollection::createGUI(const QStringList& fileList)
  if (!builder.reset()) {
 	boError() << k_funcinfo << "builder reset failed" << endl;
 	return false;
+ }
+
+ QStringList fileList = guiFiles();
+ for (QPtrListIterator<BoUfoActionCollection> it(d->mChildCollections); it.current(); ++it) {
+	QStringList l = it.current()->guiFiles();
+	QStringList::iterator i;
+	for (i = l.begin(); i != l.end(); ++i) {
+		if (!fileList.contains(*i)) {
+			fileList.append(*i);
+		}
+	}
  }
  QStringList::const_iterator it = fileList.begin();
  for (; it != fileList.end(); ++it) {

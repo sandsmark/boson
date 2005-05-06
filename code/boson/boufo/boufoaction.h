@@ -226,8 +226,22 @@ public:
 
 	void setActionEnabled(const QString& name, bool);
 
-	bool createGUI(const QString& file);
-	bool createGUI(const QStringList& fileList);
+	void setGUIFiles(const QStringList& fileList);
+	const QStringList& guiFiles() const;
+
+	/**
+	 * Create a GUI according to the current @ref guiFiles. If this
+	 * actioncollection is a child of another actioncollection, the
+	 * implementation of the parent actioncollection is called.
+	 **/
+	bool createGUI();
+
+	/**
+	 * @overload
+	 * This method calls @ref setGUIFiles with the specified files
+	 **/
+	bool createGUI(const QStringList& guiFiles);
+	bool createGUI(const QString& guiFile);
 
 	void setAccelWidget(QWidget* widget);
 	KAccel* kaccel() const;
