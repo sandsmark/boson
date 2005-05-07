@@ -2403,7 +2403,7 @@ bool MobileUnit::checkPathPoint(const BoVector2Fixed& p)
 
  // Check for code. We only check x, because y == x anyway
  if (p.x() == PF_END_CODE) {
-	boDebug() << k_funcinfo << id() << ": found PF_END_CODE code" << endl;
+	boDebug(401) << k_funcinfo << id() << ": found PF_END_CODE code" << endl;
 	// Remove this 'coded' pathpoint
 	pathPointDone();
 	// Path has ended. Check if we have more waypoints
@@ -2414,7 +2414,7 @@ bool MobileUnit::checkPathPoint(const BoVector2Fixed& p)
 		stopMoving();
 		if (work() == WorkIdle) {
 			// If we were just moving, turn to random direction
-			boDebug() << k_funcinfo << id() << ": stopping moving. Turning" << endl;
+			boDebug(401) << k_funcinfo << id() << ": stopping moving. Turning" << endl;
 			// Turn a bit
 			int turn = (int)rotation() + (owner()->game()->random()->getLong(60) - 30);
 			// Check for overflows
@@ -2430,14 +2430,14 @@ bool MobileUnit::checkPathPoint(const BoVector2Fixed& p)
 	} else {
 		// There are more waypoints. Take the next one
 		//BoVector2Fixed wp = currentWaypoint();
-		boWarning() << k_funcinfo << "Waypoints aren't supported yet!" << endl;
+		boWarning(401) << k_funcinfo << "Waypoints aren't supported yet!" << endl;
 		// Stop for now (until we have working implementation)
 		setMovingStatus(Standing);
 		stopMoving();
 		return true;
 	}
  } else if (p.x() == PF_NEXT_REGION) {
-	boDebug() << k_funcinfo << id() << ": found PF_NEXT_REGION code" << endl;
+	boDebug(401) << k_funcinfo << id() << ": found PF_NEXT_REGION code" << endl;
 	// Remove this 'coded' pathpoint
 	pathPointDone();
 	// Path has reached next region
@@ -2451,7 +2451,7 @@ bool MobileUnit::checkPathPoint(const BoVector2Fixed& p)
 	//  broken, it should recurse only once
 	return checkPathPoint(currentPathPoint());
  } else if (p.x() == PF_CANNOT_GO) {
-	boDebug() << k_funcinfo << id() << ": found PF_CANNOT_GO code" << endl;
+	boDebug(401) << k_funcinfo << id() << ": found PF_CANNOT_GO code" << endl;
 	// Remove this 'coded' pathpoint
 	pathPointDone();
 	// Unit can't go to destination. Stop moving.
