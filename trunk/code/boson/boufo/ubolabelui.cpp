@@ -247,7 +247,7 @@ UBoLabelUI * UBoLabelUI::m_labelUI = new UBoLabelUI();
 
 std::string UBoLabelUI::m_lafId("ULabel");
 
-UBoLabelUI * UBoLabelUI::createUI(UWidget * w) {
+UBoLabelUI * UBoLabelUI::createUI(UWidget * ) {
 	return m_labelUI;
 }
 
@@ -377,7 +377,10 @@ UBoLabelUI::stylePaintCompoundTextAndIcon(UGraphics * g, UCompound * w,
 	}
 
 	//if (printText.length() != 0) {
-		stylePaintControlCaption(g, w, textRect, printText);
+		stylePaintControlCaption(g, w, textRect,
+				printText,
+				w->getHorizontalAlignment(),
+				w->getVerticalAlignment());
 	//}
 
 }
@@ -468,7 +471,6 @@ UBoLabelUI::styleLayoutCompoundWidget(
 	// currently the layout does not work correctly and therefore y can
 	// become negative.
 	textRect->y = std::max(0, textRect->y); // AB
-//	printf("textRect: x=%d y=%d\n", textRect->x, textRect->y);
 
 	iconRect->x += dx;
 	iconRect->y += dy;
@@ -478,35 +480,15 @@ UBoLabelUI::styleLayoutCompoundWidget(
 
 void
 UBoLabelUI::stylePaintControlCaption(UGraphics * g, UWidget * w,
-		const URectangle & rect, const std::string & text)
+		const URectangle & rect,
+		const std::string & text,
+		Alignment hAlignment,
+		Alignment vAlignment)
 {
 	if (text.size() == 0) {
 		// nothing to do
 		return;
 	}
-
-	// AB: this cuts the string if it is too long, but I want it to get
-	// wrapped in that case.
-	// this code is obsolete now. line wrapping implemented. this code
-	// should be removed.
-#if 0
-	std::string clipText;
-	UDimension size = g->getStringSize(text);
-	// if text size greater than max size, compute the minimized string
-	if (text.length() && size.w > rect.w + 2) {
-		const UFontMetrics * metrics = g->getFont()->getFontMetrics();
-		// cut the std::string and append "..."
-		std::string appendString = "..";
-
-		int minusWidth = metrics->getStringWidth(appendString);
-
-		unsigned int index = metrics->viewToModel(text, rect.w - minusWidth);
-
-		clipText.append(text.begin(), text.begin() + index).append(appendString);
-	} else {
-		clipText = text;
-	}
-#endif
 
 	// set color
 	ugl_driver->glColor3fv(w->getColorGroup().foreground().getFloat());
@@ -538,7 +520,7 @@ UBoLabelUI::stylePaintControlCaption(UGraphics * g, UWidget * w,
 			//     ignore the rest of the text.
 			//
 			// FIXME: should we output an error to stderr?
-			// std::cerr << "line too high - layoutCompoundWidget() probably returned too many lines for a too small rect." << std::endl;
+			std::cerr << "line too high - layoutCompoundWidget() probably returned too many lines for a too small rect." << std::endl;
 			break;
 		}
 		if (size.w > rect.w + 2) {
@@ -547,14 +529,25 @@ UBoLabelUI::stylePaintControlCaption(UGraphics * g, UWidget * w,
 			// we cut the rest of the line off - the hard way.
 			//
 			// FIXME: should we output an error to stderr? it would
-			// be useful, cause at this point we have a but that
+			// be useful, cause at this point we have a bug that
 			// should be fixed, but libufo does not seem to do such
 			// things :-(
-			// std::cerr << "string too wide. layoutCompoundWidget() gave invalid string." << std::endl;
+			std::cerr << "string too wide. layoutCompoundWidget() gave invalid string." << std::endl;
 			unsigned int index = metrics->viewToModel(s, rect.w);
 			s = s.substr(0, index + 1);
 		}
-		g->drawString(s, rect.x, y);
+		// AB: "rect" is already the correctly aligned textrect. however
+		//     additionally have to align here, as we support multiple
+		//     lines.
+		int lineX;
+		if (hAlignment == AlignLeft) {
+			lineX = rect.x;
+		} else if (hAlignment == AlignCenter) {
+			lineX = rect.x + (size.w / 2);
+		} else { // AlignRight
+			lineX = rect.x + rect.w - size.w;
+		}
+		g->drawString(s, lineX, y);
 		y += size.h;
 	}
 
@@ -655,54 +648,5 @@ UBoLabelUI::getStyleCompoundPreferredSize(
 		max_height + in.getVertical()
 	);
 	//return UDimension(max_width, max_height);
-}
-
-// AB: HACK!
-// -> this is copied largely from getStyleCompundPreferredSize(), with minor
-// modifications only.
-// we should merge both methods.
-//
-// obsolete!
-int UBoLabelUI::getHeightForWidth(const UWidget * widget_, int w)
-{
-	const UCompound* widget = dynamic_cast<const UCompound*>(widget_);
-	if (!widget) {
-		return 0;
-	}
-
-	// assume that icon is on the left and text on the right side
-	const UFontMetrics * metrics = widget->getFont()->getFontMetrics();
-	UInsets insets = widget->getInsets();
-	const UIcon* icon = widget->getIcon();
-	const std::string& text = widget->getText();
-
-	int availableWidth = w;
-	int h = 0;
-	availableWidth -= insets.getHorizontal();
-	h += insets.getVertical();
-	if (widget->isFocusable()) {
-		availableWidth -= 2;
-		h += 2;
-	}
-
-	int iconWidth = 0;
-	int iconHeight = 0;
-	if (icon) {
-		iconWidth = icon->getIconWidth();
-		iconHeight = icon->getIconHeight();
-	}
-	availableWidth -= iconWidth;
-
-	UDimension textDimension;
-	if (text.length() > 0) {
-		int maxTextW = availableWidth;
-		if (iconWidth) {
-			maxTextW -= widget->getIconTextGap();
-		}
-		makeCompoundText(text, metrics, maxTextW, &textDimension);
-	}
-	h += std::max(iconHeight, textDimension.h);
-
-	return h;
 }
 

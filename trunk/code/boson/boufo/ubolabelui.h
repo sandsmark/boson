@@ -54,8 +54,6 @@ public:
 	UDimension getPreferredSize(const UWidget * w);
 	UDimension getPreferredSize(const UWidget * w, const UDimension & max);
 
-	virtual int getHeightForWidth(const UWidget * widget, int w);
-
 protected:
 	// AB: these is our modification of this class.
 	// we use the style* methods instead of corresponding methods in
@@ -74,8 +72,16 @@ protected:
 		Alignment hAlignment,
 		Alignment vAlignment,
 		int textIconGap);
-	void stylePaintControlCaption(UGraphics * g, UWidget * w, const URectangle & rect, const std::string & text);
-	UDimension getStyleCompoundPreferredSize(const UCompound * w, const UFont * f, const std::string & text, const UIcon * icon, const UDimension& maxSize);
+	void stylePaintControlCaption(UGraphics * g, UWidget * w,
+			const URectangle & rect,
+			const std::string & text,
+			Alignment hAlignment,
+			Alignment vAlignment);
+	UDimension getStyleCompoundPreferredSize(const UCompound * w,
+			const UFont * f,
+			const std::string & text,
+			const UIcon * icon,
+			const UDimension& maxSize);
 
 
 private:  // Private attributes
