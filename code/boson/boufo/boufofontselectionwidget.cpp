@@ -85,15 +85,6 @@ BoUfoFontSelectionWidget::BoUfoFontSelectionWidget(BoUfoManager* manager)
  supportedStyles |= BoUfoFontInfo::StyleUnderline;
  supportedStyles |= BoUfoFontInfo::StyleStrikeOut;
  setSupportedStyles(supportedStyles);
-
- connect(mFonts, SIGNAL(signalSelectionChanged(int, int)),
-		this, SLOT(slotFontChanged()));
- connect(mSizes, SIGNAL(signalSelectionChanged(int, int)),
-		this, SLOT(slotSizeChanged()));
- connect(mSizesCombo, SIGNAL(signalActivated(int)),
-		this, SLOT(slotSizeChangedCombo()));
- connect(mStyles, SIGNAL(signalSelectionChanged(int, int)),
-		this, SLOT(slotStyleChanged()));
 }
 
 BoUfoFontSelectionWidget::~BoUfoFontSelectionWidget()
@@ -223,5 +214,18 @@ void BoUfoFontSelectionWidget::setSupportedStyles(int supportedStyles)
  setSelectedStyles(selected);
 }
 
+void BoUfoFontSelectionWidget::slotApply()
+{
+ emit signalFontSelected(fontInfo());
+ emit signalApply();
+}
+
+void BoUfoFontSelectionWidget::slotOk()
+{
+ emit signalFontSelected(fontInfo());
+ emit signalOk();
+
+ // TODO: close dialog
+}
 
 

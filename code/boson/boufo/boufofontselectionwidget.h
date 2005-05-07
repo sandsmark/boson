@@ -37,11 +37,17 @@ public:
 
 	const BoUfoFontInfo& fontInfo() const;
 
+signals:
+	void signalFontSelected(const BoUfoFontInfo&);
+
 protected slots:
-	void slotFontChanged();
-	void slotStyleChanged();
-	void slotSizeChanged();
-	void slotSizeChangedCombo();
+	virtual void slotFontChanged();
+	virtual void slotStyleChanged();
+	virtual void slotSizeChanged();
+	virtual void slotSizeChangedCombo();
+
+	virtual void slotOk();
+	virtual void slotApply();
 
 protected:
 	void updateFont();
