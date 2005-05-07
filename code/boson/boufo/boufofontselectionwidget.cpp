@@ -57,6 +57,10 @@ BoUfoFontSelectionWidget::BoUfoFontSelectionWidget(BoUfoManager* manager)
 	}
  }
  mFonts->setItems(families);
+ if (allFonts.count() > 0) {
+	// TODO: rather select the font currently in use
+	mFonts->setSelectedItem(0);
+ }
 
  QStringList sizes;
  sizes.append("6");
