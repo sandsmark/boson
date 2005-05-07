@@ -153,7 +153,6 @@ BosonOrderButton::BosonOrderButton() : BoUfoWidget()
 
 BosonOrderButton::~BosonOrderButton()
 {
- delete mPixmap;
  delete d;
 }
 
