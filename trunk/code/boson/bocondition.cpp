@@ -173,7 +173,7 @@ bool BoCondition::save(QDomElement& root, const QMap<int, int>* playerId2Index) 
  while (it.current()) {
 	QDomElement m = doc.createElement("EventMatching");
 	if (!it.current()->save(m, playerId2Index)) {
-		boError() << k_funcinfo << "cannot save EventMatching" << endl;
+		boError(360) << k_funcinfo << "cannot save EventMatching" << endl;
 		return false;
 	}
 	eventsLeft.appendChild(m);
@@ -191,7 +191,7 @@ bool BoCondition::save(QDomElement& root, const QMap<int, int>* playerId2Index) 
  while (statIt.current()) {
 	QDomElement e = doc.createElement("StatusCondition");
 	if (!statIt.current()->save(e)) {
-		boError() << k_funcinfo << "unable to save StatusCondition" << endl;
+		boError(360) << k_funcinfo << "unable to save StatusCondition" << endl;
 		return false;
 	}
 	statusConditions.appendChild(e);
@@ -206,7 +206,7 @@ bool BoCondition::save(QDomElement& root, const QMap<int, int>* playerId2Index) 
  QDomElement action = doc.createElement("Action");
  root.appendChild(action);
  if (!mAction->saveAction(action, playerId2Index)) {
-	boError() << k_funcinfo << "could not save action" << endl;
+	boError(360) << k_funcinfo << "could not save action" << endl;
 	return false;
  }
 
@@ -217,7 +217,7 @@ bool BoCondition::load(const QDomElement& root)
 {
  QDomElement events = root.namedItem("Events").toElement();
  if (events.isNull()) {
-	boError() << k_funcinfo << "No Events tag" << endl;
+	boError(360) << k_funcinfo << "No Events tag" << endl;
 	return false;
  }
  d->mEvents.clear();
@@ -226,12 +226,12 @@ bool BoCondition::load(const QDomElement& root)
  for (unsigned int i = 0; i < matchings.count(); i++) {
 	QDomElement m = matchings.item(i).toElement();
 	if (m.isNull()) {
-		boError() << k_funcinfo << "not an element" << endl;
+		boError(360) << k_funcinfo << "not an element" << endl;
 		return false;
 	}
 	BoEventMatching* matching = new BoEventMatching();
 	if (!matching->load(m)) {
-		boError() << k_funcinfo << "cannot load EventMatching " << i << endl;
+		boError(360) << k_funcinfo << "cannot load EventMatching " << i << endl;
 		delete matching;
 		return false;
 	}
@@ -241,14 +241,14 @@ bool BoCondition::load(const QDomElement& root)
 		d->mEventsLeft.append(matching);
 	}
 	if (!ok) {
-		boError() << k_funcinfo << "IsLeft is not a valid number" << endl;
+		boError(360) << k_funcinfo << "IsLeft is not a valid number" << endl;
 		return false;
 	}
  }
 
  QDomElement statusConditions = root.namedItem("StatusConditions").toElement();
  if (statusConditions.isNull()) {
-	boError() << k_funcinfo << "no StatusConditions tag" << endl;
+	boError(360) << k_funcinfo << "no StatusConditions tag" << endl;
 	return false;
  }
  QDomNodeList statuses = statusConditions.elementsByTagName("StatusCondition");
@@ -256,7 +256,7 @@ bool BoCondition::load(const QDomElement& root)
 	QDomElement e = statuses.item(i).toElement();
 	BoStatusCondition* stat = new BoStatusCondition();
 	if (!stat->load(e)) {
-		boError() << k_funcinfo << "unable to load StatusCondition" << endl;
+		boError(360) << k_funcinfo << "unable to load StatusCondition" << endl;
 		delete stat;
 		return false;
 	}
@@ -265,13 +265,13 @@ bool BoCondition::load(const QDomElement& root)
 
  QDomElement action = root.namedItem("Action").toElement();
  if (action.isNull()) {
-	boError() << k_funcinfo << "no Action tag" << endl;
+	boError(360) << k_funcinfo << "no Action tag" << endl;
 	return false;
  }
  delete mAction;
  mAction = new BoConditionAction();
  if (!mAction->loadAction(action)) {
-	boError() << k_funcinfo << "unable to load Action" << endl;
+	boError(360) << k_funcinfo << "unable to load Action" << endl;
 	return false;
  }
 
@@ -359,7 +359,7 @@ bool BoConditionAction::saveAction(QDomElement& root, const QMap<int, int>* play
 	QDomElement actionEvent = doc.createElement("Event");
 	root.appendChild(actionEvent);
 	if (!mEventCaused->save(actionEvent, playerId2Index)) {
-		boError() << k_funcinfo << "cannot save event that is caused by condition" << endl;
+		boError(360) << k_funcinfo << "cannot save event that is caused by condition" << endl;
 		return false;
 	}
  } else if (!mScriptFile.isEmpty()) {
@@ -378,7 +378,7 @@ bool BoConditionAction::saveAction(QDomElement& root, const QMap<int, int>* play
  }
 
  if (type.isEmpty()) {
-	boError() << k_funcinfo << "internal error: don't know type of Action" << endl;
+	boError(360) << k_funcinfo << "internal error: don't know type of Action" << endl;
 	return false;
  }
  root.setAttribute("Type", type);
@@ -388,12 +388,12 @@ bool BoConditionAction::saveAction(QDomElement& root, const QMap<int, int>* play
 bool BoConditionAction::loadAction(const QDomElement& root)
 {
  if (root.isNull()) {
-	boError() << k_funcinfo << "no Action tag" << endl;
+	boError(360) << k_funcinfo << "no Action tag" << endl;
 	return false;
  }
  QString type = root.attribute("Type");
  if (type.isEmpty()) {
-	boError() << k_funcinfo << "Action tag has no type" << endl;
+	boError(360) << k_funcinfo << "Action tag has no type" << endl;
 	return false;
  }
  delete mEventCaused;
@@ -406,7 +406,7 @@ bool BoConditionAction::loadAction(const QDomElement& root)
 	if (!actionEvent.isNull()) {
 		mEventCaused = new BoEvent();
 		if (!mEventCaused->load(actionEvent)) {
-			boError() << k_funcinfo << "cannot load event that is caused by condition" << endl;
+			boError(360) << k_funcinfo << "cannot load event that is caused by condition" << endl;
 			delete mEventCaused;
 			mEventCaused = 0;
 			return false;
@@ -415,7 +415,7 @@ bool BoConditionAction::loadAction(const QDomElement& root)
  } else if (type == "Script") {
 	QDomElement file = root.namedItem("ScriptFile").toElement();
 	if (file.isNull()) {
-		boError() << k_funcinfo << "Type is Script, but Action has no ScriptFile element" << endl;
+		boError(360) << k_funcinfo << "Type is Script, but Action has no ScriptFile element" << endl;
 		return false;
 	}
 
@@ -425,11 +425,11 @@ bool BoConditionAction::loadAction(const QDomElement& root)
 	// no other prefixes are allowed.
 	mScriptFile = file.text();
 	if (mScriptFile.isEmpty()) {
-		boError() << k_funcinfo << "ScriptFile element has empty text. You must specify the script that contains the function you want to call" << endl;
+		boError(360) << k_funcinfo << "ScriptFile element has empty text. You must specify the script that contains the function you want to call" << endl;
 		return false;
 	}
 	if (!mScriptFile.startsWith("scripts/") && !mScriptFile.startsWith("map_scripts/")) {
-		boError() << k_funcinfo << "ScriptFile must start with either scripts/ or map_scripts/ - filename: " << mScriptFile << endl;
+		boError(360) << k_funcinfo << "ScriptFile must start with either scripts/ or map_scripts/ - filename: " << mScriptFile << endl;
 		return false;
 	}
 
@@ -437,20 +437,20 @@ bool BoConditionAction::loadAction(const QDomElement& root)
 	// (might be difficult in the map_scripts case, since we don't have
 	// direct access to that file system)
 	bool file_exists = true;
-	boWarning() << k_funcinfo << "TODO: check if script file actually exists" << endl;
+	boWarning(360) << k_funcinfo << "TODO: check if script file actually exists" << endl;
 
 	if (!file_exists) {
-		boError() << k_funcinfo << "ScriptFile " << mScriptFile << " was not found" << endl;
+		boError(360) << k_funcinfo << "ScriptFile " << mScriptFile << " was not found" << endl;
 		return false;
 	}
 
 	QDomElement call = root.namedItem("ScriptCall").toElement();
 	if (call.isNull()) {
-		boError() << k_funcinfo << "Script Action has no ScriptCall element." << endl;
+		boError(360) << k_funcinfo << "Script Action has no ScriptCall element." << endl;
 		return false;
 	}
 	if (call.text().isEmpty()) {
-		boError() << k_funcinfo << "ScriptCall element has empty text. you must specify a call (function)" << endl;
+		boError(360) << k_funcinfo << "ScriptCall element has empty text. you must specify a call (function)" << endl;
 		return false;
 	}
 	mScriptCall = call.text();
@@ -463,7 +463,7 @@ bool BoConditionAction::loadAction(const QDomElement& root)
 	//     parameters. maybe we even have to write a BoScriptCall class
 
  } else {
-	boError() << k_funcinfo << "Action type " << type << " is not supported." << endl;
+	boError(360) << k_funcinfo << "Action type " << type << " is not supported." << endl;
 	return false;
  }
 
@@ -474,27 +474,27 @@ void BoConditionAction::fire()
 {
  // atm only events are supported. this will change in the future (support
  // calling functions in scripts)
- boDebug() << k_funcinfo << endl;
+ boDebug(360) << k_funcinfo << endl;
  if (mEventCaused) {
 	QDomDocument doc;
 	QDomElement root = doc.createElement("Event");
 	if (!mEventCaused->save(root, 0)) {
-		boError() << k_funcinfo << "could not save event that is caused by condition" << endl;
+		boError(360) << k_funcinfo << "could not save event that is caused by condition" << endl;
 		return;
 	}
 	BoEvent* e = new BoEvent();
 	if (!e->load(root)) {
-		boError() << k_funcinfo << "could not load event that is caused by condition" << endl;
+		boError(360) << k_funcinfo << "could not load event that is caused by condition" << endl;
 		return;
 	}
 	boGame->queueEvent(e);
  } else if (!mScriptFile.isEmpty()) {
-	boWarning() << k_funcinfo << "calling script function in " << mScriptFile << endl;
-	boWarning() << k_funcinfo << "calling: " << mScriptCall << endl;
+	boWarning(360) << k_funcinfo << "calling script function in " << mScriptFile << endl;
+	boWarning(360) << k_funcinfo << "calling: " << mScriptCall << endl;
 
-	boError() << k_funcinfo << "not yet implemented" << endl;
+	boError(360) << k_funcinfo << "not yet implemented" << endl;
  } else {
-	boError() << k_funcinfo << "not a supported action - loding this object should have failed!" << endl;
+	boError(360) << k_funcinfo << "not a supported action - loding this object should have failed!" << endl;
  }
 }
 
