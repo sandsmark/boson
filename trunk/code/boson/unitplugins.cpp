@@ -603,20 +603,20 @@ bool HarvesterPlugin::isNextTo(const Unit* u) const
 
 void HarvesterPlugin::advanceMine()
 {
- boDebug() << k_funcinfo << endl;
+ boDebug(430) << k_funcinfo << endl;
  const HarvesterProperties* prop = (HarvesterProperties*)properties(PluginProperties::Harvester);
  if (!prop) {
-	boError() << k_funcinfo << "NULL harvester properties" << endl;
+	boError(430) << k_funcinfo << "NULL harvester properties" << endl;
 	unit()->setWork(Unit::WorkIdle);
 	return;
  }
  if (!mResourceMine) {
 	ResourceMinePlugin* mine = findClosestResourceMine();
 	if (!mine || !mine->unit()) {
-		boDebug() << k_funcinfo << "no resource mine found" << endl;
+		boDebug(430) << k_funcinfo << "no resource mine found" << endl;
 		mHarvestingType = 0; // stop
 	} else {
-		boDebug() << k_funcinfo << "resource mine: " << mine->unit()->id() << endl;
+		boDebug(430) << k_funcinfo << "resource mine: " << mine->unit()->id() << endl;
 		mineAt(mine);
 	}
 	return;
@@ -627,7 +627,7 @@ void HarvesterPlugin::advanceMine()
 	if (mResourceMine && mResourceMine->unit()) {
 		mineId = QString::number(mResourceMine->unit()->id());
 	}
-	boDebug() << k_funcinfo << "cannot mine at " << mResourceMine << " (" << mineId << ")" << endl;
+	boDebug(430) << k_funcinfo << "cannot mine at " << mResourceMine << " (" << mineId << ")" << endl;
 	unit()->setWork(Unit::WorkIdle);
 
 	// TODO: handle special case when mine has become empty!
@@ -638,7 +638,7 @@ void HarvesterPlugin::advanceMine()
  BO_CHECK_NULL_RET(mResourceMine);
  BO_CHECK_NULL_RET(mResourceMine->unit());
  if (mResourceMine->unit()->isDestroyed()) {
-	boDebug() << k_funcinfo << "resource mine has been destroyed!" << endl;
+	boDebug(430) << k_funcinfo << "resource mine has been destroyed!" << endl;
 	mResourceMine = 0; // search a new one
 	return;
  }
@@ -647,7 +647,7 @@ void HarvesterPlugin::advanceMine()
  if (!isAtResourceMine()) {
 	Unit* u = mResourceMine->unit();
 	if(!unit()->moveTo(u->x(), u->y(), 1)) {
-		boDebug() << k_funcinfo << "Cannot move to refinery (id=" << u->id() <<
+		boDebug(430) << k_funcinfo << "Cannot move to refinery (id=" << u->id() <<
 				") at (" << u->x() << "; " << u->y() << ")" << endl;
 		unit()->setWork(Unit::WorkIdle);
 		return;
@@ -658,7 +658,7 @@ void HarvesterPlugin::advanceMine()
  }
  if (resourcesMined() >= prop->maxResources()) {
 	// Back to refinery
-	boDebug() << k_funcinfo << "Maximal amount of resources mined." << endl;
+	boDebug(430) << k_funcinfo << "Maximal amount of resources mined." << endl;
 	mHarvestingType = 2; // refining
 	return;
  }
@@ -670,7 +670,7 @@ void HarvesterPlugin::advanceMine()
 	mined = mResourceMine->mineOil(this);
 	player()->statistics()->increaseMinedOil(mined);
  } else {
-	boError() << k_funcinfo << "oops - cannot mine here?!" << endl;
+	boError(430) << k_funcinfo << "oops - cannot mine here?!" << endl;
 	mined = 0;
  }
  if (resourcesMined() + mined > prop->maxResources()) {
@@ -680,25 +680,25 @@ void HarvesterPlugin::advanceMine()
 	mined = prop->maxResources() - resourcesMined();
  }
  mResourcesMined = resourcesMined() + mined;
- boDebug() << k_funcinfo << "resources mined: " << resourcesMined() << endl;
+ boDebug(430) << k_funcinfo << "resources mined: " << resourcesMined() << endl;
 }
 
 void HarvesterPlugin::advanceRefine()
 {
  // This is the second step of harvesting: returning to refinery and unloading
- boDebug() << k_funcinfo << endl;
+ boDebug(430) << k_funcinfo << endl;
  if (resourcesMined() == 0) {
-	boDebug() << k_funcinfo << "refining done" << endl;
+	boDebug(430) << k_funcinfo << "refining done" << endl;
 	mHarvestingType = 1; // mining
 	return;
  }
  if (!mRefinery) {
 	RefineryPlugin* refinery = findClosestRefinery();
 	if (!refinery || !refinery->unit()) {
-		boDebug() << k_funcinfo << "no refinery found" << endl;
+		boDebug(430) << k_funcinfo << "no refinery found" << endl;
 		mHarvestingType = 0; // stop
 	} else {
-		boDebug() << k_funcinfo << "refinery: " << refinery->unit()->id() << endl;
+		boDebug(430) << k_funcinfo << "refinery: " << refinery->unit()->id() << endl;
 		refineAt(refinery);
 	}
 	return;
@@ -707,7 +707,7 @@ void HarvesterPlugin::advanceRefine()
  BO_CHECK_NULL_RET(mRefinery);
  BO_CHECK_NULL_RET(mRefinery->unit());
  if (mRefinery->unit()->isDestroyed()) {
-	boDebug() << k_funcinfo << "refinery has been destroyed!" << endl;
+	boDebug(430) << k_funcinfo << "refinery has been destroyed!" << endl;
 	mRefinery = 0; // search a new one
 	return;
  }
@@ -715,7 +715,7 @@ void HarvesterPlugin::advanceRefine()
  if (!isAtRefinery()) {
 	Unit* u = mRefinery->unit();
 	if(!unit()->moveTo(u->x(), u->y(), 1)) {
-		boDebug() << k_funcinfo << "Cannot move to refinery (id=" << u->id() <<
+		boDebug(430) << k_funcinfo << "Cannot move to refinery (id=" << u->id() <<
 				") at (" << u->x() << "; " << u->y() << ")" << endl;
 		unit()->setWork(Unit::WorkIdle);
 		return;
@@ -726,7 +726,7 @@ void HarvesterPlugin::advanceRefine()
  }
  const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
  if (!prop) {
-	boError() << k_funcinfo << "NULL harvester plugin" << endl;
+	boError(430) << k_funcinfo << "NULL harvester plugin" << endl;
 	mHarvestingType = 0; // stop
 	return;
  }
@@ -736,7 +736,7 @@ void HarvesterPlugin::advanceRefine()
 	amount = resourcesMined();
  }
  if (amount < 0) {
-	boError() << k_funcinfo << "a negative amount of resources to be refined??" << endl;
+	boError(430) << k_funcinfo << "a negative amount of resources to be refined??" << endl;
 	amount = 0;
  }
  unsigned int refined = 0;
@@ -748,11 +748,11 @@ void HarvesterPlugin::advanceRefine()
 	player()->statistics()->increaseRefinedOil(refined);
  }
  if (mResourcesMined < refined) {
-	boError() << k_funcinfo << "oops - more processed than available!" << endl;
+	boError(430) << k_funcinfo << "oops - more processed than available!" << endl;
 	refined = mResourcesMined;
  }
  mResourcesMined = mResourcesMined - refined;
- boDebug() << k_funcinfo << "resources left: " << resourcesMined() << endl;
+ boDebug(430) << k_funcinfo << "resources left: " << resourcesMined() << endl;
 }
 
 ResourceMinePlugin* HarvesterPlugin::findClosestResourceMine() const
