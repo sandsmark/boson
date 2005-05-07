@@ -18,7 +18,6 @@ libboufo_la_SOURCES = \
 	uboprogressui.cpp
 #	ubotable.cpp 
 #	ubotableui.cpp
-#	uboboxlayout.cpp 
 
 libboufo_la_LIBADD = \
 		$(top_builddir)/boson/bosonfont/libbosonfont.la \
