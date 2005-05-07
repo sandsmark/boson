@@ -15,7 +15,8 @@ libboufo_la_SOURCES = \
 	boufofontrenderer.cpp \
 	ubolabelui.cpp \
 	uboprogress.cpp \
-	uboprogressui.cpp
+	uboprogressui.cpp \
+	ubogridlayout.cpp
 #	ubotable.cpp 
 #	ubotableui.cpp
 

@@ -479,9 +479,9 @@ public:
 
 	enum LayoutClass {
 		NoLayout = 0,
-		UFlowLayout,
 		UHBoxLayout,
 		UVBoxLayout,
+		UGridLayout,
 		UBorderLayout,
 		UFullLayout
 	};
@@ -540,8 +540,37 @@ public:
 
 	void setEnabled(bool);
 
+	/**
+	 * Add @p w as child to this widget. This is also adds @p w to the
+	 * layout of this widget, as BoUfo layout classes work on the child
+	 * widgets.
+	 *
+	 * Note that actually @ref BoUfoWidget::widget of @p w is added to @ref
+	 * BoUfoWidget::widget of this object.
+	 **/
 	virtual void addWidget(BoUfoWidget* w);
+
+	/**
+	 * Insert a spacing (to the layout) of @p spacing. This adds a dummy
+	 * widget that takes exactly @p spacing size in both directions.
+	 **/
 	virtual void addSpacing(int spacing);
+
+	/**
+	 * Remove the child widget @p w and delete it.
+	 *
+	 * If @p w is not a child of this widget, this method does nothing.
+	 *
+	 * See also @ref addWidget
+	 * @return TRUE if the widget was removed, otherwise FALSE.
+	 **/
+	bool removeWidget(BoUfoWidget* w);
+
+	/**
+	 * Remove all child widgets.
+	 * @return The number of returned widgets
+	 **/
+	unsigned int removeAllWidgets();
 
 	/**
 	 * Set the foreground color of the @ref widget and all of it's children
