@@ -983,8 +983,10 @@ void BosonUfoFPSGraphWidget::paintWidget()
 		d->mGameGLMatrices->viewport()[3]);
  boTextureManager->disableTexturing();
 
- paintFPS(d->mFPSData);
- paintFPS(d->mSkippedFPSData);
+ if (boConfig->boolValue("debug_fps")) {
+	paintFPS(d->mFPSData);
+	paintFPS(d->mSkippedFPSData);
+ }
 
  glPopAttrib();
 
