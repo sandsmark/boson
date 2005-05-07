@@ -107,6 +107,7 @@ UWidget::UWidget()
 	, m_properties()
 	, m_inputMap(new UInputMap())
 	, m_ancestorInputMap(new UInputMap())
+	, m_boUfoWidgetDeleter(0)
 {
 	// register at mem manager
 	trackPointer(m_inputMap);
@@ -150,6 +151,7 @@ UWidget::UWidget(ULayoutManager * layout)
 	, m_properties()
 	, m_inputMap(new UInputMap())
 	, m_ancestorInputMap(new UInputMap())
+	, m_boUfoWidgetDeleter(0)
 {
 	// register at mem manager
 	trackPointer(m_layout);
@@ -164,6 +166,9 @@ UWidget::~UWidget() {
 	if (isFocused()) {
 		releaseFocus();
 	}
+	// BoUfo extension: delete the widget deleter _first_!
+	delete m_boUfoWidgetDeleter;
+
 	removeAll();
 	// clear properties
 	for (UPropertiesMap::iterator iter = m_properties.begin();
@@ -174,6 +179,11 @@ UWidget::~UWidget() {
 		}
 	}
 	m_properties.clear();
+}
+
+void
+UWidget::setBoUfoWidgetDeleter(UCollectable* deleter) {
+	m_boUfoWidgetDeleter = deleter;
 }
 
 void
