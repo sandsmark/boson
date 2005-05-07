@@ -15,7 +15,7 @@
 
 # 260 and 270 are equal. the difference has historic reasons only - pick your
 # favourite :)
-# feel free to remove one are completely
+# feel free to remove one completely
 260    LoadGame
 270    LoadGame
 300    Boson Advance
@@ -24,8 +24,11 @@
 360    Event
 370    NetworkSync
 
-# Use 400-449 for Unit::advance*()
+# Use 400-429 for Unit::advance*()
 401    AdvanceMove
+
+# Use 430-459 for UnitPlugin's advance() methods
+430    Harvester Advance
 
 500    BosonPath
 510    BosonPathTNG

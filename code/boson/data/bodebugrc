@@ -54,8 +54,16 @@ InfoOutput=4
 [310]
 InfoOutput=4
 
+# BosonShot is off by default
+[350]
+InfoOutput=4
+
 # Event is off by default
 [360]
+InfoOutput=4
+
+# Harvester Advance is off by default
+[430]
 InfoOutput=4
 
 # BoScript if off by default
