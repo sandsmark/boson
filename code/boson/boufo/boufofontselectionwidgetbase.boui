@@ -489,6 +489,10 @@
   <Method return="void" visibility="protected" type="slot" name="slotSizeChanged()" >
    <Connections>
     <Connection sender="mSizes" signal="signalSelectionChanged(int,int)" type="receiver" />
+   </Connections>
+  </Method>
+  <Method return="void" visibility="protected" type="slot" name="slotSizeChangedCombo()" >
+   <Connections>
     <Connection sender="mSizesCombo" signal="signalActivated(int)" type="receiver" />
    </Connections>
   </Method>
