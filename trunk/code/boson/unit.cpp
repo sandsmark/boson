@@ -279,7 +279,6 @@ Unit* Unit::target() const
 
 void Unit::setTarget(Unit* target)
 {
- boDebug() << k_funcinfo << endl;
  d->mTarget = target;
  if (!d->mTarget) {
 	return;
@@ -1907,7 +1906,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
  }
 
  if ((xspeed == 0.0f) && (yspeed == 0.0f)) {
-	boWarning() << k_funcinfo << "unit " << id() << ": Speed is 0.0" << endl;
+	boWarning(401) << k_funcinfo << "unit " << id() << ": Speed is 0.0" << endl;
 	return;
  }
 
@@ -2006,7 +2005,7 @@ void MobileUnit::advanceMoveCheck()
 			} else if (pathInfo()->waiting % (20 + QMIN(pathInfo()->pathrecalced * 20, 80)) == 0) {
 				// First wait 20 adv. calls (1 sec) before recalculating path, then 40
 				//  calls, then 60 etc, but never more than 100 calls.
-				boDebug() << k_funcinfo << "unit " << id() << ": Recalcing path, waiting: " << pathInfo()->waiting <<
+				boDebug(401) << k_funcinfo << "unit " << id() << ": Recalcing path, waiting: " << pathInfo()->waiting <<
 						"; pathrecalced: " << pathInfo()->pathrecalced << endl;
 				newPath();
 				pathInfo()->pathrecalced++;
