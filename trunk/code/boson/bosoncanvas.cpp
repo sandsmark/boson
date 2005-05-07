@@ -807,7 +807,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	return;
  }
  if (!d->mDestroyedUnits.contains(unit)) {
-	boDebug() << k_funcinfo << "destroy unit " << unit->id() << endl;
+//	boDebug() << k_funcinfo << "destroy unit " << unit->id() << endl;
 	Player* owner = unit->owner();
 	d->mDestroyedUnits.append(unit);
 
@@ -818,7 +818,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	if (unit->effects() && unit->effects()->count() > 0) {
 		QPtrListIterator<BosonEffect> it(*(unit->effects()));
 		for (; it.current(); ++it) {
-			boDebug() << k_funcinfo << "Making effect " << it.current() << " obsolete" << endl;
+//			boDebug() << k_funcinfo << "Making effect " << it.current() << " obsolete" << endl;
 			it.current()->makeObsolete();
 			it.current()->setOwnerId(0);
 		}
