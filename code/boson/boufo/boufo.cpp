@@ -1388,7 +1388,6 @@ void BoUfoWidget::addSpacing(int spacing)
  addWidget(w);
 }
 
-// TODO: reimplement for certain widgets (e.g. labels)!
 void BoUfoWidget::setVerticalAlignment(int a)
 {
  if (a & Qt::AlignTop) {
@@ -1419,15 +1418,14 @@ int BoUfoWidget::verticalAlignment() const
  return a;
 }
 
-// TODO: reimplement for certain widgets (e.g. labels)!
 void BoUfoWidget::setHorizontalAlignment(int a)
 {
  if (a & Qt::AlignLeft) {
 	widget()->setHorizontalAlignment(ufo::AlignLeft);
  } else if (a & Qt::AlignRight) {
-	widget()->setVerticalAlignment(ufo::AlignRight);
+	widget()->setHorizontalAlignment(ufo::AlignRight);
  } else if (a & Qt::AlignHCenter) {
-	widget()->setVerticalAlignment(ufo::AlignCenter);
+	widget()->setHorizontalAlignment(ufo::AlignCenter);
  } else {
 	boWarning() << k_funcinfo << "invalid value " << a << endl;
  }
@@ -2176,6 +2174,18 @@ void BoUfoPushButton::init()
  CONNECT_UFO_TO_QT(BoUfoPushButton, mButton, Highlighted);
 }
 
+void BoUfoPushButton::setVerticalAlignment(int a)
+{
+ BoUfoWidget::setVerticalAlignment(a);
+ mButton->setVerticalAlignment(widget()->getVerticalAlignment());
+}
+
+void BoUfoPushButton::setHorizontalAlignment(int a)
+{
+ BoUfoWidget::setHorizontalAlignment(a);
+ mButton->setHorizontalAlignment(widget()->getHorizontalAlignment());
+}
+
 void BoUfoPushButton::setOpaque(bool o)
 {
  BoUfoWidget::setOpaque(o);
@@ -2676,7 +2686,7 @@ unsigned int BoUfoListBox::count() const
 
 QString BoUfoListBox::itemText(int i) const
 {
- // TODO: implement properly. this is only a trivail and slow implementation.
+ // TODO: implement properly. this is only a trivial and slow implementation.
  if (i < 0 || (unsigned int)i >= count()) {
 	return QString::null;
  }
@@ -2685,7 +2695,7 @@ QString BoUfoListBox::itemText(int i) const
 
 void BoUfoListBox::setItemText(int i, const QString& text)
 {
- // TODO: implement properly. this is only a trivail and slow implementation.
+ // TODO: implement properly. this is only a trivial and slow implementation.
  if (i < 0 || (unsigned int)i >= count()) {
 	return;
  }
@@ -2696,7 +2706,7 @@ void BoUfoListBox::setItemText(int i, const QString& text)
 
 void BoUfoListBox::insertItem(const QString& text, int index)
 {
- // TODO: implement properly. this is only a trivail and slow implementation.
+ // TODO: implement properly. this is only a trivial and slow implementation.
  QStringList list = items();
  if (index < 0) {
 	index = list.count();
@@ -2707,7 +2717,7 @@ void BoUfoListBox::insertItem(const QString& text, int index)
 
 void BoUfoListBox::removeItem(int index)
 {
- // TODO: implement properly. this is only a trivail and slow implementation.
+ // TODO: implement properly. this is only a trivial and slow implementation.
  QStringList list = items();
  list.remove(list.at(index));
  setItems(list);
@@ -2756,8 +2766,19 @@ void BoUfoLabel::init()
  mLabel = new ufo::ULabel();
  widget()->add(mLabel);
  mLabel->setOpaque(false);
-// setForegroundColor(Qt::white);
  setForegroundColor(defaultForegroundColor());
+}
+
+void BoUfoLabel::setVerticalAlignment(int a)
+{
+ BoUfoWidget::setVerticalAlignment(a);
+ mLabel->setVerticalAlignment(widget()->getVerticalAlignment());
+}
+
+void BoUfoLabel::setHorizontalAlignment(int a)
+{
+ BoUfoWidget::setHorizontalAlignment(a);
+ mLabel->setHorizontalAlignment(widget()->getHorizontalAlignment());
 }
 
 void BoUfoLabel::setDefaultForegroundColor(const QColor& c)
