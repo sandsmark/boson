@@ -582,7 +582,7 @@ void BoUfoAction::uslotHighlighted(ufo::UActionEvent*)
 }
 
 #warning FIXME: this is called too often by some weird reason
-// by some weirs reason this is called e.g. when a menu is closed.
+// by some weird reason this is called e.g. when a menu is closed.
 // but the pointers remain valid.
 // maybe they are just reparented?
 // -> the we really need a sigWidgetDeleted() !
