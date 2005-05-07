@@ -140,6 +140,16 @@ public:
 	UWidget(ULayoutManager * layout);
 	virtual ~UWidget();
 
+	/**
+	 * Set an object that deletes the corresponding BoUfoWidget of this
+	 * UWidget object. The deleter is deleted first in the destructor of
+	 * this class.
+	 *
+	 * WARNING: this is a BoUfo extension to libufo. It is NOT part of the
+	 * libufo API!
+	 **/
+	void setBoUfoWidgetDeleter(UCollectable* deleter);
+
 	/** No descriptions */
 	virtual bool isVisible() const;
 	/** mark the widget as visible -- this is the default state.
@@ -995,6 +1005,9 @@ private:  // Private attributes
 
 	UInputMap * m_inputMap;
 	UInputMap * m_ancestorInputMap;
+
+	// BoUfo extenstion
+	UCollectable* m_boUfoWidgetDeleter;
 
 public: // Public Signals
 	// Mouse event signals

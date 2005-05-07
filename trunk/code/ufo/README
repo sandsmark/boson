@@ -19,6 +19,8 @@ Patches applied currently (this list may not be complete):
 - Patch to gl/ugl_graphics.cpp, to fix setClipRect() for invalid rectangles
   after the mapToDevice() call (it could create negative height rects for input
   rects that are larger than the viewport)
+- Patch to uwidget.h and uwidget.cpp to take a ufo::UCollectable* as widget
+  deleter. This object is deleted at the very first in the d'tor.
 
 Use
  make_ufo_dir.sh ufo_dir code/ufo
