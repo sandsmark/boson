@@ -44,11 +44,6 @@ public:
 
 	UDimension getPreferredSize(const UWidget * w);
 
-	virtual int getHeightForWidth(const UWidget * , int )
-	{
-		return 0;
-	}
-
 protected:
 	void paintGradient(UGraphics * g, const UBoProgress * progress, const UColor& from, const UColor& to);
 
