@@ -139,7 +139,7 @@ void BosonShot::advanceMoveCheck()
     xPos = x();
     if(xPos < 0 || xPos >= canvas()->mapWidth())
     {
-      boError() << k_funcinfo << "Internal error! xPos is still invalid: " << xPos << endl;
+      boError(350) << k_funcinfo << "Internal error! xPos is still invalid: " << xPos << endl;
     }
   }
   if(yPos < 0 || yPos >= canvas()->mapHeight())
@@ -148,7 +148,7 @@ void BosonShot::advanceMoveCheck()
     yPos = y();
     if(yPos < 0 || yPos >= canvas()->mapHeight())
     {
-      boError() << k_funcinfo << "Internal error! yPos is still invalid: " << yPos << endl;
+      boError(350) << k_funcinfo << "Internal error! yPos is still invalid: " << yPos << endl;
     }
   }
   setVelocity(velocityX, velocityY, zVelocity());
@@ -163,7 +163,7 @@ bool BosonShot::saveAsXML(QDomElement& root)
 {
   if (!BosonItem::saveAsXML(root))
   {
-    boError() << k_funcinfo << "Error saving BosonItem" << endl;
+    boError(350) << k_funcinfo << "Error saving BosonItem" << endl;
     return false;
   }
 
@@ -187,7 +187,7 @@ bool BosonShot::loadFromXML(const QDomElement& root)
 {
   if (!BosonItem::loadFromXML(root))
   {
-    boError() << k_funcinfo << "Error loading BosonItem" << endl;
+    boError(350) << k_funcinfo << "Error loading BosonItem" << endl;
     return false;
   }
   mActive = true; // Inactive shots won't be saved
@@ -380,7 +380,7 @@ void BosonShotRocket::advanceMoveInternal()
   bofixed factor;
   if (mTotalDist == 0)
   {
-    boError() << k_funcinfo << "mTotalDist == 0 is not allowed" << endl;
+    boError(350) << k_funcinfo << "mTotalDist == 0 is not allowed" << endl;
     factor = 0;
   }
   else
@@ -407,7 +407,7 @@ bool BosonShotRocket::saveAsXML(QDomElement& root)
 {
   if(!BosonShot::saveAsXML(root))
   {
-    boError() << k_funcinfo << "Error saving BosonShot" << endl;
+    boError(350) << k_funcinfo << "Error saving BosonShot" << endl;
     return false;
   }
 
@@ -426,7 +426,7 @@ bool BosonShotRocket::loadFromXML(const QDomElement& root)
 {
   if(!BosonShot::loadFromXML(root))
   {
-    boError() << k_funcinfo << "Error loading BosonShot" << endl;
+    boError(350) << k_funcinfo << "Error loading BosonShot" << endl;
     return false;
   }
 
@@ -441,7 +441,7 @@ bool BosonShotRocket::loadFromXML(const QDomElement& root)
     xvelo = root.attribute("xVelo").toFloat(&ok);
     if (!ok)
     {
-      boError() << k_funcinfo << "Invalid value for xVelocity tag" << endl;
+      boError(350) << k_funcinfo << "Invalid value for xVelocity tag" << endl;
       return false;
     }
   }
@@ -451,7 +451,7 @@ bool BosonShotRocket::loadFromXML(const QDomElement& root)
     yvelo = root.attribute("yVelo").toFloat(&ok);
     if (!ok)
     {
-      boError() << k_funcinfo << "Invalid value for yVelocity tag" << endl;
+      boError(350) << k_funcinfo << "Invalid value for yVelocity tag" << endl;
       return false;
     }
   }
@@ -461,33 +461,33 @@ bool BosonShotRocket::loadFromXML(const QDomElement& root)
     zvelo = root.attribute("zVelo").toFloat(&ok);
     if (!ok)
     {
-      boError() << k_funcinfo << "Invalid value for zVelocity tag" << endl;
+      boError(350) << k_funcinfo << "Invalid value for zVelocity tag" << endl;
       return false;
     }
   }
   targetx = root.attribute("Targetx").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for Targetx tag" << endl;
+    boError(350) << k_funcinfo << "Invalid value for Targetx tag" << endl;
     return false;
   }
   targety = root.attribute("Targety").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for Targety tag" << endl;
+    boError(350) << k_funcinfo << "Invalid value for Targety tag" << endl;
     return false;
   }
   targetz = root.attribute("Targetz").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for Targetz tag" << endl;
+    boError(350) << k_funcinfo << "Invalid value for Targetz tag" << endl;
     return false;
   }
 
   speed = root.attribute("Speed").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for Speed tag" << endl;
+    boError(350) << k_funcinfo << "Invalid value for Speed tag" << endl;
     return false;
   }
 
@@ -601,8 +601,8 @@ void BosonShotMissile::advanceMoveInternal()
     return;
   }
 
-  //boDebug() << k_funcinfo << id() << ": target pos: (" << mTarget->centerX() << "; " << mTarget->centerY() << "; " << mTarget->z() << ")" << endl;
-  //boDebug() << k_funcinfo << id() << ": my pos: (" << x() << "; " << y() << "; " << z() << ")" << endl;
+  //boDebug(350) << k_funcinfo << id() << ": target pos: (" << mTarget->centerX() << "; " << mTarget->centerY() << "; " << mTarget->z() << ")" << endl;
+  //boDebug(350) << k_funcinfo << id() << ": my pos: (" << x() << "; " << y() << "; " << z() << ")" << endl;
   // Calculate velocity
   // Missile always moves towards it's target
   BoVector3Fixed totarget(mTarget->centerX() - x(), mTarget->centerY() - y(), mTarget->z() - z());
@@ -610,7 +610,7 @@ void BosonShotMissile::advanceMoveInternal()
   // We need check this here to avoid division by 0 later
   if(totargetlen <= speed())
   {
-    //boDebug() << k_funcinfo << id() << ": near target (totargetlen = " << totargetlen << "), exploding" << endl;
+    //boDebug(350) << k_funcinfo << id() << ": near target (totargetlen = " << totargetlen << "), exploding" << endl;
     explode();
     return;
   }
@@ -623,7 +623,7 @@ void BosonShotMissile::advanceMoveInternal()
   bofixed difflen = diff.length();
   if(difflen != 0)
   {
-    //boDebug() << k_funcinfo << id() << ": difflen = " << difflen << endl;
+    //boDebug(350) << k_funcinfo << id() << ": difflen = " << difflen << endl;
     // Missile is not flying towards the target atm
     // Calculate new velocity vector
     if(mProp->turningSpeed() < difflen)
@@ -647,7 +647,7 @@ bool BosonShotMissile::saveAsXML(QDomElement& root)
 {
   if(!BosonShot::saveAsXML(root))
   {
-    boError() << k_funcinfo << "Error saving BosonShot" << endl;
+    boError(350) << k_funcinfo << "Error saving BosonShot" << endl;
     return false;
   }
 
@@ -663,7 +663,7 @@ bool BosonShotMissile::loadFromXML(const QDomElement& root)
 {
   if(!BosonShot::loadFromXML(root))
   {
-    boError() << k_funcinfo << "Error loading BosonShot" << endl;
+    boError(350) << k_funcinfo << "Error loading BosonShot" << endl;
     return false;
   }
 
@@ -675,31 +675,31 @@ bool BosonShotMissile::loadFromXML(const QDomElement& root)
   xvelo = root.attribute("xVelocity").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for xVelocity tag" << endl;
+    boError(350) << k_funcinfo << "Invalid value for xVelocity tag" << endl;
     return false;
   }
   yvelo = root.attribute("yVelocity").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for yVelocity tag" << endl;
+    boError(350) << k_funcinfo << "Invalid value for yVelocity tag" << endl;
     return false;
   }
   zvelo = root.attribute("zVelocity").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for zVelocity tag" << endl;
+    boError(350) << k_funcinfo << "Invalid value for zVelocity tag" << endl;
     return false;
   }
   speed = root.attribute("Speed").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for Speed tag" << endl;
+    boError(350) << k_funcinfo << "Invalid value for Speed tag" << endl;
     return false;
   }
   targetid = root.attribute("Target").toUInt(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for Target tag" << endl;
+    boError(350) << k_funcinfo << "Invalid value for Target tag" << endl;
     return false;
   }
 
@@ -764,7 +764,7 @@ bool BosonShotExplosion::saveAsXML(QDomElement& root)
 {
   if(!BosonShot::saveAsXML(root))
   {
-    boError() << k_funcinfo << "Error while saving BosonShot" << endl;
+    boError(350) << k_funcinfo << "Error while saving BosonShot" << endl;
     return false;
   }
   return true;
@@ -774,7 +774,7 @@ bool BosonShotExplosion::loadFromXML(const QDomElement& root)
 {
   if(!BosonShot::loadFromXML(root))
   {
-    boError() << k_funcinfo << "Error while loading BosonShot" << endl;
+    boError(350) << k_funcinfo << "Error while loading BosonShot" << endl;
     return false;
   }
   return true;
@@ -821,7 +821,7 @@ bool BosonShotMine::saveAsXML(QDomElement& root)
 {
   if(!BosonShot::saveAsXML(root))
   {
-    boError() << k_funcinfo << "Error while saving BosonShot" << endl;
+    boError(350) << k_funcinfo << "Error while saving BosonShot" << endl;
     return false;
   }
   return true;
@@ -831,7 +831,7 @@ bool BosonShotMine::loadFromXML(const QDomElement& root)
 {
   if(!BosonShot::loadFromXML(root))
   {
-    boError() << k_funcinfo << "Error while loading BosonShot" << endl;
+    boError(350) << k_funcinfo << "Error while loading BosonShot" << endl;
     return false;
   }
 
@@ -842,14 +842,14 @@ bool BosonShotMine::loadFromXML(const QDomElement& root)
 
 void BosonShotMine::advanceMoveInternal()
 {
-  boDebug() << "MINE: " << k_funcinfo << endl;
+  boDebug(350) << "MINE: " << k_funcinfo << endl;
   BoItemList* contacts = collisions()->collisions(boundingRect(), this, true);
   if(!contacts->isEmpty())
   {
     // Somebody is touching the mine. If mine is activated, explode
     if(mActivated)
     {
-      boDebug() << "MINE: " << k_funcinfo << "contact. BOOM" << endl;
+      boDebug(350) << "MINE: " << k_funcinfo << "contact. BOOM" << endl;
       explode();
     }
   }
@@ -858,7 +858,7 @@ void BosonShotMine::advanceMoveInternal()
     // Nobody is touching the mine. If mine is unactivated, activate it
     if(!mActivated)
     {
-      boDebug() << "MINE: " << k_funcinfo << "Mine activated" << endl;
+      boDebug(350) << "MINE: " << k_funcinfo << "Mine activated" << endl;
       mActivated = true;
     }
   }
@@ -901,7 +901,7 @@ bool BosonShotBomb::saveAsXML(QDomElement& root)
 {
   if(!BosonShot::saveAsXML(root))
   {
-    boError() << k_funcinfo << "Error while saving BosonShot" << endl;
+    boError(350) << k_funcinfo << "Error while saving BosonShot" << endl;
     return false;
   }
 
@@ -913,7 +913,7 @@ bool BosonShotBomb::loadFromXML(const QDomElement& root)
 {
   if(!BosonShot::loadFromXML(root))
   {
-    boError() << k_funcinfo << "Error loading BosonShot" << endl;
+    boError(350) << k_funcinfo << "Error loading BosonShot" << endl;
     return false;
   }
 
@@ -923,7 +923,7 @@ bool BosonShotBomb::loadFromXML(const QDomElement& root)
   speed = root.attribute("Speed").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for Speed tag" << endl;
+    boError(350) << k_funcinfo << "Invalid value for Speed tag" << endl;
     return false;
   }
 
@@ -942,7 +942,7 @@ void BosonShotBomb::advanceMoveInternal()
   // Maybe check all corners intead of center point
   if(z() <= canvas()->heightAtPoint(centerX(), centerY()))
   {
-    boDebug() << "BOMB: " << k_funcinfo << "terrain contact. BOOM" << endl;
+    boDebug(350) << "BOMB: " << k_funcinfo << "terrain contact. BOOM" << endl;
     explode();
     return;
   }
@@ -954,7 +954,7 @@ void BosonShotBomb::advanceMoveInternal()
     //  triggered by a collision with the unit that dropped it
     if(mActivated)
     {
-      boDebug() << "BOMB: " << k_funcinfo << "item contact. BOOM" << endl;
+      boDebug(350) << "BOMB: " << k_funcinfo << "item contact. BOOM" << endl;
       explode();
     }
   }
@@ -962,13 +962,13 @@ void BosonShotBomb::advanceMoveInternal()
   {
     if(!mActivated)
     {
-      boDebug() << "BOMB: " << k_funcinfo << "Bomb activated" << endl;
+      boDebug(350) << "BOMB: " << k_funcinfo << "Bomb activated" << endl;
       mActivated = true;
     }
   }
 
   accelerate();
-  boDebug() << "BOMB: " << k_funcinfo << "accelerated (a. speed: " << accelerationSpeed() <<
+  boDebug(350) << "BOMB: " << k_funcinfo << "accelerated (a. speed: " << accelerationSpeed() <<
       "); speed is now: " << speed() << "; z: " << z() << endl;
   setVelocity(0, 0, -speed());
 }
@@ -1020,7 +1020,7 @@ void BosonShotFragment::activate(const BoVector3Fixed& pos, const UnitProperties
   mVelo.normalize();
   mVelo.scale(FRAGMENT_MIN_SPEED + (r->getDouble() * (FRAGMENT_MAX_SPEED - FRAGMENT_MIN_SPEED)));
   mVelo.setZ(FRAGMENT_MIN_Z_SPEED + (r->getDouble() * (FRAGMENT_MAX_Z_SPEED - FRAGMENT_MIN_Z_SPEED)));
-  boDebug() << k_funcinfo << "Velocity is: (" << mVelo.x() << "; " << mVelo.y() << "; " << mVelo.z() << ")" << endl;
+  boDebug(350) << k_funcinfo << "Velocity is: (" << mVelo.x() << "; " << mVelo.y() << "; " << mVelo.z() << ")" << endl;
 
   setEffects(mUnitProperties->newExplodingFragmentFlyEffects(pos));
 
@@ -1033,7 +1033,7 @@ bool BosonShotFragment::saveAsXML(QDomElement& root)
 {
   if(!BosonShot::saveAsXML(root))
   {
-    boError() << k_funcinfo << "Error while saving BosonShot" << endl;
+    boError(350) << k_funcinfo << "Error while saving BosonShot" << endl;
     return false;
   }
 
@@ -1049,7 +1049,7 @@ bool BosonShotFragment::loadFromXML(const QDomElement& root)
 {
   if(!BosonShot::loadFromXML(root))
   {
-    boError() << k_funcinfo << "Error loading BosonShot" << endl;
+    boError(350) << k_funcinfo << "Error loading BosonShot" << endl;
     return false;
   }
 
@@ -1063,7 +1063,7 @@ bool BosonShotFragment::loadFromXML(const QDomElement& root)
     velox = root.attribute("Velox").toFloat(&ok);
     if (!ok)
     {
-      boError() << k_funcinfo << "Invalid value for Velocityx tag" << endl;
+      boError(350) << k_funcinfo << "Invalid value for Velocityx tag" << endl;
       return false;
     }
   }
@@ -1073,7 +1073,7 @@ bool BosonShotFragment::loadFromXML(const QDomElement& root)
     veloy = root.attribute("Veloy").toFloat(&ok);
     if (!ok)
     {
-      boError() << k_funcinfo << "Invalid value for Velocityy tag" << endl;
+      boError(350) << k_funcinfo << "Invalid value for Velocityy tag" << endl;
       return false;
     }
   }
@@ -1083,7 +1083,7 @@ bool BosonShotFragment::loadFromXML(const QDomElement& root)
     veloz = root.attribute("Veloz").toFloat(&ok);
     if (!ok)
     {
-      boError() << k_funcinfo << "Invalid value for Velocityz tag" << endl;
+      boError(350) << k_funcinfo << "Invalid value for Velocityz tag" << endl;
       return false;
     }
   }
@@ -1091,7 +1091,7 @@ bool BosonShotFragment::loadFromXML(const QDomElement& root)
   props = root.attribute("UnitProperties").toUInt(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for UnitProperties tag" << endl;
+    boError(350) << k_funcinfo << "Invalid value for UnitProperties tag" << endl;
     return false;
   }
 
@@ -1100,7 +1100,7 @@ bool BosonShotFragment::loadFromXML(const QDomElement& root)
   mUnitProperties = owner()->speciesTheme()->unitProperties((unsigned long int)props);
   if(!mUnitProperties)
   {
-    boError() << k_funcinfo << "NULL properties for " << props << endl;
+    boError(350) << k_funcinfo << "NULL properties for " << props << endl;
     return false;
   }
 
@@ -1114,7 +1114,7 @@ void BosonShotFragment::advanceMoveInternal()
   // TODO: maybe put item/terrain collison check to generic BosonItem method
   if(z() <= canvas()->heightAtPoint(centerX(), centerY()))
   {
-    boDebug() << "FRAGMENT: " << k_funcinfo << "terrain contact. BOOM" << endl;
+    boDebug(350) << "FRAGMENT: " << k_funcinfo << "terrain contact. BOOM" << endl;
     explode();
     return;
   }
