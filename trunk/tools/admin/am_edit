@@ -452,13 +452,13 @@ sub processMakefile ($)
 
     while ($found) {
         if ($MakefileData =~ m/\n(.*)\$\(CXXFLAGS\)(.*)\n/) {
-            my $vor = $1;   # "vor" means before in German
-            my $nach = $2; # "nach" means after in German
+            my $stuff_before = $1;
+            my $stuff_after = $2;
             my $lookup = quotemeta("$1\$(CXXFLAGS)$2");
             my $replacement = "$1\$(KCXXFLAGS)$2";
             $MakefileData =~ s/$lookup/$replacement/;
             $lookup =~ s/\\\$\\\(CXXFLAGS\\\)/\\\$\\\(KCXXFLAGS\\\)/;
-            $replacement = "$vor\$(KCXXFLAGS) \$(KDE_CXXFLAGS)$nach";
+            $replacement = "$stuff_before\$(KCXXFLAGS) \$(KDE_CXXFLAGS)$stuff_after";
             substituteLine($lookup, $replacement);
         } else {
             $found = 0;
@@ -1198,16 +1198,22 @@ sub tag_UIFILES ()
 
             if (!$uiFiles{$source}) {
 
-                $dep_lines .= "$source.$cxxsuffix: $sourcedir$source.boui\n";
-                $dep_lines .= "\trm -f $source.$cxxsuffix\n";
+                my $generate_source = '';
+                $generate_source .= "\trm -f $source.$cxxsuffix\n";
                 if (!$kdeopts{"qtonly"}) {
-                    $dep_lines .= "\t$BOUIC --input $sourcedir$source.boui --output $source --addinclude klocale.h || rm -f $source.$cxxsuffix\n";
+                    $generate_source .= "\t$BOUIC --input $sourcedir$source.boui --output $source --addinclude klocale.h || rm -f $source.$cxxsuffix\n";
                 } else {
-                    $dep_lines .= "\t$BOUIC --input $sourcedir$source.boui --output $source || rm -f $source.$cxxsuffix\n";
+                    $generate_source .= "\t$BOUIC --input $sourcedir$source.boui --output $source || rm -f $source.$cxxsuffix\n";
                 }
-                $dep_lines .= "\t\$(MOC) $source.h -o $source.moc\n";
-                $dep_lines .= "$source.h: $source.$cxxsuffix\n";
-                $dep_lines .= "$source.moc: $source.$cxxsuffix\n";
+                $generate_source .= "\t\$(MOC) $source.h -o $source.moc\n";
+
+
+                $dep_lines .= "$source.$cxxsuffix: $sourcedir$source.boui\n";
+                $dep_lines .= $generate_source;
+                $dep_lines .= "$source.h: $sourcedir$source.boui $source.$cxxsuffix\n";
+                $dep_lines .= $generate_source;
+                $dep_lines .= "$source.moc: $sourcedir$source.boui $source.$cxxsuffix\n";
+                $dep_lines .= $generate_source;
 
                 $uiFiles{$source} = 1;
                 $depedmocs{$program} .= " $source.moc";
@@ -2146,8 +2152,8 @@ sub substituteLine ($$)
     if ($MakefileData =~ /\n($lookup)/) {
       $old = $1;
       $old =~ s/\034/\\\n#>\- /g;         # Fix continuation lines
-      $new =~ s/\034/\\\n/g;
-      my $newCount = ($new =~ tr/\n//) + 1;
+      my $newCount = ($new =~ tr/\034//) + ($new =~ tr/\n//) + 1;
+      $new =~ s/\\\n/\034/g;
       $MakefileData =~ s/\n$lookup/\n#>- $old\n#>\+ $newCount\n$new/;
     } else {
       print STDERR "Warning: substitution of \"$lookup\" in $printname failed\n";
