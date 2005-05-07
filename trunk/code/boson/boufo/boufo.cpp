@@ -30,6 +30,7 @@
 #include "ubolabelui.h"
 #include "uboprogress.h"
 #include "uboprogressui.h"
+#include "ubogridlayout.h"
 // AB: even though this starts with "boufo" it is actually a ufo clas
 #include "boufofontrenderer.h"
 
@@ -853,6 +854,8 @@ BoUfoManager::~BoUfoManager()
  // TODO: do we have to delete the toolkit ?
  // -> there is only a single static instance of it, so that might be tricky.
  // does libufo take care of that?
+
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 ufo::UXToolkit* BoUfoManager::toolkit() const
@@ -1366,6 +1369,36 @@ void BoUfoWidget::addWidget(BoUfoWidget* w)
  widget()->add(w->widget());
 }
 
+bool BoUfoWidget::removeWidget(BoUfoWidget* w)
+{
+ if (!widget()) {
+	BO_NULL_ERROR(widget());
+	return false;
+ }
+ if (!widget()) {
+	BO_NULL_ERROR(widget());
+	return false;
+ }
+ if (!w) {
+	BO_NULL_ERROR(w);
+	return false;
+ }
+ if (!w->widget()) {
+	BO_NULL_ERROR(w->widget());
+	return false;
+ }
+ return widget()->remove(w->widget());
+}
+
+unsigned int BoUfoWidget::removeAllWidgets()
+{
+ if (!widget()) {
+	BO_NULL_ERROR(widget());
+	return 0;
+ }
+ return widget()->removeAll();
+}
+
 void BoUfoWidget::render(BoUfoManager* ufoManager)
 {
  BO_CHECK_NULL_RET(widget());
@@ -1457,9 +1490,11 @@ void BoUfoWidget::setLayoutClass(LayoutClass layout)
 	case NoLayout:
 		setLayout(0);
 		break;
+#if 0
 	case UFlowLayout:
 		setLayout(new ufo::UFlowLayout());
 		break;
+#endif
 	case UHBoxLayout:
 		setLayout(new ufo::UBoxLayout(ufo::UBoxLayout::XAxis));
 		break;
@@ -1468,6 +1503,10 @@ void BoUfoWidget::setLayoutClass(LayoutClass layout)
 		break;
 	case UBorderLayout:
 		setLayout(new ufo::UBorderLayout());
+		break;
+	case UGridLayout:
+//		setLayout(new ufo::UBoGridLayout());
+		setLayout(new ufo::UFlowLayout());
 		break;
 	case UFullLayout:
 		setLayout(new BoUFullLayout());
@@ -2447,6 +2486,9 @@ int BoUfoComboBox::currentItem() const
 
 void BoUfoComboBox::setCurrentItem(int i)
 {
+ if (i < 0) {
+	return;
+ }
  mComboBox->setCurrentItem(i);
 }
 
