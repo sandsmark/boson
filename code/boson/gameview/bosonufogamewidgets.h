@@ -27,6 +27,7 @@ class PlayerIO;
 class UnitProperties;
 class BosonCursor;
 class BoGameCamera;
+class BosonGameFPSCounter;
 
 class BosonUfoCanvasWidgetPrivate;
 /**
@@ -215,6 +216,32 @@ private:
 };
 
 
+class FPSGraphData;
+class BosonUfoFPSGraphWidgetPrivate;
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BosonUfoFPSGraphWidget : public BoUfoCustomWidget
+{
+	Q_OBJECT
+public:
+	BosonUfoFPSGraphWidget();
+	~BosonUfoFPSGraphWidget();
+
+	virtual void paintWidget();
+
+	void setGameGLMatrices(const BoGLMatrices*);
+	void setGameFPSCounter(const BosonGameFPSCounter* c);
+
+protected:
+	void paintFPS(const FPSGraphData& data);
+
+protected slots:
+	void slotAddData();
+
+private:
+	BosonUfoFPSGraphWidgetPrivate* d;
+};
 
 
 #endif

@@ -35,7 +35,11 @@
 #include "../bosoncursor.h"
 #include "../bosonconfig.h"
 #include "../bosonprofiling.h"
+#include "../bosonfpscounter.h"
 #include "bodebug.h"
+
+#include <qtimer.h>
+#include <qvaluelist.h>
 
 class BosonUfoCanvasWidgetPrivate
 {
@@ -869,5 +873,158 @@ void BosonUfoSelectionRectWidget::paintWidget()
  glPopMatrix();
  glMatrixMode(GL_MODELVIEW);
  glPopMatrix();
+}
+
+
+
+// AB: note that this can be used for things other than FPS, too
+class FPSGraphData
+{
+public:
+	FPSGraphData();
+
+	void addData(float data);
+	float fullWidth() const;
+	void ensureMaxWidth(float width);
+
+	float mMin;
+	float mMax;
+	QValueList<float> mData;
+	float mDataWidth;
+	QColor mColor;
+};
+
+FPSGraphData::FPSGraphData()
+{
+ mMin = 0.0f;
+ mMax = 100.0f;
+ mDataWidth = 1.0;
+ mColor = Qt::red;
+}
+
+void FPSGraphData::addData(float data)
+{
+ mData.append(data);
+}
+
+float FPSGraphData::fullWidth() const
+{
+ return mData.count() * mDataWidth;
+}
+void FPSGraphData::ensureMaxWidth(float width)
+{
+ while (fullWidth() > width) {
+	mData.pop_front();
+ }
+}
+
+
+class BosonUfoFPSGraphWidgetPrivate
+{
+public:
+	BosonUfoFPSGraphWidgetPrivate()
+	{
+		mGameGLMatrices = 0;
+		mGameFPSCounter = 0;
+	}
+	const BoGLMatrices* mGameGLMatrices;
+	const BosonGameFPSCounter* mGameFPSCounter;
+
+	FPSGraphData mFPSData;
+	FPSGraphData mSkippedFPSData;
+};
+
+BosonUfoFPSGraphWidget::BosonUfoFPSGraphWidget()
+	: BoUfoCustomWidget()
+{
+ d = new BosonUfoFPSGraphWidgetPrivate();
+ QTimer* timer = new QTimer(this);
+ connect(timer, SIGNAL(timeout()),
+		this, SLOT(slotAddData()));
+
+ d->mFPSData.mColor = Qt::green;
+ d->mSkippedFPSData.mColor = Qt::red;
+
+ timer->start(100);
+}
+
+BosonUfoFPSGraphWidget::~BosonUfoFPSGraphWidget()
+{
+ delete d;
+}
+
+void BosonUfoFPSGraphWidget::setGameGLMatrices(const BoGLMatrices* m)
+{
+ d->mGameGLMatrices = m;
+}
+
+void BosonUfoFPSGraphWidget::setGameFPSCounter(const BosonGameFPSCounter* c)
+{
+ d->mGameFPSCounter = c;
+}
+
+void BosonUfoFPSGraphWidget::paintWidget()
+{
+ PROFILE_METHOD;
+ BO_CHECK_NULL_RET(d->mGameGLMatrices);
+
+ glMatrixMode(GL_PROJECTION);
+ glPushMatrix();
+ glLoadIdentity();
+ gluOrtho2D(0.0, (GLfloat)width(), 0.0, (GLfloat)height());
+ glMatrixMode(GL_MODELVIEW);
+ glPushMatrix();
+ glLoadIdentity();
+
+ glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_VIEWPORT_BIT);
+ glViewport(d->mGameGLMatrices->viewport()[0],
+		d->mGameGLMatrices->viewport()[1],
+		d->mGameGLMatrices->viewport()[2],
+		d->mGameGLMatrices->viewport()[3]);
+ boTextureManager->disableTexturing();
+
+ paintFPS(d->mFPSData);
+ paintFPS(d->mSkippedFPSData);
+
+ glPopAttrib();
+
+ glMatrixMode(GL_PROJECTION);
+ glPopMatrix();
+ glMatrixMode(GL_MODELVIEW);
+ glPopMatrix();
+}
+
+void BosonUfoFPSGraphWidget::paintFPS(const FPSGraphData& data)
+{
+ glColor3ub(data.mColor.red(), data.mColor.green(), data.mColor.blue());
+
+ float widgetHeight = (float)height();
+
+ float x = 0.0f;
+ glBegin(GL_LINE_STRIP);
+	for (QValueList<float>::const_iterator it = data.mData.begin(); it != data.mData.end(); ++it) {
+		float factor = ((*it) - data.mMin) / data.mMax;
+		float y = factor * widgetHeight;
+		glVertex2f(x, y);
+
+		x += data.mDataWidth;
+	}
+ glEnd();
+
+ // TODO: add a label describing this data
+}
+
+void BosonUfoFPSGraphWidget::slotAddData()
+{
+ if (d->mGameFPSCounter) {
+	double skippedFps;
+	double fps = d->mGameFPSCounter->counter()->fps(&skippedFps);
+	d->mFPSData.addData((float)fps);
+	d->mFPSData.ensureMaxWidth((float)width());
+
+	d->mSkippedFPSData.addData((float)skippedFps);
+	d->mSkippedFPSData.ensureMaxWidth((float)width());
+ }
+
 }
 
