@@ -499,8 +499,8 @@ public:
 	 * It seems that these alignment flags are hints to the layout manager
 	 * in libufo.
 	 **/
-	void setVerticalAlignment(int alignment);
-	void setHorizontalAlignment(int alignment);
+	virtual void setVerticalAlignment(int alignment);
+	virtual void setHorizontalAlignment(int alignment);
 	int verticalAlignment() const;
 	int horizontalAlignment() const;
 
@@ -743,6 +743,16 @@ public:
 	// however atm we don't really need it
 	void setFont(BoUfoManager*, const BoUfoFontInfo& info);
 
+	/**
+	 * See @ref BoUfoWidget::setVerticalAlignment
+	 **/
+	virtual void setVerticalAlignment(int alignment);
+
+	/**
+	 * See @ref BoUfoWidget::setHorizontalAlignment
+	 **/
+	virtual void setHorizontalAlignment(int alignment);
+
 protected:
 	virtual void setMinimumSize(const ufo::UDimension& size);
 	virtual void setPreferredSize(const ufo::UDimension& size);
@@ -793,6 +803,16 @@ public:
 	virtual void setPreferredSize(const ufo::UDimension& size);
 
 	virtual void setOpaque(bool o);
+
+	/**
+	 * See @ref BoUfoWidget::setVerticalAlignment
+	 **/
+	virtual void setVerticalAlignment(int alignment);
+
+	/**
+	 * See @ref BoUfoWidget::setHorizontalAlignment
+	 **/
+	virtual void setHorizontalAlignment(int alignment);
 
 signals:
 	void signalActivated();
