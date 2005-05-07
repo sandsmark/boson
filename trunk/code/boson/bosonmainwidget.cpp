@@ -141,6 +141,11 @@ BosonMainWidget::~BosonMainWidget()
  boConfig->save(editor);
  endGame();
  delete d->mMenuInput;
+ if (ufoManager()) {
+	boDebug() << k_funcinfo << "removing ufo widgets" << endl;
+	ufoManager()->contentWidget()->removeAllWidgets();
+	boDebug() << k_funcinfo << "removed ufo widgets" << endl;
+ }
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
 }
