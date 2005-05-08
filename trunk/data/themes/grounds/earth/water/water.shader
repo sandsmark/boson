@@ -11,6 +11,9 @@ void main()
   vertex = gl_Vertex.xyz;
   lightDir = normalize(lightPos);
 
+  // Texture coordinate for accessing diffuse and normalmap textures
+  gl_TexCoord[0] = gl_TextureMatrix[0] * vec4(gl_Vertex.xyz * 0.1, 1.0f);
+
   gl_Position = ftransform();
 }
 
@@ -23,8 +26,8 @@ uniform sampler2D texture_0;
 uniform sampler2D texture_1;
 // Envmap
 uniform samplerCube texture_2;
-uniform vec3 cameraPos;
 
+uniform vec3 cameraPos;
 varying vec3 vertex;
 varying vec3 lightDir;
 
@@ -33,11 +36,8 @@ varying vec3 lightDir;
 
 void main()
 {
-  // Texture coordinate for accessing diffuse and normalmap textures
-  vec2 texcoord = gl_TextureMatrix[0] * vec4(vertex * 0.1, 1.0f);
-
   // Get normal from the normalmap
-  vec3 normal = normalize(texture2D(texture_1, texcoord).xyz * 2.0 - 1.0);
+  vec3 normal = normalize(texture2D(texture_1, gl_TexCoord[0]).xyz * 2.0 - 1.0);
 
   // Amount of diffuse light received by surface (N.L)
   float diffuse = dot(lightDir, normal) * 0.6;
@@ -52,10 +52,10 @@ void main()
   vec4 speccolor = vec4(1.0, 0.95, 0.8, 1.0) * specular;
 
   // Color from the diffuse texture
-  vec3 basecolor = texture2D(texture_0, vertex * 0.1).xyz;
+  vec3 basecolor = texture2D(texture_0, gl_TexCoord[0]).xyz;
 
   // Color from envmap
-  vec3 envcolor = textureCube(texture_2, reflect(viewv, normal)).xyz;
+  vec3 envcolor = textureCube(texture_2, reflect(vec3(viewv.x, viewv.y, -viewv.z), normal)).xyz;
 
   // Compute fresnel reflection/refraction factor
   float d = IOR * dot(viewv, normal);
