@@ -23,7 +23,6 @@
 
 #include "bosonmap.h"
 #include "bodebug.h"
-#include "info/boinfo.h"
 #include "botexture.h"
 #include "bo3dtools.h"
 #include "bolight.h"
@@ -550,7 +549,7 @@ void BoWaterManager::initOpenGL()
   }
 
   boDebug() << k_funcinfo << "Checking for OpenGL extensions..." << endl;
-  QStringList extensions = BoInfo::boInfo()->openGLExtensions();
+  QStringList extensions = boglGetOpenGLExtensions();
 
   // TODO: some of these are part of the core in later OpenGL versions.
 
