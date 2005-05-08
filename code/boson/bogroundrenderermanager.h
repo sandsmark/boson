@@ -37,15 +37,12 @@ public:
 	~BoGroundRendererManager();
 
 	static void initStatic();
+	static void deleteStatic();
 
 	/**
 	 * @return The BoGroundRendererManager object.
 	 **/
-	static BoGroundRendererManager* manager()
-	{
-		initStatic();
-		return mManager;
-	}
+	static BoGroundRendererManager* manager();
 
 	/**
 	 * @return A list of available renderers. The list contains the names

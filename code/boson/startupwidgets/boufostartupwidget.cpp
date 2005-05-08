@@ -218,7 +218,7 @@ void BoUfoStartupWidget::showWidget(WidgetId widgetId)
 	return;
  }
 
- d->mWidgetStack->raiseWidget((int)widgetId);
+ d->mWidgetStack->raiseStackWidget((int)widgetId);
 }
 
 void BoUfoStartupWidget::initWidget(WidgetId widgetId)
@@ -322,7 +322,7 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
  w->installEventFilter(this); // for the popup menu
 
  d->mWidgetStack->addWidget(w);
- d->mWidgetStack->insertWidget(w, (int)widgetId);
+ d->mWidgetStack->insertStackWidget(w, (int)widgetId);
 
  if (widgetId == IdNewGame) {
 	// the new game widget requires a local player. this gets added
@@ -464,13 +464,13 @@ void BoUfoStartupWidget::slotShowWelcomeWidget()
  // first remove all widgets except the welcome widget
  BoUfoWidget* w = d->mWidgetStack->widget((int)IdWelcome);
  if (w) {
-	d->mWidgetStack->removeWidget(w);
+	d->mWidgetStack->removeStackWidget(w);
  }
  resetWidgets();
  if (w) {
-	d->mWidgetStack->insertWidget(w, (int)IdWelcome);
+	d->mWidgetStack->insertStackWidget(w, (int)IdWelcome);
  }
- d->mWidgetStack->raiseWidget((int)IdWelcome);
+ d->mWidgetStack->raiseStackWidget((int)IdWelcome);
  emit signalResetGame();
  networkInterface()->setGame(boGame);
 
@@ -488,14 +488,11 @@ void BoUfoStartupWidget::resetWidgets()
 
 void BoUfoStartupWidget::removeWidget(WidgetId widgetId)
 {
-#if 0
  BoUfoWidget* w = d->mWidgetStack->widget((int)widgetId);
  if (w) {
+	d->mWidgetStack->removeStackWidget(w);
 	d->mWidgetStack->removeWidget(w);
-#error do NOT delete a BoUfoWidget!!
-	delete w;
  }
-#endif
 }
 
 BosonStartupNetwork* BoUfoStartupWidget::networkInterface() const

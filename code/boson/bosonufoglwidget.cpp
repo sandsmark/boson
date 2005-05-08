@@ -32,8 +32,10 @@ BosonUfoGLWidget::BosonUfoGLWidget(QWidget* parent, const char* name, bool direc
 
 BosonUfoGLWidget::~BosonUfoGLWidget()
 {
- // FIXME: atm this causes a segfault
-// delete mUfoManager;
+ boDebug() << k_funcinfo << endl;
+ delete mUfoManager;
+ mUfoManager = 0;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonUfoGLWidget::initUfo()

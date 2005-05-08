@@ -34,6 +34,8 @@
 // AB: even though this starts with "boufo" it is actually a ufo clas
 #include "boufofontrenderer.h"
 
+#include "boufoaction.h"
+
 // AB: make sure that we are compatible to system that have QT_NO_STL defined
 #ifndef QT_NO_STL
 #define QT_NO_STL
@@ -848,7 +850,16 @@ BoUfoManager::BoUfoManager(int w, int h, bool opaque)
 BoUfoManager::~BoUfoManager()
 {
  boDebug() << k_funcinfo << endl;
+ delete mActionCollection;
+ setMenuBar(0);
+ if (contentWidget()) {
+	boDebug() << k_funcinfo << "removing all widgets" << endl;
+	contentWidget()->removeAllWidgets();
+	boDebug() << k_funcinfo << "removed all widgets" << endl;
+ }
+ boDebug() << k_funcinfo << "deleting context" << endl;
  delete mContext;
+ boDebug() << k_funcinfo << "deleting display" << endl;
  delete mDisplay;
 
  // TODO: do we have to delete the toolkit ?
@@ -875,6 +886,11 @@ void BoUfoManager::removeFrame(BoUfoInternalFrame* frame)
 
 void BoUfoManager::setMenuBar(BoUfoMenuBar* m)
 {
+ // warning: BoUfoMenuBar is NOT a BoUfoWidget! therefore it is NOT
+ // deleted when the UMenuBar is deleted!
+ BoUfoMenuBar* del = mMenuBar;
+ mMenuBar = 0; // ~BoUfoMenuBar calls setMenuBar() which deletes mMenuBar
+ delete del;
  if (mRootPane && mRootPane->getMenuBar()) {
 	mRootPane->setMenuBar(0); // deletes the old menubar
  }
@@ -1277,19 +1293,11 @@ BoUfoWidget::BoUfoWidget(ufo::UWidget* w) : QObject(0, 0)
 void BoUfoWidget::init(ufo::UWidget* w)
 {
  mWidget = w;
+ w->setBoUfoWidgetDeleter(new BoUfoWidgetDeleter(this));
  w->setClipping(false);
 
  mWidget->setOpaque(false);
  mBackgroundImageDrawable = 0;
-
-#if 0
-#warning fixme
- // this causes a crash once a layout is added to mWidget :-(
- // AB: suddenly this crash seems to be gone
-#endif
- BoUfoWidgetDeleter* deleter = new BoUfoWidgetDeleter(this);
- mWidget->trackPointer(deleter); // this means basically trackPointer(this).
-
 
  CONNECT_UFO_TO_QT(BoUfoWidget, mWidget, MouseEntered);
  CONNECT_UFO_TO_QT(BoUfoWidget, mWidget, MouseExited);
@@ -1490,11 +1498,6 @@ void BoUfoWidget::setLayoutClass(LayoutClass layout)
 	case NoLayout:
 		setLayout(0);
 		break;
-#if 0
-	case UFlowLayout:
-		setLayout(new ufo::UFlowLayout());
-		break;
-#endif
 	case UHBoxLayout:
 		setLayout(new ufo::UBoxLayout(ufo::UBoxLayout::XAxis));
 		break;
@@ -1801,7 +1804,6 @@ BoUfoWidget::~BoUfoWidget()
  // AB: do NOT delete the mWidget!
  // we are child of mWidget, not the other way round.
 
-// boDebug() << k_funcinfo << endl;
  if (mBackgroundImageDrawable) {
 	mBackgroundImageDrawable->unreference();
  }
@@ -3272,7 +3274,7 @@ QStringList BoUfoFactory::widgets()
 void BoUFullLayout::layoutContainer(const ufo::UWidget* container)
 {
  for (unsigned int i = 0 ; i < container->getWidgetCount() ; i++) {
-	 ufo::UWidget* w = container->getWidget(i);
+	ufo::UWidget* w = container->getWidget(i);
 	if (w->isVisible()) {
 		w->setBounds(0, 0, container->getWidth(), container->getHeight());
 	}
@@ -3564,7 +3566,7 @@ void BoUfoWidgetStack::init()
  setLayoutClass(BoUfoWidget::UVBoxLayout);
 }
 
-int BoUfoWidgetStack::insertWidget(BoUfoWidget* widget, int id)
+int BoUfoWidgetStack::insertStackWidget(BoUfoWidget* widget, int id)
 {
  if (id < 0) {
 	id = mId2Widget->count();
@@ -3575,17 +3577,17 @@ int BoUfoWidgetStack::insertWidget(BoUfoWidget* widget, int id)
  mId2Widget->insert(id, widget);
  widget->hide();
  if (!mVisibleWidget) {
-	raiseWidget(id);
+	raiseStackWidget(id);
  }
  return id;
 }
 
-void BoUfoWidgetStack::raiseWidget(BoUfoWidget* widget)
+void BoUfoWidgetStack::raiseStackWidget(BoUfoWidget* widget)
 {
- raiseWidget(id(widget));
+ raiseStackWidget(id(widget));
 }
 
-void BoUfoWidgetStack::raiseWidget(int id)
+void BoUfoWidgetStack::raiseStackWidget(int id)
 {
  if (mVisibleWidget) {
 	mVisibleWidget->hide();
@@ -3600,12 +3602,12 @@ void BoUfoWidgetStack::raiseWidget(int id)
  }
 }
 
-void BoUfoWidgetStack::removeWidget(BoUfoWidget* w)
+void BoUfoWidgetStack::removeStackWidget(BoUfoWidget* w)
 {
- removeWidget(id(w));
+ removeStackWidget(id(w));
 }
 
-void BoUfoWidgetStack::removeWidget(int id)
+void BoUfoWidgetStack::removeStackWidget(int id)
 {
  if (id < 0) {
 	return;
@@ -3614,9 +3616,9 @@ void BoUfoWidgetStack::removeWidget(int id)
  mId2Widget->remove(id);
  if (mVisibleWidget == w) {
 	if (mId2Widget->count() > 0) {
-		raiseWidget(mId2Widget->begin().key());
+		raiseStackWidget(mId2Widget->begin().key());
 	} else {
-		raiseWidget(-1);
+		raiseStackWidget(-1);
 	}
  }
 }
