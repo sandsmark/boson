@@ -1317,11 +1317,11 @@ public:
 	BoUfoWidgetStack();
 	~BoUfoWidgetStack();
 
-	int insertWidget(BoUfoWidget*, int id = -1);
-	void raiseWidget(BoUfoWidget*);
-	void raiseWidget(int id);
-	void removeWidget(BoUfoWidget*);
-	void removeWidget(int id);
+	int insertStackWidget(BoUfoWidget*, int id = -1);
+	void raiseStackWidget(BoUfoWidget*);
+	void raiseStackWidget(int id);
+	void removeStackWidget(BoUfoWidget*);
+	void removeStackWidget(int id);
 	BoUfoWidget* widget(int id) const;
 	BoUfoWidget* visibleWidget() const
 	{

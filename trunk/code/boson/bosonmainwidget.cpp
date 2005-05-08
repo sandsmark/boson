@@ -304,8 +304,8 @@ void BosonMainWidget::initUfoGUI()
 
  d->mWidgetStack->addWidget(d->mStartup);
  d->mWidgetStack->addWidget(d->mGameView);
- d->mWidgetStack->insertWidget(d->mStartup);
- d->mWidgetStack->insertWidget(d->mGameView);
+ d->mWidgetStack->insertStackWidget(d->mStartup);
+ d->mWidgetStack->insertStackWidget(d->mGameView);
 
  d->mGameView->setMouseEventsEnabled(true, true);
 
@@ -632,7 +632,7 @@ void BosonMainWidget::slotShowSaveGamePage()
 	return;
  }
  d->mStartup->slotSaveGame();
- d->mWidgetStack->raiseWidget(d->mStartup);
+ d->mWidgetStack->raiseStackWidget(d->mStartup);
 }
 
 void BosonMainWidget::slotStartingFailed()
@@ -769,7 +769,7 @@ void BosonMainWidget::slotGameOver()
  // if you replace this by something else you must call slotResetGame()
  // manually!
  d->mStartup->slotShowWelcomeWidget();
- d->mWidgetStack->raiseWidget(d->mStartup);
+ d->mWidgetStack->raiseStackWidget(d->mStartup);
 }
 
 void BosonMainWidget::slotCancelLoadSave()
@@ -778,7 +778,7 @@ void BosonMainWidget::slotCancelLoadSave()
  if (boGame && boGame->gameStatus() != KGame::Init) {
 	// called from a running game - but the player doesn't want to load/save a
 	// game anymore
-	d->mWidgetStack->raiseWidget(d->mGameView);
+	d->mWidgetStack->raiseStackWidget(d->mGameView);
  } else {
 	if (!d->mStartup) {
 		boError() << k_funcinfo << "NULL startup widget??" << endl;
@@ -954,7 +954,7 @@ void BosonMainWidget::slotGameStarted()
 
  d->mGameView->setCanvas(boGame->canvasNonConst());
 
- d->mWidgetStack->raiseWidget(d->mGameView);
+ d->mWidgetStack->raiseStackWidget(d->mGameView);
 // setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
  setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
 
@@ -1028,7 +1028,7 @@ void BosonMainWidget::slotShowLoadGamePage(KCmdLineArgs* args)
 	return;
  }
  d->mStartup->slotLoadGame();
- d->mWidgetStack->raiseWidget(d->mStartup);
+ d->mWidgetStack->raiseStackWidget(d->mStartup);
 }
 
 void BosonMainWidget::slotShowNewGamePage(KCmdLineArgs* args)

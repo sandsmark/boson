@@ -26,7 +26,6 @@
 #include <bodebug.h>
 
 #include <kapplication.h>
-#include <kstaticdeleter.h>
 #include <kglobal.h>
 #include <kstandarddirs.h>
 #include <klocale.h>
@@ -43,7 +42,6 @@
 BOPLUGIN_MANAGER(BoMeshRendererManager, libbomeshrendererplugin)
 
 BoMeshRendererManager* BoMeshRendererManager::mManager = 0;
-static KStaticDeleter<BoMeshRendererManager> sd;
 
 class BoMeshRendererManagerPrivate
 {
@@ -94,8 +92,30 @@ void BoMeshRendererManager::initStatic()
  if (mManager) {
 	return;
  }
+ boDebug() << k_funcinfo << endl;
  mManager = new BoMeshRendererManager;
- sd.setObject(mManager);
+ boDebug() << k_funcinfo << "done" << endl;
+}
+
+void BoMeshRendererManager::deleteStatic()
+{
+ boDebug() << k_funcinfo << endl;
+ delete mManager;
+ mManager = 0;
+ boDebug() << k_funcinfo << "done" << endl;
+}
+
+BoMeshRendererManager* BoMeshRendererManager::manager()
+{
+ if (!mManager) {
+	boError() << k_funcinfo << "requested manager, but initStatic() has not yet been called. We will most likely crash!" << endl;
+	QString bt = boBacktrace();
+	if (!bt.isEmpty()) {
+		boError() << "backtrace: " << bt << endl;
+	}
+	return 0;
+ }
+ return mManager;
 }
 
 QStringList BoMeshRendererManager::availableRenderers()

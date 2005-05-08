@@ -45,15 +45,12 @@ public:
 	~BoMeshRendererManager();
 
 	static void initStatic();
+	static void deleteStatic();
 
 	/**
 	 * @return The BoMeshRendererManager object.
 	 **/
-	static BoMeshRendererManager* manager()
-	{
-		initStatic();
-		return mManager;
-	}
+	static BoMeshRendererManager* manager();
 
 	/**
 	 * @return A list of available renderers. The list contains the names

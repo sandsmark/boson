@@ -25,7 +25,6 @@
 #include <bodebug.h>
 
 #include <kapplication.h>
-#include <kstaticdeleter.h>
 #include <kglobal.h>
 #include <kstandarddirs.h>
 #include <klocale.h>
@@ -41,7 +40,6 @@
 BOPLUGIN_MANAGER(BoGroundRendererManager, libbogroundrendererplugin)
 
 BoGroundRendererManager* BoGroundRendererManager::mManager = 0;
-static KStaticDeleter<BoGroundRendererManager> sd;
 
 class BoGroundRendererManagerPrivate
 {
@@ -78,8 +76,30 @@ void BoGroundRendererManager::initStatic()
  if (mManager) {
 	return;
  }
+ boDebug() << k_funcinfo << endl;
  mManager = new BoGroundRendererManager;
- sd.setObject(mManager);
+ boDebug() << k_funcinfo << "done" << endl;
+}
+
+void BoGroundRendererManager::deleteStatic()
+{
+ boDebug() << k_funcinfo << endl;
+ delete mManager;
+ mManager = 0;
+ boDebug() << k_funcinfo << "done" << endl;
+}
+
+BoGroundRendererManager* BoGroundRendererManager::manager()
+{
+ if (!mManager) {
+	boError() << k_funcinfo << "requested manager, but initStatic() has not yet been called. We will most likely crash!" << endl;
+	QString bt = boBacktrace();
+	if (!bt.isEmpty()) {
+		boError() << "backtrace: " << bt << endl;
+	}
+	return 0;
+ }
+ return mManager;
 }
 
 QStringList BoGroundRendererManager::availableRenderers()

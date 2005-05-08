@@ -375,6 +375,7 @@ class BosonGameViewPrivate
 public:
 	BosonGameViewPrivate()
 	{
+		mLayeredPane = 0;
 		mUfoCanvasWidget = 0;
 		mUfoGameGUI = 0;
 		mToolTipLabel = 0;
@@ -398,6 +399,7 @@ public:
 
 		mLightWidget = 0;
 	}
+	BoUfoLayeredPane* mLayeredPane;
 	BosonUfoCanvasWidget* mUfoCanvasWidget;
 	BosonUfoPlacementPreviewWidget* mUfoPlacementPreviewWidget;
 	BosonUfoLineVisualizationWidget* mUfoLineVisualizationWidget;
@@ -449,18 +451,26 @@ BosonGameView::~BosonGameView()
  boDebug() << k_funcinfo << endl;
 
  quitGame();
+ boDebug() << k_funcinfo << "quitGame() done" << endl;
+ if (!removeWidget(d->mLayeredPane)) { // AB: do NOT delete it directly!
+	// AB: probably d->mLayeredPane is not a direct child of this widget
+	// anymore?
+	boError() << k_funcinfo << "could not remove layered pane. maybe widget design is changed?" << endl;
+ }
+ boDebug() << k_funcinfo << "layered pane removed" << endl;
  delete d->mActionCollection;
  delete d->mSelectionRect;
  delete d->mScriptConnector;
  delete d->mSelectionGroups;
  delete mSelection;
  delete d->mGameGLMatrices;
- delete d->mUfoGameGUI;
  delete d->mGLMiniMap;
  delete d->mToolTips;
  BoMeshRendererManager::manager()->unsetCurrentRenderer();
  BoGroundRendererManager::manager()->unsetCurrentRenderer();
  SpeciesData::clearSpeciesData();
+ BoGroundRendererManager::deleteStatic();
+ BoMeshRendererManager::deleteStatic();
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
 }
@@ -483,6 +493,8 @@ void BosonGameView::init()
 	}
  }
 
+ BoGroundRendererManager::initStatic();
+ BoMeshRendererManager::initStatic();
  BoMeshRendererManager::manager()->makeRendererCurrent(QString::null);
  BoGroundRendererManager::manager()->makeRendererCurrent(QString::null);
  boWaterManager->setViewFrustum(d->mViewFrustum);
@@ -989,9 +1001,9 @@ void BosonGameView::initUfoGUI()
  // WARNING: ALL widget that are created MUST be added to another widget!
  // Otherwise the created widget won't be deleted!
 
- BoUfoLayeredPane* layeredPane = new BoUfoLayeredPane();
- layeredPane->setOpaque(false);
- addWidget(layeredPane);
+ d->mLayeredPane = new BoUfoLayeredPane();
+ d->mLayeredPane->setOpaque(false);
+ addWidget(d->mLayeredPane);
 
  d->mUfoCanvasWidget = new BosonUfoCanvasWidget();
  d->mUfoCanvasWidget->setGameGLMatrices(d->mGameGLMatrices);
@@ -1035,14 +1047,14 @@ void BosonGameView::initUfoGUI()
  connect(d->mSelectionRect, SIGNAL(signalChanged(const QRect&)),
 		d->mUfoSelectionRectWidget, SLOT(slotSelectionRectChanged(const QRect&)));
 
- layeredPane->addWidget(d->mUfoCanvasWidget);
- layeredPane->addWidget(d->mUfoPlacementPreviewWidget);
- layeredPane->addWidget(d->mUfoLineVisualizationWidget);
- layeredPane->addWidget(d->mUfoGameGUI);
- layeredPane->addWidget(d->mToolTipLabel);
- layeredPane->addWidget(d->mUfoCursorWidget);
- layeredPane->addWidget(d->mUfoSelectionRectWidget);
- layeredPane->addWidget(d->mUfoFPSGraphWidget);
+ d->mLayeredPane->addWidget(d->mUfoCanvasWidget);
+ d->mLayeredPane->addWidget(d->mUfoPlacementPreviewWidget);
+ d->mLayeredPane->addWidget(d->mUfoLineVisualizationWidget);
+ d->mLayeredPane->addWidget(d->mUfoGameGUI);
+ d->mLayeredPane->addWidget(d->mToolTipLabel);
+ d->mLayeredPane->addWidget(d->mUfoCursorWidget);
+ d->mLayeredPane->addWidget(d->mUfoSelectionRectWidget);
+ d->mLayeredPane->addWidget(d->mUfoFPSGraphWidget);
 
 #if 0
  // AB: these are not necessary anymore atm, as we call them in BoUfoWidget.
@@ -1053,7 +1065,7 @@ void BosonGameView::initUfoGUI()
  d->mToolTipLabel->setMouseEventsEnabled(false, false);
  d->mUfoCursorWidget->setMouseEventsEnabled(false, false);
  d->mUfoSelectionRectWidget->setMouseEventsEnabled(false, false);
- layeredPane->setMouseEventsEnabled(false, false);
+ d->mLayeredPane->setMouseEventsEnabled(false, false);
 #endif
 
  glPopAttrib();
