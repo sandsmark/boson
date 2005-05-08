@@ -1,4 +1,21 @@
 [article]
+id=050508
+date=Mai 5th 2005 12:19
+title=Status update
+text=Over a year is left since the last Boson release and you probably
+    heard about the LibUFO port. <br>
+    The work which was done the last months was mainly under the hood
+    and is comming up now. So far the new LibUFO OpenGL GUI is still in a
+    development phase but most parts of Boson are ported and some things
+    are even working ;)<br>
+    Another feature we guess you will enjoy is the use of shaders to rendering water.
+    Please note that shaders are only supported on modern graphic cards
+    (GeForce FX+ or Radeon 9500+)<br>
+    We've uploaded some <a href="screenshots.php">new screenshots</a> showing
+    parts of the LibUFO port and of course, water rendered using shaders.<br>
+    Enjoy !
+
+[article]
 id=041223
 date=December 23rd 2004 21:30
 title=Happy holidays!
