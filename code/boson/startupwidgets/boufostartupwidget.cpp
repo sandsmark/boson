@@ -488,11 +488,14 @@ void BoUfoStartupWidget::resetWidgets()
 
 void BoUfoStartupWidget::removeWidget(WidgetId widgetId)
 {
+#if 0
  BoUfoWidget* w = d->mWidgetStack->widget((int)widgetId);
  if (w) {
 	d->mWidgetStack->removeWidget(w);
+#error do NOT delete a BoUfoWidget!!
 	delete w;
  }
+#endif
 }
 
 BosonStartupNetwork* BoUfoStartupWidget::networkInterface() const
