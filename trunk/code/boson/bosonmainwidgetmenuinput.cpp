@@ -79,6 +79,7 @@ BosonMainWidgetMenuInput::BosonMainWidgetMenuInput(BoUfoActionCollection* parent
 
 BosonMainWidgetMenuInput::~BosonMainWidgetMenuInput()
 {
+ delete d->mActionCollection;
  delete d;
 }
 
