@@ -359,6 +359,10 @@ BosonCommandFrame::BosonCommandFrame()
  initGamePlugins();
  initEditorPlugins();
 
+ BoUfoWidget* stretch = new BoUfoWidget();
+ stretch->setStretch(1);
+ addWidget(stretch);
+
  // we force an update of the game mode
  d->mGameMode = false;
  setGameMode(true);
@@ -372,10 +376,16 @@ BosonCommandFrame::~BosonCommandFrame()
 
 void BosonCommandFrame::initUnitView()
 {
+ BoUfoHBox* hbox = new BoUfoHBox();
+ addWidget(hbox);
  d->mUnitViewWidget = new BoUfoWidget();
- addWidget(d->mUnitViewWidget);
  d->mUnitView = new BosonUnitView();
  d->mUnitViewWidget->addWidget(d->mUnitView);
+
+ BoUfoWidget* stretch = new BoUfoWidget();
+ stretch->setStretch(1);
+ hbox->addWidget(d->mUnitViewWidget);
+ hbox->addWidget(stretch);
 }
 
 void BosonCommandFrame::initUnitActions()

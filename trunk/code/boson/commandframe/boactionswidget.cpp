@@ -51,7 +51,7 @@ BoActionsWidget::BoActionsWidget()
 {
  d = new BoActionsWidgetPrivate;
 
- setLayoutClass(UFlowLayout);
+ setLayoutClass(UGridLayout);
 }
 
 BoActionsWidget::~BoActionsWidget()

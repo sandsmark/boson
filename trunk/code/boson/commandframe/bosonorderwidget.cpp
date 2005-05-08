@@ -56,7 +56,7 @@ BosonOrderWidget::BosonOrderWidget()
  d = new BosonOrderWidgetPrivate;
  d->mIsProduceAction = false;
 
- setLayoutClass(UFlowLayout);
+ setLayoutClass(UGridLayout);
 }
 
 BosonOrderWidget::~BosonOrderWidget()
