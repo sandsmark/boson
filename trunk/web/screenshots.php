@@ -257,27 +257,39 @@ add_screenshot("War between some units. Also note the new OpenGL minimap",
     "2. May 2004 (Boson 0.10)", "0.10-4-thumb.jpg", "0.10-4.jpg");
 
 add_screenshot("Sam-site and an aircraft shooting each other",
-    "<b>NEW:</b> 23. December 2004 (CVS)", "0412-10-thumb.jpg", "0412-10.jpg");
+    "23. December 2004 (CVS)", "0412-10-thumb.jpg", "0412-10.jpg");
 add_screenshot("Some units attacking player's base",
-    "<b>NEW:</b> 23. December 2004 (CVS)", "0412-9-thumb.jpg", "0412-9.jpg");
+    "23. December 2004 (CVS)", "0412-9-thumb.jpg", "0412-9.jpg");
 add_screenshot("Close-up of some trees",
-    "<b>NEW:</b> 23. December 2004 (CVS)", "0412-8-thumb.jpg", "0412-8.jpg");
+    "23. December 2004 (CVS)", "0412-8-thumb.jpg", "0412-8.jpg");
 add_screenshot("New fog-of-war rendering method produces smooth transitions for terrain",
-    "<b>NEW:</b> 23. December 2004 (CVS)", "0412-7-thumb.jpg", "0412-7.jpg");
+    "23. December 2004 (CVS)", "0412-7-thumb.jpg", "0412-7.jpg");
 add_screenshot("Another screenshot of the water with some oil towers in the background",
-    "<b>NEW:</b> 23. December 2004 (CVS)", "0412-6-thumb.jpg", "0412-6.jpg");
+    "23. December 2004 (CVS)", "0412-6-thumb.jpg", "0412-6.jpg");
 add_screenshot("A guided missile flying towards a helicopter",
-    "<b>NEW:</b> 23. December 2004 (CVS)", "0412-5-thumb.jpg", "0412-5.jpg");
+    "23. December 2004 (CVS)", "0412-5-thumb.jpg", "0412-5.jpg");
 add_screenshot("A small lake with forest at one side",
-    "<b>NEW:</b> 23. December 2004 (CVS)", "0412-4-thumb.jpg", "0412-4.jpg");
+    "23. December 2004 (CVS)", "0412-4-thumb.jpg", "0412-4.jpg");
 add_screenshot("A burning house",
-    "<b>NEW:</b> 23. December 2004 (CVS)", "0412-3-thumb.jpg", "0412-3.jpg");
+    "23. December 2004 (CVS)", "0412-3-thumb.jpg", "0412-3.jpg");
 add_screenshot("New beautiful water with translucency, reflections and waves",
-    "<b>NEW:</b> 23. December 2004 (CVS)", "0412-2-thumb.jpg", "0412-2.jpg");
+    "23. December 2004 (CVS)", "0412-2-thumb.jpg", "0412-2.jpg");
 add_screenshot("A village conquered by enemy with some stuff burning and smoking",
-    "<b>NEW:</b> 23. December 2004 (CVS)", "0412-1-thumb.jpg", "0412-1.jpg");
+    "23. December 2004 (CVS)", "0412-1-thumb.jpg", "0412-1.jpg");
+add_screenshot("A village conquered by enemy with some stuff burning and smoking",
+    "23. December 2004 (CVS)", "0412-1-thumb.jpg", "0412-1.jpg");
 
 
+add_screenshot("And again, the new water rendering using shaders",
+    "<b>NEW:</b> 08. May 2005 (CVS)", "050508-5-thumb.jpg", "050508-5.jpg");
+add_screenshot("Some selected units and water renderering using shaders",
+    "<b>NEW:</b> 08. May 2005 (CVS)", "050508-3-thumb.jpg", "050508-3.jpg");
+add_screenshot("The new menu",
+    "<b>NEW:</b> 08. May 2005 (CVS)", "050508-4-thumb.jpg", "050508-4.jpg");
+add_screenshot("The game is loading",
+    "<b>NEW:</b> 08. May 2005 (CVS)", "050508-2-thumb.jpg", "050508-2.jpg");
+add_screenshot("The new 'start game' dialog",
+    "<b>NEW:</b> 08. May 2005 (CVS)", "050508-1-thumb.jpg", "050508-1.jpg");
 
 $ss_count = count($screens);
 

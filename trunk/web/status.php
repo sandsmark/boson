@@ -75,6 +75,7 @@ draw_bigbox_text("What has been changed since 0.10:
     <li>Environmental effects (can be used to create snow, rain, etc)</li>
     <li>Improved and much better-looking fog-of-war rendering for terrain</li>
     <li>Support for anisotropic filtering for textures (better quality)</li>
+    <li>Support for water rendering using shaders</li>
  </ul>
 
  <h3>Game</h3>
