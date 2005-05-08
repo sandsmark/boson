@@ -108,6 +108,8 @@ public:
 	 **/
 	static BosonData* bosonData();
 
+	void clearData();
+
 	bool insertGroundTheme(BosonDataObject* object);
 	bool loadGroundTheme(const QString& id);
 	BosonGroundTheme* groundTheme(const QString& id) const;

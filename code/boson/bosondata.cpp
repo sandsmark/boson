@@ -55,10 +55,15 @@ BosonData::BosonData()
 
 BosonData::~BosonData()
 {
+ clearData();
+ delete d;
+}
+
+void BosonData::clearData()
+{
  d->mCampaigns.clear();
  d->mPlayFields.clear();
  d->mGroundThemes.clear();
- delete d;
 }
 
 BosonData* BosonData::bosonData()
