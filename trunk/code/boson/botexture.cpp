@@ -736,7 +736,8 @@ BoTextureManager* BoTextureManager::textureManager()
 {
   if(!mManager)
   {
-    mManager = new BoTextureManager();
+    boError() << k_funcinfo << "initStatic() has not been called yet!" << endl;
+    return 0;
   }
   return mManager;
 }
@@ -768,6 +769,22 @@ BoTextureManager::~BoTextureManager()
   boDebug() << k_funcinfo << "Deleting remaining " << mTextures.count() << " textures" << endl;
   mTextures.setAutoDelete(true);
   mTextures.clear();
+}
+
+void BoTextureManager::initStatic()
+{
+  if(mManager)
+  {
+    return;
+  }
+  mManager = new BoTextureManager();
+  mManager->initOpenGL();
+}
+
+void BoTextureManager::deleteStatic()
+{
+  delete mManager;
+  mManager = 0;
 }
 
 void BoTextureManager::initOpenGL()

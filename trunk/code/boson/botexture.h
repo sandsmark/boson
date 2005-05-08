@@ -343,6 +343,8 @@ class BoTextureManager
     BoTextureManager();
     ~BoTextureManager();
 
+    static void initStatic();
+    static void deleteStatic();
     static BoTextureManager* textureManager();
 
 

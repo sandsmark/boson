@@ -47,6 +47,7 @@
 #include "bosoncursor.h"
 #include "bosonfpscounter.h"
 #include "bosonmainwidgetmenuinput.h"
+#include "bosondata.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -146,6 +147,8 @@ BosonMainWidget::~BosonMainWidget()
 	ufoManager()->contentWidget()->removeAllWidgets();
 	boDebug() << k_funcinfo << "removed ufo widgets" << endl;
  }
+ BosonData::bosonData()->clearData();
+ BoTextureManager::deleteStatic();
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
 }
@@ -231,6 +234,8 @@ void BosonMainWidget::initializeGL()
  boglInit();
 
  d->mFPSCounter->reset();
+
+ BoTextureManager::initStatic();
 
  if (!context()->deviceIsPixmap()) {
 	if (!directRendering()) {
