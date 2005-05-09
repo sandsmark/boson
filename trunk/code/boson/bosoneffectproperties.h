@@ -55,6 +55,8 @@ class BosonEffectPropertiesManager
     BosonEffectPropertiesManager();
     ~BosonEffectPropertiesManager();
 
+    static void initStatic();
+    static void deleteStatic();
     static BosonEffectPropertiesManager* bosonEffectPropertiesManager();
 
     /**

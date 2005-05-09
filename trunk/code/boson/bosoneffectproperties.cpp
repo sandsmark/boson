@@ -38,6 +38,20 @@
 
 BosonEffectPropertiesManager* BosonEffectPropertiesManager::mManager = 0;
 
+void BosonEffectPropertiesManager::initStatic()
+{
+  if(!mManager)
+  {
+    mManager = new BosonEffectPropertiesManager();
+  }
+}
+
+void BosonEffectPropertiesManager::deleteStatic()
+{
+  delete mManager;
+  mManager = 0;
+}
+
 BosonEffectPropertiesManager::BosonEffectPropertiesManager()
 {
   mEffectProperties.setAutoDelete(true);
@@ -52,8 +66,7 @@ BosonEffectPropertiesManager* BosonEffectPropertiesManager::bosonEffectPropertie
 {
   if(!mManager)
   {
-#warning TODO: use static deleter
-    mManager = new BosonEffectPropertiesManager();
+    boError() << k_funcinfo << "initStatic() has not been called" << endl;
   }
   return mManager;
 }
