@@ -459,6 +459,7 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 		}
 		m *= 2;
 	}
+	delete[] helperlist;
  }
 
  bool useLOD = boConfig->boolValue("UseLOD");
