@@ -52,7 +52,7 @@ BoDebugLog::BoDebugLog()
  // problems anyway.
  // but INFO can easily reach _huge_ numbers
  setMaxCount(BoDebug::KDEBUG_ERROR, 1000);
- setMaxCount(BoDebug::KDEBUG_WARN, 1000);
+ setMaxCount(BoDebug::KDEBUG_WARN, 500);
  setMaxCount(BoDebug::KDEBUG_INFO, 2000);
 
  // the most recent errors are the important ones
