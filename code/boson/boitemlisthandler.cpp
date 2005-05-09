@@ -53,6 +53,7 @@ BoItemListHandler::BoItemListHandler() : QObject(0)
 
 BoItemListHandler::~BoItemListHandler()
 {
+ slotDeleteLists();
  delete d;
 }
 
