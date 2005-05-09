@@ -485,6 +485,7 @@ void BoConditionAction::fire()
 	BoEvent* e = new BoEvent();
 	if (!e->load(root)) {
 		boError(360) << k_funcinfo << "could not load event that is caused by condition" << endl;
+		delete e;
 		return;
 	}
 	boGame->queueEvent(e);
