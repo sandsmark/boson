@@ -61,6 +61,11 @@ BoLightManager::BoLightManager()
 
 BoLightManager::~BoLightManager()
 {
+  for(unsigned int i = 0; i < mLights->count(); i++)
+  {
+    delete (*mLights)[i];
+  }
+  mLights->clear();
   delete mLights;
 }
 
