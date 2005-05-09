@@ -68,6 +68,7 @@ CursorPreview::~CursorPreview()
 {
  delete mUpdateTimer;
  delete mCursor;
+ BoTextureManager::deleteStatic();
 }
 
 void CursorPreview::initializeGL()
@@ -79,6 +80,7 @@ void CursorPreview::initializeGL()
  glEnable(GL_BLEND);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  mUpdateTimer->start(30);
+ BoTextureManager::initStatic();
 }
 
 void CursorPreview::resizeGL(int w, int h)
