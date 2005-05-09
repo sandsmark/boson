@@ -130,6 +130,17 @@ void BoLightManager::deleteLight(int id)
   }
 }
 
+void BoLightManager::updateAllStates()
+{
+  for(unsigned int i = 0; i < mLights->size(); i++)
+  {
+    if((*mLights)[i] != 0)
+    {
+      (*mLights)[i]->updateStates();
+    }
+  }
+}
+
 
 /*****  BoLight  *****/
 
