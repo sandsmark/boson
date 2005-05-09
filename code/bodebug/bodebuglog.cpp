@@ -51,16 +51,16 @@ BoDebugLog::BoDebugLog()
  // if ERROR ever goes beyound 10000 entries, we have a lot of more grave
  // problems anyway.
  // but INFO can easily reach _huge_ numbers
- setMaxCount(BoDebug::KDEBUG_ERROR, 10000);
- setMaxCount(BoDebug::KDEBUG_WARN, 10000);
- setMaxCount(BoDebug::KDEBUG_INFO, 5000);
+ setMaxCount(BoDebug::KDEBUG_ERROR, 1000);
+ setMaxCount(BoDebug::KDEBUG_WARN, 1000);
+ setMaxCount(BoDebug::KDEBUG_INFO, 2000);
 
  // the most recent errors are the important ones
  setPopAtFront(BoDebug::KDEBUG_INFO, true);
 
 
  // the separate list that is independant of the level
- setMaxCount(-1, 10000);
+ setMaxCount(-1, 5000);
  setPopAtFront(-1, true);
 }
 
