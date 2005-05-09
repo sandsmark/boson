@@ -71,6 +71,7 @@ BosonUfoCanvasWidget::BosonUfoCanvasWidget()
 BosonUfoCanvasWidget::~BosonUfoCanvasWidget()
 {
  quitGame();
+ delete d->mCanvasRenderer;
  delete d;
 }
 
