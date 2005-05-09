@@ -148,10 +148,14 @@ void BosonAudioInterface::sendCommand(BoAudioCommand* command)
 #if USE_PROCESS
  if (d->mProcess) {
 	d->mProcess->sendCommand(command);
+ } else {
+	delete command;
  }
 #else
  if (d->mAudio) {
 	d->mAudio->executeCommand(command);
+ } else {
+	delete command;
  }
 #endif
 }
