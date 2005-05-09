@@ -21,6 +21,7 @@ Patches applied currently (this list may not be complete):
   rects that are larger than the viewport)
 - Patch to uwidget.h and uwidget.cpp to take a ufo::UCollectable* as widget
   deleter. This object is deleted at the very first in the d'tor.
+- Patch to uthemelookandfeel.cpp to close the X display it opens
 
 Use
  make_ufo_dir.sh ufo_dir code/ufo
