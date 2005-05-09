@@ -48,6 +48,8 @@ class BoLightManager
     static void deleteStatic();
     static BoLightManager* manager();
 
+    void updateAllStates();
+
   private:
     void init();
     QValueVector<BoLight*>* mLights;
