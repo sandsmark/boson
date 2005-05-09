@@ -450,6 +450,7 @@ void BosonCanvas::init()
  d->mNextItemId.registerData(IdNextItemId, d->mProperties,
 		KGamePropertyBase::PolicyLocal, "NextItemId");
  d->mNextItemId.setLocal(0);
+ BosonEffectPropertiesManager::initStatic();
 
  if (!boGame) {
 	boError() << k_funcinfo << "NULL boGame object: cannot install event listener" << endl;
@@ -465,6 +466,7 @@ BosonCanvas::~BosonCanvas()
  quitGame();
  delete d->mStatistics;
  delete mCollisions;
+ BosonEffectPropertiesManager::deleteStatic();
  delete d;
  boDebug()<< k_funcinfo <<"done"<< endl;
 }
