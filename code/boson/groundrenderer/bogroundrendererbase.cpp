@@ -495,7 +495,7 @@ float BoGroundRendererCellListLOD::distanceFromPlane(const float* plane, const B
 
 FogTexture::~FogTexture()
 {
- delete mFogTextureData;
+ delete[] mFogTextureData;
  delete mFogTexture;
 }
 
@@ -544,7 +544,7 @@ void FogTexture::initFogTexture(const BosonMap* map)
 {
  if (mLastMapWidth != map->width() || mLastMapHeight != map->height()) {
 	// Map size has changed. Delete fog texture (new one will be created)
-	delete mFogTextureData;
+	delete[] mFogTextureData;
 	delete mFogTexture;
 	mFogTextureData = 0;
 	mFogTexture = 0;
