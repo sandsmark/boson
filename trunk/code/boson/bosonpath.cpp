@@ -1562,6 +1562,10 @@ BosonPath2::BosonPath2(BosonMap* map)
 
 BosonPath2::~BosonPath2()
 {
+  mHLPathCache.setAutoDelete(true);
+  mHLPathCache.clear();
+  delete[] mSectors;
+  delete[] mRegionIdUsed;
 }
 
 void BosonPath2::init()
