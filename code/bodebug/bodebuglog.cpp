@@ -103,7 +103,7 @@ void BoDebugLog::addEntry(const QString& string, int area, const QString& areaNa
  bool addToLevel = true;
  bool addToAll = true;
  unsigned int countLevel = mMessages[level].count();
- unsigned int countAll = mMessages[level].count();
+ unsigned int countAll = mAllMessages.count();
  QString backtrace;
  if (countLevel >= mMaxCount[level]) {
 	if (mPopAtFront[level]) {
