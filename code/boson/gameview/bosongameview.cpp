@@ -2063,16 +2063,9 @@ void BosonGameView::paint()
 
 
  glLoadMatrixf(d->mModelviewMatrix.data());
- if (light(0)) {
-	// AB: lights may depend on the modelview matrix, therefore we must
-	// update the light at least once with a valid 3d modelview matrix.
-	//
-	// TODO: note that probably we should do that for _all_ lights, not just
-	// the first one!
-	// (however usually only light(0) is used, so I leave it up to someone
-	// else to fix this issue)
-	light(0)->updateStates();
- }
+ // AB: lights may depend on the modelview matrix, therefore we must
+ // update the lights at least once with a valid 3d modelview matrix.
+ BoLightManager::manager()->updateAllStates();
 
 
  glPopMatrix();
