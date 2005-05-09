@@ -50,6 +50,7 @@ BosonProfilingItem::BosonProfilingItem()
 	  mChildren(0),
 	  mEnded(false)
 {
+ gettimeofday(&mStart, 0);
 }
 
 BosonProfilingItem::BosonProfilingItem(const QString& name)
