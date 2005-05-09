@@ -79,6 +79,7 @@ BoEventListener::~BoEventListener()
  }
  d->mConditions.clear();
  d->mEventHandlers.clear();
+ delete d->mScript;
  delete d;
 }
 
