@@ -182,7 +182,7 @@ if (value != "") { cscheme->put(#key, value); }
 
 #undef UFO_PUT_VALID
 
-	//XCloseDisplay(display);
+	XCloseDisplay(display);
 #elif defined(UFO_GFX_WIN32) // UFO_GFX_X11
 #endif
 }
