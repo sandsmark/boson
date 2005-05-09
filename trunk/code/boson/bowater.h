@@ -173,6 +173,8 @@ class BoWaterManager
     BoWaterManager();
     ~BoWaterManager();
 
+    static void initStatic();
+    static void deleteStatic();
     static BoWaterManager* waterManager();
 
     bool loadFromXML(const QDomElement& root);
