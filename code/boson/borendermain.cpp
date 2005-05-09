@@ -197,6 +197,7 @@ ModelPreview::~ModelPreview()
  delete mLight;
  delete mCamera;
  mSpecies.clear();
+ BoTextureManager::deleteStatic();
 }
 
 void ModelPreview::initializeGL()
@@ -210,6 +211,7 @@ void ModelPreview::initializeGL()
  }
  recursive = true;
  makeCurrent();
+ BoTextureManager::initStatic();
 #if BOSONFONT
  delete mDefaultFont;
  BoFontInfo defaultFontInfo;
