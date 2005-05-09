@@ -471,6 +471,8 @@ BosonGameView::~BosonGameView()
  SpeciesData::clearSpeciesData();
  BoGroundRendererManager::deleteStatic();
  BoMeshRendererManager::deleteStatic();
+ BoWaterManager::deleteStatic();
+ BoLightManager::deleteStatic();
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
 }
@@ -493,10 +495,13 @@ void BosonGameView::init()
 	}
  }
 
+ BoLightManager::initStatic();
+ BoWaterManager::initStatic();
  BoGroundRendererManager::initStatic();
  BoMeshRendererManager::initStatic();
  BoMeshRendererManager::manager()->makeRendererCurrent(QString::null);
  BoGroundRendererManager::manager()->makeRendererCurrent(QString::null);
+
  boWaterManager->setViewFrustum(d->mViewFrustum);
 
 
@@ -523,7 +528,6 @@ void BosonGameView::init()
  d->mSelectionGroups->setSelection(selection());
 
  d->mScriptConnector = new BosonGameViewScriptConnector(this);
-
 
 
  BoVector4Float lightDif(0.644f, 0.644f, 0.644f, 1.0f);
@@ -853,7 +857,7 @@ void BosonGameView::cameraChanged()
 
  d->mUfoCanvasWidget->setParticlesDirty(true);
 
- const QValueVector<BoLight*>* lights = BoLightManager::lights();
+ const QValueVector<BoLight*>* lights = BoLightManager::manager()->lights();
  for (unsigned int i = 0; i < lights->size(); i++) {
 	if (lights->at(i) != 0) {
 		lights->at(i)->refreshPosition();
@@ -1057,15 +1061,12 @@ void BosonGameView::initUfoGUI()
  d->mLayeredPane->addWidget(d->mUfoFPSGraphWidget);
 
 #if 0
- // AB: these are not necessary anymore atm, as we call them in BoUfoWidget.
- d->mUfoCanvasWidget->setMouseEventsEnabled(false, false);
- d->mUfoPlacementPreviewWidget->setMouseEventsEnabled(false, false);
- d->mUfoLineVisualizationWidget->setMouseEventsEnabled(false, false);
- d->mUfoGameGUI->setMouseEventsEnabled(false, false);
- d->mToolTipLabel->setMouseEventsEnabled(false, false);
- d->mUfoCursorWidget->setMouseEventsEnabled(false, false);
- d->mUfoSelectionRectWidget->setMouseEventsEnabled(false, false);
- d->mLayeredPane->setMouseEventsEnabled(false, false);
+ d->mLayeredPane->setMouseEventsEnabled(true, true);
+ d->mLayeredPane->setKeyEventsEnabled(true);
+ d->mLayeredPane->setFocusEventsEnabled(true);
+ d->mUfoGameGUI->setMouseEventsEnabled(true, true);
+ d->mUfoGameGUI->setKeyEventsEnabled(true);
+ d->mUfoGameGUI->setFocusEventsEnabled(true);
 #endif
 
  glPopAttrib();
@@ -1430,17 +1431,17 @@ void BosonGameView::setLocalPlayerScript(BosonScript* script)
 
 BoLight* BosonGameView::light(int id) const
 {
- return BoLightManager::light(id);
+ return BoLightManager::manager()->light(id);
 }
 
 BoLight* BosonGameView::newLight()
 {
- return BoLightManager::createLight();
+ return BoLightManager::manager()->createLight();
 }
 
 void BosonGameView::removeLight(int id)
 {
- BoLightManager::deleteLight(id);
+ BoLightManager::manager()->deleteLight(id);
 }
 
 void BosonGameView::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag)

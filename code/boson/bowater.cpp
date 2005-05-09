@@ -295,12 +295,27 @@ bool BoLake::hasAnyCorner(float x1, float y1, float x2, float y2)
 
 BoWaterManager* BoWaterManager::mManager = 0;
 
+void BoWaterManager::initStatic()
+{
+  if(mManager)
+  {
+    return;
+  }
+  mManager = new BoWaterManager();
+}
+
+void BoWaterManager::deleteStatic()
+{
+  delete mManager;
+  mManager = 0;
+}
+
 BoWaterManager* BoWaterManager::waterManager()
 {
   if(!mManager)
   {
-#warning TODO: use static deleter
-    mManager = new BoWaterManager();
+    boError() << k_funcinfo << "initStatic() was not called" << endl;
+    return 0;
   }
   return mManager;
 }

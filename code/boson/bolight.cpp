@@ -27,32 +27,58 @@
 
 /*****  BoLightManager  *****/
 
-bool BoLightManager::mInited = false;
-QValueVector<BoLight*> BoLightManager::mLights;
+BoLightManager* BoLightManager::mLightManager = 0;
 
-void BoLightManager::init()
+void BoLightManager::initStatic()
 {
-  if(mInited)
+  if(mLightManager)
   {
     return;
   }
+  mLightManager = new BoLightManager();
+}
 
+void BoLightManager::deleteStatic()
+{
+  delete mLightManager;
+  mLightManager = 0;
+}
+
+BoLightManager* BoLightManager::manager()
+{
+  if(!mLightManager)
+  {
+    boError() << k_funcinfo << "initStatic() has not yet been called!" << endl;
+    return 0;
+  }
+  return mLightManager;
+}
+
+BoLightManager::BoLightManager()
+{
+  init();
+}
+
+BoLightManager::~BoLightManager()
+{
+  delete mLights;
+}
+
+void BoLightManager::init()
+{
   int maxlights;
   glGetIntegerv(GL_MAX_LIGHTS, &maxlights);
   boDebug() << k_funcinfo << maxlights << " lights are supported" << endl;
 
-  mLights.resize(maxlights, false);
-
-  mInited = true;
+  mLights = new QValueVector<BoLight*>();
+  mLights->resize(maxlights, false);
 }
 
 int BoLightManager::nextFreeId()
 {
-  init();
-
-  for(unsigned int i = 0; i < mLights.size(); i++)
+  for(unsigned int i = 0; i < mLights->size(); i++)
   {
-    if(mLights[i] == 0)
+    if((*mLights)[i] == 0)
     {
       boDebug() << k_funcinfo << "Light " << i << " not used" << endl;
       return i;
@@ -64,29 +90,22 @@ int BoLightManager::nextFreeId()
 
 void BoLightManager::setLight(int id, BoLight* light)
 {
-  init();
-
-  mLights[id] = light;
+  (*mLights)[id] = light;
 }
 
 const QValueVector<BoLight*>* BoLightManager::lights()
 {
-  init();
-
-  return &mLights;
+  return mLights;
 }
 
 BoLight* BoLightManager::light(int id)
 {
-  init();
-
-  return mLights[id];
+  return (*mLights)[id];
 }
 
 BoLight* BoLightManager::createLight()
 {
-#warning this is never deleted
-  BoLight* light = new BoLight;
+  BoLight* light = new BoLight; // this also call BoLightManager::setLight()
   if(light->id() == -1)
   {
     // Light could not be created
@@ -98,12 +117,10 @@ BoLight* BoLightManager::createLight()
 
 void BoLightManager::deleteLight(int id)
 {
-  init();
-
-  BoLight* l = mLights[id];
+  BoLight* l = (*mLights)[id];
   if(l)
   {
-    mLights[id] = 0;
+    (*mLights)[id] = 0;
     delete l;
   }
 }
@@ -114,12 +131,12 @@ void BoLightManager::deleteLight(int id)
 BoLight::BoLight()
 {
   // Get id for this light
-  mId = BoLightManager::nextFreeId();
+  mId = BoLightManager::manager()->nextFreeId();
   if(mId == -1)
   {
     return;  // All lights already in use
   }
-  BoLightManager::setLight(mId, this);
+  BoLightManager::manager()->setLight(mId, this);
 
   // Disable
   mEnabled = false;
@@ -135,7 +152,7 @@ BoLight::~BoLight()
     return;
   }
   setEnabled(false);
-  BoLightManager::setLight(mId, 0);
+  BoLightManager::manager()->setLight(mId, 0);
 }
 
 void BoLight::setAmbient(const BoVector4Float& a)

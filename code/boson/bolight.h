@@ -32,20 +32,27 @@ class BoLight;
 class BoLightManager
 {
   public:
-    static BoLight* createLight();
-    static void deleteLight(int id);
-    static BoLight* light(int id);
+    BoLightManager();
+    ~BoLightManager();
 
-    static int nextFreeId();
+    BoLight* createLight();
+    void deleteLight(int id);
+    BoLight* light(int id);
+
+    int nextFreeId();
     // TODO: make this private?
-    static void setLight(int id, BoLight* light);
-    static const QValueVector<BoLight*>* lights();
+    void setLight(int id, BoLight* light);
+    const QValueVector<BoLight*>* lights();
+
+    static void initStatic();
+    static void deleteStatic();
+    static BoLightManager* manager();
 
   private:
-    static void init();
+    void init();
+    QValueVector<BoLight*>* mLights;
 
-    static bool mInited;
-    static QValueVector<BoLight*> mLights;
+    static BoLightManager* mLightManager;
 };
 
 /**
