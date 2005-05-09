@@ -174,7 +174,7 @@ int BosonProfilingStorage::maximalEntries() const
 void BosonProfilingStorage::addItem(BosonProfilingItem* item)
 {
  mItems->append(item);
- if (maximalEntries() > 0) {
+ if (maximalEntries() >= 0) {
 	while (mItems->count() > (unsigned int)maximalEntries()) {
 		// remove the old entries
 		BosonProfilingItem* item = mItems->take(0);
