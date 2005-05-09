@@ -768,6 +768,9 @@ BoTextureManager::~BoTextureManager()
   boDebug() << k_funcinfo << "Deleting remaining " << mTextures.count() << " textures" << endl;
   mTextures.setAutoDelete(true);
   mTextures.clear();
+
+  delete[] mActiveTexture;
+  delete[] mActiveTextureType;
 }
 
 void BoTextureManager::initStatic()
