@@ -278,6 +278,8 @@ void BosonMainWidget::initUfoGUI()
 
  d->mStartup = new BoUfoStartupWidget();
  d->mStartup->show();
+ connect(d->mStartup, SIGNAL(signalUpdateGL()),
+		this, SLOT(slotUpdateGL()));
  connect(d->mStartup, SIGNAL(signalAddLocalPlayer()),
 		this, SLOT(slotAddLocalPlayer()));
  connect(d->mStartup, SIGNAL(signalResetGame()),
@@ -741,24 +743,14 @@ void BosonMainWidget::reinitGame()
 
  delete d->mStarting;
  d->mStarting = new BosonStarting(this); // manages startup of games
- connect(d->mStarting, SIGNAL(signalLoadingReset()),
-		d->mStartup, SLOT(slotLoadingReset()));
- connect(d->mStarting, SIGNAL(signalLoadingSetAdmin(bool)),
-		d->mStartup, SLOT(slotLoadingSetAdmin(bool)));
- connect(d->mStarting, SIGNAL(signalLoadingSetLoading(bool)),
-		d->mStartup, SLOT(slotLoadingSetLoading(bool)));
- connect(d->mStarting, SIGNAL(signalLoadingType(int)),
-		d->mStartup, SLOT(slotLoadingType(int)));
- connect(d->mStarting, SIGNAL(signalLoadingPlayersCount(int)),
-		d->mStartup, SLOT(slotLoadingPlayersCount(int)));
- connect(d->mStarting, SIGNAL(signalLoadingPlayer(int)),
-		d->mStartup, SLOT(slotLoadingPlayer(int)));
- connect(d->mStarting, SIGNAL(signalLoadingUnitsCount(int)),
-		d->mStartup, SLOT(slotLoadingUnitsCount(int)));
- connect(d->mStarting, SIGNAL(signalLoadingUnit(int)),
-		d->mStartup, SLOT(slotLoadingUnit(int)));
- connect(d->mStarting, SIGNAL(signalLoadingShowProgressBar(bool)),
-		d->mStartup, SLOT(slotLoadingShowProgressBar(bool)));
+ connect(d->mStarting, SIGNAL(signalLoadingMaxDuration(unsigned int)),
+		d->mStartup, SLOT(slotLoadingMaxDuration(unsigned int)));
+ connect(d->mStarting, SIGNAL(signalLoadingTaskCompleted(unsigned int)),
+		d->mStartup, SLOT(slotLoadingTaskCompleted(unsigned int)));
+ connect(d->mStarting, SIGNAL(signalLoadingStartTask(const QString&)),
+		d->mStartup, SLOT(slotLoadingStartTask(const QString&)));
+ connect(d->mStarting, SIGNAL(signalLoadingStartSubTask(const QString&)),
+		d->mStartup, SLOT(slotLoadingStartSubTask(const QString&)));
  connect(d->mStarting, SIGNAL(signalStartingFailed()),
 		this, SLOT(slotStartingFailed()));
 

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,6 +27,9 @@ class Player;
 class Boson;
 class BosonCanvas;
 class QDomElement;
+template<class T> class QPtrList;
+template<class T1, class T2> class QMap;
+class BosonStartingTask;
 
 class BosonStartingPrivate;
 /**
@@ -98,26 +101,33 @@ public:
 signals:
 	void signalStartingFailed();
 
+	void signalLoadingMaxDuration(unsigned int duration);
+	
 	/**
-	 * Change the type of data thats currently being loaded. See @ref
-	 * BosonLoadingWidget::LoadingType
+	 * Emitted when a task has been completed. The progress bar should be
+	 * updated.
+	 * @param duration The amount of "time" (as an abstract starting
+	 * progress, not with a real unit) that has passed. See @ref
+	 * signalMaxLoadingDuration for the maximal value.
 	 **/
-	void signalLoadingType(int type);
+	void signalLoadingTaskCompleted(unsigned int duration);
 
-	void signalLoadingShowProgressBar(bool show);
-	void signalLoadingReset();
-	void signalLoadingSetAdmin(bool isAdmin);
-	void signalLoadingSetLoading(bool isLoading);
-	void signalLoadingPlayersCount(int count);
-	void signalLoadingPlayer(int current);
+	/**
+	 * Emitted when a starting task begins. @p text describes this task
+	 * (i18n'ed)
+	 **/
+	void signalLoadingStartTask(const QString& text);
+
+	void signalLoadingStartSubTask(const QString& text);
+
+	void signalLoadingType(int type);
 	void signalLoadingUnitsCount(int count);
 	void signalLoadingUnit(int current);
 
 protected slots:
 	void slotStart();
 
-
-	void slotLoadPlayerData(Player* p);
+	void slotPlayFieldCreated(BosonPlayField* playField, bool* ownerChanged);
 
 protected:
 	/**
@@ -126,11 +136,312 @@ protected:
 	 **/
 	BosonPlayField* playField() const { return mDestPlayField; }
 
-	bool loadPlayerData();
-	void loadUnitDatas(Player* p);
-	bool startScenario(QMap<QString, QByteArray>& files);
 	bool start();
-	bool loadTiles();
+
+
+
+	/**
+	 * Add the players for a loaded game.
+	 **/
+	bool addLoadGamePlayers(const QString& playersXML);
+
+	void sendStartingCompleted(bool success);
+
+	bool checkStartingCompletedMessages() const;
+
+	bool executeTasks(const QPtrList<BosonStartingTask>& tasks);
+
+signals:
+	void signalDestPlayField(BosonPlayField*);
+
+private:
+	BosonStartingPrivate* d;
+
+	QByteArray mNewGameData;
+	BosonPlayField* mDestPlayField;
+};
+
+
+class BosonStartingTask : public QObject
+{
+	Q_OBJECT
+public:
+	BosonStartingTask(const QString& text, QObject* parent = 0);
+	~BosonStartingTask();
+
+	virtual QString text() const
+	{
+		return mText;
+	}
+
+	void checkEvents();
+
+	/**
+	 * Start this task. This calls @ref startTask, which does the actual
+	 * work.
+	 * @param duration How much time has already passed before this task was
+	 * started.
+	 **/
+	bool start(unsigned int duration);
+
+	/**
+	 * @return The estimated amount of time this task will take. You can
+	 * return any non-negative number that you like, there is no special
+	 * unit (ms,s,hour,...) assigned to it. Have a look at the
+	 * implementations in derived classes to get a feeling what number may
+	 * be sensible.
+	 **/
+	virtual unsigned int taskDuration() const = 0;
+
+signals:
+	void signalStartSubTask(const QString& text);
+	void signalCompleteSubTask(unsigned int duration);
+
+protected:
+	virtual bool startTask() = 0;
+
+protected:
+	/**
+	 * Call this when a sub-task has been completed.
+	 * @param duration How much time has passed since this task was started
+	 * until the sub-task has been completed. 0 is the minimum, @ref
+	 * taskDuration the maximum.
+	 **/
+	void completeSubTask(unsigned int duration);
+
+	void startSubTask(const QString& text);
+
+
+private:
+	QString mText;
+	unsigned int mTimePassed;
+};
+
+class BosonStartingLoadPlayField : public BosonStartingTask
+{
+	Q_OBJECT
+public:
+	BosonStartingLoadPlayField(const QString& text)
+		: BosonStartingTask(text)
+	{
+	}
+
+	virtual unsigned int taskDuration() const;
+
+	void setFiles(QMap<QString, QByteArray>* files)
+	{
+		mFiles = files;
+	}
+
+signals:
+	void signalPlayFieldCreated(BosonPlayField* playField, bool* ownerChanged);
+
+protected:
+	virtual bool startTask();
+
+private:
+	QMap<QString, QByteArray>* mFiles;
+};
+
+class BosonStartingCreateCanvas : public BosonStartingTask
+{
+	Q_OBJECT
+public:
+	BosonStartingCreateCanvas(const QString& text)
+		: BosonStartingTask(text)
+	{
+		mDestPlayField = 0;
+	}
+
+	virtual unsigned int taskDuration() const;
+
+	BosonPlayField* playField() const
+	{
+		return mDestPlayField;
+	}
+
+public slots:
+	void slotSetDestPlayField(BosonPlayField* dest)
+	{
+		mDestPlayField = dest;
+	}
+
+protected:
+	virtual bool startTask();
+
+private:
+	BosonPlayField* mDestPlayField;
+};
+
+class BosonStartingInitPlayerMap : public BosonStartingTask
+{
+	Q_OBJECT
+public:
+	BosonStartingInitPlayerMap(const QString& text)
+		: BosonStartingTask(text)
+	{
+		mDestPlayField = 0;
+	}
+
+	virtual unsigned int taskDuration() const;
+
+	BosonPlayField* playField() const
+	{
+		return mDestPlayField;
+	}
+
+public slots:
+	void slotSetDestPlayField(BosonPlayField* dest)
+	{
+		mDestPlayField = dest;
+	}
+
+protected:
+	virtual bool startTask();
+
+private:
+	BosonPlayField* mDestPlayField;
+};
+
+class BosonStartingInitScript : public BosonStartingTask
+{
+	Q_OBJECT
+public:
+	BosonStartingInitScript(const QString& text)
+		: BosonStartingTask(text)
+	{
+	}
+
+	virtual unsigned int taskDuration() const;
+
+protected:
+	virtual bool startTask();
+};
+
+class BosonStartingLoadTiles : public BosonStartingTask
+{
+	Q_OBJECT
+public:
+	BosonStartingLoadTiles(const QString& text)
+		: BosonStartingTask(text)
+	{
+		mDestPlayField = 0;
+	}
+
+	virtual unsigned int taskDuration() const;
+
+	BosonPlayField* playField() const
+	{
+		return mDestPlayField;
+	}
+
+public slots:
+	void slotSetDestPlayField(BosonPlayField* dest)
+	{
+		mDestPlayField = dest;
+	}
+
+protected:
+	virtual bool startTask();
+
+private:
+	BosonPlayField* mDestPlayField;
+};
+
+class BosonStartingLoadEffects : public BosonStartingTask
+{
+	Q_OBJECT
+public:
+	BosonStartingLoadEffects(const QString& text)
+		: BosonStartingTask(text)
+	{
+	}
+
+	virtual unsigned int taskDuration() const;
+
+protected:
+	virtual bool startTask();
+};
+
+class BosonStartingLoadPlayerData : public BosonStartingTask
+{
+	Q_OBJECT
+public:
+	BosonStartingLoadPlayerData(const QString& text)
+		: BosonStartingTask(text)
+	{
+		mPlayer = 0;
+		mDuration = 0;
+	}
+
+	virtual unsigned int taskDuration() const;
+
+	void setPlayer(Player* p);
+	Player* player() const
+	{
+		return mPlayer;
+	}
+
+protected:
+	virtual bool startTask();
+
+	bool loadUnitDatas();
+
+	unsigned int durationBeforeUnitLoading() const;
+	unsigned int loadUnitDuration() const;
+
+private:
+	Player* mPlayer;
+
+	unsigned int mDuration;
+};
+
+class BosonStartingLoadWater : public BosonStartingTask
+{
+	Q_OBJECT
+public:
+	BosonStartingLoadWater(const QString& text)
+		: BosonStartingTask(text)
+	{
+	}
+
+	virtual unsigned int taskDuration() const;
+
+protected:
+	virtual bool startTask();
+};
+
+class BosonStartingStartScenario : public BosonStartingTask
+{
+	Q_OBJECT
+public:
+	BosonStartingStartScenario(const QString& text)
+		: BosonStartingTask(text)
+	{
+		mDestPlayField = 0;
+		mFiles = 0;
+	}
+
+	virtual unsigned int taskDuration() const;
+
+	BosonPlayField* playField() const
+	{
+		return mDestPlayField;
+	}
+
+	void setFiles(QMap<QString, QByteArray>* files)
+	{
+		mFiles = files;
+	}
+
+public slots:
+	void slotSetDestPlayField(BosonPlayField* dest)
+	{
+		mDestPlayField = dest;
+	}
+
+protected:
+	virtual bool startTask();
 
 	/**
 	 * We cannot store the actual player ID in our files (.bsg/.bpf),
@@ -158,20 +469,9 @@ protected:
 	bool fixPlayerIds(int* actualIds, unsigned int players, QDomElement& root) const;
 	bool fixPlayerIdsInFileNames(int* actualIds, unsigned int players, QMap<QString, QByteArray>& files) const;
 
-	/**
-	 * Add the players for a loaded game.
-	 **/
-	bool addLoadGamePlayers(const QString& playersXML);
-
-	void sendStartingCompleted(bool success);
-
-	bool checkStartingCompletedMessages() const;
-
 private:
-	BosonStartingPrivate* d;
-
-	QByteArray mNewGameData;
 	BosonPlayField* mDestPlayField;
+	QMap<QString, QByteArray>* mFiles;
 };
 
 #endif

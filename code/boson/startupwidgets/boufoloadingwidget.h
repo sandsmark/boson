@@ -31,83 +31,26 @@ class BoUfoLoadingWidget : public BoUfoWidget
 {
     Q_OBJECT
   public:
-    enum LoadingType
-      {
-        AdminLoadMap = 0,  // Admin loads map and saves it to stream
-        SendMap,  // Map stream is sent to network (admin only)
-        ReceiveMap,  // Map is being received over the net
-        LoadMap,  // Map has been received and is being loaded
-        LoadTiles,  // Map tiles (textures) // AB: obsolete!
-        LoadEffects,  // Loading effects
-        LoadUnitConfigs,  // Loading unit config files for a player
-        LoadUnits,  // Loading unit models and textures for a player
-        LoadTechnologies,  // Loading technologies for a player
-        LoadObjects,  // Loading objects for a player
-        LoadActions,  // Loading actions for a player
-        LoadGeneralData,  // General data loaded only once per game (only general sounds for now)
-        LoadSavedGameHeader,  // Loading header of saved game file
-        LoadSavedGame,  // Loading saved game data (map and KGame stuff)
-        LoadSavedUnits,  // Loading units from saved game file for a player
-        LoadWater,  // Loading water (textures)
-        InitGame,  // Game is being initialized (InitFogOfWar and StartScenario messages)
-        StartingGame,  // Last phase, BosonWidget is about to being shown
-        LoadingDone  // All done
-      };
-
     BoUfoLoadingWidget();
     ~BoUfoLoadingWidget();
 
-    void setLoading(LoadingType load);
-
-    void showProgressBar(bool show = true);
-
-    // Loading units datas for one player takes so many loading steps
-    static int unitDataLoadingFactor() { return 1600; }
-
-    // Loading map tiles takes so many loading steps
-    static int mapTilesLoadingFactor() { return 2200; }
-
-    void setCurrentTile(int tile);
-
-    void setTotalPlayers(int players);
-    void setCurrentPlayer(int playerindex);
-
-    void setTotalUnits(int units);
-    void setCurrentUnit(int unitindex);
+    void setMaxDuration(unsigned int maxDuration);
+    void setDuration(unsigned int duration);
+    void setCurrentTask(const QString& text);
+    void setCurrentSubTask(const QString& text);
 
     void resetProgress();
 
-    void setAdmin(bool isAdmin)  { mAdmin = isAdmin; };
-    void setLoading(bool isLoading)  { mLoading = isLoading; };
-
-  protected:
-    /**
-     * See @ref QProgressBar::setTotalSteps
-     **/
-    void setTotalSteps(int steps);
-
-    /**
-     * See @ref QProgressBase::setProgress
-     **/
-    void setProgress(int prog);
-
-    void update();
-
-    void updateTotalSteps();
-
+  signals:
+    void signalUpdateGL();
   private:
-    BoUfoLabel* mLoadingLabel;
+    BoUfoLabel* mLoadingTaskLabel;
+    BoUfoLabel* mLoadingSubTaskLabel;
     BoUfoProgress* mProgress;
-    int mTotalPlayers;
-    int mCurrentPlayer;
-    int mTotalUnits;
-    int mCurrentUnit;
-    int mCurrentTile;
-    bool mAdmin;
-    bool mLoading;
-    LoadingType mLoadingType;
-    QString mLoadingPlayerText;
 };
 
 #endif // BOSONLOADINGWIDGET_H
 
+/*
+ * vim: et sw=2
+ */
