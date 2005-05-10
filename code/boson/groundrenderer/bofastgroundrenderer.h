@@ -36,6 +36,8 @@ public:
 	BoFastGroundRenderer();
 	virtual ~BoFastGroundRenderer();
 
+	virtual bool initGroundRenderer();
+
 	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map);
 
 protected:

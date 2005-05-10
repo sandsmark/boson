@@ -45,6 +45,15 @@ BoFastGroundRenderer::~BoFastGroundRenderer()
  delete mCellTextures;
 }
 
+bool BoFastGroundRenderer::initGroundRenderer()
+{
+ if (!BoGroundRendererBase::initGroundRenderer()) {
+	return false;
+ }
+
+ return true;
+}
+
 void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cellsCount, const BosonMap* map)
 {
  BO_CHECK_NULL_RET(renderCells);

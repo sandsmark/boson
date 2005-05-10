@@ -49,9 +49,20 @@ QObject* BoGroundRendererFactory::createObject(QObject* parent, const char* name
  Q_UNUSED(args);
  Q_UNUSED(parent);
  QObject* o = 0;
+ bool initrenderer = true;
+
  if (qstrcmp(className, "BoPluginInformation") == 0) {
 	// note: the _libbomeshrendererplugin is NOT part of the string
 	o = new BoPluginInformation_libbogroundrendererplugin;
+	BoPluginInformation_libbogroundrendererplugin* info = (BoPluginInformation_libbogroundrendererplugin*)o;
+	// Check which renderers are usable
+	bool usable;
+	usable = rendererUsable(new BoFastGroundRenderer);
+	info->mRenderers["BoFastGroundRenderer"] = rendererUsable(new BoFastGroundRenderer);
+	info->mRenderers["BoVeryFastGroundRenderer"] = rendererUsable(new BoVeryFastGroundRenderer);
+	info->mRenderers["BoQuickGroundRenderer"] = rendererUsable(new BoQuickGroundRenderer);
+	info->mRenderers["BoDefaultGroundRenderer"] = rendererUsable(new BoDefaultGroundRenderer);
+	initrenderer = false;
  } else if (qstrcmp(className, "BoDefaultGroundRenderer") == 0) {
 	o = new BoDefaultGroundRenderer();
  } else if (qstrcmp(className, "BoFastGroundRenderer") == 0) {
@@ -64,20 +75,43 @@ QObject* BoGroundRendererFactory::createObject(QObject* parent, const char* name
 	boError() << k_funcinfo << "no such class available: " << className << endl;
 	return 0;
  }
+
+ if (initrenderer) {
+	((BoGroundRenderer*)o)->initGroundRenderer();
+ }
  boDebug() << k_funcinfo << "created object of class " << o->className() << endl;
  emit objectCreated(o);
  return o;
+}
+
+bool BoGroundRendererFactory::rendererUsable(BoGroundRenderer* r) const
+{
+ bool u = r->usable();
+ delete r;
+ return u;
 }
 
 
 QStringList BoPluginInformation_libbogroundrendererplugin::plugins() const
 {
  QStringList list;
- list.append("BoFastGroundRenderer");
- list.append("BoVeryFastGroundRenderer");
- list.append("BoQuickGroundRenderer");
- list.append("BoDefaultGroundRenderer");
+ QMap<QString, bool>::const_iterator it;
+ for (it = mRenderers.begin(); it != mRenderers.end(); ++it) {
+	if (it.data()) {
+		list.append(it.key());
+	}
+ }
  return list;
+}
+
+bool BoPluginInformation_libbogroundrendererplugin::rendererUsable(const QString& className) const
+{
+ QMap<QString, bool>::const_iterator it = mRenderers.find(className);
+ if (it == mRenderers.end()) {
+	return false;
+ } else {
+	return it.data();
+ }
 }
 
 BO_EXPORT_PLUGIN_FACTORY( libbogroundrendererplugin, BoGroundRendererFactory )

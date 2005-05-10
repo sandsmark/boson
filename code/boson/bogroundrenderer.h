@@ -111,6 +111,8 @@ public:
 	BoGroundRenderer();
 	virtual ~BoGroundRenderer();
 
+	virtual bool initGroundRenderer();
+
 	/**
 	 * Apply pointers for all OpenGL matrices to this class. You must not
 	 * free those matrices as long as there are still objects of this class!
@@ -180,6 +182,14 @@ public:
 	 * Call this when fogged status of a cell changes.
 	 **/
 	virtual void cellFogChanged(int x, int y);
+
+	/**
+	 * @return Whether this ground renderer can be used.
+	 * You should check this before using a ground render.
+	 * This method should e.g. check for hardware support, default implementation
+	 * always returns true.
+	 **/
+	virtual bool usable() const;
 
 protected:
 	/**

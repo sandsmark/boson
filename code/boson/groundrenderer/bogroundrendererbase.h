@@ -102,6 +102,8 @@ public:
 	BoGroundRendererBase();
 	virtual ~BoGroundRendererBase();
 
+	virtual bool initGroundRenderer();
+
 	/**
 	 * Generate a list of cells that are (or may) be visible at the moment.
 	 * @param map The map that contains the @ref Cell pointers. Use 0 to

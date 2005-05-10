@@ -84,7 +84,17 @@ BoVeryFastGroundRenderer::BoVeryFastGroundRenderer()
  mCellTextures = 0;
  mCurrentTheme = 0;
  mThemeColors = 0;
+}
+
+bool BoVeryFastGroundRenderer::initGroundRenderer()
+{
+ if (!BoGroundRendererBase::initGroundRenderer()) {
+	return false;
+ }
+
  setLODObject(new BoVeryFastGroundRendererCellListLOD());
+
+ return true;
 }
 
 BoVeryFastGroundRenderer::~BoVeryFastGroundRenderer()

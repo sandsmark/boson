@@ -52,7 +52,9 @@ BoQuickGroundRenderer::BoQuickGroundRenderer()
   mVBOTexture = 0;
   mTextureCount = 0;
 
-  mFogTexture = new FogTexture();
+  mFogTexture = 0;
+
+  mChunks = 0;
 }
 
 BoQuickGroundRenderer::~BoQuickGroundRenderer()
@@ -67,6 +69,28 @@ BoQuickGroundRenderer::~BoQuickGroundRenderer()
 
   // Delete chunks
   delete[] mChunks;
+}
+
+bool BoQuickGroundRenderer::initGroundRenderer()
+{
+  if(!BoGroundRenderer::initGroundRenderer())
+  {
+    return false;
+  }
+
+  mFogTexture = new FogTexture();
+
+  return true;
+}
+
+bool BoQuickGroundRenderer::usable() const
+{
+  if(boTextureManager->textureUnits() < 2)
+  {
+    return false;
+  }
+
+  return true;
 }
 
 void BoQuickGroundRenderer::generateCellList(const BosonMap* map)
