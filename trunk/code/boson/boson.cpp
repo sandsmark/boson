@@ -1118,6 +1118,7 @@ bool Boson::savePlayFieldToFile(const QString& file)
  QMap<QString, QByteArray> files;
  BosonSaveLoad* save = new BosonSaveLoad(this);
  bool ret = save->savePlayFieldToFiles(files);
+ delete save;
  if (!ret) {
 	boError() << k_funcinfo << "saving failed" << endl;
 	return ret;
