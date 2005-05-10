@@ -148,13 +148,14 @@ public:
 	}
 	~CellListBuilderTree()
 	{
+		for (unsigned int i = 0; i < mLeafs.size(); i++) {
+			delete mLeafs[i];
+		}
 		delete mRoot;
 	}
 
 	virtual int* generateCellList(const BosonMap* map, int* renderCells, int* renderCellsSize, unsigned int* renderCellsCount);
 
-
-	QMemArray< QPtrList<const BoQuadTreeNode>* > mLeafs;
 
 protected:
 	/**
@@ -188,6 +189,8 @@ private:
 	unsigned int mCount;
 
 	BoQuadTreeNode* mRoot;
+
+	QMemArray< QPtrList<const BoQuadTreeNode>* > mLeafs;
 };
 
 void CellListBuilder::copyHeightMap(float* heightMap, const BosonMap* map)
