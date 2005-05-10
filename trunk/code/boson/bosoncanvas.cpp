@@ -418,6 +418,7 @@ void BoCanvasAdvance::updateEffects(QPtrList<BosonEffect>& effects, float elapse
 		count--;
 	}
  }*/
+ QPtrList<BosonEffect> removeEffects;
  for (BosonEffect* e = effects.first(); e; e = effects.next()) {
 	if (!e->hasStarted()) {
 		e->update(elapsed);
@@ -432,8 +433,12 @@ void BoCanvasAdvance::updateEffects(QPtrList<BosonEffect>& effects, float elapse
 				owner->removeEffect(e);
 			}
 		}
-		effects.removeRef(e);
+		removeEffects.append(e);
 	}
+ }
+ while (removeEffects.count() > 0) {
+	BosonEffect* e = removeEffects.take(0);
+	effects.removeRef(e);
  }
 }
 
