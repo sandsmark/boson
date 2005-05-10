@@ -425,6 +425,13 @@ void BoCanvasAdvance::updateEffects(QPtrList<BosonEffect>& effects, float elapse
 		e->markUpdate(elapsed);
 	}
 	if (!e->isActive()) {
+		if (e->ownerId()) {
+			// Remove the effect from owner
+			BosonItem* owner = mCanvas->d->mAllItems.findItem(e->ownerId());
+			if (owner) {
+				owner->removeEffect(e);
+			}
+		}
 		effects.removeRef(e);
 	}
  }

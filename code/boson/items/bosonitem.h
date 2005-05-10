@@ -540,6 +540,7 @@ public:
 	virtual const QPtrList<BosonEffect>* effects() const;
 	virtual void setEffects(const QPtrList<BosonEffect>& effects, bool addtocanvas = true);
 	virtual void addEffect(BosonEffect* e, bool addtocanvas = true);
+	virtual bool removeEffect(BosonEffect* e);
 
 	/**
 	 * Clear the effects list. Note that the effects are
