@@ -404,6 +404,11 @@ void BosonItem::addEffect(BosonEffect* e, bool addtocanvas)
  }
 }
 
+bool BosonItem::removeEffect(BosonEffect* e)
+{
+ return mEffects->removeRef(e);
+}
+
 void BosonItem::clearEffects()
 {
  if (!mEffects) {
