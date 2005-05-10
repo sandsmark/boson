@@ -56,15 +56,10 @@ public:
 	BosonStartupNetwork* networkInterface() const;
 
 public slots:
-	void slotLoadingType(int);
-	void slotLoadingShowProgressBar(bool);
-	void slotLoadingReset();
-	void slotLoadingSetAdmin(bool isAdmin);
-	void slotLoadingSetLoading(bool isLoading);
-	void slotLoadingPlayersCount(int count);
-	void slotLoadingPlayer(int current);
-	void slotLoadingUnitsCount(int count);
-	void slotLoadingUnit(int current);
+	void slotLoadingMaxDuration(unsigned int maxDuration);
+	void slotLoadingTaskCompleted(unsigned int duration);
+	void slotLoadingStartTask(const QString& text);
+	void slotLoadingStartSubTask(const QString& text);
 
 	/**
 	 * Show the welcome widget and reset all previous widget, i.e. delete
@@ -100,6 +95,12 @@ public slots:
 	void slotStartEditor(KCmdLineArgs* args = 0);
 
 signals:
+	/**
+	 * Force updating the GL widget. Usually this is not necessary, as
+	 * there is a timer regulary updating the widget.
+	 **/
+	void signalUpdateGL();
+
 	/**
 	 * Emitted when the player asks to quit the game.
 	 **/

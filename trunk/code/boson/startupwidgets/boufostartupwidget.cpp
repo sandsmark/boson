@@ -245,6 +245,8 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 		BoUfoLabel::setDefaultForegroundColor(Qt::white);
 		BoUfoLoadingWidget* loadingWidget = new BoUfoLoadingWidget();
 		BoUfoLabel::setDefaultForegroundColor(defaultColor);
+		connect(loadingWidget, SIGNAL(signalUpdateGL()),
+				this, SIGNAL(signalUpdateGL()));
 		w = loadingWidget;
 		break;
 	}
@@ -343,66 +345,31 @@ void BoUfoStartupWidget::showLoadingWidget()
  showWidget(IdLoading);
 }
 
-void BoUfoStartupWidget::slotLoadingType(int type)
+void BoUfoStartupWidget::slotLoadingMaxDuration(unsigned int maxDuration)
 {
  if (loadingWidget()) {
-	loadingWidget()->setLoading((BoUfoLoadingWidget::LoadingType)type);
+	loadingWidget()->setMaxDuration(maxDuration);
  }
 }
 
-void BoUfoStartupWidget::slotLoadingShowProgressBar(bool s)
+void BoUfoStartupWidget::slotLoadingTaskCompleted(unsigned int duration)
 {
  if (loadingWidget()) {
-	loadingWidget()->showProgressBar(s);
+	loadingWidget()->setDuration(duration);
  }
 }
 
-void BoUfoStartupWidget::slotLoadingReset()
+void BoUfoStartupWidget::slotLoadingStartTask(const QString& text)
 {
  if (loadingWidget()) {
-	loadingWidget()->resetProgress();
+	loadingWidget()->setCurrentTask(text);
  }
 }
 
-void BoUfoStartupWidget::slotLoadingSetAdmin(bool isAdmin)
+void BoUfoStartupWidget::slotLoadingStartSubTask(const QString& text)
 {
  if (loadingWidget()) {
-	loadingWidget()->setAdmin(isAdmin);
- }
-}
-
-void BoUfoStartupWidget::slotLoadingSetLoading(bool isLoading)
-{
- if (loadingWidget()) {
-	loadingWidget()->setLoading(isLoading);
- }
-}
-
-void BoUfoStartupWidget::slotLoadingPlayersCount(int count)
-{
- if (loadingWidget()) {
-	loadingWidget()->setTotalPlayers(count);
- }
-}
-
-void BoUfoStartupWidget::slotLoadingPlayer(int current)
-{
- if (loadingWidget()) {
-	loadingWidget()->setCurrentPlayer(current);
- }
-}
-
-void BoUfoStartupWidget::slotLoadingUnitsCount(int count)
-{
- if (loadingWidget()) {
-	loadingWidget()->setTotalUnits(count);
- }
-}
-
-void BoUfoStartupWidget::slotLoadingUnit(int current)
-{
- if (loadingWidget()) {
-	loadingWidget()->setCurrentUnit(current);
+	loadingWidget()->setCurrentSubTask(text);
  }
 }
 
