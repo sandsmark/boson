@@ -89,6 +89,10 @@ bool BoQuickGroundRenderer::usable() const
   {
     return false;
   }
+  if(!boglBindBuffer || !boglBufferData)
+  {
+    return false;
+  }
 
   return true;
 }
