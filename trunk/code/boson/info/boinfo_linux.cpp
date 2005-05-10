@@ -135,24 +135,210 @@ bool BoInfo::haveMtrr() const
  return !getString(MTRRString).isEmpty();
 }
 
-QString BoInfo::dataMemory() const
+
+bool BoCurrentInfo::memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
+		QString* vmData, QString* vmStk, QString* vmExe, QString* vmLib,
+		QString* vmPTE) const
 {
  int pid = (int)getpid();
  QString status = readFile(QString("/proc/%1/status").arg(pid));
- if (!status.isEmpty()) {
-	// we need the lines starting with Vm only
-	QStringList list = QStringList::split('\n', status);
-	QRegExp rx("^VmData:\\s*");
-	for (unsigned int i = 0 ; i < list.count(); i++) {
-		if (rx.search(list[i]) >= 0) {
-			QString memory = list[i];
-			memory.replace(rx, "");
-			rx = QRegExp(" .*");
-			memory.replace(rx, "");
-			return memory;
-		}
+ if (status.isEmpty()) {
+	return false;
+ }
+ // we need the lines starting with Vm only
+ QStringList list = QStringList::split('\n', status);
+ QStringList vm = list.grep(QRegExp("^Vm\\S+:.*"));
+ if (vm.count() == 0) {
+	boError() << k_funcinfo << "file could be opened, but Vm* entries could not be read" << endl;
+	return false;
+ }
+
+ if (vmSize) {
+	QString* string = vmSize;
+	QStringList l = vm.grep(QRegExp("^VmSize:.*"));
+	if (l.count() == 0) {
+		*string = QString::null;
+	} else {
+		*string = l[0].remove(QRegExp("^Vm\\S*\\s*"));
 	}
  }
- return QString::null;
+ if (vmLck) {
+	QString* string = vmLck;
+	QStringList l = vm.grep(QRegExp("^VmLck:.*"));
+	if (l.count() == 0) {
+		*string = QString::null;
+	} else {
+		*string = l[0].remove(QRegExp("^Vm\\S*\\s*"));
+	}
+ }
+ if (vmRSS) {
+	QString* string = vmRSS;
+	QStringList l = vm.grep(QRegExp("^VmRSS:.*"));
+	if (l.count() == 0) {
+		*string = QString::null;
+	} else {
+		*string = l[0].remove(QRegExp("^Vm\\S*\\s*"));
+	}
+ }
+ if (vmData) {
+	QString* string = vmData;
+	QStringList l = vm.grep(QRegExp("^VmData:.*"));
+	if (l.count() == 0) {
+		*string = QString::null;
+	} else {
+		*string = l[0].remove(QRegExp("^Vm\\S*\\s*"));
+	}
+ }
+ if (vmStk) {
+	QString* string = vmStk;
+	QStringList l = vm.grep(QRegExp("^VmStk:.*"));
+	if (l.count() == 0) {
+		*string = QString::null;
+	} else {
+		*string = l[0].remove(QRegExp("^Vm\\S*\\s*"));
+	}
+ }
+ if (vmExe) {
+	QString* string = vmExe;
+	QStringList l = vm.grep(QRegExp("^VmExe:.*"));
+	if (l.count() == 0) {
+		*string = QString::null;
+	} else {
+		*string = l[0].remove(QRegExp("^Vm\\S*\\s*"));
+	}
+ }
+ if (vmLib) {
+	QString* string = vmLib;
+	QStringList l = vm.grep(QRegExp("^VmLib:.*"));
+	if (l.count() == 0) {
+		*string = QString::null;
+	} else {
+		*string = l[0].remove(QRegExp("^Vm\\S*\\s*"));
+	}
+ }
+ if (vmPTE) {
+	QString* string = vmPTE;
+	QStringList l = vm.grep(QRegExp("^VmPTE:.*"));
+	if (l.count() == 0) {
+		*string = QString::null;
+	} else {
+		*string = l[0].remove(QRegExp("^Vm\\S*\\s*"));
+	}
+ }
+ return true;
+}
+
+
+/**
+ * This is a helper class that reads data from /proc/PID/stat
+ **/
+class ProcPIDStatInfo
+{
+public:
+	bool read(int pid);
+	void print();
+
+	int mPID;
+	QString mName;
+	char mState;
+	int mPPID;
+	int mPGrpP;
+	int mSession;
+	int mTTY; // tty_nr
+	int mTTYOwner; // tpgid
+	unsigned long mFlags;
+	unsigned long mMinFlt;
+	unsigned long mCMinFlt;
+	unsigned long mMajFlt;
+	unsigned long mCMajFlt;
+	unsigned long mUTime;
+	unsigned long mSTime;
+	long mCUTime;
+	long mCSTime;
+	long mPriority;
+	long mNice;
+	long mItRealValue;
+	unsigned long mStartTime;
+	unsigned long mVSize;
+	long mRSS;
+	unsigned long mRLim;
+	unsigned long mStartCode;
+	unsigned long mEndCode;
+	unsigned long mStartStack;
+	unsigned long mKStkesp;
+	unsigned long mKstkeip;
+	unsigned long mSignal;
+	unsigned long mBlocked;
+	unsigned long mSigIgnore;
+	unsigned long mSigCatch;
+	unsigned long mWChan;
+	unsigned long mNSwap; // according to man proc, this is NOT maintained
+	unsigned long mCNSwap; // (not maintained either, as it uses nswap)
+	int mExitSignal;
+	int mProcessor;
+
+};
+
+void ProcPIDStatInfo::print()
+{
+ boDebug() << "PID: "<< mPID << " name: " << mName << " state: " << mState << endl
+		<< "Parent PID: " << mPPID << " process groupd ID: " << mPGrpP << endl
+		<< "Session: " << mSession << " tty: " << mTTY << " tty owner: " << mTTYOwner << endl
+		<< "Flags: " << mFlags << " minflt: " << mMinFlt << " cminflt: " << mCMinFlt << " majflt: " << mMajFlt << " cmajflt: " << mCMajFlt << endl
+		<< "utime: " << mUTime << " stime: " << mSTime << " cutime: " << mCUTime << " cstime: " << mCSTime << endl
+		<< "priority: " << mPriority << " nice: " << mNice << " itrealvalue: " << mItRealValue << endl
+		<< "starttime: " << mStartTime << " vsize: " << mVSize << " RSS: " << mRSS << endl
+		<< "rlim: " << mRLim << " startcode: " << mStartCode << " endcode: " << mEndCode << endl
+		<< "kstkesp: " << mKStkesp << " kstkeip: " << mKstkeip << endl
+		<< " signal: " << mSignal << " blocked: " << mBlocked << "sigignore: " << mSigIgnore << " sigcatch: " << mSigCatch << endl
+		<< "wchan: " << mWChan << " nswap (not maintained, see man proc): " << mNSwap << " cnswap: " << mCNSwap << endl
+		<< "exitsignal: " << mExitSignal << " processor: " << mProcessor << endl;
+}
+
+bool ProcPIDStatInfo::read(int pid)
+{
+ QFile file(QString("/proc/%1/stat").arg(pid));
+ if (!file.open(IO_ReadOnly)) {
+	return false;
+ }
+ QTextStream s(&file);
+ s.setf(QTextStream::dec);
+ s >> mPID >> mName >> mState;
+ s >> mPPID >> mPGrpP >> mSession >> mTTY >> mTTYOwner;
+ s >> mFlags;
+ s >> mMinFlt >> mCMinFlt >> mMajFlt>> mCMajFlt;
+ s >> mUTime >> mSTime;
+ s >> mCUTime >> mCSTime;
+ long zero; // hardcoded to 0 according to man page .. is that true? seems to be 1 here
+ s >> mPriority >> mNice >> zero >> mItRealValue;
+ s >> mStartTime >> mVSize;
+ s >> mRSS;
+ s >> mRLim >> mStartCode >> mEndCode >> mStartStack;
+ s >> mKStkesp >> mKstkeip >> mSignal >> mBlocked;
+ s >> mSigIgnore >> mSigCatch >> mWChan >> mNSwap >> mCNSwap;
+ s >> mExitSignal >> mProcessor;
+ return true;
+}
+
+bool BoCurrentInfo::cpuTime(unsigned long int* utime, unsigned long int* stime, long int* cutime, long int* cstime) const
+{
+ int pid = (int)getpid();
+ ProcPIDStatInfo info;
+ if (!info.read(pid)) {
+	return false;
+ }
+ if (utime) {
+	*utime = info.mUTime;
+ }
+ if (stime) {
+	*stime = info.mSTime;
+ }
+ if (cutime) {
+	*cutime = info.mCUTime;
+ }
+ if (cstime) {
+	*cstime = info.mCSTime;
+ }
+ return true;
 }
 

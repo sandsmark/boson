@@ -237,6 +237,12 @@ void BosonMenuInputData::initUfoActions(bool gameMode)
 		KShortcut(), 0, 0, actionCollection(), "debug_advance_calls");
  (void)new BoUfoConfigToggleAction(i18n("Debug &Texture Memory"),
 		KShortcut(), 0, 0, actionCollection(), "debug_texture_memory");
+ (void)new BoUfoConfigToggleAction(i18n("Debug Memory Usage"),
+		KShortcut(), 0, 0, actionCollection(), "debug_memory_usage");
+ (void)new BoUfoConfigToggleAction(i18n("Debug Memory Usage (VmData only)"),
+		KShortcut(), 0, 0, actionCollection(), "debug_memory_vmdata_only");
+ (void)new BoUfoConfigToggleAction(i18n("Debug CPU Usage"),
+		KShortcut(), 0, 0, actionCollection(), "debug_cpu_usage");
  (void)new BoUfoAction(i18n("&Unfog"), KShortcut(), this,
 		SIGNAL(signalUnfogAll()), actionCollection(), "debug_unfog");
  (void)new BoUfoAction(i18n("Dump game &log"), KShortcut(), this,

@@ -103,6 +103,8 @@ protected:
 	void updateUfoLabelRenderCounts();
 	void updateUfoLabelAdvanceCalls();
 	void updateUfoLabelTextureMemory();
+	void updateUfoLabelMemoryUsage();
+	void updateUfoLabelCPUUsage();
 
 private:
 	void initUfoWidgets();
