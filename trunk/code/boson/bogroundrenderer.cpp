@@ -50,13 +50,19 @@ BoGroundRenderer::BoGroundRenderer()
  mRenderCellsSize = 0;
  mRenderCellsCount = 0;
 
- mStatistics = new BoGroundRendererStatistics();
+ mStatistics = 0;
 }
 
 BoGroundRenderer::~BoGroundRenderer()
 {
  delete[] mRenderCells;
  delete mStatistics;
+}
+
+bool BoGroundRenderer::initGroundRenderer()
+{
+ mStatistics = new BoGroundRendererStatistics();
+ return true;
 }
 
 void BoGroundRenderer::setRenderCells(int* renderCells, int renderCellsSize)
@@ -275,6 +281,11 @@ void BoGroundRenderer::cellFogChanged(int x, int y)
 {
  Q_UNUSED(x);
  Q_UNUSED(y);
+}
+
+bool BoGroundRenderer::usable() const
+{
+ return true;
 }
 
 QString BoGroundRendererStatistics::statisticsData() const

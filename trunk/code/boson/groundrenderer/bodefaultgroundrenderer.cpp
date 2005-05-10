@@ -43,6 +43,15 @@ BoDefaultGroundRenderer::~BoDefaultGroundRenderer()
 {
 }
 
+bool BoDefaultGroundRenderer::initGroundRenderer()
+{
+ if (!BoGroundRendererBase::initGroundRenderer()) {
+	return false;
+ }
+
+ return true;
+}
+
 void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cellsCount, const BosonMap* map)
 {
  BO_CHECK_NULL_RET(renderCells);

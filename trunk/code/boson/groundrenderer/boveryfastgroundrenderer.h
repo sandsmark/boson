@@ -42,6 +42,8 @@ public:
 	BoVeryFastGroundRenderer();
 	virtual ~BoVeryFastGroundRenderer();
 
+	virtual bool initGroundRenderer();
+
 protected:
 	void updateMapCache(const BosonMap*);
 	void updateGroundThemeCache(const BosonGroundTheme*);

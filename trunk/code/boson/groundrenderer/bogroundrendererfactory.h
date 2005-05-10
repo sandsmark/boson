@@ -23,6 +23,10 @@
 #include "../bogroundrenderer.h"
 #include "../bopluginmanager.h"
 
+#include <qmap.h>
+
+class BoGroundRenderer;
+
 class BoGroundRendererFactory : public KLibFactory
 {
 	Q_OBJECT
@@ -34,6 +38,8 @@ protected:
 	virtual QObject* createObject(QObject* parent = 0, const char* name = 0,
 			const char* className = "QObject",
 			const QStringList &args = QStringList());
+
+	bool rendererUsable(BoGroundRenderer* r) const;
 
 private:
 	static KInstance* mInstance;
@@ -52,6 +58,9 @@ public:
 
 	virtual QStringList plugins() const;
 
+	bool rendererUsable(const QString& className) const;
+
+	QMap<QString, bool> mRenderers;
 };
 
 #endif

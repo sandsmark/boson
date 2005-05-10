@@ -689,8 +689,8 @@ BoGroundRendererBase::BoGroundRendererBase()
  mCellListBuilder = 0;
  mMap = 0;
  mHeightMap2 = 0;
- mCellListBuilder = new CellListBuilderTree();
- mFogTexture = new FogTexture();
+ mCellListBuilder = 0;
+ mFogTexture = 0;
 }
 
 BoGroundRendererBase::~BoGroundRendererBase()
@@ -701,6 +701,18 @@ BoGroundRendererBase::~BoGroundRendererBase()
 #if FIX_EDGES
  delete[] mHeightMap2;
 #endif
+}
+
+bool BoGroundRendererBase::initGroundRenderer()
+{
+ if (!BoGroundRenderer::initGroundRenderer()) {
+	return false;
+ }
+
+ mCellListBuilder = new CellListBuilderTree();
+ mFogTexture = new FogTexture();
+
+ return true;
 }
 
 void BoGroundRendererBase::setLODObject(BoGroundRendererCellListLOD* lod)
