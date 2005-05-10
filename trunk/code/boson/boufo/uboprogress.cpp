@@ -36,7 +36,9 @@ UBoProgress::UBoProgress(Orientation o)
 	m_min(0.0),
 	m_max(100.0),
 	m_value (50.0),
-	m_orientation(o) {
+	m_orientation(o),
+	m_startcolor(255, 0, 0),
+	m_endcolor(0, 255, 0) {
 }
 
 void
@@ -64,6 +66,22 @@ UBoProgress::setValue(double v) {
 void UBoProgress::setOrientation(Orientation o) {
 	m_orientation = o;
 	invalidate();
+	repaint();
+}
+
+void UBoProgress::setStartColor(const UColor& color) {
+	m_startcolor = color;
+	repaint();
+}
+
+void UBoProgress::setEndColor(const UColor& color) {
+	m_endcolor = color;
+	repaint();
+}
+
+void UBoProgress::setColor(const UColor& color) {
+	m_startcolor = color;
+	m_endcolor = color;
 	repaint();
 }
 
