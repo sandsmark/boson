@@ -101,7 +101,7 @@
      <Widget>
       <ClassName>BoUfoVBox</ClassName>
       <Properties>
-       <name>mMatricesDebug</name>
+       <name>mNorthWestDebugContainer</name>
        <constraints/>
        <opaque/>
        <layout>UVBoxLayout</layout>
@@ -115,28 +115,9 @@
        <stretch/>
       </Properties>
       <Widget>
-       <ClassName>BoUfoLabel</ClassName>
-       <Properties>
-        <name>mWidget32</name>
-        <constraints/>
-        <opaque/>
-        <layout/>
-        <minimumWidth/>
-        <minimumHeight/>
-        <preferredWidth/>
-        <preferredHeight/>
-        <backgroundImageFile/>
-        <verticalAlignment/>
-        <horizontalAlignment/>
-        <stretch/>
-        <text>Projection Matrix</text>
-        <iconFile/>
-       </Properties>
-      </Widget>
-      <Widget>
        <ClassName>BoUfoVBox</ClassName>
        <Properties>
-        <name>mMatricesDebugProjectionContainer</name>
+        <name>mMatricesDebug</name>
         <constraints/>
         <opaque/>
         <layout>UVBoxLayout</layout>
@@ -149,11 +130,174 @@
         <horizontalAlignment/>
         <stretch/>
        </Properties>
+       <Widget>
+        <ClassName>BoUfoLabel</ClassName>
+        <Properties>
+         <name>mWidget32</name>
+         <constraints/>
+         <opaque/>
+         <layout/>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <stretch/>
+         <text>Projection Matrix</text>
+         <iconFile/>
+        </Properties>
+       </Widget>
+       <Widget>
+        <ClassName>BoUfoVBox</ClassName>
+        <Properties>
+         <name>mMatricesDebugProjectionContainer</name>
+         <constraints/>
+         <opaque/>
+         <layout>UVBoxLayout</layout>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <stretch/>
+        </Properties>
+       </Widget>
+       <Widget>
+        <ClassName>BoUfoLabel</ClassName>
+        <Properties>
+         <name>mWidget33</name>
+         <constraints/>
+         <opaque/>
+         <layout/>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <stretch/>
+         <text>Modelview Matrix</text>
+         <iconFile/>
+        </Properties>
+       </Widget>
+       <Widget>
+        <ClassName>BoUfoVBox</ClassName>
+        <Properties>
+         <name>mMatricesDebugModelviewContainer</name>
+         <constraints/>
+         <opaque/>
+         <layout>UVBoxLayout</layout>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <stretch/>
+        </Properties>
+       </Widget>
+       <Widget>
+        <ClassName>BoUfoLabel</ClassName>
+        <Properties>
+         <name>mWidget34</name>
+         <constraints/>
+         <opaque/>
+         <layout/>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <stretch/>
+         <text>Projection * Modelview</text>
+         <iconFile/>
+        </Properties>
+       </Widget>
+       <Widget>
+        <ClassName>BoUfoVBox</ClassName>
+        <Properties>
+         <name>mMatricesDebugProjModContainer</name>
+         <constraints/>
+         <opaque/>
+         <layout>UVBoxLayout</layout>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <stretch/>
+        </Properties>
+       </Widget>
+       <Widget>
+        <ClassName>BoUfoLabel</ClassName>
+        <Properties>
+         <name>mWidget38</name>
+         <constraints/>
+         <opaque/>
+         <layout/>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <stretch/>
+         <text>(Projection * Modelview)^(-1)</text>
+         <iconFile/>
+        </Properties>
+       </Widget>
+       <Widget>
+        <ClassName>BoUfoVBox</ClassName>
+        <Properties>
+         <name>mMatricesDebugProjModInvContainer</name>
+         <constraints/>
+         <opaque/>
+         <layout>UVBoxLayout</layout>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <stretch/>
+        </Properties>
+       </Widget>
+       <Widget>
+        <ClassName>BoUfoLabel</ClassName>
+        <Properties>
+         <name>mMatricesDebugText</name>
+         <constraints/>
+         <opaque/>
+         <layout/>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <stretch/>
+         <text/>
+         <iconFile/>
+        </Properties>
+       </Widget>
       </Widget>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
        <Properties>
-        <name>mWidget33</name>
+        <name>mItemWorkStatistics</name>
         <constraints/>
         <opaque/>
         <layout/>
@@ -165,31 +309,14 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
-        <text>Modelview Matrix</text>
+        <text/>
         <iconFile/>
-       </Properties>
-      </Widget>
-      <Widget>
-       <ClassName>BoUfoVBox</ClassName>
-       <Properties>
-        <name>mMatricesDebugModelviewContainer</name>
-        <constraints/>
-        <opaque/>
-        <layout>UVBoxLayout</layout>
-        <minimumWidth/>
-        <minimumHeight/>
-        <preferredWidth/>
-        <preferredHeight/>
-        <backgroundImageFile/>
-        <verticalAlignment/>
-        <horizontalAlignment/>
-        <stretch/>
        </Properties>
       </Widget>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
        <Properties>
-        <name>mWidget34</name>
+        <name>mOpenGLCamera</name>
         <constraints/>
         <opaque/>
         <layout/>
@@ -201,31 +328,14 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
-        <text>Projection * Modelview</text>
+        <text/>
         <iconFile/>
-       </Properties>
-      </Widget>
-      <Widget>
-       <ClassName>BoUfoVBox</ClassName>
-       <Properties>
-        <name>mMatricesDebugProjModContainer</name>
-        <constraints/>
-        <opaque/>
-        <layout>UVBoxLayout</layout>
-        <minimumWidth/>
-        <minimumHeight/>
-        <preferredWidth/>
-        <preferredHeight/>
-        <backgroundImageFile/>
-        <verticalAlignment/>
-        <horizontalAlignment/>
-        <stretch/>
        </Properties>
       </Widget>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
        <Properties>
-        <name>mWidget38</name>
+        <name>mRenderCounts</name>
         <constraints/>
         <opaque/>
         <layout/>
@@ -237,17 +347,17 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
-        <text>(Projection * Modelview)^(-1)</text>
+        <text/>
         <iconFile/>
        </Properties>
       </Widget>
       <Widget>
-       <ClassName>BoUfoVBox</ClassName>
+       <ClassName>BoUfoLabel</ClassName>
        <Properties>
-        <name>mMatricesDebugProjModInvContainer</name>
+        <name>mAdvanceCalls</name>
         <constraints/>
         <opaque/>
-        <layout>UVBoxLayout</layout>
+        <layout/>
         <minimumWidth/>
         <minimumHeight/>
         <preferredWidth/>
@@ -256,12 +366,14 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
+        <text/>
+        <iconFile/>
        </Properties>
       </Widget>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
        <Properties>
-        <name>mMatricesDebugText</name>
+        <name>mTextureMemory</name>
         <constraints/>
         <opaque/>
         <layout/>
@@ -279,104 +391,9 @@
       </Widget>
      </Widget>
      <Widget>
-      <ClassName>BoUfoLabel</ClassName>
-      <Properties>
-       <name>mItemWorkStatistics</name>
-       <constraints/>
-       <opaque/>
-       <layout/>
-       <minimumWidth/>
-       <minimumHeight/>
-       <preferredWidth/>
-       <preferredHeight/>
-       <backgroundImageFile/>
-       <verticalAlignment/>
-       <horizontalAlignment/>
-       <stretch/>
-       <text/>
-       <iconFile/>
-      </Properties>
-     </Widget>
-     <Widget>
-      <ClassName>BoUfoLabel</ClassName>
-      <Properties>
-       <name>mOpenGLCamera</name>
-       <constraints/>
-       <opaque/>
-       <layout/>
-       <minimumWidth/>
-       <minimumHeight/>
-       <preferredWidth/>
-       <preferredHeight/>
-       <backgroundImageFile/>
-       <verticalAlignment/>
-       <horizontalAlignment/>
-       <stretch/>
-       <text/>
-       <iconFile/>
-      </Properties>
-     </Widget>
-     <Widget>
-      <ClassName>BoUfoLabel</ClassName>
-      <Properties>
-       <name>mRenderCounts</name>
-       <constraints/>
-       <opaque/>
-       <layout/>
-       <minimumWidth/>
-       <minimumHeight/>
-       <preferredWidth/>
-       <preferredHeight/>
-       <backgroundImageFile/>
-       <verticalAlignment/>
-       <horizontalAlignment/>
-       <stretch/>
-       <text/>
-       <iconFile/>
-      </Properties>
-     </Widget>
-     <Widget>
-      <ClassName>BoUfoLabel</ClassName>
-      <Properties>
-       <name>mAdvanceCalls</name>
-       <constraints/>
-       <opaque/>
-       <layout/>
-       <minimumWidth/>
-       <minimumHeight/>
-       <preferredWidth/>
-       <preferredHeight/>
-       <backgroundImageFile/>
-       <verticalAlignment/>
-       <horizontalAlignment/>
-       <stretch/>
-       <text/>
-       <iconFile/>
-      </Properties>
-     </Widget>
-     <Widget>
-      <ClassName>BoUfoLabel</ClassName>
-      <Properties>
-       <name>mTextureMemory</name>
-       <constraints/>
-       <opaque/>
-       <layout/>
-       <minimumWidth/>
-       <minimumHeight/>
-       <preferredWidth/>
-       <preferredHeight/>
-       <backgroundImageFile/>
-       <verticalAlignment/>
-       <horizontalAlignment/>
-       <stretch/>
-       <text/>
-       <iconFile/>
-      </Properties>
-     </Widget>
-     <Widget>
       <ClassName>BoUfoVBox</ClassName>
       <Properties>
-       <name>mWidget42</name>
+       <name>mStretch42</name>
        <constraints/>
        <opaque/>
        <layout>UVBoxLayout</layout>
@@ -394,7 +411,7 @@
     <Widget>
      <ClassName>BoUfoWidget</ClassName>
      <Properties>
-      <name>mWidget40</name>
+      <name>mStretch40</name>
       <constraints/>
       <opaque/>
       <layout/>
@@ -552,47 +569,9 @@
       </Widget>
      </Widget>
      <Widget>
-      <ClassName>BoUfoLabel</ClassName>
-      <Properties>
-       <name>mFPSLabel</name>
-       <constraints/>
-       <opaque/>
-       <layout/>
-       <minimumWidth/>
-       <minimumHeight/>
-       <preferredWidth/>
-       <preferredHeight/>
-       <backgroundImageFile/>
-       <verticalAlignment/>
-       <horizontalAlignment/>
-       <stretch/>
-       <text/>
-       <iconFile/>
-      </Properties>
-     </Widget>
-     <Widget>
-      <ClassName>BoUfoLabel</ClassName>
-      <Properties>
-       <name>mGroundRendererDebug</name>
-       <constraints/>
-       <opaque/>
-       <layout/>
-       <minimumWidth/>
-       <minimumHeight/>
-       <preferredWidth/>
-       <preferredHeight/>
-       <backgroundImageFile/>
-       <verticalAlignment/>
-       <horizontalAlignment/>
-       <stretch/>
-       <text/>
-       <iconFile/>
-      </Properties>
-     </Widget>
-     <Widget>
       <ClassName>BoUfoVBox</ClassName>
       <Properties>
-       <name>mMapCoordinates</name>
+       <name>mNorthEastDebugContainer</name>
        <constraints/>
        <opaque/>
        <layout>UVBoxLayout</layout>
@@ -608,7 +587,26 @@
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
        <Properties>
-        <name>mMapCoordinatesWorldLabel</name>
+        <name>mFPSLabel</name>
+        <constraints/>
+        <opaque/>
+        <layout/>
+        <minimumWidth/>
+        <minimumHeight/>
+        <preferredWidth/>
+        <preferredHeight/>
+        <backgroundImageFile/>
+        <verticalAlignment/>
+        <horizontalAlignment/>
+        <stretch/>
+        <text>FPS</text>
+        <iconFile/>
+       </Properties>
+      </Widget>
+      <Widget>
+       <ClassName>BoUfoLabel</ClassName>
+       <Properties>
+        <name>mGroundRendererDebug</name>
         <constraints/>
         <opaque/>
         <layout/>
@@ -625,12 +623,12 @@
        </Properties>
       </Widget>
       <Widget>
-       <ClassName>BoUfoLabel</ClassName>
+       <ClassName>BoUfoVBox</ClassName>
        <Properties>
-        <name>mMapCoordinatesCanvasLabel</name>
+        <name>mMapCoordinates</name>
         <constraints/>
         <opaque/>
-        <layout/>
+        <layout>UVBoxLayout</layout>
         <minimumWidth/>
         <minimumHeight/>
         <preferredWidth/>
@@ -639,14 +637,69 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
-        <text/>
-        <iconFile/>
        </Properties>
+       <Widget>
+        <ClassName>BoUfoLabel</ClassName>
+        <Properties>
+         <name>mMapCoordinatesWorldLabel</name>
+         <constraints/>
+         <opaque/>
+         <layout/>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <stretch/>
+         <text/>
+         <iconFile/>
+        </Properties>
+       </Widget>
+       <Widget>
+        <ClassName>BoUfoLabel</ClassName>
+        <Properties>
+         <name>mMapCoordinatesCanvasLabel</name>
+         <constraints/>
+         <opaque/>
+         <layout/>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <stretch/>
+         <text/>
+         <iconFile/>
+        </Properties>
+       </Widget>
+       <Widget>
+        <ClassName>BoUfoLabel</ClassName>
+        <Properties>
+         <name>mMapCoordinatesWindowLabel</name>
+         <constraints/>
+         <opaque/>
+         <layout/>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <stretch/>
+         <text/>
+         <iconFile/>
+        </Properties>
+       </Widget>
       </Widget>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
        <Properties>
-        <name>mMapCoordinatesWindowLabel</name>
+        <name>mPathFinderDebug</name>
         <constraints/>
         <opaque/>
         <layout/>
@@ -662,30 +715,11 @@
         <iconFile/>
        </Properties>
       </Widget>
-     </Widget>
-     <Widget>
-      <ClassName>BoUfoLabel</ClassName>
-      <Properties>
-       <name>mPathFinderDebug</name>
-       <constraints/>
-       <opaque/>
-       <layout/>
-       <minimumWidth/>
-       <minimumHeight/>
-       <preferredWidth/>
-       <preferredHeight/>
-       <backgroundImageFile/>
-       <verticalAlignment/>
-       <horizontalAlignment/>
-       <stretch/>
-       <text/>
-       <iconFile/>
-      </Properties>
      </Widget>
      <Widget>
       <ClassName>BoUfoWidget</ClassName>
       <Properties>
-       <name>mWidget24</name>
+       <name>mStretch24</name>
        <constraints/>
        <opaque/>
        <layout/>
@@ -756,7 +790,7 @@
     <Widget>
      <ClassName>BoUfoWidget</ClassName>
      <Properties>
-      <name>mWidget43</name>
+      <name>mStretch43</name>
       <constraints/>
       <opaque/>
       <layout/>
