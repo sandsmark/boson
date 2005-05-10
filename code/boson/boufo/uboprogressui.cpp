@@ -53,12 +53,9 @@ UBoProgressUI::paint(UGraphics * g, UWidget * w) {
 
 	UBoProgress * progress = dynamic_cast<UBoProgress *>(w);
 
-	// TODO: support custom colors
 	// TODO: support an icon
 
-	UColor from(255, 0, 0);
-	UColor to(0, 255, 0);
-	paintGradient(g, progress, from, to);
+	paintGradient(g, progress, progress->startColor(), progress->endColor());
 }
 
 void

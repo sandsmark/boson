@@ -2066,6 +2066,33 @@ void BoUfoProgress::setRange(double min, double max)
  mProgress->setMaximumValue(max);
 }
 
+void BoUfoProgress::setStartColor(const QColor& c)
+{
+ mProgress->setStartColor(ufo::UColor(c.red(), c.green(), c.blue()));
+}
+
+QColor BoUfoProgress::startColor() const
+{
+ ufo::UColor c = mProgress->startColor();
+ return QColor((int)(c.getRed() * 255), (int)(c.getGreen() * 255), (int)(c.getBlue() * 255));
+}
+
+void BoUfoProgress::setEndColor(const QColor& c)
+{
+ mProgress->setEndColor(ufo::UColor(c.red(), c.green(), c.blue()));
+}
+
+QColor BoUfoProgress::endColor() const
+{
+ ufo::UColor c = mProgress->endColor();
+ return QColor((int)(c.getRed() * 255), (int)(c.getGreen() * 255), (int)(c.getBlue() * 255));
+}
+
+void BoUfoProgress::setColor(const QColor& c)
+{
+ mProgress->setColor(ufo::UColor(c.red(), c.green(), c.blue()));
+}
+
 BoUfoNumInput::BoUfoNumInput() : BoUfoWidget()
 {
  init();

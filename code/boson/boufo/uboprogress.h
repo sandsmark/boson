@@ -27,6 +27,7 @@
 #define UBOPROGRESS_H
 
 #include <ufo/widgets/uwidget.hpp>
+#include <ufo/util/ucolor.hpp>
 
 namespace ufo {
 
@@ -53,6 +54,16 @@ public:
 		return m_value;
 	}
 
+	void setStartColor(const UColor& color);
+	const UColor& startColor() const {
+		return m_startcolor;
+	}
+	void setEndColor(const UColor& color);
+	const UColor& endColor() const {
+		return m_endcolor;
+	}
+	void setColor(const UColor& color);
+
 protected:
 
 private:  // Private attributes
@@ -60,6 +71,8 @@ private:  // Private attributes
 	double m_max;
 	double m_value;
 	Orientation m_orientation;
+	UColor m_startcolor;
+	UColor m_endcolor;
 };
 
 } // namespace ufo

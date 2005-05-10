@@ -1185,6 +1185,12 @@ public:
 	double minimumValue() const;
 	double maximumValue() const;
 
+	void setStartColor(const QColor& color);
+	QColor startColor() const;
+	void setEndColor(const QColor& color);
+	QColor endColor() const;
+	void setColor(const QColor& color);
+
 	virtual void setOpaque(bool o);
 
 private:
