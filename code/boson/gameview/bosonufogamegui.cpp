@@ -45,9 +45,12 @@
 #include "../cell.h"
 #include "../bowater.h"
 #include "../bosonfpscounter.h"
+#include "../info/boinfo.h"
 #include "bodebug.h"
 
 #include <klocale.h>
+
+#include <qdatetime.h>
 
 /**
  * @return A string that displays @p plane. The plane consists of a normal
@@ -57,6 +60,153 @@
 static QString planeDebugString(const float* plane)
 {
  return QString("((%1,%2,%3),%4)").arg(plane[0]).arg(plane[1]).arg(plane[2]).arg(plane[3]);
+}
+
+class CPUTimes
+{
+public:
+	CPUTimes()
+	{
+		mUTime = 0;
+		mSTime = 0;
+		mCUTime = 0;
+		mCSTime = 0;
+	}
+	bool update();
+
+	CPUTimes& operator=(const CPUTimes& t)
+	{
+		mUpdated = t.mUpdated;
+		mUTime = t.mUTime;
+		mSTime = t.mSTime;
+		mCUTime = t.mCUTime;
+		mCSTime = t.mCSTime;
+		return *this;
+	}
+	unsigned int msecsTo(const QTime& t) const
+	{
+		if (mUpdated.isNull() || t.isNull()) {
+			return 0;
+		}
+		return mUpdated.msecsTo(t);
+	}
+	unsigned int msecsSince(const QTime& old) const
+	{
+		int ms = old.msecsTo(mUpdated);
+		if (ms < 0) {
+			return 0;
+		}
+		return ms;
+	}
+	unsigned int msecsSince(const CPUTimes& old) const
+	{
+		return msecsSince(old.mUpdated);
+	}
+	unsigned long int dutime(const CPUTimes& old) const
+	{
+		if (mUTime < old.mUTime) {
+			return 0;
+		}
+		return mUTime - old.mUTime;
+	}
+	unsigned long int dstime(const CPUTimes& old) const
+	{
+		if (mSTime < old.mSTime) {
+			return 0;
+		}
+		return mSTime - old.mSTime;
+	}
+	unsigned long int dcutime(const CPUTimes& old) const
+	{
+		if (mCUTime < old.mCUTime) {
+			return 0;
+		}
+		return mCUTime - old.mCUTime;
+	}
+	unsigned long int dcstime(const CPUTimes& old) const
+	{
+		if (mCSTime < old.mCSTime) {
+			return 0;
+		}
+		return mCSTime - old.mCSTime;
+	}
+	float utimePercent(const CPUTimes& old) const
+	{
+		int ms = msecsSince(old);
+		if (ms == 0) {
+			return 0.0f;
+		}
+		float djiffies = (float)dutime(old);
+		float dms = djiffies * 10.0f;
+		float percent = (dms * 100.0f) / ((float)ms);
+		return percent;
+	}
+	float stimePercent(const CPUTimes& old) const
+	{
+		int ms = msecsSince(old);
+		if (ms == 0) {
+			return 0.0f;
+		}
+		float djiffies = (float)dstime(old);
+		float dms = djiffies * 10.0f;
+		float percent = (dms * 100.0f) / ((float)ms);
+		return percent;
+	}
+	float cutimePercent(const CPUTimes& old) const
+	{
+		int ms = msecsSince(old);
+		if (ms == 0) {
+			return 0.0f;
+		}
+		float djiffies = (float)dcutime(old);
+		float dms = djiffies * 10.0f;
+		float percent = (dms * 100.0f) / ((float)ms);
+		return percent;
+	}
+	float cstimePercent(const CPUTimes& old) const
+	{
+		int ms = msecsSince(old);
+		if (ms == 0) {
+			return 0.0f;
+		}
+		float djiffies = (float)dcstime(old);
+		float dms = djiffies * 10.0f;
+		float percent = (dms * 100.0f) / ((float)ms);
+		return percent;
+	}
+	float allTimePercent(const CPUTimes& old) const
+	{
+		int ms = msecsSince(old);
+		if (ms == 0) {
+			return 0.0f;
+		}
+		float djiffies = (float)dutime(old)
+				+ (float)dstime(old)
+				+ (float)dcutime(old)
+				+ (float)dcstime(old);
+		float dms = djiffies * 10.0f;
+		float percent = (dms * 100.0f) / ((float)ms);
+		return percent;
+	}
+
+private:
+	QTime mUpdated;
+	unsigned long int mUTime;
+	unsigned long int mSTime;
+	long int mCUTime;
+	long int mCSTime;
+};
+
+bool CPUTimes::update()
+{
+ BoCurrentInfo info;
+ CPUTimes times;
+ if (!info.cpuTime(&mUTime, &mSTime, &mCUTime, &mCSTime)) {
+	mUpdated = QTime::currentTime();
+	return false;
+ }
+ mUpdated = QTime::currentTime();
+ return true;
 }
 
 
@@ -113,7 +263,10 @@ public:
 	const GLint* mViewport;
 	PlayerIO* mLocalPlayerIO;
 	BosonGameFPSCounter* mFPSCounter;
+	CPUTimes mCPUTimes;
+	CPUTimes mCPUTimes2;
 
+	// pointers to widgets in the BosonUfoGameGUIHelper
 	BoUfoHBox* mResourcesBox;
 	BoUfoLabel* mMineralsLabel;
 	BoUfoLabel* mOilLabel;
@@ -139,6 +292,10 @@ public:
 	BosonUfoChat* mUfoChat;
 	BosonUfoMiniMap* mUfoMiniMap;
 	BosonCommandFrame* mUfoCommandFrame;
+
+	// pointers to widgets that are created in this class
+	BoUfoLabel* mMemoryUsage;
+	BoUfoLabel* mCPUUsage;
 };
 
 BosonUfoGameGUI::BosonUfoGameGUI(const BoMatrix& modelview, const BoMatrix& projection,
@@ -224,6 +381,14 @@ void BosonUfoGameGUI::initUfoWidgets()
  d->mUfoChat = new BosonUfoChat();
  d->mUfoChat->setMessageId(BosonMessage::IdChat);
  widget->mUfoChatContainer->addWidget(d->mUfoChat);
+
+
+ d->mMemoryUsage = new BoUfoLabel();
+ widget->mNorthEastDebugContainer->addWidget(d->mMemoryUsage);
+ d->mCPUUsage = new BoUfoLabel();
+ widget->mNorthEastDebugContainer->addWidget(d->mCPUUsage);
+ d->mCPUTimes.update();
+ d->mCPUTimes2.update();
 }
 
 void BosonUfoGameGUI::setGLMiniMap(BosonGLMiniMap* m)
@@ -347,6 +512,8 @@ void BosonUfoGameGUI::updateUfoLabels()
  updateUfoLabelRenderCounts();
  updateUfoLabelAdvanceCalls();
  updateUfoLabelTextureMemory();
+ updateUfoLabelMemoryUsage();
+ updateUfoLabelCPUUsage();
  d->mGamePaused->setVisible(boGame->gamePaused());
 }
 
@@ -577,6 +744,86 @@ void BosonUfoGameGUI::updateUfoLabelTextureMemory()
  text += i18n("Texture memory in use (approximately): %1 kb\n").arg(boTextureManager->usedTextureMemory() / 1024);
  text += i18n(" in %1 texures\n").arg(boTextureManager->textureCount());
  d->mTextureMemory->setText(text);
+}
+
+void BosonUfoGameGUI::updateUfoLabelMemoryUsage()
+{
+ if (!boConfig->boolValue("debug_memory_usage") && !boConfig->boolValue("debug_memory_vmdata_only")) {
+	d->mMemoryUsage->setVisible(false);
+	return;
+ }
+ d->mMemoryUsage->setVisible(true);
+ BoCurrentInfo info;
+ QString vmSize;
+ QString vmLck;
+ QString vmRSS;
+ QString vmData;
+ QString vmStk;
+ QString vmExe;
+ QString vmLib;
+ QString vmPTE;
+ if (!info.memoryInUse(&vmSize, &vmLck, &vmRSS, &vmData, &vmStk, &vmExe, &vmLib, &vmPTE)) {
+	d->mMemoryUsage->setText("Memory Usage: cannot read data on your system");
+	return;
+ }
+ QString text = QString("VmSize: %1\n"
+		"VmLck: %2\n"
+		"VmRSS: %3\n"
+		"VmData: %4\n"
+		"VmStk: %5\n"
+		"VmExe: %6\n"
+		"VmLib: %7\n"
+		"VmPTE: %8")
+	 	.arg(vmSize)
+	 	.arg(vmLck)
+	 	.arg(vmRSS)
+	 	.arg(vmData)
+	 	.arg(vmStk)
+	 	.arg(vmExe)
+	 	.arg(vmLib)
+	 	.arg(vmPTE);
+ if (boConfig->boolValue("debug_memory_vmdata_only")) {
+	text = QString("VmData: %1").arg(vmData);
+ }
+ d->mMemoryUsage->setText(text);
+}
+
+void BosonUfoGameGUI::updateUfoLabelCPUUsage()
+{
+ if (!boConfig->boolValue("debug_cpu_usage")) {
+	d->mCPUUsage->setVisible(false);
+	return;
+ }
+ d->mCPUUsage->setVisible(true);
+
+ const unsigned int updateInterval = 1500; // in ms
+ if (d->mCPUTimes.msecsTo(QTime::currentTime()) < updateInterval) {
+	return;
+ }
+
+ CPUTimes times;
+ if (!times.update()) {
+	d->mCPUUsage->setText("CPU Usage: cannot read data on your system");
+	return;
+ }
+ if (times.msecsSince(d->mCPUTimes) == 0) {
+	d->mCPUUsage->setText("CPU Usage: read invalid data");
+	return;
+ }
+
+ QString text = QString("User Mode: %1\n"
+		"System Mode: %2\n"
+		"Children: User: %3 System: %3\n"
+		"All: %4")
+		.arg(times.utimePercent(d->mCPUTimes))
+		.arg(times.stimePercent(d->mCPUTimes))
+		.arg(times.cutimePercent(d->mCPUTimes))
+		.arg(times.cstimePercent(d->mCPUTimes))
+		.arg(times.allTimePercent(d->mCPUTimes));
+ d->mCPUUsage->setText(text);
+
+ d->mCPUTimes = d->mCPUTimes2;
+ d->mCPUTimes2 = times;
 }
 
 void BosonUfoGameGUI::setCursorCanvasVector(const BoVector3Fixed* v)

@@ -882,3 +882,24 @@ unsigned int BoInfo::openGLVersion() const
  return getUInt(OpenGLVersion);
 }
 
+
+BoCurrentInfo::BoCurrentInfo()
+{
+ mInfo = BoInfo::boInfo();
+ if (!mInfo) {
+	boError() << k_funcinfo << "global BoInfo object not yet initialized" << endl;
+ }
+}
+
+BoCurrentInfo::~BoCurrentInfo()
+{
+}
+
+float BoCurrentInfo::cpuSpeed() const
+{
+ if (!mInfo) {
+	return 0.0f;
+ }
+ return mInfo->cpuSpeed();
+}
+

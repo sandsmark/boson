@@ -546,30 +546,8 @@ public:
 	 **/
 	bool haveMtrr() const;
 
-	/**
-	 * Note that this is <em>always<em> current data!!
-	 *
-	 * This entry is <em>not</em> updates by @ref updateOSInfo or friends
-	 * and it isn't stored into the boinfo log either! This is for debugging
-	 * purposes (think about it: memory usage changes over lifetime of the
-	 * programe, so logging it only once is useless)
-	 *
-	 * Also note that this value is <em>not</em> accurate! E.g. on linux it
-	 * gives the amount of memory pages that are allocated for the
-	 * application, but it doesn't say anything about how much of this
-	 * memory is actually in use! It may be possible that there are 30MB
-	 * allocated, but 20MB have been freed already (but still appear in this
-	 * number)! Keep this in mind when using this number
-	 *
-	 * @return The amount of memory in the data segment that is allocated by
-	 * the current application (boson/borender/bounit/...). On linux this is the
-	 * number after "VmData" in /proc/PID/status. The returned string should
-	 * be the number only, without the "VmData: ". In kb.
-	 **/
-	QString dataMemory() const;
-
-
 	QMap<int, QVariant> completeData() const;
+
 	/**
 	 * This goes through the BoInfo data and tries to ensure that everything
 	 * is fine for a user of the proprietary nvidia driver. They have a
@@ -658,6 +636,79 @@ private:
 private:
 	BoInfoPrivate* d;
 };
+
+
+/**
+ * @short Provide current information about the system
+ *
+ * While @ref BoInfo is meant to provide static information about a system, such
+ * as installed libraries, CPU clock, installed RAM and so on, this class is
+ * meant to provide information about dynamic data.
+ *
+ * The data this class operates on can change at any time and therefore it makes
+ * little or no sense to store them in the @ref BoInfo database.
+ *
+ * This class is primarily meant to be used in-game, whereas @ref BoInfo is
+ * primarily meant to provide an information log about the system. This class
+ * can be used for example to retrieve the current system load. The game may
+ * reduce certain effects, depending on that.
+ *
+ * Note that in addition to dynamic data, this class can also be used to provide
+ * static data that may be useful for in-game use. One example may be the CPU
+ * speed.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoCurrentInfo
+{
+public:
+	BoCurrentInfo();
+	~BoCurrentInfo();
+
+	BoInfo* boInfo() const
+	{
+		return mInfo;
+	}
+
+	/**
+	 * Returns the memory that is currently in use in the parameters.
+	 *
+	 * WARNING: these values can be very confusing, if they are not read
+	 * correctly. The most important value is @p vmData, which returns the
+	 * size of the data segment of this application. However it does NOT
+	 * necessarily return the amount of memory in use! The value depends
+	 * heavily on the paging strategy of the operating system.
+	 *
+	 * If a value is not provided by any reason, the parameter is either
+	 * not touched at all, or set to @ref QString::null.
+	 *
+	 * A NULL pointer parameter is not touched by this method.
+	 *
+	 * @return TRUE, if the data could be read, FALSE otherwise.
+	 **/
+	bool memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
+			QString* vmData, QString* vmStk, QString* vmExe, QString* vmLib,
+			QString* vmPTE) const;
+
+	/**
+	 * Returns the number of jiffies that the process has been scheduled.
+	 *
+	 * Note that this may be very linux dependent - I don't know other
+	 * systems good enough to implement an API that might be portable.
+	 *
+	 * See man 5 proc for the meaning of the parameters.
+	 *
+	 * @return TRUE if the valeus could be read, otherwise FALSE
+	 **/
+	bool cpuTime(unsigned long int* utime, unsigned long int* stime, long int* cutime, long int* cstime) const;
+
+	float cpuSpeed() const;
+
+
+private:
+	BoInfo* mInfo;
+};
+
 
 #endif
 

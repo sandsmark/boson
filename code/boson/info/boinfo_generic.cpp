@@ -34,7 +34,27 @@ bool BoInfo::haveMtrr() const
  return false;
 }
 
-QString dataMemory() const
+bool BoCurrentInfo::memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
+		QString* vmData, QString* vmStk, QString* vmExe, QString* vmLib,
+		QString* vmPTE) const
 {
- return QString::null;
+ Q_UNUSED(vmSize);
+ Q_UNUSED(vmLck);
+ Q_UNUSED(vmRSS);
+ Q_UNUSED(vmData);
+ Q_UNUSED(vmStk);
+ Q_UNUSED(vmExe);
+ Q_UNUSED(vmLib);
+ Q_UNUSED(vmPTE);
+ return false;
 }
+
+bool BoCurrentInfo::cpuTime(unsigned long int* utime, unsigned long int* stime, long int* cutime, long int* cstime) const
+{
+ Q_UNUSED(utime);
+ Q_UNUSED(stime);
+ Q_UNUSED(cutime);
+ Q_UNUSED(cstime);
+ return false;
+}
+
