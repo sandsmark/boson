@@ -182,6 +182,8 @@ public:
 	BoUfoWidget* getWidgetAt(int x, int y);
 	BoUfoWidget* getContainerWidgetAt(int x, int y);
 
+	void setSelectedWidget(const QDomElement& widget);
+
 signals:
 	void signalPlaceWidget(const QDomElement& parent);
 	void signalSelectWidget(const QDomElement& widget);
@@ -212,6 +214,8 @@ private:
 	bool mPlacementMode;
 	QMap<void*, QDomElement> mUfoWidget2Element;
 	QMap<void*, BoUfoWidget*> mUfoWidget2Widget;
+
+	QString mNameOfSelectedWidget;
 };
 
 
