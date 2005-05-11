@@ -95,7 +95,7 @@ public:
 
 	bool loadObjects();
 
-	void loadActions();
+	bool loadActions();
 
 	/**
 	 * @return Concatenation of all @ref UnitProperties::md5 sums in this
@@ -243,7 +243,7 @@ public:
 	 **/
 	void playSound(const BosonWeaponProperties* weaponprop, WeaponSoundEvent event);
 
-	void loadGeneralSounds();
+	bool loadGeneralSounds();
 
 	/**
 	 * Play the specified sound event
