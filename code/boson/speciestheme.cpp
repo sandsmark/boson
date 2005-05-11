@@ -177,9 +177,10 @@ bool SpeciesTheme::loadUnit(unsigned long int type)
  return true;
 }
 
-void SpeciesTheme::loadActions()
+bool SpeciesTheme::loadActions()
 {
  mData->loadActions();
+ return true;
 }
 
 QCString SpeciesTheme::unitPropertiesMD5() const
@@ -619,21 +620,22 @@ void SpeciesTheme::playSound(const BosonWeaponProperties* weaponProp, WeaponSoun
  sound()->playSound(weaponProp->sound(event));
 }
 
-void SpeciesTheme::loadGeneralSounds()
+bool SpeciesTheme::loadGeneralSounds()
 {
 // TODO: sound mapping!
 // speciestheme designers should be able to rename the sounds for certain
 // events, just like for unit sounds!
  if (boConfig->boolValue("ForceDisableSound")) {
-	return;
+	return true;
  }
  if (!sound()) {
-	return;
+	return true;
  }
  QMap<int, QString> sounds;
  sounds.insert(SoundReportMinimapActivated, "report_minimap_activated");
  sounds.insert(SoundReportMinimapDeactivated, "report_minimap_deactivated");
  sound()->addSounds(themePath(), sounds);
+ return true;
 }
 
 const QIntDict<UpgradeProperties>& SpeciesTheme::technologyList() const
