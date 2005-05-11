@@ -199,6 +199,7 @@ BosonProfilingDialog::~BosonProfilingDialog()
 
  d->mItems.setAutoDelete(true);
  d->mItems.clear();
+ delete d->mTopItem;
  delete d;
 }
 
