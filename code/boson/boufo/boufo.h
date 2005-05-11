@@ -522,6 +522,8 @@ public:
 	 * @param drawable The object used for rendering the background. Note
 	 * that this is ignored if @ref opaque is FALSE. Also note that you have
 	 * to take care about deleting this yourself!
+	 *
+	 * WARNING: this has no effect, unless @ref opaque is TRUE !
 	 **/
 	void setBackground(BoUfoDrawable* drawable);
 
@@ -577,6 +579,11 @@ public:
 	 * (!!) to @p c
 	 **/
 	virtual void setForegroundColor(const QColor& c);
+
+	/**
+	 * WARNING: this has no effect, unless @ref opaque is TRUE !
+	 **/
+	void setBackgroundColor(const QColor& c);
 
 	virtual void setLayoutClass(LayoutClass);
 	LayoutClass layoutClass() const
