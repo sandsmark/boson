@@ -727,17 +727,26 @@ bool BosonStartingLoadPlayerData::startTask()
  mDuration = 0;
 
  startSubTask(i18n("Actions..."));
- player()->speciesTheme()->loadActions();
+ if (!player()->speciesTheme()->loadActions()) {
+	boError(270) << k_funcinfo << "loading actions failed" << endl;
+	return false;
+ }
  mDuration = 25;
  completeSubTask(mDuration);
 
  startSubTask(i18n("Objects..."));
- player()->speciesTheme()->loadObjects();
+ if (!player()->speciesTheme()->loadObjects()) {
+	boError(270) << k_funcinfo << "loading objects failed" << endl;
+	return false;
+ }
  mDuration = 50;
  completeSubTask(mDuration);
 
  startSubTask(i18n("Unit config files..."));
- player()->speciesTheme()->readUnitConfigs();
+ if (!player()->speciesTheme()->readUnitConfigs()) {
+	boError(270) << k_funcinfo << "reading unit configs failed" << endl;
+	return false;
+ }
  mDuration = 150;
  completeSubTask(mDuration);
 
@@ -746,14 +755,20 @@ bool BosonStartingLoadPlayerData::startTask()
  }
 
  startSubTask(i18n("Technologies..."));
- player()->speciesTheme()->loadTechnologies();
+ if (!player()->speciesTheme()->loadTechnologies()) {
+	boError(270) << k_funcinfo << "loading technologies failed" << endl;
+	return false;
+ }
  mDuration = durationBeforeUnitLoading() + loadUnitDuration() + 50;
  completeSubTask(mDuration);
 
  // AB: atm only the sounds of the local player are required, but I believe this
  // can easily change.
  startSubTask(i18n("Sounds..."));
- player()->speciesTheme()->loadGeneralSounds();
+ if (!player()->speciesTheme()->loadGeneralSounds()) {
+	boError(270) << k_funcinfo << "loading general sounds failed" << endl;
+	return false;
+ }
  mDuration = durationBeforeUnitLoading() + loadUnitDuration() + 100;
  completeSubTask(mDuration);
 
@@ -806,7 +821,10 @@ bool BosonStartingLoadPlayerData::loadUnitDatas()
  float factor = 0.0f;
  for (it = unitIds.begin(); it != unitIds.end(); ++it, currentUnit++) {
 	startSubTask(i18n("Unit %1 of %2...").arg(currentUnit).arg(unitIds.count()));
-	player()->speciesTheme()->loadUnit(*it);
+	if (!player()->speciesTheme()->loadUnit(*it)) {
+		boError(270) << k_funcinfo << "loading unit with ID " << *it << " failed" << endl;
+		return false;
+	}
 
 	factor = ((float)currentUnit + 1) / ((float)unitIds.count());
 	completeSubTask(durationBeforeUnitLoading() + (int)(loadUnitDuration() * factor));
