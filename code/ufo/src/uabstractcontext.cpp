@@ -66,6 +66,7 @@ UAbstractContext::UAbstractContext(UAbstractContext * parent)
 	, m_deviceBounds()
 	, m_bounds()
 	, m_dragWidget(NULL)
+	, m_dragWidgets()
 	, m_eventGrabber(NULL)
 	, m_listeners()
 {
@@ -349,6 +350,10 @@ UAbstractContext::createRepaintManager() {
 	return new URepaintManager();
 }
 
+// AB: this code exists only for reference. you can see what i changed with it,
+// but it should not be used anymore.
+#define OLD_DRAG_WIDGET 0
+
 void
 UAbstractContext::fireMouseEvent(UMouseEvent * e) {
 	URootPane * root = getRootPane();
@@ -365,22 +370,40 @@ UAbstractContext::fireMouseEvent(UMouseEvent * e) {
 	pos.x -= m_bounds.x;
 	pos.y -= m_bounds.y;
 
+#if OLD_DRAG_WIDGET
 	UWidget * w = NULL;
+#endif
+	std::vector<UWidget*> visibleWidgets;
 
 	// if we have been dragging, send the release event to the drag widget.
+#if OLD_DRAG_WIDGET
 	if (m_dragWidget) {
 		w = m_dragWidget;
 	} else {
 		w = root->getVisibleWidgetAt(pos);
 	}
-	UPoint wRoot = (w) ? w->getRootLocation() : UPoint();
+#endif
+	if (m_dragWidgets.size() > 0) {
+		visibleWidgets = m_dragWidgets;
+	} else {
+		visibleWidgets = root->getVisibleWidgetsAt(pos);
+	}
 
 	if (e->getType() == UEvent::MousePressed) {
+#if OLD_DRAG_WIDGET
 		m_dragWidget = w;
+#endif
+		m_dragWidgets = visibleWidgets;
 	} else if (e->getType() == UEvent::MouseReleased && !e->hasMouseModifiers()) {
 		// all mouse buttons have been released, dragging is over
+#if OLD_DRAG_WIDGET
 		m_dragWidget = NULL;
+#endif
+		m_dragWidgets.clear();
 	}
+
+#if OLD_DRAG_WIDGET
+	UPoint wRoot = (w) ? w->getRootLocation() : UPoint();
 
 	// lazily create a new mouse event
 	UMouseEvent * newE = new UMouseEvent(
@@ -396,6 +419,36 @@ UAbstractContext::fireMouseEvent(UMouseEvent * e) {
 
 	if (send(w, newE)) {
 		e->consume();
+	}
+#endif
+	for (std::vector<UWidget*>::iterator it = visibleWidgets.begin();
+			it != visibleWidgets.end();
+			++it) {
+
+		UWidget * w = *it;
+		UPoint wRoot = w->getRootLocation();
+
+		// lazily create a new mouse event
+		UMouseEvent * newE = new UMouseEvent(
+			w,
+			e->getType(),
+			e->getModifiers(),
+			pos - wRoot,
+			e->getRelMovement(),
+			pos,
+			e->getButton(),
+			e->getClickCount()
+		);
+
+		if (send(w, newE)) {
+			e->consume();
+		}
+	}
+	for (std::vector<UWidget*>::iterator it = visibleWidgets.begin();
+			it != visibleWidgets.end();
+			++it) {
+		// flush the saved event
+		(*it)->dispatchEvent(NULL);
 	}
 }
 
@@ -432,6 +485,10 @@ UAbstractContext::fireMouseWheelEvent(UMouseWheelEvent * e) {
 	if (send(w, newE)) {
 		e->consume();
 	}
+	// flush the event
+	if (w) {
+		w->dispatchEvent(NULL);
+	}
 }
 
 void
@@ -462,6 +519,7 @@ UAbstractContext::fireMouseMotionEvent(UMouseEvent * e) {
 	// FIXME: should mouse drag events override all?
 	// first send the drag event, then look for widgets under mouse
 	// the drag event might move some widgets (e.g. internal frames).
+#if OLD_DRAG_WIDGET
 	if (m_dragWidget) {
 		// lazily create a new mouse event
 		UMouseEvent * newE = new UMouseEvent(
@@ -478,6 +536,37 @@ UAbstractContext::fireMouseMotionEvent(UMouseEvent * e) {
 		if (send(m_dragWidget, newE)) {
 			consumed = true;
 		}
+
+		// flush the event
+		m_dragWidget->dispatchEvent(NULL);
+	}
+#endif
+	if (m_dragWidgets.size() > 0) {
+		for (std::vector<UWidget*>::iterator it = m_dragWidgets.begin();
+				it != m_dragWidgets.end();
+				++it) {
+			// lazily create a new mouse event
+			UMouseEvent * newE = new UMouseEvent(
+				(*it),
+				UEvent::MouseDragged,
+				e->getModifiers(),
+				pos - (*it)->getRootLocation(),
+				e->getRelMovement(),
+				pos,
+				e->getButton(),
+				e->getClickCount()
+			);
+
+			if (send(*it, newE)) {
+				consumed = true;
+			}
+		}
+		// flush the event
+		for (std::vector<UWidget*>::iterator it = m_dragWidgets.begin();
+				it != m_dragWidgets.end();
+				++it) {
+			(*it)->dispatchEvent(NULL);
+		}
 	}
 
 	UWidget * w;
@@ -490,7 +579,11 @@ UAbstractContext::fireMouseMotionEvent(UMouseEvent * e) {
 	UPoint wbefRoot = (wbef) ? wbef->getRootLocation() : UPoint();
 
 	// mouse motion event
+#if OLD_DRAG_WIDGET
 	if (!m_dragWidget && w == wbef) {
+#else
+	if (m_dragWidgets.size() == 0 && w == wbef) {
+#endif
 		// lazily create a new mouse event
 		UMouseEvent * newE = new UMouseEvent(
 			w,
@@ -505,6 +598,11 @@ UAbstractContext::fireMouseMotionEvent(UMouseEvent * e) {
 
 		if (send(w, newE)) {
 			consumed = true;
+		}
+
+		// flush the event
+		if (w) {
+			w->dispatchEvent(NULL);
 		}
 	}
 	// always send mouse enter and exit events
@@ -527,6 +625,11 @@ UAbstractContext::fireMouseMotionEvent(UMouseEvent * e) {
 			consumed = true;
 		}
 
+		// flush the event
+		if (wbef) {
+			wbef->dispatchEvent(NULL);
+		}
+
 		// mouse enter event
 		newE = new UMouseEvent(
 			w,
@@ -541,6 +644,10 @@ UAbstractContext::fireMouseMotionEvent(UMouseEvent * e) {
 
 		if (send(w, newE)) {
 			consumed = true;
+		}
+		// flush the event
+		if (w) {
+			w->dispatchEvent(NULL);
 		}
 	}
 	if (consumed) {
@@ -587,6 +694,11 @@ UAbstractContext::fireKeyEvent(UKeyEvent * e) {
 
 	if (send(w, newE)) {
 		e->consume();
+	}
+
+	// flush the event
+	if (w) {
+		w->dispatchEvent(NULL);
 	}
 }
 

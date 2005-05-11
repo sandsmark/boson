@@ -128,6 +128,8 @@ protected: // Private methods
 	  */
 	virtual void fireKeyEvent(UKeyEvent * e);
 
+	bool  sendToVisibleWidgets(UWidget * w, UEvent * e);
+
 private: // Private functions
 	/** Sends the given event to the event grabber or the given receiver.
 	  * @return True if the event has benn consumed
@@ -151,6 +153,7 @@ private: // Private attributes
 	URectangle m_bounds;
 
 	UWidget * m_dragWidget;
+	std::vector<UWidget*> m_dragWidgets;
 
 	USlot1<UEvent*> * m_eventGrabber;
 	UPoint m_posBeforeGrabbing;
