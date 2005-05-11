@@ -1007,7 +1007,10 @@ void FormPreview::updateGUI(const QDomElement& root, BoUfoWidget* parent)
  if (root.isNull() || !parent) {
 	return;
  }
+ bool useConvenienceBackground = false;
  QDomNode n;
+ static int depth = 0;
+ bool useRed = true;
  for (n = root.firstChild(); !n.isNull(); n = n.nextSibling()) {
 	QDomElement e = n.toElement();
 	if (e.isNull()) {
@@ -1028,9 +1031,33 @@ void FormPreview::updateGUI(const QDomElement& root, BoUfoWidget* parent)
 	parent->addWidget(widget);
 	addWidget(widget, e);
 
+	if (useConvenienceBackground) {
+		int blue = depth;
+		if (blue > 255) {
+			blue = 255;
+		}
+		if (useRed) {
+			widget->setBackgroundColor(QColor(255, 0, blue));
+		} else {
+			widget->setBackgroundColor(QColor(0, 255, blue));
+		}
+		useRed = !useRed;
+	}
+
 	widget->loadPropertiesFromXML(e.namedItem("Properties").toElement());
 
+	if (useConvenienceBackground) {
+		widget->setOpaque(true);
+	}
+
+	if (widget->name() == mNameOfSelectedWidget) {
+		// TODO: paint a rect around it or so
+		widget->widget()->setBorder(ufo::RaisedBevelBorder);
+	}
+
+	depth += 40;
 	updateGUI(e, widget);
+	depth -= 40;
  }
 }
 
@@ -1178,6 +1205,30 @@ void FormPreview::selectWidget(BoUfoWidget* widget)
  }
 
  emit signalSelectWidget(widgetUnderCursor);
+}
+
+void FormPreview::setSelectedWidget(const QDomElement& widget)
+{
+ // called e.g. when a widget in the widgettree is selected
+ mNameOfSelectedWidget = QString::null;
+ if (widget.isNull()) {
+	return;
+ }
+ QDomElement properties = widget.namedItem("Properties").toElement();
+ if (properties.isNull()) {
+	boError() << k_funcinfo << "no Properties" << endl;
+	return;
+ }
+ mNameOfSelectedWidget = properties.namedItem("name").toElement().text();
+
+ BoUfoWidget* contentWidget = mUfoManager->contentWidget();
+ BO_CHECK_NULL_RET(contentWidget);
+ QDomElement root = mUfoWidget2Element[contentWidget->widget()];
+ if (root.isNull()) {
+	boError() << k_funcinfo << "cannot find root widget" << endl;
+	return;
+ }
+ updateGUI(root);
 }
 
 
@@ -2029,7 +2080,7 @@ void BoUfoDesignerMain::slotSelectWidget(const QDomElement& widget)
 // boDebug() << k_funcinfo << endl;
  mProperties->displayProperties(widget);
  mWidgetTree->selectWidget(widget);
-// mPreview->selectWidget(widget); // paint a "rect" around the widget
+ mPreview->setSelectedWidget(widget); // paint a "rect" around the widget
 }
 
 void BoUfoDesignerMain::slotPropertiesChanged(const QDomElement& widget)
