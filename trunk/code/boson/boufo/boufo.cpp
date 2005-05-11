@@ -1708,6 +1708,17 @@ void BoUfoWidget::setForegroundColor(const QColor& c)
  }
 }
 
+void BoUfoWidget::setBackgroundColor(const QColor& c)
+{
+ ufo::UColor color(c.red(), c.green(), c.blue());
+ widget()->setBackgroundColor(color);
+ std::vector<ufo::UWidget*> widgets = widget()->getWidgets();
+ std::vector<ufo::UWidget*>::iterator it;
+ for (it = widgets.begin(); it != widgets.end(); ++it) {
+	(*it)->setBackgroundColor(color);
+ }
+}
+
 void BoUfoWidget::loadProperties(const QMap<QString, QString>& properties)
 {
  QStrList propertyNames = metaObject()->propertyNames(true);
