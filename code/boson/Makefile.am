@@ -88,7 +88,6 @@ libboson_la_SOURCES = \
 	bosonprofiling.cpp \
 	bosonprofilingdialog.cpp \
 	bosonmodeltextures.cpp \
-	bosonstarting.cpp \
 	bpfdescriptiondialog.cpp \
 	bomaterialwidget.cpp \
 	bovectorinput.cpp \
@@ -163,6 +162,7 @@ boson_SOURCES = \
 		kgamecelldebug.cpp \
 		gameoverdialog.cpp \
 		bocheckinstallation.cpp \
+		bosonstarting.cpp \
 		main.cpp
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)

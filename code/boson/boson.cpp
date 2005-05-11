@@ -35,7 +35,6 @@
 #include "bodebuglog.h"
 #include "bosonsaveload.h"
 #include "bosonconfig.h"
-#include "bosonstarting.h"
 #include "boevent.h"
 #include "boeventmanager.h"
 #include "bomessage.h"
@@ -266,8 +265,6 @@ class Boson::BosonPrivate
 public:
 	BosonPrivate()
 	{
-		mStartingObject = 0;
-
 		mGameTimer = 0;
 		mCanvas = 0;
 		mPlayField = 0;
@@ -282,8 +279,6 @@ public:
 		mPlayerInputHandler = 0;
 		mNetworkSynchronizer = 0;
 	}
-	BosonStarting* mStartingObject;
-
 	QTimer* mGameTimer;
 
 	BosonCanvas* mCanvas;
@@ -476,12 +471,6 @@ PlayerIO* Boson::findPlayerIO(Q_UINT32 id) const
  return 0;
 }
 
-void Boson::setStartingObject(BosonStarting* s)
-{
- // AB: a NULL starting object unsets the object. it is totally valid
- d->mStartingObject =  s;
-}
-
 void Boson::quitGame()
 {
  boDebug() << k_funcinfo << endl;
@@ -495,7 +484,6 @@ void Boson::quitGame()
  // remove all players from game
  removeAllPlayers();
 
- setStartingObject(0);
  boDebug() << k_funcinfo << " done" <<  endl;
 }
 
@@ -534,10 +522,6 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			boError() << k_funcinfo << "received IdNewGame, but game is already running" << endl;
 			return;
 		}
-		if (!d->mStartingObject) {
-			boError() << k_funcinfo << "received IdNewGame, but starting a game is not allowed!" << endl;
-			return;
-		}
 		Q_INT8 gameMode; // game/editor mode
 		stream >> gameMode;
 		if (gameMode == 1) {
@@ -550,7 +534,13 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		}
 		QByteArray data;
 		stream >> data;
-		d->mStartingObject->setNewGameData(data);
+		bool taken = false;
+		emit signalSetNewGameData(data, &taken);
+		if (!taken) {
+			boError() << k_funcinfo << "newgame data not taken - slot not connected?" << endl;
+			// TODO: message box ; back to newgame widget?
+			return;
+		}
 		QTimer::singleShot(0, this, SIGNAL(signalStartNewGame()));
 		break;
 	}
@@ -563,8 +553,8 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		break;
 	case BosonMessage::IdGameIsStarted:
 	{
-		int flag = 0;
-		stream >> flag;
+		QString loadFromLog;
+		stream >> loadFromLog;
 		if (sender != messageClient()->adminId()) {
 			boError() << k_funcinfo << "only ADMIN is allowed to send IdGameIsStarted message! sender="
 					<< sender << " ADMIN="
@@ -576,18 +566,14 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 
 		emit signalGameStarted();
 
-		if (flag != 0 && flag != 1) {
-			boError() << k_funcinfo << "invalid flag value " << flag << endl;
-			flag = 0;
-		}
-		if (flag == 0) {
+		if (loadFromLog.isEmpty()) {
 			if (isAdmin()) {
 				connect(d->mGameTimer, SIGNAL(timeout()), this, SLOT(slotSendAdvance()));
 			}
-		} else if (flag == 1) {
+		} else {
 			boWarning() << k_funcinfo << "starting to re-play from log..." << endl;
 
-			if (!loadFromLogFile()) {
+			if (!loadFromLogFile(loadFromLog)) {
 				slotAddChatSystemMessage(i18n("You requested to load from a log file, but the game could not be started using the specified file.\nThe current game is now unusable."));
 //				KMessageBox::sorry(0, i18n("You requested to load from a log file, but the game could not be started using the specified file.\nThe current game is now unusable."));
 			} else {
@@ -692,16 +678,12 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		// that the starting is done and we are waiting for the ADMIN to
 		// start the game. he will do so once all clients have sent this
 		// message.
-		if (!d->mStartingObject) {
-			BO_NULL_ERROR(d->mStartingObject);
-			break;
-		}
 		if (gameStatus() != KGame::Init) {
 			// the message is not allowed here
 			boError() << k_funcinfo << "not in Init state" << endl;
 			break;
 		}
-		d->mStartingObject->startingCompletedReceived(buffer, sender);
+		emit signalStartingCompletedReceived(buffer, sender);
 		break;
 	}
 	case BosonMessage::IdNetworkSyncCheck:
@@ -1593,13 +1575,8 @@ static void emergencySave(int signal)
 // At this point the game has been completely loaded/started already, all we
 // have to do is to load the messages.
 // (this is called after IdGameIsStarted is received)
-bool Boson::loadFromLogFile()
+bool Boson::loadFromLogFile(const QString& file)
 {
- if (!d->mStartingObject) {
-	BO_NULL_ERROR(d->mStartingObject);
-	return false;
- }
- QString file = d->mStartingObject->logFile();
  if (file.isEmpty()) {
 	boError() << k_funcinfo << "empty log filename" << endl;
 	return false;
