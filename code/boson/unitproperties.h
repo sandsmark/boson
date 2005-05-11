@@ -116,11 +116,6 @@ public:
 
 	UnitProperties(bool fullmode = true);
 	UnitProperties(SpeciesTheme*);
-
-	/**
-	 * @param fileName The filename of the config file for this unit type
-	 **/
-	UnitProperties(SpeciesTheme*, const QString& fileName, bool fullmode = true);
 	~UnitProperties();
 
 

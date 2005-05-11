@@ -285,7 +285,7 @@ public:
 	 * values are used by @ref loadNewUnit and @ref loadEntry - they don't
 	 * have to load the config file theirselves.
 	 **/
-	void readUnitConfigs(bool full = true);
+	bool readUnitConfigs(bool full = true);
 
 protected:
 	/**

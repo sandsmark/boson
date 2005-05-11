@@ -337,15 +337,15 @@ void SpeciesTheme::loadNewUnit(Unit* unit)
  }
 }
 
-void SpeciesTheme::readUnitConfigs(bool full)
+bool SpeciesTheme::readUnitConfigs(bool full)
 {
  // AB: at least the object models are touched here :(
  // they depend on teamcolor, so we won't be able to change teamcolor anymore!
  finalizeTeamColor();
  if (d->mUnitProperties.count() != 0) {
-	boError() << "Cannot read unit configs again. Returning untouched..."
+	boError(270) << "Cannot read unit configs again. Returning untouched..."
 			<< endl;
-	return;
+	return true;
  }
  QDir dir(themePath());
  dir.cd(QString::fromLatin1("units"));
@@ -364,18 +364,26 @@ void SpeciesTheme::readUnitConfigs(bool full)
  }
 
  if (list.isEmpty()) {
-	boError() << "No Units found in this theme" << endl;
-	return;
+	boWarning(270) << "No Units found in this theme" << endl;
+	return true;
  }
  for (QStringList::ConstIterator it = list.begin(); it != list.end(); ++it) {
-	UnitProperties* prop = new UnitProperties(this, *it, full);
+	UnitProperties* prop = new UnitProperties(this);
+	if (!prop->loadUnitType(*it, full)) {
+		boError(270) << k_funcinfo << "could not load " << *it << endl;
+		delete prop;
+		return false;
+	}
 	if (!d->mUnitProperties.find(prop->typeId())) {
 		d->mUnitProperties.insert(prop->typeId(), prop);
 	} else {
-		boError() << "UnitType " << prop->typeId() << " already there!"
+		boError(270) << "UnitType " << prop->typeId() << " already there!"
 				<< endl;
+		delete prop;
+		return false;
 	}
  }
+ return true;
 }
 
 const UnitProperties* SpeciesTheme::unitProperties(unsigned long int unitType) const

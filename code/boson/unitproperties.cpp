@@ -79,13 +79,6 @@ UnitProperties::UnitProperties(SpeciesTheme* theme)
  mTheme = theme;
 }
 
-UnitProperties::UnitProperties(SpeciesTheme* theme, const QString& fileName, bool fullload)
-{
- init();
- mTheme = theme;
- loadUnitType(fileName, fullload);
-}
-
 void UnitProperties::init()
 {
  d = new UnitPropertiesPrivate;
