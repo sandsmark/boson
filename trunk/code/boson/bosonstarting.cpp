@@ -100,9 +100,18 @@ BosonStarting::~BosonStarting()
  delete d;
 }
 
-void BosonStarting::setNewGameData(const QByteArray& data)
+void BosonStarting::slotSetNewGameData(const QByteArray& data, bool* taken)
 {
+ if (taken) {
+	if (*taken) {
+		boError() << k_funcinfo << "data has been taken before already! only the starting object should take it!" << endl;
+		// don't return
+	}
+ }
  mNewGameData = data;
+ if (taken) {
+	*taken = true;
+ }
 }
 
 void BosonStarting::setEditorMap(const QByteArray& buffer)
@@ -386,7 +395,7 @@ bool BosonStarting::addLoadGamePlayers(const QString& playersXML)
  return true;
 }
 
-void BosonStarting::startingCompletedReceived(const QByteArray& buffer, Q_UINT32 sender)
+void BosonStarting::slotStartingCompletedReceived(const QByteArray& buffer, Q_UINT32 sender)
 {
  if (!d->mStartingCompleted.contains(sender)) {
 	d->mStartingCompleted.append(sender);
@@ -424,11 +433,10 @@ void BosonStarting::startingCompletedReceived(const QByteArray& buffer, Q_UINT32
  // immediately. but it will change before IdGameIsStarted is received.
  boGame->setGameStatus(KGame::Run);
 
- if (d->mLoadFromLogFile.isEmpty()) {
-	boGame->sendMessage(0, BosonMessage::IdGameIsStarted);
- } else {
-	boGame->sendMessage(1, BosonMessage::IdGameIsStarted);
- }
+ // AB: d->mLoadFromLogFile is null usually. non-null makes sense only for
+ // non-network games, we will not start a normal game, but reproduce from a log
+ // file then.
+ boGame->sendMessage(d->mLoadFromLogFile, BosonMessage::IdGameIsStarted);
 }
 
 void BosonStarting::sendStartingCompleted(bool success)

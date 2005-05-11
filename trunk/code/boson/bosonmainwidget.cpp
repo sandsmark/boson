@@ -548,7 +548,10 @@ void BosonMainWidget::initBoson()
  if (!d->mStarting) {
 	BO_NULL_ERROR(d->mStarting);
  }
- boGame->setStartingObject(d->mStarting);
+ connect(boGame, SIGNAL(signalStartingCompletedReceived(const QByteArray&, Q_UINT32)),
+		d->mStarting, SLOT(slotStartingCompletedReceived(const QByteArray&, Q_UINT32)));
+ connect(boGame, SIGNAL(signalSetNewGameData(const QByteArray&, bool*)),
+		d->mStarting, SLOT(slotSetNewGameData(const QByteArray&, bool*)));
 
  // new games are handled in this order: ADMIN clicks on start games - this
  // sends an IdStartGame over network. Once this is received signalStartNewGame()

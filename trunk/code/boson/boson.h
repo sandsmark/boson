@@ -33,7 +33,6 @@ class QDomDocument;
 class QDataStream;
 class QTextStream;
 class BosonSaveLoad;
-class BosonStarting;
 class BoMessage;
 class BoEvent;
 class BoEventManager;
@@ -111,17 +110,6 @@ public:
 	BosonPlayField* playField() const;
 
 	PlayerIO* findPlayerIO(Q_UINT32 id) const;
-
-	/**
-	 * Set the object that will get used to start the game. Some starting
-	 * relevant network messages could get forwarded directly to this object
-	 * and we will store some data from network messages there.
-	 *
-	 * Note that a NULL @p starting parameter will unset the object and
-	 * therefore disable game starting. This can be done once the game has
-	 * been started, in order to avoid starting it twice.
-	 **/
-	void setStartingObject(BosonStarting* starting);
 
 	/**
 	 * Initialize a @ref BosonSaveLoad object with the relevant data.
@@ -289,13 +277,6 @@ public:
 	void clearDelayedMessages();
 	void forcePauseGame();
 
-	/**
-	 * Start the scenario. This must not be called anymore, once a game is
-	 * started, therefore it is allowed from a @ref BosonStarting object
-	 * only.
-	 **/
-	void startScenario(BosonStarting*);
-
 	void queueEvent(BoEvent* event);
 
 	BoEventManager* eventManager() const;
@@ -418,6 +399,23 @@ signals:
 	void signalStartNewGame();
 
 	/**
+	 * Emitted when the game is about to be started. The @p data contains
+	 * all data necessary for starting the game and should be taken by a
+	 * slot in @ref BosonStarting.
+	 *
+	 * The slot should set @p taken to TRUE, to let this object know that
+	 * the data has been received.
+	 **/
+	void signalSetNewGameData(const QByteArray& data, bool* taken);
+
+	/**
+	 * Emitted when a client has sent a message that he completed starting
+	 * (i.e. data loading). The game (i.e. advance messages) should start
+	 * when all clients completed starting.
+	 **/
+	void signalStartingCompletedReceived(const QByteArray& message, Q_UINT32 sender);
+
+	/**
 	 * Order the canvas to call @ref BosonCanvas::slotAdvance
 	 * @param advanceCallsCount The number of this advance call. This is used to
 	 * decide what should be done - e.g. there is no need to check for new
@@ -508,7 +506,7 @@ protected:
 	void makeGameLog();
 	void makeUnitLog();
 
-	bool loadFromLogFile();
+	bool loadFromLogFile(const QString& file);
 
 protected slots:
 	/**

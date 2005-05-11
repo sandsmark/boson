@@ -42,13 +42,6 @@ public:
 	BosonStarting(QObject* parent);
 	~BosonStarting();
 
-	/**
-	 * Set all data that are needed to start a new game. This stream should
-	 * have been sent by the ADMIN to all clients. It should contain at
-	 * least the map and the scenario
-	 **/
-	void setNewGameData(const QByteArray& data);
-
 	void setEditorMap(const QByteArray& buffer);
 
 	void setLoadFromLogFile(const QString& file);
@@ -64,20 +57,6 @@ public:
 	 * succeeded.
 	 **/
 	QByteArray loadGame(const QString& fileName);
-
-	/**
-	 * Called by @ref Boson once a message indicating that a client
-	 * completed game starting has been received.
-	 *
-	 * That message is sent by this class.
-	 * @param buffer The message that was sent. At the moment this is empty.
-	 * It might be used for additional data one day, e.g. to check whether
-	 * loading was successfull - we also might use this to find out about
-	 * starting failure.
-	 * @param The sender of the message, i.e. the client that completed
-	 * loading.
-	 **/
-	void startingCompletedReceived(const QByteArray& buffer, Q_UINT32 client);
 
 	/**
 	 * Check whether there are events and process them. See @ref
@@ -97,6 +76,31 @@ public:
 	 * it is a very bad idea.
 	 **/
 	void checkEvents();
+
+public slots:
+	/**
+	 * Called by @ref Boson once a message indicating that a client
+	 * completed game starting has been received.
+	 *
+	 * That message is sent by this class.
+	 * @param buffer The message that was sent. At the moment this is empty.
+	 * It might be used for additional data one day, e.g. to check whether
+	 * loading was successfull - we also might use this to find out about
+	 * starting failure.
+	 *
+	 * See also @ref Boson::signalStartingCompletedReceived
+	 *
+	 * @param The sender of the message, i.e. the client that completed
+	 * loading.
+	 **/
+	void slotStartingCompletedReceived(const QByteArray& message, Q_UINT32 sender);
+
+	/**
+	 * Set all data that are needed to start a new game. This stream should
+	 * have been sent by the ADMIN to all clients. It should contain at
+	 * least the map and the scenario
+	 **/
+	void slotSetNewGameData(const QByteArray& data, bool* taken);
 
 signals:
 	void signalStartingFailed();
@@ -128,6 +132,7 @@ protected slots:
 	void slotStart();
 
 	void slotPlayFieldCreated(BosonPlayField* playField, bool* ownerChanged);
+
 
 protected:
 	/**
