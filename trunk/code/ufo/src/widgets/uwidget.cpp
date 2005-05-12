@@ -108,7 +108,6 @@ UWidget::UWidget()
 	, m_inputMap(new UInputMap())
 	, m_ancestorInputMap(new UInputMap())
 	, m_boUfoWidgetDeleter(NULL)
-	, m_seenEvent(false)
 {
 	// register at mem manager
 	trackPointer(m_inputMap);
@@ -153,7 +152,6 @@ UWidget::UWidget(ULayoutManager * layout)
 	, m_inputMap(new UInputMap())
 	, m_ancestorInputMap(new UInputMap())
 	, m_boUfoWidgetDeleter(NULL)
-	, m_seenEvent(false)
 {
 	// register at mem manager
 	trackPointer(m_layout);
@@ -1108,50 +1106,17 @@ UWidget::getInsets() const {
 
 void
 UWidget::dispatchEvent(UEvent * e) {
-	if (m_seenEvent && e) {
-		// the context is still delivering the same event, but we have
-		// seen it already. nothing to do.
-		// (note that even if the pointer is different, it still _is_
-		// the same event! the context may create different objects of
-		// the same event, which may get propagated to the same parent)
-		return;
-	}
-	if (!m_seenEvent && !e) {
-		// event should be flushed, but it already is. nothing to do.
-		return;
-	}
-	if (!e) {
-		// the context tells us here, that event delivery is finished.
-		// flush m_seenEvent , so that the next event will be
-		// delivered again
-		m_seenEvent = false;
-		if (m_parent) {
-			// tell the parent about the flush, too (we might have
-			// propagated the event to it)
-			m_parent->dispatchEvent(NULL);
-		}
-		return;
-	}
-
-	// AB: we deny furhter event delivery until dispatchEvent(NULL) is
-	// called.
-	// This is necessary, as the same event may have been dispatched to
-	// several children and they may all propagate it back to their parent.
-	// Therefore we need to ensure that we receive it once only.
-	//
-	// AB: note that this may be necessary for mouse events only. But at
-	// least currently we do this for _all_ events. Therefore after every
-	// call to widget->dispatchEvent(e) there must be a
-	// widget->dispatchEvent(NULL) somewhere
-	m_seenEvent = true;
-
 	// anything to do?
 	e->reference();
 	if (isEventEnabled(e->getType())) {
 		processEvent(e);
 	} else if (m_parent && dynamic_cast<UInputEvent*>(e)) {
+#if 0
+		// AB: events are propagated back to parents by the
+		// abstractcontext now!
 		//e->setSource(m_parent);
 		m_parent->dispatchEvent(e);
+#endif
 	}
 	e->unreference();
 }
@@ -1427,37 +1392,6 @@ UWidget::getVisibleWidgetAt(int x, int y) const {
 UWidget *
 UWidget::getVisibleWidgetAt(const UPoint & p) const {
 	return getVisibleWidgetAt(p.x, p.y);
-}
-
-std::vector<UWidget*>
-UWidget::getVisibleWidgetsAt(int x, int y) const {
-	if (!contains(x, y) || !m_isVisible) {
-		return std::vector<UWidget*>();
-	}
-	std::vector<UWidget*> ret;
-
-	// search backwards /*const_*/
-	for (std::vector<UWidget*>::const_iterator iter = m_children.begin();
-	        iter != m_children.end(); ++iter ) {
-
-		std::vector<UWidget*> list = (*iter)->getVisibleWidgetsAt
-		      (x - (*iter)->getX(), y - (*iter)->getY() );
-
-		for (std::vector<UWidget*>::const_iterator it = list.begin();
-		        it != list.end(); ++it) {
-			ret.push_back(*it);
-		}
-	}
-	if (ret.size() == 0) {
-		// if no sub widget contains the point, return this widget
-		ret.push_back(const_cast<UWidget*>(this));
-	}
-	return ret;
-}
-
-std::vector<UWidget*>
-UWidget::getVisibleWidgetsAt(const UPoint & p) const {
-	return getVisibleWidgetsAt(p.x, p.y);
 }
 
 

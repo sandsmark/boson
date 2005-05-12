@@ -29,6 +29,7 @@
 #define UABSTRACTCONTEXT_HPP
 
 #include "ucontext.hpp"
+#include <stack>
 
 namespace ufo {
 
@@ -128,14 +129,16 @@ protected: // Private methods
 	  */
 	virtual void fireKeyEvent(UKeyEvent * e);
 
-	bool  sendToVisibleWidgets(UWidget * w, UEvent * e);
-
 private: // Private functions
 	/** Sends the given event to the event grabber or the given receiver.
 	  * @return True if the event has benn consumed
 	  */
 	bool send(UWidget * receiver, UEvent * e);
 	void sendToGrabber(UEvent * e);
+
+	bool sendMouseEventToWidgets(std::stack<UWidget*> & widgets, UMouseEvent * e);
+	bool sendMouseWheelEventToWidgets(std::stack<UWidget*> & widgets, UMouseWheelEvent * e);
+	bool sendMouseMotionEventToWidgets(std::stack<UWidget*> & widgets, UMouseEvent * e);
 
 protected: // Protected attributes
 	/** */
@@ -152,8 +155,10 @@ private: // Private attributes
 	URectangle m_deviceBounds;
 	URectangle m_bounds;
 
+#if 0
 	UWidget * m_dragWidget;
-	std::vector<UWidget*> m_dragWidgets;
+#endif
+	std::stack<UWidget*> m_dragWidgetsStack;
 
 	USlot1<UEvent*> * m_eventGrabber;
 	UPoint m_posBeforeGrabbing;

@@ -22,20 +22,24 @@ Patches applied currently (this list may not be complete):
 - Patch to uwidget.h and uwidget.cpp to take a ufo::UCollectable* as widget
   deleter. This object is deleted at the very first in the d'tor.
 - Patch to uthemelookandfeel.cpp to close the X display it opens
-- Patch to uwidget.cpp, uwidget.hpp, uabstractcontext.hpp, uabstractcontext.cpp
-  and uscrollwidget.cpp to improve events for our needs:
-  instead of delivering a mouse event to root->getVisibleWidgetAt(), we
-  implement a UWidget::getVisibleWidgetsAt() that returns _all_ widgets at the
-  specified coordinates (this is important for layered panes). the event is then
-  dispatched to all of the widgets returned by root->getVisibleWidgetsAt().
-  Because every widget may propagate an event to it's parent, we need a way to
-  make sure that the parent receives an event once only. This is done in
-  UWidget::dispatchEvent(): when it is called, it sets m_seenEvent to true and
-  doesn't accept any further events anymore. Once the event is dispatched
-  completely, the dispatchEvent(NULL) has to be called which sets the seenEvent
-  flag back to false.
-  Note that the scrollwidget had to be modified only because it makes use of
-  dispatchEvent().
+- Patch to ubasicmenuitemui.cpp to call UMenuItem::uninstallUI() instead of
+  UMenuIntem::installUI() from uninstallUI().
+- Patch to ubasicmenuitemui.cpp to check for getRootPane(true) being NULL in
+  mouseReleased()
+- Patch to uabstractcontext.hpp, uabstractcontext.cpp and ubasicmenuitemui.cpp
+  to improve events for our needs:
+  Instead of delivering a mouse event to root->getVisibleWidgetAt(), we
+  implement a getVisibleWidgetsDFS() function, that starts at the root and finds
+  all currently visible widgets (at the relevant point) using a depth first search
+  and returns them in a stack.
+  We then dispatch it to every widget on the stack until one widget consumes
+  the event (in that case we stop then).
+  This especially fixes layered panes: previously an event was delivered to the
+  topmost layer only and to the layered pane itself, if the widget was not
+  interested in that event. Now the event is first delivered to the topmost
+  layer, then to the layers below it, then to the layered pane.
+  ubasicmenuitemui.cpp had to be patched, because mousePressed() needs to
+  consume events for items as well, not only for menus.
 
 
 Use

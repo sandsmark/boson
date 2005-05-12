@@ -133,10 +133,6 @@ UScrollPane::processMouseWheelEvent(UMouseWheelEvent * e) {
 	);
 
 	m_vertical->dispatchEvent(newE);
-
-	// AB: UWidget::dispatchEvent() stores the event pointer and denies any
-	// further even delivery until that event is flushed.
-	m_vertical->dispatchEvent(NULL);
 }
 
 

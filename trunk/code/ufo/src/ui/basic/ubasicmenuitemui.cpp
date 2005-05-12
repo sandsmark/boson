@@ -173,6 +173,13 @@ UBasicMenuItemUI::mousePressed(UMouseEvent *e) {
 		}
 		//UMenuManager::getMenuManager()->activateItem(item);
 	}
+
+	// AB: the menu item actually consumes this event, even though only
+	// mousereleased events actually do something.
+	// otherwise the eventlistener that is installed may do crazy things
+	// (as my current event delivery code continues to deliver to other
+	// widgets, if this one doesnt consume it)
+	e->consume();
 }
 
 void
