@@ -120,7 +120,7 @@ UBasicMenuItemUI::installUI(UWidget * w) {
 
 void
 UBasicMenuItemUI::uninstallUI(UWidget * w) {
-	UMenuItemUI::installUI(w);
+	UMenuItemUI::uninstallUI(w);
 	w->setMargin(0, 0, 0, 0);
 	uninstallSignals(dynamic_cast<UMenuItem*>(w));
 }
