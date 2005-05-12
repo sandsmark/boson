@@ -648,9 +648,6 @@ public:
 	/** @overload */
 	UWidget * getVisibleWidgetAt(const UPoint & p) const;
 
-	std::vector<UWidget*> getVisibleWidgetsAt(int x, int y) const;
-	std::vector<UWidget*> getVisibleWidgetsAt(const UPoint & p) const;
-
 	/** @return The number of child widgets this widget has */
 	unsigned int getWidgetCount() const;
 
@@ -1011,9 +1008,6 @@ private:  // Private attributes
 
 	// BoUfo extenstion
 	UCollectable* m_boUfoWidgetDeleter;
-
-	// AB: getVisibleWidgetsAt() helper variable
-	bool m_seenEvent;
 
 public: // Public Signals
 	// Mouse event signals
