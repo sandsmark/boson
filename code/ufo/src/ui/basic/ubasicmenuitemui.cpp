@@ -179,8 +179,12 @@ void
 UBasicMenuItemUI::mouseReleased(UMouseEvent * e) {
 	UWidget * w_under_mouse = e->getWidget();
 	if (!w_under_mouse->contains(e->getLocation())) {
-		w_under_mouse = e->getWidget()->
-			getRootPane(true)->getVisibleWidgetAt(e->getRootLocation());
+		URootPane * root = e->getWidget()->getRootPane(true);
+		if (!root) {
+			std::cerr << "ERROR: mouseReleased(): NULL rootpane" << std::endl;
+			return;
+		}
+		w_under_mouse = root->getVisibleWidgetAt(e->getRootLocation());
 	}
 
 	if (dynamic_cast<UMenu*>(w_under_mouse) == NULL) {
