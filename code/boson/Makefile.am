@@ -225,6 +225,7 @@ libbo3dsdebug_la_SOURCES = \
 		boglobal.cpp \
 		bomath.cpp \
 		bo3dtools.cpp \
+		bosonprofiling.cpp \
 		kgamemodeldebug.cpp \
 		bomatrixwidget.cpp
 bo3dsdebug_LDFLAGS = $(KDE_RPATH) $(all_libraries)

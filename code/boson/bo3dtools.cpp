@@ -19,6 +19,7 @@
 
 #include "bo3dtools.h"
 #include "bodebug.h"
+#include "bosonprofiling.h"
 #include <bogl.h>
 
 #include <qstring.h>
@@ -1379,6 +1380,7 @@ bool Bo3dTools::boUnProject(const BoGLMatrices& m, const QPoint& pos, BoVector3F
 
 bool Bo3dTools::boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, BoVector3Float* ret, float z)
 {
+  PROFILE_METHOD
   // AB: most code is from mesa's gluUnProject().
   BoMatrix A(projectionMatrix);
   BoMatrix B;
@@ -1444,6 +1446,7 @@ bool Bo3dTools::mapCoordinates(const BoGLMatrices& m, const QPoint& pos, GLfloat
 
 bool Bo3dTools::mapCoordinates(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth)
 {
+  PROFILE_METHOD
   GLint realy = viewport[3] - (GLint)pos.y() - 1;
   // we basically calculate a line here .. nearX/Y/Z is the starting point,
   // farX/Y/Z is the end point. From these points we can calculate a direction.
@@ -1509,6 +1512,7 @@ bool Bo3dTools::mapCoordinates(const BoMatrix& modelviewMatrix, const BoMatrix& 
 
 bool Bo3dTools::mapDistance(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, int windx, int windy, GLfloat* dx, GLfloat* dy)
 {
+  PROFILE_METHOD
   GLfloat moveZ; // unused
   GLfloat moveX1, moveY1;
   GLfloat moveX2, moveY2;
