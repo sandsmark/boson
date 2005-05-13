@@ -52,7 +52,7 @@ draw_bigbox_text("What has been changed since 0.10:
  <h3>General</h3>
  <ul>
     <li>Start of porting boson to <a href=\"http://libufo.sourceforge.net\">libufo</a>
-    (far from being complete !)</li>
+    </li>
     <li>Added a network sync protocol, now it is possible to <i>check</i> if the
     clients are in sync. Additionally most sync errors can now be fixed.</li>
     <li>Improvements to effects system (load/save, species independent, delaying)</li>
@@ -99,7 +99,8 @@ draw_bigbox_text("What has been changed since 0.10:
 
 <h3>Data</h3>
 <ul>
-  <li>Added textured fonts from plib</li>
+  <li>Added textured fonts from plib (not functional right now, due to the
+      libufo port)</li>
   <li>Many new neutral models (trees, houses, etc)</li>
   <li>Few new maps (Cross)</li>
   <li>Scripts are now in data module</li>
@@ -109,8 +110,6 @@ draw_bigbox_text("What has been changed since 0.10:
 
  <h3>Internal</h3>
  <ul>
-    <li>Default font is textured</li>
-    <li>Added a memory manager for debugging</li>
     <li>New texture class and texture manager</li>
     <li>Canvas coordinates are now same as cell coordinates (except that
         they're floats, not ints)</li>
@@ -131,8 +130,7 @@ draw_bigbox_text("This is a list of features that we consider as
   &quot;to-be-done&quot; for the next release.
   <h2>TODO</h2>
   <ul>
-     <li>Add a configure check for libufo</li>
-     <li>Complete porting GUI to libufo</li>
+     <li>libufo port: a lot of testing</li>
      <li>Test the Sync protocol at least once in real life</li>
      <li>Support calling script functions from BoCondition (optional for
      release)</li>
