@@ -2,6 +2,7 @@ from math import *
 
 from utils import *
 from bomath import *
+import time
 
 # This is just to be able to test the syntax whith you
 # Python interpreter on the console
@@ -11,10 +12,73 @@ except ImportError:
   boprint("error", "Couldn't import BoScript, something bad is going on, watch your back !")
 
 
+
+# The sun class to calculate horizontal coordinates (altitude/azimuth) of the Sun
+class Sun:
+  def __init__(self):
+    self.alt = 0
+    self.az = 0
+    self.lon = 24.85
+    self.lat = 58.633
+    self.tzoffset = time.timezone / 3600.0
+    if time.daylight != 0:
+      self.tzoffset = time.altzone / 3600.0
+
+    self.update(time.time())
+
+
+  def equationOfTime(self, dayofyear):
+    B = 2*pi * (dayofyear - 81) / 364
+    return 9.87*sin(2*B) - 7.53*cos(B) - 1.5*sin(B)
+
+  # Sets the observer location on earth
+  def setObserverLocation(self, lon, lat):
+    self.lon = lon
+    self.lat = lat
+
+  # Sets how many hours in front of UTC the time is
+  def setTimezoneOffset(self, offset):
+    self.tzoffset = offset
+
+
+  # Updates altitude/azimuth of the sun
+  # Alogrithm taken from:
+  #  http://en.wikipedia.org/wiki/Horizontal_coordinate_system#The_position_of_the_Sun
+  def update(self, curtime):
+    mytime = time.localtime(curtime)
+    yearstart = time.mktime((mytime.tm_year, 1, 1, 0, 0, 0, 0, 0, 0))
+    day = (curtime - yearstart) / (24*60*60.0) + 1
+
+    # Calculate declination
+    decl = -23.45 * cos((2*pi/365) * (day + 10))
+
+    # Calculate hour angle
+    T = mytime.tm_hour + mytime.tm_min/60.0 + mytime.tm_sec/3600.0
+    T += self.lon/15.0 + self.tzoffset
+    T += self.equationOfTime(day) / 60.0
+    ha = (12 - T) * 15.0
+
+    # Convert some variables to radians
+    lat_rad = radians(self.lat)
+    decl_rad = radians(decl)
+    ha_rad = radians(ha)
+    # Calculate altitude and azimuth
+    self.alt = asin(sin(lat_rad) * sin(decl_rad) + cos(lat_rad) * cos(decl_rad) * cos(ha_rad))
+    self.az = acos((cos(lat_rad) * sin(decl_rad) - sin(lat_rad) * cos(decl_rad) * cos(ha_rad)) / cos(self.alt))
+    if ha < 0:
+      self.az = 2*pi - self.az
+
+
+
 cycle = 0
 enable = 1
 # How many cycles does one day last?
 duration = 2400  # that's 2 minutes
+
+sun = Sun()
+# Start at 2005/05/13 08:00
+curtime = time.mktime((2005, 05, 13,  08, 00, 00,  0, 1, -1))
+sun.update(curtime)
 
 
 def init(startcycle = 0):
@@ -46,7 +110,7 @@ def advance():
 ### Simulates day and night
 def advanceDay(cycle):
   # Make sure day and night cycle is enabled
-  global enable, duration
+  global enable, duration, sun, curtime
   if enable == 0:
     return
 
@@ -56,57 +120,43 @@ def advanceDay(cycle):
   if (cycle % updatetime) != 0:
     return
 
-  # Is it day or night?  (this is basically time)
-  # 0 = 1 = midnight (time is 0:00); 0.5 = midday (time is 12:00)
-  # We add (duration * 0.25) to cycle because we want to start at morning
-  dayfactor = ((cycle + duration * 0.25) % duration) / float(duration)
-  setTime(dayfactor)
+  ### Advance time
+  # 24 hours is duration seconds here, so time is (86400.0 / duration) times
+  #  faster here. And we need to multiply this by updatetime
+  curtime += (86400.0 / duration) * updatetime
 
-# Sets time of day and modifies lighting
-def setTime(dayfactor):
-  # How dark/light it is?
-  # 0 = dark = night; 1 = light = day
-  if dayfactor <= 0.5:
-    # day is coming; clamp [0; 0.5]  (night - day) to [0; 1]  (dark - light)
-    lightfactor = dayfactor * 2
-  else:
-    # night is coming; clamp [0.5; 1]  (day - night) to [1; 0]  (light - dark)
-    lightfactor = 1 - (dayfactor - 0.5) * 2
-
+  ### Update sun
+  sun.update(curtime)
 
   ### Light position:
   # Calculate position of the light on xy plane
-  # It depends on dayfactor (time)
-  # We add -0.2 to make it a bit more interesting
-  lightpos2d = pointByRotation(((dayfactor - 0.2) * 360.0) % 360, 5000)
-
-  # Calculate height of the light. Maximal height is 8660 (= 60 degrees)
-  # Angle between ground and light will be 60 to -5
-  sunangle = lightfactor * 65 - 5
-  sunangletan = tan(radians(sunangle))
-  height = 5000 * sunangletan
-
+  lightpos2d = pointByRotation(degrees(sun.az), 5000)
+  # Calculate height of the light.
+  height = 5000 * tan(sun.alt)
   # Compose final position for the light and set it
   pos = lightpos2d[0], -lightpos2d[1], height, 1
   BoScript.setLightPos(0, pos)
 
 
+
+  # Sunfactor should be an approximate of how much of Sun's light will reach
+  #  the ground (some of it will be dispersed in the atmosphere)
+  sunfactor = 0.0
+  if sun.alt >= 90:
+    sunfactor = 1.0
+  elif sun.alt > 0.0:
+    adist = 1.0 / sin(sun.alt)
+    #sunfactor = 1.0 / sqrt(adist)
+    sunfactor = 1.0 / adist
+
+
   ### Light colors:
   # Base intensities for ambient and diffuse colors
-  baseambientday = 0.55  # Ambient color at day
-  baseambientnight = 0.35  # Ambient color at night
-  basediffuseday = 0.8  # Diffuse color at day
-  basediffusenight = 0.15  # Diffuse color at night
+  baseambientday = 0.4  # Ambient color at day
+  baseambientnight = 0.2  # Ambient color at night
+  basediffuseday = 0.7  # Diffuse color at day
+  basediffusenight = 0.0  # Diffuse color at night
 
-  # How much sun lights the land. Note that this is 1 if sun is at >=50 degrees,
-  #  not at 90 degrees.
-  if sunangle >= 50:
-    sunfactor = 1
-  elif sunangle <= 0:
-    sunfactor = 0
-  else:
-    # Sun angle is between 50 and 0 (exclusive)
-    sunfactor = sin(radians(sunangle / 50 * 90))
 
   # Calculate base ambient intensity
   # If the sun is shining bright, ambient intensity is quite big (in real world,
@@ -127,5 +177,5 @@ def setTime(dayfactor):
   BoScript.setLightDiffuse(0, diffuse)
   BoScript.setLightSpecular(0, diffuse)  # not used yet, same as diffuse
 
-  #print "Time: ", int(dayfactor * 24), ":", int(dayfactor * 1440 - 60 * int(dayfactor * 24)), " (dayfactor: ", dayfactor, "), lightfactor: ", lightfactor, ":  sun pos: (", int(lightpos2d[0]), "; ", int(-lightpos2d[1]), "; ", int(height), "), ambient: ", baseambient, ", diffuse: ", basediffuse
+  #print time.strftime("%Y/%m/%d %H:%M:%S", time.localtime(curtime)), " : sunpos: (%.1f; %.1f);  sf: %5.3f;  pos: (%5d; %5d; %5d)" % (degrees(sun.alt), degrees(sun.az),  sunfactor,  pos[0], -pos[1], pos[2])
 
