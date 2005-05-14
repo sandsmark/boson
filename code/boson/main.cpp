@@ -140,7 +140,7 @@ int main(int argc, char **argv)
 
  if (!top->preloadData()) {
 	boError() << k_funcinfo << "unable to preload some data" << endl;
-	KMessageBox::sorry(0, errorMessage, i18n("Check your installation"));
+	KMessageBox::sorry(0, i18n("Unable to preload data. Check your installation!"), i18n("Check your installation"));
 	return 1;
  }
 
