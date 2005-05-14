@@ -24,6 +24,7 @@
 #include "boeventlistener.h"
 #include "boson.h"
 #include "bosonpropertyxml.h"
+#include "bosonprofiling.h"
 #include "bodebug.h"
 
 #include <kgame/kgameproperty.h>
@@ -306,6 +307,7 @@ bool BoEventManager::queueEvent(BoEvent* event)
 
 void BoEventManager::deliverEvent(BoEvent* event)
 {
+ PROFILE_METHOD
  const BoEvent* e = event;
  boDebug(360) << k_funcinfo << e->name() << endl;
  QPtrListIterator<BoEventListener> it(d->mEventListeners);
@@ -324,6 +326,7 @@ void BoEventManager::deliverEvent(BoEvent* event)
 
 void BoEventManager::advance()
 {
+ PROFILE_METHOD
  QPtrList<BoEvent> remainingEvents;
  while (!d->mEvents.isEmpty()) {
 	BoEvent* e = d->mEvents.take(0);
