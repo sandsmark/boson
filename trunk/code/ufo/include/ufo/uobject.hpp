@@ -306,11 +306,6 @@ private:
 // inline implemenation
 //
 
-inline unsigned int
-UObject::hashCode() const {
-	return (unsigned int)(this);
-}
-
 inline bool
 UObject::operator==(const UObject & obj) const {
 	return equals(&obj);

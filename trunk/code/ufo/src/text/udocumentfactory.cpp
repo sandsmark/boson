@@ -97,7 +97,7 @@ public:
 		
 		bool done = false;
 		while (!done) {
-			unsigned int index = filteredText.find('\n');
+			unsigned long index = filteredText.find('\n');
 			if (index == std::string::npos) {
 				done = true;
 			} else {

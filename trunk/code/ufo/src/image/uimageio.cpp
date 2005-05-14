@@ -433,7 +433,7 @@ std::ostream &
 UImageIO::paramString(std::ostream & os) const {
 	os << "bpp " << m_components
 	<< " " << m_size.w << "x" << m_size.h
-	<< " pixel src " << std::hex << uint32_t(m_data)
+	<< " pixel src " << std::hex << reinterpret_cast<long>(m_data)
 	<< " comment " << m_comment;
 	return os;
 }

@@ -26,7 +26,7 @@ Patches applied currently (this list may not be complete):
   UMenuIntem::installUI() from uninstallUI().
 - Patch to ubasicmenuitemui.cpp to check for getRootPane(true) being NULL in
   mouseReleased()
-- Patch to uabstractcontext.hpp, uabstractcontext.cpp and ubasicmenuitemui.cpp
+- Patch to uabstractcontext.hpp, uabstractcontext.cpp, uwidget.cpp and ubasicmenuitemui.cpp
   to improve events for our needs:
   Instead of delivering a mouse event to root->getVisibleWidgetAt(), we
   implement a getVisibleWidgetsDFS() function, that starts at the root and finds
@@ -40,6 +40,7 @@ Patches applied currently (this list may not be complete):
   layer, then to the layers below it, then to the layered pane.
   ubasicmenuitemui.cpp had to be patched, because mousePressed() needs to
   consume events for items as well, not only for menus.
+- AMD64 fixes ported from libufo cvs on 05/05/14
 
 
 Use

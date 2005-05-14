@@ -77,8 +77,8 @@ std::vector<std::string>
 UString::tokenize(char delimiter) const {
 	std::vector<std::string> ret;
 
-	unsigned int begin = 0;
-	unsigned int end = (*m_stringRef).find(delimiter, begin);
+	unsigned long begin = 0;
+	unsigned long end = (*m_stringRef).find(delimiter, begin);
 	while (end != std::string::npos) {
 		ret.push_back((*m_stringRef).substr(begin, end - begin));
 		begin = end + 1;
