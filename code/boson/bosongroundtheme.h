@@ -29,6 +29,25 @@ class QPixmap;
 class BosonMap;
 class BoTextureArray;
 
+
+class BosonGroundType
+{
+public:
+	BosonGroundType() { id = -1; textures = 0; icon = 0; animationDelay = 1; }
+	~BosonGroundType();
+
+	int id;
+	BoTextureArray* textures;
+	QString texturefile;
+	int animationDelay;
+	QString name;
+	// Maybe change to BoVector3Float?
+	QRgb color;
+	// TODO: remove!
+	QPixmap* icon;
+	QString iconfile;
+};
+
 class BosonGroundThemePrivate;
 /**
  * Andreas Beckermann <b_mann@gmx.de>
@@ -70,8 +89,6 @@ public:
 	// least if a different theme is used for the next map)
 	bool loadGroundTheme(QString dir);
 
-	BoTextureArray* textures(int texture) const;
-
 	/**
 	 * Create a list of BosonGroundTheme objects by searching for
 	 * index.ground files. You can retrieve all available objects from @ref
@@ -80,42 +97,25 @@ public:
 	static bool createGroundThemeList();
 
 	/**
-	 * @return The number of textures (groundTypes) available in this
+	 * @return The number of groundTypes available in this
 	 * groundTheme.
 	 **/
-	unsigned int textureCount() const;
+	unsigned int groundTypeCount() const;
 
-	QRgb miniMapColor(unsigned int texture) const;
-
-	/**
-	 * @return The name of the file (relative to the groundTheme directory)
-	 * for @p texture.
-	 **/
-	QString textureFileName(unsigned int texture) const;
-
-	/**
-	 * @return The filename (relative to the groundTheme directory) of the pixmap
-	 * for @p texture. This pixmap will be used in editor
-	 **/
-	QString texturePixmapFileName(unsigned int texture) const;
-
-	int textureAnimationDelay(unsigned int texture) const;
-
-	QPixmap pixmap(unsigned int texture);
+	BosonGroundType* groundType(unsigned int i) const;
 
 protected:
 	/**
 	 * @param dir The directory to load the image from. Including the theme
 	 * name part (e.g. "earth"). Should end with a "/".
-	 * @param texture Which texture should be loaded. Must be < @ref
-	 * textureCount
+	 * @param groundtype Which groundtype should be loaded. Must be < @ref
+	 * groundTypeCount
 	 **/
-	void loadTextureImages(const QString& dir, unsigned int texture);
+	void loadTextures(const QString& dir, unsigned int groundtype);
 
 private:
 	BosonGroundThemePrivate* d;
-	QIntDict<BoTextureArray> mTextures;
-	QIntDict<QPixmap> mPixmaps;
+	QIntDict<BosonGroundType> mGroundTypes;
 };
 
 #endif

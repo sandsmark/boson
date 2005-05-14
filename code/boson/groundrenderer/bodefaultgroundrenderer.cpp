@@ -77,7 +77,7 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 
  unsigned int usedTextures = 0;
  unsigned int renderedQuads = 0;
- for (unsigned int i = 0; i < groundTheme->textureCount(); i++) {
+ for (unsigned int i = 0; i < groundTheme->groundTypeCount(); i++) {
 	if (i == 1) {
 		glEnable(GL_BLEND);
 	}

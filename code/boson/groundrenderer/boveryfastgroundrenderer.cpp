@@ -158,7 +158,7 @@ void BoVeryFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int
  glPushAttrib(GL_ENABLE_BIT);
  glDisable(GL_TEXTURE_2D);
  glBegin(GL_QUADS);
- for (unsigned int i = 0; i < map->groundTheme()->textureCount(); i++) {
+ for (unsigned int i = 0; i < map->groundTheme()->groundTypeCount(); i++) {
 	glColor3ubv(mThemeColors + (i * 4));
 	for (unsigned int j = 0; j < cellsCount; j++) {
 		if (cellTextures[j] != i) {
@@ -215,7 +215,7 @@ void BoVeryFastGroundRenderer::updateMapCache(const BosonMap* map)
  for (unsigned int x = 0; x < map->width(); x++) {
 	for (unsigned int y = 0; y < map->height(); y++) {
 		unsigned int maxValue = 0;
-		for (unsigned int j = 0; j < map->groundTheme()->textureCount(); j++) {
+		for (unsigned int j = 0; j < map->groundTheme()->groundTypeCount(); j++) {
 			unsigned int v = 0;
 			v += (int)map->texMapAlpha(j, x, y);
 			v += (int)map->texMapAlpha(j, x + 1, y);
@@ -241,10 +241,11 @@ void BoVeryFastGroundRenderer::updateGroundThemeCache(const BosonGroundTheme* th
  }
  BO_CHECK_NULL_RET(theme);
  delete[] mThemeColors;
- mThemeColors = new GLubyte[theme->textureCount() * 4];
+ mThemeColors = new GLubyte[theme->groundTypeCount() * 4];
  boDebug() << k_funcinfo << "finding average color of ground textures..." << endl;
- for (unsigned int i = 0; i < theme->textureCount(); i++) {
-	const BoTextureArray* a = theme->textures(i);
+ // TODO: maybe use minimap's color isntead?
+ for (unsigned int i = 0; i < theme->groundTypeCount(); i++) {
+	const BoTextureArray* a = theme->groundType(i)->textures;
 	mThemeColors[i * 4 + 0] = 255;
 	mThemeColors[i * 4 + 1] = 0;
 	mThemeColors[i * 4 + 2] = 0;

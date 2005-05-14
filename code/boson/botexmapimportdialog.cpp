@@ -142,7 +142,7 @@ bool BoTexMapImportDialog::unchanged() const
 	return true;
  }
  bool modifyDirect = false;
- for (unsigned int i = 0; i < theme->textureCount() && !modifyDirect; i++) {
+ for (unsigned int i = 0; i < theme->groundTypeCount() && !modifyDirect; i++) {
 	if (!d->mTextures[i]) {
 		continue;
 	}
@@ -236,7 +236,7 @@ void BoTexMapImportDialog::slotApply()
  if (ret == KMessageBox::Yes) {
 	// apply direct manipulations first. texmap will override them, if same
 	// textures will be used again
-	for (unsigned int i = 0; i < theme->textureCount(); i++) {
+	for (unsigned int i = 0; i < theme->groundTypeCount(); i++) {
 		if (!d->mTextures[i]) {
 			continue;
 		}
@@ -288,8 +288,8 @@ void BoTexMapImportDialog::setMap(BosonMap* map)
  QStringList textureList;
  textureList.append(i18n("Ignore this component"));
  BosonGroundTheme* theme = d->mMap->groundTheme();
- for (unsigned int i = 0; i < theme->textureCount(); i++) {
-	textureList.append(theme->textureFileName(i));
+ for (unsigned int i = 0; i < theme->groundTypeCount(); i++) {
+	textureList.append(theme->groundType(i)->name);
  }
  d->mRed->clear();
  d->mGreen->clear();
@@ -312,10 +312,10 @@ void BoTexMapImportDialog::setMap(BosonMap* map)
  d->mAlpha->setEnabled(false);
 
  d->mTextures.clear();
- for (unsigned int i = 0; i < theme->textureCount(); i++) {
+ for (unsigned int i = 0; i < theme->groundTypeCount(); i++) {
 	KIntNumInput* input = new KIntNumInput(d->mTexturesGroupBox);
 	input->setRange(-1, 255);
-	input->setLabel(theme->textureFileName(i));
+	input->setLabel(theme->groundType(i)->name);
 	input->setValue(0);
 	d->mTextures.insert(i, input);
  }

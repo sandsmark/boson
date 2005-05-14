@@ -244,9 +244,9 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
   // Depth test
   glDepthFunc(GL_LEQUAL);
 
-  // Go through all ground textures
-  unsigned int texcount = map->groundTheme()->textureCount();
-  for(unsigned int i = 0; i < texcount; i++)
+  // Go through all ground types
+  unsigned int groundcount = map->groundTheme()->groundTypeCount();
+  for(unsigned int i = 0; i < groundcount; i++)
   {
     // If this is pass 2, enable blending (it's initially disabled)
     if(i == 1)
@@ -588,7 +588,7 @@ void BoQuickGroundRenderer::initMap(const BosonMap* map)
   boglBufferData(GL_ARRAY_BUFFER, mMapCW * mMapCH * sizeof(BoVector3Float), 0, GL_STATIC_DRAW);
   BoVector3Float* normals = (BoVector3Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
   // Texture weights' VBO
-  mTextureCount = map->groundTheme()->textureCount();
+  mTextureCount = map->groundTheme()->groundTypeCount();
   // Size of a single texture weights' layer (for a single texture) in bytes
   mVBOTextureLayerSize = mMapCW * mMapCH * 4;
   boglGenBuffers(1, &mVBOTexture);

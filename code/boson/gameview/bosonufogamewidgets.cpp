@@ -530,8 +530,8 @@ void BosonUfoPlacementPreviewWidget::setPlacementCellPreviewData(unsigned int te
  BO_CHECK_NULL_RET(canvas()->map());
  BO_CHECK_NULL_RET(canvas()->map()->texMap());
  BO_CHECK_NULL_RET(canvas()->map()->groundTheme());
- if (textureCount != canvas()->map()->groundTheme()->textureCount()) {
-	boError() << k_funcinfo << "texture count is invalid - doesn't fit to groundTheme" << endl;
+ if (textureCount != canvas()->map()->groundTheme()->groundTypeCount()) {
+	boError() << k_funcinfo << "groundtype count is invalid - doesn't fit to groundTheme" << endl;
 	return;
  }
  if (textureCount == 0) {

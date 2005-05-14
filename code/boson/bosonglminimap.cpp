@@ -342,7 +342,7 @@ void BosonGLMiniMap::calculateGround(int x, int y)
 		cornerBlue += 192;
 		alphaSum += 255;
 	} else {
-		for (unsigned int i = 0; i < map()->groundTheme()->textureCount(); i++) {
+		for (unsigned int i = 0; i < map()->groundTheme()->groundTypeCount(); i++) {
 			int alpha = (int)map()->texMapAlpha(i, cornerX[j], cornerY[j]);
 			alphaSum += alpha;
 
