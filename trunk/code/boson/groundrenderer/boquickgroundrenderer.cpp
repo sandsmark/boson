@@ -834,14 +834,93 @@ unsigned int BoQuickGroundRenderer::chooseLOD(BoQuickGroundRenderer::TerrainChun
   }
 }
 
-void BoQuickGroundRenderer::cellFogChanged(int x, int y)
+void BoQuickGroundRenderer::cellFogChanged(int x1, int y1, int x2, int y2)
 {
-  if(!localPlayerIO()->isFogged(x, y))
+  // TODO: don't go over every single cell!
+  for(int y = y1; y <= y2; y++)
   {
-    chunkAt(x, y)->fogged = false;
+    for(int x = x1; x <= x2; y++)
+    {
+      if(!localPlayerIO()->isFogged(x, y))
+      {
+        chunkAt(x, y)->fogged = false;
+      }
+    }
   }
   mFogTexture->setLocalPlayerIO(localPlayerIO());
-  mFogTexture->cellChanged(x, y);
+  mFogTexture->cellChanged(x1, y1, x2, y2);
+}
+
+void BoQuickGroundRenderer::cellHeightChanged(int x1, int y1, int x2, int y2)
+{
+  // Normals have to be recalculated for adjacent corners as well
+  x1 = QMAX(x1 - 1, 0);
+  y1 = QMAX(y1 - 1, 0);
+  x2 = QMIN(x2 + 1, (int)mMapW);
+  y2 = QMIN(y2 + 1, (int)mMapH);
+
+  const float* heightmap = mMap->heightMap();
+  const float* normalmap = mMap->normalMap();
+
+  boglBindBuffer(GL_ARRAY_BUFFER, mVBOVertex);
+  BoVector3Float* vertices = (BoVector3Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+  boglBindBuffer(GL_ARRAY_BUFFER, mVBONormal);
+  BoVector3Float* normals = (BoVector3Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+
+  for(int y = y1; y <= y2; y++)
+  {
+    for(int x = x1; x <= x2; y++)
+    {
+      unsigned int i = (y * mMapCW) + x;
+      int pos = mMap->cornerArrayPos(x, y);
+      vertices[i].setZ(heightmap[pos]);
+      normals[i] = BoVector3Float(normalmap + 3 * pos);
+    }
+  }
+
+  // Unmap VBOs
+  boglBindBuffer(GL_ARRAY_BUFFER, mVBOVertex);
+  if(!boglUnmapBuffer(GL_ARRAY_BUFFER))
+  {
+    boError() << k_funcinfo << "can't unmap vertices' vbo!" << endl;
+  }
+  boglBindBuffer(GL_ARRAY_BUFFER, mVBONormal);
+  if(!boglUnmapBuffer(GL_ARRAY_BUFFER))
+  {
+    boError() << k_funcinfo << "can't unmap vertices' vbo!" << endl;
+  }
+}
+
+void BoQuickGroundRenderer::cellTextureChanged(int x1, int y1, int x2, int y2)
+{
+  const unsigned char* texmap = mMap->texMap();  // Contains weights for _all_ textures
+
+  boglBindBuffer(GL_ARRAY_BUFFER, mVBOTexture);
+  unsigned char* weights = (unsigned char*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+
+  for(int y = y1; y <= y2; y++)
+  {
+    for(int x = x1; x <= x2; x++)
+    {
+      unsigned int i = (y * mMapCW) + x;
+      int pos = mMap->cornerArrayPos(x, y);
+
+      for(unsigned int t = 0; t < mTextureCount; t++)
+      {
+        weights[mVBOTextureLayerSize*t + i*4 + 0] = 255;
+        weights[mVBOTextureLayerSize*t + i*4 + 1] = 255;
+        weights[mVBOTextureLayerSize*t + i*4 + 2] = 255;
+        weights[mVBOTextureLayerSize*t + i*4 + 3] = texmap[(t * mMapCW * mMapCH) + pos];
+      }
+    }
+  }
+
+  // Unmap VBOs
+  boglBindBuffer(GL_ARRAY_BUFFER, mVBOTexture);
+  if(!boglUnmapBuffer(GL_ARRAY_BUFFER))
+  {
+    boError() << k_funcinfo << "can't unmap texture weights' vbo!" << endl;
+  }
 }
 
 void BoQuickGroundRenderer::renderVisibleCellsStart(const BosonMap* map)

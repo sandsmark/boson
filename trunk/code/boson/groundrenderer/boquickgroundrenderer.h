@@ -69,7 +69,9 @@ class BoQuickGroundRenderer : public BoGroundRenderer
     **/
     virtual void generateCellList(const BosonMap* map);
 
-    virtual void cellFogChanged(int x, int y);
+    virtual void cellFogChanged(int x1, int y1, int x2, int y2);
+    virtual void cellHeightChanged(int x1, int y1, int x2, int y2);
+    virtual void cellTextureChanged(int x1, int y1, int x2, int y2);
 
   protected:
     class TerrainChunk

@@ -42,6 +42,8 @@ BosonPlayerInput::BosonPlayerInput(Boson* game) : QObject(0, "bosonplayerinput")
  mGame = game;
  connect(this, SIGNAL(signalChangeTexMap(int, int, unsigned int, unsigned int*, unsigned char*)),
 		mGame, SIGNAL(signalChangeTexMap(int, int, unsigned int, unsigned int*, unsigned char*)));
+ connect(this, SIGNAL(signalChangeHeight(int, int, float)),
+		mGame, SIGNAL(signalChangeHeight(int, int, float)));
  connect(this, SIGNAL(signalUpdateProduction(Unit*)),
 		mGame, SIGNAL(signalUpdateProduction(Unit*)));
 }
@@ -850,6 +852,7 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 			}
 			boDebug() << k_funcinfo << "new height at " << cornerX << "," << cornerY << " is " << height << endl;
 			canvas()->setHeightAtCorner(cornerX, cornerY, height);
+			emit signalChangeHeight(cornerX, cornerY, height);
 		}
 		break;
 	}
