@@ -120,8 +120,6 @@ protected:
 
 	void renderUfo();
 
-	virtual bool eventFilter(QObject* o, QEvent* e);
-
 	void grabMovieFrameAndSave();
 
 	/**

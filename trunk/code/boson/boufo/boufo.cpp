@@ -1225,6 +1225,20 @@ QValueList<BoUfoFontInfo> BoUfoManager::listFonts()
  return ret;
 }
 
+bool BoUfoManager::focusedWidgetTakesKeyEvents() const
+{
+ ufo::UWidget* focused = ufo::UWidget::getFocusedWidget();
+ if (!focused) {
+	return false;
+ }
+ if (focused->isEventEnabled(ufo::UEvent::KeyPressed) ||
+		focused->isEventEnabled(ufo::UEvent::KeyReleased) ||
+		focused->isEventEnabled(ufo::UEvent::KeyTyped)) {
+	return true;
+ }
+ return false;
+}
+
 
 class BoUfoWidgetDeleter : public ufo::UCollectable
 {

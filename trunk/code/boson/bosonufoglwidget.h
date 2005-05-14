@@ -64,6 +64,7 @@ public:
 
 
 protected:
+	virtual bool eventFilter(QObject* o, QEvent* e);
 	virtual void mouseMoveEvent(QMouseEvent*);
 	virtual void mousePressEvent(QMouseEvent*);
 	virtual void mouseReleaseEvent(QMouseEvent*);

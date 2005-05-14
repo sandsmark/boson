@@ -327,6 +327,8 @@ public:
 	QValueList<BoUfoFontInfo> listFonts();
 	QValueList<BoUfoFontInfo> listFonts(const BoUfoFontInfo&);
 
+	bool focusedWidgetTakesKeyEvents() const;
+
 private:
 	ufo::UXDisplay* mDisplay;
 	ufo::UXContext* mContext;
