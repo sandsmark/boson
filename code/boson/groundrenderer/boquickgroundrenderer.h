@@ -168,6 +168,8 @@ class BoQuickGroundRenderer : public BoGroundRenderer
     TerrainChunk* mChunks;
     unsigned int mChunkCount;
     unsigned int mChunkSize;
+
+    bool mCellListDirty;
 };
 
 #endif
