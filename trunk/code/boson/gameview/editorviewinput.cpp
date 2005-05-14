@@ -283,8 +283,8 @@ bool EditorViewInput::actionPlace(const BoVector3Fixed& canvasVector, bool exact
 		BO_NULL_ERROR(groundTheme);
 		return false;
 	}
-	if (groundTheme->textureCount() != d->mPlacement.textureCount()) {
-		boError() << k_funcinfo << "textureCount=" << groundTheme->textureCount()
+	if (groundTheme->groundTypeCount() != d->mPlacement.textureCount()) {
+		boError() << k_funcinfo << "groundTypeCount=" << groundTheme->groundTypeCount()
 				<< " , placement textureCount="
 				<< d->mPlacement.textureCount() << endl;
 		return false;
@@ -308,7 +308,7 @@ bool EditorViewInput::actionPlace(const BoVector3Fixed& canvasVector, bool exact
 	for (unsigned int i = 0; i < 4; i++) {
 		stream << (Q_UINT32)cornersX[i];
 		stream << (Q_UINT32)cornersY[i];
-		stream << (Q_UINT32)groundTheme->textureCount();
+		stream << (Q_UINT32)groundTheme->groundTypeCount();
 		for (unsigned int j = 0; j < d->mPlacement.textureCount(); j++) {
 			unsigned char alpha = 0;
 			alpha = d->mPlacement.textureAlpha(j);

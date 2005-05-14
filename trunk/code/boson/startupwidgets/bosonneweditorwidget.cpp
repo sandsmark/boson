@@ -320,8 +320,8 @@ void BosonNewEditorWidget::slotGroundThemeChanged(int)
 	return;
  }
 
- for (unsigned int i = 0; i < theme->textureCount(); i++) {
-	mFilling->insertItem(theme->textureFileName(i));
+ for (unsigned int i = 0; i < theme->groundTypeCount(); i++) {
+	mFilling->insertItem(theme->groundType(i)->name);
  }
 }
 
@@ -444,13 +444,13 @@ QByteArray BosonNewEditorWidget::createNewMap()
 	boError() << k_funcinfo << "map could not be created" << endl;
 	return QByteArray();
  }
- unsigned int texture = mFilling->currentItem();
- if (texture >= theme->textureCount()) {
-	boError() << k_funcinfo << "invalid texture " << texture << endl;
-	KMessageBox::sorry(this, i18n("Could not fill the map with texture %1 - only %2 textures in groundTheme %3").arg(texture).arg(theme->textureCount()).arg(themeId));
+ unsigned int groundtype = mFilling->currentItem();
+ if (groundtype >= theme->groundTypeCount()) {
+	boError() << k_funcinfo << "invalid groundtype " << groundtype << endl;
+	KMessageBox::sorry(this, i18n("Could not fill the map with texture %1 - only %2 textures in groundTheme %3").arg(groundtype).arg(theme->groundTypeCount()).arg(themeId));
 	return QByteArray();
  }
- map->fill(texture);
+ map->fill(groundtype);
 
  // we add dummy players in order to save them into the bytearray.
  int maxPlayers = mMaxPlayers->value();

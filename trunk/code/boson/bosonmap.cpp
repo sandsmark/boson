@@ -353,7 +353,7 @@ bool BosonMap::createNewMap(unsigned int width, unsigned int height, BosonGround
  mGroundTheme = theme;
 
  mHeightMap = new BoHeightMap(width + 1, height + 1);
- mTexMap = new BoTexMap(theme->textureCount(), width + 1, height + 1);
+ mTexMap = new BoTexMap(theme->groundTypeCount(), width + 1, height + 1);
  mTexMap->fill(0);
  bool ret = generateCellsFromTexMap();
  if (!ret) {
@@ -408,7 +408,7 @@ bool BosonMap::createNewMap(unsigned int width, unsigned int height, BosonGround
 	boError() << k_funcinfo << "invalid height loaded" << endl;
 	return false;
  }
- if (mTexMap->textureCount() != mGroundTheme->textureCount()) {
+ if (mTexMap->textureCount() != mGroundTheme->groundTypeCount()) {
 	boError() << k_funcinfo << "texmap has invalid texture count for this groundtheme!" << endl;
 	return false;
  }
@@ -703,7 +703,7 @@ bool BosonMap::loadTexMap(QDataStream& stream)
 	delete mTexMap;
 	mTexMap = 0;
  }
- mTexMap = new BoTexMap(groundTheme()->textureCount(), width() + 1, height() + 1);
+ mTexMap = new BoTexMap(groundTheme()->groundTypeCount(), width() + 1, height() + 1);
  return mTexMap->load(stream);
 }
 
@@ -718,8 +718,8 @@ bool BosonMap::saveTexMap(QDataStream& stream)
 	BO_NULL_ERROR(groundTheme());
 	return false;
  }
- if (groundTheme()->textureCount() != mTexMap->textureCount()) {
-	boError() << k_funcinfo << "groundTheme()->texturCount() differs from texMap->textureCount() !" << endl;
+ if (groundTheme()->groundTypeCount() != mTexMap->textureCount()) {
+	boError() << k_funcinfo << "groundTheme()->groundTypeCount() differs from texMap->textureCount() !" << endl;
 	return false;
  }
  return mTexMap->save(stream);
@@ -983,16 +983,17 @@ void BosonMap::resize(unsigned int width, unsigned int height)
  loadMapGeo(width, height);
 }
 
-BoTexture* BosonMap::currentTexture(int texture, int advanceCallsCount) const
+BoTexture* BosonMap::currentTexture(int groundtype, int advanceCallsCount) const
 {
  BO_CHECK_NULL_RET0(groundTheme());
- BoTextureArray* t = groundTheme()->textures(texture);
+ BosonGroundType* ground = groundTheme()->groundType(groundtype);
+ BoTextureArray* t = ground->textures;
  BO_CHECK_NULL_RET0(t);
- return t->texture((advanceCallsCount / groundTheme()->textureAnimationDelay(texture)) % t->count());
+ return t->texture((advanceCallsCount / ground->animationDelay) % t->count());
 }
 
 
-void BosonMap::fill(unsigned int texture)
+void BosonMap::fill(unsigned int groundtype)
 {
  if (!mCells) {
 	boError() << k_funcinfo << "NULL cells" << endl;
@@ -1000,12 +1001,12 @@ void BosonMap::fill(unsigned int texture)
  }
  BO_CHECK_NULL_RET(mTexMap);
  BO_CHECK_NULL_RET(groundTheme());
- if (texture >= groundTheme()->textureCount()) {
-	boError() << k_funcinfo << "invalid texture " << texture << endl;
+ if (groundtype >= groundTheme()->groundTypeCount()) {
+	boError() << k_funcinfo << "invalid groundtype " << groundtype << endl;
 	return;
  }
 
- mTexMap->fill(texture);
+ mTexMap->fill(groundtype);
 }
 
 float BosonMap::cellAverageHeight(int x, int y) const
@@ -1045,20 +1046,20 @@ bool BosonMap::generateCellsFromTexMap()
 	return false;
  }
  createCells();
- if (groundTheme()->textureCount() == 0) {
-	boError() << k_funcinfo << "0 textures in map" << endl;
+ if (groundTheme()->groundTypeCount() == 0) {
+	boError() << k_funcinfo << "0 ground types in ground theme" << endl;
 	return false;
  }
  return true;
 }
 
-QRgb BosonMap::miniMapColor(unsigned int texture) const
+QRgb BosonMap::miniMapColor(unsigned int groundtype) const
 {
  if (!groundTheme()) {
 	boWarning() << k_funcinfo << "NULL groundTheme" << endl;
 	return 0;
  }
- return groundTheme()->miniMapColor(texture);
+ return groundTheme()->groundType(groundtype)->color;
 }
 
 void BosonMap::slotChangeTexMap(int x, int y, unsigned int texCount, unsigned int* textures, unsigned char* alpha)
@@ -1082,15 +1083,15 @@ void BosonMap::slotChangeTexMap(int x, int y, unsigned int texCount, unsigned in
 	boError() << k_funcinfo << "invalid y coordinate: " << y << endl;
 	return;
  }
- if (texCount > groundTheme()->textureCount()) {
-	boError() << k_funcinfo << "invalid textureCount " << texCount << " must be <= " << groundTheme()->textureCount() << endl;
+ if (texCount > groundTheme()->groundTypeCount()) {
+	boError() << k_funcinfo << "invalid groundTypeCount " << texCount << " must be <= " << groundTheme()->groundTypeCount() << endl;
 	return;
  }
  BO_CHECK_NULL_RET(alpha);
  BO_CHECK_NULL_RET(textures);
  for (unsigned int i = 0; i < texCount; i++) {
 	unsigned int texture = textures[i];
-	if (texture >= groundTheme()->textureCount()) {
+	if (texture >= groundTheme()->groundTypeCount()) {
 		boError() << k_funcinfo << "invalid texture " << texture << endl;
 		continue;
 	}

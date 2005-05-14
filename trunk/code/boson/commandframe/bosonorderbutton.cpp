@@ -122,7 +122,7 @@ BosonOrderButton::BosonOrderButton() : BoUfoWidget()
 {
  d = new BosonOrderButtonPrivate;
  mUnit = 0;
- mTextureNumber = 0;
+ mGroundType = 0;
  mType = ShowNothing;
 
  setLayoutClass(UHBoxLayout);
@@ -195,7 +195,7 @@ void BosonOrderButton::setAction(const BoSpecificAction& action)
  show();
 }
 
-void BosonOrderButton::setGround(unsigned int texture, BosonGroundTheme* theme)
+void BosonOrderButton::setGround(unsigned int groundtype, BosonGroundTheme* theme)
 {
  if (mUnit) {
 	unset();
@@ -203,9 +203,9 @@ void BosonOrderButton::setGround(unsigned int texture, BosonGroundTheme* theme)
  mUnit = 0;
  BO_CHECK_NULL_RET(theme);
 
- mTextureNumber = texture;
- mType = ShowCell;
- setPixmap(theme->pixmap(mTextureNumber));
+ mGroundType = groundtype;
+ mType = ShowGround;
+ setPixmap(*theme->groundType(groundtype)->icon);
 
  mHealth->hide();
 
@@ -250,8 +250,8 @@ void BosonOrderButton::slotClicked()
 	case ShowNothing:
 		boWarning(220) << "Invalid type \"ShowNothing\"" << endl;
 		break;
-	case ShowCell:
-		emit signalPlaceGround((unsigned int)texture());
+	case ShowGround:
+		emit signalPlaceGround(groundType());
 		break;
 	case ShowUnit:
 		if (!unit()) {
@@ -313,7 +313,7 @@ void BosonOrderButton::unset()
 	disconnect(mUnit->owner(), 0, this, 0);
  }
  mUnit = 0;
- mTextureNumber = 0;
+ mGroundType = 0;
  mAction.reset();
  mType = ShowNothing;
 }
@@ -352,15 +352,15 @@ void BosonOrderButton::advanceProduction(double percentage)
  QPainter p;
  p.begin(&mask);
  p.setBrush(Qt::color0);
- 
+
  // this stuff (sizes) is evil and probably not working with other pixmap sizes.
  // I'm too lazy to do it right
 
- // well, according to the QPoint documentation this is called 
- // "mahattan length" -> it would be correct to use 
+ // well, according to the QPoint documentation this is called
+ // "mahattan length" -> it would be correct to use
  // sqrt(pow(mask.width(),2) + pow(mask.height(), 2)),
  // but this is faster.
- int pieSize = mask.width() + mask.height(); 
+ int pieSize = mask.width() + mask.height();
  p.drawPie((mask.width() - pieSize)/2, (mask.height() - pieSize)/2, pieSize,
 		pieSize, 16*90, (int)(-16*360*(percentage/100)));
  p.end();

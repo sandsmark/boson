@@ -44,9 +44,9 @@ public:
 	 * @li Nothing - it's an empty button. Nothing is shown
 	 * @li Unit - a unit is shown (with health bar)
 	 * @li Action - an action is shown
-	 * @li Cell - cell is shown (for placement)
+	 * @li ShowGround - ground type is shown (for placement)
 	 **/
-	enum ShowingType { ShowNothing = 0, ShowUnit, ShowAction, ShowCell };
+	enum ShowingType { ShowNothing = 0, ShowUnit, ShowAction, ShowGround };
 
 
 	BosonOrderButton();
@@ -61,7 +61,7 @@ public:
 
 	void setAction(const BoSpecificAction& action);
 
-	void setGround(unsigned int texture, BosonGroundTheme* theme);
+	void setGround(unsigned int groundtype, BosonGroundTheme* theme);
 
 	/**
 	 * @return The displayed unit or 0 if no unit is displayed. See also
@@ -95,12 +95,12 @@ public:
 	Player* productionOwner() const;
 
 	/**
-	 * @return The displayed texturenumber or 0 if none is displayed. See also
+	 * @return The displayed ground type or 0 if none is displayed. See also
 	 * @ref unit and @ref unitType
 	 **/
-	unsigned int texture() const
+	unsigned int groundType() const
 	{
-		return (type() == ShowCell) ? mTextureNumber : 0;
+		return (type() == ShowGround) ? mGroundType : 0;
 	}
 
 	void unset();
@@ -131,9 +131,9 @@ public slots:
 
 signals:
 	/**
-	 * Emitted when the player clicks on this widget and it is a cell.
+	 * Emitted when the player clicks on this widget and it is a ground type.
 	 **/
-	void signalPlaceGround(unsigned int textureNumber);
+	void signalPlaceGround(unsigned int groundType);
 
 	/**
 	 * Emitted when the player clicks on the action
@@ -161,7 +161,7 @@ private:
 
 	Unit* mUnit;
 	// FIXME: use only one int for all order modes
-	unsigned int mTextureNumber;
+	unsigned int mGroundType;
 	BoSpecificAction mAction;
 
 	ShowingType mType;
@@ -184,7 +184,7 @@ public:
 		mGrayOut = false;
 		mProductionCount = 0;
 	}
-	
+
 	virtual void setPixmap(const QPixmap& p);
 
 	void setProductionCount(int c);
@@ -198,7 +198,7 @@ protected slots:
 
 protected:
 	void addProductionCount(QPixmap* pix);
-	
+
 private:
 	bool mGrayOut;
 	int mProductionCount;

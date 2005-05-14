@@ -1221,8 +1221,8 @@ void BosonMenuInput::slotEditorExportTexMap()
 
  BosonMap* map = boGame->playField()->map();
  QStringList textures;
- for (unsigned int i = 0; i < map->groundTheme()->textureCount(); i++) {
-	textures.append(map->groundTheme()->textureFileName(i));
+ for (unsigned int i = 0; i < map->groundTheme()->groundTypeCount(); i++) {
+	textures.append(map->groundTheme()->groundType(i)->name);
  }
 
  QDialog* d = new QDialog(0, 0, true);

@@ -86,7 +86,7 @@ void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cel
  unsigned int usedTextures = 0;
  unsigned int renderedQuads = 0;
  int count = 0;
- for (unsigned int i = 0; i < groundTheme->textureCount(); i++) {
+ for (unsigned int i = 0; i < groundTheme->groundTypeCount(); i++) {
 	BoTexture* tex = map->currentTexture(i, boGame->advanceCallsCount());
 	tex->bind();
 
@@ -166,7 +166,7 @@ void BoFastGroundRenderer::updateMapCache(const BosonMap* map)
  for (unsigned int x = 0; x < map->width(); x++) {
 	for (unsigned int y = 0; y < map->height(); y++) {
 		unsigned int maxValue = 0;
-		for (unsigned int j = 0; j < map->groundTheme()->textureCount(); j++) {
+		for (unsigned int j = 0; j < map->groundTheme()->groundTypeCount(); j++) {
 			unsigned int v = 0;
 			v += (int)map->texMapAlpha(j, x, y);
 			v += (int)map->texMapAlpha(j, x + 1, y);

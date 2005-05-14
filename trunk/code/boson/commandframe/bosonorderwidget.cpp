@@ -44,7 +44,7 @@ public:
 	}
 
 	QIntDict<BosonOrderButton> mOrderButton;
-	
+
 	BosonGroundTheme* mGroundTheme;
 
 	bool mIsProduceAction;
@@ -150,7 +150,7 @@ void BosonOrderWidget::setOrderButtonsGround()
  BO_CHECK_NULL_RET(d->mGroundTheme);
  showCellConfigWidgets();
  hideOrderButtons();
- for (unsigned int i = 0; i < d->mGroundTheme->textureCount(); i++) {
+ for (unsigned int i = 0; i < d->mGroundTheme->groundTypeCount(); i++) {
 	d->mOrderButton[i]->setGround(i, d->mGroundTheme);
  }
 }
@@ -229,21 +229,21 @@ bool BosonOrderWidget::isProduceAction() const
  return d->mIsProduceAction;
 }
 
-void BosonOrderWidget::slotPlaceGround(unsigned int texture)
+void BosonOrderWidget::slotPlaceGround(unsigned int groundtype)
 {
  boDebug(220) << k_funcinfo << endl;
  BO_CHECK_NULL_RET(d->mGroundTheme);
- if (texture >= d->mGroundTheme->textureCount()) {
-	boError(220) << k_funcinfo << "invalid texture " << texture << " textureCount="
-			<< d->mGroundTheme->textureCount() << endl;
+ if (groundtype >= d->mGroundTheme->groundTypeCount()) {
+	boError(220) << k_funcinfo << "invalid groundtype " << groundtype << " groundTypeCount="
+			<< d->mGroundTheme->groundTypeCount() << endl;
 	return;
  }
- unsigned char* alpha = new unsigned char[d->mGroundTheme->textureCount()];
- for (unsigned int i = 0; i < d->mGroundTheme->textureCount(); i++) {
+ unsigned char* alpha = new unsigned char[d->mGroundTheme->groundTypeCount()];
+ for (unsigned int i = 0; i < d->mGroundTheme->groundTypeCount(); i++) {
 	alpha[i] = 0;
  }
- alpha[texture] = 255;
- emit signalPlaceGround(d->mGroundTheme->textureCount(), alpha);
+ alpha[groundtype] = 255;
+ emit signalPlaceGround(d->mGroundTheme->groundTypeCount(), alpha);
  delete[] alpha;
 }
 

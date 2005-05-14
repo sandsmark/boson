@@ -118,18 +118,18 @@ protected:
 	void showCellConfigWidgets();
 
 protected slots:
-	void slotPlaceGround(unsigned int texture);
+	void slotPlaceGround(unsigned int groundtype);
 
 signals:
 	void signalAction(const BoSpecificAction& action);
 
 	/**
-	 * @param textureCount See @ref BosonGroundTheme::textureCount
-	 * @param alpha The desired alpha values, i.e. how much of every texture
-	 * should be display (255=maximum, 0=nothing). This is an array of size
-	 * @p textureCount.
+	 * @param groundTypeCount See @ref BosonGroundTheme::groundTypeCount
+	 * @param alpha The desired alpha values, i.e. how much of every groundtype
+	 * should be displayed (255=maximum, 0=nothing). This is an array of size
+	 * @p groundTypeCount.
 	 **/
-	void signalPlaceGround(unsigned int textureCount, unsigned char* alpha);
+	void signalPlaceGround(unsigned int groundTypeCount, unsigned char* alpha);
 
 	/**
 	 * This unit should become the only selected unit. See @ref
