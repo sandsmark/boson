@@ -839,7 +839,7 @@ void BoQuickGroundRenderer::cellFogChanged(int x1, int y1, int x2, int y2)
   // TODO: don't go over every single cell!
   for(int y = y1; y <= y2; y++)
   {
-    for(int x = x1; x <= x2; y++)
+    for(int x = x1; x <= x2; x++)
     {
       if(!localPlayerIO()->isFogged(x, y))
       {
