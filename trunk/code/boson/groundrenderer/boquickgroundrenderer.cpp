@@ -55,6 +55,8 @@ BoQuickGroundRenderer::BoQuickGroundRenderer()
   mFogTexture = 0;
 
   mChunks = 0;
+
+  mCellListDirty = true;
 }
 
 BoQuickGroundRenderer::~BoQuickGroundRenderer()
@@ -190,6 +192,8 @@ void BoQuickGroundRenderer::generateCellList(const BosonMap* map)
   setRenderCells(cells, 1);
   setRenderCellsCount(1);
 #endif
+
+  mCellListDirty = false;
 }
 
 void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMap* map)
@@ -198,6 +202,11 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
   {
     boError() << k_funcinfo << "Different map expected! Got: " << map << "; expected: " << mMap << endl;
     return;
+  }
+
+  if(mCellListDirty)
+  {
+    generateCellList(map);
   }
 
   // Statistics
@@ -843,7 +852,13 @@ void BoQuickGroundRenderer::cellFogChanged(int x1, int y1, int x2, int y2)
     {
       if(!localPlayerIO()->isFogged(x, y))
       {
-        chunkAt(x, y)->fogged = false;
+        if(chunkAt(x, y)->fogged)
+        {
+          chunkAt(x, y)->fogged = false;
+          // When a chunk becomes visible, the list of visible chunks has to be
+          //  rebuilt
+          mCellListDirty = true;
+        }
       }
     }
   }
