@@ -31,6 +31,7 @@
 #include "script/bosonscriptinterface.h"
 #include "speciestheme.h"
 #include "player.h"
+#include "bosonprofiling.h"
 
 #include <klocale.h>
 
@@ -329,6 +330,7 @@ bool BoEventListener::loadEventHandlers(const QDomElement& root)
 
 void BoEventListener::deliverToConditions(const BoEvent* event)
 {
+ PROFILE_METHOD
  boDebug(360) << k_funcinfo << "conditions: " << d->mConditions.count() << endl;
  QPtrList<BoCondition> remove;
  QPtrListIterator<BoCondition> it(d->mConditions);
@@ -351,6 +353,7 @@ void BoEventListener::deliverToConditions(const BoEvent* event)
 
 void BoEventListener::deliverToScript(const BoEvent* event)
 {
+ PROFILE_METHOD
  if (!d->mScript) {
 	if (d->mEventHandlers.count() > 0) {
 		boError() << k_funcinfo << "have eventhandlers, but d->mScript is NULL" << endl;
@@ -369,6 +372,7 @@ void BoEventListener::deliverToScript(const BoEvent* event)
 
 void BoEventListener::receiveEvent(const BoEvent* event)
 {
+ PROFILE_METHOD
  BO_CHECK_NULL_RET(event);
  deliverToConditions(event);
 
@@ -413,6 +417,7 @@ BosonScript* BoCanvasEventListener::createScriptParser() const
 
 void BoCanvasEventListener::processEvent(const BoEvent* event)
 {
+ PROFILE_METHOD
  if (event->name() == "AllUnitsDestroyed") {
 	// AB: atm the player loses when all of his units are destroyed.
 	//     will change when we support winning conditions
@@ -458,6 +463,7 @@ BosonScript* BoLocalPlayerEventListener::createScriptParser() const
 
 void BoLocalPlayerEventListener::processEvent(const BoEvent* event)
 {
+ PROFILE_METHOD
  BO_CHECK_NULL_RET(playerIO());
  BO_CHECK_NULL_RET(playerIO()->speciesTheme());
  if (event->playerId() != 0) {
@@ -532,6 +538,7 @@ BosonScript* BoComputerPlayerEventListener::createScriptParser() const
 
 void BoComputerPlayerEventListener::processEvent(const BoEvent* event)
 {
+ PROFILE_METHOD
  BO_CHECK_NULL_RET(playerIO());
  BO_CHECK_NULL_RET(playerIO()->speciesTheme());
  if (event->playerId() != 0) {
