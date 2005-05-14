@@ -1527,6 +1527,11 @@ void BoUfoWidget::setEnabled(bool e)
  widget()->setEnabled(e);
 }
 
+bool BoUfoWidget::isEnabled() const
+{
+ return widget()->isEnabled();
+}
+
 void BoUfoWidget::setOpaque(bool o)
 {
  widget()->setOpaque(o);

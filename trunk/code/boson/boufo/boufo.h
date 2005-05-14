@@ -541,6 +541,7 @@ public:
 	virtual bool opaque() const;
 
 	void setEnabled(bool);
+	bool isEnabled() const;
 
 	/**
 	 * Add @p w as child to this widget. This is also adds @p w to the
