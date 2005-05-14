@@ -382,6 +382,7 @@ public:
 		mUfoCursorWidget = 0;
 		mUfoSelectionRectWidget = 0;
 		mUfoFPSGraphWidget = 0;
+		mUfoProfilingGraphWidget = 0;
 
 		mActionCollection = 0;
 		mToolTips = 0;
@@ -408,6 +409,7 @@ public:
 	BosonUfoCursorWidget* mUfoCursorWidget;
 	BosonUfoSelectionRectWidget* mUfoSelectionRectWidget;
 	BosonUfoFPSGraphWidget* mUfoFPSGraphWidget;
+	BosonUfoProfilingGraphWidget* mUfoProfilingGraphWidget;
 
 	BosonGameFPSCounter* mFPSCounter;
 	BoUfoActionCollection* mActionCollection;
@@ -1046,6 +1048,9 @@ void BosonGameView::initUfoGUI()
  d->mUfoFPSGraphWidget->setGameGLMatrices(d->mGameGLMatrices);
  d->mUfoFPSGraphWidget->setGameFPSCounter(gameFPSCounter());
 
+ d->mUfoProfilingGraphWidget = new BosonUfoProfilingGraphWidget();
+ d->mUfoProfilingGraphWidget->setGameGLMatrices(d->mGameGLMatrices);
+
  connect(d->mSelectionRect, SIGNAL(signalVisible(bool)),
 		d->mUfoSelectionRectWidget, SLOT(slotSelectionRectVisible(bool)));
  connect(d->mSelectionRect, SIGNAL(signalChanged(const QRect&)),
@@ -1059,6 +1064,7 @@ void BosonGameView::initUfoGUI()
  d->mLayeredPane->addWidget(d->mUfoCursorWidget);
  d->mLayeredPane->addWidget(d->mUfoSelectionRectWidget);
  d->mLayeredPane->addWidget(d->mUfoFPSGraphWidget);
+ d->mLayeredPane->addWidget(d->mUfoProfilingGraphWidget);
 
 #if 0
  d->mLayeredPane->setMouseEventsEnabled(true, true);

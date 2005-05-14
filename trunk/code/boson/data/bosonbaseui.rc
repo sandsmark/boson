@@ -23,6 +23,7 @@
     <Action name="debug_texture_memory" />
     <Action name="debug_memory_usage" />
     <Action name="debug_memory_vmdata_only" />
+    <Action name="debug_profiling_graph" />
     <Action name="debug_cpu_usage" />
     <Menu name="debug_lazy"><text>&amp;Lazyness</text>
       <Action name="debug_lazy_reload_model_textures" />

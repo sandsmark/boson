@@ -988,6 +988,11 @@ void BosonUfoFPSGraphWidget::paintWidget()
 	paintFPS(d->mFPSData);
 	paintFPS(d->mSkippedFPSData);
  }
+#if 0
+ if (boConfig->boolValue("debug_something_else")) {
+	paintFPS(d->mSomethingElse);
+ }
+#endif
 
  glPopAttrib();
 
@@ -1030,4 +1035,359 @@ void BosonUfoFPSGraphWidget::slotAddData()
  }
 
 }
+
+
+
+
+
+class ProfilingGraphType
+{
+public:
+	ProfilingGraphType()
+	{
+		mY = 0;
+	}
+	QString mName;
+	QColor mColor;
+	int mY;
+};
+
+class ProfilingGraphItem
+{
+public:
+	ProfilingGraphItem()
+	{
+		mType = 0;
+		mStart = 0.0;
+		mLength = 0.0;
+	}
+	ProfilingGraphType* mType;
+	double mStart;
+	double mLength;
+};
+
+class BosonUfoProfilingGraphWidgetPrivate
+{
+public:
+	BosonUfoProfilingGraphWidgetPrivate()
+	{
+		mGameGLMatrices = 0;
+
+		mUpdateTimer = 0;
+
+		mLayeredPane = 0;
+		mLabelsWidget = 0;
+		mEnableUpdates = 0;
+		mUpdateInterval = 0;
+		mUpdateIntervalLabel = 0;
+	}
+	const BoGLMatrices* mGameGLMatrices;
+	QPtrList<ProfilingGraphItem> mItems;
+	QMap<QString, ProfilingGraphType*> mProfilingTypes;
+
+	QTimer* mUpdateTimer;
+
+	QValueList<QColor> mAvailableColors;
+
+	BoUfoLayeredPane* mLayeredPane;
+	BoUfoWidget* mLabelsWidget;
+	QPtrList<BoUfoLabel> mLabels;
+	BoUfoCheckBox* mEnableUpdates;
+	BoUfoSlider* mUpdateInterval;
+	BoUfoLabel* mUpdateIntervalLabel;
+};
+
+BosonUfoProfilingGraphWidget::BosonUfoProfilingGraphWidget()
+	: BoUfoCustomWidget()
+{
+ d = new BosonUfoProfilingGraphWidgetPrivate();
+ d->mUpdateTimer = new QTimer(this);
+ connect(d->mUpdateTimer, SIGNAL(timeout()),
+		this, SLOT(slotUpdateData()));
+ d->mUpdateTimer->start(100);
+
+ setLayoutClass(BoUfoWidget::UFullLayout);
+ d->mLayeredPane = new BoUfoLayeredPane();
+ d->mLayeredPane->setLayoutClass(BoUfoWidget::UFullLayout);
+ addWidget(d->mLayeredPane);
+
+ d->mLabelsWidget = new BoUfoWidget();
+ d->mLayeredPane->addWidget(d->mLabelsWidget);
+ d->mLabelsWidget->setLayoutClass(BoUfoWidget::NoLayout); // we use setPos() for the labels.
+
+
+ BoUfoWidget* control = new BoUfoWidget();
+ d->mLayeredPane->addWidget(control);
+ control->setLayoutClass(BoUfoWidget::UHBoxLayout);
+ BoUfoWidget* stretch = new BoUfoWidget();
+ stretch->setStretch(1);
+ control->addWidget(stretch);
+
+ BoUfoVBox* vbox = new BoUfoVBox();
+ control->addWidget(vbox);
+ vbox->addSpacing(100);
+
+ d->mEnableUpdates = new BoUfoCheckBox();
+ d->mEnableUpdates->setText("Enable Updates");
+ d->mEnableUpdates->setChecked(true);
+ d->mEnableUpdates->setForegroundColor(Qt::white);
+ vbox->addWidget(d->mEnableUpdates);
+
+ BoUfoHBox* hbox = new BoUfoHBox();
+ vbox->addWidget(hbox);
+ d->mUpdateInterval = new BoUfoSlider();
+ d->mUpdateInterval->setRange(20, 10000);
+ d->mUpdateInterval->setValue(1000);
+ hbox->addWidget(d->mUpdateInterval);
+ connect(d->mUpdateInterval, SIGNAL(signalValueChanged(int)),
+		this, SLOT(slotSetUpdateInterval(int)));
+ d->mUpdateIntervalLabel = new BoUfoLabel();
+ d->mUpdateIntervalLabel->setForegroundColor(Qt::white);
+ hbox->addWidget(d->mUpdateIntervalLabel);
+
+ stretch = new BoUfoWidget();
+ stretch->setStretch(1);
+ vbox->addWidget(stretch);
+
+
+
+ d->mItems.setAutoDelete(true);
+
+
+ d->mAvailableColors.append(QColor(255,   0,   0));
+ d->mAvailableColors.append(QColor(0,   255,   0));
+ d->mAvailableColors.append(QColor(0,     0, 255));
+ d->mAvailableColors.append(QColor(255, 255,   0));
+ d->mAvailableColors.append(QColor(255,   0, 255));
+ d->mAvailableColors.append(QColor(0,   255, 255));
+ d->mAvailableColors.append(QColor(0,     0,   0));
+
+ d->mAvailableColors.append(QColor(255, 127,   0));
+ d->mAvailableColors.append(QColor(255,   0, 127));
+ d->mAvailableColors.append(QColor(255, 127, 127));
+ d->mAvailableColors.append(QColor(127, 255,   0));
+ d->mAvailableColors.append(QColor(0,   255, 127));
+ d->mAvailableColors.append(QColor(127, 255, 127));
+ d->mAvailableColors.append(QColor(127,   0, 255));
+ d->mAvailableColors.append(QColor(0,   127, 255));
+ d->mAvailableColors.append(QColor(127, 127, 255));
+
+ d->mAvailableColors.append(QColor(255,  63,   0));
+ d->mAvailableColors.append(QColor(255,   0,  63));
+ d->mAvailableColors.append(QColor(255,  63,  63));
+ d->mAvailableColors.append(QColor(63,  255,   0));
+ d->mAvailableColors.append(QColor(0,   255,  63));
+ d->mAvailableColors.append(QColor(63,  255,  63));
+ d->mAvailableColors.append(QColor(63,    0, 255));
+ d->mAvailableColors.append(QColor(0,    63, 255));
+ d->mAvailableColors.append(QColor(63,   63, 255));
+
+ d->mAvailableColors.append(QColor(255, 255, 255));
+}
+
+BosonUfoProfilingGraphWidget::~BosonUfoProfilingGraphWidget()
+{
+ d->mItems.setAutoDelete(true);
+ d->mItems.clear();
+ resetProfilingTypes();
+ delete d;
+}
+void BosonUfoProfilingGraphWidget::resetProfilingTypes()
+{
+ // make sure no item still references one of the types
+ d->mItems.setAutoDelete(true);
+ d->mItems.clear();
+
+ QMap<QString, ProfilingGraphType*>::iterator it;
+ for (it = d->mProfilingTypes.begin(); it != d->mProfilingTypes.end(); ++it) {
+	delete *it;
+ }
+ d->mProfilingTypes.clear();
+
+ for (QPtrListIterator<BoUfoLabel> it(d->mLabels); it.current(); ++it) {
+	it.current()->hide();
+ }
+}
+
+void BosonUfoProfilingGraphWidget::setGameGLMatrices(const BoGLMatrices* m)
+{
+ d->mGameGLMatrices = m;
+}
+
+void BosonUfoProfilingGraphWidget::paintWidget()
+{
+ PROFILE_METHOD;
+ BO_CHECK_NULL_RET(d->mGameGLMatrices);
+ if (!boConfig->boolValue("debug_profiling_graph")) {
+	d->mLayeredPane->hide();
+	return;
+ }
+ d->mLayeredPane->show();
+
+ glMatrixMode(GL_PROJECTION);
+ glPushMatrix();
+ glLoadIdentity();
+ gluOrtho2D(0.0, (GLfloat)width(), 0.0, (GLfloat)height());
+ glMatrixMode(GL_MODELVIEW);
+ glPushMatrix();
+ glLoadIdentity();
+
+ glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_VIEWPORT_BIT);
+ glViewport(d->mGameGLMatrices->viewport()[0],
+		d->mGameGLMatrices->viewport()[1],
+		d->mGameGLMatrices->viewport()[2],
+		d->mGameGLMatrices->viewport()[3]);
+ boTextureManager->disableTexturing();
+
+ // AB: other than the color, we also use the y position of the lines to
+ // distinguish types. all types start between minY and maxY
+ int minY = height() / 4;
+ int maxY = (height() * 3) / 4;
+
+
+ int yDist = 30;
+ if ((int)(minY + yDist * d->mProfilingTypes.count()) > maxY) {
+	yDist = (maxY - minY) / d->mProfilingTypes.count();
+ }
+ int y = minY;
+ for (QMap<QString, ProfilingGraphType*>::iterator it = d->mProfilingTypes.begin(); it != d->mProfilingTypes.end(); ++it) {
+	(*it)->mY = y;
+	y += yDist;
+ }
+
+ glBegin(GL_LINES);
+ QPtrListIterator<ProfilingGraphItem> it(d->mItems);
+ for (; it.current(); ++it) {
+	const ProfilingGraphType* type = it.current()->mType;
+	int x = (int)(width() * it.current()->mStart);
+	int x2 = (int)(width() * (it.current()->mStart + it.current()->mLength));
+	int y = type->mY;
+	glColor3ub(type->mColor.red(), type->mColor.green(), type->mColor.blue());
+	glVertex2i(x, y);
+	glVertex2i(x2, y);
+ }
+ glEnd();
+
+
+ QPtrListIterator<BoUfoLabel> labelIt(d->mLabels);
+ QMap<QString, ProfilingGraphType*>::iterator typeIt = d->mProfilingTypes.begin();
+ while (typeIt != d->mProfilingTypes.end()) {
+	// AB: warning: libufo uses a different coordinate system (y flipped)
+	// than we do! we mustr consider that here
+	int x = 100;
+	int y = height() - (*typeIt)->mY;
+	labelIt.current()->setPos(x, y);
+	labelIt.current()->setSize(labelIt.current()->preferredWidth(), labelIt.current()->preferredHeight());
+	++labelIt;
+	++typeIt;
+ }
+
+ glPopAttrib();
+
+ glMatrixMode(GL_PROJECTION);
+ glPopMatrix();
+ glMatrixMode(GL_MODELVIEW);
+ glPopMatrix();
+}
+
+void BosonUfoProfilingGraphWidget::slotUpdateData()
+{
+ BO_CHECK_NULL_RET(d->mGameGLMatrices);
+ if (!d->mEnableUpdates->checked()) {
+	boDebug() << k_funcinfo << "not checked" << endl;
+	return;
+ }
+ PROFILE_METHOD
+ struct timeval now;
+ struct timeval since;
+ gettimeofday(&now, 0);
+ since.tv_sec = now.tv_sec;
+ since.tv_usec = now.tv_usec;
+
+ const int displaySeconds = 2;
+ since.tv_sec -= displaySeconds;
+
+ d->mItems.setAutoDelete(true);
+ d->mItems.clear();
+ resetProfilingTypes();
+
+ QPtrList<const BosonProfilingItem> itemList;
+ boProfiling->getItemsSinceSorted(&itemList, since);
+
+ unsigned long int displayTime = compareTimes(since, now);
+ double fdisplayTime = (double)displayTime;
+ for (QPtrListIterator<const BosonProfilingItem> it(itemList); it.current(); ++it) {
+	const BosonProfilingItem* profilingItem = it.current();
+	ProfilingGraphType* type = 0;
+	if (d->mProfilingTypes.contains(profilingItem->name())) {
+		type = d->mProfilingTypes[profilingItem->name()];
+	} else {
+		type = new ProfilingGraphType();
+		type->mName = profilingItem->name();
+
+		d->mProfilingTypes.insert(profilingItem->name(), type);
+	}
+
+	ProfilingGraphItem* item = new ProfilingGraphItem();
+	item->mType = type;
+
+	unsigned long int startedAfter = compareTimes(since, profilingItem->startTime());
+	unsigned long int elapsed = compareTimes(profilingItem->startTime(), profilingItem->endTime());
+
+	item->mStart = ((double)startedAfter) / fdisplayTime;
+	item->mLength = ((double)elapsed) / fdisplayTime;
+
+	d->mItems.append(item);
+ }
+
+ ensureLabels(d->mProfilingTypes.count());
+ QPtrListIterator<BoUfoLabel> labelIt(d->mLabels);
+ QValueList<QColor>::iterator colorIt = d->mAvailableColors.begin();
+ QMap<QString, ProfilingGraphType*>::iterator typeIt = d->mProfilingTypes.begin();
+ while (typeIt != d->mProfilingTypes.end()) {
+//	(*typeIt)->mColor = *colorIt;
+	(*typeIt)->mColor = Qt::white;
+
+	labelIt.current()->setText((*typeIt)->mName);
+	labelIt.current()->show();
+
+	// AB: we use the last color for all remaining types
+	++colorIt;
+	if (colorIt == d->mAvailableColors.end()) {
+		--colorIt;
+	}
+
+	++typeIt;
+	++labelIt;
+ }
+ while (labelIt.current()) {
+	labelIt.current()->hide();
+	++labelIt;
+ }
+}
+
+void BosonUfoProfilingGraphWidget::ensureLabels(unsigned int count)
+{
+ while (d->mLabels.count() < count) {
+	BoUfoLabel* label = new BoUfoLabel();
+	d->mLabels.append(label);
+	d->mLabelsWidget->addWidget(label);
+	label->setForegroundColor(Qt::white);
+
+	label->hide();
+ }
+}
+
+void BosonUfoProfilingGraphWidget::slotSetUpdateInterval(int interval)
+{
+ d->mUpdateIntervalLabel->setText(QString::number(interval));
+ if (interval < 0) {
+	boError() << k_funcinfo << interval << endl;
+	return;
+ }
+ boDebug() << k_funcinfo << interval << endl;
+ d->mUpdateTimer->stop();
+ d->mUpdateTimer->start(interval);
+}
+
 
