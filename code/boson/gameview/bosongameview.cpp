@@ -581,7 +581,6 @@ void BosonGameView::init()
 		this, SLOT(slotMouseEvent(QMouseEvent*)));
 
  setMouseEventsEnabled(true, true);
- setKeyEventsEnabled(true);
  setFocusEventsEnabled(true);
 
  updateOpenGLSettings();
