@@ -40,6 +40,7 @@
 #include "../bogroundrenderermanager.h"
 #include "../bomeshrenderermanager.h"
 #include "../playerio.h"
+#include "../player.h"
 #include "../botexmapimportdialog.h"
 #include "../bofiledialog.h"
 #ifdef BOSON_USE_BOMEMORY
@@ -52,6 +53,7 @@
 #include <kgame/kgamedebugdialog.h>
 #include <kmessagebox.h>
 #include <kfiledialog.h>
+#include <klineeditdlg.h>
 
 #include <qguardedptr.h>
 #include <qptrdict.h>
@@ -68,6 +70,7 @@
 #include <qpushbutton.h>
 #include <qcombobox.h>
 #include <qlabel.h>
+#include <qvalidator.h>
 
 #include <unistd.h>
 
@@ -640,7 +643,9 @@ void BosonMenuInput::initIO(KPlayer* player)
  // (in order to avoid that someone accidentally calls methods in there that
  // should not be called here)
  // -> as a workaround we set mPlayerIO manually using setPlayerIO() after
- // construction of this object
+ //    construction of this object
+ //
+ // AB: UPDATE: player.h is allowed in this file
 
  BO_CHECK_NULL_RET(actionCollection());
 
@@ -756,6 +761,7 @@ PlayerIO* BosonMenuInput::playerIO() const
 {
  // TODO: actually return ((Player*)player())->playerIO(); would be nicer!
  // -> but we disallow including player.h here currently
+ // AB: UPDATE: player.h is allowed here
  return mPlayerIO;
 }
 
@@ -849,9 +855,6 @@ void BosonMenuInput::slotToggleCheating(bool on)
 
 void BosonMenuInput::slotUnfogAll(Player* pl)
 {
- // AB: disabled, because we cannot use player.h here.
- // see also comment in slotEditorEditPlayerMinerals()
-#if 0
  if (!boGame) {
 	boError() << k_funcinfo << "NULL game" << endl;
 	return;
@@ -880,7 +883,6 @@ void BosonMenuInput::slotUnfogAll(Player* pl)
 	}
 	boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Unfogged player %1 - %2").arg(p->id()).arg(p->name()));
  }
-#endif
 }
 
 void BosonMenuInput::slotDumpGameLog()
@@ -1084,19 +1086,15 @@ void BosonMenuInput::slotEditorEditMapDescription()
 
 void BosonMenuInput::slotEditorEditPlayerMinerals()
 {
- // atm disabled, as we must not include player.h in this file
- // these methods (e.g. all editor dependent methods) should get moved to a
- // different file anyway.
- // maybe all game/editor menu items will be handled by a dedicated KGameIO
- // class.
-#if 0
- BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET(playerIO());
+ BO_CHECK_NULL_RET(playerIO()->player());
+ Player* localPlayer = playerIO()->player();
  bool ok = false;
- QString value = QString::number(localPlayer()->minerals());
+ QString value = QString::number(playerIO()->minerals());
  QIntValidator val(this);
  val.setBottom(0);
  val.setTop(1000000); // we need to set a top, because int is limited. this should be enough, i hope (otherwise feel free to increase)
- value = KLineEditDlg::getText(i18n("Minerals for player %1").arg(localPlayer()->name()), value, &ok, this, &val);
+ value = KLineEditDlg::getText(i18n("Minerals for player %1").arg(playerIO()->name()), value, &ok, 0, &val);
  if (!ok) {
 	// cancel pressed
 	return;
@@ -1107,21 +1105,20 @@ void BosonMenuInput::slotEditorEditPlayerMinerals()
 	boWarning() << k_funcinfo << "value " << value << " not valid" << endl;
 	return;
  }
- localPlayer()->setMinerals(v);
-#endif
+ localPlayer->setMinerals(v);
 }
 
 void BosonMenuInput::slotEditorEditPlayerOil()
 {
- // atm disabled, as we must not include player.h in this file
-#if 0
- BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET(playerIO());
+ BO_CHECK_NULL_RET(playerIO()->player());
+ Player* localPlayer = playerIO()->player();
  bool ok = false;
- QString value = QString::number(localPlayer()->oil());
+ QString value = QString::number(playerIO()->oil());
  QIntValidator val(this);
  val.setBottom(0);
  val.setTop(1000000); // we need to set a top, because int is limited. this should be enough, i hope (otherwise feel free to increase)
- value = KLineEditDlg::getText(i18n("Oil for player %1").arg(localPlayer()->name()), value, &ok, this, &val);
+ value = KLineEditDlg::getText(i18n("Oil for player %1").arg(playerIO()->name()), value, &ok, 0, &val);
  if (!ok) {
 	return;
  }
@@ -1131,8 +1128,7 @@ void BosonMenuInput::slotEditorEditPlayerOil()
 	boWarning() << k_funcinfo << "value " << value << " not valid" << endl;
 	return;
  }
- localPlayer()->setOil(v);
-#endif
+ localPlayer->setOil(v);
 }
 
 void BosonMenuInput::slotEditorImportHeightMap()
