@@ -653,7 +653,7 @@ void FogTexture::updateFogTexture()
  mFogTextureDirtyAreaY2 = -1;
 }
 
-void FogTexture::cellChanged(int x, int y)
+void FogTexture::cellChanged(int x1, int y1, int x2, int y2)
 {
  if (!boConfig->boolValue("TextureFOW")) {
 	return;
@@ -661,28 +661,37 @@ void FogTexture::cellChanged(int x, int y)
  if (!mFogTextureData) {
 	return;
  }
- if(x == 0 || y == 0 || x == ((int)mLastMapWidth - 1) || y == ((int)mLastMapHeight - 1)) {
+ x1 = QMAX(x1, 1);
+ y1 = QMAX(y1, 1);
+ x2 = QMIN(x2, (int)mLastMapWidth - 1);
+ y2 = QMIN(y2, (int)mLastMapHeight - 1);
+ if(x2 < x1 || y2 < y1) {
 	return;
  }
 
- unsigned char value = 0;
- if (!localPlayerIO()->isFogged(x, y)) {
-	value = 255;
- }
+ // TODO: don't go over every single cell!
+ for (int y = y1; y <= y2; y++) {
+	for (int x = x1; x <= x2; y++) {
+		unsigned char value = 0;
+		if (!localPlayerIO()->isFogged(x, y)) {
+			value = 255;
+		}
 
- // 'x + 1' and 'y + 1' because we use 1-texel border
- mFogTextureData[((y + 1) * mFogTextureDataW + (x + 1)) * 4 + 0] = value;
- mFogTextureData[((y + 1) * mFogTextureDataW + (x + 1)) * 4 + 1] = value;
- mFogTextureData[((y + 1) * mFogTextureDataW + (x + 1)) * 4 + 2] = value;
+		// 'x + 1' and 'y + 1' because we use 1-texel border
+		mFogTextureData[((y + 1) * mFogTextureDataW + (x + 1)) * 4 + 0] = value;
+		mFogTextureData[((y + 1) * mFogTextureDataW + (x + 1)) * 4 + 1] = value;
+		mFogTextureData[((y + 1) * mFogTextureDataW + (x + 1)) * 4 + 2] = value;
+	}
+ }
 
  // Fog texture is now dirty
  mFogTextureDirty = true;
 
  // Update dirty area
- mFogTextureDirtyAreaX1 = QMIN(mFogTextureDirtyAreaX1, x);
- mFogTextureDirtyAreaY1 = QMIN(mFogTextureDirtyAreaY1, y);
- mFogTextureDirtyAreaX2 = QMAX(mFogTextureDirtyAreaX2, x);
- mFogTextureDirtyAreaY2 = QMAX(mFogTextureDirtyAreaY2, y);
+ mFogTextureDirtyAreaX1 = QMIN(mFogTextureDirtyAreaX1, x1);
+ mFogTextureDirtyAreaY1 = QMIN(mFogTextureDirtyAreaY1, y1);
+ mFogTextureDirtyAreaX2 = QMAX(mFogTextureDirtyAreaX2, x2);
+ mFogTextureDirtyAreaY2 = QMAX(mFogTextureDirtyAreaY2, y2);
 }
 
 
@@ -764,10 +773,10 @@ void BoGroundRendererBase::generateCellList(const BosonMap* map)
 #endif
 }
 
-void BoGroundRendererBase::cellFogChanged(int x, int y)
+void BoGroundRendererBase::cellFogChanged(int x1, int y1, int x2, int y2)
 {
  mFogTexture->setLocalPlayerIO(localPlayerIO());
- mFogTexture->cellChanged(x, y);
+ mFogTexture->cellChanged(x1, y1, x2, y2);
 }
 
 QString BoGroundRendererBase::debugStringForPoint(const BoVector3Fixed& pos) const

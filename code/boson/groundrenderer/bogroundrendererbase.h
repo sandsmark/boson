@@ -59,7 +59,7 @@ public:
 
 	void start(const BosonMap* map);
 	void stop(const BosonMap* map);
-	void cellChanged(int x, int y);
+	void cellChanged(int x1, int y1, int x2, int y2);
 	void setLocalPlayerIO(PlayerIO* io)
 	{
 		mLocalPlayerIO = io;
@@ -111,7 +111,7 @@ public:
 	 **/
 	virtual void generateCellList(const BosonMap* map);
 
-	virtual void cellFogChanged(int x, int y);
+	virtual void cellFogChanged(int x1, int y1, int x2, int y2);
 
 	virtual QString debugStringForPoint(const BoVector3Fixed& pos) const;
 

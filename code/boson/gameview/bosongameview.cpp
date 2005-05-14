@@ -1267,7 +1267,7 @@ void BosonGameView::slotFog(int x, int y)
 {
  BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
  if (r) {
-	r->cellFogChanged(x, y);
+	r->cellFogChanged(x, y, x, y);
  }
 }
 
@@ -1275,7 +1275,23 @@ void BosonGameView::slotUnfog(int x, int y)
 {
  BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
  if (r) {
-	r->cellFogChanged(x, y);
+	r->cellFogChanged(x, y, x, y);
+ }
+}
+
+void BosonGameView::slotChangeTexMap(int x, int y)
+{
+ BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
+ if (r) {
+	r->cellTextureChanged(x, y, x, y);
+ }
+}
+
+void BosonGameView::slotChangeHeight(int x, int y)
+{
+ BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
+ if (r) {
+	r->cellHeightChanged(x, y, x, y);
  }
 }
 

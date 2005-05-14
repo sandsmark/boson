@@ -561,6 +561,10 @@ void BosonMainWidget::initBoson()
 
  connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
 		d->mGameView, SLOT(slotAdvance(unsigned int, bool)));
+ connect(boGame, SIGNAL(signalChangeTexMap(int, int, unsigned int, unsigned int*, unsigned char*)),
+		d->mGameView, SLOT(slotChangeTexMap(int, int)));
+ connect(boGame, SIGNAL(signalChangeHeight(int, int, float)),
+		d->mGameView, SLOT(slotChangeHeight(int, int)));
  connect(boGame, SIGNAL(signalLoadExternalStuffFromXML(const QDomElement&)),
 		this, SLOT(slotLoadExternalStuffFromXML(const QDomElement&)));
  connect(boGame, SIGNAL(signalSaveExternalStuffAsXML(QDomElement&)),
@@ -929,7 +933,7 @@ void BosonMainWidget::slotGameStarted()
 	// this can happen in two cases
 	// 1. editor mode
 	// 2. loading a game
-	
+
 	if (!boGame->gameMode()) {
 		// pick one player for editor mode
 		// (it doesnt matter which)

@@ -321,6 +321,9 @@ public slots:
 	void slotFog(int x, int y);
 	void slotUnfog(int x, int y);
 
+	void slotChangeTexMap(int x, int y);
+	void slotChangeHeight(int x, int y);
+
 	void slotAction(const BoSpecificAction&);
 
 signals:

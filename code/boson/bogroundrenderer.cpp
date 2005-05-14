@@ -277,10 +277,16 @@ int* BoGroundRenderer::makeCellArray(unsigned int count)
  return new int[count * 4];
 }
 
-void BoGroundRenderer::cellFogChanged(int x, int y)
+void BoGroundRenderer::cellFogChanged(int, int, int, int)
 {
- Q_UNUSED(x);
- Q_UNUSED(y);
+}
+
+void BoGroundRenderer::cellHeightChanged(int, int, int, int)
+{
+}
+
+void BoGroundRenderer::cellTextureChanged(int, int, int, int)
+{
 }
 
 bool BoGroundRenderer::usable() const

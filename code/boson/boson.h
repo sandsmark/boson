@@ -478,6 +478,7 @@ signals:
 	 * This is for editor use only!
 	 **/
 	void signalChangeTexMap(int x, int y, unsigned int textureCount, unsigned int* textures, unsigned char* alpha);
+	void signalChangeHeight(int x, int y, float height);
 
 	void signalAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer);
 
