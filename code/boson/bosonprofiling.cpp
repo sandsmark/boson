@@ -183,6 +183,11 @@ void BosonProfilingStorage::addItem(BosonProfilingItem* item)
  }
 }
 
+const QPtrList<BosonProfilingItem>* BosonProfilingStorage::items() const
+{
+ return mItems;
+}
+
 QPtrList<BosonProfilingItem> BosonProfilingStorage::cloneItems() const
 {
  QPtrList<BosonProfilingItem> list;
@@ -325,6 +330,77 @@ void BosonProfiling::setMaximalEntries(const QString& storage, int max)
  switchStorage(current);
 }
 
+
+void BosonProfiling::getItemsSince(QPtrList<const BosonProfilingItem>* ret, const struct timeval& since) const
+{
+ BO_CHECK_NULL_RET(ret);
+ ret->clear();
+
+ QDictIterator<BosonProfilingStorage> storageIt(d->mStorages);
+ for (; storageIt.current(); ++storageIt) {
+	const QPtrList<BosonProfilingItem>* list = storageIt.current()->items();
+	QPtrListIterator<BosonProfilingItem> itemIt(*list);
+
+	// search backwards for the first item that starts after since
+	itemIt.toLast(); // AB: this is O(1) (important!)
+	while (!itemIt.atFirst()) {
+		if (itemIt.current()->startTime() < since) {
+			// make the iterator point to the first item that starts
+			// after since
+			++itemIt;
+			break;
+		}
+		--itemIt;
+	}
+
+	for (; itemIt.current(); ++itemIt) {
+		ret->append(itemIt.current());
+	}
+ }
+}
+
+class MySortedProfilingList : public QPtrList<const BosonProfilingItem>
+{
+protected:
+	virtual int compareItems (QPtrCollection::Item item1, QPtrCollection::Item item2)
+	{
+		BosonProfilingItem* p1 = (BosonProfilingItem*)item1;
+		BosonProfilingItem* p2 = (BosonProfilingItem*)item2;
+
+		// AB: note that some combinations are _not_ possible:
+		// -> if p1 starts before p2, then it will also end before p2
+		//    starts. items cannot overlap, i.e. are disjoint.
+		//    therefore it is sufficient to compare startTimes only
+
+		if (p1->startTime() < p2->startTime()) {
+			return -1;
+		} else if (p1->startTime() == p2->startTime()) {
+			return 0;
+		}
+		return 1;
+	}
+
+};
+
+void BosonProfiling::getItemsSinceSorted(QPtrList<const BosonProfilingItem>* ret, const struct timeval& since) const
+{
+ BO_CHECK_NULL_RET(ret);
+ ret->clear();
+
+ MySortedProfilingList list;
+ getItemsSince(&list, since);
+
+ // AB: we could probably make this faster by writing our own sorting algorithm.
+ // the storages are already sorted correctly, we just need to merge the items
+ // from all storages into a single (sorted) list.
+ list.sort();
+
+ QPtrListIterator<const BosonProfilingItem> it(list);
+ while (it.current()) {
+	ret->append(it.current());
+	++it;
+ }
+}
 
 QPtrList<BosonProfilingItem> BosonProfiling::cloneItems(const QString& storageName) const
 {

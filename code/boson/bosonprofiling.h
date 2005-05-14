@@ -26,7 +26,7 @@ class QString;
 class QDataStream;
 template<class T> class QPtrList;
 template<class T> class QPtrStack;
-struct timeval;
+
 
 
 #define boProfiling BosonProfiling::bosonProfiling()
@@ -94,6 +94,15 @@ public:
 
 	QString name() const;
 
+	const struct timeval& startTime() const
+	{
+		return mStart;
+	}
+	const struct timeval& endTime() const
+	{
+		return mEnd;
+	}
+
 private:
 	QString* mName;
 	QPtrList<BosonProfilingItem>* mChildren;
@@ -119,6 +128,7 @@ public:
 
 	void addItem(BosonProfilingItem* item);
 
+	const QPtrList<BosonProfilingItem>* items() const;
 	QPtrList<BosonProfilingItem> cloneItems() const;
 
 private:
@@ -194,6 +204,23 @@ public:
 	 * @ref switchStorage.
 	 **/
 	void setMaximalEntries(const QString& storage, int max);
+
+	/**
+	 * This returns all items currently stored which are not older than @p
+	 * since. The sorting of the list depends on the internal storage
+	 * structure, i.e. is NOT sorted by time. See also @ref getItemsSinceSorted
+	 *
+	 * @param ret Returns the list of profiling items since @p since.
+	 **/
+	void getItemsSince(QPtrList<const BosonProfilingItem>* ret, const struct timeval& since) const;
+
+	/**
+	 * This behaves exactly like @ref getItemsSince, but the list will be
+	 * sorted by time.
+	 *
+	 * @param ret Returns the sorted list of profiling items since @p since.
+	 **/
+	void getItemsSinceSorted(QPtrList<const BosonProfilingItem>* ret, const struct timeval& since) const;
 
 	/**
 	 * @return A copy of all items currently stored. WARNING: you must
@@ -273,6 +300,70 @@ private:
 	bool mPopped;
 	const BosonProfilingItem* mItem;
 };
+
+
+inline bool operator<(const struct timeval& t1, const struct timeval& t2)
+{
+ if (t1.tv_sec < t2.tv_sec) {
+	return true;
+ } else if (t1.tv_sec > t2.tv_sec) {
+	return false;
+ }
+ if (t1.tv_usec < t2.tv_usec) {
+	return true;
+ }
+ return false;
+}
+inline bool operator<=(const struct timeval& t1, const struct timeval& t2)
+{
+ if (t1.tv_sec <= t2.tv_sec) {
+	return true;
+ } else if (t1.tv_sec > t2.tv_sec) {
+	return false;
+ }
+ if (t1.tv_usec <= t2.tv_usec) {
+	return true;
+ }
+ return false;
+}
+inline bool operator>(const struct timeval& t1, const struct timeval& t2)
+{
+ if (t1.tv_sec > t2.tv_sec) {
+	return true;
+ } else if (t1.tv_sec < t2.tv_sec) {
+	return false;
+ }
+ if (t1.tv_usec > t2.tv_usec) {
+	return true;
+ }
+ return false;
+}
+inline bool operator>=(const struct timeval& t1, const struct timeval& t2)
+{
+ if (t1.tv_sec >= t2.tv_sec) {
+	return true;
+ } else if (t1.tv_sec < t2.tv_sec) {
+	return false;
+ }
+ if (t1.tv_usec >= t2.tv_usec) {
+	return true;
+ }
+ return false;
+}
+inline bool operator==(const struct timeval& t1, const struct timeval& t2)
+{
+ if (t1.tv_sec == t2.tv_sec && t1.tv_usec == t2.tv_usec) {
+	return true;
+ }
+ return false;
+}
+inline bool operator!=(const struct timeval& t1, const struct timeval& t2)
+{
+ if (t1.tv_sec != t2.tv_sec || t1.tv_usec != t2.tv_usec) {
+	return true;
+ }
+ return false;
+}
 
 
 #endif

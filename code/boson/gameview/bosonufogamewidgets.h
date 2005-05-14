@@ -219,6 +219,12 @@ private:
 class FPSGraphData;
 class BosonUfoFPSGraphWidgetPrivate;
 /**
+ * @short A widget to paint a graph from FPS (or other) data
+ * This widget paints a graph (i.e. a set of connected lines) from FPS data.
+ * Although it is named like this and primarily intended to be used for
+ * frame-per-second data, it can also handle any other data (I just dont know a
+ * more generic but still descriptive name for this class).
+ *
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class BosonUfoFPSGraphWidget : public BoUfoCustomWidget
@@ -241,6 +247,34 @@ protected slots:
 
 private:
 	BosonUfoFPSGraphWidgetPrivate* d;
+};
+
+
+class BosonUfoProfilingGraphWidgetPrivate;
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BosonUfoProfilingGraphWidget : public BoUfoCustomWidget
+{
+	Q_OBJECT
+public:
+	BosonUfoProfilingGraphWidget();
+	~BosonUfoProfilingGraphWidget();
+
+	virtual void paintWidget();
+
+	void setGameGLMatrices(const BoGLMatrices*);
+
+protected slots:
+	void slotUpdateData();
+	void slotSetUpdateInterval(int);
+
+protected:
+	void resetProfilingTypes();
+	void ensureLabels(unsigned int count);
+
+private:
+	BosonUfoProfilingGraphWidgetPrivate* d;
 };
 
 
