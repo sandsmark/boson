@@ -88,9 +88,6 @@ public:
 
 		mFPSCounter = 0;
 
-		mControlPressed = false;
-		mShiftPressed = false;
-
 		mLocalPlayer = 0;
 
 		mStarting = 0;
@@ -107,9 +104,6 @@ public:
 
 	QTimer mUpdateTimer;
 	int mUpdateInterval;
-
-	bool mControlPressed;
-	bool mShiftPressed;
 
 	BosonStarting* mStarting;
 
@@ -133,7 +127,6 @@ BosonMainWidget::~BosonMainWidget()
  BoFullScreen::enterOriginalMode();
 
  qApp->setGlobalMouseTracking(false);
- qApp->removeEventFilter(this);
 
  bool editor = false;
  if (boGame) {
@@ -179,7 +172,6 @@ void BosonMainWidget::init()
  slotSetUpdateInterval(boConfig->uintValue("GLUpdateInterval"));
 
  qApp->setGlobalMouseTracking(true);
- qApp->installEventFilter(this);
 
  boProfiling->setMaximalEntries("GL", boConfig->uintValue("MaxProfilingEntriesGL"));
  boProfiling->setMaximalEntries("Advance", boConfig->uintValue("MaxProfilingEntriesAdvance"));
@@ -434,26 +426,6 @@ void BosonMainWidget::renderUfo()
 	boError() << k_funcinfo << "OpenGL error at end of method" << endl;
  }
 }
-
-bool BosonMainWidget::eventFilter(QObject* o, QEvent* e)
-{
- switch (e->type()) {
-	case QEvent::KeyPress:
-	case QEvent::KeyRelease:
-		d->mControlPressed = (((QKeyEvent*)e)->stateAfter() & Qt::ControlButton);
-		d->mShiftPressed = (((QKeyEvent*)e)->stateAfter() & Qt::ShiftButton);
-
-		// key events are sent to ufo here, mouse events elsewhere
-		if (ufoManager()) {
-			ufoManager()->sendEvent(e);
-		}
-		break;
-	default:
-		break;
- }
- return BosonUfoGLWidget::eventFilter(o, e);
-}
-
 
 void BosonMainWidget::slotSetUpdateInterval(unsigned int ms)
 {

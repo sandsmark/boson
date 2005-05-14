@@ -24,16 +24,22 @@
 #include "bodebug.h"
 #include "bosonprofiling.h"
 
+#include <qapplication.h>
+
 BosonUfoGLWidget::BosonUfoGLWidget(QWidget* parent, const char* name, bool direct)
 	: BosonGLWidget(parent, name, direct)
 {
  mUfoManager = 0;
  mSendEvents = true;
+
+ qApp->installEventFilter(this);
 }
 
 BosonUfoGLWidget::~BosonUfoGLWidget()
 {
  boDebug() << k_funcinfo << endl;
+ qApp->removeEventFilter(this);
+
  delete mUfoManager;
  mUfoManager = 0;
  boDebug() << k_funcinfo << "done" << endl;
@@ -53,6 +59,33 @@ void BosonUfoGLWidget::initUfo()
  mUfoManager = new BoUfoManager(width(), height());
  boProfiling->pop(); // "Create BoUfo Manager"
  boProfiling->popStorage();
+}
+
+bool BosonUfoGLWidget::eventFilter(QObject* o, QEvent* e)
+{
+ if (!ufoManager()) {
+	return BosonGLWidget::eventFilter(o, e);
+ }
+ switch (e->type()) {
+	case QEvent::AccelOverride:
+		// AB: Qt first sends an AccelOverride event, then an Accel
+		//     event and then a KeyPress event. If the Accel event is
+		//     accepted (which may happen in our KAccel objects), then
+		//     the KeyPress event is skipped.
+		//     If a widget accepts the AccelOverride event, then the
+		//     Accel event is skipped and a KeyPress event is sent only.
+		//     Therefore we must accept the AccelOverride event here, if
+		//     a widget that takes key events has the keyboard focus.
+		if (ufoManager()->focusedWidgetTakesKeyEvents()) {
+			QKeyEvent* ke = (QKeyEvent*)e;
+			ke->accept();
+			return true;
+		}
+		break;
+	default:
+		break;
+ }
+ return BosonGLWidget::eventFilter(o, e);
 }
 
 void BosonUfoGLWidget::makeCurrent()
