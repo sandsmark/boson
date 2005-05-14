@@ -103,9 +103,9 @@ int main(int argc, char **argv)
  boDebug() << k_funcinfo << "resolving GL, GLX and GLU symbols" << endl;
  if (!boglResolveGLSymbols()) {
 #warning TODO: messagebox
-    // TODO: open a messagebox
-    boError() << k_funcinfo << "Could not resolve all symbols!" << endl;
-    return 1;
+	// TODO: open a messagebox
+	boError() << k_funcinfo << "Could not resolve all symbols!" << endl;
+	return 1;
  }
  boDebug() << k_funcinfo << "GL, GLX and GLU symbols successfully resolved" << endl;
 
@@ -120,10 +120,10 @@ int main(int argc, char **argv)
  BoCheckInstallation checkInstallation;
  QString errorMessage = checkInstallation.checkInstallation();
  if (!errorMessage.isNull()) {
-    boError() << k_funcinfo << errorMessage << endl;
-    boError() << k_funcinfo << "check your installation!" << endl;
-    KMessageBox::sorry(0, errorMessage, i18n("Check your installation"));
-    return 1;
+	boError() << k_funcinfo << errorMessage << endl;
+	boError() << k_funcinfo << "check your installation!" << endl;
+	KMessageBox::sorry(0, errorMessage, i18n("Check your installation"));
+	return 1;
  }
 
  BoDebugDCOPIface* iface = 0;
@@ -140,61 +140,61 @@ int main(int argc, char **argv)
 
  if (!top->preloadData()) {
 	boError() << k_funcinfo << "unable to preload some data" << endl;
-    KMessageBox::sorry(0, errorMessage, i18n("Check your installation"));
-    return 1;
+	KMessageBox::sorry(0, errorMessage, i18n("Check your installation"));
+	return 1;
  }
 
  // pretend an old game was over. here we actually start
  top->slotGameOver();
 
  if (boConfig->boolValue("EnableATIDepthWorkaround", false)) {
-    double depth = boConfig->doubleValue("ATIDepthWorkaroundValue", 0.00390625);
-    Bo3dTools::enableReadDepthBufferWorkaround((float)depth);
+	double depth = boConfig->doubleValue("ATIDepthWorkaroundValue", 0.00390625);
+	Bo3dTools::enableReadDepthBufferWorkaround((float)depth);
  }
 
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
  if (args->isSet("ati-depth-workaround") || args->isSet("ati-depth-workaround-depth")) {
-    // this is the value that a call to
-    // glReadPixels(x,y,1,1,GL_DEPTH_COMPONENT, GL_FLOAT, &depth); returns
-    // when it should return 1.0 (i.e. is freshly cleared with 1.0)
-    float depth = 0.00390625;
-    if (args->isSet("ati-depth-workaround-depth")) {
-        QString s = args->getOption("ati-depth-workaround-depth");
-        bool ok = false;
-        depth = s.toFloat(&ok);
-        if (!ok) {
-            boError() << "depth of " << s << " is not a valid floating point number!" << endl;
-            return 1;
-        }
-    }
-    Bo3dTools::enableReadDepthBufferWorkaround(depth);
+	// this is the value that a call to
+	// glReadPixels(x,y,1,1,GL_DEPTH_COMPONENT, GL_FLOAT, &depth); returns
+	// when it should return 1.0 (i.e. is freshly cleared with 1.0)
+	float depth = 0.00390625;
+	if (args->isSet("ati-depth-workaround-depth")) {
+		QString s = args->getOption("ati-depth-workaround-depth");
+		bool ok = false;
+		depth = s.toFloat(&ok);
+		if (!ok) {
+			boError() << "depth of " << s << " is not a valid floating point number!" << endl;
+			return 1;
+		}
+	}
+	Bo3dTools::enableReadDepthBufferWorkaround(depth);
  }
  if (args->isSet("default-lodcount")) {
-    bool ok = false;
-    unsigned int v = 0;
-    QString s = args->getOption("default-lodcount");
-    v = s.toUInt(&ok);
-    if (!ok) {
-        boError() << k_funcinfo << "default-lodcount was not a valid number" << endl;
-        return 1;
-    }
-    boConfig->setIntValue("DefaultLodCount", v);
+	bool ok = false;
+	unsigned int v = 0;
+	QString s = args->getOption("default-lodcount");
+	v = s.toUInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "default-lodcount was not a valid number" << endl;
+		return 1;
+	}
+	boConfig->setIntValue("DefaultLodCount", v);
  }
  if (args->isSet("models")) {
-    boConfig->setBoolValue("ForceDisableModelLoading", false);
+	boConfig->setBoolValue("ForceDisableModelLoading", false);
  } else {
-    boWarning() << "model loading disabled - you will not see any units!" << endl;
-    boConfig->setBoolValue("ForceDisableModelLoading", true);
+	boWarning() << "model loading disabled - you will not see any units!" << endl;
+	boConfig->setBoolValue("ForceDisableModelLoading", true);
  }
  if (args->isSet("new")) {
-    top->slotShowNewGamePage(args);
+	top->slotShowNewGamePage(args);
  } else if (args->isSet("editor")) {
-    top->slotShowStartEditorPage(args);
+	top->slotShowStartEditorPage(args);
  } else if (args->isSet("load")) {
-    top->slotShowLoadGamePage(args);
+	top->slotShowLoadGamePage(args);
  } else if (args->isSet("load-from-log")) {
-    QString file = args->getOption("load-from-log");
-    top->slotLoadFromLog(file);
+	QString file = args->getOption("load-from-log");
+	top->slotLoadFromLog(file);
  }
  args->clear();
 
@@ -210,38 +210,38 @@ void postBosonConfigInit()
 {
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
  if (!args) {
-    boError() << k_funcinfo << "NULL cmdline args" << endl;
-    return;
+	boError() << k_funcinfo << "NULL cmdline args" << endl;
+	return;
  }
  if (!BoGlobal::boGlobal()) {
-    boError() << k_funcinfo << "NULL BoGlobal object" << endl;
-    return;
+	boError() << k_funcinfo << "NULL BoGlobal object" << endl;
+	return;
  }
  BosonConfig* conf = BoGlobal::boGlobal()->bosonConfig();
  if (!conf) {
-    boError() << k_funcinfo << "NULL BosonConfig object" << endl;
-    return;
+	boError() << k_funcinfo << "NULL BosonConfig object" << endl;
+	return;
  }
  if (args->isSet("sound")) {
-    boConfig->setBoolValue("ForceDisableSound", false);
+	boConfig->setBoolValue("ForceDisableSound", false);
  }
  if (!args->isSet("ai")) {
-    boDebug() << k_funcinfo << "ai arg is not set" << endl;
-    boConfig->setDoubleValue("AiDelay", 0.0);
+	boDebug() << k_funcinfo << "ai arg is not set" << endl;
+	boConfig->setDoubleValue("AiDelay", 0.0);
  } else if (args->isSet("aidelay")) {
-    QString delay = args->getOption("aidelay");
-    bool ok;
-    boConfig->setDoubleValue("AiDelay", delay.toFloat(&ok));
-    boDebug() << k_funcinfo << "aidelay set to " << boConfig->doubleValue("AIDelay") << endl;
-    if (!ok) {
-        boError() << k_funcinfo << "aidelay is not a valid float!" << endl;
-        // Fall back to default
-        boConfig->setDoubleValue("AiDelay", 3.0);
-    }
+	QString delay = args->getOption("aidelay");
+	bool ok;
+	boConfig->setDoubleValue("AiDelay", delay.toFloat(&ok));
+	boDebug() << k_funcinfo << "aidelay set to " << boConfig->doubleValue("AIDelay") << endl;
+	if (!ok) {
+		boError() << k_funcinfo << "aidelay is not a valid float!" << endl;
+		// Fall back to default
+		boConfig->setDoubleValue("AiDelay", 3.0);
+	}
  }
  if (args->isSet("indirect")) {
-    boWarning() << k_funcinfo << "use indirect rendering (slow!)" << endl;
-    boConfig->setBoolValue("ForceWantDirect", false);
+	boWarning() << k_funcinfo << "use indirect rendering (slow!)" << endl;
+	boConfig->setBoolValue("ForceWantDirect", false);
  }
 }
 
