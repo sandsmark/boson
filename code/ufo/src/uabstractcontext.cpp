@@ -625,9 +625,30 @@ UAbstractContext::fireKeyEvent(UKeyEvent * e) {
 		e->getKeyChar()
 	);
 
+	newE->reference();
+
+	// AB: even call this if w==NULL !
 	if (send(w, newE)) {
 		e->consume();
 	}
+
+#if 0
+	// deliver to parents
+	if (w) {
+		w = w->getParent();
+	}
+	while (w && !e->isConsumed()) {
+		// AB: using send() would be easier, but it sets the source to
+		// the widget and I am not sure whether this is intended here.
+		// We are just emulating the previous behaviour of libufo here.
+		w->dispatchEvent(newE);
+		if (newE->isConsumed()) {
+			e->consume();
+		}
+		w = w->getParent();
+	}
+#endif
+	newE->unreference();
 }
 
 //

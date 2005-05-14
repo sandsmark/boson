@@ -417,9 +417,9 @@ UTextureFontRenderer::listFonts(const UFontInfo & fontInfo) {
 			iter != files.end();
 			++iter) {
 		bool add = true;
-		unsigned int tga_index = (*iter).find(".tga");
+		unsigned long tga_index = (*iter).find(".tga");
 		if (tga_index != std::string::npos) {
-			unsigned int index = 0;
+			unsigned long index = 0;
 			UFontInfo info("", 14, UFontInfo::Normal);
 
 			// check font face
@@ -477,9 +477,9 @@ UTextureFontRenderer::listFonts() {
 	for (std::vector<std::string>::const_iterator iter = files.begin();
 			iter != files.end();
 			++iter) {
-		unsigned int tga_index = (*iter).find(".tga");
+		unsigned long tga_index = (*iter).find(".tga");
 		if (tga_index != std::string::npos) {
-			unsigned int index = 0;
+			unsigned long index = 0;
 			UFontInfo info("", 14, UFontInfo::Normal);
 			info.face = (*iter).substr(0, (*iter).find("_"));
 			while (index != std::string::npos) {

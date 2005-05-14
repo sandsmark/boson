@@ -112,6 +112,12 @@ UObject::~UObject() {
 	nFreed++;
 }
 
+unsigned int
+UObject::hashCode() const {
+	long ret = reinterpret_cast<long>(this);
+	return (unsigned int)(ret);
+}
+
 // not to be used
 unsigned int
 UObject::objCount() {

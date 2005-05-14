@@ -219,9 +219,9 @@ UINIReader::parse(char * buffer, unsigned int n) {
 
 		std::string test(pArr);
 
-		unsigned int pos = test.find('=');
-		unsigned int end = test.find('#');
-		end = std::min(end, (unsigned int)(test.length()));
+		unsigned long pos = test.find('=');
+		unsigned long end = test.find('#');
+		end = std::min(end, (unsigned long)(test.length()));
 
 		unsigned int endKey = pos;
 		unsigned int beginValue = pos + 1;
