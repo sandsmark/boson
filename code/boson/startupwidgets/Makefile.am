@@ -6,7 +6,6 @@ noinst_LTLIBRARIES = libbosonstartupwidgets.la
 libbosonstartupwidgets_la_SOURCES = \
 	bosonneweditorwidgetbase.ui \
 	bosonstartupnetwork.cpp \
-	bosonnetworkoptionswidget.cpp \
 	bosonneweditorwidget.cpp \
 	kloadsavegamewidget.cpp \
 	welcomewidget.boui \
