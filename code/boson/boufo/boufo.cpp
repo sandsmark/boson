@@ -3029,7 +3029,7 @@ QString BoUfoCheckBox::text() const
 
 void BoUfoCheckBox::setChecked(bool c)
 {
- mCheckBox->setPressed(c);
+ mCheckBox->setSelected(c);
 }
 
 bool BoUfoCheckBox::checked() const
