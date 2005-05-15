@@ -41,6 +41,9 @@ Patches applied currently (this list may not be complete):
   ubasicmenuitemui.cpp had to be patched, because mousePressed() needs to
   consume events for items as well, not only for menus.
 - AMD64 fixes ported from libufo cvs on 05/05/14
+- Patch to uinputmap.hpp and ubutton.cpp to make sure that the button
+  accelerators are actually removed from the inputmap (a ufo::UInputMap::put()
+  call with a NULL slot is NOT sufficient)
 
 
 Use

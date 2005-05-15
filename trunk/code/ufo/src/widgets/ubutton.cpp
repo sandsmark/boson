@@ -391,7 +391,7 @@ UButton::removedFromHierarchy() {
 	if (m_accelerator.getKeyCode() != UKey::UK_UNDEFINED) {
 		if (getRootPane(true)) {
 			getRootPane(true)->getInputMap(WhenAncestorFocused)
-				->put(m_accelerator, NULL);
+				->remove(m_accelerator);
 		}
 	}
 	UWidget::removedFromHierarchy();
