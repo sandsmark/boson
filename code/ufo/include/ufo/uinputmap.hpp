@@ -49,6 +49,7 @@ class UFO_EXPORT UInputMap : public UObject  {
 	UFO_DECLARE_DYNAMIC_CLASS(UInputMap)
 public:
 	void put(const UKeyStroke & strokeA, const UActionSlot & listenerA);
+	void remove(const UKeyStroke & strokeA);
 	UActionSlot * get(const UKeyStroke & strokeA);
 
 	void clear();
@@ -65,6 +66,11 @@ private:
 inline void
 UInputMap::put(const UKeyStroke & strokeA, const UActionSlot & listenerA) {
 	m_map.insert(std::pair<UKeyStroke, UActionSlot>(strokeA, listenerA));
+}
+
+inline void
+UInputMap::remove(const UKeyStroke & strokeA) {
+	m_map.erase(strokeA);
 }
 
 inline UActionSlot *
