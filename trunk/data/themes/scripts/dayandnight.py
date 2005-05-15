@@ -46,7 +46,8 @@ class Sun:
   #  http://en.wikipedia.org/wiki/Horizontal_coordinate_system#The_position_of_the_Sun
   def update(self, curtime):
     mytime = time.localtime(curtime)
-    yearstart = time.mktime((mytime.tm_year, 1, 1, 0, 0, 0, 0, 0, 0))
+    yearstart_ = time.struct_time((mytime.tm_year, 1, 1, 0, 0, 0, 0, 0, 0))
+    yearstart = time.mktime(yearstart_)
     day = (curtime - yearstart) / (24*60*60.0) + 1
 
     # Calculate declination
@@ -77,7 +78,8 @@ duration = 2400  # that's 2 minutes
 
 sun = Sun()
 # Start at 2005/05/13 08:00
-curtime = time.mktime((2005, 05, 13,  08, 00, 00,  0, 1, -1))
+curtime_ = time.struct_time((2005, 5, 13,   8, 0, 0,   0, 1, -1))
+curtime = time.mktime(curtime_)
 sun.update(curtime)
 
 
