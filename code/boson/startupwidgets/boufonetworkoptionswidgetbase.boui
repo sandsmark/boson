@@ -15,6 +15,8 @@
    <verticalAlignment/>
    <horizontalAlignment/>
    <stretch/>
+   <gridLayoutColumns/>
+   <gridLayoutRows/>
   </Properties>
   <Widget>
    <ClassName>BoUfoLabel</ClassName>
@@ -29,10 +31,12 @@
     <preferredHeight/>
     <backgroundImageFile/>
     <verticalAlignment/>
-    <horizontalAlignment>4</horizontalAlignment>
+    <horizontalAlignment>AlignHCenter</horizontalAlignment>
     <stretch/>
     <text>Network Settings</text>
     <iconFile/>
+    <gridLayoutColumns/>
+    <gridLayoutRows/>
    </Properties>
   </Widget>
   <Widget>
@@ -50,6 +54,8 @@
     <verticalAlignment/>
     <horizontalAlignment/>
     <stretch>1</stretch>
+    <gridLayoutColumns/>
+    <gridLayoutRows/>
    </Properties>
   </Widget>
   <Widget>
@@ -67,6 +73,8 @@
     <verticalAlignment/>
     <horizontalAlignment/>
     <stretch/>
+    <gridLayoutColumns/>
+    <gridLayoutRows/>
    </Properties>
    <Widget>
     <ClassName>BoUfoWidget</ClassName>
@@ -83,6 +91,8 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch>1</stretch>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
    <Widget>
@@ -100,6 +110,8 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch/>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
     <Widget>
      <ClassName>BoUfoWidget</ClassName>
@@ -116,6 +128,8 @@
       <verticalAlignment/>
       <horizontalAlignment/>
       <stretch/>
+      <gridLayoutColumns/>
+      <gridLayoutRows/>
      </Properties>
      <Widget>
       <ClassName>BoUfoLabel</ClassName>
@@ -134,6 +148,8 @@
        <stretch/>
        <text>Network Status:</text>
        <iconFile/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
       </Properties>
      </Widget>
      <Widget>
@@ -153,6 +169,8 @@
        <stretch/>
        <text/>
        <iconFile/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
       </Properties>
      </Widget>
      <Widget>
@@ -170,6 +188,8 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
       </Properties>
       <Widget>
        <ClassName>BoUfoWidget</ClassName>
@@ -186,6 +206,8 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch>1</stretch>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
        </Properties>
       </Widget>
       <Widget>
@@ -205,6 +227,8 @@
         <stretch/>
         <text>Dis&amp;connect</text>
         <iconFile/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
        </Properties>
       </Widget>
      </Widget>
@@ -223,6 +247,8 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch>1</stretch>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
       </Properties>
      </Widget>
     </Widget>
@@ -241,6 +267,8 @@
       <verticalAlignment/>
       <horizontalAlignment/>
       <stretch/>
+      <gridLayoutColumns/>
+      <gridLayoutRows/>
      </Properties>
      <Widget>
       <ClassName>BoUfoWidget</ClassName>
@@ -257,6 +285,8 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
       </Properties>
       <Widget>
        <ClassName>BoUfoHBox</ClassName>
@@ -273,6 +303,8 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
        </Properties>
        <Widget>
         <ClassName>BoUfoCheckBox</ClassName>
@@ -290,6 +322,8 @@
          <horizontalAlignment/>
          <stretch/>
          <checked/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
         </Properties>
        </Widget>
        <Widget>
@@ -309,6 +343,8 @@
          <stretch/>
          <text>Create Network Game</text>
          <iconFile/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
         </Properties>
        </Widget>
        <Widget>
@@ -326,6 +362,8 @@
          <verticalAlignment/>
          <horizontalAlignment/>
          <stretch>1</stretch>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
         </Properties>
        </Widget>
       </Widget>
@@ -344,6 +382,8 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
        </Properties>
        <Widget>
         <ClassName>BoUfoCheckBox</ClassName>
@@ -361,6 +401,8 @@
          <horizontalAlignment/>
          <stretch/>
          <checked/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
         </Properties>
        </Widget>
        <Widget>
@@ -380,6 +422,8 @@
          <stretch/>
          <text>Join Network Game</text>
          <iconFile/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
         </Properties>
        </Widget>
        <Widget>
@@ -397,6 +441,8 @@
          <verticalAlignment/>
          <horizontalAlignment/>
          <stretch>1</stretch>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
         </Properties>
        </Widget>
       </Widget>
@@ -416,6 +462,8 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
       </Properties>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
@@ -434,6 +482,8 @@
         <stretch/>
         <text>Port to Connect to:</text>
         <iconFile/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
        </Properties>
       </Widget>
       <Widget>
@@ -450,7 +500,9 @@
         <backgroundImageFile/>
         <verticalAlignment/>
         <horizontalAlignment/>
-        <stretch></stretch>
+        <stretch/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
        </Properties>
       </Widget>
      </Widget>
@@ -469,6 +521,8 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
       </Properties>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
@@ -487,6 +541,8 @@
         <stretch/>
         <text>Host to Connect to:</text>
         <iconFile/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
        </Properties>
       </Widget>
       <Widget>
@@ -506,6 +562,8 @@
         <stretch/>
         <text>localhost</text>
         <editable/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
        </Properties>
       </Widget>
      </Widget>
@@ -522,10 +580,12 @@
        <preferredHeight/>
        <backgroundImageFile/>
        <verticalAlignment/>
-       <horizontalAlignment>4</horizontalAlignment>
+       <horizontalAlignment>AlignHCenter</horizontalAlignment>
        <stretch/>
        <text>S&amp;tart Network</text>
        <iconFile/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
       </Properties>
      </Widget>
     </Widget>
@@ -544,6 +604,8 @@
       <verticalAlignment/>
       <horizontalAlignment/>
       <stretch>1</stretch>
+      <gridLayoutColumns/>
+      <gridLayoutRows/>
      </Properties>
     </Widget>
    </Widget>
@@ -562,6 +624,8 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch>1</stretch>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
   </Widget>
@@ -580,6 +644,8 @@
     <verticalAlignment/>
     <horizontalAlignment/>
     <stretch>1</stretch>
+    <gridLayoutColumns/>
+    <gridLayoutRows/>
    </Properties>
   </Widget>
   <Widget>
@@ -597,6 +663,8 @@
     <verticalAlignment/>
     <horizontalAlignment/>
     <stretch/>
+    <gridLayoutColumns/>
+    <gridLayoutRows/>
    </Properties>
    <Widget>
     <ClassName>BoUfoWidget</ClassName>
@@ -613,6 +681,8 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch>1</stretch>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
    <Widget>
@@ -629,9 +699,11 @@
      <backgroundImageFile/>
      <verticalAlignment/>
      <horizontalAlignment/>
-     <stretch></stretch>
+     <stretch/>
      <text>&amp;Ok</text>
      <iconFile/>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
   </Widget>

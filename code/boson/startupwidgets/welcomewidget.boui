@@ -9,12 +9,14 @@
    <constraints/>
    <verticalAlignment/>
    <preferredWidth/>
-   <horizontalAlignment>4</horizontalAlignment>
+   <horizontalAlignment>AlignHCenter</horizontalAlignment>
    <layout>UVBoxLayout</layout>
    <name>BoUfoWelcomeWidget</name>
    <minimumWidth/>
    <backgroundImageFile/>
    <stretch/>
+   <gridLayoutColumns/>
+   <gridLayoutRows/>
   </Properties>
   <Widget>
    <ClassName>BoUfoWidget</ClassName>
@@ -22,15 +24,17 @@
     <opaque/>
     <minimumHeight/>
     <preferredHeight/>
-    <constraints></constraints>
+    <constraints/>
     <verticalAlignment/>
     <preferredWidth/>
-    <horizontalAlignment>4</horizontalAlignment>
+    <horizontalAlignment>AlignHCenter</horizontalAlignment>
     <layout>UVBoxLayout</layout>
     <name>mWidget15</name>
     <minimumWidth/>
     <backgroundImageFile/>
     <stretch/>
+    <gridLayoutColumns/>
+    <gridLayoutRows/>
    </Properties>
    <Widget>
     <ClassName>BoUfoLabel</ClassName>
@@ -41,7 +45,7 @@
      <constraints/>
      <verticalAlignment/>
      <preferredWidth/>
-     <horizontalAlignment>4</horizontalAlignment>
+     <horizontalAlignment>AlignHCenter</horizontalAlignment>
      <layout/>
      <name>mBosonBanner</name>
      <iconFile>pics/boson-startup-banner.png</iconFile>
@@ -49,6 +53,8 @@
      <minimumWidth/>
      <backgroundImageFile/>
      <stretch/>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
   </Widget>
@@ -67,6 +73,8 @@
     <verticalAlignment/>
     <horizontalAlignment/>
     <stretch>1</stretch>
+    <gridLayoutColumns/>
+    <gridLayoutRows/>
    </Properties>
   </Widget>
   <Widget>
@@ -75,10 +83,10 @@
     <preferredHeight/>
     <minimumHeight/>
     <opaque>false</opaque>
-    <constraints></constraints>
+    <constraints/>
     <verticalAlignment/>
     <preferredWidth/>
-    <horizontalAlignment>4</horizontalAlignment>
+    <horizontalAlignment>AlignHCenter</horizontalAlignment>
     <layout/>
     <name>mTextPix</name>
     <iconFile>pics/boson-startup-textframe.png</iconFile>
@@ -86,6 +94,8 @@
     <minimumWidth/>
     <backgroundImageFile/>
     <stretch/>
+    <gridLayoutColumns/>
+    <gridLayoutRows/>
    </Properties>
   </Widget>
   <Widget>
@@ -103,6 +113,8 @@
     <verticalAlignment/>
     <horizontalAlignment/>
     <stretch>1</stretch>
+    <gridLayoutColumns/>
+    <gridLayoutRows/>
    </Properties>
   </Widget>
   <Widget>
@@ -111,15 +123,17 @@
     <preferredHeight/>
     <minimumHeight/>
     <opaque/>
-    <constraints></constraints>
+    <constraints/>
     <verticalAlignment/>
     <preferredWidth/>
-    <horizontalAlignment>4</horizontalAlignment>
+    <horizontalAlignment>AlignHCenter</horizontalAlignment>
     <layout>UHBoxLayout</layout>
     <name>mWidget4</name>
     <minimumWidth/>
     <backgroundImageFile/>
     <stretch/>
+    <gridLayoutColumns/>
+    <gridLayoutRows/>
    </Properties>
    <Widget>
     <ClassName>BoUfoWidget</ClassName>
@@ -136,6 +150,8 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch>1</stretch>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
    <Widget>
@@ -155,6 +171,8 @@
      <minimumWidth/>
      <backgroundImageFile/>
      <stretch/>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
    <Widget>
@@ -172,6 +190,8 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch>1</stretch>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
    <Widget>
@@ -191,6 +211,8 @@
      <minimumWidth/>
      <backgroundImageFile/>
      <stretch/>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
    <Widget>
@@ -208,6 +230,8 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch>1</stretch>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
    <Widget>
@@ -227,6 +251,8 @@
      <minimumWidth/>
      <backgroundImageFile/>
      <stretch/>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
    <Widget>
@@ -244,6 +270,8 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch>1</stretch>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
    <Widget>
@@ -263,6 +291,8 @@
      <minimumWidth/>
      <backgroundImageFile/>
      <stretch/>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
    <Widget>
@@ -280,6 +310,8 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch>1</stretch>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
   </Widget>
