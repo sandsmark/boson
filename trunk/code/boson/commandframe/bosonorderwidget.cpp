@@ -57,6 +57,7 @@ BosonOrderWidget::BosonOrderWidget()
  d->mIsProduceAction = false;
 
  setLayoutClass(UGridLayout);
+ setGridLayoutColumns(3);
 }
 
 BosonOrderWidget::~BosonOrderWidget()
