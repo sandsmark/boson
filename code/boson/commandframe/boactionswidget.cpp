@@ -52,6 +52,7 @@ BoActionsWidget::BoActionsWidget()
  d = new BoActionsWidgetPrivate;
 
  setLayoutClass(UGridLayout);
+ setGridLayoutColumns(3);
 }
 
 BoActionsWidget::~BoActionsWidget()
