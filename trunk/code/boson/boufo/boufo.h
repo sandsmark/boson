@@ -461,6 +461,8 @@ class BoUfoWidget : public QObject
 {
 	Q_OBJECT
 	Q_PROPERTY(QString constraints READ constraints WRITE setConstraints);
+	Q_PROPERTY(int gridLayoutColumns READ gridLayoutColumns WRITE setGridLayoutColumns);
+	Q_PROPERTY(int gridLayoutRows READ gridLayoutRows WRITE setGridLayoutRows);
 	Q_PROPERTY(bool opaque READ opaque WRITE setOpaque);
 	Q_PROPERTY(LayoutClass layout READ layoutClass WRITE setLayoutClass);
 	Q_PROPERTY(int minimumWidth READ minimumWidth WRITE setMinimumWidth);
@@ -468,10 +470,12 @@ class BoUfoWidget : public QObject
 	Q_PROPERTY(int preferredWidth READ preferredWidth WRITE setPreferredWidth);
 	Q_PROPERTY(int preferredHeight READ preferredHeight WRITE setPreferredHeight);
 	Q_PROPERTY(QString backgroundImageFile READ backgroundImageFile WRITE setBackgroundImageFile);
-	Q_PROPERTY(int verticalAlignment READ verticalAlignment WRITE setVerticalAlignment);
-	Q_PROPERTY(int horizontalAlignment READ horizontalAlignment WRITE setHorizontalAlignment);
+	Q_PROPERTY(VerticalAlignment verticalAlignment READ verticalAlignment WRITE setVerticalAlignment);
+	Q_PROPERTY(HorizontalAlignment horizontalAlignment READ horizontalAlignment WRITE setHorizontalAlignment);
 	Q_PROPERTY(int stretch READ stretch WRITE setStretch);
 	Q_ENUMS(LayoutClass);
+	Q_ENUMS(HorizontalAlignment);
+	Q_ENUMS(VerticalAlignment);
 public:
 	// AB: we must not use a QObject parent here. otherwise garbage
 	// collection of libufo and Qt may confuse each other.
@@ -487,6 +491,16 @@ public:
 		UBorderLayout,
 		UFullLayout
 	};
+	enum HorizontalAlignment {
+		AlignLeft = 0,
+		AlignHCenter = 1,
+		AlignRight = 2
+	};
+	enum VerticalAlignment {
+		AlignTop = 0,
+		AlignVCenter = 1,
+		AlignBottom = 2
+	};
 
 	ufo::UWidget* widget() const
 	{
@@ -501,10 +515,10 @@ public:
 	 * It seems that these alignment flags are hints to the layout manager
 	 * in libufo.
 	 **/
-	virtual void setVerticalAlignment(int alignment);
-	virtual void setHorizontalAlignment(int alignment);
-	int verticalAlignment() const;
-	int horizontalAlignment() const;
+	virtual void setVerticalAlignment(VerticalAlignment alignment);
+	virtual void setHorizontalAlignment(HorizontalAlignment alignment);
+	VerticalAlignment verticalAlignment() const;
+	HorizontalAlignment horizontalAlignment() const;
 
 	/**
 	 * Convenience method for @ref setBackground with a drawable that paints
@@ -577,6 +591,8 @@ public:
 	 **/
 	unsigned int removeAllWidgets();
 
+	unsigned int widgetCount() const;
+
 	/**
 	 * Set the foreground color of the @ref widget and all of it's children
 	 * (!!) to @p c
@@ -605,6 +621,44 @@ public:
 	void setConstraints(const QString&);
 	QString constraints() const;
 
+	/**
+	 * A hint to the layout manager, if this widget uses a @ref
+	 * UGridLayout layout.
+	 *
+	 * This properties lets you set the number of columns the widgets will
+	 * be organized in. Note that the columns do @em not necessarily have
+	 * the same size! (However all widgets in the same column do have the same
+	 * width)
+	 *
+	 * By default every widget uses a value of -1. See also @ref
+	 * setGridLayoutRows, but note that it makes no sense to set both,
+	 * columns and rows to values other than -1.
+	 **/
+	void setGridLayoutColumns(int columns);
+	int gridLayoutColumns() const;
+
+	/**
+	 * A hint to the layout manager, if this widget uses a @ref
+	 * UGridLayout layout.
+	 *
+	 * This properties lets you set the number of rows the widgets will
+	 * be organized in. Note that the rows do @em not necessarily have
+	 * the same size! (However all widgets in the same row do have the same
+	 * height)
+	 *
+	 * By default every widget uses a value of -1. See also @ref
+	 * setGridLayoutColumns, but note that it makes no sense to set both,
+	 * columns and rows to values other than -1.
+	 **/
+	void setGridLayoutRows(int rows);
+	int gridLayoutRows() const;
+
+	/**
+	 * Set a stretch factor that can be used by the layout class of the
+	 * _parent_ widget.
+	 *
+	 * By default every widget has a stretchFactor of 0.
+	 **/
 	void setStretch(int stretchFactor);
 	int stretch() const;
 
@@ -785,12 +839,12 @@ public:
 	/**
 	 * See @ref BoUfoWidget::setVerticalAlignment
 	 **/
-	virtual void setVerticalAlignment(int alignment);
+	virtual void setVerticalAlignment(VerticalAlignment alignment);
 
 	/**
 	 * See @ref BoUfoWidget::setHorizontalAlignment
 	 **/
-	virtual void setHorizontalAlignment(int alignment);
+	virtual void setHorizontalAlignment(HorizontalAlignment alignment);
 
 protected:
 	virtual void setMinimumSize(const ufo::UDimension& size);
@@ -846,12 +900,12 @@ public:
 	/**
 	 * See @ref BoUfoWidget::setVerticalAlignment
 	 **/
-	virtual void setVerticalAlignment(int alignment);
+	virtual void setVerticalAlignment(VerticalAlignment alignment);
 
 	/**
 	 * See @ref BoUfoWidget::setHorizontalAlignment
 	 **/
-	virtual void setHorizontalAlignment(int alignment);
+	virtual void setHorizontalAlignment(HorizontalAlignment alignment);
 
 signals:
 	void signalActivated();

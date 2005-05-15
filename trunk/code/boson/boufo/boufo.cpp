@@ -1421,6 +1421,15 @@ unsigned int BoUfoWidget::removeAllWidgets()
  return widget()->removeAll();
 }
 
+unsigned int BoUfoWidget::widgetCount() const
+{
+ if (!widget()) {
+	BO_NULL_ERROR(widget());
+	return 0;
+ }
+ return widget()->getWidgetCount();
+}
+
 void BoUfoWidget::render(BoUfoManager* ufoManager)
 {
  BO_CHECK_NULL_RET(widget());
@@ -1443,63 +1452,71 @@ void BoUfoWidget::addSpacing(int spacing)
  addWidget(w);
 }
 
-void BoUfoWidget::setVerticalAlignment(int a)
+void BoUfoWidget::setVerticalAlignment(VerticalAlignment a)
 {
- if (a & Qt::AlignTop) {
-	widget()->setVerticalAlignment(ufo::AlignTop);
- } else if (a & Qt::AlignBottom) {
-	widget()->setVerticalAlignment(ufo::AlignBottom);
- } else if (a & Qt::AlignVCenter) {
-	widget()->setVerticalAlignment(ufo::AlignCenter);
+ switch (a) {
+	default:
+	case AlignTop:
+		widget()->setVerticalAlignment(ufo::AlignTop);
+		break;
+	case AlignBottom:
+		widget()->setVerticalAlignment(ufo::AlignBottom);
+		break;
+	case AlignVCenter:
+		widget()->setVerticalAlignment(ufo::AlignCenter);
+		break;
  }
 }
 
-int BoUfoWidget::verticalAlignment() const
+BoUfoWidget::VerticalAlignment BoUfoWidget::verticalAlignment() const
 {
  ufo::Alignment v = widget()->getVerticalAlignment();
- int a;
+ VerticalAlignment a;
  switch (v) {
 	case ufo::AlignTop:
-		a = Qt::AlignTop;
+		a = AlignTop;
 		break;
 	case ufo::AlignBottom:
-		a = Qt::AlignBottom;
+		a = AlignBottom;
 		break;
 	default:
 	case ufo::AlignCenter:
-		a = Qt::AlignVCenter;
+		a = AlignVCenter;
 		break;
  }
  return a;
 }
 
-void BoUfoWidget::setHorizontalAlignment(int a)
+void BoUfoWidget::setHorizontalAlignment(HorizontalAlignment a)
 {
- if (a & Qt::AlignLeft) {
-	widget()->setHorizontalAlignment(ufo::AlignLeft);
- } else if (a & Qt::AlignRight) {
-	widget()->setHorizontalAlignment(ufo::AlignRight);
- } else if (a & Qt::AlignHCenter) {
-	widget()->setHorizontalAlignment(ufo::AlignCenter);
- } else {
-	boWarning() << k_funcinfo << "invalid value " << a << endl;
+ switch (a) {
+	default:
+	case AlignLeft:
+		widget()->setHorizontalAlignment(ufo::AlignLeft);
+		break;
+	case AlignRight:
+		widget()->setHorizontalAlignment(ufo::AlignRight);
+		break;
+	case AlignHCenter:
+		widget()->setHorizontalAlignment(ufo::AlignCenter);
+		break;
  }
 }
 
-int BoUfoWidget::horizontalAlignment() const
+BoUfoWidget::HorizontalAlignment BoUfoWidget::horizontalAlignment() const
 {
  ufo::Alignment h = widget()->getHorizontalAlignment();
- int a;
+ HorizontalAlignment a;
  switch (h) {
 	case ufo::AlignLeft:
-		a = Qt::AlignLeft;
+		a = AlignLeft;
 		break;
 	case ufo::AlignRight:
-		a = Qt::AlignRight;
+		a = AlignRight;
 		break;
 	default:
 	case ufo::AlignCenter:
-		a = Qt::AlignHCenter;
+		a = AlignHCenter;
 		break;
  }
  return a;
@@ -1522,8 +1539,7 @@ void BoUfoWidget::setLayoutClass(LayoutClass layout)
 		setLayout(new ufo::UBorderLayout());
 		break;
 	case UGridLayout:
-//		setLayout(new ufo::UBoGridLayout());
-		setLayout(new ufo::UFlowLayout());
+		setLayout(new ufo::UBoGridLayout());
 		break;
 	case UFullLayout:
 		setLayout(new BoUFullLayout());
@@ -1770,6 +1786,48 @@ QString BoUfoWidget::constraints() const
 	return QString::null;
  }
  return o->toString().c_str();
+}
+
+void BoUfoWidget::setGridLayoutColumns(int c)
+{
+ QString s = QString::number(c);
+ widget()->put("gridLayoutColumns", new ufo::UString(s.latin1()));
+}
+
+int BoUfoWidget::gridLayoutColumns() const
+{
+ ufo::UObject* o = widget()->get("gridLayoutColumns");
+ if (!o) {
+	return -1;
+ }
+ bool ok;
+ QString s = o->toString().c_str();
+ int c = s.toInt(&ok);
+ if (!ok) {
+	return -1;
+ }
+ return c;
+}
+
+void BoUfoWidget::setGridLayoutRows(int r)
+{
+ QString s = QString::number(r);
+ widget()->put("gridLayoutRows", new ufo::UString(s.latin1()));
+}
+
+int BoUfoWidget::gridLayoutRows() const
+{
+ ufo::UObject* o = widget()->get("gridLayoutRows");
+ if (!o) {
+	return -1;
+ }
+ bool ok;
+ QString s = o->toString().c_str();
+ int r = s.toInt(&ok);
+ if (!ok) {
+	return -1;
+ }
+ return r;
 }
 
 void BoUfoWidget::setStretch(int factor)
@@ -2272,13 +2330,13 @@ void BoUfoPushButton::init()
  CONNECT_UFO_TO_QT(BoUfoPushButton, mButton, Highlighted);
 }
 
-void BoUfoPushButton::setVerticalAlignment(int a)
+void BoUfoPushButton::setVerticalAlignment(VerticalAlignment a)
 {
  BoUfoWidget::setVerticalAlignment(a);
  mButton->setVerticalAlignment(widget()->getVerticalAlignment());
 }
 
-void BoUfoPushButton::setHorizontalAlignment(int a)
+void BoUfoPushButton::setHorizontalAlignment(HorizontalAlignment a)
 {
  BoUfoWidget::setHorizontalAlignment(a);
  mButton->setHorizontalAlignment(widget()->getHorizontalAlignment());
@@ -2870,13 +2928,13 @@ void BoUfoLabel::init()
  setForegroundColor(defaultForegroundColor());
 }
 
-void BoUfoLabel::setVerticalAlignment(int a)
+void BoUfoLabel::setVerticalAlignment(VerticalAlignment a)
 {
  BoUfoWidget::setVerticalAlignment(a);
  mLabel->setVerticalAlignment(widget()->getVerticalAlignment());
 }
 
-void BoUfoLabel::setHorizontalAlignment(int a)
+void BoUfoLabel::setHorizontalAlignment(HorizontalAlignment a)
 {
  BoUfoWidget::setHorizontalAlignment(a);
  mLabel->setHorizontalAlignment(widget()->getHorizontalAlignment());

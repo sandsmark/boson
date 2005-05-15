@@ -81,7 +81,7 @@ void BoUfoStartupWidget::init()
  setOpaque(true);
 
  BoUfoLabel* logo = new BoUfoLabel();
- logo->setHorizontalAlignment(Qt::AlignHCenter);
+ logo->setHorizontalAlignment(BoUfoWidget::AlignHCenter);
  logo->setIcon(logoImage);
 
  setLayoutClass(BoUfoWidget::UVBoxLayout);
