@@ -66,7 +66,11 @@ void BosonLocalPlayerInput::initIO(KPlayer* p)
     PlayerIO* io = ((Player*)p)->playerIO();
     BoEventManager* manager = ((Boson*)game())->eventManager();
     mEventListener = new BoLocalPlayerEventListener(io, manager, this);
-    mEventListener->initScript();
+    if (!mEventListener->initScript())
+    {
+      boError() << k_funcinfo << "could not init script" << endl;
+      return; // TODO: return false
+    }
   }
 }
 
@@ -433,3 +437,6 @@ void BosonLocalPlayerInput::changeHeight(int x, int y, bofixed height)
   sendInput(msg);
 }
 
+/*
+ * vim: et sw=2
+ */
