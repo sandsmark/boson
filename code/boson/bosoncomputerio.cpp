@@ -66,7 +66,10 @@ void BosonComputerIO::initIO(KPlayer* p)
  boDebug() << k_funcinfo << endl;
  BoEventManager* manager = boGame->eventManager();
  mEventListener = new BoComputerPlayerEventListener((Player*)player(), manager, this);
- mEventListener->initScript();
+ if (!mEventListener->initScript()) {
+	boError() << k_funcinfo << "could not init script" << endl;
+	return; // TODO: return false
+ }
 }
 
 void BosonComputerIO::reaction()

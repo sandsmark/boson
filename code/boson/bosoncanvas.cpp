@@ -468,7 +468,10 @@ void BosonCanvas::init()
 	boError() << k_funcinfo << "NULL boGame object: cannot install event listener" << endl;
  } else {
 	d->mEventListener = new BoCanvasEventListener(boGame->eventManager(), this);
-	d->mEventListener->initScript();
+	if (!d->mEventListener->initScript()) {
+		boError() << k_funcinfo << "cannot init eventlistener script" << endl;
+		return; // TODO: return false
+	}
  }
 }
 
