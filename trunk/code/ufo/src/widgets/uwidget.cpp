@@ -183,6 +183,7 @@ UWidget::~UWidget() {
 
 void
 UWidget::setBoUfoWidgetDeleter(UCollectable* deleter) {
+	delete m_boUfoWidgetDeleter;
 	m_boUfoWidgetDeleter = deleter;
 }
 
