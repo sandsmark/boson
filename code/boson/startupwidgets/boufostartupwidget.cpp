@@ -22,6 +22,8 @@
 
 #include "boufoloadingwidget.h"
 #include "boufonewgamewidget.h"
+#include "boufonetworkoptionswidget.h"
+//#include "boufostarteditorwidget.h"
 #include "welcomewidget.h"
 #include "bosonstartupnetwork.h"
 #include "bodebug.h"
@@ -42,7 +44,6 @@
 #include <stdlib.h>
 
 #define LOADSAVE_WIDGET 0
-#define NETWORK_WIDGET 0
 #define EDITOR_WIDGET 0
 
 class BoUfoStartupWidgetPrivate
@@ -287,8 +288,7 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 	}
 	case IdNetwork:
 	{
-#if NETWORK_WIDGET
-		BosonNetworkOptionsWidget* networkOptions = new BosonNetworkOptionsWidget(this);
+		BoUfoNetworkOptionsWidget* networkOptions = new BoUfoNetworkOptionsWidget();
 		connect(networkOptions, SIGNAL(signalOkClicked()),
 				this, SLOT(slotHideNetworkOptions()));
 		connect(networkOptions, SIGNAL(signalOfferingConnections()),
@@ -299,7 +299,6 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 				this, SLOT(slotConnectedToServer()));
 
 		w = networkOptions;
-#endif
 		break;
 	}
 	case IdStartEditor:
