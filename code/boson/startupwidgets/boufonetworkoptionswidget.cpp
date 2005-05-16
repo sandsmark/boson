@@ -42,12 +42,14 @@ void BoUfoNetworkOptionsWidget::slotDisconnect()
  setConnected(false, false);
 }
 
-void BoUfoNetworkOptionsWidget::slotConnectionTypeChanged(int type)
+void BoUfoNetworkOptionsWidget::slotConnectionTypeChanged(BoUfoRadioButton* b)
 {
- if (type == 0) { // Create network game
+ if (b == mCreateGame) {
 	mHostEdit->setEnabled(false);
- } else { // Join network game
+ } else if (b == mJoinGame) {
 	mHostEdit->setEnabled(true);
+ } else {
+	boError() << k_funcinfo << "invalid parameter" << endl;
  }
 }
 

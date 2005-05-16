@@ -289,12 +289,14 @@
        <gridLayoutRows/>
       </Properties>
       <Widget>
-       <ClassName>BoUfoHBox</ClassName>
+       <ClassName>BoUfoButtonGroupWidget</ClassName>
        <Properties>
-        <name>mWidget13</name>
+        <name>mConnectionTypeButtonGroup</name>
         <constraints/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
         <opaque/>
-        <layout>UHBoxLayout</layout>
+        <layout/>
         <minimumWidth/>
         <minimumHeight/>
         <preferredWidth/>
@@ -303,34 +305,14 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
-        <gridLayoutColumns/>
-        <gridLayoutRows/>
        </Properties>
        <Widget>
-        <ClassName>BoUfoCheckBox</ClassName>
+        <ClassName>BoUfoRadioButton</ClassName>
         <Properties>
-         <name>mCreateGameRadioButton</name>
+         <name>mCreateGame</name>
          <constraints/>
-         <opaque/>
-         <layout/>
-         <minimumWidth/>
-         <minimumHeight/>
-         <preferredWidth/>
-         <preferredHeight/>
-         <backgroundImageFile/>
-         <verticalAlignment/>
-         <horizontalAlignment/>
-         <stretch/>
-         <checked/>
          <gridLayoutColumns/>
          <gridLayoutRows/>
-        </Properties>
-       </Widget>
-       <Widget>
-        <ClassName>BoUfoLabel</ClassName>
-        <Properties>
-         <name>mWidget14</name>
-         <constraints/>
          <opaque/>
          <layout/>
          <minimumWidth/>
@@ -342,74 +324,16 @@
          <horizontalAlignment/>
          <stretch/>
          <text>Create Network Game</text>
-         <iconFile/>
-         <gridLayoutColumns/>
-         <gridLayoutRows/>
+         <selected/>
         </Properties>
        </Widget>
        <Widget>
-        <ClassName>BoUfoWidget</ClassName>
+        <ClassName>BoUfoRadioButton</ClassName>
         <Properties>
-         <name>mWidget20</name>
+         <name>mJoinGame</name>
          <constraints/>
-         <opaque/>
-         <layout/>
-         <minimumWidth/>
-         <minimumHeight/>
-         <preferredWidth/>
-         <preferredHeight/>
-         <backgroundImageFile/>
-         <verticalAlignment/>
-         <horizontalAlignment/>
-         <stretch>1</stretch>
          <gridLayoutColumns/>
          <gridLayoutRows/>
-        </Properties>
-       </Widget>
-      </Widget>
-      <Widget>
-       <ClassName>BoUfoHBox</ClassName>
-       <Properties>
-        <name>mWidget15</name>
-        <constraints/>
-        <opaque/>
-        <layout>UHBoxLayout</layout>
-        <minimumWidth/>
-        <minimumHeight/>
-        <preferredWidth/>
-        <preferredHeight/>
-        <backgroundImageFile/>
-        <verticalAlignment/>
-        <horizontalAlignment/>
-        <stretch/>
-        <gridLayoutColumns/>
-        <gridLayoutRows/>
-       </Properties>
-       <Widget>
-        <ClassName>BoUfoCheckBox</ClassName>
-        <Properties>
-         <name>mWidget16</name>
-         <constraints/>
-         <opaque/>
-         <layout/>
-         <minimumWidth/>
-         <minimumHeight/>
-         <preferredWidth/>
-         <preferredHeight/>
-         <backgroundImageFile/>
-         <verticalAlignment/>
-         <horizontalAlignment/>
-         <stretch/>
-         <checked/>
-         <gridLayoutColumns/>
-         <gridLayoutRows/>
-        </Properties>
-       </Widget>
-       <Widget>
-        <ClassName>BoUfoLabel</ClassName>
-        <Properties>
-         <name>mJoinGameRadioButton</name>
-         <constraints/>
          <opaque/>
          <layout/>
          <minimumWidth/>
@@ -421,28 +345,7 @@
          <horizontalAlignment/>
          <stretch/>
          <text>Join Network Game</text>
-         <iconFile/>
-         <gridLayoutColumns/>
-         <gridLayoutRows/>
-        </Properties>
-       </Widget>
-       <Widget>
-        <ClassName>BoUfoWidget</ClassName>
-        <Properties>
-         <name>mWidget21</name>
-         <constraints/>
-         <opaque/>
-         <layout/>
-         <minimumWidth/>
-         <minimumHeight/>
-         <preferredWidth/>
-         <preferredHeight/>
-         <backgroundImageFile/>
-         <verticalAlignment/>
-         <horizontalAlignment/>
-         <stretch>1</stretch>
-         <gridLayoutColumns/>
-         <gridLayoutRows/>
+         <selected/>
         </Properties>
        </Widget>
       </Widget>
@@ -503,6 +406,11 @@
         <stretch/>
         <gridLayoutColumns/>
         <gridLayoutRows/>
+        <label/>
+        <minimumValue>1</minimumValue>
+        <maximumValue>10000</maximumValue>
+        <stepSize>1</stepSize>
+        <value>5454</value>
        </Properties>
       </Widget>
      </Widget>
@@ -714,8 +622,10 @@
     <Connection sender="mOkButton" signal="signalClicked()" type="receiver" />
    </Connections>
   </Method>
-  <Method return="void" visibility="protected" type="slot" name="slotConnectionTypeChanged(int)" >
-   <Connections/>
+  <Method return="void" visibility="protected" type="slot" name="slotConnectionTypeChanged(BoUfoRadioButton*)" >
+   <Connections>
+    <Connection sender="mConnectionTypeButtonGroup" signal="signalButtonActivated(BoUfoRadioButton*)" type="receiver" />
+   </Connections>
   </Method>
   <Method return="void" visibility="protected" type="slot" name="slotDisconnect()" >
    <Connections>

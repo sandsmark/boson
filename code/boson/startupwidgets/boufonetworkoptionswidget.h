@@ -37,7 +37,7 @@ signals:
 	void signalConnectedToServer();
 
 protected slots:
-	virtual void slotConnectionTypeChanged(int);
+	virtual void slotConnectionTypeChanged(BoUfoRadioButton*);
 	virtual void slotDisconnect();
 	virtual void slotStartNetwork();
 
