@@ -55,9 +55,9 @@
      <stretch/>
     </Properties>
     <Widget>
-     <ClassName>BoUfoCheckBox</ClassName>
+     <ClassName>BoUfoButtonGroupWidget</ClassName>
      <Properties>
-      <name>mCreateNewMap</name>
+      <name>mMapTypeButtonGroup</name>
       <constraints/>
       <gridLayoutColumns/>
       <gridLayoutRows/>
@@ -71,71 +71,90 @@
       <verticalAlignment/>
       <horizontalAlignment/>
       <stretch/>
-      <checked>true</checked>
-      <text/>
      </Properties>
-    </Widget>
-    <Widget>
-     <ClassName>BoUfoLineEdit</ClassName>
-     <Properties>
-      <name>mMapName</name>
-      <constraints/>
-      <gridLayoutColumns/>
-      <gridLayoutRows/>
-      <opaque/>
-      <layout/>
-      <minimumWidth/>
-      <minimumHeight/>
-      <preferredWidth/>
-      <preferredHeight/>
-      <backgroundImageFile/>
-      <verticalAlignment/>
-      <horizontalAlignment/>
-      <stretch/>
-      <text>Map Name</text>
-      <editable/>
-     </Properties>
-    </Widget>
-    <Widget>
-     <ClassName>BoUfoCheckBox</ClassName>
-     <Properties>
-      <name>mEditExistingMap</name>
-      <constraints/>
-      <gridLayoutColumns/>
-      <gridLayoutRows/>
-      <opaque/>
-      <layout/>
-      <minimumWidth/>
-      <minimumHeight/>
-      <preferredWidth/>
-      <preferredHeight/>
-      <backgroundImageFile/>
-      <verticalAlignment/>
-      <horizontalAlignment/>
-      <stretch/>
-      <checked/>
-      <text/>
-     </Properties>
-    </Widget>
-    <Widget>
-     <ClassName>BoUfoListBox</ClassName>
-     <Properties>
-      <name>mMapList</name>
-      <constraints/>
-      <gridLayoutColumns/>
-      <gridLayoutRows/>
-      <opaque/>
-      <layout/>
-      <minimumWidth/>
-      <minimumHeight/>
-      <preferredWidth/>
-      <preferredHeight/>
-      <backgroundImageFile/>
-      <verticalAlignment/>
-      <horizontalAlignment/>
-      <stretch>1</stretch>
-      <selection>SingleSelection</selection>
-     </Properties>
+     <Widget>
+      <ClassName>BoUfoRadioButton</ClassName>
+      <Properties>
+       <name>mCreateNewMap</name>
+       <constraints/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <opaque/>
+       <layout/>
+       <minimumWidth/>
+       <minimumHeight/>
+       <preferredWidth/>
+       <preferredHeight/>
+       <backgroundImageFile/>
+       <verticalAlignment/>
+       <horizontalAlignment/>
+       <stretch/>
+       <text>Create New map</text>
+       <selected/>
+      </Properties>
+     </Widget>
+     <Widget>
+      <ClassName>BoUfoLineEdit</ClassName>
+      <Properties>
+       <name>mMapName</name>
+       <constraints/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <opaque/>
+       <layout/>
+       <minimumWidth/>
+       <minimumHeight/>
+       <preferredWidth/>
+       <preferredHeight/>
+       <backgroundImageFile/>
+       <verticalAlignment/>
+       <horizontalAlignment/>
+       <stretch/>
+       <text>Map Name</text>
+       <editable/>
+      </Properties>
+     </Widget>
+     <Widget>
+      <ClassName>BoUfoRadioButton</ClassName>
+      <Properties>
+       <name>mEditExistingMap</name>
+       <constraints/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <opaque/>
+       <layout/>
+       <minimumWidth/>
+       <minimumHeight/>
+       <preferredWidth/>
+       <preferredHeight/>
+       <backgroundImageFile/>
+       <verticalAlignment/>
+       <horizontalAlignment/>
+       <stretch/>
+       <text>Edit existing map</text>
+       <selected/>
+      </Properties>
+     </Widget>
+     <Widget>
+      <ClassName>BoUfoListBox</ClassName>
+      <Properties>
+       <name>mMapList</name>
+       <constraints/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <opaque/>
+       <layout/>
+       <minimumWidth/>
+       <minimumHeight/>
+       <preferredWidth/>
+       <preferredHeight/>
+       <backgroundImageFile/>
+       <verticalAlignment/>
+       <horizontalAlignment/>
+       <stretch>1</stretch>
+       <selection>SingleSelection</selection>
+      </Properties>
+     </Widget>
     </Widget>
    </Widget>
    <Widget>
