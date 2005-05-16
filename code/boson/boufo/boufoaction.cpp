@@ -473,6 +473,15 @@ BoUfoAction::BoUfoAction(const QString& text, const KShortcut& cut, const QObjec
 
 BoUfoAction::~BoUfoAction()
 {
+ // delete the widget deleters. we use a separate list, as the deleter d'tor
+ // calls BoUfoAction::removeWidget()
+ QPtrList<ufo::UWidget> list = d->mWidgets;
+ QPtrListIterator<ufo::UWidget> it(list);
+ while (it.current()) {
+	it.current()->setBoUfoWidgetDeleter(0);
+	++it;
+ }
+
  if (mParentCollection) {
 	mParentCollection->remove(this, false);
  }
@@ -522,7 +531,7 @@ void BoUfoAction::insertToKAccel(KAccel* accel)
 	boError() << k_funcinfo << "d->mAccel not NULL" << endl;
 	return;
  }
- d->mAccel = mParentCollection->kaccel();
+ d->mAccel = accel;
  d->mAccel->insert(name(), d->mText, QString::null, d->mShortcut,
 		this, SLOT(slotActivated()),
 		true, isEnabled());
@@ -581,15 +590,22 @@ void BoUfoAction::uslotHighlighted(ufo::UActionEvent*)
 {
 }
 
-#warning FIXME: this is called too often by some weird reason
-// by some weird reason this is called e.g. when a menu is closed.
-// but the pointers remain valid.
-// maybe they are just reparented?
-// -> the we really need a sigWidgetDeleted() !
-void BoUfoAction::uslotWidgetRemoved(ufo::UWidget* w)
+class BoUfoActionDeleter : public ufo::UCollectable
 {
-// removeWidget(w);
-}
+public:
+	BoUfoActionDeleter(BoUfoAction* action, ufo::UWidget* widget)
+	{
+		mAction = action;
+		mWidget = widget;
+	}
+	~BoUfoActionDeleter()
+	{
+		mAction->removeWidget(mWidget);
+	}
+private:
+	BoUfoAction* mAction;
+	ufo::UWidget* mWidget;
+};
 
 
 void BoUfoAction::plug(ufo::UWidget* w)
@@ -599,12 +615,11 @@ void BoUfoAction::plug(ufo::UWidget* w)
  ufo::UMenu* menu = dynamic_cast<ufo::UMenu*>(w);
  if (menuBar || menu) {
 	ufo::UMenuItem* menuItem = new ufo::UMenuItem(text().latin1());
+	BoUfoActionDeleter* deleter = new BoUfoActionDeleter(this, menuItem);
+	menuItem->setBoUfoWidgetDeleter(deleter);
+
 	menuItem->sigActivated().connect(slot(*this, &BoUfoAction::uslotActivated));
 	menuItem->sigHighlighted().connect(slot(*this, &BoUfoAction::uslotHighlighted));
-
-	// AB: this is required to avoid invalid pointers. I'd like to
-	// use a sigWidgetDeleted() signal instead.
-	menuItem->sigWidgetRemoved().connect(slot(*this, &BoUfoAction::uslotWidgetRemoved));
 
 	w->add(menuItem);
 	addWidget(menuItem);
@@ -627,13 +642,12 @@ void BoUfoToggleAction::plug(ufo::UWidget* w)
  ufo::UMenu* menu = dynamic_cast<ufo::UMenu*>(w);
  if (menuBar || menu) {
 	ufo::UCheckBoxMenuItem* menuItem = new ufo::UCheckBoxMenuItem(text().latin1());
+	BoUfoActionDeleter* deleter = new BoUfoActionDeleter(this, menuItem);
+	menuItem->setBoUfoWidgetDeleter(deleter);
+
 	menuItem->setSelected(isChecked());
 	menuItem->sigActivated().connect(slot(*((BoUfoAction*)this), &BoUfoAction::uslotActivated));
 	menuItem->sigHighlighted().connect(slot(*((BoUfoAction*)this), &BoUfoAction::uslotHighlighted));
-
-	// AB: this is required to avoid invalid pointers. I'd like to
-	// use a sigWidgetDeleted() signal instead.
-	menuItem->sigWidgetRemoved().connect(slot(*((BoUfoAction*)this), &BoUfoAction::uslotWidgetRemoved));
 
 	w->add(menuItem);
 	addWidget(menuItem);
@@ -714,10 +728,8 @@ void BoUfoActionMenu::plug(ufo::UWidget* w)
  ufo::UMenu* menu = dynamic_cast<ufo::UMenu*>(w);
  if (menuBar || menu) {
 	ufo::UMenu* m = new ufo::UMenu(text().latin1());
-
-	// AB: this is required to avoid invalid pointers. I'd like to
-	// use a sigWidgetDeleted() signal instead.
-	m->sigWidgetRemoved().connect(slot(*((BoUfoAction*)this), &BoUfoAction::uslotWidgetRemoved));
+	BoUfoActionDeleter* deleter = new BoUfoActionDeleter(this, m);
+	m->setBoUfoWidgetDeleter(deleter);
 
 	w->add(m);
 	addWidget(m);

@@ -95,12 +95,13 @@ private:
 public: // g++ 3.4 complains if we make this protected
 	void uslotActivated(ufo::UActionEvent*);
 	void uslotHighlighted(ufo::UActionEvent*);
-	void uslotWidgetRemoved(ufo::UWidget*);
 
 private:
 	BoUfoActionPrivate* d;
 	BoUfoActionCollection* mParentCollection;
 	bool mIsEnabled;
+
+	friend class BoUfoActionDeleter; // needs to access removeWidget()
 };
 
 class BoUfoToggleAction : public BoUfoAction
