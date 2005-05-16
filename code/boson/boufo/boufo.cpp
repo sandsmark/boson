@@ -3135,6 +3135,170 @@ bool BoUfoCheckBox::checked() const
 }
 
 
+BoUfoButtonGroup::BoUfoButtonGroup(QObject* parent)
+	: QObject(parent)
+{
+ mButtonGroup = new ufo::UButtonGroup();
+ mButtonGroup->reference();
+
+ mButtons = new QMap<ufo::URadioButton*, BoUfoRadioButton*>();
+}
+
+BoUfoButtonGroup::~BoUfoButtonGroup()
+{
+ mButtonGroup->unreference();
+ delete mButtons;
+}
+
+void BoUfoButtonGroup::addButton(BoUfoRadioButton* button)
+{
+ BO_CHECK_NULL_RET(button);
+ connect(button, SIGNAL(signalActivated()),
+		this, SLOT(slotButtonActivated()));
+ ufo::UButton* b = (ufo::UButton*)button->radioButton();
+ mButtonGroup->addButton(b);
+
+ mButtons->insert(button->radioButton(), button);
+}
+
+void BoUfoButtonGroup::removeButton(BoUfoRadioButton* button)
+{
+ BO_CHECK_NULL_RET(button);
+ ufo::UButton* b = (ufo::UButton*)button->radioButton();
+ mButtonGroup->removeButton(b);
+
+ mButtons->remove(button->radioButton());
+}
+
+void BoUfoButtonGroup::slotButtonActivated()
+{
+ emit signalButtonActivated(selectedButton());
+}
+
+BoUfoRadioButton* BoUfoButtonGroup::selectedButton() const
+{
+ ufo::URadioButton* b = dynamic_cast<ufo::URadioButton*>(mButtonGroup->getSelectedButton());
+ BoUfoRadioButton* button = 0;
+ if (b) {
+	button = (*mButtons)[b];
+ }
+ return button;
+}
+
+BoUfoButtonGroupWidget::BoUfoButtonGroupWidget()
+	: BoUfoWidget()
+{
+ mButtonGroup = new BoUfoButtonGroup(this);
+ connect(mButtonGroup, SIGNAL(signalButtonActivated(BoUfoRadioButton*)),
+		this, SIGNAL(signalButtonActivated(BoUfoRadioButton*)));
+}
+
+BoUfoButtonGroupWidget::~BoUfoButtonGroupWidget()
+{
+}
+
+void BoUfoButtonGroupWidget::addWidget(BoUfoWidget* widget)
+{
+ BoUfoWidget::addWidget(widget);
+ if (widget && widget->inherits("BoUfoRadioButton")) {
+	mButtonGroup->addButton((BoUfoRadioButton*)widget);
+ }
+}
+
+void BoUfoButtonGroupWidget::removeWidget(BoUfoWidget* widget)
+{
+ BoUfoWidget::removeWidget(widget);
+ if (widget && widget->inherits("BoUfoRadioButton")) {
+	mButtonGroup->removeButton((BoUfoRadioButton*)widget);
+ }
+}
+
+BoUfoRadioButton* BoUfoButtonGroupWidget::selectedButton() const
+{
+ return mButtonGroup->selectedButton();
+}
+
+BoUfoRadioButton::BoUfoRadioButton()
+	: BoUfoWidget()
+{
+ init();
+}
+
+BoUfoRadioButton::BoUfoRadioButton(const QString& text, bool selected)
+	: BoUfoWidget()
+{
+ init();
+ setText(text);
+ setSelected(selected);
+}
+
+void BoUfoRadioButton::init()
+{
+ setLayoutClass(UHBoxLayout);
+ mRadioButton = new ufo::URadioButton();
+ widget()->add(mRadioButton);
+ // AB: at least the background of the label must be transparent
+ mRadioButton->setOpaque(false);
+
+ CONNECT_UFO_TO_QT(BoUfoRadioButton, mRadioButton, Activated);
+ CONNECT_UFO_TO_QT(BoUfoRadioButton, mRadioButton, Highlighted);
+}
+
+void BoUfoRadioButton::setOpaque(bool o)
+{
+ BoUfoWidget::setOpaque(o);
+ mRadioButton->setOpaque(o);
+}
+
+void BoUfoRadioButton::uslotActivated(ufo::UActionEvent*)
+{
+ emit signalActivated();
+ emit signalToggled(selected());
+}
+
+void BoUfoRadioButton::uslotHighlighted(ufo::UActionEvent*)
+{
+ emit signalHighlighted();
+}
+
+void BoUfoRadioButton::setMinimumSize(const ufo::UDimension& s)
+{
+ BoUfoWidget::setMinimumSize(s);
+ mRadioButton->setMinimumSize(s);
+}
+
+void BoUfoRadioButton::setPreferredSize(const ufo::UDimension& s)
+{
+ BoUfoWidget::setPreferredSize(s);
+ mRadioButton->setPreferredSize(s);
+}
+
+void BoUfoRadioButton::setText(const QString& text)
+{
+ if (text.isNull()) {
+	mRadioButton->setText("");
+ } else {
+	mRadioButton->setText(text.latin1());
+ }
+}
+
+QString BoUfoRadioButton::text() const
+{
+ QString text = mRadioButton->getText().c_str();
+ return text;
+}
+
+void BoUfoRadioButton::setSelected(bool s)
+{
+ mRadioButton->setSelected(s);
+}
+
+bool BoUfoRadioButton::selected() const
+{
+ return mRadioButton->isSelected();
+}
+
+
 BoUfoMatrix::BoUfoMatrix() : BoUfoWidget()
 {
  init();
@@ -3370,6 +3534,8 @@ BoUfoWidget* BoUfoFactory::createWidget(const QString& className)
  CLASSNAME(BoUfoVBox)
  CLASSNAME(BoUfoPushButton)
  CLASSNAME(BoUfoCheckBox)
+ CLASSNAME(BoUfoRadioButton)
+ CLASSNAME(BoUfoButtonGroupWidget)
  CLASSNAME(BoUfoSlider)
  CLASSNAME(BoUfoProgress)
  CLASSNAME(BoUfoNumInput)
@@ -3394,6 +3560,8 @@ QStringList BoUfoFactory::widgets()
  list.append("BoUfoVBox");
  list.append("BoUfoPushButton");
  list.append("BoUfoCheckBox");
+ list.append("BoUfoRadioButton");
+ list.append("BoUfoButtonGroupWidget");
  list.append("BoUfoSlider");
  list.append("BoUfoProgress");
  list.append("BoUfoNumInput");
