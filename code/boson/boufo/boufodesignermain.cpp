@@ -218,6 +218,9 @@ static bool isContainerWidget(const QString& className)
  if (className == "BoUfoLayeredPane") {
 	return true;
  }
+ if (className == "BoUfoButtonGroupWidget") {
+	return true;
+ }
  return false;
 }
 
