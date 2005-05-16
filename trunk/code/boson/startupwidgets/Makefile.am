@@ -14,7 +14,8 @@ libbosonstartupwidgets_la_SOURCES = \
 	boufostartupwidget.cpp \
 	boufoloadingwidget.cpp \
 	boufonetworkoptionswidgetbase.boui \
-	boufonetworkoptionswidget.cpp
+	boufonetworkoptionswidget.cpp \
+	boufostarteditorwidgetbase.boui
 
 METASOURCES = AUTO
 
