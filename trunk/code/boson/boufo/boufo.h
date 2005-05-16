@@ -925,6 +925,7 @@ private:
 class BoUfoCheckBox : public BoUfoWidget
 {
 	Q_OBJECT
+	Q_PROPERTY(QString text READ text WRITE setText);
 	Q_PROPERTY(bool checked READ checked WRITE setChecked);
 public:
 	// AB: we must not use a QObject parent here. otherwise garbage
@@ -1230,6 +1231,12 @@ private:
 class BoUfoProgress : public BoUfoWidget
 {
 	Q_OBJECT
+	Q_PROPERTY(QString label READ label WRITE setLabel);
+	Q_PROPERTY(double minimumValue READ minimumValue WRITE setMinimumValue);
+	Q_PROPERTY(double maximumValue READ maximumValue WRITE setMaximumValue);
+	Q_PROPERTY(double value READ value WRITE setValue);
+	Q_PROPERTY(QColor startColor READ startColor WRITE setStartColor);
+	Q_PROPERTY(QColor endColor READ endColor WRITE setEndColor);
 public:
 	// AB: we must not use a QObject parent here. otherwise garbage
 	// collection of libufo and Qt may confuse each other.
@@ -1246,6 +1253,8 @@ public:
 	void setValue(double v);
 	void setRange(double min, double max);
 
+	void setMinimumValue(double min);
+	void setMaximumValue(double max);
 	double minimumValue() const;
 	double maximumValue() const;
 
@@ -1267,6 +1276,11 @@ private:
 class BoUfoNumInput : public BoUfoWidget
 {
 	Q_OBJECT
+	Q_PROPERTY(QString label READ label WRITE setLabel);
+	Q_PROPERTY(double minimumValue READ doubleMinimumValue WRITE setDoubleMinimumValue);
+	Q_PROPERTY(double maximumValue READ doubleMaximumValue WRITE setDoubleMaximumValue);
+	Q_PROPERTY(double stepSize READ doubleStepSize WRITE setDoubleStepSize);
+	Q_PROPERTY(double value READ doubleValue WRITE setDoubleValue);
 public:
 	// AB: we must not use a QObject parent here. otherwise garbage
 	// collection of libufo and Qt may confuse each other.
@@ -1282,19 +1296,31 @@ public:
 	}
 
 	float value() const;
+	void setRange(float min, float max);
 	float minimumValue() const;
 	float maximumValue() const;
+	void setStepSize(float);
 	float stepSize() const;
 
 	void setLabel(const QString& label, int a = AlignLeft | AlignTop);
-	void setStepSize(float);
-	void setRange(float min, float max);
+	QString label() const;
 
 	virtual void setOpaque(bool o);
+
+	// AB: these are for Qts property system which doesn't like floats:
+	double doubleValue() const { return (double)value(); }
+	double doubleMinimumValue() const { return (double)minimumValue(); }
+	double doubleMaximumValue() const { return (double)maximumValue(); }
+	double doubleStepSize() const { return (double)stepSize(); }
+	void setDoubleValue(double v) { setValue((float)v); }
+	void setDoubleMinimumValue(double v) { slotSetMinValue((float)v); }
+	void setDoubleMaximumValue(double v) { slotSetMaxValue((float)v); }
+	void setDoubleStepSize(double v) { setStepSize((float)v); }
 
 public slots:
 	void setValue(float);
 	void slotSetMaxValue(float);
+	void slotSetMinValue(float);
 
 signals:
 	void signalValueChanged(float);
