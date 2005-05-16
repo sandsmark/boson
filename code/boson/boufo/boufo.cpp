@@ -2154,6 +2154,16 @@ void BoUfoProgress::setRange(double min, double max)
  mProgress->setMaximumValue(max);
 }
 
+void BoUfoProgress::setMinimumValue(double min)
+{
+ setRange(min, maximumValue());
+}
+
+void BoUfoProgress::setMaximumValue(double max)
+{
+ setRange(minimumValue(), max);
+}
+
 void BoUfoProgress::setStartColor(const QColor& c)
 {
  mProgress->setStartColor(ufo::UColor(c.red(), c.green(), c.blue()));
@@ -2277,6 +2287,11 @@ void BoUfoNumInput::setLabel(const QString& label, int a)
  // alignment should be pretty easy using a BorderLayout
 }
 
+QString BoUfoNumInput::label() const
+{
+ return mLabel->text();
+}
+
 void BoUfoNumInput::setValue(float v)
 {
  mSlider->setFloatValue(v);
@@ -2286,6 +2301,11 @@ void BoUfoNumInput::setValue(float v)
 void BoUfoNumInput::slotSetMaxValue(float max)
 {
  setRange(minimumValue(), max);
+}
+
+void BoUfoNumInput::slotSetMinValue(float min)
+{
+ setRange(min, maximumValue());
 }
 
 void BoUfoNumInput::setStepSize(float s)
@@ -3351,6 +3371,7 @@ BoUfoWidget* BoUfoFactory::createWidget(const QString& className)
  CLASSNAME(BoUfoPushButton)
  CLASSNAME(BoUfoCheckBox)
  CLASSNAME(BoUfoSlider)
+ CLASSNAME(BoUfoProgress)
  CLASSNAME(BoUfoNumInput)
  CLASSNAME(BoUfoLabel)
  CLASSNAME(BoUfoLineEdit)
@@ -3373,12 +3394,16 @@ QStringList BoUfoFactory::widgets()
  list.append("BoUfoVBox");
  list.append("BoUfoPushButton");
  list.append("BoUfoCheckBox");
+ list.append("BoUfoSlider");
+ list.append("BoUfoProgress");
  list.append("BoUfoNumInput");
  list.append("BoUfoLabel");
  list.append("BoUfoLineEdit");
  list.append("BoUfoTextEdit");
  list.append("BoUfoComboBox");
  list.append("BoUfoListBox");
+ list.append("BoUfoMatrix");
+ list.append("BoUfoTabWidget");
  list.append("BoUfoWidgetStack");
  list.append("BoUfoLayeredPane");
  return list;
