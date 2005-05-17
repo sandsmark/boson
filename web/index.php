@@ -57,11 +57,9 @@ main_area_begin();
 
 // About
 draw_bigbox_begin("About Boson");
-echo "<tr><td>Boson is an OpenGL real-time strategy game, with the
-	feeling of Command&amp;Conquer(tm) or StarCraft(tm).
+echo "<tr><td>Boson is an OpenGL real-time strategy game.
 	It is designed to run on Unix (Linux) computers, and is built on top of the
-	KDE, Qt and kdegames libraries.<br> A minimum of two players is required,
-	since there is no artificial intelligence yet.<br><br></td></tr>";
+	KDE, Qt and kdegames libraries.<br><br></td></tr>";
 draw_bigbox_end();
 
 /*// We need you!
