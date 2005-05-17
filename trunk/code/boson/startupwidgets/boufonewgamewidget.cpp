@@ -555,7 +555,7 @@ void BoUfoNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  if (mMinPlayers == mMaxPlayers) {
     mMapPlayers->setText(i18n("%1").arg(mMinPlayers));
  } else {
-    mMapPlayers->setText(i18n("Players: %1-%2").arg(mMinPlayers).arg(mMaxPlayers));
+    mMapPlayers->setText(i18n("%1-%2").arg(mMinPlayers).arg(mMaxPlayers));
  }
 
  // Update description of the map
