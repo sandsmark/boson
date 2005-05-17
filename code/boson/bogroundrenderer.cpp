@@ -212,13 +212,6 @@ int* BoGroundRenderer::createVisibleCellList(int* cells, PlayerIO* playerIO)
 #warning FIXME: w,h
 	// FIXME: if w,h are not both 1, then there are 3 possible cases (see
 	// below, at isFogged()).
-	if (!boWaterManager->cellVisible(x, y)) {
-		// don't draw anything at all. the cell won't be visible
-
-		// AB: I think this mean there is water rendered at this cell,
-		// so we dont need to render the cell anymore.
-		continue;
-	}
 
 #warning FIXME: w,h
 	// FIXME: w,h are not used. there are 3 cases possible:

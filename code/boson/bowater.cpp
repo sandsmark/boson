@@ -51,6 +51,51 @@
 
 
 
+/*****  BoWaterData  *****/
+
+/**
+ * Holds map-specifies water data such as lakes
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+class BoWaterData
+{
+  public:
+    BoWaterData();
+    ~BoWaterData();
+
+
+    QPtrList<BoLake> lakes;
+
+    BosonMap* map;
+    // Size of map in _corners_ _not_ in cells!
+    int width, height;
+    // Size in cells
+    int cellWidth, cellHeight;
+
+    bool* underwater;
+
+    // Whether cell is passable by land units
+    bool* cellPassable;
+};
+
+BoWaterData::BoWaterData()
+{
+  map = 0;
+  underwater = 0;
+  cellPassable = 0;
+  lakes.setAutoDelete(true);
+}
+
+BoWaterData::~BoWaterData()
+{
+  lakes.clear();
+  delete[] underwater;
+  delete[] cellPassable;
+}
+
+
+
 /*****  BoLake  *****/
 
 BoLake::BoLake(BoWaterManager* man, float _level)
@@ -326,12 +371,7 @@ BoWaterManager::BoWaterManager()
   {
     boError() << k_funcinfo << "You shouldn't have more than 1 BoWaterManager object!" << endl;
   }
-  mMap = 0;
-  mUnderwater = 0;
-  mCellPassable = 0;
-  mCellVisible = 0;
   mTime = 0;
-  mLakes.setAutoDelete(true);
   mDirty = true;
   mOpenGLInited = false;
   mViewFrustum = 0;
@@ -342,31 +382,29 @@ BoWaterManager::BoWaterManager()
   mWaterAnimBump.setAutoDelete(true);
   mWaterAnimBumpCurrent = 0.0f;
   mShader = 0;
+  mData = 0;
 }
 
 BoWaterManager::~BoWaterManager()
 {
-  mLakes.clear();
-  delete[] mUnderwater;
-  delete[] mCellPassable;
-  delete[] mCellVisible;
   delete mWaterTex;
   delete mWaterBump;
   delete mEnvMap;
   delete mShader;
+  delete mData;
   mWaterAnimBump.clear();
 }
 
 bool BoWaterManager::loadFromXML(const QDomElement& root)
 {
   // Init some data structures
-  delete[] mUnderwater;
-  mUnderwater = new bool[mWidth * mHeight];
-  for (int y = 0; y < mHeight; y++)
+  delete[] mData->underwater;
+  mData->underwater = new bool[mData->width * mData->height];
+  for (int y = 0; y < mData->height; y++)
   {
-    for (int x = 0; x < mWidth; x++)
+    for (int x = 0; x < mData->width; x++)
     {
-      mUnderwater[y * mWidth + x] = false;
+      mData->underwater[y * mData->width + x] = false;
     }
   }
 
@@ -442,7 +480,7 @@ bool BoWaterManager::loadFromXML(const QDomElement& root)
 
     BoLake* bolake = new BoLake(this, level);
     bolake->findWater(originx, originy, QRect(QPoint(minx, miny), QPoint(maxx, maxy)));
-    mLakes.append(bolake);
+    mData->lakes.append(bolake);
   }
 
   initCellMaps();
@@ -453,7 +491,7 @@ bool BoWaterManager::loadFromXML(const QDomElement& root)
 bool BoWaterManager::saveToXML(QDomElement& root)
 {
   QDomDocument doc = root.ownerDocument();
-  QPtrListIterator<BoLake> it(mLakes);
+  QPtrListIterator<BoLake> it(mData->lakes);
   for(; it.current(); ++it)
   {
     BoLake* lake = it.current();
@@ -475,28 +513,24 @@ bool BoWaterManager::saveToXML(QDomElement& root)
 void BoWaterManager::initCellMaps()
 {
   // Size of map in cells
-  mCellWidth = mWidth - 1;
-  mCellHeight = mHeight - 1;
-  delete[] mCellPassable;
-  delete[] mCellVisible;
-  mCellPassable = new bool[mCellWidth * mCellHeight];
-  mCellVisible = new bool[mCellWidth * mCellHeight];
+  mData->cellWidth = mData->width - 1;
+  mData->cellHeight = mData->height - 1;
+  delete[] mData->cellPassable;
+  mData->cellPassable = new bool[mData->cellWidth * mData->cellHeight];
 
   // Set both arrays to true first
-  for (int y = 0; y < mCellHeight; y++)
+  for (int y = 0; y < mData->cellHeight; y++)
   {
-    for (int x = 0; x < mCellWidth; x++)
+    for (int x = 0; x < mData->cellWidth; x++)
     {
-      mCellPassable[y * mCellWidth + x] = true;
-      mCellVisible[y * mCellWidth + x] = true;
+      mData->cellPassable[y * mData->cellWidth + x] = true;
     }
   }
 
   // Some parameters
   const float max_passable_water_depth = 0.2;
-  const float min_solid_water_depth = 2.0f;
   // Go through all lakes
-  QPtrListIterator<BoLake> it(mLakes);
+  QPtrListIterator<BoLake> it(mData->lakes);
   for(; it.current(); ++it)
   {
     BoLake* lake = it.current();
@@ -505,35 +539,30 @@ void BoWaterManager::initCellMaps()
       for (int x = lake->minx; x < lake->maxx; x++)
       {
         // We calculate params per-cell, so we need to look at all 4 corners
-        float minwaterdepth = 1000000.0f;  // Used for visibility check
         float avgwaterdepth = 0.0f;  // Used for passability check
         int corners = 0;
 
         if(lake->hasCorner(x, y))
         {
           float waterdepth = lake->level - groundHeight(x, y);
-          minwaterdepth = QMIN(minwaterdepth, waterdepth);
           avgwaterdepth += waterdepth;
           corners++;
         }
         if(lake->hasCorner(x + 1, y))
         {
           float waterdepth = lake->level - groundHeight(x + 1, y);
-          minwaterdepth = QMIN(minwaterdepth, waterdepth);
           avgwaterdepth += waterdepth;
           corners++;
         }
         if(lake->hasCorner(x, y + 1))
         {
           float waterdepth = lake->level - groundHeight(x, y + 1);
-          minwaterdepth = QMIN(minwaterdepth, waterdepth);
           avgwaterdepth += waterdepth;
           corners++;
         }
         if(lake->hasCorner(x + 1, y + 1))
         {
           float waterdepth = lake->level - groundHeight(x + 1, y + 1);
-          minwaterdepth = QMIN(minwaterdepth, waterdepth);
           avgwaterdepth += waterdepth;
           corners++;
         }
@@ -543,11 +572,7 @@ void BoWaterManager::initCellMaps()
           avgwaterdepth /= corners;
           if(avgwaterdepth > max_passable_water_depth)
           {
-            mCellPassable[y * mCellWidth + x] = false;
-          }
-          if(corners == 4 && minwaterdepth > min_solid_water_depth)
-          {
-            mCellVisible[y * mCellWidth + x] = false;
+            mData->cellPassable[y * mData->cellWidth + x] = false;
           }
         }
       }
@@ -710,7 +735,7 @@ void BoWaterManager::reloadConfiguration()
     // We need to delete all data buffers in all chunks and set chunks' last
     //  detail level to -1.0, so that _needed_ data buffers will be reallocated
     //  next time we render them.
-    QPtrListIterator<BoLake> it(mLakes);
+    QPtrListIterator<BoLake> it(mData->lakes);
     for(; it.current(); ++it)
     {
       QPtrListIterator<BoLake::WaterChunk> cit(it.current()->chunks);
@@ -776,14 +801,17 @@ bool BoWaterManager::supportsBumpmapping() const
 
 void BoWaterManager::setMap(BosonMap* map)
 {
-  mMap = map;
-  mWidth = mMap->width() + 1;
-  mHeight = mMap->height() + 1;
+  delete mData;
+  mData = new BoWaterData;
+
+  mData->map = map;
+  mData->width = map->width() + 1;
+  mData->height = map->height() + 1;
 }
 
 float BoWaterManager::groundHeight(int x, int y) const
 {
-  return mMap->heightAtCorner(x, y);
+  return mData->map->heightAtCorner(x, y);
 }
 
 float BoWaterManager::groundHeightAt(float x, float y) const
@@ -803,7 +831,7 @@ float BoWaterManager::waterDepth(int x, int y)
     return 0.0f;
   }
 
-  QPtrListIterator<BoLake> it(mLakes);
+  QPtrListIterator<BoLake> it(mData->lakes);
   for(; it.current(); ++it)
   {
     BoLake* lake = it.current();
@@ -824,12 +852,22 @@ float BoWaterManager::waterDepth(int x, int y)
 
 bool BoWaterManager::underwater(int x, int y)
 {
-  return mUnderwater[y * mWidth + x];
+  return mData->underwater[y * mData->width + x];
 }
 
 void BoWaterManager::setUnderwater(int x, int y, bool underwater)
 {
-  mUnderwater[y * mWidth + x] = underwater;
+  mData->underwater[y * mData->width + x] = underwater;
+}
+
+bool BoWaterManager::cellPassable(int x, int y) const
+{
+  return mData->cellPassable[y * mData->cellWidth + x];
+}
+
+void BoWaterManager::cellFogChanged(int x1, int x2, int y1, int y2)
+{
+  setDirty(true);
 }
 
 float BoWaterManager::time() const
@@ -891,7 +929,7 @@ void BoWaterManager::setDirty(bool d)
   if(d == true)
   {
     // Set dirty flags of _all_ chunks to true.
-    QPtrListIterator<BoLake> it(mLakes);
+    QPtrListIterator<BoLake> it(mData->lakes);
     for(; it.current(); ++it)
     {
       QPtrListIterator<BoLake::WaterChunk> cit(it.current()->chunks);
@@ -922,7 +960,7 @@ void BoWaterManager::render()
   mRenderEnvironmentSetUp = false;
 
   // Render all the lakes (in case they're visible).
-  QPtrListIterator<BoLake> it(mLakes);
+  QPtrListIterator<BoLake> it(mData->lakes);
   while(it.current())
   {
     renderLake(it.current());
@@ -1054,7 +1092,8 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
   // First find out which rendering tehniques to use for the chunk:
   // Check whether water's alpha in chunk is variable or constant.
   info->constalpha = -1.0f;  // -1.0f means variable alpha
-  if(mEnableTranslucency)
+  // FIXME: this doesn't play well with fow, so it's commented out for now
+  /*if(mEnableTranslucency)
   {
     if(chunk->mingroundheight == chunk->maxgroundheight)
     {
@@ -1085,7 +1124,7 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
     info->singleQuad = true;
     info->detail = 1000;
     chunkdetail = 1000;
-  }
+  }*/
 
 
   // Chunk size in corners (depends on detail level) and doesn't include
@@ -1817,7 +1856,7 @@ void BoWaterManager::initRenderEnvironment()
 
 void BoWaterManager::loadNecessaryTextures()
 {
-  if(mLakes.count() == 0)
+  if(mData->lakes.count() == 0)
   {
     // If we don't have any lakes, we don't need textures either.
     return;
