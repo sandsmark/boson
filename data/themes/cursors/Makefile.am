@@ -1,4 +1,4 @@
-CURSORS = default alternative old
+CURSORS = default alternative modern1 old
 
 cursordir = $(kde_datadir)/boson/themes/cursors
 
