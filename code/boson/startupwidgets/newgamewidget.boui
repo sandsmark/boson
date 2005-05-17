@@ -15,6 +15,8 @@
    <minimumWidth/>
    <backgroundImageFile/>
    <stretch/>
+   <gridLayoutColumns/>
+   <gridLayoutRows/>
   </Properties>
   <Widget>
    <ClassName>BoUfoWidget</ClassName>
@@ -31,6 +33,8 @@
     <minimumWidth/>
     <backgroundImageFile/>
     <stretch>1</stretch>
+    <gridLayoutColumns/>
+    <gridLayoutRows/>
    </Properties>
    <Widget>
     <ClassName>BoUfoWidget</ClassName>
@@ -47,6 +51,8 @@
      <minimumWidth/>
      <backgroundImageFile/>
      <stretch>1</stretch>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
     <Widget>
      <ClassName>BoUfoWidget</ClassName>
@@ -63,24 +69,127 @@
       <minimumWidth/>
       <backgroundImageFile/>
       <stretch/>
+      <gridLayoutColumns/>
+      <gridLayoutRows/>
      </Properties>
      <Widget>
-      <ClassName>BoUfoListBox</ClassName>
+      <ClassName>BoUfoWidget</ClassName>
       <Properties>
-       <selection/>
-       <preferredHeight>300</preferredHeight>
-       <minimumHeight/>
-       <opaque/>
+       <name>mWidget44</name>
        <constraints/>
-       <verticalAlignment/>
-       <preferredWidth>200</preferredWidth>
-       <horizontalAlignment/>
-       <layout/>
-       <name>mSelectMap</name>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <opaque/>
+       <layout>UVBoxLayout</layout>
        <minimumWidth/>
+       <minimumHeight/>
+       <preferredWidth/>
+       <preferredHeight/>
        <backgroundImageFile/>
+       <verticalAlignment/>
+       <horizontalAlignment/>
        <stretch/>
       </Properties>
+      <Widget>
+       <ClassName>BoUfoWidget</ClassName>
+       <Properties>
+        <name>mWidget47</name>
+        <constraints/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <opaque/>
+        <layout>UHBoxLayout</layout>
+        <minimumWidth/>
+        <minimumHeight/>
+        <preferredWidth/>
+        <preferredHeight/>
+        <backgroundImageFile/>
+        <verticalAlignment/>
+        <horizontalAlignment/>
+        <stretch/>
+       </Properties>
+       <Widget>
+        <ClassName>BoUfoLabel</ClassName>
+        <Properties>
+         <name>mWidget45</name>
+         <constraints/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <opaque/>
+         <layout/>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment>AlignTop</verticalAlignment>
+         <horizontalAlignment/>
+         <stretch/>
+         <text>Available missions:</text>
+         <iconFile/>
+        </Properties>
+       </Widget>
+       <Widget>
+        <ClassName>BoUfoLabel</ClassName>
+        <Properties>
+         <name>mWidget48</name>
+         <constraints/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <opaque/>
+         <layout/>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <stretch/>
+         <text/>
+         <iconFile/>
+        </Properties>
+       </Widget>
+      </Widget>
+      <Widget>
+       <ClassName>BoUfoWidget</ClassName>
+       <Properties>
+        <name>mWidget46</name>
+        <constraints/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <opaque/>
+        <layout/>
+        <minimumWidth/>
+        <minimumHeight/>
+        <preferredWidth/>
+        <preferredHeight/>
+        <backgroundImageFile/>
+        <verticalAlignment/>
+        <horizontalAlignment/>
+        <stretch>1</stretch>
+       </Properties>
+       <Widget>
+        <ClassName>BoUfoListBox</ClassName>
+        <Properties>
+         <selection/>
+         <preferredHeight>300</preferredHeight>
+         <minimumHeight/>
+         <opaque/>
+         <constraints/>
+         <verticalAlignment/>
+         <preferredWidth>200</preferredWidth>
+         <horizontalAlignment/>
+         <layout/>
+         <name>mSelectMap</name>
+         <minimumWidth/>
+         <backgroundImageFile/>
+         <stretch/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+        </Properties>
+       </Widget>
+      </Widget>
      </Widget>
      <Widget>
       <ClassName>BoUfoWidget</ClassName>
@@ -97,6 +206,8 @@
        <minimumWidth/>
        <backgroundImageFile/>
        <stretch/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
       </Properties>
       <Widget>
        <ClassName>BoUfoWidget</ClassName>
@@ -113,43 +224,49 @@
         <minimumWidth/>
         <backgroundImageFile/>
         <stretch/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
        </Properties>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
         <Properties>
-         <preferredHeight/>
-         <minimumHeight/>
+         <preferredHeight>20</preferredHeight>
+         <minimumHeight></minimumHeight>
          <opaque/>
          <constraints/>
          <verticalAlignment/>
-         <preferredWidth/>
+         <preferredWidth>100</preferredWidth>
          <horizontalAlignment/>
          <layout/>
          <iconFile/>
          <name>mWidget15</name>
-         <text>Size:</text>
+         <text>Battlefield dimensions:</text>
          <minimumWidth/>
          <backgroundImageFile/>
-         <stretch/>
+         <stretch>0</stretch>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
         </Properties>
        </Widget>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
         <Properties>
-         <preferredHeight/>
+         <preferredHeight>20</preferredHeight>
          <minimumHeight/>
          <opaque/>
          <constraints/>
          <verticalAlignment/>
          <preferredWidth/>
-         <horizontalAlignment/>
+         <horizontalAlignment>AlignLeft</horizontalAlignment>
          <layout/>
          <iconFile/>
          <name>mMapSize</name>
          <text/>
          <minimumWidth/>
          <backgroundImageFile/>
-         <stretch/>
+         <stretch>0</stretch>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
         </Properties>
        </Widget>
       </Widget>
@@ -168,43 +285,110 @@
         <minimumWidth/>
         <backgroundImageFile/>
         <stretch/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
        </Properties>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
         <Properties>
-         <preferredHeight/>
+         <preferredHeight>20</preferredHeight>
          <minimumHeight/>
          <opaque/>
          <constraints/>
          <verticalAlignment/>
-         <preferredWidth/>
+         <preferredWidth>100</preferredWidth>
          <horizontalAlignment/>
          <layout/>
          <iconFile/>
          <name>mWidget19</name>
-         <text>Players:</text>
+         <text>Possible warlords:</text>
          <minimumWidth/>
          <backgroundImageFile/>
          <stretch/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
         </Properties>
        </Widget>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
         <Properties>
-         <preferredHeight/>
+         <preferredHeight>20</preferredHeight>
          <minimumHeight/>
          <opaque/>
          <constraints/>
          <verticalAlignment/>
          <preferredWidth/>
-         <horizontalAlignment/>
+         <horizontalAlignment>AlignLeft</horizontalAlignment>
          <layout/>
          <iconFile/>
          <name>mMapPlayers</name>
          <text/>
          <minimumWidth/>
          <backgroundImageFile/>
+         <stretch>0</stretch>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+        </Properties>
+       </Widget>
+      </Widget>
+      <Widget>
+       <ClassName>BoUfoWidget</ClassName>
+       <Properties>
+        <name>mWidget41</name>
+        <constraints/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <opaque/>
+        <layout>UHBoxLayout</layout>
+        <minimumWidth/>
+        <minimumHeight/>
+        <preferredWidth/>
+        <preferredHeight/>
+        <backgroundImageFile/>
+        <verticalAlignment/>
+        <horizontalAlignment/>
+        <stretch/>
+       </Properties>
+       <Widget>
+        <ClassName>BoUfoLabel</ClassName>
+        <Properties>
+         <name>mWidget42</name>
+         <constraints/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <opaque/>
+         <layout/>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
          <stretch/>
+         <text>Mission overview:</text>
+         <iconFile/>
+        </Properties>
+       </Widget>
+       <Widget>
+        <ClassName>BoUfoLabel</ClassName>
+        <Properties>
+         <name>mWidget43</name>
+         <constraints/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <opaque/>
+         <layout/>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <stretch/>
+         <text/>
+         <iconFile/>
         </Properties>
        </Widget>
       </Widget>
@@ -225,6 +409,8 @@
         <backgroundImageFile/>
         <stretch>1</stretch>
         <editable>false</editable>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
        </Properties>
       </Widget>
       <Widget>
@@ -244,6 +430,8 @@
         <minimumWidth/>
         <backgroundImageFile/>
         <stretch>1</stretch>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
        </Properties>
       </Widget>
      </Widget>
@@ -263,6 +451,8 @@
       <minimumWidth/>
       <backgroundImageFile/>
       <stretch/>
+      <gridLayoutColumns/>
+      <gridLayoutRows/>
      </Properties>
     </Widget>
    </Widget>
@@ -281,6 +471,8 @@
      <minimumWidth/>
      <backgroundImageFile/>
      <stretch/>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
     <Widget>
      <ClassName>BoUfoWidget</ClassName>
@@ -297,6 +489,8 @@
       <minimumWidth/>
       <backgroundImageFile/>
       <stretch/>
+      <gridLayoutColumns/>
+      <gridLayoutRows/>
      </Properties>
      <Widget>
       <ClassName>BoUfoHBox</ClassName>
@@ -313,6 +507,8 @@
        <minimumWidth/>
        <backgroundImageFile/>
        <stretch/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
       </Properties>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
@@ -331,6 +527,8 @@
         <minimumWidth/>
         <backgroundImageFile/>
         <stretch/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
        </Properties>
       </Widget>
       <Widget>
@@ -350,6 +548,8 @@
         <backgroundImageFile/>
         <stretch/>
         <editable/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
        </Properties>
       </Widget>
      </Widget>
@@ -368,6 +568,8 @@
        <minimumWidth/>
        <backgroundImageFile/>
        <stretch/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
       </Properties>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
@@ -386,6 +588,8 @@
         <text>Color:</text>
         <backgroundImageFile/>
         <stretch/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
        </Properties>
       </Widget>
       <Widget>
@@ -403,6 +607,8 @@
         <minimumWidth/>
         <backgroundImageFile/>
         <stretch/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
        </Properties>
       </Widget>
      </Widget>
@@ -421,6 +627,8 @@
        <minimumWidth/>
        <backgroundImageFile/>
        <stretch/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
       </Properties>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
@@ -439,6 +647,8 @@
         <text>Species:</text>
         <backgroundImageFile/>
         <stretch/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
        </Properties>
       </Widget>
       <Widget>
@@ -456,6 +666,8 @@
         <minimumWidth/>
         <backgroundImageFile/>
         <stretch/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
        </Properties>
       </Widget>
      </Widget>
@@ -473,9 +685,11 @@
        <name>mAddAIPlayer</name>
        <iconFile/>
        <minimumWidth/>
-       <text>&amp;Add AI player</text>
+       <text>&amp;Add a comp. simulated warlord</text>
        <backgroundImageFile/>
        <stretch/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
       </Properties>
      </Widget>
     </Widget>
@@ -494,24 +708,28 @@
       <minimumWidth/>
       <backgroundImageFile/>
       <stretch>1</stretch>
+      <gridLayoutColumns/>
+      <gridLayoutRows/>
      </Properties>
      <Widget>
       <ClassName>BoUfoLabel</ClassName>
       <Properties>
        <opaque/>
        <minimumHeight/>
-       <preferredHeight/>
+       <preferredHeight></preferredHeight>
        <constraints/>
-       <verticalAlignment/>
+       <verticalAlignment>AlignTop</verticalAlignment>
        <preferredWidth/>
        <horizontalAlignment/>
        <layout/>
        <name>mWidget25</name>
        <iconFile/>
        <minimumWidth/>
-       <text>Connected players</text>
+       <text>Rivaling warlords:</text>
        <backgroundImageFile/>
        <stretch/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
       </Properties>
      </Widget>
      <Widget>
@@ -530,6 +748,8 @@
        <minimumWidth>100</minimumWidth>
        <backgroundImageFile/>
        <stretch>1</stretch>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
       </Properties>
      </Widget>
      <Widget>
@@ -546,9 +766,11 @@
        <name>mRemovePlayer</name>
        <iconFile/>
        <minimumWidth/>
-       <text>&amp;Remove player</text>
+       <text>&amp;Remove warlord</text>
        <backgroundImageFile/>
        <stretch/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
       </Properties>
      </Widget>
      <Widget>
@@ -566,6 +788,8 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch>1</stretch>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
       </Properties>
      </Widget>
     </Widget>
@@ -586,6 +810,8 @@
     <minimumWidth/>
     <backgroundImageFile/>
     <stretch/>
+    <gridLayoutColumns/>
+    <gridLayoutRows/>
    </Properties>
    <Widget>
     <ClassName>BoUfoWidget</ClassName>
@@ -602,6 +828,8 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch>1</stretch>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
    <Widget>
@@ -621,6 +849,8 @@
      <minimumWidth/>
      <backgroundImageFile/>
      <stretch/>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
    <Widget>
@@ -638,6 +868,8 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch>1</stretch>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
    <Widget>
@@ -657,6 +889,8 @@
      <minimumWidth/>
      <backgroundImageFile/>
      <stretch/>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
    <Widget>
@@ -674,6 +908,8 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch>1</stretch>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
    <Widget>
@@ -689,10 +925,12 @@
      <layout/>
      <iconFile/>
      <name>mStartGame</name>
-     <text>S&amp;tart game</text>
+     <text>S&amp;tart mission</text>
      <minimumWidth/>
      <backgroundImageFile/>
      <stretch/>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
    <Widget>
@@ -710,6 +948,8 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch>1</stretch>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
     </Properties>
    </Widget>
   </Widget>

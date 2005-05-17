@@ -167,7 +167,7 @@
      <layout/>
      <name>mStartNewGame</name>
      <iconFile/>
-     <text>S&amp;tart new game</text>
+     <text>S&amp;tart a new mission</text>
      <minimumWidth/>
      <backgroundImageFile/>
      <stretch/>
@@ -207,7 +207,7 @@
      <layout/>
      <name>mLoadGame</name>
      <iconFile/>
-     <text>&amp;Load saved game</text>
+     <text>&amp;Continue a halted mission</text>
      <minimumWidth/>
      <backgroundImageFile/>
      <stretch/>
