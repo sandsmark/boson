@@ -36,6 +36,7 @@ class QRect;
 class QDomElement;
 
 class BoWaterManager;
+class BoWaterData;
 
 
 /**
@@ -167,6 +168,13 @@ class BoLake
 
 #define boWaterManager BoWaterManager::waterManager()
 
+/**
+ * @short Water manager
+ *
+ * Takes care of loading/saving/rendering/etc of water
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
 class BoWaterManager
 {
   public:
@@ -198,11 +206,11 @@ class BoWaterManager
     bool underwater(int x, int y);
     void setUnderwater(int x, int y, bool free);
 
-    bool cellPassable(int x, int y) const  { return mCellPassable[y * mCellWidth + x]; }
-    bool cellVisible(int x, int y) const  { return mCellVisible[y * mCellWidth + x]; }
+    bool cellPassable(int x, int y) const;
 
     void update(float elapsed);
     void modelviewMatrixChanged(const BoMatrix& modelview);
+    void cellFogChanged(int x1, int x2, int y1, int y2);
 
     void render();
 
@@ -291,20 +299,8 @@ class BoWaterManager
   private:
     static BoWaterManager* mManager;
 
-    QPtrList<BoLake> mLakes;
 
-    BosonMap* mMap;
-    // Size of map in _corners_ _not_ in cells!
-    int mWidth, mHeight;
-    // Size in cells
-    int mCellWidth, mCellHeight;
-
-    bool* mUnderwater;
-
-    // Whether cell is passable by land units
-    bool* mCellPassable;
-    // Whether land cell is visible (i.e. water is deep enough)
-    bool* mCellVisible;
+    BoWaterData* mData;
 
     float mTime;
     bool mDirty;

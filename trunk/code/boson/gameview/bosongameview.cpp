@@ -1268,6 +1268,7 @@ void BosonGameView::slotFog(int x, int y)
  if (r) {
 	r->cellFogChanged(x, y, x, y);
  }
+ boWaterManager->cellFogChanged(x, y, x, y);
 }
 
 void BosonGameView::slotUnfog(int x, int y)
@@ -1276,6 +1277,7 @@ void BosonGameView::slotUnfog(int x, int y)
  if (r) {
 	r->cellFogChanged(x, y, x, y);
  }
+ boWaterManager->cellFogChanged(x, y, x, y);
 }
 
 void BosonGameView::slotChangeTexMap(int x, int y)
