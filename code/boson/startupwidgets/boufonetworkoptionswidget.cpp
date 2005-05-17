@@ -30,6 +30,7 @@
 BoUfoNetworkOptionsWidget::BoUfoNetworkOptionsWidget()
 	: BoUfoNetworkOptionsWidgetBase()
 {
+ setConnected(false, false);
 }
 
 BoUfoNetworkOptionsWidget::~BoUfoNetworkOptionsWidget()
@@ -79,15 +80,15 @@ void BoUfoNetworkOptionsWidget::slotStartNetwork()
 void BoUfoNetworkOptionsWidget::setConnected(bool connected, bool master)
 {
  if (!connected) {
-	mNetStatusLabel->setText(i18n("No Network\n"));
+	mNetStatusLabel->setText(i18n("Singleplayer mode\n"));
 	mNetConfigGroupBox->setEnabled(true);
 	mDisconnectButton->setEnabled(false);
 	return;
  }
  if (master) {
-	mNetStatusLabel->setText(i18n("You are MASTER\nListening at port %1").arg(boGame->bosonPort()));
+	mNetStatusLabel->setText(i18n("Multiplayer mode\nYou are MASTER\nListening at port %1").arg(boGame->bosonPort()));
  } else {
-	mNetStatusLabel->setText(i18n("You are Connected\nServer: %1:%2").arg(boGame->bosonHostName()).arg(boGame->bosonPort()));
+	mNetStatusLabel->setText(i18n("Multiplayer mode\nYou are Connected\nServer: %1:%2").arg(boGame->bosonHostName()).arg(boGame->bosonPort()));
  }
  mNetConfigGroupBox->setEnabled(false);
  mDisconnectButton->setEnabled(true);
