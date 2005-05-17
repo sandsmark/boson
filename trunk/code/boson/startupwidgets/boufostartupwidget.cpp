@@ -385,7 +385,6 @@ void BoUfoStartupWidget::slotHideNetworkOptions()
 	boError() << k_funcinfo << "NULL new game widget??" << endl;
 	return;
  }
- removeWidget(IdNetwork);
  startGame->slotSetAdmin(boGame->isAdmin());
  showWidget(IdNewGame);
 }
