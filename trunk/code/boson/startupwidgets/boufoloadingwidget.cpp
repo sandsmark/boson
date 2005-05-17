@@ -68,8 +68,9 @@ BoUfoLoadingWidget::BoUfoLoadingWidget()
   mProgress = new BoUfoProgress();
   addWidget(mProgress);
   mProgress->setValue(0.0);
-  mProgress->setColor(QColor(96, 96, 96));
 
+  mProgress->setStartColor(QColor(0, 0, 0));
+  mProgress->setEndColor(QColor(222, 222, 222));
   addSpacing(20);
 }
 
