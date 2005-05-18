@@ -709,6 +709,10 @@ bool boglResolveGLSymbols()
 
 static bool boglResolveOpenGLSymbols(QLibrary& gl)
 {
+ if (!gl.isLoaded() && !gl.load()) {
+	boError() << k_funcinfo << "unable to load the GL library" << endl;
+	return false;
+ }
  bo_glClearIndex = (_glClearIndex)gl.resolve("glClearIndex");
  if (bo_glClearIndex == 0) {
 	boError() << k_funcinfo << "unable to resolve symbol " << "glClearIndex" << endl;
@@ -1416,6 +1420,10 @@ static bool boglResolveOpenGLSymbols(QLibrary& gl)
 
 static bool boglResolveGLUSymbols(QLibrary& glu)
 {
+ if (!glu.isLoaded() && !glu.load()) {
+	boError() << k_funcinfo << "unable to load the GLU library" << endl;
+	return false;
+ }
  bo_gluBeginCurve = (_gluBeginCurve)glu.resolve("gluBeginCurve");
  if (bo_gluBeginCurve == 0) {
 	boError() << k_funcinfo << "could not resolve symbol " << "gluBeginCurve" << endl;
@@ -1716,6 +1724,10 @@ static bool boglResolveGLUSymbols(QLibrary& glu)
 
 static bool boglResolveGLXSymbols(QLibrary& gl)
 {
+ if (!gl.isLoaded() && !gl.load()) {
+	boError() << k_funcinfo << "unable to load the GL library" << endl;
+	return false;
+ }
  bo_glXChooseVisual = (_glXChooseVisual)gl.resolve("glXChooseVisual");
  if (bo_glXChooseVisual == 0) {
 	boError() << k_funcinfo << "unable to resolve symbol " << "glXChooseVisual" << endl;
