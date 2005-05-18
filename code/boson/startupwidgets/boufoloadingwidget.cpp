@@ -1,4 +1,4 @@
-/*
+        /*
     This file is part of the Boson game
     Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
@@ -46,7 +46,7 @@ BoUfoLoadingWidget::BoUfoLoadingWidget()
 #if 0
   header->setAlignment( int( QLabel::AlignCenter ) );
 #endif
-  header->setText( i18n( "Loading game data..." ) );
+  header->setText( i18n( "Initializing mission data..." ) );
 
   addSpacing(20);
 
