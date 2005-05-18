@@ -836,7 +836,10 @@ void BoUfoNewGameWidget::slotCancel()
 {
  boDebug() << k_funcinfo << endl;
  boGame->disconnect();
- emit signalCancelled();
+
+ // AB: we use a timer, so that the newgame widget can be deleted in the slot
+ // (otherwise this would not be allowed, as we are in a pushbutton click)
+ QTimer::singleShot(0, this, SIGNAL(signalCancelled()));
 }
 
 void BoUfoNewGameWidget::slotStartGame()
