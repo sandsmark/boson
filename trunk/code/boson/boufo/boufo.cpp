@@ -2156,12 +2156,14 @@ void BoUfoProgress::setRange(double min, double max)
 
 void BoUfoProgress::setMinimumValue(double min)
 {
- setRange(min, maximumValue());
+ double max = QMAX(min, maximumValue());
+ setRange(min, max);
 }
 
 void BoUfoProgress::setMaximumValue(double max)
 {
- setRange(minimumValue(), max);
+ double min = QMIN(max, minimumValue());
+ setRange(min, max);
 }
 
 void BoUfoProgress::setStartColor(const QColor& c)
@@ -2300,12 +2302,14 @@ void BoUfoNumInput::setValue(float v)
 
 void BoUfoNumInput::slotSetMaxValue(float max)
 {
- setRange(minimumValue(), max);
+ double min = QMIN(max, minimumValue());
+ setRange(min, max);
 }
 
 void BoUfoNumInput::slotSetMinValue(float min)
 {
- setRange(min, maximumValue());
+ double max = QMAX(min, maximumValue());
+ setRange(min, max);
 }
 
 void BoUfoNumInput::setStepSize(float s)
