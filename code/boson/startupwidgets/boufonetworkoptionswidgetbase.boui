@@ -132,12 +132,14 @@
       <gridLayoutRows/>
      </Properties>
      <Widget>
-      <ClassName>BoUfoLabel</ClassName>
+      <ClassName>BoUfoHBox</ClassName>
       <Properties>
-       <name>mWidget4</name>
+       <name>mWidget32</name>
        <constraints/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
        <opaque/>
-       <layout/>
+       <layout>UHBoxLayout</layout>
        <minimumWidth/>
        <minimumHeight/>
        <preferredWidth/>
@@ -146,32 +148,49 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch/>
-       <text>Network Status:</text>
-       <iconFile/>
-       <gridLayoutColumns/>
-       <gridLayoutRows/>
       </Properties>
-     </Widget>
-     <Widget>
-      <ClassName>BoUfoLabel</ClassName>
-      <Properties>
-       <name>mNetStatusLabel</name>
-       <constraints/>
-       <opaque/>
-       <layout/>
-       <minimumWidth/>
-       <minimumHeight/>
-       <preferredWidth/>
-       <preferredHeight/>
-       <backgroundImageFile/>
-       <verticalAlignment/>
-       <horizontalAlignment/>
-       <stretch/>
-       <text/>
-       <iconFile/>
-       <gridLayoutColumns/>
-       <gridLayoutRows/>
-      </Properties>
+      <Widget>
+       <ClassName>BoUfoLabel</ClassName>
+       <Properties>
+        <name>mWidget4</name>
+        <constraints/>
+        <opaque/>
+        <layout/>
+        <minimumWidth/>
+        <minimumHeight/>
+        <preferredWidth/>
+        <preferredHeight/>
+        <backgroundImageFile/>
+        <verticalAlignment>AlignTop</verticalAlignment>
+        <horizontalAlignment/>
+        <stretch>1</stretch>
+        <text>Network Status:</text>
+        <iconFile/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+       </Properties>
+      </Widget>
+      <Widget>
+       <ClassName>BoUfoLabel</ClassName>
+       <Properties>
+        <name>mNetStatusLabel</name>
+        <constraints/>
+        <opaque/>
+        <layout/>
+        <minimumWidth/>
+        <minimumHeight/>
+        <preferredWidth/>
+        <preferredHeight/>
+        <backgroundImageFile/>
+        <verticalAlignment>AlignTop</verticalAlignment>
+        <horizontalAlignment/>
+        <stretch>1</stretch>
+        <text/>
+        <iconFile/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+       </Properties>
+      </Widget>
      </Widget>
      <Widget>
       <ClassName>BoUfoHBox</ClassName>
@@ -407,7 +426,7 @@
         <gridLayoutColumns/>
         <gridLayoutRows/>
         <label/>
-        <minimumValue>1</minimumValue>
+        <minimumValue>1025</minimumValue>
         <maximumValue>10000</maximumValue>
         <stepSize>1</stepSize>
         <value>5454</value>
