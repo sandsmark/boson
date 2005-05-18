@@ -709,10 +709,6 @@ bool boglResolveGLSymbols()
 
 static bool boglResolveOpenGLSymbols(QLibrary& gl)
 {
- if (!gl.isLoaded()) {
-	boError() << k_funcinfo << "cannot resolve symbols: libGL not loaded" << endl;
-	return false;
- }
  bo_glClearIndex = (_glClearIndex)gl.resolve("glClearIndex");
  if (bo_glClearIndex == 0) {
 	boError() << k_funcinfo << "unable to resolve symbol " << "glClearIndex" << endl;
@@ -1420,10 +1416,6 @@ static bool boglResolveOpenGLSymbols(QLibrary& gl)
 
 static bool boglResolveGLUSymbols(QLibrary& glu)
 {
- if (!glu.isLoaded()) {
-	boError() << k_funcinfo << "cannot resolve symbols: libGLU not loaded" << endl;
-	return false;
- }
  bo_gluBeginCurve = (_gluBeginCurve)glu.resolve("gluBeginCurve");
  if (bo_gluBeginCurve == 0) {
 	boError() << k_funcinfo << "could not resolve symbol " << "gluBeginCurve" << endl;
