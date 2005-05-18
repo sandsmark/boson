@@ -74,11 +74,6 @@ void boglInit()
     boDebug() << k_funcinfo << "OpenGL already inited, returning" << endl;
     return;
   }
-  if (!boglResolveGLSymbols())
-  {
-    boError() << k_funcinfo << "OpenGL symbols could bot be resolved" << endl;
-    return;
-  }
 
 #ifdef GLX_ARB_get_proc_address
   // Get pointers to supported opengl functions
