@@ -228,6 +228,10 @@ void BosonShot::setActive(bool a)
     // This sets effect owner ids to 0 (so that they won't be owned by this
     //  shot anymore). It doesn't delete the effects.
     clearEffects();
+    setVelocity(0, 0, 0);
+    setRotation(0);
+    setXRotation(0);
+    setYRotation(0);
   }
 }
 
