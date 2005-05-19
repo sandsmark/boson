@@ -46,6 +46,8 @@
 // And radians to degrees conversion
 #define RAD2DEG (180.0/M_PI)
 
+#define DEBUG_FRAGMENT
+
 
 /*****  BosonShot  *****/
 
@@ -1017,13 +1019,23 @@ BosonModel* BosonShotFragment::getModelForItem() const
 
 void BosonShotFragment::activate(const BoVector3Fixed& pos, const UnitProperties* unitproperties)
 {
+  boDebug(350) << k_funcinfo << "id: " << id() << endl;
   mUnitProperties = unitproperties;
 
   KRandomSequence* r = owner()->game()->random();
+#ifdef DEBUG_FRAGMENT
+#define MYRANDOM (bofixed(r->getLong(100)) / 100)
+  mVelo.set(MYRANDOM - 0.5, MYRANDOM - 0.5, 0);
+  mVelo.normalize();
+  mVelo.scale(FRAGMENT_MIN_SPEED + (MYRANDOM * (FRAGMENT_MAX_SPEED - FRAGMENT_MIN_SPEED)));
+  mVelo.setZ(FRAGMENT_MIN_Z_SPEED + (MYRANDOM * (FRAGMENT_MAX_Z_SPEED - FRAGMENT_MIN_Z_SPEED)));
+#undef MYRANDOM
+#else
   mVelo.set(r->getDouble() - 0.5, r->getDouble() - 0.5, 0);
   mVelo.normalize();
   mVelo.scale(FRAGMENT_MIN_SPEED + (r->getDouble() * (FRAGMENT_MAX_SPEED - FRAGMENT_MIN_SPEED)));
   mVelo.setZ(FRAGMENT_MIN_Z_SPEED + (r->getDouble() * (FRAGMENT_MAX_Z_SPEED - FRAGMENT_MIN_Z_SPEED)));
+#endif
   boDebug(350) << k_funcinfo << "Velocity is: (" << mVelo.x() << "; " << mVelo.y() << "; " << mVelo.z() << ")" << endl;
 
   setEffects(mUnitProperties->newExplodingFragmentFlyEffects(pos));
