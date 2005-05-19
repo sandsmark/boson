@@ -235,6 +235,7 @@ public:
 		// however since we do this at the same time on all clients, it
 		// is valid.
 		s << (Q_ULONG)mGame->random()->getLong(100000);
+		s << mGame->random()->getDouble();
 		return b;
 	}
 
@@ -245,10 +246,14 @@ protected:
 		QDataStream s1(b1, IO_ReadOnly);
 		QDataStream s2(b2, IO_ReadOnly);
 
-		DECLARE_UNSTREAM(Q_ULONG, random);
+		DECLARE_UNSTREAM(Q_ULONG, randomint);
+		DECLARE_UNSTREAM(double, randomdouble);
 
-		if (random != random2) {
-			return i18n("Random numbers differ. Found: %1 should be: %2").arg(random2).arg(random);
+		if (randomint != randomint2) {
+			return i18n("Random integer numbers differ. Found: %1 should be: %2").arg(randomint2).arg(randomint);
+		}
+		if (randomdouble != randomdouble2) {
+			return i18n("Random double numbers differ. Found: %1 should be: %2").arg(randomdouble2).arg(randomdouble);
 		}
 		return i18n("There is an error in the game (i.e. the Boson class) log (MD5 sums don't match), but it could not be found.");
 	}
