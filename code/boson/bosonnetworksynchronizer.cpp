@@ -31,6 +31,7 @@
 #include "player.h"
 #include "bosonmap.h"
 #include "bosonpath.h"
+#include "items/bosonshot.h"
 #include <bodebug.h>
 
 #include <kgame/kmessageclient.h>
@@ -72,7 +73,7 @@
 // compare name and name2 and add an error to the QString variable "error". note
 // that this works only if type of name/name2 is compatible with QString::arg().
 #define COMPARE(name) if (name != name##2) { error += i18n("Variables not equal: %1(%2) and %3(%4)\n").arg(#name).arg(name).arg(#name "2").arg(name##2); }
-#define COMPAREITEM(name, id, rtti) if (name != name##2) { error += i18n("Variables not equal for item %1 (%2): %3(%4) and %5(%6)\n").arg(id).arg(rtti).arg(#name).arg(name).arg(#name "2").arg(name##2); }
+#define COMPAREITEM(name, id, rtti, type) if (name != name##2) { error += i18n("Variables not equal for item %1 (%2/%3): %4(%5) and %6(%7)\n").arg(id).arg(rtti).arg(type).arg(#name).arg(name).arg(#name "2").arg(name##2); }
 
 // convenience macros that combine the above macros.
 #define DECLARE_UNSTREAM(type, name) DECLARE(type, name) UNSTREAM(name)
@@ -604,6 +605,11 @@ protected:
 	{
 		stream << (Q_UINT32)i->id();
 		stream << (Q_INT32)i->rtti();
+		if (i->rtti() == RTTI::Shot) {
+			stream << (Q_INT32)((BosonShot*)i)->type();
+		} else {
+			stream << (Q_INT32)-1;
+		}
 		stream << i->x();
 		stream << i->y();
 		stream << i->z();
@@ -611,10 +617,11 @@ protected:
 		stream << i->xRotation();
 		stream << i->yRotation();
 	}
-	static void unstreamItem(QDataStream& stream, Q_UINT32& id, Q_INT32& rtti, bofixed& x, bofixed& y, bofixed& z, bofixed& rotation, bofixed& xrotation, bofixed& yrotation)
+	static void unstreamItem(QDataStream& stream, Q_UINT32& id, Q_INT32& rtti, Q_INT32& type, bofixed& x, bofixed& y, bofixed& z, bofixed& rotation, bofixed& xrotation, bofixed& yrotation)
 	{
 		stream >> id;
 		stream >> rtti;
+		stream >> type;
 		stream >> x;
 		stream >> y;
 		stream >> z;
@@ -628,6 +635,7 @@ protected:
 
 		DECLARE(Q_UINT32, id);
 		DECLARE(Q_INT32, rtti);
+		DECLARE(Q_INT32, type);
 		DECLARE(bofixed, x);
 		DECLARE(bofixed, y);
 		DECLARE(bofixed, z);
@@ -635,17 +643,18 @@ protected:
 		DECLARE(bofixed, xrotation);
 		DECLARE(bofixed, yrotation);
 
-		unstreamItem(s1, id, rtti, x, y, z, rotation, xrotation, yrotation);
-		unstreamItem(s2, id2, rtti2, x2, y2, z2, rotation2, xrotation2, yrotation2);
+		unstreamItem(s1, id, rtti, type, x, y, z, rotation, xrotation, yrotation);
+		unstreamItem(s2, id2, rtti2, type2, x2, y2, z2, rotation2, xrotation2, yrotation2);
 
 		COMPARE(id);
 		COMPARE(rtti);
-		COMPAREITEM(x, id, rtti);
-		COMPAREITEM(y, id, rtti);
-		COMPAREITEM(z, id, rtti);
-		COMPAREITEM(rotation, id, rtti);
-		COMPAREITEM(xrotation, id, rtti);
-		COMPAREITEM(yrotation, id, rtti);
+		COMPARE(type);
+		COMPAREITEM(x, id, rtti, type);
+		COMPAREITEM(y, id, rtti, type);
+		COMPAREITEM(z, id, rtti, type);
+		COMPAREITEM(rotation, id, rtti, type);
+		COMPAREITEM(xrotation, id, rtti, type);
+		COMPAREITEM(yrotation, id, rtti, type);
 
 		return error;
 	}
