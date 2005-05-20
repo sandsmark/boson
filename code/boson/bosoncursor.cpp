@@ -352,8 +352,8 @@ void BosonOpenGLCursor::renderCursor(GLfloat x, GLfloat y)
  if (mCurrentData) {
 	// FIXME: we currently depend on image width/height == BO_TILE_SIZE
 	// we should use the actual width/height here instead!
-	const GLfloat w = 48.0f;
-	const GLfloat h = 48.0f;
+	const GLfloat w = 32.0f;
+	const GLfloat h = 32.0f;
 
 	glPushAttrib(GL_ENABLE_BIT);
 	glEnable(GL_BLEND);
