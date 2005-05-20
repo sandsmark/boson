@@ -1018,8 +1018,6 @@ void BosonMenuInput::slotPreferences()
 
  connect(dlg, SIGNAL(signalCursorChanged(int, const QString&)),
 		this, SIGNAL(signalChangeCursor(int, const QString&)));
-// connect(dlg, SIGNAL(signalCmdBackgroundChanged(const QString&)),
-//		this, SLOT(slotCmdBackgroundChanged(const QString&)));
  connect(dlg, SIGNAL(signalOpenGLSettingsUpdated()),
 		this, SIGNAL(signalUpdateOpenGLSettings()));
  connect(dlg, SIGNAL(signalApply()),

@@ -86,14 +86,6 @@ GeneralOptions::GeneralOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mMiniMapScale->setLabel(i18n("Mini Map scale factor"));
 
 
- QHBox* hbox = new QHBox(this);
- (void)new QLabel(i18n("Command frame background pixmap"), hbox);
- mCmdBackground = new QComboBox(hbox);
- mCmdBackgrounds = KGlobal::dirs()->findAllResources("data", "boson/themes/ui/*/cmdpanel*.png");
- mCmdBackground->insertItem(i18n("None"));
- //TODO: display filename only... - not the complete path
- mCmdBackground->insertStringList(mCmdBackgrounds);
-
  mRMBMovesWithAttack = new QCheckBox("Units attack enemies in sight while moving", this);
  mRMBMovesWithAttack->setChecked(boConfig->boolValue("RMBMovesWithAttack"));
 }
@@ -115,10 +107,7 @@ void GeneralOptions::apply()
  }
  boConfig->setDoubleValue("MiniMapScale", mMiniMapScale->value());
  QString file;
- if (mCmdBackground->currentItem() > 0) {
-	file = mCmdBackgrounds[mCmdBackground->currentItem() - 1];
- }
- emit signalCmdBackgroundChanged(file);
+
  boConfig->setBoolValue("RMBMovesWithAttack", mRMBMovesWithAttack->isChecked());
  boDebug(210) << k_funcinfo << "done" << endl;
 }
@@ -132,14 +121,12 @@ void GeneralOptions::load()
  setGameSpeed(game()->gameSpeed());
  setMiniMapScale(boConfig->doubleValue("MiniMapScale"));
  setRMBMovesWithAttack(boConfig->boolValue("RMBMovesWithAttack"));
- // TODO: cmdbackground
 }
 
 void GeneralOptions::setDefaults()
 {
  setGameSpeed(DEFAULT_GAME_SPEED);
  setMiniMapScale(DEFAULT_MINIMAP_SCALE);
- setCmdBackground(QString::null);
  setRMBMovesWithAttack(DEFAULT_RMB_MOVES_WITH_ATTACK);
 }
 
@@ -151,16 +138,6 @@ void GeneralOptions::setGameSpeed(int ms)
 void GeneralOptions::setMiniMapScale(double scale)
 {
  mMiniMapScale->setValue(scale);
-}
-
-void GeneralOptions::setCmdBackground(const QString& file)
-{
- if (file.isEmpty() || mCmdBackgrounds.findIndex(file) < 0) {
-	mCmdBackground->setCurrentItem(0);
- } else {
-	int index = mCmdBackgrounds.findIndex(file);
-	mCmdBackground->setCurrentItem(index + 1);
- }
 }
 
 void GeneralOptions::setRMBMovesWithAttack(bool attack)
