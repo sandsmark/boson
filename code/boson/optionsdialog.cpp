@@ -72,8 +72,6 @@ void OptionsDialog::initGeneralPage()
 {
  QVBox* vbox = addVBoxPage(i18n("&General"));
  GeneralOptions* o = new GeneralOptions(vbox);
- connect(o, SIGNAL(signalCmdBackgroundChanged(const QString&)),
-		this, SIGNAL(signalCmdBackgroundChanged(const QString&)));
  addOptions(o);
 }
 
