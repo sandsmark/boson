@@ -80,18 +80,14 @@ public:
 	 **/
 	void setGameSpeed(int ms);
 	void setMiniMapScale(double s);
-	void setCmdBackground(const QString& file);
 	void setRMBMovesWithAttack(bool attack);
 
 signals:
 	void signalMiniMapScaleChanged(double);
-	void signalCmdBackgroundChanged(const QString& file);
 
 private:
 	KIntNumInput* mGameSpeed;
 	KDoubleNumInput* mMiniMapScale;
-	QComboBox* mCmdBackground;
-	QStringList mCmdBackgrounds;
 	QCheckBox* mRMBMovesWithAttack;
 };
 

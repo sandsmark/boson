@@ -46,7 +46,6 @@ public:
 
 signals:
 	void signalCursorChanged(int index, const QString& cursorDir);
-	void signalCmdBackgroundChanged(const QString& file);
 	void signalOpenGLSettingsUpdated();
 	void signalFontChanged(const BoFontInfo&);
 
