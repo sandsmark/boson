@@ -1024,11 +1024,19 @@ void BosonShotFragment::activate(const BoVector3Fixed& pos, const UnitProperties
 
   KRandomSequence* r = owner()->game()->random();
 #ifdef DEBUG_FRAGMENT
+  //boDebug(350) << k_funcinfo << "random: " << r->getLong(10000) << endl;
+  long foo1 = r->getLong(100); long foo2 = r->getLong(100);
+  bofixed foo3 = bofixed(foo1); bofixed foo4 = bofixed(foo2);
+  bofixed foo5 = foo3 / 100; bofixed foo6 = foo4 / 100;
+  bofixed foo7 = foo5 - 0.5; bofixed foo8 = foo6 - 0.5;
+  mVelo.set(foo7, foo8, 0);
+  boDebug() << "foo1: " << foo1 << " foo2: " << foo2 << " foo3: " << foo3 << " foo4: " << foo4 <<
+      " foo5: " << foo5 << " foo6: " << foo6 << " foo7: " << foo7 << " foo8: " << foo8 << endl;
 #define MYRANDOM (bofixed(r->getLong(100)) / 100)
-  mVelo.set(MYRANDOM - 0.5, MYRANDOM - 0.5, 0);
+  /*mVelo.set(MYRANDOM - 0.5, MYRANDOM - 0.5, 0);
   mVelo.normalize();
   mVelo.scale(FRAGMENT_MIN_SPEED + (MYRANDOM * (FRAGMENT_MAX_SPEED - FRAGMENT_MIN_SPEED)));
-  mVelo.setZ(FRAGMENT_MIN_Z_SPEED + (MYRANDOM * (FRAGMENT_MAX_Z_SPEED - FRAGMENT_MIN_Z_SPEED)));
+  mVelo.setZ(FRAGMENT_MIN_Z_SPEED + (MYRANDOM * (FRAGMENT_MAX_Z_SPEED - FRAGMENT_MIN_Z_SPEED)));*/
 #undef MYRANDOM
 #else
   mVelo.set(r->getDouble() - 0.5, r->getDouble() - 0.5, 0);
