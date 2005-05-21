@@ -99,11 +99,13 @@ void CursorPreview::paintGL()
  if (!cursor()) {
 	return;
  }
- glColor3f(255, 255, 255);
+ glColor3ub(255, 255, 255);
  QPoint pos = mapFromGlobal(QCursor::pos());
  GLfloat x, y;
  x = (GLfloat)pos.x();
  y = height() - (GLfloat)pos.y();
+
+ glEnable(GL_TEXTURE_2D);
  cursor()->renderCursor(x, y);
 
  // display the hotspot
