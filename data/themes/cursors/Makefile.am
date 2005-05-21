@@ -1,4 +1,4 @@
-CURSORS = default alternative modern1 futuristic old nato-standard
+CURSORS = alternative modern1 futuristic nato-standard
 
 cursordir = $(kde_datadir)/boson/themes/cursors
 
