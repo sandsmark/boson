@@ -71,9 +71,15 @@ QStringList BosonCursor::availableThemes()
 
 QString BosonCursor::defaultTheme()
 {
+ QString theme = QString::fromLatin1("futuristic");
  QString cursorDir = KGlobal::dirs()->findResourceDir("data",
-		"boson/themes/cursors/default/index.cursor") +
-		QString::fromLatin1("boson/themes/cursors/default");
+		QString("boson/themes/cursors/%1/index.cursor").arg(theme));
+ if (cursorDir.isEmpty()) {
+	boError() << k_funcinfo << "cannot find default cursor theme " << theme << endl;
+	return QString::null;
+ }
+ cursorDir += QString::fromLatin1("boson/themes/cursors/");
+ cursorDir += theme;
  return cursorDir;
 }
 
