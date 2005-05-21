@@ -182,8 +182,20 @@ void BosonCursorEditor::init()
 
 void BosonCursorEditor::loadInitialCursor()
 {
- QString dir = KGlobal::dirs()->findResourceDir("data", "boson/themes/cursors/default/index.cursor"); // there must be a cleaner way!
- dir += QString::fromLatin1("boson/themes/cursors/");
+ QString defaultTheme = BosonCursor::defaultTheme();
+ if (defaultTheme.isEmpty()) {
+	boError() << k_funcinfo << "no default theme available" << endl;
+	return;
+ }
+ if (defaultTheme[defaultTheme.length() - 1] == '/') {
+	defaultTheme = defaultTheme.left(defaultTheme.length() - 1);
+ }
+ int i = defaultTheme.findRev('/');
+ if (i < 0) {
+		boError() << k_funcinfo << "no / found in cursor dir \"" << defaultTheme << "\", cannot be a valid directory" << endl;
+	return;
+ }
+ QString dir = defaultTheme.left(i);
  setCursor(CursorKDE);
  mSpriteConfig->setEnabled(false);
  changeBaseDirectory(dir);
