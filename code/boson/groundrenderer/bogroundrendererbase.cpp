@@ -663,8 +663,8 @@ void FogTexture::cellChanged(int x1, int y1, int x2, int y2)
  }
  x1 = QMAX(x1, 1);
  y1 = QMAX(y1, 1);
- x2 = QMIN(x2, (int)mLastMapWidth - 1);
- y2 = QMIN(y2, (int)mLastMapHeight - 1);
+ x2 = QMIN(x2, (int)mLastMapWidth - 2);
+ y2 = QMIN(y2, (int)mLastMapHeight - 2);
  if(x2 < x1 || y2 < y1) {
 	return;
  }
