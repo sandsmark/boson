@@ -39,6 +39,7 @@ public:
 	int id;
 	BoTextureArray* textures;
 	QString texturefile;
+	float texturesize;
 	int animationDelay;
 	QString name;
 	// Maybe change to BoVector3Float?
