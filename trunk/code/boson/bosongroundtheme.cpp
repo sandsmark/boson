@@ -207,6 +207,7 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
 		delete ground;
 		break;
 	}
+	ground->texturesize = (float)(conf.readDoubleNumEntry("TextureSize", 5.0f));
 	BoVector3Float color = BosonConfig::readBoVector3FloatEntry(&conf, "MiniMapColor");
 	ground->color = qRgb((int)color.x(), (int)color.y(), (int)color.z());
 	ground->animationDelay = conf.readUnsignedNumEntry("AnimationDelay", 1);

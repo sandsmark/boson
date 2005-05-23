@@ -238,12 +238,10 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
 
   // Texture stuff
   // Use OpenGL's automatic texture coordinate generation.
-  const float texPlaneS[] = { 0.2, 0.0, 0.0, 0.0 };
-  const float texPlaneT[] = { 0.0, 0.2, 0.0, 0.0 };
+  float texPlaneS[] = { 0.2, 0.0, 0.0, 0.0 };
+  float texPlaneT[] = { 0.0, 0.2, 0.0, 0.0 };
   glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
   glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-  glTexGenfv(GL_S, GL_OBJECT_PLANE, texPlaneS);
-  glTexGenfv(GL_T, GL_OBJECT_PLANE, texPlaneT);
   glEnable(GL_TEXTURE_GEN_S);
   glEnable(GL_TEXTURE_GEN_T);
 
@@ -291,6 +289,12 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
         // Bind current texture
         BoTexture* tex = map->currentTexture(i, boGame->advanceCallsCount());
         tex->bind();
+        // Set correct tex planes
+        BosonGroundType* ground = map->groundTheme()->groundType(i);
+        texPlaneS[0] = 1.0f / ground->texturesize;
+        texPlaneT[1] = 1.0f / ground->texturesize;
+        glTexGenfv(GL_S, GL_OBJECT_PLANE, texPlaneS);
+        glTexGenfv(GL_T, GL_OBJECT_PLANE, texPlaneT);
         // Bind texture weights vbo corresponding to this texture
         glColorPointer(4, GL_UNSIGNED_BYTE, 0, (char*)NULL + mVBOTextureLayerSize*i);
         inited = true;
