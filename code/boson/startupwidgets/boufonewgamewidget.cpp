@@ -264,6 +264,7 @@ void BoUfoNewGameWidget::initSpecies()
   //TODO: some scenarios might not provide all species!
  int defaultIndex = 0;
  QStringList list = SpeciesTheme::availableSpecies();
+ int index = 0;
  for (unsigned int i = 0; i < list.count(); i++) {
     KSimpleConfig cfg(list[i]);
     cfg.setGroup("Boson Species");
@@ -272,14 +273,15 @@ void BoUfoNewGameWidget::initSpecies()
         continue;
     }
     QStringList playerSpeciesItems = mPlayerSpecies->items();
-    playerSpeciesItems.insert(playerSpeciesItems.at(i), cfg.readEntry("Name", i18n("Unknown")));
+    playerSpeciesItems.insert(playerSpeciesItems.at(index), cfg.readEntry("Name", i18n("Unknown")));
     mPlayerSpecies->setItems(playerSpeciesItems);
     // comments aren't used. Maybe remove this dict?
-    d->mSpeciesIndex2Comment.insert(i, cfg.readEntry("Comment", i18n("None")));
-    d->mSpeciesIndex2Identifier.insert(i, identifier);
+    d->mSpeciesIndex2Comment.insert(index, cfg.readEntry("Comment", i18n("None")));
+    d->mSpeciesIndex2Identifier.insert(index, identifier);
     if (identifier == SpeciesTheme::defaultSpecies()) {
-        defaultIndex = i;
+        defaultIndex = index;
     }
+    index++;
  }
  mPlayerSpecies->setCurrentItem(defaultIndex);
 }
