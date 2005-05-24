@@ -46,6 +46,8 @@
 #include <qfile.h>
 #include <qfileinfo.h>
 
+#include <unistd.h>
+
 
 static QString findSaveFileName(const QString& prefix, const QString& suffix)
 {
