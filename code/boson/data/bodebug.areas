@@ -6,6 +6,7 @@
 110    Boson Textures
 120    BoLOD
 121    BoLOD verbose
+130    BoShader
 150    Boson Particles
 200    Boson Sound
 210    OptionsDialog
