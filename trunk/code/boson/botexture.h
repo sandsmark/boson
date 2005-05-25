@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2004-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -274,6 +274,7 @@ class BoTextureArray
   public:
     BoTextureArray(const QStringList& files, BoTexture::Class texclass);
     BoTextureArray(const QStringList& files, int options = BoTexture::FilterLinearMipmapLinear | BoTexture::FormatAuto, BoTexture::Type type = BoTexture::Texture2D);
+    BoTextureArray(const QPtrList<BoTexture>& textures);
     ~BoTextureArray();
 
     BoTexture* texture(int i) const  { return mTextures[i]; }
@@ -282,6 +283,7 @@ class BoTextureArray
 
   private:
     QValueVector<BoTexture*> mTextures;
+    bool mAutoDelete;
 };
 
 

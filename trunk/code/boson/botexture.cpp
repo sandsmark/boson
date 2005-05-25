@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2004-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -695,6 +695,7 @@ void BoTexture::reload()
 
 BoTextureArray::BoTextureArray(const QStringList& files, BoTexture::Class texclass)
 {
+  mAutoDelete = true;
   mTextures.reserve(files.count());
   QStringList::ConstIterator it;
   for (it = files.begin(); it != files.end(); ++it)
@@ -706,6 +707,7 @@ BoTextureArray::BoTextureArray(const QStringList& files, BoTexture::Class texcla
 
 BoTextureArray::BoTextureArray(const QStringList& files, int options, BoTexture::Type type)
 {
+  mAutoDelete = true;
   mTextures.reserve(files.count());
   QStringList::ConstIterator it;
   for (it = files.begin(); it != files.end(); ++it)
@@ -715,12 +717,27 @@ BoTextureArray::BoTextureArray(const QStringList& files, int options, BoTexture:
   }
 }
 
+BoTextureArray::BoTextureArray(const QPtrList<BoTexture>& textures)
+{
+  mAutoDelete = false;
+  mTextures.reserve(textures.count());
+  QPtrListIterator<BoTexture> it(textures);
+  while(it.current())
+  {
+    mTextures.append(it.current());
+    ++it;
+  }
+}
+
 BoTextureArray::~BoTextureArray()
 {
-  // Delete all textures
-  for(unsigned int i = 0; i < mTextures.count(); i++)
+  if(mAutoDelete)
   {
-    delete mTextures[i];
+    // Delete all textures
+    for(unsigned int i = 0; i < mTextures.count(); i++)
+    {
+      delete mTextures[i];
+    }
   }
 }
 
