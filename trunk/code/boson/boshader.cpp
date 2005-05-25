@@ -52,7 +52,7 @@ BoShader::BoShader(const QString& file)
   QFile f(file);
   if(!f.open(IO_ReadOnly))
   {
-    boError() << k_funcinfo << "Couldn't open " << file << " for reading!" << endl;
+    boError(130) << k_funcinfo << "Couldn't open " << file << " for reading!" << endl;
     return;
   }
 
@@ -95,8 +95,8 @@ BoShader::BoShader(const QString& file)
     }
   }
 
-  boDebug() << k_funcinfo << "Loaded vertex shader source : \n'" << vertexsrc << "'" << endl;
-  boDebug() << k_funcinfo << "Loaded fragment shader source : \n'" << fragmentsrc << "'" << endl;
+  //boDebug() << k_funcinfo << "Loaded vertex shader source : \n'" << vertexsrc << "'" << endl;
+  //boDebug() << k_funcinfo << "Loaded fragment shader source : \n'" << fragmentsrc << "'" << endl;
 
 #undef READ_NOTHING
 #undef READ_VERTEXSRC
@@ -127,12 +127,12 @@ void BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
 {
   if(fragmentsrc.isEmpty() && vertexsrc.isEmpty())
   {
-    boError() << k_funcinfo << "No shader sources given!" << endl;
+    boError(130) << k_funcinfo << "No shader sources given!" << endl;
     return;
   }
   if(!boglCreateProgram)
   {
-    boError() << k_funcinfo << "Shaders aren't supported!" << endl;
+    boError(130) << k_funcinfo << "Shaders aren't supported!" << endl;
     return;
   }
 
@@ -141,6 +141,9 @@ void BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
 
   GLuint vertexshader;
   GLuint fragmentshader;
+
+  char log[8192];
+  GLsizei logsize;
 
   // Load vertex shader, if it was given
   if(!vertexsrc.isEmpty())
@@ -155,13 +158,15 @@ void BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
     // Make sure it compiled correctly
     int compiled;
     boglGetShaderiv(vertexshader, GL_COMPILE_STATUS, &compiled);
+    boglGetShaderInfoLog(vertexshader, 8192, &logsize, log);
     if(!compiled)
     {
-      boError() << k_funcinfo << "Couldn't compile vertex shader!" << endl;
-      char error[4096];
-      boglGetShaderInfoLog(vertexshader, 4096, NULL, error);
-      boError() << k_funcinfo << "Error string:" << endl << error << endl;
+      boError(130) << k_funcinfo << "Couldn't compile vertex shader!" << endl << log;
       return;
+    }
+    else if(logsize > 0)
+    {
+      boDebug(130) << "Vertex shader compilation log:" << endl << log;
     }
     // Attach the shader to the program
     boglAttachShader(mProgram, vertexshader);
@@ -183,13 +188,15 @@ void BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
     // Make sure it compiled correctly
     int compiled;
     boglGetShaderiv(fragmentshader, GL_COMPILE_STATUS, &compiled);
+    boglGetShaderInfoLog(fragmentshader, 8192, &logsize, log);
     if(!compiled)
     {
-      boError() << k_funcinfo << "Couldn't compile fragment shader!" << endl;
-      char error[4096];
-      boglGetShaderInfoLog(fragmentshader, 4096, NULL, error);
-      boError() << error;
+      boError(130) << k_funcinfo << "Couldn't compile fragment shader!" << endl << log;
       return;
+    }
+    else if(logsize > 0)
+    {
+      boDebug(130) << "Fragment shader compilation log:" << endl << log;
     }
     // Attach the shader to the program
     boglAttachShader(mProgram, fragmentshader);
@@ -202,13 +209,16 @@ void BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
   // Make sure it linked correctly
   int linked;
   boglGetProgramiv(mProgram, GL_LINK_STATUS, &linked);
+  boglGetProgramInfoLog(mProgram, 8192, &logsize, log);
+
   if(!linked)
   {
-    boError() << k_funcinfo << "Couldn't link the program!" << endl;
-    char error[4096];
-    boglGetProgramInfoLog(mProgram, 4096, NULL, error);
-    boError() << error;
+    boError(130) << k_funcinfo << "Couldn't link the program!" << endl << log;
     return;
+  }
+  else if(logsize > 0)
+  {
+    boDebug(130) << "Shader linking log:" << endl << log;
   }
 
   // Create uniform locations dict
