@@ -252,7 +252,7 @@ void BoAdvance::receiveAdvanceCall()
  // AB: do _not_ connect to the signal!
  // -> slots may be called in random order, but we need well defined order
  // (otherwise network may get broken soon)
- mBoson->eventManager()->advance();
+ mBoson->eventManager()->advance(advanceCallsCount());
 
  boDebug(300) << k_funcinfo << advanceCallsCount() << " DONE" << endl;
 
@@ -743,6 +743,11 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	case BosonMessage::IdNetworkSyncUnlockGame:
 	{
 		d->mNetworkSynchronizer->receiveNetworkSyncUnlockGame(stream);
+		break;
+	}
+	case BosonMessage::IdStatus:
+	{
+		// This message is only meant for the dedicated server. Ignore it.
 		break;
 	}
 	default:
