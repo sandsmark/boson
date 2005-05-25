@@ -64,7 +64,7 @@ public:
 	/**
 	 * Advance any queued events.
 	 **/
-	void advance();
+	void advance(unsigned int advanceCallsCount);
 
 	bool saveAsXML(QDomElement& root) const;
 	bool loadFromXML(const QDomElement& root);
@@ -85,6 +85,8 @@ public:
 
 protected:
 	void deliverEvent(BoEvent* event);
+	void cacheStatusEvent(BoEvent* event);
+	void sendStatusEvents();
 	void declareEvents();
 
 private:
