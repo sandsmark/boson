@@ -54,6 +54,8 @@ public:
 		// advance messages (still the "within a game" section)
 		AdvanceN = 50, // call BosonCanvas::advance() N times
 
+		IdStatus = 60, // status messages (events)
+
 		IdChat = 70, // a chat message
 		IdNetworkSyncCheck = 80,
 		IdNetworkSyncCheckACK = 81,
