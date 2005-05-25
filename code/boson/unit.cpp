@@ -2604,6 +2604,9 @@ bool Facility::loadFromXML(const QDomElement& root)
  // effects in loadFromXML() - then these lines are obsolete.
  if (d->mConstructionStep == constructionSteps()) {
 	setEffects(unitProperties()->newConstructedEffects(x() + width() / 2, y() + height() / 2, z()));
+	if (itemRenderer()) {
+		itemRenderer()->setAnimationMode(UnitAnimationIdle);
+	}
  } else {
 	if (itemRenderer()) {
 		itemRenderer()->setAnimationMode(UnitAnimationConstruction);
