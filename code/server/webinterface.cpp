@@ -122,6 +122,7 @@ void WebInterface::writeHTMLHeader(QTextStream& os, const QString& title)
             </style>";
   os << "</head>\r\n";
   os << "<body>\r\n";
+  os << "<table height=\"90%\" width=\"100%\" border=\"0\"><tr><td>\r\n";
   os << "<div align=\"center\"><img src=\"http://boson.eu.org/pictures/header_small.jpg\" alt=\"\"></div>\r\n";
   os << "<h1 align=\"center\">BOSON Server Statistics</h1>\r\n \
             <table border=\"0\" cellpadding=\"3\" cellspacing=\"2\" width=\"100%\" class=\"main\">\r\n\
@@ -132,8 +133,10 @@ void WebInterface::writeHTMLHeader(QTextStream& os, const QString& title)
 
 void WebInterface::writeHTMLFooter(QTextStream& os)
 {
-  os << "</td></tr></table></td></tr></table>\r\n";
-  os << "</body></html>\r\n";
+  os << "</table></td></tr></table></td></tr></table>\r\n";
+  os << "</td></tr>\r\n";
+  os << "<tr><td>&copy; 2005 <a href=\"http://boson.eu.org\" target=\"_blank\">The Boson Team</a></td></tr>\r\n";
+  os << "</table></body></html>\r\n";
 }
 
 void WebInterface::writeServerInfos(QTextStream& os)
