@@ -167,6 +167,9 @@ void WebInterface::writeServerInfos(QTextStream& os)
                 sGameStatus = "Running";
             }
     }
+    else
+        sGameStatus = "Not running";
+
   }
 
   os << "<table cellpadding=\"2\" cellspacing=\"1\" border=\"0\" width=\"100%\" class=\"sidebarbox\">\r\n \
@@ -290,7 +293,10 @@ void WebInterface::writeClientStats(QTextStream& os)
     {
         clientcount--;
     }
-    os << "  There are " << clientcount << " clients in the game:<br>\r\n";
+    if(clientcount == 1)
+        os << "  There is 1 client in the game:<br>\r\n";
+    else
+        os << "  There are " << clientcount << " clients in the game:<br>\r\n";
     QValueList<Q_UINT32> clientids = mServer->clientIDs();
     QValueList<Q_UINT32>::iterator it = clientids.begin();
     for(; it != clientids.end(); it++)
@@ -308,7 +314,10 @@ void WebInterface::writeClientStats(QTextStream& os)
 void WebInterface::writePlayerStats(QTextStream& os)
 {
     Game* game = mServer->game();
-    os << "  There are " << game->playerCount() << " players in game:<br>\r\n";
+    if(game->playerCount() == 1)
+        os << "  There is 1 player in game:<br>\r\n";
+    else
+        os << "  There are " << game->playerCount() << " players in game:<br>\r\n";
     QPtrListIterator<KPlayer> itP(*game->playerList());
     while(itP.current())
     {
