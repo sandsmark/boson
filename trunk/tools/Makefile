@@ -4,7 +4,7 @@
 CC = gcc
 CXX = g++
 
-all: checktextures fixtexturesize modelstatistics stripifier gentexfont dedicatedserver
+all: checktextures fixtexturesize modelstatistics stripifier gentexfont
 
 checktextures: checktextures.c
 	$(CC) checktextures.c -o checktextures -l3ds -lm
@@ -20,6 +20,3 @@ stripifier: stripifier.c
 
 gentexfont: gentexfont.c
 	$(CC) -o gentexfont gentexfont.c -lX11 -L/usr/X11R6/lib
-
-dedicatedserver: dedicatedserver.cpp
-	$(CXX) -o dedicatedserver dedicatedserver.cpp -I$(QTDIR)/include -I$(KDEDIR)/include -L$(KDEDIR)/lib -L$(QTDIR)/lib -lqt-mt -lkdegames
