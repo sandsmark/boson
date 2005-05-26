@@ -33,6 +33,7 @@
 #include "bowater.h"
 #include "info/boinfo.h"
 #include "botexture.h"
+#include "bosongroundtheme.h"
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -523,6 +524,8 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  hbox = new QHBox(mAdvanced);
  (void)new QLabel(i18n("Ground render:"), hbox);
  mGroundRenderer = new QComboBox(hbox);
+ mUseGroundShaders = new QCheckBox(i18n("Use shaders for ground rendering"), mAdvanced);
+ mUseGroundShaders->setEnabled(BosonGroundTheme::shadersSupported());
 
  mUseLOD = new QCheckBox(i18n("Use level of detail"), mAdvanced);
  hbox = new QHBox(mAdvanced);
@@ -597,6 +600,7 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mUseLight->setChecked(DEFAULT_USE_LIGHT);
 		mUseMaterials->setChecked(DEFAULT_USE_MATERIALS);
 		setCurrentGroundRenderer(DEFAULT_GROUND_RENDERER);
+		mUseGroundShaders->setChecked(true);
 		setCurrentMeshRenderer(DEFAULT_MESH_RENDERER);
 		setUseLOD(true);
 		setDefaultLOD(0);
@@ -611,6 +615,7 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mUseLight->setChecked(DEFAULT_USE_LIGHT);
 		mUseMaterials->setChecked(DEFAULT_USE_MATERIALS);
 		setCurrentGroundRenderer(DEFAULT_GROUND_RENDERER);
+		mUseGroundShaders->setChecked(true);
 		setCurrentMeshRenderer(DEFAULT_MESH_RENDERER);
 		setUseLOD(true);
 		setDefaultLOD(0);
@@ -624,6 +629,7 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mUseLight->setChecked(false);
 		mUseMaterials->setChecked(false);
 		setCurrentGroundRenderer("BoFastGroundRenderer");
+		mUseGroundShaders->setChecked(false);
 		setCurrentMeshRenderer(DEFAULT_MESH_RENDERER);
 		setUseLOD(true);
 		setDefaultLOD(5000);
@@ -753,6 +759,8 @@ void OpenGLOptions::apply()
 		kapp->exit(1);
 	}
  }
+ boConfig->setBoolValue("UseGroundShaders", mUseGroundShaders->isChecked());
+ BosonGroundTheme::setUseGroundShaders(mUseGroundShaders->isChecked());
 
 
  emit signalOpenGLSettingsUpdated();
@@ -773,6 +781,7 @@ void OpenGLOptions::setDefaults()
  mUseLight->setChecked(DEFAULT_USE_LIGHT);
  mUseMaterials->setChecked(DEFAULT_USE_MATERIALS);
  setCurrentGroundRenderer(DEFAULT_GROUND_RENDERER);
+ mUseGroundShaders->setChecked(true);
  setCurrentMeshRenderer(DEFAULT_MESH_RENDERER);
  setUseLOD(DEFAULT_USE_LOD);
  setDefaultLOD(0);
@@ -808,6 +817,7 @@ void OpenGLOptions::load()
 
  setCurrentMeshRenderer(BoMeshRendererManager::manager()->currentRendererName());
  setCurrentGroundRenderer(BoGroundRendererManager::manager()->currentRendererName());
+ mUseGroundShaders->setChecked(boConfig->boolValue("UseGroundShaders"));
 }
 
 void OpenGLOptions::setUpdateInterval(int ms)

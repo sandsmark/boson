@@ -554,6 +554,9 @@ void BosonGameView::init()
  boTextureManager->initOpenGL();
  boWaterManager->initOpenGL();
  boConfig->setBoolValue("TextureFOW", boTextureManager->textureUnits() > 1);
+ if (!BosonGroundTheme::shadersSupported()) {
+	boConfig->setBoolValue("UseGroundShaders", false);
+ }
 
 
  if (Bo3dTools::checkError()) {

@@ -983,15 +983,21 @@ void BosonMap::resize(unsigned int width, unsigned int height)
  loadMapGeo(width, height);
 }
 
-BoTexture* BosonMap::currentTexture(int groundtype, int advanceCallsCount) const
+BoTexture* BosonMap::currentTexture(BosonGroundType* ground, int advanceCallsCount) const
 {
- BO_CHECK_NULL_RET0(groundTheme());
- BosonGroundType* ground = groundTheme()->groundType(groundtype);
+ BO_CHECK_NULL_RET0(ground);
  BoTextureArray* t = ground->textures;
  BO_CHECK_NULL_RET0(t);
  return t->texture((advanceCallsCount / ground->animationDelay) % t->count());
 }
 
+BoTexture* BosonMap::currentBumpTexture(BosonGroundType* ground, int advanceCallsCount) const
+{
+ BO_CHECK_NULL_RET0(ground);
+ BoTextureArray* t = ground->bumptextures;
+ BO_CHECK_NULL_RET0(t);
+ return t->texture((advanceCallsCount / ground->animationDelay) % t->count());
+}
 
 void BosonMap::fill(unsigned int groundtype)
 {
