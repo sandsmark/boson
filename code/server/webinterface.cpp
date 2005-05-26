@@ -81,10 +81,10 @@ void WebInterface::sendStatistics(QTextStream& os)
   writeServerInfos(os);
   os << "</td></tr><tr><td>\r\n";
   writeServerStatistics(os);
-  os << "</td></tr></tr></table></td><td valign=\"top\">\r\n";
+  os << "</td></tr></table></td><td valign=\"top\">\r\n";
   os << "<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" class=\"sidebar\"><tr><td>\r\n";
   writeGameInfos(os);
-  os << "</td></tr><tr><td>\r\n";
+  // end
   writeGameStatistics(os);
 
   writeHTMLFooter(os);
@@ -99,10 +99,11 @@ void WebInterface::writeHTTPHeader(QTextStream& os)
 
 void WebInterface::writeHTMLHeader(QTextStream& os, const QString& title)
 {
+  os << "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">";
   os << "<html>\r\n";
   os << "<head>\r\n";
   os << "  <title>" << title << "</title>\r\n";
-  os << " <style> \r\n\
+  os << " <style type=\"text/css\"> \r\n\
                 body {color: #00ff00;background-color: #000000;font-family: helvetica,arial;}\r\n \
                 td {color: #00ff00;}\r\n \
                 a {color: #40ff40;background-color: transparent;text-decoration: underline;}\r\n \
@@ -118,11 +119,10 @@ void WebInterface::writeHTMLHeader(QTextStream& os, const QString& title)
                 table.sidebarbox {background-color: #004000;color: #00ff00;}\r\n \
                 td.sidebarboxtitlecell {background-color: #202020;color: #00ff00;}\r\n \
                 td.sidebarboxcell {background-color: #081808;color: #00ff00;}\r\n \
-                pre {background-color: #103010;color: #a0d0a0;margin-left: 10px; \
-                margin-top: 10px; margin-bottom: 10px;}\r\n</style>\r\n";
+            </style>";
   os << "</head>\r\n";
   os << "<body>\r\n";
-  os << "<div align=\"center\" width=\"100%\"><img src=\"http://boson.eu.org/pictures/header_small.jpg\"></div>\r\n";
+  os << "<div align=\"center\"><img src=\"http://boson.eu.org/pictures/header_small.jpg\" alt=\"\"></div>\r\n";
   os << "<h1 align=\"center\">BOSON Server Statistics</h1>\r\n \
             <table border=\"0\" cellpadding=\"3\" cellspacing=\"2\" width=\"100%\" class=\"main\">\r\n\
             <tr valign=\"top\"><td>\r\n\
@@ -132,7 +132,8 @@ void WebInterface::writeHTMLHeader(QTextStream& os, const QString& title)
 
 void WebInterface::writeHTMLFooter(QTextStream& os)
 {
-  os << "</table></td></tr></table></body></html>\r\n";
+  os << "</td></tr></table></td></tr></table>\r\n";
+  os << "</body></html>\r\n";
 }
 
 void WebInterface::writeServerInfos(QTextStream& os)
