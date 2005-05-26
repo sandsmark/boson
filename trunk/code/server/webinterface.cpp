@@ -22,6 +22,7 @@
 #include "server.h"
 #include "game.h"
 #include "player.h"
+#include "boson/boversion.h"
 
 #include <qsocket.h>
 #include <qregexp.h>
@@ -110,7 +111,7 @@ void WebInterface::writeHTMLHeader(QTextStream& os, const QString& title)
                 .sidebarboxtitle {font-weight: bold;}\r\n \
                 td.boxcell {background-color: #202020;color: #00ff00;}\r\n \
                 .bigboxtitle {font-weight: bold;}\r\n \
-                .bigboxsubheader {font-weight: bold;}\r\n \
+                .bigboxsubheader {font-weight: bold;vertical-align: top;}\r\n \
                 table.main {background-color: #000000;color: #00ff00;}\r\n \
                 td.mainarea {background-color: #000000;color: #00ff00;}\r\n \
                 table.sidebar {background-color: #000000;color: #00ff00;}\r\n \
@@ -121,7 +122,8 @@ void WebInterface::writeHTMLHeader(QTextStream& os, const QString& title)
                 margin-top: 10px; margin-bottom: 10px;}\r\n</style>\r\n";
   os << "</head>\r\n";
   os << "<body>\r\n";
-  os << "<h1 align=\"center\">BOSON Server Statistics</h1>\r\n\
+  os << "<div align=\"center\" width=\"100%\"><img src=\"http://boson.eu.org/pictures/header_small.jpg\"></div>\r\n";
+  os << "<h1 align=\"center\">BOSON Server Statistics</h1>\r\n \
             <table border=\"0\" cellpadding=\"3\" cellspacing=\"2\" width=\"100%\" class=\"main\">\r\n\
             <tr valign=\"top\"><td>\r\n\
             <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" class=\"sidebar\">\r\n\
@@ -130,8 +132,7 @@ void WebInterface::writeHTMLHeader(QTextStream& os, const QString& title)
 
 void WebInterface::writeHTMLFooter(QTextStream& os)
 {
-  os << "</body>\r\n";
-  os << "</html>\r\n";
+  os << "</table></td></tr></table></body></html>\r\n";
 }
 
 void WebInterface::writeServerInfos(QTextStream& os)
@@ -174,8 +175,8 @@ void WebInterface::writeServerInfos(QTextStream& os)
                     </td></tr>\r\n \
                     <tr><td class=\"sidebarboxcell\">\r\n \
                         <table width=\"100%\">\r\n \
-                            <tr><td class=\"bigboxsubheader\">Version</td><td>0.11-pre1 (cvs)*</td></tr>\r\n \
-                            <tr><td class=\"bigboxsubheader\">Started</td><td>" << mServer->timeServerStarted().toString() << "</td></tr>\r\n \
+                            <tr><td class=\"bigboxsubheader\">Version</td><td>" << BOSON_VERSION_STRING << "</td></tr>\r\n \
+                            <tr><td class=\"bigboxsubheader\">Startet</td><td>" << mServer->timeServerStarted().toString() << "</td></tr>\r\n \
                             <tr><td class=\"bigboxsubheader\">Server Status</td><td>" << sServerStatus << "</td></tr>\r\n \
                             <tr><td class=\"bigboxsubheader\">Game Status</td><td>" << sGameStatus << "</td></tr>\r\n \
                         </table>\r\n \
@@ -206,7 +207,11 @@ void WebInterface::writeGameInfos(QTextStream& os)
   int clientcount = 0;
   int playercount = 0;
   QString sGameMap;
+  QString sGameSize;
+  QString sGameGroundTheme;
+  QString sGameComment;
   QString sGameStarted;
+
   Game* game = mServer->game();
 
   if(mServer->clientCount() > 0)
@@ -222,13 +227,13 @@ void WebInterface::writeGameInfos(QTextStream& os)
 
   if(game)
   {
-    clientcount--;
     if(game->gameStarted())
     {
-      sGameStarted = "The game is running";
-      sGameMap = game->mapName() + "<br>\r\n" \
-        +  QString::number(game->mapWidth()) + "x" +  QString::number(game->mapHeight()) + "<br>\r\n" \
-        + game->mapGroundTheme();
+      sGameStarted = "The Game is running";
+      sGameMap = game->mapName();
+      sGameSize = QString::number(game->mapWidth()) + "x" +  QString::number(game->mapHeight());
+      sGameGroundTheme = game->mapGroundTheme();
+      sGameComment = game->mapComment();
     }
     else
     {
@@ -250,6 +255,9 @@ void WebInterface::writeGameInfos(QTextStream& os)
                             <tr><td class=\"bigboxsubheader\">Status</td><td>" << sGameStarted << "</td></tr>\r\n \
                             <tr><td class=\"bigboxsubheader\">Clients/Players</td><td>" << clientcount  << "/" << playercount << "</td></tr>\r\n \
                             <tr><td class=\"bigboxsubheader\">Map</td><td>" << sGameMap << "</td></tr>\r\n \
+                            <tr><td class=\"bigboxsubheader\">Map size</td><td>" << sGameSize << "</td></tr>\r\n \
+                            <tr><td class=\"bigboxsubheader\">Map Ground Theme</td><td>" << sGameGroundTheme<< "</td></tr>\r\n \
+                            <tr><td class=\"bigboxsubheader\">Map comment</td><td width=\"100\">" << sGameComment << "</td></tr>\r\n \
                         </table>\r\n \
                 </td></tr>\r\n \
             </table>\r\n \
@@ -258,17 +266,18 @@ void WebInterface::writeGameInfos(QTextStream& os)
 
 void WebInterface::writeGameStatistics(QTextStream& os)
 {
-  if(mServer->clientCount() > 0)
-  {
-    os << "<table cellpadding=\"2\" cellspacing=\"1\" border=\"0\" width=\"100%\" class=\"sidebarbox\">\r\n \
+  os << "<table cellpadding=\"2\" cellspacing=\"1\" border=\"0\" width=\"100%\" class=\"sidebarbox\">\r\n \
                 <tr><td class=\"sidebarboxtitlecell\">\r\n \
                     <font class=\"sidebarboxtitle\">&nbsp;Game Statistics</font>\r\n \
                 </td></tr>\r\n \
-                <tr><td class=\"sidebarboxcell\">\r\n";
+                <tr><td class=\"sidebarboxcell\">\r\n \
+                    <pre>\r\n";
+  if(mServer->clientCount() > 0)
+  {
     writeClientStats(os);
     writePlayerStats(os);
-    os << "</td></tr></table><br>";
   }
+  os << "</pre></td></tr></table><br>";
 }
 
 void WebInterface::writeClientStats(QTextStream& os)
