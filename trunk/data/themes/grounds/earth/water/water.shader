@@ -37,10 +37,10 @@ varying vec3 lightDir;
 void main()
 {
   // Get normal from the normalmap
-  vec3 normal = normalize(texture2D(texture_1, gl_TexCoord[0]).xyz * 2.0 - 1.0);
+  vec3 normal = normalize(texture2D(texture_1, gl_TexCoord[0].xy).rgb * 2.0 - 1.0);
 
-  // Amount of diffuse light received by surface (N.L)
-  float diffuse = dot(lightDir, normal) * 0.6;
+  // Diffuse light received by surface (N.L)
+  vec3 diffuse = dot(lightDir, normal) * gl_LightSource[0].diffuse.rgb;
 
   // View-vector
   vec3 viewv = normalize(cameraPos - vertex);
@@ -49,13 +49,16 @@ void main()
   // Amount of specular light
   float specular = pow(dot(halfv, normal), 80);
   // Specular color
-  vec4 speccolor = vec4(1.0, 0.95, 0.8, 1.0) * specular;
+  vec4 speccolor = gl_LightSource[0].specular * specular;
 
   // Color from the diffuse texture
-  vec3 basecolor = texture2D(texture_0, gl_TexCoord[0]).xyz;
+  vec3 basetexcolor = texture2D(texture_0, gl_TexCoord[0].xy).rgb;
+
+  // Color of the lit water surface
+  vec3 litcolor = basetexcolor * (diffuse + gl_LightSource[0].ambient.rgb);
 
   // Color from envmap
-  vec3 envcolor = textureCube(texture_2, reflect(vec3(viewv.x, viewv.y, -viewv.z), normal)).xyz;
+  vec3 envcolor = textureCube(texture_2, reflect(vec3(viewv.x, viewv.y, -viewv.z), normal)).rgb * gl_LightSource[0].ambient.rgb;
 
   // Compute fresnel reflection/refraction factor
   float d = IOR * dot(viewv, normal);
@@ -64,6 +67,6 @@ void main()
   // Final result
   // This will be mix between reflection (from envmap) and basecolor
   // Specular color will be added to the result
-  gl_FragColor = vec4(mix(envcolor, basecolor * (diffuse + 0.4), refrFactor), 1.0 - refrFactor * 0.75) + speccolor;
+  gl_FragColor = vec4(mix(envcolor, litcolor, refrFactor), 1.0 - refrFactor * 0.75) + speccolor;
 }
 
