@@ -254,12 +254,15 @@ void WebInterface::writeGameInfos(QTextStream& os)
                 <tr><td class=\"sidebarboxcell\">\r\n \
                         <table width=\"100%\">\r\n \
                             <tr><td class=\"bigboxsubheader\">Status</td><td>" << sGameStarted << "</td></tr>\r\n \
-                            <tr><td class=\"bigboxsubheader\">Clients/Players</td><td>" << clientcount  << "/" << playercount << "</td></tr>\r\n \
-                            <tr><td class=\"bigboxsubheader\">Map</td><td>" << sGameMap << "</td></tr>\r\n \
+                            <tr><td class=\"bigboxsubheader\">Clients/Players</td><td>" << clientcount  << "/" << playercount << "</td></tr>\r\n";
+  if(game && game->gameStarted())
+  {
+    os << "                            <tr><td class=\"bigboxsubheader\">Map</td><td>" << sGameMap << "</td></tr>\r\n \
                             <tr><td class=\"bigboxsubheader\">Map size</td><td>" << sGameSize << "</td></tr>\r\n \
-                            <tr><td class=\"bigboxsubheader\">Map Ground Theme</td><td>" << sGameGroundTheme<< "</td></tr>\r\n \
-                            <tr><td class=\"bigboxsubheader\">Map comment</td><td width=\"100\">" << sGameComment << "</td></tr>\r\n \
-                        </table>\r\n \
+                            <tr><td class=\"bigboxsubheader\">Map ground theme</td><td>" << sGameGroundTheme<< "</td></tr>\r\n \
+                            <tr><td class=\"bigboxsubheader\">Map comment</td><td width=\"100\">" << sGameComment << "</td></tr>\r\n";
+  }
+  os << "                        </table>\r\n \
                 </td></tr>\r\n \
             </table>\r\n \
             <br>\r\n";
