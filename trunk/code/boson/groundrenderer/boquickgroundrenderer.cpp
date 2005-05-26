@@ -29,6 +29,7 @@
 #include "../botexture.h"
 #include "../playerio.h"
 #include "../bosonconfig.h"
+#include "../boshader.h"
 #include "bogroundrendererbase.h"
 #include "bodebug.h"
 
@@ -215,6 +216,8 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
   // Temporary array to hold the indices for tristrips
   unsigned int* indices = new unsigned int[2 * (mChunkSize + 1)];
 
+  bool useShaders = boConfig->boolValue("UseGroundShaders");
+
 
   glPushClientAttrib(GL_ALL_ATTRIB_BITS);
 
@@ -238,12 +241,16 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
 
   // Texture stuff
   // Use OpenGL's automatic texture coordinate generation.
-  float texPlaneS[] = { 0.2, 0.0, 0.0, 0.0 };
-  float texPlaneT[] = { 0.0, 0.2, 0.0, 0.0 };
+  boTextureManager->activateTextureUnit(0);
+  float texPlaneS[] = { 1.0, 0.0, 0.0, 0.0 };
+  float texPlaneT[] = { 0.0, 1.0, 0.0, 0.0 };
   glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
   glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
   glEnable(GL_TEXTURE_GEN_S);
   glEnable(GL_TEXTURE_GEN_T);
+  glTexGenfv(GL_S, GL_OBJECT_PLANE, texPlaneS);
+  glTexGenfv(GL_T, GL_OBJECT_PLANE, texPlaneT);
+  glMatrixMode(GL_TEXTURE);
 
   // Set blending function
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -286,15 +293,27 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
       // Init if necessary
       if(!inited && !mDrawGrid)
       {
+        BosonGroundType* ground = map->groundTheme()->groundType(i);
         // Bind current texture
-        BoTexture* tex = map->currentTexture(i, boGame->advanceCallsCount());
+        BoTexture* tex = map->currentTexture(ground, boGame->advanceCallsCount());
         tex->bind();
         // Set correct tex planes
-        BosonGroundType* ground = map->groundTheme()->groundType(i);
-        texPlaneS[0] = 1.0f / ground->texturesize;
-        texPlaneT[1] = 1.0f / ground->texturesize;
-        glTexGenfv(GL_S, GL_OBJECT_PLANE, texPlaneS);
-        glTexGenfv(GL_T, GL_OBJECT_PLANE, texPlaneT);
+        glLoadIdentity();
+        glScalef(1.0f / ground->texturesize, 1.0f / ground->texturesize, 1.0);
+        if(useShaders)
+        {
+          // Bind bump tex
+          boTextureManager->activateTextureUnit(2);
+          BoTexture* bumptex = map->currentBumpTexture(ground, boGame->advanceCallsCount());
+          bumptex->bind();
+          glLoadIdentity();
+          glScalef(1.0f / ground->texturesize, 1.0f / ground->texturesize, 1.0);
+          boTextureManager->activateTextureUnit(0);
+          // Shader
+          ground->shader->bind();
+          ground->shader->setUniform("bumpScale", ground->bumpscale);
+          ground->shader->setUniform("bumpBias", ground->bumpbias);
+        }
         // Bind texture weights vbo corresponding to this texture
         glColorPointer(4, GL_UNSIGNED_BYTE, 0, (char*)NULL + mVBOTextureLayerSize*i);
         inited = true;
@@ -343,9 +362,16 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
     }
   }
 
+  glLoadIdentity();
+  glMatrixMode(GL_MODELVIEW);
+
   // Disable VBO
   boglBindBuffer(GL_ARRAY_BUFFER, 0);
 
+  if(useShaders)
+  {
+    BoShader::unbind();
+  }
   boTextureManager->unbindTexture();
   boTextureManager->disableTexturing();
 

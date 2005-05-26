@@ -314,6 +314,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntryUInt("MaxProfilingEntriesGL", 1000);
  addDynamicEntryUInt("MaxProfilingEntriesAdvance", 200);
  addDynamicEntryUInt("MaxProfilingEntries", 1000);
+ addDynamicEntryBool("UseGroundShaders", true);
 
  // these are dynamic entries. usually they are added in the class where they
  // get used, but sometimes it is also handy to add them here (e.g. when it

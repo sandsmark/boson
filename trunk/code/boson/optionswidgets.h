@@ -243,6 +243,7 @@ private:
 	QCheckBox* mUseLight;
 	QCheckBox* mUseMaterials;
 	QComboBox* mGroundRenderer;
+	QCheckBox* mUseGroundShaders;
 	QCheckBox* mUseLOD;
 	QComboBox* mDefaultLOD;
 	QPushButton* mFont;

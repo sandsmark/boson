@@ -22,24 +22,33 @@
 #include <qstring.h>
 #include <qwindowdefs.h> // QRgb
 #include <qintdict.h>
+#include <qdict.h>
 
 class QImage;
 class QPixmap;
 
 class BosonMap;
 class BoTextureArray;
+class BoShader;
+class BoTexture;
 
 
 class BosonGroundType
 {
 public:
-	BosonGroundType() { id = -1; textures = 0; icon = 0; animationDelay = 1; }
+	BosonGroundType();
 	~BosonGroundType();
 
 	int id;
 	BoTextureArray* textures;
 	QString texturefile;
+	BoTextureArray* bumptextures;
+	QString bumptexturefile;
+	float bumpscale;
+	float bumpbias;
 	float texturesize;
+	QString shaderfile;
+	BoShader* shader;
 	int animationDelay;
 	QString name;
 	// Maybe change to BoVector3Float?
@@ -65,6 +74,8 @@ public:
 	~BosonGroundTheme();
 
 	const QString& identifier() const;
+
+	const QString& themeDirectory() const;
 
 	/**
 	 * This should load all data from the config file (i.e. index.ground),
@@ -105,6 +116,9 @@ public:
 
 	BosonGroundType* groundType(unsigned int i) const;
 
+	static bool shadersSupported();
+	static void setUseGroundShaders(bool use);
+
 protected:
 	/**
 	 * @param dir The directory to load the image from. Including the theme
@@ -114,9 +128,13 @@ protected:
 	 **/
 	void loadTextures(const QString& dir, unsigned int groundtype);
 
+	void loadShaders(const QString& dir, BosonGroundType* ground);
+
 private:
 	BosonGroundThemePrivate* d;
 	QIntDict<BosonGroundType> mGroundTypes;
+	QDict<BoTexture> mBumpTextures;
+	QDict<BoShader> mShaders;
 };
 
 #endif

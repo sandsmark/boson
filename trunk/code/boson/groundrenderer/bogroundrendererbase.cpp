@@ -511,8 +511,8 @@ void FogTexture::start(const BosonMap* map)
 	updateFogTexture();
 	boTextureManager->bindTexture(mFogTexture);
 	// Use automatic texcoord generation to map fog texture to cells
-	const float texPlaneS[] = { 1.0f / mFogTextureDataW, 0.0, 0.0, 0.0 };
-	const float texPlaneT[] = { 0.0, 1.0f / mFogTextureDataH, 0.0, 0.0 };
+	const float texPlaneS[] = { 1.0, 0.0, 0.0, 0.0 };
+	const float texPlaneT[] = { 0.0, 1.0, 0.0, 0.0 };
 	glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
 	glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
 	glTexGenfv(GL_S, GL_OBJECT_PLANE, texPlaneS);
@@ -523,6 +523,7 @@ void FogTexture::start(const BosonMap* map)
 	glLoadIdentity();
 	// This compensates for the border that we add to the texture
 	glTranslatef(1.0f / mFogTextureDataW, 1.0f / mFogTextureDataH, 0.0);
+	glScalef(1.0f / mFogTextureDataW, 1.0f / mFogTextureDataH, 1.0f);
 	glScalef(1, -1, 1);
 	glMatrixMode(GL_MODELVIEW);
 	boTextureManager->activateTextureUnit(0);
@@ -534,6 +535,9 @@ void FogTexture::stop(const BosonMap*)
  if (boConfig->boolValue("TextureFOW")) {
 	// end using fog texture
 	boTextureManager->activateTextureUnit(1);
+	glMatrixMode(GL_TEXTURE);
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
 	boTextureManager->unbindTexture();
 	{
 		glDisable(GL_TEXTURE_GEN_S);
