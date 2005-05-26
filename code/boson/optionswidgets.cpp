@@ -600,7 +600,7 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mUseLight->setChecked(DEFAULT_USE_LIGHT);
 		mUseMaterials->setChecked(DEFAULT_USE_MATERIALS);
 		setCurrentGroundRenderer(DEFAULT_GROUND_RENDERER);
-		mUseGroundShaders->setChecked(true);
+		mUseGroundShaders->setChecked(false);
 		setCurrentMeshRenderer(DEFAULT_MESH_RENDERER);
 		setUseLOD(true);
 		setDefaultLOD(0);
@@ -781,7 +781,7 @@ void OpenGLOptions::setDefaults()
  mUseLight->setChecked(DEFAULT_USE_LIGHT);
  mUseMaterials->setChecked(DEFAULT_USE_MATERIALS);
  setCurrentGroundRenderer(DEFAULT_GROUND_RENDERER);
- mUseGroundShaders->setChecked(true);
+ mUseGroundShaders->setChecked(false);
  setCurrentMeshRenderer(DEFAULT_MESH_RENDERER);
  setUseLOD(DEFAULT_USE_LOD);
  setDefaultLOD(0);
