@@ -143,7 +143,7 @@ void WebInterface::writeServerInfos(QTextStream& os)
 
   if(mServer->isOfferingConnections())
   {
-      sServerStatus = "Listening for new connections on port <b>" + QString::number(mServer->serverPort()) + "</b>";
+      sServerStatus = "Listening for new connections on port " + QString::number(mServer->serverPort());
   }
   else
   {
