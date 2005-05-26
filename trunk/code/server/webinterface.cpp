@@ -176,7 +176,7 @@ void WebInterface::writeServerInfos(QTextStream& os)
                     <tr><td class=\"sidebarboxcell\">\r\n \
                         <table width=\"100%\">\r\n \
                             <tr><td class=\"bigboxsubheader\">Version</td><td>" << BOSON_VERSION_STRING << "</td></tr>\r\n \
-                            <tr><td class=\"bigboxsubheader\">Startet</td><td>" << mServer->timeServerStarted().toString() << "</td></tr>\r\n \
+                            <tr><td class=\"bigboxsubheader\">Started</td><td>" << mServer->timeServerStarted().toString() << "</td></tr>\r\n \
                             <tr><td class=\"bigboxsubheader\">Server Status</td><td>" << sServerStatus << "</td></tr>\r\n \
                             <tr><td class=\"bigboxsubheader\">Game Status</td><td>" << sGameStatus << "</td></tr>\r\n \
                         </table>\r\n \
@@ -227,6 +227,7 @@ void WebInterface::writeGameInfos(QTextStream& os)
 
   if(game)
   {
+    clientcount--;
     if(game->gameStarted())
     {
       sGameStarted = "The Game is running";
@@ -266,18 +267,17 @@ void WebInterface::writeGameInfos(QTextStream& os)
 
 void WebInterface::writeGameStatistics(QTextStream& os)
 {
-  os << "<table cellpadding=\"2\" cellspacing=\"1\" border=\"0\" width=\"100%\" class=\"sidebarbox\">\r\n \
+  if(mServer->clientCount() > 0)
+  {
+    os << "<table cellpadding=\"2\" cellspacing=\"1\" border=\"0\" width=\"100%\" class=\"sidebarbox\">\r\n \
                 <tr><td class=\"sidebarboxtitlecell\">\r\n \
                     <font class=\"sidebarboxtitle\">&nbsp;Game Statistics</font>\r\n \
                 </td></tr>\r\n \
-                <tr><td class=\"sidebarboxcell\">\r\n \
-                    <pre>\r\n";
-  if(mServer->clientCount() > 0)
-  {
+                <tr><td class=\"sidebarboxcell\">\r\n";
     writeClientStats(os);
     writePlayerStats(os);
+    os << "</td></tr></table><br>";
   }
-  os << "</pre></td></tr></table><br>";
 }
 
 void WebInterface::writeClientStats(QTextStream& os)
