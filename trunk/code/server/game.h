@@ -61,6 +61,7 @@ class Game : public KGame
     int gameSpeed() const  { return mGameSpeed; }
     bool gamePaused() const  { return mGamePaused; }
     bool gameStarted() const  { return mGameStarted; }
+    bool gameInited() const  { return mGameInited; }
     const QDateTime& gameStartedTime()  { return mGameStartedTime; }
 
     const QString& mapName() const  { return mMapName; }
@@ -95,6 +96,7 @@ class Game : public KGame
     KGamePropertyInt mAdvanceFlag;
     KGameProperty<unsigned int> mAdvanceCallsCount;
     bool mGameStarted;
+    bool mGameInited;
     QDateTime mGameStartedTime;
 
     QString mMapName;
