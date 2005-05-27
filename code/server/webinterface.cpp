@@ -142,38 +142,20 @@ void WebInterface::writeHTMLFooter(QTextStream& os)
 void WebInterface::writeServerInfos(QTextStream& os)
 {
   QString sServerStatus;
-  QString sGameStatus;
-  Game* g = mServer->game();
+  Game* game = mServer->game();
 
   if(mServer->isOfferingConnections())
   {
-      sServerStatus = "Listening for new connections on port " + QString::number(mServer->serverPort());
+      if (!game)
+            sServerStatus = "Listening for new connections on port " + QString::number(mServer->serverPort());
+      else if(game->gameInited())
+            sServerStatus = "NOT accepting new connections";
+      else
+            sServerStatus = "Listening for new connections on port " + QString::number(mServer->serverPort());
   }
   else
   {
       sServerStatus = "NOT accepting new connections";
-  }
-
-  if(!g)
-  {
-    sGameStatus = "Not running";
-  }
-  else
-  {
-    if(g->gameStarted())
-    {
-            if(g->gamePaused())
-            {
-                sGameStatus = "Paused";
-            }
-            else
-            {
-                sGameStatus = "Running";
-            }
-    }
-    else
-        sGameStatus = "Not running";
-
   }
 
   os << "<table cellpadding=\"2\" cellspacing=\"1\" border=\"0\" width=\"100%\" class=\"sidebarbox\">\r\n \
@@ -184,8 +166,7 @@ void WebInterface::writeServerInfos(QTextStream& os)
                         <table width=\"100%\">\r\n \
                             <tr><td class=\"bigboxsubheader\">Version</td><td>" << BOSON_VERSION_STRING << "</td></tr>\r\n \
                             <tr><td class=\"bigboxsubheader\">Started</td><td>" << mServer->timeServerStarted().toString() << "</td></tr>\r\n \
-                            <tr><td class=\"bigboxsubheader\">Server Status</td><td>" << sServerStatus << "</td></tr>\r\n \
-                            <tr><td class=\"bigboxsubheader\">Game Status</td><td>" << sGameStatus << "</td></tr>\r\n \
+                            <tr><td class=\"bigboxsubheader\">Status</td><td>" << sServerStatus << "</td></tr>\r\n \
                         </table>\r\n \
                     </td></tr>\r\n \
                 </table>\r\n \
@@ -237,16 +218,24 @@ void WebInterface::writeGameInfos(QTextStream& os)
     clientcount--;
     if(game->gameStarted())
     {
-      sGameStarted = "The Game is running";
+      sGameStarted = "The game is running";
       sGameMap = game->mapName();
       sGameSize = QString::number(game->mapWidth()) + "x" +  QString::number(game->mapHeight());
       sGameGroundTheme = game->mapGroundTheme();
       sGameComment = game->mapComment();
     }
-    else
+    else if(game->gamePaused())
     {
-      sGameStarted = "The game is not yet started";
+      sGameStarted = "The game is paused";
+      sGameMap = game->mapName();
+      sGameSize = QString::number(game->mapWidth()) + "x" +  QString::number(game->mapHeight());
+      sGameGroundTheme = game->mapGroundTheme();
+      sGameComment = game->mapComment();
     }
+    else if(game->gameInited())
+      sGameStarted = "The game is loading...";
+    else
+        sGameStarted = "The game is not yet started";
   }
   else
   {
@@ -262,7 +251,7 @@ void WebInterface::writeGameInfos(QTextStream& os)
                         <table width=\"100%\">\r\n \
                             <tr><td class=\"bigboxsubheader\">Status</td><td>" << sGameStarted << "</td></tr>\r\n \
                             <tr><td class=\"bigboxsubheader\">Clients/Players</td><td>" << clientcount  << "/" << playercount << "</td></tr>\r\n";
-  if(game && game->gameStarted())
+  if(game && (game->gameStarted() || game->gamePaused()))
   {
     os << "                            <tr><td class=\"bigboxsubheader\">Map</td><td>" << sGameMap << "</td></tr>\r\n \
                             <tr><td class=\"bigboxsubheader\">Map size</td><td>" << sGameSize << "</td></tr>\r\n \

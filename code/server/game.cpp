@@ -46,6 +46,8 @@ Game::Game(Server* s, Q_UINT16 cookie) : KGame(cookie)
 
   mCycle = 0;
   mGameStarted = false;
+  mGameInited = false;
+
   mMapWidth = -1;
   mMapHeight = -1;
 
@@ -175,7 +177,7 @@ bool Game::playerInput(QDataStream& msg, KPlayer* player)
 
 void Game::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 receiver, Q_UINT32 sender)
 {
-  QDataStream stream(buffer, IO_ReadOnly);
+ QDataStream stream(buffer, IO_ReadOnly);
   switch(msgid)
   {
     case BosonMessage::IdNewGame:
@@ -184,6 +186,7 @@ void Game::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 receive
         boError() << k_funcinfo << "received IdNewGame, but game is already running" << endl;
         return;
       }
+      mGameInited = true;
       Q_INT8 gameMode; // game/editor mode
       stream >> gameMode;
       if(gameMode != 1) {
@@ -206,6 +209,7 @@ void Game::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 receive
         QByteArray b = buffer.copy();
         sendMessage(b, BosonMessage::IdGameStartingCompleted);
       }
+      mGameInited = false;
     }
     case BosonMessage::IdGameIsStarted:
     {
