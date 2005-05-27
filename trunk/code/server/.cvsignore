@@ -1,0 +1,9 @@
+.deps
+.libs
+Makefile
+Makefile.in
+boserver
+game.moc.cpp
+player.moc.cpp
+server.moc
+webinterface.moc
