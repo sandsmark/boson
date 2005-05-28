@@ -46,7 +46,7 @@
 // And radians to degrees conversion
 #define RAD2DEG (180.0/M_PI)
 
-#define DEBUG_FRAGMENT
+//#define DEBUG_FRAGMENT
 
 
 /*****  BosonShot  *****/
