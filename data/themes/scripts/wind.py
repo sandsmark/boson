@@ -14,10 +14,10 @@ cycle = 0
 enable = 1
 
 rand = Random(96435)
-wbase = 0.2, 0.1, 0.0
+wbase = 0.0, 0.0, 0.0
 wrandom = 0.0, 0.0, 0.0
-wrandomscale = 0.25
-wchangespeed = 0.5
+wrandomscale = 0.4
+wchangespeed = 0.6
 
 def init(startcycle = 0):
   # Init lighting
