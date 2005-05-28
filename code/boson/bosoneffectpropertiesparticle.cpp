@@ -38,6 +38,7 @@
 #warning this is never freed!
 QDict<BoTextureArray> BosonEffectPropertiesParticle::mTextureArrays;
 QString BosonEffectPropertiesParticle::mTexturePath;
+BoVector3Fixed BosonEffectPropertiesParticle::mWind(0.2, 0.1, 0.0);
 
 BosonEffectPropertiesParticle::BosonEffectPropertiesParticle() :
     BosonEffectProperties()
@@ -257,10 +258,9 @@ void BosonEffectPropertiesParticleGeneric::initParticle(BosonEffectParticle* eff
   {
     particle->velo.scale(BosonEffect::getFloat(mMinVeloScale, mMaxVeloScale) / particle->velo.length());
   }
-  particle->velo += (wind().toFixed() * e->mass());
 }
 
-void BosonEffectPropertiesParticleGeneric::updateParticle(BosonEffectParticle* effect, BosonParticle* p) const
+void BosonEffectPropertiesParticleGeneric::updateParticle(BosonEffectParticle* effect, BosonParticle* p, float elapsed) const
 {
   BosonGenericParticle* particle = (BosonGenericParticle*)p;
   float factor = particle->life / particle->maxage;  // This is 1 when particle is born and will be 0 by the time when it dies
@@ -275,6 +275,8 @@ void BosonEffectPropertiesParticleGeneric::updateParticle(BosonEffectParticle* e
     t = mTextures->count() - 1;
   }
   particle->tex = mTextures->texture(t);
+  BosonEffectParticleGeneric* e = (BosonEffectParticleGeneric*)effect;
+  particle->pos += (wind() * (e->mass() * elapsed));
 }
 
 
@@ -406,10 +408,9 @@ void BosonEffectPropertiesParticleTrail::initParticle(BosonEffectParticle* effec
         BosonEffect::getFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getFloat(mMinVelo[2], mMaxVelo[2]));
   }
   particle->pos += offset;
-  particle->velo += (wind().toFixed() * e->mass());
 }
 
-void BosonEffectPropertiesParticleTrail::updateParticle(BosonEffectParticle* effect, BosonParticle* p) const
+void BosonEffectPropertiesParticleTrail::updateParticle(BosonEffectParticle* effect, BosonParticle* p, float elapsed) const
 {
   BosonGenericParticle* particle = (BosonGenericParticle*)p;
   float factor = particle->life / particle->maxage;  // This is 1 when particle is born and will be 0 by the time when it dies
@@ -424,6 +425,8 @@ void BosonEffectPropertiesParticleTrail::updateParticle(BosonEffectParticle* eff
     t = mTextures->count() - 1;
   }
   particle->tex = mTextures->texture(t);
+  BosonEffectParticleTrail* e = (BosonEffectParticleTrail*)effect;
+  particle->pos += (wind() * (e->mass() * elapsed));
 }
 
 
@@ -516,13 +519,12 @@ void BosonEffectPropertiesParticleEnvironmental::initParticle(BosonEffectParticl
   BosonEffectParticleEnvironmental* e = (BosonEffectParticleEnvironmental*)effect;
   particle->velo.set(BosonEffect::getFloat(mMinVelo[0], mMaxVelo[0]),
       BosonEffect::getFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getFloat(mMinVelo[2], mMaxVelo[2]));
-  particle->velo += (wind().toFixed() * e->mass());
 }
 
-void BosonEffectPropertiesParticleEnvironmental::updateParticle(BosonEffectParticle* /*effect*/, BosonParticle* /*p*/) const
+void BosonEffectPropertiesParticleEnvironmental::updateParticle(BosonEffectParticle* effect, BosonParticle* p, float elapsed) const
 {
-  // Nothing to do, because parameters are constant for environmental
-  //  particles.
-  // TODO: maybe support animated textures (they would just loop then)?
+  BosonGenericParticle* particle = (BosonGenericParticle*)p;
+  BosonEffectParticleEnvironmental* e = (BosonEffectParticleEnvironmental*)effect;
+  particle->pos += (wind() * (e->mass() * elapsed));
 }
 

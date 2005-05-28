@@ -355,7 +355,7 @@ void BosonEffectParticleGeneric::updateParticle(BosonGenericParticle* particle, 
 
   if(properties())
   {
-    ((BosonEffectPropertiesParticleGeneric*)properties())->updateParticle(this, particle);
+    ((BosonEffectPropertiesParticleGeneric*)properties())->updateParticle(this, particle, elapsed);
     mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (float)(particle->pos - mPosition).dotProduct());
   }
 }
@@ -703,7 +703,7 @@ void BosonEffectParticleTrail::updateParticle(BosonGenericParticle* particle, fl
 
   if(properties())
   {
-    ((BosonEffectPropertiesParticleTrail*)properties())->updateParticle(this, particle);
+    ((BosonEffectPropertiesParticleTrail*)properties())->updateParticle(this, particle, elapsed);
   }
   mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (float)(particle->pos - mPosition).dotProduct());
 }
@@ -1174,7 +1174,7 @@ void BosonEffectParticleEnvironmental::updateParticle(BosonGenericParticle* part
 
   if(properties())
   {
-    ((BosonEffectPropertiesParticleTrail*)properties())->updateParticle(this, particle);
+    ((BosonEffectPropertiesParticleTrail*)properties())->updateParticle(this, particle, elapsed);
   }
 }
 

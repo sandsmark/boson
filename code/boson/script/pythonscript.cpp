@@ -135,6 +135,8 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"addEffect", py_addEffect, METH_VARARGS, 0 },
   { (char*)"addEffectToUnit", py_addEffectToUnit, METH_VARARGS, 0 },
   { (char*)"advanceEffects", py_advanceEffects, METH_VARARGS, 0 },
+  { (char*)"wind", py_wind, METH_VARARGS, 0 },
+  { (char*)"setWind", py_setWind, METH_VARARGS, 0 },
   { (char*)"unfogPlayer", py_unfogPlayer, METH_VARARGS, 0 },
   { (char*)"unfogAllPlayers", py_unfogAllPlayers, METH_VARARGS, 0 },
   { (char*)"setAcceptUserInput", py_setAcceptUserInput, METH_VARARGS, 0 },
@@ -1879,6 +1881,25 @@ PyObject* PythonScript::py_advanceEffects(PyObject*, PyObject* args)
     return 0;
   }
   BosonScript::advanceEffects(ticks);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_wind(PyObject*, PyObject*)
+{
+  BO_CHECK_NULL_RET0(currentScript());
+  const BoVector3Fixed& wind = currentScript()->wind();
+  return Py_BuildValue((char*)"[f, f, f]", (float)wind.x(), (float)wind.y(), (float)wind.z());
+}
+
+PyObject* PythonScript::py_setWind(PyObject*, PyObject* args)
+{
+  float x = 0, y = 0, z = 0;
+  if(!PyArg_ParseTuple(args, (char*)"(fff)", &x, &y, &z))
+  {
+    return 0;
+  }
+  BosonScript::setWind(BoVector3Fixed(x, y, z));
   Py_INCREF(Py_None);
   return Py_None;
 }
