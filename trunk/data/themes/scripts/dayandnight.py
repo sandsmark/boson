@@ -107,6 +107,15 @@ def advance():
   cycle = cycle + 1
   advanceDay(cycle)
 
+def setTime(hour, min, sec = 0):
+  global curtime
+  mytime_ = time.struct_time((2005, 5, 13,   hour, min, sec,   0, 1, -1))
+  curtime = time.mktime(mytime_)
+  sun.update(curtime)
+  updateLighting()
+
+
+
 
 ### "Day And Night" demo
 ### Simulates day and night
@@ -130,6 +139,10 @@ def advanceDay(cycle):
   ### Update sun
   sun.update(curtime)
 
+  updateLighting()
+
+def updateLighting():
+  global sun
   ### Light position:
   # Calculate position of the light on xy plane
   lightpos2d = pointByRotation(degrees(sun.az), 5000)
