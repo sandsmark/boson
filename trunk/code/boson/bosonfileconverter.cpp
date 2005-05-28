@@ -1186,6 +1186,7 @@ bool BosonFileConverter::addLocalPlayerPyScript_From_0_10_82_To_0_10_83(QByteArr
 {
   QString script =
     "import dayandnight\n"
+    "import wind\n"
     "\n"
     "player = -1\n"
     "\n"
@@ -1193,13 +1194,15 @@ bool BosonFileConverter::addLocalPlayerPyScript_From_0_10_82_To_0_10_83(QByteArr
     "  global player\n"
     "  player = id\n"
     "  dayandnight.init()\n"
+    "  wind.init()\n"
     "\n"
     "def setPlayerId(id):\n"
     "  global player\n"
     "  player = id\n"
     "\n"
     "def advance():\n"
-    "  dayandnight.advance()\n";
+    "  dayandnight.advance()\n"
+    "  wind.advance()\n";
   localplayerPy.duplicate(script.latin1(), script.length());
   return true;
 }
