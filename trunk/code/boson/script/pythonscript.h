@@ -174,6 +174,8 @@ class PythonScript : public BosonScript
     static PyObject* py_addEffect(PyObject* self, PyObject* args);
     static PyObject* py_addEffectToUnit(PyObject* self, PyObject* args);
     static PyObject* py_advanceEffects(PyObject* self, PyObject* args);
+    static PyObject* py_wind(PyObject* self, PyObject* args);
+    static PyObject* py_setWind(PyObject* self, PyObject* args);
     static PyObject* py_unfogPlayer(PyObject* self, PyObject* args);
     static PyObject* py_unfogAllPlayers(PyObject* self, PyObject* args);
     static PyObject* py_setAcceptUserInput(PyObject* self, PyObject* args);

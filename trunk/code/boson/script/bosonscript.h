@@ -442,6 +442,8 @@ class BosonScript
     static void addEffectToUnit(int unitid, unsigned int effectid);
     static void addEffectToUnit(int unitid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot = 0);
     static void advanceEffects(int ticks);
+    static void setWind(const BoVector3Fixed& wind);
+    static const BoVector3Fixed& wind();
     static void unfogPlayer(int playerid);
     static void unfogAllPlayers();
     void setAcceptUserInput(bool accept);

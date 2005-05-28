@@ -55,7 +55,8 @@ class BosonEffectPropertiesParticle : public BosonEffectProperties
     static void initStatic(const QString& texdir);
 
 
-    inline static BoVector3Float wind()  { return BoVector3Float(0.2, 0.1, 0); };
+    inline static const BoVector3Fixed& wind()  { return mWind; }
+    inline static void setWind(const BoVector3Fixed& w)  { mWind = w; }
 
 
   protected:
@@ -63,6 +64,7 @@ class BosonEffectPropertiesParticle : public BosonEffectProperties
 
     static QDict<BoTextureArray> mTextureArrays;
     static QString mTexturePath;
+    static BoVector3Fixed mWind;
 };
 
 
@@ -101,7 +103,7 @@ class BosonEffectPropertiesParticleGeneric : public BosonEffectPropertiesParticl
     /**
      * Updates given particle
      **/
-    virtual void updateParticle(BosonEffectParticle* effect, BosonParticle* particle) const;
+    virtual void updateParticle(BosonEffectParticle* effect, BosonParticle* particle, float elapsed) const;
 
 
   protected:
@@ -156,7 +158,7 @@ class BosonEffectPropertiesParticleTrail : public BosonEffectPropertiesParticle
     /**
      * Updates given particle
      **/
-    virtual void updateParticle(BosonEffectParticle* effect, BosonParticle* particle) const;
+    virtual void updateParticle(BosonEffectParticle* effect, BosonParticle* particle, float elapsed) const;
 
 
   protected:
@@ -212,7 +214,7 @@ class BosonEffectPropertiesParticleEnvironmental : public BosonEffectPropertiesP
     /**
      * Updates given particle
      **/
-    virtual void updateParticle(BosonEffectParticle* effect, BosonParticle* particle) const;
+    virtual void updateParticle(BosonEffectParticle* effect, BosonParticle* particle, float elapsed) const;
 
 
   protected:

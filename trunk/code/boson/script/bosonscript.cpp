@@ -41,6 +41,7 @@
 #include "../unitbase.h"
 #include "../bosonplayfield.h"
 #include "../bosonmap.h"
+#include "../bosoneffectpropertiesparticle.h"
 #include "bosonscriptinterface.h"
 #include "bodebug.h"
 
@@ -1416,6 +1417,16 @@ void BosonScript::advanceEffects(int ticks)
     }
     ++it;
   }
+}
+
+void BosonScript::setWind(const BoVector3Fixed& wind)
+{
+  BosonEffectPropertiesParticle::setWind(wind);
+}
+
+const BoVector3Fixed& BosonScript::wind()
+{
+  return BosonEffectPropertiesParticle::wind();
 }
 
 void BosonScript::unfogPlayer(int playerid)
