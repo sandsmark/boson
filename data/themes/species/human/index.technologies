@@ -1,15 +1,15 @@
 [Armor+2]
 Id=48
 Name=Basic facility armor (for all facilities)
-MineralCost=400
-OilCost=50
+MineralCost=600
+OilCost=200
 Producer=5
-ProductionTime=1.5
+ProductionTime=30
 ProduceAction=ProduceUpgradeArmor
 Pixmap=armor_plus2.png
 RequireUnits=12,5,3
 ApplyToFacilities=true
-Armor=2
+Armor=+2
 
 [SamSite missile upgrade]
 Id=10001
@@ -17,7 +17,7 @@ Name=Upgrade SamSite missiles
 MineralCost=750
 OilCost=150
 Producer=5
-ProductionTime=15
+ProductionTime=20
 ProduceAction=ProduceUpgradeSamSiteMissiles
 Pixmap=samsitemissiles.png
 ApplyToTypes=6
@@ -31,7 +31,7 @@ Name=Upgrade turrets
 MineralCost=600
 OilCost=150
 Producer=5
-ProductionTime=20
+ProductionTime=18
 ProduceAction=ProduceUpgradeTurrets
 Pixmap=turretupgrade.png
 ApplyToTypes=10
@@ -44,7 +44,7 @@ Name=Upgrade Grizzly missiles
 MineralCost=750
 OilCost=150
 Producer=5
-ProductionTime=15
+ProductionTime=20
 ProduceAction=ProduceUpgradeGrizzlyMissile
 Pixmap=grizzlymissiles.png
 ApplyToTypes=10006
