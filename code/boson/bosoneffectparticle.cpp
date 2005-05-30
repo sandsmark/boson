@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2004-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,10 +36,10 @@
 BosonEffectParticle::BosonEffectParticle(const BosonEffectPropertiesParticle* prop) : BosonEffect(prop)
 {
   mProperties = prop;
-  mBoundingSphereRadius = 0;
+  mBoundingSphereRadius = 0.0f;
   mBlendFunc[0] = GL_SRC_ALPHA;
   mBlendFunc[1] = GL_ONE_MINUS_SRC_ALPHA;
-  mParticleDist = 0;
+  mParticleDist = 0.0f;
   mParticleCount = 0;
   mAlign = true;
 }
@@ -114,6 +114,12 @@ bool BosonEffectParticle::loadFromXML(const QDomElement& root)
   return true;
 }
 
+void BosonEffectParticle::setPosition(const BoVector3Fixed& pos)
+{
+  mPositionFloat = pos.toFloat();
+  BosonEffect::setPosition(pos);
+}
+
 
 /*****  BosonEffectParticleGeneric  *****/
 
@@ -126,17 +132,17 @@ BosonEffectParticleGeneric::BosonEffectParticleGeneric(const BosonEffectProperti
   mTextures = textures;
 
   // Init variables to defaults
-  mAge = 3600;
-  mMass = 1.0;
-  mParticleDist = 0.0;
+  mAge = 3600.0f;
+  mMass = 1.0f;
+  mParticleDist = 0.0f;
   mMoveParticlesWithSystem = false;
-  mCreateCache = 0.0;
-  mRate = 0;
+  mCreateCache = 0.0f;
+  mRate = 0.0f;
   mBlendFunc[0] = GL_SRC_ALPHA;
   mBlendFunc[1] = GL_ONE_MINUS_SRC_ALPHA;
   mRotated = false;
   mNum = 0;
-  mMaxParticleSize = 0.0;
+  mMaxParticleSize = 0.0f;
   mMaxDelayedUpdates = 60;
 }
 
@@ -157,30 +163,30 @@ void BosonEffectParticleGeneric::update(float elapsed)
       " to create cache (total will be = " << mCreateCache + (elapsed * mRate) << ")" << endl;*/
   mCreateCache += (elapsed * mRate);
 
-  if((mCreateCache < 1.0) && (mNum <= 0))
+  if((mCreateCache < 1.0f) && (mNum <= 0))
   {
     return;
   }
 
   mNum = 0;
-  mBoundingSphereRadius = 0.0;
+  mBoundingSphereRadius = 0.0f;
   bool createnew;
 
   // Check if new particles should be created
-  if(mAge == -1)
+  if(mAge == -1.0f)
   {
     // -1 means to create new particles forever
-    createnew = (mCreateCache >= 1.0);
+    createnew = (mCreateCache >= 1.0f);
   }
-  else if(mAge > 0.0)
+  else if(mAge > 0.0f)
   {
     // system still producing new particles
     mAge -= elapsed;
-    if(mAge < 0.0)
+    if(mAge < 0.0f)
     {
-      mAge = 0.0;
+      mAge = 0.0f;
     }
-    createnew = (mCreateCache >= 1.0) && (mAge > 0.0);
+    createnew = (mCreateCache >= 1.0f) && (mAge > 0.0f);
   }
   else
   {
@@ -191,13 +197,13 @@ void BosonEffectParticleGeneric::update(float elapsed)
   // Update particles
   for(unsigned int i = 0; i < mParticleCount; i++)
   {
-    if(mParticles[i].life > 0.0)
+    if(mParticles[i].life > 0.0f)
     {
       updateParticle(&mParticles[i], elapsed);
       // Check for death
       // For performance reasons particles aren't actually created/deleted.
       //  They're just marked as dead (aka inactive)
-      if(mParticles[i].life > 0.0)
+      if(mParticles[i].life > 0.0f)
       {
         mNum++;
       }
@@ -206,15 +212,15 @@ void BosonEffectParticleGeneric::update(float elapsed)
     {
       // Dead particle, re-create it
       initParticle(&mParticles[i]);
-      mCreateCache -= 1.0;
+      mCreateCache -= 1.0f;
       mNum++;
-      createnew = (mCreateCache >= 1.0);
+      createnew = (mCreateCache >= 1.0f);
     }
   }
 
   // Particle update and init methods set mRadius to dot product for performance
   //  reasons. Convert it here.
-  mBoundingSphereRadius = sqrt(mBoundingSphereRadius) + mMaxParticleSize;
+  mBoundingSphereRadius = sqrtf(mBoundingSphereRadius) + mMaxParticleSize;
 }
 
 void BosonEffectParticleGeneric::start()
@@ -267,18 +273,16 @@ void BosonEffectParticleGeneric::setRotation(const BoVector3Fixed& rotation)
     transformmatrix.rotate(rotation.x(), 1.0f, 0.0f, 0.0f);
     transformmatrix.rotate(rotation.y(), 0.0f, 1.0f, 0.0f);
 
-    BoVector3Fixed newpos, oldpos;
+    BoVector3Float newpos, oldpos;
+    BoVector3Float fposition = mPosition.toFloat();
     // Rotate all particles
     for(unsigned int i = 0; i < mParticleCount; i++)
     {
-      if(mParticles[i].life > 0.0)
+      if(mParticles[i].life > 0.0f)
       {
-        oldpos = mParticles[i].pos - mPosition;
-        BoVector3Float _newpos, _oldpos;
-        _oldpos = oldpos.toFloat();
-        transformmatrix.transform(&_newpos, &_oldpos);
-        newpos = _newpos.toFixed();
-        mParticles[i].pos = newpos + mPosition;
+        oldpos = mParticles[i].pos - fposition;
+        transformmatrix.transform(&newpos, &oldpos);
+        mParticles[i].pos = newpos + fposition;
       }
     }
   }
@@ -297,17 +301,17 @@ void BosonEffectParticleGeneric::setPosition(const BoVector3Fixed& pos)
 {
   if(mMoveParticlesWithSystem)
   {
-    BoVector3Fixed diff = pos - mPosition;
+    BoVector3Float diff = pos.toFloat() - positionFloat();
     // Move all particles by diff
     for(unsigned int i = 0; i < mParticleCount; i++)
     {
-      if(mParticles[i].life > 0.0)
+      if(mParticles[i].life > 0.0f)
       {
         mParticles[i].pos += diff;
       }
     }
   }
-  BosonEffect::setPosition(pos);
+  BosonEffectParticle::setPosition(pos);
 }
 
 void BosonEffectParticleGeneric::createParticles(int count)
@@ -324,14 +328,14 @@ void BosonEffectParticleGeneric::createParticles(int count)
       }
     }
   }
-  mBoundingSphereRadius = sqrt(mBoundingSphereRadius) + mMaxParticleSize;
+  mBoundingSphereRadius = sqrtf(mBoundingSphereRadius) + mMaxParticleSize;
 }
 
 void BosonEffectParticleGeneric::initParticle(BosonGenericParticle* particle)
 {
   // Note that most stuff isn't initialized here, it's done in
   //  BosonParticleSystemProperties
-  particle->pos = mPosition;
+  particle->pos = positionFloat();
   if(!mTextures)
   {
     boError(150) << k_funcinfo << "NULL textures" << endl;
@@ -345,7 +349,7 @@ void BosonEffectParticleGeneric::initParticle(BosonGenericParticle* particle)
   {
     ((BosonEffectPropertiesParticleGeneric*)properties())->initParticle(this, particle);
   }
-  mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (float)(particle->pos - mPosition).dotProduct());
+  mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (particle->pos - positionFloat()).dotProduct());
 }
 
 void BosonEffectParticleGeneric::updateParticle(BosonGenericParticle* particle, float elapsed)
@@ -356,7 +360,7 @@ void BosonEffectParticleGeneric::updateParticle(BosonGenericParticle* particle, 
   if(properties())
   {
     ((BosonEffectPropertiesParticleGeneric*)properties())->updateParticle(this, particle, elapsed);
-    mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (float)(particle->pos - mPosition).dotProduct());
+    mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (particle->pos - positionFloat()).dotProduct());
   }
 }
 
@@ -393,7 +397,7 @@ bool BosonEffectParticleGeneric::saveAsXML(QDomElement& root) const
   int particlessaved = 0;
   for(unsigned int i = 0; i < mParticleCount; i++)
   {
-    if(mParticles[i].life > 0.0)
+    if(mParticles[i].life > 0.0f)
     {
       stream << mParticles[i].velo;
       stream << mParticles[i].maxage;
@@ -523,7 +527,7 @@ bool BosonEffectParticleGeneric::loadFromXML(const QDomElement& root)
 
     // Update particle's texture (can't be saved because texture id can change)
     float factor = mParticles[i].life / mParticles[i].maxage;
-    int t = (int)((1.0 - factor) * ((int)mTextures->count() + 1)); // +1 for last texture to be shown
+    int t = (int)((1.0f - factor) * ((int)mTextures->count() + 1)); // +1 for last texture to be shown
     if(t >= (int)mTextures->count())
     {
       t = mTextures->count() - 1;
@@ -547,9 +551,9 @@ BosonEffectParticleTrail::BosonEffectParticleTrail(const BosonEffectPropertiesPa
   mTextures = textures;
 
   // Init variables to defaults
-  mMass = 1.0;
-  mParticleDist = 0.0;
-  mCreateCache = 0.0;
+  mMass = 1.0f;
+  mParticleDist = 0.0f;
+  mCreateCache = 0.0f;
   mBlendFunc[0] = GL_SRC_ALPHA;
   mBlendFunc[1] = GL_ONE_MINUS_SRC_ALPHA;
   mRotated = false;
@@ -557,7 +561,7 @@ BosonEffectParticleTrail::BosonEffectParticleTrail(const BosonEffectPropertiesPa
   mObsolete = false;
   mMaxDelayedUpdates = 60;
 
-  mLastPos = pos;
+  mLastPos = pos.toFloat();
   setPosition(pos);
 }
 
@@ -578,17 +582,17 @@ void BosonEffectParticleTrail::update(float elapsed)
       " to create cache (total will be = " << mCreateCache + (elapsed * mRate) << ")" << endl;*/
 
   // How much and how have we moved since last update?
-  BoVector3Fixed movevector = mPosition - mLastPos;
+  BoVector3Float movevector = positionFloat() - mLastPos;
   float movedlength = movevector.length();
   //boDebug() << k_funcinfo << "movedlength: " << movedlength << "(" << mParticleCount << " particles)" << endl;
 
   // Where to create next particle?
-  float createpos = 1.0 - mCreateCache;
+  float createpos = 1.0f - mCreateCache;
   //boDebug() << k_funcinfo << "mCreateCache: " << mCreateCache << "createpos: " << createpos << endl;
 
   bool createnew = false;
 
-  if(movedlength > 0.0 && !mObsolete)
+  if(movedlength > 0.0f && !mObsolete)
   {
     // Scale movevector by (1 / movedlength), so that we can later do
     //  movevector * x  and have the position for x-th particle
@@ -598,13 +602,13 @@ void BosonEffectParticleTrail::update(float elapsed)
     mCreateCache += (movedlength / mSpacing);
 
     //boDebug() << k_funcinfo << "mCreateCache: " << mCreateCache << "mSpacing: " << mSpacing << endl;
-    if((mCreateCache < 1.0) && (mNum <= 0))
+    if((mCreateCache < 1.0f) && (mNum <= 0))
     {
       return;
     }
 
     // Check if new particles should be created
-    createnew = (mCreateCache >= 1.0);
+    createnew = (mCreateCache >= 1.0f);
   }
   else
   {
@@ -618,19 +622,19 @@ void BosonEffectParticleTrail::update(float elapsed)
   }
 
   mNum = 0;  // Number of active particles
-  mBoundingSphereRadius = 0.0;
+  mBoundingSphereRadius = 0.0f;
 
 
   // Update particles
   for(unsigned int i = 0; i < mParticleCount; i++)
   {
-    if(mParticles[i].life > 0.0)
+    if(mParticles[i].life > 0.0f)
     {
       updateParticle(&mParticles[i], elapsed);
       // Check for death
       // For performance reasons particles aren't actually created/deleted.
       //  They're just marked as dead (aka inactive)
-      if(mParticles[i].life > 0.0)
+      if(mParticles[i].life > 0.0f)
       {
         mNum++;
       }
@@ -639,23 +643,23 @@ void BosonEffectParticleTrail::update(float elapsed)
     {
       // Dead particle, re-create it
       initParticle(&mParticles[i], mLastPos + (movevector * createpos * mSpacing));
-      mCreateCache -= 1.0;
-      createpos += 1.0;
+      mCreateCache -= 1.0f;
+      createpos += 1.0f;
       mNum++;
-      createnew = (mCreateCache >= 1.0);
+      createnew = (mCreateCache >= 1.0f);
     }
   }
 
-  if(mCreateCache >= 1.0)
+  if(mCreateCache >= 1.0f)
   {
     boWarning() << k_funcinfo << "propid: " << properties()->id() << "; mCreateCache = " << mCreateCache << " after update()! Increase MaxSpeed!" << endl;
   }
 
   // Particle update and init methods set mRadius to dot product for performance
   //  reasons. Convert it here.
-  mBoundingSphereRadius = sqrt(mBoundingSphereRadius) + mMaxParticleSize;
+  mBoundingSphereRadius = sqrtf(mBoundingSphereRadius) + mMaxParticleSize;
 
-  mLastPos = mPosition;
+  mLastPos = positionFloat();
 }
 
 void BosonEffectParticleTrail::setRotation(const BoVector3Fixed& rotation)
@@ -672,10 +676,10 @@ void BosonEffectParticleTrail::setRotation(const BoVector3Fixed& rotation)
 
 void BosonEffectParticleTrail::setPosition(const BoVector3Fixed& pos)
 {
-  BosonEffect::setPosition(pos);
+  BosonEffectParticle::setPosition(pos);
 }
 
-void BosonEffectParticleTrail::initParticle(BosonGenericParticle* particle, const BoVector3Fixed& pos)
+void BosonEffectParticleTrail::initParticle(BosonGenericParticle* particle, const BoVector3Float& pos)
 {
   // Note that most stuff isn't initialized here, it's done in
   //  BosonParticleSystemProperties
@@ -693,7 +697,7 @@ void BosonEffectParticleTrail::initParticle(BosonGenericParticle* particle, cons
   {
     ((BosonEffectPropertiesParticleTrail*)properties())->initParticle(this, particle);
   }
-  mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (float)(particle->pos.toFixed() - mPosition).dotProduct());
+  mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (particle->pos - positionFloat()).dotProduct());
 }
 
 void BosonEffectParticleTrail::updateParticle(BosonGenericParticle* particle, float elapsed)
@@ -705,7 +709,7 @@ void BosonEffectParticleTrail::updateParticle(BosonGenericParticle* particle, fl
   {
     ((BosonEffectPropertiesParticleTrail*)properties())->updateParticle(this, particle, elapsed);
   }
-  mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (float)(particle->pos - mPosition).dotProduct());
+  mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (particle->pos - positionFloat()).dotProduct());
 }
 
 bool BosonEffectParticleTrail::saveAsXML(QDomElement& root) const
@@ -742,7 +746,7 @@ bool BosonEffectParticleTrail::saveAsXML(QDomElement& root) const
   int particlessaved = 0;
   for(unsigned int i = 0; i < mParticleCount; i++)
   {
-    if(mParticles[i].life > 0.0)
+    if(mParticles[i].life > 0.0f)
     {
       stream << mParticles[i].velo;
       stream << mParticles[i].maxage;
@@ -868,7 +872,7 @@ bool BosonEffectParticleTrail::loadFromXML(const QDomElement& root)
 
     // Update particle's texture (can't be saved because texture id can change)
     float factor = mParticles[i].life / mParticles[i].maxage;
-    int t = (int)((1.0 - factor) * ((int)mTextures->count() + 1)); // +1 for last texture to be shown
+    int t = (int)((1.0f - factor) * ((int)mTextures->count() + 1)); // +1 for last texture to be shown
     if(t >= (int)mTextures->count())
     {
       t = mTextures->count() - 1;
@@ -898,7 +902,7 @@ BosonEffectParticleEnvironmental::BosonEffectParticleEnvironmental(const BosonEf
   mTextures = textures;
 
   // Init variables to defaults
-  mMass = 1.0;
+  mMass = 1.0f;
   mBlendFunc[0] = GL_SRC_ALPHA;
   mBlendFunc[1] = GL_ONE_MINUS_SRC_ALPHA;
   mNum = 0;
@@ -908,8 +912,8 @@ BosonEffectParticleEnvironmental::BosonEffectParticleEnvironmental(const BosonEf
   // Init num particles at default position
   int i = 0;
   // Min/max coords of the box where to spawn particles
-  BoVector3Fixed min(pos.x() - mRange, pos.y() - mRange, pos.z() - mRange);
-  BoVector3Fixed max(pos.x() + mRange, pos.y() + mRange, pos.z() + mRange);
+  BoVector3Float min(pos.x() - mRange, pos.y() - mRange, pos.z() - mRange);
+  BoVector3Float max(pos.x() + mRange, pos.y() + mRange, pos.z() + mRange);
 
   // Spawn them
   while(num >= 1.0f)
@@ -925,7 +929,7 @@ BosonEffectParticleEnvironmental::BosonEffectParticleEnvironmental(const BosonEf
     num -= 1.0f;
   }
 
-  BosonEffect::setPosition(pos);
+  BosonEffectParticle::setPosition(pos);
 }
 
 BosonEffectParticleEnvironmental::~BosonEffectParticleEnvironmental()
@@ -949,16 +953,16 @@ void BosonEffectParticleEnvironmental::update(float elapsed)
   //  the particle system was moved by -velo.
 
   // First update particles and obsolete those that have gone out of range.
-  BoVector3Fixed pos = position();
+  BoVector3Float pos = positionFloat();
   mNum = 0;
   for(unsigned int i = 0; i < mParticleCount; i++)
   {
-    if(mParticles[i].life > 0.0)
+    if(mParticles[i].life > 0.0f)
     {
       // Update particle
       updateParticle(&mParticles[i], elapsed);
       // Calculate dist between particle and particle system's center.
-      bofixed dist = 0;
+      float dist = 0.0f;
       dist = QMAX(dist, QABS(pos.x() - mParticles[i].pos.x()));
       dist = QMAX(dist, QABS(pos.y() - mParticles[i].pos.y()));
       dist = QMAX(dist, QABS(pos.z() - mParticles[i].pos.z()));
@@ -976,27 +980,28 @@ void BosonEffectParticleEnvironmental::update(float elapsed)
 
   // Then spawn some new particles where necessary.
   // This is average velocity of all particles
-  BoVector3Fixed velo = mParticleVelo + BosonEffectPropertiesParticle::wind().toFixed() * mMass;
-  particleBoxMoved(pos, (pos - velo * elapsed));
+  BoVector3Float velo = mParticleVelo + BosonEffectPropertiesParticle::wind() * mMass;
+  particleBoxMoved(pos, pos - velo * elapsed);
 }
 
-void BosonEffectParticleEnvironmental::setPosition(const BoVector3Fixed& pos)
+void BosonEffectParticleEnvironmental::setPosition(const BoVector3Fixed& _pos)
 {
-  BoVector3Fixed oldpos = position();
+  BoVector3Float oldpos = positionFloat();
+  BoVector3Float pos = _pos.toFloat();
   if(oldpos == pos)
   {
     // Position didn't change. No need to do anything
     return;
   }
-  BosonEffect::setPosition(pos);
+  BosonEffectParticle::setPosition(_pos);
 
   // Delete all particles that are too far away now
   for(unsigned int i = 0; i < mParticleCount; i++)
   {
-    if(mParticles[i].life > 0.0)
+    if(mParticles[i].life > 0.0f)
     {
       // Calculate dist between particle and particle system's center.
-      bofixed dist = 0;
+      float dist = 0;
       dist = QMAX(dist, QABS(pos.x() - mParticles[i].pos.x()));
       dist = QMAX(dist, QABS(pos.y() - mParticles[i].pos.y()));
       dist = QMAX(dist, QABS(pos.z() - mParticles[i].pos.z()));
@@ -1012,7 +1017,7 @@ void BosonEffectParticleEnvironmental::setPosition(const BoVector3Fixed& pos)
   particleBoxMoved(oldpos, pos);
 }
 
-void BosonEffectParticleEnvironmental::particleBoxMoved(const BoVector3Fixed& oldpos, const BoVector3Fixed& newpos)
+void BosonEffectParticleEnvironmental::particleBoxMoved(const BoVector3Float& oldpos, const BoVector3Float& newpos)
 {
   // Find out the area where to spawn new particles
   // If oldbox is the old bounding box of the system, and newbox is the new
@@ -1024,8 +1029,8 @@ void BosonEffectParticleEnvironmental::particleBoxMoved(const BoVector3Fixed& ol
       MyBox() { empty = true; volume = 0.0f; }
       void updateVolume()  { volume = (max.x() - min.x()) * (max.y() - min.y()) * (max.z() - min.z()); }
 
-      BoVector3Fixed min;
-      BoVector3Fixed max;
+      BoVector3Float min;
+      BoVector3Float max;
       float volume;
       bool empty;
   };
@@ -1130,7 +1135,7 @@ void BosonEffectParticleEnvironmental::particleBoxMoved(const BoVector3Fixed& ol
       // Spawn next particle
       for(; particlepos < mParticleCount; particlepos++)
       {
-        if(mParticles[particlepos].life <= 0.0)
+        if(mParticles[particlepos].life <= 0.0f)
         {
           // Use this dead particle to spawn new one.
           // Choose random position inside this box.
@@ -1148,7 +1153,7 @@ void BosonEffectParticleEnvironmental::particleBoxMoved(const BoVector3Fixed& ol
   }
 }
 
-void BosonEffectParticleEnvironmental::initParticle(BosonGenericParticle* particle, const BoVector3Fixed& pos)
+void BosonEffectParticleEnvironmental::initParticle(BosonGenericParticle* particle, const BoVector3Float& pos)
 {
   // Note that most stuff isn't initialized here, it's done in
   //  BosonParticleSystemProperties
@@ -1200,7 +1205,7 @@ bool BosonEffectParticleEnvironmental::saveAsXML(QDomElement& root) const
   int particlessaved = 0;
   for(unsigned int i = 0; i < mParticleCount; i++)
   {
-    if(mParticles[i].life > 0.0)
+    if(mParticles[i].life > 0.0f)
     {
       stream << mParticles[i].velo;
       stream << mParticles[i].maxage;

@@ -752,9 +752,10 @@ void BosonCanvasRenderer::renderParticles(BoVisibleEffects& visible)
  //  camera hasn't changed either
  BosonParticle* p = 0;
  //bool wassorted = d->mVisibleEffects.mParticlesDirty;  // only for debug, commented because of compiler warning
+ BoVector3Float camerapos = camera()->cameraPos();
  if (visible.mParticlesDirty) {
 	float x, y, z;
-	BoVector3Fixed dir;
+	BoVector3Float dir;
 	visible.mParticleList.clear();
 	// Add all particles to the list
 	QPtrListIterator<BosonEffectParticle> visibleIt(visible.mParticles);
@@ -764,7 +765,7 @@ void BosonCanvasRenderer::renderParticles(BoVisibleEffects& visible)
 		// If particleDist is non-zero, calculate vector for moving particles closer
 		//  to camera
 		if (s->particleDist() != 0.0f) {
-			dir = (camera()->cameraPos() - s->position().toFloat()).toFixed();
+			dir = camerapos - s->positionFloat();
 			dir.scale(s->particleDist() / dir.length());
 			s->setParticleDistVector(dir);
 		}
@@ -774,9 +775,9 @@ void BosonCanvasRenderer::renderParticles(BoVisibleEffects& visible)
 				p = s->particle(i);
 				// Calculate distance from camera. Note that for performance reasons,
 				//  we don't calculate actual distance, but square of it.
-				x = p->pos.x() - camera()->cameraPos().x();
-				y = p->pos.y() - camera()->cameraPos().y();
-				z = p->pos.z() - camera()->cameraPos().z();
+				x = p->pos.x() - camerapos.x();
+				y = p->pos.y() - camerapos.y();
+				z = p->pos.z() - camerapos.z();
 				p->distance = (x*x + y*y + z*z);
 				visible.mParticleList.append(p);
 			}
@@ -808,14 +809,24 @@ void BosonCanvasRenderer::renderParticles(BoVisibleEffects& visible)
 
  // Matrix stuff for aligned particles
  const BoMatrix& modelview = d->mGameMatrices->modelviewMatrix();
- BoVector3Fixed x(modelview[0], modelview[4], modelview[8]);
- BoVector3Fixed y(modelview[1], modelview[5], modelview[9]);
+ const BoVector3Float x(modelview[0], modelview[4], modelview[8]);
+ const BoVector3Float y(modelview[1], modelview[5], modelview[9]);
 
  // Some cache variables
  int blendfunc = -1;
  BoTexture* texture = 0;
  bool betweenbeginend = false;  // If glBegin has been called, but glEnd() hasn't. Very hackish.
- BoVector3Fixed a, b, c, e;  // Vertex positions. e is used instead of d which clashes with private class
+ BoVector3Float a, b, c, e;  // Vertex positions. e is used instead of d which clashes with private class
+
+ // Precalculate relative particle corner positions
+ const BoVector3Float upperleft(-0.5, 0.5, 0.0);
+ const BoVector3Float upperright(0.5, 0.5, 0.0);
+ const BoVector3Float lowerright(0.5, -0.5, 0.0);
+ const BoVector3Float lowerleft(-0.5, -0.5, 0.0);
+ const BoVector3Float alignedupperleft (-x + y);
+ const BoVector3Float alignedupperright( x + y);
+ const BoVector3Float alignedlowerright( x - y);
+ const BoVector3Float alignedlowerleft (-x - y);
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error x1" << endl;
@@ -848,39 +859,37 @@ void BosonCanvasRenderer::renderParticles(BoVisibleEffects& visible)
 		betweenbeginend = true;
 	}
 
-	// Is it worth to duplicate this code just to save few vector additions for
-	//  systems with particleDist() == 0.0 ?
-	if (p->system->particleDist() != 0.0) {
+	if (p->system->particleDist() != 0.0f) {
 		if (p->system->alignParticles()) {
-			a = p->pos + ((-x + y) * p->size) + p->system->particleDistVector();
-			b = p->pos + (( x + y) * p->size) + p->system->particleDistVector();
-			c = p->pos + (( x - y) * p->size + p->system->particleDistVector());
-			e = p->pos + ((-x - y) * p->size) + p->system->particleDistVector();
+			a = p->pos + (alignedupperleft  * p->size) + p->system->particleDistVector();
+			b = p->pos + (alignedupperright * p->size) + p->system->particleDistVector();
+			c = p->pos + (alignedlowerright * p->size + p->system->particleDistVector());
+			e = p->pos + (alignedlowerleft  * p->size) + p->system->particleDistVector();
 		} else {
-			a = p->pos + (BoVector3Fixed(-0.5, 0.5, 0.0) * p->size) + p->system->particleDistVector();
-			b = p->pos + (BoVector3Fixed(0.5, 0.5, 0.0) * p->size) + p->system->particleDistVector();
-			c = p->pos + (BoVector3Fixed(0.5, -0.5, 0.0) * p->size) + p->system->particleDistVector();
-			e = p->pos + (BoVector3Fixed(-0.5, -0.5, 0.0) * p->size) + p->system->particleDistVector();
+			a = p->pos + (upperleft  * p->size) + p->system->particleDistVector();
+			b = p->pos + (upperright * p->size) + p->system->particleDistVector();
+			c = p->pos + (lowerright * p->size) + p->system->particleDistVector();
+			e = p->pos + (lowerleft  * p->size) + p->system->particleDistVector();
 		}
 	} else {
 		if (p->system->alignParticles()) {
-			a = p->pos + ((-x + y) * p->size);
-			b = p->pos + (( x + y) * p->size);
-			c = p->pos + (( x - y) * p->size);
-			e = p->pos + ((-x - y) * p->size);
+			a = p->pos + (alignedupperleft  * p->size);
+			b = p->pos + (alignedupperright * p->size);
+			c = p->pos + (alignedlowerright * p->size);
+			e = p->pos + (alignedlowerleft  * p->size);
 		} else {
-			a = p->pos + (BoVector3Fixed(-0.5, 0.5, 0.0) * p->size);
-			b = p->pos + (BoVector3Fixed(0.5, 0.5, 0.0) * p->size);
-			c = p->pos + (BoVector3Fixed(0.5, -0.5, 0.0) * p->size);
-			e = p->pos + (BoVector3Fixed(-0.5, -0.5, 0.0) * p->size);
+			a = p->pos + (upperleft  * p->size);
+			b = p->pos + (upperright * p->size);
+			c = p->pos + (lowerright * p->size);
+			e = p->pos + (lowerleft  * p->size);
 		}
 	}
 
-	glColor4fv(p->color.data());  // Is it worth to cache color as well?
-	glTexCoord2f(0.0, 1.0);  glVertex3fv(a.toFloat().data());
-	glTexCoord2f(1.0, 1.0);  glVertex3fv(b.toFloat().data());
-	glTexCoord2f(1.0, 0.0);  glVertex3fv(c.toFloat().data());
-	glTexCoord2f(0.0, 0.0);  glVertex3fv(e.toFloat().data());
+	glColor4fv(p->color.data());
+	glTexCoord2f(0.0, 1.0);  glVertex3fv(a.data());
+	glTexCoord2f(1.0, 1.0);  glVertex3fv(b.data());
+	glTexCoord2f(1.0, 0.0);  glVertex3fv(c.data());
+	glTexCoord2f(0.0, 0.0);  glVertex3fv(e.data());
 	d->mRenderedParticles++;
  }
  glEnd();

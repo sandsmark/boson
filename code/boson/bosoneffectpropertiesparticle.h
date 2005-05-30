@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2004-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -55,8 +55,8 @@ class BosonEffectPropertiesParticle : public BosonEffectProperties
     static void initStatic(const QString& texdir);
 
 
-    inline static const BoVector3Fixed& wind()  { return mWind; }
-    inline static void setWind(const BoVector3Fixed& w)  { mWind = w; }
+    inline static const BoVector3Float& wind()  { return mWind; }
+    inline static void setWind(const BoVector3Float& w)  { mWind = w; }
 
 
   protected:
@@ -64,7 +64,7 @@ class BosonEffectPropertiesParticle : public BosonEffectProperties
 
     static QDict<BoTextureArray> mTextureArrays;
     static QString mTexturePath;
-    static BoVector3Fixed mWind;
+    static BoVector3Float mWind;
 };
 
 
@@ -111,8 +111,8 @@ class BosonEffectPropertiesParticleGeneric : public BosonEffectPropertiesParticl
 
 
   protected:
-    BoVector3Fixed mMinVelo, mMaxVelo;
-    BoVector3Fixed mMinPos, mMaxPos;
+    BoVector3Float mMinVelo, mMaxVelo;
+    BoVector3Float mMinPos, mMaxPos;
     bool mNormalizePos, mNormalizeVelo;
     float mMinPosScale, mMaxPosScale, mMinVeloScale, mMaxVeloScale;
     BoVector4Float mStartColor, mEndColor;
@@ -167,8 +167,8 @@ class BosonEffectPropertiesParticleTrail : public BosonEffectPropertiesParticle
 
   protected:
     float mSpacing;
-    BoVector3Fixed mMinVelo, mMaxVelo;
-    BoVector3Fixed mMinOffset, mMaxOffset;
+    BoVector3Float mMinVelo, mMaxVelo;
+    BoVector3Float mMinOffset, mMaxOffset;
     float mStartSize;
     float mEndSize;
     BoVector4Float mStartColor;
@@ -222,7 +222,7 @@ class BosonEffectPropertiesParticleEnvironmental : public BosonEffectPropertiesP
 
 
   protected:
-    BoVector3Fixed mMinVelo, mMaxVelo;
+    BoVector3Float mMinVelo, mMaxVelo;
     float mSize;
     BoVector4Float mColor;
     float mMass, mParticleDist;

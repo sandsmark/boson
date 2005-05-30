@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -442,8 +442,8 @@ class BosonScript
     static void addEffectToUnit(int unitid, unsigned int effectid);
     static void addEffectToUnit(int unitid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot = 0);
     static void advanceEffects(int ticks);
-    static void setWind(const BoVector3Fixed& wind);
-    static const BoVector3Fixed& wind();
+    static void setWind(const BoVector3Float& wind);
+    static const BoVector3Float& wind();
     static void unfogPlayer(int playerid);
     static void unfogAllPlayers();
     void setAcceptUserInput(bool accept);

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1888,8 +1888,8 @@ PyObject* PythonScript::py_advanceEffects(PyObject*, PyObject* args)
 PyObject* PythonScript::py_wind(PyObject*, PyObject*)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  const BoVector3Fixed& wind = currentScript()->wind();
-  return Py_BuildValue((char*)"[f, f, f]", (float)wind.x(), (float)wind.y(), (float)wind.z());
+  const BoVector3Float& wind = currentScript()->wind();
+  return Py_BuildValue((char*)"[f, f, f]", wind.x(), wind.y(), wind.z());
 }
 
 PyObject* PythonScript::py_setWind(PyObject*, PyObject* args)
@@ -1899,7 +1899,7 @@ PyObject* PythonScript::py_setWind(PyObject*, PyObject* args)
   {
     return 0;
   }
-  BosonScript::setWind(BoVector3Fixed(x, y, z));
+  BosonScript::setWind(BoVector3Float(x, y, z));
   Py_INCREF(Py_None);
   return Py_None;
 }

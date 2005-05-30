@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2004-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@
 #warning this is never freed!
 QDict<BoTextureArray> BosonEffectPropertiesParticle::mTextureArrays;
 QString BosonEffectPropertiesParticle::mTexturePath;
-BoVector3Fixed BosonEffectPropertiesParticle::mWind(0.2, 0.1, 0.0);
+BoVector3Float BosonEffectPropertiesParticle::mWind(0.2, 0.1, 0.0);
 
 BosonEffectPropertiesParticle::BosonEffectPropertiesParticle() :
     BosonEffectProperties()
@@ -108,25 +108,25 @@ void BosonEffectPropertiesParticleGeneric::reset()
   mMinPos.reset();
   mMaxPos.reset();
   mNormalizePos = false;
-  mMinPosScale = 1.0;
-  mMaxPosScale = 1.0;
+  mMinPosScale = 1.0f;
+  mMaxPosScale = 1.0f;
   mNormalizeVelo = false;
-  mMinVeloScale = 1.0;
-  mMaxVeloScale = 1.0;
+  mMinVeloScale = 1.0f;
+  mMaxVeloScale = 1.0f;
   mStartColor.reset();
   mEndColor.reset();
-  mMinLife = 1.0;
-  mMaxLife = 1.0;
+  mMinLife = 1.0f;
+  mMaxLife = 1.0f;
   mMaxNum = 100;
   mInitNum = 0;
   mGLBlendFuncStr = "GL_ONE_MINUS_SRC_ALPHA";
   mGLSrcBlendFuncStr = "GL_SRC_ALPHA";
-  mRate = 0;
-  mStartSize = 1;
-  mEndSize = 1;
-  mAge = 0;
-  mMass = 1.0;
-  mParticleDist = 0.0;
+  mRate = 0.0f;
+  mStartSize = 1.0f;
+  mEndSize = 1.0f;
+  mAge = 0.0f;
+  mMass = 1.0f;
+  mParticleDist = 0.0f;
   mAlign = true;
   mMoveParticlesWithSystem = false;
   mTextureName = "explosion";
@@ -139,36 +139,36 @@ bool BosonEffectPropertiesParticleGeneric::load(KSimpleConfig* cfg, const QStrin
     return false;
   }
 
-  mMinVelo = BosonConfig::readBoVector3FixedEntry(cfg, "MinVelocity", mMinVelo);
-  mMaxVelo = BosonConfig::readBoVector3FixedEntry(cfg, "MaxVelocity", mMaxVelo);
-  mMinPos = BosonConfig::readBoVector3FixedEntry(cfg, "MinPos", mMinPos);
-  mMaxPos = BosonConfig::readBoVector3FixedEntry(cfg, "MaxPos", mMaxPos);
+  mMinVelo = BosonConfig::readBoVector3FloatEntry(cfg, "MinVelocity", mMinVelo);
+  mMaxVelo = BosonConfig::readBoVector3FloatEntry(cfg, "MaxVelocity", mMaxVelo);
+  mMinPos = BosonConfig::readBoVector3FloatEntry(cfg, "MinPos", mMinPos);
+  mMaxPos = BosonConfig::readBoVector3FloatEntry(cfg, "MaxPos", mMaxPos);
   mNormalizePos = cfg->readBoolEntry("NormalizePos", mNormalizePos);
   if(mNormalizePos)
   {
-    mMinPosScale = (float)(cfg->readDoubleNumEntry("MinPosScale", mMinPosScale));
-    mMaxPosScale = (float)(cfg->readDoubleNumEntry("MaxPosScale", mMaxPosScale));
+    mMinPosScale = cfg->readDoubleNumEntry("MinPosScale", mMinPosScale);
+    mMaxPosScale = cfg->readDoubleNumEntry("MaxPosScale", mMaxPosScale);
   }
   mNormalizeVelo = cfg->readBoolEntry("NormalizeVelo", mNormalizeVelo);
   if(mNormalizeVelo)
   {
-    mMinVeloScale = (float)(cfg->readDoubleNumEntry("MinVeloScale", mMinVeloScale));
-    mMaxVeloScale = (float)(cfg->readDoubleNumEntry("MaxVeloScale", mMaxVeloScale));
+    mMinVeloScale = cfg->readDoubleNumEntry("MinVeloScale", mMinVeloScale);
+    mMaxVeloScale = cfg->readDoubleNumEntry("MaxVeloScale", mMaxVeloScale);
   }
   mStartColor = BosonConfig::readBoVector4FloatEntry(cfg, "StartColor", mStartColor);
   mEndColor = BosonConfig::readBoVector4FloatEntry(cfg, "EndColor", mEndColor);
-  mMinLife = (float)(cfg->readDoubleNumEntry("MinLife", mMinLife));
-  mMaxLife = (float)(cfg->readDoubleNumEntry("MaxLife", mMaxLife));
+  mMinLife = cfg->readDoubleNumEntry("MinLife", mMinLife);
+  mMaxLife = cfg->readDoubleNumEntry("MaxLife", mMaxLife);
   mMaxNum = cfg->readNumEntry("MaxNum", mMaxNum);
   mInitNum = cfg->readNumEntry("InitNum", mInitNum);
   mGLBlendFuncStr = cfg->readEntry("BlendFunc", mGLBlendFuncStr);
   mGLSrcBlendFuncStr = cfg->readEntry("SrcBlendFunc", mGLSrcBlendFuncStr);
-  mRate = (float)(cfg->readDoubleNumEntry("Rate", mRate));
-  mStartSize = (float)(cfg->readDoubleNumEntry("StartSize", mStartSize));
-  mEndSize = (float)(cfg->readDoubleNumEntry("EndSize", mEndSize));
-  mAge = (float)(cfg->readDoubleNumEntry("SystemLife", mAge));
-  mMass = (float)(cfg->readDoubleNumEntry("Mass", mMass));
-  mParticleDist = (float)(cfg->readDoubleNumEntry("ParticleDist", mParticleDist));
+  mRate = cfg->readDoubleNumEntry("Rate", mRate);
+  mStartSize = cfg->readDoubleNumEntry("StartSize", mStartSize);
+  mEndSize = cfg->readDoubleNumEntry("EndSize", mEndSize);
+  mAge = cfg->readDoubleNumEntry("SystemLife", mAge);
+  mMass = cfg->readDoubleNumEntry("Mass", mMass);
+  mParticleDist = cfg->readDoubleNumEntry("ParticleDist", mParticleDist);
   mAlign = cfg->readBoolEntry("Align", mAlign);
   mMoveParticlesWithSystem = cfg->readBoolEntry("MoveParticlesWithSystem", mMoveParticlesWithSystem);
   mTextureName = cfg->readEntry("Texture", mTextureName);
@@ -240,20 +240,20 @@ void BosonEffectPropertiesParticleGeneric::initParticle(BosonEffectParticle* eff
   BosonEffectParticleGeneric* e = (BosonEffectParticleGeneric*)effect;
   if(e->isRotated())
   {
-    BoVector3Float pos2 = pos;
+    BoVector3Float tmp;
+    e->matrix().transform(&tmp, &pos);
+    pos = tmp;
     BoVector3Float velo(BosonEffect::getFloat(mMinVelo[0], mMaxVelo[0]),
         BosonEffect::getFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getFloat(mMinVelo[2], mMaxVelo[2]));
-    e->matrix().transform(&pos, &pos2);
-    BoVector3Float particleVelo = particle->velo.toFloat();
-    e->matrix().transform(&particleVelo, &velo);
-    particle->velo = particleVelo.toFixed();
+    e->matrix().transform(&tmp, &velo);
+    particle->velo = tmp;
   }
   else
   {
     particle->velo.set(BosonEffect::getFloat(mMinVelo[0], mMaxVelo[0]),
         BosonEffect::getFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getFloat(mMinVelo[2], mMaxVelo[2]));
   }
-  particle->pos += pos.toFixed();
+  particle->pos += pos;
   if(mNormalizeVelo)
   {
     particle->velo.scale(BosonEffect::getFloat(mMinVeloScale, mMaxVeloScale) / particle->velo.length());
@@ -264,12 +264,12 @@ void BosonEffectPropertiesParticleGeneric::updateParticle(BosonEffectParticle* e
 {
   BosonGenericParticle* particle = (BosonGenericParticle*)p;
   float factor = particle->life / particle->maxage;  // This is 1 when particle is born and will be 0 by the time when it dies
-  particle->color.setBlended(mStartColor, factor, mEndColor, 1.0 - factor);
-  particle->size = mStartSize * factor + mEndSize * (1.0 - factor);
+  particle->color.setBlended(mStartColor, factor, mEndColor, 1.0f - factor);
+  particle->size = mStartSize * factor + mEndSize * (1.0f - factor);
   // Note that we use our own texture array here, not the one stored in
   //  BosonParticleSystem (which is only used for drawing). It doesn't matter,
   //  because they are identical (in theory ;-)) anyway.
-  int t = (int)((1.0 - factor) * ((int)mTextures->count() + 1)); // +1 for last texture to be shown
+  int t = (int)((1.0f - factor) * ((int)mTextures->count() + 1)); // +1 for last texture to be shown
   if(t >= (int)mTextures->count())
   {
     t = mTextures->count() - 1;
@@ -292,20 +292,20 @@ BosonEffectPropertiesParticleTrail::BosonEffectPropertiesParticleTrail() :
 void BosonEffectPropertiesParticleTrail::reset()
 {
   // Reset all variables to their default values
-  mSpacing = 10 / 48.0f;  // distance between 2 particles
-  mMass = 0.5;
+  mSpacing = 10.0f / 48.0f;  // distance between 2 particles
+  mMass = 0.5f;
   mMinOffset.reset();
   mMaxOffset.reset();
   mMinVelo.reset();
   mMaxVelo.reset();
   mStartColor.reset();
   mEndColor.reset();
-  mStartSize = 0.5;
-  mEndSize = 1.0;
-  mParticleDist = 0;
-  mMinLife = 1.0;
-  mMaxLife = 1.0;
-  mMaxSpeed = 30.0 / 48.0f;
+  mStartSize = 0.5f;
+  mEndSize = 1.0f;
+  mParticleDist = 0.0f;
+  mMinLife = 1.0f;
+  mMaxLife = 1.0f;
+  mMaxSpeed = 30.0f / 48.0f;
   mTextureName = "smoke";
   mGLBlendFuncStr = "GL_ONE_MINUS_SRC_ALPHA";
   mGLSrcBlendFuncStr = "GL_SRC_ALPHA";
@@ -319,19 +319,19 @@ bool BosonEffectPropertiesParticleTrail::load(KSimpleConfig* cfg, const QString&
   }
 
   mSpacing = (float)(cfg->readDoubleNumEntry("Spacing", mSpacing)) / 48.0f;
-  mMass = (float)(cfg->readDoubleNumEntry("Mass", mMass));
-  mMinOffset = BosonConfig::readBoVector3FixedEntry(cfg, "MinOffset", mMinOffset);
-  mMaxOffset = BosonConfig::readBoVector3FixedEntry(cfg, "MaxOffset", mMaxOffset);
-  mMinVelo = BosonConfig::readBoVector3FixedEntry(cfg, "MinVelocity", mMinVelo);
-  mMaxVelo = BosonConfig::readBoVector3FixedEntry(cfg, "MaxVelocity", mMaxVelo);
+  mMass = cfg->readDoubleNumEntry("Mass", mMass);
+  mMinOffset = BosonConfig::readBoVector3FloatEntry(cfg, "MinOffset", mMinOffset);
+  mMaxOffset = BosonConfig::readBoVector3FloatEntry(cfg, "MaxOffset", mMaxOffset);
+  mMinVelo = BosonConfig::readBoVector3FloatEntry(cfg, "MinVelocity", mMinVelo);
+  mMaxVelo = BosonConfig::readBoVector3FloatEntry(cfg, "MaxVelocity", mMaxVelo);
   mStartColor = BosonConfig::readBoVector4FloatEntry(cfg, "StartColor", mStartColor);
   mEndColor = BosonConfig::readBoVector4FloatEntry(cfg, "EndColor", mEndColor);
-  mStartSize = (float)(cfg->readDoubleNumEntry("StartSize", mStartSize));
-  mEndSize = (float)(cfg->readDoubleNumEntry("EndSize", mEndSize));
-  mMaxSpeed = (float)(cfg->readDoubleNumEntry("MaxSpeed", mMaxSpeed));
-  mMinLife = (float)(cfg->readDoubleNumEntry("MinLife", mMinLife));
-  mMaxLife = (float)(cfg->readDoubleNumEntry("MaxLife", mMaxLife));
-  mParticleDist = (float)(cfg->readDoubleNumEntry("ParticleDist", mParticleDist));
+  mStartSize = cfg->readDoubleNumEntry("StartSize", mStartSize);
+  mEndSize = cfg->readDoubleNumEntry("EndSize", mEndSize);
+  mMaxSpeed = cfg->readDoubleNumEntry("MaxSpeed", mMaxSpeed);
+  mMinLife = cfg->readDoubleNumEntry("MinLife", mMinLife);
+  mMaxLife = cfg->readDoubleNumEntry("MaxLife", mMaxLife);
+  mParticleDist = cfg->readDoubleNumEntry("ParticleDist", mParticleDist);
   mGLBlendFuncStr = cfg->readEntry("BlendFunc", mGLBlendFuncStr);
   mGLSrcBlendFuncStr = cfg->readEntry("SrcBlendFunc", mGLSrcBlendFuncStr);
   mTextureName = cfg->readEntry("Texture", mTextureName);
@@ -386,21 +386,17 @@ void BosonEffectPropertiesParticleTrail::initParticle(BosonEffectParticle* effec
   particle->maxage = particle->life;
   particle->color = mStartColor;
   particle->size = mStartSize;
-  BoVector3Fixed offset;  // particle's relative position to particle system
+  BoVector3Float offset;  // particle's relative position to particle system
   offset.set(BosonEffect::getFloat(mMinOffset[0], mMaxOffset[0]), BosonEffect::getFloat(mMinOffset[1], mMaxOffset[1]),
       BosonEffect::getFloat(mMinOffset[2], mMaxOffset[2]));
   BosonEffectParticleTrail* e = (BosonEffectParticleTrail*)effect;
   if(e->isRotated())
   {
-    BoVector3Float _offset = offset.toFloat();
-    BoVector3Float offset2 = _offset;
+    BoVector3Float offset2 = offset;
     BoVector3Float velo(BosonEffect::getFloat(mMinVelo[0], mMaxVelo[0]),
         BosonEffect::getFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getFloat(mMinVelo[2], mMaxVelo[2]));
-    e->matrix().transform(&_offset, &offset2);
-    BoVector3Float particleVelo;
-    e->matrix().transform(&particleVelo, &velo);
-    particle->velo = particleVelo.toFixed();
-    offset = _offset.toFixed();
+    e->matrix().transform(&offset, &offset2);
+    e->matrix().transform(&particle->velo, &velo);
   }
   else
   {
@@ -414,12 +410,12 @@ void BosonEffectPropertiesParticleTrail::updateParticle(BosonEffectParticle* eff
 {
   BosonGenericParticle* particle = (BosonGenericParticle*)p;
   float factor = particle->life / particle->maxage;  // This is 1 when particle is born and will be 0 by the time when it dies
-  particle->color.setBlended(mStartColor, factor, mEndColor, 1.0 - factor);
-  particle->size = mStartSize * factor + mEndSize * (1.0 - factor);
+  particle->color.setBlended(mStartColor, factor, mEndColor, 1.0f - factor);
+  particle->size = mStartSize * factor + mEndSize * (1.0f - factor);
   // Note that we use our own texture array here, not the one stored in
   //  BosonParticleSystem (which is only used for drawing). It doesn't matter,
   //  because they are identical (in theory ;-)) anyway.
-  int t = (int)((1.0 - factor) * ((int)mTextures->count() + 1)); // +1 for last texture to be shown
+  int t = (int)((1.0f - factor) * ((int)mTextures->count() + 1)); // +1 for last texture to be shown
   if(t >= (int)mTextures->count())
   {
     t = mTextures->count() - 1;
@@ -442,17 +438,17 @@ BosonEffectPropertiesParticleEnvironmental::BosonEffectPropertiesParticleEnviron
 void BosonEffectPropertiesParticleEnvironmental::reset()
 {
   // Reset all variables to their default values
-  mMass = 0.5;
+  mMass = 0.5f;
   mMinVelo.reset();
   mMaxVelo.reset();
   mColor.reset();
-  mSize = 0.5;
-  mParticleDist = 0;
+  mSize = 0.5f;
+  mParticleDist = 0.0f;
   mTextureName = "smoke";
   mGLBlendFuncStr = "GL_ONE_MINUS_SRC_ALPHA";
   mGLSrcBlendFuncStr = "GL_SRC_ALPHA";
-  mRange = 5;
-  mDensity = 10;
+  mRange = 5.0f;
+  mDensity = 10.0f;
 }
 
 bool BosonEffectPropertiesParticleEnvironmental::load(KSimpleConfig* cfg, const QString& group, bool inherited)
@@ -462,16 +458,16 @@ bool BosonEffectPropertiesParticleEnvironmental::load(KSimpleConfig* cfg, const 
     return false;
   }
 
-  mMass = (float)(cfg->readDoubleNumEntry("Mass", mMass));
-  mMinVelo = BosonConfig::readBoVector3FixedEntry(cfg, "MinVelocity", mMinVelo);
-  mMaxVelo = BosonConfig::readBoVector3FixedEntry(cfg, "MaxVelocity", mMaxVelo);
+  mMass = cfg->readDoubleNumEntry("Mass", mMass);
+  mMinVelo = BosonConfig::readBoVector3FloatEntry(cfg, "MinVelocity", mMinVelo);
+  mMaxVelo = BosonConfig::readBoVector3FloatEntry(cfg, "MaxVelocity", mMaxVelo);
   mColor = BosonConfig::readBoVector4FloatEntry(cfg, "Color", mColor);
-  mSize = (float)(cfg->readDoubleNumEntry("Size", mSize));
-  mParticleDist = (float)(cfg->readDoubleNumEntry("ParticleDist", mParticleDist));
+  mSize = cfg->readDoubleNumEntry("Size", mSize);
+  mParticleDist = cfg->readDoubleNumEntry("ParticleDist", mParticleDist);
   mGLBlendFuncStr = cfg->readEntry("BlendFunc", mGLBlendFuncStr);
   mGLSrcBlendFuncStr = cfg->readEntry("SrcBlendFunc", mGLSrcBlendFuncStr);
-  mRange = (float)(cfg->readDoubleNumEntry("Range", mRange));
-  mDensity = (float)(cfg->readDoubleNumEntry("Density", mDensity));
+  mRange = cfg->readDoubleNumEntry("Range", mRange);
+  mDensity = cfg->readDoubleNumEntry("Density", mDensity);
   mTextureName = cfg->readEntry("Texture", mTextureName);
 
   // If we're loading main properties (not inherited ones), load the textures
@@ -516,7 +512,6 @@ void BosonEffectPropertiesParticleEnvironmental::initParticle(BosonEffectParticl
   particle->maxage = 1.0f;  // Not used
   particle->color = mColor;
   particle->size = mSize;
-  BosonEffectParticleEnvironmental* e = (BosonEffectParticleEnvironmental*)effect;
   particle->velo.set(BosonEffect::getFloat(mMinVelo[0], mMaxVelo[0]),
       BosonEffect::getFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getFloat(mMinVelo[2], mMaxVelo[2]));
 }
