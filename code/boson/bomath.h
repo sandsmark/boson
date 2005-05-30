@@ -39,6 +39,10 @@ class QDataStream;
  * drastically increasing the dependencies.
  */
 
+// Define this when you want bofixed to use normal floats (so that essentially
+//  bofixed = float)
+//#define BOFIXED_IS_FLOAT
+
 
 
 /**
@@ -102,6 +106,7 @@ void floatToBin(float f);
  *
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
+#ifndef BOFIXED_IS_FLOAT
 class bofixed
 {
 public:
@@ -242,6 +247,141 @@ public:
 private:
 	Q_INT32 mValue;
 };
+#else
+class bofixed
+{
+public:
+	/**
+	 * Construct a fixed point variable with initial value 0.0
+	 **/
+	bofixed()
+		: mValue(0.0f)
+	{
+	}
+	bofixed(const bofixed& f)
+		: mValue(f.mValue)
+	{
+	}
+	bofixed(Q_INT32 f)  : mValue(f) { }
+	bofixed(Q_UINT32 f) : mValue(f) { }
+	bofixed(Q_INT8 f)   : mValue(f) { }
+	bofixed(Q_UINT8 f)  : mValue(f) { }
+	bofixed(Q_INT16 f)  : mValue(f) { }
+	bofixed(Q_UINT16 f) : mValue(f) { }
+	bofixed(Q_LONG f)   : mValue(f) { }
+	bofixed(Q_ULONG f)  : mValue(f) { }
+	bofixed(float f)    : mValue(f) { }
+	bofixed(double f)   : mValue(f) { }
+
+	inline bool equals(const bofixed& f) const         { return (mValue == f.mValue); }
+	inline bool isGreater(const bofixed& f) const      { return (mValue >  f.mValue); }
+	inline bool isGreaterEqual(const bofixed& f) const { return (mValue >= f.mValue); }
+	inline bool isLess(const bofixed& f) const         { return (mValue <  f.mValue); }
+	inline bool isLessEqual(const bofixed& f) const    { return (mValue <= f.mValue); }
+
+	/**
+	 * @return The fixed point value castet to integer. This behaves just
+	 * like casting a floating point number to int, i.e. the digits after
+	 * the decimal point are "cut off".
+	 **/
+	inline Q_INT32 toInt() const { return (Q_INT32)mValue; }
+	inline float toFloat() const { return mValue; }
+	inline double toDouble() const { return (double)mValue; }
+
+	/**
+	 * @return The internal representation of the fixed point value. This
+	 * may be useful for debugging-
+	 **/
+	Q_INT32 rawInt() const { return *((Q_UINT32*)&mValue); }
+	void setFromRawInt(Q_INT32 r) { mValue = *((float*)&r); }
+
+	bofixed& operator=(const bofixed& f) { mValue = f.mValue; return *this; }
+	bofixed& operator=(Q_INT32 f)  { mValue = f; return *this; }
+	bofixed& operator=(Q_UINT32 f) { mValue = f; return *this; }
+	bofixed& operator=(Q_INT8 f)   { mValue = f; return *this; }
+	bofixed& operator=(Q_UINT8 f)  { mValue = f; return *this; }
+	bofixed& operator=(Q_INT16 f)  { mValue = f; return *this; }
+	bofixed& operator=(Q_UINT16 f) { mValue = f; return *this; }
+	bofixed& operator=(Q_LONG f)   { mValue = f; return *this; }
+	bofixed& operator=(Q_ULONG f)  { mValue = f; return *this; }
+	bofixed& operator=(float f)    { mValue = f; return *this; }
+	bofixed& operator=(double f)   { mValue = f; return *this; }
+
+	inline operator float() const { return toFloat(); }
+
+	// AB: providing dedicated casting operators for several types is _not_
+	// a good idea. for example things like if (!x) where x is a bofixed
+	// causes a compiler error, as g++ doesn't know what to cast to (since
+	// unless we would provide a bool cast operator, too).
+	// providing float only means that if (!x) does exactly what we would
+	// expect.
+	//
+	// disadvantage: things like domElement.setAttribute("x", x) work
+	// without changes - we store a float here. I believe it would be nicer
+	// if we'd store bofixed as a rawInt() in xml files.
+
+	inline bofixed operator-() const { bofixed f(*this); f.mValue *= -1; return f; }
+
+	inline bofixed& operator+=(const bofixed& f) { mValue += f.mValue; return *this; }
+	inline bofixed& operator+=(Q_INT32 f)  { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(Q_UINT32 f) { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(Q_INT16 f)  { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(Q_UINT16 f) { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(Q_INT8 f)   { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(Q_UINT8 f)  { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(Q_LONG f)   { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(Q_ULONG f)  { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(float f)    { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(double f)   { return operator+=(bofixed(f)); }
+
+	inline bofixed& operator-=(const bofixed& f) { mValue -= f.mValue; return *this; }
+	inline bofixed& operator-=(Q_INT32 f)  { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(Q_UINT32 f) { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(Q_INT16 f)  { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(Q_UINT16 f) { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(Q_INT8 f)   { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(Q_UINT8 f)  { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(Q_LONG f)   { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(Q_ULONG f)  { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(float f)    { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(double f)   { return operator-=(bofixed(f)); }
+
+	inline bofixed& operator*=(const bofixed& f)
+	{
+		mValue *= f.mValue;
+		return *this;
+	}
+	inline bofixed& operator*=(Q_INT32 f)  { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(Q_UINT32 f) { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(Q_INT16 f)  { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(Q_UINT16 f) { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(Q_INT8 f)   { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(Q_UINT8 f)  { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(Q_LONG f)   { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(Q_ULONG f)  { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(float f)    { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(double f)   { return operator*=(bofixed(f)); }
+
+	inline bofixed& operator/=(const bofixed& f)
+	{
+		mValue /= f.mValue;
+		return *this;
+	}
+	inline bofixed& operator/=(Q_INT32 f)  { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(Q_UINT32 f) { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(Q_INT16 f)  { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(Q_UINT16 f) { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(Q_INT8 f)   { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(Q_UINT8 f)  { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(Q_LONG f)   { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(Q_ULONG f)  { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(float f)    { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(double f)   { return operator/=(bofixed(f)); }
+
+private:
+	float mValue;
+};
+#endif
 
 inline bofixed operator+(const bofixed& f1, const bofixed& f2) { bofixed f(f1); f += f2; return f; }
 inline bofixed operator+(const bofixed& f1, Q_INT32 f2)  { bofixed f(f1); f += f2; return f; }
