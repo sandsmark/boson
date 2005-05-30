@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2004-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -160,6 +160,11 @@ class BosonEffect
      * You can use this to easily get random parameters between given limits.
      **/
     static float getFloat(float min, float max);
+    /**
+     * @return Random bofixed number between min and max (inclusive).
+     * You can use this to easily get random parameters between given limits.
+     **/
+    static bofixed getBofixed(bofixed min, bofixed max);
 
     /**
      * Initializes static things.

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2004-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -58,6 +58,18 @@ float BosonEffect::getFloat(float min, float max)
   else
   {
     return ((float)(mRandom->getDouble())) * (max - min) + min;
+  }
+}
+
+bofixed BosonEffect::getBofixed(bofixed min, bofixed max)
+{
+  if(min == max)
+  {
+    return min;
+  }
+  else
+  {
+    return ((bofixed)(mRandom->getDouble())) * (max - min) + min;
   }
 }
 

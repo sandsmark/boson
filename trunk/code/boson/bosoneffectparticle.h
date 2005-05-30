@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2004-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -84,7 +84,7 @@ class BosonParticle
      * Current position of particle in OpenGL (world) coordinates (absolute
      *  coordinates).
      **/
-    BoVector3Fixed pos;
+    BoVector3Float pos;
     /**
      * Current size (diameter) of particle. When it's 1.0, particle is as big as
      *  one cell.
@@ -153,13 +153,13 @@ class BosonEffectParticle : public BosonEffect
      * This must be precalculated and set using @ref setParticleDistVector every
      *  time position of camera or particle system changes.
      **/
-    const BoVector3Fixed& particleDistVector() const  { return mParticleDistVector; }
+    const BoVector3Float& particleDistVector() const  { return mParticleDistVector; }
     /**
      * Sets particle distance vector (specifies how much particles are "pulled")
      *  towards the camera.
      * @see particleDistVector
      **/
-    void setParticleDistVector(const BoVector3Fixed& v)  { mParticleDistVector = v; }
+    void setParticleDistVector(const BoVector3Float& v)  { mParticleDistVector = v; }
 
     /**
      * @return Particle at position i in the particles list.
@@ -187,15 +187,18 @@ class BosonEffectParticle : public BosonEffect
      **/
     virtual bool testFogged() const  { return true; }
 
+    virtual void setPosition(const BoVector3Fixed& pos);
+    const BoVector3Float& positionFloat()  { return mPositionFloat; }
 
   protected:
     float mBoundingSphereRadius;
     int mBlendFunc[2];
     float mParticleDist;
-    BoVector3Fixed mParticleDistVector;
+    BoVector3Float mParticleDistVector;
     unsigned int mParticleCount;
     const BosonEffectPropertiesParticle* mProperties;
     bool mAlign;  // Whether to align particles to camera
+    BoVector3Float mPositionFloat;
 };
 
 
@@ -218,7 +221,7 @@ class BosonGenericParticle : public BosonParticle
     /**
      * Current velocity i.e. how much particle moves per second.
      **/
-    BoVector3Fixed velo;
+    BoVector3Float velo;
     /**
      * Maximum lifetime of this particle.
      * @see life
@@ -340,7 +343,7 @@ class BosonEffectParticleGeneric : public BosonEffectParticle
      *  delayed (not yet started)
      * Only active systems have to be updated.
      **/
-    virtual bool isActive() const  { return ((mNum > 0) || (mAge != 0) || (!hasStarted())); }
+    virtual bool isActive() const  { return ((mNum > 0) || (mAge != 0.0f) || (!hasStarted())); }
 
     /**
      * Sets OpenGL blending function of this system. This function is used in
@@ -494,8 +497,8 @@ class BosonEffectParticleTrail : public BosonEffectParticle
      *  we want to place them. You can use it to e.g. place a smoke trail behind
      *  the missile.
      **/
-    const BoVector3Fixed& offset() const  { return mOffset; }
-    void setOffset(const BoVector3Fixed& o)  { mOffset = o; }
+    const BoVector3Float& offset() const  { return mOffset; }
+    void setOffset(const BoVector3Float& o)  { mOffset = o; }
 
     void setMaxParticleSize(float size)  { mMaxParticleSize = size; }
 
@@ -521,7 +524,7 @@ class BosonEffectParticleTrail : public BosonEffectParticle
     /**
      * Called when new particle is made active and needs to be initialized
      **/
-    virtual void initParticle(BosonGenericParticle* particle, const BoVector3Fixed& pos);
+    virtual void initParticle(BosonGenericParticle* particle, const BoVector3Float& pos);
     /**
      * Called when particle has to be updated. Called from @ref update
      **/
@@ -541,9 +544,9 @@ class BosonEffectParticleTrail : public BosonEffectParticle
     float mSpacing;
     int mMaxDelayedUpdates;
 
-    BoVector3Fixed mOffset;
+    BoVector3Float mOffset;
 
-    BoVector3Fixed mLastPos;
+    BoVector3Float mLastPos;
 };
 
 
@@ -621,8 +624,8 @@ class BosonEffectParticleEnvironmental : public BosonEffectParticle
      * @return Average velocity of particles.
      * Note that this doesn't take wind into account
      **/
-    const BoVector3Fixed& particleVelo() const  { return mParticleVelo; }
-    void setParticleVelo(const BoVector3Fixed& velo)  { mParticleVelo = velo; }
+    const BoVector3Float& particleVelo() const  { return mParticleVelo; }
+    void setParticleVelo(const BoVector3Float& velo)  { mParticleVelo = velo; }
 
 
     /**
@@ -646,13 +649,13 @@ class BosonEffectParticleEnvironmental : public BosonEffectParticle
     /**
      * Called when new particle is made active and needs to be initialized
      **/
-    virtual void initParticle(BosonGenericParticle* particle, const BoVector3Fixed& pos);
+    virtual void initParticle(BosonGenericParticle* particle, const BoVector3Float& pos);
     /**
      * Called when particle has to be updated. Called from @ref update
      **/
     virtual void updateParticle(BosonGenericParticle* particle, float elapsed);
 
-    void particleBoxMoved(const BoVector3Fixed& oldpos, const BoVector3Fixed& newpos);
+    void particleBoxMoved(const BoVector3Float& oldpos, const BoVector3Float& newpos);
 
 
   protected:
@@ -663,7 +666,7 @@ class BosonEffectParticleEnvironmental : public BosonEffectParticle
     bool mObsolete;  // If true, new particles won't be created anymore
     float mRange;
     float mDensity;
-    BoVector3Fixed mParticleVelo;
+    BoVector3Float mParticleVelo;
 };
 
 

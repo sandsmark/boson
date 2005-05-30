@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1419,12 +1419,12 @@ void BosonScript::advanceEffects(int ticks)
   }
 }
 
-void BosonScript::setWind(const BoVector3Fixed& wind)
+void BosonScript::setWind(const BoVector3Float& wind)
 {
   BosonEffectPropertiesParticle::setWind(wind);
 }
 
-const BoVector3Fixed& BosonScript::wind()
+const BoVector3Float& BosonScript::wind()
 {
   return BosonEffectPropertiesParticle::wind();
 }
