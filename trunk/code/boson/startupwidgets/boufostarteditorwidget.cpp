@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "bosonneweditorwidget.h"
-#include "bosonneweditorwidget.moc"
+#include "boufostarteditorwidget.h"
+#include "boufostarteditorwidget.moc"
 
 #include "../defines.h"
 #include "../bosonconfig.h"
@@ -39,31 +39,20 @@
 
 #include <klocale.h>
 #include <kmessagebox.h>
-#include <klistview.h>
-#include <klistbox.h>
-#include <knuminput.h>
-#include <ktextbrowser.h>
-#include <klineedit.h>
 
-#include <qcombobox.h>
-#include <qgroupbox.h>
-#include <qlabel.h>
-#include <qslider.h>
 #include <qptrdict.h>
-#include <qvaluelist.h>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
+#include <qmap.h>
 
-class BosonNewEditorWidgetPrivate
+class BoUfoStartEditorWidgetPrivate
 {
 public:
-	BosonNewEditorWidgetPrivate()
+	BoUfoStartEditorWidgetPrivate()
 	{
 		mSelectedMap = 0;
 	}
 
 	QPtrDict<KPlayer> mItem2Player;
-	QMap<QListViewItem*, QString> mItem2Map;
+	QMap<int, QString> mIndex2Map;
 
 	QMap<int, QString> mSpeciesIndex2Identifier;
 	QMap<int, QString> mSpeciesIndex2Comment;
@@ -72,13 +61,13 @@ public:
 };
 
 
-BosonNewEditorWidget::BosonNewEditorWidget(BosonStartupNetwork* interface, QWidget* parent)
-    : BosonNewEditorWidgetBase(parent, "bosonneweditorwidget")
+BoUfoStartEditorWidget::BoUfoStartEditorWidget(BosonStartupNetwork* interface)
+	: BoUfoStartEditorWidgetBase()
 {
  boDebug() << k_funcinfo << endl;
  BO_CHECK_NULL_RET(boGame);
  BO_CHECK_NULL_RET(interface);
- d = new BosonNewEditorWidgetPrivate;
+ d = new BoUfoStartEditorWidgetPrivate;
  mNetworkInterface = interface;
 
  initPlayFields();
@@ -89,34 +78,31 @@ BosonNewEditorWidget::BosonNewEditorWidget(BosonStartupNetwork* interface, QWidg
  connect(networkInterface(), SIGNAL(signalPlayFieldChanged(BosonPlayField*)),
 		this, SLOT(slotNetPlayFieldChanged(BosonPlayField*)));
 
- connect(mCancelButton, SIGNAL(clicked()), this, SIGNAL(signalCancelled()));
- connect(mStartButton, SIGNAL(clicked()), this, SLOT(slotStartClicked()));
-
  // AB: this widget isn't the ideal place for this...
  initKGame();
 }
 
-BosonNewEditorWidget::~BosonNewEditorWidget()
+BoUfoStartEditorWidget::~BoUfoStartEditorWidget()
 {
  QString playFieldIdentifier;
- if (mSelectMap->currentItem()) {
-	if (d->mItem2Map.contains(mSelectMap->currentItem())) {
-		playFieldIdentifier = d->mItem2Map[mSelectMap->currentItem()];
+ if (mSelectMap->selectedItem() >= 0) {
+	if (d->mIndex2Map.contains(mSelectMap->selectedItem())) {
+		playFieldIdentifier = d->mIndex2Map[mSelectMap->selectedItem()];
 	}
  }
  boConfig->saveEditorMap(playFieldIdentifier);
- boConfig->saveEditorCreateNewMap(mCreateNewMap->isChecked());
+ boConfig->saveEditorCreateNewMap(mCreateNewMap->selected());
  delete d;
 }
 
-void BosonNewEditorWidget::slotStartClicked()
+void BoUfoStartEditorWidget::slotStartClicked()
 {
  boDebug() << k_funcinfo << endl;
  // FIXME: it's not start _game_
  networkInterface()->sendStartGameClicked();
 }
 
-void BosonNewEditorWidget::initKGame()
+void BoUfoStartEditorWidget::initKGame()
 {
  // We must manually set maximum players number to some bigger value, because
  //  KGame in KDE 3.0.0 (what about 3.0.1?) doesn't support infinite number of
@@ -127,7 +113,7 @@ void BosonNewEditorWidget::initKGame()
 
 }
 
-void BosonNewEditorWidget::initPlayFields()
+void BoUfoStartEditorWidget::initPlayFields()
 {
  boDebug() << k_funcinfo << endl;
  QStringList list = boData->availablePlayFields();
@@ -137,20 +123,19 @@ void BosonNewEditorWidget::initPlayFields()
 		boWarning() << k_funcinfo << "NULL playField " << list[i] << endl;
 		continue;
 	}
-	QListViewItem* item = new QListViewItem(mSelectMap);
-	item->setText(0, boData->playField(list[i])->playFieldName());
-	mSelectMap->insertItem(item);
-	d->mItem2Map.insert(item, list[i]);
+	int index = mSelectMap->count();
+	mSelectMap->insertItem(boData->playField(list[i])->playFieldName());
+	d->mIndex2Map.insert(index, list[i]);
  }
 
  // Load whether to create new map or edit existing one
  bool createnew = boConfig->readEditorCreateNewMap();
  boDebug() << k_funcinfo << "createnew: " << createnew << endl;
  if (createnew) {
-	mCreateNewMap->setChecked(true);
+	mCreateNewMap->setSelected(true);
 	slotCreateNewToggled(true);
  } else {
-	mCreateNewMap->setChecked(false);
+	mCreateNewMap->setSelected(false);
 	slotCreateNewToggled(false);
 	// Load selected map
 	QString mapId = boConfig->readEditorMap();
@@ -163,16 +148,19 @@ void BosonNewEditorWidget::initPlayFields()
  }
 }
 
-void BosonNewEditorWidget::initGroundThemes()
+void BoUfoStartEditorWidget::initGroundThemes()
 {
  // AB: atm we use identifiers for the combobox only. one day we may want to add
  // names for them, too
  QStringList list = BosonData::bosonData()->availableGroundThemes();
- mGroundTheme->insertStringList(list);
- slotGroundThemeChanged(mGroundTheme->currentItem());
+ mGroundTheme->setItems(list);
+
+ if (mGroundTheme->count() > 0) {
+	mGroundTheme->setCurrentItem(0);
+ }
 }
 
-void BosonNewEditorWidget::slotNetStart()
+void BoUfoStartEditorWidget::slotNetStart()
 {
  BO_CHECK_NULL_RET(boGame);
  boDebug() << k_funcinfo << endl;
@@ -196,21 +184,21 @@ void BosonNewEditorWidget::slotNetStart()
  }
 
  QByteArray newMap;
- if (mCreateNewMap->isChecked()) {
+ if (mCreateNewMap->selected()) {
 	newMap = createNewMap();
 	if (newMap.size() == 0) {
 		boError() << k_funcinfo << "could not create new map" << endl;
-		KMessageBox::sorry(this, i18n("An error occured while creating a new map"));
+		KMessageBox::sorry(0, i18n("An error occured while creating a new map"));
 		return;
 	}
-	maxPlayers = mMaxPlayers->value();
+	maxPlayers = (int)mMaxPlayers->value();
  } else {
 	// Editing old map
-	if (!mSelectMap->currentItem()) {
-		boError() << k_funcinfo << "NULL current item" << endl;
+	if (mSelectMap->selectedItem() < 0) {
+		boError() << k_funcinfo << "invalid selected index" << endl;
 		return;
 	}
-	QString playFieldIdentifier = d->mItem2Map[mSelectMap->currentItem()];
+	QString playFieldIdentifier = d->mIndex2Map[mSelectMap->selectedItem()];
 	field = boData->playField(playFieldIdentifier);
 	if (!field) {
 		boError() << k_funcinfo << "NULL playfield" << endl;
@@ -222,7 +210,7 @@ void BosonNewEditorWidget::slotNetStart()
  QValueList<QColor> availableTeamColors = boGame->availableTeamColors();
  if ((int)availableTeamColors.count() < maxPlayers) {
 	boError() << k_funcinfo << "too many players - not enough team colors!" << endl;
-	KMessageBox::sorry(this, i18n("Too many (max-)players. Not enough colors available (internal error)."));
+	KMessageBox::sorry(0, i18n("Too many (max-)players. Not enough colors available (internal error)."));
 	return;
  }
  boDebug() << k_funcinfo << "adding " << maxPlayers << " players" << endl;
@@ -240,7 +228,7 @@ void BosonNewEditorWidget::slotNetStart()
 }
 
 
-void BosonNewEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
+void BoUfoStartEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
 {
  boDebug() << k_funcinfo << endl;
 
@@ -249,17 +237,25 @@ void BosonNewEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
 	return;
  }
 
- QMap<QListViewItem*, QString>::Iterator it;
- QListViewItem* item = 0;
- for (it = d->mItem2Map.begin(); it != d->mItem2Map.end() && !item; ++it) {
+ // AB: this is a workaround.
+ // actually selecting a map should be disabled when "edit existing map" is not
+ // selected. however setEnabled(false) seems not to work properly with libufo,
+ // so here we make sure that the correct radio button is selected.
+ slotEditExistingToggled(true);
+
+ QMap<int, QString>::Iterator it;
+ int item = -1;
+ for (it = d->mIndex2Map.begin(); it != d->mIndex2Map.end() && item < 0; ++it) {
 	if (it.data() == field->identifier()) {
 		item = it.key();
 	}
  }
- if (!item) {
+ if (item < 0) {
 	boError() << k_funcinfo << "Cannot find playfield item for " << field->identifier() << endl;
  } else {
-	mSelectMap->setCurrentItem(item);
+	mSelectMap->blockSignals(true);
+	mSelectMap->setSelectedItem(item);
+	mSelectMap->blockSignals(false);
  }
 
 
@@ -279,85 +275,105 @@ void BosonNewEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
 	mMapDescription->setText(description->comment());
  }
 
- mWidth->setValue(information->mapWidth());
- mWidthNum->setValue(information->mapWidth());
- mHeight->setValue(information->mapHeight());
- mHeightNum->setValue(information->mapHeight());
+ mMapWidth->setValue(information->mapWidth());
+ mMapHeight->setValue(information->mapHeight());
  mGroundTheme->setCurrentItem(0); // TODO - we do not yet support more than one :(
  mMaxPlayers->setValue(information->maxPlayers());
- mMaxPlayersNum->setValue(information->maxPlayers());
 
  d->mSelectedMap = field;
 }
 
-void BosonNewEditorWidget::slotPlayFieldChanged(QListViewItem* item)
+void BoUfoStartEditorWidget::slotPlayFieldChanged(int, int)
 {
  boDebug() << k_funcinfo << endl;
- BO_CHECK_NULL_RET(item);
- if (!d->mItem2Map.contains(item)) {
+ int index = mSelectMap->selectedItem();
+ if (index < 0) {
+	boWarning() << k_funcinfo << "no playfield selected" << endl;
+	return;
+ }
+ if (!d->mIndex2Map.contains(index)) {
 	boWarning() << k_funcinfo << "invalid item" << endl;
 	return;
  }
- networkInterface()->sendChangePlayField(d->mItem2Map[item]);
+ networkInterface()->sendChangePlayField(d->mIndex2Map[index]);
 }
 
-void BosonNewEditorWidget::slotGroundThemeChanged(int)
+void BoUfoStartEditorWidget::slotGroundThemeChanged(int)
 {
  // we don't transmit over network.
+
+ if (mGroundTheme->count() == 0) {
+	// not yet initialized
+	return;
+ }
 
  mFilling->clear();
  QStringList groundThemes = BosonData::bosonData()->availableGroundThemes();
  int themeIndex = mGroundTheme->currentItem();
  if (themeIndex < 0 || (unsigned int)themeIndex >= groundThemes.count()) {
-	KMessageBox::sorry(this, i18n("Invalid groundTheme index %1").arg(themeIndex));
+	KMessageBox::sorry(0, i18n("Invalid groundTheme index %1").arg(themeIndex));
 	return;
  }
  QString themeId = groundThemes[themeIndex];
  BosonGroundTheme* theme = boData->groundTheme(themeId);
  if (!theme) {
 	BO_NULL_ERROR(theme);
-	KMessageBox::sorry(this, i18n("An error occured while loading the selected groundtheme"));
+	KMessageBox::sorry(0, i18n("An error occured while loading the selected groundtheme"));
 	return;
  }
 
  for (unsigned int i = 0; i < theme->groundTypeCount(); i++) {
 	mFilling->insertItem(theme->groundType(i)->name);
  }
+ if (mFilling->count() > 0) {
+	mFilling->setCurrentItem(0);
+ }
 }
 
-void BosonNewEditorWidget::slotMaxPlayersChanged(int)
+void BoUfoStartEditorWidget::slotMaxPlayersChanged(float m)
+{
+ slotMaxPlayersChanged((int)m);
+}
+
+void BoUfoStartEditorWidget::slotMaxPlayersChanged(int)
 {
  // we don't transmit over network.
 }
 
-void BosonNewEditorWidget::slotWidthChanged(int)
+void BoUfoStartEditorWidget::slotWidthChanged(float w)
+{
+ slotWidthChanged((int)w);
+}
+
+void BoUfoStartEditorWidget::slotWidthChanged(int)
 {
  // we don't transmit over network.
 }
 
-void BosonNewEditorWidget::slotHeightChanged(int)
+void BoUfoStartEditorWidget::slotHeightChanged(float h)
+{
+ slotHeightChanged((int)h);
+}
+
+void BoUfoStartEditorWidget::slotHeightChanged(int)
 {
  // we don't transmit over network.
 }
 
-void BosonNewEditorWidget::slotNewMapToggled(bool isNewMap)
+void BoUfoStartEditorWidget::slotNewMapToggled(bool isNewMap)
 {
  boDebug() << k_funcinfo << "isNewMap: " << isNewMap << endl;
- mNewMapName->setEnabled(isNewMap);
+ mMapName->setEnabled(isNewMap);
  mSelectMap->setEnabled(!isNewMap);
 
  if (isNewMap) {
-	mHeight->setValue(50);
-	mHeightNum->setValue(50);
-	mWidth->setValue(50);
-	mWidthNum->setValue(50);
+	mMapHeight->setValue(50);
+	mMapWidth->setValue(50);
 	mMaxPlayers->setValue(2);
-	mMaxPlayersNum->setValue(2);
 	mGroundTheme->setCurrentItem(0);
 	mFilling->setCurrentItem(0);
 	mMapDescription->setText(i18n("Enter description here"));
  } else if (d->mSelectedMap) {
-	BosonMap* map = d->mSelectedMap->map();
 	const BosonPlayFieldInformation* information = d->mSelectedMap->information();
 	BPFDescription* description = d->mSelectedMap->description();
 
@@ -369,25 +385,19 @@ void BosonNewEditorWidget::slotNewMapToggled(bool isNewMap)
 	} else {
 		mMapDescription->setText(description->comment());
 	}
-	mWidth->setValue(information->mapWidth());
-	mWidthNum->setValue(information->mapWidth());
-	mHeight->setValue(information->mapHeight());
-	mHeightNum->setValue(information->mapHeight());
+	mMapWidth->setValue(information->mapWidth());
+	mMapHeight->setValue(information->mapHeight());
 	mGroundTheme->setCurrentItem(0); // TODO - we do not yet support more than one :(
 	mMaxPlayers->setValue(information->maxPlayers());
-	mMaxPlayersNum->setValue(information->maxPlayers());
  }
 
- mHeight->setEnabled(isNewMap);
- mHeightNum->setEnabled(isNewMap);
- mWidth->setEnabled(isNewMap);
- mWidthNum->setEnabled(isNewMap);
+ mMapHeight->setEnabled(isNewMap);
+ mMapWidth->setEnabled(isNewMap);
  mMaxPlayers->setEnabled(isNewMap);
- mMaxPlayersNum->setEnabled(isNewMap);
  mGroundTheme->setEnabled(isNewMap);
  mFilling->setEnabled(isNewMap);
 
- mMapDescription->setReadOnly(!isNewMap);
+ mMapDescription->setEditable(isNewMap);
 
  if (isNewMap) {
 	// Reset playfield
@@ -397,26 +407,26 @@ void BosonNewEditorWidget::slotNewMapToggled(bool isNewMap)
  boDebug() << k_funcinfo << "DONE" << endl;
 }
 
-void BosonNewEditorWidget::slotCreateNewToggled(bool checked)
+void BoUfoStartEditorWidget::slotCreateNewToggled(bool selected)
 {
- mEditExistingMap->setChecked(!checked);
- slotNewMapToggled(checked);
+ mEditExistingMap->setSelected(!selected);
+ slotNewMapToggled(selected);
 }
 
-void BosonNewEditorWidget::slotEditExistingToggled(bool checked)
+void BoUfoStartEditorWidget::slotEditExistingToggled(bool selected)
 {
- mCreateNewMap->setChecked(!checked);
- slotNewMapToggled(!checked);
+ mCreateNewMap->setSelected(!selected);
+ slotNewMapToggled(!selected);
 }
 
-QByteArray BosonNewEditorWidget::createNewMap()
+QByteArray BoUfoStartEditorWidget::createNewMap()
 {
  boDebug() << k_funcinfo << endl;
- unsigned int width = mWidth->value();
- unsigned int height = mHeight->value();
+ unsigned int width = (unsigned int)mMapWidth->value();
+ unsigned int height = (unsigned int)mMapHeight->value();
  if (!BosonMap::isValidMapGeo(width, height)) {
 	boError() << k_funcinfo << "invalid map geo" << endl;
-	KMessageBox::sorry(this, i18n("The desired map geo is not valid\nWidth=%1\nHeight=%2").arg(width).arg(height));
+	KMessageBox::sorry(0, i18n("The desired map geo is not valid\nWidth=%1\nHeight=%2").arg(width).arg(height));
 	return QByteArray();
  }
  QStringList groundThemes = BosonData::bosonData()->availableGroundThemes();
@@ -424,9 +434,9 @@ QByteArray BosonNewEditorWidget::createNewMap()
  if (themeIndex < 0 || (unsigned int)themeIndex >= groundThemes.count()) {
 	boError() << k_funcinfo << "invalid theme index " << themeIndex << endl;
 	if (themeIndex < 0) {
-		KMessageBox::sorry(this, i18n("Please select a ground theme first"));
+		KMessageBox::sorry(0, i18n("Please select a ground theme first"));
 	} else {
-		KMessageBox::sorry(this, i18n("The selected groundTheme at index %1 could not be found. %2 themes are available").arg(themeIndex).arg(groundThemes.count()));
+		KMessageBox::sorry(0, i18n("The selected groundTheme at index %1 could not be found. %2 themes are available").arg(themeIndex).arg(groundThemes.count()));
 	}
 	return QByteArray();
  }
@@ -434,7 +444,7 @@ QByteArray BosonNewEditorWidget::createNewMap()
  BosonGroundTheme* theme = boData->groundTheme(themeId);
  if (!theme) {
 	BO_NULL_ERROR(theme);
-	KMessageBox::sorry(this, i18n("An error occured while loading the selected groundtheme"));
+	KMessageBox::sorry(0, i18n("An error occured while loading the selected groundtheme"));
 	return QByteArray();
  }
  BosonPlayField playField;
@@ -447,21 +457,21 @@ QByteArray BosonNewEditorWidget::createNewMap()
  unsigned int groundtype = mFilling->currentItem();
  if (groundtype >= theme->groundTypeCount()) {
 	boError() << k_funcinfo << "invalid groundtype " << groundtype << endl;
-	KMessageBox::sorry(this, i18n("Could not fill the map with texture %1 - only %2 textures in groundTheme %3").arg(groundtype).arg(theme->groundTypeCount()).arg(themeId));
+	KMessageBox::sorry(0, i18n("Could not fill the map with texture %1 - only %2 textures in groundTheme %3").arg(groundtype).arg(theme->groundTypeCount()).arg(themeId));
 	return QByteArray();
  }
  map->fill(groundtype);
 
  // we add dummy players in order to save them into the bytearray.
- int maxPlayers = mMaxPlayers->value();
+ int maxPlayers = (int)mMaxPlayers->value();
  if (maxPlayers < 2) {
 	boError() << k_funcinfo << "maxPlayers < 2 does not make sense" << endl;
-	KMessageBox::sorry(this, i18n("Max Players is an invalid value: %1").arg(maxPlayers));
+	KMessageBox::sorry(0, i18n("Max Players is an invalid value: %1").arg(maxPlayers));
 	return QByteArray();
  }
  if (maxPlayers > BOSON_MAX_PLAYERS) {
 	boError() << k_funcinfo << "maxPlayers > " << BOSON_MAX_PLAYERS << " is not allowed" << endl;
-	KMessageBox::sorry(this, i18n("Max Players is an invalid value: %1 (must be < %2)").arg(maxPlayers).arg(BOSON_MAX_PLAYERS));
+	KMessageBox::sorry(0, i18n("Max Players is an invalid value: %1 (must be < %2)").arg(maxPlayers).arg(BOSON_MAX_PLAYERS));
 	return QByteArray();
  }
 
@@ -472,7 +482,7 @@ QByteArray BosonNewEditorWidget::createNewMap()
  if (!save->saveToFiles(files)) {
 	delete save;
 	boError() << k_funcinfo << "error occured while saving" << endl;
-	KMessageBox::sorry(this, i18n("An error occured while saving the a game to a stream"));
+	KMessageBox::sorry(0, i18n("An error occured while saving the a game to a stream"));
 	return QByteArray();
  }
  boDebug() << k_funcinfo << "saving completed" << endl;
@@ -507,11 +517,11 @@ QByteArray BosonNewEditorWidget::createNewMap()
  files.insert("canvas.xml", canvasDoc.toCString());
 
  BPFDescription desc;
- desc.setName(mNewMapName->text());
+ desc.setName(mMapName->text());
  files.insert("C/description.xml", desc.toString().utf8());
  files.insert("scripts/eventlistener/game.py", QByteArray());
  files.insert("scripts/eventlistener/localplayer.py", QByteArray());
- for (unsigned int i = 0; i < maxPlayers + 1; i++) {
+ for (unsigned int i = 0; i < (unsigned int)(maxPlayers + 1); i++) {
 	files.insert(QString("scripts/eventlistener/ai-player_%1.py").arg(i), QByteArray());
  }
 

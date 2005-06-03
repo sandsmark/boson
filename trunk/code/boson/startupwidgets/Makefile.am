@@ -2,11 +2,8 @@ INCLUDES = -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl -I$(top_srcdir)/boson -I
 
 noinst_LTLIBRARIES = libbosonstartupwidgets.la
 
-# AB: rename! use bosonneweditorwidgetbase.ui
 libbosonstartupwidgets_la_SOURCES = \
-	bosonneweditorwidgetbase.ui \
 	bosonstartupnetwork.cpp \
-	bosonneweditorwidget.cpp \
 	kloadsavegamewidget.cpp \
 	welcomewidget.boui \
 	newgamewidget.boui \
@@ -15,7 +12,8 @@ libbosonstartupwidgets_la_SOURCES = \
 	boufoloadingwidget.cpp \
 	boufonetworkoptionswidgetbase.boui \
 	boufonetworkoptionswidget.cpp \
-	boufostarteditorwidgetbase.boui
+	boufostarteditorwidgetbase.boui \
+	boufostarteditorwidget.cpp
 
 METASOURCES = AUTO
 

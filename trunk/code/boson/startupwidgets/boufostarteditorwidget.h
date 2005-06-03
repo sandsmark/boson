@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,12 +17,10 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef BOSONNEWEDITORWIDGET_H
-#define BOSONNEWEDITORWIDGET_H
+#ifndef BOUFOSTARTEDITORWIDGET_H
+#define BOUFOSTARTEDITORWIDGET_H
 
-#include "bosonneweditorwidgetbase.h"
-
-#include <qwidget.h>
+#include "boufostarteditorwidgetbase.h"
 
 class BosonStartupNetwork;
 class BosonPlayField;
@@ -30,13 +28,13 @@ class Player;
 class KPlayer;
 class KGamePropertyBase;
 
-class BosonNewEditorWidgetPrivate;
-class BosonNewEditorWidget : public BosonNewEditorWidgetBase
+class BoUfoStartEditorWidgetPrivate;
+class BoUfoStartEditorWidget : public BoUfoStartEditorWidgetBase
 {
 	Q_OBJECT
 public:
-	BosonNewEditorWidget(BosonStartupNetwork* interface, QWidget* parent);
-	~BosonNewEditorWidget();
+	BoUfoStartEditorWidget(BosonStartupNetwork* interface);
+	~BoUfoStartEditorWidget();
 
 public slots:
 	virtual void slotStartClicked();
@@ -52,10 +50,13 @@ protected slots: // implementations for the .ui slots
 	// these slots describe actions that the local player has executed in
 	// his widget. nearly all must be transferred over network before the
 	// actual action is performed!
-	virtual void slotPlayFieldChanged(QListViewItem*);
+	virtual void slotPlayFieldChanged(int, int);
 	virtual void slotGroundThemeChanged(int);
+	virtual void slotMaxPlayersChanged(float);
 	virtual void slotMaxPlayersChanged(int);
+	virtual void slotWidthChanged(float);
 	virtual void slotWidthChanged(int);
+	virtual void slotHeightChanged(float);
 	virtual void slotHeightChanged(int);
 	virtual void slotNewMapToggled(bool);
 	virtual void slotCreateNewToggled(bool checked);
@@ -83,7 +84,7 @@ private:
 	void initKGame();
 
 private:
-	BosonNewEditorWidgetPrivate* d;
+	BoUfoStartEditorWidgetPrivate* d;
 	BosonStartupNetwork* mNetworkInterface;
 };
 
