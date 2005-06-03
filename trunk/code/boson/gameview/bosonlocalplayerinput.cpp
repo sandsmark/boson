@@ -49,29 +49,30 @@ BosonLocalPlayerInput::~BosonLocalPlayerInput()
   delete mEventListener;
 }
 
-void BosonLocalPlayerInput::initIO(KPlayer* p)
+bool BosonLocalPlayerInput::initializeIO()
 {
-  KGameIO::initIO(p);
   delete mEventListener;
   mEventListener = 0;
-  if (!p)
+  if (!player())
   {
-     return;
+    BO_NULL_ERROR(player());
+    return false;
   }
   boDebug() << k_funcinfo << endl;
   if (game())
   {
     // note: a NULL game() _is_ possible on program startup.
     // that player IO will be deleted later though, it is never really used
-    PlayerIO* io = ((Player*)p)->playerIO();
+    PlayerIO* io = ((Player*)player())->playerIO();
     BoEventManager* manager = ((Boson*)game())->eventManager();
     mEventListener = new BoLocalPlayerEventListener(io, manager, this);
     if (!mEventListener->initScript())
     {
       boError() << k_funcinfo << "could not init script" << endl;
-      return; // TODO: return false
+      return false; // TODO: return false
     }
   }
+  return true;
 }
 
 void BosonLocalPlayerInput::slotAction(const BoSpecificAction& action)

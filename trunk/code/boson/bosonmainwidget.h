@@ -142,7 +142,7 @@ protected:
 	 **/
 	void reinitGame();
 
-	void changeLocalPlayer(Player* p);
+	bool changeLocalPlayer(Player* p);
 	void saveConfig();
 
 protected slots:

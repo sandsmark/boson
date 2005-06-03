@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,7 +38,14 @@ public:
 	~BosonComputerIO();
 
 	virtual int rtti() const { return KGameIO::ComputerIO; }
-	virtual void initIO(KPlayer*);
+
+	/**
+	 * Call this once after adding the newly constructed IO to it's player.
+	 *
+	 * Note that this is NOT called automatically by KGame, in contrast to @ref
+	 * initIO. This is required to make use of the return value.
+	 **/
+	bool initializeIO();
 
 protected:
 	virtual void reaction();

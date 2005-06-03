@@ -52,7 +52,13 @@ class BosonLocalPlayerInput : public KGameIO
     BosonLocalPlayerInput();
     virtual ~BosonLocalPlayerInput();
 
-    virtual void initIO(KPlayer*);
+    /**
+     * Call this once after adding the newly constructed IO to it's player.
+     *
+     * Note that this is NOT called automatically by KGame, in contrast to @ref
+     * initIO. This is required to make use of the return value.
+     **/
+    bool initializeIO();
 
     BoEventListener* eventListener() const  { return mEventListener; }
 
