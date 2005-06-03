@@ -253,7 +253,10 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 	case IdLoadSaveGame:
 	{
 #if LOADSAVE_WIDGET
+		QColor defaultColor = BoUfoLabel::defaultForegroundColor();
+		BoUfoLabel::setDefaultForegroundColor(Qt::white);
 		KLoadSaveGameWidget* loadSaveWidget = new KLoadSaveGameWidget(d->mWidgetStack);
+		BoUfoLabel::setDefaultForegroundColor(defaultColor);
 		loadSaveWidget->setSuffix(QString::fromLatin1("bsg"));
 		connect(loadSaveWidget, SIGNAL(signalLoadGame(const QString&)),
 				this, SIGNAL(signalLoadGame(const QString&)));
@@ -287,7 +290,10 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 	}
 	case IdNetwork:
 	{
+		QColor defaultColor = BoUfoLabel::defaultForegroundColor();
+		BoUfoLabel::setDefaultForegroundColor(Qt::white);
 		BoUfoNetworkOptionsWidget* networkOptions = new BoUfoNetworkOptionsWidget();
+		BoUfoLabel::setDefaultForegroundColor(defaultColor);
 		connect(networkOptions, SIGNAL(signalOkClicked()),
 				this, SLOT(slotHideNetworkOptions()));
 		connect(networkOptions, SIGNAL(signalOfferingConnections()),
@@ -302,7 +308,10 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 	}
 	case IdStartEditor:
 	{
+		QColor defaultColor = BoUfoLabel::defaultForegroundColor();
+		BoUfoLabel::setDefaultForegroundColor(Qt::white);
 		BoUfoStartEditorWidget* startEditor = new BoUfoStartEditorWidget(networkInterface());
+		BoUfoLabel::setDefaultForegroundColor(defaultColor);
 		connect(startEditor, SIGNAL(signalCancelled()),
 				this, SLOT(slotShowWelcomeWidget()));
 
