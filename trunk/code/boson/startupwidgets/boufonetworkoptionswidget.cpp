@@ -31,6 +31,11 @@ BoUfoNetworkOptionsWidget::BoUfoNetworkOptionsWidget()
 	: BoUfoNetworkOptionsWidgetBase()
 {
  setConnected(false, false);
+
+ connect(boGame, SIGNAL(signalConnectionBroken()),
+		this, SLOT(slotConnectionBroken()));
+ connect(boGame, SIGNAL(signalClientJoinedGame(Q_UINT32, KGame*)),
+		this, SLOT(slotClientJoinedGame(Q_UINT32, KGame*)));
 }
 
 BoUfoNetworkOptionsWidget::~BoUfoNetworkOptionsWidget()
