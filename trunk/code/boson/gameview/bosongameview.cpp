@@ -1673,7 +1673,7 @@ void BosonGameView::setDisplayInput(BosonGameViewInputBase* input)
  }
  d->mInput->setSelection(selection());
 
- d->mInput->setCursor(d->mUfoCursorWidget->cursor());
+ d->mInput->slotSetCursor(d->mUfoCursorWidget->cursor());
 
  d->mInput->setCanvas(canvas());
  d->mInput->setLocalPlayerIO(localPlayerIO());
@@ -1690,6 +1690,9 @@ void BosonGameView::setDisplayInput(BosonGameViewInputBase* input)
 		d->mUfoPlacementPreviewWidget, SLOT(slotSetPlacementCellPreviewData(unsigned int, unsigned char*, bool)));
  connect(input, SIGNAL(signalLockAction(bool, int)),
 		d->mUfoPlacementPreviewWidget, SLOT(slotLockAction(bool, int)));
+
+ connect(d->mUfoCursorWidget, SIGNAL(signalSetCursor(BosonCursor*)),
+		input, SLOT(slotSetCursor(BosonCursor*)));
 }
 
 BosonGameViewInputBase* BosonGameView::displayInput() const

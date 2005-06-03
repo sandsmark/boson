@@ -785,6 +785,8 @@ void BosonUfoCursorWidget::slotChangeCursor(int mode, const QString& cursorDir)
 	// TODO: rename setCursorMode() to setCursorType()
 	boConfig->setIntValue("CursorMode", d->mCursorCollection->cursorType());
 	boConfig->setStringValue("CursorDir", d->mCursorCollection->cursorDir());
+
+	emit signalSetCursor(cursor());
  }
 }
 
