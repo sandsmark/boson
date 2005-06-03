@@ -23,7 +23,7 @@ def init(startcycle = 0):
   # Init lighting
   global cycle
   cycle = startcycle
-  advanceWind(cycle)
+  advance()
 
 
 def setEnabled(e):
