@@ -2630,6 +2630,9 @@ void BoUfoComboBox::setCurrentItem(int i)
  if (i < 0) {
 	return;
  }
+ if ((unsigned int)i >= count()) {
+	return;
+ }
  mComboBox->setCurrentItem(i);
 }
 
