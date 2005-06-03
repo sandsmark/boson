@@ -231,6 +231,11 @@ public slots:
 		placeUnit(unitType, owner);
 	}
 
+	void slotSetCursor(BosonCursor* c)
+	{
+		setCursor(c);
+	}
+
 protected:
 	enum CanSelectUnit {
 		CanSelectMultipleOk = 0, // the unit can be selected - multiple selections allowed

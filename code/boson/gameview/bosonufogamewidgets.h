@@ -183,6 +183,12 @@ signals:
 	 **/
 	void signalSetWidgetCursor(BosonCursor* c);
 
+	/**
+	 * Emitted by @ref slotChangeCursor. This signals tells the rest of the
+	 * world that we have a new cursor now
+	 **/
+	void signalSetCursor(BosonCursor* cursor);
+
 private:
 	BosonUfoCursorWidgetPrivate* d;
 };
