@@ -720,6 +720,7 @@ bool BosonMainWidget::changeLocalPlayer(Player* p)
  // AB: note: the startup widgets don't need to know the new local player
  // -> they need the unique local player only (new game widget), which is set
  // right after construction of the player.
+ return true;
 }
 
 void BosonMainWidget::reinitGame()
