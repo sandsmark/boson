@@ -23,7 +23,7 @@
 #include "boufoloadingwidget.h"
 #include "boufonewgamewidget.h"
 #include "boufonetworkoptionswidget.h"
-//#include "boufostarteditorwidget.h"
+#include "boufostarteditorwidget.h"
 #include "welcomewidget.h"
 #include "bosonstartupnetwork.h"
 #include "bodebug.h"
@@ -44,7 +44,6 @@
 #include <stdlib.h>
 
 #define LOADSAVE_WIDGET 0
-#define EDITOR_WIDGET 0
 
 class BoUfoStartupWidgetPrivate
 {
@@ -303,13 +302,11 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 	}
 	case IdStartEditor:
 	{
-#if EDITOR_WIDGET
-		BosonNewEditorWidget* startEditor = new BosonNewEditorWidget(networkInterface(), this);
+		BoUfoStartEditorWidget* startEditor = new BoUfoStartEditorWidget(networkInterface());
 		connect(startEditor, SIGNAL(signalCancelled()),
 				this, SLOT(slotShowWelcomeWidget()));
 
 		w = startEditor;
-#endif
 		break;
 	}
 	case IdLast:
