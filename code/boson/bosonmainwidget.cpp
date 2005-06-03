@@ -685,14 +685,14 @@ void BosonMainWidget::slotEndGame()
  slotGameOver();
 }
 
-void BosonMainWidget::changeLocalPlayer(Player* p)
+bool BosonMainWidget::changeLocalPlayer(Player* p)
 {
  boDebug() << k_funcinfo << p << endl;
 
  // AB: note that both, p == 0 AND p == currentplayer are valid and must be executed!
  if (!boGame) {
 	boError() << k_funcinfo << "NULL game object" << endl;
-	return;
+	return false;
  }
  if (d->mLocalPlayer) {
 	KGameIO* oldIO = d->mLocalPlayer->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
@@ -706,6 +706,12 @@ void BosonMainWidget::changeLocalPlayer(Player* p)
 	connect(input, SIGNAL(signalAction(const BoSpecificAction&)),
 			d->mGameView, SLOT(slotAction(const BoSpecificAction&)));
 	d->mLocalPlayer->addGameIO(input);
+	if (!input->initializeIO()) {
+		boError() << k_funcinfo << "IO could not be initialized" << endl;
+		changeLocalPlayer(0);
+		return false;
+	}
+
 	d->mGameView->setLocalPlayerIO(d->mLocalPlayer->playerIO());
  } else {
 	d->mGameView->setLocalPlayerIO(0);
@@ -926,7 +932,12 @@ void BosonMainWidget::slotGameStarted()
 	boError(270) << k_funcinfo << "NULL local player" << endl;
 	return;
  }
- slotChangeLocalPlayer(localPlayer);
+
+ if (!changeLocalPlayer(localPlayer)) {
+	boError(270) << k_funcinfo << "Changing to localplayer failed. Probably localPlayer could not be initialized." << endl;
+	// TODO: see top of this method. return to welcome widget.
+	return;
+ }
 
  d->mGameView->setCanvas(boGame->canvasNonConst());
 

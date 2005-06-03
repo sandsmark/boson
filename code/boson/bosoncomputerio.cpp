@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -53,23 +53,28 @@ BosonComputerIO::~BosonComputerIO()
  delete mEventListener;
 }
 
-void BosonComputerIO::initIO(KPlayer* p)
+bool BosonComputerIO::initializeIO()
 {
- KGameComputerIO::initIO(p);
  delete mEventListener;
  mEventListener = 0;
- if (!p) {
-	return;
+ if (!player()) {
+	BO_NULL_ERROR(player());
+	return false;
  }
 
  // warning: p->game() is NULL at this point. using boGame here is ugly.
  boDebug() << k_funcinfo << endl;
+ if (!boGame) {
+	BO_NULL_ERROR(boGame);
+	return false;
+ }
  BoEventManager* manager = boGame->eventManager();
  mEventListener = new BoComputerPlayerEventListener((Player*)player(), manager, this);
  if (!mEventListener->initScript()) {
 	boError() << k_funcinfo << "could not init script" << endl;
-	return; // TODO: return false
+	return false;
  }
+ return true;
 }
 
 void BosonComputerIO::reaction()

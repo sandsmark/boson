@@ -768,6 +768,12 @@ void BoUfoNewGameWidget::slotAddComputerPlayer()
 
  BosonComputerIO* io = new BosonComputerIO();
  p->addGameIO(io);
+ if (!io->initializeIO()) {
+   boError() << k_funcinfo << "could not initialize IO" << endl;
+   KMessageBox::sorry(0, i18n("An error occured while initializing computer IO. Could not add the player."));
+   delete p;
+   return;
+ }
  boGame->bosonAddPlayer(p);
 }
 
