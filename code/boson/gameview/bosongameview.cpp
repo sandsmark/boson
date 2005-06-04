@@ -2005,6 +2005,7 @@ void BosonGameView::mouseEventRelease(ButtonState button, const BoMouseEvent& ev
 		boError() << k_funcinfo << "invalid mouse button " << button << endl;
 		break;
  }
+ displayInput()->updateCursor();
 }
 
 void BosonGameView::mouseEventReleaseDouble(ButtonState button, const BoMouseEvent& event)
