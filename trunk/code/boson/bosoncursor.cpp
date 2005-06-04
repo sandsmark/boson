@@ -458,6 +458,9 @@ BosonCursor* BosonCursorCollection::changeCursor(int type, const QString& cursor
 	mCursorType = type;
 	connect(mCursor, SIGNAL(signalSetWidgetCursor(BosonCursor*)),
 			this, SIGNAL(signalSetWidgetCursor(BosonCursor*)));
+
+	// make sure this is called at least once with the correct cursor
+	emit signalSetWidgetCursor(mCursor);
  } else {
 	// will never happen, as loadCursor() falls back to CursorKDE.
 	boError() << k_funcinfo << "loading cursor failed." << endl;
