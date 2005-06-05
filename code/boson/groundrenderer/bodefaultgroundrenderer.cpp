@@ -125,6 +125,10 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  statistics()->setRenderedQuads(renderedQuads);
  statistics()->setUsedTextures(usedTextures);
  if (useShaders) {
+	boTextureManager->activateTextureUnit(2);
+	glLoadIdentity();
+	boTextureManager->disableTexturing();
+	boTextureManager->activateTextureUnit(0);
 	BoShader::unbind();
  }
  glLoadIdentity();

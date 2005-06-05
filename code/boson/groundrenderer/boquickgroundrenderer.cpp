@@ -370,6 +370,10 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
 
   if(useShaders)
   {
+    boTextureManager->activateTextureUnit(2);
+    glLoadIdentity();
+    boTextureManager->disableTexturing();
+    boTextureManager->activateTextureUnit(0);
     BoShader::unbind();
   }
   boTextureManager->unbindTexture();
