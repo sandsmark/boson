@@ -1296,7 +1296,6 @@ void BosonUfoProfilingGraphWidget::slotUpdateData()
 {
  BO_CHECK_NULL_RET(d->mGameGLMatrices);
  if (!d->mEnableUpdates->checked()) {
-	boDebug() << k_funcinfo << "not checked" << endl;
 	return;
  }
  PROFILE_METHOD
