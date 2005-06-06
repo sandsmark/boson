@@ -697,6 +697,7 @@ bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
  QDomElement canvasRoot = canvasDoc.documentElement();
  canvasRoot.removeChild(canvasRoot.namedItem("Pathfinder"));
  canvasRoot.removeChild(canvasRoot.namedItem("Effects"));
+ canvasRoot.appendChild(canvasDoc.createElement("Effects"));
 
  QByteArray kgameXML = kgameDoc.toCString();
  QByteArray playersXML = playersDoc.toCString();
