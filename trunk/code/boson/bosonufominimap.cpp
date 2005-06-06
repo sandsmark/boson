@@ -23,6 +23,7 @@
 #include "bosonglminimap.h"
 #include "botexture.h"
 #include "bosonmap.h"
+#include "bosonprofiling.h"
 
 #include <bodebug.h>
 
@@ -44,6 +45,7 @@ public:
 		if (!mMiniMap) {
 			return;
 		}
+		PROFILE_METHOD
 		boTextureManager->invalidateCache();
 		glPushMatrix();
 		glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
