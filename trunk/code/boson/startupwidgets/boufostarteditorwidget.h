@@ -73,13 +73,6 @@ private:
 	void initPlayFields();
 	void initGroundThemes();
 
-signals:
-	/**
-	 * Emitted when the player clicks on cancel. The widget should get
-	 * hidden now. (back to welcome widget)
-	 **/
-	void signalCancelled();
-
 private:
 	void initKGame();
 
