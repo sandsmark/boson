@@ -397,6 +397,11 @@ BoWaterManager::~BoWaterManager()
 
 bool BoWaterManager::loadFromXML(const QDomElement& root)
 {
+  if(!mData)
+  {
+    BO_NULL_ERROR(mData);
+    return false;
+  }
   // Init some data structures
   delete[] mData->underwater;
   mData->underwater = new bool[mData->width * mData->height];
@@ -490,6 +495,11 @@ bool BoWaterManager::loadFromXML(const QDomElement& root)
 
 bool BoWaterManager::saveToXML(QDomElement& root)
 {
+  if(!mData)
+  {
+    BO_NULL_ERROR(mData);
+    return false;
+  }
   QDomDocument doc = root.ownerDocument();
   QPtrListIterator<BoLake> it(mData->lakes);
   for(; it.current(); ++it)
@@ -512,6 +522,7 @@ bool BoWaterManager::saveToXML(QDomElement& root)
 
 void BoWaterManager::initCellMaps()
 {
+  BO_CHECK_NULL_RET(mData);
   // Size of map in cells
   mData->cellWidth = mData->width - 1;
   mData->cellHeight = mData->height - 1;
@@ -694,6 +705,7 @@ void BoWaterManager::initOpenGL()
 
 void BoWaterManager::reloadConfiguration()
 {
+  BO_CHECK_NULL_RET(mData);
   bool configDirty = false;
   bool texturesHaveChanged = false;
 
@@ -811,11 +823,21 @@ void BoWaterManager::setMap(BosonMap* map)
 
 float BoWaterManager::groundHeight(int x, int y) const
 {
+  if(!mData)
+  {
+    BO_NULL_ERROR(mData);
+    return 0.0f;
+  }
   return mData->map->heightAtCorner(x, y);
 }
 
 float BoWaterManager::groundHeightAt(float x, float y) const
 {
+  if(!mData)
+  {
+    BO_NULL_ERROR(mData);
+    return 0.0f;
+  }
   return groundHeight((int)x, (int)y);
 }
 
@@ -828,6 +850,11 @@ float BoWaterManager::waterDepth(int x, int y)
 {
   if(!underwater(x, y))
   {
+    return 0.0f;
+  }
+  if(!mData)
+  {
+    BO_NULL_ERROR(mData);
     return 0.0f;
   }
 
@@ -852,16 +879,27 @@ float BoWaterManager::waterDepth(int x, int y)
 
 bool BoWaterManager::underwater(int x, int y)
 {
+  if(!mData)
+  {
+    BO_NULL_ERROR(mData);
+    return false;
+  }
   return mData->underwater[y * mData->width + x];
 }
 
 void BoWaterManager::setUnderwater(int x, int y, bool underwater)
 {
+  BO_CHECK_NULL_RET(mData);
   mData->underwater[y * mData->width + x] = underwater;
 }
 
 bool BoWaterManager::cellPassable(int x, int y) const
 {
+  if(!mData)
+  {
+    BO_NULL_ERROR(mData);
+    return 0.0f;
+  }
   return mData->cellPassable[y * mData->cellWidth + x];
 }
 
@@ -919,6 +957,7 @@ QString BoWaterManager::currentRenderStatisticsData() const
 
 void BoWaterManager::setDirty(bool d)
 {
+  BO_CHECK_NULL_RET(mData);
   if(mDirty == d)
   {
     return;
@@ -943,6 +982,7 @@ void BoWaterManager::setDirty(bool d)
 
 void BoWaterManager::render()
 {
+  BO_CHECK_NULL_RET(mData);
   if(!mOpenGLInited)
   {
     boWarning() << k_funcinfo << "OpenGL not inited! Initing now..." << endl;
@@ -1140,6 +1180,7 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
     if(!mSun)
     {
       boError() << k_funcinfo << "NULL sun!" << endl;
+      return;
     }
     info->lightvector = mSun->position3();
     info->lightvector.normalize();
@@ -1567,6 +1608,7 @@ void BoWaterManager::uninitDataBuffersForStorage(RenderInfo* info)
 
 void BoWaterManager::calculateIndices(RenderInfo* info)
 {
+  BO_CHECK_NULL_RET(mLocalPlayerIO);
   int xi, yi;
   xi = 0;  // X Index
   for(float x = info->chunk->minx; x < info->chunk->maxx; x += info->detail, xi++)
@@ -1856,6 +1898,7 @@ void BoWaterManager::initRenderEnvironment()
 
 void BoWaterManager::loadNecessaryTextures()
 {
+  BO_CHECK_NULL_RET(mData);
   if(mData->lakes.count() == 0)
   {
     // If we don't have any lakes, we don't need textures either.
@@ -1922,3 +1965,6 @@ void BoWaterManager::loadNecessaryTextures()
   }
 }
 
+/*
+ * vim: et sw=2
+ */
