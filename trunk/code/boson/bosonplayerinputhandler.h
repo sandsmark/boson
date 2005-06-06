@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2004-2005 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef BOSONPLAYERINPUT_H
-#define BOSONPLAYERINPUT_H
+#ifndef BOSONPLAYERINPUTHANDLER_H
+#define BOSONPLAYERINPUTHANDLER_H
 
 #include <qobject.h>
 
@@ -39,12 +39,12 @@ class BosonCanvas;
  *
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonPlayerInput : public QObject
+class BosonPlayerInputHandler : public QObject
 {
 	Q_OBJECT
 public:
-	BosonPlayerInput(Boson* game);
-	~BosonPlayerInput();
+	BosonPlayerInputHandler(Boson* game);
+	~BosonPlayerInputHandler();
 
 	bool playerInput(QDataStream& stream, Player* player);
 
@@ -60,6 +60,18 @@ protected:
 	Player* findPlayer(unsigned long int id) const;
 
 	BosonCanvas* canvas() const;
+
+	/**
+	 * WARNING: return value differs from @ref playerInput!
+	 * @return TRUE if the message was processed in here, otherwise FALSE
+	 **/
+	bool gamePlayerInput(Q_UINT32 msgid, QDataStream& stream, Player* player);
+
+	/**
+	 * WARNING: return value differs from @ref playerInput!
+	 * @return TRUE if the message was processed in here, otherwise FALSE
+	 **/
+	bool editorPlayerInput(Q_UINT32 msgid, QDataStream& stream, Player* player);
 
 signals:
 	void signalChangeTexMap(int x, int y, unsigned int textureCount, unsigned int* textures, unsigned char* alpha);

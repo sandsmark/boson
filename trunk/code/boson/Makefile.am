@@ -95,7 +95,7 @@ libboson_la_SOURCES = \
 	bomemorytrace.cpp \
 	boaction.cpp \
 	botexmapimportdialog.cpp \
-	bosonplayerinput.cpp \
+	bosonplayerinputhandler.cpp \
 	bobincoder.cpp \
 	bolight.cpp \
 	bopluginmanager.cpp \

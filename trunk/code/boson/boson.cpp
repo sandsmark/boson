@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@
 #include "boevent.h"
 #include "boeventmanager.h"
 #include "bomessage.h"
-#include "bosonplayerinput.h"
+#include "bosonplayerinputhandler.h"
 #include "bosonnetworksynchronizer.h"
 #include "boeventloop.h"
 #include "bosonpath.h"
@@ -299,7 +299,7 @@ public:
 
 	BoEventManager* mEventManager;
 
-	BosonPlayerInput* mPlayerInputHandler;
+	BosonPlayerInputHandler* mPlayerInputHandler;
 	BosonNetworkSynchronizer* mNetworkSynchronizer;
 };
 
@@ -307,7 +307,7 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 {
  setPolicy(PolicyClean);
  d = new BosonPrivate;
- d->mPlayerInputHandler = new BosonPlayerInput(this);
+ d->mPlayerInputHandler = new BosonPlayerInputHandler(this);
  d->mAdvance = new BoAdvance(this);
  d->mMessageDelayer = new BoMessageDelayer(this);
  d->mNetworkSynchronizer = new BosonNetworkSynchronizer();

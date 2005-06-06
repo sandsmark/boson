@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2004-2005 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "bosonplayerinput.h"
-#include "bosonplayerinput.moc"
+#include "bosonplayerinputhandler.h"
+#include "bosonplayerinputhandler.moc"
 
 #include "boson.h"
 #include "bosonmessage.h"
@@ -37,7 +37,7 @@
 
 #include <math.h>
 
-BosonPlayerInput::BosonPlayerInput(Boson* game) : QObject(0, "bosonplayerinput")
+BosonPlayerInputHandler::BosonPlayerInputHandler(Boson* game) : QObject(0, "bosonplayerinputhandler")
 {
  mGame = game;
  connect(this, SIGNAL(signalChangeTexMap(int, int, unsigned int, unsigned int*, unsigned char*)),
@@ -48,26 +48,26 @@ BosonPlayerInput::BosonPlayerInput(Boson* game) : QObject(0, "bosonplayerinput")
 		mGame, SIGNAL(signalUpdateProduction(Unit*)));
 }
 
-BosonPlayerInput::~BosonPlayerInput()
+BosonPlayerInputHandler::~BosonPlayerInputHandler()
 {
 }
 
-BosonCanvas* BosonPlayerInput::canvas() const
+BosonCanvas* BosonPlayerInputHandler::canvas() const
 {
  return mGame->canvasNonConst();
 }
 
-Unit* BosonPlayerInput::findUnit(unsigned long int id, Player* p) const
+Unit* BosonPlayerInputHandler::findUnit(unsigned long int id, Player* p) const
 {
  return mGame->findUnit(id, p);
 }
 
-Player* BosonPlayerInput::findPlayer(unsigned long int id) const
+Player* BosonPlayerInputHandler::findPlayer(unsigned long int id) const
 {
  return (Player*)mGame->findPlayer(id);
 }
 
-bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
+bool BosonPlayerInputHandler::playerInput(QDataStream& stream, Player* player)
 {
  if (player->isOutOfGame()) {
 	boWarning() << k_funcinfo << "Player must not send input anymore!!" << endl;
@@ -85,6 +85,25 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
  }
  Q_UINT32 msgid;
  stream >> msgid;
+ if (mGame->gameMode()) {
+	if (gamePlayerInput(msgid, stream, player)) {
+		return true;
+	}
+ } else {
+	if (editorPlayerInput(msgid, stream, player)) {
+		return true;
+	}
+ }
+ switch (msgid) {
+	default:
+		boWarning() << k_funcinfo << "unexpected playerInput " << msgid << endl;
+		break;
+ }
+ return true;
+}
+
+bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& stream, Player* player)
+{
  switch (msgid) {
 	case BosonMessage::MoveMove:
 	{
@@ -745,6 +764,17 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 
 		break;
 	}
+	default:
+		// did not process message
+		return false;
+ }
+ // message processed
+ return true;
+}
+
+bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& stream, Player* player)
+{
+ switch (msgid) {
 	case BosonMessage::MovePlaceUnit:
 	{
 		Q_UINT32 unitType;
@@ -870,9 +900,10 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 		break;
 	}
 	default:
-		boWarning() << k_funcinfo << "unexpected playerInput " << msgid << endl;
-		break;
+		// did not process message
+		return false;
  }
+ // message processed
  return true;
 }
 
