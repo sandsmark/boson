@@ -497,8 +497,7 @@ bool BosonMap::loadWaterFromFile(const QByteArray& waterXML)
 	return false;
  }
  boWaterManager->setMap(this);
- boWaterManager->loadFromXML(root);
- return true;
+ return boWaterManager->loadFromXML(root);
 }
 
 
@@ -762,7 +761,9 @@ QByteArray BosonMap::saveWaterToFile()
  QDomDocument doc(QString::fromLatin1("Water"));
  QDomElement root = doc.createElement(QString::fromLatin1("Water"));
  doc.appendChild(root);
- boWaterManager->saveToXML(root);
+ if (!boWaterManager->saveToXML(root)) {
+	return QByteArray();
+ }
  return doc.toCString();
 }
 
