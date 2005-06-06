@@ -759,7 +759,7 @@ void BoUfoCustomWidget::paintBorder()
  ufo::UContext* c = tk->getCurrentContext();
  BO_CHECK_NULL_RET(c);
  ufo::UGraphics* g = c->getGraphics();
-  BO_CHECK_NULL_RET(g);
+ BO_CHECK_NULL_RET(g);
  ((UCustomWidgetRenderer*)widget())->ufoPaintBorder(g);
 }
 
