@@ -364,6 +364,20 @@ void BoCursorEdgeScrolling::slotCursorEdgeTimeout()
  }
 }
 
+/**
+ * This class is a simple container class for the @ref BoUfoGameGUI class. It
+ * exists only so that we can easily profile the time that is spent in @ref
+ * paint.
+ **/
+class BoUfoGameGUIContainer : public BoUfoCustomWidget
+{
+public:
+	virtual void paint()
+	{
+		PROFILE_METHOD
+		BoUfoCustomWidget::paint();
+	}
+};
 
 
 
@@ -1023,6 +1037,7 @@ void BosonGameView::initUfoGUI()
  d->mUfoLineVisualizationWidget = new BosonUfoLineVisualizationWidget();
  d->mUfoLineVisualizationWidget->setGameGLMatrices(d->mGameGLMatrices);
 
+ BoUfoGameGUIContainer* ufoGameGUIContainer = new BoUfoGameGUIContainer();
  d->mUfoGameGUI = new BosonUfoGameGUI(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewFrustum, d->mViewport);
  d->mUfoGameGUI->setCursorWidgetPos(&d->mCursorWidgetPos);
  d->mUfoGameGUI->setCursorCanvasVector(&d->mCursorCanvasVector);
@@ -1032,6 +1047,7 @@ void BosonGameView::initUfoGUI()
  d->mUfoGameGUI->setGLMiniMap(d->mGLMiniMap);
  connect(this, SIGNAL(signalSelectionChanged(BoSelection*)),
 		d->mUfoGameGUI, SIGNAL(signalSelectionChanged(BoSelection*)));
+ ufoGameGUIContainer->addWidget(d->mUfoGameGUI);
 
  d->mToolTipLabel = new BoUfoLabel();
  d->mToolTipLabel->setForegroundColor(Qt::white);
@@ -1061,7 +1077,7 @@ void BosonGameView::initUfoGUI()
  d->mLayeredPane->addWidget(d->mUfoCanvasWidget);
  d->mLayeredPane->addWidget(d->mUfoPlacementPreviewWidget);
  d->mLayeredPane->addWidget(d->mUfoLineVisualizationWidget);
- d->mLayeredPane->addWidget(d->mUfoGameGUI);
+ d->mLayeredPane->addWidget(ufoGameGUIContainer);
  d->mLayeredPane->addWidget(d->mToolTipLabel);
  d->mLayeredPane->addWidget(d->mUfoCursorWidget);
  d->mLayeredPane->addWidget(d->mUfoSelectionRectWidget);
@@ -1942,6 +1958,7 @@ void BosonGameView::mouseEventMove(int buttonState, const BoMouseEvent& event)
  } else if (buttonState & MidButton) {
 	// currently unused
  }
+
  updateCursorCanvasVector(event.qtWidgetPos(), event.widgetPos());
  displayInput()->setPlacementFreePlacement(event.controlButton());
  displayInput()->setPlacementDisableCollisions(event.shiftButton());
