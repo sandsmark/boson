@@ -497,9 +497,10 @@ bool BoWaterManager::saveToXML(QDomElement& root)
 {
   if(!mData)
   {
-    BO_NULL_ERROR(mData);
-    return false;
+    // This is valid - happens when creating a new map
+    return true;
   }
+
   QDomDocument doc = root.ownerDocument();
   QPtrListIterator<BoLake> it(mData->lakes);
   for(; it.current(); ++it)
