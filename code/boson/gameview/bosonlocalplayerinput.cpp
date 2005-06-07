@@ -24,6 +24,7 @@
 #include "../unit.h"
 #include "../player.h"
 #include "../boselection.h"
+#include "../bosonmessage.h"
 #include "../bosonmessageids.h"
 #include "bodebug.h"
 #include "../bosonweapon.h"
@@ -408,14 +409,17 @@ void BosonLocalPlayerInput::follow(const QPtrList<Unit>& units, Unit* target)
 void BosonLocalPlayerInput::placeUnit(Player* owner, unsigned long int unitType, bofixed x, bofixed y)
 {
   boDebug() << k_funcinfo << endl;
+
+  // editor message
+  BosonMessageMovePlaceUnit message(owner->id(), unitType, BoVector2Fixed(x, y));
+
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
-
-  stream << (Q_UINT32)BosonMessageIds::MoveEditor;
-  stream << (Q_UINT32)BosonMessageIds::MovePlaceUnit;
-  stream << (Q_INT32)owner->id();
-  stream << (Q_INT32)unitType;
-  stream << BoVector2Fixed(x, y);
+  if (!message.save(stream))
+  {
+    boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
+    return;
+  }
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(msg);
@@ -424,15 +428,23 @@ void BosonLocalPlayerInput::placeUnit(Player* owner, unsigned long int unitType,
 void BosonLocalPlayerInput::changeHeight(int x, int y, bofixed height)
 {
   boDebug() << k_funcinfo << endl;
+
+  // editor message
+  QValueVector<Q_UINT32> cornersX(1);
+  QValueVector<Q_UINT32> cornersY(1);
+  QValueVector<bofixed> cornersHeight(1);
+  cornersX[0] = x;
+  cornersY[0] = y;
+  cornersHeight[0] = height;
+  BosonMessageMoveChangeHeight message(cornersX, cornersY, cornersHeight);
+
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
-
-  stream << (Q_UINT32)BosonMessageIds::MoveEditor;
-  stream << (Q_UINT32)BosonMessageIds::MoveChangeHeight;
-  stream << (Q_UINT32)1; // we change one corner only
-  stream << (Q_INT32)x;
-  stream << (Q_INT32)y;
-  stream << (float)height;
+  if (!message.save(stream))
+  {
+    boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
+    return;
+  }
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(msg);

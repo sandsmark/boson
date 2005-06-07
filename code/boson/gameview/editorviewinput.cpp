@@ -24,6 +24,7 @@
 #include "../boselection.h"
 #include "../bosoncanvas.h"
 #include "../bosonconfig.h"
+#include "../bosonmessage.h"
 #include "../bosonmessageids.h"
 #include "../bosongroundtheme.h"
 #include "../boson.h"
@@ -257,6 +258,7 @@ bool EditorViewInput::actionPlace(const BoVector3Fixed& canvasVector, bool exact
 		unsigned char version = kapp->random() % 4;
 		boDebug() << k_funcinfo << "place ground " << d->mPlacement.cell() << ",version=" << version << endl;
 
+#if 0
 		stream << (Q_UINT32)BosonMessageIds::MoveEditor;
 		stream << (Q_UINT32)BosonMessageIds::MovePlaceCell;
 		stream << (Q_INT32)d->mPlacement.cell();
@@ -265,6 +267,10 @@ bool EditorViewInput::actionPlace(const BoVector3Fixed& canvasVector, bool exact
 		stream << (Q_INT8)false; // never a big trans
 		stream << (Q_INT32)x;
 		stream << (Q_INT32)y;
+#else
+		BosonMessageMovePlaceCell message;
+		...
+#endif
 		ret = true;
 	}
 #endif
@@ -290,32 +296,51 @@ bool EditorViewInput::actionPlace(const BoVector3Fixed& canvasVector, bool exact
 		return false;
 	}
 
-	// I find it more comfortable to put everything to stream here and use
+	// I find it more comfortable to create the message here and then use
 	//  localPlayerInput()->sendInput() rather than to add method with many many
 	//  parameters to localPlayerInput
-	QByteArray b;
-	QDataStream stream(b, IO_WriteOnly);
 
-
-	stream << (Q_UINT32)BosonMessageIds::MoveEditor;
-	stream << (Q_UINT32)BosonMessageIds::MoveChangeTexMap;
 
 	// we modify 4 corners (hardcoded at the moment)
-	stream << (Q_UINT32)4;
+	QValueVector<Q_UINT32> cornersX(4);
+	QValueVector<Q_UINT32> cornersY(4);
+	QValueVector<Q_UINT32> cornersTextureCount(4);
+	QValueVector< QValueVector<Q_UINT32> > cornerTextures(4);
+	QValueVector< QValueVector<Q_UINT8> > cornerAlpha(4);
 
-	unsigned int cornersX[4] = { x, x + 1, x + 1,     x };
-	unsigned int cornersY[4] = { y,     y, y + 1, y + 1 };
-	for (unsigned int i = 0; i < 4; i++) {
-		stream << (Q_UINT32)cornersX[i];
-		stream << (Q_UINT32)cornersY[i];
-		stream << (Q_UINT32)groundTheme->groundTypeCount();
+	cornersX[0] = x;
+	cornersX[1] = x + 1;
+	cornersX[2] = x + 1;
+	cornersX[3] = x;
+	cornersY[0] = y;
+	cornersY[1] = y;
+	cornersY[2] = y + 1;
+	cornersY[3] = y + 1;
+	for (int i = 0; i < 4; i++) {
+		cornersTextureCount[i] = groundTheme->groundTypeCount();
+		if (d->mPlacement.textureCount() != groundTheme->groundTypeCount()) {
+			boError() << k_funcinfo << "invalid texture count" << endl;
+			return false;
+		}
+		cornerTextures[i].resize(d->mPlacement.textureCount());
+		cornerAlpha[i].resize(d->mPlacement.textureCount());
 		for (unsigned int j = 0; j < d->mPlacement.textureCount(); j++) {
 			unsigned char alpha = 0;
 			alpha = d->mPlacement.textureAlpha(j);
-			stream << (Q_UINT32)j;
-			stream << (Q_UINT8)alpha;
+			(cornerTextures[i])[j] = j;
+			(cornerAlpha[i])[j] = alpha;
 		}
 	}
+
+	QByteArray b;
+	QDataStream stream(b, IO_WriteOnly);
+
+	BosonMessageMoveChangeTexMap message(cornersX, cornersY, cornersTextureCount, cornerTextures, cornerAlpha);
+	if (!message.save(stream)) {
+		boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
+		return false;
+	}
+
 	QDataStream msg(b, IO_ReadOnly);
 	localPlayerInput()->sendInput(msg);
 	ret = true;
@@ -399,15 +424,19 @@ void EditorViewInput::deleteSelectedUnits()
  }
  QPtrList<Unit> units = selection()->allUnits();
  selection()->clear();
- QByteArray b;
- QDataStream s(b, IO_WriteOnly);
- s << (Q_UINT32)BosonMessageIds::MoveEditor;
- s << (Q_UINT32)BosonMessageIds::MoveDeleteItems;
- s << (Q_UINT32)units.count();
+
+ QValueList<Q_ULONG> items;
  QPtrListIterator<Unit> it(units);
- QPtrList<BosonItem> items;
  for (; it.current(); ++it) {
-	s << (Q_ULONG)it.current()->id();
+	items.append(it.current()->id());
+ }
+
+ QByteArray b;
+ QDataStream stream(b, IO_WriteOnly);
+ BosonMessageMoveDeleteItems message(items);
+ if (!message.save(stream)) {
+	boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
+	return;
  }
 
  QDataStream msg(b, IO_ReadOnly);
