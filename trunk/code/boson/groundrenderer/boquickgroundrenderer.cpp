@@ -63,9 +63,12 @@ BoQuickGroundRenderer::BoQuickGroundRenderer()
 BoQuickGroundRenderer::~BoQuickGroundRenderer()
 {
   // Delete VBOs
-  boglDeleteBuffers(1, &mVBOVertex);
-  boglDeleteBuffers(1, &mVBONormal);
-  boglDeleteBuffers(1, &mVBOTexture);
+  if (boglDeleteBuffers)
+  {
+    boglDeleteBuffers(1, &mVBOVertex);
+    boglDeleteBuffers(1, &mVBONormal);
+    boglDeleteBuffers(1, &mVBOTexture);
+  }
 
   // Delete fog texture
   delete mFogTexture;
