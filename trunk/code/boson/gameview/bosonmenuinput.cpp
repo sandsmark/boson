@@ -569,6 +569,7 @@ void BosonMenuInputData::slotEditorChangeLocalPlayerHack()
 
 void BosonMenuInputData::slotEditorChangeLocalPlayer(int index)
 {
+ boDebug() << k_funcinfo << index << endl;
  Player* p = 0;
  p = (Player*)d->mEditorPlayers.at(index);
 
@@ -586,14 +587,23 @@ void BosonMenuInputData::slotEditorChangeLocalPlayer(int index)
 	QTimer::singleShot(0, this, SLOT(slotEditorChangeLocalPlayerHack()));
 	return;
  }
- boDebug() << k_funcinfo << "sender() is NULL - we were probably called indirectly using a QTimer - continue..." << endl;
+ boDebug() << k_funcinfo << "sender() not a BoUfoAction - we were probably called indirectly using a QTimer - continue..." << endl;
  p = senderPlayer;
  if (p) {
 	emit signalEditorChangeLocalPlayer((Player*)p);
+
+	// AB: returning here is important: the signal causes the menu input to
+	// be deleted!
+	return;
+
+	// FIXME: when changing the player, we should select the previous
+	// "place" item again.
+#if 0
 	BO_CHECK_NULL_RET(d->mActionEditorPlace);
 	if (d->mActionEditorPlace->currentItem() >= 0) {
 		slotEditorPlace(d->mActionEditorPlace->currentItem());
 	}
+#endif
  } else {
 	boWarning() << k_funcinfo << "NULL player for index " << index << endl;
  }
