@@ -22,7 +22,7 @@
 #include "server.h"
 #include "bodebug.h"
 #include "player.h"
-#include "boson/bosonmessage.h"
+#include "boson/bosonmessageids.h"
 
 #include <qcstring.h>
 #include <qmap.h>
@@ -180,7 +180,7 @@ void Game::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 receive
  QDataStream stream(buffer, IO_ReadOnly);
   switch(msgid)
   {
-    case BosonMessage::IdNewGame:
+    case BosonMessageIds::IdNewGame:
     {
       if (mGameStarted) {
         boError() << k_funcinfo << "received IdNewGame, but game is already running" << endl;
@@ -199,7 +199,7 @@ void Game::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 receive
       loadGameData(data);
       break;
     }
-    case BosonMessage::IdGameStartingCompleted:
+    case BosonMessageIds::IdGameStartingCompleted:
     {
       if(sender == messageClient()->adminId())
       {
@@ -207,18 +207,18 @@ void Game::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 receive
         //  requires every client to send the md5sum of the speciestheme data, so
         //  we need to fake it here.
         QByteArray b = buffer.copy();
-        sendMessage(b, BosonMessage::IdGameStartingCompleted);
+        sendMessage(b, BosonMessageIds::IdGameStartingCompleted);
       }
       mGameInited = false;
     }
-    case BosonMessage::IdGameIsStarted:
+    case BosonMessageIds::IdGameIsStarted:
     {
       mCycle = 0;
       mGameStarted = true;
       mGameStartedTime = QDateTime::currentDateTime();
       break;
     }
-    case BosonMessage::AdvanceN:
+    case BosonMessageIds::AdvanceN:
     {
       mCycle += mGameSpeed;
       if((int)(mCycle % 100) < mGameSpeed)
