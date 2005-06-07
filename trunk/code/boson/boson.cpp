@@ -20,7 +20,7 @@
 #include "boson.moc"
 
 #include "defines.h"
-#include "bosonmessage.h"
+#include "bosonmessageids.h"
 #include "player.h"
 #include "unit.h"
 #include "unitplugins.h"
@@ -202,7 +202,7 @@ public:
 	void sendAdvance() // slot?
 	{
 		boDebug(300) << k_funcinfo << "advanceCallsCount=" << mBoson->advanceCallsCount() << " sending advance msg" << endl;
-		mBoson->sendMessage(0, BosonMessage::AdvanceN);
+		mBoson->sendMessage(0, BosonMessageIds::AdvanceN);
 	}
 
 	/**
@@ -505,18 +505,18 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 {
  QDataStream stream(buffer, IO_ReadOnly);
  switch (msgid) {
-	case BosonMessage::AdvanceN:
+	case BosonMessageIds::AdvanceN:
 	{
 		d->mNetworkSynchronizer->receiveAdvanceMessage(d->mCanvas);
 		d->mAdvance->receiveAdvanceMessage(gameSpeed());
 		break;
 	}
-	case BosonMessage::ChangeMap:
+	case BosonMessageIds::ChangeMap:
 	{
 		emit signalEditorNewMap(buffer);
 		break;
 	}
-	case BosonMessage::IdNewGame:
+	case BosonMessageIds::IdNewGame:
 	{
 		if (isRunning()) {
 			boError() << k_funcinfo << "received IdNewGame, but game is already running" << endl;
@@ -544,14 +544,14 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		QTimer::singleShot(0, this, SIGNAL(signalStartNewGame()));
 		break;
 	}
-	case BosonMessage::IdStartGameClicked:
+	case BosonMessageIds::IdStartGameClicked:
 		// this is kind of a workaround.
 		// for --start we need to call slotStart() in the start widgets
 		// only once the (e.g.) playfield messages have arrived. for
 		// this we use a message and *then* call slotStart() there.
 		QTimer::singleShot(0, this, SIGNAL(signalStartGameClicked()));
 		break;
-	case BosonMessage::IdGameIsStarted:
+	case BosonMessageIds::IdGameIsStarted:
 	{
 		QString loadFromLog;
 		stream >> loadFromLog;
@@ -581,7 +581,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		}
 		break;
 	}
-	case BosonMessage::ChangeSpecies:
+	case BosonMessageIds::ChangeSpecies:
 	{
 		Q_UINT32 id;
 		QString species;
@@ -598,7 +598,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		emit signalSpeciesChanged(p);
 		break;
 	}
-	case BosonMessage::ChangeTeamColor:
+	case BosonMessageIds::ChangeTeamColor:
 	{
 		Q_UINT32 id;
 		Q_UINT32 color;
@@ -620,18 +620,18 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		}
 		break;
 	}
-	case BosonMessage::ChangePlayField:
+	case BosonMessageIds::ChangePlayField:
 	{
 		QString field;
 		stream >> field;
 		emit signalPlayFieldChanged(field);
 		break;
 	}
-	case BosonMessage::IdChat:
+	case BosonMessageIds::IdChat:
 	{
 		break;
 	}
-	case BosonMessage::IdKillPlayer:
+	case BosonMessageIds::IdKillPlayer:
 	{
 		Player* p = 0;
 		Q_UINT32 id = 0;
@@ -642,7 +642,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		killPlayer(p);
 		slotAddChatSystemMessage(i18n("Debug"), i18n("Killed player %1 - %2").arg(p->id()).arg(p->name()));
 	}
-	case BosonMessage::IdModifyMinerals:
+	case BosonMessageIds::IdModifyMinerals:
 	{
 		Player* p = 0;
 		Q_INT32 change = 0;
@@ -656,7 +656,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		p->setMinerals(p->minerals() + change);
 		break;
 	}
-	case BosonMessage::IdModifyOil:
+	case BosonMessageIds::IdModifyOil:
 	{
 		Player* p = 0;
 		Q_INT32 change = 0;
@@ -672,7 +672,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		}
 		break;
 	}
-	case BosonMessage::IdGameStartingCompleted:
+	case BosonMessageIds::IdGameStartingCompleted:
 	{
 		// this message is a kind of ACK from the client. it indicates
 		// that the starting is done and we are waiting for the ADMIN to
@@ -686,7 +686,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		emit signalStartingCompletedReceived(buffer, sender);
 		break;
 	}
-	case BosonMessage::IdNetworkSyncCheck:
+	case BosonMessageIds::IdNetworkSyncCheck:
 	{
 		if (!d->mNetworkSynchronizer->receiveNetworkSyncCheck(stream)) {
 			// the network is not in sync anymore.
@@ -695,7 +695,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		}
 		break;
 	}
-	case BosonMessage::IdNetworkSyncCheckACK:
+	case BosonMessageIds::IdNetworkSyncCheckACK:
 	{
 		if (!isAdmin()) {
 			break;
@@ -707,7 +707,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		syncNetwork();
 		break;
 	}
-	case BosonMessage::IdNetworkRequestSync:
+	case BosonMessageIds::IdNetworkRequestSync:
 	{
 		if (!d->mNetworkSynchronizer->receiveNetworkRequestSync(stream)) {
 			slotAddChatSystemMessage(i18n("Could not synchronize clients. Cannot fix out-of-sync client. Sorry"));
@@ -716,7 +716,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		}
 		break;
 	}
-	case BosonMessage::IdNetworkSync:
+	case BosonMessageIds::IdNetworkSync:
 	{
 		if (!d->mNetworkSynchronizer->receiveNetworkSync(stream)) {
 			slotAddChatSystemMessage(i18n("Could not load from sync stream. Game unusable now (loading error)"));
@@ -740,12 +740,12 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		}
 		break;
 	}
-	case BosonMessage::IdNetworkSyncUnlockGame:
+	case BosonMessageIds::IdNetworkSyncUnlockGame:
 	{
 		d->mNetworkSynchronizer->receiveNetworkSyncUnlockGame(stream);
 		break;
 	}
-	case BosonMessage::IdStatus:
+	case BosonMessageIds::IdStatus:
 	{
 		// This message is only meant for the dedicated server. Ignore it.
 		break;
@@ -1597,7 +1597,7 @@ bool Boson::loadFromLogFile(const QString& file)
  BoMessage* start = 0;
  QPtrListIterator<BoMessage> it(messages);
  while (it.current()) {
-	if (it.current()->msgid == KGameMessage::IdUser + BosonMessage::IdGameIsStarted) {
+	if (it.current()->msgid == KGameMessage::IdUser + BosonMessageIds::IdGameIsStarted) {
 		start = it.current();
 	}
 	++it;

@@ -24,7 +24,7 @@
 #include "../boselection.h"
 #include "../bosoncanvas.h"
 #include "../bosonconfig.h"
-#include "../bosonmessage.h"
+#include "../bosonmessageids.h"
 #include "../bosongroundtheme.h"
 #include "../boson.h"
 #include "../bosonmap.h"
@@ -257,8 +257,8 @@ bool EditorViewInput::actionPlace(const BoVector3Fixed& canvasVector, bool exact
 		unsigned char version = kapp->random() % 4;
 		boDebug() << k_funcinfo << "place ground " << d->mPlacement.cell() << ",version=" << version << endl;
 
-		stream << (Q_UINT32)BosonMessage::MoveEditor;
-		stream << (Q_UINT32)BosonMessage::MovePlaceCell;
+		stream << (Q_UINT32)BosonMessageIds::MoveEditor;
+		stream << (Q_UINT32)BosonMessageIds::MovePlaceCell;
 		stream << (Q_INT32)d->mPlacement.cell();
 		stream << (Q_UINT8)version;
 //		stream << (Q_INT8)Cell::isBigTrans(d->mPlacement.cell());
@@ -297,8 +297,8 @@ bool EditorViewInput::actionPlace(const BoVector3Fixed& canvasVector, bool exact
 	QDataStream stream(b, IO_WriteOnly);
 
 
-	stream << (Q_UINT32)BosonMessage::MoveEditor;
-	stream << (Q_UINT32)BosonMessage::MoveChangeTexMap;
+	stream << (Q_UINT32)BosonMessageIds::MoveEditor;
+	stream << (Q_UINT32)BosonMessageIds::MoveChangeTexMap;
 
 	// we modify 4 corners (hardcoded at the moment)
 	stream << (Q_UINT32)4;
@@ -401,8 +401,8 @@ void EditorViewInput::deleteSelectedUnits()
  selection()->clear();
  QByteArray b;
  QDataStream s(b, IO_WriteOnly);
- s << (Q_UINT32)BosonMessage::MoveEditor;
- s << (Q_UINT32)BosonMessage::MoveDeleteItems;
+ s << (Q_UINT32)BosonMessageIds::MoveEditor;
+ s << (Q_UINT32)BosonMessageIds::MoveDeleteItems;
  s << (Q_UINT32)units.count();
  QPtrListIterator<Unit> it(units);
  QPtrList<BosonItem> items;

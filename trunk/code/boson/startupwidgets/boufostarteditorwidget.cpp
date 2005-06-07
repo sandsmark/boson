@@ -22,7 +22,7 @@
 
 #include "../defines.h"
 #include "../bosonconfig.h"
-#include "../bosonmessage.h"
+#include "../bosonmessageids.h"
 #include "../player.h"
 #include "../speciestheme.h"
 #include "../bosoncomputerio.h"

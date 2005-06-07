@@ -94,7 +94,7 @@ This means a player clicks on the screen and this click is sent through the
 network. To prevent a network to get slower just cause a player keeps clicking
 on the ground the click is checked first. So if the click is e.g. on the ground
 (no unit) and there is already a unit selected the playerinput with the id
-BosonMessage::MoveMove is sent out. This means something like "move unit with id
+BosonMessageIds::MoveMove is sent out. This means something like "move unit with id
 z to coordinates x,y". This playerinput is received by *all* clients, including
 the one that sent it out. Now all clients just move the unit. 
 This has a lot of advantages, but also some disadvantages:

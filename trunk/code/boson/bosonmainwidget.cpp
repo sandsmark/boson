@@ -39,7 +39,7 @@
 #include "gameview/bosonlocalplayerinput.h"
 #include "startupwidgets/boufostartupwidget.h"
 #include "player.h"
-#include "bosonmessage.h"
+#include "bosonmessageids.h"
 #include "sound/bosonaudiointerface.h"
 #include "bosonsaveload.h"
 #include "bosongroundtheme.h"
@@ -830,7 +830,7 @@ void BosonMainWidget::slotLoadGame(const QString& fileName)
  stream << data;
 
  // actually start the game
- boGame->sendMessage(buffer, BosonMessage::IdNewGame);
+ boGame->sendMessage(buffer, BosonMessageIds::IdNewGame);
 }
 
 void BosonMainWidget::slotStartNewGame()

@@ -28,7 +28,7 @@
 #include "bosonconfig.h"
 #include "bosondata.h"
 #include "boson.h"
-#include "bosonmessage.h"
+#include "bosonmessageids.h"
 #include "sound/bosonaudiointerface.h"
 #include "kgameunitdebug.h"
 #include "kgameplayerdebug.h"
@@ -262,43 +262,43 @@ void BosonMainWidgetMenuInput::slotDebugRequestIdName(int msgid, bool , QString&
 {
  // we don't use i18n() for debug messages... not worth the work
  switch (msgid) {
-	case BosonMessage::ChangeSpecies:
+	case BosonMessageIds::ChangeSpecies:
 		name = "Change Species";
 		break;
-	case BosonMessage::ChangePlayField:
+	case BosonMessageIds::ChangePlayField:
 		name = "Change PlayField";
 		break;
-	case BosonMessage::ChangeTeamColor:
+	case BosonMessageIds::ChangeTeamColor:
 		name = "Change TeamColor";
 		break;
-	case BosonMessage::AdvanceN:
+	case BosonMessageIds::AdvanceN:
 		name = "Advance";
 		break;
-	case BosonMessage::IdChat:
+	case BosonMessageIds::IdChat:
 		name = "Chat Message";
 		break;
-	case BosonMessage::IdGameIsStarted:
+	case BosonMessageIds::IdGameIsStarted:
 		name = "Game is started";
 		break;
-	case BosonMessage::MoveMove:
+	case BosonMessageIds::MoveMove:
 		name = "PlayerInput: Move";
 		break;
-	case BosonMessage::MoveAttack:
+	case BosonMessageIds::MoveAttack:
 		name = "PlayerInput: Attack";
 		break;
-	case BosonMessage::MoveBuild:
+	case BosonMessageIds::MoveBuild:
 		name = "PlayerInput: Build";
 		break;
-	case BosonMessage::MoveProduce:
+	case BosonMessageIds::MoveProduce:
 		name = "PlayerInput: Produce";
 		break;
-	case BosonMessage::MoveProduceStop:
+	case BosonMessageIds::MoveProduceStop:
 		name = "PlayerInput: Produce Stop";
 		break;
-	case BosonMessage::MoveMine:
+	case BosonMessageIds::MoveMine:
 		name = "PlayerInput: Mine";
 		break;
-	case BosonMessage::UnitPropertyHandler:
+	case BosonMessageIds::UnitPropertyHandler:
 	default:
 		// a unit property was changed
 		// all ids > UnitPropertyHandler will be a unit property. we

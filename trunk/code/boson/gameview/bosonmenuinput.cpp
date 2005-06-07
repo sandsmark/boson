@@ -30,7 +30,7 @@
 #include "../bosonconfig.h"
 #include "../bpfdescriptiondialog.h"
 #include "../boconditionwidget.h"
-#include "../bosonmessage.h"
+#include "../bosonmessageids.h"
 #include "../bocamera.h"
 #include "../boaction.h"
 #include "../bosonplayfield.h"
@@ -825,7 +825,7 @@ void BosonMenuInput::slotDebugKillPlayer(Q_UINT32 playerId)
  QByteArray b;
  QDataStream stream(b, IO_WriteOnly);
  stream << (Q_UINT32)playerId;
- boGame->sendMessage(b, BosonMessage::IdKillPlayer);
+ boGame->sendMessage(b, BosonMessageIds::IdKillPlayer);
 }
 
 void BosonMenuInput::slotDebugModifyMinerals(Q_UINT32 playerId, int amount)
@@ -834,7 +834,7 @@ void BosonMenuInput::slotDebugModifyMinerals(Q_UINT32 playerId, int amount)
  QDataStream stream(b, IO_WriteOnly);
  stream << (Q_UINT32)playerId;
  stream << (Q_INT32)amount;
- boGame->sendMessage(b, BosonMessage::IdModifyMinerals);
+ boGame->sendMessage(b, BosonMessageIds::IdModifyMinerals);
 }
 
 void BosonMenuInput::slotDebugModifyOil(Q_UINT32 playerId, int amount)
@@ -843,7 +843,7 @@ void BosonMenuInput::slotDebugModifyOil(Q_UINT32 playerId, int amount)
  QDataStream stream(b, IO_WriteOnly);
  stream << (Q_UINT32)playerId;
  stream << (Q_INT32)amount;
- boGame->sendMessage(b, BosonMessage::IdModifyOil);
+ boGame->sendMessage(b, BosonMessageIds::IdModifyOil);
 }
 
 void BosonMenuInput::slotToggleCheating(bool on)

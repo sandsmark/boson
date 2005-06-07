@@ -21,6 +21,7 @@
 #include "bosonplayerinputhandler.moc"
 
 #include "boson.h"
+#include "bosonmessageids.h"
 #include "bosonmessage.h"
 #include "player.h"
 #include "unit.h"
@@ -78,7 +79,7 @@ bool BosonPlayerInputHandler::playerInput(QDataStream& stream, Player* player)
 	// might have constructed a wrong display or so
 	Q_UINT32 editor;
 	stream >> editor;
-	if (editor != BosonMessage::MoveEditor) {
+	if (editor != BosonMessageIds::MoveEditor) {
 		boError() << k_funcinfo << "Not an editor message, elthough we're in editor mode!" << endl;
 		return true;
 	}
@@ -105,7 +106,7 @@ bool BosonPlayerInputHandler::playerInput(QDataStream& stream, Player* player)
 bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& stream, Player* player)
 {
  switch (msgid) {
-	case BosonMessage::MoveMove:
+	case BosonMessageIds::MoveMove:
 	{
 		bool attack;
 		Q_UINT8 attackcode;
@@ -159,7 +160,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		}
 		break;
 	}
-	case BosonMessage::MoveAttack:
+	case BosonMessageIds::MoveAttack:
 	{
 		Q_ULONG attackedUnitId;
 		Q_UINT32 unitCount;
@@ -203,7 +204,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		}
 		break;
 	}
-	case BosonMessage::MoveStop:
+	case BosonMessageIds::MoveStop:
 	{
 		Q_UINT32 unitCount;
 		stream >> unitCount;
@@ -237,7 +238,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		}
 		break;
 	}
-	case BosonMessage::MoveMine:
+	case BosonMessageIds::MoveMine:
 	{
 		boDebug() << "MoveMine" << endl;
 		Q_ULONG harvesterId;
@@ -280,7 +281,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		h->mineAt(r);
 		break;
 	}
-	case BosonMessage::MoveRefine:
+	case BosonMessageIds::MoveRefine:
 	{
 		boDebug() << "MoveRefine" << endl;
 		Q_UINT32 refineryOwnerId;
@@ -331,7 +332,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		}
 		break;
 	}
-	case BosonMessage::MoveRepair:
+	case BosonMessageIds::MoveRepair:
 	{
 		boWarning() << "MoveRepair is a TODO" << endl;
 		break;
@@ -384,7 +385,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		}
 		break;
 	}
-	case BosonMessage::MoveProduce:
+	case BosonMessageIds::MoveProduce:
 	{
 		Q_UINT32 productionType;
 		Q_UINT32 owner;
@@ -466,7 +467,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		emit signalUpdateProduction(factory);
 		break;
 	}
-	case BosonMessage::MoveProduceStop:
+	case BosonMessageIds::MoveProduceStop:
 	{
 		boDebug() << "MoveProduceStop" << endl;
 		Q_UINT32 productionType;
@@ -553,7 +554,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		}
 		break;
 	}
-	case BosonMessage::MoveBuild:
+	case BosonMessageIds::MoveBuild:
 	{
 		boDebug() << "MoveBuild" << endl;
 		Q_UINT32 productionType;
@@ -608,7 +609,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		mGame->buildProducedUnit(production, unitType, pos);
 		break;
 	}
-	case BosonMessage::MoveFollow:
+	case BosonMessageIds::MoveFollow:
 	{
 		Q_ULONG followUnitId;
 		Q_UINT32 unitCount;
@@ -646,7 +647,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		}
 		break;
 	}
-	case BosonMessage::MoveLayMine:
+	case BosonMessageIds::MoveLayMine:
 	{
 		boDebug() << k_funcinfo << "MoveLayMine action" << endl;
 		Q_UINT32 unitCount;
@@ -679,7 +680,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 
 		break;
 	}
-	case BosonMessage::MoveDropBomb:
+	case BosonMessageIds::MoveDropBomb:
 	{
 		boDebug() << k_funcinfo << "MoveDropBomb action" << endl;
 		Q_UINT32 unitCount;
@@ -714,7 +715,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 
 		break;
 	}
-	case BosonMessage::MoveTeleport:
+	case BosonMessageIds::MoveTeleport:
 	{
 		Q_UINT32 unitId;
 		Q_UINT32 owner;
@@ -739,7 +740,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 
 		break;
 	}
-	case BosonMessage::MoveRotate:
+	case BosonMessageIds::MoveRotate:
 	{
 		Q_UINT32 unitId;
 		Q_UINT32 owner;
@@ -775,15 +776,16 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& stream, Player* player)
 {
  switch (msgid) {
-	case BosonMessage::MovePlaceUnit:
+	case BosonMessageIds::MovePlaceUnit:
 	{
-		Q_UINT32 unitType;
-		Q_UINT32 owner;
-		BoVector2Fixed pos;
-
-		stream >> owner;
-		stream >> unitType;
-		stream >> pos;
+		BosonMessageMovePlaceUnit message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			break;
+		}
+		Q_UINT32 unitType = message.mUnitType;
+		Q_UINT32 owner = message.mOwner;
+		BoVector2Fixed pos = message.mPos;
 
 		Player* p = 0;
 		if (owner >= 1024) { // a KPlayer ID
@@ -831,47 +833,44 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
 		}
 		break;
 	}
-	case BosonMessage::MoveChangeTexMap:
+	case BosonMessageIds::MoveChangeTexMap:
 	{
-		Q_UINT32 count;
-		stream >> count;
-		for (unsigned int i = 0; i < count; i++) {
-			Q_UINT32 x;
-			Q_UINT32 y;
-			Q_UINT32 texCount;
-			stream >> x;
-			stream >> y;
-			stream >> texCount;
-			if (texCount > 200) {
-				boError() << k_funcinfo << "more than 200 textures? invalid!" << endl;
-				break;
-			}
+		BosonMessageMoveChangeTexMap message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			break;
+		}
+		for (unsigned int i = 0; i < message.mCellCornersX.count(); i++) {
+			int x = message.mCellCornersX[i];
+			int y = message.mCellCornersY[i];
+			Q_UINT32 texCount = message.mCellCornersTextureCount[i];
 			Q_UINT32* textures = new Q_UINT32[texCount];
 			Q_UINT8* alpha = new Q_UINT8[texCount];
 			for (unsigned int j = 0; j < texCount; j++) {
-				stream >> textures[j];
-				stream >> alpha[j];
+				textures[j] = (message.mCellCornerTextures[i])[j];
+				alpha[j] = (message.mCellCornerAlpha[i])[j];
 			}
-			emit signalChangeTexMap((int)x, (int)y, texCount, textures, alpha);
+			emit signalChangeTexMap(x, y, texCount, textures, alpha);
 			delete[] textures;
 			delete[] alpha;
 		}
 		break;
 	}
-	case BosonMessage::MoveChangeHeight:
+	case BosonMessageIds::MoveChangeHeight:
 	{
 		boDebug() << k_lineinfo << "change height" << endl;
+		BosonMessageMoveChangeHeight message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			break;
+		}
 		Q_UINT32 count;
-		Q_INT32 cornerX;
-		Q_INT32 cornerY;
-		bofixed height;
-		stream >> count;
-		for (unsigned int i = 0; i < count; i++) {
-			stream >> cornerX;
-			stream >> cornerY;
-			stream >> height;
+		for (Q_UINT32 i = 0; i < message.mCellCornersX.count(); i++) {
 			// note: cornerX == mapWidth() and cornerY == mapHeight()
 			// are valid!
+			Q_INT32 cornerX = message.mCellCornersX[i];
+			Q_INT32 cornerY = message.mCellCornersY[i];
+			bofixed height = message.mCellCornersHeight[i];
 			if (cornerX < 0 || (unsigned int)cornerX > canvas()->mapWidth()) {
 				boError() << k_funcinfo << "invalid x coordinate " << cornerX << endl;
 				continue;
@@ -886,17 +885,14 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
 		}
 		break;
 	}
-	case BosonMessage::MoveDeleteItems:
+	case BosonMessageIds::MoveDeleteItems:
 	{
-		Q_UINT32 count;
-		stream >> count;
-		QValueList<unsigned long int> items;
-		for (unsigned int i = 0; i < count; i++) {
-			Q_ULONG id;
-			stream >> id;
-			items.append(id);
+		BosonMessageMoveDeleteItems message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			break;
 		}
-		canvas()->deleteItems(items);
+		canvas()->deleteItems(message.mItems);
 		break;
 	}
 	default:

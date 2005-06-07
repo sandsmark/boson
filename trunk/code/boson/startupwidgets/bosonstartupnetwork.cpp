@@ -23,7 +23,7 @@
 #include "../boson.h"
 #include "../bosonplayfield.h"
 #include "../player.h"
-#include "../bosonmessage.h"
+#include "../bosonmessageids.h"
 #include "../bosondata.h"
 #include "../defines.h"
 #include "bodebug.h"
@@ -164,7 +164,7 @@ bool BosonStartupNetwork::sendNewGame(BosonPlayField* field, bool editor, const 
  }
  stream << data;
  boDebug() << k_funcinfo << "neutral player will get added from network soon. sending newgame message." << endl;
- mGame->sendMessage(buffer, BosonMessage::IdNewGame);
+ mGame->sendMessage(buffer, BosonMessageIds::IdNewGame);
  return true;
 }
 
@@ -176,7 +176,7 @@ void BosonStartupNetwork::sendChangeTeamColor(Player* p, const QColor& color)
  QDataStream stream(b, IO_WriteOnly);
  stream << (Q_UINT32)p->id();
  stream << (Q_UINT32)color.rgb();
- mGame->sendMessage(b, BosonMessage::ChangeTeamColor);
+ mGame->sendMessage(b, BosonMessageIds::ChangeTeamColor);
 }
 
 void BosonStartupNetwork::sendChangeSpecies(Player* p, const QString& species, const QColor& color)
@@ -188,7 +188,7 @@ void BosonStartupNetwork::sendChangeSpecies(Player* p, const QString& species, c
  stream << (Q_UINT32)p->id();
  stream << species;
  stream << (Q_UINT32)color.rgb();
- mGame->sendMessage(b, BosonMessage::ChangeSpecies);
+ mGame->sendMessage(b, BosonMessageIds::ChangeSpecies);
 }
 
 void BosonStartupNetwork::sendChangePlayerName(Player* p, const QString& name)
@@ -216,7 +216,7 @@ void BosonStartupNetwork::sendChangePlayField(const QString& identifier)
  // transmit the identifier/name so that the remote newgame dialogs will be able
  // to display the newly selected playfield
  stream << identifier;
- mGame->sendMessage(buffer, BosonMessage::ChangePlayField);
+ mGame->sendMessage(buffer, BosonMessageIds::ChangePlayField);
 }
 
 void BosonStartupNetwork::removePlayer(KPlayer* p)
@@ -229,7 +229,7 @@ void BosonStartupNetwork::removePlayer(KPlayer* p)
 void BosonStartupNetwork::sendStartGameClicked()
 {
  BO_CHECK_NULL_RET(mGame);
- mGame->sendMessage(0, BosonMessage::IdStartGameClicked);
+ mGame->sendMessage(0, BosonMessageIds::IdStartGameClicked);
 }
 
 void BosonStartupNetwork::sendChangePlayField(int index)
