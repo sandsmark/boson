@@ -124,7 +124,7 @@ void WebInterface::writeHTMLHeader(QTextStream& os, const QString& title)
   os << "<body>\r\n";
   os << "<table height=\"90%\" width=\"100%\" border=\"0\"><tr><td>\r\n";
   os << "<div align=\"center\"><img src=\"http://boson.eu.org/pictures/header_small.jpg\" alt=\"\"></div>\r\n";
-  os << "<h1 align=\"center\">BOSON Server Statistics</h1>\r\n \
+  os << "<h1 align=\"center\">Boson Server Statistics</h1>\r\n \
             <table border=\"0\" cellpadding=\"3\" cellspacing=\"2\" width=\"100%\" class=\"main\">\r\n\
             <tr valign=\"top\"><td>\r\n\
             <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" class=\"sidebar\">\r\n\
