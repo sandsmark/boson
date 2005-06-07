@@ -130,7 +130,7 @@ class BosonMessageMoveDeleteItems : public BosonMessage
 {
 public:
 	BosonMessageMoveDeleteItems();
-	BosonMessageMoveDeleteItems(Q_UINT32 count, const QValueList<Q_ULONG>& items);
+	BosonMessageMoveDeleteItems(const QValueList<Q_ULONG>& items);
 
 	virtual bool save(QDataStream& stream) const;
 	virtual bool load(QDataStream& stream);
@@ -140,7 +140,6 @@ public:
 	}
 
 public:
-	Q_UINT32 mCount;
 	QValueList<Q_ULONG> mItems;
 };
 
