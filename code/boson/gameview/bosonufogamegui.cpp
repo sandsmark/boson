@@ -36,7 +36,7 @@
 #include "../bosonufochat.h"
 #include "../bosonufominimap.h"
 #include "../commandframe/bosoncommandframe.h"
-#include "../bosonmessage.h"
+#include "../bosonmessageids.h"
 #include "../boselection.h"
 #include "../playerio.h"
 #include "bosonlocalplayerinput.h"
@@ -379,7 +379,7 @@ void BosonUfoGameGUI::initUfoWidgets()
 
 
  d->mUfoChat = new BosonUfoChat();
- d->mUfoChat->setMessageId(BosonMessage::IdChat);
+ d->mUfoChat->setMessageId(BosonMessageIds::IdChat);
  widget->mUfoChatContainer->addWidget(d->mUfoChat);
 
 

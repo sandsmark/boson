@@ -24,7 +24,7 @@
 #include "../unit.h"
 #include "../player.h"
 #include "../boselection.h"
-#include "../bosonmessage.h"
+#include "../bosonmessageids.h"
 #include "bodebug.h"
 #include "../bosonweapon.h"
 #include "../boeventlistener.h"
@@ -119,11 +119,11 @@ void BosonLocalPlayerInput::produceAction(const BoSpecificAction& action)
   // FIXME: is there any way not to hardcode this?
   if(action.type() == ActionStopProduceUnit || action.type() == ActionStopProduceTech)
   {
-    stream << (Q_UINT32)BosonMessage::MoveProduceStop;
+    stream << (Q_UINT32)BosonMessageIds::MoveProduceStop;
   }
   else
   {
-    stream << (Q_UINT32)BosonMessage::MoveProduce;
+    stream << (Q_UINT32)BosonMessageIds::MoveProduce;
   }
 
   stream << (Q_UINT32)action.productionType();
@@ -148,7 +148,7 @@ void BosonLocalPlayerInput::stopUnits(const QPtrList<Unit>& units)
   QDataStream stream(b, IO_WriteOnly);
 
   // tell the clients we want to move units:
-  stream << (Q_UINT32)BosonMessage::MoveStop;
+  stream << (Q_UINT32)BosonMessageIds::MoveStop;
   // tell them how many units:
   stream << (Q_UINT32)units.count();
   while (it.current())
@@ -178,7 +178,7 @@ void BosonLocalPlayerInput::layMine(const BoSpecificAction& action)
   boDebug() << k_funcinfo << endl;
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
-  stream << (Q_UINT32)BosonMessage::MoveLayMine;
+  stream << (Q_UINT32)BosonMessageIds::MoveLayMine;
   stream << (Q_UINT32)1;
   stream << (Q_ULONG)action.unit()->id();
   stream << (Q_ULONG)action.weapon()->id();
@@ -197,7 +197,7 @@ void BosonLocalPlayerInput::harvest(const HarvesterPlugin* harvester, const Reso
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  stream << (Q_UINT32)BosonMessage::MoveMine;
+  stream << (Q_UINT32)BosonMessageIds::MoveMine;
   stream << (Q_ULONG)harvester->unit()->id();
   stream << (Q_ULONG)mine->unit()->id();
 
@@ -213,7 +213,7 @@ void BosonLocalPlayerInput::moveWithoutAttack(const QPtrList<Unit>& units, bofix
 
   QPtrListIterator<Unit> it(units);
   // tell the clients we want to move units:
-  stream << (Q_UINT32)BosonMessage::MoveMove;
+  stream << (Q_UINT32)BosonMessageIds::MoveMove;
   // We want to move without attacking
   stream << (Q_UINT8)0;
   // tell them where to move to:
@@ -246,7 +246,7 @@ void BosonLocalPlayerInput::moveWithAttack(const QPtrList<Unit>& units, bofixed 
 
   QPtrListIterator<Unit> it(units);
   // tell the clients we want to move units:
-  stream << (Q_UINT32)BosonMessage::MoveMove;
+  stream << (Q_UINT32)BosonMessageIds::MoveMove;
   // We want to move with attacking
   stream << (Q_UINT8)1;
   // tell them where to move to:
@@ -275,7 +275,7 @@ void BosonLocalPlayerInput::build(ProductionType type, Unit* factory, bofixed x,
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  stream << (Q_UINT32)BosonMessage::MoveBuild;
+  stream << (Q_UINT32)BosonMessageIds::MoveBuild;
   stream << (Q_UINT32)type;
   stream << (Q_ULONG)factory->id();
   stream << (Q_UINT32)factory->owner()->id();
@@ -293,7 +293,7 @@ void BosonLocalPlayerInput::attack(const QPtrList<Unit>& units, Unit* target)
 
   QPtrListIterator<Unit> it(units);
   // tell the clients we want to attack:
-  stream << (Q_UINT32)BosonMessage::MoveAttack;
+  stream << (Q_UINT32)BosonMessageIds::MoveAttack;
   // tell them which unit to attack:
   stream << (Q_ULONG)target->id();
   // tell them how many units attack:
@@ -316,7 +316,7 @@ void BosonLocalPlayerInput::dropBomb(Unit* u, int weapon, bofixed x, bofixed y)
   QDataStream stream(b, IO_WriteOnly);
 
   // tell the clients we want to drop bomb:
-  stream << (Q_UINT32)BosonMessage::MoveDropBomb;
+  stream << (Q_UINT32)BosonMessageIds::MoveDropBomb;
   // tell place
   stream << BoVector2Fixed(x, y);
   // tell them how many units attack:
@@ -336,7 +336,7 @@ void BosonLocalPlayerInput::repair(const QPtrList<Unit>& units, Unit* repairyard
 
   QPtrListIterator<Unit> it(units);
   // tell the clients we want to repair:
-  stream << (Q_UINT32)BosonMessage::MoveRepair;
+  stream << (Q_UINT32)BosonMessageIds::MoveRepair;
   // the owner of the repairyard (can also be an allied
   // player - not localplayer only)
   stream << (Q_UINT32)repairyard->owner()->id();
@@ -362,7 +362,7 @@ void BosonLocalPlayerInput::refine(const QPtrList<Unit>& units, Unit* refinery)
   QDataStream stream(b, IO_WriteOnly);
 
   QPtrListIterator<Unit> it(units);
-  stream << (Q_UINT32)BosonMessage::MoveRefine;
+  stream << (Q_UINT32)BosonMessageIds::MoveRefine;
   // the owner of the refinery (can also be an allied
   // player - not localplayer only)
   stream << (Q_UINT32)refinery->owner()->id();
@@ -389,7 +389,7 @@ void BosonLocalPlayerInput::follow(const QPtrList<Unit>& units, Unit* target)
 
   QPtrListIterator<Unit> it(units);
   // tell the clients we want to follow:
-  stream << (Q_UINT32)BosonMessage::MoveFollow;
+  stream << (Q_UINT32)BosonMessageIds::MoveFollow;
   // tell them which unit to follow:
   stream << (Q_ULONG)target->id();
   // tell them how many units follow:
@@ -411,8 +411,8 @@ void BosonLocalPlayerInput::placeUnit(Player* owner, unsigned long int unitType,
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  stream << (Q_UINT32)BosonMessage::MoveEditor;
-  stream << (Q_UINT32)BosonMessage::MovePlaceUnit;
+  stream << (Q_UINT32)BosonMessageIds::MoveEditor;
+  stream << (Q_UINT32)BosonMessageIds::MovePlaceUnit;
   stream << (Q_INT32)owner->id();
   stream << (Q_INT32)unitType;
   stream << BoVector2Fixed(x, y);
@@ -427,8 +427,8 @@ void BosonLocalPlayerInput::changeHeight(int x, int y, bofixed height)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  stream << (Q_UINT32)BosonMessage::MoveEditor;
-  stream << (Q_UINT32)BosonMessage::MoveChangeHeight;
+  stream << (Q_UINT32)BosonMessageIds::MoveEditor;
+  stream << (Q_UINT32)BosonMessageIds::MoveChangeHeight;
   stream << (Q_UINT32)1; // we change one corner only
   stream << (Q_INT32)x;
   stream << (Q_INT32)y;

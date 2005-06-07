@@ -52,6 +52,7 @@ libboson_la_SOURCES = \
 	bpfdescription.cpp \
 	bosonfileconverter.cpp \
 	bosoncampaign.cpp \
+	bosonmessage.cpp \
 	boson.cpp \
 	bomessage.cpp \
 	boeventloop.cpp \

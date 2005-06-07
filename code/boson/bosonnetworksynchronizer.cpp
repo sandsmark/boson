@@ -22,7 +22,7 @@
 #include "bomessage.h"
 #include "boson.h"
 #include "bosoncanvas.h"
-#include "bosonmessage.h"
+#include "bosonmessageids.h"
 #include "bosonprofiling.h"
 #include "boitemlist.h"
 #include "rtti.h"
@@ -99,7 +99,7 @@ public:
 		QDataStream stream(buffer, IO_WriteOnly);
 		stream << (Q_UINT32)syncId;
 		stream << md5.hexDigest();
-		game->sendMessage(buffer, BosonMessage::IdNetworkSyncCheck);
+		game->sendMessage(buffer, BosonMessageIds::IdNetworkSyncCheck);
 		mClientsLeft = game->messageClient()->clientList();
 		return;
 	}
@@ -1101,7 +1101,7 @@ void BosonNetworkSynchronizer::syncNetwork()
  // on receiving of this message we generate the sync message.
  // the clients will load their game from the sync message and
  // then they'll hopefully be in sync again
- mGame->sendMessage(0, BosonMessage::IdNetworkRequestSync);
+ mGame->sendMessage(0, BosonMessageIds::IdNetworkRequestSync);
 }
 
 void BosonNetworkSynchronizer::unlockGame()
@@ -1121,7 +1121,7 @@ void BosonNetworkSynchronizer::unlockGame()
 	// AB: this is never reached. this is called only for ADMIN.
 	return;
  }
- mGame->sendMessage(0, BosonMessage::IdNetworkSyncUnlockGame);
+ mGame->sendMessage(0, BosonMessageIds::IdNetworkSyncUnlockGame);
 }
 
 void BosonNetworkSynchronizer::forceCompleteSyncCheckAndUnlockGame(BosonCanvas* canvas)
@@ -1169,10 +1169,10 @@ bool BosonNetworkSynchronizer::acceptNetworkTransmission(int msgid) const
 	return false;
  }
  switch (msgid - KGameMessage::IdUser) {
-	case BosonMessage::IdNetworkSync:
-	case BosonMessage::IdNetworkSyncCheck:
-	case BosonMessage::IdNetworkSyncCheckACK:
-	case BosonMessage::IdNetworkSyncUnlockGame:
+	case BosonMessageIds::IdNetworkSync:
+	case BosonMessageIds::IdNetworkSyncCheck:
+	case BosonMessageIds::IdNetworkSyncCheckACK:
+	case BosonMessageIds::IdNetworkSyncUnlockGame:
 		return true;
 	default:
 		return false;
@@ -1364,7 +1364,7 @@ void BosonNetworkSyncChecker::sendAck(const QCString& md5, bool verify, unsigned
  if (!verify) {
 	stream << origLog;
  }
- mGame->sendMessage(buffer, BosonMessage::IdNetworkSyncCheckACK);
+ mGame->sendMessage(buffer, BosonMessageIds::IdNetworkSyncCheckACK);
 }
 
 QByteArray BosonNetworkSyncChecker::createCompleteSyncCheckLog(BosonCanvas* canvas) const
@@ -1425,7 +1425,7 @@ bool BosonNetworkSyncer::receiveNetworkRequestSync(QDataStream&)
 	setGameLocked(false);
 	return false;
  }
- mGame->sendMessage(syncBuffer, BosonMessage::IdNetworkSync);
+ mGame->sendMessage(syncBuffer, BosonMessageIds::IdNetworkSync);
  return true;
 }
 

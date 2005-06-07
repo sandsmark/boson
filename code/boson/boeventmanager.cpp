@@ -26,7 +26,7 @@
 #include "bosonpropertyxml.h"
 #include "bosonprofiling.h"
 #include "bodebug.h"
-#include "bosonmessage.h"
+#include "bosonmessageids.h"
 
 #include <kgame/kgameproperty.h>
 #include <kgame/kgamepropertyhandler.h>
@@ -360,7 +360,7 @@ void BoEventManager::sendStatusEvents()
 	delete e;
  }
 
- boGame->sendMessage(b, BosonMessage::IdStatus);
+ boGame->sendMessage(b, BosonMessageIds::IdStatus);
 }
 
 void BoEventManager::advance(unsigned int advanceCallsCount)

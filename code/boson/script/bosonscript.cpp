@@ -22,7 +22,7 @@
 #include "../bo3dtools.h"
 #include "../player.h"
 #include "../boson.h"
-#include "../bosonmessage.h"
+#include "../bosonmessageids.h"
 #include "../bosoncanvas.h"
 #include "../bosoncollisions.h"
 #include "../rtti.h"
@@ -243,7 +243,7 @@ void BosonScript::addMinerals(int playerId, int amount)
   QDataStream stream(b, IO_WriteOnly);
   stream << (Q_UINT32)playerId;
   stream << (Q_INT32)amount;
-  game()->sendMessage(b, BosonMessage::IdModifyMinerals);
+  game()->sendMessage(b, BosonMessageIds::IdModifyMinerals);
 }
 
 unsigned long int BosonScript::oil(int playerId)
@@ -277,7 +277,7 @@ void BosonScript::addOil(int playerId, int amount)
   QDataStream stream(b, IO_WriteOnly);
   stream << (Q_UINT32)playerId;
   stream << (Q_INT32)amount;
-  game()->sendMessage(b, BosonMessage::IdModifyOil);
+  game()->sendMessage(b, BosonMessageIds::IdModifyOil);
 }
 
 QValueList<BoVector2Fixed> BosonScript::nearestMineralLocations(int playerId, int x, int y, unsigned int n, unsigned int radius)
@@ -326,7 +326,7 @@ void BosonScript::moveUnit(int player, int id, float x, float y)
   QDataStream stream(b, IO_WriteOnly);
 
   // tell the clients we want to move units:
-  stream << (Q_UINT32)BosonMessage::MoveMove;
+  stream << (Q_UINT32)BosonMessageIds::MoveMove;
   // We want to move without attacking
   stream << (Q_UINT8)0;
   // tell them where to move to:
@@ -346,7 +346,7 @@ void BosonScript::moveUnitWithAttacking(int player, int id, float x, float y)
   QDataStream stream(b, IO_WriteOnly);
 
   // tell the clients we want to move units:
-  stream << (Q_UINT32)BosonMessage::MoveMove;
+  stream << (Q_UINT32)BosonMessageIds::MoveMove;
   // We want to move with attacking
   stream << (Q_UINT8)1;
   // tell them where to move to:
@@ -366,7 +366,7 @@ void BosonScript::attack(int player, int attackerId, int targetId)
   QDataStream stream(b, IO_WriteOnly);
 
   // tell the clients we want to attack:
-  stream << (Q_UINT32)BosonMessage::MoveAttack;
+  stream << (Q_UINT32)BosonMessageIds::MoveAttack;
   // tell them which unit to attack:
   stream << (Q_ULONG)targetId;
   // tell them how many units attack:
@@ -383,7 +383,7 @@ void BosonScript::stopUnit(int player, int id)
   QDataStream stream(b, IO_WriteOnly);
 
   // tell the clients we want to move units:
-  stream << (Q_UINT32)BosonMessage::MoveStop;
+  stream << (Q_UINT32)BosonMessageIds::MoveStop;
   // tell them how many units:
   stream << (Q_UINT32)1;
   stream << (Q_ULONG)id;
@@ -415,7 +415,7 @@ void BosonScript::mineUnit(int player, int id, float x, float y)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  stream << (Q_UINT32)BosonMessage::MoveMine;
+  stream << (Q_UINT32)BosonMessageIds::MoveMine;
   stream << (Q_ULONG)id;
   stream << (Q_ULONG)resourceUnit->id();
 
@@ -428,7 +428,7 @@ void BosonScript::setUnitRotation(int player, int id, float rotation)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  stream << (Q_UINT32)BosonMessage::MoveRotate;
+  stream << (Q_UINT32)BosonMessageIds::MoveRotate;
   stream << (Q_UINT32)player;
   stream << (Q_ULONG)id;
   stream << rotation;
@@ -442,7 +442,7 @@ void BosonScript::dropBomb(int player, int id, int weapon, float x, float y)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  stream << (Q_UINT32)BosonMessage::MoveDropBomb;
+  stream << (Q_UINT32)BosonMessageIds::MoveDropBomb;
   // tell place
   stream << BoVector2Fixed(x, y);
   // tell them how many units attack:
@@ -459,7 +459,7 @@ void BosonScript::produceUnit(int player, int factory, int production)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  stream << (Q_UINT32)BosonMessage::MoveProduce;
+  stream << (Q_UINT32)BosonMessageIds::MoveProduce;
   stream << (Q_UINT32)ProduceUnit;
   stream << (Q_UINT32)player;
   stream << (Q_ULONG)factory;
@@ -479,7 +479,7 @@ void BosonScript::spawnUnit(int player, int type, float x, float y)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  stream << (Q_UINT32)BosonMessage::MovePlaceUnit;
+  stream << (Q_UINT32)BosonMessageIds::MovePlaceUnit;
   stream << (Q_UINT32)player;
   stream << (Q_UINT32)type;
   stream << BoVector2Fixed(x, y);
@@ -498,7 +498,7 @@ void BosonScript::teleportUnit(int player, int id, float x, float y)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  stream << (Q_UINT32)BosonMessage::MoveTeleport;
+  stream << (Q_UINT32)BosonMessageIds::MoveTeleport;
   stream << (Q_UINT32)player;
   stream << (Q_UINT32)id;
   stream << BoVector2Fixed(x, y);
@@ -551,7 +551,7 @@ void BosonScript::placeProduction(int player, int factoryid, float x, float y)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  stream << (Q_UINT32)BosonMessage::MoveBuild;
+  stream << (Q_UINT32)BosonMessageIds::MoveBuild;
   stream << (Q_UINT32)ProduceUnit;
   stream << (Q_ULONG)u->id();
   stream << (Q_UINT32)p->id();

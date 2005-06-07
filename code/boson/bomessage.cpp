@@ -21,7 +21,7 @@
 
 #include <bodebug.h>
 #include "boson.h"
-#include "bosonmessage.h"
+#include "bosonmessageids.h"
 #include "boeventloop.h"
 
 #include <kgame/kgamemessage.h>
@@ -199,7 +199,7 @@ bool BoMessageDelayer::processMessage(BoMessage* m)
 	mDelayedMessages->enqueue(m);
 	mDelayedWaiting = true;
 	switch (m->msgid - KGameMessage::IdUser) {
-		case BosonMessage::AdvanceN:
+		case BosonMessageIds::AdvanceN:
 			mAdvanceMessageWaiting++;
 			if (mAdvanceMessageWaiting > 1) {
 				// one advance message waiting is ok, more is
@@ -235,7 +235,7 @@ void BoMessageDelayer::processDelayed()
  QDataStream s(m->byteArray, IO_ReadOnly);
  mDelayedWaiting = false;
  switch (m->msgid - KGameMessage::IdUser) {
-	case BosonMessage::AdvanceN:
+	case BosonMessageIds::AdvanceN:
 //		boWarning(300) << k_funcinfo << "delayed advance msg will be sent!" << endl;
 		mAdvanceMessageWaiting--;
 		((BoEventLoop*)qApp->eventLoop())->setAdvanceMessagesWaiting(mAdvanceMessageWaiting);

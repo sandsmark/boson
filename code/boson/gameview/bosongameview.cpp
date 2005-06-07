@@ -68,7 +68,6 @@
 #include "../bosonplayfield.h"
 #include "../bosondata.h"
 #include "../bocamerawidget.h"
-#include "../bosonmessage.h"
 #include "../boaction.h"
 #include "../boeventlistener.h"
 #include "bosonmenuinput.h"

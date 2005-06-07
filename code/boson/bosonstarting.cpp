@@ -25,7 +25,7 @@
 #include "player.h"
 #include "bosonplayfield.h"
 #include "bosonmap.h"
-#include "bosonmessage.h"
+#include "bosonmessageids.h"
 #include "speciestheme.h"
 #include "bosonprofiling.h"
 #include "bosondata.h"
@@ -436,7 +436,7 @@ void BosonStarting::slotStartingCompletedReceived(const QByteArray& buffer, Q_UI
  // AB: d->mLoadFromLogFile is null usually. non-null makes sense only for
  // non-network games, we will not start a normal game, but reproduce from a log
  // file then.
- boGame->sendMessage(d->mLoadFromLogFile, BosonMessage::IdGameIsStarted);
+ boGame->sendMessage(d->mLoadFromLogFile, BosonMessageIds::IdGameIsStarted);
 }
 
 void BosonStarting::sendStartingCompleted(bool success)
@@ -461,7 +461,7 @@ void BosonStarting::sendStartingCompleted(bool success)
  }
  stream << themeMD5;
 
- boGame->sendMessage(b, BosonMessage::IdGameStartingCompleted);
+ boGame->sendMessage(b, BosonMessageIds::IdGameStartingCompleted);
 }
 
 bool BosonStarting::checkStartingCompletedMessages() const

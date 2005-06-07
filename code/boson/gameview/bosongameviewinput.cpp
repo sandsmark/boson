@@ -25,7 +25,6 @@
 #include "../boselection.h"
 #include "../bosoncanvas.h"
 #include "../bosonconfig.h"
-#include "../bosonmessage.h"
 #include "../boson.h"
 #include "../bosoncursor.h"
 #include "../playerio.h"

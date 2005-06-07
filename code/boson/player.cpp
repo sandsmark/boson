@@ -23,7 +23,7 @@
 #include "speciestheme.h"
 #include "unit.h"
 #include "unitproperties.h"
-#include "bosonmessage.h"
+#include "bosonmessageids.h"
 #include "bosonmap.h"
 #include "bosonstatistics.h"
 #include "boson.h"
@@ -205,7 +205,7 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
 
  // this wasn't a unit property but a normal message
  switch (msgid) {
-	case BosonMessage::IdChat:
+	case BosonMessageIds::IdChat:
 		break;
 	default:
 		boWarning() << k_funcinfo << "Unknown message " << msgid << endl;
@@ -230,7 +230,7 @@ void Player::addUnit(Unit* unit, int dataHandlerId)
 {
  d->mUnits.append(unit);
  if (dataHandlerId == -1) {
-	dataHandlerId = BosonMessage::UnitPropertyHandler + d->mUnitPropID;
+	dataHandlerId = BosonMessageIds::UnitPropertyHandler + d->mUnitPropID;
 	d->mUnitPropID++;// used for ID of KGamePropertyHandler
  }
  unit->dataHandler()->registerHandler(dataHandlerId, this,
