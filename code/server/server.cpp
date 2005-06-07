@@ -19,7 +19,7 @@
 
 #include "server.h"
 
-#include "boson/bosonmessage.h"
+#include "boson/bosonmessageids.h"
 #include "webinterface.h"
 #include "game.h"
 #include "bodebug.h"
@@ -239,11 +239,11 @@ void Server::slotMessageReceived(const QByteArray& data, Q_UINT32 clientId, bool
 
 void Server::processBosonMessage(QDataStream& stream, int msgid)
 {
-  if(msgid == BosonMessage::IdGameIsStarted)
+  if(msgid == BosonMessageIds::IdGameIsStarted)
   {
     gameWasStarted();
   }
-  else if(msgid == BosonMessage::IdStatus)
+  else if(msgid == BosonMessageIds::IdStatus)
   {
     int count;
     stream >> count;
@@ -253,7 +253,7 @@ void Server::processBosonMessage(QDataStream& stream, int msgid)
       processStatusEvent(stream);
     }
   }
-  else if(msgid == BosonMessage::IdNetworkSyncCheckACK)
+  else if(msgid == BosonMessageIds::IdNetworkSyncCheckACK)
   {
     Q_UINT32 id;
     QCString md5;
