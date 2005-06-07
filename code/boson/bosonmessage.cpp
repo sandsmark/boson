@@ -222,18 +222,17 @@ BosonMessageMoveDeleteItems::BosonMessageMoveDeleteItems()
 {
 }
 
-BosonMessageMoveDeleteItems::BosonMessageMoveDeleteItems(Q_UINT32 count, const QValueList<Q_ULONG>& items)
-	: BosonMessage()
+BosonMessageMoveDeleteItems::BosonMessageMoveDeleteItems(const QValueList<Q_ULONG>& items)
+	: BosonMessage(),
+	mItems(items)
 {
- mCount = count;
- mItems = items;
 }
 
 bool BosonMessageMoveDeleteItems::save(QDataStream& stream) const
 {
  stream << (Q_UINT32)BosonMessageIds::MoveEditor;
  stream << (Q_UINT32)messageId();
- stream << mCount;
+ stream << (Q_UINT32)mItems.count();
  QValueList<Q_ULONG>::const_iterator it;
  for (it = mItems.begin(); it != mItems.end(); ++it) {
 	stream << (*it);
@@ -244,9 +243,10 @@ bool BosonMessageMoveDeleteItems::save(QDataStream& stream) const
 bool BosonMessageMoveDeleteItems::load(QDataStream& stream)
 {
  // AB: msgid and editor flag have been read already
- stream >> mCount;
+ Q_UINT32 count;
+ stream >> count;
  mItems.clear();
- for (Q_UINT32 i = 0; i < mCount; i++) {
+ for (Q_UINT32 i = 0; i < count; i++) {
 	Q_ULONG item;
 	stream >> item;
 	mItems.append(item);
