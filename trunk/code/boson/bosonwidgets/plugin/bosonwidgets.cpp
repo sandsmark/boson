@@ -18,7 +18,6 @@
 */
 
 #include "dummyclasses.h"
-#include "../bogamechat.h"
 #include "../bosonplayfieldview.h"
 #include "../bonuminput.h"
 #include "../bocolorchooser.h"
@@ -26,7 +25,6 @@
 #include <kdeversion.h>
 #include <kstandarddirs.h>
 #include <kdebug.h>
-#include <kgame/kgamechat.h>
 
 #include <qwidgetplugin.h>
 
@@ -96,7 +94,6 @@ private:
 
 BosonWidgetsPlugin::BosonWidgetsPlugin()
 {
- addBosonWidget("BoGameChatWidget", "bosonwidgets/bogamechat.h", "Boson's KGame chat widget (with fixed message id!)", QString::null, QString::null);
  addBosonWidget("BosonMiniMap", "bosonminimap.h", "Mini map widget", QString::null, QString::null);
  addBosonWidget("BosonPlayFieldView", "bosonwidgets/bosonplayfieldview.h", "PlayField view", QString::null, QString::null);
  addBosonWidget("BoIntNumInput", "bosonwidgets/bonuminput.h", "Boson's int num input", QString::null, QString::null);
@@ -126,9 +123,7 @@ void BosonWidgetsPlugin::addBosonWidget(const QString& className, const QString&
 
 QWidget* BosonWidgetsPlugin::create(const QString& key, QWidget* parent, const char* name)
 {
- if (key == "BoGameChatWidget") {
-  return new BoGameChatWidget(parent, name);
- } else if (key == "BosonMiniMap") {
+ if (key == "BosonMiniMap") {
   // we cannot create an actual minimap widget, as it depends on Unit,
   // Player, ...
   // uic should generate code that does use BosonMiniMap.
