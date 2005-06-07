@@ -411,7 +411,7 @@ void BosonLocalPlayerInput::placeUnit(Player* owner, unsigned long int unitType,
   boDebug() << k_funcinfo << endl;
 
   // editor message
-  BosonMessageMovePlaceUnit message(owner->id(), unitType, BoVector2Fixed(x, y));
+  BosonMessageMovePlaceUnit message(unitType, owner->id(), BoVector2Fixed(x, y));
 
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
