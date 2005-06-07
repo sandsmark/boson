@@ -31,9 +31,6 @@
 #include "../bpfdescription.h"
 #include "../bosonmap.h"
 #include "../bosondata.h"
-#include "../bosonwidgets/bosonplayfieldview.h"
-#include "../bosonwidgets/bocolorchooser.h"
-#include "../bosonwidgets/bogamechat.h"
 #include "bosonstartupnetwork.h"
 #include "bodebug.h"
 
