@@ -1216,6 +1216,7 @@ void BosonGameView::setLocalPlayerIO(PlayerIO* io)
 
  d->mUfoGameGUI->setLocalPlayerIO(localPlayerIO());
  d->mUfoCanvasWidget->setLocalPlayerIO(localPlayerIO());
+ d->mUfoPlacementPreviewWidget->setLocalPlayerIO(localPlayerIO());
 
  if (d->mInput) {
 	d->mInput->setLocalPlayerIO(localPlayerIO());
