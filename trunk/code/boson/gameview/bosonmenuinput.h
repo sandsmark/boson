@@ -142,6 +142,7 @@ public:
 	BoUfoActionCollection* actionCollection() const;
 
 signals:
+	void signalScroll(int direction);
 	void signalToggleStatusbar(bool);
 	void signalToggleChatVisible();
 	void signalResetViewProperties();

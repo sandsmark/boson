@@ -1434,6 +1434,8 @@ void BosonGameView::setGameMode(bool mode)
 			this, SLOT(slotShowLight0Widget()));
 	connect(io, SIGNAL(signalSelectSelectionGroup(int)),
 			d->mSelectionGroups, SLOT(slotSelectSelectionGroup(int)));
+	connect(io, SIGNAL(signalScroll(int)),
+			this, SLOT(slotScroll(int)));
 	connect(io, SIGNAL(signalCreateSelectionGroup(int)),
 			d->mSelectionGroups, SLOT(slotCreateSelectionGroup(int)));
 	connect(io, SIGNAL(signalPreferencesApply()),
