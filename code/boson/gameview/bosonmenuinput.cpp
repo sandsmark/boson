@@ -664,6 +664,8 @@ void BosonMenuInput::initIO(KPlayer* player)
  mData = new BosonMenuInputData(actionCollection());
  mData->initUfoActions(mGameMode);
 
+ connect(mData, SIGNAL(signalScroll(int)),
+		this, SIGNAL(signalScroll(int)));
  connect(mData, SIGNAL(signalRotateLeft()),
 		this, SLOT(slotRotateLeft()));
  connect(mData, SIGNAL(signalRotateRight()),
