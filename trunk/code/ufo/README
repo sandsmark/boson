@@ -58,6 +58,10 @@ Patches applied currently (this list may not be complete):
   This replaces the previous getInputMap() solution which had several
   disadvantages - see
   http://sourceforge.net/mailarchive/forum.php?thread_id=7459852&forum_id=6384
+- Patch to uwidget.cpp, to make sure that processKeyBindings() calls
+  notifyKeyBindingAction() on its parents only if they have key events enabled.
+  Otherwise key events would get enabled for these parents, as
+  notifyKeyBindingAction() calls getInputMap() which in turn enables key events
 
 
 Use
