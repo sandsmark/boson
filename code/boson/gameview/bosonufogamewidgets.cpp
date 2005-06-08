@@ -389,6 +389,7 @@ void BosonUfoPlacementPreviewWidget::paintWidget()
 
 void BosonUfoPlacementPreviewWidget::renderPlacementPreview()
 {
+ BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(canvas());
  BO_CHECK_NULL_RET(canvas()->map());
  if (!d->mShowPreview) {
