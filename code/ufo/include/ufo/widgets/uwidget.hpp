@@ -842,6 +842,15 @@ protected:  // Protected methods
 	/** Processes key events. Primarily, it is used to notify listeners.
 	  */
 	virtual void processKeyEvent(UKeyEvent * e);
+	/** This receives @ref UEvent::Accel and @ref UEvent::AccelOverride
+	  * events (see uabstractcontext.cpp for documentation on these).
+	  *
+	  * Accelerators are currently used by @ref UButton only.
+	  *
+	  * AB: I have noidea what @ref processKeyBindings is actually for, so
+	  * this method might be a duplicated method.
+	  **/
+	virtual void processAccelEvent(UKeyEvent * e);
 	/** Processes key events. Primarily, it is used to notify listeners.
 	  */
 	virtual void processFocusEvent(UFocusEvent * e);

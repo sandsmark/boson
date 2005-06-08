@@ -140,6 +140,19 @@ private: // Private functions
 	bool sendMouseWheelEventToWidgets(std::stack<UWidget*> & widgets, UMouseWheelEvent * e);
 	bool sendMouseMotionEventToWidgets(std::stack<UWidget*> & widgets, UMouseEvent * e);
 
+	/**
+	 * Send @p e to @p widget and all children of @p widget. Sending is
+	 * stopped once one widget consumes the event.
+	 * Widgets that are either not enabled or not visible are skipped.
+	 *
+	 * Note that this method uses @p e directly without creating a new
+	 * object. Therefore you need to call e->reference() before calling this
+	 * method!
+	 *
+	 * @return TRUE if the event has been consumed, otherwise FALSE.
+	 **/
+	bool sendEventToWidgetAndChildren(UWidget * widget, UEvent * e);
+
 protected: // Protected attributes
 	/** */
 	UContextGroup * m_contextGroup;

@@ -598,14 +598,60 @@ UAbstractContext::fireKeyEvent(UKeyEvent * e) {
 		<< "REASON: this context has no root pane" << "\n";
 		return;
 	}
-	// check key bindings
+	if (e->getType() == UEvent::KeyPressed) {
+		// We send
+		// 1. AccelOverride event. If that is consumed, we jump to 3. (i.e. skip
+		//    the Accel event)
+		// 2. Accel event. If that is consumed, no KeyPressed event is sent.
+		// 3. KeyPressed event to the focused widget.
+		// AccelOverride and Accel events are sent to all widgets in the
+		// hierarchy that are visible and enabled, KeyPressed event to the
+		// focused widget only.
+		//
+		// AB: this works slightly similar to the way Qt processes these events
+		//     (however Qt does not deliver the events to all widgets)
+
+		UKeyEvent * accelOverride = new UKeyEvent(
+			root,
+			UEvent::AccelOverride,
+			e->getModifiers(),
+			e->getKeyCode(),
+			e->getKeyChar()
+		);
+
+		accelOverride->reference();
+		bool consumed = sendEventToWidgetAndChildren(root, accelOverride);
+		accelOverride->unreference();
+
+		if (!consumed) {
+			UKeyEvent * accel = new UKeyEvent(
+				root,
+				UEvent::Accel,
+				e->getModifiers(),
+				e->getKeyCode(),
+				e->getKeyChar()
+			);
+
+			accel->reference();
+			bool acceptAccel = sendEventToWidgetAndChildren(root, accel);
+			accel->unreference();
+			if (acceptAccel) {
+				// do not send KeyPressed event
+				return;
+			}
+		}
+	}
+
+
+#if 0
+	// check key binding
 	UKeyStroke stroke(e);
 	USlot1<UActionEvent*> * slot = m_inputMap->get(stroke);
 	if (slot) {
 		UActionEvent * ae = new UActionEvent(this, UEvent::Action,
 			e->getModifiers(), stroke.toString());
 		ae->reference();
-		(*slot)(ae);
+		(*slot)(ae)
 		// FIXME: should context bindings be consumable?
 		// if (e->isConsumend()) {
 		//	e->unreference();
@@ -613,6 +659,7 @@ UAbstractContext::fireKeyEvent(UKeyEvent * e) {
 		//}
 		ae->unreference();
 	}
+#endif
 
 	UWidget * w = root->getFocusedWidget();
 
@@ -809,3 +856,32 @@ UAbstractContext::sendMouseMotionEventToWidgets(std::stack<UWidget*> & widgets, 
 	}
 	return false;
 }
+
+// send e to the widget and all of its children.
+// note that this uses e directly (does not create a new object) and assumes
+// that e->reference() was called at least once before this method is called!
+//
+// widgets that are not visible or not enabled are skipped.
+bool
+UAbstractContext::sendEventToWidgetAndChildren(UWidget * widget, UEvent * e) {
+	if (!widget->isVisible()) {
+		return false;
+	}
+	if (!widget->isEnabled()) {
+		return false;
+	}
+	if (send(widget, e)) {
+		e->consume();
+		return true;
+	}
+	const std::vector<UWidget*> & children = widget->getWidgets();
+	for (std::vector<UWidget*>::const_reverse_iterator it = children.rbegin();
+			it != children.rend();
+			++it) {
+		if (sendEventToWidgetAndChildren((*it), e)) {
+			return true;
+		}
+	}
+	return false;
+}
+
