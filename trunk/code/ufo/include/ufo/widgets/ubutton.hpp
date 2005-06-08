@@ -233,6 +233,7 @@ protected:  // Overrides UWidget
 	virtual void paintBorder(UGraphics * g);
 	virtual void addedToHierarchy();
 	virtual void removedFromHierarchy();
+	virtual void processAccelEvent(UKeyEvent * e);
 
 private:  // Private attributes
 	/**  the icon which is shown when the icon is pressed */

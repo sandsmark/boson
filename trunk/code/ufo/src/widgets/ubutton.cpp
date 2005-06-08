@@ -30,6 +30,7 @@
 #include "ufo/utoolkit.hpp"
 #include "ufo/udisplay.hpp"
 #include "ufo/events/uactionevent.hpp"
+#include "ufo/events/ukeyevent.hpp"
 #include "ufo/events/utimerevent.hpp"
 
 #include "ufo/uicon.hpp"
@@ -148,6 +149,8 @@ UButton::setText(const std::string & text) {
 		m_acceleratorIndex = index;
 	} else {
 		UCompound::setText(text);
+
+		// TODO: unset a previous accelerator
 	}
 }
 
@@ -379,8 +382,10 @@ UButton::paintBorder(UGraphics * g) {
 void
 UButton::addedToHierarchy() {
 	if (m_accelerator.getKeyCode() != UKey::UK_UNDEFINED) {
+#if 0
 		getRootPane(true)->getInputMap(WhenAncestorFocused)
 			->put(m_accelerator, slot(*this, &UButton::keybindingSlot));
+#endif
 	}
 	UWidget::addedToHierarchy();
 }
@@ -410,14 +415,6 @@ UButton::fireActionEvent() {
 
 void
 UButton::keybindingSlot(UActionEvent * e) {
-	// check if this widget is visible && enabled
-	UWidget * w = this;
-	while (w) {
-		if (!w->isVisible() || !w->isEnabled()) {
-			return;
-		}
-		w = w->getParent();
-	}
 	doClick();
 }
 
@@ -441,6 +438,7 @@ UButton::getMnemonic() const {
 void
 UButton::setAccelerator(const UKeyStroke & stroke) {
 	m_accelerator = stroke;
+	setEventState(UEvent::KeyPressed, true);
 
 	// search for accel index
 	std::string text(getText());
@@ -457,12 +455,14 @@ UButton::setAccelerator(const UKeyStroke & stroke) {
 		}
 	}
 
+#if 0
 	if (isInValidHierarchy()) {
 		if (URootPane * root = getRootPane(true)) {
 			root->getInputMap(WhenAncestorFocused)->
 				put(stroke, slot(*this, &UButton::keybindingSlot));
 		}
 	}
+#endif
 }
 
 UKeyStroke
@@ -474,3 +474,27 @@ int
 UButton::getAcceleratorIndex() const {
 	return m_acceleratorIndex;
 }
+
+void
+UButton::processAccelEvent(UKeyEvent * e) {
+	if (e->getType() == UEvent::AccelOverride) {
+		return;
+	}
+	if (e->getType() != UEvent::Accel) {
+		// Oops - should not happen
+		std::cerr << "invalid event type in UButton::processAccelEvent" << std::endl;
+		return;
+	}
+	UKeyStroke stroke(e);
+	if (m_accelerator == stroke) {
+		UActionEvent * ae = new UActionEvent(getContext(), UEvent::Action,
+				e->getModifiers(), stroke.toString());
+		ae->reference();
+		keybindingSlot(ae);
+		if (ae->isConsumed()) {
+			e->consume();
+		}
+		ae->unreference();
+	}
+}
+

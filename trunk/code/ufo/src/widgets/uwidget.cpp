@@ -1130,6 +1130,11 @@ UWidget::processEvent(UEvent * e) {
 	} else if (UMouseWheelEvent * pe = dynamic_cast<UMouseWheelEvent*>(e)) {
 		processMouseWheelEvent(pe);
 	} else if (UKeyEvent * pe = dynamic_cast<UKeyEvent*>(e)) {
+		if (pe->getType() == UEvent::AccelOverride ||
+				pe->getType() == UEvent::Accel) {
+			processAccelEvent(pe);
+			return;
+		}
 		processKeyEvent(pe);
 		UFocusManager::getFocusManager()->processEvent(e);
 	} else if (UFocusEvent * pe = dynamic_cast<UFocusEvent*>(e)) {
@@ -1182,6 +1187,12 @@ UWidget::processKeyEvent(UKeyEvent * e) {
 	if (e->isConsumed() == false) {
 		processKeyBindings(e);
 	}
+}
+
+void
+UWidget::processAccelEvent(UKeyEvent * ) {
+	// the default implementation does nothing.
+	// reimplemented in UButton.
 }
 
 void
@@ -1685,6 +1696,8 @@ UWidget::setEventState(UEvent::Type type, bool b) {
 			case UEvent::KeyPressed:
 			case UEvent::KeyReleased:
 			case UEvent::KeyTyped:
+			case UEvent::Accel:
+			case UEvent::AccelOverride:
 				m_eventState |= KeyEvents;
 			break;
 
@@ -1723,6 +1736,8 @@ UWidget::setEventState(UEvent::Type type, bool b) {
 			case UEvent::KeyPressed:
 			case UEvent::KeyReleased:
 			case UEvent::KeyTyped:
+			case UEvent::Accel:
+			case UEvent::AccelOverride:
 				m_eventState &= ~KeyEvents;
 			break;
 
@@ -1766,6 +1781,8 @@ UWidget::isEventEnabled(UEvent::Type type) const {
 		case UEvent::KeyPressed:
 		case UEvent::KeyReleased:
 		case UEvent::KeyTyped:
+		case UEvent::Accel:
+		case UEvent::AccelOverride:
 			ret = (m_eventState & KeyEvents);
 		break;
 

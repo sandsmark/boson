@@ -70,7 +70,10 @@ public:
 		WidgetShown = 32,
 		WidgetHidden = 33,
 
-		PropertyChanged = 40 // property change event
+		PropertyChanged = 40, // property change event
+
+		AccelOverride = 50,
+		Accel = 51
 	};
 
 public:
