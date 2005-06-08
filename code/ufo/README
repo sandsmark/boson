@@ -44,6 +44,10 @@ Patches applied currently (this list may not be complete):
 - Patch to uinputmap.hpp and ubutton.cpp to make sure that the button
   accelerators are actually removed from the inputmap (a ufo::UInputMap::put()
   call with a NULL slot is NOT sufficient)
+- Patch to ubutton.cpp so that UButton::keybindingSlot() does not execute
+  anything when the button is not enabled or not visible.
+  This is a workaround only until a final solution is available, see
+  http://sourceforge.net/mailarchive/forum.php?thread_id=7459852&forum_id=6384
 
 
 Use

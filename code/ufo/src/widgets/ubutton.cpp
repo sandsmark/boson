@@ -410,6 +410,14 @@ UButton::fireActionEvent() {
 
 void
 UButton::keybindingSlot(UActionEvent * e) {
+	// check if this widget is visible && enabled
+	UWidget * w = this;
+	while (w) {
+		if (!w->isVisible() || !w->isEnabled()) {
+			return;
+		}
+		w = w->getParent();
+	}
 	doClick();
 }
 
