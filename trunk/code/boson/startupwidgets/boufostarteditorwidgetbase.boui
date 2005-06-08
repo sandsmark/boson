@@ -643,10 +643,7 @@
   </Widget>
  </Widgets>
  <Methods>
-  <Method return="void" visibility="protected" type="slot" name="slotMaxPlayersChanged(int)" >
-   <Connections/>
-  </Method>
-  <Method return="void" visibility="public" type="signal" name="signalCancelled()" >
+  <Method return="void" visibility="protected" type="slot" name="slotCancel()" >
    <Connections>
     <Connection sender="mCancelButton" signal="signalClicked()" type="receiver" />
    </Connections>
@@ -678,6 +675,9 @@
    <Connections>
     <Connection sender="mMaxPlayers" signal="signalValueChanged(float)" type="receiver" />
    </Connections>
+  </Method>
+  <Method return="void" visibility="protected" type="slot" name="slotMaxPlayersChanged(int)" >
+   <Connections/>
   </Method>
   <Method return="void" visibility="protected" type="slot" name="slotNewMapToggled(bool)" >
    <Connections/>

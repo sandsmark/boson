@@ -39,6 +39,9 @@ public:
 public slots:
 	virtual void slotStartClicked();
 
+signals:
+	void signalCancelled();
+
 protected:
 	/**
 	 * Create a new map, according to the settings in the widget (such as
@@ -61,6 +64,7 @@ protected slots: // implementations for the .ui slots
 	virtual void slotNewMapToggled(bool);
 	virtual void slotCreateNewToggled(bool checked);
 	virtual void slotEditExistingToggled(bool checked);
+	virtual void slotCancel();
 
 private slots:
 	void slotNetStart();

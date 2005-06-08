@@ -42,6 +42,7 @@
 
 #include <qptrdict.h>
 #include <qmap.h>
+#include <qtimer.h>
 
 class BoUfoStartEditorWidgetPrivate
 {
@@ -528,5 +529,12 @@ QByteArray BoUfoStartEditorWidget::createNewMap()
  QByteArray b = BosonPlayField::streamFiles(files);
  boDebug() << k_funcinfo << "files got streamed" << endl;
  return b;
+}
+
+void BoUfoStartEditorWidget::slotCancel()
+{
+ // AB: we use a timer, so that the widget can be deleted in the slot
+ // (otherwise this would not be allowed, as we are in a pushbutton click)
+ QTimer::singleShot(0, this, SIGNAL(signalCancelled()));
 }
 
