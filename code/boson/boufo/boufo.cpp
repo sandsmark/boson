@@ -1912,7 +1912,11 @@ void BoUfoWidget::uslotMouseMoved(ufo::UMouseEvent* e)
  int button = convertUfoMouseButtonToQt(e->getButton());
  int state = convertUfoModifierStateToQt(e->getModifiers());
  QMouseEvent me(QEvent::MouseMove, QPoint(e->getX(), e->getY()), button, state);
+ me.ignore();
  emit signalMouseMoved(&me);
+ if (me.isAccepted()) {
+	e->consume();
+ }
 }
 
 void BoUfoWidget::uslotMouseDragged(ufo::UMouseEvent* e)
@@ -1920,7 +1924,11 @@ void BoUfoWidget::uslotMouseDragged(ufo::UMouseEvent* e)
  int button = convertUfoMouseButtonToQt(e->getButton());
  int state = convertUfoModifierStateToQt(e->getModifiers());
  QMouseEvent me(QEvent::MouseMove, QPoint(e->getX(), e->getY()), button, state);
+ me.ignore();
  emit signalMouseDragged(&me);
+ if (me.isAccepted()) {
+	e->consume();
+ }
 }
 
 void BoUfoWidget::uslotMousePressed(ufo::UMouseEvent* e)
@@ -1929,7 +1937,13 @@ void BoUfoWidget::uslotMousePressed(ufo::UMouseEvent* e)
  int state = convertUfoModifierStateToQt(e->getModifiers());
  state &= ~button;
  QMouseEvent me(QEvent::MouseButtonPress, QPoint(e->getX(), e->getY()), button, state);
+ boDebug() << k_funcinfo << endl;
+ me.ignore();
  emit signalMousePressed(&me);
+ if (me.isAccepted()) {
+	boDebug() << k_funcinfo << "consume" << endl;
+	e->consume();
+ }
 }
 
 void BoUfoWidget::uslotMouseReleased(ufo::UMouseEvent* e)
@@ -1938,7 +1952,13 @@ void BoUfoWidget::uslotMouseReleased(ufo::UMouseEvent* e)
  int state = convertUfoModifierStateToQt(e->getModifiers());
  state |= button;
  QMouseEvent me(QEvent::MouseButtonRelease, QPoint(e->getX(), e->getY()), button, state);
+ me.ignore();
+ boDebug() << k_funcinfo << endl;
  emit signalMouseReleased(&me);
+ if (me.isAccepted()) {
+	boDebug() << k_funcinfo << "consume" << endl;
+	e->consume();
+ }
 }
 
 void BoUfoWidget::uslotMouseClicked(ufo::UMouseEvent* e)
@@ -1963,7 +1983,11 @@ void BoUfoWidget::uslotMouseWheel(ufo::UMouseWheelEvent* e)
  }
  int state = convertUfoModifierStateToQt(e->getModifiers());
  QWheelEvent we(QPoint(e->getX(), e->getY()), e->getDelta(), state, orientation);
+ we.ignore();
  emit signalMouseWheel(&we);
+ if (we.isAccepted()) {
+	e->consume();
+ }
 }
 
 void BoUfoWidget::uslotKeyPressed(ufo::UKeyEvent* e)
@@ -2333,12 +2357,14 @@ void BoUfoNumInput::setRange(float min, float max)
 }
 
 
-BoUfoPushButton::BoUfoPushButton() : BoUfoWidget()
+BoUfoPushButton::BoUfoPushButton()
+	: BoUfoWidget(new ufo::UButton())
 {
  init();
 }
 
-BoUfoPushButton::BoUfoPushButton(const QString& text) : BoUfoWidget()
+BoUfoPushButton::BoUfoPushButton(const QString& text)
+	: BoUfoWidget(new ufo::UButton())
 {
  init();
  setText(text);
@@ -2346,9 +2372,7 @@ BoUfoPushButton::BoUfoPushButton(const QString& text) : BoUfoWidget()
 
 void BoUfoPushButton::init()
 {
- setLayoutClass(UHBoxLayout);
- mButton = new ufo::UButton();
- widget()->add(mButton);
+ mButton = (ufo::UButton*)widget();
 
  CONNECT_UFO_TO_QT(BoUfoPushButton, mButton, Activated);
  CONNECT_UFO_TO_QT(BoUfoPushButton, mButton, Highlighted);
