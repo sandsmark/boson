@@ -1646,6 +1646,9 @@ UWidget::processKeyBindings(UKeyEvent * e) {
 	}
 
 	for (UWidget * container = this; container; container = container->m_parent) {
+		if (!container->isEventEnabled(e->getType())) {
+			continue;
+		}
 		if (container->notifyKeyBindingAction(stroke, e, WhenAncestorFocused)) {
 			return true;
 		}
