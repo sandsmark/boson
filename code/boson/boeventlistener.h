@@ -60,6 +60,10 @@ public:
 	/**
 	 * @return The filename of the script of this event listener. This is
 	 * only the filename, without the path. Example: "localplayer.py"
+	 *
+	 * Note that <em>every</em> event listener <em>must</em> provide a
+	 * unique script filename, event if it does not make use of scripts. It will
+	 * just save empty script data files then.
 	 **/
 	virtual QString scriptFileName() const = 0;
 
