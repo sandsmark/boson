@@ -353,11 +353,6 @@ public slots:
 	void slotAdvanceComputerPlayers(unsigned int advanceCallsCount, bool advanceFlag);
 
 	/**
-	 * Emits @ref signalUpdateProductionOptions
-	 **/
-	void slotUpdateProductionOptions();
-
-	/**
 	 * Add a system message for the local player only. Note that this does
 	 * <em>not</em> send a chat message over network. It is displayed on
 	 * this client only.
@@ -464,12 +459,6 @@ signals:
 	 * This is also emitted once a production has been completed.
 	 **/
 	void signalUpdateProduction(Unit* factory);
-
-	/**
-	 * Emitted when unit's construction or when technology research has been
-	 * completed to ensure that new production options become available.
-	 **/
-	void signalUpdateProductionOptions();
 
 	/**
 	 * Tell the map to change @ref BosonMap::texMap at coordinates @p x, @p

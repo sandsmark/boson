@@ -946,7 +946,7 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
 
  BoEvent* productionPlaced = new BoEvent("ProducedUnitWithTypePlaced", QString::number(unit->type()));
  productionPlaced->setUnitId(unit->id());
- productionPlaced->setUnitId(unit->owner()->id());
+ productionPlaced->setPlayerId(unit->owner()->id());
  productionPlaced->setLocation(BoVector3Fixed(unit->x(), unit->y(), unit->z()));
  boGame->queueEvent(productionPlaced);
 
@@ -1259,11 +1259,6 @@ int Boson::loadingStatus() const
 bool Boson::advanceFlag() const
 {
  return d->mAdvance->advanceFlag();
-}
-
-void Boson::slotUpdateProductionOptions()
-{
- emit signalUpdateProductionOptions();
 }
 
 void Boson::slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* p)

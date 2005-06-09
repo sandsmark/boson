@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1712,12 +1712,10 @@ bool MobileUnit::init()
 {
   bool ret = Unit::init();
   if (!ret) {
-	 return ret;
+	return ret;
   }
 
  setWork(WorkIdle);
-
- ((Boson*)owner()->game())->slotUpdateProductionOptions();
 
  // FIXME: loading!
  setEffects(unitProperties()->newConstructedEffects(x() + width() / 2, y() + height() / 2, z()));
@@ -2576,7 +2574,6 @@ void Facility::setConstructionStep(unsigned int step)
  if (step == constructionSteps()) {
 	setWork(WorkIdle);
 	owner()->facilityCompleted(this);
-	((Boson*)owner()->game())->slotUpdateProductionOptions();
 	if (itemRenderer()) {
 		itemRenderer()->setAnimationMode(UnitAnimationIdle);
 	}
