@@ -1937,11 +1937,9 @@ void BoUfoWidget::uslotMousePressed(ufo::UMouseEvent* e)
  int state = convertUfoModifierStateToQt(e->getModifiers());
  state &= ~button;
  QMouseEvent me(QEvent::MouseButtonPress, QPoint(e->getX(), e->getY()), button, state);
- boDebug() << k_funcinfo << endl;
  me.ignore();
  emit signalMousePressed(&me);
  if (me.isAccepted()) {
-	boDebug() << k_funcinfo << "consume" << endl;
 	e->consume();
  }
 }
@@ -1953,10 +1951,8 @@ void BoUfoWidget::uslotMouseReleased(ufo::UMouseEvent* e)
  state |= button;
  QMouseEvent me(QEvent::MouseButtonRelease, QPoint(e->getX(), e->getY()), button, state);
  me.ignore();
- boDebug() << k_funcinfo << endl;
  emit signalMouseReleased(&me);
  if (me.isAccepted()) {
-	boDebug() << k_funcinfo << "consume" << endl;
 	e->consume();
  }
 }
