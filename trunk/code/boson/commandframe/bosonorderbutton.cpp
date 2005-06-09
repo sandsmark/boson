@@ -83,6 +83,7 @@ void BoOrderButtonButton::slotMouseReleaseEvent(QMouseEvent* e)
 {
  if (e->button() == Qt::RightButton) {
 	emit rightClicked();
+	e->accept();
  }
 }
 
