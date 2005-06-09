@@ -207,9 +207,6 @@ void ProductionPlugin::advance(unsigned int)
 
 
 
- // FIXME: this code is broken!
- // it gets executed on *every* client but sendInput() should be used on *one*
- // client only!
  // a unit is completed as soon as mProductionState == player()->unitProperties(type)->productionTime()
  unsigned int productionTime = 0;
  if(currentProductionType() == ProduceUnit) {
