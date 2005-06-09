@@ -97,6 +97,14 @@ void BoEventManager::declareEvents()
  BO_DECLARE_EVENT(UnitWithIdUnfogged);
  BO_DECLARE_EVENT(UnitsWithTypeUnfogged);
  BO_DECLARE_EVENT(TechnologyWithTypeResearched);
+ BO_DECLARE_EVENT(StartProductionOfUnitWithType);
+ BO_DECLARE_EVENT(StartProductionOfTechnologyWithType);
+ BO_DECLARE_EVENT(PauseProductionOfUnitWithType);
+ BO_DECLARE_EVENT(PauseProductionOfTechnologyWithType);
+ BO_DECLARE_EVENT(ContinueProductionOfUnitWithType);
+ BO_DECLARE_EVENT(ContinueProductionOfTechnologyWithType);
+ BO_DECLARE_EVENT(StopProductionOfUnitWithType);
+ BO_DECLARE_EVENT(StopProductionOfTechnologyWithType);
 
  BO_DECLARE_EVENT(PlayerLost);
 
