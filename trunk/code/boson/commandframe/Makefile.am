@@ -8,7 +8,8 @@ libbosoncommandframe_la_SOURCES = \
 		bosonorderbutton.cpp \
 		boactionswidget.cpp \
 		bosonunitview.cpp \
-		editorunitconfigwidget.cpp
+		editorunitconfigwidget.cpp \
+		bocommandframeeventlistener.cpp
 
 METASOURCES = AUTO
 

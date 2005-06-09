@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2004-2005 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -82,10 +82,12 @@ signals:
 
 public slots:
 	void slotUpdate();
+	void slotUpdateProduction(unsigned long int id);
 	void slotUpdateProduction(Unit*);
 	void slotUpdateProductionOptions();
 	void slotSelectionChanged(BoSelection*);
 	void slotProduce(const BoSpecificAction&);
+	void slotConstructionCompleted(unsigned long int facilityId);
 
 	/**
 	 * Editor mode only. Emit @ref signalPlaceUnit.
