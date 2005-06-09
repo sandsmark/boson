@@ -96,6 +96,7 @@ void BoEventManager::declareEvents()
  BO_DECLARE_EVENT(UnitsWithTypeLostCount);
  BO_DECLARE_EVENT(UnitWithIdUnfogged);
  BO_DECLARE_EVENT(UnitsWithTypeUnfogged);
+ BO_DECLARE_EVENT(TechnologyWithTypeResearched);
 
  BO_DECLARE_EVENT(PlayerLost);
 

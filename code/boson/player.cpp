@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include "speciestheme.h"
 #include "unit.h"
 #include "unitproperties.h"
+#include "unitplugins.h"
 #include "bosonmessageids.h"
 #include "bosonmap.h"
 #include "bosonstatistics.h"
@@ -566,8 +567,9 @@ void Player::facilityCompleted(Facility* fac)
  }
 
  BoVector3Fixed location(fac->x(), fac->y(), fac->z());
- BoEvent* constructedEvent = new BoEvent("FacilityWithTypeConstructed");
+ BoEvent* constructedEvent = new BoEvent("FacilityWithTypeConstructed", QString::number(fac->type()));
  constructedEvent->setPlayerId(id());
+ constructedEvent->setUnitId(fac->id());
  constructedEvent->setLocation(location);
  boGame->queueEvent(constructedEvent);
 
@@ -704,21 +706,23 @@ bool Player::hasTechnology(unsigned long int id) const
  return false;
 }
 
-void Player::technologyResearched(ProductionPlugin*, unsigned long int id)
+void Player::technologyResearched(ProductionPlugin* plugin, unsigned long int type)
 {
- boDebug() << k_funcinfo << "id: " << id << endl;
+ BO_CHECK_NULL_RET(plugin);
+ BO_CHECK_NULL_RET(plugin->unit());
+ boDebug() << k_funcinfo << "type: " << type << endl;
  // Check if it isn't researched already
- if (d->mResearchedUpgrades.contains(id)) {
-	boError() << k_funcinfo << "upgrade " << id << " already researched!" << endl;
+ if (d->mResearchedUpgrades.contains(type)) {
+	boError() << k_funcinfo << "upgrade " << type << " already researched!" << endl;
 	return;
  }
 
- UpgradeProperties* prop = speciesTheme()->technology(id);
+ UpgradeProperties* prop = speciesTheme()->technology(type);
  if (!prop) {
-	boError() << k_funcinfo << "NULL technology " << id << endl;
+	boError() << k_funcinfo << "NULL technology " << type << endl;
 	return;
  }
- d->mResearchedUpgrades.append(id);
+ d->mResearchedUpgrades.append(type);
 
  // AB: important: _first_ apply to units, then apply to the UnitProperties.
  // otherwise the old values are already discarded (but required for applying to
@@ -727,8 +731,11 @@ void Player::technologyResearched(ProductionPlugin*, unsigned long int id)
 
  applyUpgrades();
 
- ((Boson*)game())->slotUpdateProductionOptions();
- // TODO: also update unit view
+ BoEvent* event = new BoEvent("TechnologyWithTypeResearched", QString::number(type));
+ event->setPlayerId(id());
+ event->setUnitId(plugin->unit()->id());
+ event->setLocation(BoVector3Fixed(plugin->unit()->x(), plugin->unit()->y(), plugin->unit()->z()));
+ ((Boson*)game())->queueEvent(event);
 }
 
 bool Player::advanceFlag() const
