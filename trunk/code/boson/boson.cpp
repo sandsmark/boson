@@ -928,6 +928,10 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
 	boError() << k_funcinfo << "NULL owner" << endl;
 	return false;
  }
+ if (!factory->unit()) {
+	boError() << k_funcinfo << "NULL factory unit" << endl;
+	return false;
+ }
  if (!(d->mCanvas)->canPlaceUnitAt(p->unitProperties(unitType), pos, 0)) {
 	boDebug() << k_funcinfo << "Cannot create unit here" << endl;
 	return false;
@@ -944,7 +948,7 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
 	p->statistics()->addProducedMobileUnit((MobileUnit*)unit, factory);
  }
 
- BoEvent* productionPlaced = new BoEvent("ProducedUnitWithTypePlaced", QString::number(unit->type()));
+ BoEvent* productionPlaced = new BoEvent("ProducedUnitWithTypePlaced", QString::number(unit->type()), QString::number(factory->unit()->id()));
  productionPlaced->setUnitId(unit->id());
  productionPlaced->setPlayerId(unit->owner()->id());
  productionPlaced->setLocation(BoVector3Fixed(unit->x(), unit->y(), unit->z()));
