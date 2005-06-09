@@ -81,6 +81,7 @@ void BoEventManager::declareEvents()
 {
 #define BO_DECLARE_EVENT(name) d->mEventNames.append(QCString(#name));
  BO_DECLARE_EVENT(UnitWithTypeProduced);
+ BO_DECLARE_EVENT(FacilityWithTypeConstructed);
  BO_DECLARE_EVENT(UnitWithTypeDestroyed);
  BO_DECLARE_EVENT(AllUnitsDestroyed);
  BO_DECLARE_EVENT(LostMinimap);

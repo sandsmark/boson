@@ -564,11 +564,18 @@ void Player::facilityCompleted(Facility* fac)
 	boError() << k_funcinfo << "NULL facility" << endl;
 	return;
  }
+
+ BoVector3Fixed location(fac->x(), fac->y(), fac->z());
+ BoEvent* constructedEvent = new BoEvent("FacilityWithTypeConstructed");
+ constructedEvent->setPlayerId(id());
+ constructedEvent->setLocation(location);
+ boGame->queueEvent(constructedEvent);
+
  if (fac->unitProperties()->supportMiniMap()) {
-	BoEvent* event = new BoEvent("GainedMinimap");
-	event->setPlayerId(id());
-	event->setLocation(BoVector3Fixed(fac->x(), fac->y(), fac->z()));
-	boGame->queueEvent(event);
+	BoEvent* miniMapEvent = new BoEvent("GainedMinimap");
+	miniMapEvent->setPlayerId(id());
+	miniMapEvent->setLocation(location);
+	boGame->queueEvent(miniMapEvent);
  }
 }
 
