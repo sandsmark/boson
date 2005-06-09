@@ -731,9 +731,8 @@ void Player::technologyResearched(ProductionPlugin* plugin, unsigned long int ty
 
  applyUpgrades();
 
- BoEvent* event = new BoEvent("TechnologyWithTypeResearched", QString::number(type));
+ BoEvent* event = new BoEvent("TechnologyWithTypeResearched", QString::number(type), QString::number(plugin->unit()->id()));
  event->setPlayerId(id());
- event->setUnitId(plugin->unit()->id());
  event->setLocation(BoVector3Fixed(plugin->unit()->x(), plugin->unit()->y(), plugin->unit()->z()));
  ((Boson*)game())->queueEvent(event);
 }
