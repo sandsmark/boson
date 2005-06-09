@@ -46,8 +46,6 @@ BosonPlayerInputHandler::BosonPlayerInputHandler(Boson* game) : QObject(0, "boso
 		mGame, SIGNAL(signalChangeTexMap(int, int, unsigned int, unsigned int*, unsigned char*)));
  connect(this, SIGNAL(signalChangeHeight(int, int, float)),
 		mGame, SIGNAL(signalChangeHeight(int, int, float)));
- connect(this, SIGNAL(signalUpdateProduction(Unit*)),
-		mGame, SIGNAL(signalUpdateProduction(Unit*)));
 }
 
 BosonPlayerInputHandler::~BosonPlayerInputHandler()
@@ -472,8 +470,6 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 				event->setPlayerId(owner);
 				event->setLocation(eventLocation);
 				mGame->queueEvent(event);
-
-				emit signalUpdateProduction(factory);
 				break;
 			}
 		}
@@ -494,8 +490,6 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		event->setPlayerId(owner);
 		event->setLocation(eventLocation);
 		mGame->queueEvent(event);
-
-		emit signalUpdateProduction(factory);
 		break;
 	}
 	case BosonMessageIds::MoveProduceStop:
@@ -602,7 +596,6 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			event->setLocation(BoVector3Fixed(factory->x(), factory->y(), factory->z()));
 			mGame->queueEvent(event);
 		}
-		emit signalUpdateProduction(factory);
 		break;
 	}
 	case BosonMessageIds::MoveBuild:

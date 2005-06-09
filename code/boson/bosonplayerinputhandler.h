@@ -76,7 +76,6 @@ protected:
 signals:
 	void signalChangeTexMap(int x, int y, unsigned int textureCount, unsigned int* textures, unsigned char* alpha);
 	void signalChangeHeight(int x, int y, float height);
-	void signalUpdateProduction(Unit* factory);
 
 private:
 	Boson* mGame;

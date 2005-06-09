@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2004-2005 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "bosonunitview.h"
 #include "boactionswidget.h"
 #include "editorunitconfigwidget.h"
+#include "bocommandframeeventlistener.h"
 #include "../boselection.h"
 #include "../unit.h"
 #include "../unitplugins.h"
@@ -298,6 +299,7 @@ public:
 	BosonCommandFramePrivate()
 	{
 		mLocalPlayerIO = 0;
+		mEventListener = 0;
 		mSelection = 0;
 
 		mUnitViewWidget = 0;
@@ -318,6 +320,7 @@ public:
 
 	bool mGameMode;
 	PlayerIO* mLocalPlayerIO;
+	BoCommandFrameEventListener* mEventListener;
 	BoSelection* mSelection;
 	QTimer mUpdateTimer;
 
@@ -371,6 +374,7 @@ BosonCommandFrame::BosonCommandFrame()
 BosonCommandFrame::~BosonCommandFrame()
 {
  d->mUnitDisplayWidgets.clear();
+ delete d->mEventListener;
  delete d;
 }
 
@@ -432,7 +436,28 @@ void BosonCommandFrame::initPlacementWidget()
 
 void BosonCommandFrame::setLocalPlayerIO(PlayerIO* io)
 {
+ delete d->mEventListener;
+ d->mEventListener = 0;
  d->mLocalPlayerIO = io;
+ Boson* game = boGame;
+ if (!game) {
+	BO_NULL_ERROR(game);
+	return;
+ }
+ if (d->mLocalPlayerIO && game->gameMode()) {
+	// AB: WARNING: the event listener will not get loaded correctly when
+	// loading a game!
+	// this is harmless currently, as we do not use scripts and therefore
+	// there is nothing to be loaded.
+	BoEventManager* manager = game->eventManager();
+	d->mEventListener = new BoCommandFrameEventListener(io, manager, this);
+	connect(d->mEventListener, SIGNAL(signalUpdateProductionOptions()),
+			this, SLOT(slotUpdateProductionOptions()));
+	connect(d->mEventListener, SIGNAL(signalUpdateProduction(unsigned long int)),
+			this, SLOT(slotUpdateProduction(unsigned long int)));
+	connect(d->mEventListener, SIGNAL(signalFacilityConstructed(unsigned long int)),
+			this, SLOT(slotConstructionCompleted(unsigned long int)));
+ }
 }
 
 PlayerIO* BosonCommandFrame::localPlayerIO() const
@@ -478,6 +503,19 @@ void BosonCommandFrame::slotSelectionChanged(BoSelection* selection)
 	d->mSelectionWidget->showUnits(selection->allUnits());
  } else {
 	setProduction(leader);
+ }
+}
+
+void BosonCommandFrame::slotConstructionCompleted(unsigned long int facilityId)
+{
+ if (!selection() || selection()->count() == 0) {
+	return;
+ }
+ if (!selection()->leader()) {
+	return;
+ }
+ if (selection()->leader()->id() == facilityId) {
+	slotSelectionChanged(selection());
  }
 }
 
@@ -557,15 +595,6 @@ void BosonCommandFrame::setGameMode(bool game)
 
  for (QPtrListIterator<BoUnitDisplayBase> it(d->mUnitDisplayWidgets); it.current(); ++it) {
 	it.current()->setGameMode(game);
- }
-
- if (boGame) {
-	connectDisconnect(game,
-			boGame, SIGNAL(signalUpdateProduction(Unit*)),
-			this, SLOT(slotUpdateProduction(Unit*)));
-	connectDisconnect(game,
-			boGame, SIGNAL(signalUpdateProductionOptions()),
-			this, SLOT(slotUpdateProductionOptions()));
  }
 }
 
@@ -772,6 +801,17 @@ void BosonCommandFrame::slotUpdate()
  if (production && production->hasProduction()) {
 	d->mSelectionWidget->productionAdvanced(selectedUnit(), production->productionProgress());
  }
+}
+
+void BosonCommandFrame::slotUpdateProduction(unsigned long int id)
+{
+ if (!selectedUnit()) {
+	return;
+ }
+ if (selectedUnit()->id() != id) {
+	return;
+ }
+ slotUpdateProduction(selectedUnit());
 }
 
 void BosonCommandFrame::slotUpdateProduction(Unit* f)

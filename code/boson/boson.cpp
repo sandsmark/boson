@@ -956,7 +956,6 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
 
  // the current production is done.
  factory->removeProduction();
- emit signalUpdateProduction(factory->unit());
  return true;
 }
 

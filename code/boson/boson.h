@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -449,16 +449,6 @@ signals:
 	 * are added and so
 	 **/
 	void signalGameStarted();
-
-	/**
-	 * This signal is emitted whenever the production list of factory
-	 * changes. This means whenever you add a unit to the queue (see @ref
-	 * Factory::productionList), pause a production (using @ref
-	 * Unit::setWork(Unit::WorkIdle)) or continue a production
-	 *
-	 * This is also emitted once a production has been completed.
-	 **/
-	void signalUpdateProduction(Unit* factory);
 
 	/**
 	 * Tell the map to change @ref BosonMap::texMap at coordinates @p x, @p
