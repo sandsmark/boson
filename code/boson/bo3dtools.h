@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -426,6 +426,8 @@ template<class T> class BoVector3
     }
 
     /**
+     * The cross product of v and w is a vector that is perpendicular to both, v
+     * and w.
      * @return The cross product of v and w.
      **/
     static BoVector3<T> crossProduct(const BoVector3<T>& v, const BoVector3<T>& w)
