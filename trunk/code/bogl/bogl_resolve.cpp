@@ -684,6 +684,11 @@ bool boglResolveGLSymbols()
  if (symbolsResolved) {
 	return true;
  }
+#warning TODO
+ // TODO: QLibrary assumes that the library ends with .so, however e.g. on
+ // vanilla debian systems libGLU.so may not exist. Only libGLU.so.1.3 does.
+ // Therefore we must check whether the library got loaded and if not, we must
+ // try to use all libGL.* (libGLU.*) files found.
  QLibrary gl("GL");
  gl.setAutoUnload(false);
 
@@ -698,6 +703,8 @@ bool boglResolveGLSymbols()
  // can we actually do so safely? is some flag like -export-dynamic required for
  // the linker?
  // TODO: maybe provide a copy of libGLU.so from mesa in our package?
+ //
+ // TODO: see above (QLibrary and .so.1.3 names)
  QLibrary glu("GLU");
  glu.setAutoUnload(false);
 
