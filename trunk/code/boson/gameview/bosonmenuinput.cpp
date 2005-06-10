@@ -671,6 +671,8 @@ void BosonMenuInput::initIO(KPlayer* player)
  connect(mData, SIGNAL(signalRotateRight()),
 		this, SLOT(slotRotateRight()));
  connect(mData, SIGNAL(signalZoomIn()),
+		this, SLOT(slotZoomIn()));
+ connect(mData, SIGNAL(signalZoomOut()),
 		this, SLOT(slotZoomOut()));
  connect(mData, SIGNAL(signalToggleStatusbar(bool)),
 		this, SIGNAL(signalToggleStatusbar(bool)));
