@@ -194,9 +194,11 @@ void Game::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 receive
         boError() << k_funcinfo << "Not in game mode??? mode: " << gameMode << endl;
         return;
       }
-      QByteArray data;
-      stream >> data;
-      boDebug() << "Got " << data.count() << " bytes of newgame data" << endl;
+      QByteArray compresseddata;
+      stream >> compresseddata;
+      QByteArray data = qUncompress(compresseddata);
+      boDebug() << "Got " << compresseddata.count() << " bytes of compressed newgame data (" <<
+          data.count() << "b uncompressed)" << endl;
       loadGameData(data);
       break;
     }
