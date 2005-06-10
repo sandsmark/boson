@@ -1,5 +1,5 @@
 
-COMPILE_FIRST = bobmfconverter bomemory bodebug kgame bosound ufo
+COMPILE_FIRST = math bobmfconverter bomemory bodebug kgame bosound ufo
 
 SUBDIRS = $(TOPSUBDIRS)
 
