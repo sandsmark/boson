@@ -18,6 +18,7 @@
 */
 
 #include "game.h"
+#include "game.moc"
 
 #include "server.h"
 #include "bodebug.h"
