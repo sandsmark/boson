@@ -64,55 +64,6 @@ class Bo3dToolsBase
      * @return @p rad as degree.
      **/
     static bofixed rad2deg(bofixed rad);
-
-    /**
-     * @param plane An array of size 4 representing a plane. The first 3 floats
-     * are the normal vector, the 4th value the distance.
-     * @return The distance of @pos from the @p plane. Negative if @p pos is
-     * behind the @p plane.
-     **/
-    static float distanceFromPlane(const float* plane, const BoVector3Float& pos);
-
-    /**
-     * See @ref BosonBigDisplayBase::extractFrustum for more information about this stuff.
-     *
-     * We use a bounding spere so that we can easily rotate it.
-     * @return 0 if the object is not in the frustum (i.e. is not visible)
-     * otherwise the distance from the near plane. We might use this for the
-     * level of detail.
-     * @param viewFrustum This is the viewFrustum, as it is used by @ref
-     * BosonBigDisplayBase. The view frustum is a 6x4 matrix
-     **/
-    static float sphereInFrustum(const float* viewFrustum, const BoVector3Float&, float radius);
-    static bofixed sphereInFrustum(const float* viewFrustum, const BoVector3Fixed&, bofixed radius);
-
-    /**
-     * See @ref BosonBigDisplayBase::extractFrustum for more information about this stuff.
-     *
-     * @param viewFrustum This is the viewFrustum, as it is used by @ref
-     * BosonBigDisplayBase. The view frustum is a 6x4 matrix
-     **/
-    static bool boxInFrustum(const float* viewFrustum, const BoVector3Float& min, const BoVector3Float& max);
-
-    /**
-     * This is similar to @ref sphereInFrustum, but will test whether the sphere
-     * is completely in the frustum.
-     *
-     * @return 0 if the sphere is not in the frustum at all, 1 if it is
-     * partially in the frustum and 2 if the complete sphere is in the frustum.
-     **/
-    static int sphereCompleteInFrustum(const float* viewFrustum, const BoVector3Float&, float radius);
-    static int sphereCompleteInFrustum(const float* viewFrustum, const BoVector3Fixed&, bofixed radius);
-
-    /**
-     * @overload
-     **/
-    inline static float sphereInFrustum(const float* viewFrustum, float x, float y, float z, float radius)
-    {
-      BoVector3Float pos(x,y,z);
-      return sphereInFrustum(viewFrustum, pos, radius);
-    }
-
 };
 
 
