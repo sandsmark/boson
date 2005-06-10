@@ -316,8 +316,8 @@ template<class T> class BoVector3
     }
 
     /**
-     * The cross product of v and w is a vector that is perpendicular to both, v
-     * and w.
+     * The cross product of v and w is a vector that is perpendicular to the
+     * surface that is perpendicular to the surface made up by v and w.
      * @return The cross product of v and w.
      **/
     static BoVector3<T> crossProduct(const BoVector3<T>& v, const BoVector3<T>& w)
