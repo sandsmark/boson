@@ -532,8 +532,9 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			boError() << k_funcinfo << "invalid gameMode value " << gameMode << endl;
 			return;
 		}
-		QByteArray data;
-		stream >> data;
+		QByteArray compresseddata;
+		stream >> compresseddata;
+		QByteArray data = qUncompress(compresseddata);
 		bool taken = false;
 		emit signalSetNewGameData(data, &taken);
 		if (!taken) {

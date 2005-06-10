@@ -824,10 +824,12 @@ void BosonMainWidget::slotLoadGame(const QString& fileName)
 	return;
  }
 
+ QByteArray compresseddata = qCompress(data);
+
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
  stream << (Q_INT8)1; // game mode
- stream << data;
+ stream << compresseddata;
 
  // actually start the game
  boGame->sendMessage(buffer, BosonMessageIds::IdNewGame);

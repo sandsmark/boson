@@ -155,6 +155,8 @@ bool BosonStartupNetwork::sendNewGame(BosonPlayField* field, bool editor, const 
 	return false;
  }
 
+ QByteArray compresseddata = qCompress(data);
+
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
  if (editor) {
@@ -162,7 +164,7 @@ bool BosonStartupNetwork::sendNewGame(BosonPlayField* field, bool editor, const 
  } else {
 	stream << (Q_INT8)1;
  }
- stream << data;
+ stream << compresseddata;
  boDebug() << k_funcinfo << "neutral player will get added from network soon. sending newgame message." << endl;
  mGame->sendMessage(buffer, BosonMessageIds::IdNewGame);
  return true;
