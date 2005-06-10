@@ -151,8 +151,8 @@ bool BosonEffect::saveAsXML(QDomElement& root) const
     return false;
   }
   // Position and rotation
-  mPosition.saveAsXML(root, "Position");
-  mRotation.saveAsXML(root, "Rotation");
+  saveVector3AsXML(mPosition, root, "Position");
+  saveVector3AsXML(mRotation, root, "Rotation");
 
   // Misc
   root.setAttribute(QString::fromLatin1("Active"), mActive ? 1 : 0);
@@ -191,11 +191,11 @@ bool BosonEffect::loadFromXML(const QDomElement& root)
     return false;
   }
 
-  if(!mPosition.loadFromXML(root, "Position"))
+  if(!loadVector3FromXML(&mPosition, root, "Position"))
   {
     return false;
   }
-  if(!mRotation.loadFromXML(root, "Rotation"))
+  if(!loadVector3FromXML(&mRotation, root, "Rotation"))
   {
     return false;
   }
@@ -233,7 +233,7 @@ bool BosonEffectFog::saveAsXML(QDomElement& root) const
     return false;
   }
 
-  mColor.saveAsXML(root, "Color");
+  saveVector4AsXML(mColor, root, "Color");
   root.setAttribute(QString::fromLatin1("Start"), mStart);
   root.setAttribute(QString::fromLatin1("End"), mEnd);
   root.setAttribute(QString::fromLatin1("Radius"), mRadius);
@@ -249,7 +249,7 @@ bool BosonEffectFog::loadFromXML(const QDomElement& root)
   }
 
   bool ok;
-  if(mColor.loadFromXML(root, "Color"))
+  if(loadVector4FromXML(&mColor, root, "Color"))
   {
     return false;
   }
@@ -324,8 +324,8 @@ bool BosonEffectFade::saveAsXML(QDomElement& root) const
   }
 
   root.setAttribute(QString::fromLatin1("TimeLeft"), mTimeLeft);
-  mColor.saveAsXML(root, "Color");
-  mGeometry.saveAsXML(root, "Geometry");
+  saveVector4AsXML(mColor, root, "Color");
+  saveVector4AsXML(mGeometry, root, "Geometry");
   root.setAttribute(QString::fromLatin1("BlendFunc.src"), mBlendFunc[0]);
   root.setAttribute(QString::fromLatin1("BlendFunc.dst"), mBlendFunc[1]);
 
@@ -346,11 +346,11 @@ bool BosonEffectFade::loadFromXML(const QDomElement& root)
     boError() << k_funcinfo << "Error loading TimeLeft attribute ('" << root.attribute("TimeLeft") << "')" << endl;
     return false;
   }
-  if(!mColor.loadFromXML(root, "Color"))
+  if(!loadVector4FromXML(&mColor, root, "Color"))
   {
     return false;
   }
-  if(!mGeometry.loadFromXML(root, "Geometry"))
+  if(!loadVector4FromXML(&mGeometry, root, "Geometry"))
   {
     return false;
   }
@@ -609,9 +609,9 @@ bool BosonEffectBulletTrail::saveAsXML(QDomElement& root) const
     return false;
   }
 
-  mLastPos.saveAsXML(root, "LastPos");
-  mStart.saveAsXML(root, "Start");
-  mEnd.saveAsXML(root, "End");
+  saveVector3AsXML(mLastPos, root, "LastPos");
+  saveVector3AsXML(mStart, root, "Start");
+  saveVector3AsXML(mEnd, root, "End");
   root.setAttribute("Advanced", mAdvanced);
   root.setAttribute("ShouldMakeObsolete", mShouldMakeObsolete ? 1 : 0);
 
@@ -625,15 +625,15 @@ bool BosonEffectBulletTrail::loadFromXML(const QDomElement& root)
     return false;
   }
 
-  if(!mLastPos.loadFromXML(root, "LastPos"))
+  if(!loadVector3FromXML(&mLastPos, root, "LastPos"))
   {
     return false;
   }
-  if(!mStart.loadFromXML(root, "Start"))
+  if(!loadVector3FromXML(&mStart, root, "Start"))
   {
     return false;
   }
-  if(!mEnd.loadFromXML(root, "End"))
+  if(!loadVector3FromXML(&mEnd, root, "End"))
   {
     return false;
   }

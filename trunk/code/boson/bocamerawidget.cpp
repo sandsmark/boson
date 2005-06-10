@@ -786,7 +786,7 @@ void BoUfoPlainCameraWidget::updateMatrixWidget()
  glMatrixMode(GL_MODELVIEW);
  glPushMatrix();
  camera()->applyCameraToScene();
- BoMatrix cameraMatrix(GL_MODELVIEW_MATRIX);
+ BoMatrix cameraMatrix = createMatrixFromOpenGL(GL_MODELVIEW_MATRIX);
  glPopMatrix();
  d->mCameraMatrix->setMatrix(&cameraMatrix);
  d->mCameraMatrix->compareMatrices(d->mMatrix);

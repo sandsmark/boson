@@ -1611,11 +1611,11 @@ bool BosonCanvas::loadEffectsFromXML(const QDomElement& root)
 	}
 
 	BoVector3Fixed pos, rot;
-	if (!pos.loadFromXML(effect, "Position")) {
+	if (!loadVector3FromXML(&pos, effect, "Position")) {
 		ret = false;
 		continue;
 	}
-	if (!rot.loadFromXML(effect, "Rotation")) {
+	if (!loadVector3FromXML(&rot, effect, "Rotation")) {
 		ret = false;
 		continue;
 	}

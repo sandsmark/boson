@@ -123,6 +123,7 @@ libboson_la_SOURCES = \
 libboson_la_LIBADD = \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/bogl/libbogl.la \
+		$(top_builddir)/math/libbomath.la \
 		$(top_builddir)/boson/items/libbosonitems.la \
 		$(top_builddir)/boson/sound/libbosonsoundinterface.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
@@ -168,6 +169,7 @@ boson_SOURCES = \
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bounit_LDADD = \
+		$(top_builddir)/math/libbomath.la \
 		$(top_builddir)/boson/libboson.la \
 		$(LIB_BOMEMORY)
 bounit_SOURCES = \
@@ -184,6 +186,7 @@ libbocursor_la_SOURCES = \
 bocursor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bocursor_LDADD = \
 		$(top_builddir)/bogl/libbogl.la \
+		$(top_builddir)/math/libbomath.la \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/libbocursor.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
@@ -198,6 +201,7 @@ libborender_la_SOURCES = \
 		kgamemodeldebug.cpp
 borender_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker -export-dynamic
 borender_LDADD = \
+		$(top_builddir)/math/libbomath.la \
 		$(top_builddir)/boson/libboson.la \
 		$(top_builddir)/boson/libborender.la \
 		$(LIB_BOMEMORY) -l3ds
@@ -214,6 +218,7 @@ boinfo_LDADD = \
 		$(top_builddir)/boson/libboinfo.la \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
+		$(top_builddir)/math/libbomath.la \
 		$(top_builddir)/bogl/libbogl.la \
 		$(LIB_BOMEMORY) \
 		-lkio $(LIB_KDEUI) \
@@ -232,6 +237,7 @@ libbo3dsdebug_la_SOURCES = \
 bo3dsdebug_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bo3dsdebug_LDADD = \
 		$(top_builddir)/boson/libbo3dsdebug.la \
+		$(top_builddir)/math/libbomath.la \
 		$(top_builddir)/bogl/libbogl.la \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/boufo/libboufo.la \
