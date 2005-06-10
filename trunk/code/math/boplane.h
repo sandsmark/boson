@@ -204,7 +204,7 @@ public:
 	{
 		float inv_length = 1.0f / normal().length();
 		mNormal.scale(inv_length);
-		mDistanceFromOrigin /= inv_length;
+		mDistanceFromOrigin *= inv_length;
 	}
 
 	/**
