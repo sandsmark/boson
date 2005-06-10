@@ -549,7 +549,7 @@ bool BosonItem::initItemRenderer()
  return ret;
 }
 
-bool BosonItem::itemInFrustum(const float* frustum) const
+bool BosonItem::itemInFrustum(const BoFrustum& frustum) const
 {
  if (itemRenderer()) {
 	return itemRenderer()->itemInFrustum(frustum);

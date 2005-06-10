@@ -499,19 +499,6 @@ void BoMatrix::extractUp(BoVector3Float& up, const BoVector3Float& x, const BoVe
 
 }
 
-
-BoGLMatrices::BoGLMatrices(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const float* viewFrustum, const int* viewport, const float& fovY, const float& aspect)
-    : mModelviewMatrix(modelviewMatrix),
-      mProjectionMatrix(projectionMatrix),
-      mViewFrustum(viewFrustum),
-      mViewport(viewport),
-      mFovY(fovY),
-      mAspect(aspect)
-{
-}
-
-
-
 /*
  * vim:et sw=2
  */

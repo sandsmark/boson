@@ -121,11 +121,8 @@ void BosonItemRenderer::renderItem(unsigned int lod)
  glTranslatef(w/2, h/2, 0.0f);
 }
 
-bool BosonItemRenderer::itemInFrustum(const float* frustum) const
+bool BosonItemRenderer::itemInFrustum(const BoFrustum& frustum) const
 {
- if (!frustum) {
-	return false;
- }
  if (!mItem) {
 	BO_NULL_ERROR(mItem);
 	return false;
@@ -135,7 +132,7 @@ bool BosonItemRenderer::itemInFrustum(const float* frustum) const
  bofixed y = -((mItem->y() + mItem->height() / 2));
  bofixed z = mItem->z(); // this is already in the correct format!
  BoVector3Fixed pos(x, y, z);
- return Bo3dTools::sphereInFrustum(frustum, pos, boundingSphereRadius());
+ return frustum.sphereInFrustum(pos, boundingSphereRadius());
 }
 
 

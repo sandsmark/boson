@@ -30,8 +30,11 @@
 
 #include "math/bo3dtoolsbase.h"
 #include "math/bofixed.h"
+#include "math/bofrustum.h"
+#include "math/boglmatrices.h"
 #include "math/bomath.h"
 #include "math/bomatrix.h"
+#include "math/boplane.h"
 #include "math/boquaternion.h"
 #include "math/borect.h"
 #include "math/bovector.h"

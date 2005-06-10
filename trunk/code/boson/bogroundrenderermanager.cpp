@@ -21,6 +21,7 @@
 #include "bogroundrenderer.h"
 #include "bosonconfig.h"
 #include "boversion.h"
+#include "bo3dtools.h"
 
 #include <bodebug.h>
 
@@ -54,7 +55,7 @@ public:
 	}
 
 	PlayerIO* mLocalPlayerIO;
-	const float* mViewFrustum;
+	const BoFrustum* mViewFrustum;
 	const BoMatrix* mModelviewMatrix;
 	const BoMatrix* mProjectionMatrix;
 	const int* mViewport;
@@ -138,7 +139,7 @@ void BoGroundRendererManager::setLocalPlayerIO(PlayerIO* io)
  }
 }
 
-void BoGroundRendererManager::setViewFrustum(const float* f)
+void BoGroundRendererManager::setViewFrustum(const BoFrustum* f)
 {
  d->mViewFrustum = f;
  if (currentRenderer()) {

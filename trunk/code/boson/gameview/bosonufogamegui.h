@@ -29,6 +29,7 @@ class Player;
 class BosonCanvas;
 class BoGameCamera;
 class BoMatrix;
+class BoFrustum;
 class BosonGroundTheme;
 class BosonGameFPSCounter;
 class bofixed;
@@ -53,7 +54,7 @@ class BosonUfoGameGUI : public BoUfoWidget
 {
 	Q_OBJECT
 public:
-	BosonUfoGameGUI(const BoMatrix& modelview, const BoMatrix& projection, const GLfloat* viewFrustum, const GLint* viewport);
+	BosonUfoGameGUI(const BoMatrix& modelview, const BoMatrix& projection, const BoFrustum& viewFrustum, const GLint* viewport);
 	virtual ~BosonUfoGameGUI();
 
 	void setCursorWidgetPos(const QPoint* pos);

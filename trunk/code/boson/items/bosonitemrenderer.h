@@ -29,6 +29,7 @@ class BosonAnimation;
 class BoFrame;
 class Player;
 class BosonItem;
+class BoFrustum;
 
 class QColor;
 class QString;
@@ -80,7 +81,7 @@ public:
 	/**
 	 * @return TRUE if this item is in the @p frustum, otherwise FALSE.
 	 **/
-	bool itemInFrustum(const float* frustum) const;
+	bool itemInFrustum(const BoFrustum& frustum) const;
 
 	BosonItem* item() const
 	{

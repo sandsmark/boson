@@ -388,17 +388,6 @@ protected:
 	 **/
 	void setViewport(int x, int y, GLsizei w, GLsizei h);
 
-	/**
-	 * Extract the frustum from both, modelview and projection matrices.
-	 * Credits for this function go to Mark Morley - see
-	 * http://www.markmorley.com/opengl/frustumculling.html
-	 *
-	 * We use pretty much of his code examples here so let me quote from the
-	 * article: "[...] Unless otherwise noted, you may use any and all code
-	 * examples provided herein in any way you want. [...]"
-	 **/
-	void extractFrustum();
-
 	void resetGameMode();
 	void setGameMode(bool);
 

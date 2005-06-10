@@ -947,7 +947,12 @@ void BoWaterManager::modelviewMatrixChanged(const BoMatrix& modelview)
 
 float BoWaterManager::sphereInFrustum(const BoVector3Float& pos, float radius) const
 {
- return Bo3dTools::sphereInFrustum(mViewFrustum, pos, radius);
+  if(!mViewFrustum)
+  {
+    BO_NULL_ERROR(mViewFrustum);
+    return 0.0f;
+  }
+  return mViewFrustum->sphereInFrustum(pos, radius);
 }
 
 QString BoWaterManager::currentRenderStatisticsData() const
@@ -1048,10 +1053,15 @@ void BoWaterManager::renderLake(BoLake* lake)
   {
     return;
   }
+  if(!mViewFrustum)
+  {
+    BO_NULL_ERROR(mViewFrustum);
+    return;
+  }
   // Box test is slower than sphere test, but often more accurate
   BoVector3Float lakemin(lake->minx, -lake->miny, lake->level);
   BoVector3Float lakemax(lake->maxx, -lake->maxy, lake->level);
-  if(!Bo3dTools::boxInFrustum(mViewFrustum, lakemin, lakemax))
+  if(!mViewFrustum->boxInFrustum(lakemin, lakemax))
   {
     return;
   }
@@ -1070,7 +1080,7 @@ void BoWaterManager::renderLake(BoLake* lake)
     // Test with more accurate box-in-frustum test
     BoVector3Float chunkmin(chunk->minx, -chunk->miny, lake->level);
     BoVector3Float chunkmax(chunk->maxx, -chunk->maxy, lake->level);
-    if(!Bo3dTools::boxInFrustum(mViewFrustum, chunkmin, chunkmax))
+    if(!mViewFrustum->boxInFrustum(chunkmin, chunkmax))
     {
       continue;
     }

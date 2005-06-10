@@ -92,14 +92,14 @@ public:
 
 	void setViewport(const int* p) { mViewport = p; }
 	const int* viewport() const { return mViewport; }
-	void setViewFrustum(const float* f)
+	void setViewFrustum(const BoFrustum* f)
 	{
 		mViewFrustum = f;
 		if (mLODObject) {
 			mLODObject->setViewFrustum(viewFrustum());
 		}
 	}
-	const float* viewFrustum() const { return mViewFrustum; }
+	const BoFrustum* viewFrustum() const { return mViewFrustum; }
 
 	/**
 	 * @param renderCells The original list of cells. You should use this
@@ -124,7 +124,7 @@ protected:
 	BoGroundRendererCellListLOD* mLODObject;
 
 private:
-	const float* mViewFrustum;
+	const BoFrustum* mViewFrustum;
 	const int* mViewport;
 };
 
@@ -406,7 +406,7 @@ bool CellListBuilderTree::cellsVisible(const BoQuadTreeNode* node, bool* partial
  radius = sqrtf(radius); // turn dotProduct() into length()
  BoVector3Float center(hmid, -vmid, z);
 
- int ret = Bo3dTools::sphereCompleteInFrustum(viewFrustum(), center, radius);
+ int ret = viewFrustum()->sphereCompleteInFrustum(center, radius);
  if (ret == 0) {
 	*partially = false;
 	return false;
@@ -455,7 +455,7 @@ bool BoGroundRendererCellListLOD::doLOD(const BosonMap* map, const BoQuadTreeNod
  if (count == 1) {
 	return true;
  }
- const float* plane = &viewFrustum()[5 * 4]; // NEAR plane
+ const BoPlane& plane = viewFrustum()->near();
 
  // FIXME: distanceFromPlane() tests the distance of all 4 corners of the rect
  // only. this is perfectly legal if the whole rect is inside the viewfrustum,
@@ -471,7 +471,7 @@ bool BoGroundRendererCellListLOD::doLOD(const BosonMap* map, const BoQuadTreeNod
  return false;
 }
 
-float BoGroundRendererCellListLOD::distanceFromPlane(const float* plane, const BoQuadTreeNode* node, const BosonMap* map) const
+float BoGroundRendererCellListLOD::distanceFromPlane(const BoPlane& plane, const BoQuadTreeNode* node, const BosonMap* map) const
 {
  const int l = node->left();
  const int t = node->top();
@@ -485,10 +485,10 @@ float BoGroundRendererCellListLOD::distanceFromPlane(const float* plane, const B
  const float zTopRight = map->heightAtCorner(r + 1, t);
  const float zBottomLeft = map->heightAtCorner(l, b + 1);
  const float zBottomRight = map->heightAtCorner(r + 1, b + 1);
- const float d1 = Bo3dTools::distanceFromPlane(plane, BoVector3Float(x, y, zTopLeft));
- const float d2 = Bo3dTools::distanceFromPlane(plane, BoVector3Float(x2, y, zTopRight));
- const float d3 = Bo3dTools::distanceFromPlane(plane, BoVector3Float(x, y2, zBottomLeft));
- const float d4 = Bo3dTools::distanceFromPlane(plane, BoVector3Float(x2, y2, zBottomRight));
+ const float d1 = plane.distance(BoVector3Float(x, y, zTopLeft));
+ const float d2 = plane.distance(BoVector3Float(x2, y, zTopRight));
+ const float d3 = plane.distance(BoVector3Float(x, y2, zBottomLeft));
+ const float d4 = plane.distance(BoVector3Float(x2, y2, zBottomRight));
  float d = QMAX(d1, d2);
  d = QMAX(d, d3);
  d = QMAX(d, d4);
@@ -799,9 +799,9 @@ QString BoGroundRendererBase::debugStringForPoint(const BoVector3Fixed& pos) con
 	s += "NULL viewFrustum() - cannot do anything";
 	return s;
  }
-// const float* bottomPlane = &viewFrustum()[2 * 4];
- const float* nearPlane = &viewFrustum()[5 * 4];
-// const float* farPlane = &viewFrustum()[4 * 4];
+// const bottomPlane* bottomPlane = &viewFrustum()->bottom();
+ const BoPlane* nearPlane = &viewFrustum()->near();
+// const BoPlane* farPlane = &viewFrustum()->far();
 
 #if 0
  s += QString("\nPlane: (%1,%2,%3,%4)").
@@ -813,9 +813,9 @@ QString BoGroundRendererBase::debugStringForPoint(const BoVector3Fixed& pos) con
 
  s += QString("\n");
 
-// s += QString("distance from BOTTOM plane: %1\n").arg(Bo3dTools::distanceFromPlane(bottomPlane, pos), 6, 'f', 3);
- s += QString("distance from NEAR plane: %1\n").arg(Bo3dTools::distanceFromPlane(nearPlane, pos.toFloat()), 6, 'f', 3);
-// s += QString("distance from FAR plane: %1\n").arg(Bo3dTools::distanceFromPlane(farPlane, pos), 6, 'f', 3);
+// s += QString("distance from BOTTOM plane: %1\n").arg(bottomPlane->distance(pos), 6, 'f', 3);
+ s += QString("distance from NEAR plane: %1\n").arg(nearPlane->distance(pos.toFloat()), 6, 'f', 3);
+// s += QString("distance from FAR plane: %1\n").arg(farPlane->distance(pos), 6, 'f', 3);
 
  return s;
 }

@@ -185,9 +185,8 @@ PlayerIO* BosonCanvasRenderer::localPlayerIO() const
  return d->mLocalPlayerIO;
 }
 
-const GLfloat* BosonCanvasRenderer::viewFrustum() const
+const BoFrustum& BosonCanvasRenderer::viewFrustum() const
 {
- BO_CHECK_NULL_RET0(d->mGameMatrices);
  return d->mGameMatrices->viewFrustum();
 }
 
@@ -239,7 +238,6 @@ void BosonCanvasRenderer::reset()
 void BosonCanvasRenderer::paintGL(const BosonCanvas* canvas)
 {
  PROFILE_METHOD;
- BO_CHECK_NULL_RET(viewFrustum());
  BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(camera());
  BO_CHECK_NULL_RET(d->mSelectBoxData);
@@ -365,7 +363,6 @@ void BosonCanvasRenderer::renderBoundingBox(const BoVector3Float& c1, const BoVe
 
 void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* renderItemList, const BoItemList* allItems)
 {
- BO_CHECK_NULL_RET(viewFrustum());
  BO_CHECK_NULL_RET(localPlayerIO());
 
  renderItemList->clear();
@@ -687,7 +684,7 @@ void BosonCanvasRenderer::createVisibleEffectsList(BoVisibleEffects* v, const QP
 		//boDebug(150) << k_funcinfo << "System: " << s << "; radius: " << s->boundingSphereRadius() << endl;
 		// TODO: maybe we should just add particleDist() to bounding sphere radius
 		//  of the system?
-		if (Bo3dTools::sphereInFrustum(viewFrustum(), s->position(), s->boundingSphereRadius())) {
+		if (viewFrustum().sphereInFrustum(s->position(), s->boundingSphereRadius())) {
 			if (!s->testFogged() ||
 					(((s->position().x() < mapWidth) && (-s->position().y() < mapHeight)) &&
 					localPlayerIO()->canSee((int)s->position().x(), -(int)s->position().y()))) {

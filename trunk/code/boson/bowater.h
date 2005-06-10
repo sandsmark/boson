@@ -216,7 +216,7 @@ class BoWaterManager
 
     QString currentRenderStatisticsData() const;
 
-    void setViewFrustum(const float* f)  { mViewFrustum = f; setDirty(true); }
+    void setViewFrustum(const BoFrustum* f)  { mViewFrustum = f; setDirty(true); }
     void setSun(BoLight* sun)  { mSun = sun; setDirty(true); }
     void setCameraPos(const BoVector3Float& pos)  { mCameraPos = pos; setDirty(true); }
     void setLocalPlayerIO(PlayerIO* playerIO)  { mLocalPlayerIO = playerIO; }
@@ -305,7 +305,7 @@ class BoWaterManager
     float mTime;
     bool mDirty;
     bool mOpenGLInited;
-    const float* mViewFrustum;
+    const BoFrustum* mViewFrustum;
     BoLight* mSun;
     BoVector3Float mCameraPos;
     PlayerIO* mLocalPlayerIO;

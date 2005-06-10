@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -472,13 +472,13 @@ QImage BosonGLMiniMap::imageFromTheme(const QString& file, const QString& theme)
 }
 
 
-void BosonGLMiniMap::createMap(BosonMap* map, const int* viewport)
+void BosonGLMiniMap::createMap(BosonMap* map, const BoGLMatrices* gameGLMatrices)
 {
  BO_CHECK_NULL_RET(map);
  boDebug() << k_funcinfo << endl;
  mMap = map;
  delete mRenderer;
- mRenderer = new BosonGLMiniMapRenderer(viewport);
+ mRenderer = new BosonGLMiniMapRenderer(gameGLMatrices);
  mRenderer->createMap(map->width(), map->height(), map->groundTheme());
  if (!d->mImageTheme.isEmpty()) {
 	setImageTheme(d->mImageTheme);
@@ -657,6 +657,7 @@ class BosonGLMiniMapRendererPrivate
 public:
 	BosonGLMiniMapRendererPrivate()
 	{
+		mGameGLMatrices = 0;
 		mMapTexture = 0;
 		mGLMapTexture = 0;
 
@@ -664,6 +665,7 @@ public:
 	}
 	BoMatrix mModelviewMatrix;
 	QImage mOrigLogo;
+	const BoGLMatrices* mGameGLMatrices;
 
 	GLubyte* mMapTexture;
 	int mMapTextureWidth;
@@ -677,11 +679,11 @@ public:
 	int mMiniMapChangesSinceRendering;
 };
 
-BosonGLMiniMapRenderer::BosonGLMiniMapRenderer(const int* viewport)
+BosonGLMiniMapRenderer::BosonGLMiniMapRenderer(const BoGLMatrices* gameGLMatrices)
 {
  d = new BosonGLMiniMapRendererPrivate;
 
- mViewport = viewport;
+ d->mGameGLMatrices = gameGLMatrices;
 
  mMapWidth = 0;
  mMapHeight = 0;
@@ -839,10 +841,10 @@ void BosonGLMiniMapRenderer::renderMiniMap()
 
  renderQuad();
 
+ renderCamera();
+
  glPopAttrib();
  glPopMatrix();
-
- renderCamera();
 }
 
 void BosonGLMiniMapRenderer::renderQuad()
@@ -871,11 +873,6 @@ void BosonGLMiniMapRenderer::renderQuad()
 
 void BosonGLMiniMapRenderer::renderCamera()
 {
- // AB: we might
- // 1. set a projection matrix similar to the one in the bigdisplay
- // 2. call gluLookAt() so that we are looking down at the map from the center
- // 3. scale it so that it fits to the minimap size
- // 4. render the current modelview matrix of the bigdisplay
 }
 
 void BosonGLMiniMapRenderer::setFogged(int x, int y)
@@ -918,21 +915,26 @@ void BosonGLMiniMapRenderer::setPoint(int x, int y, const QColor& color)
 
 void BosonGLMiniMapRenderer::setAlignment(int f)
 {
+ BO_CHECK_NULL_RET(d->mGameGLMatrices);
  if (f & Qt::AlignLeft) {
 	mPosX = distanceFromEdge();
  } else {
-	mPosX = mViewport[2] - miniMapWidth() - distanceFromEdge();
+	mPosX = d->mGameGLMatrices->viewport()[2] - miniMapWidth() - distanceFromEdge();
  }
  if (f & Qt::AlignBottom) {
 	mPosY = distanceFromEdge();
  } else {
-	mPosY = mViewport[3] - miniMapHeight() - distanceFromEdge();
+	mPosY = d->mGameGLMatrices->viewport()[3] - miniMapHeight() - distanceFromEdge();
  }
 }
 
 bool BosonGLMiniMapRenderer::windowToCell(const QPoint& pos, QPoint* cell) const
 {
- int realy = mViewport[3] - pos.y();
+ if (!d->mGameGLMatrices) {
+	BO_NULL_ERROR(d->mGameGLMatrices);
+	return false;
+ }
+ int realy = d->mGameGLMatrices->viewport()[3] - pos.y();
  if (pos.x() < (int)mPosX) {
 	return false;
  }
