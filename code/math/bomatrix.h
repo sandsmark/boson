@@ -312,40 +312,6 @@ class BoMatrix
     float mData[16];
 };
 
-/**
- * @short A collection of the most important GL matrices
- *
- * Often a class needs read access to the matrices that are currently used - for
- * example the canvas renderer needs them to do frustum culling. This class is a
- * convenience class that provides them, so that we don't have to provide them
- * all separately in the constructor of every class that needs them.
- *
- * Note that this class stores references to the actual matrices, so they always
- * reflect the current values and don't require updates.
- *
- * @author Andreas Beckermann <b_mann@gmx.de
- **/
-class BoGLMatrices
-{
-  public:
-    BoGLMatrices(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const float* viewFrustum, const int* viewport, const float& fovY, const float& aspect);
-
-    const BoMatrix& modelviewMatrix() const { return mModelviewMatrix; }
-    const BoMatrix& projectionMatrix() const { return mProjectionMatrix; }
-    const float* viewFrustum() const { return mViewFrustum; }
-    const int* viewport() const { return mViewport; }
-    const float& fovY() const { return mFovY; }
-    const float& aspect() const { return mAspect; }
-
-private:
-  const BoMatrix& mModelviewMatrix;
-  const BoMatrix& mProjectionMatrix;
-  const float* mViewFrustum;
-  const int* mViewport;
-  const float& mFovY;
-  const float& mAspect;
-};
-
 #endif
 /*
  * vim:et sw=2

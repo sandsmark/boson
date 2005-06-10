@@ -57,9 +57,9 @@
  * vector in the first 3 numbers and the distance from the origin in the 4th
  * number.
  **/
-static QString planeDebugString(const float* plane)
+static QString planeDebugString(const BoPlane& plane)
 {
- return QString("((%1,%2,%3),%4)").arg(plane[0]).arg(plane[1]).arg(plane[2]).arg(plane[3]);
+ return QString("((%1,%2,%3),%4)").arg(plane.normal().x()).arg(plane.normal().y()).arg(plane.normal().z()).arg(plane.distanceFromOrigin());
 }
 
 class CPUTimes
@@ -214,7 +214,7 @@ class BosonUfoGameGUIPrivate
 {
 public:
 	BosonUfoGameGUIPrivate(const BoMatrix& modelview, const BoMatrix& projection,
-			const GLfloat* viewFrustum, const GLint* viewport)
+			const BoFrustum& viewFrustum, const GLint* viewport)
 		: mModelviewMatrix(modelview), mProjectionMatrix(projection),
 		mViewFrustum(viewFrustum), mViewport(viewport)
 	{
@@ -259,7 +259,7 @@ public:
 	const BosonCanvas* mCanvas;
 	const BoMatrix& mModelviewMatrix;
 	const BoMatrix& mProjectionMatrix;
-	const GLfloat* mViewFrustum;
+	const BoFrustum& mViewFrustum;
 	const GLint* mViewport;
 	PlayerIO* mLocalPlayerIO;
 	BosonGameFPSCounter* mFPSCounter;
@@ -299,7 +299,7 @@ public:
 };
 
 BosonUfoGameGUI::BosonUfoGameGUI(const BoMatrix& modelview, const BoMatrix& projection,
-		const GLfloat* viewFrustum, const GLint* viewport)
+		const BoFrustum& viewFrustum, const GLint* viewport)
 	: BoUfoWidget()
 {
  d = new BosonUfoGameGUIPrivate(modelview, projection, viewFrustum, viewport);
@@ -614,12 +614,12 @@ void BosonUfoGameGUI::updateUfoLabelMatricesDebug()
 
  // display the planes. they consist of the normal vector and the
  // distance from the origin
- QString planes = i18n("Right Plane: %1\n").arg(planeDebugString(&d->mViewFrustum[0 * 4]));
- planes += i18n("Left Plane: %1\n").arg(planeDebugString(&d->mViewFrustum[1 * 4]));
- planes += i18n("Bottom Plane: %1\n").arg(planeDebugString(&d->mViewFrustum[2 * 4]));
- planes += i18n("Top Plane: %1\n").arg(planeDebugString(&d->mViewFrustum[3 * 4]));
- planes += i18n("Far Plane: %1\n").arg(planeDebugString(&d->mViewFrustum[4 * 4]));
- planes += i18n("Near Plane: %1").arg(planeDebugString(&d->mViewFrustum[5 * 4]));
+ QString planes = i18n("Right Plane: %1\n").arg(planeDebugString(d->mViewFrustum.right()));
+ planes += i18n("Left Plane: %1\n").arg(planeDebugString(d->mViewFrustum.left()));
+ planes += i18n("Bottom Plane: %1\n").arg(planeDebugString(d->mViewFrustum.bottom()));
+ planes += i18n("Top Plane: %1\n").arg(planeDebugString(d->mViewFrustum.top()));
+ planes += i18n("Far Plane: %1\n").arg(planeDebugString(d->mViewFrustum.far()));
+ planes += i18n("Near Plane: %1").arg(planeDebugString(d->mViewFrustum.near()));
 
  // AB: this label can be used to measure the performance of displaying multiple
  // lines in ULabel

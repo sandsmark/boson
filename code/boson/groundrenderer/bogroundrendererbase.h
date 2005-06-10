@@ -26,6 +26,7 @@ class PlayerIO;
 class QString;
 class BosonMap;
 class BoMatrix;
+class BoPlane;
 class bofixed;
 template<class T> class BoVector3;
 typedef BoVector3<bofixed> BoVector3Fixed;
@@ -157,16 +158,16 @@ public:
 	/**
 	 * Called by the cell list builder. No need to call yourself.
 	 **/
-	void setViewFrustum(const float* f)
+	void setViewFrustum(const BoFrustum* f)
 	{
 		mViewFrustum = f;
 	}
-	const float* viewFrustum() const
+	const BoFrustum* viewFrustum() const
 	{
 		return mViewFrustum;
 	}
 
-	float distanceFromPlane(const float* plane, const BoQuadTreeNode* node, const BosonMap* map) const;
+	float distanceFromPlane(const BoPlane& plane, const BoQuadTreeNode* node, const BosonMap* map) const;
 
 	/**
 	 * @return TRUE if the @p node is supposed to be displayed as a single
@@ -177,7 +178,7 @@ public:
 	virtual bool doLOD(const BosonMap* map, const BoQuadTreeNode* node) const;
 
 protected:
-	const float* mViewFrustum;
+	const BoFrustum* mViewFrustum;
 };
 
 

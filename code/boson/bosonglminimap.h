@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ class BosonGLMiniMapRenderer;
 class BosonGroundTheme;
 class Cell;
 class KGameIO;
+class BoGLMatrices;
 
 class QPixmap;
 class QPainter;
@@ -52,7 +53,7 @@ public:
 
 	void quitGame();
 
-	void createMap(BosonMap* map, const int* viewport);
+	void createMap(BosonMap* map, const BoGLMatrices*);
 	void setLocalPlayerIO(PlayerIO*);
 
 	void renderMiniMap();
@@ -181,7 +182,7 @@ public:
 		Logo = 1
 	};
 public:
-	BosonGLMiniMapRenderer(const int* viewport);
+	BosonGLMiniMapRenderer(const BoGLMatrices* );
 	virtual ~BosonGLMiniMapRenderer();
 
 	void setMiniMapSize(unsigned int w, unsigned int h);
@@ -282,7 +283,6 @@ private:
 	float mTextureMaxWidth;
 	float mTextureMaxHeight;
 
-	const int* mViewport;
 	unsigned int mMiniMapWidth;
 	unsigned int mMiniMapHeight;
 	unsigned int mPosX;

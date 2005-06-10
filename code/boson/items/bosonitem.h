@@ -41,6 +41,7 @@ template<class T> class BoRect;
 typedef BoRect<bofixed> BoRectFixed;
 typedef BoVector2<bofixed> BoVector2Fixed;
 typedef BoVector3<bofixed> BoVector3Fixed;
+class BoFrustum;
 
 class KGamePropertyHandler;
 class KGamePropertyBase;
@@ -325,7 +326,7 @@ public:
 	/**
 	 * @return TRUE if the item is in @p frustum, otherwise FALSE
 	 **/
-	bool itemInFrustum(const float* frustum) const;
+	bool itemInFrustum(const BoFrustum& frustum) const;
 
 	/**
 	 * @return The select box of this item, or NULL if it is not selected.

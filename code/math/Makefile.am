@@ -12,5 +12,8 @@ libbomath_la_SOURCES = \
 	borect.cpp \
 	borect.cpp \
 	bomatrix.cpp \
-	boquaternion.cpp
+	boquaternion.cpp \
+	boplane.cpp \
+	bofrustum.cpp \
+	boglmatrices.cpp
 

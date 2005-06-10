@@ -59,7 +59,7 @@ public:
 			return true;
 		}
 
-		const float* plane = &viewFrustum()[5 * 4]; // NEAR plane
+		const BoPlane& plane = viewFrustum()->near();
 
 		// FIXME: distanceFromPlane() tests the distance of all 4 corners of the rect
 		// only. this is perfectly legal if the whole rect is inside the viewfrustum,

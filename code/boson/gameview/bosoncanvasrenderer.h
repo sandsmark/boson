@@ -92,7 +92,7 @@ public:
 
 	BoGameCamera* camera() const;
 	PlayerIO* localPlayerIO() const;
-	const GLfloat* viewFrustum() const;
+	const BoFrustum& viewFrustum() const;
 
 protected:
 	void renderGround(const BosonMap*);

@@ -24,6 +24,7 @@
 class BoGroundRenderer;
 class PlayerIO;
 class BoMatrix;
+class BoFrustum;
 
 class BoGroundRendererManagerPrivate;
 
@@ -92,7 +93,7 @@ public:
 	}
 
 	void setLocalPlayerIO(PlayerIO*);
-	void setViewFrustum(const float*);
+	void setViewFrustum(const BoFrustum*);
 	void setMatrices(const BoMatrix* modelviewMatrix, const BoMatrix* projectionMatrix, const int* viewport);
 
 	void unsetCurrentRenderer()

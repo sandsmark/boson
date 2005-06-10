@@ -124,12 +124,12 @@ void BoQuickGroundRenderer::generateCellList(const BosonMap* map)
     }
 
     // Check if the chunk is visible
-    float dist = Bo3dTools::sphereInFrustum(viewFrustum(), c->center, c->radius);
+    float dist = viewFrustum()->sphereInFrustum(c->center, c->radius);
     if(dist == 0)
     {
       continue;
     }
-    else if(Bo3dTools::boxInFrustum(viewFrustum(), BoVector3Float(c->minX, -((float)c->minY), c->minZ),
+    else if(viewFrustum()->boxInFrustum(BoVector3Float(c->minX, -((float)c->minY), c->minZ),
         BoVector3Float(c->maxX, -((float)c->maxY), c->maxZ)) == 0)
     {
       continue;

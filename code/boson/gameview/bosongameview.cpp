@@ -446,7 +446,7 @@ public:
 	GLint mViewport[4];
 	BoMatrix mProjectionMatrix;
 	BoMatrix mModelviewMatrix;
-	GLfloat mViewFrustum[6 * 4];
+	BoFrustum mViewFrustum;
 	BoGLMatrices* mGameGLMatrices;
 	GLfloat mFovY; // see gluPerspective
 	GLfloat mAspect; // see gluPerspective
@@ -504,11 +504,6 @@ void BosonGameView::init()
  for (int i = 0; i < 4; i++) {
 	d->mViewport[i] = 0;
  }
- for (int i = 0; i < 6; i++) {
-	for (int j = 0; j < 4; j++) {
-		d->mViewFrustum[i * 4 + j] = 0.0;
-	}
- }
 
  BoLightManager::initStatic();
  BoWaterManager::initStatic();
@@ -517,12 +512,12 @@ void BosonGameView::init()
  BoMeshRendererManager::manager()->makeRendererCurrent(QString::null);
  BoGroundRendererManager::manager()->makeRendererCurrent(QString::null);
 
- boWaterManager->setViewFrustum(d->mViewFrustum);
+ boWaterManager->setViewFrustum(&d->mViewFrustum);
 
 
  d->mGameGLMatrices = new BoGLMatrices(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewFrustum, d->mViewport, d->mFovY, d->mAspect);
  BoGroundRendererManager::manager()->setMatrices(&d->mModelviewMatrix, &d->mProjectionMatrix, d->mViewport);
- BoGroundRendererManager::manager()->setViewFrustum(d->mViewFrustum);
+ BoGroundRendererManager::manager()->setViewFrustum(&d->mViewFrustum);
 
  d->mToolTips = new BoGLToolTip(this);
  connect(this, SIGNAL(signalCursorCanvasVectorChanged(const BoVector3Fixed&)),
@@ -655,7 +650,7 @@ void BosonGameView::slotWidgetResized()
  // cache the composed projection matrix. we'll need it very often in
  // mapCoordinates()
  d->mProjectionMatrix = createMatrixFromOpenGL(GL_PROJECTION_MATRIX);
- extractFrustum(); // projection matrix changed
+ d->mViewFrustum.loadViewFrustum(d->mModelviewMatrix, d->mProjectionMatrix);
 
  glPopMatrix();
  glMatrixMode(GL_MODELVIEW);
@@ -695,110 +690,6 @@ void BosonGameView::setViewport(int x, int y, GLsizei w, GLsizei h)
  d->mViewport[1] = y;
  d->mViewport[2] = w;
  d->mViewport[3] = h;
-}
-
-void BosonGameView::extractFrustum()
-{
- // modelview or projection matrix was changed (and therefore the frustum).
- GLfloat t;
-
- // Combine the two matrices (multiply projection by modelview)
- BoMatrix clip(d->mProjectionMatrix);
- clip.multiply(&d->mModelviewMatrix);
-
-
- // Extract the numbers for the RIGHT plane
- d->mViewFrustum[0 * 4 + 0] = clip[3] - clip[0];
- d->mViewFrustum[0 * 4 + 1] = clip[7] - clip[4];
- d->mViewFrustum[0 * 4 + 2] = clip[11] - clip[8];
- d->mViewFrustum[0 * 4 + 3] = clip[15] - clip[12];
-
- // Normalize the result
- // ( AB: normalizing means to make a unit vector, i.e. a vector with length 1! )
- // ( AB: the length of a vector v is |v| == sqrt(v[0]^2 + v[1]^2 + v[2]^2) )
- // ( AB: you can normalize a vector by doing v / |v| )
- t = sqrt(d->mViewFrustum[0 * 4 + 0] * d->mViewFrustum[0 * 4 + 0] +
-		d->mViewFrustum[0 * 4 + 1] * d->mViewFrustum[0 * 4 + 1] +
-		d->mViewFrustum[0 * 4 + 2] * d->mViewFrustum[0 * 4 + 2]);
- d->mViewFrustum[0 * 4 + 0] /= t;
- d->mViewFrustum[0 * 4 + 1] /= t;
- d->mViewFrustum[0 * 4 + 2] /= t;
- d->mViewFrustum[0 * 4 + 3] /= t;
-
- // Extract the numbers for the LEFT plane
- d->mViewFrustum[1 * 4 + 0] = clip[3] + clip[0];
- d->mViewFrustum[1 * 4 + 1] = clip[7] + clip[4];
- d->mViewFrustum[1 * 4 + 2] = clip[11] + clip[8];
- d->mViewFrustum[1 * 4 + 3] = clip[15] + clip[12];
-
- // Normalize the result
- t = sqrt(d->mViewFrustum[1 * 4 + 0] * d->mViewFrustum[1 * 4 + 0] +
-		d->mViewFrustum[1 * 4 + 1] * d->mViewFrustum[1 * 4 + 1] +
-		d->mViewFrustum[1 * 4 + 2] * d->mViewFrustum[1 * 4 + 2]);
- d->mViewFrustum[1 * 4 + 0] /= t;
- d->mViewFrustum[1 * 4 + 1] /= t;
- d->mViewFrustum[1 * 4 + 2] /= t;
- d->mViewFrustum[1 * 4 + 3] /= t;
-
- // Extract the BOTTOM plane
- d->mViewFrustum[2 * 4 + 0] = clip[3] + clip[1];
- d->mViewFrustum[2 * 4 + 1] = clip[7] + clip[5];
- d->mViewFrustum[2 * 4 + 2] = clip[11] + clip[9];
- d->mViewFrustum[2 * 4 + 3] = clip[15] + clip[13];
-
- // Normalize the result
- t = sqrt(d->mViewFrustum[2 * 4 + 0] * d->mViewFrustum[2 * 4 + 0] +
-		d->mViewFrustum[2 * 4 + 1] * d->mViewFrustum[2 * 4 + 1] +
-		d->mViewFrustum[2 * 4 + 2] * d->mViewFrustum[2 * 4 + 2]);
- d->mViewFrustum[2 * 4 + 0] /= t;
- d->mViewFrustum[2 * 4 + 1] /= t;
- d->mViewFrustum[2 * 4 + 2] /= t;
- d->mViewFrustum[2 * 4 + 3] /= t;
-
- // Extract the TOP plane
- d->mViewFrustum[3 * 4 + 0] = clip[3] - clip[1];
- d->mViewFrustum[3 * 4 + 1] = clip[7] - clip[5];
- d->mViewFrustum[3 * 4 + 2] = clip[11] - clip[9];
- d->mViewFrustum[3 * 4 + 3] = clip[15] - clip[13];
-
- // Normalize the result
- t = sqrt(d->mViewFrustum[3 * 4 + 0] * d->mViewFrustum[3 * 4 + 0] +
-		d->mViewFrustum[3 * 4 + 1] * d->mViewFrustum[3 * 4 + 1] +
-		d->mViewFrustum[3 * 4 + 2] * d->mViewFrustum[3 * 4 + 2]);
- d->mViewFrustum[3 * 4 + 0] /= t;
- d->mViewFrustum[3 * 4 + 1] /= t;
- d->mViewFrustum[3 * 4 + 2] /= t;
- d->mViewFrustum[3 * 4 + 3] /= t;
-
- // Extract the FAR plane
- d->mViewFrustum[4 * 4 + 0] = clip[3] - clip[2];
- d->mViewFrustum[4 * 4 + 1] = clip[7] - clip[6];
- d->mViewFrustum[4 * 4 + 2] = clip[11] - clip[10];
- d->mViewFrustum[4 * 4 + 3] = clip[15] - clip[14];
-
- // Normalize the result
- t = sqrt(d->mViewFrustum[4 * 4 + 0] * d->mViewFrustum[4 * 4 + 0] +
-		d->mViewFrustum[4 * 4 + 1] * d->mViewFrustum[4 * 4 + 1] +
-		d->mViewFrustum[4 * 4 + 2] * d->mViewFrustum[4 * 4 + 2]);
- d->mViewFrustum[4 * 4 + 0] /= t;
- d->mViewFrustum[4 * 4 + 1] /= t;
- d->mViewFrustum[4 * 4 + 2] /= t;
- d->mViewFrustum[4 * 4 + 3] /= t;
-
- // Extract the NEAR plane
- d->mViewFrustum[5 * 4 + 0] = clip[3] + clip[2];
- d->mViewFrustum[5 * 4 + 1] = clip[7] + clip[6];
- d->mViewFrustum[5 * 4 + 2] = clip[11] + clip[10];
- d->mViewFrustum[5 * 4 + 3] = clip[15] + clip[14];
-
- // Normalize the result
- t = sqrt(d->mViewFrustum[5 * 4 + 0] * d->mViewFrustum[5 * 4 + 0] +
-		d->mViewFrustum[5 * 4 + 1] * d->mViewFrustum[5 * 4 + 1] +
-		d->mViewFrustum[5 * 4 + 2] * d->mViewFrustum[5 * 4 + 2]);
- d->mViewFrustum[5 * 4 + 0] /= t;
- d->mViewFrustum[5 * 4 + 1] /= t;
- d->mViewFrustum[5 * 4 + 2] /= t;
- d->mViewFrustum[5 * 4 + 3] /= t;
 }
 
 const BoVector3Fixed& BosonGameView::cursorCanvasVector() const
@@ -862,7 +753,7 @@ void BosonGameView::cameraChanged()
  // stuff
  d->mModelviewMatrix = createMatrixFromOpenGL(GL_MODELVIEW_MATRIX);
 
- extractFrustum(); // modelview matrix changed
+ d->mViewFrustum.loadViewFrustum(d->mModelviewMatrix, d->mProjectionMatrix);
  BoGroundRenderer* renderer = BoGroundRendererManager::manager()->currentRenderer();
  if (renderer) {
 	BosonMap* map = 0;
@@ -1146,7 +1037,7 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
  boDebug() << k_funcinfo << endl;
  BosonMap* map = mCanvas->map();
  if (d->mGLMiniMap) {
-	d->mGLMiniMap->createMap(map, d->mViewport);
+	d->mGLMiniMap->createMap(map, d->mGameGLMatrices);
  } else {
 	BO_NULL_ERROR(d->mGLMiniMap);
  }

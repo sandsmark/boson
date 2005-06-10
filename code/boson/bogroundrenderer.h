@@ -26,6 +26,7 @@ class PlayerIO;
 class QString;
 class BosonMap;
 class BoMatrix;
+class BoFrustum;
 class bofixed;
 class BoTexture;
 template<class T> class BoVector3;
@@ -120,10 +121,9 @@ public:
 	void setMatrices(const BoMatrix* modelviewMatrix, const BoMatrix* projectionMatrix, const int* viewport);
 
 	/**
-	 * @param viewFrustum A pointer to the view frustum which must be a 6*4
-	 * array. Do <em>not</em> use this class after freeing the pointer
+	 * Do <em>not</em> use this class after freeing the pointer
 	 **/
-	void setViewFrustum(const float* viewFrustum)
+	void setViewFrustum(const BoFrustum* viewFrustum)
 	{
 		mViewFrustum = viewFrustum;
 	}
@@ -264,7 +264,7 @@ protected:
 	{
 		return mViewport;
 	}
-	const float* viewFrustum() const
+	const BoFrustum* viewFrustum() const
 	{
 		return mViewFrustum;
 	}
@@ -281,7 +281,7 @@ private:
 	const BoMatrix* mModelviewMatrix;
 	const BoMatrix* mProjectionMatrix;
 	const int* mViewport;
-	const float* mViewFrustum;
+	const BoFrustum* mViewFrustum;
 	class PlayerIO* mLocalPlayerIO;
 	BoGroundRendererStatistics* mStatistics;
 
