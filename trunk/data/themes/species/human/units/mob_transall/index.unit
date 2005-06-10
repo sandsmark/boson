@@ -6,7 +6,7 @@ CanGoOnWater=true
 Speed=2.2
 
 [Boson Unit]
-Armor=0
+Armor=4
 ConstructedEffects=11001,11002,11003,11004
 DestroyedEffects=1001,6100
 ExplodingDamage=0
@@ -20,9 +20,9 @@ Health=200
 HitPoint=0,0,0.47
 Id=10007
 IsFacility=false
-MineralCost=800
+MineralCost=1200
 Name=Transall
-OilCost=400
+OilCost=600
 Producer=2
 ProductionTime=40
 Requirements=1,14
