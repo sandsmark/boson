@@ -18,6 +18,7 @@
 */
 
 #include "player.h"
+#include "player.moc"
 
 #include "bodebug.h"
 
