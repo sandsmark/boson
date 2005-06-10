@@ -1132,8 +1132,8 @@ bool Unit::saveAsXML(QDomElement& root)
  QDomElement pathinfoxml = doc.createElement(QString::fromLatin1("PathInfo"));
  root.appendChild(pathinfoxml);
  // Save start/dest points and range
- pathInfo()->start.saveAsXML(pathinfoxml, "start");
- pathInfo()->dest.saveAsXML(pathinfoxml, "dest");
+ saveVector2AsXML(pathInfo()->start, pathinfoxml, "start");
+ saveVector2AsXML(pathInfo()->dest, pathinfoxml, "dest");
  pathinfoxml.setAttribute("range", pathInfo()->range);
  // Save hlpath
  if (pathInfo()->hlpath) {
@@ -1145,7 +1145,7 @@ bool Unit::saveAsXML(QDomElement& root)
  // Save llpath
  pathinfoxml.setAttribute("llpathlength", pathInfo()->llpath.count());
  for (unsigned int i = 0; i < pathInfo()->llpath.count(); i++) {
-	pathInfo()->llpath[i].saveAsXML(pathinfoxml, QString("llpath-%1").arg(i));
+	saveVector2AsXML(pathInfo()->llpath[i], pathinfoxml, QString("llpath-%1").arg(i));
  }
  // Save passable flag
  pathinfoxml.setAttribute("passable", pathInfo()->passable ? 1 : 0);
@@ -1251,8 +1251,8 @@ bool Unit::loadFromXML(const QDomElement& root)
  pathInfo()->reset();
  QDomElement pathinfoxml = root.namedItem("PathInfo").toElement();
  if (!pathinfoxml.isNull()) {
-	pathInfo()->start.loadFromXML(pathinfoxml, "start");
-	pathInfo()->dest.loadFromXML(pathinfoxml, "dest");
+	loadVector2FromXML(&pathInfo()->start, pathinfoxml, "start");
+	loadVector2FromXML(&pathInfo()->dest, pathinfoxml, "dest");
 	pathInfo()->range = pathinfoxml.attribute("range").toInt(&ok);
 	if (!ok) {
 		boError() << k_funcinfo << "Error loading range attribute ('" << pathinfoxml.attribute("range") << "')" << endl;
@@ -1281,7 +1281,7 @@ bool Unit::loadFromXML(const QDomElement& root)
 	}
 	pathInfo()->llpath.reserve(llpathlength);
 	for(unsigned int i = 0; i < llpathlength; i++) {
-		pathInfo()->llpath[i].loadFromXML(pathinfoxml, QString("llpath-%1").arg(i));
+		loadVector2FromXML(&pathInfo()->llpath[i], pathinfoxml, QString("llpath-%1").arg(i));
 	}
 	// regions aren't saved/loaded
 	pathInfo()->startRegion = 0;

@@ -57,7 +57,7 @@ bool BosonEffectParticle::saveAsXML(QDomElement& root) const
   root.setAttribute("ParticleDist", mParticleDist);
   root.setAttribute("ParticleCount", mParticleCount);
   root.setAttribute("Align", mAlign ? 1 : 0);
-  mParticleDistVector.saveAsXML(root, "ParticleDistVector");
+  saveVector3AsXML(mParticleDistVector, root, "ParticleDistVector");
 
   return true;
 }
@@ -106,7 +106,7 @@ bool BosonEffectParticle::loadFromXML(const QDomElement& root)
     boError() << k_funcinfo << "Error loading Align attribute ('" << root.attribute("Align") << "')" << endl;
     return false;
   }
-  if(!mParticleDistVector.loadFromXML(root, "ParticleDistVector"))
+  if(!loadVector3FromXML(&mParticleDistVector, root, "ParticleDistVector"))
   {
     return false;
   }
@@ -726,8 +726,8 @@ bool BosonEffectParticleTrail::saveAsXML(QDomElement& root) const
   root.setAttribute("MaxParticleSize", mMaxParticleSize);
   root.setAttribute("Obsolete", mObsolete ? 1 : 0);
   root.setAttribute("Spacing", mSpacing);
-  mOffset.saveAsXML(root, "Offset");
-  mLastPos.saveAsXML(root, "LastPos");
+  saveVector3AsXML(mOffset, root, "Offset");
+  saveVector3AsXML(mLastPos, root, "LastPos");
 
   // Init byte array and data stream
   QByteArray ba;
@@ -826,8 +826,8 @@ bool BosonEffectParticleTrail::loadFromXML(const QDomElement& root)
     boError() << k_funcinfo << "Error loading Spacing attribute ('" << root.attribute("Spacing") << "')" << endl;
     return false;
   }
-  mOffset.loadFromXML(root, "Offset");
-  mLastPos.loadFromXML(root, "LastPos");
+  loadVector3FromXML(&mOffset, root, "Offset");
+  loadVector3FromXML(&mLastPos, root, "LastPos");
 
   QDomElement dataelement = root.namedItem("Data").toElement();
   if(dataelement.isNull())
@@ -1195,7 +1195,7 @@ bool BosonEffectParticleEnvironmental::saveAsXML(QDomElement& root) const
   root.setAttribute("Obsolete", mObsolete ? 1 : 0);
   root.setAttribute("Range", mRange);
   root.setAttribute("Density", mDensity);
-  mParticleVelo.saveAsXML(root, "ParticleVelo");
+  saveVector3AsXML(mParticleVelo, root, "ParticleVelo");
 
   // Init byte array and data stream
   QByteArray ba;
@@ -1273,7 +1273,7 @@ bool BosonEffectParticleEnvironmental::loadFromXML(const QDomElement& root)
     boError() << k_funcinfo << "Error loading Density attribute ('" << root.attribute("Density") << "')" << endl;
     return false;
   }
-  mParticleVelo.loadFromXML(root, "ParticleVelo");
+  loadVector3FromXML(&mParticleVelo, root, "ParticleVelo");
 
   QDomElement dataelement = root.namedItem("Data").toElement();
   if(dataelement.isNull())

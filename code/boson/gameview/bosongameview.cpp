@@ -654,7 +654,7 @@ void BosonGameView::slotWidgetResized()
 
  // cache the composed projection matrix. we'll need it very often in
  // mapCoordinates()
- d->mProjectionMatrix.loadMatrix(GL_PROJECTION_MATRIX);
+ d->mProjectionMatrix = createMatrixFromOpenGL(GL_PROJECTION_MATRIX);
  extractFrustum(); // projection matrix changed
 
  glPopMatrix();
@@ -860,7 +860,7 @@ void BosonGameView::cameraChanged()
  // everything else will be discarded by glPushMatrix/glPopMatrix anyway (in
  // paintGL()). So we cache the matrix here, for mapCoordinates() and some other
  // stuff
- d->mModelviewMatrix.loadMatrix(GL_MODELVIEW_MATRIX);
+ d->mModelviewMatrix = createMatrixFromOpenGL(GL_MODELVIEW_MATRIX);
 
  extractFrustum(); // modelview matrix changed
  BoGroundRenderer* renderer = BoGroundRendererManager::manager()->currentRenderer();

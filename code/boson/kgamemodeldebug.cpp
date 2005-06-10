@@ -899,9 +899,9 @@ void BoTrackWidget::configureKey(QListViewItem* item, Bo3DSTrackKey* key, int ty
 	{
 		item->setText(mKeyData0, debugStringVector(key->quatData()->axis, prec));
 		item->setText(mKeyData1, QString::number(key->quatData()->angle, 'f', prec));
-		item->setText(mKeyData2, key->quatData()->q.debugString(prec));
-		item->setText(mKeyData3, key->quatData()->dd.debugString(prec));
-		item->setText(mKeyData4, key->quatData()->ds.debugString(prec));
+		item->setText(mKeyData2, debugStringQuaternion(key->quatData()->q, prec));
+		item->setText(mKeyData3, debugStringQuaternion(key->quatData()->dd, prec));
+		item->setText(mKeyData4, debugStringQuaternion(key->quatData()->ds, prec));
 		break;
 	}
 	default:

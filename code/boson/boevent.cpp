@@ -62,7 +62,7 @@ bool BoEvent::save(QDomElement& root, const QMap<int, int>* playerId2Index) cons
  root.setAttribute("HasLocation", QString::number((int)hasLocation()));
  root.setAttribute("Data1", mData1);
  root.setAttribute("Data2", mData2);
- if (!location().saveAsXML(root, "Location")) {
+ if (!saveVector3AsXML(location(), root, "Location")) {
 	boError(360) << k_funcinfo << endl;
 	return false;
  }
@@ -120,7 +120,7 @@ bool BoEvent::load(const QDomElement& root)
 	boError(360) << k_funcinfo << "Invalid HasLocation" << endl;
 	return false;
  }
- if (!mLocation.loadFromXML(root, "Location")) {
+ if (!loadVector3FromXML(&mLocation, root, "Location")) {
 	boError(360) << k_funcinfo << "unable to load Location" << endl;
 	return false;
  }
