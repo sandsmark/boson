@@ -136,8 +136,11 @@ BosonOrderButton::BosonOrderButton() : BoUfoWidget()
  mPixmap = new BoOrderButtonButton();
  mPixmap->setOpaque(false);
  display->addWidget(mPixmap);
+ mPixmap->setMouseEventsEnabled(true, true);
  connect(mPixmap, SIGNAL(signalClicked()), this, SLOT(slotClicked()));
  connect(mPixmap, SIGNAL(rightClicked()), this, SLOT(slotRightClicked()));
+ connect(mPixmap, SIGNAL(signalMouseEntered(ufo::UMouseEvent*)), this, SIGNAL(signalMouseEntered()));
+ connect(mPixmap, SIGNAL(signalMouseExited(ufo::UMouseEvent*)), this, SIGNAL(signalMouseLeft()));
 // mPixmap->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 
  mHealth = new BoUfoProgress();
@@ -395,7 +398,7 @@ ProductionType BosonOrderButton::productionType() const
  return (type() == ShowAction) ? mAction.productionType() : ProduceNothing;
 }
 
-Player* BosonOrderButton::productionOwner() const
+PlayerIO* BosonOrderButton::productionOwner() const
 {
  return (type() == ShowAction) ? mAction.productionOwner() : 0;
 }

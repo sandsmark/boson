@@ -33,6 +33,8 @@ class Facility;
 class Player;
 class BosonGroundTheme;
 class BosonOrderButton;
+class UnitProperties;
+class BosonCommandFrame;
 
 template<class T> class QPtrList;
 template<class T> class QValueList;
@@ -49,7 +51,7 @@ class BosonOrderWidget : public BoUfoWidget
 {
 	Q_OBJECT
 public:
-	BosonOrderWidget();
+	BosonOrderWidget(BosonCommandFrame* cmdframe);
 	~BosonOrderWidget();
 
 	/**
@@ -120,6 +122,11 @@ protected:
 protected slots:
 	void slotPlaceGround(unsigned int groundtype);
 
+	void slotMouseEnteredButton();
+	void slotMouseLeftButton();
+	void slotMouseMoved(QMouseEvent* e);
+	void slotCheckCursor();
+
 signals:
 	void signalAction(const BoSpecificAction& action);
 
@@ -136,6 +143,8 @@ signals:
 	 * BosonOrderButton::signalSelectUnit
 	 **/
 	void signalSelectUnit(Unit*);
+
+	void signalUnittypeHighlighted(const UnitProperties*);
 
 private:
 	BosonOrderWidgetPrivate* d;

@@ -58,6 +58,7 @@ public:
 	virtual ~BosonUfoGameGUI();
 
 	void setCursorWidgetPos(const QPoint* pos);
+	void setCursorRootPos(const QPoint* pos);
 	void setCursorCanvasVector(const BoVector3Fixed* v);
 	void setSelection(BoSelection* s);
 	void setCanvas(const BosonCanvas* c);

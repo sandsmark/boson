@@ -836,6 +836,11 @@ void BosonUfoGameGUI::setCursorWidgetPos(const QPoint* pos)
  d->mCursorWidgetPos = pos;
 }
 
+void BosonUfoGameGUI::setCursorRootPos(const QPoint* pos)
+{
+ d->mUfoCommandFrame->setCursorRootPos(pos);
+}
+
 const BoVector3Fixed& BosonUfoGameGUI::cursorCanvasVector() const
 {
  return *d->mCursorCanvasVector;

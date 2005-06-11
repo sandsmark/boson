@@ -84,6 +84,7 @@ void BoSpecificAction::reset()
 {
   mAction = 0;
   mProductionId = 0;
+  mProductionOwner = 0;
   mType = ActionInvalid;
   mUnit = 0;
   mAllUnits->clear();
@@ -112,7 +113,7 @@ void BoSpecificAction::setUnit(Unit* u)
   mUnit = u;
   if(mUnit)
   {
-    mProductionOwner = mUnit->owner();
+    mProductionOwner = mUnit->ownerIO();
   }
   // Don't reset owner if unit is 0 (needed for editor)
 }

@@ -26,6 +26,7 @@
 
 class Unit;
 class Player;
+class PlayerIO;
 class BosonGroundTheme;
 class BoOrderButtonButton;
 class BoUfoProgress;
@@ -92,7 +93,7 @@ public:
 	 * entry (i.e. an order button) then it is the player that produces
 	 * here.
 	 **/
-	Player* productionOwner() const;
+	PlayerIO* productionOwner() const;
 
 	/**
 	 * @return The displayed ground type or 0 if none is displayed. See also
@@ -145,6 +146,9 @@ signals:
 	 * on one of them. This unit should become the only selected unit now.
 	 **/
 	void signalSelectUnit(Unit*);
+
+	void signalMouseEntered();
+	void signalMouseLeft();
 
 protected:
 	virtual void displayUnitPixmap(Unit* unit);
