@@ -702,6 +702,8 @@ public:
 	virtual void setPos(int x, int y);
 	int width() const;
 	int height() const;
+	int x() const;
+	int y() const;
 
 	void setMouseEventsEnabled(bool enabled, bool moveEnabled);
 	void setKeyEventsEnabled(bool enabled);

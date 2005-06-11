@@ -1592,6 +1592,16 @@ int BoUfoWidget::height() const
  return widget()->getHeight();
 }
 
+int BoUfoWidget::x() const
+{
+ return widget()->getX();
+}
+
+int BoUfoWidget::y() const
+{
+ return widget()->getY();
+}
+
 void BoUfoWidget::setMinimumWidth(int w)
 {
  ufo::UDimension s1 = widget()->getMinimumSize();
