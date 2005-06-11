@@ -709,6 +709,24 @@ public:
 	void setWidgetEventsEnabled(bool enabled);
 	bool hasMouse() const;
 
+	/**
+	 * @param rootPos A position relative to the @ref BoUfoManager::rootPane
+	 * @return @p rootPos in coordinates relative to this widget.
+	 **/
+	QPoint mapFromRoot(const QPoint& rootPos) const;
+
+	/**
+	 * @param pos A position relative to this widget.
+	 * @return @p pos in coordinates relative to the @ref
+	 * BoUfoManager::rootPane
+	 **/
+	QPoint mapToRoot(const QPoint& pos) const;
+
+
+	/**
+	 * @return The location of this BoUfo widget in the root pane, i.e.
+	 * @ref BoUfoManager::rootPane.
+	 **/
 	QPoint rootLocation() const;
 
 	/**
