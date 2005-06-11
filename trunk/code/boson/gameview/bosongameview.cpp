@@ -1026,8 +1026,10 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
 
 	connect(d->mGLMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
 			this, SLOT(slotReCenterDisplay(const QPoint&)));
-	connect(d->mGLMiniMap, SIGNAL(signalMoveSelection(int, int)),
-			displayInput(), SLOT(slotMoveSelection(int, int)));
+	if (displayInput()) {
+		connect(d->mGLMiniMap, SIGNAL(signalMoveSelection(int, int)),
+				displayInput(), SLOT(slotMoveSelection(int, int)));
+	}
  }
 
  d->mCamera.setCanvas(mCanvas);
@@ -1602,6 +1604,10 @@ void BosonGameView::setDisplayInput(BosonGameViewInputBase* input)
 
  connect(d->mUfoCursorWidget, SIGNAL(signalSetCursor(BosonCursor*)),
 		input, SLOT(slotSetCursor(BosonCursor*)));
+ if (d->mGLMiniMap) {
+	connect(d->mGLMiniMap, SIGNAL(signalMoveSelection(int, int)),
+			input, SLOT(slotMoveSelection(int, int)));
+ }
 }
 
 BosonGameViewInputBase* BosonGameView::displayInput() const
