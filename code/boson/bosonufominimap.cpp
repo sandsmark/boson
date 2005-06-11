@@ -92,6 +92,8 @@ BosonUfoMiniMap::BosonUfoMiniMap() : BoUfoWidget()
  d = new BosonUfoMiniMapPrivate;
  setOpaque(true);
 
+ setMouseEventsEnabled(true, true);
+
  d->mUfoMiniMap = new UfoMiniMap();
  setBackground(d->mUfoMiniMap);
 
@@ -138,6 +140,8 @@ void BosonUfoMiniMap::slotMouseEvent(QMouseEvent* e)
 {
  QPoint pos = e->pos();
  QPoint cell = widgetToCell(pos);
+
+ e->accept();
 
  // FIXME: maybe we can do this using this->setEnabled(false/true) ?
  if (!d->mGLMiniMap->showMiniMap()) {
