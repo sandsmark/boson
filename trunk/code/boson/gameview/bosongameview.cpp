@@ -382,7 +382,6 @@ public:
 
 
 
-
 class BosonGameViewPrivate
 {
 public:
@@ -437,9 +436,7 @@ public:
 	BoCursorEdgeScrolling* mCursorEdgeScrolling;
 	BoMouseMoveDiff mMouseMoveDiff;
 
-	QPoint mCursorQtWidgetPos;
-	QPoint mCursorWidgetPos;
-	BoVector3Fixed mCursorCanvasVector;
+	BoCursorPos mCursorPos;
 	BoGameCamera mCamera;
 	BoSelectionGroup* mSelectionGroups;
 
@@ -694,22 +691,24 @@ void BosonGameView::setViewport(int x, int y, GLsizei w, GLsizei h)
 
 const BoVector3Fixed& BosonGameView::cursorCanvasVector() const
 {
- return d->mCursorCanvasVector;
+ return d->mCursorPos.canvasVector();
 }
 
 const QPoint& BosonGameView::cursorWidgetPos() const
 {
- return d->mCursorWidgetPos;
+ return d->mCursorPos.gameViewPos();
 }
 
-void BosonGameView::updateCursorCanvasVector(const QPoint& qtWidgetPos, const QPoint& widgetPos)
+void BosonGameView::updateCursorCanvasVector(const QPoint& cursorGameViewPos)
 {
  GLfloat x = 0.0, y = 0.0, z = 0.0;
- d->mCursorQtWidgetPos = qtWidgetPos;
- d->mCursorWidgetPos = widgetPos;
- mapCoordinates(d->mCursorWidgetPos, &x, &y, &z);
- d->mCursorCanvasVector = BoVector3Fixed(x, -y, z); // AB: are these already real z coordinates?
- emit signalCursorCanvasVectorChanged(d->mCursorCanvasVector);
+ mapCoordinates(cursorGameViewPos, &x, &y, &z);
+ BoVector3Fixed canvas(x, -y, z); // AB: are these already real z coordinates?
+ QPoint rootPanePos = mapToRoot(cursorGameViewPos);
+
+ d->mCursorPos.set(cursorGameViewPos, rootPanePos, canvas);
+
+ emit signalCursorCanvasVectorChanged(d->mCursorPos.canvasVector());
 }
 
 void BosonGameView::setGameFPSCounter(BosonGameFPSCounter* counter)
@@ -798,7 +797,7 @@ void BosonGameView::cameraChanged()
  emit signalChangeViewport(this, cellTL, cellTR, cellBL, cellBR);
 #endif
 
- updateCursorCanvasVector(d->mCursorQtWidgetPos, cursorWidgetPos());
+ updateCursorCanvasVector(cursorWidgetPos());
 }
 
 void BosonGameView::advanceCamera()
@@ -929,8 +928,8 @@ void BosonGameView::initUfoGUI()
 
  BoUfoGameGUIContainer* ufoGameGUIContainer = new BoUfoGameGUIContainer();
  d->mUfoGameGUI = new BosonUfoGameGUI(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewFrustum, d->mViewport);
- d->mUfoGameGUI->setCursorWidgetPos(&d->mCursorWidgetPos);
- d->mUfoGameGUI->setCursorCanvasVector(&d->mCursorCanvasVector);
+ d->mUfoGameGUI->setCursorWidgetPos(d->mCursorPos.gameViewPosPointer());
+ d->mUfoGameGUI->setCursorCanvasVector(d->mCursorPos.canvasVectorPointer());
  d->mUfoGameGUI->setSelection(selection());
  d->mUfoGameGUI->setCanvas(canvas());
  d->mUfoGameGUI->setCamera(camera());
@@ -945,7 +944,7 @@ void BosonGameView::initUfoGUI()
 
  d->mUfoCursorWidget = new BosonUfoCursorWidget();
  d->mUfoCursorWidget->setGameGLMatrices(d->mGameGLMatrices);
- d->mUfoCursorWidget->setCursorWidgetPos(&d->mCursorWidgetPos);
+ d->mUfoCursorWidget->setCursorWidgetPos(d->mCursorPos.gameViewPosPointer());
  connect(d->mUfoCursorWidget, SIGNAL(signalSetWidgetCursor(BosonCursor*)),
 		this, SIGNAL(signalSetWidgetCursor(BosonCursor*)));
 
@@ -1588,7 +1587,7 @@ void BosonGameView::setDisplayInput(BosonGameViewInputBase* input)
 
  d->mInput->setCanvas(canvas());
  d->mInput->setLocalPlayerIO(localPlayerIO());
- d->mInput->setCursorCanvasVector(&d->mCursorCanvasVector);
+ d->mInput->setCursorCanvasVector(d->mCursorPos.canvasVectorPointer());
 
  connect(d->mUfoGameGUI, SIGNAL(signalPlaceGround(unsigned int, unsigned char*)),
 		input, SLOT(slotPlaceGround(unsigned int, unsigned char*)));
@@ -1655,15 +1654,13 @@ void BosonGameView::slotMouseEvent(QMouseEvent* e)
  event.setCanvasVector(canvasVector);
  event.setWorldPos(posX, posY, posZ);
  if (e->type() != QEvent::Wheel) {
-	event.setQtWidgetPos(e->pos());
-	event.setWidgetPos(e->pos());
+	event.setGameViewWidgetPos(e->pos());
 	event.setControlButton(e->state() & ControlButton);
 	event.setShiftButton(e->state() & ShiftButton);
 	event.setAltButton(e->state() & AltButton);
  } else {
 	QWheelEvent* w = (QWheelEvent*)e;
-	event.setQtWidgetPos(w->pos());
-	event.setWidgetPos(w->pos());
+	event.setGameViewWidgetPos(w->pos());
 	event.setControlButton(w->state() & ControlButton);
 	event.setShiftButton(w->state() & ShiftButton);
 	event.setAltButton(w->state() & AltButton);
@@ -1797,7 +1794,7 @@ void BosonGameView::mouseEventMove(int buttonState, const BoMouseEvent& event)
 {
  float posX, posY, posZ;
  event.worldPos(&posX, &posY, &posZ);
- d->mMouseMoveDiff.moveEvent(event.widgetPos());
+ d->mMouseMoveDiff.moveEvent(event.gameViewWidgetPos());
  if (event.altButton()) {
 	// The Alt button is the camera modifier in boson.
 	// Better don't do important stuff (like unit movement
@@ -1817,7 +1814,7 @@ void BosonGameView::mouseEventMove(int buttonState, const BoMouseEvent& event)
 		// selection rect gets drawn.
 		// other modifiers are ignored
 		d->mSelectionRect->setVisible(true);
-		moveSelectionRect(event.widgetPos());
+		moveSelectionRect(event.gameViewWidgetPos());
 	} else if (!boGame->gameMode() && displayInput()->actionType() != ActionChangeHeight) {
 		// In editor mode, try to place unit/ground whenever mouse moves. This
 		//  enables you to edit big areas easily. But it's not done for height
@@ -1858,7 +1855,7 @@ void BosonGameView::mouseEventMove(int buttonState, const BoMouseEvent& event)
 	// currently unused
  }
 
- updateCursorCanvasVector(event.qtWidgetPos(), event.widgetPos());
+ updateCursorCanvasVector(event.gameViewWidgetPos());
  displayInput()->setPlacementFreePlacement(event.controlButton());
  displayInput()->setPlacementDisableCollisions(event.shiftButton());
  displayInput()->updatePlacementPreviewData();

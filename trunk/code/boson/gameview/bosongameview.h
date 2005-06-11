@@ -139,19 +139,11 @@ public:
 	{
 	}
 
-	void setQtWidgetPos(const QPoint& pos)
-	{
-		mQtWidgetPos = pos;
-	}
-	void setWidgetPos(const QPoint& pos)
+	void setGameViewWidgetPos(const QPoint& pos)
 	{
 		mWidgetPos = pos;
 	}
-	const QPoint& qtWidgetPos() const
-	{
-		return mQtWidgetPos;
-	}
-	const QPoint& widgetPos() const
+	const QPoint& gameViewWidgetPos() const
 	{
 		return mWidgetPos;
 	}
@@ -216,7 +208,6 @@ public:
 	}
 
 private:
-	QPoint mQtWidgetPos;
 	QPoint mWidgetPos;
 	QPoint mCanvasPos;
 	BoVector3Fixed mCanvasVector;
@@ -227,6 +218,91 @@ private:
 	bool mControlButton;
 	bool mShiftButton;
 	bool mAltButton;
+};
+
+
+/**
+ * @short The current mouse position
+ *
+ * This class should always contain the current mouse position in the formats
+ * required by Boson. The position is set using @ref set, which should be called
+ * whenever a mouse move event occurs.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoCursorPos
+{
+public:
+	void set(const QPoint& gameView, const QPoint& rootPane, const BoVector3Fixed& canvas)
+	{
+		mCursorGameViewPos = gameView;
+		mCursorBoUfoRootPanePos = rootPane;
+		mCursorCanvasVector = canvas;
+	}
+
+	/**
+	 * @return The cursor position relative to the game view, i.e. the main
+	 * widget of Boson. This is in X11-like coordinates, that means (0,0)
+	 * describes the top-left corner of the widget
+	 **/
+	const QPoint& gameViewPos() const
+	{
+		return mCursorGameViewPos;
+	}
+
+	/**
+	 * @return Like @ref gameViewPos, but as a pointer. This pointer is
+	 * guaranteed to always contain the current @ref gameViewPos, as long as
+	 * this object exists.
+	 **/
+	const QPoint* gameViewPosPointer() const
+	{
+		return &mCursorGameViewPos;
+	}
+
+	/**
+	 * @return The current cursor position relative to the libufo root pane,
+	 * that is to @ref BoUfoManager::rootPane. These can be useful to be
+	 * used within @ref BoUfoWidget::mapFromRoot widget other than the game
+	 * view. Note that libufo uses X11-like coordinates, i.e. (0,0) is the
+	 * top-left corner.
+	 **/
+	const QPoint& rootPanePos() const
+	{
+		return mCursorBoUfoRootPanePos;
+	}
+	/**
+	 * @return Like @ref rootPanePos, but as a pointer that is guaranteed to
+	 * always contain the current @ref rootPanePos as long as this object
+	 * exists.
+	 **/
+	const QPoint* rootPanePosPointer() const
+	{
+		return &mCursorBoUfoRootPanePos;
+	}
+
+	/**
+	 * @return The current cursor position in 3d canvas-coordinates
+	 **/
+	const BoVector3Fixed& canvasVector() const
+	{
+		return mCursorCanvasVector;
+	}
+
+	/**
+	 * @return Like @ref rootPanePos, but as a pointer that is guaranteed to
+	 * always contain the current @ref rootPanePos as long as this object
+	 * exists.
+	 **/
+	const BoVector3Fixed* canvasVectorPointer() const
+	{
+		return &mCursorCanvasVector;
+	}
+
+private:
+	QPoint mCursorGameViewPos;
+	QPoint mCursorBoUfoRootPanePos;
+	BoVector3Fixed mCursorCanvasVector;
 };
 
 
@@ -355,14 +431,11 @@ protected:
 	 * This should be called whenever the mouse is moved (i.e. when a mouse
 	 * move event occurs) and whenever the camera is changed.
 	 *
-	 * @param qtWidgetPos The current position of the cursor, as it is
-	 * provided by Qt/X11 or by libufo.
-	 * @param widgetPos The current position of the cursor, as it is used in
-	 * Boson, i.e. with the y coordinate flipped. Note that the pos is
-	 * relative to the widget and therefore other widget like the menubar
-	 * must be taken into account when the y coordinate is being flipped.
+	 * @param cursorGameViewPos The current position of the cursor in the
+	 * gameView. This parameter is supposed to be in a X11-like coordinate
+	 * system, i.e. (0,0) specifies the top-left corner of the widget.
 	 **/
-	void updateCursorCanvasVector(const QPoint& qtWidgetPos, const QPoint& widgetPos);
+	void updateCursorCanvasVector(const QPoint& cursorGameViewPos);
 
 	void setCamera(const BoGameCamera& c);
 	void cameraChanged();
