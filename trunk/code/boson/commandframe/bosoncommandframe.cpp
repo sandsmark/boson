@@ -293,6 +293,77 @@ bool BoUnitDisplayBase::showUnit(Unit* unit)
 }
 
 
+class BosonUnitInfo : public BoUfoCustomWidget
+{
+public:
+	BosonUnitInfo();
+
+	void showUnit(const UnitProperties* prop);
+
+	virtual void paintWidget();
+
+private:
+	UnitProperties* prop;
+	BoUfoLabel* mName;
+	BoUfoLabel* mMineralCost;
+	BoUfoLabel* mOilCost;
+	BoUfoLabel* mDescription;
+};
+
+BosonUnitInfo::BosonUnitInfo()
+	: BoUfoCustomWidget()
+{
+ hide();
+ setLayoutClass(UVBoxLayout);
+
+ mName = new BoUfoLabel();
+ mMineralCost = new BoUfoLabel();
+ mOilCost = new BoUfoLabel();
+ mDescription = new BoUfoLabel();
+
+ addWidget(mName);
+ addWidget(mMineralCost);
+ addWidget(mOilCost);
+ addWidget(mDescription);
+}
+
+void BosonUnitInfo::showUnit(const UnitProperties* prop)
+{
+ boDebug() << k_funcinfo << "prop: " << prop << endl;
+ if (!prop) {
+	hide();
+	return;
+ }
+
+ mName->setText(prop->name());
+ mMineralCost->setText(i18n("Minerals: %1").arg(prop->mineralCost()));
+ mOilCost->setText(i18n("Oil: %1").arg(prop->oilCost()));
+ if (!prop->description().isEmpty()) {
+	mDescription->setText("\n" + prop->description());
+ } else {
+	mDescription->setText("");
+ }
+ show();
+}
+
+void BosonUnitInfo::paintWidget()
+{
+ /*if (!prop) {
+	return;
+ }
+
+ glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_VIEWPORT_BIT);
+
+ // Render a semi-transparent rectangle
+ glEnable(GL_BLEND);
+ glColor4f(0.0, 0.0, 0.0, 0.75);
+ QPoint p = rootLocation();
+ glRecti(x(), y(), x() + width(), y() + height());
+
+ glPopAttrib();*/
+}
+
+
 class BosonCommandFramePrivate
 {
 public:
@@ -301,6 +372,7 @@ public:
 		mLocalPlayerIO = 0;
 		mEventListener = 0;
 		mSelection = 0;
+		mCursorRootPos = 0;
 
 		mUnitViewWidget = 0;
 		mUnitView = 0;
@@ -316,6 +388,7 @@ public:
 		mConstructionProgress = 0;
 		mMinerWidget = 0;
 		mResourceMineWidget = 0;
+		mUnitInfoWidget = 0;
 	}
 
 	bool mGameMode;
@@ -323,6 +396,7 @@ public:
 	BoCommandFrameEventListener* mEventListener;
 	BoSelection* mSelection;
 	QTimer mUpdateTimer;
+	const QPoint* mCursorRootPos;
 
 	QPtrList<BoUnitDisplayBase> mUnitDisplayWidgets;
 
@@ -340,6 +414,7 @@ public:
 	BoConstructionProgress* mConstructionProgress;
 	BoHarvesterWidget* mMinerWidget;
 	BoResourceMineWidget* mResourceMineWidget;
+	BosonUnitInfo* mUnitInfoWidget;
 };
 
 BosonCommandFrame::BosonCommandFrame()
@@ -361,6 +436,7 @@ BosonCommandFrame::BosonCommandFrame()
  initPlacementWidget();
  initGamePlugins();
  initEditorPlugins();
+ initUnitInfo();
 
  BoUfoWidget* stretch = new BoUfoWidget();
  stretch->setStretch(1);
@@ -416,11 +492,13 @@ void BosonCommandFrame::initSelectionWidget()
  // TODO: scroll widget!
  d->mSelectionScrollWidget = new BoUfoVBox();
  addWidget(d->mSelectionScrollWidget);
- d->mSelectionWidget = new BosonOrderWidget();
+ d->mSelectionWidget = new BosonOrderWidget(this);
  d->mSelectionScrollWidget->addWidget(d->mSelectionWidget);
 
  connect(d->mSelectionWidget, SIGNAL(signalSelectUnit(Unit*)),
 		this, SIGNAL(signalSelectUnit(Unit*)));
+ connect(d->mSelectionWidget, SIGNAL(signalUnittypeHighlighted(const UnitProperties*)),
+		this, SLOT(slotUnittypeHighlighted(const UnitProperties*)));
 }
 
 void BosonCommandFrame::initPlacementWidget()
@@ -428,10 +506,16 @@ void BosonCommandFrame::initPlacementWidget()
  // TODO: scroll widget!
  d->mPlacementScrollWidget = new BoUfoVBox();
  addWidget(d->mPlacementScrollWidget);
- d->mPlacementWidget = new BosonOrderWidget();
+ d->mPlacementWidget = new BosonOrderWidget(this);
  d->mPlacementScrollWidget->addWidget(d->mPlacementWidget);
  d->mPlacementWidget->hide();
 
+}
+
+void BosonCommandFrame::initUnitInfo()
+{
+ d->mUnitInfoWidget = new BosonUnitInfo();
+ addWidget(d->mUnitInfoWidget);
 }
 
 void BosonCommandFrame::setLocalPlayerIO(PlayerIO* io)
@@ -890,7 +974,7 @@ void BosonCommandFrame::placeMobiles(PlayerIO* io)
 	BoSpecificAction a(theme->unitProperties(*it)->produceAction());
 	a.setType(ActionPlacementPreview);
 	a.setProductionId(*it);
-	a.setProductionOwner(io->player());
+	a.setProductionOwner(io);
 	actions.append(a);
  }
  d->mPlacementWidget->setOrderButtons(actions);
@@ -915,7 +999,7 @@ void BosonCommandFrame::placeFacilities(PlayerIO* io)
 	BoSpecificAction a(theme->unitProperties(*it)->produceAction());
 	a.setType(ActionPlacementPreview);
 	a.setProductionId(*it);
-	a.setProductionOwner(io->player());
+	a.setProductionOwner(io);
 	actions.append(a);
  }
  d->mPlacementWidget->setOrderButtons(actions);
@@ -927,5 +1011,21 @@ void BosonCommandFrame::slotUpdateUnitConfig()
  BO_CHECK_NULL_RET(d->mUnitConfigWidget);
  // apply changed in the config widget to the unit
  d->mUnitConfigWidget->updateUnit(selectedUnit());
+}
+
+void BosonCommandFrame::slotUnittypeHighlighted(const UnitProperties* prop)
+{
+ boDebug() << k_funcinfo << "prop: " << prop << endl;
+ d->mUnitInfoWidget->showUnit(prop);
+}
+
+const QPoint* BosonCommandFrame::cursorRootPos() const
+{
+ return d->mCursorRootPos;
+}
+
+void BosonCommandFrame::setCursorRootPos(const QPoint* pos)
+{
+ d->mCursorRootPos = pos;
 }
 

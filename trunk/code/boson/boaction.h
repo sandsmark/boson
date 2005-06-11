@@ -28,7 +28,7 @@ class QPixmap;
 class KSimpleConfig;
 template<class T> class QPtrList;
 
-class Player;
+class PlayerIO;
 class Unit;
 class SpeciesData;
 class BosonWeaponProperties;
@@ -70,8 +70,8 @@ class BoSpecificAction
     // These are meant to be used by commandframe only
     long unsigned int productionId() const  { return mProductionId; }
     void setProductionId(long unsigned int id)  { mProductionId = id; }
-    Player* productionOwner() const  { return mProductionOwner; }
-    void setProductionOwner(Player* owner)  { mProductionOwner = owner; }
+    PlayerIO* productionOwner() const  { return mProductionOwner; }
+    void setProductionOwner(PlayerIO* owner)  { mProductionOwner = owner; }
 
     Unit* unit() const  { return mUnit; }
     // Production owner is also set to u->owner()
@@ -154,7 +154,7 @@ class BoSpecificAction
     UnitAction mType;
     Unit* mUnit;
     QPtrList<Unit>* mAllUnits;
-    Player* mProductionOwner;
+    PlayerIO* mProductionOwner;
     BosonWeaponProperties* mWeapon;
     bool mOk;
 };

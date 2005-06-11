@@ -930,6 +930,7 @@ void BosonGameView::initUfoGUI()
  d->mUfoGameGUI = new BosonUfoGameGUI(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewFrustum, d->mViewport);
  d->mUfoGameGUI->setCursorWidgetPos(d->mCursorPos.gameViewPosPointer());
  d->mUfoGameGUI->setCursorCanvasVector(d->mCursorPos.canvasVectorPointer());
+ d->mUfoGameGUI->setCursorRootPos(d->mCursorPos.rootPanePosPointer());
  d->mUfoGameGUI->setSelection(selection());
  d->mUfoGameGUI->setCanvas(canvas());
  d->mUfoGameGUI->setCamera(camera());

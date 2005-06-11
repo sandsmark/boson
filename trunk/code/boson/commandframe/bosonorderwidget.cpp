@@ -21,10 +21,13 @@
 #include "bosonorderwidget.moc"
 
 #include "bosonorderbutton.h"
+#include "bosoncommandframe.h"
 #include "../unit.h"
 #include "../unitplugins.h"
 #include "../unitproperties.h"
 #include "../bosongroundtheme.h"
+#include "../playerio.h"
+#include "../boaction.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -33,6 +36,7 @@
 #include <qvaluelist.h>
 #include <qptrlist.h>
 #include <qstring.h>
+#include <qtimer.h>
 
 
 class BosonOrderWidgetPrivate
@@ -41,23 +45,35 @@ public:
 	BosonOrderWidgetPrivate()
 	{
 		mGroundTheme = 0;
+		mButtonTimer = 0;
+		mCommandFrame = 0;
 	}
 
 	QIntDict<BosonOrderButton> mOrderButton;
 
 	BosonGroundTheme* mGroundTheme;
+	BosonCommandFrame* mCommandFrame;
 
 	bool mIsProduceAction;
+
+	QTimer* mButtonTimer;
 };
 
-BosonOrderWidget::BosonOrderWidget()
+BosonOrderWidget::BosonOrderWidget(BosonCommandFrame* cmdframe)
 	: BoUfoWidget()
 {
  d = new BosonOrderWidgetPrivate;
  d->mIsProduceAction = false;
+ d->mCommandFrame = cmdframe;
 
  setLayoutClass(UGridLayout);
  setGridLayoutColumns(3);
+ setMouseEventsEnabled(true, true);
+
+ connect(this, SIGNAL(signalMouseMoved(QMouseEvent*)), this, SLOT(slotMouseMoved(QMouseEvent*)));
+
+ d->mButtonTimer = new QTimer(this);
+ connect(d->mButtonTimer, SIGNAL(timeout()), this, SLOT(slotCheckCursor()));
 }
 
 BosonOrderWidget::~BosonOrderWidget()
@@ -82,6 +98,10 @@ void BosonOrderWidget::ensureButtons(unsigned int number)
 				this, SIGNAL(signalAction(const BoSpecificAction&)));
 		connect(b, SIGNAL(signalSelectUnit(Unit*)),
 				this, SIGNAL(signalSelectUnit(Unit*)));
+		connect(b, SIGNAL(signalMouseEntered()),
+				this, SLOT(slotMouseEnteredButton()));
+		connect(b, SIGNAL(signalMouseLeft()),
+				this, SLOT(slotMouseLeftButton()));
 	}
  }
 }
@@ -246,5 +266,70 @@ void BosonOrderWidget::slotPlaceGround(unsigned int groundtype)
  alpha[groundtype] = 255;
  emit signalPlaceGround(d->mGroundTheme->groundTypeCount(), alpha);
  delete[] alpha;
+}
+
+void BosonOrderWidget::slotMouseEnteredButton()
+{
+ BosonOrderButton* button = (BosonOrderButton*)sender();
+ boDebug() << k_funcinfo << "button: " << button << endl;
+ if (button->type() == BosonOrderButton::ShowAction) {
+	const BoSpecificAction& action = button->action();
+	if (action.isProduceAction()) {
+		const UnitProperties* prop = action.productionOwner()->unitProperties(action.productionId());
+		emit signalUnittypeHighlighted(prop);
+	}
+ }
+}
+
+void BosonOrderWidget::slotMouseLeftButton()
+{
+ BosonOrderButton* button = (BosonOrderButton*)sender();
+ boDebug() << k_funcinfo << "button: " << button << endl;
+ if (button->type() == BosonOrderButton::ShowAction) {
+	const BoSpecificAction& action = button->action();
+	if (action.isProduceAction()) {
+		emit signalUnittypeHighlighted(0);
+	}
+ }
+}
+
+void BosonOrderWidget::slotMouseMoved(QMouseEvent* e)
+{
+ for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
+	BosonOrderButton* button = d->mOrderButton[i];
+	QRect r(QPoint(button->x(), button->y()), QSize(button->width(), button->height()));
+	if (r.contains(e->x(), e->y())) {
+		if (button->type() == BosonOrderButton::ShowAction) {
+			const BoSpecificAction& action = button->action();
+			if (action.isProduceAction()) {
+				const UnitProperties* prop = action.productionOwner()->unitProperties(action.productionId());
+				emit signalUnittypeHighlighted(prop);
+				d->mButtonTimer->start(200);
+				return;
+			}
+		}
+	}
+ }
+ emit signalUnittypeHighlighted(0);
+ d->mButtonTimer->stop();
+}
+
+void BosonOrderWidget::slotCheckCursor()
+{
+ QRect r(rootLocation(), QSize(width(), height()));
+ if (r.contains(*d->mCommandFrame->cursorRootPos())) {
+	// TODO: check for children?
+	return;
+ }
+/* for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
+	BosonOrderButton* button = d->mOrderButton[i];
+	if (button->hasMouse()) {
+		return;
+	}
+ }*/
+
+ // None of the order buttons has mouse. Disable unit info
+ emit signalUnittypeHighlighted(0);
+ d->mButtonTimer->stop();
 }
 

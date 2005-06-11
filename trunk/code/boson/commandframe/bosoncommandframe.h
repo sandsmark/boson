@@ -28,6 +28,7 @@ class BoSelection;
 class BoUnitDisplayBase;
 class BoSpecificAction;
 class BosonGroundTheme;
+class UnitProperties;
 
 class BosonCommandFramePrivate;
 class BosonCommandFrame : public BoUfoWidget
@@ -54,6 +55,9 @@ public:
 	void placeGround();
 	void placeMobiles(PlayerIO* io);
 	void placeFacilities(PlayerIO* io);
+
+	const QPoint* cursorRootPos() const;
+	void setCursorRootPos(const QPoint* pos);
 
 signals:
 	/**
@@ -100,6 +104,8 @@ public slots:
 	void slotPlaceGround(unsigned int textureCount, unsigned char* alpha);
 
 	void slotSetGroundTheme(BosonGroundTheme* theme);
+
+	void slotUnittypeHighlighted(const UnitProperties* prop);
 
 protected:
 	/**
@@ -167,6 +173,7 @@ private:
 	void initEditorPlugins();
 	void initSelectionWidget();
 	void initPlacementWidget();
+	void initUnitInfo();
 
 private:
 	BosonCommandFramePrivate* d;

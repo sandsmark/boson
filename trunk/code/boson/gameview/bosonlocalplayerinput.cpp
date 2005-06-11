@@ -23,6 +23,7 @@
 #include "../boaction.h"
 #include "../unit.h"
 #include "../player.h"
+#include "../playerio.h"
 #include "../boselection.h"
 #include "../bosonmessage.h"
 #include "../bosonmessageids.h"
@@ -128,7 +129,7 @@ void BosonLocalPlayerInput::produceAction(const BoSpecificAction& action)
   }
 
   stream << (Q_UINT32)action.productionType();
-  stream << (Q_UINT32)action.productionOwner()->id();
+  stream << (Q_UINT32)action.productionOwner()->playerId();
   stream << (Q_ULONG)action.unit()->id();
   stream << (Q_UINT32)action.productionId();
 
