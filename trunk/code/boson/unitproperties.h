@@ -213,6 +213,12 @@ public:
 	const QString& name() const;
 
 	/**
+	 * @return Longer description of this unit type. This might e.g. say what
+	 * the unit is good for.
+	 **/
+	const QString& description() const;
+
+	/**
 	 * @return If this is a mobile unit. Better use @ref Unit::isMobile()
 	 **/
 	bool isMobile() const { return !mIsFacility; }

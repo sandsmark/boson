@@ -43,6 +43,7 @@ public:
 
 	QCString mMD5;
 	QString mName;
+	QString mDescription;
 	QString mUnitPath; // the path to the unit files
 	QValueList<unsigned long int> mRequirements;
 
@@ -124,6 +125,7 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  mUnitHeight = (conf.readDoubleNumEntry("UnitHeight", 1.0));
  mUnitDepth = conf.readDoubleNumEntry("UnitDepth", 1.0);
  d->mName = conf.readEntry("Name", i18n("Unknown"));
+ d->mDescription = conf.readEntry("Description", QString::null);
  // We convert this from seconds to advance calls
  m_productionTime.init((int)(conf.readDoubleNumEntry("ProductionTime", 5) * 20.0f));
  m_health.init(conf.readUnsignedLongNumEntry("Health", 100));
@@ -435,6 +437,11 @@ void UnitProperties::setName(const QString& n)
 const QString& UnitProperties::name() const
 {
  return d->mName;
+}
+
+const QString& UnitProperties::description() const
+{
+ return d->mDescription;
 }
 
 const QString& UnitProperties::unitPath() const
