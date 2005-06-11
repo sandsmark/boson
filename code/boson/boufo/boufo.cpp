@@ -1862,15 +1862,15 @@ QPoint BoUfoWidget::rootLocation() const
  return QPoint(p.x, p.y);
 }
 
-QPoint BoUfoWidget::mapFromRoot(const QPoint& p) const
+QPoint BoUfoWidget::mapFromRoot(const QPoint& pos) const
 {
- ufo::UPoint p = widget()->rootPointToPoint(p.x, p.y);
+ ufo::UPoint p = widget()->rootPointToPoint(pos.x(), pos.y());
  return QPoint(p.x, p.y);
 }
 
-QPoint BoUfoWidget::mapToRoot(const QPoint& p) const
+QPoint BoUfoWidget::mapToRoot(const QPoint& pos) const
 {
- ufo::UPoint p = widget()->pointToRootPoint(p.x, p.y);
+ ufo::UPoint p = widget()->pointToRootPoint(pos.x(), pos.y());
  return QPoint(p.x, p.y);
 }
 
