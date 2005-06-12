@@ -107,24 +107,17 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
  switch (msgid) {
 	case BosonMessageIds::MoveMove:
 	{
-		bool attack;
-		Q_UINT8 attackcode;
-		BoVector2Fixed pos;
-		Q_UINT32 unitCount;
-		stream >> attackcode;
-		if (attackcode == 0) {
-			attack = false;
-		} else {
-			attack = true;
+		BosonMessageMoveMove message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			break;
 		}
+		bool attack = message.mIsAttack;
 		boDebug() << "MOVING: " << k_funcinfo << "attack: " << attack << endl;
-		stream >> pos;
-		stream >> unitCount;
 		QPtrList<Unit> unitsToMove;
-		for (unsigned int i = 0; i < unitCount; i++) {
-			Q_ULONG unitId;
-			stream >> unitId;
-//			boDebug() << "pos: " << pos.x() << " " << pos.y() << endl;
+		for (QValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
+			Q_ULONG unitId = *it;
+//			boDebug() << "pos: " << mPos.x() << " " << mPos.y() << endl;
 			Unit* unit = findUnit(unitId, player);
 			if (!unit) {
 				boDebug() << "unit " << unitId << " not found for this player" << endl;
@@ -148,12 +141,12 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			break;
 		}
 		if (unitsToMove.count() == 1) {
-			unitsToMove.first()->moveTo(pos, attack);
+			unitsToMove.first()->moveTo(message.mPos, attack);
 		} else {
-		QPtrListIterator<Unit> it(unitsToMove);
+			QPtrListIterator<Unit> it(unitsToMove);
 			it.toFirst();
 			while (it.current()) {
-				it.current()->moveTo(pos, attack);
+				it.current()->moveTo(message.mPos, attack);
 				++it;
 			}
 		}
@@ -161,19 +154,19 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 	}
 	case BosonMessageIds::MoveAttack:
 	{
-		Q_ULONG attackedUnitId;
-		Q_UINT32 unitCount;
-		stream >> attackedUnitId;
-		stream >> unitCount;
-		Unit* attackedUnit = findUnit(attackedUnitId, 0);
+		BosonMessageMoveAttack message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			break;
+		}
+		Unit* attackedUnit = findUnit(message.mAttackedUnitId, 0);
 		if (!attackedUnit) {
 			boError() << "Cannot attack NULL unit" << endl;
 			return true;
 		}
-		for (unsigned int i = 0; i < unitCount; i++) {
-			Q_ULONG unitId;
-			stream >> unitId;
-			if (unitId == attackedUnitId) {
+		for (QValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
+			Q_ULONG unitId = *it;
+			if (unitId == message.mAttackedUnitId) {
 				// can become possible one day - e.g. when
 				// repairing a unit
 				boWarning() << "Can not (yet) attack myself"
@@ -194,7 +187,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 				continue;
 			}
 			if (unit->unitProperties()->canShoot()) {
-				boDebug() << unitId << " attacks " << attackedUnitId << endl;
+				boDebug() << unitId << " attacks " << message.mAttackedUnitId << endl;
 				unit->setTarget(attackedUnit);
 				if (unit->target()) {
 					unit->setWork(Unit::WorkAttack);
@@ -205,12 +198,14 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 	}
 	case BosonMessageIds::MoveStop:
 	{
-		Q_UINT32 unitCount;
-		stream >> unitCount;
+		BosonMessageMoveStop message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			break;
+		}
 		QPtrList<Unit> unitsToStop;
-		for (unsigned int i = 0; i < unitCount; i++) {
-			Q_ULONG unitId;
-			stream >> unitId;
+		for (QValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
+			Q_ULONG unitId = *it;
 			Unit* unit = findUnit(unitId, player);
 			if (!unit) {
 				boDebug() << "unit " << unitId << " not found for this player" << endl;
@@ -239,14 +234,15 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 	}
 	case BosonMessageIds::MoveMine:
 	{
+		BosonMessageMoveMine message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			break;
+		}
 		boDebug() << "MoveMine" << endl;
-		Q_ULONG harvesterId;
-		Q_ULONG resourceMineId;
-		stream >> harvesterId;
-		stream >> resourceMineId;
-		Unit* u = findUnit(harvesterId, player);
+		Unit* u = findUnit(message.mHarvesterId, player);
 		if (!u) {
-			boError() << k_lineinfo << "cannot find harvester unit " << harvesterId << " for player " << player << endl;
+			boError() << k_lineinfo << "cannot find harvester unit " << message.mHarvesterId << " for player " << player << endl;
 			break;
 		}
 		if (!u->isMobile()) {
@@ -259,7 +255,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			break;
 		}
 		if (u->owner() != player) {
-			boDebug() << k_funcinfo << "unit " << harvesterId << "only owner can move units!" << endl;
+			boDebug() << k_funcinfo << "unit " << message.mHarvesterId << "only owner can move units!" << endl;
 			break;
 		}
 		if (u->isDestroyed()) {
@@ -267,9 +263,9 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			break;
 		}
 
-		u = findUnit(resourceMineId, 0);
+		u = findUnit(message.mResourceMineId, 0);
 		if (!u) {
-			boError() << k_lineinfo << "cannot find resourcemine unit " << resourceMineId << " for player " << player << endl;
+			boError() << k_lineinfo << "cannot find resourcemine unit " << message.mResourceMineId << " for player " << player << endl;
 			break;
 		}
 		ResourceMinePlugin* r = (ResourceMinePlugin*)u->plugin(UnitPlugin::ResourceMine);
@@ -282,35 +278,33 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 	}
 	case BosonMessageIds::MoveRefine:
 	{
+		BosonMessageMoveRefine message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			break;
+		}
 		boDebug() << "MoveRefine" << endl;
-		Q_UINT32 refineryOwnerId;
-		Q_ULONG refineryId;
-		Q_UINT32 unitCount;
-		stream >> refineryOwnerId;
-		stream >> refineryId;
-		stream >> unitCount;
-		Player* refineryOwner = findPlayer(refineryOwnerId);
+		Player* refineryOwner = findPlayer(message.mRefineryOwner);
 		if (!refineryOwner) {
-			boError() << k_lineinfo << "Cannot find player " << refineryOwnerId << endl;
+			boError() << k_lineinfo << "Cannot find player " << message.mRefineryOwner << endl;
 			break;
 		}
 		if (player->isEnemy(refineryOwner)) {
 			boError() << k_lineinfo << "Cannot go to enemy refinery" << endl;
 			break;
 		}
-		Unit* refineryUnit = findUnit(refineryId, refineryOwner);
+		Unit* refineryUnit = findUnit(message.mRefineryId, refineryOwner);
 		if (!refineryUnit) {
-			boError() << k_lineinfo << "cannot find refinery " << refineryId << " for player " << refineryOwnerId << endl;
+			boError() << k_lineinfo << "cannot find refinery " << message.mRefineryId << " for player " << message.mRefineryOwner << endl;
 			break;
 		}
 		RefineryPlugin* refinery = (RefineryPlugin*)refineryUnit->plugin(UnitPlugin::Refinery);
 		if (!refinery) {
-			boWarning() << k_lineinfo << "refinery must be a refinery " << endl;
+			boWarning() << k_lineinfo << "refinery must be a refinery" << endl;
 			break;
 		}
-		for (unsigned int i = 0; i < unitCount; i++) {
-			Q_ULONG unitId;
-			stream >> unitId;
+		for (QValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
+			Q_ULONG unitId = *it;
 			Unit* u = findUnit(unitId, player);
 			if (!u) {
 				boError() << k_lineinfo << "cannot find unit " << unitId << " for player " << player->id() << endl;
@@ -335,6 +329,14 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 	{
 		boWarning() << "MoveRepair is a TODO" << endl;
 		break;
+
+		BosonMessageMoveRepair message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			break;
+		}
+
+#if 0
 		// move mobile units to repairyard
 		//
 		// TODO there are several ways of repairing:
@@ -382,29 +384,25 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			}
 			repair->repair(u);
 		}
+#endif
 		break;
 	}
 	case BosonMessageIds::MoveProduce:
 	{
-		Q_UINT32 productionType;
-		Q_UINT32 owner;
-		Q_ULONG factoryId;
-		Q_UINT32 id;
-
-		stream >> productionType;
-
-		stream >> owner;
-		stream >> factoryId;
-		stream >> id; // TODO: rename to "type" (simple text replacement, but I am lazy atm)
-
-		Player* p = findPlayer(owner);
-		if (!p) {
-			boError() << k_lineinfo << "Cannot find player " << owner << endl;
+		BosonMessageMoveProduce message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
 			break;
 		}
-		Unit* factory = findUnit(factoryId, p);
+
+		Player* p = findPlayer(message.mOwner);
+		if (!p) {
+			boError() << k_lineinfo << "Cannot find player " << message.mOwner << endl;
+			break;
+		}
+		Unit* factory = findUnit(message.mFactoryId, p);
 		if (!factory) {
-			boError() << "Cannot find unit " << factoryId << endl;
+			boError() << "Cannot find unit " << message.mFactoryId << endl;
 			break;
 		}
 
@@ -414,25 +412,25 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			boWarning() << k_lineinfo << factory->id() << " cannot produce" << endl;
 			break;
 		}
-		if (id <= 0) {
-			boError() << k_lineinfo << "Invalid id " << id << endl;
+		if (message.mType  <= 0) {
+			boError() << k_lineinfo << "Invalid type " << message.mType << endl;
 			break;
 		}
 
 		unsigned long int mineralCost = 0, oilCost = 0;
 
-		if ((ProductionType)productionType == ProduceUnit) {
+		if ((ProductionType)message.mProduceType == ProduceUnit) {
 			// Produce unit
-			const UnitProperties* prop = p->unitProperties(id);
+			const UnitProperties* prop = p->unitProperties(message.mType);
 			if (!prop) {
 				boError() << k_lineinfo << "NULL unit properties (EVIL BUG)" << endl;
 				break;
 			}
 			mineralCost = prop->mineralCost();
 			oilCost = prop->oilCost();
-		} else if ((ProductionType)productionType == ProduceTech) {
+		} else if ((ProductionType)message.mProduceType == ProduceTech) {
 			// Produce upgrade
-			const UpgradeProperties* prop = p->speciesTheme()->technology(id);
+			const UpgradeProperties* prop = p->speciesTheme()->technology(message.mType);
 			if (!prop) {
 				boError() << k_lineinfo << "NULL technology properties (EVIL BUG)" << endl;
 				break;
@@ -440,7 +438,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			mineralCost = prop->mineralCost();
 			oilCost = prop->oilCost();
 		} else {
-			boError() << k_funcinfo << "Invalid productionType: " << productionType << endl;
+			boError() << k_funcinfo << "Invalid productionType: " << message.mProduceType << endl;
 		}
 
 		// AB: event parameters.
@@ -449,25 +447,25 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		// started or un-paused) and the productiontype (unit/tech). two
 		// events that differ by productiontype only, differ in their
 		// name by the "Unit" or "Technology" part only.
-		QString eventTypeParameter = QString::number(id);
+		QString eventTypeParameter = QString::number(message.mType);
 		QCString productionTypeString;
-		if ((ProductionType)productionType == ProduceUnit) {
+		if ((ProductionType)message.mProduceType == ProduceUnit) {
 			productionTypeString = "Unit";
-		} else if ((ProductionType)productionType == ProduceTech) {
+		} else if ((ProductionType)message.mProduceType == ProduceTech) {
 			productionTypeString = "Technology";
 		} else {
-			boError() << k_funcinfo << "Invalid productionType: " << productionType << endl;
+			boError() << k_funcinfo << "Invalid productionType: " << message.mProduceType << endl;
 		}
 		BoVector3Fixed eventLocation(factory->x(), factory->y(), factory->z());
 
 		if (factory->currentPluginType() != UnitPlugin::Production) {
-			if ((production->currentProductionId() == id) && (production->currentProductionType() == (ProductionType)productionType)) {
+			if ((production->currentProductionId() == message.mType) && (production->currentProductionType() == (ProductionType)message.mProduceType)) {
 				// production was paused - continue it now
 				factory->setPluginWork(UnitPlugin::Production);
 
 				QCString name = "ContinueProductionOf" + productionTypeString + "WithType";
-				BoEvent* event = new BoEvent(name, eventTypeParameter, QString::number(factoryId));
-				event->setPlayerId(owner);
+				BoEvent* event = new BoEvent(name, eventTypeParameter, QString::number(message.mFactoryId));
+				event->setPlayerId(message.mOwner);
 				event->setLocation(eventLocation);
 				mGame->queueEvent(event);
 				break;
@@ -484,36 +482,31 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		}
 		p->setMinerals(p->minerals() - mineralCost);
 		p->setOil(p->oil() - oilCost);
-		production->addProduction((ProductionType)productionType, (unsigned long int)id);
+		production->addProduction((ProductionType)message.mProduceType, (unsigned long int)message.mType);
 
-		BoEvent* event = new BoEvent(QCString("StartProductionOf") + productionTypeString + "WithType", eventTypeParameter, QString::number(factoryId));
-		event->setPlayerId(owner);
+		BoEvent* event = new BoEvent(QCString("StartProductionOf") + productionTypeString + "WithType", eventTypeParameter, QString::number(message.mFactoryId));
+		event->setPlayerId(message.mOwner);
 		event->setLocation(eventLocation);
 		mGame->queueEvent(event);
 		break;
 	}
 	case BosonMessageIds::MoveProduceStop:
 	{
-		boDebug() << "MoveProduceStop" << endl;
-		Q_UINT32 productionType;
-		Q_UINT32 owner;
-		Q_ULONG factoryId;
-		Q_UINT32 id;
-
-		stream >> productionType;
-
-		stream >> owner;
-		stream >> factoryId;
-		stream >> id; // TODO: rename to "type" (simple text replacement, but I am lazy atm)
-
-		Player* p = findPlayer(owner);
-		if (!p) {
-			boError() << k_lineinfo << "Cannot find player " << owner << endl;
+		BosonMessageMoveProduceStop message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
 			break;
 		}
-		Unit* factory = findUnit(factoryId, p);
+		boDebug() << "MoveProduceStop" << endl;
+
+		Player* p = findPlayer(message.mOwner);
+		if (!p) {
+			boError() << k_lineinfo << "Cannot find player " << message.mOwner << endl;
+			break;
+		}
+		Unit* factory = findUnit(message.mFactoryId, p);
 		if (!factory) {
-			boError() << "Cannot find unit " << factoryId << endl;
+			boError() << "Cannot find unit " << message.mFactoryId << endl;
 			break;
 		}
 
@@ -523,28 +516,28 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			boError() << k_lineinfo << factory->id() << "cannot produce?!" << endl;
 			break;
 		}
-		if (!production->contains((ProductionType)productionType, (unsigned long int)id)) {
-			boDebug() << k_lineinfo << "Production " << productionType << " with id "
-					 << id << " is not in production queue" << endl;
+		if (!production->contains((ProductionType)message.mProduceType, (unsigned long int)message.mType)) {
+			boDebug() << k_lineinfo << "Production " << message.mProduceType << " with id "
+					 << message.mType << " is not in production queue" << endl;
 			return true;
 		}
-		if (id <= 0) {
-			boError() << k_lineinfo << "Invalid id " << id << endl;
+		if (message.mType <= 0) {
+			boError() << k_lineinfo << "Invalid type " << message.mType << endl;
 			break;
 		}
 
 		unsigned long int mineralCost = 0, oilCost = 0;
 
-		if ((ProductionType)productionType == ProduceUnit) {
-			const UnitProperties* prop = p->unitProperties(id);
+		if ((ProductionType)message.mProduceType == ProduceUnit) {
+			const UnitProperties* prop = p->unitProperties(message.mType);
 			if (!prop) {
 				boError() << k_lineinfo << "NULL unit properties (EVIL BUG)" << endl;
 				break;
 			}
 			mineralCost = prop->mineralCost();
 			oilCost = prop->oilCost();
-		} else if ((ProductionType)productionType == ProduceTech) {
-			const UpgradeProperties* prop = p->speciesTheme()->technology(id);
+		} else if ((ProductionType)message.mProduceType == ProduceTech) {
+			const UpgradeProperties* prop = p->speciesTheme()->technology(message.mType);
 			if (!prop) {
 				boError() << k_lineinfo << "NULL technology properties (EVIL BUG)" << endl;
 				break;
@@ -552,33 +545,33 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			mineralCost = prop->mineralCost();
 			oilCost = prop->oilCost();
 		} else {
-			boError() << k_funcinfo << "Invalid productionType: " << productionType << endl;
+			boError() << k_funcinfo << "Invalid productionType: " << message.mProduceType << endl;
 		}
 
 
 		// AB: event parameters.
-		QString eventTypeParameter = QString::number(id);
+		QString eventTypeParameter = QString::number(message.mType);
 		QCString productionTypeString;
-		if ((ProductionType)productionType == ProduceUnit) {
+		if ((ProductionType)message.mProduceType == ProduceUnit) {
 			productionTypeString = "Unit";
-		} else if ((ProductionType)productionType == ProduceTech) {
+		} else if ((ProductionType)message.mProduceType == ProduceTech) {
 			productionTypeString = "Technology";
 		} else {
-			boError() << k_funcinfo << "Invalid productionType: " << productionType << endl;
+			boError() << k_funcinfo << "Invalid productionType: " << message.mProduceType << endl;
 		}
 
 
 		BoEvent* event = 0;
-		if ((production->currentProductionId() == id) && (production->currentProductionType() == (ProductionType)productionType)) {
+		if ((production->currentProductionId() == message.mType) && (production->currentProductionType() == (ProductionType)message.mProduceType)) {
 			if (factory->currentPluginType() == UnitPlugin::Production) {
 				// do not abort but just pause
 				factory->setWork(Unit::WorkIdle);
-				event = new BoEvent(QCString("PauseProductionOf") + productionTypeString + "WithType", eventTypeParameter, QString::number(factoryId));
+				event = new BoEvent(QCString("PauseProductionOf") + productionTypeString + "WithType", eventTypeParameter, QString::number(message.mFactoryId));
 			} else {
 				p->setMinerals(p->minerals() + mineralCost);
 				p->setOil(p->oil() + oilCost);
 				production->removeProduction();
-				event = new BoEvent(QCString("StopProductionOf") + productionTypeString + "WithType", eventTypeParameter, QString::number(factoryId));
+				event = new BoEvent(QCString("StopProductionOf") + productionTypeString + "WithType", eventTypeParameter, QString::number(message.mFactoryId));
 			}
 		} else {
 			// not the current, but a queued production is stopped.
@@ -588,11 +581,11 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			//item is added to the queue)
 			p->setMinerals(p->minerals() + mineralCost);
 			p->setOil(p->oil() + oilCost);
-			production->removeProduction((ProductionType)productionType, (unsigned long int)id);
-			event = new BoEvent(QCString("StopProductionOf") + productionTypeString + "WithType", eventTypeParameter, QString::number(factoryId));
+			production->removeProduction((ProductionType)message.mProduceType, (unsigned long int)message.mType);
+			event = new BoEvent(QCString("StopProductionOf") + productionTypeString + "WithType", eventTypeParameter, QString::number(message.mFactoryId));
 		}
 		if (event) {
-			event->setPlayerId(owner);
+			event->setPlayerId(message.mOwner);
 			event->setLocation(BoVector3Fixed(factory->x(), factory->y(), factory->z()));
 			mGame->queueEvent(event);
 		}
@@ -600,32 +593,27 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 	}
 	case BosonMessageIds::MoveBuild:
 	{
+		BosonMessageMoveBuild message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			break;
+		}
 		boDebug() << "MoveBuild" << endl;
-		Q_UINT32 productionType;
-		Q_ULONG factoryId;
-		Q_UINT32 owner;
-		BoVector2Fixed pos;
-
-		stream >> productionType;
-
-		stream >> factoryId;
-		stream >> owner;
-		stream >> pos;
 
 		// Only units are "built"
-		if ((ProductionType)productionType != ProduceUnit) {
-			boError() << k_funcinfo << "Invalid productionType: " << productionType << endl;
+		if ((ProductionType)message.mProduceType != ProduceUnit) {
+			boError() << k_funcinfo << "Invalid productionType: " << message.mProduceType << endl;
 			break;
 		}
 
-		Player* p = findPlayer(owner);
+		Player* p = findPlayer(message.mOwner);
 		if (!p) {
-			boError() << k_lineinfo << "Cannot find player " << owner << endl;
+			boError() << k_lineinfo << "Cannot find player " << message.mOwner << endl;
 			break;
 		}
-		Unit* factory = findUnit(factoryId, p);
+		Unit* factory = findUnit(message.mFactoryId, p);
 		if (!factory) {
-			boError() << "Cannot find unit " << factoryId << endl;
+			boError() << "Cannot find unit " << message.mFactoryId << endl;
 			break;
 		}
 		ProductionPlugin* production = (ProductionPlugin*)factory->plugin(UnitPlugin::Production);
@@ -650,24 +638,24 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			boWarning() << k_lineinfo << "not yet completed" << endl;
 			break;
 		}
-		mGame->buildProducedUnit(production, unitType, pos);
+		mGame->buildProducedUnit(production, unitType, message.mPos);
 		break;
 	}
 	case BosonMessageIds::MoveFollow:
 	{
-		Q_ULONG followUnitId;
-		Q_UINT32 unitCount;
-		stream >> followUnitId;
-		stream >> unitCount;
-		Unit* followUnit = findUnit(followUnitId, 0);
+		BosonMessageMoveFollow message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			break;
+		}
+		Unit* followUnit = findUnit(message.mFollowUnitId, 0);
 		if (!followUnit) {
 			boError() << "Cannot follow NULL unit" << endl;
 			return true;
 		}
-		for (unsigned int i = 0; i < unitCount; i++) {
-			Q_ULONG unitId;
-			stream >> unitId;
-			if (unitId == followUnitId) {
+		for (QValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
+			Q_ULONG unitId = *it;
+			if (unitId == message.mFollowUnitId) {
 				boWarning() << "Cannot follow myself" << endl;
 				continue;
 			}
@@ -693,15 +681,16 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 	}
 	case BosonMessageIds::MoveLayMine:
 	{
+		BosonMessageMoveLayMine message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			break;
+		}
 		boDebug() << k_funcinfo << "MoveLayMine action" << endl;
-		Q_UINT32 unitCount;
 		Q_UINT32 unitId, weaponId;
-
-		stream >> unitCount;
-
-		for (unsigned int i = 0; i < unitCount; i++) {
-			stream >> unitId;
-			stream >> weaponId;
+		for (unsigned int i = 0; i < message.mUnits.count(); i++) {
+			unitId = message.mUnits[i];
+			weaponId = message.mWeapons[i];
 			boDebug() << k_funcinfo << "unit: " << unitId << "; weapon: " << weaponId << endl;
 
 			Unit* unit = findUnit(unitId, 0);
@@ -726,17 +715,17 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 	}
 	case BosonMessageIds::MoveDropBomb:
 	{
+		BosonMessageMoveDropBomb message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			break;
+		}
 		boDebug() << k_funcinfo << "MoveDropBomb action" << endl;
-		Q_UINT32 unitCount;
-		BoVector2Fixed pos;
 		Q_UINT32 unitId, weaponId;
 
-		stream >> pos;
-		stream >> unitCount;
-
-		for (unsigned int i = 0; i < unitCount; i++) {
-			stream >> unitId;
-			stream >> weaponId;
+		for (unsigned int i = 0; i < message.mUnits.count(); i++) {
+			unitId = message.mUnits[i];
+			weaponId = message.mWeapons[i];
 			boDebug() << k_funcinfo << "unit: " << unitId << "; weapon: " << weaponId << endl;
 
 			Unit* unit = findUnit(unitId, 0);
@@ -753,7 +742,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 				boError() << k_lineinfo << "This unit has no bombing plugin" << endl;
 				break;
 			}
-			b->bomb(weaponId, pos);
+			b->bomb(weaponId, message.mPos);
 		}
 		boDebug() << k_funcinfo << "done" << endl;
 
@@ -761,51 +750,47 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 	}
 	case BosonMessageIds::MoveTeleport:
 	{
-		Q_UINT32 unitId;
-		Q_UINT32 owner;
-		BoVector2Fixed pos;
+		BosonMessageMoveTeleport message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			break;
+		}
 
-		stream >> owner;
-		stream >> unitId;
-		stream >> pos;
-
-		Player* p = findPlayer(owner);
+		Player* p = findPlayer(message.mOwner);
 		if (!p) {
-			boError() << k_lineinfo << "Cannot find player " << owner << endl;
+			boError() << k_lineinfo << "Cannot find player " << message.mOwner << endl;
 			break;
 		}
-		Unit* u = findUnit(unitId, p);
+		Unit* u = findUnit(message.mUnitId, p);
 		if (!u) {
-			boError() << "Cannot find unit " << unitId << endl;
+			boError() << "Cannot find unit " << message.mUnitId << endl;
 			break;
 		}
 
-		u->moveBy(pos.x() - u->x(), pos.y() - u->y(), 0);
+		u->moveBy(message.mPos.x() - u->x(), message.mPos.y() - u->y(), 0);
 
 		break;
 	}
 	case BosonMessageIds::MoveRotate:
 	{
-		Q_UINT32 unitId;
-		Q_UINT32 owner;
-		bofixed rot;
+		BosonMessageMoveRotate message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			break;
+		}
 
-		stream >> owner;
-		stream >> unitId;
-		stream >> rot;
-
-		Player* p = findPlayer(owner);
+		Player* p = findPlayer(message.mOwner);
 		if (!p) {
-			boError() << k_lineinfo << "Cannot find player " << owner << endl;
+			boError() << k_lineinfo << "Cannot find player " << message.mOwner << endl;
 			break;
 		}
-		Unit* u = findUnit(unitId, p);
+		Unit* u = findUnit(message.mUnitId, p);
 		if (!u) {
-			boError() << "Cannot find unit " << unitId << endl;
+			boError() << "Cannot find unit " << message.mUnitId << endl;
 			break;
 		}
 
-		u->setRotation(rot);
+		u->setRotation(message.mRotate);
 
 		break;
 	}
@@ -822,7 +807,7 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
  switch (msgid) {
 	case BosonMessageIds::MovePlaceUnit:
 	{
-		BosonMessageMovePlaceUnit message;
+		BosonMessageEditorMovePlaceUnit message;
 		if (!message.load(stream)) {
 			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
 			break;
@@ -879,7 +864,7 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
 	}
 	case BosonMessageIds::MoveChangeTexMap:
 	{
-		BosonMessageMoveChangeTexMap message;
+		BosonMessageEditorMoveChangeTexMap message;
 		if (!message.load(stream)) {
 			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
 			break;
@@ -903,7 +888,7 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
 	case BosonMessageIds::MoveChangeHeight:
 	{
 		boDebug() << k_lineinfo << "change height" << endl;
-		BosonMessageMoveChangeHeight message;
+		BosonMessageEditorMoveChangeHeight message;
 		if (!message.load(stream)) {
 			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
 			break;
@@ -931,7 +916,7 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
 	}
 	case BosonMessageIds::MoveDeleteItems:
 	{
-		BosonMessageMoveDeleteItems message;
+		BosonMessageEditorMoveDeleteItems message;
 		if (!message.load(stream)) {
 			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
 			break;
