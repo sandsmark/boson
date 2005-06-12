@@ -319,6 +319,8 @@ public:
 	void deleteDestroyed();
 	void deleteUnusedShots();
 
+	BosonItem* findItem(unsigned long int id) const;
+
 	/**
 	 * Convenience method. See @ref BosonCollisions::findUnitAt
 	 **/
