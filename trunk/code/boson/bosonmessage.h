@@ -48,11 +48,11 @@ public:
 	virtual bool load(QDataStream& stream) = 0;
 };
 
-class BosonMessageMovePlaceUnit : public BosonMessage
+class BosonMessageEditorMovePlaceUnit : public BosonMessage
 {
 public:
-	BosonMessageMovePlaceUnit();
-	BosonMessageMovePlaceUnit(Q_UINT32 unitType, Q_UINT32 owner, const BoVector2Fixed& pos);
+	BosonMessageEditorMovePlaceUnit();
+	BosonMessageEditorMovePlaceUnit(Q_UINT32 unitType, Q_UINT32 owner, const BoVector2Fixed& pos);
 
 	virtual bool save(QDataStream& stream) const;
 	virtual bool load(QDataStream& stream);
@@ -67,10 +67,10 @@ public:
 	BoVector2Fixed mPos;
 };
 
-class BosonMessageMoveChangeTexMap : public BosonMessage
+class BosonMessageEditorMoveChangeTexMap : public BosonMessage
 {
 public:
-	BosonMessageMoveChangeTexMap();
+	BosonMessageEditorMoveChangeTexMap();
 
 	/**
 	 * A message consists of a number of cell corners (each x and y indices)
@@ -82,7 +82,7 @@ public:
 	 * BosonGroundTheme::groundTypeCount must be present)
 	 * @li The alpha value for that texture
 	 **/
-	BosonMessageMoveChangeTexMap(const QValueVector<Q_UINT32>& cellCornersX,
+	BosonMessageEditorMoveChangeTexMap(const QValueVector<Q_UINT32>& cellCornersX,
 			const QValueVector<Q_UINT32>& cellCornersY,
 			const QValueVector<Q_UINT32>& cellCornersTexCount,
 			const QValueVector< QValueVector<Q_UINT32> > cellCornerTextures,
@@ -103,11 +103,11 @@ public:
 	QValueVector< QValueVector<Q_UINT8> > mCellCornerAlpha;
 };
 
-class BosonMessageMoveChangeHeight : public BosonMessage
+class BosonMessageEditorMoveChangeHeight : public BosonMessage
 {
 public:
-	BosonMessageMoveChangeHeight();
-	BosonMessageMoveChangeHeight(
+	BosonMessageEditorMoveChangeHeight();
+	BosonMessageEditorMoveChangeHeight(
 			const QValueVector<Q_UINT32> cellCornersX,
 			const QValueVector<Q_UINT32> cellCornersY,
 			const QValueVector<bofixed> cellCornersHeight
@@ -126,11 +126,11 @@ public:
 	QValueVector<bofixed> mCellCornersHeight;
 };
 
-class BosonMessageMoveDeleteItems : public BosonMessage
+class BosonMessageEditorMoveDeleteItems : public BosonMessage
 {
 public:
-	BosonMessageMoveDeleteItems();
-	BosonMessageMoveDeleteItems(const QValueList<Q_ULONG>& items);
+	BosonMessageEditorMoveDeleteItems();
+	BosonMessageEditorMoveDeleteItems(const QValueList<Q_ULONG>& items);
 
 	virtual bool save(QDataStream& stream) const;
 	virtual bool load(QDataStream& stream);
@@ -141,6 +141,341 @@ public:
 
 public:
 	QValueList<Q_ULONG> mItems;
+};
+
+class BosonMessageMoveMove : public BosonMessage
+{
+public:
+	BosonMessageMoveMove();
+	BosonMessageMoveMove(bool isAttack, const BoVector2Fixed& pos, const QValueList<Q_ULONG>& items);
+
+	virtual bool save(QDataStream& stream) const;
+	virtual bool load(QDataStream& stream);
+	virtual int messageId() const
+	{
+		return BosonMessageIds::MoveMove;
+	}
+
+public:
+	Q_INT8 mIsAttack;
+	BoVector2Fixed mPos;
+	QValueList<Q_ULONG> mItems;
+};
+
+class BosonMessageMoveAttack : public BosonMessage
+{
+public:
+	BosonMessageMoveAttack() : BosonMessage() {}
+	BosonMessageMoveAttack(Q_ULONG attackedUnitId, const QValueList<Q_ULONG>& items)
+		: BosonMessage(),
+		mAttackedUnitId(attackedUnitId),
+		mItems(items)
+	{
+	}
+
+	virtual bool save(QDataStream& stream) const;
+	virtual bool load(QDataStream& stream);
+	virtual int messageId() const
+	{
+		return BosonMessageIds::MoveAttack;
+	}
+
+public:
+	Q_ULONG mAttackedUnitId;
+	QValueList<Q_ULONG> mItems;
+};
+
+class BosonMessageMoveStop : public BosonMessage
+{
+public:
+	BosonMessageMoveStop() : BosonMessage() {}
+	BosonMessageMoveStop(const QValueList<Q_ULONG>& items)
+		: BosonMessage(),
+		mItems(items)
+	{
+	}
+
+	virtual bool save(QDataStream& stream) const;
+	virtual bool load(QDataStream& stream);
+	virtual int messageId() const
+	{
+		return BosonMessageIds::MoveStop;
+	}
+
+public:
+	QValueList<Q_ULONG> mItems;
+};
+
+class BosonMessageMoveMine : public BosonMessage
+{
+public:
+	BosonMessageMoveMine() : BosonMessage() {}
+	BosonMessageMoveMine(Q_ULONG harvester, Q_ULONG resourceMine)
+		: BosonMessage(),
+		mHarvesterId(harvester),
+		mResourceMineId(resourceMine)
+	{
+	}
+
+	virtual bool save(QDataStream& stream) const;
+	virtual bool load(QDataStream& stream);
+	virtual int messageId() const
+	{
+		return BosonMessageIds::MoveMine;
+	}
+
+public:
+	Q_ULONG mHarvesterId;
+	Q_ULONG mResourceMineId;
+};
+
+class BosonMessageMoveRefine: public BosonMessage
+{
+public:
+	BosonMessageMoveRefine() : BosonMessage() {}
+	BosonMessageMoveRefine(Q_UINT32 refineryOwner, Q_ULONG refineryId, const QValueList<Q_ULONG> items)
+		: BosonMessage(),
+		mRefineryOwner(refineryOwner),
+		mRefineryId(refineryId),
+		mItems(items)
+	{
+	}
+
+	virtual bool save(QDataStream& stream) const;
+	virtual bool load(QDataStream& stream);
+	virtual int messageId() const
+	{
+		return BosonMessageIds::MoveRefine;
+	}
+
+public:
+	Q_UINT32 mRefineryOwner;
+	Q_ULONG mRefineryId;
+	QValueList<Q_ULONG> mItems;
+};
+
+// is a TODO
+class BosonMessageMoveRepair : public BosonMessage
+{
+public:
+	BosonMessageMoveRepair() : BosonMessage() {}
+	BosonMessageMoveRepair(Q_ULONG unit)
+		: BosonMessage(),
+		mUnit(unit)
+	{
+	}
+
+	virtual bool save(QDataStream& stream) const;
+	virtual bool load(QDataStream& stream);
+	virtual int messageId() const
+	{
+		return BosonMessageIds::MoveRepair;
+	}
+
+public:
+	Q_ULONG mUnit;
+};
+
+class BosonMessageMoveProduce : public BosonMessage
+{
+public:
+	BosonMessageMoveProduce() : BosonMessage() {}
+	BosonMessageMoveProduce(Q_UINT32 produceType, Q_UINT32 owner, Q_ULONG factoryId, Q_UINT32 type)
+		: BosonMessage(),
+		mProduceType(produceType),
+		mOwner(owner),
+		mFactoryId(factoryId),
+		mType(type)
+	{
+	}
+
+	virtual bool save(QDataStream& stream) const;
+	virtual bool load(QDataStream& stream);
+	virtual int messageId() const
+	{
+		return BosonMessageIds::MoveProduce;
+	}
+
+public:
+	Q_UINT32 mProduceType;
+	Q_UINT32 mOwner;
+	Q_ULONG mFactoryId;
+	Q_UINT32 mType;
+};
+
+class BosonMessageMoveProduceStop : public BosonMessage
+{
+public:
+	BosonMessageMoveProduceStop() : BosonMessage() {}
+	BosonMessageMoveProduceStop(Q_UINT32 produceType, Q_UINT32 owner, Q_ULONG factoryId, Q_UINT32 type)
+		: BosonMessage(),
+		mProduceType(produceType),
+		mOwner(owner),
+		mFactoryId(factoryId),
+		mType(type)
+	{
+	}
+
+	virtual bool save(QDataStream& stream) const;
+	virtual bool load(QDataStream& stream);
+	virtual int messageId() const
+	{
+		return BosonMessageIds::MoveProduceStop;
+	}
+
+public:
+	Q_UINT32 mProduceType;
+	Q_UINT32 mOwner;
+	Q_ULONG mFactoryId;
+	Q_UINT32 mType;
+};
+
+class BosonMessageMoveBuild : public BosonMessage
+{
+public:
+	BosonMessageMoveBuild() : BosonMessage() {}
+	BosonMessageMoveBuild(Q_UINT32 produceType, Q_UINT32 owner, Q_ULONG factoryId, const BoVector2Fixed& pos)
+		: BosonMessage(),
+		mProduceType(produceType),
+		mOwner(owner),
+		mFactoryId(factoryId),
+		mPos(pos)
+	{
+	}
+
+	virtual bool save(QDataStream& stream) const;
+	virtual bool load(QDataStream& stream);
+	virtual int messageId() const
+	{
+		return BosonMessageIds::MoveBuild;
+	}
+
+public:
+	Q_UINT32 mProduceType;
+	Q_UINT32 mOwner;
+	Q_ULONG mFactoryId;
+	BoVector2Fixed mPos;
+};
+
+class BosonMessageMoveFollow : public BosonMessage
+{
+public:
+	BosonMessageMoveFollow() : BosonMessage() {}
+	BosonMessageMoveFollow(Q_UINT32 followUnitId, const QValueList<Q_ULONG>& items)
+		: BosonMessage(),
+		mFollowUnitId(followUnitId),
+		mItems(items)
+	{
+	}
+
+	virtual bool save(QDataStream& stream) const;
+	virtual bool load(QDataStream& stream);
+	virtual int messageId() const
+	{
+		return BosonMessageIds::MoveFollow;
+	}
+
+public:
+	Q_UINT32 mFollowUnitId;
+	QValueList<Q_ULONG> mItems;
+};
+
+class BosonMessageMoveLayMine : public BosonMessage
+{
+public:
+	BosonMessageMoveLayMine() : BosonMessage() {}
+	BosonMessageMoveLayMine(const QValueList<Q_ULONG>& units, const QValueList<Q_ULONG>& weapons)
+		: BosonMessage(),
+		mUnits(units),
+		mWeapons(weapons)
+	{
+	}
+
+	virtual bool save(QDataStream& stream) const;
+	virtual bool load(QDataStream& stream);
+	virtual int messageId() const
+	{
+		return BosonMessageIds::MoveLayMine;
+	}
+
+public:
+	QValueList<Q_ULONG> mUnits;
+	QValueList<Q_ULONG> mWeapons;
+};
+
+class BosonMessageMoveDropBomb : public BosonMessage
+{
+public:
+	BosonMessageMoveDropBomb() : BosonMessage() {}
+	BosonMessageMoveDropBomb(const BoVector2Fixed& pos, const QValueList<Q_ULONG>& units, const QValueList<Q_ULONG>& weapons)
+		: BosonMessage(),
+		mPos(pos),
+		mUnits(units),
+		mWeapons(weapons)
+	{
+	}
+
+	virtual bool save(QDataStream& stream) const;
+	virtual bool load(QDataStream& stream);
+	virtual int messageId() const
+	{
+		return BosonMessageIds::MoveDropBomb;
+	}
+
+public:
+	BoVector2Fixed mPos;
+	QValueList<Q_ULONG> mUnits;
+	QValueList<Q_ULONG> mWeapons;
+};
+
+class BosonMessageMoveTeleport : public BosonMessage
+{
+public:
+	BosonMessageMoveTeleport() : BosonMessage() {}
+	BosonMessageMoveTeleport(Q_ULONG unitId, Q_UINT32 owner, const BoVector2Fixed& pos)
+		: BosonMessage(),
+		mUnitId(unitId),
+		mOwner(owner),
+		mPos(pos)
+	{
+	}
+
+	virtual bool save(QDataStream& stream) const;
+	virtual bool load(QDataStream& stream);
+	virtual int messageId() const
+	{
+		return BosonMessageIds::MoveTeleport;
+	}
+
+public:
+	Q_ULONG mUnitId;
+	Q_UINT32 mOwner;
+	BoVector2Fixed mPos;
+};
+
+class BosonMessageMoveRotate : public BosonMessage
+{
+public:
+	BosonMessageMoveRotate() : BosonMessage() {}
+	BosonMessageMoveRotate(Q_ULONG unitId, Q_UINT32 owner, const bofixed& rotate)
+		: BosonMessage(),
+		mUnitId(unitId),
+		mOwner(owner),
+		mRotate(rotate)
+	{
+	}
+
+	virtual bool save(QDataStream& stream) const;
+	virtual bool load(QDataStream& stream);
+	virtual int messageId() const
+	{
+		return BosonMessageIds::MoveRotate;
+	}
+
+public:
+	Q_ULONG mUnitId;
+	Q_UINT32 mOwner;
+	bofixed mRotate;
 };
 
 #endif

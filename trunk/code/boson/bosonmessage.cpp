@@ -21,12 +21,12 @@
 
 #include <bodebug.h>
 
-BosonMessageMovePlaceUnit::BosonMessageMovePlaceUnit()
+BosonMessageEditorMovePlaceUnit::BosonMessageEditorMovePlaceUnit()
 	: BosonMessage()
 {
 }
 
-BosonMessageMovePlaceUnit::BosonMessageMovePlaceUnit(Q_UINT32 unitType, Q_UINT32 owner, const BoVector2Fixed& pos)
+BosonMessageEditorMovePlaceUnit::BosonMessageEditorMovePlaceUnit(Q_UINT32 unitType, Q_UINT32 owner, const BoVector2Fixed& pos)
 	: BosonMessage(),
 	mUnitType(unitType),
 	mOwner(owner),
@@ -34,7 +34,7 @@ BosonMessageMovePlaceUnit::BosonMessageMovePlaceUnit(Q_UINT32 unitType, Q_UINT32
 {
 }
 
-bool BosonMessageMovePlaceUnit::save(QDataStream& stream) const
+bool BosonMessageEditorMovePlaceUnit::save(QDataStream& stream) const
 {
  stream << (Q_UINT32)BosonMessageIds::MoveEditor;
  stream << (Q_UINT32)messageId();
@@ -44,7 +44,7 @@ bool BosonMessageMovePlaceUnit::save(QDataStream& stream) const
  return true;
 }
 
-bool BosonMessageMovePlaceUnit::load(QDataStream& stream)
+bool BosonMessageEditorMovePlaceUnit::load(QDataStream& stream)
 {
  // AB: msgid and editor flag have been read already
  stream >> mUnitType;
@@ -54,12 +54,12 @@ bool BosonMessageMovePlaceUnit::load(QDataStream& stream)
 }
 
 
-BosonMessageMoveChangeTexMap::BosonMessageMoveChangeTexMap()
+BosonMessageEditorMoveChangeTexMap::BosonMessageEditorMoveChangeTexMap()
 	: BosonMessage()
 {
 }
 
-BosonMessageMoveChangeTexMap::BosonMessageMoveChangeTexMap(
+BosonMessageEditorMoveChangeTexMap::BosonMessageEditorMoveChangeTexMap(
 		const QValueVector<Q_UINT32>& cellCornersX,
 		const QValueVector<Q_UINT32>& cellCornersY,
 		const QValueVector<Q_UINT32>& cellCornersTexCount,
@@ -75,7 +75,7 @@ BosonMessageMoveChangeTexMap::BosonMessageMoveChangeTexMap(
 {
 }
 
-bool BosonMessageMoveChangeTexMap::save(QDataStream& stream) const
+bool BosonMessageEditorMoveChangeTexMap::save(QDataStream& stream) const
 {
  if (mCellCornersX.count() != mCellCornersY.count()
 		 || mCellCornersX.count() != mCellCornersTextureCount.count()
@@ -112,7 +112,7 @@ bool BosonMessageMoveChangeTexMap::save(QDataStream& stream) const
  return true;
 }
 
-bool BosonMessageMoveChangeTexMap::load(QDataStream& stream)
+bool BosonMessageEditorMoveChangeTexMap::load(QDataStream& stream)
 {
  // AB: msgid and editor flag have been read already
  Q_UINT32 count;
@@ -157,12 +157,12 @@ bool BosonMessageMoveChangeTexMap::load(QDataStream& stream)
 }
 
 
-BosonMessageMoveChangeHeight::BosonMessageMoveChangeHeight()
+BosonMessageEditorMoveChangeHeight::BosonMessageEditorMoveChangeHeight()
 	: BosonMessage()
 {
 }
 
-BosonMessageMoveChangeHeight::BosonMessageMoveChangeHeight(
+BosonMessageEditorMoveChangeHeight::BosonMessageEditorMoveChangeHeight(
 		const QValueVector<Q_UINT32> cellCornersX,
 		const QValueVector<Q_UINT32> cellCornersY,
 		const QValueVector<bofixed> cellCornersHeight
@@ -174,7 +174,7 @@ BosonMessageMoveChangeHeight::BosonMessageMoveChangeHeight(
 {
 }
 
-bool BosonMessageMoveChangeHeight::save(QDataStream& stream) const
+bool BosonMessageEditorMoveChangeHeight::save(QDataStream& stream) const
 {
  if (mCellCornersX.count() != mCellCornersY.count() ||
 		mCellCornersX.count() != mCellCornersHeight.count()) {
@@ -195,7 +195,7 @@ bool BosonMessageMoveChangeHeight::save(QDataStream& stream) const
  return true;
 }
 
-bool BosonMessageMoveChangeHeight::load(QDataStream& stream)
+bool BosonMessageEditorMoveChangeHeight::load(QDataStream& stream)
 {
  // AB: msgid and editor flag have been read already
  Q_UINT32 count;
@@ -217,30 +217,30 @@ bool BosonMessageMoveChangeHeight::load(QDataStream& stream)
  return true;
 }
 
-BosonMessageMoveDeleteItems::BosonMessageMoveDeleteItems()
+BosonMessageEditorMoveDeleteItems::BosonMessageEditorMoveDeleteItems()
 	: BosonMessage()
 {
 }
 
-BosonMessageMoveDeleteItems::BosonMessageMoveDeleteItems(const QValueList<Q_ULONG>& items)
+BosonMessageEditorMoveDeleteItems::BosonMessageEditorMoveDeleteItems(const QValueList<Q_ULONG>& items)
 	: BosonMessage(),
 	mItems(items)
 {
 }
 
-bool BosonMessageMoveDeleteItems::save(QDataStream& stream) const
+bool BosonMessageEditorMoveDeleteItems::save(QDataStream& stream) const
 {
  stream << (Q_UINT32)BosonMessageIds::MoveEditor;
  stream << (Q_UINT32)messageId();
  stream << (Q_UINT32)mItems.count();
  QValueList<Q_ULONG>::const_iterator it;
  for (it = mItems.begin(); it != mItems.end(); ++it) {
-	stream << (*it);
+	stream << (Q_ULONG)(*it);
  }
  return true;
 }
 
-bool BosonMessageMoveDeleteItems::load(QDataStream& stream)
+bool BosonMessageEditorMoveDeleteItems::load(QDataStream& stream)
 {
  // AB: msgid and editor flag have been read already
  Q_UINT32 count;
@@ -251,6 +251,345 @@ bool BosonMessageMoveDeleteItems::load(QDataStream& stream)
 	stream >> item;
 	mItems.append(item);
  }
+ return true;
+}
+
+
+BosonMessageMoveMove::BosonMessageMoveMove()
+	: BosonMessage()
+{
+}
+
+BosonMessageMoveMove::BosonMessageMoveMove(bool isAttack, const BoVector2Fixed& pos, const QValueList<Q_ULONG>& items)
+	: BosonMessage(),
+	mIsAttack(isAttack),
+	mPos(pos),
+	mItems(items)
+{
+}
+
+bool BosonMessageMoveMove::save(QDataStream& stream) const
+{
+ stream << (Q_UINT32)messageId();
+ stream << (Q_INT8)mIsAttack;
+ stream << mPos;
+ stream << (Q_UINT32)mItems.count();
+ QValueList<Q_ULONG>::const_iterator it;
+ for (it = mItems.begin(); it != mItems.end(); ++it) {
+	stream << (Q_ULONG)(*it);
+ }
+ return true;
+}
+
+bool BosonMessageMoveMove::load(QDataStream& stream)
+{
+ // AB: msgid has been read already
+ stream >> mIsAttack;
+ stream >> mPos;
+ Q_UINT32 count;
+ stream >> count;
+ mItems.clear();
+ for (Q_UINT32 i = 0; i < count; i++) {
+	Q_ULONG item;
+	stream >> item;
+	mItems.append(item);
+ }
+ return true;
+}
+
+bool BosonMessageMoveAttack::save(QDataStream& stream) const
+{
+ stream << (Q_UINT32)messageId();
+ stream << (Q_ULONG)mAttackedUnitId;
+ stream << (Q_UINT32)mItems.count();
+ QValueList<Q_ULONG>::const_iterator it;
+ for (it = mItems.begin(); it != mItems.end(); ++it) {
+	stream << (*it);
+ }
+ return true;
+}
+
+bool BosonMessageMoveAttack::load(QDataStream& stream)
+{
+ // AB: msgid has been read already
+ stream >> mAttackedUnitId;
+ Q_UINT32 count;
+ stream >> count;
+ mItems.clear();
+ for (Q_UINT32 i = 0; i < count; i++) {
+	Q_ULONG item;
+	stream >> item;
+	mItems.append(item);
+ }
+ return true;
+}
+
+bool BosonMessageMoveStop::save(QDataStream& stream) const
+{
+ stream << (Q_UINT32)messageId();
+ stream << (Q_UINT32)mItems.count();
+ QValueList<Q_ULONG>::const_iterator it;
+ for (it = mItems.begin(); it != mItems.end(); ++it) {
+	stream << (*it);
+ }
+ return true;
+}
+
+bool BosonMessageMoveStop::load(QDataStream& stream)
+{
+ // AB: msgid has been read already
+ Q_UINT32 count;
+ stream >> count;
+ mItems.clear();
+ for (Q_UINT32 i = 0; i < count; i++) {
+	Q_ULONG item;
+	stream >> item;
+	mItems.append(item);
+ }
+ return true;
+}
+
+bool BosonMessageMoveMine::save(QDataStream& stream) const
+{
+ stream << (Q_UINT32)messageId();
+ stream << (Q_ULONG)mHarvesterId;
+ stream << (Q_ULONG)mResourceMineId;
+ return true;
+}
+
+bool BosonMessageMoveMine::load(QDataStream& stream)
+{
+ // AB: msgid has been read already
+ stream >> mHarvesterId;
+ stream >> mResourceMineId;
+ return true;
+}
+
+bool BosonMessageMoveRefine::save(QDataStream& stream) const
+{
+ stream << (Q_UINT32)messageId();
+ stream << (Q_UINT32)mRefineryOwner;
+ stream << (Q_ULONG)mRefineryId;
+ stream << (Q_UINT32)mItems.count();
+ QValueList<Q_ULONG>::const_iterator it;
+ for (it = mItems.begin(); it != mItems.end(); ++it) {
+	stream << (*it);
+ }
+ return true;
+}
+
+bool BosonMessageMoveRefine::load(QDataStream& stream)
+{
+ // AB: msgid has been read already
+ stream >> mRefineryOwner;
+ stream >> mRefineryId;
+ Q_UINT32 count;
+ stream >> count;
+ mItems.clear();
+ for (Q_UINT32 i = 0; i < count; i++) {
+	Q_ULONG item;
+	stream >> item;
+	mItems.append(item);
+ }
+ return true;
+}
+
+bool BosonMessageMoveRepair::save(QDataStream& stream) const
+{
+ stream << (Q_UINT32)messageId();
+ return true;
+}
+
+bool BosonMessageMoveRepair::load(QDataStream& stream)
+{
+ // AB: msgid has been read already
+ return true;
+}
+
+bool BosonMessageMoveProduce::save(QDataStream& stream) const
+{
+ stream << (Q_UINT32)messageId();
+ stream << (Q_UINT32)mProduceType;
+ stream << (Q_UINT32)mOwner;
+ stream << (Q_ULONG)mFactoryId;
+ stream << (Q_UINT32)mType;
+ return true;
+}
+
+bool BosonMessageMoveProduce::load(QDataStream& stream)
+{
+ // AB: msgid has been read already
+ stream >> mProduceType;
+ stream >> mOwner;
+ stream >> mFactoryId;
+ stream >> mType;
+ return true;
+}
+
+bool BosonMessageMoveProduceStop::save(QDataStream& stream) const
+{
+ stream << (Q_UINT32)messageId();
+ stream << (Q_UINT32)mProduceType;
+ stream << (Q_UINT32)mOwner;
+ stream << (Q_ULONG)mFactoryId;
+ stream << (Q_UINT32)mType;
+ return true;
+}
+
+bool BosonMessageMoveProduceStop::load(QDataStream& stream)
+{
+ // AB: msgid has been read already
+ stream >> mProduceType;
+ stream >> mOwner;
+ stream >> mFactoryId;
+ stream >> mType;
+ return true;
+}
+
+bool BosonMessageMoveBuild::save(QDataStream& stream) const
+{
+ stream << (Q_UINT32)messageId();
+ stream << (Q_UINT32)mProduceType;
+ stream << (Q_UINT32)mOwner;
+ stream << (Q_ULONG)mFactoryId;
+ stream << mPos;
+ return true;
+}
+
+bool BosonMessageMoveBuild::load(QDataStream& stream)
+{
+ // AB: msgid has been read already
+ stream >> mProduceType;
+ stream >> mOwner;
+ stream >> mFactoryId;
+ stream >> mPos;
+ return true;
+}
+
+bool BosonMessageMoveFollow::save(QDataStream& stream) const
+{
+ stream << (Q_UINT32)messageId();
+ stream << (Q_UINT32)mFollowUnitId;
+ stream << (Q_UINT32)mItems.count();
+ QValueList<Q_ULONG>::const_iterator it;
+ for (it = mItems.begin(); it != mItems.end(); ++it) {
+	stream << (*it);
+ }
+ return true;
+}
+
+bool BosonMessageMoveFollow::load(QDataStream& stream)
+{
+ // AB: msgid has been read already
+ stream >> mFollowUnitId;
+ Q_UINT32 count;
+ stream >> count;
+ mItems.clear();
+ for (Q_UINT32 i = 0; i < count; i++) {
+	Q_ULONG item;
+	stream >> item;
+	mItems.append(item);
+ }
+ return true;
+}
+
+bool BosonMessageMoveLayMine::save(QDataStream& stream) const
+{
+ if (mUnits.count() != mWeapons.count()) {
+	boError() << k_funcinfo << "unit count must match weapon count" << endl;
+	return false;
+ }
+ stream << (Q_UINT32)mUnits.count();
+ for (unsigned int i = 0; i < mUnits.count(); i++) {
+	stream << (Q_ULONG)mUnits[i];
+	stream << (Q_ULONG)mWeapons[i];
+ }
+ return true;
+}
+
+bool BosonMessageMoveLayMine::load(QDataStream& stream)
+{
+ // AB: msgid has been read already
+ mUnits.clear();
+ mWeapons.clear();
+ Q_UINT32 count;
+ stream >> count;
+ for (Q_UINT32 i = 0; i < count; i++) {
+	Q_ULONG unit;
+	Q_ULONG weapon;
+	stream >> unit;
+	stream >> weapon;
+	mUnits.append(unit);
+	mWeapons.append(weapon);
+ }
+ return true;
+}
+
+bool BosonMessageMoveDropBomb::save(QDataStream& stream) const
+{
+ if (mUnits.count() != mWeapons.count()) {
+	boError() << k_funcinfo << "unit count must match weapon count" << endl;
+	return false;
+ }
+ stream << mPos;
+ stream << (Q_UINT32)mUnits.count();
+ for (unsigned int i = 0; i < mUnits.count(); i++) {
+	stream << (Q_ULONG)mUnits[i];
+	stream << (Q_ULONG)mWeapons[i];
+ }
+ return true;
+}
+
+bool BosonMessageMoveDropBomb::load(QDataStream& stream)
+{
+ // AB: msgid has been read already
+ mUnits.clear();
+ mWeapons.clear();
+ stream >> mPos;
+ Q_UINT32 count;
+ stream >> count;
+ for (Q_UINT32 i = 0; i < count; i++) {
+	Q_ULONG unit;
+	Q_ULONG weapon;
+	stream >> unit;
+	stream >> weapon;
+	mUnits.append(unit);
+	mWeapons.append(weapon);
+ }
+ return true;
+}
+
+bool BosonMessageMoveTeleport::save(QDataStream& stream) const
+{
+ stream << (Q_ULONG)mUnitId;
+ stream << (Q_UINT32)mOwner;
+ stream << mPos;
+ return true;
+}
+
+bool BosonMessageMoveTeleport::load(QDataStream& stream)
+{
+ // AB: msgid has been read already
+ stream >> mUnitId;
+ stream >> mOwner;
+ stream >> mPos;
+ return true;
+}
+
+bool BosonMessageMoveRotate::save(QDataStream& stream) const
+{
+ stream << (Q_ULONG)mUnitId;
+ stream << (Q_UINT32)mOwner;
+ stream << mRotate;
+ return true;
+}
+
+bool BosonMessageMoveRotate::load(QDataStream& stream)
+{
+ // AB: msgid has been read already
+ stream >> mUnitId;
+ stream >> mOwner;
+ stream >> mRotate;
  return true;
 }
 

@@ -22,6 +22,7 @@
 #include "../bo3dtools.h"
 #include "../player.h"
 #include "../boson.h"
+#include "../bosonmessage.h"
 #include "../bosonmessageids.h"
 #include "../bosoncanvas.h"
 #include "../bosoncollisions.h"
@@ -325,16 +326,14 @@ void BosonScript::moveUnit(int player, int id, float x, float y)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  // tell the clients we want to move units:
-  stream << (Q_UINT32)BosonMessageIds::MoveMove;
-  // We want to move without attacking
-  stream << (Q_UINT8)0;
-  // tell them where to move to:
-  stream << BoVector2Fixed(x, y);
-  // tell them how many units:
-  stream << (Q_UINT32)1;
-  // Unit id
-  stream << (Q_ULONG)id;
+  QValueList<Q_ULONG> moveUnits;
+  moveUnits.append((Q_ULONG)id);
+  BosonMessageMoveMove message(false, BoVector2Fixed(x, y), moveUnits);
+  if(!message.save(stream))
+  {
+    boError() << k_funcinfo << "failed saving message " << message.messageId() << " to stream" << endl;
+    return;
+  }
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(player, msg);
@@ -345,16 +344,14 @@ void BosonScript::moveUnitWithAttacking(int player, int id, float x, float y)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  // tell the clients we want to move units:
-  stream << (Q_UINT32)BosonMessageIds::MoveMove;
-  // We want to move with attacking
-  stream << (Q_UINT8)1;
-  // tell them where to move to:
-  stream << BoVector2Fixed(x, y);
-  // tell them how many units:
-  stream << (Q_UINT32)1;
-  // Unit id
-  stream << (Q_ULONG)id;
+  QValueList<Q_ULONG> moveUnits;
+  moveUnits.append((Q_ULONG)id);
+  BosonMessageMoveMove message(true, BoVector2Fixed(x, y), moveUnits);
+  if(!message.save(stream))
+  {
+    boError() << k_funcinfo << "failed saving message " << message.messageId() << " to stream" << endl;
+    return;
+  }
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(player, msg);
@@ -365,13 +362,14 @@ void BosonScript::attack(int player, int attackerId, int targetId)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  // tell the clients we want to attack:
-  stream << (Q_UINT32)BosonMessageIds::MoveAttack;
-  // tell them which unit to attack:
-  stream << (Q_ULONG)targetId;
-  // tell them how many units attack:
-  stream << (Q_UINT32)1;
-  stream << (Q_ULONG)attackerId;
+  QValueList<Q_ULONG> units;
+  units.append((Q_ULONG)attackerId);
+  BosonMessageMoveAttack message(targetId, units);
+  if(!message.save(stream))
+  {
+    boError() << k_funcinfo << "failed saving message " << message.messageId() << " to stream" << endl;
+    return;
+  }
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(player, msg);
@@ -382,11 +380,14 @@ void BosonScript::stopUnit(int player, int id)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  // tell the clients we want to move units:
-  stream << (Q_UINT32)BosonMessageIds::MoveStop;
-  // tell them how many units:
-  stream << (Q_UINT32)1;
-  stream << (Q_ULONG)id;
+  QValueList<Q_ULONG> units;
+  units.append((Q_ULONG)id);
+  BosonMessageMoveStop message(units);
+  if(!message.save(stream))
+  {
+    boError() << k_funcinfo << "failed saving message " << message.messageId() << " to stream" << endl;
+    return;
+  }
 
   QDataStream msg(b, IO_WriteOnly);
   sendInput(player, msg);
@@ -415,9 +416,12 @@ void BosonScript::mineUnit(int player, int id, float x, float y)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  stream << (Q_UINT32)BosonMessageIds::MoveMine;
-  stream << (Q_ULONG)id;
-  stream << (Q_ULONG)resourceUnit->id();
+  BosonMessageMoveMine message(id, resourceUnit->id());
+  if(!message.save(stream))
+  {
+    boError() << k_funcinfo << "failed saving message " << message.messageId() << " to stream" << endl;
+    return;
+  }
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(player, msg);
@@ -428,10 +432,12 @@ void BosonScript::setUnitRotation(int player, int id, float rotation)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  stream << (Q_UINT32)BosonMessageIds::MoveRotate;
-  stream << (Q_UINT32)player;
-  stream << (Q_ULONG)id;
-  stream << rotation;
+  BosonMessageMoveRotate message(id, player, rotation);
+  if(!message.save(stream))
+  {
+    boError() << k_funcinfo << "failed saving message " << message.messageId() << " to stream" << endl;
+    return;
+  }
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(player, msg);
@@ -442,13 +448,16 @@ void BosonScript::dropBomb(int player, int id, int weapon, float x, float y)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  stream << (Q_UINT32)BosonMessageIds::MoveDropBomb;
-  // tell place
-  stream << BoVector2Fixed(x, y);
-  // tell them how many units attack:
-  stream << (Q_UINT32)1;
-  stream << (Q_UINT32)id;
-  stream << (Q_UINT32)weapon;
+  QValueList<Q_ULONG> units;
+  QValueList<Q_ULONG> weapons;
+  units.append((Q_ULONG)id);
+  weapons.append((Q_ULONG)weapon);
+  BosonMessageMoveDropBomb message(BoVector2Fixed(x, y), units, weapons);
+  if(!message.save(stream))
+  {
+    boError() << k_funcinfo << "failed saving message " << message.messageId() << " to stream" << endl;
+    return;
+  }
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(player, msg);
@@ -459,11 +468,12 @@ void BosonScript::produceUnit(int player, int factory, int production)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  stream << (Q_UINT32)BosonMessageIds::MoveProduce;
-  stream << (Q_UINT32)ProduceUnit;
-  stream << (Q_UINT32)player;
-  stream << (Q_ULONG)factory;
-  stream << (Q_UINT32)production;
+  BosonMessageMoveProduce message((Q_UINT32)ProduceUnit, player, factory, production);
+  if(!message.save(stream))
+  {
+    boError() << k_funcinfo << "failed saving message " << message.messageId() << " to stream" << endl;
+    return;
+  }
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(player, msg);
@@ -479,10 +489,14 @@ void BosonScript::spawnUnit(int player, int type, float x, float y)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
+#warning AB: This is an editor message. it should not be here.
+  boWarning() << k_funcinfo << "FIXME" << endl;
+#if 0
   stream << (Q_UINT32)BosonMessageIds::MovePlaceUnit;
   stream << (Q_UINT32)player;
   stream << (Q_UINT32)type;
   stream << BoVector2Fixed(x, y);
+#endif
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(player, msg);
@@ -498,10 +512,12 @@ void BosonScript::teleportUnit(int player, int id, float x, float y)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  stream << (Q_UINT32)BosonMessageIds::MoveTeleport;
-  stream << (Q_UINT32)player;
-  stream << (Q_UINT32)id;
-  stream << BoVector2Fixed(x, y);
+  BosonMessageMoveTeleport message(id, player, BoVector2Fixed(x, y));
+  if(!message.save(stream))
+  {
+    boError() << k_funcinfo << "failed saving message " << message.messageId() << " to stream" << endl;
+    return;
+  }
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(player, msg);
@@ -551,11 +567,12 @@ void BosonScript::placeProduction(int player, int factoryid, float x, float y)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  stream << (Q_UINT32)BosonMessageIds::MoveBuild;
-  stream << (Q_UINT32)ProduceUnit;
-  stream << (Q_ULONG)u->id();
-  stream << (Q_UINT32)p->id();
-  stream << BoVector2Fixed(x, y);
+  BosonMessageMoveBuild message((Q_UINT32)ProduceUnit, p->id(), u->id(), BoVector2Fixed(x, y));
+  if(!message.save(stream))
+  {
+    boError() << k_funcinfo << "failed saving message " << message.messageId() << " to stream" << endl;
+    return;
+  }
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(player, msg);

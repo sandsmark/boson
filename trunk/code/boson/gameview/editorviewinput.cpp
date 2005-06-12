@@ -268,7 +268,7 @@ bool EditorViewInput::actionPlace(const BoVector3Fixed& canvasVector, bool exact
 		stream << (Q_INT32)x;
 		stream << (Q_INT32)y;
 #else
-		BosonMessageMovePlaceCell message;
+		BosonMessageEditorMovePlaceCell message;
 		...
 #endif
 		ret = true;
@@ -335,7 +335,7 @@ bool EditorViewInput::actionPlace(const BoVector3Fixed& canvasVector, bool exact
 	QByteArray b;
 	QDataStream stream(b, IO_WriteOnly);
 
-	BosonMessageMoveChangeTexMap message(cornersX, cornersY, cornersTextureCount, cornerTextures, cornerAlpha);
+	BosonMessageEditorMoveChangeTexMap message(cornersX, cornersY, cornersTextureCount, cornerTextures, cornerAlpha);
 	if (!message.save(stream)) {
 		boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
 		return false;
@@ -433,7 +433,7 @@ void EditorViewInput::deleteSelectedUnits()
 
  QByteArray b;
  QDataStream stream(b, IO_WriteOnly);
- BosonMessageMoveDeleteItems message(items);
+ BosonMessageEditorMoveDeleteItems message(items);
  if (!message.save(stream)) {
 	boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
 	return;
