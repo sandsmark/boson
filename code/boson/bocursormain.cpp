@@ -185,7 +185,7 @@ int main(int argc, char **argv)
 		version,
 		description,
 		KAboutData::License_GPL,
-		"(C) 2002 The Boson team",
+		"(C) 2002-2005 The Boson team",
 		0,
 		"http://boson.eu.org");
  about.addAuthor( "Andreas Beckermann", I18N_NOOP("Design & Coding"), "b_mann@gmx.de" );
