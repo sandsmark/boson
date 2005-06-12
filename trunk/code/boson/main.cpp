@@ -78,7 +78,7 @@ int main(int argc, char **argv)
         version,
         description,
         KAboutData::License_GPL,
-        "(C) 1999-2000,2001-2004 The Boson team",
+        "(C) 1999-2000,2001-2005 The Boson team",
         0,
         "http://boson.eu.org");
  about.addAuthor("Thomas Capricelli", I18N_NOOP("Initial Game Design & Coding"),
