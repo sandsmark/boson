@@ -2116,3 +2116,8 @@ bool BosonCanvas::loadConditions(const QDomElement& root)
  return eventListener()->loadConditions(root);
 }
 
+BosonItem* BosonCanvas::findItem(unsigned long int id) const
+{
+ return d->mAllItems.findItem(id);
+}
+
