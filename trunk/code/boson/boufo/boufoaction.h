@@ -274,6 +274,9 @@ public:
 		GameNew, GameLoad, GameSave, GameSaveAs,
 		GameEnd, GamePause, GameQuit,
 
+		// Edit Menu
+		EditUndo, EditRedo,
+
 		// Settings menu
 		ShowMenubar, ShowToolbar, ShowStatusbar,
 		KeyBindings, Preferences,
@@ -314,6 +317,10 @@ public:
 	static BoUfoToggleAction* gamePause(const QObject* receiver = 0, const char* slot = 0,
 			BoUfoActionCollection* parent = 0, const char* name = 0);
 	static BoUfoAction* gameQuit(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+	static BoUfoAction* editUndo(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+	static BoUfoAction* editRedo(const QObject* receiver = 0, const char* slot = 0,
 			BoUfoActionCollection* parent = 0, const char* name = 0);
 	static BoUfoToggleAction* showMenubar(const QObject* receiver = 0, const char* slot = 0,
 			BoUfoActionCollection* parent = 0, const char* name = 0);

@@ -22,6 +22,7 @@
 
 #include "../boaction.h"
 #include "../unit.h"
+#include "../unitproperties.h"
 #include "../player.h"
 #include "../playerio.h"
 #include "../boselection.h"
@@ -35,6 +36,8 @@
 #include <qptrlist.h>
 #include <qdatastream.h>
 #include <qpoint.h>
+
+#include <krandomsequence.h>
 
 
 // AB: because of the event listener the name "Input" is not correct anymore.
@@ -410,8 +413,21 @@ void BosonLocalPlayerInput::placeUnit(Player* owner, unsigned long int unitType,
 {
   boDebug() << k_funcinfo << endl;
 
-  // editor message
-  BosonMessageEditorMovePlaceUnit message(unitType, owner->id(), BoVector2Fixed(x, y));
+  bofixed rotation = 0;
+  if (owner->unitProperties(unitType))
+  {
+    if (owner->unitProperties(unitType)->isMobile())
+    {
+#warning FIXME: this will break network
+      // TODO: we need a separate random object, that does not influence the
+      // random numbers/the seed of the random object of the game
+      //
+      // atm this is not high priority, because placeUnit() can be called in
+      // editor mode only anyway.
+      rotation = bofixed(boGame->random()->getLong(359));
+    }
+  }
+  BosonMessageEditorMovePlaceUnit message(unitType, owner->id(), BoVector2Fixed(x, y), rotation);
 
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
@@ -429,7 +445,6 @@ void BosonLocalPlayerInput::changeHeight(int x, int y, bofixed height)
 {
   boDebug() << k_funcinfo << endl;
 
-  // editor message
   QValueVector<Q_UINT32> cornersX(1);
   QValueVector<Q_UINT32> cornersY(1);
   QValueVector<bofixed> cornersHeight(1);

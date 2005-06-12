@@ -407,6 +407,9 @@ void BosonMenuInputData::initUfoEditorActions()
 		SIGNAL(signalEditConditions()), actionCollection(),
 		"editor_edit_conditions");
 
+ BoUfoStdAction::editUndo(this, SIGNAL(signalEditorUndo()), actionCollection());
+ BoUfoStdAction::editRedo(this, SIGNAL(signalEditorRedo()), actionCollection());
+
 // KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection()); // FIXME: slotEditorPreferences()
 
  createEditorPlayerMenu();
@@ -754,6 +757,10 @@ void BosonMenuInput::initIO(KPlayer* player)
 		this, SLOT(slotEditorImportTexMap()));
  connect(mData, SIGNAL(signalEditorExportTexMap()),
 		this, SLOT(slotEditorExportTexMap()));
+ connect(mData, SIGNAL(signalEditorUndo()),
+		this, SIGNAL(signalEditorUndo()));
+ connect(mData, SIGNAL(signalEditorRedo()),
+		this, SIGNAL(signalEditorRedo()));
 
 }
 

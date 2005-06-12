@@ -1407,6 +1407,10 @@ const BoUfoStdActionInfo g_actionInfo[] = {
 	{ BoUfoStdAction::GamePause, KStdAccel::AccelNone, Qt::Key_P, "game_pause", I18N_NOOP("Pa&use"), 0, "player_pause"},
 	{ BoUfoStdAction::GameQuit, KStdAccel::Quit, 0, "game_quit", I18N_NOOP("&Quit"), 0, "exit"},
 
+	// Edit menu
+	{ BoUfoStdAction::EditUndo, KStdAccel::Undo, 0, "edit_undo", I18N_NOOP("&Undo"), 0, "undo"},
+	{ BoUfoStdAction::EditRedo, KStdAccel::Redo, 0, "edit_redo", I18N_NOOP("Re&do"), 0, "redo"},
+
 	// Settings menu
 	{ BoUfoStdAction::ShowMenubar, KStdAccel::ShowMenubar, 0, "options_show_menubar", I18N_NOOP("Show &Menubar"), 0, "showmenu"},
 	{ BoUfoStdAction::ShowToolbar, KStdAccel::AccelNone, 0, "options_show_toolbar", I18N_NOOP("Show &Toolbar"), 0, 0},
@@ -1497,6 +1501,9 @@ ACTION(fileSave, FileSave, BoUfoAction)
 ACTION(fileSaveAs, FileSaveAs, BoUfoAction)
 ACTION(fileClose, FileClose, BoUfoAction)
 ACTION(fileQuit, FileQuit, BoUfoAction)
+
+ACTION(editUndo, EditUndo, BoUfoAction)
+ACTION(editRedo, EditRedo, BoUfoAction)
 
 ACTION(gameNew, GameNew, BoUfoAction)
 ACTION(gameLoad, GameLoad, BoUfoAction)

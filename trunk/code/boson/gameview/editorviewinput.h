@@ -23,6 +23,7 @@
 
 class BoSelection;
 class BoSpecificAction;
+class BosonMessageEditorMove;
 
 class EditorViewInputPrivate;
 
@@ -70,8 +71,17 @@ public:
 
 	virtual bool selectAll(const UnitProperties* prop, bool replace);
 
+	virtual void undo();
+	virtual void redo();
+
 public slots:
 	virtual void slotMoveSelection(int cellX, int cellY);
+
+protected slots:
+	void slotClearUndoStack();
+	void slotClearRedoStack();
+	void slotNewUndoMessage(const BosonMessageEditorMove&);
+	void slotNewRedoMessage(const BosonMessageEditorMove&);
 
 protected:
 	//AB: use BoMouseEvent as 1st parameter

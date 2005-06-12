@@ -1273,6 +1273,16 @@ void BosonGameView::slotEditorEditHeight(bool on)
  }
 }
 
+void BosonGameView::slotEditorUndo()
+{
+ displayInput()->undo();
+}
+
+void BosonGameView::slotEditorRedo()
+{
+ displayInput()->redo();
+}
+
 void BosonGameView::slotWidgetShown()
 {
  if (displayInput()) {
@@ -1355,6 +1365,10 @@ void BosonGameView::setGameMode(bool mode)
 			this, SLOT(slotEditorDeleteSelectedUnits()));
 	connect(io, SIGNAL(signalEditorEditHeight(bool)),
 			this, SLOT(slotEditorEditHeight(bool)));
+	connect(io, SIGNAL(signalEditorUndo()),
+			this, SLOT(slotEditorUndo()));
+	connect(io, SIGNAL(signalEditorRedo()),
+			this, SLOT(slotEditorRedo()));
 
  }
 }
