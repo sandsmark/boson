@@ -88,6 +88,8 @@ signals: // editor actions
 	void signalEditorExportHeightMap();
 	void signalEditorImportTexMap();
 	void signalEditorExportTexMap();
+	void signalEditorUndo();
+	void signalEditorRedo();
 
 
 protected:
@@ -161,6 +163,8 @@ signals:
 	void signalEditorShowPlaceGround();
 	void signalEditorDeleteSelectedUnits();
 	void signalEditorEditHeight(bool);
+	void signalEditorUndo();
+	void signalEditorRedo();
 
 protected slots:
 	void slotRotateLeft();

@@ -47,6 +47,8 @@
 #include <klocale.h>
 #include <kapplication.h>
 
+#include <qptrstack.h>
+
 #include <math.h>
 
 
@@ -162,6 +164,9 @@ public:
 	{
 	}
 	Placement mPlacement;
+
+	QPtrStack<BosonMessageEditorMove> mUndoStack;
+	QPtrStack<BosonMessageEditorMove> mRedoStack;
 };
 
 EditorViewInput::EditorViewInput()
@@ -169,10 +174,21 @@ EditorViewInput::EditorViewInput()
 {
  d = new EditorViewInputPrivate;
  setActionType(ActionPlacementPreview); // dummy initialization
+
+ connect(boGame, SIGNAL(signalEditorClearUndoStack()),
+		this, SLOT(slotClearUndoStack()));
+ connect(boGame, SIGNAL(signalEditorClearRedoStack()),
+		this, SLOT(slotClearRedoStack()));
+ connect(boGame, SIGNAL(signalEditorNewUndoMessage(const BosonMessageEditorMove&)),
+		this, SLOT(slotNewUndoMessage(const BosonMessageEditorMove&)));
+ connect(boGame, SIGNAL(signalEditorNewRedoMessage(const BosonMessageEditorMove&)),
+		this, SLOT(slotNewRedoMessage(const BosonMessageEditorMove&)));
 }
 
 EditorViewInput::~EditorViewInput()
 {
+ slotClearRedoStack();
+ slotClearUndoStack();
  delete d;
 }
 
@@ -534,5 +550,92 @@ void EditorViewInput::updateCursor()
  // AB: this especially calls setWidgetCursor(), this is necessary in case the
  // cursor was hidden before
  c->setCursor(CursorDefault);
+}
+
+void EditorViewInput::slotClearUndoStack()
+{
+ while (!d->mUndoStack.isEmpty()) {
+	BosonMessageEditorMove* m = d->mUndoStack.pop();
+	delete m;
+ }
+}
+
+void EditorViewInput::slotClearRedoStack()
+{
+ while (!d->mRedoStack.isEmpty()) {
+	BosonMessageEditorMove* m = d->mRedoStack.pop();
+	delete m;
+ }
+}
+
+void EditorViewInput::slotNewUndoMessage(const BosonMessageEditorMove& undo)
+{
+ // AB: a new undo message implies a new message was processed. therefore we
+ // must clear the redo stack. this should have been done by the message
+ // already, so this is probably a noop and here for safety only.
+ slotClearRedoStack();
+
+ BosonMessageEditorMove* m = 0;
+ m = BosonMessageEditorMove::newCopy(undo);
+ if (!m) {
+	boError() << k_funcinfo << "unable to create a copy of message " << undo.messageId() << endl;
+	return;
+ }
+ d->mUndoStack.push(m);
+}
+
+void EditorViewInput::slotNewRedoMessage(const BosonMessageEditorMove& redo)
+{
+ BosonMessageEditorMove* m = 0;
+ m = BosonMessageEditorMove::newCopy(redo);
+ if (!m) {
+	boError() << k_funcinfo << "unable to create a copy of message " << redo.messageId() << endl;
+	return;
+ }
+ d->mRedoStack.push(m);
+}
+
+void EditorViewInput::undo()
+{
+ BO_CHECK_NULL_RET(localPlayerInput());
+ BosonMessageEditorMove* message = d->mUndoStack.pop();
+ if (!message) {
+	boWarning() << k_funcinfo << "no message on stack" << endl;
+	return;
+ }
+
+ QByteArray b;
+ QDataStream stream(b, IO_WriteOnly);
+ if (!message->save(stream)) {
+	boError() << k_funcinfo << "unable to save message (" << message->messageId() << ")" << endl;
+	return;
+ }
+
+ delete message;
+
+ QDataStream msg(b, IO_ReadOnly);
+ localPlayerInput()->sendInput(msg);
+}
+
+void EditorViewInput::redo()
+{
+ BO_CHECK_NULL_RET(localPlayerInput());
+ BosonMessageEditorMove* message = d->mRedoStack.pop();
+ if (!message) {
+	boWarning() << k_funcinfo << "no message on stack" << endl;
+	return;
+ }
+
+ QByteArray b;
+ QDataStream stream(b, IO_WriteOnly);
+ if (!message->save(stream)) {
+	boError() << k_funcinfo << "unable to save message (" << message->messageId() << ")" << endl;
+	return;
+ }
+
+ delete message;
+
+ QDataStream msg(b, IO_ReadOnly);
+ localPlayerInput()->sendInput(msg);
 }
 

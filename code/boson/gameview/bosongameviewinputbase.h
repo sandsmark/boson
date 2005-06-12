@@ -176,12 +176,12 @@ public:
 	void selectUnits(QPtrList<Unit>, bool replace);
 
 	/**
-	 * See @ref EditorView::placeUnit
+	 * See @ref EditorViewInput::placeUnit
 	 **/
 	virtual void placeUnit(unsigned long int unitType, Player* owner) { Q_UNUSED(unitType); Q_UNUSED(owner); }
 
 	/**
-	 * See @ref EditorView::placeGround
+	 * See @ref EditorViewInput::placeGround
 	 **/
 	virtual void placeGround(unsigned int textureCount, unsigned char* alpha)
 	{
@@ -190,9 +190,12 @@ public:
 	}
 
 	/**
-	 * See @ref EditorView::deleteSelectedUnits
+	 * See @ref EditorViewInput::deleteSelectedUnits
 	 **/
 	virtual void deleteSelectedUnits() { }
+
+	virtual void undo() { }
+	virtual void redo() { }
 
 signals:
 	/**

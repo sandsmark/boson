@@ -1719,9 +1719,6 @@ bool MobileUnit::init()
 
  // FIXME: loading!
  setEffects(unitProperties()->newConstructedEffects(x() + width() / 2, y() + height() / 2, z()));
-
- setRotation(bofixed(owner()->game()->random()->getLong(359)));
- updateRotation();
  return true;
 }
 

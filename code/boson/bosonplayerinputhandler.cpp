@@ -37,15 +37,15 @@
 
 #include <klocale.h>
 
+#include <qptrstack.h>
+#include <qdom.h>
+
 #include <math.h>
 
-BosonPlayerInputHandler::BosonPlayerInputHandler(Boson* game) : QObject(0, "bosonplayerinputhandler")
+BosonPlayerInputHandler::BosonPlayerInputHandler(Boson* game)
+	: QObject(0, "bosonplayerinputhandler")
 {
  mGame = game;
- connect(this, SIGNAL(signalChangeTexMap(int, int, unsigned int, unsigned int*, unsigned char*)),
-		mGame, SIGNAL(signalChangeTexMap(int, int, unsigned int, unsigned int*, unsigned char*)));
- connect(this, SIGNAL(signalChangeHeight(int, int, float)),
-		mGame, SIGNAL(signalChangeHeight(int, int, float)));
 }
 
 BosonPlayerInputHandler::~BosonPlayerInputHandler()
@@ -812,54 +812,16 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
 			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
 			break;
 		}
-		Q_UINT32 unitType = message.mUnitType;
-		Q_UINT32 owner = message.mOwner;
-		BoVector2Fixed pos = message.mPos;
 
-		Player* p = 0;
-		if (owner >= 1024) { // a KPlayer ID
-			p = findPlayer(owner);
-		} else {
-			p = (Player*)mGame->playerList()->at(owner);
-		}
-		if (!p) {
-			boError() << k_lineinfo << "Cannot find player " << owner << endl;
+		Unit* u = editorPlaceUnit(message.mOwner, message.mUnitType, message.mPos, message.mRotation);
+
+		if (!u) {
+			boError() << k_funcinfo << "placing unit failed" << endl;
 			break;
 		}
 
-		// First make sure unit can be placed there
-		// We must only check if cells aren't occupied and if unit can go there,
-		//  because everything else should be checked before placing anything. But
-		//  occupied status of cell might have changed already.
-		const UnitProperties* prop = p->speciesTheme()->unitProperties(unitType);
-		/*bofixed width = prop->unitWidth();
-		bofixed height = prop->unitHeight();
-		BoRectFixed r(pos, pos + BoVector2Fixed(width, height));
-		if (!canvas()->canGo(prop, r)) {
-			boWarning() << k_funcinfo << "Unit with type " << unitType << " can't go to (" << pos.x() << "; " << pos.y() << ")" << endl;
-			break;
-		}
-		if (canvas()->collisions()->cellsOccupied(r)) {
-			boWarning() << k_funcinfo << "Cells at (" << pos.x() << "; " << pos.y() << ") are occupied" << endl;
-			break;
-		}*/
-
-		BoVector3Fixed pos3(pos.x(), pos.y(), 0.0f);
-		Unit* u = (Unit*)canvas()->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType), pos3);
-		// Facilities will be fully constructed by default
-		if (u->isFacility()) {
-			((Facility*)u)->setConstructionStep(((Facility*)u)->constructionSteps());
-		}
-		// Resource mines will have 20000 minerals / 10000 oil by default
-		if (u->plugin(UnitPlugin::ResourceMine)) {
-			ResourceMinePlugin* res = (ResourceMinePlugin*)u->plugin(UnitPlugin::ResourceMine);
-			if (res->canProvideMinerals()) {
-				res->setMinerals(20000);
-			}
-			if (res->canProvideOil()) {
-				res->setOil(10000);
-			}
-		}
+		BosonMessageEditorMoveUndoPlaceUnit undo(u->id(), message);
+		emit signalEditorNewUndoMessage(undo);
 		break;
 	}
 	case BosonMessageIds::MoveChangeTexMap:
@@ -921,7 +883,70 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
 			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
 			break;
 		}
-		canvas()->deleteItems(message.mItems);
+
+		BosonMessageEditorMove* undo = createNewUndoDeleteItemsMessage(message);
+
+		editorDeleteItems(message.mItems);
+
+		emit signalEditorNewUndoMessage(*undo);
+		delete undo;
+
+		break;
+	}
+	case BosonMessageIds::MoveUndoPlaceUnit:
+	{
+		BosonMessageEditorMoveUndoPlaceUnit message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			break;
+		}
+
+		editorDeleteItems(message.mDeleteUnit.mItems);
+
+		// AB: no additional information required here for redo
+		emit signalEditorNewRedoMessage(message.mMessage);
+		break;
+	}
+	case BosonMessageIds::MoveUndoDeleteItems:
+	{
+		BosonMessageEditorMoveUndoDeleteItems message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			break;
+		}
+
+		QValueList<Q_ULONG> redoDeleteItems;
+		for (unsigned int i = 0; i < message.mUnits.count(); i++) {
+			BosonMessageEditorMovePlaceUnit* p = message.mUnits[i];
+
+			Unit* u = editorPlaceUnit(p->mOwner, p->mUnitType, p->mPos, p->mRotation);
+
+			if (!u) {
+				boError() << k_funcinfo << "placing unit failed" << endl;
+				continue;
+			}
+
+			// AB: we even add this to redo if loading the unit from
+			// xml fails
+			redoDeleteItems.append(u->id());
+
+			QString xml = message.mUnitsData[i];
+			QDomDocument doc;
+			if (!doc.setContent(xml)) {
+				boError() << k_funcinfo << "invalid xml string" << endl;
+				continue;
+			}
+			QDomElement root = doc.documentElement();
+			if (!u->loadFromXML(root)) {
+				boError() << k_funcinfo << "unable to load unit " << u->id() << " from XML" << endl;
+				continue;
+			}
+		}
+
+
+		// for redo we need the new unit IDs
+		message.mMessage.mItems = redoDeleteItems;
+		emit signalEditorNewRedoMessage(message.mMessage);
 		break;
 	}
 	default:
@@ -932,4 +957,105 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
  return true;
 }
 
+void BosonPlayerInputHandler::editorDeleteItems(const QValueList<Q_ULONG>& items)
+{
+ BO_CHECK_NULL_RET(canvas());
+ canvas()->deleteItems(items);
+}
+
+Unit* BosonPlayerInputHandler::editorPlaceUnit(Q_UINT32 owner, Q_UINT32 unitType, const BoVector2Fixed& pos, const bofixed& rotation)
+{
+ BO_CHECK_NULL_RET0(canvas());
+
+ Player* p = 0;
+ if (owner >= 1024) { // a KPlayer ID
+	p = findPlayer(owner);
+ } else {
+	p = (Player*)mGame->playerList()->at(owner);
+ }
+ if (!p) {
+	boError() << k_lineinfo << "Cannot find player " << owner << endl;
+	return 0;
+ }
+
+ // First make sure unit can be placed there
+ // We must only check if cells aren't occupied and if unit can go there,
+ //  because everything else should be checked before placing anything. But
+ //  occupied status of cell might have changed already.
+ const UnitProperties* prop = p->speciesTheme()->unitProperties(unitType);
+ /*bofixed width = prop->unitWidth();
+ bofixed height = prop->unitHeight();
+ BoRectFixed r(pos, pos + BoVector2Fixed(width, height));
+ if (!canvas()->canGo(prop, r)) {
+	boWarning() << k_funcinfo << "Unit with type " << unitType << " can't go to (" << pos.x() << "; " << pos.y() << ")" << endl;
+	return 0;
+ }
+ if (canvas()->collisions()->cellsOccupied(r)) {
+	boWarning() << k_funcinfo << "Cells at (" << pos.x() << "; " << pos.y() << ") are occupied" << endl;
+	return 0;
+ }*/
+
+ BoVector3Fixed pos3(pos.x(), pos.y(), 0.0f);
+ Unit* u = (Unit*)canvas()->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType), pos3);
+ u->setRotation(rotation);
+ u->updateRotation();
+ if (u->isFacility()) {
+	// Facilities will be fully constructed by default
+	((Facility*)u)->setConstructionStep(((Facility*)u)->constructionSteps());
+ }
+ // Resource mines will have 20000 minerals / 10000 oil by default
+ if (u->plugin(UnitPlugin::ResourceMine)) {
+	ResourceMinePlugin* res = (ResourceMinePlugin*)u->plugin(UnitPlugin::ResourceMine);
+	if (res->canProvideMinerals()) {
+		res->setMinerals(20000);
+	}
+	if (res->canProvideOil()) {
+		res->setOil(10000);
+	}
+ }
+ return u;
+}
+
+
+
+BosonMessageEditorMove* BosonPlayerInputHandler::createNewUndoDeleteItemsMessage(const BosonMessageEditorMoveDeleteItems& message) const
+{
+ QValueList<BosonMessageEditorMovePlaceUnit*> placeUnit;
+ QValueList<QString> unitData;
+ for (unsigned int i = 0; i < message.mItems.count(); i++) {
+	unsigned long int id = message.mItems[i];
+	BosonItem* item = canvas()->findItem(id);
+	if (!item) {
+		boError() << k_funcinfo << "cannot find item " << id << endl;
+		continue;
+	}
+	if (!RTTI::isUnit(item->rtti())) {
+		boWarning() << k_funcinfo << "undo deletion works for units only" << endl;
+		continue;
+	}
+	Unit* u = (Unit*)item;
+	BosonMessageEditorMovePlaceUnit* m;
+
+	QDomDocument doc;
+	QDomElement root = doc.createElement("Item");
+	if (!u->saveAsXML(root)) {
+		boError() << k_funcinfo << "unable to save unit as xml" << endl;
+		continue;
+	}
+	doc.appendChild(root);
+
+	m = new BosonMessageEditorMovePlaceUnit(u->type(), u->owner()->id(), BoVector2Fixed(u->x(), u->y()), u->rotation());
+	placeUnit.append(m);
+	QString xml = doc.toString();
+	unitData.append(xml);
+ }
+
+ BosonMessageEditorMoveUndoDeleteItems* undo;
+ undo = new BosonMessageEditorMoveUndoDeleteItems(placeUnit, unitData, message);
+ while (!placeUnit.isEmpty()) {
+	delete placeUnit[0];
+	placeUnit.pop_front();
+ }
+ return undo;
+}
 

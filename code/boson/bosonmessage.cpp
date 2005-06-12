@@ -21,16 +21,116 @@
 
 #include <bodebug.h>
 
+bool BosonMessage::readMessageId(QDataStream& stream) const
+{
+ Q_UINT32 msgid;
+ stream >> msgid;
+ if (msgid != (unsigned int)messageId()) {
+	boError() << k_funcinfo << "read msgid=" << msgid << " expected " << messageId() << endl;
+	return false;
+ }
+ return true;
+}
+
+bool BosonMessage::copyTo(BosonMessage& copy) const
+{
+ // AB: we do not reimplement operator=() in every subclass, but still we do not
+ // want to depend on the default c++ implementation of operator=(). So we use
+ // this indirect way, that is always guaranteed to work.
+
+ if (messageId() != copy.messageId()) {
+	boError() << k_funcinfo << "can copy to the same class only" << endl;
+	return false;
+ }
+
+ QByteArray buffer;
+ QDataStream write(buffer, IO_WriteOnly);
+ if (!save(write)) {
+	boError() << k_funcinfo << "could not save this message" << endl;
+	return false;
+ }
+
+ QDataStream read(buffer, IO_ReadOnly);
+
+ if (!readMessageId(read)) {
+	boError() << k_funcinfo << "could not read messageId from saved message" << endl;
+	return false;
+ }
+ if (!copy.load(read)) {
+	boError() << k_funcinfo << "saved message could not be loaded" << endl;
+	return false;
+ }
+ return true;
+}
+
+bool BosonMessageEditorMove::readMessageId(QDataStream& stream) const
+{
+ Q_UINT32 editor;
+ stream >> editor;
+ if (editor != BosonMessageIds::MoveEditor) {
+	boError() << k_funcinfo << "not an editor Move message! read: " << editor << " expected: " << BosonMessageIds::MoveEditor << endl;
+	return false;
+ }
+ return BosonMessage::readMessageId(stream);
+}
+
+BosonMessageEditorMove* BosonMessageEditorMove::newCopy(const BosonMessageEditorMove& message)
+{
+ BosonMessageEditorMove* m = 0;
+ switch (message.messageId()) {
+	case BosonMessageIds::MovePlaceUnit:
+		m = new BosonMessageEditorMovePlaceUnit();
+		break;
+	case BosonMessageIds::MoveChangeTexMap:
+		m = new BosonMessageEditorMoveChangeTexMap();
+		break;
+	case BosonMessageIds::MoveChangeHeight:
+		m = new BosonMessageEditorMoveChangeHeight();
+		break;
+	case BosonMessageIds::MoveDeleteItems:
+		m = new BosonMessageEditorMoveDeleteItems();
+		break;
+	case BosonMessageIds::MoveUndoPlaceUnit:
+		m = new BosonMessageEditorMoveUndoPlaceUnit();
+		break;
+#if 0
+	case BosonMessageIds::MoveUndoChangeTexMap:
+		m = new BosonMessageEditorMoveUndoChangeTexMap();
+		break;
+	case BosonMessageIds::MoveUndoChangeHeight:
+		m = new BosonMessageEditorMoveUndoChangeHeight();
+		break;
+#endif
+	case BosonMessageIds::MoveUndoDeleteItems:
+		m = new BosonMessageEditorMoveUndoDeleteItems();
+		break;
+	default:
+		m = 0;
+		break;
+ }
+ if (!m) {
+	boError() << k_funcinfo << "unknown message id " << message.messageId();
+	return 0;
+ }
+ if (!message.copyTo(*m)) {
+	boError() << k_funcinfo << "unable to copy message" << endl;
+	delete m;
+	return 0;
+ }
+ return m;
+}
+
 BosonMessageEditorMovePlaceUnit::BosonMessageEditorMovePlaceUnit()
-	: BosonMessage()
+	: BosonMessageEditorMove()
 {
 }
 
-BosonMessageEditorMovePlaceUnit::BosonMessageEditorMovePlaceUnit(Q_UINT32 unitType, Q_UINT32 owner, const BoVector2Fixed& pos)
-	: BosonMessage(),
+BosonMessageEditorMovePlaceUnit::BosonMessageEditorMovePlaceUnit(Q_UINT32 unitType, Q_UINT32 owner, const BoVector2Fixed& pos, const bofixed& rotation)
+	: BosonMessageEditorMove(),
 	mUnitType(unitType),
 	mOwner(owner),
-	mPos(pos)
+	mPos(pos),
+	mRotation(rotation)
 {
 }
 
@@ -41,6 +141,7 @@ bool BosonMessageEditorMovePlaceUnit::save(QDataStream& stream) const
  stream << mUnitType;
  stream << mOwner;
  stream << mPos;
+ stream << mRotation;
  return true;
 }
 
@@ -50,12 +151,66 @@ bool BosonMessageEditorMovePlaceUnit::load(QDataStream& stream)
  stream >> mUnitType;
  stream >> mOwner;
  stream >> mPos;
+ stream >> mRotation;
+ return true;
+}
+
+BosonMessageEditorMoveUndoPlaceUnit::BosonMessageEditorMoveUndoPlaceUnit(Q_ULONG unit, const BosonMessageEditorMovePlaceUnit& message)
+	: BosonMessageEditorMove()
+{
+ QValueList<Q_ULONG> items;
+ items.append(unit);
+ BosonMessageEditorMoveDeleteItems del(items);
+ if (!del.copyTo(mDeleteUnit)) {
+	boError() << k_funcinfo << "could not copy delete message" << endl;
+ }
+
+ if (!message.copyTo(mMessage)) {
+	boError() << k_funcinfo << "could not copy message" << endl;
+ }
+}
+
+bool BosonMessageEditorMoveUndoPlaceUnit::save(QDataStream& stream) const
+{
+ stream << (Q_UINT32)BosonMessageIds::MoveEditor;
+ stream << (Q_UINT32)messageId();
+ if (!mDeleteUnit.save(stream)) {
+	boError() << k_funcinfo << "could not save delete message to stream" << endl;
+	return false;
+ }
+ if (!mMessage.save(stream)) {
+	boError() << k_funcinfo << "could not save message to stream" << endl;
+	return false;
+ }
+ return true;
+}
+
+bool BosonMessageEditorMoveUndoPlaceUnit::load(QDataStream& stream)
+{
+ // AB: msgid and editor flag have been read already
+ if (!mDeleteUnit.readMessageId(stream)) {
+	boError() << k_funcinfo << "could not load delete messages messageId from stream" << endl;
+	return false;
+ }
+ if (!mDeleteUnit.load(stream)) {
+	boError() << k_funcinfo << "could not load delete message from stream" << endl;
+	return false;
+ }
+
+ if (!mMessage.readMessageId(stream)) {
+	boError() << k_funcinfo << "could not load messages messageId from stream" << endl;
+	return false;
+ }
+ if (!mMessage.load(stream)) {
+	boError() << k_funcinfo << "could not load message from stream" << endl;
+	return false;
+ }
  return true;
 }
 
 
 BosonMessageEditorMoveChangeTexMap::BosonMessageEditorMoveChangeTexMap()
-	: BosonMessage()
+	: BosonMessageEditorMove()
 {
 }
 
@@ -66,7 +221,7 @@ BosonMessageEditorMoveChangeTexMap::BosonMessageEditorMoveChangeTexMap(
 		const QValueVector< QValueVector<Q_UINT32> > cellCornerTextures,
 		const QValueVector< QValueVector<Q_UINT8> > cellCornerAlpha
 		)
-	: BosonMessage(),
+	: BosonMessageEditorMove(),
 	mCellCornersX(cellCornersX),
 	mCellCornersY(cellCornersY),
 	mCellCornersTextureCount(cellCornersTexCount),
@@ -158,7 +313,7 @@ bool BosonMessageEditorMoveChangeTexMap::load(QDataStream& stream)
 
 
 BosonMessageEditorMoveChangeHeight::BosonMessageEditorMoveChangeHeight()
-	: BosonMessage()
+	: BosonMessageEditorMove()
 {
 }
 
@@ -167,7 +322,7 @@ BosonMessageEditorMoveChangeHeight::BosonMessageEditorMoveChangeHeight(
 		const QValueVector<Q_UINT32> cellCornersY,
 		const QValueVector<bofixed> cellCornersHeight
 		)
-	: BosonMessage(),
+	: BosonMessageEditorMove(),
 	mCellCornersX(cellCornersX),
 	mCellCornersY(cellCornersY),
 	mCellCornersHeight(cellCornersHeight)
@@ -218,12 +373,12 @@ bool BosonMessageEditorMoveChangeHeight::load(QDataStream& stream)
 }
 
 BosonMessageEditorMoveDeleteItems::BosonMessageEditorMoveDeleteItems()
-	: BosonMessage()
+	: BosonMessageEditorMove()
 {
 }
 
 BosonMessageEditorMoveDeleteItems::BosonMessageEditorMoveDeleteItems(const QValueList<Q_ULONG>& items)
-	: BosonMessage(),
+	: BosonMessageEditorMove(),
 	mItems(items)
 {
 }
@@ -250,6 +405,101 @@ bool BosonMessageEditorMoveDeleteItems::load(QDataStream& stream)
 	Q_ULONG item;
 	stream >> item;
 	mItems.append(item);
+ }
+ return true;
+}
+
+BosonMessageEditorMoveUndoDeleteItems::BosonMessageEditorMoveUndoDeleteItems(
+		const QValueList<BosonMessageEditorMovePlaceUnit*>& units,
+		const QValueList<QString>& unitsData,
+		const BosonMessageEditorMoveDeleteItems& message
+	)
+	: BosonMessageEditorMove()
+{
+ if (!message.copyTo(mMessage)) {
+	boError() << k_funcinfo << "could not copy message" << endl;
+ }
+ QValueList<BosonMessageEditorMovePlaceUnit*>::const_iterator it;
+ for (it = units.begin(); it != units.end(); ++it) {
+	BosonMessageEditorMovePlaceUnit* u = new BosonMessageEditorMovePlaceUnit();
+	if (!(*it)->copyTo(*u)) {
+		boError() << k_funcinfo << "could not copy PlaceUnit message" << endl;
+		delete u;
+		continue;
+	}
+	mUnits.append(u);
+ }
+ mUnitsData = unitsData;
+}
+
+BosonMessageEditorMoveUndoDeleteItems::~BosonMessageEditorMoveUndoDeleteItems()
+{
+ clearUnits();
+}
+
+void BosonMessageEditorMoveUndoDeleteItems::clearUnits()
+{
+ for (unsigned int i = 0; i < mUnits.count(); i++) {
+	delete mUnits[i];
+ }
+ mUnits.clear();
+ mUnitsData.clear();
+}
+
+bool BosonMessageEditorMoveUndoDeleteItems::save(QDataStream& stream) const
+{
+ stream << (Q_UINT32)BosonMessageIds::MoveEditor;
+ stream << (Q_UINT32)messageId();
+
+ stream << (Q_UINT32)mUnits.count();
+ for (unsigned int i = 0; i < mUnits.count(); i++) {
+	if (!mUnits[i]->save(stream)) {
+		boError() << k_funcinfo << "could not save PlaceUnit message to stream" << endl;
+		return false;
+	}
+	stream << mUnitsData[i];
+ }
+
+ if (!mMessage.save(stream)) {
+	boError() << k_funcinfo << "could not save message to stream" << endl;
+	return false;
+ }
+ return true;
+}
+
+bool BosonMessageEditorMoveUndoDeleteItems::load(QDataStream& stream)
+{
+ // AB: msgid and editor flag have been read already
+ clearUnits();
+
+ Q_UINT32 count;
+ stream >> count;
+ for (Q_UINT32 i = 0; i < count; i++) {
+	BosonMessageEditorMovePlaceUnit* u = new BosonMessageEditorMovePlaceUnit();
+	if (!u->readMessageId(stream)) {
+		delete u;
+		boError() << k_funcinfo << "could not load PlaceUnit's messageId from stream" << endl;
+		return false;
+	}
+	if (!u->load(stream)) {
+		boError() << k_funcinfo << "could not load PlaceUnit message from stream" << endl;
+		delete u;
+		return false;
+	}
+	QString xml;
+	stream >> xml;
+
+	mUnits.append(u);
+	mUnitsData.append(xml);
+ }
+
+ if (!mMessage.readMessageId(stream)) {
+	boError() << k_funcinfo << "could not load messages messageId from stream" << endl;
+	return false;
+ }
+ if (!mMessage.load(stream)) {
+	boError() << k_funcinfo << "could not load message from stream" << endl;
+	return false;
  }
  return true;
 }

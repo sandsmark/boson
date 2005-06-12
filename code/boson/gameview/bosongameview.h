@@ -553,6 +553,8 @@ protected slots:
 	void slotEditorShowPlaceFacilities();
 	void slotEditorShowPlaceMobiles();
 	void slotEditorShowPlaceGround();
+	void slotEditorUndo();
+	void slotEditorRedo();
 
 	void slotShowLight0Widget();
 	void slotPreferencesApply();

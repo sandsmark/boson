@@ -43,6 +43,7 @@ template<class T> class BoVector2;
 template<class T> class BoRect;
 typedef BoVector2<bofixed> BoVector2Fixed;
 typedef BoRect<bofixed> BoRectFixed;
+class BosonMessageEditorMove;
 
 #define boGame Boson::boson()
 
@@ -476,6 +477,11 @@ signals:
 	 **/
 	void signalPlayerKilled(Player*);
 
+	void signalEditorClearUndoStack();
+	void signalEditorClearRedoStack();
+	void signalEditorNewUndoMessage(const BosonMessageEditorMove&);
+	void signalEditorNewRedoMessage(const BosonMessageEditorMove&);
+
 protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);
 
@@ -487,6 +493,8 @@ protected:
 	void makeUnitLog();
 
 	bool loadFromLogFile(const QString& file);
+
+	void clearUndoStacks();
 
 protected slots:
 	/**

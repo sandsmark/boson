@@ -46,13 +46,32 @@ public:
 	virtual int messageId() const = 0;
 	virtual bool save(QDataStream& stream) const = 0;
 	virtual bool load(QDataStream& stream) = 0;
+
+
+	/**
+	 * @internal
+	 * Read the message ID from @p stream.
+	 *
+	 * Note that this is for internal use only.
+	 **/
+	virtual bool readMessageId(QDataStream& stream) const;
+
+	bool copyTo(BosonMessage& copy) const;
 };
 
-class BosonMessageEditorMovePlaceUnit : public BosonMessage
+class BosonMessageEditorMove : public BosonMessage
+{
+public:
+	virtual bool readMessageId(QDataStream& stream) const;
+
+	static BosonMessageEditorMove* newCopy(const BosonMessageEditorMove& message);
+};
+
+class BosonMessageEditorMovePlaceUnit : public BosonMessageEditorMove
 {
 public:
 	BosonMessageEditorMovePlaceUnit();
-	BosonMessageEditorMovePlaceUnit(Q_UINT32 unitType, Q_UINT32 owner, const BoVector2Fixed& pos);
+	BosonMessageEditorMovePlaceUnit(Q_UINT32 unitType, Q_UINT32 owner, const BoVector2Fixed& pos, const bofixed& rotation);
 
 	virtual bool save(QDataStream& stream) const;
 	virtual bool load(QDataStream& stream);
@@ -65,9 +84,10 @@ public:
 	Q_UINT32 mUnitType;
 	Q_UINT32 mOwner;
 	BoVector2Fixed mPos;
+	bofixed mRotation;
 };
 
-class BosonMessageEditorMoveChangeTexMap : public BosonMessage
+class BosonMessageEditorMoveChangeTexMap : public BosonMessageEditorMove
 {
 public:
 	BosonMessageEditorMoveChangeTexMap();
@@ -103,7 +123,7 @@ public:
 	QValueVector< QValueVector<Q_UINT8> > mCellCornerAlpha;
 };
 
-class BosonMessageEditorMoveChangeHeight : public BosonMessage
+class BosonMessageEditorMoveChangeHeight : public BosonMessageEditorMove
 {
 public:
 	BosonMessageEditorMoveChangeHeight();
@@ -126,7 +146,7 @@ public:
 	QValueVector<bofixed> mCellCornersHeight;
 };
 
-class BosonMessageEditorMoveDeleteItems : public BosonMessage
+class BosonMessageEditorMoveDeleteItems : public BosonMessageEditorMove
 {
 public:
 	BosonMessageEditorMoveDeleteItems();
@@ -141,6 +161,59 @@ public:
 
 public:
 	QValueList<Q_ULONG> mItems;
+};
+
+class BosonMessageEditorMoveUndoPlaceUnit : public BosonMessageEditorMove
+{
+public:
+	BosonMessageEditorMoveUndoPlaceUnit() : BosonMessageEditorMove() {}
+	BosonMessageEditorMoveUndoPlaceUnit(Q_ULONG unit, const BosonMessageEditorMovePlaceUnit& message);
+
+	virtual bool save(QDataStream& stream) const;
+	virtual bool load(QDataStream& stream);
+	virtual int messageId() const
+	{
+		return BosonMessageIds::MoveUndoPlaceUnit;
+	}
+
+public:
+	BosonMessageEditorMoveDeleteItems mDeleteUnit;
+	BosonMessageEditorMovePlaceUnit mMessage;
+};
+
+class BosonMessageEditorMoveUndoDeleteItems : public BosonMessageEditorMove
+{
+public:
+	BosonMessageEditorMoveUndoDeleteItems() { }
+	~BosonMessageEditorMoveUndoDeleteItems();
+
+	/**
+	 * @param units One PlaceUnit message per unit that was deleted. Note
+	 * that ownership is NOT taken, you need to delete the pointers
+	 * yourself.
+	 * @param unitsData A string containing @ref BosonItem::saveAsXML
+	 * @param message The original DeleteItems message.
+	 **/
+	BosonMessageEditorMoveUndoDeleteItems(
+			const QValueList<BosonMessageEditorMovePlaceUnit*>& units,
+			const QValueList<QString>& unitsData,
+			const BosonMessageEditorMoveDeleteItems& message
+	);
+
+	virtual bool save(QDataStream& stream) const;
+	virtual bool load(QDataStream& stream);
+	virtual int messageId() const
+	{
+		return BosonMessageIds::MoveUndoDeleteItems;
+	}
+
+protected:
+	void clearUnits();
+
+public:
+	QValueList<BosonMessageEditorMovePlaceUnit*> mUnits;
+	QValueList<QString> mUnitsData;
+	BosonMessageEditorMoveDeleteItems mMessage;
 };
 
 class BosonMessageMoveMove : public BosonMessage

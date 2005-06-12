@@ -308,6 +308,15 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
  setPolicy(PolicyClean);
  d = new BosonPrivate;
  d->mPlayerInputHandler = new BosonPlayerInputHandler(this);
+ connect(d->mPlayerInputHandler, SIGNAL(signalChangeTexMap(int, int, unsigned int, unsigned int*, unsigned char*)),
+		this, SIGNAL(signalChangeTexMap(int, int, unsigned int, unsigned int*, unsigned char*)));
+ connect(d->mPlayerInputHandler, SIGNAL(signalChangeHeight(int, int, float)),
+		this, SIGNAL(signalChangeHeight(int, int, float)));
+
+ connect(d->mPlayerInputHandler, SIGNAL(signalEditorNewUndoMessage(const BosonMessageEditorMove&)),
+		this, SIGNAL(signalEditorNewUndoMessage(const BosonMessageEditorMove&)));
+ connect(d->mPlayerInputHandler, SIGNAL(signalEditorNewRedoMessage(const BosonMessageEditorMove&)),
+		this, SIGNAL(signalEditorNewRedoMessage(const BosonMessageEditorMove&)));
  d->mAdvance = new BoAdvance(this);
  d->mMessageDelayer = new BoMessageDelayer(this);
  d->mNetworkSynchronizer = new BosonNetworkSynchronizer();
@@ -518,6 +527,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	}
 	case BosonMessageIds::IdNewGame:
 	{
+		clearUndoStacks();
 		if (isRunning()) {
 			boError() << k_funcinfo << "received IdNewGame, but game is already running" << endl;
 			return;
@@ -546,6 +556,8 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		break;
 	}
 	case BosonMessageIds::IdStartGameClicked:
+		clearUndoStacks();
+
 		// this is kind of a workaround.
 		// for --start we need to call slotStart() in the start widgets
 		// only once the (e.g.) playfield messages have arrived. for
@@ -580,6 +592,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			} else {
 			}
 		}
+		clearUndoStacks();
 		break;
 	}
 	case BosonMessageIds::ChangeSpecies:
@@ -1718,5 +1731,11 @@ void Boson::syncNetwork()
 {
  boDebug() << k_funcinfo << endl;
  d->mNetworkSynchronizer->syncNetwork();
+}
+
+void Boson::clearUndoStacks()
+{
+ emit signalEditorClearRedoStack();
+ emit signalEditorClearUndoStack();
 }
 

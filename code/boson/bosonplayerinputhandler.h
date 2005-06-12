@@ -27,6 +27,16 @@ class Player;
 class Boson;
 class Unit;
 class BosonCanvas;
+class BosonMessageEditorMove;
+class BosonMessageEditorMoveDeleteItems;
+class bofixed;
+template<class T> class BoVector2;
+template<class T> class BoRect;
+typedef BoVector2<bofixed> BoVector2Fixed;
+typedef BoRect<bofixed> BoRectFixed;
+
+template<class T> class QPtrStack;
+template<class T> class QValueList;
 
 /**
  * @short Helper class for @ref Boson
@@ -47,6 +57,10 @@ public:
 	~BosonPlayerInputHandler();
 
 	bool playerInput(QDataStream& stream, Player* player);
+
+signals:
+	void signalEditorNewUndoMessage(const BosonMessageEditorMove&);
+	void signalEditorNewRedoMessage(const BosonMessageEditorMove&);
 
 protected:
 	/**
@@ -72,6 +86,11 @@ protected:
 	 * @return TRUE if the message was processed in here, otherwise FALSE
 	 **/
 	bool editorPlayerInput(Q_UINT32 msgid, QDataStream& stream, Player* player);
+
+	void editorDeleteItems(const QValueList<Q_ULONG>& items);
+	Unit* editorPlaceUnit(Q_UINT32 owner, Q_UINT32 unitType, const BoVector2Fixed& pos, const bofixed& rotation);
+
+	BosonMessageEditorMove* createNewUndoDeleteItemsMessage(const BosonMessageEditorMoveDeleteItems&) const;
 
 signals:
 	void signalChangeTexMap(int x, int y, unsigned int textureCount, unsigned int* textures, unsigned char* alpha);

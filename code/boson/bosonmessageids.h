@@ -90,6 +90,11 @@ public:
 		MoveChangeHeight = 203,
 		MoveDeleteItems = 204,
 
+		MoveUndoPlaceUnit = 241,
+		MoveUndoChangeTexMap = 242,
+		MoveUndoChangeHeight = 243,
+		MoveUndoDeleteItems = 244,
+
 
 	// the last message ID:
 		UnitPropertyHandler = 1000 // + unit id
