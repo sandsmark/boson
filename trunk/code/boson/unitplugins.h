@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -220,6 +220,9 @@ public:
 
 	QValueList<QPair<ProductionType, unsigned long int> > productionList() const { return mProductions; }
 	bool contains(ProductionType type, unsigned long int id); // { return productionList().contains(typeId); }
+
+	QValueList<unsigned long int> possibleUnitProductions() const;
+	QValueList<unsigned long int> possibleTechnologyProductions() const;
 
 	/**
 	 * @return The percentage of the production progress. 0 means the
