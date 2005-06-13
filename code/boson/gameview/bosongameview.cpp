@@ -1988,9 +1988,7 @@ void BosonGameView::paint()
 	// delayed!
 
 	long long time = gameFPSCounter()->counter()->timeSinceLastFrame(true);
-//	boDebug() << (int)time << endl;
 	if (time > 0 && time < 500000) {
-//		boDebug() << "skipping" << endl;
 		// now we need to let the counter know, that this frame is being skipped
 		gameFPSCounter()->skipFrame();
 		return;

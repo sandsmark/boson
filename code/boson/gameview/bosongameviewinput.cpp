@@ -251,7 +251,7 @@ bool BosonGameViewInput::actionHarvest(const BoVector3Fixed& canvasVector)
 	if (!h) {
 		continue;
 	}
-	boDebug() << u->id() << " is a harvester" << endl;
+	boDebug() << k_funcinfo << u->id() << " is a harvester" << endl;
 	if (resource->isUsableTo(h)) {
 		boDebug() << k_funcinfo << u->id() << " will harvest at " << resource->unit()->id() << "," << canvasVector.y() << " which is " << h->unit()->id() << endl;
 		localPlayerInput()->harvest(h, resource);
@@ -428,7 +428,7 @@ bool BosonGameViewInput::actionRepair(const BoVector3Fixed& canvasVector)
  QPtrListIterator<Unit> it(allUnits);
  while (it.current()) {
 	if (it.current()->health() < it.current()->unitProperties()->health()) {
-		boDebug() << "repair " << it.current()->id() << endl;
+		boDebug() << k_funcinfo << "repair " << it.current()->id() << endl;
 		list.append(it.current());
 	}
 	++it;
