@@ -58,10 +58,6 @@ public:
 
 	bool playerInput(QDataStream& stream, Player* player);
 
-signals:
-	void signalEditorNewUndoMessage(const BosonMessageEditorMove&);
-	void signalEditorNewRedoMessage(const BosonMessageEditorMove&);
-
 protected:
 	/**
 	 * Convenience method for mGame->findUnit(id, searchIn)
@@ -95,6 +91,8 @@ protected:
 signals:
 	void signalChangeTexMap(int x, int y, unsigned int textureCount, unsigned int* textures, unsigned char* alpha);
 	void signalChangeHeight(int x, int y, float height);
+	void signalEditorNewUndoMessage(const BosonMessageEditorMove&);
+	void signalEditorNewRedoMessage(const BosonMessageEditorMove&);
 
 private:
 	Boson* mGame;
