@@ -541,6 +541,8 @@ void BosonCommandFrame::setLocalPlayerIO(PlayerIO* io)
 			this, SLOT(slotUpdateProduction(unsigned long int)));
 	connect(d->mEventListener, SIGNAL(signalFacilityConstructed(unsigned long int)),
 			this, SLOT(slotConstructionCompleted(unsigned long int)));
+	connect(d->mEventListener, SIGNAL(signalUnitDestroyed(unsigned long int)),
+			this, SLOT(slotUnitDestroyed(unsigned long int)));
  }
 }
 
@@ -599,6 +601,19 @@ void BosonCommandFrame::slotConstructionCompleted(unsigned long int facilityId)
 	return;
  }
  if (selection()->leader()->id() == facilityId) {
+	slotSelectionChanged(selection());
+ }
+}
+
+void BosonCommandFrame::slotUnitDestroyed(unsigned long int id)
+{
+ if (!selection() || selection()->count() == 0) {
+	return;
+ }
+ if (!selection()->leader()) {
+	return;
+ }
+ if (selection()->leader()->id() == id) {
 	slotSelectionChanged(selection());
  }
 }
