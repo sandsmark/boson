@@ -105,7 +105,7 @@ public slots:
 
 	void slotSetGroundTheme(BosonGroundTheme* theme);
 
-	void slotUnittypeHighlighted(const UnitProperties* prop);
+	void slotUnitTypeHighlighted(const UnitProperties* prop);
 
 protected:
 	/**

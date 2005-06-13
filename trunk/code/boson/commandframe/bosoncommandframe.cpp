@@ -497,8 +497,8 @@ void BosonCommandFrame::initSelectionWidget()
 
  connect(d->mSelectionWidget, SIGNAL(signalSelectUnit(Unit*)),
 		this, SIGNAL(signalSelectUnit(Unit*)));
- connect(d->mSelectionWidget, SIGNAL(signalUnittypeHighlighted(const UnitProperties*)),
-		this, SLOT(slotUnittypeHighlighted(const UnitProperties*)));
+ connect(d->mSelectionWidget, SIGNAL(signalUnitTypeHighlighted(const UnitProperties*)),
+		this, SLOT(slotUnitTypeHighlighted(const UnitProperties*)));
 }
 
 void BosonCommandFrame::initPlacementWidget()
@@ -1009,11 +1009,13 @@ void BosonCommandFrame::slotUpdateUnitConfig()
 {
  BO_CHECK_NULL_RET(selectedUnit());
  BO_CHECK_NULL_RET(d->mUnitConfigWidget);
+
+ // TODO: support undo
  // apply changed in the config widget to the unit
  d->mUnitConfigWidget->updateUnit(selectedUnit());
 }
 
-void BosonCommandFrame::slotUnittypeHighlighted(const UnitProperties* prop)
+void BosonCommandFrame::slotUnitTypeHighlighted(const UnitProperties* prop)
 {
  boDebug() << k_funcinfo << "prop: " << prop << endl;
  d->mUnitInfoWidget->showUnit(prop);
