@@ -313,8 +313,8 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
  connect(d->mPlayerInputHandler, SIGNAL(signalChangeHeight(int, int, float)),
 		this, SIGNAL(signalChangeHeight(int, int, float)));
 
- connect(d->mPlayerInputHandler, SIGNAL(signalEditorNewUndoMessage(const BosonMessageEditorMove&)),
-		this, SIGNAL(signalEditorNewUndoMessage(const BosonMessageEditorMove&)));
+ connect(d->mPlayerInputHandler, SIGNAL(signalEditorNewUndoMessage(const BosonMessageEditorMove&, bool)),
+		this, SIGNAL(signalEditorNewUndoMessage(const BosonMessageEditorMove&, bool)));
  connect(d->mPlayerInputHandler, SIGNAL(signalEditorNewRedoMessage(const BosonMessageEditorMove&)),
 		this, SIGNAL(signalEditorNewRedoMessage(const BosonMessageEditorMove&)));
  d->mAdvance = new BoAdvance(this);

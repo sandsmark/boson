@@ -821,7 +821,7 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
 		}
 
 		BosonMessageEditorMoveUndoPlaceUnit undo(u->id(), message);
-		emit signalEditorNewUndoMessage(undo);
+		emit signalEditorNewUndoMessage(undo, message.isRedo());
 		break;
 	}
 	case BosonMessageIds::MoveChangeTexMap:
@@ -888,7 +888,7 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
 
 		editorDeleteItems(message.mItems);
 
-		emit signalEditorNewUndoMessage(*undo);
+		emit signalEditorNewUndoMessage(*undo, message.isRedo());
 		delete undo;
 
 		break;
