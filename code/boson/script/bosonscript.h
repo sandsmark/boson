@@ -94,12 +94,12 @@ class BosonScript
      * Calls "advance" function in the script.
      * Should be called every advance call
      **/
-    virtual void advance() = 0;
+    virtual bool advance() = 0;
     /**
      * Calls "init" function in the script.
      * Should be called immeditely after the game is started
      **/
-    virtual void init() = 0;
+    virtual bool init() = 0;
     /**
      * Calls "setPlayerId" function in the script.
      * New player id of the player that owns this script is given to the

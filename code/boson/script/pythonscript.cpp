@@ -178,11 +178,6 @@ PythonScript::~PythonScript()
 
   getPythonLock();
 
-  if(mDict)
-  {
-    Py_DECREF(mDict);
-  }
-
   Py_EndInterpreter(mInterpreter);
 
   freePythonLock();
@@ -274,6 +269,7 @@ bool PythonScript::loadScriptFromString(const QString& string)
     freePythonLock();
     return false;
   }
+  Py_DECREF(obj);
 
   mLoadedScripts += string;
   mLoadedScripts += '\n';
@@ -526,18 +522,22 @@ void PythonScript::callEventHandler(const BoEvent* e, const QString& function, c
   }
 
   freePythonLock();
+
+  Py_DECREF(funcargs);
 }
 
-void PythonScript::advance()
+bool PythonScript::advance()
 {
-  callFunction("advance");
+  return (callFunctionWithReturn("advance") == 0);
 }
 
-void PythonScript::init()
+bool PythonScript::init()
 {
   PyObject* args = PyTuple_New(1);
   PyTuple_SetItem(args, 0, PyInt_FromLong(playerId()));
-  callFunction("init", args);
+  int ret = callFunctionWithReturn("init", args);
+  Py_DECREF(args);
+  return (ret == 0);
 }
 
 void PythonScript::setPlayerId(int id)
@@ -545,6 +545,7 @@ void PythonScript::setPlayerId(int id)
   PyObject* args = PyTuple_New(1);
   PyTuple_SetItem(args, 0, PyInt_FromLong(id));
   callFunction("setPlayerId", args);
+  Py_DECREF(args);
 }
 
 bool PythonScript::save(QDataStream& stream)
