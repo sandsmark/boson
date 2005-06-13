@@ -223,7 +223,7 @@ public:
 	 **/
 	unsigned int preferredLod(float distanceFromCamera) const;
 
-	void loadModel(const QString& configfile);
+	bool loadModel(const QString& configfile);
 
 	/**
 	 * Generate animation for construction steps. The unit will
