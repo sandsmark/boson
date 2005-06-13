@@ -366,7 +366,6 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
   }
 
   glLoadIdentity();
-  glMatrixMode(GL_MODELVIEW);
 
   // Disable VBO
   boglBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -379,9 +378,9 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
     boTextureManager->activateTextureUnit(0);
     BoShader::unbind();
   }
-  boTextureManager->unbindTexture();
   boTextureManager->disableTexturing();
 
+  glMatrixMode(GL_MODELVIEW);
   glDisable(GL_TEXTURE_GEN_S);
   glDisable(GL_TEXTURE_GEN_T);
   glDisable(GL_BLEND);
