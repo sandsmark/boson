@@ -202,21 +202,24 @@ public:
 	}
 
 	/**
-	 * Remove the first item from the production list.
+	 * This is called when the current production has been placed onto the
+	 * map. The current production is removed from the internal list and the
+	 * next production is started.
+	 *
+	 * The result of calling this while the current production is not yet
+	 * finished is undefined.
 	 **/
-	void removeProduction(); // removes first item
-
-	/**
-	 * Remove first occurance of type ID id in the production list. Does not
-	 * remove anything if id is not in the list.
-	 **/
-	void removeProduction(ProductionType type, unsigned long int id);
+	void productionPlaced(Unit* produced);
 
 	/**
 	 * Add production of type and with id (see @ref UnitProprties::typeId) to the
-	 * construction list.
+	 * construction list and start the production.
 	 **/
 	void addProduction(ProductionType type, unsigned long int id);
+
+	void pauseProduction();
+	void unpauseProduction();
+	void abortProduction(ProductionType type, unsigned long int id);
 
 	QValueList<QPair<ProductionType, unsigned long int> > productionList() const { return mProductions; }
 	bool contains(ProductionType type, unsigned long int id); // { return productionList().contains(typeId); }
@@ -236,6 +239,18 @@ public:
 	virtual bool loadFromXML(const QDomElement& root);
 
 	virtual void itemRemoved(BosonItem*) {}
+
+protected:
+	/**
+	 * Remove first occurance of type ID id in the production list. Does not
+	 * remove anything if id is not in the list.
+	 **/
+	bool removeProduction(ProductionType type, unsigned long int id);
+
+	/**
+	 * Remove the first item from the production list.
+	 **/
+	bool removeProduction(); // removes first item
 
 private:
 	QValueList<QPair<ProductionType, unsigned long int> > mProductions;

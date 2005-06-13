@@ -134,24 +134,86 @@ ProductionType ProductionPlugin::completedProductionType() const
  return currentProductionType();
 }
 
+void ProductionPlugin::productionPlaced(Unit* produced)
+{
+ BO_CHECK_NULL_RET(produced);
+ if (produced->isFacility()) {
+	player()->statistics()->addProducedFacility((Facility*)produced, this);
+ } else {
+	player()->statistics()->addProducedMobileUnit((MobileUnit*)produced, this);
+ }
+
+ BoEvent* productionPlaced = new BoEvent("ProducedUnitWithTypePlaced", QString::number(produced->type()), QString::number(unit()->id()));
+ productionPlaced->setUnitId(produced->id());
+ productionPlaced->setPlayerId(produced->owner()->id());
+ productionPlaced->setLocation(BoVector3Fixed(produced->x(), produced->y(), produced->z()));
+ boGame->queueEvent(productionPlaced);
+
+ // the current production is done.
+ removeProduction();
+}
+
 void ProductionPlugin::addProduction(ProductionType type, unsigned long int id)
 {
- ProductionProperties* p = (ProductionProperties*)unit()->unitProperties()->properties(PluginProperties::Production);
+ BO_CHECK_NULL_RET(unit());
+ BO_CHECK_NULL_RET(unitProperties());
+ BO_CHECK_NULL_RET(player());
+ BO_CHECK_NULL_RET(speciesTheme());
+ BO_CHECK_NULL_RET(game());
+ ProductionProperties* p = (ProductionProperties*)unitProperties()->properties(PluginProperties::Production);
  if (!p) {
 	boError() << k_funcinfo << "NULL production properties" << endl;
 	return;
  }
+
+ unsigned long int mineralCost = 0;
+ unsigned long int oilCost = 0;
+
  if (type == ProduceUnit) {
-	if (!speciesTheme()->productions(p->producerList()).contains(id)) {
-		boError() << k_funcinfo << " cannot produce unit with id " << id << endl;
+	const UnitProperties* prop = speciesTheme()->unitProperties(id);
+	if (!prop) {
+		boError() << k_lineinfo << "NULL unit properties (EVIL BUG)" << endl;
 		return;
 	}
+	if (!possibleUnitProductions().contains(id)) {
+		boError() << k_funcinfo << " cannot produce unit witht type " << id << endl;
+		game()->slotAddChatSystemMessage(i18n("Cannot produce unit %1").arg(prop->name()), player());
+		return;
+	}
+
+	mineralCost = prop->mineralCost();
+	oilCost = prop->oilCost();
  } else if (type == ProduceTech) {
-	if (!speciesTheme()->technologies(p->producerList()).contains(id)) {
-		boError() << k_funcinfo << " cannot produce technology with id " << id << endl;
+	const UpgradeProperties* prop = speciesTheme()->technology(id);
+	if (!prop) {
+		boError() << k_lineinfo << "NULL technology properties (EVIL BUG)" << endl;
 		return;
 	}
+	if (!possibleTechnologyProductions().contains(id)) {
+		boError() << k_funcinfo << " cannot produce technology with id " << id << endl;
+		game()->slotAddChatSystemMessage(i18n("Cannot produce technology %1").arg(prop->upgradeName()), player());
+		return;
+	}
+
+	mineralCost = prop->mineralCost();
+	oilCost = prop->oilCost();
+ } else {
+	boError() << k_funcinfo << "Invalid productionType: " << (int)type << endl;
+	return;
  }
+
+ if (player()->minerals() < mineralCost) {
+	game()->slotAddChatSystemMessage(i18n("You have not enough minerals!"), player());
+	return;
+ }
+ if (player()->oil() < oilCost) {
+	game()->slotAddChatSystemMessage(i18n("You have not enough oil!"), player());
+	return;
+ }
+ player()->setMinerals(player()->minerals() - mineralCost);
+ player()->setOil(player()->oil() - oilCost);
+
+
  bool start = false;
  if (!hasProduction()) {
 	start = true;
@@ -163,23 +225,167 @@ void ProductionPlugin::addProduction(ProductionType type, unsigned long int id)
  if (start) {
 	unit()->setPluginWork(pluginType());
  }
+
+ QCString eventName;
+ if (type == ProduceUnit) {
+	eventName = "StartProductionOfUnitWithType";
+ } else if (type == ProduceTech) {
+	eventName = "StartProductionOfTechnologyWithType";
+ } else {
+	boError() << k_funcinfo << "Invalid productionType: " << (int)type << endl;
+ }
+ if (!eventName.isNull()) {
+	BoEvent* event = new BoEvent(eventName, QString::number(id), QString::number(unit()->id()));
+	event->setPlayerId(player()->id());
+	event->setLocation(BoVector3Fixed(unit()->x(), unit()->y(), unit()->z()));
+	game()->queueEvent(event);
+ }
 }
 
-void ProductionPlugin::removeProduction()
+void ProductionPlugin::pauseProduction()
 {
- mProductions.pop_front();
- mProductionState = 0; // start next production (if any)
+ if (unit()->currentPluginType() != UnitPlugin::Production) {
+	// already paused
+	return;
+ }
+ if (currentProductionId() == 0) {
+	// no production
+	boWarning() << k_funcinfo << "no current production" << endl;
+	return;
+ }
+
+ unit()->setWork(Unit::WorkIdle);
+
+ QCString eventName;
+ if (currentProductionType() == ProduceUnit) {
+	eventName = "PauseProductionOfUnitWithType";
+ } else if (currentProductionType() == ProduceTech) {
+	eventName = "PauseProductionOfTechnologyWithType";
+ } else {
+	boError() << k_funcinfo << "Invalid productionType: " << (int)currentProductionType() << endl;
+ }
+
+ if (!eventName.isNull()) {
+	BoEvent* event = new BoEvent(eventName, QString::number(currentProductionId()), QString::number(unit()->id()));
+	event->setPlayerId(player()->id());
+	event->setLocation(BoVector3Fixed(unit()->x(), unit()->y(), unit()->z()));
+	game()->queueEvent(event);
+ }
 }
 
-void ProductionPlugin::removeProduction(ProductionType type, unsigned long int id)
+void ProductionPlugin::unpauseProduction()
+{
+ if (unit()->currentPluginType() == UnitPlugin::Production) {
+	// not paused
+	return;
+ }
+ if (currentProductionId() == 0) {
+	// no production
+	boWarning() << k_funcinfo << "no current production" << endl;
+	return;
+ }
+
+ unit()->setPluginWork(UnitPlugin::Production);
+
+
+ QCString eventName;
+ if (currentProductionType() == ProduceUnit) {
+	eventName = "ContinueProductionOfUnitWithType";
+ } else if (currentProductionType() == ProduceTech) {
+	eventName = "ContinueProductionOfTechnologyWithType";
+ } else {
+	boError() << k_funcinfo << "Invalid productionType: " << (int)currentProductionType() << endl;
+ }
+ if (!eventName.isNull()) {
+	BoEvent* event = new BoEvent(eventName, QString::number(currentProductionId()), QString::number(unit()->id()));
+	event->setPlayerId(player()->id());
+	event->setLocation(BoVector3Fixed(unit()->x(), unit()->y(), unit()->z()));
+	game()->queueEvent(event);
+ }
+}
+
+void ProductionPlugin::abortProduction(ProductionType type, unsigned long int id)
+{
+ if (!hasProduction()) {
+	// no production
+	boWarning() << k_funcinfo << "no productions" << endl;
+	return;
+ }
+
+ unsigned long int mineralCost = 0, oilCost = 0;
+
+ if (type == ProduceUnit) {
+	const UnitProperties* prop = player()->unitProperties(id);
+	if (!prop) {
+		boError() << k_lineinfo << "NULL unit properties (EVIL BUG)" << endl;
+		return;
+	}
+	mineralCost = prop->mineralCost();
+	oilCost = prop->oilCost();
+ } else if (type == ProduceTech) {
+	const UpgradeProperties* prop = player()->speciesTheme()->technology(id);
+	if (!prop) {
+		boError() << k_lineinfo << "NULL technology properties (EVIL BUG)" << endl;
+		return;
+	}
+	mineralCost = prop->mineralCost();
+	oilCost = prop->oilCost();
+ } else {
+	boError() << k_funcinfo << "Invalid productionType: " << (int)type << endl;
+	return;
+ }
+
+
+ QString eventTypeParameter = QString::number(id);
+ QCString eventName;
+ if (type == ProduceUnit) {
+	eventName = "StopProductionOfUnitWithType";
+ } else if (type == ProduceTech) {
+	eventName = "StopProductionOfTechnologyWithType";
+ } else {
+	boError() << k_funcinfo << "Invalid productionType: " << (int)type << endl;
+ }
+
+ if (!removeProduction(type, id)) {
+	boError() << k_funcinfo << "no such production available" << endl;
+	return;
+ }
+
+ // FIXME: money should be paid when the production is
+ // actually started! (currently it is paid as soon as an
+ // item is added to the queue)
+ player()->setMinerals(player()->minerals() + mineralCost);
+ player()->setOil(player()->oil() + oilCost);
+
+ if (!eventName.isNull()) {
+	BoEvent* event = new BoEvent(eventName, QString::number(id), QString::number(unit()->id()));
+	event->setPlayerId(player()->id());
+	event->setLocation(BoVector3Fixed(unit()->x(), unit()->y(), unit()->z()));
+	game()->queueEvent(event);
+ }
+}
+
+bool ProductionPlugin::removeProduction()
+{
+ if (!hasProduction()) {
+	return false;
+ }
+ return removeProduction(currentProductionType(), currentProductionId());
+}
+
+bool ProductionPlugin::removeProduction(ProductionType type, unsigned long int id)
 {
  for (unsigned int i = 0; i < productionList().count(); i++) {
 	if ((mProductions[i].first == type) && (mProductions[i].second == id)) {
 		boDebug() << k_funcinfo << "remove; type: " << type << ", id: " << id << endl;
 		mProductions.remove(mProductions.at(i));
-		return;
+		if (i == 0) {
+			mProductionState = 0; // start next production (if any)
+		}
+		return true;
 	}
  }
+ return false;
 }
 
 double ProductionPlugin::productionProgress() const
@@ -223,10 +429,14 @@ void ProductionPlugin::advance(unsigned int)
 
 		if (currentProductionType() != ProduceUnit) {
 			// It's technology
+			// these can be handled immediately.
 			removeProduction();
 			player()->technologyResearched(this, id);
 			return;
 		}
+
+		// A unit must be placed on the map, before removeProduction()
+		// may be called.
 
 		// Auto-place unit
 		// Unit positioning scheme: all tiles starting with tile that is below
