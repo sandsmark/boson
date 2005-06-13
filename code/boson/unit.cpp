@@ -1334,7 +1334,7 @@ bool Unit::inRange(unsigned long int r, Unit* target) const
 void Unit::shootAt(BosonWeapon* w, Unit* target)
 {
  if (!w->reloaded()) {
-//	boDebug() << "gotta reload first" << endl;
+//	boDebug() << k_funcinfo << "gotta reload first" << endl;
 	return;
  }
  if (!w->canShootAt(target)) {
@@ -1508,7 +1508,7 @@ bool Unit::isNextTo(Unit* target) const
 			QABS(bottomEdge() - target->topEdge()) <= r||
 			topEdge() <= target->topEdge() && bottomEdge() <= target->bottomEdge()// will never happen with current pixmaps
 			) {
-		boDebug() << "ok - inrange" << endl;
+		boDebug() << k_funcinfo << "ok - inrange" << endl;
 		return true;
 	}
  }
