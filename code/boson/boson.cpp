@@ -956,20 +956,10 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
 	boError() << k_funcinfo << "NULL unit" << endl;
 	return false;
  }
- if (unit->isFacility()) {
-	p->statistics()->addProducedFacility((Facility*)unit, factory);
- } else {
-	p->statistics()->addProducedMobileUnit((MobileUnit*)unit, factory);
- }
-
- BoEvent* productionPlaced = new BoEvent("ProducedUnitWithTypePlaced", QString::number(unit->type()), QString::number(factory->unit()->id()));
- productionPlaced->setUnitId(unit->id());
- productionPlaced->setPlayerId(unit->owner()->id());
- productionPlaced->setLocation(BoVector3Fixed(unit->x(), unit->y(), unit->z()));
- boGame->queueEvent(productionPlaced);
 
  // the current production is done.
- factory->removeProduction();
+ factory->productionPlaced(unit);
+
  return true;
 }
 

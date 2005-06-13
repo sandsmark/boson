@@ -413,81 +413,19 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			break;
 		}
 		if (message.mType  <= 0) {
-			boError() << k_lineinfo << "Invalid type " << message.mType << endl;
+			boError() << k_lineinfo << "Invalid unit type " << message.mType << endl;
 			break;
 		}
-
-		unsigned long int mineralCost = 0, oilCost = 0;
-
-		if ((ProductionType)message.mProduceType == ProduceUnit) {
-			// Produce unit
-			const UnitProperties* prop = p->unitProperties(message.mType);
-			if (!prop) {
-				boError() << k_lineinfo << "NULL unit properties (EVIL BUG)" << endl;
-				break;
-			}
-			mineralCost = prop->mineralCost();
-			oilCost = prop->oilCost();
-		} else if ((ProductionType)message.mProduceType == ProduceTech) {
-			// Produce upgrade
-			const UpgradeProperties* prop = p->speciesTheme()->technology(message.mType);
-			if (!prop) {
-				boError() << k_lineinfo << "NULL technology properties (EVIL BUG)" << endl;
-				break;
-			}
-			mineralCost = prop->mineralCost();
-			oilCost = prop->oilCost();
-		} else {
-			boError() << k_funcinfo << "Invalid productionType: " << message.mProduceType << endl;
-		}
-
-		// AB: event parameters.
-		// all events in here contain a type (unittype or technology type) and a location.
-		// the name of the event depends what is to be done (production
-		// started or un-paused) and the productiontype (unit/tech). two
-		// events that differ by productiontype only, differ in their
-		// name by the "Unit" or "Technology" part only.
-		QString eventTypeParameter = QString::number(message.mType);
-		QCString productionTypeString;
-		if ((ProductionType)message.mProduceType == ProduceUnit) {
-			productionTypeString = "Unit";
-		} else if ((ProductionType)message.mProduceType == ProduceTech) {
-			productionTypeString = "Technology";
-		} else {
-			boError() << k_funcinfo << "Invalid productionType: " << message.mProduceType << endl;
-		}
-		BoVector3Fixed eventLocation(factory->x(), factory->y(), factory->z());
 
 		if (factory->currentPluginType() != UnitPlugin::Production) {
-			if ((production->currentProductionId() == message.mType) && (production->currentProductionType() == (ProductionType)message.mProduceType)) {
-				// production was paused - continue it now
-				factory->setPluginWork(UnitPlugin::Production);
-
-				QCString name = "ContinueProductionOf" + productionTypeString + "WithType";
-				BoEvent* event = new BoEvent(name, eventTypeParameter, QString::number(message.mFactoryId));
-				event->setPlayerId(message.mOwner);
-				event->setLocation(eventLocation);
-				mGame->queueEvent(event);
+			if ((ProductionType)message.mProduceType == production->currentProductionType() &&
+					message.mType == production->currentProductionId()) {
+				production->unpauseProduction();
 				break;
 			}
 		}
-
-		if (p->minerals() < mineralCost) {
-			mGame->slotAddChatSystemMessage(i18n("You have not enough minerals!"), p);
-			break;
-		}
-		if (p->oil() < oilCost) {
-			mGame->slotAddChatSystemMessage(i18n("You have not enough oil!"), p);
-			break;
-		}
-		p->setMinerals(p->minerals() - mineralCost);
-		p->setOil(p->oil() - oilCost);
 		production->addProduction((ProductionType)message.mProduceType, (unsigned long int)message.mType);
 
-		BoEvent* event = new BoEvent(QCString("StartProductionOf") + productionTypeString + "WithType", eventTypeParameter, QString::number(message.mFactoryId));
-		event->setPlayerId(message.mOwner);
-		event->setLocation(eventLocation);
-		mGame->queueEvent(event);
 		break;
 	}
 	case BosonMessageIds::MoveProduceStop:
@@ -516,79 +454,27 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			boError() << k_lineinfo << factory->id() << "cannot produce?!" << endl;
 			break;
 		}
+
 		if (!production->contains((ProductionType)message.mProduceType, (unsigned long int)message.mType)) {
 			boDebug() << k_lineinfo << "Production " << message.mProduceType << " with id "
 					 << message.mType << " is not in production queue" << endl;
-			return true;
+			break;
 		}
 		if (message.mType <= 0) {
 			boError() << k_lineinfo << "Invalid type " << message.mType << endl;
 			break;
 		}
 
-		unsigned long int mineralCost = 0, oilCost = 0;
-
-		if ((ProductionType)message.mProduceType == ProduceUnit) {
-			const UnitProperties* prop = p->unitProperties(message.mType);
-			if (!prop) {
-				boError() << k_lineinfo << "NULL unit properties (EVIL BUG)" << endl;
-				break;
-			}
-			mineralCost = prop->mineralCost();
-			oilCost = prop->oilCost();
-		} else if ((ProductionType)message.mProduceType == ProduceTech) {
-			const UpgradeProperties* prop = p->speciesTheme()->technology(message.mType);
-			if (!prop) {
-				boError() << k_lineinfo << "NULL technology properties (EVIL BUG)" << endl;
-				break;
-			}
-			mineralCost = prop->mineralCost();
-			oilCost = prop->oilCost();
-		} else {
-			boError() << k_funcinfo << "Invalid productionType: " << message.mProduceType << endl;
-		}
-
-
-		// AB: event parameters.
-		QString eventTypeParameter = QString::number(message.mType);
-		QCString productionTypeString;
-		if ((ProductionType)message.mProduceType == ProduceUnit) {
-			productionTypeString = "Unit";
-		} else if ((ProductionType)message.mProduceType == ProduceTech) {
-			productionTypeString = "Technology";
-		} else {
-			boError() << k_funcinfo << "Invalid productionType: " << message.mProduceType << endl;
-		}
-
-
-		BoEvent* event = 0;
 		if ((production->currentProductionId() == message.mType) && (production->currentProductionType() == (ProductionType)message.mProduceType)) {
 			if (factory->currentPluginType() == UnitPlugin::Production) {
 				// do not abort but just pause
-				factory->setWork(Unit::WorkIdle);
-				event = new BoEvent(QCString("PauseProductionOf") + productionTypeString + "WithType", eventTypeParameter, QString::number(message.mFactoryId));
-			} else {
-				p->setMinerals(p->minerals() + mineralCost);
-				p->setOil(p->oil() + oilCost);
-				production->removeProduction();
-				event = new BoEvent(QCString("StopProductionOf") + productionTypeString + "WithType", eventTypeParameter, QString::number(message.mFactoryId));
+				production->pauseProduction();
+				break;
 			}
-		} else {
-			// not the current, but a queued production is stopped.
+		}
 
-			//FIXME: money should be paid when the production is
-			//actually started! (currently it is paid as soon as an
-			//item is added to the queue)
-			p->setMinerals(p->minerals() + mineralCost);
-			p->setOil(p->oil() + oilCost);
-			production->removeProduction((ProductionType)message.mProduceType, (unsigned long int)message.mType);
-			event = new BoEvent(QCString("StopProductionOf") + productionTypeString + "WithType", eventTypeParameter, QString::number(message.mFactoryId));
-		}
-		if (event) {
-			event->setPlayerId(message.mOwner);
-			event->setLocation(BoVector3Fixed(factory->x(), factory->y(), factory->z()));
-			mGame->queueEvent(event);
-		}
+		production->abortProduction((ProductionType)message.mProduceType, message.mType);
+
 		break;
 	}
 	case BosonMessageIds::MoveBuild:
