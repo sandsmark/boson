@@ -551,6 +551,12 @@ QString BosonModel::cachedModelFilename(const QCString& md5, const QString& orig
 		boError(100) << k_funcinfo << "Error while trying to convert the model" << endl;
 		return QString::null;
 	}
+
+	cachedmodel = KGlobal::dirs()->findResource("data", QString("%1/model-%2.bmf").arg("boson/modelcache").arg(md5));
+	if (cachedmodel.isEmpty()) {
+		boError(100) << k_funcinfo << "bobmfconverter did not write file " << cachedmodel << endl;
+		return QString::null;
+	}
  }
 
  return cachedmodel;
