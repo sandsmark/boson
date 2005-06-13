@@ -54,6 +54,7 @@ public:
 	BoUfoAction(const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name);
 	~BoUfoAction();
 
+	void setText(const QString& text);
 	const QString& text() const;
 
 	void setEnabled(bool e);
@@ -288,7 +289,17 @@ public:
 	static BoUfoAction* create(StdAction id,
 			const QObject* receiver, const char* slot,
 			BoUfoActionCollection* parent, const char* name);
+
+	/**
+	 * @return The name for @p id as it appears in the ui.rc file. E.g.
+	 * "game_quit" for GameQuit.
+	 **/
 	static const char* name(StdAction id);
+
+	/**
+	 * @return The label that is used by default for @p id.
+	 **/
+	static const char* label(StdAction id);
 
 
 	static BoUfoAction* fileNew(const QObject* receiver = 0, const char* slot = 0,

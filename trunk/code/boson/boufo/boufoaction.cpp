@@ -555,6 +555,28 @@ void BoUfoAction::setEnabled(bool e)
  emit signalEnabled(e);
 }
 
+void BoUfoAction::setText(const QString& text)
+{
+ if (d->mText == text) {
+	return;
+ }
+ d->mText = text;
+ QPtrListIterator<ufo::UWidget> it(d->mWidgets);
+ while (it.current()) {
+	ufo::UButton* b = dynamic_cast<ufo::UButton*>(it.current());
+	if (b) {
+		// a UMenuItem is a UButton, therefore this covers
+		// * UMenuItem
+		// * UMenu (is a UMenuItem)
+		// * UCheckBoxMenuItem (is a UMenuItem)
+		b->setText(d->mText.latin1());
+	} else {
+		boWarning() << k_funcinfo << "unknown class of widget not handled yet" << endl;
+	}
+	++it;
+ }
+}
+
 const QString& BoUfoAction::text() const
 {
  return d->mText;
@@ -1487,6 +1509,17 @@ const char* BoUfoStdAction::name(BoUfoStdAction::StdAction id)
  const BoUfoStdActionInfo* info = infoPtr(id);
  if (info) {
 	return info->name;
+ }
+ return 0;
+}
+
+// AB: this may break i18n() !
+// -> I18N_NOOP is used for the label. I don't know how to handle that correctly!
+const char* BoUfoStdAction::label(BoUfoStdAction::StdAction id)
+{
+ const BoUfoStdActionInfo* info = infoPtr(id);
+ if (info) {
+	return info->label;
  }
  return 0;
 }
