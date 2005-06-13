@@ -490,8 +490,6 @@ void ProductionPlugin::advance(unsigned int)
 				if (canvas()->canPlaceUnitAt(speciesTheme()->unitProperties(id), BoVector2Fixed(currentx, currenty), this)) {
 					// Free cell - place unit at it
 					mProductionState = mProductionState + 1;
-					//FIXME: buildProduction should not
-					//depend on Facility! should be Unit
 					((Boson*)player()->game())->buildProducedUnit(this, id, BoVector2Fixed(currentx, currenty));
 					return;
 				}
@@ -504,6 +502,42 @@ void ProductionPlugin::advance(unsigned int)
 	} else {
 		mProductionState = mProductionState + 1;
 	}
+ }
+}
+
+void ProductionPlugin::unitDestroyed(Unit* destroyedUnit)
+{
+ QValueList<unsigned long int> units = possibleUnitProductions();
+ QValueList<unsigned long int> techs = possibleTechnologyProductions();
+ QValueList< QPair<ProductionType, unsigned long int> > abort;
+ QValueList<unsigned long int> abortTechs;
+ for (unsigned int i = 0; i < mProductions.count(); i++) {
+	unsigned long int id = mProductions[i].second;
+	if (mProductions[i].first == ProduceUnit) {
+		if (!units.contains(id)) {
+			QPair<ProductionType, unsigned long int> pair;
+			pair.first = ProduceUnit;
+			pair.second = id;
+			abort.append(pair);
+		}
+	} else if (mProductions[i].first == ProduceTech) {
+		if (!techs.contains(id)) {
+			QPair<ProductionType, unsigned long int> pair;
+			pair.first = ProduceTech;
+			pair.second = id;
+			abort.append(pair);
+		}
+	} else {
+		boError() << k_funcinfo << "production " << i << " has unexpected type" << endl;
+		continue;
+	}
+ }
+
+ for (unsigned int i = 0; i < abort.count(); i++) {
+	abortProduction(abort[i].first, abort[i].second);
+ }
+ if (abort.count() > 0) {
+	game()->slotAddChatSystemMessage(i18n("Production in %1 got aborted because %2 was required but destroyed").arg(unit()->name()).arg(destroyedUnit->name()), player());
  }
 }
 
@@ -704,6 +738,10 @@ bool RepairPlugin::loadFromXML(const QDomElement& root)
 {
  Q_UNUSED(root);
  return true;
+}
+
+void RepairPlugin::unitDestroyed(Unit*)
+{
 }
 
 void RepairPlugin::itemRemoved(BosonItem*)
@@ -1193,6 +1231,18 @@ unsigned int HarvesterPlugin::unloadingSpeed() const
  return prop->unloadingSpeed();
 }
 
+void HarvesterPlugin::unitDestroyed(Unit* u)
+{
+ RefineryPlugin* r = (RefineryPlugin*)u->plugin(UnitPlugin::Refinery);
+ if (mRefinery == r) {
+	mRefinery = 0;
+ }
+ ResourceMinePlugin* m = (ResourceMinePlugin*)u->plugin(UnitPlugin::ResourceMine);
+ if (mResourceMine == m) {
+	mResourceMine = 0;
+ }
+}
+
 void HarvesterPlugin::itemRemoved(BosonItem* item)
 {
  if (!item) {
@@ -1202,14 +1252,7 @@ void HarvesterPlugin::itemRemoved(BosonItem* item)
 	return;
  }
  Unit* u = (Unit*)item;
- RefineryPlugin* r = (RefineryPlugin*)u->plugin(UnitPlugin::Refinery);
- if (mRefinery == r) {
-	mRefinery = 0;
- }
- ResourceMinePlugin* m = (ResourceMinePlugin*)u->plugin(UnitPlugin::ResourceMine);
- if (mResourceMine == m) {
-	mResourceMine = 0;
- }
+ unitDestroyed(u);
 }
 
 BombingPlugin::BombingPlugin(Unit* owner) : UnitPlugin(owner)
@@ -1657,6 +1700,10 @@ int ResourceMinePlugin::oil() const
  return mOil;
 }
 
+void ResourceMinePlugin::unitDestroyed(Unit*)
+{
+}
+
 void ResourceMinePlugin::itemRemoved(BosonItem*)
 {
 }
@@ -1701,6 +1748,10 @@ bool RefineryPlugin::canRefineOil() const
 	return false;
  }
  return prop->canRefineOil();
+}
+
+void RefineryPlugin::unitDestroyed(Unit*)
+{
 }
 
 void RefineryPlugin::itemRemoved(BosonItem*)

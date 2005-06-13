@@ -381,6 +381,7 @@ class BosonWeapon : public UnitPlugin
      **/
     bool dropBomb();
 
+    virtual void unitDestroyed(Unit*) {}
     virtual void itemRemoved(BosonItem*) {}
 
   protected:
