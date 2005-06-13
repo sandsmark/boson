@@ -81,6 +81,8 @@ void BoCommandFrameEventListener::processEvent(const BoEvent* event)
 
 	// might be a production completed
 	emit signalUpdateProduction(event->data2().toULong());
+ } else if (event->name() == "UnitWithTypeDestroyed") {
+	emit signalUpdateProductionOptions();
  } else if (event->name() == "StartProductionOfUnitWithType" ||
 		event->name() == "StartProductionOfTechnologyWithType" ||
 		event->name() == "PauseProductionOfUnitWithType" ||
