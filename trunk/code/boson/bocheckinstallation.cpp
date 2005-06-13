@@ -23,6 +23,7 @@
 
 #include <klocale.h>
 #include <kstandarddirs.h>
+#include <kglobal.h>
 
 #include <qpixmap.h>
 
@@ -35,7 +36,7 @@ QString BoCheckInstallation::checkInstallation()
  QPixmap p2(locate("data", "boson/pics/boson-startup-logo.png"));
   if (p1.isNull() || p2.isNull()) {
 	return i18n("You seem not to have Boson data files installed!\n Please install data package of Boson and restart Boson.");
-}
+ }
 
 #warning TODO: check without preloading data
 #if 0
@@ -46,6 +47,13 @@ QString BoCheckInstallation::checkInstallation()
 	return i18n("Unable to preload playFields. Check your installation!");
  }
 #endif
+
+ if (KGlobal::dirs()->findResource("exe", "bobmfconverter").isNull()) {
+	if (KGlobal::dirs()->findExe("bobmfconverter").isNull()) {
+		return i18n("You seem not to have the \"bobmfconverer\" binary installed!\nPlease check your installation.");
+	}
+ }
+
 
  boDebug() << k_funcinfo << "successful" << endl;
  return QString::null;
