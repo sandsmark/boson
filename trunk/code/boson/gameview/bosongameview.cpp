@@ -922,6 +922,7 @@ void BosonGameView::initUfoGUI()
 
  d->mUfoPlacementPreviewWidget = new BosonUfoPlacementPreviewWidget();
  d->mUfoPlacementPreviewWidget->setGameGLMatrices(d->mGameGLMatrices);
+ d->mUfoPlacementPreviewWidget->setCursorCanvasVectorPointer(d->mCursorPos.canvasVectorPointer());
 
  d->mUfoLineVisualizationWidget = new BosonUfoLineVisualizationWidget();
  d->mUfoLineVisualizationWidget->setGameGLMatrices(d->mGameGLMatrices);

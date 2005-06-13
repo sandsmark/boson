@@ -269,11 +269,12 @@ public:
 	{
 		mGameGLMatrices = 0;
 		mCanvas = 0;
+		mCursorCanvasVector = 0;
 		mLocalPlayerIO = 0;
 	}
 	const BoGLMatrices* mGameGLMatrices;
 	BosonCanvas* mCanvas;
-	BoVector3Fixed mCursorCanvasVector;
+	const BoVector3Fixed* mCursorCanvasVector;
 	PlayerIO* mLocalPlayerIO;
 	PlacementPreview mPlacementPreview;
 	bool mShowPreview;
@@ -307,14 +308,14 @@ const BosonCanvas* BosonUfoPlacementPreviewWidget::canvas() const
  return d->mCanvas;
 }
 
-void BosonUfoPlacementPreviewWidget::setCursorCanvasVector(const BoVector3Fixed& v)
+void BosonUfoPlacementPreviewWidget::setCursorCanvasVectorPointer(const BoVector3Fixed* v)
 {
  d->mCursorCanvasVector = v;
 }
 
 const BoVector3Fixed& BosonUfoPlacementPreviewWidget::cursorCanvasVector() const
 {
- return d->mCursorCanvasVector;
+ return *d->mCursorCanvasVector;
 }
 
 void BosonUfoPlacementPreviewWidget::setLocalPlayerIO(PlayerIO* io)
@@ -553,7 +554,6 @@ void BosonUfoPlacementPreviewWidget::slotSetPlacementCellPreviewData(unsigned in
 {
  setPlacementCellPreviewData(textureCount, alpha, canPlace);
 }
-
 
 
 

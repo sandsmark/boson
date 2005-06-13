@@ -69,7 +69,7 @@ public:
 	void setGameGLMatrices(const BoGLMatrices*);
 	void setCanvas(BosonCanvas* canvas);
 	const BosonCanvas* canvas() const;
-	void setCursorCanvasVector(const BoVector3Fixed& cursorCanvasVector);
+	void setCursorCanvasVectorPointer(const BoVector3Fixed* cursorCanvasVector);
 	const BoVector3Fixed& cursorCanvasVector() const;
 	void setLocalPlayerIO(PlayerIO* io);
 	PlayerIO* localPlayerIO() const;
