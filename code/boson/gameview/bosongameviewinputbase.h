@@ -217,6 +217,9 @@ signals:
 	void signalSetPlacementPreviewData(const UnitProperties* prop, bool canPlace, bool freePlacement, bool collisionDetection);
 	void signalSetPlacementCellPreviewData(unsigned int textureData, unsigned char* alpha, bool canPlace);
 
+	void signalEditorHasUndo(const QString&);
+	void signalEditorHasRedo(const QString&);
+
 
 public slots:
 	/**

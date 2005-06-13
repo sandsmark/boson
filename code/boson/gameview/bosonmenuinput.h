@@ -143,6 +143,10 @@ public:
 	void setActionCollection(BoUfoActionCollection* a);
 	BoUfoActionCollection* actionCollection() const;
 
+public slots:
+	void slotEditorHasUndo(const QString&);
+	void slotEditorHasRedo(const QString&);
+
 signals:
 	void signalScroll(int direction);
 	void signalToggleStatusbar(bool);

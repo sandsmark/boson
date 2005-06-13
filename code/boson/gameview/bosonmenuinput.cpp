@@ -409,6 +409,8 @@ void BosonMenuInputData::initUfoEditorActions()
 
  BoUfoStdAction::editUndo(this, SIGNAL(signalEditorUndo()), actionCollection());
  BoUfoStdAction::editRedo(this, SIGNAL(signalEditorRedo()), actionCollection());
+ actionCollection()->action("edit_undo")->setEnabled(false);
+ actionCollection()->action("edit_redo")->setEnabled(false);
 
 // KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection()); // FIXME: slotEditorPreferences()
 
@@ -1281,4 +1283,34 @@ void BosonMenuInput::slotEditorExportTexMap()
  }
 }
 
+void BosonMenuInput::slotEditorHasUndo(const QString& name)
+{
+ BoUfoAction* undo = actionCollection()->action("edit_undo");
+ if (!undo) {
+	boDebug() << "no undo action" << endl;
+	return;
+ }
+ if (name.isEmpty()) {
+	undo->setEnabled(false);
+	undo->setText(BoUfoStdAction::label(BoUfoStdAction::EditUndo));
+ } else {
+	undo->setEnabled(true);
+	undo->setText(i18n("%1: %2").arg(BoUfoStdAction::label(BoUfoStdAction::EditUndo)).arg(name));
+ }
+}
+
+void BosonMenuInput::slotEditorHasRedo(const QString& name)
+{
+ BoUfoAction* redo = actionCollection()->action("edit_redo");
+ if (!redo) {
+	return;
+ }
+ if (name.isEmpty()) {
+	redo->setEnabled(false);
+	redo->setText(BoUfoStdAction::label(BoUfoStdAction::EditRedo));
+ } else {
+	redo->setEnabled(true);
+	redo->setText(i18n("%1: %2").arg(BoUfoStdAction::label(BoUfoStdAction::EditRedo)).arg(name));
+ }
+}
 

@@ -1370,6 +1370,10 @@ void BosonGameView::setGameMode(bool mode)
 			this, SLOT(slotEditorUndo()));
 	connect(io, SIGNAL(signalEditorRedo()),
 			this, SLOT(slotEditorRedo()));
+	connect(this, SIGNAL(signalEditorHasUndo(const QString&)),
+			io, SLOT(slotEditorHasUndo(const QString&)));
+	connect(this, SIGNAL(signalEditorHasRedo(const QString&)),
+			io, SLOT(slotEditorHasRedo(const QString&)));
 
  }
 }
@@ -1623,6 +1627,12 @@ void BosonGameView::setDisplayInput(BosonGameViewInputBase* input)
 	connect(d->mGLMiniMap, SIGNAL(signalMoveSelection(int, int)),
 			input, SLOT(slotMoveSelection(int, int)));
  }
+
+ connect(input, SIGNAL(signalEditorHasUndo(const QString&)),
+		this, SIGNAL(signalEditorHasUndo(const QString&)));
+ connect(input, SIGNAL(signalEditorHasRedo(const QString&)),
+		this, SIGNAL(signalEditorHasRedo(const QString&)));
+
 }
 
 BosonGameViewInputBase* BosonGameView::displayInput() const
