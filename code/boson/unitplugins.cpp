@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -366,6 +366,62 @@ bool ProductionPlugin::contains(ProductionType type, unsigned long int id)
  pair.second = id;
  return productionList().contains(pair);
 }
+
+QValueList<unsigned long int> ProductionPlugin::possibleUnitProductions() const
+{
+ QValueList<unsigned long int> ret;
+ ProductionProperties* pp = (ProductionProperties*)properties(PluginProperties::Production);
+ if (!pp) {
+	// Must not happen when the unit has a ProductionPlugin
+	boError() << k_funcinfo << "no ProductionProperties" << endl;
+	return ret;
+ }
+ if (!speciesTheme()) {
+	BO_NULL_ERROR(speciesTheme());
+	return ret;
+ }
+
+ QValueList<unsigned long int> unitsList = speciesTheme()->productions(pp->producerList());
+
+ // Filter out things that player can't actually build (requirements aren't met yet)
+ QValueList<unsigned long int>::Iterator it;
+ it = unitsList.begin();
+ for (; it != unitsList.end(); ++it) {
+	if (player()->canBuild(*it)) {
+		ret.append(*it);
+	}
+ }
+
+ return ret;
+}
+
+QValueList<unsigned long int> ProductionPlugin::possibleTechnologyProductions() const
+{
+ QValueList<unsigned long int> ret;
+ ProductionProperties* pp = (ProductionProperties*)properties(PluginProperties::Production);
+ if (!pp) {
+	// Must not happen when the unit has a ProductionPlugin
+	boError() << k_funcinfo << "no ProductionProperties" << endl;
+	return ret;
+ }
+ if (!speciesTheme()) {
+	BO_NULL_ERROR(speciesTheme());
+	return ret;
+ }
+
+ QValueList<unsigned long int> techList = speciesTheme()->technologies(pp->producerList());
+
+ // Filter out things that player can't actually build (requirements aren't met yet)
+ QValueList<unsigned long int>::Iterator it;
+ for (it = techList.begin(); it != techList.end(); it++) {
+	if ((!player()->hasTechnology(*it)) && (player()->canResearchTech(*it))) {
+		ret.append(*it);
+	}
+ }
+
+ return ret;
+}
+
 
 RepairPlugin::RepairPlugin(Unit* unit) : UnitPlugin(unit)
 {

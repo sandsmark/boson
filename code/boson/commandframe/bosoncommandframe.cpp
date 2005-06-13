@@ -739,47 +739,33 @@ void BosonCommandFrame::setProduction(Unit* unit)
 	return;
  }
 
- // this unit cannot produce.
- if (!unit->plugin(UnitPlugin::Production)) {
+ ProductionPlugin* production = (ProductionPlugin*)unit->plugin(UnitPlugin::Production);
+ if (!production) {
+	// this unit cannot produce.
 	d->mSelectionWidget->hideOrderButtons();
-	return;
- }
- ProductionProperties* pp = (ProductionProperties*)unit->properties(PluginProperties::Production);
- if (!pp) {
-	// must not happen if the units has the production
-	// plugin
-	boError(220) << k_funcinfo << "no production properties!" << endl;
 	return;
  }
  QValueList<BoSpecificAction> actions;
 
- // Add units to production list
- QValueList<unsigned long int> unitsList = speciesTheme->productions(pp->producerList());
- // Filter out things that player can't actually build (requirements aren't met yet)
+ QValueList<unsigned long int> unitsList = production->possibleUnitProductions();
  QValueList<unsigned long int>::Iterator it;
  it = unitsList.begin();
  for (; it != unitsList.end(); ++it) {
-	if (localPlayerIO()->canBuild(*it)) {
-		BoSpecificAction a(speciesTheme->unitProperties(*it)->produceAction());
-		a.setType(ActionProduceUnit);
-		a.setProductionId(*it);
-		a.setUnit(unit);
-		actions.append(a);
-	}
+	BoSpecificAction a(speciesTheme->unitProperties(*it)->produceAction());
+	a.setType(ActionProduceUnit);
+	a.setProductionId(*it);
+	a.setUnit(unit);
+	actions.append(a);
  }
 
- // Add technologies to production list
- QValueList<unsigned long int> techList = speciesTheme->technologies(pp->producerList());
- // Filter out things that player can't actually build (requirements aren't met yet)
+ QValueList<unsigned long int> techList = production->possibleTechnologyProductions();
  QValueList<unsigned long int>::Iterator tit;  // tit = Technology ITerator ;-)
  for (tit = techList.begin(); tit != techList.end(); tit++) {
-	if ((!localPlayerIO()->hasTechnology(*tit)) && (localPlayerIO()->canResearchTech(*tit))) {
-		BoSpecificAction a(speciesTheme->technology(*tit)->produceAction());
-		a.setType(ActionProduceTech);
-		a.setProductionId(*tit);
-		a.setUnit(unit);
-		actions.append(a);
-	}
+	BoSpecificAction a(speciesTheme->technology(*tit)->produceAction());
+	a.setType(ActionProduceTech);
+	a.setProductionId(*tit);
+	a.setUnit(unit);
+	actions.append(a);
  }
 
  // Set buttons
