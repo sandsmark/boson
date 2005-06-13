@@ -39,8 +39,8 @@ class PythonScript : public BosonScript
     virtual bool loadScript(QString file);
     virtual bool loadScriptFromString(const QString& string);
 
-    virtual void advance();
-    virtual void init();
+    virtual bool advance();
+    virtual bool init();
     virtual void setPlayerId(int id);
 
     virtual bool load(QDataStream& stream);
