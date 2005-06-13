@@ -515,7 +515,7 @@ QString BosonModel::cachedModelFilename(const QCString& md5, const QString& orig
 {
  QString cachedmodel = KGlobal::dirs()->findResource("data", QString("%1/model-%2.bmf").arg("boson/modelcache").arg(md5));
 
- if (!cachedmodel) {
+ if (cachedmodel.isEmpty()) {
 	// Cached model wasn't found
 	// Convert the model now.
 	// Get the path where the cached model can be saved
