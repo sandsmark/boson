@@ -117,6 +117,16 @@ public:
 	void setPluginWork(int pluginType);
 
 	/**
+	 * Called when @p unit is destroyed. If the unit is a target of this
+	 * unit, it can now decide to reset the target.
+	 *
+	 * Note that @p unit usually will remain on the map as a wreckage for a
+	 * certain time. @ref itemRemoved is called when it is finally removed
+	 * completely.
+	 **/
+	virtual void unitDestroyed(Unit* unit);
+
+	/**
 	 * We are about to remove @p item from the game. Make sure that this
 	 * unit does not use that item in any way (e.g. as a target)
 	 *

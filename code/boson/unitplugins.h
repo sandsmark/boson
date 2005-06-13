@@ -107,6 +107,11 @@ public:
 	virtual int pluginType() const = 0;
 
 	/**
+	 * See @ref Unit::unitDestroyed
+	 **/
+	virtual void unitDestroyed(Unit* unit) = 0;
+
+	/**
 	 * Called when @p item is about to be removed from the game. When your
 	 * plugin stores a pointer to an item (e.g. a unit, such as a pointer to
 	 * a refinery), you should set it at least to NULL now.
@@ -238,7 +243,8 @@ public:
 	virtual bool saveAsXML(QDomElement& root) const;
 	virtual bool loadFromXML(const QDomElement& root);
 
-	virtual void itemRemoved(BosonItem*) {}
+	virtual void unitDestroyed(Unit*);
+	virtual void itemRemoved(BosonItem*) { }
 
 protected:
 	/**
@@ -299,6 +305,7 @@ public:
 	virtual bool saveAsXML(QDomElement& root) const;
 	virtual bool loadFromXML(const QDomElement& root);
 
+	virtual void unitDestroyed(Unit*);
 	virtual void itemRemoved(BosonItem*);
 
 private:
@@ -356,6 +363,7 @@ public:
 	virtual bool saveAsXML(QDomElement& root) const;
 	virtual bool loadFromXML(const QDomElement& root);
 
+	virtual void unitDestroyed(Unit*);
 	virtual void itemRemoved(BosonItem*);
 
 protected:
@@ -397,6 +405,7 @@ public:
 	virtual bool saveAsXML(QDomElement& root) const;
 	virtual bool loadFromXML(const QDomElement& root);
 
+	virtual void unitDestroyed(Unit*) {}
 	virtual void itemRemoved(BosonItem*) {}
 
 private:
@@ -426,6 +435,7 @@ public:
 	virtual bool saveAsXML(QDomElement& root) const;
 	virtual bool loadFromXML(const QDomElement& root);
 
+	virtual void unitDestroyed(Unit*) {}
 	virtual void itemRemoved(BosonItem*) {}
 
 private:
@@ -488,6 +498,7 @@ public:
 	 **/
 	bool canProvideOil() const;
 
+	virtual void unitDestroyed(Unit*);
 	virtual void itemRemoved(BosonItem*);
 
 protected:
@@ -533,6 +544,7 @@ public:
 	 **/
 	unsigned int refineOil(unsigned int oil);
 
+	virtual void unitDestroyed(Unit*);
 	virtual void itemRemoved(BosonItem*);
 };
 

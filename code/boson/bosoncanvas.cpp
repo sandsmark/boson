@@ -149,6 +149,7 @@ protected:
 	void updateWork2AdvanceList();
 	void maximalAdvanceCountTasks(unsigned int advanceCallsCount); // "maximalAdvanceCount" is nonsense here, but the name has historic reasons
 	void updateEffects(QPtrList<BosonEffect>& effects, float elapsed);
+	void notifyAboutDestroyedUnits(const QPtrList<Unit>& destroyedUnits, unsigned int first, const BoItemList& allItems);
 
 private:
 	BosonCanvas* mCanvas;
@@ -157,6 +158,8 @@ private:
 void BoCanvasAdvance::advance(const BoItemList& allItems, const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount, bool advanceFlag)
 {
  boProfiling->push(prof_funcinfo + " - Whole method");
+
+ unsigned int initialDestroyedUnitsCount = mCanvas->d->mDestroyedUnits.count();
 
  /*
   * Main part of this method. This is the most important, but unfortunately also
@@ -173,6 +176,10 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, const QPtrList<BosonIt
  boProfiling->push("Advance Water");
  boWaterManager->update(0.05);
  boProfiling->pop(); // Advance Water
+
+ boProfiling->push("Notify About Destroyed Units");
+ notifyAboutDestroyedUnits(mCanvas->d->mDestroyedUnits, initialDestroyedUnitsCount, allItems);
+ boProfiling->pop(); // Advance Maximal Advance Count
 
  /*
   * This contains some things that need to be done "sometimes" only - currently
@@ -442,6 +449,31 @@ void BoCanvasAdvance::updateEffects(QPtrList<BosonEffect>& effects, float elapse
  }
 }
 
+void BoCanvasAdvance::notifyAboutDestroyedUnits(const QPtrList<Unit>& destroyedUnits, unsigned int first, const BoItemList& allItems)
+{
+ unsigned int i = 0;
+ QPtrListIterator<Unit> destIt(destroyedUnits);
+ while (destIt.current() && i < first) {
+	++destIt;
+ }
+
+ // notify all units about the destroyed units in this advance call (i.e. from first
+ // to end of list)
+ while (destIt.current()) {
+	Unit* destroyedUnit = destIt.current();
+	for (BoItemList::const_iterator it = allItems.begin(); it != allItems.end(); ++it) {
+		if (!RTTI::isUnit((*it)->rtti())) {
+			continue;
+		}
+		Unit* u = (Unit*)*it;
+		if (u == destroyedUnit) {
+			continue;
+		}
+		u->unitDestroyed(destroyedUnit);
+	}
+	++destIt;
+ }
+}
 
 
 BosonCanvas::BosonCanvas(QObject* parent)
