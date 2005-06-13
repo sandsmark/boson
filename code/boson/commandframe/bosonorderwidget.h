@@ -144,7 +144,7 @@ signals:
 	 **/
 	void signalSelectUnit(Unit*);
 
-	void signalUnittypeHighlighted(const UnitProperties*);
+	void signalUnitTypeHighlighted(const UnitProperties*);
 
 private:
 	BosonOrderWidgetPrivate* d;

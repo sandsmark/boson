@@ -276,7 +276,7 @@ void BosonOrderWidget::slotMouseEnteredButton()
 	const BoSpecificAction& action = button->action();
 	if (action.isProduceAction()) {
 		const UnitProperties* prop = action.productionOwner()->unitProperties(action.productionId());
-		emit signalUnittypeHighlighted(prop);
+		emit signalUnitTypeHighlighted(prop);
 	}
  }
 }
@@ -288,7 +288,7 @@ void BosonOrderWidget::slotMouseLeftButton()
  if (button->type() == BosonOrderButton::ShowAction) {
 	const BoSpecificAction& action = button->action();
 	if (action.isProduceAction()) {
-		emit signalUnittypeHighlighted(0);
+		emit signalUnitTypeHighlighted(0);
 	}
  }
 }
@@ -303,14 +303,14 @@ void BosonOrderWidget::slotMouseMoved(QMouseEvent* e)
 			const BoSpecificAction& action = button->action();
 			if (action.isProduceAction()) {
 				const UnitProperties* prop = action.productionOwner()->unitProperties(action.productionId());
-				emit signalUnittypeHighlighted(prop);
+				emit signalUnitTypeHighlighted(prop);
 				d->mButtonTimer->start(200);
 				return;
 			}
 		}
 	}
  }
- emit signalUnittypeHighlighted(0);
+ emit signalUnitTypeHighlighted(0);
  d->mButtonTimer->stop();
 }
 
@@ -329,7 +329,7 @@ void BosonOrderWidget::slotCheckCursor()
  }*/
 
  // None of the order buttons has mouse. Disable unit info
- emit signalUnittypeHighlighted(0);
+ emit signalUnitTypeHighlighted(0);
  d->mButtonTimer->stop();
 }
 
