@@ -95,6 +95,8 @@ protected:
 	 **/
 	virtual CanSelectUnit canSelect(Unit* unit) const { Q_UNUSED(unit); return CanSelectMultipleOk; }
 
+	QString messageName(const BosonMessageEditorMove* m) const;
+
 private:
 	EditorViewInputPrivate* d;
 };

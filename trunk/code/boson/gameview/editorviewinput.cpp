@@ -558,6 +558,7 @@ void EditorViewInput::slotClearUndoStack()
 	BosonMessageEditorMove* m = d->mUndoStack.pop();
 	delete m;
  }
+ emit signalEditorHasUndo(QString::null);
 }
 
 void EditorViewInput::slotClearRedoStack()
@@ -566,6 +567,7 @@ void EditorViewInput::slotClearRedoStack()
 	BosonMessageEditorMove* m = d->mRedoStack.pop();
 	delete m;
  }
+ emit signalEditorHasRedo(QString::null);
 }
 
 void EditorViewInput::slotNewUndoMessage(const BosonMessageEditorMove& undo)
@@ -582,6 +584,9 @@ void EditorViewInput::slotNewUndoMessage(const BosonMessageEditorMove& undo)
 	return;
  }
  d->mUndoStack.push(m);
+
+ QString name = messageName(d->mUndoStack.top());
+ emit signalEditorHasUndo(name);
 }
 
 void EditorViewInput::slotNewRedoMessage(const BosonMessageEditorMove& redo)
@@ -593,6 +598,9 @@ void EditorViewInput::slotNewRedoMessage(const BosonMessageEditorMove& redo)
 	return;
  }
  d->mRedoStack.push(m);
+
+ QString name = messageName(d->mRedoStack.top());
+ emit signalEditorHasRedo(name);
 }
 
 void EditorViewInput::undo()
@@ -615,6 +623,9 @@ void EditorViewInput::undo()
 
  QDataStream msg(b, IO_ReadOnly);
  localPlayerInput()->sendInput(msg);
+
+ QString name = messageName(d->mUndoStack.top());
+ emit signalEditorHasUndo(name);
 }
 
 void EditorViewInput::redo()
@@ -637,5 +648,68 @@ void EditorViewInput::redo()
 
  QDataStream msg(b, IO_ReadOnly);
  localPlayerInput()->sendInput(msg);
+
+ QString name = messageName(d->mRedoStack.top());
+ emit signalEditorHasRedo(name);
+}
+
+QString EditorViewInput::messageName(const BosonMessageEditorMove* message) const
+{
+ if (!message) {
+	return QString::null;
+ }
+ QString name;
+ switch (message->messageId()) {
+	case BosonMessageIds::MovePlaceUnit: // redo
+	{
+		BosonMessageEditorMovePlaceUnit* m = (BosonMessageEditorMovePlaceUnit*)message;
+		QString type = i18n("Unknown");
+		PlayerIO* p = boGame->findPlayerIO(m->mOwner);
+		if (p) {
+			const UnitProperties* prop = p->unitProperties(m->mUnitType);
+			if (prop) {
+				type = prop->name();
+			}
+		}
+		name = i18n("Place unit (%1)").arg(type);
+		break;
+	}
+	case BosonMessageIds::MoveUndoPlaceUnit:
+	{
+		BosonMessageEditorMoveUndoPlaceUnit* m = (BosonMessageEditorMoveUndoPlaceUnit*)message;
+		QString type = i18n("Unknown");
+		PlayerIO* p = boGame->findPlayerIO(m->mMessage.mOwner);
+		if (p) {
+			const UnitProperties* prop = p->unitProperties(m->mMessage.mUnitType);
+			if (prop) {
+				type = prop->name();
+			}
+		}
+		QString id = i18n("Unknown");
+		if (m->mDeleteUnit.mItems.count() > 0) {
+			id = QString::number(m->mDeleteUnit.mItems[0]);
+		}
+		name = i18n("Place unit (%1 , ID %2)").arg(type).arg(id);
+		break;
+	}
+	case BosonMessageIds::MoveDeleteItems: // redo
+	{
+		BosonMessageEditorMoveDeleteItems* m = (BosonMessageEditorMoveDeleteItems*)message;
+		QString count = QString::number(m->mItems.count());
+		name = i18n("Delete %1 items").arg(count);
+		break;
+	}
+	case BosonMessageIds::MoveUndoDeleteItems:
+	{
+		BosonMessageEditorMoveUndoDeleteItems* m = (BosonMessageEditorMoveUndoDeleteItems*)message;
+		QString count = QString::number(m->mMessage.mItems.count());
+		name = i18n("Delete %1 items").arg(count);
+		break;
+	}
+	default:
+		name = i18n("(Unknown - ID %1)").arg(message->messageId());
+		break;
+ }
+ return name;
 }
 

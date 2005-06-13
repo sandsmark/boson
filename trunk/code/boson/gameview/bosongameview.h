@@ -416,6 +416,8 @@ signals:
 	void signalEndGame();
 	void signalQuit();
 	void signalEditorChangeLocalPlayer(Player*);
+	void signalEditorHasUndo(const QString&);
+	void signalEditorHasRedo(const QString&);
 	void signalSetUpdateInterval(unsigned int ms);
 
 	/**
