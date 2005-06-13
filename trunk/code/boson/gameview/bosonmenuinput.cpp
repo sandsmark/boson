@@ -986,7 +986,7 @@ void BosonMenuInput::slotReloadMeshRenderer()
  if (r) {
 	return;
  }
- boError() << "meshrenderer reloading failed" << endl;
+ boError() << k_funcinfo << "meshrenderer reloading failed" << endl;
  if (unusable) {
 	KMessageBox::sorry(0, i18n("Reloading meshrenderer failed, library is now unusable. quitting."));
 	exit(1);
@@ -1002,7 +1002,7 @@ void BosonMenuInput::slotReloadGroundRenderer()
  if (r) {
 	return;
  }
- boError() << "groundrenderer reloading failed" << endl;
+ boError() << k_funcinfo << "groundrenderer reloading failed" << endl;
  if (unusable) {
 	KMessageBox::sorry(0, i18n("Reloading groundrenderer failed, library is now unusable. quitting."));
 	exit(1);

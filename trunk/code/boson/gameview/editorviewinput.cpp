@@ -256,7 +256,7 @@ bool EditorViewInput::actionPlace(const BoVector3Fixed& canvasVector, bool exact
 		boGame->slotAddChatSystemMessage(i18n("You can't place a %1 there!").arg(prop->name()));
 		ret = false;
 	} else {
-		boDebug() << "place unit " << d->mPlacement.unitType() << endl;
+		boDebug() << k_funcinfo << "place unit " << d->mPlacement.unitType() << endl;
 
 		localPlayerInput()->placeUnit(d->mPlacement.owner(), d->mPlacement.unitType(), x, y);
 		ret = true;

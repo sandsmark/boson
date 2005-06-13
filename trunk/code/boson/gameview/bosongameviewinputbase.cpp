@@ -142,7 +142,7 @@ void BosonGameViewInputBase::selectArea(BoItemList* itemsInArea, bool replace)
  if (boConfig->intValue("DebugMode") == (int)BosonConfig::DebugSelection) {
 	const BoItemList* list = itemsInArea;
 	BoItemList::ConstIterator it;
-	boDebug() << "Selection count: " << list->count() << endl;
+	boDebug() << k_funcinfo << "Selection count: " << list->count() << endl;
 	for (it = list->begin(); it != list->end(); ++it) {
 		QString s = QString("Selected: RTTI=%1").arg((*it)->rtti());
 		if (RTTI::isUnit((*it)->rtti())) {
@@ -152,7 +152,7 @@ void BosonGameViewInputBase::selectArea(BoItemList* itemsInArea, bool replace)
 				s += QString("(destroyed)");
 			}
 		}
-		boDebug() << s << endl;
+		boDebug() << k_funcinfo << s << endl;
 	}
  }
 
@@ -186,7 +186,7 @@ void BosonGameViewInputBase::selectArea(BoItemList* itemsInArea, bool replace)
  }
 
  if (unitList.count() > 0) {
-	boDebug() << "select " << unitList.count() << " units" << endl;
+	boDebug() << k_funcinfo << "select " << unitList.count() << " units" << endl;
 	selectUnits(unitList, replace);
  } else if (fallBackUnit && selection()->count() == 0) {
 	selectSingle(fallBackUnit, replace);
