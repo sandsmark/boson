@@ -92,6 +92,7 @@ public slots:
 	void slotSelectionChanged(BoSelection*);
 	void slotProduce(const BoSpecificAction&);
 	void slotConstructionCompleted(unsigned long int facilityId);
+	void slotUnitDestroyed(unsigned long int id);
 
 	/**
 	 * Editor mode only. Emit @ref signalPlaceUnit.

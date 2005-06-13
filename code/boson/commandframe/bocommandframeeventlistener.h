@@ -62,6 +62,8 @@ signals:
 	 **/
 	void signalFacilityConstructed(unsigned long int unitId);
 
+	void signalUnitDestroyed(unsigned long int unitId);
+
 protected:
 	virtual void processEvent(const BoEvent* event);
 	virtual BosonScript* createScriptParser() const
