@@ -44,6 +44,7 @@ class BoSpecificAction;
 class BoGLMatrices;
 class BoRenderItem;
 class BosonCursor;
+class BoUfoWidget;
 
 class KGameChat;
 class KGameIO;
@@ -144,6 +145,8 @@ protected:
 
 	bool changeLocalPlayer(Player* p);
 	void saveConfig();
+
+	void raiseWidget(BoUfoWidget*);
 
 protected slots:
 	void slotChangeLocalPlayer(Player* p);
