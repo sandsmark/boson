@@ -141,12 +141,12 @@ void ProductionPlugin::addProduction(ProductionType type, unsigned long int id)
 	boError() << k_funcinfo << "NULL production properties" << endl;
 	return;
  }
- if(type == ProduceUnit) {
+ if (type == ProduceUnit) {
 	if (!speciesTheme()->productions(p->producerList()).contains(id)) {
 		boError() << k_funcinfo << " cannot produce unit with id " << id << endl;
 		return;
 	}
- } else if(type == ProduceTech) {
+ } else if (type == ProduceTech) {
 	if (!speciesTheme()->technologies(p->producerList()).contains(id)) {
 		boError() << k_funcinfo << " cannot produce technology with id " << id << endl;
 		return;
@@ -185,9 +185,9 @@ void ProductionPlugin::removeProduction(ProductionType type, unsigned long int i
 double ProductionPlugin::productionProgress() const
 {
  unsigned int productionTime = 0;
- if(currentProductionType() == ProduceUnit) {
+ if (currentProductionType() == ProduceUnit) {
 	productionTime = speciesTheme()->unitProperties(currentProductionId())->productionTime();
- } else if(currentProductionType() == ProduceTech) {
+ } else if (currentProductionType() == ProduceTech) {
 	productionTime = speciesTheme()->technology(currentProductionId())->productionTime();
  } else {
 	boDebug() << k_funcinfo << "Unknown productiontype: " << currentProductionType() << endl;
@@ -209,9 +209,9 @@ void ProductionPlugin::advance(unsigned int)
 
  // a unit is completed as soon as mProductionState == player()->unitProperties(type)->productionTime()
  unsigned int productionTime = 0;
- if(currentProductionType() == ProduceUnit) {
+ if (currentProductionType() == ProduceUnit) {
 	productionTime = speciesTheme()->unitProperties(currentProductionId())->productionTime();
- } else if(currentProductionType() == ProduceTech) {
+ } else if (currentProductionType() == ProduceTech) {
 	productionTime = speciesTheme()->technology(currentProductionId())->productionTime();
  } else {
 	boDebug() << k_funcinfo << "Unknown productiontype: " << currentProductionType() << endl;
@@ -643,7 +643,7 @@ void HarvesterPlugin::advanceMine()
  // Check if unit is at mining location. If not, go there
  if (!isAtResourceMine()) {
 	Unit* u = mResourceMine->unit();
-	if(!unit()->moveTo(u->x(), u->y(), 1)) {
+	if (!unit()->moveTo(u->x(), u->y(), 1)) {
 		boDebug(430) << k_funcinfo << "Cannot move to refinery (id=" << u->id() <<
 				") at (" << u->x() << "; " << u->y() << ")" << endl;
 		unit()->setWork(Unit::WorkIdle);
@@ -711,7 +711,7 @@ void HarvesterPlugin::advanceRefine()
 
  if (!isAtRefinery()) {
 	Unit* u = mRefinery->unit();
-	if(!unit()->moveTo(u->x(), u->y(), 1)) {
+	if (!unit()->moveTo(u->x(), u->y(), 1)) {
 		boDebug(430) << k_funcinfo << "Cannot move to refinery (id=" << u->id() <<
 				") at (" << u->x() << "; " << u->y() << ")" << endl;
 		unit()->setWork(Unit::WorkIdle);
