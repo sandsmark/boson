@@ -54,7 +54,11 @@ BosonModel* BosonModelFactory::createUnitModel(const UnitProperties* prop, const
 {
  BosonModel* m = new BosonModel(prop->unitPath(), file);
  QString configfile = prop->unitPath() + QString::fromLatin1("index.unit");
- m->loadModel(configfile);
+ if (!m->loadModel(configfile)) {
+	boError() << k_funcinfo << "model loading failed" << endl;
+	delete m;
+	return 0;
+ }
 
 
  // now we load animation information. this is just which frame is used for
@@ -100,7 +104,11 @@ BosonModel* BosonModelFactory::createObjectModel(const KSimpleConfig* config, co
 
 
  BosonModel* m = new BosonModel(themePath + QString::fromLatin1("/objects/"), file);
- m->loadModel(tmpconfig.name());
+ if (!m->loadModel(tmpconfig.name())) {
+	boError() << k_funcinfo << "model loading failed" << endl;
+	delete m;
+	return 0;
+ }
 
  return m;
 }
@@ -476,6 +484,10 @@ bool SpeciesData::loadObjects(const QColor& teamColor)
 	if (!m) {
 		BosonModelFactory factory;
 		m = factory.createObjectModel(&cfg, themePath());
+		if (!m) {
+			boError(270) << k_funcinfo  << "NULL model created" << endl;
+			return false;
+		}
 		d->mObjectModels.insert(*it, m);
 	} else {
 		// nothing special to do here

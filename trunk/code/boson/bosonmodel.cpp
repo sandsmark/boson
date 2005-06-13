@@ -61,11 +61,11 @@ BoFrame::BoFrame(const BoFrame& f, unsigned int firstNode, unsigned int nodeCoun
  mRadius = f.mRadius;
 
  if (nodeCount == 0) {
-	boWarning() << k_funcinfo << "no nodes copied" << endl;
+	boWarning(100) << k_funcinfo << "no nodes copied" << endl;
 	return;
  }
  if (firstNode + nodeCount > f.mNodeCount) {
-	boError() << k_funcinfo << "can't copy " << nodeCount
+	boError(100) << k_funcinfo << "can't copy " << nodeCount
 			<< " nodes starting at " << firstNode
 			<< ", as there are only " << f.mNodeCount
 			<< " nodes!" << endl;
@@ -113,16 +113,16 @@ BoFrame::~BoFrame()
 void BoFrame::copyNodes(const BoFrame& f, unsigned int* nodes, unsigned int count)
 {
  if (f.mNodeCount == 0 || !f.mMeshes || !f.mMatrices) {
-	boError() << k_funcinfo << "oops - can't copy from invalid frame!" << endl;
+	boError(100) << k_funcinfo << "oops - can't copy from invalid frame!" << endl;
 	return;
  }
  BO_CHECK_NULL_RET(nodes);
  if (count == 0) {
-	boWarning() << k_funcinfo << "no nodes copied" << endl;
+	boWarning(100) << k_funcinfo << "no nodes copied" << endl;
 	return;
  }
  if (count > f.mNodeCount) {
-	boError() << k_funcinfo << "cannot copy " << count
+	boError(100) << k_funcinfo << "cannot copy " << count
 			<< " nodes as frame contains " << f.mNodeCount
 			<< " nodes only" << endl;
 	return;
@@ -131,7 +131,7 @@ void BoFrame::copyNodes(const BoFrame& f, unsigned int* nodes, unsigned int coun
  // before allocating anything we first check whether all indices are valid
  for (unsigned int i = 0; i < count; i++) {
 	if (nodes[i] >= f.mNodeCount) {
-		boError() << k_funcinfo << "index " << nodes[i] << " at " << i
+		boError(100) << k_funcinfo << "index " << nodes[i] << " at " << i
 				<< " is not valid! only " << f.mNodeCount
 				<< " available in the frame" << endl;
 		return;
@@ -149,15 +149,15 @@ void BoFrame::copyNodes(const BoFrame& f, unsigned int* nodes, unsigned int coun
 void BoFrame::allocNodes(int nodes)
 {
  if (mNodeCount != 0) {
-	boError() << k_funcinfo << "nodes already loaded" << endl;
+	boError(100) << k_funcinfo << "nodes already loaded" << endl;
 	return;
  }
  if (mMatrices) {
-	boError() << k_funcinfo << "matrices already allocated??" << endl;
+	boError(100) << k_funcinfo << "matrices already allocated??" << endl;
 	delete[] mMatrices;
  }
  if (mMeshes) {
-	boError() << k_funcinfo << "meshes already allocated??" << endl;
+	boError(100) << k_funcinfo << "meshes already allocated??" << endl;
 	delete[] mMeshes;
  }
  mMeshes = new BoMesh*[nodes];
@@ -172,7 +172,7 @@ void BoFrame::allocNodes(int nodes)
 void BoFrame::setMesh(unsigned int index, BoMesh* mesh)
 {
  if (index >= mNodeCount) {
-	boError() << k_funcinfo << "invalid mesh " << index << " , count=" << mNodeCount << endl;
+	boError(100) << k_funcinfo << "invalid mesh " << index << " , count=" << mNodeCount << endl;
 	return;
  }
  BO_CHECK_NULL_RET(mesh);
@@ -192,11 +192,11 @@ void BoFrame::renderFrame(const QColor* teamColor, int mode)
 	BoMatrix* m = mMatrices[i];
 	BoMesh* mesh = mMeshes[i];
 	if (!m) {
-		boError() << k_funcinfo << "NULL matrix at " << i << endl;
+		boError(100) << k_funcinfo << "NULL matrix at " << i << endl;
 		continue;
 	}
 	if (!mesh) {
-		boError() << k_funcinfo << "NULL mesh at " << i << endl;
+		boError(100) << k_funcinfo << "NULL mesh at " << i << endl;
 		continue;
 	}
 	if (mode == GL_SELECT) {
@@ -398,7 +398,7 @@ unsigned int BosonModel::materialCount() const
 void BosonModel::allocateMaterials(unsigned int count)
 {
  if (d->mMaterials) {
-	boWarning() << k_funcinfo << "Materials already allocated!" << endl;
+	boWarning(100) << k_funcinfo << "Materials already allocated!" << endl;
 	delete[] d->mMaterials;
  }
 
@@ -423,11 +423,11 @@ void BosonModel::loadTextures(const QStringList& list)
  }
 }
 
-void BosonModel::loadModel(const QString& configfilename)
+bool BosonModel::loadModel(const QString& configfilename)
 {
  if (d->mFile.isEmpty() || d->mDirectory.isEmpty()) {
 	boError(100) << k_funcinfo << "No file has been specified for loading" << endl;
-	return;
+	return false;
  }
  BosonProfiler profiler("LoadModel");
 
@@ -435,13 +435,13 @@ void BosonModel::loadModel(const QString& configfilename)
  QString fileName = d->mDirectory + d->mFile;
  QFile modelfile(fileName);
  if (!modelfile.open(IO_ReadOnly)) {
-	boError() << k_funcinfo << "could not open model file " << fileName << endl;
-	return;
+	boError(100) << k_funcinfo << "could not open model file " << fileName << endl;
+	return false;
  }
  QFile configfile(configfilename);
  if (!configfile.open(IO_ReadOnly)) {
-	boError() << k_funcinfo << "could not open config file " << configfilename << endl;
-	return;
+	boError(100) << k_funcinfo << "could not open config file " << configfilename << endl;
+	return false;
  }
  KMD5 md5(modelfile.readAll());
  md5.update(configfile.readAll());
@@ -452,7 +452,7 @@ void BosonModel::loadModel(const QString& configfilename)
  QString cachedmodel = cachedModelFilename(d->mMD5, fileName, configfilename);
  if (cachedmodel.isNull()) {
 	// Conversion failed
-	return;
+	return false;
  }
 
 
@@ -460,13 +460,13 @@ void BosonModel::loadModel(const QString& configfilename)
  BoBMFLoad loader(cachedmodel, this);
  if (!loader.loadModel()) {
 	// TODO: add a profiling entry for this
-	boError() << k_funcinfo << "error while loading from .bmf file " << cachedmodel << endl;
-	return;
+	boError(100) << k_funcinfo << "error while loading from .bmf file " << cachedmodel << endl;
+	return false;
  }
 
  if (lodCount() == 0) {
-	boError() << k_funcinfo << "0 lods loaded for model " << cachedmodel << endl;
-	return;
+	boError(100) << k_funcinfo << "0 lods loaded for model " << cachedmodel << endl;
+	return false;
  }
 
  // Load the textures
@@ -486,7 +486,7 @@ void BosonModel::loadModel(const QString& configfilename)
 
  if (!BoContext::currentContext()) {
 	boError(100) << k_funcinfo << "NULL current context" << endl;
-	return;
+	return false;
  }
 
  // Set texture objects for materials
@@ -508,6 +508,7 @@ void BosonModel::loadModel(const QString& configfilename)
  BoMeshRendererManager::manager()->addModel(this);
 
  boDebug(100) << k_funcinfo << "loaded from " << fileName << "(cached file: " << cachedmodel << ")" << endl;
+ return true;
 }
 
 QString BosonModel::cachedModelFilename(const QCString& md5, const QString& originalmodel, const QString& configfile)
@@ -520,7 +521,7 @@ QString BosonModel::cachedModelFilename(const QCString& md5, const QString& orig
 	// Get the path where the cached model can be saved
 	cachedmodel = KGlobal::dirs()->saveLocation("data", "boson/modelcache/");
 	if (cachedmodel.isNull()) {
-		boError() << k_funcinfo << "Failed to get save location for cached model" << endl;
+		boError(100) << k_funcinfo << "Failed to get save location for cached model" << endl;
 		return QString::null;
 	}
 	cachedmodel += QString("model-%1.bmf").arg(md5);
@@ -529,7 +530,7 @@ QString BosonModel::cachedModelFilename(const QCString& md5, const QString& orig
 	if (converter.isNull()) {
 		converter = KGlobal::dirs()->findExe("bobmfconverter");
 		if (converter.isNull()) {
-			boError() << k_funcinfo << "Couldn't find bobmfconverter!" << endl;
+			boError(100) << k_funcinfo << "Couldn't find bobmfconverter!" << endl;
 			return QString::null;
 		}
 	}
@@ -547,7 +548,7 @@ QString BosonModel::cachedModelFilename(const QCString& md5, const QString& orig
 
 	// FIXME: KProcess:Block ain't pretty here...
 	if (!proc.start(KProcess::Block)) {
-		boError() << k_funcinfo << "Error while trying to convert the model" << endl;
+		boError(100) << k_funcinfo << "Error while trying to convert the model" << endl;
 		return QString::null;
 	}
  }
@@ -576,7 +577,7 @@ void BosonModel::generateConstructionAnimation(unsigned int steps)
 	// Allocate extra frames
 	unsigned int offset = l->addFrames(steps);
 	if (animstart != 0 && animstart != offset) {
-		boError() << k_funcinfo << "Animation start mismatch: animstart: " << animstart <<
+		boError(100) << k_funcinfo << "Animation start mismatch: animstart: " << animstart <<
 				"; offset: " << offset << endl;
 	}
 	animstart = offset;
@@ -673,7 +674,7 @@ unsigned int BosonModel::pointArraySize() const
 void BosonModel::allocatePointArray(unsigned int size)
 {
  if (d->mPoints) {
-	boWarning() << k_funcinfo << "Point array already allocated!" << endl;
+	boWarning(100) << k_funcinfo << "Point array already allocated!" << endl;
 	delete[] d->mPoints;
  }
  d->mPoints = new float[size * BoMesh::pointSize()];
@@ -682,7 +683,7 @@ void BosonModel::allocatePointArray(unsigned int size)
  static int usedpoints = 0;
 
  usedpoints += size;
- boDebug() << k_funcinfo << usedpoints << " points are used now, taking " <<
+ boDebug(100) << k_funcinfo << usedpoints << " points are used now, taking " <<
 		(usedpoints * BoMesh::pointSize() * sizeof(float)) / 1024 << "kb" << endl;
 }
 
@@ -690,7 +691,7 @@ void BosonModel::prepareRendering()
 {
  BoMeshRendererManager* manager = BoMeshRendererManager::manager();
  if (!manager->checkCurrentRenderer()) {
-	boError() << k_funcinfo << "unable to load a renderer" << endl;
+	boError(100) << k_funcinfo << "unable to load a renderer" << endl;
 	return;
  }
  if (manager->currentRenderer()) {
@@ -703,7 +704,7 @@ void BosonModel::prepareRendering()
 void BosonModel::allocateLODs(unsigned int count)
 {
  if (d->mLODs) {
-	boWarning() << k_funcinfo << "LODs already allocated!" << endl;
+	boWarning(100) << k_funcinfo << "LODs already allocated!" << endl;
 	delete[] d->mLODs;
 	delete[] d->mLODDistances;
  }
@@ -773,7 +774,7 @@ void BosonModel::setMeshRendererModelData(BoMeshRendererModelData* data)
 void BosonModel::startModelRendering()
 {
  if (!BoMeshRendererManager::checkCurrentRenderer()) {
-	boError() << k_funcinfo << "unable to load a renderer" << endl;
+	boError(100) << k_funcinfo << "unable to load a renderer" << endl;
 	return;
  }
  BoMeshRenderer* renderer = BoMeshRendererManager::manager()->currentRenderer();
