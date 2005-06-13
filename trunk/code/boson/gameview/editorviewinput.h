@@ -80,7 +80,7 @@ public slots:
 protected slots:
 	void slotClearUndoStack();
 	void slotClearRedoStack();
-	void slotNewUndoMessage(const BosonMessageEditorMove&);
+	void slotNewUndoMessage(const BosonMessageEditorMove&, bool fromRedo);
 	void slotNewRedoMessage(const BosonMessageEditorMove&);
 
 protected:

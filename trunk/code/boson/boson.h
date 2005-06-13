@@ -479,7 +479,7 @@ signals:
 
 	void signalEditorClearUndoStack();
 	void signalEditorClearRedoStack();
-	void signalEditorNewUndoMessage(const BosonMessageEditorMove&);
+	void signalEditorNewUndoMessage(const BosonMessageEditorMove&, bool fromRedo);
 	void signalEditorNewRedoMessage(const BosonMessageEditorMove&);
 
 protected:

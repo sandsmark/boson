@@ -179,8 +179,8 @@ EditorViewInput::EditorViewInput()
 		this, SLOT(slotClearUndoStack()));
  connect(boGame, SIGNAL(signalEditorClearRedoStack()),
 		this, SLOT(slotClearRedoStack()));
- connect(boGame, SIGNAL(signalEditorNewUndoMessage(const BosonMessageEditorMove&)),
-		this, SLOT(slotNewUndoMessage(const BosonMessageEditorMove&)));
+ connect(boGame, SIGNAL(signalEditorNewUndoMessage(const BosonMessageEditorMove&, bool)),
+		this, SLOT(slotNewUndoMessage(const BosonMessageEditorMove&, bool)));
  connect(boGame, SIGNAL(signalEditorNewRedoMessage(const BosonMessageEditorMove&)),
 		this, SLOT(slotNewRedoMessage(const BosonMessageEditorMove&)));
 }
@@ -570,13 +570,13 @@ void EditorViewInput::slotClearRedoStack()
  emit signalEditorHasRedo(QString::null);
 }
 
-void EditorViewInput::slotNewUndoMessage(const BosonMessageEditorMove& undo)
+void EditorViewInput::slotNewUndoMessage(const BosonMessageEditorMove& undo, bool fromRedo)
 {
- // AB: a new undo message implies a new message was processed. therefore we
- // must clear the redo stack. this should have been done by the message
- // already, so this is probably a noop and here for safety only.
- slotClearRedoStack();
-
+ if (!fromRedo) {
+	// message resulted from a normal (not-undo) message. no redo possible
+	// anymore
+	slotClearRedoStack();
+ }
  BosonMessageEditorMove* m = 0;
  m = BosonMessageEditorMove::newCopy(undo);
  if (!m) {
@@ -599,8 +599,7 @@ void EditorViewInput::slotNewRedoMessage(const BosonMessageEditorMove& redo)
  }
  d->mRedoStack.push(m);
 
- QString name = messageName(d->mRedoStack.top());
- emit signalEditorHasRedo(name);
+ emit signalEditorHasRedo(messageName(d->mRedoStack.top()));
 }
 
 void EditorViewInput::undo()
@@ -611,6 +610,7 @@ void EditorViewInput::undo()
 	boWarning() << k_funcinfo << "no message on stack" << endl;
 	return;
  }
+ message->setUndo();
 
  QByteArray b;
  QDataStream stream(b, IO_WriteOnly);
@@ -624,8 +624,7 @@ void EditorViewInput::undo()
  QDataStream msg(b, IO_ReadOnly);
  localPlayerInput()->sendInput(msg);
 
- QString name = messageName(d->mUndoStack.top());
- emit signalEditorHasUndo(name);
+ emit signalEditorHasUndo(messageName(d->mUndoStack.top()));
 }
 
 void EditorViewInput::redo()
@@ -636,6 +635,7 @@ void EditorViewInput::redo()
 	boWarning() << k_funcinfo << "no message on stack" << endl;
 	return;
  }
+ message->setRedo();
 
  QByteArray b;
  QDataStream stream(b, IO_WriteOnly);
@@ -649,8 +649,7 @@ void EditorViewInput::redo()
  QDataStream msg(b, IO_ReadOnly);
  localPlayerInput()->sendInput(msg);
 
- QString name = messageName(d->mRedoStack.top());
- emit signalEditorHasRedo(name);
+ emit signalEditorHasRedo(messageName(d->mRedoStack.top()));
 }
 
 QString EditorViewInput::messageName(const BosonMessageEditorMove* message) const

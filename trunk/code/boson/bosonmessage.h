@@ -62,9 +62,36 @@ public:
 class BosonMessageEditorMove : public BosonMessage
 {
 public:
+	BosonMessageEditorMove();
+
 	virtual bool readMessageId(QDataStream& stream) const;
 
+	void setUndo()
+	{
+		mUndo = true;
+	}
+	void setRedo()
+	{
+		mRedo = true;
+	}
+
+	bool isUndo() const
+	{
+		return mUndo;
+	}
+	bool isRedo() const
+	{
+		return mRedo;
+	}
+
+	bool saveFlags(QDataStream&) const;
+	bool loadFlags(QDataStream&);
+
 	static BosonMessageEditorMove* newCopy(const BosonMessageEditorMove& message);
+
+private:
+	Q_INT8 mUndo;
+	Q_INT8 mRedo;
 };
 
 class BosonMessageEditorMovePlaceUnit : public BosonMessageEditorMove
@@ -166,7 +193,10 @@ public:
 class BosonMessageEditorMoveUndoPlaceUnit : public BosonMessageEditorMove
 {
 public:
-	BosonMessageEditorMoveUndoPlaceUnit() : BosonMessageEditorMove() {}
+	BosonMessageEditorMoveUndoPlaceUnit() : BosonMessageEditorMove()
+	{
+		setUndo();
+	}
 	BosonMessageEditorMoveUndoPlaceUnit(Q_ULONG unit, const BosonMessageEditorMovePlaceUnit& message);
 
 	virtual bool save(QDataStream& stream) const;
@@ -184,7 +214,10 @@ public:
 class BosonMessageEditorMoveUndoDeleteItems : public BosonMessageEditorMove
 {
 public:
-	BosonMessageEditorMoveUndoDeleteItems() { }
+	BosonMessageEditorMoveUndoDeleteItems()
+	{
+		setUndo();
+	}
 	~BosonMessageEditorMoveUndoDeleteItems();
 
 	/**
