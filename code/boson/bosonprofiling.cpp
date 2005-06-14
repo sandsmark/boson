@@ -427,3 +427,14 @@ QPtrList<BosonProfilingItem> BosonProfiling::cloneItems() const
  return list;
 }
 
+BosonProfiler::BosonProfiler(const QString& name, const QString& storageName)
+	: mPopped(false),
+	mPopStorage(false)
+{
+ mItem = boProfiling->push(name);
+ if (!storageName.isEmpty()) {
+	boProfiling->pushStorage(storageName);
+	mPopStorage = true;
+ }
+}
+

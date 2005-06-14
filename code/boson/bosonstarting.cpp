@@ -199,7 +199,7 @@ void BosonStarting::slotPlayFieldCreated(BosonPlayField* playField, bool* ownerC
 
 bool BosonStarting::start()
 {
- BosonProfiler profiler("BosonStarting::start()");
+ BosonProfiler profiler("BosonStarting::start()", "Starting");
  d->mStartingCompleted.clear();
 
  boDebug(270) << k_funcinfo << endl;
