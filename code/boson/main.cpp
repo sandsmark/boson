@@ -64,6 +64,7 @@ static KCmdLineOptions options[] =
     { "ati-depth-workaround-depth <depth>", I18N_NOOP("Use with --ati-depth-workaround. Supply a depth value for your system (default=0.00390625)"), 0 },
     { "default-lodcount <count>", I18N_NOOP("Use <count> for default level of detail count"), 0 },
     { "nomodels", I18N_NOOP("Disable model loading for faster startup (you won't see the units)"), 0 },
+    { "notexturecompression", I18N_NOOP("Disable texture compression for faster startup"), 0 },
     { 0, 0, 0 }
 };
 
@@ -185,6 +186,11 @@ int main(int argc, char **argv)
  } else {
 	boWarning() << "model loading disabled - you will not see any units!" << endl;
 	boConfig->setBoolValue("ForceDisableModelLoading", true);
+ }
+ if (args->isSet("texturecompression")) {
+	boConfig->setBoolValue("ForceDisableTextureCompression", false);
+ } else {
+	boConfig->setBoolValue("ForceDisableTextureCompression", true);
  }
  if (args->isSet("new")) {
 	top->slotShowNewGamePage(args);
