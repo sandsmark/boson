@@ -22,6 +22,7 @@
 #include "bosonconfig.h"
 #include "bodebug.h"
 #include "botexture.h"
+#include "bosonprofiling.h"
 
 #include <qimage.h>
 #include <qgl.h>
@@ -89,12 +90,14 @@ BosonModelTextures::~BosonModelTextures()
 
 BoTexture* BosonModelTextures::insert(BosonModel* model, const QString& textureName)
 {
+ BosonProfiler prof("BosonModelTextures::insert");
  if (!model) {
 	boError(110) << k_funcinfo << "NULL model" << endl;
 	return 0;
  }
  BoTexture* tex = 0;
  if (!d->mName2Texture.contains(textureName)) {
+	BosonProfiler prof("BosonModelTextures::insert: load texture");
 	tex = new BoTexture(texturePath() + textureName, BoTexture::Model);
 	d->mName2Texture.insert(textureName, tex);
  } else {
