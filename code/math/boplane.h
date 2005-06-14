@@ -34,7 +34,27 @@ public:
 	}
 
 	/**
-	 * Construct a matrix that is a copy of @p matrix. See @ref loadMatrix
+	 * Construct a plane with normal vector @p normal and a distance of @p distance
+	 * from the origin.
+	 * See @ref loadPlane
+	 **/
+	BoPlane(const BoVector3Float& normal, float distance)
+	{
+		loadPlane(normal, distance);
+	}
+
+	/**
+	 * Construct a plane with normal vector @p normal and a @p pointOnPlane.
+	 * See @ref loadPlane
+	 **/
+	BoPlane(const BoVector3Float& normal, const BoVector3Float& pointOnPlane)
+	{
+		loadPlane(normal, pointOnPlane);
+	}
+
+	/**
+	 * Construct a plane that is a copy of @p plane . See @ref loadPlane
+	 * See @ref loadPlane
 	 **/
 	BoPlane(const float* plane)
 	{
@@ -42,7 +62,18 @@ public:
 	}
 
 	/**
-	 * Construct a matrix that is a copy of @p matrix. See @ref loadMatrix
+	 * Construct a plane with normal vector @p normal and a distance of @p distance
+	 * from the origin.
+	 * See @ref loadPlane
+	 **/
+	BoPlane(const float* normal, float distance)
+	{
+		loadPlane(normal, distance);
+	}
+
+	/**
+	 * Construct plane matrix that is a copy of @p plane.
+	 * See @ref loadPlane
 	 **/
 	BoPlane(const BoPlane& plane)
 	{
@@ -59,7 +90,7 @@ public:
 		mDistanceFromOrigin = distance;
 		normalize();
 	}
-	void loadPlane(const BoVector3Float& normal, BoVector3Float& pointOnPlane)
+	void loadPlane(const BoVector3Float& normal, const BoVector3Float& pointOnPlane)
 	{
 		// AB:
 		// "pointOnPlane" (in the following I'll call it p) can be
@@ -80,23 +111,28 @@ public:
 		//
 		// Now if the normal is normalized (i.e. |normal| = 1) this is
 		// exactly what dotProduct(p, normal) calculates.
+		//
+		// We need to multiply that with -1 so that the normal in the
+		// triangle points into the correct direction
+		// (ok, lousy explanation. i dont find a better one - consider
+		// to use a piece of paper to make this clear to yourself)
 
 		BoVector3Float normalizedNormal = normal;
 		normalizedNormal.normalize();
-		float distance = BoVector3Float::dotProduct(normalizedNormal, pointOnPlane);
+		float distance = -BoVector3Float::dotProduct(normalizedNormal, pointOnPlane);
 		loadPlane(normalizedNormal, distance);
 	}
 	void loadPlane(const float* plane)
 	{
 		loadPlane(plane, plane[3]);
 	}
-	void loadPlane(const BoPlane& p)
-	{
-		loadPlane(p.normal().data(), p.distanceFromOrigin());
-	}
 	void loadPlane(const float* normal, float distance)
 	{
 		loadPlane(BoVector3Float(normal), distance);
+	}
+	void loadPlane(const BoPlane& p)
+	{
+		loadPlane(p.normal().data(), p.distanceFromOrigin());
 	}
 
 	inline const BoVector3Float& normal() const
