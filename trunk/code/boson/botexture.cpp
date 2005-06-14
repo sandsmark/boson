@@ -25,6 +25,12 @@
 
 #include "bodebug.h"
 #include "bosonconfig.h"
+#include "bosonprofiling.h"
+
+#define USE_BTF 0
+#if USE_BTF
+#include "bobtfload.h"
+#endif
 
 
 /*****  BoTexture  *****/
@@ -201,8 +207,10 @@ void BoTexture::applyOptions()
 
 void BoTexture::load(const QString& name)
 {
+  BosonProfiler prof("BoTexture::load()");
   if(mType == TextureCube)
   {
+    BosonProfiler prof("BoTexture::load() (TextureCube)");
     if(!boTextureManager->supportsTextureCube())
     {
       boError() << k_funcinfo << "Cubemap textures are not supported (trying to load from file '" <<
@@ -232,6 +240,7 @@ void BoTexture::load(const QString& name)
   else
   {
     // Load the image using QImage
+#if !USE_BTF
     QImage img(name);
     if(img.isNull())
     {
@@ -239,10 +248,34 @@ void BoTexture::load(const QString& name)
       return;
     }
     img = QGLWidget::convertToGLFormat(img);
+#else
+    BoBTFLoad btfLoader(name);
+    if(!btfLoader.loadTexture())
+    {
+      boError() << k_funcinfo << "Couldn't load image from file '" << name << "'" << endl;
+      return;
+    }
+#endif
     // QImage always uses RGBA
     mOptions |= FormatRGBA;
     mOptions &= (~FormatAuto);
+#if !USE_BTF
     load(img.bits(), img.width(), img.height());
+#else
+    bool useMipmaps = !(mOptions & DontGenMipmaps);
+    mOptions |= DontGenMipmaps;
+    load((unsigned char*)btfLoader.data(0), btfLoader.width(0), btfLoader.height(0));
+    if(useMipmaps)
+    {
+      mOptions &= ~DontGenMipmaps;
+      for(unsigned int i = 1; i < btfLoader.mipmapLevels(); i++)
+      {
+        glTexImage2D(mType, i, determineInternalFormat(),
+            btfLoader.width(i), btfLoader.height(i),
+            0, determineFormat(), GL_UNSIGNED_BYTE, btfLoader.data(i));
+      }
+    }
+#endif
   }
 
   mFilePath = name;
@@ -266,27 +299,10 @@ void BoTexture::load(unsigned char* data, int width, int height, int side)
   }
 
   // Find out format
-  GLenum format;
-  if(mOptions & FormatDepth)
-  {
-    format = GL_DEPTH_COMPONENT;
-  }
-  else
-  {
-    format = (mOptions & FormatRGB) ? GL_RGB : GL_RGBA;
-  }
+  GLenum format = determineFormat();
 
   // Find out internal format
-  GLenum internalFormat;
-  // Check if we can use texture compression
-  if(boTextureManager->supportsTextureCompression() && boTextureManager->useTextureCompression() && !(mOptions & DontCompress) && !(mOptions & FormatDepth))
-  {
-    internalFormat = (mOptions & FormatRGB) ? GL_COMPRESSED_RGB_S3TC_DXT1_EXT : GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-  }
-  else
-  {
-    internalFormat = format;
-  }
+  GLenum internalFormat = determineInternalFormat();
 
   // Ensure that texture has correct size
   unsigned char* newdata = ensureCorrectSize(data, width, height);
@@ -301,6 +317,7 @@ void BoTexture::load(unsigned char* data, int width, int height, int side)
   if((mOptions & useMipmaps) && !(mOptions & DontGenMipmaps))
   {
     // Generate mipmaps
+    BosonProfiler profMipMaps("BoTexture::load() - generate mipmaps");
     if(newdata == 0)
     {
       // Just specify null data for every mipmap level
@@ -347,7 +364,7 @@ void BoTexture::load(unsigned char* data, int width, int height, int side)
         // Can't generate mipmaps on hardware. Use software fallback.
         int error = gluBuild2DMipmaps(type, internalFormat, width, height,
             format, GL_UNSIGNED_BYTE, newdata);
-        if(error)
+        if(error != 0)
         {
           boWarning() << k_funcinfo << "gluBuild2DMipmaps() returned error: " << error << endl;
         }
@@ -356,6 +373,7 @@ void BoTexture::load(unsigned char* data, int width, int height, int side)
   }
   else
   {
+    BosonProfiler prof("BoTexture::load() - glTexImage2D without mipmaps");
     // No mipmaps
     // Load base texture
     glTexImage2D(type, 0, internalFormat, width, height, 0, format,
@@ -383,6 +401,7 @@ void BoTexture::load(unsigned char* data, int width, int height, int side)
 
 unsigned char* BoTexture::ensureCorrectSize(unsigned char* data, int &width, int &height)
 {
+  BosonProfiler prof("BoTexture::ensureCorrectSize()");
   // Find out max size of the texture
   int maxSize;
   if(mType == Texture2D)
@@ -466,6 +485,35 @@ int BoTexture::nextPower2(int n)
     i *= 2;
   }
   return i;
+}
+
+GLenum BoTexture::determineFormat() const
+{
+  GLenum format;
+  if(mOptions & FormatDepth)
+  {
+    format = GL_DEPTH_COMPONENT;
+  }
+  else
+  {
+    format = (mOptions & FormatRGB) ? GL_RGB : GL_RGBA;
+  }
+  return format;
+}
+
+GLenum BoTexture::determineInternalFormat() const
+{
+  GLenum internalFormat;
+  // Check if we can use texture compression
+  if(boTextureManager->supportsTextureCompression() && boTextureManager->useTextureCompression() && !(mOptions & DontCompress) && !(mOptions & FormatDepth))
+  {
+    internalFormat = (mOptions & FormatRGB) ? GL_COMPRESSED_RGB_S3TC_DXT1_EXT : GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+  }
+  else
+  {
+    internalFormat = determineFormat();
+  }
+  return internalFormat;
 }
 
 int BoTexture::memoryUsed() const
@@ -1106,7 +1154,7 @@ bool BoTextureManager::useColoredMipmaps() const
 
 bool BoTextureManager::useTextureCompression() const
 {
-  return boConfig->boolValue("TextureCompression");
+  return (boConfig->boolValue("TextureCompression") && !boConfig->boolValue("ForceDisableTextureCompression"));
 }
 
 int BoTextureManager::textureFilter() const

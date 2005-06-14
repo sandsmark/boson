@@ -181,6 +181,7 @@ libbocursor_la_SOURCES = \
 		boglobal.cpp \
 		bosoncursor.cpp \
 		botexture.cpp \
+		bosonprofiling.cpp \
 		bosonconfig.cpp \
 		bosonglwidget.cpp
 bocursor_LDFLAGS = $(KDE_RPATH) $(all_libraries)

@@ -316,9 +316,6 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntryUInt("MaxProfilingEntries", 1000);
  addDynamicEntryBool("UseGroundShaders", false);
 
- // these are dynamic entries. usually they are added in the class where they
- // get used, but sometimes it is also handy to add them here (e.g. when it
- // isn't 100% clear which class will reference it first).
  addDynamicEntry(new BoConfigUIntEntry(this, "GroundRenderer", 0)); // obsolete
  addDynamicEntry(new BoConfigUIntEntry(this, "DefaultLOD", 0));
  addDynamicEntry(new BoConfigBoolEntry(this, "EnableATIDepthWorkaround", false));
@@ -356,6 +353,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntryBool("debug_colormap_enable", false, false);
  addDynamicEntryBool("debug_profiling_graph", false, false);
  addDynamicEntryBool("ForceDisableModelLoading", false, false); // command line arg! do NOT save to config
+ addDynamicEntryBool("ForceDisableTextureCompression", false, false); // command line arg! do NOT save to config
  addDynamicEntryBool("TextureFOW", true, false);
  addDynamicEntryInt("DefaultLodCount", 5, false);
 

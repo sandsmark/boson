@@ -245,6 +245,9 @@ class BoTexture
     int buildColoredMipmaps(unsigned char* data, int width, int height,
         GLenum format, GLenum internalformat, GLenum type);
 
+    GLenum determineFormat() const;
+    GLenum determineInternalFormat() const;
+
 
     // Dimensions of the texture, in pixels
     int mWidth;
