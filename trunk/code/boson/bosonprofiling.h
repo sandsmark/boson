@@ -267,10 +267,12 @@ class BosonProfiler
 {
 public:
 	BosonProfiler(const QString& name)
-		: mPopped(false)
+		: mPopped(false),
+		mPopStorage(false)
 	{
 		mItem = boProfiling->push(name);
 	}
+	BosonProfiler(const QString& name, const QString& storageName);
 
 	~BosonProfiler()
 	{
@@ -284,6 +286,10 @@ public:
 		}
 		mPopped = true;
 		boProfiling->pop();
+		if (mPopStorage) {
+			boProfiling->popStorage();
+			mPopStorage = false;
+		}
 	}
 	long int popElapsed()
 	{
@@ -298,6 +304,7 @@ public:
 
 private:
 	bool mPopped;
+	bool mPopStorage;
 	const BosonProfilingItem* mItem;
 };
 
