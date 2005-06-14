@@ -65,7 +65,10 @@
  * returned by @ref planes_intersect or can easily be calculated using (p0-p1)
  * if p0 and p1 are two different points on the line.
  **/
-static void plane_line_intersect(const BoPlane& plane, const BoVector3Float& linePoint, BoVector3Float& lineVector, BoVector3Float* intersection);
+static bool plane_line_intersect(const BoPlane& plane, const BoVector3Float& linePoint, const BoVector3Float& lineVector, BoVector3Float* intersection);
+static bool plane_line_segment_intersect(const BoPlane& plane, const BoVector3Float& linePoint1, const BoVector3Float& linePoint2, BoVector3Float* intersection);
+static bool plane_line_intersect_internal(const BoPlane& plane, const BoVector3Float& linePoint, const BoVector3Float& lineVector, float* factor);
+static void cut_line_segment_at_plane(const BoPlane& plane, BoVector3Float& linePoint1, BoVector3Float& linePoint2);
 
 class BosonGLMiniMapPrivate
 {
@@ -887,8 +890,10 @@ void BosonGLMiniMapRenderer::renderQuad()
  glEnd();
 }
 
-static void cutLine(BoVector3Float& p1_, BoVector3Float& p2_)
+// cuts the line at z=0.0
+static void cutLineZ0(BoVector3Float& p1_, BoVector3Float& p2_)
 {
+#if 0
  BoVector3Float* p1 = &p1_;
  BoVector3Float* p2 = &p2_;
  if (p1->z() < 0.0f && p2->z() < 0.0f) {
@@ -908,12 +913,58 @@ static void cutLine(BoVector3Float& p1_, BoVector3Float& p2_)
  p2->setX(p2->x() + s * u.x());
  p2->setY(p2->y() + s * u.y());
  p2->setZ(0.0f);
+#else
+ BoPlane zPlane(BoVector3Float(0.0f, 0.0f, 1.0f), BoVector3Float(0.0f, 0.0f, 0.0f));
+ cut_line_segment_at_plane(zPlane, p1_, p2_);
+#endif
 }
 
-static void drawLine(const BoVector3Float& p1, const BoVector3Float& p2)
+static void keepLinesInRect(int w, int h, BoVector3Float& p1, BoVector3Float& p2, bool* skip)
 {
- glVertex3f(p1.x(), p1.y(), p1.z());
- glVertex3f(p2.x(), p2.y(), p2.z());
+ // x=0 plane
+ BoPlane x_0(BoVector3Float(1.0f, 0.0f, 0.0f), BoVector3Float(0.0f, 0.0f, 0.0f));
+ // y=0 plane
+ BoPlane y_0(BoVector3Float(0.0f, 1.0f, 0.0f), BoVector3Float(0.0f, 0.0f, 0.0f));
+ // x=w plane
+ BoPlane x_x(BoVector3Float(-1.0f, 0.0f, 0.0f), BoVector3Float(w, 0.0f, 0.0f));
+ // y=h plane
+ BoPlane y_y(BoVector3Float(0.0f, -1.0f, 0.0f), BoVector3Float(0.0f, h, 0.0f));
+
+
+ cut_line_segment_at_plane(x_0, p1, p2);
+ cut_line_segment_at_plane(x_x, p1, p2);
+ cut_line_segment_at_plane(y_0, p1, p2);
+ cut_line_segment_at_plane(y_y, p1, p2);
+
+ if (x_0.behindPlane(p1) && x_0.behindPlane(p2)) {
+	*skip = true;
+	return;
+ }
+ if (y_0.behindPlane(p1) && y_0.behindPlane(p2)) {
+	*skip = true;
+	return;
+ }
+ if (x_x.behindPlane(p1) && x_x.behindPlane(p2)) {
+	*skip = true;
+	return;
+ }
+ if (y_y.behindPlane(p1) && y_y.behindPlane(p2)) {
+	*skip = true;
+	return;
+ }
+}
+
+static void drawLine(const BoVector3Float& p1_, const BoVector3Float& p2_, int w, int h)
+{
+ BoVector3Float p1(p1_);
+ BoVector3Float p2(p2_);
+ bool skip = false;
+ keepLinesInRect(w, h, p1, p2, &skip);
+ if (skip) {
+	return;
+ }
+ glVertex3fv(p1.data());
+ glVertex3fv(p2.data());
 }
 
 void BosonGLMiniMapRenderer::renderCamera()
@@ -1009,18 +1060,18 @@ void BosonGLMiniMapRenderer::renderCamera()
  //     or rather implement plane_line_segment_intersect
  //     -> if segment doesnt intersect: do nothing. if it does: replace point of
  //     segment with z < 0 by the intersection point
- cutLine(BLF, BRF);
- cutLine(BRF, BRN);
- cutLine(BRN, BLN);
- cutLine(BLN, BLF);
- cutLine(TLF, TRF);
- cutLine(TRF, TRN);
- cutLine(TRN, TLN);
- cutLine(TLN, TLF);
- cutLine(BLF, TLF);
- cutLine(BRF, TRF);
- cutLine(BRN, TRN);
- cutLine(BLN, TLN);
+ cutLineZ0(BLF, BRF);
+ cutLineZ0(BRF, BRN);
+ cutLineZ0(BRN, BLN);
+ cutLineZ0(BLN, BLF);
+ cutLineZ0(TLF, TRF);
+ cutLineZ0(TRF, TRN);
+ cutLineZ0(TRN, TLN);
+ cutLineZ0(TLN, TLF);
+ cutLineZ0(BLF, TLF);
+ cutLineZ0(BRF, TRF);
+ cutLineZ0(BRN, TRN);
+ cutLineZ0(BLN, TLN);
 
  glDisable(GL_TEXTURE_2D);
  glColor3ub(255, 255, 255);
@@ -1046,18 +1097,18 @@ void BosonGLMiniMapRenderer::renderCamera()
  // now the points should be final - we can draw our lines onto the minimap
  glColor3ub(255, 255, 255);
  glBegin(GL_LINES);
-	drawLine(BLF, BRF);
-	drawLine(BRF, BRN);
-	drawLine(BRN, BLN);
-	drawLine(BLN, BLF);
-	drawLine(TLF, TRF);
-	drawLine(TRF, TRN);
-	drawLine(TRN, TLN);
-	drawLine(TLN, TLF);
-	drawLine(BLF, TLF);
-	drawLine(BRF, TRF);
-	drawLine(BRN, TRN);
-	drawLine(BLN, TLN);
+	drawLine(BLF, BRF, miniMapWidth(), miniMapHeight());
+	drawLine(BRF, BRN, miniMapWidth(), miniMapHeight());
+	drawLine(BRN, BLN, miniMapWidth(), miniMapHeight());
+	drawLine(BLN, BLF, miniMapWidth(), miniMapHeight());
+	drawLine(TLF, TRF, miniMapWidth(), miniMapHeight());
+	drawLine(TRF, TRN, miniMapWidth(), miniMapHeight());
+	drawLine(TRN, TLN, miniMapWidth(), miniMapHeight());
+	drawLine(TLN, TLF, miniMapWidth(), miniMapHeight());
+	drawLine(BLF, TLF, miniMapWidth(), miniMapHeight());
+	drawLine(BRF, TRF, miniMapWidth(), miniMapHeight());
+	drawLine(BRN, TRN, miniMapWidth(), miniMapHeight());
+	drawLine(BLN, TLN, miniMapWidth(), miniMapHeight());
  glEnd();
 }
 
@@ -1197,23 +1248,86 @@ void BosonGLMiniMapRenderer::setZoomImages(const QImage& in_, const QImage& out_
 #endif
 }
 
-static void plane_line_intersect(const BoPlane& plane, const BoVector3Float& linePoint, BoVector3Float& lineVector, BoVector3Float* intersection)
+/**
+ * Cut the line segment defined by @p linePoint1 and @p linePoint2 at the plane.
+ *
+ * The line that is behind the plane (see @ref BoPlane::behindPlane) is
+ * replaced by the intersection point.
+ **/
+static void cut_line_segment_at_plane(const BoPlane& plane, BoVector3Float& linePoint1, BoVector3Float& linePoint2)
 {
- // AB: see http://geometryalgorithms.com/Archive/algorithm_0104/algorithm_0104B.htm#intersect3D_SegPlane()
- float NdotLine = BoVector3Float::dotProduct(plane.normal(), lineVector);
- if (fabsf(NdotLine) <= 0.001) {
-	boError() << k_funcinfo << "line is parallel to plane. not allowed in this function!" << endl;
-	// intersection still possible, if the line is on the plane.
+ BoVector3Float intersection;
+ if (!plane_line_segment_intersect(plane, linePoint1, linePoint2, &intersection)) {
 	return;
  }
+ if (plane.behindPlane(linePoint1)) {
+	linePoint1 = intersection;
+ } else {
+	linePoint2 = intersection;
+ }
+}
 
- // AB: note that our normals are directed to the _inside_ of the frustum,
- // therefore we need to multiply be the negative normal (or by the negative
- // distance) to get a point on the plane
- float foo = -BoVector3Float::dotProduct(plane.normal(), linePoint - plane.pointOnPlane());
+static bool plane_line_segment_intersect(const BoPlane& plane, const BoVector3Float& linePoint1, const BoVector3Float& linePoint2, BoVector3Float* intersection)
+{
+ float factor;
+ BoVector3Float lineVector = (linePoint2 - linePoint1);
+ if (!plane_line_intersect_internal(plane, linePoint1, lineVector, &factor)) {
+	return false;
+ }
+ if (factor < 0.0f || factor > 1.0f) {
+	return false;
+ }
+ *intersection = linePoint1 + lineVector * factor;
+ return true;
+}
 
- float d = foo / NdotLine;
+static bool plane_line_intersect(const BoPlane& plane, const BoVector3Float& linePoint, const BoVector3Float& lineVector, BoVector3Float* intersection)
+{
+ float factor;
+ if (!plane_line_intersect_internal(plane, linePoint, lineVector, &factor)) {
+	return false;
+ }
+ *intersection = linePoint + lineVector * factor;
+ return true;
+}
 
- *intersection = linePoint + lineVector * d;
+/**
+ * @param factor how often the @p lineVector has to be added to @p linePoint to
+ * get the intersection point. If @p factor is between 0 and 1, then the
+ * intersection point is on the line segment that starts at linePoint and ends
+ * with linePoint + lineVector.
+ * @return TRUE if the line intersects with the plane
+ **/
+static bool plane_line_intersect_internal(const BoPlane& plane, const BoVector3Float& linePoint, const BoVector3Float& lineVector, float* factor)
+{
+ // http://geometryalgorithms.com/Archive/algorithm_0104/algorithm_0104B.htm#intersect3D_SegPlane()
+ // provides a nice explanation of the maths in here
+
+ float NdotLine = BoVector3Float::dotProduct(plane.normal(), lineVector);
+ if (fabsf(NdotLine) <= 0.001) {
+	// intersection still possible, if the line is on the plane.
+	return false;
+ }
+
+ // now we know the line _does_ intersect with the plane (let's call the point p)
+ // the vector from a point on the plane to p is perpendicular to the plane
+ // normal.
+ // That means their dot product is 0.
+ //
+ // i.e. normal * (point_on_plane - p) = 0
+ // "p" can also be written as linePoint + a * lineVector, with a being a
+ // certain real number. this makes:
+ // normal * (point_on_plane - (linePoint + a * lineVector)) = 0
+ // =>
+ // normal * (point_on_plane - linePoint) + a * normal * lineVector = 0
+ // =>
+ // a = (normal * (point_on_plane - linePoint)) / (normal * lineVector)
+
+ float foo = BoVector3Float::dotProduct(plane.normal(), plane.pointOnPlane() - linePoint);
+
+ float a = foo / NdotLine;
+
+ *factor = a;
+ return true;
 }
 
