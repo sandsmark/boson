@@ -177,7 +177,7 @@ void BosonMainWidgetMenuInput::slotChangeMaxProfilingEntries()
 		(int)max, 0, 100000, 1, &ok, 0);
  if (ok) {
 	boConfig->setUIntValue("MaxProfilingEntries", max);
-	boProfiling->setMaximalEntries(QString::null, boConfig->uintValue("MaxProfilingEntries"));
+	boProfiling->setMaximalEntries("Default", boConfig->uintValue("MaxProfilingEntries"));
  }
 }
 
