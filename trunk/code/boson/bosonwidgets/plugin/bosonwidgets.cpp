@@ -20,7 +20,6 @@
 #include "dummyclasses.h"
 #include "../bosonplayfieldview.h"
 #include "../bonuminput.h"
-#include "../bocolorchooser.h"
 
 #include <kdeversion.h>
 #include <kstandarddirs.h>
@@ -97,7 +96,6 @@ BosonWidgetsPlugin::BosonWidgetsPlugin()
  addBosonWidget("BosonMiniMap", "bosonminimap.h", "Mini map widget", QString::null, QString::null);
  addBosonWidget("BosonPlayFieldView", "bosonwidgets/bosonplayfieldview.h", "PlayField view", QString::null, QString::null);
  addBosonWidget("BoIntNumInput", "bosonwidgets/bonuminput.h", "Boson's int num input", QString::null, QString::null);
- addBosonWidget("BoColorChooser", "bosonwidgets/bocolorchooser.h", "Boson's color chooser", QString::null, QString::null);
 
 //kdDebug() << k_funcinfo << endl;
  new KInstance("bosonwidgets");
@@ -132,8 +130,6 @@ QWidget* BosonWidgetsPlugin::create(const QString& key, QWidget* parent, const c
   return new BosonPlayFieldView(parent, name);
  } else if (key == "BoIntNumInput") {
   return new BoIntNumInput(parent, name);
- } else if (key == "BoColorChooser") {
-  return new BoColorChooser(parent, name);
  }
  return 0;
 }

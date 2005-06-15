@@ -8,7 +8,5 @@ METASOURCES = AUTO
 
 libbosonwidgets_la_SOURCES = \
 	bosonplayfieldview.cpp \
-	bonuminput.cpp \
-	bocolorchooserbase.ui \
-	bocolorchooser.cpp
+	bonuminput.cpp
 
