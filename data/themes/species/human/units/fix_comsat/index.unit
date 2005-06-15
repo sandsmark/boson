@@ -6,6 +6,7 @@ ConstructionSteps=18
 [Boson Unit]
 Armor=0
 ConstructedEffects=
+Description=Provides the minimap and enables you to build helipad.
 DestroyedEffects=1010,3010,6010,7010
 ExplodingDamage=0
 ExplodingDamageRange=0

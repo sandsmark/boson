@@ -8,6 +8,7 @@ Speed=3
 [Boson Unit]
 Armor=0
 ConstructedEffects=
+Description=Light truck. Armed with light L20B machinegun.
 DestroyedEffects=1002,3001,6001,7001
 ExplodingDamage=0
 ExplodingDamageRange=0
@@ -42,7 +43,7 @@ Shoot=shoot
 [Weapon_0]
 CanShootAtAirUnits=false
 CanShootAtLandUnits=true
-Damage=25
+Damage=15
 DamageRange=1
 FlyEffects=5001
 Height=0.25

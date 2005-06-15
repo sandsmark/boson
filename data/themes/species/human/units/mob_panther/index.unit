@@ -6,6 +6,7 @@ Speed=2
 [Boson Unit]
 Armor=2
 ConstructedEffects=
+Description=Light armored vehicle with a .50 cal machinegun.
 DestroyedEffects=1002,3003,6003,7001
 ExplodingDamage=0
 ExplodingDamageRange=0

@@ -4,8 +4,9 @@ CanGoOnWater=false
 Speed=1.8
 
 [Boson Unit]
-Armor=0
+Armor=3
 ConstructedEffects=
+Description=Light armored vehicle, equipped with a small radar capable of detecting nearby units.\nArmored with a medium-range K-4 machinegun.
 DestroyedEffects=1002,3001,6001,7001
 ExplodingDamage=0
 ExplodingDamageRange=0

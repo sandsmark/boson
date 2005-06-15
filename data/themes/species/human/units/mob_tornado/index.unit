@@ -8,6 +8,7 @@ Speed=4
 [Boson Unit]
 Armor=2
 ConstructedEffects=
+Description=Very fast VTOL aircraft, equipped with light anti-air cannon and S-8 air-to-surface missiles.
 DestroyedEffects=1001,6100
 ExplodingDamage=0
 ExplodingDamageRange=0

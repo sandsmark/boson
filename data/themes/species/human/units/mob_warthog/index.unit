@@ -9,6 +9,7 @@ Speed=2.8
 [Boson Unit]
 Armor=5
 ConstructedEffects=21010,21011
+Description=Fast assault plane.\nArmed with light anti-air cannon and extremely effective LR-102 air-to-surface rockets.
 DestroyedEffects=1001,6100
 ExplodingDamage=0
 ExplodingDamageRange=0
