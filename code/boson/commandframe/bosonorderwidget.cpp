@@ -301,7 +301,7 @@ void BosonOrderWidget::slotMouseMoved(QMouseEvent* e)
 	if (r.contains(e->x(), e->y())) {
 		if (button->type() == BosonOrderButton::ShowAction) {
 			const BoSpecificAction& action = button->action();
-			if (action.isProduceAction()) {
+			if (action.isProduceAction() && action.productionType() == ProduceUnit) {
 				const UnitProperties* prop = action.productionOwner()->unitProperties(action.productionId());
 				emit signalUnitTypeHighlighted(prop);
 				d->mButtonTimer->start(200);
