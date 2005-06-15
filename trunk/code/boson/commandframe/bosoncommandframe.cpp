@@ -523,11 +523,12 @@ void BosonCommandFrame::setLocalPlayerIO(PlayerIO* io)
  delete d->mEventListener;
  d->mEventListener = 0;
  d->mLocalPlayerIO = io;
- Boson* game = boGame;
- if (!game) {
-	BO_NULL_ERROR(game);
+
+ if (!d->mLocalPlayerIO) {
 	return;
  }
+ Boson* game = boGame;
+ BO_CHECK_NULL_RET(game);
  if (d->mLocalPlayerIO && game->gameMode()) {
 	// AB: WARNING: the event listener will not get loaded correctly when
 	// loading a game!
