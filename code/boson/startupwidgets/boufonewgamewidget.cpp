@@ -280,7 +280,9 @@ void BoUfoNewGameWidget::initSpecies()
     }
     index++;
  }
+ mPlayerSpecies->blockSignals(true); // localPlayer() is not yet available, so dont emit signal
  mPlayerSpecies->setCurrentItem(defaultIndex);
+ mPlayerSpecies->blockSignals(false);
 }
 
 void BoUfoNewGameWidget::updateColors()
