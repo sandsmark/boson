@@ -1,9 +1,0 @@
-This is a collection of widgets for use in Qt Designer.
-In bosonwidgets/ you'll find libbosonwidgets.la, which contains all widgets that
-can be included into designer directly. That library will get used in boson as
-well.
-
-bosonwidgets/plugin/ contains the necessary code for the Qt designer plugin and
-several dummy classes, for the widgets that can't be used in designer directly
-(e.g. the minimap, which depends on Unit and Player and ...)
-These dummy classes must not be used in boson.
