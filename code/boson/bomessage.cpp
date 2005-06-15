@@ -195,7 +195,7 @@ bool BoMessageDelayer::processMessage(BoMessage* m)
 	return true;
  }
  if (mIsLocked || mDelayedWaiting) {
-	boDebug() << k_funcinfo << "delayed " << m->debug(mBoson) << endl;
+//	boDebug() << k_funcinfo << "delayed " << m->debug(mBoson) << endl;
 	mDelayedMessages->enqueue(m);
 	mDelayedWaiting = true;
 	switch (m->msgid - KGameMessage::IdUser) {
