@@ -1924,7 +1924,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
  }
 
  if ((xspeed == 0.0f) && (yspeed == 0.0f)) {
-	boWarning(401) << k_funcinfo << "unit " << id() << ": Speed is 0.0" << endl;
+	//boWarning(401) << k_funcinfo << "unit " << id() << ": Speed is 0.0" << endl;
 	return;
  }
 
