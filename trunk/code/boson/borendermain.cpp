@@ -213,6 +213,7 @@ void ModelPreview::initializeGL()
  makeCurrent();
  BoTextureManager::initStatic();
  BoLightManager::initStatic();
+ BoMeshRendererManager::initStatic();
 #if BOSONFONT
  delete mDefaultFont;
  BoFontInfo defaultFontInfo;
