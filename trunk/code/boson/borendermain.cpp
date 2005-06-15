@@ -212,6 +212,7 @@ void ModelPreview::initializeGL()
  recursive = true;
  makeCurrent();
  BoTextureManager::initStatic();
+ BoLightManager::initStatic();
 #if BOSONFONT
  delete mDefaultFont;
  BoFontInfo defaultFontInfo;
