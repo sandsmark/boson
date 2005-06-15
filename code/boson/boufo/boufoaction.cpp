@@ -1163,7 +1163,7 @@ bool BoUfoActionCollection::createGUI(const QString& file)
 {
  QStringList list;
  list.append(file);
- return createGUI(file);
+ return createGUI(list);
 }
 
 bool BoUfoActionCollection::createGUI(const QStringList& fileList)
