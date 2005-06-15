@@ -734,6 +734,7 @@ void BosonUfoCursorWidget::paintWidget()
 {
  PROFILE_METHOD;
  BO_CHECK_NULL_RET(d->mCursorWidgetPos);
+ BO_CHECK_NULL_RET(d->mGameGLMatrices);
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error before method" << endl;
  }
