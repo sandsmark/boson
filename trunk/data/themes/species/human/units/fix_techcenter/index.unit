@@ -6,6 +6,7 @@ ConstructionSteps=27
 [Boson Unit]
 Armor=10
 ConstructedEffects=
+Description=You can research new technologies and upgrades here.
 DestroyedEffects=1011,3010,6010,7010
 ExplodingDamage=0
 ExplodingDamageRange=0

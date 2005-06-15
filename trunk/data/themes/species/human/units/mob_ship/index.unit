@@ -6,6 +6,7 @@ Speed=1.25
 [Boson Unit]
 Armor=10
 ConstructedEffects=
+Description=Armed with a heavy M40 machinegun.
 DestroyedEffects=1010,3010,6010
 ExplodingDamage=0
 ExplodingDamageRange=0

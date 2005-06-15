@@ -6,6 +6,7 @@ ConstructionSteps=12
 [Boson Unit]
 Armor=5
 ConstructedEffects=
+Description=Defence against land units.\nHas a heavy cannon capable of destroying even the toughest units with only a few shots.
 DestroyedEffects=1001,3001,6010,7001
 ExplodingDamage=0
 ExplodingDamageRange=0

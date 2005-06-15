@@ -6,6 +6,7 @@ Speed=1.65
 [Boson Unit]
 Armor=2
 ConstructedEffects=
+Description=Equipped with G-76 short-range rockets which can be used against both land- and air-units.
 DestroyedEffects=1002,3001,6001,7001
 ExplodingDamage=0
 ExplodingDamageRange=0

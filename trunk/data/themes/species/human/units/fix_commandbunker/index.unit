@@ -6,6 +6,7 @@ ConstructionSteps=22
 [Boson Unit]
 Armor=10
 ConstructedEffects=
+Description=This is the base of your operations.\nYou can build all other facilities from here, so guard it well.
 DestroyedEffects=1010,3011,6011,7010,4001
 ExplodingDamage=0
 ExplodingDamageRange=0

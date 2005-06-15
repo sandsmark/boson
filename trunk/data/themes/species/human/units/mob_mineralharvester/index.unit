@@ -6,6 +6,7 @@ Speed=1.6
 [Boson Unit]
 Armor=0
 ConstructedEffects=
+Description=Collects minerals from mineral mines.
 DestroyedEffects=1001,3001,6001,7001
 ExplodingDamage=0
 ExplodingDamageRange=0

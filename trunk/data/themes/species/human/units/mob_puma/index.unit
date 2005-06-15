@@ -8,6 +8,7 @@ Speed=2.75
 [Boson Unit]
 Armor=2
 ConstructedEffects=
+Description=Light and fast assault helicopter.\nArmed with a cannon and anti-air rockets.
 DestroyedEffects=1001,6100
 ExplodingDamage=0
 ExplodingDamageRange=0

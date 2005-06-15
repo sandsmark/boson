@@ -6,6 +6,7 @@ ConstructionSteps=12
 [Boson Unit]
 Armor=0
 ConstructedEffects=
+Description=Anti-air cannon.
 DestroyedEffects=1001,3001,6010,7001
 ExplodingDamage=0
 ExplodingDamageRange=0

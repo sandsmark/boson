@@ -6,6 +6,7 @@ ConstructionSteps=25
 [Boson Unit]
 Armor=10
 ConstructedEffects=
+Description=Constructs land units.
 DestroyedEffects=1010,3001,6001,7010
 ExplodingDamage=0
 ExplodingDamageRange=0

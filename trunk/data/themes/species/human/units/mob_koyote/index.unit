@@ -8,6 +8,7 @@ Speed=2.2
 [Boson Unit]
 Armor=5
 ConstructedEffects=
+Description=Heavy assault helicopter.\nHas a .50 cal gun for land units and S-22 rockets against both land and air units.
 DestroyedEffects=1001,6100
 ExplodingDamage=0
 ExplodingDamageRange=0

@@ -6,6 +6,7 @@ ConstructionSteps=14
 [Boson Unit]
 Armor=5
 ConstructedEffects=
+Description=Anti-air defence unit.\nUses AA-20 guided missiles which are very effective against air units.
 DestroyedEffects=1001,3001,6001,7001
 ExplodingDamage=0
 ExplodingDamageRange=0
