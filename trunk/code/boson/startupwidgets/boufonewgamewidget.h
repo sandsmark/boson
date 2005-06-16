@@ -82,7 +82,6 @@ protected slots: // implementations for the .ui slots
 	// his widget. nearly all must be transferred over network before the
 	// actual action is performed!
 	virtual void slotPlayerNameChanged();
-	virtual void slotPlayerColorChanged(int);
 	virtual void slotPlayFieldSelected(int, int);
 	virtual void slotPlayFieldSelected(int index);
 	virtual void slotPlayerSpeciesChanged(int);
@@ -140,6 +139,7 @@ private slots:
 	void slotNetConnectionBroken();
 
 	void slotAddChatSystemMessage(const QString&, const QString&, const Player*);
+	void slotPlayerColorChanged(int);
 
 signals:
 	void signalShowNetworkOptions();

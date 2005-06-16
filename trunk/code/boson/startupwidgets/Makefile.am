@@ -3,6 +3,7 @@ INCLUDES = -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl -I$(top_srcdir)/boson -I
 noinst_LTLIBRARIES = libbosonstartupwidgets.la
 
 libbosonstartupwidgets_la_SOURCES = \
+	boufocolorchooser.cpp \
 	bosonstartupnetwork.cpp \
 	kloadsavegamewidget.cpp \
 	welcomewidget.boui \
