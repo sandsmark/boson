@@ -235,7 +235,7 @@
          <opaque/>
          <constraints/>
          <verticalAlignment/>
-         <preferredWidth>100</preferredWidth>
+         <preferredWidth></preferredWidth>
          <horizontalAlignment/>
          <layout/>
          <iconFile/>
@@ -296,7 +296,7 @@
          <opaque/>
          <constraints/>
          <verticalAlignment/>
-         <preferredWidth>100</preferredWidth>
+         <preferredWidth></preferredWidth>
          <horizontalAlignment/>
          <layout/>
          <iconFile/>
@@ -539,7 +539,7 @@
         <opaque/>
         <constraints/>
         <verticalAlignment/>
-        <preferredWidth>100</preferredWidth>
+        <preferredWidth></preferredWidth>
         <horizontalAlignment/>
         <layout/>
         <name>mPlayerName</name>
@@ -600,7 +600,7 @@
         <preferredHeight/>
         <constraints/>
         <verticalAlignment/>
-        <preferredWidth>100</preferredWidth>
+        <preferredWidth></preferredWidth>
         <horizontalAlignment/>
         <layout/>
         <name>mPlayerColor</name>
@@ -659,7 +659,7 @@
         <preferredHeight/>
         <constraints/>
         <verticalAlignment/>
-        <preferredWidth>100</preferredWidth>
+        <preferredWidth></preferredWidth>
         <horizontalAlignment/>
         <layout/>
         <name>mPlayerSpecies</name>
