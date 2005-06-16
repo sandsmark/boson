@@ -33,6 +33,7 @@
 #include "../bosonmap.h"
 #include "../bosondata.h"
 #include "bosonstartupnetwork.h"
+#include "boufocolorchooser.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -46,7 +47,6 @@
 
 #warning TODO: implement!
 #define HAVE_CHAT_WIDGET 0
-#define HAVE_COLOR_CHOOSER 0
 
 class BoUfoNewGameWidgetPrivate
 {
@@ -54,6 +54,8 @@ public:
     BoUfoNewGameWidgetPrivate()
     {
         mLocalPlayer = 0;
+
+        mPlayerColor = 0;
     }
 
     QMap<int, KPlayer*> mItem2Player;
@@ -63,6 +65,8 @@ public:
     QMap<int, QString> mSpeciesIndex2Comment;
 
     QGuardedPtr<Player> mLocalPlayer;
+
+    BoUfoColorChooser* mPlayerColor;
 };
 
 
@@ -79,6 +83,12 @@ BoUfoNewGameWidget::BoUfoNewGameWidget(BosonStartupNetwork* interface)
  mMaxPlayers = 0;
  mMinPlayers = 0;
  mInited = false; // Will become true once localplayer gets added
+
+ d->mPlayerColor = new BoUfoColorChooser();
+ mPlayerColorContainer->setLayoutClass(BoUfoWidget::UHBoxLayout);
+ mPlayerColorContainer->addWidget(d->mPlayerColor);
+ connect(d->mPlayerColor, SIGNAL(signalColorSelected(int)),
+        this, SLOT(slotPlayerColorChanged(int)));
 
  initPlayFields();
  initSpecies();
@@ -107,9 +117,7 @@ BoUfoNewGameWidget::BoUfoNewGameWidget(BosonStartupNetwork* interface)
  connect(networkInterface(), SIGNAL(signalSetAdmin(bool)),
         this, SLOT(slotNetSetAdmin(bool)));
 
-#if HAVE_COLOR_CHOOSER
- mPlayerColor->setColors(SpeciesTheme::defaultColors());
-#endif
+ d->mPlayerColor->setColors(SpeciesTheme::defaultColors());
 
  slotNetSetAdmin(boGame->isAdmin());
 
@@ -295,14 +303,12 @@ void BoUfoNewGameWidget::updateColors()
  availableColors.prepend(p->teamColor());
 
  // first set all taken, then make those available, that are still available
-#if HAVE_COLOR_CHOOSER
- mPlayerColor->setAllTaken(true);
+ d->mPlayerColor->setAllTaken(true);
  for(unsigned int i = 0; i < availableColors.count(); i++) {
-    mPlayerColor->setTaken(availableColors[i], false);
+    d->mPlayerColor->setTaken(availableColors[i], false);
  }
 
- mPlayerColor->highlightColor(p->teamColor());
-#endif
+ d->mPlayerColor->highlightColor(p->teamColor());
 }
 
 /*****  Slots for networks commands  *****/
@@ -653,7 +659,7 @@ void BoUfoNewGameWidget::slotPlayerNameChanged()
 
 void BoUfoNewGameWidget::slotPlayerColorChanged(int index)
 {
- boDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << index << endl;
  if (index < 0 || (unsigned int)index >= SpeciesTheme::defaultColors().count()) {
     boWarning() << k_funcinfo << "Invalid index: " << index << endl;
     return;
@@ -816,7 +822,7 @@ void BoUfoNewGameWidget::slotPlayerSelected(int index)
     canChange = true;
  }
  mPlayerName->setEditable(canChange);
- mPlayerColor->setEnabled(canChange);
+ d->mPlayerColor->setEnabled(canChange);
  mPlayerSpecies->setEnabled(canChange);
  mRemovePlayer->setEnabled(canChange && (mSelectedPlayer != localPlayer()));
 }
@@ -944,6 +950,23 @@ void BoUfoNewGameWidget::removePlayer(KPlayer* p)
         }
         mConnectedPlayersList->removeItem(index);
         d->mItem2Player.remove(index);
+
+        {
+          // fix indices
+          QMap<int, KPlayer*> fix;
+          QMap<int, KPlayer*>::iterator it2;
+          for (it2 = d->mItem2Player.begin(); it2 != d->mItem2Player.end(); ++it2) {
+            if (it2.key() > index) {
+              fix.insert(it2.key(), it2.data());
+            }
+          }
+          for (it2 = fix.begin(); it2 != fix.end(); ++it2) {
+            d->mItem2Player.remove(it2.key());
+            int i = it2.key() - 1;
+            d->mItem2Player.insert(i, it2.data());
+          }
+        }
+
         // Update player info
         playerCountChanged();
         slotPlayerSelected(mConnectedPlayersList->selectedItem());
