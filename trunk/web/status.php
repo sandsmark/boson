@@ -68,9 +68,10 @@ draw_bigbox_text("What has been changed since 0.10:
  <h3>Rendering</h3>
  <ul>
     <li>Basic support for animated water (lakes and oceans are possible), not included in editor yet</li>
-    <li>Many improvements for textured fonts (wrapping, colors, blending)</li>
     <li>Simple terrain LOD (level of detail) system</li>
     <li>Light effect (dynamic lights)</li>
+    <li>Daylight effect</li>
+    <li>Wind effect</li>
     <li>Bullet trail effect</li>
     <li>Environmental effects (can be used to create snow, rain, etc)</li>
     <li>Improved and much better-looking fog-of-war rendering for terrain</li>
@@ -82,6 +83,8 @@ draw_bigbox_text("What has been changed since 0.10:
  <ul>
     <li>Support for winning conditions</li>
     <li>Forbid placing refineries too close to resource mines</li>
+    <li>Skip rendering some frames when the game becomes overloaded. This
+    reserves more CPU power for the actual game tasks and keeps it playable</li>
  </ul>
 
  <h3>Scripts / AI</h3>
@@ -95,6 +98,7 @@ draw_bigbox_text("What has been changed since 0.10:
  <ul>
      <li>Basic widget to edit conditions</li>
      <li>Improvements to unit placing</li>
+     <li>Support for undo/redo of unit placement/deletion</li>
  </ul>
 
 <h3>Data</h3>
@@ -106,6 +110,7 @@ draw_bigbox_text("What has been changed since 0.10:
   <li>Scripts are now in data module</li>
   <li>Some new effects</li>
   <li>Sight and weapon ranges of units are much bigger now</li>
+  <li>Some new cursor themes</li>
 </ul>
 
  <h3>Internal</h3>
@@ -120,6 +125,16 @@ draw_bigbox_text("What has been changed since 0.10:
         editing the files much easier</li>
     <li>Weapon types are now saved as strings instead of ints in config files,
         making them more readable</li>
+    <li>New profiling architecture</li>
+    <li>Adding a cache file format for model files (decreases startup times)</li>
+    <li>Adding an internal math library</li>
+    <li>Load libGL.so dynamically on startup using dlopen()</li>
+    <li>Compress map data before sending it over network</li>
+    <li>Game Event subsystem</li>
+    <li>Making game starting more modular</li>
+    <li>bosonwidget.cpp has been removed. It has seen 218 HEAD revisions and
+    some more from branches. bosonwidget.cpp, 2001/11/09 - 2004/12/10, may it
+    rest in peace.</li>
  </ul>
 
 
