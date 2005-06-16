@@ -1,6 +1,7 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2005 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2002-2005 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,22 +37,10 @@
 
 #include <klocale.h>
 #include <kgame/kgameproperty.h>
-#include <kgame/kgamechat.h>
 #include <kgame/kgamemessage.h>
 #include <ksimpleconfig.h>
 #include <kmessagebox.h>
-#include <klistbox.h>
-#include <ktextbrowser.h>
-#include <kcombobox.h> // can we use qcombobox instead?
 
-#include <qcombobox.h>
-#include <qframe.h>
-#include <qgroupbox.h>
-#include <qlabel.h>
-#include <qlineedit.h>
-#include <qpushbutton.h>
-#include <qlayout.h>
-#include <qpainter.h>
 #include <qguardedptr.h>
 #include <qtimer.h>
 
