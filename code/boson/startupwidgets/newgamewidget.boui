@@ -603,7 +603,7 @@
         <preferredWidth></preferredWidth>
         <horizontalAlignment/>
         <layout/>
-        <name>mPlayerColor</name>
+        <name>mPlayerColorContainer</name>
         <minimumWidth/>
         <backgroundImageFile/>
         <stretch/>
@@ -973,11 +973,6 @@
   <Method return="void" visibility="protected" type="slot" name="slotPlayFieldSelected(int, int)" >
    <Connections>
     <Connection sender="mSelectMap" signal="signalSelectionChanged(int, int)" type="receiver" />
-   </Connections>
-  </Method>
-  <Method return="void" visibility="protected" type="slot" name="slotPlayerColorChanged(int)" >
-   <Connections>
-    <Connection sender="mPlayerColor" signal="signalColorSelected(int)" type="receiver" />
    </Connections>
   </Method>
   <Method return="void" visibility="protected" type="slot" name="slotPlayerNameChanged()" >
