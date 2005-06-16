@@ -141,7 +141,17 @@ void BosonUfoMiniMap::slotMouseEvent(QMouseEvent* e)
  QPoint pos = e->pos();
  QPoint cell = widgetToCell(pos);
 
- e->accept();
+ // we accept all mouse events except mousemove events. this means that only
+ // mouse move events are propagated to the parent (necessary for updating
+ // cursor position)
+ switch (e->type()) {
+	case QMouseEvent::MouseMove:
+		e->ignore();
+		break;
+	default:
+		e->accept();
+		break;
+ }
 
  // FIXME: maybe we can do this using this->setEnabled(false/true) ?
  if (!d->mGLMiniMap->showMiniMap()) {
