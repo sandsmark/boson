@@ -5,7 +5,6 @@ noinst_LTLIBRARIES = libbosonstartupwidgets.la
 libbosonstartupwidgets_la_SOURCES = \
 	boufocolorchooser.cpp \
 	bosonstartupnetwork.cpp \
-	kloadsavegamewidget.cpp \
 	welcomewidget.boui \
 	newgamewidget.boui \
 	boufonewgamewidget.cpp \
@@ -14,7 +13,8 @@ libbosonstartupwidgets_la_SOURCES = \
 	boufonetworkoptionswidgetbase.boui \
 	boufonetworkoptionswidget.cpp \
 	boufostarteditorwidgetbase.boui \
-	boufostarteditorwidget.cpp
+	boufostarteditorwidget.cpp \
+	boufoloadsavegamewidget.cpp
 
 METASOURCES = AUTO
 

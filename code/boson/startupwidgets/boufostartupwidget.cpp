@@ -25,6 +25,7 @@
 #include "boufonewgamewidget.h"
 #include "boufonetworkoptionswidget.h"
 #include "boufostarteditorwidget.h"
+#include "boufoloadsavegamewidget.h"
 #include "welcomewidget.h"
 #include "bosonstartupnetwork.h"
 #include "bodebug.h"
@@ -42,8 +43,6 @@
 #include <qguardedptr.h>
 
 #include <stdlib.h>
-
-#define LOADSAVE_WIDGET 0
 
 class BoUfoStartupWidgetPrivate
 {
@@ -113,30 +112,26 @@ void BoUfoStartupWidget::setLocalPlayer(Player* p)
 void BoUfoStartupWidget::slotLoadGame()
 {
  showWidget(IdLoadSaveGame);
-#if LOADSAVE_WIDGET
- KLoadSaveGameWidget* loadSave = (KLoadSaveGameWidget*)d->mWidgetStack->widget(IdLoadSaveGame);
+ BoUfoLoadSaveGameWidget* loadSave = (BoUfoLoadSaveGameWidget*)d->mWidgetStack->widget(IdLoadSaveGame);
  if (!loadSave) {
 	boError() << k_funcinfo << "load/save widget hasn't been initialized?!" << endl;
 	return;
  }
  loadSave->setSaveMode(false);
  loadSave->updateGames();
-#endif
 }
 
 void BoUfoStartupWidget::slotSaveGame()
 {
  // TODO pause game!
  showWidget(IdLoadSaveGame);
-#if LOADSAVE_WIDGET
- KLoadSaveGameWidget* loadSave = (KLoadSaveGameWidget*)d->mWidgetStack->widget(IdLoadSaveGame);
+ BoUfoLoadSaveGameWidget* loadSave = (BoUfoLoadSaveGameWidget*)d->mWidgetStack->widget(IdLoadSaveGame);
  if (!loadSave) {
 	boError() << k_funcinfo << "load/save widget hasn't been initialized?!" << endl;
 	return;
  }
  loadSave->setSaveMode(true);
  loadSave->updateGames();
-#endif
 }
 
 void BoUfoStartupWidget::slotNewGame(KCmdLineArgs* args)
@@ -252,10 +247,9 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 	}
 	case IdLoadSaveGame:
 	{
-#if LOADSAVE_WIDGET
 		QColor defaultColor = BoUfoLabel::defaultForegroundColor();
 		BoUfoLabel::setDefaultForegroundColor(Qt::white);
-		KLoadSaveGameWidget* loadSaveWidget = new KLoadSaveGameWidget(d->mWidgetStack);
+		BoUfoLoadSaveGameWidget* loadSaveWidget = new BoUfoLoadSaveGameWidget();
 		BoUfoLabel::setDefaultForegroundColor(defaultColor);
 		loadSaveWidget->setSuffix(QString::fromLatin1("bsg"));
 		connect(loadSaveWidget, SIGNAL(signalLoadGame(const QString&)),
@@ -265,7 +259,6 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 		connect(loadSaveWidget, SIGNAL(signalCancel()),
 				this, SIGNAL(signalCancelLoadSave()));
 		w = loadSaveWidget;
-#endif
 		break;
 	}
 	case IdNewGame:
