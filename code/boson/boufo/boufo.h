@@ -270,6 +270,11 @@ public:
 		return mLayeredPaneWidget;
 	}
 
+	BoUfoWidget* rootPaneWidget() const
+	{
+		return mRootPaneWidget;
+	}
+
 	void addFrame(BoUfoInternalFrame*);
 	void removeFrame(BoUfoInternalFrame*);
 
@@ -339,6 +344,7 @@ private:
 	ufo::UWidget* mContentPane;
 	BoUfoWidget* mContentWidget;
 	BoUfoLayeredPane* mLayeredPaneWidget;
+	BoUfoWidget* mRootPaneWidget;
 
 	BoUfoActionCollection* mActionCollection;
 	BoUfoMenuBar* mMenuBar;

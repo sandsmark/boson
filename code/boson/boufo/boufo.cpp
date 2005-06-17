@@ -817,6 +817,7 @@ BoUfoManager::BoUfoManager(int w, int h, bool opaque)
  }
 
  mRootPane = mContext->getRootPane();
+ mRootPaneWidget = 0,
  mLayeredPaneWidget = 0;
  mContentPane = 0;
  mContentWidget = 0;
@@ -827,6 +828,7 @@ BoUfoManager::BoUfoManager(int w, int h, bool opaque)
  if (!mRootPane) {
 	BO_NULL_ERROR(mRootPane);
  } else {
+	mRootPaneWidget = new BoUfoWidget(mRootPane);
 	if (mRootPane->getLayeredPane()) {
 		mLayeredPaneWidget = new BoUfoLayeredPane(mRootPane->getLayeredPane(), false);
 	} else {
@@ -1333,7 +1335,7 @@ void BoUfoWidget::init(ufo::UWidget* w)
  CONNECT_UFO_TO_QT(BoUfoWidget, mWidget, FocusGained);
  CONNECT_UFO_TO_QT(BoUfoWidget, mWidget, FocusLost);
 
- // AB: note that disabling these does not influence the child widgets!
+ // AB: note that disabling these do not influence the child widgets!
  setMouseEventsEnabled(false, false);
  setKeyEventsEnabled(false);
 
