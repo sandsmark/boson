@@ -2538,6 +2538,26 @@ QString BoUfoPushButton::iconFile() const
  return mIconFile;
 }
 
+void BoUfoPushButton::setToggleButton(bool t)
+{
+ mButton->setToggable(t);
+}
+
+bool BoUfoPushButton::isToggleButton() const
+{
+ return mButton->isToggable();
+}
+
+void BoUfoPushButton::setOn(bool on)
+{
+ mButton->setSelected(on);
+}
+
+bool BoUfoPushButton::isOn() const
+{
+ return mButton->isSelected();
+}
+
 
 BoUfoLineEdit::BoUfoLineEdit() : BoUfoWidget()
 {

@@ -933,6 +933,20 @@ public:
 	 **/
 	QString iconFile() const;
 
+	void setToggleButton(bool t);
+	bool isToggleButton() const;
+
+	/**
+	 * @return The current value of a toggle button. See @ref
+	 * setToggleButton
+	 **/
+	bool isOn() const;
+
+	/**
+	 * Set the current value of a toggle button. See @ref setToggleButton
+	 **/
+	void setOn(bool on);
+
 	virtual void setMinimumSize(const ufo::UDimension& size);
 	virtual void setPreferredSize(const ufo::UDimension& size);
 
