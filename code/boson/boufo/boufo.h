@@ -474,10 +474,12 @@ class BoUfoWidget : public QObject
 	Q_PROPERTY(QString backgroundImageFile READ backgroundImageFile WRITE setBackgroundImageFile);
 	Q_PROPERTY(VerticalAlignment verticalAlignment READ verticalAlignment WRITE setVerticalAlignment);
 	Q_PROPERTY(HorizontalAlignment horizontalAlignment READ horizontalAlignment WRITE setHorizontalAlignment);
+	Q_PROPERTY(BorderType borderType READ borderType WRITE setBorderType);
 	Q_PROPERTY(int stretch READ stretch WRITE setStretch);
 	Q_ENUMS(LayoutClass);
 	Q_ENUMS(HorizontalAlignment);
 	Q_ENUMS(VerticalAlignment);
+	Q_ENUMS(BorderType);
 public:
 	// AB: we must not use a QObject parent here. otherwise garbage
 	// collection of libufo and Qt may confuse each other.
@@ -503,6 +505,14 @@ public:
 		AlignVCenter = 1,
 		AlignBottom = 2
 	};
+	enum BorderType {
+		NoBorder = 0,
+		LineBorder = 1,
+		RaisedBevelBorder = 2,
+		LoweredBevelBorder = 3,
+		TitledBorder = 4,
+		UIBorder = 5
+	};
 
 	ufo::UWidget* widget() const
 	{
@@ -521,6 +531,9 @@ public:
 	virtual void setHorizontalAlignment(HorizontalAlignment alignment);
 	VerticalAlignment verticalAlignment() const;
 	HorizontalAlignment horizontalAlignment() const;
+
+	void setBorderType(BorderType type);
+	BorderType borderType() const;
 
 	/**
 	 * Convenience method for @ref setBackground with a drawable that paints
