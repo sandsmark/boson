@@ -343,14 +343,20 @@ void BosonProfiling::getItemsSince(QPtrList<const BosonProfilingItem>* ret, cons
 
 	// search backwards for the first item that starts after since
 	itemIt.toLast(); // AB: this is O(1) (important!)
-	while (!itemIt.atFirst()) {
+	while (itemIt.current()) {
 		if (itemIt.current()->startTime() < since) {
 			// make the iterator point to the first item that starts
 			// after since
 			++itemIt;
 			break;
+		} else if (itemIt.atFirst()) {
+			break;
 		}
 		--itemIt;
+	}
+
+	if (!itemIt.current()) {
+		continue;
 	}
 
 	for (; itemIt.current(); ++itemIt) {
