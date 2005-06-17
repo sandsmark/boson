@@ -306,6 +306,8 @@ void BosonMainWidget::initUfoGUI()
  d->mWidgetStack->insertStackWidget(d->mStartup);
  d->mWidgetStack->insertStackWidget(d->mGameView);
 
+ raiseWidget(d->mStartup);
+
  d->mGameView->setMouseEventsEnabled(true, true);
 
  ufoManager()->actionCollection()->createGUI();
@@ -1071,6 +1073,15 @@ void BosonMainWidget::raiseWidget(BoUfoWidget* w)
 {
  if (w != d->mGameView) {
 	unsetCursor();
+
+	// AB: we ignore the gameview widget for minimum size calculation
+	int width = ufoManager()->rootPaneWidget()->preferredWidth();
+	int height = ufoManager()->rootPaneWidget()->preferredHeight();
+	setMinimumWidth(width);
+	setMinimumHeight(height);
+ } else {
+	// gameview widget is maximized by default
+	showMaximized();
  }
  d->mWidgetStack->raiseStackWidget(w);
 }
