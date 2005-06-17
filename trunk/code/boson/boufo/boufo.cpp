@@ -1522,6 +1522,53 @@ BoUfoWidget::HorizontalAlignment BoUfoWidget::horizontalAlignment() const
  return a;
 }
 
+BoUfoWidget::BorderType BoUfoWidget::borderType() const
+{
+ ufo::BorderType b = widget()->getBorder();
+ BorderType t;
+ switch (b) {
+	default:
+	case ufo::NoBorder:
+		t = NoBorder;
+		break;
+	case ufo::LineBorder:
+		t = LineBorder;
+		break;
+	case ufo::RaisedBevelBorder:
+		t = RaisedBevelBorder;
+		break;
+	case ufo::LoweredBevelBorder:
+		t = LoweredBevelBorder;
+		break;
+	case ufo::TitledBorder:
+		t = TitledBorder;
+		break;
+ }
+ return t;
+}
+
+void BoUfoWidget::setBorderType(BoUfoWidget::BorderType t)
+{
+ switch (t) {
+	default:
+	case ufo::NoBorder:
+		widget()->setBorder(ufo::NoBorder);
+		break;
+	case ufo::LineBorder:
+		widget()->setBorder(ufo::LineBorder);
+		break;
+	case ufo::RaisedBevelBorder:
+		widget()->setBorder(ufo::RaisedBevelBorder);
+		break;
+	case ufo::LoweredBevelBorder:
+		widget()->setBorder(ufo::LoweredBevelBorder);
+		break;
+	case ufo::TitledBorder:
+		widget()->setBorder(ufo::TitledBorder);
+		break;
+ }
+}
+
 void BoUfoWidget::setLayoutClass(LayoutClass layout)
 {
  switch (layout) {
@@ -2945,8 +2992,15 @@ void BoUfoListBox::insertItem(const QString& text, int index)
 
 void BoUfoListBox::removeItem(int index)
 {
+ if (index < 0) {
+	boError() << k_funcinfo << "index must be >= 0" << endl;
+	return;
+ }
  // TODO: implement properly. this is only a trivial and slow implementation.
  QStringList list = items();
+ if (index >= (int)list.count()) {
+	return;
+ }
  list.remove(list.at(index));
  setItems(list);
 }
@@ -3640,7 +3694,14 @@ void BoUFullLayout::layoutContainer(const ufo::UWidget* container)
 
 ufo::UDimension BoUFullLayout::getPreferredLayoutSize(const ufo::UWidget* container, const ufo::UDimension& maxSize) const
 {
- return maxSize;
+ ufo::UDimension dim(0, 0);
+ for (unsigned int i = 0 ; i < container->getWidgetCount() ; i++) {
+	const ufo::UWidget* w = container->getWidget(i);
+	const ufo::UDimension& s = w->getPreferredSize(maxSize);
+	dim.w = std::max(dim.w, s.w);
+	dim.h = std::max(dim.h, s.h);
+ }
+ return dim;
 }
 
 BoUfoLayeredPane::BoUfoLayeredPane()
@@ -3661,29 +3722,23 @@ BoUfoLayeredPane::~BoUfoLayeredPane()
 {
 }
 
-// AB: this seems to crash when layer == 0 and pos == -1 ?
-// (though this should even be the default!)
 void BoUfoLayeredPane::addLayer(BoUfoWidget* w, int layer, int pos)
 {
  BO_CHECK_NULL_RET(w);
  BO_CHECK_NULL_RET(widget());
- boDebug() << k_funcinfo << endl;
  addWidget(w);
  setLayer(w, layer, pos);
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BoUfoLayeredPane::setLayer(BoUfoWidget* w, int layer, int pos)
 {
  BO_CHECK_NULL_RET(w);
  BO_CHECK_NULL_RET(widget());
- boDebug() << k_funcinfo << endl;
  if (!dynamic_cast<ufo::ULayeredPane*>(widget())) {
 	boError() << k_funcinfo << "oops - not a ULayeredPane" << endl;
 	return;
  }
  dynamic_cast<ufo::ULayeredPane*>(widget())->setLayer(w->widget(), layer, pos);
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 
