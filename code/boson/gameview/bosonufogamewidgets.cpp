@@ -38,6 +38,8 @@
 #include "../bosonfpscounter.h"
 #include "bodebug.h"
 
+#include <klocale.h>
+
 #include <qtimer.h>
 #include <qvaluelist.h>
 
@@ -1084,6 +1086,7 @@ public:
 		mEnableUpdates = 0;
 		mUpdateInterval = 0;
 		mUpdateIntervalLabel = 0;
+		mOneLinePerType = 0;
 	}
 	const BoGLMatrices* mGameGLMatrices;
 	QPtrList<ProfilingGraphItem> mItems;
@@ -1099,6 +1102,7 @@ public:
 	BoUfoCheckBox* mEnableUpdates;
 	BoUfoSlider* mUpdateInterval;
 	BoUfoLabel* mUpdateIntervalLabel;
+	BoUfoCheckBox* mOneLinePerType;
 };
 
 BosonUfoProfilingGraphWidget::BosonUfoProfilingGraphWidget()
@@ -1132,22 +1136,31 @@ BosonUfoProfilingGraphWidget::BosonUfoProfilingGraphWidget()
  vbox->addSpacing(100);
 
  d->mEnableUpdates = new BoUfoCheckBox();
- d->mEnableUpdates->setText("Enable Updates");
+ d->mEnableUpdates->setText(i18n("Enable Updates"));
  d->mEnableUpdates->setChecked(true);
  d->mEnableUpdates->setForegroundColor(Qt::white);
  vbox->addWidget(d->mEnableUpdates);
 
  BoUfoHBox* hbox = new BoUfoHBox();
  vbox->addWidget(hbox);
+ BoUfoLabel* intervalLabel = new BoUfoLabel(i18n("Update interval (ms): "));
+ intervalLabel->setForegroundColor(Qt::white);
+ hbox->addWidget(intervalLabel);
  d->mUpdateInterval = new BoUfoSlider();
- d->mUpdateInterval->setRange(20, 10000);
- d->mUpdateInterval->setValue(1000);
  hbox->addWidget(d->mUpdateInterval);
- connect(d->mUpdateInterval, SIGNAL(signalValueChanged(int)),
-		this, SLOT(slotSetUpdateInterval(int)));
  d->mUpdateIntervalLabel = new BoUfoLabel();
  d->mUpdateIntervalLabel->setForegroundColor(Qt::white);
  hbox->addWidget(d->mUpdateIntervalLabel);
+ connect(d->mUpdateInterval, SIGNAL(signalValueChanged(int)),
+		this, SLOT(slotSetUpdateInterval(int)));
+ d->mUpdateInterval->setRange(20, 4000);
+ d->mUpdateInterval->setValue(1000);
+
+ d->mOneLinePerType = new BoUfoCheckBox();
+ d->mOneLinePerType->setText(i18n("Display sum of elapsed time"));
+ d->mOneLinePerType->setChecked(true);
+ d->mOneLinePerType->setForegroundColor(Qt::white);
+ vbox->addWidget(d->mOneLinePerType);
 
  stretch = new BoUfoWidget();
  stretch->setStretch(1);
@@ -1277,7 +1290,7 @@ void BosonUfoProfilingGraphWidget::paintWidget()
  QMap<QString, ProfilingGraphType*>::iterator typeIt = d->mProfilingTypes.begin();
  while (typeIt != d->mProfilingTypes.end()) {
 	// AB: warning: libufo uses a different coordinate system (y flipped)
-	// than we do! we mustr consider that here
+	// than we do! we must consider that here
 	int x = 100;
 	int y = height() - (*typeIt)->mY;
 	labelIt.current()->setPos(x, y);
@@ -1317,6 +1330,9 @@ void BosonUfoProfilingGraphWidget::slotUpdateData()
  QPtrList<const BosonProfilingItem> itemList;
  boProfiling->getItemsSinceSorted(&itemList, since);
 
+ bool oneLinePerType = d->mOneLinePerType->checked();
+
+ QMap<ProfilingGraphType*, unsigned long int> elapsedSumOfType;
  unsigned long int displayTime = compareTimes(since, now);
  double fdisplayTime = (double)displayTime;
  for (QPtrListIterator<const BosonProfilingItem> it(itemList); it.current(); ++it) {
@@ -1329,18 +1345,37 @@ void BosonUfoProfilingGraphWidget::slotUpdateData()
 		type->mName = profilingItem->name();
 
 		d->mProfilingTypes.insert(profilingItem->name(), type);
+		elapsedSumOfType.insert(type, 0);
 	}
-
-	ProfilingGraphItem* item = new ProfilingGraphItem();
-	item->mType = type;
 
 	unsigned long int startedAfter = compareTimes(since, profilingItem->startTime());
 	unsigned long int elapsed = compareTimes(profilingItem->startTime(), profilingItem->endTime());
 
-	item->mStart = ((double)startedAfter) / fdisplayTime;
-	item->mLength = ((double)elapsed) / fdisplayTime;
+	elapsedSumOfType[type] += elapsed;
 
-	d->mItems.append(item);
+	if (!oneLinePerType) {
+		ProfilingGraphItem* item = new ProfilingGraphItem();
+		item->mType = type;
+
+		item->mStart = ((double)startedAfter) / fdisplayTime;
+		item->mLength = ((double)elapsed) / fdisplayTime;
+
+		d->mItems.append(item);
+	}
+ }
+
+ if (oneLinePerType) {
+	QMap<ProfilingGraphType*, unsigned long int>::iterator it;
+	for (it = elapsedSumOfType.begin(); it != elapsedSumOfType.end(); ++it) {
+		ProfilingGraphItem* item = new ProfilingGraphItem();
+		item->mType = it.key();
+
+		item->mStart = 0.0;
+		item->mLength = ((double)it.data()) / fdisplayTime;
+
+		d->mItems.append(item);
+	}
+
  }
 
  ensureLabels(d->mProfilingTypes.count());
