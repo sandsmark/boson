@@ -311,20 +311,6 @@ public:
 		return mMenuBar;
 	}
 
-	bool sendResizeEvent(int w, int h);
-
-	// TODO: find out whether the event is taken by UFO and return true if
-	// that is the case (other GUI elements can ignore it)
-	bool sendMousePressEvent(QMouseEvent* e);
-	bool sendMouseReleaseEvent(QMouseEvent* e);
-	bool sendMouseMoveEvent(QMouseEvent* e);
-	bool sendWheelEvent(QWheelEvent* e);
-	bool sendKeyPressEvent(QKeyEvent* e);
-	bool sendKeyReleaseEvent(QKeyEvent* e);
-
-	/**
-	 * Convenience method that uses the above methods.
-	 **/
 	bool sendEvent(QEvent* e);
 
 	void setUfoToolkitProperty(const QString& key, const QString& value);
@@ -335,6 +321,15 @@ public:
 	QValueList<BoUfoFontInfo> listFonts(const BoUfoFontInfo&);
 
 	bool focusedWidgetTakesKeyEvents() const;
+
+protected:
+	bool sendResizeEvent(int w, int h);
+	bool sendMousePressEvent(QMouseEvent* e);
+	bool sendMouseReleaseEvent(QMouseEvent* e);
+	bool sendMouseMoveEvent(QMouseEvent* e);
+	bool sendWheelEvent(QWheelEvent* e);
+	bool sendKeyPressEvent(QKeyEvent* e);
+	bool sendKeyReleaseEvent(QKeyEvent* e);
 
 private:
 	ufo::UXDisplay* mDisplay;
