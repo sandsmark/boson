@@ -2354,7 +2354,10 @@ void BoUfoNumInput::slotTextEntered(const QString& text)
 
 float BoUfoNumInput::value() const
 {
- return mSlider->floatValue();
+ double v = mLineEdit->text().toDouble();
+ v = QMAX(v, minimumValue());
+ v = QMIN(v, maximumValue());
+ return v;
 }
 
 float BoUfoNumInput::minimumValue() const
@@ -2388,7 +2391,7 @@ QString BoUfoNumInput::label() const
 void BoUfoNumInput::setValue(float v)
 {
  mSlider->setFloatValue(v);
- mLineEdit->setText(QString::number(value()));
+ mLineEdit->setText(QString::number(mSlider->value()));
 }
 
 void BoUfoNumInput::slotSetMaxValue(float max)
