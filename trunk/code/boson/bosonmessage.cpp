@@ -306,7 +306,7 @@ bool BosonMessageEditorMoveChangeTexMap::save(QDataStream& stream) const
 			return false;
 		}
 		stream << (Q_UINT32)((mCellCornerTextures[i])[j]);
-		stream << (Q_UINT32)((mCellCornerAlpha[i])[j]);
+		stream << (Q_UINT8)((mCellCornerAlpha[i])[j]);
 	}
  }
  return true;
