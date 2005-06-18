@@ -28,6 +28,7 @@
 
 class BoUfoWidget;
 class BoUfoManager;
+class BoUfoFontInfo;
 
 
 /**
@@ -53,8 +54,12 @@ protected:
 	virtual void keyPressEvent(QKeyEvent* e);
 	virtual void keyReleaseEvent(QKeyEvent* e);
 
+	void initUfoActions();
+
 protected slots:
 	void mySlotUpdateGL();
+
+	void slotChangeFont(const BoUfoFontInfo&);
 
 private:
 	BoUfoManager* mUfoManager;
