@@ -173,6 +173,51 @@ static int convertUfoModifierStateToQt(ufo::UMod_t modifiers)
  return s;
 }
 
+static ufo::UMod_t convertQtModifierStateToUfo(int modifiers, ufo::UMod_t origUfoModifiers = ufo::UMod::NoModifier)
+{
+ int s = ufo::UMod::NoModifier;
+ if (modifiers & Qt::LeftButton) {
+	s |= ufo::UMod::LeftButton;
+ }
+ if (modifiers & Qt::RightButton) {
+	s |= ufo::UMod::RightButton;
+ }
+ if (modifiers & Qt::MidButton) {
+	s |= ufo::UMod::MiddleButton;
+ }
+
+ if (modifiers & Qt::ShiftButton) {
+	s |= ufo::UMod::Shift;
+ }
+ if (modifiers & Qt::ControlButton) {
+	s |= ufo::UMod::Ctrl;
+ }
+ if (modifiers & Qt::AltButton) {
+	s |= ufo::UMod::Alt;
+ }
+ if (modifiers & Qt::MetaButton) {
+	s |= ufo::UMod::Meta;
+ }
+
+ // AB: libufo keeps track of several states that Qt does not:
+ // * numlock
+ // * capslock
+ // * left/right shift (2 different buttons!)
+ // * left/right ctrl (2 different buttons!)
+ // * left/right alt (2 different buttons!)
+ // * left/right meta (2 different buttons!)
+ // * lsuper (left "windows" key)
+ // * rsuper (right "windows" key)
+ // * alt_graph
+ //
+ // we try to retrieve them from origUfoModifiers.
+ // Note that we ignore these items that Qt provides 1 key, but libufo provides 2 for.
+ modifiers |= (origUfoModifiers & ufo::UMod::Num);
+ modifiers |= (origUfoModifiers & ufo::UMod::Caps);
+ modifiers |= (origUfoModifiers & ufo::UMod::AltGraph);
+ return (ufo::UMod_t)s;
+}
+
 static ufo::UKeyCode_t convertQtKeyToUfo(int key)
 {
  ufo::UKeyCode_t uk = ufo::UKey::UK_UNKOWN;
@@ -942,6 +987,41 @@ void BoUfoManager::render()
 
 bool BoUfoManager::sendEvent(QEvent* e)
 {
+ // AB: under certain circumstances the keyboard mod states of libufo may be
+ // obsolete (e.g. if alt+tab was used to switch to another window and back to
+ // the libufo window - the window manager eats these events then)
+ // so before dispatching an event, we update the keyboard state, if possible
+ bool updateKeys = false;
+ Qt::ButtonState state;
+ switch (e->type()) {
+	case QEvent::Wheel:
+		state = ((QWheelEvent*)e)->state();
+		updateKeys = true;
+		break;
+	case QEvent::MouseMove:
+	case QEvent::MouseButtonPress:
+	case QEvent::MouseButtonRelease:
+	case QEvent::MouseButtonDblClick:
+		state = ((QMouseEvent*)e)->state();
+		updateKeys = true;
+		break;
+	case QEvent::KeyPress:
+	case QEvent::KeyRelease:
+		state = ((QKeyEvent*)e)->state();
+		updateKeys = true;
+		break;
+	default:
+		break;
+ }
+ if (updateKeys) {
+	int x, y;
+	ufo::UMod_t mouseState = display()->getMouseState(&x, &y);
+	ufo::UMod_t keyState = convertQtModifierStateToUfo(state & ~Qt::MouseButtonMask, display()->getModState());
+
+	ufo::UMod_t modState = (ufo::UMod_t)((int)mouseState | (int)keyState);
+	display()->setModState(modState);
+ }
+
  switch (e->type()) {
 	case QEvent::Wheel:
 		return sendWheelEvent((QWheelEvent*)e);
@@ -955,9 +1035,15 @@ bool BoUfoManager::sendEvent(QEvent* e)
 		return sendKeyPressEvent((QKeyEvent*)e);
 	case QEvent::KeyRelease:
 		return sendKeyReleaseEvent((QKeyEvent*)e);
+	case QEvent::Resize:
+	{
+		QResizeEvent* r = (QResizeEvent*)e;
+		return sendResizeEvent(r->size().width(), r->size().height());
+	}
 	default:
 		break;
  }
+ boDebug() << k_funcinfo << "unhandled event " << e->type() << endl;
  return false;
 }
 

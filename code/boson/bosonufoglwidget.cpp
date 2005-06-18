@@ -106,7 +106,11 @@ void BosonUfoGLWidget::resizeGL(int , int )
  boProfiling->push("resizeGL()");
  if (mUfoManager && mSendEvents) {
 	makeCurrent();
-	mUfoManager->sendResizeEvent(width(), height());
+
+	// WARNING: FIXME: we use size() as oldsize !!
+	// (doesn't harm atm, as BoUfo does not use oldsize)
+	QResizeEvent r(size(), size());
+	mUfoManager->sendEvent(&r);
 
 	// AB: is this necessary? if so then it should be in sendResizeEvent() !
 	mUfoManager->contentWidget()->invalidate();
@@ -122,7 +126,7 @@ void BosonUfoGLWidget::mousePressEvent(QMouseEvent* e)
  boProfiling->push("mousePressEvent()");
  if (mUfoManager && mSendEvents) {
 	makeCurrent();
-	mUfoManager->sendMousePressEvent(e);
+	mUfoManager->sendEvent(e);
 	update();
  }
  boProfiling->pop(); // "mousePressEvent()"
@@ -135,7 +139,7 @@ void BosonUfoGLWidget::mouseReleaseEvent(QMouseEvent* e)
  boProfiling->push("mouseReleaseEvent()");
  if (mUfoManager && mSendEvents) {
 	makeCurrent();
-	mUfoManager->sendMouseReleaseEvent(e);
+	mUfoManager->sendEvent(e);
 	update();
  }
  boProfiling->pop(); // "mouseReleaseEvent()"
@@ -148,7 +152,7 @@ void BosonUfoGLWidget::mouseMoveEvent(QMouseEvent* e)
  boProfiling->push("mouseMoveEvent()");
  if (mUfoManager && mSendEvents) {
 	makeCurrent();
-	mUfoManager->sendMouseMoveEvent(e);
+	mUfoManager->sendEvent(e);
 	update();
  }
  boProfiling->pop(); // "mouseMoveEvent()"
@@ -161,7 +165,7 @@ void BosonUfoGLWidget::wheelEvent(QWheelEvent* e)
  boProfiling->push("wheelEvent()");
  if (mUfoManager && mSendEvents) {
 	makeCurrent();
-	mUfoManager->sendWheelEvent(e);
+	mUfoManager->sendEvent(e);
 	update();
  }
  boProfiling->pop(); // "wheelEvent()"
@@ -174,7 +178,7 @@ void BosonUfoGLWidget::keyPressEvent(QKeyEvent* e)
  boProfiling->push("keyPressEvent()");
  if (mUfoManager && mSendEvents) {
 	makeCurrent();
-	mUfoManager->sendKeyPressEvent(e);
+	mUfoManager->sendEvent(e);
 	update();
  }
  BosonGLWidget::keyPressEvent(e);
@@ -188,7 +192,7 @@ void BosonUfoGLWidget::keyReleaseEvent(QKeyEvent* e)
  boProfiling->push("keyReleaseEvent()");
  if (mUfoManager && mSendEvents) {
 	makeCurrent();
-	mUfoManager->sendKeyReleaseEvent(e);
+	mUfoManager->sendEvent(e);
 	update();
  }
  BosonGLWidget::keyReleaseEvent(e);

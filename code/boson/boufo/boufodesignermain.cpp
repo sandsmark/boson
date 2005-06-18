@@ -1108,7 +1108,11 @@ void FormPreview::resizeGL(int w, int h)
 {
  makeCurrent();
  if (mUfoManager) {
-	mUfoManager->sendResizeEvent(w, h);
+	// WARNING: FIXME: we use size == oldsize
+	// doesn't harm atm, as BoUfo does not use oldsize
+	QResizeEvent r(QSize(w, h), QSize(w, h));
+
+	mUfoManager->sendEvent(&r);
  }
 }
 
@@ -1128,7 +1132,7 @@ bool FormPreview::eventFilter(QObject* o, QEvent* e)
 void FormPreview::mouseMoveEvent(QMouseEvent* e)
 {
  if (mUfoManager) {
-	mUfoManager->sendMouseMoveEvent(e);
+	mUfoManager->sendEvent(e);
  }
 }
 
@@ -1139,7 +1143,7 @@ void FormPreview::mousePressEvent(QMouseEvent* e)
  // AB: we display the ufo widgets only, we don't use them. so don't deliver
  // this event.
  if (mUfoManager) {
-	mUfoManager->sendMousePressEvent(e);
+	mUfoManager->sendEvent(e);
  }
 #endif
 
@@ -1165,7 +1169,7 @@ void FormPreview::mouseReleaseEvent(QMouseEvent* e)
  // AB: we display the ufo widgets only, we don't use them. so don't deliver
  // this event.
  if (mUfoManager) {
-	mUfoManager->sendMouseReleaseEvent(e);
+	mUfoManager->sendEvent(e);
  }
 #endif
 }
@@ -1173,14 +1177,14 @@ void FormPreview::mouseReleaseEvent(QMouseEvent* e)
 void FormPreview::wheelEvent(QWheelEvent* e)
 {
  if (mUfoManager) {
-	mUfoManager->sendWheelEvent(e);
+	mUfoManager->sendEvent(e);
  }
 }
 
 void FormPreview::keyPressEvent(QKeyEvent* e)
 {
  if (mUfoManager) {
-	mUfoManager->sendKeyPressEvent(e);
+	mUfoManager->sendEvent(e);
  }
  QGLWidget::keyPressEvent(e);
 }
@@ -1188,7 +1192,7 @@ void FormPreview::keyPressEvent(QKeyEvent* e)
 void FormPreview::keyReleaseEvent(QKeyEvent* e)
 {
  if (mUfoManager) {
-	mUfoManager->sendKeyReleaseEvent(e);
+	mUfoManager->sendEvent(e);
  }
  QGLWidget::keyReleaseEvent(e);
 }
