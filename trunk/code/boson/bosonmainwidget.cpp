@@ -333,9 +333,11 @@ void BosonMainWidget::resizeGL(int w, int h)
  boDebug() << k_funcinfo << w << " " << h << endl;
  BosonUfoGLWidget::resizeGL(w, h);
 
+#if 0
  if (ufoManager()) {
 	ufoManager()->sendResizeEvent(w, h);
  }
+#endif
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << endl;
