@@ -19,12 +19,10 @@
 
 #include <bogl.h>
 
-//#include <ufo/ufo.hpp>
-//#include <ufo/ux/ux.hpp>
-#include "boufo.h"
-
 #include "boufotestmain.h"
 #include "boufotestmain.moc"
+
+#include "boufo.h"
 
 #include "boufofontselectionwidget.h"
 
@@ -38,7 +36,8 @@
 #include <stdlib.h>
 
 
-BoUfoTest::BoUfoTest(QWidget* parent, const char* name) : QGLWidget(parent, name)
+BoUfoTest::BoUfoTest(QWidget* parent, const char* name)
+	: QGLWidget(parent, name, 0, Qt::WType_TopLevel | Qt::WDestructiveClose)
 {
  setMouseTracking(true);
  setMinimumSize(800, 200);
@@ -78,7 +77,6 @@ void BoUfoTest::initializeGL()
  mUfoManager = new BoUfoManager(width(), height(), true);
  mContentWidget = mUfoManager->contentWidget();
 
-// mContentWidget->setLayoutClass(BoUfoWidget::UBorderLayout);
  mContentWidget->setLayoutClass(BoUfoWidget::UVBoxLayout);
 
 #define MULTILINE_TEST 0
@@ -117,6 +115,8 @@ void BoUfoTest::initializeGL()
  frame->setSize(frame->preferredWidth(), frame->preferredHeight());
 #endif // FONT_SELECTION_TEST
 
+ initUfoActions();
+
  recursive = false;
  initialized = true;
 }
@@ -125,7 +125,11 @@ void BoUfoTest::resizeGL(int w, int h)
 {
  makeCurrent();
  if (mUfoManager) {
-	mUfoManager->sendResizeEvent(w, h);
+	// WARNING: FIXME: we use size == oldsize
+	// doesn't harm atm, as BoUfo does not use oldsize
+	QResizeEvent r(QSize(w, h), QSize(w, h));
+
+	mUfoManager->sendEvent(&r);
  }
 
  glViewport(0, 0, width(), height());
@@ -197,35 +201,35 @@ bool BoUfoTest::eventFilter(QObject* o, QEvent* e)
 void BoUfoTest::mouseMoveEvent(QMouseEvent* e)
 {
  if (mUfoManager) {
-	mUfoManager->sendMouseMoveEvent(e);
+	mUfoManager->sendEvent(e);
  }
 }
 
 void BoUfoTest::mousePressEvent(QMouseEvent* e)
 {
  if (mUfoManager) {
-	mUfoManager->sendMousePressEvent(e);
+	mUfoManager->sendEvent(e);
  }
 }
 
 void BoUfoTest::mouseReleaseEvent(QMouseEvent* e)
 {
  if (mUfoManager) {
-	mUfoManager->sendMouseReleaseEvent(e);
+	mUfoManager->sendEvent(e);
  }
 }
 
 void BoUfoTest::wheelEvent(QWheelEvent* e)
 {
  if (mUfoManager) {
-	mUfoManager->sendWheelEvent(e);
+	mUfoManager->sendEvent(e);
  }
 }
 
 void BoUfoTest::keyPressEvent(QKeyEvent* e)
 {
  if (mUfoManager) {
-	mUfoManager->sendKeyPressEvent(e);
+	mUfoManager->sendEvent(e);
  }
  QGLWidget::keyPressEvent(e);
 }
@@ -233,19 +237,26 @@ void BoUfoTest::keyPressEvent(QKeyEvent* e)
 void BoUfoTest::keyReleaseEvent(QKeyEvent* e)
 {
  if (mUfoManager) {
-	mUfoManager->sendKeyReleaseEvent(e);
+	mUfoManager->sendEvent(e);
  }
  QGLWidget::keyReleaseEvent(e);
+}
+
+void BoUfoTest::slotChangeFont(const BoUfoFontInfo& font)
+{
+}
+
+void BoUfoTest::initUfoActions()
+{
 }
 
 int main(int argc, char **argv)
 {
  std::cout << "resolving GL, GLX and GLU symbols" << std::endl;
  if (!boglResolveGLSymbols()) {
-#warning TODO: messagebox
 	// TODO: open a messagebox
 	std::cerr << "Could not resolve all symbols!" << std::endl;
-    return 1;
+	return 1;
  }
  std::cout << "GL, GLX and GLU symbols successfully resolved" << std::endl;
 
