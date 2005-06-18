@@ -192,6 +192,7 @@ protected slots:
 
 	void slotCenterHomeBase();
 	void slotSyncNetwork();
+	void slotEndGame();
 
 	void slotEditorSavePlayFieldAs();
 	void slotEditorEditMapDescription();

@@ -712,7 +712,7 @@ void BosonMenuInput::initIO(KPlayer* player)
  connect(mData, SIGNAL(signalDebugMemory()),
 		this, SLOT(slotDebugMemory()));
  connect(mData, SIGNAL(signalEndGame()),
-		this, SIGNAL(signalEndGame()));
+		this, SLOT(slotEndGame()));
  connect(mData, SIGNAL(signalQuit()),
 		this, SIGNAL(signalQuit()));
  connect(mData, SIGNAL(signalPreferences()),
@@ -1065,6 +1065,11 @@ void BosonMenuInput::slotSyncNetwork()
 {
  BO_CHECK_NULL_RET(boGame);
  boGame->syncNetwork();
+}
+
+void BosonMenuInput::slotEndGame()
+{
+ QTimer::singleShot(0, this, SIGNAL(signalEndGame()));
 }
 
 void BosonMenuInput::slotEditorSavePlayFieldAs()
