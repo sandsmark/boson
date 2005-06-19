@@ -1,7 +1,7 @@
 INCLUDES = -I$(top_srcdir)/bodebug $(all_includes)
 
 if include_bomemory
-BOMEMORYLIB=libbomemory.la
+BOMEMORYLIB = libbomemory.la
 endif
 
 noinst_LTLIBRARIES = $(BOMEMORYLIB)
