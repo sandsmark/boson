@@ -59,6 +59,8 @@ public:
 	QMap<int, QString> mSpeciesIndex2Comment;
 
 	BosonPlayField* mSelectedMap;
+
+	QValueList<int> mMapSizes;
 };
 
 
@@ -73,6 +75,7 @@ BoUfoStartEditorWidget::BoUfoStartEditorWidget(BosonStartupNetwork* interface)
 
  initPlayFields();
  initGroundThemes();
+ initMapSizes();
 
  connect(networkInterface(), SIGNAL(signalStartGameClicked()),
 		this, SLOT(slotNetStart()));
@@ -159,6 +162,35 @@ void BoUfoStartEditorWidget::initGroundThemes()
  if (mGroundTheme->count() > 0) {
 	mGroundTheme->setCurrentItem(0);
  }
+}
+
+void BoUfoStartEditorWidget::initMapSizes()
+{
+ d->mMapSizes.clear();
+
+ // Map sizes
+ d->mMapSizes.append(64); // Tiny
+ d->mMapSizes.append(128); // Small
+ d->mMapSizes.append(192); // Medium
+ d->mMapSizes.append(256); // Large
+ d->mMapSizes.append(320); // Huge
+ d->mMapSizes.append(384); // Super
+ d->mMapSizes.append(-1); // Custom
+
+ // Labels
+ QStringList labels;
+ labels.append("Tiny");
+ labels.append("Small");
+ labels.append("Medium");
+ labels.append("Large");
+ labels.append("Huge");
+ labels.append("Super");
+ labels.append("Custom");
+
+ mMapSize->setItems(labels);
+
+ // Medium is the default size
+ mMapSize->setCurrentItem(2);
 }
 
 void BoUfoStartEditorWidget::slotNetStart()
@@ -361,6 +393,20 @@ void BoUfoStartEditorWidget::slotHeightChanged(int)
  // we don't transmit over network.
 }
 
+void BoUfoStartEditorWidget::slotMapSizeChanged(int index)
+{
+ int size = d->mMapSizes[index];
+
+ bool custom = (index == -1);
+ mMapHeight->setEnabled(custom);
+ mMapWidth->setEnabled(custom);
+
+ if (!custom) {
+	mMapHeight->setValue(size);
+	mMapWidth->setValue(size);
+ }
+}
+
 void BoUfoStartEditorWidget::slotNewMapToggled(bool isNewMap)
 {
  boDebug() << k_funcinfo << "isNewMap: " << isNewMap << endl;
@@ -392,6 +438,7 @@ void BoUfoStartEditorWidget::slotNewMapToggled(bool isNewMap)
 	mMaxPlayers->setValue(information->maxPlayers());
  }
 
+ mMapSize->setEnabled(isNewMap);
  mMapHeight->setEnabled(isNewMap);
  mMapWidth->setEnabled(isNewMap);
  mMaxPlayers->setEnabled(isNewMap);
