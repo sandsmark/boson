@@ -18,7 +18,8 @@ dnl AC_MSG_CHECKING(for libGL)
 # LDFLAGS="$LDFLAGS $LIB_XEXT -lm $LIBSOCKET"
  bo_include_file="-include bomemory/bomemory.h"
  bo_include_path="$srcdir"
- CXXFLAGS="$CXXFLAGS -I$bo_include_path $bo_include_file"
+dnl AB: disabled, as the STL does not like macros redefining new
+dnl CXXFLAGS="$CXXFLAGS -I$bo_include_path $bo_include_file"
  AC_TRY_COMPILE([
 	],
 	[],
@@ -32,7 +33,8 @@ dnl AC_MSG_CHECKING(for libGL)
  else
 	AC_MSG_RESULT([yes])
 	if test "x$bo_use_bomemory" = "xyes"; then
-		KDE_CXXFLAGS="$KDE_CXXFLAGS $bo_include_file"
+		dnl AB: disabled, as the STL does not like macros redefining new
+dnl		KDE_CXXFLAGS="$KDE_CXXFLAGS $bo_include_file"
 		AC_SUBST(KDE_CXXFLAGS)
 		AC_DEFINE([BOSON_USE_BOMEMORY], 1, [Defines whether bomemory library should be used (debugging)])
 		LIB_BOMEMORY="\$(top_builddir)/bomemory/libbomemory.la"
