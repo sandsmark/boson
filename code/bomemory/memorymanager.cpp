@@ -20,14 +20,25 @@
 #include "memorymanager.h"
 #include "memnode.h"
 
-#include <bodebug.h>
-
-//#include <stdlib.h>
+#include <stdlib.h>
 #include <string.h>
-#include <dlfcn.h> // dlopen, dlsym
 
 #include <qstring.h>
 #include <qptrdict.h>
+
+//#define TOO_MUCH_DEBUGGING
+
+#ifndef __GLIBC__
+#error __GLIBC__ is not defined - we need glibc (for __libc_malloc)
+#endif
+
+#define libc_malloc __libc_malloc
+#define libc_free __libc_free
+extern "C" {
+void* __libc_malloc(size_t);
+void __libc_free(void*);
+}
+
 
 // AB: see dmalloc/return.h
 #ifdef __i386
@@ -48,9 +59,6 @@
 int MemoryManager::mDisabled = 0;
 MemoryManager* MemoryManager::mManager= 0;
 
-static void loadMalloc();
-static void* (*libc_malloc)(size_t) = 0;
-static void (*libc_free)(void*) = 0;
 
 class MemoryManagerPrivate
 {
@@ -77,56 +85,71 @@ MemoryManager::MemoryManager()
 
 MemoryManager::~MemoryManager()
 {
+ mDisabled++;
  d->mMemoryInfo.clear();
  delete d;
+ mDisabled--;
 }
 
 void* MemoryManager::bomalloc(size_t size, const char* file, int line, const char* function, bool isMalloc)
 {
- if (!libc_malloc) {
-	loadMalloc();
- }
  if (mDisabled) {
 	// the memory manager also allocates memory, but we dont want to track
 	// that (to avoid infinite recursion)
+#ifdef TOO_MUCH_DEBUGGING
+	printf("bomalloc: %d %p line=%d %p %d\n", size, file, line, function, isMalloc ? 1 : 0);
+	printf("bomalloc() done (disabled)\n");
+#endif
 	return libc_malloc(size);
  }
  mDisabled++;
+#ifdef TOO_MUCH_DEBUGGING
+ printf("bomalloc: %d %p line=%d %p %d\n", size, file, line, function, isMalloc ? 1 : 0);
+#endif
  void* p = libc_malloc(size);
  MemNode* node = (MemNode*)libc_malloc(sizeof(struct MemNode));
  makeMemNode(node, size, p, file, line, function, isMalloc);
  d->mMemoryInfo.insert(p, node);
  d->mMemory += size;
  mDisabled--;
+#ifdef TOO_MUCH_DEBUGGING
+ printf("bomalloc() done\n");
+#endif
  return p;
 }
 
 void MemoryManager::bofree(void* p, bool isFree)
 {
- if (!libc_free) {
-	loadMalloc();
- }
  if (!p) {
 	return;
  }
+#ifdef TOO_MUCH_DEBUGGING
+ printf("bofree()\n");
+#endif
  if (mDisabled) {
 	libc_free(p);
+#ifdef TOO_MUCH_DEBUGGING
+	printf("bofree() done\n");
+#endif
 	return;
  }
  mDisabled++;
  MemNode* node = d->mMemoryInfo.take(p);
  if (!node) {
-	boError() << k_funcinfo << "deleting memory that is unkown to the MemoryManager: " << p << endl;
+	printf("ERROR (bofree): deleting memory that is unkown to the MemoryManager: %p\n", p);
 	mDisabled --;
  } else {
 	d->mMemory -= node->mSize;
 	if (node->mIsMalloc != isFree) {
-		boError() << k_funcinfo << "isMalloc != isFree" << endl;
+		printf("ERROR (bofree): isMalloc != isFree\n");
 	}
  }
  libc_free(node);
  libc_free(p);
  mDisabled--;
+#ifdef TOO_MUCH_DEBUGGING
+ printf("bofree() done\n");
+#endif
 }
 
 const QPtrDict<MemNode>& MemoryManager::allNodes() const
@@ -148,42 +171,8 @@ void MemoryManager::enable()
 {
  mDisabled--;
  if (mDisabled < 0) {
-	boError() << k_funcinfo << "invalid use of enable()/disable() !" << endl;
+	printf("ERROR (enable()): invalid use of enable()/disable() !\n");
  }
 }
 
-
-// mostly taken from ccmalloc/wrapper.c
-static void loadMalloc()
-{
- void* handle = 0;
- const char* malloc_name = "__libc_malloc";
- const char* free_name = "__libc_free";
-
- /*
- const char* libcname = "libc"; // FIXME: configure check
- handle = dlopen(libcname, RTLD_NOW);
- if (!handle) {
-	const char* err = dlerror();
-	fprintf(stderr, "Could not open %s. Exit now.\n", libcname);
-	fprintf(stderr, err);
-	fprintf(stderr, "\n");
-	exit(1);
-	return;
- }
- */
-
- libc_malloc = (void*(*)(size_t))dlsym(handle, malloc_name);
- if (!libc_malloc) {
-	fprintf(stderr, "Could not find %s symbol. Exit now\n", malloc_name);
-	exit(1);
-	return;
- }
- libc_free = (void(*)(void*))dlsym(handle, free_name);
- if (!libc_free) {
-	fprintf(stderr, "Could not find %s symbol. Exit now\n", free_name);
-	exit(1);
-	return;
- }
-}
 
