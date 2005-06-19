@@ -22,6 +22,10 @@
 #include <sys/types.h>
 #include <stdlib.h>
 
+#include <config.h>
+
+#if BOSON_USE_BOMEMORY
+
 /*
  * Warning: this file gets included using "g++ -include", meaning it will always
  * be included in all of our files, but if it changes g++ won't notice that all
@@ -30,36 +34,35 @@
  * You have to do make clean manually then.
  */
 
-void* operator new(size_t size, const char* file, int line, const char* function);
-void* operator new[](size_t size, const char* file, int line, const char* function);
-
-#undef calloc
-#undef malloc
-#undef realloc
-#undef free
-extern void* calloc(size_t num, size_t size);
-extern void* malloc(size_t size);
-extern void* realloc(void* ptr, size_t size);
-extern void free(void* ptr);
-/*
-*/
-
-extern void* bo_malloc(size_t size, const char* file, int line, const char* function);
-extern void bo_free(void* ptr);
-
 
 #ifdef __PRETTY_FUNCTION__
 #define BOMEM_PRETTY_FUNCTION __PRETTY_FUNCITON__
 #else
 #define BOMEM_PRETTY_FUNCTION ""
-#endif // __PRETTY_FUNCTION__
+#endif /* __PRETTY_FUNCTION__ */
 
-
+void* operator new(size_t size, const char* file, int line, const char* function);
+void* operator new[](size_t size, const char* file, int line, const char* function);
+#if 1
 #define new new(__FILE__, __LINE__, __PRETTY_FUNCTION__)
+
+
+#undef calloc
+#undef malloc
+#undef realloc
+#undef free
+
+void* bo_malloc(size_t size, const char* file, int line, const char* function);
+void bo_free(void* ptr);
+
 #define malloc(size) bo_malloc((size), __FILE__, __LINE__, BOMEM_PRETTY_FUNCTION)
 #define calloc(count, size) bo_malloc((count) * (size), __FILE__, __LINE__, BOMEM_PRETTY_FUNCTION)
 #define realloc(ptr, size) bo_malloc((count) * (size), __FILE__, __LINE__, BOMEM_PRETTY_FUNCTION)
 #define free(ptr) bo_free(ptr)
+
+#endif
+
+#endif // BOSON_USE_BOMEMORY
 
 #endif
 
