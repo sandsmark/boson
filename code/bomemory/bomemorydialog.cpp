@@ -133,12 +133,13 @@ BoMemoryDialog::BoMemoryDialog(QWidget* parent, bool modal)
  d->mList->setRootIsDecorated(true);
  layout->addWidget(d->mList);
  d->mList->addColumn(i18n("File"));
- d->mList->addColumn(i18n("Function"));
+ d->mList->addColumn(i18n("Function"), 100);
  d->mList->addColumn(i18n("Line"));
  d->mList->addColumn(i18n("Size (Byte)"));
  d->mList->addColumn(i18n("Size (KB)"));
  d->mList->addColumn(i18n("Size (MB)"));
- d->mList->addColumn(i18n("malloc/new"));
+ d->mList->addColumn(i18n("malloc calls"));
+ d->mList->addColumn(i18n("new calls"));
 }
 
 BoMemoryDialog::~BoMemoryDialog()
@@ -150,8 +151,13 @@ BoMemoryDialog::~BoMemoryDialog()
 
 void BoMemoryDialog::slotUpdate()
 {
+ boDebug() << k_funcinfo << endl;
  d->mList->clear();
  MemoryManager::createManager();
+ if (!MemoryManager::manager()) {
+	boError() << k_funcinfo << "NULL memory manager. probably permanently disabled. cannot show any data" << endl;
+	return;
+ }
  MemoryManager::manager()->disable(); // do not manage the ptrdict
  unsigned int nodeCount = MemoryManager::manager()->allNodes().count();
  unsigned int totalMemory = MemoryManager::manager()->memoryInUse();
@@ -247,7 +253,7 @@ void BoMemoryDialog::slotUpdate()
 
 	QListViewItem* file = createFileItem(fileName);
 
-	boDebug() << k_funcinfo << "creating items for file " << fileName << endl;
+//	boDebug() << k_funcinfo << "creating items for file " << fileName << endl;
 	size += createFileList(file, list);
  }
  boDebug() << k_funcinfo << "total size: " << size << endl;
@@ -276,16 +282,22 @@ QListViewItem* BoMemoryDialog::createMemoryItem(QListViewItem* parent, const MyM
  QString line = QString::number(node->mLine);
  QListViewItem* item = new QListViewItem(parent, node->mFile, node->mFunction, line);
  setSize(item, node->mSize);
+ unsigned int mallocCalls = node->mIsMalloc? 1 : 0;
+ unsigned int newCalls = node->mIsMalloc? 0 : 1;
  QString is = (node->mIsMalloc) ? QString("malloc") : QString("new");
- item->setText(6, is);
+ item->setText(6, QString::number(mallocCalls));
+ item->setText(7, QString::number(newCalls));
  return item;
 }
 
 void BoMemoryDialog::setSize(QListViewItem* item, unsigned long int size_) const
 {
- QString size = QString::number(size_);
- QString sizeK = QString::number(((double)size_) / (1024.0));
- QString sizeM = QString::number(((double)size_) / (1024.0 * 1024));
+ QString size;
+ QString sizeK;
+ QString sizeM;
+ size.sprintf("%07d", (int)size_);
+ sizeK.sprintf("%07f", ((double)size_) / (1024.0));
+ sizeM.sprintf("%07f", ((double)size_) / (1024.0 * 1024.0));
 
  item->setText(3, size);
  item->setText(4, sizeK);
@@ -299,7 +311,7 @@ unsigned long int BoMemoryDialog::createFileList(QListViewItem* file, const QPtr
 	return 0;
  }
  QPtrList<MyMemNode> list = *list_;
- boDebug() << k_funcinfo << list.count() << endl;
+// boDebug() << k_funcinfo << list.count() << endl;
  list.sort();
  unsigned long int size = 0;
 
@@ -307,7 +319,7 @@ unsigned long int BoMemoryDialog::createFileList(QListViewItem* file, const QPtr
 	MyMemNode* node = list.first();
 	list.removeFirst();
 	const char* function = node->mFunction;
-	boDebug() << k_funcinfo << "left: " << list.count() << endl;
+//	boDebug() << k_funcinfo << "left: " << list.count() << endl;
 
 	QPtrList<MyMemNode> sameFunction;
 	QPtrList<MyMemNode> otherFunction;
@@ -328,7 +340,7 @@ unsigned long int BoMemoryDialog::createFileList(QListViewItem* file, const QPtr
 	QListViewItem* item = createFunctionItem(file, QString(function));
 	size += createFunctionList(item, &sameFunction);
  }
- boDebug() << k_funcinfo << "done" << endl;
+// boDebug() << k_funcinfo << "done" << endl;
  setSize(file, size);
  return size;
 }
@@ -339,6 +351,8 @@ unsigned long int BoMemoryDialog::createFunctionList(QListViewItem* function, co
 	return 0;
  }
  unsigned long int size = 0;
+ unsigned int mallocCalls = 0;
+ unsigned int newCalls = 0;
 
  QPtrListIterator<MyMemNode> it(*list);
  while (it.current()) {
@@ -349,8 +363,15 @@ unsigned long int BoMemoryDialog::createFunctionList(QListViewItem* function, co
 	createMemoryItem(function, node);
 #endif
 	size += node->mSize;
+	if (node->mIsMalloc) {
+		mallocCalls++;
+	} else {
+		newCalls++;
+	}
  }
  setSize(function, size);
+ function->setText(6, QString::number(mallocCalls));
+ function->setText(7, QString::number(newCalls));
  return size;
 }
 
