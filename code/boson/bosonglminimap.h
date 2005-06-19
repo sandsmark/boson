@@ -124,6 +124,13 @@ signals:
 	void signalMoveSelection(int cellX, int cellY);
 
 protected:
+	/**
+	 * @return TRUE if a map has been set and should be displayed. Otherwise
+	 * FALSE (minimap is disabled). All function calls that update
+	 * units/cells should be ignored.
+	 **/
+	bool hasMap() const;
+
 	void setPoint(int x, int y, const QColor& color);
 	void makeCellList(QPtrVector<Cell>* cells, const Unit* unit, bofixed x, bofixed y);
 	/**

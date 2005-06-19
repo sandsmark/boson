@@ -139,6 +139,9 @@ void BosonGLMiniMap::slotShowMiniMap(bool s)
 
 void BosonGLMiniMap::slotMoveRect(const QPoint& topLeft, const QPoint& topRight, const QPoint& bottomLeft, const QPoint& bottomRight)
 {
+ if (!hasMap()) {
+	return;
+ }
  d->mSelectionRect.setPoint(0, topLeft);
  d->mSelectionRect.setPoint(1, topRight);
 
@@ -154,6 +157,9 @@ void BosonGLMiniMap::slotMoveRect(const QPoint& topLeft, const QPoint& topRight,
 
 void BosonGLMiniMap::slotUnitMoved(Unit* unit, bofixed oldX, bofixed oldY)
 {
+ if (!hasMap()) {
+	return;
+ }
  BO_CHECK_NULL_RET(unit);
  QPtrVector<Cell> newCells;
  QPtrVector<Cell> oldCells;
@@ -164,6 +170,9 @@ void BosonGLMiniMap::slotUnitMoved(Unit* unit, bofixed oldX, bofixed oldY)
 
 void BosonGLMiniMap::slotUnitDestroyed(Unit* unit)
 {
+ if (!hasMap()) {
+	return;
+ }
  BO_CHECK_NULL_RET(unit)
  QPtrVector<Cell> cells;
  makeCellList(&cells, unit, unit->x(), unit->y());
@@ -172,6 +181,9 @@ void BosonGLMiniMap::slotUnitDestroyed(Unit* unit)
 
 void BosonGLMiniMap::makeCellList(QPtrVector<Cell>* cells, const Unit* unit, bofixed x, bofixed y)
 {
+ if (!hasMap()) {
+	return;
+ }
  BO_CHECK_NULL_RET(map());
  BO_CHECK_NULL_RET(unit);
  bofixed right = QMIN(x + unit->width(), bofixed(map()->width()));
@@ -182,6 +194,9 @@ void BosonGLMiniMap::makeCellList(QPtrVector<Cell>* cells, const Unit* unit, bof
 
 void BosonGLMiniMap::moveUnit(Unit* unit, const QPtrVector<Cell>* newCells, const QPtrVector<Cell>* oldCells)
 {
+ if (!hasMap()) {
+	return;
+ }
  // all parameters use cell coordinates!
  // note that using unit->x() and unit->y() as well as unit->cells() and such
  // stuff can be undefined at this point! especially when adding units
@@ -256,6 +271,9 @@ void BosonGLMiniMap::slotUpdateCell(int x, int y)
 
 void BosonGLMiniMap::updateCell(int x, int y)
 {
+ if (!hasMap()) {
+	return;
+ }
  BO_CHECK_NULL_RET(map());
  BO_CHECK_NULL_RET(groundTheme());
  if (!map()->isValidCell(x, y)) {
@@ -284,6 +302,9 @@ void BosonGLMiniMap::updateCell(int x, int y)
 
 void BosonGLMiniMap::initFogOfWar(PlayerIO* p)
 {
+ if (!hasMap()) {
+	return;
+ }
  BO_CHECK_NULL_RET(map());
  boDebug() << k_funcinfo << endl;
 
@@ -332,6 +353,9 @@ BosonGroundTheme* BosonGLMiniMap::groundTheme() const
 
 void BosonGLMiniMap::calculateGround(int x, int y)
 {
+ if (!hasMap()) {
+	return;
+ }
  BO_CHECK_NULL_RET(groundTheme());
  BO_CHECK_NULL_RET(map());
  BO_CHECK_NULL_RET(map()->texMap());
@@ -396,6 +420,9 @@ void BosonGLMiniMap::calculateGround(int x, int y)
 
 void BosonGLMiniMap::setPoint(int x, int y, const QColor& color)
 {
+ if (!hasMap()) {
+	return;
+ }
  BO_CHECK_NULL_RET(mRenderer);
  mRenderer->setPoint(x, y, color);
 }
@@ -506,6 +533,9 @@ void BosonGLMiniMap::createMap(BosonMap* map, const BoGLMatrices* gameGLMatrices
 
 void BosonGLMiniMap::renderMiniMap()
 {
+ if (!hasMap()) {
+	return;
+ }
  BO_CHECK_NULL_RET(mRenderer);
 
  // AB: we set all settings in the renderer in every frame. this is a small
@@ -544,6 +574,9 @@ unsigned int BosonGLMiniMap::miniMapHeight() const
 
 void BosonGLMiniMap::slotUnfog(int x, int y)
 {
+ if (!hasMap()) {
+	return;
+ }
  if (!localPlayerIO()) {
 	// don't use fog of war at all (editor mode)
 	return;
@@ -575,6 +608,9 @@ void BosonGLMiniMap::slotUnfog(int x, int y)
 
 void BosonGLMiniMap::slotFog(int x, int y)
 {
+ if (!hasMap()) {
+	return;
+ }
  if (!localPlayerIO()) {
 	// don't use fog of war at all (editor mode)
 	return;
@@ -591,6 +627,9 @@ void BosonGLMiniMap::slotFog(int x, int y)
 
 bool BosonGLMiniMap::mouseEvent(KGameIO*, QDataStream&, QMouseEvent* e, bool* send)
 {
+ if (!hasMap()) {
+	return false;
+ }
  *send = false;
  static int state = Qt::NoButton;
  if (!mRenderer) {
@@ -667,6 +706,11 @@ void BosonGLMiniMap::emitSignalReCenterView(const QPoint& cell)
 void BosonGLMiniMap::emitSignalMoveSelection(const QPoint& cell)
 {
  emit signalMoveSelection(cell.x(), cell.y());
+}
+
+bool BosonGLMiniMap::hasMap() const
+{
+ return (mMap && mRenderer);
 }
 
 
