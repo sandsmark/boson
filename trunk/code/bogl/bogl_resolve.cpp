@@ -17,6 +17,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#define QT_CLEAN_NAMESPACE
+
 #include <qdir.h> // must be first, due to a header conflict otherwise
 
 #include "bogl.h"
