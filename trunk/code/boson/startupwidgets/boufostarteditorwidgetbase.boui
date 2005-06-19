@@ -94,14 +94,14 @@
       </Properties>
      </Widget>
      <Widget>
-      <ClassName>BoUfoLineEdit</ClassName>
+      <ClassName>BoUfoHBox</ClassName>
       <Properties>
-       <name>mMapName</name>
+       <name>mWidget38</name>
        <constraints/>
        <gridLayoutColumns/>
        <gridLayoutRows/>
        <opaque/>
-       <layout/>
+       <layout>UHBoxLayout</layout>
        <minimumWidth/>
        <minimumHeight/>
        <preferredWidth/>
@@ -110,9 +110,47 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch/>
-       <text>Map Name</text>
-       <editable/>
       </Properties>
+      <Widget>
+       <ClassName>BoUfoWidget</ClassName>
+       <Properties>
+        <name>mWidget39</name>
+        <constraints/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <opaque/>
+        <layout/>
+        <minimumWidth>15</minimumWidth>
+        <minimumHeight/>
+        <preferredWidth>15</preferredWidth>
+        <preferredHeight/>
+        <backgroundImageFile/>
+        <verticalAlignment/>
+        <horizontalAlignment/>
+        <stretch/>
+       </Properties>
+      </Widget>
+      <Widget>
+       <ClassName>BoUfoLineEdit</ClassName>
+       <Properties>
+        <name>mMapName</name>
+        <constraints/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <opaque/>
+        <layout/>
+        <minimumWidth/>
+        <minimumHeight/>
+        <preferredWidth/>
+        <preferredHeight/>
+        <backgroundImageFile/>
+        <verticalAlignment/>
+        <horizontalAlignment/>
+        <stretch>1</stretch>
+        <text>Map Name</text>
+        <editable/>
+       </Properties>
+      </Widget>
      </Widget>
      <Widget>
       <ClassName>BoUfoRadioButton</ClassName>
@@ -136,14 +174,14 @@
       </Properties>
      </Widget>
      <Widget>
-      <ClassName>BoUfoListBox</ClassName>
+      <ClassName>BoUfoHBox</ClassName>
       <Properties>
-       <name>mSelectMap</name>
+       <name>mWidget40</name>
        <constraints/>
        <gridLayoutColumns/>
        <gridLayoutRows/>
        <opaque/>
-       <layout/>
+       <layout>UHBoxLayout</layout>
        <minimumWidth/>
        <minimumHeight/>
        <preferredWidth/>
@@ -152,8 +190,46 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch>1</stretch>
-       <selection>SingleSelection</selection>
       </Properties>
+      <Widget>
+       <ClassName>BoUfoWidget</ClassName>
+       <Properties>
+        <name>mWidget41</name>
+        <constraints/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <opaque/>
+        <layout/>
+        <minimumWidth>15</minimumWidth>
+        <minimumHeight/>
+        <preferredWidth>15</preferredWidth>
+        <preferredHeight/>
+        <backgroundImageFile/>
+        <verticalAlignment/>
+        <horizontalAlignment/>
+        <stretch/>
+       </Properties>
+      </Widget>
+      <Widget>
+       <ClassName>BoUfoListBox</ClassName>
+       <Properties>
+        <name>mSelectMap</name>
+        <constraints/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <opaque/>
+        <layout/>
+        <minimumWidth/>
+        <minimumHeight/>
+        <preferredWidth/>
+        <preferredHeight/>
+        <backgroundImageFile/>
+        <verticalAlignment/>
+        <horizontalAlignment/>
+        <stretch>1</stretch>
+        <selection>SingleSelection</selection>
+       </Properties>
+      </Widget>
      </Widget>
     </Widget>
    </Widget>
@@ -331,14 +407,14 @@
       </Widget>
      </Widget>
      <Widget>
-      <ClassName>BoUfoVBox</ClassName>
+      <ClassName>BoUfoHBox</ClassName>
       <Properties>
-       <name>mWidget24</name>
+       <name>mWidget34</name>
        <constraints/>
        <gridLayoutColumns/>
        <gridLayoutRows/>
        <opaque/>
-       <layout>UVBoxLayout</layout>
+       <layout>UHBoxLayout</layout>
        <minimumWidth/>
        <minimumHeight/>
        <preferredWidth/>
@@ -349,9 +425,9 @@
        <stretch/>
       </Properties>
       <Widget>
-       <ClassName>BoUfoNumInput</ClassName>
+       <ClassName>BoUfoLabel</ClassName>
        <Properties>
-        <name>mMapWidth</name>
+        <name>mWidget35</name>
         <constraints/>
         <gridLayoutColumns/>
         <gridLayoutRows/>
@@ -365,17 +441,14 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
-        <label>Map Width:</label>
-        <minimumValue>50</minimumValue>
-        <maximumValue>500</maximumValue>
-        <stepSize/>
-        <value>50</value>
+        <text>Map size:</text>
+        <iconFile/>
        </Properties>
       </Widget>
       <Widget>
-       <ClassName>BoUfoNumInput</ClassName>
+       <ClassName>BoUfoComboBox</ClassName>
        <Properties>
-        <name>mMapHeight</name>
+        <name>mMapSize</name>
         <constraints/>
         <gridLayoutColumns/>
         <gridLayoutRows/>
@@ -389,22 +462,55 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
-        <label>Map Height:</label>
-        <minimumValue>50</minimumValue>
-        <maximumValue>500</maximumValue>
-        <stepSize/>
-        <value>50</value>
+       </Properties>
+      </Widget>
+     </Widget>
+     <Widget>
+      <ClassName>BoUfoHBox</ClassName>
+      <Properties>
+       <name>mWidget37</name>
+       <constraints/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <opaque/>
+       <layout>UHBoxLayout</layout>
+       <minimumWidth/>
+       <minimumHeight/>
+       <preferredWidth/>
+       <preferredHeight/>
+       <backgroundImageFile/>
+       <verticalAlignment/>
+       <horizontalAlignment/>
+       <stretch/>
+      </Properties>
+      <Widget>
+       <ClassName>BoUfoWidget</ClassName>
+       <Properties>
+        <name>mWidget36</name>
+        <constraints/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <opaque/>
+        <layout/>
+        <minimumWidth>15</minimumWidth>
+        <minimumHeight/>
+        <preferredWidth>15</preferredWidth>
+        <preferredHeight/>
+        <backgroundImageFile/>
+        <verticalAlignment/>
+        <horizontalAlignment/>
+        <stretch/>
        </Properties>
       </Widget>
       <Widget>
-       <ClassName>BoUfoNumInput</ClassName>
+       <ClassName>BoUfoVBox</ClassName>
        <Properties>
-        <name>mMaxPlayers</name>
+        <name>mWidget24</name>
         <constraints/>
         <gridLayoutColumns/>
         <gridLayoutRows/>
         <opaque/>
-        <layout/>
+        <layout>UVBoxLayout</layout>
         <minimumWidth/>
         <minimumHeight/>
         <preferredWidth/>
@@ -412,14 +518,81 @@
         <backgroundImageFile/>
         <verticalAlignment/>
         <horizontalAlignment/>
-        <stretch/>
-        <label>Maximal Players:</label>
-        <minimumValue>1</minimumValue>
-        <maximumValue>10</maximumValue>
-        <stepSize/>
-        <value>1</value>
+        <stretch>1</stretch>
        </Properties>
+       <Widget>
+        <ClassName>BoUfoNumInput</ClassName>
+        <Properties>
+         <name>mMapWidth</name>
+         <constraints/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <opaque/>
+         <layout/>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <stretch/>
+         <label>Map Width:</label>
+         <minimumValue>50</minimumValue>
+         <maximumValue>500</maximumValue>
+         <stepSize/>
+         <value>256</value>
+        </Properties>
+       </Widget>
+       <Widget>
+        <ClassName>BoUfoNumInput</ClassName>
+        <Properties>
+         <name>mMapHeight</name>
+         <constraints/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <opaque/>
+         <layout/>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <stretch/>
+         <label>Map Height:</label>
+         <minimumValue>50</minimumValue>
+         <maximumValue>500</maximumValue>
+         <stepSize/>
+         <value>256</value>
+        </Properties>
+       </Widget>
       </Widget>
+     </Widget>
+     <Widget>
+      <ClassName>BoUfoNumInput</ClassName>
+      <Properties>
+       <name>mMaxPlayers</name>
+       <constraints/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <opaque/>
+       <layout/>
+       <minimumWidth/>
+       <minimumHeight/>
+       <preferredWidth/>
+       <preferredHeight/>
+       <backgroundImageFile/>
+       <verticalAlignment/>
+       <horizontalAlignment/>
+       <stretch/>
+       <label>Maximal Players:</label>
+       <minimumValue>1</minimumValue>
+       <maximumValue>10</maximumValue>
+       <stepSize/>
+       <value>2</value>
+      </Properties>
      </Widget>
      <Widget>
       <ClassName>BoUfoVBox</ClassName>
@@ -643,6 +816,11 @@
   </Widget>
  </Widgets>
  <Methods>
+  <Method return="void" visibility="protected" type="slot" name="slotMapSizeChanged(int)" >
+   <Connections>
+    <Connection sender="mMapSize" signal="signalActivated(int)" type="receiver" />
+   </Connections>
+  </Method>
   <Method return="void" visibility="protected" type="slot" name="slotCancel()" >
    <Connections>
     <Connection sender="mCancelButton" signal="signalClicked()" type="receiver" />

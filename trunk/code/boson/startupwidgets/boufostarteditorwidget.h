@@ -62,6 +62,7 @@ protected slots: // implementations for the .ui slots
 	virtual void slotWidthChanged(int);
 	virtual void slotHeightChanged(float);
 	virtual void slotHeightChanged(int);
+	virtual void slotMapSizeChanged(int);
 	virtual void slotNewMapToggled(bool);
 	virtual void slotCreateNewToggled(bool checked);
 	virtual void slotEditExistingToggled(bool checked);
@@ -77,6 +78,7 @@ protected:
 private:
 	void initPlayFields();
 	void initGroundThemes();
+	void initMapSizes();
 
 private:
 	void initKGame();
