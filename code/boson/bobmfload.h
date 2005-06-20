@@ -50,6 +50,18 @@ class BoBMFLoad
     QString file() const;
 
 
+    /**
+     * @return Filename of the cached model for given model- and configfile
+     *  pair, or null QString if such model cannot be found
+     **/
+    static QString cachedModelFilename(const QString& modelfile, const QString& configfile);
+    /**
+     * Converts given model to bmf format, using given config file.
+     * @return Filename of the bmf model or null QString if the conversion failed
+     **/
+    static QString convertModel(const QString& modelfile, const QString& configfile);
+
+
   protected:
     bool loadInfo(QDataStream& stream);
     bool loadTextures(QDataStream& stream);
@@ -58,6 +70,7 @@ class BoBMFLoad
     bool loadLOD(QDataStream& stream, int lod);
     bool loadMeshes(QDataStream& stream, int lod);
     bool loadFrames(QDataStream& stream, int lod);
+    bool loadArrays(QDataStream& stream);
 
 
     /**
@@ -66,6 +79,16 @@ class BoBMFLoad
     **/
     const QString& baseDirectory() const;
 
+    static QCString calculateHash(const QString& modelfile, const QString& configfile);
+    static Q_UINT32 getVersion(const QString& modelfile);
+
+    /**
+     * Converts array from little-endian to big-endian.
+     * @param elements Number of elements (e.g. floats) in the array
+     * @param elementsize Size of a single element in bytes
+     **/
+    static void convertToBigEndian(char* array, unsigned int elements, unsigned int elementsize);
+
   private:
     void init();
 
@@ -73,8 +96,6 @@ class BoBMFLoad
     QString mFile;
     BosonModel* mModel;
     QValueVector<QString> mTextureNames;
-    float* mPointArray;
-    unsigned int mPointArrayOffset;
 };
 
 

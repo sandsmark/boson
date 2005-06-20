@@ -119,9 +119,22 @@ unsigned int BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh
  unsigned int renderedPoints = 0;
  glBegin(mesh->renderMode());
 
- for(unsigned int i = 0; i < mesh->pointCount(); i++) {
-	glArrayElement(mesh->pointOffset() + i);
-	renderedPoints++;
+ if (mesh->useIndices()) {
+	for (unsigned int i = 0; i < mesh->indexCount(); i++) {
+		unsigned int index;
+		if (model()->indexArrayType() == GL_UNSIGNED_SHORT) {
+			index = ((Q_UINT16*)mesh->indices())[i];
+		} else {
+			index = ((Q_UINT32*)mesh->indices())[i];
+		}
+		glArrayElement(index);
+		renderedPoints++;
+	}
+ } else {
+	for(unsigned int i = 0; i < mesh->pointCount(); i++) {
+		glArrayElement(mesh->pointOffset() + i);
+		renderedPoints++;
+	}
  }
 
  glEnd();

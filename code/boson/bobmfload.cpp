@@ -30,6 +30,14 @@
 #include <qdatastream.h>
 #include <qapplication.h>
 
+#include <kmdcodec.h>
+#include <kglobal.h>
+#include <kstandarddirs.h>
+#include <kprocess.h>
+
+
+#define MIN_SUPPORTED_VERSION BMF_MAKE_VERSION_CODE(0, 1, 0)
+
 
 BoBMFLoad::BoBMFLoad(const QString& file, BosonModel* model)
 {
@@ -85,12 +93,12 @@ bool BoBMFLoad::loadModel()
 
   Q_UINT32 versioncode;
   stream >> versioncode;
-  if(versioncode < BMF_MAKE_VERSION_CODE(0, 0, 2))
+  if(versioncode < MIN_SUPPORTED_VERSION)
   {
     boError(100) << k_funcinfo << "Unsupported BMF version 0x" <<
         QString::number(versioncode, 16) << endl;
     boError(100) << k_funcinfo << "Last supported version is 0x" <<
-        QString::number(BMF_MAKE_VERSION_CODE(0, 0, 2), 16) << endl;
+        QString::number(MIN_SUPPORTED_VERSION, 16) << endl;
     boError(100) << k_funcinfo << "Current version is 0x" <<
         QString::number(BMF_VERSION_CODE, 16) << endl;
     return false;
@@ -108,6 +116,11 @@ bool BoBMFLoad::loadModel()
   // Load the model
   // Info section
   if(!loadInfo(stream))
+  {
+    return false;
+  }
+  // Arrays
+  if(!loadArrays(stream))
   {
     return false;
   }
@@ -171,20 +184,7 @@ bool BoBMFLoad::loadInfo(QDataStream& stream)
   stream >> str;
   delete[] str;
 
-  // It also has number of points in the model and radius of the model
-  stream >> magic;
-  if(magic != BMF_MAGIC_MODEL_POINTS)
-  {
-    boError(100) << k_funcinfo << "Loading failed (no point count found in info section)!" << endl;
-    return false;
-  }
-  Q_UINT32 points;
-  stream >> points;
-  mModel->allocatePointArray(points);
-  // Get pointer to the point array in the model and reset offset counter
-  mPointArray = mModel->pointArray();
-  mPointArrayOffset = 0;
-
+  // It also has the radius of the model
   stream >> magic;
   if(magic != BMF_MAGIC_MODEL_RADIUS)
   {
@@ -195,7 +195,16 @@ bool BoBMFLoad::loadInfo(QDataStream& stream)
   stream >> radius;
   mModel->setBoundingSphereRadius(radius);
 
-  boDebug(100) << "    " << k_funcinfo << "Model: points: " << points << "; radius: " << radius << endl;
+  // ... and the bounding box of the model
+  stream >> magic;
+  if(magic != BMF_MAGIC_MODEL_BBOX)
+  {
+    boError(100) << k_funcinfo << "Loading failed (no bbox found in info section)!" << endl;
+    return false;
+  }
+  BoVector3Float min, max;
+  stream >> min >> max;
+  mModel->setBoundingBox(min, max);
 
   // Check end magic
   stream >> magic;
@@ -203,6 +212,57 @@ bool BoBMFLoad::loadInfo(QDataStream& stream)
   {
     boError(100) << k_funcinfo << "Loading failed (info section end magic not found)!" << endl;
     return false;
+  }
+
+  return true;
+}
+
+bool BoBMFLoad::loadArrays(QDataStream& stream)
+{
+  Q_UINT32 magic;
+  // Load vertex and index arrays
+  stream >> magic;
+  if(magic != BMF_MAGIC_ARRAYS)
+  {
+    boError(100) << k_funcinfo << "Loading failed (no arrays section found)!" << endl;
+    return false;
+  }
+
+  Q_UINT32 points, indices, indextype;
+  stream >> points;
+  stream >> indices;
+  stream >> indextype;
+
+  // Load points (vertices)
+  mModel->allocatePointArray(points);
+  stream.readRawBytes((char*)mModel->pointArray(), points * 8 * sizeof(float));
+  // Load indices
+  mModel->allocateIndexArray(indices, indextype);
+  if(indextype == BMF_DATATYPE_UNSIGNED_SHORT)
+  {
+    stream.readRawBytes((char*)mModel->indexArray(), indices * sizeof(Q_UINT16));
+  }
+  else
+  {
+    stream.readRawBytes((char*)mModel->indexArray(), indices * sizeof(Q_UINT32));
+  }
+
+  // The data is little-endian, so if the system uses big-endian, it has to
+  //  be converted.
+  int wordsize;
+  bool bigendian;
+  qSysInfo(&wordsize, &bigendian);
+  if(bigendian)
+  {
+    convertToBigEndian((char*)mModel->pointArray(), points * 8, sizeof(float));
+    if(indextype == BMF_DATATYPE_UNSIGNED_SHORT)
+    {
+      convertToBigEndian((char*)mModel->indexArray(), indices, sizeof(Q_UINT16));
+    }
+    else
+    {
+      convertToBigEndian((char*)mModel->indexArray(), indices, sizeof(Q_UINT32));
+    }
   }
 
   return true;
@@ -220,12 +280,14 @@ bool BoBMFLoad::loadTextures(QDataStream& stream)
 
   Q_UINT32 count;
   char* name;
+  Q_UINT8 hastransparency;
   stream >> count;
   mTextureNames.clear();
   mTextureNames.reserve(count);
   for(unsigned int i = 0; i < count; i++)
   {
     stream >> name;
+    stream >> hastransparency;  // TODO: use this!
     mTextureNames.append(name);
     delete[] name;
   }
@@ -325,6 +387,9 @@ bool BoBMFLoad::loadLOD(QDataStream& stream, int lod)
     boError(100) << k_funcinfo << "Loading failed (no LODs section)!" << endl;
     return false;
   }
+  float dist;
+  stream >> dist;
+  mModel->setLodDistance(lod, dist);
 
   if(!loadMeshes(stream, lod))
   {
@@ -357,43 +422,62 @@ bool BoBMFLoad::loadMeshes(QDataStream& stream, int lod)
   l->allocateMeshes(count);
   for(unsigned int i = 0; i < count; i++)
   {
+    BoMesh* mesh = l->mesh(i);
+
     stream >> magic;
-    if(magic != BMF_MAGIC_MESH_VERTICES)
+    if(magic != BMF_MAGIC_MESH_INFO)
     {
-      boError(100) << k_funcinfo << "Loading failed (no vertices section for mesh " <<
+      boError(100) << k_funcinfo << "Loading failed (no info section for mesh " <<
           i << " in lod " << lod << ")!" << endl;
       return false;
     }
-    Q_UINT32 vertexcount;
-    stream >> vertexcount;
+    char* name;
+    stream >> name;
+    mesh->setName(name);
+    delete[] name;
+    BoVector3Float min, max;
+    stream >> min >> max;
+    mesh->setBoundingBox(min, max);
 
-    BoMesh* mesh = l->mesh(i);
-    mesh->setPointOffset(mPointArrayOffset);
-    mesh->setPointCount(vertexcount);
-    mesh->setRenderMode(GL_TRIANGLES);
-
-    // Load the points
-    // Read the whole block of floats into memory at once - should be faster
-    //  this way.
-    float* array = mPointArray + (mPointArrayOffset * 8);
-    stream.readRawBytes((char*)array, vertexcount * 8 * sizeof(float));
-
-    int wordsize;
-    bool bigendian;
-    qSysInfo(&wordsize, &bigendian);
-    if(!bigendian)
+    stream >> magic;
+    if(magic != BMF_MAGIC_MESH_DATA)
     {
-      // Convert to little endian
-      char* p = (char*)array;
-      char x[4];
-      for(unsigned int i = 0; i < vertexcount * 8 * sizeof(float); i += 4)
-      {
-        x[0] = p[i+0]; x[1] = p[i+1]; x[2] = p[i+2]; x[3] = p[i+3];
-        p[i+0] = x[3]; p[i+1] = x[2]; p[i+2] = x[1]; p[i+3] = x[0];
-      }
+      boError(100) << k_funcinfo << "Loading failed (no data section for mesh " <<
+          i << " in lod " << lod << ")!" << endl;
+      return false;
     }
 
-    mPointArrayOffset += vertexcount;
+    Q_UINT8 useindices;
+    Q_UINT32 rendermode;
+    Q_UINT32 pointoffset;
+    Q_UINT32 pointcount;
+    stream >> useindices;
+    stream >> rendermode;
+    stream >> pointoffset;
+    stream >> pointcount;
+
+    mesh->setUseIndices(useindices);
+    mesh->setRenderMode(rendermode);
+    mesh->setPointOffset(pointoffset);
+    mesh->setPointCount(pointcount);
+
+    if(useindices)
+    {
+      Q_UINT32 indexoffset;
+      Q_UINT32 indexcount;
+      stream >> indexoffset;
+      stream >> indexcount;
+
+      mesh->setIndexCount(indexcount);
+      if(mModel->indexArrayType() == BMF_DATATYPE_UNSIGNED_SHORT)
+      {
+        mesh->setIndices(mModel->indexArray() + 2*indexoffset);
+      }
+      else
+      {
+        mesh->setIndices(mModel->indexArray() + 4*indexoffset);
+      }
+    }
 
     // Load misc info
     stream >> magic;
@@ -403,11 +487,6 @@ bool BoBMFLoad::loadMeshes(QDataStream& stream, int lod)
           i << " in lod " << lod << ")!" << endl;
       return false;
     }
-    char* name;
-    stream >> name;
-    // TODO: set name
-    mesh->setName(name);
-    delete[] name;
     Q_INT32 materialid;
     stream >> materialid;
     if(materialid >= 0)
@@ -466,5 +545,148 @@ bool BoBMFLoad::loadFrames(QDataStream& stream, int lod)
   }
 
   return true;
+}
+
+
+QString BoBMFLoad::cachedModelFilename(const QString& modelfile, const QString& configfile)
+{
+  QCString hash = calculateHash(modelfile, configfile);
+  QString cachedmodel = KGlobal::dirs()->findResource("data", QString("%1/model-%2.bmf").arg("boson/modelcache").arg(hash));
+
+  if(!cachedmodel.isEmpty())
+  {
+    Q_UINT32 versioncode = getVersion(cachedmodel);
+    if(versioncode >= MIN_SUPPORTED_VERSION)
+    {
+      // File exists and is up-to-date
+      return cachedmodel;
+    }
+    else
+    {
+      // Cached model is too old
+      // TODO: maybe delete the obsolete model?
+      return QString::null;
+    }
+  }
+  return QString::null;
+}
+
+QString BoBMFLoad::convertModel(const QString& modelfile, const QString& configfile)
+{
+  QCString hash = calculateHash(modelfile, configfile);
+
+  // Get the path where the cached model can be saved
+  QString cachedmodel = KGlobal::dirs()->saveLocation("data", "boson/modelcache/");
+  if(cachedmodel.isEmpty())
+  {
+    boError() << k_funcinfo << "Failed to get save location for cached model" << endl;
+    return QString::null;
+  }
+  cachedmodel += QString("model-%1.bmf").arg(hash);
+  // Find path to bobmfconverter binary
+  QString converter = KGlobal::dirs()->findResource("exe", "bobmfconverter");
+  if(converter.isEmpty())
+  {
+    converter = KGlobal::dirs()->findExe("bobmfconverter");
+    if(converter.isEmpty())
+    {
+      boError() << k_funcinfo << "Couldn't find bobmfconverter!" << endl;
+      return QString::null;
+    }
+  }
+  // Create KProcess object
+  KProcess proc;
+  proc << converter;
+  // Add default cmdline args
+  proc << "-lods" << "5" <<  "-keepframes" <<  "-texnametolower" <<  "-useboth" << "-dontloadtex";
+  proc << "-o" << cachedmodel;
+  if(!configfile.isEmpty())
+  {
+    proc << "-c" << configfile;
+  }
+  proc << modelfile;
+  proc << "-comment" << QString("Automatically converted from file '%1'").arg(modelfile);
+
+  // FIXME: KProcess:Block ain't pretty here...
+  if(!proc.start(KProcess::Block))
+  {
+    boError() << k_funcinfo << "Error while trying to convert the model" << endl;
+    return QString::null;
+  }
+
+  cachedmodel = KGlobal::dirs()->findResource("data", QString("%1/model-%2.bmf").arg("boson/modelcache").arg(hash));
+  if(cachedmodel.isEmpty())
+  {
+    boError() << k_funcinfo << "bobmfconverter did not write file " << cachedmodel << endl;
+    return QString::null;
+  }
+
+  return cachedmodel;
+}
+
+QCString BoBMFLoad::calculateHash(const QString& modelfilename, const QString& configfilename)
+{
+  QFile modelfile(modelfilename);
+  if(!modelfile.open(IO_ReadOnly))
+  {
+    boError() << k_funcinfo << "could not open model file " << modelfilename << endl;
+    return QCString();
+  }
+  QFile configfile(configfilename);
+  if(!configfile.open(IO_ReadOnly))
+  {
+    boError() << k_funcinfo << "could not open config file " << configfilename << endl;
+    return QCString();
+  }
+
+  KMD5 md5(modelfile.readAll());
+  md5.update(configfile.readAll());
+  return md5.hexDigest();
+}
+
+Q_UINT32 BoBMFLoad::getVersion(const QString& modelfile)
+{
+  QFile f(modelfile);
+  if(!f.open(IO_ReadOnly))
+  {
+    boError() << k_funcinfo << "can't open " << modelfile << endl;;
+    return 0;
+  }
+
+  QDataStream stream(&f);
+
+  char header[BMF_FILE_ID_LEN];
+  stream.readRawBytes(header, BMF_FILE_ID_LEN);
+  if(strncmp(header, BMF_FILE_ID, BMF_FILE_ID_LEN) != 0)
+  {
+    boError(100) << k_funcinfo << "This file doesn't seem to be in BMF format (invalid header)!" << endl;
+    return 0;
+  }
+
+  Q_UINT32 versioncode;
+  stream >> versioncode;
+
+  f.close();
+  return versioncode;
+}
+
+void BoBMFLoad::convertToBigEndian(char* array, unsigned int elements, unsigned int elementsize)
+{
+  char* x = new char[elementsize];
+  for(unsigned int i = 0; i < elements * elementsize; i += elementsize)
+  {
+    //x[0] = p[i+0]; x[1] = p[i+1]; x[2] = p[i+2]; x[3] = p[i+3];
+    //p[i+0] = x[3]; p[i+1] = x[2]; p[i+2] = x[1]; p[i+3] = x[0];
+    for(unsigned int j = 0; j < elementsize; j++)
+    {
+      x[j] = array[i+j];
+    }
+    for(unsigned int j = 0; j < elementsize; j++)
+    {
+      array[i+j] = x[elementsize-1-j];
+    }
+  }
+
+  delete x;
 }
 

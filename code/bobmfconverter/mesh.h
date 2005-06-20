@@ -149,6 +149,11 @@ class Mesh
     void calculateFaceNormals();
     void calculateVertexNormals();
 
+    void updateBoundingBox();
+
+    const BoVector3Float& minCoord() const  { return mMinCoord; }
+    const BoVector3Float& maxCoord() const  { return mMaxCoord; }
+
 
     Material* material() const  { return mMaterial; }
     void setMaterial(Material* mat)  { mMaterial = mat; }
@@ -165,30 +170,50 @@ class Mesh
     /**
      * Creates vertex and index arrays necessary for rendering.
      **/
-    void createArrays();
+    void createArrays(float* vertices, unsigned char* indices,
+        unsigned int* vertexoffset, unsigned int* indexoffset, unsigned int indextype);
 
-    float* vertexArray() const  { return mVertexArray; }
-    unsigned int vertexArrayElements() const  { return mVertexArrayElements; }
+    unsigned int vertexArrayOffset()  { return mVertexArrayOffset; }
+    unsigned int vertexArraySize() const  { return mVertexArraySize; }
+
+    unsigned int indexArrayOffset()  { return mIndexArrayOffset; }
+    unsigned int indexArraySize()  { return mIndexArraySize; }
+
+    bool useIndices() const  { return mUseIndices; }
+    void setUseIndices(bool use)  { mUseIndices = use; }
+
+    unsigned int renderMode() const  { return mRenderMode; }
+    void setRenderMode(unsigned int mode)  { mRenderMode = mode; }
 
 
   private:
+    // (Internal) id of the mesh
     int mId;
 
+    // Vertices and faces
     Vertex** mVertices;
     Face** mFaces;
-
     unsigned int mVertexCount;
     unsigned int mFaceCount;
+
+    // BBox
+    BoVector3Float mMinCoord;
+    BoVector3Float mMaxCoord;
 
     Material* mMaterial;
     bool mIsTeamColor;
     unsigned int mBaseNode;
+    unsigned int mRenderMode;
+    QString mName;
 
     // Interleaved vertex array for rendering
-    float* mVertexArray;
-    unsigned int mVertexArrayElements;
-
-    QString mName;
+    unsigned int mVertexArraySize;
+    unsigned int mVertexArrayOffset;
+    // Indices array
+    unsigned int mIndexArraySize;
+    unsigned int mIndexArrayOffset;
+    // Whether to use indices
+    bool mUseIndices;
 };
 
 

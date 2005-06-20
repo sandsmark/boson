@@ -59,6 +59,8 @@ class Texture
 
     QImage* image() const  { return mImage; }
 
+    bool hasTransparency()  { return mHasTransparency; }
+
 
     static void addTexturePath(const QString& path);
     static const QStringList& texturePaths();
@@ -81,6 +83,7 @@ class Texture
     QString mFilename;
 
     QImage* mImage;
+    bool mHasTransparency;
 
 
     static QStringList mTexturePaths;

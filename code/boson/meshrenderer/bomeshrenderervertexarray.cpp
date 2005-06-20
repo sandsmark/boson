@@ -127,8 +127,15 @@ unsigned int BoMeshRendererVertexArray::render(const QColor* teamColor, BoMesh* 
  }
  unsigned int renderedPoints = 0;
 
- glDrawArrays(mesh->renderMode(), mesh->pointOffset(), mesh->pointCount());
- renderedPoints = mesh->pointCount();
+ if (mesh->useIndices()) {
+	unsigned int minindex = mesh->pointOffset();
+	unsigned int maxindex = mesh->pointOffset() + mesh->pointCount() - 1;
+	glDrawRangeElements(mesh->renderMode(), minindex, maxindex, mesh->indexCount(), model()->indexArrayType(), mesh->indices());
+	renderedPoints = mesh->indexCount();
+ } else {
+	glDrawArrays(mesh->renderMode(), mesh->pointOffset(), mesh->pointCount());
+	renderedPoints = mesh->pointCount();
+ }
 
  if (resetColor) {
 	// we need to reset the color (mainly for the placement preview)

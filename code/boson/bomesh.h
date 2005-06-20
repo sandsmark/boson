@@ -97,8 +97,11 @@ public:
 	 **/
 	void renderVertexPoints();
 
+	bool useIndices() const { return mUseIndices; }
+	void setUseIndices(bool use) { mUseIndices = use; }
+
 	/**
-	 * @return The number of points in this mesh. See also @ref facesCount
+	 * @return The number of points in this mesh.
 	 **/
 	unsigned int pointCount() const { return mPointCount; }
 	void setPointCount(unsigned int c) { mPointCount = c; }
@@ -109,11 +112,25 @@ public:
 	void setPointOffset(unsigned int o) { mPointOffset = o; }
 
 	/**
+	 * @return The number of indices in this mesh.
+	 **/
+	unsigned int indexCount() const { return mIndexCount; }
+	void setIndexCount(unsigned int c) { mIndexCount = c; }
+
+	unsigned char* indices() const { return mIndices; }
+	void setIndices(unsigned char* i) { mIndices = i; }
+
+	/**
 	 * Rendering mode that should be used to render this mesh.
 	 * Usually it's GL_TRIANGLES
 	 **/
 	GLenum renderMode() const { return mRenderMode; }
 	void setRenderMode(GLenum m) { mRenderMode = m; }
+
+	const BoVector3Float& boundingBoxMin() const { return mMinCoord; }
+	const BoVector3Float& boundingBoxMax() const { return mMaxCoord; }
+	void setBoundingBox(const BoVector3Float& min, const BoVector3Float& max) { mMinCoord = min; mMaxCoord = max; }
+
 
 	inline BoMeshRendererMeshData* meshRendererMeshData() const
 	{
@@ -134,7 +151,13 @@ private:
 
 	unsigned int mPointCount;
 	unsigned int mPointOffset;
+	unsigned int mIndexCount;
+	unsigned char* mIndices;
+	bool mUseIndices;
 	GLenum mRenderMode;
+
+	BoVector3Float mMinCoord;
+	BoVector3Float mMaxCoord;
 
 	BoMeshRendererMeshData* mMeshRendererMeshData;
 };

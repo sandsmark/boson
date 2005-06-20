@@ -49,6 +49,9 @@ void BoMesh::init()
  mMaterial = 0;
  mPointCount = 0;
  mPointOffset = 0;
+ mIndexCount = 0;
+ mIndices = 0;
+ mUseIndices = true;
  mRenderMode = GL_TRIANGLES;
 
  mMeshRendererMeshData = 0;

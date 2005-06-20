@@ -37,8 +37,8 @@
 
 // Version of the BMF format
 #define BMF_VERSION_MAJOR              0
-#define BMF_VERSION_MINOR              0
-#define BMF_VERSION_RELEASE            2
+#define BMF_VERSION_MINOR              1
+#define BMF_VERSION_RELEASE            0
 
 #define BMF_MAKE_VERSION_CODE(a, b, c)  ( ((a) << 16) | ((b) << 8) | (c) )
 #define BMF_VERSION_CODE \
@@ -55,15 +55,28 @@
 #define BMF_MAGIC_MODEL_NAME           0x100032
 #define BMF_MAGIC_MODEL_COMMENT        0x100033
 #define BMF_MAGIC_MODEL_AUTHOR         0x100034
-#define BMF_MAGIC_MODEL_POINTS         0x100035
 #define BMF_MAGIC_MODEL_RADIUS         0x100036
-#define BMF_MAGIC_LODS                 0x100040
+#define BMF_MAGIC_MODEL_BBOX           0x100037
+#define BMF_MAGIC_ARRAYS               0x100050
+#define BMF_MAGIC_LODS                 0x100090
 #define BMF_MAGIC_LOD                  0x100100
 #define BMF_MAGIC_MESHES               0x100110
-#define BMF_MAGIC_MESH_VERTICES        0x100111
-#define BMF_MAGIC_MESH_MISC            0x100112
+#define BMF_MAGIC_MESH_INFO            0x100111
+#define BMF_MAGIC_MESH_DATA            0x100114
+#define BMF_MAGIC_MESH_MISC            0x100118
 #define BMF_MAGIC_FRAMES               0x100120
 #define BMF_MAGIC_END                  0x109999
+
+
+// Same as corresponding OpenGL constants
+#define BMF_RENDERMODE_TRIANGLES       0x0004
+#define BMF_RENDERMODE_TRIANGLE_STRIP  0x0005
+#define BMF_RENDERMODE_TRIANGLE_FAN    0x0006
+
+// 8-, 16- and 32-bit unsigned integers
+#define BMF_DATATYPE_UNSIGNED_BYTE     0x1401
+#define BMF_DATATYPE_UNSIGNED_SHORT    0x1403
+#define BMF_DATATYPE_UNSIGNED_INT      0x1405
 
 
 #endif //BMF_H

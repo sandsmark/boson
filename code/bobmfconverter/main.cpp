@@ -71,6 +71,7 @@ QString tex_path;
 bool tex_converttolowercase = false;
 bool tex_optimize = false;
 bool model_center = false;
+bool tex_dontload = false;
 
 
 double starttime;
@@ -202,6 +203,7 @@ bool processCommandLine(int argc, char** argv)
       usage += "  -t <dir>           Add directory <dir> to texture search path\n";
       usage += "  -texnametolower    Convert all texture names to lowercase\n";
       usage += "  -center            Centers the model\n";
+      usage += "  -dontloadtex       Will not try to load the used textures\n";
       //usage += "  \n";
       cout << usage;
       return false;
@@ -319,6 +321,10 @@ bool processCommandLine(int argc, char** argv)
     else if(larg == "-center")
     {
       model_center = true;
+    }
+    else if(larg == "-dontloadtex")
+    {
+      tex_dontload = true;
     }
     else
     {
@@ -578,6 +584,12 @@ void saveLodFrameAC(Model* m, unsigned int lodi, unsigned int framei)
 
 void doModelProcessing(Model* m)
 {
+  if(!tex_dontload)
+  {
+    // Load textures
+    m->loadTextures();
+  }
+
   if(tex_converttolowercase)
   {
     // Convert texture names to lowercase
@@ -596,7 +608,7 @@ void doModelProcessing(Model* m)
   UnusedDataRemover unuseddataremover(m, m->baseLOD());
   unuseddataremover.process();
 
-  if(!frames_keepall)
+  if(!frames_keepall || frames_removeall)
   {
     boDebug() << "Removing duplicate frames..." << endl;
     FrameOptimizer frameoptimizer(m, m->baseLOD());

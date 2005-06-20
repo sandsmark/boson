@@ -74,17 +74,6 @@ bool Saver::saveModel(QDataStream& stream, Model* model)
 {
   stream << (Q_UINT32)BMF_MAGIC_MODEL;
 
-  // Find number of points (vertices) in the whole model
-  unsigned int points = 0;
-  for(unsigned int i = 0; i < model->lodCount(); i++)
-  {
-    LOD* l = model->lod(i);
-    for(unsigned int j = 0; j < l->meshCount(); j++)
-    {
-      points += l->mesh(j)->faceCount()*3;
-    }
-  }
-
   // Info
   stream << (Q_UINT32)BMF_MAGIC_MODEL_INFO;
   stream << (Q_UINT32)BMF_MAGIC_MODEL_NAME;
@@ -93,11 +82,46 @@ bool Saver::saveModel(QDataStream& stream, Model* model)
   stream << model->comment().latin1();
   stream << (Q_UINT32)BMF_MAGIC_MODEL_AUTHOR;
   stream << model->author().latin1();
-  stream << (Q_UINT32)BMF_MAGIC_MODEL_POINTS;
-  stream << (Q_UINT32)points;
   stream << (Q_UINT32)BMF_MAGIC_MODEL_RADIUS;
   stream << model->radius();
+  stream << (Q_UINT32)BMF_MAGIC_MODEL_BBOX;
+  stream << model->minCoord();
+  stream << model->maxCoord();
   stream << (Q_UINT32)BMF_MAGIC_MODEL_INFO_END;
+
+  // Vertex and index arrays
+  stream << (Q_UINT32)BMF_MAGIC_ARRAYS;
+  stream << (Q_UINT32)model->vertexArraySize();
+  stream << (Q_UINT32)model->indexArraySize();
+  stream << (Q_UINT32)model->indexArrayType();
+  // Arrays will be little-endian-encoded
+  stream.setByteOrder(QDataStream::LittleEndian);
+  // Vertex array
+  for(unsigned int i = 0; i < model->vertexArraySize(); i++)
+  {
+    for(unsigned int j = 0; j < 8; j++)
+    {
+      stream << model->vertexArray()[i*8 + j];
+    }
+  }
+  // Index array
+  if(model->indexArrayType() == BMF_DATATYPE_UNSIGNED_SHORT)
+  {
+    Q_UINT16* indices = (Q_UINT16*)model->indexArray();
+    for(unsigned int i = 0; i < model->indexArraySize(); i++)
+    {
+      stream << indices[i];
+    }
+  }
+  else
+  {
+    Q_UINT32* indices = (Q_UINT32*)model->indexArray();
+    for(unsigned int i = 0; i < model->indexArraySize(); i++)
+    {
+      stream << indices[i];
+    }
+  }
+  stream.setByteOrder(QDataStream::BigEndian);
 
   // Textures
   stream << (Q_UINT32)BMF_MAGIC_TEXTURES;
@@ -141,6 +165,7 @@ bool Saver::saveModel(QDataStream& stream, Model* model)
 bool Saver::saveTexture(QDataStream& stream, Texture* tex)
 {
   stream << tex->filename().latin1();
+  stream << (Q_UINT8)tex->hasTransparency();
   return true;
 }
 
@@ -163,6 +188,7 @@ bool Saver::saveMaterial(QDataStream& stream, Material* mat)
 bool Saver::saveLOD(QDataStream& stream, LOD* lod)
 {
   stream << (Q_UINT32)BMF_MAGIC_LOD;
+  stream << lod->distance();
 
   // Meshes
   stream << (Q_UINT32)BMF_MAGIC_MESHES;
@@ -187,40 +213,27 @@ bool Saver::saveLOD(QDataStream& stream, LOD* lod)
 
 bool Saver::saveMesh(QDataStream& stream, Mesh* mesh)
 {
-  // Vertices
-  stream << (Q_UINT32)BMF_MAGIC_MESH_VERTICES;
-#if 0
-  int vertexcount = mesh->vertexArrayElements();
-  float* array = mesh->vertexArray();
-  stream << vertexcount;
-  for(int i = 0; i < vertexcount; i++)
+  // Info
+  stream << (Q_UINT32)BMF_MAGIC_MESH_INFO;
+  stream << mesh->name().latin1();
+  stream << mesh->minCoord();
+  stream << mesh->maxCoord();
+
+  // Format
+  stream << (Q_UINT32)BMF_MAGIC_MESH_DATA;
+  bool useindices = mesh->useIndices();
+  stream << (Q_UINT8)useindices;
+  stream << (Q_UINT32)mesh->renderMode();
+  stream << (Q_UINT32)mesh->vertexArrayOffset();
+  stream << (Q_UINT32)mesh->vertexArraySize();
+  if(useindices)
   {
-    // Save the vertex
-    // Every vertex consists of 8 floats
-    for(int j = 0; j < 8; j++)
-    {
-      stream << array[(i * 8) + j];
-    }
+    stream << (Q_UINT32)mesh->indexArrayOffset();
+    stream << (Q_UINT32)mesh->indexArraySize();
   }
-#else
-  unsigned int facecount = mesh->faceCount();
-  stream << (Q_UINT32)facecount*3;
-  for(unsigned int i = 0; i < facecount; i++)
-  {
-    Face* f = mesh->face(i);
-    for(unsigned int j = 0; j < 3; j++)
-    {
-      Vertex* v = f->vertex(j);
-      stream << v->pos;
-      stream << v->normal;
-      stream << v->tex;
-    }
-  }
-#endif
 
   // Misc info
   stream << (Q_UINT32)BMF_MAGIC_MESH_MISC;
-  stream << mesh->name().latin1();
   stream << (Q_INT32)(mesh->material() ? mesh->material()->id() : -1);
   stream << (Q_UINT8)(mesh->isTeamColor() ? 255 : 0);
 
