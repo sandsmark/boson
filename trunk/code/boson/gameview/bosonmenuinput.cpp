@@ -43,6 +43,7 @@
 #include "../player.h"
 #include "../botexmapimportdialog.h"
 #include "../bofiledialog.h"
+#include "../bomemory/bomemory.h"
 #ifdef BOSON_USE_BOMEMORY
 #include "../bomemory/bomemorydialog.h"
 #endif
@@ -1017,7 +1018,7 @@ void BosonMenuInput::slotDebugMemory()
 {
 #ifdef BOSON_USE_BOMEMORY
  boDebug() << k_funcinfo << endl;
- BoMemoryDialog* dialog = new BoMemoryDialog(this);
+ BoMemoryDialog* dialog = new BoMemoryDialog(0);
  connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
  boDebug() << k_funcinfo << "update data" << endl;
  dialog->slotUpdate();
