@@ -26,11 +26,19 @@
 #include "saver.h"
 #include "mesh.h"
 #include "frame.h"
+#include "debug.h"
+#include "bmf.h"
 
 
 Model::Model()
 {
   mRadius = 0.0f;
+
+  mVertexArray = 0;
+  mVertexArraySize = 0;
+  mIndexArray = 0;
+  mIndexArraySize = 0;
+  mIndexArrayType = 0;
 }
 
 bool Model::load(const QString& file)
@@ -89,20 +97,78 @@ void Model::addTexture(Texture* t)
   mTextures.insert(t->filename(), t);
 }
 
+bool Model::loadTextures()
+{
+  bool ret = true;
+  QDictIterator<Texture> it(mTextures);
+  while(it.current())
+  {
+    ret &= it.current()->load();
+    ++it;
+  }
+  return ret;
+}
+
 void Model::prepareForSaving(unsigned int baseframe)
 {
+  updateBoundingBox(baseframe);
   updateIds();
   updateRadius(baseframe);
+  createArrays();
+}
 
-  // Create arrays for meshes
-  /*for(unsigned int i = 0; i < lodCount(); i++)
+void Model::createArrays()
+{
+  // Count the number of indices and vertices we need to allocate
+  mVertexArraySize = 0;
+  mIndexArraySize = 0;
+  unsigned int maxIndex = 0;
+  for(unsigned int i = 0; i < lodCount(); i++)
   {
     LOD* l = lod(i);
     for(unsigned int j = 0; j < l->meshCount(); j++)
     {
-      l->mesh(j)->createArrays();
+      Mesh* m = l->mesh(j);
+      if(m->useIndices())
+      {
+        mVertexArraySize += m->vertexCount();
+        mIndexArraySize += m->faceCount() * 3;
+        maxIndex = mVertexArraySize - 1;
+      }
+      else
+      {
+        mVertexArraySize += m->faceCount() * 3;
+      }
     }
-  }*/
+  }
+
+  // Create the arrays
+  mVertexArray = new float[mVertexArraySize * (3+3+2)];
+  if(maxIndex <= 65535)
+  {
+    mIndexArrayType = BMF_DATATYPE_UNSIGNED_SHORT;
+    mIndexArray = (unsigned char*)new Q_UINT16[mIndexArraySize];
+  }
+  else
+  {
+    mIndexArrayType = BMF_DATATYPE_UNSIGNED_INT;
+    mIndexArray = (unsigned char*)new Q_UINT32[mIndexArraySize];
+  }
+
+  // Copy data into the arrays
+  unsigned int vertexoffset = 0;
+  unsigned int indexoffset = 0;
+  for(unsigned int i = 0; i < lodCount(); i++)
+  {
+    LOD* l = lod(i);
+    for(unsigned int j = 0; j < l->meshCount(); j++)
+    {
+      l->mesh(j)->createArrays(mVertexArray, mIndexArray, &vertexoffset, &indexoffset, mIndexArrayType);
+    }
+  }
+
+  boDebug() << k_funcinfo << vertexoffset << " of " << mVertexArraySize << " vertices copied" << endl;
+  boDebug() << k_funcinfo << indexoffset << " of " << mIndexArraySize << " indices copied" << endl;
 }
 
 void Model::updateIds()
@@ -127,7 +193,13 @@ void Model::updateIds()
     // Meshes
     for(unsigned int j = 0; j < l->meshCount(); j++)
     {
-      l->mesh(j)->setId(j);
+      Mesh* m = l->mesh(j);
+      m->setId(j);
+      // Vertices
+      for(unsigned int k = 0; k < m->vertexCount(); k++)
+      {
+        m->vertex(k)->id = k;
+      }
     }
     // Frames
     for(unsigned int j = 0; j < l->frameCount(); j++)
@@ -173,6 +245,40 @@ void Model::smoothAllFaces()
   }
 }
 
+void Model::updateBoundingBox(unsigned int baseframe)
+{
+  mMinCoord.set( 1000000000,  1000000000,  1000000000);
+  mMaxCoord.set(-1000000000, -1000000000, -1000000000);
+  // We only consider the base lod and base frame here.
+  Frame* f = baseLOD()->frame(baseframe);
+  for(unsigned int i = 0; i < f->nodeCount(); i++)
+  {
+    Mesh* mesh = f->mesh(i);
+    BoMatrix* matrix = f->matrix(i);
+    for(unsigned int j = 0; j < mesh->vertexCount(); j++)
+    {
+      BoVector3Float pos;
+      matrix->transform(&pos, &mesh->vertex(j)->pos);
+      mMinCoord.setX(QMIN(mMinCoord.x(), pos.x()));
+      mMinCoord.setY(QMIN(mMinCoord.y(), pos.y()));
+      mMinCoord.setZ(QMIN(mMinCoord.z(), pos.z()));
+      mMaxCoord.setX(QMAX(mMaxCoord.x(), pos.x()));
+      mMaxCoord.setY(QMAX(mMaxCoord.y(), pos.y()));
+      mMaxCoord.setZ(QMAX(mMaxCoord.z(), pos.z()));
+    }
+  }
+
+  // Update bounding boxes of meshes
+  for(unsigned int i = 0; i < lodCount(); i++)
+  {
+    LOD* l = lod(i);
+    for(unsigned int j = 0; j < l->meshCount(); j++)
+    {
+      l->mesh(j)->updateBoundingBox();
+    }
+  }
+}
+
 void Model::loadingCompleted()
 {
   for(unsigned int i = 0; i < lodCount(); i++)
@@ -193,6 +299,20 @@ void Model::createLODs(unsigned int num)
   {
     LOD* l = new LOD(baseLOD());
     mLODs.append(l);
+  }
+
+  setLodDistances();
+}
+
+void Model::setLodDistances(float multiplier)
+{
+  // Calculate initial distances for lods
+  float dist = 0.0f;
+  for(unsigned int i = 0; i < lodCount(); i++)
+  {
+    lod(i)->setDistance(dist * multiplier);
+    // dists will be 0, 10, 25, 45, 70, ...
+    dist = dist + (10 * (0.5 + i * 0.5));
   }
 }
 

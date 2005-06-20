@@ -33,13 +33,14 @@ Texture::Texture(const QString& filename)
   mTotalUsedFaceArea = -1;
   mUsedMinX = mUsedMinY = mUsedMaxX = mUsedMaxY = 0;
   mImage = 0;
+  mHasTransparency = false;
 }
 
 bool Texture::load()
 {
   if(mImage)
   {
-    boWarning() << k_funcinfo << "Texture '" << mFilename << "' already loaded?!" << endl;
+    // Texture is already loaded
     return true;
   }
 
@@ -72,6 +73,36 @@ bool Texture::load()
     mImage = 0;
     return false;
   }
+
+  // Check for transparency
+  mHasTransparency = false;
+  if(mImage->depth() != 32)
+  {
+    boWarning() << k_funcinfo << "Depth of '" << filepath << "' is " << mImage->depth() << endl;
+    mHasTransparency = mImage->hasAlphaBuffer();
+  }
+  else if(mImage->hasAlphaBuffer())
+  {
+    // The alpha buffer might be unused, we need to check for it
+    for(int y = 0; y < mImage->height(); y++)
+    {
+      uint* p = (uint*)mImage->scanLine(y);
+      for(int x = 0; x < mImage->width(); x++)
+      {
+        if(qAlpha(*p) != 255)
+        {
+          mHasTransparency = true;
+          break;
+        }
+      }
+      if(mHasTransparency)
+      {
+        break;
+      }
+    }
+  }
+
+  boDebug() << k_funcinfo << "'" << filepath << "' " << (mHasTransparency ? "has" : "doesn't have") << " transparency" << endl;
 
   return true;
 }

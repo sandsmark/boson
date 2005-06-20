@@ -114,11 +114,26 @@ unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* me
 
  glBegin(mesh->renderMode());
 
- for (unsigned int i = 0; i < mesh->pointCount(); i++) {
-	glVertex3fv(pointArray + (i * pointsize + 0));
-	glNormal3fv(pointArray + (i * pointsize + 3));
-	glTexCoord2fv(pointArray + (i * pointsize + 6));
-	renderedPoints++;
+ if (mesh->useIndices()) {
+	for (unsigned int i = 0; i < mesh->indexCount(); i++) {
+		unsigned int index;
+		if (model()->indexArrayType() == GL_UNSIGNED_SHORT) {
+			index = ((Q_UINT16*)mesh->indices())[i];
+		} else {
+			index = ((Q_UINT32*)mesh->indices())[i];
+		}
+		glVertex3fv(model()->pointArray() + (index * pointsize + 0));
+		glNormal3fv(model()->pointArray() + (index * pointsize + 3));
+		glTexCoord2fv(model()->pointArray() + (index * pointsize + 6));
+		renderedPoints++;
+	}
+ } else {
+	for (unsigned int i = 0; i < mesh->pointCount(); i++) {
+		glVertex3fv(pointArray + (i * pointsize + 0));
+		glNormal3fv(pointArray + (i * pointsize + 3));
+		glTexCoord2fv(pointArray + (i * pointsize + 6));
+		renderedPoints++;
+	}
  }
 
  glEnd();

@@ -34,10 +34,6 @@
 #include "bobmfload.h"
 
 #include <ksimpleconfig.h>
-#include <kmdcodec.h>
-#include <kglobal.h>
-#include <kstandarddirs.h>
-#include <kprocess.h>
 
 #include <qstringlist.h>
 #include <qvaluelist.h>
@@ -308,6 +304,9 @@ public:
 		mMaterialCount = 0;
 		mPointArraySize = 0;
 		mPoints = 0;
+		mIndexArraySize = 0;
+		mIndexArrayType = 0;
+		mIndices = 0;
 	}
 
 	BoLOD* mLODs;
@@ -323,9 +322,13 @@ public:
 	unsigned int mPointArraySize;
 	float* mPoints;
 
-	float mBoundingSphereRadius;
+	unsigned int mIndexArraySize;
+	unsigned int mIndexArrayType;
+	unsigned char* mIndices;
 
-	QCString mMD5;
+	float mBoundingSphereRadius;
+	BoVector3Float mMinCoord;
+	BoVector3Float mMaxCoord;
 
 	unsigned int id;
 	static unsigned int maxId;
@@ -432,27 +435,19 @@ bool BosonModel::loadModel(const QString& configfilename)
  BosonProfiler profiler("LoadModel");
 
  // Calculate MD5 hash of the original model file and it's config file
- QString fileName = d->mDirectory + d->mFile;
- QFile modelfile(fileName);
- if (!modelfile.open(IO_ReadOnly)) {
-	boError(100) << k_funcinfo << "could not open model file " << fileName << endl;
-	return false;
- }
- QFile configfile(configfilename);
- if (!configfile.open(IO_ReadOnly)) {
-	boError(100) << k_funcinfo << "could not open config file " << configfilename << endl;
-	return false;
- }
- KMD5 md5(modelfile.readAll());
- md5.update(configfile.readAll());
- d->mMD5 = md5.hexDigest();
+ QString filename = d->mDirectory + d->mFile;
 
  // Get filename of the cached model.
  // This converts the original model file if cached model file doesn't exist.
- QString cachedmodel = cachedModelFilename(d->mMD5, fileName, configfilename);
+ QString cachedmodel = BoBMFLoad::cachedModelFilename(filename, configfilename);
  if (cachedmodel.isNull()) {
-	// Conversion failed
-	return false;
+	// No cached model was found. Convert the original model
+	BosonProfiler profiler("ConvertModel");
+	cachedmodel = BoBMFLoad::convertModel(filename, configfilename);
+	if (cachedmodel.isNull()) {
+		// Conversion failed
+		return false;
+	}
  }
 
 
@@ -477,7 +472,9 @@ bool BosonModel::loadModel(const QString& configfilename)
 		BO_NULL_ERROR(mat);
 		continue;
 	}
-	modelTextures.append(mat->textureName());
+	if (!mat->textureName().isEmpty()) {
+		modelTextures.append(mat->textureName());
+	}
  }
 
  boProfiling->push("LoadModelTextures");
@@ -507,59 +504,8 @@ bool BosonModel::loadModel(const QString& configfilename)
  boDebug(100) << k_funcinfo << "adding model to meshrenderer" << endl;
  BoMeshRendererManager::manager()->addModel(this);
 
- boDebug(100) << k_funcinfo << "loaded from " << fileName << "(cached file: " << cachedmodel << ")" << endl;
+ boDebug(100) << k_funcinfo << "loaded from " << filename << "(cached file: " << cachedmodel << ")" << endl;
  return true;
-}
-
-QString BosonModel::cachedModelFilename(const QCString& md5, const QString& originalmodel, const QString& configfile)
-{
- QString cachedmodel = KGlobal::dirs()->findResource("data", QString("%1/model-%2.bmf").arg("boson/modelcache").arg(md5));
-
- if (cachedmodel.isEmpty()) {
-	// Cached model wasn't found
-	// Convert the model now.
-	// Get the path where the cached model can be saved
-	cachedmodel = KGlobal::dirs()->saveLocation("data", "boson/modelcache/");
-	if (cachedmodel.isNull()) {
-		boError(100) << k_funcinfo << "Failed to get save location for cached model" << endl;
-		return QString::null;
-	}
-	cachedmodel += QString("model-%1.bmf").arg(md5);
-	// Find path to bobmfconverter binary
-	QString converter = KGlobal::dirs()->findResource("exe", "bobmfconverter");
-	if (converter.isNull()) {
-		converter = KGlobal::dirs()->findExe("bobmfconverter");
-		if (converter.isNull()) {
-			boError(100) << k_funcinfo << "Couldn't find bobmfconverter!" << endl;
-			return QString::null;
-		}
-	}
-	// Create KProcess object
-	KProcess proc;
-	proc << converter;
-	// Add default cmdline args
-	proc << "-lods" << "5" <<  "-keepframes" <<  "-texnametolower" <<  "-useboth";
-	proc << "-o" << cachedmodel;
-	if (!configfile.isNull()) {
-		proc << "-c" << configfile;
-	}
-	proc << originalmodel;
-	proc << "-comment" << QString("Automatically converted from file '%1'").arg(originalmodel);
-
-	// FIXME: KProcess:Block ain't pretty here...
-	if (!proc.start(KProcess::Block)) {
-		boError(100) << k_funcinfo << "Error while trying to convert the model" << endl;
-		return QString::null;
-	}
-
-	cachedmodel = KGlobal::dirs()->findResource("data", QString("%1/model-%2.bmf").arg("boson/modelcache").arg(md5));
-	if (cachedmodel.isEmpty()) {
-		boError(100) << k_funcinfo << "bobmfconverter did not write file " << cachedmodel << endl;
-		return QString::null;
-	}
- }
-
- return cachedmodel;
 }
 
 void BosonModel::generateConstructionAnimation(unsigned int steps)
@@ -693,6 +639,45 @@ void BosonModel::allocatePointArray(unsigned int size)
 		(usedpoints * BoMesh::pointSize() * sizeof(float)) / 1024 << "kb" << endl;
 }
 
+unsigned char* BosonModel::indexArray() const
+{
+ return d->mIndices;
+}
+
+unsigned int BosonModel::indexArraySize() const
+{
+ return d->mIndexArraySize;
+}
+
+unsigned int BosonModel::indexArrayType() const
+{
+ return d->mIndexArrayType;
+}
+
+void BosonModel::allocateIndexArray(unsigned int size, unsigned int type)
+{
+ if (d->mIndices) {
+	boWarning(100) << k_funcinfo << "Index array already allocated!" << endl;
+	delete[] d->mIndices;
+ }
+ static int usedbytes = 0;
+
+ d->mIndexArraySize = size;
+ d->mIndexArrayType = type;
+ if(type == GL_UNSIGNED_SHORT)
+ {
+	d->mIndices = (unsigned char*)new Q_UINT16[size];
+	usedbytes += size * 2;
+ }
+ else
+ {
+	d->mIndices = (unsigned char*)new Q_UINT32[size];
+	usedbytes += size * 4;
+ }
+
+ boDebug(100) << k_funcinfo << "Indices are used now taking " << usedbytes / 1024 << "kb" << endl;
+}
+
 void BosonModel::prepareRendering()
 {
  BoMeshRendererManager* manager = BoMeshRendererManager::manager();
@@ -805,4 +790,19 @@ void BosonModel::setBoundingSphereRadius(float r)
  d->mBoundingSphereRadius = r;
 }
 
+const BoVector3Float& BosonModel::boundingBoxMin() const
+{
+ return d->mMinCoord;
+}
+
+const BoVector3Float& BosonModel::boundingBoxMax() const
+{
+ return d->mMaxCoord;
+}
+
+void BosonModel::setBoundingBox(const BoVector3Float& min, const BoVector3Float& max)
+{
+ d->mMinCoord = min;
+ d->mMaxCoord = max;
+}
 

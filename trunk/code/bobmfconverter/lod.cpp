@@ -28,6 +28,7 @@
 
 LOD::LOD()
 {
+  mDist = 0;
 }
 
 LOD::LOD(LOD* base)

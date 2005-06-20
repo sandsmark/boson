@@ -44,12 +44,16 @@ class LOD
     unsigned int frameCount() const  { return mFrames.count(); }
     void setFrames(const QValueVector<Frame*>& frames);
 
+    float distance() const  { return mDist; }
+    void setDistance(float dist)  { mDist = dist; }
+
     QString shortStats() const;
 
 
   private:
     QValueVector<Mesh*> mMeshes;
     QValueVector<Frame*> mFrames;
+    float mDist;
 };
 
 #endif //LOD_H

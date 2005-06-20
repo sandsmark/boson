@@ -177,16 +177,14 @@ public:
 
 #if 0
 	/**
-	 * @return The width of the model in the OpenGL coordinate system. This
-	 * is the value provided in the constructor - most units will use 1.0 or
-	 * 1.5 or 2.0 probably.
+	 * @return The width of the model in the OpenGL coordinate system. Most units
+	 * will use 1.0 or 1.5 or 2.0 probably.
 	 **/
 	float width() const { return mWidth; }
 
 	/**
-	 * @return The height of the model in the OpenGL coordinate system. This
-	 * is the value provided in the constructor - most units will use 1.0 or
-	 * 1.5 or 2.0 probably.
+	 * @return The height of the model in the OpenGL coordinate system. Most units
+	 * will use 1.0 or 1.5 or 2.0 probably.
 	 **/
 	float height() const { return mHeight; }
 #endif
@@ -290,8 +288,32 @@ public:
 
 	void allocatePointArray(unsigned int size);
 
+	/**
+	 * @return A pointer to the indices for this model.
+	 * Note that you'll need to cast the array into either QUINT16* or QUINT32*,
+	 *  depending on what @ref indexArrayType returns.
+	 **/
+	unsigned char* indexArray() const;
+
+	/**
+	 * @return The number of indices in @ref indexArray
+	 **/
+	unsigned int indexArraySize() const;
+
+	unsigned int indexArrayType() const;
+
+	/**
+	 * Allocates index array, consisting of size elements of type type.
+	 * Type can be either GL_UNSIGNED_SHORT or GL_UNSIGNED_INT.
+	 **/
+	void allocateIndexArray(unsigned int size, unsigned int type);
+
 	float boundingSphereRadius() const;
 	void setBoundingSphereRadius(float r);
+
+	const BoVector3Float& boundingBoxMin() const;
+	const BoVector3Float& boundingBoxMax() const;
+	void setBoundingBox(const BoVector3Float& min, const BoVector3Float& max);
 
 	/**
 	 * Called before the very first model in a set of models is rendered.

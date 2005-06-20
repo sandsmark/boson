@@ -21,6 +21,7 @@
 #include "mesh.h"
 
 #include "debug.h"
+#include "bmf.h"
 
 
 Mesh::Mesh()
@@ -33,8 +34,12 @@ Mesh::Mesh()
   mMaterial = 0;
   mIsTeamColor = false;
   mBaseNode = 0;
-  mVertexArray = 0;
-  mVertexArrayElements = 0;
+  mVertexArraySize = 0;
+  mVertexArrayOffset = 0;
+  mIndexArraySize = 0;
+  mIndexArrayOffset = 0;
+  mUseIndices = true;
+  mRenderMode = BMF_RENDERMODE_TRIANGLES;
 }
 
 Mesh::Mesh(Mesh* m)
@@ -75,9 +80,14 @@ Mesh::Mesh(Mesh* m)
 
   mIsTeamColor = m->isTeamColor();
   mBaseNode = m->baseNode();
-  mVertexArray = 0;
-  mVertexArrayElements = 0;
+  mVertexArraySize = 0;
+  mVertexArrayOffset = 0;
+  mIndexArraySize = 0;
+  mIndexArrayOffset = 0;
   mName = m->name();
+
+  mUseIndices = m->useIndices();
+  mRenderMode = m->renderMode();
 }
 
 Mesh::~Mesh()
@@ -92,8 +102,6 @@ Mesh::~Mesh()
     delete mFaces[i];
   }
   delete[] mFaces;
-
-  delete[] mVertexArray;
 }
 
 void Mesh::allocateVertices(int n)
@@ -138,53 +146,81 @@ void Mesh::replaceFaceList(Face** faces, int count)
   mFaceCount = count;
 }
 
-void Mesh::createArrays()
+void Mesh::createArrays(float* vertices, unsigned char* indices,
+    unsigned int* vertexoffset, unsigned int* indexoffset, unsigned int indextype)
 {
-  /*mVertexArrayElements = vertexCount();
+  mVertexArrayOffset = *vertexoffset;
+  mIndexArrayOffset = *indexoffset;
 
-  mVertexArray = new float[mVertexArrayElements * (3+3+2)];
+  float* varray = vertices + (mVertexArrayOffset * 8);
 
-  // Copy vertices to the array
-  for(int i = 0; i < mVertexArrayElements; i++)
+  if(useIndices())
   {
-    Vertex* v = vertex(i);
-    // Position
-    mVertexArray[(i * 8) + 0] = v->pos.x();
-    mVertexArray[(i * 8) + 0] = v->pos.y();
-    mVertexArray[(i * 8) + 0] = v->pos.z();
-    // Normal
-    mVertexArray[(i * 8) + 0] = v->normal.x();
-    mVertexArray[(i * 8) + 0] = v->normal.y();
-    mVertexArray[(i * 8) + 0] = v->normal.z();
-    // Texcoord
-    mVertexArray[(i * 8) + 0] = v->tex.x();
-    mVertexArray[(i * 8) + 0] = v->tex.y();
-  }*/
-
-  mVertexArrayElements = faceCount() * 3;
-
-  mVertexArray = new float[mVertexArrayElements * (3+3+2)];
-
-  // Copy vertices to the array
-  for(unsigned int i = 0; i < faceCount(); i++)
-  {
-    Face* f = face(i);
-    for(unsigned int j = 0; j < 3; j++)
+    // Copy vertices to the array
+    for(unsigned int i = 0; i < vertexCount(); i++)
     {
-      unsigned int pos = i*3 + j;
-      Vertex* v = f->vertex(j);
+      Vertex* v = vertex(i);
       // Position
-      mVertexArray[(pos * 8) + 0] = v->pos.x();
-      mVertexArray[(pos * 8) + 1] = v->pos.y();
-      mVertexArray[(pos * 8) + 2] = v->pos.z();
+      varray[(i * 8) + 0] = v->pos.x();
+      varray[(i * 8) + 1] = v->pos.y();
+      varray[(i * 8) + 2] = v->pos.z();
       // Normal
-      mVertexArray[(pos * 8) + 3] = v->normal.x();
-      mVertexArray[(pos * 8) + 4] = v->normal.y();
-      mVertexArray[(pos * 8) + 5] = v->normal.z();
+      varray[(i * 8) + 3] = v->normal.x();
+      varray[(i * 8) + 4] = v->normal.y();
+      varray[(i * 8) + 5] = v->normal.z();
       // Texcoord
-      mVertexArray[(pos * 8) + 6] = v->tex.x();
-      mVertexArray[(pos * 8) + 7] = v->tex.y();
+      varray[(i * 8) + 6] = v->tex.x();
+      varray[(i * 8) + 7] = v->tex.y();
     }
+    mVertexArraySize = vertexCount();
+    *vertexoffset += mVertexArraySize;
+
+    // Copy the indices
+    for(unsigned int i = 0; i < faceCount(); i++)
+    {
+      Face* f = face(i);
+      for(unsigned int j = 0; j < 3; j++)
+      {
+        unsigned int pos = i*3 + j;
+        Vertex* v = f->vertex(j);
+        if(indextype == BMF_DATATYPE_UNSIGNED_SHORT)
+        {
+          ((Q_UINT16*)indices)[mIndexArrayOffset + pos] = (Q_UINT16)(mVertexArrayOffset + v->id);
+        }
+        else
+        {
+          ((Q_UINT32*)indices)[mIndexArrayOffset + pos] = (Q_UINT32)(mVertexArrayOffset + v->id);
+        }
+      }
+    }
+    mIndexArraySize = faceCount()*3;
+    *indexoffset += mIndexArraySize;
+  }
+  else
+  {
+    // Copy vertices to the array
+    for(unsigned int i = 0; i < faceCount(); i++)
+    {
+      Face* f = face(i);
+      for(unsigned int j = 0; j < 3; j++)
+      {
+        unsigned int pos = i*3 + j;
+        Vertex* v = f->vertex(j);
+        // Position
+        varray[(pos * 8) + 0] = v->pos.x();
+        varray[(pos * 8) + 1] = v->pos.y();
+        varray[(pos * 8) + 2] = v->pos.z();
+        // Normal
+        varray[(pos * 8) + 3] = v->normal.x();
+        varray[(pos * 8) + 4] = v->normal.y();
+        varray[(pos * 8) + 5] = v->normal.z();
+        // Texcoord
+        varray[(pos * 8) + 6] = v->tex.x();
+        varray[(pos * 8) + 7] = v->tex.y();
+      }
+    }
+    mVertexArraySize = faceCount()*3;
+    *vertexoffset += mVertexArraySize;
   }
 }
 
@@ -269,6 +305,23 @@ void Mesh::smoothAllFaces()
   for(unsigned int i = 0; i < faceCount(); i++)
   {
     face(i)->smoothgroup = 1;
+  }
+}
+
+void Mesh::updateBoundingBox()
+{
+  mMinCoord = vertex(0)->pos;
+  mMaxCoord = vertex(0)->pos;
+  // Go through all vertices
+  for(unsigned int i = 0; i < vertexCount(); i++)
+  {
+    Vertex* v = vertex(i);
+    mMinCoord.setX(QMIN(mMinCoord.x(), v->pos.x()));
+    mMinCoord.setY(QMIN(mMinCoord.y(), v->pos.y()));
+    mMinCoord.setZ(QMIN(mMinCoord.z(), v->pos.z()));
+    mMaxCoord.setX(QMAX(mMaxCoord.x(), v->pos.x()));
+    mMaxCoord.setY(QMAX(mMaxCoord.y(), v->pos.y()));
+    mMaxCoord.setZ(QMAX(mMaxCoord.z(), v->pos.z()));
   }
 }
 

@@ -21,6 +21,8 @@
 #define MODEL_H
 
 
+#include "bo3dtools.h"
+
 #include <qstring.h>
 #include <qvaluevector.h>
 #include <qdict.h>
@@ -51,6 +53,7 @@ class Model
     void prepareForSaving(unsigned int baseframe);
 
     void updateIds();
+    void createArrays();
 
 
     void calculateFaceNormals();
@@ -67,6 +70,8 @@ class Model
 
     void createLODs(unsigned int num);
 
+    void setLodDistances(float multiplier = 1.0f);
+
     LOD* lod(unsigned int i) const  { return mLODs[i]; }
     LOD* baseLOD() const  { return lod(0); }
     unsigned int lodCount() const  { return mLODs.count(); }
@@ -76,6 +81,11 @@ class Model
     unsigned int materialCount() const  { return mMaterials.count(); }
     void setMaterials(const QValueVector<Material*>& materials);
 
+    void updateBoundingBox(unsigned int baseframe);
+
+    const BoVector3Float& minCoord() const  { return mMinCoord; }
+    const BoVector3Float& maxCoord() const  { return mMaxCoord; }
+
     /**
      * Returns texture with given filename from textures' dict.
      * If texture with such filename doesn't exist, it will be created.
@@ -84,6 +94,7 @@ class Model
     void addTexture(Texture* t);
     QDict<Texture>* texturesDict()  { return &mTextures; }
     void setTextures(const QDict<Texture>& textures);
+    bool loadTextures();
 
 
     const QString& name() const  { return mName; }
@@ -96,6 +107,27 @@ class Model
     float radius() const  { return mRadius; }
     void updateRadius(unsigned int baseframe);
 
+    /**
+     * @return Pointer to the vertex array
+     **/
+    float* vertexArray() const  { return mVertexArray; }
+    /**
+     * @return Number of vertices in the vertex array.
+     * Note that every vertex consists of 8 floats, so the size of the array in
+     * bytes is  vertexArraySize() * 8 * sizeof(float)
+     **/
+    unsigned int vertexArraySize() const  { return mVertexArraySize; }
+
+    /**
+     * @return Pointer to the index array
+     **/
+    unsigned char* indexArray() const  { return mIndexArray; }
+    /**
+     * @return Number of indices in the index array.
+     **/
+    unsigned int indexArraySize()  { return mIndexArraySize; }
+    unsigned int indexArrayType()  { return mIndexArrayType; }
+
 
   private:
     QValueVector<LOD*> mLODs;
@@ -106,7 +138,21 @@ class Model
     QString mComment;
     QString mAuthor;
 
+    // BBox
+    BoVector3Float mMinCoord;
+    BoVector3Float mMaxCoord;
+
     float mRadius;
+
+    // Interleaved vertex array for rendering
+    float* mVertexArray;
+    unsigned int mVertexArraySize;
+
+    // Indices array
+    unsigned char* mIndexArray;
+    unsigned int mIndexArraySize;
+    unsigned int mIndexArrayType;
+
 };
 
 #endif //MODEL_H
