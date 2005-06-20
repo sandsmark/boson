@@ -963,7 +963,6 @@ QString BoWaterManager::currentRenderStatisticsData() const
 
 void BoWaterManager::setDirty(bool d)
 {
-  BO_CHECK_NULL_RET(mData);
   if(mDirty == d)
   {
     return;
@@ -971,7 +970,7 @@ void BoWaterManager::setDirty(bool d)
 
   mDirty = d;
 
-  if(d == true)
+  if(mData && d == true)
   {
     // Set dirty flags of _all_ chunks to true.
     QPtrListIterator<BoLake> it(mData->lakes);
