@@ -20,6 +20,8 @@
 #include "bosongameview.h"
 #include "bosongameview.moc"
 
+#include <../bomemory/bomemory.h>
+
 #include "../no_player.h"
 #include "../defines.h"
 #include "../bosoncanvas.h"
