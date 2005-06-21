@@ -22,6 +22,7 @@
 #include "bosonglwidget.h"
 #include "bosonglwidget.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 
 #include <kapplication.h>

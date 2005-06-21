@@ -19,6 +19,8 @@
 
 #include "boitemlisthandler.h"
 #include "boitemlisthandler.moc"
+
+#include "../bomemory/bodummymemory.h"
 #include "boitemlist.h"
 #include "boglobal.h"
 #include "bodebug.h"

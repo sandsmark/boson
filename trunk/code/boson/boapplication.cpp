@@ -18,6 +18,8 @@
 */
 
 #include "boapplication.h"
+
+#include "../bomemory/bodummymemory.h"
 #include "boglobal.h"
 
 #include <config.h>

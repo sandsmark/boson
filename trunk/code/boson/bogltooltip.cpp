@@ -19,6 +19,7 @@
 #include "bogltooltip.h"
 #include "bogltooltip.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "botooltipcreator.h"
 #include "bodebug.h"
 #include "bosoncanvas.h"

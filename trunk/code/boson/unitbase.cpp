@@ -20,6 +20,7 @@
 
 #include "unitbase.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "unitproperties.h"
 #include "items/bosonitempropertyhandler.h"
 #include "player.h"

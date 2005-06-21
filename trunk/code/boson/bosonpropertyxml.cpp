@@ -20,6 +20,7 @@
 #include "bosonpropertyxml.h"
 #include "bosonpropertyxml.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "bomath.h"
 #include "bo3dtools.h"

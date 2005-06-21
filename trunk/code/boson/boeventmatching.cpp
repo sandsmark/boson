@@ -19,6 +19,7 @@
 
 #include "boeventmatching.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "boevent.h"
 

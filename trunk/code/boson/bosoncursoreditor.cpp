@@ -20,6 +20,7 @@
 #include "bosoncursoreditor.h"
 #include "bosoncursoreditor.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "global.h"
 #include "bosoncursor.h"
 #include "bodebug.h"

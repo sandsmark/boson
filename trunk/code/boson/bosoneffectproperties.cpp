@@ -20,18 +20,18 @@
 
 #include "bosoneffectproperties.h"
 
+#include "../bomemory/bodummymemory.h"
+#include "bosoneffectpropertiesparticle.h"
+#include "speciestheme.h"
+#include "bosonconfig.h"
+#include "bodebug.h"
+#include "speciesdata.h"
 
 #include <ksimpleconfig.h>
 #include <kglobal.h>
 #include <kstandarddirs.h>
 
 #include <qstring.h>
-
-#include "bosoneffectpropertiesparticle.h"
-#include "speciestheme.h"
-#include "bosonconfig.h"
-#include "bodebug.h"
-#include "speciesdata.h"
 
 
 /*****  BosonEffectPropertiesManager  *****/

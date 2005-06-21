@@ -20,6 +20,7 @@
 #include "boitemlist.h"
 #include "boitemlisthandler.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "rtti.h"
 #include "unit.h"

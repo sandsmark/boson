@@ -19,6 +19,7 @@
 #include "bosonpath.h"
 #include "bosonpath.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "cell.h"
 #include "unit.h"
 #include "bosoncanvas.h"

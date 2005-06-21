@@ -20,6 +20,7 @@
 #include "boselection.h"
 #include "boselection.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "unit.h"
 #include "unitproperties.h"
 #include "pluginproperties.h"

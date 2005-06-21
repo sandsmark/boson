@@ -19,6 +19,7 @@
 
 #include "bomessage.h"
 
+#include "../bomemory/bodummymemory.h"
 #include <bodebug.h>
 #include "boson.h"
 #include "bosonmessageids.h"

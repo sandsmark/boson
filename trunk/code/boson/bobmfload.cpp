@@ -19,6 +19,7 @@
 
 #include "bobmfload.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "bo3dtools.h"
 #include "bomesh.h"
 #include "bomaterial.h"

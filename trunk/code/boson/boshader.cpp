@@ -19,6 +19,7 @@
 
 #include "boshader.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "bogl.h"
 #include "bodebug.h"
 #include "bolight.h"

@@ -18,6 +18,8 @@
 */
 
 #include "botooltipcreator.h"
+
+#include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "rtti.h"
 #include "unit.h"

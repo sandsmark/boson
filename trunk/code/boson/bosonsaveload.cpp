@@ -20,6 +20,7 @@
 #include "bosonsaveload.h"
 #include "bosonsaveload.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "boson.h"
 #include "boversion.h"
 #include "bosonprofiling.h"

@@ -19,6 +19,7 @@
 
 #include "bosoncampaign.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "bosonplayfield.h"
 #include "bosondata.h"
 #include "bodebug.h"

@@ -20,6 +20,7 @@
 #include "boeventmanager.h"
 #include "boeventmanager.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "boevent.h"
 #include "boeventlistener.h"
 #include "boson.h"

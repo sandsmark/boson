@@ -19,6 +19,7 @@
 
 #include "bofile.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "defines.h"
 

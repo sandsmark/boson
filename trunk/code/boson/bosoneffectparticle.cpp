@@ -20,15 +20,16 @@
 
 #include "bosoneffectparticle.h"
 
+#include "../bomemory/bodummymemory.h"
+#include "botexture.h"
+#include "bosoneffectpropertiesparticle.h"
+#include "bodebug.h"
+
 #include <math.h>
 
 #include <qdom.h>
 
 #include <kmdcodec.h>
-
-#include "botexture.h"
-#include "bosoneffectpropertiesparticle.h"
-#include "bodebug.h"
 
 
 /*****  BosonEffectParticle  *****/

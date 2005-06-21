@@ -19,6 +19,7 @@
 
 #include "speciesdata.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "unitproperties.h"
 #include "bosonmodel.h"
 #include "bodebug.h"

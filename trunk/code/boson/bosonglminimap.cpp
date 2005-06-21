@@ -21,6 +21,7 @@
 #include "bosonglminimap.moc"
 
 #include "defines.h"
+#include "../bomemory/bodummymemory.h"
 #include "cell.h"
 #include "bosonmap.h"
 #include "bosonconfig.h"

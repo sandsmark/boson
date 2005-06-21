@@ -19,6 +19,7 @@
 #include "bocheckinstallation.h"
 
 #include "defines.h"
+#include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 
 #include <klocale.h>

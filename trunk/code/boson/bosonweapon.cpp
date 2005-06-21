@@ -19,6 +19,7 @@
 
 #include "bosonweapon.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "speciestheme.h"
 #include "bosoneffect.h"
 #include "bosoneffectproperties.h"

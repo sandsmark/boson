@@ -19,6 +19,7 @@
 
 #include "bosondata.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "boglobal.h"
 #include "bodebug.h"
 

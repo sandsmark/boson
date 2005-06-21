@@ -20,6 +20,7 @@
 #include "kgamemodeldebug.h"
 #include "kgamemodeldebug.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "bo3dtools.h"
 #include "bomatrixwidget.h"
 #include "bodebug.h"

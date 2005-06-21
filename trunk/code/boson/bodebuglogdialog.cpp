@@ -20,6 +20,7 @@
 #include "bodebuglogdialog.h"
 #include "bodebuglogdialog.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "bodebuglog.h"
 

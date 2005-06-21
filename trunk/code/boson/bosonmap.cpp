@@ -21,6 +21,7 @@
 #include "bosonmap.moc"
 
 #include "defines.h"
+#include "../bomemory/bodummymemory.h"
 #include "cell.h"
 #include "bosongroundtheme.h"
 #include "boson.h" // for an ugly boGame->gameMode() hack!

@@ -19,6 +19,7 @@
 
 #include "pluginproperties.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "unitproperties.h"
 #include "speciestheme.h"
 #include "bodebug.h"

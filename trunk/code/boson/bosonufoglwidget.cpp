@@ -20,6 +20,7 @@
 #include "bosonufoglwidget.h"
 #include "bosonufoglwidget.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "boufo/boufo.h"
 #include "bodebug.h"
 #include "bosonprofiling.h"

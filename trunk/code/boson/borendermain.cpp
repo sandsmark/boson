@@ -21,6 +21,7 @@
 #include "borendermain.moc"
 
 #include "defines.h"
+#include "../bomemory/bodummymemory.h"
 #include "speciestheme.h"
 #include "bosonconfig.h"
 #include "bosonmodel.h"

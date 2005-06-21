@@ -18,6 +18,7 @@
 */
 #include "cell.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "defines.h"
 #include "unitproperties.h"
 #include "bodebug.h"

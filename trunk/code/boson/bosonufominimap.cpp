@@ -20,6 +20,7 @@
 #include "bosonufominimap.h"
 #include "bosonufominimap.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "bosonglminimap.h"
 #include "botexture.h"
 #include "bosonmap.h"

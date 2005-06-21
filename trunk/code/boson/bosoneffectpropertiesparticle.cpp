@@ -20,15 +20,16 @@
 
 #include "bosoneffectpropertiesparticle.h"
 
-#include <ksimpleconfig.h>
-#include <qstring.h>
-#include <qdir.h>
-#include <qstringlist.h>
-
+#include "../bomemory/bodummymemory.h"
 #include "botexture.h"
 #include "bosoneffectparticle.h"
 #include "bodebug.h"
 #include "bosonconfig.h"
+
+#include <ksimpleconfig.h>
+#include <qstring.h>
+#include <qdir.h>
+#include <qstringlist.h>
 
 #include <math.h>
 

@@ -19,6 +19,7 @@
 
 #include "bosoncollisions.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "cell.h"
 #include "unit.h"
 #include "bosonmap.h"

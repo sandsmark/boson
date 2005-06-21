@@ -18,6 +18,8 @@
 */
 
 #include "bomesh.h"
+
+#include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "bo3dtools.h"
 #include "bomaterial.h"

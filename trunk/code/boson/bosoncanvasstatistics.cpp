@@ -19,6 +19,7 @@
 
 #include "bosoncanvasstatistics.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "boitemlist.h"
 #include "bosoncanvas.h"
 #include "rtti.h"

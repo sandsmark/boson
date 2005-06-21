@@ -21,6 +21,8 @@
 
 #include "bomath.h"
 
+#include "../bomemory/bodummymemory.h"
+
 #include <qdatastream.h>
 
 

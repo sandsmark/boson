@@ -21,6 +21,7 @@
 
 #include "bowater.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "bosonmap.h"
 #include "bodebug.h"
 #include "botexture.h"

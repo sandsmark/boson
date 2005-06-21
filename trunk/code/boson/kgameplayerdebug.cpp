@@ -20,6 +20,7 @@
 #include "kgameplayerdebug.h"
 #include "kgameplayerdebug.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "boson.h"
 #include "player.h"
 #include "speciestheme.h"

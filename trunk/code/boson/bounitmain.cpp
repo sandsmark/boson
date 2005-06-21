@@ -19,6 +19,7 @@
 
 #include "bouniteditor.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "bodebugdcopiface.h"
 #include "boversion.h"
 #include "boapplication.h"

@@ -19,6 +19,7 @@
 
 #include "player.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "playerio.h"
 #include "speciestheme.h"
 #include "unit.h"

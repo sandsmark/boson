@@ -19,6 +19,8 @@
 
 #include "bomousemovediff.h"
 
+#include "../bomemory/bodummymemory.h"
+
 #include <qpoint.h>
 #include <qevent.h>
 

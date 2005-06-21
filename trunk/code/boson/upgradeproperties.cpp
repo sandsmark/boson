@@ -19,6 +19,7 @@
 
 #include "upgradeproperties.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "player.h"
 #include "unitproperties.h"
 #include "speciestheme.h"
