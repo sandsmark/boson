@@ -18,6 +18,7 @@
 */
 #include "bosonitemrenderer.h"
 
+#include "../../bomemory/bodummymemory.h"
 #include "../bosonmodel.h"
 #include "../bo3dtools.h"
 #include "../bosonconfig.h"
