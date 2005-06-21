@@ -20,6 +20,7 @@
 #include "editorviewinput.h"
 #include "editorviewinput.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "bosongameview.h"
 #include "../boselection.h"
 #include "../bosoncanvas.h"
