@@ -31,8 +31,11 @@ class Player;
 class HarvesterPlugin;
 class ResourceMinePlugin;
 class BoEventListener;
+class QPoint;
 
 template<class T> class QPtrList;
+template<class T> class QValueList;
+template<class T1, class T2> class QPair;
 
 
 
@@ -81,6 +84,7 @@ class BosonLocalPlayerInput : public KGameIO
 
     void placeUnit(Player* owner, unsigned long int unitType, bofixed x, bofixed y);
     void changeHeight(int x, int y, bofixed height);
+    void changeHeight(const QValueList< QPair<QPoint, bofixed> >& heights);
 
   protected slots:
     virtual void slotAction(const BoSpecificAction& action);

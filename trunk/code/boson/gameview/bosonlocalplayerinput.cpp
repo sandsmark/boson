@@ -37,6 +37,8 @@
 #include <qptrlist.h>
 #include <qdatastream.h>
 #include <qpoint.h>
+#include <qpair.h>
+#include <qvaluelist.h>
 
 #include <krandomsequence.h>
 
@@ -446,12 +448,28 @@ void BosonLocalPlayerInput::changeHeight(int x, int y, bofixed height)
 {
   boDebug() << k_funcinfo << endl;
 
-  QValueVector<Q_UINT32> cornersX(1);
-  QValueVector<Q_UINT32> cornersY(1);
-  QValueVector<bofixed> cornersHeight(1);
-  cornersX[0] = x;
-  cornersY[0] = y;
-  cornersHeight[0] = height;
+  QValueList< QPair<QPoint, bofixed> > heights;
+  heights.append(QPair<QPoint, bofixed>(QPoint(x, y), height));
+  changeHeight(heights);
+}
+
+void BosonLocalPlayerInput::changeHeight(const QValueList< QPair<QPoint, bofixed> >& heights)
+{
+  boDebug() << k_funcinfo << endl;
+
+  QValueVector<Q_UINT32> cornersX(heights.count());
+  QValueVector<Q_UINT32> cornersY(heights.count());
+  QValueVector<bofixed> cornersHeight(heights.count());
+  QValueList< QPair<QPoint, bofixed> >::const_iterator it;
+  int i = 0;
+  for (it = heights.begin(); it != heights.end(); ++it)
+  {
+    cornersX[i] = (*it).first.x();
+    cornersY[i] = (*it).first.y();
+    cornersHeight[i] = (*it).second;
+
+    i++;
+  }
   BosonMessageEditorMoveChangeHeight message(cornersX, cornersY, cornersHeight);
 
   QByteArray b;
