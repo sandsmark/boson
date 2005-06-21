@@ -30,7 +30,8 @@ boufodesigner_LDADD = \
 		$(top_builddir)/bogl/libbogl.la \
 		$(top_builddir)/boson/boufo/libboufo.la \
 		$(LIB_QT) \
-		$(LIB_KDECORE)
+		$(LIB_KDECORE) \
+		$(LIB_BOMEMORY)
 boufodesigner_SOURCES = \
 		boufodesignermain.cpp
 
@@ -41,7 +42,8 @@ boufotest_LDADD = \
 		$(top_builddir)/bogl/libbogl.la \
 		$(top_builddir)/boson/boufo/libboufo.la \
 		$(LIB_QT) \
-		$(LIB_KDECORE)
+		$(LIB_KDECORE) \
+		$(LIB_BOMEMORY)
 boufotest_SOURCES = \
 		boufotestmain.cpp \
 		boufofontselectionwidgetbase.boui \
