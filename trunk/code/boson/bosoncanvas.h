@@ -50,6 +50,7 @@ template<class T> class QPtrList;
 template<class T> class QValueList;
 template<class T> class QPtrVector;
 template<class T1, class T2> class QMap;
+template<class T1, class T2> class QPair;
 
 /**
  * Helper class for @ref BosonCanvas::createItem.
@@ -191,6 +192,11 @@ public:
 	 * See @ref BosonMap::setHeightAtCorner
 	 **/
 	void setHeightAtCorner(int x, int y, float height);
+
+	/**
+	 * See @ref BosonMap::setHeightsAtCorners
+	 **/
+	void setHeightsAtCorners(const QValueList< QPair<QPoint, float> >& heights);
 
 	/**
 	 * @return BosonMap::heightAtCorner

@@ -31,6 +31,8 @@ class QDataStream;
 class BosonGroundTheme;
 class BoTexture;
 class BosonGroundType;
+template<class T> class QValueList;
+template<class T1, class T2> class QPair;
 
 /**
  * @short abstract class for data operating of the corners of the cells (like
@@ -694,6 +696,7 @@ public:
 	float heightAtCorner(int x, int y) const;
 	void setHeightAtCorner(int x, int y, float height);
 	float cellAverageHeight(int x, int y) const;
+	void setHeightsAtCorners(const QValueList< QPair<QPoint, float> >& heights);
 
 
 
