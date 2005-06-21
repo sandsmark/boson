@@ -23,7 +23,6 @@
 #include "bodebug.h"
 #include "bo3dtools.h"
 #include "bomaterial.h"
-#include "bomemorytrace.h"
 #include "bomeshrenderermanager.h"
 #include "bomeshrenderer.h"
 #include "bosonmodel.h"

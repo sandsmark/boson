@@ -29,7 +29,6 @@
 #include "bomesh.h"
 #include "bomaterial.h"
 #include "bosonconfig.h"
-#include "bomemorytrace.h"
 #include "bomeshrenderer.h"
 #include "bomeshrenderermanager.h"
 #include "bobmfload.h"
