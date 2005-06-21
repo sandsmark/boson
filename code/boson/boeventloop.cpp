@@ -20,6 +20,7 @@
 #include "boeventloop.h"
 #include "boeventloop.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "global.h"
 #include "bodebug.h"
 #include "boson.h"

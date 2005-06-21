@@ -20,6 +20,7 @@
 #include "bocursormain.h"
 #include "bocursormain.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "bosoncursoreditor.h"
 #include "bosoncursor.h"
 #include "bosonconfig.h"

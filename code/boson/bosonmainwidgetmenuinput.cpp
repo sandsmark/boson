@@ -20,6 +20,7 @@
 #include "bosonmainwidgetmenuinput.h"
 #include "bosonmainwidgetmenuinput.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "boufo/boufoaction.h"
 #include "bodebug.h"
 #include "bodebuglogdialog.h"

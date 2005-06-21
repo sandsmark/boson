@@ -19,6 +19,7 @@
 
 #include "bosonstatistics.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "unitbase.h"
 #include "player.h"
 #include "bodebug.h"

@@ -20,6 +20,7 @@
 #include "info/boinfo.h"
 #include "info/boinfodialog.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "bodebugdcopiface.h"
 #include "bodebug.h"
 #include "boversion.h"

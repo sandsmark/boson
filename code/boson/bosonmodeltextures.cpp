@@ -19,6 +19,7 @@
 
 #include "bosonmodeltextures.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "bosonconfig.h"
 #include "bodebug.h"
 #include "botexture.h"

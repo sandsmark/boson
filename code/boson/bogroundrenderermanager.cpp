@@ -18,6 +18,7 @@
 */
 #include "bogroundrenderermanager.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "bogroundrenderer.h"
 #include "bosonconfig.h"
 #include "boversion.h"

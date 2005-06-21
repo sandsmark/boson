@@ -18,6 +18,7 @@
 */
 #include "bosoncomputerio.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "player.h"
 #include "bodebug.h"
 #include "unit.h"

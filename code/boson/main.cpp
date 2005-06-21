@@ -17,6 +17,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "../bomemory/bodummymemory.h"
 #include "bosonmainwidget.h"
 #include "bocheckinstallation.h"
 #include "bosonconfig.h"

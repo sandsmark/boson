@@ -20,6 +20,7 @@
 #include "botexmapimportdialog.h"
 #include "botexmapimportdialog.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "bosonmap.h"
 #include "bosongroundtheme.h"

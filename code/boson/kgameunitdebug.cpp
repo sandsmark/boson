@@ -19,6 +19,7 @@
 #include "kgameunitdebug.h"
 #include "kgameunitdebug.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "boson.h"
 #include "cell.h"
 #include "unit.h"

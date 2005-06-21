@@ -18,6 +18,7 @@
 */
 
 
+#include "../bomemory/bodummymemory.h"
 #include "kgamemodeldebug.h"
 #include "boapplication.h"
 #include "bodebug.h"

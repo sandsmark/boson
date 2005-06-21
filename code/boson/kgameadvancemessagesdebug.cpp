@@ -20,6 +20,7 @@
 #include "kgameadvancemessagesdebug.h"
 #include "kgameadvancemessagesdebug.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "bosoncanvas.h"
 #include "boson.h"

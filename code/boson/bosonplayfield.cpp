@@ -19,6 +19,7 @@
 
 #include "bosonplayfield.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "boversion.h"
 #include "bosonmap.h"
 #include "bosonfileconverter.h"

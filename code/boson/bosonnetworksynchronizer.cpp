@@ -19,6 +19,7 @@
 
 #include "bosonnetworksynchronizer.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "bomessage.h"
 #include "boson.h"
 #include "bosoncanvas.h"

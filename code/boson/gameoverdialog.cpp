@@ -20,6 +20,7 @@
 #include "gameoverdialog.h"
 #include "gameoverdialog.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "boson.h"
 #include "player.h"
 #include "bosonstatistics.h"

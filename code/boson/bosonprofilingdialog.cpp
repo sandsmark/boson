@@ -19,6 +19,7 @@
 #include "bosonprofilingdialog.h"
 #include "bosonprofilingdialog.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "bosonprofiling.h"
 #include "bodebug.h"
 #include "bofiledialog.h"

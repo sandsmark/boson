@@ -17,9 +17,10 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "optionsdialog.h"
+
+#include "../bomemory/bodummymemory.h"
 #include "bosonconfig.h"
 #include "optionswidgets.h"
-
 #include "bosoncursor.h"
 #include "defines.h"
 #include "bodebug.h"

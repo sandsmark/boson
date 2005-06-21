@@ -19,6 +19,7 @@
 
 #include "playerio.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "player.h"
 #include "cell.h"

@@ -18,6 +18,8 @@
 */
 
 #include "unit.h"
+
+#include "../bomemory/bodummymemory.h"
 #include "player.h"
 #include "playerio.h"
 #include "bosoncanvas.h"

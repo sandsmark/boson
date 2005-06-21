@@ -19,6 +19,7 @@
 
 #include "bocamera.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "boautocamera.h"
 #include "defines.h"
 #include "bosonconfig.h"

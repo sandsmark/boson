@@ -19,6 +19,7 @@
 
 #include "borendertarget.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "boglx.h"
 #include "bodebug.h"
 #include "botexture.h"

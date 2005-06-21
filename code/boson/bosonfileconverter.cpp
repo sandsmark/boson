@@ -19,6 +19,7 @@
 
 #include "bosonfileconverter.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "defines.h"
 #include "boversion.h"

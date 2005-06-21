@@ -18,6 +18,8 @@
 */
 
 #include "bosonprofiling.h"
+
+#include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "boglobal.h"
 #include "defines.h"

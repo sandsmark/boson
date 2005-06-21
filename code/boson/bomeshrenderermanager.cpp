@@ -18,6 +18,7 @@
 */
 #include "bomeshrenderermanager.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "bomeshrenderer.h"
 #include "bosonmodel.h"
 #include "bosonconfig.h"

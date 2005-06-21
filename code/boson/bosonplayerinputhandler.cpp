@@ -20,6 +20,7 @@
 #include "bosonplayerinputhandler.h"
 #include "bosonplayerinputhandler.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "boson.h"
 #include "bosonmessageids.h"
 #include "bosonmessage.h"

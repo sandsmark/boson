@@ -19,6 +19,7 @@
 #include "bomeshrenderer.h"
 #include "bomeshrenderer.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "bosonmodel.h"
 #include "bomesh.h"
 #include "bomaterial.h"

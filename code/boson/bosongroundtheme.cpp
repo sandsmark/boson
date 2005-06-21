@@ -18,6 +18,7 @@
 */
 #include "bosongroundtheme.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "bosonmap.h"
 #include "bodebug.h"
 #include "defines.h"

@@ -23,6 +23,7 @@
 #include <qimage.h>
 #include <qgl.h>
 
+#include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "bosonconfig.h"
 #include "bosonprofiling.h"

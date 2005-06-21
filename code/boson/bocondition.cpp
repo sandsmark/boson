@@ -19,6 +19,7 @@
 
 #include "bocondition.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "boevent.h"
 #include "boeventmatching.h"
 #include "boson.h" // boGame->queueEvent()

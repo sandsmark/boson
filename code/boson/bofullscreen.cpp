@@ -21,6 +21,7 @@
 
 #define QT_CLEAN_NAMESPACE 1
 
+#include "../bomemory/bodummymemory.h"
 #include <bodebug.h>
 
 #include <kstaticdeleter.h>

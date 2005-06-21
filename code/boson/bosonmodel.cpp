@@ -20,6 +20,7 @@
 #include "bosonmodel.h"
 
 #include "defines.h"
+#include "../bomemory/bodummymemory.h"
 #include "bosonmodeltextures.h"
 #include "bosonprofiling.h"
 #include "bo3dtools.h"

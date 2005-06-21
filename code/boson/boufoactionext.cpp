@@ -20,6 +20,7 @@
 #include "boufoactionext.h"
 #include "boufoactionext.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "bosonconfig.h"
 

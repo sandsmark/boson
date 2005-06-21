@@ -19,6 +19,7 @@
 
 #include "boglobal.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 
 #include <kstaticdeleter.h>

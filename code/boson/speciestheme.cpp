@@ -19,6 +19,7 @@
 
 #include "speciestheme.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "speciesdata.h"
 #include "defines.h"
 #include "unit.h"

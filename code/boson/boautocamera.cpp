@@ -19,6 +19,7 @@
 
 #include "boautocamera.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "bocamera.h"
 #include "defines.h"
 #include "bodebug.h"

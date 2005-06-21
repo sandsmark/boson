@@ -18,7 +18,9 @@
 */
 
 #include "bomemorytrace.h"
+
 #include "bodebug.h"
+#include "../bomemory/bodummymemory.h"
 
 #include <kstaticdeleter.h>
 

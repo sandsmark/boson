@@ -19,6 +19,7 @@
 
 #include "selectbox.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "defines.h"
 #include "botexture.h"
 #include "bosonglwidget.h"

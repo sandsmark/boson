@@ -20,15 +20,16 @@
 
 #include "bosoneffect.h"
 
+#include "../bomemory/bodummymemory.h"
+#include "bosoneffectpropertiesparticle.h"
+#include "bodebug.h"
+#include "bolight.h"
+
 #include <krandomsequence.h>
 #include <kstaticdeleter.h>
 
 #include <qstring.h>
 #include <qdom.h>
-
-#include "bosoneffectpropertiesparticle.h"
-#include "bodebug.h"
-#include "bolight.h"
 
 
 // Static initialization stuff

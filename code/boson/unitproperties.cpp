@@ -19,6 +19,7 @@
 #include "unitproperties.h"
 #include "defines.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "speciestheme.h"
 #include "pluginproperties.h"
 #include "bosoneffect.h"

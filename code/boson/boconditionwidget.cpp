@@ -20,6 +20,7 @@
 #include "boconditionwidget.h"
 #include "boconditionwidget.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "bo3dtools.h"
 #include "boeventmatching.h"
 #include "boevent.h"

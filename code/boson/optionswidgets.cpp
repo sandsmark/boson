@@ -19,6 +19,7 @@
 #include "optionswidgets.h"
 #include "optionswidgets.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "bosonconfig.h"
 #include "bosoncursor.h"
 #include "bosonmodeltextures.h"

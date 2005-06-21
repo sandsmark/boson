@@ -22,6 +22,7 @@
 
 #include <assert.h> // FIXME: remove! no abort() calls on errors!
 
+#include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 
 using namespace std;

@@ -20,6 +20,7 @@
 #include "bpfdescriptiondialog.h"
 #include "bpfdescriptiondialog.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "bpfdescription.h"
 #include "bodebug.h"
 

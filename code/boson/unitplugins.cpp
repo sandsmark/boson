@@ -18,6 +18,7 @@
 */
 #include "unitplugins.h"
 
+#include "../bomemory/bodummymemory.h"
 #include "defines.h"
 #include "unit.h"
 #include "unitproperties.h"

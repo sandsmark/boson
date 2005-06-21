@@ -20,6 +20,7 @@
 #include "boorbiterwidget.h"
 #include "boorbiterwidget.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "bo3dtools.h"
 #include "bocamera.h"

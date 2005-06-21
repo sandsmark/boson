@@ -20,6 +20,7 @@
 #include "boglstatewidget.h"
 #include "boglstatewidget.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "info/boglquerystates.h"
 #include <bogl.h>
 

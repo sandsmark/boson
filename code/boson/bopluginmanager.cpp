@@ -19,6 +19,7 @@
 #include "bopluginmanager.h"
 #include "bopluginmanager.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "bosonconfig.h"
 #include "boversion.h"
 

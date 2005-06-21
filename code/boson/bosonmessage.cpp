@@ -19,6 +19,7 @@
 
 #include "bosonmessage.h"
 
+#include "../bomemory/bodummymemory.h"
 #include <bodebug.h>
 
 bool BosonMessage::readMessageId(QDataStream& stream) const
