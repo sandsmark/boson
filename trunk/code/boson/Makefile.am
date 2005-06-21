@@ -93,7 +93,6 @@ libboson_la_SOURCES = \
 	bomaterialwidget.cpp \
 	bovectorinput.cpp \
 	bosonpropertyxml.cpp \
-	bomemorytrace.cpp \
 	boaction.cpp \
 	botexmapimportdialog.cpp \
 	bosonplayerinputhandler.cpp \
