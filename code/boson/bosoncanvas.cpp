@@ -992,6 +992,12 @@ void BosonCanvas::setHeightAtCorner(int x, int y, float height)
  map()->setHeightAtCorner(x, y, height);
 }
 
+void BosonCanvas::setHeightsAtCorners(const QValueList< QPair<QPoint, float> >& heights)
+{
+ BO_CHECK_NULL_RET(map());
+ map()->setHeightsAtCorners(heights);
+}
+
 float BosonCanvas::heightAtCorner(int x, int y) const
 {
  if (!map()) {

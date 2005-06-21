@@ -954,19 +954,41 @@ float BosonMap::heightAtCorner(int x, int y) const
  return mHeightMap->heightAt(x, y);
 }
 
-void BosonMap::setHeightAtCorner(int x, int y, float h)
+void BosonMap::setHeightsAtCorners(const QValueList< QPair<QPoint, float> >& heights)
 {
  BO_CHECK_NULL_RET(mHeightMap);
  BO_CHECK_NULL_RET(mNormalMap);
  boDebug() << k_funcinfo << endl;
- mHeightMap->setHeightAt(x, y, h);
+
+ int minX = 0;
+ int maxX = 0;
+ int minY = 0;
+ int maxY = 0;
+ QValueList< QPair<QPoint, float> >::const_iterator it;
+ for (it = heights.begin(); it != heights.end(); ++it) {
+	int x = (*it).first.x();
+	int y = (*it).first.y();
+	mHeightMap->setHeightAt(x, y, (*it).second);
+
+	minX = QMIN(minX, x);
+	minY = QMIN(minY, y);
+	maxX = QMAX(maxX, x);
+	maxY = QMAX(maxY, y);
+ }
+
  // Update affected normals
- // Whenever a corner's height changes, normals of four cells, that have this
- //  corner, also changes and every corner that these cells have must be updated
- //  If changed corner is not at the edge of the map, 9 corners have to be
- //  updated.
- recalculateNormalsInRect(QMAX(0, x - 1), QMAX(0, y - 1),
-		QMIN((int)width(), x + 1), QMIN((int)height(), y + 1));
+ minX = QMAX(0, minX - 1);
+ maxX = QMIN((int)width(), maxX + 1);
+ minY = QMAX(0, minY - 1);
+ maxY = QMIN((int)height(), maxY + 1);
+ recalculateNormalsInRect(minX, minY, maxX, maxY);
+}
+
+void BosonMap::setHeightAtCorner(int x, int y, float h)
+{
+ QValueList< QPair<QPoint, float> > heights;
+ heights.append(QPair<QPoint, float>(QPoint(x, y), h));
+ setHeightsAtCorners(heights);
 }
 
 void BosonMap::resize(unsigned int width, unsigned int height)
