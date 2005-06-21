@@ -742,6 +742,10 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
 			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
 			break;
 		}
+
+		// TODO: unify. either store float or bofixed, storing float in
+		// the map and bofixed in the message is not good.
+		QValueList< QPair<QPoint, float> > heights;
 		Q_UINT32 count;
 		for (Q_UINT32 i = 0; i < message.mCellCornersX.count(); i++) {
 			// note: cornerX == mapWidth() and cornerY == mapHeight()
@@ -757,8 +761,22 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
 				boError() << k_funcinfo << "invalid y coordinate " << cornerY << endl;
 				continue;
 			}
-			boDebug() << k_funcinfo << "new height at " << cornerX << "," << cornerY << " is " << height << endl;
-			canvas()->setHeightAtCorner(cornerX, cornerY, height);
+			QPoint p(cornerX, cornerY);
+			heights.append(QPair<QPoint, float>(p, height));
+		}
+
+		canvas()->setHeightsAtCorners(heights);
+
+		for (Q_UINT32 i = 0; i < message.mCellCornersX.count(); i++) {
+			Q_INT32 cornerX = message.mCellCornersX[i];
+			Q_INT32 cornerY = message.mCellCornersY[i];
+			float height = canvas()->heightAtCorner(cornerX, cornerY);
+
+			// TODO: find out whether we actually still need this
+			// signal. if we do, find out whether we can use a list
+			// instead.
+			// this is currently terribly inefficient for many
+			// corners at once.
 			emit signalChangeHeight(cornerX, cornerY, height);
 		}
 		break;
