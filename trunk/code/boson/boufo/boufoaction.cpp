@@ -449,6 +449,23 @@ bool BoUfoXMLBuilder::makeUfoMenu(const QDomElement& parentElement, BoUfoMenuBar
 }
 
 
+class BoUfoActionDeleter : public ufo::UCollectable
+{
+public:
+	BoUfoActionDeleter(BoUfoAction* action, ufo::UWidget* widget)
+	{
+		mAction = action;
+		mWidget = widget;
+	}
+	~BoUfoActionDeleter()
+	{
+		mAction->removeWidget(mWidget, false);
+	}
+private:
+	BoUfoAction* mAction;
+	ufo::UWidget* mWidget;
+};
+
 class BoUfoActionPrivate
 {
 public:
@@ -473,14 +490,7 @@ BoUfoAction::BoUfoAction(const QString& text, const KShortcut& cut, const QObjec
 
 BoUfoAction::~BoUfoAction()
 {
- // delete the widget deleters. we use a separate list, as the deleter d'tor
- // calls BoUfoAction::removeWidget()
- QPtrList<ufo::UWidget> list = d->mWidgets;
- QPtrListIterator<ufo::UWidget> it(list);
- while (it.current()) {
-	it.current()->setBoUfoWidgetDeleter(0);
-	++it;
- }
+ unplug();
 
  if (mParentCollection) {
 	mParentCollection->remove(this, false);
@@ -593,9 +603,18 @@ void BoUfoAction::addWidget(ufo::UWidget* w)
  d->mWidgets.append(w);
 }
 
-void BoUfoAction::removeWidget(ufo::UWidget* w)
+void BoUfoAction::removeWidget(ufo::UWidget* w, bool del)
 {
- d->mWidgets.removeRef(w);
+ if (!del) {
+	d->mWidgets.removeRef(w);
+ } else {
+	if (w) {
+		if (w->getParent()) {
+			// deletes w. its deleters d'tor will call removeWidget(w, false)
+			w->getParent()->remove(w);
+		}
+	}
+ }
 }
 
 const QPtrList<ufo::UWidget>& BoUfoAction::widgets() const
@@ -611,23 +630,6 @@ void BoUfoAction::uslotActivated(ufo::UActionEvent*)
 void BoUfoAction::uslotHighlighted(ufo::UActionEvent*)
 {
 }
-
-class BoUfoActionDeleter : public ufo::UCollectable
-{
-public:
-	BoUfoActionDeleter(BoUfoAction* action, ufo::UWidget* widget)
-	{
-		mAction = action;
-		mWidget = widget;
-	}
-	~BoUfoActionDeleter()
-	{
-		mAction->removeWidget(mWidget);
-	}
-private:
-	BoUfoAction* mAction;
-	ufo::UWidget* mWidget;
-};
 
 
 void BoUfoAction::plug(ufo::UWidget* w)
@@ -645,6 +647,16 @@ void BoUfoAction::plug(ufo::UWidget* w)
 
 	w->add(menuItem);
 	addWidget(menuItem);
+ }
+}
+
+void BoUfoAction::unplug()
+{
+ QPtrList<ufo::UWidget> widgets = d->mWidgets;
+ QPtrListIterator<ufo::UWidget> it(widgets);
+ while (it.current()) {
+	removeWidget(it.current(), true);
+	++it;
  }
 }
 
@@ -1009,6 +1021,7 @@ BoUfoActionCollection::~BoUfoActionCollection()
 	d->mParentCollection->unregisterChildCollection(this);
  }
  clearActions();
+ d->mActionDict.setAutoDelete(true);
  d->mActionDict.clear();
  delete d->mAccel;
  delete d;
@@ -1100,6 +1113,7 @@ void BoUfoActionCollection::remove(BoUfoAction* action, bool deleteIt)
 
 void BoUfoActionCollection::clearActions()
 {
+ boDebug() << k_funcinfo << endl;
  if (parent() && parent()->inherits("BoUfoManager")) {
 	BoUfoManager* m = (BoUfoManager*)parent();
 	m->setMenuBar(0);
@@ -1111,6 +1125,7 @@ void BoUfoActionCollection::clearActions()
 		++it;
 	}
  }
+ d->mActionDict.setAutoDelete(true);
  d->mActionDict.clear();
 }
 
