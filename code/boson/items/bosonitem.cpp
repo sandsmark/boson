@@ -18,6 +18,7 @@
 */
 #include "bosonitem.h"
 
+#include "../../bomemory/bodummymemory.h"
 #include "../bosoncanvas.h"
 #include "../rtti.h"
 #include "../selectbox.h"

@@ -19,6 +19,7 @@
 
 #include "bosonshot.h"
 
+#include "../../bomemory/bodummymemory.h"
 #include "../global.h"
 #include "../bosoncanvas.h"
 #include "../bosoneffect.h"
