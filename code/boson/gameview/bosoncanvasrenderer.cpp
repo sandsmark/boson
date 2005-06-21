@@ -19,6 +19,7 @@
 
 #include "bosoncanvasrenderer.h"
 
+#include "../../bomemory/bodummymemory.h"
 #include "../no_player.h"
 #include "../defines.h"
 #include "../bosoncanvas.h"

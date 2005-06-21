@@ -20,6 +20,7 @@
 #include "bosonlocalplayerinput.h"
 #include "bosonlocalplayerinput.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "../boaction.h"
 #include "../unit.h"
 #include "../unitproperties.h"

@@ -20,6 +20,7 @@
 #include "bosonufogamegui.h"
 #include "bosonufogamegui.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "../no_player.h"
 #include "bosonufogameguihelper.h"
 #include "../bomath.h"

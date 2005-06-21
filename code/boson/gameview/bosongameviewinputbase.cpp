@@ -20,6 +20,7 @@
 #include "bosongameviewinputbase.h"
 #include "bosongameviewinputbase.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "../no_player.h"
 #include "../bosonconfig.h"
 #include "../boselection.h"

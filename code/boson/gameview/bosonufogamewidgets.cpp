@@ -20,6 +20,7 @@
 #include "bosonufogamewidgets.h"
 #include "bosonufogamewidgets.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "../no_player.h"
 #include "bosoncanvasrenderer.h"
 #include "../bosonpath.h"

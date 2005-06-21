@@ -20,6 +20,7 @@
 #include "bosonmenuinput.h"
 #include "bosonmenuinput.moc"
 
+#include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "../boufo/boufoaction.h"
 #include "../boufoactionext.h"
@@ -43,7 +44,6 @@
 #include "../player.h"
 #include "../botexmapimportdialog.h"
 #include "../bofiledialog.h"
-#include "../bomemory/bomemory.h"
 #ifdef BOSON_USE_BOMEMORY
 #include "../bomemory/bomemorydialog.h"
 #endif

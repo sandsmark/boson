@@ -20,8 +20,7 @@
 #include "bosongameview.h"
 #include "bosongameview.moc"
 
-#include <../bomemory/bomemory.h>
-
+#include "../bomemory/bodummymemory.h"
 #include "../no_player.h"
 #include "../defines.h"
 #include "../bosoncanvas.h"
@@ -599,6 +598,7 @@ void BosonGameView::init()
 void BosonGameView::quitGame()
 {
  boDebug() << k_funcinfo << endl;
+ resetGameMode();
 
  d->mMouseMoveDiff.stop();
  d->mCursorEdgeScrolling->quitGame();
