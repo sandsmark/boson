@@ -24,7 +24,7 @@
 
 #include <config.h>
 
-#if BOSON_USE_BOMEMORY
+#ifdef BOSON_USE_BOMEMORY
 
 /*
  * Warning: this file gets included using "g++ -include", meaning it will always

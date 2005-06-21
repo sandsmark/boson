@@ -21,7 +21,7 @@
 
 #include <config.h>
 
-#if BOSON_USE_BOMEMORY
+#ifdef BOSON_USE_BOMEMORY
 
 // AB: bomemory.h redefines "new" using macros. therefore we have to include
 // files that redefine new using Class::operator new() before bomemory.h
