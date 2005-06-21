@@ -23,6 +23,7 @@
 
 #include "boufofontselectionwidget.h"
 #include "boufofontselectionwidget.moc"
+
 #include <bodebug.h>
 
 #include <klocale.h>
