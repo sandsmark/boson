@@ -64,6 +64,7 @@ public:
 	}
 
 	virtual void plug(ufo::UWidget*);
+	virtual void unplug();
 
 	/**
 	 * @internal
@@ -82,7 +83,7 @@ public slots:
 
 protected:
 	void addWidget(ufo::UWidget*);
-	void removeWidget(ufo::UWidget*);
+	void removeWidget(ufo::UWidget*, bool del = true);
 	const QPtrList<ufo::UWidget>& widgets() const;
 
 signals:
