@@ -1031,6 +1031,8 @@ bool BoUfoManager::sendEvent(QEvent* e)
 		return sendMousePressEvent((QMouseEvent*)e);
 	case QEvent::MouseButtonRelease:
 		return sendMouseReleaseEvent((QMouseEvent*)e);
+	case QEvent::MouseButtonDblClick:
+		return false;
 	case QEvent::KeyPress:
 		return sendKeyPressEvent((QKeyEvent*)e);
 	case QEvent::KeyRelease:
