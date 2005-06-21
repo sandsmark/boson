@@ -20,6 +20,7 @@
 #include "editorunitconfigwidget.h"
 #include "editorunitconfigwidget.moc"
 
+#include "../../bomemory/bodummymemory.h"
 #include "../unit.h"
 #include "../unitplugins.h"
 #include "../unitproperties.h"

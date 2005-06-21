@@ -18,6 +18,8 @@
 */
 
 #include "boinfo.h"
+
+#include "../../bomemory/bodummymemory.h"
 #include "bodebug.h"
 
 #include <qfile.h>

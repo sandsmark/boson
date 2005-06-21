@@ -20,6 +20,7 @@
 #include "bosoncommandframe.h"
 #include "bosoncommandframe.moc"
 
+#include "../../bomemory/bodummymemory.h"
 #include "bosonorderwidget.h"
 #include "bosonunitview.h"
 #include "boactionswidget.h"

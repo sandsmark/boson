@@ -22,6 +22,7 @@
 #include "boquickgroundrenderer.h"
 #include "boquickgroundrenderer.moc"
 
+#include "../../bomemory/bodummymemory.h"
 #include "../bosonmap.h"
 #include "../bosongroundtheme.h"
 #include "../bo3dtools.h"

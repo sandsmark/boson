@@ -20,6 +20,7 @@
 #include "boaudioprocesscontroller.h"
 #include "boaudioprocesscontroller.moc"
 
+#include "../../bomemory/bodummymemory.h"
 #include "bodebug.h"
 
 #include <boaudiocommand.h>

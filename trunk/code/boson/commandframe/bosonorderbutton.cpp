@@ -20,6 +20,7 @@
 #include "bosonorderbutton.h"
 #include "bosonorderbutton.moc"
 
+#include "../../bomemory/bodummymemory.h"
 #include "../bosongroundtheme.h"
 #include "../unit.h"
 #include "../player.h"

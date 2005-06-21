@@ -24,6 +24,7 @@
 #define QT_CLEAN_NAMESPACE
 
 #include "fntLocal.h"
+#include "../../bomemory/bodummymemory.h"
 #include <bogl.h>
 #include <boglx.h>
 

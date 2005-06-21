@@ -21,6 +21,7 @@
 #include "boufonewgamewidget.h"
 #include "boufonewgamewidget.moc"
 
+#include "../../bomemory/bodummymemory.h"
 #include "../defines.h"
 #include "../bosonconfig.h"
 #include "../player.h"

@@ -19,6 +19,7 @@
 
 #include "bosonscript.h"
 
+#include <bomemory/bodummymemory.h>
 #include "../bo3dtools.h"
 #include "../player.h"
 #include "../boson.h"

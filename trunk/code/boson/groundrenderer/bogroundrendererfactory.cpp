@@ -20,6 +20,7 @@
 #include "bogroundrendererfactory.h"
 #include "bogroundrendererfactory.moc"
 
+#include "../../bomemory/bodummymemory.h"
 #include "bodefaultgroundrenderer.h"
 #include "bofastgroundrenderer.h"
 #include "boveryfastgroundrenderer.h"

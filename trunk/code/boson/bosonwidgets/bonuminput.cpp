@@ -21,6 +21,8 @@
 #include "bonuminput.h"
 #include "bonuminput.moc"
 
+#include "../../bomemory/bodummymemory.h"
+
 #include <qspinbox.h>
 #include <qlayout.h>
 #include <qslider.h>

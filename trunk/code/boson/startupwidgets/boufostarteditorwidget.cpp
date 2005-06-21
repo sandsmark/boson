@@ -21,6 +21,7 @@
 #include "boufostarteditorwidget.h"
 #include "boufostarteditorwidget.moc"
 
+#include "../../bomemory/bodummymemory.h"
 #include "../defines.h"
 #include "../bosonconfig.h"
 #include "../bosonmessageids.h"

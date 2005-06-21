@@ -19,6 +19,8 @@
 
 #include "boinfodialog.h"
 #include "boinfodialog.moc"
+
+#include "../../bomemory/bodummymemory.h"
 #include "boinfo.h"
 #include "../boglobal.h"
 #include "../bofiledialog.h"

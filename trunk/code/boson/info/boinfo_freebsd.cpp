@@ -18,7 +18,9 @@
 */
 
 #include "boinfo.h"
+
 #include "bodebug.h"
+#include "../../bomemory/bodummymemory.h"
 
 #include <qfile.h>
 #include <qregexp.h>

@@ -21,6 +21,7 @@
 #include "boufostartupwidget.h"
 #include "boufostartupwidget.moc"
 
+#include "../../bomemory/bodummymemory.h"
 #include "boufoloadingwidget.h"
 #include "boufonewgamewidget.h"
 #include "boufonetworkoptionswidget.h"
