@@ -20,6 +20,8 @@
 #define QT_CLEAN_NAMESPACE
 
 #include "boinfo.h"
+
+#include "../../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "boglquerystates.h"
 #include <bogl.h>

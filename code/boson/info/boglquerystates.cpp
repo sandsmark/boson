@@ -19,6 +19,7 @@
 
 #include "boglquerystates.h"
 
+#include "../../bomemory/bodummymemory.h"
 #include <bogl.h>
 #include <bodebug.h>
 

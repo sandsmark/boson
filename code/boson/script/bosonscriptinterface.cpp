@@ -20,6 +20,7 @@
 #include "bosonscriptinterface.h"
 #include "bosonscriptinterface.moc"
 
+#include "../../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "../bo3dtools.h"
 

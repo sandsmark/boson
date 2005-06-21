@@ -21,7 +21,7 @@
 
 #include <boaudiocommand.h>
 
-
+#include "../../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "../bosonconfig.h"
 #include "../boglobal.h"

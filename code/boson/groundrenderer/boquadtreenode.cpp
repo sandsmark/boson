@@ -19,6 +19,7 @@
 
 #include "boquadtreenode.h"
 
+#include "../../bomemory/bodummymemory.h"
 #include <bodebug.h>
 
 BoQuadTreeNode::BoQuadTreeNode(int l, int t, int r, int b)

@@ -20,6 +20,7 @@
 #include "boveryfastgroundrenderer.h"
 #include "boveryfastgroundrenderer.moc"
 
+#include "../../bomemory/bodummymemory.h"
 #include "bogroundrendererbase.h"
 #include "boquadtreenode.h"
 #include "../bosonmap.h"

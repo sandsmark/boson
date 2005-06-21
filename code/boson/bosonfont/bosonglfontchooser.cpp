@@ -22,6 +22,7 @@
 #include "bosonglfontchooser.h"
 #include "bosonglfontchooser.moc"
 
+#include "../../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "bosonglfont.h"
 #include "../bosonglwidget.h"

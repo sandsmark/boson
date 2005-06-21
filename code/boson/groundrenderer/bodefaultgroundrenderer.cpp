@@ -20,6 +20,7 @@
 #include "bodefaultgroundrenderer.h"
 #include "bodefaultgroundrenderer.moc"
 
+#include "../../bomemory/bodummymemory.h"
 #include "bogroundrendererbase.h"
 #include "../bosonmap.h"
 #include "../bosonconfig.h"

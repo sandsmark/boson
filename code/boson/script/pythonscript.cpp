@@ -19,6 +19,8 @@
 
 #include "pythonscript.h"
 
+#include "../../bomemory/bodummymemory.h"
+
 #include <Python.h>
 #include <marshal.h>
 #include <compile.h>

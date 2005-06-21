@@ -22,6 +22,7 @@
 */
 
 #include "fntLocal.h"
+#include "../../bomemory/bodummymemory.h"
 #include <bodebug.h>
 
 #define DO_LIBUFO 1

@@ -20,6 +20,7 @@
 #include "boactionswidget.h"
 #include "boactionswidget.moc"
 
+#include "../../bomemory/bodummymemory.h"
 #include "bosonorderbutton.h"
 #include "../unit.h"
 #include "../unitplugins.h"

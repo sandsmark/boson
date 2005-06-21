@@ -20,6 +20,8 @@
 #include "boufoloadingwidget.h"
 #include "boufoloadingwidget.moc"
 
+#include "../../bomemory/bodummymemory.h"
+
 #include <klocale.h>
 
 BoUfoLoadingWidget::BoUfoLoadingWidget()

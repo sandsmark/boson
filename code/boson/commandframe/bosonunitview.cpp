@@ -19,6 +19,7 @@
 #include "bosonunitview.h"
 #include "bosonunitview.moc"
 
+#include "../../bomemory/bodummymemory.h"
 #include "../unitbase.h"
 #include "../player.h"
 #include "../unitproperties.h"

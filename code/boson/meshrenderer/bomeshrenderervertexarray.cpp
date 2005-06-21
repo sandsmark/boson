@@ -19,6 +19,7 @@
 #include "bomeshrenderervertexarray.h"
 #include "bomeshrenderervertexarray.moc"
 
+#include "../../bomemory/bodummymemory.h"
 #include "../bomeshrenderer.h"
 #include "../bosonmodel.h"
 #include "../bomesh.h"

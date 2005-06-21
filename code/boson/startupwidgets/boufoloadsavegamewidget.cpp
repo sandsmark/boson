@@ -20,6 +20,7 @@
 #include "boufoloadsavegamewidget.h"
 #include "boufoloadsavegamewidget.moc"
 
+#include "../../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "../bofiledialog.h"
 

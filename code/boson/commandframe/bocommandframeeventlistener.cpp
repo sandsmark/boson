@@ -20,6 +20,7 @@
 #include "bocommandframeeventlistener.h"
 #include "bocommandframeeventlistener.moc"
 
+#include "../../bomemory/bodummymemory.h"
 #include "../playerio.h"
 #include "../boevent.h"
 #include <bodebug.h>

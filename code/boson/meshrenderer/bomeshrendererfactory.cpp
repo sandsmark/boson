@@ -20,6 +20,7 @@
 #include "bomeshrendererfactory.h"
 #include "bomeshrendererfactory.moc"
 
+#include "../../bomemory/bodummymemory.h"
 #include "bomeshrendererimmediate.h"
 #include "bomeshrenderersemiimmediate.h"
 #include "bomeshrenderervertexarray.h"
