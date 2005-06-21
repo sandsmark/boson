@@ -23,6 +23,7 @@
 #include "bosonmainwidget.moc"
 
 #include "defines.h"
+#include "../bomemory/bodummymemory.h"
 #include "bosonconfig.h"
 #include "bosonprofiling.h"
 #include "boson.h"
@@ -751,6 +752,10 @@ void BosonMainWidget::slotGameOver()
 {
  boDebug() << k_funcinfo << endl;
  endGame();
+
+ if (ufoManager() && ufoManager()->actionCollection()) {
+	ufoManager()->actionCollection()->createGUI();
+ }
 
  // this also resets the game!
  // if you replace this by something else you must call slotResetGame()
