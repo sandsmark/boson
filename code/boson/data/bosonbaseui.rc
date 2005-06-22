@@ -29,6 +29,7 @@
       <Action name="debug_lazy_reload_model_textures" />
       <Action name="debug_lazy_reload_meshrenderer" />
       <Action name="debug_lazy_reload_groundrenderer" />
+      <Action name="debug_lazy_reload_gameviewplugin" />
     </Menu>
     <Menu name="debug_colormap"><text>&amp;Color map</text>
       <Action name="debug_colormap_enable" />

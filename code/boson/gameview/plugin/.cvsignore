@@ -1,0 +1,10 @@
+Makefile
+Makefile.in
+.deps
+.libs
+*.moc
+*.lo
+libbosongameviewplugin.la
+libbosongameviewplugin_la_meta_unload.*
+libbosongameviewext.la
+libbosongameviewext_la_meta_unload.*

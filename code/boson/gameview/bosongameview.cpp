@@ -78,6 +78,8 @@
 #include "../script/bosonscriptinterface.h"
 #include "../bomousemovediff.h"
 #include "../bosonfpscounter.h"
+#include "../bosongameviewpluginmanager.h"
+#include "../bosongameviewpluginbase.h"
 
 #include <kgame/kgameio.h>
 #include <kgame/kplayer.h>
@@ -412,6 +414,10 @@ public:
 		mGameGLMatrices = 0;
 
 		mLightWidget = 0;
+
+		mGameViewPlugin = 0;
+		mGameViewPluginWidget = 0;
+		mGameViewPluginWidgetContainer = 0;
 	}
 	BoUfoLayeredPane* mLayeredPane;
 	BosonUfoCanvasWidget* mUfoCanvasWidget;
@@ -450,6 +456,10 @@ public:
 	GLfloat mAspect; // see gluPerspective
 
 	BoLightCameraWidget1* mLightWidget;
+
+	BosonGameViewPluginBase* mGameViewPlugin;
+	BoUfoWidget* mGameViewPluginWidget;
+	BoUfoWidget* mGameViewPluginWidgetContainer;
 };
 
 BosonGameView::BosonGameView()
@@ -479,11 +489,14 @@ BosonGameView::~BosonGameView()
  delete d->mGameGLMatrices;
  delete d->mGLMiniMap;
  delete d->mToolTips;
+ d->mGameViewPlugin = 0;
  BoMeshRendererManager::manager()->unsetCurrentRenderer();
  BoGroundRendererManager::manager()->unsetCurrentRenderer();
+ BosonGameViewPluginManager::manager()->unsetCurrentPlugin();
  SpeciesData::clearSpeciesData();
  BoGroundRendererManager::deleteStatic();
  BoMeshRendererManager::deleteStatic();
+ BosonGameViewPluginManager::deleteStatic();
  BoWaterManager::deleteStatic();
  BoLightManager::deleteStatic();
  delete d;
@@ -507,8 +520,11 @@ void BosonGameView::init()
  BoWaterManager::initStatic();
  BoGroundRendererManager::initStatic();
  BoMeshRendererManager::initStatic();
+ BosonGameViewPluginManager::initStatic();
  BoMeshRendererManager::manager()->makeRendererCurrent(QString::null);
  BoGroundRendererManager::manager()->makeRendererCurrent(QString::null);
+ BosonGameViewPluginManager::manager()->makePluginCurrent(QString::null);
+ resetGameViewPlugin();
 
  boWaterManager->setViewFrustum(&d->mViewFrustum);
 
@@ -516,6 +532,7 @@ void BosonGameView::init()
  d->mGameGLMatrices = new BoGLMatrices(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewFrustum, d->mViewport, d->mFovY, d->mAspect);
  BoGroundRendererManager::manager()->setMatrices(&d->mModelviewMatrix, &d->mProjectionMatrix, d->mViewport);
  BoGroundRendererManager::manager()->setViewFrustum(&d->mViewFrustum);
+ resetGameViewPlugin(); // set GL matrices
 
  d->mToolTips = new BoGLToolTip(this);
  connect(this, SIGNAL(signalCursorCanvasVectorChanged(const BoVector3Fixed&)),
@@ -600,6 +617,7 @@ void BosonGameView::quitGame()
  boDebug() << k_funcinfo << endl;
  resetGameMode();
 
+ d->mGameViewPlugin->quitGame();
  d->mMouseMoveDiff.stop();
  d->mCursorEdgeScrolling->quitGame();
  delete d->mMouseIO;
@@ -967,6 +985,8 @@ void BosonGameView::initUfoGUI()
  connect(d->mSelectionRect, SIGNAL(signalChanged(const QRect&)),
 		d->mUfoSelectionRectWidget, SLOT(slotSelectionRectChanged(const QRect&)));
 
+ d->mGameViewPluginWidgetContainer = new BoUfoWidget();
+
  d->mLayeredPane->addWidget(d->mUfoCanvasWidget);
  d->mLayeredPane->addWidget(d->mUfoPlacementPreviewWidget);
  d->mLayeredPane->addWidget(d->mUfoLineVisualizationWidget);
@@ -976,6 +996,7 @@ void BosonGameView::initUfoGUI()
  d->mLayeredPane->addWidget(d->mUfoSelectionRectWidget);
  d->mLayeredPane->addWidget(d->mUfoFPSGraphWidget);
  d->mLayeredPane->addWidget(d->mUfoProfilingGraphWidget);
+ d->mLayeredPane->addWidget(d->mGameViewPluginWidgetContainer);
 
 #if 0
  d->mLayeredPane->setMouseEventsEnabled(true, true);
@@ -1003,6 +1024,7 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
  d->mUfoGameGUI->setCanvas(mCanvas);
  d->mUfoCanvasWidget->setCanvas(mCanvas);
  d->mUfoPlacementPreviewWidget->setCanvas(mCanvas);
+ resetGameViewPlugin(); // setCanvas()
  if (!mCanvas) {
 	return;
  }
@@ -1113,6 +1135,7 @@ void BosonGameView::setLocalPlayerIO(PlayerIO* io)
  d->mUfoGameGUI->setLocalPlayerIO(localPlayerIO());
  d->mUfoCanvasWidget->setLocalPlayerIO(localPlayerIO());
  d->mUfoPlacementPreviewWidget->setLocalPlayerIO(localPlayerIO());
+ resetGameViewPlugin(); // setLocalPlayerIO()
 
  if (d->mInput) {
 	d->mInput->setLocalPlayerIO(localPlayerIO());
@@ -1239,6 +1262,56 @@ void BosonGameView::slotInitMiniMapFogOfWar()
  }
 }
 
+void BosonGameView::slotReloadGameViewPlugin()
+{
+ if (d->mGameViewPluginWidget) {
+	d->mGameViewPluginWidgetContainer->removeWidget(d->mGameViewPluginWidget);
+	d->mGameViewPluginWidget = 0;
+ }
+ bool unusable = false;
+ bool r = BosonGameViewPluginManager::manager()->reloadPlugin(&unusable);
+ if (!r || unusable) {
+	KMessageBox::sorry(0, i18n("Reloading gameview plugin failed. quitting."));
+	exit(1);
+	return;
+ }
+ boDebug() << k_funcinfo << "gameviewplugin reloading succeeded" << endl;
+ 
+ if (BosonGameViewPluginManager::manager()->currentPlugin()) {
+	BosonGameViewPluginBase* p = (BosonGameViewPluginBase*)BosonGameViewPluginManager::manager()->currentPlugin();
+	if (p) {
+		p->init();
+	} else {
+		BO_NULL_ERROR(p);
+		return;
+	}
+ }
+ resetGameViewPlugin();
+}
+
+void BosonGameView::resetGameViewPlugin()
+{
+ resetGameViewPlugin(boGame ? boGame->gameMode() : true);
+}
+
+void BosonGameView::resetGameViewPlugin(bool gameMode)
+{
+ d->mGameViewPlugin = (BosonGameViewPluginBase*)BosonGameViewPluginManager::manager()->currentPlugin();
+ BO_CHECK_NULL_RET(d->mGameViewPlugin);
+
+ d->mGameViewPlugin->init();
+
+ if (!d->mGameViewPluginWidget && d->mGameViewPluginWidgetContainer) {
+	d->mGameViewPluginWidget = d->mGameViewPlugin->ufoWidget();
+	d->mGameViewPluginWidgetContainer->addWidget(d->mGameViewPluginWidget);
+ }
+
+ d->mGameViewPlugin->setGameGLMatrices(d->mGameGLMatrices);
+ d->mGameViewPlugin->setCanvas(mCanvas);
+ d->mGameViewPlugin->setLocalPlayerIO(localPlayerIO());
+ d->mGameViewPlugin->setGameMode(gameMode);
+}
+
 void BosonGameView::addChatMessage(const QString& message)
 {
  d->mUfoGameGUI->addChatMessage(message);
@@ -1298,6 +1371,7 @@ void BosonGameView::resetGameMode()
  d->mUfoCursorWidget->slotChangeCursor(boConfig->intValue("CursorMode"), boConfig->stringValue("CursorDir"));
 
  d->mUfoGameGUI->setGameMode(true);
+ resetGameViewPlugin(true);
 
  if (localPlayerIO()) {
 	KGameIO* io = localPlayerIO()->findRttiIO(BosonMenuInput::RTTI);
@@ -1316,6 +1390,7 @@ void BosonGameView::setGameMode(bool mode)
  BO_CHECK_NULL_RET(actionCollection());
  resetGameMode();
  d->mUfoGameGUI->setGameMode(mode);
+ resetGameViewPlugin(mode);
 
  if (localPlayerIO()) {
 	KGameIO* oldIO = localPlayerIO()->findRttiIO(BosonMenuInput::RTTI);
@@ -1356,6 +1431,8 @@ void BosonGameView::setGameMode(bool mode)
 			this, SIGNAL(signalQuit()));
 	connect(io, SIGNAL(signalSaveGame()),
 			this, SIGNAL(signalSaveGame()));
+	connect(io, SIGNAL(signalReloadGameViewPlugin()),
+			this, SLOT(slotReloadGameViewPlugin()));
 	connect(io, SIGNAL(signalEditorChangeLocalPlayer(Player*)),
 			this, SIGNAL(signalEditorChangeLocalPlayer(Player*)));
 	connect(io, SIGNAL(signalEditorShowPlaceFacilities()),
@@ -2040,6 +2117,9 @@ void BosonGameView::paint()
  glPopMatrix();
 
  d->mUfoGameGUI->updateUfoLabels();
+ if (d->mGameViewPlugin) {
+	d->mGameViewPlugin->updateBeforePaint();
+ }
 
  // the original implementation paints the children
  boProfiling->push("BoUfoCustomWidget::paint()");

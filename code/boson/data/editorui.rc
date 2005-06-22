@@ -22,6 +22,7 @@
     <Action name="editor_player_minerals" />
     <Action name="editor_player_oil" />
     <Action name="editor_edit_conditions" />
+    <Action name="editor_show_random_map_generation" />
   </Menu>
 </MenuBar>
 <ToolBar>

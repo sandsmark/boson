@@ -1,3 +1,5 @@
+SUBDIRS = plugin
+
 INCLUDES = -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl -I$(top_srcdir)/boson/boufo $(all_includes)
 
 noinst_LTLIBRARIES = libbosongameview.la

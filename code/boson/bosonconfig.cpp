@@ -326,6 +326,8 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntry(new BoConfigBoolEntry(this, "SmoothShading", true));
  addDynamicEntry(new BoConfigStringEntry(this, "MeshRenderer", "BoMeshRendererVertexArray"));
  addDynamicEntry(new BoConfigStringEntry(this, "GroundRendererClass", DEFAULT_GROUND_RENDERER));
+ addDynamicEntry(new BoConfigStringEntry(this, "GameViewPlugin", "BosonGameViewDefault"));
+ addDynamicEntry(new BoConfigBoolEntry(this, "EditorShowRandomMapGenerationWidget", false));
 
 
  // the following are NOT stored into the config file
