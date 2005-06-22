@@ -534,6 +534,9 @@ protected:
 	 **/
 	void mouseEventReleaseDouble(ButtonState button, const BoMouseEvent& action);
 
+	void resetGameViewPlugin();
+	void resetGameViewPlugin(bool gameMode);
+
 
 protected slots:
 	void slotResetViewProperties();
@@ -549,6 +552,8 @@ protected slots:
 	void slotAdvance(unsigned int, bool);
 
 	void slotInitMiniMapFogOfWar();
+
+	void slotReloadGameViewPlugin();
 
 	void slotEditorDeleteSelectedUnits();
 	void slotEditorEditHeight(bool);

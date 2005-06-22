@@ -276,6 +276,9 @@ void BosonMenuInputData::initUfoActions(bool gameMode)
  (void)new BoUfoAction(i18n("Reload &groundrenderer plugin"), KShortcut(), this,
 		SIGNAL(signalReloadGroundRenderer()), actionCollection(),
 		"debug_lazy_reload_groundrenderer");
+ (void)new BoUfoAction(i18n("Reload g&ameview plugin"), KShortcut(), this,
+		SIGNAL(signalReloadGameViewPlugin()), actionCollection(),
+		"debug_lazy_reload_gameviewplugin");
  (void)new BoUfoAction(i18n("Light0..."), KShortcut(), this,
 		SIGNAL(signalShowLight0Widget()), actionCollection(),
 		"debug_light0");
@@ -407,6 +410,10 @@ void BosonMenuInputData::initUfoEditorActions()
  (void)new BoUfoAction(i18n("Edit global conditions"), KShortcut(), this,
 		SIGNAL(signalEditConditions()), actionCollection(),
 		"editor_edit_conditions");
+ (void)new BoUfoConfigToggleAction(i18n("Show Random Map Generation Widget"),
+		KShortcut(), 0, 0, actionCollection(),
+		"editor_show_random_map_generation",
+		"EditorShowRandomMapGenerationWidget");
 
  BoUfoStdAction::editUndo(this, SIGNAL(signalEditorUndo()), actionCollection());
  BoUfoStdAction::editRedo(this, SIGNAL(signalEditorRedo()), actionCollection());
@@ -708,6 +715,8 @@ void BosonMenuInput::initIO(KPlayer* player)
 		this, SLOT(slotReloadMeshRenderer()));
  connect(mData, SIGNAL(signalReloadGroundRenderer()),
 		this, SLOT(slotReloadGroundRenderer()));
+ connect(mData, SIGNAL(signalReloadGameViewPlugin()),
+		this, SIGNAL(signalReloadGameViewPlugin()));
  connect(mData, SIGNAL(signalShowLight0Widget()),
 		this, SIGNAL(signalShowLight0Widget()));
  connect(mData, SIGNAL(signalDebugMemory()),

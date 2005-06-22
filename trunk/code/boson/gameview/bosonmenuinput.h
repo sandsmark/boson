@@ -60,6 +60,7 @@ signals:
 	void signalEditConditions();
 	void signalReloadMeshRenderer();
 	void signalReloadGroundRenderer();
+	void signalReloadGameViewPlugin();
 	void signalShowLight0Widget();
 	void signalDebugMemory();
 	void signalEndGame();
@@ -161,6 +162,7 @@ signals:
 	void signalEndGame();
 	void signalQuit();
 	void signalSaveGame();
+	void signalReloadGameViewPlugin();
 	void signalEditorChangeLocalPlayer(Player*);
 	void signalEditorShowPlaceFacilities();
 	void signalEditorShowPlaceMobiles();

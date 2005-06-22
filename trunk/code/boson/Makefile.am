@@ -138,7 +138,7 @@ libboson_la_LIBADD = \
 		-lXmu \
 		$(LIB_XRANDR)
 
-boson_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker -export-dynamic
+boson_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker --export-dynamic
 boson_LDADD = \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		$(top_builddir)/boson/gameview/libbosongameview.la \
@@ -164,6 +164,8 @@ boson_SOURCES = \
 		gameoverdialog.cpp \
 		bocheckinstallation.cpp \
 		bosonstarting.cpp \
+		bosongameviewpluginbase.cpp \
+		bosongameviewpluginmanager.cpp \
 		main.cpp
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
@@ -199,7 +201,7 @@ bocursor_SOURCES = \
 
 libborender_la_SOURCES = \
 		kgamemodeldebug.cpp
-borender_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker -export-dynamic
+borender_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker --export-dynamic
 borender_LDADD = \
 		$(top_builddir)/math/libbomath.la \
 		$(top_builddir)/boson/libboson.la \
