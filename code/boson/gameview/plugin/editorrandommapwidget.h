@@ -58,6 +58,7 @@ public:
 
 protected slots:
 	void slotApply();
+	void slotUpdateProbabilityLabels();
 
 protected:
 	void createHeights(QValueList< QPair<QPoint, bofixed> >* heights);
