@@ -2479,7 +2479,7 @@ QString BoUfoNumInput::label() const
 void BoUfoNumInput::setValue(float v)
 {
  mSlider->setFloatValue(v);
- mLineEdit->setText(QString::number(mSlider->value()));
+ mLineEdit->setText(QString::number(mSlider->floatValue()));
 }
 
 void BoUfoNumInput::slotSetMaxValue(float max)
