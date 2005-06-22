@@ -60,8 +60,13 @@ void BosonGameViewPluginDefault::init()
  d->mInitialized = true;
  BosonGameViewPluginBase::init();
 
+ QColor defaultColor = BoUfoLabel::defaultForegroundColor();
+ BoUfoLabel::setDefaultForegroundColor(Qt::white);
+
  d->mEditorRandomMapWidget = new EditorRandomMapWidget();
  ufoWidget()->addWidget(d->mEditorRandomMapWidget);
+
+ BoUfoLabel::setDefaultForegroundColor(defaultColor);
 }
 
 BoUfoWidget* BosonGameViewPluginDefault::createUfoWidget() const
