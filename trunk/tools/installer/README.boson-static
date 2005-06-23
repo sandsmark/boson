@@ -121,6 +121,7 @@ cd python2.4
  * edit Modules/Setup to include the math module and some more: uncomment the lines
    cmath cmathmodule.c # -lm # complex math library functions
    math mathmodule.c # -lm # math library functions, e.g. sin()
+   time timemodule.c # -lm # time operations and variables
    binascii binascii.c
  * in Modules/Setup add the line (below the cmath/math lines):
    _random _randommodule.c
