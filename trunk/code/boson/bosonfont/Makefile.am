@@ -7,7 +7,5 @@ METASOURCES = AUTO
 libbosonfont_la_SOURCES = \
 	fnt.cpp \
 	fntTXF.cpp \
-	bosonglfont.cpp \
-	bosonglfontchooserbase.ui \
-	bosonglfontchooser.cpp
+	bosonglfont.cpp
 
