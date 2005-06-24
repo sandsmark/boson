@@ -37,6 +37,9 @@
     <!-- AB: icon="icon.xpm" has been removed -->
       boson
     </binary>
+    <binary arch="any" libc="any" symlink="boserver">
+      boserver
+    </binary>
     <binary arch="any" libc="any" keepdirs="yes">
       bin/bobmfconverter
     </binary>
