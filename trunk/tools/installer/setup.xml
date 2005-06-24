@@ -37,13 +37,13 @@
     <!-- AB: icon="icon.xpm" has been removed -->
       boson
     </binary>
-    <!-- TODO:
     <binary arch="any" libc="any" keepdirs="yes">
       bin/bobmfconverter
     </binary>
     <binary arch="any" libc="any" symlink="boinfo">
       boinfo
     </binary>
+    <!-- TODO:
     <binary arch="any" libc="any" symlink="boufodesigner">
       boufodesigner
     </binary>
