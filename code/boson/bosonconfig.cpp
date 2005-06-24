@@ -354,7 +354,6 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntryBool("debug_memory_vmdata_only", false, false);
  addDynamicEntryBool("debug_cpu_usage", false, false);
  addDynamicEntryBool("show_resources", true, false);
- addDynamicEntryBool("debug_colormap_enable", false, false);
  addDynamicEntryBool("debug_profiling_graph", false, false);
  addDynamicEntryBool("ForceDisableModelLoading", false, false); // command line arg! do NOT save to config
  addDynamicEntryBool("ForceDisableTextureCompression", false, false); // command line arg! do NOT save to config

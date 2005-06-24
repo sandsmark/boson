@@ -203,6 +203,7 @@ class BosonMap;
 class Cell;
 class BosonBigDisplayBase;
 class BosonCanvas;
+class BoColorMap;
 
 class QDomElement;
 
@@ -387,6 +388,8 @@ class BosonPath2
     bool* mRegionIdUsed;
     QPtrVector<BosonPathRegion> mRegions;
     bool mDataLocked;
+    BoColorMap* mRegionColorMap;
+    BoColorMap* mSlopeColorMap;
 };
 
 /**

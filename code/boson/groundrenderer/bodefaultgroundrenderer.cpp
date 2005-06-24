@@ -135,13 +135,14 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  glLoadIdentity();
  glMatrixMode(GL_MODELVIEW);
 
- if (boConfig->boolValue("debug_colormap_enable")) {
+ if (map->activeColorMap()) {
 	boTextureManager->disableTexturing();
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
-	renderCellColors(renderCells, cellsCount, map->width(), map->colorMap()->colorMap(), mHeightMap2);
+	map->activeColorMap()->start(map);
+	renderCellColors(renderCells, cellsCount, map->width(), mHeightMap2);
+	map->activeColorMap()->stop();
 	glPopAttrib();
-
  }
 
  glDisable(GL_TEXTURE_GEN_S);
@@ -227,10 +228,12 @@ unsigned int BoDefaultGroundRenderer::renderCellsNow(int* cells, int count, int 
  return renderedQuads;
 }
 
-void BoDefaultGroundRenderer::renderCellColors(int* cells, int count, int width, const unsigned char* colorMap, const float* heightMap)
+void BoDefaultGroundRenderer::renderCellColors(int* cells, int count, int width, const float* heightMap)
 {
  const unsigned char alpha = 128;
  int cornersWidth = width + 1;
+
+ glColor4ub(255, 255, 255, alpha);
 
  glBegin(GL_QUADS);
 
@@ -243,7 +246,6 @@ void BoDefaultGroundRenderer::renderCellColors(int* cells, int count, int width,
 
 	int coloroffset = y * width + x;
 	int heightoffset = y * cornersWidth + x;
-	const unsigned char* color = colorMap + coloroffset * 3;
 	const float* heightMapUpperLeft = heightMap + heightoffset;
 
 	GLfloat cellXPos = (float)x;
@@ -254,16 +256,12 @@ void BoDefaultGroundRenderer::renderCellColors(int* cells, int count, int width,
 	float lowerLeftHeight = *(heightMapUpperLeft + cornersWidth * h);
 	float lowerRightHeight = *(heightMapUpperLeft + cornersWidth * h + w);
 
-	glColor4ub(color[0], color[1], color[2], alpha);
 	glVertex3f(cellXPos, cellYPos, upperLeftHeight + 0.05);
 
-	glColor4ub(color[0], color[1], color[2], alpha);
 	glVertex3f(cellXPos, cellYPos - h, lowerLeftHeight + 0.05);
 
-	glColor4ub(color[0], color[1], color[2], alpha);
 	glVertex3f(cellXPos + w, cellYPos - h, lowerRightHeight + 0.05);
 
-	glColor4ub(color[0], color[1], color[2], alpha);
 	glVertex3f(cellXPos + w, cellYPos, upperRightHeight + 0.05);
  }
  glEnd();

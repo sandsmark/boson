@@ -506,9 +506,6 @@ bool BosonPlayField::loadMapFromFile(const QByteArray& mapXML, const QByteArray&
 	return false;
  }
 
- // Create color map
- mMap->createColorMap();
-
  return ret;
 }
 

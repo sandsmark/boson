@@ -109,6 +109,7 @@ public:
 	QGuardedPtr<BoUfoToggleAction> mActionMenubar;
 #endif
 	QGuardedPtr<BoUfoActionMenu> mActionDebugPlayers;
+	QGuardedPtr<BoUfoActionMenu> mActionDebugColormap;
 	QGuardedPtr<BoUfoSelectAction> mActionEditorPlayer;
 	QGuardedPtr<BoUfoSelectAction> mActionEditorPlace;
 	QGuardedPtr<BoUfoToggleAction> mActionEditorChangeHeight;
@@ -253,8 +254,6 @@ void BosonMenuInputData::initUfoActions(bool gameMode)
 		SIGNAL(signalUnfogAll()), actionCollection(), "debug_unfog");
  (void)new BoUfoAction(i18n("Dump game &log"), KShortcut(), this,
 		SIGNAL(signalDumpGameLog()), actionCollection(), "debug_gamelog");
- (void)new BoUfoConfigToggleAction(i18n("Enable colormap"),
-		KShortcut(), 0, 0, actionCollection(), "debug_colormap_enable");
  (void)new BoUfoAction(i18n("Edit global conditions..."), KShortcut(), this,
 		SIGNAL(signalEditConditions()), actionCollection(),
 		"debug_edit_conditions");
@@ -289,6 +288,13 @@ void BosonMenuInputData::initUfoActions(bool gameMode)
 #endif
  createDebugPlayersMenu();
 
+ d->mActionDebugColormap = new BoUfoActionMenu(i18n("Colormap"),
+		actionCollection(), "debug_colormap");
+ connect(d->mActionDebugColormap, SIGNAL(signalActivated(int)),
+		this, SLOT(slotChangeColorMap(int)));
+ slotUpdateColorMapsMenu();
+ connect(boGame->playField()->map(), SIGNAL(signalColorMapsChanged()),
+		this, SLOT(slotUpdateColorMapsMenu()));
 
  QStringList files;
  files.append(boData->locateDataFile("boson/bosonbaseui.rc"));
@@ -436,7 +442,6 @@ void BosonMenuInputData::resetDefaults()
  resetToggleAction(false, "debug_wireframes");
  resetToggleAction(false, "debug_boundingboxes");
  resetToggleAction(false, "debug_fps");
- resetToggleAction(false, "debug_colormap_enable");
  resetToggleAction(true, "options_show_statusbar");
  resetToggleAction(DEFAULT_CHEAT_MODE, "debug_enable_cheating");
 
@@ -572,6 +577,48 @@ void BosonMenuInputData::slotDebugPlayer(int index)
 	default:
 		boError() << k_funcinfo << "unknown index " << index << endl;
 		break;
+ }
+}
+
+void BosonMenuInputData::slotUpdateColorMapsMenu()
+{
+ // Clear current entries
+ d->mActionDebugColormap->clear();
+
+ int i = 0;
+ // First add the "disabled" entry
+ d->mActionDebugColormap->insertItem(i18n("Disabled"), i++);
+
+ // Then add colormap entries
+ BosonMap* map = boGame->playField()->map();
+ QDictIterator<BoColorMap> it(*map->colorMaps());
+ while (it.current()) {
+	d->mActionDebugColormap->insertItem(it.currentKey(), i++);
+	++it;
+ }
+}
+
+void BosonMenuInputData::slotChangeColorMap(int index)
+{
+ BosonMap* map = boGame->playField()->map();
+ // Check if colormap was disabled
+ if (index == 0) {
+	map->setActiveColorMap(0);
+	return;
+ }
+
+ // Find the wanted colormap
+ int i = 1;
+ QDictIterator<BoColorMap> it(*map->colorMaps());
+ while (it.current()) {
+	if (index == i) {
+		// Set it to be the active one
+		map->setActiveColorMap(it.current());
+		return;
+	}
+
+	i++;
+	++it;
  }
 }
 
