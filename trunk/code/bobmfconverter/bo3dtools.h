@@ -20,7 +20,6 @@
 #ifndef BO3DTOOLS_H
 #define BO3DTOOLS_H
 
-#include <GL/gl.h>
 #include <math.h>
 
 //#include "defines.h"
@@ -961,7 +960,7 @@ class BoMatrix
     /**
      * Construct a matrix that is a copy of @p matrix. See @ref loadMatrix
      **/
-    BoMatrix(const GLfloat* matrix)
+    BoMatrix(const float* matrix)
     {
       loadMatrix(matrix);
     }
@@ -970,14 +969,6 @@ class BoMatrix
      * Construct a matrix that is a copy of @p matrix. See @ref loadMatrix
      **/
     BoMatrix(const BoMatrix& matrix)
-    {
-      loadMatrix(matrix);
-    }
-
-    /**
-     * Load @p matrix from OpenGL. See @ref loadMatrix.
-     **/
-    BoMatrix(GLenum matrix)
     {
       loadMatrix(matrix);
     }
@@ -994,18 +985,11 @@ class BoMatrix
       mData[0] = mData[5] = mData[10] = mData[15] = 1.0;
     }
 
-    /**
-     * Load the specified OpenGL matrix.
-     * @param GL_MODELVIEW_MATRIX, GL_PROJECTION_MATRIX or GL_TEXTURE_MATRIX.
-     * Note that all other values (also e.g. GL_TEXTURE) will result in the
-     * identity matrix and generate an error
-     **/
-    void loadMatrix(GLenum matrix);
 
     /**
      * @overload
      **/
-    void loadMatrix(const GLfloat* m);
+    void loadMatrix(const float* m);
 
     /**
      * @overload
@@ -1043,7 +1027,7 @@ class BoMatrix
      * @return A pointer to the internal array. See also @ref element, @ref indexAt,
      * @ref setElement
      **/
-    const GLfloat* data() const { return mData; }
+    const float* data() const { return mData; }
 
     /**
      * @return TRUE if <em>all</em> elements of this matrix are 0. Otherwise
@@ -1076,7 +1060,7 @@ class BoMatrix
     /**
      * Translate (i.e. move) the matrix by x,y,z.
      **/
-    void translate(GLfloat x, GLfloat y, GLfloat z);
+    void translate(float x, float y, float z);
 
     /**
      * @overload
@@ -1092,13 +1076,13 @@ class BoMatrix
      * Note that if one of x,y,z is 0.0 the result will probably an invalid
      * matrix. Don't do that unless you really know what you're doing.
      **/
-    void scale(GLfloat x, GLfloat y, GLfloat z);
+    void scale(float x, float y, float z);
 
     /**
      * Multiply the matrix by @p mat.
      * @param mat An array as returned by @ref data and as used by OpenGL.
      **/
-    void multiply(const GLfloat* mat);
+    void multiply(const float* mat);
 
     /**
      * @overload
@@ -1114,7 +1098,7 @@ class BoMatrix
      *
      * See also the OpenGL glRotate() which uses the same syntax.
      **/
-    void rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z);
+    void rotate(float angle, float x, float y, float z);
 
     /**
      * Generate a matrix from the three vectors, just as gluLookAt() does. Note
@@ -1153,7 +1137,7 @@ class BoMatrix
      * @return The element at index @p i in the internal array. See @ref
      * indexAt.
      **/
-    inline GLfloat operator[](int i) const { return mData[i]; }
+    inline float operator[](int i) const { return mData[i]; }
 
     /**
      * Convert the rotation matrix to 3 angles. If you combine these angles in
@@ -1210,7 +1194,7 @@ class BoMatrix
     /**
      * Dump @p matrix onto the console as debug output.
      **/
-    static void debugMatrix(const GLfloat* matrix);
+    static void debugMatrix(const float* matrix);
 
     /**
      * See @ref loadMatrix
@@ -1228,7 +1212,7 @@ class BoMatrix
     void extractUp(BoVector3Float& up, const BoVector3Float& x, const BoVector3Float& z) const;
 
   private:
-    GLfloat mData[16];
+    float mData[16];
 };
 
 // most has been stolen from
@@ -1587,84 +1571,6 @@ class Bo3dTools
       return sphereInFrustum(viewFrustum, pos, radius);
     }
 
-    /**
-     * @param modelviewMatrix A reference to the modelview matrix. You can use
-     * @ref BoMatrix::loadMatrix with GL_MODELVIEW_MATRIX for this.
-     * @param projectionMatrix A reference to the projection matrix. You can use
-     * @ref BoMatrix::loadMatrix with GL_PROJECTION_MATRIX for this.
-     * @ref viewport The viewport. Use glGetIntegerv(GL_VIEWPORT, viewport) for
-     * this.
-     * @param x The x-coordinate (world-, aka OpenGL- coordinates) of the point
-     * that is to be projected.
-     * @param y The y-coordinate (world-, aka OpenGL- coordinates) of the point
-     * that is to be projected.
-     * @param z The z-coordinate (world-, aka OpenGL- coordinates) of the point
-     * that is to be projected.
-     * @param pos Here the result will get returned. It will be in
-     * window-coordinates (relative to the OpenGL widget of course).
-     **/
-    static bool boProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, GLfloat x, GLfloat y, GLfloat z, QPoint* pos);
-
-    static bool boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, BoVector3Float* v, float z = -1.0);
-
-    /**
-     * This is a frontend to @ref boUnProject. It calculates the world-(aka
-     * OpenGL-) coordinates (@p posX, @p posY, @p posZ) of given window
-     * coordinates @p pos.
-     *
-     * This function takes the correct z value at @p pos into account (usually
-     * the z/depth at the mouse cursor).
-     * @param useRealDepth If TRUE this function will calculate the real
-     * coordinates at @p pos, if FALSE it will calculate the coordinate at
-     * @p pos with z=0.0. This is useful for e.g. @ref mapDistance, where
-     * different z values could deliver wrong values.
-     **/
-    static bool mapCoordinates(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth = true);
-
-    /**
-     * Map distances from window to world coordinates.
-     *
-     * Sometimes you need to know how much a certain amount of pixels (from a
-     * widget) is in world-coordinates. This is e.g. the case for mouse
-     * scrolling - the player moved the mouse by a certain distance and you need
-     * to scroll the scene by a certain distance.
-     **/
-    static bool mapDistance(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, int windx, int windy, GLfloat* dx, GLfloat* dy);
-
-    /**
-     * Workaround for a probable driver bug. ATI's properitary drivers do
-     * not return 1.0 in the depth buffer, even if it is cleared with 1.0.
-     * This function sets the value that is actually returned.
-     *
-     * Note that we still assume that 0.0 is returned properly, if it is
-     * cleared with 0.0
-     **/
-    static void enableReadDepthBufferWorkaround(float _1_0_depthValue);
-    static void disableReadDepthBufferWorkaround();
-
-    /**
-     * Check whether there is any OpenGL error and output an error to the
-     * konsole if there is one. The error state is cleared then (since @ref
-     * glGetError is used).
-     *
-     * @param error If non-NULL this is set to the error (if any) or to GL_NO_ERROR
-     * @param errorString If non-NULL this is set to the error string describing
-     * @p error, or to an empty string if there is no error. @ref gluErrorString
-     * is used for this string.
-     * @param errorName If non-NULL this is set to the name of the enum that describes
-     * @p error, or an empty string if there is no error.
-     **/
-    static bool checkError(GLenum* error = 0, QString* errorString = 0, QString* errorName = 0);
-
-    /**
-     * @return OpenGL blending function given in QString.
-     * str can be one of "GL_SRC_APLHA", "GL_ONE_MINUS_SRC_ALPHA", "GL_ONE",
-     *  "GL_ZERO", "GL_DST_COLOR", "GL_ONE_MINUS_DST_COLOR", "GL_DST_APLHA",
-     *  "GL_ONE_MINUS_DST_ALPHA", "GL_SRC_ALPHA_SATURATE", "GL_SRC_COLOR",
-     *  "GL_ONE_MINUS_SRC_COLOR". If str is not one of these, GL_INVALID_ENUM
-     *  is returned
-     **/
-    static GLenum string2GLBlendFunc(const QString& str);
 };
 
 
