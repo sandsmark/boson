@@ -31,6 +31,8 @@ class QDataStream;
 class BosonGroundTheme;
 class BoTexture;
 class BosonGroundType;
+class BosonMap;
+template<class T> class QDict;
 template<class T> class QValueList;
 template<class T1, class T2> class QPair;
 
@@ -401,77 +403,33 @@ private:
 
 
 /**
- * Data structure for holding region-coloring info about the map
- *
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
-class BoColorMap: public BoMapCornerArray
+class BoColorMap
 {
 public:
-	BoColorMap(unsigned int width, unsigned int height)
-			: BoMapCornerArray(width, height)
-	{
-		if (width == 0) {
-			width = 1;
-		}
-		if (height == 0) {
-			height = 1;
-		}
-		mColorMap = new unsigned char[colorMapArrayPos(width - 1, height - 1) + 3];
-	}
+	BoColorMap(unsigned int width, unsigned int height);
 
-	virtual ~BoColorMap()
-	{
-		delete[] mColorMap;
-	}
+	virtual ~BoColorMap();
 
-	// Normal maps won't be saved/loaded (they're auto-generated)
+	// Color maps won't be saved/loaded (they're auto-generated)
 	virtual bool save(QDataStream&) { return true; }
 	virtual bool load(QDataStream&) { return true; }
 
-	inline const unsigned char* colorMap() const { return mColorMap; }
+	void update(unsigned char* data);
+	void updateRect(int x, int y, unsigned int w, unsigned int h, unsigned char* data);
 
-	/**
-	 * @return The normal at @p x, @þ y. This function is safe, i.e. if @þ x
-	 * or @p y are invalid we won't crash.
-	 **/
-	const unsigned char* colorAt(int x, int y) const
-	{
-		if (x < 0 || y < 0) {
-			// AB: the very first normal in the array is returned. it will
-			// be invalid anyway, no matter what we return.
-			x = 0;
-			y = 0;
-		}
-		if ((unsigned int)x >= width() || (unsigned int)y >= height()) {
-			// AB: the very first normal in the array is returned. it will
-			// be invalid anyway, no matter what we return.
-			x = 0;
-			y = 0;
-		}
-		return mColorMap + colorMapArrayPos(x, y);
-	}
+	BoTexture* texture() const { return mTexture; }
 
-	void setColorAt(int x, int y, const unsigned char* c)
-	{
-		if (x < 0 || y < 0) {
-			return;
-		}
-		if ((unsigned int)x >= width() || (unsigned int)y >= height()) {
-			return;
-		}
-		mColorMap[colorMapArrayPos(x, y) + 0] = c[0];
-		mColorMap[colorMapArrayPos(x, y) + 1] = c[1];
-		mColorMap[colorMapArrayPos(x, y) + 2] = c[2];
-	}
-
-	inline int colorMapArrayPos(int x, int y) const
-	{
-		return arrayPos(x, y) * 3;
-	}
+	void start(const BosonMap* map);
+	void stop();
 
 private:
-	unsigned char* mColorMap;
+	BoTexture* mTexture;
+	unsigned int mWidth;
+	unsigned int mHeight;
+	unsigned int mTexWidth;
+	unsigned int mTexHeight;
 };
 
 
@@ -525,8 +483,6 @@ public:
 	 **/
 	void recalculateNormalsInRect(int x1, int y1, int x2, int y2);
 	bool generateCellsFromTexMap();
-
-	void createColorMap();
 
 	/**
 	 * Resize the map. Currently this works only if the cells have
@@ -627,8 +583,13 @@ public:
 	BoTexture* currentBumpTexture(BosonGroundType* ground, int advanceCallsCount) const;
 	inline const float* heightMap() const { return mHeightMap->heightMap(); }
 	inline const float* normalMap() const { return mNormalMap->normalMap(); }
-	inline BoColorMap* colorMap() const { return mColorMap; }
+	void setActiveColorMap(BoColorMap* map) { mActiveColorMap = map; }
+	inline BoColorMap* activeColorMap() const { return mActiveColorMap; }
 	BosonGroundTheme* groundTheme() const { return mGroundTheme; }
+
+	void addColorMap(BoColorMap* map, const QString& name);
+	QDict<BoColorMap>* colorMaps();
+	void removeColorMap(const QString& name);
 
 	/**
 	 * @return The internal texmap array, which defines how much percent
@@ -798,6 +759,8 @@ signals:
 	 **/
 	void signalCellChanged(int x, int y);
 
+	void signalColorMapsChanged();
+
 protected:
 	bool saveHeightMap(QDataStream& stream);
 
@@ -837,7 +800,7 @@ private:
 	Cell* mCells;
 	BoHeightMap* mHeightMap;
 	BoNormalMap* mNormalMap;
-	BoColorMap* mColorMap;
+	BoColorMap* mActiveColorMap;
 	BoTexMap* mTexMap;
 	bool mModified;
 

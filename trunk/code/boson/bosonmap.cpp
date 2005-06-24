@@ -302,12 +302,77 @@ bool BoTexMap::copyTexture(unsigned int dstTexture, const BoTexMap* src, unsigne
 }
 
 
+BoColorMap::BoColorMap(unsigned int width, unsigned int height)
+{
+ mWidth = width;
+ mHeight = height;
+ mTexWidth = BoTexture::nextPower2(width);
+ mTexHeight = BoTexture::nextPower2(height);
+ // Create BoTexture object
+ mTexture = new BoTexture(BoTexture::FilterNearest | BoTexture::FormatRGB | BoTexture::DontCompress);
+ // Load initial black texture
+ int datasize = mTexWidth * mTexHeight * 3;
+ unsigned char* data = new unsigned char[datasize];
+ for (int i = 0; i < datasize; i++) {
+	data[i] = 0;
+ }
+ mTexture->load(data, mTexWidth, mTexHeight);
+}
+
+BoColorMap::~BoColorMap()
+{
+ delete mTexture;
+}
+
+void BoColorMap::update(unsigned char* data)
+{
+ updateRect(0, 0, mWidth, mHeight, data);
+}
+
+void BoColorMap::updateRect(int x, int y, unsigned int w, unsigned int h, unsigned char* data)
+{
+ mTexture->bind();
+ glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, GL_RGB, GL_UNSIGNED_BYTE, data);
+}
+
+void BoColorMap::start(const BosonMap*)
+{
+ mTexture->bind();
+ // Use automatic texcoord generation to map the texture to cells
+ const float texPlaneS[] = { 1.0, 0.0, 0.0, 0.0 };
+ const float texPlaneT[] = { 0.0, 1.0, 0.0, 0.0 };
+ glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
+ glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
+ glTexGenfv(GL_S, GL_OBJECT_PLANE, texPlaneS);
+ glTexGenfv(GL_T, GL_OBJECT_PLANE, texPlaneT);
+ glEnable(GL_TEXTURE_GEN_S);
+ glEnable(GL_TEXTURE_GEN_T);
+ glMatrixMode(GL_TEXTURE);
+ glLoadIdentity();
+ glScalef(1.0f / mTexWidth, 1.0f / mTexHeight, 1.0f);
+ glScalef(1, -1, 1);
+ glMatrixMode(GL_MODELVIEW);
+}
+
+void BoColorMap::stop()
+{
+ glMatrixMode(GL_TEXTURE);
+ glLoadIdentity();
+ glMatrixMode(GL_MODELVIEW);
+ boTextureManager->unbindTexture();
+ glDisable(GL_TEXTURE_GEN_S);
+ glDisable(GL_TEXTURE_GEN_T);
+}
+
+
 class BosonMap::BosonMapPrivate
 {
 public:
 	BosonMapPrivate()
 	{
 	}
+
+	QDict<BoColorMap> mColorMaps;
 };
 
 BosonMap::BosonMap(QObject* parent) : QObject(parent)
@@ -318,7 +383,6 @@ BosonMap::BosonMap(QObject* parent) : QObject(parent)
 BosonMap::~BosonMap()
 {
  delete[] mCells;
- delete mColorMap;
  delete mNormalMap;
  delete mHeightMap;
  delete mTexMap;
@@ -329,7 +393,7 @@ void BosonMap::init()
 {
  d = new BosonMapPrivate;
  mCells = 0;
- mColorMap = 0;
+ mActiveColorMap = 0;
  mHeightMap = 0;
  mNormalMap = 0;
  mGroundTheme = 0;
@@ -530,10 +594,6 @@ bool BosonMap::loadCompleteMap(QDataStream& stream)
 	boError() << k_funcinfo << "NULL cells" << endl;
 	return false;
  }
- // should this be done somewhere else?
- boDebug() << k_funcinfo << "creating colormap" << endl;
- createColorMap();
- boDebug() << k_funcinfo << "created colormap" << endl;
  return true;
 }
 
@@ -555,9 +615,6 @@ bool BosonMap::loadMapGeo(unsigned int width, unsigned int height)
  mHeightMap = 0;
  delete mNormalMap;
  mNormalMap = 0;
- boDebug() << k_funcinfo << "deleting colormap" << endl;
- delete mColorMap;
- mColorMap = 0;
  delete mTexMap;
  mTexMap = 0;
 
@@ -1311,27 +1368,23 @@ int BosonMap::mapFileFormatVersion()
  return BOSONMAP_VERSION;
 }
 
-void BosonMap::createColorMap()
+void BosonMap::addColorMap(BoColorMap* map, const QString& name)
 {
- boDebug() << k_funcinfo << "" << endl;
- if (mColorMap) {
-	// Old normal map should already be deleted
-	boWarning() << k_funcinfo << "Old color map not deleted!" << endl;
-	delete mColorMap;
-	mColorMap = 0;
- }
+ d->mColorMaps.insert(name, map);
+ emit signalColorMapsChanged();
+}
 
- boDebug() << k_funcinfo << "creating map" << endl;
- mColorMap = new BoColorMap(width(), height());
+QDict<BoColorMap>* BosonMap::colorMaps()
+{
+ return &d->mColorMaps;
+}
 
- boDebug() << k_funcinfo << "initing map" << endl;
- // Init colormap to gray
- unsigned char color[] = { 128, 128, 128 };
- for (unsigned int y = 0; y < height(); y++) {
-	for (unsigned int x = 0; x < width(); x++) {
-		mColorMap->setColorAt(x, y, color);
-	}
+void BosonMap::removeColorMap(const QString& name)
+{
+ BoColorMap* map = d->mColorMaps.take(name);
+ if (map == mActiveColorMap) {
+	mActiveColorMap = 0;
  }
- boDebug() << k_funcinfo << "done" << endl;
+ emit signalColorMapsChanged();
 }
 

@@ -108,6 +108,8 @@ protected slots:
 	void slotEditorPlace(int index);
 	void slotEditorChangeLocalPlayer(int index);
 	void slotEditorChangeLocalPlayerHack();
+	void slotChangeColorMap(int index);
+	void slotUpdateColorMapsMenu();
 
 private:
 	BosonMenuInputDataPrivate* d;

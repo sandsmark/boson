@@ -1565,6 +1565,10 @@ BosonPath2::~BosonPath2()
 {
   mHLPathCache.setAutoDelete(true);
   mHLPathCache.clear();
+  mMap->removeColorMap("Regions");
+  mMap->removeColorMap("Slopes");
+  delete mSlopeColorMap;
+  delete mRegionColorMap;
   delete[] mSectors;
   delete[] mRegionIdUsed;
 }
@@ -1579,6 +1583,10 @@ void BosonPath2::init()
   findRegionNeighbors(0, 0, mMap->width() - 1, mMap->height() - 1);
   initRegionCosts(mRegions);
   initRegionGroups(mRegions);
+
+  mRegionColorMap = new BoColorMap(mMap->width(), mMap->height());
+  mMap->addColorMap(mRegionColorMap, "Regions");
+
   long int elapsed = profiler.elapsedSinceStart();
   boDebug(510) << k_funcinfo << "END, elapsed: " << elapsed / 1000.0 << " ms" << endl;
 }
@@ -2761,6 +2769,9 @@ void BosonPath2::initCellPassability()
 {
 #define RAD2DEG (180.0/M_PI)
 //  boDebug(510) << k_funcinfo << endl;
+  mSlopeColorMap = new BoColorMap(mMap->width(), mMap->height());
+  mMap->addColorMap(mSlopeColorMap, "Slopes");
+  unsigned char* slopedata = new unsigned char[mMap->width() * mMap->height() * 3];
   const bofixed maxPassableSlope = 45; // If slope <= this, then it's passable, otherwise not
   bofixed minh, maxh, slope;
   for(unsigned int y = 0; y < mMap->height(); y++)
@@ -2796,8 +2807,15 @@ void BosonPath2::initCellPassability()
       }
 
       cell(x, y)->setPassable(slope <= maxPassableSlope);
+
+      unsigned char s = (unsigned char)((float)slope / 90.0f * 255.0f);
+      slopedata[(y * mMap->width() + x) * 3 + 0] = s;
+      slopedata[(y * mMap->width() + x) * 3 + 1] = s;
+      slopedata[(y * mMap->width() + x) * 3 + 2] = s;
     }
   }
+  mSlopeColorMap->update(slopedata);
+  delete[] slopedata;
 //  boDebug(510) << k_funcinfo << "END" << endl;
 #undef RAD2DEG
 }
@@ -3070,7 +3088,7 @@ void BosonPath2::colorizeRegions()
   // Step 3: every region should have color now. So we take every cell and tell
   //  colorMap which color it should have
   //boDebug(510) << k_funcinfo << "Starting step 3" << endl;
-  BoColorMap* colormap = mMap->colorMap();
+  unsigned char* colormap = new unsigned char[mMap->width() * mMap->height() * 3];
   //boDebug(510) << k_funcinfo << "colormap is at " << colormap << endl;
   for(unsigned int y = 0; y < mMap->height(); y++)
   {
@@ -3084,7 +3102,9 @@ void BosonPath2::colorizeRegions()
         // Now what?
         // Make it black. Black is colors[6] atm (special one)
         //boDebug(510) << k_funcinfo << "NULL region, setting color to (" << (int)colors[6][0] << "; " << (int)colors[6][1] << "; " << (int)colors[6][2] << ")" << endl;
-        colormap->setColorAt(x, y, colors[6]);
+        colormap[(y * mMap->width() + x) * 3 + 0] = colors[6][0];
+        colormap[(y * mMap->width() + x) * 3 + 1] = colors[6][1];
+        colormap[(y * mMap->width() + x) * 3 + 2] = colors[6][2];
       }
       else
       {
@@ -3094,11 +3114,15 @@ void BosonPath2::colorizeRegions()
           //boError(510) << k_funcinfo << "Region for cell at (" << x << "; " << y << ") with id " << r->id << " has wrong color " << colorindices[r->id] << endl;
         }
         //boDebug(510) << k_funcinfo << "setting color to (" << (int)colors[colorindices[r->id]][0] << "; " << (int)colors[colorindices[r->id]][1] << "; " << (int)colors[colorindices[r->id]][2] << ")" << endl;
-        colormap->setColorAt(x, y, colors[colorindices[r->id]]);
+        colormap[(y * mMap->width() + x) * 3 + 0] = colors[colorindices[r->id]][0];
+        colormap[(y * mMap->width() + x) * 3 + 1] = colors[colorindices[r->id]][1];
+        colormap[(y * mMap->width() + x) * 3 + 2] = colors[colorindices[r->id]][2];
       }
       //boDebug(510) << k_funcinfo << "DONE for that location" << endl;
     }
   }
+  mRegionColorMap->update(colormap);
+  delete[] colormap;
   //boDebug(510) << k_funcinfo << "END of step 3" << endl;
 
   delete[] colorindices;
