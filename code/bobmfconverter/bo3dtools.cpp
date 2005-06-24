@@ -27,15 +27,11 @@
 #include <qpoint.h>
 
 #include <math.h>
-#include <GL/glu.h>
 
 // Degrees to radians conversion (AB: from mesa/src/macros.h)
 #define DEG2RAD (M_PI/180.0)
 // And radians to degrees conversion
 #define RAD2DEG (180.0/M_PI)
-
-static float workaround_depth_value_1_0 = 1.0f;
-static bool workaround_depth_value_enabled = false;
 
 /*****  BoVector*  *****/
 
@@ -219,27 +215,12 @@ QDataStream& operator>>(QDataStream& s, BoVector4Float& v)
 
 /*****  BoMatrix  *****/
 
-void BoMatrix::loadMatrix(const GLfloat* m)
+void BoMatrix::loadMatrix(const float* m)
 {
  for (int i = 0; i < 16; i++)
  {
    mData[i] = m[i];
  }
-}
-
-void BoMatrix::loadMatrix(GLenum matrix)
-{
- switch (matrix)
- {
-   case GL_MODELVIEW_MATRIX:
-   case GL_PROJECTION_MATRIX:
-   case GL_TEXTURE_MATRIX:
-     break;
-   default:
-     break;
-     //boError() << k_funcinfo << "Invalid matrix enum " << (int)matrix << endl;
- }
- glGetFloatv(matrix, mData);
 }
 
 void BoMatrix::loadMatrix(const BoVector3Float& x, const BoVector3Float& y, const BoVector3Float& z)
@@ -301,13 +282,13 @@ bool BoMatrix::invert(BoMatrix* inverse) const
  // shamelessy stolen from mesa/src/math/m_math.c
  // invert_matrix_general
 
-#define SWAP_ROWS(a, b) { GLfloat *_tmp = a; (a)=(b); (b)=_tmp; }
+#define SWAP_ROWS(a, b) { float *_tmp = a; (a)=(b); (b)=_tmp; }
 #define MAT(m,r,c) (m)[(c)*4+(r)]
- const GLfloat *m = mData;
- GLfloat *out = inverse->mData;
- GLfloat wtmp[4][8];
- GLfloat m0, m1, m2, m3, s;
- GLfloat *r0, *r1, *r2, *r3;
+ const float *m = mData;
+ float *out = inverse->mData;
+ float wtmp[4][8];
+ float m0, m1, m2, m3, s;
+ float *r0, *r1, *r2, *r3;
 
  r0 = wtmp[0], r1 = wtmp[1], r2 = wtmp[2], r3 = wtmp[3];
 
@@ -416,7 +397,7 @@ bool BoMatrix::invert(BoMatrix* inverse) const
 #undef SWAP_ROWS
 }
 
-void BoMatrix::translate(GLfloat x, GLfloat y, GLfloat z)
+void BoMatrix::translate(float x, float y, float z)
 {
  // shamelessy stolen from mesa/src/math/m_math.c
  mData[12] = mData[0] * x + mData[4] * y + mData[8]  * z + mData[12];
@@ -425,7 +406,7 @@ void BoMatrix::translate(GLfloat x, GLfloat y, GLfloat z)
  mData[15] = mData[3] * x + mData[7] * y + mData[11] * z + mData[15];
 }
 
-void BoMatrix::scale(GLfloat x, GLfloat y, GLfloat z)
+void BoMatrix::scale(float x, float y, float z)
 {
  // shamelessy stolen from mesa/src/math/m_math.c
  mData[0] *= x;   mData[4] *= y;   mData[8]  *= z;
@@ -434,17 +415,17 @@ void BoMatrix::scale(GLfloat x, GLfloat y, GLfloat z)
  mData[3] *= x;   mData[7] *= y;   mData[11] *= z;
 }
 
-void BoMatrix::multiply(const GLfloat* mat)
+void BoMatrix::multiply(const float* mat)
 {
  // shamelessy stolen from mesa/src/math/m_math.c
  // we use matmul4() from mesa only, not matmul34(). this means we are slower
  // than mesa! (and also less complex).
  // AB: this function multiplies mData by mat and places the result into mData.
 #define B(row,col)  mat[indexAt(row, col)]
- GLint i;
+ int i;
  for (i = 0; i < 4; i++)
  {
-   const GLfloat ai0=element(i,0),  ai1=element(i,1),  ai2=element(i,2),  ai3=element(i,3);
+   const float ai0=element(i,0),  ai1=element(i,1),  ai2=element(i,2),  ai3=element(i,3);
    mData[indexAt(i, 0)] = ai0 * B(0,0) + ai1 * B(1,0) + ai2 * B(2,0) + ai3 * B(3,0);
    mData[indexAt(i, 1)] = ai0 * B(0,1) + ai1 * B(1,1) + ai2 * B(2,1) + ai3 * B(3,1);
    mData[indexAt(i, 2)] = ai0 * B(0,2) + ai1 * B(1,2) + ai2 * B(2,2) + ai3 * B(3,2);
@@ -453,17 +434,17 @@ void BoMatrix::multiply(const GLfloat* mat)
 #undef B
 }
 
-void BoMatrix::rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
+void BoMatrix::rotate(float angle, float x, float y, float z)
 {
  // shamelessy stolen from mesa/src/math/m_math.c
- GLfloat mag, s, c;
- GLfloat xx, yy, zz, xy, yz, zx, xs, ys, zs, one_c;
- GLfloat m[16];
+ float mag, s, c;
+ float xx, yy, zz, xy, yz, zx, xs, ys, zs, one_c;
+ float m[16];
 
- s = (GLfloat) sin( angle * DEG2RAD );
- c = (GLfloat) cos( angle * DEG2RAD );
+ s = (float) sin( angle * DEG2RAD );
+ c = (float) cos( angle * DEG2RAD );
 
- mag = (GLfloat) sqrt( x*x + y*y + z*z ); // AB: mesa uses GL_SQRT here
+ mag = (float) sqrt( x*x + y*y + z*z ); // AB: mesa uses GL_SQRT here
 
  if (mag <= 1.0e-4)
  {
@@ -538,7 +519,7 @@ bool BoMatrix::isEqual(const BoMatrix& matrix, float diff) const
   return true;
 }
 
-void BoMatrix::debugMatrix(const GLfloat* m)
+void BoMatrix::debugMatrix(const float* m)
 {
  //boDebug() << k_funcinfo << endl;
  for (int i = 0; i < 4; i++)
@@ -1087,315 +1068,6 @@ bool Bo3dTools::boxInFrustum(const float* viewFrustum, const BoVector3Float& min
   return true;
 }
 
-bool Bo3dTools::boProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, GLfloat x, GLfloat y, GLfloat z, QPoint* pos)
-{
-  // AB: once again - most credits go to mesa :)
-  BoVector4Float v;
-  v.setX(x);
-  v.setY(y);
-  v.setZ(z);
-  v.setW(1.0f);
-
-  BoVector4Float v2;
-  modelviewMatrix.transform(&v2, &v);
-  projectionMatrix.transform(&v, &v2);
-
-  if(v[3] == 0.0f)
-  {
-    //boError() << k_funcinfo << "Can't divide by zero" << endl;
-    return false;
-  }
-  v2.setX(v[0] / v[3]);
-  v2.setY(v[1] / v[3]);
-  v2.setZ(v[2] / v[3]);
-
-  pos->setX((int)(viewport[0] + (1 + v2[0]) * viewport[2] / 2));
-  pos->setY((int)(viewport[1] + (1 + v2[1]) * viewport[3] / 2));
-
-  // return the actual window y
-  pos->setY(viewport[3] - pos->y());
-  return true;
-}
-
-bool Bo3dTools::boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, BoVector3Float* ret, float z)
-{
-  // AB: most code is from mesa's gluUnProject().
-  BoMatrix A(projectionMatrix);
-  BoMatrix B;
-
-  // A = A x Modelview (== Projection x Modelview)
-  A.multiply(&modelviewMatrix);
-
-  // B = A^(-1)
-  if(!A.invert(&B))
-  {
-    //boError() << k_funcinfo << "Could not invert (Projection x Modelview)" << endl;
-    return false;
-  }
-
-  // AB: we could calculate the inverse whenever camera changes!
-  // --> less inverses to be calculated.
-
-  GLfloat depth = 0.0f;
-  GLint realy = viewport[3] - (GLint)pos.y() - 1;
-  if (z == -1.0f)
-  {
-    glReadPixels(pos.x(), realy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-    if (workaround_depth_value_enabled)
-    {
-      depth /= workaround_depth_value_1_0;
-    }
-  }
-  else
-  {
-    depth = z;
-  }
-
-
-  BoVector4Float v;
-  BoVector4Float result;
-  v.setX( ((GLfloat)((pos.x() - viewport[0]) * 2)) / viewport[2] - 1.0f);
-  v.setY( ((GLfloat)((realy - viewport[1]) * 2)) / viewport[3] - 1.0f);
-#if 0
-  // mesa uses this
-  v.setX( (pos.x() - viewport[0]) * 2 / viewport[2] - 1.0f);
-  v.setY( (realy - viewport[1]) * 2 / viewport[3] - 1.0f);
-#endif
-  v.setZ(2 * depth - 1.0f);
-  v.setW(1.0f);
-  B.transform(&result, &v);
-
-  if(result[3] == 0.0f)
-  {
-    //boError() << k_funcinfo << "Can't divide by zero" << endl;
-    return false;
-  }
-
-  ret->set(result[0] / result[3], result[1] / result[3], result[2] / result[3]);
-
-  return true;
-}
-
-bool Bo3dTools::mapCoordinates(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth)
-{
-  GLint realy = viewport[3] - (GLint)pos.y() - 1;
-  // we basically calculate a line here .. nearX/Y/Z is the starting point,
-  // farX/Y/Z is the end point. From these points we can calculate a direction.
-  // using this direction and the points nearX(Y)/farX(Y) you can build triangles
-  // and then find the point that is on z=0.0
-  GLdouble nearX, nearY, nearZ;
-  GLdouble farX, farY, farZ;
-  BoVector3Float near, far;
-  if(!boUnProject(modelviewMatrix, projectionMatrix, viewport, pos, &near, 0.0f))
-  {
-    return false;
-  }
-  if(!boUnProject(modelviewMatrix, projectionMatrix, viewport, pos, &far, 1.0f))
-  {
-    return false;
-  }
-  nearX = near[0];
-  nearY = near[1];
-  nearZ = near[2];
-  farX = far[0];
-  farY = far[1];
-  farZ = far[2];
-
-  GLdouble zAtPoint = 0.0f;
-
-  // we need to find out which z position is at the point pos. this is important
-  // for mapping 2d values (screen coordinates) to 3d (world coordinates)
-  GLfloat depth = 0.0;
-  glReadPixels(pos.x(), realy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-  if (workaround_depth_value_enabled)
-  {
-    depth /= workaround_depth_value_1_0;
-  }
-
-  // AB: 0.0f is reached when we have a point that is outside the actual window!
-  if(useRealDepth && depth != 1.0f && depth != 0.0f) {
-    // retrieve z
-    BoVector3Float v;
-    if(!boUnProject(modelviewMatrix, projectionMatrix, viewport, pos, &v))
-    {
-      return false;
-    }
-    zAtPoint = v[2];
-  }
-  else
-  {
-    // assume we're using z = 0.0f
-    zAtPoint = 0.0f;
-  }
-
-  // simple maths .. however it took me pretty much time to do this.. I haven't
-  // done this for way too long time!
-  GLdouble dist = (nearZ - zAtPoint); // distance from nearZ to our actual z. for z=0.0 this is equal to nearZ.
-  GLdouble tanAlphaX = (nearX - farX) / (nearZ - farZ);
-  *posX = (GLfloat)(nearX - tanAlphaX * dist);
-
-  GLdouble tanAlphaY = (nearY - farY) / (nearZ - farZ);
-  *posY = (GLfloat)(nearY - tanAlphaY * dist);
-
-  *posZ = zAtPoint;
-  return true;
-}
-
-bool Bo3dTools::mapDistance(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, int windx, int windy, GLfloat* dx, GLfloat* dy)
-{
-  GLfloat moveZ; // unused
-  GLfloat moveX1, moveY1;
-  GLfloat moveX2, moveY2;
-  if(windx >= viewport[2]) // viewport[2] == width
-  {
-    //boError() << k_funcinfo << "windx (" << windx <<") must be < " << viewport[2] << endl;
-    return false;
-  }
-  if(windy >= viewport[3]) // viewport[3] == height
-  {
-    //boError() << k_funcinfo << "windy (" << windy <<") must be < " << viewport[3] << endl;
-    return false;
-  }
-  if(!mapCoordinates(modelviewMatrix, projectionMatrix, viewport,
-              QPoint(viewport[2] / 2 - windx / 2, viewport[3] / 2 - windy / 2),
-              &moveX1, &moveY1, &moveZ, false))
-  {
-    //boError() << k_funcinfo << "Cannot map coordinates" << endl;
-    return false;
-  }
-  if(!mapCoordinates(modelviewMatrix, projectionMatrix, viewport,
-              QPoint(viewport[2] / 2 + windx / 2, viewport[3] / 2 + windy / 2),
-              &moveX2, &moveY2, &moveZ, false))
-  {
-    //boError() << k_funcinfo << "Cannot map coordinates" << endl;
-    return false;
-  }
-  *dx = moveX2 - moveX1;
-  *dy = moveY2 - moveY1;
-  return true;
-}
-
-
-void Bo3dTools::enableReadDepthBufferWorkaround(float _1_0_depthValue)
-{
-  workaround_depth_value_1_0 = _1_0_depthValue;
-  workaround_depth_value_enabled = true;
-}
-
-void Bo3dTools::disableReadDepthBufferWorkaround()
-{
-  workaround_depth_value_enabled = false;
-}
-
-bool Bo3dTools::checkError(GLenum* error, QString* errorString, QString* errorName)
-{
-  bool ret = true;
-  GLenum e = glGetError();
-  QString s;
-  switch(e)
-  {
-    case GL_INVALID_ENUM:
-      s =  "GL_INVALID_ENUM";
-      break;
-    case GL_INVALID_VALUE:
-      s = "GL_INVALID_VALUE";
-      break;
-    case GL_INVALID_OPERATION:
-      s = "GL_INVALID_OPERATION";
-      break;
-    case GL_STACK_OVERFLOW:
-      s = "GL_STACK_OVERFLOW";
-      break;
-    case GL_STACK_UNDERFLOW:
-      s = "GL_STACK_UNDERFLOW";
-      break;
-    case GL_OUT_OF_MEMORY:
-      s = "GL_OUT_OF_MEMORY";
-      break;
-    case GL_NO_ERROR:
-      ret = false;
-      break;
-    default:
-      s = QString("Unknown OpenGL Error: %1").arg((int)e);
-      break;
-  }
-  if(!s.isEmpty())
-  {
-    //boError() << s << endl;
-  }
-  QString string;
-  if(e != GL_NO_ERROR)
-  {
-    string = QString((char*)gluErrorString(e));
-    //boError() << "Error string: " << string << endl;
-  }
-  if(error)
-  {
-    *error = e;
-  }
-  if(errorString)
-  {
-    *errorString = string;
-  }
-  if(errorName)
-  {
-    *errorName = s;
-  }
-  return ret;
-}
-
-GLenum Bo3dTools::string2GLBlendFunc(const QString& str)
-{
-  if(str == "GL_SRC_ALPHA")
-  {
-    return GL_SRC_ALPHA;
-  }
-  else if(str == "GL_ONE_MINUS_SRC_ALPHA")
-  {
-    return GL_ONE_MINUS_SRC_ALPHA;
-  }
-  else if(str == "GL_ONE")
-  {
-    return GL_ONE;
-  }
-  else if(str == "GL_ZERO")
-  {
-    return GL_ZERO;
-  }
-  else if(str == "GL_DST_COLOR")
-  {
-    return GL_DST_COLOR;
-  }
-  else if(str == "GL_ONE_MINUS_DST_COLOR")
-  {
-    return GL_ONE_MINUS_DST_COLOR;
-  }
-  else if(str == "GL_DST_ALPHA")
-  {
-    return GL_DST_ALPHA;
-  }
-  else if(str == "GL_ONE_MINUS_DST_ALPHA")
-  {
-    return GL_ONE_MINUS_DST_ALPHA;
-  }
-  else if(str == "GL_SRC_ALPHA_SATURATE")
-  {
-    return GL_SRC_ALPHA_SATURATE;
-  }
-  else if(str == "GL_SRC_COLOR")
-  {
-    return GL_SRC_COLOR;
-  }
-  else if(str == "GL_ONE_MINUS_SRC_COLOR")
-  {
-    return GL_ONE_MINUS_SRC_COLOR;
-  }
-  else
-  {
-    // Invalid string was given
-    return GL_INVALID_ENUM;
-  }
-}
 
 
 /*
