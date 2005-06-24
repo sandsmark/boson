@@ -206,6 +206,10 @@ Makefile.ams
    * -lart_lgp2 (kdecore dependency)  (note: this may link dynamically! might not be desired)
    * -lidn (kdecore dependency)  (note: this may link dynamically! might not be desired)
  * remove line kde_widget_LTLIBRARIES = bosonwidgets.la from bosonwidgets/plugin/Makefile.am
+ * bobmfconverter/Makefile.am needs to be modified in the same manner as boson/Makefile.am.
+   i.e. add more or less the same libraries to bobmfconverter_LDADD as you added to boson_LDADD
+   -> actually much less: only qt and kdecore and their dependencies. just replace $(LIB_QT) and $(LIB_KDECORE) accordingly.
+   --> just replacing them by the variables $(LIB_KDE_MISC_STATIC), $(LIB_QT_STATIC), $(LIB_MISC_NON_STATIC) should work.
 
 make -f Makefile.cvs
 
