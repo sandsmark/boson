@@ -12,12 +12,12 @@ See README.boson-static
 -----------------------------------------------------------------------------
 
 
-* in loki_setupdb: ./autogen; ./configure; make
+* in loki_setupdb: ./autogen.sh; ./configure; make
 * in loki_setup:
-  * ./autogen
+  * ./autogen.sh
   * ./configure --enable-libxml-static --enable-libglade-static
   * make
-  * mkdir -p image/setup.data/bin/Linux/glibc-2.1
+  * mkdir -p image/setup.data/bin/Linux/x86/glibc-2.1
     Directory names Linux, x86 and glibc-2.1 may vary in your system.
     Check top of Makefile.
     See also the README of the loki_installer for more on the
