@@ -28,6 +28,7 @@
 #include "bosonconfig.h"
 #include "bodebug.h"
 #include "boaction.h"
+#include "bosonprofiling.h"
 
 #include <ksimpleconfig.h>
 #include <klocale.h>
@@ -338,6 +339,7 @@ void UnitProperties::loadWeapons(KSimpleConfig* conf)
 
 void UnitProperties::loadActions()
 {
+ BosonProfiler prof("LoadActions");
  KSimpleConfig conf(unitPath() + "index.unit");
  // Produce action first
  // Produce is special because it uses little overview as pixmap and it's

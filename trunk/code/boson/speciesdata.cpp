@@ -25,6 +25,7 @@
 #include "bodebug.h"
 #include "boaction.h"
 #include "bosonconfig.h"
+#include "bosonprofiling.h"
 
 #include <qintdict.h>
 #include <qdict.h>
@@ -311,6 +312,7 @@ void SpeciesData::removeTeamColor(const QColor& color)
 
 bool SpeciesData::loadUnitOverview(const UnitProperties* prop, const QColor& teamColor)
 {
+ BosonProfiler prof("LoadUnitOverview");
  TeamColorData* data = teamColorData(teamColor);
  if (!data) {
 	boError(270) << k_funcinfo << "NULL teamcolor data" << endl;
