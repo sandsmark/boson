@@ -154,6 +154,7 @@ bool SpeciesTheme::loadUnit(unsigned long int type)
 	return false;
  }
  // Load unit sounds
+ BosonProfiler soundProfiling("UnitSound");
  QStringList sounds;
  QMap<int, QString> unitSounds = prop->sounds();
  QMap<int,QString>::Iterator it = unitSounds.begin();
@@ -175,6 +176,7 @@ bool SpeciesTheme::loadUnit(unsigned long int type)
 	}
  }
  mSound->addUnitSounds(themePath(), sounds);
+ soundProfiling.pop();
  return true;
 }
 
