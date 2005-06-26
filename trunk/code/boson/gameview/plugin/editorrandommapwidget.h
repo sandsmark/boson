@@ -27,6 +27,7 @@ class bofixed;
 template<class T> class QValueList;
 template<class T1, class T2> class QPair;
 
+class MyMap;
 
 class EditorRandomMapWidgetPrivate;
 /**
@@ -57,11 +58,21 @@ public:
 	}
 
 protected slots:
-	void slotApply();
-	void slotUpdateProbabilityLabels();
+	void slotCreateTerrain();
+	void slotCreateMountains();
+
+	void slotUpdateHeightProbabilityLabels();
+	void slotUpdateMountainProbabilityLabels();
+	void slotTerrainCreationChanged(BoUfoRadioButton*);
 
 protected:
-	void createHeights(QValueList< QPair<QPoint, bofixed> >* heights);
+	void createHeightsSimple(MyMap&);
+	void createHeightsDiamondSquare(MyMap&);
+	void createMountains(MyMap& map);
+
+private:
+	void initTerrainCreationGUI(BoUfoWidget* parent);
+	void initMountainCreationGUI(BoUfoWidget* parent);
 
 private:
 	EditorRandomMapWidgetPrivate* d;
