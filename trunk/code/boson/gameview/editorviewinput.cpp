@@ -617,6 +617,7 @@ void EditorViewInput::undo()
  QDataStream stream(b, IO_WriteOnly);
  if (!message->save(stream)) {
 	boError() << k_funcinfo << "unable to save message (" << message->messageId() << ")" << endl;
+	delete message;
 	return;
  }
 
@@ -642,6 +643,7 @@ void EditorViewInput::redo()
  QDataStream stream(b, IO_WriteOnly);
  if (!message->save(stream)) {
 	boError() << k_funcinfo << "unable to save message (" << message->messageId() << ")" << endl;
+	delete message;
 	return;
  }
 
@@ -704,6 +706,20 @@ QString EditorViewInput::messageName(const BosonMessageEditorMove* message) cons
 		BosonMessageEditorMoveUndoDeleteItems* m = (BosonMessageEditorMoveUndoDeleteItems*)message;
 		QString count = QString::number(m->mMessage.mItems.count());
 		name = i18n("Delete %1 items").arg(count);
+		break;
+	}
+	case BosonMessageIds::MoveChangeHeight: // redo
+	{
+		BosonMessageEditorMoveChangeHeight* m = (BosonMessageEditorMoveChangeHeight*)message;
+		QString count = QString::number(m->mCellCornersX.count());
+		name = i18n("Change height of %1 corners").arg(count);
+		break;
+	}
+	case BosonMessageIds::MoveUndoChangeHeight:
+	{
+		BosonMessageEditorMoveUndoChangeHeight* m = (BosonMessageEditorMoveUndoChangeHeight*)message;
+		QString count = QString::number(m->mOriginalHeights.mCellCornersX.count());
+		name = i18n("Change height of %1 corners").arg(count);
 		break;
 	}
 	default:
