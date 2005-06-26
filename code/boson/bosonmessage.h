@@ -249,6 +249,27 @@ public:
 	BosonMessageEditorMoveDeleteItems mMessage;
 };
 
+class BosonMessageEditorMoveUndoChangeHeight : public BosonMessageEditorMove
+{
+public:
+	BosonMessageEditorMoveUndoChangeHeight() : BosonMessageEditorMove()
+	{
+		setUndo();
+	}
+	BosonMessageEditorMoveUndoChangeHeight(const BosonMessageEditorMoveChangeHeight& originalHeights, const BosonMessageEditorMoveChangeHeight& message);
+
+	virtual bool save(QDataStream& stream) const;
+	virtual bool load(QDataStream& stream);
+	virtual int messageId() const
+	{
+		return BosonMessageIds::MoveUndoChangeHeight;
+	}
+
+public:
+	BosonMessageEditorMoveChangeHeight mOriginalHeights;
+	BosonMessageEditorMoveChangeHeight mMessage;
+};
+
 class BosonMessageMoveMove : public BosonMessage
 {
 public:

@@ -743,42 +743,22 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
 			break;
 		}
 
-		// TODO: unify. either store float or bofixed, storing float in
-		// the map and bofixed in the message is not good.
-		QValueList< QPair<QPoint, float> > heights;
-		Q_UINT32 count;
-		for (Q_UINT32 i = 0; i < message.mCellCornersX.count(); i++) {
-			// note: cornerX == mapWidth() and cornerY == mapHeight()
-			// are valid!
-			Q_INT32 cornerX = message.mCellCornersX[i];
-			Q_INT32 cornerY = message.mCellCornersY[i];
-			bofixed height = message.mCellCornersHeight[i];
-			if (cornerX < 0 || (unsigned int)cornerX > canvas()->mapWidth()) {
-				boError() << k_funcinfo << "invalid x coordinate " << cornerX << endl;
-				continue;
-			}
-			if (cornerY < 0 || (unsigned int)cornerY > canvas()->mapHeight()) {
-				boError() << k_funcinfo << "invalid y coordinate " << cornerY << endl;
-				continue;
-			}
-			QPoint p(cornerX, cornerY);
-			heights.append(QPair<QPoint, float>(p, height));
-		}
-
-		canvas()->setHeightsAtCorners(heights);
-
+		// save the original values (for undo)
+		QValueVector<bofixed> originalHeights(message.mCellCornersX.count());
 		for (Q_UINT32 i = 0; i < message.mCellCornersX.count(); i++) {
 			Q_INT32 cornerX = message.mCellCornersX[i];
 			Q_INT32 cornerY = message.mCellCornersY[i];
-			float height = canvas()->heightAtCorner(cornerX, cornerY);
-
-			// TODO: find out whether we actually still need this
-			// signal. if we do, find out whether we can use a list
-			// instead.
-			// this is currently terribly inefficient for many
-			// corners at once.
-			emit signalChangeHeight(cornerX, cornerY, height);
+			bofixed height = canvas()->heightAtCorner(cornerX, cornerY);
+			originalHeights[i] = height;
 		}
+
+		editorChangeHeight(message.mCellCornersX,
+				message.mCellCornersY,
+				message.mCellCornersHeight);
+
+		BosonMessageEditorMoveChangeHeight originalHeightsMessage(message.mCellCornersX, message.mCellCornersY, originalHeights);
+		BosonMessageEditorMoveUndoChangeHeight undo(originalHeightsMessage, message);
+		emit signalEditorNewUndoMessage(undo, message.isRedo());
 		break;
 	}
 	case BosonMessageIds::MoveDeleteItems:
@@ -854,6 +834,21 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
 		emit signalEditorNewRedoMessage(message.mMessage);
 		break;
 	}
+	case BosonMessageIds::MoveUndoChangeHeight:
+	{
+		BosonMessageEditorMoveUndoChangeHeight message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			break;
+		}
+
+		editorChangeHeight(message.mOriginalHeights.mCellCornersX,
+				message.mOriginalHeights.mCellCornersY,
+				message.mOriginalHeights.mCellCornersHeight);
+
+		emit signalEditorNewRedoMessage(message.mMessage);
+		break;
+	}
 	default:
 		// did not process message
 		return false;
@@ -887,8 +882,8 @@ Unit* BosonPlayerInputHandler::editorPlaceUnit(Q_UINT32 owner, Q_UINT32 unitType
  // We must only check if cells aren't occupied and if unit can go there,
  //  because everything else should be checked before placing anything. But
  //  occupied status of cell might have changed already.
- const UnitProperties* prop = p->speciesTheme()->unitProperties(unitType);
- /*bofixed width = prop->unitWidth();
+ /*const UnitProperties* prop = p->speciesTheme()->unitProperties(unitType);
+ bofixed width = prop->unitWidth();
  bofixed height = prop->unitHeight();
  BoRectFixed r(pos, pos + BoVector2Fixed(width, height));
  if (!canvas()->canGo(prop, r)) {
@@ -962,5 +957,50 @@ BosonMessageEditorMove* BosonPlayerInputHandler::createNewUndoDeleteItemsMessage
 	placeUnit.pop_front();
  }
  return undo;
+}
+
+
+void BosonPlayerInputHandler::editorChangeHeight(const QValueVector<Q_UINT32>& cellCornersX, const QValueVector<Q_UINT32>& cellCornersY, const QValueVector<bofixed>& cellCornersHeight)
+{
+ if (cellCornersX.count() != cellCornersY.count() || cellCornersX.count() != cellCornersHeight.count()) {
+	boError() << k_funcinfo << "invalid sizes" << endl;
+	return;
+ }
+
+ // TODO: unify. either store float or bofixed, storing float in
+ // the map and bofixed in the message is not good.
+ QValueList< QPair<QPoint, float> > heights;
+ for (Q_UINT32 i = 0; i < cellCornersX.count(); i++) {
+	// note: cornerX == mapWidth() and cornerY == mapHeight()
+	// are valid!
+	Q_INT32 cornerX = cellCornersX[i];
+	Q_INT32 cornerY = cellCornersY[i];
+	bofixed height = cellCornersHeight[i];
+	if (cornerX < 0 || (unsigned int)cornerX > canvas()->mapWidth()) {
+		boError() << k_funcinfo << "invalid x coordinate " << cornerX << endl;
+		continue;
+	}
+	if (cornerY < 0 || (unsigned int)cornerY > canvas()->mapHeight()) {
+		boError() << k_funcinfo << "invalid y coordinate " << cornerY << endl;
+		continue;
+	}
+	QPoint p(cornerX, cornerY);
+	heights.append(QPair<QPoint, float>(p, height));
+ }
+
+ canvas()->setHeightsAtCorners(heights);
+
+ for (Q_UINT32 i = 0; i < cellCornersX.count(); i++) {
+	Q_INT32 cornerX = cellCornersX[i];
+	Q_INT32 cornerY = cellCornersY[i];
+	float height = canvas()->heightAtCorner(cornerX, cornerY);
+
+	// TODO: find out whether we actually still need this
+	// signal. if we do, find out whether we can use a list
+	// instead.
+	// this is currently terribly inefficient for many
+	// corners at once.
+	emit signalChangeHeight(cornerX, cornerY, height);
+ }
 }
 

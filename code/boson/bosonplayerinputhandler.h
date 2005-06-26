@@ -37,6 +37,7 @@ typedef BoRect<bofixed> BoRectFixed;
 
 template<class T> class QPtrStack;
 template<class T> class QValueList;
+template<class T> class QValueVector;
 
 /**
  * @short Helper class for @ref Boson
@@ -85,6 +86,8 @@ protected:
 
 	void editorDeleteItems(const QValueList<Q_ULONG>& items);
 	Unit* editorPlaceUnit(Q_UINT32 owner, Q_UINT32 unitType, const BoVector2Fixed& pos, const bofixed& rotation);
+
+	void editorChangeHeight(const QValueVector<Q_UINT32>& cornersX, const QValueVector<Q_UINT32>& cornersY, const QValueVector<bofixed>& heights);
 
 	BosonMessageEditorMove* createNewUndoDeleteItemsMessage(const BosonMessageEditorMoveDeleteItems&) const;
 

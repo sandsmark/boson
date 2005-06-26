@@ -127,10 +127,10 @@ BosonMessageEditorMove* BosonMessageEditorMove::newCopy(const BosonMessageEditor
 	case BosonMessageIds::MoveUndoChangeTexMap:
 		m = new BosonMessageEditorMoveUndoChangeTexMap();
 		break;
+#endif
 	case BosonMessageIds::MoveUndoChangeHeight:
 		m = new BosonMessageEditorMoveUndoChangeHeight();
 		break;
-#endif
 	case BosonMessageIds::MoveUndoDeleteItems:
 		m = new BosonMessageEditorMoveUndoDeleteItems();
 		break;
@@ -559,6 +559,69 @@ bool BosonMessageEditorMoveUndoDeleteItems::load(QDataStream& stream)
 
 	mUnits.append(u);
 	mUnitsData.append(xml);
+ }
+
+ if (!mMessage.readMessageId(stream)) {
+	boError() << k_funcinfo << "could not load messages messageId from stream" << endl;
+	return false;
+ }
+ if (!mMessage.load(stream)) {
+	boError() << k_funcinfo << "could not load message from stream" << endl;
+	return false;
+ }
+ return true;
+}
+
+BosonMessageEditorMoveUndoChangeHeight::BosonMessageEditorMoveUndoChangeHeight(
+		const BosonMessageEditorMoveChangeHeight& originalHeights,
+		const BosonMessageEditorMoveChangeHeight& message
+	)
+	: BosonMessageEditorMove()
+{
+ setUndo();
+ if (!originalHeights.copyTo(mOriginalHeights)) {
+	boError() << k_funcinfo << "could not copy original heights message" << endl;
+ }
+ if (!message.copyTo(mMessage)) {
+	boError() << k_funcinfo << "could not copy message" << endl;
+ }
+}
+
+bool BosonMessageEditorMoveUndoChangeHeight::save(QDataStream& stream) const
+{
+ stream << (Q_UINT32)BosonMessageIds::MoveEditor;
+ stream << (Q_UINT32)messageId();
+ if (!BosonMessageEditorMove::saveFlags(stream)) {
+	return false;
+ }
+
+ if (!mOriginalHeights.save(stream)) {
+	boError() << k_funcinfo << "could not save original heights message to stream" << endl;
+	return false;
+ }
+
+
+ if (!mMessage.save(stream)) {
+	boError() << k_funcinfo << "could not save message to stream" << endl;
+	return false;
+ }
+ return true;
+}
+
+bool BosonMessageEditorMoveUndoChangeHeight::load(QDataStream& stream)
+{
+ // AB: msgid and editor flag have been read already
+ if (!BosonMessageEditorMove::loadFlags(stream)) {
+	return false;
+ }
+
+ if (!mOriginalHeights.readMessageId(stream)) {
+	boError() << k_funcinfo << "could not load original heights messages messageId from stream" << endl;
+	return false;
+ }
+ if (!mOriginalHeights.load(stream)) {
+	boError() << k_funcinfo << "could not load original heights message from stream" << endl;
+	return false;
  }
 
  if (!mMessage.readMessageId(stream)) {
