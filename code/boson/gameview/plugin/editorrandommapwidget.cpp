@@ -119,6 +119,58 @@ public:
 		}
 	}
 
+	/**
+	 * Scale all heights in this map to be inside the valid @ref BosonMap
+	 * heights.
+	 *
+	 * If all heights are already valid, no scaling is applied.
+	 **/
+	void scaleHeights()
+	{
+		float min = 0.0f;
+		float max = 0.0f;
+		for (int x = 0; x < cornerWidth(); x++) {
+			for (int y = 0; y < cornerHeight(); y++) {
+				float h = heightAtCorner(x, y);
+				if (h < min) {
+					min = h;
+				}
+				if (h > max) {
+					max = h;
+				}
+			}
+		}
+
+		float realMax = 18.75;
+		float realMin = -13.125;
+
+		float scalePos = 1.0f;
+		float scaleNeg = 1.0f;
+		if (max > realMax) {
+			scalePos = realMax / max;
+		}
+		if (min < realMin) {
+			// AB: both are negative, so scaleNeg is positive
+			scaleNeg = realMin / min;
+		}
+		if (scalePos == 1.0f && scaleNeg == 1.0f) {
+			// nothing to scale
+			boDebug() << "all heights valid - no scaling" << endl;
+			return;
+		}
+		float scale = scalePos;
+		if (scaleNeg < scale) {
+			scale = scaleNeg;
+		}
+		boDebug() << "scaling of " << scalePos << " for positive and of " << scaleNeg << " for negative heights requested. Using " << scale << " for all heights." << endl;
+		for (int x = 0; x < cornerWidth(); x++) {
+			for (int y = 0; y < cornerHeight(); y++) {
+				float h = heightAtCorner(x, y);
+				setHeightAtCorner(x, y, h * scale);
+			}
+		}
+	}
+
 	void setHeightAtCorner(int x, int y, float h)
 	{
 		if (x < 0 || x >= cornerWidth()) {
@@ -193,7 +245,12 @@ private:
 };
 
 /**
- * Implementation of the diamond square algorithm
+ * Implementation of the diamond square algorithm.
+ * Idea from
+ * Game Programming Gems 1, Chapter 4.18, by Jason Shankel. Code completely by
+ * me, I did not use the sample code in any way.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class DiamondSquare
 {
@@ -222,6 +279,7 @@ public:
 	}
 
 	void diamondSquare(MyMap& map);
+	void diamondSquare2(MyMap& map, int x1, int x2, int y1, int y2);
 
 	void setDHeight(float d)
 	{
@@ -234,13 +292,6 @@ public:
 	}
 
 protected:
-#if 0
-	bool diamondStep(int x1, int x2, int y1, int y2, float dHeight);
-	bool squareStep(int x1, int x2, int y1, int y2, float dHeight);
-	void squareStepCorner(int x, int y, float dHeight);
-#endif
-
-
 	// diamond/square step at a specific corner.
 	// lod := (current rectangle width) / 2
 	void diamondStepCorner(int x, int y, int lod, float dHeight);
@@ -252,6 +303,110 @@ private:
 	float mR;
 	float mPow2_R;
 	KRandomSequence mRandom;
+};
+
+/**
+ * Particle Deposition algorithm that is intended to create mountains. Idea from
+ * Game Programming Gems 1, Chapter 4.19, by Jason Shankel. Code completely by
+ * me, I did not use the sample code in any way.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class ParticleDeposition
+{
+public:
+	ParticleDeposition()
+	{
+		mParticleHeight = 0.5f;
+		mNumberOfParticles = 100;
+
+		setParticleHeight(0.5f);
+		setNumberOfParticles(1000);
+	}
+	~ParticleDeposition()
+	{
+	}
+	void setParticleHeight(float h)
+	{
+		mParticleHeight = h;
+	}
+	void setNumberOfParticles(int n)
+	{
+		mNumberOfParticles = n;
+	}
+
+	void particleDeposition(MyMap& map, const QPoint& start);
+
+protected:
+	bool moveParticle(MyMap& map, int x, int y, float particleHeight, QPoint* dest);
+
+	bool neighbor(const MyMap& map, int i, int* x, int* y) const
+	{
+		switch (i)
+		{
+			case 0:
+				if (*x - 1 >= 0) {
+					*x = *x - 1;
+					return true;
+				}
+				return false;
+			case 1:
+				if (*y - 1 >= 0) {
+					*y = *y - 1;
+					return true;
+				}
+				return false;
+			case 2:
+				if (*x - 1 >= 0 && *y - 1 >= 0) {
+					*x = *x - 1;
+					*y = *y - 1;
+					return true;
+				}
+				return false;
+			case 3:
+				if (*x + 1 < map.cornerWidth()) {
+					*x = *x + 1;
+					return true;
+				}
+				return false;
+			case 4:
+				if (*y + 1 < map.cornerHeight()) {
+					*y = *y + 1;
+					return true;
+				}
+				return false;
+			case 5:
+				if (*x + 1 < map.cornerWidth() && *y + 1 < map.cornerHeight()) {
+					*x = *x + 1;
+					*y = *y + 1;
+					return true;
+				}
+				return false;
+			case 6:
+				if (*x + 1 < map.cornerWidth() && *y - 1 >= 0) {
+					*x = *x + 1;
+					*y = *y - 1;
+					return true;
+				}
+				return false;
+			case 7:
+				if (*x - 1 >= 0 && *y + 1 < map.cornerHeight()) {
+					*x = *x - 1;
+					*y = *y + 1;
+					return true;
+				}
+				return false;
+			default:
+				boError() << k_funcinfo << "invalid parameter" << endl;
+				return false;
+		}
+		return false;
+	}
+
+private:
+	KRandomSequence mRandom;
+	float mParticleHeight;
+	int mNumberOfParticles;
 };
 
 class EditorRandomMapWidgetPrivate
@@ -276,8 +431,22 @@ public:
 		mDiamondSquareDHeight = 0;
 		mDiamondSquareR = 0;
 
+		mSelectMountainCreation = 0;
+		mSimpleMountainCreationButton = 0;
+		mParticleDepositionMountainCreationButton = 0;
+		mDiamondSquareMountainCreationButton = 0;
+
+		mSimpleMountainCreation = 0;
 		mRandomMountainCount = 0;
 		mMountainProbabilities = 0;
+
+		mParticleDepositionMountainCreation = 0;
+		mParticlesCount = 0;
+		mParticlesHeight = 0;
+
+		mDiamondSquareMountainCreation = 0;
+		mMountainDiamondSquareDHeight = 0;
+		mMountainDiamondSquareR = 0;
 	}
 	KRandomSequence* mRandom;
 
@@ -296,8 +465,22 @@ public:
 	BoUfoNumInput* mDiamondSquareDHeight;
 	BoUfoNumInput* mDiamondSquareR;
 
+	BoUfoButtonGroupWidget* mSelectMountainCreation;
+	BoUfoRadioButton* mSimpleMountainCreationButton;
+	BoUfoRadioButton* mParticleDepositionMountainCreationButton;
+	BoUfoRadioButton* mDiamondSquareMountainCreationButton;
+
+	BoUfoWidget* mSimpleMountainCreation;
 	BoUfoNumInput* mRandomMountainCount;
 	BoUfoLabel* mMountainProbabilities;
+
+	BoUfoWidget* mParticleDepositionMountainCreation;
+	BoUfoNumInput* mParticlesCount;
+	BoUfoNumInput* mParticlesHeight;
+
+	BoUfoWidget* mDiamondSquareMountainCreation;
+	BoUfoNumInput* mMountainDiamondSquareDHeight;
+	BoUfoNumInput* mMountainDiamondSquareR;
 };
 
 EditorRandomMapWidget::EditorRandomMapWidget()
@@ -427,20 +610,75 @@ void EditorRandomMapWidget::initMountainCreationGUI(BoUfoWidget* parent)
  BoUfoLabel* label = new BoUfoLabel("Mountains");
  parent->addWidget(label);
 
- d->mRandomMountainCount = new BoUfoNumInput();
- d->mRandomMountainCount->setLabel(i18n("Random Count (mountain): "));
- d->mRandomMountainCount->setRange(0.0f, 2000.0f);
+ d->mSelectMountainCreation = new BoUfoButtonGroupWidget();
+ parent->addWidget(d->mSelectMountainCreation);
+ d->mSimpleMountainCreationButton = new BoUfoRadioButton(i18n("Simple algorithm"));
+ d->mParticleDepositionMountainCreationButton = new BoUfoRadioButton(i18n("Particle deposition algorithm"));
+ d->mDiamondSquareMountainCreationButton = new BoUfoRadioButton(i18n("Diamond square algorithm"));
+ d->mSimpleMountainCreationButton->setSelected(true);
+// d->mParticleDepositionMountainCreationButton->setSelected(true);
+// d->mDiamondSquareMountainCreationButton->setSelected(true);
+ d->mSelectMountainCreation->addWidget(d->mSimpleMountainCreationButton);
+ d->mSelectMountainCreation->addWidget(d->mParticleDepositionMountainCreationButton);
+ d->mSelectMountainCreation->addWidget(d->mDiamondSquareMountainCreationButton);
 
- parent->addWidget(d->mRandomMountainCount);
+
+ d->mSimpleMountainCreation = new BoUfoWidget();
+ parent->addWidget(d->mSimpleMountainCreation);
+
+ d->mParticleDepositionMountainCreation = new BoUfoWidget();
+ parent->addWidget(d->mParticleDepositionMountainCreation);
+
+ d->mParticlesCount = new BoUfoNumInput();
+ d->mParticlesCount->setLabel(i18n("Particle Count: "));
+ d->mParticlesCount->setRange(100.0f, 10000.0f);
+ d->mParticlesCount->setValue(500.0f);
+ d->mParticleDepositionMountainCreation->addWidget(d->mParticlesCount);
+
+ d->mParticlesHeight = new BoUfoNumInput();
+ d->mParticlesHeight->setLabel(i18n("Particle height: "));
+ d->mParticlesHeight->setRange(0.1f, 2.0f);
+ d->mParticlesHeight->setStepSize(0.1f);
+ d->mParticlesHeight->setValue(0.5f);
+ d->mParticleDepositionMountainCreation->addWidget(d->mParticlesHeight);
+
+ d->mDiamondSquareMountainCreation = new BoUfoWidget();
+ parent->addWidget(d->mDiamondSquareMountainCreation);
+
+ d->mMountainDiamondSquareDHeight = new BoUfoNumInput();
+ d->mMountainDiamondSquareDHeight->setLabel(i18n("\"dHeight\" in diamond square: "));
+ d->mMountainDiamondSquareDHeight->setRange(0.0f, 100.0f);
+ d->mMountainDiamondSquareDHeight->setStepSize(0.5f);
+ d->mMountainDiamondSquareDHeight->setValue(30.0f);
+ d->mDiamondSquareMountainCreation->addWidget(d->mMountainDiamondSquareDHeight);
+
+ d->mMountainDiamondSquareR = new BoUfoNumInput();
+ d->mMountainDiamondSquareR->setLabel(i18n("\"r\" in diamond square: "));
+ d->mMountainDiamondSquareR->setRange(0.0f, 10.0f);
+ d->mMountainDiamondSquareR->setStepSize(0.1f);
+ d->mMountainDiamondSquareR->setValue(1.0f);
+ d->mDiamondSquareMountainCreation->addWidget(d->mMountainDiamondSquareR);
+
+
+
+ BoUfoWidget* generalConfiguration = new BoUfoWidget();
+ parent->addWidget(generalConfiguration);
+ d->mRandomMountainCount = new BoUfoNumInput();
+ d->mRandomMountainCount->setLabel(i18n("Random Count (place mountain): "));
+ d->mRandomMountainCount->setRange(0.0f, 2000.0f);
+ generalConfiguration->addWidget(d->mRandomMountainCount);
 
  d->mMountainProbabilities = new BoUfoLabel();
- parent->addWidget(d->mMountainProbabilities);
+ generalConfiguration->addWidget(d->mMountainProbabilities);
 
  connect(d->mRandomMountainCount, SIGNAL(signalValueChanged(float)),
 		this, SLOT(slotUpdateMountainProbabilityLabels()));
-
  d->mRandomMountainCount->setValue(1000.0f);
 
+
+ connect(d->mSelectMountainCreation, SIGNAL(signalButtonActivated(BoUfoRadioButton*)),
+		this, SLOT(slotMountainCreationChanged(BoUfoRadioButton*)));
+ slotMountainCreationChanged(d->mSelectMountainCreation->selectedButton());
 
  BoUfoPushButton* apply = new BoUfoPushButton(i18n("Create Mountains"));
  parent->addWidget(apply);
@@ -477,6 +715,8 @@ void EditorRandomMapWidget::slotCreateTerrain()
 	return;
  }
 
+ map.scaleHeights();
+
  QValueList< QPair<QPoint, bofixed> > heights;
  for (int x = 0; x < map.cornerWidth(); x++) {
 	for (int y = 0; y < map.cornerHeight(); y++) {
@@ -497,6 +737,12 @@ void EditorRandomMapWidget::slotCreateTerrain()
 
 void EditorRandomMapWidget::slotCreateMountains()
 {
+ BoUfoRadioButton* b = d->mSelectMountainCreation->selectedButton();
+ if (!b) {
+	boWarning() << k_funcinfo << "no mountain creation algorithm selected" << endl;
+	return;
+ }
+
  BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(canvas());
  BosonMap* realMap = canvas()->map();
@@ -510,7 +756,79 @@ void EditorRandomMapWidget::slotCreateMountains()
  MyMap map(realMap->width() + 1, realMap->height() + 1);
  map.loadHeightsFromRealMap(realMap);
 
- createMountains(map);
+ // do a BFS on all corners
+ QValueList<QPoint> mountains;
+ QValueList<QPoint> queue;
+ cornersBFS(map, &queue);
+ while (!queue.isEmpty()) {
+	QPoint p = queue.front();
+	queue.pop_front();
+
+	if (lrint(d->mRandomMountainCount->value()) > 0) {
+		int r = d->mRandom->getLong(lrint(d->mRandomMountainCount->value()));
+		if (r == 0) {
+			mountains.append(p);
+		}
+	}
+ }
+ // remove mountains that are too close to other mountains
+#if 0
+ for (QValueList<QPoint>::iterator it = mountains.begin(); it != mountains.end(); ++it) {
+	QPoint p = *it;
+
+	bool removedAllTooClose = true;
+	do {
+		removedAllTooClose = true;
+		QValueList<QPoint>::iterator it2 = it;
+		++it2;
+		for (; it2 != mountains.end(); ++it2) {
+			if (it2 == it) {
+				continue;
+			}
+			QPoint p2 = *it2;
+			int dx = QABS(p2.x() - p.x());
+			int dy = QABS(p2.y() - p.y());
+			// AB: sqrt probably not necessary, but at this point we dont
+			// care _that_ much about speed
+			float dist = sqrtf(dx * dx + dy * dy);
+
+			const float maxDist = 0.0f; // TODO: currently unused
+			if (dist < maxDist) {
+				mountains.remove(it2);
+
+				// somewhat ugly (slow) but who cares.
+				removedAllTooClose = false;
+				break;
+			}
+		}
+	} while (!removedAllTooClose);
+ }
+#endif
+
+ bool isSimple = false;
+ bool isParticleDeposition = false;
+ bool isDiamondSquare  = false;
+ if (b == d->mSimpleMountainCreationButton) {
+	isSimple = true;
+ } else if (b == d->mParticleDepositionMountainCreationButton) {
+	isParticleDeposition = true;
+ } else if (b == d->mDiamondSquareMountainCreationButton) {
+	isDiamondSquare = true;
+ } else {
+	boError() << k_funcinfo << "unknown button selected" << endl;
+	return;
+ }
+
+ for (QValueList<QPoint>::iterator it = mountains.begin(); it != mountains.end(); ++it) {
+	if (isSimple) {
+		createMountainSimple(map, *it);
+	} else if (isParticleDeposition) {
+		createMountainParticleDeposition(map, *it);
+	} else if (isDiamondSquare) {
+		createMountainDiamondSquare(map, *it);
+	}
+ }
+
 
  QValueList< QPair<QPoint, bofixed> > heights;
  for (int x = 0; x < map.cornerWidth(); x++) {
@@ -680,114 +998,83 @@ void EditorRandomMapWidget::createHeightsDiamondSquare(MyMap& map)
  diamond.diamondSquare(map);
 }
 
-void EditorRandomMapWidget::createMountains(MyMap& map)
+void EditorRandomMapWidget::createMountainSimple(MyMap& map, const QPoint& start)
 {
- // do a BFS on all corners
- QValueList<QPoint> queue;
- cornersBFS(map, &queue);
- while (!queue.isEmpty()) {
-	QPoint p = queue.front();
-	queue.pop_front();
+ QPoint p = start;
 
-	if (lrint(d->mRandomMountainCount->value()) > 0) {
-		int r = d->mRandom->getLong(lrint(d->mRandomMountainCount->value()));
-		if (r == 0) {
-			map.setStartMountainAtCorner(p.x(), p.y(), true);
-		}
+ // TODO: should be randomized
+ float maxHeight = 20.0f; // TODO: numinput
+ float heightFactor = (float)d->mRandom->getDouble();
+ float height = maxHeight * heightFactor;
+
+ float radiusFactor = d->mRandom->getDouble() / 8.0 + 0.875;
+ int radius = (int)(10 * heightFactor * radiusFactor);
+
+ int startX = QMAX(0, p.x() - radius);
+ int endX = QMIN(p.x() + radius, map.cornerWidth() - 1);
+ int startY = QMAX(0, p.y() - radius);
+ int endY = QMIN(p.y() + radius, map.cornerHeight() - 1);
+// boDebug() << startX << " " << endX << "   " << startY << " " << endY << endl;
+ for (int x = startX; x <= endX; x++) {
+	for (int y = startY; y <= endY; y++) {
+		int dx = QABS(x - p.x());
+		int dy = QABS(y - p.y());
+		// dist is element of [0 ; sqrt(2)*radius]
+		float dist = sqrtf(dx * dx + dy * dy);
+
+		// factor is element of [0 ; 1]
+		float factor = dist / (sqrtf(2.0f) * radius);
+		factor = QMIN(factor, 1.0f);
+
+		// now dx==dy==0      => factor==1
+		// and dx==dy==radius => factor==0
+		// this means linear interpolation of the height from the top of
+		// the mountain to all other points.
+		factor = 1.0f - factor;
+
+		factor = factor * factor;
+
+		float h = map.heightAtCorner(x, y);
+
+		// randomize the factor slightly
+		// we get a random value in [0.875;1] and multiply factor
+		// by it
+		float randomFactor = (float)d->mRandom->getDouble() / 8;
+		randomFactor += 0.875f;
+		factor *= randomFactor;
+
+		h += height * factor;
+
+		map.setHeightAtCorner(x, y, h);
 	}
  }
+}
 
- // now actually place the mountains
- QValueList<QPoint> mountains;
- for (int x = 0; x < map.cornerWidth(); x++) {
-	for (int y = 0; y < map.cornerHeight(); y++) {
-		if (map.startMountainAtCorner(x, y)) {
-			mountains.append(QPoint(x, y));
-		}
-	}
+void EditorRandomMapWidget::createMountainParticleDeposition(MyMap& map, const QPoint& start)
+{
+ ParticleDeposition pd;
+ pd.setParticleHeight(d->mParticlesHeight->value());
+ pd.setNumberOfParticles((int)d->mParticlesCount->value());
+ pd.particleDeposition(map, start);
+}
+
+void EditorRandomMapWidget::createMountainDiamondSquare(MyMap& map, const QPoint& start)
+{
+ const int size = 32;
+ if (start.x() < size || start.x() + size >= map.cornerWidth()) {
+	boDebug() << k_funcinfo << "won't start mountain at x=" << start.x() << endl;
+	return;
  }
-
- // remove mountains that are too close to other mountains
- for (QValueList<QPoint>::iterator it = mountains.begin(); it != mountains.end(); ++it) {
-	QPoint p = *it;
-
-	bool removedAllTooClose = true;
-	do {
-		removedAllTooClose = true;
-		QValueList<QPoint>::iterator it2 = it;
-		++it2;
-		for (; it2 != mountains.end(); ++it2) {
-			if (it2 == it) {
-				continue;
-			}
-			QPoint p2 = *it2;
-			int dx = QABS(p2.x() - p.x());
-			int dy = QABS(p2.y() - p.y());
-			// AB: sqrt probably not necessary, but at this point we dont
-			// care _that_ much about speed
-			float dist = sqrtf(dx * dx + dy * dy);
-
-			const float maxDist = 0.0f; // TODO: currently unused
-			if (dist < maxDist) {
-				mountains.remove(it2);
-
-				// somewhat ugly (slow) but who cares.
-				removedAllTooClose = false;
-				break;
-			}
-		}
-	} while (!removedAllTooClose);
+ if (start.y() < size || start.y() + size >= map.cornerHeight()) {
+	boDebug() << k_funcinfo << "won't start mountain at y=" << start.y() << endl;
+	return;
  }
-
- for (QValueList<QPoint>::iterator it = mountains.begin(); it != mountains.end(); ++it) {
-	QPoint p = *it;
-
-	// TODO: should be randomized
-	float maxHeight = 20.0f; // TODO: numinput
-	float heightFactor = (float)d->mRandom->getDouble();
-	float height = maxHeight * heightFactor;
-
-	float radiusFactor = d->mRandom->getDouble() / 8.0 + 0.875;
-	int radius = (int)(10 * heightFactor * radiusFactor);
-
-	int startX = QMAX(0, p.x() - radius);
-	int endX = QMIN(p.x() + radius, map.cornerWidth() - 1);
-	int startY = QMAX(0, p.y() - radius);
-	int endY = QMIN(p.y() + radius, map.cornerHeight() - 1);
-//	boDebug() << startX << " " << endX << "   " << startY << " " << endY << endl;
-	for (int x = startX; x <= endX; x++) {
-		for (int y = startY; y <= endY; y++) {
-			int dx = QABS(x - p.x());
-			int dy = QABS(y - p.y());
-
-			// dist is element of [0 ; sqrt(2)*radius]
-			float dist = sqrtf(dx * dx + dy * dy);
-
-			// factor is element of [0 ; 1]
-			float factor = dist / (sqrtf(2.0f) * radius);
-			factor = QMIN(factor, 1.0f);
-
-			// now dx==dy==0      => factor==1
-			// and dx==dy==radius => factor==0
-			factor = 1.0f - factor;
-
-			float h = map.heightAtCorner(x, y);
-
-			// randomize the factor slightly
-			// we get a random value in [0.875;1] and multiply factor
-			// by it
-			float randomFactor = (float)d->mRandom->getDouble() / 8;
-			randomFactor += 0.875f;
-			factor *= randomFactor;
-
-			h += height * factor;
-
-			map.setHeightAtCorner(x, y, h);
-		}
-	}
- }
-
-
+#if 1
+ DiamondSquare diamond;
+ diamond.setDHeight(d->mMountainDiamondSquareDHeight->value());
+ diamond.setR(d->mMountainDiamondSquareR->value());
+ diamond.diamondSquare2(map, start.x() - size/2, start.x() + size/2, start.y() - size/2, start.y() + size/2);
+#endif
 }
 
 void EditorRandomMapWidget::slotUpdateHeightProbabilityLabels()
@@ -799,16 +1086,9 @@ void EditorRandomMapWidget::slotUpdateHeightProbabilityLabels()
  float changeBy = d->mChangeBy->value();
  float probUp = d->mChangeUpCount->value() / d->mRandomHeightCount->value();
  float probDown = d->mChangeDownCount->value() / d->mRandomHeightCount->value();
-#if 0
- float probMountain = 0.0f;
- if (lrint(d->mRandomMountainCount->value()) > 0) {
-	probMountain = 1.0f / d->mRandomMountainCount->value();
- }
-#endif
  d->mHeightProbabilities->setText(i18n(
 			 	"Prob(Change height UP by %1 at corner) = %2\n"
 			 	"Prob(Change height DOWN by %3 at corner) = %4\n")
-//			 	"Prob(Start mountain at corner) = %5")
 				.arg(changeBy)
 				.arg(probUp)
 				.arg(changeBy)
@@ -827,14 +1107,11 @@ void EditorRandomMapWidget::slotUpdateMountainProbabilityLabels()
 
 void EditorRandomMapWidget::slotTerrainCreationChanged(BoUfoRadioButton* button)
 {
- boDebug() << k_funcinfo << button << endl;
  bool isSimple = false;
  bool isDiamondSquare = false;
  if (button == d->mSimpleTerrainCreationButton) {
-	boDebug() << k_funcinfo << "isSimple" << endl;
 	isSimple = true;
  } else if (button == d->mDiamondSquareTerrainCreationButton) {
-	boDebug() << k_funcinfo << "isDiamond" << endl;
 	isDiamondSquare = true;
  } else if (!button) {
 	boWarning() << k_funcinfo << "no button selected" << endl;
@@ -845,6 +1122,26 @@ void EditorRandomMapWidget::slotTerrainCreationChanged(BoUfoRadioButton* button)
  d->mDiamondSquareTerrainCreation->setVisible(isDiamondSquare);
 }
 
+void EditorRandomMapWidget::slotMountainCreationChanged(BoUfoRadioButton* button)
+{
+ bool isSimple = false;
+ bool isParticleDeposition = false;
+ bool isDiamondSquare = false;
+ if (button == d->mSimpleMountainCreationButton) {
+	isSimple = true;
+ } else if (button == d->mParticleDepositionMountainCreationButton) {
+	isParticleDeposition = true;
+ } else if (button == d->mDiamondSquareMountainCreationButton) {
+	isDiamondSquare = true;
+ } else if (!button) {
+	boWarning() << k_funcinfo << "no button selected" << endl;
+ } else {
+	boError() << k_funcinfo << "unknown button selected" << endl;
+ }
+ d->mSimpleMountainCreation->setVisible(isSimple);
+ d->mParticleDepositionMountainCreation->setVisible(isParticleDeposition);
+ d->mDiamondSquareMountainCreation->setVisible(isDiamondSquare);
+}
 
 
 void DiamondSquare::diamondSquare(MyMap& origMap)
@@ -916,6 +1213,116 @@ void DiamondSquare::diamondSquare(MyMap& origMap)
  mMap = 0;
 }
 
+void DiamondSquare::diamondSquare2(MyMap& origMap, int x1, int x2, int y1, int y2)
+{
+ int dx = x2 - x1;
+ int dy = y2 - y1;
+ if (x1 < dx/2 || x2 + dx/2 >= origMap.cornerWidth()) {
+	boWarning() << "invalid x parameters " << x1 << " " << x2 << endl;
+	return;
+ }
+ if (y1 < dy/2 || y2 + dy/2 >= origMap.cornerHeight()) {
+	boWarning() << "invalid y parameters" << endl;
+	return;
+ }
+
+ if (dx != dy) {
+	boWarning() << k_funcinfo << "invalid paramters" << endl;
+ }
+
+ int w = 1;
+ int h = 1;
+ while (w < (origMap.cornerWidth() - 1)) {
+	w *= 2;
+ }
+ while (h < (origMap.cornerHeight() - 1)) {
+	h *= 2;
+ }
+ if (w > h) {
+	h = w;
+ } else {
+	w = h;
+ }
+
+ // new map has 2^n * 2^n cells, i.e. 2^(n+1) * 2^(n+1) corners
+ // -> this makes things easier. we will later cut this to original size
+ w++;
+ h++;
+ delete mMap;
+ mMap = new MyMap(w, h);
+
+ boDebug() << k_funcinfo << w << "x" << h << endl;
+ boDebug() << k_funcinfo << "r=" << mR << " => 2^-r=" << mPow2_R << endl;
+ boDebug() << k_funcinfo << "dheight=" << mOrigDHeight << endl;
+
+#if 0
+
+ // initial values
+ mMap->setHeightAtCorner(0, 0, 0.0f);
+ mMap->setHeightAtCorner(mMap->cornerWidth() - 1, 0, 0.0f);
+ mMap->setHeightAtCorner(0, mMap->cornerHeight() - 1, 0.0f);
+ mMap->setHeightAtCorner(mMap->cornerWidth() - 1, mMap->cornerHeight() - 1, 0.0f);
+#else
+
+ for (int x = 0; x < origMap.cornerWidth(); x++) {
+	for (int y = 0; y < origMap.cornerHeight(); y++) {
+		mMap->setHeightAtCorner(x, y, origMap.heightAtCorner(x, y));
+	}
+ }
+ for (int x = 0; x < origMap.cornerWidth(); x++) {
+	for (int y = origMap.cornerHeight(); y < mMap->cornerHeight(); y++) {
+		mMap->setHeightAtCorner(x, y, origMap.heightAtCorner(x, origMap.cornerHeight() - 1));
+	}
+ }
+ for (int x = origMap.cornerWidth(); x < mMap->cornerWidth(); x++) {
+	for (int y = 0; y < origMap.cornerHeight(); y++) {
+		mMap->setHeightAtCorner(x, y, origMap.heightAtCorner(origMap.cornerWidth() - 1, y));
+	}
+ }
+ for (int x = origMap.cornerWidth(); x < mMap->cornerWidth(); x++) {
+	for (int y = origMap.cornerHeight(); y < mMap->cornerHeight(); y++) {
+		mMap->setHeightAtCorner(x, y, origMap.heightAtCorner(origMap.cornerWidth() - 1, origMap.cornerHeight() - 1));
+	}
+ }
+
+#endif
+
+ float dHeight = mOrigDHeight;
+
+ // AB: note that dx == dy is important here
+ int lod = (dx - 1) / 2;
+ while (lod >= 1) {
+	// "diamond step"
+	for (int x = x1 + lod; x < x2; x += 2 * lod) {
+		for (int y = y1 + lod; y < y2; y += 2 * lod) {
+			diamondStepCorner(x, y, lod, dHeight);
+		}
+	}
+
+	// "square step"
+	for (int x = x1 + lod; x < x2; x += 2 * lod) {
+		for (int y = 0; y < y2; y += 2 * lod) {
+			squareStepCorner(x, y, lod, dHeight);
+		}
+	}
+	for (int x = 0; x < x2; x += 2 * lod) {
+		for (int y = y1 + lod; y < y2; y += 2 * lod) {
+			squareStepCorner(x, y, lod, dHeight);
+		}
+	}
+
+
+	dHeight *= mPow2_R;
+	lod /= 2;
+ }
+
+ // copy to original map (also cuts to original size)
+ origMap.copyFrom(*mMap);
+
+ delete mMap;
+ mMap = 0;
+}
+
 void DiamondSquare::diamondStepCorner(int x, int y, int lod, float dHeight)
 {
  int x1 = x - lod;
@@ -961,6 +1368,95 @@ void DiamondSquare::squareStepCorner(int x, int y, int lod, float dHeight)
  float height = averageHeight + random * dHeight;
 
  mMap->setHeightAtCorner(x, y, height);
+}
+
+void ParticleDeposition::particleDeposition(MyMap& map, const QPoint& start)
+{
+ // TODO: instead of a number of particles, we could also use a certain height
+ // of the start point as stop condition
+ // TODO: randomize the number of particles slightly, e.g. use a factor in
+ // [0.5;1.5] that mNumberOfParticles is multiplied by
+ int numberOfParticles = mNumberOfParticles;
+ for (int count = 0; count < numberOfParticles; count++) {
+	float particleHeight = mParticleHeight;
+
+#if 0
+	// our particles do not have a fixed size
+	double factor = mRandom.getDouble() + 0.5;
+	particleHeight *= factor;
+#endif
+
+	float cornerHeight = map.heightAtCorner(start.x(), start.y());
+	cornerHeight += particleHeight;
+
+	map.setHeightAtCorner(start.x(), start.y(), cornerHeight);
+
+	QPoint pos = start;
+	QPoint dest;
+
+	while (moveParticle(map, pos.x(), pos.y(), particleHeight, &dest)) {
+#if 0
+		boDebug() << count << " from " << pos.x() << "x" << pos.y()
+				<< " to " << dest.x() << "x" << dest.y()
+				<< " from "
+				<< map.heightAtCorner(pos.x(), pos.y())
+				<< " to "
+				<< map.heightAtCorner(dest.x(), dest.y())
+				<< endl;
+#endif
+
+		pos = dest;
+	}
+ }
+}
+
+bool ParticleDeposition::moveParticle(MyMap& map, int x, int y, float particleHeight, QPoint* dest)
+{
+#if 0
+ // with a certain (low) probability stop without moving any further.
+ int r = mRandom.getLong(1000);
+ if (r == 0) {
+	// do not move any further
+	return false;
+ }
+#endif
+
+ if (!dest) {
+	BO_NULL_ERROR(dest);
+	return false;
+ }
+ float cornerHeight = map.heightAtCorner(x, y);
+
+ QValueList<int> candidates;
+ for (int i = 0; i < 8; i++) {
+	int nx = x;
+	int ny = y;
+	if (neighbor(map, i, &nx, &ny)) {
+		const float epsilon = 0.0001f;
+		if (map.heightAtCorner(nx, ny) + particleHeight + epsilon < cornerHeight) {
+			candidates.append(i);
+		}
+	}
+ }
+ if (candidates.count() == 0) {
+	// don't move the particle any further
+	return false;
+ }
+
+ int target = mRandom.getLong(candidates.count());
+ int destX = x;
+ int destY = y;
+ if (!neighbor(map, candidates[target], &destX, &destY)) {
+	boError() << k_funcinfo << "internal error" << endl;
+	return false;
+ }
+
+ map.setHeightAtCorner(x, y, map.heightAtCorner(x, y) - particleHeight);
+ map.setHeightAtCorner(destX, destY, map.heightAtCorner(destX, destY) + particleHeight);
+
+ dest->setX(destX);
+ dest->setY(destY);
+ return true;
 }
 
 void cornersBFS(const MyMap& map, QValueList<QPoint>* retQueue)
