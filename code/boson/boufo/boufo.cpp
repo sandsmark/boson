@@ -2245,7 +2245,7 @@ void BoUfoSlider::setValue(int v)
 
 void BoUfoSlider::setFloatValue(float v)
 {
- mSlider->setValue((int)(v / mStep));
+ mSlider->setValue(lrint(v / mStep));
 }
 
 void BoUfoSlider::setRange(int min, int max)
