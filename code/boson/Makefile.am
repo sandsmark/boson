@@ -131,6 +131,7 @@ libboson_la_LIBADD = \
 		$(top_builddir)/boson/boufo/libboufo.la \
 		$(LIB_MESHRENDERER) \
 		$(LIB_GROUNDRENDERER) \
+		$(LIB_GAMEVIEWPLUGIN) \
 		$(LIB_KGAME) \
 		$(LIB_KDEUI) \
 		$(LIB_KIO) \
