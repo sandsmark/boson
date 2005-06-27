@@ -64,11 +64,14 @@ protected slots:
 	void slotUpdateHeightProbabilityLabels();
 	void slotUpdateMountainProbabilityLabels();
 	void slotTerrainCreationChanged(BoUfoRadioButton*);
+	void slotMountainCreationChanged(BoUfoRadioButton*);
 
 protected:
 	void createHeightsSimple(MyMap&);
 	void createHeightsDiamondSquare(MyMap&);
-	void createMountains(MyMap& map);
+	void createMountainSimple(MyMap& map, const QPoint& start);
+	void createMountainParticleDeposition(MyMap& map, const QPoint& start);
+	void createMountainDiamondSquare(MyMap& map, const QPoint& start);
 
 private:
 	void initTerrainCreationGUI(BoUfoWidget* parent);
