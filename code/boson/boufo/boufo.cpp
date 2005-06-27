@@ -3292,6 +3292,8 @@ void BoUfoCheckBox::init()
  // are the same widget
  mCheckBox->setOpaque(false);
 
+ setForegroundColor(BoUfoLabel::defaultForegroundColor());
+
  CONNECT_UFO_TO_QT(BoUfoCheckBox, mCheckBox, Activated);
  CONNECT_UFO_TO_QT(BoUfoCheckBox, mCheckBox, Highlighted);
 }
@@ -3455,6 +3457,8 @@ void BoUfoRadioButton::init()
  widget()->add(mRadioButton);
  // AB: at least the background of the label must be transparent
  mRadioButton->setOpaque(false);
+
+ setForegroundColor(BoUfoLabel::defaultForegroundColor());
 
  CONNECT_UFO_TO_QT(BoUfoRadioButton, mRadioButton, Activated);
  CONNECT_UFO_TO_QT(BoUfoRadioButton, mRadioButton, Highlighted);
