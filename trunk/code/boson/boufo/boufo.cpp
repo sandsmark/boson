@@ -57,6 +57,8 @@
 
 #include <bodebug.h>
 
+#include <math.h>
+
 QColor BoUfoLabel::mDefaultForegroundColor = Qt::black;
 
 
