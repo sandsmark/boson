@@ -48,12 +48,14 @@ public:
 		h = 0.0f;
 		willStartMountain = false;
 		dir = 0;
+		factor = 1.0f;
 	}
 	HCorner& operator=(const HCorner& c)
 	{
 		h = c.h;
 		willStartMountain = c.willStartMountain;
 		dir = c.dir;
+		factor = c.factor;
 
 		return *this;
 	}
@@ -61,6 +63,7 @@ public:
 	bool willStartMountain;
 
 	int dir;
+	float factor;
 };
 class MyMap {
 public:
@@ -69,6 +72,14 @@ public:
 		mCornerWidth = cornerWidth;
 		mCornerHeight = cornerHeight;
 		mCorners = new HCorner[(mCornerWidth + 1) * (mCornerHeight + 1)];
+	}
+	MyMap(const MyMap& map)
+	{
+		mCornerWidth = map.cornerWidth();
+		mCornerHeight = map.cornerHeight();
+		mCorners = new HCorner[(mCornerWidth + 1) * (mCornerHeight + 1)];
+
+		copyFrom(map);
 	}
 	~MyMap()
 	{
@@ -115,6 +126,7 @@ public:
 		for (int x = 0; x < cornerWidth(); x++) {
 			for (int y = 0; y < cornerHeight(); y++) {
 				setHeightAtCorner(x, y, 0.0f);
+				setFactorAtCorner(x, y, 1.0f);
 			}
 		}
 	}
@@ -237,6 +249,17 @@ public:
 	inline int cornerArrayPos(int x, int y) const
 	{
 		return BoMapCornerArray::arrayPos(x, y, cornerWidth());
+	}
+
+	void setFactorAtCorner(int x, int y, float f)
+	{
+		int index = cornerArrayPos(x, y);
+		mCorners[index].factor = f;
+	}
+	float factorAtCorner(int x, int y) const
+	{
+		int index = cornerArrayPos(x, y);
+		return mCorners[index].factor;
 	}
 private:
 	HCorner* mCorners;
@@ -409,6 +432,81 @@ private:
 	int mNumberOfParticles;
 };
 
+class MountainSimple
+{
+public:
+	MountainSimple()
+	{
+		mMaxHeight = 10.0f;
+		mMultiplyHeightWithRandomFactor = true;
+		mMultiplyWidthWithRandomFactor = true;
+		mMultiplyWidthWithRandomHeightFactor = true;
+		mWidthX = 10.0f;
+		mWidthY = 10.0f;
+
+		setMaxHeight(10.0f);
+		setMultiplyHeightWithRandomFactor(true);
+		setMultiplyWidthWithRandomFactor(true);
+		setMultiplyWidthWithRandomHeightFactor(true);
+		setWidthX(10.0f);
+		setWidthY(10.0f);
+	}
+
+	void setMaxHeight(float h)
+	{
+		mMaxHeight = h;
+	}
+	void setMultiplyHeightWithRandomFactor(bool m)
+	{
+		mMultiplyHeightWithRandomFactor = m;
+	}
+	void setMultiplyWidthWithRandomFactor(bool m)
+	{
+		mMultiplyWidthWithRandomFactor = m;
+	}
+	void setMultiplyWidthWithRandomHeightFactor(bool m)
+	{
+		mMultiplyWidthWithRandomHeightFactor = m;
+	}
+	void setWidthX(float x)
+	{
+		mWidthX = x;
+	}
+	void setWidthY(float y)
+	{
+		mWidthY = y;
+	}
+	void createMountain(MyMap& map, const QPoint& start);
+
+protected:
+	/**
+	 * @return A factor describing the distance to the maxHeight corner. 0.0
+	 * means maximum distance, 1.0 means zero distance.
+	 *
+	 * @param x x-coordinate of the corner
+	 * @param y y-coordinate of the corner
+	 * @param maxHeightX x-coordinate of the corner with the maximum height
+	 * (e.g. the center of the mountain)
+	 * @param maxHeightY y-coordinate of the corner with the maximum height
+	 * (e.g. the center of the mountain)
+	 * @param widthX The width in x direction of the mountain
+	 * @param widthY The width in y direction of the mountain
+	 **/
+	float linearFactorOfCorner(int x, int y, int maxHeightX, int maxHeightY, int widthX, int widthY) const;
+
+
+	float heightAtCorner2(float factor, float factor2, float height2, float maxHeight) const;
+
+private:
+	KRandomSequence mRandom;
+	float mMaxHeight;
+	bool mMultiplyHeightWithRandomFactor;
+	bool mMultiplyWidthWithRandomFactor;
+	bool mMultiplyWidthWithRandomHeightFactor;
+	float mWidthX;
+	float mWidthY;
+};
+
 class EditorRandomMapWidgetPrivate
 {
 public:
@@ -437,8 +535,9 @@ public:
 		mDiamondSquareMountainCreationButton = 0;
 
 		mSimpleMountainCreation = 0;
-		mRandomMountainCount = 0;
-		mMountainProbabilities = 0;
+		mSimpleMountainMaxHeight = 0;
+		mSimpleMountainWidthX = 0;
+		mSimpleMountainWidthY = 0;
 
 		mParticleDepositionMountainCreation = 0;
 		mParticlesCount = 0;
@@ -447,6 +546,9 @@ public:
 		mDiamondSquareMountainCreation = 0;
 		mMountainDiamondSquareDHeight = 0;
 		mMountainDiamondSquareR = 0;
+
+		mRandomMountainCount = 0;
+		mMountainProbabilities = 0;
 	}
 	KRandomSequence* mRandom;
 
@@ -471,8 +573,9 @@ public:
 	BoUfoRadioButton* mDiamondSquareMountainCreationButton;
 
 	BoUfoWidget* mSimpleMountainCreation;
-	BoUfoNumInput* mRandomMountainCount;
-	BoUfoLabel* mMountainProbabilities;
+	BoUfoNumInput* mSimpleMountainMaxHeight;
+	BoUfoNumInput* mSimpleMountainWidthX;
+	BoUfoNumInput* mSimpleMountainWidthY;
 
 	BoUfoWidget* mParticleDepositionMountainCreation;
 	BoUfoNumInput* mParticlesCount;
@@ -481,6 +584,9 @@ public:
 	BoUfoWidget* mDiamondSquareMountainCreation;
 	BoUfoNumInput* mMountainDiamondSquareDHeight;
 	BoUfoNumInput* mMountainDiamondSquareR;
+
+	BoUfoNumInput* mRandomMountainCount;
+	BoUfoLabel* mMountainProbabilities;
 };
 
 EditorRandomMapWidget::EditorRandomMapWidget()
@@ -625,6 +731,23 @@ void EditorRandomMapWidget::initMountainCreationGUI(BoUfoWidget* parent)
 
  d->mSimpleMountainCreation = new BoUfoWidget();
  parent->addWidget(d->mSimpleMountainCreation);
+ d->mSimpleMountainMaxHeight = new BoUfoNumInput();
+ d->mSimpleMountainMaxHeight->setLabel(i18n("Max Height"));
+ d->mSimpleMountainMaxHeight->setRange(5.0f, 20.0f);
+ d->mSimpleMountainMaxHeight->setValue(15.0f);
+ d->mSimpleMountainCreation->addWidget(d->mSimpleMountainMaxHeight);
+
+ d->mSimpleMountainWidthX = new BoUfoNumInput();
+ d->mSimpleMountainWidthX->setLabel(i18n("Width in X direction"));
+ d->mSimpleMountainWidthX->setRange(5.0f, 40.0f);
+ d->mSimpleMountainWidthX->setValue(10.0f);
+ d->mSimpleMountainCreation->addWidget(d->mSimpleMountainWidthX);
+
+ d->mSimpleMountainWidthY = new BoUfoNumInput();
+ d->mSimpleMountainWidthY->setLabel(i18n("Width in Y direction"));
+ d->mSimpleMountainWidthY->setRange(5.0f, 40.0f);
+ d->mSimpleMountainWidthY->setValue(10.0f);
+ d->mSimpleMountainCreation->addWidget(d->mSimpleMountainWidthY);
 
  d->mParticleDepositionMountainCreation = new BoUfoWidget();
  parent->addWidget(d->mParticleDepositionMountainCreation);
@@ -1000,54 +1123,15 @@ void EditorRandomMapWidget::createHeightsDiamondSquare(MyMap& map)
 
 void EditorRandomMapWidget::createMountainSimple(MyMap& map, const QPoint& start)
 {
- QPoint p = start;
+ MountainSimple simple;
+ simple.setMaxHeight(d->mSimpleMountainMaxHeight->value());
+ simple.setMultiplyHeightWithRandomFactor(true);
+ simple.setMultiplyWidthWithRandomFactor(true);
+ simple.setMultiplyWidthWithRandomHeightFactor(true);
+ simple.setWidthX(d->mSimpleMountainWidthX->value());
+ simple.setWidthY(d->mSimpleMountainWidthY->value());
 
- // TODO: should be randomized
- float maxHeight = 20.0f; // TODO: numinput
- float heightFactor = (float)d->mRandom->getDouble();
- float height = maxHeight * heightFactor;
-
- float radiusFactor = d->mRandom->getDouble() / 8.0 + 0.875;
- int radius = (int)(10 * heightFactor * radiusFactor);
-
- int startX = QMAX(0, p.x() - radius);
- int endX = QMIN(p.x() + radius, map.cornerWidth() - 1);
- int startY = QMAX(0, p.y() - radius);
- int endY = QMIN(p.y() + radius, map.cornerHeight() - 1);
-// boDebug() << startX << " " << endX << "   " << startY << " " << endY << endl;
- for (int x = startX; x <= endX; x++) {
-	for (int y = startY; y <= endY; y++) {
-		int dx = QABS(x - p.x());
-		int dy = QABS(y - p.y());
-		// dist is element of [0 ; sqrt(2)*radius]
-		float dist = sqrtf(dx * dx + dy * dy);
-
-		// factor is element of [0 ; 1]
-		float factor = dist / (sqrtf(2.0f) * radius);
-		factor = QMIN(factor, 1.0f);
-
-		// now dx==dy==0      => factor==1
-		// and dx==dy==radius => factor==0
-		// this means linear interpolation of the height from the top of
-		// the mountain to all other points.
-		factor = 1.0f - factor;
-
-		factor = factor * factor;
-
-		float h = map.heightAtCorner(x, y);
-
-		// randomize the factor slightly
-		// we get a random value in [0.875;1] and multiply factor
-		// by it
-		float randomFactor = (float)d->mRandom->getDouble() / 8;
-		randomFactor += 0.875f;
-		factor *= randomFactor;
-
-		h += height * factor;
-
-		map.setHeightAtCorner(x, y, h);
-	}
- }
+ simple.createMountain(map, start);
 }
 
 void EditorRandomMapWidget::createMountainParticleDeposition(MyMap& map, const QPoint& start)
@@ -1457,6 +1541,170 @@ bool ParticleDeposition::moveParticle(MyMap& map, int x, int y, float particleHe
  dest->setX(destX);
  dest->setY(destY);
  return true;
+}
+
+void MountainSimple::createMountain(MyMap& map, const QPoint& start)
+{
+ QPoint p = start;
+
+ float heightFactor = 1.0f;
+ if (mMultiplyHeightWithRandomFactor) {
+	// heightFactor <= 1.0f is ensured, so maxHeight will never be exceeded
+	heightFactor = (float)mRandom.getDouble();
+ }
+ float height = mMaxHeight * heightFactor;
+
+ float widthXBase = mWidthX;
+ float widthYBase = mWidthY;
+ if (mMultiplyWidthWithRandomFactor) {
+	// note that the factor is allowed to be larger than 1
+	// (also note, that this implementation may not necessarily use this)
+
+	float r;
+	r = mRandom.getDouble() + 0.875;
+//	r = mRandom.getDouble() / 8.0 + 0.875;
+	widthXBase *= r;
+	r = mRandom.getDouble() + 0.875;
+//	r = mRandom.getDouble() / 8.0 + 0.875;
+	widthYBase *= r;
+ }
+ if (mMultiplyWidthWithRandomHeightFactor) {
+	widthXBase *= heightFactor;
+	widthYBase *= heightFactor;
+ }
+ int widthX = (int)widthXBase;
+ int widthY = (int)widthYBase;
+
+ // we use a dummy map with height = 0.0f everywhere to create the mountain
+ MyMap tmpMap(map.cornerWidth(), map.cornerHeight());
+ tmpMap.resetHeights();
+
+ int startX = QMAX(0, p.x() - widthX);
+ int endX = QMIN(p.x() + widthX, map.cornerWidth() - 1);
+ int startY = QMAX(0, p.y() - widthY);
+ int endY = QMIN(p.y() + widthY, map.cornerHeight() - 1);
+ bool quadratic = false; // factor * factor
+ bool sqrtf_linear = true; // sqrtf(factor) * factor
+ bool randomize = true;
+ bool usePreviousCorners = true;
+ for (int x = startX; x <= endX; x++) {
+	for (int y = startY; y <= endY; y++) {
+		float factor = linearFactorOfCorner(x, y, p.x(), p.y(), widthX, widthY);
+
+		if (quadratic) {
+			factor = factor * factor;
+		} else if (sqrtf_linear) {
+			factor = sqrtf(factor) * factor;
+		}
+
+		if (randomize) {
+			// randomize the factor slightly
+			// we get a random value in [0.875;1] and multiply factor
+			// by it
+			float randomFactor = (float)mRandom.getDouble() / 8;
+			randomFactor += 0.875f;
+			factor *= randomFactor;
+		}
+
+		tmpMap.setFactorAtCorner(x, y, factor);
+
+
+		float h = 0.0f;
+		if (usePreviousCorners) {
+			// macro that returns the height that the corner 2, which is
+			// defined by (a,b) "thinks" that should be at corner (x,y)
+			#define HEIGHT2(a, b) \
+				heightAtCorner2(factor, \
+					tmpMap.factorAtCorner(a, b), \
+					tmpMap.heightAtCorner(a, b), \
+					height \
+				)
+
+			int c = 0;
+			float average = 0.0f;
+			if (x - 1 >= 0 && x - 1 >= startX) {
+				average += HEIGHT2(x - 1, y);
+				c++;
+				if (y - 1 >= 0 && y - 1 >= startY) {
+					average += HEIGHT2(x - 1, y - 1);
+					c++;
+				}
+				if (y + 1 < tmpMap.cornerHeight() && y + 1 <= endY) {
+					average += HEIGHT2(x - 1, y + 1);
+					c++;
+				}
+				average /= (float)c;
+			} else {
+				// no neighbors available.
+				average = heightAtCorner2(factor, -1.0f, 0.0f, height);
+			}
+
+			#undef HEIGHT2
+			h = average;
+		} else {
+			h = height * factor;
+		}
+
+
+		tmpMap.setHeightAtCorner(x, y, h);
+	}
+ }
+
+ // apply the generated corner to the official map
+ for (int x = startX; x <= endX; x++) {
+	for (int y = startY; y <= endY; y++) {
+		float h = map.heightAtCorner(x, y);
+
+		h += tmpMap.heightAtCorner(x, y);
+
+		map.setHeightAtCorner(x, y, h);
+	}
+ }
+}
+
+float MountainSimple::linearFactorOfCorner(int x, int y, int maxHeightX, int maxHeightY, int widthX, int widthY) const
+{
+ int dx = QABS(x - maxHeightX);
+ int dy = QABS(y - maxHeightY);
+
+ // dist is element of [0 ; sqrt(widthX^2 + widthY^2)]
+ float dist = sqrtf(dx * dx + dy * dy);
+
+ // factor is element of [0 ; 1]
+ float factor = dist / (sqrtf(widthX * widthX + widthY * widthY));
+ factor = QMIN(factor, 1.0f);
+
+ // now dx==dy==0              => factor==1
+ // and dx==widthX, dy==widthY => factor==0
+ // this means linear interpolation of the height from the top of
+ // the mountain to all other points.
+ factor = 1.0f - factor;
+
+ return factor;
+}
+
+float MountainSimple::heightAtCorner2(float factor, float factor2, float height2, float maxHeight) const
+{
+ // AB: the real equation for the height is:
+ //   h = maxHeight * factor
+ //
+ // however due to randomizing, it might make sense to take the
+ // actual height values of the neighbor corners which have been
+ // calculated already into account.
+ // for any (other) corner (x', y') with factor f2, we can
+ // calculate the height of this corner with the height of the
+ // other corner like:
+ //   h = cornerHeight(x',y') + (factor - f2) * maxHeight
+ //
+ // if no randomizing is applied, the the value of h is the same with both
+ // approaches, assuming that (x',y') has been calculated the same way.
+ //
+ // note that if no neighbor corner does exist, only the first equation can be
+ // used.
+ if (factor2 < 0.0f) {
+	return maxHeight * factor;
+ }
+ return height2 + (factor - factor2) * maxHeight;
 }
 
 void cornersBFS(const MyMap& map, QValueList<QPoint>* retQueue)
