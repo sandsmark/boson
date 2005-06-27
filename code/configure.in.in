@@ -20,6 +20,22 @@ AC_SUBST(LIB_KGAME)
 AC_DEFINE_UNQUOTED(HAVE_KGAME_VERSION_H, 1, [ ])
 AC_DEFINE_UNQUOTED(HAVE_KGAME_SAVEGAME, 1, [ ])
 
+AC_ARG_WITH(static-qt-dir,
+    AC_HELP_STRING([--with-static-qt-dir=DIR],[where the root of Qt is installed ]),
+    [  BO_STATIC_QT_DIR="$withval"
+       bo_static_qt_includes="$withval"/include
+       BO_STATIC_QT_LIBS="$withval"/lib${kdelibsuff}
+       bo_static_qt_bindir="$withval"/bin
+    ])
+
+AC_ARG_WITH(static-kde-dir,
+    AC_HELP_STRING([--with-static-kde-dir=DIR],[where the root of KDE is installed ]),
+    [  BO_STATIC_KDE_DIR="$withval"
+       bo_static_kde_includes="$withval"/include
+       BO_STATIC_KDE_LIBS="$withval"/lib${kdelibsuff}
+       bo_static_kde_bindir="$withval"/bin
+    ])
+
 
 AC_DEFUN([AC_BOSON_STATIC],
 [
@@ -29,6 +45,25 @@ AC_DEFUN([AC_BOSON_STATIC],
     AC_DEFINE_UNQUOTED(BOSON_LINK_STATIC, 0, [ ])
   fi
  AM_CONDITIONAL(link_static, test x$enable_static = xyes)
+
+ if test "x$BO_STATIC_QT_DIR" = "x"; then
+   AC_MSG_ERROR([--with-static-qt-dir was not provided. Please provide the path to the static Qt installation])
+ fi
+ AC_MSG_RESULT($BO_STATIC_QT_DIR)
+ if test "x$BO_STATIC_KDE_DIR" = "x"; then
+   AC_MSG_ERROR([--with-static-kde-dir was not provided. Please provide the path to the static KDE installation])
+ fi
+
+ AC_SUBST(BO_STATIC_QT_DIR)
+ AC_SUBST(BO_STATIC_QT_LIBS)
+ AC_SUBST(BO_STATIC_KDE_DIR)
+ AC_SUBST(BO_STATIC_KDE_LIBS)
+
+ LIB_KDECORE=$BO_STATIC_KDE_LIBS/libkdecore.a
+ LIB_KDEUI=$BO_STATIC_KDE_LIBS/libkdeui.a
+ LIB_KIO=$BO_STATIC_KDE_LIBS/libkio.a
+ AC_SUBST(LIB_KDECORE)
+ AC_SUBST(LIB_KDEUI)
 ])
 AC_BOSON_STATIC
 
