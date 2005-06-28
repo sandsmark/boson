@@ -1010,6 +1010,15 @@ float BosonCanvas::heightAtCorner(int x, int y) const
  return map()->heightAtCorner(x, y);
 }
 
+float BosonCanvas::waterDepthAtCorner(int x, int y) const
+{
+ if (!map()) {
+	BO_NULL_ERROR(map());
+	return 0.0f;
+ }
+ return map()->waterDepthAtCorner(x, y);
+}
+
 float BosonCanvas::heightAtPoint(bofixed x, bofixed y) const
 {
  // Coordinates of the cell (x; y) is on
@@ -1017,18 +1026,18 @@ float BosonCanvas::heightAtPoint(bofixed x, bofixed y) const
  int cellY = (int)(y);
 
  if ((x == cellX) && (y == cellY)) {
-	return heightAtCorner(cellX, cellY) + boWaterManager->waterDepth(cellX, cellY);
+	return heightAtCorner(cellX, cellY) + waterDepthAtCorner(cellX, cellY);
  } else if(x == cellX) {
 	bofixed y2 = (y) - cellY;
 	float h1, h2;
-	h1 = heightAtCorner(cellX, cellY) + boWaterManager->waterDepth(cellX, cellY);
-	h2 = heightAtCorner(cellX, cellY + 1) + boWaterManager->waterDepth(cellX, cellY + 1);
+	h1 = heightAtCorner(cellX, cellY) + waterDepthAtCorner(cellX, cellY);
+	h2 = heightAtCorner(cellX, cellY + 1) + waterDepthAtCorner(cellX, cellY + 1);
 	return h1 * (1 - y2) + (h2 * y2);
  } else if(y == cellY) {
 	bofixed x2 = (x) - cellX;
 	float h1, h2;
-	h1 = heightAtCorner(cellX, cellY) + boWaterManager->waterDepth(cellX, cellY);
-	h2 = heightAtCorner(cellX + 1, cellY) + boWaterManager->waterDepth(cellX + 1, cellY);
+	h1 = heightAtCorner(cellX, cellY) + waterDepthAtCorner(cellX, cellY);
+	h2 = heightAtCorner(cellX + 1, cellY) + waterDepthAtCorner(cellX + 1, cellY);
 	return h1 * (1 - x2) + (h2 * x2);
  }
 
@@ -1039,10 +1048,10 @@ float BosonCanvas::heightAtPoint(bofixed x, bofixed y) const
  // These are heights of the corners of the cell (x; y) is on
  float h1, h2, h3, h4;
 
- h1 = heightAtCorner(cellX, cellY) + boWaterManager->waterDepth(cellX, cellY);
- h2 = heightAtCorner(cellX + 1, cellY) + boWaterManager->waterDepth(cellX + 1, cellY);
- h3 = heightAtCorner(cellX, cellY + 1) + boWaterManager->waterDepth(cellX, cellY + 1);
- h4 = heightAtCorner(cellX + 1, cellY + 1) + boWaterManager->waterDepth(cellX + 1, cellY + 1);
+ h1 = heightAtCorner(cellX, cellY) + waterDepthAtCorner(cellX, cellY);
+ h2 = heightAtCorner(cellX + 1, cellY) + waterDepthAtCorner(cellX + 1, cellY);
+ h3 = heightAtCorner(cellX, cellY + 1) + waterDepthAtCorner(cellX, cellY + 1);
+ h4 = heightAtCorner(cellX + 1, cellY + 1) + waterDepthAtCorner(cellX + 1, cellY + 1);
 
  // Blend all corners together and return the result
  // FIXME: this can probably be written _much_ more understandably and maybe faster

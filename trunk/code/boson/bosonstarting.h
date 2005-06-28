@@ -408,12 +408,27 @@ public:
 	BosonStartingLoadWater(const QString& text)
 		: BosonStartingTask(text)
 	{
+		mDestPlayField = 0;
 	}
 
 	virtual unsigned int taskDuration() const;
 
+	BosonPlayField* playField() const
+	{
+		return mDestPlayField;
+	}
+
+public slots:
+	void slotSetDestPlayField(BosonPlayField* dest)
+	{
+		mDestPlayField = dest;
+	}
+
 protected:
 	virtual bool startTask();
+
+private:
+	BosonPlayField* mDestPlayField;
 };
 
 class BosonStartingStartScenario : public BosonStartingTask

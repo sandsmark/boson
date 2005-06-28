@@ -54,9 +54,9 @@
 
 /*****  BoLakeGL  *****/
 
-BoLakeGL::BoLakeGL(BoLake* l, BoWaterManager* manager)
+BoLakeGL::BoLakeGL(BoLake* l, const BosonMap* map)
 {
-  init(l, manager);
+  init(l, map);
 }
 
 BoLakeGL::~BoLakeGL()
@@ -64,7 +64,7 @@ BoLakeGL::~BoLakeGL()
   chunks.clear();
 }
 
-void BoLakeGL::init(BoLake* l, BoWaterManager* manager)
+void BoLakeGL::init(BoLake* l, const BosonMap* map)
 {
   lake = l;
   waveVector.set(0.866, 0.5);
@@ -120,7 +120,7 @@ void BoLakeGL::init(BoLake* l, BoWaterManager* manager)
       {
         if(lake->hasCorner(x, y))
         {
-          float h = manager->groundHeightAt(x, y);
+          float h = map->heightAtCorner(x, y);
           chunk->mingroundheight = QMIN(chunk->mingroundheight, h);
           chunk->maxgroundheight = QMAX(chunk->maxgroundheight, h);
 
@@ -442,34 +442,18 @@ bool BoWaterRenderer::supportsBumpmapping() const
   return (boTextureManager->textureUnits() > 1) && mSupports_env_combine && mSupports_env_dot3 && (mSupports_blendcolor || mSupports_blendcolor_ext);
 }
 
-void BoWaterRenderer::setLakes(const QPtrList<BoLake> lakes)
+//Lakes(const QPtrList<BoLake>& lakes)
+void BoWaterRenderer::setMap(const BosonMap* map)
 {
-  if(mLakes.count() == lakes.count())
-  {
-    bool equal = true;
-    QPtrListIterator<BoLake> it(lakes);
-    QPtrListIterator<BoLakeGL> it2(mLakes);
-    while(it.current() && equal)
-    {
-      if(it.current() != it2.current()->lake)
-      {
-        equal = false;
-      }
-      ++it;
-      ++it2;
-    }
-    if(equal)
-    {
-      return;
-    }
-  }
+  BO_CHECK_NULL_RET(map);
+  BO_CHECK_NULL_RET(map->lakes());
+  mMap = map;
   mLakes.setAutoDelete(true);
   mLakes.clear();
-  QPtrListIterator<BoLake> it(lakes);
+  QPtrListIterator<BoLake> it(*map->lakes());
   while(it.current())
   {
-    BoWaterManager* manager = boWaterManager; // ugly
-    BoLakeGL* l = new BoLakeGL(it.current(), manager);
+    BoLakeGL* l = new BoLakeGL(it.current(), mMap);
     mLakes.append(l);
     ++it;
   }
@@ -477,7 +461,11 @@ void BoWaterRenderer::setLakes(const QPtrList<BoLake> lakes)
 
 float BoWaterRenderer::waterAlphaAt(BoLakeGL* lake, float x, float y)
 {
-  return QMIN(1.0, ((lake->lake->level - boWaterManager->groundHeightAt(x, y)) * lake->alphaMultiplier + lake->alphaBase)/* * mWaterDiffuseColor*/);
+  if(!mMap)
+  {
+    return 1.0f;
+  }
+  return QMIN(1.0, ((lake->lake->level - mMap->heightAtCorner(x, y)) * lake->alphaMultiplier + lake->alphaBase)/* * mWaterDiffuseColor*/);
 }
 
 void BoWaterRenderer::cellFogChanged(int x1, int x2, int y1, int y2)
@@ -567,11 +555,6 @@ void BoWaterRenderer::render()
   {
     boWarning() << k_funcinfo << "OpenGL not inited! Initing now..." << endl;
     initOpenGL();
-  }
-
-  if(boWaterManager->lakes())
-  {
-    setLakes(*boWaterManager->lakes());
   }
 
   // Clear statistics
@@ -1497,7 +1480,7 @@ void BoWaterRenderer::initRenderEnvironment()
 
 void BoWaterRenderer::loadNecessaryTextures()
 {
-  if(mLakes.count() == 0 && boWaterManager->lakes() && boWaterManager->lakes()->count() == 0)
+  if(mLakes.count() == 0)
   {
     // If we don't have any lakes, we don't need textures either.
     return;

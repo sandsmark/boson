@@ -204,6 +204,11 @@ public:
 	float heightAtCorner(int x, int y) const;
 
 	/**
+	 * @return BosonMap::waterDepthAtCorner
+	 **/
+	float waterDepthAtCorner(int x, int y) const;
+
+	/**
 	 * @return Height at point x,y (in canvas coordinates)
 	 * This is calculated from heights at the corners of the cell that the point
 	 * is on. Water surface level is also taken insto account
