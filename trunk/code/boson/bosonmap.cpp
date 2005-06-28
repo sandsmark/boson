@@ -54,7 +54,7 @@ int BoHeightMap::heightToPixel(float height)
  return ((int)(height * 8.0f)) + 105;
 }
 
-bool BoHeightMap::save(QDataStream& stream)
+bool BoHeightMap::save(QDataStream& stream) const
 {
  if (width() == 0) {
 	boError() << k_funcinfo << "width()==0" << endl;
@@ -96,7 +96,7 @@ bool BoHeightMap::load(QDataStream& stream)
 }
 
 
-bool BoTexMap::save(QDataStream& stream)
+bool BoTexMap::save(QDataStream& stream) const
 {
  boDebug() << k_funcinfo << endl;
  if (!mTexMap) {
@@ -764,7 +764,7 @@ bool BosonMap::loadTexMap(QDataStream& stream)
  return mTexMap->load(stream);
 }
 
-bool BosonMap::saveTexMap(QDataStream& stream)
+bool BosonMap::saveTexMap(QDataStream& stream) const
 {
  boDebug() << k_funcinfo << endl;
  if (!mTexMap) {
@@ -782,7 +782,7 @@ bool BosonMap::saveTexMap(QDataStream& stream)
  return mTexMap->save(stream);
 }
 
-QByteArray BosonMap::saveMapToFile()
+QByteArray BosonMap::saveMapToFile() const
 {
  if (!isValidMapGeo(width(), height())) {
 	boError() << k_funcinfo << "Map geo is not valid" << endl;
@@ -814,7 +814,7 @@ QByteArray BosonMap::saveMapToFile()
  return doc.toCString();
 }
 
-QByteArray BosonMap::saveWaterToFile()
+QByteArray BosonMap::saveWaterToFile() const
 {
  QDomDocument doc(QString::fromLatin1("Water"));
  QDomElement root = doc.createElement(QString::fromLatin1("Water"));
@@ -825,7 +825,7 @@ QByteArray BosonMap::saveWaterToFile()
  return doc.toCString();
 }
 
-bool BosonMap::saveCompleteMap(QDataStream& stream)
+bool BosonMap::saveCompleteMap(QDataStream& stream) const
 {
  // AB: we may have a problem here - this stream is meant to be sent through
  // network, but it is very big! (sometimes several MB)
@@ -849,7 +849,7 @@ bool BosonMap::saveCompleteMap(QDataStream& stream)
  return true;
 }
 
-bool BosonMap::saveHeightMap(QDataStream& stream)
+bool BosonMap::saveHeightMap(QDataStream& stream) const
 {
  if (!mHeightMap) {
 	BoHeightMap heightMap(width() + 1, height() + 1);
@@ -858,7 +858,7 @@ bool BosonMap::saveHeightMap(QDataStream& stream)
  return mHeightMap->save(stream);
 }
 
-QByteArray BosonMap::saveHeightMapImage()
+QByteArray BosonMap::saveHeightMapImage() const
 {
  // this function is sloooow !
  if (!width() || !height()) {
@@ -904,7 +904,7 @@ QByteArray BosonMap::saveHeightMapImage()
  return array;
 }
 
-QByteArray BosonMap::saveTexMapImage(unsigned int texture)
+QByteArray BosonMap::saveTexMapImage(unsigned int texture) const
 {
  // this function is sloooow !
  if (!width() || !height()) {
