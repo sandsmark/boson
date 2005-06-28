@@ -35,7 +35,6 @@
 #include "bosonprofiling.h"
 #include "botexture.h"
 #include "bosonglwidget.h"
-#include "bowater.h"
 #include <bogl.h>
 
 #include <klocale.h>
@@ -379,7 +378,17 @@ void BosonGLMiniMap::calculateGround(int x, int y)
 	int cornerRed = 0;
 	int cornerGreen = 0;
 	int cornerBlue = 0;
-	if (boWaterManager->underwater(cornerX[j], cornerY[j])) {
+
+	// TODO: fix water:
+	//       use different texture layers:
+	//       1. terrain layer
+	//       2. water layer
+	//       3. unit layer
+	//       every layer contains data it is responsible for only. where it
+	//       does not have any data, it is transparent.
+	//       when rendering, we blend all layers together.
+//	if (boWaterManager->underwater(cornerX[j], cornerY[j])) {
+	if (false) {
 		// Water is dark-blue, a bit greenish
 		cornerRed += 0;
 		cornerGreen += 64;
