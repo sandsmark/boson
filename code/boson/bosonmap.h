@@ -56,7 +56,7 @@ public:
 	{
 	}
 
-	virtual bool save(QDataStream& stream) = 0;
+	virtual bool save(QDataStream& stream) const = 0;
 	virtual bool load(QDataStream& stream) = 0;
 
 	/**
@@ -116,7 +116,7 @@ public:
 		delete[] mHeightMap;
 	}
 
-	virtual bool save(QDataStream& stream);
+	virtual bool save(QDataStream& stream) const;
 	virtual bool load(QDataStream& stream);
 
 	inline float* heightMap() const { return mHeightMap; }
@@ -203,7 +203,7 @@ public:
 		delete[] mTexMap;
 	}
 
-	virtual bool save(QDataStream& stream);
+	virtual bool save(QDataStream& stream) const;
 	virtual bool load(QDataStream& stream);
 
 	/**
@@ -353,7 +353,7 @@ public:
 	}
 
 	// Normal maps won't be saved/loaded (they're auto-generated)
-	virtual bool save(QDataStream&) { return true; }
+	virtual bool save(QDataStream&) const { return true; }
 	virtual bool load(QDataStream&) { return true; }
 
 	inline const float* normalMap() const { return mNormalMap; }
@@ -413,7 +413,7 @@ public:
 	virtual ~BoColorMap();
 
 	// Color maps won't be saved/loaded (they're auto-generated)
-	virtual bool save(QDataStream&) { return true; }
+	virtual bool save(QDataStream&) const { return true; }
 	virtual bool load(QDataStream&) { return true; }
 
 	void update(unsigned char* data);
@@ -662,8 +662,8 @@ public:
 
 
 
-	QByteArray saveMapToFile();
-	QByteArray saveWaterToFile();
+	QByteArray saveMapToFile() const;
+	QByteArray saveWaterToFile() const;
 
 
 	/**
@@ -696,7 +696,7 @@ public:
 
 	bool importHeightMapImage(const QImage& image);
 
-	QByteArray saveHeightMapImage();
+	QByteArray saveHeightMapImage() const;
 
 	/**
 	 * Load the @ref texMap from @p stream.
@@ -706,9 +706,9 @@ public:
 	 * already loaded cells. The default number of textures is used then.
 	 **/
 	bool loadTexMap(QDataStream& stream);
-	bool saveTexMap(QDataStream& stream);
+	bool saveTexMap(QDataStream& stream) const;
 
-	QByteArray saveTexMapImage(unsigned int texture);
+	QByteArray saveTexMapImage(unsigned int texture) const;
 
 	void setModified(bool m) { mModified = m; }
 	bool modified() const { return mModified; }
@@ -762,7 +762,7 @@ signals:
 	void signalColorMapsChanged();
 
 protected:
-	bool saveHeightMap(QDataStream& stream);
+	bool saveHeightMap(QDataStream& stream) const;
 
 	/**
 	 * Save @p heightMap into @p stream.
@@ -789,7 +789,7 @@ protected:
 	 * Use this to send the map over network, but remember that there will
 	 * be a lot of data! (probably more a few MB for 500x500 maps!)
 	 **/
-	bool saveCompleteMap(QDataStream& stream);
+	bool saveCompleteMap(QDataStream& stream) const;
 
 private:
 	void init();
