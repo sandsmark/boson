@@ -32,7 +32,6 @@
 #include "player.h"
 #include "playerio.h"
 #include "bodebug.h"
-#include "bosonprofiling.h"
 #include "botexture.h"
 #include "bosonglwidget.h"
 #include <bogl.h>
@@ -69,6 +68,9 @@ static bool plane_line_intersect(const BoPlane& plane, const BoVector3Float& lin
 static bool plane_line_segment_intersect(const BoPlane& plane, const BoVector3Float& linePoint1, const BoVector3Float& linePoint2, BoVector3Float* intersection);
 static bool plane_line_intersect_internal(const BoPlane& plane, const BoVector3Float& linePoint, const BoVector3Float& lineVector, float* factor);
 static void cut_line_segment_at_plane(const BoPlane& plane, BoVector3Float& linePoint1, BoVector3Float& linePoint2);
+static void cutLineZ0(BoVector3Float& p1_, BoVector3Float& p2_);
+static void drawLine(const BoVector3Float& p1_, const BoVector3Float& p2_, int w, int h);
+static void keepLinesInRect(int w, int h, BoVector3Float& p1, BoVector3Float& p2, bool* skip);
 
 class BosonGLMiniMapPrivate
 {
@@ -201,7 +203,6 @@ void BosonGLMiniMap::moveUnit(Unit* unit, const QPtrVector<Cell>* newCells, cons
  // note that using unit->x() and unit->y() as well as unit->cells() and such
  // stuff can be undefined at this point! especially when adding units
  // (oldX==oldY==-1)!
- BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(map());
  BO_CHECK_NULL_RET(unit);
  BO_CHECK_NULL_RET(newCells);
@@ -224,9 +225,6 @@ void BosonGLMiniMap::moveUnit(Unit* unit, const QPtrVector<Cell>* newCells, cons
 
  if (oldCells && oldCells->count() != 0) {
 	// unit is moving.
-	// pretty much everything can happen here now. the cell that the unit
-	// left can be fogged for the local player, can have another unit, ...
-	// so we need to update all cells that the unit has left.
 	for (unsigned int i = 0; i < oldCells->count(); i++) {
 		bool found = false;
 		for (unsigned int j = 0; j < newCells->count(); j++) {
@@ -238,65 +236,46 @@ void BosonGLMiniMap::moveUnit(Unit* unit, const QPtrVector<Cell>* newCells, cons
 		if (!found) {
 			Cell* c = oldCells->at(i);
 			if (c) {
-				updateCell(c->x(), c->y());
+				updateUnitsAtCell(c->x(), c->y());
 			}
 		}
 	}
  }
- QColor color = unit->owner()->teamColor();
  for (unsigned int i = 0; i < newCells->count(); i++) {
 	Cell* c = newCells->at(i);
 	if (!c) {
 		continue;
 	}
-	int x = c->x();
-	int y = c->y();
-	if (localPlayerIO() && !localPlayerIO()->canSee(x, y)) {
-		// we don't call slotFog() here now, as it should be fogged
-		// already. maybe we should do this anyway?
-		continue;
-	}
-	if (!unit->isDestroyed()) {
-		setPoint(x, y, color);
-	} else {
-		updateCell(x, y);
-	}
+	updateUnitsAtCell(c->x(), c->y());
  }
 }
 
-void BosonGLMiniMap::slotUpdateCell(int x, int y)
+void BosonGLMiniMap::slotUpdateTerrainAtCorner(int x, int y)
 {
- updateCell(x, y);
+ calculateGround(x, y);
 }
 
-void BosonGLMiniMap::updateCell(int x, int y)
+void BosonGLMiniMap::updateUnitsAtCell(int x, int y)
 {
  if (!hasMap()) {
 	return;
  }
  BO_CHECK_NULL_RET(map());
- BO_CHECK_NULL_RET(groundTheme());
- if (!map()->isValidCell(x, y)) {
-	boError() << k_funcinfo << x << "," << y << " is no valid cell!" << endl;
+ Cell* cell = map()->cell(x, y);
+ BO_CHECK_NULL_RET(cell);
+ BO_CHECK_NULL_RET(mRenderer);
+
+ QValueList<Unit*> list = cell->items()->units(false);
+
+ for (QValueList<Unit*>::iterator it = list.begin(); it != list.end(); ++it) {
+	Unit* u = *it;
+	if (u->isDestroyed()) {
+		continue;
+	}
+	mRenderer->setUnitPoint(x, y, u->owner()->teamColor(), true);
 	return;
  }
- Cell* cell = map()->cell(x, y);
- // AB: note that localPlayerIO() == NULL is valid in editor mode here!
- if (localPlayerIO()) {
-	if (localPlayerIO()->isFogged(x, y)) {
-		slotFog(x, y);
-		return;
-	}
- }
- QValueList<Unit*> list = cell->items()->units(false);
- if (list.isEmpty()) {
-	calculateGround(x, y);
- } else {
-	Unit* u = list.first();
-	QPtrVector<Cell> cells;
-	makeCellList(&cells, u, u->x(), u->y());
-	moveUnit(u, &cells, 0);
- }
+ mRenderer->setUnitPoint(x, y, QColor(0, 0, 0), false);
 }
 
 
@@ -356,13 +335,11 @@ void BosonGLMiniMap::calculateGround(int x, int y)
  if (!hasMap()) {
 	return;
  }
+ BO_CHECK_NULL_RET(mRenderer);
  BO_CHECK_NULL_RET(groundTheme());
  BO_CHECK_NULL_RET(map());
  BO_CHECK_NULL_RET(map()->texMap());
  if (!map()->isValidCell(x, y)) {
-	return;
- }
- if (localPlayerIO() && !localPlayerIO()->cell(x, y)) {
 	return;
  }
 
@@ -379,34 +356,17 @@ void BosonGLMiniMap::calculateGround(int x, int y)
 	int cornerGreen = 0;
 	int cornerBlue = 0;
 
-	// TODO: fix water:
-	//       use different texture layers:
-	//       1. terrain layer
-	//       2. water layer
-	//       3. unit layer
-	//       every layer contains data it is responsible for only. where it
-	//       does not have any data, it is transparent.
-	//       when rendering, we blend all layers together.
-//	if (boWaterManager->underwater(cornerX[j], cornerY[j])) {
-	if (false) {
-		// Water is dark-blue, a bit greenish
-		cornerRed += 0;
-		cornerGreen += 64;
-		cornerBlue += 192;
-		alphaSum += 255;
-	} else {
-		for (unsigned int i = 0; i < map()->groundTheme()->groundTypeCount(); i++) {
-			int alpha = (int)map()->texMapAlpha(i, cornerX[j], cornerY[j]);
-			alphaSum += alpha;
+	for (unsigned int i = 0; i < map()->groundTheme()->groundTypeCount(); i++) {
+		int alpha = (int)map()->texMapAlpha(i, cornerX[j], cornerY[j]);
+		alphaSum += alpha;
 
-			QRgb rgb = map()->miniMapColor(i);
-			int red = qRed(rgb);
-			int green = qGreen(rgb);
-			int blue = qBlue(rgb);
-			cornerRed += red * alpha / 255;
-			cornerGreen += green * alpha / 255;
-			cornerBlue += blue * alpha / 255;
-		}
+		QRgb rgb = map()->miniMapColor(i);
+		int red = qRed(rgb);
+		int green = qGreen(rgb);
+		int blue = qBlue(rgb);
+		cornerRed += red * alpha / 255;
+		cornerGreen += green * alpha / 255;
+		cornerBlue += blue * alpha / 255;
 	}
 	if (alphaSum == 0) {
 		// nothing to do for this corner.
@@ -425,16 +385,8 @@ void BosonGLMiniMap::calculateGround(int x, int y)
  g /= 4;
  b /= 4;
 
- setPoint(x, y, QColor(r, g, b));
-}
-
-void BosonGLMiniMap::setPoint(int x, int y, const QColor& color)
-{
- if (!hasMap()) {
-	return;
- }
- BO_CHECK_NULL_RET(mRenderer);
- mRenderer->setPoint(x, y, color);
+ mRenderer->setTerrainPoint(x, y, QColor(r, g, b));
+ mRenderer->setWaterPoint(x, y, map()->cell(x, y)->isWater());
 }
 
 void BosonGLMiniMap::setImageTheme(const QString& theme)
@@ -539,6 +491,15 @@ void BosonGLMiniMap::createMap(BosonMap* map, const BoGLMatrices* gameGLMatrices
  if (!d->mImageTheme.isEmpty()) {
 	setImageTheme(d->mImageTheme);
  }
+ for (unsigned int x = 0; x < map->width() + 1; x++) {
+	for (unsigned int y = 0; y < map->height() + 1; y++) {
+		calculateGround(x, y);
+		if (x < map->width() && y < map->height()) {
+			updateUnitsAtCell(x, y);
+		}
+	}
+ }
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonGLMiniMap::renderMiniMap()
@@ -587,33 +548,12 @@ void BosonGLMiniMap::slotUnfog(int x, int y)
  if (!hasMap()) {
 	return;
  }
- if (!localPlayerIO()) {
-	// don't use fog of war at all (editor mode)
-	return;
- }
  if (!map()) {
 	return;
  }
- BO_CHECK_NULL_RET(groundTheme());
- if (!localPlayerIO()->isValidCell(x, y)) {
-	boError() << k_funcinfo << "invalid cell " << x << "," << y << endl;
-	return;
- }
- Cell* cell = localPlayerIO()->cell(x, y);
- if (!cell) {
-	// should not happen anymore! must be unfogged already!
-	boError() << k_funcinfo << "cannot unfog cell for minimap - it is still fogged for the player!" << endl;
-	return;
- }
- QValueList<Unit*> list = cell->items()->units(false);
- if (!list.isEmpty()) {
-	Unit* u = list.first();
-	QPtrVector<Cell> cells;
-	makeCellList(&cells, u, u->x(), u->y());
-	moveUnit(u, &cells, 0);
- } else {
-	calculateGround(x, y);
- }
+ BO_CHECK_NULL_RET(map()->cell(x, y));
+ BO_CHECK_NULL_RET(mRenderer);
+ mRenderer->setFoggedPoint(x, y, false);
 }
 
 void BosonGLMiniMap::slotFog(int x, int y)
@@ -621,18 +561,12 @@ void BosonGLMiniMap::slotFog(int x, int y)
  if (!hasMap()) {
 	return;
  }
- if (!localPlayerIO()) {
-	// don't use fog of war at all (editor mode)
-	return;
- }
  if (!map()) {
 	return;
  }
- if (!localPlayerIO()->isValidCell(x, y)) {
-	boError() << k_funcinfo << "invalid cell " << x << "," << y << endl;
-	return;
- }
- setPoint(x, y, COLOR_UNKNOWN);
+ BO_CHECK_NULL_RET(map()->cell(x, y));
+ BO_CHECK_NULL_RET(mRenderer);
+ mRenderer->setFoggedPoint(x, y, true);
 }
 
 bool BosonGLMiniMap::mouseEvent(KGameIO*, QDataStream&, QMouseEvent* e, bool* send)
@@ -731,8 +665,14 @@ public:
 	BosonGLMiniMapRendererPrivate()
 	{
 		mGameGLMatrices = 0;
-		mMapTexture = 0;
-		mGLMapTexture = 0;
+		mTerrainTexture = 0;
+		mWaterTexture = 0;
+		mUnitsTexture = 0;
+		mFogTexture = 0;
+		mGLTerrainTexture = 0;
+		mGLWaterTexture = 0;
+		mGLUnitsTexture = 0;
+		mGLFogTexture = 0;
 
 		mLogoTexture = 0;
 	}
@@ -740,16 +680,23 @@ public:
 	QImage mOrigLogo;
 	const BoGLMatrices* mGameGLMatrices;
 
-	GLubyte* mMapTexture;
+	GLubyte* mTerrainTexture;
+	GLubyte* mWaterTexture;
+	GLubyte* mUnitsTexture;
+	GLubyte* mFogTexture;
 	int mMapTextureWidth;
 	int mMapTextureHeight;
-	BoTexture* mGLMapTexture;
+	BoTexture* mGLTerrainTexture;
+	BoTexture* mGLWaterTexture;
+	BoTexture* mGLUnitsTexture;
+	BoTexture* mGLFogTexture;
 
 	BoTexture* mLogoTexture;
 
 
 	bool mUpdatesEnabled;
 	int mMiniMapChangesSinceRendering;
+	QMap<GLubyte*, bool> mTextureUpdatesEnabled;
 };
 
 BosonGLMiniMapRenderer::BosonGLMiniMapRenderer(const BoGLMatrices* gameGLMatrices)
@@ -780,21 +727,56 @@ BosonGLMiniMapRenderer::BosonGLMiniMapRenderer(const BoGLMatrices* gameGLMatrice
 
 BosonGLMiniMapRenderer::~BosonGLMiniMapRenderer()
 {
- delete d->mGLMapTexture;
- delete[] d->mMapTexture;
+ delete d->mGLTerrainTexture;
+ delete d->mGLWaterTexture;
+ delete d->mGLUnitsTexture;
+ delete d->mGLFogTexture;
+ delete[] d->mTerrainTexture;
+ delete[] d->mWaterTexture;
+ delete[] d->mUnitsTexture;
+ delete[] d->mFogTexture;
  delete d->mLogoTexture;
  delete d;
 }
 
 void BosonGLMiniMapRenderer::setUpdatesEnabled(bool e)
 {
+ bool wasEnabled = d->mUpdatesEnabled;
  d->mUpdatesEnabled = e;
- if (e) {
-	delete d->mGLMapTexture;
-	d->mGLMapTexture = new BoTexture(d->mMapTexture,
+ if (!e) {
+	return;
+ }
+ if (!wasEnabled || !d->mTextureUpdatesEnabled[d->mTerrainTexture]) {
+	delete d->mGLTerrainTexture;
+	d->mGLTerrainTexture = new BoTexture(d->mTerrainTexture,
 			d->mMapTextureWidth, d->mMapTextureHeight,
 			BoTexture::FilterLinear | BoTexture::FormatRGBA |
 			BoTexture::DontCompress | BoTexture::DontGenMipmaps);
+	d->mTextureUpdatesEnabled[d->mTerrainTexture] = true;
+ }
+ if (!wasEnabled || !d->mTextureUpdatesEnabled[d->mWaterTexture]) {
+	delete d->mGLWaterTexture;
+	d->mGLWaterTexture = new BoTexture(d->mWaterTexture,
+			d->mMapTextureWidth, d->mMapTextureHeight,
+			BoTexture::FilterLinear | BoTexture::FormatRGBA |
+			BoTexture::DontCompress | BoTexture::DontGenMipmaps);
+	d->mTextureUpdatesEnabled[d->mWaterTexture] = true;
+ }
+ if (!wasEnabled || !d->mTextureUpdatesEnabled[d->mUnitsTexture]) {
+	delete d->mGLUnitsTexture;
+	d->mGLUnitsTexture = new BoTexture(d->mUnitsTexture,
+			d->mMapTextureWidth, d->mMapTextureHeight,
+			BoTexture::FilterLinear | BoTexture::FormatRGBA |
+			BoTexture::DontCompress | BoTexture::DontGenMipmaps);
+	d->mTextureUpdatesEnabled[d->mUnitsTexture] = true;
+ }
+ if (!wasEnabled || !d->mTextureUpdatesEnabled[d->mFogTexture]) {
+	delete d->mGLFogTexture;
+	d->mGLFogTexture = new BoTexture(d->mFogTexture,
+			d->mMapTextureWidth, d->mMapTextureHeight,
+			BoTexture::FilterLinear | BoTexture::FormatRGBA |
+			BoTexture::DontCompress | BoTexture::DontGenMipmaps);
+	d->mTextureUpdatesEnabled[d->mFogTexture] = true;
  }
 }
 
@@ -816,26 +798,48 @@ void BosonGLMiniMapRenderer::createMap(unsigned int w, unsigned int h, BosonGrou
  mTextureMaxWidth = (float)w / (float)w2;
  mTextureMaxHeight = (float)h / (float)h2;
 
- delete[] d->mMapTexture;
- d->mMapTexture = new GLubyte[w2 * h2 * 4];
+ delete[] d->mTerrainTexture;
+ delete[] d->mWaterTexture;
+ delete[] d->mUnitsTexture;
+ delete[] d->mFogTexture;
+ d->mTerrainTexture = new GLubyte[w2 * h2 * 4];
+ d->mWaterTexture = new GLubyte[w2 * h2 * 4];
+ d->mUnitsTexture = new GLubyte[w2 * h2 * 4];
+ d->mFogTexture = new GLubyte[w2 * h2 * 4];
  d->mMapTextureWidth = w2;
  d->mMapTextureHeight = h2;
 
- for (int y = 0; y < d->mMapTextureHeight; y++) {
-	for (int x = 0; x < d->mMapTextureWidth; x++) {
-		d->mMapTexture[(y * w + x) * 4 + 0] = 0;
-		d->mMapTexture[(y * w + x) * 4 + 1] = 0;
-		d->mMapTexture[(y * w + x) * 4 + 2] = 0;
-		d->mMapTexture[(y * w + x) * 4 + 3] = 0;
+ QValueList<GLubyte*> textures;
+ textures.append(d->mTerrainTexture);
+ textures.append(d->mWaterTexture);
+ textures.append(d->mUnitsTexture);
+ textures.append(d->mFogTexture);
+ for (QValueList<GLubyte*>::iterator it = textures.begin(); it != textures.end(); ++it) {
+	GLubyte* texture = (*it);
+	for (int y = 0; y < d->mMapTextureHeight; y++) {
+		for (int x = 0; x < d->mMapTextureWidth; x++) {
+			texture[(y * w + x) * 4 + 0] = 0;
+			texture[(y * w + x) * 4 + 1] = 0;
+			texture[(y * w + x) * 4 + 2] = 0;
+			texture[(y * w + x) * 4 + 3] = 0;
+		}
 	}
  }
 
  // AB: d->mMapTexture has been resized to 2^n * 2^m. replace the alpha values for
  // all coordinates that are relevant to us.
- for (unsigned int x = 0; x < w; x++) {
-	for (unsigned int y = 0; y < h; y++) {
-		// FIXME: endianness?
-		d->mMapTexture[(y * w + x) * 4 + 3] = 0;
+ for (QValueList<GLubyte*>::iterator it = textures.begin(); it != textures.end(); ++it) {
+	GLubyte* texture = (*it);
+
+	GLubyte alpha = 255;
+	if (texture != d->mTerrainTexture && texture != d->mFogTexture) {
+		alpha = 0;
+	}
+	for (unsigned int x = 0; x < w; x++) {
+		for (unsigned int y = 0; y < h; y++) {
+			// FIXME: endianness?
+			texture[(y * w + x) * 4 + 3] = alpha;
+		}
 	}
  }
 
@@ -892,8 +896,14 @@ void BosonGLMiniMapRenderer::renderLogo()
 
 void BosonGLMiniMapRenderer::renderMiniMap()
 {
- BO_CHECK_NULL_RET(d->mMapTexture);
- BO_CHECK_NULL_RET(d->mGLMapTexture);
+ BO_CHECK_NULL_RET(d->mTerrainTexture);
+ BO_CHECK_NULL_RET(d->mWaterTexture);
+ BO_CHECK_NULL_RET(d->mUnitsTexture);
+ BO_CHECK_NULL_RET(d->mFogTexture);
+ BO_CHECK_NULL_RET(d->mGLTerrainTexture);
+ BO_CHECK_NULL_RET(d->mGLWaterTexture);
+ BO_CHECK_NULL_RET(d->mGLUnitsTexture);
+ BO_CHECK_NULL_RET(d->mGLFogTexture);
  glPushMatrix();
 
  // AB: this is only for pre-ufo use
@@ -907,12 +917,24 @@ void BosonGLMiniMapRenderer::renderMiniMap()
  d->mModelviewMatrix.scale(mZoom, mZoom, 1.0f); // AB: maybe do this on the texture matrix stack
 // glScalef(mZoom, mZoom, 1.0f); // AB: maybe do this on the texture matrix stack
 
- if (!d->mUpdatesEnabled) {
-	setUpdatesEnabled(true);
- }
- d->mGLMapTexture->bind();
+ setUpdatesEnabled(true);
 
+ glDisable(GL_BLEND);
+ d->mGLTerrainTexture->bind();
  renderQuad();
+
+ glEnable(GL_BLEND);
+ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+ d->mGLWaterTexture->bind();
+ renderQuad();
+ d->mGLUnitsTexture->bind();
+ renderQuad();
+ if (mUseFog) {
+	d->mGLFogTexture->bind();
+	renderQuad();
+ }
+
+ glDisable(GL_BLEND);
 
  renderCamera();
 
@@ -942,83 +964,6 @@ void BosonGLMiniMapRenderer::renderQuad()
 	glTexCoord2f(0.0f, 0.0f);
 	glVertex3i(0, miniMapHeight(), 0);
  glEnd();
-}
-
-// cuts the line at z=0.0
-static void cutLineZ0(BoVector3Float& p1_, BoVector3Float& p2_)
-{
-#if 0
- BoVector3Float* p1 = &p1_;
- BoVector3Float* p2 = &p2_;
- if (p1->z() < 0.0f && p2->z() < 0.0f) {
-	return;
- }
- if (p2->z() >= 0.0f) {
-	if (p1->z() >= 0.0f) {
-		return;
-	}
-	p2 = &p1_;
-	p1 = &p2_;
- }
- // now p1 >= 0 && p2 < 0
-
- BoVector3Float u = *p1 - *p2;
- float s = -p2->z() / u.z();
- p2->setX(p2->x() + s * u.x());
- p2->setY(p2->y() + s * u.y());
- p2->setZ(0.0f);
-#else
- BoPlane zPlane(BoVector3Float(0.0f, 0.0f, 1.0f), BoVector3Float(0.0f, 0.0f, 0.0f));
- cut_line_segment_at_plane(zPlane, p1_, p2_);
-#endif
-}
-
-static void keepLinesInRect(int w, int h, BoVector3Float& p1, BoVector3Float& p2, bool* skip)
-{
- // x=0 plane
- BoPlane x_0(BoVector3Float(1.0f, 0.0f, 0.0f), BoVector3Float(0.0f, 0.0f, 0.0f));
- // y=0 plane
- BoPlane y_0(BoVector3Float(0.0f, 1.0f, 0.0f), BoVector3Float(0.0f, 0.0f, 0.0f));
- // x=w plane
- BoPlane x_x(BoVector3Float(-1.0f, 0.0f, 0.0f), BoVector3Float(w, 0.0f, 0.0f));
- // y=h plane
- BoPlane y_y(BoVector3Float(0.0f, -1.0f, 0.0f), BoVector3Float(0.0f, h, 0.0f));
-
-
- cut_line_segment_at_plane(x_0, p1, p2);
- cut_line_segment_at_plane(x_x, p1, p2);
- cut_line_segment_at_plane(y_0, p1, p2);
- cut_line_segment_at_plane(y_y, p1, p2);
-
- if (x_0.behindPlane(p1) && x_0.behindPlane(p2)) {
-	*skip = true;
-	return;
- }
- if (y_0.behindPlane(p1) && y_0.behindPlane(p2)) {
-	*skip = true;
-	return;
- }
- if (x_x.behindPlane(p1) && x_x.behindPlane(p2)) {
-	*skip = true;
-	return;
- }
- if (y_y.behindPlane(p1) && y_y.behindPlane(p2)) {
-	*skip = true;
-	return;
- }
-}
-
-static void drawLine(const BoVector3Float& p1_, const BoVector3Float& p2_, int w, int h)
-{
- BoVector3Float p1(p1_);
- BoVector3Float p2(p2_);
- bool skip = false;
- keepLinesInRect(w, h, p1, p2, &skip);
- if (skip) {
-	return;
- }
- glVertex3fv(p1.data());
- glVertex3fv(p2.data());
 }
 
 void BosonGLMiniMapRenderer::renderCamera()
@@ -1166,7 +1111,32 @@ void BosonGLMiniMapRenderer::renderCamera()
  glEnd();
 }
 
-void BosonGLMiniMapRenderer::setFogged(int x, int y)
+void BosonGLMiniMapRenderer::setTerrainPoint(int x, int y, const QColor& color)
+{
+ setColor(x, y, color, 255, d->mTerrainTexture, d->mGLTerrainTexture);
+}
+
+void BosonGLMiniMapRenderer::setWaterPoint(int x, int y, bool isWater)
+{
+ // AB: maybe mix with the terrain texture? (i.e. use alpha < 255)
+ if (isWater) {
+	int alpha = 255;
+	setColor(x, y, QColor(0, 64, 192), alpha, d->mWaterTexture, d->mGLWaterTexture);
+ } else {
+	unsetPoint(x, y, d->mWaterTexture, d->mGLWaterTexture);
+ }
+}
+
+void BosonGLMiniMapRenderer::setUnitPoint(int x, int y, const QColor& color, bool hasUnit)
+{
+ if (!hasUnit) {
+	unsetPoint(x, y, d->mUnitsTexture, d->mGLUnitsTexture);
+ } else {
+	setPoint(x, y, color, d->mUnitsTexture, d->mGLUnitsTexture);
+ }
+}
+
+void BosonGLMiniMapRenderer::setFoggedPoint(int x, int y, bool fogged)
 {
  if (!mUseFog) {
 	return;
@@ -1175,31 +1145,50 @@ void BosonGLMiniMapRenderer::setFogged(int x, int y)
 	boError() << k_funcinfo << "invalid cell " << x << "," << y << endl;
 	return;
  }
- setPoint(x, y, COLOR_UNKNOWN);
+ if (fogged) {
+	setPoint(x, y, COLOR_UNKNOWN, d->mFogTexture, d->mGLFogTexture);
+ } else {
+	unsetPoint(x, y, d->mFogTexture, d->mGLFogTexture);
+ }
 }
 
-void BosonGLMiniMapRenderer::setPoint(int x, int y, const QColor& color)
+
+void BosonGLMiniMapRenderer::unsetPoint(int x, int y, GLubyte* textureData, BoTexture* texture)
 {
- BO_CHECK_NULL_RET(d->mMapTexture);
+ if (textureData == d->mTerrainTexture) {
+	boWarning() << k_funcinfo << "a point on the terrain texture should never be unset. terrain is never transparent." << endl;
+	return;
+ }
+ setColor(x, y, QColor(0, 0, 0), 0, textureData, texture);
+}
+
+void BosonGLMiniMapRenderer::setPoint(int x, int y, const QColor& color, GLubyte* textureData, BoTexture* texture)
+{
+ setColor(x, y, color, 255, textureData, texture);
+}
+
+void BosonGLMiniMapRenderer::setColor(int x, int y, const QColor& color, int alpha, GLubyte* textureData, BoTexture* texture)
+{
+ BO_CHECK_NULL_RET(textureData);
  if (d->mMapTextureWidth <= 0 || d->mMapTextureHeight <= 0) {
 	boError() << k_funcinfo << "invalid map texture size" << endl;
  }
  // FIXME: endianness ?
- d->mMapTexture[(y * d->mMapTextureWidth + x) * 4 + 0] = color.red();
- d->mMapTexture[(y * d->mMapTextureWidth + x) * 4 + 1] = color.green();
- d->mMapTexture[(y * d->mMapTextureWidth + x) * 4 + 2] = color.blue();
- d->mMapTexture[(y * d->mMapTextureWidth + x) * 4 + 3] = 255; // redundant! is already set on initialization
- if (d->mGLMapTexture && d->mUpdatesEnabled) {
-	d->mGLMapTexture->bind();
+ textureData[(y * d->mMapTextureWidth + x) * 4 + 0] = color.red();
+ textureData[(y * d->mMapTextureWidth + x) * 4 + 1] = color.green();
+ textureData[(y * d->mMapTextureWidth + x) * 4 + 2] = color.blue();
+ textureData[(y * d->mMapTextureWidth + x) * 4 + 3] = alpha;
+ if (texture && d->mUpdatesEnabled) {
+	texture->bind();
 	glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE,
-			&d->mMapTexture[(y * d->mMapTextureWidth + x) * 4]);
+			&textureData[(y * d->mMapTextureWidth + x) * 4]);
 	d->mMiniMapChangesSinceRendering++;
 	if (d->mMiniMapChangesSinceRendering > 20) {
 		// we've done many changes to the minimap without ever rendering
 		// a single change. probably there are lots of changes going on
 		// and we expect even more.
 		// disable updates until minimap is being rendered again
-		setUpdatesEnabled(false);
+		d->mTextureUpdatesEnabled[textureData] = false;
 	}
  }
 }
@@ -1301,6 +1290,85 @@ void BosonGLMiniMapRenderer::setZoomImages(const QImage& in_, const QImage& out_
  d->mZoomDefaultButton->setImage(defaultZoom);
 #endif
 }
+
+
+// cuts the line at z=0.0
+static void cutLineZ0(BoVector3Float& p1_, BoVector3Float& p2_)
+{
+#if 0
+ BoVector3Float* p1 = &p1_;
+ BoVector3Float* p2 = &p2_;
+ if (p1->z() < 0.0f && p2->z() < 0.0f) {
+	return;
+ }
+ if (p2->z() >= 0.0f) {
+	if (p1->z() >= 0.0f) {
+		return;
+	}
+	p2 = &p1_;
+	p1 = &p2_;
+ }
+ // now p1 >= 0 && p2 < 0
+
+ BoVector3Float u = *p1 - *p2;
+ float s = -p2->z() / u.z();
+ p2->setX(p2->x() + s * u.x());
+ p2->setY(p2->y() + s * u.y());
+ p2->setZ(0.0f);
+#else
+ BoPlane zPlane(BoVector3Float(0.0f, 0.0f, 1.0f), BoVector3Float(0.0f, 0.0f, 0.0f));
+ cut_line_segment_at_plane(zPlane, p1_, p2_);
+#endif
+}
+
+static void keepLinesInRect(int w, int h, BoVector3Float& p1, BoVector3Float& p2, bool* skip)
+{
+ // x=0 plane
+ BoPlane x_0(BoVector3Float(1.0f, 0.0f, 0.0f), BoVector3Float(0.0f, 0.0f, 0.0f));
+ // y=0 plane
+ BoPlane y_0(BoVector3Float(0.0f, 1.0f, 0.0f), BoVector3Float(0.0f, 0.0f, 0.0f));
+ // x=w plane
+ BoPlane x_x(BoVector3Float(-1.0f, 0.0f, 0.0f), BoVector3Float(w, 0.0f, 0.0f));
+ // y=h plane
+ BoPlane y_y(BoVector3Float(0.0f, -1.0f, 0.0f), BoVector3Float(0.0f, h, 0.0f));
+
+
+ cut_line_segment_at_plane(x_0, p1, p2);
+ cut_line_segment_at_plane(x_x, p1, p2);
+ cut_line_segment_at_plane(y_0, p1, p2);
+ cut_line_segment_at_plane(y_y, p1, p2);
+
+ if (x_0.behindPlane(p1) && x_0.behindPlane(p2)) {
+	*skip = true;
+	return;
+ }
+ if (y_0.behindPlane(p1) && y_0.behindPlane(p2)) {
+	*skip = true;
+	return;
+ }
+ if (x_x.behindPlane(p1) && x_x.behindPlane(p2)) {
+	*skip = true;
+	return;
+ }
+ if (y_y.behindPlane(p1) && y_y.behindPlane(p2)) {
+	*skip = true;
+	return;
+ }
+}
+
+static void drawLine(const BoVector3Float& p1_, const BoVector3Float& p2_, int w, int h)
+{
+ BoVector3Float p1(p1_);
+ BoVector3Float p2(p2_);
+ bool skip = false;
+ keepLinesInRect(w, h, p1, p2, &skip);
+ if (skip) {
+	return;
+ }
+ glVertex3fv(p1.data());
+ glVertex3fv(p2.data());
+}
+
 
 /**
  * Cut the line segment defined by @p linePoint1 and @p linePoint2 at the plane.

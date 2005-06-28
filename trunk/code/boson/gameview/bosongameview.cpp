@@ -1224,6 +1224,9 @@ void BosonGameView::slotChangeTexMap(int x, int y)
  if (r) {
 	r->cellTextureChanged(x, y, x, y);
  }
+ if (d->mGLMiniMap) {
+	d->mGLMiniMap->slotUpdateTerrainAtCorner(x, y);
+ }
 }
 
 void BosonGameView::slotChangeHeight(int x, int y)

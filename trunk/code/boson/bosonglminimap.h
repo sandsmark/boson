@@ -22,6 +22,7 @@
 #include <qobject.h>
 
 #include "bomath.h"
+#include <bogl.h>
 
 class Player;
 class PlayerIO;
@@ -33,6 +34,7 @@ class BosonGroundTheme;
 class Cell;
 class KGameIO;
 class BoGLMatrices;
+class BoTexture;
 
 class QPixmap;
 class QPainter;
@@ -113,11 +115,7 @@ public slots:
 	void slotZoomOut();
 	void slotZoomDefault();
 
-	/**
-	 * @param x The x - coordinate of the cell
-	 * @param y The x - coordinate of the cell
-	 **/
-	void slotUpdateCell(int x, int y);
+	void slotUpdateTerrainAtCorner(int x, int y);
 
 signals:
 	void signalReCenterView(const QPoint& pos);
@@ -131,7 +129,6 @@ protected:
 	 **/
 	bool hasMap() const;
 
-	void setPoint(int x, int y, const QColor& color);
 	void makeCellList(QPtrVector<Cell>* cells, const Unit* unit, bofixed x, bofixed y);
 	/**
 	 * Move a unit. if oldCells is NULL they are ignored.
@@ -139,11 +136,7 @@ protected:
 	 **/
 	void moveUnit(Unit* unit, const QPtrVector<Cell>* newCells, const QPtrVector<Cell>* oldCells);
 
-	/**
-	 * Update the cell. Checks whether cell is fogged, checks for units on
-	 * the cell, ...
-	 **/
-	void updateCell(int x, int y);
+	void updateUnitsAtCell(int x, int y);
 
 	/**
 	 * @return A pixmap for @p file in the theme @p theme if it is existing.
@@ -239,14 +232,18 @@ public:
 
 	void render();
 
-	void setFogged(int x, int y);
-	void unfog(int x, int y);
+	void setPoint(int x, int y, const QColor& color, GLubyte* textureData, BoTexture* texture);
+	void unsetPoint(int x, int y, GLubyte* textureData, BoTexture* texture);
+	void setColor(int x, int y, const QColor& color, int alpha, GLubyte* textureData, BoTexture* texture);
 
-	void setPoint(int x, int y, const QColor& color);
+	void setTerrainPoint(int x, int y, const QColor& color);
+	void setWaterPoint(int x, int y, bool isWater);
+	void setFoggedPoint(int x, int y, bool isFogged);
+	void setUnitPoint(int x, int y, const QColor& color, bool hasUnit);
 
 	/**
 	 * Disable updates before calling @ref setPoint (e.g. using @ref
-	 * setFogged or @ref unfog) many times. After you've called them, enable
+	 * setFoggedPoint) many times. After you've called them, enable
 	 * updates again. Before enabling updates again, previous updates are
 	 * incorporated into the minimap then.
 	 **/
