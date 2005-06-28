@@ -113,6 +113,7 @@ libboson_la_SOURCES = \
 	boconditionwidget.cpp \
 	bodebuglogdialog.cpp \
 	bowater.cpp \
+	bowaterrenderer.cpp \
 	botexture.cpp \
 	bobmfload.cpp \
 	boshader.cpp \

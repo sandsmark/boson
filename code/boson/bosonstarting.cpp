@@ -35,7 +35,7 @@
 #include "bosonsaveload.h"
 #include "boevent.h"
 #include "bosoneffectproperties.h"
-#include "bowater.h"
+#include "bowaterrenderer.h"
 #include "script/bosonscript.h"
 
 #include <klocale.h>
@@ -839,7 +839,7 @@ bool BosonStartingLoadPlayerData::loadUnitDatas()
 
 bool BosonStartingLoadWater::startTask()
 {
- boWaterManager->loadNecessaryTextures();
+ boWaterRenderer->loadNecessaryTextures();
  return true;
 }
 
