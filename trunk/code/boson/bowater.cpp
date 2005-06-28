@@ -21,6 +21,7 @@
 
 #include "../bomemory/bodummymemory.h"
 #include "bosonmap.h"
+#include "cell.h"
 #include "bodebug.h"
 #include "bo3dtools.h"
 
@@ -58,16 +59,12 @@ class BoWaterData
     int cellWidth, cellHeight;
 
     bool* underwater;
-
-    // Whether cell is passable by land units
-    bool* cellPassable;
 };
 
 BoWaterData::BoWaterData()
 {
   map = 0;
   underwater = 0;
-  cellPassable = 0;
   lakes.setAutoDelete(true);
 
   width = 0;
@@ -81,7 +78,6 @@ BoWaterData::~BoWaterData()
   lakes.setAutoDelete(true);
   lakes.clear();
   delete[] underwater;
-  delete[] cellPassable;
 }
 
 
@@ -395,17 +391,21 @@ void BoWaterManager::initCellMaps()
 {
   BO_CHECK_NULL_RET(mData);
   // Size of map in cells
-  mData->cellWidth = mData->width - 1;
-  mData->cellHeight = mData->height - 1;
-  delete[] mData->cellPassable;
-  mData->cellPassable = new bool[mData->cellWidth * mData->cellHeight];
+  mData->cellWidth = mData->map->width();
+  mData->cellHeight = mData->map->height();
 
   // Set both arrays to true first
   for (int y = 0; y < mData->cellHeight; y++)
   {
     for (int x = 0; x < mData->cellWidth; x++)
     {
-      mData->cellPassable[y * mData->cellWidth + x] = true;
+      Cell* c = mData->map->cell(x, y);
+      if(!c)
+      {
+        BO_NULL_ERROR(c);
+        continue;
+      }
+      c->setIsWater(false);
     }
   }
 
@@ -454,7 +454,13 @@ void BoWaterManager::initCellMaps()
           avgwaterdepth /= corners;
           if(avgwaterdepth > max_passable_water_depth)
           {
-            mData->cellPassable[y * mData->cellWidth + x] = false;
+            Cell* c = mData->map->cell(x, y);
+            if(!c)
+            {
+              BO_NULL_ERROR(c);
+              continue;
+            }
+            c->setIsWater(true);
           }
         }
       }
@@ -479,6 +485,11 @@ float BoWaterManager::groundHeight(int x, int y) const
     BO_NULL_ERROR(mData);
     return 0.0f;
   }
+  if(!mData->map)
+  {
+    BO_NULL_ERROR(mData->map);
+    return 0.0f;
+  }
   return mData->map->heightAtCorner(x, y);
 }
 
@@ -487,6 +498,11 @@ float BoWaterManager::groundHeightAt(float x, float y) const
   if(!mData)
   {
     BO_NULL_ERROR(mData);
+    return 0.0f;
+  }
+  if(!mData->map)
+  {
+    BO_NULL_ERROR(mData->map);
     return 0.0f;
   }
   return groundHeight((int)x, (int)y);
@@ -546,7 +562,18 @@ bool BoWaterManager::cellPassable(int x, int y) const
     BO_NULL_ERROR(mData);
     return 0.0f;
   }
-  return mData->cellPassable[y * mData->cellWidth + x];
+  if(!mData->map)
+  {
+    BO_NULL_ERROR(mData->map);
+    return 0.0f;
+  }
+  Cell* c = mData->map->cell(x, y);
+  if (!c)
+  {
+    BO_NULL_ERROR(c);
+    return 0.0f;
+  }
+  return !c->isWater();
 }
 
 const QPtrList<BoLake>* BoWaterManager::lakes() const
