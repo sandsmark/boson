@@ -32,8 +32,10 @@ class BosonGroundTheme;
 class BoTexture;
 class BosonGroundType;
 class BosonMap;
+class BoLake;
 template<class T> class QDict;
 template<class T> class QValueList;
+template<class T> class QPtrList;
 template<class T1, class T2> class QPair;
 
 /**
@@ -653,12 +655,22 @@ public:
 	 * values.
 	 * @return The height of the upper left corner of the cell at @p x, @p
 	 * y or 1.0 if invalid coordinates were specified.
+	 *
+	 * WARNING this returns the height of the ground at this corner. It does
+	 * NOT consider the @ref waterDepth !
 	 **/
 	float heightAtCorner(int x, int y) const;
 	void setHeightAtCorner(int x, int y, float height);
 	float cellAverageHeight(int x, int y) const;
 	void setHeightsAtCorners(const QValueList< QPair<QPoint, float> >& heights);
 
+	/**
+	 * @return The water depth at the specified corner. This is the distance
+	 * of the @ref heightAtCorner to the surface of the water.
+	 **/
+	float waterDepthAtCorner(int x, int y) const;
+
+	const QPtrList<BoLake>* lakes() const;
 
 
 

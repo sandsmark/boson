@@ -95,8 +95,6 @@ class BoLake
 };
 
 
-#define boWaterManager BoWaterManager::waterManager()
-
 /**
  * @short Water manager
  *
@@ -110,10 +108,6 @@ class BoWaterManager
     BoWaterManager();
     ~BoWaterManager();
 
-    static void initStatic();
-    static void deleteStatic();
-    static BoWaterManager* waterManager();
-
     bool loadFromXML(const QDomElement& root);
     bool saveToXML(QDomElement& root);
 
@@ -125,7 +119,7 @@ class BoWaterManager
     void setMap(BosonMap* map);
     float groundHeight(int x, int y) const;
     float groundHeightAt(float x, float y) const;
-    float waterDepth(int x, int y);
+    float waterDepthAtCorner(int x, int y);
 
     bool underwater(int x, int y);
     void setUnderwater(int x, int y, bool free);
@@ -133,8 +127,6 @@ class BoWaterManager
     bool cellPassable(int x, int y) const;
 
   private:
-    static BoWaterManager* mManager;
-
     BoWaterData* mData;
 };
 

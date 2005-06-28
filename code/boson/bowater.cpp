@@ -220,39 +220,8 @@ bool BoLake::hasAnyCorner(float x1, float y1, float x2, float y2)
 
 /***** BoWaterManager  *****/
 
-BoWaterManager* BoWaterManager::mManager = 0;
-
-void BoWaterManager::initStatic()
-{
-  if(mManager)
-  {
-    return;
-  }
-  mManager = new BoWaterManager();
-}
-
-void BoWaterManager::deleteStatic()
-{
-  delete mManager;
-  mManager = 0;
-}
-
-BoWaterManager* BoWaterManager::waterManager()
-{
-  if(!mManager)
-  {
-    boError() << k_funcinfo << "initStatic() was not called" << endl;
-    return 0;
-  }
-  return mManager;
-}
-
 BoWaterManager::BoWaterManager()
 {
-  if(mManager)
-  {
-    boError() << k_funcinfo << "You shouldn't have more than 1 BoWaterManager object!" << endl;
-  }
   mData = 0;
 }
 
@@ -508,7 +477,7 @@ float BoWaterManager::groundHeightAt(float x, float y) const
   return groundHeight((int)x, (int)y);
 }
 
-float BoWaterManager::waterDepth(int x, int y)
+float BoWaterManager::waterDepthAtCorner(int x, int y)
 {
   if(!underwater(x, y))
   {

@@ -370,9 +370,11 @@ class BosonMap::BosonMapPrivate
 public:
 	BosonMapPrivate()
 	{
+		mWaterManager = 0;
 	}
 
 	QDict<BoColorMap> mColorMaps;
+	BoWaterManager* mWaterManager;
 };
 
 BosonMap::BosonMap(QObject* parent) : QObject(parent)
@@ -386,6 +388,7 @@ BosonMap::~BosonMap()
  delete mNormalMap;
  delete mHeightMap;
  delete mTexMap;
+ delete d->mWaterManager;
  delete d;
 }
 
@@ -400,6 +403,7 @@ void BosonMap::init()
  mTexMap = 0;
  mMapWidth = 0;
  mMapHeight = 0;
+ d->mWaterManager = new BoWaterManager();
  setModified(false);
 }
 
@@ -448,6 +452,8 @@ bool BosonMap::createNewMap(unsigned int width, unsigned int height, BosonGround
 	mGroundTheme = 0;
 	return false;
  }
+
+ d->mWaterManager->setMap(this);
 
  QDataStream readStream(buffer, IO_ReadOnly);
  ret = loadCompleteMap(readStream);
@@ -561,8 +567,8 @@ bool BosonMap::loadWaterFromFile(const QByteArray& waterXML)
 	boError(270) << k_funcinfo << "no root element" << endl;
 	return false;
  }
- boWaterManager->setMap(this);
- return boWaterManager->loadFromXML(root);
+ d->mWaterManager->setMap(this);
+ return d->mWaterManager->loadFromXML(root);
 }
 
 
@@ -819,7 +825,7 @@ QByteArray BosonMap::saveWaterToFile() const
  QDomDocument doc(QString::fromLatin1("Water"));
  QDomElement root = doc.createElement(QString::fromLatin1("Water"));
  doc.appendChild(root);
- if (!boWaterManager->saveToXML(root)) {
+ if (!d->mWaterManager->saveToXML(root)) {
 	return QByteArray();
  }
  return doc.toCString();
@@ -1046,6 +1052,21 @@ void BosonMap::setHeightAtCorner(int x, int y, float h)
  QValueList< QPair<QPoint, float> > heights;
  heights.append(QPair<QPoint, float>(QPoint(x, y), h));
  setHeightsAtCorners(heights);
+}
+
+float BosonMap::waterDepthAtCorner(int x, int y) const
+{
+ if (!d->mWaterManager) {
+	boError() << k_funcinfo << "NULL water manager" << endl;
+	return 0.0f;
+ }
+ return d->mWaterManager->waterDepthAtCorner(x, y);
+}
+
+const QPtrList<BoLake>* BosonMap::lakes() const
+{
+ BO_CHECK_NULL_RET0(d->mWaterManager);
+ return d->mWaterManager->lakes();
 }
 
 void BosonMap::resize(unsigned int width, unsigned int height)

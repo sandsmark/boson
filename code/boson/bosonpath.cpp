@@ -31,7 +31,6 @@
 #include "bosonprofiling.h"
 #include "bosonmap.h"
 #include "unitplugins.h"
-#include "bowater.h"
 
 #include <qptrqueue.h>
 #include <qdom.h>
@@ -947,7 +946,7 @@ bofixed BosonPath::cost(int x, int y)
       }
       else
       {
-        if(boWaterManager->cellPassable(x, y))
+        if(!c->isWater())
         {
           if(!mUnit->unitProperties()->canGoOnLand())
           {
@@ -3616,7 +3615,7 @@ BosonPath2::PassabilityType BosonPath2::cellPassability(int x, int y)
   {
     return NotPassable;
   }
-  else if(boWaterManager->cellPassable(x, y))
+  else if(!cell(x, y)->isWater())
   {
     // Cell is passable by land units
     return Land;

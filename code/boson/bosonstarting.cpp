@@ -276,6 +276,8 @@ bool BosonStarting::start()
  }
 
  BosonStartingLoadWater* water = new BosonStartingLoadWater(i18n("Load Water"));
+ connect(this, SIGNAL(signalDestPlayField(BosonPlayField*)),
+		water, SLOT(slotSetDestPlayField(BosonPlayField*)));
  tasks.append(water);
 
  BosonStartingStartScenario* scenario = new BosonStartingStartScenario(i18n("Start Scenario"));
@@ -839,6 +841,19 @@ bool BosonStartingLoadPlayerData::loadUnitDatas()
 
 bool BosonStartingLoadWater::startTask()
 {
+ if (!playField()) {
+	BO_NULL_ERROR(playField());
+	return false;
+ }
+ if (!playField()->map()) {
+	BO_NULL_ERROR(playField()->map());
+	return false;
+ }
+ if (!playField()->map()->lakes()) {
+	BO_NULL_ERROR(playField()->lakes());
+	return false;
+ }
+ boWaterRenderer->setMap(playField()->map());
  boWaterRenderer->loadNecessaryTextures();
  return true;
 }

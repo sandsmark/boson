@@ -35,7 +35,6 @@ class BoShader;
 class QRect;
 class QDomElement;
 
-class BoWaterManager;
 class BoLake;
 
 
@@ -48,7 +47,7 @@ class BoLakeGL
     /**
      * Constructs a lake with specified level
      **/
-    BoLakeGL(BoLake* l, BoWaterManager*);
+    BoLakeGL(BoLake* l, const BosonMap*);
 
     ~BoLakeGL();
 
@@ -122,7 +121,7 @@ class BoLakeGL
     QPtrList<WaterChunk> chunks;
 
   protected:
-    void init(BoLake* l, BoWaterManager*);
+    void init(BoLake* l, const BosonMap*);
 };
 
 
@@ -150,7 +149,7 @@ class BoWaterRenderer
     //  changed.
     void loadNecessaryTextures();
 
-    void setLakes(const QPtrList<BoLake> lakes);
+    void setMap(const BosonMap* map);
     float waterAlphaAt(BoLakeGL* lake, float x, float y);
 
     float time() const;
@@ -247,6 +246,7 @@ class BoWaterRenderer
     static BoWaterRenderer* mRenderer;
 
 
+    const BosonMap* mMap;
     QPtrList<BoLakeGL> mLakes;
 
     float mTime;
@@ -295,5 +295,5 @@ class BoWaterRenderer
     int mRenderedQuads;
 };
 
-#endif // BOWATER_H
+#endif // BOWATERRENDERER_H
 

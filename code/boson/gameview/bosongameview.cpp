@@ -59,7 +59,6 @@
 #include "../bomaterial.h"
 #include "../info/boinfo.h"
 #include "../speciesdata.h"
-#include "../bowater.h"
 #include "../bowaterrenderer.h"
 #include "../bosonpath.h"
 #include "../botexture.h"
@@ -499,7 +498,6 @@ BosonGameView::~BosonGameView()
  BoMeshRendererManager::deleteStatic();
  BosonGameViewPluginManager::deleteStatic();
  BoWaterRenderer::deleteStatic();
- BoWaterManager::deleteStatic();
  BoLightManager::deleteStatic();
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
@@ -519,7 +517,6 @@ void BosonGameView::init()
  }
 
  BoLightManager::initStatic();
- BoWaterManager::initStatic();
  BoWaterRenderer::initStatic();
  BoGroundRendererManager::initStatic();
  BoMeshRendererManager::initStatic();
