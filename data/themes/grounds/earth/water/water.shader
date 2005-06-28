@@ -12,7 +12,7 @@ void main()
   lightDir = normalize(lightPos);
 
   // Texture coordinate for accessing diffuse and normalmap textures
-  gl_TexCoord[0] = gl_TextureMatrix[0] * vec4(gl_Vertex.xyz * 0.1, 1.0f);
+  gl_TexCoord[0] = gl_TextureMatrix[0] * vec4(gl_Vertex.xyz * 0.1, 1.0);
 
   gl_Position = ftransform();
 }
@@ -47,7 +47,7 @@ void main()
   // Half-vector
   vec3 halfv = normalize(viewv + lightDir);
   // Amount of specular light
-  float specular = pow(dot(halfv, normal), 80);
+  float specular = pow(dot(halfv, normal), 80.0);
   // Specular color
   vec4 speccolor = gl_LightSource[0].specular * specular;
 
