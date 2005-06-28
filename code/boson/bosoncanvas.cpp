@@ -615,7 +615,7 @@ bool BosonCanvas::canGo(const UnitProperties* prop, const BoRectFixed& rect) con
 			return false;
 		} else if (!prop->isAircraft()) {
 			// Non-aircrafts can usually only move on either land or water (aircrafts can move on both).
-			if (boWaterManager->cellPassable(x, y)) {
+			if (!newCell->isWater()) {
 				if (!prop->canGoOnLand()) {
 					// Cell is passable for land units, but this unit can't move on land
 					return false;

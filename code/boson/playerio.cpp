@@ -26,7 +26,6 @@
 #include "unit.h"
 #include "bosoncanvas.h"
 #include "bosonmap.h"
-#include "bowater.h"
 #include "unitproperties.h"
 
 #include <qptrvector.h>
@@ -298,7 +297,7 @@ bool PlayerIO::canGo(const UnitProperties* prop, const Cell* cell, bool _default
 	// Aircrafts can go everywhere (except for unpassable cells)
 	return true;
  } else {
-	if (boWaterManager->cellPassable(cell->x(), cell->y())) {
+	if (!cell->isWater()) {
 		return prop->canGoOnLand();
 	} else {
 		return prop->canGoOnWater();

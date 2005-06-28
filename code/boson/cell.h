@@ -89,8 +89,22 @@ public:
 	inline BosonPathRegion* region() const { return mRegion; }
 
 	inline void setPassable(bool p) { mPassable = p; }
+	/**
+	 * @return FALSE if this cell is unpassable by non-air units, otherwise
+	 * TRUE.
+	 * See also @ref isWater, which may also indicate that a cell is not
+	 * passable.
+	 **/
 	inline bool passable() const { return mPassable; }
 
+	inline void setIsWater(bool w) { mIsWater = w; }
+	/**
+	 * @return Whether this cell is (under) water. A cell being (under)
+	 * water implies that it is not passable for land units (even if @ref
+	 * passable is TRUE), whereas it can be passed by water units (if @ref
+	 * passable is TRUE).
+	 **/
+	inline bool isWater() const { return mIsWater; }
 
 private:
 	int mX;
@@ -101,6 +115,7 @@ private:
 	BosonPathRegion* mRegion;
 
 	bool mPassable;
+	bool mIsWater;
 };
 
 #endif

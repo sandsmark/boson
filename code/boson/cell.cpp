@@ -28,7 +28,8 @@ Cell::Cell()
 	mY(0),
 	mItems(BoItemList(2, false)),
 	mRegion(0),
-	mPassable(true)
+	mPassable(true),
+	mIsWater(false)
 {
 }
 
