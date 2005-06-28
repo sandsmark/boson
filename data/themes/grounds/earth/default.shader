@@ -14,10 +14,10 @@ void main()
   alpha = gl_Color.w;
 
   // Texture coordinate for accessing diffuse and normalmap textures
-  gl_TexCoord[0] = gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0f);
+  gl_TexCoord[0] = gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0);
 
   // Texture coordinate for accessing fog texture
-  gl_TexCoord[1] = gl_TextureMatrix[1] * vec4(gl_Vertex.xyz, 1.0f);
+  gl_TexCoord[1] = gl_TextureMatrix[1] * vec4(gl_Vertex.xyz, 1.0);
 
   // Calculate tangent and binormal
   vec3 tangent = normalize(vec3(gl_Normal.z, 0.0, -gl_Normal.x));
