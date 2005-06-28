@@ -44,6 +44,7 @@
 #include "bosonpropertyxml.h"
 #include "bosonpath.h"
 #include "bowater.h"
+#include "bowaterrenderer.h"
 
 #include <klocale.h>
 #include <kgame/kgamepropertyhandler.h>
@@ -176,7 +177,9 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, const QPtrList<BosonIt
  boProfiling->pop(); // Advance Effects
 
  boProfiling->push("Advance Water");
- boWaterManager->update(0.05);
+ // FIXME: rendering advancing should be done elsewhere (probably using a
+ // signal)
+ boWaterRenderer->update(0.05);
  boProfiling->pop(); // Advance Water
 
  boProfiling->push("Notify About Destroyed Units");

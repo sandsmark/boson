@@ -31,7 +31,7 @@
 #include "bo3dtools.h"
 #include "bofullscreen.h"
 #include "bomeshrenderermanager.h"
-#include "bowater.h"
+#include "bowaterrenderer.h"
 #include "info/boinfo.h"
 #include "botexture.h"
 #include "bosongroundtheme.h"
@@ -991,15 +991,15 @@ WaterOptions::WaterOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 {
 // QHBox* hbox = new QHBox(this);
  mShaders = new QCheckBox(i18n("Enable shaders"), this);
- mShaders->setEnabled(boWaterManager->supportsShaders());
+ mShaders->setEnabled(boWaterRenderer->supportsShaders());
  mReflections = new QCheckBox(i18n("Enable reflections"), this);
- mReflections->setEnabled(boWaterManager->supportsReflections());
+ mReflections->setEnabled(boWaterRenderer->supportsReflections());
  mTranslucency = new QCheckBox(i18n("Enable translucent water"), this);
- mTranslucency->setEnabled(boWaterManager->supportsTranslucency());
+ mTranslucency->setEnabled(boWaterRenderer->supportsTranslucency());
  mBumpmapping = new QCheckBox(i18n("Enable bumpmapped water"), this);
- mBumpmapping->setEnabled(boWaterManager->supportsBumpmapping());
+ mBumpmapping->setEnabled(boWaterRenderer->supportsBumpmapping());
  mAnimatedBumpmaps = new QCheckBox(i18n("Enable animated bumpmaps"), this);
- mAnimatedBumpmaps->setEnabled(boWaterManager->supportsBumpmapping());
+ mAnimatedBumpmaps->setEnabled(boWaterRenderer->supportsBumpmapping());
 
  connect(mShaders, SIGNAL(toggled(bool)), this, SLOT(slotEnableShaders(bool)));
 }
@@ -1017,7 +1017,7 @@ void WaterOptions::apply()
  boConfig->setBoolValue("WaterTranslucency", mTranslucency->isChecked());
  boConfig->setBoolValue("WaterBumpmapping", mBumpmapping->isChecked());
  boConfig->setBoolValue("WaterAnimatedBumpmaps", mAnimatedBumpmaps->isChecked());
- boWaterManager->reloadConfiguration();
+ boWaterRenderer->reloadConfiguration();
  boDebug(210) << k_funcinfo << "done" << endl;
 }
 

@@ -60,6 +60,7 @@
 #include "../info/boinfo.h"
 #include "../speciesdata.h"
 #include "../bowater.h"
+#include "../bowaterrenderer.h"
 #include "../bosonpath.h"
 #include "../botexture.h"
 #include "../boufo/boufoaction.h"
@@ -497,6 +498,7 @@ BosonGameView::~BosonGameView()
  BoGroundRendererManager::deleteStatic();
  BoMeshRendererManager::deleteStatic();
  BosonGameViewPluginManager::deleteStatic();
+ BoWaterRenderer::deleteStatic();
  BoWaterManager::deleteStatic();
  BoLightManager::deleteStatic();
  delete d;
@@ -518,6 +520,7 @@ void BosonGameView::init()
 
  BoLightManager::initStatic();
  BoWaterManager::initStatic();
+ BoWaterRenderer::initStatic();
  BoGroundRendererManager::initStatic();
  BoMeshRendererManager::initStatic();
  BosonGameViewPluginManager::initStatic();
@@ -526,7 +529,7 @@ void BosonGameView::init()
  BosonGameViewPluginManager::manager()->makePluginCurrent(QString::null);
  resetGameViewPlugin();
 
- boWaterManager->setViewFrustum(&d->mViewFrustum);
+ boWaterRenderer->setViewFrustum(&d->mViewFrustum);
 
 
  d->mGameGLMatrices = new BoGLMatrices(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewFrustum, d->mViewport, d->mFovY, d->mAspect);
@@ -570,12 +573,12 @@ void BosonGameView::init()
  l->setDirectional(true);
  l->setPosition3(lightPos);
  l->setEnabled(true);
- boWaterManager->setSun(l);
+ boWaterRenderer->setSun(l);
  BoShader::setSun(l);
 
 
  boTextureManager->initOpenGL();
- boWaterManager->initOpenGL();
+ boWaterRenderer->initOpenGL();
  boConfig->setBoolValue("TextureFOW", boTextureManager->textureUnits() > 1);
  if (!BosonGroundTheme::shadersSupported()) {
 	boConfig->setBoolValue("UseGroundShaders", false);
@@ -801,8 +804,8 @@ void BosonGameView::cameraChanged()
  }
 
 
- boWaterManager->modelviewMatrixChanged(d->mModelviewMatrix);
- boWaterManager->setCameraPos(camera()->cameraPos());
+ boWaterRenderer->modelviewMatrixChanged(d->mModelviewMatrix);
+ boWaterRenderer->setCameraPos(camera()->cameraPos());
  BoShader::setCameraPos(camera()->cameraPos());
 
 #if 0
@@ -1099,7 +1102,7 @@ void BosonGameView::setLocalPlayerIO(PlayerIO* io)
  delete d->mMouseIO;
  d->mMouseIO = 0;
 
- boWaterManager->setLocalPlayerIO(localPlayerIO());
+ boWaterRenderer->setLocalPlayerIO(localPlayerIO());
 
  if (d->mGLMiniMap) {
 	if (previousPlayerIO) {
@@ -1206,7 +1209,7 @@ void BosonGameView::slotFog(int x, int y)
  if (r) {
 	r->cellFogChanged(x, y, x, y);
  }
- boWaterManager->cellFogChanged(x, y, x, y);
+ boWaterRenderer->cellFogChanged(x, y, x, y);
 }
 
 void BosonGameView::slotUnfog(int x, int y)
@@ -1215,7 +1218,7 @@ void BosonGameView::slotUnfog(int x, int y)
  if (r) {
 	r->cellFogChanged(x, y, x, y);
  }
- boWaterManager->cellFogChanged(x, y, x, y);
+ boWaterRenderer->cellFogChanged(x, y, x, y);
 }
 
 void BosonGameView::slotChangeTexMap(int x, int y)

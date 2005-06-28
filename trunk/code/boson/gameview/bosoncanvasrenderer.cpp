@@ -47,7 +47,7 @@
 #include "../bolight.h"
 #include "../bomaterial.h"
 #include "../speciesdata.h"
-#include "../bowater.h"
+#include "../bowaterrenderer.h"
 #include "../botexture.h"
 #include "../bosondata.h"
 #include "../boaction.h"
@@ -708,7 +708,7 @@ void BosonCanvasRenderer::renderWater()
 {
  PROFILE_METHOD;
  BoTextureManager::BoTextureBindCounter bindCounter(boTextureManager, &d->mTextureBindsWater);
- boWaterManager->render();
+ boWaterRenderer->render();
 }
 
 void BosonCanvasRenderer::renderFog(BoVisibleEffects& visible)

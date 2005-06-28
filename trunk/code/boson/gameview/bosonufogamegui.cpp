@@ -44,7 +44,7 @@
 #include "../unit.h"
 #include "../bosonpath.h"
 #include "../cell.h"
-#include "../bowater.h"
+#include "../bowaterrenderer.h"
 #include "../bosonfpscounter.h"
 #include "../info/boinfo.h"
 #include "bodebug.h"
@@ -708,7 +708,7 @@ void BosonUfoGameGUI::updateUfoLabelRenderCounts()
  text += i18n("\n");
 
  text += i18n("Water renderer statistics:\n");
- text += boWaterManager->currentRenderStatisticsData();
+ text += boWaterRenderer->currentRenderStatisticsData();
  text += i18n("\n");
 
 #if HAVE_CANVAS_RENDERER
