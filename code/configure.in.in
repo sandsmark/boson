@@ -41,18 +41,18 @@ AC_DEFUN([AC_BOSON_STATIC],
 [
   if test "x$enable_static" = "xyes"; then
     AC_DEFINE_UNQUOTED(BOSON_LINK_STATIC, 1, [ ])
+    if test "x$BO_STATIC_QT_DIR" = "x"; then
+      AC_MSG_ERROR([--with-static-qt-dir was not provided. Please provide the path to the static Qt installation])
+    fi
+    AC_MSG_RESULT($BO_STATIC_QT_DIR)
+    if test "x$BO_STATIC_KDE_DIR" = "x"; then
+      AC_MSG_ERROR([--with-static-kde-dir was not provided. Please provide the path to the static KDE installation])
+    fi
   else
     AC_DEFINE_UNQUOTED(BOSON_LINK_STATIC, 0, [ ])
   fi
  AM_CONDITIONAL(link_static, test x$enable_static = xyes)
 
- if test "x$BO_STATIC_QT_DIR" = "x"; then
-   AC_MSG_ERROR([--with-static-qt-dir was not provided. Please provide the path to the static Qt installation])
- fi
- AC_MSG_RESULT($BO_STATIC_QT_DIR)
- if test "x$BO_STATIC_KDE_DIR" = "x"; then
-   AC_MSG_ERROR([--with-static-kde-dir was not provided. Please provide the path to the static KDE installation])
- fi
 
  AC_SUBST(BO_STATIC_QT_DIR)
  AC_SUBST(BO_STATIC_QT_LIBS)
