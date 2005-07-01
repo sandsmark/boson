@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -106,6 +106,11 @@ BoTexMapImportDialog::BoTexMapImportDialog(QWidget* parent, bool modal)
  hbox = new QHBox(colors, "hbox_alpha");
  (void)new QLabel(i18n("Alpha: "), hbox);
  d->mAlpha = new QComboBox(hbox);
+
+ connect(d->mRed, SIGNAL(activated(int)), this, SLOT(slotComponentTargetChanged(int)));
+ connect(d->mGreen, SIGNAL(activated(int)), this, SLOT(slotComponentTargetChanged(int)));
+ connect(d->mBlue, SIGNAL(activated(int)), this, SLOT(slotComponentTargetChanged(int)));
+ connect(d->mAlpha, SIGNAL(activated(int)), this, SLOT(slotComponentTargetChanged(int)));
 
  d->mRed->setEnabled(false);
  d->mGreen->setEnabled(false);
@@ -319,6 +324,36 @@ void BoTexMapImportDialog::setMap(BosonMap* map)
 	input->setLabel(theme->groundType(i)->name);
 	input->setValue(0);
 	d->mTextures.insert(i, input);
+ }
+}
+
+void BoTexMapImportDialog::slotComponentTargetChanged(int index)
+{
+ BO_CHECK_NULL_RET(sender());
+ if (index < 0) {
+	return;
+ }
+ if (index == 0) {
+	// ignoring a component is _always_ valid
+	return;
+ }
+ bool isTwice = false;
+ QComboBox* s = (QComboBox*)sender();
+ if (s != d->mRed && d->mRed->currentItem() == index) {
+	isTwice = true;
+ }
+ if (s != d->mGreen && d->mGreen->currentItem() == index) {
+	isTwice = true;
+ }
+ if (s != d->mBlue && d->mBlue->currentItem() == index) {
+	isTwice = true;
+ }
+ if (s != d->mAlpha && d->mAlpha->currentItem() == index) {
+	isTwice = true;
+ }
+ if (isTwice) {
+	KMessageBox::sorry(this, i18n("Only one component can be assigned to one texture"));
+	s->setCurrentItem(0);
  }
 }
 
