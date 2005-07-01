@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003 Andreas Beckermann (b_mann@gmx.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
