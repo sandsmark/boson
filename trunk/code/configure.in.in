@@ -48,6 +48,12 @@ AC_DEFUN([AC_BOSON_STATIC],
     if test "x$BO_STATIC_KDE_DIR" = "x"; then
       AC_MSG_ERROR([--with-static-kde-dir was not provided. Please provide the path to the static KDE installation])
     fi
+
+    LIB_KDECORE=$BO_STATIC_KDE_LIBS/libkdecore.a
+    LIB_KDEUI=$BO_STATIC_KDE_LIBS/libkdeui.a
+    LIB_KIO=$BO_STATIC_KDE_LIBS/libkio.a
+    AC_SUBST(LIB_KDECORE)
+    AC_SUBST(LIB_KDEUI)
   else
     AC_DEFINE_UNQUOTED(BOSON_LINK_STATIC, 0, [ ])
   fi
@@ -58,12 +64,6 @@ AC_DEFUN([AC_BOSON_STATIC],
  AC_SUBST(BO_STATIC_QT_LIBS)
  AC_SUBST(BO_STATIC_KDE_DIR)
  AC_SUBST(BO_STATIC_KDE_LIBS)
-
- LIB_KDECORE=$BO_STATIC_KDE_LIBS/libkdecore.a
- LIB_KDEUI=$BO_STATIC_KDE_LIBS/libkdeui.a
- LIB_KIO=$BO_STATIC_KDE_LIBS/libkio.a
- AC_SUBST(LIB_KDECORE)
- AC_SUBST(LIB_KDEUI)
 ])
 AC_BOSON_STATIC
 
