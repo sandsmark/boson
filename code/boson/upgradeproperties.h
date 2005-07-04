@@ -79,34 +79,42 @@ class UpgradeProperties
      * @return Id of this upgrade
      **/
     unsigned long int id() const { return mId; }
+
     /**
      * @return Name of this upgrade
      **/
     const QString& upgradeName() const { return mName; }
+
     /**
      * @return Mineral cost of this upgrade
      **/
     unsigned long int mineralCost() const { return mMineralCost; }
+
     /**
      * @return Oil cost of this upgrade
      **/
     unsigned long int oilCost() const { return mOilCost; }
+
     /**
      * @return producer of this upgrade. Producer ids are used
      **/
     unsigned int producer() const { return mProducer; }
+
     /**
      * @return How much time it takes to produce this upgrade
      **/
     unsigned int productionTime() const { return mProductionTime; }
+
     /**
      * @return Action to produce this upgrade
      **/
     const BoAction* produceAction() const { return mProduceAction; }
+
     /**
      * @return List of units required by this upgrade
      **/
     QValueList<unsigned long int> requiredUnits() const;
+
     /**
      * @return List of technologies required by this upgrade
      **/
@@ -123,18 +131,6 @@ class UpgradeProperties
     };
     enum ValueType { Absolute = 0, Relative, Percent };
 
-    void applyProperty(QValueList<unsigned long int>* typeIds, Player* player,
-        const QString& data, UpgradeType type, int weaponid = -1) const;
-    void applyPropertyToUnits(QValueList<unsigned long int>* typeIds, Player* player,
-        const QString& data, UpgradeType type, int weaponid = -1) const;
-    void applyPropertyToUnits(bofixed oldvalue, bofixed newvalue,
-        unsigned long int typeId, Player* player, UpgradeType type) const;
-
-
-    unsigned long int applyValue(const QString& data, unsigned long int oldvalue) const;
-    bofixed applyValue(const QString& data, bofixed oldvalue) const;
-    bool parseEntryType(const QString& typeString, UpgradeType* type, int* weaponid) const;
-    void parseEntry(const QString& entry, ValueType& type, QString& value) const;
 
     /**
      * @return A list of unit types the upgrade applies to. This can be a fixed
@@ -143,19 +139,6 @@ class UpgradeProperties
     QValueList<unsigned long int> appliesToTypes(const Player* player) const;
 
   private:
-    /**
-     * Note: you are meant to use primitive data (int, uint, bofixed, ...) only
-     * here!
-     * You should avoid classes
-     *
-     * @param oldvalue The initial value
-     * @param value The change-value. What this actually does depends on the
-     * @ref ValueType of the value.
-     * @return The new value, i.e. @p oldValue changed by @p value according to
-     * @p data.
-     **/
-    template<class T> T applyValueInternal(ValueType type, T oldvalue, T value) const;
-
     /**
      * Converts entries in entry list from seconds to advance calls if
      *  necessary.
@@ -176,6 +159,8 @@ class UpgradeProperties
 
     class UpgradePropertiesPrivate;
     UpgradePropertiesPrivate* d;
+
+    friend class UpgradeApplyer;
 };
 
 #endif
