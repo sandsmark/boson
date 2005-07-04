@@ -96,6 +96,7 @@ class BoBMFLoad
     QString mFile;
     BosonModel* mModel;
     QValueVector<QString> mTextureNames;
+    bool* mTextureTransparent;
 };
 
 

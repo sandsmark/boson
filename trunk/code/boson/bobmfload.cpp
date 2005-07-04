@@ -49,11 +49,13 @@ BoBMFLoad::BoBMFLoad(const QString& file, BosonModel* model)
 
 void BoBMFLoad::init()
 {
+  mTextureTransparent = 0;
 }
 
 BoBMFLoad::~BoBMFLoad()
 {
   boDebug(100) << k_funcinfo << endl;
+  delete[] mTextureTransparent;
 }
 
 QString BoBMFLoad::file() const
@@ -285,11 +287,13 @@ bool BoBMFLoad::loadTextures(QDataStream& stream)
   stream >> count;
   mTextureNames.clear();
   mTextureNames.reserve(count);
+  mTextureTransparent = new bool[count];
   for(unsigned int i = 0; i < count; i++)
   {
     stream >> name;
-    stream >> hastransparency;  // TODO: use this!
+    stream >> hastransparency;
     mTextureNames.append(name);
+    mTextureTransparent[i] = (bool)(hastransparency);
     delete[] name;
   }
 
@@ -346,6 +350,7 @@ bool BoBMFLoad::loadMaterials(QDataStream& stream)
     if(textureid >= 0)
     {
       mat->setTextureName(mTextureNames[textureid]);
+      mat->setIsTransparent(mTextureTransparent[textureid]);
     }
   }
 
@@ -421,6 +426,7 @@ bool BoBMFLoad::loadMeshes(QDataStream& stream, int lod)
   Q_UINT32 count;
   stream >> count;
   l->allocateMeshes(count);
+  bool hastransparentmeshes = false;
   for(unsigned int i = 0; i < count; i++)
   {
     BoMesh* mesh = l->mesh(i);
@@ -493,11 +499,17 @@ bool BoBMFLoad::loadMeshes(QDataStream& stream, int lod)
     if(materialid >= 0)
     {
       mesh->setMaterial(mModel->material(materialid));
+      if(mesh->material()->isTransparent())
+      {
+        hastransparentmeshes = true;
+      }
     }
     Q_UINT8 isteamcolor;
     stream >> isteamcolor;
     mesh->setIsTeamColor((bool)(isteamcolor));
   }
+
+  l->setHasTransparentMeshes(hastransparentmeshes);
 
   return true;
 }

@@ -34,6 +34,11 @@ Texture::Texture(const QString& filename)
   mUsedMinX = mUsedMinY = mUsedMaxX = mUsedMaxY = 0;
   mImage = 0;
   mHasTransparency = false;
+
+  if(filename.lower().endsWith(".png"))
+  {
+    mHasTransparency = true;
+  }
 }
 
 bool Texture::load()

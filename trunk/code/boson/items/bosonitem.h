@@ -308,8 +308,9 @@ public:
 	 * Render the item. This assumes the modelview matrix was already
 	 * translated and rotated to the correct position.
 	 * @param lod See @ref BoFrame::renderFrame
+	 * @param transparentmeshes Whether to render transparent or solid meshes
 	 **/
-	void renderItem(unsigned int lod = 0);
+	void renderItem(unsigned int lod = 0, bool transparentmeshes = false);
 
 	/**
 	 * @return itemRenderer()->preferredLod(dist)

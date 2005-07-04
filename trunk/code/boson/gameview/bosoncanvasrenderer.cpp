@@ -467,6 +467,10 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 	boError() << k_funcinfo << "OpenGL error before rendering items" << endl;
  }
 
+ // List of models with semi-transparent parts
+ QValueVector<BoRenderItem> transparentmodels;
+ transparentmodels.reserve((int)(itemcount * 0.25));
+
  // Model that is being used currently
  BosonModel* currentmodel = 0;
  // Render all items
@@ -514,10 +518,56 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 	glColor3ub(255, 255, 255);
 	glPopMatrix();
 
+	if (currentmodel->hasTransparentMeshes(lod)) {
+		transparentmodels.append(d->mRenderItemList[i]);
+	}
+
 	if (boConfig->boolValue("debug_boundingboxes")) {
 		renderBoundingBox(item);
 	}
  }
+
+ // Render semi-transparent meshes of the models
+ // TODO: sort the models by depth
+ glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT);
+ glEnable(GL_DEPTH_TEST);
+ //glDepthMask(GL_FALSE);
+ glEnable(GL_BLEND);
+ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+ glEnable(GL_ALPHA_TEST);
+ glAlphaFunc(GL_GEQUAL, 0.2);
+ glDisable(GL_CULL_FACE);
+ //glDisable(GL_LIGHTING);
+ for (unsigned int i = 0; i < transparentmodels.count(); i++) {
+	BosonItem* item = transparentmodels[i].item;
+
+	GLfloat x = item->centerX();
+	GLfloat y = -item->centerY();
+	GLfloat z = item->z();
+
+	glPushMatrix();
+	glTranslatef(x, y, z);
+	glRotatef(-(item->rotation()), 0.0, 0.0, 1.0);
+	glRotatef(item->xRotation(), 1.0, 0.0, 0.0);
+	glRotatef(item->yRotation(), 0.0, 1.0, 0.0);
+
+	unsigned int lod = 0;
+	if (useLOD) {
+		// TODO: we could compare squared distances here and get rid of sqrt()
+		float dist = (camera()->cameraPos() - BoVector3Float(x, y, z)).length();
+		lod = item->preferredLod(dist);
+	}
+	// If this item has different model then change current model
+	if (item->getModelForItem() != currentmodel) {
+		currentmodel = item->getModelForItem();
+		currentmodel->prepareRendering();
+	}
+	item->renderItem(lod, true);
+	glColor4ub(255, 255, 255, 255);
+	glPopMatrix();
+ }
+ glPopAttrib();
+
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error before rendering selections" << endl;
  }

@@ -65,9 +65,13 @@ const QColor* BosonItemRenderer::teamColor() const
  return mItem->teamColor();
 }
 
-void BosonItemRenderer::renderItem(unsigned int lod)
+void BosonItemRenderer::renderItem(unsigned int lod, bool transparentmeshes)
 {
  Q_UNUSED(lod);
+
+ if (transparentmeshes) {
+	return;
+ }
 
  // this code renders an item without using a model. this is for debugging only
  // (by not loading the models we can reduce startup time greatly)
@@ -205,14 +209,14 @@ void BosonItemModelRenderer::animate()
  }
 }
 
-void BosonItemModelRenderer::renderItem(unsigned int lod)
+void BosonItemModelRenderer::renderItem(unsigned int lod, bool transparentmeshes)
 {
  BO_CHECK_NULL_RET(mModel);
  BoLOD* l = mModel->lod(lod);
  BO_CHECK_NULL_RET(l);
  BoFrame* frame = l->frame((unsigned int)mCurrentFrame);
  BO_CHECK_NULL_RET(frame);
- frame->renderFrame(teamColor());
+ frame->renderFrame(teamColor(), transparentmeshes);
 }
 
 unsigned int BosonItemModelRenderer::lodCount() const

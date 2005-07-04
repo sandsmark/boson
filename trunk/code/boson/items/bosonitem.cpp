@@ -336,10 +336,10 @@ void BosonItem::setSize(bofixed width, bofixed height, bofixed depth)
  addToCells();
 }
 
-void BosonItem::renderItem(unsigned int lod)
+void BosonItem::renderItem(unsigned int lod, bool transparentmeshes)
 {
  if (itemRenderer()) {
-	itemRenderer()->renderItem(lod);
+	itemRenderer()->renderItem(lod, transparentmeshes);
  }
 }
 
