@@ -61,12 +61,6 @@ class UpgradeProperties
     virtual bool load(KSimpleConfig* cfg, const QString& group);
 
     /**
-     * @return Whether it is possible by player to research this upgrade (all
-     * requirements are met)
-     **/
-    virtual bool canBeResearched(Player* player) const;
-
-    /**
      * One of the most important methods in this class
      * It applies upgrade to UnitProperties
      * @param player owner of this class (and UnitProperties)
@@ -184,4 +178,4 @@ class UpgradeProperties
     UpgradePropertiesPrivate* d;
 };
 
-#endif // UPGRADEPROPERTIES_H
+#endif
