@@ -492,7 +492,7 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 		if (((Unit*)item)->isDestroyed()) {
 			glColor3f(0.4f, 0.4f, 0.4f);
 		} else {
-			float f = ((Unit*)item)->health() / (float)((Unit*)item)->unitProperties()->health() * 0.3;
+			float f = ((Unit*)item)->health() / (float)((Unit*)item)->maxHealth() * 0.3;
 			glColor3f(0.7f + f, 0.7f + f, 0.7f + f);
 		}
 	} else {

@@ -429,7 +429,7 @@ bool BosonGameViewInput::actionRepair(const BoVector3Fixed& canvasVector)
  QPtrList<Unit> list;
  QPtrListIterator<Unit> it(allUnits);
  while (it.current()) {
-	if (it.current()->health() < it.current()->unitProperties()->health()) {
+	if (it.current()->health() < it.current()->maxHealth()) {
 		boDebug() << k_funcinfo << "repair " << it.current()->id() << endl;
 		list.append(it.current());
 	}

@@ -31,7 +31,6 @@
 #include "unitproperties.h"
 #include "bosoncanvas.h"
 #include "global.h"
-#include "upgradeproperties.h"
 #include "bodebug.h"
 #include "bosonweapon.h"
 #include "boevent.h"

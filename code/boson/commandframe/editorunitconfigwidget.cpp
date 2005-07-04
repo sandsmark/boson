@@ -151,7 +151,7 @@ bool EditorUnitConfigWidget::display(Unit* unit)
 	mob = (MobileUnit*)unit;
  }
 
- d->mHealth->setRange(1, prop->health());
+ d->mHealth->setRange(1, unit->maxHealth());
  d->mHealth->setValue(unit->health());
  if (!fac || (fac && fac->constructionSteps() == 0)) {
 	d->mConstructionStep->hide();

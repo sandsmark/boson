@@ -294,11 +294,10 @@ void Unit::setTarget(Unit* target)
 
 void Unit::setHealth(unsigned long int h)
 {
- unsigned long int maxHealth = unitProperties()->health();
- if (h > maxHealth) {
-	h = maxHealth;
+ if (h > maxHealth()) {
+	h = maxHealth();
  }
- if (maxHealth == 0) {
+ if (maxHealth() == 0) {
 	boError() << "Ooop - maxHealth == 0" << endl;
 	return;
  }
@@ -1169,9 +1168,9 @@ bool Unit::loadFromXML(const QDomElement& root)
 	boError(260) << k_funcinfo << "Unit not loaded properly" << endl;
 	return false;
  }
- if (health() > unitProperties()->health()) {
-	boError(260) << k_funcinfo << "Unit with Id " << id() << " (Type=" << type() << ") wants health=" << health() << " but only " << unitProperties()->health() << " is possible for that type according to index.unit file. decreasing health to maximum." << endl;
-	setHealth(unitProperties()->health());
+ if (health() > maxHealth()) {
+	boError(260) << k_funcinfo << "Unit with Id " << id() << " (Type=" << type() << ") wants health=" << health() << " but only " << maxHealth() << " is possible for that type according to index.unit file. decreasing health to maximum." << endl;
+	setHealth(maxHealth());
  }
  bool ok = false;
  bofixed rotation = root.attribute(QString::fromLatin1("Rotation")).toFloat(&ok);

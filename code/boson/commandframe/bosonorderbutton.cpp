@@ -305,8 +305,9 @@ void BosonOrderButton::slotUnitChanged(Unit* unit)
 	setUnit(0);
 	return;
  }
- double h = (double)unit->health() * 100 / (double)unit->unitProperties()->health();
- if (unit->health() > unit->unitProperties()->health()) {
+ const double epsilon = 0.0001;
+ double h = (double)unit->health() * 100 / (double)unit->maxHealth();
+ if (h > 1.0 + epsilon) {
 	boWarning(220) << k_lineinfo << "health > possible health" << endl;
  }
  mHealth->setValue(h);
