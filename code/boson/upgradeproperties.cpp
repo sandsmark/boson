@@ -169,34 +169,6 @@ void UpgradeProperties::resetUpgradeableWeaponProperties(Player* player)
   }
 }
 
-bool UpgradeProperties::canBeResearched(Player* player) const
-{
-  if(!d->mRequireUnits.isEmpty())
-  {
-    QValueList<unsigned long int>::Iterator it;
-    for(it = d->mRequireUnits.begin(); it != d->mRequireUnits.end(); ++it)
-    {
-      if(!player->hasUnitWithType(*it))
-      {
-        return false;
-      }
-    }
-  }
-
-  if(!d->mRequireTechnologies.isEmpty())
-  {
-    QValueList<unsigned long int>::Iterator it;
-    for(it = d->mRequireTechnologies.begin(); it != d->mRequireTechnologies.end(); ++it)
-    {
-      if(!player->hasTechnology(*it))
-      {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
 bool UpgradeProperties::load(KSimpleConfig* cfg, const QString& group)
 {
   boDebug(600) << k_funcinfo << "Loading from group " << group << endl;
