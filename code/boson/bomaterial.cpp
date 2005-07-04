@@ -63,6 +63,7 @@ void BoMaterial::init()
  mUseWireAbs = false;
 
  mTextureObject = 0;
+ mIsTransparent = false;
 }
 
 void BoMaterial::activate(BoMaterial* mat)

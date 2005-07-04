@@ -183,7 +183,7 @@ BoMatrix* BoFrame::matrix(int index) const
  return mMatrices[index];
 }
 
-void BoFrame::renderFrame(const QColor* teamColor, int mode)
+void BoFrame::renderFrame(const QColor* teamColor, bool transparentmeshes, int mode)
 {
  for (unsigned int i = 0; i < mNodeCount; i++) {
 	BoMatrix* m = mMatrices[i];
@@ -194,6 +194,13 @@ void BoFrame::renderFrame(const QColor* teamColor, int mode)
 	}
 	if (!mesh) {
 		boError(100) << k_funcinfo << "NULL mesh at " << i << endl;
+		continue;
+	}
+	if (mesh->material()) {
+		if (mesh->material()->isTransparent() != transparentmeshes) {
+			continue;
+		}
+	} else if (transparentmeshes) {
 		continue;
 	}
 	if (mode == GL_SELECT) {
@@ -755,6 +762,11 @@ unsigned int BosonModel::preferredLod(float dist) const
 
  // None of the reduce-detail lods were fitting. Use the full-detail one
  return 0;
+}
+
+bool BosonModel::hasTransparentMeshes(unsigned int lod)
+{
+  return d->mLODs[lod].hasTransparentMeshes();
 }
 
 void BosonModel::setMeshRendererModelData(BoMeshRendererModelData* data)

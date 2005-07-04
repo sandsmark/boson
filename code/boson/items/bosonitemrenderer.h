@@ -76,7 +76,7 @@ public:
 	 * translated and rotated to the correct position.
 	 * @param lod See @ref BoFrame::renderFrame
 	 **/
-	virtual void renderItem(unsigned int lod = 0);
+	virtual void renderItem(unsigned int lod = 0, bool transparentmeshes = false);
 
 	/**
 	 * @return TRUE if this item is in the @p frustum, otherwise FALSE.
@@ -112,7 +112,7 @@ public:
 	 * translated and rotated to the correct position.
 	 * @param lod See @ref BoFrame::renderFrame
 	 **/
-	virtual void renderItem(unsigned int lod = 0);
+	virtual void renderItem(unsigned int lod = 0, bool transparentmeshes = false);
 
 	/**
 	 * Set the animation mode.

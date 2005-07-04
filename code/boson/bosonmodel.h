@@ -122,7 +122,7 @@ public:
 	/**
 	 * @param lod See @ref BoMesh::renderMesh
 	 **/
-	void renderFrame(const QColor* teamColor, int mode = GL_RENDER);
+	void renderFrame(const QColor* teamColor, bool transparentmeshes = false, int mode = GL_RENDER);
 
 private:
 	void init();
@@ -154,12 +154,16 @@ public:
 	BoFrame* frame(unsigned int i) const;
 	void setFrame(unsigned int i, BoFrame* f);
 
+	bool hasTransparentMeshes() const { return mHasTransparentMeshes; }
+	void setHasTransparentMeshes(bool has) { mHasTransparentMeshes = has; }
+
 
 private:
 	unsigned int mMeshCount;
 	BoMesh** mMeshes;
 	unsigned int mFrameCount;
 	BoFrame** mFrames;
+	bool mHasTransparentMeshes;
 };
 
 
@@ -221,6 +225,8 @@ public:
 	 * distanceFromCamera.
 	 **/
 	unsigned int preferredLod(float distanceFromCamera) const;
+
+	bool hasTransparentMeshes(unsigned int lod = 0);
 
 	bool loadModel(const QString& configfile);
 

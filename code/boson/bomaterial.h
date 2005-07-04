@@ -88,6 +88,9 @@ public:
 	float shininess() const { return mShininess; }
 	bool twoSided() const { return mTwoSided; }
 
+	bool isTransparent() const { return mIsTransparent; }
+	void setIsTransparent(bool is) { mIsTransparent = is; }
+
 	/**
 	 * Set the (file-)name of the primary texture map. In boson we use this
 	 * texture map only, I (AB) have no idea what the others are for
@@ -162,6 +165,7 @@ private:
 	// idea (yet) what they are for. maybe they will get added one day.
 	QString mTextureName;
 	BoTexture* mTextureObject;
+	bool mIsTransparent;
 };
 
 #endif
