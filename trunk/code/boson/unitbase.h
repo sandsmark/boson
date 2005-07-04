@@ -172,6 +172,8 @@ public:
 	 **/
 	const QString& name() const;
 
+	unsigned long int maxHealth() const;
+
 	/**
 	 * Health aka hitpoints
 	 *

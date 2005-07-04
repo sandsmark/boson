@@ -129,14 +129,19 @@ void UnitBase::setShields(unsigned long int s)
  mShields = s;
 }
 
+unsigned long int UnitBase::maxHealth() const
+{
+ return unitProperties()->health();
+}
+
 unsigned long int UnitBase::health() const
 {
- return (int)(healthPercentage() * mUnitProperties->health());
+ return (int)(healthPercentage() * maxHealth());
 }
 
 void UnitBase::setHealth(unsigned long int h)
 {
- setHealthPercentage((bofixed)h / mUnitProperties->health());
+ setHealthPercentage((bofixed)h / maxHealth());
 }
 
 unsigned long int UnitBase::type() const
