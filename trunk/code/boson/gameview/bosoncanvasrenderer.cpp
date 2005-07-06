@@ -472,7 +472,7 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
  transparentmodels.reserve((int)(itemcount * 0.25));
 
  // Model that is being used currently
- BosonModel* currentmodel = 0;
+ BosonModel* currentModel = 0;
  // Render all items
  for (unsigned int i = 0; i < itemcount; i++) {
 	BosonItem* item = d->mRenderItemList[i].item;
@@ -510,15 +510,15 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 		lod = item->preferredLod(dist);
 	}
 	// If this item has different model then change current model
-	if (item->getModelForItem() != currentmodel) {
-		currentmodel = item->getModelForItem();
-		currentmodel->prepareRendering();
+	if (item->getModelForItem() != currentModel) {
+		currentModel = item->getModelForItem();
+		currentModel->prepareRendering();
 	}
 	item->renderItem(lod);
 	glColor3ub(255, 255, 255);
 	glPopMatrix();
 
-	if (currentmodel->hasTransparentMeshes(lod)) {
+	if (currentModel && currentModel->hasTransparentMeshes(lod)) {
 		transparentmodels.append(d->mRenderItemList[i]);
 	}
 
@@ -558,9 +558,9 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 		lod = item->preferredLod(dist);
 	}
 	// If this item has different model then change current model
-	if (item->getModelForItem() != currentmodel) {
-		currentmodel = item->getModelForItem();
-		currentmodel->prepareRendering();
+	if (item->getModelForItem() != currentModel) {
+		currentModel = item->getModelForItem();
+		currentModel->prepareRendering();
 	}
 	item->renderItem(lod, true);
 	glColor4ub(255, 255, 255, 255);
