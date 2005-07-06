@@ -492,12 +492,16 @@ void BosonGLMiniMap::createMap(BosonMap* map, const BoGLMatrices* gameGLMatrices
  if (!d->mImageTheme.isEmpty()) {
 	setImageTheme(d->mImageTheme);
  }
- for (unsigned int x = 0; x < map->width() + 1; x++) {
-	for (unsigned int y = 0; y < map->height() + 1; y++) {
+ boDebug() << k_funcinfo << "initializing ground" << endl;
+ for (unsigned int x = 0; x < map->width(); x++) {
+	for (unsigned int y = 0; y < map->height(); y++) {
 		calculateGround(x, y);
-		if (x < map->width() && y < map->height()) {
-			updateUnitsAtCell(x, y);
-		}
+	}
+ }
+ boDebug() << k_funcinfo << "initializing units" << endl;
+ for (unsigned int x = 0; x < map->width(); x++) {
+	for (unsigned int y = 0; y < map->height(); y++) {
+		updateUnitsAtCell(x, y);
 	}
  }
  boDebug() << k_funcinfo << "done" << endl;
@@ -1179,7 +1183,7 @@ void BosonGLMiniMapRenderer::setColor(int x, int y, const QColor& color, int alp
  textureData[(y * d->mMapTextureWidth + x) * 4 + 1] = color.green();
  textureData[(y * d->mMapTextureWidth + x) * 4 + 2] = color.blue();
  textureData[(y * d->mMapTextureWidth + x) * 4 + 3] = alpha;
- if (texture && d->mUpdatesEnabled) {
+ if (texture && d->mUpdatesEnabled && d->mTextureUpdatesEnabled[textureData]) {
 	texture->bind();
 	glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE,
 			&textureData[(y * d->mMapTextureWidth + x) * 4]);
