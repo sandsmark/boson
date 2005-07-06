@@ -146,6 +146,7 @@ BosonOrderButton::BosonOrderButton() : BoUfoWidget()
 // mPixmap->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 
  mHealth = new BoUfoProgress();
+ mHealth->setRange(0.0, 1.0);
  display->addWidget(mHealth);
  mHealth->setOrientation(Vertical);
 #if 0
@@ -306,7 +307,7 @@ void BosonOrderButton::slotUnitChanged(Unit* unit)
 	return;
  }
  const double epsilon = 0.0001;
- double h = (double)unit->health() * 100 / (double)unit->maxHealth();
+ double h = (double)unit->health() / (double)unit->maxHealth();
  if (h > 1.0 + epsilon) {
 	boWarning(220) << k_lineinfo << "health > possible health" << endl;
  }
