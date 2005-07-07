@@ -218,14 +218,14 @@ void UnitProperties::saveUnitType(const QString& fileName)
  conf.writeEntry("UnitHeight", (double)mUnitHeight);
  conf.writeEntry("UnitDepth", (double)mUnitDepth);
  conf.writeEntry("Name", d->mName);
- conf.writeEntry("Health", baseHealth());
- conf.writeEntry("MineralCost", baseMineralCost());
- conf.writeEntry("OilCost", baseOilCost());
- conf.writeEntry("SightRange", baseSightRange());
+ conf.writeEntry("Health", ulongBaseValue("Health", "MaxValue", 100));
+ conf.writeEntry("MineralCost", ulongBaseValue("MineralCost"));
+ conf.writeEntry("OilCost", ulongBaseValue("OilCost"));
+ conf.writeEntry("SightRange", ulongBaseValue("SightRange"));
  // This is converted from advance calls to seconds
- conf.writeEntry("ProductionTime", baseProductionTime() / 20.0f);
- conf.writeEntry("Shield", baseShields());
- conf.writeEntry("Armor", baseArmor());
+ conf.writeEntry("ProductionTime", ulongBaseValue("ProductionTime") / 20.0f);
+ conf.writeEntry("Shield", ulongBaseValue("Shields"));
+ conf.writeEntry("Armor", ulongBaseValue("Armor"));
  conf.writeEntry("SupportMiniMap", mSupportMiniMap);
  conf.writeEntry("IsFacility", isFacility());
  BosonConfig::writeUnsignedLongNumList(&conf, "Requirements", d->mRequirements);
@@ -255,14 +255,14 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
  // We divide speeds with 20, because speeds in config files are cells/second,
  //  but we want cells/advance call
  mBaseSpeed = conf->readDoubleNumEntry("Speed", 0) / 20.0f;
- if (baseSpeed() < 0) {
-	boWarning() << k_funcinfo << "Invalid Speed value: " << baseSpeed() <<
+ if (bofixedBaseValue("Speed") < 0) {
+	boWarning() << k_funcinfo << "Invalid Speed value: " << bofixedBaseValue("Speed") <<
 			" for unit " << typeId() << ", defaulting to 0" << endl;
 	mBaseSpeed = 0;
  }
  mBaseAccelerationSpeed = conf->readDoubleNumEntry("AccelerationSpeed", 1) / 20.0f / 20.0f;
  mBaseDecelerationSpeed = conf->readDoubleNumEntry("DecelerationSpeed", 2) / 20.0f / 20.0f;
- mRotationSpeed = (int)(conf->readNumEntry("RotationSpeed", (int)(baseSpeed() * 20.0f * 90.0f)) / 20.0f);
+ mRotationSpeed = (int)(conf->readNumEntry("RotationSpeed", (int)(bofixedBaseValue("Speed") * 20.0f * 90.0f)) / 20.0f);
  mCanGoOnLand = conf->readBoolEntry("CanGoOnLand", (isLand() || isAircraft()));
  mCanGoOnWater = conf->readBoolEntry("CanGoOnWater", (isShip() || isAircraft()));
 }
@@ -397,9 +397,9 @@ void UnitProperties::saveMobileProperties(KSimpleConfig* conf)
  conf->setGroup("Boson Mobile Unit");
  // We multiply speeds with 20 because speeds in config files are cells/second,
  //  but here we have cells/advance call
- conf->writeEntry("Speed", baseSpeed() * 20.0f);
- conf->writeEntry("AccelerationSpeed", (double)mBaseAccelerationSpeed * 20.0f * 20.0f);
- conf->writeEntry("DecelerationSpeed", (double)mBaseDecelerationSpeed * 20.0f * 20.0f);
+ conf->writeEntry("Speed", bofixedBaseValue("Speed") * 20.0f);
+ conf->writeEntry("AccelerationSpeed", (double)bofixedBaseValue("AccelerationSpeed") * 20.0f * 20.0f);
+ conf->writeEntry("DecelerationSpeed", (double)bofixedBaseValue("DecelerationSpeed") * 20.0f * 20.0f);
  conf->writeEntry("RotationSpeed", mRotationSpeed * 20.0f);
  conf->writeEntry("CanGoOnLand", mCanGoOnLand);
  conf->writeEntry("CanGoOnWater", mCanGoOnWater);
@@ -518,28 +518,28 @@ void UnitProperties::setRequirements(QValueList<unsigned long int> requirements)
  d->mRequirements = requirements;
 }
 
-bofixed UnitProperties::baseSpeed() const
+bofixed UnitProperties::maxSpeed() const
 {
  if (!isMobile()) {
 	return bofixed(0);
  }
- return mBaseSpeed;
+ return mSpeed.value(upgradesCollection());
 }
 
-bofixed UnitProperties::baseAccelerationSpeed() const
+bofixed UnitProperties::maxAccelerationSpeed() const
 {
  if (!isMobile()) {
-	return bofixed();
+	return bofixed(0);
  }
- return mBaseAccelerationSpeed;
+ return mAccelerationSpeed.value(upgradesCollection());
 }
 
-bofixed UnitProperties::baseDecelerationSpeed() const
+bofixed UnitProperties::maxDecelerationSpeed() const
 {
  if (!isMobile()) {
-	return bofixed();
+	return bofixed(0);
  }
- return mBaseDecelerationSpeed;
+ return mDecelerationSpeed.value(upgradesCollection());
 }
 
 int UnitProperties::rotationSpeed() const
@@ -723,7 +723,7 @@ void UnitProperties::reset()
  mIsFacility = false;
  mBaseAccelerationSpeed = 2 / 20.0f / 20.0f;
  mBaseDecelerationSpeed = 4 / 20.0f / 20.0f;
- mRotationSpeed = (int)(45.0f * baseSpeed());
+ mRotationSpeed = (int)(45.0f * bofixedBaseValue("Speed"));
  mCanGoOnLand = true;
  mCanGoOnWater = false;
  // Sounds
@@ -767,7 +767,7 @@ const BosonWeaponProperties* UnitProperties::weaponProperties(unsigned long int 
  return nonConstWeaponProperties(id);
 }
 
-bool UnitProperties::getUpgradeableBaseValue(unsigned long int* ret, const QString& name, const QString& type) const
+bool UnitProperties::getBaseValue(unsigned long int* ret, const QString& name, const QString& type) const
 {
  if (!d->mULongProperties.contains(name)) {
 	boError() << k_funcinfo << "no such property " << name << endl;
@@ -787,7 +787,7 @@ bool UnitProperties::getUpgradeableBaseValue(unsigned long int* ret, const QStri
  return false;
 }
 
-bool UnitProperties::getUpgradeableBaseValue(long int* ret, const QString& name, const QString& type) const
+bool UnitProperties::getBaseValue(long int* ret, const QString& name, const QString& type) const
 {
  if (!d->mLongProperties.contains(name)) {
 	boError() << k_funcinfo << "no such property " << name << endl;
@@ -807,7 +807,7 @@ bool UnitProperties::getUpgradeableBaseValue(long int* ret, const QString& name,
  return false;
 }
 
-bool UnitProperties::getUpgradeableBaseValue(bofixed* ret, const QString& name, const QString& type) const
+bool UnitProperties::getBaseValue(bofixed* ret, const QString& name, const QString& type) const
 {
  if (!d->mBoFixedProperties.contains(name)) {
 	boError() << k_funcinfo << "no such property " << name << endl;
@@ -825,6 +825,33 @@ bool UnitProperties::getUpgradeableBaseValue(bofixed* ret, const QString& name, 
 	return false;
  }
  return false;
+}
+
+unsigned long int UnitProperties::ulongBaseValue(const QString& name, const QString& type, unsigned long int defaultValue) const
+{
+ unsigned long int v = defaultValue;
+ if (!getBaseValue(&v, name, type)) {
+	return defaultValue;
+ }
+ return v;
+}
+
+long int UnitProperties::longBaseValue(const QString& name, const QString& type, long int defaultValue) const
+{
+ long int v = defaultValue;
+ if (!getBaseValue(&v, name, type)) {
+	return defaultValue;
+ }
+ return v;
+}
+
+bofixed UnitProperties::bofixedBaseValue(const QString& name, const QString& type, bofixed defaultValue) const
+{
+ bofixed v = defaultValue;
+ if (!getBaseValue(&v, name, type)) {
+	return defaultValue;
+ }
+ return v;
 }
 
 const UpgradesCollection& UnitProperties::upgradesCollection() const

@@ -138,51 +138,49 @@ public:
 	const bofixed& unitDepth() const { return mUnitDepth; }
 
 	/**
-	 * @return Default health aka power aka hitpoints of this unit.
+	 * @return Maximum health of units of this type. Note that for a
+	 * particular @ref Unit object of this type, this value might be larger,
+	 * depending on the upgrades applied to that unit.
+	 *
+	 * This value applies to newly produced units only.
 	 **/
-	unsigned long int baseHealth() const { return mBaseHealth; }
-
 	unsigned long int maxHeatlh() const { return mHealth.value(upgradesCollection()); }
 
 	/**
-	 * @return The default shields value of this unit.
+	 * @return Maximum shields of units of this type. Note that for a
+	 * particular @ref Unit object of this type, this value might be larger,
+	 * depending on the upgrades applied to that unit.
+	 *
+	 * This value applies to newly produced units only.
 	 **/
-	unsigned long int baseShields() const { return mBaseShields; }
-
 	unsigned long int maxShields() const { return mShields.value(upgradesCollection()); }
 
 	/**
-	 * @return The default armor value of this unit.
+	 * @return Maximum armor of units of this type. Note that for a
+	 * particular @ref Unit object of this type, this value might be larger,
+	 * depending on the upgrades applied to that unit.
+	 *
+	 * This value applies to newly produced units only.
 	 **/
-	unsigned long int baseArmor() const { return mBaseArmor; }
-
 	unsigned long int maxArmor() const { return mArmor.value(upgradesCollection()); }
 
 	/**
 	 * @return How much this unit costs (of your mineral account).
-	 * Note that this is the "base" cost only, that can be modified by
-	 * upgrades. To retrieve the actual cost, all matching current upgrades
-	 * of the player need to be applied.
 	 **/
-	unsigned long int baseMineralCost() const { return mBaseMineralCost; }
-
 	unsigned long int mineralCost() const { return mMineralCost.value(upgradesCollection()); }
 
 	/**
 	 * @return How much this unit costs (of your oil account)
-	 * Note that this is the "base" cost only, that can be modified by
-	 * upgrades. To retrieve the actual cost, all matching current upgrades
-	 * of the player need to be applied.
 	 **/
-	unsigned long int baseOilCost() const { return mBaseOilCost; }
-
 	unsigned long int oilCost() const { return mOilCost.value(upgradesCollection()); }
 
 	/**
-	 * return How far this unit can see. Is a number of cells
+	 * @return Maximum sight range of units of this type. Note that for a
+	 * particular @ref Unit object of this type, this value might be larger,
+	 * depending on the upgrades applied to that unit.
+	 *
+	 * This value applies to newly produced units only.
 	 **/
-	unsigned int baseSightRange() const { return mBaseSightRange; }
-
 	unsigned int maxSightRange() const { return mSightRange.value(upgradesCollection()); }
 
 
@@ -218,28 +216,25 @@ public:
 	bool isFacility() const { return mIsFacility; }
 
 	/**
-	 * @return Maximal speed of the mobile unit. 0 if this is a facility. See
-	 * @ref isFacility
+	 * @return Maximum speed of units of this type. Note that for a
+	 * particular @ref Unit object of this type, this value might be larger,
+	 * depending on the upgrades applied to that unit.
+	 *
+	 * This value applies to newly produced units only.
 	 **/
-	bofixed baseSpeed() const;
-
-	bofixed maxSpeed() const { return mSpeed.value(upgradesCollection()); }
+	bofixed maxSpeed() const;
 
 	/**
 	 * @return How fast this mobile unit accelerates. 0 if this is a facility. See
 	 * @ref isFacility
 	 **/
-	bofixed baseAccelerationSpeed() const;
-
-	bofixed maxAccelerationSpeed() const { return mAccelerationSpeed.value(upgradesCollection()); }
+	bofixed maxAccelerationSpeed() const;
 
 	/**
 	 * @return How fast this mobile unit decelerates. 0 if this is a facility. See
 	 * @ref isFacility
 	 **/
-	bofixed baseDecelerationSpeed() const;
-
-	bofixed maxDecelerationSpeed() const { return mDecelerationSpeed.value(upgradesCollection()); }
+	bofixed maxDecelerationSpeed() const;
 
 	/**
 	 * @return Turning speed of this mobile unit (degrees per advance call). 0 if
@@ -311,13 +306,8 @@ public:
 	 * the unit and maybe th number of facilities (to name 2 examples).
 	 * @return The number of @ref Unit::advance calls this unit needs
 	 * (usually) to be produced.
-	 * Note that this is the "base" time only, that can be modified by
-	 * upgrades. To retrieve the actual time, all matching current upgrades
-	 * of the player need to be applied.
 	 **/
-	unsigned int baseProductionTime() const { return mBaseProductionTime; }
-
-	unsigned int productionTime() const { return mProductionTime.value(upgradesCollection()); }
+	unsigned long int productionTime() const { return mProductionTime.value(upgradesCollection()); }
 
 	/**
 	 * @return TRUE if this unittype gives you the ability to show a
@@ -408,9 +398,24 @@ public:
 
 	bool removeWreckageImmediately() const { return mRemoveWreckageImmediately; }
 
-	bool getUpgradeableBaseValue(unsigned long int* ret, const QString& name, const QString& type) const;
-	bool getUpgradeableBaseValue(long int* ret, const QString& name, const QString& type) const;
-	bool getUpgradeableBaseValue(bofixed* ret, const QString& name, const QString& type) const;
+	/**
+	 * @return The base value of an upgradeable property. This value is the
+	 * start-value, before any upgrades are applied.
+	 * @param name The name of the property
+	 * @param type Either "MaxValue" or "MinValue". Use "MaxValue" if you
+	 * are not sure.
+	 **/
+	bool getBaseValue(unsigned long int* ret, const QString& name, const QString& type) const;
+	bool getBaseValue(long int* ret, const QString& name, const QString& type) const;
+	bool getBaseValue(bofixed* ret, const QString& name, const QString& type) const;
+
+	/**
+	 * @return @ref getBaseValue or @p defaultValue if the @p
+	 * name @p type pair does not exist.
+	 **/
+	unsigned long int ulongBaseValue(const QString& name, const QString& type = "MaxValue", unsigned long int defaultValue = 0) const;
+	long int longBaseValue(const QString& name, const QString& type = "MaxValue", long int defaultValue = 0) const;
+	bofixed bofixedBaseValue(const QString& name, const QString& type = "MaxValue", bofixed defaultValue = 0) const;
 
 	const UpgradesCollection& upgradesCollection() const;
 
