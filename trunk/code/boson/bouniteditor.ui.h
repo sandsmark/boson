@@ -380,17 +380,17 @@ void BoUnitEditor::slotUpdateUnitProperties()
 	mUnit->setConstructionSteps(mUnitConstructionSteps->value());
     } else {
 	mUnit->setIsFacility(false);
-	mUnit->setBaseValue_speed(bofixed(mUnitSpeed->value()));
+	mUnit->setBaseSpeed(bofixed(mUnitSpeed->value()));
 	mUnit->setCanGoOnLand(mUnitCanGoOnLand->isChecked());
 	mUnit->setCanGoOnWater(mUnitCanGoOnWater->isChecked());
     }
     // Properties page
-    mUnit->setBaseValue_health(mUnitHealth->value());
-    mUnit->setBaseValue_armor(mUnitArmor->value());
-    mUnit->setBaseValue_shields(mUnitShields->value());
-    mUnit->setBaseValue_mineralCost(mUnitMineralCost->value());
-    mUnit->setBaseValue_oilCost(mUnitOilCost->value());
-    mUnit->setBaseValue_sightRange(mUnitSight->value());
+    mUnit->setBaseHealth(mUnitHealth->value());
+    mUnit->setBaseArmor(mUnitArmor->value());
+    mUnit->setBaseShields(mUnitShields->value());
+    mUnit->setBaseMineralCost(mUnitMineralCost->value());
+    mUnit->setBaseOilCost(mUnitOilCost->value());
+    mUnit->setBaseSightRange(mUnitSight->value());
     mUnit->setTerrainType((UnitProperties::TerrainType)(mUnitTerrain->currentItem()));
     mUnit->setSupportMiniMap(mUnitSupportMiniMap->isChecked());
     // Weapons page
@@ -427,7 +427,7 @@ void BoUnitEditor::slotUpdateUnitProperties()
 	mUnit->addPlugin(p);
     }
     // Producing page
-    mUnit->setBaseValue_productionTime(mUnitProductionTime->value());
+    mUnit->setBaseProductionTime(mUnitProductionTime->value());
     mUnit->setProducer(mUnitProducer->value());
     mUnit->setRequirements(stringToList(mUnitRequirements->text()));
     // Mapping page
@@ -467,19 +467,19 @@ void BoUnitEditor::slotUpdateWidgets()
     mUnitHeight->setValue(mUnit->unitHeight());
     mUnitDepth->setValue(mUnit->unitDepth());
     // Properties page
-    mUnitHealth->setValue(mUnit->health());
-    mUnitArmor->setValue(mUnit->armor());
-    mUnitShields->setValue(mUnit->shields());
-    mUnitMineralCost->setValue(mUnit->mineralCost());
-    mUnitOilCost->setValue(mUnit->oilCost());
-    mUnitSight->setValue(mUnit->sightRange());
+    mUnitHealth->setValue(mUnit->baseHealth());
+    mUnitArmor->setValue(mUnit->baseArmor());
+    mUnitShields->setValue(mUnit->baseShields());
+    mUnitMineralCost->setValue(mUnit->baseMineralCost());
+    mUnitOilCost->setValue(mUnit->baseOilCost());
+    mUnitSight->setValue(mUnit->baseSightRange());
     int terrain = (int)(mUnit->terrainType());
     mUnitTerrain->setCurrentItem(terrain);
     mUnitSupportMiniMap->setChecked(mUnit->supportMiniMap());
     // FIXME: UnitProperties only saves mobile *or* facility properties, but
     //  I'd like to have them both saved
     // TODO: This MUST be double, but Designer knows nothing about KDoubleNumInput
-    mUnitSpeed->setValue(mUnit->speed());
+    mUnitSpeed->setValue(mUnit->baseSpeed());
     mUnitCanGoOnLand->setChecked(mUnit->canGoOnLand());
     mUnitCanGoOnWater->setChecked(mUnit->canGoOnWater());
     mUnitConstructionSteps->setValue(mUnit->constructionSteps());
@@ -563,14 +563,14 @@ void BoUnitEditor::slotUpdateWeaponProps()
     }
     BosonWeaponProperties* w = mWeapons.at(mCurrentWeapon);
     w->setWeaponName(mWeaponName->text());
-    w->setBaseValue_damage(mWeaponDamage->value());
-    w->setBaseValue_damageRange(mWeaponDamageRange->value());
-    w->setBaseValue_fullDamageRange(mWeaponFullDamageRange->value());
-    w->setBaseValue_reloadingTime(mWeaponReload->value());
-    w->setBaseValue_range(mWeaponRange->value());
+    w->setBaseDamage(mWeaponDamage->value());
+    w->setBaseDamageRange(mWeaponDamageRange->value());
+    w->setBaseFullDamageRange(mWeaponFullDamageRange->value());
+    w->setBaseReloadingTime(mWeaponReload->value());
+    w->setBaseRange(mWeaponRange->value());
     w->setCanShootAtAirUnits(mWeaponCanShootAtAirUnits->isChecked());
     w->setCanShootAtLandUnits(mWeaponCanShootAtLandUnits->isChecked());
-    w->setBaseValue_speed((long unsigned int)mWeaponSpeed->value());
+    w->setBaseSpeed((long unsigned int)mWeaponSpeed->value());
     w->setModelFileName(mWeaponModel->text());
     w->setHeight(mWeaponHeight->value());
     BoVector3Fixed offset(mWeaponOffsetX->value(), mWeaponOffsetY->value(), mWeaponOffsetZ->value());

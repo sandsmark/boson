@@ -39,7 +39,9 @@ class BosonMap;
 class BosonStatistics;
 class ProductionPlugin;
 class PlayerIO;
+class UpgradeProperties;
 
+class PlayerPrivate;
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -150,7 +152,11 @@ public:
 	void setMinerals(unsigned long int m);
 	void setOil(unsigned long int o);
 
-	void applyUpgrades();
+	void clearUpgrades();
+	void addUpgrade(const UpgradeProperties* upgrade);
+	void removeUpgrade(const UpgradeProperties* upgrade);
+	void removeUpgrade(unsigned long int id);
+	const QValueList<const UpgradeProperties*>* upgrades() const;
 
 	/**
 	 * Initialize the map for this player - this is mostly the fog of war,
@@ -281,7 +287,6 @@ protected:
 	bool loadFogOfWar(const QDomElement& root);
 
 private:
-	class PlayerPrivate;
 	PlayerPrivate* d;
 
 	SpeciesTheme* mSpecies;

@@ -311,6 +311,17 @@ void Unit::setHealth(unsigned long int h)
  }
 }
 
+void Unit::setSightRange(unsigned long int r)
+{
+ UnitBase::setSightRange(r);
+ if (isDestroyed()) {
+	return;
+ }
+ if (canvas()) {
+	canvas()->updateSight(this, x(), y());
+ }
+}
+
 void Unit::setWork(WorkType w)
 {
  if (currentPlugin() && w != WorkPlugin) {
@@ -353,7 +364,7 @@ int Unit::currentPluginType() const
 void Unit::updateSelectBox()
 {
  if (selectBox()) {
-	selectBox()->setFactor(healthPercentage());
+	selectBox()->setFactor(((float)health()) / ((float)maxHealth()));
  }
 }
 
@@ -474,7 +485,7 @@ void Unit::reload(unsigned int count)
 	}
  }
 
- if (shields() < unitProperties()->shields()) {
+ if (shields() < maxShields()) {
 	reloadShields(count);
  }
 }
@@ -1090,6 +1101,8 @@ bool Unit::saveAsXML(QDomElement& root)
 	return false;
  }
 
+ QDomDocument doc = root.ownerDocument();
+
  root.setAttribute(QString::fromLatin1("Rotation"), rotation());
  // No need to store x and y rotations
 
@@ -1109,7 +1122,6 @@ bool Unit::saveAsXML(QDomElement& root)
  root.setAttribute(QString::fromLatin1("Target"), (unsigned int)targetId);
 
  if (d->mPlugins.count() != 0) {
-	QDomDocument doc = root.ownerDocument();
 	QDomElement pluginElement = doc.createElement(QString::fromLatin1("UnitPlugin"));
 	QPtrListIterator<UnitPlugin> it(d->mPlugins);
 	for (; it.current(); ++it) {
@@ -1129,9 +1141,23 @@ bool Unit::saveAsXML(QDomElement& root)
 	}
  }
 
+ QDomElement weaponUpgrades = doc.createElement("WeaponUpgrades");
+ for (QPtrListIterator<UnitPlugin> it(d->mPlugins); it.current(); ++it) {
+	if (it.current()->pluginType() == PluginProperties::Weapon) {
+		const BosonWeaponProperties* prop = (const BosonWeaponProperties*)it.current();
+		QDomElement weaponType = doc.createElement("WeaponTypeUpgrades");
+		weaponType.setAttribute("Id", QString::number(prop->id()));
+		if (!prop->saveUpgradesAsXML(weaponType)) {
+			boError() << k_funcinfo << "cannot save Upgrades of weapon type " << prop->id() << endl;
+			return false;
+		}
+		weaponUpgrades.appendChild(weaponType);
+	}
+ }
+ root.appendChild(weaponUpgrades);
+
 
  // Save pathinfo
- QDomDocument doc = root.ownerDocument();
  QDomElement pathinfoxml = doc.createElement(QString::fromLatin1("PathInfo"));
  root.appendChild(pathinfoxml);
  // Save start/dest points and range
@@ -1249,6 +1275,36 @@ bool Unit::loadFromXML(const QDomElement& root)
  setRotation(rotation);
  updateRotation();
  setAdvanceWork(advanceWork());
+
+ QDomElement weaponUpgrades = root.namedItem("WeaponUpgrades").toElement();
+ if (weaponUpgrades.isNull()) {
+	boError() << k_funcinfo << "NULL WeaponUpgrades tag" << endl;
+	return false;
+ }
+ for (QDomNode n = weaponUpgrades.firstChild(); !n.isNull(); n = n.nextSibling()) {
+	QDomElement e = n.toElement();
+	if (e.isNull()) {
+		continue;
+	}
+	if (e.tagName() != "WeaponTypeUpgrades") {
+		continue;
+	}
+	bool ok = false;
+	unsigned long int id = e.attribute("Id").toULong(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "Invalid number for WeaponTypeUpgrades Id" << endl;
+		return false;
+	}
+	BosonWeaponProperties* prop = unitProperties()->nonConstWeaponProperties(id);
+	if (!prop) {
+		boError() << k_funcinfo << "NULL weapon properties for " << id << endl;
+		return false;
+	}
+	if (!prop->loadUpgradesFromXML(speciesTheme(), e)) {
+		boError() << k_funcinfo << "unable to load WeaponTypeUpgrades from XML for " << id << endl;
+		return false;
+	}
+ }
 
  // Load pathinfo
  pathInfo()->reset();
@@ -1722,9 +1778,9 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
 {
  d = new MobileUnitPrivate;
 
- setMaxSpeed(prop->speed());
- setAccelerationSpeed(prop->accelerationSpeed());
- setDecelerationSpeed(prop->decelerationSpeed());
+ setMaxSpeed(prop->maxSpeed());
+ setAccelerationSpeed(prop->maxAccelerationSpeed());
+ setDecelerationSpeed(prop->maxDecelerationSpeed());
  d->lastXVelocity = 0.0f;
  d->lastYVelocity = 0.0f;
 }

@@ -23,12 +23,14 @@
 
 #include "rtti.h"
 #include "items/bosonitem.h"
+#include "boupgradeableproperty.h"
 
 #include <kgame/kgameproperty.h>
 
 class KGamePropertyHandler;
 class QDomElement;
 template<class T, class T2> class QMap;
+template<class T> class QValueList;
 
 class Player;
 class PlayerIO;
@@ -37,6 +39,9 @@ class UnitProperties;
 class PluginProperties;
 class SpeciesTheme;
 class BosonItemPropertyHandler;
+class UpgradeProperties;
+class UpgradesCollection;
+
 
 /**
  * Ok, ok - this class is useless. All it does is providing a lot of properties
@@ -63,15 +68,18 @@ public:
 	enum PropertyIds {
 		// UnitBase uses IDs from 512 to 1023.
 		//IdHealth = 512 + 0,
-		IdArmor = 512 + 1,
-		IdShields = 512 + 2,
+		//IdArmor = 512 + 1,
+		//IdShields = 512 + 2,
 		IdShieldReloadCounter = 512 + 3,
-		IdSightRange = 512 + 5,
+		//IdSightRange = 512 + 5,
 		IdWork = 512 + 10,
 		IdAdvanceWork = 512 + 11,
 		IdMovingStatus = 512 + 12,
 		IdDeletionTimer = 512 + 15,
-		IdHealthPercentage = 512 + 20
+		IdHealthFactor = 512 + 20,
+		IdArmorFactor = 512 + 21,
+		IdShieldsFactor = 512 + 22,
+		IdSightRangeFactor = 512 + 23
 	};
 
 	/**
@@ -191,16 +199,9 @@ public:
 	 **/
 	virtual void setHealth(unsigned long int h);
 
-	/**
-	 * @return how many percentage of maximum health this unit has
-	 * Note that the returned value is in range 0-1, not 0-100!
-	 **/
-	inline virtual bofixed healthPercentage() const { return mHealthPercentage; }
-	inline virtual void setHealthPercentage(bofixed h) { mHealthPercentage = h; }
-
 	bool isDestroyed() const
 	{
-		return (healthPercentage() == 0);
+		return (health() == 0);
 	}
 
 	/**
@@ -214,11 +215,13 @@ public:
 	 **/
 	KGamePropertyHandler* weaponDataHandler();
 
-	inline unsigned long int shields() const { return mShields; }
+	unsigned long int shields() const;
 	void setShields(unsigned long int shields);
+	unsigned long int maxShields() const;
 
 	unsigned long int armor() const;
 	void setArmor(unsigned long int armor);
+	unsigned long int maxArmor() const;
 
 	/**
 	 * The type of the unit as described in the index.unit file of this
@@ -234,8 +237,9 @@ public:
 	/**
 	 * @return How far this unit can see. This is a number of cells
 	 **/
-	inline unsigned int sightRange() const { return mSightRange; }
-	void setSightRange(unsigned int r) { mSightRange = r; }
+	unsigned long int sightRange() const;
+	virtual void setSightRange(unsigned long int r);
+	unsigned long int maxSightRange() const;
 
 	virtual bool saveAsXML(QDomElement& root);
 	virtual bool loadFromXML(const QDomElement& root);
@@ -315,6 +319,17 @@ public:
 	 **/
 	virtual bool saveScenario(QDomElement& node);
 
+	const QValueList<const UpgradeProperties*>* upgrades() const;
+
+	void clearUpgrades();
+	void addUpgrade(const UpgradeProperties* upgrade);
+	void removeUpgrade(const UpgradeProperties* upgrade);
+	void removeUpgrade(unsigned long int upgradeId);
+	const UpgradesCollection& upgradesCollection() const
+	{
+		return mUpgradesCollection;
+	}
+
 protected:
 	/**
 	 * Should get called in every @ref Unit::advance call. This counts the
@@ -325,25 +340,47 @@ protected:
 	 **/
 	void reloadShields(int by = 1);
 
+	/**
+	 * @return how many percentage of maximum health this unit has
+	 * Note that the returned value is in range 0-1, not 0-100!
+	 **/
+	inline bofixed healthFactor() const { return mHealthFactor; }
+	inline void setHealthFactor(bofixed f) { mHealthFactor = f; }
+
+	inline bofixed armorFactor() const { return mArmorFactor; }
+	inline void setArmorFactor(bofixed f) { mArmorFactor = f; }
+
+	inline bofixed shieldsFactor() const { return mShieldsFactor; }
+	inline void setShieldsFactor(bofixed f) { mShieldsFactor = f; }
+
+	inline bofixed sightRangeFactor() const { return mSightRangeFactor; }
+	inline void setSightRangeFactor(bofixed f) { mSightRangeFactor = f; }
+
 private:
 	static void initStatic();
 
 private:
-	KGameProperty<unsigned long int> mArmor;
-	KGameProperty<unsigned long int> mShields;
+	const UnitProperties* mUnitProperties;
+	UpgradesCollection mUpgradesCollection;
+
+	BosonItemPropertyHandler* mWeaponProperties;
+
 	KGameProperty<unsigned long int> mShieldReloadCounter;
 	KGameProperty<unsigned int> mDeletionTimer;
-	KGameProperty<bofixed> mHealthPercentage;
-	KGameProperty<unsigned int> mSightRange;
 	KGamePropertyInt mWork;
 	KGamePropertyInt mAdvanceWork;
 	KGamePropertyInt mMovingStatus;
 
-	BosonItemPropertyHandler* mWeaponProperties;
+	KGameProperty<bofixed> mHealthFactor;
+	KGameProperty<bofixed> mArmorFactor;
+	KGameProperty<bofixed> mShieldsFactor;
+	KGameProperty<bofixed> mSightRangeFactor;
 
-	const UnitProperties* mUnitProperties;
 
-	friend class UpgradePropertiesBase;
+	BoUpgradeableProperty<unsigned long int> mMaxHealth;
+	BoUpgradeableProperty<unsigned long int> mMaxArmor;
+	BoUpgradeableProperty<unsigned long int> mMaxShields;
+	BoUpgradeableProperty<unsigned long int> mMaxSightRange;
 };
 
 #endif

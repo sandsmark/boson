@@ -31,6 +31,7 @@
 #include "bodebug.h"
 #include "boaction.h"
 #include "bosonprofiling.h"
+#include "upgradeproperties.h"
 
 #include <ksimpleconfig.h>
 #include <klocale.h>
@@ -38,7 +39,7 @@
 
 #include <qfile.h>
 
-class UnitProperties::UnitPropertiesPrivate
+class UnitPropertiesPrivate
 {
 public:
 	UnitPropertiesPrivate()
@@ -51,6 +52,9 @@ public:
 	QString mUnitPath; // the path to the unit files
 	QValueList<unsigned long int> mRequirements;
 
+	QMap<QString, unsigned long int*> mULongProperties;
+	QMap<QString, long int*> mLongProperties;
+	QMap<QString, bofixed*> mBoFixedProperties;
 
 	QPtrList<PluginProperties> mPlugins;
 
@@ -68,29 +72,49 @@ public:
 	QPtrList<BosonEffectProperties> mExplodingFragmentHitEffects;
 	QValueList<unsigned long int> mExplodingFragmentHitEffectIds;
 	BoVector3Fixed mHitPoint;  // FIXME: better name
+
+	UpgradesCollection mUpgradesCollection;
 };
 
 
-
-UnitProperties::UnitProperties(bool fullmode)
-{
- init();
- mFullMode = fullmode;
-}
-
-UnitProperties::UnitProperties(SpeciesTheme* theme)
+UnitProperties::UnitProperties(SpeciesTheme* theme, bool fullMode)
+	:
+	mHealth(this, 0, "Health", "MaxValue"),
+	mSightRange(this, 0, "SightRange", "MaxValue"),
+	mProductionTime(this, 0, "ProductionTime", "MaxValue"),
+	mMineralCost(this, 0, "MineralCost", "MaxValue"),
+	mOilCost(this, 0, "OilCost", "MaxValue"),
+	mArmor(this, 0, "Armor", "MaxValue"),
+	mShields(this, 0, "Shields", "MaxValue"),
+	mSpeed(this, 0, "Speed", "MaxValue"),
+	mAccelerationSpeed(this, 0, "AccelerationSpeed", "MaxValue"),
+	mDecelerationSpeed(this, 0, "DecelerationSpeed", "MaxValue")
 {
  init();
  mTheme = theme;
+ mFullMode = fullMode;
 }
 
 void UnitProperties::init()
 {
  d = new UnitPropertiesPrivate;
+ mFullMode = true;
  mTheme = 0;
  mIsFacility = false;
  mProduceAction = 0;
  d->mPlugins.setAutoDelete(true);
+
+ d->mULongProperties.insert("Health", &mBaseHealth);
+ d->mULongProperties.insert("SightRange", &mBaseSightRange);
+ d->mULongProperties.insert("ProductionTime", &mBaseProductionTime);
+ d->mULongProperties.insert("MineralCost", &mBaseMineralCost);
+ d->mULongProperties.insert("OilCost", &mBaseOilCost);
+ d->mULongProperties.insert("Armor", &mBaseArmor);
+ d->mULongProperties.insert("Shields", &mBaseShields);
+
+ d->mBoFixedProperties.insert("Speed", &mBaseSpeed);
+ d->mBoFixedProperties.insert("AccelerationSpeed", &mBaseAccelerationSpeed);
+ d->mBoFixedProperties.insert("DecelerationSpeed", &mBaseDecelerationSpeed);
 }
 
 UnitProperties::~UnitProperties()
@@ -131,13 +155,13 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  d->mName = conf.readEntry("Name", i18n("Unknown"));
  d->mDescription = conf.readEntry("Description", QString::null);
  // We convert this from seconds to advance calls
- m_productionTime.init((int)(conf.readDoubleNumEntry("ProductionTime", 5) * 20.0f));
- m_health.init(conf.readUnsignedLongNumEntry("Health", 100));
- m_mineralCost.init(conf.readUnsignedLongNumEntry("MineralCost", 100));
- m_oilCost.init(conf.readUnsignedLongNumEntry("OilCost", 0));
- m_sightRange.init(conf.readUnsignedLongNumEntry("SightRange", 5));
- m_shields.init(conf.readUnsignedLongNumEntry("Shield", 0));
- m_armor.init(conf.readUnsignedLongNumEntry("Armor", 0));
+ mBaseProductionTime = ((int)(conf.readDoubleNumEntry("ProductionTime", 5) * 20.0f));
+ mBaseHealth = conf.readUnsignedLongNumEntry("Health", 100);
+ mBaseMineralCost = conf.readUnsignedLongNumEntry("MineralCost", 100);
+ mBaseOilCost = conf.readUnsignedLongNumEntry("OilCost", 0);
+ mBaseSightRange = conf.readUnsignedLongNumEntry("SightRange", 5);
+ mBaseShields = conf.readUnsignedLongNumEntry("Shield", 0);
+ mBaseArmor = conf.readUnsignedLongNumEntry("Armor", 0);
  mSupportMiniMap = conf.readBoolEntry("SupportMiniMap", false);
  isFacility = conf.readBoolEntry("IsFacility", false);
  d->mRequirements = BosonConfig::readUnsignedLongNumList(&conf, "Requirements");
@@ -194,14 +218,14 @@ void UnitProperties::saveUnitType(const QString& fileName)
  conf.writeEntry("UnitHeight", (double)mUnitHeight);
  conf.writeEntry("UnitDepth", (double)mUnitDepth);
  conf.writeEntry("Name", d->mName);
- conf.writeEntry("Health", health());
- conf.writeEntry("MineralCost", mineralCost());
- conf.writeEntry("OilCost", oilCost());
- conf.writeEntry("SightRange", sightRange());
+ conf.writeEntry("Health", baseHealth());
+ conf.writeEntry("MineralCost", baseMineralCost());
+ conf.writeEntry("OilCost", baseOilCost());
+ conf.writeEntry("SightRange", baseSightRange());
  // This is converted from advance calls to seconds
- conf.writeEntry("ProductionTime", productionTime() / 20.0f);
- conf.writeEntry("Shield", shields());
- conf.writeEntry("Armor", armor());
+ conf.writeEntry("ProductionTime", baseProductionTime() / 20.0f);
+ conf.writeEntry("Shield", baseShields());
+ conf.writeEntry("Armor", baseArmor());
  conf.writeEntry("SupportMiniMap", mSupportMiniMap);
  conf.writeEntry("IsFacility", isFacility());
  BosonConfig::writeUnsignedLongNumList(&conf, "Requirements", d->mRequirements);
@@ -230,15 +254,15 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
  conf->setGroup("Boson Mobile Unit");
  // We divide speeds with 20, because speeds in config files are cells/second,
  //  but we want cells/advance call
- m_speed.init(conf->readDoubleNumEntry("Speed", 0) / 20.0f);
- if (speed() < 0) {
-	boWarning() << k_funcinfo << "Invalid Speed value: " << speed() <<
+ mBaseSpeed = conf->readDoubleNumEntry("Speed", 0) / 20.0f;
+ if (baseSpeed() < 0) {
+	boWarning() << k_funcinfo << "Invalid Speed value: " << baseSpeed() <<
 			" for unit " << typeId() << ", defaulting to 0" << endl;
-	m_speed.init(0);
+	mBaseSpeed = 0;
  }
- mAccelerationSpeed = conf->readDoubleNumEntry("AccelerationSpeed", 1) / 20.0f / 20.0f;
- mDecelerationSpeed = conf->readDoubleNumEntry("DecelerationSpeed", 2) / 20.0f / 20.0f;
- mRotationSpeed = (int)(conf->readNumEntry("RotationSpeed", (int)(speed() * 20.0f * 90.0f)) / 20.0f);
+ mBaseAccelerationSpeed = conf->readDoubleNumEntry("AccelerationSpeed", 1) / 20.0f / 20.0f;
+ mBaseDecelerationSpeed = conf->readDoubleNumEntry("DecelerationSpeed", 2) / 20.0f / 20.0f;
+ mRotationSpeed = (int)(conf->readNumEntry("RotationSpeed", (int)(baseSpeed() * 20.0f * 90.0f)) / 20.0f);
  mCanGoOnLand = conf->readBoolEntry("CanGoOnLand", (isLand() || isAircraft()));
  mCanGoOnWater = conf->readBoolEntry("CanGoOnWater", (isShip() || isAircraft()));
 }
@@ -373,9 +397,9 @@ void UnitProperties::saveMobileProperties(KSimpleConfig* conf)
  conf->setGroup("Boson Mobile Unit");
  // We multiply speeds with 20 because speeds in config files are cells/second,
  //  but here we have cells/advance call
- conf->writeEntry("Speed", speed() * 20.0f);
- conf->writeEntry("AccelerationSpeed", (double)mAccelerationSpeed * 20.0f * 20.0f);
- conf->writeEntry("DecelerationSpeed", (double)mDecelerationSpeed * 20.0f * 20.0f);
+ conf->writeEntry("Speed", baseSpeed() * 20.0f);
+ conf->writeEntry("AccelerationSpeed", (double)mBaseAccelerationSpeed * 20.0f * 20.0f);
+ conf->writeEntry("DecelerationSpeed", (double)mBaseDecelerationSpeed * 20.0f * 20.0f);
  conf->writeEntry("RotationSpeed", mRotationSpeed * 20.0f);
  conf->writeEntry("CanGoOnLand", mCanGoOnLand);
  conf->writeEntry("CanGoOnWater", mCanGoOnWater);
@@ -494,28 +518,28 @@ void UnitProperties::setRequirements(QValueList<unsigned long int> requirements)
  d->mRequirements = requirements;
 }
 
-bofixed UnitProperties::speed() const
+bofixed UnitProperties::baseSpeed() const
 {
  if (!isMobile()) {
 	return bofixed(0);
  }
- return m_speed;
+ return mBaseSpeed;
 }
 
-bofixed UnitProperties::accelerationSpeed() const
+bofixed UnitProperties::baseAccelerationSpeed() const
 {
  if (!isMobile()) {
 	return bofixed();
  }
- return mAccelerationSpeed;
+ return mBaseAccelerationSpeed;
 }
 
-bofixed UnitProperties::decelerationSpeed() const
+bofixed UnitProperties::baseDecelerationSpeed() const
 {
  if (!isMobile()) {
 	return bofixed();
  }
- return mDecelerationSpeed;
+ return mBaseDecelerationSpeed;
 }
 
 int UnitProperties::rotationSpeed() const
@@ -613,20 +637,6 @@ void UnitProperties::setConstructionSteps(unsigned int steps)
  }
 }
 
-void UnitProperties::setAccelerationSpeed(bofixed speed)
-{
- if (isMobile()) {
-	mAccelerationSpeed = speed;
- }
-}
-
-void UnitProperties::setDecelerationSpeed(bofixed speed)
-{
- if (isMobile()) {
-	mDecelerationSpeed = speed;
- }
-}
-
 void UnitProperties::setRotationSpeed(int speed)
 {
  if (isMobile()) {
@@ -693,14 +703,14 @@ void UnitProperties::reset()
  mUnitHeight = 1.0f;
  mUnitDepth = 1.0;
  d->mName = i18n("Unknown");
- m_health.init(100);
- m_mineralCost.init(100);
- m_oilCost.init(0);
- m_sightRange.init(5);
- m_productionTime.init(100);
- m_shields.init(0);
- m_armor.init(0);
- m_speed.init(0);
+ mBaseHealth = 100;
+ mBaseMineralCost = 100;
+ mBaseOilCost = 0;
+ mBaseSightRange = 5;
+ mBaseProductionTime = 100;
+ mBaseShields = 0;
+ mBaseArmor = 0;
+ mBaseSpeed = 0;
  mSupportMiniMap = false;
  d->mRequirements.clear();
  d->mDestroyedEffectIds.clear();
@@ -711,9 +721,9 @@ void UnitProperties::reset()
  mExplodingDamageRange = 0;
  // Mobile stuff (because unit is mobile by default)
  mIsFacility = false;
- mAccelerationSpeed = 2 / 20.0f / 20.0f;
- mDecelerationSpeed = 4 / 20.0f / 20.0f;
- mRotationSpeed = (int)(45.0f * speed());
+ mBaseAccelerationSpeed = 2 / 20.0f / 20.0f;
+ mBaseDecelerationSpeed = 4 / 20.0f / 20.0f;
+ mRotationSpeed = (int)(45.0f * baseSpeed());
  mCanGoOnLand = true;
  mCanGoOnWater = false;
  // Sounds
@@ -738,7 +748,7 @@ const BoVector3Fixed& UnitProperties::hitPoint() const
  return d->mHitPoint;
 }
 
-const BosonWeaponProperties* UnitProperties::weaponProperties(unsigned long int id) const
+BosonWeaponProperties* UnitProperties::nonConstWeaponProperties(unsigned long int id) const
 {
  QPtrListIterator<PluginProperties> it(d->mPlugins);
  while (it.current()) {
@@ -749,6 +759,130 @@ const BosonWeaponProperties* UnitProperties::weaponProperties(unsigned long int 
 	}
 	++it;
  }
- return 0l;
+ return 0;
+}
+
+const BosonWeaponProperties* UnitProperties::weaponProperties(unsigned long int id) const
+{
+ return nonConstWeaponProperties(id);
+}
+
+bool UnitProperties::getUpgradeableBaseValue(unsigned long int* ret, const QString& name, const QString& type) const
+{
+ if (!d->mULongProperties.contains(name)) {
+	boError() << k_funcinfo << "no such property " << name << endl;
+	return false;
+ }
+ if (type == "MaxValue") {
+	unsigned long int* p = d->mULongProperties[name];
+	*ret = *p;
+	return true;
+ } else if (type == "MinValue") {
+	boError() << k_funcinfo << "MinValue not yet implemented" << endl;
+	return false;
+ } else {
+	boError() << k_funcinfo << "invalid type " << type << endl;
+	return false;
+ }
+ return false;
+}
+
+bool UnitProperties::getUpgradeableBaseValue(long int* ret, const QString& name, const QString& type) const
+{
+ if (!d->mLongProperties.contains(name)) {
+	boError() << k_funcinfo << "no such property " << name << endl;
+	return false;
+ }
+ if (type == "MaxValue") {
+	long int* p = d->mLongProperties[name];
+	*ret = *p;
+	return true;
+ } else if (type == "MinValue") {
+	boError() << k_funcinfo << "MinValue not yet implemented" << endl;
+	return false;
+ } else {
+	boError() << k_funcinfo << "invalid type " << type << endl;
+	return false;
+ }
+ return false;
+}
+
+bool UnitProperties::getUpgradeableBaseValue(bofixed* ret, const QString& name, const QString& type) const
+{
+ if (!d->mBoFixedProperties.contains(name)) {
+	boError() << k_funcinfo << "no such property " << name << endl;
+	return false;
+ }
+ if (type == "MaxValue") {
+	bofixed* p = d->mBoFixedProperties[name];
+	*ret = *p;
+	return true;
+ } else if (type == "MinValue") {
+	boError() << k_funcinfo << "MinValue not yet implemented" << endl;
+	return false;
+ } else {
+	boError() << k_funcinfo << "invalid type " << type << endl;
+	return false;
+ }
+ return false;
+}
+
+const UpgradesCollection& UnitProperties::upgradesCollection() const
+{
+ return d->mUpgradesCollection;
+}
+
+bool UnitProperties::saveUpgradesAsXML(QDomElement& root) const
+{
+ return upgradesCollection().saveAsXML(root);
+}
+
+bool UnitProperties::loadUpgradesFromXML(const QDomElement& root)
+{
+ if (!mTheme) {
+	BO_NULL_ERROR(mTheme);
+	return false;
+ }
+ return d->mUpgradesCollection.loadFromXML(mTheme, root);
+}
+
+void UnitProperties::clearUpgrades()
+{
+ d->mUpgradesCollection.clearUpgrades();
+}
+
+void UnitProperties::addUpgrade(const UpgradeProperties* upgrade)
+{
+ d->mUpgradesCollection.addUpgrade(upgrade);
+
+ for (QPtrListIterator<PluginProperties> it(d->mPlugins); it.current(); ++it) {
+	if (it.current()->pluginType() != PluginProperties::Weapon) {
+		continue;
+	}
+	BosonWeaponProperties* prop = ((BosonWeaponProperties*)it.current());
+	if (upgrade->appliesTo(prop)) {
+		prop->addUpgrade(upgrade);
+	}
+ }
+}
+
+void UnitProperties::removeUpgrade(const UpgradeProperties* upgrade)
+{
+ d->mUpgradesCollection.removeUpgrade(upgrade);
+
+ for (QPtrListIterator<PluginProperties> it(d->mPlugins); it.current(); ++it) {
+	if (it.current()->pluginType() != PluginProperties::Weapon) {
+		continue;
+	}
+	BosonWeaponProperties* prop = ((BosonWeaponProperties*)it.current());
+	if (upgrade->appliesTo(prop)) {
+		prop->addUpgrade(upgrade);
+	}
+ }
+}
+
+void UnitProperties::removeUpgrade(unsigned long int id)
+{
+ removeUpgrade(d->mUpgradesCollection.findUpgrade(id));
 }
 

@@ -39,6 +39,7 @@
 
 #include <qintdict.h>
 #include <qdir.h>
+#include <qdom.h>
 
 class SpeciesTheme::SpeciesThemePrivate
 {
@@ -332,10 +333,16 @@ void SpeciesTheme::loadNewUnit(Unit* unit)
 	return;
  }
 
- unit->setHealth(prop->health());
- unit->setArmor(prop->armor());
- unit->setShields(prop->shields());
- unit->setSightRange(prop->sightRange());
+ unit->clearUpgrades();
+ const QValueList<const UpgradeProperties*>* upgrades = unit->upgradesCollection().upgrades();
+ for (QValueList<const UpgradeProperties*>::const_iterator it = upgrades->begin(); it != upgrades->end(); ++it) {
+	unit->addUpgrade(*it);
+ }
+
+ unit->setHealth(unit->maxHealth());
+ unit->setArmor(unit->maxArmor());
+ unit->setShields(unit->maxShields());
+ unit->setSightRange(unit->maxSightRange());
 
  if (prop->isMobile()) {
  } else if (prop->isFacility()) {
@@ -454,6 +461,11 @@ QValueList<unsigned long int> SpeciesTheme::allMobiles() const
 	++it;
  }
  return list;
+}
+
+const QIntDict<UnitProperties>* SpeciesTheme::allUnitsNonConst() const
+{
+ return &d->mUnitProperties;
 }
 
 QValueList<const UnitProperties*> SpeciesTheme::allUnits() const
@@ -668,4 +680,72 @@ void SpeciesTheme::finalizeTeamColor()
 	mData->addTeamColor(teamColor());
  }
 }
+
+bool SpeciesTheme::saveGameDataAsXML(QDomElement& root) const
+{
+ root.setAttribute("Identifier", identifier());
+ root.setAttribute("TeamColor", teamColor().rgb());
+
+ QDomDocument doc = root.ownerDocument();
+ QDomElement unitTypes = doc.createElement("UnitTypes");
+ root.appendChild(unitTypes);
+ for (QIntDictIterator<UnitProperties> it(d->mUnitProperties); it.current(); ++it) {
+	const UnitProperties* prop = it.current();
+	QDomElement type = doc.createElement("UnitType");
+	type.setAttribute("Id", prop->typeId());
+	unitTypes.appendChild(type);
+
+	QDomElement upgradesTag = doc.createElement("Upgrades");
+	type.appendChild(upgradesTag);
+
+	if (!prop->saveUpgradesAsXML(upgradesTag)) {
+		boError() << k_funcinfo << "unable to save upgrades for unit type " << prop->typeId() << endl;
+		return false;
+	}
+ }
+ return true;
+}
+
+bool SpeciesTheme::loadGameDataFromXML(const QDomElement& root)
+{
+ QDomElement unitTypes = root.namedItem("UnitTypes").toElement();
+ if (unitTypes.isNull()) {
+	boError() << k_funcinfo << "NULL UnitTypes tag" << endl;
+	return false;
+ }
+ for (QIntDictIterator<UnitProperties> it(d->mUnitProperties); it.current(); ++it) {
+	it.current()->clearUpgrades();
+ }
+ for (QDomNode n = unitTypes.firstChild(); !n.isNull(); n = n.nextSibling()) {
+	QDomElement type = n.toElement();
+	if (type.isNull()) {
+		continue;
+	}
+	if (type.tagName() != "UnitType") {
+		continue;
+	}
+	bool ok = false;
+	unsigned long int id = type.attribute("Id").toULong(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "invalid number for Id of UnitType" << endl;
+		return false;
+	}
+	UnitProperties* prop = nonConstUnitProperties(id);
+	if (!prop) {
+		boError() << k_funcinfo << "cannot find unitproperties for " << id << endl;
+		return false;
+	}
+	QDomElement upgrades = type.namedItem("Upgrades").toElement();
+	if (upgrades.isNull()) {
+		boError() << k_funcinfo << "NULL Upgrades tag for UnitType " << id << endl;
+		return false;
+	}
+	if (!prop->loadUpgradesFromXML(upgrades)) {
+		boError() << k_funcinfo << "unable to load Upgrades of UnitType " << id << endl;
+		return false;
+	}
+ }
+ return true;
+}
+
 

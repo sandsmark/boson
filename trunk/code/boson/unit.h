@@ -98,6 +98,8 @@ public:
 
 	virtual void setHealth(unsigned long int h);
 
+	virtual void setSightRange(unsigned long int r);
+
 	/**
 	 * @return The current plugin, used in e.g. @ref advance or NULL if
 	 * none. Always NULL if @ref work != WorkPlugin

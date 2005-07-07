@@ -28,6 +28,7 @@
 #include "player.h"
 #include "speciestheme.h"
 #include "bosoncanvas.h"
+#include "upgradeproperties.h"
 #include "bosonpropertyxml.h"
 #include "bodebug.h"
 
@@ -37,22 +38,25 @@
 #include <qmap.h>
 
 UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
-	: BosonItem(owner, canvas)
+	: BosonItem(owner, canvas),
+	mMaxHealth(prop, 0, "Health", "MaxValue"),
+	mMaxArmor(prop, 0, "Armor", "MaxValue"),
+	mMaxShields(prop, 0, "Shields", "MaxValue"),
+	mMaxSightRange(prop, 0, "SightRange", "MaxValue")
 {
  initStatic();
  mWeaponProperties = 0; // created on the fly in weaponDataHandler()
  mUnitProperties = prop; // WARNING: this might be 0 at this point! MUST be != 0 for Unit, but ScenarioUnit uses 0 here
 
-// PolicyLocal?
- registerData(&mArmor, IdArmor);
- registerData(&mShields, IdShields);
  registerData(&mShieldReloadCounter, IdShieldReloadCounter);
- registerData(&mSightRange, IdSightRange);
+ registerData(&mDeletionTimer, IdDeletionTimer);
  registerData(&mWork, IdWork);
  registerData(&mAdvanceWork, IdAdvanceWork);
- registerData(&mDeletionTimer, IdDeletionTimer);
  registerData(&mMovingStatus, IdMovingStatus);
- registerData(&mHealthPercentage, IdHealthPercentage);
+ registerData(&mHealthFactor, IdHealthFactor);
+ registerData(&mArmorFactor, IdArmorFactor);
+ registerData(&mShieldsFactor, IdShieldsFactor);
+ registerData(&mSightRangeFactor, IdSightRangeFactor);
 
  // these properties are fully internal (i.e. nothing is displayed in any
  // widget) and they change very often. So we increase speed greatly by not
@@ -63,12 +67,12 @@ UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canva
  mWork.setLocal((int)WorkIdle);
  mAdvanceWork.setLocal((int)WorkIdle);
  mMovingStatus.setLocal((int)Standing);
- mShields.setLocal(0); // doesn't have any shields
  mShieldReloadCounter.setLocal(0);
- mArmor.setLocal(0); // doesn't have any armor
- mSightRange.setLocal(0);
  mDeletionTimer.setLocal(0);
- mHealthPercentage.setLocal(0); // initially destroyed
+ mHealthFactor.setLocal(0); // initially destroyed
+ mArmorFactor.setLocal(0); // doesn't have any armor
+ mShieldsFactor.setLocal(0); // doesn't have any shields
+ mSightRangeFactor.setLocal(0);
 }
 
 UnitBase::~UnitBase()
@@ -97,15 +101,15 @@ void UnitBase::initStatic()
  if (initialized) {
 	return;
  }
- addPropertyId(IdArmor, QString::fromLatin1("Armor"));
- addPropertyId(IdShields, QString::fromLatin1("Shields"));
- addPropertyId(IdSightRange, QString::fromLatin1("SightRange"));
  addPropertyId(IdWork, QString::fromLatin1("Work"));
  addPropertyId(IdAdvanceWork, QString::fromLatin1("AdvanceWork"));
  addPropertyId(IdDeletionTimer, QString::fromLatin1("DeletionTimer"));
  addPropertyId(IdShieldReloadCounter, QString::fromLatin1("ShieldReloadCounter"));
  addPropertyId(IdMovingStatus, QString::fromLatin1("MovingStatus"));
- addPropertyId(IdHealthPercentage, QString::fromLatin1("HealthPercentage"));
+ addPropertyId(IdHealthFactor, QString::fromLatin1("HealthFactor"));
+ addPropertyId(IdArmorFactor, QString::fromLatin1("ArmorFactor"));
+ addPropertyId(IdShieldsFactor, QString::fromLatin1("ShieldsFactor"));
+ addPropertyId(IdSightRangeFactor, QString::fromLatin1("SightRangeFactor"));
  initialized = true;
 }
 
@@ -114,34 +118,92 @@ const QString& UnitBase::name() const
  return unitProperties()->name();
 }
 
+unsigned long int UnitBase::maxSightRange() const
+{
+ return mMaxSightRange.value(upgradesCollection());
+}
+
+unsigned long int UnitBase::sightRange() const
+{
+ return (unsigned long int)(sightRangeFactor() * maxSightRange());
+}
+
+void UnitBase::setSightRange(unsigned long int r)
+{
+ if (r > maxSightRange()) {
+	r = maxSightRange();
+ }
+ if (maxSightRange() > 0) {
+	setSightRangeFactor((bofixed)r / maxSightRange());
+ } else {
+	setSightRangeFactor(bofixed(1.0f));
+ }
+}
+
+unsigned long int UnitBase::maxArmor() const
+{
+ return mMaxArmor.value(upgradesCollection());
+}
+
 unsigned long int UnitBase::armor() const
 {
- return mArmor;
+ return (unsigned long int)(armorFactor() * maxArmor());
 }
 
 void UnitBase::setArmor(unsigned long int a)
 {
- mArmor = a;
+ if (a > maxArmor()) {
+	a = maxArmor();
+ }
+ if (maxArmor() > 0) {
+	setArmorFactor((bofixed)a / maxArmor());
+ } else {
+	setArmorFactor(bofixed(1.0f));
+ }
+}
+
+unsigned long int UnitBase::maxShields() const
+{
+ return mMaxShields.value(upgradesCollection());
+}
+
+unsigned long int UnitBase::shields() const
+{
+ return (unsigned long int)(shieldsFactor() * maxShields());
 }
 
 void UnitBase::setShields(unsigned long int s)
 {
- mShields = s;
+ if (s > maxShields()) {
+	s = maxShields();
+ }
+ if (maxShields() > 0) {
+	setShieldsFactor((bofixed)s / maxShields());
+ } else {
+	setShieldsFactor(bofixed(1.0f));
+ }
 }
 
 unsigned long int UnitBase::maxHealth() const
 {
- return unitProperties()->health();
+ return mMaxHealth.value(upgradesCollection());
 }
 
 unsigned long int UnitBase::health() const
 {
- return (int)(healthPercentage() * maxHealth());
+ return (unsigned long int)(healthFactor() * maxHealth());
 }
 
 void UnitBase::setHealth(unsigned long int h)
 {
- setHealthPercentage((bofixed)h / maxHealth());
+ if (h > maxHealth()) {
+	h = maxHealth();
+ }
+ if (maxHealth() > 0) {
+	setHealthFactor((bofixed)h / maxHealth());
+ } else {
+	setHealthFactor(bofixed(1.0f));
+ }
 }
 
 unsigned long int UnitBase::type() const
@@ -159,6 +221,13 @@ bool UnitBase::saveAsXML(QDomElement& root)
  root.setAttribute(QString::fromLatin1("Group"), 0);
  root.setAttribute(QString::fromLatin1("GroupType"), 0);
 
+ QDomElement upgrades = doc.createElement("Upgrades");
+ root.appendChild(upgrades);
+ if (!upgradesCollection().saveAsXML(upgrades)) {
+	boError() << k_funcinfo << "Unable to save Upgrades" << endl;
+	return false;
+ }
+
  // save the weapon datahandler, if present
  if (mWeaponProperties) {
 	BosonCustomPropertyXML propertyXML;
@@ -169,6 +238,7 @@ bool UnitBase::saveAsXML(QDomElement& root)
 	}
 	root.appendChild(weaponHandler);
  }
+
  return true;
 }
 
@@ -182,6 +252,17 @@ bool UnitBase::loadFromXML(const QDomElement& root)
 	return false;
  }
 
+ clearUpgrades();
+ QDomElement upgrades = root.namedItem("Upgrades").toElement();
+ if (upgrades.isNull()) {
+	boError(260) << k_funcinfo << "NULL Upgrades tag" << endl;
+	return false;
+ }
+ if (!mUpgradesCollection.loadFromXML(speciesTheme(), upgrades)) {
+	boError() << k_funcinfo << "Unable to save Upgrades" << endl;
+	return false;
+ }
+
  // the weapon data handler
  QDomElement weaponHandler = root.namedItem(QString::fromLatin1("WeaponDataHandler")).toElement();
  if (!weaponHandler.isNull()) {
@@ -191,6 +272,7 @@ bool UnitBase::loadFromXML(const QDomElement& root)
 		return false;
 	}
  }
+
  return true;
 }
 
@@ -278,7 +360,7 @@ void UnitBase::reloadShields(int by)
  // reset to 10 and so on.
  // would allow configurable reload times more easily.
  if (mShieldReloadCounter >= MAX_SHIELD_RELOAD_COUNT) {
-	if (shields() < unitProperties()->shields()) {
+	if (shields() < maxShields()) {
 		setShields(shields() + 1);
 	}
 	mShieldReloadCounter = 0;
@@ -303,5 +385,47 @@ PlayerIO* UnitBase::ownerIO() const
 	return 0;
  }
  return owner()->playerIO();
+}
+
+const QValueList<const UpgradeProperties*>* UnitBase::upgrades() const
+{
+ return upgradesCollection().upgrades();
+}
+
+void UnitBase::clearUpgrades()
+{
+ mUpgradesCollection.clearUpgrades();
+}
+
+void UnitBase::addUpgrade(const UpgradeProperties* upgrade)
+{
+ BO_CHECK_NULL_RET(upgrade);
+ mUpgradesCollection.addUpgrade(upgrade);
+
+ if (!upgrade->upgradeUnit(this)) {
+	boError() << k_funcinfo << "error while applying upgrade to Unit " << id() << endl;
+	return;
+ }
+}
+
+void UnitBase::removeUpgrade(unsigned long int id)
+{
+ removeUpgrade(mUpgradesCollection.findUpgrade(id));
+}
+
+void UnitBase::removeUpgrade(const UpgradeProperties* upgrade)
+{
+ if (!upgrade) {
+	return;
+ }
+ if (!mUpgradesCollection.removeUpgrade(upgrade)) {
+	// nothing changed
+	return;
+ }
+
+ if (!upgrade->downgradeUnit(this)) {
+	boError() << k_funcinfo << "error while un-applying upgrade from Unit " << id() << endl;
+	return;
+ }
 }
 

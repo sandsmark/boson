@@ -790,9 +790,9 @@ void BosonCanvas::unitDamaged(Unit* unit, long int damage)
 	// Usually, unit's armor is substracted from attacker's weaponDamage, but
 	//  if target has only little health left, then armor doesn't have full effect
 	int health = (int)unit->health();
-	if (health <= (int)(unit->unitProperties()->health() / 10.0)) {
+	if (health <= (int)(unit->maxHealth() / 10.0)) {
 		// If unit has only 10% or less of it's hitpoint left, armor has no effect (it's probably destroyed)
-	} else if (health <= (int)(unit->unitProperties()->health() / 2.5)) {
+	} else if (health <= (int)(unit->maxHealth() / 2.5)) {
 		// Unit has 40% or less of hitpoints left. Only half of armor is "working"
 		damage -= (int)(unit->armor() / 2.0);
 	} else {
@@ -1406,7 +1406,7 @@ bool BosonCanvas::loadItemsFromXML(const QDomElement& root)
 	BosonItem* item = allItems[i];
 	if (!loadItemFromXML(e, item)) {
 		boError(260) << k_funcinfo << "failed loading item" << endl;
-		continue;
+		return false;
 	}
 	itemCount++;
  }

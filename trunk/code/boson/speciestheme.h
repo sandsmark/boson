@@ -37,6 +37,7 @@ class BosonWeaponProperties;
 class SpeciesData;
 class BoAction;
 
+class QDomElement;
 class QPixmap;
 class QStringList;
 class QColor;
@@ -178,6 +179,9 @@ public:
 
 	const UnitProperties* unitProperties(unsigned long int unitType) const;
 
+	/**
+	 * See also @ref allUnitsNonConst
+	 **/
 	UnitProperties* nonConstUnitProperties(unsigned long int unitType) const;
 
 	UpgradeProperties* technology(unsigned long int techType) const;
@@ -204,6 +208,8 @@ public:
 	 * @return A list of all unit properties in this theme
 	 **/
 	QValueList<const UnitProperties*> allUnits() const;
+
+	const QIntDict<UnitProperties>* allUnitsNonConst() const;
 
 	/**
 	 * @return The names of all objects of this theme, as they could
@@ -288,6 +294,15 @@ public:
 	 * have to load the config file theirselves.
 	 **/
 	bool readUnitConfigs(bool full = true);
+
+	/**
+	 * Save the game data to XML. The "game data" is all data that depends
+	 * on how the game is being played. Therefore all UnitProperties are NOT
+	 * saved (they depend on their index.unit files only), but the teamcolor
+	 * or e.g. the upgrades of the UnitProperties are saved here.
+	 **/
+	bool saveGameDataAsXML(QDomElement& root) const;
+	bool loadGameDataFromXML(const QDomElement& root);
 
 protected:
 	/**

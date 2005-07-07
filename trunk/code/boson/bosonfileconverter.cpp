@@ -23,8 +23,12 @@
 #include "bodebug.h"
 #include "defines.h"
 #include "boversion.h"
-#include "rtti.h"
-#include "unitbase.h"
+#include "bomath.h"
+
+// do NOT include unit.h, rtti.h, unitbase.h, player.h, ... here!
+// -> you should hardcode everything. all values and methods from these files
+//    can change in different versions, so making a file converter depend on
+//    them is completely nonsense!
 
 #include <qdatastream.h>
 #include <qcolor.h>
@@ -1001,7 +1005,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_82_To_0_10_83(QMap<QString, 
  return true;
 }
 
-bool BosonFileConverter::convertPlayField_From_0_10_83_To_0_11(QMap<QString, QByteArray>& files)
+bool BosonFileConverter::convertPlayField_From_0_10_83_To_0_10_84(QMap<QString, QByteArray>& files)
 {
  QDomDocument kgameDoc(QString::fromLatin1("Boson"));
  QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
@@ -1022,113 +1026,107 @@ bool BosonFileConverter::convertPlayField_From_0_10_83_To_0_11(QMap<QString, QBy
  QDomElement canvasRoot = canvasDoc.documentElement();
  QDomElement playersRoot = playersDoc.documentElement();
 
-#if BOSON_VERSION_MICRO < 0x80 || BOSON_VERSION_MINOR >= 0x11
-#error replace the following by BOSON_SAVEGAME_FORMAT_VERSION_0_11
-#endif
-#define BO_VERSION BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x08)
- kgameRoot.setAttribute("Version", BO_VERSION);
-#undef BO_VERSION
+ kgameRoot.setAttribute("Version", BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x08));
 
  // Find out which species (eithe human or neutral) players have
  QDomNodeList playerList = playersRoot.elementsByTagName("Player");
- bool ishuman[playerList.count()];
+ bool isHuman[playerList.count()];
  for (unsigned int i = 0; i < playerList.count(); i++) {
 	QDomElement e = playerList.item(i).toElement();
 	int id = e.attribute("PlayerId").toInt();
 	int isneutral = e.attribute("IsNeutral").toInt();
-	ishuman[id] = !(isneutral);
+	isHuman[id] = !(isneutral);
  }
 
  // Unit type <-> health  map
  // Human species
- QMap<int, int> humanhealths;
- humanhealths.insert(18, 200);
- humanhealths.insert( 4, 250);
- humanhealths.insert( 5, 800);
- humanhealths.insert(14, 400);
- humanhealths.insert( 1, 400);
- humanhealths.insert(13, 400);
- humanhealths.insert( 8, 400);
- humanhealths.insert( 2, 300);
- humanhealths.insert(11, 200);
- humanhealths.insert( 9, 350);
- humanhealths.insert( 6, 150);
- humanhealths.insert(12, 500);
- humanhealths.insert(10, 150);
- humanhealths.insert( 3, 600);
- humanhealths.insert(10011, 150);
- humanhealths.insert(10006, 130);
- humanhealths.insert(10034, 200);
- humanhealths.insert(10008, 200);
- humanhealths.insert(10003, 150);
- humanhealths.insert(10002, 150);
- humanhealths.insert(10001,  80);
- humanhealths.insert(10009, 230);
- humanhealths.insert(10005, 200);
- humanhealths.insert(10000, 250);
- humanhealths.insert(10010, 200);
- humanhealths.insert(10004, 180);
- humanhealths.insert(10007, 300);
- humanhealths.insert(10035, 100);
- humanhealths.insert(10018, 100);
+ QMap<int, int> humanHealths;
+ humanHealths.insert(18, 200);
+ humanHealths.insert( 4, 250);
+ humanHealths.insert( 5, 800);
+ humanHealths.insert(14, 400);
+ humanHealths.insert( 1, 400);
+ humanHealths.insert(13, 400);
+ humanHealths.insert( 8, 400);
+ humanHealths.insert( 2, 300);
+ humanHealths.insert(11, 200);
+ humanHealths.insert( 9, 350);
+ humanHealths.insert( 6, 150);
+ humanHealths.insert(12, 500);
+ humanHealths.insert(10, 150);
+ humanHealths.insert( 3, 600);
+ humanHealths.insert(10011, 150);
+ humanHealths.insert(10006, 130);
+ humanHealths.insert(10034, 200);
+ humanHealths.insert(10008, 200);
+ humanHealths.insert(10003, 150);
+ humanHealths.insert(10002, 150);
+ humanHealths.insert(10001,  80);
+ humanHealths.insert(10009, 230);
+ humanHealths.insert(10005, 200);
+ humanHealths.insert(10000, 250);
+ humanHealths.insert(10010, 200);
+ humanHealths.insert(10004, 180);
+ humanHealths.insert(10007, 300);
+ humanHealths.insert(10035, 100);
+ humanHealths.insert(10018, 100);
  // Neutral species
- QMap<int, int> neutralhealths;
- neutralhealths.insert( 1, 100);
- neutralhealths.insert(26,  20);
- neutralhealths.insert(25,  20);
- neutralhealths.insert( 2, 100);
- neutralhealths.insert(36,  60);
- neutralhealths.insert(35,  35);
- neutralhealths.insert(38,  60);
- neutralhealths.insert(37,  35);
- neutralhealths.insert(40,  60);
- neutralhealths.insert(39,  35);
- neutralhealths.insert( 3, 100);
- neutralhealths.insert(45,  50);
- neutralhealths.insert(46,  70);
- neutralhealths.insert(12, 400);
- neutralhealths.insert(11, 150);
- neutralhealths.insert( 4, 100);
- neutralhealths.insert(56,  30);
- neutralhealths.insert(57,  15);
- neutralhealths.insert(55,  20);
- neutralhealths.insert(30,  30);
- neutralhealths.insert( 5, 100);
- neutralhealths.insert( 6, 100);
- neutralhealths.insert( 7, 100);
- neutralhealths.insert(16,  70);
- neutralhealths.insert(17,  70);
- neutralhealths.insert(15,  70);
- neutralhealths.insert(21, 100);
- neutralhealths.insert(22, 100);
- neutralhealths.insert(20, 100);
- neutralhealths.insert(51, 120);
- neutralhealths.insert(52,  60);
- neutralhealths.insert(50, 100);
+ QMap<int, int> neutralHealths;
+ neutralHealths.insert( 1, 100);
+ neutralHealths.insert(26,  20);
+ neutralHealths.insert(25,  20);
+ neutralHealths.insert( 2, 100);
+ neutralHealths.insert(36,  60);
+ neutralHealths.insert(35,  35);
+ neutralHealths.insert(38,  60);
+ neutralHealths.insert(37,  35);
+ neutralHealths.insert(40,  60);
+ neutralHealths.insert(39,  35);
+ neutralHealths.insert( 3, 100);
+ neutralHealths.insert(45,  50);
+ neutralHealths.insert(46,  70);
+ neutralHealths.insert(12, 400);
+ neutralHealths.insert(11, 150);
+ neutralHealths.insert( 4, 100);
+ neutralHealths.insert(56,  30);
+ neutralHealths.insert(57,  15);
+ neutralHealths.insert(55,  20);
+ neutralHealths.insert(30,  30);
+ neutralHealths.insert( 5, 100);
+ neutralHealths.insert( 6, 100);
+ neutralHealths.insert( 7, 100);
+ neutralHealths.insert(16,  70);
+ neutralHealths.insert(17,  70);
+ neutralHealths.insert(15,  70);
+ neutralHealths.insert(21, 100);
+ neutralHealths.insert(22, 100);
+ neutralHealths.insert(20, 100);
+ neutralHealths.insert(51, 120);
+ neutralHealths.insert(52,  60);
+ neutralHealths.insert(50, 100);
 
 
  // Go through all units
- for(QDomNode n = canvasRoot.firstChild(); !n.isNull(); n = n.nextSibling()) {
+ for (QDomNode n = canvasRoot.firstChild(); !n.isNull(); n = n.nextSibling()) {
 	QDomElement e = n.toElement();
-	if(e.isNull() || e.tagName() != "Items") {
+	if (e.isNull() || e.tagName() != "Items") {
 		continue;
 	}
 	int playerid = e.attribute("PlayerId").toInt();
-	bool isplayerhuman = ishuman[playerid];
+	bool isPlayerHuman = isHuman[playerid];
 	// Go through all units and change their absolute health to relative one
-	for(QDomNode n2 = e.firstChild(); !n2.isNull(); n2 = n2.nextSibling()) {
+	for (QDomNode n2 = e.firstChild(); !n2.isNull(); n2 = n2.nextSibling()) {
 		QDomElement item = n2.toElement();
-		if(item.isNull() || item.tagName() != "Item") {
+		if (item.isNull() || item.tagName() != "Item") {
 			continue;
 		}
 		// We're interested only in units
 		int rtti = item.attribute("Rtti").toInt();
-		if (RTTI::isUnit(rtti)) {
-			// It's unit
+		if (rtti >= 200) { // RTTI::isUnit()
 			int type = item.attribute("Type").toInt();
-			if (!(isplayerhuman ? humanhealths : neutralhealths).contains(type)) {
+			if (!(isPlayerHuman ? humanHealths : neutralHealths).contains(type)) {
 				boError() << k_funcinfo << "Invalid unit type " << type << " for " <<
-						(isplayerhuman ? "human" : "neutral") << " unit with id " << item.attribute("Id") <<
+						(isPlayerHuman ? "human" : "neutral") << " unit with id " << item.attribute("Id") <<
 						"! Skipping." << endl;
 				// Don't return, convert other units
 				continue;
@@ -1141,11 +1139,11 @@ bool BosonFileConverter::convertPlayField_From_0_10_83_To_0_11(QMap<QString, QBy
 				int propertyid = prop.attribute("Id").toInt();
 				// Health property had id 512
 				if (propertyid == 512) {
-					QDomNode healthnode = prop.firstChild();
-					int maxhealth = (isplayerhuman ? humanhealths : neutralhealths)[type];
-					bofixed healthpercentage = (bofixed)healthnode.nodeValue().toInt() / maxhealth;
-					healthnode.setNodeValue(QString::number(healthpercentage));
-					prop.setAttribute("Id", QString::number(UnitBase::IdHealthPercentage));
+					QDomNode healthNode = prop.firstChild();
+					int maxhealth = (isPlayerHuman ? humanHealths : neutralHealths)[type];
+					bofixed healthFactor = (bofixed)healthNode.nodeValue().toInt() / maxhealth;
+					healthNode.setNodeValue(QString::number(healthFactor));
+					prop.setAttribute("Id", QString::number(512 + 20)); // UnitBase::IdHealthFactor
 					break;
 				}
 			}
@@ -1154,6 +1152,155 @@ bool BosonFileConverter::convertPlayField_From_0_10_83_To_0_11(QMap<QString, QBy
  }
 
  files.insert("kgame.xml", kgameDoc.toString().utf8());
+ files.insert("canvas.xml", canvasDoc.toString().utf8());
+ return true;
+}
+
+bool BosonFileConverter::convertPlayField_From_0_10_84_To_0_11(QMap<QString, QByteArray>& files)
+{
+ QDomDocument kgameDoc(QString::fromLatin1("Boson"));
+ QDomDocument playersDoc(QString::fromLatin1("Players"));
+ QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
+ if (!loadXMLDoc(&kgameDoc, files["kgame.xml"])) {
+	boError() << k_funcinfo << "could not load kgame.xml" << endl;
+	return false;
+ }
+ if (!loadXMLDoc(&playersDoc, files["players.xml"])) {
+	boError() << k_funcinfo << "could not load players.xml" << endl;
+	return false;
+ }
+ if (!loadXMLDoc(&canvasDoc, files["canvas.xml"])) {
+	boError() << k_funcinfo << "could not load canvas.xml" << endl;
+	return false;
+ }
+ QDomElement kgameRoot = kgameDoc.documentElement();
+ QDomElement playersRoot = playersDoc.documentElement();
+ QDomElement canvasRoot = canvasDoc.documentElement();
+
+#if BOSON_VERSION_MICRO < 0x80 || BOSON_VERSION_MINOR >= 0x11
+#error replace the following by BOSON_SAVEGAME_FORMAT_VERSION_0_11
+#endif
+#define BO_VERSION BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x09)
+ kgameRoot.setAttribute("Version", BO_VERSION);
+#undef BO_VERSION
+
+ for (QDomNode n = playersRoot.firstChild(); !n.isNull(); n = n.nextSibling()) {
+	QDomElement player = n.toElement();
+	if (player.isNull()) {
+		continue;
+	}
+	if (player.tagName() != "Player") {
+		continue;
+	}
+
+	QDomElement speciesThemeTag = playersDoc.createElement("SpeciesTheme");
+	player.appendChild(speciesThemeTag);
+	speciesThemeTag.setAttribute("Identifier", player.attribute("SpeciesTheme"));
+	speciesThemeTag.setAttribute("TeamColor", player.attribute("TeamColor"));
+	player.removeAttribute("Identifier");
+	player.removeAttribute("TeamColor");
+
+	QDomElement unitTypes = playersDoc.createElement("UnitTypes");
+	speciesThemeTag.appendChild(unitTypes);
+
+	// AB: all already researched upgrades will be thrown away. we do not
+	//     convert them (I think it's not worth the work)
+	QDomElement upgrades = player.namedItem("Upgrades").toElement();
+	if (upgrades.isNull()) {
+		boError() << k_funcinfo << "player has no Upgrades tag" << endl;
+		return false;
+	}
+	player.removeChild(upgrades);
+
+	upgrades = playersDoc.createElement("Upgrades");
+	player.appendChild(upgrades);
+ }
+
+ for (QDomNode n = canvasRoot.firstChild(); !n.isNull(); n = n.nextSibling()) {
+	QDomElement items = n.toElement();
+	if (items.isNull() || items.tagName() != "Items") {
+		continue;
+	}
+	for (QDomNode n2 = items.firstChild(); !n2.isNull(); n2 = n2.nextSibling()) {
+		QDomElement item = n2.toElement();
+		if (item.isNull() || item.tagName() != "Item") {
+			continue;
+		}
+		int rtti = item.attribute("Rtti").toInt();
+		if (rtti < 200) { // !RTTI::isUnit()
+			continue;
+		}
+		QDomElement upgrades = canvasDoc.createElement("Upgrades");
+		item.appendChild(upgrades);
+		QDomElement weaponUpgrades = canvasDoc.createElement("WeaponUpgrades");
+		item.appendChild(weaponUpgrades);
+	}
+ }
+
+ // convert Armor, Shields and SightRange properties to factor values
+ for (QDomNode n = canvasRoot.firstChild(); !n.isNull(); n = n.nextSibling()) {
+	QDomElement items = n.toElement();
+	if (items.isNull() || items.tagName() != "Items") {
+		continue;
+	}
+	for (QDomNode n2 = items.firstChild(); !n2.isNull(); n2 = n2.nextSibling()) {
+		QDomElement item = n2.toElement();
+		if (item.isNull() || item.tagName() != "Item") {
+			continue;
+		}
+		int rtti = item.attribute("Rtti").toInt();
+		if (rtti < 200) { // !RTTI::isUnit()
+			continue;
+		}
+		QDomElement dataHandler = item.namedItem(QString::fromLatin1("DataHandler")).toElement();
+		if (dataHandler.isNull()) {
+			boError() << k_funcinfo << "no DataHandler" << endl;
+			return false;
+		}
+		for (QDomNode n3 = dataHandler.firstChild(); !n3.isNull(); n3 = n3.nextSibling()) {
+			QDomElement property = n3.toElement();
+			if (property.isNull()) {
+				continue;
+			}
+			if (property.tagName() != "KGameProperty") {
+				continue;
+			}
+			bool ok = false;
+			int id = property.attribute("Id").toInt(&ok);
+			if (!ok) {
+				boError() << k_funcinfo << "Invalid Id for KGameProperty tag" << endl;
+				return false;
+			}
+			if (id == 512 + 1) { // IdArmor
+				// IdArmor -> IdArmorFactor
+				property.setAttribute("Id", QString::number(512 + 21));
+
+				// AB: we never supported armor < maxArmor
+				QDomNode text = property.firstChild();
+				bofixed v = bofixed(1.0f);
+				text.setNodeValue(QString::number(v));
+			} else if (id == 512 + 2) { // IdShields
+				// IdShields -> IdShieldsFactor
+				property.setAttribute("Id", QString::number(512 + 22));
+
+				// AB: shields were pretty much unused.
+				//     so we can assume shields == maxShields
+				QDomNode text = property.firstChild();
+				bofixed v = bofixed(1.0f);
+				text.setNodeValue(QString::number(v));
+			} else if (id == 512 + 5) { // IdSightRange
+				// IdSightRange -> IdSightRangeFactor
+				property.setAttribute("Id", QString::number(512 + 23));
+				// AB: we never supported sightRange < maxSightRange
+				QDomNode text = property.firstChild();
+				bofixed v = bofixed(1.0f);
+				text.setNodeValue(QString::number(v));
+			}
+		}
+	}
+ }
+ files.insert("kgame.xml", kgameDoc.toString().utf8());
+ files.insert("players.xml", playersDoc.toString().utf8());
  files.insert("canvas.xml", canvasDoc.toString().utf8());
  return true;
 }

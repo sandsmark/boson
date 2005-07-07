@@ -24,6 +24,8 @@
 #include "global.h"
 #include "bomath.h"
 
+#include "boupgradeableproperty.h"
+
 class SpeciesTheme;
 class PluginProperties;
 class BosonWeaponProperties;
@@ -41,40 +43,7 @@ typedef BoVector3<bofixed> BoVector3Fixed;
 
 class KSimpleConfig;
 
-/**
- * @internal
- * @author Andreas Beckermann <b_mann@gmx.de>
- **/
-template<class T> class BoUpgradeableProperty
-{
-public:
-	/**
-	 * Equivalent to @ref setBaseValue
-	 **/
-	void init(T v) { setBaseValue(v); }
-
-	/**
-	 * Set the base value. This is the value that is found in the index.unit
-	 * file and should never change in the game.
-	 **/
-	void setBaseValue(T v) { mBaseValue = v; setValue(baseValue()); }
-
-	/**
-	 * Set the value of this property. It may differ from the @ref
-	 * baseValue, e.g. because of upgrades.
-	 **/
-	void setValue(T v) { mValue = v; }
-
-	T baseValue() const { return mBaseValue; }
-	T value() const { return mValue; }
-
-	operator T() const { return value(); }
-
-private:
-	T mBaseValue;
-	T mValue;
-};
-
+class UnitPropertiesPrivate;
 /**
  * Represents the config file of a unit. This holds all information about unit
  * type, such as unit's maximum health, damage it causes or armor it has.
@@ -116,8 +85,7 @@ public:
 		CommandBunker = 10
 	};
 
-	UnitProperties(bool fullmode = true);
-	UnitProperties(SpeciesTheme*);
+	UnitProperties(SpeciesTheme*, bool fullMode = true);
 	~UnitProperties();
 
 
@@ -172,32 +140,51 @@ public:
 	/**
 	 * @return Default health aka power aka hitpoints of this unit.
 	 **/
-	unsigned long int health() const { return m_health; }
+	unsigned long int baseHealth() const { return mBaseHealth; }
+
+	unsigned long int maxHeatlh() const { return mHealth.value(upgradesCollection()); }
 
 	/**
 	 * @return The default shields value of this unit.
 	 **/
-	unsigned long int shields() const { return m_shields; }
+	unsigned long int baseShields() const { return mBaseShields; }
+
+	unsigned long int maxShields() const { return mShields.value(upgradesCollection()); }
 
 	/**
 	 * @return The default armor value of this unit.
 	 **/
-	unsigned long int armor() const { return m_armor; }
+	unsigned long int baseArmor() const { return mBaseArmor; }
+
+	unsigned long int maxArmor() const { return mArmor.value(upgradesCollection()); }
 
 	/**
-	 * @return How much this unit costs (of your mineral account)
+	 * @return How much this unit costs (of your mineral account).
+	 * Note that this is the "base" cost only, that can be modified by
+	 * upgrades. To retrieve the actual cost, all matching current upgrades
+	 * of the player need to be applied.
 	 **/
-	unsigned long int mineralCost() const { return m_mineralCost; }
+	unsigned long int baseMineralCost() const { return mBaseMineralCost; }
+
+	unsigned long int mineralCost() const { return mMineralCost.value(upgradesCollection()); }
 
 	/**
 	 * @return How much this unit costs (of your oil account)
+	 * Note that this is the "base" cost only, that can be modified by
+	 * upgrades. To retrieve the actual cost, all matching current upgrades
+	 * of the player need to be applied.
 	 **/
-	unsigned long int oilCost() const { return m_oilCost; }
+	unsigned long int baseOilCost() const { return mBaseOilCost; }
+
+	unsigned long int oilCost() const { return mOilCost.value(upgradesCollection()); }
 
 	/**
 	 * return How far this unit can see. Is a number of cells
 	 **/
-	unsigned int sightRange() const { return m_sightRange; }
+	unsigned int baseSightRange() const { return mBaseSightRange; }
+
+	unsigned int maxSightRange() const { return mSightRange.value(upgradesCollection()); }
+
 
 	/**
 	 * @return The Type ID of the unit. This ID is unique for this
@@ -234,19 +221,25 @@ public:
 	 * @return Maximal speed of the mobile unit. 0 if this is a facility. See
 	 * @ref isFacility
 	 **/
-	bofixed speed() const;
+	bofixed baseSpeed() const;
+
+	bofixed maxSpeed() const { return mSpeed.value(upgradesCollection()); }
 
 	/**
 	 * @return How fast this mobile unit accelerates. 0 if this is a facility. See
 	 * @ref isFacility
 	 **/
-	bofixed accelerationSpeed() const;
+	bofixed baseAccelerationSpeed() const;
+
+	bofixed maxAccelerationSpeed() const { return mAccelerationSpeed.value(upgradesCollection()); }
 
 	/**
 	 * @return How fast this mobile unit decelerates. 0 if this is a facility. See
 	 * @ref isFacility
 	 **/
-	bofixed decelerationSpeed() const;
+	bofixed baseDecelerationSpeed() const;
+
+	bofixed maxDecelerationSpeed() const { return mDecelerationSpeed.value(upgradesCollection()); }
 
 	/**
 	 * @return Turning speed of this mobile unit (degrees per advance call). 0 if
@@ -318,8 +311,13 @@ public:
 	 * the unit and maybe th number of facilities (to name 2 examples).
 	 * @return The number of @ref Unit::advance calls this unit needs
 	 * (usually) to be produced.
+	 * Note that this is the "base" time only, that can be modified by
+	 * upgrades. To retrieve the actual time, all matching current upgrades
+	 * of the player need to be applied.
 	 **/
-	unsigned int productionTime() const { return m_productionTime; }
+	unsigned int baseProductionTime() const { return mBaseProductionTime; }
+
+	unsigned int productionTime() const { return mProductionTime.value(upgradesCollection()); }
 
 	/**
 	 * @return TRUE if this unittype gives you the ability to show a
@@ -394,6 +392,7 @@ public:
 	 * @return BosonWeaponProperties with id id or NULL if they doesn't exist
 	 **/
 	const BosonWeaponProperties* weaponProperties(unsigned long int id) const;
+	BosonWeaponProperties* nonConstWeaponProperties(unsigned long int id) const;
 
 	BoAction* action(UnitAction type) const;
 
@@ -409,6 +408,15 @@ public:
 
 	bool removeWreckageImmediately() const { return mRemoveWreckageImmediately; }
 
+	bool getUpgradeableBaseValue(unsigned long int* ret, const QString& name, const QString& type) const;
+	bool getUpgradeableBaseValue(long int* ret, const QString& name, const QString& type) const;
+	bool getUpgradeableBaseValue(bofixed* ret, const QString& name, const QString& type) const;
+
+	const UpgradesCollection& upgradesCollection() const;
+
+	bool saveUpgradesAsXML(QDomElement& root) const;
+	bool loadUpgradesFromXML(const QDomElement& root);
+
 
 	/**
 	 * Load actions for this unit. Must be called after overview pixmaps are
@@ -416,6 +424,11 @@ public:
 	 * Should be used by only SpeciesTheme.
 	 **/
 	void loadActions();
+
+	void clearUpgrades();
+	void addUpgrade(const UpgradeProperties* prop);
+	void removeUpgrade(const UpgradeProperties* prop);
+	void removeUpgrade(unsigned long int id);
 
 
 protected:
@@ -456,8 +469,6 @@ protected:
 
 	// These only have effect if there is mobile or facility properties
 	void setConstructionSteps(unsigned int steps);
-	void setAccelerationSpeed(bofixed speed);
-	void setDecelerationSpeed(bofixed speed);
 	void setRotationSpeed(int speed);
 	void setCanGoOnLand(bool c);
 	void setCanGoOnWater(bool c);
@@ -473,13 +484,11 @@ protected:
 	TerrainType terrainType() const  { return mTerrain; }
 
 	friend class BoUnitEditor;
-	friend class UpgradeProperties;
 
 private:
 	void init();
 
 private:
-	class UnitPropertiesPrivate;
 	class MobileProperties;
 	class FacilityProperties;
 
@@ -489,12 +498,9 @@ private:
 	bool mFullMode;
 
 #define DECLAREUPGRADEABLE(type, name) \
-	public: \
-		void setUpgradedValue_##name(type value) { m_##name.setValue(value); } \
-		void resetUpgradedValue_##name() { m_##name.setValue(m_##name.baseValue()); } \
-	private: \
-		void setBaseValue_##name(type value) { m_##name.setBaseValue(value); } /* for unit editor */ \
-		BoUpgradeableProperty<type> m_##name;
+		void setBase##name(type v) { mBase##name = v; } \
+		BoUpgradeableProperty<type> m##name; \
+		type mBase##name;
 
 	unsigned long int mTypeId; // note: 0 is invalid!
 	bofixed mUnitWidth;
@@ -505,13 +511,13 @@ private:
 	bool mSupportMiniMap;
 	bool mCanShootAtAirUnits;
 	bool mCanShootAtLandUnits;
-	DECLAREUPGRADEABLE(unsigned long int, health);
-	DECLAREUPGRADEABLE(unsigned long int, sightRange);
-	DECLAREUPGRADEABLE(unsigned int, productionTime);
-	DECLAREUPGRADEABLE(unsigned long int, mineralCost);
-	DECLAREUPGRADEABLE(unsigned long int, oilCost);
-	DECLAREUPGRADEABLE(unsigned long int, armor);
-	DECLAREUPGRADEABLE(unsigned long int, shields);
+	DECLAREUPGRADEABLE(unsigned long int, Health);
+	DECLAREUPGRADEABLE(unsigned long int, SightRange);
+	DECLAREUPGRADEABLE(unsigned long int, ProductionTime);
+	DECLAREUPGRADEABLE(unsigned long int, MineralCost);
+	DECLAREUPGRADEABLE(unsigned long int, OilCost);
+	DECLAREUPGRADEABLE(unsigned long int, Armor);
+	DECLAREUPGRADEABLE(unsigned long int, Shields);
 	unsigned long int mMaxWeaponRange;
 	unsigned long int mMaxLandWeaponRange;
 	unsigned long int mMaxAirWeaponRange;
@@ -524,9 +530,11 @@ private:
 	bool mRemoveWreckageImmediately;
 
 	// for mobile units only
-	DECLAREUPGRADEABLE(bofixed, speed);
-	bofixed mAccelerationSpeed;
-	bofixed mDecelerationSpeed;
+	DECLAREUPGRADEABLE(bofixed, Speed);
+
+	// AB: TODO: these two are now upgradeable, too!
+	DECLAREUPGRADEABLE(bofixed, AccelerationSpeed);
+	DECLAREUPGRADEABLE(bofixed, DecelerationSpeed);
 	int mRotationSpeed;
 	bool mCanGoOnLand;
 	bool mCanGoOnWater;

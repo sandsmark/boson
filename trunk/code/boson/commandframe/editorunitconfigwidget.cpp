@@ -163,9 +163,9 @@ bool EditorUnitConfigWidget::display(Unit* unit)
 	d->mConstructionStep->setValue(fac->currentConstructionStep());
  }
 
- d->mShields->setRange(0, prop->shields());
+ d->mShields->setRange(0, unit->maxShields());
  d->mShields->setValue(unit->shields());
- if (prop->shields() != 0) {
+ if (unit->maxShields() != 0) {
 	d->mShields->show();
  } else {
 	d->mShields->hide();
