@@ -72,11 +72,11 @@ BosonShot::~BosonShot()
 
 BosonModel* BosonShot::getModelForItem() const
 {
-  if(!mProp)
+  if(!properties())
   {
     return 0;
   }
-  return mProp->model();
+  return properties()->model();
 }
 
 void BosonShot::initStatic()
@@ -601,7 +601,7 @@ void BosonShotMissile::advanceMoveInternal()
   accelerate();
   // Increase distance that missile has flied
   mPassedDist = mPassedDist + speed();
-  if(mPassedDist > mProp->maxFlyDistance())
+  if(mPassedDist > properties()->maxFlyDistance())
   {
     // TODO: wait e.g. 0.5 or 1 second before exploding
     explode();
@@ -633,9 +633,9 @@ void BosonShotMissile::advanceMoveInternal()
     //boDebug(350) << k_funcinfo << id() << ": difflen = " << difflen << endl;
     // Missile is not flying towards the target atm
     // Calculate new velocity vector
-    if(mProp->turningSpeed() < difflen)
+    if(properties()->turningSpeed() < difflen)
     {
-      diff.scale(mProp->turningSpeed() / difflen);
+      diff.scale(properties()->turningSpeed() / difflen);
     }
     // Alter velocity direction so that it's more towards the target
     mVelo += diff;
