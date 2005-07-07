@@ -2,6 +2,7 @@ from math import *
 
 from utils import *
 from bomath import *
+import traceback
 import time
 
 # This is just to be able to test the syntax whith you
@@ -45,7 +46,15 @@ class Sun:
   # Alogrithm taken from:
   #  http://en.wikipedia.org/wiki/Horizontal_coordinate_system#The_position_of_the_Sun
   def update(self, curtime):
-    mytime = time.localtime(curtime)
+    try:
+        # It doesn't matter what you add here (e.g. 1)
+        # sometimes a TypeError Exception is thrown because curtime
+        # not being an integer
+        mytime = time.localtime(int(curtime))
+    except TypeError:
+        print("ERROR: FIXME: Is this a python bug ?")
+        traceback.print_exc()
+        return
     yearstart_ = time.struct_time((mytime.tm_year, 1, 1, 0, 0, 0, 0, 0, 0))
     yearstart = time.mktime(yearstart_)
     day = (curtime - yearstart) / (24*60*60.0) + 1
