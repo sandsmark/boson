@@ -155,9 +155,9 @@ bool BoUpgradeablePropertyBase::loadBaseValue(unsigned long int* v) const
  }
 
  if (unitProperties()) {
-	unitProperties()->getUpgradeableBaseValue(v, name(), type());
+	unitProperties()->getBaseValue(v, name(), type());
  } else if (weaponProperties()) {
-	weaponProperties()->getUpgradeableBaseValue(v, name(), type());
+	weaponProperties()->getBaseValue(v, name(), type());
  }
  return true;
 }
@@ -174,9 +174,9 @@ bool BoUpgradeablePropertyBase::loadBaseValue(long int* v) const
  }
 
  if (unitProperties()) {
-	unitProperties()->getUpgradeableBaseValue(v, name(), type());
+	unitProperties()->getBaseValue(v, name(), type());
  } else if (weaponProperties()) {
-	weaponProperties()->getUpgradeableBaseValue(v, name(), type());
+	weaponProperties()->getBaseValue(v, name(), type());
  }
  return true;
 }
@@ -193,9 +193,9 @@ bool BoUpgradeablePropertyBase::loadBaseValue(bofixed* v) const
  }
 
  if (unitProperties()) {
-	unitProperties()->getUpgradeableBaseValue(v, name(), type());
+	unitProperties()->getBaseValue(v, name(), type());
  } else if (weaponProperties()) {
-	weaponProperties()->getUpgradeableBaseValue(v, name(), type());
+	weaponProperties()->getBaseValue(v, name(), type());
  }
  return true;
 }

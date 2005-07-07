@@ -202,9 +202,9 @@ class BosonWeaponProperties : public PluginProperties
     QIntDict<BoAction>* actions()  { return &mActions; }
 
 
-    bool getUpgradeableBaseValue(unsigned long int* ret, const QString& name, const QString& type) const;
-    bool getUpgradeableBaseValue(long int* ret, const QString& name, const QString& type) const;
-    bool getUpgradeableBaseValue(bofixed* ret, const QString& name, const QString& type) const;
+    bool getBaseValue(unsigned long int* ret, const QString& name, const QString& type) const;
+    bool getBaseValue(long int* ret, const QString& name, const QString& type) const;
+    bool getBaseValue(bofixed* ret, const QString& name, const QString& type) const;
 
     const UpgradesCollection& upgradesCollection() const
     {

@@ -467,19 +467,19 @@ void BoUnitEditor::slotUpdateWidgets()
     mUnitHeight->setValue(mUnit->unitHeight());
     mUnitDepth->setValue(mUnit->unitDepth());
     // Properties page
-    mUnitHealth->setValue(mUnit->baseHealth());
-    mUnitArmor->setValue(mUnit->baseArmor());
-    mUnitShields->setValue(mUnit->baseShields());
-    mUnitMineralCost->setValue(mUnit->baseMineralCost());
-    mUnitOilCost->setValue(mUnit->baseOilCost());
-    mUnitSight->setValue(mUnit->baseSightRange());
+    mUnitHealth->setValue(mUnit->ulongBaseValue("Health"));
+    mUnitArmor->setValue(mUnit->ulongBaseValue("Armor"));
+    mUnitShields->setValue(mUnit->ulongBaseValue("Shields"));
+    mUnitMineralCost->setValue(mUnit->ulongBaseValue("MineralCost"));
+    mUnitOilCost->setValue(mUnit->ulongBaseValue("OilCost"));
+    mUnitSight->setValue(mUnit->ulongBaseValue("SightRange"));
     int terrain = (int)(mUnit->terrainType());
     mUnitTerrain->setCurrentItem(terrain);
     mUnitSupportMiniMap->setChecked(mUnit->supportMiniMap());
     // FIXME: UnitProperties only saves mobile *or* facility properties, but
     //  I'd like to have them both saved
     // TODO: This MUST be double, but Designer knows nothing about KDoubleNumInput
-    mUnitSpeed->setValue(mUnit->baseSpeed());
+    mUnitSpeed->setValue(mUnit->bofixedBaseValue("Speed"));
     mUnitCanGoOnLand->setChecked(mUnit->canGoOnLand());
     mUnitCanGoOnWater->setChecked(mUnit->canGoOnWater());
     mUnitConstructionSteps->setValue(mUnit->constructionSteps());

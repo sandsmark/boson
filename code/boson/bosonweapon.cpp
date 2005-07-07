@@ -404,7 +404,7 @@ void BosonWeaponProperties::loadAction(UnitAction type, KSimpleConfig* cfg, cons
   mActions.insert(type, speciesTheme()->action(cfg->readEntry(key, key)));
 }
 
-bool BosonWeaponProperties::getUpgradeableBaseValue(unsigned long int* ret, const QString& name, const QString& type) const
+bool BosonWeaponProperties::getBaseValue(unsigned long int* ret, const QString& name, const QString& type) const
 {
   if(!mULongProperties.contains(name))
   {
@@ -430,7 +430,7 @@ bool BosonWeaponProperties::getUpgradeableBaseValue(unsigned long int* ret, cons
   return false;
 }
 
-bool BosonWeaponProperties::getUpgradeableBaseValue(long int* ret, const QString& name, const QString& type) const
+bool BosonWeaponProperties::getBaseValue(long int* ret, const QString& name, const QString& type) const
 {
   if(!mLongProperties.contains(name))
   {
@@ -456,7 +456,7 @@ bool BosonWeaponProperties::getUpgradeableBaseValue(long int* ret, const QString
   return false;
 }
 
-bool BosonWeaponProperties::getUpgradeableBaseValue(bofixed* ret, const QString& name, const QString& type) const
+bool BosonWeaponProperties::getBaseValue(bofixed* ret, const QString& name, const QString& type) const
 {
   if(!mBoFixedProperties.contains(name))
   {
