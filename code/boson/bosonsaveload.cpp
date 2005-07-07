@@ -596,7 +596,9 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 			return false;
 		}
 	}
-	p->loadFromXML(player);
+	if (!p->loadFromXML(player)) {
+		boError(270) << k_funcinfo << "failed loading player " << i << endl;
+	}
  }
  return true;
 }
@@ -662,10 +664,12 @@ bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
 	QDomElement p = playerList.item(i).toElement();
 	p.removeAttribute("NetworkPriority");
 	p.removeAttribute("UnitPropId");
-	p.removeAttribute("TeamColor");
-	p.removeAttribute("SpeciesTheme");
 	p.removeChild(p.namedItem("Statistics"));
 	p.removeChild(p.namedItem("Fogged"));
+
+	QDomElement speciesThemeTag = p.namedItem("SpeciesTheme").toElement();
+	speciesThemeTag.removeAttribute("Identifier");
+	speciesThemeTag.removeAttribute("TeamColor");
 	bool ok = false;
 	unsigned int id = p.attribute("PlayerId").toUInt(&ok);
 	if (!ok) {

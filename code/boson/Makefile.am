@@ -33,6 +33,7 @@ libboson_la_SOURCES = \
 	bosonconfig.cpp \
 	bosondata.cpp \
 	bo3dtools.cpp \
+	boupgradeableproperty.cpp \
 	unitbase.cpp \
 	unit.cpp \
 	unitproperties.cpp \

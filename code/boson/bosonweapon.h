@@ -24,6 +24,7 @@
 #include "pluginproperties.h"
 #include "unitplugins.h"
 #include "bo3dtools.h"
+#include "boupgradeableproperty.h"
 
 #include <qptrlist.h>
 #include <qintdict.h>
@@ -38,40 +39,6 @@ class BoAction;
 class QString;
 template<class T> class QIntDict;
 template<class T1, class T2> class QMap;
-
-/**
- * Warning! Duplicated class! See ære BoUpgradeableProperty in unitproperties.h
- **/
-template<class T> class BoUpgradeableWeaponProperty
-{
-public:
-	/**
-	 * Equivalent to @ref setBaseValue
-	 **/
-	void init(T v) { setBaseValue(v); }
-
-	/**
-	 * Set the base value. This is the value that is found in the index.unit
-	 * file and should never change in the game.
-	 **/
-	void setBaseValue(T v) { mBaseValue = v; setValue(baseValue()); }
-
-	/**
-	 * Set the value of this property. It may differ from the @ref
-	 * baseValue, e.g. because of upgrades.
-	 **/
-	void setValue(T v) { mValue = v; }
-
-	T baseValue() const { return mBaseValue; }
-	T value() const { return mValue; }
-
-	operator T() const { return value(); }
-
-private:
-	T mBaseValue;
-	T mValue;
-};
-
 
 /**
  * @short This class holds properties for @ref BosonWeapon
@@ -102,7 +69,8 @@ class BosonWeaponProperties : public PluginProperties
     /**
      * @return The weapon range of this unit. It's a number of cells
      **/
-    inline unsigned long int range() const  { return m_range; }
+    inline unsigned long int range() const  { return mRange.value(upgradesCollection()); }
+    inline unsigned long int baseRange() const  { return mBaseRange; }
     /**
      * @return Maximum flying distance of the missile of this weapon.
      * If the missile hasn't caught the target after flying this distance, the
@@ -124,25 +92,30 @@ class BosonWeaponProperties : public PluginProperties
     /**
      * @return The number of advance calls until the weapon is reloaded
      **/
-    inline unsigned int reloadingTime() const  { return m_reloadingTime; }
+    inline unsigned int reloadingTime() const  { return mReloadingTime.value(upgradesCollection()); }
+    inline unsigned int baseReloadingTime() const  { return mBaseReloadingTime; }
     /**
      * The damage this unit makes to other units. Negative values means
      * repairing
      **/
-    inline long int damage() const  { return m_damage; }
+    inline long int damage() const  { return mDamage.value(upgradesCollection()); }
+    inline long int baseDamage() const  { return mBaseDamage; }
     /**
      * @return Damage range of missile of this unit, e.g. range in what units will be damaged
      **/
-    inline bofixed damageRange() const  { return m_damageRange; }
+    inline bofixed damageRange() const  { return mDamageRange.value(upgradesCollection()); }
+    inline bofixed baseDamageRange() const  { return mBaseDamageRange; }
     /**
      * @return Full damage range of missile of this unit, e.g. range in what
      *  units will be damaged by damage value (farther they'll be damaged less)
      **/
-    inline bofixed fullDamageRange() const  { return m_fullDamageRange; }
+    inline bofixed fullDamageRange() const  { return mFullDamageRange.value(upgradesCollection()); }
+    inline bofixed baseFullDamageRange() const  { return mBaseFullDamageRange; }
     /**
      * @return Maximum speed that missile of this weapon can have or 0 if speed is infinite
      **/
-    inline bofixed speed() const  { return m_speed; }
+    inline bofixed speed() const  { return mSpeed.value(upgradesCollection()); }
+    inline bofixed baseSpeed() const  { return mBaseSpeed; }
     /**
      * @return Acceleration speed of missile of this unit
      **/
@@ -228,6 +201,23 @@ class BosonWeaponProperties : public PluginProperties
 
     QIntDict<BoAction>* actions()  { return &mActions; }
 
+
+    bool getUpgradeableBaseValue(unsigned long int* ret, const QString& name, const QString& type) const;
+    bool getUpgradeableBaseValue(long int* ret, const QString& name, const QString& type) const;
+    bool getUpgradeableBaseValue(bofixed* ret, const QString& name, const QString& type) const;
+
+    const UpgradesCollection& upgradesCollection() const
+    {
+      return mUpgradesCollection;
+    }
+    void clearUpgrades();
+    void addUpgrade(const UpgradeProperties* prop);
+    void removeUpgrade(const UpgradeProperties* prop);
+    void removeUpgrade(unsigned long int id);
+
+    bool saveUpgradesAsXML(QDomElement& root) const;
+    bool loadUpgradesFromXML(const SpeciesTheme* theme, const QDomElement& root);
+
   protected:
     void setWeaponName(QString str)  { mName = str; }
     void setCanShootAtAirUnits(bool can)  { mCanShootAtAirUnits = can; }
@@ -250,26 +240,22 @@ class BosonWeaponProperties : public PluginProperties
     void loadAction(UnitAction type, KSimpleConfig* cfg, const QString& key, bool useDefault = false);
 
     friend class BoUnitEditor;
-    friend class UpgradeProperties;
 
   private:
 
 #define DECLAREUPGRADEABLE(type, name) \
-	public: \
-		void setUpgradedValue_##name(type value) { m_##name.setValue(value); } \
-		void resetUpgradedValue_##name() { m_##name.setValue(m_##name.baseValue()); } \
-	private: \
-		void setBaseValue_##name(type value) { m_##name.setBaseValue(value); } /* for unit editor */ \
-		BoUpgradeableWeaponProperty<type> m_##name;
+                void setBase##name(type v) { mBase##name = v; } \
+                BoUpgradeableProperty<type> m##name; \
+                type mBase##name;
 
 
     unsigned long int mId;
-    DECLAREUPGRADEABLE(unsigned long int, range);
-    DECLAREUPGRADEABLE(long int, damage);
-    DECLAREUPGRADEABLE(bofixed, damageRange);
-    DECLAREUPGRADEABLE(bofixed, fullDamageRange);
-    DECLAREUPGRADEABLE(unsigned int, reloadingTime);
-    DECLAREUPGRADEABLE(bofixed, speed);
+    DECLAREUPGRADEABLE(unsigned long int, Range);
+    DECLAREUPGRADEABLE(long int, Damage);
+    DECLAREUPGRADEABLE(bofixed, DamageRange);
+    DECLAREUPGRADEABLE(bofixed, FullDamageRange);
+    DECLAREUPGRADEABLE(unsigned long int, ReloadingTime);
+    DECLAREUPGRADEABLE(bofixed, Speed);
     bool mCanShootAtAirUnits;
     bool mCanShootAtLandUnits;
     bofixed mAccelerationSpeed;
@@ -296,6 +282,11 @@ class BosonWeaponProperties : public PluginProperties
 
 
 #undef DECLAREUPGRADEABLE
+
+    UpgradesCollection mUpgradesCollection;
+    QMap<QString, unsigned long int*> mULongProperties;
+    QMap<QString, long int*> mLongProperties;
+    QMap<QString, bofixed*> mBoFixedProperties;
 };
 
 

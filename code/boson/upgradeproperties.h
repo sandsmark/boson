@@ -1,6 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 2002-2004 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2005 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,6 +25,10 @@
 
 class Player;
 class UnitProperties;
+class Unit;
+class UnitBase;
+class BosonWeaponProperties;
+class BosonWeapon;
 class BoAction;
 class SpeciesTheme;
 
@@ -33,6 +38,7 @@ class KSimpleConfig;
 template<class T> class QValueList;
 
 
+class UpgradePropertiesPrivate;
 /**
  * @short Upgrades class
  *
@@ -52,28 +58,40 @@ class UpgradeProperties
     UpgradeProperties(const SpeciesTheme* theme);
     virtual ~UpgradeProperties();
 
-    static void resetUpgradeableUnitProperties(Player* player);
-    static void resetUpgradeableWeaponProperties(Player* player);
+    bool appliesTo(const UnitProperties* prop) const;
+    bool appliesTo(const UnitBase* unit) const;
+    bool appliesTo(const BosonWeaponProperties* prop) const;
+    bool appliesTo(const BosonWeapon* weapon) const;
+
+    bool upgradeUnit(UnitBase* unit) const;
+    bool downgradeUnit(UnitBase* unit) const;
+
+    /**
+     * Upgrade @p v. The value is considered to be the "maximum" value of the
+     * property.
+     * @param type allowed values: "MaxValue" (default), "MinValue". This
+     * parameters decides which kind of value is being upgraded. For example a
+     * turret may have an upgradeable weaponrange with a minimum and a maximum
+     * value. Note that with some properties MinValue does not make sense (such
+     * as health).
+     * @return The new maximum value of the property
+     **/
+    bool upgradeValue(const QString& name, unsigned long int* v, const QString& type = "MaxValue") const;
+
+    /**
+     * @overload
+     **/
+    bool upgradeValue(const QString& name, long int* v, const QString& type = "MaxValue") const;
+
+    /**
+     * @overload
+     **/
+    bool upgradeValue(const QString& name, bofixed* v, const QString& type = "MaxValue") const;
 
     /**
      * Load upgrade properties
      **/
     virtual bool load(KSimpleConfig* cfg, const QString& group);
-
-    /**
-     * One of the most important methods in this class
-     * It applies upgrade to UnitProperties
-     * @param player owner of this class (and UnitProperties)
-     **/
-    virtual void apply(Player* player) const;
-
-    /**
-     * Apply the upgrade to all Units of the player. This must not be called
-     * more than once per upgrade. Don't call this when loading a game (the
-     * properties of the units are already changed then).
-     **/
-    virtual void applyToUnits(Player* player) const;
-
 
     /**
      * @return Id of this upgrade
@@ -122,10 +140,22 @@ class UpgradeProperties
 
 
   protected:
-    enum UpgradeType { Health = 0, Armor, Shields, MineralCost, OilCost, SightRange,
-        ProductionTime, Speed,
-        WeaponDamage, WeaponDamageRange, WeaponFullDamageRange, WeaponReload,
-        WeaponRange, WeaponSpeed,
+    enum UpgradeType
+    {
+        Health = 0,
+        Armor,
+        Shields,
+        MineralCost,
+        OilCost,
+        SightRange,
+        ProductionTime,
+        Speed,
+        WeaponDamage,
+        WeaponDamageRange,
+        WeaponFullDamageRange,
+        WeaponReload,
+        WeaponRange,
+        WeaponSpeed,
 
         LastUpgrade // MUST be last entry in the list!
     };
@@ -157,10 +187,14 @@ class UpgradeProperties
     const BoAction* mProduceAction;
     const SpeciesTheme* mTheme;
 
-    class UpgradePropertiesPrivate;
     UpgradePropertiesPrivate* d;
 
     friend class UpgradeApplyer;
 };
 
+
 #endif
+
+/*
+ * vim: et sw=2
+ */

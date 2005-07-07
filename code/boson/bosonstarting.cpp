@@ -372,9 +372,14 @@ bool BosonStarting::addLoadGamePlayers(const QString& playersXML)
 		boError(260) << k_funcinfo << "invalid PlayerId" << endl;
 		return false;
 	}
-	QString species = p.attribute(QString::fromLatin1("SpeciesTheme"));
+	QDomElement speciesTheme = p.namedItem("SpeciesTheme").toElement();
+	if (speciesTheme.isNull()) {
+		boError(260) << k_funcinfo << "NULL SpeciesTheme tag for player " << i<< endl;
+		return false;
+	}
+	QString species = speciesTheme.attribute(QString::fromLatin1("Identifier"));
 	QColor color;
-	color.setRgb(p.attribute(QString::fromLatin1("TeamColor")).toUInt(&ok));
+	color.setRgb(speciesTheme.attribute(QString::fromLatin1("TeamColor")).toUInt(&ok));
 	if (!ok) {
 		boError(260) << k_funcinfo << "invalid teamcolor" << endl;
 		return false;

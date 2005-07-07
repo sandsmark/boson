@@ -47,7 +47,8 @@
 
 #include "player.moc"
 
-class Player::PlayerPrivate
+
+class PlayerPrivate
 {
 public:
 	PlayerPrivate()
@@ -79,6 +80,8 @@ public:
 	PlayerIO* mPlayerIO;
 
 	QValueList<unsigned long int> mResearchedUpgrades;
+
+	UpgradesCollection mUpgradesCollection;
 };
 
 Player::Player(bool isNeutralPlayer) : KPlayer()
@@ -280,10 +283,10 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 
  bool emitSignalUnitChanged = false;
  switch (prop->id()) {
-	case UnitBase::IdHealthPercentage:
-	case UnitBase::IdArmor:
-	case UnitBase::IdShields:
-	case UnitBase::IdSightRange:
+	case UnitBase::IdHealthFactor:
+	case UnitBase::IdArmorFactor:
+	case UnitBase::IdShieldsFactor:
+	case UnitBase::IdSightRangeFactor:
 		// update BosonUnitView if the unit is selected.
 		// not all of these IDs are displayed there. But perhaps they
 		// will one day.
@@ -726,12 +729,7 @@ void Player::technologyResearched(ProductionPlugin* plugin, unsigned long int ty
  }
  d->mResearchedUpgrades.append(type);
 
- // AB: important: _first_ apply to units, then apply to the UnitProperties.
- // otherwise the old values are already discarded (but required for applying to
- // units)
- prop->applyToUnits(this);
-
- applyUpgrades();
+ addUpgrade(prop);
 
  BoEvent* event = new BoEvent("TechnologyWithTypeResearched", QString::number(type), QString::number(plugin->unit()->id()));
  event->setPlayerId(id());
@@ -749,6 +747,10 @@ bool Player::saveAsXML(QDomElement& root)
  PROFILE_METHOD
  if (!game() || !game()->playerList()) {
 	boError() << k_funcinfo << "NULL game/playerlist" << endl;
+	return false;
+ }
+ if (!speciesTheme()) {
+	BO_NULL_ERROR(speciesTheme());
 	return false;
  }
 
@@ -772,25 +774,16 @@ bool Player::saveAsXML(QDomElement& root)
  }
  root.appendChild(handler);
 
- // Save speciestheme
- if (speciesTheme()) {
-	root.setAttribute(QString::fromLatin1("SpeciesTheme"), speciesTheme()->identifier());
-	root.setAttribute(QString::fromLatin1("TeamColor"), (unsigned int)speciesTheme()->teamColor().rgb());
- } else {
-	// the attributes won't be there
-	boWarning() << k_funcinfo << "NULL speciestheme while saving into XML" << endl;
- }
-
  QDomElement upgrades = doc.createElement("Upgrades");
- if (speciesTheme()) {
-	QValueList<unsigned long int>::Iterator it;
-	for (it = d->mResearchedUpgrades.begin(); it != d->mResearchedUpgrades.end(); ++it) {
-		QDomElement e = doc.createElement("Researched");
-		e.setAttribute("Id", QString::number(*it));
-		upgrades.appendChild(e);
-	}
- }
+ d->mUpgradesCollection.saveAsXML(upgrades);
  root.appendChild(upgrades);
+
+ QDomElement speciesThemeTag = doc.createElement("SpeciesTheme");
+ if (!speciesTheme()->saveGameDataAsXML(speciesThemeTag)) {
+	boError() << k_funcinfo << "Unable to save SpeciesTheme" << endl;
+	return false;
+ }
+ root.appendChild(speciesThemeTag);
 
  // Save unitpropID
  root.setAttribute(QString::fromLatin1("UnitPropId"), (unsigned int)d->mUnitPropID);
@@ -835,34 +828,25 @@ bool Player::loadFromXML(const QDomElement& root)
 	return false;
  }
 
+ clearUpgrades();
  QDomElement upgrades = root.namedItem("Upgrades").toElement();
  if (upgrades.isNull()) {
 	boError(260) << k_funcinfo << "no Upgrades tag found" << endl;
 	return false;
  }
- d->mResearchedUpgrades.clear();
- if (speciesTheme()) {
-	QDomNodeList researched = upgrades.elementsByTagName("Researched");
-	for (unsigned int i = 0; i < researched.count(); i++) {
-		QDomElement e = researched.item(i).toElement();
-		bool ok = false;
-		unsigned int id = e.attribute("Id").toUInt(&ok);
-		if (!ok) {
-			boError() << k_funcinfo << "Id attribute of Researched tag is not a valid number" << endl;
-			continue;
-		}
-		UpgradeProperties* u = speciesTheme()->technology(id);
-		if (!u) {
-			boWarning() << k_funcinfo << "technology " << id << " not found" << endl;
-			continue;
-		}
-		if (d->mResearchedUpgrades.contains(id)) {
-			boWarning() << k_funcinfo << "technology " << id << " already researched" << endl;
-			continue;
-		}
-		d->mResearchedUpgrades.append(id);
-	}
-	applyUpgrades();
+ if (!d->mUpgradesCollection.loadFromXML(speciesTheme(), upgrades)) {
+	boError(260) << k_funcinfo << "errror loading upgrades" << endl;
+	return false;
+ }
+
+ QDomElement speciesThemeTag = root.namedItem("SpeciesTheme").toElement();
+ if (speciesThemeTag.isNull()) {
+	boError(260) << k_funcinfo << "NULL SpeciesTheme tag" << endl;
+	return false;
+ }
+ if (!speciesTheme()->loadGameDataFromXML(speciesThemeTag)) {
+	boError(260) << k_funcinfo << "Unable to load SpeciesTheme" << endl;
+	return false;
  }
 
  if (root.hasAttribute(QString::fromLatin1("UnitPropId"))) {
@@ -968,20 +952,52 @@ unsigned int Player::foggedCells() const
  return d->mFoggedCount;
 }
 
-void Player::applyUpgrades()
+void Player::clearUpgrades()
 {
- BO_CHECK_NULL_RET(speciesTheme());
- boDebug(600) << k_funcinfo << endl;
+ d->mUpgradesCollection.clearUpgrades();
+}
 
- // revert the effect of previous upgrade->apply() calls.
- UpgradeProperties::resetUpgradeableUnitProperties(this);
- UpgradeProperties::resetUpgradeableWeaponProperties(this);
+void Player::addUpgrade(const UpgradeProperties* upgrade)
+{
+ BO_CHECK_NULL_RET(upgrade);
+ d->mUpgradesCollection.addUpgrade(upgrade);
 
- // re-apply all upgrades
- QValueList<unsigned long int>::Iterator it = d->mResearchedUpgrades.begin();
- for (; it != d->mResearchedUpgrades.end(); ++it) {
-	UpgradeProperties* upgrade = speciesTheme()->technology(*it);
-	upgrade->apply(this);
+ for (QPtrListIterator<Unit> it(d->mUnits); it.current(); ++it) {
+	if (upgrade->appliesTo(it.current())) {
+		it.current()->addUpgrade(upgrade);
+	}
+ }
+
+ const QIntDict<UnitProperties>* units = speciesTheme()->allUnitsNonConst();
+ for (QIntDictIterator<UnitProperties> it(*units); it.current(); ++it) {
+	if (upgrade->appliesTo(it.current())) {
+		it.current()->addUpgrade(upgrade);
+	}
  }
 }
+
+void Player::removeUpgrade(unsigned long int id)
+{
+ removeUpgrade(d->mUpgradesCollection.findUpgrade(id));
+}
+
+void Player::removeUpgrade(const UpgradeProperties* upgrade)
+{
+ d->mUpgradesCollection.removeUpgrade(upgrade);
+
+ for (QPtrListIterator<Unit> it(d->mUnits); it.current(); ++it) {
+	it.current()->removeUpgrade(upgrade);
+ }
+
+ const QIntDict<UnitProperties>* units = speciesTheme()->allUnitsNonConst();
+ for (QIntDictIterator<UnitProperties> it(*units); it.current(); ++it) {
+	it.current()->removeUpgrade(upgrade);
+ }
+}
+
+const QValueList<const UpgradeProperties*>* Player::upgrades() const
+{
+ return d->mUpgradesCollection.upgrades();
+}
+
 

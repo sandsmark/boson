@@ -1,6 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 2002-2004 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2005 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,23 +40,16 @@
 class UpgradeApplyer
 {
   public:
-    UpgradeApplyer(const UpgradeProperties* prop, Player* p)
+    UpgradeApplyer(const UpgradeProperties* prop)
     {
       mProp = prop;
-      mPlayer = p;
     }
 
-    void apply(const QMap<QString, QString>& entries) const;
-    void applyToUnits(const QMap<QString, QString>& entries) const;
+    // AB: valid types for T currently: unsigned long int, bofixed
+    // note that only numerical values are valid!
+    template<class T> bool upgradeValue(const QString& data, T* value, const QString& type) const;
 
   protected:
-    void applyProperty(QValueList<unsigned long int>* typeIds,
-        const QString& data, UpgradeProperties::UpgradeType type, int weaponid) const;
-    void applyPropertyToUnits(QValueList<unsigned long int>* typeIds,
-        const QString& data, UpgradeProperties::UpgradeType type, int weaponid = -1) const;
-    void applyPropertyToUnits(bofixed oldvalue, bofixed newvalue,
-        unsigned long int typeId, UpgradeProperties::UpgradeType type) const;
-
     unsigned long int applyValue(const QString& data, unsigned long int oldvalue) const;
     bofixed applyValue(const QString& data, bofixed oldvalue) const;
 
@@ -78,11 +72,10 @@ class UpgradeApplyer
 
   private:
     const UpgradeProperties* mProp;
-    Player* mPlayer;
 };
 
 
-class UpgradeProperties::UpgradePropertiesPrivate
+class UpgradePropertiesPrivate
 {
 public:
   UpgradePropertiesPrivate()
@@ -117,102 +110,56 @@ UpgradeProperties::~UpgradeProperties()
   delete d;
 }
 
-void UpgradeProperties::resetUpgradeableUnitProperties(Player* player)
+bool UpgradeProperties::appliesTo(const UnitProperties* prop) const
 {
-  if(!player || !player->speciesTheme())
+  if(!prop)
   {
-    return;
+    BO_NULL_ERROR(prop);
+    return false;
   }
-  QValueList<const UnitProperties*> list = player->speciesTheme()->allUnits();
-  QValueList<const UnitProperties*>::Iterator it;
-  for(it = list.begin(); it != list.end(); ++it)
+  if(mApplyToFacilities && prop->isFacility())
   {
-    UnitProperties* prop = player->speciesTheme()->nonConstUnitProperties((*it)->typeId());
-    for(int i = 0; i < LastUpgrade; i++)
-    {
-      switch((UpgradeType)i)
-      {
-        // AB: do NOT add a default!
-        // -> I want a compiler warning if something is missing here
-#define RESET(name, enumName) case enumName: prop->resetUpgradedValue_##name(); break;
-
-        RESET(health, Health);
-        RESET(armor, Armor);
-        RESET(shields, Shields);
-        RESET(mineralCost, MineralCost);
-        RESET(oilCost, OilCost);
-        RESET(sightRange, SightRange);
-        RESET(productionTime, ProductionTime);
-        RESET(speed, Speed);
-
-#undef RESET
-
-        case WeaponDamage:
-        case WeaponDamageRange:
-        case WeaponFullDamageRange:
-        case WeaponReload:
-        case WeaponRange:
-        case WeaponSpeed:
-          break;
-
-        case LastUpgrade:
-          break;
-      }
-    }
+    return true;
   }
+  if(mApplyToMobiles && prop->isMobile())
+  {
+    return true;
+  }
+  if(d->mApplyToTypes.contains(prop->typeId()))
+  {
+    return true;
+  }
+  return false;
 }
 
-void UpgradeProperties::resetUpgradeableWeaponProperties(Player* player)
+bool UpgradeProperties::appliesTo(const UnitBase* unit) const
 {
-  if(!player || !player->speciesTheme())
+  if(!unit)
   {
-    return;
+    BO_NULL_ERROR(unit);
+    return false;
   }
-  QValueList<const UnitProperties*> list = player->speciesTheme()->allUnits();
-  QValueList<const UnitProperties*>::Iterator it;
-  for(it = list.begin(); it != list.end(); ++it)
+  return appliesTo(unit->unitProperties());
+}
+
+bool UpgradeProperties::appliesTo(const BosonWeaponProperties* prop) const
+{
+  if(!prop)
   {
-    UnitProperties* prop = player->speciesTheme()->nonConstUnitProperties((*it)->typeId());
-    for (int weaponid = 1; true; weaponid++)
-    {
-      BosonWeaponProperties* wep = const_cast<BosonWeaponProperties*>(prop->weaponProperties(weaponid));
-      if(!wep)
-      {
-        break;
-      }
-      for(int i = 0; i < LastUpgrade; i++)
-      {
-        switch((UpgradeType)i)
-        {
-          // AB: do NOT add a default!
-          // -> I want a compiler warning if something is missing here
-
-#define RESET(name, enumName) case enumName: wep->resetUpgradedValue_##name(); break;
-
-          RESET(damage, WeaponDamage);
-          RESET(damageRange, WeaponDamageRange);
-          RESET(fullDamageRange, WeaponFullDamageRange);
-          RESET(reloadingTime, WeaponReload);
-          RESET(range, WeaponRange);
-          RESET(speed, WeaponSpeed);
-
-#undef RESET
-
-          case Health:
-          case Armor:
-          case Shields:
-          case MineralCost:
-          case OilCost:
-          case SightRange:
-          case ProductionTime:
-          case Speed:
-            break;
-          case LastUpgrade:
-            break;
-        }
-      }
-    }
+    BO_NULL_ERROR(prop);
+    return false;
   }
+  return appliesTo(prop->unitProperties());
+}
+
+bool UpgradeProperties::appliesTo(const BosonWeapon* weapon) const
+{
+  if(!weapon)
+  {
+    BO_NULL_ERROR(weapon);
+    return false;
+  }
+  return weapon->properties();
 }
 
 bool UpgradeProperties::load(KSimpleConfig* cfg, const QString& group)
@@ -262,18 +209,6 @@ bool UpgradeProperties::load(KSimpleConfig* cfg, const QString& group)
 }
 
 
-void UpgradeProperties::apply(Player* player) const
-{
-  UpgradeApplyer a(this, player);
-  a.apply(d->mEntryList);
-}
-
-void UpgradeProperties::applyToUnits(Player* player) const
-{
-  UpgradeApplyer a(this, player);
-  a.applyToUnits(d->mEntryList);
-}
-
 
 QValueList<unsigned long int> UpgradeProperties::requiredUnits() const
 {
@@ -309,6 +244,61 @@ QValueList<unsigned long int> UpgradeProperties::appliesToTypes(const Player* pl
     }
   }
   return list;
+}
+
+bool UpgradeProperties::upgradeUnit(UnitBase* unit) const
+{
+  if(!appliesTo(unit))
+  {
+    return true;
+  }
+
+#warning TODO
+
+  return true;
+}
+
+bool UpgradeProperties::downgradeUnit(UnitBase* unit) const
+{
+  if(!appliesTo(unit))
+  {
+    return true;
+  }
+
+#warning TODO
+
+  return true;
+}
+
+bool UpgradeProperties::upgradeValue(const QString& name, unsigned long int* v, const QString& type) const
+{
+  if(!d->mEntryList.contains(name))
+  {
+    return true;
+  }
+  UpgradeApplyer a(this);
+  return a.upgradeValue(d->mEntryList[name], v, type);
+}
+
+bool UpgradeProperties::upgradeValue(const QString& name, long int* v, const QString& type) const
+{
+  if(!d->mEntryList.contains(name))
+  {
+    boDebug() << k_funcinfo << "dont have " << name << endl;
+    return true;
+  }
+  UpgradeApplyer a(this);
+  return a.upgradeValue(d->mEntryList[name], v, type);
+}
+
+bool UpgradeProperties::upgradeValue(const QString& name, bofixed* v, const QString& type) const
+{
+  if(!d->mEntryList.contains(name))
+  {
+    return true;
+  }
+  UpgradeApplyer a(this);
+  return a.upgradeValue(d->mEntryList[name], v, type);
 }
 
 void UpgradeProperties::convertEntries()
@@ -347,132 +337,6 @@ void UpgradeProperties::convertEntries()
       it.data() = QString::number(it.data().toFloat() * 20.0f);
     }
   }
-}
-
-void UpgradeApplyer::apply(const QMap<QString, QString>& entries) const
-{
-  boDebug(600) << k_funcinfo << "id: " << mProp->id() << endl;
-
-  // Add unit types to list
-  QValueList<unsigned long int> list = mProp->appliesToTypes(mPlayer);
-  QValueList<unsigned long int>::Iterator tit;
-  QString addingTo = "Adding to types:";
-  for(tit = list.begin(); tit != list.end(); tit++)
-  {
-    addingTo += " ";
-    addingTo += QString::number(*tit);
-  }
-  boDebug(600) << "  " << k_funcinfo << addingTo << endl;
-
-  // Iterate through entries map and apply them
-  QMap<QString, QString>::const_iterator it;
-  for(it = entries.begin(); it != entries.end(); it++)
-  {
-    UpgradeProperties::UpgradeType type;
-    int weaponid = -1;
-
-    if(!parseEntryType(it.key(), &type, &weaponid))
-    {
-      boError(600) << k_funcinfo << "unable to retrieve type from string " << it.key() << endl;
-      continue;
-    }
-    applyProperty(&list, it.data(), type, weaponid);
-  }
-}
-
-void UpgradeApplyer::applyProperty(QValueList<unsigned long int>* typeIds,
-    const QString& data, UpgradeProperties::UpgradeType type, int weaponid) const
-{
-  // Note that I don't use k_funcinfo here, because I get _very_ long lines with it
-#define my_funcinfo "[UpgradeProperties::applyProperty(...)] "
-
-  boDebug(600) << "    " << my_funcinfo << "Applying property (type: " << type << ") to " << typeIds->count() << " properites. weaponid: " << weaponid << endl;
-  QValueList<unsigned long int>::iterator it;
-  for(it = typeIds->begin(); it != typeIds->end(); it++)
-  {
-    UnitProperties* prop = mPlayer->speciesTheme()->nonConstUnitProperties(*it);
-    boDebug(600) << "        " << my_funcinfo << "Applying to prop with id: " << prop->typeId() << "; name: " << prop->name() << endl;
-    if(weaponid == -1)
-    {
-      // Not a weapon upgrade
-      switch(type)
-      {
-
-/**
- * This macro creates the case entries.
- * @param name is the name of the property. We require that there is a method in
- * @ref UnitProperties with that name returning the current value and that
- * a corresponding setUpgradedValue_name exists.
- * @param enumName is the name of the type enum
- **/
-#define APPLY(name, enumName) \
-          case UpgradeProperties::enumName: \
-          { \
-            prop->setUpgradedValue_##name(applyValue(data, prop->name())); \
-            break; \
-          }
-
-        APPLY(health, Health);
-        APPLY(armor, Armor);
-        APPLY(shields, Shields);
-        APPLY(mineralCost, MineralCost);
-        APPLY(oilCost, OilCost);
-        APPLY(sightRange, SightRange);
-        APPLY(productionTime, ProductionTime);
-        APPLY(speed, Speed);
-
-#undef APPLY
-
-        default:
-        {
-          boError(600) << my_funcinfo << "Invalid UpgradeType: " << type << endl;
-          break;
-        }
-      }
-    }
-    else
-    {
-      unsigned long int oldvalueuint = 0;
-      bofixed oldvaluef = 0;
-      // It's a weapon upgrade
-      // Weapon's ids actually start from 1. So we add 1 to weaponid here
-      BosonWeaponProperties* wep = const_cast<BosonWeaponProperties*>(prop->weaponProperties(weaponid + 1));
-      if(!wep)
-      {
-        boError(600) << "[UpgradeProperties::applyProperty(...)]" << "NULL const weaponproperties (id: " << weaponid << ")" << endl;
-        return;
-      }
-      switch(type)
-      {
-
-/**
- * This macro is similar to the one above for non-weapon properties
- **/
-#define APPLY(name, enumName) \
-          case UpgradeProperties::enumName: \
-          { \
-            wep->setUpgradedValue_##name(applyValue(data, wep->name())); \
-            break; \
-          }
-
-        APPLY(damage, WeaponDamage);
-        APPLY(damageRange, WeaponDamageRange);
-        APPLY(fullDamageRange, WeaponFullDamageRange);
-        APPLY(reloadingTime, WeaponReload);
-        APPLY(range, WeaponRange);
-        APPLY(speed, WeaponSpeed);
-        default:
-        {
-          oldvalueuint = 0;
-          oldvaluef = 0.0f;
-          boError(600) << "[UpgradeProperties::applyProperty(...)]" << "Invalid UpgradeType: " << type << endl;
-          break;
-        }
-      }
-    }
-  }
-
-#undef my_funcinfo
 }
 
 unsigned long int UpgradeApplyer::applyValue(const QString& data, unsigned long int oldvalue) const
@@ -515,146 +379,7 @@ template<class T> T UpgradeApplyer::applyValueInternal(UpgradeProperties::ValueT
   }
 }
 
-void UpgradeApplyer::applyToUnits(const QMap<QString, QString>& entries) const
-{
-  boDebug(600) << k_funcinfo << "id: " << mProp->id() << endl;
-
-  // Add unit types to list
-  QValueList<unsigned long int> list = mProp->appliesToTypes(mPlayer);
-
-  // Iterate through entries map and apply them
-  QMap<QString, QString>::const_iterator it;
-  for(it = entries.begin(); it != entries.end(); it++)
-  {
-    UpgradeProperties::UpgradeType type;
-    int weaponid = -1;
-
-    if(!parseEntryType(it.key(), &type, &weaponid))
-    {
-      boError(600) << k_funcinfo << "unable to retrieve type from string " << it.key() << endl;
-      continue;
-    }
-    applyPropertyToUnits(&list, it.data(), type, weaponid);
-  }
-}
-
-void UpgradeApplyer::applyPropertyToUnits(QValueList<unsigned long int>* typeIds,
-    const QString& data, UpgradeProperties::UpgradeType type, int weaponid) const
-{
-  // Note that I don't use k_funcinfo here, because I get _very_ long lines with it
-#define my_funcinfo "[UpgradeProperties::applyPropertyToUnits(...)] "
-
-  if(weaponid != -1)
-  {
-    return;
-  }
-  // Not a weapon upgrade
-
-  QValueList<unsigned long int>::Iterator it;
-  for(it = typeIds->begin(); it != typeIds->end(); it++)
-  {
-    unsigned long int oldvalueuint = 0;
-    bofixed oldvaluef = 0;
-    unsigned long int newvalueuint = 0;
-    bofixed newvaluef = 0;
-    UnitProperties* prop = mPlayer->speciesTheme()->nonConstUnitProperties(*it);
-    switch(type)
-    {
-      case UpgradeProperties::Health:
-      {
-        oldvalueuint = prop->health();
-        newvalueuint = applyValue(data, oldvalueuint);
-        applyPropertyToUnits((bofixed)oldvalueuint, (bofixed)newvalueuint, *it, type);
-        break;
-      }
-      case UpgradeProperties::Armor:
-      {
-        oldvalueuint = prop->armor();
-        newvalueuint = applyValue(data, oldvalueuint);
-        applyPropertyToUnits((bofixed)oldvalueuint, (bofixed)newvalueuint, *it, type);
-        break;
-      }
-      case UpgradeProperties::Shields:
-      {
-        oldvalueuint = prop->shields();
-        newvalueuint = applyValue(data, oldvalueuint);
-        applyPropertyToUnits((bofixed)oldvalueuint, (bofixed)newvalueuint, *it, type);
-        break;
-      }
-      case UpgradeProperties::MineralCost:
-        break;
-      case UpgradeProperties::OilCost:
-        break;
-      case UpgradeProperties::SightRange:
-      {
-        oldvalueuint = prop->sightRange();
-        newvalueuint = applyValue(data, oldvalueuint);
-        applyPropertyToUnits((bofixed)oldvalueuint, (bofixed)newvalueuint, *it, type);
-        break;
-      }
-      case UpgradeProperties::ProductionTime:
-        break;
-      case UpgradeProperties::Speed:
-        break;
-      default:
-      {
-        oldvalueuint = 0;
-        oldvaluef = 0;
-        boError(600) << my_funcinfo << "Invalid UpgradeType: " << type << endl;
-        break;
-      }
-    }
-  }
-
-#undef my_funcinfo
-}
-
-void UpgradeApplyer::applyPropertyToUnits(bofixed oldvalue, bofixed newvalue,
-    unsigned long int typeId, UpgradeProperties::UpgradeType type) const
-{
-#define my_funcinfo "[UpgradeProperties::applyPropertyToUnits(...)] "
-  boDebug(600) << "          " << my_funcinfo <<
-      "PARAMS: oldvalue: " << oldvalue << "; newvalue: " << newvalue <<
-      "; typeId: " << typeId <<
-      "; player: " << mPlayer << "; type: " << type << endl;
-  //boDebug(600) << "      " << k_funcinfo << "Starting to apply" << endl;
-  QPtrListIterator<Unit> it(*(mPlayer->allUnits()));
-  //boDebug(600) << "        " << k_funcinfo << "Unit count: " << it.count() << endl;
-  while(it.current())
-  {
-    Unit* u = it.current();
-    if(u->type() == typeId)
-    {
-      switch(type)
-      {
-        case UpgradeProperties::Health:
-          // Health is special: we have to take old health into account as well
-          u->setHealth((unsigned long int)((u->health() / oldvalue) * newvalue));
-          break;
-        case UpgradeProperties::Shields:
-          // Shields are also quite special, but not that special, so we use simpler approach here
-          u->setShields((unsigned long int)(newvalue - (oldvalue - u->shields())));
-          break;
-        case UpgradeProperties::Armor:
-          // New value will just replace the old one
-          u->setArmor(newvalue);
-          break;
-        case UpgradeProperties::SightRange:
-          u->setSightRange(newvalue);
-          // Update unit's sight
-          u->canvas()->updateSight(u, u->x(), u->y());
-          break;
-        default:
-          boError(600) << my_funcinfo << "Invalid UpgradeType: " << type << endl;
-          return;
-      }
-    }
-    ++it;
-  }
-#undef my_funcinfo
-}
-
-
+#if 0
 bool UpgradeApplyer::parseEntryType(const QString& typeString, UpgradeProperties::UpgradeType* type, int* weaponid) const
 {
   *weaponid = -1;
@@ -759,6 +484,7 @@ bool UpgradeApplyer::parseEntryType(const QString& typeString, UpgradeProperties
   }
   return true;
 }
+#endif
 
 void UpgradeApplyer::parseEntry(const QString& entry, UpgradeProperties::ValueType& type, QString& value) const
 {
@@ -778,6 +504,34 @@ void UpgradeApplyer::parseEntry(const QString& entry, UpgradeProperties::ValueTy
     value = entry;
   }
 }
+
+template<class T> bool UpgradeApplyer::upgradeValue(const QString& data, T* value, const QString& type) const
+{
+  if(data.isEmpty())
+  {
+    boError(600) << k_funcinfo << "empty data string" << endl;
+    return false;
+  }
+  if(type == "MaxValue")
+  {
+    *value = applyValue(data, *value);
+    return true;
+  }
+  else if(type == "MinValue")
+  {
+    boError(600) << k_funcinfo << "MinValue not yet supported" << endl;
+    return false;
+  }
+  else
+  {
+    boError(600) << k_funcinfo << "invalid type " << type << endl;
+    return false;
+  }
+  return false;
+}
+
+
+
 
 /*
  * vim:et sw=2
