@@ -30,11 +30,94 @@ class UpgradeProperties;
 class SpeciesTheme;
 class QDomElement;
 
-class UpgradesCollection
+class BoBaseValueCollectionPrivate;
+/**
+ * This class provides a collection of "base" values of upgradeable properties.
+ * Providing a value in an object of this class is mandatory for @ref
+ * BoUpgradeableProperty objects.
+ *
+ * A "base" value of a property is the value that is read from for example the
+ * index.unit file. This value will be used as base for all upgrades (see @ref
+ * BoUpgradeableProperty).
+ * @short Collection of base values for @ref BoUpgradeableProperty objects
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoBaseValueCollection
 {
 public:
-	UpgradesCollection();
-	~UpgradesCollection();
+	BoBaseValueCollection();
+	~BoBaseValueCollection();
+
+	bool insertULongBaseValue(unsigned long int v, const QString& name, const QString& type = "MaxValue", bool replace = true);
+	bool insertLongBaseValue(long int v, const QString& name, const QString& type = "MaxValue", bool replace = true);
+	bool insertBoFixedBaseValue(bofixed v, const QString& name, const QString& type = "MaxValue", bool replace = true);
+
+	/**
+	 * Same as @ref insertULongBaseValue, but this name provides overloaded
+	 * versions of the method for all data types. For type safety you should
+	 * prefer @ref insertULongBaseValue instead.
+	 **/
+	bool insertBaseValue(unsigned long int v, const QString& name, const QString& type = "MaxValue", bool replace = true)
+	{
+		return insertULongBaseValue(v, name, type, replace);
+	}
+	/**
+	 * @overload
+	 **/
+	bool insertBaseValue(long int v, const QString& name, const QString& type = "MaxValue", bool replace = true)
+	{
+		return insertLongBaseValue(v, name, type, replace);
+	}
+	/**
+	 * @overload
+	 **/
+	bool insertBaseValue(bofixed v, const QString& name, const QString& type = "MaxValue", bool replace = true)
+	{
+		return insertBoFixedBaseValue(v, name, type, replace);
+	}
+
+	/**
+	 * @return The base value of an upgradeable property. This value is the
+	 * start-value, before any upgrades are applied.
+	 * @param name The name of the property
+	 * @param type Either "MaxValue" or "MinValue". Use "MaxValue" if you
+	 * are not sure.
+	 **/
+	bool getBaseValue(unsigned long int* ret, const QString& name, const QString& type = "MaxValue") const;
+	bool getBaseValue(long int* ret, const QString& name, const QString& type = "MaxValue") const;
+	bool getBaseValue(bofixed* ret, const QString& name, const QString& type = "MaxValue") const;
+
+	/**
+	 * @return @ref getBaseValue or @p defaultValue if the @p
+	 * name @p type pair does not exist.
+	 **/
+	unsigned long int ulongBaseValue(const QString& name, const QString& type = "MaxValue", unsigned long int defaultValue = 0) const;
+	long int longBaseValue(const QString& name, const QString& type = "MaxValue", long int defaultValue = 0) const;
+	bofixed bofixedBaseValue(const QString& name, const QString& type = "MaxValue", bofixed defaultValue = 0) const;
+
+
+private:
+	BoBaseValueCollectionPrivate* d;
+};
+
+/**
+ * @short This class provides a collection of upgrades.
+ * A @ref BoUpgradeableProperty requires a list of upgrades to be applied to the
+ * property in order to calculate the real value. Such a list is provided by
+ * this class.
+ *
+ * This class also provides a hint to @ref BoUpgradeableProperty whether it
+ * can use the cached value of the property, or whether it has to recalculate
+ * the value. Whenever @ref addUpgrade or @ref removeUpgrade is called, all @ref
+ * BoUpgradeableProperty objects will recalculate their value once they are
+ * accessed.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoUpgradesCollection
+{
+public:
+	BoUpgradesCollection();
+	~BoUpgradesCollection();
 
 	bool saveAsXML(QDomElement& root) const;
 	bool loadFromXML(const SpeciesTheme* speciesTheme, const QDomElement& root);
@@ -58,6 +141,25 @@ private:
 	unsigned long int mUpgradesCacheCounter;
 };
 
+/**
+ * @short This is the base class for @ref BoUpgradeableProperty.
+ *
+ * @ref BoUpgradeableProperty uses @ref loadBaseValue to load the initial value
+ * of the property and then @ref upgradeValue to apply the upgrades to this
+ * value.
+ *
+ * Every property has a @ref name and a @ref type.
+ *
+ * The @ref name is a unique internal string that identifies the property. It
+ * usually makes sense to use the same name as in the index.technologies (or
+ * similar) files. For example "Health" for the health property.
+ *
+ * The @ref type describes whether the property is a "MaxValue" or a "MinValue"
+ * property. This has no internal meaning, it is meant as a help for the user.
+ * In Boson we currently make no use of  "MinValue", it might be used for things
+ * like "minimal weapon range".
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BoUpgradeablePropertyBase
 {
 public:
@@ -67,11 +169,10 @@ public:
 	 * @param type Whether this object represents the maximum or the minimum
 	 * value of this property.
 	 **/
-	BoUpgradeablePropertyBase(const UnitProperties* unitProperties, const BosonWeaponProperties* weaponProperties, const QString& name, const QString& type = "MaxValue")
+	BoUpgradeablePropertyBase(const BoBaseValueCollection* baseValueSource, const QString& name, const QString& type = "MaxValue")
 	{
 		mCacheCounter = 0;
-		mUnitProperties = unitProperties;
-		mWeaponProperties = weaponProperties;
+		mBaseValueSource = baseValueSource;
 		mName = name;
 		mType = type;
 	}
@@ -84,22 +185,19 @@ public:
 	{
 		return mType;
 	}
-	const UnitProperties* unitProperties() const
+	const BoBaseValueCollection* baseValueCollection() const
 	{
-		return mUnitProperties;
+		return mBaseValueSource;
 	}
 
-	const BosonWeaponProperties* weaponProperties() const
+protected:
+	template<class T>bool loadBaseValue(T* v) const
 	{
-		return mWeaponProperties;
+		if (!baseValueCollection()) {
+			return false;
+		}
+		return baseValueCollection()->getBaseValue(v, name(), type());
 	}
-
-	// AB: we cannot use a template method here, as we would have to
-	// implement it in the header. i dont want to do this, as we would have
-	// to include unitproperties.h and bosonweapon.h
-	bool loadBaseValue(unsigned long int* v) const;
-	bool loadBaseValue(long int* v) const;
-	bool loadBaseValue(bofixed* v) const;
 
 	bool upgradeValue(const QValueList<const UpgradeProperties*>* list, unsigned long int* v) const;
 	bool upgradeValue(const QValueList<const UpgradeProperties*>* list, long int* v) const;
@@ -116,18 +214,71 @@ protected:
 private:
 	QString mName;
 	QString mType;
-	const UnitProperties* mUnitProperties;
-	const BosonWeaponProperties* mWeaponProperties;
+	const BoBaseValueCollection* mBaseValueSource;
 };
 
+/**
+ * @short Upgradeable properties
+ *
+ * An object of this class is a property that can make use of upgrades, i.e. is
+ * upgradeable.
+ *
+ * WARNING: An "upgradeable" property refers to the values a property can be set
+ *          to, i.e. their minimum and maximum values. It does NOT refer to the
+ *          actual current value. For example the "Health" property should NOT
+ *          be an object of this class, whereas the MaxHealth property should be
+ *          (MinHealth does of course make no sense, as it is always 0).
+ *
+ * You must provide an object of @ref BoBaseValueCollection to this class, this
+ * is where the propertiy retrieves its "base" values from. Note that you have
+ * to fill it with data, under the same @ref name and @ref type (and with the
+ * same data type) as the object of this class uses.
+ *
+ * You can retrieve the actual value of this property using @ref value. This is
+ * the value of the property after all upgrades have been applied.
+ *
+ * The value is calculated on the fly, but is cached internally. Therefore
+ * calling @ref value is very fast, only when upgrades changed @ref value
+ * requires recalculations.
+ *
+ * WARNING: Note that you should NOT use @ref value with two different @ref
+ *          BoUpgradeCollection objects! This might cause the cache to get
+ *          out of sync!
+ *
+ * Objects of this class are never saved to a stream or a file, as they are
+ * always calculated on the fly from the current upgrades (the upgrades @em are
+ * saved).
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 template<class T> class BoUpgradeableProperty : public BoUpgradeablePropertyBase
 {
 public:
-	BoUpgradeableProperty(const UnitProperties* unitProperties, const BosonWeaponProperties* weaponProperties, const QString& name, const QString& type = "MaxValue")
-		: BoUpgradeablePropertyBase(unitProperties, weaponProperties, name, type)
+	BoUpgradeableProperty(const BoBaseValueCollection* baseValueSource, const QString& name, const QString& type = "MaxValue")
+		: BoUpgradeablePropertyBase(baseValueSource, name, type)
 	{
 	}
+	BoUpgradeableProperty(BoBaseValueCollection* baseValueSource, const QString& name, const QString& type = "MaxValue")
+		: BoUpgradeablePropertyBase(baseValueSource, name, type)
+	{
+		// AB: this makes sure that there actually is a base value for
+		//     this property.
+		//     note that because of replace=fase, this will be a noop, if
+		//     such a base value is already provided.
+		// AB: FIXME: this requires that we can cast "0" into this data
+		//    type. is there a different way to achieve this?
+		baseValueSource->insertBaseValue((T)0, name, type, false);
+	}
 
+	inline T value(const BoUpgradesCollection* c) const
+	{
+		return value(c->upgrades(), c->upgradesCacheCounter());
+	}
+	inline T value(const BoUpgradesCollection& c) const
+	{
+		return value(c.upgrades(), c.upgradesCacheCounter());
+	}
+
+protected:
 	T value(const QValueList<const UpgradeProperties*>* upgrades, unsigned long int cacheCounter) const
 	{
 		if (mCacheCounter != cacheCounter || cacheCounter == 0) {
@@ -145,14 +296,6 @@ public:
 			}
 		}
 		return mCachedValue;
-	}
-	inline T value(const UpgradesCollection* c) const
-	{
-		return value(c->upgrades(), c->upgradesCacheCounter());
-	}
-	inline T value(const UpgradesCollection& c) const
-	{
-		return value(c.upgrades(), c.upgradesCacheCounter());
 	}
 
 private:

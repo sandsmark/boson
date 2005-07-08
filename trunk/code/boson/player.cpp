@@ -81,7 +81,7 @@ public:
 
 	QValueList<unsigned long int> mResearchedUpgrades;
 
-	UpgradesCollection mUpgradesCollection;
+	BoUpgradesCollection mUpgradesCollection;
 };
 
 Player::Player(bool isNeutralPlayer) : KPlayer()

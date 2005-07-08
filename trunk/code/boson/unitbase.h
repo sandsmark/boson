@@ -40,7 +40,6 @@ class PluginProperties;
 class SpeciesTheme;
 class BosonItemPropertyHandler;
 class UpgradeProperties;
-class UpgradesCollection;
 
 
 /**
@@ -322,10 +321,9 @@ public:
 	const QValueList<const UpgradeProperties*>* upgrades() const;
 
 	void clearUpgrades();
-	void addUpgrade(const UpgradeProperties* upgrade);
-	void removeUpgrade(const UpgradeProperties* upgrade);
-	void removeUpgrade(unsigned long int upgradeId);
-	const UpgradesCollection& upgradesCollection() const
+	virtual void addUpgrade(const UpgradeProperties* upgrade);
+	virtual void removeUpgrade(const UpgradeProperties* upgrade);
+	const BoUpgradesCollection& upgradesCollection() const
 	{
 		return mUpgradesCollection;
 	}
@@ -361,7 +359,7 @@ private:
 
 private:
 	const UnitProperties* mUnitProperties;
-	UpgradesCollection mUpgradesCollection;
+	BoUpgradesCollection mUpgradesCollection;
 
 	BosonItemPropertyHandler* mWeaponProperties;
 

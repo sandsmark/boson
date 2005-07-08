@@ -17,20 +17,139 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-
 #include "boupgradeableproperty.h"
 
 #include "../bomemory/bodummymemory.h"
 #include <bodebug.h>
-#include "unitproperties.h"
-#include "bosonweapon.h"
 #include "upgradeproperties.h"
 #include "speciestheme.h"
 
 #include <qdom.h>
 
+class BoBaseValueCollectionPrivate
+{
+public:
+	BoBaseValueCollectionPrivate()
+	{
+	}
+	QMap< QString, QMap<QString, unsigned long int> > mULongProperties;
+	QMap< QString, QMap<QString, long int> > mLongProperties;
+	QMap< QString, QMap<QString, bofixed> > mBoFixedProperties;
+};
 
-UpgradesCollection::UpgradesCollection()
+BoBaseValueCollection::BoBaseValueCollection()
+{
+ d = new BoBaseValueCollectionPrivate;
+}
+
+BoBaseValueCollection::~BoBaseValueCollection()
+{
+ delete d;
+}
+
+bool BoBaseValueCollection::insertULongBaseValue(unsigned long int v, const QString& name, const QString& type, bool replace)
+{
+ if (type != "MaxValue" && type != "MinValue") {
+	boError() << k_funcinfo << "invalid type " << type << endl;
+	return false;
+ }
+ (d->mULongProperties[type]).insert(name, v, replace);
+ return true;
+}
+
+bool BoBaseValueCollection::insertLongBaseValue(long int v, const QString& name, const QString& type, bool replace)
+{
+ if (type != "MaxValue" && type != "MinValue") {
+	boError() << k_funcinfo << "invalid type " << type << endl;
+	return false;
+ }
+ (d->mLongProperties[type]).insert(name, v, replace);
+ return true;
+}
+
+bool BoBaseValueCollection::insertBoFixedBaseValue(bofixed v, const QString& name, const QString& type, bool replace)
+{
+ if (type != "MaxValue" && type != "MinValue") {
+	boError() << k_funcinfo << "invalid type " << type << endl;
+	return false;
+ }
+ (d->mBoFixedProperties[type]).insert(name, v, replace);
+ return true;
+}
+
+bool BoBaseValueCollection::getBaseValue(unsigned long int* ret, const QString& name, const QString& type) const
+{
+ if (type != "MaxValue" && type != "MinValue") {
+	boError() << k_funcinfo << "invalid type " << type << endl;
+	return false;
+ }
+ if (!(d->mULongProperties[type]).contains(name)) {
+	boError() << k_funcinfo << "no such property " << name << endl;
+	return false;
+ }
+ *ret = (d->mULongProperties[type])[name];
+ return true;
+}
+
+bool BoBaseValueCollection::getBaseValue(long int* ret, const QString& name, const QString& type) const
+{
+ if (type != "MaxValue" && type != "MinValue") {
+	boError() << k_funcinfo << "invalid type " << type << endl;
+	return false;
+ }
+ if (!(d->mLongProperties[type]).contains(name)) {
+	boError() << k_funcinfo << "no such property " << name << endl;
+	return false;
+ }
+ *ret = (d->mLongProperties[type])[name];
+ return true;
+}
+
+bool BoBaseValueCollection::getBaseValue(bofixed* ret, const QString& name, const QString& type) const
+{
+ if (type != "MaxValue" && type != "MinValue") {
+	boError() << k_funcinfo << "invalid type " << type << endl;
+	return false;
+ }
+ if (!(d->mBoFixedProperties[type]).contains(name)) {
+	boError() << k_funcinfo << "no such property " << name << endl;
+	return false;
+ }
+ *ret = (d->mBoFixedProperties[type])[name];
+ return true;
+}
+
+unsigned long int BoBaseValueCollection::ulongBaseValue(const QString& name, const QString& type, unsigned long int defaultValue) const
+{
+ unsigned long int v = defaultValue;
+ if (!getBaseValue(&v, name, type)) {
+	return defaultValue;
+ }
+ return v;
+}
+
+long int BoBaseValueCollection::longBaseValue(const QString& name, const QString& type, long int defaultValue) const
+{
+ long int v = defaultValue;
+ if (!getBaseValue(&v, name, type)) {
+	return defaultValue;
+ }
+ return v;
+}
+
+bofixed BoBaseValueCollection::bofixedBaseValue(const QString& name, const QString& type, bofixed defaultValue) const
+{
+ bofixed v = defaultValue;
+ if (!getBaseValue(&v, name, type)) {
+	return defaultValue;
+ }
+ return v;
+}
+
+
+
+
+BoUpgradesCollection::BoUpgradesCollection()
 {
  mUpgrades = new QValueList<const UpgradeProperties*>();
 
@@ -39,12 +158,12 @@ UpgradesCollection::UpgradesCollection()
  mUpgradesCacheCounter = 1;
 }
 
-UpgradesCollection::~UpgradesCollection()
+BoUpgradesCollection::~BoUpgradesCollection()
 {
  delete mUpgrades;
 }
 
-void UpgradesCollection::addUpgrade(const UpgradeProperties* upgrade)
+void BoUpgradesCollection::addUpgrade(const UpgradeProperties* upgrade)
 {
  BO_CHECK_NULL_RET(upgrade);
  mUpgrades->append(upgrade);
@@ -55,7 +174,7 @@ void UpgradesCollection::addUpgrade(const UpgradeProperties* upgrade)
  mUpgradesCacheCounter++;
 }
 
-void UpgradesCollection::clearUpgrades()
+void BoUpgradesCollection::clearUpgrades()
 {
  while (!upgrades()->isEmpty()) {
 	removeUpgrade(upgrades()->first());
@@ -63,7 +182,7 @@ void UpgradesCollection::clearUpgrades()
 }
 
 
-const UpgradeProperties* UpgradesCollection::findUpgrade(unsigned long int id) const
+const UpgradeProperties* BoUpgradesCollection::findUpgrade(unsigned long int id) const
 {
  QValueList<const UpgradeProperties*>::const_iterator it;
  for (it = upgrades()->begin(); it != upgrades()->end(); ++it) {
@@ -74,7 +193,7 @@ const UpgradeProperties* UpgradesCollection::findUpgrade(unsigned long int id) c
  return 0;
 }
 
-bool UpgradesCollection::removeUpgrade(const UpgradeProperties* upgrade)
+bool BoUpgradesCollection::removeUpgrade(const UpgradeProperties* upgrade)
 {
  if (!upgrade) {
 	return false;
@@ -88,7 +207,7 @@ bool UpgradesCollection::removeUpgrade(const UpgradeProperties* upgrade)
  return ret;
 }
 
-bool UpgradesCollection::saveAsXML(QDomElement& root) const
+bool BoUpgradesCollection::saveAsXML(QDomElement& root) const
 {
  if (root.isNull()) {
 	return false;
@@ -103,7 +222,7 @@ bool UpgradesCollection::saveAsXML(QDomElement& root) const
  return true;
 }
 
-bool UpgradesCollection::loadFromXML(const SpeciesTheme* speciesTheme, const QDomElement& root)
+bool BoUpgradesCollection::loadFromXML(const SpeciesTheme* speciesTheme, const QDomElement& root)
 {
  clearUpgrades();
  if (!speciesTheme) {
@@ -141,64 +260,6 @@ bool UpgradesCollection::loadFromXML(const SpeciesTheme* speciesTheme, const QDo
  return true;
 }
 
-
-
-bool BoUpgradeablePropertyBase::loadBaseValue(unsigned long int* v) const
-{
- if (!unitProperties() && !weaponProperties()) {
-	boError() << k_funcinfo << "dont know where to retrieve base value from" << endl;
-	return false;
- }
- if (unitProperties() && weaponProperties()) {
-	boError() << k_funcinfo << "more than one source for base value available" << endl;
-	return false;
- }
-
- if (unitProperties()) {
-	unitProperties()->getBaseValue(v, name(), type());
- } else if (weaponProperties()) {
-	weaponProperties()->getBaseValue(v, name(), type());
- }
- return true;
-}
-
-bool BoUpgradeablePropertyBase::loadBaseValue(long int* v) const
-{
- if (!unitProperties() && !weaponProperties()) {
-	boError() << k_funcinfo << "dont know where to retrieve base value from" << endl;
-	return false;
- }
- if (unitProperties() && weaponProperties()) {
-	boError() << k_funcinfo << "more than one source for base value available" << endl;
-	return false;
- }
-
- if (unitProperties()) {
-	unitProperties()->getBaseValue(v, name(), type());
- } else if (weaponProperties()) {
-	weaponProperties()->getBaseValue(v, name(), type());
- }
- return true;
-}
-
-bool BoUpgradeablePropertyBase::loadBaseValue(bofixed* v) const
-{
- if (!unitProperties() && !weaponProperties()) {
-	boError() << k_funcinfo << "dont know where to retrieve base value from" << endl;
-	return false;
- }
- if (unitProperties() && weaponProperties()) {
-	boError() << k_funcinfo << "more than one source for base value available" << endl;
-	return false;
- }
-
- if (unitProperties()) {
-	unitProperties()->getBaseValue(v, name(), type());
- } else if (weaponProperties()) {
-	weaponProperties()->getBaseValue(v, name(), type());
- }
- return true;
-}
 
 bool BoUpgradeablePropertyBase::upgradeValue(const QValueList<const UpgradeProperties*>* list, unsigned long int* v) const
 {

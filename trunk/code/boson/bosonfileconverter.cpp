@@ -1232,8 +1232,6 @@ bool BosonFileConverter::convertPlayField_From_0_10_84_To_0_11(QMap<QString, QBy
 		}
 		QDomElement upgrades = canvasDoc.createElement("Upgrades");
 		item.appendChild(upgrades);
-		QDomElement weaponUpgrades = canvasDoc.createElement("WeaponUpgrades");
-		item.appendChild(weaponUpgrades);
 	}
  }
 

@@ -696,12 +696,23 @@ bool SpeciesTheme::saveGameDataAsXML(QDomElement& root) const
 	unitTypes.appendChild(type);
 
 	QDomElement upgradesTag = doc.createElement("Upgrades");
-	type.appendChild(upgradesTag);
-
 	if (!prop->saveUpgradesAsXML(upgradesTag)) {
 		boError() << k_funcinfo << "unable to save upgrades for unit type " << prop->typeId() << endl;
 		return false;
 	}
+	type.appendChild(upgradesTag);
+
+	const QPtrList<PluginProperties>* plugins = prop->plugins();
+	QDomElement pluginsTag = doc.createElement("PluginProperties");
+	for (QPtrListIterator<PluginProperties> it(*plugins); it.current(); ++it) {
+		QDomElement plugin = doc.createElement("Plugin");
+		plugin.setAttribute("Id", QString::number(it.current()->pluginType()));
+		QDomElement pluginUpgrades = doc.createElement("Upgrades");
+		plugin.appendChild(pluginUpgrades);
+
+		pluginsTag.appendChild(plugin);
+	}
+	type.appendChild(pluginsTag);
  }
  return true;
 }
@@ -743,6 +754,43 @@ bool SpeciesTheme::loadGameDataFromXML(const QDomElement& root)
 	if (!prop->loadUpgradesFromXML(upgrades)) {
 		boError() << k_funcinfo << "unable to load Upgrades of UnitType " << id << endl;
 		return false;
+	}
+
+	QDomElement pluginsTag = type.namedItem("PluginProperties").toElement();
+	if (pluginsTag.isNull()) {
+		boError() << k_funcinfo << "NULL PluginProperties tag" << endl;
+		return false;
+	}
+	for (QDomNode n2 = pluginsTag.firstChild(); !n2.isNull(); n2 = n2.nextSibling()) {
+		QDomElement plugin = n2.toElement();
+		if (plugin.isNull()) {
+			continue;
+		}
+		if (plugin.tagName() == "Plugin") {
+			continue;
+		}
+		bool ok = false;
+		int id = plugin.attribute("Id").toInt(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "invalid value for Id attribute of Plugin" << endl;
+			return false;
+		}
+		QDomElement upgrades = plugin.namedItem("Upgrades").toElement();
+		if (upgrades.isNull()) {
+			boError() << k_funcinfo << "NULL Upgrades tag of Plugin" << endl;
+			return false;
+		}
+		PluginProperties* p = 0;
+		for (QPtrListIterator<PluginProperties> it(*prop->plugins()); it.current() && !p; ++it) {
+			if (it.current()->pluginType() == id) {
+				p = it.current();
+			}
+		}
+		if (!p) {
+			boError() << k_funcinfo << "cannot find properties with ID " << id << endl;
+			return false;
+		}
+		
 	}
  }
  return true;

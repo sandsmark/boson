@@ -38,6 +38,7 @@ class PluginProperties;
 class Boson;
 class BosonItem;
 class BosonWeapon;
+class BoUpgradesCollection;
 template<class T> class BoVector2;
 template<class T> class BoRect;
 typedef BoVector2<bofixed> BoVector2Fixed;
@@ -104,6 +105,14 @@ public:
 	 * Convenience method for player()->game()
 	 **/
 	Boson* game() const;
+
+	/**
+	 * Convenience method for unit()->upgradesCollection().
+	 *
+	 * This object can be used to implement @ref BoUpgradeableProperty
+	 * objects in UnitPlugin objects.
+	 **/
+	const BoUpgradesCollection& upgradesCollection() const;
 
 	virtual int pluginType() const = 0;
 

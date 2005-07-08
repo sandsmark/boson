@@ -39,10 +39,10 @@
 
 UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
 	: BosonItem(owner, canvas),
-	mMaxHealth(prop, 0, "Health", "MaxValue"),
-	mMaxArmor(prop, 0, "Armor", "MaxValue"),
-	mMaxShields(prop, 0, "Shields", "MaxValue"),
-	mMaxSightRange(prop, 0, "SightRange", "MaxValue")
+	mMaxHealth(prop, "Health", "MaxValue"),
+	mMaxArmor(prop, "Armor", "MaxValue"),
+	mMaxShields(prop, "Shields", "MaxValue"),
+	mMaxSightRange(prop, "SightRange", "MaxValue")
 {
  initStatic();
  mWeaponProperties = 0; // created on the fly in weaponDataHandler()
@@ -406,11 +406,6 @@ void UnitBase::addUpgrade(const UpgradeProperties* upgrade)
 	boError() << k_funcinfo << "error while applying upgrade to Unit " << id() << endl;
 	return;
  }
-}
-
-void UnitBase::removeUpgrade(unsigned long int id)
-{
- removeUpgrade(mUpgradesCollection.findUpgrade(id));
 }
 
 void UnitBase::removeUpgrade(const UpgradeProperties* upgrade)

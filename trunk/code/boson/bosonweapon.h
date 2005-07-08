@@ -24,7 +24,6 @@
 #include "pluginproperties.h"
 #include "unitplugins.h"
 #include "bo3dtools.h"
-#include "boupgradeableproperty.h"
 
 #include <qptrlist.h>
 #include <qintdict.h>
@@ -69,8 +68,7 @@ class BosonWeaponProperties : public PluginProperties
     /**
      * @return The weapon range of this unit. It's a number of cells
      **/
-    inline unsigned long int range() const  { return mRange.value(upgradesCollection()); }
-    inline unsigned long int baseRange() const  { return mBaseRange; }
+    inline unsigned long int range1() const  { return mRange.value(upgradesCollection()); }
     /**
      * @return Maximum flying distance of the missile of this weapon.
      * If the missile hasn't caught the target after flying this distance, the
@@ -92,30 +90,25 @@ class BosonWeaponProperties : public PluginProperties
     /**
      * @return The number of advance calls until the weapon is reloaded
      **/
-    inline unsigned int reloadingTime() const  { return mReloadingTime.value(upgradesCollection()); }
-    inline unsigned int baseReloadingTime() const  { return mBaseReloadingTime; }
+    inline unsigned int reloadingTime1() const  { return mReloadingTime.value(upgradesCollection()); }
     /**
      * The damage this unit makes to other units. Negative values means
      * repairing
      **/
-    inline long int damage() const  { return mDamage.value(upgradesCollection()); }
-    inline long int baseDamage() const  { return mBaseDamage; }
+    inline long int damage1() const  { return mDamage.value(upgradesCollection()); }
     /**
      * @return Damage range of missile of this unit, e.g. range in what units will be damaged
      **/
-    inline bofixed damageRange() const  { return mDamageRange.value(upgradesCollection()); }
-    inline bofixed baseDamageRange() const  { return mBaseDamageRange; }
+    inline bofixed damageRange1() const  { return mDamageRange.value(upgradesCollection()); }
     /**
      * @return Full damage range of missile of this unit, e.g. range in what
      *  units will be damaged by damage value (farther they'll be damaged less)
      **/
-    inline bofixed fullDamageRange() const  { return mFullDamageRange.value(upgradesCollection()); }
-    inline bofixed baseFullDamageRange() const  { return mBaseFullDamageRange; }
+    inline bofixed fullDamageRange1() const  { return mFullDamageRange.value(upgradesCollection()); }
     /**
      * @return Maximum speed that missile of this weapon can have or 0 if speed is infinite
      **/
-    inline bofixed speed() const  { return mSpeed.value(upgradesCollection()); }
-    inline bofixed baseSpeed() const  { return mBaseSpeed; }
+    inline bofixed speed1() const  { return mSpeed.value(upgradesCollection()); }
     /**
      * @return Acceleration speed of missile of this unit
      **/
@@ -177,13 +170,14 @@ class BosonWeaponProperties : public PluginProperties
     /**
      * Creates new shot
      * @param attacker Unit that fired this shot
+     * @param weapon The weapon that fired this shot
      * @param pos Position (center point) of attacker. Note that offset is added to this value
      * @param target Position of shot's target point
      * @return Created shot. Note that it's not added to canvas.
      * Note that pos or target may not be used depending on shot's type
      **/
-    BosonShot* newShot(Unit* attacker, BoVector3Fixed pos, BoVector3Fixed target) const;
-    BosonShot* newShot(Unit* attacker, BoVector3Fixed pos, Unit* target) const;
+    BosonShot* newShot(Unit* attacker, const BosonWeapon* weapon, BoVector3Fixed pos, BoVector3Fixed target) const;
+    BosonShot* newShot(Unit* attacker, const BosonWeapon* weapon, BoVector3Fixed pos, Unit* target) const;
 
     QPtrList<BosonEffect> newShootEffects(BoVector3Fixed pos, bofixed rotation) const;
     QPtrList<BosonEffect> newFlyEffects(BoVector3Fixed pos, bofixed rotation) const;
@@ -202,21 +196,6 @@ class BosonWeaponProperties : public PluginProperties
     QIntDict<BoAction>* actions()  { return &mActions; }
 
 
-    bool getBaseValue(unsigned long int* ret, const QString& name, const QString& type) const;
-    bool getBaseValue(long int* ret, const QString& name, const QString& type) const;
-    bool getBaseValue(bofixed* ret, const QString& name, const QString& type) const;
-
-    const UpgradesCollection& upgradesCollection() const
-    {
-      return mUpgradesCollection;
-    }
-    void clearUpgrades();
-    void addUpgrade(const UpgradeProperties* prop);
-    void removeUpgrade(const UpgradeProperties* prop);
-    void removeUpgrade(unsigned long int id);
-
-    bool saveUpgradesAsXML(QDomElement& root) const;
-    bool loadUpgradesFromXML(const SpeciesTheme* theme, const QDomElement& root);
 
   protected:
     void setWeaponName(QString str)  { mName = str; }
@@ -239,23 +218,33 @@ class BosonWeaponProperties : public PluginProperties
     void reset();
     void loadAction(UnitAction type, KSimpleConfig* cfg, const QString& key, bool useDefault = false);
 
+    /**
+     * Calls @ref insertULongWeaponBaseValue. @p name is converted to be a valid
+     * weapon name, i.e. to "Weapon_ID:name", where ID is @ref id - 1.
+     **/
+    bool insertULongWeaponBaseValue(unsigned long int v, const QString& name, const QString& type = "MaxValue");
+    bool insertLongWeaponBaseValue(long int v, const QString& name, const QString& type = "MaxValue");
+    bool insertBoFixedWeaponBaseValue(bofixed v, const QString& name, const QString& type = "MaxValue");
+
+    /**
+     * @return @ref ulongBaseValue, but with @p name modified so, that it is a
+     * valid weapon property name (see also @ref insertULongWeaponBaseValue).
+     **/
+    unsigned long int ulongWeaponBaseValue(const QString& name, const QString& type = "MaxValue", unsigned long int defaultValue = 0) const;
+    long int longWeaponBaseValue(const QString& name, const QString& type = "MaxValue", long int defaultValue = 0) const;
+    bofixed bofixedWeaponBaseValue(const QString& name, const QString& type = "MaxValue", bofixed defaultValue = 0) const;
+
     friend class BoUnitEditor;
 
   private:
 
-#define DECLAREUPGRADEABLE(type, name) \
-                void setBase##name(type v) { mBase##name = v; } \
-                BoUpgradeableProperty<type> m##name; \
-                type mBase##name;
-
-
     unsigned long int mId;
-    DECLAREUPGRADEABLE(unsigned long int, Range);
-    DECLAREUPGRADEABLE(long int, Damage);
-    DECLAREUPGRADEABLE(bofixed, DamageRange);
-    DECLAREUPGRADEABLE(bofixed, FullDamageRange);
-    DECLAREUPGRADEABLE(unsigned long int, ReloadingTime);
-    DECLAREUPGRADEABLE(bofixed, Speed);
+    BoUpgradeableProperty<unsigned long int> mRange;
+    BoUpgradeableProperty<long int> mDamage;
+    BoUpgradeableProperty<bofixed> mDamageRange;
+    BoUpgradeableProperty<bofixed> mFullDamageRange;
+    BoUpgradeableProperty<unsigned long int> mReloadingTime;
+    BoUpgradeableProperty<bofixed> mSpeed;
     bool mCanShootAtAirUnits;
     bool mCanShootAtLandUnits;
     bofixed mAccelerationSpeed;
@@ -279,14 +268,6 @@ class BosonWeaponProperties : public PluginProperties
     bofixed mMaxFlyDistance;
     bofixed mTurningSpeed;
     bofixed mStartAngle;
-
-
-#undef DECLAREUPGRADEABLE
-
-    UpgradesCollection mUpgradesCollection;
-    QMap<QString, unsigned long int*> mULongProperties;
-    QMap<QString, long int*> mLongProperties;
-    QMap<QString, bofixed*> mBoFixedProperties;
 };
 
 
@@ -375,6 +356,34 @@ class BosonWeapon : public UnitPlugin
     virtual void unitDestroyed(Unit*) {}
     virtual void itemRemoved(BosonItem*) {}
 
+    /**
+     * @return The weapon range of this unit. It's a number of cells
+     **/
+    inline unsigned long int range() const  { return mRange.value(upgradesCollection()); }
+    /**
+     * @return The number of advance calls until the weapon is reloaded
+     **/
+    inline unsigned int reloadingTime() const  { return mReloadingTime.value(upgradesCollection()); }
+    /**
+     * The damage this unit makes to other units. Negative values means
+     * repairing
+     **/
+    inline long int damage() const  { return mDamage.value(upgradesCollection()); }
+    /**
+     * @return Damage range of missile of this unit, e.g. range in what units will be damaged
+     **/
+    inline bofixed damageRange() const  { return mDamageRange.value(upgradesCollection()); }
+    /**
+     * @return Full damage range of missile of this unit, e.g. range in what
+     *  units will be damaged by damage value (farther they'll be damaged less)
+     **/
+    inline bofixed fullDamageRange() const  { return mFullDamageRange.value(upgradesCollection()); }
+    /**
+     * @return Maximum speed that missile of this weapon can have or 0 if speed is infinite
+     **/
+    inline bofixed speed() const  { return mSpeed.value(upgradesCollection()); }
+
+
   protected:
     void shoot(const BoVector3Fixed& pos, const BoVector3Fixed& target);
 
@@ -383,6 +392,13 @@ class BosonWeapon : public UnitPlugin
   private:
     const BosonWeaponProperties* mProp;
     KGameProperty<int> mReloadCounter;
+
+    BoUpgradeableProperty<unsigned long int> mRange;
+    BoUpgradeableProperty<long int> mDamage;
+    BoUpgradeableProperty<bofixed> mDamageRange;
+    BoUpgradeableProperty<bofixed> mFullDamageRange;
+    BoUpgradeableProperty<unsigned long int> mReloadingTime;
+    BoUpgradeableProperty<bofixed> mSpeed;
 };
 
 #endif // BOSONWEAPON_H

@@ -94,6 +94,11 @@ Boson* UnitPlugin::game() const
  return (Boson*)player()->game();
 }
 
+const BoUpgradesCollection& UnitPlugin::upgradesCollection() const
+{
+ return unit()->upgradesCollection();
+}
+
 
 ProductionPlugin::ProductionPlugin(Unit* unit) : UnitPlugin(unit)
 {
@@ -1332,7 +1337,7 @@ void BombingPlugin::advance(unsigned int)
 	mWeapon->dropBomb();
 	// And get the hell out of there
 	// Go away from bomb's explosion radius
-	bofixed dist = mWeapon->properties()->damageRange() + unit()->width() / 2;
+	bofixed dist = mWeapon->damageRange() + unit()->width() / 2;
   boDebug() << k_funcinfo << "Getaway dist: " << dist << "; rot: " << unit()->rotation() << endl;
 	bofixed newx = unitx;
 	bofixed newy = unity;

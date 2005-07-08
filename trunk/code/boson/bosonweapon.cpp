@@ -46,12 +46,12 @@ BosonWeaponProperties::BosonWeaponProperties(const UnitProperties* prop, unsigne
     PluginProperties(prop),
     // AB: note that ids start with _1_ here, but with _0_ in the config files.
     // so we must subtract one for the strings.
-    mRange(0,           this, QString("Weapon_%1:Range").arg(id-1), "MaxValue"),
-    mDamage(0,          this, QString("Weapon_%1:Damage").arg(id-1), "MaxValue"),
-    mDamageRange(0,     this, QString("Weapon_%1:DamageRange").arg(id-1), "MaxValue"),
-    mFullDamageRange(0, this, QString("Weapon_%1:FullDamageRange").arg(id-1), "MaxValue"),
-    mReloadingTime(0,   this, QString("Weapon_%1:Reload").arg(id-1), "MaxValue"),
-    mSpeed(0,           this, QString("Weapon_%1:Speed").arg(id-1), "MaxValue")
+    mRange(          this, QString("Weapon_%1:Range").arg(id-1), "MaxValue"),
+    mDamage(         this, QString("Weapon_%1:Damage").arg(id-1), "MaxValue"),
+    mDamageRange(    this, QString("Weapon_%1:DamageRange").arg(id-1), "MaxValue"),
+    mFullDamageRange(this, QString("Weapon_%1:FullDamageRange").arg(id-1), "MaxValue"),
+    mReloadingTime(  this, QString("Weapon_%1:Reload").arg(id-1), "MaxValue"),
+    mSpeed(          this, QString("Weapon_%1:Speed").arg(id-1), "MaxValue")
 {
   mId = id;
 
@@ -59,13 +59,6 @@ BosonWeaponProperties::BosonWeaponProperties(const UnitProperties* prop, unsigne
   {
     boError() << k_funcinfo << "weapon IDs must be >= 1 !!" << endl;
   }
-
-  mULongProperties.insert(QString("Weapon_%1:Range").arg(id-1), &mBaseRange);
-  mLongProperties.insert(QString("Weapon_%1:Damage").arg(id-1), &mBaseDamage);
-  mBoFixedProperties.insert(QString("Weapon_%1:DamageRange").arg(id-1), &mBaseDamageRange);
-  mBoFixedProperties.insert(QString("Weapon_%1:FullDamageRange").arg(id-1), &mBaseFullDamageRange);
-  mULongProperties.insert(QString("Weapon_%1:Reload").arg(id-1), &mBaseReloadingTime);
-  mBoFixedProperties.insert(QString("Weapon_%1:Speed").arg(id-1), &mBaseSpeed);
 }
 
 BosonWeaponProperties::~BosonWeaponProperties()
@@ -75,6 +68,36 @@ BosonWeaponProperties::~BosonWeaponProperties()
 QString BosonWeaponProperties::name() const
 {
   return "Weapon";
+}
+
+bool BosonWeaponProperties::insertULongWeaponBaseValue(unsigned long int v, const QString& name, const QString& type)
+{
+  return insertULongBaseValue(v, QString("Weapon_%1:%2").arg(id() - 1).arg(name), type);
+}
+
+bool BosonWeaponProperties::insertLongWeaponBaseValue(long int v, const QString& name, const QString& type)
+{
+  return insertLongBaseValue(v, QString("Weapon_%1:%2").arg(id() - 1).arg(name), type);
+}
+
+bool BosonWeaponProperties::insertBoFixedWeaponBaseValue(bofixed v, const QString& name, const QString& type)
+{
+  return insertBoFixedBaseValue(v, QString("Weapon_%1:%2").arg(id() - 1).arg(name), type);
+}
+
+unsigned long int BosonWeaponProperties::ulongWeaponBaseValue(const QString& name, const QString& type, unsigned long int defaultValue) const
+{
+  return ulongBaseValue(QString("Weapon_%1:%2").arg(id() - 1).arg(name), type, defaultValue);
+}
+
+long int BosonWeaponProperties::longWeaponBaseValue(const QString& name, const QString& type, long int defaultValue) const
+{
+  return longBaseValue(QString("Weapon_%1:%2").arg(id() - 1).arg(name), type, defaultValue);
+}
+
+bofixed BosonWeaponProperties::bofixedWeaponBaseValue(const QString& name, const QString& type, bofixed defaultValue) const
+{
+  return bofixedBaseValue(QString("Weapon_%1:%2").arg(id() - 1).arg(name), type, defaultValue);
 }
 
 void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
@@ -109,8 +132,8 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
     mShotType = BosonShot::Rocket;
   }
   // Other parameters
-  mBaseRange = cfg->readUnsignedLongNumEntry("Range", 0);
-  mMaxFlyDistance = cfg->readDoubleNumEntry("MaxFlyDistance", mBaseRange * 1.5f);
+  insertULongWeaponBaseValue(cfg->readUnsignedLongNumEntry("Range", 0), "Range", "MaxValue");
+  mMaxFlyDistance = cfg->readDoubleNumEntry("MaxFlyDistance", ulongWeaponBaseValue("Range", "MaxValue") * 1.5f);
   mStartAngle = cfg->readDoubleNumEntry("StartAngle", -1);
   if(mStartAngle != -1 && (mStartAngle < 0 || mStartAngle > 90))
   {
@@ -118,11 +141,11 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
     mStartAngle = -1;
   }
   // Reload interval is converted from seconds to advance calls here
-  mBaseReloadingTime = (int)(cfg->readDoubleNumEntry("Reload", 0) * 20.0f);
+  insertULongWeaponBaseValue((unsigned long int)(cfg->readDoubleNumEntry("Reload", 0) * 20.0f), "Reload", "MaxValue");
  // We divide speeds with 20, because speeds in config files are cells/second,
  //  but we want cells/advance call
-  mBaseSpeed = cfg->readDoubleNumEntry("Speed", 0) / 20.0f;
-  if(speed() == 0 && mShotType == BosonShot::Rocket)
+  insertBoFixedWeaponBaseValue(cfg->readDoubleNumEntry("Speed", 0) / 20.0f, "Speed", "MaxValue");
+  if(speed1() == 0 && mShotType == BosonShot::Rocket)
   {
     boWarning() << k_funcinfo << "Type is rocket, but speed is 0, setting type to bullet" << endl;
     mShotType = BosonShot::Bullet;
@@ -131,13 +154,13 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   bofixed turningspeed = (cfg->readDoubleNumEntry("TurningSpeed", 120) / 20.0f);
   // We convert turning speed for performace reasons
   mTurningSpeed = tan(turningspeed * DEG2RAD);
-  mBaseDamage = cfg->readUnsignedLongNumEntry("Damage", 0);
-  mBaseDamageRange = cfg->readDoubleNumEntry("DamageRange", 1);
-  mBaseFullDamageRange = cfg->readDoubleNumEntry("FullDamageRange", 0.25 * mBaseDamageRange);
-  if(mBaseFullDamageRange > mBaseDamageRange)
+  insertLongWeaponBaseValue(cfg->readLongNumEntry("Damage", 0), "Damage", "MaxValue");
+  insertBoFixedWeaponBaseValue(cfg->readDoubleNumEntry("DamageRange", 1), "DamageRange", "MaxValue");
+  insertBoFixedWeaponBaseValue(cfg->readDoubleNumEntry("FullDamageRange", 0.25 * bofixedWeaponBaseValue("DamageRange")), "FullDamageRange", "MaxValue");
+  if(bofixedWeaponBaseValue("FullDamageRange") > bofixedWeaponBaseValue("DamageRange"))
   {
     boWarning() << k_funcinfo << "FullDamageRange must not be bigger than DamageRange!" << endl;
-    mBaseFullDamageRange = mBaseDamageRange;
+    insertBoFixedWeaponBaseValue(bofixedWeaponBaseValue("DamageRange"), "FullDamageRange", "MaxValue");
   }
   mCanShootAtAirUnits = cfg->readBoolEntry("CanShootAtAirUnits", false);
   mCanShootAtLandUnits = cfg->readBoolEntry("CanShootAtLandUnits", false);
@@ -214,17 +237,17 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   cfg->writeEntry("Type", shottype);
   // Other parameters
   cfg->writeEntry("Name", mName);
-  cfg->writeEntry("Range", range());
+  cfg->writeEntry("Range", range1());
   // Reload interval is converted from advance calls to seconds here
-  cfg->writeEntry("Reload", reloadingTime() / 20.0f);
+  cfg->writeEntry("Reload", reloadingTime1() / 20.0f);
  // We multiply speeds with 20 because speeds in config files are cells/second,
  //  but here we have cells/advance calls
-  cfg->writeEntry("Speed", speed() * 20.0f);
+  cfg->writeEntry("Speed", speed1() * 20.0f);
   cfg->writeEntry("AccelerationSpeed", mAccelerationSpeed * 20.0f * 20.0f);
   cfg->writeEntry("TurningSpeed", atan(mTurningSpeed) * RAD2DEG * 20.0f);
   cfg->writeEntry("StartAngle", mStartAngle);
-  cfg->writeEntry("Damage", damage());
-  cfg->writeEntry("DamageRange", damageRange());
+  cfg->writeEntry("Damage", damage1());
+  cfg->writeEntry("DamageRange", damageRange1());
   cfg->writeEntry("CanShootAtAirUnits", mCanShootAtAirUnits);
   cfg->writeEntry("CanShootAtLandUnits", mCanShootAtLandUnits);
   cfg->writeEntry("Height", (double)mHeight);
@@ -240,15 +263,15 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
 void BosonWeaponProperties::reset()
 {
   mName = "";
-  mBaseRange = 0;
-  mBaseReloadingTime = 0;
-  mBaseSpeed = 0;
+  insertULongWeaponBaseValue(0, "Range", "MaxValue");
+  insertLongWeaponBaseValue(0, "Damage", "MaxValue");
+  insertBoFixedWeaponBaseValue(1, "DamageRange", "MaxValue");
+  insertBoFixedWeaponBaseValue(0.25 * bofixedWeaponBaseValue("DamageRange"), "FullDamageRange", "MaxValue");
+  insertULongWeaponBaseValue(0, "Reload", "MaxValue");
+  insertBoFixedWeaponBaseValue(0, "Speed", "MaxValue");
   mAccelerationSpeed = 0;
   mTurningSpeed = tan(120 * DEG2RAD / 20.0f);
   mStartAngle = -1;
-  mBaseDamage = 0;
-  mBaseDamageRange = 1;
-  mBaseFullDamageRange = 0.25 * mBaseDamageRange;
   mShotType = BosonShot::Rocket;
   mCanShootAtAirUnits = false;
   mCanShootAtLandUnits = false;
@@ -264,7 +287,7 @@ void BosonWeaponProperties::reset()
   mSounds.insert(SoundWeaponHit, "hit");
 }
 
-BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3Fixed pos, BoVector3Fixed target) const
+BosonShot* BosonWeaponProperties::newShot(Unit* attacker, const BosonWeapon* weapon, BoVector3Fixed pos, BoVector3Fixed target) const
 {
   if(!attacker)
   {
@@ -275,54 +298,95 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3Fixed pos, Bo
   BosonCanvas* canvas = attacker->canvas();
   BO_CHECK_NULL_RET0(canvas);
   BO_CHECK_NULL_RET0(attacker->owner());
-  if(shotType() == BosonShot::Bullet)
+  BoVector3Fixed realPos;
+  switch(shotType())
   {
-    ItemType type(BosonShot::Bullet, unitProperties()->typeId(), id());
-    s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, pos);
-    ((BosonShotBullet*)s)->setTarget(target);
-    s->explode();
+    case BosonShot::Bullet:
+    {
+      ItemType type(BosonShot::Bullet, unitProperties()->typeId(), id());
+      s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, pos);
+      break;
+    }
+    case BosonShot::Rocket:
+    {
+      BoVector3Float realPosFloat;
+      BoMatrix m;
+      m.rotate(attacker->rotation(), 0, 0, 1);
+      BoVector3Float offset = mOffset.toFloat();
+      m.transform(&realPosFloat, &offset);
+      realPos = realPosFloat.toFixed();
+      realPos += pos;
+      ItemType type(BosonShot::Rocket, unitProperties()->typeId(), id());
+      s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, realPos);
+      break;
+    }
+    case BosonShot::Mine:
+    {
+      ItemType type(BosonShot::Mine, unitProperties()->typeId(), id());
+      s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, pos);
+      break;
+    }
+    case BosonShot::Bomb:
+    {
+      BoVector3Float realPosFloat;
+      BoMatrix m;
+      m.rotate(attacker->rotation(), 0, 0, 1);
+      BoVector3Float offset = mOffset.toFloat();
+      m.transform(&realPosFloat, &offset);
+      realPos = realPosFloat.toFixed();
+      realPos += pos;
+      ItemType type(BosonShot::Bomb, unitProperties()->typeId(), id());
+      s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, pos);
+      break;
+    }
+    default:
+    {
+      boError() << k_funcinfo << "Invalid shotType: " << shotType() << endl;
+      return 0;
+    }
   }
-  else if(shotType() == BosonShot::Rocket)
+
+  if(!s)
   {
-    BoVector3Float realPosFloat;
-    BoMatrix m;
-    m.rotate(attacker->rotation(), 0, 0, 1);
-    BoVector3Float offset = mOffset.toFloat();
-    m.transform(&realPosFloat, &offset);
-    BoVector3Fixed realPos = realPosFloat.toFixed();
-    realPos += pos;
-    ItemType type(BosonShot::Rocket, unitProperties()->typeId(), id());
-    s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, realPos);
-    ((BosonShotRocket*)s)->init(realPos, target);
-  }
-  else if(shotType() == BosonShot::Mine)
-  {
-    ItemType type(BosonShot::Mine, unitProperties()->typeId(), id());
-    s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, pos);
-    ((BosonShotMine*)s)->init(pos);
-  }
-  else if(shotType() == BosonShot::Bomb)
-  {
-    BoVector3Float realPosFloat;
-    BoMatrix m;
-    m.rotate(attacker->rotation(), 0, 0, 1);
-    BoVector3Float offset = mOffset.toFloat();
-    m.transform(&realPosFloat, &offset);
-    BoVector3Fixed realPos = realPosFloat.toFixed();
-    realPos += pos;
-    ItemType type(BosonShot::Bomb, unitProperties()->typeId(), id());
-    s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, pos);
-    ((BosonShotBomb*)s)->init(realPos);
-  }
-  else
-  {
-    boError() << k_funcinfo << "Invalid shotType: " << shotType() << endl;
     return 0;
   }
+
+  s->applyWeapon(weapon);
+
+  switch(shotType())
+  {
+    case BosonShot::Bullet:
+    {
+      ((BosonShotBullet*)s)->setTarget(target);
+      s->explode();
+      break;
+    }
+    case BosonShot::Rocket:
+    {
+      ((BosonShotRocket*)s)->init(realPos, target);
+      break;
+    }
+    case BosonShot::Mine:
+    {
+      ((BosonShotMine*)s)->init(pos);
+      break;
+    }
+    case BosonShot::Bomb:
+    {
+      ((BosonShotBomb*)s)->init(realPos);
+      break;
+    }
+    default:
+    {
+      boError() << k_funcinfo << "Invalid shotType: " << shotType() << endl;
+      return 0;
+    }
+  }
+
   return s;
 }
 
-BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3Fixed pos, Unit* target) const
+BosonShot* BosonWeaponProperties::newShot(Unit* attacker, const BosonWeapon* weapon, BoVector3Fixed pos, Unit* target) const
 {
   if(!attacker)
   {
@@ -333,25 +397,48 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3Fixed pos, Un
   BosonCanvas* canvas = attacker->canvas();
   BO_CHECK_NULL_RET0(canvas);
   BO_CHECK_NULL_RET0(attacker->owner());
-  if(shotType() == BosonShot::Missile)
+  BoVector3Fixed realPos;
+  switch(shotType())
   {
-    BoVector3Float realPosFloat;
-    BoMatrix m;
-    m.rotate(attacker->rotation(), 0, 0, 1);
-    BoVector3Float offset = mOffset.toFloat();
-    m.transform(&realPosFloat, &offset);
-    BoVector3Fixed realPos = realPosFloat.toFixed();
-    realPos += pos;
-    ItemType type(BosonShot::Missile, unitProperties()->typeId(), id());
-    s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, realPos);
-    ((BosonShotMissile*)s)->init(realPos, target);
+    case BosonShot::Missile:
+    {
+      BoVector3Float realPosFloat;
+      BoMatrix m;
+      m.rotate(attacker->rotation(), 0, 0, 1);
+      BoVector3Float offset = mOffset.toFloat();
+      m.transform(&realPosFloat, &offset);
+      realPos = realPosFloat.toFixed();
+      realPos += pos;
+      ItemType type(BosonShot::Missile, unitProperties()->typeId(), id());
+      s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, realPos);
+      break;
+    }
+    default:
+    {
+      boWarning() << k_funcinfo << "Use newShot() which takes target position parameter for shottype " << shotType() << endl;
+      BoVector3Fixed targetpos(target->centerX(), target->centerY(), target->z());
+
+      // abort further processing, return.
+      return newShot(attacker, weapon, pos, targetpos);
+    }
   }
-  else
+
+  if(!s)
   {
-    boWarning() << k_funcinfo << "Use newShot() which takes target position parameter for shottype " << shotType() << endl;
-    BoVector3Fixed targetpos(target->centerX(), target->centerY(), target->z());
-    s = newShot(attacker, pos, targetpos);
+    return 0;
   }
+  s->applyWeapon(weapon);
+
+  switch(shotType())
+  {
+    case BosonShot::Missile:
+      ((BosonShotMissile*)s)->init(realPos, target);
+      break;
+    default:
+      boError() << k_funcinfo << "unhandled shot type " << shotType() << endl;
+      break;
+  }
+
   return s;
 }
 
@@ -404,116 +491,18 @@ void BosonWeaponProperties::loadAction(UnitAction type, KSimpleConfig* cfg, cons
   mActions.insert(type, speciesTheme()->action(cfg->readEntry(key, key)));
 }
 
-bool BosonWeaponProperties::getBaseValue(unsigned long int* ret, const QString& name, const QString& type) const
-{
-  if(!mULongProperties.contains(name))
-  {
-    boError() << k_funcinfo << "no such property " << name << endl;
-    return false;
-  }
-  if(type == "MaxValue")
-  {
-    unsigned long int* p = mULongProperties[name];
-    *ret = *p;
-    return true;
-  }
-  else if(type == "MinValue")
-  {
-    boError() << k_funcinfo << "MinValue not yet implemented" << endl;
-    return false;
-  }
-  else
-  {
-    boError() << k_funcinfo << "invalid type " << type << endl;
-    return false;
-  }
-  return false;
-}
-
-bool BosonWeaponProperties::getBaseValue(long int* ret, const QString& name, const QString& type) const
-{
-  if(!mLongProperties.contains(name))
-  {
-    boError() << k_funcinfo << "no such property " << name << endl;
-    return false;
-  }
-  if(type == "MaxValue")
-  {
-    long int* p = mLongProperties[name];
-    *ret = *p;
-    return true;
-  }
-  else if(type == "MinValue")
-  {
-    boError() << k_funcinfo << "MinValue not yet implemented" << endl;
-    return false;
-  }
-  else
-  {
-    boError() << k_funcinfo << "invalid type " << type << endl;
-    return false;
-  }
-  return false;
-}
-
-bool BosonWeaponProperties::getBaseValue(bofixed* ret, const QString& name, const QString& type) const
-{
-  if(!mBoFixedProperties.contains(name))
-  {
-    boError() << k_funcinfo << "no such property " << name << endl;
-    return false;
-  }
-  if(type == "MaxValue")
-  {
-    bofixed* p = mBoFixedProperties[name];
-    *ret = *p;
-    return true;
-  }
-  else if(type == "MinValue")
-  {
-    boError() << k_funcinfo << "MinValue not yet implemented" << endl;
-    return false;
-  }
-  else
-  {
-    boError() << k_funcinfo << "invalid type " << type << endl;
-    return false;
-  }
-  return false;
-}
-
-void BosonWeaponProperties::clearUpgrades()
-{
-  mUpgradesCollection.clearUpgrades();
-}
-
-void BosonWeaponProperties::addUpgrade(const UpgradeProperties* prop)
-{
-  mUpgradesCollection.addUpgrade(prop);
-}
-
-void BosonWeaponProperties::removeUpgrade(const UpgradeProperties* prop)
-{
-  mUpgradesCollection.removeUpgrade(prop);
-}
-
-void BosonWeaponProperties::removeUpgrade(unsigned long int id)
-{
-  removeUpgrade(mUpgradesCollection.findUpgrade(id));
-}
-
-bool BosonWeaponProperties::saveUpgradesAsXML(QDomElement& root) const
-{
-  return upgradesCollection().saveAsXML(root);
-}
-
-bool BosonWeaponProperties::loadUpgradesFromXML(const SpeciesTheme* theme, const QDomElement& root)
-{
-  return mUpgradesCollection.loadFromXML(theme, root);
-}
 
 /*****  BosonWeapon  *****/
-BosonWeapon::BosonWeapon(int weaponNumber, BosonWeaponProperties* prop, Unit* _unit) : UnitPlugin(_unit)
+BosonWeapon::BosonWeapon(int weaponNumber, BosonWeaponProperties* prop, Unit* _unit)
+    : UnitPlugin(_unit),
+    // AB: note that ids start with _1_ here, but with _0_ in the config files.
+    // so we must subtract one for the strings.
+    mRange(          prop, QString("Weapon_%1:Range").arg(prop->id()-1), "MaxValue"),
+    mDamage(         prop, QString("Weapon_%1:Damage").arg(prop->id()-1), "MaxValue"),
+    mDamageRange(    prop, QString("Weapon_%1:DamageRange").arg(prop->id()-1), "MaxValue"),
+    mFullDamageRange(prop, QString("Weapon_%1:FullDamageRange").arg(prop->id()-1), "MaxValue"),
+    mReloadingTime(  prop, QString("Weapon_%1:Reload").arg(prop->id()-1), "MaxValue"),
+    mSpeed(          prop, QString("Weapon_%1:Speed").arg(prop->id()-1), "MaxValue")
 {
   mProp = prop;
   if (!unit())
@@ -602,10 +591,10 @@ void BosonWeapon::shoot(Unit* u)
   if(mProp->shotType() == BosonShot::Missile)
   {
     // FIXME: code duplication
-    mProp->newShot(unit(), mypos, u);
+    mProp->newShot(unit(), this, mypos, u);
     canvas()->addEffects(mProp->newShootEffects(mypos, unit()->rotation()));
     mProp->playSound(SoundWeaponShoot);
-    mReloadCounter = mProp->reloadingTime();
+    mReloadCounter = reloadingTime();
     return;
   }
 
@@ -617,7 +606,7 @@ void BosonWeapon::shoot(Unit* u)
     // Note that this is just _approximation_! It doesn't take many things,
     //  e.g. acceleration into account.
     float dist = (targetpos - mypos).length();
-    float time = dist / mProp->speed();
+    float time = dist / speed();
     targetpos += BoVector3Fixed(u->xVelocity(), u->yVelocity(), u->zVelocity()) * time;
   }
   if (!unit())
@@ -645,10 +634,10 @@ void BosonWeapon::shoot(const BoVector3Fixed& pos, const BoVector3Fixed& target)
     boError() << k_funcinfo << "NULL unit" << endl;
     return;
   }
-  mProp->newShot(unit(), pos, target);
+  mProp->newShot(unit(), this, pos, target);
   canvas()->addEffects(mProp->newShootEffects(pos, unit()->rotation()));
   mProp->playSound(SoundWeaponShoot);
-  mReloadCounter = mProp->reloadingTime();
+  mReloadCounter = reloadingTime();
 }
 
 bool BosonWeapon::layMine()

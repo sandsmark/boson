@@ -453,9 +453,18 @@ public:
 	 **/
 	BosonWeapon* weapon(unsigned long int id) const;
 
+	/**
+	 * @return maximum range of weapons of this unit e.g. range of weapon with the longest range
+	 **/
+	unsigned long int maxWeaponRange() const;
+	unsigned long int maxAirWeaponRange() const;
+	unsigned long int maxLandWeaponRange() const;
+
 
 	virtual void setMovingStatus(MovingStatus m);
 
+	virtual void addUpgrade(const UpgradeProperties* upgrade);
+	virtual void removeUpgrade(const UpgradeProperties* upgrade);
 
 protected:
 	void shootAt(BosonWeapon* w, Unit* target);
@@ -531,6 +540,8 @@ protected:
 	void updateZ(bofixed moveByX, bofixed moveByY, bofixed* moveZ, bofixed* rotateX, bofixed* rotateY);
 
 	virtual const QColor* teamColor() const;
+
+	void recalculateMaxWeaponRange();
 
 
 private:
