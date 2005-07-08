@@ -132,6 +132,10 @@ public:
 	BosonWeapon** mWeapons;
 
 	BosonPathInfo mPathInfo;
+
+	unsigned long int mMaxWeaponRange;
+	unsigned long int mMaxLandWeaponRange;
+	unsigned long int mMaxAirWeaponRange;
 };
 
 Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
@@ -141,6 +145,9 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
 	initStatic();
  }
  d = new UnitPrivate;
+ d->mMaxWeaponRange = 0;
+ d->mMaxAirWeaponRange = 0;
+ d->mMaxLandWeaponRange = 0;
  mCurrentPlugin = 0;
  mAdvanceFunction = &Unit::advanceIdle;
  mAdvanceFunction2 = &Unit::advanceIdle;
@@ -550,7 +557,7 @@ bool Unit::attackEnemyUnitsInRange()
 	// If there's no target or target isn't in range anymore, find new best enemy unit in range
 	// FIXME: check for max(Land|Air)WeaponRange
 	if (!target() || target()->isDestroyed() ||
-			!inRange(unitProperties()->maxWeaponRange(), target())) {
+			!inRange(maxWeaponRange(), target())) {
 		d->mTarget = bestEnemyUnitInRange();
 		if (!target()) {
 			return false;
@@ -576,7 +583,7 @@ bool Unit::attackEnemyUnitsInRange()
 	}
 
 	// And finally... let it have everything we've got
-	if (w->canShootAt(target()) && inRange(w->properties()->range(), target())) {
+	if (w->canShootAt(target()) && inRange(w->range(), target())) {
 		shootAt(w, target());
 		if (target()->isDestroyed()) {
 			d->mTarget = 0;
@@ -599,7 +606,7 @@ Unit* Unit::bestEnemyUnitInRange()
 	return 0;
  }
  // Return if no enemies in range
- BoItemList* list = enemyUnitsInRange(unitProperties()->maxWeaponRange());
+ BoItemList* list = enemyUnitsInRange(maxWeaponRange());
  if (!list->count() > 0) {
 	return 0;
  }
@@ -623,14 +630,14 @@ Unit* Unit::bestEnemyUnitInRange()
 		if (!unitProperties()->canShootAtAirUnits()) {
 			continue;
 		}
-		if (dist > unitProperties()->maxAirWeaponRange()) {
+		if (dist > maxAirWeaponRange()) {
 			continue;
 		}
 	} else {
 		if (!unitProperties()->canShootAtLandUnits()) {
 			continue;
 		}
-		if (dist > unitProperties()->maxLandWeaponRange()) {
+		if (dist > maxLandWeaponRange()) {
 			continue;
 		}
 	}
@@ -690,9 +697,9 @@ void Unit::advanceAttack(unsigned int advanceCallsCount)
  boDebug(300) << "    " << k_funcinfo << "checking if unit " << target()->id() << ") is in range" << endl;
  int range;
  if (target()->isFlying()) {
-	range = unitProperties()->maxAirWeaponRange();
+	range = maxAirWeaponRange();
  } else {
-	range = unitProperties()->maxLandWeaponRange();
+	range = maxLandWeaponRange();
  }
 
  if (!inRange(range, target())) {
@@ -737,7 +744,7 @@ void Unit::advanceAttack(unsigned int advanceCallsCount)
  BosonWeapon* w;
  for (; *wit; ++wit) {
 	w = *wit;
-	if (w->properties()->autoUse() && w->reloaded() && w->canShootAt(target()) && inRange(w->properties()->range(), target())) {
+	if (w->properties()->autoUse() && w->reloaded() && w->canShootAt(target()) && inRange(w->range(), target())) {
 		shootAt(w, target());
 		if (target()->isDestroyed()) {
 			boDebug(300) << "    " << k_funcinfo << "target destroyed, returning" << endl;
@@ -1141,22 +1148,6 @@ bool Unit::saveAsXML(QDomElement& root)
 	}
  }
 
- QDomElement weaponUpgrades = doc.createElement("WeaponUpgrades");
- for (QPtrListIterator<UnitPlugin> it(d->mPlugins); it.current(); ++it) {
-	if (it.current()->pluginType() == PluginProperties::Weapon) {
-		const BosonWeaponProperties* prop = (const BosonWeaponProperties*)it.current();
-		QDomElement weaponType = doc.createElement("WeaponTypeUpgrades");
-		weaponType.setAttribute("Id", QString::number(prop->id()));
-		if (!prop->saveUpgradesAsXML(weaponType)) {
-			boError() << k_funcinfo << "cannot save Upgrades of weapon type " << prop->id() << endl;
-			return false;
-		}
-		weaponUpgrades.appendChild(weaponType);
-	}
- }
- root.appendChild(weaponUpgrades);
-
-
  // Save pathinfo
  QDomElement pathinfoxml = doc.createElement(QString::fromLatin1("PathInfo"));
  root.appendChild(pathinfoxml);
@@ -1276,35 +1267,6 @@ bool Unit::loadFromXML(const QDomElement& root)
  updateRotation();
  setAdvanceWork(advanceWork());
 
- QDomElement weaponUpgrades = root.namedItem("WeaponUpgrades").toElement();
- if (weaponUpgrades.isNull()) {
-	boError() << k_funcinfo << "NULL WeaponUpgrades tag" << endl;
-	return false;
- }
- for (QDomNode n = weaponUpgrades.firstChild(); !n.isNull(); n = n.nextSibling()) {
-	QDomElement e = n.toElement();
-	if (e.isNull()) {
-		continue;
-	}
-	if (e.tagName() != "WeaponTypeUpgrades") {
-		continue;
-	}
-	bool ok = false;
-	unsigned long int id = e.attribute("Id").toULong(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "Invalid number for WeaponTypeUpgrades Id" << endl;
-		return false;
-	}
-	BosonWeaponProperties* prop = unitProperties()->nonConstWeaponProperties(id);
-	if (!prop) {
-		boError() << k_funcinfo << "NULL weapon properties for " << id << endl;
-		return false;
-	}
-	if (!prop->loadUpgradesFromXML(speciesTheme(), e)) {
-		boError() << k_funcinfo << "unable to load WeaponTypeUpgrades from XML for " << id << endl;
-		return false;
-	}
- }
 
  // Load pathinfo
  pathInfo()->reset();
@@ -1380,6 +1342,9 @@ bool Unit::loadFromXML(const QDomElement& root)
  }
  // Null pathinfoxml is valid too: in this case, we're loading from playfield
  //  file, not from savegame
+
+
+ recalculateMaxWeaponRange();
 
 
  return true;
@@ -1634,6 +1599,7 @@ void Unit::loadWeapons()
 		weaponPos++;
 	}
  }
+ recalculateMaxWeaponRange();
 }
 
 bool Unit::canShootAt(Unit *u)
@@ -1755,6 +1721,57 @@ void Unit::itemRemoved(BosonItem* item)
  }
 }
 
+void Unit::addUpgrade(const UpgradeProperties* upgrade)
+{
+ UnitBase::addUpgrade(upgrade);
+ recalculateMaxWeaponRange();
+}
+
+void Unit::removeUpgrade(const UpgradeProperties* upgrade)
+{
+ UnitBase::removeUpgrade(upgrade);
+ recalculateMaxWeaponRange();
+}
+
+unsigned long int Unit::maxWeaponRange() const
+{
+ return d->mMaxWeaponRange;
+}
+
+unsigned long int Unit::maxAirWeaponRange() const
+{
+ return d->mMaxAirWeaponRange;
+}
+
+unsigned long int Unit::maxLandWeaponRange() const
+{
+ return d->mMaxLandWeaponRange;
+}
+
+void Unit::recalculateMaxWeaponRange()
+{
+ d->mMaxAirWeaponRange = 0;
+ d->mMaxLandWeaponRange = 0;
+ for (BoPointerIterator<BosonWeapon> it = d->mWeapons; *it; ++it) {
+	const BosonWeapon* w = *it;
+	if (!w->properties()) {
+		boError() << k_funcinfo << "NULL properties for weapon " << w << endl;
+		continue;
+	}
+	if (w->properties()->canShootAtAirUnits()) {
+		if (w->range() > d->mMaxAirWeaponRange) {
+			d->mMaxAirWeaponRange = w->range();
+		}
+	}
+	if (w->properties()->canShootAtLandUnits()) {
+		if (w->range() > d->mMaxLandWeaponRange) {
+			d->mMaxLandWeaponRange = w->range();
+		}
+	}
+ }
+ d->mMaxWeaponRange = QMAX(d->mMaxAirWeaponRange, d->mMaxLandWeaponRange);
+}
+
 
 
 /////////////////////////////////////////////////
@@ -1865,9 +1882,9 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
 		}
 		int range;
 		if (target()->isFlying()) {
-			range = unitProperties()->maxAirWeaponRange();
+			range = maxAirWeaponRange();
 		} else {
-			range = unitProperties()->maxLandWeaponRange();
+			range = maxLandWeaponRange();
 		}
 		if (inRange(range, target())) {
 			boDebug(401) << k_funcinfo << "unit " << id() << ": target is in range now" << endl;

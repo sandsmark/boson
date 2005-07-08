@@ -19,8 +19,9 @@
 #ifndef PLUGINPROPERTIES_H
 #define PLUGINPROPERTIES_H
 
-#include <qstring.h>
+#include "boupgradeableproperty.h"
 
+#include <qstring.h>
 #include <qvaluelist.h>
 
 class UnitProperties;
@@ -47,7 +48,7 @@ class KSimpleConfig;
  * @short Base class for plugin properties for @ref UnitProperties
  * @authorAndreas Beckermann <b_mann@gmx.de>
  **/
-class PluginProperties
+class PluginProperties : public BoBaseValueCollection
 {
 public:
 	enum PluginPropertiesTypes {
@@ -76,6 +77,12 @@ public:
 	 * @return A unique ID for the plugin. See @ref PluginPropertiesTypes
 	 **/
 	virtual int pluginType() const = 0;
+
+
+	/**
+	 * @return UnitProperties::upgradesCollection.
+	 **/
+	const BoUpgradesCollection& upgradesCollection() const;
 
 private:
 	const UnitProperties* mUnitProperties;

@@ -30,6 +30,7 @@
 class Unit;
 class Player;
 class BosonWeaponProperties;
+class BosonWeapon;
 class UnitProperties;
 
 class QDomElement;
@@ -55,6 +56,10 @@ class BosonShot : public BosonItem
         // (static!!) property map, IDs must be unique among different classes.
         // Therefore we must not use the same ID twice, even if that's in
         // different classes.
+        IdWeaponDamage = 4096,
+        IdWeaponDamageRange = 4097,
+        IdWeaponFullDamageRange = 4098,
+        IdWeaponSpeed = 4099
     };
 
     /**
@@ -90,6 +95,13 @@ class BosonShot : public BosonItem
 
     virtual BosonModel* getModelForItem() const;
     virtual bool init();
+
+    /**
+     * Apply the values from @p weapon to this shot. @p weapon is the weapon
+     * shooting this shot, its values (like @ref damage) are derived to this
+     * object.
+     **/
+    virtual void applyWeapon(const BosonWeapon* weapon);
 
     /**
      * @return Weapon properties of this shot if it has one.
@@ -172,8 +184,19 @@ class BosonShot : public BosonItem
 
     virtual void moveToTarget() {}
 
+  protected:
     bool mActive;
     const BosonWeaponProperties* mProp;
+
+    // values from BosonWeapon. note that some classes may not use them at all
+    // (e.g. reimplement damage() with their own values)
+    KGameProperty<long int> mWeaponDamage;
+    KGameProperty<bofixed> mWeaponDamageRange;
+    KGameProperty<bofixed> mWeaponFullDamageRange;
+    KGameProperty<bofixed> mWeaponSpeed;
+
+  private:
+    void initPrivate();
 };
 
 

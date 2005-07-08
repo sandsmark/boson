@@ -60,7 +60,7 @@ class UnitPropertiesPrivate;
  *
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class UnitProperties
+class UnitProperties : public BoBaseValueCollection
 {
 protected:
 	enum TerrainType {
@@ -354,12 +354,6 @@ public:
 
 	const QPtrList<PluginProperties>* plugins() const;
 
-	/**
-	 * @return maximum range of weapons of this unit e.g. range of weapon with the longest range
-	 **/
-	unsigned long int maxWeaponRange() const  { return mMaxWeaponRange; }
-	unsigned long int maxAirWeaponRange() const  { return mMaxAirWeaponRange; }
-	unsigned long int maxLandWeaponRange() const  { return mMaxLandWeaponRange; }
 
 	/**
 	 * @return Damage done by explosion when this unit is destroyed
@@ -398,26 +392,7 @@ public:
 
 	bool removeWreckageImmediately() const { return mRemoveWreckageImmediately; }
 
-	/**
-	 * @return The base value of an upgradeable property. This value is the
-	 * start-value, before any upgrades are applied.
-	 * @param name The name of the property
-	 * @param type Either "MaxValue" or "MinValue". Use "MaxValue" if you
-	 * are not sure.
-	 **/
-	bool getBaseValue(unsigned long int* ret, const QString& name, const QString& type) const;
-	bool getBaseValue(long int* ret, const QString& name, const QString& type) const;
-	bool getBaseValue(bofixed* ret, const QString& name, const QString& type) const;
-
-	/**
-	 * @return @ref getBaseValue or @p defaultValue if the @p
-	 * name @p type pair does not exist.
-	 **/
-	unsigned long int ulongBaseValue(const QString& name, const QString& type = "MaxValue", unsigned long int defaultValue = 0) const;
-	long int longBaseValue(const QString& name, const QString& type = "MaxValue", long int defaultValue = 0) const;
-	bofixed bofixedBaseValue(const QString& name, const QString& type = "MaxValue", bofixed defaultValue = 0) const;
-
-	const UpgradesCollection& upgradesCollection() const;
+	const BoUpgradesCollection& upgradesCollection() const;
 
 	bool saveUpgradesAsXML(QDomElement& root) const;
 	bool loadUpgradesFromXML(const QDomElement& root);
@@ -502,11 +477,6 @@ private:
 	SpeciesTheme* mTheme;
 	bool mFullMode;
 
-#define DECLAREUPGRADEABLE(type, name) \
-		void setBase##name(type v) { mBase##name = v; } \
-		BoUpgradeableProperty<type> m##name; \
-		type mBase##name;
-
 	unsigned long int mTypeId; // note: 0 is invalid!
 	bofixed mUnitWidth;
 	bofixed mUnitHeight;
@@ -516,16 +486,13 @@ private:
 	bool mSupportMiniMap;
 	bool mCanShootAtAirUnits;
 	bool mCanShootAtLandUnits;
-	DECLAREUPGRADEABLE(unsigned long int, Health);
-	DECLAREUPGRADEABLE(unsigned long int, SightRange);
-	DECLAREUPGRADEABLE(unsigned long int, ProductionTime);
-	DECLAREUPGRADEABLE(unsigned long int, MineralCost);
-	DECLAREUPGRADEABLE(unsigned long int, OilCost);
-	DECLAREUPGRADEABLE(unsigned long int, Armor);
-	DECLAREUPGRADEABLE(unsigned long int, Shields);
-	unsigned long int mMaxWeaponRange;
-	unsigned long int mMaxLandWeaponRange;
-	unsigned long int mMaxAirWeaponRange;
+	BoUpgradeableProperty<unsigned long int> mHealth;
+	BoUpgradeableProperty<unsigned long int> mSightRange;
+	BoUpgradeableProperty<unsigned long int> mProductionTime;
+	BoUpgradeableProperty<unsigned long int> mMineralCost;
+	BoUpgradeableProperty<unsigned long int> mOilCost;
+	BoUpgradeableProperty<unsigned long int> mArmor;
+	BoUpgradeableProperty<unsigned long int> mShields;
 	long int mExplodingDamage;
 	bofixed mExplodingDamageRange;
 	BoAction* mProduceAction;
@@ -535,19 +502,17 @@ private:
 	bool mRemoveWreckageImmediately;
 
 	// for mobile units only
-	DECLAREUPGRADEABLE(bofixed, Speed);
+	BoUpgradeableProperty<bofixed> mSpeed;
 
-	// AB: TODO: these two are now upgradeable, too!
-	DECLAREUPGRADEABLE(bofixed, AccelerationSpeed);
-	DECLAREUPGRADEABLE(bofixed, DecelerationSpeed);
+	BoUpgradeableProperty<bofixed> mAccelerationSpeed;
+	BoUpgradeableProperty<bofixed> mDecelerationSpeed;
+
 	int mRotationSpeed;
 	bool mCanGoOnLand;
 	bool mCanGoOnWater;
 
 	// for facilities only
 	unsigned int mConstructionFrames;
-
-#undef DECLAREUPGRADEABLE
 
 	bool mIsFacility;
 	MobileProperties* mMobileProperties;

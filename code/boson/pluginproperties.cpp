@@ -29,6 +29,7 @@
 #include <ksimpleconfig.h>
 
 PluginProperties::PluginProperties(const UnitProperties* parent)
+	: BoBaseValueCollection()
 {
  mUnitProperties = parent;
 }
@@ -40,6 +41,11 @@ PluginProperties::~PluginProperties()
 SpeciesTheme* PluginProperties::speciesTheme() const
 {
  return unitProperties()->theme();
+}
+
+const BoUpgradesCollection& PluginProperties::upgradesCollection() const
+{
+ return unitProperties()->upgradesCollection();
 }
 
 

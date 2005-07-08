@@ -55,19 +55,54 @@
 BosonShot::BosonShot(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
     BosonItem(owner, canvas)
 {
-  initStatic();
+  initPrivate();
   mProp = prop;
+
+  if(properties())
+  {
+    mWeaponDamage.setLocal(properties()->damage1());
+    mWeaponDamageRange.setLocal(properties()->damageRange1());
+    mWeaponFullDamageRange.setLocal(properties()->fullDamageRange1());
+    mWeaponSpeed.setLocal(properties()->speed1());
+  }
 }
 
 BosonShot::BosonShot(Player* owner, BosonCanvas* canvas) :
     BosonItem(owner, canvas)
 {
+  initPrivate();
+}
+
+void BosonShot::initPrivate()
+{
   initStatic();
   mProp = 0;
+  registerData(&mWeaponDamage, IdWeaponDamage);
+  registerData(&mWeaponDamageRange, IdWeaponDamageRange);
+  registerData(&mWeaponFullDamageRange, IdWeaponFullDamageRange);
+  registerData(&mWeaponSpeed, IdWeaponSpeed);
+
+  mWeaponDamage.setLocal(0);
+  mWeaponDamageRange.setLocal(0);
+  mWeaponFullDamageRange.setLocal(0);
+  mWeaponSpeed.setLocal(0);
 }
 
 BosonShot::~BosonShot()
 {
+}
+
+void BosonShot::applyWeapon(const BosonWeapon* weapon)
+{
+  if(!weapon)
+  {
+    BO_NULL_ERROR(weapon);
+    return;
+  }
+  mWeaponDamage.setLocal(weapon->damage());
+  mWeaponDamageRange.setLocal(weapon->damageRange());
+  mWeaponFullDamageRange.setLocal(weapon->fullDamageRange());
+  mWeaponSpeed.setLocal(weapon->speed());
 }
 
 BosonModel* BosonShot::getModelForItem() const
@@ -86,6 +121,10 @@ void BosonShot::initStatic()
   {
     return;
   }
+  addPropertyId(IdWeaponDamage, "WeaponDamage");
+  addPropertyId(IdWeaponDamageRange, "WeaponDamageRange");
+  addPropertyId(IdWeaponFullDamageRange, "WeaponFullDamageRange");
+  addPropertyId(IdWeaponSpeed, "WeaponSpeed");
   initialized = true;
 }
 
@@ -210,17 +249,17 @@ void BosonShot::explode()
 
 long int BosonShot::damage() const
 {
-  return properties() ? properties()->damage() : 0;
+  return mWeaponDamage;
 }
 
 bofixed BosonShot::damageRange() const
 {
-  return properties() ? properties()->damageRange() : bofixed(0);
+  return mWeaponDamageRange;
 }
 
 bofixed BosonShot::fullDamageRange() const
 {
-  return properties() ? properties()->fullDamageRange() : bofixed(0);
+  return mWeaponFullDamageRange;
 }
 
 void BosonShot::setActive(bool a)
@@ -353,7 +392,7 @@ void BosonShotRocket::init(const BoVector3Fixed& pos, const BoVector3Fixed& targ
 
   // Speeds
   setAccelerationSpeed(properties()->accelerationSpeed());
-  setMaxSpeed(properties()->speed());
+  setMaxSpeed(mWeaponSpeed);
 
   // Maximum height missile can have
   mMaxHeight = properties()->height() * (mTotalDist);
@@ -504,7 +543,7 @@ bool BosonShotRocket::loadFromXML(const QDomElement& root)
   setRotation(Bo3dTools::rotationToPoint(mVelo[0], mVelo[1]));
   setSpeed(speed);
   setAccelerationSpeed(properties()->accelerationSpeed());
-  setMaxSpeed(properties()->speed());
+  setMaxSpeed(mWeaponSpeed);
   setVisible(true);
   return true;
 }
@@ -559,7 +598,7 @@ void BosonShotMissile::init(const BoVector3Fixed& pos, Unit* target)
 
   // Speeds
   setAccelerationSpeed(properties()->accelerationSpeed());
-  setMaxSpeed(properties()->speed());
+  setMaxSpeed(mWeaponSpeed);
 
   // Effects
   setEffects(properties()->newFlyEffects(pos, 0.0));
@@ -716,7 +755,7 @@ bool BosonShotMissile::loadFromXML(const QDomElement& root)
   setXRotation(Bo3dTools::rotationToPoint(mVelo.y(), mVelo.z()) + 90);
   setSpeed(speed);
   setAccelerationSpeed(properties()->accelerationSpeed());
-  setMaxSpeed(properties()->speed());
+  setMaxSpeed(mWeaponSpeed);
   setVisible(true);
   return true;
 }
@@ -881,7 +920,7 @@ BosonShotBomb::BosonShotBomb(Player* owner, BosonCanvas* canvas, const BosonWeap
   initStatic();
   // Speeds
   setAccelerationSpeed(properties()->accelerationSpeed());
-  setMaxSpeed(properties()->speed());
+  setMaxSpeed(mWeaponSpeed);
 }
 
 void BosonShotBomb::initStatic()
@@ -936,7 +975,7 @@ bool BosonShotBomb::loadFromXML(const QDomElement& root)
 
   setSpeed(speed);
   setAccelerationSpeed(properties()->accelerationSpeed());
-  setMaxSpeed(properties()->speed());
+  setMaxSpeed(mWeaponSpeed);
   setVisible(true);
 
   return true;
