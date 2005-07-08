@@ -58,6 +58,8 @@ UnitOilCost
 SightRange
 UnitProductionTime
 Speed
+AccelerationSpeed
+DecelerationSpeed
 
 The values for them are:
 
