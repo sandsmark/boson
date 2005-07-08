@@ -26,15 +26,69 @@
 
 #include <qdom.h>
 
+class BaseValueEntryBase
+{
+public:
+	BaseValueEntryBase()
+	{
+	}
+	virtual unsigned long int toULong() const = 0;
+	virtual long int toLong() const = 0;
+	virtual bofixed toBoFixed() const = 0;
+
+	virtual void setValue(unsigned long int v) = 0;
+	virtual void setValue(long int v) = 0;
+	virtual void setValue(bofixed v) = 0;
+};
+
+template<class T> class BaseValueEntry : public BaseValueEntryBase
+{
+public:
+	BaseValueEntry() : BaseValueEntryBase()
+	{
+	}
+	BaseValueEntry(const BaseValueEntry& v) : BaseValueEntryBase()
+	{
+		*this = v;
+	}
+	BaseValueEntry(const T& v) : BaseValueEntryBase()
+	{
+		mValue = v;
+	}
+	const BaseValueEntry& operator=(const BaseValueEntry& e)
+	{
+		mValue = e.mValue;
+		return *this;
+	}
+	const BaseValueEntry& operator=(const T& v)
+	{
+		mValue = v;
+		return *this;
+	}
+	operator T() const
+	{
+		return mValue;
+	}
+
+	virtual unsigned long int toULong() const { return (unsigned long int)mValue; }
+	virtual long int toLong() const { return (long int)mValue; }
+	virtual bofixed toBoFixed() const { return (bofixed)mValue; }
+
+	virtual void setValue(unsigned long int v) { mValue = (T)v; }
+	virtual void setValue(long int v)  { mValue = (T)v; }
+	virtual void setValue(bofixed v)  { mValue = (T)v; }
+
+private:
+	T mValue;
+};
+
 class BoBaseValueCollectionPrivate
 {
 public:
 	BoBaseValueCollectionPrivate()
 	{
 	}
-	QMap< QString, QMap<QString, unsigned long int> > mULongProperties;
-	QMap< QString, QMap<QString, long int> > mLongProperties;
-	QMap< QString, QMap<QString, bofixed> > mBoFixedProperties;
+	QMap< QString, QMap<QString, BaseValueEntryBase*> > mProperties;
 };
 
 BoBaseValueCollection::BoBaseValueCollection()
@@ -44,6 +98,14 @@ BoBaseValueCollection::BoBaseValueCollection()
 
 BoBaseValueCollection::~BoBaseValueCollection()
 {
+ QMap< QString, QMap<QString, BaseValueEntryBase*> >::iterator it;
+ for (it = d->mProperties.begin(); it != d->mProperties.end(); ++it) {
+	QMap<QString, BaseValueEntryBase*>::iterator it2;
+	for (it2 = (*it).begin(); it2 != (*it).end(); ++it2) {
+		delete *it2;
+	}
+	(*it).clear();
+ }
  delete d;
 }
 
@@ -53,7 +115,13 @@ bool BoBaseValueCollection::insertULongBaseValue(unsigned long int v, const QStr
 	boError() << k_funcinfo << "invalid type " << type << endl;
 	return false;
  }
- (d->mULongProperties[type]).insert(name, v, replace);
+ if (!(d->mProperties[type]).contains(name)) {
+	BaseValueEntryBase* value = new BaseValueEntry<unsigned long int>(v);
+	(d->mProperties[type]).insert(name, value);
+ }
+ if (replace) {
+	(d->mProperties[type])[name]->setValue(v);
+ }
  return true;
 }
 
@@ -63,7 +131,13 @@ bool BoBaseValueCollection::insertLongBaseValue(long int v, const QString& name,
 	boError() << k_funcinfo << "invalid type " << type << endl;
 	return false;
  }
- (d->mLongProperties[type]).insert(name, v, replace);
+ if (!(d->mProperties[type]).contains(name)) {
+	BaseValueEntryBase* value = new BaseValueEntry<long int>(v);
+	(d->mProperties[type]).insert(name, value);
+ }
+ if (replace) {
+	(d->mProperties[type])[name]->setValue(v);
+ }
  return true;
 }
 
@@ -73,7 +147,13 @@ bool BoBaseValueCollection::insertBoFixedBaseValue(bofixed v, const QString& nam
 	boError() << k_funcinfo << "invalid type " << type << endl;
 	return false;
  }
- (d->mBoFixedProperties[type]).insert(name, v, replace);
+ if (!(d->mProperties[type]).contains(name)) {
+	BaseValueEntryBase* value = new BaseValueEntry<bofixed>(v);
+	(d->mProperties[type]).insert(name, value);
+ }
+ if (replace) {
+	(d->mProperties[type])[name]->setValue(v);
+ }
  return true;
 }
 
@@ -83,11 +163,11 @@ bool BoBaseValueCollection::getBaseValue(unsigned long int* ret, const QString& 
 	boError() << k_funcinfo << "invalid type " << type << endl;
 	return false;
  }
- if (!(d->mULongProperties[type]).contains(name)) {
+ if (!(d->mProperties[type]).contains(name)) {
 	boError() << k_funcinfo << "no such property " << name << endl;
 	return false;
  }
- *ret = (d->mULongProperties[type])[name];
+ *ret = (d->mProperties[type])[name]->toULong();
  return true;
 }
 
@@ -97,11 +177,11 @@ bool BoBaseValueCollection::getBaseValue(long int* ret, const QString& name, con
 	boError() << k_funcinfo << "invalid type " << type << endl;
 	return false;
  }
- if (!(d->mLongProperties[type]).contains(name)) {
+ if (!(d->mProperties[type]).contains(name)) {
 	boError() << k_funcinfo << "no such property " << name << endl;
 	return false;
  }
- *ret = (d->mLongProperties[type])[name];
+ *ret = (d->mProperties[type])[name]->toLong();
  return true;
 }
 
@@ -111,11 +191,11 @@ bool BoBaseValueCollection::getBaseValue(bofixed* ret, const QString& name, cons
 	boError() << k_funcinfo << "invalid type " << type << endl;
 	return false;
  }
- if (!(d->mBoFixedProperties[type]).contains(name)) {
+ if (!(d->mProperties[type]).contains(name)) {
 	boError() << k_funcinfo << "no such property " << name << endl;
 	return false;
  }
- *ret = (d->mBoFixedProperties[type])[name];
+ *ret = (d->mProperties[type])[name]->toBoFixed();
  return true;
 }
 
