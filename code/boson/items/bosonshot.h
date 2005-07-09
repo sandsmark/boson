@@ -84,12 +84,6 @@ class BosonShot : public BosonItem
      **/
     BosonShot(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
 
-    /**
-     * Same as above, except that it meant to be used when you don't have weapon
-     * properties, but still want to use a model
-     **/
-    BosonShot(Player* owner, BosonCanvas* canvas, BosonModel* model);
-
     BosonShot(Player* owner, BosonCanvas* canvas);
     ~BosonShot();
 
