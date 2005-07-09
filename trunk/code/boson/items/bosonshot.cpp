@@ -918,6 +918,7 @@ BosonShotBomb::BosonShotBomb(Player* owner, BosonCanvas* canvas, const BosonWeap
     BosonShot(owner, canvas, prop)
 {
   initStatic();
+  registerData(&mActivated, IdActivated);
   // Speeds
   setAccelerationSpeed(properties()->accelerationSpeed());
   setMaxSpeed(mWeaponSpeed);
