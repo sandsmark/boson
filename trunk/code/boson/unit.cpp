@@ -1791,13 +1791,17 @@ public:
 	bofixed lastYVelocity;
 };
 
-MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) : Unit(prop, owner, canvas)
+MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
+	: Unit(prop, owner, canvas),
+	mMaxSpeed(prop, "Speed", "MaxValue"),
+	mMaxAccelerationSpeed(prop, "AccelerationSpeed", "MaxValue"),
+	mMaxDecelerationSpeed(prop, "DecelerationSpeed", "MaxValue")
 {
  d = new MobileUnitPrivate;
 
- setMaxSpeed(prop->maxSpeed());
- setAccelerationSpeed(prop->maxAccelerationSpeed());
- setDecelerationSpeed(prop->maxDecelerationSpeed());
+ setMaxSpeed(mMaxSpeed.value(upgradesCollection())); // AB: WARNING: maxSpeed() must NOT be used here (we _set_ it here)
+ setAccelerationSpeed(maxAccelerationSpeed());
+ setDecelerationSpeed(maxDecelerationSpeed());
  d->lastXVelocity = 0.0f;
  d->lastYVelocity = 0.0f;
 }
@@ -1819,6 +1823,53 @@ bool MobileUnit::init()
  // FIXME: loading!
  setEffects(unitProperties()->newConstructedEffects(x() + width() / 2, y() + height() / 2, z()));
  return true;
+}
+
+bofixed MobileUnit::maxAccelerationSpeed() const
+{
+ return mMaxAccelerationSpeed.value(upgradesCollection());
+}
+
+bofixed MobileUnit::maxDecelerationSpeed() const
+{
+ return mMaxDecelerationSpeed.value(upgradesCollection());
+}
+
+void MobileUnit::addUpgrade(const UpgradeProperties* upgrade)
+{
+ changeUpgrades(upgrade, true);
+}
+
+void MobileUnit::removeUpgrade(const UpgradeProperties* upgrade)
+{
+ changeUpgrades(upgrade, false);
+}
+
+void MobileUnit::changeUpgrades(const UpgradeProperties* upgrade, bool add)
+{
+ // AB: these are special cases: they are stored and handled in BosonItem and
+ // therefore we can not use some kind of "speedFactor" as we do with e.g.
+ // health
+ bofixed origMaxSpeed = mMaxSpeed.value(upgradesCollection());
+ bofixed origMaxAccelerationSpeed = maxAccelerationSpeed();
+ bofixed origMaxDecelerationSpeed = maxAccelerationSpeed();
+
+ if (add) {
+	Unit::addUpgrade(upgrade);
+ } else {
+	Unit::removeUpgrade(upgrade);
+ }
+
+ if (origMaxSpeed != mMaxSpeed.value(upgradesCollection())) {
+	setMaxSpeed(mMaxSpeed.value(upgradesCollection()));
+ }
+ // AB: accelerationSpeed/decelerationSpeed always use maximum values
+ if (origMaxAccelerationSpeed != maxAccelerationSpeed()) {
+	setAccelerationSpeed(maxAccelerationSpeed());
+ }
+ if (origMaxDecelerationSpeed != maxDecelerationSpeed()) {
+	setDecelerationSpeed(maxDecelerationSpeed());
+ }
 }
 
 void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this actually needs to be called for every advanceCallsCount.

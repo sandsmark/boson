@@ -629,6 +629,19 @@ public:
 	 **/
 	bool checkPathPoint(const BoVector2Fixed& p);
 
+	/**
+	 * @return How fast this mobile unit accelerates.
+	 **/
+	bofixed maxAccelerationSpeed() const;
+
+	/**
+	 * @return How fast this mobile unit decelerates.
+	 **/
+	bofixed maxDecelerationSpeed() const;
+
+	virtual void addUpgrade(const UpgradeProperties* upgrade);
+	virtual void removeUpgrade(const UpgradeProperties* upgrade);
+
 protected:
 	virtual void advanceMoveInternal(unsigned int advanceCallsCount); // move one step futher to path
 
@@ -642,11 +655,18 @@ protected:
 	virtual void advanceMoveCheck();
 
 private:
+	void changeUpgrades(const UpgradeProperties* upgrade, bool add);
+
+private:
 	// a d pointer is probably not very good here - far too much memory consumption
 	// same apllies to Unit and UnitBase. But it speeds up compiling as we don't
 	// have to change the headers every time...
 	class MobileUnitPrivate;
 	MobileUnitPrivate* d;
+
+	BoUpgradeableProperty<bofixed> mMaxSpeed;
+	BoUpgradeableProperty<bofixed> mMaxAccelerationSpeed;
+	BoUpgradeableProperty<bofixed> mMaxDecelerationSpeed;
 };
 
 // if you add class members - ONLY KGameProperties!! otherwise Player::load and
