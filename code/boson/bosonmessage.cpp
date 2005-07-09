@@ -880,6 +880,7 @@ bool BosonMessageMoveLayMine::save(QDataStream& stream) const
 	boError() << k_funcinfo << "unit count must match weapon count" << endl;
 	return false;
  }
+ stream << (Q_UINT32)messageId();
  stream << (Q_UINT32)mUnits.count();
  for (unsigned int i = 0; i < mUnits.count(); i++) {
 	stream << (Q_ULONG)mUnits[i];
@@ -912,6 +913,7 @@ bool BosonMessageMoveDropBomb::save(QDataStream& stream) const
 	boError() << k_funcinfo << "unit count must match weapon count" << endl;
 	return false;
  }
+ stream << (Q_UINT32)messageId();
  stream << mPos;
  stream << (Q_UINT32)mUnits.count();
  for (unsigned int i = 0; i < mUnits.count(); i++) {
@@ -942,6 +944,7 @@ bool BosonMessageMoveDropBomb::load(QDataStream& stream)
 
 bool BosonMessageMoveTeleport::save(QDataStream& stream) const
 {
+ stream << (Q_UINT32)messageId();
  stream << (Q_ULONG)mUnitId;
  stream << (Q_UINT32)mOwner;
  stream << mPos;
@@ -959,6 +962,7 @@ bool BosonMessageMoveTeleport::load(QDataStream& stream)
 
 bool BosonMessageMoveRotate::save(QDataStream& stream) const
 {
+ stream << (Q_UINT32)messageId();
  stream << (Q_ULONG)mUnitId;
  stream << (Q_UINT32)mOwner;
  stream << mRotate;
