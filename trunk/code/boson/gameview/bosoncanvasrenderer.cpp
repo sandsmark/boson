@@ -54,6 +54,7 @@
 #include "../boaction.h"
 #include "../playerio.h"
 #include "../bocamera.h"
+#include "../boshader.h"
 
 #include <qvaluevector.h>
 
@@ -308,7 +309,7 @@ void BosonCanvasRenderer::paintGL(const BosonCanvas* canvas)
  glPopMatrix();
  glMatrixMode(GL_MODELVIEW);
  glPopMatrix();
-
+ BoShader::setFogEnabled(false);
 }
 
 void BosonCanvasRenderer::renderGround(const BosonMap* map)
@@ -773,6 +774,7 @@ void BosonCanvasRenderer::renderFog(BoVisibleEffects& visible)
 	glFogf(GL_FOG_START, f->startDistance());
 	glFogf(GL_FOG_END, f->endDistance());
 	glFogi(GL_FOG_MODE, GL_LINEAR);
+	BoShader::setFogEnabled(true);
  } else {
 	// Disable fog
 	glDisable(GL_FOG);

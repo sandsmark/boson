@@ -73,6 +73,7 @@ class BoShader
 
     bool setUniform(QString name, float value);
     bool setUniform(QString name, int value);
+    bool setUniform(QString name, bool value);
     bool setUniform(QString name, const BoVector2Float& value);
     bool setUniform(QString name, const BoVector3Float& value);
     bool setUniform(QString name, const BoVector4Float& value);
@@ -83,6 +84,7 @@ class BoShader
     static void setCameraPos(const BoVector3Float& pos);
     static void setSun(BoLight* sun);
     static void setTime(float time);
+    static void setFogEnabled(float enabled);
 
 
   protected:
@@ -99,6 +101,7 @@ class BoShader
     static BoVector3Float mCameraPos;
     static BoLight* mSun;
     static float mTime;
+    static bool mFogEnabled;
 };
 
 #endif //BOSHADER_H
