@@ -1,6 +1,7 @@
 <vertex>
 
 uniform vec3 lightPos;
+uniform bool fogEnabled;
 
 varying vec3 vertex;
 varying vec3 lightDir;
@@ -15,6 +16,9 @@ void main()
   gl_TexCoord[0] = gl_TextureMatrix[0] * vec4(gl_Vertex.xyz * 0.1, 1.0);
 
   gl_Position = ftransform();
+
+  if(fogEnabled)
+    gl_FogFragCoord = gl_Position.z;
 }
 
 
@@ -26,6 +30,7 @@ uniform sampler2D texture_0;
 uniform sampler2D texture_1;
 // Envmap
 uniform samplerCube texture_2;
+uniform bool fogEnabled;
 
 uniform vec3 cameraPos;
 varying vec3 vertex;
@@ -64,9 +69,14 @@ void main()
   float d = IOR * dot(viewv, normal);
   float refrFactor = clamp(d*d + 1.0 - IOR*IOR, 0.0, 1.0);
 
+  float fog = 1.0;
+  if(fogEnabled)
+    fog = clamp((gl_Fog.end - gl_FogFragCoord) * gl_Fog.scale, 0.0, 1.0);
+
   // Final result
   // This will be mix between reflection (from envmap) and basecolor
   // Specular color will be added to the result
-  gl_FragColor = vec4(mix(envcolor, litcolor, refrFactor), 1.0 - refrFactor * 0.75) + speccolor;
+  vec3 visiblecolor = mix(envcolor, litcolor, refrFactor);
+  gl_FragColor = vec4(mix(gl_Fog.color.rgb, visiblecolor, fog), 1.0 - refrFactor * 0.75) + speccolor;
 }
 

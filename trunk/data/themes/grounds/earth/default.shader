@@ -3,6 +3,7 @@
 
 uniform vec3 lightPos;
 uniform vec3 cameraPos;
+uniform bool fogEnabled;
 
 varying float alpha;
 varying vec3 tLightDir;
@@ -29,6 +30,9 @@ void main()
   tCameraDir = normalize(vec3(dot(v, tangent),  dot(v, binormal),  dot(v, gl_Normal.xyz)));
 
   gl_Position = ftransform();
+
+  if(fogEnabled)
+    gl_FogFragCoord = gl_Position.z;
 }
 
 
@@ -43,6 +47,7 @@ uniform sampler2D texture_2;
 
 uniform float bumpScale;
 uniform float bumpBias;
+uniform bool fogEnabled;
 
 varying float alpha;
 varying vec3 tLightDir;
@@ -85,6 +90,10 @@ void main()
 
   vec3 litcolor = basetexcolor * (diffuse + gl_LightSource[0].ambient.rgb);
 
-  gl_FragColor = vec4(litcolor * visibility, alpha) /*+ speccolor*/;
+  float fog = 1.0;
+  if(fogEnabled)
+    fog = clamp((gl_Fog.end - gl_FogFragCoord) * gl_Fog.scale, 0.0, 1.0);
+
+  gl_FragColor = vec4(mix(gl_Fog.color.rgb, litcolor * visibility, fog), alpha) /*+ speccolor*/;
 }
 
