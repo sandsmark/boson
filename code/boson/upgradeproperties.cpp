@@ -89,12 +89,13 @@ public:
   QMap<QString, QString> mEntryList;
 };
 
-UpgradeProperties::UpgradeProperties(const SpeciesTheme* theme)
+UpgradeProperties::UpgradeProperties(const QString& type, const SpeciesTheme* theme)
 {
   d = new UpgradePropertiesPrivate;
 
   mTheme = theme;
 
+  mType = type;
   mId = 0;
   mMineralCost = 0;
   mOilCost = 0;

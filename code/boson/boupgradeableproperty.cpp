@@ -297,6 +297,7 @@ bool BoUpgradesCollection::saveAsXML(QDomElement& root) const
  for (it = upgrades()->begin(); it != upgrades()->end(); ++it) {
 	QDomElement e = doc.createElement("Upgrade");
 	e.setAttribute("Id", QString::number((*it)->id()));
+	e.setAttribute("Type", (*it)->type());
 	root.appendChild(e);
  }
  return true;
@@ -327,12 +328,15 @@ bool BoUpgradesCollection::loadFromXML(const SpeciesTheme* speciesTheme, const Q
 		boError() << k_funcinfo << "invalid Id attribute" << endl;
 		return false;
 	}
+	QString type = e.attribute("Type");
+	if (type.isEmpty()) {
+		boError() << k_funcinfo << "no Type given" << endl;
+		return false;
+	}
 
-#warning FIXME: only technologies supported atm
-	// TODO: atm we support technologies only. should be more general.
-	const UpgradeProperties* upgrade = speciesTheme->technology(id);
+	const UpgradeProperties* upgrade = speciesTheme->upgrade(type, id);
 	if (!upgrade) {
-		boError() << k_funcinfo << "cannot find upgrade " << id << endl;
+		boError() << k_funcinfo << "cannot find upgrade type=" << type << " id=" << id << endl;
 		return false;
 	}
 	addUpgrade(upgrade);

@@ -722,7 +722,7 @@ void Player::technologyResearched(ProductionPlugin* plugin, unsigned long int ty
 	return;
  }
 
- UpgradeProperties* prop = speciesTheme()->technology(type);
+ const UpgradeProperties* prop = speciesTheme()->technology(type);
  if (!prop) {
 	boError() << k_funcinfo << "NULL technology " << type << endl;
 	return;

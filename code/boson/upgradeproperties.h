@@ -55,7 +55,7 @@ class UpgradeProperties
      * Constructs UpgradeProperties
      * You should call @ref load after that.
      **/
-    UpgradeProperties(const SpeciesTheme* theme);
+    UpgradeProperties(const QString& type, const SpeciesTheme* theme);
     virtual ~UpgradeProperties();
 
     bool appliesTo(const UnitProperties* prop) const;
@@ -94,7 +94,14 @@ class UpgradeProperties
     virtual bool load(KSimpleConfig* cfg, const QString& group);
 
     /**
-     * @return Id of this upgrade
+     * @return The type of this upgrade. The type together with the @ref id
+     * uniquely identify an upgrade.
+     **/
+    const QString& type() const { return mType; }
+
+    /**
+     * @return Id of this upgrade. The Id is unique among different upgrades of
+     * the same @ref type.
      **/
     unsigned long int id() const { return mId; }
 
@@ -176,6 +183,7 @@ class UpgradeProperties
     void convertEntries();
 
   private:
+    QString mType;
     unsigned long int mId;
     QString mName;
     unsigned long int mMineralCost;
@@ -184,8 +192,8 @@ class UpgradeProperties
     unsigned int mProductionTime;
     bool mApplyToFacilities;
     bool mApplyToMobiles;
-    const BoAction* mProduceAction;
     const SpeciesTheme* mTheme;
+    const BoAction* mProduceAction;
 
     UpgradePropertiesPrivate* d;
 
