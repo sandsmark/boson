@@ -38,18 +38,59 @@
 #include <klocale.h>
 
 #include <qintdict.h>
+#include <qdict.h>
 #include <qdir.h>
 #include <qdom.h>
 
-class SpeciesTheme::SpeciesThemePrivate
+class UpgradesContainer
+{
+public:
+	UpgradesContainer()
+	{
+		mUpgrades.setAutoDelete(true);
+		mConstUpgrades.setAutoDelete(true);
+	}
+	~UpgradesContainer()
+	{
+		mUpgrades.setAutoDelete(true);
+		mUpgrades.clear();
+		mConstUpgrades.setAutoDelete(true);
+		mConstUpgrades.clear();
+	}
+
+	void insertUpgrade(UpgradeProperties* upgrade)
+	{
+		BO_CHECK_NULL_RET(upgrade);
+		mUpgrades.insert(upgrade->id(), upgrade);
+		mConstUpgrades.insert(upgrade->id(), upgrade);
+	}
+	const QIntDict<const UpgradeProperties>& upgrades() const
+	{
+		return mConstUpgrades;
+	}
+
+	const UpgradeProperties* upgrade(unsigned long int id) const
+	{
+		return mConstUpgrades[id];
+	}
+private:
+	QIntDict<UpgradeProperties> mUpgrades;
+	QIntDict<const UpgradeProperties> mConstUpgrades;
+};
+
+class SpeciesThemePrivate
 {
 public:
 	SpeciesThemePrivate()
 	{
 	}
 
-	QIntDict<UnitProperties> mUnitProperties; // they can't be placed into SpeciesData, since they can be modified by upgrades
-	QIntDict<UpgradeProperties> mTechnologies; // can't be in SpeciesData - we need setResearched()
+	// data that cannot go to SpeciesData as it must be modifyable by some
+	// reason
+	QIntDict<UnitProperties> mUnitProperties;
+
+	// AB: maybe this _can_ go to SpeciesData?
+	QDict< UpgradesContainer > mUpgrades;
 
 	bool mCanChangeTeamColor;
 };
@@ -73,7 +114,7 @@ SpeciesTheme::SpeciesTheme(const QString& speciesDir, const QColor& teamColor)
 {
  d = new SpeciesThemePrivate;
  d->mUnitProperties.setAutoDelete(true);
- d->mTechnologies.setAutoDelete(true);
+ d->mUpgrades.setAutoDelete(true);
  d->mCanChangeTeamColor = true;
  mSound = 0;
  mData = 0;
@@ -104,8 +145,10 @@ SpeciesTheme::~SpeciesTheme()
 
 void SpeciesTheme::reset()
 {
+ d->mUnitProperties.setAutoDelete(true);
  d->mUnitProperties.clear();
- d->mTechnologies.clear();
+ d->mUpgrades.setAutoDelete(true);
+ d->mUpgrades.clear();
 }
 
 QColor SpeciesTheme::defaultColor()
@@ -218,32 +261,26 @@ const BoAction* SpeciesTheme::action(const QString& name) const
 bool SpeciesTheme::loadTechnologies()
 {
  QFile f(themePath() + "index.technologies");
- if(!f.exists()) {
+ if (!f.exists()) {
 	boWarning(270) << k_funcinfo << "Technologies file (" << f.name() << ") does not exists. No technologies loaded" << endl;
 	// We assume that this theme has no technologies and still return true
 	return true;
  }
  KSimpleConfig cfg(f.name());
  QStringList techs = cfg.groupList();
- if(techs.isEmpty()) {
+ if (techs.isEmpty()) {
 	boDebug(270) << k_funcinfo << "No technologies found in technologies file (" << f.name() << ")" << endl;
 	return true;
  }
- QStringList::Iterator it;
- for(it = techs.begin(); it != techs.end(); ++it) {
+ for (QStringList::Iterator it = techs.begin(); it != techs.end(); ++it) {
 	boDebug(270) << k_funcinfo << "Loading upgrade from group " << *it << endl;
-	UpgradeProperties* tech = new UpgradeProperties(this);
+	UpgradeProperties* tech = new UpgradeProperties("Technology", this);
 	if (!tech->load(&cfg, *it)) {
 		boError(270) << k_funcinfo << *it << " could not be loaded" << endl;
 		delete tech;
 		continue;
 	}
-	if (!d->mTechnologies.find(tech->id())) {
-		d->mTechnologies.insert(tech->id(), tech);
-	} else {
-		boError(270) << k_funcinfo << "Technology with id " << tech->id() << " already there!" << endl;
-		delete tech;
-	}
+	insertUpgrade(tech);
  }
  return true;
 }
@@ -424,17 +461,27 @@ UnitProperties* SpeciesTheme::nonConstUnitProperties(unsigned long int unitType)
  return d->mUnitProperties[unitType];
 }
 
-UpgradeProperties* SpeciesTheme::technology(unsigned long int techType) const
+const UpgradeProperties* SpeciesTheme::technology(unsigned long int techType) const
 {
- if (techType == 0) {
-	boError() << k_funcinfo << "invalid technology type " << techType << endl;
+ return upgrade("Technology", techType);
+}
+
+const UpgradeProperties* SpeciesTheme::upgrade(const QString& type, unsigned long int id) const
+{
+ if (id == 0) {
+	boError() << k_funcinfo << "invalid id 0" << endl;
 	return 0;
  }
- if (!d->mTechnologies[techType]) {
-	boError() << k_lineinfo << "oops - no technology properties for " << techType << endl;
+ const UpgradeProperties* upgrade = 0;
+ UpgradesContainer* c = d->mUpgrades[type];
+ if (c) {
+	upgrade = c->upgrade(id);
+ }
+ if (!upgrade) {
+	boError() << k_funcinfo << "NULL upgrade for type=" << type << " id=" << id << endl;
 	return 0;
  }
- return d->mTechnologies[techType];
+ return upgrade;
 }
 
 QValueList<unsigned long int> SpeciesTheme::allFacilities() const
@@ -529,7 +576,10 @@ QValueList<unsigned long int> SpeciesTheme::productions(QValueList<unsigned long
 QValueList<unsigned long int> SpeciesTheme::technologies(QValueList<unsigned long int> producers) const
 {
  QValueList<unsigned long int> list;
- QIntDictIterator<UpgradeProperties> it(d->mTechnologies);
+ if (!d->mUpgrades["Technology"]) {
+	return list;
+ }
+ QIntDictIterator<const UpgradeProperties> it(d->mUpgrades["Technology"]->upgrades());
  while (it.current()) {
 	if (producers.contains(it.current()->producer())) {
 		list.append(it.current()->id());
@@ -663,11 +713,6 @@ bool SpeciesTheme::loadGeneralSounds()
  return true;
 }
 
-const QIntDict<UpgradeProperties>& SpeciesTheme::technologyList() const
-{
- return d->mTechnologies;
-}
-
 BosonModel* SpeciesTheme::objectModel(const QString& name) const
 {
  return mData->objectModel(name);
@@ -796,4 +841,23 @@ bool SpeciesTheme::loadGameDataFromXML(const QDomElement& root)
  return true;
 }
 
+// AB: I did not choose "addUpgrade()" as name to avoid confusing with the
+// addUpgrade() methods that are called when an upgrade is gained
+void SpeciesTheme::insertUpgrade(UpgradeProperties* upgrade)
+{
+ if (!upgrade) {
+	return;
+ }
+ UpgradesContainer* c = d->mUpgrades[upgrade->type()];
+ if (!c) {
+	c = new UpgradesContainer();
+	d->mUpgrades.insert(upgrade->type(), c);
+ }
+ if (c->upgrade(upgrade->id())) {
+	boError() << k_funcinfo << "tried to insert upgrade with type=" << upgrade->type() << " and id=" << upgrade->id() << " twice" << endl;
+	delete upgrade;
+	return;
+ }
+ c->insertUpgrade(upgrade);
+}
 

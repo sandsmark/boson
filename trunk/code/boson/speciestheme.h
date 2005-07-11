@@ -44,6 +44,7 @@ class QColor;
 template<class T> class QValueList;
 template<class T> class QIntDict;
 
+class SpeciesThemePrivate;
 /**
  * Stores player's species - this includes units' textures and models, sounds,
  * properties and overviews as well as action pixmaps (attack, move and stop)
@@ -184,7 +185,13 @@ public:
 	 **/
 	UnitProperties* nonConstUnitProperties(unsigned long int unitType) const;
 
-	UpgradeProperties* technology(unsigned long int techType) const;
+	/**
+	 * @return The technology with @p id. Equivalent to
+	 * upgrade("Technology", id)
+	 **/
+	const UpgradeProperties* technology(unsigned long int id) const;
+
+	const UpgradeProperties* upgrade(const QString& type, unsigned long int id) const;
 
 	/**
 	 * @return the path to the species theme (ending with
@@ -279,13 +286,6 @@ public:
 
 	static QValueList<QColor> defaultColors();
 
-	/**
-	 * @return QIntDict containing all technologies
-	 * Do not use this method! It's only meant to be used by
-	 * Player::hasTechnology() and might be made private later
-	 **/
-	const QIntDict<UpgradeProperties>& technologyList() const;
-
 	bool loadUnitModel(const UnitProperties* prop);
 
 	/**
@@ -311,8 +311,9 @@ protected:
 	 **/
 	void finalizeTeamColor();
 
+	void insertUpgrade(UpgradeProperties* upgrade);
+
 private:
-	class SpeciesThemePrivate;
 	SpeciesThemePrivate* d;
 
 	QString mThemePath;
