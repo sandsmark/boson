@@ -144,7 +144,7 @@ public:
 	 *
 	 * This value applies to newly produced units only.
 	 **/
-	unsigned long int maxHeatlh() const { return mHealth.value(upgradesCollection()); }
+	unsigned long int maxHealth() const { return mHealth.value(upgradesCollection()); }
 
 	/**
 	 * @return Maximum shields of units of this type. Note that for a
