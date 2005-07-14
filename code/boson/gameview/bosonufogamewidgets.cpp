@@ -113,6 +113,9 @@ void BosonUfoCanvasWidget::quitGame()
 void BosonUfoCanvasWidget::paintWidget()
 {
  PROFILE_METHOD;
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "GL error at the beginning of this method" << endl;
+ }
  d->mCanvasRenderer->setCamera(d->mCamera);
  d->mCanvasRenderer->setLocalPlayerIO(d->mLocalPlayerIO);
 
@@ -139,6 +142,9 @@ void BosonUfoCanvasWidget::paintWidget()
  glPopMatrix();
  glMatrixMode(GL_MODELVIEW);
  glPopMatrix();
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "GL error at the end of this method" << endl;
+ }
 }
 
 
@@ -610,6 +616,9 @@ const BosonCanvas* BosonUfoLineVisualizationWidget::canvas() const
 void BosonUfoLineVisualizationWidget::paintWidget()
 {
  PROFILE_METHOD;
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "GL error at the beginning of this method" << endl;
+ }
  BO_CHECK_NULL_RET(d->mGameGLMatrices);
  // Store the original libufo matrices and set our 3d matrices
  glMatrixMode(GL_PROJECTION);
@@ -645,6 +654,9 @@ void BosonUfoLineVisualizationWidget::paintWidget()
  glPopMatrix();
  glMatrixMode(GL_MODELVIEW);
  glPopMatrix();
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "GL error at the end of this method" << endl;
+ }
 }
 
 void BosonUfoLineVisualizationWidget::addLineVisualization(BoLineVisualization v)
@@ -841,6 +853,9 @@ void BosonUfoSelectionRectWidget::paintWidget()
 {
  PROFILE_METHOD;
  BO_CHECK_NULL_RET(d->mGameGLMatrices);
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "GL error at the beginning of this method" << endl;
+ }
  if (!d->mSelectionRectVisible) {
 	return;
  }
@@ -882,6 +897,9 @@ void BosonUfoSelectionRectWidget::paintWidget()
  glPopMatrix();
  glMatrixMode(GL_MODELVIEW);
  glPopMatrix();
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "GL error at the end of this method" << endl;
+ }
 }
 
 
@@ -976,6 +994,9 @@ void BosonUfoFPSGraphWidget::paintWidget()
 {
  PROFILE_METHOD;
  BO_CHECK_NULL_RET(d->mGameGLMatrices);
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "GL error at the beginning of this method" << endl;
+ }
 
  glMatrixMode(GL_PROJECTION);
  glPushMatrix();
@@ -1008,6 +1029,9 @@ void BosonUfoFPSGraphWidget::paintWidget()
  glPopMatrix();
  glMatrixMode(GL_MODELVIEW);
  glPopMatrix();
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "GL error at the end of this method" << endl;
+ }
 }
 
 void BosonUfoFPSGraphWidget::paintFPS(const FPSGraphData& data)
@@ -1237,6 +1261,9 @@ void BosonUfoProfilingGraphWidget::paintWidget()
 {
  PROFILE_METHOD;
  BO_CHECK_NULL_RET(d->mGameGLMatrices);
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "GL error at the beginning of this method" << endl;
+ }
  if (!boConfig->boolValue("debug_profiling_graph")) {
 	d->mLayeredPane->hide();
 	return;
@@ -1307,6 +1334,9 @@ void BosonUfoProfilingGraphWidget::paintWidget()
  glPopMatrix();
  glMatrixMode(GL_MODELVIEW);
  glPopMatrix();
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "GL error at the end of this method" << endl;
+ }
 }
 
 void BosonUfoProfilingGraphWidget::slotUpdateData()
