@@ -295,20 +295,14 @@ void BosonCanvasRenderer::paintGL(const BosonCanvas* canvas)
  renderBulletTrailEffects(d->mVisibleEffects);
 
  glMatrixMode(GL_PROJECTION);
- glPushMatrix();
  glLoadIdentity();
  gluOrtho2D(0.0, (GLfloat)d->mGameMatrices->viewport()[2], 0.0, (GLfloat)d->mGameMatrices->viewport()[3]);
  glMatrixMode(GL_MODELVIEW);
- glPushMatrix();
  glLoadIdentity();
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
  renderFadeEffects(d->mVisibleEffects);
 
- glMatrixMode(GL_PROJECTION);
- glPopMatrix();
- glMatrixMode(GL_MODELVIEW);
- glPopMatrix();
  BoShader::setFogEnabled(false);
 }
 
