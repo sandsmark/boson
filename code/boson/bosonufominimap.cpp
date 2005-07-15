@@ -43,6 +43,9 @@ public:
 
 	virtual void render(int x, int y, int w, int h)
 	{
+		if (Bo3dTools::checkError()) {
+			boError() << k_funcinfo << "GL error at the beginning of this method" << endl;
+		}
 		if (!mMiniMap) {
 			return;
 		}
@@ -54,6 +57,9 @@ public:
 		mMiniMap->renderMiniMap();
 		glPopMatrix();
 		boTextureManager->invalidateCache();
+		if (Bo3dTools::checkError()) {
+			boError() << k_funcinfo << "GL error at the end of this method" << endl;
+		}
 	}
 
 	virtual int drawableWidth() const
