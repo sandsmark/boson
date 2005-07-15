@@ -34,7 +34,11 @@
 
 namespace ufo {
 
-/** This class represents a compound widget with a static text and an icon.
+class UCompoundModel;
+
+/** @short This class represents a compound widget with a static text and an icon.
+  * @ingroup abstractwidgets
+  *
   * It is not meant to be used directly. Use instead ULabel, UButton, ...
   *
   * @author Johannes Schmidt
@@ -95,10 +99,14 @@ public:
 
 protected:  // Overrides UWidget
 	virtual std::ostream & paramString(std::ostream & os) const;
+	virtual void processStateChangeEvent(uint32_t state);
+	virtual void processStyleHintChange(uint32_t styleHint);
+
+protected: // Protected methods
+	UCompoundModel * getCompoundModel() const;
+	void updateMnemonic();
 
 private:  // Protected attributes
-	/** The static text shown on screen */
-	std::string m_text;
 	/** the default icon */
 	UIcon * m_icon;
 	/** the icon which is shown when the icon is disabled */
@@ -110,16 +118,6 @@ private:  // Protected attributes
 //
 // inline implementation
 //
-
-inline std::string
-UCompound::getText() const {
-	return m_text;
-}
-
-inline UIcon *
-UCompound::getDefaultIcon() const {
-	return m_icon;
-}
 
 inline UIcon *
 UCompound::getDisabledIcon() const {

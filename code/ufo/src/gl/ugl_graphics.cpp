@@ -41,9 +41,12 @@
 
 #include "ufo/font/ufont.hpp"
 #include "ufo/font/ufontrenderer.hpp"
+#include "ufo/font/ufontmetrics.hpp"
 
 #include "ufo/widgets/uwidget.hpp"
 #include "ufo/widgets/urootpane.hpp"
+
+#include "ufo/uvertexarray.hpp"
 
 using namespace ufo;
 
@@ -53,19 +56,14 @@ UGL_Graphics::UGL_Graphics(UContext * context)
 	: m_context(context)
 	, m_color()//UColor::black)
 	, m_clearColor()//UColor::black)
-	, m_font(NULL) // FIXME ! insert valid value
+	, m_font()
 	, m_clipRect(URectangle::invalid)
+	, m_translationX(0)
+	, m_translationY(0)
 {
-	//m_color->reference();
-	//m_clearColor->reference();
 }
 
 UGL_Graphics::~UGL_Graphics() {
-	//m_color->unreference();
-	//m_clearColor->unreference();
-	if (m_font) {
-		m_font->unreference();
-	}
 }
 
 UContext *
@@ -82,8 +80,8 @@ UGL_Graphics::resetDeviceAttributes() {
 
 	ugl_driver->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-	ugl_driver->glEnable(GL_BLEND);
-	ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//ugl_driver->glEnable(GL_BLEND);
+	//ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void
@@ -130,6 +128,7 @@ UGL_Graphics::resetDeviceViewMatrix() {
 	ugl_driver->glLoadIdentity();
 }
 
+
 URectangle
 UGL_Graphics::mapToDevice(const URectangle & rect) {
 	// FIXME
@@ -156,16 +155,108 @@ UGL_Graphics::mapFromDevice(const URectangle & rect) {
 
 
 void
-UGL_Graphics::flush() {
+UGL_Graphics::begin() {
+	// push all changing attributes
+	ugl_driver->glPushAttrib(GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT |
+		GL_LIGHTING_BIT | GL_LINE_BIT | GL_LINE_BIT | GL_SCISSOR_BIT |
+		GL_TEXTURE_BIT | GL_VIEWPORT_BIT);
+
+	// push matrices
+	ugl_driver->glMatrixMode(GL_PROJECTION);
+	ugl_driver->glPushMatrix();
+	ugl_driver->glMatrixMode(GL_MODELVIEW);
+	ugl_driver->glPushMatrix();
+
+	// reset states
+	ugl_driver->glDisable(GL_TEXTURE_2D);
+	ugl_driver->glDisable(GL_DEPTH_TEST);
+
+	ugl_driver->glShadeModel(GL_FLAT);
+
+	ugl_driver->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	ugl_driver->glFlush();
+
+	// set up viewport
+	UContext * context = getContext();
+
+	URectangle deviceBounds;
+	URectangle contextBounds;
+	if (context) {
+		deviceBounds = context->getDeviceBounds();
+		contextBounds = context->getContextBounds();
+	} else {
+		// assume full gl viewport
+		int vport[4];
+		ugl_driver->glGetIntegerv(GL_VIEWPORT, vport);
+		deviceBounds = URectangle(vport[0], vport[1] + vport[3], vport[2], vport[3]);
+		contextBounds = deviceBounds;
+	}
+
+	ugl_driver->glViewport(
+		contextBounds.x,
+		deviceBounds.h - contextBounds.y - contextBounds.h,
+		contextBounds.w,
+		contextBounds.h
+	);
+
+	ugl_driver->glMatrixMode(GL_PROJECTION);
+	ugl_driver->glLoadIdentity();
+
+	ugl_driver->glOrtho(
+		0,
+		contextBounds.w,
+		contextBounds.h,
+		0,
+		-100,
+		100
+	);
+	ugl_driver->glTranslatef(0.375, 0.375, 0);
+
+	ugl_driver->glMatrixMode(GL_MODELVIEW);
+	ugl_driver->glLoadIdentity();
+	ugl_driver->glTranslatef(getTranslationX(), getTranslationY(), 0);
+}
+
+void
+UGL_Graphics::end() {
+	// pop matrices
+	ugl_driver->glMatrixMode(GL_PROJECTION);
+	ugl_driver->glPopMatrix();
+	ugl_driver->glMatrixMode(GL_MODELVIEW);
+	ugl_driver->glPopMatrix();
+
+	// pop attributes
+	ugl_driver->glPopAttrib();
 }
 
 void
 UGL_Graphics::clear() {
-	// FIXME what about UFO contexts which do not cover the whole screen?
-	ugl_driver->glClear(GL_COLOR_BUFFER_BIT);
+	UContext * context = getContext();
+
+	if (context) {
+		URectangle deviceBounds = context->getDeviceBounds();
+		URectangle contextBounds = context->getContextBounds();
+		if (deviceBounds != contextBounds) {
+			UColor colTemp = m_color;
+			setColor(m_clearColor);
+			drawRect(mapToDevice(contextBounds));
+			setColor(colTemp);
+		} else {
+			ugl_driver->glClear(GL_COLOR_BUFFER_BIT);
+		}
+	} else {
+		ugl_driver->glClear(GL_COLOR_BUFFER_BIT);
+	}
 }
 
+void
+UGL_Graphics::setEnabled(GCState state, bool b) {
+}
+
+bool
+UGL_Graphics::isEnabled(GCState state) const {
+	return false;
+}
 
 // FIXME
 // should we use some 4-byte hacking?
@@ -229,42 +320,36 @@ UGL_Graphics::setColor(const UColor & color) {
 	m_color = color;
 
 	ugl_driver->glColor4fv(m_color.getFloat());
+	if (color.getAlpha() < 1.0f) {
+		ugl_driver->glEnable(GL_BLEND);
+		ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	} else {
+		ugl_driver->glDisable(GL_BLEND);
+	}
 }
 
-const UColor &
+UColor
 UGL_Graphics::getColor() const {
 	return m_color;
 }
 
 void
 UGL_Graphics::setClearColor(const UColor & clearColor) {
-	//if (clearColor) {
-	//	m_clearColor->unreference();
-		m_clearColor = clearColor;
-	//	m_clearColor->reference();
-
-		//ugl_driver->glClearColor(m_clearColor->getFloat());
-	//}
+	m_clearColor = clearColor;
+	ugl_driver->glClearColor(m_clearColor.getRed(), m_clearColor.getGreen(), m_clearColor.getBlue(), m_clearColor.getAlpha());
 }
 
-const UColor &
+UColor
 UGL_Graphics::getClearColor() const {
 	return m_clearColor;
 }
 
 void
-UGL_Graphics::setFont(const UFont * font) {
-	if (font && m_font != font) {
-		//swapPointers(m_font, font);
-		if (m_font) {
-			m_font->unreference();
-		}
-		m_font = font;
-		m_font->reference();
-	}
+UGL_Graphics::setFont(const UFont & font) {
+	m_font = font;
 }
 
-const UFont *
+UFont
 UGL_Graphics::getFont() const {
 	return m_font;
 }
@@ -287,19 +372,18 @@ UGL_Graphics::popClipRect() {
 void
 UGL_Graphics::setClipRect(const URectangle & rect) {
 	m_clipRect = rect;
-	// ensure at least zero size
-	m_clipRect.expand(UDimension(0, 0));
 
-	if (m_clipRect.isInvalid() || m_clipRect.w * m_clipRect.h <= 0) {
+	if (m_clipRect.isInvalid()) {
 		ugl_driver->glDisable(GL_SCISSOR_TEST);
 	} else {
 		ugl_driver->glEnable(GL_SCISSOR_TEST);
-		URectangle clipRect = mapToDevice(rect);
+		// ensure at least zero size
+		m_clipRect.expand(UDimension(0, 0));
+		URectangle clipRect = mapToDevice(m_clipRect);
 
-		// FIXME: Is +1 correct? This allows modifying the border
 		ugl_driver->glScissor(
 			clipRect.x, clipRect.y,
-			clipRect.w + 1, std::max(0, clipRect.h + 1)
+			clipRect.w, clipRect.h
 		);
 	}
 }
@@ -311,12 +395,12 @@ UGL_Graphics::getClipRect() const {
 
 void
 UGL_Graphics::drawString(const std::string & text, int x, int y) {
-	m_font->getRenderer()->drawString(this, text.data(), text.length(), x, y);
+	m_font.getRenderer()->drawString(this, text.data(), text.length(), x, y);
 }
 
 UDimension
 UGL_Graphics::getStringSize(const std::string & text) {
-	const UFontMetrics * metrics = m_font->getFontMetrics();
+	const UFontMetrics * metrics = m_font.getFontMetrics();
 	return UDimension(metrics->getStringWidth(text), metrics->getHeight());
 }
 
@@ -326,6 +410,8 @@ UGL_Graphics::getStringSize(const std::string & text) {
 
 void
 UGL_Graphics::translate(float x, float y) {
+	m_translationX += x;
+	m_translationY += y;
 	ugl_driver->glTranslatef(x, y, 0);
 }
 
@@ -349,9 +435,9 @@ UGL_Graphics::drawRect(const URectangle & rect) {
 	// width 1 measured in y direction
 	ugl_driver->glBegin(GL_LINE_LOOP);
 	ugl_driver->glVertex2i(rect.x, rect.y);
-	ugl_driver->glVertex2i(rect.x + rect.w - 1, rect.y);
-	ugl_driver->glVertex2i(rect.x + rect.w - 1, rect.y + rect.h - 1);
 	ugl_driver->glVertex2i(rect.x, rect.y + rect.h - 1);
+	ugl_driver->glVertex2i(rect.x + rect.w - 1, rect.y + rect.h - 1);
+	ugl_driver->glVertex2i(rect.x + rect.w - 1, rect.y);
 	ugl_driver->glEnd();
 }
 
@@ -367,7 +453,39 @@ UGL_Graphics::drawLine(const UPoint & p1, const UPoint & p2) {
 	ugl_driver->glVertex2i(p2.x, p2.y);
 	ugl_driver->glEnd();
 }
+void
+UGL_Graphics::drawVertexArray(VertexType type, UVertexArray * buffer) {
+	int glType;
+	switch (type) {
+		case Lines:
+			glType = GL_LINES;
+		break;
+		case LineStrip:
+			glType = GL_LINE_STRIP;
+		break;
+		case Triangles:
+			glType = GL_TRIANGLES;
+		break;
+		case TriangleStrip:
+			glType = GL_TRIANGLE_STRIP;
+		break;
+		default:
+			glType = GL_LINE_STRIP;
+		break;
+	}
+	if (buffer->getType() == UVertexArray::V3F) {
+		ugl_driver->glInterleavedArrays(GL_V3F, 0, buffer->getArray());
+		ugl_driver->glDrawArrays(glType, 0, buffer->getCount());
+	} else if (buffer->getType() == UVertexArray::C3F_V3F) {
+		ugl_driver->glInterleavedArrays(GL_C3F_V3F, 0, buffer->getArray());
+		ugl_driver->glDrawArrays(glType, 0, buffer->getCount());
+	}
+}
 
+void
+UGL_Graphics::flush() {
+}
+/*
 void
 UGL_Graphics::drawLines(int x[], int y[], int nPoints) {
 	ugl_driver->glBegin(GL_LINES);
@@ -400,20 +518,20 @@ UGL_Graphics::drawImage(UImage * image, const UPoint & p) {
 	UGL_Image * tex = static_cast<UGL_Image*>(image);
 	tex->paint(this, p);
 }
-
+*/
 void
 UGL_Graphics::drawImage(UImage * image, const URectangle & rect) {
 	UGL_Image * tex = static_cast<UGL_Image*>(image);
 	tex->paint(this, rect);
 }
-
+/*
 void
 UGL_Graphics::drawSubImage(UImage * image,
 		const URectangle & srcRect, const UPoint & destLocation) {
 	UGL_Image * tex = static_cast<UGL_Image*>(image);
 	tex->paintSubImage(this, srcRect, destLocation);
 }
-
+*/
 void
 UGL_Graphics::drawSubImage(UImage * image,
 		const URectangle & srcRect, const URectangle & destRect) {

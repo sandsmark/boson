@@ -44,12 +44,12 @@ UInputEvent::getModifiers() {
 
 bool
 UInputEvent::isControlDown() {
-	return (m_modifiers & UMod::LCtrl) || (m_modifiers & UMod::RCtrl);
+	return (m_modifiers & UMod::Ctrl);
 }
 
 bool
 UInputEvent::isAltDown() {
-	return (m_modifiers & UMod::LAlt) || (m_modifiers & UMod::RAlt);
+	return (m_modifiers & UMod::Alt);
 }
 
 bool
@@ -59,7 +59,7 @@ UInputEvent::isAltGraphDown() {
 
 bool
 UInputEvent::isShiftDown() {
-	return (m_modifiers & UMod::LShift) || (m_modifiers & UMod::RShift);
+	return (m_modifiers & UMod::Shift);
 }
 
 bool
@@ -79,15 +79,12 @@ UInputEvent::isNumDown() {
 
 bool
 UInputEvent::hasMouseModifiers() {
-	return (m_modifiers & (UMod::Button1 | UMod::Button2 | UMod::Button3 |
-		UMod::Button4 | UMod::Button5));
+	return (m_modifiers & UMod::MouseModifierMask);
 }
 
 bool
 UInputEvent::hasKeyboardModifiers() {
-	return (m_modifiers & (UMod::LCtrl | UMod::RCtrl | UMod::LAlt |
-		UMod::RAlt | UMod::AltGraph | UMod::LShift | UMod::RShift |
-		UMod::Caps | UMod::Meta | UMod::Num));
+	return (m_modifiers & UMod::KeyboardModifierMask);
 }
 
 //*

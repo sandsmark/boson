@@ -36,22 +36,27 @@ namespace ufo {
 class UGraphics;
 class UContextGroup;
 
+/** @short A abstract image representation
+  * @ingroup drawing
+  *
+  * @author Johannes Schmidt
+  */
 class UFO_EXPORT UImage : public UDrawable, public UVolatileData {
 	UFO_DECLARE_ABSTRACT_CLASS(UImage)
 public:
-	virtual int getImageWidth() const = 0;
-	virtual int getImageHeight() const = 0;
+	/** @return The size of the image. */
+	virtual UDimension getImageSize() const = 0;
 
-	/** Returns the number of bytes used for a pixel. */
+	/** @return The number of bytes used for one pixel. */
 	virtual int getImageComponents() const = 0;
 
-	/** No-op. */
+public: // Implements UVolatileData
+	/** May be overriden for auto refreshing after context recreation. */
 	virtual void refresh();
 
 public: // Implements UDrawable
-	virtual void paintDrawable(UGraphics * g, int x, int y, int w, int h);
-	virtual int getDrawableWidth() const;
-	virtual int getDrawableHeight() const;
+	virtual void paintDrawable(UGraphics * g, const URectangle & rect);
+	virtual UDimension getDrawableSize() const;
 
 public: // System dependent
 	/** Returns the system dependent image peer object, if any.

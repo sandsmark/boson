@@ -34,8 +34,13 @@ namespace ufo {
 
 class UWidget;
 
-/**is fired when a widget was moved, resized, ...
-  *@author Johannes Schmidt
+/** @short An event for widget state changes.
+  * @ingroup events
+  *
+  * It is fired when a widget was moved, resized, added,
+  * is about to be removed or its z order changed.
+  *
+  * @author Johannes Schmidt
   */
 
 class UFO_EXPORT UWidgetEvent : public UEvent {

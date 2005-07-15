@@ -9,6 +9,6 @@ noinst_LTLIBRARIES = libtext.la
 
 libtext_la_SOURCES = \
 	ubasicdocument.cpp \
-	udefaultdocumentrenderer.cpp \
-	udocumentfactory.cpp
+	udocumentfactory.cpp \
+	utextlayout.cpp
 

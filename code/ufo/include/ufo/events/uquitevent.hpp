@@ -32,6 +32,11 @@
 
 namespace ufo {
 
+/** @short This event is used to request the application to terminate.
+  * @ingroup events
+  *
+  * @author Johannes Schmidt
+  */
 class UFO_EXPORT UQuitEvent : public UEvent {
 	UFO_DECLARE_DYNAMIC_CLASS(UQuitEvent)
 public:

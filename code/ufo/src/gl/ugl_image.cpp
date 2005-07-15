@@ -30,7 +30,8 @@
 #include "ufo/ugraphics.hpp"
 //#include "ufo/ucontext.hpp"
 #include "ufo/ucontextgroup.hpp"
-//#include "ufo/utoolkit.hpp"
+#include "ufo/udisplay.hpp"
+#include "ufo/utoolkit.hpp"
 
 #include "ufo/gl/ugl_driver.hpp"
 #include "ufo/image/uimagefilter.hpp"
@@ -41,67 +42,45 @@ using namespace ufo;
 
 UFO_IMPLEMENT_DYNAMIC_CLASS(UGL_Image, UImage)
 
-UGL_Image::UGL_Image(const std::string & fileName, bool autoRefresh,
+UGL_Image::UGL_Image(const std::string & fileName, bool lazy, bool autoRefresh,
 		GLenum imageFormat, GLenum internalFormat)
 	: m_index(0)
 	, m_imageFormat(imageFormat)
 	, m_internalFormat(internalFormat)
 	, m_size()
 	, m_imageComponents(0)
+	, m_quality(2)
 	, m_isValid(false)
+	, m_isLazy(lazy)
+	, m_autoRefresh(autoRefresh)
+	, m_fileName(fileName)
 	, m_imageData(NULL)
-	//, m_contextGroup(NULL)
 {
-	/*UContext * context = UToolkit::getToolkit()->getCurrentContext();
-	if (!context) {
-		uError() << "UGL_Image: There is no current UFO context\n";
-		return;
-	}*/
-	//m_contextGroup = context->getContextGroup();
-
-	UImageIO * imageIO = new UImageIO(fileName);
-	imageIO->reference();
-
-	m_size = imageIO->getSize();
-	m_imageComponents = imageIO->getImageComponents();
-
-	createGLTexture(imageIO->getPixels(), imageIO->getImageComponents(),
-		imageFormat, internalFormat);
-
-	if (autoRefresh) {
-		m_imageData = imageIO;
-		//context->sigRefresh().connect(slot(*this, &UGL_Image::refresh));
-		getContextGroup()->addVolatileData(this);
-	} else {
-		imageIO->unreference();
+	if (!m_isLazy) {
+		ensureImage();
 	}
 }
 
-UGL_Image::UGL_Image(UImageIO * imageIO, bool autoRefresh,
+UGL_Image::UGL_Image(UImageIO * imageIO, bool lazy, bool autoRefresh,
 		GLenum imageFormat, GLenum internalFormat)
 	: m_index(0)
 	, m_imageFormat(imageFormat)
 	, m_internalFormat(internalFormat)
 	, m_size()
 	, m_imageComponents(0)
+	, m_quality(2)
 	, m_isValid(false)
-	, m_imageData(NULL)
+	, m_isLazy(lazy)
+	, m_autoRefresh(autoRefresh)
+	, m_imageData(imageIO)
 {
 	imageIO->reference();
 
-	m_size = imageIO->getSize();
-	m_imageComponents = imageIO->getImageComponents();
-
-	createGLTexture(imageIO->getPixels(), imageIO->getImageComponents(),
-		imageFormat, internalFormat);
-
-	if (autoRefresh) {
-		m_imageData = imageIO;
-		//UContext * context = UToolkit::getToolkit()->getCurrentContext();
-		//context->sigRefresh().connect(slot(*this, &UGL_Image::refresh));
-		getContextGroup()->addVolatileData(this);
-	} else {
-		imageIO->unreference();
+	if (!m_isLazy) {
+		ensureImage();
+		if (!autoRefresh) {
+			dispose();
+		}
 	}
 }
 
@@ -119,26 +98,16 @@ UGL_Image::~UGL_Image() {
 // implements UImage
 //
 
-int
-UGL_Image::getImageWidth() const {
-	return m_size.w;
-}
-
-int
-UGL_Image::getImageHeight() const {
-	return m_size.h;
+UDimension
+UGL_Image::getImageSize() const {
+	return getSize();
 }
 
 int
 UGL_Image::getImageComponents() const {
 	return m_imageComponents;
 }
-/*
-UContextGroup *
-UGL_Image::getContextGroup() const {
-	return m_contextGroup;
-}
-*/
+
 unsigned long
 UGL_Image::handle() const {
 	return m_index;
@@ -148,8 +117,9 @@ UGL_Image::handle() const {
 // public methods
 //
 
-const UDimension &
+UDimension
 UGL_Image::getSize() const {
+	(const_cast<UGL_Image*>(this))->ensureImage();
 	return m_size;
 }
 
@@ -165,31 +135,38 @@ UGL_Image::getHeight() const {
 }
 */
 
+bool
+hasAlpha(int bpp, int internalFormat) {
+	return (bpp == 2 || bpp == 4 ||
+		internalFormat == GL_ALPHA || internalFormat == GL_INTENSITY);
+}
 
 //
 // painting
 //
 
 void
-UGL_Image::paint(UGraphics * g) const {
-	paint(g, URectangle(0, 0, m_size.w, m_size.h));
+UGL_Image::paint(UGraphics * g) {
+	paint(g, getSize());
 }
 
 void
-UGL_Image::paint(UGraphics * g, const UPoint & location) const {
+UGL_Image::paint(UGraphics * g, const UPoint & location) {
+	// we need the size
+	ensureImage();
 	paint(g, URectangle(location.x, location.y, m_size.w, m_size.h));
 }
 
 void
-UGL_Image::paint(UGraphics * g, const URectangle & rect) const {
+UGL_Image::paint(UGraphics * g, const URectangle & rect) {
+	ensureImage();
 	if (m_isValid) {
 		ugl_driver->glEnable(GL_TEXTURE_2D);
 		ugl_driver->glBindTexture(GL_TEXTURE_2D, m_index);
 
 		ugl_driver->glColor4f(1, 1, 1, 1);
 
-		if (m_imageComponents == 2 || m_imageComponents == 4) {
-			ugl_driver->glPushAttrib(GL_COLOR_BUFFER_BIT);
+		if (hasAlpha(m_imageComponents, m_internalFormat)) {
 			ugl_driver->glEnable(GL_BLEND);
 			ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
@@ -207,8 +184,8 @@ UGL_Image::paint(UGraphics * g, const URectangle & rect) const {
 		}
 		ugl_driver->glEnd();
 
-		if (m_imageComponents == 2 || m_imageComponents == 4) {
-			ugl_driver->glPopAttrib();
+		if (hasAlpha(m_imageComponents, m_internalFormat)) {
+			ugl_driver->glDisable(GL_BLEND);
 		}
 
 		ugl_driver->glDisable(GL_TEXTURE_2D);
@@ -218,21 +195,24 @@ UGL_Image::paint(UGraphics * g, const URectangle & rect) const {
 
 void
 UGL_Image::paintSubImage(UGraphics * g, const URectangle & rect,
-		const UPoint & dest) const {
+		const UPoint & dest) {
+	// we need the image size
+	ensureImage();
 	paintSubImage(g, rect, URectangle(dest.x, dest.y, m_size.w, m_size.h));
 }
 
 
 void
 UGL_Image::paintSubImage(UGraphics * g, const URectangle & rect,
-		const URectangle & dest) const {
+		const URectangle & dest) {
+	ensureImage();
 	if (m_isValid) {
 		ugl_driver->glEnable(GL_TEXTURE_2D);
 		ugl_driver->glBindTexture(GL_TEXTURE_2D, m_index);
 
-		if (m_imageComponents == 2 || m_imageComponents == 4) {
-			//ugl_driver->glEnable(GL_BLEND);
-			//ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		if (hasAlpha(m_imageComponents, m_internalFormat)) {
+			ugl_driver->glEnable(GL_BLEND);
+			ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
 
 		//ugl_driver->glColor4f(1, 1, 1, 1);
@@ -254,8 +234,8 @@ UGL_Image::paintSubImage(UGraphics * g, const URectangle & rect,
 		}
 		ugl_driver->glEnd();
 
-		if (m_imageComponents == 2 || m_imageComponents == 4) {
-			//ugl_driver->glDisable(GL_BLEND);
+		if (hasAlpha(m_imageComponents, m_internalFormat)) {
+			ugl_driver->glDisable(GL_BLEND);
 		}
 
 		ugl_driver->glDisable(GL_TEXTURE_2D);
@@ -276,18 +256,27 @@ UGL_Image::disposeGL() {
 	if (m_isValid) {
 		ugl_driver->glDeleteTextures(1, &m_index);
 		m_isValid = false;
+		getDisplay()->removeVolatileData(this);
 	}
 }
 
 void
 UGL_Image::refresh() {
 	disposeGL();
-	if (m_imageData) {
-		createGLTexture(m_imageData->getPixels(), m_imageData->getImageComponents(),
-			m_imageFormat, m_internalFormat);
+	if (!m_isLazy) {
+		ensureImage();
 	}
 }
 
+void
+UGL_Image::setQuality(int quality) {
+	m_quality = quality;
+}
+
+int
+UGL_Image::getQuality() const {
+	return m_quality;
+}
 
 //
 // private methods
@@ -305,6 +294,31 @@ UGL_Image::round2(int n) {
 		return m;
 	} else {
 		return m / 2;
+	}
+}
+
+void
+UGL_Image::ensureImage() {
+	if (m_isValid) {
+		return;
+	}
+	if (m_fileName != "" && !m_imageData) {
+		m_imageData = new UImageIO(m_fileName);
+		m_imageData->reference();
+	}
+	if (m_imageData != NULL) {
+		m_size = m_imageData->getSize();
+		m_imageComponents = m_imageData->getImageComponents();
+
+		if (UToolkit::getToolkit()->getCurrentContext())
+			createGLTexture(m_imageData->getPixels(), m_imageData->getImageComponents(),
+				m_imageFormat, m_internalFormat);
+	}
+	if (!m_autoRefresh) {
+		dispose();
+	}
+	if (m_isValid) {
+		getDisplay()->addVolatileData(this);
 	}
 }
 
@@ -359,6 +373,7 @@ UGL_Image::createGLTexture(GLubyte * dataA, int componentsA,
 				(m_imageFormat != GL_GREEN) &&
 				(m_imageFormat != GL_BLUE) &&
 				(m_imageFormat != GL_ALPHA) &&
+				(m_imageFormat != GL_INTENSITY) &&
 				(m_imageFormat != GL_LUMINANCE)) {
 			m_imageFormat = GL_LUMINANCE;
 		}
@@ -421,10 +436,17 @@ UGL_Image::createGLTexture(GLubyte * dataA, int componentsA,
 	ugl_driver->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	ugl_driver->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	// scale linearly when image bigger than texture
-	ugl_driver->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// scale linearly when image smalled than texture
-	ugl_driver->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	if (m_quality == 0 || m_quality == 2) {
+		// scale linearly when image bigger than texture
+		ugl_driver->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		// scale linearly when image smalled than texture
+		ugl_driver->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	} else if (m_quality == 1) {
+		// scale linearly when image bigger than texture
+		ugl_driver->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		// scale linearly when image smalled than texture
+		ugl_driver->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	}
 
 	// ??
 	ugl_driver->glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);

@@ -34,8 +34,6 @@
 
 
 // headers in core
-
-
 #include "ubuttongroup.hpp"
 #include "ucollectable.hpp"
 #include "ucontext.hpp"
@@ -55,19 +53,60 @@
 #include "urepaintmanager.hpp"
 #include "usharedlib.hpp"
 #include "usharedptr.hpp"
+// this would includes native system headers
 //#include "usysteminfo.hpp"
 #include "utoolkit.hpp"
 #include "uversioninfo.hpp"
 #include "uvideodevice.hpp"
 #include "uvideodriver.hpp"
+#include "uvalidator.hpp"
 
-// deleted
-//#include "utexture.hpp"
+
+// headers in events
+#include "events/uevents.hpp"
+
+
+// headers in font
+#include "font/ufont.hpp"
+#include "font/ufontrenderer.hpp"
+#include "font/ufontmetrics.hpp"
+//#include "font/unativefontrenderer.hpp"
+#include "font/utexturefont.hpp"
+
+
+// headers in image
+#include "image/uimage.hpp"
+#include "image/uimagefilter.hpp"
+#include "image/uimageicon.hpp"
+#include "image/uimageio.hpp"
+
+// deprecated
+#include "image/uxbmicon.hpp"
+
+
+// headers in layouts
+#include "layouts/ulayoutmanager.hpp"
+#include "layouts/uflowlayout.hpp"
+#include "layouts/uboxlayout.hpp"
+#include "layouts/uborderlayout.hpp"
+
+
+// headers in text
+#include "text/udocument.hpp"
+#include "text/udocumentfactory.hpp"
+#include "text/ubasicdocument.hpp"
+#include "text/utextlayout.hpp"
+
+
+// headers in ui
+#include "ui/ustyle.hpp"
+#include "ui/ustylehints.hpp"
+#include "ui/ustylemanager.hpp"
+#include "ui/ucss.hpp"
 
 
 // headers in util
 #include "util/ucolor.hpp"
-#include "util/ucolorgroup.hpp"
 #include "util/ufilearchive.hpp"
 #include "util/ugeom.hpp"
 #include "util/uinsets.hpp"
@@ -76,17 +115,8 @@
 #include "util/uproperties.hpp"
 #include "util/ustring.hpp"
 
-// deleted
-//#include "util/uhashmap.hpp"
-//#include "util/uvector.hpp"
-//#include "util/ulist.hpp"
-
-// headers in events
-#include "events/uevents.hpp"
-
 
 // headers in widgets
-
 #include "widgets/uwidget.hpp"
 #include "widgets/ubutton.hpp"
 #include "widgets/ucheckbox.hpp"
@@ -94,6 +124,8 @@
 #include "widgets/ucombobox.hpp"
 #include "widgets/ucompound.hpp"
 #include "widgets/udesktoppane.hpp"
+#include "widgets/udockwidget.hpp"
+#include "widgets/ugroupbox.hpp"
 #include "widgets/uinternalframe.hpp"
 #include "widgets/uitem.hpp"
 #include "widgets/ulabel.hpp"
@@ -104,6 +136,7 @@
 #include "widgets/umenubar.hpp"
 #include "widgets/umenuitem.hpp"
 #include "widgets/upopupmenu.hpp"
+#include "widgets/uprogressbar.hpp"
 #include "widgets/uradiobutton.hpp"
 #include "widgets/urootpane.hpp"
 #include "widgets/uscrollablewidget.hpp"
@@ -111,102 +144,13 @@
 #include "widgets/uscrollpane.hpp"
 #include "widgets/useparator.hpp"
 #include "widgets/uslider.hpp"
+#include "widgets/uspinbox.hpp"
 #include "widgets/utextedit.hpp"
+#include "widgets/utextwidget.hpp"
 #include "widgets/uviewport.hpp"
 
-/*
-// headers in borders
-// deleted
-#include "borders/uborder.hpp"
-#include "borders/uborderfactory.hpp"
-#include "borders/ubevelborder.hpp"
-#include "borders/ucompoundborder.hpp"
-#include "borders/uemptyborder.hpp"
-#include "borders/ulineborder.hpp"
-#include "borders/utitledborder.hpp"
-*/
-// headers in layouts
 
-#include "layouts/ulayoutmanager.hpp"
-#include "layouts/uflowlayout.hpp"
-#include "layouts/uboxlayout.hpp"
-#include "layouts/uborderlayout.hpp"
-
-// headers in ui
-#include "ui/ubuttonui.hpp"
-#include "ui/ucomboboxui.hpp"
-#include "ui/uinternalframeui.hpp"
-#include "ui/ulabelui.hpp"
-#include "ui/ulistboxui.hpp"
-#include "ui/umenubarui.hpp"
-#include "ui/umenuitemui.hpp"
-#include "ui/upopupmenuui.hpp"
-#include "ui/uscrollbarui.hpp"
-#include "ui/useparatorui.hpp"
-#include "ui/usliderui.hpp"
-#include "ui/utexteditui.hpp"
-#include "ui/uwidgetui.hpp"
-
-#include "ui/uuimanager.hpp"
-#include "ui/ustyle.hpp"
-#include "ui/ulookandfeel.hpp"
-#include "ui/uthemelookandfeel.hpp"
-
-// deprecated
-
-// deleted
-//#include "ui/umenuui.hpp"
-//#include "ui/uuiutilities.hpp"
-
-// headers in ui/basic
-// FIXME
-// should they be included in main include file?
-//#include "ui/basic/ubasicbuttonui.hpp"
-//#include "ui/basic/ubasiccheckboxui.hpp"
-//#include "ui/basic/ubasicinternalframeui.hpp"
-//#include "ui/basic/ubasiclabelui.hpp"
-//#include "ubasiclistui.hpp"
-//#include "ui/basic/ubasiclookandfeel.hpp"
-//#include "ui/basic/ubasicmenubarui.hpp"
-//#include "ui/basic/ubasicmenuitemui.hpp"
-//#include "ui/basic/ubasicmenuui.hpp"
-//#include "ui/basic/ubasicpopupmenuui.hpp"
-//#include "ui/basic/ubasicseparatorui.hpp"
-//#include "ui/basic/ubasictextfieldui.hpp"
-//#include "ui/basic/ubasictextpaneui.hpp"
-//#include "ui/basic/ubasicborderfactory.hpp"
-//#include "ui/basic/ubasiclistboxui.hpp"
-
-// headers in text
-#include "text/udocument.hpp"
-#include "text/udocumentfactory.hpp"
-#include "text/ubasicdocument.hpp"
-#include "text/udocumentfilter.hpp"
-
-#include "text/udocumentrenderer.hpp"
-#include "text/udefaultdocumentrenderer.hpp"
-
-// deleted
-//#include "text/utextwidget.hpp"
-//#include "text/uattribute.hpp"
-
-// headers in font
-#include "font/ufont.hpp"
-#include "font/ufontrenderer.hpp"
-#include "font/ufontmetrics.hpp"
-//#include "font/unativefontrenderer.hpp"
-#include "font/utexturefont.hpp"
-
-// deleted
-//#include "font/uglyph.hpp"
-
-// headers in image
-#include "image/uimage.hpp"
-#include "image/uimagefilter.hpp"
-#include "image/uimageicon.hpp"
-#include "image/uimageio.hpp"
-
-// deprecated
-#include "image/uxbmicon.hpp"
+// headers in xml
+#include "xml/uxul.hpp"
 
 #endif // UFO_HPP

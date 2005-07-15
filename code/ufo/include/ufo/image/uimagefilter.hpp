@@ -33,7 +33,11 @@
 namespace ufo {
 
 class UImageIO;
-
+/** @short A class used for image manipulation.
+  * @ingroup internal
+  *
+  * @author Johannes Schmidt
+  */
 class UImageFilter : public UObject {
 	UFO_DECLARE_ABSTRACT_CLASS(UImageFilter)
 public:
@@ -63,7 +67,7 @@ public:
 	  * @param heightout The height (in pixels) of the destination image
 	  * @param dataout A pointer to the destination image (shouldn't be NULL)
 	  */
-	static void scale(int components, 
+	static void scale(int components,
 		int widthin, int heightin, const uint8_t * datain,
 		int widthout, int heightout, uint8_t * dataout);
 };

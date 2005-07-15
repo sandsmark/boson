@@ -37,8 +37,9 @@ namespace ufo {
 class UWidget;
 class UGraphics;
 
-/** The repaint manager is a very simple controller which keeps track
-  * of the union of all dirty regions.
+/** @short The repaint manager is a very simple controller which keeps track
+  *  of the union of all dirty regions.
+  * @ingroup drawing
   *
   * @author Johannes Schmidt
   */
@@ -55,7 +56,7 @@ public:
 
 	/** Returns the unioned dirty region for the whole context. */
 	virtual URectangle getDirtyRegion() const;
-	
+
 	/** In general, this method repaints the whole buffer.
 	  * This method may be overriden to repaint only parts of the given
 	  * buffer.

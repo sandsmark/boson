@@ -29,49 +29,73 @@
 
 #include "ufo/uicon.hpp"
 
-//#include "ufo/ui/uuimanager.hpp"
+#include "ufo/ui/ustyle.hpp"
+#include "ufo/ui/ustylehints.hpp"
+// for shortcut events
+#include "ufo/events/ushortcutevent.hpp"
+#include "ufo/widgets/ubutton.hpp"
 
-namespace ufo {
+using namespace ufo;
 
 
 UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(ULabel, UCompound)
 
 ULabel::ULabel()
 	: UCompound()
+	, m_buddy(NULL)
 {
+	setCssType("label");
 }
 
 ULabel::ULabel(UIcon * icon)
 	: UCompound(icon)
+	, m_buddy(NULL)
 {
+	setCssType("label");
 }
 
 ULabel::ULabel(const std::string & text, UIcon * icon)
 	: UCompound(text, icon)
+	, m_buddy(NULL)
 {
-}
-
-//*
-//* hides | overrides UWidget
-//*
-/*
-void
-ULabel::setUI(ULabelUI * ui) {
-	UWidget::setUI(ui);
-}
-
-UWidgetUI *
-ULabel::getUI() const {
-	return static_cast<ULabelUI*>(UWidget::getUI());
+	setCssType("label");
 }
 
 void
-ULabel::updateUI() {
-	setUI(static_cast<ULabelUI*>(getUIManager()->getUI(this)));
+ULabel::setBuddy(UWidget * buddy) {
+	m_buddy = buddy;
 }
-*/
-//*
-//* public methods
-//*
 
-} // namespace ufo
+UWidget *
+ULabel::getBuddy() const {
+	return m_buddy;
+}
+
+UDimension
+ULabel::getContentsSize(const UDimension & maxSize) const {
+	UDimension ret(getStyle()->getCompoundPreferredSize(
+		getStyleHints(),
+		getText(),
+		getIcon())
+	);
+
+	if (ret.isValid()) {
+		ret.clamp(maxSize);
+		return ret;
+	}
+	return UDimension::invalid;
+}
+
+void
+ULabel::processShortcutEvent(UShortcutEvent * e) {
+	if (isVisible() && isEnabled() && m_buddy) {
+		m_buddy->requestFocus();
+		if (!e->isAmbiguous()) {
+			if (UButton * button = dynamic_cast<UButton*>(m_buddy)) {
+				button->doClick();
+			}
+		}
+		e->consume();
+	}
+	UWidget::processShortcutEvent(e);
+}

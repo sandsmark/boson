@@ -37,7 +37,7 @@
 
 #include "ufo/util/ucolor.hpp"
 
-namespace ufo {
+using namespace ufo;
 
 UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(UScrollPane, UWidget)
 
@@ -47,15 +47,15 @@ UScrollPane::UScrollPane(UScrollableWidget * viewA)
 	, m_vertical(NULL)
 	, m_autoAdd(true)
 {
-	setLayout(new UBorderLayout());
+	setLayout(new UBorderLayout(0, 0));
 	add(m_viewport, UBorderLayout::Center);
 
-	m_vertical = new ScrollBar(this, Vertical);
-	m_vertical->sigScrollPos().connect(slot(*this, &UScrollPane::on_scroll));
+	m_vertical = new UScrollBar(Vertical);//this, Vertical);
+	m_vertical->sigValueChanged().connect(slot(*this, &UScrollPane::on_scroll));
 	trackPointer(m_vertical);
 
-	m_horizontal = new ScrollBar(this, Horizontal);
-	m_horizontal->sigScrollPos().connect(slot(*this, &UScrollPane::on_scroll));
+	m_horizontal = new UScrollBar();//this, Horizontal);
+	m_horizontal->sigValueChanged().connect(slot(*this, &UScrollPane::on_scroll));
 	trackPointer(m_horizontal);
 
 	setScrollable(viewA);
@@ -67,6 +67,9 @@ UScrollPane::UScrollPane(UScrollableWidget * viewA)
 	//setBorder(UBorderFactory::createBevelBorder(Lowered));
 	setBorder(LoweredBevelBorder);//UBorderFactory::createBevelBorder(Lowered));
 	//setBorder(UBorderFactory::createLineBorder(UColor::red));
+
+	// FIXME: should this be set via style sheets?
+	setOpaque(false);
 }
 
 
@@ -115,12 +118,6 @@ UScrollPane::isAutoAddingScrollBars() const {
 }
 
 void
-UScrollPane::addedToHierarchy() {
-	UWidget::addedToHierarchy();
-	installScrollable();
-}
-
-void
 UScrollPane::processMouseWheelEvent(UMouseWheelEvent * e) {
 	// lazily send a copy to the vertical scroll bar
 	UMouseWheelEvent * newE = new UMouseWheelEvent(
@@ -132,46 +129,68 @@ UScrollPane::processMouseWheelEvent(UMouseWheelEvent * e) {
 		e->getWheel()
 	);
 
-	m_vertical->dispatchEvent(newE);
+	if (m_vertical->isVisible()) {
+		m_vertical->dispatchEvent(newE);
+	}
 }
 
+void
+UScrollPane::processWidgetEvent(UWidgetEvent * e) {
+	switch (e->getType()) {
+		case UEvent::WidgetAdded:
+			installScrollable();
+		break;
+		case UEvent::WidgetResized:
+			installScrollable();
+		break;
+	}
+	UWidget::processWidgetEvent(e);
+}
 
 void
-UScrollPane::on_scroll(UScrollBar * scrollBarA, int amountA) {
-	if (scrollBarA->getOrientation() == Horizontal) {
+UScrollPane::on_scroll(UAbstractSlider * slider) {
+	if (slider->getOrientation() == Horizontal) {
 		UPoint pos = m_viewport->getViewLocation();
-		pos.x = amountA;
+		pos.x = slider->getValue();
 		m_viewport->setViewLocation(pos);
-	} else if (scrollBarA->getOrientation() == Vertical) {
+	} else if (slider->getOrientation() == Vertical) {
 		UPoint pos = m_viewport->getViewLocation();
-		pos.y = amountA;
+		pos.y = slider->getValue();
 		m_viewport->setViewLocation(pos);
 	}
 }
 
 void
 UScrollPane::installScrollable() {
-	UScrollableWidget * view = dynamic_cast<UScrollableWidget*>(m_viewport->getView());
+	UWidget * view = m_viewport->getView();
+	UScrollableWidget * scrollableView = dynamic_cast<UScrollableWidget*>(view);
 	if (!view) {
 		return;
 	}
 
 	view->invalidateSelf();
-	view->validate();
+	view->validateSelf();
+	validateSelf();
 
 	UDimension size;// = view->getSize();
 	if (size.isEmpty()) {
 		size = view->getPreferredSize();
 	}
-	m_vertical->setMaximum(size.h);
-	m_horizontal->setMaximum(size.w);
-	m_vertical->setMinimum(0);
-	m_horizontal->setMinimum(0);
-
-	UDimension viewSize = view->getPreferredViewportSize();
+	UDimension viewSize;
+	if (scrollableView) {
+		viewSize = scrollableView->getPreferredViewportSize();
+	} else {
+		viewSize = getPreferredSize();
+		if (!viewSize.isValid()) {
+			viewSize = UDimension(150, 150);
+		}
+	}
+	m_vertical->setRange(0, size.h - viewSize.h);
+	m_horizontal->setRange(0, size.w - viewSize.w);
+/*
 	m_vertical->setVisibleAmount(viewSize.h);
 	m_horizontal->setVisibleAmount(viewSize.w);
-
+*/
 	// check for auto adding scroll bars
 	if (m_autoAdd) {
 		if (viewSize.h >= size.h) {
@@ -200,26 +219,10 @@ UScrollPane::installScrollable() {
 			add(m_horizontal, UBorderLayout::South);
 		}
 	}
+	if (scrollableView) {
+		m_vertical->setUnitIncrement(scrollableView->getUnitIncrement(Vertical));
+		m_vertical->setBlockIncrement(scrollableView->getBlockIncrement(Vertical));
+		m_horizontal->setUnitIncrement(scrollableView->getUnitIncrement(Horizontal));
+		m_horizontal->setBlockIncrement(scrollableView->getBlockIncrement(Horizontal));
+	}
 }
-
-//
-// protected classes
-// ScrollBar
-//
-
-int
-UScrollPane::ScrollBar::getUnitIncrement(Direction directionA) const {
-	UScrollableWidget * w = m_scrollPane->getScrollable();
-	return w->getUnitIncrement(m_scrollPane->getWidget(0)->getBounds(),
-		getOrientation(), directionA);
-}
-
-int
-UScrollPane::ScrollBar::getBlockIncrement(Direction directionA) const {
-	UScrollableWidget * w = m_scrollPane->getScrollable();
-	return w->getBlockIncrement(m_scrollPane->getWidget(0)->getBounds(),
-		getOrientation(), directionA);
-}
-
-} // namespace ufo
-

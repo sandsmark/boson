@@ -33,12 +33,13 @@
 
 namespace ufo {
 
-/**
+/** @short An abstraction of a four float array (red, green, blue and alpha)
+  *  describing a color.
+  * @ingroup appearance
+  * @ingroup drawing
+  *
   * This class is not part of the @ref UObject inheritance structure.
   * Use instead @ref UColorObject if you need a color derived from UObject.
-  *
-  * @short An abstraction of a four float array (red, green, blue and alpha)
-  * describing a color.
   *
   * @author Johannes Schmidt
   */
@@ -108,6 +109,9 @@ public:
 	float getGreen() const;
 	float getBlue() const;
 	float getAlpha() const;
+	
+	uint32_t getArgb() const;
+	uint32_t getRgba() const;
 
 	/** returns a darker version of the color. The Alpha value is untouched.
 	  * Multiplies each rgb value with FACTOR.

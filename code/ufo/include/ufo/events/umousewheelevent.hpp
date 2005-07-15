@@ -34,7 +34,9 @@
 
 namespace ufo {
 
-/**
+/** @short This event is used for mouse wheel events.
+  * @ingroup events
+  *
   * @author Johannes Schmidt
   */
 
@@ -65,7 +67,7 @@ public:
 		const UPoint & root,
 		int delta,
 		int wheel);
-	
+
 	UMouseWheelEvent(
 		UWidget * source,
 		Type type,

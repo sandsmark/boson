@@ -27,7 +27,7 @@
 
 #include "ufo/uvolatiledata.hpp"
 
-#include "ufo/ucontextgroup.hpp"
+#include "ufo/udisplay.hpp"
 #include "ufo/utoolkit.hpp"
 
 using namespace ufo;
@@ -35,20 +35,19 @@ using namespace ufo;
 UFO_IMPLEMENT_ABSTRACT_CLASS(UVolatileData, UObject)
 
 
-UVolatileData::UVolatileData(UContextGroup * group)
-	: m_contextGroup(group)
+UVolatileData::UVolatileData(UDisplay * display)
+	: m_display(display)
 	, m_refreshTime(0)
 {
-	if (m_contextGroup == NULL) {
-		m_contextGroup =
-			UToolkit::getToolkit()->getCurrentContext()->getContextGroup();
+	if (display == NULL && UDisplay::getDefault()) {
+		m_display = UDisplay::getDefault();
 	}
 }
 
 
 bool
 UVolatileData::needsRefresh() const {
-	return (m_contextGroup->getLastRefreshTime() > m_refreshTime);
+	return false;//(m_contextGroup->getLastRefreshTime() > m_refreshTime);
 }
 
 
@@ -59,6 +58,6 @@ UVolatileData::updateRefreshTime() {
 
 
 void
-UVolatileData::setContextGroup(UContextGroup * group) {
-	m_contextGroup = group;
+UVolatileData::setDisplay(UDisplay * display) {
+	m_display = display;
 }

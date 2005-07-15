@@ -32,15 +32,19 @@
 
 #include <map>
 
-#include "ufontmetrics.hpp"
 #include "ufontinfo.hpp"
-#include "../util/ustring.hpp"
+#include "ufontrenderer.hpp"
 
 namespace ufo {
 
-class UContextGroup;
+class UFontMetrics;
+class UDisplay;
 
-/** This class is a controller class for abstract font renderers.
+/** @short This class is a controller class for abstract font renderers.
+  * @ingroup appearance
+  * @ingroup text
+  * @ingroup drawing
+  *
   * It uses the active font plugin to create new font renderers according
   * to its attributes.
   * The preferred way to create font with a specific font face is to use one
@@ -48,8 +52,8 @@ class UContextGroup;
   * Alternatively, you may use an explicit string literal defining your font
   * face
   * This class may use caching of already existing font renderers.
-  * 
-  *@author Johannes Schmidt
+  *
+  * @author Johannes Schmidt
   */
 
 class UFO_EXPORT UFont : public UObject {
@@ -85,6 +89,10 @@ public: // Public c'tors
 	  * The font renderer will not be registered at the cache.
 	  */
 	UFont(UFontRenderer * renderer);
+
+	/** Explicit copy constructor */
+	UFont(const UFont & font);
+	UFont& operator=(const UFont & font);
 
 	virtual ~UFont();
 
@@ -138,12 +146,14 @@ protected: // Private methods
 	  * font cache and creates a new font renderer on no results.
 	  */
 	void queryAndLoad(const UFontInfo & info);
+	/** Disposes the font renderer. */
+	void dispose();
 
 private: // Private static attributes
 	typedef std::map<UFontInfo, UFontRenderer*> fontCache_t;
-	typedef std::map<UContextGroup*, fontCache_t> contexGroupCache_t;
+	typedef std::map<UDisplay*, fontCache_t> displayCache_t;
 	//static fontCache_t sm_fontCache;
-	static contexGroupCache_t sm_fontCache;
+	static displayCache_t sm_fontCache;
 
 private: // Private attributes
 	/** The currently used font renderer. */

@@ -27,90 +27,15 @@
 
 #include "ufo/widgets/umenubar.hpp"
 
-#include "ufo/widgets/urootpane.hpp"
-#include "ufo/widgets/umenu.hpp"
+#include "ufo/layouts/uflowlayout.hpp"
 
-//#include "ufo/ui/uuimanager.hpp"
+using namespace ufo;
 
-#include "ufo/events/umouseevent.hpp"
-
-namespace ufo {
-
-UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(UMenuBar, UWidget)
+UFO_IMPLEMENT_CLASS(UMenuBar, UDockWidget)
 
 UMenuBar::UMenuBar()
-	: m_visMenu(NULL)
+	: UDockWidget()
 {
+	setLayout(new UFlowLayout());
+	setCssType("menubar");
 }
-
-//*
-//* hides | overrides UWidget
-//*
-/*
-void
-UMenuBar::setUI(UMenuBarUI * ui) {
-	UWidget::setUI(ui);
-}
-
-UWidgetUI *
-UMenuBar::getUI() const {
-	return static_cast<UMenuBarUI*>(UWidget::getUI());
-}
-
-void
-UMenuBar::updateUI() {
-	setUI(static_cast<UMenuBarUI*>(getUIManager()->getUI(this)));
-}
-*/
-void
-UMenuBar::addImpl(UWidget * w, UObject * constraints, int index) {
-	if (UMenu * menu = dynamic_cast<UMenu*>(w)) {
-		UWidget::addImpl(menu, constraints, index);
-		menu->sigMouseEntered().connect(slot(*this, &UMenuBar::menuPopup));
-	}
-}
-
-//*
-//* public methods
-//*
-
-void
-UMenuBar::closePopups() {
-	const std::vector<UWidget*> & children = getWidgets();
-	for (std::vector<UWidget*>::const_iterator iter = children.begin();
-			iter != children.end(); ++iter ) {
-		if (UMenu * menu = dynamic_cast<UMenu *>(*iter)) {
-			menu->setPopupMenuVisible(false);
-		}
-	}
-}
-
-
-void
-UMenuBar::setVisibleMenu(UMenu * menu) {
-	m_visMenu = menu;
-}
-
-UMenu *
-UMenuBar::getVisibleMenu() {
-	return m_visMenu;
-}
-
-
-//
-// protected slots
-//
-
-void
-UMenuBar::menuPopup(UMouseEvent * e) {
-	UMenu * menu = dynamic_cast<UMenu *>(e->getSource());
-	UMenu * visMenu = getVisibleMenu();
-	
-	if (visMenu && (menu != visMenu)) {
-		// eliminate the pressed status of the menu buttons
-		visMenu->doClick(0);
-		menu->doClick(0);
-	}
-}
-
-} // namespace ufo

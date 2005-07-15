@@ -34,6 +34,7 @@
 #include "ufocusevent.hpp"
 #include "uinputevent.hpp"
 #include "ukeyevent.hpp"
+#include "ushortcutevent.hpp"
 #include "umouseevent.hpp"
 #include "umousewheelevent.hpp"
 #include "uquitevent.hpp"

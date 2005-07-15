@@ -34,10 +34,20 @@
 
 namespace ufo {
 
-/**Base class for all garbage collected objects. So far, this is a simple
-  * wrapper class for gc_cleanup class of libgc:
-  * http://www.hpl.hp.com/personal/Hans_Boehm/gc
-  *@author Johannes Schmidt
+/**
+  * @short Base class for all garbage collected objects.
+  * @ingroup core
+  *
+  * This class simply adds a reference counter and deletes the object
+  * if it was created dynamically and the reference count drops to 0.
+  * <p>
+  * An instance is created dynamically if it was created with
+  * the new operator.
+  * <em>Please note:</em>
+  * The reference count starts with a reference count, that means no
+  * garbage collection activated.
+  *
+  * @author Johannes Schmidt
   */
 
 //class UFO_EXPORT UCollectable : public gc_cleanup {

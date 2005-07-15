@@ -43,6 +43,11 @@ class UPluginBase;
 class USharedLib;
 class UXSDLDevice;
 
+/** @short A video driver which uses SDL for windowing.
+  * @ingroup internal
+  *
+  * @author Johannes Schmidt
+  */
 class UFO_EXPORT UXSDLDriver : public UVideoDriver {
 	UFO_DECLARE_DYNAMIC_CLASS(UXSDLDriver)
 public:
@@ -90,6 +95,11 @@ private: // Private attributes
 };
 
 
+/** @short A video device which uses SDL for windowing.
+  * @ingroup internal
+  *
+  * @author Johannes Schmidt
+  */
 class UFO_EXPORT UXSDLDevice : public UVideoDevice {
 	UFO_DECLARE_ABSTRACT_CLASS(UXSDLDevice)
 public:

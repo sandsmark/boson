@@ -32,8 +32,11 @@
 
 namespace ufo {
 
-/** This icon uses an x bitmap and paints it via glBitmap.
+/** @short This icon uses an x bitmap and paints it via glBitmap.
+  * @ingroup internal
+  *
   * WARNING: This class is deprecated and should not be used.
+  *
   * @author Johannes Schmidt
   */
 
@@ -43,19 +46,15 @@ public:
 	UXBMIcon(const uint8_t * src, int width, int height);
 	~UXBMIcon();
 
-	/** Use color (instead of widget attributes) to paint the bitmap. */
-	void paintIcon(UGraphics * g, UColor * color, int x, int y);
-
 public: // Overrides UIcon
-	void paintIcon(UGraphics * g, UWidget * widget, int x, int y);
+	virtual void paintIcon(UGraphics * g, const URectangle & rect,
+		const UStyleHints * hints, uint32_t widgetState = 0);
 
-	int getIconWidth() const;
-	int getIconHeight() const;
+	virtual UDimension getIconSize() const;
 
 private:
 	uint8_t * m_data;
-	int m_width;
-	int m_height;
+	UDimension m_size;
 };
 
 } // namespace ufo

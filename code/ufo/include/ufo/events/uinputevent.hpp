@@ -33,7 +33,12 @@
 
 namespace ufo {
 
-/**
+/** @short This event is used as base class for user inputs
+  *  (keyboard, mouse etc.).
+  * @ingroup events
+  *
+  * @see UKeyEvent
+  * @see UMouseEvent
   * @author Johannes Schmidt
   */
 

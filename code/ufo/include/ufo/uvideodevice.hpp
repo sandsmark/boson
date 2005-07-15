@@ -37,8 +37,9 @@ namespace ufo {
 
 class UXFrame;
 
-/**
-  * @short An abstraction for a native video device (e.g. X11 windows).
+/** @short An abstraction for a native video device (e.g. X11 windows).
+  * @ingroup windowing
+  * @ingroup native
   *
   * @author Johannes Schmidt
   */

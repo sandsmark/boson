@@ -32,13 +32,13 @@
 
 namespace ufo {
 
-/**
+/** @short An abstraction of a two dimensional point (x and y).
+  * @ingroup appearance
+  *
   * This class is not part of the @ref UObject inheritance structure.
-  * Use instead @ref UPointObject if you need a color derived from UObject.
+  * Use instead @ref UPointObject if you need a point derived from UObject.
   *
-  * @short An abstraction of a two dimensional point (x and y).
-  *
-  *@author Johannes Schmidt
+  * @author Johannes Schmidt
   */
 
 class UFO_EXPORT UPoint {

@@ -6,4 +6,3 @@ Makefile.in
 *.lo
 libboufo.la
 libboufo_la_meta_unload.*
-boufodesigner

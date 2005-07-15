@@ -71,12 +71,13 @@ UButtonGroup::setSelectedButton(UButton * button, bool selected) {
 			m_selectedButton = NULL;
 		}
 	} else
-	if (button && !button->isSelected() ) {
-		UButton * oldButton = m_selectedButton;
+	if (button) {
+		if (m_selectedButton && m_selectedButton != button) {
+			m_selectedButton->setSelected(false);
+		}
 		m_selectedButton = button;
-		m_selectedButton->setSelected(true);
-		if (oldButton) {
-			oldButton->setSelected(false);
+		if (!m_selectedButton->isSelected()) {
+			m_selectedButton->setSelected(true);
 		}
 	}
 }

@@ -38,10 +38,13 @@
 
 namespace ufo {
 
-/** A simple wrapper for std::string which is derived from UObject.
+/** @short A simple wrapper for std::string which is derived from UObject.
+  * @ingroup core
+  *
   * Uses implicit data sharing.
   * Implements some usefule functions like toString(Type & T), tokenize(),
   * unsigned int hash(const char*), etc.
+  *
   * @author Johannes Schmidt
   */
 
@@ -65,7 +68,7 @@ public: // operators
 	UString & operator =(const std::string & str);
 
 	operator std::string() const {
-		return m_stringRef;
+		return *m_stringRef;
 	}
 
 public: // Public methods

@@ -32,23 +32,23 @@
 
 #include "../util/ucolor.hpp"
 
-// we need this for proper getUI() overriding
-//#include "../ui/ulistboxui.hpp"
-
 namespace ufo {
 
 class UItem;
 class UIcon;
 class UColor;
 
-/**
-  *@author Johannes Schmidt
+/** @short A widget with several items
+  * @ingroup widgets
+  *
+  * This widget may be added to a scroll pane.
+  *
+  * @author Johannes Schmidt
   */
-
-
 class UFO_EXPORT UListBox : public UScrollableWidget {
 	UFO_DECLARE_DYNAMIC_CLASS(UListBox)
 	UFO_UI_CLASS(UListBoxUI)
+	UFO_STYLE_TYPE(UStyle::CE_ListBox)
 public: // Public Types
 	/** Allow either single selection or multiple selection.
 	  * So far, multiple selection isn't fully implemented
@@ -62,17 +62,10 @@ public: // Public Types
 public: // Public constructors
 	UListBox();
 	UListBox(const std::vector<UString> & listDataA);
-/*
-public: // hides | overrides UWidget
-	virtual void setUI(UListBoxUI * ui);
-	virtual UWidgetUI * getUI() const;
-	virtual void updateUI();
-*/
+
 public: // overrides UScrollableWidget
-	virtual int getUnitIncrement(const URectangle & visibleRectA,
-		Orientation orientationA, Direction directionA) const;
-	virtual int getBlockIncrement(const URectangle & visibleRectA,
-		Orientation orientationA, Direction directionA) const;
+	virtual int getUnitIncrement(Orientation orientation = Horizontal) const;
+	virtual int getBlockIncrement(Orientation orientation = Horizontal) const;
 
 	virtual UDimension getPreferredViewportSize() const;
 
@@ -132,7 +125,10 @@ public: // Other methods
 	  * item under the given point. */
 	int locationToIndex(const UPoint & locationA);
 
-public: // Overrides UWidget
+protected: // Overrides UWidget
+	virtual void paintWidget(UGraphics * g);
+	virtual UDimension getContentsSize(const UDimension & maxSize) const;
+	virtual void processMouseEvent(UMouseEvent * e);
 	virtual void addedToHierarchy();
 	virtual void removedFromHierarchy();
 

@@ -25,44 +25,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA *
  ***************************************************************************/
 
-
 #include "ufo/widgets/ulistbox.hpp"
+
 #include "ufo/widgets/uitem.hpp"
-
-#include "ufo/ui/ulistboxui.hpp"
-
-//#include "ufo/ui/uuimanager.hpp"
-
-// used by string list box item
-//#include "ufo/widgets/ulabel.hpp"
+#include "ufo/events/umouseevent.hpp"
 
 
-namespace ufo {
-
-/** private class for string items and icon items.
-  * @author Johannes Schmidt
-  */
-  /*
-class UStringListBoxItem : public UListBoxItem {
-	UFO_DECLARE_ABSTRACT_CLASS(UStringListBoxItem)
-public:
-	UStringListBoxItem(const UString & s);
-	UStringListBoxItem(UIcon * i);
-	UStringListBoxItem(const UString & s, UIcon * icon);
-
-public: // Implements UListBoxItem
-	virtual void paintItem(UListBox * listBoxA, int x, int y,
-		bool isSelectedA, bool hasFocusA);
-	virtual UDimension getItemSize(const UListBox * listBoxA) const;
-	virtual void notify(UListBox * listBox, bool b);
-private: // Private attributes
-	UIcon * m_icon;
-	std::string m_text;
-};
-UFO_IMPLEMENT_DYNAMIC_CLASS(UStringListBoxItem, UListBoxItem)
-
-UFO_IMPLEMENT_DYNAMIC_CLASS(UListBoxItem, "")
-*/
+using namespace ufo;
 
 UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(UListBox, UScrollableWidget)
 
@@ -71,58 +40,36 @@ UListBox::UListBox()
 	: m_selectionMode(SingleSelection)
 	, m_indices()
 	, m_visRowCount(5)
-{}
+{
+	setCssType("listbox");
+}
 
 UListBox::UListBox(const std::vector<UString> & listDataA)
 	: m_selectionMode(SingleSelection)
 	, m_indices()
 	, m_visRowCount(5)
-{}
-
-
-//*
-//* hides | overrides UWidget
-//*
-/*
-void
-UListBox::setUI(UListBoxUI * ui) {
-	UWidget::setUI(ui);
+{
+	setCssType("listbox");
 }
 
-UWidgetUI *
-UListBox::getUI() const {
-	return static_cast<UListBoxUI*>(UWidget::getUI());
-}
 
-void
-UListBox::updateUI() {
-	setUI(static_cast<UListBoxUI*>(getUIManager()->getUI(this)));
-}
-*/
-
-//*
-//* hides | overrides UScrollableWidget
-//*
+//
+// hides | overrides UScrollableWidget
+//
 
 int
-UListBox::getUnitIncrement(const URectangle & visibleRectA,
-		Orientation orientationA, Direction directionA) const {
+UListBox::getUnitIncrement(Orientation orientation) const {
 	int ret = 0;
-	if (m_items.size()) {
-		ret = m_items[0]->getItemSize(this).h;
-	}
-	if (directionA == Up) {
-		ret = -ret;
+	if (orientation == Vertical && m_items.size()) {
+		ret = m_items[0]->getItemSize(getSize(), getStyleHints(), this).h;
 	}
 	return ret;
 }
 
 int
-UListBox::getBlockIncrement(const URectangle & visibleRectA,
-		Orientation orientationA, Direction directionA) const {
+UListBox::getBlockIncrement(Orientation orientation) const {
 	// FIXME
-	return (getVisibleRowCount() - 1) *
-		getUnitIncrement(visibleRectA, orientationA, directionA);
+	return (getVisibleRowCount() - 1) * getUnitIncrement(orientation);
 }
 
 UDimension
@@ -130,22 +77,20 @@ UListBox::getPreferredViewportSize() const {
 	int n = getVisibleRowCount();
 	int i = 0;
 	UDimension ret;
-	UInsets insets = getInsets();
 	for (std::vector<UItem*>::const_iterator iter = m_items.begin();
 			i < n && iter != m_items.end();
 			++iter) {
-		UDimension size = (*iter)->getItemSize(this);
+		UDimension size = (*iter)->getItemSize(getSize(), getStyleHints(), this);
 		ret.h += size.h;
 		ret.w = std::max(ret.w, size.w);
 		++i;
 	}
-	ret.w += insets.left + insets.right;
-	ret.h += insets.top + insets.bottom;
-	return ret;
+	return ret + getInsets();
 }
-//*
-//* public methods
-//*
+
+//
+// public methods
+//
 
 void
 UListBox::addList(const std::vector<UString> & listData) {
@@ -192,6 +137,79 @@ UListBox::addItemImpl(UItem * itemA, int index) {
 		itemA->install(this);
 	}
 	repaint();
+}
+
+void
+UListBox::paintWidget(UGraphics * g) {
+	//UWidget::paintWidget(g);
+
+	UInsets insets = getInsets();
+	// painting cells
+	int x = insets.left;
+	int y = insets.top;
+	const UColor & background = getBackgroundColor();
+	const UColor & foreground = getForegroundColor();
+	const std::vector<UItem*> & items = getItems();
+	const UStyleHints * hints = getStyleHints();
+	URectangle rect = getInnerBounds();
+
+	for (std::vector<UItem*>::const_iterator iter = items.begin();
+			iter != items.end();
+			++iter) {
+		UDimension dim = (*iter)->getItemSize(getSize(), hints, this);
+		rect.h = dim.h;
+		if (isSelectedIndex(iter - items.begin())) {
+			(*iter)->paintItem(g, rect, hints, WidgetSelected, this);
+
+			/*g, this, x, y,
+				true, // is selected
+				false, // has focus
+				getColorGroup().highlightedText(), // foreground
+				getColorGroup().highlight() // background
+			);
+			*/
+		} else {
+			(*iter)->paintItem(g, rect, hints, WidgetNoState, this);
+			/*
+			(*iter)->paintItem(g, this, x, y,
+				false, false,
+				foreground, background
+			);*/
+		}
+		rect.y += dim.h;//(*iter)->getItemSize(this).getHeight();
+	}
+}
+
+UDimension
+UListBox::getContentsSize(const UDimension & maxSize) const {
+	UDimension ret;
+
+	// iterate through all cells
+	// FIXME: this is quite expensive
+	const std::vector<UItem*> & items = getItems();
+	for (std::vector<UItem*>::const_iterator iter = items.begin();
+			iter != items.end();
+			++iter) {
+		const UDimension & wsize = (*iter)->getItemSize(getSize(), getStyleHints(), this);
+
+		ret.h += wsize.h;
+		ret.w = std::max(ret.w, wsize.w);
+	}
+
+	return ret;
+}
+
+void
+UListBox::processMouseEvent(UMouseEvent * e) {
+	switch (e->getType()) {
+		case UEvent::MousePressed:
+			e->consume();
+
+			int index = locationToIndex(e->getLocation());
+			setSelectedIndex(index);
+		break;
+	}
+	UWidget::processMouseEvent(e);
 }
 
 void
@@ -283,6 +301,9 @@ UListBox::setSelectedIndex(int indexA) {
 		if (indexA == -1) {
 			m_indices.clear();
 		} else {
+			if (indexA >= m_items.size()) {
+				indexA = (m_items.size()) ? m_items.size() - 1 : 0;
+			}
 			m_indices[0] = indexA;
 		}
 
@@ -365,12 +386,29 @@ UListBox::setVisibleRowCount(int visibleRowCountA) {
 
 UPoint
 UListBox::indexToLocation(unsigned int indexA) {
-	return static_cast<UListBoxUI*>(getUI())->indexToLocation(this, indexA);
+	UItem * item = getItemAt(0);
+	int height = 0;
+	if (item) {
+		height = item->getItemSize(getSize(), getStyleHints(), this).h;
+	}
+
+	return UPoint(0, indexA * height);
+	//return static_cast<UListBoxUI*>(getUI())->indexToLocation(this, indexA);
+	//return UPoint();
 }
 
 int
 UListBox::locationToIndex(const UPoint & locationA) {
-	return static_cast<UListBoxUI*>(getUI())->locationToIndex(this, locationA);
+	UItem * item = getItemAt(0);
+	if (item) {
+		int height = item->getItemSize(getSize(), getStyleHints(), this).h;
+		return locationA.y / height;
+	} else {
+		// FIXME
+		// what about -1 ?
+		return 0;
+	}
+	//return static_cast<UListBoxUI*>(getUI())->locationToIndex(this, locationA);
 }
 
 
@@ -378,102 +416,3 @@ void
 UListBox::fireSelectionEvent(int firstIndexA, int lastIndexA) {
 	m_sigSelectionChanged(this, firstIndexA, lastIndexA);
 }
-
-} // namespace ufo
-/*
-#include "ufo/uicon.hpp"
-#include "ufo/ugraphics.hpp"
-#include "ufo/ufo_gl.hpp"
-#include "ufo/font/ufont.hpp"
-#include "ufo/font/ufontmetrics.hpp"
-namespace ufo {
-
-//
-// class UStringListBoxItem
-//
-
-UStringListBoxItem::UStringListBoxItem(const UString & s)
-	: m_icon(NULL)
-	, m_text(s.str())
-{}
-UStringListBoxItem::UStringListBoxItem(UIcon * i)
-	: m_icon(i)
-	, m_text("")
-{}
-UStringListBoxItem::UStringListBoxItem(const UString & s, UIcon * icon)
-	: m_icon(icon)
-	, m_text(s.str())
-{}
-
-void
-UStringListBoxItem::paintItem(UListBox * listBoxA, int x, int y,
-		bool isSelectedA, bool hasFocusA) {
-*/
-	/*if (isSelectedA) {
-		setForegroundColor(listBoxA->getSelectionForeground());
-		setBackgroundColor(listBoxA->getSelectionBackground());
-	} else {
-		setForegroundColor(listBoxA->getForegroundColor());
-		setBackgroundColor(listBoxA->getBackgroundColor());
-	}*/
-/*
-	//setSize(getPreferredSize());
-
-	// FIXME:
-	// is this a hack?
-	//UDimension dim = listBoxA->getInnerSize();
-	//setBounds(x, y, dim.getWidth(), getHeight());
-
-	//paint();
-
-	UGraphics * graphics = listBoxA->getGraphics();
-	UDimension dim = listBoxA->getInnerSize();
-
-	// background
-	if (isSelectedA) {
-		glColor3fv(listBoxA->getSelectionBackground()->getFloat());
-	} else {
-		glColor3fv(listBoxA->getBackgroundColor()->getFloat());
-	}
-	glRecti(x, y, x + dim.getWidth(), y + dim.getHeight());
-
-	// foreground
-	if (isSelectedA) {
-		glColor3fv(listBoxA->getSelectionForeground()->getFloat());
-	} else {
-		glColor3fv(listBoxA->getForegroundColor()->getFloat());
-	}
-	if (m_icon) {
-		m_icon->paintIcon(listBoxA, x, y);
-		x += m_icon->getIconWidth() + 4;
-	}
-	graphics->drawText(m_text, x, y);
-}
-
-UDimension
-UStringListBoxItem::getItemSize(const UListBox * listBoxA) const {
-	UDimension ret;
-	const UFontMetrics * metrics = listBoxA->getFont()->getFontMetrics();
-	ret.w = metrics->getTextWidth(m_text);
-	ret.h = metrics->getHeight();
-	if (m_icon) {
-		ret.w += m_icon->getIconWidth() + 4;
-		ret.h = std::max(m_icon->getIconHeight(), ret.h);
-	}
-	return ret;
-	//return ULabel::getSize();
-}
-
-void
-UStringListBoxItem::notify(UListBox * listBox, bool b) {
-*/
-	/*setContext(listBox->getContext());
-	//updateUI();
-	validate();
-	setSize(getPreferredSize());
-	setVisible(true);*/
-/*
-}
-
-} // namespace ufo
-*/

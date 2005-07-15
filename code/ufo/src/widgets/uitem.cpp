@@ -27,13 +27,17 @@
 
 #include "ufo/widgets/uitem.hpp"
 
+#include "ufo/widgets/uwidget.hpp"
+
 #include "ufo/uicon.hpp"
 #include "ufo/ugraphics.hpp"
 
 #include "ufo/font/ufont.hpp"
 #include "ufo/font/ufontmetrics.hpp"
 
-namespace ufo {
+#include "ufo/ui/ustylehints.hpp"
+
+using namespace ufo;
 
 
 UFO_IMPLEMENT_ABSTRACT_CLASS(UItem, UObject)
@@ -61,36 +65,53 @@ UStringItem::UStringItem(const std::string & str, UIcon * icon)
 {}
 
 void
-UStringItem::paintItem(UGraphics * g, UWidget * parent,
-		int x, int y,
-		bool isSelectedA, bool hasFocusA,
-		const UColor & foreground, const UColor & background) {
-	UDimension dim = parent->getInnerSize();
-
-	g->setColor(background);
+UStringItem::paintItem(
+		UGraphics * g,
+		const URectangle & rect,
+		const UStyleHints * hints,
+		uint32_t state,
+		const UWidget * parent) {
+	UColor bg;
+	if (state & WidgetSelected) {
+		bg = hints->palette.highlight();
+	} else {
+		bg = hints->palette.base();
+	}
+	if (hints->opacity != 1.0f) {
+		bg.getFloat()[3] = hints->opacity;
+	}
+	g->setColor(bg);
 	int height = g->getStringSize(m_text).getHeight();
 	if (m_icon) {
-		std::max(m_icon->getIconHeight(), height);
+		std::max(m_icon->getIconSize().h, height);
 	}
-	g->fillRect(x, y, dim.getWidth(), height);
+	g->fillRect(rect);
 
-	g->setColor(foreground);
-	if (m_icon) {
-		m_icon->paintIcon(g, parent, x, y);
-		x += m_icon->getIconWidth() + 4;
+	if (state & WidgetSelected) {
+		g->setColor(hints->palette.highlightedText());
+	} else {
+		g->setColor(hints->palette.text());
 	}
-	g->drawString(m_text, x, y);
+	int x = rect.x;
+	if (m_icon) {
+		m_icon->paintIcon(g, x, rect.y, hints, state);
+		x += m_icon->getIconSize().w + 4;
+	}
+	g->drawString(m_text, x, rect.y);
 }
 
 UDimension
-UStringItem::getItemSize(const UWidget * parent) const {
+UStringItem::getItemSize(
+		const UDimension & maxSize,
+		const UStyleHints * hints,
+		const UWidget * parent) const {
 	UDimension ret;
-	const UFontMetrics * metrics = parent->getFont()->getFontMetrics();
+	const UFontMetrics * metrics = hints->font.getFontMetrics();
 	ret.w = metrics->getStringWidth(m_text);
 	ret.h = metrics->getHeight();
 	if (m_icon) {
-		ret.w += m_icon->getIconWidth() + 4;
-		ret.h = std::max(m_icon->getIconHeight(), ret.h);
+		ret.w += m_icon->getIconSize().w + 4;
+		ret.h = std::max(m_icon->getIconSize().h, ret.h);
 	}
 	return ret;
 	//return ULabel::getSize();
@@ -113,5 +134,3 @@ std::ostream &
 UStringItem::paramString(std::ostream & os) const {
 	return os << "\"" << itemToString() << "\"";
 }
-
-} // namespace ufo

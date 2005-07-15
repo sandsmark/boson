@@ -29,6 +29,7 @@
 
 // for texture loading
 #include "ufo/utoolkit.hpp"
+#include "ufo/udisplay.hpp"
 #include "ufo/gl/ugl_driver.hpp"
 
 #include "ufo/util/ufilearchive.hpp"
@@ -84,6 +85,7 @@ struct CharStruct {
 };
 
 struct UGL_TextureFontData {
+	UGL_TextureFontData() : m_chars(), m_maxBounds(), m_textureIndex(0) {}
 	CharStruct m_chars[256];
 	CharStruct m_maxBounds;
 	uint32_t m_textureIndex;
@@ -132,7 +134,10 @@ UGL_TextureFontRenderer::UGL_TextureFontRenderer(const UFontInfo & fontInfo)
 
 	if (io->getPixels() != NULL) {
 		genGlyphMetrics(io);
-		createTexture(io);
+
+		if (UToolkit::getToolkit()->getCurrentContext()) {
+			createTexture(io);
+		}
 		m_isValid = true;
 	}
 
@@ -153,6 +158,13 @@ UGL_TextureFontRenderer::isValid() const {
 int
 UGL_TextureFontRenderer::drawString(UGraphics * g, const char * text, unsigned int nChar,
 		int xA, int yA) {
+	if (m_data->m_textureIndex == 0) {
+		refresh();
+	}
+	if (m_data->m_textureIndex == 0) {
+		// FIXME: warning: couldn't load texture
+		return 0;
+	}
 	beginDrawing(g);
 	register float texAdvance = 1.0f / 16.0f;
 
@@ -189,8 +201,8 @@ void
 UGL_TextureFontRenderer::beginDrawing(UGraphics * g) {
 	ugl_driver->glEnable(GL_TEXTURE_2D);
 
-	//ugl_driver->glEnable(GL_BLEND);
-	//ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //
+	ugl_driver->glEnable(GL_BLEND);
+	ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //
 
 	ugl_driver->glBindTexture(GL_TEXTURE_2D, m_data->m_textureIndex);
 
@@ -201,7 +213,7 @@ void
 UGL_TextureFontRenderer::endDrawing(UGraphics * g) {
 	ugl_driver->glEnd();
 	ugl_driver->glDisable(GL_TEXTURE_2D);
-	//ugl_driver->glDisable(GL_BLEND);
+	ugl_driver->glDisable(GL_BLEND);
 }
 
 const UFontMetrics *
@@ -221,17 +233,13 @@ UGL_TextureFontRenderer::getSystemName() const {
 
 void
 UGL_TextureFontRenderer::refresh() {
+	setDisplay(UDisplay::getDefault());
 	//m_fontCache[m_systemName]->refresh();
-	UFileArchive * archive = new UFileArchive(UToolkit::getToolkit()->getFontDir());
-	archive->reference();
-	if (archive->existsInArchive(m_systemName)) {
-		UImageIO * io = new UImageIO;
-		io->load(archive->getAbsolutePath(m_systemName));
-		io->reference();
-		createTexture(io);
-		io->unreference();
-	}
-	archive->unreference();
+	UImageIO * io = loadImageFile();
+	io->reference();
+	createTexture(io);
+	io->unreference();
+	m_isValid = true;
 }
 
 UImageIO *

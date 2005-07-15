@@ -35,7 +35,9 @@ namespace ufo {
 class UPopup;
 class UWidget;
 
-/** This class handles requests for popup widget.
+/** @short This class handles requests for popup widget.
+  * @ingroup misc
+  *
   * The default implementation uses lightweight popups, i.e.
   * UFO widget placed in the popup layer.
   * //The popup manager is responsible for closing the popup on appropriate

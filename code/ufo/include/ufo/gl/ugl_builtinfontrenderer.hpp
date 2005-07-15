@@ -63,7 +63,12 @@ extern const UBuiltinFontStruct s_font_timesRoman10;
 //extern UBuiltinFontStruct s_font_timesRoman24;
 
 
-/** An OpenGL implementation of a fixed point size font (used as fallback).
+/** @short An OpenGL implementation of a fixed point size font (used as fallback).
+  * @ingroup internal
+  * @ingroup opengl
+  *
+  * This font renderer uses built in byte arrays to draw characters.
+  *
   * @author Johannes Schmidt
   */
 

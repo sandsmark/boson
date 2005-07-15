@@ -38,7 +38,11 @@ class UFontMetrics;
 class UGraphics;
 class UContextGroup;
 
-/** This class is responsible for low level rendering of fonts.
+/** @short This class is responsible for low level rendering of fonts.
+  * @ingroup text
+  * @ingroup drawing
+  * @ingroup internal
+  *
   * Usually this class is not used directly.
   * Use instead the graphics object.
   *
@@ -61,7 +65,7 @@ public: // text drawing operations
 
 	/** If you have to draw several strings after each other, you can optimize
 	  * the drawing with using beginDrawing before and endDrawing at the end.
-	  * You should not call any other method which changes the drawing state 
+	  * You should not call any other method which changes the drawing state
 	  * within one enclosing block.
 	  * Example:
 	  * <pre>
@@ -88,7 +92,7 @@ public: // renderer attributes
 
 	/** Returns a font info object which describes several font attributes */
 	virtual UFontInfo getFontInfo() const = 0;
-	
+
 	/** The system dependent name of the used font. */
 	virtual std::string getSystemName() const = 0;
 };

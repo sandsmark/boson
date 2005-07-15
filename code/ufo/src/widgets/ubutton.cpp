@@ -30,8 +30,10 @@
 #include "ufo/utoolkit.hpp"
 #include "ufo/udisplay.hpp"
 #include "ufo/events/uactionevent.hpp"
+#include "ufo/events/umouseevent.hpp"
 #include "ufo/events/ukeyevent.hpp"
 #include "ufo/events/utimerevent.hpp"
+#include "ufo/events/ushortcutevent.hpp"
 
 #include "ufo/uicon.hpp"
 #include "ufo/ubuttongroup.hpp"
@@ -39,6 +41,9 @@
 #include "ufo/ukeystroke.hpp"
 #include "ufo/uinputmap.hpp"
 #include "ufo/widgets/urootpane.hpp"
+#include "ufo/ui/ustylehints.hpp"
+#include "ufo/ui/ustyle.hpp"
+#include "ufo/umodel.hpp"
 //#include "ufo/ui/uuimanager.hpp"
 
 using namespace ufo;
@@ -50,13 +55,13 @@ UButton::UButton()
 	, m_pressedIcon(NULL)
 	, m_rolloverIcon(NULL)
 	, m_actionCommand("")
-	, m_flags(RolloverEnabled | BorderPainted)
 	, m_buttonGroup(NULL)
 	, m_accelerator()
 	, m_acceleratorIndex(-1)
 {
 	trackPointer(m_pressedIcon);
 	trackPointer(m_rolloverIcon);
+	setCssType("button");
 }
 
 UButton::UButton(UIcon * icon)
@@ -64,13 +69,13 @@ UButton::UButton(UIcon * icon)
 	, m_pressedIcon(NULL)
 	, m_rolloverIcon(NULL)
 	, m_actionCommand("")
-	, m_flags(RolloverEnabled | BorderPainted)
 	, m_buttonGroup(NULL)
 	, m_accelerator()
 	, m_acceleratorIndex(-1)
 {
 	trackPointer(m_pressedIcon);
 	trackPointer(m_rolloverIcon);
+	setCssType("button");
 }
 
 UButton::UButton(const std::string & text, UIcon * icon)
@@ -78,38 +83,17 @@ UButton::UButton(const std::string & text, UIcon * icon)
 	, m_pressedIcon(NULL)
 	, m_rolloverIcon(NULL)
 	, m_actionCommand("")
-	, m_flags(RolloverEnabled | BorderPainted)
 	, m_buttonGroup(NULL)
 	, m_accelerator()
 	, m_acceleratorIndex(-1)
 {
 	trackPointer(m_pressedIcon);
 	trackPointer(m_rolloverIcon);
+	setCssType("button");
 
 	// we need this to remove '&' for accelerators
 	setText(text);
 }
-
-
-//*
-//* hides | overrides UWidget
-//*
-/*
-void
-UButton::setUI(UButtonUI * ui) {
-	UWidget::setUI(ui);
-}
-
-UWidgetUI *
-UButton::getUI() const {
-	return static_cast<UButtonUI*>(UWidget::getUI());
-}
-
-void
-UButton::updateUI() {
-	setUI(static_cast<UButtonUI*>(getUIManager()->getUI(this)));
-}
-*/
 
 //
 // Overrides UCompound
@@ -137,7 +121,7 @@ UButton::getIcon() const {
 
 void
 UButton::setText(const std::string & text) {
-	unsigned int index = text.find('&');
+	/*unsigned int index = text.find('&');
 	if (index < text.length() - 1 && text[index + 1] != '&') {
 		std::string accel("Alt");
 		accel += '+';
@@ -147,11 +131,14 @@ UButton::setText(const std::string & text) {
 		newtext.erase(index, 1);
 		UCompound::setText(newtext);
 		m_acceleratorIndex = index;
-	} else {
+	} else*/ {
 		UCompound::setText(text);
-
-		// TODO: unset a previous accelerator
-	}
+	}/*
+	if (getAcceleratorIndex() != -1) {
+		std::string accel("Alt+");
+		accel += getText()[getAcceleratorIndex()];
+		setAccelerator(accel);
+	}*/
 }
 
 //
@@ -176,7 +163,7 @@ UButton::doClick(int millis) {
 
 bool
 UButton::isSelected() const {
-	return (m_flags & Selected);
+	return testState(WidgetSelected);
 }
 void
 UButton::setSelected(bool b) {
@@ -184,74 +171,46 @@ UButton::setSelected(bool b) {
 	if (b == isSelected()) {
 		return;
 	}
-	if (b) {
-		m_flags |= Selected;
-	} else {
-		m_flags &= ~Selected;
+	setState(WidgetSelected, b);
+
+	if (b && m_buttonGroup) {
+		// we do not get an infinite recursion as UButtonGroup checks
+		// whether this button is selected before explicitly selecting it
+		m_buttonGroup->setSelectedButton(this, b);
 	}
 
 	// fire toggle event
-	UActionEvent * ae = new UActionEvent(this, UEvent::Action,
-		UMod::NoModifier, getActionCommand());
-	ae->reference();
-	m_sigActivated(ae);
-	ae->unreference();
+	fireActionEvent();
 
 	repaint();
 }
 
 bool
 UButton::isPressed( ) const {
-	return (m_flags & Pressed);
+	return testState(WidgetPressed);
 }
 void
-UButton::setPressed(bool b) {//, UMod_t modifiers) {
-	if (b) {
-		m_flags |= Pressed;
-	} else {
-		m_flags &= ~Pressed;
-/*
-		// this button was clicked
-		if (isArmed()) {
-			if (isToggable()) {
-				if (m_buttonGroup) {
-					m_buttonGroup->setSelectedButton(this, true);
-				} else {
-					setSelected(!isSelected());
-				}
-			}
-			fireActionPerformed(modifiers);
-		}
-		*/
-	}
-	repaint();
+UButton::setPressed(bool b) {
+	setState(WidgetPressed, b);
 }
 
 bool
 UButton::isRolloverEnabled() const {
-	return (m_flags & RolloverEnabled);
+	//return (m_flags & RolloverEnabled);
+	return true;
 }
 void
 UButton::setRolloverEnabled(bool b) {
 	if (b) {
-		m_flags |= RolloverEnabled;
+		//m_flags |= RolloverEnabled;
 	} else {
-		m_flags &= ~RolloverEnabled;
+		//m_flags &= ~RolloverEnabled;
 	}
 }
 
 bool
 UButton::isRollover() const {
-	return (m_flags & Rollover);
-}
-void
-UButton::setRollover(bool b) {
-	if (b) {
-		m_flags |= Rollover;
-	} else {
-		m_flags &= ~Rollover;
-	}
-	repaint();
+	return (hasMouseFocus());// & isRolloverEnabled());
 }
 
 
@@ -277,21 +236,6 @@ UButton::activate() {
 	}
 }
 
-
-bool
-UButton::isArmed() const {
-	return (m_flags & Armed);
-}
-void
-UButton::setArmed(bool b) {
-	if (b) {
-		m_flags |= Armed;
-	} else {
-		m_flags &= ~Armed;
-	}
-	repaint();
-}
-
 void
 UButton::buttonUp() {
 	setPressed(false);
@@ -301,15 +245,11 @@ UButton::buttonUp() {
 
 bool
 UButton::isToggable() const {
-	return (m_flags & Toggable);
+	return testState(WidgetToggable);
 }
 void
 UButton::setToggable(bool b) {
-	if (b) {
-		m_flags |= Toggable;
-	} else {
-		m_flags &= ~Toggable;
-	}
+	setState(WidgetToggable);
 }
 
 
@@ -337,29 +277,21 @@ UButton::setRolloverIcon(UIcon * icon) {
 	repaint();
 }
 
+UDimension
+UButton::getContentsSize(const UDimension & maxSize) const {
+	UDimension ret(getStyle()->getCompoundPreferredSize(
+		getStyleHints(),
+		getText(),
+		getIcon())
+	);
 
-bool
-UButton::isBorderPainted() const {
-	return (m_flags & BorderPainted);
-}
-void
-UButton::setBorderPainted(bool b) {
-	if (b) {
-		m_flags |= BorderPainted;
-	} else {
-		m_flags &= ~BorderPainted;
+	if (ret.isValid()) {
+		ret.clamp(maxSize);
+		return ret;
 	}
-	repaint();
+	return UDimension::invalid;
 }
 
-UInsets
-UButton::getInsets() const {
-	if (isBorderPainted()) {
-		return UWidget::getInsets();
-	} else {
-		return UInsets();
-	}
-}
 
 bool
 UButton::isActive() const {
@@ -372,34 +304,71 @@ UButton::isActive() const {
 //
 
 void
-UButton::paintBorder(UGraphics * g) {
-	if (isBorderPainted()) {
-		UWidget::paintBorder(g);
+UButton::processKeyEvent(UKeyEvent * e) {
+	if (e->isConsumed()) {
+		return;
 	}
-}
 
+	UKeyCode_t key = e->getKeyCode();
 
-void
-UButton::addedToHierarchy() {
-	if (m_accelerator.getKeyCode() != UKey::UK_UNDEFINED) {
-#if 0
-		getRootPane(true)->getInputMap(WhenAncestorFocused)
-			->put(m_accelerator, slot(*this, &UButton::keybindingSlot));
-#endif
-	}
-	UWidget::addedToHierarchy();
-}
-
-void
-UButton::removedFromHierarchy() {
-	// about to be removed
-	if (m_accelerator.getKeyCode() != UKey::UK_UNDEFINED) {
-		if (getRootPane(true)) {
-			getRootPane(true)->getInputMap(WhenAncestorFocused)
-				->remove(m_accelerator);
+	if (key == UKey::UK_SPACE) {
+		if (e->getType() == UEvent::KeyPressed) {
+			setPressed(true);
+			e->consume();
+		} else if (e->getType() == UEvent::KeyReleased && isPressed()) {
+			// FIXME: check for key repeat events and ignore them
+			setPressed(false);
+			activate();
+			e->consume();
 		}
 	}
-	UWidget::removedFromHierarchy();
+	UWidget::processKeyEvent(e);
+}
+
+static UButton * s_mouse_press_button = NULL;
+void
+UButton::processMouseEvent(UMouseEvent * e) {
+	switch (e->getType()) {
+		case UEvent::MousePressed:
+			e->consume();
+			s_mouse_press_button = this;
+			setPressed(true);
+			requestFocus();
+		break;
+		case UEvent::MouseReleased:
+			e->consume();
+			if (s_mouse_press_button == this && contains(e->getLocation())) {
+				activate();
+			}
+			setPressed(false);
+			s_mouse_press_button = NULL;
+		break;
+		case UEvent::MouseEntered:
+			if (s_mouse_press_button == this) {
+				e->consume();
+				setPressed(true);
+			}
+		break;
+		case UEvent::MouseExited:
+			if (isPressed()) {
+				e->consume();
+				setPressed(false);
+			}
+		break;
+	}
+	UWidget::processMouseEvent(e);
+}
+
+void
+UButton::processShortcutEvent(UShortcutEvent * e) {
+	if (isVisible() && isEnabled()) {
+		requestFocus();
+		if (!e->isAmbiguous()) {
+			doClick();
+		}
+		e->consume();
+	}
+	UWidget::processShortcutEvent(e);
 }
 
 void
@@ -413,10 +382,6 @@ UButton::fireActionEvent() {
 	ae->unreference();
 }
 
-void
-UButton::keybindingSlot(UActionEvent * e) {
-	doClick();
-}
 
 /*
 void
@@ -437,32 +402,28 @@ UButton::getMnemonic() const {
 
 void
 UButton::setAccelerator(const UKeyStroke & stroke) {
+	// remove old accelerator
+	if (m_accelerator.getKeyCode() != UKey::UK_UNDEFINED) {
+		releaseShortcut(m_accelerator);
+	}
 	m_accelerator = stroke;
-	setEventState(UEvent::KeyPressed, true);
 
-	// search for accel index
+	// search for accel index (i.e. whether this is a mnemonic accelerator
 	std::string text(getText());
 	unsigned int index;
 
 	// try lower case first
 	index = text.find(char(/*std::*/tolower(stroke.getKeyCode() + 32)));
 	if (index < text.length()) {
-		m_acceleratorIndex = index;
+		getCompoundModel()->acceleratorIndex = index;
 	} else {
 		index = text.find(char(stroke.getKeyCode()));
 		if (index < text.length()) {
-			m_acceleratorIndex = index;
+			getCompoundModel()->acceleratorIndex = index;
 		}
 	}
 
-#if 0
-	if (isInValidHierarchy()) {
-		if (URootPane * root = getRootPane(true)) {
-			root->getInputMap(WhenAncestorFocused)->
-				put(stroke, slot(*this, &UButton::keybindingSlot));
-		}
-	}
-#endif
+	grabShortcut(stroke);
 }
 
 UKeyStroke
@@ -474,27 +435,3 @@ int
 UButton::getAcceleratorIndex() const {
 	return m_acceleratorIndex;
 }
-
-void
-UButton::processAccelEvent(UKeyEvent * e) {
-	if (e->getType() == UEvent::AccelOverride) {
-		return;
-	}
-	if (e->getType() != UEvent::Accel) {
-		// Oops - should not happen
-		std::cerr << "invalid event type in UButton::processAccelEvent" << std::endl;
-		return;
-	}
-	UKeyStroke stroke(e);
-	if (m_accelerator == stroke) {
-		UActionEvent * ae = new UActionEvent(getContext(), UEvent::Action,
-				e->getModifiers(), stroke.toString());
-		ae->reference();
-		keybindingSlot(ae);
-		if (ae->isConsumed()) {
-			e->consume();
-		}
-		ae->unreference();
-	}
-}
-

@@ -36,6 +36,7 @@ namespace ufo {
 
 /** @short This event is used for many synchronous messages
   *  which indicate an action like in button, check boxes etc.
+  * @ingroup events
   *
   *
   * @author Johannes Schmidt

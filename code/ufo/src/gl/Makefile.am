@@ -13,6 +13,5 @@ libgl_la_SOURCES = \
 	ugl_font_data.cpp \
 	ugl_graphics.cpp \
 	ugl_image.cpp \
-	ugl_style.cpp \
 	ugl_texturefontrenderer.cpp
 

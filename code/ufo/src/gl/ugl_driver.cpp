@@ -38,6 +38,7 @@
 ufo::UGL_Driver * ufo::ugl_driver = NULL;//new ufo::UGL_Driver("");
 
 ufo::UGL_Driver::UGL_Driver(const char * glPath) {
+#if 0
 	m_glLib = new USharedLib();
 
 	// Unix style: load linked libs first
@@ -61,6 +62,20 @@ ufo::UGL_Driver::UGL_Driver(const char * glPath) {
 #include "ufo/gl/ugl_prototypes.hpp"
 #undef UFO_GL_PROC
 //#endif // UFO_TARGET_OPENGL
+#else
+
+#define UFO_GL_PROC(ret,func,params) \
+{ \
+	func = ::func; \
+	if (!func) { \
+		std::cerr << "Couldn't load GL function: " << #func << "\n"; \
+		exit(0); \
+	} \
+}
+#include "ufo/gl/ugl_prototypes.hpp"
+#undef UFO_GL_PROC
+
+#endif // 0
 }
 
 

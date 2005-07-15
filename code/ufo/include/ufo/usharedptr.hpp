@@ -32,7 +32,8 @@
 
 namespace ufo {
 
-/** Shared reference counting smart pointer.
+/** @short Shared reference counting smart pointer.
+  * @ingroup core
   *
   * @author Johannes Schmidt
   */
@@ -55,7 +56,7 @@ public:
 			m_refCount = NULL;
 		}
 	}
-	
+
 	explicit USharedPtr(T * right) : m_object(NULL), m_refCount(NULL) {
 		assign(right);
 	}
@@ -96,6 +97,12 @@ public:
 	bool valid() {
 		return (m_object != NULL);
 	}
+	bool operator()() const {
+		return (m_object != NULL);
+	}
+	bool operator!() const {
+		return (m_object == NULL);
+	}
 
 	T * operator ->() const {
 		return m_object;
@@ -108,11 +115,11 @@ public:
 	operator T*() const {
 		return m_object;
 	}
-
+/* msvc6 don't like this for abstract classes
 	operator T() const {
 		return *m_object;
 	}
-
+*/
 	int refCount() {
 		return *m_refCount;
 	}

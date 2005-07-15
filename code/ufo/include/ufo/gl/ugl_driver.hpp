@@ -36,7 +36,10 @@ namespace ufo {
 
 class USharedLib;
 
-/** A simple OpenGL driver which loads OpenGL at runtime.
+/** @short A simple OpenGL driver which loads OpenGL at runtime.
+  * @ingroup internal
+  * @ingroup opengl
+  *
   * @author Johannes Schmidt
   */
 class UFO_EXPORT UGL_Driver {

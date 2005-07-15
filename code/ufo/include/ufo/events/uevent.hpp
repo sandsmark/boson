@@ -32,7 +32,9 @@
 
 namespace ufo {
 
-/** This is the base class for all UFO events
+/** @short This is the base class for all UFO events
+  * @ingroup events
+  *
   * @author Johannes Schmidt
   */
 
@@ -41,39 +43,57 @@ class UFO_EXPORT UEvent : public UObject {
 public:
 	enum Type {
 		NoEvent = 0,
-		Timer = 1, // timer event
-		Action = 2, // action event
+		/** A timer event (for simple time outs). */
+		Timer = 1,
+		/** Generic action event. */
+		Action = 2,
+		/** An event whose run method is executed on processing. */
 		RunnableEvent = 3,
-		QuitEvent = 4, // Quit event
+		/** Request for application quit. */
+		QuitEvent = 4,
+		/** Repaint event. */
 		Repaint = 5,
+		/** Lost hardware surfaces, request for refresh. */
+		Refresh = 6,
 
 		MousePressed = 10, // mouse event
 		MouseReleased = 11,
 		MouseClicked = 12,
 		MouseMoved = 13,
 		MouseDragged = 14,
+		/** Widget got mouse focus. */
 		MouseEntered = 15,
+		/** Widget lost mouse focus. */
 		MouseExited = 16,
 
 		MouseWheel = 19,
 
-		KeyPressed = 20, // key event
+		KeyPressed = 20,
 		KeyReleased = 21,
+		/** A unicode character was pressed. */
 		KeyTyped = 22,
+		Shortcut = 23,
 
-		FocusGained = 25, // focus event
+		/** Got input focus. */
+		FocusGained = 25,
+		/** Lost input focus. */
 		FocusLost = 26,
 
-		WidgetMoved = 30, // move event
+		WidgetMoved = 30,
 		WidgetResized = 31,
 
 		WidgetShown = 32,
 		WidgetHidden = 33,
 
-		PropertyChanged = 40, // property change event
+		/** Widget added to a parent visible on screen. */
+		WidgetAdded = 34,
+		/** Widget about to be removed. */
+		WidgetRemoved = 35,
+		/** The z order of this widget has been changed. */
+		WidgetZOrderChanged = 36,
 
-		AccelOverride = 50,
-		Accel = 51
+		/** A Property has been changed. */
+		PropertyChanged = 40
 	};
 
 public:
@@ -94,8 +114,7 @@ public:
 
 	/** returns whether an event is consumed.
 	  * @see #consume
-	  * @return
-	  * 	true if this event is consumed
+	  * @return True if this event is consumed
 	  */
 	virtual bool isConsumed() const;
 
@@ -107,7 +126,7 @@ protected:  // Protected attributes
 	UObject * m_source;
 	/** an int describing the event */
 	Type m_type;
-	/** the consume property
+	/** The consume property
 	  * @see #consume
 	  */
 	bool m_isConsumed;

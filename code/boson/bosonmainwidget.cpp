@@ -119,6 +119,7 @@ BosonMainWidget::BosonMainWidget(QWidget* parent, bool wantDirect)
  boDebug() << k_funcinfo << endl;
  init();
  initGL();
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 BosonMainWidget::~BosonMainWidget()
@@ -187,6 +188,7 @@ void BosonMainWidget::initializeGL()
 	// already called initializeGL()
 	return;
  }
+ boDebug() << k_funcinfo << endl;
  BosonProfiler prof("initializeGL");
 
  // AB: WARNING you must _not_ assume this gets called once only!
@@ -253,10 +255,12 @@ void BosonMainWidget::initializeGL()
  initUfoGUI();
 
  recursive = false;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonMainWidget::initUfoGUI()
 {
+ boDebug() << k_funcinfo << endl;
  glPushAttrib(GL_ALL_ATTRIB_BITS);
 
  initUfo();
@@ -313,9 +317,12 @@ void BosonMainWidget::initUfoGUI()
 
  d->mGameView->setMouseEventsEnabled(true, true);
 
+ boDebug() << k_funcinfo << "creating BoUfoAction GUI" << endl;
  ufoManager()->actionCollection()->createGUI();
+ boDebug() << k_funcinfo << "creating BoUfoAction GUI done" << endl;
 
  glPopAttrib();
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 bool BosonMainWidget::preloadData()
@@ -335,12 +342,6 @@ void BosonMainWidget::resizeGL(int w, int h)
 {
  boDebug() << k_funcinfo << w << " " << h << endl;
  BosonUfoGLWidget::resizeGL(w, h);
-
-#if 0
- if (ufoManager()) {
-	ufoManager()->sendResizeEvent(w, h);
- }
-#endif
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << endl;
@@ -390,8 +391,6 @@ void BosonMainWidget::paintGL()
 
  boProfiling->push("Rendering");
 
- glPushMatrix();
-
  glDisable(GL_DEPTH_TEST);
  glDisable(GL_LIGHTING);
  glDisable(GL_NORMALIZE);
@@ -401,8 +400,6 @@ void BosonMainWidget::paintGL()
  boProfiling->push("renderUfo");
  renderUfo();
  boProfiling->pop(); // "renderUfo"
-
- glPopMatrix();
 
  boProfiling->pop(); // "Rendering"
 
@@ -427,7 +424,7 @@ void BosonMainWidget::renderUfo()
 	boProfiling->push("dispatchEvents");
 	ufoManager()->dispatchEvents();
 	boProfiling->pop(); // "dispatchEvents"
-	ufoManager()->render();
+	ufoManager()->render(false);
  }
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error at end of method" << endl;

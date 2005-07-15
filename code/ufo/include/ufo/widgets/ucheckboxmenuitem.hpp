@@ -32,7 +32,9 @@
 
 namespace ufo {
 
-/** A checkbox menu item is a toggable UFO menu item.
+/** @short A checkbox menu item is a toggable UFO menu item.
+  * @ingroup widgets
+  *
   * If a check box is "checked", isSelected() returns true.
   *
   * @author Johannes Schmidt

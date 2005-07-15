@@ -32,7 +32,13 @@
 
 namespace ufo {
 
-/** An implementation of a UFO toolkit. Currently for posix and Win32
+/** @short An implementation of a UFO toolkit. Currently for posix and Win32
+  * @ingroup native
+  *
+  * Works with UXContexts and UXFrames.
+  *
+  * @see UXContext
+  * @see UXFrame
   * @author Johannes Schmidt
   */
 class UFO_EXPORT UXToolkit : public UAbstractToolkit {

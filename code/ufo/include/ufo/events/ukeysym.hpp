@@ -41,11 +41,13 @@ namespace UKey {
 	 */
 
 	/** This value is used to indicate that the keyCode is unknown.
-	  * KEY_TYPED events do not have a keyCode value;
-	   * this value is used instead
-	   */
+	  * @p UEvent::KeyTyped events do not have a keyCode value;
+	  * this value is used instead
+	  */
 	enum KeyCode {
+		/** @deprecated */
 		UK_UNKOWN = 0x00,
+		UK_UNKNOWN = 0x00,
 		UK_UNDEFINED = 0x00,
 		UK_BACKSPACE	= 0x08,
 		UK_TAB	= 0x09,
@@ -77,7 +79,7 @@ namespace UKey {
 		UK_MINUS	= 0x2D,
 		UK_PERIOD	= 0x2E,
 		UK_SLASH	= 0x2F,
-		
+
 		UK_0	= 0x30,
 		UK_1	= 0x31,
 		UK_2	= 0x32,
@@ -88,7 +90,7 @@ namespace UKey {
 		UK_7	= 0x37,
 		UK_8	= 0x38,
 		UK_9	= 0x39,
-		
+
 		UK_COLON	= 0x3A,
 		UK_SEMICOLON	= 0x3B,
 		UK_LESS	= 0x3C,
@@ -377,7 +379,8 @@ namespace UKey {
 		/** Power MacUKeyCode_tosh power key */
 		UK_POWER	= 0xF025,
 		/** Constant for the Euro currency sign key. */
-		UK_EURO	= 0xF026
+		UK_EURO	= 0xF026,
+		UK_LAST = UK_EURO
 	};
 } // namespace UKey
 
@@ -386,38 +389,32 @@ typedef UKey::KeyCode UKeyCode_t;
 
 namespace UMod {
 	enum Modifier {
-		NoModifier = 0x0000,
+		NoModifier = 0x00000000,
 		NoButton = NoModifier,
-		
-		LShift = 0x0001,
-		RShift = 0x0002,
-		Shift = LShift | RShift,
 
-		LCtrl = 0x0004,
-		RCtrl = 0x0008,
-		Ctrl = LCtrl | RCtrl,
+		Shift = 0x0001,
+		Ctrl = 0x0002,
+		Alt = 0x0004,
+		Meta = 0x0008,
+		Super = 0x0010,
 
-		LAlt = 0x0010,
-		RAlt = 0x0020,
-		Alt = LAlt | RAlt,
-
-		LMeta = 0x0040,
-		RMeta = 0x0080,
-		Meta = LMeta | RMeta,
-
-		Num = 0x0100,
-		Caps = 0x0200,
-		AltGraph = 0x0400,
+		Num = 0x0020,
+		Caps = 0x0040,
+		AltGraph = 0x0080,
 
 		/** mouse buttons are modifiers, too */
-		Button1 = 0x0800,
-		LeftButton = Button1,
-		Button2 = 0x1000,
-		MiddleButton = Button2,
-		Button3 = 0x2000,
-		RightButton = Button3,
-		Button4 = 0x4000,
-		Button5 = 0x8000
+		MouseButton1 = 0x0100,
+		MouseButton2 = 0x0200,
+		MouseButton3 = 0x0400,
+		MouseButton4 = 0x0800,
+		MouseButton5 = 0x1000,
+		LeftButton = MouseButton1,
+		MiddleButton = MouseButton2,
+		RightButton = MouseButton3,
+
+		KeyboardModifierMask = 0x00ff,
+		MouseModifierMask  = 0xff00,
+		MouseButtonMask = MouseModifierMask
 	};
 } // namespace UMod
 

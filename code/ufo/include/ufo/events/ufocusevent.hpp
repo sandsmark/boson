@@ -32,7 +32,9 @@
 
 namespace ufo {
 
-/**
+/** @short This event is used for input focus changes.
+  * @ingroup events
+  *
   * @author Johannes Schmidt
   */
 

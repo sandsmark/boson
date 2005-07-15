@@ -32,7 +32,9 @@
 
 namespace ufo {
 
-/** This class provides an generic viewport for widgets.
+/** @short This class provides an generic viewport for widgets.
+  * @ingroup widgets
+  *
   * Only the given visible rect is shown by child widgets of viewports.
   * @author Johannes Schmidt
   */
@@ -40,7 +42,7 @@ class UFO_EXPORT UViewport : public UWidget {
 	UFO_DECLARE_DYNAMIC_CLASS(UViewport)
 public:
 	UViewport();
-	
+
 public:
 	/** Sets the widget this viewport creates an view on. */
 	void setView(UWidget * w);

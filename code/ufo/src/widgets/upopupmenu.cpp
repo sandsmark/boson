@@ -44,7 +44,9 @@
 #include "ufo/upopupmanager.hpp"
 #include "ufo/upopup.hpp"
 
-namespace ufo {
+#include "ufo/layouts/uboxlayout.hpp"
+
+using namespace ufo;
 
 
 UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(UPopupMenu, UWidget)
@@ -54,39 +56,27 @@ UPopupMenu::UPopupMenu()
 	: m_invoker(NULL)
 	, m_popupLocation()
 	, m_closeSlot(slot(*this, &UPopupMenu::popupCloseSlot))
-{}
+{
+	setLayout(new UBoxLayout(Vertical));
+	setCssType("popupmenu");
+}
 
 UPopupMenu::UPopupMenu(UWidget * invoker)
 	: m_invoker(invoker)
 	, m_popupLocation()
 	, m_closeSlot(slot(*this, &UPopupMenu::popupCloseSlot))
-{}
-
-
-//*
-//* hides | overrides UWidget
-//*
-/*
-void
-UPopupMenu::setUI(UPopupMenuUI * ui) {
-	UWidget::setUI(ui);
+{
+	setLayout(new UBoxLayout(Vertical));
+	setCssType("popupmenu");
 }
 
-UWidgetUI *
-UPopupMenu::getUI() const {
-	return static_cast<UPopupMenuUI*>(UWidget::getUI());
-}
 
-void
-UPopupMenu::updateUI() {
-	setUI(static_cast<UPopupMenuUI*>(getUIManager()->getUI(this)));
-}
-*/
 void
 UPopupMenu::setVisible(bool v) {
 	if (UWidget::isVisible() == v) {
 		return;
 	}
+	UWidget::setVisible(v);
 
 	if (v) {
 	m_popup = UPopupManager::getPopupManager()->
@@ -98,45 +88,12 @@ UPopupMenu::setVisible(bool v) {
 		UWidget::setVisible(false);*/
 		m_popup->hide();
 	}
-/*
-	if (!v) {
-		if (UWidget * parent = getParent()) {
-			parent->remove(this);
-			parent->repaint();
-		}
-		UWidget::setVisible(false);
-		getContext()->disconnectListener(m_closeSlot);
-	} else if (m_invoker) {
-		// reset the wanted location
-		setLocation(m_invoker->pointToRootPoint(m_popupLocation));
-
-		// notify listeners
-		m_sigMenuAboutToOpen(this);
-
-		// get the layered pane to display this popup menu in the poup layer
-		UWidget * layeredPane = m_invoker->getRootPane(true)->getLayeredPane();
-
-		if (layeredPane) {
-			layeredPane->add(this, ULayeredPane::PopupLayer);
-
-			//m_isVisible = true;
-			validate(ValidationUI);
-
-			// the layered pane has no layout manager
-			setSize(getPreferredSize());
-
-			UWidget::setVisible(true);
-			layeredPane->repaint();
-		}
-		getContext()->connectListener(m_closeSlot);
-	}
-*/
 }
 
 
-//*
-//* public methods
-//*
+//
+// public methods
+//
 
 void
 UPopupMenu::addSeparator() {
@@ -145,8 +102,6 @@ UPopupMenu::addSeparator() {
 
 void
 UPopupMenu::setInvoker(UWidget * invoker) {
-	// FIXME !
-	// ref count? what about cyclic pointers?
 	if (invoker != m_invoker) {
 		// FIXME !
 		// should we reinstall UI immediately?
@@ -164,17 +119,6 @@ UWidget *
 UPopupMenu::getInvoker() const {
 	return m_invoker;
 }
-/*
-void
-UPopupMenu::setPopupLocation(int x, int y) {
-	if (m_invoker) {
-		const UPoint & pos = m_invoker->pointToRootPoint(x, y);
-		setLocation(pos);
-	} else {
-		setLocation(x, y);
-	}
-}
-*/
 
 //
 // Protected methods
@@ -190,25 +134,3 @@ UPopupMenu::popupCloseSlot(UPopup * popup) {
 	UWidget::setVisible(false);
 	m_popup = NULL;
 }
-/*
-void
-UPopupMenu::popupCloseSlot(UEvent * e) {
-	if (e->getType() == UEvent::MousePressed) {
-		UMouseEvent * mouseEvent = dynamic_cast<UMouseEvent*>(e);
-		if (!containsRootPoint(mouseEvent->getRootLocation())) {
-			// special case for menu popups
-			*//*if (NULL == dynamic_cast<UMenu*>(e->getSource())) {
-				if (UMenu * menu = dynamic_cast<UMenu*>(getInvoker())) {
-					menu->setPopupMenuVisible(false);
-				} else {
-					setVisible(false);
-				}
-			}*//*
-			// notify listeners
-			m_sigMenuAboutToClose(this);
-			setVisible(false);
-		}
-	}
-}
-*/
-} // namespace ufo

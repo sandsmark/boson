@@ -35,7 +35,9 @@
 
 namespace ufo {
 
-/** A set of properties which can be saved to or loaded from a stream.
+/** @short A set of properties which can be saved to or loaded from a stream.
+  * @ingroup core
+  *
   * @author Johannes Schmidt
   */
 
@@ -58,7 +60,7 @@ public: // Public types
 		virtual void write(std::ostream & streamA, UProperties * propA) = 0;
 	};
 
-public: 
+public:
 	UProperties();
 	UProperties(const std::string & fileNameA);
 
@@ -67,23 +69,23 @@ public:
 
 	void setReader(Reader * p);
 	Reader * getReader();
-	
+
 	void setWriter(Writer * p);
 	Writer * getWriter();
 
 	void load(const std::string & fileNameA);
 	void load(std::istream & streamA);
-	
+
 	void save(std::ostream & streamA);
 	void save(const std::string & fileNameA);
-	
+
 	/** Returns value specified by keyA. */
 	std::string get(const std::string & keyA);
 	void put(const std::string & keyA, const std::string & valueA);
-	
+
 	/** Returns all available keys in this properties set. */
 	std::vector<std::string> getKeys();
-	
+
 	/** clears all entries and child properties */
 	void clear();
 
@@ -95,15 +97,15 @@ public:
 
 	/** Returns all keys for children. */
 	std::vector<std::string> getChildKeys();
-	
+
 public: // Protected types
 	typedef std::map<std::string, std::string> propertiesMap;
 	typedef std::map<std::string, UProperties*> childMap;
-	
+
 private: // Private attributes
 	propertiesMap m_hash;
 	childMap m_children;
-	
+
 	Reader * m_reader;
 	Writer * m_writer;
 };

@@ -45,9 +45,14 @@ namespace ufo {
 class UContext;
 class UPlugin;
 class ULookAndFeel;
+class UStyleManager;
 class UFontRenderer;
 
-/** An abstract class that represents data shared by all UContext objects
+/** @short The toolkit encapsulates some important system functions and loads
+  *  plugins.
+  * @ingroup core
+  *
+  * An abstract class that represents data shared by all UContext objects
   * and controls the interaction of UContext objects.
   * Furthermore it stores several system properties, can load plugins
   * and encapsulates some important system functions.
@@ -78,7 +83,7 @@ public: // administrative methods
 	  * ufo library.
 	  */
 	virtual UVersionInfo getVersionInfo() const = 0;
-	
+
 public: // window manager and user informations
 	/** @return The screen size in pixels.
 	  */
@@ -90,14 +95,14 @@ public: // window manager and user informations
 	/** @return The screen depth.
 	  */
 	virtual int getScreenDepth() const = 0;
-	
+
 
 	virtual std::string getUserName() const = 0;
 	virtual std::string getRealName() const = 0;
-	
+
 	virtual std::string getHomeDir() const = 0;
 	virtual std::string getTmpDir() const = 0;
-	
+
 	virtual std::string getPrgName() const = 0;
 	virtual void setPrgName(const std::string & prgName) = 0;
 
@@ -108,7 +113,7 @@ public: // Plugin methods
 	virtual void loadPlugin(const std::string & fileName) = 0;
 	/** Manually loads a plugin. */
 	virtual void loadPlugin(UPluginInfo plugin) = 0;
-	
+
 	virtual void unloadPlugin(const std::string & pluginName) = 0;
 	/** Searches in the plugin cache for a matching plugin and unloads it. */
 	virtual void unloadPlugin(UPluginInfo plugin) = 0;
@@ -124,6 +129,7 @@ public: // font and laf methods
 	  * @see putProperty
 	  */
 	virtual ULookAndFeel * createLookAndFeel() = 0;
+	virtual UStyleManager * getStyleManager() = 0;
 
 	/** Returns a colon separated list of font directories.
 	  * This is the search path for font ressource files.

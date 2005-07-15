@@ -41,39 +41,34 @@
 
 #include <list>
 
+// UFO RTTI is mainly used for debugging purposes
+
 #ifdef UFO_RTTI
 
 namespace ufo {
-class UFO_EXPORT UObject;
-
+class UObject;
 typedef UObject *(*UObjectConstructorFn)(void);
-
-//UFO_EXPORT UObject * UCreateDynamicObject(const char * name);
-
 } // namespace ufo
 
 //
 // UFO RTTI declaration
 //
 
-#define UFO_DECLARE_DYNAMIC_CLASS(name)           \
+#define UFO_DECLARE_CLASS(name)           \
  public:                                          \
   static ufo::UClassInfo sm_class##name;          \
   virtual ufo::UClassInfo * getClassInfo() const  \
    { return &name::sm_class##name; }
-
-#define UFO_DECLARE_ABSTRACT_CLASS(name) UFO_DECLARE_DYNAMIC_CLASS(name)
 
 //
 // UFO RTTI implementation
 //
 
 // dynamic classes
-// FIXME
-// too much macros
 
 // implements rtti for classes with default constructor
-#define UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(name, basename)   \
+/*
+#define UFO_IMPLEMENT_CLASS(name, basename)   \
  ufo::UObject * UConstructorFor##name()                       \
     { return new name; }                                      \
  ufo::UClassInfo name::sm_class##name(                        \
@@ -81,26 +76,9 @@ typedef UObject *(*UObjectConstructorFn)(void);
           #basename,                                          \
           (unsigned int) sizeof(name),                        \
           (ufo::UObjectConstructorFn) UConstructorFor##name);
+*/
 
-// implements rtti for classes with given constructor
-#define UFO_IMPLEMENT_CTOR_DYNAMIC_CLASS(name, basename, ctor)  \
- ufo::UClassInfo name::sm_class##name(                     \
-          #name,                                           \
-          #basename,                                       \
-          (unsigned int) sizeof(name),                     \
-          (ufo::UObjectConstructorFn) ctor);
-
-#define UFO_IMPLEMENT_DYNAMIC_CLASS(name, basename)        \
- ufo::UClassInfo name::sm_class##name(                     \
-          #name,                                           \
-          #basename,                                       \
-          (unsigned int) sizeof(name),                     \
-          (ufo::UObjectConstructorFn) NULL);
-
-//
-// for abstract classes
-//
-#define UFO_IMPLEMENT_ABSTRACT_CLASS(name, basename)       \
+#define UFO_IMPLEMENT_CLASS(name, basename)       \
  ufo::UClassInfo name::sm_class##name(                     \
            #name,                                          \
            #basename,                                      \
@@ -175,24 +153,30 @@ private:
 
 #else // UFO_RTTI
 
-#define UFO_DECLARE_DYNAMIC_CLASS(name)
-#define UFO_DECLARE_ABSTRACT_CLASS(name)
-
-#define UFO_IMPLEMENT_DYNAMIC_CLASS(name, basename)
-#define UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(name, basename)
-#define UFO_IMPLEMENT_CTOR_DYNAMIC_CLASS(name, basename)
-#define UFO_IMPLEMENT_ABSTRACT_CLASS(name, basename)
+#define UFO_DECLARE_CLASS(name)
+#define UFO_IMPLEMENT_CLASS(name, basename)
 
 #endif // !UFO_RTTI
 
+
+#define UFO_DECLARE_DYNAMIC_CLASS(name) UFO_DECLARE_CLASS(name)
+#define UFO_DECLARE_ABSTRACT_CLASS(name) UFO_DECLARE_CLASS(name)
+
+#define UFO_IMPLEMENT_DYNAMIC_CLASS(name, basename) UFO_IMPLEMENT_CLASS(name, basename)
+#define UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(name, basename) UFO_IMPLEMENT_CLASS(name, basename)
+#define UFO_IMPLEMENT_ABSTRACT_CLASS(name, basename) UFO_IMPLEMENT_CLASS(name, basename)
+#define UFO_IMPLEMENT_CTOR_DYNAMIC_CLASS(name, basename) UFO_IMPLEMENT_CLASS(name, basename)
+
 namespace ufo {
 
-/** This is the base class for all dynamic UFO objects
+/** @short This is the base class for all dynamic UFO objects.
+  * @ingroup core
+  *
   * @author Johannes Schmidt
   */
 
 class UFO_EXPORT UObject : public virtual UCollectable {
-	UFO_DECLARE_DYNAMIC_CLASS(UObject)
+	UFO_DECLARE_CLASS(UObject)
 public:
 	UObject();
 	UObject(const UObject &);

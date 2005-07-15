@@ -40,7 +40,9 @@
 namespace ufo {
 
 
-/** A basic image loader and saver.
+/** @short A basic image loader and saver.
+  * @ingroup drawing
+  *
   * It loads given images from files of streams.
   * The loaded pixels will be freed when the image is destroyed.
   * Currently, only pnm and tga files are supported.
@@ -98,7 +100,13 @@ public: // Public types
 	};*/
 
 public: // c'tors
+	/** Creates an empty image io object.
+	  */
 	UImageIO();
+	/** Creates an image io object and tries to load an image from the given
+	  * file name.
+	  * @param fileName File name which should be used to load an image.
+	  */
 	UImageIO(const std::string & fileNameA);
 	/**
 	  * @param streamA the stream which should be
@@ -224,7 +232,7 @@ public: // Public static methods
 	  * functions to get the current image saving functions for the given
 	  * extension.
 	  *
-	  *@param loaderA The new image loading function. 
+	  *@param loaderA The new image loading function.
 	  *@param extensionA The extension/format which can be loaded by the
 	  * 	image loading function (e.g. .pnm for pnm images)
 	  *@return The old image loading function pointer or NULL
@@ -273,7 +281,7 @@ protected:  // Overrides UObject
 	virtual std::ostream & paramString(std::ostream & os) const;
 
 public:  // Public attributes
-	
+
 	static const int ALPHA_LAYER;
 
 	static const int COLOR_TYPE_RGB;

@@ -33,7 +33,9 @@
 
 namespace ufo {
 
-/** A general abstraction for a widget which pops up.
+/** @short A general abstraction for a widget which pops up.
+  * @ingroup misc
+  *
   * A popup is created via the popup manager and is initially
   * visible.
   * The life cycle for popups are generally short.

@@ -34,7 +34,9 @@
 
 namespace ufo {
 
-/** A very simplistic time out event.
+/** @short A very simplistic time out event.
+  * @ingroup events
+  *
   * If sent to the event queue, it is guaranteed that the call back
   * is not executed before the given time has elapsed.
   * It is executed in the event dispatch "thread".

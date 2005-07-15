@@ -30,7 +30,6 @@
 
 #include "../uobject.hpp"
 #include "udocument.hpp"
-#include "udocumentfilter.hpp"
 
 namespace ufo {
 
@@ -52,17 +51,17 @@ public:
 	  * Returns Null for undefined document types.
 	  */
 	static UDocument * createMimeDocument(const std::string & typeA);
-	
+
 	/** Returns a plain text document.
 	  * The returned document is suitable for text fields (\n filtering).
 	  */
 	static UDocument * createPlainDocument();
-	
+
 	/** Returns a document which allows digits as input.
 	  * The returned document is suitable for text fields (\n filtering).
 	  */
 	static UDocument * createDigitDocument();
-	
+
 	/** Returns a document which allows only numbers as input.
 	  * The returned document is suitable for text fields (\n filtering).
 	  */
@@ -72,7 +71,7 @@ public:
 		return new UNumberDocument<NumT>;
 	}
 	*/
-	
+
 	/** Returns a document which only allows characters which are
 	  * within the <code>allowedCharatersA</code> string.
 	  * The returned document is suitable for text fields (\n filtering).
@@ -80,10 +79,10 @@ public:
 	static UDocument * createSpecialCharDocument(const std::string & allowedCharatersA);
 
 	/** Creates a filter which removes \n charaters. */
-	static UDocumentFilter * createNewLineFilter();
-	
+	//static UDocumentFilter * createNewLineFilter();
+
 	/** Creates a filter which allows only numbers as input. */
-	static UDocumentFilter * createDigitFilter();
+	//static UDocumentFilter * createDigitFilter();
 };
 
 } // namespace ufo

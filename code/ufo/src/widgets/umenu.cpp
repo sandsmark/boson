@@ -27,50 +27,30 @@
 
 #include "ufo/widgets/umenu.hpp"
 
+#include "ufo/umodel.hpp"
 #include "ufo/widgets/umenubar.hpp"
 #include "ufo/widgets/upopupmenu.hpp"
 
 //#include "ufo/ui/uuimanager.hpp"
 
-namespace ufo {
+using namespace ufo;
 
 UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(UMenu, UMenuItem)
 
 UMenu::UMenu(const std::string & text, UIcon * icon)
 		: UMenuItem(text, icon)
 {
-	//m_popupMenu = new UPopupMenu(this);
 	setPopupMenu(new UPopupMenu(this));
-	//trackPointer(m_popupMenu);
+	getMenuItemModel()->buttonFeatures |= UMenuItemModel::HasMenu;
 }
 UMenu::UMenu(UIcon * icon)
 		: UMenuItem(icon)
 {
-	//m_popupMenu = new UPopupMenu(this);
 	setPopupMenu(new UPopupMenu(this));
-	//trackPointer(m_popupMenu);
+	getMenuItemModel()->buttonFeatures |= UMenuItemModel::HasMenu;
 }
 
 
-//*
-//* hides | overrides UWidget
-//*
-/*
-void
-UMenu::setUI(UMenuUI * ui) {
-	UWidget::setUI(ui);
-}
-
-UWidgetUI *
-UMenu::getUI() const {
-	return static_cast<UMenuUI*>(UWidget::getUI());
-}
-
-void
-UMenu::updateUI() {
-	setUI(static_cast<UMenuUI*>(getUIManager()->getUI(this)));
-}
-*/
 
 void
 UMenu::addImpl(UWidget * w, UObject * constraints, int index) {
@@ -79,9 +59,9 @@ UMenu::addImpl(UWidget * w, UObject * constraints, int index) {
 	}
 }
 
-//*
-//* public methods
-//*
+//
+// public methods
+//
 
 bool
 UMenu::isTopLevelMenu() const {
@@ -115,22 +95,22 @@ UMenu::setPopupMenuVisible(bool b) {
 	}
 
 	if (b) {
+		UDimension size(getSize());
+		if (size.isEmpty() || !size.isValid()) {
+			size = getPreferredSize();
+		}
 		if (dynamic_cast<UPopupMenu*>(getParent())) {
 			// this is a sub menu
-			getPopupMenu()->setPopupLocation(UPoint(getWidth(), 0));
+			getPopupMenu()->setPopupLocation(UPoint(size.w, 0));
 		} else {
-			getPopupMenu()->setPopupLocation(UPoint(0, getHeight()));
+			getPopupMenu()->setPopupLocation(UPoint(0, size.h));
 		}
 		getPopupMenu()->setVisible(true);
 
-		if (UMenuBar * mb = dynamic_cast<UMenuBar*>(getParent())) {
-			mb->setVisibleMenu(this);
-		}
+		setState(WidgetHighlighted);
 	} else {
-		if (UMenuBar * mb = dynamic_cast<UMenuBar*>(getParent()) ) {
-			mb->setVisibleMenu(NULL);
-		}
 		getPopupMenu()->setVisible(false);
+		setState(WidgetHighlighted, false);
 	}
 }
 
@@ -154,5 +134,3 @@ UMenu::paramString(std::ostream & os) const {
 	// add common widget params
 	return UWidget::paramString(os);
 }
-
-} // namespace ufo

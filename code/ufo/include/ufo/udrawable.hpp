@@ -30,11 +30,17 @@
 
 #include "uobject.hpp"
 
+#include "util/udimension.hpp"
+#include "util/urectangle.hpp"
+
 namespace ufo {
 
 class UGraphics;
 
-/**a simple interface for some drawable things (e.g. textures)
+/** @short A simple interface for some drawable things (e.g. textures)
+  * @ingroup drawing
+  *
+  *
   *@author Johannes Schmidt
   */
 
@@ -43,12 +49,15 @@ class UFO_EXPORT UDrawable : public virtual UObject {
 public:
 	/** Draw to the given rectangle. Possibly scale to the given size.
 	  */
-	virtual void paintDrawable(UGraphics * g, int x, int y, int w, int h) = 0;
+	virtual void paintDrawable(UGraphics * g, const URectangle & rect) = 0;
+	/** @overload */
+	void paintDrawable(UGraphics * g, int x, int y, int w, int h) {
+		paintDrawable(g, URectangle(x, y, w, h));
+	}
+	/** @return The preferred size of the drawable. */
+	virtual UDimension getDrawableSize() const = 0;
 
-	/** @return The desired width of the drawable */
-	virtual int getDrawableWidth() const = 0;
-	/** @return The desired height of the drawable */
-	virtual int getDrawableHeight() const = 0;
+
 };
 
 } // namespace ufo

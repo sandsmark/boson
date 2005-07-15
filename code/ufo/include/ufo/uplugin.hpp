@@ -38,7 +38,9 @@ class ULookAndFeel;
 class UVideoDriver;
 class USharedLib;
 
-/** This is the base class for all plug-ins
+/** @short This is the base class for all plug-ins.
+  * @ingroup plugin
+  *
   * @author Johannes Schmidt
   */
 class UFO_EXPORT UPluginBase : public UObject {
@@ -58,8 +60,10 @@ typedef void (*plugin_destroy_t)(UPluginBase*);
     { delete static_cast<plugin*>(c); } \
   }
 
-/** The plugin info struct stores create and destroy methods for
-  * dynamic plugin creation.
+/** @short The plugin info struct stores create and destroy methods for
+  *  dynamic plugin creation.
+  * @ingroup plugin
+  *
   * @author Johannes Schmidt
   */
 struct UFO_EXPORT UPluginInfo {
@@ -86,8 +90,11 @@ inline UFO_EXPORT bool operator==(const UPluginInfo & p1,const UPluginInfo & p2)
 	);
 }
 
-/** base class for font plug-ins.
+/** @short Base class for font plug-ins..
+  * @ingroup plugin
+  *
   * The destructor should clean up all created font renderers.
+  *
   * @author Johannes Schmidt
   */
 class UFO_EXPORT UFontPlugin : public UPluginBase {
@@ -105,7 +112,9 @@ public:
 	virtual std::vector<UFontInfo> listFonts() = 0;
 };
 
-/** base class for look and feel plug-ins
+/** @short Base class for look and feel plug-ins.
+  * @ingroup plugin
+  *
   * The destructor should clean up all created 'look and feel's.
   * @author Johannes Schmidt
   */
@@ -115,17 +124,21 @@ public:
 	virtual ULookAndFeel * createLookAndFeel() = 0;
 };
 
-/** Base class for image io method plugins.
+/** @short Base class for image io method plugins.
+  * @ingroup plugin
+  *
   * There is generally not much to do for image io plug ins.
   * Registering and deregistering at UImageIO is one point.
+  * @author Johannes Schmidt
   */
 class UFO_EXPORT UImageIOPlugin : public UPluginBase {
 	UFO_DECLARE_DYNAMIC_CLASS(UImageIOPlugin)
 public:
 };
 
-/** base class for look and feel plug-ins
-  * The destructor should clean up all created 'look and feel's.
+/** @short Base class for video driver plugins.
+  * @ingroup plugin
+  *
   * @author Johannes Schmidt
   */
 class UFO_EXPORT UVideoPlugin : public UPluginBase {

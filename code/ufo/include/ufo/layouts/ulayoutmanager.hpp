@@ -37,7 +37,7 @@ class UWidget;
 
 /** @short The layout manager handles the size and position of child widgets
   *  of a container.
-  *@author Johannes Schmidt
+  * @author Johannes Schmidt
   */
 
 class UFO_EXPORT ULayoutManager : public UObject {

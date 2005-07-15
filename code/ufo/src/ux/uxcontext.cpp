@@ -118,16 +118,14 @@ UXContext::popAttributes() {
 
 void
 UXContext::repaint() {
-	getGraphics()->resetDeviceAttributes();
-	getGraphics()->resetDeviceViewMatrix();
-
 	// clear repaint manager before repainting as some widgets
 	// immediately want a repaint
 	getRepaintManager()->clearDirtyRegions();
-	//ugl_driver->glLoadIdentity();
-	getRootPane()->paint(getGraphics());
 
-	getGraphics()->flush();
+	UGraphics * g = getGraphics();
+	g->begin();
+	getRootPane()->paint(g);
+	g->end();
 }
 
 UXFrame *

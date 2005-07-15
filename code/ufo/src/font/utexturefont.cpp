@@ -31,6 +31,7 @@
 
 // for texture loading
 #include "ufo/utoolkit.hpp"
+#include "ufo/udisplay.hpp"
 #include "ufo/ugraphics.hpp"
 //#include "ufo/utexture.hpp"
 //#include "ufo/ufo_gl.hpp"
@@ -131,12 +132,16 @@ UTextureFontRenderer::UTextureFontRenderer(const UFontInfo & fontInfo)
 	, m_data(new UTextureFontData)
 	, m_isValid(false)
 {
+	m_data->m_image = NULL;
 	UImageIO * io = loadImageFile();
 	io->reference();
 
 	if (io->getPixels() != NULL) {
 		genGlyphMetrics(io);
-		createTexture(io);
+
+		if (UToolkit::getToolkit()->getCurrentContext()) {
+			createTexture(io);
+		}
 		m_isValid = true;
 	}
 
@@ -156,6 +161,13 @@ UTextureFontRenderer::isValid() const {
 int
 UTextureFontRenderer::drawString(UGraphics * g, const char * text, unsigned int nChar,
 		int xA, int yA) {
+	if (m_data->m_image == 0) {
+		refresh();
+	}
+	if (m_data->m_image == 0) {
+		// FIXME: warning: couldn't load texture
+		return 0;
+	}
 	beginDrawing(g);
 	register float x = xA;
 	float y = yA;
@@ -203,6 +215,13 @@ UTextureFontRenderer::getSystemName() const {
 void
 UTextureFontRenderer::refresh() {
 //	m_fontCache[m_systemName]->refresh();
+	setDisplay(UDisplay::getDefault());
+	//m_fontCache[m_systemName]->refresh();
+	UImageIO * io = loadImageFile();
+	io->reference();
+	createTexture(io);
+	io->unreference();
+	m_isValid = true;
 }
 
 
@@ -271,11 +290,17 @@ UTextureFontRenderer::loadImageFile() {
 	return ioL;
 }
 
+#include "ufo/gl/ugl_image.hpp"
 void
 UTextureFontRenderer::createTexture(UImageIO * io) {
 	io->reference();
 
-	m_data->m_image = UToolkit::getToolkit()->getCurrentContext()->createImage(io);
+	//UToolkit::getToolkit()->getCurrentContext()->createImage(io);
+	m_data->m_image = UDisplay::getDefault()->createImage(io);
+
+	if (UGL_Image * im = dynamic_cast<UGL_Image*>(m_data->m_image)) {
+		im->setQuality(1);
+	}
 
 	io->unreference();
 }
@@ -359,13 +384,13 @@ UTextureFontRenderer::genGlyphMetrics(UImageIO * ioA) {
 		if (m_data->m_chars[i].ascent > m_data->m_maxBounds.ascent) {
 			m_data->m_maxBounds.ascent = m_data->m_chars[i].ascent;
 		}
-		if (m_data->m_chars[i].descent < m_data->m_maxBounds.descent) {
+		if (m_data->m_chars[i].descent > m_data->m_maxBounds.descent) {
 			m_data->m_maxBounds.descent = m_data->m_chars[i].descent;
 		}
 		if (m_data->m_chars[i].width > m_data->m_maxBounds.width) {
 			m_data->m_maxBounds.width = m_data->m_chars[i].width;
 		}
-		if (m_data->m_chars[i].lbearing < m_data->m_maxBounds.lbearing) {
+		if (m_data->m_chars[i].lbearing > m_data->m_maxBounds.lbearing) {
 			m_data->m_maxBounds.lbearing = m_data->m_chars[i].lbearing;
 		}
 		if (m_data->m_chars[i].rbearing > m_data->m_maxBounds.rbearing) {
@@ -417,9 +442,9 @@ UTextureFontRenderer::listFonts(const UFontInfo & fontInfo) {
 			iter != files.end();
 			++iter) {
 		bool add = true;
-		unsigned long tga_index = (*iter).find(".tga");
+		std::string::size_type tga_index = (*iter).find(".tga");
 		if (tga_index != std::string::npos) {
-			unsigned long index = 0;
+			std::string::size_type index = 0;
 			UFontInfo info("", 14, UFontInfo::Normal);
 
 			// check font face
@@ -444,12 +469,12 @@ UTextureFontRenderer::listFonts(const UFontInfo & fontInfo) {
 							fontInfo.style != UFontInfo::AnyStyle) {
 						add = false;
 					}
-				} else if ((*iter)[index + 1] >= 48 && (*iter)[index + 1] < 58) {
+				} else if ((*iter)[index + 1] >= '0' && (*iter)[index + 1] <= '9') {
 					// point size
-					int ptSize = (*iter)[index + 1] - 48;
-					if ((*iter)[index + 2] >= 48 && (*iter)[index + 1] < 58) {
+					int ptSize = (*iter)[index + 1] - '0';
+					if ((*iter)[index + 2] >= '0' && (*iter)[index + 1] <= '9') {
 						ptSize *= 10;
-						ptSize += (*iter)[index + 2] - 48;
+						ptSize += (*iter)[index + 2] - '0';
 					}
 					info.pointSize = ptSize;
 					if ((fontInfo.pointSize != ptSize) &&
@@ -477,9 +502,9 @@ UTextureFontRenderer::listFonts() {
 	for (std::vector<std::string>::const_iterator iter = files.begin();
 			iter != files.end();
 			++iter) {
-		unsigned long tga_index = (*iter).find(".tga");
+		std::string::size_type tga_index = (*iter).find(".tga");
 		if (tga_index != std::string::npos) {
-			unsigned long index = 0;
+			std::string::size_type index = 0;
 			UFontInfo info("", 14, UFontInfo::Normal);
 			info.face = (*iter).substr(0, (*iter).find("_"));
 			while (index != std::string::npos) {
@@ -539,6 +564,7 @@ int
 UTextureFontMetrics::getStringWidth(const char * text, unsigned int nChar) const {
 	float ret = 0;
 	for (unsigned int i = 0; i < nChar; ++i) {
+		if (!iscntrl(text[i]))
 		ret += m_renderer->m_data->m_chars[uint8_t(text[i])].width;//+ * m_renderer->m_multiplier;
 	}
 	return int(ret + 0.5f);

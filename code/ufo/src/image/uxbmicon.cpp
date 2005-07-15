@@ -29,6 +29,8 @@
 
 #include "ufo/gl/ugl_driver.hpp"
 #include "ufo/util/ucolor.hpp"
+#include "ufo/ugraphics.hpp"
+#include "ufo/ui/ustylehints.hpp"
 
 using namespace ufo;
 
@@ -46,8 +48,7 @@ static uint8_t loNibble[16] = {
 
 UXBMIcon::UXBMIcon(const uint8_t * src, int width, int height)
 	: m_data(NULL)
-	, m_width(width)
-	, m_height(height)
+	, m_size(width, height)
 {
 	int bytes_per_row = (width + 7) / 8;
 	int pad = bytes_per_row & 1;
@@ -74,16 +75,18 @@ UXBMIcon::~UXBMIcon() {
 }
 
 void
-UXBMIcon::paintIcon(UGraphics * g, UColor * color, int x, int y) {
-	ugl_driver->glColor3fv(color->getFloat());
-
-	ugl_driver->glRasterPos2i(x, y + m_height - 1);
+UXBMIcon::paintIcon(UGraphics * g, const URectangle & rect,
+		const UStyleHints * hints, uint32_t widgetState) {
+	if (hints) {
+		g->setColor(hints->palette.foreground());
+	}
+	ugl_driver->glRasterPos2i(rect.x, rect.y + m_size.h - 1);
 
 	ugl_driver->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	ugl_driver->glBitmap(
-		m_width, // width
-		m_height, // height
+		m_size.w, // width
+		m_size.h, // height
 		0, // xorig
 		0, // yorig
 		0,
@@ -92,31 +95,7 @@ UXBMIcon::paintIcon(UGraphics * g, UColor * color, int x, int y) {
 	);
 }
 
-void
-UXBMIcon::paintIcon(UGraphics * g, UWidget * widget, int x, int y) {
-	ugl_driver->glColor3fv(widget->getColorGroup().foreground().getFloat());
-
-	ugl_driver->glRasterPos2i(x, y + m_height - 1);
-
-	ugl_driver->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-	ugl_driver->glBitmap(
-		m_width, // width
-		m_height, // height
-		0, // xorig
-		0, // yorig
-		0,
-		0,
-		m_data
-	);
-}
-
-int
-UXBMIcon::getIconWidth() const {
-	return m_width;
-}
-
-int
-UXBMIcon::getIconHeight() const {
-	return m_height;
+UDimension
+UXBMIcon::getIconSize() const {
+	return m_size;
 }

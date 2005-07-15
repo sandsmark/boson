@@ -45,7 +45,10 @@ struct UGL_TextureFontData;
 class UFontPlugin;
 class UPluginBase;
 
-/** An OpenGL implementation of texture fonts.
+/** @short An OpenGL implementation of a texture font renderer.
+  * @ingroup opengl
+  * @ingroup internal
+  *
   * @author Johannes Schmidt
   */
 

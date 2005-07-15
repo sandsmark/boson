@@ -32,9 +32,13 @@
 
 namespace ufo {
 
-/** This class represents a runnable event.
+/** @short This event represents an event which run method is called at
+  *  processing.
+  * @ingroup events
+  *
   * If posted to a display, the run method will be executed
   * as soon as all events prior are dispatched.
+  *
   * @see USlotEvent
   * @author Johannes Schmidt
   */

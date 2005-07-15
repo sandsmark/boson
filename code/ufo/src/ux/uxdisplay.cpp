@@ -67,7 +67,7 @@ public: // Implements UVideoDriver
 		m_isInit = false;
 	}
 	std::string getName() {
-		return "dummy";
+		return "dummygl";
 	}
 
 	virtual void pumpEvents() {}
@@ -94,7 +94,7 @@ UXDisplay::UXDisplay(const std::string & videoDriver)
 	if (videoDriver != "") {
 		tk->putProperty("video_driver", videoDriver);
 	}
-	if (videoDriver == "dummy") {
+	if (videoDriver == "dummy" || videoDriver == "dummygl") {
 		m_videoDriver = new UXDummyDriver();
 	} else {
 		m_videoDriver = UToolkit::getToolkit()->createVideoDriver();
@@ -475,6 +475,8 @@ UXDisplay::keyDown(UContext * context,
 	}
 
 	// FIXME keytyped: is this correct?
+	// FIXME: create key type event only if key press wasn't consumed.
+	//  How do we check whether key press wasn't consumed?
 	if (! /*std::*/iscntrl(keyChar)) {
 		UKeyEvent* e = new UKeyEvent(
 			context->getRootPane(),  // source

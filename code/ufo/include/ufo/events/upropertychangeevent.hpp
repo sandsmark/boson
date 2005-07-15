@@ -32,7 +32,9 @@
 
 namespace ufo {
 
-/** fired when property was changed
+/** @short This event is used to notify property changes.
+  * @ingroup events
+  *
   * @author Johannes Schmidt
   */
 
@@ -61,10 +63,10 @@ public:
 	UObject * getNewValue() const {
 		return m_newValue;
 	}
-	
+
 protected: // Protected methods
 	virtual std::ostream & paramString(std::ostream & os) const;
-	
+
 protected:  // Protected attributes
 	std::string m_propName;
 

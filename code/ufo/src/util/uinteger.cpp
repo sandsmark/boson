@@ -56,11 +56,19 @@ UInteger::toInt() const {
 }
 
 int
-UInteger::toInt(const std::string & stringA) {
+UInteger::toInt(const std::string & stringA, bool * ok) {
 	UIStringStream stream(stringA);
 
 	int ret = 0;
 	stream >> ret;
+
+	if (ok) {
+		*ok = false;
+		// FIXME: what about eof and not good?
+		if (stream.good() || stream.eof()) {
+			*ok = true;
+		}
+	}
 
 	return ret;
 }

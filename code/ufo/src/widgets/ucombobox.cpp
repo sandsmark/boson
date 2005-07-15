@@ -29,54 +29,52 @@
 #include "ufo/widgets/ucombobox.hpp"
 #include "ufo/widgets/uitem.hpp"
 #include "ufo/widgets/ulistbox.hpp"
-#include "ufo/widgets/utextedit.hpp"
+#include "ufo/widgets/ulineedit.hpp"
 
-namespace ufo {
+#include "ufo/layouts/uboxlayout.hpp"
+#include "ufo/widgets/uscrollpane.hpp"
+#include "ufo/upopupmanager.hpp"
+#include "ufo/upopup.hpp"
+
+#include "ufo/events/umouseevent.hpp"
+#include "ufo/events/ukeyevent.hpp"
+
+using namespace ufo;
 
 UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(UComboBox, UWidget)
 
 UComboBox::UComboBox()
 	: m_listBox(new UListBox())
-	, m_textEdit(new UTextEdit())
+	, m_textEdit(new ULineEdit())
 	, m_activated(NULL)
 	, m_currentText()
 	, m_visRowCount(4)
 {
 	trackPointer(m_listBox);
 	trackPointer(m_textEdit);
+	setLayout(new UBoxLayout(Horizontal));
+	add(getTextEdit());/*, UBorderLayout::Center);
+	UWidget * spacer = new UWidget();
+	spacer->setPreferredSize(UDimension(20, 0));
+	add(spacer, UBorderLayout::East);*/
 }
 
 UComboBox::UComboBox(const std::vector<UString> & listDataA)
 	: m_listBox(new UListBox(listDataA))
-	, m_textEdit(new UTextEdit())
+	, m_textEdit(new ULineEdit())
 	, m_activated(NULL)
 	, m_currentText()
 	, m_visRowCount(4)
 {
 	trackPointer(m_listBox);
 	trackPointer(m_textEdit);
+	setLayout(new UBoxLayout(Horizontal));
+	add(getTextEdit());/*, UBorderLayout::Center);
+	UWidget * spacer = new UWidget();
+	spacer->setPreferredSize(UDimension(20, 0));
+	add(spacer, UBorderLayout::East);*/
 }
 
-
-//*
-//* hides | overrides UWidget
-//*
-/*
-void
-UComboBox::setUI(UComboBoxUI * ui) {
-	UWidget::setUI(ui);
-}
-
-UWidgetUI *
-UComboBox::getUI() const {
-	return static_cast<UComboBoxUI*>(UWidget::getUI());
-}
-
-void
-UComboBox::updateUI() {
-	setUI(static_cast<UComboBoxUI*>(getUIManager()->getUI(this)));
-}
-*/
 
 //
 // public methods
@@ -172,9 +170,55 @@ UComboBox::setCurrentText(const std::string & text) {
 }
 
 
+static UComboBox * s_comboBox = NULL;
+static UPopup * s_popup = NULL;
+static UScrollPane  * s_pane = NULL;
+
+static void
+combobox_highlight(UMouseEvent * e) {
+	e->consume();
+	s_comboBox->getListBox()->setSelectedIndex(s_comboBox->getListBox()->
+		locationToIndex(e->getLocation()));
+}
+
+static void
+combobox_activated(UMouseEvent * e) {
+	e->consume();
+	s_comboBox->setCurrentItem(s_comboBox->getListBox()->
+		locationToIndex(e->getLocation()));
+	s_popup->hide();
+}
+
+static void
+popup_about_to_close(UPopup * popup) {
+	s_popup->sigPopupAboutToClose().disconnect(slot(&popup_about_to_close));
+	s_comboBox->getListBox()->sigMouseMoved().disconnect(slot(&combobox_highlight));
+	s_comboBox->getListBox()->sigMouseClicked().disconnect(slot(&combobox_activated));
+	s_pane->setScrollable(NULL);
+	s_comboBox = NULL;
+	s_popup = NULL;
+}
+
 void
 UComboBox::popup() {
+	if (s_pane == NULL) {
+		s_pane = new UScrollPane();
+		s_pane->reference();
+	}
+	if (!s_popup) {
+		s_comboBox = this;
+		getListBox()->sigMouseMoved().connect(slot(&combobox_highlight));
+		getListBox()->sigMouseClicked().connect(slot(&combobox_activated));
 
+		s_pane->setScrollable(getListBox());
+		s_popup = UPopupManager::getPopupManager()->createPopup(
+			this,
+			s_pane,
+			0, getHeight(), getWidth(), 0);
+		s_popup->sigPopupAboutToClose().connect(slot(&popup_about_to_close));
+	} else {
+		s_popup->hide();
+	}
 }
 
 void
@@ -194,8 +238,10 @@ void
 UComboBox::setTextEdit(UTextEdit * textEdit) {
 	std::string oldText = m_textEdit->getText();
 	swapPointers(m_textEdit, textEdit);
+	removeAll();
 	m_textEdit = textEdit;
 	m_textEdit->setText(oldText);
+	add(m_textEdit);
 }
 
 UTextEdit *
@@ -203,4 +249,69 @@ UComboBox::getTextEdit() const {
 	return m_textEdit;
 }
 
-} // namespace ufo
+UDimension
+UComboBox::getContentsSize(const UDimension & maxSize) const {
+	return UWidget::getContentsSize(maxSize);
+}
+
+void
+UComboBox::processMouseEvent(UMouseEvent * e) {
+	switch (e->getType()) {
+		case UEvent::MousePressed:
+			popup();
+		break;
+	}
+	UWidget::processMouseEvent(e);
+}
+
+void
+UComboBox::processKeyEvent(UKeyEvent * e) {
+	if (e->isConsumed()) {
+		UWidget::processKeyEvent(e);
+		return;
+	}
+	bool isOpen = false;
+	if (m_listBox->isVisible()) {
+		isOpen = true;
+	}
+
+	int cur = getCurrentItem();
+	if (e->getType() == UEvent::KeyPressed) {
+		switch (e->getKeyCode()) {
+			case UKey::UK_KP_DOWN:
+			case UKey::UK_DOWN:
+				setCurrentItem(cur + 1);
+				e->consume();
+			break;
+			case UKey::UK_KP_UP:
+			case UKey::UK_UP: {
+				setCurrentItem((cur) ? cur - 1 : 0);
+				e->consume();
+			}
+			break;
+			/* FIXME:
+			case UKey::UK_SPACE:
+				if (!isOpen) {
+					popup();
+				}
+				e->consume();
+			break;*/
+			case UKey::UK_ESCAPE:
+				if (isOpen) {
+					popup();
+				}
+				e->consume();
+			break;
+			/*
+			case UKey::UK_KP_ENTER:
+			case UKey::UK_RETURN:
+				if (!isOpen) {
+					popup();
+				}
+				e->consume();
+			break;
+			*/
+		}
+	}
+	UWidget::processKeyEvent(e);
+}

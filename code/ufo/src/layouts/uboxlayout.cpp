@@ -2,6 +2,8 @@
     LibUFO - UI For OpenGL
     copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
+    copyright         : (C) 2005 by Andreas Beckermann
+    email             : b_mann at gmx.de
                              -------------------
 
     file              : src/layouts/upopuplayout.cpp
@@ -36,22 +38,30 @@
 using namespace ufo;
 
 static std::vector<URectangle>
-getBounds(int axis, int hgap, int vgap, const UWidget* container, const URectangle & bounds, bool useAvailableSize = true);
+getBounds(int orientation, int hgap, int vgap, const UWidget* container, const URectangle & bounds, bool useAvailableSize = true);
 
 UFO_IMPLEMENT_DYNAMIC_CLASS(UBoxLayout, ULayoutManager)
 
-UBoxLayout::UBoxLayout() : m_axis(XAxis), m_hgap(2), m_vgap(2) {}
+UBoxLayout::UBoxLayout()
+	: m_orientation(NoOrientation)
+	, m_hgap(2)
+	, m_vgap(2)
+{}
 
-UBoxLayout::UBoxLayout(int axis) : m_axis(axis), m_hgap(2), m_vgap(2) {}
+UBoxLayout::UBoxLayout(int orientation)
+	: m_orientation(orientation)
+	, m_hgap(2)
+	, m_vgap(2)
+{}
 
 UBoxLayout::UBoxLayout(int hgap, int vgap)
-	: m_axis(XAxis)
+	: m_orientation(NoOrientation)
 	, m_hgap(hgap)
 	, m_vgap(vgap)
 {}
 
-UBoxLayout::UBoxLayout(int axis, int hgap, int vgap)
-	: m_axis(axis)
+UBoxLayout::UBoxLayout(int orientation, int hgap, int vgap)
+	: m_orientation(orientation)
 	, m_hgap(hgap)
 	, m_vgap(vgap)
 {}
@@ -61,17 +71,21 @@ UBoxLayout::~UBoxLayout() {}
 UDimension
 UBoxLayout::getPreferredLayoutSize(const UWidget * container,
 		const UDimension & maxSize) const {
+	int orientation = m_orientation;
+	if (orientation == NoOrientation) {
+		orientation = container->getOrientation();
+	}
 	URectangle bounds = container->getInnerBounds();
 	// AB: x, y don't matter in this method
 	bounds.w = maxSize.w;
 	bounds.h = maxSize.h;
-	std::vector<URectangle> childBounds = getBounds(m_axis, m_hgap, m_vgap, container, bounds, false);
+	std::vector<URectangle> childBounds = getBounds(orientation, m_hgap, m_vgap, container, bounds, false);
 	UDimension ret(0, 0);
 
 
 	if (container->getWidgetCount() >= 1) {
 		const URectangle& b = childBounds[container->getWidgetCount() - 1];
-		if (m_axis == XAxis) {
+		if (orientation == Horizontal) {
 			ret = UDimension(b.x + b.w, maxSize.h);
 		} else {
 			ret = UDimension(maxSize.w, b.y + b.h);
@@ -81,13 +95,13 @@ UBoxLayout::getPreferredLayoutSize(const UWidget * container,
 #if 1
 	// AB: the above seems not to work correctly (e.g. for menus).
 	// note that with the following code we'll exceed maxSize!
-	if (m_axis == XAxis) {
+	if (orientation == Horizontal) {
 		ret.h = 0;
 	} else {
 		ret.w = 0;
 	}
 	for (unsigned int i = 0; i < container->getWidgetCount(); i++) {
-		if (m_axis == XAxis) {
+		if (orientation == Horizontal) {
 			ret.h = std::max(ret.h, childBounds[i].h);
 		} else {
 			ret.w = std::max(ret.w, childBounds[i].w);
@@ -103,7 +117,7 @@ UBoxLayout::getPreferredLayoutSize(const UWidget * container,
 }
 
 std::vector<URectangle>
-getBounds(int axis, int hgap, int vgap, const UWidget * container, const URectangle & bounds, bool useAvailableSize) {
+getBounds(int orientation, int hgap, int vgap, const UWidget * container, const URectangle & bounds, bool useAvailableSize) {
 	std::vector<URectangle> ret(container->getWidgetCount());
 
 	int x = bounds.x;
@@ -114,7 +128,7 @@ getBounds(int axis, int hgap, int vgap, const UWidget * container, const URectan
 		const UWidget * w = container->getWidget(i);
 
 		if (w->isVisible()) {
-			if (axis == UBoxLayout::XAxis) {
+			if (orientation == Horizontal) {
 				if (x > bounds.x) {
 					x += hgap;
 					if (dim.w >= hgap) {
@@ -139,7 +153,7 @@ getBounds(int axis, int hgap, int vgap, const UWidget * container, const URectan
 
 			ret[i].x = x;
 			ret[i].y = y;
-			if (axis == UBoxLayout::XAxis) {
+			if (orientation == Horizontal) {
 				ret[i].w = d.w;
 				ret[i].h = d.h;
 
@@ -192,7 +206,7 @@ getBounds(int axis, int hgap, int vgap, const UWidget * container, const URectan
 	//    testing will reveal whether aspect maintaining looks better or
 	//    not.
 	// 2. we totally ignore any maximum size currently
-	int addW;
+	int addW = 0;
 	if (visibleWidgets > 0) {
 		if (stretchCount > 0) {
 			addW = dim.w / stretchCount;
@@ -200,7 +214,7 @@ getBounds(int axis, int hgap, int vgap, const UWidget * container, const URectan
 			addW = dim.w / visibleWidgets;
 		}
 	}
-	int addH;
+	int addH = 0;
 	if (visibleWidgets > 0) {
 		if (stretchCount > 0) {
 			addH = dim.h / stretchCount;
@@ -230,7 +244,7 @@ getBounds(int axis, int hgap, int vgap, const UWidget * container, const URectan
 				stretchFactor = 1;
 			}
 
-			if (axis == UBoxLayout::XAxis) {
+			if (orientation == Horizontal) {
 				int add = addW;
 				add *= stretchFactor;
 
@@ -253,15 +267,19 @@ getBounds(int axis, int hgap, int vgap, const UWidget * container, const URectan
 
 void
 UBoxLayout::layoutContainer(const UWidget * container) {
+	int orientation = m_orientation;
+	if (orientation == NoOrientation) {
+		orientation = container->getOrientation();
+	}
 	const URectangle & bounds = container->getInnerBounds();
-	std::vector<URectangle> childBounds = getBounds(m_axis, m_hgap, m_vgap, container, bounds);
+	std::vector<URectangle> childBounds = getBounds(orientation, m_hgap, m_vgap, container, bounds);
 
 	for (unsigned int i = 0 ; i < container->getWidgetCount() ; i++) {
 		UWidget * w = container->getWidget(i);
 
 		if (w->isVisible()) {
 			const URectangle & b = childBounds[i];
-			if (m_axis == XAxis) {
+			if (orientation == Horizontal) {
 				w->setBounds(b.x, b.y, b.w, bounds.h);
 			} else {
 				w->setBounds(b.x, b.y, bounds.w, b.h);
@@ -270,3 +288,7 @@ UBoxLayout::layoutContainer(const UWidget * container) {
 	}
 }
 
+int
+UBoxLayout::getTotalFlex(const UWidget * container) {
+	return 0;
+}

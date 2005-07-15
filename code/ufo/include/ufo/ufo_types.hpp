@@ -96,15 +96,19 @@ namespace ufo {
 
 /** Used by scroll bars and separators */
 enum Orientation {
-	Horizontal = 0,
+	NoOrientation = 0,
+	Horizontal,
 	Vertical
 };
 
 enum Direction {
-	Up = 0,
+	NoDirection = 0,
+	Up,
 	Down,
 	Left,
-	Right
+	Right,
+	LeftToRight = Right,
+	RightToLeft = Left
 };
 
 /** The relief resp. contour of an object. Used by UBevelBorder */
@@ -116,21 +120,57 @@ enum Relief {
 // Alignment
 enum Alignment {
 	AlignNone = 0,
-	AlignLeft,
-	AlignRight,
+	AlignStart,
+	AlignEnd,
 	AlignCenter,
-	AlignTop,
-	AlignBottom
+	AlignStretch,
+	AlignLeft = AlignStart,
+	AlignRight = AlignEnd,
+	AlignTop = AlignStart,
+	AlignBottom = AlignEnd
 };
 
 enum BorderType {
 	NoBorder = 0,
 	LineBorder,
+	BottomLineBorder,
 	RaisedBevelBorder,
 	LoweredBevelBorder,
-	TitledBorder,
-	UIBorder = 100,
+	StyleBorder = 100,
+	CssBorder,
 	BorderLast = 199
+};
+
+enum BorderStyle {
+	NoBorderStyle = 0,
+	BorderSolid,
+	BorderDotted,
+	BorderDashed,
+	BorderDouble,
+	BorderGroove,
+	BorderRidge,
+	BorderInset,
+	BorderOutset,
+	BorderStyleLast = BorderOutset
+};
+
+/** Some generic widget flags which covers most widget states. */
+enum WidgetState {
+	WidgetNoState 			= 0x000000,
+	WidgetVisible			= 0x000001,
+	WidgetForceInvisible	= 0x000002,
+	WidgetDisabled			= 0x000004,
+	WidgetForceDisabled		= 0x000008,
+	WidgetEditable			= 0x000010,
+	WidgetFocusable			= 0x000020,
+	WidgetHasFocus			= 0x000040,
+	WidgetHasMouseFocus		= 0x000080,
+	WidgetSelected			= 0x000100,
+	WidgetPressed			= 0x000200,
+	WidgetRaised			= 0x000400,
+	WidgetToggable			= 0x000800,
+	WidgetHighlighted		= 0x001000,
+	WidgetEditing			= 0x002000
 };
 
 enum FrameStyle {
@@ -159,10 +199,19 @@ enum FrameState {
 	FrameFullScreen = FrameStyleLast << 7,
 	FrameCreated = FrameStyleLast << 8,
 	FrameVisible = FrameStyleLast << 9,
-	FrameStateLast = FrameVisible,
+	FrameActive = FrameStyleLast << 10,
+	FrameStateLast = FrameActive,
 	FrameStateFlags = FrameModal | FrameSticky |
 		FrameStaysOnTop | FrameSkipTaskBar | FrameMaximized | FrameMinimized |
-		FrameFullScreen | FrameCreated | FrameVisible
+		FrameFullScreen | FrameCreated | FrameVisible | FrameActive
+};
+
+enum DockWidgetArea {
+	LeftDockWidgetArea = 0x01,
+	RightDockWidgetArea = 0x02,
+	TopDockWidgetArea = 0x04,
+	BottomDockWidgetArea = 0x08,
+	AllDockWidgetAreas = 0xff
 };
 
 //

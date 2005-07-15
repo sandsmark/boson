@@ -77,8 +77,8 @@ std::vector<std::string>
 UString::tokenize(char delimiter) const {
 	std::vector<std::string> ret;
 
-	unsigned long begin = 0;
-	unsigned long end = (*m_stringRef).find(delimiter, begin);
+	std::string::size_type begin = 0;
+	std::string::size_type end = (*m_stringRef).find(delimiter, begin);
 	while (end != std::string::npos) {
 		ret.push_back((*m_stringRef).substr(begin, end - begin));
 		begin = end + 1;
@@ -192,12 +192,12 @@ UString::equals(const UString * str) const {
 
 std::string
 UString::toString() const {
-	return m_stringRef;
+	return *m_stringRef;
 }
 
 UObject *
 UString::clone() const {
-	return new UString(m_stringRef);
+	return new UString(*m_stringRef);
 }
 
 //

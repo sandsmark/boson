@@ -30,15 +30,15 @@
 
 #include "uwidget.hpp"
 
-// we need this for proper getUI() overriding
-//#include "../ui/upopupmenuui.hpp"
-
 namespace ufo {
 
 class UMenuItem;
+class UPopup;
 
-/** A popup menu
-  *@author Johannes Schmidt
+/** @short A popup used for popup menus.
+  * @ingroup widgets
+  *
+  * @author Johannes Schmidt
   */
 
 class UFO_EXPORT UPopupMenu : public UWidget {
@@ -49,14 +49,8 @@ public:
 	UPopupMenu(UWidget * invoker);
 
 public: // hides | overrides UWidget
-/*
-	virtual void setUI(UPopupMenuUI * ui);
-	virtual UWidgetUI * getUI() const;
-	virtual void updateUI();
-*/
 	/** use show, at least the first time
-	  * @see
-	  * 	show
+	  * @see show
 	  */
 	virtual void setVisible(bool v);
 
@@ -92,7 +86,7 @@ protected: // Protected methods
 	  * FIXME: Should this be within the UI class?
 	  */
 	//void popupCloseSlot(UEvent * e);
-	void popupCloseSlot(class UPopup * popup);
+	void popupCloseSlot(UPopup * popup);
 
 private:
 	UWidget * m_invoker;

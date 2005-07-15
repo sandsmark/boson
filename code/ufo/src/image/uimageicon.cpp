@@ -28,6 +28,7 @@
 #include "ufo/image/uimageicon.hpp"
 
 #include "ufo/utoolkit.hpp"
+#include "ufo/udisplay.hpp"
 #include "ufo/ugraphics.hpp"
 #include "ufo/image/uimage.hpp"
 //#include "ufo/ufo_gl.hpp"
@@ -39,24 +40,16 @@ using namespace ufo;
 
 UFO_IMPLEMENT_ABSTRACT_CLASS(UImageIcon, UIcon)
 
-UImageIcon::UImageIcon(const std::string & fileNameA) {
-	m_image = UToolkit::getToolkit()->getCurrentContext()->createImage(fileNameA);
-	//new UTexture();
-
-	//m_tex->loadFromArchive(fileNameA);
-
+UImageIcon::UImageIcon(const std::string & fileName)
+	: m_image(NULL)
+{
+	m_image = UDisplay::getDefault()->createImage(fileName);
 	trackPointer(m_image);
-
-	// cache size
-	m_width = m_image->getImageWidth();
-	m_height = m_image->getImageHeight();
 }
 
 
 UImageIcon::UImageIcon(UImage * image)
 	: m_image(image)
-	, m_width(image->getImageWidth())
-	, m_height(image->getImageHeight())
 {
 	if (m_image) {
 		trackPointer(m_image);
@@ -66,23 +59,22 @@ UImageIcon::UImageIcon(UImage * image)
 }
 
 void
-UImageIcon::paintIcon(UGraphics * g, UWidget * widget, int x, int y) {
+UImageIcon::paintIcon(UGraphics * g, const URectangle & rect,
+		const UStyleHints * hints, uint32_t widgetState) {
 	if (m_image) {
-		g->drawImage(m_image, x, y);
-		//glTranslatef(x, y, 0);
-
-		//m_tex->paint(g);
-
-		//glTranslatef(-x, -y, 0);
+		UDimension size = rect.getSize();
+		if (size.isEmpty() || size == UDimension::invalid) {
+			g->drawImage(m_image, rect.x, rect.y);
+		} else {
+			g->drawImage(m_image, rect);
+		}
 	}
 }
 
-int
-UImageIcon::getIconWidth() const {
-	return m_width;
-}
-
-int
-UImageIcon::getIconHeight() const {
-	return m_height;
+UDimension
+UImageIcon::getIconSize() const {
+	if (m_image) {
+		return m_image->getImageSize();
+	}
+	return UDimension();
 }

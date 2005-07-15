@@ -28,9 +28,10 @@
 #include "ufo/font/ufont.hpp"
 
 #include "ufo/font/ufontrenderer.hpp"
+#include "ufo/font/ufontmetrics.hpp"
 
 #include "ufo/utoolkit.hpp"
-#include "ufo/ucontextgroup.hpp"
+#include "ufo/udisplay.hpp"
 
 using namespace ufo;
 
@@ -53,45 +54,93 @@ static UFontInfo s_defaultFontInfo(
 );
 
 // initialize static members
-UFont::contexGroupCache_t UFont::sm_fontCache;
+UFont::displayCache_t UFont::sm_fontCache;
 
-UFont::UFont() : m_renderer(NULL) {
-	queryAndLoad(s_defaultFontInfo);
+UFont::UFont()
+	: m_renderer(NULL)
+	, m_infoCache(s_defaultFontInfo)
+{
+	//queryAndLoad(s_defaultFontInfo);
 }
 
 UFont::UFont(UFontInfo::Family family, float pointSize, int weight, int style,
-		UFontInfo::Encoding encoding) : m_renderer(NULL) {
+		UFontInfo::Encoding encoding)
+	: m_renderer(NULL)
+	, m_infoCache(UFontInfo(family, "", pointSize, weight, style, encoding))
+{
 	// FIXME !
 	//if (face == Default) {
-		queryAndLoad(UFontInfo(family, "", pointSize, weight, style, encoding));
+	//	queryAndLoad(m_infoCache);
 	//}
 }
 
 UFont::UFont(const std::string & face, float pointSize, int weight, int style,
-		UFontInfo::Encoding encoding) : m_renderer(NULL) {
-	queryAndLoad(UFontInfo(face, pointSize, weight, style, encoding));
+		UFontInfo::Encoding encoding)
+	: m_renderer(NULL)
+	, m_infoCache(UFontInfo(face, pointSize, weight, style, encoding))
+{
+	//queryAndLoad(m_infoCache);
 }
 
-UFont::UFont(const UFontInfo & fontInfo) : m_renderer(NULL) {
-	queryAndLoad(fontInfo);
+UFont::UFont(const UFontInfo & fontInfo)
+	: m_renderer(NULL)
+	, m_infoCache(fontInfo)
+{
+	//queryAndLoad(m_infoCache);
 }
 
-UFont::UFont(UFontRenderer * renderer) : m_renderer(renderer) {
-	m_renderer->reference();
+UFont::UFont(UFontRenderer * renderer)
+	: m_renderer(renderer)
+	, m_infoCache()
+{
+	if (m_renderer) {
+		m_infoCache = m_renderer->getFontInfo();
+		m_renderer->reference();
+	}
+}
+
+UFont::UFont(const UFont & font)
+	: m_renderer(NULL)
+	, m_infoCache()
+{
+	m_renderer = font.m_renderer;
+	m_infoCache = font.m_infoCache;
+
+	if (m_renderer) {
+		m_renderer->reference();
+	}
+}
+
+UFont&
+UFont::operator=(const UFont & font) {
+	if (font.m_renderer) {
+		font.m_renderer->reference();
+	}
+	dispose();
+	m_renderer = font.m_renderer;
+	m_infoCache = font.m_infoCache;
+	return *this;
 }
 
 UFont::~UFont() {
-	m_renderer->unreference();
+	dispose();
 }
 
 UFontRenderer *
 UFont::getRenderer() const {
+	if (!m_renderer) {
+		// for the sake of logical const correctness ...
+		(const_cast<UFont*>(this))->queryAndLoad(m_infoCache);
+	}
 	return m_renderer;
 }
 
 const UFontMetrics *
 UFont::getFontMetrics() const {
-	return m_renderer->getFontMetrics();
+	if (getRenderer()) {
+		return m_renderer->getFontMetrics();
+	}
+	return NULL;
 }
 
 //
@@ -100,84 +149,80 @@ UFont::getFontMetrics() const {
 
 void
 UFont::setFamiliy(UFontInfo::Family family) {
-	UFontInfo info = m_renderer->getFontInfo();
+	UFontInfo info = m_infoCache;//m_renderer->getFontInfo();
 	info.family = family;
-	UFontRenderer * oldRenderer = m_renderer;
 	queryAndLoad(info);
-	oldRenderer->unreference();
 }
 
 void
 UFont::setFontFace(const std::string & face) {
-	UFontInfo info = m_renderer->getFontInfo();
+	UFontInfo info = m_infoCache;//m_renderer->getFontInfo();
 	info.face = face;
-	UFontRenderer * oldRenderer = m_renderer;
 	queryAndLoad(info);
-	oldRenderer->unreference();
 }
 
 std::string
 UFont::getFontFace() const {
+	getRenderer();
 	return m_infoCache.face;
 }
 
 
 void
 UFont::setPointSize(float pointSize) {
-	UFontInfo info = m_renderer->getFontInfo();
+	UFontInfo info = m_infoCache;//m_renderer->getFontInfo();
 	info.pointSize = pointSize;
-	UFontRenderer * oldRenderer = m_renderer;
 	queryAndLoad(info);
-	oldRenderer->unreference();
 }
 
 float
 UFont::getPointSize() const {
+	getRenderer();
 	return m_infoCache.pointSize;
 }
 
 void
 UFont::setWeight(int weight) {
-	UFontInfo info = m_renderer->getFontInfo();
+	UFontInfo info = m_infoCache;//m_renderer->getFontInfo();
 	info.weight = weight;
-	UFontRenderer * oldRenderer = m_renderer;
 	queryAndLoad(info);
-	oldRenderer->unreference();
 }
 
 int
 UFont::getWeight() const {
+	getRenderer();
 	return m_infoCache.weight;
 }
 
 void
 UFont::setStyle(int flag) {
-	UFontInfo info = m_renderer->getFontInfo();
+	UFontInfo info = m_infoCache;//m_renderer->getFontInfo();
 	info.style = flag;
-	UFontRenderer * oldRenderer = m_renderer;
 	queryAndLoad(info);
-	oldRenderer->unreference();
 }
 
 int
 UFont::getStyle() const {
+	getRenderer();
 	return m_infoCache.style;
 }
 
 
 void
 UFont::setEncoding(UFontInfo::Encoding encoding) {
-	UFontInfo info = m_renderer->getFontInfo();
+	UFontInfo info = m_infoCache;//m_renderer->getFontInfo();
 	info.encoding = encoding;
-	UFontRenderer * oldRenderer = m_renderer;
 	queryAndLoad(info);
-	oldRenderer->unreference();
 }
 
 UFontInfo::Encoding
 UFont::getEncoding() const {
+	getRenderer();
 	return m_infoCache.encoding;
 }
+
+// FIXME: why does the display selection code do not work?
+static std::map<UFontInfo, UFontRenderer*> fontContextCache;
 
 void
 UFont::queryAndLoad(const UFontInfo & fontInfo) {
@@ -185,21 +230,46 @@ UFont::queryAndLoad(const UFontInfo & fontInfo) {
 
 	UFontInfo info = tk->queryFont(fontInfo);
 
-	UContextGroup * group = tk->getCurrentContext()->getContextGroup();
-	fontCache_t fontContextCache = sm_fontCache[group];
+	UDisplay * display = UDisplay::getDefault();
+	// FIXME: critical
+	// why does this line do not work?
+	// we always get a new font cache ..
+	//fontCache_t fontContextCache = sm_fontCache[display];
 	if (fontContextCache[info]) {
 		m_renderer = fontContextCache[info];
 	} else {
+		fontContextCache.erase(info);
 		m_renderer = tk->createFontRenderer(info);
-		fontContextCache[info] = m_renderer;
-		group->addVolatileData(m_renderer);
+		fontContextCache[m_renderer->getFontInfo()] = m_renderer;
+		display->addVolatileData(m_renderer);
+		//static int nfonts = 0;
+		//std::cerr << "created " << ++nfonts << " fonts\n";
 	}
-	m_renderer->reference();
 
 	m_infoCache = m_renderer->getFontInfo();
+	m_renderer->reference();
+}
+
+void
+UFont::dispose() {
+	// ref count == 1: we have to remove it from the cache
+	if (UDisplay::getDefault() && m_renderer && m_renderer->getReferenceCount() == 1) {
+		UDisplay * display = UDisplay::getDefault();
+		// FIXME: see above
+		//fontCache_t fontContextCache = sm_fontCache[display];
+		if (fontContextCache[m_renderer->getFontInfo()]) {
+			fontContextCache.erase(m_renderer->getFontInfo());
+			display->removeVolatileData(m_renderer);
+		}
+	}
+	if (m_renderer) {
+		m_renderer->unreference();
+	}
+	m_renderer = NULL;
 }
 
 void
 UFont::clearCache() {
-	sm_fontCache.clear();
+	//sm_fontCache.clear();
+	fontContextCache.clear();
 }

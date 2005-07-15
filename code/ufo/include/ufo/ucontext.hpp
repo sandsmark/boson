@@ -52,17 +52,17 @@ class UEvent;
 
 struct USystemInfo;
 
-/** Interface class for libUFO Contexts. This class must be implemented
-  * by an auxiliary library (like libUSDL) to get libUFO working.
+/** @short An UFO context is the abstract container for UFO widgets
+  *  (think of it as an OpenGL context).
+  * @ingroup native
+  *
+  * The UFO context provides the top level container for UFO widgets
+  * (URootPane) and is responsible for event dispatching.
   * <p>
-  * Implementations should provide a constructor which define which
-  * data is shared with its parent, e.g.:
-  * <code>UContext(UContext * parentA, int shareA = SHARE_ALL)</code>.
-  * See also the implementation of libUSDL
-  *</p><p>
-  * A new context object should also create a root pane object.
-  * </p>
-  *@author Johannes Schmidt
+  * An UFO context does not have to have the size of the OpenGL context.
+  *
+  * @see UXContext
+  * @author Johannes Schmidt
   */
 
 class UFO_EXPORT UContext : public UObject {

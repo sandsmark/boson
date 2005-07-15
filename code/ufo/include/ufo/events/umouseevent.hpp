@@ -35,8 +35,10 @@
 
 namespace ufo {
 
-/**
-  *@author Johannes Schmidt
+/** @short This event is used for mouse button and mouse move events.
+  * @ingroup events
+  *
+  * @author Johannes Schmidt
   */
 
 class UFO_EXPORT UMouseEvent : public UInputEvent {
@@ -88,15 +90,22 @@ public:
 
 	/** returns how many times this mouse button was clicked within ?? ms */
 	int getClickCount() const;
-	
+
 	/** Returns the mouse button which was changed.
 	  * Returned value is a modifier type and one of the values of:
-	  * NoButton, LeftButton, MiddleButton, RightButton or Button{1-5}
+	  * @arg NoButton no button changed
+	  * @arg LeftButton left mouse button changed
+	  * @arg MiddleButton middle mouse button changed
+	  * @arg RightButton right mouse button changed
+	  * @arg MouseButton{1-5} mouse button 1..5 changed
 	  */
 	UMod_t getButton() const;
-	
+
+	/** @return The mouse location relative to the source widget. */
 	const UPoint & getLocation() const;
+	/** @return The mouse location relative to the UFO context. */
 	const UPoint & getRootLocation() const;
+	/** @return The relative mouse movement. */
 	const UPoint & getRelMovement() const;
 
 	/** X value relative to the source widget. */
@@ -104,14 +113,16 @@ public:
 	/** Y value relative to the source widget. */
 	int getY() const;
 
+	/** The mouse movement in x direction. */
 	int getXRel() const;
+	/** The mouse movement in y direction. */
 	int getYRel() const;
 
 	/** X value relative to the top most root pane. */
 	int getRootX() const;
 	/** Y value relative to the top most root pane. */
 	int getRootY() const;
-	
+
 	/** translates the origin of the event */
 	void translate(const UPoint & pos);
 
@@ -120,7 +131,7 @@ protected: // Protected methods
 
 private:  // Private attributes
 	UPoint m_pos;
-	
+
 	UPoint m_rel;
 
 	UPoint m_root;

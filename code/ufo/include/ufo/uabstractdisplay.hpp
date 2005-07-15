@@ -39,7 +39,10 @@ class UTimerEvent;
 class UKeyEvent;
 class UMouseEvent;
 
-/** Default implementation for the event queue.
+/** @short Implements some platform independent methods of UDisplay.
+  *  Provided for convenience.
+  * @ingroup native
+  * @ingroup internal
   *
   * This class is not part of the official UFO API and
   * may be changed without warning.
@@ -53,6 +56,10 @@ public:
 	virtual ~UAbstractDisplay();
 
 public: // Implements UDisplay
+	virtual UImage * createImage(const std::string fileName);
+	virtual UImage * createImage(UImageIO * io);
+	virtual void addVolatileData(UVolatileData * vdata);
+	virtual void removeVolatileData(UVolatileData * vdata);
 	virtual void pushEvent(UEvent * e);
 	virtual bool dispatchEvent(UEvent * e);
 	virtual bool dispatchEvents(unsigned int nevents);
@@ -92,6 +99,7 @@ private: // Private attributes
 	UMod_t m_mouseModState;
 	UPoint m_mouseLocation;
 	UEvent * m_currentEvent;
+	std::list<UVolatileData*> m_volatileData;
 };
 
 } // namespace ufo
