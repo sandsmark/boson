@@ -80,11 +80,11 @@ void BoUfoStartupWidget::init()
  setBackgroundImage(backgroundImage);
  setOpaque(true);
 
+ setLayoutClass(BoUfoWidget::UVBoxLayout);
  BoUfoLabel* logo = new BoUfoLabel();
  logo->setHorizontalAlignment(BoUfoWidget::AlignHCenter);
  logo->setIcon(logoImage);
 
- setLayoutClass(BoUfoWidget::UVBoxLayout);
  addSpacing(5);
  addWidget(logo);
  addWidget(d->mWidgetStack);
