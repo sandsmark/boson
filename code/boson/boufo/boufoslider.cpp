@@ -32,6 +32,8 @@
 
 #include <bodebug.h>
 
+#include <math.h>
+
 BoUfoSlider::BoUfoSlider(Qt::Orientation o) : BoUfoWidget()
 {
  init(o);
