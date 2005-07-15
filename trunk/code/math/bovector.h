@@ -91,9 +91,24 @@ template<class T> class BoVector2
     {
       return mData[0] * mData[0] + mData[1] * mData[1];
     }
+    inline T dotProduct(const BoVector2<T>& v)
+    {
+      return mData[0] * v.mData[0] + mData[1] * v.mData[1];
+    }
     T length() const
     {
       return sqrt(dotProduct());
+    }
+    inline void normalize()
+    {
+      T l = length();
+      if (l != 0.0f) {
+        scale(1.0f / l);
+      }
+    }
+    inline void scale(T s)
+    {
+      mData[0] = mData[0] * s;  mData[1] = mData[1] * s;
     }
 
     inline T operator[](int i) const  { return mData[i]; }
@@ -144,11 +159,11 @@ template<class T> class BoVector2
     }
     inline void operator+=(const BoVector2& v)
     {
-      mData[0] += v[0];
+      mData[0] += v[0]; mData[1] += v[1];
     }
     inline void operator-=(const BoVector2& v)
     {
-      mData[0] -= v[0];
+      mData[0] -= v[0]; mData[1] -= v[1];
     }
 
     inline const T* data() const { return mData; }
@@ -302,6 +317,11 @@ template<class T> class BoVector3
       return v[0] * w[0] + v[1] * w[1] + v[2] * w[2];
     }
 
+    inline T dotProduct(const BoVector3<T>& v)
+    {
+      return dotProduct(*this, v);
+    }
+
     /**
      * @return The dot product of this vector with itself, i.e. (v * v).
      *
@@ -327,7 +347,12 @@ template<class T> class BoVector3
       r.setY((v.z() * w.x()) - (v.x() * w.z()));
       r.setZ((v.x() * w.y()) - (v.y() * w.x()));
       return r;
- }
+    }
+
+    inline BoVector3<T> crossProduct(const BoVector3<T>& v) const
+    {
+      return crossProduct(*this, v);
+    }
 
     /**
      * @return A pointer to the internal array.
