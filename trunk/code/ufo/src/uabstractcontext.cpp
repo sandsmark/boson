@@ -40,7 +40,7 @@
 #include "ufo/widgets/uwidget.hpp"
 #include "ufo/widgets/urootpane.hpp"
 
-#include "ufo/ui/uuimanager.hpp"
+//#include "ufo/ui/uuimanager.hpp"
 
 #include "ufo/utoolkit.hpp"
 #include "ufo/ucontextgroup.hpp"
@@ -50,12 +50,12 @@
 #include "ufo/ukeystroke.hpp"
 #include "ufo/events/uactionevent.hpp"
 
-#include <stack>
-#include <queue>
 
 using namespace ufo;
 
+#if !OLD_EVENT_CODE
 void getVisibleWidgetsDFS(std::stack<UWidget*> * stack, UWidget * w, int x, int y);
+#endif
 
 UFO_IMPLEMENT_ABSTRACT_CLASS(UAbstractContext, UObject)
 
@@ -69,10 +69,9 @@ UAbstractContext::UAbstractContext(UAbstractContext * parent)
 	, m_inputMap(new UInputMap())
 	, m_deviceBounds()
 	, m_bounds()
-#if 0
+#if OLD_EVENT_CODE
 	, m_dragWidget(NULL)
 #endif
-	, m_dragWidgetsStack()
 	, m_eventGrabber(NULL)
 	, m_listeners()
 {
@@ -281,8 +280,8 @@ UAbstractContext::init() {
 	m_repaintManager = createRepaintManager();
 	trackPointer(m_repaintManager);
 
-	m_graphics->resetDeviceAttributes();
-	m_graphics->resetDeviceViewMatrix();
+	//m_graphics->resetDeviceAttributes();
+	//m_graphics->resetDeviceViewMatrix();
 	/*
 	if (getSharedBits() & ShareLAF) {
 		if (UContext * context = getParent()) {
@@ -295,15 +294,15 @@ UAbstractContext::init() {
 		m_uiManager->setLookAndFeel(UToolkit::getToolkit()->createLookAndFeel());
 	}*/
 	// the new default is to always share th ui manager
-	if (UContext * context = getParent()) {
+	/*if (UContext * context = getParent()) {
 		// re-use the already existant ui manager object of the parent
 		m_uiManager = context->getUIManager();
 	} else {
 		m_uiManager = new UUIManager();
 		m_uiManager->setLookAndFeel(UToolkit::getToolkit()->createLookAndFeel());
-	}
+	}*/
 
-	trackPointer(m_uiManager);
+	//trackPointer(m_uiManager);
 
 	setRootPane(new URootPane());
 }
@@ -313,7 +312,7 @@ UAbstractContext::refresh() {
 	// refresh ui manager (only when created self)
 	UContext * context = getParent();
 	if (!context) {// || !(getSharedBits() & ShareLAF)) {
-		getUIManager()->refresh();
+		//getUIManager()->refresh();
 	}
 	// FIXME!: this should be done automatically by refresh signals
 	// refresh ui attributes (like icons which have to be recreated)
@@ -330,8 +329,8 @@ UAbstractContext::dispose() {
 	releasePointer(m_rootPane);
 	m_rootPane = NULL;
 
-	releasePointer(m_uiManager);
-	m_uiManager = NULL;
+	//releasePointer(m_uiManager);
+	//m_uiManager = NULL;
 
 	releasePointer(m_repaintManager);
 	m_repaintManager = NULL;
@@ -356,10 +355,6 @@ UAbstractContext::createRepaintManager() {
 	return new URepaintManager();
 }
 
-// AB: this code exists only for reference. you can see what i changed with it,
-// but it should not be used anymore.
-#define OLD_DRAG_WIDGET 0
-
 void
 UAbstractContext::fireMouseEvent(UMouseEvent * e) {
 	URootPane * root = getRootPane();
@@ -376,41 +371,45 @@ UAbstractContext::fireMouseEvent(UMouseEvent * e) {
 	pos.x -= m_bounds.x;
 	pos.y -= m_bounds.y;
 
-#if OLD_DRAG_WIDGET
+#if OLD_EVENT_CODE
 	UWidget * w = NULL;
-#endif
+#else
 	std::stack<UWidget*> visibleWidgets;
+#endif
 
 	// if we have been dragging, send the release event to the drag widget.
-#if OLD_DRAG_WIDGET
+#if OLD_EVENT_CODE
 	if (m_dragWidget) {
 		w = m_dragWidget;
 	} else {
 		w = root->getVisibleWidgetAt(pos);
 	}
-#endif
+#else
 	if (m_dragWidgetsStack.size() > 0) {
 		visibleWidgets = m_dragWidgetsStack;
 	} else {
 		getVisibleWidgetsDFS(&visibleWidgets, root, pos.x, pos.y);
 	}
+#endif
 
 	if (e->getType() == UEvent::MousePressed) {
-#if OLD_DRAG_WIDGET
+#if OLD_EVENT_CODE
 		m_dragWidget = w;
-#endif
+#else
 		m_dragWidgetsStack = visibleWidgets;
+#endif
 	} else if (e->getType() == UEvent::MouseReleased && !e->hasMouseModifiers()) {
 		// all mouse buttons have been released, dragging is over
-#if OLD_DRAG_WIDGET
+#if OLD_EVENT_CODE
 		m_dragWidget = NULL;
-#endif
+#else
 		while (m_dragWidgetsStack.size() > 0) {
 			m_dragWidgetsStack.pop();
 		}
+#endif
 	}
 
-#if OLD_DRAG_WIDGET
+#if OLD_EVENT_CODE
 	UPoint wRoot = (w) ? w->getRootLocation() : UPoint();
 
 	// lazily create a new mouse event
@@ -428,8 +427,9 @@ UAbstractContext::fireMouseEvent(UMouseEvent * e) {
 	if (send(w, newE)) {
 		e->consume();
 	}
-#endif
+#else
 	sendMouseEventToWidgets(visibleWidgets, e);
+#endif
 }
 
 void
@@ -448,10 +448,29 @@ UAbstractContext::fireMouseWheelEvent(UMouseWheelEvent * e) {
 	pos.x -= m_bounds.x;
 	pos.y -= m_bounds.y;
 
+#if OLD_EVENT_CODE
+	UWidget * w = root->getVisibleWidgetAt(pos);
+	UPoint wRoot = (w) ? w->getRootLocation() : UPoint();
+
+	// lazily create a new mouse event
+	UMouseWheelEvent * newE = new UMouseWheelEvent(
+		w,
+		e->getType(),
+		e->getModifiers(),
+		pos - wRoot,
+		pos,
+		e->getDelta(),
+		e->getWheel()
+	);
+
+	if (send(w, newE)) {
+		e->consume();
+	}
+#else
 	std::stack<UWidget*> visibleWidgets;
 	getVisibleWidgetsDFS(&visibleWidgets, root, pos.x, pos.y);
 	sendMouseWheelEventToWidgets(visibleWidgets, e);
-
+#endif
 }
 
 void
@@ -482,7 +501,7 @@ UAbstractContext::fireMouseMotionEvent(UMouseEvent * e) {
 	// FIXME: should mouse drag events override all?
 	// first send the drag event, then look for widgets under mouse
 	// the drag event might move some widgets (e.g. internal frames).
-#if OLD_DRAG_WIDGET
+#if OLD_EVENT_CODE
 	if (m_dragWidget) {
 		// lazily create a new mouse event
 		UMouseEvent * newE = new UMouseEvent(
@@ -500,7 +519,7 @@ UAbstractContext::fireMouseMotionEvent(UMouseEvent * e) {
 			consumed = true;
 		}
 	}
-#endif
+#else
 	if (m_dragWidgetsStack.size() > 0) {
 		std::stack<UWidget*> widgets = m_dragWidgetsStack; // make a copy
 
@@ -522,30 +541,46 @@ UAbstractContext::fireMouseMotionEvent(UMouseEvent * e) {
 		newE->unreference();
 		// flush the event
 	}
+#endif
 
 	UWidget * w;
 	UWidget * wbef;
 
-	// TODO: this should be done more complex, in order to support layered
+	// AB: TODO: this should be done more complex, in order to support layered
 	// pane!
 	// -> we have to look through the getVisibleWidgetsAt() lists!
 	w = root->getVisibleWidgetAt(pos);
-	wbef = root->getVisibleWidgetAt(pos.x - e->getXRel(), pos.y - e->getYRel());
+	wbef = root->getVisibleWidgetAt(pos - e->getRelMovement());
 
 	UPoint wRoot = (w) ? w->getRootLocation() : UPoint();
 	UPoint wbefRoot = (wbef) ? wbef->getRootLocation() : UPoint();
 
 	// mouse motion event
-#if OLD_DRAG_WIDGET
+#if OLD_EVENT_CODE
 	if (!m_dragWidget && w == wbef) {
+		// lazily create a new mouse event
+		UMouseEvent * newE = new UMouseEvent(
+			w,
+			e->getType(),
+			e->getModifiers(),
+			pos - wRoot,
+			e->getRelMovement(),
+			pos,
+			e->getButton(),
+			e->getClickCount()
+		);
+
+		if (send(w, newE)) {
+			consumed = true;
+		}
+	}
 #else
 	if (m_dragWidgetsStack.size() == 0 && w == wbef) {
-#endif
-
 		std::stack<UWidget*> visibleWidgets;
 		getVisibleWidgetsDFS(&visibleWidgets, root, pos.x, pos.y);
 		sendMouseMotionEventToWidgets(visibleWidgets, e);
 	}
+#endif
 	// always send mouse enter and exit events
 	if (w != wbef) {
 		UMouseEvent * newE;
@@ -565,7 +600,6 @@ UAbstractContext::fireMouseMotionEvent(UMouseEvent * e) {
 		if (send(wbef, newE)) {
 			consumed = true;
 		}
-
 
 		// mouse enter event
 		newE = new UMouseEvent(
@@ -598,60 +632,14 @@ UAbstractContext::fireKeyEvent(UKeyEvent * e) {
 		<< "REASON: this context has no root pane" << "\n";
 		return;
 	}
-	if (e->getType() == UEvent::KeyPressed) {
-		// We send
-		// 1. AccelOverride event. If that is consumed, we jump to 3. (i.e. skip
-		//    the Accel event)
-		// 2. Accel event. If that is consumed, no KeyPressed event is sent.
-		// 3. KeyPressed event to the focused widget.
-		// AccelOverride and Accel events are sent to all widgets in the
-		// hierarchy that are visible and enabled, KeyPressed event to the
-		// focused widget only.
-		//
-		// AB: this works slightly similar to the way Qt processes these events
-		//     (however Qt does not deliver the events to all widgets)
-
-		UKeyEvent * accelOverride = new UKeyEvent(
-			root,
-			UEvent::AccelOverride,
-			e->getModifiers(),
-			e->getKeyCode(),
-			e->getKeyChar()
-		);
-
-		accelOverride->reference();
-		bool consumed = sendEventToWidgetAndChildren(root, accelOverride);
-		accelOverride->unreference();
-
-		if (!consumed) {
-			UKeyEvent * accel = new UKeyEvent(
-				root,
-				UEvent::Accel,
-				e->getModifiers(),
-				e->getKeyCode(),
-				e->getKeyChar()
-			);
-
-			accel->reference();
-			bool acceptAccel = sendEventToWidgetAndChildren(root, accel);
-			accel->unreference();
-			if (acceptAccel) {
-				// do not send KeyPressed event
-				return;
-			}
-		}
-	}
-
-
-#if 0
-	// check key binding
+	// check key bindings
 	UKeyStroke stroke(e);
 	USlot1<UActionEvent*> * slot = m_inputMap->get(stroke);
 	if (slot) {
 		UActionEvent * ae = new UActionEvent(this, UEvent::Action,
 			e->getModifiers(), stroke.toString());
 		ae->reference();
-		(*slot)(ae)
+		(*slot)(ae);
 		// FIXME: should context bindings be consumable?
 		// if (e->isConsumend()) {
 		//	e->unreference();
@@ -659,7 +647,6 @@ UAbstractContext::fireKeyEvent(UKeyEvent * e) {
 		//}
 		ae->unreference();
 	}
-#endif
 
 	UWidget * w = root->getFocusedWidget();
 
@@ -671,31 +658,24 @@ UAbstractContext::fireKeyEvent(UKeyEvent * e) {
 		e->getKeyCode(),
 		e->getKeyChar()
 	);
-
-	newE->reference();
-
-	// AB: even call this if w==NULL !
+#if OLD_EVENT_CODE
 	if (send(w, newE)) {
 		e->consume();
 	}
-
-#if 0
-	// deliver to parents
-	if (w) {
-		w = w->getParent();
-	}
+#else
+	// AB: UWidget::dispatchEvent() does not do any automatic propagation to
+	//     parents. so we do it here.
+	newE->reference();
 	while (w && !e->isConsumed()) {
-		// AB: using send() would be easier, but it sets the source to
-		// the widget and I am not sure whether this is intended here.
-		// We are just emulating the previous behaviour of libufo here.
-		w->dispatchEvent(newE);
-		if (newE->isConsumed()) {
+		newE->setSource(w);
+		if (send(w, newE)) {
 			e->consume();
+		} else {
 		}
 		w = w->getParent();
 	}
-#endif
 	newE->unreference();
+#endif
 }
 
 //
@@ -738,6 +718,7 @@ UAbstractContext::send(UWidget * receiver, UEvent * e) {
 	}
 }
 
+#if !OLD_EVENT_CODE
 // we do a depth-first-search for visible widgets
 void
 getVisibleWidgetsDFS(std::stack<UWidget*> * stack, UWidget * w, int x, int y) {
@@ -857,31 +838,5 @@ UAbstractContext::sendMouseMotionEventToWidgets(std::stack<UWidget*> & widgets, 
 	return false;
 }
 
-// send e to the widget and all of its children.
-// note that this uses e directly (does not create a new object) and assumes
-// that e->reference() was called at least once before this method is called!
-//
-// widgets that are not visible or not enabled are skipped.
-bool
-UAbstractContext::sendEventToWidgetAndChildren(UWidget * widget, UEvent * e) {
-	if (!widget->isVisible()) {
-		return false;
-	}
-	if (!widget->isEnabled()) {
-		return false;
-	}
-	if (send(widget, e)) {
-		e->consume();
-		return true;
-	}
-	const std::vector<UWidget*> & children = widget->getWidgets();
-	for (std::vector<UWidget*>::const_reverse_iterator it = children.rbegin();
-			it != children.rend();
-			++it) {
-		if (sendEventToWidgetAndChildren((*it), e)) {
-			return true;
-		}
-	}
-	return false;
-}
+#endif // !OLD_EVENT_CODE
 

@@ -39,16 +39,11 @@ UImage::refresh() {
 }
 
 void
-UImage::paintDrawable(UGraphics * g, int x, int y, int w, int h) {
-	g->drawImage(this, x, y, w, h);
+UImage::paintDrawable(UGraphics * g, const URectangle & rect) {
+	g->drawImage(this, rect);
 }
 
-int
-UImage::getDrawableWidth() const {
-	return getImageWidth();
-}
-
-int
-UImage::getDrawableHeight() const {
-	return getImageHeight();
+UDimension
+UImage::getDrawableSize() const {
+	return getImageSize();
 }

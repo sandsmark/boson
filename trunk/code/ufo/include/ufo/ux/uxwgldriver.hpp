@@ -47,6 +47,11 @@ class UVideoPlugin;
 class UPluginBase;
 class USharedLib;
 
+/** @short A video driver which uses Win32/WGL for windowing.
+  * @ingroup internal
+  *
+  * @author Johannes Schmidt
+  */
 class UFO_EXPORT UXWGLDriver : public UVideoDriver {
 	UFO_DECLARE_DYNAMIC_CLASS(UXWGLDriver)
 public:
@@ -99,6 +104,11 @@ private: // Private attributes
 };
 
 
+/** @short A video device which uses Win32/WGL for windowing.
+  * @ingroup internal
+  *
+  * @author Johannes Schmidt
+  */
 class UFO_EXPORT UXWGLDevice : public UVideoDevice {
 	UFO_DECLARE_DYNAMIC_CLASS(UXWGLDevice)
 public:

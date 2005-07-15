@@ -32,9 +32,15 @@
 #define WIN32
 #endif
 
-#if defined(WIN32) && defined(_MSC_VER)
+#if defined HAVE_CONFIG_H
+// this is our auto configured config header
+#include "ufo_config_gnu.hpp"
+#elif defined(WIN32)
+//&& defined(_MSC_VER)
+// use msvc header for win 32 targets without configure
 #include "ufo_config_msvc.hpp"
-#else // GNU
+#else
+// last resort
 #include "ufo_config_gnu.hpp"
 #endif
 
@@ -47,17 +53,6 @@
 #define VC_EXTRALEAN
 #include <windows.h>
 #endif // WIN32
-
-/*
-// find the correct include path for hash_map
-#if defined(HAVE_HASH_MAP)
-#define HASH_MAP_INC <hash_map>
-#elif defined(HAVE_EXT_HASH_MAP)
-#define HASH_MAP_INC <ext/hash_map>
-#else
-*/
-/* #undef HASH_MAP_INC */
-//#endif
 
 #ifndef _UFO_EXPORT_RULE
 # ifdef WIN32
@@ -87,7 +82,6 @@
 
 // ufo internal run time type information
 #define UFO_RTTI
-
 
 //
 // OS specific defines

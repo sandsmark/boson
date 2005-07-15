@@ -46,7 +46,9 @@ class UImageIO;
 class UFontPlugin;
 class UPluginBase;
 
-/** A basic implementation of texture fonts.
+/** @short A basic (multimedia library independent) implementation of texture fonts.
+  * @ingroup internal
+  *
   * @author Johannes Schmidt
   */
 
@@ -55,7 +57,7 @@ class UFO_EXPORT UTextureFontRenderer : public UFontRenderer {
 private:
 	friend class UTextureFontMetrics;
 	// some forward declarations
-public: 
+public:
 	/** @param Specifies the font familiy (like Courier, Helvetica, ...)
 	  * @param pointSize The point size
 	  * @param weight The font weight, e.g. UFont::Bold, UFont::Normal, ...
@@ -75,7 +77,7 @@ public: // Implements UFontRenderer
 
 	void beginDrawing(UGraphics * g);
 	void endDrawing(UGraphics * g);
-	
+
 	void refresh();
 
 	const UFontMetrics * getFontMetrics() const;

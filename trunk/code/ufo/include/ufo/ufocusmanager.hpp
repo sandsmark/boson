@@ -36,8 +36,11 @@ class UEvent;
 class UMouseEvent;
 class UKeyEvent;
 
-/** This class controls the mouse and keyboard focus. The focus manager is not
-  * bound to a specific UFO context.
+/** @short This class controls the mouse and keyboard focus.
+  * @ingroup misc
+  * @ingroup events
+  *
+  * The focus manager is not bound to a specific UFO context.
   *
   * @author Johannes Schmidt
   */

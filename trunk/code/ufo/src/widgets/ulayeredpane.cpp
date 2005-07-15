@@ -81,13 +81,13 @@ ULayeredPane::setLayer(UWidget * w, int layer, int position) {
 		// no change
 		return ;
 	}
-	
+
 	putLayerProperty(w, layer);
 	// at first, move the widget to the very end of the container.
 	// this way, we do not have to factor in the case when we move
 	// within the same layer (might give wrong results)
 	// Note: This violates the order of child widgets
-	setIndexOf(w, -1);
+	//setIndexOf(w, -1);
 	int index = indexForLayer(layer, position);
 	setIndexOf(w, index);
 }
@@ -195,7 +195,7 @@ ULayeredPane::indexForLayer(int layer, int position) const {
 	} else if (ret > layerEnd) {
 		ret = layerEnd;
 	}
-	
+
 	//
 	if (ret >= getWidgetCount()) {
 		return -1;

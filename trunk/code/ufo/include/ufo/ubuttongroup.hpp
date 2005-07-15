@@ -36,6 +36,20 @@ namespace ufo {
 
 class UButton;
 
+/** @short Provides a container for organizing selection states of
+  *  toggable button widgets
+  * @ingroup widgets
+  *
+  * A button group is usually used for an exclusive selection of certain
+  * buttons, e.g. radio buttons.
+  * It is not a visible container for the buttons.
+  * <p>
+  * If one button within the button group is selected, all other buttons
+  * are deselected.
+  *
+  * @see URadioButton
+  * @author Johannes Schmidt
+  */
 class UFO_EXPORT UButtonGroup : public UObject {
 	UFO_DECLARE_DYNAMIC_CLASS(UButtonGroup)
 public:

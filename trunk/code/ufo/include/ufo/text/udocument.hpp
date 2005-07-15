@@ -32,14 +32,13 @@
 
 #include "../signals/usignal.hpp"
 
-//#include "uattribute.hpp"
-#include "udocumentfilter.hpp"
-
 namespace ufo {
 
 class UCaret;
 
-/** A low level interface for text documents.
+/** @short A low level interface for text documents.
+  * @ingroup text
+  *
   * It is an abstract character buffer for text widgets.
   * Usually this class is not used directly but via text widgets.
   *
@@ -85,16 +84,6 @@ public:
 	  */
 	virtual void replace(unsigned int offset, unsigned int length,
 		const char * chars, unsigned int nChars) = 0;
-	
-	/** Sets a filter which filters every input in the document and discards
-	  * invalid characters.
-	  * @see UDocumentFilter
-	  */
-	virtual void setDocumentFilter(UDocumentFilter * filter) = 0;
-	/** @see setDocumentFilter
-	  * @see UDocumentFilter
-	  */
-	virtual UDocumentFilter * getDocumentFilter() const = 0;
 
 	/** A caret is a text position within a document.
 	  * It can also be used for text highlighting.

@@ -32,15 +32,15 @@
 
 namespace ufo {
 
-/**
+/** @short This class desribes insets to a rectangle which is used to
+  *  distinguish between the whole rectangle and the actual client size.
+  * @ingroup appearance
+  *
   * Instances of this class are mainly used to describe insets of
   * widget borders and widget margins.
   *
   * This class is not part of the @ref UObject inheritance structure.
-  * Use instead @ref UInsetsObject if you need a color derived from UObject.
-  *
-  * @short This class desribes insets to a rectangle which is used to
-  *  distinguish between the whole rectangle and the actual client size.
+  * Use instead @ref UInsetsObject if you need insets derived from UObject.
   *
   * @author Johannes Schmidt
   */

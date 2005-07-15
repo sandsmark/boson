@@ -1173,9 +1173,7 @@ UXWGLDevice::notify(uint32_t type, int arg1, int arg2, int arg3, int arg4) {
 				m_size = newSize;
 				// FIXME: throw event
 				if (m_frame) {
-					m_frame->getContext()->setContextBounds(
-						URectangle(0, 0,m_size.w, m_size.h)
-					);
+					m_frame->getContext()->setContextBounds(m_size);
 				}
 			}
 

@@ -40,7 +40,10 @@ class UProperties;
 // used for map sorting
 bool operator<(const UPluginInfo & p1, const UPluginInfo & p2);
 
-/**
+/** @short Implements some platform independent methods of UToolkit.
+  *  Provided for convenience.
+  * @ingroup native
+  * @ingroup internal
   *
   * This class is not part of the official UFO API and
   * may be changed without warning.
@@ -57,39 +60,40 @@ public:
 	virtual ~UAbstractToolkit();
 
 public: // Implements UToolkit
-	UVersionInfo getVersionInfo() const;
-	
-	std::string getUserName() const;
-	std::string getRealName() const;
+	virtual UVersionInfo getVersionInfo() const;
 
-	std::string getHomeDir() const;
-	std::string getTmpDir() const;
+	virtual std::string getUserName() const;
+	virtual std::string getRealName() const;
 
-	std::string getPrgName() const;
-	void setPrgName(const std::string & prgName);
+	virtual std::string getHomeDir() const;
+	virtual std::string getTmpDir() const;
 
-	std::string getFontDir() const;
+	virtual std::string getPrgName() const;
+	virtual void setPrgName(const std::string & prgName);
 
-	std::string getProperty(const std::string & keyA) const;
-	void putProperty(const std::string & keyA, const std::string & valueA);
+	virtual std::string getFontDir() const;
+
+	virtual std::string getProperty(const std::string & keyA) const;
+	virtual void putProperty(const std::string & keyA, const std::string & valueA);
 
 public: // Plugin methods
-	void loadPlugin(const std::string & fileName);
-	void loadPlugin(UPluginInfo plugin);
+	virtual void loadPlugin(const std::string & fileName);
+	virtual void loadPlugin(UPluginInfo plugin);
 
-	void unloadPlugin(const std::string & pluginName);
-	void unloadPlugin(UPluginInfo plugin);
+	virtual void unloadPlugin(const std::string & pluginName);
+	virtual void unloadPlugin(UPluginInfo plugin);
 
-	std::vector<UPluginInfo> getPluginInfos() const;
+	virtual std::vector<UPluginInfo> getPluginInfos() const;
 
 	virtual UVideoDriver * createVideoDriver();
 	/** This method is called internally at UFO context creation .*/
-	ULookAndFeel * createLookAndFeel();
+	virtual ULookAndFeel * createLookAndFeel();
+	virtual UStyleManager * getStyleManager();
 
-	UFontRenderer * createFontRenderer(const UFontInfo & fontInfo);
-	UFontInfo queryFont(const UFontInfo & fontInfo);
-	std::vector<UFontInfo> listFonts(const UFontInfo & fontInfo);
-	std::vector<UFontInfo> listFonts();
+	virtual UFontRenderer * createFontRenderer(const UFontInfo & fontInfo);
+	virtual UFontInfo queryFont(const UFontInfo & fontInfo);
+	virtual std::vector<UFontInfo> listFonts(const UFontInfo & fontInfo);
+	virtual std::vector<UFontInfo> listFonts();
 
 protected: // Protected methods
 	/** Inits UFO. */
@@ -107,6 +111,7 @@ private: // Private methods
 	  * e.g. UFO_LOOK_AND_FEEL
 	  */
 	void initMissing();
+	UFontInfo privateQueryFont(const UFontInfo & fontInfo, std::string * renderer);
 
 private: // Private attributes
 	UProperties * m_properties;

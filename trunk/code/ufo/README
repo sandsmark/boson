@@ -1,31 +1,27 @@
 This is a copy of libufo cvs with a couple of patches applied.
 
-Patches applied currently (this list may not be complete):
-- Patch to uboboxlayout.cpp to make multiline labels work
-- Patch to utexturefont.cpp to return the correct face in listFonts()
-- Patch to uwidget.cpp: call invalidate() in setFont()
+libufo CVS checkout date: 2005/07/14
+
+Patches applied currently:
+- Patch to uwidget.hpp and uwidget.cpp to take a ufo::UCollectable* as widget
+  deleter. This object is deleted at the very first in the d'tor.
 - Patch to include/ufo/ufo_gl.hpp and usysteminfo.hpp to include bogl.h instead
   of gl.h and glu.h
-- Patch to uthemelookandfeel.cpp to include bogl.h before glx.h
-- Patch to ufo/include/ufo/usysteminfo.hpp, ufo/include/ufo/ux/uxglxdriver.hpp
-  and ufo/src/ui/uthemelookandfeel.cpp to include boglx.h instead of glx.h
+- Patch to ufo/include/ufo/usysteminfo.hpp and ufo/include/ufo/ux/uxglxdriver.hpp
+  to include boglx.h instead of glx.h
   note that this must be included before X11/Xlib.h
-- Patch to fix index underflow in UFontMetrics::viewToModel()
-- Patch to ugl_image.cpp to enable blending for images with 4 components
-- Patch to uboboxlayout.cpp to make widgets use all remaining space
-- Patch to uboboxlayout.cpp to support stretching
+- Patch to uboxlayout.cpp:
+  * widgets use remaining space
+  * support for "stretch" property
+  -> in general: use our own code, instead of the libufo code
+- Patch to urootpane.cpp and udesktoppane.cpp to fix URootPane::setMenuBar()
+  when there is already a menubar set. I.e. fix menubar removal.
+  For this UDesktopPane::removeDockWidget() got implemented.
 - Patch to ulayeredpane.cpp to insert new widgets at the beginning of a layer
   (which makes it the last widget that is painted), if not specified otherwise
-- Patch to gl/ugl_graphics.cpp, to fix setClipRect() for invalid rectangles
-  after the mapToDevice() call (it could create negative height rects for input
-  rects that are larger than the viewport)
-- Patch to uwidget.h and uwidget.cpp to take a ufo::UCollectable* as widget
-  deleter. This object is deleted at the very first in the d'tor.
-- Patch to uthemelookandfeel.cpp to close the X display it opens
-- Patch to ubasicmenuitemui.cpp to call UMenuItem::uninstallUI() instead of
-  UMenuIntem::installUI() from uninstallUI().
-- Patch to ubasicmenuitemui.cpp to check for getRootPane(true) being NULL in
-  mouseReleased()
+- Patch to ugl_driver.cpp to use bogl functions instead of loading the OpenGL
+  library once again
+- Patch to ustylehints.cpp to avoid uninitialized values (especially bordertype)
 - Patch to uabstractcontext.hpp, uabstractcontext.cpp, uwidget.cpp and ubasicmenuitemui.cpp
   to improve events for our needs:
   Instead of delivering a mouse event to root->getVisibleWidgetAt(), we
@@ -40,28 +36,11 @@ Patches applied currently (this list may not be complete):
   layer, then to the layers below it, then to the layered pane.
   ubasicmenuitemui.cpp had to be patched, because mousePressed() needs to
   consume events for items as well, not only for menus.
-- AMD64 fixes ported from libufo cvs on 05/05/14
-- Patch to uinputmap.hpp and ubutton.cpp to make sure that the button
-  accelerators are actually removed from the inputmap (a ufo::UInputMap::put()
-  call with a NULL slot is NOT sufficient)
-- Patch to uabstractcontext.h, uabstractcontext.cpp, uwidget.h, uwidget.cpp,
-  uevent.h, to
-  * Add UEvent::Accel (uses UKeyPressEvent class)
-  * Add UEvent::AccelOverride (uses UKeyPressEvent class)
-  * First send AccelOverride, then Accel and only then KeyPressed event in
-    UAbstractContext::fireKeyEvent()
-  -> AccelOverride and Accel are sent to all visible and enabled widgets. If
-     AccelOverride is consumed , Accel is not sent (but KeyPressed will be). If
-     Accel is consumed, KeyPressed is not sent anymore.
-  -> Accel and AccelOverride are received in UWidget::processAccelEvent() which
-     is a noop. UButton reimplements it to provide its accelerator.
-  This replaces the previous getInputMap() solution which had several
-  disadvantages - see
-  http://sourceforge.net/mailarchive/forum.php?thread_id=7459852&forum_id=6384
-- Patch to uwidget.cpp, to make sure that processKeyBindings() calls
-  notifyKeyBindingAction() on its parents only if they have key events enabled.
-  Otherwise key events would get enabled for these parents, as
-  notifyKeyBindingAction() calls getInputMap() which in turn enables key events
+  UPDATE: AB: after the update to libufo CVS of 05/07/14, the menuitems were NOT
+              patched again. we may need to do though, so. the code is now in
+              umenuitem.cpp (ubasicmenuitemui.cpp doesnt exist anymore)
+
+
 
 
 Use

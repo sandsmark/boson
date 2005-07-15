@@ -34,7 +34,9 @@
 
 namespace ufo {
 
-/** A panel with different layers.
+/** @short A panel with different layers.
+  * @ingroup internal
+  *
   * Widgets in the highest layer are painted on top of the widgets in lower
   * layers. Widgets should be added with add( widget, layer, positionInLayer).
   * If the layer isn´t specified, the default layer is used.
@@ -103,7 +105,7 @@ public:
 	/** @return The (child vector) index for a widget which should be added,
 	  *  relative to the whole children vector
 	  * @param layer The desired layer
-	  * @param position The new position relative to the layer. 
+	  * @param position The new position relative to the layer.
 	  *  Use -1 for appending
 	  */
 	int indexForLayer(int layer, int position) const;
@@ -111,13 +113,10 @@ public:
 
 protected:
 	/** add a sub widget at the specified index
-	  * @param w
-	  * 	the widget, which should be added
-	  * @param index
-	  * 	if index is -1 or isn´t set, the widget will be added at the end of
-	  * 	the layer
-	  * @param constraints
-	  * 	the layer
+	  * @param w the widget, which should be added
+	  * @param index if index is -1 or isn´t set, the widget will be
+	  *   added at the end of the layer
+	  * @param constraints the layer
 	  * @see put
 	 */
 	void addImpl(UWidget * w, UObject * constraints, int index);

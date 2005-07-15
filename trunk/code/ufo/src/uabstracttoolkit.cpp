@@ -31,7 +31,7 @@
 
 #include "ufo/util/uproperties.hpp"
 
-#include "ufo/ui/ulookandfeel.hpp"
+//#include "ufo/ui/ulookandfeel.hpp"
 #include "ufo/font/ufontrenderer.hpp"
 
 
@@ -41,8 +41,8 @@
 #include "ufo/font/utexturefont.hpp"
 
 // pre register look and feel plugins
-#include "ufo/ui/basic/ubasiclookandfeel.hpp"
-#include "ufo/ui/uthemelookandfeel.hpp"
+//#include "ufo/ui/basic/ubasiclookandfeel.hpp"
+//#include "ufo/ui/uthemelookandfeel.hpp"
 
 // OpenGL specific
 #include "ufo/gl/ugl_texturefontrenderer.hpp"
@@ -305,7 +305,7 @@ UAbstractToolkit::createVideoDriver() {
 
 ULookAndFeel *
 UAbstractToolkit::createLookAndFeel() {
-	//return new UThemeLookAndFeel();
+	/*//return new UThemeLookAndFeel();
 
 	std::string type = getProperty("look_and_feel");
 
@@ -316,22 +316,32 @@ UAbstractToolkit::createLookAndFeel() {
 		}
 	}
 	// fall back to basic look and feel
-	return new UBasicLookAndFeel();
+	return new UBasicLookAndFeel();*/
+	return NULL;
+}
+#include "ufo/ui/ustylemanager.hpp"
+UStyleManager *
+UAbstractToolkit::getStyleManager() {
+	static UStyleManager * manager = NULL;
+	if (!manager) {
+		manager = new UStyleManager();
+	}
+	return manager;
 }
 
 UFontRenderer *
 UAbstractToolkit::createFontRenderer(const UFontInfo & fontInfo) {
-	std::string type = getProperty("font");
+	// override it with given renderer
+	//std::string type = getProperty("font");
 	UFontRenderer * ret = NULL;
 
-	if (fontInfo == UFontInfo()) {
-		return new UGL_BuiltinFontRenderer(fontInfo);
-	}
+	std::string renderer = getProperty("font");
+	UFontInfo info = privateQueryFont(fontInfo, &renderer);
 
 	FontPluginCache::iterator iter = m_fontPlugins.begin();
 	for (; iter != m_fontPlugins.end(); ++iter) {
-		if ((*iter).first.feature == type) {
-			ret = ((*iter).second)->createFontRenderer(fontInfo);
+		if ((*iter).first.feature == renderer) {
+			ret = ((*iter).second)->createFontRenderer(info);
 			break;
 		}
 	}
@@ -346,16 +356,24 @@ UAbstractToolkit::createFontRenderer(const UFontInfo & fontInfo) {
 
 UFontInfo
 UAbstractToolkit::queryFont(const UFontInfo & fontInfo) {
+	return privateQueryFont(fontInfo, NULL);
+	/*
 	std::string type = getProperty("font");
 
 	FontPluginCache::iterator iter = m_fontPlugins.begin();
 	for (; iter != m_fontPlugins.end(); ++iter) {
-		if ((*iter).first.feature == type) {
+		if (type != "" && (*iter).first.feature == type) {
 			return ((*iter).second)->queryFont(fontInfo);
+		} else {
+			UFontInfo info = ((*iter).second)->queryFont(fontInfo);
+			if (info != UFontInfo()) {
+				return info;
+			}
 		}
 	}
 	// FIXME
 	return UFontInfo();
+	*/
 }
 
 std::vector<UFontInfo>
@@ -433,7 +451,7 @@ UAbstractToolkit::initPlugins() {
 	builtin.create = &UGL_BuiltinFontRenderer::createPlugin;
 	builtin.destroy = &UGL_BuiltinFontRenderer::destroyPlugin;
 	loadPlugin(builtin);
-
+/*
 	// look and feel plugins
 	UPluginInfo basic;
 	basic.lib = NULL;
@@ -450,7 +468,7 @@ UAbstractToolkit::initPlugins() {
 	theme.create = &UThemeLookAndFeel::createPlugin;
 	theme.destroy = &UThemeLookAndFeel::destroyPlugin;
 	loadPlugin(theme);
-
+*/
 	// backend plugin
 #ifdef UFO_USE_SDL
 	UPluginInfo sdlDriver;
@@ -550,7 +568,8 @@ UAbstractToolkit::initMissing() {
 		// overwrite with env var
 		m_properties->put("font", getenv("UFO_FONT"));
 	} else if (m_properties->get("font").empty()) {
-		m_properties->put("font", "gl_texture_font");
+		//m_properties->put("font", "gl_texture_font");
+		m_properties->put("font", "");
 	}
 
 	if (getenv("UFO_FONT_DIR")) {
@@ -691,4 +710,35 @@ UAbstractToolkit::initMissing() {
 	} else {
 		m_properties->put("real_name", real_name);
 	}
+}
+
+UFontInfo
+UAbstractToolkit::privateQueryFont(const UFontInfo & fontInfo, std::string * renderer) {
+	std::string type = getProperty("font");
+	UFontInfo ret;
+
+	FontPluginCache::iterator iter = m_fontPlugins.begin();
+	if (type != "") {
+		for (; iter != m_fontPlugins.end(); ++iter) {
+			if ((*iter).first.feature == type) {
+				ret = ((*iter).second)->queryFont(fontInfo);
+			}
+		}
+
+	}
+	// if the specified font could only return the default font info,
+	// search for better matching renderer
+	if (ret == UFontInfo()) {
+		for (; iter != m_fontPlugins.end(); ++iter) {
+			UFontInfo info = ((*iter).second)->queryFont(fontInfo);
+			if (info != UFontInfo()) {
+				ret = info;
+				if (renderer) {
+					*renderer = (*iter).first.feature;
+				}
+				break;
+			}
+		}
+	}
+	return ret;
 }

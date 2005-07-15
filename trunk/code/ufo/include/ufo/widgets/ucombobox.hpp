@@ -39,23 +39,23 @@ class UColor;
 class UListBox;
 class UTextEdit;
 
-/** This a combination between a selection and a text edit  box.
-  * You can ...
+/** @short A button with a popup item list.
+  * @ingroup widgets
+  *
+  * A UComboBox provides a list of options as choice to the user.
+  * <p>
   * Currently it is implemented using a text edit and a list box widget.
-  *@author Johannes Schmidt
+  * But this might change.
+  *
+  * @author Johannes Schmidt
   */
 class UFO_EXPORT UComboBox : public UWidget {
 	UFO_DECLARE_DYNAMIC_CLASS(UComboBox)
 	UFO_UI_CLASS(UComboBoxUI)
+	UFO_STYLE_TYPE(UStyle::CE_ComboBox)
 public: // Public constructors
 	UComboBox();
 	UComboBox(const std::vector<UString> & listDataA);
-/*
-public: // hides | overrides UWidget
-	virtual void setUI(UComboBoxUI * ui);
-	virtual UWidgetUI * getUI() const;
-	virtual void updateUI();
-*/
 public: // Item accessing methods
 	/** Appends the strings of list data to the list box.
 	  * Using add prefix instead of insert to match UWidget
@@ -119,6 +119,11 @@ public: // Public signal accessors
 	sig_activated_t & sigActivated();
 	sig_highlighted_t & sigHighlighted();
 	sig_selection_change_t & sigSelectionChanged();
+
+protected: // Overrides UWidget
+	virtual UDimension getContentsSize(const UDimension & maxSize) const;
+	virtual void processMouseEvent(UMouseEvent * e);
+	virtual void processKeyEvent(UKeyEvent * e);
 
 protected: // Protected attributes
 	// internally used widgets to represent the data

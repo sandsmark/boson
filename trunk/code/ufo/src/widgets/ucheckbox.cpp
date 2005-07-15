@@ -34,10 +34,12 @@ UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(UCheckBox, UButton)
 
 UCheckBox::UCheckBox() : UButton() {
 	setToggable(true);
+	setCssType("checkbox");
 }
 
 UCheckBox::UCheckBox(const std::string & text) : UButton(text) {
 	setToggable(true);
+	setCssType("checkbox");
 }
 
 } // namespace ufo

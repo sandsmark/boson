@@ -34,7 +34,10 @@ namespace ufo {
 
 class UFontRenderer;
 
-/** The metrics for a font renderer object.
+/** @short Describes metrics of a font.
+  * @ingroup text
+  * @ingroup drawing
+  *
   * This class describes the metrices of single characters as well as
   * character strings.
   *

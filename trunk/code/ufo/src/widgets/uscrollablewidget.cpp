@@ -31,7 +31,7 @@
 
 #include "ufo/ugraphics.hpp"
 
-namespace ufo {
+using namespace ufo;
 
 UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(UScrollableWidget, UWidget)
 
@@ -44,15 +44,8 @@ UScrollableWidget::UScrollableWidget()
 }
 
 int
-UScrollableWidget::getUnitIncrement(const URectangle & visibleRectA,
-		Orientation orientationA, Direction directionA) const {
-	// FIXME: doh! what a hack
-	int ret = (m_unitIncrement) ? m_unitIncrement : 1;
-	
-	if (directionA == Up) {
-		ret = -ret;
-	}
-	return ret;
+UScrollableWidget::getUnitIncrement(Orientation orientation) const {
+	return (m_unitIncrement) ? m_unitIncrement : 1;
 }
 
 void
@@ -61,14 +54,8 @@ UScrollableWidget::setUnitIncrement(int incrementA) {
 }
 
 int
-UScrollableWidget::getBlockIncrement(const URectangle & visibleRectA,
-		Orientation orientationA, Direction directionA) const {
-	int ret = (m_blockIncrement) ? m_blockIncrement : 10;
-	
-	if (directionA == Up) {
-		ret = -ret;
-	}
-	return ret;
+UScrollableWidget::getBlockIncrement(Orientation orientation) const {
+	return (m_blockIncrement) ? m_blockIncrement : 10;
 }
 
 void
@@ -85,19 +72,3 @@ void
 UScrollableWidget::setPreferredViewportSize(const UDimension & viewSize) {
 	m_viewSize = viewSize;
 }
-
-void
-UScrollableWidget::clipPaint(UGraphics * g, int x, int y, int w, int h) {
-	UPoint pos = pointToRootPoint(x, y);
-
-	//graphics->pushClipRect();
-	URectangle old_rect = g->getClipRect();
-	g->setClipRect(URectangle(pos.x, pos.y, w, h));
-	
-	paint(g);
-
-	//graphics->popClipRect();
-	g->setClipRect(old_rect);
-}
-
-} // namespace ufo

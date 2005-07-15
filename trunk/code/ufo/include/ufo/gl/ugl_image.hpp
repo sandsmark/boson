@@ -39,8 +39,11 @@
 
 namespace ufo {
 
-/** OpenGL implementation of an image.
-  * Loads and paints openGL textures to screen.
+/** @short OpenGL implementation of an image.
+  * @ingroup opengl
+  * @ingroup internal
+  *
+  * Loads and paints OpenGL textures to screen.
   *
   * @author Johannes Schmidt
   */
@@ -51,51 +54,62 @@ public: // constructors
 	/** Creates an OpenGL texture from the given file.
 	  *
 	  * @param fileName The image file
+	  * @param lazy If true, loads the texture on request (otherwise immediately)
 	  * @param autoRefresh When true recreates automatically
 	  * 	the OpenGL texture on GL context recreation
 	  * @param imageFormat The format used to interpret the image data
 	  * @param internalFormat The format used to save the texture in the VRAM
 	  */
-	UGL_Image(const std::string & fileName, bool autoRefresh = false,
+	UGL_Image(const std::string & fileName, bool lazy = true, bool autoRefresh = true,
 		GLenum imageFormat = 0, GLenum internalFormat = 0);
 
 	/** Creates an OpenGL texture from the given image IO data.
 	  *
 	  * @param imageIO the image data
+	  * @param lazy If true, loads the texture on request (otherwise immediately)
 	  * @param autoRefresh When true recreates automatically
 	  * 	the OpenGL texture on GL context recreation
 	  * @param imageFormat The format used to interpret the image data
 	  * @param internalFormat The format used to save the texture in the VRAM
 	  */
-	UGL_Image(UImageIO * imageIO, bool autoRefresh = false,
+	UGL_Image(UImageIO * imageIO, bool lazy = true, bool autoRefresh = true,
 		GLenum imageFormat = 0, GLenum internalFormat = 0);
 
 	virtual ~UGL_Image();
 
 public: // Implements UImage
-	virtual int getImageWidth() const;
-	virtual int getImageHeight() const;
+	virtual UDimension getImageSize() const;
 	virtual int getImageComponents() const;
 	virtual unsigned long handle() const;
 
 public: // Public methods
 	/** @return The size of the image as UDimension */
-	const UDimension & getSize() const;
+	UDimension getSize() const;
 
 	/** paints the texture */
-	void paint(UGraphics * g) const;
+	void paint(UGraphics * g);
 
 	/** Paints the texture with an offset of x, y. */
-	void paint(UGraphics * g, const UPoint & location) const;
+	void paint(UGraphics * g, const UPoint & location);
 	/** paints the texture and scale it if it is necessary
 	  */
-	void paint(UGraphics * g, const URectangle & rect) const;
+	void paint(UGraphics * g, const URectangle & rect);
 
-
+	/** Paints sub rectangle @p rect of this image at destination @p dest.
+	  * @param g The graphics object
+	  * @param rect The sub rect
+	  * @param dest The destination location for painting
+	  */
 	void paintSubImage(UGraphics * g, const URectangle & rect,
-		const UPoint & dest) const;
+		const UPoint & dest);
+	/** Paints sub rectangle @p rect of this image in the destination
+	  * rect @p dest.
+	  * @param g The graphics object
+	  * @param rect The sub rect
+	  * @param dest The destination rect for painting
+	  */
 	void paintSubImage(UGraphics * g, const URectangle & rect,
-		const URectangle & dest) const;
+		const URectangle & dest);
 
 	/** Disposes the saved image data which is normally used to do an
 	  * auto refresh.
@@ -109,11 +123,16 @@ public: // Public methods
 	/** Refreshes the OpenGL texture using the saved image data. */
 	void refresh();
 
+	/** 0 == default, 1 = nearest, 2 = linear, 3 = mipmap. */
+	void setQuality(int quality);
+	int getQuality() const;
+
 protected:  // Protected methods
 	/** makes a openGL texture */
 	virtual bool createGLTexture(GLubyte * dataA, int componentsA,
 	                 GLenum imageFormatA, GLenum internalFormatA);
 
+	void ensureImage();
 	/** rounds to the next power of two
 	  */
 	int round2(int n);
@@ -124,9 +143,14 @@ private:  // Private attributes
 	GLenum m_internalFormat;
 	/** the image size in pixels */
 	UDimension m_size;
-	int m_imageComponents;
-	bool m_isValid;
+	int m_imageComponents : 4;
+	int m_quality : 4;
+	int m_isValid : 1;
+	int m_isLazy : 1;
+	int m_autoRefresh : 1;
 
+	/** A pointer to the image data. Used to recreate the GL texture. */
+	std::string m_fileName;
 	/** A pointer to the image data. Used to recreate the GL texture. */
 	UImageIO * m_imageData;
 };

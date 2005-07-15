@@ -33,6 +33,8 @@
 namespace ufo {
 
 /** @short A class representing an integer, derived from UObject.
+  * @ingroup core
+  *
   * @author Johannes Schmidt
   */
 
@@ -52,7 +54,7 @@ public:
 	}
 
 	int toInt() const;
-	static int toInt(const std::string & stringA);
+	static int toInt(const std::string & stringA, bool * ok = NULL);
 
 	/** checks if this object is the same object than obj */
 	bool equals(const UInteger * integer) const;

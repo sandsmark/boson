@@ -33,8 +33,10 @@
 
 namespace ufo {
 
-/** Do not use this class in client code. Interface may change. Use instead
-  * the document factory.
+/** @short A plain text document
+  * @ingroup text
+  * @ingroup internal
+  *
   * @see UDocumentFactory
   * @author Johannes Schmidt
   */
@@ -64,9 +66,6 @@ public: // Implements UDocument
 	virtual void replace(unsigned int offset, unsigned int length,
 		const char * chars, unsigned int nChars);
 
-	virtual void setDocumentFilter(UDocumentFilter * filter);
-	virtual UDocumentFilter * getDocumentFilter() const;
-
 	virtual UCaret * getCaret() const;
 	//virtual void setCaret(UCaret * caret);
 
@@ -76,7 +75,6 @@ protected: // Protected methods
 
 private: // Private attributes
 	std::string m_content;
-	UDocumentFilter * m_filter;
 	UCaret * m_caret;
 };
 
@@ -88,7 +86,7 @@ class UFO_EXPORT UBasicCaret : public UCaret {
 public:
 	UBasicCaret(UDocument * document);
 	virtual ~UBasicCaret();
-	
+
 public: // Implements UCaret
 	virtual void setPosition(unsigned int posA);
 	virtual unsigned int getPosition() const;

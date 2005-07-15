@@ -27,44 +27,32 @@
 
 #include "ufo/widgets/useparator.hpp"
 
-//#include "ufo/ui/uuimanager.hpp"
-
 using namespace ufo;
 
 UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(USeparator, UWidget)
 
-USeparator::USeparator(Orientation orientation) : m_orientation(orientation) {}
-
-//*
-//* hides | overrides UWidget
-//*
-/*
-void
-USeparator::setUI(USeparatorUI * ui) {
-	UWidget::setUI(ui);
+USeparator::USeparator(Orientation orientation)
+{
+	if (orientation != Horizontal) {
+		setOrientation(orientation);
+	}
 }
 
-UWidgetUI *
-USeparator::getUI() const {
-	return static_cast<USeparatorUI*>(UWidget::getUI());
-}
-
-void
-USeparator::updateUI() {
-	setUI(static_cast<USeparatorUI*>(getUIManager()->getUI(this)));
-}
-*/
-//*
-//* public methods
-//*
-
-
-Orientation
-USeparator::getOrientation() const {
-	return m_orientation;
-}
-
-void
-USeparator::setOrientation(Orientation orientation) {
-	m_orientation = orientation;
+UDimension
+USeparator::getContentsSize(const UDimension & maxSize) const {
+	Orientation orient = getOrientation();
+	if (orient == NoOrientation) {
+		if (getParent()) {
+			if (getParent()->getOrientation() == Horizontal) {
+				orient = Vertical;
+			} else {
+				orient = Horizontal;
+			}
+		}
+	}
+	if (orient == Vertical) {
+		return UDimension(2, 0);
+	} else {
+		return UDimension(0, 2);
+	}
 }

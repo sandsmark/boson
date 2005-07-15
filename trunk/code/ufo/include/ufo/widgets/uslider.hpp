@@ -29,22 +29,28 @@
 #ifndef USLIDER_HPP
 #define USLIDER_HPP
 
-#include "uwidget.hpp"
+#include "uabstractslider.hpp"
 
 
 namespace ufo {
 
-/** A slider.
+class USliderModel;
+
+/** @short A vertical or horizontal slider.
+  * @ingroup widgets
+  *
+  * A slider is used to control a bounded value.
   *
   * @author Johannes Schmidt
   */
 
-class UFO_EXPORT USlider : public UWidget {
+class UFO_EXPORT USlider : public UAbstractSlider {
 	UFO_DECLARE_DYNAMIC_CLASS(USlider)
 	UFO_UI_CLASS(USliderUI)
+	UFO_STYLE_TYPE(UStyle::CE_Slider)
 public:
 	/** Creates a slider with horizontal orientation, a minimum value of 0,
-	  * a maximum of 100 and a value of 0.
+	  * a maximum of 99 and a value of 0.
 	  */
 	USlider();
 	/** Creates a slider with the given orientation, a minimum value of 0,
@@ -66,78 +72,17 @@ public:
 	USlider(Orientation orientation, int min, int max, int value);
 
 public: // Public methods
-	Orientation getOrientation() const;
-	//void setOrientation(Orientation orientation);
 
-	int getMinimum() const;
-	void setMinimum(int min);
-
-	int getMaximum() const;
-	void setMaximum(int max);
-
-	int getValue() const;
-	void setValue(int newValue);
-
-	//int getMajorTickSpacing() const;
-	/** Not yet implemented:
-	  * Sets the spacing for major ticks.
-	  * Major ticks are the distance between major tick marks.
-	  * Only important for UI and when using snap to ticks.
-	  */
-	//void setMajorTickSpacing(int spacing);
-
-	/** The amount to scroll for one unit (e.g. mouse wheel events). */
-	int getUnitIncrement() const;
-	void setUnitIncrement(int inc);
-
-	/** The amount to scroll for a block increment (e.g. page up/down).
-	  */
-	int getBlockIncrement() const;
-	void setBlockIncrement(int inc);
-
-public:
-	USignal2<USlider*, int> & sigValueChanged();
-
-protected: // Protected methods
-	void processMouseWheelEvent(UMouseWheelEvent * e);
+protected: // Overrides UWidget
+	virtual UDimension getContentsSize(const UDimension & maxSize) const;
+	virtual void processMouseEvent(UMouseEvent * e);
 
 private: // Private attributes
-	/**  */
-	Orientation m_orientation;
-	int m_min;
-	int m_max;
-	int m_value;
-
-	int m_unitIncrement;
-	int m_blockIncrement;
-
-	USignal2<USlider*, int> m_sigValueChanged;
+	/** True if mouse is dragging the slider knob. */
+	bool m_isDragging;
+	/** The last mouse press on this slider. */
+	UPoint m_mousePress;
 };
-
-//
-// inline implementation
-//
-
-inline Orientation
-USlider::getOrientation() const {
-	return m_orientation;
-}
-
-
-inline int
-USlider::getMinimum() const {
-	return m_min;
-}
-
-inline int
-USlider::getMaximum() const {
-	return m_max;
-}
-
-inline USignal2<USlider*, int> &
-USlider::sigValueChanged() {
-	return m_sigValueChanged;
-}
 
 } // namespace ufo
 

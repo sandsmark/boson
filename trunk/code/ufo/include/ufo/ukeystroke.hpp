@@ -36,7 +36,8 @@ namespace ufo {
 
 class UKeyEvent;
 
-/** A representation of a typed key on the keyboard. Used for hotkeys.
+/** @short A representation of a typed key on the keyboard. Used for hotkeys.
+  * @ingroup events
   *
   * @author Johannes Schmidt
   */

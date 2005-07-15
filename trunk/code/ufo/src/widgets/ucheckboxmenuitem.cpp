@@ -27,6 +27,8 @@
 
 #include "ufo/widgets/ucheckboxmenuitem.hpp"
 
+#include "ufo/umodel.hpp"
+
 using namespace ufo;
 
 UFO_IMPLEMENT_DYNAMIC_CLASS(UCheckBoxMenuItem, UMenuItem)
@@ -36,10 +38,12 @@ UCheckBoxMenuItem::UCheckBoxMenuItem()
 	: UMenuItem()
 {
 	setToggable(true);
+	getMenuItemModel()->checkType = UMenuItemModel::NonExclusive;
 }
 
 UCheckBoxMenuItem::UCheckBoxMenuItem(const std::string & text)
 	: UMenuItem(text)
 {
 	setToggable(true);
+	getMenuItemModel()->checkType = UMenuItemModel::NonExclusive;
 }

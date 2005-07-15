@@ -58,7 +58,6 @@ fireSigReplaced(UDocument * doc, unsigned int start,
 
 UBasicDocument::UBasicDocument()
 	: m_content()
-	, m_filter(NULL)
 	, m_caret(NULL)
 {
 	m_caret = createCaret();
@@ -102,39 +101,19 @@ UBasicDocument::replaceSelection(const char * chars, unsigned int nChars) {
 	unsigned int replaceEnd = std::max(m_caret->getPosition(), m_caret->getMark());
 	unsigned int length = replaceEnd - replaceStart;
 
-	if (m_filter) {
-		const std::string newText =
-			m_filter->filterText(std::string(chars, nChars));
+	m_content.replace(replaceStart, length, chars, nChars);
+	updateCaret(replaceStart, length, nChars);
 
-		m_content.replace(replaceStart, length, newText);
-		updateCaret(replaceStart, length, newText.length());
-
-		fireSigReplaced(this, replaceStart, length, newText.length());
-	} else {
-		m_content.replace(replaceStart, length, chars, nChars);
-		updateCaret(replaceStart, length, nChars);
-
-		fireSigReplaced(this, replaceStart, length, nChars);
-	}
+	fireSigReplaced(this, replaceStart, length, nChars);
 }
 
 void
 UBasicDocument::insertString(unsigned int offset,
 		const char * chars, unsigned int nChars) {
-	if (m_filter) {
-		const std::string newText =
-			m_filter->filterText(std::string(chars, nChars));
+	m_content.insert(offset, chars, nChars);
+	updateCaret(offset, 0, nChars);
 
-		m_content.insert(offset, newText);
-		updateCaret(offset, 0, newText.length());
-
-		fireSigInserted(this, offset, newText.length());
-	} else {
-		m_content.insert(offset, chars, nChars);
-		updateCaret(offset, 0, nChars);
-
-		fireSigInserted(this, offset, nChars);
-	}
+	fireSigInserted(this, offset, nChars);
 }
 
 void
@@ -148,30 +127,10 @@ UBasicDocument::remove(unsigned int offset, unsigned int length) {
 void
 UBasicDocument::replace(unsigned int offset, unsigned int length,
 		const char * chars, unsigned int nChars) {
-	if (m_filter) {
-		const std::string newText =
-			m_filter->filterText(std::string(chars, nChars));
+	m_content.replace(offset, length, chars, nChars);
+	updateCaret(offset, length, nChars);
 
-		m_content.replace(offset, length, newText);
-		updateCaret(offset, length, newText.length());
-
-		fireSigReplaced(this, offset, length, newText.length());
-	} else {
-		m_content.replace(offset, length, chars, nChars);
-		updateCaret(offset, length, nChars);
-
-		fireSigReplaced(this, offset, length, nChars);
-	}
-}
-
-void
-UBasicDocument::setDocumentFilter(UDocumentFilter * filter) {
-	m_filter = filter;
-}
-
-UDocumentFilter *
-UBasicDocument::getDocumentFilter() const {
-	return m_filter;
+	fireSigReplaced(this, offset, length, nChars);
 }
 
 

@@ -38,6 +38,14 @@ class UMenuItem;
 class UMenu;
 class UEvent;
 
+class UKeyEvent;
+class UMouseEvent;
+
+/** @short Manages menu trees for popup menus.
+  * @ingroup internal
+  *
+  * @author Johannes Schmidt
+  */
 class UFO_EXPORT UMenuManager : public UObject {
 	UFO_DECLARE_DYNAMIC_CLASS(UMenuManager)
 public:
@@ -48,17 +56,35 @@ public:
 
 	virtual void clearPath();
 
+	virtual void processKeyEvent(UKeyEvent * e);
+	virtual void processMouseEvent(UMouseEvent * e);
+
 public: // Public static methods
 	static void setMenuManager(UMenuManager * manager);
 	static UMenuManager * getMenuManager();
 
 protected: // Private slots
+	/** @return The parent menu or the given item if it is itsself
+	  * an aldready visible menu.
+	  */
 	std::vector<UMenu*>::iterator getIteratorOfSameHierarchy(UMenuItem * item);
+	/** Clears i.e. closes all menus following @p iter. */
 	void clearPathFrom(const std::vector<UMenu*>::iterator & iter);
+	/** Closes all menu popups. */
 	void closeMenuPopups(UEvent * e);
+
+	void openMenu(UMenu * menu);
+
+	void recalcPathWithLeaf(UMenuItem * item);
+
+	void highlightNextSibling(UMenuItem * item);
+	void highlightPreviousSibling(UMenuItem * item);
+	void highlightNextTopLevel(UMenuItem * item);
+	void highlightPreviousTopLevel(UMenuItem * item);
 
 private:
 	std::vector<UMenu*> m_menuPath;
+	UMenuItem * m_currentItem;
 
 private: // Private static attributes
 	static UMenuManager * sm_menuManager;

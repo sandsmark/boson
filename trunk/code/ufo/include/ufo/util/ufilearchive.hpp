@@ -35,7 +35,9 @@
 
 namespace ufo {
 
-/** A simple abstraction to read files.
+/** @short A simple abstraction to read files.
+  * @ingroup core
+  *
   * This class provides two static methods to check the content of a directory
   * and to check whether a file exists.
   * Furthermore, there is one default instance for file archives to load

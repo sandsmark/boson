@@ -33,7 +33,9 @@
 
 namespace ufo {
 
-/** This class is provided for convenience. If pushed to the event queue,
+/** @short This event can execute a slot (function or method) on dispachting.
+  * @ingroup events
+  * This class is provided for convenience. If pushed to the event queue,
   * the callback slot will be executed as soon as all prior events are
   * dispatched.
   * @see URunnableEvent

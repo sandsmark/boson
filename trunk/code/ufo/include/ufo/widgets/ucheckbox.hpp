@@ -32,7 +32,9 @@
 
 namespace ufo {
 
-/** A checkbox is a toggle UFO button.
+/** @short A togglable button.
+  * @ingroup widgets
+  *
   * If a check box is "checked", isSelected() returns true.
   *
   * @author Johannes Schmidt
@@ -41,6 +43,7 @@ namespace ufo {
 class UFO_EXPORT UCheckBox : public UButton  {
 	UFO_DECLARE_DYNAMIC_CLASS(UCheckBox)
 	UFO_UI_CLASS(UCheckBoxUI)
+	UFO_STYLE_TYPE(UStyle::CE_CheckBox)
 public:
 	UCheckBox();
 	UCheckBox(const std::string & text);

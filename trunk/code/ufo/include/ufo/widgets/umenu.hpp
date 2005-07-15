@@ -30,14 +30,13 @@
 
 #include "umenuitem.hpp"
 
-// we need this for proper getUI() overriding
-//#include "../ui/umenuui.hpp"
-
 namespace ufo {
 
 class UPopupMenu;
 
-/** a handler class for popup menus.
+/** @short A menu item with a popup menu (used for popup menus).
+  * @ingroup widgets
+  *
   * @author Johannes Schmidt
   */
 
@@ -47,12 +46,7 @@ class UFO_EXPORT UMenu : public UMenuItem {
 public:
 	UMenu(const std::string & text = "", UIcon * icon = NULL);
 	UMenu(UIcon * icon);
-/*
-public: // hides | overrides UWidget
-	virtual void setUI(UMenuUI * ui);
-	virtual UWidgetUI * getUI() const;
-	virtual void updateUI();
-*/
+
 protected: // overrides UWidget
 	/** adds a sub widget to the popup */
 	virtual void addImpl(UWidget * w, UObject * constraints, int index);

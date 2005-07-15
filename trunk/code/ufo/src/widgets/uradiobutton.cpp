@@ -32,8 +32,10 @@ UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(URadioButton, UButton)
 
 URadioButton::URadioButton() : UButton() {
 	setToggable(true);
+	setCssType("radio");
 }
 
 URadioButton::URadioButton(const std::string & text) : UButton(text) {
 	setToggable(true);
+	setCssType("radio");
 }

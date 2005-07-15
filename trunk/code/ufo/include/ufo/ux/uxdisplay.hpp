@@ -36,7 +36,9 @@ class UVideoDriver;
 class UXContext;
 class UXFrame;
 
-/** The Display is the connection to the underlying windowing system.
+/** @short The Display is the connection to the underlying windowing system.
+  * @ingroup native
+  *
   * On construction, a video driver is loaded and initialized.
   * The display can create frames.
   * On destruction, all frames and system ressources allocated by this object

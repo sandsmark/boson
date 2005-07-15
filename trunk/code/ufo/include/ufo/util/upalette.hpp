@@ -31,49 +31,116 @@
 #include "../uobject.hpp"
 
 #include "ucolor.hpp"
-#include "ucolorgroup.hpp"
 
 namespace ufo {
 
-/** A palettes represents the color set used to paint a widget. 
+/** A palettes represents the color set used to paint a widget.
   * @author Johannes Schmidt
   */
 class UFO_EXPORT UPalette : public UObject {
 	UFO_DECLARE_DYNAMIC_CLASS(UPalette)
 public: // Public types
-	enum ColorGroupType {
+	/** Currently not used. */
+	enum ColorGroup {
 		Active,
 		Inactive,
 		Disabled,
 		NColorGroupType
 	};
-public: // Static members
-	static const UPalette nullPalette;
-
+	/** Identifiers for different colors used in a GUI. */
+	enum ColorRole {
+		/** The background color for normal widgets. */
+		Background,
+		/** suitable foreground color for drawing over the widget. */
+		Foreground,
+		/** Background color of text entries. */
+		Base ,
+		/** suitable foreground color for text, usually the same as foreground. */
+		Text,
+		/** Some GUIs need different background colors for buttons,
+		  * but usually the same as background. */
+		Button,
+		/** Foreground color for Button. */
+		ButtonText,
+		/** A lighter color than Button. */
+		Light,
+		/** Between Light and Button. */
+		MidLight,
+		/** A darker color than Button. */
+		Dark,
+		/** Between Dark and Button. */
+		Mid,
+		/** Used for selected or current item and text background. */
+		Highlight,
+		/** Text color used for Highlight. */
+		HighlightedText,
+		/** Used for unvisited hyper links. */
+		Link,
+		/** Used for visited hyper links. */
+		LinkVisited,
+		MaxColorRoles
+	};
 public:
-	UPalette(const UColorGroup & active, const UColorGroup & disabled, 
-		const UColorGroup & inactive);
+	UPalette();
+	UPalette(
+		const UColor & background, const UColor & foreground,
+		const UColor & base, const UColor & text,
+		const UColor & light, const UColor & midLight,
+		const UColor & dark, const UColor & mid,
+		const UColor & highlight, const UColor & highlightedText,
+		const UColor & button, const UColor & buttonText,
+		const UColor & link, const UColor & linkVisited
+	);
+	UPalette(
+		const UColor & background, const UColor & foreground,
+		const UColor & base, const UColor & text,
+		const UColor & highlight, const UColor & highlightedText
+	);
 	virtual ~UPalette();
 
-	const UColor & getColor(ColorGroupType group, 
-		UColorGroup::ColorRole role) const;
-	void setColor(ColorGroupType group, 
-		UColorGroup::ColorRole role, const UColor & color);
 
-	const UColorGroup & getColorGroup(ColorGroupType groupType) const;
-	void setColorGroup(ColorGroupType groupType, const UColorGroup & group);
+	void setColor(ColorRole role, const UColor & color);
+	const UColor & getColor(ColorRole role) const;
 
-	const UColorGroup & getActive() const;
-	void setActive(const UColorGroup & active);
+	/** Every color of @p pal which is no default color of the default
+	  * constructor overwrites the appropriate value of this palette.
+	  * Example: If pal->foreground != UPalette().foreground then
+	  * this->foreground becomes pal->foreground.
+	  */
+	void transcribe(const UPalette & pal);
+	/** Updates every default value of this palette with the
+	  * given values of @p pal.
+	  * Example: If this->foreground == UPalette().foreground then
+	  * this->foreground becomes pal->foreground.
+	  */
+	void update(const UPalette & pal);
 
-	const UColorGroup & getInactive() const;
-	void setInactive(const UColorGroup & inactive);
 
-	const UColorGroup & getDisabled() const;
-	void setDisabled(const UColorGroup & disabled);
+	const UColor & background()	const	{ return getColor(Background); }
+	const UColor & foreground()	const	{ return getColor(Foreground); }
+	const UColor & base()	const	{ return getColor(Base); }
+	const UColor & text()	const	{ return getColor(Text); }
+
+	const UColor & button()	const	{ return getColor(Button); }
+	const UColor & buttonText()	const	{ return getColor(ButtonText); }
+
+	const UColor & light()	const	{ return getColor(Light); }
+	const UColor & midLight()	const	{ return getColor(MidLight); }
+	const UColor & dark()	const	{ return getColor(Dark); }
+	const UColor & mid()	const	{ return getColor(Mid); }
+	const UColor & highlight()	const	{ return getColor(Highlight); }
+	const UColor & highlightedText()	const	{ return getColor(HighlightedText); }
+
+	const UColor & link()	const	{ return getColor(Link); }
+	const UColor & linkVisited()	const	{ return getColor(LinkVisited); }
+
+	/** @not used. */
+	const UColor & getColor(ColorGroup group, ColorRole role) const;
+	/** @not used. */
+	void setColor(ColorGroup group, ColorRole role, const UColor & color);
+
 
 public: // Public operators
-	void operator=(const UPalette & pal);
 	bool operator==(const UPalette & pal) const;
 	bool operator!=(const UPalette & pal) const;
 
@@ -81,48 +148,23 @@ protected: // Overrides UObject
 	virtual std::ostream & paramString(std::ostream & os) const;
 
 private:
-	void detach();
-
-private:
-	USharedPtr<UColorGroup> m_active;
-	USharedPtr<UColorGroup> m_inactive;
-	USharedPtr<UColorGroup> m_disabled;
+	UColor m_colors[MaxColorRoles];
 };
+
 
 //
 // inline implementation
 //
 
-
-inline const UColorGroup & 
-UPalette::getColorGroup(ColorGroupType groupType) const {
-	switch (groupType) {
-		case Active:
-			return *(m_active);
-			break;
-		case Inactive:
-			return *(m_inactive);
-			break;
-		case Disabled:
-			return *(m_disabled);
-			break;
-		default:
-			return *(m_active);
-			break;
-	}
+inline void
+UPalette::setColor(ColorRole role, const UColor & color) {
+	//detach();
+	m_colors[role] = color;
 }
 
-inline const UColorGroup & 
-UPalette::getActive() const {
-	return *(m_active);
-}
-inline const UColorGroup & 
-UPalette::getInactive() const {
-	return *(m_inactive);
-}
-inline const UColorGroup & 
-UPalette::getDisabled() const {
-	return *(m_disabled);
+inline const UColor &
+UPalette::getColor(ColorRole role) const {
+	return m_colors[role];
 }
 
 inline bool

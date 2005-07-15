@@ -34,7 +34,9 @@ namespace ufo {
 
 class UXFrame;
 
-/** A platform-indenpendent implementation of a UFO context.
+/** @short A platform-indenpendent implementation of a UFO context.
+  * @ingroup native
+  *
   * May be used in conjunction with the UX modul or
   * using a custom OpenGL context.
   * See also test/sdl.cpp and test/glut.cpp

@@ -37,17 +37,27 @@
 namespace ufo {
 
 class UContext;
+class UImage;
+class UImageIO;
+class UVolatileData;
 
-/** The display object is responsible for creating the video driver
+/** @short The display represents the connection to the underlying system and
+  *  contains the UFO event queue.
+  * @ingroup native
+  * @ingroup events
+  *
+  * The display object is responsible for creating the video driver
   * (depending on the arguments given to the constructor) and to handle
   * the system events send to the created video devices.
+  * <p>
   * Usually there exists only one implementation of a Display.
-  *
-  * @short The display represents the connection to the underlying system and
-  *  contains the UFO event queue.
+  * <p>
+  * All native ressources are loaded by the display object. For example
+  * OpenGL textures and video devices.
   *
   * @see UVideoDriver
   * @see UVideoDevice
+  * @see UImage
   * @author Johannes Schmidt
   */
 class UFO_EXPORT UDisplay : public UObject {
@@ -57,6 +67,12 @@ public: // Public methods
 	  * display object.
 	  */
 	virtual std::vector<UContext*> getContexts() const = 0;
+
+	virtual UImage * createImage(const std::string fileName) = 0;
+	virtual UImage * createImage(UImageIO * io) = 0;
+
+	virtual void addVolatileData(UVolatileData * vdata) = 0;
+	virtual void removeVolatileData(UVolatileData * vdata) = 0;
 public: // event methods
 	/** Pumps system events to the event queue.
 	  * May be a no-op on some systems. */

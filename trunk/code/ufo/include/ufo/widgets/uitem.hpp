@@ -31,15 +31,19 @@
 #include "../uobject.hpp"
 
 #include "../util/udimension.hpp"
+#include "../util/urectangle.hpp"
 
 namespace ufo {
 
 class UGraphics;
 class UColor;
 class UWidget;
+class UStyleHints;
 
-/** This is an abstract base class for items. This includes list box items,
-  * combo box items, tab items, ...
+/** @short This is an abstract base class for items.
+  * @ingroup widgets
+  *
+  * This includes list box items, combo box items, tab items, ...
   *
   * @author Johannes Schmidt
   */
@@ -48,12 +52,17 @@ class UFO_EXPORT UItem : public virtual UObject {
 public:
 	/** Paints the item at the specified position with the specified values.
 	  */
-	virtual void paintItem(UGraphics * g, UWidget * parent,
-		int x, int y,
-		bool isSelectedA, bool hasFocusA,
-		const UColor & foreground, const UColor & background) = 0;
+	virtual void paintItem(
+		UGraphics * g,
+		const URectangle & rect,
+		const UStyleHints * hints,
+		uint32_t state,
+		const UWidget * parent = NULL) = 0;
 	/** Returns the desired item size. */
-	virtual UDimension getItemSize(const UWidget * parent) const = 0;
+	virtual UDimension getItemSize(
+		const UDimension & maxSize,
+		const UStyleHints * hints,
+		const UWidget * parent = NULL) const = 0;
 
 	/** A string representation of the current value.
 	  * Most items show up only a string.
@@ -65,7 +74,7 @@ public:
 };
 
 class UIcon;
-/** A common representation of a string (+ icon) icon.
+/** A common representation of a string (+ icon).
   * @author Johannes Schmidt
   */
 class UFO_EXPORT UStringItem : public UItem {
@@ -76,13 +85,18 @@ public:
 	UStringItem(UIcon * i);
 	UStringItem(const std::string & str, UIcon * icon);
 
-public: // Implements UListBoxItem
-	virtual void paintItem(UGraphics * g, UWidget * parent,
-		int x, int y,
-		bool isSelectedA, bool hasFocusA,
-		const UColor & foreground, const UColor & background);
+public: // Implements UItem
+	virtual void paintItem(
+		UGraphics * g,
+		const URectangle & rect,
+		const UStyleHints * hints,
+		uint32_t state,
+		const UWidget * parent = NULL);
 
-	virtual UDimension getItemSize(const UWidget * parent) const;
+	virtual UDimension getItemSize(
+		const UDimension & maxSize,
+		const UStyleHints * hints,
+		const UWidget * parent = NULL) const;
 
 	virtual std::string itemToString() const;
 

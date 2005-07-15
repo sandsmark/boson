@@ -219,12 +219,12 @@ UINIReader::parse(char * buffer, unsigned int n) {
 
 		std::string test(pArr);
 
-		unsigned long pos = test.find('=');
-		unsigned long end = test.find('#');
-		end = std::min(end, (unsigned long)(test.length()));
+		std::string::size_type pos = test.find('=');
+		std::string::size_type end = test.find('#');
+		end = std::min(end, test.length());
 
-		unsigned int endKey = pos;
-		unsigned int beginValue = pos + 1;
+		std::string::size_type endKey = pos;
+		std::string::size_type beginValue = pos + 1;
 		// remove white space
 		while (pArr[endKey - 1] == ' ') {
 			endKey--;

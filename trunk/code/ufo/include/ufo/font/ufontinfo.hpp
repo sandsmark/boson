@@ -34,8 +34,11 @@
 
 namespace ufo {
 
-/** A struct describing a font and its attributes.
-  * This class is used to query for and load fonts and to get font attributes.
+/** @short A struct describing a font and its attributes.
+  * @ingroup text
+  * @ingroup drawing
+  *
+  * It is used to query for and load fonts and to get font attributes.
   * <p>
   * The default way to query for font is to use the UFont class.
   * <p>
@@ -130,7 +133,7 @@ public: // Public attributes
 public:
 	/** Creates the null font info struct. */
 	UFontInfo();
-	
+
 	UFontInfo(const std::string & face, float pointSize, int weight,
 		int style = Plain, Encoding encoding = Encoding_Default);
 	UFontInfo(Family family, float pointSize, int weight,
@@ -215,11 +218,11 @@ inline std::ostream &
 operator<<(std::ostream & os, const UFontInfo & info) {
 	return os << "UFontInfo["
 	<< "family " << info.family
-	<< "face " << info.face
-	<< "point size " << info.pointSize
-	<< "weight " << info.weight
-	<< "style " << info.style
-	<< "encoding " << info.encoding
+	<< "; face " << info.face
+	<< "; point size " << info.pointSize
+	<< "; weight " << info.weight
+	<< "; style " << info.style
+	<< "; encoding " << info.encoding
 	<< "]";
 }
 

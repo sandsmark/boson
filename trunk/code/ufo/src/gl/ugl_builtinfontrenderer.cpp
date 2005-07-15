@@ -81,7 +81,8 @@ UGL_BuiltinFontRenderer::UGL_BuiltinFontRenderer(const UFontInfo & fontInfo)
 	, m_yorig(3.0f)
 {
 	m_fontInfo.style = UFontInfo::Plain;
-	m_fontInfo.encoding = UFontInfo::Encoding_ISO8859_14;
+	m_fontInfo.encoding = UFontInfo::Encoding_ISO8859_1;
+	m_fontInfo.face = "";
 
 	if (fontInfo.family == UFontInfo::DefaultFamily ||
 			fontInfo.family == UFontInfo::SansSerif ||
@@ -230,9 +231,7 @@ UGL_BuiltinFontMetrics::viewToModel(const char * text, unsigned int nChar,
 	for (;index < nChar; ++index) {
 		advance += (m_renderer->m_fontStruct.m_characters[text[index]])[0];
 		if (advance > w) {
-			if (index > 0) {
-				index--;
-			}
+			index--;
 			break;
 		}
 	}
@@ -251,6 +250,7 @@ public:
 
 	virtual UFontInfo queryFont(const UFontInfo & fontInfo) {
 		UFontInfo ret;
+		ret.face = "";
 		if (fontInfo.family == UFontInfo::DefaultFamily ||
 				fontInfo.family == UFontInfo::SansSerif ||
 				fontInfo.family == UFontInfo::Decorative) {
@@ -268,6 +268,8 @@ public:
 			ret.family = UFontInfo::MonoSpaced;
 			ret.pointSize = 8;
 		}
+		ret.style = UFontInfo::Plain;
+		ret.encoding = UFontInfo::Encoding_ISO8859_1;
 		return ret;
 	}
 	virtual std::vector<UFontInfo> listFonts(const UFontInfo & fontInfo) {

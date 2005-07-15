@@ -32,15 +32,20 @@
 
 namespace ufo {
 
-/** Warning: Experimental; not all features are implemented.
-  * @short This class provides basic desktop features like frame decorations,
+class UInternalFrame;
+class UDockWidget;
+
+/** @short This class provides basic desktop features like frame decorations,
   *  minimizing and maximizing.
+  * @ingroup internal
+  *
+  * Warning: Experimental; not all features are implemented.
   *
   * @author Johannes Schmidt
   */
 
 class UFO_EXPORT UDesktopPane : public ULayeredPane {
-	UFO_DECLARE_DYNAMIC_CLASS(UDesktopPane)
+	UFO_DECLARE_CLASS(UDesktopPane)
 public:
 	UDesktopPane();
 	virtual ~UDesktopPane();
@@ -48,37 +53,54 @@ public:
 public:
 	/** Adds the widget to this desktop pane and installs frame decorations.
 	  */
-	virtual void addFrame(UWidget * w);
+	virtual void addFrame(UInternalFrame * frame);
 	/** Removes this frame from this desktop pane (if it is a child) and
 	  * uninstalls frame decorations.
 	  */
-	virtual UWidget * removeFrame(UWidget * w);
+	virtual bool removeFrame(UInternalFrame * frame);
 
 	/** Resizes the frame to cover the whole desktop.
 	  */
-	virtual void maximize(UWidget * w);
-	virtual bool isMaximized(UWidget * w);
-	/** Iconifies the frame to cover the whole desktop. */
-	virtual void minimize(UWidget * w);
-	virtual bool isMinimized(UWidget * w);
+	virtual void maximize(UInternalFrame * frame);
+	virtual bool isMaximized(UInternalFrame * frame);
+	/** Iconifies the frame. */
+	virtual void minimize(UInternalFrame * frame);
+	virtual bool isMinimized(UInternalFrame * frame);
 	/** Restores a previously maximized or minimized frame. */
-	virtual void restore(UWidget * w);
+	virtual void restore(UInternalFrame * frame);
 	/** Closes the given frame. This basically removes the widget from
 	  * the desktop pane.
 	  */
-	virtual void close(UWidget * w);
+	virtual void close(UInternalFrame * frame);
+
+	virtual void raise(UInternalFrame * frame);
+	virtual void lower(UInternalFrame * frame);
+	virtual bool isActive(UInternalFrame * frame);
 
 	/** */
-	virtual void setTitle(UWidget * w, const std::string & title);
-	virtual std::string getTitle(UWidget * w);
+	virtual void setTitle(UInternalFrame * frame, const std::string & title);
+	virtual std::string getTitle(UInternalFrame * frame);
+
+	virtual void addDockWidget(UDockWidget * w, DockWidgetArea area);
+	virtual void removeDockWidget(UDockWidget * w);
+
+	virtual void dragDockWidget(UDockWidget * w, const UPoint & pos);
+	virtual void dropDockWidget(UDockWidget * w, const UPoint & pos);
+
+	virtual UInsets getContentsInsets() const;
 
 protected: // Protected methods
-	/** @return The frame widget for the given desktop window or NULL. */
-	virtual UWidget * getFrame(UWidget * w) const;
 	virtual void eventListener(UEvent * e);
+	void moveDockWidget(UDockWidget * w, DockWidgetArea newArea);
 protected: // Overrides UWidget
-	virtual void addedToHierarchy();
-	virtual void removedFromHierarchy();
+	virtual void validateSelf();
+	virtual void processWidgetEvent(UWidgetEvent * e);
+	virtual UDimension getContentsSize(const UDimension & maxSize) const;
+private:
+	UWidget * m_topDock;
+	UWidget * m_leftDock;
+	UWidget * m_bottomDock;
+	UWidget * m_rightDock;
 };
 
 } // namespace ufo

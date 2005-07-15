@@ -8,12 +8,15 @@ INCLUDES = -I$(top_srcdir)/ufo/include -I$(top_srcdir)/bogl $(all_includes)
 noinst_LTLIBRARIES = libwidgets.la
 
 libwidgets_la_SOURCES = \
+	uabstractslider.cpp \
 	ubutton.cpp \
 	ucheckbox.cpp \
 	ucheckboxmenuitem.cpp \
 	ucombobox.cpp \
 	ucompound.cpp \
 	udesktoppane.cpp \
+	udockwidget.cpp \
+	ugroupbox.cpp \
 	uinternalframe.cpp \
 	uitem.cpp \
 	ulabel.cpp \
@@ -24,6 +27,7 @@ libwidgets_la_SOURCES = \
 	umenubar.cpp \
 	umenuitem.cpp \
 	upopupmenu.cpp \
+	uprogressbar.cpp \
 	uradiobutton.cpp \
 	urootpane.cpp \
 	uscrollablewidget.cpp \
@@ -31,7 +35,9 @@ libwidgets_la_SOURCES = \
 	uscrollpane.cpp \
 	useparator.cpp \
 	uslider.cpp \
+	uspinbox.cpp \
 	utextedit.cpp \
+	utextwidget.cpp \
 	uviewport.cpp \
 	uwidget.cpp
 

@@ -41,7 +41,9 @@ class URootPane;
 class UWidget;
 class UVideoDevice;
 
-/** A platform-independent representation of system windows.
+/** @short A platform-independent representation of system windows.
+  * @ingroup native
+  *
   * Use a UXDisplay object to create frames.
   * Note: You can use LibUFO without using frames.
   * See test/sdl.cpp and test/glut.cpp

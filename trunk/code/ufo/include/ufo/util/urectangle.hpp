@@ -36,7 +36,13 @@
 
 namespace ufo {
 
-/**
+/** @short An abstraction of a rectangle (x, y, width and height).
+  * @ingroup appearance
+  *
+  * This class is not part of the @ref UObject inheritance structure.
+  * Use instead @ref URectangleObject if you need a rectangle derived
+  * from UObject.
+  *
   * @author Johannes Schmidt
   */
 
@@ -47,6 +53,8 @@ public:
 	URectangle(const UPoint & p, const UDimension & d);
 	/** Computes a rectangle between two points. */
 	URectangle(const UPoint & p1, const UPoint & p2);
+	/** Creates a rectangle with locatin 0,0 and the given size. */
+	URectangle(const UDimension & d);
 
 	UPoint getLocation() const;
 	UDimension getSize() const;
@@ -57,7 +65,7 @@ public:
 	/** @return True when the given point pos is inside the rectangle
 	  * or on the edge of the rectangle
 	  */
-	bool contains(const UPoint & pos);
+	bool contains(const UPoint & pos) const;
 
 	/** @return True if the width and height are equal to @p invalid
 	  * @see invalid
@@ -99,8 +107,8 @@ public:
 		const URectangle & src2, URectangle * dest);
 
 public: // Public operators
-	bool operator()() { return !(isEmpty()); }
-	bool operator!() { return isEmpty(); }
+	bool operator()() const { return !(isEmpty()); }
+	bool operator!() const { return isEmpty(); }
 
 
 	/** Moves this rectangle using the coordinates of the given point
@@ -155,6 +163,9 @@ UFO_EXPORT URectangle operator-(const URectangle & rect, const UPoint & p);
 UFO_EXPORT URectangle operator+(const URectangle & rect, const UDimension & dim);
 UFO_EXPORT URectangle operator-(const URectangle & rect, const UDimension & dim);
 
+UFO_EXPORT URectangle operator+(const URectangle & rect, const UInsets & in);
+UFO_EXPORT URectangle operator-(const URectangle & rect, const UInsets & in);
+
 /// Equality
 UFO_EXPORT bool operator==(const URectangle & r1,const URectangle & r2);
 UFO_EXPORT bool operator!=(const URectangle & r1,const URectangle & r2);
@@ -208,6 +219,13 @@ inline URectangle::URectangle(const UPoint & p1, const UPoint & p2) {
 	h = std::abs(p2.y - p1.y);
 }
 
+inline URectangle::URectangle(const UDimension & d)
+	: x(0)
+	, y(0)
+	, w(d.w)
+	, h(d.h)
+{}
+
 
 inline UPoint
 URectangle::getLocation() const {
@@ -255,7 +273,9 @@ URectangle::intersect(const URectangle & rect) {
 	int x2 = std::min(x + w, rect.x + rect.w);
 	int y2 = std::min(y + h, rect.y + rect.h);
 
-	setBounds(x1, y1, x2 - x1, y2 - y1);
+	setBounds(x1, y1, x2 - x1 + 1, y2 - y1 + 1);
+	w = std::max(w, 0);
+	h = std::max(h, 0);
 }
 
 inline void
@@ -265,11 +285,11 @@ URectangle::unite(const URectangle & rect) {
 	int x2 = std::max(x + w, rect.x + rect.w);
 	int y2 = std::max(y + h, rect.y + rect.h);
 
-	setBounds(x1, y1, x2 - x1, x2 - y1);
+	setBounds(x1, y1, x2 - x1 + 1, y2 - y1 + 1);
 }
 
 inline bool
-URectangle::contains(const UPoint & pos) {
+URectangle::contains(const UPoint & pos) const {
 	return (
 		pos.x >= x && pos.x < x + w &&
 		pos.y >= y && pos.y < y + h
@@ -345,8 +365,8 @@ URectangle::operator-=(const UDimension & dim) {
 
 inline URectangle &
 URectangle::operator+=(const UInsets & insets) {
-	x -= insets.top;
-	y -= insets.left;
+	x -= insets.left;
+	y -= insets.top;
 	w += insets.getHorizontal();
 	h += insets.getVertical();
 	return *this;
@@ -354,8 +374,8 @@ URectangle::operator+=(const UInsets & insets) {
 
 inline URectangle &
 URectangle::operator-=(const UInsets & insets) {
-	x += insets.top;
-	y += insets.left;
+	x += insets.left;
+	y += insets.top;
 	w -= insets.getHorizontal();
 	h -= insets.getVertical();
 	return *this;
@@ -376,7 +396,6 @@ inline URectangle operator-(const URectangle & rect, const UPoint & p) {
 	return ret -= p;
 }
 
-
 inline URectangle operator+(const URectangle & rect, const UDimension & dim) {
 	URectangle ret(rect);
 	return ret += dim;
@@ -386,6 +405,17 @@ inline URectangle operator-(const URectangle & rect, const UDimension & dim) {
 	URectangle ret(rect);
 	return ret -= dim;
 }
+
+inline URectangle operator+(const URectangle & rect, const UInsets & in) {
+	URectangle ret(rect);
+	return ret += in;
+}
+
+inline URectangle operator-(const URectangle & rect, const UInsets & in) {
+	URectangle ret(rect);
+	return ret -= in;
+}
+
 
 inline bool operator==(const URectangle & r1,const URectangle & r2) {
 	return ((r1.x == r2.x) &&

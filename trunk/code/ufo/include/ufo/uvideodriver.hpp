@@ -34,9 +34,11 @@ namespace ufo {
 
 class UVideoDevice;
 
-/**
-  * @short The video driver loads all necessary multimedia libraries and
+/** @short The video driver loads all necessary multimedia libraries and
   *  initializes the system to create video devices.
+  * @ingroup windowing
+  * @ingroup native
+  *
   * @see UVideoDevice
   * @author Johannes Schmidt
   */

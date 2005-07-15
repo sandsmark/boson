@@ -30,32 +30,43 @@
 
 #include "ubutton.hpp"
 
-// we need this for proper getUI() overriding
-//#include "../ui/umenuitemui.hpp"
-
 namespace ufo {
 
 class UPopupMenu;
+class UMenu;
+class UMenuItemModel;
 
-/**
-  *@author Johannes Schmidt
+/** @short A menu item.
+  * @ingroup widgets
+  *
+  * @author Johannes Schmidt
   */
 
 class UFO_EXPORT UMenuItem : public UButton {
 	UFO_DECLARE_DYNAMIC_CLASS(UMenuItem)
 	UFO_UI_CLASS(UMenuItemUI)
+private:
+	friend class UMenuManager;
 public:
 	UMenuItem();
 	UMenuItem(UIcon * icon);
 	UMenuItem(const std::string & text, UIcon * icon = NULL);
-/*
-public: // hides | overrides UWidget
-	virtual void setUI(UMenuItemUI * ui);
-	virtual UWidgetUI * getUI() const;
-	virtual void updateUI();
-*/
+
+public: // Public methods
+	/** @return The logical parent which created the popupmenu with this
+	  *  menuitem or NULL if this menu is in the top most menu container
+	  *  (e.g. a menubar or a context popup menu).
+	  */
+	UMenu * getParentMenu() const;
+
 public: // Overrides UWidget
 	virtual void activate();
+	virtual UStyle::ComponentElement getStyleType() const;
+protected:
+	virtual void processMouseEvent(UMouseEvent * e);
+	virtual void processKeyEvent(UKeyEvent * e);
+protected: // Protected methods
+	UMenuItemModel * getMenuItemModel() const;
 };
 
 } // namespace ufo

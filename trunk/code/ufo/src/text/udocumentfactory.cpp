@@ -35,80 +35,6 @@
 using namespace ufo;
 
 UFO_IMPLEMENT_DYNAMIC_CLASS(UDocumentFactory, UObject)
-UFO_IMPLEMENT_ABSTRACT_CLASS(UDocumentFilter, UObject)
-
-class DigitFilter : public UDocumentFilter {
-	UFO_DECLARE_DYNAMIC_CLASS(DigitFilter)
-public:
-	std::string filterText(const std::string & input) {
-		char * filteredText = new char[input.length() + 1];
-		
-		int index = 0;
-		for (std::string::const_iterator iter = input.begin();
-				iter != input.end();
-				iter++) {
-			if (/*std::*/isdigit(*iter)) {
-				filteredText[index++] = *iter;
-			}
-		}
-		filteredText[index] = '\0';
-		
-		std::string ret = filteredText;
-		delete[](filteredText);
-		
-		return ret;
-	}
-};
-UFO_IMPLEMENT_DYNAMIC_CLASS(DigitFilter, UDocumentFilter)
-
-class UCharacterFilter : public UDocumentFilter {
-	UFO_DECLARE_ABSTRACT_CLASS(UCharacterFilter)
-public:
-	UCharacterFilter(const std::string & allowedA) : m_allowed(allowedA) {}
-	
-	std::string filterText(const std::string & input) {
-		char * filteredText = new char[input.length() + 1];
-		
-		int index = 0;
-		for (std::string::const_iterator iter = input.begin();
-				iter != input.end();
-				iter++) {
-			if (m_allowed.find(*iter) != std::string::npos) {
-				filteredText[index++] = *iter;
-			}
-		}
-		filteredText[index] = '\0';
-		
-		std::string ret = filteredText;
-		delete[](filteredText);
-		
-		return ret;
-	}
-private:
-	std::string m_allowed;
-};
-UFO_IMPLEMENT_ABSTRACT_CLASS(UCharacterFilter, UDocumentFilter)
-
-class NewLineFilter : public UDocumentFilter {
-	UFO_DECLARE_DYNAMIC_CLASS(NewLineFilter)
-public:
-	std::string filterText(const std::string & input) {
-		std::string filteredText = input;
-		
-		bool done = false;
-		while (!done) {
-			unsigned long index = filteredText.find('\n');
-			if (index == std::string::npos) {
-				done = true;
-			} else {
-				filteredText.erase(index, 1);
-			}
-		}
-		return filteredText;
-	}
-};
-UFO_IMPLEMENT_DYNAMIC_CLASS(NewLineFilter, UDocumentFilter)
-
 
 
 UDocument *
@@ -122,14 +48,12 @@ UDocumentFactory::createMimeDocument(const std::string & typeA) {
 UDocument *
 UDocumentFactory::createPlainDocument() {
 	UDocument * doc = new UBasicDocument();
-	doc->setDocumentFilter(createNewLineFilter());
 	return doc;
 }
 
 UDocument *
 UDocumentFactory::createDigitDocument() {
 	UDocument * doc = new UBasicDocument();
-	doc->setDocumentFilter(createDigitFilter());
 	return doc;
 }
 
@@ -137,23 +61,22 @@ UDocumentFactory::createDigitDocument() {
 UDocument *
 UDocumentFactory::createSpecialCharDocument(const std::string & allowedCharatersA) {
 	UDocument * doc = new UBasicDocument();
-	doc->setDocumentFilter(new UCharacterFilter(allowedCharatersA));
 	return doc;
 }
 
-
+/*
 UDocumentFilter *
 UDocumentFactory::createNewLineFilter() {
-	static UDocumentFilter * newlineFilter = new NewLineFilter();
-	return newlineFilter;
+	//static UDocumentFilter * newlineFilter = new NewLineFilter();
+	return NULL;//newlineFilter;
 }
 
 UDocumentFilter *
 UDocumentFactory::createDigitFilter() {
-	static UDocumentFilter * digitFilter = new DigitFilter();
-	return digitFilter;
+	//static UDocumentFilter * digitFilter = new DigitFilter();
+	return NULL;//digitFilter;
 }
-
+*/
 /*
 template <class NumT>
 class UNumberDocument : public UBasicDocument {

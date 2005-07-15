@@ -37,7 +37,9 @@ class UWidget;
 class UTextEdit;
 class UDocument;
 
-/** A Caret represents a text cursor within a document.
+/** @short A Caret represents a text cursor within a document.
+  * @ingroup text
+  *
   * Further it supports basic selection features via a position and a mark
   * handle.
   *
@@ -90,15 +92,15 @@ UCaret::sigPositionChanged() {
 	return m_sigPositionChanged;
 }
 /*
-	// Paints the caret 
+	// Paints the caret
 	virtual void paint();
 
-	// Sets the default blink rate of the cursor. Currently not supported. 
+	// Sets the default blink rate of the cursor. Currently not supported.
 	virtual void setBlinkRate(int blinkRateA);
 	virtual int getBlinkRate() const;
 
 	// @return the text widget which this caret is dedicated to.
-	  
+
 	virtual const UTextEdit * getWidget() const;
 
 	virtual void setVisible(bool v);
@@ -107,7 +109,7 @@ UCaret::sigPositionChanged() {
 protected: // Protected slots
 	void textInserted(UDocument * doc, unsigned int offset, unsigned int length);
 	void textRemoved(UDocument * doc, unsigned int offset, unsigned int length);
-	
+
 protected:
 	int m_position;
 	int m_mark;

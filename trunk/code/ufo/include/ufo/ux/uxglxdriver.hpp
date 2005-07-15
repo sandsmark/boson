@@ -44,6 +44,12 @@ class UVideoPlugin;
 class UPluginBase;
 class USharedLib;
 
+/** @short A video driver which uses GLX to create video devices.
+  * @ingroup internal
+  *
+  * @see UXGLXVideoDevice
+  * @author Johannes Schmidt
+  */
 class UFO_EXPORT UXGLXDriver : public UVideoDriver {
 	UFO_DECLARE_DYNAMIC_CLASS(UXGLXDriver)
 public:
@@ -101,7 +107,11 @@ private: // Private attributes
 	UKeyCode_t m_ODD_keymap[255];
 };
 
-
+/** @short A video device which uses GLX for windowing.
+  * @ingroup internal
+  *
+  * @author Johannes Schmidt
+  */
 class UFO_EXPORT UXGLXDevice : public UVideoDevice {
 	UFO_DECLARE_DYNAMIC_CLASS(UXGLXDevice)
 public:

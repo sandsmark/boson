@@ -30,9 +30,12 @@
 
 namespace ufo {
 
-/** A radio button is a toggle UFO button.
+/** @short A radio button is a toggle UFO button.
+  * @ingroup widgets
+  *
   * If a radio button is "checked", isSelected() returns true.
   * Radio Buttons are usually combined in button groups.
+  *
   * @see UButtonGroup
   *
   * @author Johannes Schmidt
@@ -41,6 +44,7 @@ namespace ufo {
 class UFO_EXPORT URadioButton : public UButton  {
 	UFO_DECLARE_DYNAMIC_CLASS(URadioButton)
 	UFO_UI_CLASS(URadioButtonUI)
+	UFO_STYLE_TYPE(UStyle::CE_RadioButton)
 public:
 	URadioButton();
 	URadioButton(const std::string & text);

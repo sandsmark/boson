@@ -32,118 +32,99 @@ using namespace ufo;
 UFO_IMPLEMENT_DYNAMIC_CLASS(UPalette, UObject)
 
 
-const UPalette UPalette::nullPalette = 
-	UPalette(UColorGroup(), UColorGroup(), UColorGroup());
+UPalette::UPalette()
+{}
 
-UPalette::UPalette(const UColorGroup & active, const UColorGroup & disabled, 
-		const UColorGroup & inactive)
-	: m_active(new UColorGroup(active))
-	, m_inactive(new UColorGroup(inactive))
-	, m_disabled(new UColorGroup(disabled))
+UPalette::UPalette(
+		const UColor & background, const UColor & foreground,
+		const UColor & base, const UColor & text,
+		const UColor & light, const UColor & midLight,
+		const UColor & dark, const UColor & mid,
+		const UColor & highlight, const UColor & highlightedText,
+		const UColor & button, const UColor & buttonText,
+		const UColor & link, const UColor & linkVisited)
 {
+	m_colors[Background] = background;
+	m_colors[Foreground] = foreground;
+	m_colors[Base] = base;
+	m_colors[Text] = text;
+	m_colors[Light] = light;
+	m_colors[MidLight] = midLight;
+	m_colors[Dark] = dark;
+	m_colors[Mid] = mid;
+	m_colors[Highlight] = highlight;
+	m_colors[HighlightedText] = highlightedText;
+	m_colors[Button] = button;
+	m_colors[ButtonText] = buttonText;
+	m_colors[Link] = link;
+	m_colors[LinkVisited] = linkVisited;
+}
+
+UPalette::UPalette(
+		const UColor & background, const UColor & foreground,
+		const UColor & base, const UColor & text,
+		const UColor & highlight, const UColor & highlightedText
+	)
+{
+	m_colors[Background] = background;
+	m_colors[Foreground] = foreground;
+	m_colors[Base] = base;
+	m_colors[Text] = text;
+	m_colors[Light] = background.brighter().brighter();
+	m_colors[MidLight] = background.brighter();
+	m_colors[Dark] = background.darker().darker();
+	m_colors[Mid] = background.darker();
+	m_colors[Highlight] = highlight;
+	m_colors[HighlightedText] = highlightedText;
+	m_colors[Button] = background;
+	m_colors[ButtonText] = foreground;
+	m_colors[Link] = UColor::blue;
+	m_colors[LinkVisited] = UColor::magenta;
 }
 
 UPalette::~UPalette()
 {}
 
-const UColor &
-UPalette::getColor(ColorGroupType group, 
-		UColorGroup::ColorRole role) const {
-	switch (group) {
-		case Active: return m_active->getColor(role);
-			break;
-		case Inactive: return m_inactive->getColor(role);
-			break;
-		case Disabled: return m_disabled->getColor(role);
-			break;
-		default:
-			return m_active->getColor(role);
+void
+UPalette::transcribe(const UPalette & pal) {
+	UPalette defColors;
+	for (int i = 0; i < MaxColorRoles; ++i) {
+		if (pal.m_colors[ColorRole(i)] != defColors.m_colors[ColorRole(i)]) {
+			m_colors[ColorRole(i)] = pal.m_colors[ColorRole(i)];
+		}
 	}
 }
 
 void
-UPalette::setColor(ColorGroupType group, 
-		UColorGroup::ColorRole role, const UColor & color) {
-	detach();
-	switch (group) {
-		case Active: m_active->setColor(role, color);
-			break;
-		case Inactive: m_inactive->setColor(role, color);
-			break;
-		case Disabled: m_disabled->setColor(role, color);
-			break;
-		default:
-			break;
+UPalette::update(const UPalette & pal) {
+	UPalette defColors;
+	for (int i = 0; i < MaxColorRoles; ++i) {
+		if (m_colors[ColorRole(i)] == defColors.m_colors[ColorRole(i)]) {
+			m_colors[ColorRole(i)] = pal.m_colors[ColorRole(i)];
+		}
 	}
-}
-
-void
-UPalette::setColorGroup(ColorGroupType groupType, const UColorGroup & group) {
-	detach();
-	switch (groupType) {
-		case Active:
-			m_active = new UColorGroup(group);
-			break;
-		case Inactive:
-			m_inactive = new UColorGroup(group);
-			break;
-		case Disabled:
-			m_disabled = new UColorGroup(group);
-			break;
-		default:
-			break;
-	}
-}
-
-void
-UPalette::setActive(const UColorGroup & active) {
-	detach();
-	m_active = new UColorGroup(active);
-}
-
-void
-UPalette::setInactive(const UColorGroup & inactive) {
-	detach();
-	m_inactive = new UColorGroup(inactive);
-}
-
-void
-UPalette::setDisabled(const UColorGroup & disabled) {
-	detach();
-	m_disabled = new UColorGroup(disabled);
-}
-
-void
-UPalette::operator=(const UPalette & pal) {
-	m_active = pal.m_active;
-	m_inactive = pal.m_inactive;
-	m_disabled = pal.m_disabled;
 }
 
 bool
 UPalette::operator==(const UPalette & pal) const {
-	return (
-		*m_active == pal.getActive() &&
-		*m_inactive == pal.getInactive() &&
-		*m_disabled == pal.getDisabled()
-	);
-}
-
-void
-UPalette::detach() {
-	if (m_active.refCount() > 1 ||
-		m_inactive.refCount() > 1 ||
-		m_disabled.refCount() > 1
-		) {
-		m_active = new UColorGroup(m_active);
-		m_inactive = new UColorGroup(m_inactive);
-		m_disabled = new UColorGroup(m_disabled);
+	UPalette defColors;
+	for (int i = 0; i < MaxColorRoles; ++i) {
+		if (m_colors[ColorRole(i)] != defColors.m_colors[ColorRole(i)]) {
+			return false;
+		}
 	}
+	return true;
 }
 
-std::ostream & 
+std::ostream &
 UPalette::paramString(std::ostream & os) const {
-	return os << "active: " << *m_active
-	<< "inactive: " << *m_inactive
-	<< "disabled: " << *m_disabled;
+	return os
+	<< "bg = " << (m_colors)[Background]
+	<< "; fg = " << (m_colors)[Foreground]
+	<< "; base = " << (m_colors)[Base]
+	<< "; text = " << (m_colors)[Text]
+	<< "; light = " << (m_colors)[Light]
+	<< "; dark = " << (m_colors)[Dark]
+	<< "; highlight = " << (m_colors)[Highlight]
+	<< "; highlightedText = " << (m_colors)[HighlightedText];
 }

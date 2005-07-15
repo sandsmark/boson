@@ -90,6 +90,8 @@ UViewport::UViewport()
 {
 	setLayout(createLayoutManager());
 	setClipping(true);
+	// FIXME: should this be set via style sheets?
+	setOpaque(false);
 }
 
 void

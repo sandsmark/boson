@@ -32,6 +32,11 @@
 
 namespace ufo {
 
+/** @short Loads a dynamic link library at runtime.
+  * @ingroup plugin
+  *
+  * @author Johannes Schmidt
+  */
 class UFO_EXPORT USharedLib : public UObject {
 	UFO_DECLARE_DYNAMIC_CLASS(USharedLib)
 public: // Public types

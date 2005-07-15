@@ -33,7 +33,8 @@
 namespace ufo {
 
 /**
-  * @short This layout manager lays out all children in one direction: XAxis or YAxis
+  * @short This layout manager lays out all children in horizontal or vertical
+  *  orientation
   *
   * @author Johannes Schmidt
   */
@@ -42,25 +43,35 @@ class UFO_EXPORT UBoxLayout : public ULayoutManager {
 	UFO_DECLARE_DYNAMIC_CLASS(UBoxLayout)
 public:  // Public attributes
 	enum {
-		XAxis,
-		YAxis
+		XAxis = Horizontal,
+		YAxis = Vertical
 	};
 
 public:
+	/** Creates a new box layout which uses the orientation of the container
+	  * widget as orientation. Vertical and horizontal spacing between child
+	  * widgets is 2.
+	  */
 	UBoxLayout();
-	UBoxLayout(int axis);
+	/** Creates a new box layout with the given orientation.
+	  * Vertical and horizontal spacing between child
+	  * widgets is 2.
+	  */
+	UBoxLayout(int orientation);
 	UBoxLayout(int hgap, int vgap);
-	UBoxLayout(int axis, int hgap, int vgap);
+	UBoxLayout(int orientation, int hgap, int vgap);
 	virtual ~UBoxLayout();
 
 public: // Implements ULayoutManager
-	virtual void layoutContainer(const UWidget * parent);
-	virtual UDimension getPreferredLayoutSize(const UWidget * parent,
+	virtual void layoutContainer(const UWidget * container);
+	virtual UDimension getPreferredLayoutSize(const UWidget * container,
 		const UDimension & maxSize) const;
 
+protected: // Protected methods
+	virtual int getTotalFlex(const UWidget * container);
 protected:  // Protected attributes
 	/**  */
-	int m_axis;
+	int m_orientation;
 	/**  horizontal gap between widgets*/
 	int m_hgap;
 	/**  vertical gap between widgets*/

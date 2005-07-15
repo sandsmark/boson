@@ -32,22 +32,25 @@
 
 namespace ufo {
 
-class UContextGroup;
+class UDisplay;
 
-/** An interface for volatile data, i.e. for data which have to be recreated
-  * after an OpenGL context was destroyed and recreated.
+/** @short An interface for volatile data, i.e. for data which have to be recreated
+  *  after an OpenGL context was destroyed and recreated.
+  * @ingroup misc
+  *
+  * @author Johannes Schmidt
   */
 class UVolatileData : public virtual UObject {
 	UFO_DECLARE_ABSTRACT_CLASS(UVolatileData)
 public: // constructor
-	UVolatileData(UContextGroup * group = NULL);
+	UVolatileData(UDisplay * display = NULL);
 
 public: // Public virtual methods
 	virtual void refresh() = 0;
 
 public: // Public methods
 	/** Returns the context group which stores the volatile data. */
-	UContextGroup * getContextGroup() const;
+	UDisplay * getDisplay() const;
 
 	/** Returns true when the volatile data needs a refresh. */
 	bool needsRefresh() const;
@@ -58,12 +61,12 @@ public: // Public methods
 
 protected: // Protected methods
 	/** Sets the context group. */
-	void setContextGroup(UContextGroup * group);
+	void setDisplay(UDisplay * display);
 	/** Updates the time stamp. Should be called at a call to refresh. */
 	void updateRefreshTime();
 
 private: // Private attributes
-	UContextGroup * m_contextGroup;
+	UDisplay * m_display;
 	uint32_t m_refreshTime;
 };
 
@@ -77,9 +80,9 @@ UVolatileData::getLastRefreshTime() const {
 	return m_refreshTime;
 }
 
-inline UContextGroup *
-UVolatileData::getContextGroup() const {
-	return m_contextGroup;
+inline UDisplay *
+UVolatileData::getDisplay() const {
+	return m_display;
 }
 
 } // namespace ufo

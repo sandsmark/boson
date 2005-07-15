@@ -56,11 +56,14 @@ UXFrame::UXFrame(UVideoDevice * device)
 {
 	m_videoDevice->sigMoved().connect(slot(*this, &UXFrame::deviceMoved));
 	m_videoDevice->sigResized().connect(slot(*this, &UXFrame::deviceResized));
+	openContext();
+	UToolkit::getToolkit()->makeContextCurrent(NULL);
 }
 
 UXFrame::~UXFrame() {
 	setVisible(false);
 	delete (m_videoDevice);
+	closeContext();
 	//UXApp::getInstance()->unregisterFrame(this);
 }
 
@@ -71,12 +74,10 @@ UXFrame::setVisible(bool vis) {
 	}
 	if (vis) {
 		m_videoDevice->show();
-		openContext();
 		m_isVisible = true;
 	} else {
 		m_isVisible = false;
 		m_videoDevice->hide();
-		closeContext();
 	}
 }
 
@@ -108,14 +109,15 @@ UXFrame::pack() {
 void
 UXFrame::repaint(bool force) {
 	if (m_isVisible) {
-		m_videoDevice->makeContextCurrent();
+		//m_videoDevice->makeContextCurrent();
 		if (force || m_context->needsRepaint()) {
+			UToolkit::getToolkit()->makeContextCurrent(m_context);
 			//m_context->getRootPane()->repaint();
-			m_context->pushAttributes();
+			//m_context->pushAttributes();
 			m_context->repaint();
-			m_context->popAttributes();
+			//m_context->popAttributes();
+			m_videoDevice->swapBuffers();
 		}
-		m_videoDevice->swapBuffers();
 	}
 }
 
@@ -231,6 +233,10 @@ void
 UXFrame::setBounds(int x, int y, int w, int h) {
 	m_videoDevice->setLocation(x, y);
 	m_videoDevice->setSize(w, h);
+
+	m_context->setDeviceBounds(URectangle(x, y, w, h));
+	m_context->setContextBounds(URectangle(0, 0, w, h));
+
 	sigMoved().emit(this);
 	sigResized().emit(this);
 }

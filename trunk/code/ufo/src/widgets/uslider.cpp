@@ -27,131 +27,158 @@
 
 #include "ufo/widgets/uslider.hpp"
 
-#include "ufo/events/umousewheelevent.hpp"
+#include "ufo/events/umouseevent.hpp"
+
+#include "ufo/umodel.hpp"
+#include "ufo/ui/ustylehints.hpp"
 
 using namespace ufo;
 
 
-UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(USlider, UWidget)
+UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(USlider, UAbstractSlider)
 
 
 USlider::USlider()
-	: m_orientation(Horizontal)
-	, m_min(0)
-	, m_max(100)
-	, m_value(0)
-	, m_unitIncrement(1)
-	, m_blockIncrement(10)
+	: UAbstractSlider()
+	, m_mousePress()
+	, m_isDragging(false)
 {
-	setEventState(UEvent::MouseWheel, true);
+	// init sub controls for style
+	getSliderModel()->subControls = UStyle::SubControls(
+		UStyle::SC_SliderHandle | UStyle::SC_SliderGroove
+	);
+	// init active sub controls for style
+	getSliderModel()->activeSubControls = UStyle::SC_None;
 }
+
 USlider::USlider(Orientation orientation)
-	: m_orientation(orientation)
-	, m_min(0)
-	, m_max(100)
-	, m_value(0)
-	, m_unitIncrement(1)
-	, m_blockIncrement(10)
+	: UAbstractSlider()
+	, m_mousePress()
+	, m_isDragging(false)
 {
-	setEventState(UEvent::MouseWheel, true);
+	setOrientation(orientation);
+	// init sub controls for style
+	getSliderModel()->subControls = UStyle::SubControls(
+		UStyle::SC_SliderHandle | UStyle::SC_SliderGroove
+	);
+	// init active sub controls for style
+	getSliderModel()->activeSubControls = UStyle::SC_None;
 }
 
 USlider::USlider(int min, int max, int value)
-	: m_orientation(Horizontal)
-	, m_min(min)
-	, m_max(max)
-	, m_value(value)
-	, m_unitIncrement(1)
-	, m_blockIncrement(10)
+	: UAbstractSlider()
+	, m_mousePress()
+	, m_isDragging(false)
 {
-	setEventState(UEvent::MouseWheel, true);
+	setRange(min, max);
+	setValue(value);
+	// init sub controls for style
+	getSliderModel()->subControls = UStyle::SubControls(
+		UStyle::SC_SliderHandle | UStyle::SC_SliderGroove
+	);
+	// init active sub controls for style
+	getSliderModel()->activeSubControls = UStyle::SC_None;
 }
 
-USlider::USlider(Orientation orientationA, int min, int max, int value)
-	: m_orientation(orientationA)
-	, m_min(min)
-	, m_max(max)
-	, m_value(value)
-	, m_unitIncrement(1)
-	, m_blockIncrement(10)
+USlider::USlider(Orientation orientation, int min, int max, int value)
+	: UAbstractSlider()
+	, m_mousePress()
+	, m_isDragging(false)
 {
-	setEventState(UEvent::MouseWheel, true);
+	setOrientation(orientation);
+	setRange(min, max);
+	setValue(value);
+	// init sub controls for style
+	getSliderModel()->subControls = UStyle::SubControls(
+		UStyle::SC_SliderHandle | UStyle::SC_SliderGroove
+	);
+	// init active sub controls for style
+	getSliderModel()->activeSubControls = UStyle::SC_None;
 }
 
-
-void
-USlider::setMinimum(int min) {
-	m_min = min;
-	if (m_value < m_min) {
-		setValue(m_min);
-	}
-}
-
-void
-USlider::setMaximum(int min) {
-	m_max = min;
-	if (m_value > m_max) {
-		setValue(m_max);
-	}
-}
-
-void
-USlider::setValue(int newValue) {
-	// clamp
-	int value = std::max(m_min, newValue);
-	m_value = std::min(m_max/* - m_visAmount*/, value);
-
-	repaint();
-
-	m_sigValueChanged(this, m_value);
-}
-
-int
-USlider::getValue() const {
-	return m_value;
-}
-
-
-int
-USlider::getUnitIncrement() const {
-	return m_unitIncrement;
-}
-
-void
-USlider::setUnitIncrement(int inc) {
-	m_unitIncrement = inc;
-}
-
-
-int
-USlider::getBlockIncrement() const {
-	return m_blockIncrement;
-}
-
-void
-USlider::setBlockIncrement(int inc) {
-	m_blockIncrement = inc;
-}
-
-/*
-int
-USlider::getMajorTickSpacing() const {
-	return m_majorTickSpacing;
-}
-
-void
-USlider::setMajorTickSpacing(int spacing) {
-	m_majorTickSpacing = spacing;
-}
-*/
-
-void
-USlider::processMouseWheelEvent(UMouseWheelEvent * e) {
-	//Direction dir = (e->getDelta() > 0) ? Up : Down;
-
-	setValue(m_value + e->getWheelRotation() * getUnitIncrement());
-	/*if (dir == Down) {
+UDimension
+USlider::getContentsSize(const UDimension & maxSize) const {
+	if (getStyleHints()->orientation == Vertical) {
+		return UDimension(10, 100);
 	} else {
-		setValue(m_value + e->getWheelRotation());// * getUnitIncrement(dir));
-	}*/
+		return UDimension(100, 10);
+	}
+}
+
+void
+USlider::processMouseEvent(UMouseEvent * e) {
+	switch (e->getType()) {
+		case UEvent::MousePressed: {
+			e->consume();
+			UPoint pos = e->getLocation();
+			URectangle rect = getStyle()->getSubControlBounds(
+				UStyle::CE_Slider, getSize(), getStyleHints(),
+				getModel(), UStyle::SC_SliderHandle
+			);
+			//if (m_rect.contains(pos)) {
+			if (rect.contains(pos)) {
+				// dragging
+				m_isDragging = true;
+				m_mousePress = rect.getLocation() - e->getLocation();
+				getSliderModel()->activeSubControls = UStyle::SC_SliderHandle;
+				repaint();
+			} else {
+				m_isDragging = false;
+				// block scrolling
+				int value = getValue();
+				int delta = 0;
+				if (getOrientation() == Vertical) {
+					if (pos.y <= rect.y) {
+						delta = - getBlockIncrement();//Up)
+					} else {
+						delta = getBlockIncrement();//Down)
+					}
+				} else {
+					if (pos.x <= rect.x) {
+						delta = - getBlockIncrement();//Up)
+					} else {
+						delta = getBlockIncrement();//Down)
+					}
+				}
+				if (delta) {
+					setValue(value + delta);
+				}
+			}
+		}
+		break;
+		case UEvent::MouseReleased:
+			e->consume();
+			getSliderModel()->activeSubControls = UStyle::SC_None;
+			m_isDragging = false;
+			repaint();
+		break;
+		case UEvent::MouseDragged:
+		if (m_isDragging) {
+			e->consume();
+			URectangle rect = getStyle()->getSubControlBounds(
+				UStyle::CE_Slider, getSize(), getStyleHints(),
+				getModel(), UStyle::SC_SliderHandle
+			);
+			UPoint rel(e->getLocation() - rect.getLocation() + m_mousePress);
+
+			float delta;
+			if (getOrientation() == Vertical) {
+				delta = (rel.y *
+					float(getMaximum()) / (getHeight() - rect.h));
+			} else {
+				delta = (rel.x *
+					float(getMaximum()) / (getWidth() - rect.w));
+			}
+			int idelta = 0;
+			// rounding
+			if (delta > 0) {
+				idelta = int(delta + 0.5f);
+			} else {
+				idelta = int(delta - 0.5f);
+			}
+			setValue(getValue() + idelta);
+		}
+		break;
+	}
+
 }

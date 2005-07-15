@@ -82,7 +82,9 @@ UEvent::paramString(std::ostream & os) const {
 #include "ufo/events/uquitevent.hpp"
 #include "ufo/events/urunnableevent.hpp"
 #include "ufo/events/uslotevent.hpp"
+#include "ufo/events/ushortcutevent.hpp"
 
 UFO_IMPLEMENT_ABSTRACT_CLASS(UQuitEvent, UEvent)
 UFO_IMPLEMENT_ABSTRACT_CLASS(URunnableEvent, UEvent)
 UFO_IMPLEMENT_ABSTRACT_CLASS(USlotEvent, URunnableEvent)
+UFO_IMPLEMENT_ABSTRACT_CLASS(UShortcutEvent, UWidgetEvent)

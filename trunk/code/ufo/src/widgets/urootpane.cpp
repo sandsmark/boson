@@ -29,24 +29,40 @@
 
 #include <algorithm>
 
+#include "ufo/layouts/uboxlayout.hpp"
 #include "ufo/widgets/umenubar.hpp"
 
 #include "ufo/widgets/uinternalframe.hpp"
 #include "ufo/widgets/ulayeredpane.hpp"
 #include "ufo/widgets/udesktoppane.hpp"
+#include "ufo/widgets/udockwidget.hpp"
 
 #include "ufo/utoolkit.hpp"
 
 using namespace ufo;
 
 UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(URootPane, UWidget)
-//UFO_IMPLEMENT_DYNAMIC_CLASS(URootPane::URootLayout, ULayoutManager)
+
+namespace ufo {
+class URootLayout : public ULayoutManager {
+public:
+	URootLayout(URootPane * rootPane);
+public: // Implements ULayoutManager
+	virtual UDimension
+	getPreferredLayoutSize(const UWidget * parent, const UDimension & maxSize) const;
+
+	virtual void layoutContainer(const UWidget * parent);
+private:  //Private attributes
+	URootPane * m_rootPane;
+};
+}
 
 URootPane::URootPane()
 	: UWidget()
 	, m_menuBar(NULL)
 	, m_contentPane(NULL)
 	, m_desktopPane(NULL)
+	, m_modalWidget(NULL)
 {
 	m_context = UToolkit::getToolkit()->getCurrentContext();
 
@@ -55,19 +71,19 @@ URootPane::URootPane()
 	setContentPane(createContentPane());
 	setLayout(new URootLayout(this));
 
-	setVisible(false);
+	setVisible(true);
 }
 
 
 void
-URootPane::setMenuBar( UMenuBar * menuBar ) {
-	if (m_menuBar && m_menuBar->getParent() == m_desktopPane) {
-		m_desktopPane->remove(m_menuBar);
+URootPane::setMenuBar(UMenuBar * menuBar) {
+	if (m_menuBar && m_menuBar->getParent() && m_menuBar->getParent()->getParent() == m_desktopPane) {
+		m_desktopPane->removeDockWidget(m_menuBar);
 	}
 	m_menuBar = menuBar;
 
 	if (m_menuBar) {
-		m_desktopPane->add(m_menuBar, ULayeredPane::RootPaneLayer, 0);
+		m_desktopPane->addDockWidget(m_menuBar, TopDockWidgetArea);//, ULayeredPane::RootPaneLayer, 0);
 	}
 }
 
@@ -75,7 +91,6 @@ UMenuBar *
 URootPane::getMenuBar( ) {
 	return m_menuBar;
 }
-
 
 UWidget *
 URootPane::createContentPane() const {
@@ -114,7 +129,7 @@ URootPane::setLayeredPane(ULayeredPane * layeredPane) {
 		if (m_desktopPane && m_desktopPane->getParent() == this) {
 			remove(m_desktopPane);
 		}
-		m_desktopPane = layeredPane;
+		m_desktopPane = dynamic_cast<UDesktopPane*>(layeredPane);
 
 		add(m_desktopPane);
 	}
@@ -152,6 +167,27 @@ URootPane::moveToBack(UInternalFrame * frame) {
 	m_desktopPane->moveToBack(frame);
 }
 
+void
+URootPane::addDockWidget(UDockWidget * w, DockWidgetArea area) {
+	m_desktopPane->addDockWidget(w, area);
+}
+
+void
+URootPane::removeDockWidget(UDockWidget * w) {
+	m_desktopPane->removeDockWidget(w);
+}
+
+
+void
+URootPane::setModalWidget(UWidget * w) {
+	m_modalWidget = w;
+}
+
+UWidget *
+URootPane::getModalWidget() const {
+	return m_modalWidget;
+}
+
 //
 // Overrides UWidget
 //
@@ -168,46 +204,60 @@ URootPane::getRootPane(bool topmost) {
 
 void
 URootPane::addedToHierarchy() {
-	if (m_context) {
-		updateUI();
-	}
 	UWidget::addedToHierarchy();
 }
 
-
+UWidget *
+URootPane::getVisibleWidgetAt(const UPoint & p) const {
+	if (m_modalWidget) {
+		return m_modalWidget->getVisibleWidgetAt(p - m_modalWidget->getRootLocation());
+	}
+	return UWidget::getVisibleWidgetAt(p);
+}
 
 //
 // class URootPane::URootLayout
 //
 
-URootPane::URootLayout::URootLayout(URootPane * rootPane) :
+URootLayout::URootLayout(URootPane * rootPane) :
 m_rootPane(rootPane) {}
 
 UDimension
-URootPane::URootLayout::getPreferredLayoutSize(const UWidget * container,
+URootLayout::getPreferredLayoutSize(const UWidget * container,
 		const UDimension & maxSize) const {
 	UDimension contentDim;
 	UDimension menuDim;
-	const UInsets & in = m_rootPane->getInsets();
-
+/*
 	if (UMenuBar * mbar = m_rootPane->getMenuBar()) {
 		menuDim = mbar->getPreferredSize(maxSize);
+	}
+	if (UWidget * tDock = m_rootPane->m_topDock) {
+		menuDim += tDock->getPreferredSize(maxSize);
 	}
 	if (UWidget * content = m_rootPane->getContentPane()) {
 		contentDim = content->getPreferredSize(maxSize - menuDim);
 	}
 
 	return UDimension(
-		std::max(contentDim.w, menuDim.w) + in.getHorizontal(),
-		contentDim.h + menuDim.h + in.getVertical()
+		std::max(contentDim.w, menuDim.w),
+		contentDim.h + menuDim.h
 	);
+	*/
+	menuDim = m_rootPane->m_desktopPane->getPreferredSize();
+	contentDim = m_rootPane->getContentPane()->getPreferredSize(maxSize - menuDim);
+
+	return menuDim + contentDim;
 }
 
 void
-URootPane::URootLayout::layoutContainer(const UWidget * parent) {
-	const UDimension & dim = parent->getInnerSize();
+URootLayout::layoutContainer(const UWidget * parent) {
+	URectangle rect = parent->getInnerBounds();
 	int top = 0;
 
+	m_rootPane->m_desktopPane->setBounds(rect);
+
+	m_rootPane->getContentPane()->setBounds(rect - m_rootPane->m_desktopPane->getContentsInsets());
+/*
 	if (ULayeredPane * lPane = m_rootPane->getLayeredPane()) {
 		lPane->setBounds(0, 0, dim.w, dim.h);
 	}
@@ -217,7 +267,12 @@ URootPane::URootLayout::layoutContainer(const UWidget * parent) {
 		mbar->setBounds(0, top, dim.w, menuDim.h);
 		top += menuDim.h;
 	}
+	if (UWidget * tDock = m_rootPane->m_topDock) {
+		UDimension menuDim = tDock->getPreferredSize(parent->getSize());
+		tDock->setBounds(0, top, dim.w, menuDim.h);
+		top += menuDim.h;
+	}
 	if (UWidget * content = m_rootPane->getContentPane()) {
 		content->setBounds(0, top, dim.w, dim.h - top);
-	}
+	}*/
 }

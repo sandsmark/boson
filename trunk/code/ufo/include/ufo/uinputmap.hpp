@@ -36,7 +36,9 @@
 
 namespace ufo {
 
-/** An input map stores registered actions for certain key events
+/** @short An input map stores registered actions for certain key events
+  * @ingroup events
+  *
   * It is used by widgets and contexts.
   *
   * @see UContext::getInputMap
@@ -65,7 +67,7 @@ private:
 
 inline void
 UInputMap::put(const UKeyStroke & strokeA, const UActionSlot & listenerA) {
-	m_map.insert(std::pair<UKeyStroke, UActionSlot>(strokeA, listenerA));
+	m_map[strokeA] = listenerA;
 }
 
 inline void

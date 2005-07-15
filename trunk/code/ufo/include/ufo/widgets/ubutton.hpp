@@ -32,13 +32,12 @@
 #include "../events/ukeysym.hpp"
 #include "../ukeystroke.hpp"
 
-// we need this for proper getUI() overriding
-//#include "../ui/ubuttonui.hpp"
-
 namespace ufo {
 class UButtonGroup;
 
-/** The base class for all clickable widgets.
+/** @short The base class for all clickable widgets.
+  * @ingroup widgets
+  *
   * In its basic version, it is a standard push button.
   *
   * @author Johannes Schmidt
@@ -47,26 +46,12 @@ class UButtonGroup;
 class UFO_EXPORT UButton : public UCompound {
 	UFO_DECLARE_DYNAMIC_CLASS(UButton)
 	UFO_UI_CLASS(UButtonUI)
-public:  // Public types
-	enum {
-		RolloverEnabled = 1,
-		Toggable = 2,
-		BorderPainted = 4,
-		Rollover = 8,
-		Pressed = 16,
-		Selected = 32,
-		Armed = 64
-	};
+	UFO_STYLE_TYPE(UStyle::CE_Button)
 public:
 	UButton();
 	UButton(UIcon * icon);
 	UButton(const std::string & text, UIcon * icon = NULL);
-/*
-public: // hides | overrides UWidget
-	void setUI(UButtonUI * ui);
-	UWidgetUI * getUI() const;
-	void updateUI();
-*/
+
 public: // Public methods
 	/** Emulates a mouse click on that button, i.e. shows a pressed button,
 	  * releases it and calls activate.
@@ -99,13 +84,13 @@ public: // Public methods
 	  * This is mainly for visible effects.
 	  * @return true if the button is down
 	  */
-	virtual bool isPressed() const;
+	bool isPressed() const;
 
 	/** Sets whether the button is pressed or not.
 	  * A button is pressed normally by mouse or keyboard.
 	  * @param b If true, the button is pressed
 	  */
-	virtual void setPressed(bool b);
+	void setPressed(bool b);
 
 	/** checks whether rollover effects are enabled
 	  * @return the rollover flag
@@ -119,16 +104,9 @@ public: // Public methods
 
 	/** checks whether rollover effects are taking places, i.e. mouse is over
 	  * button
-	  * @return the state of rollover activities
+	  * @return True of rollover is enabled and the mouse is over this widget
 	  */
-	bool isRollover() const ;
-
-	/** sets whether rollover effects should perform now, i.e. mouse is over
-	  * button
-	  * @param b
-	  * 	if true, the button is painted if the mouse is over the button
-	  */
-	void setRollover(bool b);
+	bool isRollover() const;
 
 	/** if a button is toggable, you change the state by a mouse click
 	  * @return if true, the button is toggable
@@ -170,17 +148,6 @@ public: // Public methods
 	  */
 	UIcon * getRolloverIcon() const;
 
-	/** Sometimes it is unwanted that the border is painted
-	  * (e.g. internal frame closebuttons).
-	  * This affects also the insets returned by getInsets();
-	  */
-	void setBorderPainted(bool b);
-	/**
-	  * @return true if the border of this button should be painted
-	  * @see setBorderPainted
-	  */
-	bool isBorderPainted() const;
-
 	/** Sets the accelerator. If the given key combination is pressed
 	  * and the focused widget does not process it, the button will be
 	  * activated.
@@ -202,38 +169,23 @@ public: // Public methods
 	virtual void activate();
 
 public: // Overrides UWidget
-	virtual UInsets getInsets() const;
 	virtual bool isActive() const;
 
 public: // Overrides UCompound
 	virtual UIcon * getIcon() const;
 	virtual void setText(const std::string & text);
 
-public: // deprecated
-
-	/** Checks whether the button is armed or not
-	  * @return true if the button is armed
-	  */
-	bool isArmed() const ;
-
-	/** Sets whether the button is armed or not
-	  * @param b The new "armed"-state
-	  */
-	void setArmed(bool b);
 
 protected:  // Protected slots
 	void fireActionEvent();
-	void keybindingSlot(UActionEvent * e);
 	/** A slot for the doClick method. */
 	void buttonUp();
 
 protected:  // Overrides UWidget
-	/** First, check if border should be painted
-	  */
-	virtual void paintBorder(UGraphics * g);
-	virtual void addedToHierarchy();
-	virtual void removedFromHierarchy();
-	virtual void processAccelEvent(UKeyEvent * e);
+	virtual UDimension getContentsSize(const UDimension & maxSize) const;
+	virtual void processKeyEvent(UKeyEvent * e);
+	virtual void processMouseEvent(UMouseEvent * e);
+	virtual void processShortcutEvent(UShortcutEvent * e);
 
 private:  // Private attributes
 	/**  the icon which is shown when the icon is pressed */
@@ -241,22 +193,18 @@ private:  // Private attributes
 	/** * the icon which is shown when the mouse is over the button */
 	UIcon * m_rolloverIcon;
 
-	/** */
+	/** A string describing the performed action.
+	  * If not specified, uses this button's text.
+	  */
 	std::string m_actionCommand;
 
-	/** saves all state flags */
-	uint32_t m_flags;
 	UButtonGroup * m_buttonGroup;
 
+	/** */
 	UKeyStroke m_accelerator;
 	int m_acceleratorIndex;
 
 public: // Public signal methods
-	/** deprecated */
-	USignal1<UActionEvent*> & sigButtonClicked() { return m_sigActivated; }
-	/** deprecated */
-	USignal1<UActionEvent*> & sigButtonToggled() { return m_sigActivated; }
-
 	/** This signal is fired when the button has been clicked, toggled etc.
 	  */
 	USignal1<UActionEvent*> & sigActivated() { return m_sigActivated; }

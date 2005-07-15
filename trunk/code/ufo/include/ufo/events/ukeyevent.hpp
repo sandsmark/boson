@@ -33,28 +33,29 @@
 
 namespace ufo {
 
-/**
+/** @short This event is used for keyboard events.
+  * @ingroup events
+  *
   * A key event is used for indicating two types of events:
   *<p>
-  * 1. KEY_PRESSED / KEY_RELEASED Events: Generated whenever a
+  * 1. @p KeyPressed / KeyReleased Events: Generated whenever a
   * key is pressed or release. Only with these events you can get
   * information about keys which do not generate character output.
-  * </p><p>
-  * 2. KEY_TYPED Events: Generated whenever a Unicode character
+  * </p>
+  * <p>
+  * 2. @p KeyTyped Events: Generated whenever a Unicode character
   * is entered. It can be represented by a single key press (e.g. 'u'), but
   * most of the it represents multiple key presses (like shift + 'u' which
   * results in a Unicode character 'U'). Some Keys can´t create Unicode
   * character (like modifiers, action keys, ..) and don´t create KEY_TYPED
   * events.
   * </p>
-  * The key code (returned by getKeyCode()) of KEY_TYPED events return
+  * The key code (returned by getKeyCode()) of @p KeyTyped events return
   * always VK_UNDEFINED. The getKeyChar() returns a valid Unicode character
   * or CHAR_UNDEFINED.
   * <p>
-  * <strong>NOTE:</strong><br>
-  * Do not rely on the UKeyCode_t values of the virtual key constants (VK_*).
-  * These values may change in the future to support a wider range of
-  * keyboards.
+  * <em>Please note:</em>The virtual key constants (UK_*) may change in future
+  *  without any warning.
   * </p>
   *
   * @author Johannes Schmidt

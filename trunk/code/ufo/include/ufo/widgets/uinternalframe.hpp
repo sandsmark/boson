@@ -30,8 +30,6 @@
 
 #include "uwidget.hpp"
 
-// we need this for proper getUI() overriding
-//#include "../ui/uinternalframeui.hpp"
 
 namespace ufo {
 
@@ -39,13 +37,16 @@ class URootPane;
 class ULayeredPane;
 class UDesktopPane;
 
-/** an internal frame, contains a root pane and optional a menubar
+/** @short An internal frame, contains a root pane and optional a menubar
+  * @ingroup widgets
+  *
   * @author Johannes Schmidt
   */
 
 class UFO_EXPORT UInternalFrame : public UWidget {
 	UFO_DECLARE_DYNAMIC_CLASS(UInternalFrame)
 	UFO_UI_CLASS(UInternalFrameUI)
+	UFO_STYLE_TYPE(UStyle::CE_InternalFrame)
 public:
 	/** Creates a closable internal frame. */
 	UInternalFrame();
@@ -64,14 +65,8 @@ public:
 	  */
 	UInternalFrame(const std::string & title, uint32_t frameStyle);
 
-public: // overrides UWidget
-	/** Brings internal frame to front */
-	virtual void setVisible(bool b);
-	/** Returns true if this frame is the top most frame. */
-	virtual bool isActive() const;
-
+	friend class UDesktopPane;
 public: // Public methods
-
 	/** @return The root pane object for this frame
 	  */
 	virtual URootPane * getRootPane() const;
@@ -98,57 +93,51 @@ public: // Public methods
 	FrameStyle getFrameStyle() const;
 	void setFrameStyle(int frameStyle);
 
+	FrameState getFrameState() const;
+	/** Tries to change the frame state. You should check with
+	  * getFrameState whether it was succesful.
+	  */
+	void setFrameState(int frameState);
+
 	/** Maximizes this internal frame to parents root pane size.
-	  * Not yet implemented.
 	  */
 	void maximize();
 	bool isMaximized() const;
 
-	void minimized();
+	void minimize();
 	bool isMinimized() const;
 
-	/** */
+	/** Restores this internal frame to its size before
+	  * maximizing or minimizing or does nothing.
+	  */
 	void restore();
 
 	/** Sets whether this frame is resizable.
-	  * Default is false.
-	  * Not yet implemented.
+	  * Default is false. Not yet implemented
 	  */
 	virtual void setResizable(bool b);
 	bool isResizable() const;
 
-	/** Sets whether this frame is maximizable.
-	  * Default is false.
-	  * Not yet implemented.
-	  */
-	virtual void setMaximizable(bool b);
-	bool isMaximizable() const;
-
-	/** Sets whether this frame is maximizable.
-	  * Default is false.
-	  * Not yet implemented.
-	  */
-	virtual void setMinimizable(bool b);
-	bool isMinimizable() const;
-
-	/** Sets whether this frame is closable.
-	  * Default is false.
-	  * Not yet implemented.
-	  */
-	virtual void setClosable(bool b);
-	bool isClosable() const;
+public: // overrides UWidget
+	/** Returns true if this frame is the top most frame. */
+	virtual bool isActive() const;
+	virtual UDimension getContentsSize(const UDimension & maxSize) const;
+	virtual void processMouseEvent(UMouseEvent * e);
+	virtual void processWidgetEvent(UWidgetEvent * e);
+	virtual void processStateChangeEvent(uint32_t state);
 
 protected: // Protected methods
 	UDesktopPane * getDesktopPane();
 
 protected:  // Protected attributes
-	/** the root pane object
-	  * @see URootPane
-	  */
+	UDesktopPane * m_desktop;
+	/** the root pane object */
 	URootPane * m_rootPane;
 	std::string m_title;
 
 	uint32_t m_frameStyle;
+	uint32_t m_frameState;
+	URectangle m_restoreBounds;
 };
 
 } // namespace ufo

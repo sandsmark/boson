@@ -34,25 +34,32 @@ namespace ufo {
 
 class UImage;
 
-/** An icon which uses a image as source.
+/** @short An icon which uses an image as source.
+  * @ingroup drawing
+  *
   * @author Johannes Schmidt
   */
 
 class UFO_EXPORT UImageIcon : public UIcon  {
 	UFO_DECLARE_DYNAMIC_CLASS(UImageIcon)
 public:
-	UImageIcon(const std::string & fileNameA);
+	/** Creates an image icon with an image using the given file name.
+	  * @param fileName The file name of the desired image
+	  */
+	UImageIcon(const std::string & fileName);
+	/** Creates an icon displaying the given image.
+	  * @param image The image which should be displayed.
+	  */
 	UImageIcon(UImage * image);
 
-	void paintIcon(UGraphics * g, UWidget * widget, int x, int y);
+public: // Implements UIcon
+	virtual void paintIcon(UGraphics * g, const URectangle & rect,
+		const UStyleHints * hints, uint32_t widgetState = 0);
 
-	int getIconWidth() const;
-	int getIconHeight() const;
+	virtual UDimension getIconSize() const;
 
 private:
 	UImage * m_image;
-	int m_width;
-	int m_height;
 };
 
 } // namespace ufo

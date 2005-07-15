@@ -34,13 +34,17 @@ namespace ufo {
 
 class UActionEvent;
 class UKeyEvent;
+class UValidator;
 
-/** A widget for single line input fields.
+/** @short A widget for single line input fields.
+  * @ingroup widgets
+  *
   * @author Johannes Schmidt
   */
 
 class UFO_EXPORT ULineEdit : public UTextEdit {
 	UFO_DECLARE_DYNAMIC_CLASS(ULineEdit)
+	UFO_STYLE_TYPE(UStyle::CE_LineEdit)
 public:
 	/** */
 	ULineEdit();
@@ -50,17 +54,14 @@ public:
 	ULineEdit(const std::string & text);
 
 public: // Public methods
-	//void restrictToAll();
-	/** Allow only integers as input. */
-	//void restrictToInt();
-	/** Allow only doubles as input. */
-	//void restrictToDouble();
-
-	//bool isDoubleInput();
-	//bool isIntInput();
+	void setValidator(const UValidator * val);
+	const UValidator * getValidator() const;
 
 	int getInt() const;
 	double getDouble() const;
+
+	/** If @p text is not empty, the text size is used as preferred size. */
+	void setPrototype(const std::string & text);
 
 public: // Public signals
 	/** This signal is fired when the user pressed Enter or Return. */
@@ -68,9 +69,11 @@ public: // Public signals
 
 protected: // Overrides UTextEdit
 	virtual void processKeyEvent(UKeyEvent * e);
+	virtual UDimension getContentsSize(const UDimension & maxSize) const;
 
 private: // Private attributes
-
+	const UValidator * m_validator;
+	std::string m_prototype;
 
 private: // Private signals
 	USignal1<UActionEvent*> m_sigActivated;

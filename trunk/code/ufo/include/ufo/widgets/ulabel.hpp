@@ -30,30 +30,34 @@
 
 #include "ucompound.hpp"
 
-// we need this for proper getUI() overriding
-//#include "../ui/ulabelui.hpp"
-
 namespace ufo {
 
 class UIcon;
 
-/** A static text field. Can display icons and static text.
+/** @short A short, static, non-wrapping text field used to describe a
+  * nearby control or to display an icon.
+  * @ingroup widgets
+  *
   * @author Johannes Schmidt
   */
 
 class UFO_EXPORT ULabel : public UCompound {
 	UFO_DECLARE_DYNAMIC_CLASS(ULabel)
 	UFO_UI_CLASS(ULabelUI)
+	UFO_STYLE_TYPE(UStyle::CE_Label)
 public:
 	ULabel();
 	ULabel(UIcon * icon);
 	ULabel(const std::string & text, UIcon * icon = NULL);
-/*
-public: // hides | overrides UWidget
-	virtual void setUI(ULabelUI * ui);
-	virtual UWidgetUI * getUI() const;
-	virtual void updateUI();
-*/
+
+	void setBuddy(UWidget * buddy);
+	UWidget * getBuddy() const;
+
+protected:  // Overrides UWidget
+	virtual UDimension getContentsSize(const UDimension & maxSize) const;
+	virtual void processShortcutEvent(UShortcutEvent * e);
+private:
+	UWidget * m_buddy;
 };
 
 } // namespace ufo

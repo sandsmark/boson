@@ -190,28 +190,28 @@ mapSDLModifier(SDLMod mod) {
 	int ret = UMod::NoModifier;
 
 	if (mod & KMOD_LSHIFT) {
-		ret |= UMod::LShift;
+		ret |= UMod::Shift;
 	}
 	if (mod & KMOD_RSHIFT) {
-		ret |= UMod::RShift;
+		ret |= UMod::Shift;
 	}
 	if (mod & KMOD_LCTRL) {
-		ret |= UMod::LCtrl;
+		ret |= UMod::Ctrl;
 	}
 	if (mod & KMOD_RCTRL) {
-		ret |= UMod::RCtrl;
+		ret |= UMod::Ctrl;
 	}
 	if (mod & KMOD_LALT) {
-		ret |= UMod::LAlt;
+		ret |= UMod::Alt;
 	}
 	if (mod & KMOD_RALT) {
-		ret |= UMod::RAlt;
+		ret |= UMod::Alt;
 	}
 	if (mod & KMOD_LMETA) {
-		ret |= UMod::LMeta;
+		ret |= UMod::Meta;
 	}
 	if (mod & KMOD_RMETA) {
-		ret |= UMod::RMeta;
+		ret |= UMod::Meta;
 	}
 	if (mod & KMOD_NUM) {
 		ret |= UMod::Num;
@@ -226,21 +226,18 @@ mapSDLModifier(SDLMod mod) {
 	return UMod_t(ret);
 }
 
-#undef Button1
-#undef Button2
-#undef Button3
 UMod_t
 mapSDLButtonState(int button) {
 	int ret = UMod::NoButton;
 
 	if (button & SDL_BUTTON(1)) {
-		ret |= UMod::Button1;
+		ret |= UMod::MouseButton1;
 	}
 	if (button & SDL_BUTTON(2)) {
-		ret |= UMod::Button2;
+		ret |= UMod::MouseButton2;
 	}
 	if (button & SDL_BUTTON(3)) {
-		ret |= UMod::Button3;
+		ret |= UMod::MouseButton3;
 	}
 
 	return UMod_t(ret);
@@ -390,7 +387,8 @@ UXSDLDriver::pushSDLEvents(UXContext * uxcontext, SDL_Event * events, int numEve
 						events[i].resize.w, events[i].resize.h, 0, 0);
 				}
 #if !defined(UFO_GFX_X11)
-				uxcontext->getContextGroup()->refresh();
+				display->pushEvent(new UEvent(this, UEvent::Refresh));
+				//uxcontext->getContextGroup()->refresh();
 #endif
 			}
 			break;
@@ -566,7 +564,7 @@ UXSDLDevice::show() {
 	if (m_frameState & FrameFullScreen) {
 		sdl_flags |= SDL_FULLSCREEN;
 	}
-	if (m_frameState & FrameResizable) {
+	if (m_frameStyle & FrameResizable) {
 		sdl_flags |= SDL_RESIZABLE;
 	}
 
@@ -631,7 +629,7 @@ UXSDLDevice::notify(uint32_t type, int arg1, int arg2, int arg3, int arg4) {
 				// FIXME: throw event?
 			}
 			if (m_frame) {
-				m_frame->getContext()->setContextBounds(URectangle(0, 0, m_size.w, m_size.h));
+				m_frame->getContext()->setContextBounds(m_size);
 			}
 		}
 		break;

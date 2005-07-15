@@ -30,34 +30,23 @@
 
 #include "uwidget.hpp"
 
-// we need this for proper getUI() overriding
-//#include "../ui/useparatorui.hpp"
-
 namespace ufo {
 
-/** A separator for menus, ..
+/** @short A separator for menus, ..
+  * @ingroup widgets
+  *
   * @author Johannes Schmidt
   */
 
 class UFO_EXPORT USeparator : public UWidget {
 	UFO_DECLARE_DYNAMIC_CLASS(USeparator)
 	UFO_UI_CLASS(USeparatorUI)
+	UFO_STYLE_TYPE(UStyle::CE_Separator)
 public:
 	USeparator(Orientation orientation = Horizontal);
-/*
-public: // hides | overrides UWidget
-	virtual void setUI(USeparatorUI * ui);
-	virtual UWidgetUI * getUI() const;
-	virtual void updateUI();
-*/
-public: // Public methods
 
-	Orientation getOrientation() const;
-	void setOrientation(Orientation orientation);
-
-private: // Private attributes
-	/**  */
-	Orientation m_orientation;
+protected: // Public methods
+	virtual UDimension getContentsSize(const UDimension & maxSize) const;
 };
 
 } // namespace ufo

@@ -30,21 +30,43 @@
 
 #include "uobject.hpp"
 
-#include "widgets/uwidget.hpp"
+#include "util/udimension.hpp"
+#include "util/urectangle.hpp"
 
 namespace ufo {
 
-/**abstract class for label and button icons
-  *@author Johannes Schmidt
+class UGraphics;
+class UStyleHints;
+
+/** @short Abstract class for label and button icons
+  * @ingroup drawing
+  *
+  * @author Johannes Schmidt
   */
 
 class UFO_EXPORT UIcon : public UObject {
 	UFO_DECLARE_ABSTRACT_CLASS(UIcon)
 public:
-	virtual void paintIcon(UGraphics * g, UWidget * widget, int x, int y) = 0;
+	/** Paints this icon on the given graphics object.
+	  * If the size of the rectangle is empty or invalid, the actual icon
+	  * size is used. Furthermore, the icon may ignore given sizes.
+	  *
+	  * @param g The graphics object
+	  * @param rect The rectangle
+	  * @param hints Style hints which may be used to paint the icon
+	  * @param widgetState state flags
+	  */
+	virtual void paintIcon(UGraphics * g, const URectangle & rect,
+		const UStyleHints * hints, uint32_t widgetState = 0) = 0;
 
-	virtual int getIconWidth() const = 0;
-	virtual int getIconHeight() const = 0;
+	/** @overload */
+	void paintIcon(UGraphics * g, int x, int y,
+		const UStyleHints * hints, uint32_t widgetState = 0) {
+		paintIcon(g, URectangle(UPoint(x, y), getIconSize()), hints, widgetState);
+	}
+
+	/** @return The actual icon size */
+	virtual UDimension getIconSize() const = 0;
 };
 
 } // namespace ufo

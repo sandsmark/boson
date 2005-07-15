@@ -27,99 +27,40 @@
 
 #include "ufo/widgets/uscrollbar.hpp"
 
-#include "ufo/events/umousewheelevent.hpp"
+#include "ufo/events/umouseevent.hpp"
 
-//#include "ufo/ui/uuimanager.hpp"
+#include "ufo/umodel.hpp"
+#include "ufo/ui/ustylehints.hpp"
 
 using namespace ufo;
 
-UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(UScrollBar, UWidget)
+UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(UScrollBar, UAbstractSlider)
 
-UScrollBar::UScrollBar(Orientation orientationA,
+UScrollBar::UScrollBar(Orientation orientation,
 		int valueA, int visAmountA ,
 		int minA, int maxA)
-	: m_orientation(orientationA)
-	, m_value(valueA)
+	: UAbstractSlider()
 	, m_visAmount(visAmountA)
-	, m_minValue(minA)
-	, m_maxValue(maxA)
-	, m_unitIncrement(1)
-	, m_blockIncrement(10)
+	, m_mousePress()
+	, m_isDragging(false)
 {
-	setEventState(UEvent::MouseWheel, true);
-}
-
-//*
-//* hides | overrides UWidget
-//*
-/*
-void
-UScrollBar::setUI(UScrollBarUI * ui) {
-	UWidget::setUI(ui);
-}
-
-UWidgetUI *
-UScrollBar::getUI() const {
-	return static_cast<UScrollBarUI*>(UWidget::getUI());
-}
-
-void
-UScrollBar::updateUI() {
-	setUI(static_cast<UScrollBarUI*>(getUIManager()->getUI(this)));
-}
-*/
-//*
-//* public methods
-//*
-
-
-
-Orientation
-UScrollBar::getOrientation() const {
-	return m_orientation;
-}
-
-int
-UScrollBar::getValue() const {
-	return m_value;
-}
-
-void
-UScrollBar::setValue(int newValueA) {
-	// clamp
-	int value = std::max(m_minValue, newValueA);
-	m_value = std::min(m_maxValue - m_visAmount, value);
-
-	m_sigValueChanged(this, m_value);
-}
-
-
-int
-UScrollBar::getMaximum() const {
-	return m_maxValue;
-}
-
-void
-UScrollBar::setMaximum(int maxA) {
-	m_maxValue = maxA;
-	if (m_value > m_maxValue) {
-		setValue(m_maxValue);
+	if (orientation != Horizontal) {
+		setOrientation(orientation);
 	}
+	setCssType("scrollbar");
+	// init sub controls for style
+	getSliderModel()->subControls = UStyle::SubControls(
+		UStyle::SC_ScrollBarSubLine | UStyle::SC_ScrollBarAddLine |
+		UStyle::SC_ScrollBarSubPage | UStyle::SC_ScrollBarAddPage |
+		UStyle::SC_ScrollBarSlider
+	);
+	// init active sub controls for style
+	getSliderModel()->activeSubControls = UStyle::SC_None;
 }
 
-
-int
-UScrollBar::getMinimum() const {
-	return m_minValue;
-}
-
-void
-UScrollBar::setMinimum(int minA) {
-	m_minValue = minA;
-	if (m_value < m_minValue) {
-		setValue(m_minValue);
-	}
-}
+//
+// public methods
+//
 
 
 int
@@ -132,44 +73,88 @@ UScrollBar::setVisibleAmount(int amountA) {
 	m_visAmount = amountA;
 }
 
+//
+// protected methods
+//
 
-int
-UScrollBar::getUnitIncrement(Direction directionA) const {
-	if (directionA == Up) {
-		return - m_unitIncrement;
+UDimension
+UScrollBar::getContentsSize(const UDimension & maxSize) const {
+	if (getStyleHints()->orientation == Horizontal) {
+		return UDimension(32, 16);
 	} else {
-		return m_unitIncrement;
+		return UDimension(16, 32);
 	}
 }
 
 void
-UScrollBar::setUnitIncrement(int incA) {
-	m_unitIncrement = incA;
-}
+UScrollBar::processMouseEvent(UMouseEvent * e) {
+	switch (e->getType()) {
+		case UEvent::MousePressed: {
+			e->consume();
+			UPoint pos = e->getLocation();
+			UStyle::SubControls subctrl = getStyle()->getSubControlAt(
+				UStyle::CE_ScrollBar, getSize(), getStyleHints(),
+				getModel(), e->getLocation()
+			);
+			getSliderModel()->activeSubControls = subctrl;
+			switch (subctrl) {
+				case UStyle::SC_ScrollBarSlider: {
+					URectangle rect = getStyle()->getSubControlBounds(
+						UStyle::CE_ScrollBar, getSize(), getStyleHints(),
+						getModel(), UStyle::SC_ScrollBarSlider
+					);
+					m_isDragging = true;
+					m_mousePress = rect.getLocation() - e->getLocation();
+					repaint();
+				}
+				break;
+				case UStyle::SC_ScrollBarSubLine:
+					setValue(getValue() - getUnitIncrement());
+				break;
+				case UStyle::SC_ScrollBarAddLine:
+					setValue(getValue() + getUnitIncrement());
+				break;
+				case UStyle::SC_ScrollBarSubPage:
+					setValue(getValue() - getBlockIncrement());
+				break;
+				case UStyle::SC_ScrollBarAddPage:
+					setValue(getValue() + getBlockIncrement());
+				break;
+			}
+		}
+		break;
+		case UEvent::MouseReleased:
+			getSliderModel()->activeSubControls = UStyle::SC_None;
+			m_isDragging = false;
+			repaint();
+		break;
+		case UEvent::MouseDragged:
+		if (m_isDragging) {
+			e->consume();
+			URectangle rect = getStyle()->getSubControlBounds(
+				UStyle::CE_ScrollBar, getSize(), getStyleHints(),
+				getModel(), UStyle::SC_ScrollBarSlider
+			);
+			UPoint rel(e->getLocation() - rect.getLocation() + m_mousePress);
 
-
-int
-UScrollBar::getBlockIncrement(Direction directionA) const {
-	if (directionA == Up) {
-		return - m_blockIncrement;
-	} else {
-		return m_blockIncrement;
+			float delta;
+			if (getOrientation() == Vertical) {
+				delta = (rel.y *
+					float(getMaximum()) / (getHeight() - rect.h));
+			} else {
+				delta = (rel.x *
+					float(getMaximum()) / (getWidth() - rect.w));
+			}
+			int idelta = 0;
+			// rounding
+			if (delta > 0) {
+				idelta = int(delta + 0.5f);
+			} else {
+				idelta = int(delta - 0.5f);
+			}
+			setValue(getValue() + idelta);
+		}
+		break;
 	}
-}
 
-void
-UScrollBar::setBlockIncremenet(int incA) {
-	m_blockIncrement = incA;
-}
-
-
-void
-UScrollBar::processMouseWheelEvent(UMouseWheelEvent * e) {
-	Direction dir = (e->getDelta() > 0) ? Up : Down;
-
-	if (dir == Down) {
-		setValue(m_value - e->getWheelRotation() * getUnitIncrement(dir));
-	} else {
-		setValue(m_value + e->getWheelRotation() * getUnitIncrement(dir));
-	}
 }

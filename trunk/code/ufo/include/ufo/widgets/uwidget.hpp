@@ -38,9 +38,9 @@
 //#include "../util/uhashmap.hpp"
 #include "../util/ustring.hpp"
 #include "../util/ucolor.hpp"
-#include "../util/ucolorgroup.hpp"
 #include "../util/upalette.hpp"
 
+#include "../ui/ustyle.hpp"
 
 // headers in events
 #include "../events/uevent.hpp"
@@ -64,6 +64,12 @@ public:                    \
 		return #name; \
 	}
 
+#define UFO_STYLE_TYPE(name) \
+public:                    \
+	virtual UStyle::ComponentElement getStyleType() const { \
+		return name; \
+	}
+
 namespace ufo {
 
 typedef std::map<std::string, UObject*> UPropertiesMap;
@@ -71,7 +77,6 @@ typedef std::map<std::string, UObject*> UPropertiesMap;
 
 // forward declartions
 class UColor;
-class UColorGroup;
 class UFont;
 class UBorder;
 class UUIManager;
@@ -98,9 +103,17 @@ class UKeyEvent;
 class UMouseEvent;
 class UMouseWheelEvent;
 class UPropertyChangeEvent;
+class UShortcutEvent;
 class UWidgetEvent;
 
-/** The base class for all widgets.
+class UStyle;
+class UStyleHints;
+class UStyleManager;
+class UStyleOption;
+class UWidgetModel;
+
+/** @short The base class for all widgets.
+  * @ingroup widgets
   *
   * @author Johannes Schmidt
   */
@@ -108,6 +121,7 @@ class UWidgetEvent;
 class UFO_EXPORT UWidget : public UObject {
 	UFO_DECLARE_DYNAMIC_CLASS(UWidget)
 	UFO_UI_CLASS(UWidgetUI)
+	UFO_STYLE_TYPE(UStyle::CE_Widget)
 private:
 	friend class UWidgetUI;
 
@@ -116,15 +130,6 @@ public:  // Public types
 	enum InputCondition {
 		WhenFocused = 1,
 		WhenAncestorFocused = 2
-	};
-	// for validation process
-	enum Validation {
-		ValidationNone = 0,
-		ValidationLayout = 1,
-		ValidationUI = 2,
-		ValidationUIAttributes = 4, // special flag for reinstalling the UI
-		ValidationAll = ValidationLayout | ValidationUI | ValidationUIAttributes,
-		ValidationLast = 4
 	};
 	enum EventState {
 		NoEvents = 0x0000,
@@ -150,18 +155,25 @@ public:
 	 **/
 	void setBoUfoWidgetDeleter(UCollectable* deleter);
 
-	/** No descriptions */
+	/** @return True if this widget is currently visible on screen
+	  *  (mapped to screen). This means also, that all parent widgets are
+	  *  visible on screen.
+	  */
 	virtual bool isVisible() const;
-	/** mark the widget as visible -- this is the default state.
-	  * If a wiget is not visible, the widget itsself and all of its children
-	  * will not be painted.
+	/** <p>If @p v is true and the parent widget returns true on isVisible,
+	  * maps this widget all child widget to screen.
+	  * If a child widget was hidden with setVisible(false), it remains
+	  * hidden.
+	  * </p><p>
+	  * If @p v is false, this widget and all child widget will disappear
+	  * from screen.</p>
 	  */
 	virtual void setVisible(bool v);
 
 	/** Switches clipping.
 	  * If b is true, you can only draw within the rectangle given by
 	  * the bounds of this widget.
-	  * Default value is no clipping!
+	  * Default value is true for clipping.
 	  */
 	void setClipping(bool b);
 	/** Returns true when clipping is enabled. */
@@ -173,6 +185,9 @@ public:
 	  * input events (mouse, keyboard) and is usually drawn with a different
 	  * colorgroup (e.g. gray).
 	  * Default value is true!
+	  * Calling setEnabled(false) on a widget implicetly disables all
+	  * child widgets. They are reenabled on calling setEnabled(true) on the
+	  * same widget.
 	  */
 	void setEnabled(bool b);
 	/** @return True if this widget if fully opaque (opacity == 1)
@@ -185,13 +200,6 @@ public:
 	  * @see setOpacity
 	  */
 	virtual void setOpaque(bool o);
-	/** Sets the opacity of the widget background.
-	  * 1.0 means fully opaque which is the default.
-	  * This effect might show unwanted result when used with more complex
-	  * widgets or when using a different look and feel.
-	  */
-	virtual void setOpacity(float f);
-	virtual float getOpacity() const;
 
 	/** Returns whether this widget is active.
 	  * Mostly this means that the current widget has mouse focus.
@@ -289,7 +297,8 @@ public:
 	  * It takes the root location and the size of this widget.
 	  */
 	URectangle getRootBounds() const;
-	/** Returns the bounding rectangle which should be used for clipping.
+	/** Returns the bounding rectangle in root coordinates
+	  * which should be used for clipping.
 	  * Takes into account if a parent widget does also clipping.
 	  */
 	URectangle getClipBounds() const;
@@ -355,17 +364,35 @@ public:
 	void repaint();
 
 
-	/** Retrieves a UI object from the UI manager and installs it on this
-	  * widget. Called automatically by validate.
-	  * @see validate
+	/** @return The style manager used to inquire style and style hints. */
+	virtual UStyleManager * getStyleManager() const;
+
+	/** @return The style object used to paint this widget. */
+	UStyle * getStyle() const;
+	/** Explicetly sets the style for this widget.
+	  * It is not recommend to
+	  * use this method directly and to set specific styles for certain
+	  * widgets.
 	  */
-	virtual void updateUI();
-	/** Sets the UI object for this widget.
-	  * @see UWidgetUI
+	void setStyle(UStyle * style);
+	/** @return The style hints object used to paint this widget. */
+	const UStyleHints * getStyleHints() const;
+	/** Explicetly sets the style hints object for this widget. */
+	void setStyleHints(UStyleHints * hints);
+
+	/** Sets the cascading style sheet (CSS) type for this widget.
+	  * This affects only XUL interpreted GUIs-
 	  */
-	virtual void setUI(UWidgetUI * newUI);
-	/** @return The UI object. */
-	virtual UWidgetUI * getUI() const;
+	void setCssType(const std::string & type);
+	/** @return The cascading style sheet (CSS) type for this widget. */
+	std::string getCssType() const;
+	/** Sets the cascading style sheet (CSS) class for this widget.
+	  * This affects GUI with custom style sheets.
+	  * @see UStyleManager::loadStyleSheet
+	  */
+	void setCssClass(const std::string & cssClass);
+	/** @return The cascading style sheet (CSS) class for this widget. */
+	std::string getCssClass() const;
 
 	/** @return The rendering context for this widget,
 	  * may be NULL for invalid widgets.
@@ -381,15 +408,10 @@ public:
 	  */
 	void setContext(UContext * context);
 
-	/** @return the UIManager used to draw this widget,
-	  * may be NULL for invalid widgets.
-	  */
+	/** @deprecated */
 	UUIManager * getUIManager() const;
 
-	/** @obsolete Use instead getContext()->getGraphics()
-	  * @return the Graphics object used to draw this widget,
-	  * may be NULL for invalid widgets.
-	  */
+	/** @deprecated */
 	UGraphics * getGraphics() const;
 
 
@@ -398,12 +420,15 @@ public:
 	//
 
 	//
-	// general palette methods
+	// style hints
 	//
-	/** @return The currently used color group. */
-	const UColorGroup & getColorGroup() const;
-	/** @return the currently used color group type. */
-	UPalette::ColorGroupType getColorGroupType() const;
+	float getOpacity() const;
+	/** Sets the opacity of the widget background.
+	  * 1.0 means fully opaque which is the default.
+	  * This effect might show unwanted result when used with more complex
+	  * widgets or when using a different look and feel.
+	  */
+	virtual void setOpacity(float f);
 
 	/** Sets the palette for this widget. */
 	void setPalette(const UPalette & palette);
@@ -439,22 +464,24 @@ public:
 	/** @return The current back ground or NULL if none was set */
 	UDrawable * getBackground() const;
 
-	/** No descriptions */
-	void setFont(const UFont * font);
-	/** @return The font used for this widget. */
-	const UFont * getFont() const;
+	/** Sets the font style hint. */
+	void setFont(const UFont & font);
+	/** @return The font style hint used for this widget. */
+	const UFont & getFont() const;
 	/** Sets the border hint for the UI object */
-	void setBorder(BorderType borderType);//const UBorder * border);
+	void setBorder(BorderType borderType);
 	/** @return The border type */
 	BorderType getBorder() const;
 
 
-	/** sets an empty margin between widget content and widget border
+	/** Sets an insets style hint used as empty margin between widget content
+	  * and widget border
 	  * @see getMargin
 	  * @see getInsets
 	  */
 	void setMargin(const UInsets & margin);
-	/** sets an empty margin between widget content and widget border
+	/** Sets an insets style hint used as empty margin between widget content
+	  * and widget border
 	  * @see getMargin
 	  * @see getInsets
 	  */
@@ -466,12 +493,66 @@ public:
 	  */
 	const UInsets & getMargin() const;
 
-	/** returns all insets, i.e. insets of a possible border and (?)
-	  * FIXME now what?
+	/** returns all insets, i.e. insets of a possible border and margin
+	  * @see setMargin
 	  */
 	virtual UInsets getInsets() const;
 
 
+	/** Sets a hint about the minimum size for the layout manager. */
+	void setMinimumSize(const UDimension & minimumSize);
+	/** @return The minimum size */
+	UDimension getMinimumSize() const;
+
+	/** Sets an explicit preferred size hint for this widget.
+	  * This size hint is used by the parent's layout manager. If you do
+	  * not use layout managers, use @p setSize or @p setBounds
+	  * A @p preferredSize is equal to @p UDimenion::invalid, this size
+	  * hint is ignored.
+	  * @param preferredSize The size hint used by the parent's layout manager
+	  * @see getPreferredSize
+	  */
+	void setPreferredSize(const UDimension & preferredSize);
+
+	/** Sets the preferred size of the widget. */
+	void setMaximumSize(const UDimension & maximumSize);
+	/**@see setMaximumSize */
+	UDimension getMaximumSize() const;
+
+	/** Sets the style hint for horizontal layouts.
+	  * This influences the lay out of child widgets or visible parts like
+	  * icons and text.
+	  */
+	void setHorizontalAlignment(Alignment alignX);
+	/** @see setHorizontalAlignment */
+	Alignment getHorizontalAlignment() const;
+	/** Sets the vertical alignment of this widget.
+	  * This influences the lay out of child widgets or visible parts like
+	  * icons and text.
+	  */
+	void setVerticalAlignment(Alignment alignY);
+	/** @see setVerticalAlignment */
+	Alignment getVerticalAlignment() const;
+
+	/** Sets the Direction of this widget.
+	  * There are two valid direction: @p LeftToRight and @p RightToLeft.
+	  * This influence the order of child widgets.
+	  * Default value is @p LeftToRight
+	  */
+	void setDirection(Direction dir);
+	/** @see setDirection */
+	Direction getDirection() const;
+	/** Sets the Orientation of this widget.
+	  * @arg Horizontal (default)
+	  * @arg Vetical
+	  */
+	void setOrientation(Orientation orientation);
+	/** @see setOrientation */
+	Orientation getOrientation() const;
+
+	//
+	// generic methods
+	//
 
 	/** @return True if this widget is focused. There can be only one focused
 	  * widget for all UFO contexts.
@@ -479,6 +560,8 @@ public:
 	virtual bool isFocused() const;
 	/** @return True if a child widget is focused. */
 	virtual bool isChildFocused() const;
+	/** @return True if a parent widget is focused. */
+	virtual bool isAncestorFocused() const;
 	/** tries to get input focus.
 	  * @return The old focused widget or NULL
 	  */
@@ -524,7 +607,7 @@ public:
 	  * This is used for pull right menus for normal widgets or
 	  * for menu bar popups
 	  */
-	virtual void setPopupMenu(UPopupMenu * popupMenu);
+	void setPopupMenu(UPopupMenu * popupMenu);
 	/** Returns the popup menu.
 	  */
 	virtual UPopupMenu * getPopupMenu() const;
@@ -637,7 +720,7 @@ public:
 	  */
 	UWidget * getWidgetAt(int x, int y) const;
 	/** @overload */
-	UWidget * getWidgetAt(const UPoint & p) const;
+	virtual UWidget * getWidgetAt(const UPoint & p) const;
 	/** Returns the top most visible child widget at the given position.
 	  * The point should be in the coordinate system of this widget
 	  * @return
@@ -646,7 +729,7 @@ public:
 	  */
 	UWidget * getVisibleWidgetAt(int x, int y) const;
 	/** @overload */
-	UWidget * getVisibleWidgetAt(const UPoint & p) const;
+	virtual UWidget * getVisibleWidgetAt(const UPoint & p) const;
 
 	/** @return The number of child widgets this widget has */
 	unsigned int getWidgetCount() const;
@@ -658,7 +741,7 @@ public:
 
 
 	///
-	/// layout functions and size hints
+	/// layout methods and size methods
 	///
 
 	/** @return The layout manager used by this widget. */
@@ -666,19 +749,6 @@ public:
 	/** Sets the layout manager for this widget. */
 	void setLayout(ULayoutManager * layout);
 
-	/** Sets a hint about the minimum size for the layout manager. */
-	virtual void setMinimumSize(const UDimension & minimumSize);
-	/** @return The minimum size */
-	virtual UDimension getMinimumSize() const;
-
-	/** Sets an explicit preferred size hint for the layout manager of
-	  * the parent widget and overrides the default calculated one.
-	  * If an empty size was given, use the default method to calculate
-	  * the preferred size
-	  * @param preferredSize The size hint used by the parent's layout manager
-	  * @see getPreferredSize
-	  */
-	virtual void setPreferredSize(const UDimension & preferredSize);
 	/** This method returns a size hint used by the layout manager to compute
 	  * desired extensions of widget and to layout child widgets.
 	  * If an explicit preferred size was set, return that one.
@@ -704,11 +774,9 @@ public:
 	  */
 	virtual UDimension getPreferredSize(const UDimension & maxSize) const;
 
-	// deprecated
-	/** Sets the preferred size of the widget. */
-	virtual void setMaximumSize(const UDimension & maximumSize);
-	/**@see setMaximumSize */
-	virtual UDimension getMaximumSize() const;
+	///
+	/// property methods
+	///
 
 	/** puts a property in the local UProperty object
 	  * @param key the string key that should be used to save the value
@@ -738,15 +806,6 @@ public:
 	  */
 	std::string getString(const std::string & key) const;
 
-	/** */
-	void setHorizontalAlignment(Alignment alignX);
-	/** */
-	Alignment getHorizontalAlignment() const;
-	/** */
-	void setVerticalAlignment(Alignment alignY);
-	/** */
-	Alignment getVerticalAlignment() const;
-
 	/** Returns an input map of the given condition.
 	  * You can modify ist data directly, so you do not have to set it as
 	  * input map again.
@@ -774,20 +833,33 @@ public:
 	  */
 	bool isEventEnabled(UEvent::Type type) const;
 
-protected: // Protected Types
-	/** Flags to determine which attributes were set by the user and
-	  * which were set by the UIManager.
+	/** You shouldn't need to call this method!
+	  * It's supposed to be UFO internal.
+	  * @return The widget model.
 	  */
-	enum AttribState {
-		AttribLayout = 0x0001,
-		AttribPalette = 0x0002,
-		AttribFont = 0x0004,
-		AttribBorder = 0x0008,
-		AttribCursor = 0x0010,
-		AttribMargin = 0x0020,
-		AttribTextIconGap = 0x0040,
-		AttribStateLast = 0x0040
-	};
+	const UWidgetModel * getModel() const;
+
+	/** As soon as a widget is visible and focused, all key strokes which are
+	  * equal to the given one fire a shortcut event to this widget.
+	  * It can be processed via processShortcutEvent.
+	  * Every key stroke which match a shortcut fires exactly one shortcut
+	  * event to one widget.
+	  * If more than one widget registered for the same shortcut,
+	  * UShortcutEvent::isAmbiguous() returns true.
+	  * Pressing the stroke again dispatches a newly created event
+	  * to the next listener.
+	  * @see UShortcutEvent::isAmbiguous
+	  * @see processShortcutEvent
+	  */
+	void grabShortcut(const UKeyStroke & stroke);
+	/** Releases a previously grabbed shortcut.
+	  * @see grabShortcut
+	  */
+	void releaseShortcut(const UKeyStroke & stroke);
+	/** Releases all previously grabbed shortcuts.
+	  * @see grabShortcut
+	  */
+	void releaseAllShortcuts();
 
 protected: // Overrides UObject
 	virtual std::ostream & paramString(std::ostream & os) const;
@@ -805,6 +877,7 @@ protected:  // Protected methods
 	  * @see UBorderLayout
 	  */
 	virtual void addImpl(UWidget * w, UObject * constraints, int index);
+	virtual bool removeImpl(std::vector<UWidget*>::iterator iter);
 
 	/** Notifies recursively all childs that they have been added to
 	  * a valid containment hierarchy.
@@ -829,7 +902,7 @@ protected:  // Protected methods
 	virtual void paintChildren(UGraphics * g);
 
 
-	/** Process the event by invoking a apropriate process* functions
+	/** Process the event by invoking a appropriate process* functions
 	  */
 	virtual void processEvent(UEvent * e);
 
@@ -842,21 +915,16 @@ protected:  // Protected methods
 	/** Processes key events. Primarily, it is used to notify listeners.
 	  */
 	virtual void processKeyEvent(UKeyEvent * e);
-	/** This receives @ref UEvent::Accel and @ref UEvent::AccelOverride
-	  * events (see uabstractcontext.cpp for documentation on these).
-	  *
-	  * Accelerators are currently used by @ref UButton only.
-	  *
-	  * AB: I have noidea what @ref processKeyBindings is actually for, so
-	  * this method might be a duplicated method.
-	  **/
-	virtual void processAccelEvent(UKeyEvent * e);
+	virtual void processShortcutEvent(UShortcutEvent * e);
 	/** Processes key events. Primarily, it is used to notify listeners.
 	  */
 	virtual void processFocusEvent(UFocusEvent * e);
 	/** Processes widget events. Primarily, it is used to notify listeners.
 	  */
 	virtual void processWidgetEvent(UWidgetEvent * e);
+
+	virtual void processStyleHintChange(uint32_t styleHint);
+	virtual void processStateChangeEvent(uint32_t state);
 
 
 	/** notifies all property change listeners that a property change was performed
@@ -891,14 +959,24 @@ protected:  // Protected methods
 	  */
 	void resetFocus();
 
+	virtual UDimension getContentsSize(const UDimension & maxSize) const;
+	void detachStyleHints();
+
 protected:  // Protected methods
+	bool testState(uint32_t state) const;
+	void setState(uint32_t state, bool b = true);
+	void setStates(uint32_t states);
+	uint32_t getStates() const;
 
-	/** Marks an attribute to be set by the UI. */
-	void markUIAttribute(uint32_t state);
-	/** marks an attribute not to be set by the UI. */
-	void unmarkUIAttribute(uint32_t state);
-
-	uint32_t getUIAttributesState() const;
+private:
+	/** Recursively shows/hides this and its child widgets if not
+	  * invisibilty forced.
+	  */
+	void setChildrenVisible(bool b);
+	/** Recursively enables/disables this and its child widgets if not
+	  * a disabled state is forced.
+	  */
+	void setChildrenEnabled(bool b);
 
 protected:  // Protected static attributes
 	/** The widget with input (keyboard) focus */
@@ -908,13 +986,11 @@ protected:  // Protected static attributes
 	/** The dragged widget (currentyl not used) */
 	static UWidget * sm_dragWidget;
 
-
 protected:  // Protected attributes
 	/** this is the context at which the widget is currently registered */
 	UContext * m_context;
 
-	/**  FIXME: does this have to be protected? */
-	UWidgetUI * m_ui;
+	UWidgetModel * m_model;
 
 private:  // Private attributes
 	//
@@ -922,32 +998,31 @@ private:  // Private attributes
 	//
 
 	/** state of visibility */
-	uint16_t m_isVisible: 1;
+	uint32_t m_isVisible: 1;
 	/** True if clipping is enabled. */
-	uint16_t m_hasClipping: 1;
+	uint32_t m_hasClipping: 1;
 	/** True if this widget is enabled. */
-	uint16_t m_isEnabled: 1;
+	uint32_t m_isEnabled: 1;
 	/** An opaque widget draws its background */
-	uint16_t m_isOpaque: 1;
+	//uint16_t m_isOpaque: 1;
 	/** True if this widget is focusable. */
-	uint16_t m_isFocusable: 1;
+	uint32_t m_isFocusable: 1;
 	/** True if the top level parent belongs to a UFO context.
 	  * @see isInValidHierarchy()
 	  */
-	uint16_t m_isInValidHierarchy: 1;
+	uint32_t m_isInValidHierarchy: 1;
+	/**  */
+	uint32_t m_hasInvalidLayout : 1;
+	/** Does own an own copy of style hints */
+	uint32_t m_styleHintsDetached : 1;
 
 	//
 	// flags for caching
 	//
-	/** An integer flag for all invalid parts of this widget. */
-	int m_needsValidation;
 	/** A flag for all events which should be processed.
 	  * @see EventState
 	  */
 	uint32_t m_eventState;
-
-	/** Indicates which attributes are set by the user interface classes. */
-	uint32_t m_uiAttributes;
 
 	//
 	// general variables
@@ -966,6 +1041,14 @@ private:  // Private attributes
 	UPopupMenu * m_popupMenu;
 
 	//
+	// style hints
+	//
+	std::string m_cssType;
+	std::string m_cssClass;
+	mutable UStyle * m_style;
+	mutable UStyleHints * m_styleHints;
+
+	//
 	// size hints
 	//
 
@@ -974,35 +1057,7 @@ private:  // Private attributes
 	mutable URectangle m_clipBounds;
 	/** A cache for the root location relative to the top most root pane. */
 	mutable UPoint m_cachedRootLocation;
-	/** Cache for the minimum size */
-	UDimension m_minimumSize;
-	UDimension m_maximumSize;
-	/** Cache for the preferred size */
-	UDimension m_preferredSize;
 	mutable UDimension m_cachedPreferredSize;
-
-	/** the margin between widget content and border */
-	UInsets m_margin;
-
-	// alignment
-	Alignment m_horizontalAlignment;
-	Alignment m_verticalAlignment;
-
-	//
-	// further attributes
-	//
-
-	/** This attribute contains a drawable background. May be NULL */
-	UDrawable * m_bgDrawable;
-
-	/** the font of this widget */
-	const UFont * m_font;
-	/** the border of this widget */
-	BorderType m_border;
-
-	UPalette m_palette;
-
-	float m_opacity;
 
 	/** the background color */
 	//const UColor * m_bgColor;
@@ -1091,10 +1146,10 @@ public: // Public Signals
 	  * (Please note that this signal does <b>not</b> mean that another widget
 	  * was added to this widget).
 	  */
-	USignal1<UWidget*> & sigWidgetAdded();
+	USignal1<UWidgetEvent*> & sigWidgetAdded();
 	/** This signal is fired when this widget has been removed from a parent.
 	  */
-	USignal1<UWidget*> & sigWidgetRemoved();
+	USignal1<UWidgetEvent*> & sigWidgetRemoved();
 
 	// Focus event signals
 	/** This signal is fired when this widget gained input (keyboard) focus. */
@@ -1127,8 +1182,8 @@ private: // Private Signals
 	USignal1<UWidgetEvent*> m_sigWidgetShown;
 	USignal1<UWidgetEvent*> m_sigWidgetHidden;
 
-	USignal1<UWidget*> m_sigWidgetAdded;
-	USignal1<UWidget*> m_sigWidgetRemoved;
+	USignal1<UWidgetEvent*> m_sigWidgetAdded;
+	USignal1<UWidgetEvent*> m_sigWidgetRemoved;
 
 	// focus signals
 	USignal1<UFocusEvent*> m_sigFocusGained;
@@ -1223,11 +1278,11 @@ UWidget::sigWidgetHidden() {
 	setEventState(UEvent::WidgetHidden, true);
 	return m_sigWidgetHidden;
 }
-inline USignal1<UWidget*> &
+inline USignal1<UWidgetEvent*> &
 UWidget::sigWidgetAdded() {
 	return m_sigWidgetAdded;
 }
-inline USignal1<UWidget*> &
+inline USignal1<UWidgetEvent*> &
 UWidget::sigWidgetRemoved() {
 	return m_sigWidgetRemoved;
 }
@@ -1295,10 +1350,7 @@ UWidget::getSize() const {
 inline UDimension
 UWidget::getInnerSize() const {
 	UDimension ret(getSize());
-	const UInsets & in = getInsets();
-	ret.w -= in.getHorizontal();
-	ret.h -= in.getVertical();
-	return ret;
+	return ret - getInsets();
 }
 
 inline void
@@ -1307,13 +1359,8 @@ UWidget::setBounds(const URectangle & b) {
 }
 inline URectangle
 UWidget::getInnerBounds() const {
-	URectangle ret(getBounds());
-	const UInsets & in = getInsets();
-	ret.x = in.left;
-	ret.y = in.top;
-	ret.w -= in.getHorizontal();
-	ret.h -= in.getVertical();
-	return ret;
+	URectangle ret(0, 0, getWidth(), getHeight());
+	return ret - getInsets();
 }
 inline URectangle
 UWidget::getRootBounds() const {

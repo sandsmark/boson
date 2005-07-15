@@ -43,8 +43,11 @@
 #include "ufo/ufocusmanager.hpp"
 #include "ufo/urepaintmanager.hpp"
 
-#include "ufo/ui/uuimanager.hpp"
-#include "ufo/ui/uwidgetui.hpp"
+//#include "ufo/ui/uuimanager.hpp"
+//#include "ufo/ui/uwidgetui.hpp"
+#include "ufo/ui/ustylemanager.hpp"
+#include "ufo/ui/ustyle.hpp"
+#include "ufo/ui/ustylehints.hpp"
 
 #include "ufo/util/uinteger.hpp"
 #include "ufo/util/ustring.hpp"
@@ -63,6 +66,8 @@
 
 #include "ufo/ugraphics.hpp"
 
+#include "ufo/umodel.hpp"
+
 using namespace ufo;
 
 UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(UWidget, UObject)
@@ -73,37 +78,27 @@ UWidget * UWidget::sm_dragWidget = NULL;
 
 UWidget::UWidget()
 	: m_context(NULL)
-	, m_ui(NULL)
+	, m_model(new UWidgetModel())
 	, m_isVisible(false)
 	, m_hasClipping(true)
 	, m_isEnabled(true)
-	, m_isOpaque(true)
 	, m_isFocusable(true)
 	, m_isInValidHierarchy(false)
-	, m_needsValidation(ValidationAll)
-	, m_eventState(0)//MouseEvents | MouseMotionEvents) // FIXME
-	, m_uiAttributes(0xffffffff)
+	, m_hasInvalidLayout(false)
+	, m_eventState(0xffffffff)//MouseEvents | MouseMotionEvents) // FIXME
 	, m_parent(NULL)
 	, m_children()
 	, m_layout(NULL)
 	, m_popupMenu(NULL)
+	, m_cssType("widget")
+	, m_cssClass()
+	, m_style(NULL)
+	, m_styleHints(NULL)
+	, m_styleHintsDetached(false)
 	, m_bounds()
 	, m_clipBounds(URectangle::invalid)
 	, m_cachedRootLocation(UPoint::invalid)
-	, m_minimumSize()
-	, m_maximumSize(UDimension::maxDimension)
-	, m_preferredSize(UDimension::invalid)
 	, m_cachedPreferredSize(UDimension::invalid)
-	, m_margin()
-	, m_horizontalAlignment(AlignLeft)
-	, m_verticalAlignment(AlignCenter)
-	, m_bgDrawable(NULL)
-	, m_font(NULL)
-	, m_border(NoBorder)
-	, m_palette(UPalette::nullPalette)
-	, m_opacity(1.0f)
-	//, m_bgColor(NULL)
-	//, m_fgColor(NULL)
 	, m_properties()
 	, m_inputMap(new UInputMap())
 	, m_ancestorInputMap(new UInputMap())
@@ -116,38 +111,32 @@ UWidget::UWidget()
 	if (UToolkit * tk = UToolkit::getToolkit()) {
 		m_context = tk->getCurrentContext();
 	}
+	m_model->widgetState = 0;
 }
 
 UWidget::UWidget(ULayoutManager * layout)
 	: m_context(NULL)
-	, m_ui(NULL)
+	, m_model(new UWidgetModel())
 	, m_isVisible(false)
 	, m_hasClipping(true)
 	, m_isEnabled(true)
-	, m_isOpaque(true)
 	, m_isFocusable(true)
-	, m_needsValidation(ValidationAll)
-	, m_eventState(0)//MouseEvents | MouseMotionEvents) // FIXME
-	, m_uiAttributes(0xffffffff)
+	, m_isInValidHierarchy(false)
+	, m_hasInvalidLayout(false)
+	, m_eventState(0xffffffff)//MouseEvents | MouseMotionEvents) // FIXME
 	, m_parent(NULL)
 	, m_children()
 	, m_layout(layout)
 	, m_popupMenu(NULL)
+	, m_cssType("widget")
+	, m_cssClass()
+	, m_style(NULL)
+	, m_styleHints(NULL)
+	, m_styleHintsDetached(false)
 	, m_bounds()
 	, m_clipBounds(URectangle::invalid)
 	, m_cachedRootLocation(UPoint::invalid)
-	, m_minimumSize()
-	, m_maximumSize(UDimension::maxDimension)
-	, m_preferredSize(UDimension::invalid)
 	, m_cachedPreferredSize(UDimension::invalid)
-	, m_margin()
-	, m_horizontalAlignment(AlignLeft)
-	, m_verticalAlignment(AlignCenter)
-	, m_bgDrawable(NULL)
-	, m_font(NULL)
-	, m_border(NoBorder)
-	, m_palette(UPalette::nullPalette)
-	, m_opacity(1.0f)
 	, m_properties()
 	, m_inputMap(new UInputMap())
 	, m_ancestorInputMap(new UInputMap())
@@ -160,6 +149,7 @@ UWidget::UWidget(ULayoutManager * layout)
 	if (UToolkit * tk = UToolkit::getToolkit()) {
 		m_context = tk->getCurrentContext();
 	}
+	m_model->widgetState = 0;
 }
 
 UWidget::~UWidget() {
@@ -169,6 +159,7 @@ UWidget::~UWidget() {
 	// BoUfo extension: delete the widget deleter _first_!
 	delete m_boUfoWidgetDeleter;
 
+	releaseAllShortcuts();
 	removeAll();
 	// clear properties
 	for (UPropertiesMap::iterator iter = m_properties.begin();
@@ -179,6 +170,7 @@ UWidget::~UWidget() {
 		}
 	}
 	m_properties.clear();
+	delete (m_model);
 }
 
 void
@@ -189,27 +181,65 @@ UWidget::setBoUfoWidgetDeleter(UCollectable* deleter) {
 
 void
 UWidget::setVisible(bool v) {
-	if (v != m_isVisible) {
-		m_isVisible = v;
-		UEvent::Type type;
-		// reset focus if this widget is focused
-		if (!m_isVisible) {
-			resetFocus();
-			type = UEvent::WidgetHidden;
-		} else {
-			type = UEvent::WidgetShown;
-		}
-		UWidgetEvent * e = new UWidgetEvent(this, type);
-		processWidgetEvent(e);
-
-		invalidate();
-		repaint();
+	if (!v) {
+		setState(WidgetForceInvisible);
+	} else {
+		setState(WidgetForceInvisible, false);
 	}
+	if (v == testState(WidgetVisible)) {
+		return;
+	}
+/*
+	if (v) {
+		m_isVisible = true;
+		UWidgetEvent * e = new UWidgetEvent(this, UEvent::WidgetShown);
+		processWidgetEvent(e);
+	} else {
+		// widget about to hide
+		UWidgetEvent * e = new UWidgetEvent(this, UEvent::WidgetHidden);
+		processWidgetEvent(e);
+		resetFocus();
+		m_isVisible = false;
+	}
+	invalidate();
+	repaint();
+*/
+	if (v && getParent() && !getParent()->isVisible()) {
+		return;
+	}
+	setChildrenVisible(v);
+}
+
+void
+UWidget::setChildrenVisible(bool b) {
+	if (b && testState(WidgetForceInvisible)) {
+		return;
+	}
+	if (b != testState(WidgetVisible)) {
+		if (b) {
+			// show self
+			setState(WidgetVisible);
+			UWidgetEvent * e = new UWidgetEvent(this, UEvent::WidgetShown);
+			processWidgetEvent(e);
+		} else if (!b) {
+			// show self
+			setState(WidgetVisible, false);
+			UWidgetEvent * e = new UWidgetEvent(this, UEvent::WidgetHidden);
+			processWidgetEvent(e);
+		}
+	}
+	for (std::vector<UWidget*>::iterator
+			iter = m_children.begin();
+			iter != m_children.end(); ++iter ) {
+		(*iter)->setChildrenVisible(b);
+	}
+	invalidate();
+	repaint();
 }
 
 bool
 UWidget::isVisible() const {
-	return m_isVisible;
+	return testState(WidgetVisible);//m_isVisible;
 }
 
 void
@@ -225,50 +255,81 @@ UWidget::hasClipping() const {
 
 bool
 UWidget::isEnabled() const {
-	return m_isEnabled;
+	return !testState(WidgetDisabled);//m_isEnabled;
 }
 
 void
 UWidget::setEnabled(bool b) {
-	if (b != m_isEnabled) {
+	/*if (b != m_isEnabled) {
 		m_isEnabled = b;
 		// FIXME: invalidate?
 		repaint();
+	}*/
+	if (!b) {
+		setState(WidgetForceDisabled);
+	} else {
+		setState(WidgetForceDisabled, false);
 	}
+	if (b == isEnabled()) {
+		return;
+	}
+	if (b && getParent() && !getParent()->isEnabled()) {
+		return;
+	}
+	setChildrenEnabled(b);
 }
+void
+UWidget::setChildrenEnabled(bool b) {
+	if (b && testState(WidgetForceDisabled)) {
+		return;
+	}
+	if (b) {
+		// enable
+		setState(WidgetDisabled, false);
+	} else {
+		// disable
+		setState(WidgetDisabled);
+	}
+	for (std::vector<UWidget*>::iterator
+			iter = m_children.begin();
+			iter != m_children.end(); ++iter ) {
+		(*iter)->setChildrenEnabled(b);
+	}
+	invalidate();
+	repaint();
+}
+
 
 void
 UWidget::setOpaque(bool o) {
-	/*if (o != m_isOpaque) {
-		m_isOpaque = o;
-		// FIXME: invalidate?
-		repaint();
-	}*/
-	if (o && (m_opacity != 1.0f)) {
-		m_opacity = 1.0f;
-		repaint();
-	} else if (!o && (m_opacity != 0.0f)) {
-		m_opacity = 0.0f;
-		repaint();
+	if (o) {
+		setOpacity(1.0f);
+	} else {
+		setOpacity(0.0f);
 	}
 }
 bool
 UWidget::isOpaque() const {
-	return (m_opacity == 1.0f);//m_isOpaque;
+	return (getStyleHints()->opacity == 1.0f);//m_isOpaque;
 }
 
 void
-UWidget::setOpacity(float f) {
-	m_opacity = f;
+UWidget::setOpacity(float opacity) {
+	if (getStyleHints()->opacity != opacity) {
+		detachStyleHints();
+		m_styleHints->opacity = opacity;
+		processStyleHintChange(UStyleHints::OpacityHint);
+	}
 }
+
 float
 UWidget::getOpacity() const {
-	return m_opacity;
+	return getStyleHints()->opacity;
 }
 
 bool
 UWidget::isActive() const {
-	return false;//hasMouseFocus();//m_isActive;
+	return false;
 }
 
 bool
@@ -278,53 +339,10 @@ UWidget::isInValidHierarchy() const {
 
 bool
 UWidget::isValid() const {
-	return !(m_needsValidation & ValidationLayout);//== ValidationNone;//m_isValid;
+	return !m_hasInvalidLayout;
 }
 void
 UWidget::validate() {
-/*
-	// assure that this widget has a valid UContext variable
-	if (m_parent) {
-		m_context = m_parent->m_context;
-	}
-	Validation validA = ValidationAll;
-
-#ifdef VALIDATION_DEBUG
-	uDebug() << "validating " << this << " with "
-		<< validA << "; invalid is " << m_needsValidation << "\n";
-#endif
-
-
-	if ((validA & ValidationUI) && (m_needsValidation & ValidationUI)) {
-		updateUI();
-		if (!m_ui) {
-			uError() << "couldn't set UI class for widget " << this << "\n";
-			// FIXME: should we reenable it?
-			//m_needsValidation |= VALIDATION_UI;
-		}
-		m_needsValidation &= ~ValidationUI;
-		m_needsValidation &= ~ValidationUIAttributes;
-	}
-
-	if ((validA & ValidationUIAttributes) &&
-			(m_needsValidation & ValidationUIAttributes)) {
-		if (!m_ui) {
-			updateUI();
-		} else {
-			// FIXME:
-			// uninstall shouldn't be necessary.
-			m_ui->uninstallUI(this);
-			m_ui->installUI(this);
-		}
-		m_needsValidation &= ~ValidationUIAttributes;
-	}
-
-	if ((validA & ValidationLayout) &&
-			(m_needsValidation & ValidationLayout)) {
-		doLayout();
-		m_needsValidation &= ~ValidationLayout;
-	}
-*/
 	validateSelf();
 	for (std::vector<UWidget*>::iterator iter = m_children.begin();
 			iter != m_children.end(); ++iter) {
@@ -334,17 +352,16 @@ UWidget::validate() {
 
 void
 UWidget::validateSelf() {
-	if (//(validA & ValidationLayout) &&
-			(m_needsValidation & ValidationLayout)) {
-		m_needsValidation &= ~ValidationLayout;
+	if (m_hasInvalidLayout) {
+		m_hasInvalidLayout = false;
 		doLayout();
-		m_needsValidation &= ~ValidationLayout;
+		m_hasInvalidLayout = false;
 	}
 }
 
 void
 UWidget::invalidateSelf() {
-	m_needsValidation |= ValidationLayout;
+	m_hasInvalidLayout = true;
 	m_cachedRootLocation = UPoint::invalid;
 	m_cachedPreferredSize = UDimension::invalid;
 	m_clipBounds = URectangle::invalid;
@@ -397,8 +414,8 @@ UWidget::setBounds(int x, int y, int w, int h) {
 		m_bounds.h = h;
 
 		// check for minimum size
-		m_bounds.expand(m_minimumSize);
-		m_bounds.clamp(m_maximumSize);
+		m_bounds.expand(getStyleHints()->minimumSize);
+		m_bounds.clamp(getStyleHints()->maximumSize);
 		UWidgetEvent * e = new UWidgetEvent(this, UWidgetEvent::WidgetResized);
 		processWidgetEvent(e);
 
@@ -457,74 +474,66 @@ UWidget::getRootLocation() const {
 }
 
 
-const UColorGroup &
-UWidget::getColorGroup() const {
-	return m_palette.getColorGroup(getColorGroupType());
-}
-
-UPalette::ColorGroupType
-UWidget::getColorGroupType() const {
-	if (!isEnabled()) {
-		return UPalette::Disabled;
-	} else if (isActive()) {
-		return UPalette::Active;
-	} else {
-		return UPalette::Inactive;
-	}
+const UPalette &
+UWidget::getPalette() const {
+	return getStyleHints()->palette;
 }
 
 void
 UWidget::setPalette(const UPalette & palette) {
-	m_palette = palette;
-	unmarkUIAttribute(AttribPalette);
-}
-
-const UPalette &
-UWidget::getPalette() const {
-	return m_palette;
-}
-
-void
-UWidget::setBackgroundColor(const UColor & col) {
-	if (col != m_palette.getColor(getColorGroupType(), UColorGroup::Background)) {
-		m_palette.setColor(getColorGroupType(), UColorGroup::Background, col);
-		unmarkUIAttribute(AttribPalette);
-		repaint();
+	if (getStyleHints()->palette != palette) {
+		detachStyleHints();
+		m_styleHints->palette = palette;
+		processStyleHintChange(UStyleHints::PaletteHint);
 	}
 }
+
+void
+UWidget::setBackgroundColor(const UColor & background) {
+	if (getStyleHints()->palette.background() != background) {
+		detachStyleHints();
+		m_styleHints->palette.setColor(UPalette::Background, background);
+		processStyleHintChange(UStyleHints::PaletteHint);
+	}
+}
+
 const UColor &
 UWidget::getBackgroundColor() const {
-	return getColorGroup().getColor(UColorGroup::Background);
+	return getStyleHints()->palette.getColor(UPalette::Background);
 }
 
 void
-UWidget::setForegroundColor(const UColor & col) {
-	if (col != m_palette.getColor(getColorGroupType(), UColorGroup::Foreground)) {
-		m_palette.setColor(getColorGroupType(), UColorGroup::Foreground, col);
-		unmarkUIAttribute(AttribPalette);
-		repaint();
+UWidget::setForegroundColor(const UColor & foreground) {
+	if (getStyleHints()->palette.foreground() != foreground) {
+		detachStyleHints();
+		m_styleHints->palette.setColor(UPalette::Foreground, foreground);
+		processStyleHintChange(UStyleHints::PaletteHint);
 	}
 }
 const UColor &
 UWidget::getForegroundColor() const {
-	return getColorGroup().getColor(UColorGroup::Foreground);
+	return getStyleHints()->palette.getColor(UPalette::Foreground);
 }
 
 
 bool
 UWidget::hasBackground() const {
-	return (m_bgDrawable != NULL);
+	return (getStyleHints()->background != NULL);
+	//return (m_bgDrawable != NULL);
 }
 void
-UWidget::setBackground(UDrawable * texA) {
-	m_bgDrawable = texA;
-	invalidate();
-	repaint();
+UWidget::setBackground(UDrawable * background) {
+	if (getStyleHints()->background != background) {
+		detachStyleHints();
+		m_styleHints->background = background;
+		processStyleHintChange(UStyleHints::BackgroundHint);
+	}
 }
 
 UDrawable *
 UWidget::getBackground() const {
-	return m_bgDrawable;
+	return getStyleHints()->background;
+	//return m_bgDrawable;
 }
 
 /** @return current look and feel */
@@ -576,11 +585,16 @@ UWidget::repaint() {
 
 void
 UWidget::paintWidget(UGraphics * g) {
-	if (m_ui) {
-		m_ui->paint(g, this);
+	//if (m_ui) {
+	//	m_ui->paint(g, this);
+	/*
+	if (m_style) {
+		m_style->paint(g, this);
 	} else {
 		uError() << this << " has no ui delegate\n";
 	}
+	*/
+	getStyle()->paintComponent(g, getStyleType(), getSize(), getStyleHints(), getModel(), this);
 }
 
 void
@@ -591,47 +605,101 @@ UWidget::paintBorder(UGraphics * g) {
 		m_border->paintBorder(g, this, 0, 0, //-borderIn.left, -borderIn.top,
 		                     getWidth(), getHeight());
 	}*/
-	if (m_ui) {
+	getStyle()->paintBorder(g, getStyleHints()->border->borderType, getSize(), getStyleHints(), getModel()->widgetState);
+	/*if (m_ui) {
 		m_ui->paintBorder(g, this);
-	}
+	}*/
 }
 
 void
 UWidget::paintChildren(UGraphics * g) {
-	if ( m_children.size() ) {
-		// paint the last added widget first
-		for (std::vector<UWidget*>::reverse_iterator
-				iter = m_children.rbegin();
-				iter != m_children.rend(); ++iter ) {
-			(*iter)->paint(g);
-		}
+	// paint the last added widget first
+	for (std::vector<UWidget*>::reverse_iterator
+			iter = m_children.rbegin();
+			iter != m_children.rend(); ++iter ) {
+		(*iter)->paint(g);
+	}
+}
+
+
+const UWidgetModel *
+UWidget::getModel() const {
+	return m_model;
+}
+
+UStyleManager *
+UWidget::getStyleManager() const {
+	/*if (URootPane * pane = getRootPane(true)) {
+		return pane->getStyleManager();
+	}*/
+	return UToolkit::getToolkit()->getStyleManager();
+}
+
+UStyle *
+UWidget::getStyle() const {
+	if (m_style) {
+		return m_style;
+	}
+	return getStyleManager()->getStyle();
+}
+
+void
+UWidget::setStyle(UStyle * style) {
+	m_style = style;
+}
+
+const UStyleHints *
+UWidget::getStyleHints() const {
+	if (!m_styleHints) {
+		m_styleHints = getStyleManager()->
+			getStyleHints(getCssType(), getCssClass(), getName());
+		(const_cast<UWidget*>(this))->processStyleHintChange(UStyleHints::AllHints);
+	}
+	return m_styleHints;
+}
+
+void
+UWidget::setStyleHints(UStyleHints * hints) {
+	if (m_styleHintsDetached && m_styleHints) {
+		delete (m_styleHints);
+	}
+	m_styleHints = hints;
+	if (hints == NULL) {
+		m_styleHintsDetached = false;
+	} else {
+		m_styleHintsDetached = true;
+	}
+	processStyleHintChange(UStyleHints::AllHints);
+}
+
+void
+UWidget::detachStyleHints() {
+	// ensure style hint
+	getStyleHints();
+	if (!m_styleHintsDetached) {
+		m_styleHints = m_styleHints->clone();
+		m_styleHintsDetached = true;
 	}
 }
 
 void
-UWidget::updateUI() {
-	setUI(getUIManager()->getUI(this));
+UWidget::setCssType(const std::string & type) {
+	m_cssType = type;
+}
+
+std::string
+UWidget::getCssType() const {
+	return m_cssType;
 }
 
 void
-UWidget::setUI(UWidgetUI * newUI) {
-	if (m_ui) {
-		m_ui->uninstallUI(this);
-	}
-
-	UWidgetUI * oldUI = m_ui;
-	m_ui = newUI;
-	if (m_ui) {
-		m_ui->installUI(this);
-	}
-	firePropertyChangeEvent("UI", oldUI, newUI);
-	invalidate();
-	repaint();
+UWidget::setCssClass(const std::string & cssClass) {
+	m_cssClass = cssClass;
 }
 
-UWidgetUI *
-UWidget::getUI() const {
-	return m_ui;
+std::string
+UWidget::getCssClass() const {
+	return m_cssClass;
 }
 
 
@@ -683,72 +751,48 @@ UWidget::getPopupMenu() const {
 
 
 bool
+UWidget::removeImpl(std::vector<UWidget*>::iterator iter) {
+	if (iter != m_children.end()) {
+		(*iter)->setChildrenVisible(false);
+		(*iter)->removedFromHierarchy();
+		(*iter)->m_parent = NULL;
+
+		// remove from mem manager
+		releasePointer((*iter));
+
+		m_children.erase(iter);
+
+		invalidateTree();
+		return true;
+	}
+	return false;
+}
+
+bool
 UWidget::remove(UWidget * w) {
 	std::vector<UWidget*>::iterator iter = std::find(m_children.begin(),
 		m_children.end(), w);
 
-	if (iter != m_children.end()) {
-		w->setVisible(false);
-		w->removedFromHierarchy();
-		m_children.erase(iter);
-
-		w->m_parent = NULL;
-
-		invalidateTree();
-
-		// remove from mem manager
-		releasePointer(w);
-		return true;
-	} else {
-		return false;
-	}
+	return removeImpl(iter);
 }
 
 bool
 UWidget::remove(unsigned int n) {
 	if (m_children.size() > n ) {
-		UWidget * ret = m_children[n];
-		if (ret /* && ret->m_parent == this*/) {
-			ret->setVisible(false);
-			ret->removedFromHierarchy();
-
-			ret->m_parent = NULL;
-
-			m_children.erase( m_children.begin() + n );
-			invalidateTree();
-
-			// remove from mem manager
-			releasePointer(ret);
-
-			return true;
-		}
+		return removeImpl(m_children.begin() + n);
 	}
 	return false;
-
-	//	return (UWidget *) m_children.remove(n);
 }
 
 UWidget *
 UWidget::removeAndReturn(unsigned int n) {
 	if (m_children.size() > n ) {
 		UWidget * ret = m_children[n];
-		if (ret /* && ret->m_parent == this*/) {
-			ret->setVisible(false);
-			ret->removedFromHierarchy();
-
-			ret->m_parent = NULL;
-
-			m_children.erase(m_children.begin() + n);
-			invalidateTree();
-
-			// ensure that ref count doesn't drop below 1
+		if (ret) {
 			ret->reference();
-
-			// remove from mem manager
-			releasePointer(ret);
-
-			return ret;
 		}
+		removeImpl(m_children.begin() + n);
+		return ret;
 	}
 	return NULL;
 }
@@ -757,17 +801,7 @@ unsigned int
 UWidget::removeAll() {
 	unsigned int size = m_children.size();
 
-	for (std::vector<UWidget*>::iterator iter = m_children.begin();
-			iter != m_children.end();
-			++iter ) {
-		(*iter)->setVisible(false);
-		(*iter)->removedFromHierarchy();
-		(*iter)->m_parent = NULL;
-
-		// remove from mem manager
-		releasePointer((*iter));
-	}
-	m_children.clear();
+	while (removeImpl(m_children.begin())) {}
 
 	invalidate();
 	return size;
@@ -850,7 +884,13 @@ UWidget::addImpl(UWidget * w, UObject * constraints, int index) {
 		w->addedToHierarchy();
 	}
 
-	w->m_isVisible = true;
+	//w->m_isVisible = true;
+	if (isVisible()) {
+		w->setChildrenVisible(true);
+	}
+	if (!isEnabled()) {
+		w->setChildrenEnabled(false);
+	}
 
 	repaint();
 }
@@ -865,14 +905,14 @@ UWidget::addedToHierarchy() {
 	// FIXME: top-level root panes do not have parents, but all others should
 	if (getParent()) {
 		m_context = getParent()->m_context;
-		updateUI();
+		//updateUI();
 	}
 	// FIXME: should we check whether the parent is valid?
 	// FIXME: is this the right position to enable?
 	m_isInValidHierarchy = true;
 	// we need to call this signal before validating as some widgets
 	// (e.g. items) need install methods to get attributes like font objects
-	m_sigWidgetAdded(this);
+	processWidgetEvent(new UWidgetEvent(this, UEvent::WidgetAdded));
 
 	for (std::vector<UWidget*>::iterator iter = m_children.begin();
 			iter != m_children.end(); ++iter) {
@@ -888,12 +928,13 @@ UWidget::addedToHierarchy() {
 void
 UWidget::removedFromHierarchy() {
 	m_isInValidHierarchy = false;
+	resetFocus();
 	for (std::vector<UWidget*>::iterator iter = m_children.begin();
 			iter != m_children.end();
 			++iter) {
 		(*iter)->removedFromHierarchy();
 	}
-	m_sigWidgetRemoved(this);
+	processWidgetEvent(new UWidgetEvent(this, UEvent::WidgetRemoved));
 }
 
 
@@ -904,16 +945,16 @@ UWidget::paramString(std::ostream & os) const {
 	os << m_bounds.x << "," << m_bounds.y << ";"
 	<< m_bounds.w << "x" << m_bounds.h;
 
-	if (m_needsValidation & ValidationLayout) {
+	if (m_hasInvalidLayout) {
 		os << ",invalid layout";
 	}
 	//if (m_needsValidation & ValidationUI) {
 	//	os << ",invalid ui";
 	//}
-	if (!m_isVisible) {
+	if (!isVisible()) {
 		os << ",hidden";
 	}
-	if (!m_isEnabled) {
+	if (!isEnabled()) {
 		os << ",disabled";
 	}
 	return os;
@@ -921,17 +962,21 @@ UWidget::paramString(std::ostream & os) const {
 
 
 void
-UWidget::setFont(const UFont * font) {
-	m_font = font;
-	unmarkUIAttribute(AttribFont);
+UWidget::setFont(const UFont & font) {
+	detachStyleHints();
+	m_styleHints->font = font;
+	processStyleHintChange(UStyleHints::FontHint);
+	//m_font = font;
+	//unmarkUIAttribute(AttribFont);
 	invalidate();
 	repaint();
 }
 
-const UFont *
+const UFont &
 UWidget::getFont() const {
+	return getStyleHints()->font;
 	// FIXME
-	return (m_font) ? m_font : NULL;
+	//return (m_font) ? m_font : NULL;
 	       //m_context->getUIManager()->getTheme()->getControlTextFont();
 }
 
@@ -941,15 +986,20 @@ UWidget::setBorder(BorderType borderType) {//const UBorder * border) {
 	/*m_border = border;
 	removeUIAttribute(AttribBorder);
 	repaint();*/
-	m_border = borderType;
-	unmarkUIAttribute(AttribBorder);
+
+	detachStyleHints();
+	m_styleHints->border->borderType = borderType;
+	processStyleHintChange(UStyleHints::BorderHint);
+	//m_border = borderType;
+	//unmarkUIAttribute(AttribBorder);
 	invalidate();
 	repaint();
 }
 
 BorderType
 UWidget::getBorder() const {
-	return m_border;
+	return BorderType(getStyleHints()->border->borderType);
+	//return m_border;
 }
 
 
@@ -957,7 +1007,6 @@ void
 UWidget::setLayout(ULayoutManager * layout) {
 	swapPointers(m_layout, layout);
 	m_layout = layout;
-	unmarkUIAttribute(AttribLayout);
 	invalidate();
 	repaint();
 }
@@ -984,10 +1033,20 @@ bool
 UWidget::isChildFocused() const {
 	// going upwards is much faster
 	// than going downwards from this widget
-	for (UWidget * container = sm_inputFocusWidget;
-			container;
+	for (UWidget * container = sm_inputFocusWidget; container;
 			container = container->m_parent) {
 		if (container == this) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool
+UWidget::isAncestorFocused() const {
+	for (const UWidget * container = this; container;
+			container = container->m_parent) {
+		if (container == sm_inputFocusWidget) {
 			return true;
 		}
 	}
@@ -1077,19 +1136,19 @@ UWidget::getParent() const {
 
 void
 UWidget::setMargin(const UInsets & margin) {
-	m_margin = margin;
+	detachStyleHints();
+	m_styleHints->margin = margin;
+	processStyleHintChange(UStyleHints::MarginHint);
+	//m_margin = margin;
 }
 void
 UWidget::setMargin(int top, int left, int bottom, int right) {
-	m_margin.top = top;
-	m_margin.left = left;
-	m_margin.bottom = bottom;
-	m_margin.right = right;
+	setMargin(UInsets(top, left, bottom, right));
 }
 
 const UInsets &
 UWidget::getMargin() const {
-	return m_margin;
+	return getStyleHints()->margin;
 }
 
 UInsets
@@ -1099,26 +1158,34 @@ UWidget::getInsets() const {
 	} else {
 		return UInsets();
 	}*/
-	if (m_ui) {
+	/*if (m_ui) {
 		return getMargin() + m_ui->getBorderInsets(const_cast<UWidget*>(this));
-	}
-	return getMargin();
+	}*/
+	//return getMargin() + getStyle()->getBorderInsets(getStyleType(), getStyleHints());
+	return getStyle()->getInsets(getStyleType(), getStyleHints(), getModel());
 }
 
 void
 UWidget::dispatchEvent(UEvent * e) {
 	// anything to do?
 	e->reference();
-	if (isEventEnabled(e->getType())) {
+	bool propagate = true;
+	if (isEnabled() && isEventEnabled(e->getType())) {
 		processEvent(e);
-	} else if (m_parent && dynamic_cast<UInputEvent*>(e)) {
-#if 0
-		// AB: events are propagated back to parents by the
-		// abstractcontext now!
-		//e->setSource(m_parent);
-		m_parent->dispatchEvent(e);
-#endif
+		propagate = !e->isConsumed();
 	}
+#if 0
+	if (propagate && m_parent && dynamic_cast<UInputEvent*>(e) &&
+			e->getType() != UEvent::MouseEntered &&
+			e->getType() != UEvent::MouseExited) {
+		// reparent event
+		e->setSource(m_parent);
+		if (UMouseEvent * me = dynamic_cast<UMouseEvent*>(e)) {
+			me->translate(getLocation());
+		}
+		m_parent->dispatchEvent(e);
+	}
+#endif
 	e->unreference();
 }
 
@@ -1130,15 +1197,12 @@ UWidget::processEvent(UEvent * e) {
 	} else if (UMouseWheelEvent * pe = dynamic_cast<UMouseWheelEvent*>(e)) {
 		processMouseWheelEvent(pe);
 	} else if (UKeyEvent * pe = dynamic_cast<UKeyEvent*>(e)) {
-		if (pe->getType() == UEvent::AccelOverride ||
-				pe->getType() == UEvent::Accel) {
-			processAccelEvent(pe);
-			return;
-		}
 		processKeyEvent(pe);
 		UFocusManager::getFocusManager()->processEvent(e);
 	} else if (UFocusEvent * pe = dynamic_cast<UFocusEvent*>(e)) {
 		processFocusEvent(pe);
+	} else if (dynamic_cast<UShortcutEvent*>(e) && isVisible()) {
+		processShortcutEvent(dynamic_cast<UShortcutEvent*>(e));
 	} else if (UWidgetEvent * pe = dynamic_cast<UWidgetEvent*>(e)) {
 		processWidgetEvent(pe);
 	}
@@ -1151,27 +1215,24 @@ UWidget::processMouseEvent(UMouseEvent * e) {
 	switch (e->getType()) {
 		case UEvent::MouseEntered:
 			if (!hasMouseFocus()) {
+				if (sm_mouseFocusWidget) {
+					sm_mouseFocusWidget->setState(WidgetHasMouseFocus, false);
+				}
 				sm_mouseFocusWidget = this;
+				setState(WidgetHasMouseFocus);
 				repaint();
 			}
 		break;
 		case UEvent::MouseExited:
 			if (hasMouseFocus()) {
 				sm_mouseFocusWidget = NULL;
+				setState(WidgetHasMouseFocus, false);
 				repaint();
 			}
 		break;
 		default:
 		break;
 	}
-	/*
-	if (!m_isActive && e->getType() == UEvent::MouseEntered) {
-		m_isActive = true;
-		repaint();
-	} else if (m_isActive && e->getType() == UEvent::MouseExited) {
-		m_isActive = false;
-		repaint();
-	}*/
 	fireMouseEvent(e);
 }
 
@@ -1185,19 +1246,24 @@ UWidget::processKeyEvent(UKeyEvent * e) {
 	fireKeyEvent(e);
 
 	if (e->isConsumed() == false) {
-		processKeyBindings(e);
+		if (processKeyBindings(e)) {
+			e->consume();
+		}
 	}
 }
 
 void
-UWidget::processAccelEvent(UKeyEvent * ) {
-	// the default implementation does nothing.
-	// reimplemented in UButton.
+UWidget::processShortcutEvent(UShortcutEvent * e) {
 }
 
 void
 UWidget::processFocusEvent(UFocusEvent * e) {
 	e->reference();
+	if (e->getType() == UEvent::FocusGained) {
+		setState(WidgetHasFocus);
+	} else {
+		setState(WidgetHasFocus, false);
+	}
 	fireFocusEvent(e);
 	e->unreference();
 }
@@ -1207,6 +1273,16 @@ UWidget::processWidgetEvent(UWidgetEvent * e) {
 	e->reference();
 	fireWidgetEvent(e);
 	e->unreference();
+}
+
+void
+UWidget::processStateChangeEvent(uint32_t state) {
+}
+
+void
+UWidget::processStyleHintChange(uint32_t styleHint) {
+	invalidate();
+	repaint();
 }
 
 bool
@@ -1297,6 +1373,12 @@ UWidget::fireWidgetEvent(UWidgetEvent * e) {
 		case UEvent::WidgetHidden:
 			m_sigWidgetHidden(e);
 			break;
+		case UEvent::WidgetAdded:
+			m_sigWidgetAdded(e);
+			break;
+		case UEvent::WidgetRemoved:
+			m_sigWidgetRemoved(e);
+			break;
 
 		default:
 			break;
@@ -1327,12 +1409,19 @@ UWidget::setIndexOf(UWidget * w, int index) {
 		std::find(m_children.begin(), m_children.end(), w);
 
 	if (pos != m_children.end()) {
+		int old_pos = pos - m_children.begin();
 		m_children.erase(pos);
 		// range checking: if invalid position, push back
 		if (index < 0 || (unsigned int)(index) >= m_children.size()) {
 			m_children.push_back(w);
 		} else {
 			m_children.insert(m_children.begin() + index, w);
+		}
+		int min_pos = std::min(index, old_pos);
+		for (int i = min_pos; i < m_children.size(); ++i) {
+			getWidget(i)->processWidgetEvent(
+				new UWidgetEvent(getWidget(i), UEvent::WidgetZOrderChanged)
+			);
 		}
 		// The child widget might be partially hidden or revealed now
 		repaint();
@@ -1380,7 +1469,7 @@ UWidget::getWidgetAt(const UPoint & p) const {
 
 UWidget *
 UWidget::getVisibleWidgetAt(int x, int y) const {
-	if ( !contains(x, y) || !m_isVisible) {
+	if ( !contains(x, y) || !isVisible()) {
 		return NULL;
 	}
 	UWidget * ret = NULL;
@@ -1426,55 +1515,62 @@ UWidget::getWidgets() {
 ///
 
 void
-UWidget::setMinimumSize(const UDimension & minimumSize ) {
-	m_minimumSize = minimumSize;
-	repaint();
+UWidget::setMinimumSize(const UDimension & minimumSize) {
+	if (getStyleHints()->minimumSize != minimumSize) {
+		detachStyleHints();
+		m_styleHints->minimumSize = minimumSize;
+		processStyleHintChange(UStyleHints::MinimumSizeHint);
+	}
 }
 
 
 UDimension
 UWidget::getMinimumSize() const {
-	return m_minimumSize;
+	return getStyleHints()->minimumSize;
 }
 
 
 void
 UWidget::setPreferredSize(const UDimension & preferredSize) {
-	m_preferredSize = preferredSize;
-	repaint();
+	if (getStyleHints()->preferredSize != preferredSize) {
+		detachStyleHints();
+		m_styleHints->preferredSize = preferredSize;
+		processStyleHintChange(UStyleHints::PreferredSizeHint);
+	}
 }
 
 
 UDimension
 UWidget::getPreferredSize() const {
-	// check whether there is a explicetly requested preferred size
-	if (m_preferredSize.isInvalid() == false) {
-		return m_preferredSize;
+	return getPreferredSize(UDimension::maxDimension);
+	/*// check whether there is a explicetly requested preferred size
+	if (m_styleHints->preferredSize.isInvalid() == false) {
+		return m_styleHints->preferredSize;
 	}
 	// check whether this value is already cached
 	if (m_cachedPreferredSize.isInvalid() == false && isValid()) {
 		return m_cachedPreferredSize;
-	} else if (m_ui) {
+	} else if (m_style) {
 		// query the UI object for a preferred size
-		m_cachedPreferredSize = m_ui->getPreferredSize(this);
+		m_cachedPreferredSize = m_style->getPreferredSize(this, UDimension::invalid);
 	}
 	if (m_cachedPreferredSize.isInvalid() && m_layout) {
 		// try to query the layout manager
 		m_cachedPreferredSize = m_layout->getPreferredLayoutSize(this);
 	}
-	if (m_cachedPreferredSize.isInvalid() && m_bgDrawable) {
+	if (m_cachedPreferredSize.isInvalid() && m_styleHints->background) {
 		// try to query the background drawable
 		// FIXME: Should this value be cached?
 		m_cachedPreferredSize = UDimension(
-			m_bgDrawable->getDrawableWidth(),
-			m_bgDrawable->getDrawableHeight()
+			m_styleHints->background->getDrawableWidth(),
+			m_styleHints->background->getDrawableHeight()
 		);
 	}
 
 	if (m_cachedPreferredSize.isInvalid() == false) {
 		return m_cachedPreferredSize;
 	}
-	return UDimension();
+	return UDimension();*/
 	/*
 	// FIXME: last resort
 	if (getSize().isEmpty()) {
@@ -1486,50 +1582,63 @@ UWidget::getPreferredSize() const {
 
 UDimension
 UWidget::getPreferredSize(const UDimension & maxSize) const {
-	UDimension ret(m_preferredSize);
+	if (maxSize.isEmpty()) {
+		return maxSize;
+	}
+	// make sure that we are valid
+	(const_cast<UWidget*>(this))->validate();
 	// check whether there is a explicetly requested preferred size
-	if (ret.isInvalid() == false) {
+	UDimension ret(getStyleHints()->preferredSize);
+	// check the contents size (layout or custom)
+	if (!ret.isValid()) {
+		ret.clamp(maxSize);
+		ret = getStyle()->getSizeFromContents(
+			getStyleType(),
+			getContentsSize(ret - getInsets()),
+			getStyleHints(),
+			getModel());
+		//ret = getContentsSize(ret - getInsets());
+	}
+	// check background drawable
+	if (!ret.isValid() && getStyleHints()->background) {
+		ret = m_styleHints->background->getDrawableSize();
+	}
+
+	// clamp
+	if (ret.isValid()) {
+		// add margin and border insets
+		//ret += getInsets();
+		// update valid preferred size value (width or height)
+		ret.transcribe(getStyleHints()->preferredSize);
 		ret.clamp(maxSize);
 		return ret;
 	}
-	// this time we do not cache the values
-	if (m_ui) {
-		// query the UI object for a preferred size
-		ret = m_ui->getPreferredSize(this, maxSize);
+	return UDimension();
+}
+
+
+UDimension
+UWidget::getContentsSize(const UDimension & maxSize) const {
+	if (m_layout) {
+		return m_layout->getPreferredLayoutSize(this, maxSize);
 	}
-	if (ret.isInvalid() && m_layout) {
-		// try to query the layout manager
-		ret = m_layout->getPreferredLayoutSize(this, maxSize);
-	}
-	if (ret.isInvalid() && m_bgDrawable) {
-		// try to query the background drawable
-		// FIXME: Should this value be cached?
-		ret = UDimension(
-			m_bgDrawable->getDrawableWidth(),
-			m_bgDrawable->getDrawableHeight()
-		);
-	}
-	ret.clamp(maxSize);
-	return ret;
-	/*
-	if (ret.isEmpty() == false) {
-		ret.clamp(maxSize);
-		return ret;
-	}
-	// FIXME: last resort
-	return UDimension();//getSize();*/
+	return UDimension::invalid;
 }
 
 void
 UWidget::setMaximumSize(const UDimension & maximumSize) {
-	m_maximumSize = maximumSize;
-	repaint();
+	if (getStyleHints()->maximumSize != maximumSize) {
+		detachStyleHints();
+		m_styleHints->maximumSize = maximumSize;
+		processStyleHintChange(UStyleHints::MaximumSizeHint);
+	}
 }
 
 
 UDimension
 UWidget::getMaximumSize() const {
-	return m_maximumSize;
+	return getStyleHints()->maximumSize;
+	//return m_maximumSize;
 }
 
 
@@ -1581,24 +1690,62 @@ UWidget::getString(const std::string & key) const {
 
 
 void
-UWidget::setHorizontalAlignment(Alignment alignX) {
-	m_horizontalAlignment = alignX;
+UWidget::setHorizontalAlignment(Alignment hAlignment) {
+	if (getStyleHints()->hAlignment != hAlignment) {
+		detachStyleHints();
+		m_styleHints->hAlignment = hAlignment;
+		processStyleHintChange(UStyleHints::HAlignmentHint);
+	}
 }
 
 Alignment
 UWidget::getHorizontalAlignment() const {
-	return m_horizontalAlignment;
+	return getStyleHints()->hAlignment;
+	//return m_horizontalAlignment;
 }
 
 
 void
-UWidget::setVerticalAlignment(Alignment alignY) {
-	m_verticalAlignment = alignY;
+UWidget::setVerticalAlignment(Alignment vAlignment) {
+	if (getStyleHints()->vAlignment != vAlignment) {
+		detachStyleHints();
+		m_styleHints->vAlignment = vAlignment;
+		processStyleHintChange(UStyleHints::VAlignmentHint);
+	}
 }
 
 Alignment
 UWidget::getVerticalAlignment() const {
-	return m_verticalAlignment;
+	return getStyleHints()->vAlignment;
+	//return m_verticalAlignment;
+}
+
+void
+UWidget::setDirection(Direction direction) {
+	if (getStyleHints()->direction != direction) {
+		detachStyleHints();
+		m_styleHints->direction = direction;
+		processStyleHintChange(UStyleHints::DirectionHint);
+	}
+}
+
+Direction
+UWidget::getDirection() const {
+	return getStyleHints()->direction;
+}
+
+void
+UWidget::setOrientation(Orientation orientation) {
+	if (getStyleHints()->orientation != orientation) {
+		detachStyleHints();
+		m_styleHints->orientation = orientation;
+		processStyleHintChange(UStyleHints::OrientationHint);
+	}
+}
+
+Orientation
+UWidget::getOrientation() const {
+	return getStyleHints()->orientation;
 }
 
 UInputMap *
@@ -1637,8 +1784,99 @@ UWidget::notifyKeyBindingAction(const UKeyStroke & ks, UKeyEvent * e, InputCondi
 	return false;
 }
 
+
+static std::list<std::pair<UKeyStroke, UWidget*> > ufo_s_shortcuts;
+static int ufo_s_oldIndex = 0;
+static UKeyStroke ufo_s_oldStroke;
+
+void
+UWidget::grabShortcut(const UKeyStroke & stroke) {
+	ufo_s_shortcuts.push_back(std::make_pair(stroke, this));
+}
+
+void
+UWidget::releaseShortcut(const UKeyStroke & stroke) {
+	for (std::list<std::pair<UKeyStroke, UWidget*> >::iterator iter = ufo_s_shortcuts.begin();
+			iter != ufo_s_shortcuts.end();
+			++iter) {
+		if (((*iter).first == stroke) &&
+				((*iter).second == this)) {
+			ufo_s_shortcuts.erase(iter);
+			// we have invalidated our iterators
+			break;
+		}
+	}
+}
+void
+UWidget::releaseAllShortcuts() {
+	for (std::list<std::pair<UKeyStroke, UWidget*> >::iterator iter = ufo_s_shortcuts.begin();
+			iter != ufo_s_shortcuts.end();
+			++iter) {
+		if ((*iter).second == this) {
+			ufo_s_shortcuts.erase(iter);
+			// we have invalidated our iterators
+			break;
+		}
+	}
+}
+
 bool
 UWidget::processKeyBindings(UKeyEvent * e) {
+	UKeyStroke stroke(e);
+
+	// vectors of lists tend to be ugly
+	std::vector<std::list<std::pair<UKeyStroke, UWidget*> >::iterator> receivers;
+	for (std::list<std::pair<UKeyStroke, UWidget*> >::iterator iter = ufo_s_shortcuts.begin();
+			iter != ufo_s_shortcuts.end();
+			++iter) {
+		if ((*iter).first == stroke) {
+			receivers.push_back(iter);/*
+			//todo
+			UShortcutEvent * e = new UShortcutEvent((*iter).second, UEvent::Shortcut,
+				stroke, false);
+			e->reference();
+			(*iter).second->processEvent(e);
+			e->unreference();*/
+		}
+	}
+	if (!receivers.size()) {
+		return false;
+	}
+
+	bool ambig = receivers.size() > 1;
+	if (ufo_s_oldStroke == stroke && ambig) {
+		ufo_s_oldIndex++;
+	}
+	// clamp
+	if (ufo_s_oldIndex >= receivers.size()) {
+		ufo_s_oldIndex = 0;
+	}
+	ufo_s_oldStroke = stroke;
+	std::vector<std::list<std::pair<UKeyStroke, UWidget*> >::iterator>::iterator iter2 = receivers.begin();
+	if (ufo_s_oldIndex) {
+		iter2 += ufo_s_oldIndex;
+	}
+
+	bool ret = false;
+	UShortcutEvent * se = new UShortcutEvent((*(*iter2)).second, UEvent::Shortcut,
+			stroke, ambig);
+	se->reference();
+	(*(*iter2)).second->processEvent(se);
+	ret = se->isConsumed();
+	se->unreference();
+	return ret;
+
+	/*
+	for (std::vector<std::vector<std::pair<UKeyStroke, UWidget*> >::iterator>::iterator iter = receivers.begin();
+			iter != receivers.end();
+			++iter) {
+		UShortcutEvent * e = new UShortcutEvent((*(*iter)).second, UEvent::Shortcut,
+			stroke, ambig);
+		e->reference();
+		(*(*iter)).second->processEvent(e);
+		e->unreference();
+	}*/
+	/*
 	//UKeyStroke * stroke = UKeyStroke::getKeyStroke(e);
 	UKeyStroke stroke(e);
 	if (notifyKeyBindingAction(stroke, e, WhenFocused)) {
@@ -1646,14 +1884,12 @@ UWidget::processKeyBindings(UKeyEvent * e) {
 	}
 
 	for (UWidget * container = this; container; container = container->m_parent) {
-		if (!container->isEventEnabled(e->getType())) {
-			continue;
-		}
 		if (container->notifyKeyBindingAction(stroke, e, WhenAncestorFocused)) {
 			return true;
 		}
 	}
 	return false;
+	*/
 }
 
 void
@@ -1669,11 +1905,14 @@ UWidget::resetFocus() {
 		}
 	}
 	if (hasMouseFocus() && root) {
+		setState(WidgetHasMouseFocus, false);
 		UPoint mouse_pos;
 		UDisplay::getDefault()->getMouseState(&mouse_pos.x, &mouse_pos.y);
 		// getVisibleWidget does already necessary NULL return
 		// if no widget is visible
 		sm_mouseFocusWidget = root->getVisibleWidgetAt(mouse_pos);
+		if (sm_mouseFocusWidget)
+			sm_mouseFocusWidget->setState(WidgetHasMouseFocus);
 	}
 }
 
@@ -1699,8 +1938,6 @@ UWidget::setEventState(UEvent::Type type, bool b) {
 			case UEvent::KeyPressed:
 			case UEvent::KeyReleased:
 			case UEvent::KeyTyped:
-			case UEvent::Accel:
-			case UEvent::AccelOverride:
 				m_eventState |= KeyEvents;
 			break;
 
@@ -1739,8 +1976,6 @@ UWidget::setEventState(UEvent::Type type, bool b) {
 			case UEvent::KeyPressed:
 			case UEvent::KeyReleased:
 			case UEvent::KeyTyped:
-			case UEvent::Accel:
-			case UEvent::AccelOverride:
 				m_eventState &= ~KeyEvents;
 			break;
 
@@ -1784,8 +2019,6 @@ UWidget::isEventEnabled(UEvent::Type type) const {
 		case UEvent::KeyPressed:
 		case UEvent::KeyReleased:
 		case UEvent::KeyTyped:
-		case UEvent::Accel:
-		case UEvent::AccelOverride:
 			ret = (m_eventState & KeyEvents);
 		break;
 
@@ -1811,15 +2044,31 @@ UWidget::isEventEnabled(UEvent::Type type) const {
 //* protected functions
 //*
 
-void
-UWidget::markUIAttribute(uint32_t attribute) {
-	m_uiAttributes |= attribute;
+
+bool
+UWidget::testState(uint32_t state) const {
+	return (m_model->widgetState & state);
 }
+
 void
-UWidget::unmarkUIAttribute(uint32_t attribute) {
-	m_uiAttributes &= ~attribute;
+UWidget::setState(uint32_t state, bool b) {
+	if (testState(state) != b) {
+		if (b) {
+			m_model->widgetState |= state;
+		} else {
+			m_model->widgetState &= ~state;
+		}
+		processStateChangeEvent(state);
+		repaint();
+	}
 }
+
+void
+UWidget::setStates(uint32_t states) {
+	m_model->widgetState = states;
+}
+
 uint32_t
-UWidget::getUIAttributesState() const {
-	return m_uiAttributes;
+UWidget::getStates() const {
+	return m_model->widgetState;
 }

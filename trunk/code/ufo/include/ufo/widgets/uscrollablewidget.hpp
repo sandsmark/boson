@@ -32,43 +32,36 @@
 
 namespace ufo {
 
-/** A scrollable widget.
+/** @short A scrollable widget.
+  * @ingroup abstractwidgets
+  *
   * @author Johannes Schmidt
   */
 
 class UFO_EXPORT UScrollableWidget : public UWidget {
 	UFO_DECLARE_DYNAMIC_CLASS(UScrollableWidget)
-	UFO_UI_CLASS(UWidgetUI)
-public: 
+public:
 	UScrollableWidget();
-	
+
 	/** Returns the positive increment for scrolling one "unit"
 	  */
-	virtual int getUnitIncrement(const URectangle & visibleRectA,
-		Orientation orientationA, Direction directionA) const;
+	virtual int getUnitIncrement(Orientation orientation = Horizontal) const;
 	/** A default value for all directions.
 	  */
-	virtual void setUnitIncrement(int incrementA);
+	virtual void setUnitIncrement(int increment);
 
 	/** Returns the positive increment for scrolling one block (page up/down)
 	  */
-	virtual int getBlockIncrement(const URectangle & visibleRectA,
-		Orientation orientationA, Direction directionA) const;
+	virtual int getBlockIncrement(Orientation orientation = Horizontal) const;
 	/** A default value for all directions.
 	  */
-	virtual void setBlockIncrement(int incrementA);
+	virtual void setBlockIncrement(int increment);
 
 
 	/** The size of the visible viewport for this scrollable widget.
 	  */
 	virtual UDimension getPreferredViewportSize() const;
 	virtual void setPreferredViewportSize(const UDimension & viewSize);
-
-	/** Paints the given cutting of the scrollable widget.
-	  * Should be overriden by subclasses for more optimized clip
-	  * paint functions (@see UList).
-	  */
-	virtual void clipPaint(UGraphics * g, int x, int y, int w, int h);
 
 protected: // Protected attributes
 	int m_unitIncrement;

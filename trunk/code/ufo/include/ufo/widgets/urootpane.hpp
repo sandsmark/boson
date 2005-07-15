@@ -30,28 +30,31 @@
 
 #include "uwidget.hpp"
 
-#include "../layouts/ulayoutmanager.hpp"
-
 namespace ufo {
 
 class UMenuBar;
 class UInternalFrame;
 class ULayeredPane;
+class UStyleManager;
+class UDockWidget;
+class UDesktopPane;
 
-/** The top level widget.
+/** @short The top level widget.
+  * @ingroup widgets
+  *
   * @author Johannes Schmidt
   */
 
 class UFO_EXPORT URootPane : public UWidget {
 	UFO_DECLARE_DYNAMIC_CLASS(URootPane)
-	UFO_UI_CLASS(UWidgetUI)
+	friend class URootLayout;
 public:
 	URootPane();
 
-	/** sets the new menubar.
+	/** Sets the new menubar.
 	  */
 	virtual void setMenuBar(UMenuBar * menuBar);
-	/** returns the menubar
+	/** @return The menubar
 	  */
 	virtual UMenuBar * getMenuBar();
 
@@ -61,41 +64,43 @@ public:
 	  * @see createContentPane
 	  */
 	virtual void setContentPane(UWidget * contentPane);
-	/** returns the content pane.
+	/** @return the content pane.
 	  * @see createContentPane
 	  */
 	virtual UWidget * getContentPane() const;
 
 	virtual ULayeredPane * createLayeredPane() const;
 	virtual void setLayeredPane(ULayeredPane * layeredPane);
-	/** No descriptions */
 	virtual ULayeredPane * getLayeredPane() const;
-
-	//virtual void setGlasPane(UWidget * glasPaneA);
-	//virtual UWidget * getGlasPane() const;
 
 	/** Adds a frame to root pane. The new frame is at top.
 	  * The frames are stored in a vector. If a new frame is added or
-	  * the state of a frame ( on top; behind another frame ) is changed,
+	  * the state of a frame ( on top; * behind another frame ) is changed,
 	  * the vector will be reordered.
 	  */
 	virtual void addFrame(UInternalFrame * frame);
 	/** removes a frame to root pane.
-	  * @return
-	  	the removed internal frame or NULL
+	  * @return the removed internal frame or NULL
 	  */
 	virtual UInternalFrame * removeFrame(UInternalFrame * frame);
 
-	/** moves the given internal frame to first position in children vector
+	/** Moves the given internal frame to first position in children vector
 	  */
 	virtual void moveToFront(UInternalFrame * frame);
 	/** moves the given internal frame to last position in children vector
 	  */
 	virtual void moveToBack(UInternalFrame * frame);
 
+	virtual void addDockWidget(UDockWidget * w, DockWidgetArea area);
+	virtual void removeDockWidget(UDockWidget * w);
+
+	virtual void setModalWidget(UWidget * w);
+	virtual UWidget * getModalWidget() const;
+
 public: // Overrides UWidget
 	virtual URootPane * getRootPane(bool topmost = false);
 	virtual void addedToHierarchy();
+	virtual UWidget * getVisibleWidgetAt(const UPoint & p) const;
 
 private:  // Private attributes
 	/** the menubar which hosts the menus */
@@ -103,21 +108,8 @@ private:  // Private attributes
 	/** the panel that contains all user widgets */
 	UWidget * m_contentPane;
 	/** the panel that contains all user frames */
-	ULayeredPane * m_desktopPane;
-
-class UFO_EXPORT URootLayout : public ULayoutManager {
-	//UFO_DECLARE_DYNAMIC_CLASS(URootLayout)
-	public:
-		URootLayout(URootPane * rootPane);
-
-	public: // Implements ULayoutManager
-		virtual UDimension
-		getPreferredLayoutSize(const UWidget * parent, const UDimension & maxSize) const;
-
-		virtual void layoutContainer(const UWidget * parent);
-	private:  //Private attributes
-		URootPane * m_rootPane;
-	};
+	UDesktopPane * m_desktopPane;
+	UWidget * m_modalWidget;
 };
 
 } // namespace ufo

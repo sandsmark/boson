@@ -28,50 +28,20 @@
 #ifndef UMENUBAR_HPP
 #define UMENUBAR_HPP
 
-#include "uwidget.hpp"
-
-// we need this for proper getUI() overriding
-//#include "../ui/umenubarui.hpp"
+#include "udockwidget.hpp"
 
 namespace ufo {
 
-class UMenu;
-class UMouseEvent;
-class URootPane;
-
-/** The menu bar contains different umenu objects
+/** @short The menu bar contains different UMenu objects
+  * @ingroup widgets
+  *
   * @author Johannes Schmidt
   */
 
-class UFO_EXPORT UMenuBar : public UWidget {
-	UFO_DECLARE_DYNAMIC_CLASS(UMenuBar)
-	UFO_UI_CLASS(UMenuBarUI)
+class UFO_EXPORT UMenuBar : public UDockWidget {
+	UFO_DECLARE_CLASS(UMenuBar)
 public:
 	UMenuBar();
-/*
-public: // hides | overrides UWidget
-	virtual void setUI(UMenuBarUI * ui);
-	virtual UWidgetUI * getUI() const;
-	virtual void updateUI();
-*/
-protected: // overrides UWidget
-	/** adds a menu */
-	virtual void addImpl(UWidget * w, UObject * constraints, int index);
-
-public: // Public methods
-	/** closes all popup menus opened by a menu of this menu bar */
-	virtual void closePopups();
-
-	/** Don´t call this function directly. It is internally used by UMenu */
-	virtual void setVisibleMenu(UMenu * menu);
-	/** Don ´t call this function directly. It is internally used by UMenu */
-	virtual UMenu * getVisibleMenu();
-
-protected: // Protected slots
-	void menuPopup(UMouseEvent * e);
-
-private:  // Private attributes
-	UMenu * m_visMenu;
 };
 
 } // namespace ufo

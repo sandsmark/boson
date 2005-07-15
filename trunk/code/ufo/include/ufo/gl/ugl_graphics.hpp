@@ -37,7 +37,9 @@ namespace ufo {
 
 class UImageIO;
 
-/** OpenGL implementation of the UGraphics interface.
+/** @short OpenGL implementation of the UGraphics interface.
+  * @ingroup opengl
+  * @ingroup internal
   *
   * This class is not part of the official UFO API and
   * may be changed without warning.
@@ -60,18 +62,23 @@ public: // Implements UGraphics
 	virtual URectangle mapToDevice(const URectangle & rect);
 	virtual URectangle mapFromDevice(const URectangle & rect);
 
+	virtual void begin();
+	virtual void end();
 	virtual void flush();
 	virtual void clear();
 	virtual UImageIO * dump();
 
 	virtual void setColor(const UColor & color);
-	virtual const UColor & getColor() const;
+	virtual UColor getColor() const;
 
 	virtual void setClearColor(const UColor & clearColor);
-	virtual const UColor & getClearColor() const;
+	virtual UColor getClearColor() const;
 
-	virtual void setFont(const UFont * font);
-	virtual const UFont * getFont() const;
+	virtual void setFont(const UFont & font);
+	virtual UFont getFont() const;
+
+	virtual void setEnabled(GCState state, bool b);
+	virtual bool isEnabled(GCState state) const;
 
 
 	virtual void drawString(const std::string & text, int x = 0, int y = 0);
@@ -91,18 +98,12 @@ public: // Implements UGraphics
 
 	virtual void drawRect(const URectangle & rect);
 	virtual void fillRect(const URectangle & rect);
-
 	virtual void drawLine(const UPoint & p1, const UPoint & p2);
-	virtual void drawLines(int x[], int y[], int nPoints);
-	virtual void drawPolygon(int x[], int y[], int nPoints);
-	virtual void fillPolygon(int x[], int y[], int nPoints);
 
-	virtual void drawImage(UImage * image, const UPoint & p);
+	virtual void drawVertexArray(VertexType type, UVertexArray * buffer);
+
 	virtual void drawImage(UImage * image, const URectangle & rect);
 
-	virtual void drawSubImage(UImage * image,
-		const URectangle & srcRect,
-		const UPoint & destLocation);
 	virtual void drawSubImage(UImage * image,
 		const URectangle & srcRect, const URectangle & destRect);
 
@@ -110,7 +111,7 @@ private:
 	UContext * m_context;
 	UColor m_color;
 	UColor m_clearColor;
-	const UFont * m_font;
+	UFont m_font;
 	URectangle m_clipRect;
 	float m_translationX;
 	float m_translationY;

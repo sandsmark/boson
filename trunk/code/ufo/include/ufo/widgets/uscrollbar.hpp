@@ -28,96 +28,43 @@
 #ifndef USCROLLBAR_HPP
 #define USCROLLBAR_HPP
 
-#include "uwidget.hpp"
-
-// we need this for proper getUI() overriding
-//#include "../ui/uscrollbarui.hpp"
+#include "uabstractslider.hpp"
 
 namespace ufo {
 
-/**
-  *@author Johannes Schmidt
+/** @short A scroll bar may be used to scroll the contents of a scroll pane.
+  * @ingroup widgets
+  *
+  * @author Johannes Schmidt
   */
 
-class UFO_EXPORT UScrollBar : public UWidget  {
+class UFO_EXPORT UScrollBar : public UAbstractSlider  {
 	UFO_DECLARE_DYNAMIC_CLASS(UScrollBar)
 	UFO_UI_CLASS(UScrollBarUI)
+	UFO_STYLE_TYPE(UStyle::CE_ScrollBar)
 public:
 	UScrollBar(Orientation orientationA = Horizontal,
 		int valueA = 0, int visAmountA = 10,
 		int minA = 0, int maxA = 100);
 
-	Orientation getOrientation() const;
-/*
-public: // hides | overrides UWidget
-	virtual void setUI(UScrollBarUI * ui);
-	virtual UWidgetUI * getUI() const;
-	virtual void updateUI();
-*/
 public: // Public methods
-
-	int getValue() const;
-	void setValue(int newValueA);
-
-	int getMaximum() const;
-	void setMaximum(int maxA);
-
-	int getMinimum() const;
-	void setMinimum(int minA);
 
 	/** The visible amount is the size of knob
 	  */
 	int getVisibleAmount() const;
 	void setVisibleAmount(int amountA);
 
-	/** The direction determines up or down scrolling. The return value
-	  * my differ if the scroll knob is almost on top/bottom.
-	  */
-	virtual int getUnitIncrement(Direction directionA) const;
-	virtual void setUnitIncrement(int incA);
+protected: // Overrides UWidget
+	virtual UDimension getContentsSize(const UDimension & maxSize) const;
+	virtual void processMouseEvent(UMouseEvent * e);
 
-	/** The amount to scroll for a block increment (e.g. page up/down).
-	  * The direction determines up or down scrolling. The return value
-	  * my differ if the scroll knob is almost on top/bottom.
-	  */
-	virtual int getBlockIncrement(Direction direction) const;
-	virtual void setBlockIncremenet(int incA);
-
-public: // Public signals
-	USignal2<UScrollBar*, int> & sigValueChanged();
-	/** Deprecated! */
-	USignal2<UScrollBar*, int> & sigScrollPos();
-
-protected: // Protected methods
-	void processMouseWheelEvent(UMouseWheelEvent * e);
-
-// private:
-protected: // Protected attributes
-	Orientation m_orientation;
-	int m_value;
+private: // Private attributes
+	/** True if mouse is dragging the slider knob. */
+	bool m_isDragging;
+	/** The last mouse press on this slider. */
+	UPoint m_mousePress;
 	int m_visAmount;
-	int m_minValue;
-	int m_maxValue;
-
-	int m_unitIncrement;
-	int m_blockIncrement;
-
-	USignal2<UScrollBar*, int> m_sigValueChanged;
 };
-
-//
-// inline implementation
-//
-
-inline USignal2<UScrollBar*, int> &
-UScrollBar::sigValueChanged() {
-	return m_sigValueChanged;
-}
-
-inline USignal2<UScrollBar*, int> &
-UScrollBar::sigScrollPos() {
-	return m_sigValueChanged;
-}
 
 } // namespace ufo
 

@@ -36,13 +36,15 @@ namespace ufo {
 
 class UViewport;
 
-/**
-  *@author Johannes Schmidt
+/** @short A scroll pane may be used to display a smaller detail of
+  *  a large widget on a relative
+  * @ingroup widgets
+  *
+  * @author Johannes Schmidt
   */
 
 class UFO_EXPORT UScrollPane : public UWidget  {
 	UFO_DECLARE_DYNAMIC_CLASS(UScrollPane)
-	UFO_UI_CLASS(UWidgetUI)
 public:
 	UScrollPane(UScrollableWidget * viewA = NULL);
 
@@ -54,11 +56,11 @@ public:
 	bool isAutoAddingScrollBars() const;
 
 protected: // Overrides UWidget
-	virtual void addedToHierarchy();
 	virtual void processMouseWheelEvent(UMouseWheelEvent * e);
+	virtual void processWidgetEvent(UWidgetEvent * e);
 
 protected: // Protected methods
-	void on_scroll(UScrollBar * scrollBarA, int amountA);
+	void on_scroll(UAbstractSlider * slider);
 
 	/** Does all initalizing for the previously set scrollable. */
 	void installScrollable();
@@ -72,21 +74,6 @@ private: // Private attributes
 	/** Saves the border type of the scrollable widget. */
 	BorderType m_oldBorderType;
 	bool m_autoAdd;
-protected: // Protected classes
-	/** A scroll bar implementation which uses the unit and block increment
-	  * methods of UScrollableWidget.
-	  * @author Johannes Schmidt
-	  */
-	class ScrollBar : public UScrollBar {
-	public:
-		ScrollBar(UScrollPane * pane, Orientation orientation)
-			: UScrollBar(orientation), m_scrollPane(pane) {}
-
-		int getUnitIncrement(Direction directionA) const;
-		int getBlockIncrement(Direction directionA) const;
-	private:
-		UScrollPane * m_scrollPane;
-	};
 };
 
 } // namespace ufo

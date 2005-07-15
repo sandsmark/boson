@@ -379,8 +379,8 @@ UXGLXDriver::mapX11Keycode(const XKeyEvent & xkey) {
 				//	keysym->sym += ('a'-'A');
 				//break;
 				// Map lowercase letter syms to uppercase
-				if ((ret >= 'A')&&(ret <= 'Z'))
-					ret += ('a'-'A');
+				if ((ret >= 'a')&&(ret <= 'z'))
+					ret += ('A'-'a');
 				break;
 			case 0xFE:
 				ret = m_ODD_keymap[xsym&0xFF];
@@ -424,6 +424,7 @@ UXGLXDriver::mapX11Unicode(const XKeyEvent & xkey) {
 	int len;
 
 	XKeyEvent key = xkey;
+	// FIXME: Implement input method protocol, XmbLookupString
 	len = XLookupString(&key, asciiCode, sizeof(asciiCode),
 		&keySym, &composeStatus);
 
@@ -852,6 +853,7 @@ UXGLXDevice::makeContextCurrent() {
 	m_glxDriver->glXMakeCurrent(m_glxDriver->getX11Display(), m_window, m_glContext);
 }
 
+static GLXContext s_glx_shared_context = NULL;
 bool
 UXGLXDevice::show() {
 	// Check whether we have a valid visual and select that one.
@@ -898,9 +900,12 @@ UXGLXDevice::show() {
 		m_glxDriver->getX11Display(),
 		visualinfo,
 		//m_parent == NULL ? NULL : m_parent->m_glContext,
-		NULL,
+		s_glx_shared_context,
 		true
 	);
+	if (s_glx_shared_context == NULL) {
+		s_glx_shared_context = m_glContext;
+	}
 
 	// Set the new context as the current one. That's all about the window creation.
 	m_glxDriver->glXMakeCurrent(
@@ -931,6 +936,9 @@ UXGLXDevice::show() {
 
 void
 UXGLXDevice::hide() {
+	if (s_glx_shared_context == m_glContext) {
+		s_glx_shared_context = NULL;
+	}
 	// at first, destroy the OpenGL context
 	m_glxDriver->glXDestroyContext(m_glxDriver->getX11Display(), m_glContext);
 	m_glContext = NULL;
@@ -966,9 +974,7 @@ UXGLXDevice::notify(uint32_t type, int arg1, int arg2, int arg3, int arg4) {
 				// FIXME: throw event
 				//std::cerr << "WidgetResized " << arg1 << "x" << arg2 << "\n";
 				if (m_frame) {
-					m_frame->getContext()->setContextBounds(
-						URectangle(0, 0,m_size.w, m_size.h)
-					);
+					m_frame->getContext()->setContextBounds(m_size);
 				}
 			}
 

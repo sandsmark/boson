@@ -40,6 +40,12 @@
 #include "ufo/widgets/uwidget.hpp"
 #include "ufo/widgets/urootpane.hpp"
 
+#include "ufo/gl/ugl_image.hpp"
+#include "ufo/image/uimageio.hpp"
+#include "ufo/uvolatiledata.hpp"
+
+#include <bitset>
+
 namespace ufo {
 
 // FIXME: this should be in a file udisplay.cpp
@@ -64,6 +70,37 @@ UAbstractDisplay::~UAbstractDisplay() {
 }
 
 
+UImage *
+UAbstractDisplay::createImage(const std::string fileName) {
+	return new UGL_Image(fileName);
+}
+
+UImage *
+UAbstractDisplay::createImage(UImageIO * io) {
+	return new UGL_Image(io);
+}
+
+void
+UAbstractDisplay::addVolatileData(UVolatileData * vdata) {
+	if (std::find(m_volatileData.begin(), m_volatileData.end(), vdata) ==
+			m_volatileData.end()) {
+		m_volatileData.push_back(vdata);
+		// references the volatile data
+		vdata->reference();
+	}
+}
+
+void
+UAbstractDisplay::removeVolatileData(UVolatileData * vdata) {
+	std::list<UVolatileData*>::iterator iter =
+		std::find(m_volatileData.begin(), m_volatileData.end(), vdata);
+
+	if (iter != m_volatileData.end()) {
+		m_volatileData.erase(iter);
+		vdata->unreference();
+	}
+}
+
 bool
 UAbstractDisplay::dispatchEvents(unsigned int nevents) {
 	// check if a timer event is ready to run
@@ -76,8 +113,10 @@ UAbstractDisplay::dispatchEvents(unsigned int nevents) {
 			m_queues[i].pop_front();
 
 			if (privateDispatchEvent(e)) {
-				// we got a quit event, return immediately
-				e->unreference();
+				// we got a quit event
+				// push back and return immediately
+				m_queues[i].push_front(e);
+				//e->unreference();
 				return true;
 			}
 
@@ -103,6 +142,9 @@ UAbstractDisplay::pushEvent(UEvent * e) {
 		// choose event queue
 		switch(e->getType()) {
 			case UEvent::QuitEvent:
+				m_queues[2].push_back(e);
+			break;
+			case UEvent::Refresh:
 				m_queues[2].push_back(e);
 			break;
 			/*case UEvent::Repaint:
@@ -180,32 +222,8 @@ UAbstractDisplay::pollEvent() {
 
 void
 UAbstractDisplay::setModState(UMod_t modifiers) {
-	int keymod = modifiers;
-	int mousemod = 0;
-
-	// remove mouse modifiers
-	if (keymod & UMod::Button1) {
-		mousemod |= UMod::Button1;
-		keymod &= ~UMod::Button1;
-	}
-	if (keymod & UMod::Button2) {
-		mousemod |= UMod::Button2;
-		keymod &= ~UMod::Button2;
-	}
-	if (keymod & UMod::Button3) {
-		mousemod |= UMod::Button3;
-		keymod &= ~UMod::Button3;
-	}
-	if (keymod & UMod::Button4) {
-		mousemod |= UMod::Button4;
-		keymod &= ~UMod::Button4;
-	}
-	if (keymod & UMod::Button5) {
-		mousemod |= UMod::Button5;
-		keymod &= ~UMod::Button5;
-	}
-	m_keyModState = UMod_t(keymod);
-	m_mouseModState = UMod_t(mousemod);
+	m_keyModState = UMod_t(modifiers & UMod::MouseModifierMask);
+	m_keyModState = UMod_t(modifiers & UMod::KeyboardModifierMask);
 }
 
 UMod_t
@@ -259,12 +277,19 @@ UAbstractDisplay::privateDispatchEvent(UEvent * e) {
 		case UEvent::QuitEvent:
 			m_currentEvent = NULL;
 			return true;
-			break;
+		break;
+		case UEvent::Refresh: {
+			for(std::list<UVolatileData*>::iterator iter = m_volatileData.begin();
+					iter != m_volatileData.end(); ++iter) {
+				(*iter)->refresh();
+			}
+		}
+		break;
 		case UEvent::RunnableEvent:
 			if (URunnableEvent * re = dynamic_cast<URunnableEvent*>(e)) {
 				re->run();
 			}
-			break;
+		break;
 		default:
 		{
 			if (UWidgetEvent * we = dynamic_cast<UWidgetEvent*>(e)) {
@@ -318,24 +343,54 @@ UAbstractDisplay::preprocessEvent(UEvent * e) {
 
 void
 UAbstractDisplay::processKeyModChange(UKeyEvent * keyEvent) {
+	// Whoo, this is really error prone
+	static std::bitset<16> modifier_keys;
 	int modstate = m_keyModState;
 	if (keyEvent->getType() == UEvent::KeyPressed) {
 		switch (keyEvent->getKeyCode()) {
 			case UKey::UK_NUMLOCK: modstate |= UMod::Num; break;
 			case UKey::UK_CAPSLOCK: modstate |= UMod::Caps; break;
 			case UKey::UK_SCROLLOCK: break;
-			case UKey::UK_RSHIFT: modstate |= UMod::RShift; break;
-			case UKey::UK_LSHIFT: modstate |= UMod::LShift; break;
-			case UKey::UK_RCTRL: modstate |= UMod::RCtrl; break;
-			case UKey::UK_LCTRL: modstate |= UMod::LCtrl; break;
-			case UKey::UK_RALT: modstate |= UMod::RAlt; break;
-			case UKey::UK_LALT: modstate |= UMod::LAlt; break;
-			case UKey::UK_RMETA: modstate |= UMod::RMeta; break;
-			case UKey::UK_LMETA: modstate |= UMod::LMeta; break;
-			/** Left "Windows" key */
-			case UKey::UK_LSUPER: break;
-			/** Right "Windows" key */
-			case UKey::UK_RSUPER: break;
+			case UKey::UK_RSHIFT:
+				modstate |= UMod::Shift;
+				modifier_keys.set(UKey::UK_RSHIFT & 0xff);
+			break;
+			case UKey::UK_LSHIFT:
+				modstate |= UMod::Shift;
+				modifier_keys.set(UKey::UK_RSHIFT & 0xff);
+			break;
+			case UKey::UK_RCTRL:
+				modstate |= UMod::Ctrl;
+				modifier_keys.set(UKey::UK_RCTRL & 0xff);
+			break;
+			case UKey::UK_LCTRL:
+				modstate |= UMod::Ctrl;
+				modifier_keys.set(UKey::UK_LCTRL & 0xff);
+			break;
+			case UKey::UK_RALT:
+				modstate |= UMod::Alt;
+				modifier_keys.set(UKey::UK_RALT & 0xff);
+			break;
+			case UKey::UK_LALT:
+				modstate |= UMod::Alt;
+				modifier_keys.set(UKey::UK_LALT & 0xff);
+			break;
+			case UKey::UK_RMETA:
+				modstate |= UMod::Meta;
+				modifier_keys.set(UKey::UK_RMETA & 0xff);
+			break;
+			case UKey::UK_LMETA:
+				modstate |= UMod::Meta;
+				modifier_keys.set(UKey::UK_LMETA & 0xff);
+			break;
+			case UKey::UK_RSUPER: //right windows key
+				modstate |= UMod::Super;
+				modifier_keys.set(UKey::UK_RSUPER & 0xff);
+			break;
+			case UKey::UK_LSUPER:  //left windows key
+				modstate |= UMod::Super;
+				modifier_keys.set(UKey::UK_LSUPER & 0xff);
+			break;
 			case UKey::UK_ALT_GRAPH: modstate |= UMod::AltGraph; break;
 			/** Multi-key compose key */
 			case UKey::UK_COMPOSE: break;
@@ -346,18 +401,56 @@ UAbstractDisplay::processKeyModChange(UKeyEvent * keyEvent) {
 			case UKey::UK_NUMLOCK: modstate &= ~UMod::Num; break;
 			case UKey::UK_CAPSLOCK: modstate &= ~UMod::Caps; break;
 			case UKey::UK_SCROLLOCK: break;
-			case UKey::UK_RSHIFT: modstate &= ~UMod::RShift; break;
-			case UKey::UK_LSHIFT: modstate &= ~UMod::LShift; break;
-			case UKey::UK_RCTRL: modstate &= ~UMod::RCtrl; break;
-			case UKey::UK_LCTRL: modstate &= ~UMod::LCtrl; break;
-			case UKey::UK_RALT: modstate &= ~UMod::RAlt; break;
-			case UKey::UK_LALT: modstate &= ~UMod::LAlt; break;
-			case UKey::UK_RMETA: modstate &= ~UMod::RMeta; break;
-			case UKey::UK_LMETA: modstate &= ~UMod::LMeta; break;
-			/** Left "Windows" key */
-			case UKey::UK_LSUPER: break;
-			/** Right "Windows" key */
-			case UKey::UK_RSUPER: break;
+			case UKey::UK_RSHIFT:
+				if (!modifier_keys[UKey::UK_LSHIFT & 0xff])
+					modstate &= ~UMod::Shift;
+				modifier_keys.reset(UKey::UK_RSHIFT & 0xff);
+			break;
+			case UKey::UK_LSHIFT:
+				if (!modifier_keys[UKey::UK_RSHIFT & 0xff])
+					modstate &= ~UMod::Shift;
+				modifier_keys.reset(UKey::UK_RSHIFT & 0xff);
+			break;
+			case UKey::UK_RCTRL:
+				if (!modifier_keys[UKey::UK_LCTRL & 0xff])
+					modstate &= ~UMod::Ctrl;
+				modifier_keys.reset(UKey::UK_RCTRL & 0xff);
+			break;
+			case UKey::UK_LCTRL:
+				if (!modifier_keys[UKey::UK_RCTRL & 0xff])
+					modstate &= ~UMod::Ctrl;
+				modifier_keys.reset(UKey::UK_LCTRL & 0xff);
+			break;
+			case UKey::UK_RALT:
+				if (!modifier_keys[UKey::UK_LALT & 0xff])
+					modstate &= ~UMod::Alt;
+				modifier_keys.reset(UKey::UK_RALT & 0xff);
+			break;
+			case UKey::UK_LALT:
+				if (!modifier_keys[UKey::UK_RALT & 0xff])
+					modstate &= ~UMod::Alt;
+				modifier_keys.reset(UKey::UK_LALT & 0xff);
+			break;
+			case UKey::UK_RMETA:
+				if (!modifier_keys[UKey::UK_LMETA & 0xff])
+					modstate &= ~UMod::Meta;
+				modifier_keys.reset(UKey::UK_RMETA & 0xff);
+			break;
+			case UKey::UK_LMETA:
+				if (!modifier_keys[UKey::UK_RMETA & 0xff])
+					modstate &= ~UMod::Meta;
+				modifier_keys.reset(UKey::UK_LMETA & 0xff);
+			break;
+			case UKey::UK_RSUPER: //right windows key
+				if (!modifier_keys[UKey::UK_LSUPER & 0xff])
+					modstate &= ~UMod::Super;
+				modifier_keys.reset(UKey::UK_RSUPER & 0xff);
+			break;
+			case UKey::UK_LSUPER:  //left windows key
+				if (!modifier_keys[UKey::UK_RSUPER & 0xff])
+					modstate &= ~UMod::Super;
+				modifier_keys.reset(UKey::UK_LSUPER & 0xff);
+			break;
 			case UKey::UK_ALT_GRAPH: modstate &= ~UMod::AltGraph; break;
 			/** Multi-key compose key */
 			case UKey::UK_COMPOSE: break;
