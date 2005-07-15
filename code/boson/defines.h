@@ -36,7 +36,9 @@
 // least sqrt(500*500+500*500)=707. take the camera z into account (say 100) and
 // you need at least sqrt(707*707+100*100)=714.
 // so a value of 1000 should be sufficient for now. (04/02/11)
-#define BO_GL_FAR_PLANE 1000.0f
+// AB: note that using 2^n values leads to higher precision (same for the NEAR
+//     plane: use 2^-m values)
+#define BO_GL_FAR_PLANE 1024.0f
 
 
 #define BOSON_COOKIE 992
