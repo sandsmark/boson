@@ -27,6 +27,11 @@
 #include "math/bovector.h"
 #include "math/bomatrix.h"
 
+// Degrees to radians conversion (AB: from mesa/src/macros.h)
+#define DEG2RAD (M_PI/180.0)
+// And radians to degrees conversion
+#define RAD2DEG (180.0/M_PI)
+
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  * @short collection class for misc 3d functions
