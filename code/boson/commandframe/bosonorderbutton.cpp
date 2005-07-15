@@ -31,7 +31,6 @@
 #include "../upgradeproperties.h"
 #include "bodebug.h"
 
-#include <kgameprogress.h>
 #include <kpixmap.h>
 #include <kpixmapeffect.h>
 #include <klocale.h>
@@ -39,9 +38,6 @@
 #include <qpixmap.h>
 #include <qbitmap.h>
 #include <qpainter.h>
-#include <qtooltip.h>
-#include <qlayout.h>
-#include <qpushbutton.h>
 
 #define BAR_WIDTH 10 // FIXME hardcoded value
 
