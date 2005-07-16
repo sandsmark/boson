@@ -137,16 +137,6 @@ void Bo3dToolsBase::pointByRotation(float* _x, float* _y, const float _angle, co
   *_y = y;
 }
 
-bofixed Bo3dToolsBase::deg2rad(bofixed deg)
-{
-  return deg * DEG2RAD;
-}
-
-bofixed Bo3dToolsBase::rad2deg(bofixed rad)
-{
-  return rad * RAD2DEG;
-}
-
 
 /*
  * vim:et sw=2
