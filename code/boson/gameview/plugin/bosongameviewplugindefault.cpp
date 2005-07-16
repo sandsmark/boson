@@ -73,6 +73,7 @@ BoUfoWidget* BosonGameViewPluginDefault::createUfoWidget() const
 {
  BoUfoWidget* w = new BoUfoWidget();
  w->setLayoutClass(BoUfoWidget::UVBoxLayout);
+ w->setName("GameViewPluginDefault"); // for debugging
  return w;
 }
 
