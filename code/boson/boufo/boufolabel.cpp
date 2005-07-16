@@ -33,6 +33,7 @@
 #include "boufoimage.h"
 #include "boufomanager.h"
 #include "boufofontinfo.h"
+#include "ufoext/ubolabel.h"
 #include <bodebug.h>
 
 #include <kglobal.h>
@@ -56,7 +57,7 @@ BoUfoLabel::BoUfoLabel(const QString& text) : BoUfoWidget()
 void BoUfoLabel::init()
 {
  setLayoutClass(UHBoxLayout);
- mLabel = new ufo::ULabel();
+ mLabel = new ufo::UBoLabel();
  widget()->add(mLabel);
  mLabel->setOpaque(false);
  setForegroundColor(defaultForegroundColor());

@@ -9,6 +9,7 @@ KDE_CXXFLAGS = $(UFO_CFLAGS)
 libufoext_la_SOURCES = \
 	boufofontrenderer.cpp \
 	ubosonstyle.cpp \
+	ubolabel.cpp \
 	ubolabelui.cpp \
 	uboprogress.cpp \
 	ubogridlayout.cpp
