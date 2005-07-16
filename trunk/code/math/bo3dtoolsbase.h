@@ -64,12 +64,12 @@ class Bo3dToolsBase
      * Convert @p deg, given in degree, into radians.
      * @return @p deg as radians.
      **/
-    static bofixed deg2rad(bofixed deg);
+    inline static bofixed deg2rad(bofixed deg)  { return deg * DEG2RAD; }
     /**
      * Convert @p rad, given in radians, into degree.
      * @return @p rad as degree.
      **/
-    static bofixed rad2deg(bofixed rad);
+    inline static bofixed rad2deg(bofixed rad)  { return rad * RAD2DEG; }
 };
 
 
