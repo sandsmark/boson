@@ -133,6 +133,8 @@ void BosonMainWidgetMenuInput::initUfoActions()
  (void)new BoUfoAction(i18n("Show OpenGL states"), KShortcut(), this,
 		SLOT(slotShowGLStates()), actionCollection(),
 		"debug_show_opengl_states");
+ (void)new BoUfoAction(i18n("Debug &ufo widgets..."), KShortcut(),
+		this, SIGNAL(signalDebugUfoWidgets()), actionCollection(), "debug_ufo_widgets");
 // (void)new BoUfoAction(i18n("Grab &Profiling data"), KShortcut(Qt::CTRL + Qt::Key_P),
 //		this, SLOT(slotGrabProfiling()), actionCollection(), "game_grab_profiling");
  (void)new BoUfoAction(i18n("&Grab Screenshot"), KShortcut(Qt::CTRL + Qt::Key_G),

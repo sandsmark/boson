@@ -184,6 +184,11 @@ public:
 
 	void setSelectedWidget(const QDomElement& widget);
 
+	BoUfoManager* ufoManager() const
+	{
+		return mUfoManager;
+	}
+
 signals:
 	void signalPlaceWidget(const QDomElement& parent);
 	void signalSelectWidget(const QDomElement& widget);
@@ -340,6 +345,7 @@ protected:
 
 protected slots:
 	void slotUpdateGUI();
+	void slotDebugUfo();
 
 private slots:
 	void slotWidgetClassSelected(const QString&);

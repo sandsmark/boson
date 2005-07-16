@@ -34,7 +34,8 @@ libboufo_la_SOURCES = \
 	boufoinputdialog.cpp \
 	boufomanager.cpp \
 	boufofactory.cpp \
-	boufoaction.cpp
+	boufoaction.cpp \
+	boufodebugwidget.cpp
 
 libboufo_la_LIBADD = \
 		$(top_builddir)/boson/boufo/ufoext/libufoext.la \

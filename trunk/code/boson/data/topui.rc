@@ -20,6 +20,7 @@
       <Action name="debug_sleep_1s" />
       <Action name="debug_crash_boson" />
     </Menu>
+    <Action name="debug_ufo_widgets" />
     <MergeLocal />
   </Menu>
   <Menu name="settings" group="settingsmenu"><text>&amp;Settings</text>

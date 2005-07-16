@@ -51,12 +51,14 @@
 #include "bosonfpscounter.h"
 #include "bosonmainwidgetmenuinput.h"
 #include "bosondata.h"
+#include "boufo/boufodebugwidget.h"
 #include "bodebug.h"
 
 #include <klocale.h>
 #include <kmessagebox.h>
 #include <kstandarddirs.h>
 #include <kapplication.h>
+#include <kdialogbase.h>
 #include "boeventloop.h"
 
 #include <qtimer.h>
@@ -66,6 +68,7 @@
 #include <qdom.h>
 #include <qvaluevector.h>
 #include <qguardedptr.h>
+#include <qlayout.h>
 
 
 #if HAVE_SYS_TIME_H
@@ -268,6 +271,8 @@ void BosonMainWidget::initUfoGUI()
  BoUfoActionCollection::initActionCollection(ufoManager());
  ufoManager()->actionCollection()->setAccelWidget(this);
  d->mMenuInput = new BosonMainWidgetMenuInput(ufoManager()->actionCollection(), this);
+ connect(d->mMenuInput, SIGNAL(signalDebugUfoWidgets()),
+		this, SLOT(slotDebugUfoWidgets()));
 
  BoUfoWidget* contentWidget = ufoManager()->contentWidget();
  contentWidget->setLayoutClass(BoUfoWidget::UFullLayout);
@@ -1092,3 +1097,18 @@ void BosonMainWidget::raiseWidget(BoUfoWidget* w)
  d->mWidgetStack->raiseStackWidget(w);
 }
 
+void BosonMainWidget::slotDebugUfoWidgets()
+{
+ KDialogBase* dialog = new KDialogBase(KDialogBase::Plain,
+		i18n("Debug Ufo Widgets"),
+		KDialogBase::Cancel, KDialogBase::Cancel, 0,
+		"debugufowidgets", false, true);
+ connect(dialog, SIGNAL(finished()), dialog, SLOT(delayedDestruct()));
+ BoUfoDebugWidget* debug = new BoUfoDebugWidget(dialog->plainPage());
+ QVBoxLayout* l = new QVBoxLayout(dialog->plainPage());
+ l->addWidget(debug);
+
+ debug->setBoUfoManager(ufoManager());
+
+ dialog->show();
+}
