@@ -39,7 +39,8 @@ Patches applied currently:
   UPDATE: AB: after the update to libufo CVS of 05/07/14, the menuitems were NOT
               patched again. we may need to do though, so. the code is now in
               umenuitem.cpp (ubasicmenuitemui.cpp doesnt exist anymore)
-
+- Patch to uwidget.cpp to return (0,0) instead of maxSize when maxSize is 0 in
+  one direction in getPreferredSize().
 
 
 
