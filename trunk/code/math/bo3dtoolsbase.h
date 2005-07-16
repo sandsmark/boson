@@ -72,6 +72,8 @@ class Bo3dToolsBase
     inline static bofixed rad2deg(bofixed rad)  { return rad * RAD2DEG; }
 };
 
+#undef DEG2RAD
+#undef RAD2DEG
 
 #endif
 /*
