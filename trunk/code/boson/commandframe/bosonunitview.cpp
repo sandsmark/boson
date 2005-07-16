@@ -60,6 +60,7 @@ BosonUnitView::BosonUnitView()
 	: BosonOrderButton()
 {
  d = new BosonUnitViewPrivate;
+ setName("BosonUnitView");
 
  BoUfoVBox* v = new BoUfoVBox();
  addWidget(v);
