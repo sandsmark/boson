@@ -39,6 +39,9 @@ public:
 
 	BoUfoActionCollection* actionCollection() const;
 
+signals:
+	void signalDebugUfoWidgets();
+
 protected slots:
 	void slotToggleSound();
 	void slotToggleMusic();

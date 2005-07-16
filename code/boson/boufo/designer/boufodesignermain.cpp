@@ -25,6 +25,8 @@
 #include "boufodesignermain.h"
 #include "boufodesignermain.moc"
 
+#include "boufodebugwidget.h"
+
 #include <bodebug.h>
 
 #include <qtimer.h>
@@ -46,6 +48,7 @@
 #include <qcombobox.h>
 #include <qvgroupbox.h>
 #include <qwidgetstack.h>
+#include <qdialog.h>
 
 #include <math.h>
 #include <stdlib.h>
@@ -2209,6 +2212,9 @@ void BoUfoDesignerMain::initActions()
  QAction* editSignalsSlots = new QAction(tr("Edit &Signals and Slots..."), 0, this, "editsignalsslots");
  connect(editSignalsSlots, SIGNAL(activated()), this, SLOT(slotEditSignalsSlots()));
 
+ QAction* debugUfo = new QAction(tr("Debug Ufo..."), 0, this, "debug_ufo");
+ connect(debugUfo, SIGNAL(activated()), this, SLOT(slotDebugUfo()));
+
  QPopupMenu* file = new QPopupMenu(this);
  menuBar()->insertItem("&File", file);
  fileNew->addTo(file);
@@ -2217,6 +2223,9 @@ void BoUfoDesignerMain::initActions()
  QPopupMenu* edit = new QPopupMenu(this);
  menuBar()->insertItem("&Edit", edit);
  editSignalsSlots->addTo(edit);
+ QPopupMenu* debug = new QPopupMenu(this);
+ menuBar()->insertItem("&Debug", debug);
+ debugUfo->addTo(debug);
 }
 
 void BoUfoDesignerMain::closeEvent(QCloseEvent* e)
@@ -2231,6 +2240,16 @@ void BoUfoDesignerMain::closeEvent(QCloseEvent* e)
 		e->ignore();
 		break;
  }
+}
+
+void BoUfoDesignerMain::slotDebugUfo()
+{
+ QDialog* dialog = new QDialog(0,"ufodebugdialog", false, Qt::WDestructiveClose);
+ QVBoxLayout* l = new QVBoxLayout(dialog);
+ BoUfoDebugWidget* debug = new BoUfoDebugWidget(dialog);
+ debug->setBoUfoManager(mPreview->ufoManager());
+ l->addWidget(debug);
+ dialog->show();
 }
 
 int main(int argc, char **argv)
