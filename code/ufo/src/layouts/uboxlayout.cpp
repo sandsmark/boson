@@ -83,16 +83,14 @@ UBoxLayout::getPreferredLayoutSize(const UWidget * container,
 	UDimension ret(0, 0);
 
 
-	if (container->getWidgetCount() >= 1) {
-		const URectangle& b = childBounds[container->getWidgetCount() - 1];
-		if (orientation == Horizontal) {
-			ret = UDimension(b.x + b.w, maxSize.h);
-		} else {
-			ret = UDimension(maxSize.w, b.y + b.h);
-		}
+	for (unsigned int i = 0; i < container->getWidgetCount(); i++) {
+		const URectangle& b = childBounds[i];
+		ret.w = std::max(b.x + b.w, ret.w);
+		ret.h = std::max(b.y + b.h, ret.h);
 	}
+	ret.clamp(maxSize);
 
-#if 1
+#if 0
 	// AB: the above seems not to work correctly (e.g. for menus).
 	// note that with the following code we'll exceed maxSize!
 	if (orientation == Horizontal) {
@@ -110,8 +108,6 @@ UBoxLayout::getPreferredLayoutSize(const UWidget * container,
 #endif
 
 
-	// Add (border and other) insets
-	ret += container->getInsets();
 
 	return ret;
 }
@@ -147,22 +143,17 @@ getBounds(int orientation, int hgap, int vgap, const UWidget * container, const 
 					}
 				}
 			}
-
 			UDimension d = w->getPreferredSize(dim);
 			d.clamp(dim);
 
 			ret[i].x = x;
 			ret[i].y = y;
+			ret[i].w = d.w;
+			ret[i].h = d.h;
 			if (orientation == Horizontal) {
-				ret[i].w = d.w;
-				ret[i].h = d.h;
-
 				x += d.w;
 				dim.w -= d.w;
 			} else {
-				ret[i].w = d.w;
-				ret[i].h = d.h;
-
 				y += d.h;
 				dim.h -= d.h;
 			}
