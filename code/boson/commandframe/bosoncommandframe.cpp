@@ -460,6 +460,7 @@ void BosonCommandFrame::initUnitView()
  BoUfoHBox* hbox = new BoUfoHBox();
  addWidget(hbox);
  d->mUnitViewWidget = new BoUfoWidget();
+ d->mUnitViewWidget->setName("UnitViewWidget");
  d->mUnitView = new BosonUnitView();
  d->mUnitViewWidget->addWidget(d->mUnitView);
 

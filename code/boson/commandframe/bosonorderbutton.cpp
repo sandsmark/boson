@@ -120,6 +120,7 @@ public:
 BosonOrderButton::BosonOrderButton() : BoUfoWidget()
 {
  d = new BosonOrderButtonPrivate;
+ setName("BosonOrderButton");
  mUnit = 0;
  mGroundType = 0;
  mType = ShowNothing;
