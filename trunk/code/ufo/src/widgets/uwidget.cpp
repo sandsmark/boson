@@ -1583,7 +1583,7 @@ UWidget::getPreferredSize() const {
 UDimension
 UWidget::getPreferredSize(const UDimension & maxSize) const {
 	if (maxSize.isEmpty()) {
-		return maxSize;
+		return UDimension();
 	}
 	// make sure that we are valid
 	(const_cast<UWidget*>(this))->validate();
