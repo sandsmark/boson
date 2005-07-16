@@ -173,6 +173,11 @@ public:
 	}
 
 	/**
+	 * Reimplemented from @ref QObject::setName
+	 **/
+	virtual void setName(const char* name);
+
+	/**
 	 * Set the vertical alignment, see @ref
 	 * ufo::UWidget::setVerticalAlignment. @p alignment should be a value
 	 * from @ref Qt::AlignmentFlags that describes a vertical alignment
