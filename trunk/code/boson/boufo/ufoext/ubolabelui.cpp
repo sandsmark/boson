@@ -592,6 +592,9 @@ UBoLabelUI::getStyleCompoundPreferredSize(
 	// assume that icon is on the left and text on the right side
 	const UFontMetrics * metrics = f.getFontMetrics();
 
+#if FOO_1
+		printf("getStyleCompoundPreferredSize\n");
+#endif
 	UDimension textDimension;
 	if (maxSize.isInvalid()) {
 		makeCompoundText(text, metrics, -1, &textDimension);
@@ -601,6 +604,9 @@ UBoLabelUI::getStyleCompoundPreferredSize(
 #endif
 		makeCompoundText(text, metrics, maxSize.w, &textDimension);
 	}
+#if FOO_1
+		printf("textDim %d %d\n", textDimension.w, textDimension.h);
+#endif
 
 	// warning these are dangerous. e.g. when width is reduced, then we need
 	// a greater height!
@@ -617,16 +623,26 @@ UBoLabelUI::getStyleCompoundPreferredSize(
 
 		max_width += iconSize.w;
 		max_height += iconSize.h;
+#if FOO_1
+		printf("is=%d iw=%d\n", iconSize.w, iconSize.h);
+#endif
 	}
 
 	max_height = std::max(textDimension.h, max_height);
 
 	UInsets in = w->getInsets();
 //	printf("returning preferred width width for text=%s : %d (in.getHorizontal()=%d)\n", text.c_str(), max_width + in.getHorizontal(), in.getHorizontal());
+#if FOO_1
+		printf("mw=%d mh=%d in=%d %d\n", max_width, max_height, in.getHorizontal(), in.getVertical());
+		printf("getStyleCompoundPreferredSize done\n");
+#endif
+#if 0
 	return UDimension(
 		max_width + in.getHorizontal(),
 		max_height + in.getVertical()
 	);
-	//return UDimension(max_width, max_height);
+#else
+	return UDimension(max_width, max_height);
+#endif
 }
 
