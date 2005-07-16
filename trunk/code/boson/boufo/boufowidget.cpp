@@ -427,6 +427,14 @@ void BoUfoWidget::init(ufo::UWidget* w)
  setWidgetEventsEnabled(true);
 }
 
+void BoUfoWidget::setName(const char* name)
+{
+ QObject::setName(name);
+ if (widget()) {
+	widget()->setName(name);
+ }
+}
+
 void BoUfoWidget::invalidate()
 {
 // boDebug() << k_funcinfo << endl;
