@@ -30,7 +30,7 @@
 #include "global.h"
 
 // both must be > 0.0:
-#define BO_GL_NEAR_PLANE 0.05f
+#define BO_GL_NEAR_PLANE 0.0625f
 // AB: the largest possible map is 500x500. if you are at one corner (say
 // topleft) you need to see the opposite corner (bottomright), so we need at
 // least sqrt(500*500+500*500)=707. take the camera z into account (say 100) and
