@@ -20,7 +20,7 @@
 #ifndef BOACTIONSWIDGET_H
 #define BOACTIONSWIDGET_H
 
-#include "../boufo/boufo.h"
+#include "../boufo/boufowidget.h"
 
 #include "../boaction.h"
 

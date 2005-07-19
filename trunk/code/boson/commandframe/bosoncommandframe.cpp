@@ -37,6 +37,9 @@
 #include "../speciestheme.h"
 #include "../boson.h"
 #include "bodebug.h"
+#include "../boufo/boufolabel.h"
+#include "../boufo/boufoprogress.h"
+#include "../boufo/boufocustomwidget.h"
 
 #include <klocale.h>
 

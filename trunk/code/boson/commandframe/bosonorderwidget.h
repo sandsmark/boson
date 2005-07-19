@@ -20,14 +20,10 @@
 #ifndef BOSONORDERWIDGET_H
 #define BOSONORDERWIDGET_H
 
-#include <qwidget.h>
-#include <qvaluelist.h>
-#include <qpair.h>
+#include "../boufo/boufowidget.h"
 
 #include "../global.h"
 #include "../boaction.h"
-
-#include "../boufo/boufo.h"
 
 class Unit;
 class Facility;
