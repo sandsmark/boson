@@ -26,6 +26,7 @@
 #include "../speciestheme.h"
 #include "../unit.h"
 #include "../bosonweapon.h"
+#include "../boufo/boufolabel.h"
 #include "bodebug.h"
 
 #include <klocale.h>

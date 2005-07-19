@@ -25,6 +25,8 @@
 #include "../unitplugins.h"
 #include "../unitproperties.h"
 #include "../defines.h"
+#include "../boufo/boufolabel.h"
+#include "../boufo/boufonuminput.h"
 #include "bodebug.h"
 
 #include <klocale.h>

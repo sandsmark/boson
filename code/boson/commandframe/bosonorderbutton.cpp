@@ -30,6 +30,8 @@
 #include "../defines.h"
 #include "../upgradeproperties.h"
 #include "bodebug.h"
+#include "../boufo/boufoimage.h"
+#include "../boufo/boufoprogress.h"
 
 #include <kpixmap.h>
 #include <kpixmapeffect.h>
