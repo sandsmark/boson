@@ -49,6 +49,7 @@ Patches applied currently:
 - Patch to uinternalframe.cpp to initialize m_frameState
 - Porting patch to ufocusmanager.cpp to consume events in processMouseEvent()
   from official libufo cvs (05/07/19)
+- Porting menu patch from official libufo cvs (05/07/19)
 
 
 

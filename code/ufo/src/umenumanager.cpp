@@ -188,7 +188,7 @@ UMenuManager::processMouseEvent(UMouseEvent * e) {
 						menu->activate();
 					} else {
 						// in menu path, do nothing
-						if (m_currentItem) {
+						if (!dynamic_cast<UMenu*>(m_currentItem)) {
 							m_currentItem->setState(WidgetHighlighted, false);
 						}
 						m_currentItem = menu;
@@ -234,11 +234,6 @@ UMenuManager::clearPathFrom(const std::vector<UMenu*>::iterator & iter) {
 	}
 	(*iter)->setPopupMenuVisible(false);
 	m_menuPath.erase(iter, m_menuPath.end());
-
-	if (m_currentItem) {
-		m_currentItem->setState(WidgetHighlighted, false);
-		m_currentItem = NULL;
-	}
 }
 
 void
@@ -327,13 +322,10 @@ UMenuManager::recalcPathWithLeaf(UMenuItem * item) {
 		openMenu(*iter);
 	}
 
-	// deselect old current item, if not parent of a newly opened sub-menu
+	// deselect old current item, if in the current menu path
 	if (m_currentItem) {
-		if (m_menuPath.size()) {
-			if (m_currentItem != *(m_menuPath.end() - 1)) {
-				m_currentItem->setState(WidgetHighlighted, false);
-			}
-		} else {
+		std::vector<UMenu*>::iterator pos = std::find(m_menuPath.begin(), m_menuPath.end(), m_currentItem);
+		if (pos == m_menuPath.end()) {
 			m_currentItem->setState(WidgetHighlighted, false);
 		}
 	}
