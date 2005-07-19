@@ -195,8 +195,8 @@ ufo::UFontInfo BoUfoFontRenderer::getFontInfo() const
 	ufo::UFontInfo::DefaultFamily,
 	face,
 	(float)mFont->fontInfo().pointSize(),
-	0, // weight
-	0, // style
+	ufo::UFontInfo::Normal, // weight
+	ufo::UFontInfo::Plain, // style
 	ufo::UFontInfo::Encoding_Default // FIXME?
  );
  // set weight
@@ -324,16 +324,20 @@ public:
 			if ((*it).pointSize != fontInfo.pointSize) {
 				continue;
 			}
-			if ((*it).style != ufo::UFontInfo::AnyStyle) {
-				if ((*it).style != fontInfo.style) {
-					continue;
+			if (fontInfo.style != ufo::UFontInfo::AnyStyle) {
+				if ((*it).style != ufo::UFontInfo::AnyStyle) {
+					if ((*it).style != fontInfo.style) {
+						continue;
+					}
 				}
 			}
-			if ((*it).weight != ufo::UFontInfo::AnyWeight) {
-				if ((*it).weight >= ufo::UFontInfo::Bold && fontInfo.weight < ufo::UFontInfo::Bold) {
-					continue;
-				} else if ((*it).weight < ufo::UFontInfo::Bold && fontInfo.weight >= ufo::UFontInfo::Bold) {
-					continue;
+			if (fontInfo.weight != ufo::UFontInfo::AnyWeight) {
+				if ((*it).weight != ufo::UFontInfo::AnyWeight) {
+					if ((*it).weight >= ufo::UFontInfo::Bold && fontInfo.weight < ufo::UFontInfo::Bold) {
+						continue;
+					} else if ((*it).weight < ufo::UFontInfo::Bold && fontInfo.weight >= ufo::UFontInfo::Bold) {
+						continue;
+					}
 				}
 			}
 			ret.push_back(*it);
