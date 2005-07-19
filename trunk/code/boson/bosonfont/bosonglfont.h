@@ -185,7 +185,6 @@ public:
 	 **/
 	bool loadFont(const BoFontInfo& font);
 
-	void setFont(const BoFontInfo& info);
 	const BoFontInfo& fontInfo() const;
 
 	/**
