@@ -92,6 +92,7 @@ UInternalFrame::UInternalFrame()
 	, m_rootPane(new URootPane())
 	, m_title("")
 	, m_frameStyle(FrameTitleBar | FrameCloseBox | FrameResizable)
+	, m_frameState(0)
 {
 	setCssType("internalframe");
 	setOpaque(false);
@@ -105,6 +106,7 @@ UInternalFrame::UInternalFrame(const std::string & title)
 	, m_rootPane(new URootPane())
 	, m_title(title)
 	, m_frameStyle(FrameTitleBar | FrameCloseBox | FrameResizable)
+	, m_frameState(0)
 {
 	setCssType("internalframe");
 	setOpaque(false);
@@ -117,6 +119,7 @@ UInternalFrame::UInternalFrame(uint32_t frameStyle)
 	, m_rootPane(new URootPane())
 	, m_title("")
 	, m_frameStyle(FrameStyle(frameStyle))
+	, m_frameState(0)
 {
 	setCssType("internalframe");
 	setOpaque(false);
@@ -129,6 +132,7 @@ UInternalFrame::UInternalFrame(const std::string & title, uint32_t frameStyle)
 	, m_rootPane(new URootPane())
 	, m_title(title)
 	, m_frameStyle(FrameStyle(frameStyle))
+	, m_frameState(0)
 {
 	setCssType("internalframe");
 	setOpaque(false);

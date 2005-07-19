@@ -17,11 +17,16 @@ Patches applied currently:
 - Patch to urootpane.cpp and udesktoppane.cpp to fix URootPane::setMenuBar()
   when there is already a menubar set. I.e. fix menubar removal.
   For this UDesktopPane::removeDockWidget() got implemented.
+  (patch is also in official libufo cvs (05/07/19))
 - Patch to ulayeredpane.cpp to insert new widgets at the beginning of a layer
   (which makes it the last widget that is painted), if not specified otherwise
 - Patch to ugl_driver.cpp to use bogl functions instead of loading the OpenGL
   library once again
 - Patch to ustylehints.cpp to avoid uninitialized values (especially bordertype)
+  (patch is also in official libufo cvs (05/07/19))
+- Patch to ubasicstyle.cpp to use icon_size.h instead of .w, when calculating
+  the height in getCompountPreferredSize()
+  (patch is also in official libufo cvs (05/07/19))
 - Patch to uabstractcontext.hpp, uabstractcontext.cpp, uwidget.cpp and ubasicmenuitemui.cpp
   to improve events for our needs:
   Instead of delivering a mouse event to root->getVisibleWidgetAt(), we
@@ -41,6 +46,7 @@ Patches applied currently:
               umenuitem.cpp (ubasicmenuitemui.cpp doesnt exist anymore)
 - Patch to uwidget.cpp to return (0,0) instead of maxSize when maxSize is 0 in
   one direction in getPreferredSize().
+- Patch to uinternalframe.cpp to initialize m_frameState
 
 
 
