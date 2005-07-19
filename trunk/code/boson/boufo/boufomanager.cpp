@@ -53,6 +53,9 @@
 
 #include <math.h>
 
+static BoUfoManager* g_currentManager = 0;
+static QMap<ufo::UContext*, BoUfoManager*> g_context2Manager;
+
 
 /**
  * Macro to simplify ufo to Qt signal connection.
@@ -291,6 +294,7 @@ BoUfoManager::BoUfoManager(int w, int h, bool opaque)
 	: QObject(0, "ufomanager")
 {
  boDebug() << k_funcinfo << w << "x" << h << endl;
+ mGlobalFont = new BoUfoFontInfo();
  if (!ufo::UToolkit::getToolkit()) {
 	ufo::UXToolkit* tk = new ufo::UXToolkit();
 	tk->getStyleManager()->setStyle(new ufo::UBosonStyle);
@@ -310,7 +314,7 @@ BoUfoManager::BoUfoManager(int w, int h, bool opaque)
 		tk->putProperty("font_dir", font_dir.latin1());
 	}
 
-#if 0
+#if 1
 	ufo::UPluginInfo bosonGLFontPlugin;
 	bosonGLFontPlugin.lib = NULL;
 	bosonGLFontPlugin.category = "font";
@@ -335,6 +339,7 @@ BoUfoManager::BoUfoManager(int w, int h, bool opaque)
  ufo::URectangle deviceRect(0, 0, w, h);
  ufo::URectangle contextRect(0, 0, w, h);
  mContext = new ufo::UXContext(deviceRect, contextRect);
+ g_context2Manager.insert(mContext, this);
 
  mRootPane = mContext->getRootPane();
  mRootPaneWidget = 0,
@@ -376,6 +381,22 @@ BoUfoManager::BoUfoManager(int w, int h, bool opaque)
 BoUfoManager::~BoUfoManager()
 {
  boDebug() << k_funcinfo << endl;
+ if (g_currentManager == this) {
+	g_currentManager = 0;
+ }
+ {
+	QValueList<ufo::UContext*> remove;
+	QMap<ufo::UContext*, BoUfoManager*>::iterator it;
+	for (it = g_context2Manager.begin(); it != g_context2Manager.end(); ++it) {
+		if (it.data() == this) {
+			remove.append(it.key());
+		}
+	}
+	while (!remove.isEmpty()) {
+		g_context2Manager.remove(remove.first());
+		remove.pop_front();
+	}
+ }
  delete mActionCollection;
  setMenuBar(0);
  if (contentWidget()) {
@@ -393,6 +414,35 @@ BoUfoManager::~BoUfoManager()
  // does libufo take care of that?
 
  boDebug() << k_funcinfo << "done" << endl;
+}
+
+BoUfoManager* BoUfoManager::currentUfoManager()
+{
+ ufo::UToolkit* tk = ufo::UToolkit::getToolkit();
+ if (!tk) {
+	return 0;
+ }
+ ufo::UContext* c = tk->getCurrentContext();
+ if (!c) {
+	return 0;
+ }
+ if (g_currentManager) {
+	if ((ufo::UContext*)g_currentManager->context() == c) {
+		return g_currentManager;
+	}
+	g_currentManager = 0;
+ }
+ g_currentManager = g_context2Manager[c];
+ return g_currentManager;
+}
+
+BoUfoManager* BoUfoManager::ufoManagerForContext(ufo::UContext* context)
+{
+ BO_CHECK_NULL_RET0(context);
+ if (!g_context2Manager.contains(context)) {
+	return 0;
+ }
+ return g_context2Manager[context];
 }
 
 ufo::UXToolkit* BoUfoManager::toolkit() const
@@ -798,5 +848,28 @@ bool BoUfoManager::focusedWidgetTakesKeyEvents() const
  }
  return false;
 }
+
+void BoUfoManager::setGlobalFont(const BoUfoFontInfo& font)
+{
+ BO_CHECK_NULL_RET(mGlobalFont);
+ boDebug() << k_funcinfo << font.debugString() << endl;
+ *mGlobalFont = font;
+ if (rootPaneWidget()) {
+	if (rootPaneWidget()->providesOwnFont()) {
+		return;
+	}
+	rootPaneWidget()->unsetFont();
+ }
+}
+
+const BoUfoFontInfo& BoUfoManager::globalFont() const
+{
+ if (!mGlobalFont) {
+	BO_NULL_ERROR(mGlobalFont);
+	// will crash
+ }
+ return *mGlobalFont;
+}
+
 
 

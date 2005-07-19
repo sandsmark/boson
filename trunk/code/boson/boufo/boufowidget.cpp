@@ -40,6 +40,7 @@
 #include "boufoimage.h"
 #include "boufodrawable.h"
 #include "boufomanager.h"
+#include "boufofontinfo.h"
 
 #include <qdom.h>
 #include <qimage.h>
@@ -47,6 +48,27 @@
 #include <bodebug.h>
 
 #include <math.h>
+
+static QMap<ufo::UWidget*, BoUfoWidget*> g_ufoWidget2BoUfoWidget;
+
+static void applyFontToWidgetAndChildren(const ufo::UFont& font, ufo::UWidget* w)
+{
+ BO_CHECK_NULL_RET(w);
+ w->setFont(font);
+
+ std::vector<ufo::UWidget*> widgets = w->getWidgets();
+ std::vector<ufo::UWidget*>::iterator it;
+ for (it = widgets.begin(); it != widgets.end(); ++it) {
+	if (g_ufoWidget2BoUfoWidget.contains(*it)) {
+		BoUfoWidget* w = g_ufoWidget2BoUfoWidget[*it];
+		if (w->providesOwnFont()) {
+			// dont apply to widgets that have a custom font
+			continue;
+		}
+	}
+	applyFontToWidgetAndChildren(font, *it);
+ }
+}
 
 
 static ufo::UMod_t convertQtMouseButtonToUfo(int button)
@@ -396,6 +418,9 @@ void BoUfoWidget::init(ufo::UWidget* w)
  w->setBoUfoWidgetDeleter(new BoUfoWidgetDeleter(this));
 // w->setClipping(false);
 
+ g_ufoWidget2BoUfoWidget.insert(widget(), this);
+ mUsesOwnFont = false;
+
  mWidget->setOpaque(false);
  mBackgroundImageDrawable = 0;
 
@@ -425,6 +450,39 @@ void BoUfoWidget::init(ufo::UWidget* w)
 
  setFocusEventsEnabled(true);
  setWidgetEventsEnabled(true);
+
+ unsetFont();
+}
+
+void BoUfoWidget::setFont(const BoUfoFontInfo& info)
+{
+ BO_CHECK_NULL_RET(widget());
+ mUsesOwnFont = true;
+
+ BoUfoManager* manager = BoUfoManager::ufoManagerForContext(widget()->getContext());
+ BO_CHECK_NULL_RET(manager);
+
+ applyFontToWidgetAndChildren(info.ufoFont(manager), widget());
+}
+
+void BoUfoWidget::unsetFont()
+{
+ BO_CHECK_NULL_RET(widget());
+ mUsesOwnFont = false;
+
+ ufo::UFont resetFont;
+ if (widget()->getParent()) {
+	resetFont = widget()->getParent()->getFont();
+ } else {
+	BoUfoManager* m = BoUfoManager::ufoManagerForContext(widget()->getContext());
+	if (!m) {
+		BO_NULL_ERROR(m);
+	} else {
+		resetFont = m->globalFont().ufoFont(m);
+	}
+ }
+
+ applyFontToWidgetAndChildren(resetFont, widget());
 }
 
 void BoUfoWidget::setName(const char* name)
@@ -1071,6 +1129,7 @@ BoUfoWidget::~BoUfoWidget()
  if (mBackgroundImageDrawable) {
 	mBackgroundImageDrawable->unreference();
  }
+ g_ufoWidget2BoUfoWidget.remove(widget());
 }
 
 void BoUfoWidget::uslotMouseEntered(ufo::UMouseEvent* e)
@@ -1177,13 +1236,21 @@ void BoUfoWidget::uslotKeyTyped(ufo::UKeyEvent* e)
  emit signalKeyTyped(e);
 }
 
+// called when _this_ widget is added to another widget
 void BoUfoWidget::uslotWidgetAdded(ufo::UWidgetEvent*)
 {
+ if (!providesOwnFont()) {
+	unsetFont();
+ }
  emit signalWidgetAdded();
 }
 
+// called when _this_ widget is removed from another widget
 void BoUfoWidget::uslotWidgetRemoved(ufo::UWidgetEvent*)
 {
+ if (!providesOwnFont()) {
+	unsetFont();
+ }
  emit signalWidgetRemoved();
 }
 

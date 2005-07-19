@@ -31,12 +31,12 @@
 #include "boufofontinfo.h"
 
 #include "boufomanager.h"
+#include "bodebug.h"
 
 BoUfoFontInfo::BoUfoFontInfo()
 {
- mPointSize = 12.0f;
- mStyle = 0;
- mFixedSize = false;
+ ufo::UFontInfo info;
+ init("", info);
 }
 
 BoUfoFontInfo::BoUfoFontInfo(const BoUfoFontInfo& font)
@@ -46,7 +46,15 @@ BoUfoFontInfo::BoUfoFontInfo(const BoUfoFontInfo& font)
 
 BoUfoFontInfo::BoUfoFontInfo(const QString& fontPlugin, const ufo::UFontInfo& font)
 {
+ init(fontPlugin, font);
+}
+
+void BoUfoFontInfo::init(const QString& fontPlugin, const ufo::UFontInfo& font)
+{
  mFontPlugin = fontPlugin;
+ if (mFontPlugin.isEmpty()) {
+	mFontPlugin = "builtin_font";
+ }
  mPointSize = font.pointSize;
  mFixedSize = false;
  mStyle = 0;
@@ -110,14 +118,35 @@ BoUfoFontInfo& BoUfoFontInfo::operator=(const BoUfoFontInfo& font)
  return *this;
 }
 
-ufo::UFont* BoUfoFontInfo::ufoFont(BoUfoManager* manager) const
+bool BoUfoFontInfo::operator==(const BoUfoFontInfo& info) const
+{
+ if (fontPlugin() != info.fontPlugin()) {
+	return false;
+ }
+ if (family() != info.family()) {
+	return false;
+ }
+ if (fixedSize() != info.fixedSize()) {
+	return false;
+ }
+ if (pointSize() != info.pointSize()) {
+	return false;
+ }
+ if (style() != info.style()) {
+	return false;
+ }
+ return true;
+}
+
+ufo::UFont BoUfoFontInfo::ufoFont(BoUfoManager* manager) const
 {
  QString originalFontPlugin = manager->ufoToolkitProperty("font");
  if (!fontPlugin().isEmpty()) {
 	manager->setUfoToolkitProperty("font", fontPlugin());
  }
 
- ufo::UFont* font = new ufo::UFont(ufoFontInfo());
+ ufo::UFont font = ufo::UFont(ufoFontInfo());
+ font.getRenderer(); // force to create the renderer with the current plugin
 
  manager->setUfoToolkitProperty("font", originalFontPlugin);
  return font;
@@ -176,4 +205,28 @@ ufo::UFontInfo BoUfoFontInfo::ufoFontInfo() const
  return fontInfo;
 }
 
+QString BoUfoFontInfo::debugString() const
+{
+ QString ret;
+ ret += QString::fromLatin1("font plugin=%1").arg(fontPlugin());
+ ret += QString::fromLatin1(" family=%1").arg(family());
+ ret += QString::fromLatin1(" pointSize=%1").arg(pointSize());
+ ret += QString::fromLatin1(" style mask=%1").arg(style());
+ if (italic()) {
+	ret += QString::fromLatin1(" italic");
+ }
+ if (bold()) {
+	ret += QString::fromLatin1(" bold");
+ }
+ if (underline()) {
+	ret += QString::fromLatin1(" underline");
+ }
+ if (strikeOut()) {
+	ret += QString::fromLatin1(" strikeOut");
+ }
+ if (fixedSize()) {
+	ret += QString::fromLatin1(" fixedSize");
+ }
+ return ret;
+}
 

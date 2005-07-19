@@ -42,6 +42,9 @@ BoUfoInternalFrame::BoUfoInternalFrame(BoUfoManager* manager, const QString& tit
  setTitle(title);
 
  manager->addFrame(this);
+
+ setMouseEventsEnabled(true, true);
+// setKeyEventsEnabled(true);
 }
 
 BoUfoInternalFrame::~BoUfoInternalFrame()
