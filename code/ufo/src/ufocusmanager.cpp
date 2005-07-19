@@ -92,11 +92,13 @@ UFocusManager::processMouseEvent(UMouseEvent * e) {
 	if ((m_policy == ClickToFocus) && (e->getType() == UEvent::MousePressed)) {
 		UWidget * w = e->getWidget();
 		w->requestFocus();
+		e->consume();
 	}
 	else if ((m_policy == FocusUnderMouse) &&
 			(e->getType() == UEvent::MouseEntered)) {
 		UWidget * w = e->getWidget();
 		w->requestFocus();
+		e->consume();
 	}
 }
 

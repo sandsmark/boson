@@ -47,6 +47,8 @@ Patches applied currently:
 - Patch to uwidget.cpp to return (0,0) instead of maxSize when maxSize is 0 in
   one direction in getPreferredSize().
 - Patch to uinternalframe.cpp to initialize m_frameState
+- Porting patch to ufocusmanager.cpp to consume events in processMouseEvent()
+  from official libufo cvs (05/07/19)
 
 
 
