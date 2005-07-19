@@ -111,6 +111,8 @@ void BoUfoTest::initializeGL()
  BoUfoFontSelectionWidget* selection = new BoUfoFontSelectionWidget(mUfoManager);
  frame->addWidget(selection);
  frame->setSize(frame->preferredWidth(), frame->preferredHeight());
+ connect(selection, SIGNAL(signalFontSelected(const BoUfoFontInfo&)),
+		this, SLOT(slotChangeFont(const BoUfoFontInfo&)));
 #endif // FONT_SELECTION_TEST
 
  initUfoActions();
@@ -242,6 +244,7 @@ void BoUfoTest::keyReleaseEvent(QKeyEvent* e)
 
 void BoUfoTest::slotChangeFont(const BoUfoFontInfo& font)
 {
+ mUfoManager->setGlobalFont(font);
 }
 
 void BoUfoTest::initUfoActions()

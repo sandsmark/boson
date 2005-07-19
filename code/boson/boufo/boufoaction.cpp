@@ -639,6 +639,7 @@ void BoUfoAction::plug(ufo::UWidget* w)
  ufo::UMenu* menu = dynamic_cast<ufo::UMenu*>(w);
  if (menuBar || menu) {
 	ufo::UMenuItem* menuItem = new ufo::UMenuItem(text().latin1());
+	menuItem->setFont(w->getFont());
 	BoUfoActionDeleter* deleter = new BoUfoActionDeleter(this, menuItem);
 	menuItem->setBoUfoWidgetDeleter(deleter);
 
@@ -676,6 +677,7 @@ void BoUfoToggleAction::plug(ufo::UWidget* w)
  ufo::UMenu* menu = dynamic_cast<ufo::UMenu*>(w);
  if (menuBar || menu) {
 	ufo::UCheckBoxMenuItem* menuItem = new ufo::UCheckBoxMenuItem(text().latin1());
+	menuItem->setFont(w->getFont());
 	BoUfoActionDeleter* deleter = new BoUfoActionDeleter(this, menuItem);
 	menuItem->setBoUfoWidgetDeleter(deleter);
 
@@ -762,6 +764,7 @@ void BoUfoActionMenu::plug(ufo::UWidget* w)
  ufo::UMenu* menu = dynamic_cast<ufo::UMenu*>(w);
  if (menuBar || menu) {
 	ufo::UMenu* m = new ufo::UMenu(text().latin1());
+	m->setFont(w->getFont());
 	BoUfoActionDeleter* deleter = new BoUfoActionDeleter(this, m);
 	m->setBoUfoWidgetDeleter(deleter);
 
@@ -1299,6 +1302,7 @@ void BoUfoMenuBar::createMenu()
  d->mUfoManager->makeContextCurrent();
  clearUfo();
  d->mBar = new ufo::UMenuBar();
+ d->mBar->setFont(d->mUfoManager->rootPane()->getFont());
  d->mUfoManager->rootPane()->setMenuBar(d->mBar);
 
  boDebug() << k_funcinfo << "creating submenus" << endl;
@@ -1383,6 +1387,7 @@ void BoUfoMenuBarMenu::createUfoSubMenu(ufo::UWidget* parentWidget)
 
 		// TODO: we could provide an icon
 		ufo::UMenu* menu = new ufo::UMenu(m->text().latin1());
+		menu->setFont(parentWidget->getFont());
 		parentWidget->add(menu);
 
 		m->createUfoSubMenu(menu);
@@ -1393,6 +1398,7 @@ void BoUfoMenuBarMenu::createUfoSubMenu(ufo::UWidget* parentWidget)
 			// e.g. a separator
 			ufo::UMenuItem* menuItem = 0;
 			menuItem = new ufo::UMenuItem(item->text().latin1());
+			menuItem->setFont(parentWidget->getFont());
 			parentWidget->add(menuItem);
 		} else {
 //			boDebug() << k_funcinfo << "plugging action " << action->name() << endl;

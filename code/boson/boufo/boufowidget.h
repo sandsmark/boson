@@ -382,6 +382,18 @@ public:
 	void setWidgetEventsEnabled(bool enabled);
 	bool hasMouse() const;
 
+	void setFont(const BoUfoFontInfo& info);
+	void unsetFont();
+
+	/**
+	 * @return TRUE if @ref setFont was called without calling @ref
+	 * unsetFont afterwards. Otherwise FALSE.
+	 **/
+	bool providesOwnFont() const
+	{
+		return mUsesOwnFont;
+	}
+
 	/**
 	 * @param rootPos A position relative to the @ref BoUfoManager::rootPane
 	 * @return @p rootPos in coordinates relative to this widget.
@@ -487,6 +499,7 @@ private:
 	LayoutClass mLayoutClass;
 	QString mBackgroundImageFile;
 	ufo::UDrawable* mBackgroundImageDrawable;
+	bool mUsesOwnFont;
 };
 
 class BoUfoVBox : public BoUfoWidget

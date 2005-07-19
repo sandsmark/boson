@@ -40,6 +40,7 @@ class BoUfoFontInfo;
 namespace ufo {
 	class UXToolkit;
 	class UXDisplay;
+	class UContext;
 	class UXContext;
 	class URootPane;
 	class UObject;
@@ -115,6 +116,22 @@ public:
 	 **/
 	BoUfoManager(int w, int h, bool opaque = false);
 	~BoUfoManager();
+
+	/**
+	 * @return The BoUfoManager object that maintains the currently active
+	 * context, see @ref ufo::UToolkit::getCurrentContext or NULL if no
+	 * context is current, or if no BoUfoManager manages that context. Note
+	 * that if a BoUfoManager is existing, this method returns NULL only, if
+	 * you changed the libufo context manually.
+	 **/
+	static BoUfoManager* currentUfoManager();
+
+	/**
+	 * @internal
+	 * @return The BoUfoManager object that manages @p context or NULL if
+	 * none does.
+	 **/
+	static BoUfoManager* ufoManagerForContext(ufo::UContext* context);
 
 	// AB: note that atm we always use video device size == context size
 	void resize(int w, int h);
@@ -210,6 +227,9 @@ public:
 	QString ufoToolkitProperty(const QString& key) const;
 	QMap<QString, QString> toolkitProperties() const;
 
+	void setGlobalFont(const BoUfoFontInfo& font);
+	const BoUfoFontInfo& globalFont() const;
+
 	QValueList<BoUfoFontInfo> listFonts();
 	QValueList<BoUfoFontInfo> listFonts(const BoUfoFontInfo&);
 
@@ -236,6 +256,7 @@ private:
 
 	BoUfoActionCollection* mActionCollection;
 	BoUfoMenuBar* mMenuBar;
+	BoUfoFontInfo* mGlobalFont;
 };
 
 #endif

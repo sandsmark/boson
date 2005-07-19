@@ -31,44 +31,8 @@ template<class T1> class QValueList;
 class QDomElement;
 
 namespace ufo {
-	class UXToolkit;
-	class UXDisplay;
-	class UXContext;
-	class URootPane;
-	class UObject;
-	class ULayoutManager;
-	class UDimension;
-	class UDrawable;
-	class UImage;
-	class UImageIO;
-	class UPoint;
-	class UFontInfo;
 	class UFont;
-
-	class UWidget;
-	class UButton;
-	class UCheckBox;
-	class URadioButton;
-	class UTextEdit;
-	class UAbstractSlider;
-	class USlider;
-	class UListBox;
-	class ULineEdit;
-	class ULabel;
-	class UComboBox;
-	class UInternalFrame;
-	class UBoProgress;
-	class ULayeredPane;
-	class UWidgetUI;
-	class UButtonGroup;
-
-
-	class UActionEvent;
-	class UMouseEvent;
-	class UMouseWheelEvent;
-	class UWidgetEvent;
-	class UKeyEvent;
-	class UFocusEvent;
+	class UFontInfo;
 };
 
 
@@ -150,17 +114,24 @@ public:
 	void setFixedSize(bool e) { mFixedSize = e; }
 	bool fixedSize() const { return mFixedSize; }
 
+	bool operator==(const BoUfoFontInfo& info) const;
+
 	/**
-	 * This creates a NEW (!!) font according to the properties of this
+	 * This creates a font according to the properties of this
 	 * font. If there is no such font available, libufo will return an
 	 * alternative font.
 	 *
-	 * You should use this font in a ufo widget (using setFont) or delete
-	 * it.
+	 * This font can be used in a ufo widget.
 	 **/
-	ufo::UFont* ufoFont(BoUfoManager* manager) const;
+	ufo::UFont ufoFont(BoUfoManager* manager) const;
 
 	ufo::UFontInfo ufoFontInfo() const;
+
+	QString debugString() const;
+
+private:
+	void init(const QString& fontPlugin, const ufo::UFontInfo& font);
+
 private:
 	QString mFontPlugin;
 	QString mFamily;

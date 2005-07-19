@@ -1,6 +1,6 @@
 INCLUDES = $(UFO_INCLUDES) -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl $(all_includes) -I$(top_srcdir)/boson -I$(top_srcdir)/boson/boufo
 
-bin_PROGRAMS = boufotest boufobuttontest
+bin_PROGRAMS = boufotest boufobuttontest boufolistboxtest
 
 METASOURCES = AUTO
 
@@ -30,4 +30,14 @@ boufobuttontest_LDADD = \
 boufobuttontest_SOURCES = \
 		boufobuttontest.cpp
 
+boufolistboxtest_LDFLAGS = $(KDE_RPATH) $(all_libraries)
+boufolistboxtest_LDADD = \
+		$(top_builddir)/bodebug/libbodebug.la \
+		$(top_builddir)/bogl/libbogl.la \
+		$(top_builddir)/boson/boufo/libboufo.la \
+		$(LIB_QT) \
+		$(LIB_KDECORE) \
+		$(LIB_BOMEMORY)
+boufolistboxtest_SOURCES = \
+		boufolistboxtest.cpp
 

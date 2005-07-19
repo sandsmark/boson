@@ -162,10 +162,7 @@ void BoUfoFontSelectionWidget::updateFont()
 	// setSupportedStyles(supportedStyles);
  }
 
- // AB: I _think_ libufo deletes the font once it is not used anymore
-// ufo::UFont* font = fontInfo().ufoFont(d->mUfoManager);
-// font->reference();
- mPreview->setFont(d->mUfoManager, fontInfo());
+ mPreview->setFont(fontInfo());
 }
 
 int BoUfoFontSelectionWidget::selectedStyles() const

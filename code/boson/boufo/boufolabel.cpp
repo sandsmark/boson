@@ -155,23 +155,3 @@ QString BoUfoLabel::iconFile() const
  return mIconFile;
 }
 
-void BoUfoLabel::setFont(BoUfoManager* m, const BoUfoFontInfo& info)
-{
- ufo::UFont* font = info.ufoFont(m);
-
-#warning FIXME: memory leak
- // this should be done by ufo::UWidget::setFont() and that one should also
- // unreference it.
- // it is necessary because otherwise the application crashes when rendering due
- // to ufo::UGraphics::setFont().
- font->reference();
-
-#warning FIXME: setFont() is broken
-#if 0
- mLabel->setFont(font);
-#else
- boError() << k_funcinfo << "is broken" << endl;
-#endif
-}
-
-

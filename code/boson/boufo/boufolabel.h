@@ -58,11 +58,6 @@ public:
 	static void setDefaultForegroundColor(const QColor& color);
 	static const QColor& defaultForegroundColor();
 
-	// AB: probably this should be in BoUfoWidget and all derived classes
-	// reimplement it for their own widget.
-	// however atm we don't really need it
-	void setFont(BoUfoManager*, const BoUfoFontInfo& info);
-
 	/**
 	 * See @ref BoUfoWidget::setVerticalAlignment
 	 **/
