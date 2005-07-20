@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2005 Andreas Beckermann (b_mann@gmx.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -18,33 +18,33 @@
 */
 
 // note the copyright above: this is LGPL!
-#ifndef BOUFO_H
-#define BOUFO_H
+#ifndef BOUFOGROUPBOX_H
+#define BOUFOGROUPBOX_H
 
-#include "boufomanager.h"
-#include "boufofontinfo.h"
-#include "boufofactory.h"
-#include "boufodrawable.h"
-#include "boufoimage.h"
 #include "boufowidget.h"
-#include "boufowidgetstack.h"
-#include "boufogroupbox.h"
-#include "boufolabel.h"
-#include "boufopushbutton.h"
-#include "boufoslider.h"
-#include "boufotabwidget.h"
-#include "boufolayeredpane.h"
-#include "boufoinputdialog.h"
-#include "boufointernalframe.h"
-#include "boufoprogress.h"
-#include "boufomatrix.h"
-#include "boufolistbox.h"
-#include "boufolineedit.h"
-#include "boufotextedit.h"
-#include "bouforadiobutton.h"
-#include "boufocheckbox.h"
-#include "boufocombobox.h"
-#include "boufonuminput.h"
-#include "boufocustomwidget.h"
+
+namespace ufo {
+	class UGroupBox;
+};
+
+class BoUfoGroupBox : public BoUfoWidget
+{
+	Q_OBJECT
+	Q_PROPERTY(QString title READ title WRITE setTitle);
+public:
+	BoUfoGroupBox();
+	BoUfoGroupBox(const QString& title);
+
+	ufo::UGroupBox* groupBox() const
+	{
+		return mGroupBox;
+	}
+
+	void setTitle(const QString& text);
+	QString title() const;
+
+private:
+	ufo::UGroupBox* mGroupBox;
+};
 
 #endif

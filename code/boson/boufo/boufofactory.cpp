@@ -44,6 +44,7 @@ BoUfoWidget* BoUfoFactory::createWidget(const QString& className)
  CLASSNAME(BoUfoWidget)
  CLASSNAME(BoUfoHBox)
  CLASSNAME(BoUfoVBox)
+ CLASSNAME(BoUfoGroupBox)
  CLASSNAME(BoUfoPushButton)
  CLASSNAME(BoUfoCheckBox)
  CLASSNAME(BoUfoRadioButton)
@@ -70,6 +71,7 @@ QStringList BoUfoFactory::widgets()
  list.append("BoUfoWidget");
  list.append("BoUfoHBox");
  list.append("BoUfoVBox");
+ list.append("BoUfoGroupBox");
  list.append("BoUfoPushButton");
  list.append("BoUfoCheckBox");
  list.append("BoUfoRadioButton");
