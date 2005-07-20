@@ -126,13 +126,19 @@ UTextWidget::setDocument(UDocument * documentA) {
 		releasePointer(m_doc);
 	}
 
+	bool hadDoc = m_doc;
+
 	m_doc = documentA;
 	trackPointer(m_doc);
 
 	caret = getCaret();
 	caret->setPosition(mark);
 	caret->movePosition(position);
-	getTextModel()->document = m_doc;
+	if (hadDoc) { // false in c'tor only
+		// AB: in c'tor getTextModel() does _NOT_ return a text model
+		// yet! we must not use it!
+		getTextModel()->document = m_doc;
+	}
 
 	m_doc->sigTextReplaced().connect(slot(*this, &UTextWidget::docChanged));
 }
