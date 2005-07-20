@@ -29,6 +29,7 @@ libboufo_la_SOURCES = \
 	boufotabwidget.cpp \
 	boufolayeredpane.cpp \
 	boufowidgetstack.cpp \
+	boufogroupbox.cpp \
 	boufocustomwidget.cpp \
 	boufointernalframe.cpp \
 	boufoinputdialog.cpp \
