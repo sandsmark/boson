@@ -360,7 +360,7 @@ bool BoTXFFont::loadFont(const QString& fileName)
 {
  mFont = new BofntTexFont();
  mFont->setGap(0.0f);
- if (mFont->load(fileName.latin1()) != FNT_TRUE) {
+ if (mFont->load(fileName.latin1(), GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR) != FNT_TRUE) {
 	boError() << k_funcinfo << "could not load txf font " << fileName << endl;
 	return false;
  }

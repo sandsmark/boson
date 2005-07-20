@@ -30,6 +30,8 @@
 
 #include <bodebug.h>
 
+#define DISABLE_MIPMAPS 1
+
 static bool glIsValidContext( void )
 {
   return ( glXGetCurrentContext() != NULL );
@@ -50,8 +52,9 @@ static void tex_make_mip_maps( GLubyte *image, int xsize,
 
   texels [ 0 ] = image;
 
-  int lev;
+  int lev = 0;
 
+#if !DISABLE_MIPMAPS
   for ( lev = 0 ; (( xsize >> (lev+1) ) != 0 ||
                    ( ysize >> (lev+1) ) != 0 ) ; lev++ )
   {
@@ -108,6 +111,7 @@ static void tex_make_mip_maps( GLubyte *image, int xsize,
       }
     }
   }
+#endif
 
   texels [ lev+1 ] = NULL;
 
@@ -354,6 +358,9 @@ int BofntTexFont::loadTXF( const char *fname, GLenum mag, GLenum min )
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+#if DISABLE_MIPMAPS
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0 );
+#endif
   glBindTexture( GL_TEXTURE_2D, 0 );
 
   return FNT_TRUE;
