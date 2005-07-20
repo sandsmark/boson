@@ -30,18 +30,22 @@
 #include "boufogroupbox.h"
 #include "boufogroupbox.moc"
 
+#include "boufolabel.h"
+
 #include <bodebug.h>
 
 BoUfoGroupBox::BoUfoGroupBox()
 	: BoUfoWidget(new ufo::UGroupBox())
 {
  mGroupBox = (ufo::UGroupBox*)widget();
+ setForegroundColor(BoUfoLabel::defaultForegroundColor());
 }
 
 BoUfoGroupBox::BoUfoGroupBox(const QString& title)
 	: BoUfoWidget(new ufo::UGroupBox())
 {
  mGroupBox = (ufo::UGroupBox*)widget();
+ setForegroundColor(BoUfoLabel::defaultForegroundColor());
  setTitle(title);
 }
 
