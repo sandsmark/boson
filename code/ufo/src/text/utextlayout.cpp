@@ -295,6 +295,9 @@ UTextLayout::layout() {
 				if (lineStart == wrap_index) {
 					wrap_index = (index > 0) ? index - 1 : 0;
 				}
+				if (wrap_index < lineStart) {
+					wrap_index = lineStart;
+				}
 				UTextLine line(lineStart, wrap_index - lineStart, lineHeight, pos);
 				m_lines.push_back(line);
 				pos.y += lineHeight;
