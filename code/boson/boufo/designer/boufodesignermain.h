@@ -172,7 +172,7 @@ class FormPreview : public QGLWidget
 {
 	Q_OBJECT
 public:
-	FormPreview(QWidget*);
+	FormPreview(const QGLFormat& format, QWidget*);
 	~FormPreview();
 
 	void setPlacementMode(bool m);
