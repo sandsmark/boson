@@ -48,14 +48,13 @@ public:
 	UpgradesContainer()
 	{
 		mUpgrades.setAutoDelete(true);
-		mConstUpgrades.setAutoDelete(true);
 	}
 	~UpgradesContainer()
 	{
+		mConstUpgrades.setAutoDelete(false);
+		mConstUpgrades.clear();
 		mUpgrades.setAutoDelete(true);
 		mUpgrades.clear();
-		mConstUpgrades.setAutoDelete(true);
-		mConstUpgrades.clear();
 	}
 
 	void insertUpgrade(UpgradeProperties* upgrade)
