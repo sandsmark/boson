@@ -919,7 +919,7 @@ void BoSignalsSlotsEditor::slotMethodVisibilityChanged(const QString& v)
 
 
 
-FormPreview::FormPreview(QWidget* parent) : QGLWidget(parent)
+FormPreview::FormPreview(const QGLFormat& format, QWidget* parent) : QGLWidget(format, parent)
 {
 // qApp->setGlobalMouseTracking(true);
 // qApp->installEventFilter(this);
@@ -1826,7 +1826,9 @@ BoUfoDesignerMain::BoUfoDesignerMain()
 		this, SLOT(slotWidgetClassSelected(const QString&)));
  mWidgets->show();
 
- mPreview = new FormPreview(splitter);
+ QGLFormat format;
+// format.setDirectRendering(false);
+ mPreview = new FormPreview(format, splitter);
  connect(mPreview, SIGNAL(signalPlaceWidget(const QDomElement&)),
 		this, SLOT(slotPlaceWidget(const QDomElement&)));
  connect(mPreview, SIGNAL(signalSelectWidget(const QDomElement&)),
