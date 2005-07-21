@@ -55,10 +55,27 @@ public:
 		mLoop = loop;
 	}
 
+	/**
+	 * @return The number of the first frame of this animation
+	 **/
 	inline unsigned int start() const { return mStart; }
+
+	/**
+	 * @return The number of the last frame of this animation
+	 **/
 	inline unsigned int end() const { return mEnd; }
-	inline unsigned int range() const { return mEnd - mStart; }
+
+	/**
+	 * @return The number of frames in this animation
+	 **/
+	inline unsigned int range() const { return mEnd - mStart + 1; }
+
 	inline float speed() const { return mSpeed; }
+
+	/**
+	 * @return TRUE if if the animation should restart at @ref start once
+	 * @ref end was exceeded
+	 **/
 	inline bool loop() const { return mLoop; }
 
 private:
