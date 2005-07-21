@@ -17,6 +17,7 @@
    <verticalAlignment/>
    <horizontalAlignment/>
    <stretch/>
+   <borderType/>
   </Properties>
   <Widget>
    <ClassName>BoUfoHBox</ClassName>
@@ -35,6 +36,7 @@
     <verticalAlignment/>
     <horizontalAlignment/>
     <stretch>2</stretch>
+    <borderType/>
    </Properties>
    <Widget>
     <ClassName>BoUfoVBox</ClassName>
@@ -53,6 +55,7 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch/>
+     <borderType/>
     </Properties>
     <Widget>
      <ClassName>BoUfoButtonGroupWidget</ClassName>
@@ -71,6 +74,7 @@
       <verticalAlignment/>
       <horizontalAlignment/>
       <stretch/>
+      <borderType/>
      </Properties>
      <Widget>
       <ClassName>BoUfoRadioButton</ClassName>
@@ -91,6 +95,7 @@
        <stretch/>
        <text>Create New map</text>
        <selected/>
+       <borderType/>
       </Properties>
      </Widget>
      <Widget>
@@ -110,6 +115,7 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch/>
+       <borderType/>
       </Properties>
       <Widget>
        <ClassName>BoUfoWidget</ClassName>
@@ -128,6 +134,7 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
+        <borderType/>
        </Properties>
       </Widget>
       <Widget>
@@ -149,6 +156,7 @@
         <stretch>1</stretch>
         <text>Map Name</text>
         <editable/>
+        <borderType/>
        </Properties>
       </Widget>
      </Widget>
@@ -171,6 +179,7 @@
        <stretch/>
        <text>Edit existing map</text>
        <selected/>
+       <borderType/>
       </Properties>
      </Widget>
      <Widget>
@@ -190,6 +199,7 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch>1</stretch>
+       <borderType/>
       </Properties>
       <Widget>
        <ClassName>BoUfoWidget</ClassName>
@@ -208,6 +218,7 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
+        <borderType/>
        </Properties>
       </Widget>
       <Widget>
@@ -228,6 +239,7 @@
         <horizontalAlignment/>
         <stretch>1</stretch>
         <selection>SingleSelection</selection>
+        <borderType/>
        </Properties>
       </Widget>
      </Widget>
@@ -250,9 +262,10 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch/>
+     <borderType/>
     </Properties>
     <Widget>
-     <ClassName>BoUfoWidget</ClassName>
+     <ClassName>BoUfoGroupBox</ClassName>
      <Properties>
       <name>mMapInformationGroupBox</name>
       <constraints/>
@@ -268,6 +281,8 @@
       <verticalAlignment/>
       <horizontalAlignment/>
       <stretch/>
+      <borderType/>
+      <title>Map information</title>
      </Properties>
      <Widget>
       <ClassName>BoUfoVBox</ClassName>
@@ -286,6 +301,7 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch/>
+       <borderType/>
       </Properties>
       <Widget>
        <ClassName>BoUfoHBox</ClassName>
@@ -304,6 +320,7 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
+        <borderType/>
        </Properties>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
@@ -324,6 +341,7 @@
          <stretch/>
          <text>Ground Theme:</text>
          <iconFile/>
+         <borderType/>
         </Properties>
        </Widget>
        <Widget>
@@ -343,6 +361,7 @@
          <verticalAlignment/>
          <horizontalAlignment/>
          <stretch/>
+         <borderType/>
         </Properties>
        </Widget>
       </Widget>
@@ -363,6 +382,7 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
+        <borderType/>
        </Properties>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
@@ -383,6 +403,7 @@
          <stretch/>
          <text>Fill with:</text>
          <iconFile/>
+         <borderType/>
         </Properties>
        </Widget>
        <Widget>
@@ -402,6 +423,7 @@
          <verticalAlignment/>
          <horizontalAlignment/>
          <stretch/>
+         <borderType/>
         </Properties>
        </Widget>
       </Widget>
@@ -423,6 +445,7 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch/>
+       <borderType/>
       </Properties>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
@@ -443,6 +466,7 @@
         <stretch/>
         <text>Map size:</text>
         <iconFile/>
+        <borderType/>
        </Properties>
       </Widget>
       <Widget>
@@ -462,6 +486,7 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
+        <borderType/>
        </Properties>
       </Widget>
      </Widget>
@@ -482,6 +507,7 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch/>
+       <borderType/>
       </Properties>
       <Widget>
        <ClassName>BoUfoWidget</ClassName>
@@ -500,6 +526,7 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
+        <borderType/>
        </Properties>
       </Widget>
       <Widget>
@@ -519,6 +546,7 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch>1</stretch>
+        <borderType/>
        </Properties>
        <Widget>
         <ClassName>BoUfoNumInput</ClassName>
@@ -542,6 +570,7 @@
          <maximumValue>500</maximumValue>
          <stepSize/>
          <value>256</value>
+         <borderType/>
         </Properties>
        </Widget>
        <Widget>
@@ -566,6 +595,7 @@
          <maximumValue>500</maximumValue>
          <stepSize/>
          <value>256</value>
+         <borderType/>
         </Properties>
        </Widget>
       </Widget>
@@ -592,6 +622,7 @@
        <maximumValue>10</maximumValue>
        <stepSize/>
        <value>2</value>
+       <borderType/>
       </Properties>
      </Widget>
      <Widget>
@@ -611,6 +642,7 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch>1</stretch>
+       <borderType/>
       </Properties>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
@@ -631,6 +663,7 @@
         <stretch/>
         <text>Map Description</text>
         <iconFile/>
+        <borderType/>
        </Properties>
       </Widget>
       <Widget>
@@ -652,6 +685,7 @@
         <stretch>1</stretch>
         <text/>
         <editable/>
+        <borderType/>
        </Properties>
       </Widget>
      </Widget>
@@ -672,6 +706,7 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch>1</stretch>
+       <borderType/>
       </Properties>
      </Widget>
     </Widget>
@@ -694,6 +729,7 @@
     <verticalAlignment/>
     <horizontalAlignment/>
     <stretch>1</stretch>
+    <borderType/>
    </Properties>
   </Widget>
   <Widget>
@@ -713,6 +749,7 @@
     <verticalAlignment/>
     <horizontalAlignment/>
     <stretch/>
+    <borderType/>
    </Properties>
    <Widget>
     <ClassName>BoUfoWidget</ClassName>
@@ -731,6 +768,7 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch>1</stretch>
+     <borderType/>
     </Properties>
    </Widget>
    <Widget>
@@ -752,6 +790,7 @@
      <stretch/>
      <text>&amp;Cancel</text>
      <iconFile/>
+     <borderType/>
     </Properties>
    </Widget>
    <Widget>
@@ -771,6 +810,7 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch>1</stretch>
+     <borderType/>
     </Properties>
    </Widget>
    <Widget>
@@ -792,6 +832,7 @@
      <stretch/>
      <text>S&amp;tart</text>
      <iconFile/>
+     <borderType/>
     </Properties>
    </Widget>
    <Widget>
@@ -811,6 +852,7 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch>1</stretch>
+     <borderType/>
     </Properties>
    </Widget>
   </Widget>
