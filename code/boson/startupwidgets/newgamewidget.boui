@@ -17,6 +17,7 @@
    <stretch/>
    <gridLayoutColumns/>
    <gridLayoutRows/>
+   <borderType/>
   </Properties>
   <Widget>
    <ClassName>BoUfoWidget</ClassName>
@@ -35,6 +36,7 @@
     <stretch>1</stretch>
     <gridLayoutColumns/>
     <gridLayoutRows/>
+    <borderType/>
    </Properties>
    <Widget>
     <ClassName>BoUfoWidget</ClassName>
@@ -53,9 +55,10 @@
      <stretch>1</stretch>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
     <Widget>
-     <ClassName>BoUfoWidget</ClassName>
+     <ClassName>BoUfoGroupBox</ClassName>
      <Properties>
       <preferredHeight/>
       <minimumHeight/>
@@ -71,6 +74,8 @@
       <stretch/>
       <gridLayoutColumns/>
       <gridLayoutRows/>
+      <borderType/>
+      <title>Choose Map</title>
      </Properties>
      <Widget>
       <ClassName>BoUfoWidget</ClassName>
@@ -89,6 +94,7 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch/>
+       <borderType/>
       </Properties>
       <Widget>
        <ClassName>BoUfoWidget</ClassName>
@@ -107,6 +113,7 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
+        <borderType/>
        </Properties>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
@@ -127,6 +134,7 @@
          <stretch/>
          <text>Available missions:</text>
          <iconFile/>
+         <borderType/>
         </Properties>
        </Widget>
        <Widget>
@@ -148,6 +156,7 @@
          <stretch/>
          <text/>
          <iconFile/>
+         <borderType/>
         </Properties>
        </Widget>
       </Widget>
@@ -168,6 +177,7 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch>1</stretch>
+        <borderType/>
        </Properties>
        <Widget>
         <ClassName>BoUfoListBox</ClassName>
@@ -187,6 +197,7 @@
          <stretch/>
          <gridLayoutColumns/>
          <gridLayoutRows/>
+         <borderType/>
         </Properties>
        </Widget>
       </Widget>
@@ -208,6 +219,7 @@
        <stretch/>
        <gridLayoutColumns/>
        <gridLayoutRows/>
+       <borderType/>
       </Properties>
       <Widget>
        <ClassName>BoUfoWidget</ClassName>
@@ -226,16 +238,17 @@
         <stretch/>
         <gridLayoutColumns/>
         <gridLayoutRows/>
+        <borderType/>
        </Properties>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
         <Properties>
          <preferredHeight>20</preferredHeight>
-         <minimumHeight></minimumHeight>
+         <minimumHeight/>
          <opaque/>
          <constraints/>
          <verticalAlignment/>
-         <preferredWidth></preferredWidth>
+         <preferredWidth/>
          <horizontalAlignment/>
          <layout/>
          <iconFile/>
@@ -246,6 +259,7 @@
          <stretch>0</stretch>
          <gridLayoutColumns/>
          <gridLayoutRows/>
+         <borderType/>
         </Properties>
        </Widget>
        <Widget>
@@ -267,6 +281,7 @@
          <stretch>0</stretch>
          <gridLayoutColumns/>
          <gridLayoutRows/>
+         <borderType/>
         </Properties>
        </Widget>
       </Widget>
@@ -287,6 +302,7 @@
         <stretch/>
         <gridLayoutColumns/>
         <gridLayoutRows/>
+        <borderType/>
        </Properties>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
@@ -296,7 +312,7 @@
          <opaque/>
          <constraints/>
          <verticalAlignment/>
-         <preferredWidth></preferredWidth>
+         <preferredWidth/>
          <horizontalAlignment/>
          <layout/>
          <iconFile/>
@@ -307,6 +323,7 @@
          <stretch/>
          <gridLayoutColumns/>
          <gridLayoutRows/>
+         <borderType/>
         </Properties>
        </Widget>
        <Widget>
@@ -328,6 +345,7 @@
          <stretch>0</stretch>
          <gridLayoutColumns/>
          <gridLayoutRows/>
+         <borderType/>
         </Properties>
        </Widget>
       </Widget>
@@ -348,6 +366,7 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
+        <borderType/>
        </Properties>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
@@ -368,6 +387,7 @@
          <stretch/>
          <text>Mission overview:</text>
          <iconFile/>
+         <borderType/>
         </Properties>
        </Widget>
        <Widget>
@@ -389,6 +409,7 @@
          <stretch/>
          <text/>
          <iconFile/>
+         <borderType/>
         </Properties>
        </Widget>
       </Widget>
@@ -411,6 +432,7 @@
         <editable>false</editable>
         <gridLayoutColumns/>
         <gridLayoutRows/>
+        <borderType/>
        </Properties>
       </Widget>
       <Widget>
@@ -432,6 +454,7 @@
         <stretch>1</stretch>
         <gridLayoutColumns/>
         <gridLayoutRows/>
+        <borderType/>
        </Properties>
       </Widget>
      </Widget>
@@ -453,6 +476,7 @@
       <stretch/>
       <gridLayoutColumns/>
       <gridLayoutRows/>
+      <borderType/>
      </Properties>
     </Widget>
    </Widget>
@@ -473,9 +497,10 @@
      <stretch/>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
     <Widget>
-     <ClassName>BoUfoWidget</ClassName>
+     <ClassName>BoUfoGroupBox</ClassName>
      <Properties>
       <opaque/>
       <minimumHeight/>
@@ -491,6 +516,8 @@
       <stretch/>
       <gridLayoutColumns/>
       <gridLayoutRows/>
+      <borderType/>
+      <title>Player options</title>
      </Properties>
      <Widget>
       <ClassName>BoUfoHBox</ClassName>
@@ -509,6 +536,7 @@
        <stretch/>
        <gridLayoutColumns/>
        <gridLayoutRows/>
+       <borderType/>
       </Properties>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
@@ -529,6 +557,7 @@
         <stretch/>
         <gridLayoutColumns/>
         <gridLayoutRows/>
+        <borderType/>
        </Properties>
       </Widget>
       <Widget>
@@ -539,7 +568,7 @@
         <opaque/>
         <constraints/>
         <verticalAlignment/>
-        <preferredWidth></preferredWidth>
+        <preferredWidth/>
         <horizontalAlignment/>
         <layout/>
         <name>mPlayerName</name>
@@ -550,6 +579,7 @@
         <editable/>
         <gridLayoutColumns/>
         <gridLayoutRows/>
+        <borderType/>
        </Properties>
       </Widget>
      </Widget>
@@ -570,6 +600,7 @@
        <stretch/>
        <gridLayoutColumns/>
        <gridLayoutRows/>
+       <borderType/>
       </Properties>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
@@ -590,6 +621,7 @@
         <stretch/>
         <gridLayoutColumns/>
         <gridLayoutRows/>
+        <borderType/>
        </Properties>
       </Widget>
       <Widget>
@@ -600,7 +632,7 @@
         <preferredHeight/>
         <constraints/>
         <verticalAlignment/>
-        <preferredWidth></preferredWidth>
+        <preferredWidth/>
         <horizontalAlignment/>
         <layout/>
         <name>mPlayerColorContainer</name>
@@ -609,6 +641,7 @@
         <stretch/>
         <gridLayoutColumns/>
         <gridLayoutRows/>
+        <borderType/>
        </Properties>
       </Widget>
      </Widget>
@@ -629,6 +662,7 @@
        <stretch/>
        <gridLayoutColumns/>
        <gridLayoutRows/>
+       <borderType/>
       </Properties>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
@@ -649,6 +683,7 @@
         <stretch/>
         <gridLayoutColumns/>
         <gridLayoutRows/>
+        <borderType/>
        </Properties>
       </Widget>
       <Widget>
@@ -659,7 +694,7 @@
         <preferredHeight/>
         <constraints/>
         <verticalAlignment/>
-        <preferredWidth></preferredWidth>
+        <preferredWidth/>
         <horizontalAlignment/>
         <layout/>
         <name>mPlayerSpecies</name>
@@ -668,6 +703,7 @@
         <stretch/>
         <gridLayoutColumns/>
         <gridLayoutRows/>
+        <borderType/>
        </Properties>
       </Widget>
      </Widget>
@@ -690,6 +726,7 @@
        <stretch/>
        <gridLayoutColumns/>
        <gridLayoutRows/>
+       <borderType/>
       </Properties>
      </Widget>
     </Widget>
@@ -710,13 +747,14 @@
       <stretch>1</stretch>
       <gridLayoutColumns/>
       <gridLayoutRows/>
+      <borderType/>
      </Properties>
      <Widget>
       <ClassName>BoUfoLabel</ClassName>
       <Properties>
        <opaque/>
        <minimumHeight/>
-       <preferredHeight></preferredHeight>
+       <preferredHeight/>
        <constraints/>
        <verticalAlignment>AlignTop</verticalAlignment>
        <preferredWidth/>
@@ -730,6 +768,7 @@
        <stretch/>
        <gridLayoutColumns/>
        <gridLayoutRows/>
+       <borderType/>
       </Properties>
      </Widget>
      <Widget>
@@ -750,6 +789,7 @@
        <stretch>1</stretch>
        <gridLayoutColumns/>
        <gridLayoutRows/>
+       <borderType/>
       </Properties>
      </Widget>
      <Widget>
@@ -771,6 +811,7 @@
        <stretch/>
        <gridLayoutColumns/>
        <gridLayoutRows/>
+       <borderType/>
       </Properties>
      </Widget>
      <Widget>
@@ -790,6 +831,7 @@
        <stretch>1</stretch>
        <gridLayoutColumns/>
        <gridLayoutRows/>
+       <borderType/>
       </Properties>
      </Widget>
     </Widget>
@@ -812,6 +854,7 @@
     <stretch/>
     <gridLayoutColumns/>
     <gridLayoutRows/>
+    <borderType/>
    </Properties>
    <Widget>
     <ClassName>BoUfoWidget</ClassName>
@@ -830,6 +873,7 @@
      <stretch>1</stretch>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
    </Widget>
    <Widget>
@@ -851,6 +895,7 @@
      <stretch/>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
    </Widget>
    <Widget>
@@ -870,6 +915,7 @@
      <stretch>1</stretch>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
    </Widget>
    <Widget>
@@ -891,6 +937,7 @@
      <stretch/>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
    </Widget>
    <Widget>
@@ -910,6 +957,7 @@
      <stretch>1</stretch>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
    </Widget>
    <Widget>
@@ -931,6 +979,7 @@
      <stretch/>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
    </Widget>
    <Widget>
@@ -950,6 +999,7 @@
      <stretch>1</stretch>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
    </Widget>
   </Widget>

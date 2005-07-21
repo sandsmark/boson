@@ -17,6 +17,7 @@
    <stretch/>
    <gridLayoutColumns/>
    <gridLayoutRows/>
+   <borderType/>
   </Properties>
   <Widget>
    <ClassName>BoUfoLabel</ClassName>
@@ -37,6 +38,7 @@
     <iconFile/>
     <gridLayoutColumns/>
     <gridLayoutRows/>
+    <borderType/>
    </Properties>
   </Widget>
   <Widget>
@@ -56,6 +58,7 @@
     <stretch>1</stretch>
     <gridLayoutColumns/>
     <gridLayoutRows/>
+    <borderType/>
    </Properties>
   </Widget>
   <Widget>
@@ -75,6 +78,7 @@
     <stretch/>
     <gridLayoutColumns/>
     <gridLayoutRows/>
+    <borderType/>
    </Properties>
    <Widget>
     <ClassName>BoUfoWidget</ClassName>
@@ -93,6 +97,7 @@
      <stretch>1</stretch>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
    </Widget>
    <Widget>
@@ -112,6 +117,7 @@
      <stretch/>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
     <Widget>
      <ClassName>BoUfoWidget</ClassName>
@@ -130,6 +136,7 @@
       <stretch/>
       <gridLayoutColumns/>
       <gridLayoutRows/>
+      <borderType/>
      </Properties>
      <Widget>
       <ClassName>BoUfoHBox</ClassName>
@@ -148,6 +155,7 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch/>
+       <borderType/>
       </Properties>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
@@ -168,6 +176,7 @@
         <iconFile/>
         <gridLayoutColumns/>
         <gridLayoutRows/>
+        <borderType/>
        </Properties>
       </Widget>
       <Widget>
@@ -189,6 +198,7 @@
         <iconFile/>
         <gridLayoutColumns/>
         <gridLayoutRows/>
+        <borderType/>
        </Properties>
       </Widget>
      </Widget>
@@ -209,6 +219,7 @@
        <stretch/>
        <gridLayoutColumns/>
        <gridLayoutRows/>
+       <borderType/>
       </Properties>
       <Widget>
        <ClassName>BoUfoWidget</ClassName>
@@ -227,6 +238,7 @@
         <stretch>1</stretch>
         <gridLayoutColumns/>
         <gridLayoutRows/>
+        <borderType/>
        </Properties>
       </Widget>
       <Widget>
@@ -248,6 +260,7 @@
         <iconFile/>
         <gridLayoutColumns/>
         <gridLayoutRows/>
+        <borderType/>
        </Properties>
       </Widget>
      </Widget>
@@ -268,11 +281,12 @@
        <stretch>1</stretch>
        <gridLayoutColumns/>
        <gridLayoutRows/>
+       <borderType/>
       </Properties>
      </Widget>
     </Widget>
     <Widget>
-     <ClassName>BoUfoWidget</ClassName>
+     <ClassName>BoUfoGroupBox</ClassName>
      <Properties>
       <name>mNetConfigGroupBox</name>
       <constraints/>
@@ -288,6 +302,8 @@
       <stretch/>
       <gridLayoutColumns/>
       <gridLayoutRows/>
+      <borderType/>
+      <title>Network config</title>
      </Properties>
      <Widget>
       <ClassName>BoUfoWidget</ClassName>
@@ -306,6 +322,7 @@
        <stretch/>
        <gridLayoutColumns/>
        <gridLayoutRows/>
+       <borderType/>
       </Properties>
       <Widget>
        <ClassName>BoUfoButtonGroupWidget</ClassName>
@@ -324,6 +341,7 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
+        <borderType/>
        </Properties>
        <Widget>
         <ClassName>BoUfoRadioButton</ClassName>
@@ -344,6 +362,7 @@
          <stretch/>
          <text>Create Network Game</text>
          <selected/>
+         <borderType/>
         </Properties>
        </Widget>
        <Widget>
@@ -365,6 +384,7 @@
          <stretch/>
          <text>Join Network Game</text>
          <selected/>
+         <borderType/>
         </Properties>
        </Widget>
       </Widget>
@@ -386,6 +406,7 @@
        <stretch/>
        <gridLayoutColumns/>
        <gridLayoutRows/>
+       <borderType/>
       </Properties>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
@@ -406,6 +427,7 @@
         <iconFile/>
         <gridLayoutColumns/>
         <gridLayoutRows/>
+        <borderType/>
        </Properties>
       </Widget>
       <Widget>
@@ -430,6 +452,7 @@
         <maximumValue>10000</maximumValue>
         <stepSize>1</stepSize>
         <value>5454</value>
+        <borderType/>
        </Properties>
       </Widget>
      </Widget>
@@ -450,6 +473,7 @@
        <stretch/>
        <gridLayoutColumns/>
        <gridLayoutRows/>
+       <borderType/>
       </Properties>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
@@ -470,6 +494,7 @@
         <iconFile/>
         <gridLayoutColumns/>
         <gridLayoutRows/>
+        <borderType/>
        </Properties>
       </Widget>
       <Widget>
@@ -491,6 +516,7 @@
         <editable/>
         <gridLayoutColumns/>
         <gridLayoutRows/>
+        <borderType/>
        </Properties>
       </Widget>
      </Widget>
@@ -513,6 +539,7 @@
        <iconFile/>
        <gridLayoutColumns/>
        <gridLayoutRows/>
+       <borderType/>
       </Properties>
      </Widget>
     </Widget>
@@ -533,6 +560,7 @@
       <stretch>1</stretch>
       <gridLayoutColumns/>
       <gridLayoutRows/>
+      <borderType/>
      </Properties>
     </Widget>
    </Widget>
@@ -553,6 +581,7 @@
      <stretch>1</stretch>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
    </Widget>
   </Widget>
@@ -573,6 +602,7 @@
     <stretch>1</stretch>
     <gridLayoutColumns/>
     <gridLayoutRows/>
+    <borderType/>
    </Properties>
   </Widget>
   <Widget>
@@ -592,6 +622,7 @@
     <stretch/>
     <gridLayoutColumns/>
     <gridLayoutRows/>
+    <borderType/>
    </Properties>
    <Widget>
     <ClassName>BoUfoWidget</ClassName>
@@ -610,6 +641,7 @@
      <stretch>1</stretch>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
    </Widget>
    <Widget>
@@ -631,6 +663,7 @@
      <iconFile/>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
    </Widget>
   </Widget>
