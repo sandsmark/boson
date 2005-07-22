@@ -2,6 +2,8 @@
 CanGoOnLand=true
 CanGoOnWater=false
 Speed=1.8
+MaxSlope=50
+CrushDamage=50
 
 [Boson Unit]
 Armor=3
