@@ -423,7 +423,7 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
  createRenderItemList(&d->mRenderItemList, allCanvasItems); // AB: this is very fast. < 1.5ms on experimental5 for me
 
 
- unsigned int itemcount = d->mRenderItemList.count();
+ unsigned int itemCount = d->mRenderItemList.count();
 
  {
 	// Sort the list of to-be-rendered items by their models, so that items with
@@ -434,20 +434,20 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 	unsigned int m = 1;
 	unsigned int maxM = BosonModel::maxId();
 	unsigned int k;
-	BoRenderItem* helperlist = new BoRenderItem[itemcount];
+	BoRenderItem* helperlist = new BoRenderItem[itemCount];
 	while (m <= maxM) {
 		k = 0;
-		for (unsigned int i = 0; i < itemcount; i++) {
+		for (unsigned int i = 0; i < itemCount; i++) {
 			if((d->mRenderItemList[i].modelId & m) == 0) {
 				helperlist[k++] = d->mRenderItemList[i];
 			}
 		}
-		for(unsigned int i = 0; i < itemcount; i++) {
+		for(unsigned int i = 0; i < itemCount; i++) {
 			if((d->mRenderItemList[i].modelId & m) == m) {
 				helperlist[k++] = d->mRenderItemList[i];
 			}
 		}
-		for(unsigned int i = 0; i < itemcount; i++) {
+		for(unsigned int i = 0; i < itemCount; i++) {
 			d->mRenderItemList[i] = helperlist[i];
 		}
 		m *= 2;
@@ -462,13 +462,13 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
  }
 
  // List of models with semi-transparent parts
- QValueVector<BoRenderItem> transparentmodels;
- transparentmodels.reserve((int)(itemcount * 0.25));
+ QValueVector<BoRenderItem> transparentModels;
+ transparentModels.reserve((int)(itemCount * 0.25));
 
  // Model that is being used currently
  BosonModel* currentModel = 0;
  // Render all items
- for (unsigned int i = 0; i < itemcount; i++) {
+ for (unsigned int i = 0; i < itemCount; i++) {
 	BosonItem* item = d->mRenderItemList[i].item;
 
 	GLfloat x = item->centerX();
@@ -513,7 +513,7 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 	glPopMatrix();
 
 	if (currentModel && currentModel->hasTransparentMeshes(lod)) {
-		transparentmodels.append(d->mRenderItemList[i]);
+		transparentModels.append(d->mRenderItemList[i]);
 	}
 
 	if (boConfig->boolValue("debug_boundingboxes")) {
@@ -532,8 +532,8 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
  glAlphaFunc(GL_GEQUAL, 0.2);
  glDisable(GL_CULL_FACE);
  //glDisable(GL_LIGHTING);
- for (unsigned int i = 0; i < transparentmodels.count(); i++) {
-	BosonItem* item = transparentmodels[i].item;
+ for (unsigned int i = 0; i < transparentModels.count(); i++) {
+	BosonItem* item = transparentModels[i].item;
 
 	GLfloat x = item->centerX();
 	GLfloat y = -item->centerY();
@@ -588,8 +588,8 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 void BosonCanvasRenderer::createSelectionsList(BoItemList* selectedItems, const QValueVector<BoRenderItem>* items)
 {
  selectedItems->clear();
- unsigned int itemcount = d->mRenderItemList.count();
- for (unsigned int i = 0; i < itemcount; i++) {
+ unsigned int itemCount = d->mRenderItemList.count();
+ for (unsigned int i = 0; i < itemCount; i++) {
 	BosonItem* item = d->mRenderItemList[i].item;
 	if (item->isSelected()) {
 		selectedItems->append(item);
