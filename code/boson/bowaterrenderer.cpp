@@ -465,7 +465,7 @@ float BoWaterRenderer::waterAlphaAt(BoLakeGL* lake, float x, float y)
   {
     return 1.0f;
   }
-  return QMIN(1.0, ((lake->lake->level - mMap->heightAtCorner(x, y)) * lake->alphaMultiplier + lake->alphaBase)/* * mWaterDiffuseColor*/);
+  return QMIN(1.0, ((lake->lake->level - mMap->heightAtCorner((int)x, (int)y)) * lake->alphaMultiplier + lake->alphaBase)/* * mWaterDiffuseColor*/);
 }
 
 void BoWaterRenderer::cellFogChanged(int x1, int x2, int y1, int y2)
