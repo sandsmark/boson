@@ -28,7 +28,6 @@
 
 class BosonTextureArray;
 class BosonModel;
-class BosonSoundInterface;
 class UnitProperties;
 class UnitBase;
 class Unit;
@@ -114,8 +113,6 @@ public:
 	static QString unitActionName(UnitAction action);
 
 	const BoAction* action(const QString& name) const;
-
-	QPixmap* pixmap(const QString& name);
 
 	/**
 	 * @return The @ref BosonModel object for the specified unit type in
@@ -242,11 +239,6 @@ public:
 	 * Reset this theme. Delete all pixmaps, unitProperties, ...
 	 **/
 	void reset();
-
-	/**
-	 * @return The @ref BosonSound object for this species.
-	 **/
-	BosonSoundInterface* sound() const { return mSound; }
 
 	/**
 	 * Play the specified event for the specified unit.

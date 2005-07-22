@@ -85,7 +85,8 @@ public:
 	}
 
 	// data that cannot go to SpeciesData as it must be modifyable by some
-	// reason
+	// reasons
+	// (e.g. because of upgrades)
 	QIntDict<UnitProperties> mUnitProperties;
 
 	// AB: maybe this _can_ go to SpeciesData?
@@ -115,7 +116,6 @@ SpeciesTheme::SpeciesTheme(const QString& speciesDir, const QColor& teamColor)
  d->mUnitProperties.setAutoDelete(true);
  d->mUpgrades.setAutoDelete(true);
  d->mCanChangeTeamColor = true;
- mSound = 0;
  mData = 0;
  boDebug() << "teamcolor: " << teamColor.red() << " " << teamColor.green() << " " << teamColor.blue() << endl;
 
@@ -166,7 +166,6 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
  mThemePath = speciesDir;
  boDebug() << "theme path: " << themePath() << endl;
  mData = SpeciesData::speciesData(themePath());
- mSound = boAudio->addSounds(themePath());
 
  // don't preload units here as the species can still be changed in new game
  // dialog
@@ -198,30 +197,10 @@ bool SpeciesTheme::loadUnit(unsigned long int type)
  if (!ret) {
 	return false;
  }
- // Load unit sounds
- BosonProfiler soundProfiling("UnitSound");
- QStringList sounds;
- QMap<int, QString> unitSounds = prop->sounds();
- QMap<int,QString>::Iterator it = unitSounds.begin();
- for (; it != unitSounds.end(); ++it) {
-	sounds.append(*it);
+ if (!mData->loadUnitSounds(prop)) {
+	boError(270) << k_funcinfo << "unable to load sounds for unit " << type << endl;
+	return false;
  }
- // Load sounds of weapons of this unit
- if (prop->canShoot()) {
-	QPtrListIterator<PluginProperties> it(*(prop->plugins()));
-	while (it.current()) {
-		if (it.current()->pluginType() == PluginProperties::Weapon) {
-			QMap<int, QString> weaponSounds = ((BosonWeaponProperties*)it.current())->sounds();
-			QMap<int, QString>::Iterator it = weaponSounds.begin();
-			for (; it != weaponSounds.end(); ++it) {
-				sounds.append(*it);
-			}
-		}
-		++it;
-	}
- }
- mSound->addUnitSounds(themePath(), sounds);
- soundProfiling.pop();
  return true;
 }
 
@@ -245,11 +224,6 @@ QCString SpeciesTheme::unitPropertiesMD5() const
 	++it;
  }
  return string;
-}
-
-QPixmap* SpeciesTheme::pixmap(const QString& name)
-{
- return mData->pixmap(name);
 }
 
 const BoAction* SpeciesTheme::action(const QString& name) const
@@ -653,63 +627,22 @@ bool SpeciesTheme::loadUnitModel(const UnitProperties* prop)
 
 void SpeciesTheme::playSound(UnitBase* unit, UnitSoundEvent event)
 {
- if (boConfig->boolValue("ForceDisableSound")) {
-	return;
- }
- if (!sound()) {
-	return;
- }
- if (!boConfig->unitSoundActivated(event)) {
-	return;
- }
- sound()->playSound(unit->unitProperties()->sound(event));
+ mData->playSound(unit, event);
 }
 
 void SpeciesTheme::playSound(SoundEvent event)
 {
- if (boConfig->boolValue("ForceDisableSound")) {
-	return;
- }
- if (!sound()) {
-	return;
- }
- //TODO;
-// if (!boConfig->soundActivated(event)) {
-//	return;
-// }
- sound()->playSound(event);
+ mData->playSound(event);
 }
 
 void SpeciesTheme::playSound(const BosonWeaponProperties* weaponProp, WeaponSoundEvent event)
 {
- if (boConfig->boolValue("ForceDisableSound")) {
-	return;
- }
- if (!sound()) {
-	return;
- }
- if (boConfig->boolValue("DeactivateWeaponSounds")) {
-	return;
- }
- sound()->playSound(weaponProp->sound(event));
+ mData->playSound(weaponProp, event);
 }
 
 bool SpeciesTheme::loadGeneralSounds()
 {
-// TODO: sound mapping!
-// speciestheme designers should be able to rename the sounds for certain
-// events, just like for unit sounds!
- if (boConfig->boolValue("ForceDisableSound")) {
-	return true;
- }
- if (!sound()) {
-	return true;
- }
- QMap<int, QString> sounds;
- sounds.insert(SoundReportMinimapActivated, "report_minimap_activated");
- sounds.insert(SoundReportMinimapDeactivated, "report_minimap_deactivated");
- sound()->addSounds(themePath(), sounds);
- return true;
+ return mData->loadGeneralSounds();
 }
 
 BosonModel* SpeciesTheme::objectModel(const QString& name) const

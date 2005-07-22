@@ -30,6 +30,7 @@ class UnitProperties;
 class UnitBase;
 class BosonWeaponProperties;
 class BoAction;
+class BosonSoundInterface;
 
 class QPixmap;
 class QStringList;
@@ -148,6 +149,29 @@ public:
 	 * These are the relative filenames, i.e. "unit.3ds", "unit.ac"
 	 **/
 	static QStringList unitModelFiles();
+
+	/**
+	 * @return The @ref BosonSound object for this species.
+	 **/
+	BosonSoundInterface* sound() const;
+
+	/**
+	 * Play the specified event for the specified unit.
+	 **/
+	void playSound(UnitBase* unit, UnitSoundEvent event);
+
+	/**
+	 * Play the specified event for the specified weapon.
+	 **/
+	void playSound(const BosonWeaponProperties* weaponprop, WeaponSoundEvent event);
+
+	/**
+	 * Play the specified sound event
+	 **/
+	void playSound(SoundEvent event);
+
+	bool loadGeneralSounds();
+	bool loadUnitSounds(const UnitProperties* prop);
 
 protected:
 
