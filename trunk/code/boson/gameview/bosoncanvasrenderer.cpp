@@ -470,30 +470,33 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 	// Sort the list of to-be-rendered items by their models, so that items with
 	//  same models are rendered after each other. This increases rendering
 	//  performance (especially with vbos).
-	// We use radix sort, which is (much) faster than quicksort with many items.
-	// Radix sort
-	unsigned int m = 1;
-	unsigned int maxM = BosonModel::maxId();
-	unsigned int k;
-	BoRenderItem* helperlist = new BoRenderItem[itemCount];
-	while (m <= maxM) {
-		k = 0;
-		for (unsigned int i = 0; i < itemCount; i++) {
-			if((d->mRenderItemList[i].modelId & m) == 0) {
-				helperlist[k++] = d->mRenderItemList[i];
-			}
-		}
-		for(unsigned int i = 0; i < itemCount; i++) {
-			if((d->mRenderItemList[i].modelId & m) == m) {
-				helperlist[k++] = d->mRenderItemList[i];
-			}
-		}
-		for(unsigned int i = 0; i < itemCount; i++) {
-			d->mRenderItemList[i] = helperlist[i];
-		}
-		m *= 2;
+
+	int maxId = BosonModel::maxId();
+
+	// Bucketsort
+	QValueList<BoRenderItem>** lists = new QValueList<BoRenderItem>*[maxId];
+	for (int i = 0; i < maxId; i++) {
+		lists[i] = 0;
 	}
-	delete[] helperlist;
+	for (unsigned int i = 0; i < itemCount; i++) {
+		if (!lists[i]) {
+			lists[i] = new QValueList<BoRenderItem>();
+		}
+		lists[i]->append(d->mRenderItemList[i]);
+	}
+	unsigned int pos = 0;
+	QValueList<BoRenderItem>::iterator it;
+	for (int i = 0; i < maxId; i++) {
+		if (!lists[i]) {
+			continue;
+		}
+		for (it = lists[i]->begin(); it != lists[i]->end(); ++it) {
+			d->mRenderItemList[pos] = *it;
+		}
+		delete lists[i];
+		lists[i] = 0;
+	}
+	delete[] lists;
  }
 
  bool useLOD = boConfig->boolValue("UseLOD");
