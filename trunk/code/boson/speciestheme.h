@@ -310,7 +310,6 @@ private:
 
 	QString mThemePath;
 	QColor mTeamColor;
-	BosonSoundInterface* mSound;
 	SpeciesData* mData;
 };
 
