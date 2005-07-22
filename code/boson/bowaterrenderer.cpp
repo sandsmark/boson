@@ -484,7 +484,8 @@ void BoWaterRenderer::update(float elapsed)
   mWaterAnimBumpCurrent += elapsed * 15;
   if(mWaterAnimBump.count() && ((unsigned int)mWaterAnimBumpCurrent >= mWaterAnimBump.count()))
   {
-    mWaterAnimBumpCurrent -= mWaterAnimBump.count();
+    int d = ((int)mWaterAnimBumpCurrent) / mWaterAnimBump.count();
+    mWaterAnimBumpCurrent -= mWaterAnimBump.count() * d;
   }
 }
 
