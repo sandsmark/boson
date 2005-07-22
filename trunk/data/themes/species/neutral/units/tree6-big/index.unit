@@ -3,8 +3,10 @@ ConstructionSteps=0
 
 [Boson Unit]
 Name=Tree6 (big)
-Health=120
+Health=40
 Id=51
+DestroyedEffects=22002
+RemoveWreckageImmediately=true
 IsFacility=true
 MineralCost=100
 OilCost=0

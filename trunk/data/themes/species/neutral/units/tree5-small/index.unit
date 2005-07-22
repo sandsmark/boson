@@ -3,8 +3,10 @@ ConstructionSteps=0
 
 [Boson Unit]
 Name=Tree5 (small)
-Health=100
+Health=20
 Id=22
+DestroyedEffects=22001
+RemoveWreckageImmediately=true
 IsFacility=true
 MineralCost=100
 OilCost=0
@@ -13,6 +15,8 @@ OilCost=0
 SupportMiniMap=false
 TerrainType=0
 UnitDepth=1.4
-UnitHeight=0.7
-UnitWidth=0.7
+UnitHeight=0.2
+UnitWidth=0.2
 
+[Model]
+Size=0.7
