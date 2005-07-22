@@ -1005,6 +1005,44 @@ Mass=0
 Align=true
 Texture=halo
 
+[Tree-destroyed]
+Id=22000
+Type=ParticleGeneric
+MinVelocity=-0.2,-0.2,-0.6
+MaxVelocity=0.2,0.2,-2.0
+MinPos=-0.5,-0.5,0.3
+MaxPos=0.5,0.5,1.8
+StartColor=1.0,1.0,1.0,1.0
+EndColor=1.0,1.0,1.0,1.0
+MinLife=3
+MaxLife=3
+MaxNum=40
+InitNum=40
+BlendFunc=GL_ONE_MINUS_SRC_ALPHA
+Rate=0
+StartSize=0.15
+EndSize=0.15
+SystemLife=-1
+Mass=0.5
+Align=true
+Texture=treepiece-1
+
+[Tree-destroyed-small]
+Id=22001
+Inherits=Tree-destroyed
+MinPos=-0.35,-0.35,0.3
+MaxPos=0.35,0.35,1.3
+MaxNum=30
+InitNum=30
+
+[Tree-destroyed-big]
+Id=22002
+Inherits=Tree-destroyed
+MinPos=-0.7,-0.7,0.3
+MaxPos=0.7,0.7,2.3
+MaxNum=60
+InitNum=60
+
 
 
 [GeneralSnow]
