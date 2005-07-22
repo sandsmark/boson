@@ -29,7 +29,6 @@
 #include "speciestheme.h"
 #include "unitproperties.h"
 #include "bosonpath.h"
-#include "selectbox.h"
 #include "bosonstatistics.h"
 #include "unitplugins.h"
 #include "boitemlist.h"
@@ -265,7 +264,6 @@ void Unit::select(bool markAsLeader)
 	return; // shall we really return?
  }
  BosonItem::select(markAsLeader);
- updateSelectBox();
 }
 
 bofixed Unit::destinationX() const
@@ -309,7 +307,6 @@ void Unit::setHealth(unsigned long int h)
 	return;
  }
  UnitBase::setHealth(h);
- updateSelectBox();
  if (isDestroyed()) {
 	unselect();
 	if (itemRenderer()) {
@@ -367,13 +364,6 @@ int Unit::currentPluginType() const
  return currentPlugin()->pluginType();
 }
 
-
-void Unit::updateSelectBox()
-{
- if (selectBox()) {
-	selectBox()->setFactor(((float)health()) / ((float)maxHealth()));
- }
-}
 
 void Unit::moveBy(bofixed moveX, bofixed moveY, bofixed moveZ)
 {

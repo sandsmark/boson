@@ -53,32 +53,5 @@ private:
 	GLsizei mDisplayListCount;
 };
 
-class SelectBox
-{
-public :
-	SelectBox(BosonItem*, BosonCanvas* canvas, bool groupLeader = false);
-	~SelectBox();
-
-	/**
-	 * Set a factor between 0 and 1 that describes the amount of health of
-	 * the item this box belongs to.
-	 *
-	 * The health bar of the selectbox displays the health according to this
-	 * factor.
-	 **/
-	void setFactor(float factor)
-	{
-		mFactor = factor;
-	}
-
-	float factor() const
-	{
-		return mFactor;
-	}
-
-private:
-	float mFactor;
-};
-
 #endif
 

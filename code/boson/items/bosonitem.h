@@ -28,7 +28,6 @@
 
 class BosonCanvas;
 class BosonCollisions;
-class SelectBox;
 class BosonModel;
 class BosonAnimation;
 class Cell;
@@ -302,7 +301,13 @@ public:
 	 * @return TRUE if the object is selected, i.e. a select box should be
 	 * drawn around it. Otherwise FALSE.
 	 **/
-	bool isSelected() const { return mSelectBox != 0; }
+	bool isSelected(bool* isGroupLeader = 0) const
+	{
+		if (isGroupLeader) {
+			*isGroupLeader = mIsGroupLeaderOfSelection;
+		}
+		return mIsSelected;
+	}
 
 	/**
 	 * Render the item. This assumes the modelview matrix was already
@@ -329,12 +334,6 @@ public:
 	 * @return TRUE if the item is in @p frustum, otherwise FALSE
 	 **/
 	bool itemInFrustum(const BoFrustum& frustum) const;
-
-	/**
-	 * @return The select box of this item, or NULL if it is not selected.
-	 * See @ref isSelected.
-	 **/
-	inline SelectBox* selectBox() const { return mSelectBox; }
 
 	/**
 	 * @return The (cell-)coordinates of the left-top cell this object
@@ -554,9 +553,6 @@ public:
 
 	/**
 	 * Select this unit, i.e. construct the select box - see @ref isSelected.
-	 * Note that @ref SelectBox is constructed very fast - the box is
-	 * constructed only once and the display list is stored as a static
-	 * variable.
 	 * @param markAsLeader The leader of a group of units/items will have a
 	 * slightly different select box (e.g. another color or so).
 	 **/
@@ -636,7 +632,8 @@ private:
 	bofixed mYRotation;
 
 	bool mIsAnimated;
-	SelectBox* mSelectBox;
+	bool mIsSelected;
+	bool mIsGroupLeaderOfSelection;
 
 	QPtrVector<Cell>* mCells;
 	bool mCellsDirty;
