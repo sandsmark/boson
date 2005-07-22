@@ -1078,7 +1078,6 @@ void BosonGLMiniMapRenderer::renderCamera()
  cutLineZ0(BLN, TLN);
 
  glDisable(GL_TEXTURE_2D);
- glColor3ub(255, 255, 255);
 
  // map world-coordinates to minimap-coordinates
  BLF.setX((BLF.x() * miniMapWidth()) / mMapWidth);
@@ -1098,8 +1097,26 @@ void BosonGLMiniMapRenderer::renderCamera()
  TLN.setX((TLN.x() * miniMapWidth()) / mMapWidth);
  TLN.setY((TLN.y() * miniMapHeight()) / mMapHeight + (float)miniMapHeight());
 
+ // Render a semitransparent yellow quad to better illustrate the visible area
+ glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT);
+ glEnable(GL_BLEND);
+ glShadeModel(GL_SMOOTH);
+ glScissor(0, d->mGameGLMatrices->viewport()[3] - miniMapHeight(), miniMapWidth(), miniMapHeight());
+ glEnable(GL_SCISSOR_TEST);
+ glBegin(GL_QUADS);
+	// Far side of the quad is more transparent...
+	glColor4f(1.0, 1.0, 0.0, 0.15);
+	glVertex3fv(TLF.data());
+	glVertex3fv(TRF.data());
+	// ... and the front one is less
+	glColor4f(1.0, 1.0, 0.0, 0.3);
+	glVertex3fv(BRF.data());
+	glVertex3fv(BLF.data());
+ glEnd();
+ glPopAttrib();
+
  // now the points should be final - we can draw our lines onto the minimap
- glColor3ub(255, 255, 255);
+ glColor3ub(192, 192, 192);
  glBegin(GL_LINES);
 	drawLine(BLF, BRF, miniMapWidth(), miniMapHeight());
 	drawLine(BRF, BRN, miniMapWidth(), miniMapHeight());
@@ -1114,6 +1131,7 @@ void BosonGLMiniMapRenderer::renderCamera()
 	drawLine(BRN, TRN, miniMapWidth(), miniMapHeight());
 	drawLine(BLN, TLN, miniMapWidth(), miniMapHeight());
  glEnd();
+ glColor3ub(255, 255, 255);
 }
 
 void BosonGLMiniMapRenderer::setTerrainPoint(int x, int y, const QColor& color)
