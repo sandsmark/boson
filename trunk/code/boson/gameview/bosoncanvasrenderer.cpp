@@ -479,10 +479,11 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 		lists[i] = 0;
 	}
 	for (unsigned int i = 0; i < itemCount; i++) {
-		if (!lists[i]) {
-			lists[i] = new QValueList<BoRenderItem>();
+		int id = d->mRenderItemList[i].modelId;
+		if (!lists[id]) {
+			lists[id] = new QValueList<BoRenderItem>();
 		}
-		lists[i]->append(d->mRenderItemList[i]);
+		lists[id]->append(d->mRenderItemList[i]);
 	}
 	unsigned int pos = 0;
 	QValueList<BoRenderItem>::iterator it;
@@ -762,6 +763,17 @@ void BosonCanvasRenderer::renderWater()
 {
  PROFILE_METHOD;
  BoTextureManager::BoTextureBindCounter bindCounter(boTextureManager, &d->mTextureBindsWater);
+ // TODO:
+#if 0
+ if (currentAdvanceCall != lastAdvanceCall) {
+	int advanceDiff = (currentAdvanceCall - lastAdvanceCall);
+	if (advanceDiff > 0) {
+		boWaterRenderer->update(advanceDiff * 0.05);
+	}
+ }
+ // TODO (somewhere else probably):
+ lastAdvanceCall = currentAdvanceCall;
+#endif
  boWaterRenderer->render();
 }
 
