@@ -50,6 +50,7 @@ public:
 	static void stopItemRendering();
 
 	virtual bool setModel(BosonModel*) { return true; }
+	virtual BosonModel* model() const { return 0; }
 
 	/**
 	 * For OpenGL performance <em>only</em>! Do <em>not</em> use outside
@@ -105,7 +106,7 @@ public:
 
 	virtual bool setModel(BosonModel* model);
 
-	inline BosonModel* model() const { return mModel; }
+	virtual inline BosonModel* model() const { return mModel; }
 
 	/**
 	 * Render the item. This assumes the modelview matrix was already
