@@ -215,7 +215,7 @@ void BosonItem::makeCells(Cell* allCells, QPtrVector<Cell>* cells, const BoRectF
 
 bool BosonItem::bosonCollidesWith(BosonItem* item) const
 {
- BoVector3Fixed itempos(item->x() + xVelocity(), item->y() + yVelocity(), item->z() + zVelocity());
+ BoVector3Fixed itempos(item->x() + item->xVelocity(), item->y() + item->yVelocity(), item->z() + item->zVelocity());
  return bosonCollidesWith(itempos, itempos + BoVector3Fixed(item->width(), item->height(), item->depth()));
 }
 
@@ -242,9 +242,9 @@ bool BosonItem::bosonCollidesWith(const BoVector3Fixed& v1, const BoVector3Fixed
  // BB 1
  bofixed minx1, miny1, maxx1, maxy1;
  minx1 = x() + xVelocity() - halfw;
- miny1 = y() + xVelocity() - halfh + 1;
- maxx1 = x() + yVelocity() + width() + halfw;
- maxy1 = y() + yVelocity() + height() + halfw - 1;
+ miny1 = y() + yVelocity() - halfh + 1;
+ maxx1 = x() + xVelocity() + width() + halfw;
+ maxy1 = y() + yVelocity() + height() + halfh - 1;
  if ((centerx > minx1) && (centerx < maxx1) && (centery > miny1) && (centery < maxy1)) {
 	// Box's center is in BB 1
 //	boDebug() << "        " << k_funcinfo << "Items COLLIDE (1)!!!" << endl;
@@ -254,9 +254,9 @@ bool BosonItem::bosonCollidesWith(const BoVector3Fixed& v1, const BoVector3Fixed
  // BB 2
  bofixed minx2, miny2, maxx2, maxy2;
  minx2 = x() + xVelocity() - halfw + 1;
- miny2 = y() + xVelocity() - halfh;
- maxx2 = x() + yVelocity() + width() + halfw - 1;
- maxy2 = y() + yVelocity() + height() + halfw;
+ miny2 = y() + yVelocity() - halfh;
+ maxx2 = x() + xVelocity() + width() + halfw - 1;
+ maxy2 = y() + yVelocity() + height() + halfh;
  if ((centerx > minx2) && (centerx < maxx2) && (centery > miny2) && (centery < maxy2)) {
 	// Box's center is in BB 2
 //	boDebug() << "        " << k_funcinfo << "Items COLLIDE (2)!!!" << endl;
