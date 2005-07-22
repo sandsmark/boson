@@ -471,11 +471,11 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 	//  same models are rendered after each other. This increases rendering
 	//  performance (especially with vbos).
 
-	int maxId = BosonModel::maxId();
+	int idCount = BosonModel::maxId() + 1;
 
 	// Bucketsort
-	QValueList<BoRenderItem>** lists = new QValueList<BoRenderItem>*[maxId];
-	for (int i = 0; i < maxId; i++) {
+	QValueList<BoRenderItem>** lists = new QValueList<BoRenderItem>*[idCount];
+	for (int i = 0; i < idCount; i++) {
 		lists[i] = 0;
 	}
 	for (unsigned int i = 0; i < itemCount; i++) {
@@ -487,7 +487,7 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 	}
 	unsigned int pos = 0;
 	QValueList<BoRenderItem>::iterator it;
-	for (int i = 0; i < maxId; i++) {
+	for (int i = 0; i < idCount; i++) {
 		if (!lists[i]) {
 			continue;
 		}
