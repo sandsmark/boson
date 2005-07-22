@@ -68,6 +68,47 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+static BosonModel* renderSingleItem(
+		bool useLOD,
+		BoCamera* camera,
+		const BosonItem* item,
+		BosonItemRenderer* itemRenderer,
+		bool transparentMeshes,
+		BosonModel* currentModel,
+		unsigned int* _lod = 0)
+{
+ BO_CHECK_NULL_RET0(camera);
+ BO_CHECK_NULL_RET0(item);
+ BO_CHECK_NULL_RET0(itemRenderer);
+ GLfloat x = item->centerX();
+ GLfloat y = -item->centerY();
+ GLfloat z = item->z();
+
+ glPushMatrix();
+ glTranslatef(x, y, z);
+ glRotatef(-(item->rotation()), 0.0, 0.0, 1.0);
+ glRotatef(item->xRotation(), 1.0, 0.0, 0.0);
+ glRotatef(item->yRotation(), 0.0, 1.0, 0.0);
+
+ unsigned int lod = 0;
+ if (useLOD) {
+	// TODO: we could compare squared distances here and get rid of sqrt()
+	float dist = (camera->cameraPos() - BoVector3Float(x, y, z)).length();
+	lod = itemRenderer->preferredLod(dist);
+ }
+ // If this item has different model then change current model
+ if (itemRenderer->model() != currentModel) {
+	currentModel = itemRenderer->model();
+	currentModel->prepareRendering();
+ }
+ itemRenderer->renderItem(lod, transparentMeshes);
+ glColor3ub(255, 255, 255);
+ glPopMatrix();
+ if (_lod) {
+	*_lod = lod;
+ }
+ return currentModel;
+}
 
 
 class BoVisibleEffects
@@ -469,21 +510,16 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
  BosonModel* currentModel = 0;
  // Render all items
  for (unsigned int i = 0; i < itemCount; i++) {
-	BosonItem* item = d->mRenderItemList[i].item;
-
-	GLfloat x = item->centerX();
-	GLfloat y = -item->centerY();
-	GLfloat z = item->z();
+	const BosonItem* item = d->mRenderItemList[i].item;
+	BosonItemRenderer* itemRenderer = item->itemRenderer();
+	if (!itemRenderer) {
+		BO_NULL_ERROR(itemRenderer);
+		continue;
+	}
 
 	// AB: note units are rendered in the *center* point of their
 	// width/height.
 	// but concerning z-position they are rendered from bottom to top!
-
-	glPushMatrix();
-	glTranslatef(x, y, z);
-	glRotatef(-(item->rotation()), 0.0, 0.0, 1.0);
-	glRotatef(item->xRotation(), 1.0, 0.0, 0.0);
-	glRotatef(item->yRotation(), 0.0, 1.0, 0.0);
 
 	// Units will be tinted accordingly to how much health they have left
 	if (RTTI::isUnit(item->rtti())) {
@@ -497,20 +533,9 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 		glColor3ub(255, 255, 255);
 	}
 
-	unsigned int lod = 0;
-	if (useLOD) {
-		// TODO: we could compare squared distances here and get rid of sqrt()
-		float dist = (camera()->cameraPos() - BoVector3Float(x, y, z)).length();
-		lod = item->preferredLod(dist);
-	}
-	// If this item has different model then change current model
-	if (item->getModelForItem() != currentModel) {
-		currentModel = item->getModelForItem();
-		currentModel->prepareRendering();
-	}
-	item->renderItem(lod);
-	glColor3ub(255, 255, 255);
-	glPopMatrix();
+	unsigned int lod;
+	currentModel = renderSingleItem(useLOD, camera(), item, itemRenderer, false, currentModel, &lod);
+
 
 	if (currentModel && currentModel->hasTransparentMeshes(lod)) {
 		transparentModels.append(d->mRenderItemList[i]);
@@ -534,31 +559,13 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
  //glDisable(GL_LIGHTING);
  for (unsigned int i = 0; i < transparentModels.count(); i++) {
 	BosonItem* item = transparentModels[i].item;
-
-	GLfloat x = item->centerX();
-	GLfloat y = -item->centerY();
-	GLfloat z = item->z();
-
-	glPushMatrix();
-	glTranslatef(x, y, z);
-	glRotatef(-(item->rotation()), 0.0, 0.0, 1.0);
-	glRotatef(item->xRotation(), 1.0, 0.0, 0.0);
-	glRotatef(item->yRotation(), 0.0, 1.0, 0.0);
-
-	unsigned int lod = 0;
-	if (useLOD) {
-		// TODO: we could compare squared distances here and get rid of sqrt()
-		float dist = (camera()->cameraPos() - BoVector3Float(x, y, z)).length();
-		lod = item->preferredLod(dist);
+	BosonItemRenderer* itemRenderer = item->itemRenderer();
+	if (!itemRenderer) {
+		BO_NULL_ERROR(itemRenderer);
+		continue;
 	}
-	// If this item has different model then change current model
-	if (item->getModelForItem() != currentModel) {
-		currentModel = item->getModelForItem();
-		currentModel->prepareRendering();
-	}
-	item->renderItem(lod, true);
-	glColor4ub(255, 255, 255, 255);
-	glPopMatrix();
+
+	currentModel = renderSingleItem(useLOD, camera(), item, itemRenderer, true, currentModel);
  }
  glPopAttrib();
 
@@ -588,9 +595,9 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 void BosonCanvasRenderer::createSelectionsList(BoItemList* selectedItems, const QValueVector<BoRenderItem>* items)
 {
  selectedItems->clear();
- unsigned int itemCount = d->mRenderItemList.count();
+ unsigned int itemCount = items->count();
  for (unsigned int i = 0; i < itemCount; i++) {
-	BosonItem* item = d->mRenderItemList[i].item;
+	BosonItem* item = (*items)[i].item;
 	if (item->isSelected()) {
 		selectedItems->append(item);
 	}
