@@ -143,6 +143,8 @@ class BoQuickGroundRenderer : public BoGroundRenderer
     void glueToRight(TerrainChunk* chunk, TerrainChunk* neighbor);
     void glueToBottom(TerrainChunk* chunk, TerrainChunk* neighbor);
 
+    int renderChunk(TerrainChunk* c, unsigned int* indices);
+
 
   private:
     const BosonMap* mMap;

@@ -234,11 +234,8 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
   boglBindBuffer(GL_ARRAY_BUFFER, mVBONormal);
   glNormalPointer(GL_FLOAT, 0, 0);
 
-  if(!mDrawGrid)
-  {
-    glEnableClientState(GL_COLOR_ARRAY);
-    boglBindBuffer(GL_ARRAY_BUFFER, mVBOTexture);
-  }
+  glEnableClientState(GL_COLOR_ARRAY);
+  boglBindBuffer(GL_ARRAY_BUFFER, mVBOTexture);
 
 //  glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_TEXTURE_BIT);
   glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -269,12 +266,6 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
     // If this is pass 2, enable blending (it's initially disabled)
     if(i == 1)
     {
-      if(mDrawGrid)
-      {
-        // We don't want do render the grid multiple times
-        break;
-      }
-
       glEnable(GL_BLEND);
     }
 
@@ -289,13 +280,13 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
       {
         continue;
       }
-      if(!mDrawGrid && !c->hastexture[i])
+      if(!c->hastexture[i])
       {
         continue;
       }
 
       // Init if necessary
-      if(!inited && !mDrawGrid)
+      if(!inited)
       {
         BosonGroundType* ground = map->groundTheme()->groundType(i);
         // Bind current texture
@@ -324,53 +315,13 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
       }
 
       // Render!
-      // Size of a rendered quad (cell) in cells
-      unsigned int step = (1 << c->useLOD);
-
-      for(unsigned int y = c->minRenderY; y < c->maxRenderY; y += step)
-      {
-        unsigned int indexcount = 0;
-        unsigned int ystep = QMIN((int)step, (int)c->maxRenderY - (int)y);
-
-        indices[indexcount++] = y * mMapCW + c->minRenderX;
-        indices[indexcount++] = (y + ystep) * mMapCW + c->minRenderX;
-        for(unsigned int x = c->minRenderX; x < c->maxRenderX; x += step)
-        {
-          unsigned int xstep = QMIN((int)step, (int)c->maxRenderX - (int)x);
-          indices[indexcount++] = y * mMapCW + (x + xstep);
-          indices[indexcount++] = (y + ystep) * mMapCW + (x + xstep);
-        }
-
-        glDrawElements(GL_TRIANGLE_STRIP, indexcount, GL_UNSIGNED_INT, indices);
-        renderedQuads += indexcount - 2;
-      }
-
-      // Glue the chunk to neighbors if necessary
-      if(c->neighbors[0] && c->neighbors[0]->render && c->neighbors[0]->useLOD > c->useLOD)
-      {
-        glueToLeft(c, c->neighbors[0]);
-      }
-      if(c->neighbors[1] && c->neighbors[1]->render && c->neighbors[1]->useLOD > c->useLOD)
-      {
-        glueToTop(c, c->neighbors[1]);
-      }
-      if(c->neighbors[2] && c->neighbors[2]->render && c->neighbors[2]->useLOD > c->useLOD)
-      {
-        glueToRight(c, c->neighbors[2]);
-      }
-      if(c->neighbors[3] && c->neighbors[3]->render && c->neighbors[3]->useLOD > c->useLOD)
-      {
-        glueToBottom(c, c->neighbors[3]);
-      }
-
+      renderedQuads += renderChunk(c, indices);
     }
   }
 
   glLoadIdentity();
 
-  // Disable VBO
-  boglBindBuffer(GL_ARRAY_BUFFER, 0);
-
+  // Disable shader
   if(useShaders)
   {
     boTextureManager->activateTextureUnit(2);
@@ -386,12 +337,112 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
   glDisable(GL_TEXTURE_GEN_T);
   glDisable(GL_BLEND);
   glColor4ub(255, 255, 255, 255);
+
+  // Render the color map if necessary
+  if(map->activeColorMap())
+  {
+    glDisableClientState(GL_COLOR_ARRAY);
+    glPushAttrib(GL_ENABLE_BIT);
+    glEnable(GL_BLEND);
+    glColor4ub(255, 255, 255, 128);
+    glDisable(GL_LIGHTING);
+    map->activeColorMap()->start(map);
+
+    for(unsigned int j = 0; j < mChunkCount; j++)
+    {
+      TerrainChunk* c = &mChunks[j];
+      if(!c->render)
+      {
+        continue;
+      }
+
+      renderedQuads += renderChunk(c, indices);
+    }
+
+    map->activeColorMap()->stop();
+    glPopAttrib();
+  }
+
+  // Optionally render the grid
+  if(mDrawGrid)
+  {
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_NORMALIZE);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+    glColor3ub(127, 127, 127);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    for(unsigned int j = 0; j < mChunkCount; j++)
+    {
+      TerrainChunk* c = &mChunks[j];
+      if(!c->render)
+      {
+        continue;
+      }
+
+      renderedQuads += renderChunk(c, indices);
+    }
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  }
+
+  // Disable VBO
+  boglBindBuffer(GL_ARRAY_BUFFER, 0);
+
   glPopAttrib();
   glPopClientAttrib();
 
   delete[] indices;
 
   statistics()->setRenderedQuads(renderedQuads);
+}
+
+int BoQuickGroundRenderer::renderChunk(BoQuickGroundRenderer::TerrainChunk* c, unsigned int* indices)
+{
+  int renderedQuads = 0;
+
+  // Size of a rendered quad (cell) in cells
+  unsigned int step = (1 << c->useLOD);
+
+  for(unsigned int y = c->minRenderY; y < c->maxRenderY; y += step)
+  {
+    unsigned int indexcount = 0;
+    unsigned int ystep = QMIN((int)step, (int)c->maxRenderY - (int)y);
+
+    indices[indexcount++] = y * mMapCW + c->minRenderX;
+    indices[indexcount++] = (y + ystep) * mMapCW + c->minRenderX;
+    for(unsigned int x = c->minRenderX; x < c->maxRenderX; x += step)
+    {
+      unsigned int xstep = QMIN((int)step, (int)c->maxRenderX - (int)x);
+      indices[indexcount++] = y * mMapCW + (x + xstep);
+      indices[indexcount++] = (y + ystep) * mMapCW + (x + xstep);
+    }
+
+    glDrawElements(GL_TRIANGLE_STRIP, indexcount, GL_UNSIGNED_INT, indices);
+    renderedQuads += indexcount - 2;
+  }
+
+  // Glue the chunk to neighbors if necessary
+  if(c->neighbors[0] && c->neighbors[0]->render && c->neighbors[0]->useLOD > c->useLOD)
+  {
+    glueToLeft(c, c->neighbors[0]);
+  }
+  if(c->neighbors[1] && c->neighbors[1]->render && c->neighbors[1]->useLOD > c->useLOD)
+  {
+    glueToTop(c, c->neighbors[1]);
+  }
+  if(c->neighbors[2] && c->neighbors[2]->render && c->neighbors[2]->useLOD > c->useLOD)
+  {
+    glueToRight(c, c->neighbors[2]);
+  }
+  if(c->neighbors[3] && c->neighbors[3]->render && c->neighbors[3]->useLOD > c->useLOD)
+  {
+    glueToBottom(c, c->neighbors[3]);
+  }
+
+  return renderedQuads;
 }
 
 void BoQuickGroundRenderer::glueToLeft(BoQuickGroundRenderer::TerrainChunk* c, BoQuickGroundRenderer::TerrainChunk* n)
@@ -921,7 +972,7 @@ void BoQuickGroundRenderer::cellHeightChanged(int x1, int y1, int x2, int y2)
 
   for(int y = y1; y <= y2; y++)
   {
-    for(int x = x1; x <= x2; y++)
+    for(int x = x1; x <= x2; x++)
     {
       unsigned int i = (y * mMapCW) + x;
       int pos = mMap->cornerArrayPos(x, y);
@@ -979,36 +1030,12 @@ void BoQuickGroundRenderer::renderVisibleCellsStart(const BosonMap* map)
 {
   mDrawGrid = boConfig->boolValue("debug_cell_grid");
 
-  if(mDrawGrid)
-  {
-    glDisable(GL_LIGHTING);
-    glDisable(GL_NORMALIZE);
-    glDisable(GL_DEPTH_TEST);
-    glColor3ub(127, 127, 127);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  }
-  else
-  {
-    mFogTexture->setLocalPlayerIO(localPlayerIO());
-    mFogTexture->start(map);
-  }
+  mFogTexture->setLocalPlayerIO(localPlayerIO());
+  mFogTexture->start(map);
 }
 
 void BoQuickGroundRenderer::renderVisibleCellsStop(const BosonMap* map)
 {
-  if(mDrawGrid)
-  {
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glEnable(GL_DEPTH_TEST);
-    if(boConfig->boolValue("UseLight"))
-    {
-      glEnable(GL_LIGHTING);
-      glEnable(GL_NORMALIZE);
-    }
-  }
-  else
-  {
-    mFogTexture->stop(map);
-  }
+  mFogTexture->stop(map);
 }
 
