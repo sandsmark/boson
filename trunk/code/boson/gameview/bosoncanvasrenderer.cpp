@@ -47,7 +47,6 @@
 #include "../bomeshrenderermanager.h"
 #include "../bolight.h"
 #include "../bomaterial.h"
-#include "../speciesdata.h"
 #include "../bowaterrenderer.h"
 #include "../botexture.h"
 #include "../bosondata.h"
