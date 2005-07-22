@@ -50,7 +50,7 @@ void BosonEffect::initStatic(const QString& particletexdir)
   BosonEffectPropertiesParticle::initStatic(particletexdir);
 }
 
-float BosonEffect::getFloat(float min, float max)
+float BosonEffect::getRandomFloat(float min, float max)
 {
   if(min == max)
   {
@@ -62,7 +62,7 @@ float BosonEffect::getFloat(float min, float max)
   }
 }
 
-bofixed BosonEffect::getBofixed(bofixed min, bofixed max)
+bofixed BosonEffect::getRandomBofixed(bofixed min, bofixed max)
 {
   if(min == max)
   {
@@ -545,7 +545,7 @@ void BosonEffectBulletTrail::update(float elapsed)
   BoVector3Fixed movevector = mPosition - mLastPos;
   float movelength = movevector.length();
   movevector.scale(1 / movelength); // Normalize movevector
-  float length = getFloat(mProperties->minLength(), mProperties->maxLength());  // Line's length
+  float length = getRandomFloat(mProperties->minLength(), mProperties->maxLength());  // Line's length
   if(length > movelength)
   {
     length = movelength;
@@ -559,7 +559,7 @@ void BosonEffectBulletTrail::update(float elapsed)
   else
   {
     // Distance of start from mLastPos
-    float pos = getFloat(0, movelength - length);
+    float pos = getRandomFloat(0, movelength - length);
     mStart = mLastPos + movevector * pos;
 //    mEnd = mPosition - movevector * (pos - (movelength - length));
     mEnd = mLastPos + movevector * (pos + length);
