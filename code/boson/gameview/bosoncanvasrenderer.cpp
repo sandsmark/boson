@@ -493,6 +493,7 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 		}
 		for (it = lists[i]->begin(); it != lists[i]->end(); ++it) {
 			d->mRenderItemList[pos] = *it;
+			pos++;
 		}
 		delete lists[i];
 		lists[i] = 0;
