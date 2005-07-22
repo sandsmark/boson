@@ -922,9 +922,9 @@ BosonEffectParticleEnvironmental::BosonEffectParticleEnvironmental(const BosonEf
     // Spawn next particle
     // Use this dead particle to spawn new one.
     // Choose random position inside this box.
-    mParticles[i].pos.setX(getFloat(min.x(), max.x()));
-    mParticles[i].pos.setY(getFloat(min.y(), max.y()));
-    mParticles[i].pos.setZ(getFloat(min.z(), max.z()));
+    mParticles[i].pos.setX(getRandomFloat(min.x(), max.x()));
+    mParticles[i].pos.setY(getRandomFloat(min.y(), max.y()));
+    mParticles[i].pos.setZ(getRandomFloat(min.z(), max.z()));
     initParticle(&mParticles[i], mParticles[i].pos);
     i++;
     num -= 1.0f;
@@ -1140,9 +1140,9 @@ void BosonEffectParticleEnvironmental::particleBoxMoved(const BoVector3Float& ol
         {
           // Use this dead particle to spawn new one.
           // Choose random position inside this box.
-          mParticles[particlepos].pos.setX(getFloat(boxes[i].min.x(), boxes[i].max.x()));
-          mParticles[particlepos].pos.setY(getFloat(boxes[i].min.y(), boxes[i].max.y()));
-          mParticles[particlepos].pos.setZ(getFloat(boxes[i].min.z(), boxes[i].max.z()));
+          mParticles[particlepos].pos.setX(getRandomFloat(boxes[i].min.x(), boxes[i].max.x()));
+          mParticles[particlepos].pos.setY(getRandomFloat(boxes[i].min.y(), boxes[i].max.y()));
+          mParticles[particlepos].pos.setZ(getRandomFloat(boxes[i].min.z(), boxes[i].max.z()));
           initParticle(&mParticles[particlepos], mParticles[particlepos].pos);
           mNum++;
           // Break out of for-loop

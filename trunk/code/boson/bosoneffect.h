@@ -159,12 +159,12 @@ class BosonEffect
      * @return Random float number between min and max (inclusive).
      * You can use this to easily get random parameters between given limits.
      **/
-    static float getFloat(float min, float max);
+    static float getRandomFloat(float min, float max);
     /**
      * @return Random bofixed number between min and max (inclusive).
      * You can use this to easily get random parameters between given limits.
      **/
-    static bofixed getBofixed(bofixed min, bofixed max);
+    static bofixed getRandomBofixed(bofixed min, bofixed max);
 
     /**
      * Initializes static things.

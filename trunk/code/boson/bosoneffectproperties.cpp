@@ -535,7 +535,7 @@ BosonEffect* BosonEffectPropertiesBulletTrail::newEffect(const BoVector3Fixed& p
 {
   if(mProbability < 1.0f)
   {
-    if(BosonEffect::getFloat(0.0f, 1.0f) <= mProbability)
+    if(BosonEffect::getRandomFloat(0.0f, 1.0f) <= mProbability)
     {
       return 0;
     }

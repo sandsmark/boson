@@ -222,20 +222,20 @@ BosonEffect* BosonEffectPropertiesParticleGeneric::newEffect(const BoVector3Fixe
 void BosonEffectPropertiesParticleGeneric::initParticle(BosonEffectParticle* effect, BosonParticle* p) const
 {
   BosonGenericParticle* particle = (BosonGenericParticle*)p;
-  particle->life = BosonEffect::getFloat(mMinLife, mMaxLife);
+  particle->life = BosonEffect::getRandomFloat(mMinLife, mMaxLife);
   particle->maxage = particle->life;
   particle->color = mStartColor;
   particle->size = mStartSize;
   BoVector3Float pos;  // particle's relative position to particle system
-  pos.set(BosonEffect::getFloat(mMinPos[0], mMaxPos[0]), BosonEffect::getFloat(mMinPos[1], mMaxPos[1]),
-      BosonEffect::getFloat(mMinPos[2], mMaxPos[2]));
+  pos.set(BosonEffect::getRandomFloat(mMinPos[0], mMaxPos[0]), BosonEffect::getRandomFloat(mMinPos[1], mMaxPos[1]),
+      BosonEffect::getRandomFloat(mMinPos[2], mMaxPos[2]));
   if(mNormalizePos)
   {
     //boDebug(150) << k_funcinfo << "Normalizing particle pos (scale: " << mMinPosScale << " - " << mMaxPosScale << ")" << endl;
     //boDebug(150) << k_funcinfo << "Current pos: (" << particle->pos.x() << ", " << particle->pos.y() << ", " << particle->pos.z() << "); length: " << particle->pos.length() << endl;
-    //float scale = getFloat(mMinPosScale, mMaxPosScale);
+    //float scale = getRandomFloat(mMinPosScale, mMaxPosScale);
     //boDebug(150) << k_funcinfo << "Scaling by " << scale << " / " << particle->pos.length() << " = " << scale / particle->pos.length() << endl;
-    pos.scale(BosonEffect::getFloat(mMinPosScale, mMaxPosScale) / pos.length());
+    pos.scale(BosonEffect::getRandomFloat(mMinPosScale, mMaxPosScale) / pos.length());
     //boDebug(150) << k_funcinfo << "New pos: (" << particle->pos.x() << ", " << particle->pos.y() << ", " << particle->pos.z() << "); length: " << particle->pos.length() << endl;
   }
   BosonEffectParticleGeneric* e = (BosonEffectParticleGeneric*)effect;
@@ -244,20 +244,20 @@ void BosonEffectPropertiesParticleGeneric::initParticle(BosonEffectParticle* eff
     BoVector3Float tmp;
     e->matrix().transform(&tmp, &pos);
     pos = tmp;
-    BoVector3Float velo(BosonEffect::getFloat(mMinVelo[0], mMaxVelo[0]),
-        BosonEffect::getFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getFloat(mMinVelo[2], mMaxVelo[2]));
+    BoVector3Float velo(BosonEffect::getRandomFloat(mMinVelo[0], mMaxVelo[0]),
+        BosonEffect::getRandomFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getRandomFloat(mMinVelo[2], mMaxVelo[2]));
     e->matrix().transform(&tmp, &velo);
     particle->velo = tmp;
   }
   else
   {
-    particle->velo.set(BosonEffect::getFloat(mMinVelo[0], mMaxVelo[0]),
-        BosonEffect::getFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getFloat(mMinVelo[2], mMaxVelo[2]));
+    particle->velo.set(BosonEffect::getRandomFloat(mMinVelo[0], mMaxVelo[0]),
+        BosonEffect::getRandomFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getRandomFloat(mMinVelo[2], mMaxVelo[2]));
   }
   particle->pos += pos;
   if(mNormalizeVelo)
   {
-    particle->velo.scale(BosonEffect::getFloat(mMinVeloScale, mMaxVeloScale) / particle->velo.length());
+    particle->velo.scale(BosonEffect::getRandomFloat(mMinVeloScale, mMaxVeloScale) / particle->velo.length());
   }
 }
 
@@ -383,26 +383,26 @@ BosonEffect* BosonEffectPropertiesParticleTrail::newEffect(const BoVector3Fixed&
 void BosonEffectPropertiesParticleTrail::initParticle(BosonEffectParticle* effect, BosonParticle* p) const
 {
   BosonGenericParticle* particle = (BosonGenericParticle*)p;
-  particle->life = BosonEffect::getFloat(mMinLife, mMaxLife);
+  particle->life = BosonEffect::getRandomFloat(mMinLife, mMaxLife);
   particle->maxage = particle->life;
   particle->color = mStartColor;
   particle->size = mStartSize;
   BoVector3Float offset;  // particle's relative position to particle system
-  offset.set(BosonEffect::getFloat(mMinOffset[0], mMaxOffset[0]), BosonEffect::getFloat(mMinOffset[1], mMaxOffset[1]),
-      BosonEffect::getFloat(mMinOffset[2], mMaxOffset[2]));
+  offset.set(BosonEffect::getRandomFloat(mMinOffset[0], mMaxOffset[0]), BosonEffect::getRandomFloat(mMinOffset[1], mMaxOffset[1]),
+      BosonEffect::getRandomFloat(mMinOffset[2], mMaxOffset[2]));
   BosonEffectParticleTrail* e = (BosonEffectParticleTrail*)effect;
   if(e->isRotated())
   {
     BoVector3Float offset2 = offset;
-    BoVector3Float velo(BosonEffect::getFloat(mMinVelo[0], mMaxVelo[0]),
-        BosonEffect::getFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getFloat(mMinVelo[2], mMaxVelo[2]));
+    BoVector3Float velo(BosonEffect::getRandomFloat(mMinVelo[0], mMaxVelo[0]),
+        BosonEffect::getRandomFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getRandomFloat(mMinVelo[2], mMaxVelo[2]));
     e->matrix().transform(&offset, &offset2);
     e->matrix().transform(&particle->velo, &velo);
   }
   else
   {
-    particle->velo.set(BosonEffect::getFloat(mMinVelo[0], mMaxVelo[0]),
-        BosonEffect::getFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getFloat(mMinVelo[2], mMaxVelo[2]));
+    particle->velo.set(BosonEffect::getRandomFloat(mMinVelo[0], mMaxVelo[0]),
+        BosonEffect::getRandomFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getRandomFloat(mMinVelo[2], mMaxVelo[2]));
   }
   particle->pos += offset;
 }
@@ -513,8 +513,8 @@ void BosonEffectPropertiesParticleEnvironmental::initParticle(BosonEffectParticl
   particle->maxage = 1.0f;  // Not used
   particle->color = mColor;
   particle->size = mSize;
-  particle->velo.set(BosonEffect::getFloat(mMinVelo[0], mMaxVelo[0]),
-      BosonEffect::getFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getFloat(mMinVelo[2], mMaxVelo[2]));
+  particle->velo.set(BosonEffect::getRandomFloat(mMinVelo[0], mMaxVelo[0]),
+      BosonEffect::getRandomFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getRandomFloat(mMinVelo[2], mMaxVelo[2]));
 }
 
 void BosonEffectPropertiesParticleEnvironmental::updateParticle(BosonEffectParticle* effect, BosonParticle* p, float elapsed) const
