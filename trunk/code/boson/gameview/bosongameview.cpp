@@ -948,6 +948,7 @@ void BosonGameView::initUfoGUI()
 
  d->mUfoLineVisualizationWidget = new BosonUfoLineVisualizationWidget();
  d->mUfoLineVisualizationWidget->setGameGLMatrices(d->mGameGLMatrices);
+ d->mUfoLineVisualizationWidget->setCanvas(canvas());
 
  BoUfoGameGUIContainer* ufoGameGUIContainer = new BoUfoGameGUIContainer();
  d->mUfoGameGUI = new BosonUfoGameGUI(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewFrustum, d->mViewport);
@@ -1023,6 +1024,7 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
  if (d->mInput) {
 	d->mInput->setCanvas(mCanvas);
  }
+ d->mUfoLineVisualizationWidget->setCanvas(mCanvas);
  d->mUfoGameGUI->setCanvas(mCanvas);
  d->mUfoCanvasWidget->setCanvas(mCanvas);
  d->mUfoPlacementPreviewWidget->setCanvas(mCanvas);
@@ -1281,7 +1283,7 @@ void BosonGameView::slotReloadGameViewPlugin()
 	return;
  }
  boDebug() << k_funcinfo << "gameviewplugin reloading succeeded" << endl;
- 
+
  if (BosonGameViewPluginManager::manager()->currentPlugin()) {
 	BosonGameViewPluginBase* p = (BosonGameViewPluginBase*)BosonGameViewPluginManager::manager()->currentPlugin();
 	if (p) {
