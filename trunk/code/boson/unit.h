@@ -355,8 +355,6 @@ public:
 	virtual bool saveAsXML(QDomElement& root);
 	virtual bool loadFromXML(const QDomElement& root);
 
-	void updateSelectBox();
-
 	/**
 	 * @return All units except this that are @ref range or less cells away from this unit
 	 * Note that it doesn't include units on cells that are not visible

@@ -623,11 +623,6 @@ void BosonCanvasRenderer::renderSelections(const BoItemList* selectedItems)
 		++it;
 		continue;
 	}
-	if (!item->selectBox()) {
-		boError() << k_funcinfo << "selected but NULL selectBox" << endl;
-		++it;
-		continue;
-	}
 
 	GLfloat x = (item->x() + item->width() / 2);
 	GLfloat y = -((item->y() + item->height() / 2));
@@ -644,13 +639,17 @@ void BosonCanvasRenderer::renderSelections(const BoItemList* selectedItems)
 	if (boConfig->boolValue("AlignSelectionBoxes")) {
 		glRotatef(camera()->rotation(), 0.0, 0.0, 1.0);
 	}
-	GLuint list = d->mSelectBoxData->list(item->selectBox()->factor());
-	glCallList(list);
-	glPopMatrix();
 	Unit* u = 0;
 	if (RTTI::isUnit(item->rtti())) {
 		u = (Unit*)item;
 	}
+	float factor = 1.0f;
+	if (u) {
+		factor = ((float)u->health()) / ((float)u->maxHealth());
+	}
+	GLuint list = d->mSelectBoxData->list(factor);
+	glCallList(list);
+	glPopMatrix();
 /*
 	if (u && u->waypointList().count() > 0) {
 		// render a line from the current position of the unit to the

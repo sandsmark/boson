@@ -22,7 +22,6 @@
 #include "../../bomemory/bodummymemory.h"
 #include "../bosoncanvas.h"
 #include "../rtti.h"
-#include "../selectbox.h"
 #include "../cell.h" // for deleteitem. i dont want this. how can we avoid this? don't use qptrvector probably.
 #include "../bosoneffect.h"
 #include "../bosonpropertyxml.h"
@@ -143,7 +142,8 @@ BosonItem::BosonItem(Player* owner, BosonCanvas* canvas)
  mDecelerationSpeed = 0;
 
  mIsAnimated = true; // obsolete! remove!
- mSelectBox = 0;
+ mIsSelected = false;
+ mIsGroupLeaderOfSelection = false;
 
  mCells = new QPtrVector<Cell>();
  mRenderer = 0;
@@ -278,17 +278,14 @@ bool BosonItem::bosonCollidesWith(const BoVector3Fixed& v1, const BoVector3Fixed
 
 void BosonItem::select(bool markAsLeader)
 {
- if (mSelectBox) {
-	// already selected
-	return;
- }
- mSelectBox = new SelectBox(this, canvas(), markAsLeader);
+ mIsSelected = true;
+ mIsGroupLeaderOfSelection = markAsLeader;
 }
 
 void BosonItem::unselect()
 {
- delete mSelectBox;
- mSelectBox = 0;
+ mIsSelected = false;
+ mIsGroupLeaderOfSelection = false;
 }
 
 BoVector2Fixed BosonItem::center() const
@@ -336,10 +333,10 @@ void BosonItem::setSize(bofixed width, bofixed height, bofixed depth)
  addToCells();
 }
 
-void BosonItem::renderItem(unsigned int lod, bool transparentmeshes)
+void BosonItem::renderItem(unsigned int lod, bool transparentMeshes)
 {
  if (itemRenderer()) {
-	itemRenderer()->renderItem(lod, transparentmeshes);
+	itemRenderer()->renderItem(lod, transparentMeshes);
  }
 }
 
