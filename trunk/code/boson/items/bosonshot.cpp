@@ -22,12 +22,10 @@
 #include "../../bomemory/bodummymemory.h"
 #include "../global.h"
 #include "../bosoncanvas.h"
-#include "../bosoneffect.h"
 #include "../bosonweapon.h"
 #include "../player.h"
 #include "../unitproperties.h"
 #include "../boitemlist.h"
-#include "../bosoneffectproperties.h"
 #include "../boson.h"
 #include "../speciestheme.h"
 #include "../unit.h"
@@ -147,13 +145,13 @@ bool BosonShot::init()
   if(!owner())
   {
     boError(350) << k_funcinfo << "NULL owner!" << endl;
-    setActive(false);
+    setInactive();
     return false;
   }
   if(!canvas())
   {
     boError(350) << k_funcinfo << "NULL canvas" << endl;
-    setActive(false);
+    setInactive();
     return false;
   }
 
@@ -244,7 +242,7 @@ void BosonShot::explode()
  setVelocity(0, 0, 0);
  setVisible(false);
  canvas()->shotHit(this);
- setActive(false);
+ setInactive();
 }
 
 long int BosonShot::damage() const
@@ -262,9 +260,9 @@ bofixed BosonShot::fullDamageRange() const
   return mWeaponFullDamageRange;
 }
 
-void BosonShot::setActive(bool a)
+void BosonShot::setInactive()
 {
-  mActive = a;
+  mActive = false;
   if(!mActive)
   {
     // This sets effect owner ids to 0 (so that they won't be owned by this
@@ -307,7 +305,7 @@ bool BosonShotBullet::init()
   if(!properties())
   {
     boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
-    setActive(false);
+    setInactive();
     return false;
   }
   return true;
@@ -374,13 +372,13 @@ void BosonShotRocket::init(const BoVector3Fixed& pos, const BoVector3Fixed& targ
   if(!properties())
   {
     boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
-    setActive(false);
+    setInactive();
     return;
   }
   if(!canvas()->onCanvas((int)pos[0], (int)pos[1]))
   {
     boError(350) << k_funcinfo << "invalid start position" << endl;
-    setActive(false);
+    setInactive();
     return;
   }
 
@@ -586,13 +584,13 @@ void BosonShotMissile::init(const BoVector3Fixed& pos, Unit* target)
   if(!properties())
   {
     boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
-    setActive(false);
+    setInactive();
     return;
   }
   if(!canvas()->onCanvas((int)pos[0], (int)pos[1]))
   {
     boError(350) << k_funcinfo << "invalid start position" << endl;
-    setActive(false);
+    setInactive();
     return;
   }
 

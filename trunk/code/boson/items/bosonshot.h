@@ -170,7 +170,7 @@ class BosonShot : public BosonItem
   protected:
     virtual const QColor* teamColor() const;
 
-    void setActive(bool a);
+    void setInactive();
     inline void setProperties(const BosonWeaponProperties* p)  { mProp = p; }
 
     virtual void advanceMoveInternal() {}
@@ -217,7 +217,7 @@ class BosonShotBullet : public BosonShot
     virtual bool saveAsXML(QDomElement&) { return true; }
     virtual bool loadFromXML(const QDomElement&)
     {
-      setActive(false);
+      setInactive();
       return true;
     }
 
