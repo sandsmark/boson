@@ -118,7 +118,7 @@ public:
 	// but for now we are safe.
 	KGameProperty<unsigned long int> mNextItemId;
 
-	BosonPath2* mPathfinder;
+	BosonPath* mPathfinder;
 
 	BoCanvasEventListener* mEventListener;
 };
@@ -182,6 +182,11 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, const QPtrList<BosonIt
  // signal)
  boWaterRenderer->update(0.05);
  boProfiling->pop(); // Advance Water
+
+ // TODO: check when is it best to do this
+ boProfiling->push("Advance Pathfinder");
+ mCanvas->pathfinder()->advance();
+ boProfiling->pop(); // Advance Pathfinder
 
  boProfiling->push("Notify About Destroyed Units");
  notifyAboutDestroyedUnits(mCanvas->d->mDestroyedUnits, initialDestroyedUnitsCount, allItems);
@@ -273,9 +278,8 @@ void BoCanvasAdvance::advanceFunctionAndMove(unsigned int advanceCallsCount, boo
 			skip = false;
 			break;
 		case (int)UnitBase::WorkIdle:
-			if (advanceCallsCount % 10 != 0) {
-				skip = true;
-			}
+			// TODO: maybe use some other work for circling aircrafts?
+			skip = false;
 			break;
 		case (int)UnitBase::WorkNone:
 			skip = true;
@@ -332,6 +336,7 @@ void BoCanvasAdvance::advanceFunctionAndMove(unsigned int advanceCallsCount, boo
 
 		if (s->xVelocity() || s->yVelocity() || s->zVelocity()) {
 			s->moveBy(s->xVelocity(), s->yVelocity(), s->zVelocity());
+			s->setVelocity(0, 0, 0);
 		}
 	}
  }
@@ -592,7 +597,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag)
  boProfiling->popStorage();
 }
 
-bool BosonCanvas::canGo(const UnitProperties* prop, const BoRectFixed& rect) const
+bool BosonCanvas::canGo(const UnitProperties* prop, const BoRectFixed& rect, bool _default) const
 {
 // boDebug() << k_funcinfo << endl;
  if (rect.left() < 0 || rect.top() < 0 ||
@@ -606,27 +611,8 @@ bool BosonCanvas::canGo(const UnitProperties* prop, const BoRectFixed& rect) con
  do {
 	int x = (int)rect.x();
 	do {
-		Cell* newCell = cell(x, y);
-		if (!newCell) {
-			boError() << k_funcinfo << "NULL cell" << endl;
+		if (!canGo(prop, x, y, _default)) {
 			return false;
-		}
-		if (!newCell->passable()) {
-			// Cell is not passable by any unit (probably the slope is too big).
-			return false;
-		} else if (!prop->isAircraft()) {
-			// Non-aircrafts can usually only move on either land or water (aircrafts can move on both).
-			if (!newCell->isWater()) {
-				if (!prop->canGoOnLand()) {
-					// Cell is passable for land units, but this unit can't move on land
-					return false;
-				}
-			} else {
-				if (!prop->canGoOnWater()) {
-					// Cell is passable for water units, but this unit can't move on water
-					return false;
-				}
-			}
 		}
 		x++;
 	} while (x < right);
@@ -634,6 +620,21 @@ bool BosonCanvas::canGo(const UnitProperties* prop, const BoRectFixed& rect) con
  } while (y < bottom);
 
  return true;
+}
+
+bool BosonCanvas::canGo(const UnitProperties* prop, int x, int y, bool _default) const
+{
+ // TODO: check for fog (we'll probably need Player/PlayerIO for this)
+ // TODO: move this to UnitProperties. The reason it's here ATM is that we need
+ //  map's width
+ if (prop->isAircraft()) {
+	return true;
+ } else if(prop->isFacility()) {
+	// TODO: add MaxSlope and WaterDepth properties to facilities and take those into account
+	return !cell(x, y)->isWater();
+ }
+
+ return prop->moveData()->cellPassable[y * mapWidth() + x];
 }
 
 void BosonCanvas::setMap(BosonMap* map)
@@ -670,13 +671,13 @@ void BosonCanvas::unitMoved(Unit* unit, bofixed oldX, bofixed oldY)
  emit signalUnitMoved(unit, oldX, oldY);
 }
 
-void BosonCanvas::updateSight(Unit* unit, bofixed , bofixed)
+void BosonCanvas::updateSight(Unit* unit, bofixed, bofixed)
 {
 // TODO: use the bofixed parameters - check whether the player can still see
 // these coordinates and if not out fog on them again. Remember to check for -1
 // (new unit placed)!
 
- unsigned int sight = unit->sightRange(); // *cell* number! not pixel number!
+ unsigned int sight = (int)unit->sightRange();
  unsigned int x = (unsigned int)unit->centerX();
  unsigned int y = (unsigned int)unit->centerY();
 
@@ -1215,10 +1216,8 @@ void BosonCanvas::deleteItem(BosonItem* item)
  // BosonItem d'tor)
  if (RTTI::isUnit(item->rtti())) {
 	Unit* u = (Unit*)item;
-#ifdef PATHFINDER_TNG
 	// Update occupied status of cells that unit occupied
 	u->setMovingStatus(UnitBase::Removing);
-#endif
 	// In editor mode, we need to do couple of things before deleting the unit,
 	//  to prevent crashes later (e.g. when selecting units)
 	if (!boGame->gameMode()) {
@@ -1343,7 +1342,8 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
  }
 
  if (loadpathfinder) {
-	pathfinder()->setDataLocked(true);
+	// TODO: make sure this is correct (it was true earlier)
+	pathfinder()->setDataLocked(false);
  } else {
 	initPathfinder();
  }
@@ -2077,7 +2077,6 @@ unsigned long int BosonCanvas::nextItemId()
 
 void BosonCanvas::initPathfinder()
 {
-#ifdef PATHFINDER_TNG
  boDebug() << k_funcinfo << endl;
 
  if (d->mPathfinder) {
@@ -2086,64 +2085,26 @@ void BosonCanvas::initPathfinder()
  }
 
  boDebug() << k_funcinfo << "Constructing..." << endl;
- d->mPathfinder = new BosonPath2(map());
+ d->mPathfinder = new BosonPath(map());
  boDebug() << k_funcinfo << "Constructing done!" << endl;
 
  boDebug() << k_funcinfo << "Initing..." << endl;
  d->mPathfinder->init();
  boDebug() << k_funcinfo << "Initing done!" << endl;
- d->mPathfinder->colorizeRegions();
 
  boDebug() << k_funcinfo << "DONE" << endl;
-#endif
 }
 
-BosonPath2* BosonCanvas::pathfinder()
+BosonPath* BosonCanvas::pathfinder() const
 {
  return d->mPathfinder;
 }
 
 void BosonCanvas::unitMovingStatusChanges(Unit* u, int oldstatus, int newstatus)
 {
-#ifdef PATHFINDER_TNG
- if (oldstatus == newstatus) {
-	// Shouldn't probably happen
-	boWarning() << k_funcinfo << "oldstatus == newstatus" << endl;
-	return;
+ if (pathfinder()) {
+	pathfinder()->unitMovingStatusChanges(u, oldstatus, newstatus);
  }
-
- if ((oldstatus != UnitBase::Standing) && (newstatus != UnitBase::Standing)) {
-	// Unit was moving and will continue to be moving. No need to do anything
-	return;
- } else {
-	// Unit either starts or stops moving
-	// It should be suffient if we go through all cells that unit is on, and
-	//  recalc their occupied status
-	int x1, x2, y1, y2;  // Rect in which cells changed
-	x1 = y1 = 1000000;
-	x2 = y2 = -1000000;
-	const QPtrVector<Cell>* cells = u->cells();
-	for (unsigned int i = 0; i < cells->count(); i++) {
-		Cell* c = cells->at(i);
-		if (!c) {
-			boError() << k_funcinfo << "NULL cell at " << i << endl;
-			continue;
-		}
-		if (u->isFlying()) {
-			c->recalculateAirOccupiedStatus();
-		} else {
-			c->recalculateLandOccupiedStatus();
-		}
-		x1 = QMIN(x1, c->x());
-		y1 = QMIN(y1, c->y());
-		x2 = QMAX(x2, c->x());
-		y2 = QMAX(y2, c->y());
-	}
-	if (pathfinder()) {
-		pathfinder()->cellsOccupiedStatusChanged(x1, y1, x2, y2);
-	}
- }
-#endif
 }
 
 BoEventListener* BosonCanvas::eventListener() const

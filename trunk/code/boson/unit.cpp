@@ -53,6 +53,7 @@
 
 #include "defines.h"
 
+
 #define MAX_PATH_AGE 5
 
 // If defined, new (not cell based) collision detection method is used
@@ -63,45 +64,8 @@
 // If defined, units will search and fire at enemy units only when they are at
 //  waypoints. This may make unit movement better for big groups, because units
 //  shouldn't occupy multiple cells while firing at enemies.
-#define CHECK_ENEMIES_ONLY_AT_WAYPOINT
+//#define CHECK_ENEMIES_ONLY_AT_WAYPOINT
 
-
-// AB: debugging code, used to find a network bug. will be removed soon
-#define NET_DEBUG 0
-
-#if NET_DEBUG
-void printBinaryFloat(const char* name, float var)
-{
- fprintf(stderr, "    %s: %f: ", name, var);
- int var2 = *((int*)&var);
- for (int i = 31; i >= 0; i--) {
-	if (var2 & 0x1 << i) {
-		fprintf(stderr, "1");
-	} else {
-		fprintf(stderr, "0");
-	}
- }
- int sign = (var2 & (0x1 << 31)) ? 1 : 0;
- int e = 0;
- float m = 0;
- for (int i = 30; i >= 23; i--) {
-	e <<= 1;
-	if (var2 & (0x1 << i)) {
-		e += 1;
-	}
- }
- for (int i = 0; i < 23; i++) {
-	m /= 2.0f;
-	if (var2 & (0x1 << i)) {
-		m += (0.5f);
-	}
- }
- // ieee stuff. mantissa always has a leading 1, exponent has a bias of 127
- m += 1.0f;
- e -= 127;
- fprintf(stderr, " - sign=%d, e=%d, m=%f\n", sign, e, m);
-}
-#endif
 
 
 bool Unit::mInitialized = false;
@@ -174,14 +138,9 @@ Unit::~Unit()
 	delete *it;
  }
  delete[] d->mWeapons;
-#ifdef PATHFINDER_TNG
  if (canvas()->pathfinder()) {
-	if(pathInfo()->hlpath) {
-		canvas()->pathfinder()->releaseHighLevelPath(pathInfo()->hlpath);
-		pathInfo()->hlpath = 0;
-	}
+	// Release highlevel path here once we cache them
  }
-#endif
  delete d;
 }
 
@@ -507,7 +466,7 @@ void Unit::advanceIdle(unsigned int advanceCallsCount)
  }
  BosonProfiler profiler("advanceIdle");
 
- if (!unitProperties()->canShoot() ||!d->mWeapons[0]) {
+ if ((!unitProperties()->canShoot() ||!d->mWeapons[0]) && (!unitProperties()->isAircraft())) {
 	// this unit does not have any weapons, so it will never shoot anyway.
 	// no need to call advanceIdle() again
 	setAdvanceWork(WorkNone);
@@ -863,16 +822,9 @@ unsigned int Unit::waypointCount() const
 
 void Unit::resetPathInfo()
 {
-#ifdef PATHFINDER_TNG
- if(pathInfo()->hlpath) {
-	canvas()->pathfinder()->releaseHighLevelPath(pathInfo()->hlpath);
-	pathInfo()->hlpath = 0;
- }
-#endif
+ // Release highlevel path here once we cache them
  pathInfo()->reset();
  pathInfo()->unit = this;
- pathInfo()->canMoveOnLand = unitProperties()->canGoOnLand();
- pathInfo()->canMoveOnWater = unitProperties()->canGoOnWater();
  pathInfo()->flying = unitProperties()->isAircraft();
 }
 
@@ -882,11 +834,16 @@ void Unit::moveTo(const BoVector2Fixed& pos, bool attack)
  PROFILE_METHOD
  d->mTarget = 0;
 
- // We want unit's center point to be in the middle of the cell after moving.
- bofixed x = pos.x() + (1.0f/ 2);
- bofixed y = pos.y() + (1.0f/ 2);
+ // We want land unit's center point to be in the middle of the cell after
+ //  moving.
+ bofixed add = 0;
+ if (!unitProperties()->isAircraft()) {
+	add = (((unitProperties()->moveData()->size % 2) == 1) ? 0.5 : 0);
+ }
+ bofixed x = (int)pos.x() + add;
+ bofixed y = (int)pos.y() + add;
 
- if (moveTo(x, y, 0)) {
+ if (moveTo(x, y, -1)) {
 	boDebug() << k_funcinfo << "unit " << id() << ": Will move to (" << x << "; " << y << ")" << endl;
 	addWaypoint(BoVector2Fixed(x, y));
 	pathInfo()->moveAttacking = attack;
@@ -901,11 +858,20 @@ void Unit::moveTo(const BoVector2Fixed& pos, bool attack)
 
 bool Unit::moveTo(bofixed x, bofixed y, int range)
 {
- // Range -1 means to use previously set range
- if (range == -1) {
-	range = pathInfo()->range;
+ if (maxSpeed() == 0) {
+	// If unit's max speed is 0, it cannot move
+	return false;
  }
 
+ if (unitProperties()->isAircraft()) {
+	// Aircrafts cannot go near the border of the map to make sure they have
+	//  enough room for turning around
+	x = QMIN(QMAX(x, bofixed(6)), (bofixed)canvas()->mapWidth() - 6);
+	y = QMIN(QMAX(y, bofixed(6)), (bofixed)canvas()->mapHeight() - 6);
+ }
+
+ // TODO: move the destination point a bit in case the unit partially goes off
+ // the map otherwise
  // Find destination cell
  int cellX = (int)x;
  int cellY = (int)y;
@@ -916,26 +882,12 @@ bool Unit::moveTo(bofixed x, bofixed y, int range)
 	return false;
  }
 
- // Check if unit can go to destination cell.
- // FIXME: this doesn't support units which occupy multiple cells!
- //  We could iterate through all the cells unit would occupy, but that would be
- //  too slow...
- if (range == 0) {
-	if (ownerIO()->canSee(cell)) {
-		if (!ownerIO()->canGo(this, cell)) {
-			// No pathfinding if goal not reachable or occupied and we can see it
-			boDebug() << k_funcinfo << "unit " << id() << ": Can't go to " << x << "," << y << endl;
-			return false;
-		}
-	}
- }
-
  // Update path info
  resetPathInfo();
- pathInfo()->dest.setX((int)x);
- pathInfo()->dest.setY((int)y);
+ pathInfo()->dest.setX(x);
+ pathInfo()->dest.setY(y);
  pathInfo()->range = range;
- boDebug() << k_funcinfo << "unit " << id() << ": dest: (" << (int)x << "; " << (int)y << "); range: " << range << endl;
+ boDebug() << k_funcinfo << "unit " << id() << ": dest: (" << x << "; " << y << "); range: " << range << endl;
 
  // Remove old way/pathpoints
  // TODO: maybe call stopMoving() instead and remove setMovingStatus(Standing)
@@ -950,62 +902,6 @@ bool Unit::moveTo(bofixed x, bofixed y, int range)
  setMovingStatus(MustSearch);
 
  return true;
-}
-
-void Unit::newPath()
-{
- BosonProfiler profiler("newPath");
- boDebug(401) << k_funcinfo << "unit " << id() << endl;
- // Check if we can still go to cell (it may be that cell was fogged previously,
- //  so we couldn't check, but now it's unfogged)
- // FIXME: don't check if cell is valid/invalid if range > 0
- //  then unit would behave correctly when e.g. commanding land unit to attack
- //  a ship
- int cellX = (int)pathInfo()->dest.x();
- int cellY = (int)pathInfo()->dest.y();
- if (!ownerIO()->isFogged(cellX, cellY)) {
-	Cell* destCell = canvas()->cell(cellX, cellY);
-	if (!destCell || (!ownerIO()->canGo(this, destCell))) {
-		// If we can't move to destination, then we add special pathpoint with
-		//  coordinates (PF_CANNOT_GO; PF_CANNOT_GO) and in
-		//  MobileUnit::advanceMove(), we check for these special codes
-		boDebug() << k_funcinfo << "unit " << id() << ": Null cell or can't go to (" <<
-				pathInfo()->dest.x() << "; " << pathInfo()->dest.y() << ") (cell (" << cellX << "; " << cellY << "))" << endl;
-		clearPathPoints();
-		addPathPoint(BoVector2Fixed(PF_CANNOT_GO, PF_CANNOT_GO));
-		return;
-	}
- }
-
- // Update our start position
- pathInfo()->start.setX((int)(BosonItem::x() + width() / 2));
- pathInfo()->start.setY((int)(BosonItem::y() + height() / 2));
-
- // Find path
-#ifdef PATHFINDER_TNG
- canvas()->pathfinder()->findPath(pathInfo());
-#else
- BosonPath::findPath(pathInfo());
-#endif
-
- // Copy low-level path to pathpoints' list
- clearPathPoints();
- for (int unsigned i = 0; i < pathInfo()->llpath.count(); i++) {
-	addPathPoint(pathInfo()->llpath[i]);
- }
-
- // Pathfinder always adds our current position as the first point of the path.
- // Note that last pathpoint must always remain there (and pf end point)
- if (pathPointCount() > 2 && (currentPathPoint() == pathInfo()->start)) {
-	pathPointDone();
- }
-
- if (pathPointCount() == 0) {
-	// Pathfinder now adds -1; -1 itself, so this shouldn't be reached
-	boError() << k_funcinfo << "!!!!! No valid points in path !!!!! Fix pathfinder !!!!!" << endl;
-	addPathPoint(BoVector2Fixed(PF_CANNOT_GO, PF_CANNOT_GO));
- }
- return;
 }
 
 void Unit::clearWaypoints()
@@ -1058,15 +954,7 @@ void Unit::stopMoving()
  clearWaypoints();
  clearPathPoints();
 
-#ifdef PATHFINDER_TNG
- // Release high-level path. We check if it exists here, because it's ok if it
- //  doesn't. That's the case when e.g. path wasn't found
- if(pathInfo()->hlpath) {
-	canvas()->pathfinder()->releaseHighLevelPath(pathInfo()->hlpath);
-	pathInfo()->hlpath = 0;
-	pathInfo()->hlstep = 0;
- }
-#endif
+ // Release highlevel path here once we cache them
 
  // Call this only if we are only moving - stopMoving() is also called e.g. on
  // WorkAttack, when the unit is not yet in range.
@@ -1146,19 +1034,17 @@ bool Unit::saveAsXML(QDomElement& root)
  saveVector2AsXML(pathInfo()->dest, pathinfoxml, "dest");
  pathinfoxml.setAttribute("range", pathInfo()->range);
  // Save hlpath
- if (pathInfo()->hlpath) {
+ /*if (pathInfo()->hlpath) {
 	pathinfoxml.setAttribute("hlpathid", pathInfo()->hlpath->id);
 	pathinfoxml.setAttribute("hlstep", pathInfo()->hlstep);
  } else {
 	pathinfoxml.setAttribute("hlpathid", 0);
- }
+ }*/
  // Save llpath
  pathinfoxml.setAttribute("llpathlength", pathInfo()->llpath.count());
  for (unsigned int i = 0; i < pathInfo()->llpath.count(); i++) {
 	saveVector2AsXML(pathInfo()->llpath[i], pathinfoxml, QString("llpath-%1").arg(i));
  }
- // Save passable flag
- pathinfoxml.setAttribute("passable", pathInfo()->passable ? 1 : 0);
  // Save misc stuff
  pathinfoxml.setAttribute("moveAttacking", pathInfo()->moveAttacking ? 1 : 0);
  pathinfoxml.setAttribute("slowDownAtDest", pathInfo()->slowDownAtDest ? 1 : 0);
@@ -1269,7 +1155,7 @@ bool Unit::loadFromXML(const QDomElement& root)
 		boError() << k_funcinfo << "Error loading range attribute ('" << pathinfoxml.attribute("range") << "')" << endl;
 		return false;
 	}
-	pathInfo()->hlstep = 0;
+	/*pathInfo()->hlstep = 0;
 	pathInfo()->hlpath = 0;
 	int hlpathid = pathinfoxml.attribute("hlpathid").toInt(&ok);
 	if (!ok) {
@@ -1277,7 +1163,8 @@ bool Unit::loadFromXML(const QDomElement& root)
 		return false;
 	}
 	if (hlpathid > 0) {
-		pathInfo()->hlpath = canvas()->pathfinder()->highLevelPath(hlpathid);
+	// TODO
+	//pathInfo()->hlpath = canvas()->pathfinder()->highLevelPath(hlpathid);
 		pathInfo()->hlstep = pathinfoxml.attribute("hlstep").toInt(&ok);
 		if (!ok) {
 			boError() << k_funcinfo << "Error loading hlstep attribute ('" << pathinfoxml.attribute("hlstep") << "')" << endl;
@@ -1297,13 +1184,8 @@ bool Unit::loadFromXML(const QDomElement& root)
 	// regions aren't saved/loaded
 	pathInfo()->startRegion = 0;
 	pathInfo()->destRegion = 0;
-	pathInfo()->possibleDestRegions.resize(0);
+	pathInfo()->possibleDestRegions.resize(0);*/
 	// misc
-	pathInfo()->passable = (pathinfoxml.attribute("passable").toInt(&ok));
-	if (!ok) {
-		boError() << k_funcinfo << "Error loading passable attribute ('" << pathinfoxml.attribute("passable") << "')" << endl;
-		return false;
-	}
 	pathInfo()->moveAttacking = (pathinfoxml.attribute("moveAttacking").toInt(&ok));
 	if (!ok) {
 		boError() << k_funcinfo << "Error loading moveAttacking attribute ('" << pathinfoxml.attribute("moveAttacking") << "')" << endl;
@@ -1326,8 +1208,6 @@ bool Unit::loadFromXML(const QDomElement& root)
 	}
 	// These aren't saved
 	pathInfo()->unit = this;
-	pathInfo()->canMoveOnLand = unitProperties()->canGoOnLand();
-	pathInfo()->canMoveOnWater = unitProperties()->canGoOnWater();
 	pathInfo()->flying = unitProperties()->isAircraft();
  }
  // Null pathinfoxml is valid too: in this case, we're loading from playfield
@@ -1762,11 +1642,75 @@ void Unit::recalculateMaxWeaponRange()
  d->mMaxWeaponRange = QMAX(d->mMaxAirWeaponRange, d->mMaxLandWeaponRange);
 }
 
+bool Unit::cellOccupied(int x, int y, bool ignoremoving) const
+{
+ // TODO: move this method away from here and merge it with the one in the pathfinder
+ if (unitProperties()->isAircraft()) {
+	return false;
+ }
+
+ BosonMoveData* movedata = unitProperties()->moveData();
+ if (x < movedata->edgedist1 || y < movedata->edgedist1 ||
+	x > (int)canvas()->mapWidth() - 1 - movedata->edgedist2 ||
+	y > (int)canvas()->mapHeight() - 1 - movedata->edgedist2) {
+	return true;
+ }
+
+ for (int x2 = x - movedata->edgedist1; x2 <= x + movedata->edgedist2; x2++) {
+	for (int y2 = y - movedata->edgedist1; y2 <= y + movedata->edgedist2; y2++) {
+		if (!movedata->cellPassable[y2 * canvas()->mapWidth() + x2]) {
+			return true;
+		}
+
+		const BoItemList* items = canvas()->cell(x2, y2)->items();
+		for (BoItemList::ConstIterator it = items->begin(); it != items->end(); ++it) {
+			if (RTTI::isUnit((*it)->rtti())) {
+				Unit* u = (Unit*)*it;
+				if(u->isFlying()) {
+					// We don't care about air units
+					continue;
+				} else if(u == this) {
+					continue;
+				}
+
+				// Maybe we can just crush the obstacle
+				if (u->maxHealth() <= movedata->crushDamage) {
+					// Check player's relationship with the u's owner
+					if (ownerIO()->isEnemy(u)) {
+						// Crush the damn enemy :-)
+						continue;
+					} else if (ownerIO()->isNeutral(u)) {
+						// Also crush it
+						// TODO: maybe have additional cost for crushing neutral stuff???
+						continue;
+					}
+				}
+
+				if (ignoremoving && u->movingStatus() == UnitBase::Moving) {
+					continue;
+				}
+
+				// This one's occupying the cell
+				return true;
+			}
+			// TODO: check for e.g. mines
+		}
+
+	}
+ }
+
+ return false;
+}
+
 
 
 /////////////////////////////////////////////////
 // MobileUnit
 /////////////////////////////////////////////////
+
+
+QValueVector<BoVector2Fixed> MobileUnit::mCellIntersectionTable[11][11];
+
 
 class MobileUnit::MobileUnitPrivate
 {
@@ -1776,9 +1720,15 @@ public:
 	}
 
 
-	// Should this be made KGameProperty?
-	bofixed lastXVelocity;
-	bofixed lastYVelocity;
+	// Should these be made KGameProperty?
+	int lastCellX;
+	int lastCellY;
+
+	int nextCellX;
+	int nextCellY;
+	QValueVector<BoVector2Fixed>* nextWaypointIntersections;
+	int nextWaypointIntersectionsXOffset;
+	int nextWaypointIntersectionsYOffset;
 };
 
 MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
@@ -1792,8 +1742,8 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
  setMaxSpeed(mMaxSpeed.value(upgradesCollection())); // AB: WARNING: maxSpeed() must NOT be used here (we _set_ it here)
  setAccelerationSpeed(maxAccelerationSpeed());
  setDecelerationSpeed(maxDecelerationSpeed());
- d->lastXVelocity = 0.0f;
- d->lastYVelocity = 0.0f;
+ d->lastCellX = -1;
+ d->lastCellY = -1;
 }
 
 MobileUnit::~MobileUnit()
@@ -1864,6 +1814,15 @@ void MobileUnit::changeUpgrades(const UpgradeProperties* upgrade, bool add)
 
 void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this actually needs to be called for every advanceCallsCount.
 {
+ if (isFlying()) {
+	advanceMoveFlying(advanceCallsCount);
+ } else {
+	advanceMoveLeader(advanceCallsCount);
+ }
+}
+
+void MobileUnit::advanceMoveLeader(unsigned int advanceCallsCount)
+{
  BosonProfiler profiler("advanceMoveInternal");
  //boDebug(401) << k_funcinfo << endl;
 
@@ -1890,21 +1849,25 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
 		return;
 	}
 	// If there aren't any enemies, find new path
-	newPath();
+	if (!newPath()) {
+		// No path was found
+		return;
+	}
  }
 
  // Make sure we have pathpoints
  if (pathPointCount() == 0) {
-	// No pathpoints. We should have at least one point in any case, so most
-	//  probably something is broken
-	boError(401) << k_funcinfo << "unit " << id() << ": No pathpoints" << endl;
-	// Try to find new path
-	newPath();
-	if (pathPointCount() == 0) {
-		// Still no points - serious problem somewhere
-		boError(401) << k_funcinfo << "unit " << id() << ": Still no pathpoints. Aborting" << endl;
+	if (pathInfo()->result == BosonPath::OutOfRange) {
+		// New pathfinding query has to made, because last returned path was
+		//  only partial.
+		if (!newPath()) {
+			// Probably no path could be found (and stopMoving() was called)
+			return;
+		}
+	} else {
+		// TODO: rotate a bit randomly
+		// TODO: support multiple waypoints
 		stopMoving();
-		setMovingStatus(Standing);
 		return;
 	}
  }
@@ -1957,18 +1920,16 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
  }
 
  // x and y are center of the unit here
- bofixed x = BosonItem::x() + width() / 2;
- bofixed y = BosonItem::y() + height() / 2;
+ bofixed x = centerX();
+ bofixed y = centerY();
+
+
  //boDebug(401) << k_funcinfo << "unit " << id() << ": pos: (" << x << "; "<< y << ")" << endl;
  // If we're close to destination, decelerate, otherwise  accelerate
  // TODO: we should also slow down when turning at pathpoint.
  // TODO: support range != 0
  bofixed oldspeed = speed();
- if (pathInfo()->slowDownAtDest && QMAX(QABS(x - bofixed(pathInfo()->dest.x())), QABS(y - bofixed(pathInfo()->dest.y()))) <= decelerationDistance()) {
-	decelerate();
- } else {
-	accelerate();
- }
+ accelerate();
 
  // Go speed() distance towards the next pathpoint. If distance to it is less
  //  than speed(), we go towards the one after this as well
@@ -1979,77 +1940,88 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
 
  // We move through the pathpoints, until we've passed dist distance
  while (dist > 0) {
-	// Take next pathpoint
-	if (currentPathPoint().x() == PF_END_CODE && currentPathPoint().y() == PF_END_CODE) {
-		if (xspeed || yspeed) {
-			// Current pathpoint marks the end of the path, but we've moved already.
-			// We can't just stop moving here, because then velocity would be set to 0
-			//  and we'd never move this last step.
-			// So we just break here, move this last step, and next time we'll return
-			//  here, we'll stop moving.
+	// Check if we have any pathpoints left
+	if (pathPointCount() == 0) {
+		if (pathInfo()->result == BosonPath::OutOfRange) {
+			// New pathfinding query has to made, because last returned path was
+			//  only partial.
+			if (!newPath()) {
+				// Probably no path could be found (and stopMoving() was called)
+				break;
+			}
+		} else {
+			// TODO: rotate a bit randomly
+			// TODO: support multiple waypoints
 			break;
 		}
 	}
-	if (checkPathPoint(currentPathPoint())) {
-		break;
-	}
-	// Check if we have any pathpoints left
-	if (pathPointCount() == 0) {
-		// Probably end of the path was reached.
-		// Last pathpoint had to be PF_END_CODE; PF_END_CODE, so checkPathPoint()
-		//  already stopped movement, so we can just return here
-		// Note that xspeed and yspeed are 0 (checked above), so we won't miss any
-		//  last steps
-		return;
+
+	// Take next pathpoint
+	pp = currentPathPoint();
+
+	// Pathpoint skipping
+	int currentCellX = (int)(x + xspeed);
+	int currentCellY = (int)(y + yspeed);
+	// We will check if we can skip some pathpoint if we're not on the same cell
+	//  as the current pathpoint. Also we remember where we were when we skipped
+	//  pathpoints last time in order not to do it every frame
+	if ((currentCellX != d->lastCellX) || (currentCellY != d->lastCellY)) {
+		if (d->lastCellX == -1) {
+			// New path has been searched.
+			currentPathPointChanged((int)(x + xspeed), (int)(y + yspeed));
+			// Modify lastCellX to not execute this again until next cell is reached
+			//  or new path is searched.
+			d->lastCellX = -2;
+		}
+		if (((int)pp.x() != currentCellX) || ((int)pp.y() != currentCellY)) {
+			selectNextPathPoint(currentCellX, currentCellY);
+			d->lastCellX = currentCellX;
+			d->lastCellY = currentCellY;
+			pp = currentPathPoint();
+		}
 	}
 
-	pp = currentPathPoint();
 	//boDebug(401) << k_funcinfo << "unit " << id() << ": Current pp: (" << pp.x() << "; "<< pp.y() << ")" << endl;
+
+	// Make sure it's possible to go to the pathpoint
+	if (!canGoToCurrentPathPoint(x + xspeed, y + yspeed)) {
+		// Gotta find another path
+		if (!newPath()) {
+			// Probably no path could be found (and stopMoving() was called)
+			break;
+		}
+		currentPathPointChanged((int)(x + xspeed), (int)(y + yspeed));
+		selectNextPathPoint((int)(x + xspeed), (int)(y + yspeed));
+		d->lastCellX = (int)(x + xspeed);
+		d->lastCellY = (int)(y + yspeed);
+	}
 
 	// Move towards it
 	dist -= moveTowardsPoint(pp, x + xspeed, y + yspeed, dist, xspeed, yspeed);
 
-#if NET_DEBUG
-	boDebug(401) << k_funcinfo << "Moving from (" << x << "; " << y <<
-			") to (" << x + xspeed << "; " << y + yspeed <<
-			"); pp: (" << pp.x() << "; " << pp.y() <<
-			"); dist: " << dist << "/" << speed() << endl;
-	printBinaryFloat("x", x);
-	printBinaryFloat("y", y);
-	printBinaryFloat("xspeed", xspeed);
-	printBinaryFloat("yspeed", yspeed);
-	printBinaryFloat("pp.x()", pp.x());
-	printBinaryFloat("pp.y()", pp.y());
-#endif
-	// Check if we reached that pathpoint
+	// Check if we reached this pathpoint
 	if ((x + xspeed == pp.x()) && (y + yspeed == pp.y())) {
 		// Unit has reached pathpoint
 		boDebug(401) << k_funcinfo << "unit " << id() << ": unit is at pathpoint" << endl;
 		pathPointDone();
-#if NET_DEBUG
-		BoVector2Fixed nextpp = currentPathPoint();
-		boDebug(401) << k_funcinfo << "next pathpoint is (" << nextpp.x() << "; " << nextpp.y() << ")" << endl;
-#endif
+		currentPathPointChanged((int)(x + xspeed), (int)(y + yspeed));
 		// Check for enemies
 		if (attackEnemyUnitsInRangeWhileMoving()) {
-#if NET_DEBUG
-			boDebug(401) << k_funcinfo << "enemies found in range, breaking" << endl;
-#endif
 			break;
 		}
 	}
  }
 
- if ((xspeed == 0.0f) && (yspeed == 0.0f)) {
-	//boWarning(401) << k_funcinfo << "unit " << id() << ": Speed is 0.0" << endl;
+ // If the unit didn't move, we can just return now (this is valid)
+ if ((xspeed == 0) && (yspeed == 0)) {
 	return;
  }
 
  //boDebug(401) << k_funcinfo << "unit " << id() << ": Setting velo to: (" << xspeed << "; "<< yspeed << ")" << endl;
  setVelocity(xspeed, yspeed, 0.0);
- d->lastXVelocity = xspeed;
- d->lastYVelocity = yspeed;
  setMovingStatus(Moving);
+
+ //avoidance();
 
  turnTo();
 
@@ -2061,41 +2033,34 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
 
 bofixed MobileUnit::moveTowardsPoint(const BoVector2Fixed& p, bofixed x, bofixed y, bofixed maxdist, bofixed &xspeed, bofixed &yspeed)
 {
- //boDebug(401) << k_funcinfo << "p: (" << (float)p.x() << "; "<< (float)p.y() << "); pos: (" << x << "; "<< y <<
-		//");  maxdist: " << maxdist << "; xspeed: " << xspeed << "; yspeed: " << yspeed << endl;
+ PROFILE_METHOD;
  // Passed distance
  bofixed dist = 0.0f;
  // Calculate difference between point and our current position
  bofixed xdiff, ydiff;
  xdiff = p.x() - x;
  ydiff = p.y() - y;
+ bofixed difflen = sqrt(xdiff*xdiff + ydiff*ydiff);
 
- // Calculate how much to move on x-axis
- if (xdiff != 0.0f) {
-	if (QABS(xdiff) < maxdist) {
-		// We move less than possible (less than maxdist) on x axis
-		xspeed += xdiff;
-		dist = QMAX(dist, QABS(xdiff));  // Actually QMAX isn't needed here, because dist is 0 anyway...
-	} else {
-		// We move as much as possible on x axis
-		xspeed += (xdiff > 0) ? maxdist : -maxdist;
-		dist = QMAX(dist, maxdist);
-	}
+ if (difflen <= maxdist) {
+	xspeed += xdiff;
+	yspeed += ydiff;
+	return difflen;
+ } else {
+	bofixed factor = maxdist / difflen;
+	xspeed += xdiff * factor;
+	yspeed += ydiff * factor;
+	return maxdist;
  }
- // Calculate how much to move on y-axis
- if (ydiff != 0.0f) {
-	if (QABS(ydiff) < maxdist) {
-		yspeed += ydiff;
-		dist = QMAX(dist, QABS(ydiff));
-	} else {
-		yspeed += (ydiff > 0) ? maxdist : -maxdist;
-		dist = QMAX(dist, maxdist);
-	}
- }
+}
 
- // Calculate passed distance
- // TODO: use pythagoras
- return dist;
+void MobileUnit::advanceMoveFlying(unsigned int advanceCallsCount)
+{
+ advanceMoveLeader(advanceCallsCount);
+}
+
+void MobileUnit::advanceMoveFollowing(unsigned int advanceCallsCount)
+{
 }
 
 void MobileUnit::advanceMoveCheck()
@@ -2107,33 +2072,11 @@ void MobileUnit::advanceMoveCheck()
  if (pathInfo()->waiting) {
 	// We try to move every 5 advance calls
 	if (pathInfo()->waiting % 5 == 0) {
-		if (currentPathPoint().x() == PF_END_CODE && currentPathPoint().y() == PF_END_CODE) {
-			// This is allowed and means that unit will stop after this this advance call
-			//  (there are no more actual pathpoints).
-			pathInfo()->waiting = 0;
-			setMovingStatus(Waiting);  // TODO: is this ok here? maybe set to Moving instead?
-			return;
-		}
 		// Try to move again
-#ifdef USE_NEW_COLLISION_DETECTION
-		// I know, this code is _very_ ugly and unreadable, but once we'll have
-		//  polygonal pathfinder, I'll change/cleanup/rewrite this
-		QValueList<Unit*> immediatecollisions;
-		immediatecollisions = canvas()->collisionsInBox(BoVector3Fixed(x() + d->lastXVelocity, y() + d->lastYVelocity, z()),
-				BoVector3Fixed(x() + d->lastXVelocity + width(), y() + d->lastYVelocity + height(), z() + depth()), this);
-		if(!immediatecollisions.isEmpty()) {
-/*		if(canvas()->collisionsInBox(BoVector3Fixed(x() + d->lastXVelocity, y() + d->lastYVelocity, z()),
-				BoVector3Fixed(x() + d->lastXVelocity + width(), y() + d->lastYVelocity + height(), z() + depth()), this) &&
-				canvas()->collisionsInBox(BoVector3Fixed(x() + d->lastXVelocity * 5, y() + d->lastYVelocity * 5, z()),
-				BoVector3Fixed(x() + d->lastXVelocity * 5 + width(), y() + d->lastYVelocity * 5 + height(), z() + depth()), this)) {*/
-#else
-		if (canvas()->cellOccupied((int)currentPathPoint().x(),
-				(int)currentPathPoint().y(), this, false)) {
-#endif
+		if (cellOccupied(d->nextCellX, d->nextCellY)) {
 			// Obstacle is still there. Continue waiting
 			if (pathInfo()->waiting >= 600) {
 				// Enough of waiting (30 secs). Give up.
-				setMovingStatus(Standing);
 				stopMoving();
 				setWork(WorkIdle);
 				return;
@@ -2146,6 +2089,7 @@ void MobileUnit::advanceMoveCheck()
 				pathInfo()->pathrecalced++;
 				pathInfo()->waiting = 0;
 				// New path will be used next advance call
+				return;
 			}
 			pathInfo()->waiting++;
 			return;
@@ -2188,9 +2132,7 @@ void MobileUnit::advanceMoveCheck()
 	boError(401) << k_funcinfo << "leaving unit a current topleft pos: ("
 			<< boundingRect().topLeft().x() << ";"
 			<< boundingRect().topLeft().y() << ")" << endl;
-	setMovingStatus(Standing);
 	stopMoving();
-	setWork(WorkIdle);
 	return;
  }
  // Check if bottom-right point of the unit will be on canvas after moving
@@ -2223,118 +2165,325 @@ void MobileUnit::advanceMoveCheck()
 	boError(401) << k_funcinfo << "leaving unit a current bottomright pos: ("
 			<< boundingRect().bottomRight().x() << ";"
 			<< boundingRect().bottomRight().y() << ")" << endl;
-	setMovingStatus(Standing);
 	stopMoving();
-	setWork(WorkIdle);
 	return;
  }
 
- if (currentPathPoint().x() == PF_END_CODE && currentPathPoint().y() == PF_END_CODE) {
+ if (pathPointCount() == 0) {
 	// This is allowed and means that unit will stop after this this advance call
-	//  (there are no more actual pathpoints).
-	if (pathPointCount() > 1) {
-		// There shouldn't be more pathpoints
-		boWarning(401) << k_funcinfo << "PF_END_CODE pathpoint reached, but pathpoint count is" <<
-				pathPointCount() << endl;
-	}
 	return;
  }
- if (!canvas()->cell((int)currentPathPoint().x(), (int)currentPathPoint().y())) {
-	boError(401) << k_funcinfo << "NULL cell " << (int)currentPathPoint().x() << "," << (int)currentPathPoint().y() << endl;
-	setMovingStatus(Standing);
-	stopMoving();
-	setWork(WorkIdle);
+
+ if (unitProperties()->isAircraft()) {
+	return;
+ }
+
+ if (xVelocity() == 0 && yVelocity() == 0) {
+	// Probably unit stopped to attack other units
 	return;
  }
 
  //boDebug(401) << k_funcinfo << "unit " << id() << endl;
- // Make sure the unit won't collide with anything. Collision detection works in
- //  several stages: first we check if unit will immediately collide with
- //  anything (and if it will, we stop the unit), then we also check if unit
- //  will collide with anything in the near future (and will possibly take
- //  action to prevent this, e.g. slow down)
-#ifdef USE_NEW_COLLISION_DETECTION
- QValueList<Unit*> immediatecollisions;
- immediatecollisions = canvas()->collisionsInBox(BoVector3Fixed(x() + d->lastXVelocity, y() + d->lastYVelocity, z()),
-		BoVector3Fixed(x() + d->lastXVelocity + width(), y() + d->lastYVelocity + height(), z() + depth()), this);
- if (!immediatecollisions.isEmpty()) {
-#else
- if (canvas()->cellOccupied((int)currentPathPoint().x(),
-		(int)currentPathPoint().y(), this, false)) {
-#endif
-#if NET_DEBUG
-	boDebug(401) << k_funcinfo << "Next pathpoint is occupied, waiting" << endl;
-	const BoItemList* items = canvas()->cell((int)currentPathPoint().x(),
-			(int)currentPathPoint().y())->items();
-	bool flying = isFlying();
-	for (BoItemList::ConstIterator it = items->begin(); it != items->end(); it++) {
-		if (RTTI::isUnit((*it)->rtti())) {
-			Unit* u = (Unit*)*it;
-			if (this == u) {
-				continue;
-			}
-			if (u->isFlying() != flying) {
-				continue;
-			}
-			boDebug(401) << k_funcinfo << "Unit " << u->id() << " found on occupied cell" << endl;
+
+ // Crushing & waiting
+ bool wait = false;
+ QValueList<Unit*> collisions;
+ collisions = canvas()->collisionsInBox(BoVector3Fixed(x() + xVelocity(), y() + yVelocity(), z()),
+		BoVector3Fixed(x() + xVelocity() + width(), y() + yVelocity() + height(), z() + depth()), this);
+ if (!collisions.isEmpty()) {
+	for (QValueList<Unit*>::Iterator it = collisions.begin(); it != collisions.end(); it++) {
+		Unit* u = *it;
+		if (this == u) {
+			continue;
+		} else if (u->isFlying() != isFlying()) {
+			continue;
+		} else if (!u->bosonCollidesWith(this)) {
+			continue;
 		}
+		// Make sure we actually can crush this unit
+		if (u->maxHealth() > unitProperties()->crushDamage()) {
+			boDebug(401) << k_funcinfo << id() << ": Colliding with uncrushable unit " << u->id() << endl;
+			// Whoops. Now what?
+			wait = true;
+			continue;
+		}
+		// Crush it!
+		boDebug(401) << k_funcinfo << id() << ": Crushing " << u->id() << endl;
+		u->setHealth(0);
+		canvas()->destroyUnit(u);
 	}
-#endif
-	// If we'd continue moving with set velocity, we'd collide with something.
-	// Stop.
-
-	// Stop unit (note that it doesn't stop completely, work will still be
-	//  WorkMoving)
-	setVelocity(0.0, 0.0, 0.0);
+ }
+ /*if (wait) {
+	setVelocity(0, 0, 0);
+	setMovingStatus(UnitBase::Waiting);
 	setSpeed(0);
-	setMovingStatus(Waiting);
+ }*/
 
-	// Increase waiting counter (how long unit has been waiting)
+ // Check if we need to wait
+ // Find the next cell we'll be on
+ int currentx = (int)(center().x() + xVelocity());
+ int currenty = (int)(center().y() + yVelocity());
+ d->nextCellX = -1;
+ for (unsigned int i = 0; i < d->nextWaypointIntersections->count(); i++) {
+	if (currentx == d->nextWaypointIntersections->at(i).x() && currenty == d->nextWaypointIntersections->at(i).y()) {
+		if (i+1 >= d->nextWaypointIntersections->count()) {
+			// This is the last cell, i.e. we're at pathpoint cell
+			d->nextCellX = d->nextWaypointIntersections->last().x();
+			d->nextCellY = d->nextWaypointIntersections->last().y();
+		} else {
+			// We're in the middle of the way to the next pathpoint. Use the next cell
+			d->nextCellX = d->nextWaypointIntersections->at(i+1).x();
+			d->nextCellY = d->nextWaypointIntersections->at(i+1).y();
+		}
+		break;
+	}
+ }
+ if (d->nextCellX == -1) {
+	// We're at the beginning of the way to the next pathpoint
+	d->nextCellX = d->nextWaypointIntersections->first().x();
+	d->nextCellY = d->nextWaypointIntersections->first().y();
+ }
+ d->nextCellX += d->nextWaypointIntersectionsXOffset;
+ d->nextCellY += d->nextWaypointIntersectionsYOffset;
+
+ // Make sure the next cell is free of any obstacles
+ if (cellOccupied(d->nextCellX, d->nextCellY)) {
+	// Gotta wait
+	setVelocity(0, 0, 0);
+	setMovingStatus(UnitBase::Waiting);
+	setSpeed(0);
 	pathInfo()->waiting++;
 	return;
  }
-#ifdef USE_NEW_COLLISION_DETECTION
- QValueList<Unit*> fiveadvcollisions;
- fiveadvcollisions = canvas()->collisionsInBox(BoVector3Fixed(x() + d->lastXVelocity * 5, y() + d->lastYVelocity * 5, z()),
-		BoVector3Fixed(x() + d->lastXVelocity * 5 + width(), y() + d->lastYVeloity * 5 + height(), z() + depth()), this);
- if (!fiveadvcollisions.isEmpty()) {
-	// Unit will collide with smth in 5 adv. calls. Stop.
-	// Maybe it would be better to slow down quickly instead...
-	setVelocity(0.0, 0.0, 0.0);
-	setSpeed(0);
-	setMovingStatus(Waiting);
 
-	// Increase waiting counter (how long unit has been waiting)
-	pathInfo()->waiting++;
-	return;
- }
- QValueList<Unit*> tenadvcollisions;
- tenadvcollisions = canvas()->collisionsInBox(BoVector3Fixed(x() + d->lastXVelocity * 10, y() + d->lastYVelocity * 10, z()),
-		BoVector3Fixed(x() + d->lastXVelocity * 10 + width(), y() + d->lastYVelocity * 10 + height(), z() + depth()), this);
- if (!tenadvcollisions.isEmpty()) {
-	// Unit will collide with smth in 10 adv. calls. Decelerate
-	decelerate();
-	decelerate();  // Yes, we decelerate _two_ times
-	bofixed s = speed();
-	if (s > 0.0f) {
-		d->lastXVelocity = QMIN(d->lastXVelocity, s);
-		d->lastYVelocity = QMIN(d->lastYVelocity, s);
-		setVelocity(d->lastXVelocity, d->lastYVelocity, 0.0);
-	} else {
-		// Stop and set moving status to Waiting
-		setVelocity(0.0, 0.0, 0.0);
-		setSpeed(0);
-		setMovingStatus(Waiting);
-		// Increase waiting counter (how long unit has been waiting)
-		pathInfo()->waiting++;
-		return;
-	}
- }
-#endif // USE_NEW_COLLISION_DETECTION
+
  pathInfo()->waiting = 0;
  pathInfo()->pathrecalced = 0;
 
  //boDebug(401) << k_funcinfo << "unit " << id() << ": done" << endl;
+}
+
+void MobileUnit::currentPathPointChanged(int unitx, int unity)
+{
+ if (unitProperties()->isAircraft()) {
+	return;
+ }
+ int xindex = (int)currentPathPoint().x() - unitx + 5;
+ int yindex = (int)currentPathPoint().y() - unity + 5;
+ d->nextWaypointIntersectionsXOffset = unitx;
+ d->nextWaypointIntersectionsYOffset = unity;
+ d->nextWaypointIntersections = &mCellIntersectionTable[xindex][yindex];
+}
+
+int MobileUnit::selectNextPathPoint(int xpos, int ypos)
+{
+ if (unitProperties()->isAircraft()) {
+	return 0;
+ }
+ //return 0;
+ // TODO: better name?
+ // Find next pathpoint where we can go in straight line
+ int skipped = 0;
+ bool cango = true;
+ while (cango && (skipped < 6) && (pathPointCount() > 1)) {
+	int newCellX = (int)pathPointList()[1].x();
+	int newCellY = (int)pathPointList()[1].y();
+	if ((QABS(newCellX - xpos) >= 6) || (QABS(newCellY - ypos) >= 6)) {
+		// We're too far
+		break;
+	}
+	int xindex = newCellX - xpos + 5;
+	int yindex = newCellY - ypos + 5;
+	for (unsigned int i = 0; i < mCellIntersectionTable[xindex][yindex].count(); i++) {
+		// Check if this cell is accessable
+		// TODO: check terrain
+		if (cellOccupied(xpos + mCellIntersectionTable[xindex][yindex][i].x(),
+				ypos + mCellIntersectionTable[xindex][yindex][i].y(), true)) {
+			cango = false;
+			break;
+		}
+	}
+	if (cango) {
+		// skip previous waypoint (go directly to this one)
+		pathPointDone();
+		currentPathPointChanged(xpos, ypos);
+		skipped++;
+	}
+ }
+
+ return skipped;
+}
+
+void MobileUnit::avoidance()
+{
+ BosonMoveData* md = unitProperties()->moveData();
+ BoVector2Fixed velocity(xVelocity(), yVelocity());
+ velocity.normalize();
+ BoVector3Fixed toRight3 = BoVector3Fixed(velocity.x(), -velocity.y(), 0).crossProduct(BoVector3Fixed(0, 0, 1));
+ BoVector2Fixed toRight(toRight3.x(), -toRight3.y());
+ bofixed avoidstrength = 0;
+ // Find all units which are near us
+ BoRectFixed rect(centerX() - width() - speed() * 20 - 3, centerY() - width() - speed() * 20 - 3,
+		centerX() + width() + speed() * 20 + 3, centerY() + width() + speed() * 20 + 3);
+ BoItemList* items = canvas()->collisions()->collisionsAtCells(rect, this, false);
+ // Go through the units
+ for (BoItemList::ConstIterator it = items->begin(); it != items->end(); ++it) {
+	if (!RTTI::isUnit((*it)->rtti())) {
+		// TODO: check for e.g. mines
+		continue;
+	}
+	Unit* u = (Unit*)*it;
+	if (u == this) {
+		continue;
+	} else if (u->isFlying()) {
+		// We don't care about flying units
+		continue;
+	} else if (u->maxHealth() <= unitProperties()->crushDamage()) {
+		// We can just crush this one
+		continue;
+	}
+	if (velocity.dotProduct(u->center() - center()) <= 0) {
+		// We only care about units in front of us
+		continue;
+	}
+
+//	BoVector2Fixed toUnit((u->center() + BoVector2Fixed(u->xVelocity(), u->yVelocity()) * 20) - center());
+	bofixed unitSizesSum = (width() + u->width()) / 2;
+	// Vector and distance to the other unit ATM
+	BoVector2Fixed toUnit(u->center() - center());
+	bofixed distToUnit = toUnit.length();
+	// Vector and distance to the other unit in one second
+	BoVector2Fixed toUnitSoon((u->center() + BoVector2Fixed(u->xVelocity(), u->yVelocity()) * 20) -
+			(center() + BoVector2Fixed(xVelocity(), yVelocity()) * 20));
+	bofixed distToUnitSoon = toUnitSoon.length();
+	if ((distToUnitSoon < distToUnit) && (distToUnitSoon < unitSizesSum + 1.5)) {
+		// We're getting too close to the other unit
+		// Distance between the units on the axis perpendicular to this unit's rotation
+		// TODO: maybe use toUnitSoon instead?
+		bofixed sideDistance = toUnit.dotProduct(toRight);
+		if (QABS(sideDistance) < unitSizesSum) {
+			// We'll crash with this unit if we don't act
+			// Calculate how much we'll try to avoid this unit
+			bofixed factor = 1;  // Positive = turn right
+			if (sideDistance > 0) {
+				// The other unit is right of us. Turn left
+				factor *= -1;
+			}
+			// The more int front of us the unit is, the bigger the factor
+			factor *= unitSizesSum * 1.5 - QABS(sideDistance);
+			// The farther from us the unit is, the smaller the factor
+			factor *= 2 - (distToUnitSoon - unitSizesSum);
+			//factor /= distToUnit;
+
+			avoidstrength += factor;
+		}
+	}
+
+
+	/*if (distToUnit < speed() * 20 + unitSizesSum + 2) {
+		// This unit is too close to us
+		// Probably the unit is coming toward us
+		bofixed sideDistance = toUnit.dotProduct(toRight);
+		if (/*(toUnit.dotProduct(velocity) < unitSizesSum) &&*/ /*(QABS(sideDistance) < unitSizesSum)) {
+			// We'll crash with this unit if we don't act
+			// Try to avoid the crash by turning left or right
+			if (sideDistance > 0) {
+				avoidstrength -= (unitSizesSum - sideDistance) * 2 / distToUnit;
+			} else {
+				avoidstrength += (unitSizesSum - QABS(sideDistance)) * 2 / distToUnit;
+			}
+		}
+	}*/ /*else if (distToUnit < unitSizesSum + 2 && speed() > u->speed()) {
+		// This unit is too close to us
+		// Probaly unit is either standing or moving in same direction as us (but more slowly)
+		bofixed sideDistance = toUnit.dotProduct(toRight);
+		if (QABS(sideDistance) < unitSizesSum) {
+			// We'll crash with this unit if we don't act
+			// Try to avoid the crash by turning left or right
+			if (sideDistance > 0) {
+				avoidstrength -= (unitSizesSum - sideDistance) * 2 / distToUnit;
+			} else {
+				avoidstrength += (unitSizesSum - QABS(sideDistance)) * 2 / distToUnit;
+			}
+		}
+	}*/
+ }
+ if (avoidstrength != 0) {
+	// Calculate new velocity
+	BoVector2Fixed avoidance(toRight * avoidstrength);
+	boDebug(401) << k_funcinfo << id() << ": Avoidstrength: " << avoidstrength <<
+			"; avoidance vector: (" << avoidance.x() << "; " << avoidance.y() << ")" << endl;
+	velocity += avoidance;
+	velocity.normalize();
+	boDebug(401) << k_funcinfo << id() << ": Changing velo from (" << xVelocity() << "; " << yVelocity() <<
+			") to (" << velocity.x() * speed() << "; " << velocity.y() * speed() << ")" << endl;
+	setVelocity(velocity.x() * speed(), velocity.y() * speed(), zVelocity());
+ }
+}
+
+bool MobileUnit::canGoToCurrentPathPoint(int xpos, int ypos)
+{
+ if (unitProperties()->isAircraft()) {
+	return true;
+ }
+ int ppx = (int)currentPathPoint().x();
+ int ppy = (int)currentPathPoint().y();
+ if ((QABS(ppx - xpos) >= 6) || (QABS(ppy - ypos) >= 6)) {
+	// We're too far
+	return false;
+ }
+ int xindex = ppx - xpos + 5;
+ int yindex = ppy - ypos + 5;
+ for (unsigned int i = 0; i < mCellIntersectionTable[xindex][yindex].count(); i++) {
+	// Check if this cell is accessable
+	// TODO: check terrain
+	const BoItemList* items = canvas()->cell(xpos + mCellIntersectionTable[xindex][yindex][i].x(),
+			ypos + mCellIntersectionTable[xindex][yindex][i].y())->items();
+	for (BoItemList::ConstIterator it = items->begin(); it != items->end(); ++it) {
+		if (RTTI::isUnit((*it)->rtti())) {
+			Unit* u = (Unit*)*it;
+			if (this == u) {
+				continue;
+			} else if (u->isFlying()) {
+				continue;
+			}
+			if (u->movingStatus() != UnitBase::Moving) {
+				return false;
+			}
+		}
+	}
+ }
+ return true;
+}
+
+bool MobileUnit::newPath()
+{
+ BosonProfiler profiler("newPath");
+ boDebug(401) << k_funcinfo << "unit " << id() << endl;
+
+ // Update our start position
+ pathInfo()->start.set(centerX(), centerY());
+
+ // Find path
+ canvas()->pathfinder()->findPath(pathInfo());
+
+ if(pathInfo()->result == BosonPath::NoPath || pathInfo()->llpath.count() == 0) {
+	// Stop moving
+	stopMoving();
+	return false;
+ }
+ // Copy low-level path to pathpoints' list
+ clearPathPoints();
+ for (int unsigned i = 0; i < pathInfo()->llpath.count(); i++) {
+	addPathPoint(pathInfo()->llpath[i]);
+ }
+
+ // Reset last cell
+ d->lastCellX = -1;
+ d->lastCellY = -1;
+ d->nextWaypointIntersections = &mCellIntersectionTable[5][5];
+
+ return true;
 }
 
 void MobileUnit::turnTo(int dir)
@@ -2444,16 +2593,28 @@ void MobileUnit::advanceFollow(unsigned int advanceCallsCount)
  // Do nothing (unit is in range)
 }
 
-BoRectFixed MobileUnit::boundingRect() const
+void MobileUnit::advanceIdle(unsigned int advanceCallsCount)
 {
-// FIXME: workaround for pathfinding which does not yet support units with size
-// > 1.0f
-// we simply return a boundingrect which has size 1.0f
- if (width() < 1.0f || height() < 1.0f) {
-	boWarning() << k_funcinfo << "width or height  < 1.0f - not supported!!" << endl;
-	return BosonItem::boundingRect();
+ Unit::advanceIdle(advanceCallsCount);
+ if (!isFlying()) {
+	return;
  }
- return BoRectFixed(x(), y(), x() + 1.0f, y() + 1.0f);
+
+ // Flying units need to keep flying
+ // TODO: choose which way to turn
+ bofixed newrot = rotation() + maxSpeed() * 20;
+ bofixed xdist = cos(Bo3dTools::deg2rad(newrot - 90)) * maxSpeed();
+ bofixed ydist = sin(Bo3dTools::deg2rad(newrot - 90)) * maxSpeed();
+
+ // Don't go off the map
+ if (x() < 0.5 || y() < 0.5 ||
+		x() > bofixed(canvas()->mapWidth()) - width() - 0.5 || y() > bofixed(canvas()->mapHeight()) - height() - 0.5) {
+	move(QMIN(QMAX(x(), bofixed(1)), bofixed(canvas()->mapWidth()) - width() - 1),
+			QMIN(QMAX(y(), bofixed(1)), bofixed(canvas()->mapHeight()) - height() - 1), z());
+ }
+
+ setRotation(newrot);
+ setVelocity(xdist, ydist, 0);
 }
 
 bool MobileUnit::loadFromXML(const QDomElement& root)
@@ -2495,8 +2656,6 @@ void MobileUnit::stopMoving()
  if (pathInfo()->slowDownAtDest) {
 	setSpeed(0);
  }
- d->lastXVelocity = 0.0f;
- d->lastYVelocity = 0.0f;
 }
 
 bool MobileUnit::attackEnemyUnitsInRangeWhileMoving()
@@ -2509,8 +2668,6 @@ bool MobileUnit::attackEnemyUnitsInRangeWhileMoving()
  if (pathInfo()->moveAttacking && attackEnemyUnitsInRange()) {
 	boDebug(401) << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
 	setVelocity(0.0, 0.0, 0.0);  // To prevent moving
-	d->lastXVelocity = 0.0f;
-	d->lastYVelocity = 0.0f;
 	setSpeed(0);
 	setMovingStatus(Engaging);
 	return true;
@@ -2518,86 +2675,76 @@ bool MobileUnit::attackEnemyUnitsInRangeWhileMoving()
  return false;
 }
 
-
-void MobileUnit::newPath()
+void MobileUnit::initCellIntersectionTable()
 {
- // FIXME: remove this, Unit::newPath() seems to be enough
- Unit::newPath();
-}
+ // Go over all the cells in 11x11 area and store all the cells that the unit
+ //  would be on if it would move from (0; 0) to a certain point in straight
+ //  line
+ // This code is entirely taken from TA Spring project
+ for(int y = 0; y < 11; y++) {
+	for(int x = 0; x < 11; x++) {
+		BoVector2Fixed start(0.5, 0.5);
+		BoVector2Fixed to(x - 5 + 0.5, y - 5 + 0.5);
 
-bool MobileUnit::checkPathPoint(const BoVector2Fixed& p)
-{
- BosonProfiler profiler("checkPathPoint");
- boDebug(401) << k_funcinfo << "p: (" << p.x() << "; " << p.y() << ")" << endl;
- // Check for special codes in path point
- if (p.x() != p.y()) {
-	// All special points have x == y, so this is not one of them
-	return false;
- }
+		bofixed dx = to.x() - start.x();
+		bofixed dy = to.y() - start.y();
+		bofixed xp = start.x();
+		bofixed yp = start.y();
+		bofixed xn, yn;
 
- // Check for code. We only check x, because y == x anyway
- if (p.x() == PF_END_CODE) {
-	boDebug(401) << k_funcinfo << id() << ": found PF_END_CODE code" << endl;
-	// Remove this 'coded' pathpoint
-	pathPointDone();
-	// Path has ended. Check if we have more waypoints
-	waypointDone();
-	if (waypointCount() == 0) {
-		// No more waypoints. Unit should stop moving
-		setMovingStatus(Standing);
-		stopMoving();
-		if (work() == WorkIdle) {
-			// If we were just moving, turn to random direction
-			boDebug(401) << k_funcinfo << id() << ": stopping moving. Turning" << endl;
-			// Turn a bit
-			int turn = (int)rotation() + (owner()->game()->random()->getLong(60) - 30);
-			// Check for overflows
-			if (turn < 0) {
-				turn += 360;
-			} else if (turn >= 360) {
-				turn -= 360;
+		if (floor(start.x()) == floor(to.x())) {
+			// x coordinates are same
+			if (dy > 0) {
+				for (int a = 1; a <= floor(to.y()); a++) {
+					mCellIntersectionTable[x][y].push_back(BoVector2Fixed(0, a));
+				}
+			} else {
+				for (int a = -1; a >= floor(to.y()); a--) {
+					mCellIntersectionTable[x][y].push_back(BoVector2Fixed(0, a));
+				}
 			}
-			Unit::turnTo(turn);
-			setWork(WorkTurn);
-			return true;
-		}
-	} else {
-		// There are more waypoints. Take the next one
-		//BoVector2Fixed wp = currentWaypoint();
-		boWarning(401) << k_funcinfo << "Waypoints aren't supported yet!" << endl;
-		// Stop for now (until we have working implementation)
-		setMovingStatus(Standing);
-		stopMoving();
-		return true;
-	}
- } else if (p.x() == PF_NEXT_REGION) {
-	boDebug(401) << k_funcinfo << id() << ": found PF_NEXT_REGION code" << endl;
-	// Remove this 'coded' pathpoint
-	pathPointDone();
-	// Path has reached next region
-	// Increase hlstep (high-level path step), i.e. go to next region
-	pathInfo()->hlstep++;
-	// We have to find new low-level path
-	newPath();
-	// Now we need to check for special points again (in case path couldn't be
-	//  found now, e.g. it destination could have been fogged before, but is
-	//  unfogged now). I know, recursive isn't good, but unless something is
-	//  broken, it should recurse only once
-	return checkPathPoint(currentPathPoint());
- } else if (p.x() == PF_CANNOT_GO) {
-	boDebug(401) << k_funcinfo << id() << ": found PF_CANNOT_GO code" << endl;
-	// Remove this 'coded' pathpoint
-	pathPointDone();
-	// Unit can't go to destination. Stop moving.
-	// FIXME: is this a good place to do this? Maybe it should be done in
-	//  newPath() instead?
-	setMovingStatus(Standing);
-	stopMoving();
-	return true;
- }
+		} else if (floor(start.y()) == floor(to.y())) {
+			// y coordinates are same
+			if (dx > 0) {
+				for (int a = 1; a <= floor(to.x()); a++) {
+					mCellIntersectionTable[x][y].push_back(BoVector2Fixed(a, 0));
+				}
+			} else {
+				for (int a = -1; a >= floor(to.x()); a--) {
+					mCellIntersectionTable[x][y].push_back(BoVector2Fixed(a, 0));
+				}
+			}
+		} else {
+			// Tough case: both coordinates differ
+			bool keepgoing = true;
+			while (keepgoing) {
+				if (dx > 0) {
+					xn = (floor(xp) + 1 - xp) / dx;
+				} else {
+					xn = (floor(xp) - xp) / dx;
+				}
+				if (dy > 0) {
+					yn = (floor(yp) + 1 - yp) / dy;
+				} else {
+					yn = (floor(yp) - yp) / dy;
+				}
 
- // No special code was found (this is ok, e.g. if point was (5; 5) or so)
- return false;
+				if (xn < yn) {
+					xp += (xn + 0.0001) * dx;
+					yp += (xn + 0.0001) * dy;
+				} else {
+					xp += (yn + 0.0001) * dx;
+					yp += (yn + 0.0001) * dy;
+				}
+				keepgoing = (QABS(xp - start.x()) < QABS(to.x() - start.x())) &&
+						(QABS(yp - start.y()) < QABS(to.y() - start.y()));
+
+				mCellIntersectionTable[x][y].push_back(BoVector2Fixed(floor(xp), floor(yp)));
+			}
+			mCellIntersectionTable[x][y].pop_back();
+		}
+	}
+ }
 }
 
 

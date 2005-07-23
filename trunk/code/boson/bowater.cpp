@@ -378,8 +378,6 @@ void BoWaterManager::initCellMaps()
     }
   }
 
-  // Some parameters
-  const float max_passable_water_depth = 0.2;
   // Go through all lakes
   QPtrListIterator<BoLake> it(mData->lakes);
   for(; it.current(); ++it)
@@ -389,48 +387,23 @@ void BoWaterManager::initCellMaps()
     {
       for (int x = lake->minx; x < lake->maxx; x++)
       {
-        // We calculate params per-cell, so we need to look at all 4 corners
-        float avgwaterdepth = 0.0f;  // Used for passability check
-        int corners = 0;
+        bool iswater = false;
 
-        if(lake->hasCorner(x, y))
+        if((lake->hasCorner(x, y)) || (lake->hasCorner(x + 1, y)) ||
+            (lake->hasCorner(x, y + 1)) || (lake->hasCorner(x + 1, y + 1)))
         {
-          float waterdepth = lake->level - groundHeight(x, y);
-          avgwaterdepth += waterdepth;
-          corners++;
-        }
-        if(lake->hasCorner(x + 1, y))
-        {
-          float waterdepth = lake->level - groundHeight(x + 1, y);
-          avgwaterdepth += waterdepth;
-          corners++;
-        }
-        if(lake->hasCorner(x, y + 1))
-        {
-          float waterdepth = lake->level - groundHeight(x, y + 1);
-          avgwaterdepth += waterdepth;
-          corners++;
-        }
-        if(lake->hasCorner(x + 1, y + 1))
-        {
-          float waterdepth = lake->level - groundHeight(x + 1, y + 1);
-          avgwaterdepth += waterdepth;
-          corners++;
+          iswater = true;
         }
 
-        if(corners)
+        if(iswater)
         {
-          avgwaterdepth /= corners;
-          if(avgwaterdepth > max_passable_water_depth)
+          Cell* c = mData->map->cell(x, y);
+          if(!c)
           {
-            Cell* c = mData->map->cell(x, y);
-            if(!c)
-            {
-              BO_NULL_ERROR(c);
-              continue;
-            }
-            c->setIsWater(true);
+            BO_NULL_ERROR(c);
+            continue;
           }
+          c->setIsWater(true);
         }
       }
     }
@@ -522,27 +495,6 @@ void BoWaterManager::setUnderwater(int x, int y, bool underwater)
 {
   BO_CHECK_NULL_RET(mData);
   mData->underwater[y * mData->width + x] = underwater;
-}
-
-bool BoWaterManager::cellPassable(int x, int y) const
-{
-  if(!mData)
-  {
-    BO_NULL_ERROR(mData);
-    return 0.0f;
-  }
-  if(!mData->map)
-  {
-    BO_NULL_ERROR(mData->map);
-    return 0.0f;
-  }
-  Cell* c = mData->map->cell(x, y);
-  if (!c)
-  {
-    BO_NULL_ERROR(c);
-    return 0.0f;
-  }
-  return !c->isWater();
 }
 
 const QPtrList<BoLake>* BoWaterManager::lakes() const

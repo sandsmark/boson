@@ -203,17 +203,6 @@ public:
 	bool hasTechnology(unsigned long int id) const;
 
 	/**
-	 * @return Whether a unit with @p prop can gto on @p cell. When the
-	 * player can not see this cell, @p _default is returned.
-	 **/
-	bool canGo(const UnitProperties* prop, const Cell* cell, bool _default = false) const;
-
-	/**
-	 * @overload
-	 **/
-	bool canGo(const Unit* unit, const Cell* cell, bool _default = false) const;
-
-	/**
 	 * @return The item at @p canvasVector, if any.
 	 **/
 	BosonItem* findItemAt(const BosonCanvas* canvas, const BoVector3Fixed& canvasVector) const;

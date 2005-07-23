@@ -37,6 +37,7 @@
 #include "bosoneffectproperties.h"
 #include "bowaterrenderer.h"
 #include "script/bosonscript.h"
+#include "unit.h"
 
 #include <klocale.h>
 #include <kgame/kmessageclient.h>
@@ -879,6 +880,10 @@ bool BosonStartingStartScenario::startTask()
 	return false;
  }
 
+ createMoveDatas();
+
+ MobileUnit::initCellIntersectionTable();
+
  // map player number (aka index, as used by .bsg/.bpf) to player Id
  boProfiling->push("FixPlayerIds");
  if (!fixPlayerIds(*mFiles)) {
@@ -1097,5 +1102,9 @@ bool BosonStartingStartScenario::fixPlayerIdsInFileNames(int* actualIds, unsigne
 	files.insert(it.key(), it.data());
  }
  return true;
+}
+
+void BosonStartingStartScenario::createMoveDatas() const
+{
 }
 

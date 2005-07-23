@@ -1373,7 +1373,7 @@ void Boson::makeUnitLog()
 		}
 		ts << endl;
 		// PathInfo
-		if (path) {
+		/*if (path) {
 			ts << "        " << "PathInfo:  start(" << path->start.x() << "; " << path->start.y() <<
 					"); dest(" << path->dest.x() << "; " << path->dest.y() << "); hlstep: " << path->hlstep <<
 					"; range: " << path->range << "; passable: " << path->passable <<
@@ -1381,7 +1381,7 @@ void Boson::makeUnitLog()
 					"); flying: " << path->flying << "; pass: " << (int)path->passability <<
 					"; attack: " << path->moveAttacking << "; slow: " << path->slowDownAtDest <<
 					"; waiting: " << path->waiting << "; recalc: " << path->pathrecalced << endl;
-		}
+		}*/
 
 		++uit;
 	}

@@ -24,7 +24,7 @@
 #include "boitemlist.h"
 
 class UnitProperties;
-class BosonPathRegion;
+class BosonPathSubregion;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -67,44 +67,14 @@ public:
 	inline bool isOccupied(bool includeMoving = true) const { return mItems.isOccupied(includeMoving); }
 	inline void isOccupied(Unit* forUnit, bool& hasmoving, bool& hasany) const { mItems.isOccupied(forUnit, hasmoving, hasany); }
 
-	inline bool isLandOccupied() const { return mItems.isLandOccupied(); }
-	inline bool isAirOccupied() const { return mItems.isAirOccupied(); }
-	inline void recalculateLandOccupiedStatus() { return mItems.recalculateLandOccupiedStatus(); }
-	inline void recalculateAirOccupiedStatus() { return mItems.recalculateAirOccupiedStatus(); }
-
-	inline bofixed passageCostLand() const { return mItems.passageCostLand(); }
-	inline bofixed passageCostAir() const { return mItems.passageCostAir(); }
-
-	// AB: bah. I want to have models for minerals/oil and use a BosonItem,
-	// instead of hardcoding them into the ground.
-	// we should iterate through mItems and search for the oil/minerals RTTI
-	// once we have implemented that!
-//	bool hasOil() const { return (groundType() == GroundGrassOil); }
-//	bool hasMinerals() const { return (groundType() == GroundGrassMineral); }
-	bool hasOil() const { return (false); }
-	bool hasMinerals() const { return (false); }
-
 	inline const BoItemList* items() const { return &mItems; }
 	unsigned int unitCount() const { return mItems.count(); }
 
-	inline void setRegion(BosonPathRegion* r) { mRegion = r; }
-	inline BosonPathRegion* region() const { return mRegion; }
-
-	inline void setPassable(bool p) { mPassable = p; }
-	/**
-	 * @return FALSE if this cell is unpassable by non-air units, otherwise
-	 * TRUE.
-	 * See also @ref isWater, which may also indicate that a cell is not
-	 * passable.
-	 **/
-	inline bool passable() const { return mPassable; }
-
 	inline void setIsWater(bool w) { mIsWater = w; }
 	/**
-	 * @return Whether this cell is (under) water. A cell being (under)
-	 * water implies that it is not passable for land units (even if @ref
-	 * passable is TRUE), whereas it can be passed by water units (if @ref
-	 * passable is TRUE).
+	 * @return Whether this cell is under water.
+	 * Note that cell being under water does NOT imply that water units can and
+	 *  land units can't go on that cell.
 	 **/
 	inline bool isWater() const { return mIsWater; }
 
@@ -114,9 +84,6 @@ private:
 
 	BoItemList mItems;
 
-	BosonPathRegion* mRegion;
-
-	bool mPassable;
 	bool mIsWater;
 };
 
