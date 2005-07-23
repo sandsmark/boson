@@ -220,7 +220,7 @@ class BosonPath
         {
           mCellStatusDirty[i] = oldarray[i];
         }
-        delete oldarray;
+        delete[] oldarray;
       }
       mCellStatusDirty[mCellStatusDirtyCount++] = pos;
     }
