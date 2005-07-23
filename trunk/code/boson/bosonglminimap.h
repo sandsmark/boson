@@ -101,7 +101,7 @@ public slots:
 	void slotMoveRect(const QPoint& topLeft, const QPoint& topRight, const QPoint& bottomLeft, const QPoint& bottomRight);
 
 	void slotUnitMoved(Unit* unit, bofixed oldX, bofixed oldY);
-	void slotUnitDestroyed(Unit* unit);
+	void slotUnitRemoved(Unit* unit);
 
 	void slotUnfog(int x, int y);
 	void slotFog(int x, int y);

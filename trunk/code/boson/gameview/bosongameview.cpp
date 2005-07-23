@@ -1051,7 +1051,7 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
 	connect(mCanvas, SIGNAL(signalUnitMoved(Unit*, bofixed, bofixed)),
 		d->mGLMiniMap, SLOT(slotUnitMoved(Unit*, bofixed, bofixed)));
 	connect(mCanvas, SIGNAL(signalUnitRemoved(Unit*)),
-		d->mGLMiniMap, SLOT(slotUnitDestroyed(Unit*)));
+		d->mGLMiniMap, SLOT(slotUnitRemoved(Unit*)));
 
 	connect(d->mGLMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
 			this, SLOT(slotReCenterDisplay(const QPoint&)));
