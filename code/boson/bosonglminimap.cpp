@@ -171,7 +171,7 @@ void BosonGLMiniMap::slotUnitMoved(Unit* unit, bofixed oldX, bofixed oldY)
  moveUnit(unit, &newCells, &oldCells);
 }
 
-void BosonGLMiniMap::slotUnitDestroyed(Unit* unit)
+void BosonGLMiniMap::slotUnitRemoved(Unit* unit)
 {
  if (!hasMap()) {
 	return;
