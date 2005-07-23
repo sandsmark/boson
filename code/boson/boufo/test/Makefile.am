@@ -1,6 +1,6 @@
 INCLUDES = $(UFO_INCLUDES) -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl $(all_includes) -I$(top_srcdir)/boson -I$(top_srcdir)/boson/boufo
 
-bin_PROGRAMS = boufotest boufobuttontest boufolistboxtest
+noinst_PROGRAMS = boufotest boufobuttontest boufolistboxtest
 
 METASOURCES = AUTO
 
