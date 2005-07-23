@@ -328,7 +328,7 @@ public:
 		mPathFinder = 0;
 	}
 	void setMap(BosonMap* m) { mMap = m; }
-	void setPathfinder(BosonPath2* p) { mPathFinder = p; }
+	void setPathfinder(BosonPath* p) { mPathFinder = p; }
 	virtual QByteArray makeLog();
 
 protected:
@@ -336,7 +336,7 @@ protected:
 
 	// AB: this is mostly a debugging method. we really should not stream
 	// _all_ of this data.
-	static bool streamRegion(QDataStream& stream, BosonPathRegion* r)
+	/*static bool streamRegion(QDataStream& stream, BosonPathRegion* r)
 	{
 		if (!r) {
 			return false;
@@ -360,9 +360,9 @@ protected:
 		}
 #endif
 		return true;
-	}
+	}*/
 
-	static bool unstreamRegion(QDataStream& stream, Q_INT32& id, Q_INT32& passabilityType, Q_INT32& cellsCount, bofixed& centerx, bofixed& centery, bofixed& cost,
+	/*static bool unstreamRegion(QDataStream& stream, Q_INT32& id, Q_INT32& passabilityType, Q_INT32& cellsCount, bofixed& centerx, bofixed& centery, bofixed& cost,
 			Q_UINT32& nCount
 #if NET_DEBUG
 			, QValueVector<Q_INT32>& nIds, QValueVector<bofixed>& nCost, QValueVector<Q_INT32>& nBorderCells
@@ -393,10 +393,10 @@ protected:
 		}
 #endif
 		return true;
-	}
+	}*/
 private:
 	BosonMap* mMap;
-	BosonPath2* mPathFinder;
+	BosonPath* mPathFinder;
 };
 
 QByteArray BoPathSyncCheckMessage::makeLog()
@@ -404,7 +404,7 @@ QByteArray BoPathSyncCheckMessage::makeLog()
  QByteArray b;
  // TODO: do NOT stream all sectors! (too much data)
  QDataStream stream(b, IO_WriteOnly);
- stream << (Q_UINT32)mPathFinder->sectorWidth();
+ /*stream << (Q_UINT32)mPathFinder->sectorWidth();
  stream << (Q_UINT32)mPathFinder->sectorHeight();
  unsigned int count = 0;
  for (unsigned int x = 0; x * mPathFinder->sectorWidth() < mMap->width(); x++) {
@@ -446,7 +446,7 @@ QByteArray BoPathSyncCheckMessage::makeLog()
 			}
 		}
 	}
- }
+ }*/
  return b;
 }
 
@@ -456,7 +456,7 @@ QString BoPathSyncCheckMessage::findLogError(const QByteArray& b1, const QByteAr
  QDataStream s1(b1, IO_ReadOnly);
  QDataStream s2(b2, IO_ReadOnly);
  QString error;
- DECLARE_UNSTREAM_COMPARE(Q_UINT32, sectorWidth);
+ /*DECLARE_UNSTREAM_COMPARE(Q_UINT32, sectorWidth);
  DECLARE_UNSTREAM_COMPARE(Q_UINT32, sectorHeight);
  DECLARE_UNSTREAM_COMPARE(Q_UINT32, sectorCount);
  for (unsigned int i = 0; i < sectorCount; i++) {
@@ -514,7 +514,7 @@ QString BoPathSyncCheckMessage::findLogError(const QByteArray& b1, const QByteAr
 		}
 #endif
 	}
- }
+ }*/
 
 
 

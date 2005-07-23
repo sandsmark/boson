@@ -526,35 +526,8 @@ void BosonUfoGameGUI::updateUfoLabelPathFinderDebug()
  }
  d->mPathFinderDebug->setVisible(true);
 
- Cell* cellUnderCursor = boGame->canvas()->cellAt(cursorCanvasVector().x(), cursorCanvasVector().y());
- BosonPathRegion* r = 0;
- if (cellUnderCursor) {
-	r = cellUnderCursor->region();
- }
-
- QString cell = QString::fromLatin1("Cell pos: (%1; %2)")
-		.arg((cellUnderCursor == 0) ? -1 : cellUnderCursor->x()).arg((cellUnderCursor == 0) ? -1 : cellUnderCursor->y());
- QString cellpassable = QString::fromLatin1("  passable: %1").arg((cellUnderCursor == 0) ? "n/a" : (cellUnderCursor->passable() ? "true" : "false"));
- QString celloccupied = QString::fromLatin1("  occupied: %1").arg((cellUnderCursor == 0) ? "n/a" : (cellUnderCursor->isLandOccupied() ? "true" : "false"));
- QString regid = QString::fromLatin1("Region  : %1").arg((r == 0) ? -1 : r->id);
- QString regcost = QString::fromLatin1("    cost: %1").arg((r == 0) ? bofixed(-1) : r->cost, 5, 'g', 3);
- QString regcenter = QString::fromLatin1("  center: (%1; %2)").arg((r == 0) ? bofixed(-1) : r->centerx).arg((r == 0) ? bofixed(-1) : r->centery);
- QString regcells = QString::fromLatin1("   cells: %1").arg((r == 0) ? -1 : r->cellsCount);
- QString reggroup = QString::fromLatin1("   group: 0x%1").arg((r == 0) ? 0 : (int)r->group);
- QString regneighs = QString::fromLatin1("  neighs: %1").arg((r == 0) ? -1 : (int)r->neighbors.count());
- QString neighbors;
- if (r && r->neighbors.count() > 0) {
-	for (unsigned int i = 0; i < r->neighbors.count(); i++) {
-		neighbors += QString::fromLatin1("\n  id: %1; border: %2; cost: %3").arg(r->neighbors[i].region->id).arg(r->neighbors[i].bordercells).arg(r->neighbors[i].cost, 5, 'g', 3);
-	}
- }
- // We create temporary cellinfo and reginfo strings, because QString support
- //  only 9 markers in arg() (%1, %2 ... %9)
- QString cellinfo = QString::fromLatin1("%1\n%2\n%3").arg(cell).arg(cellpassable).arg(celloccupied);
- QString reginfo = QString::fromLatin1("%1\n%2\n%3\n%4\n%5\n%6%7").arg(regid).arg(regcost).arg(regcenter).arg(regcells).arg(reggroup).arg(regneighs).arg(neighbors);
- QString text = QString::fromLatin1("%1\n%2").arg(cellinfo).arg(reginfo);
-
- d->mPathFinderDebug->setText(text);
+ BosonPath* pf = boGame->canvas()->pathfinder();
+ d->mPathFinderDebug->setText(pf->debugText(cursorCanvasVector().x(), cursorCanvasVector().y()));
 }
 
 void BosonUfoGameGUI::updateUfoLabelMatricesDebug()

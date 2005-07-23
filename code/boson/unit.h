@@ -24,6 +24,8 @@
 #include "unitbase.h"
 #include "global.h"
 
+#include <qvaluevector.h>
+
 class Player;
 class BosonCanvas;
 class BoItemList;
@@ -328,11 +330,11 @@ public:
 	 * point. You shouldn't use this directly, but instead use 'client methods',
 	 * which will then call this one.
 	 *
-	 * Moves unit's _center_ exactly to given position. If range is not 0, unit
-	 * will move until it's less that range _cells_ away from destination.
+	 * Moves unit's _center_ exactly to given position. If range is not -1, unit
+	 * will move until it's at most that range _cells_ away from destination.
 	 * Destination is in canvas coords.
 	 **/
-	bool moveTo(bofixed x, bofixed y, int range = 0);
+	bool moveTo(bofixed x, bofixed y, int range = -1);
 
 	/**
 	 * Turns unit smoothly to given degrees
@@ -474,16 +476,6 @@ protected:
 	QValueList<Unit*> unitCollisions(bool exact = false);
 
 	/**
-	 * Finds new path to destination.
-	 * Destination must have been set before in variables movedestx and
-	 * movedesty - usually using @ref moveTo
-	 *
-	 * This is in Unit instead of @ref MobileUnit so that we can apply a
-	 * path to newly constructed units of factories.
-	 **/
-	virtual void newPath();
-
-	/**
 	 * Move the unit. By default this does nothing. Reimplemented in @ref
 	 * MobileUnit
 	 **/
@@ -541,6 +533,9 @@ protected:
 
 	void recalculateMaxWeaponRange();
 
+	// TODO: move to BosonCanvas or to somewhere else
+	bool cellOccupied(int x, int y, bool ignoremoving = false) const;
+
 
 private:
 	typedef void (Unit::*MemberFunction)(unsigned int advanceCallsCount);
@@ -594,14 +589,14 @@ public:
 
 	virtual void advanceFollow(unsigned int advanceCallsCount);
 
+	virtual void advanceIdle(unsigned int advanceCallsCount);
+
 
 	/**
 	 * Move this unit to the repairYard and repair it there.
 	 * TODO: move to plugin
 	 **/
 	void repairAt(Facility* repairYard);
-
-	virtual BoRectFixed boundingRect() const;
 
 	virtual bool saveAsXML(QDomElement& root);
 	virtual bool loadFromXML(const QDomElement& root);
@@ -619,14 +614,6 @@ public:
 	 **/
 	bofixed moveTowardsPoint(const BoVector2Fixed& p, bofixed x, bofixed y, bofixed maxdist, bofixed &xspeed, bofixed &yspeed);
 
-	virtual void newPath();
-
-	/**
-	 * Check if pathpoint p marks end of the path. If yes, then it stops unit,
-	 * turns to random direction and true, otherwise returns false.
-	 **/
-	bool checkPathPoint(const BoVector2Fixed& p);
-
 	/**
 	 * @return How fast this mobile unit accelerates.
 	 **/
@@ -640,8 +627,15 @@ public:
 	virtual void addUpgrade(const UpgradeProperties* upgrade);
 	virtual void removeUpgrade(const UpgradeProperties* upgrade);
 
+	static void initCellIntersectionTable();
+
 protected:
 	virtual void advanceMoveInternal(unsigned int advanceCallsCount); // move one step futher to path
+
+	// TODO: rename?
+	void advanceMoveLeader(unsigned int advanceCallsCount);
+	void advanceMoveFollowing(unsigned int advanceCallsCount);
+	void advanceMoveFlying(unsigned int advanceCallsCount);
 
 	/**
 	 * Note: this is not actually an advance*() method, like @ref
@@ -651,6 +645,20 @@ protected:
 	 * This is most notably @ref advanceMove
 	 **/
 	virtual void advanceMoveCheck();
+
+	/**
+	 * Finds new path to destination.
+	 * Destination must have been set before in @ref pathInfo
+	 *
+	 * This is in Unit instead of @ref MobileUnit so that we can apply a
+	 * path to newly constructed units of factories.
+	 **/
+	virtual bool newPath();
+
+	int selectNextPathPoint(int xpos, int ypos);
+	void avoidance();
+	bool canGoToCurrentPathPoint(int xpos, int ypos);
+	void currentPathPointChanged(int unitx, int unity);
 
 private:
 	void changeUpgrades(const UpgradeProperties* upgrade, bool add);
@@ -665,6 +673,8 @@ private:
 	BoUpgradeableProperty<bofixed> mMaxSpeed;
 	BoUpgradeableProperty<bofixed> mMaxAccelerationSpeed;
 	BoUpgradeableProperty<bofixed> mMaxDecelerationSpeed;
+
+	static QValueVector<BoVector2Fixed> mCellIntersectionTable[11][11];
 };
 
 // if you add class members - ONLY KGameProperties!! otherwise Player::load and

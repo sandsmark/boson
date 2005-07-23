@@ -282,37 +282,6 @@ bool PlayerIO::hasTechnology(unsigned long int id) const
  return player()->hasTechnology(id);
 }
 
-bool PlayerIO::canGo(const UnitProperties* prop, const Cell* cell, bool _default) const
-{
- if (!prop || !cell) {
-	return _default;
- }
- if (!canSee(cell)) {
-	return _default;
- }
- if (!cell->passable()) {
-	return false;
- }
- if (prop->isAircraft()) {
-	// Aircrafts can go everywhere (except for unpassable cells)
-	return true;
- } else {
-	if (!cell->isWater()) {
-		return prop->canGoOnLand();
-	} else {
-		return prop->canGoOnWater();
-	}
- }
-}
-
-bool PlayerIO::canGo(const Unit* unit, const Cell* cell, bool _default) const
-{
- if (unit) {
-	return canGo(unit->unitProperties(), cell, _default);
- }
- return _default;
-}
-
 bool PlayerIO::isValidCell(int x, int y) const
 {
  if (!player()->map()) {

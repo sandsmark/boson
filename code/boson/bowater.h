@@ -124,8 +124,6 @@ class BoWaterManager
     bool underwater(int x, int y);
     void setUnderwater(int x, int y, bool free);
 
-    bool cellPassable(int x, int y) const;
-
   private:
     BoWaterData* mData;
 };

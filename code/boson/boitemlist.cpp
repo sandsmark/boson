@@ -24,13 +24,10 @@
 #include "bodebug.h"
 #include "rtti.h"
 #include "unit.h"
-#include "bosonpath.h"
 
 BoItemList::BoItemList()
 {
  registerList();
- mLandOccupied = false;
- mAirOccupied = false;
 }
 
 BoItemList::BoItemList(const BoItemList& list, bool _registerList)
@@ -39,8 +36,6 @@ BoItemList::BoItemList(const BoItemList& list, bool _registerList)
 	registerList();
  }
  mList = list.mList;
- mLandOccupied = list.mLandOccupied;
- mAirOccupied = list.mAirOccupied;
 }
 
 BoItemList::~BoItemList()
@@ -194,133 +189,5 @@ void BoItemList::isOccupied(Unit* forUnit, bool& hasmoving, bool& hasany) const
 		hasany = true;
 	}
  }
-}
-
-void BoItemList::recalculateLandOccupiedStatus()
-{
-#ifdef PATHFINDER_TNG
- mLandOccupied = false;
-
- for (ConstIterator it = begin(); it != end(); ++it) {
-	if (RTTI::isUnit((*it)->rtti())) {
-		Unit* u = (Unit*)*it;
-		if (u->isFlying()) {
-			continue;
-		}
-		if (u->movingStatus() != UnitBase::Standing) {
-			continue;
-		}
-		mLandOccupied = true;
-		return;
-	}
- }
-#endif // PATHFINDER_TNG
-}
-
-void BoItemList::recalculateAirOccupiedStatus()
-{
-#ifdef PATHFINDER_TNG
- mAirOccupied = false;
-
- for (ConstIterator it = begin(); it != end(); ++it) {
-	if (RTTI::isUnit((*it)->rtti())) {
-		Unit* u = (Unit*)*it;
-		if (!u->isFlying()) {
-			continue;
-		}
-		if (u->movingStatus() != UnitBase::Standing) {
-			continue;
-		}
-		mAirOccupied = true;
-		return;
-	}
- }
-#endif // PATHFINDER_TNG
-}
-
-bofixed BoItemList::passageCostLand() const
-{
- // FIXME: this rather belongs to pathfinder, but it's here because pathfinder
- //  doesn't have direct access to list of items on a cell and so it is faster
- //  like this
- // TODO: we shouldn't only check which units are on this cell, but also how
- //  much of the cell they occupy and change cost accordingly. E.g. if waiting
- //  unit occupies 25% of the cell, we should use  WAITING_COST * 0.25  instead
- //  of just  WAITING_COST.
- //  Maybe use maximum of costs of all units on this cell, not sum of them?
- bofixed cost = 0;
-#ifdef PATHFINDER_TNG
- for (ConstIterator it = begin(); it != end(); ++it) {
-	if (RTTI::isUnit((*it)->rtti())) {
-		Unit* u = (Unit*)*it;
-		if (u->isFlying()) {
-			continue;
-		}
-		if (u->movingStatus() == UnitBase::Standing) {
-			cost += PF_TNG_COST_STANDING_UNIT;
-		} else if(u->movingStatus() == UnitBase::Moving) {
-			cost += PF_TNG_COST_MOVING_UNIT;
-		} else if(u->movingStatus() == UnitBase::Waiting) {
-			cost += PF_TNG_COST_WAITING_UNIT;
-		} else if(u->movingStatus() == UnitBase::Engaging) {
-			cost += PF_TNG_COST_ENGAGING_UNIT;
-		} else if(u->movingStatus() == UnitBase::MustSearch) {
-			cost += PF_TNG_COST_MUSTSEARCH_UNIT;
-		} else if(u->movingStatus() == UnitBase::Removing) {
-			// Unit is being deleted, but it hasn't been removed from cells yet.
-			//  Do nothing
-		} else {
-			// Internal moving status. This shouldn't be reached
-			boError() << k_funcinfo << "Internal moving status " << u->movingStatus() <<
-					" for unit with id " << u->id() << endl;
-			cost += PF_TNG_COST_INTERNAL_UNIT;
-		}
-	}
- }
-#endif // PATHFINDER_TNG
- return cost;
-}
-
-bofixed BoItemList::passageCostAir() const
-{
- // FIXME: this rather belongs to pathfinder, but it's here because pathfinder
- //  doesn't have direct access to list of items on a cell and so it is faster
- //  like this
- // TODO: we shouldn't only check which units are on this cell, but also how
- //  much of the cell they occupy and change cost accordingly. E.g. if waiting
- //  unit occupies 25% of the cell, we should use  WAITING_COST * 0.25  instead
- //  of just  WAITING_COST.
- //  Maybe use maximum of costs of all units on this cell, not sum of them?
- bofixed cost = 0;
-#ifdef PATHFINDER_TNG
- for (ConstIterator it = begin(); it != end(); ++it) {
-	if (RTTI::isUnit((*it)->rtti())) {
-		Unit* u = (Unit*)*it;
-		if (!u->isFlying()) {
-			continue;
-		}
-		if (u->movingStatus() == UnitBase::Standing) {
-			cost += PF_TNG_COST_STANDING_UNIT;
-		} else if(u->movingStatus() == UnitBase::Moving) {
-			cost += PF_TNG_COST_MOVING_UNIT;
-		} else if(u->movingStatus() == UnitBase::Waiting) {
-			cost += PF_TNG_COST_WAITING_UNIT;
-		} else if(u->movingStatus() == UnitBase::Engaging) {
-			cost += PF_TNG_COST_ENGAGING_UNIT;
-		} else if(u->movingStatus() == UnitBase::MustSearch) {
-			cost += PF_TNG_COST_MUSTSEARCH_UNIT;
-		} else if(u->movingStatus() == UnitBase::Removing) {
-			// Unit is being deleted, but it hasn't been removed from cells yet.
-			//  Do nothing
-		} else {
-			// Internal moving status. This shouldn't be reached
-			boError() << k_funcinfo << "Internal moving status " << u->movingStatus() <<
-					" for unit with id " << u->id() << endl;
-			cost += PF_TNG_COST_INTERNAL_UNIT;
-		}
-	}
- }
-#endif // PATHFINDER_TNG
- return cost;
 }
 

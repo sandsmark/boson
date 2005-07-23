@@ -98,6 +98,7 @@ void UnitProperties::init()
  mTheme = 0;
  mIsFacility = false;
  mProduceAction = 0;
+ mMoveData = 0;
  d->mPlugins.setAutoDelete(true);
 }
 
@@ -249,6 +250,13 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
  mRotationSpeed = (int)(conf->readNumEntry("RotationSpeed", (int)(bofixedBaseValue("Speed") * 20.0f * 90.0f)) / 20.0f);
  mCanGoOnLand = conf->readBoolEntry("CanGoOnLand", (isLand() || isAircraft()));
  mCanGoOnWater = conf->readBoolEntry("CanGoOnWater", (isShip() || isAircraft()));
+ mCrushDamage = conf->readUnsignedLongNumEntry("CrushDamage", 0);
+ mMaxSlope = conf->readDoubleNumEntry("MaxSlope", 30);
+ mWaterDepth = conf->readDoubleNumEntry("WaterDepth", 0.25);
+
+ // Those are relevant only for aircrafts
+ mIsHelicopter = conf->readBoolEntry("IsHelicopter", false);
+ mTurnRadius = conf->readDoubleNumEntry("TurnRadius", 5);
 }
 
 void UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
@@ -525,6 +533,22 @@ int UnitProperties::rotationSpeed() const
  return mRotationSpeed;
 }
 
+bool UnitProperties::isHelicopter() const
+{
+ if (!isMobile() || !isAircraft()) {
+	return false;
+ }
+ return mIsHelicopter;
+}
+
+bofixed UnitProperties::turnRadius() const
+{
+ if (!isMobile() || !isAircraft()) {
+	return 0;
+ }
+ return mTurnRadius;
+}
+
 bool UnitProperties::canGoOnLand() const
 {
  if (!isMobile()) {
@@ -779,5 +803,17 @@ void UnitProperties::removeUpgrade(const UpgradeProperties* upgrade)
 void UnitProperties::removeUpgrade(unsigned long int id)
 {
  removeUpgrade(d->mUpgradesCollection.findUpgrade(id));
+}
+
+bool UnitProperties::canGo(int x, int y)
+{
+ if (isAircraft()) {
+	// Aircrafts can go everywhere
+	return true;
+ } else {
+	// TODO: implement this (we could use map's width here...Z)
+	return true;
+	//return moveData()->cellPassable[...];
+ }
 }
 

@@ -43,6 +43,50 @@ typedef BoVector3<bofixed> BoVector3Fixed;
 
 class KSimpleConfig;
 
+
+/**
+ *
+ **/
+class BosonMoveData
+{
+public:
+	BosonMoveData()
+	{
+		id = 0; type = Land; maxSlope = 30; waterDepth = 0.25;
+		size = 1; crushDamage = 0;
+		edgedist1 = 0; edgedist2 = 0;
+		cellPassable = 0;
+	}
+	~BosonMoveData()
+	{
+		delete[] cellPassable;
+	}
+
+	enum Type { Land = 1, Water = 2 };
+
+	// Type of the unit
+	Type type;
+	// Unit can move on cells with slope <= maxSlope
+	bofixed maxSlope;
+	// Max water depth for land units, min water depth for water units
+	bofixed waterDepth;
+	// Size of the unit (in cells)
+	int size;
+	// Unit can crush units with maxHealth <= crushDamage
+	unsigned int crushDamage;
+
+	int edgedist1;
+	int edgedist2;
+
+	// Internal id of the movedata
+	unsigned int id;
+	// Whether or not a cell is passable for units which use this movedata
+	// Note that this does NOT take unit size into account!
+	// TODO: maybe it should take unit size into account?
+	bool* cellPassable;
+};
+
+
 class UnitPropertiesPrivate;
 /**
  * Represents the config file of a unit. This holds all information about unit
@@ -243,6 +287,34 @@ public:
 	int rotationSpeed() const;
 
 	/**
+	 * @return Whether this unit can move like a helicopter.
+	 * Work only for aircrafts
+	 **/
+	bool isHelicopter() const;
+	/**
+	 * @return Turn radius for flying units
+	 **/
+	bofixed turnRadius() const;
+
+	/**
+	 * @return Mobile unit's crushDamage.
+	 * If @ref maxHealth of some other unit is less than that, then this unit can
+	 *  crush it (read: drive over it and destory it)
+	 **/
+	unsigned int crushDamage() const { return mCrushDamage; }
+
+	/**
+	 * @return Max slope (in degrees) that this mobile unit can climb
+	 **/
+	bofixed maxSlope() const { return mMaxSlope; }
+
+	/**
+	 * @return Max water depth in which the unit can move for mobile land units
+	 * and min water depth for ships.
+	 **/
+	bofixed waterDepth() const { return mWaterDepth; }
+
+	/**
 	 * @return Whether this unit can go over land
 	 **/
 	bool canGoOnLand() const; // FIXME is there a shorter and better name?
@@ -364,6 +436,9 @@ public:
 	 **/
 	const bofixed& explodingDamageRange() const { return mExplodingDamageRange; }
 
+	BosonMoveData* moveData() const { return mMoveData; }
+	void setMoveData(BosonMoveData* data) { mMoveData = data; }
+
 	/**
 	 * @return So called hitpoint of this unit
 	 * Hitpoint is used to calculate target position for missiles and position for
@@ -410,6 +485,12 @@ public:
 	void removeUpgrade(const UpgradeProperties* prop);
 	void removeUpgrade(unsigned long int id);
 
+	/**
+	 * @return Whether unit of this type can go onto cell with given coordinates.
+	 * Note that this method takes only terrain into account, it doesn't care
+	 *  about units or fog of war.
+	 **/
+	bool canGo(int x, int y);
 
 protected:
 	void loadMobileProperties(KSimpleConfig* conf);
@@ -500,6 +581,7 @@ private:
 	long int mExplodingFragmentDamage;
 	bofixed mExplodingFragmentDamageRange;
 	bool mRemoveWreckageImmediately;
+	BosonMoveData* mMoveData;
 
 	// for mobile units only
 	BoUpgradeableProperty<bofixed> mSpeed;
@@ -508,8 +590,13 @@ private:
 	BoUpgradeableProperty<bofixed> mDecelerationSpeed;
 
 	int mRotationSpeed;
+	bool mIsHelicopter;
+	bofixed mTurnRadius;
 	bool mCanGoOnLand;
 	bool mCanGoOnWater;
+	unsigned int mCrushDamage;
+	bofixed mMaxSlope;
+	bofixed mWaterDepth;
 
 	// for facilities only
 	unsigned int mConstructionFrames;

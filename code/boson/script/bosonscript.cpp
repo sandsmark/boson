@@ -298,7 +298,7 @@ QValueList<BoVector2Fixed> BosonScript::nearestMineralLocations(int playerId, in
     return QValueList<BoVector2Fixed>();
   }
 
-  return BosonPath::findLocations(p, x, y, n, radius, BosonPath::Minerals);
+  return canvas()->pathfinder()->findLocations(p, x, y, n, radius, BosonPath::Minerals);
 }
 
 QValueList<BoVector2Fixed> BosonScript::nearestOilLocations(int playerId, int x, int y, unsigned int n, unsigned int radius)
@@ -317,7 +317,7 @@ QValueList<BoVector2Fixed> BosonScript::nearestOilLocations(int playerId, int x,
     return QValueList<BoVector2Fixed>();
   }
 
-  return BosonPath::findLocations(p, x, y, n, radius, BosonPath::Oil);
+  return canvas()->pathfinder()->findLocations(p, x, y, n, radius, BosonPath::Oil);
 }
 
 

@@ -37,7 +37,7 @@ class ProductionPlugin;
 class BosonEffect;
 class BosonShot;
 class BosonCanvasStatistics;
-class BosonPath2;
+class BosonPath;
 class BoEventListener;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
@@ -152,7 +152,7 @@ public:
 	BosonCanvasStatistics* canvasStatistics() const;
 
 	void initPathfinder();
-	BosonPath2* pathfinder();
+	BosonPath* pathfinder() const;
 
 	inline BosonCollisions* collisions() const { return mCollisions; }
 
@@ -169,7 +169,8 @@ public:
 	 * the ground <em>not</em> for collisions with other units. See @ref Unit for
 	 * this.
 	 **/
-	bool canGo(const UnitProperties* prop, const BoRectFixed& rect) const;
+	bool canGo(const UnitProperties* prop, const BoRectFixed& rect, bool _default = false) const;
+	bool canGo(const UnitProperties* prop, int x, int y, bool _default = false) const;
 
 	void setMap(BosonMap* map);
 	BosonMap* map() const;

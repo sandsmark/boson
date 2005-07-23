@@ -71,8 +71,6 @@ public:
 		if (_registerList) {
 			registerList();
 		}
-		mLandOccupied = false;
-		mAirOccupied = false;
 	}
 
 	BoItemList(const BoItemList&, bool _registerList = true);
@@ -158,37 +156,11 @@ public:
 	 **/
 	bool isOccupied(bool includeMoving = true) const;
 
-	/**
-	 * Checks if cell is occupied for land units.
-	 * This differs from isOccupied(...) methods in that it uses pre-calculated
-	 * occupied status.
-	 * Also note, that this doesn't check for moving units.
-	 * @return TRUE if cell is occupied by standing land unit, otherwise FALSE
-	 **/
-	inline bool isLandOccupied() const { return mLandOccupied; }
-
-	/**
-	 * Checks if cell is occupied for land units.
-	 * This differs from isOccupied(...) methods in that it uses pre-calculated
-	 * occupied status.
-	 * Also note, that this doesn't check for moving units.
-	 * @return TRUE if cell is occupied by standing land unit, otherwise FALSE
-	 **/
-	inline bool isAirOccupied() const { return mAirOccupied; }
-
-	void recalculateLandOccupiedStatus();
-	void recalculateAirOccupiedStatus();
-
-	bofixed passageCostLand() const;
-	bofixed passageCostAir() const;
-
 protected:
 	void registerList();
 
 private:
 	QValueList<BosonItem*> mList;
-	bool mLandOccupied;  // Occupied for land units?
-	bool mAirOccupied;  // Occupied for air units?
 };
 
 #endif

@@ -106,7 +106,7 @@ signals:
 	void signalStartingFailed();
 
 	void signalLoadingMaxDuration(unsigned int duration);
-	
+
 	/**
 	 * Emitted when a task has been completed. The progress bar should be
 	 * updated.
@@ -488,6 +488,11 @@ protected:
 	 **/
 	bool fixPlayerIds(int* actualIds, unsigned int players, QDomElement& root) const;
 	bool fixPlayerIdsInFileNames(int* actualIds, unsigned int players, QMap<QString, QByteArray>& files) const;
+
+	/**
+	 * Creates @ref BosonMoveData objects for all unitproperties
+	 **/
+	void createMoveDatas() const;
 
 private:
 	BosonPlayField* mDestPlayField;
