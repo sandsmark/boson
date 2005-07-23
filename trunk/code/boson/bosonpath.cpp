@@ -2194,8 +2194,6 @@ void BosonPath::unitMovingStatusChanges(Unit* u, int oldstatus, int newstatus)
       }
       else
       {
-        // TODO: this is wrong since we don't have a global occupied status
-        //  anymore (occupied status has to be checked per-movedata now).
         cellChanged(c);
       }
     }
@@ -2214,9 +2212,13 @@ void BosonPath::markBlockChanged(Cell* c)
   int blocky = c->y() / mBlockSize;
   int blockpos = blocky * mBlocksCountX + blockx;
 
-  // TODO: check if we can return immediately if the block is already changed
   // Set this block to be dirty
-  if(!(mBlocks[blockpos].flags & STATUS_CHANGED))
+  if(mBlocks[blockpos].flags & STATUS_CHANGED)
+  {
+    // The block has changed already
+    return;
+  }
+  else
   {
     mBlocks[blockpos].flags |= STATUS_CHANGED;
     mChangedBlocks.append(blockpos);
