@@ -319,6 +319,7 @@ BoColorMap::BoColorMap(unsigned int width, unsigned int height)
 	data[i] = 0;
  }
  mTexture->load(data, mTexWidth, mTexHeight);
+ delete[] data;
 }
 
 BoColorMap::~BoColorMap()
