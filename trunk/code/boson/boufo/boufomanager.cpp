@@ -404,6 +404,7 @@ BoUfoManager::~BoUfoManager()
 	contentWidget()->removeAllWidgets();
 	boDebug() << k_funcinfo << "removed all widgets" << endl;
  }
+ delete mGlobalFont;
  boDebug() << k_funcinfo << "deleting context" << endl;
  delete mContext;
  boDebug() << k_funcinfo << "deleting display" << endl;
