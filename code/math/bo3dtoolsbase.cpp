@@ -93,9 +93,11 @@ void Bo3dToolsBase::pointByRotation(bofixed* x, bofixed* y, const bofixed& angle
     *y = 0;
     return;
   }
-  bofixed tmpx = tan(angle / RAD2DEG);
-  bofixed tmpy = 1;
-  bofixed length = sqrt(tmpx * tmpx + tmpy * tmpy);
+  // AB: WARNING: to avoid overflows in bofixed (max value around 16383) we use
+  //     float here.
+  float tmpx = tanf(angle / RAD2DEG);
+  float tmpy = 1;
+  float length = sqrtf(tmpx * tmpx + tmpy * tmpy);
   tmpx = tmpx / length * radius;
   tmpy = tmpy / length * radius;
   if(angle < 90)
