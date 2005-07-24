@@ -36,8 +36,6 @@ public:
 	BosonEffectManager();
 	~BosonEffectManager();
 
-	static BosonEffectManager* manager();
-
 	bool loadUnitType(const UnitProperties* prop);
 	bool loadWeaponType(const BosonWeaponProperties* prop);
 
@@ -53,7 +51,6 @@ public:
 
 private:
 	BosonEffectManagerPrivate* d;
-	static BosonEffectManager* mManager;
 };
 
 #endif // BOSONEFFECTMANAGER_H

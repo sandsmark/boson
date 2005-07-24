@@ -137,6 +137,8 @@ public:
 		mCamera = 0;
 		mLocalPlayerIO = 0;
 		mCanvas = 0;
+
+		mEffectManager = 0;
 	}
 	const BoGLMatrices* mGameGLMatrices;
 	BosonCanvasRenderer* mCanvasRenderer;
@@ -146,6 +148,8 @@ public:
 
 	QPtrDict<BosonItemEffects> mItem2Effects;
 	QPtrList<BosonEffect> mEffects;
+
+	BosonEffectManager* mEffectManager;
 };
 
 BosonUfoCanvasWidget::BosonUfoCanvasWidget()
@@ -153,6 +157,7 @@ BosonUfoCanvasWidget::BosonUfoCanvasWidget()
 {
  d = new BosonUfoCanvasWidgetPrivate();
  BosonEffectPropertiesManager::initStatic();
+ d->mEffectManager = new BosonEffectManager();
 
 
  d->mCanvasRenderer = new BosonCanvasRenderer();
@@ -163,6 +168,7 @@ BosonUfoCanvasWidget::~BosonUfoCanvasWidget()
 {
  quitGame();
  delete d->mCanvasRenderer;
+ delete d->mEffectManager;
  BosonEffectPropertiesManager::deleteStatic();
  delete d;
 }
@@ -421,8 +427,8 @@ void BosonUfoCanvasWidget::slotShotFired(BosonShot* shot, BosonWeapon* weapon)
  BO_CHECK_NULL_RET(weapon->properties());
  BO_CHECK_NULL_RET(weapon->unit());
  BoVector3Fixed pos(shot->x(), shot->y(), shot->z());
- BosonEffectManager::manager()->loadWeaponType(weapon->properties());
- addEffects(BosonEffectManager::manager()->newShootEffects(weapon->properties(), pos, weapon->unit()->rotation()));
+ d->mEffectManager->loadWeaponType(weapon->properties());
+ addEffects(d->mEffectManager->newShootEffects(weapon->properties(), pos, weapon->unit()->rotation()));
  weapon->properties()->playSound(SoundWeaponShoot);
 }
 
@@ -434,10 +440,10 @@ void BosonUfoCanvasWidget::slotShotHit(BosonShot* shot)
  BoVector3Fixed pos(shot->x(), shot->y(), shot->z());
 
  if (effects && shot->properties()) {
-	BosonEffectManager::manager()->loadWeaponType(shot->properties());
+	d->mEffectManager->loadWeaponType(shot->properties());
 	switch (shot->type()) {
 		case BosonShot::Bullet:
-			effects->setEffects(BosonEffectManager::manager()->newFlyEffects(shot->properties(), pos, 0), &d->mEffects);
+			effects->setEffects(d->mEffectManager->newFlyEffects(shot->properties(), pos, 0), &d->mEffects);
 			break;
 		case BosonShot::Rocket:
 			break;
@@ -452,8 +458,8 @@ void BosonUfoCanvasWidget::slotShotHit(BosonShot* shot)
 			BoVector3Fixed pos(shot->centerX(), shot->centerY(), shot->z());
 			BosonShotFragment* fragment = (BosonShotFragment*)shot;
 			const UnitProperties* prop = fragment->unitProperties();
-			BosonEffectManager::manager()->loadUnitType(prop);
-			addEffects(BosonEffectManager::manager()->newExplodingFragmentHitEffects(prop, pos));
+			d->mEffectManager->loadUnitType(prop);
+			addEffects(d->mEffectManager->newExplodingFragmentHitEffects(prop, pos));
 			break;
 		}
 		case BosonShot::Missile:
@@ -473,8 +479,8 @@ void BosonUfoCanvasWidget::slotShotHit(BosonShot* shot)
  }
  if (shot->properties()) {
 	// Add hit effects
-	BosonEffectManager::manager()->loadWeaponType(shot->properties());
-	addEffects(BosonEffectManager::manager()->newHitEffects(shot->properties(), pos));
+	d->mEffectManager->loadWeaponType(shot->properties());
+	addEffects(d->mEffectManager->newHitEffects(shot->properties(), pos));
  }
 
  if (shot->properties()) {
@@ -507,8 +513,8 @@ void BosonUfoCanvasWidget::slotUnitDestroyed(Unit* unit)
  BoVector3Fixed pos(unit->x() + unit->width() / 2, unit->y() + unit->height() / 2, unit->z());
  //pos += unit->unitProperties()->hitPoint();
  // Add destroyed effects
- BosonEffectManager::manager()->loadUnitType(unit->unitProperties());
- addEffects(BosonEffectManager::manager()->newDestroyedEffects(unit->unitProperties(), pos[0], pos[1], pos[2]));
+ d->mEffectManager->loadUnitType(unit->unitProperties());
+ addEffects(d->mEffectManager->newDestroyedEffects(unit->unitProperties(), pos[0], pos[1], pos[2]));
 }
 
 void BosonUfoCanvasWidget::slotFragmentCreated(BosonShotFragment* fragment)
@@ -516,8 +522,8 @@ void BosonUfoCanvasWidget::slotFragmentCreated(BosonShotFragment* fragment)
  BosonItemEffects* effects = d->mItem2Effects[fragment];
  BO_CHECK_NULL_RET(effects);
  BoVector3Fixed pos(fragment->x(), fragment->y(), fragment->z());
- BosonEffectManager::manager()->loadWeaponType(fragment->properties());
- effects->setEffects(BosonEffectManager::manager()->newExplodingFragmentFlyEffects(fragment->unitProperties(), pos), &d->mEffects);
+ d->mEffectManager->loadWeaponType(fragment->properties());
+ effects->setEffects(d->mEffectManager->newExplodingFragmentFlyEffects(fragment->unitProperties(), pos), &d->mEffects);
 }
 
 void BosonUfoCanvasWidget::slotFacilityConstructed(Unit* unit)
@@ -533,8 +539,8 @@ void BosonUfoCanvasWidget::addFacilityConstructedEffects(Unit* unit)
  float x = unit->x() + unit->width() / 2;
  float y = unit->y() + unit->height() / 2;
  float z = unit->z();
- BosonEffectManager::manager()->loadUnitType(unit->unitProperties());
- effects->setEffects(BosonEffectManager::manager()->newConstructedEffects(unit->unitProperties(), x, y, z), &d->mEffects);
+ d->mEffectManager->loadUnitType(unit->unitProperties());
+ effects->setEffects(d->mEffectManager->newConstructedEffects(unit->unitProperties(), x, y, z), &d->mEffects);
 }
 
 void BosonUfoCanvasWidget::slotItemAdded(BosonItem* item)
@@ -549,21 +555,21 @@ void BosonUfoCanvasWidget::slotItemAdded(BosonItem* item)
  if (RTTI::isUnit(item->rtti())) {
 	Unit* u = (Unit*)item;
 	if (u->isMobile()) {
-		BosonEffectManager::manager()->loadUnitType(u->unitProperties());
-		effects->setEffects(BosonEffectManager::manager()->newConstructedEffects(u->unitProperties(), x, y, z), &d->mEffects);
+		d->mEffectManager->loadUnitType(u->unitProperties());
+		effects->setEffects(d->mEffectManager->newConstructedEffects(u->unitProperties(), x, y, z), &d->mEffects);
 	} else {
 		// facilities need to be constructed first
 	}
  } else if (RTTI::isShot(item->rtti())) {
 	BosonShot* shot = (BosonShot*)item;
-	BosonEffectManager::manager()->loadWeaponType(shot->properties());
+	d->mEffectManager->loadWeaponType(shot->properties());
 	switch (shot->type()) {
 		case BosonShot::Bullet:
 			break;
 		case BosonShot::Rocket:
 		{
 			BoVector3Fixed pos(shot->x(), shot->y(), shot->z());
-			effects->setEffects(BosonEffectManager::manager()->newFlyEffects(shot->properties(), pos, 0.0), &d->mEffects);
+			effects->setEffects(d->mEffectManager->newFlyEffects(shot->properties(), pos, 0.0), &d->mEffects);
 			break;
 		}
 		case BosonShot::Explosion:
@@ -577,7 +583,7 @@ void BosonUfoCanvasWidget::slotItemAdded(BosonItem* item)
 		case BosonShot::Missile:
 		{
 			BoVector3Fixed pos(shot->x(), shot->y(), shot->z());
-			effects->setEffects(BosonEffectManager::manager()->newFlyEffects(shot->properties(), pos, 0.0), &d->mEffects);
+			effects->setEffects(d->mEffectManager->newFlyEffects(shot->properties(), pos, 0.0), &d->mEffects);
 			break;
 		}
 		default:
