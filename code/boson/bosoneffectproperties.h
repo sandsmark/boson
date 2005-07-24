@@ -161,7 +161,7 @@ class BosonEffectProperties
      * Same as above, but uses already specified list of ids instead of loading
      *  them.
      **/
-    static QPtrList<BosonEffectProperties> loadEffectProperties(QValueList<unsigned long int> ids);
+    static QPtrList<BosonEffectProperties> loadEffectProperties(const QValueList<unsigned long int>& ids);
 
     /**
      * Static helper method to create new effects.
