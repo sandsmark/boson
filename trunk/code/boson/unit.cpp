@@ -2390,35 +2390,6 @@ void MobileUnit::avoidance()
 			avoidstrength += factor;
 		}
 	}
-
-
-	/*if (distToUnit < speed() * 20 + unitSizesSum + 2) {
-		// This unit is too close to us
-		// Probably the unit is coming toward us
-		bofixed sideDistance = toUnit.dotProduct(toRight);
-		if (/*(toUnit.dotProduct(velocity) < unitSizesSum) &&*/ /*(QABS(sideDistance) < unitSizesSum)) {
-			// We'll crash with this unit if we don't act
-			// Try to avoid the crash by turning left or right
-			if (sideDistance > 0) {
-				avoidstrength -= (unitSizesSum - sideDistance) * 2 / distToUnit;
-			} else {
-				avoidstrength += (unitSizesSum - QABS(sideDistance)) * 2 / distToUnit;
-			}
-		}
-	}*/ /*else if (distToUnit < unitSizesSum + 2 && speed() > u->speed()) {
-		// This unit is too close to us
-		// Probaly unit is either standing or moving in same direction as us (but more slowly)
-		bofixed sideDistance = toUnit.dotProduct(toRight);
-		if (QABS(sideDistance) < unitSizesSum) {
-			// We'll crash with this unit if we don't act
-			// Try to avoid the crash by turning left or right
-			if (sideDistance > 0) {
-				avoidstrength -= (unitSizesSum - sideDistance) * 2 / distToUnit;
-			} else {
-				avoidstrength += (unitSizesSum - QABS(sideDistance)) * 2 / distToUnit;
-			}
-		}
-	}*/
  }
  if (avoidstrength != 0) {
 	// Calculate new velocity
