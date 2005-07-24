@@ -1770,12 +1770,6 @@ void BosonPath::initBlocks()
   // Create the array of blocks
   mBlocks = new BlockInfo[blockcount];
 
-  unsigned int* passableblocks = new unsigned int[mMoveDatas.count()];
-  for(unsigned int i = 0; i < mMoveDatas.count(); i++)
-  {
-    passableblocks[i] = 0;
-  }
-
   // Find out the block centers for all movedatas
   for(int i = 0; i < blockcount; i++)
   {
@@ -1785,19 +1779,7 @@ void BosonPath::initBlocks()
     for(unsigned int j = 0; j < mMoveDatas.count(); j++)
     {
       findBlockCenter(i, mMoveDatas[j]);
-      if(mBlocks[i].centerx[j] != -1)
-      {
-        passableblocks[j]++;
-      }
     }
-  }
-
-  for(unsigned int i = 0; i < mMoveDatas.count(); i++)
-  {
-    BosonMoveData* movedata = mMoveDatas[i];
-    boDebug(500) << k_funcinfo << "Passable blocks for movedata " << i << " (" <<
-        (movedata->type == BosonMoveData::Land ? "land" : "water") <<
-        "; size: " << movedata->size << ") : " << passableblocks[i] << " of " << blockcount << endl;
   }
 
   // Find the connections between the blocks
