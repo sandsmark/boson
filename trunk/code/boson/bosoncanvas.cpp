@@ -29,8 +29,6 @@
 #include "unitproperties.h"
 #include "speciestheme.h"
 #include "boitemlist.h"
-#include "bosoneffect.h"
-#include "bosoneffectproperties.h"
 #include "defines.h"
 #include "items/bosonshot.h"
 #include "items/bosonitemrenderer.h"
@@ -45,7 +43,6 @@
 #include "bosonpropertyxml.h"
 #include "bosonpath.h"
 #include "bowater.h"
-#include "bowaterrenderer.h"
 
 #include <klocale.h>
 #include <kgame/kgamepropertyhandler.h>
@@ -53,6 +50,7 @@
 #include <qpointarray.h>
 #include <qdatastream.h>
 #include <qdom.h>
+#include <qintdict.h>
 
 #include <math.h>
 
@@ -99,7 +97,6 @@ public:
 	QPtrList<BosonItem> mAnimList;
 
 	BoItemList mAllItems;
-	QPtrList<BosonEffect> mEffects;
 
 	// by default ALL items are in "work" == -1. if an item changes its work
 	// (i.e. it is a unit and it called setAdvanceWork()) then it will go to
@@ -121,6 +118,8 @@ public:
 	BosonPath* mPathfinder;
 
 	BoCanvasEventListener* mEventListener;
+
+	QIntDict<BosonMoveData> mUnitProperties2MoveData;
 };
 
 
@@ -152,7 +151,6 @@ protected:
 	void syncAdvanceFunctions(const BoItemList& allItems, bool advanceFlag); // MUST be called after advanceFunction() stuff
 	void updateWork2AdvanceList();
 	void maximalAdvanceCountTasks(unsigned int advanceCallsCount); // "maximalAdvanceCount" is nonsense here, but the name has historic reasons
-	void updateEffects(QPtrList<BosonEffect>& effects, float elapsed);
 	void notifyAboutDestroyedUnits(const QPtrList<Unit>& destroyedUnits, unsigned int first, const BoItemList& allItems);
 
 private:
@@ -172,16 +170,6 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, const QPtrList<BosonIt
  boProfiling->push("Advance Items");
  advanceItems(allItems, animItems, advanceCallsCount, advanceFlag);
  boProfiling->pop(); // Advance Items
-
- boProfiling->push("Advance Effects");
- updateEffects(mCanvas->d->mEffects, 0.05);  // With default game speed, delay between advance messages is 1.0 / 20 = 0.05 sec
- boProfiling->pop(); // Advance Effects
-
- boProfiling->push("Advance Water");
- // FIXME: rendering advancing should be done elsewhere (probably using a
- // signal)
- boWaterRenderer->update(0.05);
- boProfiling->pop(); // Advance Water
 
  // TODO: check when is it best to do this
  boProfiling->push("Advance Pathfinder");
@@ -417,49 +405,6 @@ void BoCanvasAdvance::maximalAdvanceCountTasks(unsigned int advanceCallsCount)
  boProfiling->pop();
 }
 
-// AB: elapsed is unused
-void BoCanvasAdvance::updateEffects(QPtrList<BosonEffect>& effects, float elapsed)
-{
- PROFILE_METHOD;
-/* int count = d->mParticles.count();
- if (count <= 0) {
-	return;
- }
-	BosonParticleSystem* s;
-	for (int i = 0; i < count; i++) {
-	s = d->mParticles.at(i);
-	s->update(elapsed);
-	if (!s->isActive()) {
-		boDebug() << k_funcinfo << "**********  REMOVING inactive particle system (particle count: " << s->particleCount() << ")!  *****" << endl;
-		d->mParticles.remove();
-		i--;
-		count--;
-	}
- }*/
- QPtrList<BosonEffect> removeEffects;
- for (BosonEffect* e = effects.first(); e; e = effects.next()) {
-	if (!e->hasStarted()) {
-		e->update(elapsed);
-	} else {
-		e->markUpdate(elapsed);
-	}
-	if (!e->isActive()) {
-		if (e->ownerId()) {
-			// Remove the effect from owner
-			BosonItem* owner = mCanvas->d->mAllItems.findItem(e->ownerId());
-			if (owner) {
-				owner->removeEffect(e);
-			}
-		}
-		removeEffects.append(e);
-	}
- }
- while (removeEffects.count() > 0) {
-	BosonEffect* e = removeEffects.take(0);
-	effects.removeRef(e);
- }
-}
-
 void BoCanvasAdvance::notifyAboutDestroyedUnits(const QPtrList<Unit>& destroyedUnits, unsigned int first, const BoItemList& allItems)
 {
  unsigned int i = 0;
@@ -497,7 +442,6 @@ void BosonCanvas::init()
 {
  d = new BosonCanvasPrivate;
  d->mDestroyedUnits.setAutoDelete(false);
- d->mEffects.setAutoDelete(true);
  mAdvanceFunctionLocked = false;
  mCollisions = new BosonCollisions();
  d->mStatistics = new BosonCanvasStatistics(this);
@@ -505,7 +449,6 @@ void BosonCanvas::init()
  d->mNextItemId.registerData(IdNextItemId, d->mProperties,
 		KGamePropertyBase::PolicyLocal, "NextItemId");
  d->mNextItemId.setLocal(0);
- BosonEffectPropertiesManager::initStatic();
 
  if (!boGame) {
 	boError() << k_funcinfo << "NULL boGame object: cannot install event listener" << endl;
@@ -524,7 +467,7 @@ BosonCanvas::~BosonCanvas()
  quitGame();
  delete d->mStatistics;
  delete mCollisions;
- BosonEffectPropertiesManager::deleteStatic();
+ clearMoveDatas();
  delete d;
  boDebug()<< k_funcinfo <<"done"<< endl;
 }
@@ -541,7 +484,6 @@ void BosonCanvas::quitGame()
  delete d->mPathfinder;
  d->mPathfinder = 0;
  deleteDestroyed();
- d->mEffects.clear();
  QMap<int, QPtrList<BosonItem> >::Iterator it;
  for (it = d->mWork2AdvanceList.begin(); it != d->mWork2AdvanceList.end(); ++it) {
 	(*it).clear();
@@ -633,8 +575,13 @@ bool BosonCanvas::canGo(const UnitProperties* prop, int x, int y, bool _default)
 	// TODO: add MaxSlope and WaterDepth properties to facilities and take those into account
 	return !cell(x, y)->isWater();
  }
+ BosonMoveData* md = moveData(prop);
+ if (!md) {
+	BO_NULL_ERROR(md);
+	return false;
+ }
 
- return prop->moveData()->cellPassable[y * mapWidth() + x];
+ return md->cellPassable[y * mapWidth() + x];
 }
 
 void BosonCanvas::setMap(BosonMap* map)
@@ -722,21 +669,8 @@ void BosonCanvas::shotHit(BosonShot* s)
 	boError() << k_funcinfo << "NULL shot" << endl;
 	return;
  }
- // Make shot's effects (e.g. smoke traces) obsolete
- if (s->effects() && s->effects()->count() > 0) {
-	QPtrListIterator<BosonEffect> it(*(s->effects()));
-	while (it.current()) {
-		it.current()->makeObsolete();
-		++it;
-	}
- }
- if (s->properties()) {
-	// Add hit effects
-	addEffects(s->properties()->newHitEffects(BoVector3Fixed(s->x(), s->y(), s->z())));
 
-	// Play hit sound
-	s->properties()->playSound(SoundWeaponHit);
- }
+ emit signalShotHit(s);
 
  explosion(BoVector3Fixed(s->x(), s->y(), s->z()), s->damage(), s->damageRange(),
 		s->fullDamageRange(), s->owner());
@@ -870,25 +804,11 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	// This stops everything
 	unit->stopAttacking();
 
-	// Make all unit's effects obsolete
-	if (unit->effects() && unit->effects()->count() > 0) {
-		QPtrListIterator<BosonEffect> it(*(unit->effects()));
-		for (; it.current(); ++it) {
-//			boDebug() << k_funcinfo << "Making effect " << it.current() << " obsolete" << endl;
-			it.current()->makeObsolete();
-			it.current()->setOwnerId(0);
-		}
-		unit->clearEffects();
-	}
-
 	// the unit is added to a list - now displayed as a wreckage only.
 	removeUnit(unit);
-	unit->playSound(SoundReportDestroyed);
 	// Pos is center of unit
 	BoVector3Fixed pos(unit->x() + unit->width() / 2, unit->y() + unit->height() / 2, unit->z());
 	//pos += unit->unitProperties()->hitPoint();
-	// Add destroyed effects
-	addEffects(unit->unitProperties()->newDestroyedEffects(pos[0], pos[1], pos[2]));
 	// Make explosion if needed
 	const UnitProperties* prop = unit->unitProperties();
 	if (prop->explodingDamage() > 0) {
@@ -907,8 +827,20 @@ void BosonCanvas::destroyUnit(Unit* unit)
 			// AB: pos parameter is redundant due to createNewItem()
 			// change
 			f->activate(pos, unit->unitProperties());
+
+			// AB: ugly.
+			// when fragments are created, they don't have the
+			// unitproperties pointer yet, so we can not yet create
+			// the corresponding effect object.
+			// so we must notify the effects somehow that activate()
+			// got called.
+			// -> still this exception for fragments is very ugly.
+			emit signalFragmentCreated(f);
 		}
 	}
+
+	emit signalUnitDestroyed(unit);
+
 	// Hide unit if wreckage should be removed immediately
 	if (unit->unitProperties()->removeWreckageImmediately()) {
 		unit->setVisible(false);
@@ -956,6 +888,11 @@ void BosonCanvas::removeUnit(Unit* unit)
 
  // note: we don't add unit to any list and we don't delete it here.
  // editor will now delete it, while game mustn't delete it (displays wreckage)
+}
+
+void BosonCanvas::shotFired(BosonShot* shot, BosonWeapon* weapon)
+{
+ emit signalShotFired(shot, weapon);
 }
 
 Cell* BosonCanvas::cellAt(Unit* unit) const
@@ -1255,16 +1192,6 @@ void BosonCanvas::removeItem(BosonItem* item)
  emit signalRemovedItem(item);
 }
 
-unsigned int BosonCanvas::effectsCount() const
-{
- return effects()->count();
-}
-
-QPtrList<BosonEffect>* BosonCanvas::effects() const
-{
- return &(d->mEffects);
-}
-
 void BosonCanvas::deleteUnusedShots()
 {
  QPtrList<BosonItem> unusedShots;
@@ -1280,19 +1207,6 @@ void BosonCanvas::deleteUnusedShots()
  while (!unusedShots.isEmpty()) {
 	BosonItem* i = unusedShots.take(0);
 	deleteItem(i);
- }
-}
-
-void BosonCanvas::addEffect(BosonEffect* e)
-{
- d->mEffects.append(e);
-}
-
-void BosonCanvas::addEffects(const QPtrList<BosonEffect> effects)
-{
- QPtrListIterator<BosonEffect> it(effects);
- for (; it.current(); ++it) {
-	addEffect(it.current());
  }
 }
 
@@ -1323,10 +1237,6 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
  }
  if (!loadItemsFromXML(root)) {
 	boError(260) << k_funcinfo << "unable to load items from XML" << endl;
-	return false;
- }
- if (!loadEffectsFromXML(root)) {
-	boError(260) << k_funcinfo << "unable to load effects from XML" << endl;
 	return false;
  }
 
@@ -1618,89 +1528,6 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& element, BosonItem* item)
  return true;
 }
 
-bool BosonCanvas::loadEffectsFromXML(const QDomElement& root)
-{
- QDomElement effects = root.namedItem("Effects").toElement();
- if (effects.isNull()) {
-	boError(260) << k_funcinfo << "Effects tag not found" << endl;
-	return false;
- }
-
- bool ret = true;
- QDomNodeList list = effects.elementsByTagName(QString::fromLatin1("Effect"));
-
- for (unsigned int i = 0; i < list.count(); i++) {
-	QDomElement effect = list.item(i).toElement();
-	bool ok = false;
-
-	unsigned int propId = 0;
-	unsigned int ownerId = 0;
-
-	propId = effect.attribute(QString::fromLatin1("PropId")).toUInt(&ok);
-	if (!propId || !ok) {
-		boError() << k_funcinfo << "invalid number for PropId" << endl;
-		ret = false;
-		continue;
-	}
-	ownerId = effect.attribute(QString::fromLatin1("OwnerId")).toUInt(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "invalid number for OwnerId" << endl;
-		ret = false;
-		continue;
-	}
-
-	// AB: ownerId is an item here
-	// if that item is not present, then it belongs to a player that is not
-	// being loaded in this game. we ignore the effect then.
-	if (!d->mAllItems.findItem(ownerId)) {
-		continue;
-	}
-
-	const BosonEffectProperties* prop = boEffectPropertiesManager->effectProperties(propId);
-	if (!prop) {
-		boError() << k_funcinfo << "Null effect properties with id " << propId << endl;
-		ret = false;
-		continue;
-	}
-
-	BoVector3Fixed pos, rot;
-	if (!loadVector3FromXML(&pos, effect, "Position")) {
-		ret = false;
-		continue;
-	}
-	if (!loadVector3FromXML(&rot, effect, "Rotation")) {
-		ret = false;
-		continue;
-	}
-
-	BosonEffect* e = prop->newEffect(pos, rot);
-	if(!e) {
-		boError() << k_funcinfo << "NULL effect created! id: " << propId << "; owner: " << ownerId << endl;
-		ret = false;
-		continue;
-	}
-	if(!e->loadFromXML(effect)) {
-		ret = false;
-		delete e;
-		continue;
-	}
-	addEffect(e);
-	if (e->ownerId()) {
-		// Find effect's owner
-		BosonItem* owner = d->mAllItems.findItem(e->ownerId());
-		if (owner) {
-			owner->addEffect(e, false);
-		} else {
-			boError() << k_funcinfo << "Can't find owner item with id " << e->ownerId() << " for effect!" << endl;
-			e->makeObsolete();  // Maybe delete immediately?
-			ret = false;
-		}
-	}
- }
-
- return ret;
-}
-
 bool BosonCanvas::saveAsXML(QDomElement& root) const
 {
  boDebug() << k_funcinfo << endl;
@@ -1711,10 +1538,6 @@ bool BosonCanvas::saveAsXML(QDomElement& root) const
  }
  if (!saveItemsAsXML(root)) {
 	boError() << k_funcinfo << "cannot save items as xml" << endl;
-	return false;
- }
- if (!saveEffectsAsXML(root)) {
-	boError() << k_funcinfo << "could not save effects as xml" << endl;
 	return false;
  }
 
@@ -1783,23 +1606,6 @@ bool BosonCanvas::saveItemsAsXML(QDomElement& root) const
 		return false;
 	}
 	items.appendChild(item);
- }
- return true;
-}
-
-bool BosonCanvas::saveEffectsAsXML(QDomElement& root) const
-{
- QDomDocument doc = root.ownerDocument();
-
- // Save effects
- QDomElement effects = doc.createElement(QString::fromLatin1("Effects"));
- root.appendChild(effects);
- QPtrListIterator<BosonEffect> effectIt(d->mEffects);
- while (effectIt.current()) {
-	QDomElement e = doc.createElement(QString::fromLatin1("Effect"));
-	effectIt.current()->saveAsXML(e);
-	effects.appendChild(e);
-	++effectIt;
  }
  return true;
 }
@@ -1988,6 +1794,7 @@ Unit* BosonCanvas::createUnit(Player* owner, unsigned long int unitType)
 	boError() << k_funcinfo << "invalid unit type " << unitType << endl;
 	return 0;
  }
+ unit->setMoveData(moveData(prop));
  theme->loadNewUnit(unit);
  return unit;
 }
@@ -2089,7 +1896,14 @@ void BosonCanvas::initPathfinder()
  boDebug() << k_funcinfo << "Constructing done!" << endl;
 
  boDebug() << k_funcinfo << "Initing..." << endl;
- d->mPathfinder->init();
+ d->mPathfinder->init(this);
+
+ for (BoItemList::ConstIterator it = allItems()->begin(); it != allItems()->end(); ++it) {
+	if (RTTI::isUnit((*it)->rtti())) {
+		Unit* u = (Unit*)*it;
+		u->setMoveData(moveData(u->unitProperties()));
+	}
+ }
  boDebug() << k_funcinfo << "Initing done!" << endl;
 
  boDebug() << k_funcinfo << "DONE" << endl;
@@ -2133,5 +1947,34 @@ bool BosonCanvas::loadConditions(const QDomElement& root)
 BosonItem* BosonCanvas::findItem(unsigned long int id) const
 {
  return d->mAllItems.findItem(id);
+}
+
+void BosonCanvas::clearMoveDatas()
+{
+ d->mUnitProperties2MoveData.setAutoDelete(false);
+ QPtrList<BosonMoveData> datas;
+ for (QIntDictIterator<BosonMoveData> it(d->mUnitProperties2MoveData); it.current(); ++it) {
+	if (!datas.contains(it.current())) {
+		datas.append(it.current());
+	}
+ }
+ d->mUnitProperties2MoveData.clear();
+ while (!datas.isEmpty()) {
+	BosonMoveData* data = datas.take(0);
+	delete data;
+ }
+}
+
+void BosonCanvas::insertMoveData(const UnitProperties* prop, BosonMoveData* data)
+{
+ BO_CHECK_NULL_RET(prop);
+ BO_CHECK_NULL_RET(data);
+ d->mUnitProperties2MoveData.insert(prop->typeId(), data);
+}
+
+BosonMoveData* BosonCanvas::moveData(const UnitProperties* prop) const
+{
+ BO_CHECK_NULL_RET0(prop);
+ return d->mUnitProperties2MoveData[prop->typeId()];
 }
 

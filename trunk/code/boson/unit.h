@@ -36,6 +36,7 @@ class ProductionPlugin;
 class UnitPlugin;
 class RepairPlugin;
 class BosonWeapon;
+class BosonMoveData;
 class BosonPathInfo;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
@@ -49,6 +50,7 @@ class QDomElement;
 
 class KGameUnitDebug;
 
+class UnitPrivate;
 /**
  * Implementation of the visual parts of a unit. As far as possible all stuff
  * should go to UnitBase directly - except the visual stuff. (UPDATE 01/12/27:
@@ -97,6 +99,9 @@ public:
 	static void initStatic();
 
 	inline virtual int rtti() const { return UnitBase::rtti(); }
+
+	void setMoveData(BosonMoveData* moveData);
+	BosonMoveData* moveData() const;
 
 	virtual void setHealth(unsigned long int h);
 
@@ -542,7 +547,6 @@ private:
 	void setAdvanceFunction(MemberFunction, bool advanceFlag);
 
 private:
-	class UnitPrivate;
 	UnitPrivate* d;
 	UnitPlugin* mCurrentPlugin;
 

@@ -34,7 +34,6 @@
 #include "boitemlist.h"
 #include "pluginproperties.h"
 #include "boson.h"
-#include "bosoneffect.h"
 #include "bosonweapon.h"
 #include "bopointeriterator.h"
 #include "bodebug.h"
@@ -70,7 +69,7 @@
 
 bool Unit::mInitialized = false;
 
-class Unit::UnitPrivate
+class UnitPrivate
 {
 public:
 	UnitPrivate()
@@ -78,6 +77,8 @@ public:
 		mTarget = 0;
 
 		mWeapons = 0;
+
+		mMoveData = 0;
 	}
 	KGamePropertyList<BoVector2Fixed> mWaypoints;
 	KGamePropertyList<BoVector2Fixed> mPathPoints;
@@ -94,6 +95,7 @@ public:
 	QPtrList<UnitPlugin> mPlugins;
 	BosonWeapon** mWeapons;
 
+	BosonMoveData* mMoveData;
 	BosonPathInfo mPathInfo;
 
 	unsigned long int mMaxWeaponRange;
@@ -214,6 +216,16 @@ void Unit::initStatic()
  addPropertyId(IdResourceMineOil, QString::fromLatin1("ResourceMineOil"));
 
  mInitialized = true;
+}
+
+void Unit::setMoveData(BosonMoveData* data)
+{
+ d->mMoveData = data;
+}
+
+BosonMoveData* Unit::moveData() const
+{
+ return d->mMoveData;
 }
 
 void Unit::select(bool markAsLeader)
@@ -838,7 +850,8 @@ void Unit::moveTo(const BoVector2Fixed& pos, bool attack)
  //  moving.
  bofixed add = 0;
  if (!unitProperties()->isAircraft()) {
-	add = (((unitProperties()->moveData()->size % 2) == 1) ? 0.5 : 0);
+	BO_CHECK_NULL_RET(moveData());
+	add = (((moveData()->size % 2) == 1) ? 0.5 : 0);
  }
  bofixed x = (int)pos.x() + add;
  bofixed y = (int)pos.y() + add;
@@ -1648,17 +1661,20 @@ bool Unit::cellOccupied(int x, int y, bool ignoremoving) const
  if (unitProperties()->isAircraft()) {
 	return false;
  }
+ if (!moveData()) {
+	BO_NULL_ERROR(moveData());
+	return false;
+ }
 
- BosonMoveData* movedata = unitProperties()->moveData();
- if (x < movedata->edgedist1 || y < movedata->edgedist1 ||
-	x > (int)canvas()->mapWidth() - 1 - movedata->edgedist2 ||
-	y > (int)canvas()->mapHeight() - 1 - movedata->edgedist2) {
+ if (x < moveData()->edgedist1 || y < moveData()->edgedist1 ||
+	x > (int)canvas()->mapWidth() - 1 - moveData()->edgedist2 ||
+	y > (int)canvas()->mapHeight() - 1 - moveData()->edgedist2) {
 	return true;
  }
 
- for (int x2 = x - movedata->edgedist1; x2 <= x + movedata->edgedist2; x2++) {
-	for (int y2 = y - movedata->edgedist1; y2 <= y + movedata->edgedist2; y2++) {
-		if (!movedata->cellPassable[y2 * canvas()->mapWidth() + x2]) {
+ for (int x2 = x - moveData()->edgedist1; x2 <= x + moveData()->edgedist2; x2++) {
+	for (int y2 = y - moveData()->edgedist1; y2 <= y + moveData()->edgedist2; y2++) {
+		if (!moveData()->cellPassable[y2 * canvas()->mapWidth() + x2]) {
 			return true;
 		}
 
@@ -1674,7 +1690,7 @@ bool Unit::cellOccupied(int x, int y, bool ignoremoving) const
 				}
 
 				// Maybe we can just crush the obstacle
-				if (u->maxHealth() <= movedata->crushDamage) {
+				if (u->maxHealth() <= moveData()->crushDamage) {
 					// Check player's relationship with the u's owner
 					if (ownerIO()->isEnemy(u)) {
 						// Crush the damn enemy :-)
@@ -1759,9 +1775,6 @@ bool MobileUnit::init()
   }
 
  setWork(WorkIdle);
-
- // FIXME: loading!
- setEffects(unitProperties()->newConstructedEffects(x() + width() / 2, y() + height() / 2, z()));
  return true;
 }
 
@@ -2316,7 +2329,6 @@ int MobileUnit::selectNextPathPoint(int xpos, int ypos)
 
 void MobileUnit::avoidance()
 {
- BosonMoveData* md = unitProperties()->moveData();
  BoVector2Fixed velocity(xVelocity(), yVelocity());
  velocity.normalize();
  BoVector3Fixed toRight3 = BoVector3Fixed(velocity.x(), -velocity.y(), 0).crossProduct(BoVector3Fixed(0, 0, 1));
@@ -2861,7 +2873,6 @@ void Facility::setConstructionStep(unsigned int step)
 	if (itemRenderer()) {
 		itemRenderer()->setAnimationMode(UnitAnimationIdle);
 	}
-	setEffects(unitProperties()->newConstructedEffects(x() + width() / 2, y() + height() / 2, z()));
  }
 }
 
@@ -2881,10 +2892,7 @@ bool Facility::loadFromXML(const QDomElement& root)
 	d->mConstructionStep = constructionSteps();
  }
 
- // FIXME: remove. this is from Facility::setConstructionStep. we _need_ to load
- // effects in loadFromXML() - then these lines are obsolete.
  if (d->mConstructionStep == constructionSteps()) {
-	setEffects(unitProperties()->newConstructedEffects(x() + width() / 2, y() + height() / 2, z()));
 	if (itemRenderer()) {
 		itemRenderer()->setAnimationMode(UnitAnimationIdle);
 	}

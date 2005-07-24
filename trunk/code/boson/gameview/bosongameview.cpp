@@ -82,6 +82,7 @@
 #include "../bosonfpscounter.h"
 #include "../bosongameviewpluginmanager.h"
 #include "../bosongameviewpluginbase.h"
+#include "bosongamevieweventlistener.h"
 
 #include <kgame/kgameio.h>
 #include <kgame/kplayer.h>
@@ -420,6 +421,8 @@ public:
 		mGameViewPlugin = 0;
 		mGameViewPluginWidget = 0;
 		mGameViewPluginWidgetContainer = 0;
+
+		mEventListener = 0;
 	}
 	BoUfoLayeredPane* mLayeredPane;
 	BosonUfoCanvasWidget* mUfoCanvasWidget;
@@ -462,6 +465,8 @@ public:
 	BosonGameViewPluginBase* mGameViewPlugin;
 	BoUfoWidget* mGameViewPluginWidget;
 	BoUfoWidget* mGameViewPluginWidgetContainer;
+
+	BosonGameViewEventListener* mEventListener;
 };
 
 BosonGameView::BosonGameView()
@@ -476,6 +481,7 @@ BosonGameView::~BosonGameView()
  boDebug() << k_funcinfo << endl;
 
  quitGame();
+ delete d->mEventListener;
  boDebug() << k_funcinfo << "quitGame() done" << endl;
  if (!removeWidget(d->mLayeredPane)) { // AB: do NOT delete it directly!
 	// AB: probably d->mLayeredPane is not a direct child of this widget
@@ -784,8 +790,6 @@ void BosonGameView::cameraChanged()
 	renderer->generateCellList(map);
  }
 
- d->mUfoCanvasWidget->setParticlesDirty(true);
-
  const QValueVector<BoLight*>* lights = BoLightManager::manager()->lights();
  for (unsigned int i = 0; i < lights->size(); i++) {
 	if (lights->at(i) != 0) {
@@ -793,15 +797,7 @@ void BosonGameView::cameraChanged()
 	}
  }
 
- // Update position of environmental effects
- QPtrListIterator<BosonEffect> it(*canvas()->effects());
- while (it.current()) {
-	if (it.current()->type() == BosonEffect::ParticleEnvironmental) {
-		it.current()->setPosition(camera()->cameraPos().toFixed());
-	}
-	++it;
- }
-
+ d->mUfoCanvasWidget->cameraChanged();
 
  boWaterRenderer->modelviewMatrixChanged(d->mModelviewMatrix);
  boWaterRenderer->setCameraPos(camera()->cameraPos());
@@ -1021,6 +1017,8 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
 	disconnect(previousCanvas, 0, mSelection, 0);
  }
  mCanvas = canvas;
+ delete d->mEventListener;
+ d->mEventListener = 0;
  if (d->mInput) {
 	d->mInput->setCanvas(mCanvas);
  }
@@ -1032,6 +1030,10 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
  if (!mCanvas) {
 	return;
  }
+ d->mEventListener = new BosonGameViewEventListener(boGame->eventManager(), this);
+ d->mEventListener->setCanvas(mCanvas);
+ connect(d->mEventListener, SIGNAL(signalFacilityConstructed(Unit*)),
+		d->mUfoCanvasWidget, SLOT(slotFacilityConstructed(Unit*)));
 
  connect(mCanvas, SIGNAL(signalRemovedItem(BosonItem*)),
 		d->mSelectionGroups, SLOT(slotRemoveItem(BosonItem*)));
@@ -1491,9 +1493,9 @@ void BosonGameView::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag
  // AB: note that in the big display no game logic must be done!
  // -> this slotAdvance() is here for certain optimizations on rendering, not
  //    for advancing the game itself
- d->mUfoCanvasWidget->setParticlesDirty(true);
  advanceCamera();
 
+ d->mUfoCanvasWidget->slotAdvance(advanceCallsCount, advanceFlag);
  d->mUfoLineVisualizationWidget->slotAdvance(advanceCallsCount, advanceFlag);
 
 #warning FIXME: movie
@@ -1508,14 +1510,25 @@ void BosonGameView::loadFromXML(const QDomElement& root)
 {
  boDebug() << k_funcinfo << endl;
 
+ // AB: note that a failure in this methods is an error, but it does not abort
+ // loading.
+
  QDomElement unitGroups = root.namedItem(QString::fromLatin1("UnitGroups")).toElement();
  if (unitGroups.isNull()) {
 	boError(260) << k_funcinfo << "no UnitGroups tag" << endl;
-	return;
+	// do not return
+ } else if (!d->mSelectionGroups->loadFromXML(unitGroups)) {
+	boError(260) << k_funcinfo << "could not load selection groups" << endl;
+	// do not return
  }
- if (!d->mSelectionGroups->loadFromXML(unitGroups)) {
-	boError() << k_funcinfo << "could not load selectiong groups" << endl;
-	return;
+
+ QDomElement effects = root.namedItem("Effects").toElement();
+ if (effects.isNull()) {
+	boError(260) << k_funcinfo << "no Effects tag" << endl;
+	// do not return
+ } else if (!d->mUfoCanvasWidget->loadEffectsFromXML(effects)) {
+	boError(260) << k_funcinfo << "could not load effects" << endl;
+	// do not return
  }
 
  QDomElement displays = root.namedItem(QString::fromLatin1("Displays")).toElement();
@@ -1553,8 +1566,12 @@ void BosonGameView::saveAsXML(QDomElement& root)
 
  // Save selection groups
  QDomElement unitGroups = doc.createElement(QString::fromLatin1("UnitGroups"));
- d->mSelectionGroups->saveAsXML(root);
+ d->mSelectionGroups->saveAsXML(unitGroups);
  root.appendChild(unitGroups);
+
+ QDomElement effects = doc.createElement(QString::fromLatin1("Effects"));
+ d->mUfoCanvasWidget->saveEffectsAsXML(effects);
+ root.appendChild(effects);
 
 
  // we use a Displays and a Display tag for historic reasons. we have only one

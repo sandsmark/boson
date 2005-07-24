@@ -251,7 +251,15 @@ void BoAdvance::receiveAdvanceCall()
  // currently used function, but to the other one.
  toggleAdvanceFlag();
 
- emit mBoson->signalAdvance(advanceCallsCount(), flag);
+ if (mBoson->gameMode()) {
+	// AB: slots connected to signals are not guaranteed to be executed in a
+	//     certain order. But we must guarantee to execute
+	//     BosonCanvas::slotAdvance() first, so we better call it manually.
+	if (mBoson->canvasNonConst()) {
+		mBoson->canvasNonConst()->slotAdvance(advanceCallsCount(), flag);
+	}
+	emit mBoson->signalAdvance(advanceCallsCount(), flag);
+ }
  // AB: do _not_ connect to the signal!
  // -> slots may be called in random order, but we need well defined order
  // (otherwise network may get broken soon)
@@ -416,11 +424,6 @@ void Boson::createCanvas()
 	return;
  }
  d->mCanvas = new BosonCanvas(this);
-
- if (gameMode()) {
-	connect(this, SIGNAL(signalAdvance(unsigned int, bool)),
-			d->mCanvas, SLOT(slotAdvance(unsigned int, bool)));
- }
 }
 
 BosonCanvas* Boson::canvasNonConst() const

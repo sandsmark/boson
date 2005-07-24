@@ -34,10 +34,12 @@ class UnitProperties;
 class BoItemList;
 class BosonItem;
 class ProductionPlugin;
-class BosonEffect;
 class BosonShot;
+class BosonWeapon;
 class BosonCanvasStatistics;
 class BosonPath;
+class BosonMoveData;
+class BosonShotFragment;
 class BoEventListener;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
@@ -297,6 +299,17 @@ public:
 	void destroyUnit(Unit* unit);
 
 	/**
+	 * @internal
+	 * Used by @ref BosonWeapon::shoot
+	 *
+	 * This causes the correct effects (visual as well as sound effects) to
+	 * be emitted
+	 *
+	 * See also @ref signalShotFired.
+	 **/
+	void shotFired(BosonShot* shot, BosonWeapon* weapon);
+
+	/**
 	 * Prepare the unit to be deleted. Remove the unit from the player and
 	 * so on. This doesn't play any sound or so, so it can be used in
 	 * editor, too.
@@ -393,11 +406,6 @@ public:
 
 	bool advanceFunctionLocked() const { return mAdvanceFunctionLocked; }
 
-	unsigned int effectsCount() const;
-	QPtrList<BosonEffect>* effects() const;
-	void addEffect(BosonEffect* e);
-	void addEffects(const QPtrList<BosonEffect> effects);
-
 	bool loadFromXML(const QDomElement& root);
 	bool saveAsXML(QDomElement& root) const;
 
@@ -428,6 +436,15 @@ public:
 
 	BoEventListener* eventListener() const;
 
+	/**
+	 * @internal
+	 * Used by @ref BosonPath
+	 **/
+	void clearMoveDatas();
+
+	void insertMoveData(const UnitProperties* prop, BosonMoveData* data);
+	BosonMoveData* moveData(const UnitProperties* prop) const;
+
 public slots:
 	/**
 	 * @param See @ref Boson::signalAdvance
@@ -438,6 +455,22 @@ signals:
 	void signalItemAdded(BosonItem* item);
 	void signalUnitMoved(Unit* unit, bofixed oldX, bofixed oldY);
 	void signalUnitRemoved(Unit* unit);
+
+	/**
+	 * Like @ref signalUnitRemoved, but the unit actually got destroyed
+	 * (e.g. this is not emitted in editor mode)
+	 **/
+	void signalUnitDestroyed(Unit* unit);
+
+	/**
+	 * Signal to notify the GUI that a fragment was created. A corresponding
+	 * effect can be created in a GUI class now.
+	 *
+	 * Note that this signal is ugly. However fragments need additional
+	 * initialization after their creation, therefore ·@ref signalItemAdded
+	 * can not be used directly.
+	 **/
+	void signalFragmentCreated(BosonShotFragment* fragment);
 
 	/**
 	 * Emitted by @ref removeItem just after the item is removed from the
@@ -454,6 +487,9 @@ signals:
 	 * that the tooltip item points to a valid item)
 	 **/
 	void signalRemovedItem(BosonItem* item);
+
+	void signalShotFired(BosonShot* shot, BosonWeapon* weapon);
+	void signalShotHit(BosonShot* shot);
 
 protected:
 	/**
@@ -485,8 +521,6 @@ protected:
 	 **/
 	bool loadItemsFromXML(const QDomElement& root);
 	bool saveItemsAsXML(QDomElement& root) const;
-	bool loadEffectsFromXML(const QDomElement& root);
-	bool saveEffectsAsXML(QDomElement& root) const;
 
 	bool loadEventListenerFromXML(const QDomElement& root);
 	bool saveEventListenerAsXML(QDomElement& root) const;

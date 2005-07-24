@@ -21,8 +21,6 @@
 
 #include "../bomemory/bodummymemory.h"
 #include "speciestheme.h"
-#include "bosoneffect.h"
-#include "bosoneffectproperties.h"
 #include "unit.h"
 #include "global.h"
 #include "bosoncanvas.h"
@@ -175,12 +173,6 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   mShootEffectIds = BosonConfig::readUnsignedLongNumList(cfg, "ShootEffects");
   mFlyEffectIds = BosonConfig::readUnsignedLongNumList(cfg, "FlyEffects");
   mHitEffectIds = BosonConfig::readUnsignedLongNumList(cfg, "HitEffects");
-  if(full)
-  {
-    mShootEffects = BosonEffectProperties::loadEffectProperties(mShootEffectIds);
-    mFlyEffects = BosonEffectProperties::loadEffectProperties(mFlyEffectIds);
-    mHitEffects = BosonEffectProperties::loadEffectProperties(mHitEffectIds);
-  }
   // We need to have some kind of model even for bullet (though it won't be shown),
   //  because BosonShot will crash otherwise (actually it's BosonItem)
   mModelFileName = cfg->readEntry("Model", "missile");
@@ -442,21 +434,6 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, const BosonWeapon* wea
   return s;
 }
 
-QPtrList<BosonEffect> BosonWeaponProperties::newShootEffects(BoVector3Fixed pos, bofixed rotation) const
-{
-  return BosonEffectProperties::newEffects(&mShootEffects, pos, BoVector3Fixed(0, 0, rotation));
-}
-
-QPtrList<BosonEffect> BosonWeaponProperties::newFlyEffects(BoVector3Fixed pos, bofixed rotation) const
-{
-  return BosonEffectProperties::newEffects(&mFlyEffects, pos, BoVector3Fixed(0, 0, rotation));
-}
-
-QPtrList<BosonEffect> BosonWeaponProperties::newHitEffects(BoVector3Fixed pos) const
-{
-  return BosonEffectProperties::newEffects(&mHitEffects, pos);
-}
-
 void BosonWeaponProperties::setSound(int event, QString filename)
 {
   mSounds.insert(event, filename);
@@ -590,10 +567,8 @@ void BosonWeapon::shoot(Unit* u)
   BoVector3Fixed mypos(unit()->centerX(), unit()->centerY(), unit()->z());
   if(mProp->shotType() == BosonShot::Missile)
   {
-    // FIXME: code duplication
-    mProp->newShot(unit(), this, mypos, u);
-    canvas()->addEffects(mProp->newShootEffects(mypos, unit()->rotation()));
-    mProp->playSound(SoundWeaponShoot);
+    BosonShot* shot = mProp->newShot(unit(), this, mypos, u);
+    canvas()->shotFired(shot, this);
     mReloadCounter = reloadingTime();
     return;
   }
@@ -634,9 +609,8 @@ void BosonWeapon::shoot(const BoVector3Fixed& pos, const BoVector3Fixed& target)
     boError() << k_funcinfo << "NULL unit" << endl;
     return;
   }
-  mProp->newShot(unit(), this, pos, target);
-  canvas()->addEffects(mProp->newShootEffects(pos, unit()->rotation()));
-  mProp->playSound(SoundWeaponShoot);
+  BosonShot* shot = mProp->newShot(unit(), this, pos, target);
+  canvas()->shotFired(shot, this);
   mReloadCounter = reloadingTime();
 }
 

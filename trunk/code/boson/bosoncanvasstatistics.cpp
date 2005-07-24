@@ -73,11 +73,6 @@ unsigned int BosonCanvasStatistics::itemCount(int rtti) const
  return d->mItemCount[rtti];
 }
 
-unsigned int BosonCanvasStatistics::effectsCount() const
-{
- return mCanvas->effectsCount();
-}
-
 QMap<int, int>* BosonCanvasStatistics::workCounts() const
 {
  return &d->mWorkCounts;

@@ -31,7 +31,6 @@ class BosonCollisions;
 class BosonModel;
 class BosonAnimation;
 class Cell;
-class BosonEffect;
 class BosonItemPropertyHandler;
 class Player;
 class BosonItemRenderer;
@@ -292,7 +291,7 @@ public:
 			removeFromCells();
 			setPos(x() + dx, y() + dy, z() + dz);
 			addToCells();
-			setEffectsPosition(x(), y(), z());
+			setEffectsPositionDirty(true);
 		}
 	}
 
@@ -523,33 +522,14 @@ public:
 	 * unit to correct direction when moving.
 	 **/
 	inline bofixed rotation() const { return mRotation; }
-	void setRotation(bofixed r) { mRotation = r; setEffectsRotation(mXRotation, mYRotation, mRotation); }
+	void setRotation(bofixed r) { mRotation = r; setEffectsRotationDirty(true); }
 
 	inline bofixed xRotation() const { return mXRotation; }
-	void setXRotation(bofixed r) { mXRotation = r; setEffectsRotation(mXRotation, mYRotation, mRotation); }
+	void setXRotation(bofixed r) { mXRotation = r; setEffectsRotationDirty(true); }
 
 	inline bofixed yRotation() const { return mYRotation; }
-	void setYRotation(bofixed r) { mYRotation = r; setEffectsRotation(mXRotation, mYRotation, mRotation); }
+	void setYRotation(bofixed r) { mYRotation = r; setEffectsRotationDirty(true); }
 
-
-	void setEffectsPosition(bofixed x, bofixed y, bofixed z);
-	void setEffectsRotation(bofixed xrot, bofixed yrot, bofixed zrot);
-
-	/**
-	 * @return List of active effects this item has.
-	 * This may include e.g. smoke for factories.
-	 **/
-	virtual const QPtrList<BosonEffect>* effects() const;
-	virtual void setEffects(const QPtrList<BosonEffect>& effects, bool addtocanvas = true);
-	virtual void addEffect(BosonEffect* e, bool addtocanvas = true);
-	virtual bool removeEffect(BosonEffect* e);
-
-	/**
-	 * Clear the effects list. Note that the effects are
-	 * <em>not</em> deleted - @ref BosonCanvas will take care of this
-	 * anyway. Just the @ref effects list is meant to be cleared.
-	 **/
-	virtual void clearEffects();
 
 	/**
 	 * Select this unit, i.e. construct the select box - see @ref isSelected.
@@ -573,6 +553,24 @@ public:
 	 * valid)
 	 **/
 	virtual const QColor* teamColor() const = 0;
+
+	inline void setEffectsPositionDirty(bool d)
+	{
+		mEffectsPositionIsDirty = d;
+	}
+	bool isEffectsPositionDirty() const
+	{
+		return mEffectsPositionIsDirty;
+	}
+
+	inline void setEffectsRotationDirty(bool d)
+	{
+		mEffectsRotationIsDirty = d;
+	}
+	bool isEffectsRotationDirty() const
+	{
+		return mEffectsRotationIsDirty;
+	}
 
 private:
 	/**
@@ -639,7 +637,8 @@ private:
 	bool mCellsDirty;
 	bool mIsVisible;
 
-	QPtrList<BosonEffect>* mEffects;
+	bool mEffectsPositionIsDirty;
+	bool mEffectsRotationIsDirty;
 };
 
 #endif

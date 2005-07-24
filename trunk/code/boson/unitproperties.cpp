@@ -24,8 +24,6 @@
 #include "../bomemory/bodummymemory.h"
 #include "speciestheme.h"
 #include "pluginproperties.h"
-#include "bosoneffect.h"
-#include "bosoneffectproperties.h"
 #include "bosonweapon.h"
 #include "bosonconfig.h"
 #include "bodebug.h"
@@ -59,13 +57,9 @@ public:
 
 	QIntDict<BoAction> mActions;
 
-	QPtrList<BosonEffectProperties> mDestroyedEffects;
 	QValueList<unsigned long int> mDestroyedEffectIds;
-	QPtrList<BosonEffectProperties> mConstructedEffects;
 	QValueList<unsigned long int> mConstructedEffectIds;
-	QPtrList<BosonEffectProperties> mExplodingFragmentFlyEffects;
 	QValueList<unsigned long int> mExplodingFragmentFlyEffectIds;
-	QPtrList<BosonEffectProperties> mExplodingFragmentHitEffects;
 	QValueList<unsigned long int> mExplodingFragmentHitEffectIds;
 	BoVector3Fixed mHitPoint;  // FIXME: better name
 
@@ -98,7 +92,6 @@ void UnitProperties::init()
  mTheme = 0;
  mIsFacility = false;
  mProduceAction = 0;
- mMoveData = 0;
  d->mPlugins.setAutoDelete(true);
 }
 
@@ -159,18 +152,10 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  mRemoveWreckageImmediately = conf.readBoolEntry("RemoveWreckageImmediately", false);
  d->mExplodingFragmentFlyEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "ExplodingFragmentFlyEffects");
  d->mExplodingFragmentHitEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "ExplodingFragmentHitEffects");
- if (mFullMode) {
-	d->mExplodingFragmentFlyEffects = BosonEffectProperties::loadEffectProperties(d->mExplodingFragmentFlyEffectIds);
-	d->mExplodingFragmentHitEffects = BosonEffectProperties::loadEffectProperties(d->mExplodingFragmentHitEffectIds);
- }
  d->mHitPoint = BosonConfig::readBoVector3FixedEntry(&conf, "HitPoint", BoVector3Fixed(0, 0, mUnitDepth / 2.0f));  // FIXME: better name
 
  d->mDestroyedEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "DestroyedEffects");
  d->mConstructedEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "ConstructedEffects");
- if (mFullMode) {
-	d->mDestroyedEffects = BosonEffectProperties::loadEffectProperties(d->mDestroyedEffectIds);
-	d->mConstructedEffects = BosonEffectProperties::loadEffectProperties(d->mConstructedEffectIds);
- }
 
  mIsFacility = isFacility;
 
@@ -584,26 +569,6 @@ const PluginProperties* UnitProperties::properties(int pluginType) const
  return 0;
 }
 
-QPtrList<BosonEffect> UnitProperties::newDestroyedEffects(float x, float y, float z) const
-{
- return BosonEffectProperties::newEffects(&d->mDestroyedEffects, BoVector3Fixed(x, y, z));
-}
-
-QPtrList<BosonEffect> UnitProperties::newConstructedEffects(float x, float y, float z) const
-{
- return BosonEffectProperties::newEffects(&d->mConstructedEffects, BoVector3Fixed(x, y, z));
-}
-
-QPtrList<BosonEffect> UnitProperties::newExplodingFragmentFlyEffects(BoVector3Fixed pos) const
-{
- return BosonEffectProperties::newEffects(&d->mExplodingFragmentFlyEffects, pos);
-}
-
-QPtrList<BosonEffect> UnitProperties::newExplodingFragmentHitEffects(BoVector3Fixed pos) const
-{
- return BosonEffectProperties::newEffects(&d->mExplodingFragmentHitEffects, pos);
-}
-
 void UnitProperties::clearPlugins(bool deleteweapons)
 {
  // FIXME: deleteweapons is very ugly hack here. In unit editor, we store
@@ -672,7 +637,7 @@ void UnitProperties::setDestroyedEffectIds(QValueList<unsigned long int> ids)
  d->mDestroyedEffectIds = ids;
 }
 
-QValueList<unsigned long int> UnitProperties::destroyedEffectIds() const
+const QValueList<unsigned long int>& UnitProperties::destroyedEffectIds() const
 {
  return d->mDestroyedEffectIds;
 }
@@ -682,9 +647,19 @@ void UnitProperties::setConstructedEffectIds(QValueList<unsigned long int> ids)
  d->mConstructedEffectIds = ids;
 }
 
-QValueList<unsigned long int> UnitProperties::constructedEffectIds() const
+const QValueList<unsigned long int>& UnitProperties::constructedEffectIds() const
 {
  return d->mConstructedEffectIds;
+}
+
+const QValueList<unsigned long int>& UnitProperties::explodingFragmentFlyEffectIds() const
+{
+ return d->mExplodingFragmentFlyEffectIds;
+}
+
+const QValueList<unsigned long int>& UnitProperties::explodingFragmentHitEffectIds() const
+{
+ return d->mExplodingFragmentHitEffectIds;
 }
 
 void UnitProperties::reset()

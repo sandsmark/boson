@@ -196,7 +196,7 @@ BosonPath::~BosonPath()
   delete[] mBlockConnectionsDirty;
 }
 
-void BosonPath::init()
+void BosonPath::init(BosonCanvas* canvas)
 {
   PROFILE_METHOD;
   boDebug(500) << k_funcinfo << endl;
@@ -207,7 +207,7 @@ void BosonPath::init()
   mSlopeMap = calculateSlopemap();
   mForestMap = calculateForestmap();
 
-  initMoveDatas();
+  initMoveDatas(canvas);
   initCellPassabilityMaps();
   initCellStatusArray();
   initBlocks();
@@ -242,7 +242,7 @@ void BosonPath::findPath(BosonPathInfo* info)
     // Land unit
     if(info->unit)
     {
-      info->movedata = info->unit->unitProperties()->moveData();
+      info->movedata = info->unit->moveData();
       info->player = info->unit->ownerIO();
     }
 
@@ -1625,11 +1625,12 @@ void BosonPath::initOffsets()
   }
 }
 
-void BosonPath::initMoveDatas()
+void BosonPath::initMoveDatas(BosonCanvas* canvas)
 {
   PROFILE_METHOD;
   // TODO: delete current movedatas
   mMoveDatas.clear();
+  canvas->clearMoveDatas();
 
   // Go through all units and create all possible movedatas
   QPtrListIterator<KPlayer> playerit(*boGame->playerList());
@@ -1642,7 +1643,7 @@ void BosonPath::initMoveDatas()
     QValueList<unsigned long int>::Iterator it;
     for(it = unitpropids.begin(); it != unitpropids.end(); ++it)
     {
-      UnitProperties* prop = theme->nonConstUnitProperties(*it);
+      const UnitProperties* prop = theme->unitProperties(*it);
       if(prop->isAircraft())
       {
         // Flying units are special. Skip it
@@ -1683,7 +1684,7 @@ void BosonPath::initMoveDatas()
       }
 
       // Set unit's movedata to data
-      prop->setMoveData(data);
+      canvas->insertMoveData(prop, data);
     }
 
     ++playerit;

@@ -278,7 +278,7 @@ void BosonCanvasRenderer::reset()
  d->mVisibleEffects.mParticleList.clear();
 }
 
-void BosonCanvasRenderer::paintGL(const BosonCanvas* canvas)
+void BosonCanvasRenderer::paintGL(const BosonCanvas* canvas, const QPtrList<BosonEffect>& effects)
 {
  PROFILE_METHOD;
  BO_CHECK_NULL_RET(localPlayerIO());
@@ -302,7 +302,7 @@ void BosonCanvasRenderer::paintGL(const BosonCanvas* canvas)
  d->mTextureBindsWater = 0;
  d->mTextureBindsParticles = 0;
 
- createVisibleEffectsList(&d->mVisibleEffects, *canvas->effects(), canvas->mapWidth(), canvas->mapHeight());
+ createVisibleEffectsList(&d->mVisibleEffects, effects, canvas->mapWidth(), canvas->mapHeight());
  updateEffects(d->mVisibleEffects);
 
  renderFog(d->mVisibleEffects);

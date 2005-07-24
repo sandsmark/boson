@@ -82,7 +82,7 @@ public:
 
 	void reset();
 	void initGL();
-	void paintGL(const BosonCanvas* canvas);
+	void paintGL(const BosonCanvas* canvas, const QPtrList<BosonEffect>& effects);
 	unsigned int renderedItems() const;
 	unsigned int renderedCells() const;
 	unsigned int renderedParticles() const;

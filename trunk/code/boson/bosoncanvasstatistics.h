@@ -69,8 +69,6 @@ public:
 
 	unsigned int allItemsCount() const;
 
-	unsigned int effectsCount() const;
-
 	/**
 	 * Increase the number work-count for @p work by @p by. For non-Unit items
 	 * (which therefore do no have a "work") you can use -1 for  @p work.
