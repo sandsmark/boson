@@ -225,8 +225,6 @@ class BosonShotBullet : public BosonShot
 
     inline virtual int type() const { return BosonShot::Bullet; }
 
-    virtual void explode();
-
   protected:
     virtual void moveToTarget();
 
@@ -486,7 +484,10 @@ class BosonShotFragment : public BosonShot
 
     inline virtual int type() const { return BosonShot::Fragment; }
 
-    virtual void explode();
+    const UnitProperties* unitProperties() const
+    {
+      return mUnitProperties;
+    }
 
   protected:
     virtual void advanceMoveInternal();

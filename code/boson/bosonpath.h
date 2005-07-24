@@ -115,7 +115,7 @@ class BosonPath
     /**
      * Initializes the pathfinder
      **/
-    void init();
+    void init(BosonCanvas* canvas);
 
     /**
      * Advances the pathfinder. This includes e.g. updating changed blocks.
@@ -141,7 +141,7 @@ class BosonPath
   protected:
     // TODO: add const to more methods
     /*****  Init methods  *****/
-    void initMoveDatas();
+    void initMoveDatas(BosonCanvas* canvas);
     void initCellStatusArray();
     void initCellPassabilityMaps();
     void initBlocks();

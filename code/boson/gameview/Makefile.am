@@ -11,6 +11,7 @@ libbosongameview_la_SOURCES = \
 	bosonufogamegui.cpp \
 	bosonufogamewidgets.cpp \
 	bosongameview.cpp \
+	bosongamevieweventlistener.cpp \
 	bosoncanvasrenderer.cpp \
 	bosongameviewinputbase.cpp \
 	bosongameviewinput.cpp \

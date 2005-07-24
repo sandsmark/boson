@@ -29,8 +29,6 @@
 class SpeciesTheme;
 class PluginProperties;
 class BosonWeaponProperties;
-class BosonEffect;
-class BosonEffectProperties;
 class BoAction;
 class QCString;
 class QString;
@@ -52,9 +50,14 @@ class BosonMoveData
 public:
 	BosonMoveData()
 	{
-		id = 0; type = Land; maxSlope = 30; waterDepth = 0.25;
-		size = 1; crushDamage = 0;
-		edgedist1 = 0; edgedist2 = 0;
+		id = 0;
+		type = Land;
+		maxSlope = 30;
+		waterDepth = 0.25;
+		size = 1;
+		crushDamage = 0;
+		edgedist1 = 0;
+		edgedist2 = 0;
 		cellPassable = 0;
 	}
 	~BosonMoveData()
@@ -418,11 +421,10 @@ public:
 
 	QMap<int, QString> sounds() const;
 
-	QPtrList<BosonEffect> newDestroyedEffects(float x, float y, float z) const;
-	QValueList<unsigned long int> destroyedEffectIds() const;
-
-	QPtrList<BosonEffect> newConstructedEffects(float x, float y, float z) const;
-	QValueList<unsigned long int> constructedEffectIds() const;
+	const QValueList<unsigned long int>& destroyedEffectIds() const;
+	const QValueList<unsigned long int>& constructedEffectIds() const;
+	const QValueList<unsigned long int>& explodingFragmentFlyEffectIds() const;
+	const QValueList<unsigned long int>& explodingFragmentHitEffectIds() const;
 
 	const QPtrList<PluginProperties>* plugins() const;
 
@@ -435,9 +437,6 @@ public:
 	 * @return Radius of explosion when this unit is destroyed
 	 **/
 	const bofixed& explodingDamageRange() const { return mExplodingDamageRange; }
-
-	BosonMoveData* moveData() const { return mMoveData; }
-	void setMoveData(BosonMoveData* data) { mMoveData = data; }
 
 	/**
 	 * @return So called hitpoint of this unit
@@ -462,8 +461,6 @@ public:
 	unsigned int explodingFragmentCount() const { return mExplodingFragmentCount; }
 	long int explodingFragmentDamage() const { return mExplodingFragmentDamage; }
 	const bofixed& explodingFragmentDamageRange() const { return mExplodingFragmentDamageRange; }
-	QPtrList<BosonEffect> newExplodingFragmentFlyEffects(BoVector3Fixed pos) const;
-	QPtrList<BosonEffect> newExplodingFragmentHitEffects(BoVector3Fixed pos) const;
 
 	bool removeWreckageImmediately() const { return mRemoveWreckageImmediately; }
 
@@ -581,7 +578,6 @@ private:
 	long int mExplodingFragmentDamage;
 	bofixed mExplodingFragmentDamageRange;
 	bool mRemoveWreckageImmediately;
-	BosonMoveData* mMoveData;
 
 	// for mobile units only
 	BoUpgradeableProperty<bofixed> mSpeed;

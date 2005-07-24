@@ -102,6 +102,7 @@ libboson_la_SOURCES = \
 	bopluginmanager.cpp \
 	boglstatewidget.cpp \
 	bofullscreen.cpp \
+	bosoneffectmanager.cpp \
 	bosoneffect.cpp \
 	bosoneffectproperties.cpp \
 	bosoneffectparticle.cpp \

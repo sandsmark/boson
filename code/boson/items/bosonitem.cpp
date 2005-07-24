@@ -23,7 +23,6 @@
 #include "../bosoncanvas.h"
 #include "../rtti.h"
 #include "../cell.h" // for deleteitem. i dont want this. how can we avoid this? don't use qptrvector probably.
-#include "../bosoneffect.h"
 #include "../bosonpropertyxml.h"
 #include "../bosonconfig.h"
 #include "../bo3dtools.h"
@@ -130,7 +129,8 @@ BosonItem::BosonItem(Player* owner, BosonCanvas* canvas)
  mXRotation = 0;
  mYRotation = 0;
  mIsVisible = true;
- mEffects = 0;
+ mEffectsPositionIsDirty = true;
+ mEffectsRotationIsDirty = true;
 
  mXVelocity = 0;
  mYVelocity = 0;
@@ -151,7 +151,6 @@ BosonItem::BosonItem(Player* owner, BosonCanvas* canvas)
 
 BosonItem::~BosonItem()
 {
- clearEffects();
  unselect();
  if (canvas()) {
 	canvas()->removeFromCells(this);
@@ -161,7 +160,6 @@ BosonItem::~BosonItem()
 	}
  }
  delete mCells;
- delete mEffects;
  delete mRenderer;
 }
 
@@ -343,83 +341,6 @@ void BosonItem::renderItem(unsigned int lod, bool transparentMeshes)
 BosonCollisions* BosonItem::collisions() const
 {
  return canvas()->collisions();
-}
-
-void BosonItem::setEffectsPosition(bofixed x, bofixed y, bofixed z)
-{
- if (effects() && effects()->count() > 0) {
-	BoVector3Fixed pos(x + width() / 2, y + height() / 2, z);
-	pos.canvasToWorld();
-	QPtrListIterator<BosonEffect> it(*effects());
-	for (; it.current(); ++it) {
-		it.current()->setPosition(pos);
-	}
- }
-}
-
-void BosonItem::setEffectsRotation(bofixed xrot, bofixed yrot, bofixed zrot)
-{
- BoVector3Fixed rot(xrot, yrot, zrot);
- if (effects() && effects()->count() > 0) {
-	QPtrListIterator<BosonEffect> it(*effects());
-	for (; it.current(); ++it) {
-		it.current()->setRotation(rot);
-	}
- }
-}
-
-const QPtrList<BosonEffect>* BosonItem::effects() const
-{
- return mEffects;
-}
-
-void BosonItem::setEffects(const QPtrList<BosonEffect>& effects, bool addtocanvas)
-{
- clearEffects();
- delete mEffects;
- mEffects = new QPtrList<BosonEffect>(effects);
- // Make effects owned by us
- QPtrListIterator<BosonEffect> it(*mEffects);
- while (it.current()) {
-	it.current()->setOwnerId(id());
-	++it;
- }
- // Add effects to canvas if necessary
- if (addtocanvas) {
-	canvas()->addEffects(*mEffects);
- }
-}
-
-void BosonItem::addEffect(BosonEffect* e, bool addtocanvas)
-{
- if (!mEffects) {
-	mEffects = new QPtrList<BosonEffect>;
- }
- e->setOwnerId(id());
- mEffects->append(e);
- // Add effect to canvas if necessary
- if (addtocanvas) {
-	canvas()->addEffect(e);
- }
-}
-
-bool BosonItem::removeEffect(BosonEffect* e)
-{
- return mEffects->removeRef(e);
-}
-
-void BosonItem::clearEffects()
-{
- if (!mEffects) {
-	return;
- }
- // Set ownerid of all effects to 0
- QPtrListIterator<BosonEffect> it(*mEffects);
- while (it.current()) {
-	it.current()->setOwnerId(0);
-	++it;
- }
- mEffects->clear();
 }
 
 bool BosonItem::saveAsXML(QDomElement& root)

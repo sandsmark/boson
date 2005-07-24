@@ -1156,7 +1156,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_83_To_0_10_84(QMap<QString, 
  return true;
 }
 
-bool BosonFileConverter::convertPlayField_From_0_10_84_To_0_11(QMap<QString, QByteArray>& files)
+bool BosonFileConverter::convertPlayField_From_0_10_84_To_0_10_85(QMap<QString, QByteArray>& files)
 {
  QDomDocument kgameDoc(QString::fromLatin1("Boson"));
  QDomDocument playersDoc(QString::fromLatin1("Players"));
@@ -1177,12 +1177,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_84_To_0_11(QMap<QString, QBy
  QDomElement playersRoot = playersDoc.documentElement();
  QDomElement canvasRoot = canvasDoc.documentElement();
 
-#if BOSON_VERSION_MICRO < 0x80 || BOSON_VERSION_MINOR >= 0x11
-#error replace the following by BOSON_SAVEGAME_FORMAT_VERSION_0_11
-#endif
-#define BO_VERSION BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x09)
- kgameRoot.setAttribute("Version", BO_VERSION);
-#undef BO_VERSION
+ kgameRoot.setAttribute("Version", BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x09));
 
  for (QDomNode n = playersRoot.firstChild(); !n.isNull(); n = n.nextSibling()) {
 	QDomElement player = n.toElement();
@@ -1300,6 +1295,51 @@ bool BosonFileConverter::convertPlayField_From_0_10_84_To_0_11(QMap<QString, QBy
  files.insert("kgame.xml", kgameDoc.toString().utf8());
  files.insert("players.xml", playersDoc.toString().utf8());
  files.insert("canvas.xml", canvasDoc.toString().utf8());
+ return true;
+}
+
+bool BosonFileConverter::convertPlayField_From_0_10_85_To_0_11(QMap<QString, QByteArray>& files)
+{
+ QDomDocument kgameDoc(QString::fromLatin1("Boson"));
+ if (!loadXMLDoc(&kgameDoc, files["kgame.xml"])) {
+	boError() << k_funcinfo << "could not load kgame.xml" << endl;
+	return false;
+ }
+ QDomElement kgameRoot = kgameDoc.documentElement();
+
+#if BOSON_VERSION_MICRO < 0x80 || BOSON_VERSION_MINOR >= 0x11
+#error replace the following by BOSON_SAVEGAME_FORMAT_VERSION_0_11
+#endif
+#define BO_VERSION BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x0A)
+ kgameRoot.setAttribute("Version", BO_VERSION);
+#undef BO_VERSION
+
+ if (files.contains("external.xml") && files["external.xml"].size() > 0) {
+	QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
+	QDomDocument externalDoc(QString::fromLatin1("External"));
+	if (!loadXMLDoc(&canvasDoc, files["canvas.xml"])) {
+		boError() << k_funcinfo << "could not load canvas.xml" << endl;
+		return false;
+	}
+	if (!loadXMLDoc(&externalDoc, files["external.xml"])) {
+		boError() << k_funcinfo << "could not load external.xml" << endl;
+		return false;
+	}
+	QDomElement canvasRoot = canvasDoc.documentElement();
+	QDomElement externalRoot = externalDoc.documentElement();
+
+	QDomElement effects = canvasRoot.namedItem("Effects").toElement();
+	if (effects.isNull()) {
+		boError() << k_funcinfo << "no Effects element in canvas.xml" << endl;
+		return false;
+	}
+	canvasRoot.removeChild(effects);
+	externalRoot.appendChild(effects);
+	files.insert("canvas.xml", canvasDoc.toString().utf8());
+	files.insert("external.xml", externalDoc.toString().utf8());
+ }
+
+ files.insert("kgame.xml", kgameDoc.toString().utf8());
  return true;
 }
 

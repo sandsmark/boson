@@ -25,10 +25,17 @@
 
 class BosonCanvas;
 class PlayerIO;
+class Unit;
 class UnitProperties;
 class BosonCursor;
 class BoGameCamera;
 class BosonGameFPSCounter;
+class BosonShot;
+class BosonShotFragment;
+class BosonItem;
+class BosonEffect;
+class BosonWeapon;
+template<class T> class QPtrList;
 
 class BosonUfoCanvasWidgetPrivate;
 /**
@@ -46,11 +53,31 @@ public:
 	void setLocalPlayerIO(PlayerIO* io);
 	void setCanvas(const BosonCanvas* canvas);
 
-	void setParticlesDirty(bool);
-
 	virtual void paintWidget();
 
 	void quitGame();
+
+	void cameraChanged();
+
+	bool loadEffectsFromXML(const QDomElement& root);
+	bool saveEffectsAsXML(QDomElement& root) const;
+
+public slots:
+	void slotAdvance(unsigned int advanceCallsCount, bool advanceFlag);
+	void slotItemAdded(BosonItem*);
+	void slotItemRemoved(BosonItem*);
+	void slotShotFired(BosonShot* shot, BosonWeapon* weapon);
+	void slotShotHit(BosonShot* shot);
+	void slotUnitDestroyed(Unit* unit);
+	void slotFacilityConstructed(Unit* unit);
+	void slotFragmentCreated(BosonShotFragment* fragment);
+
+protected:
+	void addEffect(BosonEffect* effect);
+	void addEffects(const QPtrList<BosonEffect>& effects);
+	void advanceEffects(float elapsed);
+	void setParticlesDirty(bool);
+	void addFacilityConstructedEffects(Unit* facility);
 
 private:
 	BosonUfoCanvasWidgetPrivate* d;

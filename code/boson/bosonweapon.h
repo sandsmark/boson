@@ -31,8 +31,6 @@
 
 class KSimpleConfig;
 class SpeciesTheme;
-class BosonEffect;
-class BosonEffectProperties;
 class Unit;
 class BoAction;
 class QString;
@@ -179,10 +177,6 @@ class BosonWeaponProperties : public PluginProperties
     BosonShot* newShot(Unit* attacker, const BosonWeapon* weapon, BoVector3Fixed pos, BoVector3Fixed target) const;
     BosonShot* newShot(Unit* attacker, const BosonWeapon* weapon, BoVector3Fixed pos, Unit* target) const;
 
-    QPtrList<BosonEffect> newShootEffects(BoVector3Fixed pos, bofixed rotation) const;
-    QPtrList<BosonEffect> newFlyEffects(BoVector3Fixed pos, bofixed rotation) const;
-    QPtrList<BosonEffect> newHitEffects(BoVector3Fixed pos) const;
-
     QValueList<unsigned long int> shootEffectIds() const  { return mShootEffectIds; }
     QValueList<unsigned long int> flyEffectIds() const  { return mFlyEffectIds; }
     QValueList<unsigned long int> hitEffectIds() const  { return mHitEffectIds; }
@@ -253,10 +247,6 @@ class BosonWeaponProperties : public PluginProperties
     BosonModel* mModel;
     QString mModelFileName;
     QString mName;
-    QPtrList<BosonEffectProperties> mShootEffects;
-    QPtrList<BosonEffectProperties> mFlyEffects;
-    QPtrList<BosonEffectProperties> mHitEffects;
-    // FIXME: these are only needed in editor mode. In normal mode, they only waste memory
     QValueList<unsigned long int> mShootEffectIds;
     QValueList<unsigned long int> mFlyEffectIds;
     QValueList<unsigned long int> mHitEffectIds;

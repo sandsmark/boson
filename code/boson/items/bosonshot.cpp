@@ -263,16 +263,10 @@ bofixed BosonShot::fullDamageRange() const
 void BosonShot::setInactive()
 {
   mActive = false;
-  if(!mActive)
-  {
-    // This sets effect owner ids to 0 (so that they won't be owned by this
-    //  shot anymore). It doesn't delete the effects.
-    clearEffects();
-    setVelocity(0, 0, 0);
-    setRotation(0);
-    setXRotation(0);
-    setYRotation(0);
-  }
+  setVelocity(0, 0, 0);
+  setRotation(0);
+  setXRotation(0);
+  setYRotation(0);
 }
 
 
@@ -321,17 +315,6 @@ void BosonShotBullet::setTarget(const BoVector3Fixed& target)
   mTarget = target;
 }
 
-void BosonShotBullet::explode()
-{
-  // We need to create fly effects here, because atm, our position is shooter's
-  //  (weapon's) position and BosonShot::explode() moves us to target position,
-  //  so fly effects will then get correctly moved as well.
-  setEffects(properties()->newFlyEffects(BoVector3Fixed(x(), y(), z()), 0));
-
-  BosonShot::explode();
-
-  clearEffects();
-}
 
 
 
@@ -399,8 +382,6 @@ void BosonShotRocket::init(const BoVector3Fixed& pos, const BoVector3Fixed& targ
   mVelo.setZ(target.z() - pos.z());
   mVelo.scale(1 / mTotalDist);
 
-  // Effects
-  setEffects(properties()->newFlyEffects(pos, 0.0));
   // FIXME: name: it has nothing to do with effects anymore
   mEffectVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]);
 
@@ -597,9 +578,6 @@ void BosonShotMissile::init(const BoVector3Fixed& pos, Unit* target)
   // Speeds
   setAccelerationSpeed(properties()->accelerationSpeed());
   setMaxSpeed(mWeaponSpeed);
-
-  // Effects
-  setEffects(properties()->newFlyEffects(pos, 0.0));
 
   // Initialization
   move(pos[0], pos[1], pos[2]);
@@ -1085,8 +1063,6 @@ void BosonShotFragment::activate(const BoVector3Fixed& pos, const UnitProperties
 #endif
   boDebug(350) << k_funcinfo << "Velocity is: (" << mVelo.x() << "; " << mVelo.y() << "; " << mVelo.z() << ")" << endl;
 
-  setEffects(mUnitProperties->newExplodingFragmentFlyEffects(pos));
-
   move(pos.x(), pos.y(), pos.z() + 0.2);  // +0.2 prevents immediate contact with the terrain
   setRotation(Bo3dTools::rotationToPoint(mVelo.x(), mVelo.y()));
   setVisible(true);
@@ -1185,14 +1161,6 @@ void BosonShotFragment::advanceMoveInternal()
 
   mVelo.setZ(mVelo.z() + FRAGMENT_GRAVITY);
   setVelocity(mVelo.x(), mVelo.y(), mVelo.z());
-}
-
-void BosonShotFragment::explode()
-{
-  BosonShot::explode();
-
-  BoVector3Fixed pos(centerX(), centerY(), z());
-  canvas()->addEffects(mUnitProperties->newExplodingFragmentHitEffects(pos));
 }
 
 long int BosonShotFragment::damage() const

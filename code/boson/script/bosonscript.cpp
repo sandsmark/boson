@@ -1359,6 +1359,9 @@ void BosonScript::addEffect(unsigned int id, BoVector3Fixed pos, bofixed zrot)
     return;
   }
 
+#warning FIXME: addEffect
+  boError() << k_funcinfo << "currently not supported" << endl;
+#if 0
   const BosonEffectProperties* prop = boEffectPropertiesManager->effectProperties(id);
   if(!prop)
   {
@@ -1368,6 +1371,7 @@ void BosonScript::addEffect(unsigned int id, BoVector3Fixed pos, bofixed zrot)
   QPtrList<BosonEffect> list = BosonEffectProperties::newEffects(prop, pos, BoVector3Fixed(0, 0, zrot));
   BosonCanvas* c = boGame->canvasNonConst();
   c->addEffects(list);
+#endif
 }
 
 void BosonScript::addEffectToUnit(int unitid, unsigned int effectid)
@@ -1390,6 +1394,10 @@ void BosonScript::addEffectToUnit(int unitid, unsigned int effectid, BoVector3Fi
     return;
   }
 
+#warning FIXME: addEffectToUnit
+  boError() << k_funcinfo << "currently not supported" << endl;
+
+#if 0
   const BosonEffectProperties* prop = boEffectPropertiesManager->effectProperties(effectid);
   if(!prop)
   {
@@ -1407,6 +1415,7 @@ void BosonScript::addEffectToUnit(int unitid, unsigned int effectid, BoVector3Fi
     u->addEffect(*it);
     ++it;
   }
+#endif
 }
 
 void BosonScript::advanceEffects(int ticks)
@@ -1417,6 +1426,9 @@ void BosonScript::advanceEffects(int ticks)
     return;
   }
 
+#warning fixme: advanceEffects
+  boError() << k_funcinfo << "currently not supported" << endl;
+#if 0
   QPtrListIterator<BosonEffect> it(*game()->canvas()->effects());
   while(it.current())
   {
@@ -1435,6 +1447,7 @@ void BosonScript::advanceEffects(int ticks)
     }
     ++it;
   }
+#endif
 }
 
 void BosonScript::setWind(const BoVector3Float& wind)

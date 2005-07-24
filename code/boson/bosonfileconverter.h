@@ -71,7 +71,8 @@ public:
 	bool convertPlayField_From_0_10_81_To_0_10_82(QMap<QString, QByteArray>& files);
 	bool convertPlayField_From_0_10_82_To_0_10_83(QMap<QString, QByteArray>& files);
 	bool convertPlayField_From_0_10_83_To_0_10_84(QMap<QString, QByteArray>& files);
-	bool convertPlayField_From_0_10_84_To_0_11(QMap<QString, QByteArray>& files);
+	bool convertPlayField_From_0_10_84_To_0_10_85(QMap<QString, QByteArray>& files);
+	bool convertPlayField_From_0_10_85_To_0_11(QMap<QString, QByteArray>& files);
 
 	bool addDummyWaterXML_From_0_10_To_0_10_80(QByteArray& waterXML);
 
