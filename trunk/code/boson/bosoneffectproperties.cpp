@@ -285,10 +285,10 @@ QPtrList<BosonEffectProperties> BosonEffectProperties::loadEffectProperties(KSim
   return loadEffectProperties(BosonConfig::readUnsignedLongNumList(cfg, key));
 }
 
-QPtrList<BosonEffectProperties> BosonEffectProperties::loadEffectProperties(QValueList<unsigned long int> ids)
+QPtrList<BosonEffectProperties> BosonEffectProperties::loadEffectProperties(const QValueList<unsigned long int>& ids)
 {
   QPtrList<BosonEffectProperties> props;
-  QValueList<unsigned long int>::Iterator it;
+  QValueList<unsigned long int>::const_iterator it;
   for(it = ids.begin(); it != ids.end(); it++)
   {
     props.append(boEffectPropertiesManager->effectProperties(*it));
