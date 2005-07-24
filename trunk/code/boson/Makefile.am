@@ -102,11 +102,6 @@ libboson_la_SOURCES = \
 	bopluginmanager.cpp \
 	boglstatewidget.cpp \
 	bofullscreen.cpp \
-	bosoneffectmanager.cpp \
-	bosoneffect.cpp \
-	bosoneffectproperties.cpp \
-	bosoneffectparticle.cpp \
-	bosoneffectpropertiesparticle.cpp \
 	boevent.cpp \
 	boeventmatching.cpp \
 	boeventlistener.cpp \
@@ -170,6 +165,11 @@ boson_SOURCES = \
 		bosonstarting.cpp \
 		bosongameviewpluginbase.cpp \
 		bosongameviewpluginmanager.cpp \
+		bosoneffectmanager.cpp \
+		bosoneffect.cpp \
+		bosoneffectproperties.cpp \
+		bosoneffectparticle.cpp \
+		bosoneffectpropertiesparticle.cpp \
 		main.cpp
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
