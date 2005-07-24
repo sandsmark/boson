@@ -36,14 +36,11 @@
 #include "../bosonprofiling.h"
 #include "../bosonpath.h"
 #include "../speciestheme.h"
-#include "../bosoneffectproperties.h"
-#include "../bosoneffect.h"
 #include "../playerio.h"
 #include "../pluginproperties.h"
 #include "../unitbase.h"
 #include "../bosonplayfield.h"
 #include "../bosonmap.h"
-#include "../bosoneffectpropertiesparticle.h"
 #include "bosonscriptinterface.h"
 #include "bodebug.h"
 
@@ -1452,12 +1449,22 @@ void BosonScript::advanceEffects(int ticks)
 
 void BosonScript::setWind(const BoVector3Float& wind)
 {
+#if 0
   BosonEffectPropertiesParticle::setWind(wind);
+#else
+#warning FIXME
+#endif
 }
 
+static BoVector3Float g_wind(0.2, 0.1, 0.0);
 const BoVector3Float& BosonScript::wind()
 {
+#if 0
   return BosonEffectPropertiesParticle::wind();
+#else
+#warning FIXME
+  return g_wind;
+#endif
 }
 
 void BosonScript::unfogPlayer(int playerid)
