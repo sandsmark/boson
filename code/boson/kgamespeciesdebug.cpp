@@ -25,7 +25,6 @@
 #include "bodebug.h"
 #include "bosonmodel.h"
 #include "bomesh.h"
-#include "bosoneffectproperties.h"
 
 #include <klocale.h>
 
@@ -353,8 +352,6 @@ KGameSpeciesDebug::KGameSpeciesDebug(QWidget* parent) : QWidget(parent)
 
  d->mSpeciesView = new SpeciesView(this);
  topLayout->addWidget(d->mSpeciesView, 1);
-
- boEffectPropertiesManager->loadEffectProperties();
 }
 
 KGameSpeciesDebug::~KGameSpeciesDebug()
