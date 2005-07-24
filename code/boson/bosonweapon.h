@@ -66,7 +66,7 @@ class BosonWeaponProperties : public PluginProperties
     /**
      * @return The weapon range of this unit. It's a number of cells
      **/
-    inline unsigned long int range1() const  { return mRange.value(upgradesCollection()); }
+    inline unsigned long int range() const  { return mRange.value(upgradesCollection()); }
     /**
      * @return Maximum flying distance of the missile of this weapon.
      * If the missile hasn't caught the target after flying this distance, the
@@ -88,25 +88,25 @@ class BosonWeaponProperties : public PluginProperties
     /**
      * @return The number of advance calls until the weapon is reloaded
      **/
-    inline unsigned int reloadingTime1() const  { return mReloadingTime.value(upgradesCollection()); }
+    inline unsigned int reloadingTime() const  { return mReloadingTime.value(upgradesCollection()); }
     /**
      * The damage this unit makes to other units. Negative values means
      * repairing
      **/
-    inline long int damage1() const  { return mDamage.value(upgradesCollection()); }
+    inline long int damage() const  { return mDamage.value(upgradesCollection()); }
     /**
      * @return Damage range of missile of this unit, e.g. range in what units will be damaged
      **/
-    inline bofixed damageRange1() const  { return mDamageRange.value(upgradesCollection()); }
+    inline bofixed damageRange() const  { return mDamageRange.value(upgradesCollection()); }
     /**
      * @return Full damage range of missile of this unit, e.g. range in what
      *  units will be damaged by damage value (farther they'll be damaged less)
      **/
-    inline bofixed fullDamageRange1() const  { return mFullDamageRange.value(upgradesCollection()); }
+    inline bofixed fullDamageRange() const  { return mFullDamageRange.value(upgradesCollection()); }
     /**
      * @return Maximum speed that missile of this weapon can have or 0 if speed is infinite
      **/
-    inline bofixed speed1() const  { return mSpeed.value(upgradesCollection()); }
+    inline bofixed speed() const  { return mSpeed.value(upgradesCollection()); }
     /**
      * @return Acceleration speed of missile of this unit
      **/

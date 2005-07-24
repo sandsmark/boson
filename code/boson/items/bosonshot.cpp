@@ -58,10 +58,10 @@ BosonShot::BosonShot(Player* owner, BosonCanvas* canvas, const BosonWeaponProper
 
   if(properties())
   {
-    mWeaponDamage.setLocal(properties()->damage1());
-    mWeaponDamageRange.setLocal(properties()->damageRange1());
-    mWeaponFullDamageRange.setLocal(properties()->fullDamageRange1());
-    mWeaponSpeed.setLocal(properties()->speed1());
+    mWeaponDamage.setLocal(properties()->damage());
+    mWeaponDamageRange.setLocal(properties()->damageRange());
+    mWeaponFullDamageRange.setLocal(properties()->fullDamageRange());
+    mWeaponSpeed.setLocal(properties()->speed());
   }
 }
 

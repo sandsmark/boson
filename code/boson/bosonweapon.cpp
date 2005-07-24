@@ -143,7 +143,7 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
  // We divide speeds with 20, because speeds in config files are cells/second,
  //  but we want cells/advance call
   insertBoFixedWeaponBaseValue(cfg->readDoubleNumEntry("Speed", 0) / 20.0f, "Speed", "MaxValue");
-  if(speed1() == 0 && mShotType == BosonShot::Rocket)
+  if(speed() == 0 && mShotType == BosonShot::Rocket)
   {
     boWarning() << k_funcinfo << "Type is rocket, but speed is 0, setting type to bullet" << endl;
     mShotType = BosonShot::Bullet;
@@ -229,17 +229,17 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   cfg->writeEntry("Type", shottype);
   // Other parameters
   cfg->writeEntry("Name", mName);
-  cfg->writeEntry("Range", range1());
+  cfg->writeEntry("Range", range());
   // Reload interval is converted from advance calls to seconds here
-  cfg->writeEntry("Reload", reloadingTime1() / 20.0f);
+  cfg->writeEntry("Reload", reloadingTime() / 20.0f);
  // We multiply speeds with 20 because speeds in config files are cells/second,
  //  but here we have cells/advance calls
-  cfg->writeEntry("Speed", speed1() * 20.0f);
+  cfg->writeEntry("Speed", speed() * 20.0f);
   cfg->writeEntry("AccelerationSpeed", mAccelerationSpeed * 20.0f * 20.0f);
   cfg->writeEntry("TurningSpeed", atan(mTurningSpeed) * RAD2DEG * 20.0f);
   cfg->writeEntry("StartAngle", mStartAngle);
-  cfg->writeEntry("Damage", damage1());
-  cfg->writeEntry("DamageRange", damageRange1());
+  cfg->writeEntry("Damage", damage());
+  cfg->writeEntry("DamageRange", damageRange());
   cfg->writeEntry("CanShootAtAirUnits", mCanShootAtAirUnits);
   cfg->writeEntry("CanShootAtLandUnits", mCanShootAtLandUnits);
   cfg->writeEntry("Height", (double)mHeight);
