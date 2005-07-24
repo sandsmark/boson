@@ -2291,7 +2291,7 @@ void BosonPath::updateChangedBlocks()
   // Update connections
   while(!mDirtyConnections.isEmpty())
   {
-    int connectionpos = mChangedBlocks.first();
+    int connectionpos = mDirtyConnections.first();
     mDirtyConnections.pop_front();
     //int connectionpos = blockpos * 4 + (dir - 1);
     int blockpos = connectionpos / 4;
