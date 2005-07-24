@@ -28,8 +28,6 @@
 
 #include <qptrlist.h>
 
-BosonEffectManager* BosonEffectManager::mManager = 0;
-
 // effects that are stored per-unittype.
 class UnitPropertiesEffects
 {
@@ -134,15 +132,6 @@ BosonEffectManager::~BosonEffectManager()
  }
  d->mWeaponPropertiesEffects.clear();
  delete d;
-}
-
-#warning TODO: remove global static object! make it an object of the gameview
-BosonEffectManager* BosonEffectManager::manager()
-{
- if (!mManager) {
-	mManager = new BosonEffectManager();
- }
- return mManager;
 }
 
 bool BosonEffectManager::loadUnitType(const UnitProperties* prop)
