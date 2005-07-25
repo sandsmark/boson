@@ -167,6 +167,9 @@ public:
 	 * @return The model that should be used for this item. This model will
 	 * get assigned to this model after construction using @ref
 	 * BosonItemRenderer::setModel.
+	 *
+	 * Note that if you need access to the model this item currently uses,
+	 * you should prefer @ref BosonItemRenderer::model instead.
 	 **/
 	virtual BosonModel* getModelForItem() const = 0;
 
