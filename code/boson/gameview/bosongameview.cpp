@@ -76,6 +76,7 @@
 #include "bosonmenuinput.h"
 #include "../boshader.h"
 #include "bosonufogamewidgets.h"
+#include "bosonufocanvaswidget.h"
 #include "../script/bosonscript.h"
 #include "../script/bosonscriptinterface.h"
 #include "../bomousemovediff.h"
