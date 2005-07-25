@@ -408,8 +408,9 @@ void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* rende
  BoItemList::const_iterator it = allItems->begin();
  for (; it != allItems->end(); ++it) {
 	BosonItem* item = *it;
+	BosonItemRenderer* itemRenderer = item->itemRenderer();
 
-	if (!item->isVisible() || !item->itemRenderer()) {
+	if (!item->isVisible() || !itemRenderer) {
 		continue;
 	}
 
@@ -439,8 +440,8 @@ void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* rende
 	bool visible = localPlayerIO()->canSee(item);
 	if (visible) {
 		unsigned int modelid = 0;
-		if (item->getModelForItem()) {
-			modelid = item->getModelForItem()->id();
+		if (itemRenderer->model()) {
+			modelid = itemRenderer->model()->id();
 		}
 		renderItemList->append(BoRenderItem(modelid, item));
 	}
