@@ -9,6 +9,7 @@ METASOURCES = AUTO
 libbosongameview_la_SOURCES = \
 	bosonufogameguihelper.boui \
 	bosonufogamegui.cpp \
+	bosonufocanvaswidget.cpp \
 	bosonufogamewidgets.cpp \
 	bosongameview.cpp \
 	bosongamevieweventlistener.cpp \
