@@ -240,6 +240,8 @@ bool BosonStarting::start()
  BosonStartingCreateCanvas* createCanvas = new BosonStartingCreateCanvas(i18n("Create Canvas"));
  connect(this, SIGNAL(signalDestPlayField(BosonPlayField*)),
 		createCanvas, SLOT(slotSetDestPlayField(BosonPlayField*)));
+ connect(createCanvas, SIGNAL(signalCanvasCreated(BosonCanvas*)),
+		this, SIGNAL(signalCanvas(BosonCanvas*)));
  tasks.append(createCanvas);
 
 
@@ -252,6 +254,8 @@ bool BosonStarting::start()
  tasks.append(playerMap);
 
  BosonStartingInitScript* script = new BosonStartingInitScript(i18n("Init Script"));
+ connect(this, SIGNAL(signalCanvas(BosonCanvas*)),
+		script, SLOT(slotSetCanvas(BosonCanvas*)));
  tasks.append(script);
 
  BosonStartingLoadTiles* tiles = new BosonStartingLoadTiles(i18n("Load Tiles"));
@@ -284,6 +288,8 @@ bool BosonStarting::start()
  BosonStartingStartScenario* scenario = new BosonStartingStartScenario(i18n("Start Scenario"));
  connect(this, SIGNAL(signalDestPlayField(BosonPlayField*)),
 		scenario, SLOT(slotSetDestPlayField(BosonPlayField*)));
+ connect(this, SIGNAL(signalCanvas(BosonCanvas*)),
+		scenario, SLOT(slotSetCanvas(BosonCanvas*)));
  scenario->setFiles(&files);
  tasks.append(scenario);
 
@@ -622,6 +628,9 @@ bool BosonStartingCreateCanvas::startTask()
 	return false;
  }
  canvas->setMap(playField()->map());
+
+ emit signalCanvasCreated(canvas);
+
  return true;
 }
 
@@ -662,8 +671,12 @@ unsigned int BosonStartingInitPlayerMap::taskDuration() const
 
 bool BosonStartingInitScript::startTask()
 {
+ if (!mCanvas) {
+	BO_NULL_ERROR(mCanvas);
+	return false;
+ }
  BosonScript::setGame(boGame);
- BosonScript::setCanvas(boGame->canvasNonConst());
+ BosonScript::setCanvas(mCanvas);
  return true;
 }
 
@@ -880,7 +893,10 @@ bool BosonStartingStartScenario::startTask()
 	return false;
  }
 
- createMoveDatas();
+ if (!createMoveDatas()) {
+	boError(270) << k_funcinfo << "creation of MoveDatas failed" << endl;
+	return false;
+ }
 
  MobileUnit::initCellIntersectionTable();
 
@@ -1104,7 +1120,15 @@ bool BosonStartingStartScenario::fixPlayerIdsInFileNames(int* actualIds, unsigne
  return true;
 }
 
-void BosonStartingStartScenario::createMoveDatas() const
+bool BosonStartingStartScenario::createMoveDatas()
 {
+ if (!mCanvas) {
+	BO_NULL_ERROR(mCanvas);
+	return false;
+ }
+
+ // TODO
+
+ return true;
 }
 

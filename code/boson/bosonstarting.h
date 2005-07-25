@@ -158,6 +158,7 @@ protected:
 
 signals:
 	void signalDestPlayField(BosonPlayField*);
+	void signalCanvas(BosonCanvas* canvas);
 
 private:
 	BosonStartingPrivate* d;
@@ -265,6 +266,9 @@ public:
 		return mDestPlayField;
 	}
 
+signals:
+	void signalCanvasCreated(BosonCanvas* canvas);
+
 public slots:
 	void slotSetDestPlayField(BosonPlayField* dest)
 	{
@@ -315,12 +319,22 @@ public:
 	BosonStartingInitScript(const QString& text)
 		: BosonStartingTask(text)
 	{
+		mCanvas = 0;
 	}
 
 	virtual unsigned int taskDuration() const;
 
+public slots:
+	void slotSetCanvas(BosonCanvas* canvas)
+	{
+		mCanvas = canvas;
+	}
+
 protected:
 	virtual bool startTask();
+
+private:
+	BosonCanvas* mCanvas;
 };
 
 class BosonStartingLoadTiles : public BosonStartingTask
@@ -440,6 +454,8 @@ public:
 	{
 		mDestPlayField = 0;
 		mFiles = 0;
+
+		mCanvas = 0;
 	}
 
 	virtual unsigned int taskDuration() const;
@@ -458,6 +474,10 @@ public slots:
 	void slotSetDestPlayField(BosonPlayField* dest)
 	{
 		mDestPlayField = dest;
+	}
+	void slotSetCanvas(BosonCanvas* canvas)
+	{
+		mCanvas = canvas;
 	}
 
 protected:
@@ -492,11 +512,13 @@ protected:
 	/**
 	 * Creates @ref BosonMoveData objects for all unitproperties
 	 **/
-	void createMoveDatas() const;
+	bool createMoveDatas();
 
 private:
 	BosonPlayField* mDestPlayField;
 	QMap<QString, QByteArray>* mFiles;
+
+	BosonCanvas* mCanvas;
 };
 
 #endif
