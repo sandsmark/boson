@@ -109,7 +109,9 @@ BosonModel* BosonShot::getModelForItem() const
   {
     return 0;
   }
-  return properties()->model();
+  BO_CHECK_NULL_RET0(owner());
+  BO_CHECK_NULL_RET0(owner()->speciesTheme());
+  return owner()->speciesTheme()->objectModel(properties()->modelFileName());
 }
 
 void BosonShot::initStatic()
