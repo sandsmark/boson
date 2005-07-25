@@ -522,7 +522,7 @@ void BosonUfoCanvasWidget::slotFragmentCreated(BosonShotFragment* fragment)
  BosonItemEffects* effects = d->mItem2Effects[fragment];
  BO_CHECK_NULL_RET(effects);
  BoVector3Fixed pos(fragment->x(), fragment->y(), fragment->z());
- d->mEffectManager->loadWeaponType(fragment->properties());
+ d->mEffectManager->loadUnitType(fragment->unitProperties());
  effects->setEffects(d->mEffectManager->newExplodingFragmentFlyEffects(fragment->unitProperties(), pos), &d->mEffects);
 }
 
@@ -562,12 +562,12 @@ void BosonUfoCanvasWidget::slotItemAdded(BosonItem* item)
 	}
  } else if (RTTI::isShot(item->rtti())) {
 	BosonShot* shot = (BosonShot*)item;
-	d->mEffectManager->loadWeaponType(shot->properties());
 	switch (shot->type()) {
 		case BosonShot::Bullet:
 			break;
 		case BosonShot::Rocket:
 		{
+			d->mEffectManager->loadWeaponType(shot->properties());
 			BoVector3Fixed pos(shot->x(), shot->y(), shot->z());
 			effects->setEffects(d->mEffectManager->newFlyEffects(shot->properties(), pos, 0.0), &d->mEffects);
 			break;
@@ -582,6 +582,7 @@ void BosonUfoCanvasWidget::slotItemAdded(BosonItem* item)
 			break;
 		case BosonShot::Missile:
 		{
+			d->mEffectManager->loadWeaponType(shot->properties());
 			BoVector3Fixed pos(shot->x(), shot->y(), shot->z());
 			effects->setEffects(d->mEffectManager->newFlyEffects(shot->properties(), pos, 0.0), &d->mEffects);
 			break;
