@@ -176,10 +176,6 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   // We need to have some kind of model even for bullet (though it won't be shown),
   //  because BosonShot will crash otherwise (actually it's BosonItem)
   mModelFileName = cfg->readEntry("Model", "missile");
-  if(full)
-  {
-    mModel = speciesTheme()->objectModel(mModelFileName);
-  }
   mSounds.clear();
   mSounds.insert(SoundWeaponShoot, cfg->readEntry("SoundShoot", "shoot"));
   mSounds.insert(SoundWeaponFly, cfg->readEntry("SoundFly", "missile_fly"));

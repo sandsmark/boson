@@ -141,8 +141,6 @@ class BosonWeaponProperties : public PluginProperties
      **/
     inline bofixed height() const  { return mHeight; }
 
-    inline BosonModel* model() const  { return mModel; }
-
     /**
      * @return First part of the sound filename - e.g. "shoot" if the file
      * name should be "shoot_00.ogg". the _00 is added dynamically (randomly)
@@ -244,7 +242,6 @@ class BosonWeaponProperties : public PluginProperties
     bofixed mAccelerationSpeed;
     bofixed mHeight;
     BosonShot::Type mShotType;
-    BosonModel* mModel;
     QString mModelFileName;
     QString mName;
     QValueList<unsigned long int> mShootEffectIds;
