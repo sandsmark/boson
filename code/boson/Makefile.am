@@ -1,19 +1,19 @@
 ## Makefile.am for boson
 
 SUBDIRS = \
-	data \
-	bosonfont \
-	boufo \
-	bosonwidgets \
-	items \
-	commandframe \
-	startupwidgets \
-	sound \
-	info \
-	script \
-	meshrenderer \
-	groundrenderer \
-	gameview
+		data \
+		bosonfont \
+		boufo \
+		bosonwidgets \
+		items \
+		commandframe \
+		startupwidgets \
+		sound \
+		info \
+		script \
+		meshrenderer \
+		groundrenderer \
+		gameview
 
 noinst_LTLIBRARIES = \
 		libboson.la \
@@ -27,94 +27,90 @@ INCLUDES = -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl -I$(top_srcdir)/boson/bo
 
 
 libboson_la_SOURCES = \
-	bomath.cpp \
-	boapplication.cpp \
-	boglobal.cpp \
-	bosonconfig.cpp \
-	bosondata.cpp \
-	bo3dtools.cpp \
-	boupgradeableproperty.cpp \
-	unitbase.cpp \
-	unit.cpp \
-	unitproperties.cpp \
-	pluginproperties.cpp \
-	unitplugins.cpp \
-	upgradeproperties.cpp \
-	bosonweapon.cpp \
-	boitemlist.cpp \
-	boitemlisthandler.cpp \
-	boselection.cpp \
-	botooltipcreator.cpp \
-	bosonplayfield.cpp \
-	bosonmap.cpp \
-	bosongroundtheme.cpp \
-	cell.cpp \
-	bofile.cpp \
-	bpfdescription.cpp \
-	bosonfileconverter.cpp \
-	bosoncampaign.cpp \
-	bosonmessage.cpp \
-	boson.cpp \
-	bomessage.cpp \
-	boeventloop.cpp \
-	bosoncanvas.cpp \
-	bosoncanvasstatistics.cpp \
-	bosoncollisions.cpp \
-	bosonnetworksynchronizer.cpp \
-	bosonsaveload.cpp \
-	speciestheme.cpp \
-	speciesdata.cpp \
-	player.cpp \
-	playerio.cpp \
-	bomatrixwidget.cpp \
-	bosonglwidget.cpp \
-	bomousemovediff.cpp \
-	bosonufoglwidget.cpp \
-	bocamera.cpp \
-	boautocamera.cpp \
-	bocamerawidget.cpp \
-	boorbiterwidget.cpp \
-	bosoncomputerio.cpp \
-	bosonpath.cpp \
-	selectbox.cpp \
-	bosoncursor.cpp \
-	bosonstatistics.cpp \
-	bosonmodel.cpp \
-	bomesh.cpp \
-	bomeshrenderer.cpp \
-	bomeshrenderermanager.cpp \
-	bomaterial.cpp \
-	\
-	bogameproperty.cpp \
-	bosonufochat.cpp \
-	bosonprofiling.cpp \
-	bosonprofilingdialog.cpp \
-	bosonmodeltextures.cpp \
-	bpfdescriptiondialog.cpp \
-	bomaterialwidget.cpp \
-	bovectorinput.cpp \
-	bosonpropertyxml.cpp \
-	boaction.cpp \
-	botexmapimportdialog.cpp \
-	bosonplayerinputhandler.cpp \
-	bobincoder.cpp \
-	bolight.cpp \
-	bopluginmanager.cpp \
-	boglstatewidget.cpp \
-	bofullscreen.cpp \
-	boevent.cpp \
-	boeventmatching.cpp \
-	boeventlistener.cpp \
-	boeventmanager.cpp \
-	bocondition.cpp \
-	boconditionwidget.cpp \
-	bodebuglogdialog.cpp \
-	bowater.cpp \
-	bowaterrenderer.cpp \
-	botexture.cpp \
-	bobmfload.cpp \
-	boshader.cpp \
-	borendertarget.cpp
+		boapplication.cpp \
+		boeventloop.cpp \
+		boglobal.cpp \
+		bosonconfig.cpp \
+		bosondata.cpp \
+		bomath.cpp \
+		bo3dtools.cpp \
+		bosonprofiling.cpp \
+		bopluginmanager.cpp \
+		\
+		boupgradeableproperty.cpp \
+		unitbase.cpp \
+		unit.cpp \
+		unitproperties.cpp \
+		pluginproperties.cpp \
+		unitplugins.cpp \
+		upgradeproperties.cpp \
+		bosonweapon.cpp \
+		boitemlist.cpp \
+		boitemlisthandler.cpp \
+		bosonplayfield.cpp \
+		bosonmap.cpp \
+		cell.cpp \
+		bofile.cpp \
+		bpfdescription.cpp \
+		bosonfileconverter.cpp \
+		bosoncampaign.cpp \
+		bosonmessage.cpp \
+		boson.cpp \
+		bomessage.cpp \
+		bosoncanvas.cpp \
+		bosoncanvasstatistics.cpp \
+		bosoncollisions.cpp \
+		bosonnetworksynchronizer.cpp \
+		speciestheme.cpp \
+		player.cpp \
+		playerio.cpp \
+		bosoncomputerio.cpp \
+		bosonpath.cpp \
+		bosonstatistics.cpp \
+		bogameproperty.cpp \
+		bosonpropertyxml.cpp \
+		bosonplayerinputhandler.cpp \
+		bobincoder.cpp \
+		boevent.cpp \
+		boeventmatching.cpp \
+		boeventlistener.cpp \
+		boeventmanager.cpp \
+		bocondition.cpp \
+		bowater.cpp \
+		bosonsaveload.cpp \
+		\
+		speciesdata.cpp \
+		bosongroundtheme.cpp \
+		boaction.cpp \
+		\
+		boselection.cpp \
+		botooltipcreator.cpp \
+		bosonglwidget.cpp \
+		bosonufoglwidget.cpp \
+		bomousemovediff.cpp \
+		bomatrixwidget.cpp \
+		bocamerawidget.cpp \
+		boorbiterwidget.cpp \
+		bosonufochat.cpp \
+		bosonprofilingdialog.cpp \
+		bpfdescriptiondialog.cpp \
+		boglstatewidget.cpp \
+		bodebuglogdialog.cpp \
+		bofullscreen.cpp \
+		bocamera.cpp \
+		boautocamera.cpp \
+		bosoncursor.cpp \
+		bosonmodel.cpp \
+		bosonmodeltextures.cpp \
+		bomesh.cpp \
+		bomeshrenderer.cpp \
+		bomeshrenderermanager.cpp \
+		bomaterial.cpp \
+		bolight.cpp \
+		botexture.cpp \
+		bobmfload.cpp \
+		boshader.cpp \
+		borendertarget.cpp
 
 
 libboson_la_LIBADD = \
@@ -170,6 +166,10 @@ boson_SOURCES = \
 		bosoneffectproperties.cpp \
 		bosoneffectparticle.cpp \
 		bosoneffectpropertiesparticle.cpp \
+		botexmapimportdialog.cpp \
+		boconditionwidget.cpp \
+		bowaterrenderer.cpp \
+		selectbox.cpp \
 		main.cpp
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
@@ -212,6 +212,8 @@ borender_LDADD = \
 		$(top_builddir)/boson/libborender.la \
 		$(LIB_BOMEMORY) -l3ds
 borender_SOURCES = \
+		bomaterialwidget.cpp \
+		bovectorinput.cpp \
 		kgamespeciesdebug.cpp \
 		borendermain.cpp
 
