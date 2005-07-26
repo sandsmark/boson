@@ -18,6 +18,7 @@
 */
 
 #include "boinfo.h"
+#include "bocurrentinfo.h"
 
 #include "../../bomemory/bodummymemory.h"
 #include "bodebug.h"

@@ -27,6 +27,7 @@
 #include "bodebug.h"
 #include "bosonconfig.h"
 #include "bosonprofiling.h"
+#include "info/boinfo.h"
 
 #define USE_BTF 0
 #if USE_BTF
@@ -865,13 +866,13 @@ void BoTextureManager::initOpenGL()
 
   // Get list of supported opengl extensions
   boDebug() << k_funcinfo << "Checking for OpenGL extensions..." << endl;
-  QStringList extensions = boglGetOpenGLExtensions();
+  const BoInfoGLCache* glInfo = BoInfo::boInfo()->gl();
+  QStringList extensions = glInfo->openGLExtensions();
   // Get OpenGL (runtime) version
-  unsigned int openglversion = boglGetOpenGLVersion();
-
+  unsigned int openglversion = glInfo->openGLVersion();
 
   // Find out maximal 2d texture size
-  glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
+  mMaxTextureSize = glInfo->maxTextureSize();
 
   // Find out number of texture units that the card has
   mTextureUnits = 0;
@@ -895,11 +896,7 @@ void BoTextureManager::initOpenGL()
 
   // Check if cube map textures are supported.
   // Cube maps are part of the core since OpenGL 1.3
-  mSupportsTextureCube = false;
-  if(openglversion >= MAKE_VERSION_BOGL(1,3,0) || extensions.contains("GL_ARB_texture_cube_map"))
-  {
-    mSupportsTextureCube = true;
-  }
+  mSupportsTextureCube = glInfo->supportsTextureCube();
   if(!mSupportsTextureCube)
   {
     boDebug() << k_funcinfo << "Cube map textures are not supported!" << endl;
@@ -912,11 +909,7 @@ void BoTextureManager::initOpenGL()
   }
 
   // Check if 3D textures are supported
-  mSupportsTexture3D = false;
-  if(/*openglversion >= MAKE_VERSION_BOGL(1,2,0) || */extensions.contains("GL_EXT_texture3D"))
-  {
-    mSupportsTexture3D = true;
-  }
+  mSupportsTexture3D = glInfo->supportsTexture3D();
   if(!mSupportsTexture3D)
   {
     boDebug() << k_funcinfo << "3D textures are not supported!" << endl;
@@ -929,23 +922,14 @@ void BoTextureManager::initOpenGL()
   }
 
   // Check if automatic mipmap generation is supported
-  mSupportsGenerateMipmap = false;
-  if(openglversion >= MAKE_VERSION_BOGL(1,4,0) || extensions.contains("GL_SGIS_generate_mipmap"))
-  {
-    mSupportsGenerateMipmap = true;
-  }
+  mSupportsGenerateMipmap = glInfo->supportsGenerateMipmap();
   if(!mSupportsGenerateMipmap)
   {
     boDebug() << k_funcinfo << "Automatic mipmap generation is not supported!" << endl;
   }
 
   // Check if texture compression is supported
-  mSupportsTextureCompressionS3TC = false;
-  if(extensions.contains("GL_EXT_texture_compression_s3tc") &&
-      (openglversion >= MAKE_VERSION_BOGL(1,3,0) || extensions.contains("GL_ARB_texture_compression")))
-  {
-    mSupportsTextureCompressionS3TC = true;
-  }
+  mSupportsTextureCompressionS3TC = glInfo->supportsTextureCompressionS3TC();
   if(!mSupportsTextureCompressionS3TC)
   {
     boDebug() << k_funcinfo << "S3TC texture compression is not supported!" << endl;

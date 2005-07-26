@@ -458,26 +458,26 @@ void BoInfoDialog::resetOpenGLPage()
 {
  bool og = d->data()->haveOpenGLData();
  d->mOGHaveData->setText(og ? i18n("Yes") : i18n("No"));
- d->mOGRuntimeVersionString->setText(og ? d->data()->openGLVersionString() : QString(""));
- d->mOGRuntimeVersionCode->setText("0x" + QString::number(d->data()->openGLVersion(), 16));
- d->mOGVendorString->setText(og ? d->data()->openGLVendorString() : QString(""));
- d->mOGRendererString->setText(og ? d->data()->openGLRendererString() : QString(""));
+ d->mOGRuntimeVersionString->setText(og ? d->data()->gl()->openGLVersionString() : QString(""));
+ d->mOGRuntimeVersionCode->setText("0x" + QString::number(d->data()->gl()->openGLVersion(), 16));
+ d->mOGVendorString->setText(og ? d->data()->gl()->openGLVendorString() : QString(""));
+ d->mOGRendererString->setText(og ? d->data()->gl()->openGLRendererString() : QString(""));
  // TODO: OG extensions
 
- d->mGLURuntimeVersionString->setText(og ? d->data()->gluVersionString() : QString(""));
+ d->mGLURuntimeVersionString->setText(og ? d->data()->gl()->gluVersionString() : QString(""));
  // TODO: GLU extensions
 
- d->mGLXClientVersionString->setText(og ? d->data()->glXClientVersionString() : QString(""));
- d->mGLXClientVendorString->setText(og ? d->data()->glXClientVendorString() : QString(""));
+ d->mGLXClientVersionString->setText(og ? d->data()->gl()->glXClientVersionString() : QString(""));
+ d->mGLXClientVendorString->setText(og ? d->data()->gl()->glXClientVendorString() : QString(""));
  int major, minor;
- d->data()->glXVersion(&major, &minor);
+ d->data()->gl()->glXVersion(&major, &minor);
  d->mGLXVersionMajor->setText(og ? QString::number(major) : QString(""));
  d->mGLXVersionMinor->setText(og ? QString::number(minor) : QString(""));
- d->mGLXServerVersionString->setText(og ? d->data()->glXServerVersionString() : QString(""));
- d->mGLXServerVendorString->setText(og ? d->data()->glXServerVendorString() : QString(""));
+ d->mGLXServerVersionString->setText(og ? d->data()->gl()->glXServerVersionString() : QString(""));
+ d->mGLXServerVendorString->setText(og ? d->data()->gl()->glXServerVendorString() : QString(""));
  // TODO: GLX client/server extensions
 
- d->mIsDirect->setText(og ? (d->data()->isDirect() ? i18n("Yes") : i18n("No")) : QString(""));
+ d->mIsDirect->setText(og ? (d->data()->gl()->isDirect() ? i18n("Yes") : i18n("No")) : QString(""));
 }
 
 void BoInfoDialog::resetXPage()

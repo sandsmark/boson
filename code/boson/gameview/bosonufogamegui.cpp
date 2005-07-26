@@ -47,6 +47,7 @@
 #include "../bowaterrenderer.h"
 #include "../bosonfpscounter.h"
 #include "../info/boinfo.h"
+#include "../info/bocurrentinfo.h"
 #include "bodebug.h"
 
 #include <klocale.h>

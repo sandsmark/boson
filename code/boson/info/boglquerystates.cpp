@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 Andreas Beckermann <b_mann@gmx.de>
+    Copyright (C) 2004-2005 Andreas Beckermann <b_mann@gmx.de>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #include "boglquerystates.h"
 
 #include "../../bomemory/bodummymemory.h"
+#include "boinfo.h"
 #include <bogl.h>
 #include <bodebug.h>
 
@@ -41,8 +42,6 @@
 // AB: we are using int instead of GLboolean, we use (partially) BOboolean to
 // make clear that this int describes a boolean.
 #define BOboolean GLint
-
-static QMap<int, QString> g_nameDict;
 
 class GLGetValue
 {
@@ -106,7 +105,6 @@ public:
         s += t + ")";
         return s;
     }
-
 };
 
 /**
@@ -119,94 +117,31 @@ class ImplementationValues
 public:
     ImplementationValues()
     {
-#define ADD(a, b) g_nameDict.insert(a, b); mNameDict.insert(a, b);
-        ADD(GL_ACCUM_ALPHA_BITS, "GL_ACCUM_ALPHA_BITS");
-        ADD(GL_ACCUM_BLUE_BITS, "GL_ACCUM_BLUE_BITS");
-        ADD(GL_ACCUM_GREEN_BITS, "GL_ACCUM_GREEN_BITS");
-        ADD(GL_ACCUM_RED_BITS, "GL_ACCUM_RED_BITS");
-        ADD(GL_ALIASED_LINE_WIDTH_RANGE, "GL_ALIASED_LINE_WIDTH_RANGE");
-        ADD(GL_ALIASED_POINT_SIZE_RANGE, "GL_ALIASED_POINT_SIZE_RANGE");
-        ADD(GL_ALPHA_BITS, "GL_ALPHA_BITS");
-        ADD(GL_AUX_BUFFERS, "GL_AUX_BUFFERS");
-        ADD(GL_BLUE_BITS, "GL_BLUE_BITS");
-        ADD(GL_DEPTH_BITS, "GL_DEPTH_BITS");
-        ADD(GL_DOUBLEBUFFER, "GL_DOUBLEBUFFER");
-        ADD(GL_GREEN_BITS, "GL_GREEN_BITS");
-        ADD(GL_INDEX_BITS, "GL_INDEX_BITS");
-        ADD(GL_INDEX_MODE, "GL_INDEX_MODE");
-        ADD(GL_MAX_3D_TEXTURE_SIZE, "GL_MAX_3D_TEXTURE_SIZE");
-        ADD(GL_MAX_ATTRIB_STACK_DEPTH, "GL_MAX_ATTRIB_STACK_DEPTH");
-        ADD(GL_MAX_CLIENT_ATTRIB_STACK_DEPTH, "GL_MAX_CLIENT_ATTRIB_STACK_DEPTH");
-        ADD(GL_MAX_CLIP_PLANES, "GL_MAX_CLIP_PLANES");
-        ADD(GL_MAX_ELEMENTS_INDICES, "GL_MAX_ELEMENTS_INDICES");
-        ADD(GL_MAX_ELEMENTS_VERTICES, "GL_MAX_ELEMENTS_VERTICES");
-        ADD(GL_MAX_EVAL_ORDER, "GL_MAX_EVAL_ORDER");
-        ADD(GL_MAX_LIGHTS, "GL_MAX_LIGHTS");
-        ADD(GL_MAX_LIST_NESTING, "GL_MAX_LIST_NESTING");
-        ADD(GL_MAX_MODELVIEW_STACK_DEPTH, "GL_MAX_MODELVIEW_STACK_DEPTH");
-        ADD(GL_MAX_NAME_STACK_DEPTH, "GL_MAX_NAME_STACK_DEPTH");
-        ADD(GL_MAX_PIXEL_MAP_TABLE, "GL_MAX_PIXEL_MAP_TABLE");
-        ADD(GL_MAX_PROJECTION_STACK_DEPTH, "GL_MAX_PROJECTION_STACK_DEPTH");
-        ADD(GL_MAX_TEXTURE_SIZE, "GL_MAX_TEXTURE_SIZE");
-        ADD(GL_MAX_TEXTURE_STACK_DEPTH, "GL_MAX_TEXTURE_STACK_DEPTH");
-        ADD(GL_MAX_TEXTURE_UNITS, "GL_MAX_TEXTURE_UNITS");
-        ADD(GL_MAX_VIEWPORT_DIMS, "GL_MAX_VIEWPORT_DIMS");
-        ADD(GL_RED_BITS, "GL_RED_BITS");
-        ADD(GL_RGBA_MODE, "GL_RGBA_MODE");
-        ADD(GL_SMOOTH_LINE_WIDTH_GRANULARITY, "GL_SMOOTH_LINE_WIDTH_GRANULARITY");
-        ADD(GL_SMOOTH_LINE_WIDTH_RANGE, "GL_SMOOTH_LINE_WIDTH_RANGE");
-        ADD(GL_SMOOTH_POINT_SIZE_GRANULARITY, "GL_SMOOTH_POINT_SIZE_GRANULARITY");
-        ADD(GL_SMOOTH_POINT_SIZE_RANGE, "GL_SMOOTH_POINT_SIZE_RANGE");
-        ADD(GL_STENCIL_BITS, "GL_STENCIL_BITS");
-        ADD(GL_STEREO, "GL_STEREO");
-        ADD(GL_SUBPIXEL_BITS, "GL_SUBPIXEL_BITS");
-#undef ADD
+        m_GL_EXTENSIONS = (const GLubyte*)"";
+        m_GL_RENDERER = (const GLubyte*)"";
+        m_GL_VENDOR = (const GLubyte*)"";
+        m_GL_VERSION = (const GLubyte*)"";
+        m_GL_SHADING_LANGUAGE_VERSION = (const GLubyte*)"";
+
+        mGLVersion = boglGetOpenGLVersion();
+        mGLExtensions = boglGetOpenGLExtensions();
+
+        addOpenGL1_1Values();
+        addOpenGL1_2Values();
+        addOpenGL1_3Values();
+        addOpenGL1_4Values();
+        addOpenGL1_5Values();
     }
 
     void getValues()
     {
-#define UPDATE(x) mValues.insert((int)x, GLGetValue::get(x, m_##x, sizeof(m_##x) / sizeof(m_##x[0])));
-        UPDATE(GL_ACCUM_ALPHA_BITS);
-        UPDATE(GL_ACCUM_BLUE_BITS);
-        UPDATE(GL_ACCUM_GREEN_BITS);
-        UPDATE(GL_ACCUM_RED_BITS);
-        UPDATE(GL_ALIASED_LINE_WIDTH_RANGE);
-        UPDATE(GL_ALIASED_POINT_SIZE_RANGE);
-        UPDATE(GL_ALPHA_BITS);
-        UPDATE(GL_AUX_BUFFERS);
-        UPDATE(GL_BLUE_BITS);
-        UPDATE(GL_DEPTH_BITS);
-        UPDATE(GL_DOUBLEBUFFER);
-        UPDATE(GL_GREEN_BITS);
-        UPDATE(GL_INDEX_BITS);
-        UPDATE(GL_INDEX_MODE);
-        UPDATE(GL_MAX_3D_TEXTURE_SIZE);
-        UPDATE(GL_MAX_ATTRIB_STACK_DEPTH);
-        UPDATE(GL_MAX_CLIENT_ATTRIB_STACK_DEPTH);
-        UPDATE(GL_MAX_CLIP_PLANES);
-        UPDATE(GL_MAX_ELEMENTS_INDICES);
-        UPDATE(GL_MAX_ELEMENTS_VERTICES);
-        UPDATE(GL_MAX_EVAL_ORDER);
-        UPDATE(GL_MAX_LIGHTS);
-        UPDATE(GL_MAX_LIST_NESTING);
-        UPDATE(GL_MAX_MODELVIEW_STACK_DEPTH);
-        UPDATE(GL_MAX_NAME_STACK_DEPTH);
-        UPDATE(GL_MAX_PIXEL_MAP_TABLE);
-        UPDATE(GL_MAX_PROJECTION_STACK_DEPTH);
-        UPDATE(GL_MAX_TEXTURE_SIZE);
-        UPDATE(GL_MAX_TEXTURE_STACK_DEPTH);
-        UPDATE(GL_MAX_TEXTURE_UNITS);
-        UPDATE(GL_MAX_VIEWPORT_DIMS);
-        UPDATE(GL_RED_BITS);
-        UPDATE(GL_RGBA_MODE);
-        UPDATE(GL_SMOOTH_LINE_WIDTH_GRANULARITY);
-        UPDATE(GL_SMOOTH_LINE_WIDTH_RANGE);
-        UPDATE(GL_SMOOTH_POINT_SIZE_GRANULARITY);
-        UPDATE(GL_SMOOTH_POINT_SIZE_RANGE);
-        UPDATE(GL_STENCIL_BITS);
-        UPDATE(GL_STEREO);
-        UPDATE(GL_SUBPIXEL_BITS);
-#undef UPDATE
+        getValuesOpenGL1_1();
+        getValuesOpenGL1_2();
+        getValuesOpenGL1_2_1();
+        getValuesOpenGL1_3();
+        getValuesOpenGL1_4();
+        getValuesOpenGL1_5();
+        getValuesOpenGL2_0();
     }
     QStringList list() const
     {
@@ -217,18 +152,26 @@ public:
         }
         return list;
     }
+
+private:
     QString value(GLenum e) const
     {
         return mValues[(int)e];
     }
 
-
+    // AB: do NOT make public!
+    // -> only variables that are actually being updated in a getValues*()
+    //    method are allowed to be used.
+    //    other variables may be declared, but not provided by the current
+    //    OpenGL implementation (e.g. version too old or extension missing).
+    //    => if they were used at some point, it would be an invalid read on an
+    //    uninitialized variable.
+private:
+    // OpenGL 1.1
     BO_VAR(GLint, GL_ACCUM_ALPHA_BITS, 1)
     BO_VAR(GLint, GL_ACCUM_BLUE_BITS, 1)
     BO_VAR(GLint, GL_ACCUM_GREEN_BITS, 1)
     BO_VAR(GLint, GL_ACCUM_RED_BITS, 1)
-    BO_VAR(GLfloat, GL_ALIASED_LINE_WIDTH_RANGE, 1)
-    BO_VAR(GLfloat, GL_ALIASED_POINT_SIZE_RANGE, 1)
     BO_VAR(GLint, GL_ALPHA_BITS, 1)
     BO_VAR(GLint, GL_AUX_BUFFERS, 1)
     BO_VAR(GLint, GL_BLUE_BITS, 1)
@@ -237,12 +180,9 @@ public:
     BO_VAR(GLint, GL_GREEN_BITS, 1)
     BO_VAR(GLint, GL_INDEX_BITS, 1)
     BO_VAR(GLint, GL_INDEX_MODE, 1)
-    BO_VAR(GLint, GL_MAX_3D_TEXTURE_SIZE, 1)
     BO_VAR(GLint, GL_MAX_ATTRIB_STACK_DEPTH, 1)
     BO_VAR(GLint, GL_MAX_CLIENT_ATTRIB_STACK_DEPTH, 1)
     BO_VAR(GLint, GL_MAX_CLIP_PLANES, 1)
-    BO_VAR(GLint, GL_MAX_ELEMENTS_INDICES, 1)
-    BO_VAR(GLint, GL_MAX_ELEMENTS_VERTICES, 1)
     BO_VAR(GLint, GL_MAX_EVAL_ORDER, 1)
     BO_VAR(GLint, GL_MAX_LIGHTS, 1)
     BO_VAR(GLint, GL_MAX_LIST_NESTING, 1)
@@ -252,21 +192,325 @@ public:
     BO_VAR(GLint, GL_MAX_PROJECTION_STACK_DEPTH, 1)
     BO_VAR(GLint, GL_MAX_TEXTURE_SIZE, 1)
     BO_VAR(GLint, GL_MAX_TEXTURE_STACK_DEPTH, 1)
-    BO_VAR(GLint, GL_MAX_TEXTURE_UNITS, 1)
     BO_VAR(GLint, GL_MAX_VIEWPORT_DIMS, 1)
     BO_VAR(GLint, GL_RED_BITS, 1)
     BO_VAR(GLint, GL_RGBA_MODE, 1)
-    BO_VAR(GLfloat, GL_SMOOTH_LINE_WIDTH_GRANULARITY, 1)
-    BO_VAR(GLfloat, GL_SMOOTH_LINE_WIDTH_RANGE, 1)
-    BO_VAR(GLfloat, GL_SMOOTH_POINT_SIZE_GRANULARITY, 1)
-    BO_VAR(GLfloat, GL_SMOOTH_POINT_SIZE_RANGE, 1)
     BO_VAR(GLint, GL_STENCIL_BITS, 1)
     BO_VAR(GLint, GL_STEREO, 1)
     BO_VAR(GLint, GL_SUBPIXEL_BITS, 1)
+//    BO_VAR(GLfloat, GL_LINE_WIDTH_GRANULARITY, 1) // deprecated by OpenGL 1.2
+//    BO_VAR(GLfloat, GL_LINE_WIDTH_RANGE, 1) // deprecated by OpenGL 1.2
+//    BO_VAR(GLfloat, GL_POINT_SIZE_GRANULARITY, 1) // deprecated by OpenGL 1.2
+//    BO_VAR(GLfloat, GL_POINT_SIZE_RANGE, 1) // deprecated by OpenGL 1.2
+
+    // OpenGL 1.2
+    BO_VAR(GLint, GL_MAX_COLOR_MATRIX_STACK_DEPTH, 1); // extension "GL_ARB_imaging"
+    BO_VAR(GLint, GL_MAX_CONVOLUTION_WIDTH, 3); // extension "GL_ARB_imaging"
+    BO_VAR(GLint, GL_MAX_CONVOLUTION_HEIGHT, 2); // extension "GL_ARB_imaging"
+    BO_VAR(GLfloat, GL_ALIASED_LINE_WIDTH_RANGE, 2)
+    BO_VAR(GLfloat, GL_ALIASED_POINT_SIZE_RANGE, 2)
+    BO_VAR(GLint, GL_MAX_3D_TEXTURE_SIZE, 1)
+    BO_VAR(GLint, GL_MAX_ELEMENTS_INDICES, 1)
+    BO_VAR(GLint, GL_MAX_ELEMENTS_VERTICES, 1)
+    BO_VAR(GLfloat, GL_SMOOTH_LINE_WIDTH_GRANULARITY, 1) // replaces GL_LINE_WIDTH_GRANULARITY from OpenGL 1.1
+    BO_VAR(GLfloat, GL_SMOOTH_LINE_WIDTH_RANGE, 2) // replaces GL_LINE_WIDTH_RANGE from OpenGL 1.1
+    BO_VAR(GLfloat, GL_SMOOTH_POINT_SIZE_GRANULARITY, 1) // replaces GL_POINT_SIZE_GRANULARITY from OpenGL 1.1
+    BO_VAR(GLfloat, GL_SMOOTH_POINT_SIZE_RANGE, 2) // replaces GL_POINT_SIZE_RANGE from OpenGL 1.1
+
+    // OpenGL 1.2.1
+//    BO_VAR(GLint, GL_MAX_TEXTURE_UNITS_ARB, 1) // "GL_MAX_TEXTURE_UNITS" -> OpenGL 1.3
+
+    // OpenGL 1.3
+    BO_VAR(GLint, GL_MAX_CUBE_MAP_TEXTURE_SIZE, 1);
+    BO_VAR(GLint, GL_MAX_TEXTURE_UNITS, 1)
+    BO_VAR(GLint, GL_SAMPLE_BUFFERS, 1);
+    BO_VAR(GLint, GL_SAMPLES, 1);
+//    BO_VAR(GL_COMPRESSED_TEXTURE_FORMATS); // TODO
+    BO_VAR(GLint, GL_NUM_COMPRESSED_TEXTURE_FORMATS, 1);
+
+
+    // OpenGL 1.4
+    BO_VAR(GLfloat, GL_MAX_TEXTURE_LOD_BIAS, 1);
+
+    // OpenGL 1.5
+    BO_VAR(GLint, GL_QUERY_COUNTER_BITS, 1);
+
+    // OpenGL 2.0
+    const GLubyte* m_GL_EXTENSIONS;
+    BO_VAR(GLint, GL_MAX_DRAW_BUFFERS, 1);
+    BO_VAR(GLint, GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, 1);
+    BO_VAR(GLint, GL_MAX_FRAGMENT_COMPONENTS, 1);
+    BO_VAR(GLint, GL_MAX_TEXTURE_COORDS, 1);
+    BO_VAR(GLint, GL_MAX_VARYING_FLOATS, 1);
+    BO_VAR(GLint, GL_MAX_VERTEX_ATTRIBS, 1);
+    BO_VAR(GLint, GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, 1);
+    BO_VAR(GLint, GL_MAX_VERTEX_UNIFORM_COMPONENTS, 1);
+    const GLubyte* m_GL_RENDERER;
+    const GLubyte* m_GL_SHADING_LANGUAGE_VERSION;
+    const GLubyte* m_GL_VENDOR;
+    const GLubyte* m_GL_VERSION;
+
+private:
+    void addOpenGL1_1Values()
+    {
+#define ADD(a) mNameDict.insert(a, #a);
+        ADD(GL_ACCUM_ALPHA_BITS);
+        ADD(GL_ACCUM_BLUE_BITS);
+        ADD(GL_ACCUM_GREEN_BITS);
+        ADD(GL_ACCUM_RED_BITS);
+        ADD(GL_ALPHA_BITS);
+        ADD(GL_AUX_BUFFERS);
+        ADD(GL_BLUE_BITS);
+        ADD(GL_DEPTH_BITS);
+        ADD(GL_DOUBLEBUFFER);
+        ADD(GL_GREEN_BITS);
+        ADD(GL_INDEX_BITS);
+        ADD(GL_INDEX_MODE);
+        ADD(GL_MAX_ATTRIB_STACK_DEPTH);
+        ADD(GL_MAX_CLIENT_ATTRIB_STACK_DEPTH);
+        ADD(GL_MAX_CLIP_PLANES);
+        ADD(GL_MAX_EVAL_ORDER);
+        ADD(GL_MAX_LIGHTS);
+        ADD(GL_MAX_LIST_NESTING);
+        ADD(GL_MAX_MODELVIEW_STACK_DEPTH);
+        ADD(GL_MAX_NAME_STACK_DEPTH);
+        ADD(GL_MAX_PIXEL_MAP_TABLE);
+        ADD(GL_MAX_PROJECTION_STACK_DEPTH);
+        ADD(GL_MAX_TEXTURE_SIZE);
+        ADD(GL_MAX_TEXTURE_STACK_DEPTH);
+        ADD(GL_MAX_VIEWPORT_DIMS);
+        ADD(GL_RED_BITS);
+        ADD(GL_RGBA_MODE);
+        ADD(GL_STENCIL_BITS);
+        ADD(GL_STEREO);
+        ADD(GL_SUBPIXEL_BITS);
+//        ADD(GL_POINT_SIZE_RANGE); // deprecated by OpenGL 1.2
+//        ADD(GL_POINT_SIZE_GRANULARITY); // deprecated by OpenGL 1.2
+//        ADD(GL_LINE_WIDTH_RANGE); // deprecated by OpenGL 1.2
+//        ADD(GL_LINE_WIDTH_GRANULARITY); // deprecated by OpenGL 1.2
+#undef ADD
+    }
+    void addOpenGL1_2Values()
+    {
+#define ADD(a) mNameDict.insert(a, #a);
+        ADD(GL_MAX_COLOR_MATRIX_STACK_DEPTH); // extension "GL_ARB_imaging"
+        ADD(GL_MAX_CONVOLUTION_WIDTH); // extension "GL_ARB_imaging"
+        ADD(GL_MAX_CONVOLUTION_HEIGHT); // extension "GL_ARB_imaging"
+
+        ADD(GL_ALIASED_LINE_WIDTH_RANGE);
+        ADD(GL_ALIASED_POINT_SIZE_RANGE);
+        ADD(GL_MAX_3D_TEXTURE_SIZE);
+        ADD(GL_MAX_ELEMENTS_INDICES);
+        ADD(GL_MAX_ELEMENTS_VERTICES);
+        ADD(GL_SMOOTH_LINE_WIDTH_GRANULARITY); // replaces GL_LINE_WIDTH_GRANULARITY from OpenGL 1.1
+        ADD(GL_SMOOTH_LINE_WIDTH_RANGE); // replaces GL_LINE_WIDTH_RANGE from OpenGL 1.1
+        ADD(GL_SMOOTH_POINT_SIZE_GRANULARITY); // replaces GL_POINT_SIZE_GRANULARITY from OpenGL 1.1
+        ADD(GL_SMOOTH_POINT_SIZE_RANGE); // replaces GL_POINT_SIZE_RANGE from OpenGL 1.1
+#undef ADD
+    }
+    void addOpenGL1_2_1Values()
+    {
+#define ADD(a) mNameDict.insert(a, #a);
+        ADD(GL_MAX_TEXTURE_UNITS_ARB); // extension "GL_ARB_multitexture"
+#undef ADD
+    }
+    void addOpenGL1_3Values()
+    {
+#define ADD(a) mNameDict.insert(a, #a);
+        ADD(GL_MAX_CUBE_MAP_TEXTURE_SIZE);
+        ADD(GL_MAX_TEXTURE_UNITS);
+        ADD(GL_SAMPLE_BUFFERS);
+        ADD(GL_SAMPLES);
+        ADD(GL_COMPRESSED_TEXTURE_FORMATS);
+        ADD(GL_NUM_COMPRESSED_TEXTURE_FORMATS);
+#undef ADD
+
+    }
+
+    void addOpenGL1_4Values()
+    {
+#ifdef GL_VERSION_1_4
+#define ADD(a) mNameDict.insert(a, #a);
+        ADD(GL_MAX_TEXTURE_LOD_BIAS);
+#undef ADD
+#endif
+    }
+    void addOpenGL1_5Values()
+    {
+#ifdef GL_VERSION_1_5
+#define ADD(a) mNameDict.insert(a, #a);
+        ADD(GL_QUERY_COUNTER_BITS);
+#undef ADD
+#endif
+    }
+    void addOpenGL2_0Values()
+    {
+#ifdef GL_VERSION_2_0
+#define ADD(a) mNameDict.insert(a, #a);
+        ADD(GL_EXTENSIONS);
+        ADD(GL_RENDERER);
+        ADD(GL_SHADING_LANGUAGE_VERSION);
+        ADD(GL_VENDOR);
+        ADD(GL_VERSION);
+        ADD(GL_MAX_VERTEX_ATTRIBS);
+        ADD(GL_MAX_VERTEX_UNIFORM_COMPONENTS);
+        ADD(GL_MAX_VARYING_FLOATS);
+        ADD(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        ADD(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS);
+        ADD(GL_MAX_TEXTURE_COORDS);
+        ADD(GL_MAX_FRAGMENT_COMPONENTS);
+        ADD(GL_MAX_DRAW_BUFFERS);
+#undef ADD
+#endif
+    }
+
+
+    void getValuesOpenGL1_1()
+    {
+        if (mGLVersion < MAKE_VERSION(1, 1, 0)) {
+            return;
+        }
+#define UPDATE(x) mValues.insert((int)x, GLGetValue::get(x, m_##x, sizeof(m_##x) / sizeof(m_##x[0])));
+        UPDATE(GL_ACCUM_ALPHA_BITS);
+        UPDATE(GL_ACCUM_BLUE_BITS);
+        UPDATE(GL_ACCUM_GREEN_BITS);
+        UPDATE(GL_ACCUM_RED_BITS);
+        UPDATE(GL_ALPHA_BITS);
+        UPDATE(GL_AUX_BUFFERS);
+        UPDATE(GL_BLUE_BITS);
+        UPDATE(GL_DEPTH_BITS);
+        UPDATE(GL_DOUBLEBUFFER);
+        UPDATE(GL_GREEN_BITS);
+        UPDATE(GL_INDEX_BITS);
+        UPDATE(GL_INDEX_MODE);
+        UPDATE(GL_MAX_ATTRIB_STACK_DEPTH);
+        UPDATE(GL_MAX_CLIENT_ATTRIB_STACK_DEPTH);
+        UPDATE(GL_MAX_CLIP_PLANES);
+        UPDATE(GL_MAX_EVAL_ORDER);
+        UPDATE(GL_MAX_LIGHTS);
+        UPDATE(GL_MAX_LIST_NESTING);
+        UPDATE(GL_MAX_MODELVIEW_STACK_DEPTH);
+        UPDATE(GL_MAX_NAME_STACK_DEPTH);
+        UPDATE(GL_MAX_PIXEL_MAP_TABLE);
+        UPDATE(GL_MAX_PROJECTION_STACK_DEPTH);
+        UPDATE(GL_MAX_TEXTURE_SIZE);
+        UPDATE(GL_MAX_TEXTURE_STACK_DEPTH);
+        UPDATE(GL_MAX_VIEWPORT_DIMS);
+        UPDATE(GL_RED_BITS);
+        UPDATE(GL_RGBA_MODE);
+        UPDATE(GL_STENCIL_BITS);
+        UPDATE(GL_STEREO);
+        UPDATE(GL_SUBPIXEL_BITS);
+
+        // AB: we do not update them here, because Boson requires OpenGL > 1.1,
+        //     i.e. we do have 1.2 anyway.
+//        UPDATE(GL_LINE_WIDTH_GRANULARITY) // deprecated by OpenGL 1.2
+//        UPDATE(GL_LINE_WIDTH_RANGE) // deprecated by OpenGL 1.2
+//        UPDATE(GL_POINT_SIZE_GRANULARITY) // deprecated by OpenGL 1.2
+//        UPDATE(GL_POINT_SIZE_RANGE) // deprecated by OpenGL 1.2
+#undef UPDATE
+
+        // AB: these are special cases:
+        //     only in OpenGL 2.0 they are listed in the "implementation
+        //     dependent" section, but they already exist before.
+        m_GL_EXTENSIONS = glGetString(GL_EXTENSIONS);
+        m_GL_RENDERER = glGetString(GL_RENDERER);
+        m_GL_VENDOR = glGetString(GL_VENDOR);
+        m_GL_VERSION = glGetString(GL_VERSION);
+    }
+    void getValuesOpenGL1_2()
+    {
+        if (mGLVersion < MAKE_VERSION(1, 2, 0)) {
+            return;
+        }
+#define UPDATE(x) mValues.insert((int)x, GLGetValue::get(x, m_##x, sizeof(m_##x) / sizeof(m_##x[0])));
+        if (mGLExtensions.contains("GL_ARB_imaging")) {
+                UPDATE(GL_MAX_COLOR_MATRIX_STACK_DEPTH);
+                UPDATE(GL_MAX_CONVOLUTION_WIDTH);
+                UPDATE(GL_MAX_CONVOLUTION_HEIGHT);
+        }
+        UPDATE(GL_ALIASED_LINE_WIDTH_RANGE);
+        UPDATE(GL_ALIASED_POINT_SIZE_RANGE);
+        UPDATE(GL_MAX_3D_TEXTURE_SIZE);
+        UPDATE(GL_MAX_ELEMENTS_INDICES);
+        UPDATE(GL_MAX_ELEMENTS_VERTICES);
+        UPDATE(GL_SMOOTH_LINE_WIDTH_GRANULARITY);
+        UPDATE(GL_SMOOTH_LINE_WIDTH_RANGE);
+        UPDATE(GL_SMOOTH_POINT_SIZE_GRANULARITY);
+        UPDATE(GL_SMOOTH_POINT_SIZE_RANGE);
+#undef UPDATE
+    }
+    void getValuesOpenGL1_2_1()
+    {
+        if (mGLVersion < MAKE_VERSION(1, 2, 1)) {
+            return;
+        }
+#define UPDATE(x) mValues.insert((int)x, GLGetValue::get(x, m_##x, sizeof(m_##x) / sizeof(m_##x[0])));
+        // AB: actually the enum in 1.2.1 is GL_MAX_TEXTURE_UNITS_ARB, but since
+        // both enums are defined to the same number, we can use the one from GL
+        // 1.3, too.
+        if (mGLExtensions.contains("GL_ARB_multitexture")) {
+            UPDATE(GL_MAX_TEXTURE_UNITS);
+        }
+#undef UPDATE
+    }
+    void getValuesOpenGL1_3()
+    {
+        if (mGLVersion < MAKE_VERSION(1, 3, 0)) {
+            return;
+        }
+#define UPDATE(x) mValues.insert((int)x, GLGetValue::get(x, m_##x, sizeof(m_##x) / sizeof(m_##x[0])));
+        UPDATE(GL_MAX_CUBE_MAP_TEXTURE_SIZE);
+        UPDATE(GL_MAX_TEXTURE_UNITS);
+        UPDATE(GL_SAMPLE_BUFFERS);
+        UPDATE(GL_SAMPLES);
+        UPDATE(GL_NUM_COMPRESSED_TEXTURE_FORMATS);
+//        UPDATE(GL_COMPRESSED_TEXTURE_FORMATS);
+#undef UPDATE
+    }
+
+    void getValuesOpenGL1_4()
+    {
+        if (mGLVersion < MAKE_VERSION(1, 4, 0)) {
+            return;
+        }
+#ifdef GL_VERSION_1_4
+#define UPDATE(x) mValues.insert((int)x, GLGetValue::get(x, m_##x, sizeof(m_##x) / sizeof(m_##x[0])));
+        UPDATE(GL_MAX_TEXTURE_LOD_BIAS);
+#undef UPDATE
+#endif
+    }
+    void getValuesOpenGL1_5()
+    {
+        if (mGLVersion < MAKE_VERSION(1, 5, 0)) {
+            return;
+        }
+#ifdef GL_VERSION_1_5
+#define UPDATE(x) mValues.insert((int)x, GLGetValue::get(x, m_##x, sizeof(m_##x) / sizeof(m_##x[0])));
+        UPDATE(GL_QUERY_COUNTER_BITS);
+#undef UPDATE
+#endif
+    }
+    void getValuesOpenGL2_0()
+    {
+        if (mGLVersion < MAKE_VERSION(2, 0, 0)) {
+            return;
+        }
+#ifdef GL_VERSION_2_0
+        m_GL_EXTENSIONS = glGetString(GL_EXTENSIONS);
+        m_GL_RENDERER = glGetString(GL_RENDERER);
+        m_GL_SHADING_LANGUAGE_VERSION = glGetString(GL_SHADING_LANGUAGE_VERSION);
+        m_GL_VENDOR = glGetString(GL_VENDOR);
+        m_GL_VERSION = glGetString(GL_VERSION);
+#endif
+    }
 
 private:
     QMap<int, QString> mNameDict;
     QMap<int, QString> mValues;
+
+    unsigned int mGLVersion;
+    QStringList mGLExtensions;
 };
 
 // class like below, but contains only glGetMaterialfv() calls
@@ -359,7 +603,7 @@ public:
         }
         mLightStates = new LightStates[mMaxLights];
 
-#define ADD(a, b) g_nameDict.insert(a, b); mNameDict.insert(a, b);
+#define ADD(a, b) mNameDict.insert(a, b);
         ADD(GL_ACCUM_CLEAR_VALUE, "GL_ACCUM_CLEAR_VALUE");
         ADD(GL_ACTIVE_TEXTURE, "GL_ACTIVE_TEXTURE");
         ADD(GL_ALPHA_BIAS, "GL_ALPHA_BIAS");
@@ -1255,7 +1499,9 @@ BoGLQueryStates::~BoGLQueryStates()
 
 void BoGLQueryStates::init()
 {
+ boDebug() << k_funcinfo << endl;
  d->mImplementationValues.getValues();
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BoGLQueryStates::getStates()
@@ -1328,3 +1574,6 @@ QStringList BoGLQueryStates::getDifferences(const QStringList& _l1, const QStrin
  return list;
 }
 
+/*
+ * vim: et sw=4
+ */

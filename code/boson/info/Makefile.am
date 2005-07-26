@@ -6,6 +6,8 @@ METASOURCES = AUTO
 
 libbosoninfo_la_SOURCES = \
 	boinfo.cpp \
+	bocurrentinfo.cpp \
+	boinfoglcache.cpp \
 	boinfo_x11.cpp \
 	boinfodialog.cpp \
 	boglquerystates.cpp
