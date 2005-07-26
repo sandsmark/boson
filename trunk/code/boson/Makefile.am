@@ -16,6 +16,8 @@ SUBDIRS = \
 		gameview
 
 noinst_LTLIBRARIES = \
+		libbosoncommon.la \
+		libbosongameengine.la \
 		libboson.la \
 		libbocursor.la \
 		libborender.la \
@@ -26,17 +28,7 @@ bin_PROGRAMS = boson borender bounit bocursor boinfo bo3dsdebug
 INCLUDES = -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl -I$(top_srcdir)/boson/boufo $(all_includes)
 
 
-libboson_la_SOURCES = \
-		boapplication.cpp \
-		boeventloop.cpp \
-		boglobal.cpp \
-		bosonconfig.cpp \
-		bosondata.cpp \
-		bomath.cpp \
-		bo3dtools.cpp \
-		bosonprofiling.cpp \
-		bopluginmanager.cpp \
-		\
+libbosongameengine_la_SOURCES = \
 		boupgradeableproperty.cpp \
 		unitbase.cpp \
 		unit.cpp \
@@ -81,8 +73,20 @@ libboson_la_SOURCES = \
 		\
 		speciesdata.cpp \
 		bosongroundtheme.cpp \
-		boaction.cpp \
-		\
+		boaction.cpp
+
+libbosoncommon_la_SOURCES = \
+		boapplication.cpp \
+		boeventloop.cpp \
+		boglobal.cpp \
+		bosonconfig.cpp \
+		bosondata.cpp \
+		bomath.cpp \
+		bo3dtools.cpp \
+		bosonprofiling.cpp \
+		bopluginmanager.cpp
+
+libboson_la_SOURCES = \
 		boselection.cpp \
 		botooltipcreator.cpp \
 		bosonglwidget.cpp \
@@ -112,12 +116,13 @@ libboson_la_SOURCES = \
 		boshader.cpp \
 		borendertarget.cpp
 
+libbosongameengine_la_LIBADD = \
+		$(top_builddir)/boson/items/libbosonitems.la
 
 libboson_la_LIBADD = \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/bogl/libbogl.la \
 		$(top_builddir)/math/libbomath.la \
-		$(top_builddir)/boson/items/libbosonitems.la \
 		$(top_builddir)/boson/sound/libbosonsoundinterface.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
@@ -139,6 +144,8 @@ boson_LDADD = \
 		$(top_builddir)/boson/gameview/libbosongameview.la \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/libboson.la \
+		$(top_builddir)/boson/libbosongameengine.la \
+		$(top_builddir)/boson/libbosoncommon.la \
 		$(LIB_BOMEMORY)
 boson_SOURCES = \
 		bosonfpscounter.cpp \
@@ -174,8 +181,9 @@ boson_SOURCES = \
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bounit_LDADD = \
-		$(top_builddir)/math/libbomath.la \
+		$(top_builddir)/boson/libbosongameengine.la \
 		$(top_builddir)/boson/libboson.la \
+		$(top_builddir)/boson/libbosoncommon.la \
 		$(LIB_BOMEMORY)
 bounit_SOURCES = \
 		bounitmain.cpp bosonsearchpathswidget.ui \
@@ -208,7 +216,9 @@ libborender_la_SOURCES = \
 borender_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker --export-dynamic
 borender_LDADD = \
 		$(top_builddir)/math/libbomath.la \
+		$(top_builddir)/boson/libbosongameengine.la \
 		$(top_builddir)/boson/libboson.la \
+		$(top_builddir)/boson/libbosoncommon.la \
 		$(top_builddir)/boson/libborender.la \
 		$(LIB_BOMEMORY) -l3ds
 borender_SOURCES = \
