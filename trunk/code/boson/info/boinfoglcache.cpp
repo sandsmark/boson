@@ -22,6 +22,7 @@
 #include "../../bomemory/bodummymemory.h"
 #include "boinfo.h"
 #include "bodebug.h"
+#include <bogl.h>
 
 #include <qstringlist.h>
 #include <qregexp.h>
@@ -31,10 +32,6 @@ static int getIntFromList(const QStringList& list, const QString& start, int def
  QRegExp reg(QString("^%1 = ").arg(start));
  QStringList tmp = list.grep(reg);
  if (tmp.isEmpty()) {
-	boWarning() << k_funcinfo << "no such entry " << start << endl;
-	for (int i = 0; i < list.count(); i++) {
-		boDebug() << list[i] << endl;
-	}
 	return default_;
  }
  QString s = tmp[0];
@@ -42,7 +39,6 @@ static int getIntFromList(const QStringList& list, const QString& start, int def
  bool ok;
  int ret = s2.toInt(&ok);
  if (!ok) {
-	boWarning() << k_funcinfo << "not a number " << s2 << " from " << s << endl;
 	return default_;
  }
  return ret;
@@ -78,6 +74,10 @@ public:
 	QStringList mOpenGLExtensions;
 
 	int mMaxTextureSize;
+	int mMaxTextureUnits;
+	int mMaxCubeMapTextureSize;
+	int mMax3DTextureSize;
+	int mMaxTextureMaxAnisotropy;
 	bool mSupportsGenerateMipmap;
 	bool mSupportsTextureCompressionS3TC;
 	bool mSupportsTextureCube;
@@ -143,6 +143,14 @@ void BoInfoGLCache::update()
 
  QStringList glValues = mInfo->openGLValues();
  d->mMaxTextureSize = getIntFromList(glValues, "GL_MAX_TEXTURE_SIZE", 1);
+ d->mMaxTextureUnits = getIntFromList(glValues, "GL_MAX_TEXTURE_UNITS", 1);
+ if (d->mMaxTextureUnits > 1) {
+	if (!boglActiveTexture) {
+		boError() << k_funcinfo << "multitexturing supported, but not glActiveTexture function found!" << endl;
+		// disable multitexturing
+		d->mMaxTextureUnits = 1;
+	}
+ }
 
  d->mSupportsGenerateMipmap = false;
  if (d->mOpenGLVersion >= MAKE_VERSION(1,4,0) || d->mOpenGLExtensions.contains("GL_SGIS_generate_mipmap")) {
@@ -154,26 +162,21 @@ void BoInfoGLCache::update()
 		(d->mOpenGLVersion >= MAKE_VERSION(1,3,0) || d->mOpenGLExtensions.contains("GL_ARB_texture_compression"))) {
 	d->mSupportsTextureCompressionS3TC = true;
  }
+
  d->mSupportsTexture3D = false;
  if (d->mOpenGLVersion >= MAKE_VERSION(1,2,0) || d->mOpenGLExtensions.contains("GL_EXT_texture3D")) {
 	d->mSupportsTexture3D = true;
  }
+ d->mMax3DTextureSize = getIntFromList(glValues, "GL_MAX_3D_TEXTURE_SIZE", 0);
 
-  // Cube maps are part of the core since OpenGL 1.3
  d->mSupportsTextureCube = false;
  if (d->mOpenGLVersion >= MAKE_VERSION(1,3,0) || d->mOpenGLExtensions.contains("GL_ARB_texture_cube_map")) {
 	d->mSupportsTextureCube = true;
  }
+ d->mMaxCubeMapTextureSize = getIntFromList(glValues, "GL_MAX_CUBE_MAP_TEXTURE_SIZE", 0);
 
-#if 0
- d->mMaxCubeTextureSize = 0;
- if (d->mSupportsTextureCube) {
-	d->mMaxCubeTextureSize = 0;
- }
+ d->mMaxTextureMaxAnisotropy = getIntFromList(glValues, "GL_MAX_TEXTURE_MAX_ANISOTROPRY_EXT", 1);
 
- 
-d->mSupportsShaders = false;
-#endif
 }
 
 bool BoInfoGLCache::isDirect() const
@@ -300,8 +303,31 @@ int BoInfoGLCache::maxTextureSize() const
  if (d->mCacheDirty) {
 	updateConst();
  }
- boDebug() << d->mMaxTextureSize << endl;
  return d->mMaxTextureSize;
+}
+
+int BoInfoGLCache::maxTextureUnits() const
+{
+ if (d->mCacheDirty) {
+	updateConst();
+ }
+ return d->mMaxTextureUnits;
+}
+
+int BoInfoGLCache::maxCubeMapTextureSize() const
+{
+ if (d->mCacheDirty) {
+	updateConst();
+ }
+ return d->mMaxCubeMapTextureSize;
+}
+
+int BoInfoGLCache::max3DTextureSize() const
+{
+ if (d->mCacheDirty) {
+	updateConst();
+ }
+ return d->mMax3DTextureSize;
 }
 
 bool BoInfoGLCache::supportsGenerateMipmap() const
@@ -334,6 +360,14 @@ bool BoInfoGLCache::supportsTextureCube() const
 	updateConst();
  }
  return d->mSupportsTextureCube;
+}
+
+int BoInfoGLCache::maxTextureMaxAnisotropy() const
+{
+ if (d->mCacheDirty) {
+	updateConst();
+ }
+ return d->mMaxTextureMaxAnisotropy;
 }
 
 
