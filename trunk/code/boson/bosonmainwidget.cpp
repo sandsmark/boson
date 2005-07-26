@@ -235,8 +235,6 @@ void BosonMainWidget::initializeGL()
 
  d->mFPSCounter->reset();
 
- BoTextureManager::initStatic();
-
  if (!context()->deviceIsPixmap()) {
 	if (!directRendering()) {
 		// baad.
@@ -248,10 +246,12 @@ void BosonMainWidget::initializeGL()
 	// start rendering (will also start the timer if necessary)
 	QTimer::singleShot(d->mUpdateInterval, this, SLOT(slotUpdateGL()));
 
-	// update system information (we initializeGL() must have been called before
+	// update system information (initializeGL() must have been called before
 	// this makes sense)
 	BoInfo::boInfo()->update(this);
  }
+
+ BoTextureManager::initStatic();
 
  connect(kapp->eventLoop(), SIGNAL(signalUpdateGL()), this, SLOT(slotUpdateGL()));
 
