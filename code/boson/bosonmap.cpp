@@ -332,8 +332,8 @@ void BoColorMap::updateRect(int _x, int _y, unsigned int w, unsigned int h, unsi
 {
  QRect r(_x, _y, w, h);
  int pos = 0;
- for (unsigned int y = r.y(); y < r.y() + r.height(); y++) {
-	for (unsigned int x = r.x(); x < r.x() + r.width(); x++) {
+ for (int y = r.y(); y < r.y() + r.height(); y++) {
+	for (int x = r.x(); x < r.x() + r.width(); x++) {
 		int index = (y * mWidth + x) * 3;
 		mData[index + 0] = data[pos + 0];
 		mData[index + 1] = data[pos + 1];
