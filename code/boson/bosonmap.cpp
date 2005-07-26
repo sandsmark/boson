@@ -308,23 +308,19 @@ BoColorMap::BoColorMap(unsigned int width, unsigned int height)
 {
  mWidth = width;
  mHeight = height;
- mTexWidth = BoTexture::nextPower2(width);
- mTexHeight = BoTexture::nextPower2(height);
- // Create BoTexture object
- mTexture = new BoTexture(BoTexture::FilterNearest | BoTexture::FormatRGB | BoTexture::DontCompress);
+
  // Load initial black texture
- int datasize = mTexWidth * mTexHeight * 3;
- unsigned char* data = new unsigned char[datasize];
- for (int i = 0; i < datasize; i++) {
-	data[i] = 0;
+ int dataSize = mWidth * mHeight * 3;
+ mData = new unsigned char[dataSize];
+ for (int i = 0; i < dataSize; i++) {
+	mData[i] = 0;
  }
- mTexture->load(data, mTexWidth, mTexHeight);
- delete[] data;
+ mDirtyRect = QRect(0, 0, mWidth, mHeight);
 }
 
 BoColorMap::~BoColorMap()
 {
- delete mTexture;
+ delete[] mData;
 }
 
 void BoColorMap::update(unsigned char* data)
@@ -332,39 +328,21 @@ void BoColorMap::update(unsigned char* data)
  updateRect(0, 0, mWidth, mHeight, data);
 }
 
-void BoColorMap::updateRect(int x, int y, unsigned int w, unsigned int h, unsigned char* data)
+void BoColorMap::updateRect(int _x, int _y, unsigned int w, unsigned int h, unsigned char* data)
 {
- mTexture->bind();
- glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, GL_RGB, GL_UNSIGNED_BYTE, data);
-}
-
-void BoColorMap::start(const BosonMap*)
-{
- mTexture->bind();
- // Use automatic texcoord generation to map the texture to cells
- const float texPlaneS[] = { 1.0, 0.0, 0.0, 0.0 };
- const float texPlaneT[] = { 0.0, 1.0, 0.0, 0.0 };
- glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
- glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
- glTexGenfv(GL_S, GL_OBJECT_PLANE, texPlaneS);
- glTexGenfv(GL_T, GL_OBJECT_PLANE, texPlaneT);
- glEnable(GL_TEXTURE_GEN_S);
- glEnable(GL_TEXTURE_GEN_T);
- glMatrixMode(GL_TEXTURE);
- glLoadIdentity();
- glScalef(1.0f / mTexWidth, 1.0f / mTexHeight, 1.0f);
- glScalef(1, -1, 1);
- glMatrixMode(GL_MODELVIEW);
-}
-
-void BoColorMap::stop()
-{
- glMatrixMode(GL_TEXTURE);
- glLoadIdentity();
- glMatrixMode(GL_MODELVIEW);
- boTextureManager->unbindTexture();
- glDisable(GL_TEXTURE_GEN_S);
- glDisable(GL_TEXTURE_GEN_T);
+ QRect r(_x, _y, w, h);
+ int pos = 0;
+ for (unsigned int y = r.y(); y < r.y() + r.height(); y++) {
+	for (unsigned int x = r.x(); x < r.x() + r.width(); x++) {
+		int index = (y * mWidth + x) * 3;
+		mData[index + 0] = data[pos + 0];
+		mData[index + 1] = data[pos + 1];
+		mData[index + 2] = data[pos + 2];
+		pos += 3;
+	}
+ }
+ mDirtyRect = mDirtyRect.unite(r);
+ mDirtyRect = mDirtyRect.intersect(QRect(0, 0, mWidth, mHeight));
 }
 
 
@@ -387,6 +365,8 @@ BosonMap::BosonMap(QObject* parent) : QObject(parent)
 
 BosonMap::~BosonMap()
 {
+ d->mColorMaps.setAutoDelete(true);
+ d->mColorMaps.clear();
  delete[] mCells;
  delete mNormalMap;
  delete mHeightMap;
@@ -1394,6 +1374,11 @@ int BosonMap::mapFileFormatVersion()
 
 void BosonMap::addColorMap(BoColorMap* map, const QString& name)
 {
+ if (d->mColorMaps[name]) {
+	boWarning() << k_funcinfo << "already have a colormap named " << name << endl;
+	BoColorMap* old = d->mColorMaps[name];
+	delete old;
+ }
  d->mColorMaps.insert(name, map);
  emit signalColorMapsChanged();
 }
@@ -1409,6 +1394,7 @@ void BosonMap::removeColorMap(const QString& name)
  if (map == mActiveColorMap) {
 	mActiveColorMap = 0;
  }
+ delete map;
  emit signalColorMapsChanged();
 }
 

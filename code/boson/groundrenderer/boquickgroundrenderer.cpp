@@ -31,6 +31,7 @@
 #include "../playerio.h"
 #include "../bosonconfig.h"
 #include "../boshader.h"
+#include "bocolormaprenderer.h"
 #include "bogroundrendererbase.h"
 #include "bodebug.h"
 
@@ -41,6 +42,7 @@
 #define TEXROUGHNESS_MULTIPLIER 0.125f
 
 
+#warning FIXME: use base class
 BoQuickGroundRenderer::BoQuickGroundRenderer()
 {
   mMap = 0;
@@ -339,28 +341,33 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
   glColor4ub(255, 255, 255, 255);
 
   // Render the color map if necessary
+#warning FIXME: does NOT belong to quick renderer. belongs to base class.
   if(map->activeColorMap())
   {
-    glDisableClientState(GL_COLOR_ARRAY);
-    glPushAttrib(GL_ENABLE_BIT);
-    glEnable(GL_BLEND);
-    glColor4ub(255, 255, 255, 128);
-    glDisable(GL_LIGHTING);
-    map->activeColorMap()->start(map);
-
-    for(unsigned int j = 0; j < mChunkCount; j++)
+    BoColorMapRenderer* renderer = getUpdatedColorMapRenderer(map->activeColorMap());
+    if(renderer)
     {
-      TerrainChunk* c = &mChunks[j];
-      if(!c->render)
+      glDisableClientState(GL_COLOR_ARRAY);
+      glPushAttrib(GL_ENABLE_BIT);
+      glEnable(GL_BLEND);
+      glColor4ub(255, 255, 255, 128);
+      glDisable(GL_LIGHTING);
+      renderer->start(map);
+
+      for(unsigned int j = 0; j < mChunkCount; j++)
       {
-        continue;
+        TerrainChunk* c = &mChunks[j];
+        if(!c->render)
+        {
+          continue;
+        }
+
+        renderedQuads += renderChunk(c, indices);
       }
 
-      renderedQuads += renderChunk(c, indices);
+      renderer->stop();
+      glPopAttrib();
     }
-
-    map->activeColorMap()->stop();
-    glPopAttrib();
   }
 
   // Optionally render the grid
@@ -666,6 +673,9 @@ void BoQuickGroundRenderer::glueToBottom(BoQuickGroundRenderer::TerrainChunk* c,
 void BoQuickGroundRenderer::initMap(const BosonMap* map)
 {
   mMap = map;
+
+  mColorMapRenderers.setAutoDelete(true);
+  mColorMapRenderers.clear();
 
   // Cache map size
   mMapW = map->width();
@@ -1039,3 +1049,21 @@ void BoQuickGroundRenderer::renderVisibleCellsStop(const BosonMap* map)
   mFogTexture->stop(map);
 }
 
+// TODO: use BoGroundRendererBase
+#warning FIXME: duplicated code
+BoColorMapRenderer* BoQuickGroundRenderer::getUpdatedColorMapRenderer(BoColorMap* map)
+{
+ BoColorMapRenderer* r = mColorMapRenderers[map];
+ if(r)
+ {
+   r->update();
+   return r;
+ }
+ r = new BoColorMapRenderer(map);
+ mColorMapRenderers.insert(map, r);
+ return r;
+}
+
+/*
+ * vim: et sw=2
+ */

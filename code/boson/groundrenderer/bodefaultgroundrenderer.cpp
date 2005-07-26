@@ -30,6 +30,7 @@
 #include "../boson.h"
 #include "../botexture.h"
 #include "../boshader.h"
+#include "bocolormaprenderer.h"
 #include <bogl.h>
 #include <bodebug.h>
 
@@ -135,14 +136,18 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  glLoadIdentity();
  glMatrixMode(GL_MODELVIEW);
 
+#warning FIXME: does NOT belong to default renderer. belongs to base class.
  if (map->activeColorMap()) {
-	boTextureManager->disableTexturing();
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_LIGHTING);
-	map->activeColorMap()->start(map);
-	renderCellColors(renderCells, cellsCount, map->width(), mHeightMap2);
-	map->activeColorMap()->stop();
-	glPopAttrib();
+	BoColorMapRenderer* renderer = getUpdatedColorMapRenderer(map->activeColorMap());
+	if (renderer) {
+		boTextureManager->disableTexturing();
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_LIGHTING);
+		renderer->start(map);
+		renderCellColors(renderCells, cellsCount, map->width(), mHeightMap2);
+		renderer->stop();
+		glPopAttrib();
+	}
  }
 
  glDisable(GL_TEXTURE_GEN_S);

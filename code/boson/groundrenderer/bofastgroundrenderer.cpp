@@ -165,6 +165,7 @@ void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cel
 
 void BoFastGroundRenderer::updateMapCache(const BosonMap* map)
 {
+ BoGroundRendererBase::updateMapCache(map);
  if (mCurrentMap == map) {
 	return;
  }
