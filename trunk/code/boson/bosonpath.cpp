@@ -185,8 +185,6 @@ BosonPath::~BosonPath()
 
   mMap->removeColorMap("Forestation");
   mMap->removeColorMap("Slopes");
-  delete mSlopeColormap;
-  delete mForestColormap;
 
   delete[] mCellStatus;
   delete[] mCellStatusDirty;
@@ -2019,8 +2017,8 @@ bofixed* BosonPath::calculateSlopemap()
 {
   PROFILE_METHOD;
 //  boDebug(500) << k_funcinfo << endl;
-  mSlopeColormap = new BoColorMap(mMap->width(), mMap->height());
-  mMap->addColorMap(mSlopeColormap, "Slopes");
+  BoColorMap* slopeColormap = new BoColorMap(mMap->width(), mMap->height());
+  mMap->addColorMap(slopeColormap, "Slopes");
   unsigned char* slopecolors = new unsigned char[mMap->width() * mMap->height() * 3];
 
   bofixed* slopemap = new bofixed[mMap->height() * mMap->width()];
@@ -2060,7 +2058,7 @@ bofixed* BosonPath::calculateSlopemap()
       slopecolors[(y * mMap->width() + x) * 3 + 2] = s;
     }
   }
-  mSlopeColormap->update(slopecolors);
+  slopeColormap->update(slopecolors);
   delete[] slopecolors;
 //  boDebug(500) << k_funcinfo << "END" << endl;
   return slopemap;
@@ -2069,8 +2067,8 @@ bofixed* BosonPath::calculateSlopemap()
 bofixed* BosonPath::calculateForestmap()
 {
   PROFILE_METHOD;
-  mForestColormap = new BoColorMap(mMap->width(), mMap->height());
-  mMap->addColorMap(mForestColormap, "Forestation");
+  BoColorMap* forestColormap = new BoColorMap(mMap->width(), mMap->height());
+  mMap->addColorMap(forestColormap, "Forestation");
   unsigned char* forestcolors = new unsigned char[mMap->width() * mMap->height() * 3];
 
   bofixed* itemmap = new bofixed[mMap->height() * mMap->width()];
@@ -2132,7 +2130,7 @@ bofixed* BosonPath::calculateForestmap()
     }
   }
 
-  mForestColormap->update(forestcolors);
+  forestColormap->update(forestcolors);
   delete[] forestcolors;
 
   delete[] itemmap;

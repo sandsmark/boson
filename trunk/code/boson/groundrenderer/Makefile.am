@@ -16,6 +16,7 @@ libbogroundrendererplugin_la_SOURCES = \
 		boveryfastgroundrenderer.cpp \
 		boquickgroundrenderer.cpp \
 		bogroundrendererbase.cpp \
+		bocolormaprenderer.cpp \
 		boquadtreenode.cpp
 
 libbogroundrenderer_la_SOURCES = \
@@ -25,6 +26,7 @@ libbogroundrenderer_la_SOURCES = \
 		boveryfastgroundrenderer.cpp \
 		boquickgroundrenderer.cpp \
 		bogroundrendererbase.cpp \
+		bocolormaprenderer.cpp \
 		boquadtreenode.cpp
 
 pluginsdir = $(kde_datadir)/boson/groundrendererplugins

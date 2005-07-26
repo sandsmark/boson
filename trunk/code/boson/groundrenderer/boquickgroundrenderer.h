@@ -25,9 +25,12 @@
 #include "../bo3dtools.h"
 
 #include <qptrlist.h>
+#include <qptrdict.h>
 
 
 class BosonMap;
+class BoColorMap;
+class BoColorMapRenderer;
 class FogTexture;
 
 
@@ -145,6 +148,9 @@ class BoQuickGroundRenderer : public BoGroundRenderer
 
     int renderChunk(TerrainChunk* c, unsigned int* indices);
 
+  private:
+#warning FIXME: duplicated code
+    BoColorMapRenderer* getUpdatedColorMapRenderer(BoColorMap*);
 
   private:
     const BosonMap* mMap;
@@ -172,6 +178,8 @@ class BoQuickGroundRenderer : public BoGroundRenderer
     unsigned int mChunkSize;
 
     bool mCellListDirty;
+
+    QPtrDict<BoColorMapRenderer> mColorMapRenderers;
 };
 
 #endif

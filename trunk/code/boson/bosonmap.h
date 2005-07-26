@@ -22,6 +22,7 @@
 #define BOSONMAPDOM_H
 
 #include <qobject.h>
+#include <qrect.h>
 
 #include "bo3dtools.h"
 
@@ -423,17 +424,52 @@ public:
 	void update(unsigned char* data);
 	void updateRect(int x, int y, unsigned int w, unsigned int h, unsigned char* data);
 
-	BoTexture* texture() const { return mTexture; }
+	const unsigned char* textureData() const
+	{
+		return mData;
+	}
 
-	void start(const BosonMap* map);
-	void stop();
+	unsigned int width() const
+	{
+		return mWidth;
+	}
+	unsigned int height() const
+	{
+		return mHeight;
+	}
+
+	/**
+	 * @return Whether the colormap changed since @ref setNotDirty was
+	 * called.
+	 **/
+	bool isDirty() const
+	{
+		return mDirtyRect.isValid();
+	}
+
+	/**
+	 * @return A rect containing the area that changed since @ref
+	 * setNotDirty was called.
+	 **/
+	QRect dirtyRect() const
+	{
+		return mDirtyRect;
+	}
+
+	/**
+	 * Unset any previous dirty settings
+	 **/
+	void setNotDirty()
+	{
+		mDirtyRect = QRect();
+	}
 
 private:
-	BoTexture* mTexture;
 	unsigned int mWidth;
 	unsigned int mHeight;
-	unsigned int mTexWidth;
-	unsigned int mTexHeight;
+	unsigned char* mData;
+
+	QRect mDirtyRect;
 };
 
 

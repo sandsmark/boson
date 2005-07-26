@@ -30,6 +30,7 @@
 #include "../bosonconfig.h" // WARNING: groundrenderer needs to be re-installed if bosonconfig.h changes!
 #include "../botexture.h"
 #include "../playerio.h"
+#include "bocolormaprenderer.h"
 #include <bogl.h>
 #include <bodebug.h>
 
@@ -704,7 +705,7 @@ void FogTexture::cellChanged(int x1, int y1, int x2, int y2)
 BoGroundRendererBase::BoGroundRendererBase()
 {
  mCellListBuilder = 0;
- mMap = 0;
+ mCurrentMap = 0;
  mHeightMap2 = 0;
  mCellListBuilder = 0;
  mFogTexture = 0;
@@ -713,6 +714,8 @@ BoGroundRendererBase::BoGroundRendererBase()
 BoGroundRendererBase::~BoGroundRendererBase()
 {
  boDebug() << k_funcinfo << endl;
+ mColorMapRenderers.setAutoDelete(true);
+ mColorMapRenderers.clear();
  delete mFogTexture;
  delete mCellListBuilder;
 #if FIX_EDGES
@@ -737,6 +740,24 @@ void BoGroundRendererBase::setLODObject(BoGroundRendererCellListLOD* lod)
  mCellListBuilder->setLODObject(lod);
 }
 
+void BoGroundRendererBase::updateMapCache(const BosonMap* map)
+{
+ if (mCurrentMap == map) {
+	return;
+ }
+ mCurrentMap = map;
+
+ mColorMapRenderers.setAutoDelete(true);
+ mColorMapRenderers.clear();
+
+#if FIX_EDGES
+ delete[] mHeightMap2;
+ mHeightMap2 = new float[map->cornerArrayPos(map->width(), map->height()) + 1];
+#else
+ mHeightMap2 = (float*)map->heightMap();
+#endif
+}
+
 void BoGroundRendererBase::generateCellList(const BosonMap* map)
 {
  // we need to regenerate the cell list whenever the modelview or the projection
@@ -752,15 +773,11 @@ void BoGroundRendererBase::generateCellList(const BosonMap* map)
 	// we construct the display before the map is received
 	return;
  }
- if (mMap != map) {
-#if FIX_EDGES
-	delete[] mHeightMap2;
-	mHeightMap2 = new float[map->cornerArrayPos(map->width(), map->height()) + 1];
-#else
-	mHeightMap2 = (float*)map->heightMap();
-#endif
- }
- mMap = map;
+
+ // update mCurrentMap and mHeightMap2
+ // derived classes may do their own updates, too
+ updateMapCache(map);
+
  int renderCellsSize = 0;
  unsigned int renderCellsCount = 0;
  int* originalList = renderCells();
@@ -823,6 +840,8 @@ QString BoGroundRendererBase::debugStringForPoint(const BoVector3Fixed& pos) con
 
 void BoGroundRendererBase::renderVisibleCellsStart(const BosonMap* map)
 {
+ updateMapCache(map);
+
  mFogTexture->setLocalPlayerIO(localPlayerIO());
  mFogTexture->start(map);
 }
@@ -830,5 +849,18 @@ void BoGroundRendererBase::renderVisibleCellsStart(const BosonMap* map)
 void BoGroundRendererBase::renderVisibleCellsStop(const BosonMap* map)
 {
  mFogTexture->stop(map);
+}
+
+BoColorMapRenderer* BoGroundRendererBase::getUpdatedColorMapRenderer(BoColorMap* map)
+{
+ BoColorMapRenderer* r = mColorMapRenderers[map];
+ if (r) {
+	r->update();
+	return r;
+ }
+ boDebug() << k_funcinfo << "creating new colormap renderer" << endl;
+ r = new BoColorMapRenderer(map);
+ mColorMapRenderers.insert(map, r);
+ return r;
 }
 

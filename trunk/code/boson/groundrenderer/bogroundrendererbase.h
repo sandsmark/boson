@@ -21,6 +21,8 @@
 
 #include "../bogroundrenderer.h"
 
+#include <qptrdict.h>
+
 class Cell;
 class PlayerIO;
 class QString;
@@ -36,6 +38,8 @@ class QRect;
 class CellListBuilder;
 class BoQuadTreeNode;
 class BoGroundRendererCellListLOD;
+class BoColorMap;
+class BoColorMapRenderer;
 
 
 class FogTexture
@@ -128,14 +132,28 @@ protected:
 	virtual void renderVisibleCellsStart(const BosonMap* map);
 	virtual void renderVisibleCellsStop(const BosonMap* map);
 
+	/**
+	 * Called regulary when the map might have changed. Call this before you
+	 * access data that depends on the current map (and reimplement this to
+	 * update such data).
+	 *
+	 *
+	 * This method must be a noop when the given map is the same as the
+	 * current map.
+	 **/
+	virtual void updateMapCache(const BosonMap* map);
+
+	BoColorMapRenderer* getUpdatedColorMapRenderer(BoColorMap*);
+
 protected:
 	float* mHeightMap2;
 
 private:
 	CellListBuilder* mCellListBuilder;
-	const BosonMap* mMap;
+	const BosonMap* mCurrentMap;
 
 	FogTexture* mFogTexture;
+	QPtrDict<BoColorMapRenderer> mColorMapRenderers;
 };
 
 
