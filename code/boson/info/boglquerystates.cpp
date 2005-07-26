@@ -131,6 +131,7 @@ public:
         addOpenGL1_3Values();
         addOpenGL1_4Values();
         addOpenGL1_5Values();
+        addExtensionsValues();
     }
 
     void getValues()
@@ -142,6 +143,7 @@ public:
         getValuesOpenGL1_4();
         getValuesOpenGL1_5();
         getValuesOpenGL2_0();
+        getValuesExtensions();
     }
     QStringList list() const
     {
@@ -249,6 +251,10 @@ private:
     const GLubyte* m_GL_SHADING_LANGUAGE_VERSION;
     const GLubyte* m_GL_VENDOR;
     const GLubyte* m_GL_VERSION;
+
+
+    // Extensions
+    BO_VAR(GLint, GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, 1); // GL_EXT_texture_filter_anisotropic
 
 private:
     void addOpenGL1_1Values()
@@ -362,6 +368,13 @@ private:
         ADD(GL_MAX_DRAW_BUFFERS);
 #undef ADD
 #endif
+    }
+
+    void addExtensionsValues()
+    {
+#define ADD(a) mNameDict.insert(a, #a);
+        ADD(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+#undef ADD
     }
 
 
@@ -497,12 +510,23 @@ private:
             return;
         }
 #ifdef GL_VERSION_2_0
+#define UPDATE(x) mValues.insert((int)x, GLGetValue::get(x, m_##x, sizeof(m_##x) / sizeof(m_##x[0])));
         m_GL_EXTENSIONS = glGetString(GL_EXTENSIONS);
         m_GL_RENDERER = glGetString(GL_RENDERER);
         m_GL_SHADING_LANGUAGE_VERSION = glGetString(GL_SHADING_LANGUAGE_VERSION);
         m_GL_VENDOR = glGetString(GL_VENDOR);
         m_GL_VERSION = glGetString(GL_VERSION);
+#undef UPDATE
 #endif
+    }
+    void getValuesExtensions()
+    {
+#define UPDATE(x) mValues.insert((int)x, GLGetValue::get(x, m_##x, sizeof(m_##x) / sizeof(m_##x[0])));
+        if (mGLExtensions.contains("GL_EXT_texture_filter_anisotropic")) {
+            UPDATE(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+        }
+
+#undef UPDATE
     }
 
 private:
