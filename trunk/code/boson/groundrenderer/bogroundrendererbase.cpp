@@ -840,15 +840,30 @@ QString BoGroundRendererBase::debugStringForPoint(const BoVector3Fixed& pos) con
 
 void BoGroundRendererBase::renderVisibleCellsStart(const BosonMap* map)
 {
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "before method" << endl;
+ }
  updateMapCache(map);
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "after updating map cache" << endl;
+ }
 
  mFogTexture->setLocalPlayerIO(localPlayerIO());
  mFogTexture->start(map);
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "at end of method" << endl;
+ }
 }
 
 void BoGroundRendererBase::renderVisibleCellsStop(const BosonMap* map)
 {
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "before method" << endl;
+ }
  mFogTexture->stop(map);
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "at end of method" << endl;
+ }
 }
 
 BoColorMapRenderer* BoGroundRendererBase::getUpdatedColorMapRenderer(BoColorMap* map)

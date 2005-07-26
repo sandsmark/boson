@@ -161,8 +161,8 @@ bool BoMeshRendererVBO::useVBO() const
 
 bool BoMeshRendererVBO::hasVBOExtension() const
 {
- if (!BoInfo::boInfo()->openGLExtensions().contains("GL_ARB_vertex_buffer_object")) {
-	if (BoInfo::boInfo()->openGLVersion() < MAKE_VERSION(2,0,0)) {
+ if (!BoInfo::boInfo()->gl()->openGLExtensions().contains("GL_ARB_vertex_buffer_object")) {
+	if (BoInfo::boInfo()->gl()->openGLVersion() < MAKE_VERSION(2,0,0)) {
 		return false;
 	}
  }

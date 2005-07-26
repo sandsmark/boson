@@ -97,6 +97,7 @@ BoInfo::~BoInfo()
 void BoInfo::init()
 {
  d = new BoInfoPrivate;
+ mGLCache = new BoInfoGLCache(this);
 }
 
 BoInfo* BoInfo::boInfo()
@@ -107,6 +108,7 @@ BoInfo* BoInfo::boInfo()
 void BoInfo::reset()
 {
  d->mInfos.clear();
+ mGLCache->setDirty(true);
 }
 
 bool BoInfo::save(QDataStream& stream) const
@@ -268,6 +270,8 @@ void BoInfo::update(QWidget* widget)
  updateOSInfo();
  updateLibraryInfo();
  updateDevicesInfo();
+
+ updateCachedValues();
 }
 
 void BoInfo::updateLibraryInfo()
@@ -331,6 +335,12 @@ void BoInfo::updateDevicesInfo()
  insert(BoInfo::DevNVidia3, (int)checkCharacterDevice(QString::fromLatin1("/dev/nvidia3")));
 }
 
+void BoInfo::updateCachedValues()
+{
+ mGLCache->update();
+ mGLCache->setDirty(false);
+}
+
 void BoInfo::insert(int key, int value)
 {
  d->mInfos.insert(key, QVariant((int)value));
@@ -390,57 +400,6 @@ unsigned int BoInfo::getUInt(int key) const
 bool BoInfo::getBool(int key) const
 {
  return getInt(key);
-}
-
-QStringList BoInfo::openGLExtensions() const
-{
- return QStringList::split('\n', getString(OpenGLExtensionsString));
-}
-
-QStringList BoInfo::openGLValues() const
-{
- return QStringList::split('\n', getString(OpenGLValuesString));
-}
-
-QStringList BoInfo::gluExtensions() const
-{
- return QStringList::split('\n', getString(GLUExtensionsString));
-}
-
-void BoInfo::glXVersion(int* major, int* minor) const
-{
- *major = getInt(GLXVersionMajor);
- *minor = getInt(GLXVersionMinor);
-}
-
-QString BoInfo::osType() const
-{
- if (!d->mInfos.contains(BoInfo::OSTypeString)) {
-	return QString::null;
- }
- QString s = getString(BoInfo::OSTypeString);
- s.replace(QRegExp("\n"), "");
- return s;
-}
-
-QString BoInfo::osVersion() const
-{
- if (!d->mInfos.contains(BoInfo::OSVersionString)) {
-	return QString::null;
- }
- QString s = getString(BoInfo::OSVersionString);
- s.replace(QRegExp("\n"), "");
- return s;
-}
-
-QStringList BoInfo::glXClientExtensions() const
-{
- return QStringList::split('\n', getString(GLXClientExtensionsString));
-}
-
-QStringList BoInfo::glXServerExtensions() const
-{
- return QStringList::split('\n', getString(GLXServerExtensionsString));
 }
 
 QString BoInfo::keyToName(int key)
@@ -873,34 +832,30 @@ QMap<int, QVariant> BoInfo::completeData() const
  return d->mInfos;
 }
 
-bool BoInfo::hasOpenGLVersion(unsigned int version) const
+QStringList BoInfo::openGLValues() const
 {
- return (getUInt(OpenGLVersion) >= version);
+ return QStringList::split('\n', getString(OpenGLValuesString));
 }
 
-unsigned int BoInfo::openGLVersion() const
+QString BoInfo::osType() const
 {
- return getUInt(OpenGLVersion);
-}
-
-
-BoCurrentInfo::BoCurrentInfo()
-{
- mInfo = BoInfo::boInfo();
- if (!mInfo) {
-	boError() << k_funcinfo << "global BoInfo object not yet initialized" << endl;
+ if (!d->mInfos.contains(BoInfo::OSTypeString)) {
+	return QString::null;
  }
+ QString s = getString(BoInfo::OSTypeString);
+ s.replace(QRegExp("\n"), "");
+ return s;
 }
 
-BoCurrentInfo::~BoCurrentInfo()
+QString BoInfo::osVersion() const
 {
-}
-
-float BoCurrentInfo::cpuSpeed() const
-{
- if (!mInfo) {
-	return 0.0f;
+ if (!d->mInfos.contains(BoInfo::OSVersionString)) {
+	return QString::null;
  }
- return mInfo->cpuSpeed();
+ QString s = getString(BoInfo::OSVersionString);
+ s.replace(QRegExp("\n"), "");
+ return s;
 }
+
+
 

@@ -21,6 +21,8 @@
 
 #include <qstring.h>
 
+#include "boinfoglcache.h"
+
 class QStringList;
 class QWidget;
 class QVariant;
@@ -80,6 +82,11 @@ class BoInfo
 public:
 	BoInfo();
 	~BoInfo();
+
+	BoInfoGLCache* gl() const
+	{
+		return mGLCache;
+	}
 
 	enum InfoEntries {
 		// boson specific
@@ -282,102 +289,11 @@ public:
 	}
 
 	/**
-	 * Note that we don't have the OpenGL version available boson was
-	 * compiled with (at least not yet)!
-	 * @return A string containing the OpenGL version (with both, vendor
-	 * version such as mesa 3.2 and OpenGL version such as 1.1).
-	 **/
-	QString openGLVersionString() const
-	{
-		return getString(OpenGLVersionString);
-	}
-
-	/**
-	 * @return Runtime OpenGL version which is encoded using MAKE_VERSION macro.
-	 **/
-	unsigned int openGLVersion() const;
-
-	/**
-	 * @return Whether runtime OpenGL version is equal or greater than given
-	 *  version.
-	 * vesion must be encoded using MAKE_VERSION macro.
-	 **/
-	bool hasOpenGLVersion(unsigned int version) const;
-
-	/**
-	 * @return Whether runtime OpenGL version is equal or greater than given
-	 *  version.
-	 **/
-	bool hasOpenGLVersion(unsigned int major, unsigned int minor, unsigned int release) const
-	{
-		return hasOpenGLVersion(MAKE_VERSION(major, minor, release));
-	}
-
-	/**
-	 * @return A string containing the vendor of the installed OpenGL
-	 * version (runtime). Usually mesa or nvidia.
-	 **/
-	QString openGLVendorString() const
-	{
-		return getString(OpenGLVendorString);
-	}
-
-	QString openGLRendererString() const
-	{
-		return getString(OpenGLRendererString);
-	}
-
-	/**
-	 * @return A list of available OpenGL extensions. This <em>could</em> be
-	 * used to do certain tasks only if the extension is available. But if
-	 * we actually want to do that we should cache the list somewhere.
-	 **/
-	QStringList openGLExtensions() const;
-
-	/**
 	 * @return A list of all implementation dependant OpenGL values (those
 	 * that can be retrieved using glGetIntegerv() and friends). An example
 	 * is GL_MAX_TEXTURE_SIZE.
 	 **/
 	QStringList openGLValues() const;
-
-	/**
-	 * @return A string describing the GLU version.
-	 **/
-	QString gluVersionString() const
-	{
-		return getString(GLUVersionString);
-	}
-	QStringList gluExtensions() const;
-
-	QString glXClientVersionString() const
-	{
-		return getString(GLXClientVersionString);
-	}
-	QString glXClientVendorString() const
-	{
-		return getString(GLXClientVendorString);
-	}
-	QStringList glXClientExtensions() const;
-	void glXVersion(int* major, int* minor) const;
-	QString glXServerVersionString() const
-	{
-		return getString(GLXServerVersionString);
-	}
-	QString glXServerVendorString() const
-	{
-		return getString(GLXServerVendorString);
-	}
-	QStringList glXServerExtensions() const;
-
-	/**
-	 * @return TRUE if the rendering context is direct (should be so, as
-	 * non-direct is slow)
-	 **/
-	bool isDirect() const
-	{
-		return getBool(IsDirect);
-	}
 
 	/**
 	 * @return TRUE if this object has information about X, otherwise FALSE
@@ -621,6 +537,7 @@ protected:
 	void updateOSInfo();
 	void updateLibraryInfo();
 	void updateDevicesInfo();
+	void updateCachedValues();
 
 	/**
 	 * @return 0 On success, otherwise from @ref CharacterDevice, OR'ed
@@ -635,78 +552,7 @@ private:
 
 private:
 	BoInfoPrivate* d;
-};
-
-
-/**
- * @short Provide current information about the system
- *
- * While @ref BoInfo is meant to provide static information about a system, such
- * as installed libraries, CPU clock, installed RAM and so on, this class is
- * meant to provide information about dynamic data.
- *
- * The data this class operates on can change at any time and therefore it makes
- * little or no sense to store them in the @ref BoInfo database.
- *
- * This class is primarily meant to be used in-game, whereas @ref BoInfo is
- * primarily meant to provide an information log about the system. This class
- * can be used for example to retrieve the current system load. The game may
- * reduce certain effects, depending on that.
- *
- * Note that in addition to dynamic data, this class can also be used to provide
- * static data that may be useful for in-game use. One example may be the CPU
- * speed.
- *
- * @author Andreas Beckermann <b_mann@gmx.de>
- **/
-class BoCurrentInfo
-{
-public:
-	BoCurrentInfo();
-	~BoCurrentInfo();
-
-	BoInfo* boInfo() const
-	{
-		return mInfo;
-	}
-
-	/**
-	 * Returns the memory that is currently in use in the parameters.
-	 *
-	 * WARNING: these values can be very confusing, if they are not read
-	 * correctly. The most important value is @p vmData, which returns the
-	 * size of the data segment of this application. However it does NOT
-	 * necessarily return the amount of memory in use! The value depends
-	 * heavily on the paging strategy of the operating system.
-	 *
-	 * If a value is not provided by any reason, the parameter is either
-	 * not touched at all, or set to @ref QString::null.
-	 *
-	 * A NULL pointer parameter is not touched by this method.
-	 *
-	 * @return TRUE, if the data could be read, FALSE otherwise.
-	 **/
-	bool memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
-			QString* vmData, QString* vmStk, QString* vmExe, QString* vmLib,
-			QString* vmPTE) const;
-
-	/**
-	 * Returns the number of jiffies that the process has been scheduled.
-	 *
-	 * Note that this may be very linux dependent - I don't know other
-	 * systems good enough to implement an API that might be portable.
-	 *
-	 * See man 5 proc for the meaning of the parameters.
-	 *
-	 * @return TRUE if the valeus could be read, otherwise FALSE
-	 **/
-	bool cpuTime(unsigned long int* utime, unsigned long int* stime, long int* cutime, long int* cstime) const;
-
-	float cpuSpeed() const;
-
-
-private:
-	BoInfo* mInfo;
+	BoInfoGLCache* mGLCache;
 };
 
 
