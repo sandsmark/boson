@@ -875,50 +875,27 @@ void BoTextureManager::initOpenGL()
   mMaxTextureSize = glInfo->maxTextureSize();
 
   // Find out number of texture units that the card has
-  mTextureUnits = 0;
-  if(openglversion >= MAKE_VERSION_BOGL(1,3,0) || extensions.contains("GL_ARB_multitexture"))
-  {
-    glGetIntegerv(GL_MAX_TEXTURE_UNITS, &mTextureUnits);
-    if(!boglActiveTexture)
-    {
-      boWarning() << k_funcinfo << "GL_ARB_multitexture is supported, but no glActiveTexture function was found!" << endl;
-      // Disable multitexturing
-      mTextureUnits = 1;
-    }
-
-    boDebug() << k_funcinfo << mTextureUnits << " texture units are available." << endl;
-  }
-  else
+  mTextureUnits = glInfo->maxTextureUnits();
+  if (mTextureUnits == 1)
   {
     boDebug() << k_funcinfo << "Multitexturing is not supported!" << endl;
-    mTextureUnits = 1;
   }
 
   // Check if cube map textures are supported.
   // Cube maps are part of the core since OpenGL 1.3
   mSupportsTextureCube = glInfo->supportsTextureCube();
+  mMaxCubeTextureSize = glInfo->maxCubeMapTextureSize();
   if(!mSupportsTextureCube)
   {
     boDebug() << k_funcinfo << "Cube map textures are not supported!" << endl;
-    mMaxCubeTextureSize = 0;
-  }
-  else
-  {
-    // Find out maximal cube map texture size
-    glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &mMaxCubeTextureSize);
   }
 
   // Check if 3D textures are supported
   mSupportsTexture3D = glInfo->supportsTexture3D();
+  mMax3DTextureSize = glInfo->max3DTextureSize();
   if(!mSupportsTexture3D)
   {
     boDebug() << k_funcinfo << "3D textures are not supported!" << endl;
-    mMax3DTextureSize = 0;
-  }
-  else
-  {
-    // Find out maximal 3d texture size
-    glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &mMax3DTextureSize);
   }
 
   // Check if automatic mipmap generation is supported
@@ -936,11 +913,7 @@ void BoTextureManager::initOpenGL()
   }
 
   // Check if anisotropic texture filtering is supported
-  mMaxAnisotropy = 1;
-  if(extensions.contains("GL_EXT_texture_filter_anisotropic"))
-  {
-    glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &mMaxAnisotropy);
-  }
+  mMaxAnisotropy = glInfo->maxTextureMaxAnisotropy();
   boDebug() << k_funcinfo << "Max anisotropy: " << mMaxAnisotropy << endl;
   if(boConfig->intValue("TextureAnisotropy") > mMaxAnisotropy)
   {

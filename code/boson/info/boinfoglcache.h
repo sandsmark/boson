@@ -98,6 +98,10 @@ public:
 	const QString& openGLRendererString() const;
 
 	int maxTextureSize() const;
+	int maxTextureUnits() const;
+	int maxCubeMapTextureSize() const;
+	int max3DTextureSize() const;
+	int maxTextureMaxAnisotropy() const;
 	bool supportsGenerateMipmap() const;
 	bool supportsTextureCompressionS3TC() const;
 	bool supportsTexture3D() const;
