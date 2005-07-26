@@ -439,8 +439,11 @@ private:
 #define UPDATE(x) mValues.insert((int)x, GLGetValue::get(x, m_##x, sizeof(m_##x) / sizeof(m_##x[0])));
         if (mGLExtensions.contains("GL_ARB_imaging")) {
                 UPDATE(GL_MAX_COLOR_MATRIX_STACK_DEPTH);
-                UPDATE(GL_MAX_CONVOLUTION_WIDTH);
-                UPDATE(GL_MAX_CONVOLUTION_HEIGHT);
+#if 0
+                // TODO
+                glGetConvolutionParameteriv(..., m_GL_MAX_CONVOLUTION_WIDTH);
+                glGetConvolutionParameteriv(..., m_GL_MAX_CONVOLUTION_HEIGHT);
+#endif
         }
         UPDATE(GL_ALIASED_LINE_WIDTH_RANGE);
         UPDATE(GL_ALIASED_POINT_SIZE_RANGE);
