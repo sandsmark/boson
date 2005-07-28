@@ -92,18 +92,11 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  glTexGenfv(GL_T, GL_OBJECT_PLANE, texPlaneT);
  glMatrixMode(GL_TEXTURE);
 
- if (Bo3dTools::checkError()) {
-	boError() << k_funcinfo << "1" << endl;
- }
-
  bool useShaders = boConfig->boolValue("UseGroundShaders");
 
  unsigned int usedTextures = 0;
  unsigned int renderedQuads = 0;
  for (unsigned int i = 0; i < groundTheme->groundTypeCount(); i++) {
-	if (Bo3dTools::checkError()) {
-		boError() << k_funcinfo << "2 " << i << endl;
-	}
 	if (i == 1) {
 		glEnable(GL_BLEND);
 	}
@@ -133,13 +126,6 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 		usedTextures++;
 	}
 	renderedQuads += quads;
-
-	if (Bo3dTools::checkError()) {
-		boError() << k_funcinfo << "3 " << i << endl;
-	}
- }
- if (Bo3dTools::checkError()) {
-	boError() << k_funcinfo << "4" << endl;
  }
  statistics()->setRenderedQuads(renderedQuads);
  statistics()->setUsedTextures(usedTextures);
@@ -152,9 +138,6 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  }
  glLoadIdentity();
  glMatrixMode(GL_MODELVIEW);
- if (Bo3dTools::checkError()) {
-	boError() << k_funcinfo << "5" << endl;
- }
 
 #warning FIXME: does NOT belong to default renderer. belongs to base class.
  if (map->activeColorMap()) {
@@ -168,9 +151,6 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 		renderer->stop();
 		glPopAttrib();
 	}
- }
- if (Bo3dTools::checkError()) {
-	boError() << k_funcinfo << "6" << endl;
  }
 
  glDisable(GL_TEXTURE_GEN_S);
