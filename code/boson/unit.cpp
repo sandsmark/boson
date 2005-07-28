@@ -280,9 +280,7 @@ void Unit::setHealth(unsigned long int h)
  UnitBase::setHealth(h);
  if (isDestroyed()) {
 	unselect();
-	if (itemRenderer()) {
-		itemRenderer()->setAnimationMode(UnitAnimationWreckage);
-	}
+	updateAnimationMode();
  }
 }
 
@@ -1229,6 +1227,7 @@ bool Unit::loadFromXML(const QDomElement& root)
 
  recalculateMaxWeaponRange();
 
+ updateAnimationMode();
 
  return true;
 }
@@ -1716,6 +1715,14 @@ bool Unit::cellOccupied(int x, int y, bool ignoremoving) const
  }
 
  return false;
+}
+
+int Unit::getAnimationMode() const
+{
+ if (isDestroyed()) {
+	return UnitAnimationWreckage;
+ }
+ return BosonItem::getAnimationMode();
 }
 
 
@@ -2763,9 +2770,7 @@ bool Facility::init()
 	return ret;
  }
  setWork(WorkConstructed);
- if (itemRenderer()) {
-	itemRenderer()->setAnimationMode(UnitAnimationConstruction);
- }
+ updateAnimationMode();
  return true;
 }
 
@@ -2841,9 +2846,7 @@ void Facility::setConstructionStep(unsigned int step)
  if (step == constructionSteps()) {
 	setWork(WorkIdle);
 	owner()->facilityCompleted(this);
-	if (itemRenderer()) {
-		itemRenderer()->setAnimationMode(UnitAnimationIdle);
-	}
+	updateAnimationMode();
  }
 }
 
@@ -2863,15 +2866,7 @@ bool Facility::loadFromXML(const QDomElement& root)
 	d->mConstructionStep = constructionSteps();
  }
 
- if (d->mConstructionStep == constructionSteps()) {
-	if (itemRenderer()) {
-		itemRenderer()->setAnimationMode(UnitAnimationIdle);
-	}
- } else {
-	if (itemRenderer()) {
-		itemRenderer()->setAnimationMode(UnitAnimationConstruction);
-	}
- }
+ updateAnimationMode();
 
  return true;
 }
@@ -2883,5 +2878,16 @@ bool Facility::saveAsXML(QDomElement& root)
 	return false;
  }
  return true;
+}
+
+int Facility::getAnimationMode() const
+{
+ if (isDestroyed()) {
+	return Unit::getAnimationMode();
+ }
+ if (d->mConstructionStep < constructionSteps()) {
+	return UnitAnimationConstruction;
+ }
+ return Unit::getAnimationMode();
 }
 

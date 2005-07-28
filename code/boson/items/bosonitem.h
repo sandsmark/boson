@@ -174,6 +174,20 @@ public:
 	virtual BosonModel* getModelForItem() const = 0;
 
 	/**
+	 * Update the current animation mode using @ref getAnimationMode
+	 **/
+	void updateAnimationMode();
+
+	/**
+	 * @return The current animation mode, see also @ref
+	 * updateAnimationMode.
+	 **/
+	int animationMode() const
+	{
+		return mAnimationMode;
+	}
+
+	/**
 	 * Called after the constructor. You can do all kinds of initializations
 	 * here - try to use this instead of the constructor whenever possible.
 	 *
@@ -312,30 +326,12 @@ public:
 	}
 
 	/**
-	 * Render the item. This assumes the modelview matrix was already
-	 * translated and rotated to the correct position.
-	 * @param lod See @ref BoFrame::renderFrame
-	 * @param transparentmeshes Whether to render transparent or solid meshes
-	 **/
-	void renderItem(unsigned int lod = 0, bool transparentmeshes = false);
-
-	/**
-	 * @return itemRenderer()->preferredLod(dist)
-	 **/
-	unsigned int preferredLod(float dist) const;
-
-	/**
 	 * Tell the @ref itemRenderer to operate in editor mode, e.g. display
 	 * non-constructed facilities in constructed state
 	 **/
 	void setRendererToEditorMode();
 
 	bool initItemRenderer();
-
-	/**
-	 * @return TRUE if the item is in @p frustum, otherwise FALSE
-	 **/
-	bool itemInFrustum(const BoFrustum& frustum) const;
 
 	/**
 	 * @return The (cell-)coordinates of the left-top cell this object
@@ -575,6 +571,18 @@ public:
 		return mEffectsRotationIsDirty;
 	}
 
+protected:
+	/**
+	 * @return The current animation mode. @ref UnitAnimationIdle by
+	 * default. Note that currently only units use animations, but they
+	 * should be supported for every item. See also @ref
+	 * updateAnimationMode.
+	 **/
+	virtual int getAnimationMode() const
+	{
+		return UnitAnimationIdle;
+	}
+
 private:
 	/**
 	 * Change position of the item. WARNING: you <em>must</em> call @ref
@@ -642,6 +650,10 @@ private:
 
 	bool mEffectsPositionIsDirty;
 	bool mEffectsRotationIsDirty;
+
+	// AB: this is NOT saved to any file! it is calculated on the fly by
+	// updateAnimationMode() and getAnimationMode()
+	int mAnimationMode;
 };
 
 #endif

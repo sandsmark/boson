@@ -52,22 +52,6 @@ public:
 	virtual bool setModel(BosonModel*) { return true; }
 	virtual BosonModel* model() const { return 0; }
 
-	/**
-	 * For OpenGL performance <em>only</em>! Do <em>not</em> use outside
-	 * OpenGL! Especially not in pathfinding!
-	 * @ return The radius of the bounding sphere. See @ref
-	 * BosonBigDisplayBase::sphereInFrustum
-	 **/
-	inline float boundingSphereRadius() const { return mBoundingSphereRadius; }
-
-	void setBoundingSphereRadius(float r) { mBoundingSphereRadius = r; }
-
-	virtual unsigned int preferredLod(float distanceFromCamera) const
-	{
-		Q_UNUSED(distanceFromCamera);
-		return 0;
-	}
-
 	virtual void setAnimationMode(int ) { }
 
 	virtual void animate() { }
@@ -84,13 +68,30 @@ public:
 	 **/
 	bool itemInFrustum(const BoFrustum& frustum) const;
 
+	virtual unsigned int preferredLod(float distanceFromCamera) const
+	{
+		Q_UNUSED(distanceFromCamera);
+		return 0;
+	}
+
+	/**
+	 * @ return The radius of the bounding sphere. See @ref
+	 * BosonBigDisplayBase::sphereInFrustum
+	 **/
+	inline float boundingSphereRadius() const { return mBoundingSphereRadius; }
+
 	BosonItem* item() const
 	{
 		return mItem;
 	}
 
 protected:
+	int mAnimationMode;
+
+protected:
 	const QColor* teamColor() const;
+
+	void setBoundingSphereRadius(float r) { mBoundingSphereRadius = r; }
 
 private:
 	BosonItem* mItem;
