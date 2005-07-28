@@ -541,6 +541,8 @@ protected:
 	// TODO: move to BosonCanvas or to somewhere else
 	bool cellOccupied(int x, int y, bool ignoremoving = false) const;
 
+	virtual int getAnimationMode() const;
+
 
 private:
 	typedef void (Unit::*MemberFunction)(unsigned int advanceCallsCount);
@@ -753,6 +755,9 @@ public:
 
 	virtual bool saveAsXML(QDomElement& root);
 	virtual bool loadFromXML(const QDomElement& root);
+
+protected:
+	virtual int getAnimationMode() const;
 
 private:
 	class FacilityPrivate;

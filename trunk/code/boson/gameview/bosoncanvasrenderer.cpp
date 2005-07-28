@@ -428,7 +428,7 @@ void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* rende
 	// UPDATE: we could instead use the "sectors" that we are planning to
 	// use for collision detection and pathfinding also for the frustum
 	// tests (they wouldn't do floating point calculations)
-	if (!item->itemInFrustum(viewFrustum())) {
+	if (!itemRenderer->itemInFrustum(viewFrustum())) {
 		// the unit is not visible, currently. no need to draw anything.
 		continue;
 	}

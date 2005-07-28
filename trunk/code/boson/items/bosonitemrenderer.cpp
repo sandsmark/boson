@@ -22,6 +22,7 @@
 #include "../bosonmodel.h"
 #include "../bo3dtools.h"
 #include "../bosonconfig.h"
+#include "../boson.h"
 #include "bosonitem.h"
 #include "bodebug.h"
 
@@ -32,6 +33,8 @@ BosonItemRenderer::BosonItemRenderer(BosonItem* item)
 
  // 0.866 == sqrt(3*0.5) i.e. lenght of vector whose all components are 0.5
  mBoundingSphereRadius = 0.866f;
+
+ mAnimationMode = -1; // invalid - causes update once animate() is called
 }
 
 
@@ -163,13 +166,13 @@ bool BosonItemModelRenderer::setModel(BosonModel* model)
 
  setBoundingSphereRadius(model->boundingSphereRadius());
 
- setAnimationMode(UnitAnimationIdle);
  return true;
 }
 
 void BosonItemModelRenderer::setAnimationMode(int mode)
 {
  BO_CHECK_NULL_RET(item());
+ mAnimationMode = mode;
  if (!model()) {
 	boError() << k_funcinfo << "in item id=" << item()->id() << " rtti=" << item()->rtti() << endl;
 	BO_NULL_ERROR(model());
@@ -192,6 +195,11 @@ void BosonItemModelRenderer::setAnimationMode(int mode)
 
 void BosonItemModelRenderer::animate()
 {
+ if (item()) {
+	if (boGame && boGame->gameMode() && mAnimationMode != item()->animationMode()) {
+		setAnimationMode(item()->animationMode());
+	}
+ }
  if (!mCurrentAnimation) {
 	return;
  }
