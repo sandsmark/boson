@@ -94,8 +94,6 @@ public:
 
 	BosonMap* mMap; // just a pointer - no memory allocated
 
-	QPtrList<BosonItem> mAnimList;
-
 	BoItemList mAllItems;
 
 	// by default ALL items are in "work" == -1. if an item changes its work
@@ -139,13 +137,13 @@ public:
 	{
 		mCanvas = c;
 	}
-	void advance(const BoItemList& allItems, const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount, bool advanceFlag);
+	void advance(const BoItemList& allItems, unsigned int advanceCallsCount, bool advanceFlag);
 
 protected:
-	void advanceItems(const BoItemList& allItems, const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount, bool advanceFlag);
-	void itemAdvance(const BoItemList& allItems, const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount); // calls BosonItem::advance()
+	void advanceItems(const BoItemList& allItems, unsigned int advanceCallsCount, bool advanceFlag);
+	void itemReload(const BoItemList& allItems, unsigned int advanceCallsCount); // calls BosonItem::advance()
 
-	// AB: note that animItems is not used here currently. we use
+	// AB: note that allItems is not used here currently. we use
 	// mCanvas->d->mWork2AdvanceList.
 	void advanceFunctionAndMove(unsigned int advanceCallsCount, bool advanceFlag);
 	void syncAdvanceFunctions(const BoItemList& allItems, bool advanceFlag); // MUST be called after advanceFunction() stuff
@@ -157,7 +155,7 @@ private:
 	BosonCanvas* mCanvas;
 };
 
-void BoCanvasAdvance::advance(const BoItemList& allItems, const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount, bool advanceFlag)
+void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCallsCount, bool advanceFlag)
 {
  boProfiling->push(prof_funcinfo + " - Whole method");
 
@@ -168,7 +166,7 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, const QPtrList<BosonIt
   * the most time consuming part.
   */
  boProfiling->push("Advance Items");
- advanceItems(allItems, animItems, advanceCallsCount, advanceFlag);
+ advanceItems(allItems, advanceCallsCount, advanceFlag);
  boProfiling->pop(); // Advance Items
 
  // TODO: check when is it best to do this
@@ -194,7 +192,7 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, const QPtrList<BosonIt
  boProfiling->pop(); // Whole method
 }
 
-void BoCanvasAdvance::advanceItems(const BoItemList& allItems, const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount, bool advanceFlag)
+void BoCanvasAdvance::advanceItems(const BoItemList& allItems, unsigned int advanceCallsCount, bool advanceFlag)
 {
  mCanvas->lockAdvanceFunction();
  mCanvas->d->mStatistics->resetWorkCounts();
@@ -203,8 +201,8 @@ void BoCanvasAdvance::advanceItems(const BoItemList& allItems, const QPtrList<Bo
  // AB: profiling information will be inaccurate because of this... we are
  // collecting for every item advance() here, and below for some items
  // advanceFunction(). those will be listed as *different* items...
- boProfiling->push("Advance: BosonItem::advance()");
- itemAdvance(allItems, animItems, advanceCallsCount);
+ boProfiling->push("Advance: BosonItem::reload()");
+ itemReload(allItems, advanceCallsCount);
  boProfiling->pop();
 
  // now the rest - mainly call BosonItem::advanceFunction().
@@ -225,20 +223,8 @@ void BoCanvasAdvance::advanceItems(const BoItemList& allItems, const QPtrList<Bo
  mCanvas->unlockAdvanceFunction();
 }
 
-// FIXME: name is completely wrong now. it doesn't advance anything, but does
-// animate() and reload() only.
-void BoCanvasAdvance::itemAdvance(const BoItemList& allItems, const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount)
+void BoCanvasAdvance::itemReload(const BoItemList& allItems, unsigned int advanceCallsCount)
 {
- BosonProfiler profAnimateReload("Advance: BosonItem::animate() and reload() (in itemAdvance() - whole method)");
-
- BosonProfiler profAnimate("Advance: BosonItem::animate() (in itemAdvance())");
- QPtrListIterator<BosonItem> animIt(animItems);
- for (; animIt.current(); ++animIt) {
-	animIt.current()->animate(advanceCallsCount);
- }
- profAnimate.pop();
-
- BosonProfiler profReload("Advance: BosonItem::reload() (in itemAdvance())");
  const unsigned int interval = 5;
  if (advanceCallsCount % interval == 0) {
 	BoItemList::ConstIterator allIt;
@@ -247,7 +233,6 @@ void BoCanvasAdvance::itemAdvance(const BoItemList& allItems, const QPtrList<Bos
 		(*allIt)->reload(interval);
 	}
  }
- profReload.pop();
 }
 
 void BoCanvasAdvance::advanceFunctionAndMove(unsigned int advanceCallsCount, bool advanceFlag)
@@ -489,10 +474,6 @@ void BosonCanvas::quitGame()
 	(*it).clear();
  }
  deleteItems(d->mAllItems);
- if (!d->mAnimList.isEmpty()) {
-	boError() << k_funcinfo << "mAnimList is not empty!" << endl;
-	d->mAnimList.clear();
- }
  if (!d->mAllItems.isEmpty()) {
 	boError() << k_funcinfo << "mAllItems is not empty!" << endl;
  }
@@ -533,7 +514,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag)
  boProfiling->push("slotAdvance()");
 
  BoCanvasAdvance a(this);
- a.advance(d->mAllItems, d->mAnimList, advanceCallsCount, advanceFlag);
+ a.advance(d->mAllItems, advanceCallsCount, advanceFlag);
 
  boProfiling->pop();
  boProfiling->popStorage();
@@ -588,23 +569,6 @@ void BosonCanvas::setMap(BosonMap* map)
 {
  d->mMap = map;
  collisions()->setMap(map);
-}
-
-void BosonCanvas::addAnimation(BosonItem* item)
-{
- if (!d->mAnimList.contains(item)) {
-	d->mAnimList.append(item);
- } else {
-	boError() << k_funcinfo << item << " has been added before! id=" << item->id() << endl;
- }
-}
-
-void BosonCanvas::removeAnimation(BosonItem* item)
-{
- bool ok = d->mAnimList.removeRef(item);
- if (!ok) {
-	boError() << k_funcinfo << "could not remove animation for " << item << " == " << item->id() << " which is not in the list!" << endl;
- }
 }
 
 void BosonCanvas::unitMoved(Unit* unit, bofixed oldX, bofixed oldY)
@@ -1171,7 +1135,6 @@ void BosonCanvas::deleteItem(BosonItem* item)
 
 void BosonCanvas::removeItem(BosonItem* item)
 {
- removeAnimation(item);
  d->mAllItems.remove(item);
  for (BoItemList::Iterator it = d->mAllItems.begin(); it != d->mAllItems.end(); ++it) {
 	(*it)->itemRemoved(item);
@@ -1208,11 +1171,6 @@ void BosonCanvas::deleteUnusedShots()
 	BosonItem* i = unusedShots.take(0);
 	deleteItem(i);
  }
-}
-
-unsigned int BosonCanvas::animationsCount() const
-{
- return d->mAnimList.count();
 }
 
 bool BosonCanvas::loadFromXML(const QDomElement& root)
@@ -1744,10 +1702,6 @@ BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type
 	addItem(item);
 	item->setId(id);
 	item->move(pos.x(), pos.y(), pos.z());
-	addAnimation(item);
-	if (!boGame->gameMode()) {
-		item->setRendererToEditorMode();
-	}
 	if (item && !item->init()) {
 		boError() << k_funcinfo << "item initialization failed. cannot create item." << endl;
 		deleteItem(item);

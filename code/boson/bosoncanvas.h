@@ -226,10 +226,6 @@ public:
 	 **/
 	float terrainHeightAtPoint(bofixed x, bofixed y) const;
 
-	void addAnimation(BosonItem* item);
-	void removeAnimation(BosonItem* item);
-	unsigned int animationsCount() const;
-
 	/**
 	 * Request to change the advance list in the next advance phase.
 	 **/
