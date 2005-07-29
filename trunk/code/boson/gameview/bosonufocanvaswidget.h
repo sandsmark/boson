@@ -73,6 +73,7 @@ public slots:
 protected:
 	void addEffect(BosonEffect* effect);
 	void addEffects(const QPtrList<BosonEffect>& effects);
+	void animateItems(unsigned int advanceCallsCount);
 	void advanceEffects(float elapsed);
 	void setParticlesDirty(bool);
 	void addFacilityConstructedEffects(Unit* facility);

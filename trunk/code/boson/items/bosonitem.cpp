@@ -141,7 +141,6 @@ BosonItem::BosonItem(Player* owner, BosonCanvas* canvas)
  mAccelerationSpeed = 0;
  mDecelerationSpeed = 0;
 
- mIsAnimated = true; // obsolete! remove!
  mIsSelected = false;
  mIsGroupLeaderOfSelection = false;
 
@@ -393,29 +392,6 @@ bool BosonItem::loadFromXML(const QDomElement& root)
  updateAnimationMode();
 
  return true;
-}
-
-void BosonItem::animate(unsigned int)
-{
- if (itemRenderer()) {
-	itemRenderer()->animate();
- }
-}
-
-// AB: obsolete. is done in BosonItemRenderer::animate() now
-void BosonItem::setRendererToEditorMode()
-{
- if (!itemRenderer()) {
-	return;
- }
-#if 0
- // editor won't display the construction but always completed
- // facilities. otherwise it's hard to recognize where they
- // were actually placed
-#warning FIXME
-// itemRenderer()->setShowGLConstructionSteps(false);
- setAnimationMode(UnitAnimationIdle);
-#endif
 }
 
 #include "bosonshot.h" // for an explosion hack below

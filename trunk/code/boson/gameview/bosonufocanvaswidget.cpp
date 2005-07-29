@@ -34,6 +34,7 @@
 #include "../bosonconfig.h"
 #include "../bosonprofiling.h"
 #include "../items/bosonshot.h"
+#include "../items/bosonitemrenderer.h"
 #include "../bosonweapon.h"
 #include "../unit.h"
 #include "../bosoneffectmanager.h"
@@ -244,15 +245,29 @@ void BosonUfoCanvasWidget::addEffects(const QPtrList<BosonEffect>& effects)
 
 void BosonUfoCanvasWidget::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag)
 {
- Q_UNUSED(advanceCallsCount);
  Q_UNUSED(advanceFlag);
  PROFILE_METHOD
  setParticlesDirty(true);
+ animateItems(advanceCallsCount);
  advanceEffects(0.05);
 
  boProfiling->push("Advance Water");
  boWaterRenderer->update(0.05);
  boProfiling->pop();
+}
+
+void BosonUfoCanvasWidget::animateItems(unsigned int advanceCallsCount)
+{
+ Q_UNUSED(advanceCallsCount);
+ BO_CHECK_NULL_RET(d->mCanvas);
+ const BoItemList* allItems = d->mCanvas->allItems();
+ BoItemList::const_iterator end(allItems->end());
+ for (BoItemList::const_iterator it = allItems->begin(); it != end; ++it) {
+	BosonItemRenderer* r = (*it)->itemRenderer();
+	if (r) {
+		r->animate();
+	}
+ }
 }
 
 void BosonUfoCanvasWidget::advanceEffects(float elapsed)

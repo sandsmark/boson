@@ -325,12 +325,6 @@ public:
 		return mIsSelected;
 	}
 
-	/**
-	 * Tell the @ref itemRenderer to operate in editor mode, e.g. display
-	 * non-constructed facilities in constructed state
-	 **/
-	void setRendererToEditorMode();
-
 	bool initItemRenderer();
 
 	/**
@@ -461,8 +455,6 @@ public:
 
 	inline void setVisible(bool v) { mIsVisible = v; }
 	inline bool isVisible() const { return mIsVisible; }
-
-	void animate(unsigned int advanceCallsCount);
 
 	/**
 	 * Reloads everything that can be reloaded. For example in @ref Unit
@@ -640,7 +632,6 @@ private:
 	bofixed mXRotation;
 	bofixed mYRotation;
 
-	bool mIsAnimated;
 	bool mIsSelected;
 	bool mIsGroupLeaderOfSelection;
 
