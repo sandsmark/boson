@@ -58,11 +58,6 @@ unsigned int BosonCanvasStatistics::mapWidth() const
  return mCanvas->mapWidth();
 }
 
-unsigned int BosonCanvasStatistics::animationsCount() const
-{
- return mCanvas->animationsCount();
-}
-
 unsigned int BosonCanvasStatistics::allItemsCount() const
 {
  return mCanvas->allItemsCount();
