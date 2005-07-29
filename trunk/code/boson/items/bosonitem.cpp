@@ -27,7 +27,6 @@
 #include "../bosonconfig.h"
 #include "../bo3dtools.h"
 #include "bosonitempropertyhandler.h"
-#include "bosonitemrenderer.h"
 #include "bodebug.h"
 
 #include <qptrlist.h>
@@ -145,7 +144,6 @@ BosonItem::BosonItem(Player* owner, BosonCanvas* canvas)
  mIsGroupLeaderOfSelection = false;
 
  mCells = new QPtrVector<Cell>();
- mRenderer = 0;
  mAnimationMode = UnitAnimationIdle;
 }
 
@@ -160,7 +158,6 @@ BosonItem::~BosonItem()
 	}
  }
  delete mCells;
- delete mRenderer;
 }
 
 
@@ -392,47 +389,6 @@ bool BosonItem::loadFromXML(const QDomElement& root)
  updateAnimationMode();
 
  return true;
-}
-
-#include "bosonshot.h" // for an explosion hack below
-bool BosonItem::initItemRenderer()
-{
- if (mRenderer) {
-	boWarning() << k_funcinfo << "called twice" << endl;
-	return true;
- }
-
- // TODO: a virtual bool providesModel() method would be handy here. by default
- // it would return true, but e.g. the explosion class would return false.
- bool providesModel = true;
-
- if (RTTI::isShot(rtti())) {
-	// AB: this is a hack. implement a providesModel() method instead.
-	if (((BosonShot*)this)->type() == BosonShot::Explosion) {
-		providesModel = false;
-	}
- }
-
- if (boConfig->boolValue("ForceDisableModelLoading")) {
-	providesModel = false;
- }
-
- // AB: note that we can of course use renderers other than the model renderer.
- // e.g. we might use some special renderer for bullets or so (i.e. not use any
- // model).
- // but as this is not required yet, a simple if (providesModel) is sufficient
- // here.
- bool ret = true;
- if (providesModel) {
-	mRenderer = new BosonItemModelRenderer(this);
-	ret = itemRenderer()->setModel(getModelForItem());
-	if (!ret) {
-		boWarning() << k_funcinfo << "itemRenderer()->setModel() failed" << endl;
-	}
- } else {
-	mRenderer = new BosonItemRenderer(this);
- }
- return ret;
 }
 
 void BosonItem::updateAnimationMode()

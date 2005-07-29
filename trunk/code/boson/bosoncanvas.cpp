@@ -1707,11 +1707,6 @@ BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type
 		deleteItem(item);
 		item = 0;
 	}
-	if (!item->initItemRenderer()) {
-		boError() << k_funcinfo << "initModel() failed. cannot create item." << endl;
-		deleteItem(item);
-		item = 0;
-	}
  }
  if (item) {
 	if (RTTI::isUnit(rtti)) {

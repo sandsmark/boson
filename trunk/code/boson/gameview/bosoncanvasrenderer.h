@@ -23,6 +23,8 @@
 #include "../defines.h"
 #include "../bo3dtools.h"
 
+#include <qptrlist.h>
+
 class BosonCanvas;
 class BosonCursor;
 class BoSelection;
@@ -34,6 +36,7 @@ class BoGameCamera;
 class BoAutoGameCamera;
 class BoItemList;
 class BosonItem;
+class BosonItemRenderer;
 class BoPixmapRenderer;
 class BoLight;
 class BoFontInfo;
@@ -51,6 +54,70 @@ class QDomElement;
 template<class T> class QPtrList;
 template<class T> class QValueVector;
 template<class T> class QValueList;
+
+
+class BosonItemEffects
+{
+public:
+	BosonItemEffects(BosonItem* item)
+	{
+		mItem = item;
+	}
+	~BosonItemEffects()
+	{
+		clearEffects();
+	}
+
+	const BosonItem* item() const
+	{
+		return mItem;
+	}
+	void setEffects(const QPtrList<BosonEffect>& effects, QPtrList<BosonEffect>* takeOwnership);
+	void addEffect(BosonEffect* e, QPtrList<BosonEffect>* takeOwnership);
+	void clearEffects();
+	void removeEffect(BosonEffect* e);
+	const QPtrList<BosonEffect>& effects() const
+	{
+		return mEffects;
+	}
+
+	void updateEffectsPosition();
+	void updateEffectsRotation();
+
+private:
+	QPtrList<BosonEffect> mEffects;
+	BosonItem* mItem;
+};
+
+
+class BosonItemContainer
+{
+public:
+	BosonItemContainer(BosonItem* item);
+	~BosonItemContainer();
+
+	bool initItemRenderer();
+
+	BosonItem* item() const
+	{
+		return mItem;
+	}
+	BosonItemRenderer* itemRenderer() const
+	{
+		return mItemRenderer;
+	}
+	BosonItemEffects* effects() const
+	{
+		return mEffects;
+	}
+
+private:
+	BosonItem* mItem;
+	BosonItemRenderer* mItemRenderer;
+	BosonItemEffects* mEffects;
+};
+
+
 
 class BosonCanvasRendererPrivate;
 /**
@@ -82,7 +149,7 @@ public:
 
 	void reset();
 	void initGL();
-	void paintGL(const BosonCanvas* canvas, const QPtrList<BosonEffect>& effects);
+	void paintGL(const BosonCanvas* canvas, const QPtrList<BosonItemContainer>& allItems, const QPtrList<BosonEffect>& effects);
 	unsigned int renderedItems() const;
 	unsigned int renderedCells() const;
 	unsigned int renderedParticles() const;
@@ -97,7 +164,7 @@ public:
 
 protected:
 	void renderGround(const BosonMap*);
-	void renderItems(const BoItemList* allCanvasItems);
+	void renderItems(const QPtrList<BosonItemContainer>& allCanvasItems);
 	void renderSelections(const BoItemList* selectedItems);
 	void renderWater();
 	void renderFog(BoVisibleEffects&);
@@ -105,7 +172,7 @@ protected:
 	void renderBulletTrailEffects(BoVisibleEffects& visible);
 	void renderFadeEffects(BoVisibleEffects& visible);
 	void renderPathLines(const BosonCanvas* canvas, QValueList<QPoint>& path, bool isFlying, float _z);
-	void createRenderItemList(QValueVector<BoRenderItem>* renderItemList, const BoItemList* allItems);
+	void createRenderItemList(QValueVector<BoRenderItem>* renderItemList, const QPtrList<BosonItemContainer>& allItems);
 	void createSelectionsList(BoItemList* selections, const QValueVector<BoRenderItem>* relevantItems);
 	void createVisibleEffectsList(BoVisibleEffects*, const QPtrList<BosonEffect>& allEffects, unsigned int mapWidth, unsigned int mapHeight);
 

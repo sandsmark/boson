@@ -33,7 +33,6 @@ class BosonAnimation;
 class Cell;
 class BosonItemPropertyHandler;
 class Player;
-class BosonItemRenderer;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
 template<class T> class BoRect;
@@ -200,7 +199,6 @@ public:
 	 **/
 	virtual bool init() { return true; }
 
-	BosonItemRenderer* itemRenderer() const { return mRenderer; }
 	inline BosonCanvas* canvas() const { return mCanvas; }
 	BosonCollisions* collisions() const;
 	inline Player* owner() const { return mOwner; }
@@ -324,8 +322,6 @@ public:
 		}
 		return mIsSelected;
 	}
-
-	bool initItemRenderer();
 
 	/**
 	 * @return The (cell-)coordinates of the left-top cell this object
@@ -606,7 +602,6 @@ private:
 	void removeFromCells();
 
 private:
-	BosonItemRenderer* mRenderer;
 	BosonCanvas* mCanvas;
 	Player* mOwner;
 	// FIXME: use KGameProperty here. We can do so, since we don't use
