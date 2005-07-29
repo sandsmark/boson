@@ -49,8 +49,6 @@ public:
 	 **/
 	unsigned int mapWidth() const;
 
-	unsigned int animationsCount() const;
-
 	/**
 	 * WARNING: you must call @ref updateItemCount before calling this!
 	 * Otherwise you'll get old results!
