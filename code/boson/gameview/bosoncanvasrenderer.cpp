@@ -111,6 +111,111 @@ static BosonModel* renderSingleItem(
 }
 
 
+void BosonItemEffects::setEffects(const QPtrList<BosonEffect>& effects, QPtrList<BosonEffect>* takeOwnership)
+{
+ clearEffects();
+// boDebug() << k_funcinfo << effects.count() << endl;
+ for (QPtrListIterator<BosonEffect> it(effects); it.current(); ++it) {
+	addEffect(it.current(), takeOwnership);
+ }
+}
+void BosonItemEffects::addEffect(BosonEffect* e, QPtrList<BosonEffect>* takeOwnership)
+{
+ e->setOwnerId(mItem->id());
+ mEffects.append(e);
+ if (takeOwnership) {
+	takeOwnership->append(e);
+ }
+}
+
+void BosonItemEffects::removeEffect(BosonEffect* e)
+{
+ mEffects.removeRef(e);
+}
+
+void BosonItemEffects::clearEffects()
+{
+ for (QPtrListIterator<BosonEffect> it(mEffects); it.current(); ++it) {
+	it.current()->setOwnerId(0);
+ }
+ mEffects.clear();
+}
+
+void BosonItemEffects::updateEffectsPosition()
+{
+ BoVector3Fixed pos(item()->x() + item()->width() / 2, item()->y() + item()->height() / 2, item()->z());
+ pos.canvasToWorld();
+ for (QPtrListIterator<BosonEffect> it(mEffects); it.current(); ++it) {
+	it.current()->setPosition(pos);
+ }
+ mItem->setEffectsPositionDirty(false);
+}
+
+void BosonItemEffects::updateEffectsRotation()
+{
+ BoVector3Fixed rotation(item()->xRotation(), item()->yRotation(), item()->rotation());
+ for (QPtrListIterator<BosonEffect> it(mEffects); it.current(); ++it) {
+	it.current()->setRotation(rotation);
+ }
+ mItem->setEffectsRotationDirty(false);
+}
+
+BosonItemContainer::BosonItemContainer(BosonItem* item)
+{
+ mItem = item;
+ mItemRenderer = 0;
+ mEffects = new BosonItemEffects(mItem);
+}
+
+BosonItemContainer::~BosonItemContainer()
+{
+ delete mItemRenderer;
+ delete mEffects;
+}
+
+#include "../items/bosonshot.h" // for an explosion hack below
+bool BosonItemContainer::initItemRenderer()
+{
+ if (mItemRenderer) {
+	boWarning() << k_funcinfo << "called twice" << endl;
+	return true;
+ }
+
+ // TODO: a virtual bool providesModel() method would be handy here. by default
+ // it would return true, but e.g. the explosion class would return false.
+ bool providesModel = true;
+
+ if (RTTI::isShot(item()->rtti())) {
+	// AB: this is a hack. implement a providesModel() method instead.
+	if (((BosonShot*)item())->type() == BosonShot::Explosion) {
+		providesModel = false;
+	}
+ }
+
+ if (boConfig->boolValue("ForceDisableModelLoading")) {
+	providesModel = false;
+ }
+
+ // AB: note that we can of course use renderers other than the model renderer.
+ // e.g. we might use some special renderer for bullets or so (i.e. not use any
+ // model).
+ // but as this is not required yet, a simple if (providesModel) is sufficient
+ // here.
+ bool ret = true;
+ if (providesModel) {
+	mItemRenderer = new BosonItemModelRenderer(item());
+	ret = itemRenderer()->setModel(item()->getModelForItem());
+	if (!ret) {
+		boWarning() << k_funcinfo << "itemRenderer()->setModel() failed" << endl;
+		delete mItemRenderer;
+		mItemRenderer = new BosonItemRenderer(item());
+	}
+ } else {
+	mItemRenderer = new BosonItemRenderer(item());
+ }
+ return ret;
+}
+
 class BoVisibleEffects
 {
 public:
@@ -140,15 +245,17 @@ static void updateEffects(BoVisibleEffects& v);
 class BoRenderItem
 {
 public:
-	BoRenderItem() { modelId = 0; item = 0; }
-	BoRenderItem(unsigned int _modelId, BosonItem* _item)
+	BoRenderItem() { modelId = 0; item = 0; itemRenderer = 0; }
+	BoRenderItem(unsigned int _modelId, BosonItem* _item, BosonItemRenderer* _itemRenderer)
 	{
 		modelId = _modelId;
 		item = _item;
+		itemRenderer = _itemRenderer;
 	}
 
 	BosonItem* item;
 	unsigned int modelId;
+	BosonItemRenderer* itemRenderer;
 };
 
 class BosonCanvasRendererPrivate
@@ -278,7 +385,7 @@ void BosonCanvasRenderer::reset()
  d->mVisibleEffects.mParticleList.clear();
 }
 
-void BosonCanvasRenderer::paintGL(const BosonCanvas* canvas, const QPtrList<BosonEffect>& effects)
+void BosonCanvasRenderer::paintGL(const BosonCanvas* canvas, const QPtrList<BosonItemContainer>& allItems, const QPtrList<BosonEffect>& effects)
 {
  PROFILE_METHOD;
  BO_CHECK_NULL_RET(localPlayerIO());
@@ -314,7 +421,7 @@ void BosonCanvasRenderer::paintGL(const BosonCanvas* canvas, const QPtrList<Boso
  }
 
 
- renderItems(canvas->allItems());
+ renderItems(allItems);
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "after item rendering" << endl;
@@ -398,17 +505,16 @@ void BosonCanvasRenderer::renderBoundingBox(const BoVector3Float& c1, const BoVe
  glEnd();
 }
 
-void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* renderItemList, const BoItemList* allItems)
+void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* renderItemList, const QPtrList<BosonItemContainer>& allItems)
 {
  BO_CHECK_NULL_RET(localPlayerIO());
 
  renderItemList->clear();
- renderItemList->reserve(allItems->count());
+ renderItemList->reserve(allItems.count());
 
- BoItemList::const_iterator it = allItems->begin();
- for (; it != allItems->end(); ++it) {
-	BosonItem* item = *it;
-	BosonItemRenderer* itemRenderer = item->itemRenderer();
+ for (QPtrListIterator<BosonItemContainer> it(allItems); it.current(); ++it) {
+	BosonItem* item = it.current()->item();
+	BosonItemRenderer* itemRenderer = it.current()->itemRenderer();
 
 	if (!item->isVisible() || !itemRenderer) {
 		continue;
@@ -443,12 +549,12 @@ void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* rende
 		if (itemRenderer->model()) {
 			modelid = itemRenderer->model()->id();
 		}
-		renderItemList->append(BoRenderItem(modelid, item));
+		renderItemList->append(BoRenderItem(modelid, item, itemRenderer));
 	}
  }
 }
 
-void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
+void BosonCanvasRenderer::renderItems(const QPtrList<BosonItemContainer>& allCanvasItems)
 {
  PROFILE_METHOD;
  BoTextureManager::BoTextureBindCounter bindCounter(boTextureManager, &d->mTextureBindsItems);
@@ -517,7 +623,7 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
  // Render all items
  for (unsigned int i = 0; i < itemCount; i++) {
 	const BosonItem* item = d->mRenderItemList[i].item;
-	BosonItemRenderer* itemRenderer = item->itemRenderer();
+	BosonItemRenderer* itemRenderer = d->mRenderItemList[i].itemRenderer;
 	if (!itemRenderer) {
 		BO_NULL_ERROR(itemRenderer);
 		continue;
@@ -565,7 +671,7 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
  //glDisable(GL_LIGHTING);
  for (unsigned int i = 0; i < transparentModels.count(); i++) {
 	BosonItem* item = transparentModels[i].item;
-	BosonItemRenderer* itemRenderer = item->itemRenderer();
+	BosonItemRenderer* itemRenderer = transparentModels[i].itemRenderer;
 	if (!itemRenderer) {
 		BO_NULL_ERROR(itemRenderer);
 		continue;
