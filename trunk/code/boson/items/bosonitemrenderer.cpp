@@ -195,9 +195,18 @@ void BosonItemModelRenderer::setAnimationMode(int mode)
 
 void BosonItemModelRenderer::animate()
 {
- if (item()) {
-	if (boGame && boGame->gameMode() && mAnimationMode != item()->animationMode()) {
-		setAnimationMode(item()->animationMode());
+ BO_CHECK_NULL_RET(item());
+ if (boGame) {
+	if (boGame->gameMode()) {
+		if (mAnimationMode != item()->animationMode()) {
+			setAnimationMode(item()->animationMode());
+			return;
+		}
+	} else {
+		if (mAnimationMode != UnitAnimationIdle) {
+			setAnimationMode(UnitAnimationIdle);
+			return;
+		}
 	}
  }
  if (!mCurrentAnimation) {
