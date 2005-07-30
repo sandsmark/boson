@@ -148,8 +148,6 @@ class BosonWeaponProperties : public PluginProperties
      **/
     QString sound(int soundEvent) const;
 
-    void playSound(WeaponSoundEvent event) const;
-
     QMap<int, QString> sounds() const;
 
     unsigned long int id() const  { return mId; }

@@ -376,7 +376,9 @@ void BosonUfoCanvasWidget::slotShotFired(BosonShot* shot, BosonWeapon* weapon)
  BoVector3Fixed pos(shot->x(), shot->y(), shot->z());
  d->mEffectManager->loadWeaponType(weapon->properties());
  addEffects(d->mEffectManager->newShootEffects(weapon->properties(), pos, weapon->unit()->rotation()));
- weapon->properties()->playSound(SoundWeaponShoot);
+
+ BO_CHECK_NULL_RET(weapon->speciesTheme());
+ weapon->speciesTheme()->playSound(weapon->properties(), SoundWeaponShoot);
 }
 
 void BosonUfoCanvasWidget::slotShotHit(BosonShot* shot)
@@ -432,8 +434,8 @@ void BosonUfoCanvasWidget::slotShotHit(BosonShot* shot)
 	addEffects(d->mEffectManager->newHitEffects(shot->properties(), pos));
  }
 
- if (shot->properties()) {
-	shot->properties()->playSound(SoundWeaponHit);
+ if (shot->properties() && shot->properties()->speciesTheme()) {
+	shot->properties()->speciesTheme()->playSound(shot->properties(), SoundWeaponHit);
  }
 
  BO_CHECK_NULL_RET(effects);
@@ -444,10 +446,11 @@ void BosonUfoCanvasWidget::slotShotHit(BosonShot* shot)
 void BosonUfoCanvasWidget::slotUnitDestroyed(Unit* unit)
 {
  BO_CHECK_NULL_RET(unit);
+ BO_CHECK_NULL_RET(unit->speciesTheme());
  BosonItemContainer* c = d->mItem2ItemContainer[unit];
  BO_CHECK_NULL_RET(c);
 
- unit->playSound(SoundReportDestroyed);
+ unit->speciesTheme()->playSound(unit, SoundReportDestroyed);
  BosonItemEffects* e = c->effects();
  if (e && e->effects().count() > 0) {
 	// Make all unit's effects obsolete

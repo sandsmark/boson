@@ -1659,9 +1659,7 @@ void BosonGameView::removeSelectionRect(bool replace)
 	if (!selection()->isEmpty()) {
 		Unit* u = selection()->leader();
 		if (localPlayerIO()->ownsUnit(u)) {
-			// TODO: do not play sound here
-			// instead make virtual and play in derived class
-			u->playSound(SoundOrderSelect);
+			u->speciesTheme()->playSound(u, SoundOrderSelect);
 		}
 	}
  } else {
@@ -1684,7 +1682,7 @@ void BosonGameView::removeSelectionRect(bool replace)
 		// cannot be placed into selection() cause we don't have localPlayer
 		// there
 		if (localPlayerIO()->ownsUnit(unit)) {
-			unit->playSound(SoundOrderSelect);
+			unit->speciesTheme()->playSound(unit, SoundOrderSelect);
 		}
 	} else {
 		if (replace) {

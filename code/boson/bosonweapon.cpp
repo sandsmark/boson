@@ -440,11 +440,6 @@ QString BosonWeaponProperties::sound(int soundEvent) const
   return mSounds[soundEvent];
 }
 
-void BosonWeaponProperties::playSound(WeaponSoundEvent event) const
-{
-  speciesTheme()->playSound(this, event);
-}
-
 QMap<int, QString> BosonWeaponProperties::sounds() const
 {
   return mSounds;
