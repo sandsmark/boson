@@ -427,8 +427,6 @@ public:
 	 **/
 	bool isNextTo(Unit* unit) const;
 
-	void playSound(UnitSoundEvent event);
-
 	void loadWeapons();
 
 	bool canShootAt(Unit* u);

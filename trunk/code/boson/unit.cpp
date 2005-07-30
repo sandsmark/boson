@@ -1421,14 +1421,6 @@ bool Unit::isNextTo(Unit* target) const
  return false;
 }
 
-void Unit::playSound(UnitSoundEvent event)
-{
- if (!speciesTheme()) {
-	return;
- }
- speciesTheme()->playSound(this, event);
-}
-
 void Unit::turnTo(int deg)
 {
 // boDebug() << k_funcinfo << id() << ": turning to " << deg << endl;

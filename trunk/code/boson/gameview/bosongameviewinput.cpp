@@ -39,6 +39,7 @@
 #include "bosonlocalplayerinput.h"
 #include "../bosonweapon.h"
 #include "../bo3dtools.h"
+#include "../speciestheme.h"
 
 #include <klocale.h>
 
@@ -283,7 +284,10 @@ bool BosonGameViewInput::actionMoveWithoutAttack(const BoVector3Fixed& canvasVec
  // z is ignored
  localPlayerInput()->moveWithoutAttack(selection()->allUnits(), canvasVector.x(), canvasVector.y());
  if (localPlayerIO()->ownsUnit(selection()->leader())) {
-	selection()->leader()->playSound(SoundOrderMove);
+	Unit* leader = selection()->leader();
+	if (leader->speciesTheme()) {
+		leader->speciesTheme()->playSound(leader, SoundOrderMove);
+	}
  }
  return true;
 }
@@ -306,7 +310,10 @@ bool BosonGameViewInput::actionMoveWithAttack(const BoVector3Fixed& canvasVector
  // z is ignored
  localPlayerInput()->moveWithAttack(selection()->allUnits(), canvasVector.x(), canvasVector.y());
  if (localPlayerIO()->ownsUnit(selection()->leader())) {
-	selection()->leader()->playSound(SoundOrderMove);
+	Unit* leader = selection()->leader();
+	if (leader->speciesTheme()) {
+		leader->speciesTheme()->playSound(leader, SoundOrderMove);
+	}
  }
  return true;
 }
@@ -381,7 +388,9 @@ bool BosonGameViewInput::actionAttack(const BoVector3Fixed& canvasVector)
  localPlayerInput()->attack(selection()->allUnits(), unit);
  Unit* u = selection()->leader();
  if (localPlayerIO()->ownsUnit(u)) {
-	u->playSound(SoundOrderAttack);
+	if (u->speciesTheme()) {
+		u->speciesTheme()->playSound(u, SoundOrderAttack);
+	}
  }
  return true;
 }
@@ -405,7 +414,10 @@ bool BosonGameViewInput::actionDropBomb(const BoVector3Fixed& canvasVector)
  localPlayerInput()->dropBomb(selection()->leader(), weaponId, canvasVector.x(), canvasVector.y());
  weaponId = -1;
  if (localPlayerIO()->ownsUnit(selection()->leader())) {
-	selection()->leader()->playSound(SoundOrderAttack);
+	Unit* leader = selection()->leader();
+	if (leader->speciesTheme()) {
+		leader->speciesTheme()->playSound(leader, SoundOrderAttack);
+	}
  }
  return true;
 }
@@ -436,9 +448,6 @@ bool BosonGameViewInput::actionRepair(const BoVector3Fixed& canvasVector)
 	++it;
  }
  localPlayerInput()->repair(list, unit);
-// TODO:
-// Unit* u = selection()->leader();
-// u->playSound(SoundOrderRepair);
  return true;
 }
 
@@ -479,9 +488,6 @@ bool BosonGameViewInput::actionRefine(const BoVector3Fixed& canvasVector)
 	return false;
  }
  localPlayerInput()->refine(list, unit);
-// TODO:
-// Unit* u = selection()->leader();
-// u->playSound(SoundOrderRefine);
  return true;
 }
 
@@ -507,7 +513,9 @@ bool BosonGameViewInput::actionFollow(const BoVector3Fixed& canvasVector)
  localPlayerInput()->follow(selection()->allUnits(), unit);
  Unit* u = selection()->leader();
  if (localPlayerIO()->ownsUnit(u)) {
-	u->playSound(SoundOrderMove);
+	if (u->speciesTheme()) {
+		u->speciesTheme()->playSound(u, SoundOrderMove);
+	}
  }
  return true;
 }
