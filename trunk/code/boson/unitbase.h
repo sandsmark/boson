@@ -134,7 +134,7 @@ public:
 	UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
 	virtual ~UnitBase();
 
-	virtual BosonModel* getModelForItem() const;
+	virtual QString getModelIdForItem() const;
 
 	/**
 	 * Change what this unit is currently doing.

@@ -27,7 +27,6 @@
 #include "bosonweapon.h"
 #include "bosonconfig.h"
 #include "bodebug.h"
-#include "boaction.h"
 #include "bosonprofiling.h"
 #include "upgradeproperties.h"
 
@@ -55,7 +54,7 @@ public:
 	QMap<QString, QString> mTextureNames;
 	QMap<int, QString> mSounds;
 
-	QIntDict<BoAction> mActions;
+	QMap<int, QString> mActionStrings;
 
 	QValueList<unsigned long int> mDestroyedEffectIds;
 	QValueList<unsigned long int> mConstructedEffectIds;
@@ -91,13 +90,11 @@ void UnitProperties::init()
  mFullMode = true;
  mTheme = 0;
  mIsFacility = false;
- mProduceAction = 0;
  d->mPlugins.setAutoDelete(true);
 }
 
 UnitProperties::~UnitProperties()
 {
- delete mProduceAction;
  delete d;
 }
 
@@ -317,7 +314,7 @@ void UnitProperties::loadWeapons(KSimpleConfig* conf)
  for (int i = 0; i < num; i++) {
 	conf->setGroup(QString("Weapon_%1").arg(i));
 	BosonWeaponProperties* p = new BosonWeaponProperties(this, i + 1);
-	p->loadPlugin(conf, mFullMode);
+	p->loadPlugin(conf);
 	d->mPlugins.append(p);
 	if (!p->autoUse()) {
 		continue;
@@ -340,23 +337,21 @@ void UnitProperties::loadActions()
  //  tooltip text is auto-generated. Only thing we load here is hotkey
  // TODO: load hotkey
  conf.setGroup("Actions");
- mProduceAction = new BoAction(QString("ProduceAction-%1").arg(typeId()), theme()->smallOverview(typeId()),
-		"Produce"/*, hotkey*/);
  if (canShoot()) {
-	d->mActions.insert(ActionAttack, theme()->action(conf.readEntry("ActionAttack", "ActionAttack")));
+	d->mActionStrings.insert(ActionAttack, conf.readEntry("ActionAttack", "ActionAttack"));
  }
  if (isMobile()) {
-	d->mActions.insert(ActionMove, theme()->action(conf.readEntry("ActionMove", "ActionMove")));
-	d->mActions.insert(ActionFollow, theme()->action(conf.readEntry("ActionFollow", "ActionFollow")));
+	d->mActionStrings.insert(ActionMove, conf.readEntry("ActionMove", "ActionMove"));
+	d->mActionStrings.insert(ActionFollow, conf.readEntry("ActionFollow", "ActionFollow"));
  }
  if (properties(PluginProperties::Harvester)) {
-	d->mActions.insert(ActionHarvest, theme()->action(conf.readEntry("ActionHarvest", "ActionHarvest")));
+	d->mActionStrings.insert(ActionHarvest, conf.readEntry("ActionHarvest", "ActionHarvest"));
  }
  if (properties(PluginProperties::Repair)) {
-	d->mActions.insert(ActionHarvest, theme()->action(conf.readEntry("ActionRepair", "ActionRepair")));
+	d->mActionStrings.insert(ActionHarvest, conf.readEntry("ActionRepair", "ActionRepair"));
  }
- if (!d->mActions.isEmpty()) {
-	d->mActions.insert(ActionStop, theme()->action(conf.readEntry("ActionStop", "ActionStop")));
+ if (!d->mActionStrings.isEmpty()) {
+	d->mActionStrings.insert(ActionStop, conf.readEntry("ActionStop", "ActionStop"));
  }
 }
 
@@ -471,14 +466,17 @@ QMap<int, QString> UnitProperties::sounds() const
  return d->mSounds;
 }
 
-BoAction* UnitProperties::action(UnitAction type) const
+QString UnitProperties::actionString(UnitAction type) const
 {
- return d->mActions[type];
+ if (!d->mActionStrings.contains(type)) {
+	return QString::null;
+ }
+ return d->mActionStrings[type];
 }
 
-const QIntDict<BoAction>* UnitProperties::allActions() const
+const QMap<int, QString>* UnitProperties::allActionStrings() const
 {
- return &d->mActions;
+ return &d->mActionStrings;
 }
 
 void UnitProperties::setRequirements(QValueList<unsigned long int> requirements)

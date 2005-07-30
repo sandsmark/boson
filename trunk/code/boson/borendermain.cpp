@@ -23,6 +23,7 @@
 #include "defines.h"
 #include "../bomemory/bodummymemory.h"
 #include "speciestheme.h"
+#include "speciesdata.h"
 #include "bosonconfig.h"
 #include "bosonmodel.h"
 #include "bosonmodeltextures.h"
@@ -753,8 +754,9 @@ void ModelPreview::load(SpeciesTheme* s, const UnitProperties* prop)
  BO_CHECK_NULL_RET(s);
  BO_CHECK_NULL_RET(prop);
  makeCurrent();
- s->loadUnitModel(prop);
- BosonModel* model = s->unitModel(prop->typeId());
+ s->finalizeTeamColor();
+ s->data()->loadUnitModel(prop, s->teamColor());
+ BosonModel* model = s->data()->unitModel(prop->typeId());
  if (!model) {
 	BO_NULL_ERROR(model);
  }
@@ -770,8 +772,9 @@ void ModelPreview::loadObjectModel(SpeciesTheme* s, const QString& file)
 	return;
  }
  makeCurrent();
- s->loadObjects();
- BosonModel* model = s->objectModel(file);
+ s->finalizeTeamColor();
+ s->data()->loadObjects(s->teamColor());
+ BosonModel* model = s->data()->objectModel(file);
  if (!model) {
 	BO_NULL_ERROR(model);
  }

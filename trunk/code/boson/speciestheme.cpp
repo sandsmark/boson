@@ -170,6 +170,7 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
  return true;
 }
 
+#if 0
 bool SpeciesTheme::loadUnit(unsigned long int type)
 {
  const UnitProperties* prop = unitProperties(type);
@@ -181,12 +182,15 @@ bool SpeciesTheme::loadUnit(unsigned long int type)
  finalizeTeamColor();
  return mData->loadUnit(prop, teamColor());
 }
+#endif
 
+#if 0
 bool SpeciesTheme::loadActions()
 {
  mData->loadActions();
  return true;
 }
+#endif
 
 QCString SpeciesTheme::unitPropertiesMD5() const
 {
@@ -204,10 +208,12 @@ QCString SpeciesTheme::unitPropertiesMD5() const
  return string;
 }
 
+#if 0
 const BoAction* SpeciesTheme::action(const QString& name) const
 {
  return mData->action(name);
 }
+#endif
 
 bool SpeciesTheme::loadTechnologies()
 {
@@ -236,11 +242,13 @@ bool SpeciesTheme::loadTechnologies()
  return true;
 }
 
+#if 0
 bool SpeciesTheme::loadObjects()
 {
  finalizeTeamColor(); // AB: this is obsolete, the models don't use the teamcolor anymore. removing it should be safe.
  return mData->loadObjects(teamColor());
 }
+#endif
 
 QStringList SpeciesTheme::unitModelFiles()
 {
@@ -256,7 +264,10 @@ QPixmap* SpeciesTheme::bigOverview(unsigned long int unitType)
 {
  QPixmap* p = mData->bigOverview(unitType, teamColor());
  if (!p) {
+#warning fixme
+#if 0
 	loadUnit(unitType);
+#endif
 	p = mData->bigOverview(unitType, teamColor());
 	if (!p) {
 		boError() << k_funcinfo << "Cannot find unit type " << unitType
@@ -271,7 +282,10 @@ QPixmap* SpeciesTheme::smallOverview(unsigned long int unitType)
 {
  QPixmap* p = mData->smallOverview(unitType, teamColor());
  if (!p) {
+#warning fixme
+#if 0
 	loadUnit(unitType);
+#endif
 	p = mData->smallOverview(unitType, teamColor());
 	if (!p) {
 		boError() << k_funcinfo << "Cannot find unit type " << unitType
@@ -569,13 +583,6 @@ QValueList<QColor> SpeciesTheme::defaultColors()
  return colors;
 }
 
-bool SpeciesTheme::loadUnitModel(const UnitProperties* prop)
-{
- // once we load the model the teamcolor can't be changed anymore
- finalizeTeamColor();
- return mData->loadUnitModel(prop, teamColor());
-}
-
 void SpeciesTheme::playSound(UnitBase* unit, UnitSoundEvent event)
 {
  mData->playSound(unit, event);
@@ -591,10 +598,12 @@ void SpeciesTheme::playSound(const BosonWeaponProperties* weaponProp, WeaponSoun
  mData->playSound(weaponProp, event);
 }
 
+#if 0
 bool SpeciesTheme::loadGeneralSounds()
 {
  return mData->loadGeneralSounds();
 }
+#endif
 
 BosonModel* SpeciesTheme::objectModel(const QString& name) const
 {

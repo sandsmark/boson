@@ -34,6 +34,7 @@
 #include "../unit.h"
 #include "../unitproperties.h"
 #include "../speciestheme.h"
+#include "../speciesdata.h"
 #include "../playerio.h"
 #include "../bosoncursor.h"
 #include "../boselection.h"
@@ -1655,7 +1656,7 @@ void BosonGameView::removeSelectionRect(bool replace)
 	if (!selection()->isEmpty()) {
 		Unit* u = selection()->leader();
 		if (localPlayerIO()->ownsUnit(u)) {
-			u->speciesTheme()->playSound(u, SoundOrderSelect);
+			u->speciesTheme()->data()->playSound(u, SoundOrderSelect);
 		}
 	}
  } else {
@@ -1678,7 +1679,7 @@ void BosonGameView::removeSelectionRect(bool replace)
 		// cannot be placed into selection() cause we don't have localPlayer
 		// there
 		if (localPlayerIO()->ownsUnit(unit)) {
-			unit->speciesTheme()->playSound(unit, SoundOrderSelect);
+			unit->speciesTheme()->data()->playSound(unit, SoundOrderSelect);
 		}
 	} else {
 		if (replace) {

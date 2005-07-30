@@ -29,7 +29,6 @@ class Unit;
 class UnitBase;
 class BosonWeaponProperties;
 class BosonWeapon;
-class BoAction;
 class SpeciesTheme;
 
 class QString;
@@ -131,11 +130,6 @@ class UpgradeProperties
     unsigned int productionTime() const { return mProductionTime; }
 
     /**
-     * @return Action to produce this upgrade
-     **/
-    const BoAction* produceAction() const { return mProduceAction; }
-
-    /**
      * @return List of units required by this upgrade
      **/
     QValueList<unsigned long int> requiredUnits() const;
@@ -144,6 +138,8 @@ class UpgradeProperties
      * @return List of technologies required by this upgrade
      **/
     QValueList<unsigned long int> requiredTechnologies() const;
+
+    const QString& produceActionString() const { return mProduceActionString; }
 
 
   protected:
@@ -192,8 +188,7 @@ class UpgradeProperties
     unsigned int mProductionTime;
     bool mApplyToFacilities;
     bool mApplyToMobiles;
-    const SpeciesTheme* mTheme;
-    const BoAction* mProduceAction;
+    QString mProduceActionString;
 
     UpgradePropertiesPrivate* d;
 

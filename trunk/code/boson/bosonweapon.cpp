@@ -27,7 +27,6 @@
 #include "bodebug.h"
 #include "bosonconfig.h"
 #include "unitproperties.h"
-#include "boaction.h"
 
 #include <math.h>
 
@@ -98,7 +97,7 @@ bofixed BosonWeaponProperties::bofixedWeaponBaseValue(const QString& name, const
   return bofixedBaseValue(QString("Weapon_%1:%2").arg(id() - 1).arg(name), type, defaultValue);
 }
 
-void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
+void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg)
 {
   // FIXME: don't load all values for all weapon types
   mName = cfg->readEntry("Name", "");
@@ -456,7 +455,7 @@ void BosonWeaponProperties::loadAction(UnitAction type, KSimpleConfig* cfg, cons
   {
     return;
   }
-  mActions.insert(type, speciesTheme()->action(cfg->readEntry(key, key)));
+  mActionStrings.insert(type, cfg->readEntry(key, key));
 }
 
 

@@ -28,6 +28,7 @@
 #include "../bosonmap.h"
 #include "../bosonmodel.h"
 #include "../speciestheme.h"
+#include "../speciesdata.h"
 #include "../bosongroundtheme.h"
 #include "../playerio.h"
 #include "../unitproperties.h"
@@ -378,7 +379,7 @@ void BosonUfoCanvasWidget::slotShotFired(BosonShot* shot, BosonWeapon* weapon)
  addEffects(d->mEffectManager->newShootEffects(weapon->properties(), pos, weapon->unit()->rotation()));
 
  BO_CHECK_NULL_RET(weapon->speciesTheme());
- weapon->speciesTheme()->playSound(weapon->properties(), SoundWeaponShoot);
+ weapon->speciesTheme()->data()->playSound(weapon->properties(), SoundWeaponShoot);
 }
 
 void BosonUfoCanvasWidget::slotShotHit(BosonShot* shot)
@@ -435,7 +436,7 @@ void BosonUfoCanvasWidget::slotShotHit(BosonShot* shot)
  }
 
  if (shot->properties() && shot->properties()->speciesTheme()) {
-	shot->properties()->speciesTheme()->playSound(shot->properties(), SoundWeaponHit);
+	shot->properties()->speciesTheme()->data()->playSound(shot->properties(), SoundWeaponHit);
  }
 
  BO_CHECK_NULL_RET(effects);
@@ -450,7 +451,7 @@ void BosonUfoCanvasWidget::slotUnitDestroyed(Unit* unit)
  BosonItemContainer* c = d->mItem2ItemContainer[unit];
  BO_CHECK_NULL_RET(c);
 
- unit->speciesTheme()->playSound(unit, SoundReportDestroyed);
+ unit->speciesTheme()->data()->playSound(unit, SoundReportDestroyed);
  BosonItemEffects* e = c->effects();
  if (e && e->effects().count() > 0) {
 	// Make all unit's effects obsolete

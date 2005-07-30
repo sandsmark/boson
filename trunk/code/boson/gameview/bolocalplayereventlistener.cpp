@@ -26,6 +26,7 @@
 #include "../boson.h"
 #include "../playerio.h"
 #include "../speciestheme.h"
+#include "../speciesdata.h"
 #include "../unitproperties.h"
 #include "../script/bosonscript.h"
 #include "../bosonprofiling.h"
@@ -92,10 +93,10 @@ void BoLocalPlayerEventListener::processEvent(const BoEvent* event)
 				playerIO()->player());
 	}
  } else if (event->name() == "LostMinimap") {
-	playerIO()->speciesTheme()->playSound(SoundReportMinimapDeactivated);
+	playerIO()->speciesTheme()->data()->playSound(SoundReportMinimapDeactivated);
 	emit signalShowMiniMap(false);
  } else if (event->name() == "GainedMinimap") {
-	playerIO()->speciesTheme()->playSound(SoundReportMinimapActivated);
+	playerIO()->speciesTheme()->data()->playSound(SoundReportMinimapActivated);
 	emit signalShowMiniMap(true);
  } else if (event->name() == "AllUnitsDestroyed") {
  }

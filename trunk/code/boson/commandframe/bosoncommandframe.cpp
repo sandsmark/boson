@@ -35,6 +35,7 @@
 #include "../player.h"
 #include "../playerio.h"
 #include "../speciestheme.h"
+#include "../speciesdata.h"
 #include "../boson.h"
 #include "bodebug.h"
 #include "../boufo/boufolabel.h"
@@ -44,17 +45,62 @@
 #include <klocale.h>
 
 #include <qtimer.h>
+#include <qptrdict.h>
 
 #define UPDATE_TIMEOUT 200
 
 // TODO scroll widget for selection widget
 
-// TODO add an even listener to the cmdframe.
-// -> whenever an event about the currently selected unit(s) comes in, we might
-//    want to do some things.
-//    we _have_ to do some things on certain events - e.g. when the currently
-//    selected unit is being completely constructed (we need to re-select it
-//    then, as some other widgets are now visible)
+
+class ProduceActionCollection
+{
+public:
+	ProduceActionCollection()
+	{
+	}
+	~ProduceActionCollection()
+	{
+		mNewProduceActions.setAutoDelete(true);
+		mNewProduceActions.clear();
+	}
+
+	const BoAction* produceActionFor(const UnitProperties* prop)
+	{
+		if (!prop) {
+			BO_NULL_ERROR(prop);
+			return 0;
+		}
+		if (mProduceActions.contains(prop)) {
+			return mProduceActions[prop];
+		}
+		SpeciesTheme* theme = prop->theme();
+		BoAction* a = new BoAction(QString("ProduceAction-%1").arg(prop->typeId()), theme->data()->smallOverview(prop->typeId(), theme->teamColor()), "Produce");
+		mNewProduceActions.append(a);
+		mProduceActions.insert(prop, a);
+		return a;
+	}
+	const BoAction* produceActionFor(const UpgradeProperties* technology, const SpeciesTheme* theme)
+	{
+		if (!technology) {
+			BO_NULL_ERROR(technology);
+			return 0;
+		}
+		if (!theme) {
+			BO_NULL_ERROR(theme);
+			return 0;
+		}
+		if (mProduceActions.contains(technology)) {
+			return mProduceActions[technology];
+		}
+		const BoAction* a = theme->data()->action(technology->produceActionString());
+		mProduceActions.insert(technology, a);
+		return a;
+	}
+
+private:
+	QMap<const void*, const BoAction*> mProduceActions;
+	QPtrList<BoAction> mNewProduceActions;
+};
 
 
 class BoHarvesterWidget : public BoUnitDisplayBase
@@ -393,6 +439,8 @@ public:
 		mMinerWidget = 0;
 		mResourceMineWidget = 0;
 		mUnitInfoWidget = 0;
+
+		mProduceActions = 0;
 	}
 
 	bool mGameMode;
@@ -419,6 +467,8 @@ public:
 	BoHarvesterWidget* mMinerWidget;
 	BoResourceMineWidget* mResourceMineWidget;
 	BosonUnitInfo* mUnitInfoWidget;
+
+	ProduceActionCollection* mProduceActions;
 };
 
 BosonCommandFrame::BosonCommandFrame()
@@ -427,6 +477,7 @@ BosonCommandFrame::BosonCommandFrame()
  d = new BosonCommandFramePrivate;
  d->mGameMode = true;;
  mSelectedUnit = 0;
+ d->mProduceActions = new ProduceActionCollection();
 
  setLayoutClass(UVBoxLayout);
 
@@ -455,6 +506,7 @@ BosonCommandFrame::~BosonCommandFrame()
 {
  d->mUnitDisplayWidgets.clear();
  delete d->mEventListener;
+ delete d->mProduceActions;
  delete d;
 }
 
@@ -757,7 +809,7 @@ void BosonCommandFrame::setProduction(Unit* unit)
  QValueList<unsigned long int>::Iterator it;
  it = unitsList.begin();
  for (; it != unitsList.end(); ++it) {
-	BoSpecificAction a(speciesTheme->unitProperties(*it)->produceAction());
+	BoSpecificAction a(d->mProduceActions->produceActionFor(speciesTheme->unitProperties(*it)));
 	a.setType(ActionProduceUnit);
 	a.setProductionId(*it);
 	a.setUnit(unit);
@@ -767,7 +819,7 @@ void BosonCommandFrame::setProduction(Unit* unit)
  QValueList<unsigned long int> techList = production->possibleTechnologyProductions();
  QValueList<unsigned long int>::Iterator tit;  // tit = Technology ITerator ;-)
  for (tit = techList.begin(); tit != techList.end(); tit++) {
-	BoSpecificAction a(speciesTheme->technology(*tit)->produceAction());
+	BoSpecificAction a(d->mProduceActions->produceActionFor(speciesTheme->technology(*tit), production->speciesTheme()));
 	a.setType(ActionProduceTech);
 	a.setProductionId(*tit);
 	a.setUnit(unit);
@@ -779,7 +831,6 @@ void BosonCommandFrame::setProduction(Unit* unit)
  d->mSelectionWidget->show();
 
  startStopUpdateTimer();
-
 }
 
 void BosonCommandFrame::hidePluginWidgets()
@@ -978,7 +1029,7 @@ void BosonCommandFrame::placeMobiles(PlayerIO* io)
  QValueList<long unsigned int>::iterator it;
  QValueList<BoSpecificAction> actions;
  for (it = units.begin(); it != units.end(); ++it) {
-	BoSpecificAction a(theme->unitProperties(*it)->produceAction());
+	BoSpecificAction a(d->mProduceActions->produceActionFor(theme->unitProperties(*it)));
 	a.setType(ActionPlacementPreview);
 	a.setProductionId(*it);
 	a.setProductionOwner(io);
@@ -1003,7 +1054,7 @@ void BosonCommandFrame::placeFacilities(PlayerIO* io)
  QValueList<long unsigned int>::iterator it;
  QValueList<BoSpecificAction> actions;
  for (it = units.begin(); it != units.end(); ++it) {
-	BoSpecificAction a(theme->unitProperties(*it)->produceAction());
+	BoSpecificAction a(d->mProduceActions->produceActionFor(theme->unitProperties(*it)));
 	a.setType(ActionPlacementPreview);
 	a.setProductionId(*it);
 	a.setProductionOwner(io);

@@ -87,7 +87,7 @@ class BosonShot : public BosonItem
     BosonShot(Player* owner, BosonCanvas* canvas);
     ~BosonShot();
 
-    virtual BosonModel* getModelForItem() const;
+    virtual QString getModelIdForItem() const;
     virtual bool init();
 
     /**
@@ -471,7 +471,7 @@ class BosonShotFragment : public BosonShot
     BosonShotFragment(Player* owner, BosonCanvas* canvas);
     ~BosonShotFragment();
 
-    virtual BosonModel* getModelForItem() const;
+    virtual QString getModelIdForItem() const;
 
     void activate(const BoVector3Fixed& pos, const UnitProperties* unitProperties);
 

@@ -26,6 +26,7 @@
 #include "../bosonpropertyxml.h"
 #include "../bosonconfig.h"
 #include "../bo3dtools.h"
+#include "../player.h"
 #include "bosonitempropertyhandler.h"
 #include "bodebug.h"
 
@@ -394,5 +395,13 @@ bool BosonItem::loadFromXML(const QDomElement& root)
 void BosonItem::updateAnimationMode()
 {
  mAnimationMode = getAnimationMode();
+}
+
+SpeciesTheme* BosonItem::speciesTheme() const
+{
+ if (!owner()) {
+	return 0;
+ }
+ return owner()->speciesTheme();
 }
 
