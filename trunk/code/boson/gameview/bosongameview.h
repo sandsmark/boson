@@ -403,6 +403,7 @@ public slots:
 	void slotChangeHeight(int x, int y);
 
 	void slotAction(const BoSpecificAction&);
+	void slotShowMiniMap(bool);
 
 signals:
 	/**

@@ -92,6 +92,7 @@ class BosonLocalPlayerInput : public KGameIO
 
   signals:
     void signalAction(const BoSpecificAction& action);
+    void signalShowMiniMap(bool);
 
   private:
     BoEventListener* mEventListener;

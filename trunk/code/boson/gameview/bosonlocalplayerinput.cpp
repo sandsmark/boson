@@ -34,6 +34,7 @@
 #include "../bosonweapon.h"
 #include "../boeventlistener.h"
 #include "../boson.h"
+#include "bolocalplayereventlistener.h"
 
 #include <qptrlist.h>
 #include <qdatastream.h>
@@ -75,10 +76,12 @@ bool BosonLocalPlayerInput::initializeIO()
     PlayerIO* io = ((Player*)player())->playerIO();
     BoEventManager* manager = ((Boson*)game())->eventManager();
     mEventListener = new BoLocalPlayerEventListener(io, manager, this);
+    connect(mEventListener, SIGNAL(signalShowMiniMap(bool)),
+            this, SIGNAL(signalShowMiniMap(bool)));
     if (!mEventListener->initScript())
     {
       boError() << k_funcinfo << "could not init script" << endl;
-      return false; // TODO: return false
+      return false;
     }
   }
   return true;

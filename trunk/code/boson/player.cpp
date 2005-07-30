@@ -942,11 +942,6 @@ void Player::writeGameLog(QTextStream& log)
  log << endl;
 }
 
-void Player::emitSignalShowMiniMap(bool show)
-{
- emit signalShowMiniMap(show);
-}
-
 unsigned int Player::foggedCells() const
 {
  return d->mFoggedCount;

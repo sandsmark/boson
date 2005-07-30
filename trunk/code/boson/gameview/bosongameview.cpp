@@ -1044,7 +1044,8 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
 		this, SLOT(slotRemovedItemFromCanvas(BosonItem*)));
  connect(mCanvas, SIGNAL(signalRemovedItem(BosonItem*)),
 		mSelection, SLOT(slotRemoveItem(BosonItem*)));
- if (d->mGLMiniMap) {
+
+ { // minimap
 	if (previousCanvas) {
 		disconnect(previousCanvas, 0, d->mGLMiniMap, 0);
 		disconnect(d->mGLMiniMap, 0, previousCanvas, 0);
@@ -1067,14 +1068,11 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
  d->mCamera.setCanvas(mCanvas);
  slotResetViewProperties();
 
- BO_CHECK_NULL_RET(mCanvas->map());
  boDebug() << k_funcinfo << endl;
+
+ BO_CHECK_NULL_RET(mCanvas->map());
  BosonMap* map = mCanvas->map();
- if (d->mGLMiniMap) {
-	d->mGLMiniMap->createMap(map, d->mGameGLMatrices);
- } else {
-	BO_NULL_ERROR(d->mGLMiniMap);
- }
+ d->mGLMiniMap->createMap(map, d->mGameGLMatrices);
 
  if (!boGame->gameMode()) { // AB: is this valid at this point?
 	d->mUfoGameGUI->setGroundTheme(map->groundTheme());
@@ -1108,7 +1106,7 @@ void BosonGameView::setLocalPlayerIO(PlayerIO* io)
 
  boWaterRenderer->setLocalPlayerIO(localPlayerIO());
 
- if (d->mGLMiniMap) {
+ { // minimap
 	if (previousPlayerIO) {
 		previousPlayerIO->disconnect(0, d->mGLMiniMap, 0);
 	}
@@ -1123,8 +1121,6 @@ void BosonGameView::setLocalPlayerIO(PlayerIO* io)
 		io->connect(SIGNAL(signalUnfog(int, int)),
 				this, SLOT(slotUnfog(int, int)));
 		if (boGame->gameMode()) {
-			io->connect(SIGNAL(signalShowMiniMap(bool)),
-					d->mGLMiniMap, SLOT(slotShowMiniMap(bool)));
 			d->mGLMiniMap->slotShowMiniMap(io->hasMiniMap());
 		} else {
 			d->mGLMiniMap->slotShowMiniMap(true);
@@ -1758,6 +1754,11 @@ void BosonGameView::slotAction(const BoSpecificAction& action)
 	return;
  }
  displayInput()->action(action);
+}
+
+void BosonGameView::slotShowMiniMap(bool show)
+{
+ d->mGLMiniMap->slotShowMiniMap(show);
 }
 
 

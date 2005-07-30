@@ -144,33 +144,6 @@ protected:
 private:
 };
 
-class BoLocalPlayerEventListener : public BoEventListener
-{
-	Q_OBJECT
-public:
-	BoLocalPlayerEventListener(PlayerIO* io, BoEventManager* manager, QObject* parent);
-	~BoLocalPlayerEventListener();
-
-	PlayerIO* playerIO() const
-	{
-		return mPlayerIO;
-	}
-
-	virtual QString scriptFileName() const
-	{
-		return QString("localplayer.py");
-	}
-
-	virtual void processEvent(const BoEvent* event);
-	virtual bool canSee(const BoEvent* event) const;
-
-protected:
-	virtual BosonScript* createScriptParser() const;
-
-private:
-	PlayerIO* mPlayerIO;
-};
-
 class BoComputerPlayerEventListener : public BoEventListener
 {
 	Q_OBJECT
