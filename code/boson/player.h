@@ -260,8 +260,6 @@ public:
 
 	void writeGameLog(QTextStream& log);
 
-	void emitSignalShowMiniMap(bool show);
-
 signals:
 	void signalLoadUnit(unsigned long int unitType, unsigned long int id, Player* owner);
 
@@ -269,8 +267,6 @@ signals:
 
 	void signalFog(int x, int y);
 	void signalUnfog(int x, int y);
-
-	void signalShowMiniMap(bool show);
 
 public slots:
 	/**

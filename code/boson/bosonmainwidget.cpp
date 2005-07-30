@@ -714,6 +714,8 @@ bool BosonMainWidget::changeLocalPlayer(Player* p)
 	BosonLocalPlayerInput* input = new BosonLocalPlayerInput();
 	connect(input, SIGNAL(signalAction(const BoSpecificAction&)),
 			d->mGameView, SLOT(slotAction(const BoSpecificAction&)));
+	connect(input, SIGNAL(signalShowMiniMap(bool)),
+			d->mGameView, SLOT(slotShowMiniMap(bool)));
 	d->mLocalPlayer->addGameIO(input);
 	if (!input->initializeIO()) {
 		boError() << k_funcinfo << "IO could not be initialized" << endl;
