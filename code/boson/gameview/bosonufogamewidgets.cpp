@@ -29,6 +29,7 @@
 #include "../botexture.h"
 #include "../bosonmodel.h"
 #include "../speciestheme.h"
+#include "../speciesdata.h"
 #include "../boson.h"
 #include "../bosongroundtheme.h"
 #include "../playerio.h"
@@ -412,7 +413,7 @@ void BosonUfoPlacementPreviewWidget::setPlacementPreviewData(const UnitPropertie
 	return;
  }
  if (d->mPlacementPreview.unitProperties() != prop) {
-	BosonModel* m = theme->unitModel(prop->typeId()); // AB: this does a lookup in a list and therefore should be avoided (this method gets called at least whenever the mouse is moved!)
+	BosonModel* m = theme->data()->unitModel(prop->typeId()); // AB: this does a lookup in a list and therefore should be avoided (this method gets called at least whenever the mouse is moved!)
 	if (!m) {
 		boError() << k_funcinfo << "NULL model for " << prop->typeId() << endl;
 		return;

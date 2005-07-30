@@ -22,6 +22,7 @@
 
 #include "../bomemory/bodummymemory.h"
 #include "speciestheme.h"
+#include "speciesdata.h"
 #include "bodebug.h"
 #include "bosonmodel.h"
 #include "bomesh.h"
@@ -68,8 +69,8 @@ protected:
 		units += mSpecies->allMobiles();
 		QValueList<unsigned long int>::Iterator it;
 		for (it = units.begin(); it != units.end(); ++it) {
-			if (mSpecies->unitModel(*it)) {
-				models.append(mSpecies->unitModel(*it));
+			if (mSpecies->data()->unitModel(*it)) {
+				models.append(mSpecies->data()->unitModel(*it));
 			} else {
 				boWarning() << k_funcinfo << "NULL model for unit " << *it << endl;
 			}
@@ -85,8 +86,8 @@ protected:
 		QStringList allObjects = mSpecies->allObjects();
 		QStringList::Iterator it;
 		for (it = allObjects.begin(); it != allObjects.end(); ++it) {
-			if (mSpecies->objectModel(*it)) {
-				models.append(mSpecies->objectModel(*it));
+			if (mSpecies->data()->objectModel(*it)) {
+				models.append(mSpecies->data()->objectModel(*it));
 			} else {
 				boWarning() << k_funcinfo << "NULL model for object " << *it << endl;
 			}
@@ -368,14 +369,18 @@ void KGameSpeciesDebug::loadSpecies()
  QStringList::Iterator it;
  for (it = species.begin(); it != species.end(); ++it) {
 	SpeciesTheme* s = new SpeciesTheme((*it).left((*it).length() - QString::fromLatin1("index.desktop").length()), red); // dummy color - don't use QColor(0,0,0)
-	s->loadObjects();
-	s->loadActions();
+	s->finalizeTeamColor();
+	s->data()->loadObjects(s->teamColor());
+	s->data()->loadActions();
 	s->readUnitConfigs();
 	QValueList<unsigned long int> units = s->allFacilities();
 	units += s->allMobiles();
 	QValueList<unsigned long int>::Iterator unitsIt;
 	for (unitsIt = units.begin(); unitsIt != units.end(); ++unitsIt) {
-		s->loadUnit(*unitsIt);
+		s->finalizeTeamColor();
+
+		const UnitProperties* prop = s->unitProperties(*unitsIt);
+		s->data()->loadUnit(prop, s->teamColor());
 	}
 
 	s->loadTechnologies();

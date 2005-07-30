@@ -29,7 +29,6 @@
 class SpeciesTheme;
 class PluginProperties;
 class BosonWeaponProperties;
-class BoAction;
 class QCString;
 class QString;
 template<class T> class QValueList;
@@ -452,11 +451,9 @@ public:
 	const BosonWeaponProperties* weaponProperties(unsigned long int id) const;
 	BosonWeaponProperties* nonConstWeaponProperties(unsigned long int id) const;
 
-	BoAction* action(UnitAction type) const;
+	QString actionString(UnitAction type) const;
 
-	const QIntDict<BoAction>* allActions() const;
-
-	BoAction* produceAction() const { return mProduceAction; };
+	const QMap<int, QString>* allActionStrings() const;
 
 	unsigned int explodingFragmentCount() const { return mExplodingFragmentCount; }
 	long int explodingFragmentDamage() const { return mExplodingFragmentDamage; }
@@ -573,7 +570,6 @@ private:
 	BoUpgradeableProperty<unsigned long int> mShields;
 	long int mExplodingDamage;
 	bofixed mExplodingDamageRange;
-	BoAction* mProduceAction;
 	unsigned int mExplodingFragmentCount;
 	long int mExplodingFragmentDamage;
 	bofixed mExplodingFragmentDamageRange;

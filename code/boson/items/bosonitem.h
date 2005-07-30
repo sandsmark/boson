@@ -33,6 +33,7 @@ class BosonAnimation;
 class Cell;
 class BosonItemPropertyHandler;
 class Player;
+class SpeciesTheme;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
 template<class T> class BoRect;
@@ -163,14 +164,11 @@ public:
 	virtual ~BosonItem();
 
 	/**
-	 * @return The model that should be used for this item. This model will
-	 * get assigned to this model after construction using @ref
-	 * BosonItemRenderer::setModel.
-	 *
-	 * Note that if you need access to the model this item currently uses,
-	 * you should prefer @ref BosonItemRenderer::model instead.
+	 * @return A string that identifies the model that should be used for
+	 * this item. This model will get assigned to this model after
+	 * construction using @ref BosonItemRenderer::setModel.
 	 **/
-	virtual BosonModel* getModelForItem() const = 0;
+	virtual QString getModelIdForItem() const = 0;
 
 	/**
 	 * Update the current animation mode using @ref getAnimationMode
@@ -202,6 +200,11 @@ public:
 	inline BosonCanvas* canvas() const { return mCanvas; }
 	BosonCollisions* collisions() const;
 	inline Player* owner() const { return mOwner; }
+
+	/**
+	 * @return owner()->speciesTheme()
+	 **/
+	SpeciesTheme* speciesTheme() const;
 
 
 	/**

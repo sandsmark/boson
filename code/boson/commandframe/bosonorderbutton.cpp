@@ -26,6 +26,7 @@
 #include "../unit.h"
 #include "../player.h"
 #include "../speciestheme.h"
+#include "../speciesdata.h"
 #include "../unitproperties.h"
 #include "../defines.h"
 #include "../upgradeproperties.h"
@@ -235,7 +236,7 @@ void BosonOrderButton::displayUnitPixmap(unsigned long int unitType, const Playe
 	boError(220) << k_funcinfo << "NULL owner" << endl;
 	return;
  }
- QPixmap* small = owner->speciesTheme()->smallOverview(unitType);
+ QPixmap* small = owner->speciesTheme()->data()->smallOverview(unitType, owner->teamColor());
  if (!small) {
 	boError(220) << k_funcinfo << "Cannot find small overview for "
 			<< unitType << endl;

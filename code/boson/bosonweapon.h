@@ -32,7 +32,6 @@
 class KSimpleConfig;
 class SpeciesTheme;
 class Unit;
-class BoAction;
 class QString;
 template<class T> class QIntDict;
 template<class T1, class T2> class QMap;
@@ -178,12 +177,11 @@ class BosonWeaponProperties : public PluginProperties
     QValueList<unsigned long int> hitEffectIds() const  { return mHitEffectIds; }
 
     virtual QString name() const;
-    virtual void loadPlugin(KSimpleConfig* config)  { loadPlugin(config, true); }
-    virtual void loadPlugin(KSimpleConfig* config, bool full = true);
+    virtual void loadPlugin(KSimpleConfig* config);
     virtual void savePlugin(KSimpleConfig* config);
     virtual int pluginType() const  { return Weapon; }
 
-    QIntDict<BoAction>* actions()  { return &mActions; }
+    const QMap<int, QString>* actionStrings() const  { return &mActionStrings; }
 
 
 
@@ -247,7 +245,7 @@ class BosonWeaponProperties : public PluginProperties
     QValueList<unsigned long int> mHitEffectIds;
     BoVector3Fixed mOffset;
     QMap<int, QString> mSounds;
-    QIntDict<BoAction> mActions;
+    QMap<int, QString> mActionStrings;
     bool mAutoUse;
     bool mTakeTargetVeloIntoAccount;
     bofixed mMaxFlyDistance;

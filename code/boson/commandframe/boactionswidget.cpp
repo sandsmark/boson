@@ -31,6 +31,8 @@
 #include "../boaction.h"
 #include "../pluginproperties.h"
 #include "../bosonweapon.h"
+#include "../speciestheme.h"
+#include "../speciesdata.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -101,14 +103,23 @@ void BoActionsWidget::showUnitActions(Unit* unit, const QPtrList<Unit>& allUnits
  QValueList<BoSpecificAction> actions;
 
  // Add all unit actions
- QIntDictIterator<BoAction> it(*unit->unitProperties()->allActions());
- for (; it.current(); ++it) {
-	boDebug(220) << k_funcinfo << "Adding action: type: " << it.currentKey() << "; id: " <<
-			it.current()->id() << "; text: " << it.current()->text() << endl;
-	BoSpecificAction a(it.current());
+ const QMap<int, QString>* allActionStrings = unit->unitProperties()->allActionStrings();
+ for (QMap<int, QString>::const_iterator it = allActionStrings->begin(); it != allActionStrings->end(); ++it) {
+	if (it.data().isEmpty()) {
+		boError(220) << k_funcinfo << "action ID for " << it.key() << " is empty" << endl;
+		continue;
+	}
+	const BoAction* action = unit->speciesTheme()->data()->action(it.data());
+	if (!action) {
+		boError(220) << k_funcinfo << "NULL action for " << it.key() << " == " << it.data() << endl;
+		continue;
+	}
+	boDebug(220) << k_funcinfo << "Adding action: type: " << it.key() << "; id: " <<
+			action->id() << "; text: " << action->text() << endl;
+	BoSpecificAction a(action);
 	a.setAllUnits(allUnits);
 	a.setUnit(unit);
-	a.setType((UnitAction)it.currentKey());
+	a.setType((UnitAction)it.key());
 	actions.append(a);
  }
 
@@ -117,13 +128,21 @@ void BoActionsWidget::showUnitActions(Unit* unit, const QPtrList<Unit>& allUnits
  for (; wit.current(); ++wit) {
 	if (wit.current()->pluginType() == PluginProperties::Weapon) {
 		BosonWeaponProperties* w = (BosonWeaponProperties*)wit.current();
-		// wait = Weapon Actions ITerator ;-)
-		QIntDictIterator<BoAction> wait(*w->actions());
-		for (; wait.current(); ++wait) {
-			BoSpecificAction a(wait.current());
+		const QMap<int, QString>* actionStrings = w->actionStrings();
+		for (QMap<int, QString>::const_iterator it = actionStrings->begin(); it != actionStrings->end(); ++it) {
+			if (it.data().isEmpty()) {
+				boError(220) << k_funcinfo << "weapon action string for " << it.key() << " is empty" << endl;
+				continue;
+			}
+			const BoAction* action = w->speciesTheme()->data()->action(it.data());
+			if (!action) {
+				boError(220) << k_funcinfo << "NULL action for " << it.key() << " == " << it.data() << endl;
+				continue;
+			}
+			BoSpecificAction a(action);
 			a.setUnit(unit);
 			a.setWeapon(w);
-			a.setType((UnitAction)wait.currentKey());
+			a.setType((UnitAction)it.key());
 			actions.append(a);
 		}
 	}

@@ -103,15 +103,23 @@ void BosonShot::applyWeapon(const BosonWeapon* weapon)
   mWeaponSpeed.setLocal(weapon->speed());
 }
 
-BosonModel* BosonShot::getModelForItem() const
+QString BosonShot::getModelIdForItem() const
 {
   if(!properties())
   {
-    return 0;
+    return QString::null;
   }
-  BO_CHECK_NULL_RET0(owner());
-  BO_CHECK_NULL_RET0(owner()->speciesTheme());
-  return owner()->speciesTheme()->objectModel(properties()->modelFileName());
+  if(!owner())
+  {
+    BO_NULL_ERROR(owner());
+    return QString::null;
+  }
+  if(!owner()->speciesTheme())
+  {
+    BO_NULL_ERROR(owner()->speciesTheme());
+    return QString::null;
+  }
+  return QString("%1:%2").arg("shot").arg(properties()->modelFileName());
 }
 
 void BosonShot::initStatic()
@@ -1029,11 +1037,19 @@ void BosonShotFragment::initStatic()
   initialized = true;
 }
 
-BosonModel* BosonShotFragment::getModelForItem() const
+QString BosonShotFragment::getModelIdForItem() const
 {
-  BO_CHECK_NULL_RET0(owner());
-  BO_CHECK_NULL_RET0(owner()->speciesTheme());
-  return owner()->speciesTheme()->objectModel("fragment");
+  if(!owner())
+  {
+    BO_NULL_ERROR(owner());
+    return QString::null;
+  }
+  if(!owner()->speciesTheme())
+  {
+    BO_NULL_ERROR(owner()->speciesTheme());
+    return QString::null;
+  }
+  return QString("%1:%2").arg("shot").arg("fragment");
 }
 
 void BosonShotFragment::activate(const BoVector3Fixed& pos, const UnitProperties* unitproperties)

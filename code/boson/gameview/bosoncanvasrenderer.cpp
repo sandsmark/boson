@@ -31,6 +31,7 @@
 #include "../unit.h"
 #include "../unitproperties.h"
 #include "../speciestheme.h"
+#include "../speciesdata.h"
 #include "../bosonconfig.h"
 #include "../boselection.h"
 #include "../selectbox.h"
@@ -204,7 +205,32 @@ bool BosonItemContainer::initItemRenderer()
  bool ret = true;
  if (providesModel) {
 	mItemRenderer = new BosonItemModelRenderer(item());
-	ret = itemRenderer()->setModel(item()->getModelForItem());
+	BosonModel* model = 0;
+	QString id = item()->getModelIdForItem();
+	int index = -1;
+	if (!id.isEmpty()) {
+		index = id.find(':');
+	}
+	if (index >= 0) {
+		QString type = id.left(index);
+		QString file = id.right(id.length() - index - 1);
+		if (type == "shot") {
+			model = item()->speciesTheme()->data()->objectModel(file);
+		} else if (type == "unit") {
+			bool ok;
+			unsigned long int unitType = file.toULong(&ok);
+			if (!ok) {
+				boError() << k_funcinfo << file << " is not a number in id string " << id << endl;
+			} else {
+				model = item()->speciesTheme()->data()->unitModel(unitType);
+			}
+		} else {
+			boError() << k_funcinfo << "unrecognized type \"" << type << "\" of id string " << id << endl;
+		}
+	} else {
+		boError() << k_funcinfo << "unrecognized format of id string: " << id << endl;
+	}
+	ret = itemRenderer()->setModel(model);
 	if (!ret) {
 		boWarning() << k_funcinfo << "itemRenderer()->setModel() failed" << endl;
 		delete mItemRenderer;

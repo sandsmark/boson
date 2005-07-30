@@ -67,6 +67,11 @@ public:
 
 	~SpeciesTheme();
 
+	SpeciesData* data() const
+	{
+		return mData;
+	}
+
 	/**
 	 * Load a theme. Look for index.unit files in the units directory,
 	 * read and store these information - see @ref readUnitConfigs.
@@ -82,6 +87,16 @@ public:
 	bool loadTheme(const QString& species, const QColor&);
 
 	/**
+	 * Once this has been called the teamcolor can't be changed anymore.
+	 * Also add the color to @ref SpeciesData
+	 *
+	 * AB: this is a temporary method. it will be removed once SpeciesData
+	 * has been moved to gameview
+	 **/
+	void finalizeTeamColor();
+
+#if 0
+	/**
 	 * Load the unit @p unitType. This must be done before @ref pixmapArray,
 	 * @ref bigOverview or @ref smallOverview can return something useful.
 	 * These functions call this automatically so you usually don't need to
@@ -91,22 +106,29 @@ public:
 	 **/
 	bool loadUnit(unsigned long int unitType);
 
-	/**
-	 * Load all available technologies. This must be done before starting game
-	 **/
-	bool loadTechnologies();
-
 	bool loadObjects();
 
 	bool loadActions();
 
-	/**
-	 * @return Concatenation of all @ref UnitProperties::md5 sums in this
-	 * theme, separated by "\n"s
-	 **/
-	QCString unitPropertiesMD5() const;
+	bool loadGeneralSounds();
 
 	const BoAction* action(const QString& name) const;
+#endif
+
+	/**
+	 * Play the specified event for the specified unit.
+	 **/
+	void playSound(UnitBase* unit, UnitSoundEvent event);
+
+	/**
+	 * Play the specified event for the specified weapon.
+	 **/
+	void playSound(const BosonWeaponProperties* weaponprop, WeaponSoundEvent event);
+
+	/**
+	 * Play the specified sound event
+	 **/
+	void playSound(SoundEvent event);
 
 	/**
 	 * @return The @ref BosonModel object for the specified unit type in
@@ -157,6 +179,17 @@ public:
 	 * @return A default color. This color differs after every call.
 	 **/
 	static QColor defaultColor();
+
+	/**
+	 * Load all available technologies. This must be done before starting game
+	 **/
+	bool loadTechnologies();
+
+	/**
+	 * @return Concatenation of all @ref UnitProperties::md5 sums in this
+	 * theme, separated by "\n"s
+	 **/
+	QCString unitPropertiesMD5() const;
 
 	/**
 	 * Reads the default entries from the config file of the specified unit
@@ -213,7 +246,7 @@ public:
 	 * @return The names of all objects of this theme, as they could
 	 * be provided to @ref objectModel.
 	 * @param fileList if non-null here are the filenames returned, that
-	 * belong the the names.
+	 * belong to the names.
 	 **/
 	QStringList allObjects(QStringList* files = 0) const;
 
@@ -233,23 +266,6 @@ public:
 	 * Reset this theme. Delete all pixmaps, unitProperties, ...
 	 **/
 	void reset();
-
-	/**
-	 * Play the specified event for the specified unit.
-	 **/
-	void playSound(UnitBase* unit, UnitSoundEvent event);
-
-	/**
-	 * Play the specified event for the specified weapon.
-	 **/
-	void playSound(const BosonWeaponProperties* weaponprop, WeaponSoundEvent event);
-
-	bool loadGeneralSounds();
-
-	/**
-	 * Play the specified sound event
-	 **/
-	void playSound(SoundEvent event);
 
 	/**
 	 * @return A list of all possible species. Note that the list contains
@@ -272,8 +288,6 @@ public:
 
 	static QValueList<QColor> defaultColors();
 
-	bool loadUnitModel(const UnitProperties* prop);
-
 	/**
 	 * Read the config files for all units available on this computer. The
 	 * values are used by @ref loadNewUnit and @ref loadEntry - they don't
@@ -291,11 +305,6 @@ public:
 	bool loadGameDataFromXML(const QDomElement& root);
 
 protected:
-	/**
-	 * Once this has been called the teamcolor can't be changed anymore.
-	 * Also add the color to @ref SpeciesData
-	 **/
-	void finalizeTeamColor();
 
 	void insertUpgrade(UpgradeProperties* upgrade);
 

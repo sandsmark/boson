@@ -28,6 +28,7 @@
 #include "bosonmap.h"
 #include "bosonmessageids.h"
 #include "speciestheme.h"
+#include "speciesdata.h"
 #include "bosonprofiling.h"
 #include "bosondata.h"
 #include "bosoncanvas.h"
@@ -749,7 +750,7 @@ bool BosonStartingLoadPlayerData::startTask()
  mDuration = 0;
 
  startSubTask(i18n("Actions..."));
- if (!player()->speciesTheme()->loadActions()) {
+ if (!player()->speciesTheme()->data()->loadActions()) {
 	boError(270) << k_funcinfo << "loading actions failed" << endl;
 	return false;
  }
@@ -757,7 +758,8 @@ bool BosonStartingLoadPlayerData::startTask()
  completeSubTask(mDuration);
 
  startSubTask(i18n("Objects..."));
- if (!player()->speciesTheme()->loadObjects()) {
+ player()->speciesTheme()->finalizeTeamColor();
+ if (!player()->speciesTheme()->data()->loadObjects(player()->speciesTheme()->teamColor())) {
 	boError(270) << k_funcinfo << "loading objects failed" << endl;
 	return false;
  }
@@ -787,7 +789,7 @@ bool BosonStartingLoadPlayerData::startTask()
  // AB: atm only the sounds of the local player are required, but I believe this
  // can easily change.
  startSubTask(i18n("Sounds..."));
- if (!player()->speciesTheme()->loadGeneralSounds()) {
+ if (!player()->speciesTheme()->data()->loadGeneralSounds()) {
 	boError(270) << k_funcinfo << "loading general sounds failed" << endl;
 	return false;
  }
@@ -843,7 +845,10 @@ bool BosonStartingLoadPlayerData::loadUnitDatas()
  float factor = 0.0f;
  for (it = unitIds.begin(); it != unitIds.end(); ++it, currentUnit++) {
 	startSubTask(i18n("Unit %1 of %2...").arg(currentUnit).arg(unitIds.count()));
-	if (!player()->speciesTheme()->loadUnit(*it)) {
+
+	player()->speciesTheme()->finalizeTeamColor();
+	const UnitProperties* prop = player()->speciesTheme()->unitProperties(*it);
+	if (!player()->speciesTheme()->data()->loadUnit(prop, player()->speciesTheme()->teamColor())) {
 		boError(270) << k_funcinfo << "loading unit with ID " << *it << " failed" << endl;
 		return false;
 	}

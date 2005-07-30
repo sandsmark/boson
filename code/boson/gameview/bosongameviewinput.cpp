@@ -40,6 +40,7 @@
 #include "../bosonweapon.h"
 #include "../bo3dtools.h"
 #include "../speciestheme.h"
+#include "../speciesdata.h"
 
 #include <klocale.h>
 
@@ -286,7 +287,7 @@ bool BosonGameViewInput::actionMoveWithoutAttack(const BoVector3Fixed& canvasVec
  if (localPlayerIO()->ownsUnit(selection()->leader())) {
 	Unit* leader = selection()->leader();
 	if (leader->speciesTheme()) {
-		leader->speciesTheme()->playSound(leader, SoundOrderMove);
+		leader->speciesTheme()->data()->playSound(leader, SoundOrderMove);
 	}
  }
  return true;
@@ -312,7 +313,7 @@ bool BosonGameViewInput::actionMoveWithAttack(const BoVector3Fixed& canvasVector
  if (localPlayerIO()->ownsUnit(selection()->leader())) {
 	Unit* leader = selection()->leader();
 	if (leader->speciesTheme()) {
-		leader->speciesTheme()->playSound(leader, SoundOrderMove);
+		leader->speciesTheme()->data()->playSound(leader, SoundOrderMove);
 	}
  }
  return true;
@@ -389,7 +390,7 @@ bool BosonGameViewInput::actionAttack(const BoVector3Fixed& canvasVector)
  Unit* u = selection()->leader();
  if (localPlayerIO()->ownsUnit(u)) {
 	if (u->speciesTheme()) {
-		u->speciesTheme()->playSound(u, SoundOrderAttack);
+		u->speciesTheme()->data()->playSound(u, SoundOrderAttack);
 	}
  }
  return true;
@@ -416,7 +417,7 @@ bool BosonGameViewInput::actionDropBomb(const BoVector3Fixed& canvasVector)
  if (localPlayerIO()->ownsUnit(selection()->leader())) {
 	Unit* leader = selection()->leader();
 	if (leader->speciesTheme()) {
-		leader->speciesTheme()->playSound(leader, SoundOrderAttack);
+		leader->speciesTheme()->data()->playSound(leader, SoundOrderAttack);
 	}
  }
  return true;
@@ -514,7 +515,7 @@ bool BosonGameViewInput::actionFollow(const BoVector3Fixed& canvasVector)
  Unit* u = selection()->leader();
  if (localPlayerIO()->ownsUnit(u)) {
 	if (u->speciesTheme()) {
-		u->speciesTheme()->playSound(u, SoundOrderMove);
+		u->speciesTheme()->data()->playSound(u, SoundOrderMove);
 	}
  }
  return true;

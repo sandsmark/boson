@@ -87,12 +87,21 @@ UnitBase::~UnitBase()
 // boDebug() << k_funcinfo << " done" << endl;
 }
 
-BosonModel* UnitBase::getModelForItem() const
+QString UnitBase::getModelIdForItem() const
 {
- BO_CHECK_NULL_RET0(owner());
- BO_CHECK_NULL_RET0(owner()->speciesTheme());
- BO_CHECK_NULL_RET0(unitProperties());
- return owner()->speciesTheme()->unitModel(unitProperties()->typeId());
+ if (!owner()) {
+	BO_NULL_ERROR(owner());
+	return QString::null;
+ }
+ if (!owner()->speciesTheme()) {
+	BO_NULL_ERROR(owner()->speciesTheme());
+	return QString::null;
+ }
+ if (!unitProperties()) {
+	BO_NULL_ERROR(unitProperties());
+	return QString::null;
+ }
+ return QString("%1:%2").arg("unit").arg(QString::number(unitProperties()->typeId()));
 }
 
 void UnitBase::initStatic()
