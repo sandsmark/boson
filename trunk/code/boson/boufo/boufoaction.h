@@ -203,7 +203,7 @@ class BoUfoActionCollectionPrivate;
  * // ...
  * BoUfoActionCollection::initActionCollection(ufoManager);
  * BoUfoActionCollection* actionCollection = ufoManager->actionCollection();
- * // ... create your BoAction object with actionCollection as parent
+ * // ... create your BoUfoAction object with actionCollection as parent
  * actionCollection->createGUI("myui.rc");
  * </pre>
  *
