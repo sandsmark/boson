@@ -106,12 +106,6 @@ public:
 	 **/
 	QCString unitPropertiesMD5() const;
 
-	/**
-	 * @return The i18n'ed name of the specified unit action. Can be used
-	 * e.g. in tooltips
-	 **/
-	static QString unitActionName(UnitAction action);
-
 	const BoAction* action(const QString& name) const;
 
 	/**

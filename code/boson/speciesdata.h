@@ -90,6 +90,8 @@ public:
 	 **/
 	void removeTeamColor(const QColor& color);
 
+	bool loadUnit(const UnitProperties* prop, const QColor& teamColor);
+
 	/**
 	 * Load the model for the specified unit @p prop and the color @p
 	 * teamColor.

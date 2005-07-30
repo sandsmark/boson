@@ -242,6 +242,36 @@ QString SpeciesData::themePath() const
  return d->mThemePath;
 }
 
+bool SpeciesData::loadUnit(const UnitProperties* prop, const QColor& teamColor)
+{
+ BosonProfiler prof("LoadUnit");
+ if (!prop) {
+	BO_NULL_ERROR(prop);
+	return false;
+ }
+ if (!loadUnitOverview(prop, teamColor)) {
+	return false;
+ }
+
+ // Unit's produce action is tricky because it needs overview pixmap which is
+ //  not loaded when UnitProperties are being loaded. So we load it (and other
+ //  actions) here
+#warning FIXME
+ // AB: move actions out of UnitProperties
+ {
+	UnitProperties* p = (UnitProperties*)prop;
+	p->loadActions();
+ }
+
+ if (!loadUnitModel(prop, teamColor)) {
+	return false;
+ }
+ if (!loadUnitSounds(prop)) {
+	return false;
+ }
+ return true;
+}
+
 bool SpeciesData::loadUnitModel(const UnitProperties* prop, const QColor& )
 {
  if (!prop) {
