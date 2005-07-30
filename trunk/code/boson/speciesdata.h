@@ -115,7 +115,7 @@ public:
 	/**
 	 * Load the actions specified in $speciesdir/actions.boson
 	 **/
-	void loadActions();
+	bool loadActions();
 
 	/**
 	 * @return The unit model for @p unitType. Will <em>not</em> load the
