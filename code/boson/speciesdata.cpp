@@ -540,24 +540,24 @@ bool SpeciesData::loadObjects(const QColor& teamColor)
  return true;
 }
 
-void SpeciesData::loadActions()
+bool SpeciesData::loadActions()
 {
  if (d->mActions.count() > 0) {
 	// already loaded, probably for another player
-	return;
+	return true;
  }
 
  QString fileName = themePath() + QString::fromLatin1("actions.boson");
  if (!KStandardDirs::exists(fileName)) {
 	boDebug(270) << k_funcinfo << "no actions.boson file found at " << fileName << endl;
-	return;
+	return true;
  }
 
  KSimpleConfig cfg(fileName);
  QStringList actions = cfg.groupList();
  if (actions.isEmpty()) {
 	boWarning(270) << k_funcinfo << "No actions found in actions file (" << fileName << ")" << endl;
-	return;
+	return true;
  }
 
  boDebug(270) << k_funcinfo << "Loading " << actions.count()
@@ -572,6 +572,7 @@ void SpeciesData::loadActions()
 		boError(270) << k_funcinfo << "action with id " << action->id() << " already there!" << endl;
 	}
  }
+ return true;
 }
 
 QPixmap* SpeciesData::pixmap(const QString& name)
