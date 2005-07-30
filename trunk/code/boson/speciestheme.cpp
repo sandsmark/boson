@@ -89,7 +89,6 @@ public:
 	// (e.g. because of upgrades)
 	QIntDict<UnitProperties> mUnitProperties;
 
-	// AB: maybe this _can_ go to SpeciesData?
 	QDict< UpgradesContainer > mUpgrades;
 
 	bool mCanChangeTeamColor;
@@ -117,7 +116,6 @@ SpeciesTheme::SpeciesTheme(const QString& speciesDir, const QColor& teamColor)
  d->mUpgrades.setAutoDelete(true);
  d->mCanChangeTeamColor = true;
  mData = 0;
- boDebug() << "teamcolor: " << teamColor.red() << " " << teamColor.green() << " " << teamColor.blue() << endl;
 
  // this MUST be called in c'tor, as it initializes mData!
  if (!loadTheme(speciesDir, teamColor)) {
@@ -164,7 +162,7 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
 	setTeamColor(teamColor);
  }
  mThemePath = speciesDir;
- boDebug() << "theme path: " << themePath() << endl;
+ boDebug() << k_funcinfo << "theme path: " << themePath() << endl;
  mData = SpeciesData::speciesData(themePath());
 
  // don't preload units here as the species can still be changed in new game
@@ -174,7 +172,6 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
 
 bool SpeciesTheme::loadUnit(unsigned long int type)
 {
- BosonProfiler prof("LoadUnit");
  const UnitProperties* prop = unitProperties(type);
  if (!prop) {
 	boError(270) << "Could not load unit type " << type << endl;
@@ -182,26 +179,7 @@ bool SpeciesTheme::loadUnit(unsigned long int type)
  }
  // once we load the overview pixmaps the teamcolor can't be changed anymore
  finalizeTeamColor();
- bool ret = mData->loadUnitOverview(prop, teamColor());
-
- // Unit's produce action is tricky because it needs overview pixmap which is
- //  not loaded when UnitProperties are being loaded. So we load it (and other
- //  actions) here
- nonConstUnitProperties(type)->loadActions();
-
- if (!loadUnitModel(prop)) {
-	boError(270) << k_funcinfo << "unable to load model for unit " << type << endl;
-	ret = false;
- }
-
- if (!ret) {
-	return false;
- }
- if (!mData->loadUnitSounds(prop)) {
-	boError(270) << k_funcinfo << "unable to load sounds for unit " << type << endl;
-	return false;
- }
- return true;
+ return mData->loadUnit(prop, teamColor());
 }
 
 bool SpeciesTheme::loadActions()
@@ -302,33 +280,6 @@ QPixmap* SpeciesTheme::smallOverview(unsigned long int unitType)
 	}
  }
  return p;
-}
-
-QString SpeciesTheme::unitActionName(UnitAction action)
-{
- switch (action) {
-	case ActionAttack:
-		return i18n("Attack");
-	case ActionMove:
-		return i18n("Move");
-	case ActionStop:
-		return i18n("Stop");
-	case ActionFollow:
-		return i18n("Follow");
-	case ActionHarvest:
-		return i18n("Harvest");
-	case ActionRepair:
-		return i18n("Repair");
-	case ActionProduceUnit:
-		return i18n("ProduceUnit");
-	case ActionProduceTech:
-		return i18n("ProduceTech");
-	case ActionChangeHeight:
-		return i18n("Change Height");
-	default:
-		break;
- }
- return QString::null;
 }
 
 void SpeciesTheme::loadNewUnit(Unit* unit)
