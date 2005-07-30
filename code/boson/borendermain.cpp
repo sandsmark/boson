@@ -871,7 +871,7 @@ void ModelPreview::slotDebugModels()
 	QValueList<const UnitProperties*> prop = it.current()->allUnits();
 	QValueList<const UnitProperties*>::Iterator propIt;
 	for (propIt = prop.begin(); propIt != prop.end(); ++propIt) {
-		QStringList fileNames = SpeciesTheme::unitModelFiles();
+		QStringList fileNames = SpeciesData::unitModelFiles();
 		bool found = false;
 		QString file;
 		for (QStringList::Iterator fit = fileNames.begin(); fit != fileNames.end(); ++fit) {
