@@ -95,70 +95,6 @@ public:
 	 **/
 	void finalizeTeamColor();
 
-#if 0
-	/**
-	 * Load the unit @p unitType. This must be done before @ref pixmapArray,
-	 * @ref bigOverview or @ref smallOverview can return something useful.
-	 * These functions call this automatically so you usually don't need to
-	 * bother about it. @ref unitProperties does not need to load the unit.
-	 *
-	 * You can use this to preload units.
-	 **/
-	bool loadUnit(unsigned long int unitType);
-
-	bool loadObjects();
-
-	bool loadActions();
-
-	bool loadGeneralSounds();
-
-	const BoAction* action(const QString& name) const;
-#endif
-
-	/**
-	 * Play the specified event for the specified unit.
-	 **/
-	void playSound(UnitBase* unit, UnitSoundEvent event);
-
-	/**
-	 * Play the specified event for the specified weapon.
-	 **/
-	void playSound(const BosonWeaponProperties* weaponprop, WeaponSoundEvent event);
-
-	/**
-	 * Play the specified sound event
-	 **/
-	void playSound(SoundEvent event);
-
-	/**
-	 * @return The @ref BosonModel object for the specified unit type in
-	 * this theme. Will load the model if it is not yet loaded.
-	 **/
-	BosonModel* unitModel(unsigned long int unitType);
-
-	/**
-	 * @return List of possible model filenames.
-	 * These are the relative filenames, i.e. "unit.3ds", "unit.ac"
-	 **/
-	static QStringList unitModelFiles();
-
-	BosonModel* objectModel(const QString& name) const;
-
-	/**
-	 * @return The big overview pixmap (the one that is displayed when the
-	 * unit is selected) for unitType or NULL if none was found for
-	 * this unitType. See also @ref UnitProperties::typeId
-	 **/
-	QPixmap* bigOverview(unsigned long int unitType);
-
-	/**
-	 * @return The small pixmap (the one that is displayed on the order
-	 * buttons in @ref BosonCommandFrame to construct this unit) for
-	 * unitType or NULL if none was found for this unitType. See also
-	 * @ref UnitProperties::typeId
-	 **/
-	QPixmap* smallOverview(unsigned long int unitType);
-
 	/**
 	 * @return The color of the team of this player. See also @ref
 	 * setTeamColor
@@ -215,6 +151,15 @@ public:
 	 **/
 	const UpgradeProperties* technology(unsigned long int id) const;
 
+	/**
+	 * @return The specified upgrade of this SpeciesTheme
+	 * @param type Describes the group of upgrades. Currently only
+	 * "Technology" is provided. Other values might be "Moral" or
+	 * "Experience" or ...
+	 * @param id The ID of the desired upgrade. The ID is unique inside the
+	 * groupd of upgrades of the same @p type in this theme. Different
+	 * upgrades with different types may have the same @p id.
+	 **/
 	const UpgradeProperties* upgrade(const QString& type, unsigned long int id) const;
 
 	/**
@@ -305,7 +250,6 @@ public:
 	bool loadGameDataFromXML(const QDomElement& root);
 
 protected:
-
 	void insertUpgrade(UpgradeProperties* upgrade);
 
 private:
