@@ -170,28 +170,6 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
  return true;
 }
 
-#if 0
-bool SpeciesTheme::loadUnit(unsigned long int type)
-{
- const UnitProperties* prop = unitProperties(type);
- if (!prop) {
-	boError(270) << "Could not load unit type " << type << endl;
-	return false;
- }
- // once we load the overview pixmaps the teamcolor can't be changed anymore
- finalizeTeamColor();
- return mData->loadUnit(prop, teamColor());
-}
-#endif
-
-#if 0
-bool SpeciesTheme::loadActions()
-{
- mData->loadActions();
- return true;
-}
-#endif
-
 QCString SpeciesTheme::unitPropertiesMD5() const
 {
  QCString string;
@@ -207,13 +185,6 @@ QCString SpeciesTheme::unitPropertiesMD5() const
  }
  return string;
 }
-
-#if 0
-const BoAction* SpeciesTheme::action(const QString& name) const
-{
- return mData->action(name);
-}
-#endif
 
 bool SpeciesTheme::loadTechnologies()
 {
@@ -240,60 +211,6 @@ bool SpeciesTheme::loadTechnologies()
 	insertUpgrade(tech);
  }
  return true;
-}
-
-#if 0
-bool SpeciesTheme::loadObjects()
-{
- finalizeTeamColor(); // AB: this is obsolete, the models don't use the teamcolor anymore. removing it should be safe.
- return mData->loadObjects(teamColor());
-}
-#endif
-
-QStringList SpeciesTheme::unitModelFiles()
-{
- return SpeciesData::unitModelFiles();
-}
-
-BosonModel* SpeciesTheme::unitModel(unsigned long int unitType)
-{
- return mData->unitModel(unitType);
-}
-
-QPixmap* SpeciesTheme::bigOverview(unsigned long int unitType)
-{
- QPixmap* p = mData->bigOverview(unitType, teamColor());
- if (!p) {
-#warning fixme
-#if 0
-	loadUnit(unitType);
-#endif
-	p = mData->bigOverview(unitType, teamColor());
-	if (!p) {
-		boError() << k_funcinfo << "Cannot find unit type " << unitType
-				<< endl;
-		return 0;
-	}
- }
- return p;
-}
-
-QPixmap* SpeciesTheme::smallOverview(unsigned long int unitType)
-{
- QPixmap* p = mData->smallOverview(unitType, teamColor());
- if (!p) {
-#warning fixme
-#if 0
-	loadUnit(unitType);
-#endif
-	p = mData->smallOverview(unitType, teamColor());
-	if (!p) {
-		boError() << k_funcinfo << "Cannot find unit type " << unitType
-				<< endl;
-		return 0;
-	}
- }
- return p;
 }
 
 void SpeciesTheme::loadNewUnit(Unit* unit)
@@ -581,33 +498,6 @@ QValueList<QColor> SpeciesTheme::defaultColors()
 	colors.append(QColor(default_color[i]));
  }
  return colors;
-}
-
-void SpeciesTheme::playSound(UnitBase* unit, UnitSoundEvent event)
-{
- mData->playSound(unit, event);
-}
-
-void SpeciesTheme::playSound(SoundEvent event)
-{
- mData->playSound(event);
-}
-
-void SpeciesTheme::playSound(const BosonWeaponProperties* weaponProp, WeaponSoundEvent event)
-{
- mData->playSound(weaponProp, event);
-}
-
-#if 0
-bool SpeciesTheme::loadGeneralSounds()
-{
- return mData->loadGeneralSounds();
-}
-#endif
-
-BosonModel* SpeciesTheme::objectModel(const QString& name) const
-{
- return mData->objectModel(name);
 }
 
 void SpeciesTheme::finalizeTeamColor()
