@@ -205,6 +205,7 @@ void BoVeryFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int
 
 void BoVeryFastGroundRenderer::updateMapCache(const BosonMap* map)
 {
+ BoGroundRendererBase::updateMapCache(map);
  if (mCurrentMap == map) {
 	return;
  }
