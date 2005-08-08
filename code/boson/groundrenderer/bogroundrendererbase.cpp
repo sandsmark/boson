@@ -197,6 +197,8 @@ private:
 
 void CellListBuilder::copyHeightMap(float* heightMap, const BosonMap* map)
 {
+ BO_CHECK_NULL_RET(heightMap);
+ BO_CHECK_NULL_RET(map);
  BosonProfiler prof("copyHeightMap");
  if (mMinX < 0 || mMinY < 0) {
 	boError() << k_funcinfo << "minx=" << mMinX << " miny=" << mMinY << endl;
@@ -746,6 +748,7 @@ void BoGroundRendererBase::updateMapCache(const BosonMap* map)
 	return;
  }
  mCurrentMap = map;
+ BO_CHECK_NULL_RET(mCurrentMap);
 
  mColorMapRenderers.setAutoDelete(true);
  mColorMapRenderers.clear();
@@ -755,6 +758,9 @@ void BoGroundRendererBase::updateMapCache(const BosonMap* map)
  mHeightMap2 = new float[map->cornerArrayPos(map->width(), map->height()) + 1];
 #else
  mHeightMap2 = (float*)map->heightMap();
+ if (!mHeightMap2) {
+	BO_NULL_ERROR(mHeightMap2);
+ }
 #endif
 }
 
