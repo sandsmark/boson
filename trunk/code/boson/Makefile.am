@@ -87,6 +87,7 @@ libbosoncommon_la_SOURCES = \
 		bopluginmanager.cpp
 
 libboson_la_SOURCES = \
+		bosonviewdata.cpp \
 		boselection.cpp \
 		botooltipcreator.cpp \
 		bosonglwidget.cpp \

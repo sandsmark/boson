@@ -28,6 +28,7 @@
 #include "../unit.h"
 #include "../bosonweapon.h"
 #include "../boufo/boufolabel.h"
+#include "../bosonviewdata.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -138,7 +139,7 @@ void BosonUnitView::displayUnitPixmap(unsigned long int unitType, const Player* 
 	boError(220) << k_funcinfo << "NULL owner" << endl;
 	return;
  }
- QPixmap* big = owner->speciesTheme()->data()->bigOverview(unitType, owner->teamColor());
+ QPixmap* big = boViewData->speciesData(owner->speciesTheme())->bigOverview(unitType, owner->teamColor());
  if (!big) {
 	boError(220) << "Cannot find Big Overview for " << unitType << endl;
 	return;

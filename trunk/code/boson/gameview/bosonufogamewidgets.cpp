@@ -38,6 +38,7 @@
 #include "../bosonconfig.h"
 #include "../bosonprofiling.h"
 #include "../bosonfpscounter.h"
+#include "../bosonviewdata.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -413,7 +414,7 @@ void BosonUfoPlacementPreviewWidget::setPlacementPreviewData(const UnitPropertie
 	return;
  }
  if (d->mPlacementPreview.unitProperties() != prop) {
-	BosonModel* m = theme->data()->unitModel(prop->typeId()); // AB: this does a lookup in a list and therefore should be avoided (this method gets called at least whenever the mouse is moved!)
+	BosonModel* m = boViewData->speciesData(theme)->unitModel(prop->typeId()); // AB: this does a lookup in a list and therefore should be avoided (this method gets called at least whenever the mouse is moved!)
 	if (!m) {
 		boError() << k_funcinfo << "NULL model for " << prop->typeId() << endl;
 		return;

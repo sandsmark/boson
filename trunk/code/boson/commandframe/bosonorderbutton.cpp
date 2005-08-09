@@ -33,6 +33,7 @@
 #include "bodebug.h"
 #include "../boufo/boufoimage.h"
 #include "../boufo/boufoprogress.h"
+#include "../bosonviewdata.h"
 
 #include <kpixmap.h>
 #include <kpixmapeffect.h>
@@ -236,7 +237,7 @@ void BosonOrderButton::displayUnitPixmap(unsigned long int unitType, const Playe
 	boError(220) << k_funcinfo << "NULL owner" << endl;
 	return;
  }
- QPixmap* small = owner->speciesTheme()->data()->smallOverview(unitType, owner->teamColor());
+ QPixmap* small = boViewData->speciesData(owner->speciesTheme())->smallOverview(unitType, owner->teamColor());
  if (!small) {
 	boError(220) << k_funcinfo << "Cannot find small overview for "
 			<< unitType << endl;

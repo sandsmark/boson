@@ -55,6 +55,7 @@
 #include "../playerio.h"
 #include "../bocamera.h"
 #include "../boshader.h"
+#include "../bosonviewdata.h"
 
 #include <qvaluevector.h>
 
@@ -112,135 +113,6 @@ static BosonModel* renderSingleItem(
 }
 
 
-void BosonItemEffects::setEffects(const QPtrList<BosonEffect>& effects, QPtrList<BosonEffect>* takeOwnership)
-{
- clearEffects();
-// boDebug() << k_funcinfo << effects.count() << endl;
- for (QPtrListIterator<BosonEffect> it(effects); it.current(); ++it) {
-	addEffect(it.current(), takeOwnership);
- }
-}
-void BosonItemEffects::addEffect(BosonEffect* e, QPtrList<BosonEffect>* takeOwnership)
-{
- e->setOwnerId(mItem->id());
- mEffects.append(e);
- if (takeOwnership) {
-	takeOwnership->append(e);
- }
-}
-
-void BosonItemEffects::removeEffect(BosonEffect* e)
-{
- mEffects.removeRef(e);
-}
-
-void BosonItemEffects::clearEffects()
-{
- for (QPtrListIterator<BosonEffect> it(mEffects); it.current(); ++it) {
-	it.current()->setOwnerId(0);
- }
- mEffects.clear();
-}
-
-void BosonItemEffects::updateEffectsPosition()
-{
- BoVector3Fixed pos(item()->x() + item()->width() / 2, item()->y() + item()->height() / 2, item()->z());
- pos.canvasToWorld();
- for (QPtrListIterator<BosonEffect> it(mEffects); it.current(); ++it) {
-	it.current()->setPosition(pos);
- }
- mItem->setEffectsPositionDirty(false);
-}
-
-void BosonItemEffects::updateEffectsRotation()
-{
- BoVector3Fixed rotation(item()->xRotation(), item()->yRotation(), item()->rotation());
- for (QPtrListIterator<BosonEffect> it(mEffects); it.current(); ++it) {
-	it.current()->setRotation(rotation);
- }
- mItem->setEffectsRotationDirty(false);
-}
-
-BosonItemContainer::BosonItemContainer(BosonItem* item)
-{
- mItem = item;
- mItemRenderer = 0;
- mEffects = new BosonItemEffects(mItem);
-}
-
-BosonItemContainer::~BosonItemContainer()
-{
- delete mItemRenderer;
- delete mEffects;
-}
-
-#include "../items/bosonshot.h" // for an explosion hack below
-bool BosonItemContainer::initItemRenderer()
-{
- if (mItemRenderer) {
-	boWarning() << k_funcinfo << "called twice" << endl;
-	return true;
- }
-
- // TODO: a virtual bool providesModel() method would be handy here. by default
- // it would return true, but e.g. the explosion class would return false.
- bool providesModel = true;
-
- if (RTTI::isShot(item()->rtti())) {
-	// AB: this is a hack. implement a providesModel() method instead.
-	if (((BosonShot*)item())->type() == BosonShot::Explosion) {
-		providesModel = false;
-	}
- }
-
- if (boConfig->boolValue("ForceDisableModelLoading")) {
-	providesModel = false;
- }
-
- // AB: note that we can of course use renderers other than the model renderer.
- // e.g. we might use some special renderer for bullets or so (i.e. not use any
- // model).
- // but as this is not required yet, a simple if (providesModel) is sufficient
- // here.
- bool ret = true;
- if (providesModel) {
-	mItemRenderer = new BosonItemModelRenderer(item());
-	BosonModel* model = 0;
-	QString id = item()->getModelIdForItem();
-	int index = -1;
-	if (!id.isEmpty()) {
-		index = id.find(':');
-	}
-	if (index >= 0) {
-		QString type = id.left(index);
-		QString file = id.right(id.length() - index - 1);
-		if (type == "shot") {
-			model = item()->speciesTheme()->data()->objectModel(file);
-		} else if (type == "unit") {
-			bool ok;
-			unsigned long int unitType = file.toULong(&ok);
-			if (!ok) {
-				boError() << k_funcinfo << file << " is not a number in id string " << id << endl;
-			} else {
-				model = item()->speciesTheme()->data()->unitModel(unitType);
-			}
-		} else {
-			boError() << k_funcinfo << "unrecognized type \"" << type << "\" of id string " << id << endl;
-		}
-	} else {
-		boError() << k_funcinfo << "unrecognized format of id string: " << id << endl;
-	}
-	ret = itemRenderer()->setModel(model);
-	if (!ret) {
-		boWarning() << k_funcinfo << "itemRenderer()->setModel() failed" << endl;
-		delete mItemRenderer;
-		mItemRenderer = new BosonItemRenderer(item());
-	}
- } else {
-	mItemRenderer = new BosonItemRenderer(item());
- }
- return ret;
-}
 
 class BoVisibleEffects
 {

@@ -90,8 +90,6 @@ public:
 	QIntDict<UnitProperties> mUnitProperties;
 
 	QDict< UpgradesContainer > mUpgrades;
-
-	bool mCanChangeTeamColor;
 };
 
 static int defaultColorIndex = 0;
@@ -114,10 +112,7 @@ SpeciesTheme::SpeciesTheme(const QString& speciesDir, const QColor& teamColor)
  d = new SpeciesThemePrivate;
  d->mUnitProperties.setAutoDelete(true);
  d->mUpgrades.setAutoDelete(true);
- d->mCanChangeTeamColor = true;
- mData = 0;
 
- // this MUST be called in c'tor, as it initializes mData!
  if (!loadTheme(speciesDir, teamColor)) {
 	boError() << "Theme " << speciesDir << " not properly loaded" << endl;
  }
@@ -125,16 +120,8 @@ SpeciesTheme::SpeciesTheme(const QString& speciesDir, const QColor& teamColor)
 
 SpeciesTheme::~SpeciesTheme()
 {
- // AB: do NOT delete mData here
  boDebug() << k_funcinfo << endl;
  reset();
-
- // for now we also remove our teamcolor object from the species data.
- // one day we should skip this, if possible. or just remove dependancy of most
- // data on the teamcolor.
- // we should keep the data in memory until a new game is started and drop the
- // objects that are not needed anymore
- mData->removeTeamColor(teamColor());
 
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
@@ -163,7 +150,6 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
  }
  mThemePath = speciesDir;
  boDebug() << k_funcinfo << "theme path: " << themePath() << endl;
- mData = SpeciesData::speciesData(themePath());
 
  // don't preload units here as the species can still be changed in new game
  // dialog
@@ -245,7 +231,6 @@ bool SpeciesTheme::readUnitConfigs(bool full)
 {
  // AB: at least the object models are touched here :(
  // they depend on teamcolor, so we won't be able to change teamcolor anymore!
- finalizeTeamColor();
  if (d->mUnitProperties.count() != 0) {
 	boError(270) << "Cannot read unit configs again. Returning untouched..."
 			<< endl;
@@ -483,10 +468,6 @@ QString SpeciesTheme::identifier() const
 
 bool SpeciesTheme::setTeamColor(const QColor& color)
 {
- if (!d->mCanChangeTeamColor) {
-	boWarning() << "Cannot change team color anymore!" << endl;
-	return false;
- }
  mTeamColor = color;
  return true;
 }
@@ -498,14 +479,6 @@ QValueList<QColor> SpeciesTheme::defaultColors()
 	colors.append(QColor(default_color[i]));
  }
  return colors;
-}
-
-void SpeciesTheme::finalizeTeamColor()
-{
- if (d->mCanChangeTeamColor) {
-	d->mCanChangeTeamColor = false;
-	mData->addTeamColor(teamColor());
- }
 }
 
 bool SpeciesTheme::saveGameDataAsXML(QDomElement& root) const

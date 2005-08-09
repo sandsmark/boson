@@ -33,6 +33,7 @@
 #include "../bosonweapon.h"
 #include "../speciestheme.h"
 #include "../speciesdata.h"
+#include "../bosonviewdata.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -109,7 +110,7 @@ void BoActionsWidget::showUnitActions(Unit* unit, const QPtrList<Unit>& allUnits
 		boError(220) << k_funcinfo << "action ID for " << it.key() << " is empty" << endl;
 		continue;
 	}
-	const BoAction* action = unit->speciesTheme()->data()->action(it.data());
+	const BoAction* action = boViewData->speciesData(unit->speciesTheme())->action(it.data());
 	if (!action) {
 		boError(220) << k_funcinfo << "NULL action for " << it.key() << " == " << it.data() << endl;
 		continue;
@@ -134,7 +135,7 @@ void BoActionsWidget::showUnitActions(Unit* unit, const QPtrList<Unit>& allUnits
 				boError(220) << k_funcinfo << "weapon action string for " << it.key() << " is empty" << endl;
 				continue;
 			}
-			const BoAction* action = w->speciesTheme()->data()->action(it.data());
+			const BoAction* action = boViewData->speciesData(w->speciesTheme())->action(it.data());
 			if (!action) {
 				boError(220) << k_funcinfo << "NULL action for " << it.key() << " == " << it.data() << endl;
 				continue;

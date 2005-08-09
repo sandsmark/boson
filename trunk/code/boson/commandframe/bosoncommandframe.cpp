@@ -41,6 +41,7 @@
 #include "../boufo/boufolabel.h"
 #include "../boufo/boufoprogress.h"
 #include "../boufo/boufocustomwidget.h"
+#include "../bosonviewdata.h"
 
 #include <klocale.h>
 
@@ -74,7 +75,7 @@ public:
 			return mProduceActions[prop];
 		}
 		SpeciesTheme* theme = prop->theme();
-		BoAction* a = new BoAction(QString("ProduceAction-%1").arg(prop->typeId()), theme->data()->smallOverview(prop->typeId(), theme->teamColor()), "Produce");
+		BoAction* a = new BoAction(QString("ProduceAction-%1").arg(prop->typeId()), boViewData->speciesData(theme)->smallOverview(prop->typeId(), theme->teamColor()), "Produce");
 		mNewProduceActions.append(a);
 		mProduceActions.insert(prop, a);
 		return a;
@@ -92,7 +93,7 @@ public:
 		if (mProduceActions.contains(technology)) {
 			return mProduceActions[technology];
 		}
-		const BoAction* a = theme->data()->action(technology->produceActionString());
+		const BoAction* a = boViewData->speciesData(theme)->action(technology->produceActionString());
 		mProduceActions.insert(technology, a);
 		return a;
 	}
