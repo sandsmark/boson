@@ -84,6 +84,7 @@
 #include "../bosonfpscounter.h"
 #include "../bosongameviewpluginmanager.h"
 #include "../bosongameviewpluginbase.h"
+#include "../bosonviewdata.h"
 #include "bosongamevieweventlistener.h"
 
 #include <kgame/kgameio.h>
@@ -395,6 +396,7 @@ class BosonGameViewPrivate
 public:
 	BosonGameViewPrivate()
 	{
+		mViewData = 0;
 		mLayeredPane = 0;
 		mUfoCanvasWidget = 0;
 		mUfoGameGUI = 0;
@@ -404,6 +406,7 @@ public:
 		mUfoFPSGraphWidget = 0;
 		mUfoProfilingGraphWidget = 0;
 
+		mFPSCounter = 0;
 		mActionCollection = 0;
 		mToolTips = 0;
 		mGLMiniMap = 0;
@@ -426,6 +429,8 @@ public:
 
 		mEventListener = 0;
 	}
+
+	BosonViewData* mViewData;
 	BoUfoLayeredPane* mLayeredPane;
 	BosonUfoCanvasWidget* mUfoCanvasWidget;
 	BosonUfoPlacementPreviewWidget* mUfoPlacementPreviewWidget;
@@ -509,6 +514,8 @@ BosonGameView::~BosonGameView()
  BosonGameViewPluginManager::deleteStatic();
  BoWaterRenderer::deleteStatic();
  BoLightManager::deleteStatic();
+ BosonViewData::setGlobalViewData(0);
+ delete d->mViewData;
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
 }
@@ -519,6 +526,10 @@ void BosonGameView::init()
  mCanvas = 0;
  d->mInputInitialized = false;
  d->mFPSCounter = 0;
+
+ d->mViewData = new BosonViewData(this);
+ BosonViewData::setGlobalViewData(d->mViewData);
+
 
  d->mFovY = 60.0f;
 
@@ -1645,6 +1656,7 @@ void BosonGameView::removeSelectionRect(bool replace)
 {
  BO_CHECK_NULL_RET(displayInput());
  BO_CHECK_NULL_RET(localPlayerIO());
+ BO_CHECK_NULL_RET(boViewData);
 
  if (d->mSelectionRect->isVisible()) {
 	// here as there is a performance problem in
@@ -1656,7 +1668,7 @@ void BosonGameView::removeSelectionRect(bool replace)
 	if (!selection()->isEmpty()) {
 		Unit* u = selection()->leader();
 		if (localPlayerIO()->ownsUnit(u)) {
-			u->speciesTheme()->data()->playSound(u, SoundOrderSelect);
+			boViewData->speciesData(u->speciesTheme())->playSound(u, SoundOrderSelect);
 		}
 	}
  } else {
@@ -1679,7 +1691,7 @@ void BosonGameView::removeSelectionRect(bool replace)
 		// cannot be placed into selection() cause we don't have localPlayer
 		// there
 		if (localPlayerIO()->ownsUnit(unit)) {
-			unit->speciesTheme()->data()->playSound(unit, SoundOrderSelect);
+			boViewData->speciesData(unit->speciesTheme())->playSound(unit, SoundOrderSelect);
 		}
 	} else {
 		if (replace) {

@@ -41,6 +41,7 @@ class BosonGameViewInputBase;
 class BoSpecificAction;
 class BoUfoActionCollection;
 class BosonGameFPSCounter;
+class BosonViewData;
 class KGameIO;
 class QDomElement;
 

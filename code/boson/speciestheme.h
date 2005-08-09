@@ -33,7 +33,6 @@ class UnitBase;
 class Unit;
 class UpgradeProperties;
 class BosonWeaponProperties;
-class SpeciesData;
 class BoAction;
 
 class QDomElement;
@@ -67,10 +66,6 @@ public:
 
 	~SpeciesTheme();
 
-	SpeciesData* data() const
-	{
-		return mData;
-	}
 
 	/**
 	 * Load a theme. Look for index.unit files in the units directory,
@@ -85,15 +80,6 @@ public:
 	 * color
 	 **/
 	bool loadTheme(const QString& species, const QColor&);
-
-	/**
-	 * Once this has been called the teamcolor can't be changed anymore.
-	 * Also add the color to @ref SpeciesData
-	 *
-	 * AB: this is a temporary method. it will be removed once SpeciesData
-	 * has been moved to gameview
-	 **/
-	void finalizeTeamColor();
 
 	/**
 	 * @return The color of the team of this player. See also @ref
@@ -257,7 +243,6 @@ private:
 
 	QString mThemePath;
 	QColor mTeamColor;
-	SpeciesData* mData;
 };
 
 #endif

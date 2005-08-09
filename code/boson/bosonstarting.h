@@ -172,7 +172,7 @@ class BosonStartingTask : public QObject
 {
 	Q_OBJECT
 public:
-	BosonStartingTask(const QString& text, QObject* parent = 0);
+	BosonStartingTask(const QString& text);
 	~BosonStartingTask();
 
 	virtual QString text() const

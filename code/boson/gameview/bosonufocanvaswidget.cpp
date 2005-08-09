@@ -44,6 +44,7 @@
 #include "../bowaterrenderer.h"
 #include "../bocamera.h"
 #include "../boitemlist.h"
+#include "../bosonviewdata.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -52,6 +53,75 @@
 #include <qvaluelist.h>
 #include <qptrdict.h>
 #include <qdom.h>
+
+
+BosonItemEffects::BosonItemEffects(BosonItem* item)
+{
+ mItem = item;
+ mEffects = new QPtrList<BosonEffect>();
+}
+
+BosonItemEffects::~BosonItemEffects()
+{
+ clearEffects();
+ delete mEffects;
+}
+
+const QPtrList<BosonEffect>& BosonItemEffects::effects() const
+{
+ return *mEffects;
+}
+
+void BosonItemEffects::setEffects(const QPtrList<BosonEffect>& effects, QPtrList<BosonEffect>* takeOwnership)
+{
+ clearEffects();
+// boDebug() << k_funcinfo << effects.count() << endl;
+ for (QPtrListIterator<BosonEffect> it(effects); it.current(); ++it) {
+	addEffect(it.current(), takeOwnership);
+ }
+}
+
+void BosonItemEffects::addEffect(BosonEffect* e, QPtrList<BosonEffect>* takeOwnership)
+{
+ e->setOwnerId(mItem->id());
+ mEffects->append(e);
+ if (takeOwnership) {
+	takeOwnership->append(e);
+ }
+}
+
+void BosonItemEffects::removeEffect(BosonEffect* e)
+{
+ mEffects->removeRef(e);
+}
+
+void BosonItemEffects::clearEffects()
+{
+ for (QPtrListIterator<BosonEffect> it(*mEffects); it.current(); ++it) {
+	it.current()->setOwnerId(0);
+ }
+ mEffects->clear();
+}
+
+void BosonItemEffects::updateEffectsPosition()
+{
+ BoVector3Fixed pos(item()->x() + item()->width() / 2, item()->y() + item()->height() / 2, item()->z());
+ pos.canvasToWorld();
+ for (QPtrListIterator<BosonEffect> it(*mEffects); it.current(); ++it) {
+	it.current()->setPosition(pos);
+ }
+ mItem->setEffectsPositionDirty(false);
+}
+
+void BosonItemEffects::updateEffectsRotation()
+{
+ BoVector3Fixed rotation(item()->xRotation(), item()->yRotation(), item()->rotation());
+ for (QPtrListIterator<BosonEffect> it(*mEffects); it.current(); ++it) {
+	it.current()->setRotation(rotation);
+ }
+ mItem->setEffectsRotationDirty(false);
+}
+
 
 
 class BosonUfoCanvasWidgetPrivate
@@ -73,8 +143,6 @@ public:
 	PlayerIO* mLocalPlayerIO;
 	const BosonCanvas* mCanvas;
 
-	QPtrDict<BosonItemContainer> mItem2ItemContainer;
-	QPtrList<BosonItemContainer> mAllItems;
 	QPtrList<BosonEffect> mEffects;
 
 	BosonEffectManager* mEffectManager;
@@ -90,6 +158,18 @@ BosonUfoCanvasWidget::BosonUfoCanvasWidget()
 
  d->mCanvasRenderer = new BosonCanvasRenderer();
  d->mCanvasRenderer->initGL();
+
+ if (!boViewData) {
+	BO_NULL_ERROR(boViewData);
+	return;
+ }
+ connect(boViewData, SIGNAL(signalItemContainerAdded(BosonItemContainer*)),
+		this, SLOT(slotAddItemContainerData(BosonItemContainer*)));
+ connect(boViewData, SIGNAL(signalItemContainerAboutToBeRemoved(BosonItemContainer*)),
+		this, SLOT(slotRemoveItemContainerData(BosonItemContainer*)));
+ if (boViewData->allItemContainers().count() > 0) {
+	boError() << k_funcinfo << "itemcontainer list should be empty at this point" << endl;
+ }
 }
 
 BosonUfoCanvasWidget::~BosonUfoCanvasWidget()
@@ -124,8 +204,6 @@ void BosonUfoCanvasWidget::setCanvas(const BosonCanvas* canvas)
  }
  d->mCanvas = canvas;
  if (d->mCanvas) {
-	connect(d->mCanvas, SIGNAL(signalItemAdded(BosonItem*)),
-		this, SLOT(slotItemAdded(BosonItem*)));
 	connect(d->mCanvas, SIGNAL(signalShotFired(BosonShot*, BosonWeapon*)),
 		this, SLOT(slotShotFired(BosonShot*, BosonWeapon*)));
 	connect(d->mCanvas, SIGNAL(signalShotHit(BosonShot*)),
@@ -136,7 +214,6 @@ void BosonUfoCanvasWidget::setCanvas(const BosonCanvas* canvas)
 		this, SLOT(slotFragmentCreated(BosonShotFragment*)));
 
 	for (BoItemList::ConstIterator it = d->mCanvas->allItems()->begin(); it != d->mCanvas->allItems()->end(); ++it) {
-		slotItemAdded(*it);
 		if (RTTI::isUnit((*it)->rtti())) {
 			Unit* u = (Unit*)*it;
 			if (u->isFacility()) {
@@ -157,12 +234,10 @@ void BosonUfoCanvasWidget::setParticlesDirty(bool dirty)
 
 void BosonUfoCanvasWidget::quitGame()
 {
- d->mItem2ItemContainer.clear();
- d->mAllItems.setAutoDelete(true);
- d->mAllItems.clear();
+ d->mCanvasRenderer->reset();
+
  d->mEffects.setAutoDelete(true);
  d->mEffects.clear();
- d->mCanvasRenderer->reset();
 }
 
 void BosonUfoCanvasWidget::addEffect(BosonEffect* e)
@@ -193,7 +268,7 @@ void BosonUfoCanvasWidget::slotAdvance(unsigned int advanceCallsCount, bool adva
 void BosonUfoCanvasWidget::animateItems(unsigned int advanceCallsCount)
 {
  Q_UNUSED(advanceCallsCount);
- for (QPtrListIterator<BosonItemContainer> it(d->mAllItems); it.current(); ++it) {
+ for (QPtrListIterator<BosonItemContainer> it(boViewData->allItemContainers()); it.current(); ++it) {
 	BosonItemRenderer* r = it.current()->itemRenderer();
 	if (r) {
 		r->animate();
@@ -205,7 +280,7 @@ void BosonUfoCanvasWidget::advanceEffects(float elapsed)
 {
  BO_CHECK_NULL_RET(d->mCanvas);
  QPtrList<BosonEffect> removeEffects;
- for (QPtrDictIterator<BosonItemContainer> it(d->mItem2ItemContainer); it.current(); ++it) {
+ for (QPtrListIterator<BosonItemContainer> it(boViewData->allItemContainers()); it.current(); ++it) {
 	BosonItemEffects* e = it.current()->effects();
 	if (!e->item()) {
 		continue;
@@ -233,7 +308,7 @@ void BosonUfoCanvasWidget::advanceEffects(float elapsed)
 			BosonItem* owner = d->mCanvas->findItem(e->ownerId());
 			if (owner) {
 				BosonItemEffects* itemEffects = 0;
-				BosonItemContainer* c = d->mItem2ItemContainer[owner];
+				BosonItemContainer* c = boViewData->itemContainer(owner);
 				if (c) {
 					itemEffects = c->effects();
 				}
@@ -335,7 +410,7 @@ bool BosonUfoCanvasWidget::loadEffectsFromXML(const QDomElement& root)
 		BosonItem* owner = d->mCanvas->findItem(e->ownerId());
 		BosonItemEffects* itemEffects = 0;
 		if (owner) {
-			BosonItemContainer* c = d->mItem2ItemContainer[owner];
+			BosonItemContainer* c = boViewData->itemContainer(owner);
 			if (c) {
 				itemEffects = c->effects();
 			}
@@ -370,6 +445,7 @@ bool BosonUfoCanvasWidget::saveEffectsAsXML(QDomElement& root) const
 
 void BosonUfoCanvasWidget::slotShotFired(BosonShot* shot, BosonWeapon* weapon)
 {
+ BO_CHECK_NULL_RET(boViewData);
  BO_CHECK_NULL_RET(shot);
  BO_CHECK_NULL_RET(weapon);
  BO_CHECK_NULL_RET(weapon->properties());
@@ -379,13 +455,14 @@ void BosonUfoCanvasWidget::slotShotFired(BosonShot* shot, BosonWeapon* weapon)
  addEffects(d->mEffectManager->newShootEffects(weapon->properties(), pos, weapon->unit()->rotation()));
 
  BO_CHECK_NULL_RET(weapon->speciesTheme());
- weapon->speciesTheme()->data()->playSound(weapon->properties(), SoundWeaponShoot);
+ BO_CHECK_NULL_RET(boViewData->speciesData(weapon->speciesTheme()));
+ boViewData->speciesData(weapon->speciesTheme())->playSound(weapon->properties(), SoundWeaponShoot);
 }
 
 void BosonUfoCanvasWidget::slotShotHit(BosonShot* shot)
 {
  BO_CHECK_NULL_RET(shot);
- BosonItemContainer* c = d->mItem2ItemContainer[shot];
+ BosonItemContainer* c = boViewData->itemContainer(shot);
  BO_CHECK_NULL_RET(c);
 
  BosonItemEffects* effects = c->effects();
@@ -436,7 +513,9 @@ void BosonUfoCanvasWidget::slotShotHit(BosonShot* shot)
  }
 
  if (shot->properties() && shot->properties()->speciesTheme()) {
-	shot->properties()->speciesTheme()->data()->playSound(shot->properties(), SoundWeaponHit);
+	BO_CHECK_NULL_RET(boViewData);
+	BO_CHECK_NULL_RET(boViewData->speciesData(shot->properties()->speciesTheme()));
+	boViewData->speciesData(shot->properties()->speciesTheme())->playSound(shot->properties(), SoundWeaponHit);
  }
 
  BO_CHECK_NULL_RET(effects);
@@ -446,12 +525,14 @@ void BosonUfoCanvasWidget::slotShotHit(BosonShot* shot)
 
 void BosonUfoCanvasWidget::slotUnitDestroyed(Unit* unit)
 {
+ BO_CHECK_NULL_RET(boViewData);
  BO_CHECK_NULL_RET(unit);
  BO_CHECK_NULL_RET(unit->speciesTheme());
- BosonItemContainer* c = d->mItem2ItemContainer[unit];
+ BO_CHECK_NULL_RET(boViewData->speciesData(unit->speciesTheme()));
+ BosonItemContainer* c = boViewData->itemContainer(unit);
  BO_CHECK_NULL_RET(c);
 
- unit->speciesTheme()->data()->playSound(unit, SoundReportDestroyed);
+ boViewData->speciesData(unit->speciesTheme())->playSound(unit, SoundReportDestroyed);
  BosonItemEffects* e = c->effects();
  if (e && e->effects().count() > 0) {
 	// Make all unit's effects obsolete
@@ -474,7 +555,7 @@ void BosonUfoCanvasWidget::slotUnitDestroyed(Unit* unit)
 
 void BosonUfoCanvasWidget::slotFragmentCreated(BosonShotFragment* fragment)
 {
- BosonItemContainer* c = d->mItem2ItemContainer[fragment];
+ BosonItemContainer* c = boViewData->itemContainer(fragment);
  BO_CHECK_NULL_RET(c);
  BosonItemEffects* effects = c->effects();
  BO_CHECK_NULL_RET(effects);
@@ -491,7 +572,7 @@ void BosonUfoCanvasWidget::slotFacilityConstructed(Unit* unit)
 void BosonUfoCanvasWidget::addFacilityConstructedEffects(Unit* unit)
 {
  BO_CHECK_NULL_RET(unit);
- BosonItemContainer* c = d->mItem2ItemContainer[unit];
+ BosonItemContainer* c = boViewData->itemContainer(unit);
  BO_CHECK_NULL_RET(c);
  BosonItemEffects* effects = c->effects();
  BO_CHECK_NULL_RET(effects);
@@ -502,22 +583,26 @@ void BosonUfoCanvasWidget::addFacilityConstructedEffects(Unit* unit)
  effects->setEffects(d->mEffectManager->newConstructedEffects(unit->unitProperties(), x, y, z), &d->mEffects);
 }
 
-void BosonUfoCanvasWidget::slotItemAdded(BosonItem* item)
+void BosonUfoCanvasWidget::slotAddItemContainerData(BosonItemContainer* c)
 {
+ BO_CHECK_NULL_RET(c);
+
+ BosonItem* item = c->item();
  BO_CHECK_NULL_RET(item);
- if (d->mItem2ItemContainer[item]) {
-	boError() << k_funcinfo << "item already added" << endl;
+
+ if (c->effects()) {
+	boError() << k_funcinfo << "called twice" << endl;
 	return;
  }
- BosonItemContainer* container = new BosonItemContainer(item);
- d->mAllItems.append(container);
- d->mItem2ItemContainer.insert(item, container);
- if (!container->initItemRenderer()) {
-	boError() << k_funcinfo << "unable to initialize itemRenderer for item " << item->id() << endl;
- }
 
- BosonItemEffects* effects = container->effects();
- BO_CHECK_NULL_RET(effects);
+ BosonItemEffects* effects = new BosonItemEffects(item);
+ c->setEffects(effects);
+
+ BosonItemRenderer* itemRenderer = createItemRendererFor(c);
+ if (!itemRenderer) {
+	boWarning() << k_funcinfo << "unable to initialize item renderer for item " << item->id() << endl;
+ }
+ c->setItemRenderer(itemRenderer);
 
  float x = item->x() + item->width() / 2;
  float y = item->y() + item->height() / 2;
@@ -563,18 +648,18 @@ void BosonUfoCanvasWidget::slotItemAdded(BosonItem* item)
  }
 }
 
-void BosonUfoCanvasWidget::slotItemRemoved(BosonItem* item)
+void BosonUfoCanvasWidget::slotRemoveItemContainerData(BosonItemContainer* c)
 {
- BO_CHECK_NULL_RET(item);
- BosonItemContainer* c = d->mItem2ItemContainer[item];
- if (c) {
-	if (c->effects()) {
-		c->effects()->clearEffects();
-	}
-	d->mItem2ItemContainer.remove(item);
-	d->mAllItems.setAutoDelete(true);
-	d->mAllItems.removeRef(c);
+ BO_CHECK_NULL_RET(c);
+ BosonItemEffects* effects = c->effects();
+ BosonItemRenderer* itemRenderer = c->itemRenderer();
+ if (effects) {
+	effects->clearEffects();
  }
+ c->setEffects(0);
+ c->setItemRenderer(0);
+ delete effects;
+ delete itemRenderer;
 }
 
 void BosonUfoCanvasWidget::paintWidget()
@@ -600,7 +685,7 @@ void BosonUfoCanvasWidget::paintWidget()
 		d->mGameGLMatrices->viewport()[2],
 		d->mGameGLMatrices->viewport()[3]);
 
- d->mCanvasRenderer->paintGL(d->mCanvas, d->mAllItems, d->mEffects);
+ d->mCanvasRenderer->paintGL(d->mCanvas, boViewData->allItemContainers(), d->mEffects);
 
  glPopAttrib();
 
@@ -614,5 +699,78 @@ void BosonUfoCanvasWidget::paintWidget()
  }
 }
 
+
+#include "../items/bosonshot.h" // for an explosion hack below
+BosonItemRenderer* BosonUfoCanvasWidget::createItemRendererFor(const BosonItemContainer* c)
+{
+ BO_CHECK_NULL_RET0(c);
+ BO_CHECK_NULL_RET0(c->item());
+ BO_CHECK_NULL_RET0(c->item()->speciesTheme());
+ BO_CHECK_NULL_RET0(boViewData);
+ SpeciesData* speciesData = boViewData->speciesData(c->item()->speciesTheme());
+ BO_CHECK_NULL_RET0(speciesData);
+ if (c->itemRenderer()) {
+	boWarning() << k_funcinfo << "called twice" << endl;
+	return c->itemRenderer();
+ }
+
+ // TODO: a virtual bool providesModel() method would be handy here. by default
+ // it would return true, but e.g. the explosion class would return false.
+ bool providesModel = true;
+
+ if (RTTI::isShot(c->item()->rtti())) {
+	// AB: this is a hack. implement a providesModel() method instead.
+	if (((BosonShot*)c->item())->type() == BosonShot::Explosion) {
+		providesModel = false;
+	}
+ }
+
+ if (boConfig->boolValue("ForceDisableModelLoading")) {
+	providesModel = false;
+ }
+
+ // AB: note that we can of course use renderers other than the model renderer.
+ // e.g. we might use some special renderer for bullets or so (i.e. not use any
+ // model).
+ // but as this is not required yet, a simple if (providesModel) is sufficient
+ // here.
+ BosonItemRenderer* itemRenderer = 0;
+ if (providesModel) {
+	itemRenderer = new BosonItemModelRenderer(c->item());
+	BosonModel* model = 0;
+	QString id = c->item()->getModelIdForItem();
+	int index = -1;
+	if (!id.isEmpty()) {
+		index = id.find(':');
+	}
+	if (index >= 0) {
+		QString type = id.left(index);
+		QString file = id.right(id.length() - index - 1);
+		if (type == "shot") {
+			model = boViewData->speciesData(c->item()->speciesTheme())->objectModel(file);
+		} else if (type == "unit") {
+			bool ok;
+			unsigned long int unitType = file.toULong(&ok);
+			if (!ok) {
+				boError() << k_funcinfo << file << " is not a number in id string " << id << endl;
+			} else {
+				model = boViewData->speciesData(c->item()->speciesTheme())->unitModel(unitType);
+			}
+		} else {
+			boError() << k_funcinfo << "unrecognized type \"" << type << "\" of id string " << id << endl;
+		}
+	} else {
+		boError() << k_funcinfo << "unrecognized format of id string: " << id << endl;
+	}
+	if (!itemRenderer->setModel(model)) {
+		boWarning() << k_funcinfo << "itemRenderer()->setModel() failed" << endl;
+		delete itemRenderer;
+		itemRenderer = new BosonItemRenderer(c->item());
+	}
+ } else {
+	itemRenderer = new BosonItemRenderer(c->item());
+ }
+ return itemRenderer;
+}
 
 

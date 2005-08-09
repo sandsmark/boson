@@ -47,6 +47,7 @@ class BosonEffect;
 class BoSpecificAction;
 class BoGLMatrices;
 class BoRenderItem;
+class BosonItemContainer;
 
 class KGameChat;
 class KGameIO;
@@ -54,68 +55,6 @@ class QDomElement;
 template<class T> class QPtrList;
 template<class T> class QValueVector;
 template<class T> class QValueList;
-
-
-class BosonItemEffects
-{
-public:
-	BosonItemEffects(BosonItem* item)
-	{
-		mItem = item;
-	}
-	~BosonItemEffects()
-	{
-		clearEffects();
-	}
-
-	const BosonItem* item() const
-	{
-		return mItem;
-	}
-	void setEffects(const QPtrList<BosonEffect>& effects, QPtrList<BosonEffect>* takeOwnership);
-	void addEffect(BosonEffect* e, QPtrList<BosonEffect>* takeOwnership);
-	void clearEffects();
-	void removeEffect(BosonEffect* e);
-	const QPtrList<BosonEffect>& effects() const
-	{
-		return mEffects;
-	}
-
-	void updateEffectsPosition();
-	void updateEffectsRotation();
-
-private:
-	QPtrList<BosonEffect> mEffects;
-	BosonItem* mItem;
-};
-
-
-class BosonItemContainer
-{
-public:
-	BosonItemContainer(BosonItem* item);
-	~BosonItemContainer();
-
-	bool initItemRenderer();
-
-	BosonItem* item() const
-	{
-		return mItem;
-	}
-	BosonItemRenderer* itemRenderer() const
-	{
-		return mItemRenderer;
-	}
-	BosonItemEffects* effects() const
-	{
-		return mEffects;
-	}
-
-private:
-	BosonItem* mItem;
-	BosonItemRenderer* mItemRenderer;
-	BosonItemEffects* mEffects;
-};
 
 
 

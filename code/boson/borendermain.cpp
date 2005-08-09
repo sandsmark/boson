@@ -44,6 +44,7 @@
 #include "boglstatewidget.h"
 #include "botexture.h"
 #include "bomousemovediff.h"
+#include "bosonviewdata.h"
 #include "boufo/boufo.h"
 #include "boufo/boufoaction.h"
 #include "info/boinfo.h"
@@ -754,9 +755,10 @@ void ModelPreview::load(SpeciesTheme* s, const UnitProperties* prop)
  BO_CHECK_NULL_RET(s);
  BO_CHECK_NULL_RET(prop);
  makeCurrent();
- s->finalizeTeamColor();
- s->data()->loadUnitModel(prop, s->teamColor());
- BosonModel* model = s->data()->unitModel(prop->typeId());
+ boViewData->addSpeciesTheme(s);
+ SpeciesData* speciesData = boViewData->speciesData(s);
+ speciesData->loadUnitModel(prop, s->teamColor());
+ BosonModel* model = speciesData->unitModel(prop->typeId());
  if (!model) {
 	BO_NULL_ERROR(model);
  }
@@ -772,9 +774,10 @@ void ModelPreview::loadObjectModel(SpeciesTheme* s, const QString& file)
 	return;
  }
  makeCurrent();
- s->finalizeTeamColor();
- s->data()->loadObjects(s->teamColor());
- BosonModel* model = s->data()->objectModel(file);
+ boViewData->addSpeciesTheme(s);
+ SpeciesData* speciesData = boViewData->speciesData(s);
+ speciesData->loadObjects(s->teamColor());
+ BosonModel* model = speciesData->objectModel(file);
  if (!model) {
 	BO_NULL_ERROR(model);
  }

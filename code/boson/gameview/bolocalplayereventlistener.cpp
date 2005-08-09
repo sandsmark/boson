@@ -30,6 +30,7 @@
 #include "../unitproperties.h"
 #include "../script/bosonscript.h"
 #include "../bosonprofiling.h"
+#include "../bosonviewdata.h"
 
 #include <klocale.h>
 
@@ -93,10 +94,10 @@ void BoLocalPlayerEventListener::processEvent(const BoEvent* event)
 				playerIO()->player());
 	}
  } else if (event->name() == "LostMinimap") {
-	playerIO()->speciesTheme()->data()->playSound(SoundReportMinimapDeactivated);
+	boViewData->speciesData(playerIO()->speciesTheme())->playSound(SoundReportMinimapDeactivated);
 	emit signalShowMiniMap(false);
  } else if (event->name() == "GainedMinimap") {
-	playerIO()->speciesTheme()->data()->playSound(SoundReportMinimapActivated);
+	boViewData->speciesData(playerIO()->speciesTheme())->playSound(SoundReportMinimapActivated);
 	emit signalShowMiniMap(true);
  } else if (event->name() == "AllUnitsDestroyed") {
  }

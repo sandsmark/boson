@@ -39,6 +39,7 @@
 #include "bowaterrenderer.h"
 #include "script/bosonscript.h"
 #include "unit.h"
+#include "bosonviewdata.h"
 
 #include <klocale.h>
 #include <kgame/kmessageclient.h>
@@ -249,7 +250,7 @@ bool BosonStarting::start()
  // AB: We can't do this
  // when players are initialized, as the map must be known to them once we start
  // loading the units (for *loading* games)
- BosonStartingInitPlayerMap* playerMap = new BosonStartingInitPlayerMap("Init Player Map");
+ BosonStartingInitPlayerMap* playerMap = new BosonStartingInitPlayerMap(i18n("Init Player Map"));
  connect(this, SIGNAL(signalDestPlayField(BosonPlayField*)),
 		playerMap, SLOT(slotSetDestPlayField(BosonPlayField*)));
  tasks.append(playerMap);
@@ -530,8 +531,8 @@ bool BosonStarting::checkStartingCompletedMessages() const
  return true;
 }
 
-BosonStartingTask::BosonStartingTask(const QString& text, QObject* parent)
-	: QObject(parent)
+BosonStartingTask::BosonStartingTask(const QString& text)
+	: QObject(0)
 {
  mText = text;
  mTimePassed = 0;
@@ -629,6 +630,10 @@ bool BosonStartingCreateCanvas::startTask()
 	return false;
  }
  canvas->setMap(playField()->map());
+ connect(canvas, SIGNAL(signalItemAdded(BosonItem*)),
+		boViewData, SLOT(slotAddItemContainerFor(BosonItem*)));
+ connect(canvas, SIGNAL(signalRemovedItem(BosonItem*)),
+		boViewData, SLOT(slotRemoveItemContainerFor(BosonItem*)));
 
  emit signalCanvasCreated(canvas);
 
@@ -747,10 +752,17 @@ bool BosonStartingLoadPlayerData::startTask()
  boDebug(270) << k_funcinfo << player()->id() << endl;
  // Order of calls below is very important!!! Don't change this unless you're sure you know what you're doing!!!
 
+ boViewData->addSpeciesTheme(player()->speciesTheme());
+ SpeciesData* speciesData = boViewData->speciesData(player()->speciesTheme());
+ if (!speciesData) {
+	BO_NULL_ERROR(speciesData);
+	return false;
+ }
+
  mDuration = 0;
 
  startSubTask(i18n("Actions..."));
- if (!player()->speciesTheme()->data()->loadActions()) {
+ if (!speciesData->loadActions()) {
 	boError(270) << k_funcinfo << "loading actions failed" << endl;
 	return false;
  }
@@ -758,8 +770,7 @@ bool BosonStartingLoadPlayerData::startTask()
  completeSubTask(mDuration);
 
  startSubTask(i18n("Objects..."));
- player()->speciesTheme()->finalizeTeamColor();
- if (!player()->speciesTheme()->data()->loadObjects(player()->speciesTheme()->teamColor())) {
+ if (!speciesData->loadObjects(player()->speciesTheme()->teamColor())) {
 	boError(270) << k_funcinfo << "loading objects failed" << endl;
 	return false;
  }
@@ -789,7 +800,7 @@ bool BosonStartingLoadPlayerData::startTask()
  // AB: atm only the sounds of the local player are required, but I believe this
  // can easily change.
  startSubTask(i18n("Sounds..."));
- if (!player()->speciesTheme()->data()->loadGeneralSounds()) {
+ if (!speciesData->loadGeneralSounds()) {
 	boError(270) << k_funcinfo << "loading general sounds failed" << endl;
 	return false;
  }
@@ -836,6 +847,8 @@ bool BosonStartingLoadPlayerData::loadUnitDatas()
 
  checkEvents();
 
+ SpeciesData* speciesData = boViewData->speciesData(player()->speciesTheme());
+
  // First get all id's of units
  QValueList<unsigned long int> unitIds;
  unitIds += player()->speciesTheme()->allFacilities();
@@ -846,9 +859,8 @@ bool BosonStartingLoadPlayerData::loadUnitDatas()
  for (it = unitIds.begin(); it != unitIds.end(); ++it, currentUnit++) {
 	startSubTask(i18n("Unit %1 of %2...").arg(currentUnit).arg(unitIds.count()));
 
-	player()->speciesTheme()->finalizeTeamColor();
 	const UnitProperties* prop = player()->speciesTheme()->unitProperties(*it);
-	if (!player()->speciesTheme()->data()->loadUnit(prop, player()->speciesTheme()->teamColor())) {
+	if (!speciesData->loadUnit(prop, player()->speciesTheme()->teamColor())) {
 		boError(270) << k_funcinfo << "loading unit with ID " << *it << " failed" << endl;
 		return false;
 	}

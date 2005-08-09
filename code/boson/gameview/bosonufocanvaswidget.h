@@ -33,7 +33,34 @@ class BosonShotFragment;
 class BosonItem;
 class BosonEffect;
 class BosonWeapon;
+class BosonItemRenderer;
+class BosonItemContainer;
 template<class T> class QPtrList;
+
+class BosonItemEffects
+{
+public:
+	BosonItemEffects(BosonItem* item);
+	~BosonItemEffects();
+
+	const BosonItem* item() const
+	{
+		return mItem;
+	}
+	void setEffects(const QPtrList<BosonEffect>& effects, QPtrList<BosonEffect>* takeOwnership);
+	void addEffect(BosonEffect* e, QPtrList<BosonEffect>* takeOwnership);
+	void clearEffects();
+	void removeEffect(BosonEffect* e);
+	const QPtrList<BosonEffect>& effects() const;
+
+	void updateEffectsPosition();
+	void updateEffectsRotation();
+
+private:
+	QPtrList<BosonEffect>* mEffects;
+	BosonItem* mItem;
+};
+
 
 class BosonUfoCanvasWidgetPrivate;
 /**
@@ -61,9 +88,10 @@ public:
 	bool saveEffectsAsXML(QDomElement& root) const;
 
 public slots:
+	void slotAddItemContainerData(BosonItemContainer* c);
+	void slotRemoveItemContainerData(BosonItemContainer* c);
+
 	void slotAdvance(unsigned int advanceCallsCount, bool advanceFlag);
-	void slotItemAdded(BosonItem*);
-	void slotItemRemoved(BosonItem*);
 	void slotShotFired(BosonShot* shot, BosonWeapon* weapon);
 	void slotShotHit(BosonShot* shot);
 	void slotUnitDestroyed(Unit* unit);
@@ -77,6 +105,8 @@ protected:
 	void advanceEffects(float elapsed);
 	void setParticlesDirty(bool);
 	void addFacilityConstructedEffects(Unit* facility);
+
+	BosonItemRenderer* createItemRendererFor(const BosonItemContainer* c);
 
 private:
 	BosonUfoCanvasWidgetPrivate* d;
