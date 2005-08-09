@@ -29,6 +29,7 @@
 #include "unitproperties.h"
 #include "speciestheme.h"
 #include "boitemlist.h"
+#include "boitemlisthandler.h"
 #include "defines.h"
 #include "items/bosonshot.h"
 #include "items/bosonitemrenderer.h"
@@ -479,6 +480,8 @@ void BosonCanvas::quitGame()
  }
  d->mChangeAdvanceList.clear();
  d->mNextItemId = 0;
+
+ BoItemListHandler::itemListHandler()->slotDeleteLists();
 }
 
 void BosonCanvas::deleteDestroyed()
