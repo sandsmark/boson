@@ -128,6 +128,7 @@ public:
 
         addOpenGL1_1Values();
         addOpenGL1_2Values();
+        addOpenGL1_2_1Values();
         addOpenGL1_3Values();
         addOpenGL1_4Values();
         addOpenGL1_5Values();
