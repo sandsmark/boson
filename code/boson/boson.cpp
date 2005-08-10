@@ -367,10 +367,16 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 
  setMinPlayers(1);
 
+ // AB: emergencySaveFunction() most likely is useless currently.
+ //     the log will be saved properly, but since the starting procedure has
+ //     been changed completely, we most likely won't be able to load it anyway.
+#warning FIXME: emergencySaveFunction log loading
+#if 0
  if (KCrash::emergencySaveFunction() != NULL) {
 	boError() << k_funcinfo << "oops - already an emergencySaveFunction set! overwriting!" << endl;
  }
  KCrash::setEmergencySaveFunction(emergencySave);
+#endif
 
  BoDebugLog* debugLog = BoDebugLog::debugLog();
  if (debugLog) {
