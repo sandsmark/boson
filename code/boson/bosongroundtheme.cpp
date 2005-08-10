@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2003-2005 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,16 +25,8 @@
 #include "bosondata.h"
 #include "bo3dtools.h"
 #include "bosonconfig.h"
-#include "botexture.h"
-#include "boshader.h"
-#include "bogl.h"
 
 #include <ksimpleconfig.h>
-
-#include <qimage.h>
-#include <qvaluevector.h>
-#include <qdir.h>
-
 
 /**
  * @short plugin for BosonData providing access to a @ref BosonGroundTheme object
@@ -72,7 +64,14 @@ public:
 		return mGroundTheme;
 	}
 
-	virtual bool load();
+	virtual bool load()
+	{
+		if (!groundTheme()) {
+			BO_NULL_ERROR(groundTheme());
+			return false;
+		}
+		return true;
+	}
 
 private:
 	BosonGroundTheme* mGroundTheme;
@@ -96,34 +95,20 @@ BosonGroundData::BosonGroundData(const QString& groundFile, BosonGroundTheme* gr
  }
 }
 
-bool BosonGroundData::load()
-{
- if (!groundTheme()) {
-	BO_NULL_ERROR(groundTheme());
-	return false;
- }
- QString dir = file();
- dir = dir.left(dir.length() - QString::fromLatin1("index.ground").length());
- return groundTheme()->loadGroundTheme(dir);
-}
 
 
 BosonGroundType::BosonGroundType()
 {
- id = -1;
- textures = 0;
- bumptextures = 0;
- shader = 0;
- icon = 0;
+ index = -1;
+ bumpScale = 1.0f;
+ bumpBias = 0.0f;
+ textureSize = 0.0f;
  animationDelay = 1;
+ color = Qt::black.rgb();
 }
 
 BosonGroundType::~BosonGroundType()
 {
- delete textures;
- delete bumptextures;
- // Shader will NOT be deleted here (it's shared between BosonGroundType objects)
- delete icon;
 }
 
 
@@ -141,15 +126,11 @@ BosonGroundTheme::BosonGroundTheme()
 {
  d = new BosonGroundThemePrivate;
  mGroundTypes.setAutoDelete(true);
- mBumpTextures.setAutoDelete(true);
- mShaders.setAutoDelete(true);
 }
 
 BosonGroundTheme::~BosonGroundTheme()
 {
  mGroundTypes.clear();
- mBumpTextures.clear();
- mShaders.clear();
  delete d;
 }
 
@@ -188,6 +169,16 @@ bool BosonGroundTheme::createGroundThemeList()
 
 bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
 {
+ QString dir = file;
+ if (!file.endsWith("index.ground")) {
+	boError() << k_funcinfo << "invalid filename " << file << " - it must end with index.ground" << endl;
+	return false;
+ }
+ dir = dir.left(dir.length() - QString::fromLatin1("index.ground").length());
+ if (dir.right(1) != QString::fromLatin1("/")) {
+	dir += QString::fromLatin1("/");
+ }
+
  KSimpleConfig conf(file);
  conf.setGroup("Boson Ground");
  QString identifier = conf.readEntry("Identifier", QString::null);
@@ -197,12 +188,12 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
  }
  unsigned int grounds = conf.readUnsignedNumEntry("Grounds", 0);
  if (grounds == 0) {
-       boError() << k_funcinfo << "need at least one ground type!" << endl;
-       return false;
+	boError() << k_funcinfo << "need at least one ground type!" << endl;
+	return false;
  } else if (grounds > 200) {
-       boError() << k_funcinfo << "more than 200 ground types - this must be "
-                               << "config file error!" << endl;
-       return false;
+	boError() << k_funcinfo << "more than 200 ground types - this must be "
+			<< "config file error!" << endl;
+	return false;
  }
 
  bool ret = true;
@@ -217,24 +208,24 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
 	conf.setGroup(group);
 
 	BosonGroundType* ground = new BosonGroundType;
-	ground->id = i;
+	ground->index = i;
 	ground->name = conf.readEntry("Name", group);
-	ground->texturefile = conf.readEntry("Texture", QString::null);
-	if (ground->texturefile.isEmpty()) {
+	ground->textureFile = conf.readEntry("Texture", QString::null);
+	if (ground->textureFile.isEmpty()) {
 		boError() << k_funcinfo << file << " Group=" << group << " has no or invalid Texture key" << endl;
 		ret = false;
 		delete ground;
 		break;
 	}
-	ground->bumptexturefile = conf.readEntry("BumpTexture", "bump-null");
-	ground->bumpscale = (float)(conf.readDoubleNumEntry("BumpScale", 0.04f));
-	ground->bumpbias = (float)(conf.readDoubleNumEntry("BumpBias", 0.5f)) * ground->bumpscale;
-	ground->texturesize = (float)(conf.readDoubleNumEntry("TextureSize", 5.0f));
-	ground->shaderfile = conf.readEntry("Shader", "default.shader");
+	ground->bumpTextureFile = conf.readEntry("BumpTexture", "bump-null");
+	ground->bumpScale = (float)(conf.readDoubleNumEntry("BumpScale", 0.04f));
+	ground->bumpBias = (float)(conf.readDoubleNumEntry("BumpBias", 0.5f)) * ground->bumpScale;
+	ground->textureSize = (float)(conf.readDoubleNumEntry("TextureSize", 5.0f));
+	ground->shaderFile = conf.readEntry("Shader", "default.shader");
 	BoVector3Float color = BosonConfig::readBoVector3FloatEntry(&conf, "MiniMapColor");
 	ground->color = qRgb((int)color.x(), (int)color.y(), (int)color.z());
 	ground->animationDelay = conf.readUnsignedNumEntry("AnimationDelay", 1);
-	ground->iconfile = conf.readEntry("Pixmap", QString::null);
+	ground->iconFile = conf.readEntry("Pixmap", QString::null);
 
 	mGroundTypes.insert(i, ground);
  }
@@ -246,114 +237,22 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
  }
 
  d->mId = identifier;
- return ret;
-}
-
-// AB: maybe we can use QString::null here to unload a theme
-bool BosonGroundTheme::loadGroundTheme(QString dir)
-{
- if (groundTypeCount() == 0) {
-	boWarning() << k_funcinfo << "no textures available to be loaded in this groundTheme. probably failed at loading the index.ground file!" << endl;
-	return false;
- }
- // dir is e.g. /opt/kde3/share/apps/boson/themes/grounds/earth/ -> "earth" is
- // the important part!
- if (dir.right(1) != QString::fromLatin1("/")) {
-	dir += QString::fromLatin1("/");
- }
-
- for (unsigned int i = 0; i < groundTypeCount(); i++) {
-	loadTextures(dir, i);
- }
-
  d->mGroundThemeDir = dir;
- return true;
+ return ret;
 }
 
 BosonGroundType* BosonGroundTheme::groundType(unsigned int i) const
 {
+ if (i >= mGroundTypes.count()) {
+	boError() << k_funcinfo << "index " << i << " is out of range. count=" << mGroundTypes.count() << endl;
+	return 0;
+ }
  return mGroundTypes[i];
 }
 
 unsigned int BosonGroundTheme::groundTypeCount() const
 {
  return mGroundTypes.count();
-}
-
-void BosonGroundTheme::loadTextures(const QString& dir, unsigned int i)
-{
- QDir d(dir);
- // Find all name*.png and name*.jpg files
- BosonGroundType* ground = groundType(i);
- QString name = ground->texturefile;
- QStringList files = d.entryList(name + "*.png " + name + "*.jpg", QDir::Files, QDir::Name);
- QStringList absFiles;
- for (QStringList::Iterator it = files.begin(); it != files.end(); it++) {
-	absFiles.append(dir + "/" + *it);
- }
- if (absFiles.isEmpty()) {
-	boError() << k_funcinfo << "No textures found from " << dir << " for ground type " << i << " (" << name << ")" << endl;
-	return;
- }
- ground->textures = new BoTextureArray(absFiles, BoTexture::Terrain);
-
- if (boConfig->boolValue("UseGroundShaders")) {
-	loadShaders(dir, ground);
- }
-
-
- // Load pixmap (for editor)
- if (ground->iconfile.isNull()) {
-	// If no pixmap is given, we take the first available texture
-	ground->iconfile = files.first();
- }
- QPixmap tmppix;
- if (!tmppix.load(dir + "/" + ground->iconfile)) {
-	tmppix = QPixmap();
- }
- if (tmppix.isNull()) {
-	boWarning() << k_funcinfo << "unable to load pixmap for ground type " << ground->name << " from " << dir + "/" + ground->iconfile << endl;
-	tmppix = QPixmap(50, 50, 32);
-	tmppix.fill(Qt::green);
- }
- // Final pixmap will be at most 50x50 pixels big
- int w = QMIN(tmppix.width(), 50);
- int h = QMIN(tmppix.height(), 50);
- ground->icon = new QPixmap(w, h);
- bitBlt(ground->icon, 0, 0, &tmppix, 0, 0, w, h);
-}
-
-void BosonGroundTheme::loadShaders(const QString& dir, BosonGroundType* ground)
-{
- if (ground->shader) {
-	return;
- }
-
- // Load bumpmap textures
- QDir d(dir);
- QString name = ground->bumptexturefile;
- QStringList files = d.entryList(name + "*.png " + name + "*.jpg", QDir::Files, QDir::Name);
- QPtrList<BoTexture> bumptextures;
- for (QStringList::Iterator it = files.begin(); it != files.end(); it++) {
-	QString file = dir + "/" + *it;
-	BoTexture* tex = mBumpTextures[file];
-	if (!tex) {
-		tex = new BoTexture(file, BoTexture::NormalMap);
-		mBumpTextures.insert(file, tex);
-	}
-	bumptextures.append(tex);
- }
- if (!bumptextures.isEmpty()) {
-	ground->bumptextures = new BoTextureArray(bumptextures);
- }
-
- // Load shader
- QString shaderfile = dir + "/" + ground->shaderfile;
- ground->shader = mShaders[shaderfile];
- if (!ground->shader) {
-	ground->shader = new BoShader(shaderfile);
-	mShaders.insert(shaderfile, ground->shader);
- }
 }
 
 const QString& BosonGroundTheme::identifier() const
@@ -364,31 +263,5 @@ const QString& BosonGroundTheme::identifier() const
 const QString& BosonGroundTheme::themeDirectory() const
 {
  return d->mGroundThemeDir;
-}
-
-bool BosonGroundTheme::shadersSupported()
-{
-  QStringList extensions = boglGetOpenGLExtensions();
-  return (extensions.contains("GL_ARB_shader_objects") &&
-      extensions.contains("GL_ARB_fragment_shader") && (boTextureManager->textureUnits() >= 3));
-}
-
-void BosonGroundTheme::setUseGroundShaders(bool use)
-{
- if (!use) {
-	// Maybe delete shaders and bumpmaps here?
-	return;
- }
-
- QStringList themelist = boData->availableGroundThemes();
- for (QStringList::Iterator it = themelist.begin(); it != themelist.end(); it++) {
-	BosonGroundTheme* theme = boData->groundTheme(*it);
-	if (theme->themeDirectory().isNull()) {
-		continue;
-	}
-	for (unsigned int i = 0; i < theme->groundTypeCount(); i++) {
-		theme->loadShaders(theme->themeDirectory(), theme->groundType(i));
-	}
- }
 }
 

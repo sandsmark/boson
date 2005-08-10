@@ -619,8 +619,6 @@ public:
 		return BoMapCornerArray::arrayPos(x, y, width() + 1);
 	}
 
-	BoTexture* currentTexture(BosonGroundType* ground, int advanceCallsCount) const;
-	BoTexture* currentBumpTexture(BosonGroundType* ground, int advanceCallsCount) const;
 	inline const float* heightMap() const { return mHeightMap->heightMap(); }
 	inline const float* normalMap() const { return mNormalMap->normalMap(); }
 	void setActiveColorMap(BoColorMap* map) { mActiveColorMap = map; }
@@ -681,11 +679,6 @@ public:
 		}
 		return false;
 	}
-
-	/**
-	 * @return @ref BosonGroundTheme::miniMapColor
-	 **/
-	QRgb miniMapColor(unsigned int texture) const;
 
 	/**
 	 * Note that you can specify (width() + 1) * (height() + 1) corners here!
@@ -797,8 +790,6 @@ public slots:
 	void slotChangeTexMap(int x, int y, unsigned int textureCount, unsigned int* textures, unsigned char* alpha);
 
 signals:
-	void signalGroundThemeChanged(BosonGroundTheme*);
-
 	/**
 	 * The @ref cell at @p x, @p y has been changed. This refers to the
 	 * texture values / amounts of land and water only, <em>not</em> to the
@@ -823,7 +814,7 @@ protected:
 
 	bool loadMapGeo(unsigned int width, unsigned int height);
 
-	bool loadGroundTheme(const QString& id);
+	bool applyGroundTheme(const QString& id);
 
 	bool loadHeightMap(QDataStream& stream);
 

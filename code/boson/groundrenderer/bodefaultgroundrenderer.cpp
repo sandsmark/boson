@@ -26,6 +26,7 @@
 #include "../bosonconfig.h"
 #include "../defines.h"
 #include "../bosongroundtheme.h"
+#include "../bosongroundthemedata.h"
 #include "../bomaterial.h"
 #include "../boson.h"
 #include "../botexture.h"
@@ -63,6 +64,7 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  BO_CHECK_NULL_RET(mHeightMap2);
  BO_CHECK_NULL_RET(map->normalMap());
  BO_CHECK_NULL_RET(map->groundTheme());
+ BO_CHECK_NULL_RET(currentGroundThemeData());
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "before method" << endl;
@@ -75,7 +77,7 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
- // we draw the cells in different stages. depth test is now enabled in all
+	 // we draw the cells in different stages. depth test is now enabled in all
  //  stages to prevent drawing errors. Depth func GL_LEQUAL makes sure all
  //  layers get rendered (they have same z values)
  // Maybe it should be set back to GL_LESS later?
@@ -100,25 +102,25 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 	if (i == 1) {
 		glEnable(GL_BLEND);
 	}
-	BosonGroundType* ground = map->groundTheme()->groundType(i);
+	BosonGroundTypeData* groundData = currentGroundThemeData()->groundTypeData(i);
 	// Bind texture
-	BoTexture* tex = map->currentTexture(ground, boGame->advanceCallsCount());
+	BoTexture* tex = groundData->currentTexture(boGame->advanceCallsCount());
 	tex->bind();
 	// Set up texture coordinate generation
 	glLoadIdentity();
-	glScalef(1.0f / ground->texturesize, 1.0f / ground->texturesize, 1.0);
+	glScalef(1.0f / groundData->groundType->textureSize, 1.0f / groundData->groundType->textureSize, 1.0);
 	if (useShaders) {
 		// Bind bump tex
 		boTextureManager->activateTextureUnit(2);
-		BoTexture* bumptex = map->currentBumpTexture(ground, boGame->advanceCallsCount());
+		BoTexture* bumptex = groundData->currentBumpTexture(boGame->advanceCallsCount());
 		bumptex->bind();
 		glLoadIdentity();
-		glScalef(1.0f / ground->texturesize, 1.0f / ground->texturesize, 1.0);
+		glScalef(1.0f / groundData->groundType->textureSize, 1.0f / groundData->groundType->textureSize, 1.0);
 		boTextureManager->activateTextureUnit(0);
 		// Shader
-		ground->shader->bind();
-		ground->shader->setUniform("bumpScale", ground->bumpscale);
-		ground->shader->setUniform("bumpBias", ground->bumpbias);
+		groundData->shader->bind();
+		groundData->shader->setUniform("bumpScale", groundData->groundType->bumpScale);
+		groundData->shader->setUniform("bumpBias", groundData->groundType->bumpBias);
 	}
 	// Render
 	unsigned int quads = renderCellsNow(renderCells, cellsCount, map->width() + 1, mHeightMap2, map->normalMap(), map->texMap(i));

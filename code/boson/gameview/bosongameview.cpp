@@ -51,7 +51,7 @@
 #include "../bo3dtools.h"
 #include "bosongameviewinputbase.h"
 #include "../bogltooltip.h"
-#include "../bosongroundtheme.h"
+#include "../bosongroundthemedata.h"
 #include "../bocamera.h"
 #include "../boautocamera.h"
 #include "../bogroundrenderer.h"
@@ -598,7 +598,7 @@ void BosonGameView::init()
  boTextureManager->initOpenGL();
  boWaterRenderer->initOpenGL();
  boConfig->setBoolValue("TextureFOW", boTextureManager->textureUnits() > 1);
- if (!BosonGroundTheme::shadersSupported()) {
+ if (!BosonGroundThemeData::shadersSupported()) {
 	boConfig->setBoolValue("UseGroundShaders", false);
  }
 

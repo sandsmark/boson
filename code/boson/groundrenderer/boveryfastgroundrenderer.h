@@ -24,6 +24,7 @@
 
 class BosonMap;
 class BosonGroundTheme;
+class BosonGroundThemeData;
 
 /**
  * @short Ground renderer that is optimized for software rendering
@@ -46,7 +47,7 @@ public:
 
 protected:
 	void updateMapCache(const BosonMap*);
-	void updateGroundThemeCache(const BosonGroundTheme*);
+	void updateGroundThemeCache(const BosonGroundThemeData*);
 
 	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map);
 	virtual void renderVisibleCellsStart(const BosonMap* map);
@@ -55,7 +56,7 @@ protected:
 private:
 	const BosonMap* mCurrentMap;
 	unsigned char* mCellTextures;
-	const BosonGroundTheme* mCurrentTheme;
+	const BosonGroundThemeData* mCurrentThemeData;
 	GLubyte* mThemeColors;
 };
 
