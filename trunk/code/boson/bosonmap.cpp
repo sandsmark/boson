@@ -32,6 +32,7 @@
 #include "bowater.h"
 #include "botexture.h"
 
+#include <qdict.h>
 #include <qdatastream.h>
 #include <qimage.h>
 #include <qdom.h>
@@ -402,7 +403,10 @@ bool BosonMap::createNewMap(unsigned int width, unsigned int height, BosonGround
  }
  mMapWidth = width;
  mMapHeight = height;
- mGroundTheme = theme;
+ if (!applyGroundTheme(theme->identifier())) {
+	boError() << k_funcinfo << "invalid groundtheme " << theme->identifier() << endl;
+	return false;
+ }
 
  mHeightMap = new BoHeightMap(width + 1, height + 1);
  mTexMap = new BoTexMap(theme->groundTypeCount(), width + 1, height + 1);
@@ -528,8 +532,8 @@ bool BosonMap::loadMapFromFile(const QByteArray& mapXML)
 	boError(270) << k_funcinfo << "Could not load map geo" << endl;
 	return false;
  }
- if (!loadGroundTheme(groundTheme)) {
-	boError(270) << k_funcinfo << "Could not load the ground theme" << endl;
+ if (!applyGroundTheme(groundTheme)) {
+	boError(270) << k_funcinfo << "Could not apply the ground theme " << groundTheme << endl;
 	return false;
  }
  return true;
@@ -610,14 +614,18 @@ bool BosonMap::loadMapGeo(unsigned int width, unsigned int height)
  return true;
 }
 
-bool BosonMap::loadGroundTheme(const QString& id)
+bool BosonMap::applyGroundTheme(const QString& id)
 {
- mGroundTheme = (BosonGroundTheme*)BosonData::bosonData()->groundTheme(id);
- if (!mGroundTheme) {
+ if (id.isEmpty()) {
+	boError() << k_funcinfo << "empty id string" << endl;
+	return false;
+ }
+ BosonGroundTheme* theme = (BosonGroundTheme*)BosonData::bosonData()->groundTheme(id);
+ if (!theme) {
 	boError() << k_funcinfo << "Cannot find groundTheme with id=" << id << endl;
 	return false;
  }
- emit signalGroundThemeChanged(mGroundTheme);
+ mGroundTheme = theme;
  return true;
 }
 
@@ -1068,22 +1076,6 @@ void BosonMap::resize(unsigned int width, unsigned int height)
  loadMapGeo(width, height);
 }
 
-BoTexture* BosonMap::currentTexture(BosonGroundType* ground, int advanceCallsCount) const
-{
- BO_CHECK_NULL_RET0(ground);
- BoTextureArray* t = ground->textures;
- BO_CHECK_NULL_RET0(t);
- return t->texture((advanceCallsCount / ground->animationDelay) % t->count());
-}
-
-BoTexture* BosonMap::currentBumpTexture(BosonGroundType* ground, int advanceCallsCount) const
-{
- BO_CHECK_NULL_RET0(ground);
- BoTextureArray* t = ground->bumptextures;
- BO_CHECK_NULL_RET0(t);
- return t->texture((advanceCallsCount / ground->animationDelay) % t->count());
-}
-
 void BosonMap::fill(unsigned int groundtype)
 {
  if (!mCells) {
@@ -1142,15 +1134,6 @@ bool BosonMap::generateCellsFromTexMap()
 	return false;
  }
  return true;
-}
-
-QRgb BosonMap::miniMapColor(unsigned int groundtype) const
-{
- if (!groundTheme()) {
-	boWarning() << k_funcinfo << "NULL groundTheme" << endl;
-	return 0;
- }
- return groundTheme()->groundType(groundtype)->color;
 }
 
 void BosonMap::slotChangeTexMap(int x, int y, unsigned int texCount, unsigned int* textures, unsigned char* alpha)

@@ -65,7 +65,7 @@ public:
 
 	void setAction(const BoSpecificAction& action);
 
-	void setGround(unsigned int groundtype, BosonGroundTheme* theme);
+	void setGround(unsigned int groundtype, const BosonGroundTheme* theme);
 
 	/**
 	 * @return The displayed unit or 0 if no unit is displayed. See also

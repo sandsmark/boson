@@ -70,10 +70,7 @@ libbosongameengine_la_SOURCES = \
 		bocondition.cpp \
 		bowater.cpp \
 		bosonsaveload.cpp \
-		\
-		speciesdata.cpp \
-		bosongroundtheme.cpp \
-		boaction.cpp
+		bosongroundtheme.cpp
 
 libbosoncommon_la_SOURCES = \
 		boapplication.cpp \
@@ -115,6 +112,9 @@ libboson_la_SOURCES = \
 		botexture.cpp \
 		bobmfload.cpp \
 		boshader.cpp \
+		speciesdata.cpp \
+		boaction.cpp \
+		bosongroundthemedata.cpp \
 		borendertarget.cpp
 
 libbosongameengine_la_LIBADD = \
@@ -183,8 +183,18 @@ boson_SOURCES = \
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bounit_LDADD = \
 		$(top_builddir)/boson/libbosongameengine.la \
-		$(top_builddir)/boson/libboson.la \
 		$(top_builddir)/boson/libbosoncommon.la \
+		$(top_builddir)/bogl/libbogl.la \
+		$(top_builddir)/bodebug/libbodebug.la \
+		$(top_builddir)/bogl/libbogl.la \
+		$(top_builddir)/math/libbomath.la \
+		$(top_builddir)/boson/info/libbosoninfo.la \
+		$(top_builddir)/boson/script/libbosonscript.la \
+		$(LIB_KGAME) \
+		$(LIB_KDEUI) \
+		$(LIB_KIO) \
+		-lXmu \
+		$(LIB_XRANDR) \
 		$(LIB_BOMEMORY)
 bounit_SOURCES = \
 		bounitmain.cpp bosonsearchpathswidget.ui \

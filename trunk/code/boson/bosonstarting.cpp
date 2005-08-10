@@ -26,6 +26,8 @@
 #include "player.h"
 #include "bosonplayfield.h"
 #include "bosonmap.h"
+#include "bosongroundtheme.h"
+#include "bosongroundthemedata.h"
 #include "bosonmessageids.h"
 #include "speciestheme.h"
 #include "speciesdata.h"
@@ -706,12 +708,23 @@ bool BosonStartingLoadTiles::startTask()
 	boError(270) << k_funcinfo << "NULL map" << endl;
 	return false;
  }
+ if (!playField()->map()->groundTheme()) {
+	boError(270) << k_funcinfo << "NULL groundtheme" << endl;
+	return false;
+ }
  boProfiling->push("LoadTiles");
 
  checkEvents();
 
  // actually load the theme, including textures.
- BosonData::bosonData()->loadGroundTheme(QString::fromLatin1("earth"));
+ // AB: note: this is a noop if we started a game before (the groundtheme datas
+ //           are not deleted when the game ends)
+ boViewData->addGroundTheme(playField()->map()->groundTheme());
+
+ if (!boViewData->groundThemeData(playField()->map()->groundTheme())) {
+	boError() << k_funcinfo << "loading groundtheme data object failed" << endl;
+	return false;
+ }
 
  boProfiling->pop(); // LoadTiles
  return true;

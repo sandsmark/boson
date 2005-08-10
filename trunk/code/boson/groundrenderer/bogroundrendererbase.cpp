@@ -30,6 +30,7 @@
 #include "../bosonconfig.h" // WARNING: groundrenderer needs to be re-installed if bosonconfig.h changes!
 #include "../botexture.h"
 #include "../playerio.h"
+#include "../bosonviewdata.h"
 #include "bocolormaprenderer.h"
 #include <bogl.h>
 #include <bodebug.h>
@@ -708,6 +709,7 @@ BoGroundRendererBase::BoGroundRendererBase()
 {
  mCellListBuilder = 0;
  mCurrentMap = 0;
+ mCurrentGroundThemeData = 0;
  mHeightMap2 = 0;
  mCellListBuilder = 0;
  mFogTexture = 0;
@@ -747,8 +749,13 @@ void BoGroundRendererBase::updateMapCache(const BosonMap* map)
  if (mCurrentMap == map) {
 	return;
  }
+ mCurrentGroundThemeData = 0;
  mCurrentMap = map;
  BO_CHECK_NULL_RET(mCurrentMap);
+ BO_CHECK_NULL_RET(boViewData);
+ BO_CHECK_NULL_RET(mCurrentMap->groundTheme());
+ mCurrentGroundThemeData = boViewData->groundThemeData(mCurrentMap->groundTheme());
+ BO_CHECK_NULL_RET(mCurrentGroundThemeData);
 
  mColorMapRenderers.setAutoDelete(true);
  mColorMapRenderers.clear();

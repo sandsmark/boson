@@ -35,7 +35,7 @@
 #include "bowaterrenderer.h"
 #include "info/boinfo.h"
 #include "botexture.h"
-#include "bosongroundtheme.h"
+#include "bosongroundthemedata.h"
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -527,7 +527,7 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  (void)new QLabel(i18n("Ground render:"), hbox);
  mGroundRenderer = new QComboBox(hbox);
  mUseGroundShaders = new QCheckBox(i18n("Use shaders for ground rendering"), mAdvanced);
- mUseGroundShaders->setEnabled(BosonGroundTheme::shadersSupported());
+ mUseGroundShaders->setEnabled(BosonGroundThemeData::shadersSupported());
 
  mUseLOD = new QCheckBox(i18n("Use level of detail"), mAdvanced);
  hbox = new QHBox(mAdvanced);
@@ -762,7 +762,7 @@ void OpenGLOptions::apply()
 	}
  }
  boConfig->setBoolValue("UseGroundShaders", mUseGroundShaders->isChecked());
- BosonGroundTheme::setUseGroundShaders(mUseGroundShaders->isChecked());
+ BosonGroundThemeData::setUseGroundShaders(mUseGroundShaders->isChecked());
 
 
  emit signalOpenGLSettingsUpdated();

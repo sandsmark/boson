@@ -27,6 +27,7 @@
 #include "../defines.h"
 #include "../cell.h"
 #include "../bosongroundtheme.h"
+#include "../bosongroundthemedata.h"
 #include "../bomaterial.h"
 #include "../boson.h"
 #include "../botexture.h"
@@ -83,7 +84,7 @@ BoVeryFastGroundRenderer::BoVeryFastGroundRenderer()
 {
  mCurrentMap = 0;
  mCellTextures = 0;
- mCurrentTheme = 0;
+ mCurrentThemeData = 0;
  mThemeColors = 0;
 }
 
@@ -134,7 +135,8 @@ void BoVeryFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int
  PROFILE_METHOD
 
  updateMapCache(map);
- updateGroundThemeCache(map->groundTheme());
+ BO_CHECK_NULL_RET(currentGroundThemeData());
+ updateGroundThemeCache(currentGroundThemeData());
  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
  const float* heightMap = mHeightMap2;
@@ -236,9 +238,9 @@ void BoVeryFastGroundRenderer::updateMapCache(const BosonMap* map)
  mCurrentMap = map;
 }
 
-void BoVeryFastGroundRenderer::updateGroundThemeCache(const BosonGroundTheme* theme)
+void BoVeryFastGroundRenderer::updateGroundThemeCache(const BosonGroundThemeData* theme)
 {
- if (mCurrentTheme == theme) {
+ if (mCurrentThemeData == theme) {
 	return;
  }
  BO_CHECK_NULL_RET(theme);
@@ -247,7 +249,8 @@ void BoVeryFastGroundRenderer::updateGroundThemeCache(const BosonGroundTheme* th
  boDebug() << k_funcinfo << "finding average color of ground textures..." << endl;
  // TODO: maybe use minimap's color isntead?
  for (unsigned int i = 0; i < theme->groundTypeCount(); i++) {
-	const BoTextureArray* a = theme->groundType(i)->textures;
+	BO_CHECK_NULL_RET(theme->groundTypeData(i));
+	const BoTextureArray* a = theme->groundTypeData(i)->textures;
 	mThemeColors[i * 4 + 0] = 255;
 	mThemeColors[i * 4 + 1] = 0;
 	mThemeColors[i * 4 + 2] = 0;
@@ -289,6 +292,6 @@ void BoVeryFastGroundRenderer::updateGroundThemeCache(const BosonGroundTheme* th
 	mThemeColors[i * 4 + 2] = b;
  }
  boDebug() << k_funcinfo << "finding average color of ground textures done" << endl;
- mCurrentTheme = theme;
+ mCurrentThemeData = theme;
 }
 

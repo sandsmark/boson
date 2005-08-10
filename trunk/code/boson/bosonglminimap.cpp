@@ -357,11 +357,11 @@ void BosonGLMiniMap::calculateGround(int x, int y)
 	int cornerGreen = 0;
 	int cornerBlue = 0;
 
-	for (unsigned int i = 0; i < map()->groundTheme()->groundTypeCount(); i++) {
+	for (unsigned int i = 0; i < groundTheme()->groundTypeCount(); i++) {
 		int alpha = (int)map()->texMapAlpha(i, cornerX[j], cornerY[j]);
 		alphaSum += alpha;
 
-		QRgb rgb = map()->miniMapColor(i);
+		QRgb rgb = groundTheme()->groundType(i)->color;
 		int red = qRed(rgb);
 		int green = qGreen(rgb);
 		int blue = qBlue(rgb);

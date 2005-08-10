@@ -25,12 +25,14 @@
 #include "../../bomemory/bodummymemory.h"
 #include "../bosonmap.h"
 #include "../bosongroundtheme.h"
+#include "../bosongroundthemedata.h"
 #include "../bo3dtools.h"
 #include "../boson.h"
 #include "../botexture.h"
 #include "../playerio.h"
 #include "../bosonconfig.h"
 #include "../boshader.h"
+#include "../bosonviewdata.h"
 #include "bocolormaprenderer.h"
 #include "bogroundrendererbase.h"
 #include "bodebug.h"
@@ -215,6 +217,11 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
   {
     generateCellList(map);
   }
+  BO_CHECK_NULL_RET(mMap);
+  BO_CHECK_NULL_RET(mMap->groundTheme());
+  BO_CHECK_NULL_RET(boViewData);
+  BosonGroundThemeData* groundThemeData = boViewData->groundThemeData(mMap->groundTheme());
+  BO_CHECK_NULL_RET(groundThemeData);
 
   // Statistics
   unsigned int renderedQuads = 0;
@@ -262,7 +269,7 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
   glDepthFunc(GL_LEQUAL);
 
   // Go through all ground types
-  unsigned int groundcount = map->groundTheme()->groundTypeCount();
+  unsigned int groundcount = groundThemeData->groundTypeCount();
   for(unsigned int i = 0; i < groundcount; i++)
   {
     // If this is pass 2, enable blending (it's initially disabled)
@@ -290,26 +297,26 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
       // Init if necessary
       if(!inited)
       {
-        BosonGroundType* ground = map->groundTheme()->groundType(i);
+        BosonGroundTypeData* groundData = groundThemeData->groundTypeData(i);
         // Bind current texture
-        BoTexture* tex = map->currentTexture(ground, boGame->advanceCallsCount());
+        BoTexture* tex = groundData->currentTexture(boGame->advanceCallsCount());
         tex->bind();
         // Set correct tex planes
         glLoadIdentity();
-        glScalef(1.0f / ground->texturesize, 1.0f / ground->texturesize, 1.0);
+        glScalef(1.0f / groundData->groundType->textureSize, 1.0f / groundData->groundType->textureSize, 1.0);
         if(useShaders)
         {
           // Bind bump tex
           boTextureManager->activateTextureUnit(2);
-          BoTexture* bumptex = map->currentBumpTexture(ground, boGame->advanceCallsCount());
+          BoTexture* bumptex = groundData->currentBumpTexture(boGame->advanceCallsCount());
           bumptex->bind();
           glLoadIdentity();
-          glScalef(1.0f / ground->texturesize, 1.0f / ground->texturesize, 1.0);
+          glScalef(1.0f / groundData->groundType->textureSize, 1.0f / groundData->groundType->textureSize, 1.0);
           boTextureManager->activateTextureUnit(0);
           // Shader
-          ground->shader->bind();
-          ground->shader->setUniform("bumpScale", ground->bumpscale);
-          ground->shader->setUniform("bumpBias", ground->bumpbias);
+          groundData->shader->bind();
+          groundData->shader->setUniform("bumpScale", groundData->groundType->bumpScale);
+          groundData->shader->setUniform("bumpBias", groundData->groundType->bumpBias);
         }
         // Bind texture weights vbo corresponding to this texture
         glColorPointer(4, GL_UNSIGNED_BYTE, 0, (char*)NULL + mVBOTextureLayerSize*i);

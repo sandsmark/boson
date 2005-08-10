@@ -32,6 +32,8 @@ class BosonViewData;
 class BosonEffect;
 class BosonItemEffects;
 class BosonItemContainer;
+class BosonGroundTheme;
+class BosonGroundThemeData;
 
 
 /**
@@ -154,6 +156,10 @@ public:
 
 	BosonItemContainer* itemContainer(BosonItem* item);
 	const QPtrList<BosonItemContainer>& allItemContainers() const;
+
+	void addGroundTheme(const BosonGroundTheme* theme);
+	void removeGroundTheme(const BosonGroundTheme* theme);
+	BosonGroundThemeData* groundThemeData(const BosonGroundTheme* theme) const;
 
 public slots:
 	void slotAddItemContainerFor(BosonItem* item);

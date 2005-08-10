@@ -40,6 +40,7 @@ class BoQuadTreeNode;
 class BoGroundRendererCellListLOD;
 class BoColorMap;
 class BoColorMapRenderer;
+class BosonGroundThemeData;
 
 
 class FogTexture
@@ -128,6 +129,20 @@ public:
 	 **/
 	void setLODObject(BoGroundRendererCellListLOD* lod);
 
+	/**
+	 * @return The current @ref BosonGroundThemeData that belongs to the
+	 * @ref BosonMap::groundTheme of the current map. See also @ref
+	 * BosonViewData::groundThemeData.
+	 *
+	 * Note that you need to call @ref updateMapCache to make sure that this
+	 * is valid. That method should be called whenever the current map (and
+	 * therefore also the current groundtheme) might change.
+	 **/
+	BosonGroundThemeData* currentGroundThemeData() const
+	{
+		return mCurrentGroundThemeData;
+	}
+
 protected:
 	virtual void renderVisibleCellsStart(const BosonMap* map);
 	virtual void renderVisibleCellsStop(const BosonMap* map);
@@ -151,6 +166,7 @@ protected:
 private:
 	CellListBuilder* mCellListBuilder;
 	const BosonMap* mCurrentMap;
+	BosonGroundThemeData* mCurrentGroundThemeData;
 
 	FogTexture* mFogTexture;
 	QPtrDict<BoColorMapRenderer> mColorMapRenderers;

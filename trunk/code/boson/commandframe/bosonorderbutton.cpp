@@ -23,6 +23,7 @@
 
 #include "../../bomemory/bodummymemory.h"
 #include "../bosongroundtheme.h"
+#include "../bosongroundthemedata.h"
 #include "../unit.h"
 #include "../player.h"
 #include "../speciestheme.h"
@@ -203,17 +204,40 @@ void BosonOrderButton::setAction(const BoSpecificAction& action)
  show();
 }
 
-void BosonOrderButton::setGround(unsigned int groundtype, BosonGroundTheme* theme)
+void BosonOrderButton::setGround(unsigned int groundType, const BosonGroundTheme* theme)
 {
  if (mUnit) {
 	unset();
  }
  mUnit = 0;
  BO_CHECK_NULL_RET(theme);
+ BO_CHECK_NULL_RET(boViewData);
 
- mGroundType = groundtype;
+ mGroundType = groundType;
  mType = ShowGround;
- setPixmap(*theme->groundType(groundtype)->icon);
+
+ QPixmap pixmap;
+ BosonGroundThemeData* data = boViewData->groundThemeData(theme);
+ if (!data) {
+	BO_NULL_ERROR(boViewData->groundThemeData(theme));
+	// AB: do NOT return - use a dummy pixmap
+ }
+ BosonGroundTypeData* typeData = 0;
+ if (data) {
+	typeData = data->groundTypeData(groundType);
+	if (!typeData) {
+		BO_NULL_ERROR(typeData);
+		// AB: do NOT return - use a dummy pixmap
+	}
+ }
+ if (typeData) {
+	pixmap = *typeData->icon;
+ } else {
+	// dummy pixmap
+	pixmap = QPixmap(50, 50);
+	pixmap.fill(Qt::red);
+ }
+ setPixmap(pixmap);
 
  mHealth->hide();
 

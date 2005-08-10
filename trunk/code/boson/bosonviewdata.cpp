@@ -21,12 +21,14 @@
 #include "bosonviewdata.moc"
 
 #include "bodebug.h"
-#include "items/bosonitem.h"
-#include "speciesdata.h"
-#include "speciestheme.h"
 #include "bosonconfig.h"
+#include "speciestheme.h"
+#include "speciesdata.h"
+#include "items/bosonitem.h"
 #include "items/bosonitemrenderer.h"
 #include "bosoneffect.h"
+#include "bosongroundtheme.h"
+#include "bosongroundthemedata.h"
 
 #include <qptrlist.h>
 #include <qptrdict.h>
@@ -70,13 +72,15 @@ public:
 
 	QMap<const SpeciesTheme*, SpeciesData*> mSpeciesTheme2SpeciesData;
 
+	QPtrList<BosonGroundThemeData> mAllGroundThemeDatas;
+	QMap<const BosonGroundTheme*, BosonGroundThemeData*> mGroundTheme2GroundThemeData;
+
 };
 
 BosonViewData::BosonViewData(QObject* parent)
 	: QObject(parent)
 {
  d = new BosonViewDataPrivate;
-
 }
 
 BosonViewData::~BosonViewData()
@@ -97,6 +101,13 @@ BosonViewData::~BosonViewData()
  d->mItem2ItemContainer.clear();
 
  d->mSpeciesTheme2SpeciesData.clear();
+
+ d->mGroundTheme2GroundThemeData.clear();
+ if (!d->mAllGroundThemeDatas.isEmpty()) {
+	boDebug() << k_funcinfo << "deleting remaining groundthemedata objects" << endl;
+ }
+ d->mAllGroundThemeDatas.setAutoDelete(true);
+ d->mAllGroundThemeDatas.clear();
 
  delete d;
 
@@ -172,5 +183,40 @@ SpeciesData* BosonViewData::speciesData(const SpeciesTheme* theme) const
 	return 0;
  }
  return d->mSpeciesTheme2SpeciesData[theme];
+}
+
+void BosonViewData::addGroundTheme(const BosonGroundTheme* theme)
+{
+ BO_CHECK_NULL_RET(theme);
+ if (groundThemeData(theme)) {
+	return;
+ }
+
+ BosonGroundThemeData* data = new BosonGroundThemeData();
+ if (!data->loadGroundTheme(theme)) {
+	boError() << k_funcinfo << "unable to load ground theme " << theme->identifier() << " " << theme << endl;
+	delete data;
+	return;
+ }
+ d->mAllGroundThemeDatas.append(data); // takes ownership
+ d->mGroundTheme2GroundThemeData.insert(theme, data);
+}
+
+void BosonViewData::removeGroundTheme(const BosonGroundTheme* theme)
+{
+ BO_CHECK_NULL_RET(theme);
+ BosonGroundThemeData* data = groundThemeData(theme);
+ BO_CHECK_NULL_RET(data);
+ d->mGroundTheme2GroundThemeData.remove(theme);
+ d->mAllGroundThemeDatas.setAutoDelete(true);
+ d->mAllGroundThemeDatas.removeRef(data);
+}
+
+BosonGroundThemeData* BosonViewData::groundThemeData(const BosonGroundTheme* theme) const
+{
+ if (!d->mGroundTheme2GroundThemeData.contains(theme)) {
+	return 0;
+ }
+ return d->mGroundTheme2GroundThemeData[theme];
 }
 

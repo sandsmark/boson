@@ -72,6 +72,7 @@
 #include <qcombobox.h>
 #include <qlabel.h>
 #include <qvalidator.h>
+#include <qdict.h>
 
 #include <unistd.h>
 

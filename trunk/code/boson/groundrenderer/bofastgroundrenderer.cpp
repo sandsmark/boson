@@ -26,6 +26,7 @@
 #include "../defines.h"
 #include "../cell.h"
 #include "../bosongroundtheme.h"
+#include "../bosongroundthemedata.h"
 #include "../bomaterial.h"
 #include "../boson.h"
 #include "../botexture.h"
@@ -62,6 +63,7 @@ void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cel
  BO_CHECK_NULL_RET(map->texMap());
  BO_CHECK_NULL_RET(mHeightMap2);
  BO_CHECK_NULL_RET(map->groundTheme());
+ BO_CHECK_NULL_RET(currentGroundThemeData());
 
  updateMapCache(map);
 
@@ -99,13 +101,13 @@ void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cel
  unsigned int renderedQuads = 0;
  int count = 0;
  for (unsigned int i = 0; i < groundTheme->groundTypeCount(); i++) {
-	BosonGroundType* ground = map->groundTheme()->groundType(i);
-	BoTexture* tex = map->currentTexture(ground, boGame->advanceCallsCount());
+	BosonGroundTypeData* groundData = currentGroundThemeData()->groundTypeData(i);
+	BoTexture* tex = groundData->currentTexture(boGame->advanceCallsCount());
 	tex->bind();
 
 	// Set up texture coordinate generation
 	glLoadIdentity();
-	glScalef(1.0f / ground->texturesize, 1.0f / ground->texturesize, 1.0);
+	glScalef(1.0f / groundData->groundType->textureSize, 1.0f / groundData->groundType->textureSize, 1.0);
 
 	const int cornersWidth = map->width() + 1;
 

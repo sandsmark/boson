@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2003-2005 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,15 +22,11 @@
 #include <qstring.h>
 #include <qwindowdefs.h> // QRgb
 #include <qintdict.h>
-#include <qdict.h>
 
 class QImage;
 class QPixmap;
 
 class BosonMap;
-class BoTextureArray;
-class BoShader;
-class BoTexture;
 
 
 class BosonGroundType
@@ -39,23 +35,18 @@ public:
 	BosonGroundType();
 	~BosonGroundType();
 
-	int id;
-	BoTextureArray* textures;
-	QString texturefile;
-	BoTextureArray* bumptextures;
-	QString bumptexturefile;
-	float bumpscale;
-	float bumpbias;
-	float texturesize;
-	QString shaderfile;
-	BoShader* shader;
+	int index;
+	QString textureFile;
+	QString bumpTextureFile;
+	float bumpScale;
+	float bumpBias;
+	float textureSize;
+	QString shaderFile;
 	int animationDelay;
 	QString name;
 	// Maybe change to BoVector3Float?
 	QRgb color;
-	// TODO: remove!
-	QPixmap* icon;
-	QString iconfile;
+	QString iconFile;
 };
 
 class BosonGroundThemePrivate;
@@ -93,15 +84,6 @@ public:
 	bool loadGroundThemeConfig(const QString& file);
 
 	/**
-	 * This loads all data that are necessary to use this groundTheme.
-	 * Before you can call this you must first load the config file, see
-	 * @ref loadGroundThemeConfig.
-	 **/
-	// AB: the textures should be unloaded after the map has been played (at
-	// least if a different theme is used for the next map)
-	bool loadGroundTheme(QString dir);
-
-	/**
 	 * Create a list of BosonGroundTheme objects by searching for
 	 * index.ground files. You can retrieve all available objects from @ref
 	 * BosonData.
@@ -116,25 +98,9 @@ public:
 
 	BosonGroundType* groundType(unsigned int i) const;
 
-	static bool shadersSupported();
-	static void setUseGroundShaders(bool use);
-
-protected:
-	/**
-	 * @param dir The directory to load the image from. Including the theme
-	 * name part (e.g. "earth"). Should end with a "/".
-	 * @param groundtype Which groundtype should be loaded. Must be < @ref
-	 * groundTypeCount
-	 **/
-	void loadTextures(const QString& dir, unsigned int groundtype);
-
-	void loadShaders(const QString& dir, BosonGroundType* ground);
-
 private:
 	BosonGroundThemePrivate* d;
 	QIntDict<BosonGroundType> mGroundTypes;
-	QDict<BoTexture> mBumpTextures;
-	QDict<BoShader> mShaders;
 };
 
 #endif
