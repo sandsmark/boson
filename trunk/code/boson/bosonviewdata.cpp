@@ -138,6 +138,7 @@ void BosonViewData::slotRemoveItemContainerFor(BosonItem* item)
  BO_CHECK_NULL_RET(c);
  emit signalItemContainerAboutToBeRemoved(c);
 
+ d->mItem2ItemContainer.remove(item);
  d->mAllItemContainers.setAutoDelete(true);
  d->mAllItemContainers.removeRef(c);
 }
