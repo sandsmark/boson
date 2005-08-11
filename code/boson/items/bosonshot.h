@@ -284,6 +284,7 @@ class BosonShotRocket : public BosonShot
     KGameProperty<bofixed> mZ;
     KGameProperty<bofixed> mMaxHeight;
     bofixed mEffectVelo;
+    bofixed mLastDistToTarget;
 };
 
 
