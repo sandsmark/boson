@@ -158,6 +158,8 @@ public:
 	void removeUpgrade(unsigned long int id);
 	const QValueList<const UpgradeProperties*>* upgrades() const;
 
+	const UpgradeProperties* technologyProperties(unsigned long int type) const;
+
 	/**
 	 * Initialize the map for this player - this is mostly the fog of war,
 	 * currently.
@@ -245,7 +247,7 @@ public:
 	bool canResearchTech(unsigned long int id) const;
 
 	/**
-	 * @return TRUE if player has <em>constructed</em> (if it is a facility) unit 
+	 * @return TRUE if player has <em>constructed</em> (if it is a facility) unit
 	 * with type type, FALSE otherwise
 	 **/
 	bool hasUnitWithType(unsigned long int type) const;

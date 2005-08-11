@@ -85,6 +85,11 @@ const UnitProperties* PlayerIO::unitProperties(unsigned long int type) const
  return player()->unitProperties(type);
 }
 
+const UpgradeProperties* PlayerIO::technologyProperties(unsigned long int type) const
+{
+ return player()->technologyProperties(type);
+}
+
 QPtrList<Unit>* PlayerIO::allMyUnits() const
 {
  return player()->allUnits();

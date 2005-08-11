@@ -31,6 +31,7 @@ class SpeciesTheme;
 class KGameIO;
 class KGameIOList;
 class bofixed;
+class UpgradeProperties;
 template<class T> class BoVector3;
 typedef BoVector3<bofixed> BoVector3Fixed;
 
@@ -97,6 +98,11 @@ public:
 	 * @return Player::unitProperties
 	 **/
 	const UnitProperties* unitProperties(unsigned long int type) const;
+
+	/**
+	 * @return Player::technologyProperties
+	 **/
+	const UpgradeProperties* technologyProperties(unsigned long int type) const;
 
 	/**
 	 * @return Player::allUnits
