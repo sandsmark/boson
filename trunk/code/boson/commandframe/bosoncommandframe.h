@@ -29,6 +29,7 @@ class BoUnitDisplayBase;
 class BoSpecificAction;
 class BosonGroundTheme;
 class UnitProperties;
+class UpgradeProperties;
 
 class BosonCommandFramePrivate;
 class BosonCommandFrame : public BoUfoWidget
@@ -107,6 +108,7 @@ public slots:
 	void slotSetGroundTheme(BosonGroundTheme* theme);
 
 	void slotUnitTypeHighlighted(const UnitProperties* prop);
+	void slotTechnologyHighlighted(const UpgradeProperties* prop);
 
 protected:
 	/**
