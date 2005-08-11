@@ -1755,7 +1755,6 @@ public:
 	int nextWaypointIntersectionsXOffset;
 	int nextWaypointIntersectionsYOffset;
 
-	BoVector3Fixed currentVelocity;
 	bofixed roll;
 };
 
