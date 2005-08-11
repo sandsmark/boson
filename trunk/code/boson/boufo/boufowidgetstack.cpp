@@ -88,6 +88,8 @@ void BoUfoWidgetStack::raiseStackWidget(int id)
  if (mVisibleWidget) {
 	mVisibleWidget->show();
  }
+
+ emit signalVisibleWidgetChanged(visibleWidget());
 }
 
 void BoUfoWidgetStack::removeStackWidget(BoUfoWidget* w)
