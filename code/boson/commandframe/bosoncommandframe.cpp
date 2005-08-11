@@ -344,60 +344,74 @@ bool BoUnitDisplayBase::showUnit(Unit* unit)
 }
 
 
-class BosonUnitInfo : public BoUfoCustomWidget
+class BosonInfoWidget : public BoUfoCustomWidget
 {
 public:
-	BosonUnitInfo();
+	BosonInfoWidget();
 
 	void showUnit(const UnitProperties* prop);
+	void showTechnology(const UpgradeProperties* prop);
 
 	virtual void paintWidget();
 
 private:
-	UnitProperties* prop;
-	BoUfoLabel* mName;
-	BoUfoLabel* mMineralCost;
-	BoUfoLabel* mOilCost;
-	BoUfoLabel* mDescription;
+	BoUfoLabel* mInfo;
 };
 
-BosonUnitInfo::BosonUnitInfo()
+BosonInfoWidget::BosonInfoWidget()
 	: BoUfoCustomWidget()
 {
  hide();
- setLayoutClass(UVBoxLayout);
+ setLayoutClass(UHBoxLayout);
 
- mName = new BoUfoLabel();
- mMineralCost = new BoUfoLabel();
- mOilCost = new BoUfoLabel();
- mDescription = new BoUfoLabel();
+ BoUfoWidget* spacer = new BoUfoWidget;
+ spacer->setPreferredWidth(5);
 
- addWidget(mName);
- addWidget(mMineralCost);
- addWidget(mOilCost);
- addWidget(mDescription);
+ mInfo = new BoUfoLabel();
+ mInfo->setPreferredWidth(200);
+ mInfo->setPreferredHeight(1000);
+
+ addWidget(spacer);
+ addWidget(mInfo);
 }
 
-void BosonUnitInfo::showUnit(const UnitProperties* prop)
+void BosonInfoWidget::showUnit(const UnitProperties* prop)
 {
- boDebug() << k_funcinfo << "prop: " << prop << endl;
  if (!prop) {
 	hide();
 	return;
  }
 
- mName->setText(prop->name());
- mMineralCost->setText(i18n("Minerals: %1").arg(prop->mineralCost()));
- mOilCost->setText(i18n("Oil: %1").arg(prop->oilCost()));
+ QString info = QString("%1\nMinerals: %2\nOil: %3")
+		.arg(prop->name()).arg(prop->mineralCost()).arg(prop->oilCost());
  if (!prop->description().isEmpty()) {
-	mDescription->setText("\n" + prop->description());
- } else {
-	mDescription->setText("");
+	info.append("\n\n");
+	info.append(prop->description());
  }
+
+ mInfo->setText(info);
  show();
 }
 
-void BosonUnitInfo::paintWidget()
+void BosonInfoWidget::showTechnology(const UpgradeProperties* prop)
+{
+ if (!prop) {
+	hide();
+	return;
+ }
+
+ QString info = QString("%1\nMinerals: %2\nOil: %3")
+		.arg(prop->upgradeName()).arg(prop->mineralCost()).arg(prop->oilCost());
+ if (!prop->upgradeDescription().isEmpty()) {
+	info.append("\n\n");
+	info.append(prop->upgradeDescription());
+ }
+
+ mInfo->setText(info);
+ show();
+}
+
+void BosonInfoWidget::paintWidget()
 {
  /*if (!prop) {
 	return;
@@ -439,7 +453,7 @@ public:
 		mConstructionProgress = 0;
 		mMinerWidget = 0;
 		mResourceMineWidget = 0;
-		mUnitInfoWidget = 0;
+		mInfoWidget = 0;
 
 		mProduceActions = 0;
 	}
@@ -467,7 +481,7 @@ public:
 	BoConstructionProgress* mConstructionProgress;
 	BoHarvesterWidget* mMinerWidget;
 	BoResourceMineWidget* mResourceMineWidget;
-	BosonUnitInfo* mUnitInfoWidget;
+	BosonInfoWidget* mInfoWidget;
 
 	ProduceActionCollection* mProduceActions;
 };
@@ -557,6 +571,8 @@ void BosonCommandFrame::initSelectionWidget()
 		this, SIGNAL(signalSelectUnit(Unit*)));
  connect(d->mSelectionWidget, SIGNAL(signalUnitTypeHighlighted(const UnitProperties*)),
 		this, SLOT(slotUnitTypeHighlighted(const UnitProperties*)));
+ connect(d->mSelectionWidget, SIGNAL(signalTechnologyHighlighted(const UpgradeProperties*)),
+		this, SLOT(slotTechnologyHighlighted(const UpgradeProperties*)));
 }
 
 void BosonCommandFrame::initPlacementWidget()
@@ -572,8 +588,8 @@ void BosonCommandFrame::initPlacementWidget()
 
 void BosonCommandFrame::initUnitInfo()
 {
- d->mUnitInfoWidget = new BosonUnitInfo();
- addWidget(d->mUnitInfoWidget);
+ d->mInfoWidget = new BosonInfoWidget();
+ addWidget(d->mInfoWidget);
 }
 
 void BosonCommandFrame::setLocalPlayerIO(PlayerIO* io)
@@ -1076,8 +1092,12 @@ void BosonCommandFrame::slotUpdateUnitConfig()
 
 void BosonCommandFrame::slotUnitTypeHighlighted(const UnitProperties* prop)
 {
- boDebug() << k_funcinfo << "prop: " << prop << endl;
- d->mUnitInfoWidget->showUnit(prop);
+ d->mInfoWidget->showUnit(prop);
+}
+
+void BosonCommandFrame::slotTechnologyHighlighted(const UpgradeProperties* prop)
+{
+ d->mInfoWidget->showTechnology(prop);
 }
 
 const QPoint* BosonCommandFrame::cursorRootPos() const

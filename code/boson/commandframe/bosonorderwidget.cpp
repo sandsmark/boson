@@ -300,16 +300,28 @@ void BosonOrderWidget::slotMouseMoved(QMouseEvent* e)
  for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
 	BosonOrderButton* button = d->mOrderButton[i];
 	QRect r(QPoint(button->x(), button->y()), QSize(button->width(), button->height()));
-	if (r.contains(e->x(), e->y())) {
-		if (button->type() == BosonOrderButton::ShowAction) {
-			const BoSpecificAction& action = button->action();
-			if (action.isProduceAction() && action.productionType() == ProduceUnit) {
-				const UnitProperties* prop = action.productionOwner()->unitProperties(action.productionId());
-				emit signalUnitTypeHighlighted(prop);
-				d->mButtonTimer->start(200);
-				return;
-			}
-		}
+	if (!r.contains(e->x(), e->y())) {
+		continue;
+	}
+	if (button->type() != BosonOrderButton::ShowAction) {
+		continue;
+	}
+
+	const BoSpecificAction& action = button->action();
+	if (!action.isProduceAction()) {
+		continue;
+	}
+
+	if (action.productionType() == ProduceUnit) {
+		const UnitProperties* prop = action.productionOwner()->unitProperties(action.productionId());
+		emit signalUnitTypeHighlighted(prop);
+		d->mButtonTimer->start(200);
+		return;
+	} else if (action.productionType() == ProduceTech) {
+		const UpgradeProperties* prop = action.productionOwner()->technologyProperties(action.productionId());
+		emit signalTechnologyHighlighted(prop);
+		d->mButtonTimer->start(200);
+		return;
 	}
  }
  emit signalUnitTypeHighlighted(0);

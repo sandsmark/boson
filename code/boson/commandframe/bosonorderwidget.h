@@ -32,6 +32,7 @@ class BosonGroundTheme;
 class BosonOrderButton;
 class UnitProperties;
 class BosonCommandFrame;
+class UpgradeProperties;
 
 template<class T> class QPtrList;
 template<class T> class QValueList;
@@ -142,6 +143,7 @@ signals:
 	void signalSelectUnit(Unit*);
 
 	void signalUnitTypeHighlighted(const UnitProperties*);
+	void signalTechnologyHighlighted(const UpgradeProperties*);
 
 private:
 	BosonOrderWidgetPrivate* d;
