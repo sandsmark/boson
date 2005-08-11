@@ -294,6 +294,13 @@ extern _boglUseProgram boglUseProgram;
 #define GL_FRAGMENT_SHADER                0x8B30
 
 
+// AB: defines for extensions:
+//     (note: the above defines are partially for extensions too, one day we
+//      should sort this properly)
+// GL_ARB_multitexture (part of OpenGL 1.2.1)
+#define GL_MAX_TEXTURE_UNITS_ARB          0x84E2
+
+
 
 /**
  * This header includes more or less complete support for following extensions:
