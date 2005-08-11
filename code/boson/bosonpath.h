@@ -31,16 +31,6 @@
 #include "bo3dtools.h"
 
 
-// Cell passage costs
-// This shouldn't be used, as we shouldn't touch occupied cells
-#define PF_COST_STANDING_UNIT 1000.0f
-#define PF_COST_MOVING_UNIT 1.0f
-#define PF_COST_WAITING_UNIT 2.5f
-#define PF_COST_ENGAGING_UNIT 3.5f
-#define PF_COST_MUSTSEARCH_UNIT 0.5f
-#define PF_COST_INTERNAL_UNIT 100.0f
-
-
 
 class BosonPathInfo;
 class BosonPathNode;
