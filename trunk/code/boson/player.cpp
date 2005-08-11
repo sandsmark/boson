@@ -711,6 +711,11 @@ bool Player::hasTechnology(unsigned long int id) const
  return false;
 }
 
+const UpgradeProperties* Player::technologyProperties(unsigned long int type) const
+{
+ return speciesTheme()->technology(type);
+}
+
 void Player::technologyResearched(ProductionPlugin* plugin, unsigned long int type)
 {
  BO_CHECK_NULL_RET(plugin);
