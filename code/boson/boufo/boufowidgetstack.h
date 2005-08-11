@@ -44,6 +44,15 @@ public:
 	}
 	int id(BoUfoWidget* widget) const;
 
+signals:
+	/**
+	 * Emitted when the currently visible widget is changed, e.g. when a
+	 * widget is raised (see @ref raiseStackWidget).
+	 *
+	 * Note that @p visibleWidget may be NULL!
+	 **/
+	void signalVisibleWidgetChanged(BoUfoWidget* visibleWidget);
+
 private:
 	void init();
 
