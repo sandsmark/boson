@@ -174,6 +174,7 @@ bool UpgradeProperties::load(KSimpleConfig* cfg, const QString& group)
     return false;
   }
   mName = cfg->readEntry("Name", i18n("unknown"));
+  mDescription = cfg->readEntry("Description");
   mMineralCost = cfg->readUnsignedLongNumEntry("MineralCost", 0);
   mOilCost = cfg->readUnsignedLongNumEntry("OilCost", 0);
   mProducer = cfg->readUnsignedNumEntry("Producer", 0);
