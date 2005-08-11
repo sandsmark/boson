@@ -359,11 +359,13 @@ void Unit::moveBy(bofixed moveX, bofixed moveY, bofixed moveZ)
  bofixed oldX = x();
  bofixed oldY = y();
 
- bofixed rotateX = 0.0f;
- bofixed rotateY = 0.0f;
- updateZ(moveX, moveY, &moveZ, &rotateX, &rotateY);
- setXRotation(rotateX);
- setYRotation(rotateY);
+ if (!isFlying()) {
+	bofixed rotateX = 0.0f;
+	bofixed rotateY = 0.0f;
+	updateZ(moveX, moveY, &moveZ, &rotateX, &rotateY);
+	setXRotation(rotateX);
+	setYRotation(rotateY);
+ }
 
  BosonItem::moveBy(moveX, moveY, moveZ);
  canvas()->unitMoved(this, oldX, oldY);
@@ -525,7 +527,7 @@ bool Unit::attackEnemyUnitsInRange()
 	targetfound = true;
 
 	// If unit is mobile, rotate to face the target if it isn't facing it yet
-	if (isMobile()) {
+	if (isMobile() && !isFlying()) {
 		bofixed rot = Bo3dTools::rotationToPoint(target()->x() - x(), target()->y() - y());
 		if (rot < rotation() - 5 || rot > rotation() + 5) {
 			// Rotate to face target
@@ -637,6 +639,9 @@ Unit* Unit::bestEnemyUnitInRange()
 void Unit::advanceAttack(unsigned int advanceCallsCount)
 {
  if (advanceCallsCount % 5 != 0) {
+	if (isFlying()) {
+		flyInCircle();
+	}
 	return;
  }
  BosonProfiler profiler("advanceAttack");
@@ -683,7 +688,7 @@ void Unit::advanceAttack(unsigned int advanceCallsCount)
 	return;
  }
 
- if (isMobile()) {
+ if (isMobile() && !isFlying()) {
 	bofixed rot = Bo3dTools::rotationToPoint(target()->x() - x(), target()->y() - y());
 	if(rot < rotation() - 5 || rot > rotation() + 5) {
 		if(QABS(rotation() - rot) > unitProperties()->rotationSpeed()) {
@@ -708,11 +713,14 @@ void Unit::advanceAttack(unsigned int advanceCallsCount)
 		if (target()->isDestroyed()) {
 			boDebug(300) << "    " << k_funcinfo << "target destroyed, returning" << endl;
 			stopAttacking();
+			flyInCircle();
 			return;
 		}
 	}
  }
  boDebug(300) << "    " << k_funcinfo << "done shooting" << endl;
+ // TODO: fly on straight, pass the target, fly a bit more, then turn and fly back toward the target
+ flyInCircle();
 }
 
 void Unit::advanceDestroyed(unsigned int advanceCallsCount)
@@ -974,8 +982,10 @@ void Unit::stopMoving()
  } else if (advanceWork() != work()) {
 	setAdvanceWork(work());
  }
- setMovingStatus(Standing);
- setVelocity(0.0, 0.0, 0.0);
+ if (!isFlying()) {
+	setMovingStatus(Standing);
+	setVelocity(0.0, 0.0, 0.0);
+ }
 }
 
 void Unit::stopAttacking()
@@ -1744,6 +1754,9 @@ public:
 	QValueVector<BoVector2Fixed>* nextWaypointIntersections;
 	int nextWaypointIntersectionsXOffset;
 	int nextWaypointIntersectionsYOffset;
+
+	BoVector3Fixed currentVelocity;
+	bofixed roll;
 };
 
 MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
@@ -1759,6 +1772,8 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
  setDecelerationSpeed(maxDecelerationSpeed());
  d->lastCellX = -1;
  d->lastCellY = -1;
+
+ d->roll = 0;
 }
 
 MobileUnit::~MobileUnit()
@@ -2068,7 +2083,180 @@ bofixed MobileUnit::moveTowardsPoint(const BoVector2Fixed& p, bofixed x, bofixed
 
 void MobileUnit::advanceMoveFlying(unsigned int advanceCallsCount)
 {
- advanceMoveLeader(advanceCallsCount);
+ BosonProfiler profiler("advanceMoveFlying");
+ //boDebug(401) << k_funcinfo << endl;
+
+ if (maxSpeed() == 0) {
+	// If unit's max speed is 0, it cannot move
+	boError(401) << k_funcinfo << "unit " << id() << ": maxspeed == 0" << endl;
+	stopMoving();
+	setMovingStatus(Standing);
+	return;
+ }
+
+ boDebug(401) << k_funcinfo << "unit " << id() << endl;
+
+
+ // Calculate velocity
+ // Missile always moves towards it's target
+ BoVector3Fixed targetpos(currentWaypoint().x(), currentWaypoint().y(), 0);
+ targetpos.setZ(canvas()->heightAtPoint(targetpos.x(), targetpos.y()) + 3);
+ if (advanceWork() != work()) {
+	if (work() == WorkAttack) {
+		// Unit is attacking. ATM it's moving to target.
+		if (!target()) {
+			boError() << k_funcinfo << "unit " << id() << " is in WorkAttack, but has NULL target!" << endl;
+			stopAttacking();
+			flyInCircle();
+			return;
+		}
+		int range;
+		if (target()->isFlying()) {
+			range = maxAirWeaponRange();
+		} else {
+			range = maxLandWeaponRange();
+		}
+		if (inRange(range, target())) {
+			boDebug(401) << k_funcinfo << "unit " << id() << ": target is in range now" << endl;
+			stopMoving();
+			flyInCircle();
+			return;
+		}
+
+		targetpos = BoVector3Fixed(target()->centerX(), target()->centerY(), target()->centerZ());
+		if (!target()->isFlying()) {
+			targetpos.setZ(targetpos.z() + 3);
+		}
+	}
+ } else if (pathInfo()->moveAttacking) {
+	// Attack any enemy units in range
+	// Don't check for enemies every time (if we don't have a target) because it
+	//  slows things down
+	if (target() || (advanceCallsCount % 10 == 0)) {
+		attackEnemyUnitsInRangeWhileMoving();
+	}
+ }
+
+
+ // x and y are center of the unit here
+ bofixed x = centerX();
+ bofixed y = centerY();
+ bofixed z = centerZ();
+
+ accelerate();
+
+
+ // Calculate totarget vector
+ BoVector3Fixed totarget(targetpos.x() - x, targetpos.y() - y, targetpos.z() - z);
+ bofixed totargetlen = totarget.length();
+ // We need check this here to avoid division by 0 later
+ if (totargetlen <= speed()) {
+	stopMoving();
+	return;
+ }
+ // Normalize totarget. totarget vector now shows direction to target
+ totarget.scale(1.0f / totargetlen);
+
+ // Check if the target is to our left or right
+ bofixed wantedrotation = Bo3dTools::rotationToPoint(totarget.x(), totarget.y());
+ bofixed rotationdelta = rotation() - wantedrotation;  // How many degrees to turn
+ bofixed newrotation = rotation();
+ bool turncw = false;  // Direction of turning, CW or CCW
+
+ // Find out direction of turning and huw much is left to turn
+ if (rotationdelta < 0) {
+	rotationdelta = QABS(rotationdelta);
+	turncw = true;
+ }
+ if (rotationdelta > 180) {
+	rotationdelta = 180 - (rotationdelta - 180);
+	turncw = !turncw;
+ }
+
+ const bofixed maxturningspeed = 2;
+ if (rotationdelta <= maxturningspeed) {
+	newrotation = wantedrotation;
+ } else {
+	if (turncw) {
+		newrotation += maxturningspeed;
+	} else {
+		newrotation -= maxturningspeed;
+	}
+ }
+ // Check for overflows
+ if (newrotation < 0) {
+	newrotation += 360;
+ } else if (newrotation >= 360) {
+	newrotation -= 360;
+ }
+
+ /*bofixed crossproduct = d->currentVelocity.x() * totarget.y() - d->currentVelocity.y() * totarget.x();
+ bool turnright = true;
+ if (crossproduct < 0) {
+	// Turn left
+	turnright = false;
+ } else {
+	// Turn right
+ }*/
+
+ //bofixed rotationdelta = rotation
+
+ // Difference between current direction and direction to target
+ /*BoVector3Fixed diff = totarget - d->currentVelocity;
+ bofixed difflen = diff.length();
+ const bofixed turnspeed = 0.08;
+ if (difflen != 0) {
+	// We're not flying towards the target atm
+	// Calculate new velocity vector
+	if (turnspeed < difflen) {
+		diff.scale(turnspeed / difflen);
+	}
+	// Alter velocity direction so that it's more towards the target
+	d->currentVelocity += diff;
+	d->currentVelocity.normalize();
+ }
+
+ // This is final velocity
+ BoVector3Fixed velo(d->currentVelocity * speed());*/
+
+ // Calculate velocity
+ BoVector3Fixed velo;
+ velo.setX(cos(Bo3dTools::deg2rad(newrotation - 90)) * speed());
+ velo.setY(sin(Bo3dTools::deg2rad(newrotation - 90)) * speed());
+
+ bofixed groundz = canvas()->heightAtPoint(x + velo.x(), y + velo.y());
+ if (z + velo.z() < groundz + 2) {
+	velo.setZ(groundz - z + 2);
+ }
+
+ // Calculate roll
+ /*bofixed wantedroll = QMIN(difflen / turnspeed, bofixed(1)) * 45;
+ if (totarget.crossProduct(velo).z() < 0) {
+	// Turning left
+	wantedroll = -wantedroll;
+ } else {
+	// Turning right
+ }*/
+ bofixed wantedroll = QMIN(rotationdelta / maxturningspeed, bofixed(1)) * 45;
+ if (!turncw) {
+	// Turning left
+	wantedroll = -wantedroll;
+ }
+
+ const bofixed maxrollincrease = 2;
+ bofixed delta = wantedroll - d->roll;
+ if (delta > 0) {
+	d->roll += QMIN(delta, maxrollincrease);
+ } else if (delta < 0) {
+	d->roll -= QMIN(QABS(delta), maxrollincrease);
+ }
+
+ setVelocity(velo.x(), velo.y(), velo.z());
+ setRotation(newrotation);
+ //setXRotation(Bo3dTools::rotationToPoint(sqrt(1 - velo.z() * velo.z()), velo.z()) - 90);
+ setYRotation(d->roll);
+
+ setMovingStatus(Moving);
 }
 
 void MobileUnit::advanceMoveFollowing(unsigned int advanceCallsCount)
@@ -2578,25 +2766,10 @@ void MobileUnit::advanceFollow(unsigned int advanceCallsCount)
 void MobileUnit::advanceIdle(unsigned int advanceCallsCount)
 {
  Unit::advanceIdle(advanceCallsCount);
- if (!isFlying()) {
-	return;
+
+ if (isFlying()) {
+	flyInCircle();
  }
-
- // Flying units need to keep flying
- // TODO: choose which way to turn
- bofixed newrot = rotation() + maxSpeed() * 20;
- bofixed xdist = cos(Bo3dTools::deg2rad(newrot - 90)) * maxSpeed();
- bofixed ydist = sin(Bo3dTools::deg2rad(newrot - 90)) * maxSpeed();
-
- // Don't go off the map
- if (x() < 0.5 || y() < 0.5 ||
-		x() > bofixed(canvas()->mapWidth()) - width() - 0.5 || y() > bofixed(canvas()->mapHeight()) - height() - 0.5) {
-	move(QMIN(QMAX(x(), bofixed(1)), bofixed(canvas()->mapWidth()) - width() - 1),
-			QMIN(QMAX(y(), bofixed(1)), bofixed(canvas()->mapHeight()) - height() - 1), z());
- }
-
- setRotation(newrot);
- setVelocity(xdist, ydist, 0);
 }
 
 bool MobileUnit::loadFromXML(const QDomElement& root)
@@ -2635,8 +2808,10 @@ bool MobileUnit::saveAsXML(QDomElement& root)
 void MobileUnit::stopMoving()
 {
  Unit::stopMoving();
- if (pathInfo()->slowDownAtDest) {
-	setSpeed(0);
+ if (!isFlying()) {
+	if (pathInfo()->slowDownAtDest) {
+		setSpeed(0);
+	}
  }
 }
 
@@ -2649,12 +2824,69 @@ bool MobileUnit::attackEnemyUnitsInRangeWhileMoving()
  }
  if (pathInfo()->moveAttacking && attackEnemyUnitsInRange()) {
 	boDebug(401) << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
+	if (isFlying()) {
+		// Don't stop moving
+		return true;
+	}
 	setVelocity(0.0, 0.0, 0.0);  // To prevent moving
 	setSpeed(0);
 	setMovingStatus(Engaging);
 	return true;
  }
  return false;
+}
+
+void MobileUnit::flyInCircle()
+{
+ if (!isFlying()) {
+	return;
+ }
+
+ bofixed speedfactor = speed() / maxSpeed();
+ if (speedfactor < 0.7) {
+	accelerate();
+ } else if(speedfactor > 0.8) {
+	decelerate();
+ }
+
+ // Flying units need to keep flying
+ // TODO: choose which way to turn
+ bofixed newrot = rotation() + maxSpeed() * 20;
+ if (newrot > 360) {
+	newrot -= 360;
+ }
+ BoVector3Fixed velo(0, 0, 0);
+ velo.setX(cos(Bo3dTools::deg2rad(newrot - 90)) * speed());
+ velo.setY(sin(Bo3dTools::deg2rad(newrot - 90)) * speed());
+
+ // Don't go off the map
+ if (x() < 0.5 || y() < 0.5 ||
+		x() > bofixed(canvas()->mapWidth()) - width() - 0.5 || y() > bofixed(canvas()->mapHeight()) - height() - 0.5) {
+	move(QMIN(QMAX(x(), bofixed(1)), bofixed(canvas()->mapWidth()) - width() - 1),
+			QMIN(QMAX(y(), bofixed(1)), bofixed(canvas()->mapHeight()) - height() - 1), z());
+ }
+
+ bofixed groundz = canvas()->heightAtPoint(centerX() + velo.x(), centerY() + velo.y());
+ if (z() + velo.z() < groundz + 2) {
+	velo.setZ(groundz - z() + 2);
+ }
+
+ setRotation(newrot);
+ setVelocity(velo.x(), velo.y(), velo.z());
+ //d->currentVelocity = velo;
+ //d->currentVelocity.normalize();
+
+ // Calculate roll
+ bofixed wantedroll = 25;
+ const bofixed maxrollincrease = 2;
+ bofixed delta = wantedroll - d->roll;
+ if (delta > 0) {
+	d->roll += QMIN(delta, maxrollincrease);
+ } else if (delta < 0) {
+	d->roll -= QMIN(QABS(delta), maxrollincrease);
+ }
+
+ setYRotation(d->roll);
 }
 
 void MobileUnit::initCellIntersectionTable()

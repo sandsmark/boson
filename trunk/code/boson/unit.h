@@ -541,6 +541,8 @@ protected:
 
 	virtual int getAnimationMode() const;
 
+	virtual void flyInCircle() {}
+
 
 private:
 	typedef void (Unit::*MemberFunction)(unsigned int advanceCallsCount);
@@ -663,6 +665,8 @@ protected:
 	void avoidance();
 	bool canGoToCurrentPathPoint(int xpos, int ypos);
 	void currentPathPointChanged(int unitx, int unity);
+
+	virtual void flyInCircle();
 
 private:
 	void changeUpgrades(const UpgradeProperties* upgrade, bool add);
