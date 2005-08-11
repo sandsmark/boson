@@ -45,8 +45,6 @@
 // And radians to degrees conversion
 #define RAD2DEG (180.0/M_PI)
 
-//#define DEBUG_FRAGMENT
-
 
 /*****  BosonShot  *****/
 
@@ -400,6 +398,7 @@ void BosonShotRocket::init(const BoVector3Fixed& pos, const BoVector3Fixed& targ
   setRotation(Bo3dTools::rotationToPoint(mVelo[0], mVelo[1]));
   mZ = 0; // For parable calculations only, must be 0 at the beginning
   mPassedDist = 0;
+  mLastDistToTarget = (target - pos).dotProduct();
 }
 
 // move the shot by one step
@@ -431,11 +430,12 @@ void BosonShotRocket::advanceMoveInternal()
   setXRotation(Bo3dTools::rotationToPoint(mEffectVelo * speed(), zvelo) - 90 );
 
   // Check if missile is still active
-  BoVector3Fixed dist = mTarget - BoVector3Fixed(x() + xVelocity(), y() + yVelocity(), z() + zVelocity());
-  if(dist.dotProduct() <= speed() * speed())
+  bofixed newdist = (mTarget - BoVector3Fixed(x() + xVelocity(), y() + yVelocity(), z() + zVelocity())).dotProduct();
+  if(newdist > mLastDistToTarget)
   {
     explode();
   }
+  mLastDistToTarget = newdist;
 }
 
 bool BosonShotRocket::saveAsXML(QDomElement& root)
@@ -528,6 +528,7 @@ bool BosonShotRocket::loadFromXML(const QDomElement& root)
 
   mVelo.set(xvelo, yvelo, zvelo);
   mTarget.set(targetx, targety, targetz);
+  mLastDistToTarget = (mTarget - BoVector3Fixed(x(), y(), z())).dotProduct();
   mEffectVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]);
   setRotation(Bo3dTools::rotationToPoint(mVelo[0], mVelo[1]));
   setSpeed(speed);
@@ -1058,27 +1059,10 @@ void BosonShotFragment::activate(const BoVector3Fixed& pos, const UnitProperties
   mUnitProperties = unitproperties;
 
   KRandomSequence* r = owner()->game()->random();
-#ifdef DEBUG_FRAGMENT
-  //boDebug(350) << k_funcinfo << "random: " << r->getLong(10000) << endl;
-  long foo1 = r->getLong(100); long foo2 = r->getLong(100);
-  bofixed foo3 = bofixed(foo1); bofixed foo4 = bofixed(foo2);
-  bofixed foo5 = foo3 / 100; bofixed foo6 = foo4 / 100;
-  bofixed foo7 = foo5 - 0.5; bofixed foo8 = foo6 - 0.5;
-  mVelo.set(foo7, foo8, 0);
-  boDebug() << "foo1: " << foo1 << " foo2: " << foo2 << " foo3: " << foo3 << " foo4: " << foo4 <<
-      " foo5: " << foo5 << " foo6: " << foo6 << " foo7: " << foo7 << " foo8: " << foo8 << endl;
-#define MYRANDOM (bofixed(r->getLong(100)) / 100)
-  /*mVelo.set(MYRANDOM - 0.5, MYRANDOM - 0.5, 0);
-  mVelo.normalize();
-  mVelo.scale(FRAGMENT_MIN_SPEED + (MYRANDOM * (FRAGMENT_MAX_SPEED - FRAGMENT_MIN_SPEED)));
-  mVelo.setZ(FRAGMENT_MIN_Z_SPEED + (MYRANDOM * (FRAGMENT_MAX_Z_SPEED - FRAGMENT_MIN_Z_SPEED)));*/
-#undef MYRANDOM
-#else
   mVelo.set(r->getDouble() - 0.5, r->getDouble() - 0.5, 0);
   mVelo.normalize();
   mVelo.scale(FRAGMENT_MIN_SPEED + (r->getDouble() * (FRAGMENT_MAX_SPEED - FRAGMENT_MIN_SPEED)));
   mVelo.setZ(FRAGMENT_MIN_Z_SPEED + (r->getDouble() * (FRAGMENT_MAX_Z_SPEED - FRAGMENT_MIN_Z_SPEED)));
-#endif
   boDebug(350) << k_funcinfo << "Velocity is: (" << mVelo.x() << "; " << mVelo.y() << "; " << mVelo.z() << ")" << endl;
 
   move(pos.x(), pos.y(), pos.z() + 0.2);  // +0.2 prevents immediate contact with the terrain
