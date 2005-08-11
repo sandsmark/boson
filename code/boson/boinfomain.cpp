@@ -25,6 +25,7 @@
 #include "bodebug.h"
 #include "boversion.h"
 #include "boapplication.h"
+#include "bogl.h"
 
 // we need this to initialize the GLX context.
 #include "bosonglwidget.h"
@@ -70,6 +71,7 @@ int main(int argc, char **argv)
  BosonGLWidget* glWidget = new BosonGLWidget(0);
  glWidget->hide();
  glWidget->makeCurrent();
+ boglInit();
  BoInfo::boInfo()->update(glWidget);
 
 // if (args->count() == 0) {
