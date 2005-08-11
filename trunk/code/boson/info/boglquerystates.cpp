@@ -318,13 +318,14 @@ private:
     void addOpenGL1_2_1Values()
     {
 #define ADD(a) mNameDict.insert(a, #a);
-        ADD(GL_MAX_TEXTURE_UNITS); // extension "GL_ARB_multitexture"
+        ADD(GL_MAX_TEXTURE_UNITS_ARB); // extension "GL_ARB_multitexture"
 #undef ADD
     }
     void addOpenGL1_3Values()
     {
 #define ADD(a) mNameDict.insert(a, #a);
         ADD(GL_MAX_CUBE_MAP_TEXTURE_SIZE);
+        ADD(GL_MAX_TEXTURE_UNITS);
         ADD(GL_SAMPLE_BUFFERS);
         ADD(GL_SAMPLES);
         ADD(GL_COMPRESSED_TEXTURE_FORMATS);
