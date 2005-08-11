@@ -108,6 +108,10 @@ class UpgradeProperties
      * @return Name of this upgrade
      **/
     const QString& upgradeName() const { return mName; }
+    /**
+     * @return Description of this upgrade (shown to the player)
+     **/
+    const QString& upgradeDescription() const { return mDescription; }
 
     /**
      * @return Mineral cost of this upgrade
@@ -182,6 +186,7 @@ class UpgradeProperties
     QString mType;
     unsigned long int mId;
     QString mName;
+    QString mDescription;
     unsigned long int mMineralCost;
     unsigned long int mOilCost;
     unsigned int mProducer;
