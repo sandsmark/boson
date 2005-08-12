@@ -84,9 +84,15 @@ public slots:
 
 	/**
 	 * Mainly used internally. This will display the new game widget (see
-	 * @ref BosonNewGameWidget) where the player can select the playfield.
+	 * @ref BosonNewGameWidget) for a single-player game where the player can
+	 * select the playfield.
 	 **/
-	void slotNewGame(KCmdLineArgs* args = 0);
+	void slotNewSPGame(KCmdLineArgs* args = 0);
+	/**
+	 * Mainly used internally. This will display the network widget and then new
+	 * game widget (see @ref BosonNewGameWidget) for a multi-player game.
+	 **/
+	void slotNewMPGame(KCmdLineArgs* args = 0);
 
 	/**
 	 * Mainly used internally. This will display the start editor widget
@@ -139,14 +145,17 @@ protected:
 	void removeWidget(WidgetId widgetId);
 	void showWidget(WidgetId widgetId);
 
+	void newGame(KCmdLineArgs* args = 0);
+
 	virtual bool eventFilter(QObject* o, QEvent* e);
 
 	// AB: do NOT make this public!
 	BoUfoLoadingWidget* loadingWidget() const;
 
 protected slots:
-	void slotShowNetworkOptions();
-	void slotHideNetworkOptions();
+	void slotNetworkOptionsOk();
+	void slotNetworkOptionsCancel();
+	void slotNewGameCancelled();
 
 	void slotOfferingConnections();
 	void slotConnectingToServer();
