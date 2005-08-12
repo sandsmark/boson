@@ -2,8 +2,9 @@
 ConstructionSteps=0
 
 [Boson Unit]
-Name=Toilet
-Health=30
+Name=Factory2
+Health=500
+Armor=8
 Id=61
 IsFacility=true
 MineralCost=160
@@ -12,7 +13,7 @@ OilCost=20
 #ProductionTime=20
 SupportMiniMap=false
 TerrainType=0
-UnitDepth=3
-UnitHeight=1
-UnitWidth=1
+UnitDepth=4
+UnitHeight=5
+UnitWidth=5
 

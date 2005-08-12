@@ -3,7 +3,8 @@ ConstructionSteps=0
 
 [Boson Unit]
 Name=Factory1
-Health=30
+Health=400
+Armor=5
 Id=60
 IsFacility=true
 MineralCost=160
@@ -13,6 +14,6 @@ OilCost=20
 SupportMiniMap=false
 TerrainType=0
 UnitDepth=3
-UnitHeight=1
-UnitWidth=1
+UnitHeight=4
+UnitWidth=4
 

@@ -3,7 +3,8 @@ ConstructionSteps=0
 
 [Boson Unit]
 Name=Containers1
-Health=30
+Health=60
+Armor=8
 Id=59
 IsFacility=true
 MineralCost=160
@@ -13,6 +14,6 @@ OilCost=20
 SupportMiniMap=false
 TerrainType=0
 UnitDepth=0.8
-UnitHeight=0.4
-UnitWidth=0.4
+UnitHeight=1.5
+UnitWidth=1.5
 
