@@ -25,7 +25,7 @@
 #include "../global.h"
 #include "../boaction.h"
 
-#include <qpixmap.h>
+#include <qimage.h>
 
 class Unit;
 class Player;
@@ -157,6 +157,7 @@ protected:
 	virtual void displayUnitPixmap(Unit* unit);
 	virtual void displayUnitPixmap(unsigned long int unitType, const Player* owner);
 
+	void setImage(const QImage& image);
 	void setPixmap(const QPixmap& pixmap);
 
 protected slots:
@@ -173,7 +174,7 @@ private:
 
 	ShowingType mType;
 
-	BoOrderButtonButton* mPixmap;
+	BoOrderButtonButton* mPixmapButton;
 	BoUfoProgress* mHealth;
 };
 
@@ -192,7 +193,7 @@ public:
 		mProductionCount = 0;
 	}
 
-	virtual void setPixmap(const QPixmap& p);
+	virtual void setImage(const QImage& img);
 
 	void setProductionCount(int c);
 	void setGrayOut(bool g);
@@ -204,12 +205,12 @@ protected slots:
 	void slotMouseReleaseEvent(QMouseEvent*);
 
 protected:
-	void addProductionCount(QPixmap* pix);
+	void addProductionCount(QImage* img);
 
 private:
 	bool mGrayOut;
 	int mProductionCount;
-	QPixmap mPixmap;
+	QImage mImage;
 };
 
 #endif

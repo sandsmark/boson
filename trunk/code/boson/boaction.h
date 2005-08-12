@@ -24,7 +24,7 @@
 
 #include <qstring.h>
 
-class QPixmap;
+class QImage;
 class KSimpleConfig;
 template<class T> class QPtrList;
 
@@ -42,16 +42,16 @@ class BoAction
 {
   public:
     BoAction(KSimpleConfig* cfg, const QString& name, SpeciesData* theme);
-    BoAction(const QString& name, QPixmap* pixmap, const QString& text/*, hotkey*/);
+    BoAction(const QString& name, QImage* image, const QString& text/*, hotkey*/);
 
     const QString& id() const { return mId; }
     int hotkey() const { return mHotkey; }
-    QPixmap* pixmap() const { return mPixmap; }
+    QImage* image() const { return mImage; }
     const QString& text() const { return mText; }
 
   private:
     QString mId;  // Id aka name
-    QPixmap* mPixmap;
+    QImage* mImage;
     int mHotkey;
     QString mText;  // Full text to show in tooltip
 };
@@ -130,13 +130,13 @@ class BoSpecificAction
       }
       return mAction->hotkey();
     }
-    QPixmap* pixmap() const
+    QImage* image() const
     {
       if (!mAction)
       {
         return 0;
       }
-      return mAction->pixmap();
+      return mAction->image();
     }
     const QString& text() const
     {

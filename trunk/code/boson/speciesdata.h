@@ -129,16 +129,16 @@ public:
 	 **/
 	BosonModel* objectModel(const QString& file) const;
 
-	QPixmap* bigOverview(unsigned long int unitType, const QColor& teamColor) const;
-	QPixmap* smallOverview(unsigned long int unitType, const QColor& teamColor) const;
+	QImage* bigOverview(unsigned long int unitType, const QColor& teamColor) const;
+	QImage* smallOverview(unsigned long int unitType, const QColor& teamColor) const;
 	const BoAction* action(const QString& name) const;
 
 	/**
-	 * @return Pixmap with name @name from the pixmap cache
-	 * If there is no such pixmap in the cache, it will be loaded and inserted
-	 * there. Pixmaps will be searched from $speciesdir/pixmaps/
+	 * @return Image with name @name from the image cache
+	 * If there is no such image in the cache, it will be loaded and inserted
+	 * there. Image will be searched from $speciesdir/pixmaps/
 	 **/
-	QPixmap* pixmap(const QString& name);
+	QImage* image(const QString& name);
 
 	/**
 	 * @return The absolute path to the species directory
