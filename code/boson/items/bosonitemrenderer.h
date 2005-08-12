@@ -43,8 +43,15 @@ class QString;
 class BosonItemRenderer
 {
 public:
+	enum RTTI {
+		SimpleRenderer = 0,
+		ModelRenderer = 1
+	};
+
 	BosonItemRenderer(BosonItem* item);
 	virtual ~BosonItemRenderer();
+
+	virtual int rtti() const { return SimpleRenderer; }
 
 	static void startItemRendering();
 	static void stopItemRendering();
@@ -53,6 +60,11 @@ public:
 	virtual BosonModel* model() const { return 0; }
 
 	virtual void setAnimationMode(int ) { }
+
+	int animationMode() const
+	{
+		return mAnimationMode;
+	}
 
 	virtual void animate() { }
 
@@ -85,6 +97,7 @@ public:
 		return mItem;
 	}
 
+
 protected:
 	int mAnimationMode;
 
@@ -104,6 +117,8 @@ class BosonItemModelRenderer : public BosonItemRenderer
 public:
 	BosonItemModelRenderer(BosonItem* item);
 	virtual ~BosonItemModelRenderer();
+
+	virtual int rtti() const { return ModelRenderer; }
 
 	virtual bool setModel(BosonModel* model);
 
@@ -138,6 +153,11 @@ public:
 	 * @return See @ref BosonModel::PreferredLod
 	 **/
 	virtual unsigned int preferredLod(float distanceFromCamera) const;
+
+	float currentFrame() const
+	{
+		return mCurrentFrame;
+	}
 
 private:
 	BosonModel* mModel;

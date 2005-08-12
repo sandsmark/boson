@@ -198,12 +198,12 @@ void BosonItemModelRenderer::animate()
  BO_CHECK_NULL_RET(item());
  if (boGame) {
 	if (boGame->gameMode()) {
-		if (mAnimationMode != item()->animationMode()) {
+		if (animationMode() != item()->animationMode()) {
 			setAnimationMode(item()->animationMode());
 			return;
 		}
 	} else {
-		if (mAnimationMode != UnitAnimationIdle) {
+		if (animationMode() != UnitAnimationIdle) {
 			setAnimationMode(UnitAnimationIdle);
 			return;
 		}
