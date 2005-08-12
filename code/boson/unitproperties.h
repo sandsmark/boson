@@ -151,7 +151,7 @@ public:
 	 * The file should contain units/your_unit_dir/index.desktop at the end
 	 * and should be an absolute path.
 	 **/
-	void saveUnitType(const QString& fileName);
+	bool saveUnitType(const QString& fileName);
 
 
 	/**
@@ -466,14 +466,6 @@ public:
 	bool saveUpgradesAsXML(QDomElement& root) const;
 	bool loadUpgradesFromXML(const QDomElement& root);
 
-
-	/**
-	 * Load actions for this unit. Must be called after overview pixmaps are
-	 * loaded.
-	 * Should be used by only SpeciesTheme.
-	 **/
-	void loadActions();
-
 	void clearUpgrades();
 	void addUpgrade(const UpgradeProperties* prop);
 	void removeUpgrade(const UpgradeProperties* prop);
@@ -487,20 +479,21 @@ public:
 	bool canGo(int x, int y);
 
 protected:
-	void loadMobileProperties(KSimpleConfig* conf);
-	void loadFacilityProperties(KSimpleConfig* conf);
-	void loadAllPluginProperties(KSimpleConfig* conf);
-	void loadPluginProperties(PluginProperties* prop, KSimpleConfig* conf);
+	bool loadActions(KSimpleConfig* conf);
+	bool loadMobileProperties(KSimpleConfig* conf);
+	bool loadFacilityProperties(KSimpleConfig* conf);
+	bool loadAllPluginProperties(KSimpleConfig* conf);
+	bool loadPluginProperties(PluginProperties* prop, KSimpleConfig* conf);
 
-	void loadTextureNames(KSimpleConfig* conf);
-	void loadSoundNames(KSimpleConfig* conf);
-	void loadWeapons(KSimpleConfig* conf);
+	bool loadTextureNames(KSimpleConfig* conf);
+	bool loadSoundNames(KSimpleConfig* conf);
+	bool loadWeapons(KSimpleConfig* conf);
 
-	void saveMobileProperties(KSimpleConfig* conf);
-	void saveFacilityProperties(KSimpleConfig* conf);
-	void saveAllPluginProperties(KSimpleConfig* conf);
-	void saveTextureNames(KSimpleConfig* conf);
-	void saveSoundNames(KSimpleConfig* conf);
+	bool saveMobileProperties(KSimpleConfig* conf);
+	bool saveFacilityProperties(KSimpleConfig* conf);
+	bool saveAllPluginProperties(KSimpleConfig* conf);
+	bool saveTextureNames(KSimpleConfig* conf);
+	bool saveSoundNames(KSimpleConfig* conf);
 
 	// Methods to set values. They are only meant to be used by unit
 	//  editor. Don't use them unless you know what you are doing
