@@ -132,6 +132,8 @@ signals:
 	 **/
 	void signalResetGame();
 
+	void signalPreferredSizeChanged();
+
 protected:
 	void initWidget(WidgetId widgetId);
 	void removeWidget(WidgetId widgetId);
@@ -157,6 +159,8 @@ protected slots:
 	 * This calls @ref Boson::disconnect and re-adds the local player
 	 **/
 	void slotKickedOut();
+
+	void slotVisibleWidgetChanged(BoUfoWidget* w);
 
 private:
 	void init();

@@ -74,6 +74,9 @@ void BoUfoStartupWidget::init()
  d = new BoUfoStartupWidgetPrivate;
  d->mWidgetStack = new BoUfoWidgetStack();
 
+ connect(d->mWidgetStack, SIGNAL(signalVisibleWidgetChanged(BoUfoWidget*)),
+		this, SLOT(slotVisibleWidgetChanged(BoUfoWidget*)));
+
  QImage backgroundImage(locate("data", "boson/pics/boson-startup-bg.png"));
  QImage logoImage(locate("data", "boson/pics/boson-startup-logo.png"));
 
@@ -503,5 +506,11 @@ void BoUfoStartupWidget::slotKickedOut()
  boDebug() << k_funcinfo << "disconnect DONE" << endl;
  boDebug() << k_funcinfo << "re-adding local player" << endl;
  emit signalAddLocalPlayer();
+}
+
+void BoUfoStartupWidget::slotVisibleWidgetChanged(BoUfoWidget* w)
+{
+ Q_UNUSED(w);
+ emit signalPreferredSizeChanged();
 }
 

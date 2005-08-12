@@ -188,6 +188,8 @@ protected slots:
 
 	void slotDebugUfoWidgets();
 
+	void slotStartupPreferredSizeChanged();
+
 
 private:
 	void init();
