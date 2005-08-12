@@ -32,7 +32,6 @@
 #include "boitemlisthandler.h"
 #include "defines.h"
 #include "items/bosonshot.h"
-#include "items/bosonitemrenderer.h"
 #include "bosonweapon.h"
 #include "bosonstatistics.h"
 #include "bosonprofiling.h"
