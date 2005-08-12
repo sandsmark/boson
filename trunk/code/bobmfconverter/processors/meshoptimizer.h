@@ -43,6 +43,7 @@ class MeshOptimizer : public Processor
     Mesh* mergeMeshes(QValueList<Mesh*>* equal);
     bool hasMultipleNodes(Mesh* m);
     bool areInSameFrames(Mesh* m1, Mesh* m2);
+    bool animationsDiffer(Mesh* m1, Mesh* m2);
 //    bool areMeshesEqual(Mesh* m1, Mesh* m2);
 
 

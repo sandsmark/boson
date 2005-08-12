@@ -123,6 +123,10 @@ void MeshOptimizer::findEqualMeshes(QValueList<Mesh*>* equal, QValueList<Mesh*>*
     {
       continue;
     }
+    else if(animationsDiffer(mesh, test))
+    {
+      continue;
+    }
     else
     {
       equal->append(*it);
@@ -187,6 +191,37 @@ bool MeshOptimizer::areInSameFrames(Mesh* m1, Mesh* m2)
     }
   }
   return true;
+}
+
+bool MeshOptimizer::animationsDiffer(Mesh* m1, Mesh* m2)
+{
+  BoMatrix* matrix = 0;
+
+  for(unsigned int i = 0; i < lod()->frameCount(); i++)
+  {
+    Frame* f = lod()->frame(i);
+    for(unsigned int j = 0; j < f->nodeCount(); j++)
+    {
+      if(f->mesh(j) == m1 || f->mesh(j) == m2)
+      {
+        if(matrix)
+        {
+          if(!matrix->isEqual(*f->matrix(j)))
+          {
+            // TODO: probably we could be able to merge in some cases even when
+            //  matrices differ, e.g. if both meshes are translated by same
+            //  amount
+            return true;
+          }
+        }
+        else
+        {
+          matrix = f->matrix(j);
+        }
+      }
+    }
+  }
+  return false;
 }
 
 Mesh* MeshOptimizer::mergeMeshes(QValueList<Mesh*>* equal)
