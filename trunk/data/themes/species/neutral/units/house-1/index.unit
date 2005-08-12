@@ -3,7 +3,7 @@ ConstructionSteps=0
 
 [Boson Unit]
 Name=House
-Health=50
+Health=140
 Id=45
 IsFacility=true
 MineralCost=200
@@ -13,6 +13,6 @@ OilCost=100
 SupportMiniMap=false
 TerrainType=0
 UnitDepth=1.4
-UnitHeight=2
-UnitWidth=2
+UnitHeight=1.5
+UnitWidth=1.5
 

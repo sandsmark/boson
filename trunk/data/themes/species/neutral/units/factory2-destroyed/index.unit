@@ -3,7 +3,8 @@ ConstructionSteps=0
 
 [Boson Unit]
 Name=Factory2-Destroyed
-Health=30
+Health=300
+Armor=4
 Id=62
 IsFacility=true
 MineralCost=160
@@ -12,7 +13,7 @@ OilCost=20
 #ProductionTime=20
 SupportMiniMap=false
 TerrainType=0
-UnitDepth=3
-UnitHeight=1
-UnitWidth=1
+UnitDepth=1.8
+UnitHeight=5
+UnitWidth=5
 
