@@ -838,7 +838,6 @@ Player* BoUfoNewGameWidget::localPlayer() const
 void BoUfoNewGameWidget::slotCancel()
 {
  boDebug() << k_funcinfo << endl;
- boGame->disconnect();
 
  // AB: we use a timer, so that the newgame widget can be deleted in the slot
  // (otherwise this would not be allowed, as we are in a pushbutton click)
@@ -849,12 +848,6 @@ void BoUfoNewGameWidget::slotStartGame()
 {
  boDebug() << k_funcinfo << endl;
  networkInterface()->sendStartGameClicked();
-}
-
-void BoUfoNewGameWidget::slotNetworkOptions()
-{
- boDebug() << k_funcinfo << endl;
- emit signalShowNetworkOptions();
 }
 
 void BoUfoNewGameWidget::addAIPlayer()

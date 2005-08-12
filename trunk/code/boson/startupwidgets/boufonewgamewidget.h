@@ -62,7 +62,6 @@ public slots:
 
 	virtual void slotCancel();
 	virtual void slotStartGame();
-	virtual void slotNetworkOptions();
 
 	/**
 	 * Called when server has been intied and is offering connections
@@ -127,7 +126,7 @@ private slots:
 	void slotNetSetLocalPlayer(Player*);
 
 	/**
-	 * This is used to enable or disable some widgets when user's admin 
+	 * This is used to enable or disable some widgets when user's admin
 	 * status changes
 	 **/
 	void slotNetSetAdmin(bool);
@@ -142,7 +141,6 @@ private slots:
 	void slotPlayerColorChanged(int);
 
 signals:
-	void signalShowNetworkOptions();
 //	void signalSetLocalPlayer(Player* player);
 
 	/**

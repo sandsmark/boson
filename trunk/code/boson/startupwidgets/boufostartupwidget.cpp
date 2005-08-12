@@ -62,6 +62,8 @@ public:
 	BosonStartupNetwork* mNetworkInterface;
 
 	QGuardedPtr<Player> mLocalPlayer;
+
+	bool mSinglePlayer;
 };
 
 BoUfoStartupWidget::BoUfoStartupWidget() : BoUfoWidget()
@@ -97,6 +99,8 @@ void BoUfoStartupWidget::init()
  d->mNetworkInterface->setGame(boGame);
 
  installEventFilter(this); // for the popup menu
+
+ d->mSinglePlayer = false;
 }
 
 BoUfoStartupWidget::~BoUfoStartupWidget()
@@ -138,7 +142,21 @@ void BoUfoStartupWidget::slotSaveGame()
  loadSave->updateGames();
 }
 
-void BoUfoStartupWidget::slotNewGame(KCmdLineArgs* args)
+void BoUfoStartupWidget::slotNewSPGame(KCmdLineArgs* args)
+{
+ d->mSinglePlayer = true;
+
+ newGame(args);
+}
+
+void BoUfoStartupWidget::slotNewMPGame(KCmdLineArgs* args)
+{
+ d->mSinglePlayer = false;
+
+ showWidget(IdNetwork);
+}
+
+void BoUfoStartupWidget::newGame(KCmdLineArgs* args)
 {
  showWidget(IdNewGame);
  if (!args) {
@@ -151,14 +169,14 @@ void BoUfoStartupWidget::slotNewGame(KCmdLineArgs* args)
  }
  // here we can check for some things like --playfield and call the functions
  // e.g.:
- if (args->isSet("playfield")) {
+ if (args && args->isSet("playfield")) {
 	QString identifier = args->getOption("playfield");
 	if (identifier.right(4) != QString::fromLatin1(".bpf")) {
 		identifier = identifier + QString::fromLatin1(".bpf");
 	}
 	networkInterface()->sendChangePlayField(identifier);
  }
- if (args->isSet("computer")) {
+ if (args && args->isSet("computer")) {
 	QString count = args->getOption("computer");
 	bool ok = true;
 	int c = count.toInt(&ok);
@@ -171,7 +189,7 @@ void BoUfoStartupWidget::slotNewGame(KCmdLineArgs* args)
 		boDebug() << k_funcinfo << "changing to " << BOSON_MAX_PLAYERS - 1<< endl;
 		c = BOSON_MAX_PLAYERS - 1;
 	}
-	
+
 	for (int i = 0; i < c; i++) {
 		// note: we don't have to care about which playfield was loaded,
 		// as we can *always* add unlimited players. player number is
@@ -181,7 +199,7 @@ void BoUfoStartupWidget::slotNewGame(KCmdLineArgs* args)
  }
 
 
- if (args->isSet("start")) {
+ if (args && args->isSet("start")) {
 	w->slotStartGame();
  }
 }
@@ -232,7 +250,8 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 	{
 		BoUfoWelcomeWidget* welcome = new BoUfoWelcomeWidget();
 		connect(welcome, SIGNAL(signalQuit()), this, SIGNAL(signalQuit()));
-		connect(welcome, SIGNAL(signalNewGame()), this, SLOT(slotNewGame()));
+		connect(welcome, SIGNAL(signalNewSPGame()), this, SLOT(slotNewSPGame()));
+		connect(welcome, SIGNAL(signalNewMPGame()), this, SLOT(slotNewMPGame()));
 		connect(welcome, SIGNAL(signalLoadGame()), this, SLOT(slotLoadGame()));
 		connect(welcome, SIGNAL(signalStartEditor()), this, SLOT(slotStartEditor()));
 		w = welcome;
@@ -272,9 +291,7 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 		BoUfoNewGameWidget* startGame = new BoUfoNewGameWidget(networkInterface());
 		BoUfoLabel::setDefaultForegroundColor(defaultColor);
 		connect(startGame, SIGNAL(signalCancelled()),
-				this, SLOT(slotShowWelcomeWidget()));
-		connect(startGame, SIGNAL(signalShowNetworkOptions()),
-				this, SLOT(slotShowNetworkOptions()));
+				this, SLOT(slotNewGameCancelled()));
 		connect(startGame, SIGNAL(signalKickedOut()),
 				this, SLOT(slotKickedOut()));
 
@@ -292,7 +309,9 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 		BoUfoNetworkOptionsWidget* networkOptions = new BoUfoNetworkOptionsWidget();
 		BoUfoLabel::setDefaultForegroundColor(defaultColor);
 		connect(networkOptions, SIGNAL(signalOkClicked()),
-				this, SLOT(slotHideNetworkOptions()));
+				this, SLOT(slotNetworkOptionsOk()));
+		connect(networkOptions, SIGNAL(signalCancelled()),
+				this, SLOT(slotNetworkOptionsCancel()));
 		connect(networkOptions, SIGNAL(signalOfferingConnections()),
 				this, SLOT(slotOfferingConnections()));
 		connect(networkOptions, SIGNAL(signalConnectingToServer()),
@@ -375,21 +394,15 @@ void BoUfoStartupWidget::slotLoadingStartSubTask(const QString& text)
  }
 }
 
-void BoUfoStartupWidget::slotShowNetworkOptions()
+void BoUfoStartupWidget::slotNetworkOptionsOk()
 {
- showWidget(IdNetwork);
+ newGame(0);
 }
 
-void BoUfoStartupWidget::slotHideNetworkOptions()
+void BoUfoStartupWidget::slotNetworkOptionsCancel()
 {
- BoUfoNewGameWidget* startGame = (BoUfoNewGameWidget*)d->mWidgetStack->widget(IdNewGame);
- if (!startGame) {
-	// strange as network widget gets shown for newgame widget only
-	boError() << k_funcinfo << "NULL new game widget??" << endl;
-	return;
- }
- startGame->slotSetAdmin(boGame->isAdmin());
- showWidget(IdNewGame);
+ slotShowWelcomeWidget();
+ boGame->disconnect();
 }
 
 bool BoUfoStartupWidget::eventFilter(QObject* o, QEvent* e)
@@ -445,6 +458,15 @@ void BoUfoStartupWidget::slotShowWelcomeWidget()
  // the startup widget gets hidden when game is started, so when we want to show
  // the welcome widget we also need to show the startup widget
  show();
+}
+
+void BoUfoStartupWidget::slotNewGameCancelled()
+{
+ if (d->mSinglePlayer) {
+	slotShowWelcomeWidget();
+ } else {
+	showWidget(IdNetwork);
+ }
 }
 
 void BoUfoStartupWidget::resetWidgets()

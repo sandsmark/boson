@@ -17,6 +17,7 @@
    <stretch/>
    <gridLayoutColumns/>
    <gridLayoutRows/>
+   <borderType/>
   </Properties>
   <Widget>
    <ClassName>BoUfoWidget</ClassName>
@@ -35,6 +36,7 @@
     <stretch/>
     <gridLayoutColumns/>
     <gridLayoutRows/>
+    <borderType/>
    </Properties>
    <Widget>
     <ClassName>BoUfoLabel</ClassName>
@@ -55,6 +57,7 @@
      <stretch/>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
    </Widget>
   </Widget>
@@ -75,6 +78,7 @@
     <stretch>1</stretch>
     <gridLayoutColumns/>
     <gridLayoutRows/>
+    <borderType/>
    </Properties>
   </Widget>
   <Widget>
@@ -96,6 +100,7 @@
     <stretch/>
     <gridLayoutColumns/>
     <gridLayoutRows/>
+    <borderType/>
    </Properties>
   </Widget>
   <Widget>
@@ -115,6 +120,7 @@
     <stretch>1</stretch>
     <gridLayoutColumns/>
     <gridLayoutRows/>
+    <borderType/>
    </Properties>
   </Widget>
   <Widget>
@@ -134,6 +140,7 @@
     <stretch/>
     <gridLayoutColumns/>
     <gridLayoutRows/>
+    <borderType/>
    </Properties>
    <Widget>
     <ClassName>BoUfoWidget</ClassName>
@@ -152,6 +159,7 @@
      <stretch>1</stretch>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
    </Widget>
    <Widget>
@@ -165,14 +173,57 @@
      <preferredWidth/>
      <horizontalAlignment/>
      <layout/>
-     <name>mStartNewGame</name>
+     <name>mStartSPGame</name>
      <iconFile/>
-     <text>S&amp;tart a new mission</text>
+     <text>Start &amp;Singleplayer Game</text>
      <minimumWidth/>
      <backgroundImageFile/>
      <stretch/>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
+    </Properties>
+   </Widget>
+   <Widget>
+    <ClassName>BoUfoWidget</ClassName>
+    <Properties>
+     <name>mWidget18</name>
+     <constraints/>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
+     <opaque/>
+     <layout/>
+     <minimumWidth/>
+     <minimumHeight/>
+     <preferredWidth/>
+     <preferredHeight/>
+     <backgroundImageFile/>
+     <verticalAlignment/>
+     <horizontalAlignment/>
+     <borderType/>
+     <stretch>1</stretch>
+    </Properties>
+   </Widget>
+   <Widget>
+    <ClassName>BoUfoPushButton</ClassName>
+    <Properties>
+     <name>mStartMPGame</name>
+     <constraints/>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
+     <opaque/>
+     <layout/>
+     <minimumWidth/>
+     <minimumHeight/>
+     <preferredWidth/>
+     <preferredHeight/>
+     <backgroundImageFile/>
+     <verticalAlignment/>
+     <horizontalAlignment/>
+     <borderType/>
+     <stretch/>
+     <text>Start &amp;Multiplayer Game</text>
+     <iconFile/>
     </Properties>
    </Widget>
    <Widget>
@@ -192,6 +243,7 @@
      <stretch>1</stretch>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
    </Widget>
    <Widget>
@@ -213,6 +265,7 @@
      <stretch/>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
    </Widget>
    <Widget>
@@ -232,6 +285,7 @@
      <stretch>1</stretch>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
    </Widget>
    <Widget>
@@ -253,6 +307,7 @@
      <stretch/>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
    </Widget>
    <Widget>
@@ -272,6 +327,7 @@
      <stretch>1</stretch>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
    </Widget>
    <Widget>
@@ -293,6 +349,7 @@
      <stretch/>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
    </Widget>
    <Widget>
@@ -312,6 +369,7 @@
      <stretch>1</stretch>
      <gridLayoutColumns/>
      <gridLayoutRows/>
+     <borderType/>
     </Properties>
    </Widget>
   </Widget>
@@ -322,9 +380,14 @@
     <Connection sender="mLoadGame" signal="signalClicked()" type="receiver" />
    </Connections>
   </Method>
-  <Method return="void" visibility="public" type="signal" name="signalNewGame()" >
+  <Method return="void" visibility="public" type="signal" name="signalNewMPGame()" >
    <Connections>
-    <Connection sender="mStartNewGame" signal="signalClicked()" type="receiver" />
+    <Connection sender="mStartMPGame" signal="signalClicked()" type="receiver" />
+   </Connections>
+  </Method>
+  <Method return="void" visibility="public" type="signal" name="signalNewSPGame()" >
+   <Connections>
+    <Connection sender="mStartSPGame" signal="signalClicked()" type="receiver" />
    </Connections>
   </Method>
   <Method return="void" visibility="public" type="signal" name="signalQuit()" >

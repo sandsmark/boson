@@ -36,6 +36,7 @@ signals:
 	void signalOfferingConnections();
 	void signalConnectingToServer();
 	void signalConnectedToServer();
+	void signalCancelled();
 
 protected slots:
 	virtual void slotConnectionTypeChanged(BoUfoRadioButton*);
@@ -44,6 +45,7 @@ protected slots:
 
 	void slotConnectionBroken();
 	void slotClientJoinedGame(Q_UINT32 clientId, KGame* client);
+	void slotCancel();
 
 private:
 	void setConnected(bool connected, bool master);

@@ -865,12 +865,12 @@
      <layout/>
      <minimumWidth/>
      <minimumHeight/>
-     <preferredWidth/>
+     <preferredWidth>20</preferredWidth>
      <preferredHeight/>
      <backgroundImageFile/>
      <verticalAlignment/>
      <horizontalAlignment/>
-     <stretch>1</stretch>
+     <stretch></stretch>
      <gridLayoutColumns/>
      <gridLayoutRows/>
      <borderType/>
@@ -890,48 +890,6 @@
      <iconFile/>
      <name>mCancel</name>
      <text>&amp;Cancel</text>
-     <minimumWidth/>
-     <backgroundImageFile/>
-     <stretch/>
-     <gridLayoutColumns/>
-     <gridLayoutRows/>
-     <borderType/>
-    </Properties>
-   </Widget>
-   <Widget>
-    <ClassName>BoUfoWidget</ClassName>
-    <Properties>
-     <name>mWidget37</name>
-     <constraints/>
-     <opaque/>
-     <layout/>
-     <minimumWidth/>
-     <minimumHeight/>
-     <preferredWidth/>
-     <preferredHeight/>
-     <backgroundImageFile/>
-     <verticalAlignment/>
-     <horizontalAlignment/>
-     <stretch>1</stretch>
-     <gridLayoutColumns/>
-     <gridLayoutRows/>
-     <borderType/>
-    </Properties>
-   </Widget>
-   <Widget>
-    <ClassName>BoUfoPushButton</ClassName>
-    <Properties>
-     <preferredHeight/>
-     <minimumHeight/>
-     <opaque/>
-     <constraints/>
-     <verticalAlignment/>
-     <preferredWidth/>
-     <horizontalAlignment/>
-     <layout/>
-     <iconFile/>
-     <name>mNetworkOptions</name>
-     <text>&amp;Network options</text>
      <minimumWidth/>
      <backgroundImageFile/>
      <stretch/>
@@ -991,12 +949,12 @@
      <layout/>
      <minimumWidth/>
      <minimumHeight/>
-     <preferredWidth/>
+     <preferredWidth>20</preferredWidth>
      <preferredHeight/>
      <backgroundImageFile/>
      <verticalAlignment/>
      <horizontalAlignment/>
-     <stretch>1</stretch>
+     <stretch></stretch>
      <gridLayoutColumns/>
      <gridLayoutRows/>
      <borderType/>
@@ -1013,11 +971,6 @@
   <Method return="void" visibility="public" type="slot" name="slotCancel()" >
    <Connections>
     <Connection sender="mCancel" signal="signalClicked()" type="receiver" />
-   </Connections>
-  </Method>
-  <Method return="void" visibility="public" type="slot" name="slotNetworkOptions()" >
-   <Connections>
-    <Connection sender="mNetworkOptions" signal="signalClicked()" type="receiver" />
    </Connections>
   </Method>
   <Method return="void" visibility="protected" type="slot" name="slotPlayFieldSelected(int, int)" >

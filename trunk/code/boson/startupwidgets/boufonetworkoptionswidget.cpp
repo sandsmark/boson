@@ -26,6 +26,8 @@
 #include "../defines.h"
 #include "bodebug.h"
 
+#include <qtimer.h>
+
 #include <klocale.h>
 #include <kmessagebox.h>
 
@@ -38,6 +40,8 @@ BoUfoNetworkOptionsWidget::BoUfoNetworkOptionsWidget()
 		this, SLOT(slotConnectionBroken()));
  connect(boGame, SIGNAL(signalClientJoinedGame(Q_UINT32, KGame*)),
 		this, SLOT(slotClientJoinedGame(Q_UINT32, KGame*)));
+
+ mJoinGame->setSelected(true);
 }
 
 BoUfoNetworkOptionsWidget::~BoUfoNetworkOptionsWidget()
@@ -81,13 +85,16 @@ void BoUfoNetworkOptionsWidget::slotStartNetwork()
 	emit signalConnectingToServer();
 	connected = boGame->connectToServer(host, port);
 	// don't call setConnected() here - connectToServer() is asynchron
+	// There doesn't seem to be any way to get notified once we are connected, so
+	//  we have to do this here
+	setConnected(connected, master);
  }
 }
 
 void BoUfoNetworkOptionsWidget::setConnected(bool connected, bool master)
 {
  if (!connected) {
-	mNetStatusLabel->setText(i18n("Singleplayer mode\n"));
+	mNetStatusLabel->setText(i18n("Not connected"));
 	mNetConfigGroupBox->setEnabled(true);
 	mDisconnectButton->setEnabled(false);
 	return;
@@ -131,5 +138,14 @@ void BoUfoNetworkOptionsWidget::slotClientJoinedGame(Q_UINT32 gameId, KGame*)
 	}
 	setConnected(boGame->isNetwork(), boGame->isMaster());
  }
+}
+
+void BoUfoNetworkOptionsWidget::slotCancel()
+{
+ boDebug() << k_funcinfo << endl;
+
+ // AB: we use a timer, so that the widget can be deleted in the slot
+ // (otherwise this would not be allowed, as we are in a pushbutton click)
+ QTimer::singleShot(0, this, SIGNAL(signalCancelled()));
 }
 

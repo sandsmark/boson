@@ -625,6 +625,28 @@
     <borderType/>
    </Properties>
    <Widget>
+    <ClassName>BoUfoPushButton</ClassName>
+    <Properties>
+     <name>mCancelButton</name>
+     <constraints/>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
+     <opaque/>
+     <layout/>
+     <minimumWidth/>
+     <minimumHeight/>
+     <preferredWidth/>
+     <preferredHeight/>
+     <backgroundImageFile/>
+     <verticalAlignment/>
+     <horizontalAlignment/>
+     <borderType/>
+     <stretch/>
+     <text>&amp;Cancel</text>
+     <iconFile/>
+    </Properties>
+   </Widget>
+   <Widget>
     <ClassName>BoUfoWidget</ClassName>
     <Properties>
      <name>mWidget34</name>
@@ -669,6 +691,11 @@
   </Widget>
  </Widgets>
  <Methods>
+  <Method return="void" visibility="public" type="slot" name="slotCancel()" >
+   <Connections>
+    <Connection sender="mCancelButton" signal="signalClicked()" type="receiver" />
+   </Connections>
+  </Method>
   <Method return="void" visibility="public" type="signal" name="signalOkClicked()" >
    <Connections>
     <Connection sender="mOkButton" signal="signalClicked()" type="receiver" />
