@@ -398,7 +398,7 @@ void BoUfoStartEditorWidget::slotMapSizeChanged(int index)
 {
  int size = d->mMapSizes[index];
 
- bool custom = (index == -1);
+ bool custom = (size == -1);
  mMapHeight->setEnabled(custom);
  mMapWidth->setEnabled(custom);
 
