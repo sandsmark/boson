@@ -69,6 +69,8 @@
 #include <qvaluevector.h>
 #include <qguardedptr.h>
 #include <qlayout.h>
+#include <qapplication.h>
+#include <qdesktopwidget.h>
 
 
 #if HAVE_SYS_TIME_H
@@ -295,6 +297,8 @@ void BosonMainWidget::initUfoGUI()
 		this, SLOT(slotSaveGame(const QString&, const QString&)));
  connect(d->mStartup, SIGNAL(signalCancelLoadSave()),
 		this, SLOT(slotCancelLoadSave()));
+ connect(d->mStartup, SIGNAL(signalPreferredSizeChanged()),
+		this, SLOT(slotStartupPreferredSizeChanged()));
 
  d->mGameView = new BosonGameView();
  d->mGameView->createActionCollection(ufoManager()->actionCollection());
@@ -1086,12 +1090,6 @@ void BosonMainWidget::raiseWidget(BoUfoWidget* w)
 {
  if (w != d->mGameView) {
 	unsetCursor();
-
-	// AB: we ignore the gameview widget for minimum size calculation
-	int width = ufoManager()->rootPaneWidget()->preferredWidth();
-	int height = ufoManager()->rootPaneWidget()->preferredHeight();
-	setMinimumWidth(width);
-	setMinimumHeight(height);
  } else {
 	// gameview widget is maximized by default
 	showMaximized();
@@ -1114,3 +1112,30 @@ void BosonMainWidget::slotDebugUfoWidgets()
 
  dialog->show();
 }
+
+void BosonMainWidget::slotStartupPreferredSizeChanged()
+{
+ BO_CHECK_NULL_RET(ufoManager());
+ BO_CHECK_NULL_RET(ufoManager()->rootPaneWidget());
+ BO_CHECK_NULL_RET(d->mWidgetStack);
+ if (d->mWidgetStack->visibleWidget() == d->mGameView) {
+	return;
+ }
+ int w = ufoManager()->rootPaneWidget()->preferredWidth();
+ int h = ufoManager()->rootPaneWidget()->preferredHeight();
+ if (width() >= w && height() >= h) {
+	return;
+ }
+ QDesktopWidget* desktop = QApplication::desktop();
+ QRect r = desktop->availableGeometry(this);
+ if (width() < w) {
+	w = QMAX(w, width());
+	w = QMIN(w, r.width());
+ }
+ if (height() < h) {
+	h = QMAX(h, height());
+	h = QMIN(h, r.height());
+ }
+ resize(w, h);
+}
+
