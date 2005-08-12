@@ -24,6 +24,7 @@
 #include "../../boufo/boufo.h"
 #include "../../bosonconfig.h"
 #include "editorrandommapwidget.h"
+#include "boselectiondebugwidget.h"
 
 #include <bodebug.h>
 
@@ -32,10 +33,12 @@ class BosonGameViewPluginDefaultPrivate
 public:
 	BosonGameViewPluginDefaultPrivate()
 	{
+		mSelectionDebugWidget = 0;
 		mEditorRandomMapWidget = 0;
 	}
 	bool mInitialized;
 	bool mGameMode;
+	BoSelectionDebugWidget* mSelectionDebugWidget;
 	EditorRandomMapWidget* mEditorRandomMapWidget;
 };
 
@@ -63,6 +66,9 @@ void BosonGameViewPluginDefault::init()
  QColor defaultColor = BoUfoLabel::defaultForegroundColor();
  BoUfoLabel::setDefaultForegroundColor(Qt::white);
 
+ d->mSelectionDebugWidget = new BoSelectionDebugWidget();
+ ufoWidget()->addWidget(d->mSelectionDebugWidget);
+
  d->mEditorRandomMapWidget = new EditorRandomMapWidget();
  ufoWidget()->addWidget(d->mEditorRandomMapWidget);
 
@@ -84,30 +90,45 @@ void BosonGameViewPluginDefault::quitGame()
 void BosonGameViewPluginDefault::setGameMode(bool mode)
 {
  d->mGameMode = mode;
+// d->mSelectionDebugWidget->setVisible(mode);
  d->mEditorRandomMapWidget->setVisible(!mode);
 }
 
 void BosonGameViewPluginDefault::setCanvas(const BosonCanvas* c)
 {
  BosonGameViewPluginBase::setCanvas(c);
+// d->mSelectionDebugWidget->setCanvas(c);
  d->mEditorRandomMapWidget->setCanvas(c);
 }
 
 void BosonGameViewPluginDefault::setLocalPlayerIO(PlayerIO* io)
 {
  BosonGameViewPluginBase::setLocalPlayerIO(io);
+ d->mSelectionDebugWidget->setLocalPlayerIO(io);
  d->mEditorRandomMapWidget->setLocalPlayerIO(io);
 }
 
 void BosonGameViewPluginDefault::updateBeforePaint()
 {
  if (d->mGameMode) {
-
+	bool showUnitDebug = boConfig->boolValue("ShowUnitDebugWidget");
+	if (showUnitDebug != d->mSelectionDebugWidget->isVisible()) {
+		d->mSelectionDebugWidget->setVisible(showUnitDebug);
+	}
+	if (showUnitDebug) {
+		d->mSelectionDebugWidget->update();
+	}
  } else {
 	bool showRandomMap = boConfig->boolValue("EditorShowRandomMapGenerationWidget");
 	if (showRandomMap != d->mEditorRandomMapWidget->isVisible()) {
 		d->mEditorRandomMapWidget->setVisible(showRandomMap);
 	}
  }
+}
+
+void BosonGameViewPluginDefault::slotSelectionChanged(BoSelection* selection)
+{
+ BosonGameViewPluginBase::slotSelectionChanged(selection);
+ d->mSelectionDebugWidget->setSelection(selection);
 }
 

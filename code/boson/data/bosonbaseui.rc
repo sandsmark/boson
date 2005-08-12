@@ -34,6 +34,7 @@
     <Action name="debug_colormap" />
     <Action name="debug_memory" />
     <Action name="debug_edit_conditions" />
+    <Action name="debug_show_unit_debug_widget" />
   </Menu>
   <Menu name="settings" group="settingsmenu"><text>&amp;Settings</text>
     <Action name="options_show_chat" append="show_merge" />

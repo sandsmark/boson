@@ -39,6 +39,9 @@ public:
 
 	virtual void updateBeforePaint();
 
+protected slots:
+	virtual void slotSelectionChanged(BoSelection*);
+
 protected:
 	virtual BoUfoWidget* createUfoWidget() const;
 

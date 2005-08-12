@@ -56,3 +56,8 @@ void BosonGameViewPluginBase::init()
  mUfoWidget = createUfoWidget();
 }
 
+void BosonGameViewPluginBase::slotSelectionChanged(BoSelection* selection)
+{
+ mSelection = selection;
+}
+
