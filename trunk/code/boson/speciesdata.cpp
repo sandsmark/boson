@@ -253,16 +253,6 @@ bool SpeciesData::loadUnit(const UnitProperties* prop, const QColor& teamColor)
 	return false;
  }
 
- // Unit's produce action is tricky because it needs overview pixmap which is
- //  not loaded when UnitProperties are being loaded. So we load it (and other
- //  actions) here
-#warning FIXME
- // AB: move actions out of UnitProperties
- {
-	UnitProperties* p = (UnitProperties*)prop;
-	p->loadActions();
- }
-
  if (!loadUnitModel(prop, teamColor)) {
 	return false;
  }
@@ -363,9 +353,7 @@ bool SpeciesData::loadUnitOverview(const UnitProperties* prop, const QColor& tea
  QString path = prop->unitPath();
 
 // big overview
- if (data->mBigOverview[type]) {
-	boError(270) << k_funcinfo << "BigOverview of " << type << " already there" << endl;
- } else {
+ if (!data->mBigOverview[type]) {
 	QImage image;
 	if (!loadUnitImage(teamColor, path + "overview-big.png", image)) {
 		boError(270) << k_funcinfo << "Can't load " << path + "overview-big.png" << endl;
@@ -379,9 +367,7 @@ bool SpeciesData::loadUnitOverview(const UnitProperties* prop, const QColor& tea
  }
 
 // small overview
- if (data->mSmallOverview[type]) {
-	boError(270) << k_funcinfo << "SmallOverview of " << type << " already there" << endl;
- } else {
+ if (!data->mSmallOverview[type]) {
 	QImage image;
 	if (!loadUnitImage(teamColor, path + "overview-small.png", image)) {
 		boError(270) << k_funcinfo << "Can't load " << path + "overview-small.png" << endl;

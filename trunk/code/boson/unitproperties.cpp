@@ -156,6 +156,11 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
 
  mIsFacility = isFacility;
 
+ if (!loadActions(&conf)) {
+	boError() << k_funcinfo << "loading actions failed" << endl;
+	return false;
+ }
+
  // AB: note that we need to load _both_ in order to initialize all variables.
  loadFacilityProperties(&conf);
  loadMobileProperties(&conf);
@@ -170,10 +175,11 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  loadTextureNames(&conf);
  loadSoundNames(&conf);
  loadWeapons(&conf);
+
  return true;
 }
 
-void UnitProperties::saveUnitType(const QString& fileName)
+bool UnitProperties::saveUnitType(const QString& fileName)
 {
  d->mUnitPath = fileName.left(fileName.length() - QString("index.unit").length());
  KSimpleConfig conf(fileName);
@@ -214,9 +220,11 @@ void UnitProperties::saveUnitType(const QString& fileName)
  saveAllPluginProperties(&conf);  // This saves weapons too
  saveTextureNames(&conf);
  saveSoundNames(&conf);
+
+ return true;
 }
 
-void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
+bool UnitProperties::loadMobileProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Mobile Unit");
  // We divide speeds with 20, because speeds in config files are cells/second,
@@ -239,15 +247,17 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
  // Those are relevant only for aircrafts
  mIsHelicopter = conf->readBoolEntry("IsHelicopter", false);
  mTurnRadius = conf->readDoubleNumEntry("TurnRadius", 5);
+ return true;
 }
 
-void UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
+bool UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Facility");
  mConstructionFrames = conf->readUnsignedNumEntry("ConstructionSteps", 20);
+ return true;
 }
 
-void UnitProperties::loadAllPluginProperties(KSimpleConfig* conf)
+bool UnitProperties::loadAllPluginProperties(KSimpleConfig* conf)
 {
  if (conf->hasGroup(ProductionProperties::propertyGroup())) {
 	loadPluginProperties(new ProductionProperties(this), conf);
@@ -264,22 +274,24 @@ void UnitProperties::loadAllPluginProperties(KSimpleConfig* conf)
  if (conf->hasGroup(ResourceMineProperties::propertyGroup())) {
 	loadPluginProperties(new ResourceMineProperties(this), conf);
  }
+ return true;
 }
 
-void UnitProperties::loadPluginProperties(PluginProperties* prop, KSimpleConfig* conf)
+bool UnitProperties::loadPluginProperties(PluginProperties* prop, KSimpleConfig* conf)
 {
  if (!prop || !conf) {
 	boError() << k_funcinfo << "oops" << endl;
-	return;
+	return false;
  }
  prop->loadPlugin(conf);
  d->mPlugins.append(prop);
+ return true;
 }
 
-void UnitProperties::loadTextureNames(KSimpleConfig* conf)
+bool UnitProperties::loadTextureNames(KSimpleConfig* conf)
 {
  if (!conf->hasGroup("Textures")) {
-	return;
+	return true;
  }
  d->mTextureNames.clear();
  conf->setGroup("Textures");
@@ -291,9 +303,10 @@ void UnitProperties::loadTextureNames(KSimpleConfig* conf)
 		boDebug() << "mapping " << textures[i] << "->" << longName << endl;
 	}
  }
+ return true;
 }
 
-void UnitProperties::loadSoundNames(KSimpleConfig* conf)
+bool UnitProperties::loadSoundNames(KSimpleConfig* conf)
 {
  d->mSounds.clear();
  conf->setGroup("Sounds");
@@ -303,9 +316,10 @@ void UnitProperties::loadSoundNames(KSimpleConfig* conf)
  d->mSounds.insert(SoundReportProduced, conf->readEntry("ReportProduced", "report_produced"));
  d->mSounds.insert(SoundReportDestroyed, conf->readEntry("ReportDestroyed", "report_destroyed"));
  d->mSounds.insert(SoundReportUnderAttack, conf->readEntry("ReportUnderAttack", "report_underattack"));
+ return true;
 }
 
-void UnitProperties::loadWeapons(KSimpleConfig* conf)
+bool UnitProperties::loadWeapons(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Unit");
  int num = conf->readNumEntry("Weapons", 0);
@@ -326,36 +340,37 @@ void UnitProperties::loadWeapons(KSimpleConfig* conf)
 		mCanShootAtLandUnits = true;
 	}
  }
+ return true;
 }
 
-void UnitProperties::loadActions()
+bool UnitProperties::loadActions(KSimpleConfig* conf)
 {
  BosonProfiler prof("LoadActions");
- KSimpleConfig conf(unitPath() + "index.unit");
  // Produce action first
  // Produce is special because it uses little overview as pixmap and it's
  //  tooltip text is auto-generated. Only thing we load here is hotkey
  // TODO: load hotkey
- conf.setGroup("Actions");
+ conf->setGroup("Actions");
  if (canShoot()) {
-	d->mActionStrings.insert(ActionAttack, conf.readEntry("ActionAttack", "ActionAttack"));
+	d->mActionStrings.insert(ActionAttack, conf->readEntry("ActionAttack", "ActionAttack"));
  }
  if (isMobile()) {
-	d->mActionStrings.insert(ActionMove, conf.readEntry("ActionMove", "ActionMove"));
-	d->mActionStrings.insert(ActionFollow, conf.readEntry("ActionFollow", "ActionFollow"));
+	d->mActionStrings.insert(ActionMove, conf->readEntry("ActionMove", "ActionMove"));
+	d->mActionStrings.insert(ActionFollow, conf->readEntry("ActionFollow", "ActionFollow"));
  }
  if (properties(PluginProperties::Harvester)) {
-	d->mActionStrings.insert(ActionHarvest, conf.readEntry("ActionHarvest", "ActionHarvest"));
+	d->mActionStrings.insert(ActionHarvest, conf->readEntry("ActionHarvest", "ActionHarvest"));
  }
  if (properties(PluginProperties::Repair)) {
-	d->mActionStrings.insert(ActionHarvest, conf.readEntry("ActionRepair", "ActionRepair"));
+	d->mActionStrings.insert(ActionHarvest, conf->readEntry("ActionRepair", "ActionRepair"));
  }
  if (!d->mActionStrings.isEmpty()) {
-	d->mActionStrings.insert(ActionStop, conf.readEntry("ActionStop", "ActionStop"));
+	d->mActionStrings.insert(ActionStop, conf->readEntry("ActionStop", "ActionStop"));
  }
+ return true;
 }
 
-void UnitProperties::saveMobileProperties(KSimpleConfig* conf)
+bool UnitProperties::saveMobileProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Mobile Unit");
  // We multiply speeds with 20 because speeds in config files are cells/second,
@@ -366,15 +381,17 @@ void UnitProperties::saveMobileProperties(KSimpleConfig* conf)
  conf->writeEntry("RotationSpeed", mRotationSpeed * 20.0f);
  conf->writeEntry("CanGoOnLand", mCanGoOnLand);
  conf->writeEntry("CanGoOnWater", mCanGoOnWater);
+ return true;
 }
 
-void UnitProperties::saveFacilityProperties(KSimpleConfig* conf)
+bool UnitProperties::saveFacilityProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Facility");
  conf->writeEntry("ConstructionSteps", mConstructionFrames);
+ return true;
 }
 
-void UnitProperties::saveAllPluginProperties(KSimpleConfig* conf)
+bool UnitProperties::saveAllPluginProperties(KSimpleConfig* conf)
 {
  int weaponcounter = 0;
  QPtrListIterator<PluginProperties> it(d->mPlugins);
@@ -388,12 +405,13 @@ void UnitProperties::saveAllPluginProperties(KSimpleConfig* conf)
  }
  conf->setGroup("Boson Unit");
  conf->writeEntry("Weapons", weaponcounter);
+ return true;
 }
 
-void UnitProperties::saveTextureNames(KSimpleConfig* conf)
+bool UnitProperties::saveTextureNames(KSimpleConfig* conf)
 {
  if (d->mTextureNames.count() == 0) {
-	return;
+	return true;
  }
  conf->setGroup("Textures");
  QMap<QString, QString>::Iterator it;
@@ -403,9 +421,10 @@ void UnitProperties::saveTextureNames(KSimpleConfig* conf)
 	conf->writeEntry(it.key(), it.data());
  }
  conf->writeEntry("Textures", textures);
+ return true;
 }
 
-void UnitProperties::saveSoundNames(KSimpleConfig* conf)
+bool UnitProperties::saveSoundNames(KSimpleConfig* conf)
 {
  conf->setGroup("Sounds");
  conf->writeEntry("OrderMove", d->mSounds[SoundOrderMove]);
@@ -414,6 +433,7 @@ void UnitProperties::saveSoundNames(KSimpleConfig* conf)
  conf->writeEntry("ReportProduced", d->mSounds[SoundReportProduced]);
  conf->writeEntry("ReportDestroyed", d->mSounds[SoundReportDestroyed]);
  conf->writeEntry("ReportUnderAttack", d->mSounds[SoundReportUnderAttack]);
+ return true;
 }
 
 const QCString& UnitProperties::md5() const
