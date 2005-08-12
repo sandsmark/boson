@@ -175,7 +175,7 @@ void BoInfoGLCache::update()
  }
  d->mMaxCubeMapTextureSize = getIntFromList(glValues, "GL_MAX_CUBE_MAP_TEXTURE_SIZE", 0);
 
- d->mMaxTextureMaxAnisotropy = getIntFromList(glValues, "GL_MAX_TEXTURE_MAX_ANISOTROPRY_EXT", 1);
+ d->mMaxTextureMaxAnisotropy = getIntFromList(glValues, "GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT", 1);
 
 }
 
