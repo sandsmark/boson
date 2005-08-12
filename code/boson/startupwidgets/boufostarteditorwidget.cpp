@@ -415,8 +415,7 @@ void BoUfoStartEditorWidget::slotNewMapToggled(bool isNewMap)
  mSelectMap->setEnabled(!isNewMap);
 
  if (isNewMap) {
-	mMapHeight->setValue(50);
-	mMapWidth->setValue(50);
+	mMapSize->setCurrentItem(2);
 	mMaxPlayers->setValue(2);
 	mGroundTheme->setCurrentItem(0);
 	mFilling->setCurrentItem(0);
@@ -433,6 +432,7 @@ void BoUfoStartEditorWidget::slotNewMapToggled(bool isNewMap)
 	} else {
 		mMapDescription->setText(description->comment());
 	}
+	mMapSize->setCurrentItem(6);  // custom
 	mMapWidth->setValue(information->mapWidth());
 	mMapHeight->setValue(information->mapHeight());
 	mGroundTheme->setCurrentItem(0); // TODO - we do not yet support more than one :(
