@@ -258,6 +258,10 @@ void BosonMenuInputData::initUfoActions(bool gameMode)
  (void)new BoUfoAction(i18n("Edit global conditions..."), KShortcut(), this,
 		SIGNAL(signalEditConditions()), actionCollection(),
 		"debug_edit_conditions");
+ (void)new BoUfoConfigToggleAction(i18n("Show Unit Debug Widget"),
+		KShortcut(), 0, 0, actionCollection(),
+		"debug_show_unit_debug_widget",
+		"ShowUnitDebugWidget");
 
 
  BoUfoSelectAction* debugMode = new BoUfoSelectAction(i18n("Mode"), 0, 0,

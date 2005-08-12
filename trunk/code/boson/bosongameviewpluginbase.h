@@ -26,6 +26,7 @@ class BoGLMatrices;
 class BoUfoWidget;
 class BosonCanvas;
 class PlayerIO;
+class BoSelection;
 
 class BosonGameViewPluginBasePrivate;
 class BosonGameViewPluginBase : public QObject
@@ -55,12 +56,20 @@ public:
 	virtual void setLocalPlayerIO(PlayerIO* io) { mPlayerIO = io; }
 	PlayerIO* playerIO() const { return mPlayerIO; }
 
+	BoSelection* selection() const
+	{
+		return mSelection;
+	}
+
 	/**
 	 * Called right before the widget is being painted.
 	 *
 	 * This can be used e.g. to hide certain widgets or to update some text.
 	 **/
 	virtual void updateBeforePaint() { }
+
+protected slots:
+	virtual void slotSelectionChanged(BoSelection*);
 
 protected:
 	virtual BoUfoWidget* createUfoWidget() const = 0;
@@ -71,6 +80,7 @@ private:
 	BoUfoWidget* mUfoWidget;
 	const BosonCanvas* mCanvas;
 	PlayerIO* mPlayerIO;
+	BoSelection* mSelection;
 };
 
 #endif

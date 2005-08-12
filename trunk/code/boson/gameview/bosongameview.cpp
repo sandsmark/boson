@@ -1322,6 +1322,8 @@ void BosonGameView::resetGameViewPlugin(bool gameMode)
  if (!d->mGameViewPluginWidget && d->mGameViewPluginWidgetContainer) {
 	d->mGameViewPluginWidget = d->mGameViewPlugin->ufoWidget();
 	d->mGameViewPluginWidgetContainer->addWidget(d->mGameViewPluginWidget);
+	connect(this, SIGNAL(signalSelectionChanged(BoSelection*)),
+			d->mGameViewPlugin, SLOT(slotSelectionChanged(BoSelection*)));
  }
 
  d->mGameViewPlugin->setGameGLMatrices(d->mGameGLMatrices);

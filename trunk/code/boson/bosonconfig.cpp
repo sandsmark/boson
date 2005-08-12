@@ -329,6 +329,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntry(new BoConfigStringEntry(this, "GroundRendererClass", DEFAULT_GROUND_RENDERER));
  addDynamicEntry(new BoConfigStringEntry(this, "GameViewPlugin", "BosonGameViewDefault"));
  addDynamicEntry(new BoConfigBoolEntry(this, "EditorShowRandomMapGenerationWidget", false));
+ addDynamicEntry(new BoConfigBoolEntry(this, "ShowUnitDebugWidget", false));
 
 
  // the following are NOT stored into the config file
