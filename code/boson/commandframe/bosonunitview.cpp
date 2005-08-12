@@ -139,12 +139,12 @@ void BosonUnitView::displayUnitPixmap(unsigned long int unitType, const Player* 
 	boError(220) << k_funcinfo << "NULL owner" << endl;
 	return;
  }
- QPixmap* big = boViewData->speciesData(owner->speciesTheme())->bigOverview(unitType, owner->teamColor());
+ QImage* big = boViewData->speciesData(owner->speciesTheme())->bigOverview(unitType, owner->teamColor());
  if (!big) {
 	boError(220) << "Cannot find Big Overview for " << unitType << endl;
 	return;
  }
- setPixmap(*big);
+ setImage(*big);
 }
 
 void BosonUnitView::hideAll()

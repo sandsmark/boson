@@ -35,8 +35,8 @@ BoAction::BoAction(KSimpleConfig* cfg, const QString& name, SpeciesData* theme)
 {
   cfg->setGroup(name);
   mId = name;  // is that needed?
-  mPixmap = theme->pixmap(cfg->readEntry("Pixmap", ""));
-  if(!mPixmap)
+  mImage = theme->image(cfg->readEntry("Pixmap", ""));
+  if(!mImage)
   {
     boWarning() << k_funcinfo << "NULL pixmap" << endl;
   }
@@ -44,10 +44,10 @@ BoAction::BoAction(KSimpleConfig* cfg, const QString& name, SpeciesData* theme)
   // TODO: load shortcut aka hotkey
 }
 
-BoAction::BoAction(const QString& name, QPixmap* pixmap, const QString& text/*, hotkey*/)
+BoAction::BoAction(const QString& name, QImage* image, const QString& text/*, hotkey*/)
 {
   mId = name;
-  mPixmap = pixmap;
+  mImage = image;
   mText = text;
 }
 

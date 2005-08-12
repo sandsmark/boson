@@ -32,7 +32,6 @@
 
 #include <qintdict.h>
 #include <qdict.h>
-#include <qpixmap.h>
 #include <qfile.h>
 #include <qimage.h>
 #include <qtextstream.h>
@@ -44,6 +43,27 @@
 
 static KStaticDeleter< QDict<SpeciesData> > sd;
 QDict<SpeciesData>* SpeciesData::mSpeciesData = 0;
+
+static void killAlphaMask(QImage& img)
+{
+ if (img.isNull()) {
+	return;
+ }
+ if (!img.hasAlphaBuffer()) {
+	return;
+ }
+ if (img.depth() != 32) {
+	return;
+ }
+ QRgb *p = 0;
+ for (int y = 0; y < img.height(); y++) {
+	p  = (QRgb*)img.scanLine(y);
+	for (int x = 0; x < img.width(); x++, p++) {
+		// set alpha to 255
+		*p = (*p) | (0xFF000000);
+	}
+ }
+}
 
 class BosonModelFactory
 {
@@ -119,25 +139,6 @@ BosonModel* BosonModelFactory::createObjectModel(const KSimpleConfig* config, co
 }
 
 
-/**
- * By any reason QPixmap uses the alpha mask if existing, even if a custom
- * mask using setMask() is supplied. We use this hack to delete the alpha mask
- * if existing, so we can use our custom mask in
- * BosonCommandWidget::advanceProduction()
- **/
-class OverviewPixmap : public QPixmap
-{
-public:
-	OverviewPixmap() : QPixmap() {}
-	OverviewPixmap(const QImage& image) : QPixmap(image) {}
-	void killAlphaMask()
-	{
-		delete data->alphapm;
-		data->alphapm = 0;
-	}
-};
-
-
 class SpeciesData::SpeciesDataPrivate
 {
 public:
@@ -150,7 +151,7 @@ public:
 	QString mThemePath;
 	QIntDict<TeamColorData> mTeamData;
 	QDict<BoAction> mActions;
-	QDict<QPixmap> mPixmaps;
+	QDict<QImage> mImages;
 
 	QIntDict<BosonModel> mUnitModels;
 	QDict<BosonModel> mObjectModels;
@@ -172,8 +173,8 @@ public:
 		mBigOverview.clear();
 	}
 
-	QIntDict<QPixmap> mSmallOverview;
-	QIntDict<QPixmap> mBigOverview;
+	QIntDict<QImage> mSmallOverview;
+	QIntDict<QImage> mBigOverview;
 };
 
 SpeciesData::SpeciesData(const QString& speciesPath)
@@ -190,7 +191,7 @@ SpeciesData::SpeciesData(const QString& speciesPath)
  d->mUnitModels.setAutoDelete(true);
  d->mObjectModels.setAutoDelete(true);
  d->mActions.setAutoDelete(true);
- d->mPixmaps.setAutoDelete(true);
+ d->mImages.setAutoDelete(true);
  d->mThemePath = speciesPath;
  d->mSound = boAudio->addSounds(themePath());
 }
@@ -202,7 +203,7 @@ SpeciesData::~SpeciesData()
  d->mUnitModels.clear();
  d->mObjectModels.clear();
  d->mActions.clear();
- d->mPixmaps.clear();
+ d->mImages.clear();
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
 }
@@ -354,30 +355,40 @@ bool SpeciesData::loadUnitOverview(const UnitProperties* prop, const QColor& tea
 
 // big overview
  if (!data->mBigOverview[type]) {
-	QImage image;
-	if (!loadUnitImage(teamColor, path + "overview-big.png", image)) {
+	QImage* image = new QImage();
+
+	if (!loadUnitImage(teamColor, path + "overview-big.png", *image)) {
 		boError(270) << k_funcinfo << "Can't load " << path + "overview-big.png" << endl;
-		image = QImage(100, 100, 32);
-		image.fill(Qt::red.rgb());
+		*image = QImage(100, 100, 32);
+		image->fill(Qt::red.rgb());
 	}
-	// we use 100x100 images for big overviews.
-	image = image.smoothScale(100, 100, QImage::ScaleMin);
-	QPixmap* p = new QPixmap(image);
-	data->mBigOverview.insert(type, p);
+	if (image->width() != 100 || image->height() != 100) {
+		*image = image->smoothScale(100, 100, QImage::ScaleMin);
+	}
+
+	// AB: maybe we want to remove this in the future
+	killAlphaMask(*image);
+
+	data->mBigOverview.insert(type, image);
  }
 
 // small overview
  if (!data->mSmallOverview[type]) {
-	QImage image;
-	if (!loadUnitImage(teamColor, path + "overview-small.png", image)) {
+	QImage* image = new QImage();
+
+	if (!loadUnitImage(teamColor, path + "overview-small.png", *image)) {
 		boError(270) << k_funcinfo << "Can't load " << path + "overview-small.png" << endl;
-		image = QImage(50, 50, 32);
-		image.fill(Qt::red.rgb());
+		*image = QImage(50, 50, 32);
+		image->fill(Qt::red.rgb());
 	}
-	image = image.smoothScale(50, 50, QImage::ScaleMin);
-	OverviewPixmap* p = new OverviewPixmap(image);
-	p->killAlphaMask();
-	data->mSmallOverview.insert(type, p);
+	if (image->width() != 50 || image->height() != 50) {
+		*image = image->smoothScale(50, 50, QImage::ScaleMin);
+	}
+
+	// AB: maybe we want to remove this in the future
+	killAlphaMask(*image);
+
+	data->mSmallOverview.insert(type, image);
  }
 
  return true;
@@ -386,8 +397,11 @@ bool SpeciesData::loadUnitOverview(const UnitProperties* prop, const QColor& tea
 
 bool SpeciesData::loadUnitImage(const QColor& teamColor, const QString &fileName, QImage &_image)
 {
+ BosonProfiler prof("LoadUnitImage");
+ boProfiling->push("QImage loading");
  QImage image(fileName);
- image.setAlphaBuffer(false);
+ boProfiling->pop(); // "QImage loading"
+// image.setAlphaBuffer(false);
  int x, y, w, h;
  QRgb *p = 0;
  static const QRgb background = qRgb(255,  0, 255) & RGB_MASK ;
@@ -413,6 +427,7 @@ bool SpeciesData::loadUnitImage(const QColor& teamColor, const QString &fileName
 	return false;
  }
 
+ boProfiling->push("teamcolor");
  for ( y = 0; y < h; y++ ) {
 	p  = (QRgb *)image.scanLine(y);	// image
 	for ( x = 0; x < w; x++, p++ ) {
@@ -421,29 +436,17 @@ bool SpeciesData::loadUnitImage(const QColor& teamColor, const QString &fileName
 		}
 	}
  }
+ boProfiling->pop(); // "teamcolor"
 
  if (image.isNull() || w < 32 || h < 32)  {
 	boError(270) << k_funcinfo << "image is null" << endl;
 	return false;
  }
-
- /*
- QPixmap pix;
- pix.convertFromImage(image);
-
- if (withMask) {
-	QBitmap m;
-	m.convertFromImage(*mask);
-	pix.setMask( m );
- }
- delete mask;
- _image = pix.convertToImage();
- */
  _image = image;
  return true;
 }
 
-QPixmap* SpeciesData::bigOverview(unsigned long int unitType, const QColor& teamColor) const
+QImage* SpeciesData::bigOverview(unsigned long int unitType, const QColor& teamColor) const
 {
  TeamColorData* data = teamColorData(teamColor);
  if (!data) {
@@ -453,7 +456,7 @@ QPixmap* SpeciesData::bigOverview(unsigned long int unitType, const QColor& team
  return data->mBigOverview[unitType];
 }
 
-QPixmap* SpeciesData::smallOverview(unsigned long int unitType, const QColor& teamColor) const
+QImage* SpeciesData::smallOverview(unsigned long int unitType, const QColor& teamColor) const
 {
  TeamColorData* data = teamColorData(teamColor);
  if (!data) {
@@ -561,17 +564,23 @@ bool SpeciesData::loadActions()
  return true;
 }
 
-QPixmap* SpeciesData::pixmap(const QString& name)
+QImage* SpeciesData::image(const QString& name)
 {
- if (!d->mPixmaps[name]) {
-	QPixmap* p = new QPixmap(themePath() + QString::fromLatin1("pixmaps/") + name);
-	if (p->isNull()) {
+ if (!d->mImages[name]) {
+	QImage* img = new QImage(themePath() + QString::fromLatin1("pixmaps/") + name);
+
+	if (img->isNull()) {
 		boError() << k_funcinfo << "Cannot find pixmap with name " << name << endl;
+		delete img;
 		return 0;
 	}
-	d->mPixmaps.insert(name, p);
+
+	// AB: maybe we want to remove this in the future
+	killAlphaMask(*img);
+
+	d->mImages.insert(name, img);
  }
- return d->mPixmaps[name];
+ return d->mImages[name];
 }
 
 void SpeciesData::playSound(UnitBase* unit, UnitSoundEvent event)

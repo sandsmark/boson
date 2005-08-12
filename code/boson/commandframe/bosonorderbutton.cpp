@@ -38,6 +38,7 @@
 
 #include <kpixmap.h>
 #include <kpixmapeffect.h>
+#include <kimageeffect.h>
 #include <klocale.h>
 
 #include <qpixmap.h>
@@ -50,36 +51,43 @@
 void BoOrderButtonButton::setGrayOut(bool g)
 {
  mGrayOut = g;
- setPixmap(mPixmap);
+ if (mImage.isNull()) {
+	return;
+ }
+ setImage(mImage);
 }
 
-void BoOrderButtonButton::setPixmap(const QPixmap& pix)
+void BoOrderButtonButton::setImage(const QImage& img)
 {
- mPixmap = pix;
+ if (img.isNull()) {
+	boError() << k_funcinfo << "NULL image" << endl;
+	return;
+ }
+ mImage = img;
  if (mGrayOut) {
-	KPixmap p(pix);
-	KPixmapEffect::desaturate(p, 1.0);
+	QImage img = mImage.copy();
+	KImageEffect::desaturate(img, 1.0);
 	if (mProductionCount != 0) {
-		addProductionCount(&p);
+		addProductionCount(&img);
 	}
-	BoUfoPushButton::setIcon(p);
+	BoUfoPushButton::setIcon(img);
  } else {
-	QPixmap p(pix);
+	QImage img = mImage.copy();
 	if (mProductionCount != 0) {
-		addProductionCount(&p);
+		addProductionCount(&img);
 	}
-	BoUfoPushButton::setIcon(p);
+	BoUfoPushButton::setIcon(img);
  }
 }
 
 void BoOrderButtonButton::setProductionCount(int c)
 {
  mProductionCount = c;
- QPixmap p(mPixmap);
+ QImage img = mImage.copy();
  if (mProductionCount != 0) {
-	addProductionCount(&p);
+	addProductionCount(&img);
  }
- BoUfoPushButton::setIcon(p);
+ BoUfoPushButton::setIcon(img);
 }
 
 void BoOrderButtonButton::slotMouseReleaseEvent(QMouseEvent* e)
@@ -90,12 +98,17 @@ void BoOrderButtonButton::slotMouseReleaseEvent(QMouseEvent* e)
  }
 }
 
-void BoOrderButtonButton::addProductionCount(QPixmap* pix)
+void BoOrderButtonButton::addProductionCount(QImage* img)
 {
+ BO_CHECK_NULL_RET(img);
+ if (img->isNull()) {
+	return;
+ }
  QColor color(green);
  QFont f;
  f.setBold(true);
- QPainter painter(pix);
+ QPixmap pix(*img);
+ QPainter painter(&pix);
  painter.setPen(color);
  painter.setFont(f);
 
@@ -108,6 +121,8 @@ void BoOrderButtonButton::addProductionCount(QPixmap* pix)
 	painter.drawText(5, 5 + painter.fontMetrics().height(), i18n("Pause"));
  }
  painter.end();
+
+ *img = pix.convertToImage();
 }
 
 
@@ -116,10 +131,7 @@ class BosonOrderButtonPrivate
 public:
 	BosonOrderButtonPrivate()
 	{
-		mPixmap = 0;
 	}
-
-	BoOrderButtonButton * mPixmap;
 };
 
 BosonOrderButton::BosonOrderButton() : BoUfoWidget()
@@ -137,15 +149,15 @@ BosonOrderButton::BosonOrderButton() : BoUfoWidget()
  addWidget(display);
  display->setLayoutClass(UHBoxLayout);
 
- mPixmap = new BoOrderButtonButton();
- mPixmap->setOpaque(false);
- display->addWidget(mPixmap);
- mPixmap->setMouseEventsEnabled(true, true);
- connect(mPixmap, SIGNAL(signalClicked()), this, SLOT(slotClicked()));
- connect(mPixmap, SIGNAL(rightClicked()), this, SLOT(slotRightClicked()));
- connect(mPixmap, SIGNAL(signalMouseEntered(ufo::UMouseEvent*)), this, SIGNAL(signalMouseEntered()));
- connect(mPixmap, SIGNAL(signalMouseExited(ufo::UMouseEvent*)), this, SIGNAL(signalMouseLeft()));
-// mPixmap->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+ mPixmapButton = new BoOrderButtonButton();
+ mPixmapButton->setOpaque(false);
+ display->addWidget(mPixmapButton);
+ mPixmapButton->setMouseEventsEnabled(true, true);
+ connect(mPixmapButton, SIGNAL(signalClicked()), this, SLOT(slotClicked()));
+ connect(mPixmapButton, SIGNAL(rightClicked()), this, SLOT(slotRightClicked()));
+ connect(mPixmapButton, SIGNAL(signalMouseEntered(ufo::UMouseEvent*)), this, SIGNAL(signalMouseEntered()));
+ connect(mPixmapButton, SIGNAL(signalMouseExited(ufo::UMouseEvent*)), this, SIGNAL(signalMouseLeft()));
+// mPixmapButton->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 
  mHealth = new BoUfoProgress();
  mHealth->setRange(0.0, 1.0);
@@ -193,11 +205,11 @@ void BosonOrderButton::setAction(const BoSpecificAction& action)
  mType = ShowAction;
  mAction = action;
 
- if (!action.pixmap()) {
+ if (!action.image()) {
 	boError(220) << k_funcinfo << "NULL pixmap for action " << action.id() << endl;
 	return;
  }
- setPixmap(*action.pixmap());
+ setImage(*action.image());
 
  mHealth->hide();
 
@@ -261,19 +273,28 @@ void BosonOrderButton::displayUnitPixmap(unsigned long int unitType, const Playe
 	boError(220) << k_funcinfo << "NULL owner" << endl;
 	return;
  }
- QPixmap* small = boViewData->speciesData(owner->speciesTheme())->smallOverview(unitType, owner->teamColor());
+ QImage* small = boViewData->speciesData(owner->speciesTheme())->smallOverview(unitType, owner->teamColor());
  if (!small) {
 	boError(220) << k_funcinfo << "Cannot find small overview for "
 			<< unitType << endl;
 	return;
  }
- setPixmap(*small);
+ setImage(*small);
 }
 
 void BosonOrderButton::setPixmap(const QPixmap& pixmap)
 {
- mPixmap->setPixmap(pixmap);
- mPixmap->show();
+ setImage(pixmap.convertToImage());
+}
+
+void BosonOrderButton::setImage(const QImage& image)
+{
+ if (image.isNull()) {
+	boError() << k_funcinfo << "NULL image" << endl;
+	return;
+ }
+ mPixmapButton->setImage(image);
+ mPixmapButton->show();
 }
 
 void BosonOrderButton::slotClicked()
@@ -365,19 +386,21 @@ void BosonOrderButton::advanceProduction(double percentage)
 	boError(220) << k_funcinfo << "invalid production id: " << mAction.productionId() << endl;
 	return;
  }
- QPixmap* pix = mAction.pixmap();
- if (!pix) {
-	boError(220) << k_funcinfo << "NULL pixmap for action " << mAction.id() << endl;
+ QImage* image = mAction.image();
+ if (!image) {
+	boError(220) << k_funcinfo << "NULL image for action " << mAction.id() << endl;
 	return;
  }
- QPixmap small(*pix);
  if (percentage == 100) {
-	setPixmap(small);
+	setImage(*image);
 	return;
  }
+ QPixmap small;
+ small.convertFromImage(*image);
 
  KPixmap progress(small);
- progress.setMask(QBitmap()); // something strange is going on... why is this necessary for pixmaps with alpha channel? we already deleted the alpha pixmal in SpeciesTheme...
+ progress.setMask(QBitmap());
+
  KPixmapEffect::intensity(progress, 1.4);
 
  QBitmap mask(progress.width(), progress.height());
@@ -404,17 +427,17 @@ void BosonOrderButton::advanceProduction(double percentage)
  p.drawPixmap(0, 0, progress);
  p.end();
 
- setPixmap(small);
+ setImage(small.convertToImage());
 }
 
 void BosonOrderButton::setGrayOut(bool g)
 {
- mPixmap->setGrayOut(g);
+ mPixmapButton->setGrayOut(g);
 }
 
 void BosonOrderButton::setProductionCount(int count)
 {
- mPixmap->setProductionCount(count);
+ mPixmapButton->setProductionCount(count);
 }
 
 unsigned long int BosonOrderButton::productionId() const
