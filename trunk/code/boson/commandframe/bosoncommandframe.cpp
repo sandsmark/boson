@@ -47,6 +47,7 @@
 
 #include <qtimer.h>
 #include <qptrdict.h>
+#include <qcolor.h>
 
 #define UPDATE_TIMEOUT 200
 
@@ -122,6 +123,7 @@ public:
 		mProgress = new BoUfoProgress();
 		mProgress->setRange(0.0, 100.0);
 		mProgress->setOrientation(Horizontal);
+		mProgress->setFrameColor(QColor(128, 128, 128));
 		addWidget(mProgress);
 	}
 
@@ -195,6 +197,7 @@ public:
 #endif
 		mProgress = new BoUfoProgress();
 		mProgress->setRange(0.0, 100.0);
+		mProgress->setFrameColor(QColor(128, 128, 128));
 		addWidget(mProgress);
 	}
 

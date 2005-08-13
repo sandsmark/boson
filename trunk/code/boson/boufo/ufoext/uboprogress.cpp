@@ -46,10 +46,12 @@ UBoProgress::UBoProgress(Orientation o)
 	: UWidget(),
 	m_min(0.0),
 	m_max(100.0),
-	m_value (50.0),
+	m_value(50.0),
+	m_hasframe(true),
 	m_orientation(o),
 	m_startcolor(255, 0, 0),
-	m_endcolor(0, 255, 0) {
+	m_endcolor(0, 255, 0),
+	m_framecolor(64, 64, 64) {
 }
 
 void
@@ -71,6 +73,12 @@ UBoProgress::setValue(double v) {
 	v = std::max(v, getMinimumValue());
 	v = std::min(v, getMaximumValue());
 	m_value = v;
+	repaint();
+}
+
+void
+UBoProgress::setHasFrame(bool has) {
+	m_hasframe = has;
 	repaint();
 }
 
@@ -96,10 +104,18 @@ void UBoProgress::setColor(const UColor& color) {
 	repaint();
 }
 
+void UBoProgress::setFrameColor(const UColor& color) {
+	m_framecolor = color;
+	repaint();
+}
+
 void UBoProgress::paintWidget(UGraphics* g) {
 	// TODO: support an icon
 
 	paintGradient(g, startColor(), endColor());
+	if (getHasFrame()) {
+		paintFrame(g, frameColor());
+	}
 }
 
 #define CHECKERROR if (glGetError() != GL_NO_ERROR) \
@@ -153,6 +169,20 @@ UBoProgress::paintGradient(UGraphics * g, const UColor& from, const UColor& to) 
 		glEnd();
 	}
 	glPopAttrib();
+}
+
+void
+UBoProgress::paintFrame(UGraphics * g, const UColor& color) {
+	const URectangle& rect = getInnerBounds();
+
+	g->setColor(color);
+
+	glBegin(GL_LINE_LOOP);
+		glVertex2i(rect.x, rect.y);
+		glVertex2i(rect.x, rect.y + rect.h);
+		glVertex2i(rect.x + rect.w, rect.y + rect.h);
+		glVertex2i(rect.x + rect.w, rect.y);
+	glEnd();
 }
 
 UDimension
