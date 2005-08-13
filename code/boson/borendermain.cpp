@@ -158,6 +158,9 @@ ModelPreview::ModelPreview(const QPtrList<SpeciesTheme>& species, QWidget* paren
  mSelectedMeshLabel = 0;
  mLightWidget = 0;
  mMaterialWidget = 0;
+ mViewData = new BosonViewData(this);
+ BosonViewData::setGlobalViewData(mViewData);
+
 
  mMouseMoveDiff = new BoMouseMoveDiff;
 
@@ -190,6 +193,7 @@ ModelPreview::ModelPreview(const QPtrList<SpeciesTheme>& species, QWidget* paren
 
 ModelPreview::~ModelPreview()
 {
+ delete mViewData;
  delete mMaterialWidget;
  delete mLightWidget;
  qApp->setGlobalMouseTracking(false);
@@ -839,7 +843,7 @@ void ModelPreview::slotChangeGridUnitSize()
 
 void ModelPreview::slotChangeBackgroundColor()
 {
- QColor color = boConfig->colorValue("BoRenderBackgroundColor", Qt::black);
+ QColor color = boConfig->colorValue("BoRenderBackgroundColor", QColor(183, 183, 183));
  int result = KColorDialog::getColor(color, color, this);
  if (result == KColorDialog::Accepted) {
 	boConfig->setColorValue("BoRenderBackgroundColor", color);
