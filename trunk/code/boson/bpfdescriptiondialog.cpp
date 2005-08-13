@@ -52,7 +52,7 @@ public:
 };
 
 BPFDescriptionDialog::BPFDescriptionDialog(QWidget* parent, bool modal)
-		: KDialogBase(Plain, i18n("Map Description"), Ok|Apply|Cancel, Cancel, parent,
+		: KDialogBase(Plain, i18n("Map Description"), Ok|Apply|Cancel, Ok, parent,
 		"bpfdescriptiondialog", modal, true)
 {
  init();
