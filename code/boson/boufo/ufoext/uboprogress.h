@@ -54,6 +54,11 @@ public:
 		return m_value;
 	}
 
+	void setHasFrame(bool has);
+	bool getHasFrame() const {
+		return m_hasframe;
+	}
+
 	void setStartColor(const UColor& color);
 	const UColor& startColor() const {
 		return m_startcolor;
@@ -63,6 +68,10 @@ public:
 		return m_endcolor;
 	}
 	void setColor(const UColor& color);
+	void setFrameColor(const UColor& color);
+	const UColor& frameColor() const {
+		return m_framecolor;
+	}
 
 	virtual UDimension getPreferredSize(const UDimension & maxSize);
 
@@ -70,14 +79,17 @@ protected:
 	virtual void paintWidget(UGraphics* g);
 
 	void paintGradient(UGraphics * g, const UColor& from, const UColor& to);
+	void paintFrame(UGraphics * g, const UColor& color);
 
 private:  // Private attributes
 	double m_min;
 	double m_max;
 	double m_value;
+	bool m_hasframe;
 	Orientation m_orientation;
 	UColor m_startcolor;
 	UColor m_endcolor;
+	UColor m_framecolor;
 };
 
 } // namespace ufo

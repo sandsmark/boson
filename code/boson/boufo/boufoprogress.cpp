@@ -101,6 +101,27 @@ void BoUfoProgress::setMaximumValue(double max)
  setRange(min, max);
 }
 
+void BoUfoProgress::setHasFrame(bool has)
+{
+ mProgress->setHasFrame(has);
+}
+
+bool BoUfoProgress::hasFrame() const
+{
+ return mProgress->getHasFrame();
+}
+
+void BoUfoProgress::setFrameColor(const QColor& c)
+{
+ mProgress->setFrameColor(ufo::UColor(c.red(), c.green(), c.blue()));
+}
+
+QColor BoUfoProgress::frameColor() const
+{
+ ufo::UColor c = mProgress->frameColor();
+ return QColor((int)(c.getRed() * 255), (int)(c.getGreen() * 255), (int)(c.getBlue() * 255));
+}
+
 void BoUfoProgress::setStartColor(const QColor& c)
 {
  mProgress->setStartColor(ufo::UColor(c.red(), c.green(), c.blue()));

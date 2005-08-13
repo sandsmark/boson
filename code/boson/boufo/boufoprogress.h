@@ -52,6 +52,11 @@ public:
 	double minimumValue() const;
 	double maximumValue() const;
 
+	void setHasFrame(bool has);
+	bool hasFrame() const;
+
+	void setFrameColor(const QColor& color);
+	QColor frameColor() const;
 	void setStartColor(const QColor& color);
 	QColor startColor() const;
 	void setEndColor(const QColor& color);
