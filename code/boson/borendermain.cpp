@@ -187,7 +187,7 @@ ModelPreview::ModelPreview(const QPtrList<SpeciesTheme>& species, QWidget* paren
 
  boConfig->addDynamicEntry(new BoConfigBoolEntry(boConfig, "ShowVertexPoints", true));
  boConfig->addDynamicEntry(new BoConfigUIntEntry(boConfig, "VertexPointSize", 3));
- boConfig->addDynamicEntry(new BoConfigColorEntry(boConfig, "BoRenderBackgroundColor", Qt::black));
+ boConfig->addDynamicEntry(new BoConfigColorEntry(boConfig, "BoRenderBackgroundColor", QColor(183, 183, 183)));
  boConfig->addDynamicEntry(new BoConfigDoubleEntry(boConfig, "GridUnitSize", 0.1));
 }
 
@@ -633,7 +633,9 @@ void ModelPreview::renderModel(int mode)
 		}
 		BosonModel::startModelRendering();
 		mModel->prepareRendering();
-		f->renderFrame(0, mode);
+
+#warning TODO: also render transparent meshes
+		f->renderFrame(0, false, mode);
 		BosonModel::stopModelRendering();
 		if (mPlacementPreview) {
 			// AB: do not reset the actual color - if it will get
