@@ -55,6 +55,7 @@ class BoFontInfo;
 class BoUfoManager;
 class BoUfoLabel;
 class BoUfoAction;
+class BosonViewData;
 template<class T> class BoVector3;
 typedef BoVector3<float> BoVector3Float;
 
@@ -294,6 +295,7 @@ private:
 	int mSelectedMesh;
 	BoUfoLabel* mMeshUnderMouseLabel;
 	BoUfoLabel* mSelectedMeshLabel;
+	BosonViewData* mViewData;
 
 	BosonGLFont* mDefaultFont;
 
