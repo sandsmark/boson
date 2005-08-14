@@ -70,6 +70,11 @@ void BoUfoPushButton::init()
  // around the button.
  // additionally we should provide some kind of default color (like for labels)
  setOpaque(true);
+
+
+
+ connect(this, SIGNAL(signalMouseDragged(QMouseEvent*)),
+		this, SLOT(slotMouseDragged(QMouseEvent*)));
 }
 
 void BoUfoPushButton::setVerticalAlignment(VerticalAlignment a)
@@ -185,4 +190,8 @@ bool BoUfoPushButton::isOn() const
  return mButton->isSelected();
 }
 
+void BoUfoPushButton::slotMouseDragged(QMouseEvent* e)
+{
+ e->accept();
+}
 
