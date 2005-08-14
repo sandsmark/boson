@@ -89,6 +89,9 @@ signals:
 	void signalClicked(); // equivalent to signalActivated()
 	void signalHighlighted();
 
+private slots:
+	void slotMouseDragged(QMouseEvent*);
+
 private:
 	void init();
 	void uslotActivated(ufo::UActionEvent*);
