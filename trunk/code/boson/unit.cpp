@@ -864,7 +864,6 @@ void Unit::moveTo(const BoVector2Fixed& pos, bool attack)
 
  if (moveTo(x, y, -1)) {
 	boDebug() << k_funcinfo << "unit " << id() << ": Will move to (" << x << "; " << y << ")" << endl;
-	addWaypoint(BoVector2Fixed(x, y));
 	pathInfo()->moveAttacking = attack;
 	pathInfo()->slowDownAtDest = true;
 	setWork(WorkMove);
@@ -873,6 +872,51 @@ void Unit::moveTo(const BoVector2Fixed& pos, bool attack)
 	setWork(WorkIdle);
 	stopMoving();
  }
+}
+
+bool Unit::moveTo(BosonItem* target, int range)
+{
+ // TODO: try to merge this with the moveTo() method below
+ if (maxSpeed() == 0) {
+	// If unit's max speed is 0, it cannot move
+	return false;
+ }
+
+ if (!target) {
+	boError() << k_funcinfo << "NULL target" << endl;
+	return false;
+ }
+
+ bofixed x = target->centerX();
+ bofixed y = target->centerY();
+ if (unitProperties()->isAircraft()) {
+	// Aircrafts cannot go near the border of the map to make sure they have
+	//  enough room for turning around
+	x = QMIN(QMAX(x, bofixed(6)), (bofixed)canvas()->mapWidth() - 6);
+	y = QMIN(QMAX(y, bofixed(6)), (bofixed)canvas()->mapHeight() - 6);
+ }
+
+
+ // Update path info
+ resetPathInfo();
+ pathInfo()->target = target;
+ pathInfo()->range = range;
+ boDebug() << k_funcinfo << "unit " << id() << ": target: (" << target->id() << "); range: " << range << endl;
+
+ // Remove old way/pathpoints
+ clearWaypoints();
+ clearPathPoints();
+
+
+ // Path is not searched here (it would break pathfinding for groups). Instead,
+ //  moving status is set to MustSearch and in MobileUnit::advanceMove(), path
+ //  is searched for.
+ setMovingStatus(MustSearch);
+
+ addWaypoint(BoVector2Fixed(x, y));
+ pathInfo()->slowDownAtDest = true;
+
+ return true;
 }
 
 bool Unit::moveTo(bofixed x, bofixed y, int range)
@@ -914,6 +958,7 @@ bool Unit::moveTo(bofixed x, bofixed y, int range)
  clearWaypoints();
  clearPathPoints();
 
+ addWaypoint(BoVector2Fixed(x, y));
 
  // Path is not searched here (it would break pathfinding for groups). Instead,
  //  moving status is set to MustSearch and in MobileUnit::advanceMove(), path

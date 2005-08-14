@@ -686,20 +686,18 @@ void RepairPlugin::repair(Unit* u)
 {
  boDebug() << k_funcinfo << endl;
  if (unit()->isFacility()) {
-	if (!u->moveTo(unit()->x(), unit()->y(), 1)) {
+	if (!u->moveTo(unit(), 0)) {
 		boDebug() << k_funcinfo << u->id() << " cannot find a way to repairyard" << endl;
 		u->setWork(Unit::WorkIdle);
 	} else {
 		u->setWork(Unit::WorkMove);
-		u->addWaypoint(BoVector2Fixed(unit()->x(), unit()->y()));
 	}
  } else {
-	if (!unit()->moveTo(u->x(), u->y(), 1)) {
+	if (!unit()->moveTo(u, 0)) {
 		boDebug() << k_funcinfo << "Cannot find way to " << u->id() << endl;
 		unit()->setWork(Unit::WorkIdle);
 	} else {
 		unit()->setAdvanceWork(Unit::WorkMove);
-		unit()->addWaypoint(BoVector2Fixed(u->x(), u->y()));
 	}
  }
 }
@@ -893,11 +891,13 @@ bool HarvesterPlugin::isNextTo(const Unit* u) const
  }
 
  bofixed distx, disty;
- distx = fabsf((u->x() + u->width() / 2) - (unit()->x() + unit()->width() / 2));
- disty = fabsf((u->y() + u->height() / 2) - (unit()->y() + unit()->height() / 2));
+ distx = (int)(u->centerX() - unit()->centerX());
+ disty = (int)(u->centerY() - unit()->centerY());
+ distx = QABS(distx);
+ disty = QABS(disty);
  // We might get some precision trouble with floats, so we do this:
- distx = fmaxf(distx - 1, 0);
- disty = fmaxf(disty - 1, 0);
+ distx = QMAX(distx - 0.1, bofixed(0));
+ disty = QMAX(disty - 0.1, bofixed(0));
 
  bofixed allowedx, allowedy;
  allowedx = unit()->width() / 2 + u->width() / 2;
@@ -918,7 +918,7 @@ void HarvesterPlugin::advanceMine()
 	unit()->setWork(Unit::WorkIdle);
 	return;
  }
- if (!mResourceMine) {
+ if (!mResourceMine || !mResourceMine->isUsableTo(this)) {
 	ResourceMinePlugin* mine = findClosestResourceMine();
 	if (!mine || !mine->unit()) {
 		boDebug(430) << k_funcinfo << "no resource mine found" << endl;
@@ -930,7 +930,6 @@ void HarvesterPlugin::advanceMine()
 	return;
  }
  if (!mResourceMine || !mResourceMine->isUsableTo(this)) {
-	// TODO: search a new resource mine
 	QString mineId = "no id";
 	if (mResourceMine && mResourceMine->unit()) {
 		mineId = QString::number(mResourceMine->unit()->id());
@@ -954,13 +953,12 @@ void HarvesterPlugin::advanceMine()
  // Check if unit is at mining location. If not, go there
  if (!isAtResourceMine()) {
 	Unit* u = mResourceMine->unit();
-	if (!unit()->moveTo(u->x(), u->y(), 1)) {
+	if (!unit()->moveTo(u, 0)) {
 		boDebug(430) << k_funcinfo << "Cannot move to refinery (id=" << u->id() <<
 				") at (" << u->x() << "; " << u->y() << ")" << endl;
 		unit()->setWork(Unit::WorkIdle);
 		return;
 	}
-	unit()->addWaypoint(BoVector2Fixed(u->x(), u->y()));
 	unit()->setAdvanceWork(Unit::WorkMove);
 	return;
  }
@@ -1022,13 +1020,12 @@ void HarvesterPlugin::advanceRefine()
 
  if (!isAtRefinery()) {
 	Unit* u = mRefinery->unit();
-	if (!unit()->moveTo(u->x(), u->y(), 1)) {
+	if (!unit()->moveTo(u, 0)) {
 		boDebug(430) << k_funcinfo << "Cannot move to refinery (id=" << u->id() <<
 				") at (" << u->x() << "; " << u->y() << ")" << endl;
 		unit()->setWork(Unit::WorkIdle);
 		return;
 	}
-	unit()->addWaypoint(BoVector2Fixed(u->x(), u->y()));
 	unit()->setAdvanceWork(Unit::WorkMove);
 	return;
  }
@@ -1146,14 +1143,13 @@ void HarvesterPlugin::mineAt(ResourceMinePlugin* resource)
 	boError() << k_funcinfo << resource->unit()->id() << " not a suitable resource mine" << endl;
 	return;
  }
- if (!unit()->moveTo(resource->unit()->x(), resource->unit()->y(), 1)) {
+ if (!unit()->moveTo(resource->unit(), 0)) {
 	boDebug() << k_funcinfo << "cannot find a way to resource mine" << endl;
 	boDebug() << k_funcinfo << "TODO: search another resource mine" << endl;
 	return;
  }
  unit()->setPluginWork(UnitPlugin::Harvester);
  unit()->setAdvanceWork(Unit::WorkMove);
- unit()->addWaypoint(BoVector2Fixed(resource->unit()->x(), resource->unit()->y()));
  mResourceMine = resource;
 
  mHarvestingType = 1;
@@ -1174,14 +1170,13 @@ void HarvesterPlugin::refineAt(RefineryPlugin* refinery)
 	boDebug() << k_funcinfo << "sorry, refinery is already destroyed. cannot use it" << endl;
 	return;
  }
- if (!unit()->moveTo(refinery->unit()->x(), refinery->unit()->y(), 1)) {
+ if (!unit()->moveTo(refinery->unit(), 0)) {
 	boDebug() << k_funcinfo << "cannot find a way to refinery" << endl;
 	boDebug() << k_funcinfo << "TODO: search another refinery" << endl;
 	return;
  }
  unit()->setPluginWork(UnitPlugin::Harvester);
  unit()->setAdvanceWork(Unit::WorkMove);
- unit()->addWaypoint(BoVector2Fixed(refinery->unit()->x(), refinery->unit()->y()));
  mRefinery = refinery;
 
  mHarvestingType = 2; // refining

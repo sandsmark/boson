@@ -47,6 +47,7 @@ class Player;
 class Unit;
 class BosonMoveData;
 class PlayerIO;
+class BosonItem;
 
 class QDomElement;
 
@@ -162,14 +163,16 @@ class BosonPath
     void resetDirtyCellStatuses();
     Result lowLevelDoSearch(BosonPathLowLevelData* data);
     bool lowLevelSearchNeighbor(BosonPathLowLevelData* data, const BosonPathNode& n, unsigned int dir);
-    void lowLevelCalculateCellOccupiedStatus(BosonPathLowLevelData* data, int x, int y);
+    void calculateCellStatus(BosonPathInfo* info, int x, int y);
     void lowLevelFinishSearch(BosonPathLowLevelData* data);
     bofixed lowLevelDistToGoal(BosonPathLowLevelData* data, int x, int y) const;
     void lowLevelSetAreaBoundary(int x1, int y1, int x2, int y2);
-    bool cellOccupied(BosonPathInfo* info, int x, int y) const;
+    void markTargetGoal(BosonPathInfo* info);
 
-    bool goalPassable(BosonPathInfo* info) const;
-    int findClosestFreeGoalCell(BosonPathInfo* info) const;
+    unsigned int nodeStatus(BosonPathInfo* info, int x, int y);
+
+    bool goalPassable(BosonPathInfo* info);
+    int findClosestFreeGoalCell(BosonPathInfo* info);
 
 
     /*****  High-level pathfinder  *****/
@@ -198,22 +201,7 @@ class BosonPath
     bool isValidCell(int x, int y) const;
     bool cellForested(int x, int y) const;
 
-    inline void setCellStatusDirty(int pos)
-    {
-      if(mCellStatusDirtyCount == mCellStatusDirtySize)
-      {
-        // Allocate new, bigger array and copy old items
-        int* oldarray = mCellStatusDirty;
-        mCellStatusDirtySize *= 2;
-        mCellStatusDirty = new int[mCellStatusDirtySize];
-        for(unsigned int i = 0; i < mCellStatusDirtyCount; i++)
-        {
-          mCellStatusDirty[i] = oldarray[i];
-        }
-        delete[] oldarray;
-      }
-      mCellStatusDirty[mCellStatusDirtyCount++] = pos;
-    }
+    void setCellStatusDirty(int pos);
     void setBlockConnectionDirty(int pos);
 
 
@@ -419,6 +407,7 @@ class BosonPathInfo
       hlpath.clear();
       start.reset();
       dest.reset();
+      target = 0;
       range = -1;
       needpath = true;
       flying = false;
@@ -446,6 +435,10 @@ class BosonPathInfo
     // Start and destination point
     BoVector2Fixed start;
     BoVector2Fixed dest;
+    // If this is non-NULL, this will be used as destination and pathfinder
+    //  will try to get within range cells from this item (e.g. 0 means next to
+    //  the target)
+    BosonItem* target;
 
     // Range, in cells
     // If range is -1, we try to get as close to destination point as possible,

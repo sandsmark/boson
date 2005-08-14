@@ -122,33 +122,34 @@ const int yoffsets[] = { -1, -1,  0,  1,  1,  1,  0, -1};
 
 /*****  Cell status flags  *****/
 // Per-node stuff (single node can "occupy" several cells if unit is bigger than 1x1)
-#define STATUS_UP            1
-#define STATUS_UP_RIGHT      2
-#define STATUS_RIGHT         3
-#define STATUS_DOWN_RIGHT    4
-#define STATUS_DOWN          5
-#define STATUS_DOWN_LEFT     6
-#define STATUS_LEFT          7
-#define STATUS_UP_LEFT       8
+#define STATUS_UP              1
+#define STATUS_UP_RIGHT        2
+#define STATUS_RIGHT           3
+#define STATUS_DOWN_RIGHT      4
+#define STATUS_DOWN            5
+#define STATUS_DOWN_LEFT       6
+#define STATUS_LEFT            7
+#define STATUS_UP_LEFT         8
 
-#define STATUS_DIR          (STATUS_UP | STATUS_UP_RIGHT | STATUS_RIGHT | STATUS_DOWN_RIGHT | STATUS_DOWN | STATUS_DOWN_LEFT | STATUS_LEFT | STATUS_UP_LEFT)
-#define STATUS_OPEN         16
-#define STATUS_CLOSED       32
-#define STATUS_START        64
-#define STATUS_BLOCKED     128
+#define STATUS_DIR         (STATUS_UP | STATUS_UP_RIGHT | STATUS_RIGHT | STATUS_DOWN_RIGHT | \
+    STATUS_DOWN | STATUS_DOWN_LEFT | STATUS_LEFT | STATUS_UP_LEFT)
+#define STATUS_OPEN         (1 << 4)
+#define STATUS_CLOSED       (1 << 5)
+#define STATUS_START        (1 << 6)
+#define STATUS_GOAL         (1 << 7)
+#define STATUS_BLOCKED      (1 << 8)
+#define STATUS_DIRTY        (1 << 9)
 
 // Per-cell stuff
-#define STATUS_CALCULATED  256
-#define STATUS_CANTGO      512
-#define STATUS_MOVING     1024
-#define STATUS_OTHERUNIT  2048
+#define STATUS_CALCULATED   (1 << 15)
+#define STATUS_CANTGO       (1 << 16)
+#define STATUS_MOVING       (1 << 17)
+#define STATUS_OTHERUNIT    (1 << 18)
 
 // Block stuff
-#define STATUS_CHANGED    4096
+#define STATUS_CHANGED      (1 << 25)
 
 
-
-#define REVERSEDIR(d) ((d + 4) % 8)
 
 #define ISDIAGONALDIR(d)  (((d) % 2) == 0 ? 1 : 0)
 
@@ -244,6 +245,10 @@ void BosonPath::findPath(BosonPathInfo* info)
       info->player = info->unit->ownerIO();
     }
 
+    if(info->target)
+    {
+      markTargetGoal(info);
+    }
     // Make sure the destination can be reached
     if(!goalPassable(info))
     {
@@ -275,11 +280,14 @@ void BosonPath::findPath(BosonPathInfo* info)
     }
     info->range = oldrange;
   }
+
+  // Reset statuses in the search area
+  resetDirtyCellStatuses();
 }
 
 
 
-bool BosonPath::goalPassable(BosonPathInfo* info) const
+bool BosonPath::goalPassable(BosonPathInfo* info)
 {
   if(info->range < 0)
   {
@@ -297,7 +305,7 @@ bool BosonPath::goalPassable(BosonPathInfo* info) const
     for(int x = left; x <= right; x++)
     {
       // Check if the unit could go onto this cell
-      if(!cellOccupied(info, x, y))
+      if(!(nodeStatus(info, x, y) & STATUS_CANTGO))
       {
         // Unit could go onto this cell
         return true;
@@ -308,7 +316,7 @@ bool BosonPath::goalPassable(BosonPathInfo* info) const
   return false;
 }
 
-int BosonPath::findClosestFreeGoalCell(BosonPathInfo* info) const
+int BosonPath::findClosestFreeGoalCell(BosonPathInfo* info)
 {
   int goalx = (int)info->dest.x();
   int goaly = (int)info->dest.y();
@@ -319,7 +327,7 @@ int BosonPath::findClosestFreeGoalCell(BosonPathInfo* info) const
     // First check upper and lower sides of "rectangle"
     for(int x = goalx - range; x <= goalx + range; x++)
     {
-      if(!cellOccupied(info, x, goaly - range))
+      if(!(nodeStatus(info, x, goaly - range) & STATUS_CANTGO))
       {
         return range;
       }
@@ -327,7 +335,7 @@ int BosonPath::findClosestFreeGoalCell(BosonPathInfo* info) const
     // Then right and left sides. Note that corners are already checked
     for(int y = goaly - range + 1; y < goaly + range; y++)
     {
-      if(!cellOccupied(info, goalx - range, y))
+      if(!(nodeStatus(info, goalx - range, y) & STATUS_CANTGO))
       {
         return range;
       }
@@ -445,9 +453,6 @@ BosonPath::Result BosonPath::getLowLevelPath(BosonPathInfo* info)
     //boDebug() << k_funcinfo << "No path found" << endl;
   }
 
-  // Reset statuses in the search area
-  resetDirtyCellStatuses();
-
   }
   //boDebug(500) << k_funcinfo << "Nodes opened: " << data->openednodes <<
   //    "; nodes closed: " << data->closednodes << "; path length: " << info->llpath.count() << endl;
@@ -482,7 +487,8 @@ BosonPath::Result BosonPath::lowLevelDoSearch(BosonPathLowLevelData* data)
       goalreached = true;
       break;
     }
-    else if(QMAX(QABS(n.x - data->destx), QABS(n.y - data->desty)) <= data->info->range)
+    else if((mCellStatus[n.pos].flags & STATUS_GOAL) ||
+        (QMAX(QABS(n.x - data->destx), QABS(n.y - data->desty)) <= data->info->range))
     {
       data->goalnode = n;
       pathfound = true;
@@ -625,7 +631,7 @@ bool BosonPath::lowLevelSearchNeighbor(BosonPathLowLevelData* data, const BosonP
       // Calculate cell's status if it hasn't been done yet
       if(!(mCellStatus[y * data->mapwidth + x].flags & STATUS_CALCULATED))
       {
-        lowLevelCalculateCellOccupiedStatus(data, x, y);
+        calculateCellStatus(data->info, x, y);
       }
 
       // Check the status flags
@@ -770,27 +776,22 @@ bofixed BosonPath::lowLevelDistToGoal(BosonPathLowLevelData* data, int x, int y)
   return (bofixed(cross) / LOW_CROSS_DIVIDER) + (QMAX(dx1, dy1) + QMIN(dx1, dy1) * 0.4) * LOW_DIST_MULTIPLIER;
 }
 
-void BosonPath::lowLevelCalculateCellOccupiedStatus(BosonPathLowLevelData* data, int x, int y)
+void BosonPath::calculateCellStatus(BosonPathInfo* info, int x, int y)
 {
   LP_PROFILE_METHOD;
-  BosonMoveData* movedata = data->info->movedata;
+  BosonMoveData* movedata = info->movedata;
 
   // This cell's occupied status will now be calculated
-  int pos = y * data->mapwidth + x;
+  int pos = y * mMap->width() + x;
   mCellStatus[pos].flags |= STATUS_CALCULATED;
   setCellStatusDirty(pos);
 
-  {
-  LP_PROFILE_METHOD_2(cgcprof, "CanGo check");
   if(!movedata->cellPassable[pos])
   {
     mCellStatus[pos].flags |= STATUS_CANTGO;
     return;
   }
-  }
 
-  {
-  LP_PROFILE_METHOD_2(icprof, "Items check");
   // Go through all items on the cell and look for interesting ones
   const BoItemList* items = cell(x, y)->items();
   for(BoItemList::ConstIterator it = items->begin(); it != items->end(); ++it)
@@ -803,24 +804,34 @@ void BosonPath::lowLevelCalculateCellOccupiedStatus(BosonPathLowLevelData* data,
         // We don't care about air units
         continue;
       }
-      else if(u == data->info->unit)
+      else if(u == info->unit)
       {
         continue;
       }
 
       // Maybe we can just crush the obstacle
-      if(data->info->player && (u->maxHealth() <= data->info->movedata->crushDamage))
+      if(u->maxHealth() <= movedata->crushDamage)
       {
-        if(data->info->player->isEnemy(u))
+        if(u->owner()->isNeutralPlayer())
         {
-          // Crush the damn enemy :-)
-          continue;
-        }
-        else if(data->info->player->isNeutral(u))
-        {
-          // Also crush it
+          // Crush it
           // TODO: maybe have additional cost for crushing neutral stuff???
           continue;
+        }
+        else if(info->player)
+        {
+          // Check player's relationship with the u's owner
+          if(info->player->isEnemy(u))
+          {
+            // Crush the damn enemy :-)
+            continue;
+          }
+          else if(info->player->isNeutral(u))
+          {
+            // Also crush it
+            // TODO: maybe have additional cost for crushing neutral stuff???
+            continue;
+          }
         }
       }
 
@@ -842,86 +853,30 @@ void BosonPath::lowLevelCalculateCellOccupiedStatus(BosonPathLowLevelData* data,
     }
     // TODO: check for e.g. mines
   }
-  }
 }
 
-bool BosonPath::cellOccupied(BosonPathInfo* info, int x, int y) const
+unsigned int BosonPath::nodeStatus(BosonPathInfo* info, int x, int y)
 {
-  // TODO: maybe return some status values OR'ed together (like the method above)
-  // TODO: we could actually merge this with the method above and make them
-  //  both use mCellStatus array. The status array would then be cleaned in
-  //  findPath after all the other pathfinder methods.
-
   if(x < info->movedata->edgedist1 || y < info->movedata->edgedist1 ||
     x > (int)mMap->width() - 1 - info->movedata->edgedist2 || y > (int)mMap->height() - 1 - info->movedata->edgedist2)
   {
-    return true;
+    return STATUS_CANTGO;
   }
 
+  unsigned int status = 0;
   for(int x2 = x - info->movedata->edgedist1; x2 <= x + info->movedata->edgedist2; x2++)
   {
     for(int y2 = y - info->movedata->edgedist1; y2 <= y + info->movedata->edgedist2; y2++)
     {
-      if(!info->movedata->cellPassable[y2 * mMap->width() + x2])
+      if(!(mCellStatus[y2 * mMap->width() + x2].flags & STATUS_CALCULATED))
       {
-        return true;
+        calculateCellStatus(info, x2, y2);
       }
-
-      const BoItemList* items = cell(x2, y2)->items();
-      for(BoItemList::ConstIterator it = items->begin(); it != items->end(); ++it)
-      {
-        if(RTTI::isUnit((*it)->rtti()))
-        {
-          Unit* u = (Unit*)*it;
-          if(u->isFlying())
-          {
-            // We don't care about air units
-            continue;
-          }
-          else if(u == info->unit)
-          {
-            continue;
-          }
-
-          // Maybe we can just crush the obstacle
-          if(u->maxHealth() <= info->movedata->crushDamage)
-          {
-            if(u->owner()->isNeutralPlayer())
-            {
-              // Crush it
-              // TODO: maybe have additional cost for crushing neutral stuff???
-              continue;
-            }
-            else if(info->player)
-            {
-              // Check player's relationship with the u's owner
-              if(info->player->isEnemy(u))
-              {
-                // Crush the damn enemy :-)
-                continue;
-              }
-              else if(info->player->isNeutral(u))
-              {
-                // Also crush it
-                // TODO: maybe have additional cost for crushing neutral stuff???
-                continue;
-              }
-            }
-          }
-
-          if(u->movingStatus() == UnitBase::Standing)
-          {
-            // This one's occupying the cell
-            return true;
-          }
-        }
-        // TODO: check for e.g. mines
-      }
-
+      status &= mCellStatus[y2 * mMap->width() + x2].flags;
     }
   }
 
-  return false;
+  return status;
 }
 
 void BosonPath::lowLevelSetAreaBoundary(int x1, int y1, int x2, int y2)
@@ -968,6 +923,35 @@ void BosonPath::lowLevelSetAreaBoundary(int x1, int y1, int x2, int y2)
   }
 }
 
+void BosonPath::markTargetGoal(BosonPathInfo* info)
+{
+  // Mark the target and 1-cell border around it as goal
+  BosonItem* target = info->target;
+  int left = QMAX((int)target->leftEdge() - 1 - info->range - info->movedata->edgedist2, 0);
+  int top = QMAX((int)target->topEdge() - 1 - info->range - info->movedata->edgedist2, 0);
+  int right = QMIN((int)ceilf(target->rightEdge()) + info->range
+      + info->movedata->edgedist1, (int)mMap->width() - 1);
+  int bottom = QMIN((int)ceilf(target->bottomEdge()) + info->range
+      + info->movedata->edgedist1, (int)mMap->height() - 1);
+
+  for(int x = left; x <= right; x++)
+  {
+    for(int y = top; y <= bottom; y++)
+    {
+      mCellStatus[y * mMap->width() + x].flags |= STATUS_GOAL;
+      setCellStatusDirty(y * mMap->width() + x);
+    }
+  }
+
+  // Alter destination point
+  info->dest.set(target->center());
+  // Alter range to get within given range _from the target_
+  /*if(info->range >= 0)
+  {
+    info->range += (int)ceilf(target->width() / 2) + info->movedata->edgedist1;
+  }*/
+}
+
 void BosonPath::resetDirtyCellStatuses()
 {
   //boDebug(500) << k_funcinfo << "Resetting " << mCellStatusDirtyCount << " dirty cells" << endl;
@@ -978,6 +962,29 @@ void BosonPath::resetDirtyCellStatuses()
     mCellStatus[mCellStatusDirty[i]].flags = 0;
   }
   mCellStatusDirtyCount = 0;
+}
+
+void BosonPath::setCellStatusDirty(int pos)
+{
+  if(mCellStatus[pos].flags & STATUS_DIRTY)
+  {
+    return;
+  }
+
+  if(mCellStatusDirtyCount == mCellStatusDirtySize)
+  {
+    // Allocate new, bigger array and copy old items
+    int* oldarray = mCellStatusDirty;
+    mCellStatusDirtySize *= 2;
+    mCellStatusDirty = new int[mCellStatusDirtySize];
+    for(unsigned int i = 0; i < mCellStatusDirtyCount; i++)
+    {
+      mCellStatusDirty[i] = oldarray[i];
+    }
+    delete[] oldarray;
+  }
+  mCellStatusDirty[mCellStatusDirtyCount++] = pos;
+  mCellStatus[pos].flags |= STATUS_DIRTY;
 }
 
 
@@ -1419,11 +1426,11 @@ void BosonPath::findFlyingUnitPath(BosonPathInfo* info)
 
       // TODO: do we want/need this for _air_ units?
       // Make sure cell is passable
-      if(mSlopeMap[(int)(n2->y * mMap->width() + n2->x)] > 45)
+      /*if(mSlopeMap[(int)(n2->y * mMap->width() + n2->x)] > 45)
       {
         delete n2;
         continue;
-      }
+      }*/
       // And not occupied
       /*else if(cell(n2->x, n2->y)->isAirOccupied())
       {
@@ -1800,6 +1807,8 @@ void BosonPath::initBlocks()
   {
     createBlockColormap(mMoveDatas[i]);
   }*/
+
+  resetDirtyCellStatuses();
 }
 
 void BosonPath::findBlockCenter(int blockpos, BosonMoveData* movedata)
@@ -1830,7 +1839,7 @@ void BosonPath::findBlockCenter(int blockpos, BosonMoveData* movedata)
     for(int x = left; x <= right; x++)
     {
       bofixed cost = 0;
-      if(cellOccupied(&info, x, y))
+      if(nodeStatus(&info, x, y) & STATUS_CANTGO)
       {
         // Take the next cell
         continue;
@@ -2290,6 +2299,7 @@ void BosonPath::updateChangedBlocks()
   {
     createBlockColormap(mMoveDatas[i]);
   }*/
+  resetDirtyCellStatuses();
 }
 
 bool BosonPath::cellForested(int x, int y) const
