@@ -327,6 +327,13 @@ public:
 	 **/
 	virtual void moveTo(const BoVector2Fixed& pos, bool attack = false);
 
+	/**
+	 * Moves this unit to the target.
+	 * range specifies distance between target and this unit in cells. If range
+	 * is 0, unit tries to move next to the target.
+	 **/
+	bool moveTo(BosonItem* target, int range = 0);
+
 
 	// TODO: maybe make this protected?
 	/**
