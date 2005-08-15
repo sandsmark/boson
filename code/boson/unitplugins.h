@@ -420,8 +420,10 @@ public:
 
 private:
 	BosonWeapon* mWeapon; // FIXME: must be saved on Unit::save()
-	KGameProperty<bofixed> mPosX;
-	KGameProperty<bofixed> mPosY;
+	KGameProperty<bofixed> mTargetX;
+	KGameProperty<bofixed> mTargetY;
+	KGameProperty<bofixed> mDropDist;
+	KGameProperty<bofixed> mLastDistFromDropPoint;
 };
 
 /**

@@ -333,8 +333,9 @@ class BosonWeapon : public UnitPlugin
      * Drop bomb from the current location of unit
      * If bomb is dropped, returns true. If weapon is not a bomb, not reloaded
      * or some other error occurs, returns false
+     * @param hvelocity initial horizontal velocity of the bomb
      **/
-    bool dropBomb();
+    bool dropBomb(const BoVector2Fixed& hvelocity);
 
     virtual void unitDestroyed(Unit*) {}
     virtual void itemRemoved(BosonItem*) {}

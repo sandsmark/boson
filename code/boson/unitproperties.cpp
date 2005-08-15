@@ -247,6 +247,7 @@ bool UnitProperties::loadMobileProperties(KSimpleConfig* conf)
  // Those are relevant only for aircrafts
  mIsHelicopter = conf->readBoolEntry("IsHelicopter", false);
  mTurnRadius = conf->readDoubleNumEntry("TurnRadius", 5);
+ mPreferredAltitude = conf->readDoubleNumEntry("PreferredAltitude", 3);
  return true;
 }
 
@@ -550,6 +551,14 @@ bofixed UnitProperties::turnRadius() const
 	return 0;
  }
  return mTurnRadius;
+}
+
+bofixed UnitProperties::preferredAltitude() const
+{
+ if (!isMobile() || !isAircraft()) {
+	return 0;
+ }
+ return mPreferredAltitude;
 }
 
 bool UnitProperties::canGoOnLand() const

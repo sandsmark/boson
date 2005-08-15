@@ -209,11 +209,13 @@ void Unit::initStatic()
  addPropertyId(IdResourcesX, QString::fromLatin1("ResourcesX"));
  addPropertyId(IdResourcesY, QString::fromLatin1("ResourcesY"));
  addPropertyId(IdHarvestingType, QString::fromLatin1("HarvestingType"));
- addPropertyId(IdBombingPosX, QString::fromLatin1("BombingPosX"));
- addPropertyId(IdBombingPosY, QString::fromLatin1("BombingPosY"));
+ addPropertyId(IdBombingTargetX, QString::fromLatin1("IdBombingTargetX"));
+ addPropertyId(IdBombingTargetY, QString::fromLatin1("IdBombingTargetY"));
  addPropertyId(IdMinePlacingCounter, QString::fromLatin1("MinePlacingCounter"));
  addPropertyId(IdResourceMineMinerals, QString::fromLatin1("ResourceMineMinerals"));
  addPropertyId(IdResourceMineOil, QString::fromLatin1("ResourceMineOil"));
+ addPropertyId(IdBombingDropDist, QString::fromLatin1("IdBombingDropDist"));
+ addPropertyId(IdBombingLastDistFromDropPoint, QString::fromLatin1("IdBombingLastDistFromDropPoint"));
 
  mInitialized = true;
 }
@@ -1832,6 +1834,11 @@ bool MobileUnit::init()
 	return ret;
   }
 
+ if (isFlying()) {
+	setSpeed(maxSpeed() * 0.75);
+	move(x(), y(), unitProperties()->preferredAltitude());
+ }
+
  setWork(WorkIdle);
  return true;
 }
@@ -2269,8 +2276,10 @@ void MobileUnit::advanceMoveFlying(unsigned int advanceCallsCount)
  velo.setY(sin(Bo3dTools::deg2rad(newrotation - 90)) * speed());
 
  bofixed groundz = canvas()->heightAtPoint(x + velo.x(), y + velo.y());
- if (z + velo.z() < groundz + 2) {
-	velo.setZ(groundz - z + 2);
+ if (z + velo.z() < groundz + unitProperties()->preferredAltitude() - 1) {
+	velo.setZ(groundz - z + unitProperties()->preferredAltitude() - 1);
+ } else if (z + velo.z() > groundz + unitProperties()->preferredAltitude() + 1) {
+	velo.setZ(groundz - z + unitProperties()->preferredAltitude() + 1);
  }
 
  // Calculate roll
@@ -2911,8 +2920,10 @@ void MobileUnit::flyInCircle()
  }
 
  bofixed groundz = canvas()->heightAtPoint(centerX() + velo.x(), centerY() + velo.y());
- if (z() + velo.z() < groundz + 2) {
-	velo.setZ(groundz - z() + 2);
+ if (z() + velo.z() < groundz + unitProperties()->preferredAltitude() - 1) {
+	velo.setZ(groundz - z() + unitProperties()->preferredAltitude() - 1);
+ } else if (z() + velo.z() > groundz + unitProperties()->preferredAltitude() + 1) {
+	velo.setZ(groundz - z() + unitProperties()->preferredAltitude() + 1);
  }
 
  setRotation(newrot);
