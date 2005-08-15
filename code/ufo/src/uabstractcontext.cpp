@@ -53,6 +53,9 @@
 
 using namespace ufo;
 
+//#define DEBUG_SEND 1
+//#define DEBUG_FIRE_MOUSE_EVENT 1
+
 #if !OLD_EVENT_CODE
 void getVisibleWidgetsDFS(std::stack<UWidget*> * stack, UWidget * w, int x, int y);
 #endif
@@ -371,6 +374,10 @@ UAbstractContext::fireMouseEvent(UMouseEvent * e) {
 	pos.x -= m_bounds.x;
 	pos.y -= m_bounds.y;
 
+#ifdef DEBUG_FIRE_MOUSE_EVENT
+	std::cout << "fireMouseEvent: " << e->getType() << " at pos " << pos.x << "," << pos.y << std::endl;
+#endif
+
 #if OLD_EVENT_CODE
 	UWidget * w = NULL;
 #else
@@ -387,6 +394,9 @@ UAbstractContext::fireMouseEvent(UMouseEvent * e) {
 #else
 	if (m_dragWidgetsStack.size() > 0) {
 		visibleWidgets = m_dragWidgetsStack;
+#ifdef DEBUG_FIRE_MOUSE_EVENT
+		std::cout << "fireMouseEvent: using dragWidgetsStack of size=" << m_dragWidgetsStack.size() << std::endl;
+#endif
 	} else {
 		getVisibleWidgetsDFS(&visibleWidgets, root, pos.x, pos.y);
 	}
@@ -703,6 +713,9 @@ UAbstractContext::send(UWidget * receiver, UEvent * e) {
 	}
 
 
+#ifdef DEBUG_SEND
+	std::cout << "sending event " << e->getType() << " to " << receiver << " " << (void*)receiver << std::endl;
+#endif
 	e->setSource(receiver);
 	if (receiver) {
 		receiver->dispatchEvent(e);
@@ -748,6 +761,9 @@ getVisibleWidgetsDFS(std::stack<UWidget*> * stack, UWidget * w, int x, int y) {
 
 bool
 UAbstractContext::sendMouseEventToWidgets(std::stack<UWidget*> & widgets, UMouseEvent * e) {
+#ifdef DEBUG_FIRE_MOUSE_EVENT
+	std::cout << "sendMouseEventToWidgets: " << widgets.size() << " widgets. event: " << e->getType() << std::endl;
+#endif
 	UPoint pos = e->getLocation();
 	// translate with context location in device
 	pos.x -= m_bounds.x;
