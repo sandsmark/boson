@@ -803,12 +803,7 @@ void BosonGameView::cameraChanged()
 	renderer->generateCellList(map);
  }
 
- const QValueVector<BoLight*>* lights = BoLightManager::manager()->lights();
- for (unsigned int i = 0; i < lights->size(); i++) {
-	if (lights->at(i) != 0) {
-		lights->at(i)->refreshPosition();
-	}
- }
+ BoLightManager::manager()->cameraChanged();
 
  d->mUfoCanvasWidget->cameraChanged();
 
