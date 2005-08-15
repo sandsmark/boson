@@ -85,6 +85,7 @@ class BoShader
     static void setSun(BoLight* sun);
     static void setTime(float time);
     static void setFogEnabled(float enabled);
+    static void setActiveLights(int lights);
 
 
   protected:
@@ -102,6 +103,7 @@ class BoShader
     static BoLight* mSun;
     static float mTime;
     static bool mFogEnabled;
+    static int mActiveLights;
 };
 
 #endif //BOSHADER_H

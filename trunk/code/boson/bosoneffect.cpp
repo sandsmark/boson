@@ -383,7 +383,10 @@ BosonEffectLight::BosonEffectLight(const BosonEffectPropertiesLight* prop) : Bos
 
 BosonEffectLight::~BosonEffectLight()
 {
-  delete mLight;
+  if(mLight)
+  {
+    BoLightManager::manager()->deleteLight(mLight->id());
+  }
 }
 
 void BosonEffectLight::update(float elapsed)
@@ -398,12 +401,11 @@ void BosonEffectLight::update(float elapsed)
   if(mTimeLeft <= 0)
   {
     mActive = false;
-    delete mLight;
+    if(mLight)
+    {
+      BoLightManager::manager()->deleteLight(mLight->id());
+    }
     mLight = 0;
-    return;
-  }
-  if(!mLight)
-  {
     return;
   }
 
@@ -424,22 +426,10 @@ void BosonEffectLight::start()
 {
   BosonEffect::start();
 
-  mLight = new BoLight();
-  if(mLight->id() == -1)
-  {
-    // Id -1 means that light could not be created. Probably maximum number of
-    //  lights is already in use
-    delete mLight;
-    mLight = 0;
-    mActive = false;
-    mTimeLeft = 0.0f;
-  }
-  if(mLight)
-  {
-    mLight->setEnabled(true);
-    mLight->setDirectional(false);
-    mLight->setPosition3(position().toFloat());
-  }
+  mLight = BoLightManager::manager()->createLight();
+  mLight->setEnabled(true);
+  mLight->setDirectional(false);
+  mLight->setPosition3(position().toFloat());
 }
 
 void BosonEffectLight::setPosition(const BoVector3Fixed& pos)
@@ -459,7 +449,10 @@ void BosonEffectLight::makeObsolete()
   {
     return;
   }
-  delete mLight;
+  if(mLight)
+  {
+    BoLightManager::manager()->deleteLight(mLight->id());
+  }
   mLight = 0;
   BosonEffect::makeObsolete();
 }
@@ -499,20 +492,18 @@ bool BosonEffectLight::loadFromXML(const QDomElement& root)
 
   // This creates BoLight object
   start();
-  if(!mLight)
-  {
-    float factor = mTimeLeft / mProperties->life();  // This goes from 1 to 0 during effect's lifetime
-    BoVector4Float ambient, diffuse, specular;
-    BoVector3Float attenuation;
-    ambient.setBlended(mProperties->startAmbient(), factor, mProperties->endAmbient(), 1.0 - factor);
-    diffuse.setBlended(mProperties->startDiffuse(), factor, mProperties->endDiffuse(), 1.0 - factor);
-    specular.setBlended(mProperties->startSpecular(), factor, mProperties->endSpecular(), 1.0 - factor);
-    attenuation.setBlended(mProperties->startAttenuation(), factor, mProperties->endAttenuation(), 1.0 - factor);
-    mLight->setAmbient(ambient);
-    mLight->setDiffuse(diffuse);
-    mLight->setSpecular(specular);
-    mLight->setAttenuation(attenuation);
-  }
+
+  float factor = mTimeLeft / mProperties->life();  // This goes from 1 to 0 during effect's lifetime
+  BoVector4Float ambient, diffuse, specular;
+  BoVector3Float attenuation;
+  ambient.setBlended(mProperties->startAmbient(), factor, mProperties->endAmbient(), 1.0 - factor);
+  diffuse.setBlended(mProperties->startDiffuse(), factor, mProperties->endDiffuse(), 1.0 - factor);
+  specular.setBlended(mProperties->startSpecular(), factor, mProperties->endSpecular(), 1.0 - factor);
+  attenuation.setBlended(mProperties->startAttenuation(), factor, mProperties->endAttenuation(), 1.0 - factor);
+  mLight->setAmbient(ambient);
+  mLight->setDiffuse(diffuse);
+  mLight->setSpecular(specular);
+  mLight->setAttenuation(attenuation);
 
   return true;
 }

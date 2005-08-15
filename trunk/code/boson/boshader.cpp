@@ -34,6 +34,7 @@ BoVector3Float BoShader::mCameraPos;
 BoLight* BoShader::mSun = 0;
 float BoShader::mTime = 0.0f;
 bool BoShader::mFogEnabled = false;
+int BoShader::mActiveLights = 0;
 
 
 BoShader::BoShader(const QString& vertex, const QString& fragment)
@@ -320,6 +321,7 @@ void BoShader::bind()
     setUniform("lightPos", mSun->position3());
     setUniform("time", mTime);
     setUniform("fogEnabled", mFogEnabled);
+    setUniform("activeLights", mActiveLights);
   }
 }
 
@@ -350,5 +352,10 @@ void BoShader::setTime(float time)
 void BoShader::setFogEnabled(float enabled)
 {
   mFogEnabled = enabled;
+}
+
+void BoShader::setActiveLights(int active)
+{
+  mActiveLights = active;
 }
 

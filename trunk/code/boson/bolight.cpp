@@ -21,6 +21,7 @@
 
 #include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
+#include "boshader.h"
 #include <bogl.h>
 
 #include <qvaluevector.h>
@@ -62,98 +63,135 @@ BoLightManager::BoLightManager()
 
 BoLightManager::~BoLightManager()
 {
-  for(unsigned int i = 0; i < mLights->count(); i++)
+  // Delete all lights
+  while(mAllLights->count() > 0)
   {
-    delete (*mLights)[i];
+    deleteLight(mAllLights->first()->id());
   }
-  mLights->clear();
-  delete mLights;
+
+  delete mAllLights;
+  delete mActiveLights;
+  BoShader::setActiveLights(0);
 }
 
 void BoLightManager::init()
 {
-  int maxlights;
-  glGetIntegerv(GL_MAX_LIGHTS, &maxlights);
-  boDebug() << k_funcinfo << maxlights << " lights are supported" << endl;
+  glGetIntegerv(GL_MAX_LIGHTS, &mMaxActiveLights);
+  boDebug() << k_funcinfo << mMaxActiveLights << " lights are supported" << endl;
 
-  mLights = new QValueVector<BoLight*>();
-  mLights->resize(maxlights, false);
-}
-
-int BoLightManager::nextFreeId()
-{
-  for(unsigned int i = 0; i < mLights->size(); i++)
-  {
-    if((*mLights)[i] == 0)
-    {
-      boDebug() << k_funcinfo << "Light " << i << " not used" << endl;
-      return i;
-    }
-  }
-  boDebug() << k_funcinfo << "All lights are already used" << endl;
-  return -1;
-}
-
-void BoLightManager::setLight(int id, BoLight* light)
-{
-  (*mLights)[id] = light;
-}
-
-const QValueVector<BoLight*>* BoLightManager::lights()
-{
-  return mLights;
+  mActiveLights = new QValueVector<BoLight*>();
+  mAllLights = new QValueList<BoLight*>();
+  mNextLightId = 0;
+  BoShader::setActiveLights(0);
 }
 
 BoLight* BoLightManager::light(int id)
 {
-  return (*mLights)[id];
+  for(QValueList<BoLight*>::Iterator it = mAllLights->begin(); it != mAllLights->end(); it++)
+  {
+    if((*it)->id() == id)
+    {
+      return *it;
+    }
+  }
+  return 0;
 }
 
 BoLight* BoLightManager::createLight()
 {
-  BoLight* light = new BoLight; // this also call BoLightManager::setLight()
-  if(light->id() == -1)
+  BoLight* light = new BoLight(mNextLightId++);
+  mAllLights->append(light);
+
+  // Make the light active if possible
+  if((int)mActiveLights->count() < mMaxActiveLights)
   {
-    // Light could not be created
-    delete light;
-    return 0;
+    light->setOpenGLId((int)mActiveLights->count());
+    mActiveLights->push_back(light);
+    BoShader::setActiveLights(activeLights());
   }
   return light;
 }
 
 void BoLightManager::deleteLight(int id)
 {
-  BoLight* l = (*mLights)[id];
+  BoLight* l = 0;
+  for(QValueList<BoLight*>::Iterator it = mAllLights->begin(); it != mAllLights->end(); it++)
+  {
+    if((*it)->id() == id)
+    {
+      l = *it;
+      mAllLights->erase(it);
+      break;
+    }
+  }
+
   if(l)
   {
-    (*mLights)[id] = 0;
+    int openglid = l->openGLId();
     delete l;
+
+    if(openglid >= 0)
+    {
+      // Remove the light from the list of active lights
+      if(openglid + 1 < (int)mActiveLights->count())
+      {
+        // The light is in the middle of the vector.
+        BoLight* otherlight = mActiveLights->last();
+        mActiveLights->at(openglid) = otherlight;
+        otherlight->setOpenGLId(openglid);
+      }
+      mActiveLights->pop_back();
+
+      if(mAllLights->count() > mActiveLights->count())
+      {
+        // Make another light active
+        BoLight* otherlight;
+        // Find first inactive light...
+        for(QValueList<BoLight*>::Iterator it = mAllLights->begin(); it != mAllLights->end(); it++)
+        {
+          if(!(*it)->isActive())
+          {
+            otherlight = *it;
+            break;
+          }
+        }
+        // ... and active it
+        otherlight->setOpenGLId(mAllLights->count());
+        mActiveLights->push_back(otherlight);
+      }
+      BoShader::setActiveLights(activeLights());
+    }
+  }
+}
+
+int BoLightManager::activeLights() const
+{
+  return mActiveLights->count();
+}
+
+void BoLightManager::cameraChanged()
+{
+  for (unsigned int i = 0; i < mActiveLights->count(); i++)
+  {
+    mActiveLights->at(i)->refreshPosition();
   }
 }
 
 void BoLightManager::updateAllStates()
 {
-  for(unsigned int i = 0; i < mLights->size(); i++)
+  for (unsigned int i = 0; i < mActiveLights->count(); i++)
   {
-    if((*mLights)[i] != 0)
-    {
-      (*mLights)[i]->updateStates();
-    }
+    mActiveLights->at(i)->updateStates();
   }
 }
 
 
 /*****  BoLight  *****/
 
-BoLight::BoLight()
+BoLight::BoLight(int id)
 {
-  // Get id for this light
-  mId = BoLightManager::manager()->nextFreeId();
-  if(mId == -1)
-  {
-    return;  // All lights already in use
-  }
-  BoLightManager::manager()->setLight(mId, this);
+  mId = id;
+  mOpenGLId = -1;
 
   // Disable
   mEnabled = false;
@@ -163,13 +201,7 @@ BoLight::BoLight()
 
 BoLight::~BoLight()
 {
-  if(mId == -1)
-  {
-    // Invalid light, nothing was inited, nothing has to be uninited
-    return;
-  }
   setEnabled(false);
-  BoLightManager::manager()->setLight(mId, 0);
 }
 
 void BoLight::setAmbient(const BoVector4Float& a)
@@ -180,7 +212,10 @@ void BoLight::setAmbient(const BoVector4Float& a)
   }
 
   mAmbient = a;
-  glLightfv(GL_LIGHT0 + mId, GL_AMBIENT, mAmbient.data());
+  if(isActive())
+  {
+    glLightfv(GL_LIGHT0 + mOpenGLId, GL_AMBIENT, mAmbient.data());
+  }
 }
 
 void BoLight::setDiffuse(const BoVector4Float& d)
@@ -191,7 +226,10 @@ void BoLight::setDiffuse(const BoVector4Float& d)
   }
 
   mDiffuse = d;
-  glLightfv(GL_LIGHT0 + mId, GL_DIFFUSE, mDiffuse.data());
+  if(isActive())
+  {
+    glLightfv(GL_LIGHT0 + mOpenGLId, GL_DIFFUSE, mDiffuse.data());
+  }
 }
 
 void BoLight::setSpecular(const BoVector4Float& s)
@@ -202,7 +240,10 @@ void BoLight::setSpecular(const BoVector4Float& s)
   }
 
   mSpecular = s;
-  glLightfv(GL_LIGHT0 + mId, GL_SPECULAR, mSpecular.data());
+  if(isActive())
+  {
+    glLightfv(GL_LIGHT0 + mOpenGLId, GL_SPECULAR, mSpecular.data());
+  }
 }
 
 void BoLight::setPosition(const BoVector4Float& pos)
@@ -213,7 +254,10 @@ void BoLight::setPosition(const BoVector4Float& pos)
   }
 
   mPos = pos;
-  glLightfv(GL_LIGHT0 + mId, GL_POSITION, mPos.data());
+  if(isActive())
+  {
+    glLightfv(GL_LIGHT0 + mOpenGLId, GL_POSITION, mPos.data());
+  }
 }
 
 void BoLight::setConstantAttenuation(float a)
@@ -224,7 +268,10 @@ void BoLight::setConstantAttenuation(float a)
   }
 
   mAttenuation.setX(a);
-  glLightf(GL_LIGHT0 + mId, GL_CONSTANT_ATTENUATION, a);
+  if(isActive())
+  {
+    glLightf(GL_LIGHT0 + mOpenGLId, GL_CONSTANT_ATTENUATION, a);
+  }
 }
 
 void BoLight::setLinearAttenuation(float a)
@@ -235,7 +282,10 @@ void BoLight::setLinearAttenuation(float a)
   }
 
   mAttenuation.setY(a);
-  glLightf(GL_LIGHT0 + mId, GL_LINEAR_ATTENUATION, a);
+  if(isActive())
+  {
+    glLightf(GL_LIGHT0 + mOpenGLId, GL_LINEAR_ATTENUATION, a);
+  }
 }
 
 void BoLight::setQuadraticAttenuation(float a)
@@ -246,7 +296,10 @@ void BoLight::setQuadraticAttenuation(float a)
   }
 
   mAttenuation.setZ(a);
-  glLightf(GL_LIGHT0 + mId, GL_QUADRATIC_ATTENUATION, a);
+  if(isActive())
+  {
+    glLightf(GL_LIGHT0 + mOpenGLId, GL_QUADRATIC_ATTENUATION, a);
+  }
 }
 
 void BoLight::setAttenuation(const BoVector3Float& a)
@@ -257,9 +310,12 @@ void BoLight::setAttenuation(const BoVector3Float& a)
   }
 
   mAttenuation = a;
-  glLightf(GL_LIGHT0 + mId, GL_CONSTANT_ATTENUATION, a.x());
-  glLightf(GL_LIGHT0 + mId, GL_LINEAR_ATTENUATION, a.y());
-  glLightf(GL_LIGHT0 + mId, GL_QUADRATIC_ATTENUATION, a.z());
+  if(isActive())
+  {
+    glLightf(GL_LIGHT0 + mOpenGLId, GL_CONSTANT_ATTENUATION, a.x());
+    glLightf(GL_LIGHT0 + mOpenGLId, GL_LINEAR_ATTENUATION, a.y());
+    glLightf(GL_LIGHT0 + mOpenGLId, GL_QUADRATIC_ATTENUATION, a.z());
+  }
 }
 
 void BoLight::setEnabled(bool e)
@@ -270,39 +326,61 @@ void BoLight::setEnabled(bool e)
   }
 
   mEnabled = e;
-  if(mEnabled)
+  if(isActive())
   {
-    glEnable(GL_LIGHT0 + mId);
-  }
-  else
-  {
-    glDisable(GL_LIGHT0 + mId);
+    if(mEnabled)
+    {
+      glEnable(GL_LIGHT0 + mOpenGLId);
+    }
+    else
+    {
+      glDisable(GL_LIGHT0 + mOpenGLId);
+    }
   }
 }
 
 void BoLight::refreshPosition()
 {
-  glLightfv(GL_LIGHT0 + mId, GL_POSITION, mPos.data());
+  if(isActive())
+  {
+    glLightfv(GL_LIGHT0 + mOpenGLId, GL_POSITION, mPos.data());
+  }
+}
+
+void BoLight::setOpenGLId(int id)
+{
+  if(isActive() && id < 0)
+  {
+    glDisable(GL_LIGHT0 + mOpenGLId);
+  }
+
+  mOpenGLId = id;
+  updateStates();
 }
 
 void BoLight::updateStates()
 {
+  if(!isActive())
+  {
+    return;
+  }
+
   if(mEnabled)
   {
-    glEnable(GL_LIGHT0 + mId);
+    glEnable(GL_LIGHT0 + mOpenGLId);
   }
   else
   {
-    glDisable(GL_LIGHT0 + mId);
+    glDisable(GL_LIGHT0 + mOpenGLId);
   }
 
-  glLightfv(GL_LIGHT0 + mId, GL_AMBIENT, mAmbient.data());
-  glLightfv(GL_LIGHT0 + mId, GL_DIFFUSE, mDiffuse.data());
-  glLightfv(GL_LIGHT0 + mId, GL_SPECULAR, mSpecular.data());
+  glLightfv(GL_LIGHT0 + mOpenGLId, GL_AMBIENT, mAmbient.data());
+  glLightfv(GL_LIGHT0 + mOpenGLId, GL_DIFFUSE, mDiffuse.data());
+  glLightfv(GL_LIGHT0 + mOpenGLId, GL_SPECULAR, mSpecular.data());
 
-  glLightf(GL_LIGHT0 + mId, GL_CONSTANT_ATTENUATION, mAttenuation.x());
-  glLightf(GL_LIGHT0 + mId, GL_LINEAR_ATTENUATION, mAttenuation.y());
-  glLightf(GL_LIGHT0 + mId, GL_QUADRATIC_ATTENUATION, mAttenuation.z());
+  glLightf(GL_LIGHT0 + mOpenGLId, GL_CONSTANT_ATTENUATION, mAttenuation.x());
+  glLightf(GL_LIGHT0 + mOpenGLId, GL_LINEAR_ATTENUATION, mAttenuation.y());
+  glLightf(GL_LIGHT0 + mOpenGLId, GL_QUADRATIC_ATTENUATION, mAttenuation.z());
 
-  glLightfv(GL_LIGHT0 + mId, GL_POSITION, mPos.data());
+  glLightfv(GL_LIGHT0 + mOpenGLId, GL_POSITION, mPos.data());
 }

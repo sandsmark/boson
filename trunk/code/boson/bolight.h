@@ -24,6 +24,7 @@
 
 
 template<class T> class QValueVector;
+template<class T> class QValueList;
 class BoLight;
 
 /**
@@ -35,24 +36,32 @@ class BoLightManager
     BoLightManager();
     ~BoLightManager();
 
+    /**
+     * Creates a new light and returns it.
+     * Always use this method instead of creating @ref BoLight object directly!
+     **/
     BoLight* createLight();
     void deleteLight(int id);
     BoLight* light(int id);
 
-    int nextFreeId();
-    // TODO: make this private?
-    void setLight(int id, BoLight* light);
-    const QValueVector<BoLight*>* lights();
+    int activeLights() const;
 
     static void initStatic();
     static void deleteStatic();
     static BoLightManager* manager();
 
     void updateAllStates();
+    void cameraChanged();
+
+  protected:
+    void setLight(int id, BoLight* light);
 
   private:
     void init();
-    QValueVector<BoLight*>* mLights;
+    QValueList<BoLight*>* mAllLights;
+    QValueVector<BoLight*>* mActiveLights;
+    int mNextLightId;
+    int mMaxActiveLights;
 
     static BoLightManager* mLightManager;
 };
@@ -80,11 +89,18 @@ class BoLightManager
 class BoLight
 {
   public:
-    BoLight();
+    BoLight(int id);
     ~BoLight();
 
     bool isEnabled() const  { return mEnabled; }
     void setEnabled(bool e);
+
+    /**
+     * @return whether this light is active.
+     * Only active lights are actually used by OpenGL. Number of concurrently
+     *  active lights is limited (usually 8 at most).
+     **/
+    bool isActive() const  { return (mOpenGLId >= 0); }
 
     const BoVector4Float& ambient() const  { return mAmbient; }
     const BoVector4Float& diffuse() const  { return mDiffuse; }
@@ -151,7 +167,17 @@ class BoLight
     float quadraticAttenuation() const  { return mAttenuation.z(); }
     BoVector3Float attenuation() const  { return mAttenuation; }
 
+    /**
+     * @return internal id of the light (to be used in e.g. scripts).
+     * Don't confuse this with @ref openGLId
+     **/
     int id() const  { return mId; }
+    /**
+     * @return OpenGL id of the light or -1 if the light is not active.
+     **/
+    int openGLId() const  { return mOpenGLId; }
+
+    void setOpenGLId(int id);
 
     void refreshPosition();
 
@@ -171,6 +197,7 @@ class BoLight
     BoVector3Float mAttenuation;
     bool mEnabled;
     int mId;
+    int mOpenGLId;
 };
 
 #endif // BOLIGHT_H
