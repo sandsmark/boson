@@ -940,6 +940,8 @@ bool BosonShotBomb::saveAsXML(QDomElement& root)
   }
 
   root.setAttribute("Speed", speed());
+  root.setAttribute("HorizontalVelocityX", mHorizontalVelocity.x());
+  root.setAttribute("HorizontalVelocityY", mHorizontalVelocity.y());
   return true;
 }
 
@@ -953,6 +955,7 @@ bool BosonShotBomb::loadFromXML(const QDomElement& root)
 
   bool ok;
   bofixed speed;
+  bofixed hvelox, hveloy;
 
   speed = root.attribute("Speed").toFloat(&ok);
   if(!ok)
@@ -960,8 +963,21 @@ bool BosonShotBomb::loadFromXML(const QDomElement& root)
     boError(350) << k_funcinfo << "Invalid value for Speed tag" << endl;
     return false;
   }
+  hvelox = root.attribute("HorizontalVelocityX").toFloat(&ok);
+  if(!ok)
+  {
+    boError(350) << k_funcinfo << "Invalid value for HorizontalVelocityX tag" << endl;
+    return false;
+  }
+  hveloy = root.attribute("HorizontalVelocityY").toFloat(&ok);
+  if(!ok)
+  {
+    boError(350) << k_funcinfo << "Invalid value for HorizontalVelocityY tag" << endl;
+    return false;
+  }
 
   setSpeed(speed);
+  setHorizontalVelocity(BoVector2Fixed(hvelox, hveloy));
   setAccelerationSpeed(properties()->accelerationSpeed());
   setMaxSpeed(mWeaponSpeed);
   setVisible(true);
@@ -1004,7 +1020,7 @@ void BosonShotBomb::advanceMoveInternal()
   accelerate();
   boDebug(350) << "BOMB: " << k_funcinfo << "accelerated (a. speed: " << accelerationSpeed() <<
       "); speed is now: " << speed() << "; z: " << z() << endl;
-  setVelocity(0, 0, -speed());
+  setVelocity(mHorizontalVelocity.x(), mHorizontalVelocity.y(), -speed());
 }
 
 

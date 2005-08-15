@@ -441,6 +441,8 @@ class BosonShotBomb : public BosonShot
 
     void init(const BoVector3Fixed& pos);
 
+    void setHorizontalVelocity(const BoVector2Fixed& velo) { mHorizontalVelocity = velo; }
+
     inline virtual int type() const { return BosonShot::Bomb; }
 
   protected:
@@ -451,6 +453,7 @@ class BosonShotBomb : public BosonShot
 
   private:
     KGamePropertyBool mActivated;
+    BoVector2Fixed mHorizontalVelocity;
 };
 
 

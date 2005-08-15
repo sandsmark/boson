@@ -84,11 +84,13 @@ public:
 		IdResourcesX = 1536 + 2,
 		IdResourcesY = 1536 + 3,
 		IdHarvestingType = 1536 + 4,
-		IdBombingPosX = 1536 + 5,
-		IdBombingPosY = 1536 + 6,
+		IdBombingTargetX = 1536 + 5,
+		IdBombingTargetY = 1536 + 6,
 		IdMinePlacingCounter = 1536 + 7,
 		IdResourceMineMinerals = 1536 + 8,
-		IdResourceMineOil = 1536 + 9
+		IdResourceMineOil = 1536 + 9,
+		IdBombingDropDist = 1536 + 10,
+		IdBombingLastDistFromDropPoint = 1536 + 11
 	};
 
 	Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
@@ -476,6 +478,9 @@ public:
 	virtual void addUpgrade(const UpgradeProperties* upgrade);
 	virtual void removeUpgrade(const UpgradeProperties* upgrade);
 
+	virtual void flyInCircle() {}
+
+
 protected:
 	void shootAt(BosonWeapon* w, Unit* target);
 
@@ -547,8 +552,6 @@ protected:
 	bool cellOccupied(int x, int y, bool ignoremoving = false) const;
 
 	virtual int getAnimationMode() const;
-
-	virtual void flyInCircle() {}
 
 
 private:
@@ -642,6 +645,8 @@ public:
 
 	static void initCellIntersectionTable();
 
+	virtual void flyInCircle();
+
 protected:
 	virtual void advanceMoveInternal(unsigned int advanceCallsCount); // move one step futher to path
 
@@ -672,8 +677,6 @@ protected:
 	void avoidance();
 	bool canGoToCurrentPathPoint(int xpos, int ypos);
 	void currentPathPointChanged(int unitx, int unity);
-
-	virtual void flyInCircle();
 
 private:
 	void changeUpgrades(const UpgradeProperties* upgrade, bool add);

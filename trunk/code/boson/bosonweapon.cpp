@@ -620,7 +620,7 @@ bool BosonWeapon::layMine()
   return true;
 }
 
-bool BosonWeapon::dropBomb()
+bool BosonWeapon::dropBomb(const BoVector2Fixed& hvelocity)
 {
   boDebug() << k_funcinfo << "" << endl;
   if (properties()->shotType() != BosonShot::Bomb || !reloaded()) {
@@ -630,7 +630,10 @@ bool BosonWeapon::dropBomb()
   BoVector3Fixed pos(unit()->centerX(), unit()->centerY(), unit()->z());
   // Substract half the object size from pos, so that bomb's center will be at pos
   pos += BoVector3Fixed(-0.25, -0.25, 0);  // FIXME: use real object size
-  shoot(pos, pos);
+  BosonShotBomb* bomb = (BosonShotBomb*)mProp->newShot(unit(), this, pos, pos);
+  bomb->setHorizontalVelocity(hvelocity);
+  canvas()->shotFired(bomb, this);
+  mReloadCounter = reloadingTime();
   boDebug() << k_funcinfo << "done" << endl;
   return true;
 }

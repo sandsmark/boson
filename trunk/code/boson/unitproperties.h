@@ -297,6 +297,10 @@ public:
 	 * @return Turn radius for flying units
 	 **/
 	bofixed turnRadius() const;
+	/**
+	 * @return Preferred flying altitude for flying units
+	 **/
+	bofixed preferredAltitude() const;
 
 	/**
 	 * @return Mobile unit's crushDamage.
@@ -577,6 +581,7 @@ private:
 	int mRotationSpeed;
 	bool mIsHelicopter;
 	bofixed mTurnRadius;
+	bofixed mPreferredAltitude;
 	bool mCanGoOnLand;
 	bool mCanGoOnWater;
 	unsigned int mCrushDamage;
