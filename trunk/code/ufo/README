@@ -50,6 +50,9 @@ Patches applied currently:
 - Porting menu patch from official libufo cvs (05/07/19)
 - Fix invalid memory access in utextwidget.cpp
 - Fix a crash in utextlayout.cpp due to a uint underflow for the line length
+- Fix to umenumanager.cpp to consume() mouse press events for menu items (before
+  it consumed press events for menus only). This makes sure that a press event
+  is not propagated to the parents (and siblings in a layered pane).
 
 
 

@@ -162,6 +162,12 @@ UMenuManager::processMouseEvent(UMouseEvent * e) {
 					menu->requestFocus();
 					menu->activate();
 				}
+			} else if (UMenuItem * item = dynamic_cast<UMenuItem*>(e->getSource())) {
+				if (item->contains(e->getLocation())) {
+					e->consume();
+
+					// don't do any actual action yet.
+				}
 			}
 		break;
 		case UEvent::MouseReleased: {
