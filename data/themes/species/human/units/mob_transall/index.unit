@@ -4,6 +4,7 @@ DecelerationSpeed=0.8
 CanGoOnLand=true
 CanGoOnWater=true
 Speed=2.2
+PreferredAltitude=6
 
 [Boson Unit]
 Armor=4
@@ -51,7 +52,7 @@ ReportUnderAttack=report_underattack
 Shoot=shoot
 
 [Weapon_0]
-AccelerationSpeed=0.15
+AccelerationSpeed=0.5
 CanShootAtAirUnits=false
 CanShootAtLandUnits=true
 Damage=850
@@ -68,6 +69,6 @@ Reload=15
 ShootEffects=
 SoundFly=missile_fly
 SoundShoot=shoot
-Speed=0.6
+Speed=5.0
 Type=Bomb
 AutoUse=false
