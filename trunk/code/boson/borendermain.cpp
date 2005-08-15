@@ -201,7 +201,9 @@ ModelPreview::~ModelPreview()
  BoMeshRendererManager::manager()->unsetCurrentRenderer();
  delete mUpdateTimer;
  delete mMouseMoveDiff;
- delete mLight;
+ if (mLight) {
+	BoLightManager::manager()->deleteLight(mLight->id());
+ }
  delete mCamera;
  mSpecies.clear();
  BoTextureManager::deleteStatic();
@@ -233,22 +235,21 @@ void ModelPreview::initializeGL()
  glEnable(GL_BLEND);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
- delete mLight;
- mLight = new BoLight;
- if (mLight->id() < 0) {
-	boError() << k_funcinfo << "light NOT created" << endl;
-	delete mLight;
-	mLight = 0;
- } else {
-	BoVector4Float lightDif(1.0f, 1.0f, 1.0f, 1.0f);
-	BoVector4Float lightAmb(0.5f, 0.5f, 0.5f, 1.0f);
-	BoVector3Float lightPos(-6000.0, 3000.0, 10000.0);
-	mLight->setAmbient(lightAmb);
-	mLight->setDiffuse(lightDif);
-	mLight->setSpecular(lightDif);
-	mLight->setDirectional(true);
-	mLight->setEnabled(true);
+ if (mLight) {
+	BoLightManager::manager()->deleteLight(mLight->id());
  }
+ mLight = BoLightManager::manager()->createLight();
+ if (!mLight->isActive()) {
+	boWarning() << k_funcinfo << "light is inactive" << endl;
+ }
+ BoVector4Float lightDif(1.0f, 1.0f, 1.0f, 1.0f);
+ BoVector4Float lightAmb(0.5f, 0.5f, 0.5f, 1.0f);
+ BoVector3Float lightPos(-6000.0, 3000.0, 10000.0);
+ mLight->setAmbient(lightAmb);
+ mLight->setDiffuse(lightDif);
+ mLight->setSpecular(lightDif);
+ mLight->setDirectional(true);
+ mLight->setEnabled(true);
 
  setUpdatesEnabled(false);
  mUpdateTimer->start(GL_UPDATE_TIMER);
