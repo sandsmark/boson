@@ -103,6 +103,386 @@
 #include <qdom.h>
 #include <qvaluevector.h>
 
+
+#warning d->mMouseMoveDiff.start() mostly removed. probably fix displayInput()->actionLoced() actions !
+
+
+// #define CAMERA_MODIFIER_CONFIGURABLE 1
+
+static bool cameraModifier(const BoMouseEvent& event)
+{
+ // One button is the "camera modifier". When this button is pressed, mouse move
+ // events behave differently.
+ //
+ // Note that in a state diagram a mouse move event with the camera modifier
+ // being pressed causes a state change: not only has the mousemove event a
+ // different meaning, but also the button release event will behave differently
+ // (it does not cause any action)!
+ // -> however if the camera modifier is released before the button is released,
+ //    the original state is entered again.
+ bool cameraModifier = false;
+#ifdef CAMERA_MODIFIER_CONFIGURABLE
+ if (boConfig->boolValue("CameraModifier") == "ALT") {
+	cameraModifier = event.altButton();
+ } else if (boConfig->boolValue("CameraModifier") == "Shift") {
+	cameraModifier = event.shiftButton();
+ } else if (boConfig->boolValue("CameraModifier") == "CTRL") {
+	cameraModifier = event.ctrlButton();
+ }
+#else
+ cameraModifier = event.altButton();
+#endif
+ return cameraModifier;
+}
+
+
+BoMouseButtonState::BoMouseButtonState()
+{
+ mButtonIsReleased = true;
+ mIsMove = false;
+ mIsCameraAction = false;
+
+ mCurrentWidgetPosDiffX = 0;
+ mCurrentWidgetPosDiffY = 0;
+}
+
+BoMouseButtonState::~BoMouseButtonState()
+{
+}
+
+void BoMouseButtonState::pressButton(const QPoint& pos, const BoVector3Fixed& canvasVector)
+{
+ mButtonIsReleased = false;
+
+ mStartWidgetPos = pos;
+ mStartCanvasVector = canvasVector;
+
+ mCurrentWidgetPos = mStartWidgetPos;
+ mCurrentCanvasVector = mStartCanvasVector;
+
+ mCurrentWidgetPosDiffX = 0;
+ mCurrentWidgetPosDiffY = 0;
+ mCurrentCanvasVectorDiff = BoVector3Fixed(0, 0, 0);
+}
+
+void BoMouseButtonState::releaseButton(const BoMouseEvent& modifiers)
+{
+ if (mButtonIsReleased) {
+	return;
+ }
+ mButtonIsReleased = true;
+
+ if (mIsMove) {
+	if (!mIsCameraAction) {
+		actionAfterMove(modifiers);
+	}
+ } else {
+	action(modifiers);
+ }
+ mIsMove = false;
+ mIsCameraAction = false;
+}
+
+void BoMouseButtonState::mouseMoved(const BoMouseEvent& e)
+{
+ if (mButtonIsReleased) {
+	return;
+ }
+
+ // diff = currentPos - oldPos
+ mCurrentWidgetPosDiffX = e.gameViewWidgetPos().x() - currentWidgetPos().x();
+ mCurrentWidgetPosDiffY = e.gameViewWidgetPos().y() - currentWidgetPos().y();
+ mCurrentCanvasVectorDiff = e.canvasVector() - currentCanvasVector();
+
+ // update currentPos
+ mCurrentWidgetPos = e.gameViewWidgetPos();
+ mCurrentCanvasVector = e.canvasVector();
+
+ mIsMove = true;
+ mIsCameraAction = cameraModifier(e);
+ if (mIsCameraAction) {
+	cameraAction(e);
+ } else {
+	moveAction(e);
+ }
+}
+
+
+
+
+class BoGameViewMouseState : public BoMouseButtonState
+{
+public:
+	BoGameViewMouseState(BosonGameView* gameView, const BoGLMatrices* matrices)
+		: BoMouseButtonState()
+	{
+		mGameView = gameView;
+		mGameGLMatrices = matrices;
+	}
+
+	BosonGameView* gameView() const { return mGameView; }
+	BoSelection* selection() const { return gameView()->selection(); }
+	PlayerIO* localPlayerIO() const { return gameView()->localPlayerIO(); }
+	BoGameCamera* camera() const { return gameView()->camera(); }
+	BosonGameViewInputBase* displayInput() const { return gameView()->displayInput(); }
+	const BosonCanvas* canvas() const { return gameView()->canvas(); }
+	const BoGLMatrices* gameGLMatrices() const { return mGameGLMatrices; }
+	bool mapDistance(int windx, int windy, GLfloat* dx, GLfloat* dy) const
+	{
+		return Bo3dTools::mapDistance(gameGLMatrices()->modelviewMatrix(),
+				gameGLMatrices()->projectionMatrix(),
+				gameGLMatrices()->viewport(),
+				windx, windy, dx, dy);
+	}
+
+private:
+	BosonGameView* mGameView;
+	const BoGLMatrices* mGameGLMatrices;
+};
+
+class BoLeftMouseButtonState : public BoGameViewMouseState
+{
+public:
+	BoLeftMouseButtonState(BosonGameView* v, const BoGLMatrices* m) : BoGameViewMouseState(v, m)
+	{
+		mSelectionRect = 0;
+	}
+
+	void setSelectionRect(SelectionRect* r)
+	{
+		mSelectionRect = r;
+	}
+
+protected:
+	virtual void action(const BoMouseEvent&);
+	virtual void actionAfterMove(const BoMouseEvent&);
+	virtual void cameraAction(const BoMouseEvent&);
+	virtual void moveAction(const BoMouseEvent&);
+
+private:
+	SelectionRect* mSelectionRect;
+};
+
+class BoRightMouseButtonState : public BoGameViewMouseState
+{
+public:
+	BoRightMouseButtonState(BosonGameView* v, const BoGLMatrices* m) : BoGameViewMouseState(v, m)
+	{
+	}
+
+protected:
+	virtual void action(const BoMouseEvent&);
+	virtual void actionAfterMove(const BoMouseEvent&);
+	virtual void cameraAction(const BoMouseEvent&);
+	virtual void moveAction(const BoMouseEvent&);
+};
+
+class BoMiddleMouseButtonState : public BoGameViewMouseState
+{
+public:
+	BoMiddleMouseButtonState(BosonGameView* v, const BoGLMatrices* m) : BoGameViewMouseState(v, m)
+	{
+	}
+
+protected:
+	virtual void action(const BoMouseEvent&);
+	virtual void actionAfterMove(const BoMouseEvent&);
+	virtual void cameraAction(const BoMouseEvent&);
+	virtual void moveAction(const BoMouseEvent&);
+};
+
+void BoLeftMouseButtonState::action(const BoMouseEvent& e)
+{
+ BO_CHECK_NULL_RET(displayInput());
+ BO_CHECK_NULL_RET(localPlayerIO());
+ BO_CHECK_NULL_RET(boViewData);
+
+ if (displayInput()->actionLocked()) {
+	// basically the same as a normal RMB
+	displayInput()->actionClicked(e);
+	return;
+ }
+
+ BoVector3Fixed canvasVector = startedAtCanvasVector();
+ Unit* unit = 0;
+ if (!canvas()->onCanvas(canvasVector)) {
+	return;
+ }
+
+ unit = localPlayerIO()->findUnitAt(canvas(), canvasVector);
+ bool playSelectSound = false;
+
+ if (e.controlButton()) {
+	if (unit) {
+		if (localPlayerIO()->ownsUnit(unit)) {
+			playSelectSound = true;
+		}
+		displayInput()->selectSingle(unit, false);
+	}
+ } else if (e.shiftButton()) {
+	if (unit) {
+		BoItemList* list = new BoItemList();
+		list->append(unit);
+		displayInput()->unselectArea(list);
+	}
+ } else {
+	if (unit) {
+		if (localPlayerIO()->ownsUnit(unit)) {
+			playSelectSound = true;
+		}
+		displayInput()->selectSingle(unit, true);
+	} else {
+		selection()->clear();
+	}
+ }
+
+ if (unit && playSelectSound) {
+	boViewData->speciesData(unit->speciesTheme())->playSound(unit, SoundOrderSelect);
+ }
+}
+
+void BoLeftMouseButtonState::actionAfterMove(const BoMouseEvent& e)
+{
+ BO_CHECK_NULL_RET(displayInput());
+ BO_CHECK_NULL_RET(localPlayerIO());
+ BO_CHECK_NULL_RET(boViewData);
+
+ BoItemList* items = mSelectionRect->items(localPlayerIO(), canvas());
+ bool playSelectionSoundForLeader = false;
+ if (e.controlButton()) {
+	if (selection()->count() > 0) {
+		playSelectionSoundForLeader = true;
+	}
+	displayInput()->selectArea(items, false);
+ } else if (e.shiftButton()) {
+	playSelectionSoundForLeader = false;
+	displayInput()->unselectArea(items);
+ } else {
+	playSelectionSoundForLeader = true;
+	displayInput()->selectArea(items, true);
+ }
+ mSelectionRect->setVisible(false);
+ if (playSelectionSoundForLeader && !selection()->isEmpty()) {
+	Unit* u = selection()->leader();
+	if (localPlayerIO()->ownsUnit(u)) {
+		boViewData->speciesData(u->speciesTheme())->playSound(u, SoundOrderSelect);
+	}
+ }
+}
+
+void BoLeftMouseButtonState::cameraAction(const BoMouseEvent& e)
+{
+ Q_UNUSED(e);
+ camera()->changeZ(currentWidgetPosDiffY());
+}
+
+void BoLeftMouseButtonState::moveAction(const BoMouseEvent& e)
+{
+ if (!displayInput()->actionLocked()) {
+	// TODO: use canvas coordinates for the selection rect.
+	//       atm the widget size is the largest possible area for the
+	//       selection rect, but that is not usually desired.
+	//       also, when drawing a selection rect and using RMB moving at the
+	//       same time, very unuseful things happens (the rect is scrolled
+	//       along with the screen - its start position should stay at the
+	//       same canvas position ideally)
+	mSelectionRect->setVisible(true);
+	mSelectionRect->setStartWidgetPos(startedAtWidgetPos());
+	mSelectionRect->setEndWidgetPos(e.gameViewWidgetPos());
+ } else {
+	if (!boGame->gameMode() && displayInput()->actionType() != ActionChangeHeight) {
+		// In editor mode, try to place unit/ground whenever mouse moves. This
+		//  enables you to edit big areas easily. But it's not done for height
+		//  changing (yet).
+		displayInput()->actionClicked(e);
+	}
+ }
+}
+
+
+void BoRightMouseButtonState::action(const BoMouseEvent& e)
+{
+ if (displayInput()->actionLocked()) {
+	displayInput()->unlockAction();
+	displayInput()->updateCursor();
+ } else {
+	displayInput()->actionClicked(e);
+ }
+}
+
+void BoRightMouseButtonState::actionAfterMove(const BoMouseEvent& e)
+{
+ Q_UNUSED(e);
+ // no action should be taken here (RMB move is ended)
+}
+
+void BoRightMouseButtonState::cameraAction(const BoMouseEvent& e)
+{
+ Q_UNUSED(e);
+ BO_CHECK_NULL_RET(camera());
+ camera()->changeRotation(currentWidgetPosDiffX());
+ camera()->changeRadius(currentWidgetPosDiffY());
+}
+
+void BoRightMouseButtonState::moveAction(const BoMouseEvent& e)
+{
+ if (boConfig->boolValue("RMBMove")) {
+	// problem is that QCursor::setPos() also causes
+	// a mouse move event. we can use this hack in
+	// order to check whether it is a real mouse
+	// move event or we caused it here.
+	// TODO: use d->mMouseMoveDiff.x()/y() in
+	// paintGL() for the cursor, not QCursor::pos()
+//	static bool a = false;
+//	if (a) {
+//		a = false;
+//		break;
+//	}
+//	a = true;moveLookAtBy
+//	QPoint pos = mapToGlobal(QPoint(d->mMouseMoveDiff.oldX(), d->mMouseMoveDiff.oldY()));
+//	QCursor::setPos(pos);
+
+	// modifiers are ignored.
+	GLfloat dx, dy;
+	int moveX = currentWidgetPosDiffX();
+	int moveY = currentWidgetPosDiffY();
+	mapDistance(moveX, moveY, &dx, &dy);
+	camera()->changeLookAt(BoVector3Float(dx, dy, 0));
+ }
+}
+
+
+void BoMiddleMouseButtonState::action(const BoMouseEvent& e)
+{
+ // we ignore all modifiers here, currently.
+ if (boConfig->boolValue("MMBMove")) {
+	float posX, posY, posZ;
+	e.worldPos(&posX, &posY, &posZ);
+	int cellX, cellY;
+	cellX = (int)(posX);
+	cellY = (int)(-posY);
+	gameView()->slotReCenterDisplay(QPoint(cellX, cellY));
+	displayInput()->updateCursor();
+ }
+}
+
+void BoMiddleMouseButtonState::actionAfterMove(const BoMouseEvent& e)
+{
+ action(e);
+}
+
+void BoMiddleMouseButtonState::cameraAction(const BoMouseEvent& e)
+{
+ Q_UNUSED(e);
+}
+
+void BoMiddleMouseButtonState::moveAction(const BoMouseEvent& e)
+{
+ Q_UNUSED(e);
+}
+
+
+
 /**
  * Calculate the maximum and minimum world coordinates from the
  * specified rectangles.
@@ -189,7 +569,7 @@ void SelectionRect::quitGame()
 }
 
 
-BoItemList* SelectionRect::items(const PlayerIO* localPlayerIO, const BosonCanvas* canvas, const BoGLMatrices& gameGLMatrices) const
+BoItemList* SelectionRect::items(const PlayerIO* localPlayerIO, const BosonCanvas* canvas) const
 {
  if (!canvas) {
 	BO_NULL_ERROR(canvas);
@@ -210,7 +590,7 @@ BoItemList* SelectionRect::items(const PlayerIO* localPlayerIO, const BosonCanva
 
  GLfloat maxX, maxY;
  GLfloat minX, minY;
- calculateWorldRect(gameGLMatrices, widgetRect_, &minX, &minY, &maxX, &maxY);
+ calculateWorldRect(*mMatrices, widgetRect_, &minX, &minY, &maxX, &maxY);
  maxY /= -1.0f;
  minY /= -1.0f;
 
@@ -244,7 +624,7 @@ BoItemList* SelectionRect::items(const PlayerIO* localPlayerIO, const BosonCanva
 		glx = x;
 		gly = -y;
 		glz = map->heightAtCorner(x, y);
-		Bo3dTools::boProject(gameGLMatrices, glx, gly, glz, &win);
+		Bo3dTools::boProject(*mMatrices, glx, gly, glz, &win);
 		if (widgetRect_.contains(win)) {
 			cells.append(c);
 			continue;
@@ -253,7 +633,7 @@ BoItemList* SelectionRect::items(const PlayerIO* localPlayerIO, const BosonCanva
 		glx = (x + 1);
 		gly = -y;
 		glz = map->heightAtCorner(x + 1, y);
-		Bo3dTools::boProject(gameGLMatrices, glx, gly, glz, &win);
+		Bo3dTools::boProject(*mMatrices, glx, gly, glz, &win);
 		if (widgetRect_.contains(win)) {
 			cells.append(c);
 			continue;
@@ -262,7 +642,7 @@ BoItemList* SelectionRect::items(const PlayerIO* localPlayerIO, const BosonCanva
 		glx = x;
 		gly = -(y + 1);
 		glz = map->heightAtCorner(x, y + 1);
-		Bo3dTools::boProject(gameGLMatrices, glx, gly, glz, &win);
+		Bo3dTools::boProject(*mMatrices, glx, gly, glz, &win);
 		if (widgetRect_.contains(win)) {
 			cells.append(c);
 			continue;
@@ -271,7 +651,7 @@ BoItemList* SelectionRect::items(const PlayerIO* localPlayerIO, const BosonCanva
 		glx = (x + 1);
 		gly = -(y + 1);
 		glz = map->heightAtCorner(x + 1, y + 1);
-		Bo3dTools::boProject(gameGLMatrices, glx, gly, glz, &win);
+		Bo3dTools::boProject(*mMatrices, glx, gly, glz, &win);
 		if (widgetRect_.contains(win)) {
 			cells.append(c);
 			continue;
@@ -428,6 +808,10 @@ public:
 		mGameViewPluginWidgetContainer = 0;
 
 		mEventListener = 0;
+
+		mLeftButtonState = 0;
+		mMiddleButtonState = 0;
+		mRightButtonState = 0;
 	}
 
 	BosonViewData* mViewData;
@@ -453,7 +837,6 @@ public:
 	BosonGameViewInputBase* mInput;
 	bool mInputInitialized;
 	BoCursorEdgeScrolling* mCursorEdgeScrolling;
-	BoMouseMoveDiff mMouseMoveDiff;
 
 	BoCursorPos mCursorPos;
 	BoGameCamera mCamera;
@@ -474,6 +857,10 @@ public:
 	BoUfoWidget* mGameViewPluginWidgetContainer;
 
 	BosonGameViewEventListener* mEventListener;
+
+	BoLeftMouseButtonState* mLeftButtonState;
+	BoMiddleMouseButtonState* mMiddleButtonState;
+	BoRightMouseButtonState* mRightButtonState;
 };
 
 BosonGameView::BosonGameView()
@@ -516,6 +903,9 @@ BosonGameView::~BosonGameView()
  BoLightManager::deleteStatic();
  BosonViewData::setGlobalViewData(0);
  delete d->mViewData;
+ delete d->mLeftButtonState;
+ delete d->mMiddleButtonState;
+ delete d->mRightButtonState;
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
 }
@@ -529,7 +919,6 @@ void BosonGameView::init()
 
  d->mViewData = new BosonViewData(this);
  BosonViewData::setGlobalViewData(d->mViewData);
-
 
  d->mFovY = 60.0f;
 
@@ -574,6 +963,13 @@ void BosonGameView::init()
  d->mSelectionGroups->setSelection(selection());
 
  d->mScriptConnector = new BosonGameViewScriptConnector(this);
+
+ d->mLeftButtonState = new BoLeftMouseButtonState(this, d->mGameGLMatrices);
+ d->mLeftButtonState->setSelectionRect(d->mSelectionRect);
+ d->mMiddleButtonState = new BoMiddleMouseButtonState(this, d->mGameGLMatrices);
+ d->mRightButtonState = new BoRightMouseButtonState(this, d->mGameGLMatrices);
+
+
 
 
  BoVector4Float lightDif(0.644f, 0.644f, 0.644f, 1.0f);
@@ -639,7 +1035,6 @@ void BosonGameView::quitGame()
  resetGameMode();
 
  d->mGameViewPlugin->quitGame();
- d->mMouseMoveDiff.stop();
  d->mCursorEdgeScrolling->quitGame();
  delete d->mMouseIO;
  d->mMouseIO = 0;
@@ -1656,18 +2051,6 @@ void BosonGameView::removeSelectionRect(bool replace)
  BO_CHECK_NULL_RET(boViewData);
 
  if (d->mSelectionRect->isVisible()) {
-	// here as there is a performance problem in
-	// mousemove:
-	BoItemList* items = d->mSelectionRect->items(localPlayerIO(), canvas(), *d->mGameGLMatrices);
-	displayInput()->selectArea(items, replace);
-
-	d->mSelectionRect->setVisible(false);
-	if (!selection()->isEmpty()) {
-		Unit* u = selection()->leader();
-		if (localPlayerIO()->ownsUnit(u)) {
-			boViewData->speciesData(u->speciesTheme())->playSound(u, SoundOrderSelect);
-		}
-	}
  } else {
 	// a simple click on the map
 	GLfloat x,y,z;
@@ -1772,11 +2155,6 @@ void BosonGameView::slotShowMiniMap(bool show)
 }
 
 
-// one day we might support swapping LMB and RMB so let's use defines already to
-// make that easier.
-#define LEFT_BUTTON LeftButton
-#define RIGHT_BUTTON RightButton
-
 void BosonGameView::slotMouseEvent(QMouseEvent* e)
 {
  BO_CHECK_NULL_RET(displayInput());
@@ -1838,15 +2216,19 @@ void BosonGameView::slotMouseEvent(QMouseEvent* e)
 	{
 		// no action should happen here!
 		isDoubleClick = NoButton;
-		if (e->button() == LEFT_BUTTON) {
-			d->mSelectionRect->setStartWidgetPos(e->pos());
-		} else if (e->button() == MidButton) {
-			// nothing to be done here
-		} else if (e->button() == RIGHT_BUTTON) {
-			if (boConfig->boolValue("RMBMove")) {
-				//AB: this might be obsolete..
-				d->mMouseMoveDiff.moveEvent(e->pos()); // set position, but do not yet start!
-			}
+
+		switch (e->button()) {
+			case LeftButton:
+				d->mLeftButtonState->pressButton(event.gameViewWidgetPos(), event.canvasVector());
+				break;
+			case MidButton:
+				d->mMiddleButtonState->pressButton(event.gameViewWidgetPos(), event.canvasVector());
+				break;
+			case RightButton:
+				d->mRightButtonState->pressButton(event.gameViewWidgetPos(), event.canvasVector());
+				break;
+			default:
+				break;
 		}
 		e->accept();
 		break;
@@ -1931,67 +2313,14 @@ void BosonGameView::mouseEventWheel(float delta, Orientation orientation, const 
 
 void BosonGameView::mouseEventMove(int buttonState, const BoMouseEvent& event)
 {
- float posX, posY, posZ;
- event.worldPos(&posX, &posY, &posZ);
- d->mMouseMoveDiff.moveEvent(event.gameViewWidgetPos());
- if (event.altButton()) {
-	// The Alt button is the camera modifier in boson.
-	// Better don't do important stuff (like unit movement
-	// or selections) here, since a single push on Alt gives
-	// the focus to the menu which might be very confusing
-	// during a game.
-	if (buttonState & LEFT_BUTTON) {
-		d->mMouseMoveDiff.start(LEFT_BUTTON);
-		camera()->changeZ(d->mMouseMoveDiff.dy());
-	} else if (buttonState & RIGHT_BUTTON) {
-		d->mMouseMoveDiff.start(RIGHT_BUTTON);
-		camera()->changeRotation(d->mMouseMoveDiff.dx());
-		camera()->changeRadius(d->mMouseMoveDiff.dy());
-	}
- } else if (buttonState & LEFT_BUTTON) {
-	if (!displayInput()->actionLocked()) {
-		// selection rect gets drawn.
-		// other modifiers are ignored
-		d->mSelectionRect->setVisible(true);
-		moveSelectionRect(event.gameViewWidgetPos());
-	} else if (!boGame->gameMode() && displayInput()->actionType() != ActionChangeHeight) {
-		// In editor mode, try to place unit/ground whenever mouse moves. This
-		//  enables you to edit big areas easily. But it's not done for height
-		//  changing (yet).
-		displayInput()->actionClicked(event);
-	}
- } else if (buttonState & RIGHT_BUTTON) {
-	// RMB+MouseMove does *not* depend on CTRL or Shift. the
-	// map is moved in all cases (currently - we have some
-	// free buttons here :))
-	if (boConfig->boolValue("RMBMove")) {
-		// problem is that QCursor::setPos() also causes
-		// a mouse move event. we can use this hack in
-		// order to check whether it is a real mouse
-		// move event or we caused it here.
-		// TODO: use d->mMouseMoveDiff.x()/y() in
-		// paintGL() for the cursor, not QCursor::pos()
-//		static bool a = false;
-//		if (a) {
-//			a = false;
-//			break;
-//		}
-//		a = true;moveLookAtBy
-//		QPoint pos = mapToGlobal(QPoint(d->mMouseMoveDiff.oldX(), d->mMouseMoveDiff.oldY()));
-//		QCursor::setPos(pos);
-
-		// modifiers are ignored.
-		d->mMouseMoveDiff.start(RIGHT_BUTTON);
-		GLfloat dx, dy;
-		int moveX = d->mMouseMoveDiff.dx();
-		int moveY = d->mMouseMoveDiff.dy();
-		mapDistance(moveX, moveY, &dx, &dy);
-		camera()->changeLookAt(BoVector3Float(dx, dy, 0));
-	} else {
-		d->mMouseMoveDiff.stop();
-	}
- } else if (buttonState & MidButton) {
-	// currently unused
+ if (buttonState & LeftButton) {
+	d->mLeftButtonState->mouseMoved(event);
+ }
+ if (buttonState & MidButton) {
+	d->mMiddleButtonState->mouseMoved(event);
+ }
+ if (buttonState & RightButton) {
+	d->mRightButtonState->mouseMoved(event);
  }
 
  updateCursorCanvasVector(event.gameViewWidgetPos());
@@ -2009,48 +2338,19 @@ void BosonGameView::mouseEventMove(int buttonState, const BoMouseEvent& event)
 void BosonGameView::mouseEventRelease(ButtonState button, const BoMouseEvent& event)
 {
  switch (button) {
-	case LEFT_BUTTON:
+	case LeftButton:
 	{
-		if (displayInput()->actionLocked()) {
-			// basically the same as a normal RMB
-			displayInput()->actionClicked(event);
-		} else if (event.shiftButton()) {
-			BoItemList* items = d->mSelectionRect->items(localPlayerIO(), canvas(), *d->mGameGLMatrices);
-			displayInput()->unselectArea(items);
-			d->mSelectionRect->setVisible(false);
-		} else if (event.controlButton()) {
-			removeSelectionRect(false);
-		} else {
-			// select the unit(s) below the cursor/inside the
-			// selection rect
-			removeSelectionRect(true);
-		}
+		d->mLeftButtonState->releaseButton(event);
 		break;
 	}
 	case MidButton:
 	{
-		// we ignore all modifiers here, currently.
-		if (boConfig->boolValue("MMBMove")) {
-			float posX, posY, posZ;
-			event.worldPos(&posX, &posY, &posZ);
-			int cellX, cellY;
-			cellX = (int)(posX);
-			cellY = (int)(-posY);
-			slotReCenterDisplay(QPoint(cellX, cellY));
-			displayInput()->updateCursor();
-		}
+		d->mMiddleButtonState->releaseButton(event);
 		break;
 	}
-	case RIGHT_BUTTON:
+	case RightButton:
 	{
-		if (!d->mMouseMoveDiff.isStopped()) {
-			d->mMouseMoveDiff.stop();
-		} else if (displayInput()->actionLocked()) {
-			displayInput()->unlockAction();
-			displayInput()->updateCursor();
-		} else {
-			displayInput()->actionClicked(event);
-		}
+		d->mRightButtonState->releaseButton(event);
 		break;
 	}
 	default:
@@ -2063,7 +2363,7 @@ void BosonGameView::mouseEventRelease(ButtonState button, const BoMouseEvent& ev
 void BosonGameView::mouseEventReleaseDouble(ButtonState button, const BoMouseEvent& event)
 {
  switch (button) {
-	case LEFT_BUTTON:
+	case LeftButton:
 	{
 		// we ignore UnitAction is locked here
 		// currently!
@@ -2081,7 +2381,7 @@ void BosonGameView::mouseEventReleaseDouble(ButtonState button, const BoMouseEve
 		break;
 	}
 	case MidButton:
-	case RIGHT_BUTTON:
+	case RightButton:
 	{
 		// we ignore all other (RMB, MMB) for now. we
 		// might use this one day.
