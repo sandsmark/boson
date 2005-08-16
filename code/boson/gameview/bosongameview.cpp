@@ -1947,16 +1947,12 @@ void BosonGameView::loadFromXML(const QDomElement& root)
  QDomElement cam = display.namedItem(QString::fromLatin1("Camera")).toElement();
  if (!cam.isNull()) {
 	camera()->loadFromXML(cam);
- } else {
-	boError(260) << k_funcinfo << "no camera" << endl;
  }
  // Load selection
  QDomElement sel = display.namedItem(QString::fromLatin1("Selection")).toElement();
+ selection()->clear();
  if (!sel.isNull()) {
 	selection()->loadFromXML(sel, true);
- } else {
-	boError(260) << k_funcinfo << "no selection" << endl;
-	selection()->clear(); // just in case...
  }
 }
 
