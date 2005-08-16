@@ -253,7 +253,13 @@ template<class T> class BosonPathHeap
         return;
       }
 
-      // Test left child
+      // Select the smaller one of the children
+      if((child+1 < mCount) && (mHeap[child+1] < mHeap[child]))
+      {
+        child++;
+      }
+
+      // Test the child
       if(mHeap[child] < mHeap[pos])
       {
         // Swap
@@ -261,18 +267,6 @@ template<class T> class BosonPathHeap
         mHeap[child] = mHeap[pos];
         mHeap[pos] = temp;
         fix_downward(child);
-        return;
-      }
-      // Test right child
-      child++;
-      if((child < mCount) && (mHeap[child] < mHeap[pos]))
-      {
-        // Swap
-        T temp = mHeap[child];
-        mHeap[child] = mHeap[pos];
-        mHeap[pos] = temp;
-        fix_downward(child);
-        return;
       }
     }
 
@@ -904,6 +898,8 @@ void BosonPath::lowLevelFinishSearch(BosonPathLowLevelData* data)
     //boDebug(500) << "    Tracing at (" << x << "; " << y << "); flags: " << mCellStatus[pos].flags << endl;
     if(mCellStatus[pos].flags & STATUS_START)
     {
+      // The STATUS_START flag might confuse next pf query, so remove it
+      mCellStatus[pos].flags &= ~STATUS_START;
       //boDebug(500) << "  Starting cell found. Break." << endl;
       break;
     }
@@ -1425,6 +1421,8 @@ void BosonPath::highLevelFinishSearch(BosonPathHighLevelData* data)
     if(mBlocks[pos].flags & STATUS_START)
     {
       //boDebug(500) << "  Starting block found. Break." << endl;
+      // The STATUS_START flag might confuse next pf query, so remove it
+      mBlocks[pos].flags &= ~STATUS_START;
       break;
     }
     // Failsafe
@@ -2451,7 +2449,7 @@ void BosonPath::updateChangedBlocks()
     {
       findBlockCenter(pos, mMoveDatas[i]);
     }
-    mBlocks[pos].flags |= ~STATUS_CHANGED;
+    mBlocks[pos].flags &= ~STATUS_CHANGED;
   }
 
   // Update connections
