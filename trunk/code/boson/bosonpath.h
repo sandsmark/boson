@@ -100,8 +100,6 @@ class BosonPath
     bool saveAsXML(QDomElement& root) const;
     bool loadFromXML(const QDomElement& root);
 
-    void setDataLocked(bool lock)  { mDataLocked = lock; }
-
 
     /**
      * Initializes the pathfinder
@@ -230,7 +228,6 @@ class BosonPath
     };
 
     BosonMap* mMap;
-    bool mDataLocked;
 
     // TODO: maybe use unsigned char?
     bofixed* mSlopeMap;
@@ -450,12 +447,6 @@ class BosonPathInfo
     //  check if the path can be found or not and sets the passable variable
     //  accordingly
     bool needpath;
-
-    // NOTE: all these region pointers are meant to be used _only_ by the
-    //  pathfinder. They can (and often will) become invalid during the game.
-    //  Every time pathfinder is run, it updates them and uses valid updated
-    //  pointers (so you don't need to worry about them). Just don't save/load
-    //  them.
 
     bool flying;
 
