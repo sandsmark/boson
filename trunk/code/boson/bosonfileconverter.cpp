@@ -1340,6 +1340,9 @@ bool BosonFileConverter::convertPlayField_From_0_10_85_To_0_11(QMap<QString, QBy
  }
 
  files.insert("kgame.xml", kgameDoc.toString().utf8());
+
+ files.insert("scripts/eventlistener/gamevieweventlistener.py", QByteArray());
+
  return true;
 }
 

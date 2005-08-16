@@ -411,9 +411,6 @@ bool BoSelectionGroup::loadFromXML(const QDomElement& root)
 	return false;
  }
  QDomNodeList list = root.elementsByTagName(QString::fromLatin1("Group"));
- if (list.count() == 0) {
-	return false;
- }
  for (unsigned int i = 0; i < list.count(); i++) {
 	QDomElement e = list.item(i).toElement();
 	if (e.isNull()) {

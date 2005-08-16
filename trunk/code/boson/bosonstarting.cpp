@@ -42,6 +42,7 @@
 #include "script/bosonscript.h"
 #include "unit.h"
 #include "bosonviewdata.h"
+#include "gameview/bosongameview.h"
 
 #include <klocale.h>
 #include <kgame/kmessageclient.h>
@@ -87,11 +88,14 @@ class BosonStartingPrivate
 public:
 	BosonStartingPrivate()
 	{
+		mGameView = 0;
 	}
 	QValueList<Q_UINT32> mStartingCompleted; // clients that completed starting
 	QMap<unsigned int, QByteArray> mStartingCompletedMessage;
 
 	QString mLoadFromLogFile;
+
+	BosonGameView* mGameView;
 };
 
 BosonStarting::BosonStarting(QObject* parent) : QObject(parent, "bosonstarting")
@@ -104,6 +108,11 @@ BosonStarting::~BosonStarting()
 {
  delete mDestPlayField;
  delete d;
+}
+
+void BosonStarting::setGameView(BosonGameView* gameView)
+{
+ d->mGameView = gameView;
 }
 
 void BosonStarting::slotSetNewGameData(const QByteArray& data, bool* taken)
@@ -294,6 +303,7 @@ bool BosonStarting::start()
 		scenario, SLOT(slotSetDestPlayField(BosonPlayField*)));
  connect(this, SIGNAL(signalCanvas(BosonCanvas*)),
 		scenario, SLOT(slotSetCanvas(BosonCanvas*)));
+ scenario->setGameView(d->mGameView);
  scenario->setFiles(&files);
  tasks.append(scenario);
 
@@ -912,6 +922,11 @@ unsigned int BosonStartingLoadWater::taskDuration() const
  return 100;
 }
 
+void BosonStartingStartScenario::setGameView(BosonGameView* gameView)
+{
+ mGameView = gameView;
+}
+
 bool BosonStartingStartScenario::startTask()
 {
  if (!boGame) {
@@ -920,6 +935,10 @@ bool BosonStartingStartScenario::startTask()
  }
  if (!mDestPlayField) {
 	BO_NULL_ERROR(mDestPlayField);
+	return false;
+ }
+ if (!mGameView) {
+	BO_NULL_ERROR(mGameView);
 	return false;
  }
 
@@ -937,6 +956,8 @@ bool BosonStartingStartScenario::startTask()
 	return false;
  }
  boProfiling->pop();
+
+ mGameView->setCanvas(mCanvas);
 
  BosonSaveLoad* load = new BosonSaveLoad(boGame);
  if (!load->startFromFiles(*mFiles)) {

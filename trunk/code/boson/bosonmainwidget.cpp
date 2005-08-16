@@ -754,6 +754,7 @@ void BosonMainWidget::reinitGame()
 		d->mStartup, SLOT(slotLoadingStartSubTask(const QString&)));
  connect(d->mStarting, SIGNAL(signalStartingFailed()),
 		this, SLOT(slotStartingFailed()));
+ d->mStarting->setGameView(d->mGameView);
 
  initBoson();
 }
