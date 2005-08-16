@@ -56,6 +56,8 @@ Patches applied currently:
 - Patch to umenumanager.cpp: Fixing highligt state of activated menu item.
   backported from libufo cvs, 05/08/15, revision 1.14
 - Porting menu patch (ufocusmanager.cpp, revision 1.8) from official libufo cvs (05/08/15)
+- Backporting fix for memory leak in uwdget.cpp: delete m_styleHints, if the
+  object is detached.
 
 
 
