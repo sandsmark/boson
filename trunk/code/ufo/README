@@ -58,6 +58,8 @@ Patches applied currently:
 - Porting menu patch (ufocusmanager.cpp, revision 1.8) from official libufo cvs (05/08/15)
 - Backporting fix for memory leak in uwdget.cpp: delete m_styleHints, if the
   object is detached.
+- Backporting fix for a huge memory leak in uvertexarray.*: the getArray() array
+  was never deleted
 
 
 
