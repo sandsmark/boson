@@ -164,6 +164,185 @@ const int yoffsets[] = { -1, -1,  0,  1,  1,  1,  0, -1};
 
 
 
+
+template<class T> class BosonPathHeap
+{
+  public:
+    inline BosonPathHeap(unsigned int maxitems = LOW_MAX_NODES + 2)
+    {
+      mCapacity = maxitems;
+      mCount = 0;
+      mHeap = new T[mCapacity];
+    }
+    ~BosonPathHeap()
+    {
+      delete[] mHeap;
+    }
+
+    inline void add(const T& x)
+    {
+      if(mCount == mCapacity)
+      {
+        resize(mCapacity + 200);
+      }
+      // Add the entry to the back of the heap
+      unsigned int pos = mCount;
+      mHeap[pos] = x;
+      mCount++;
+      // Fix the heap
+      fix_upward(pos);
+    }
+
+    inline void takeFirst(T& x)
+    {
+      x = mHeap[0];
+      mCount--;
+
+      if(mCount > 0)
+      {
+        mHeap[0] = mHeap[mCount];
+        fix_downward(0);
+      }
+    }
+
+    bool isEmpty() const  { return (mCount == 0); }
+
+
+  protected:
+    inline unsigned int parentPos(unsigned int pos)  { return (pos - 1) / 2; }
+    inline unsigned int leftPos(unsigned int pos)  { return pos * 2 + 1; }
+    inline unsigned int rightPos(unsigned int pos)  { return pos * 2 + 2; }
+
+    void resize(unsigned int newsize)
+    {
+      // Allocate new heap
+      T* newheap = new T[newsize];
+      // Copy items
+      for(unsigned int i = 0; i < mCount; i++)
+      {
+        newheap[i] = mHeap[i];
+      }
+      // Delete current heap
+      delete[] mHeap;
+      mHeap = newheap;
+      mCapacity = newsize;
+    }
+
+    void fix_upward(unsigned int pos)
+    {
+      if(pos == 0)
+      {
+        return;
+      }
+      unsigned int parent = parentPos(pos);
+      if(mHeap[pos] < mHeap[parent])
+      {
+        // Swap
+        T temp = mHeap[parent];
+        mHeap[parent] = mHeap[pos];
+        mHeap[pos] = temp;
+        fix_upward(parent);
+      }
+    }
+
+    void fix_downward(unsigned int pos)
+    {
+      unsigned int child = leftPos(pos);
+      if(child >= mCount)
+      {
+        return;
+      }
+
+      // Test left child
+      if(mHeap[child] < mHeap[pos])
+      {
+        // Swap
+        T temp = mHeap[child];
+        mHeap[child] = mHeap[pos];
+        mHeap[pos] = temp;
+        fix_downward(child);
+        return;
+      }
+      // Test right child
+      child++;
+      if((child < mCount) && (mHeap[child] < mHeap[pos]))
+      {
+        // Swap
+        T temp = mHeap[child];
+        mHeap[child] = mHeap[pos];
+        mHeap[pos] = temp;
+        fix_downward(child);
+        return;
+      }
+    }
+
+
+  private:
+    T* mHeap;
+    unsigned int mCapacity;
+    unsigned int mCount;
+};
+
+
+
+class BosonPathLowLevelData
+{
+  public:
+    BosonPathLowLevelData()  { openednodes = 0; closednodes = 0; }
+
+    BosonPathHeap<BosonPathNode> open;
+    int areax1;
+    int areay1;
+    int areax2;
+    int areay2;
+    int halfsize;
+    // TODO: BETTER NAAAAAME!!!!!
+    int edgedist1;
+    int edgedist2;
+    BosonPathNode goalnode;
+    BosonPathNode nearest;
+    // Actual (int) start/dest points, as used by the pathfinder
+    int startx;
+    int starty;
+    int destx;
+    int desty;
+
+    int maxdepth;
+
+    int mapwidth;
+    BosonPathInfo* info;
+
+    int openednodes;
+    int closednodes;
+};
+
+class BosonPathHighLevelData
+{
+  public:
+    BosonPathHighLevelData()  { openednodes = 0; closednodes = 0; }
+
+    BosonPathHeap<BosonPathNode> open;
+    BosonPathNode goalnode;
+    BosonPathNode nearest;
+    // Start/dest blocks
+    int startblockx;
+    int startblocky;
+    int destblockx;
+    int destblocky;
+
+    int maxdepth;
+
+    int mapwidth;
+    BosonPathInfo* info;
+    int movedataid;
+
+    int openednodes;
+    int closednodes;
+};
+
+
+
+
 /* NOTE:
  * Lot of code in this file is based on the pathfinder of the TA Spring project
  *  (http://taspring.clan-sy.com/), also licensed under GPL.
