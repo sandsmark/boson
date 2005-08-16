@@ -2845,6 +2845,17 @@ bool MobileUnit::loadFromXML(const QDomElement& root)
 	}
  }
 
+ if (unitProperties()->isAircraft()) {
+	if (root.hasAttribute("Roll")) {
+		d->roll = root.attribute("Roll").toFloat(&ok);
+		if (!ok) {
+			boWarning() << k_funcinfo << "Invalid value for Roll attribute" << endl;
+		} else {
+			setYRotation(d->roll);
+		}
+	}
+ }
+
  return true;
 }
 
@@ -2856,6 +2867,10 @@ bool MobileUnit::saveAsXML(QDomElement& root)
  }
 
  root.setAttribute("Speed", speed());
+
+ if (unitProperties()->isAircraft()) {
+	root.setAttribute("Roll", d->roll);
+ }
 
  return true;
 }
