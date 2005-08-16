@@ -28,14 +28,17 @@
 #include <bodebug.h>
 
 #include <qtimer.h>
+#include <qimage.h>
 
 #include <iostream>
 #include <math.h>
 #include <stdlib.h>
 
+//#define GL_FORMAT_OPTIONS (0)
+#define GL_FORMAT_OPTIONS (0 | QGL::IndirectRendering)
 
 BoUfoButtonTest::BoUfoButtonTest(QWidget* parent, const char* name)
-	: QGLWidget(parent, name, 0, Qt::WType_TopLevel | Qt::WDestructiveClose)
+	: QGLWidget(QGLFormat(GL_FORMAT_OPTIONS), parent, name, 0, Qt::WType_TopLevel | Qt::WDestructiveClose)
 {
  setMouseTracking(true);
 
@@ -100,6 +103,15 @@ void BoUfoButtonTest::initializeGL()
  BoUfoRadioButton* radio2 = new BoUfoRadioButton("Radio2");
  buttonGroup->addWidget(radio1);
  buttonGroup->addWidget(radio2);
+
+ mIcon1 = new BoUfoPushButton("Icon Button1");
+ connect(mIcon1, SIGNAL(signalClicked()), this, SLOT(slotSetIcon()));
+ mContentWidget->addWidget(mIcon1);
+ QImage img(100, 100, 32);
+ img.fill(Qt::red.rgb());
+ BoUfoImage i(img);
+ boDebug() << k_funcinfo << "IMAGE: " << i.image() << " BUTTON: " << mIcon1->button() << endl;
+ mIcon1->setIcon(i);
 
  recursive = false;
  initialized = true;
@@ -176,6 +188,16 @@ void BoUfoButtonTest::keyReleaseEvent(QKeyEvent* e)
 	mUfoManager->sendEvent(e);
  }
  QGLWidget::keyReleaseEvent(e);
+}
+
+void BoUfoButtonTest::slotSetIcon()
+{
+ // apply a (new) icon to the button.
+ // using this, we can find out whether setIcon() leaks memory.
+ QImage img(100, 100, 32);
+ img.fill(Qt::red.rgb());
+ BoUfoImage i(img);
+ mIcon1->setIcon(i);
 }
 
 int main(int argc, char **argv)

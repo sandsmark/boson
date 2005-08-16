@@ -29,6 +29,7 @@
 class BoUfoWidget;
 class BoUfoManager;
 class BoUfoFontInfo;
+class BoUfoPushButton;
 
 
 /**
@@ -54,9 +55,14 @@ protected:
 	virtual void keyPressEvent(QKeyEvent* e);
 	virtual void keyReleaseEvent(QKeyEvent* e);
 
+protected slots:
+	void slotSetIcon();
+
 private:
 	BoUfoManager* mUfoManager;
 	BoUfoWidget* mContentWidget;
+
+	BoUfoPushButton* mIcon1;
 };
 
 
