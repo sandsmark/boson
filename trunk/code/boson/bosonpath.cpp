@@ -2097,6 +2097,10 @@ void BosonPath::calculateBlockConnection(int blockpos, BosonMoveData* movedata, 
 
   // Try to find a path from start (this block) to destination (the other block)
   getLowLevelPath(&info);
+  // lowLevelSetAreaBoundary() marks some cells as blocking. We need to reset
+  //  them because otherwise next time the pathfinder is run, it would still
+  //  consider them to blocking
+  resetDirtyCellStatuses();
 
   //boDebug(500) << "    " << "PF result: passable: " << info.passable << "; cost: " << info.pathcost << endl;
   if(info.result != GoalReached)
