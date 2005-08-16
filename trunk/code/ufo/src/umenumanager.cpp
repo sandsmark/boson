@@ -165,7 +165,6 @@ UMenuManager::processMouseEvent(UMouseEvent * e) {
 			} else if (UMenuItem * item = dynamic_cast<UMenuItem*>(e->getSource())) {
 				if (item->contains(e->getLocation())) {
 					e->consume();
-
 					// don't do any actual action yet.
 				}
 			}
@@ -246,6 +245,10 @@ void
 UMenuManager::clearPath() {
 	//recalcPathWithLeaf(NULL);
 	clearPathFrom(m_menuPath.begin());
+	if (m_currentItem) {
+		m_currentItem->setState(WidgetHighlighted, false);
+		m_currentItem = NULL;
+	}
 }
 
 void
