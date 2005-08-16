@@ -1100,19 +1100,16 @@ bool Unit::saveAsXML(QDomElement& root)
  // Save start/dest points and range
  saveVector2AsXML(pathInfo()->start, pathinfoxml, "start");
  saveVector2AsXML(pathInfo()->dest, pathinfoxml, "dest");
+ pathinfoxml.setAttribute(QString::fromLatin1("target"), pathInfo()->target ? pathInfo()->target->id() : 0);
  pathinfoxml.setAttribute("range", pathInfo()->range);
- // Save hlpath
- /*if (pathInfo()->hlpath) {
-	pathinfoxml.setAttribute("hlpathid", pathInfo()->hlpath->id);
-	pathinfoxml.setAttribute("hlstep", pathInfo()->hlstep);
- } else {
-	pathinfoxml.setAttribute("hlpathid", 0);
- }*/
+ // Save last pf query result
+ pathinfoxml.setAttribute("result", pathInfo()->result);
  // Save llpath
  pathinfoxml.setAttribute("llpathlength", pathInfo()->llpath.count());
  for (unsigned int i = 0; i < pathInfo()->llpath.count(); i++) {
 	saveVector2AsXML(pathInfo()->llpath[i], pathinfoxml, QString("llpath-%1").arg(i));
  }
+ // hlpath doesn't have to be saved atm
  // Save misc stuff
  pathinfoxml.setAttribute("moveAttacking", pathInfo()->moveAttacking ? 1 : 0);
  pathinfoxml.setAttribute("slowDownAtDest", pathInfo()->slowDownAtDest ? 1 : 0);
@@ -1223,22 +1220,30 @@ bool Unit::loadFromXML(const QDomElement& root)
 		boError() << k_funcinfo << "Error loading range attribute ('" << pathinfoxml.attribute("range") << "')" << endl;
 		return false;
 	}
-	/*pathInfo()->hlstep = 0;
-	pathInfo()->hlpath = 0;
-	int hlpathid = pathinfoxml.attribute("hlpathid").toInt(&ok);
+	pathInfo()->result = (BosonPath::Result)pathinfoxml.attribute("result").toInt(&ok);
 	if (!ok) {
-		boError() << k_funcinfo << "Error loading hlpathid attribute ('" << pathinfoxml.attribute("hlpathid") << "')" << endl;
+		boError() << k_funcinfo << "Error loading result attribute ('" << pathinfoxml.attribute("result") << "')" << endl;
 		return false;
 	}
-	if (hlpathid > 0) {
-	// TODO
-	//pathInfo()->hlpath = canvas()->pathfinder()->highLevelPath(hlpathid);
-		pathInfo()->hlstep = pathinfoxml.attribute("hlstep").toInt(&ok);
+	// target
+	unsigned int pathinfoTargetId = 0;
+	if (root.hasAttribute(QString::fromLatin1("target"))) {
+		pathinfoTargetId = root.attribute(QString::fromLatin1("target")).toUInt(&ok);
 		if (!ok) {
-			boError() << k_funcinfo << "Error loading hlstep attribute ('" << pathinfoxml.attribute("hlstep") << "')" << endl;
-			return false;
+			boError() << k_funcinfo << "Error loading pathinfo target attribute ('" <<
+					pathinfoxml.attribute("target") << "')" << endl;
+			pathinfoTargetId = 0;
 		}
 	}
+	if (pathinfoTargetId == 0) {
+		pathInfo()->target = 0;
+	} else {
+		pathInfo()->target = canvas()->findItem(pathinfoTargetId);
+		if (!pathInfo()->target) {
+			boWarning(260) << k_funcinfo << "Could not find target with id=" << pathinfoTargetId << endl;
+		}
+	}
+
 	// llpath
 	unsigned int llpathlength = pathinfoxml.attribute("llpathlength").toInt(&ok);
 	if (!ok) {
@@ -1249,10 +1254,7 @@ bool Unit::loadFromXML(const QDomElement& root)
 	for(unsigned int i = 0; i < llpathlength; i++) {
 		loadVector2FromXML(&pathInfo()->llpath[i], pathinfoxml, QString("llpath-%1").arg(i));
 	}
-	// regions aren't saved/loaded
-	pathInfo()->startRegion = 0;
-	pathInfo()->destRegion = 0;
-	pathInfo()->possibleDestRegions.resize(0);*/
+
 	// misc
 	pathInfo()->moveAttacking = (pathinfoxml.attribute("moveAttacking").toInt(&ok));
 	if (!ok) {

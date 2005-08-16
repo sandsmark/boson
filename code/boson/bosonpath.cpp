@@ -175,7 +175,6 @@ BosonPath::BosonPath(BosonMap* map)
 {
   boDebug(500) << k_funcinfo << endl;
   mMap = map;
-  mDataLocked = false;
   boDebug(500) << k_funcinfo << "END" << endl;
 }
 
@@ -210,8 +209,6 @@ void BosonPath::init(BosonCanvas* canvas)
   initCellPassabilityMaps();
   initCellStatusArray();
   initBlocks();
-
-  // ...
 
   long int elapsed = profiler.elapsedSinceStart();
   boDebug(500) << k_funcinfo << "END, elapsed: " << elapsed / 1000.0 << " ms" << endl;
@@ -2319,11 +2316,13 @@ bool BosonPath::isValidCell(int x, int y) const
 
 bool BosonPath::saveAsXML(QDomElement& root) const
 {
+  // Nothing to save atm
   return true;
 }
 
 bool BosonPath::loadFromXML(const QDomElement& root)
 {
+  // Nothing to load atm
   return true;
 }
 

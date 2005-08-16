@@ -1182,14 +1182,6 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 	return false;
  }
 
- QDomElement pathfinderxml = root.namedItem("Pathfinder").toElement();
- bool loadpathfinder = !pathfinderxml.isNull();
- if (loadpathfinder) {
-	initPathfinder();
-	pathfinder()->loadFromXML(pathfinderxml);
-	pathfinder()->setDataLocked(true);
- }
-
 
  if (!loadEventListenerFromXML(root)) {
 	boError(260) << k_funcinfo << "unable to load EventListener from XML" << endl;
@@ -1211,12 +1203,7 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 	return false;
  }
 
- if (loadpathfinder) {
-	// TODO: make sure this is correct (it was true earlier)
-	pathfinder()->setDataLocked(false);
- } else {
-	initPathfinder();
- }
+ initPathfinder();
  boDebug(260) << k_funcinfo << "done" << endl;
  return true;
 }
