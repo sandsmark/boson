@@ -497,12 +497,9 @@ bool BosonSaveLoad::startFromFiles(const QMap<QString, QByteArray>& files)
 	addLoadError(SaveLoadError::General, i18n("error while loading canvas"));
 	return false;
  }
- if (externalXML.size() != 0) {
-	// external.xml is optional only, it's valid that it's missing
-	if (!loadExternalFromXML(externalXML)) {
-		addLoadError(SaveLoadError::General, i18n("error while loading external data"));
-		return false;
-	}
+ if (!loadExternalFromXML(externalXML)) {
+	addLoadError(SaveLoadError::General, i18n("error while loading external data"));
+	return false;
  }
 
  if (!loadEventListenerScripts(files)) {
@@ -623,12 +620,34 @@ bool BosonSaveLoad::loadCanvasFromXML(const QString& xml)
 
 bool BosonSaveLoad::loadExternalFromXML(const QString& xml)
 {
- boDebug(260) << k_funcinfo << endl;
- // Load external stuff (camera)
+ boDebug() << k_funcinfo << endl;
+
+ // external.xml is optional only, it's valid that it's missing
+ // if it is, we use a dummy document. this is meant to make sure that all
+ // pointers are set correctly, even if we don't use them (e.g. canvas pointers
+ // in all widgets that require it)
  QDomDocument doc(QString::fromLatin1("External"));
- if (!loadXMLDoc(&doc, xml)) {
-	addLoadError(SaveLoadError::LoadInvalidXML, i18n("Parsing error in external.xml"));
-	return false;
+ if (xml.length() != 0) {
+	boDebug(260) << k_funcinfo << endl;
+	if (!loadXMLDoc(&doc, xml)) {
+		addLoadError(SaveLoadError::LoadInvalidXML, i18n("Parsing error in external.xml"));
+		return false;
+	}
+ } else {
+	QDomElement root = doc.createElement(QString::fromLatin1("External"));
+	doc.appendChild(root);
+
+	QDomElement unitGroups = doc.createElement("UnitGroups");
+	root.appendChild(unitGroups);
+
+	QDomElement effects = doc.createElement("Effects");
+	root.appendChild(effects);
+
+	QDomElement displays = doc.createElement("Displays");
+	root.appendChild(displays);
+	QDomElement display = doc.createElement("Display");
+	displays.appendChild(display);
+
  }
  QDomElement root = doc.documentElement();
 

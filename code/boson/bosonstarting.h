@@ -26,6 +26,7 @@ class BosonPlayField;
 class Player;
 class Boson;
 class BosonCanvas;
+class BosonGameView;
 class QDomElement;
 template<class T> class QPtrList;
 template<class T1, class T2> class QMap;
@@ -41,6 +42,8 @@ class BosonStarting : public QObject
 public:
 	BosonStarting(QObject* parent);
 	~BosonStarting();
+
+	void setGameView(BosonGameView* gameView);
 
 	void setEditorMap(const QByteArray& buffer);
 
@@ -452,6 +455,7 @@ public:
 	BosonStartingStartScenario(const QString& text)
 		: BosonStartingTask(text)
 	{
+		mGameView = 0;
 		mDestPlayField = 0;
 		mFiles = 0;
 
@@ -459,6 +463,8 @@ public:
 	}
 
 	virtual unsigned int taskDuration() const;
+
+	void setGameView(BosonGameView* gameView);
 
 	BosonPlayField* playField() const
 	{
@@ -515,6 +521,7 @@ protected:
 	bool createMoveDatas();
 
 private:
+	BosonGameView* mGameView;
 	BosonPlayField* mDestPlayField;
 	QMap<QString, QByteArray>* mFiles;
 
