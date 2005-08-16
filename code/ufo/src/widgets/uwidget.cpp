@@ -170,6 +170,11 @@ UWidget::~UWidget() {
 		}
 	}
 	m_properties.clear();
+
+	if (m_styleHintsDetached && m_styleHints) {
+		delete (m_styleHints);
+	}
+
 	delete (m_model);
 }
 
@@ -1583,7 +1588,7 @@ UWidget::getPreferredSize() const {
 UDimension
 UWidget::getPreferredSize(const UDimension & maxSize) const {
 	if (maxSize.isEmpty()) {
-		return UDimension();
+		return UDimension(0, 0);
 	}
 	// make sure that we are valid
 	(const_cast<UWidget*>(this))->validate();
