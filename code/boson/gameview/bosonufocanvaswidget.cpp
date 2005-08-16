@@ -343,7 +343,7 @@ void BosonUfoCanvasWidget::cameraChanged()
 bool BosonUfoCanvasWidget::loadEffectsFromXML(const QDomElement& root)
 {
  if (!d->mCanvas) {
-	BO_NULL_ERROR(d->mCanva);
+	BO_NULL_ERROR(d->mCanvas);
 	return false;
  }
  bool ret = true;
