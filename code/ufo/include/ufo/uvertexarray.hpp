@@ -43,9 +43,15 @@ namespace ufo {
 class UFO_EXPORT UVertexArray : public UObject {
 	UFO_DECLARE_CLASS(UVertexArray)
 public:
+	/** This type is used to determine the array returned
+	  * by getArray.
+	  * @see getArray
+	  */
 	enum Type {
 		NoType = 0,
+		/** 3 floats for vertices. */
 		V3F,
+		/** 3 floats for color and 3 floats for vertices. */
 		C3F_V3F,
 		/** argb color and 3 floats for vertices */
 		CARGB_V3F,
@@ -57,20 +63,40 @@ public:
 	virtual ~UVertexArray();
 
 public:
-	/** Sets an offset for all following points. */
+	/** Sets an offset for all following points (not yet implemented). */
 	void setOffset(float x, float y);
+	/** Adds a new vertex to the array. */
 	void add(float x, float y);
 
+	/** Sets a new color for all following vertices. */
 	void setColor(const UColor & col);
 
+	/** @return The total count of vertices. */
 	int getCount() const;
 
+	/** @return The type of vertices. 
+	  * @see getArray
+	  */
 	int getType() const;
+	/** Explicitely sets the type of the vertices. This effects the output
+	  * of getArray.
+	  * @see getArray
+	  */
 	void setType(Type t);
+	/** @return A void pointer array of the vertices in the given type.
+	  *  The returned array is automatically freed by UVertexArray on
+	  *  destruction or if a new type was set.
+	  */
 	void * getArray();
 	
+	/** @return A vector with plain coordinates of the vertices. */
 	std::vector<std::pair<float, float> > getVertices() const;
+	/** @return A vector with colors for each vertex. */
 	std::vector<UColor> getColors() const;
+
+protected: // Protected methods
+	/** Deletes allocated memory for the returned vertex array. */
+	void dispose();
 
 private:
 	Type m_type;

@@ -40,10 +40,13 @@ UVertexArray::UVertexArray()
 	, m_array(NULL)
 {}
 
-UVertexArray::~UVertexArray() {}
+UVertexArray::~UVertexArray() {
+	dispose();
+}
 
 void
 UVertexArray::setOffset(float x, float y) {
+	// FIXME: to be implemented
 }
 
 void
@@ -84,11 +87,23 @@ UVertexArray::getType() const {
 
 void
 UVertexArray::setType(Type t) {
+	// ensure that we have a valid m_type
+	getType();
+	if (t != m_type) {
+		m_type = t;
+		dispose();
+	}
 }
 
 void *
 UVertexArray::getArray() {
+	// ensure that we have a valid m_type
 	getType();
+	if (m_array) {
+		return m_array;
+	}
+	
+	// create a new array
 	if (m_type == V3F) {
 		float * ret = new float[getCount() * 3];
 		for (int i = 0; i < getCount(); ++i) {
@@ -96,7 +111,7 @@ UVertexArray::getArray() {
 			ret[i * 3 + 1] = m_vertices[i].second;
 			ret[i * 3 + 2] = 0.0f;
 		}
-		return ret;
+		m_array = ret;
 	} else if (m_type == C3F_V3F) {
 		float * ret = new float[getCount() * 6];
 		for (int i = 0; i < getCount(); ++i) {
@@ -107,9 +122,10 @@ UVertexArray::getArray() {
 			ret[i * 6 + 4] = m_vertices[i].second;
 			ret[i * 6 + 5] = 0.0f;
 		}
-		return ret;
+		m_array = ret;
 	}
-	return NULL;
+	// FIXME: Add support for other vertex types
+	return m_array;
 }
 
 std::vector<std::pair<float, float> >
@@ -120,4 +136,13 @@ UVertexArray::getVertices() const {
 std::vector<UColor>
 UVertexArray::getColors() const {
 	return m_colors;
+}
+
+void
+UVertexArray::dispose() {
+	if (m_array) {
+		// FIXME: We use only float arrays but anyhow this is a bit dirty
+		delete[] (static_cast<float*>(m_array));
+		m_array = NULL;
+	}
 }
