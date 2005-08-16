@@ -53,6 +53,8 @@ Patches applied currently:
 - Fix to umenumanager.cpp to consume() mouse press events for menu items (before
   it consumed press events for menus only). This makes sure that a press event
   is not propagated to the parents (and siblings in a layered pane).
+- Patch to umenumanager.cpp: Fixing highligt state of activated menu item.
+  backported from libufo cvs, 05/08/15, revision 1.14
 
 
 
