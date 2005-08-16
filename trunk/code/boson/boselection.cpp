@@ -412,7 +412,6 @@ bool BoSelectionGroup::loadFromXML(const QDomElement& root)
  }
  QDomNodeList list = root.elementsByTagName(QString::fromLatin1("Group"));
  if (list.count() == 0) {
-	boWarning(260) << k_funcinfo << "no unitgroups" << endl;
 	return false;
  }
  for (unsigned int i = 0; i < list.count(); i++) {
