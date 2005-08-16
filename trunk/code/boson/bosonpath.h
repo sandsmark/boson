@@ -266,6 +266,11 @@ class BosonPathNode
   public:
     BosonPathNode() { x = 0; y = 0; pos = 0; g = 0; h = 0; depth = 0; }
 
+    inline bool operator<(const BosonPathNode& n2)
+    {
+      return ((g + h) < (n2.g + n2.h));
+    }
+
     int x;
     int y;
     // TODO: do we _really_ need this???
@@ -308,54 +313,6 @@ class BosonPathFlyingNode
     BosonPathFlyingNode* parent;
 };
 
-template<class T> class BosonPathHeap : public QValueList<T>
-{
-  public:
-    inline void add(const T& x)
-    {
-      // TODO: according to Valgrind, this method takes about 70% of time spent
-      //  in BosonPath::lowLevelSearchNeighbor() (which in turn is the methods
-      //  where most of pathfinding time is spent), so it should be optimized
-      //  as much as possible
-      QValueListIterator<T> it;
-      for(it = this->begin(); it != this->end(); ++it)
-      {
-        if((x.g + x.h) <= ((*it).g + (*it).h))
-        {
-          // ((x.g + x.h) - ((*it).g + (*it).h)) < PF_EPSILON
-          insert(it, x);
-          break;
-        }
-      }
-      if(it == this->end()) {
-        append(x);
-      }
-    }
-
-    /*inline void changeCost(const T& x)
-    {
-      QValueList<PathNode>::iterator it;
-      for(it = list.begin(); it != list.end(); ++it)
-      {
-        if(*it == x)
-        {
-          // Change cost
-          *it = x;
-          break;
-        }
-      }
-      if(it == list.end()) {
-        // ERROR: No such item in the list
-        return;
-      }
-    }*/
-
-    inline void takeFirst(T& x)
-    {
-      x = this->first();
-      this->pop_front();
-    }
-};
 
 template<class T> class BosonPathPointerHeap : public QValueList<T*>
 {
@@ -462,65 +419,6 @@ class BosonPathInfo
     int waiting;
     // How many times path has been recalculated for unit (while waiting)
     int pathrecalced;
-};
-
-
-
-// TODO: move to .cpp?
-class BosonPathLowLevelData
-{
-  public:
-    BosonPathLowLevelData()  { openednodes = 0; closednodes = 0; }
-
-    BosonPathHeap<BosonPathNode> open;
-    int areax1;
-    int areay1;
-    int areax2;
-    int areay2;
-    int halfsize;
-    // TODO: BETTER NAAAAAME!!!!!
-    int edgedist1;
-    int edgedist2;
-    BosonPathNode goalnode;
-    BosonPathNode nearest;
-    // Actual (int) start/dest points, as used by the pathfinder
-    int startx;
-    int starty;
-    int destx;
-    int desty;
-
-    int maxdepth;
-
-    int mapwidth;
-    BosonPathInfo* info;
-
-    int openednodes;
-    int closednodes;
-};
-
-// TODO: move to .cpp?
-class BosonPathHighLevelData
-{
-  public:
-    BosonPathHighLevelData()  { openednodes = 0; closednodes = 0; }
-
-    BosonPathHeap<BosonPathNode> open;
-    BosonPathNode goalnode;
-    BosonPathNode nearest;
-    // Start/dest blocks
-    int startblockx;
-    int startblocky;
-    int destblockx;
-    int destblocky;
-
-    int maxdepth;
-
-    int mapwidth;
-    BosonPathInfo* info;
-    int movedataid;
-
-    int openednodes;
-    int closednodes;
 };
 
 
