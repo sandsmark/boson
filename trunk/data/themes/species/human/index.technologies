@@ -9,6 +9,7 @@ ProduceAction=ProduceUpgradeArmor
 RequireUnits=12,5,3
 ApplyToFacilities=true
 Armor=+2
+Description=Upgrades basic armor for all facilities\nArmor +2
 
 [SamSite missile upgrade]
 Id=10001
@@ -22,6 +23,7 @@ ApplyToTypes=6
 RequireUnits=14,12,3
 Weapon_0:Damage=+5
 Weapon_0:Speed=+2.1
+Description=Upgrade SamSite missile\nDamage +5; Speed +2.1
 
 [Turrets upgrade]
 Id=10002
@@ -34,6 +36,7 @@ ProduceAction=ProduceUpgradeTurrets
 ApplyToTypes=10
 RequireUnits=12
 Weapon_0:Damage=+5
+Description=Upgrade Turrets damage\nDamage +5
 
 [Grizzly missile upgrade]
 Id=10003
@@ -47,3 +50,4 @@ ApplyToTypes=10006
 RequireUnits=14,12,3
 Weapon_0:Damage=+5
 Weapon_0:Speed=+1.6
+Description=Upgrade Grizzly missiles\nDamage +5; Speed +1.6
