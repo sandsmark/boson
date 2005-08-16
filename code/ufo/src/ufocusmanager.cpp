@@ -89,15 +89,25 @@ UFocusManager::getFocusPolicy() const {
 //
 void
 UFocusManager::processMouseEvent(UMouseEvent * e) {
-	if ((m_policy == ClickToFocus) && (e->getType() == UEvent::MousePressed)) {
+	// This ensures that we do not focus parent widgets if the event was
+	// redispatched to the parent (i.e. we do not process a mouse focus
+	// event twice).
+	// Another way would be to consume the event, but this way parents
+	// never get mouse events as the child was focused.
+	static UMouseEvent * oldEvent = NULL;
+	if ((m_policy == ClickToFocus) &&
+			(e != oldEvent) &&
+			(e->getType() == UEvent::MousePressed)) {
 		UWidget * w = e->getWidget();
 		w->requestFocus();
 	}
 	else if ((m_policy == FocusUnderMouse) &&
+			(e != oldEvent) &&
 			(e->getType() == UEvent::MouseEntered)) {
 		UWidget * w = e->getWidget();
 		w->requestFocus();
 	}
+	oldEvent = e;
 }
 
 void
