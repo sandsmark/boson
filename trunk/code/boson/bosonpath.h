@@ -216,6 +216,7 @@ class BosonPath
     {
       public:
         BlockInfo()  { centerx = 0; centery = 0; cost = 0; flags = 0; }
+        ~BlockInfo()  { delete[] centerx; delete[] centery; }
 
         // Center of the block's passable area for every movedata
         int* centerx;
