@@ -156,11 +156,6 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
 
  mIsFacility = isFacility;
 
- if (!loadActions(&conf)) {
-	boError() << k_funcinfo << "loading actions failed" << endl;
-	return false;
- }
-
  // AB: note that we need to load _both_ in order to initialize all variables.
  loadFacilityProperties(&conf);
  loadMobileProperties(&conf);
@@ -175,6 +170,11 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  loadTextureNames(&conf);
  loadSoundNames(&conf);
  loadWeapons(&conf);
+
+ if (!loadActions(&conf)) {
+	boError() << k_funcinfo << "loading actions failed" << endl;
+	return false;
+ }
 
  return true;
 }
