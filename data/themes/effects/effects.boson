@@ -1,56 +1,56 @@
 [GeneralExplosion]
 Id=1001
 Type=ParticleGeneric
-MinVelocity=0,0,0
-MaxVelocity=0,0,0
+MinVelocity=-0.5,-0.5, 0
+MaxVelocity= 0.5, 0.5, 0
 MinPos=-0.1,-0.1,0.0
 MaxPos=0.1,0.1,0.2
-StartColor=1.0,1.0,1.0,1.0
-EndColor=1.0,1.0,1.0,0.1.0
-MinLife=1.8
-MaxLife=1.8
-ParticleDist=1.0
-MaxNum=1
-InitNum=1
-BlendFunc=GL_ONE_MINUS_SRC_ALPHA
-Rate=0
-StartSize=1.2
-EndSize=1.2
+StartColor=1.0,0.4,0.05,0.7
+EndColor=1.0,0.1,0.0,0.0
+MinLife=0.5
+MaxLife=1.5
+ParticleDist=0.5
+MaxNum=30
+InitNum=20
+BlendFunc=GL_ONE
+Rate=30
+StartSize=0.4
+EndSize=0.8
 SystemLife=0.3
 Mass=0
 Align=true
-Texture=explosion-01
+Texture=explosion-old
 
 [FireBallExplosion]
 Id=1002
 Inherits=GeneralExplosion
-;NormalizeVelo=true
-MinVeloScale=0.0
-MaxVeloScale=0.0
+NormalizeVelo=true
+MinVeloScale=0.4
+MaxVeloScale=0.7
 
 [BigExplosion]
 Id=1010
 Inherits=GeneralExplosion
-MinVelocity=0,0,0
-MaxVelocity=0,0,0
+MinVelocity=-1.0,-1.0,0.0
+MaxVelocity= 1.0, 1.0,0.6
 MinPos=-0.4,-0.4,0.0
 MaxPos=0.4,0.4,0.3
-MinLife=2.3
-MaxLife=2.3
-MaxNum=1
-InitNum=1
+MinLife=0.8
+MaxLife=2.0
+MaxNum=70
+InitNum=40
 ParticleDist=2.0
-Rate=0
-StartSize=1.7
-EndSize=1.7
+Rate=60
+StartSize=0.6
+EndSize=1.0
 SystemLife=0.7
 
 [BigBallExplosion]
 Id=1011
 Inherits=BigExplosion
-;NormalizeVelo=true
-MinVeloScale=0
-MaxVeloScale=0
+NormalizeVelo=true
+MinVeloScale=0.5
+MaxVeloScale=1.4
 
 
 
@@ -74,7 +74,7 @@ EndSize=0.35
 SystemLife=0
 Mass=0
 Align=true
-Texture=explosion-01
+Texture=explosion-old
 
 [GeneralBulletHit]
 Id=2010
