@@ -991,7 +991,6 @@ void BosonGameView::init()
  BoShader::setSun(l);
 
 
- boTextureManager->initOpenGL();
  boWaterRenderer->initOpenGL();
  boConfig->setBoolValue("TextureFOW", boTextureManager->textureUnits() > 1);
  if (!BosonGroundThemeData::shadersSupported()) {
@@ -2395,6 +2394,8 @@ void BosonGameView::paint()
 	return;
  }
  BO_CHECK_NULL_RET(camera());
+ BO_CHECK_NULL_RET(boTextureManager);
+ BO_CHECK_NULL_RET(boGame);
  PROFILE_METHOD
 
  if (Bo3dTools::checkError()) {
