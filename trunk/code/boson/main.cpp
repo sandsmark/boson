@@ -137,6 +137,9 @@ int main(int argc, char **argv)
 
  bool forceWantDirect = boConfig->boolValue("ForceWantDirect");
  BosonMainWidget* top = new BosonMainWidget(0, forceWantDirect);
+ if (!top->directRendering()) {
+	KMessageBox::information(0, i18n("Direct rendering is NOT enabled - boson will run very slow. You should ensure that direct rendering is enabled!"));
+ }
  app.setMainWidget(top);
  top->show();
 

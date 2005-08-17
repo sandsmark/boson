@@ -238,12 +238,6 @@ void BosonMainWidget::initializeGL()
  d->mFPSCounter->reset();
 
  if (!context()->deviceIsPixmap()) {
-	if (!directRendering()) {
-		// baad.
-		boWarning() << k_funcinfo << "direct rendering has NOT been enabled!" << endl;
-		KMessageBox::information(this, i18n("Direct rendering is NOT enabled - boson will run very slow. You should ensure that direct rendering is enabled!"));
-	}
-
 	boDebug() << k_funcinfo << "starting timer" << endl;
 	// start rendering (will also start the timer if necessary)
 	QTimer::singleShot(d->mUpdateInterval, this, SLOT(slotUpdateGL()));
@@ -254,6 +248,7 @@ void BosonMainWidget::initializeGL()
  }
 
  BoTextureManager::initStatic();
+ boTextureManager->initOpenGL();
 
  connect(kapp->eventLoop(), SIGNAL(signalUpdateGL()), this, SLOT(slotUpdateGL()));
 
@@ -377,11 +372,11 @@ void BosonMainWidget::slotUpdateGL()
 
 void BosonMainWidget::paintGL()
 {
- BosonProfiler prof("paintGL");
  if (!isInitialized()) {
 	initGL();
 	return;
  }
+ BosonProfiler prof("paintGL");
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error at start of " << k_funcinfo << endl;
