@@ -144,6 +144,17 @@ BosonMainWidget::~BosonMainWidget()
  boConfig->save(editor);
  endGame();
  delete d->mMenuInput;
+
+ // AB: the following is a BoUfo vs valgrind issue.
+ //     removeAllWidgets() will delete all ufo children.
+ //     in every child, the BoUfoWidget obejct is deleted first, only then the
+ //     grand-children are deleted. So when a grand-child emits a signal for
+ //     which a corresponding slot needs to access a BoUfoWidget, that one is
+ //     likely to be deleted already.
+ //     I don't see a clean way around this yet, so we just prevent emitting
+ //     such signals (which are noops in the destructor anyway)
+ disconnect(d->mGameView, SIGNAL(signalSetWidgetCursor(BosonCursor*)), this, 0);
+
  if (ufoManager()) {
 	boDebug() << k_funcinfo << "removing ufo widgets" << endl;
 	ufoManager()->contentWidget()->removeAllWidgets();
