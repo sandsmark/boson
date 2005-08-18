@@ -249,7 +249,7 @@ void BosonOrderButton::setGround(unsigned int groundType, const BosonGroundTheme
 	pixmap = QPixmap(50, 50);
 	pixmap.fill(Qt::red);
  }
- setPixmap(pixmap);
+ setImage(pixmap.convertToImage());
 
  mHealth->hide();
 
@@ -280,11 +280,6 @@ void BosonOrderButton::displayUnitPixmap(unsigned long int unitType, const Playe
 	return;
  }
  setImage(*small);
-}
-
-void BosonOrderButton::setPixmap(const QPixmap& pixmap)
-{
- setImage(pixmap.convertToImage());
 }
 
 void BosonOrderButton::setImage(const QImage& image)
