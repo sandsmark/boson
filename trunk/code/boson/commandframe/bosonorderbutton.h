@@ -158,7 +158,6 @@ protected:
 	virtual void displayUnitPixmap(unsigned long int unitType, const Player* owner);
 
 	void setImage(const QImage& image);
-	void setPixmap(const QPixmap& pixmap);
 
 protected slots:
 	void slotClicked();
