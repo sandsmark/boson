@@ -236,8 +236,23 @@ void BosonUfoCanvasWidget::quitGame()
 {
  d->mCanvasRenderer->reset();
 
- d->mEffects.setAutoDelete(true);
- d->mEffects.clear();
+ while (!d->mEffects.isEmpty()) {
+	BosonEffect* e = d->mEffects.take(0);
+	if (e->ownerId() && d->mCanvas && boViewData) {
+		BosonItem* owner = d->mCanvas->findItem(e->ownerId());
+		if (owner) {
+			BosonItemEffects* itemEffects = 0;
+			BosonItemContainer* c = boViewData->itemContainer(owner);
+			if (c) {
+				itemEffects = c->effects();
+			}
+			if (itemEffects) {
+				itemEffects->removeEffect(e);
+			}
+		}
+	}
+	delete e;
+ }
 }
 
 void BosonUfoCanvasWidget::addEffect(BosonEffect* e)
