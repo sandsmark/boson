@@ -304,6 +304,10 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 	}
 	case IdNetwork:
 	{
+		// AB: the network widget requires the newgame widget to be
+		// present already
+		initWidget(IdNewGame);
+
 		QColor defaultColor = BoUfoLabel::defaultForegroundColor();
 		BoUfoLabel::setDefaultForegroundColor(Qt::white);
 		BoUfoNetworkOptionsWidget* networkOptions = new BoUfoNetworkOptionsWidget();
