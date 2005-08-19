@@ -123,7 +123,6 @@ draw_bigbox_text("What has been changed since 0.10:
         they're floats, not ints)</li>
     <li>Use new bofixed (fixed-precision number) data type in logic code to
         prevent errors caused by rounding of floats</li>
-    <li>Improvements to upgrade-applying</li>
     <li>Unit speeds are now saved as cells/second in confg files. This makes
         editing the files much easier</li>
     <li>Weapon types are now saved as strings instead of ints in config files,
@@ -138,6 +137,8 @@ draw_bigbox_text("What has been changed since 0.10:
     <li>bosonwidget.cpp has been removed. It has seen 218 HEAD revisions and
     some more from branches. bosonwidget.cpp, 2001/11/09 - 2004/12/10, may it
     rest in peace.</li>
+    <li>Complete game logic and game view separation</li>
+    <li>new upgrade architecture</li>
  </ul>
 
 
