@@ -85,6 +85,9 @@ draw_bigbox_text("What has been changed since 0.10:
     <li>Forbid placing refineries too close to resource mines</li>
     <li>Skip rendering some frames when the game becomes overloaded. This
     reserves more CPU power for the actual game tasks and keeps it playable</li>
+    <li>Descriptions for produceable facilities are now displayed in the game</li>
+    <li>Flying units have their own moving quirks</li>
+    <li>New Pathfinder</li>
  </ul>
 
  <h3>Scripts / AI</h3>
