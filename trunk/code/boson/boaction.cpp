@@ -44,7 +44,7 @@ BoAction::BoAction(KSimpleConfig* cfg, const QString& name, SpeciesData* theme)
   // TODO: load shortcut aka hotkey
 }
 
-BoAction::BoAction(const QString& name, QImage* image, const QString& text/*, hotkey*/)
+BoAction::BoAction(const QString& name, BoUfoImage* image, const QString& text/*, hotkey*/)
 {
   mId = name;
   mImage = image;

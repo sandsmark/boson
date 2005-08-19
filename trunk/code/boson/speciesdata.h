@@ -31,6 +31,7 @@ class UnitBase;
 class BosonWeaponProperties;
 class BoAction;
 class BosonSoundInterface;
+class BoUfoImage;
 
 class QPixmap;
 class QStringList;
@@ -129,8 +130,8 @@ public:
 	 **/
 	BosonModel* objectModel(const QString& file) const;
 
-	QImage* bigOverview(unsigned long int unitType, const QColor& teamColor) const;
-	QImage* smallOverview(unsigned long int unitType, const QColor& teamColor) const;
+	BoUfoImage* bigOverview(unsigned long int unitType, const QColor& teamColor) const;
+	BoUfoImage* smallOverview(unsigned long int unitType, const QColor& teamColor) const;
 	const BoAction* action(const QString& name) const;
 
 	/**
@@ -138,7 +139,7 @@ public:
 	 * If there is no such image in the cache, it will be loaded and inserted
 	 * there. Image will be searched from $speciesdir/pixmaps/
 	 **/
-	QImage* image(const QString& name);
+	BoUfoImage* image(const QString& name);
 
 	/**
 	 * @return The absolute path to the species directory

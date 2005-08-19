@@ -32,6 +32,7 @@ class PlayerIO;
 class Unit;
 class SpeciesData;
 class BosonWeaponProperties;
+class BoUfoImage;
 
 
 
@@ -42,16 +43,16 @@ class BoAction
 {
   public:
     BoAction(KSimpleConfig* cfg, const QString& name, SpeciesData* theme);
-    BoAction(const QString& name, QImage* image, const QString& text/*, hotkey*/);
+    BoAction(const QString& name, BoUfoImage* image, const QString& text/*, hotkey*/);
 
     const QString& id() const { return mId; }
     int hotkey() const { return mHotkey; }
-    QImage* image() const { return mImage; }
+    BoUfoImage* image() const { return mImage; }
     const QString& text() const { return mText; }
 
   private:
     QString mId;  // Id aka name
-    QImage* mImage;
+    BoUfoImage* mImage;
     int mHotkey;
     QString mText;  // Full text to show in tooltip
 };
@@ -130,7 +131,7 @@ class BoSpecificAction
       }
       return mAction->hotkey();
     }
-    QImage* image() const
+    BoUfoImage* image() const
     {
       if (!mAction)
       {

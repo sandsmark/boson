@@ -31,9 +31,11 @@
 #include "boufolabel.moc"
 
 #include "boufoimage.h"
+#include "boufodrawable.h"
 #include "boufomanager.h"
 #include "boufofontinfo.h"
 #include "ufoext/ubolabel.h"
+#include "ufoext/ubodrawableicon.h"
 #include <bodebug.h>
 
 #include <kglobal.h>
@@ -120,13 +122,21 @@ QString BoUfoLabel::text() const
 
 void BoUfoLabel::setIcon(const BoUfoImage& img)
 {
- if (!img.image()) {
+ if (img.isNull()) {
 	mLabel->setIcon(0);
  } else {
-	mLabel->setIcon(new ufo::UImageIcon(img.image()));
+	mLabel->setIcon(new ufo::UBoDrawableIcon(img.image()));
  }
 }
 
+void BoUfoLabel::setIcon(const BoUfoDrawable& drawable)
+{
+ if (!drawable.drawable()) {
+	mLabel->setIcon(0);
+ } else {
+	mLabel->setIcon(new ufo::UBoDrawableIcon(drawable.drawable()));
+ }
+}
 void BoUfoLabel::setIconFile(const QString& file_)
 {
  QString file = file_;
