@@ -52,6 +52,7 @@
 #include "bosonmainwidgetmenuinput.h"
 #include "bosondata.h"
 #include "boufo/boufodebugwidget.h"
+#include "boufo/boufofactory.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -285,7 +286,7 @@ void BosonMainWidget::initUfoGUI()
  BoUfoWidget* contentWidget = ufoManager()->contentWidget();
  contentWidget->setLayoutClass(BoUfoWidget::UFullLayout);
 
- d->mWidgetStack = new BoUfoWidgetStack();
+ d->mWidgetStack = (BoUfoWidgetStack*)BoUfoFactory::createWidget("BoUfoWidgetStack");
  contentWidget->addWidget(d->mWidgetStack);
 
  d->mStartup = new BoUfoStartupWidget();
