@@ -31,7 +31,9 @@
 #include "boufopushbutton.moc"
 
 #include "boufoimage.h"
+#include "boufodrawable.h"
 #include <bodebug.h>
+#include "ufoext/ubodrawableicon.h"
 
 #include <klocale.h>
 #include <kglobal.h>
@@ -135,10 +137,19 @@ QString BoUfoPushButton::text() const
 
 void BoUfoPushButton::setIcon(const BoUfoImage& img)
 {
- if (!img.image()) {
+ if (img.isNull()) {
 	mButton->setIcon(0);
  } else {
-	mButton->setIcon(new ufo::UImageIcon(img.image()));
+	mButton->setIcon(new ufo::UBoDrawableIcon(img.image()));
+ }
+}
+
+void BoUfoPushButton::setIcon(const BoUfoDrawable& drawable)
+{
+ if (!drawable.drawable()) {
+	mButton->setIcon(0);
+ } else {
+	mButton->setIcon(new ufo::UBoDrawableIcon(drawable.drawable()));
  }
 }
 

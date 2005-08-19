@@ -29,6 +29,7 @@
 #include "bosonconfig.h"
 #include "bosonprofiling.h"
 #include "sound/bosonaudiointerface.h"
+#include "boufo/boufoimage.h"
 
 #include <qintdict.h>
 #include <qdict.h>
@@ -151,7 +152,7 @@ public:
 	QString mThemePath;
 	QIntDict<TeamColorData> mTeamData;
 	QDict<BoAction> mActions;
-	QDict<QImage> mImages;
+	QDict<BoUfoImage> mImages;
 
 	QIntDict<BosonModel> mUnitModels;
 	QDict<BosonModel> mObjectModels;
@@ -173,8 +174,8 @@ public:
 		mBigOverview.clear();
 	}
 
-	QIntDict<QImage> mSmallOverview;
-	QIntDict<QImage> mBigOverview;
+	QIntDict<BoUfoImage> mSmallOverview;
+	QIntDict<BoUfoImage> mBigOverview;
 };
 
 SpeciesData::SpeciesData(const QString& speciesPath)
@@ -355,40 +356,42 @@ bool SpeciesData::loadUnitOverview(const UnitProperties* prop, const QColor& tea
 
 // big overview
  if (!data->mBigOverview[type]) {
-	QImage* image = new QImage();
+	QImage image;
 
-	if (!loadUnitImage(teamColor, path + "overview-big.png", *image)) {
+	if (!loadUnitImage(teamColor, path + "overview-big.png", image)) {
 		boError(270) << k_funcinfo << "Can't load " << path + "overview-big.png" << endl;
-		*image = QImage(100, 100, 32);
-		image->fill(Qt::red.rgb());
+		image = QImage(100, 100, 32);
+		image.fill(Qt::red.rgb());
 	}
-	if (image->width() != 100 || image->height() != 100) {
-		*image = image->smoothScale(100, 100, QImage::ScaleMin);
+	if (image.width() != 100 || image.height() != 100) {
+		image = image.smoothScale(100, 100, QImage::ScaleMin);
 	}
 
 	// AB: maybe we want to remove this in the future
-	killAlphaMask(*image);
+	killAlphaMask(image);
 
-	data->mBigOverview.insert(type, image);
+	BoUfoImage* boufoImage = new BoUfoImage(image);
+	data->mBigOverview.insert(type, boufoImage);
  }
 
 // small overview
  if (!data->mSmallOverview[type]) {
-	QImage* image = new QImage();
+	QImage image;
 
-	if (!loadUnitImage(teamColor, path + "overview-small.png", *image)) {
+	if (!loadUnitImage(teamColor, path + "overview-small.png", image)) {
 		boError(270) << k_funcinfo << "Can't load " << path + "overview-small.png" << endl;
-		*image = QImage(50, 50, 32);
-		image->fill(Qt::red.rgb());
+		image = QImage(50, 50, 32);
+		image.fill(Qt::red.rgb());
 	}
-	if (image->width() != 50 || image->height() != 50) {
-		*image = image->smoothScale(50, 50, QImage::ScaleMin);
+	if (image.width() != 50 || image.height() != 50) {
+		image = image.smoothScale(50, 50, QImage::ScaleMin);
 	}
 
 	// AB: maybe we want to remove this in the future
-	killAlphaMask(*image);
+	killAlphaMask(image);
 
-	data->mSmallOverview.insert(type, image);
+	BoUfoImage* boufoImage = new BoUfoImage(image);
+	data->mSmallOverview.insert(type, boufoImage);
  }
 
  return true;
@@ -446,7 +449,7 @@ bool SpeciesData::loadUnitImage(const QColor& teamColor, const QString &fileName
  return true;
 }
 
-QImage* SpeciesData::bigOverview(unsigned long int unitType, const QColor& teamColor) const
+BoUfoImage* SpeciesData::bigOverview(unsigned long int unitType, const QColor& teamColor) const
 {
  TeamColorData* data = teamColorData(teamColor);
  if (!data) {
@@ -456,7 +459,7 @@ QImage* SpeciesData::bigOverview(unsigned long int unitType, const QColor& teamC
  return data->mBigOverview[unitType];
 }
 
-QImage* SpeciesData::smallOverview(unsigned long int unitType, const QColor& teamColor) const
+BoUfoImage* SpeciesData::smallOverview(unsigned long int unitType, const QColor& teamColor) const
 {
  TeamColorData* data = teamColorData(teamColor);
  if (!data) {
@@ -564,21 +567,21 @@ bool SpeciesData::loadActions()
  return true;
 }
 
-QImage* SpeciesData::image(const QString& name)
+BoUfoImage* SpeciesData::image(const QString& name)
 {
  if (!d->mImages[name]) {
-	QImage* img = new QImage(themePath() + QString::fromLatin1("pixmaps/") + name);
+	QImage img = QImage(themePath() + QString::fromLatin1("pixmaps/") + name);
 
-	if (img->isNull()) {
+	if (img.isNull()) {
 		boError() << k_funcinfo << "Cannot find pixmap with name " << name << endl;
-		delete img;
 		return 0;
 	}
 
 	// AB: maybe we want to remove this in the future
-	killAlphaMask(*img);
+	killAlphaMask(img);
 
-	d->mImages.insert(name, img);
+	BoUfoImage* boufoImage = new BoUfoImage(img);
+	d->mImages.insert(name, boufoImage);
  }
  return d->mImages[name];
 }

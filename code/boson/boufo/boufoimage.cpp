@@ -108,7 +108,7 @@ BoUfoImage::BoUfoImage(const QImage& img)
 BoUfoImage::BoUfoImage(const BoUfoImage& img)
 {
  init();
- load(img);
+ *this = img;
 }
 
 BoUfoImage::~BoUfoImage()
@@ -116,6 +116,15 @@ BoUfoImage::~BoUfoImage()
  if (mImage) {
 	mImage->unreference();
  }
+}
+
+BoUfoImage& BoUfoImage::operator=(const BoUfoImage& img)
+{
+ if (mImage) {
+	mImage->unreference();
+	mImage = 0;
+ }
+ load(img);
 }
 
 void BoUfoImage::load(const QPixmap& p)
@@ -141,7 +150,6 @@ void BoUfoImage::load(const BoUfoImage& img)
  if (!img.image()) {
 	return;
  }
- load(img);
  set(img.image());
 }
 
@@ -171,5 +179,58 @@ void BoUfoImage::set(ufo::UImage* img)
  }
  mImage = img;
  mImage->reference();
+}
+
+unsigned int BoUfoImage::width() const
+{
+ if (!mImage) {
+	return 0;
+ }
+ int w = mImage->getImageSize().w;
+ if (w < 0) {
+	return 0;
+ }
+ return (unsigned int)w;
+}
+
+unsigned int BoUfoImage::height() const
+{
+ if (!mImage) {
+	return 0;
+ }
+ int h = mImage->getImageSize().h;
+ if (h < 0) {
+	return 0;
+ }
+ return (unsigned int)h;
+}
+
+void BoUfoImage::paint()
+{
+ paint(QPoint(0, 0));
+}
+
+void BoUfoImage::paint(const QPoint& pos)
+{
+ paint(QRect(pos, QSize(width(), height())));
+}
+
+void BoUfoImage::paint(const QPoint& pos, const QSize& size)
+{
+ paint(QRect(pos, size));
+}
+
+void BoUfoImage::paint(const QRect& rect)
+{
+ if (!mImage) {
+	return;
+ }
+ ufo::UToolkit* tk = ufo::UToolkit::getToolkit();
+ BO_CHECK_NULL_RET(tk);
+ ufo::UContext* c = tk->getCurrentContext();
+ BO_CHECK_NULL_RET(c);
+ ufo::UGraphics* g = c->getGraphics();
+ BO_CHECK_NULL_RET(g);
+ mImage->paintDrawable(g, ufo::URectangle(rect.x(), rect.y(), rect.width(), rect.height()));
 }
 

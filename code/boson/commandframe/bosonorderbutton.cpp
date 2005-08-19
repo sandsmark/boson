@@ -34,6 +34,9 @@
 #include "bodebug.h"
 #include "../boufo/boufoimage.h"
 #include "../boufo/boufoprogress.h"
+#include "../boufo/boufodrawable.h"
+#include "../boufo/boufostandalonefont.h"
+#include "../boufo/boufomanager.h"
 #include "../bosonviewdata.h"
 
 #include <kpixmap.h>
@@ -44,50 +47,192 @@
 #include <qpixmap.h>
 #include <qbitmap.h>
 #include <qpainter.h>
+#include <qimage.h>
 
 #define BAR_WIDTH 10 // FIXME hardcoded value
 
+static void drawProgress(float progress, float w, float h)
+{
+ // progress is a percentage value 0..100
+ if (progress >= 100.0f) {
+	return;
+ }
+ if (progress < 0.0f) {
+	progress = 0.0f;
+ }
+ glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+
+ float factor_100 = (QMIN(100.0f - progress, 12.5f)) / 12.5f;
+ float factor_875 = (QMIN(87.5f  - progress, 12.5f)) / 12.5f;
+ float factor_750 = (QMIN(75.0f  - progress, 12.5f)) / 12.5f;
+ float factor_625 = (QMIN(62.5f  - progress, 12.5f)) / 12.5f;
+ float factor_500 = (QMIN(50.0f  - progress, 12.5f)) / 12.5f;
+ float factor_375 = (QMIN(37.5f  - progress, 12.5f)) / 12.5f;
+ float factor_250 = (QMIN(25.0f  - progress, 12.5f)) / 12.5f;
+ float factor_125 = (QMIN(12.5f  - progress, 12.5f)) / 12.5f;
+
+ // AB: this code could be made faster, but this would make it less readable
+ glBegin(GL_TRIANGLE_FAN);
+	glVertex2f(w/2.0f, h/2.0f);
+	glVertex2f(w/2.0f, 0);
+
+	if (factor_100 >= 0.0f) { // progress < 100.0f
+		glVertex2f((w/2.0f) * (1.0f - factor_100), 0);
+	}
+	if (factor_875 >= 0.0f) { // progress < 87.5f
+		glVertex2f(0, (h/2.0f) * (factor_875));
+	}
+	if (factor_750 >= 0.0f) { // progress < 75.0f
+		glVertex2f(0, h/2.0f + (h/2.0f) * (factor_750));
+	}
+	if (factor_625 >= 0.0f) { // progress < 62.5f
+		glVertex2f((w/2.0f) * (factor_625), h);
+	}
+	if (factor_500 >= 0.0f) { // progress < 50.0f
+		glVertex2f(w/2.0f + (w/2.0f) * (factor_500), h);
+	}
+	if (factor_375 >= 0.0f) { // progress < 37.5f
+		glVertex2f(w, h/2.0f + (h/2.0f) * (1.0f - factor_375));
+	}
+	if (factor_250 >= 0.0f) { // progress < 25.0f
+		glVertex2f(w, (h/2.0f) * (1.0f - factor_250));
+	}
+	if (factor_125 >= 0.0f) { // progress < 12.5f
+		glVertex2f(w/2.0f + (w/2.0f) * (1.0f - factor_125), 0);
+	}
+ glEnd();
+
+
+
+ glColor3f(255, 255, 255);
+}
+
+
+class BoOrderButtonDrawable : public BoUfoDrawable
+{
+public:
+	BoOrderButtonDrawable() : BoUfoDrawable()
+	{
+		mGrayOut = false;
+		mProductionCount = 0;
+		mProgressPercentage = 0.0f;
+
+		mFont = new BoUfoStandaloneFont(BoUfoManager::currentUfoManager());
+	}
+	~BoOrderButtonDrawable()
+	{
+		delete mFont;
+	}
+
+	virtual void render(int x, int y, int w, int h);
+
+	virtual int drawableWidth() const;
+	virtual int drawableHeight() const;
+
+	void setImage(const BoUfoImage& img)
+	{
+		mImage = img;
+	}
+	void setGrayOut(bool g)
+	{
+		mGrayOut = g;
+	}
+	void setProductionCount(int c)
+	{
+		mProductionCount = c;
+	}
+	void setProgressPercentage(float p)
+	{
+		mProgressPercentage = p;
+	}
+
+private:
+	BoUfoImage mImage;
+	bool mGrayOut;
+	int mProductionCount;
+	float mProgressPercentage;
+
+	BoUfoStandaloneFont* mFont;
+};
+
+void BoOrderButtonDrawable::render(int x, int y, int w, int h)
+{
+ mImage.paint(QRect(x, y, w, h));
+ if (mGrayOut) {
+	glPushAttrib(GL_COLOR_BUFFER_BIT);
+	glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBegin(GL_QUADS);
+		glVertex2i(x, y);
+		glVertex2i(x + w, y);
+		glVertex2i(x + w, y + h);
+		glVertex2i(x, y + h);
+	glEnd();
+	glColor3f(1.0f, 1.0f, 1.0f);
+	glPopAttrib();
+ }
+ glTranslatef((float)x, (float)y, 0);
+ drawProgress(mProgressPercentage, (float)w, (float)h);
+ glTranslatef(-(float)x, -(float)y, 0);
+
+ if (mProductionCount > 0) {
+	mFont->drawString(QString::number(mProductionCount), x + 5, y + 5 + mFont->height());
+ } else if (mProductionCount == -1) {
+	// TODO: if the i18n()'ed text does not fit into the widget change the
+	// font size!
+	mFont->drawString(i18n("Pause"), x + 5, y + 5 + mFont->height());
+ }
+}
+
+int BoOrderButtonDrawable::drawableWidth() const
+{
+ return mImage.width();
+}
+
+int BoOrderButtonDrawable::drawableHeight() const
+{
+ return mImage.height();
+}
+
+
+BoOrderButtonButton::BoOrderButtonButton()
+	: BoUfoPushButton()
+{
+ connect(this, SIGNAL(signalMouseReleased(QMouseEvent*)),
+		this, SLOT(slotMouseReleaseEvent(QMouseEvent*)));
+
+ mDrawable = new BoOrderButtonDrawable();
+ mDrawable->setGrayOut(false);
+ mDrawable->setProductionCount(0);
+ mDrawable->setProgressPercentage(100.0f);
+
+ BoUfoPushButton::setIcon(*mDrawable);
+}
+
+BoOrderButtonButton::~BoOrderButtonButton()
+{
+ delete mDrawable;
+}
 
 void BoOrderButtonButton::setGrayOut(bool g)
 {
- mGrayOut = g;
- if (mImage.isNull()) {
-	return;
- }
- setImage(mImage);
+ mDrawable->setGrayOut(g);
 }
 
-void BoOrderButtonButton::setImage(const QImage& img)
+void BoOrderButtonButton::setImage(const BoUfoImage& img)
 {
- if (img.isNull()) {
-	boError() << k_funcinfo << "NULL image" << endl;
-	return;
- }
- mImage = img;
- if (mGrayOut) {
-	QImage img = mImage.copy();
-	KImageEffect::desaturate(img, 1.0);
-	if (mProductionCount != 0) {
-		addProductionCount(&img);
-	}
-	BoUfoPushButton::setIcon(img);
- } else {
-	QImage img = mImage.copy();
-	if (mProductionCount != 0) {
-		addProductionCount(&img);
-	}
-	BoUfoPushButton::setIcon(img);
- }
+ mDrawable->setImage(img);
 }
 
 void BoOrderButtonButton::setProductionCount(int c)
 {
- mProductionCount = c;
- QImage img = mImage.copy();
- if (mProductionCount != 0) {
-	addProductionCount(&img);
- }
- BoUfoPushButton::setIcon(img);
+ mDrawable->setProductionCount(c);
+}
+
+void BoOrderButtonButton::setProgressPercentage(float percentage)
+{
+ mDrawable->setProgressPercentage(percentage);
 }
 
 void BoOrderButtonButton::slotMouseReleaseEvent(QMouseEvent* e)
@@ -98,32 +243,6 @@ void BoOrderButtonButton::slotMouseReleaseEvent(QMouseEvent* e)
  }
 }
 
-void BoOrderButtonButton::addProductionCount(QImage* img)
-{
- BO_CHECK_NULL_RET(img);
- if (img->isNull()) {
-	return;
- }
- QColor color(green);
- QFont f;
- f.setBold(true);
- QPixmap pix(*img);
- QPainter painter(&pix);
- painter.setPen(color);
- painter.setFont(f);
-
- if (mProductionCount > 0) {
-	painter.drawText(5, 5 + painter.fontMetrics().height(),
-			QString::number(mProductionCount));
- } else if (mProductionCount == -1) {
-	// TODO: if the i18n()'ed text does not fit into the widget change the
-	// font size!
-	painter.drawText(5, 5 + painter.fontMetrics().height(), i18n("Pause"));
- }
- painter.end();
-
- *img = pix.convertToImage();
-}
 
 
 class BosonOrderButtonPrivate
@@ -273,7 +392,7 @@ void BosonOrderButton::displayUnitPixmap(unsigned long int unitType, const Playe
 	boError(220) << k_funcinfo << "NULL owner" << endl;
 	return;
  }
- QImage* small = boViewData->speciesData(owner->speciesTheme())->smallOverview(unitType, owner->teamColor());
+ BoUfoImage* small = boViewData->speciesData(owner->speciesTheme())->smallOverview(unitType, owner->teamColor());
  if (!small) {
 	boError(220) << k_funcinfo << "Cannot find small overview for "
 			<< unitType << endl;
@@ -282,13 +401,14 @@ void BosonOrderButton::displayUnitPixmap(unsigned long int unitType, const Playe
  setImage(*small);
 }
 
-void BosonOrderButton::setImage(const QImage& image)
+void BosonOrderButton::setImage(const BoUfoImage& image, float progressPercentage)
 {
  if (image.isNull()) {
 	boError() << k_funcinfo << "NULL image" << endl;
 	return;
  }
  mPixmapButton->setImage(image);
+ mPixmapButton->setProgressPercentage(progressPercentage);
  mPixmapButton->show();
 }
 
@@ -381,48 +501,12 @@ void BosonOrderButton::advanceProduction(double percentage)
 	boError(220) << k_funcinfo << "invalid production id: " << mAction.productionId() << endl;
 	return;
  }
- QImage* image = mAction.image();
+ BoUfoImage* image = mAction.image();
  if (!image) {
 	boError(220) << k_funcinfo << "NULL image for action " << mAction.id() << endl;
 	return;
  }
- if (percentage == 100) {
-	setImage(*image);
-	return;
- }
- QPixmap small;
- small.convertFromImage(*image);
-
- KPixmap progress(small);
- progress.setMask(QBitmap());
-
- KPixmapEffect::intensity(progress, 1.4);
-
- QBitmap mask(progress.width(), progress.height());
- mask.fill(Qt::color1);
- QPainter p;
- p.begin(&mask);
- p.setBrush(Qt::color0);
-
- // this stuff (sizes) is evil and probably not working with other pixmap sizes.
- // I'm too lazy to do it right
-
- // well, according to the QPoint documentation this is called
- // "mahattan length" -> it would be correct to use
- // sqrt(pow(mask.width(),2) + pow(mask.height(), 2)),
- // but this is faster.
- int pieSize = mask.width() + mask.height();
- p.drawPie((mask.width() - pieSize)/2, (mask.height() - pieSize)/2, pieSize,
-		pieSize, 16*90, (int)(-16*360*(percentage/100)));
- p.end();
-
- progress.setMask(mask);
-
- p.begin(&small);
- p.drawPixmap(0, 0, progress);
- p.end();
-
- setImage(small.convertToImage());
+ setImage(*image, percentage);
 }
 
 void BosonOrderButton::setGrayOut(bool g)

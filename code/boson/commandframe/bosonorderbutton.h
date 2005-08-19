@@ -22,10 +22,10 @@
 
 #include "../boufo/boufowidget.h"
 #include "../boufo/boufopushbutton.h"
+#include "../boufo/boufoimage.h"
 #include "../global.h"
 #include "../boaction.h"
 
-#include <qimage.h>
 
 class Unit;
 class Player;
@@ -34,6 +34,7 @@ class BosonGroundTheme;
 class BoOrderButtonButton;
 class BoUfoProgress;
 class BoToolTip;
+class BoOrderButtonDrawable;
 
 class BosonOrderButtonPrivate;
 /**
@@ -157,7 +158,7 @@ protected:
 	virtual void displayUnitPixmap(Unit* unit);
 	virtual void displayUnitPixmap(unsigned long int unitType, const Player* owner);
 
-	void setImage(const QImage& image);
+	void setImage(const BoUfoImage& image, float progressPercentage = 100.0f);
 
 protected slots:
 	void slotClicked();
@@ -184,16 +185,12 @@ class BoOrderButtonButton : public BoUfoPushButton
 {
 	Q_OBJECT
 public:
-	BoOrderButtonButton() : BoUfoPushButton()
-	{
-		connect(this, SIGNAL(signalMouseReleased(QMouseEvent*)),
-				this, SLOT(slotMouseReleaseEvent(QMouseEvent*)));
-		mGrayOut = false;
-		mProductionCount = 0;
-	}
+	BoOrderButtonButton();
+	~BoOrderButtonButton();
 
-	virtual void setImage(const QImage& img);
+	virtual void setImage(const BoUfoImage& img);
 
+	void setProgressPercentage(float percentage);
 	void setProductionCount(int c);
 	void setGrayOut(bool g);
 
@@ -203,13 +200,8 @@ signals:
 protected slots:
 	void slotMouseReleaseEvent(QMouseEvent*);
 
-protected:
-	void addProductionCount(QImage* img);
-
 private:
-	bool mGrayOut;
-	int mProductionCount;
-	QImage mImage;
+	BoOrderButtonDrawable* mDrawable;
 };
 
 #endif

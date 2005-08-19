@@ -121,11 +121,25 @@ private:
 class BoUfoImage
 {
 public:
-	BoUfoImage();
+	BoUfoImage(); // NULL image
 	BoUfoImage(const QPixmap&); // slowest
 	BoUfoImage(const QImage&);
-	BoUfoImage(const BoUfoImage&); // fastest
+	BoUfoImage(const BoUfoImage&); // fastest (shallow copy)
 	~BoUfoImage();
+
+	/**
+	 * Makes a shallow copy of @p img, i.e. only the image pointer is copied
+	 * and reference()d.
+	 **/
+	BoUfoImage& operator=(const BoUfoImage& img);
+
+	bool isNull() const
+	{
+		return (image() == 0);
+	}
+
+	unsigned int width() const;
+	unsigned int height() const;
 
 	void load(const QPixmap&);
 	void load(const QImage&);
@@ -135,6 +149,11 @@ public:
 	{
 		return mImage;
 	}
+
+	void paint();
+	void paint(const QPoint& pos);
+	void paint(const QPoint& pos, const QSize& size);
+	void paint(const QRect& rect);
 
 protected:
 	void set(BoUfoImageIO*);

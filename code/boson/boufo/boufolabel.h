@@ -40,6 +40,7 @@ public:
 	void setText(const QString& text);
 	QString text() const;
 	void setIcon(const BoUfoImage&);
+	void setIcon(const BoUfoDrawable& drawable);
 
 	/**
 	 * Convenience method that calls @ref setIcon.
