@@ -570,6 +570,7 @@ QByteArray BoUfoStartEditorWidget::createNewMap()
  files.insert("C/description.xml", desc.toString().utf8());
  files.insert("scripts/eventlistener/game.py", QByteArray());
  files.insert("scripts/eventlistener/localplayer.py", QByteArray());
+ files.insert("scripts/eventlistener/gamevieweventlistener.py", QByteArray());
  for (unsigned int i = 0; i < (unsigned int)(maxPlayers + 1); i++) {
 	files.insert(QString("scripts/eventlistener/ai-player_%1.py").arg(i), QByteArray());
  }
