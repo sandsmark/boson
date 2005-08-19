@@ -195,6 +195,7 @@ protected slots:
 	void slotLoadSave();
 	void slotBrowse();
 	void slotClicked(BoUfoSaveGameWidget*);
+	void slotCancel();
 
 private:
 	void init();

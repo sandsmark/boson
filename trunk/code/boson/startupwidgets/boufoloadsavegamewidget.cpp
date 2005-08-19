@@ -26,6 +26,7 @@
 
 #include <qdir.h>
 #include <qdatetime.h>
+#include <qtimer.h>
 
 #include <kstandarddirs.h>
 #include <kmessagebox.h>
@@ -114,7 +115,7 @@ void BoUfoLoadSaveGameWidget::init()
  connect(d->mLoadSaveButton, SIGNAL(signalClicked()), this, SLOT(slotLoadSave()));
 
  BoUfoPushButton* cancel = new BoUfoPushButton(i18n("&Cancel"));
- connect(cancel, SIGNAL(signalClicked()), this, SIGNAL(signalCancel()));
+ connect(cancel, SIGNAL(signalClicked()), this, SLOT(slotCancel()));
 
  bottom->addWidget(d->mDeleteButton);
  stretch = new BoUfoWidget();
@@ -138,6 +139,11 @@ void BoUfoLoadSaveGameWidget::init()
 BoUfoLoadSaveGameWidget::~BoUfoLoadSaveGameWidget()
 {
  delete d;
+}
+
+void BoUfoLoadSaveGameWidget::slotCancel()
+{
+ QTimer::singleShot(0, this, SIGNAL(signalCancel()));
 }
 
 void BoUfoLoadSaveGameWidget::setDefaultDir()
