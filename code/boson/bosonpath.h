@@ -258,6 +258,8 @@ class BosonPath
     QValueList<int> mChangedBlocks;
     QValueList<int> mDirtyConnections;
     QValueList<int> mBlockStatusDirty;
+
+    friend class BoPathSyncCheckMessage;
 };
 
 

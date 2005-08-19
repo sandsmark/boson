@@ -334,66 +334,6 @@ public:
 protected:
 	virtual QString findLogError(const QByteArray& b1, const QByteArray& b2) const;
 
-	// AB: this is mostly a debugging method. we really should not stream
-	// _all_ of this data.
-	/*static bool streamRegion(QDataStream& stream, BosonPathRegion* r)
-	{
-		if (!r) {
-			return false;
-		}
-		stream << (Q_INT32)r->id;
-		stream << (Q_INT32)r->passabilityType;
-		stream << (Q_INT32)r->cellsCount;
-		stream << (bofixed)r->centerx;
-		stream << (bofixed)r->centery;
-		stream << (bofixed)r->cost;
-		stream << (Q_UINT32)r->neighbors.count();
-#if NET_DEBUG
-		for (unsigned int i = 0; i < r->neighbors.count(); i++) {
-			if (!r->neighbors[i].region) {
-				boError(370) << k_funcinfo << "NULL neighbor region " << i << endl;
-				return false;
-			}
-			stream << (Q_INT32)r->neighbors[i].region->id;
-			stream << (bofixed)r->neighbors[i].cost;
-			stream << (Q_INT32)r->neighbors[i].bordercells;
-		}
-#endif
-		return true;
-	}*/
-
-	/*static bool unstreamRegion(QDataStream& stream, Q_INT32& id, Q_INT32& passabilityType, Q_INT32& cellsCount, bofixed& centerx, bofixed& centery, bofixed& cost,
-			Q_UINT32& nCount
-#if NET_DEBUG
-			, QValueVector<Q_INT32>& nIds, QValueVector<bofixed>& nCost, QValueVector<Q_INT32>& nBorderCells
-#endif
-			)
-	{
-		stream >> id;
-		stream >> passabilityType;
-		stream >> cellsCount;
-		stream >> centerx;
-		stream >> centery;
-		stream >> cost;
-		stream >> nCount;
-#if NET_DEBUG
-		nIds.resize(nCount);
-		nCost.resize(nCount);
-		nBorderCells.resize(nCount);
-		for (unsigned int i = 0; i < nCount; i++) {
-			Q_UINT32 id;
-			bofixed cost;
-			Q_UINT32 borderCells;
-			stream >> id;
-			stream >> cost;
-			stream >> borderCells;
-			nIds[i] = id;
-			nCost[i] = cost;
-			nBorderCells[i] = borderCells;
-		}
-#endif
-		return true;
-	}*/
 private:
 	BosonMap* mMap;
 	BosonPath* mPathFinder;
@@ -402,51 +342,39 @@ private:
 QByteArray BoPathSyncCheckMessage::makeLog()
 {
  QByteArray b;
- // TODO: do NOT stream all sectors! (too much data)
  QDataStream stream(b, IO_WriteOnly);
- /*stream << (Q_UINT32)mPathFinder->sectorWidth();
- stream << (Q_UINT32)mPathFinder->sectorHeight();
- unsigned int count = 0;
- for (unsigned int x = 0; x * mPathFinder->sectorWidth() < mMap->width(); x++) {
-	for (unsigned int y = 0; y * mPathFinder->sectorHeight() < mMap->height(); y++) {
-		count++;
+
+ // Stream dirty cell statuses
+ stream << (Q_UINT32)mPathFinder->mCellStatusDirtyCount;
+ stream << (Q_UINT32)mPathFinder->mCellStatusDirtySize;
+ for (unsigned int i = 0; i < mPathFinder->mCellStatusDirtyCount; i++) {
+	int dirtyindex = mPathFinder->mCellStatusDirty[i];
+	stream << (Q_INT32)dirtyindex;
+	stream << (Q_UINT32)mPathFinder->mCellStatus[dirtyindex].flags;
+ }
+
+ // Stream some info about blocks
+ // TODO: maybe don't send all blocks (too much data)?
+ unsigned int movedatacount = mPathFinder->mMoveDatas.count();
+ stream << (Q_UINT32)movedatacount;
+ stream << (Q_INT32)mPathFinder->mBlockSize;
+ stream << (Q_INT32)mPathFinder->mBlocksCountX;
+ stream << (Q_INT32)mPathFinder->mBlocksCountY;
+ for (int i = 0; i < mPathFinder->mBlocksCountX * mPathFinder->mBlocksCountY; i++) {
+	BosonPath::BlockInfo* block = &mPathFinder->mBlocks[i];
+	for(unsigned int j = 0; j < movedatacount; j++) {
+		stream << (Q_INT32)block->centerx[j];
+		stream << (Q_INT32)block->centery[j];
 	}
  }
- stream << (Q_UINT32)count;
- for (unsigned int x = 0; x * mPathFinder->sectorWidth() < mMap->width(); x++) {
-	for (unsigned int y = 0; y * mPathFinder->sectorHeight() < mMap->height(); y++) {
-		BosonPathSector* s = mPathFinder->sector(x, y);
-		if (!s) {
-			boError(370) << k_funcinfo << "NULL sector at " << x << "," << y << endl;
-			return QByteArray();
-		}
-		if (s->pathfinder != mPathFinder) {
-			boError(370) << k_funcinfo << "unexpected pathfinder pointer" << endl;
-			return QByteArray();
-		}
-		stream << (Q_INT32)s->x;
-		stream << (Q_INT32)s->y;
-		stream << (Q_INT32)s->w;
-		stream << (Q_INT32)s->h;
+ stream << (Q_INT32)mPathFinder->mBlockConnectionsCount;
+ for(int i = 0; i < mPathFinder->mBlockConnectionsCount; i++) {
+	stream << mPathFinder->mBlockConnections[i];
+ }
+ stream << mPathFinder->mChangedBlocks.count();
+ stream << mPathFinder->mDirtyConnections.count();
+ stream << mPathFinder->mBlockStatusDirty.count();
 
-		stream << (Q_UINT32)s->regions.count();
-		for (unsigned int i = 0; i < s->regions.count(); i++) {
-			BosonPathRegion* r = s->regions[i];
-			if (!r) {
-				boError(370) << k_funcinfo << "NULL region at " << i << " in sector " << x << "," << y << endl;
-				return QByteArray();
-			}
-			if (r->sector != s) {
-				boError(370) << k_funcinfo << "r->sector is not parent sector of region!" << endl;
-				return QByteArray();
-			}
-			if (!streamRegion(stream, r)) {
-				boError(370) << k_funcinfo << "could not stream region " << i << " in sector " << x << "," << y << endl;
-				return QByteArray();
-			}
-		}
-	}
- }*/
  return b;
 }
 
@@ -456,66 +384,31 @@ QString BoPathSyncCheckMessage::findLogError(const QByteArray& b1, const QByteAr
  QDataStream s1(b1, IO_ReadOnly);
  QDataStream s2(b2, IO_ReadOnly);
  QString error;
- /*DECLARE_UNSTREAM_COMPARE(Q_UINT32, sectorWidth);
- DECLARE_UNSTREAM_COMPARE(Q_UINT32, sectorHeight);
- DECLARE_UNSTREAM_COMPARE(Q_UINT32, sectorCount);
- for (unsigned int i = 0; i < sectorCount; i++) {
-	DECLARE_UNSTREAM_COMPARE(Q_INT32, x);
-	DECLARE_UNSTREAM_COMPARE(Q_INT32, y);
-	DECLARE_UNSTREAM_COMPARE(Q_INT32, w);
-	DECLARE_UNSTREAM_COMPARE(Q_INT32, h);
-	DECLARE_UNSTREAM_COMPARE(Q_UINT32, regionCount);
 
-	for (unsigned int j = 0; j < regionCount; j++) {
-		DECLARE(Q_INT32, id);
-		DECLARE(Q_INT32, passabilityType);
-		DECLARE(Q_INT32, cellsCount);
-		DECLARE(bofixed, centerx);
-		DECLARE(bofixed, centery);
-		DECLARE(bofixed, cost);
-		DECLARE(Q_UINT32, nCount);
-#if NET_DEBUG
-		DECLARE(QValueVector<Q_INT32>, nIds);
-		DECLARE(QValueVector<bofixed>, nCost);
-		DECLARE(QValueVector<Q_INT32>, nBorderCells);
-#endif
-		unstreamRegion(s1, id, passabilityType, cellsCount, centerx, centery, cost, nCount
-#if NET_DEBUG
-				, nIds, nCost, nBorderCells
-#endif
-				);
-		unstreamRegion(s2, id2, passabilityType2, cellsCount2, centerx2, centery2, cost2, nCount2
-#if NET_DEBUG
-				, nIds2, nCost2, nBorderCells2
-#endif
-				);
+ DECLARE_UNSTREAM_COMPARE(Q_UINT32, cellStatusDirtyCount);
+ DECLARE_UNSTREAM_COMPARE(Q_UINT32, cellStatusDirtySize);
+ for (unsigned int i = 0; i < cellStatusDirtyCount; i++) {
+	DECLARE_UNSTREAM_COMPARE(Q_INT32, dirtyIndex);
+	DECLARE_UNSTREAM_COMPARE(Q_UINT32, dirtyFlags);
+ }
 
-		COMPARE(id);
-		COMPARE(passabilityType);
-		COMPARE(cellsCount);
-		COMPARE(centerx);
-		COMPARE(centery);
-		COMPARE(cost);
-		COMPARE(nCount);
-#if NET_DEBUG
-		if (nIds.count() != nIds2.count()) {
-			return error;
-		}
-		for (unsigned int k = 0; k < nCount; k++) {
-			if (nIds[k] != nIds2[k]) {
-				error += i18n("neightbor ids at %1 don't match in region %2 of sector %3\n").arg(k).arg(j).arg(i);
-			}
-			if (nCost[k] != nCost2[k]) {
-				error += i18n("neightbor costs at %1 don't match in region %2 of sector %3\n").arg(k).arg(j).arg(i);
-			}
-			if (nBorderCells[k] != nBorderCells[k]) {
-				error += i18n("neightbor bordercells at %1 don't match in region %2 of sector %3\n").arg(k).arg(j).arg(i);
-			}
-		}
-#endif
+ DECLARE_UNSTREAM_COMPARE(Q_UINT32, movedataCount);
+ DECLARE_UNSTREAM_COMPARE(Q_INT32, blockSize);
+ DECLARE_UNSTREAM_COMPARE(Q_INT32, blocksCountX);
+ DECLARE_UNSTREAM_COMPARE(Q_INT32, blocksCountY);
+ for (int i = 0; i < blocksCountX * blocksCountY; i++) {
+	for(unsigned int j = 0; j < movedataCount; j++) {
+		DECLARE_UNSTREAM_COMPARE(Q_INT32, centerx);
+		DECLARE_UNSTREAM_COMPARE(Q_INT32, centery);
 	}
- }*/
-
+ }
+ DECLARE_UNSTREAM_COMPARE(Q_INT32, blockConnectionsCount);
+ for(int i = 0; i < blockConnectionsCount; i++) {
+	DECLARE_UNSTREAM_COMPARE(Q_UINT32, connection);
+ }
+ DECLARE_UNSTREAM_COMPARE(Q_UINT32, changedBlocksCount);
+ DECLARE_UNSTREAM_COMPARE(Q_UINT32, dirtyConnectionsCount);
+ DECLARE_UNSTREAM_COMPARE(Q_UINT32, blockStatusDirtyCount);
 
 
  return error;

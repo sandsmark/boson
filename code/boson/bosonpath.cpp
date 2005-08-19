@@ -356,7 +356,7 @@ BosonPath::~BosonPath()
   delete[] mSlopeMap;
   delete[] mForestMap;
 
-  mMap->removeColorMap("Forestation");
+  //mMap->removeColorMap("Forestation");
   mMap->removeColorMap("Slopes");
 
   delete[] mCellStatus;
@@ -376,7 +376,8 @@ void BosonPath::init(BosonCanvas* canvas)
   initOffsets();
 
   mSlopeMap = calculateSlopemap();
-  mForestMap = calculateForestmap();
+  //mForestMap = calculateForestmap();
+  mForestMap = 0;
 
   initMoveDatas(canvas);
   initCellPassabilityMaps();
