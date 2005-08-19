@@ -87,12 +87,12 @@ public slots:
 	 * @ref BosonNewGameWidget) for a single-player game where the player can
 	 * select the playfield.
 	 **/
-	void slotNewSPGame(KCmdLineArgs* args = 0);
+	void slotNewSinglePlayerGame(KCmdLineArgs* args = 0);
 	/**
 	 * Mainly used internally. This will display the network widget and then new
 	 * game widget (see @ref BosonNewGameWidget) for a multi-player game.
 	 **/
-	void slotNewMPGame(KCmdLineArgs* args = 0);
+	void slotNewMultiPlayerGame(KCmdLineArgs* args = 0);
 
 	/**
 	 * Mainly used internally. This will display the start editor widget

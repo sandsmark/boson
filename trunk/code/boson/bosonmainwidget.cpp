@@ -1054,7 +1054,7 @@ void BosonMainWidget::slotShowNewGamePage(KCmdLineArgs* args)
 	boError() << k_funcinfo << "NULL startup widget" << endl;
 	return;
  }
- d->mStartup->slotNewSPGame(args);
+ d->mStartup->slotNewSinglePlayerGame(args);
 }
 
 void BosonMainWidget::slotLoadFromLog(const QString& logFile)
@@ -1065,7 +1065,7 @@ void BosonMainWidget::slotLoadFromLog(const QString& logFile)
  }
  BO_CHECK_NULL_RET(boGame);
  boDebug() << k_funcinfo << "trying to load from log file " << logFile << endl;
- d->mStartup->slotNewSPGame(0);
+ d->mStartup->slotNewSinglePlayerGame(0);
  BO_CHECK_NULL_RET(d->mStarting);
  d->mStarting->setLoadFromLogFile(logFile);
 }

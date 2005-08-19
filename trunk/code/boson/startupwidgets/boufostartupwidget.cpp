@@ -142,14 +142,14 @@ void BoUfoStartupWidget::slotSaveGame()
  loadSave->updateGames();
 }
 
-void BoUfoStartupWidget::slotNewSPGame(KCmdLineArgs* args)
+void BoUfoStartupWidget::slotNewSinglePlayerGame(KCmdLineArgs* args)
 {
  d->mSinglePlayer = true;
 
  newGame(args);
 }
 
-void BoUfoStartupWidget::slotNewMPGame(KCmdLineArgs* args)
+void BoUfoStartupWidget::slotNewMultiPlayerGame(KCmdLineArgs* args)
 {
  d->mSinglePlayer = false;
 
@@ -250,8 +250,8 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 	{
 		BoUfoWelcomeWidget* welcome = new BoUfoWelcomeWidget();
 		connect(welcome, SIGNAL(signalQuit()), this, SIGNAL(signalQuit()));
-		connect(welcome, SIGNAL(signalNewSPGame()), this, SLOT(slotNewSPGame()));
-		connect(welcome, SIGNAL(signalNewMPGame()), this, SLOT(slotNewMPGame()));
+		connect(welcome, SIGNAL(signalNewSPGame()), this, SLOT(slotNewSinglePlayerGame()));
+		connect(welcome, SIGNAL(signalNewMPGame()), this, SLOT(slotNewMultiPlayerGame()));
 		connect(welcome, SIGNAL(signalLoadGame()), this, SLOT(slotLoadGame()));
 		connect(welcome, SIGNAL(signalStartEditor()), this, SLOT(slotStartEditor()));
 		w = welcome;
