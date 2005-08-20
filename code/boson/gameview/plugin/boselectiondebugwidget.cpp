@@ -86,6 +86,8 @@ BoSelectionDebugWidget::BoSelectionDebugWidget()
  BoUfoWidget* stretch = new BoUfoWidget();
  stretch->setStretch(1);
  addWidget(stretch);
+
+ setVisible(false);
 }
 
 BoSelectionDebugWidget::~BoSelectionDebugWidget()
