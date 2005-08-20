@@ -90,6 +90,21 @@ const UpgradeProperties* PlayerIO::technologyProperties(unsigned long int type) 
  return player()->technologyProperties(type);
 }
 
+bool PlayerIO::isOutOfGame() const
+{
+ return player()->isOutOfGame();
+}
+
+bool PlayerIO::hasLost() const
+{
+ return player()->hasLost();
+}
+
+bool PlayerIO::hasWon() const
+{
+ return player()->hasWon();
+}
+
 QPtrList<Unit>* PlayerIO::allMyUnits() const
 {
  return player()->allUnits();

@@ -534,7 +534,7 @@ void BosonMainWidget::initBoson()
 {
  if (Boson::boson()) {
 	boWarning() << k_funcinfo << "Oops - Boson object already present! deleting..." << endl;
-	Boson::deleteBoson();
+	deleteBoson();
  }
  Boson::initBoson();
  if (!d->mStarting) {
@@ -551,12 +551,6 @@ void BosonMainWidget::initBoson()
  connect(boGame, SIGNAL(signalStartNewGame()), this, SLOT(slotStartNewGame()));
  connect(boGame, SIGNAL(signalGameStarted()), this, SLOT(slotGameStarted()));
 
- connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
-		d->mGameView, SLOT(slotAdvance(unsigned int, bool)));
- connect(boGame, SIGNAL(signalChangeTexMap(int, int, unsigned int, unsigned int*, unsigned char*)),
-		d->mGameView, SLOT(slotChangeTexMap(int, int)));
- connect(boGame, SIGNAL(signalChangeHeight(int, int, float)),
-		d->mGameView, SLOT(slotChangeHeight(int, int)));
  connect(boGame, SIGNAL(signalLoadExternalStuffFromXML(const QDomElement&)),
 		this, SLOT(slotLoadExternalStuffFromXML(const QDomElement&)));
  connect(boGame, SIGNAL(signalSaveExternalStuffAsXML(QDomElement&)),
@@ -567,6 +561,19 @@ void BosonMainWidget::initBoson()
  // for editor (new maps)
  connect(boGame, SIGNAL(signalEditorNewMap(const QByteArray&)),
 		this, SLOT(slotEditorNewMap(const QByteArray&)));
+
+ d->mGameView->bosonObjectCreated(boGame);
+}
+
+void BosonMainWidget::deleteBoson()
+{
+ if (!Boson::boson()) {
+	return;
+ }
+ if (d->mGameView) {
+	d->mGameView->bosonObjectAboutToBeDestroyed(boGame);
+ }
+ Boson::deleteBoson();
 }
 
 void BosonMainWidget::endGame()
@@ -579,7 +586,7 @@ void BosonMainWidget::endGame()
  if (boGame) {
 	boGame->quitGame();
  }
- Boson::deleteBoson();  // Easiest way to reset game info
+ deleteBoson();  // Easiest way to reset game info
  delete d->mStarting;
  d->mStarting = 0;
  boDebug() << k_funcinfo << "done" << endl;

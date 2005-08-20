@@ -108,6 +108,8 @@ void BoEventManager::declareEvents()
  BO_DECLARE_EVENT(StopProductionOfTechnologyWithType);
 
  BO_DECLARE_EVENT(PlayerLost);
+ BO_DECLARE_EVENT(PlayerWon);
+ BO_DECLARE_EVENT(GameOver);
 
  BO_DECLARE_EVENT(Advance);
 

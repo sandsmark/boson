@@ -1481,6 +1481,23 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
 
 }
 
+void BosonGameView::bosonObjectCreated(Boson* boson)
+{
+ connect(boson, SIGNAL(signalAdvance(unsigned int, bool)),
+		this, SLOT(slotAdvance(unsigned int, bool)));
+ connect(boson, SIGNAL(signalChangeTexMap(int, int, unsigned int, unsigned int*, unsigned char*)),
+		this, SLOT(slotChangeTexMap(int, int)));
+ connect(boson, SIGNAL(signalChangeHeight(int, int, float)),
+		this, SLOT(slotChangeHeight(int, int)));
+ connect(boson, SIGNAL(signalGameOver()),
+		this, SLOT(slotGameOver()));
+}
+
+void BosonGameView::bosonObjectAboutToBeDestroyed(Boson* boson)
+{
+ Q_UNUSED(boson);
+}
+
 
 void BosonGameView::setLocalPlayerIO(PlayerIO* io)
 {
@@ -2469,6 +2486,76 @@ void BosonGameView::paintWidget()
  // nothing to do here, everything is done in child widgets.
  // all GL calls that should apply to child widgets as well should be made in
  // paint(), not here
+}
+
+void BosonGameView::slotGameOver()
+{
+ BO_CHECK_NULL_RET(localPlayerIO());
+ BO_CHECK_NULL_RET(boGame);
+ boDebug() << k_funcinfo << endl;
+
+ // AB: keep in mind that boGame->playerCount()-1 == neutral player
+ QString winner;
+ QString loser;
+ QString rest;
+ bool localWon = false;
+ bool localLost = false;
+ for (unsigned int i = 0; i < boGame->playerCount() - 1; i++) {
+	PlayerIO* io = boGame->playerIOAt(i);
+	if (io->hasLost()) {
+		if (io == localPlayerIO()) {
+			localLost = true;
+		}
+		if (loser.isEmpty()) {
+			loser = i18n("%1").arg(io->name());
+		} else {
+			loser = i18n("%1, %1").arg(loser).arg(io->name());
+		}
+	} else if (io->hasWon()) {
+		if (io == localPlayerIO()) {
+			localWon = true;
+		}
+		if (winner.isEmpty()) {
+			winner = i18n("%1").arg(io->name());
+		} else {
+			winner = i18n("%1, %1").arg(winner).arg(io->name());
+		}
+	} else {
+		if (rest.isEmpty()) {
+			rest = i18n("%1").arg(io->name());
+		} else {
+			rest = i18n("%1, %1").arg(rest).arg(io->name());
+		}
+	}
+ }
+ if (winner.isEmpty()) {
+	winner = i18n("No winner in this game");
+ }
+ if (loser.isEmpty()) {
+	winner = i18n("No loser in this game");
+ }
+
+ QString local;
+ if (localWon) {
+	local = i18n("You won! Damn you made it! You really rock!!!");
+ } else if (localLost) {
+	local = i18n("You are a loser. You suck.");
+ } else {
+	local = i18n("You can't decide whether to win or to lose hm? Booring!");
+ }
+ if (!rest.isEmpty()) {
+	rest = i18n("Neither winner nor loser: %1").arg(rest);
+ }
+ KMessageBox::information(0,
+		i18n("The game is over.\n"
+		"Winner: %1\nLoser: %2\n"
+		"%3\n"
+		"\n%4\n"
+		"This messagebox means that the developers have been too lazy to implement a nice gameover dialog. Sorry about this, but you didn't help, so it's your fault!")
+		.arg(winner).arg(loser).arg(rest).arg(local),
+		i18n("Game is over"));
+
+ QTimer::singleShot(0, this, SIGNAL(signalEndGame()));
 }
 
 

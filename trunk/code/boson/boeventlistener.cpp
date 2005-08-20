@@ -420,23 +420,114 @@ void BoCanvasEventListener::processEvent(const BoEvent* event)
 {
  PROFILE_METHOD
  if (event->name() == "AllUnitsDestroyed") {
-	// AB: atm the player loses when all of his units are destroyed.
-	//     will change when we support winning conditions
-	BoEvent* lost = new BoEvent("PlayerLost");
-	lost->setPlayerId(event->playerId());
-	boGame->queueEvent(lost);
+	Player* p = (Player*)boGame->findPlayer(event->playerId());
+	if (!p) {
+		boError(360) << k_funcinfo << "could not find specified player " << event->playerId() << endl;
+		return;
+	}
+	boGame->slotAddChatSystemMessage(i18n("%1 has lost all units").arg(p->name()));
+
+	checkGameOverAndEndGame();
  } else if (event->name() == "PlayerLost") {
 	Player* p = (Player*)boGame->findPlayer(event->playerId());
 	if (!p) {
 		boError(360) << k_funcinfo << "could not find specified player " << event->playerId() << endl;
 		return;
 	}
-	p->setOutOfGame();
+	boDebug() << k_funcinfo << "PlayerLost event received for player " << event->playerId() << endl;
+	p->setHasLost(true);
+	p->setHasWon(false);
+
+	// AB: atm "PlayerLost" also implies that player is out of the game
 	boGame->killPlayer(p);
+	p->setOutOfGame();
+
+	boGame->slotAddChatSystemMessage(i18n("%1 has lost and is out of the game").arg(p->name()));
+ } else if (event->name() == "PlayerWon") {
+	Player* p = (Player*)boGame->findPlayer(event->playerId());
+	if (!p) {
+		boError(360) << k_funcinfo << "could not find specified player " << event->playerId() << endl;
+		return;
+	}
+	boDebug() << k_funcinfo << "PlayerWon event received for player " << event->playerId() << endl;
+	p->setHasLost(false);
+	p->setHasWon(true);
+ } else if (event->name() == "GameOver") {
+	boDebug() << k_funcinfo << endl;
+	emit signalGameOver();
  } else if (event->name() == "CustomStringEvent") {
 	boGame->slotAddChatSystemMessage(i18n("Received CustomStringEvent - parameter1: %1").arg(event->data1()));
  }
 }
+
+// AB: here we could do several nice things
+// * provide an XML file (and a dialog in the editor) to define winning
+//   conditions
+// * provide a python script function to test for winning conditions
+bool BoCanvasEventListener::checkGameOver(QPtrList<Player>* fullfilledWinningConditions) const
+{
+ // AB: we could use some condition object here: once all events from the
+ // condition are received, the player has won (or lost) and once a won/lost
+ // from all players is received
+ //
+ // -> however atm we just poll for number of units of all players
+
+ boDebug() << k_funcinfo << endl;
+ // AB: atm we use the winning condition "at most 1 player left in game"
+ QPtrList<Player> fullfilled;
+
+ // AB: keep in mind that the last player is the neutral player who is
+ // never out of the game and is never relevant to winning conditions
+ for (unsigned int i = 0; i < boGame->playerCount() - 1; i++) {
+	Player* p = (Player*)boGame->playerList()->at(i);
+	if (p->allUnits()->count() > 0) {
+		fullfilled.append(p);
+		boDebug() << "FULLFILLED: " << p->id() << endl;
+	}
+ }
+ if (fullfilled.count() <= 1) {
+	// at most one player with units left - game is over, remaining player has won
+	if (fullfilledWinningConditions) {
+		fullfilledWinningConditions->clear();
+		if (fullfilled.count() == 1) {
+			fullfilledWinningConditions->append(fullfilled.at(0));
+		}
+	}
+	return true;
+ }
+ return false;
+}
+
+void BoCanvasEventListener::checkGameOverAndEndGame()
+{
+ QPtrList<Player> fullfilledWinningConditions;
+ if (checkGameOver(&fullfilledWinningConditions)) {
+	// AB: keep in mind that the last player is the neutral player that is
+	// always excluded from gameover/winning conditions.
+	for (unsigned int i = 0; i < boGame->playerCount() - 1; i++) {
+		Player* p = (Player*)boGame->playerList()->at(i);
+		if (fullfilledWinningConditions.contains(p)) {
+			BoEvent* won = new BoEvent("PlayerWon");
+			won->setPlayerId(p->id());
+			boGame->queueEvent(won);
+		} else {
+			BoEvent* lost = new BoEvent("PlayerLost");
+			lost->setPlayerId(p->id());
+			boGame->queueEvent(lost);
+		}
+	}
+	BoEvent* gameOver = new BoEvent("GameOver");
+
+	// We use a "fadeout" time of 100 advance calls.
+	// This is meant to make sure that the final explosions are actually
+	// displayed, and that the player can watch his units to leave the enemy
+	// base again or so (this is "nice to look at").
+	gameOver->setDelayedDelivery(100);
+
+	boGame->queueEvent(gameOver);
+ }
+}
+
 
 
 BoComputerPlayerEventListener::BoComputerPlayerEventListener(Player* p, BoEventManager* manager, QObject* parent)

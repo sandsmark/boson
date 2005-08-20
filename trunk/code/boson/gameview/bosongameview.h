@@ -44,6 +44,7 @@ class BosonGameFPSCounter;
 class BosonViewData;
 class KGameIO;
 class QDomElement;
+class Boson;
 
 
 
@@ -490,6 +491,9 @@ public:
 	BosonGameView();
 	virtual ~BosonGameView();
 
+	void bosonObjectCreated(Boson* boson);
+	void bosonObjectAboutToBeDestroyed(Boson* boson);
+
 	void setGameFPSCounter(BosonGameFPSCounter* counter);
 	BosonGameFPSCounter* gameFPSCounter() const;
 
@@ -748,6 +752,8 @@ protected slots:
 	void slotWheelEvent(QWheelEvent* e);
 
 	void slotWidgetShown();
+
+	void slotGameOver();
 
 private:
 	void init();

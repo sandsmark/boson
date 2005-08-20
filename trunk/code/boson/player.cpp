@@ -101,6 +101,12 @@ Player::Player(bool isNeutralPlayer) : KPlayer()
 	boError() << k_funcinfo << "can't find name property" << endl;
  }
 // TODO d->mFogged.registerData() or something like this
+ mOutOfGame.registerData(IdOutOfGame, dataHandler(),
+		KGamePropertyBase::PolicyLocal, "OutOfGame");
+ mHasLost.registerData(IdHasLost, dataHandler(),
+		KGamePropertyBase::PolicyLocal, "HasLost");
+ mHasWon.registerData(IdHasWon, dataHandler(),
+		KGamePropertyBase::PolicyLocal, "HasWon");
  d->mMinerals.registerData(IdMinerals, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "MineralCost");
  d->mOil.registerData(IdOil, dataHandler(),
@@ -108,6 +114,9 @@ Player::Player(bool isNeutralPlayer) : KPlayer()
  d->mIsNeutralPlayer.registerData(IdIsNeutralPlayer, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "IsNeutralPlayer");
  d->mIsNeutralPlayer = isNeutralPlayer;
+ mOutOfGame = false;
+ mHasLost = false;
+ mHasWon = false;
  d->mPlayerIO = new PlayerIO(this);
 
  quitGame(); // this will reset some variables
@@ -146,6 +155,8 @@ void Player::quitGame(bool destruct)
  d->mFacilitiesCount = 0;
  d->mFoggedCount = 0;
  mOutOfGame = false;
+ mHasWon = false;
+ mHasLost = false;
  d->mMap = 0;
  d->mResearchedUpgrades.clear();
 

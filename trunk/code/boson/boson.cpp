@@ -312,6 +312,8 @@ public:
 
 	BosonPlayerInputHandler* mPlayerInputHandler;
 	BosonNetworkSynchronizer* mNetworkSynchronizer;
+
+	bool mGameIsOver;
 };
 
 Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
@@ -339,6 +341,7 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 
 
  mGameMode = true;
+ d->mGameIsOver = false;
 
  connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, Q_UINT32)),
 		this, SLOT(slotNetworkData(int, const QByteArray&, Q_UINT32, Q_UINT32)));
@@ -430,6 +433,8 @@ void Boson::createCanvas()
 	return;
  }
  d->mCanvas = new BosonCanvas(this);
+ connect(d->mCanvas, SIGNAL(signalGameOver()),
+		this, SLOT(slotGameOver()));
 }
 
 BosonCanvas* Boson::canvasNonConst() const
@@ -488,6 +493,18 @@ PlayerIO* Boson::findPlayerIO(Q_UINT32 id) const
  Player* p = (Player*)findPlayer(id);
  if (p) {
 	return p->playerIO();
+ }
+ return 0;
+}
+
+PlayerIO* Boson::playerIOAt(unsigned int index) const
+{
+ unsigned int i = 0;
+ for (QPtrListIterator<KPlayer> it(*playerList()); it.current(); ++it) {
+	if (index == i) {
+		return ((Player*)it.current())->playerIO();
+	}
+	i++;
  }
  return 0;
 }
@@ -586,6 +603,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 					<< messageClient()->adminId() << endl;
 			break;
 		}
+		d->mGameIsOver = false;
 
 		ensureComputerIOListValid(this, d->mComputerIOList);
 
@@ -667,6 +685,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		BO_CHECK_NULL_RET(d->mCanvas);
 		killPlayer(p);
 		slotAddChatSystemMessage(i18n("Debug"), i18n("Killed player %1 - %2").arg(p->id()).arg(p->name()));
+		break;
 	}
 	case BosonMessageIds::IdModifyMinerals:
 	{
@@ -1033,6 +1052,10 @@ QValueList<QColor> Boson::availableTeamColors() const
 
 void Boson::slotReceiveAdvance()
 {
+ if (d->mGameIsOver) {
+	return;
+ }
+
  // Log game state
  if (advanceCallsCount() % boConfig->intValue("GameLogInterval") == 0) {
 	//makeGameLog();
@@ -1326,7 +1349,6 @@ void Boson::killPlayer(Player* player)
  player->setMinerals(0);
  player->setOil(0);
  boDebug() << k_funcinfo << "player " << player->id() << " is out of game" << endl;
- emit signalPlayerKilled(player);
 }
 
 void Boson::makeGameLog()
@@ -1739,5 +1761,18 @@ void Boson::clearUndoStacks()
 {
  emit signalEditorClearRedoStack();
  emit signalEditorClearUndoStack();
+}
+
+void Boson::slotGameOver()
+{
+ boDebug() << k_funcinfo << endl;
+
+ d->mGameIsOver = true;
+
+ // do not send any additional advance messages
+ d->mGameTimer->stop();
+ QObject::disconnect(d->mGameTimer, SIGNAL(timeout()), this, SLOT(slotSendAdvance()));
+
+ emit signalGameOver();
 }
 

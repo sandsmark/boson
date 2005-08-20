@@ -31,6 +31,7 @@ class Player;
 class PlayerIO;
 class BosonScript;
 template<class T1, class T2> class QMap;
+template<class T> class QPtrList;
 
 
 class BoEventListenerPrivate;
@@ -138,8 +139,24 @@ public:
 		return QString("game.py");
 	}
 
+signals:
+	void signalGameOver();
+
 protected:
 	virtual BosonScript* createScriptParser() const;
+
+	/**
+	 * Check whether the game is over (see @ref checkGameOver) and send a
+	 * "GameOver" event if it is.
+	 **/
+	void checkGameOverAndEndGame();
+
+	/**
+	 * @return TRUE if the game is over, otherwise FALSE. In either case,
+	 * the players that fullfilled the winning conditions up to now are returned
+	 * in @p fullfilledWinningConditions.
+	 **/
+	bool checkGameOver(QPtrList<Player>* fullfilledWinningConditions = 0) const;
 
 private:
 };
