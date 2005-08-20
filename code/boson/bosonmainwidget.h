@@ -196,6 +196,7 @@ private:
 	void initUfoGUI();
 
 	void initBoson();
+	void deleteBoson();
 
 private:
 	BosonMainWidgetPrivate* d;

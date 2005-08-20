@@ -388,6 +388,13 @@ public:
 	 **/
 	bool canPlaceUnitAt(const UnitProperties* unit, const BoVector2Fixed& pos, ProductionPlugin* factory) const;
 
+	/**
+	 * Clear the canvas, preparing it for destruction.
+	 *
+	 * This method is meant to eliminate all pointers and all allocated
+	 * memory from the canvas. For notifying the game that a player has won,
+	 * see @ref signalGameOver.
+	 **/
 	void quitGame();
 
 	void addToCells(BosonItem* u);
@@ -486,6 +493,16 @@ signals:
 
 	void signalShotFired(BosonShot* shot, BosonWeapon* weapon);
 	void signalShotHit(BosonShot* shot);
+
+	/**
+	 * Emitted when the winning conditions are fullfilled. See @ref
+	 * BoCanvasEventListener.
+	 *
+	 * @param fullfilledWinningConditions The list of players that have
+	 * completed their goals of this scenario, i.e. the players that have
+	 * won. If this list is empty, no player has won.
+	 **/
+	void signalGameOver();
 
 protected:
 	/**

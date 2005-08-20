@@ -69,6 +69,21 @@ public:
 	unsigned long int playerId() const;
 
 	/**
+	 * @return Player::isOutOfGame
+	 **/
+	bool isOutOfGame() const;
+
+	/**
+	 * @return Player::hasWon
+	 **/
+	bool hasWon() const;
+
+	/**
+	 * @return Player::hasLost
+	 **/
+	bool hasLost() const;
+
+	/**
 	 * Connect to the specified signal of the player. Works like any usual
 	 * @ref QObject::connect, but the first parameter (the emitter of the
 	 * signal) is always the @ref player.

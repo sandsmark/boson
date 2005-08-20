@@ -53,7 +53,10 @@ public:
 		IdFogged = KGamePropertyBase::IdUser + 1,
 		IdMinerals = KGamePropertyBase::IdUser + 2,
 		IdOil = KGamePropertyBase::IdUser + 3,
-		IdIsNeutralPlayer = KGamePropertyBase::IdUser + 4
+		IdIsNeutralPlayer = KGamePropertyBase::IdUser + 4,
+		IdOutOfGame = KGamePropertyBase::IdUser + 5,
+		IdHasLost = KGamePropertyBase::IdUser + 6,
+		IdHasWon = KGamePropertyBase::IdUser + 7
 	};
 
 	/**
@@ -195,6 +198,62 @@ public:
 	bool isOutOfGame() const { return mOutOfGame; }
 
 	/**
+	 * The @ref hasWon and @ref hasLost flags are usually set at the ond of the
+	 * game, as information to the gameover dialog. They may however be set
+	 * earlier in the game to indicate that a player has already won (lost)
+	 * and cannot lose (win) anymore, no matter what he does. Note that this
+	 * means for example, that when the @ref hasWon flag is set, not even
+	 * losing all units could cause the player to lose the game. WARNING:
+	 * this interpretation of these flags (that they are permanent and
+	 * cannot change anymore once set in a game) might change in the future!
+	 *
+	 * Note that even at the end of the game it is possible that neither
+	 * @ref hasWon nor @ref hasLost are set. In that case the player is "in
+	 * between", he hasn't accomplished his goals, but hasn't lost the game
+	 * either. Winning and losing at once is not possible.
+	 *
+	 * @return TRUE if the player lost the game. During the game this is
+	 * usually not used directly, use @ref isOutOfGame instead.
+	 **/
+	bool hasLost() const { return mHasLost; }
+
+	/**
+	 * See @ref hasLost for a more detailed explanation of @ref hasLost and
+	 * @ref hasWon flags.
+	 *
+	 * @return TRUE if the player has won the game, otherwise FALSE. Note
+	 * that this is not necessarily the opposite of @ref hasLost, a player
+	 * may have neither won nor lost (however winning and losing is not
+	 * possible).
+	 **/
+	bool hasWon() const { return mHasWon; }
+
+	/**
+	 * See @ref hasLost
+	 **/
+	void setHasLost(bool l)
+	{
+		mHasLost = l;
+		if (hasLost() && hasWon()) {
+			// hasLost() has precedence
+			mHasWon = false;
+		}
+	}
+
+	/**
+	 * See @ref hasWon and @ref hasLost.
+	 **/
+
+	void setHasWon(bool w)
+	{
+		mHasWon = w;
+		if (hasLost()) {
+			// hasLost() has precedence
+			mHasWon = false;
+		}
+	}
+
+	/**
 	 * This is called by the global @ref BoCanvasEventListener to indicate
 	 * that the player has lost the game.
 	 *
@@ -288,7 +347,9 @@ private:
 	PlayerPrivate* d;
 
 	SpeciesTheme* mSpecies;
-	bool mOutOfGame;
+	KGameProperty<Q_UINT8> mOutOfGame;
+	KGameProperty<Q_UINT8> mHasLost;
+	KGameProperty<Q_UINT8> mHasWon;
 };
 
 #endif

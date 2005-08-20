@@ -113,6 +113,7 @@ public:
 	BosonPlayField* playField() const;
 
 	PlayerIO* findPlayerIO(Q_UINT32 id) const;
+	PlayerIO* playerIOAt(unsigned int playerIndex) const;
 
 	/**
 	 * Initialize a @ref BosonSaveLoad object with the relevant data.
@@ -454,6 +455,14 @@ signals:
 	void signalGameStarted();
 
 	/**
+	 * Emitted when the game is officially over and the winners are known.
+	 *
+	 * When this signal is emitted, no more advance calls will be processed.
+	 * You most likely want to end the game now, e.g. call @ref quitGame
+	 **/
+	void signalGameOver();
+
+	/**
 	 * Tell the map to change @ref BosonMap::texMap at coordinates @p x, @p
 	 * y.
 	 *
@@ -529,6 +538,12 @@ protected slots:
 	void slotBoDebugOutput(const BoDebugMessage&);
 	void slotBoDebugWarning(const BoDebugMessage&);
 	void slotBoDebugError(const BoDebugMessage&);
+
+	/**
+	 * Called when the winning conditions are fullfilled. See @ref
+	 * BosonCanvas::signalGameOver.
+	 **/
+	void slotGameOver();
 
 private:
 	friend class BoAdvance;
