@@ -110,14 +110,15 @@ void BosonGameViewPluginDefault::setLocalPlayerIO(PlayerIO* io)
 
 void BosonGameViewPluginDefault::updateBeforePaint()
 {
+ bool showUnitDebug = boConfig->boolValue("ShowUnitDebugWidget");
+ if (showUnitDebug != d->mSelectionDebugWidget->isVisible()) {
+	d->mSelectionDebugWidget->setVisible(showUnitDebug);
+ }
+ if (showUnitDebug) {
+	d->mSelectionDebugWidget->update();
+ }
+
  if (d->mGameMode) {
-	bool showUnitDebug = boConfig->boolValue("ShowUnitDebugWidget");
-	if (showUnitDebug != d->mSelectionDebugWidget->isVisible()) {
-		d->mSelectionDebugWidget->setVisible(showUnitDebug);
-	}
-	if (showUnitDebug) {
-		d->mSelectionDebugWidget->update();
-	}
  } else {
 	bool showRandomMap = boConfig->boolValue("EditorShowRandomMapGenerationWidget");
 	if (showRandomMap != d->mEditorRandomMapWidget->isVisible()) {
