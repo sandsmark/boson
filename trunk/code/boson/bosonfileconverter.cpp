@@ -765,10 +765,12 @@ bool BosonFileConverter::convertPlayField_From_0_10_To_0_10_80(QMap<QString, QBy
 	QDomElement action = canvasDoc.createElement("Action");
 	action.setAttribute("Type", "Event");
 	cond.appendChild(action);
+#if 0
 	QDomElement actionEvent = event.cloneNode().toElement();
 	actionEvent.setAttribute("Name", "CustomStringEvent");
 	actionEvent.setAttribute("Data1", "Foobar");
 	action.appendChild(actionEvent);
+#endif
 }
 
  QDomElement effects = canvasDoc.createElement("Effects");
