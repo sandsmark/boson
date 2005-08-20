@@ -1146,7 +1146,8 @@ void BosonCanvas::removeItem(BosonItem* item)
  if (RTTI::isUnit(item->rtti())) {
 	Unit* u = (Unit*)item;
 	if (d->mDestroyedUnits.contains(u)) {
-		boError() << k_funcinfo << item << " still in destroyed units list" << endl;
+		d->mDestroyedUnits.remove(u);
+		//boError() << k_funcinfo << item << " still in destroyed units list" << endl;
 	}
  }
 
