@@ -13,7 +13,7 @@ OilCost=20
 #ProductionTime=20
 SupportMiniMap=false
 TerrainType=0
-UnitDepth=0.8
-UnitHeight=1.5
-UnitWidth=1.5
+UnitDepth=0.4
+UnitHeight=0.75
+UnitWidth=0.75
 

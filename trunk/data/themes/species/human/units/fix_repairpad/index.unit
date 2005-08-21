@@ -24,9 +24,9 @@ Shield=0
 SightRange=8
 SupportMiniMap=false
 TerrainType=0
-UnitDepth=0.4
-UnitHeight=2
-UnitWidth=2
+UnitDepth=0.48
+UnitHeight=2.4
+UnitWidth=2.4
 Weapons=0
 
 [Sounds]
