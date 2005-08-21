@@ -65,7 +65,16 @@ class BoLake
     /**
      * @return Whether this lake has given corner.
      **/
-    bool hasCorner(int x, int y)  { return corners[(y - miny) * (maxx - minx + 1) + (x - minx)]; }
+    bool hasCorner(int x, int y)
+    {
+      int index = (y - miny) * (maxx - minx + 1) + (x - minx);
+      int size = (maxx - minx + 1) * (maxy - miny + 1);
+      if(index >= size)
+      {
+        return false;
+      }
+      return corners[index];
+    }
     /**
      * @return Whether this lake has any cells in given rectangle.
      **/
@@ -129,4 +138,7 @@ class BoWaterManager
 };
 
 #endif // BOWATER_H
+/*
+ * vim: et sw=2
+ */
 
