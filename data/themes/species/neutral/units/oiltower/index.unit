@@ -28,8 +28,8 @@ SightRange=5
 SupportMiniMap=false
 TerrainType=0
 UnitDepth=0.92
-UnitHeight=1
-UnitWidth=1
+UnitHeight=2
+UnitWidth=2
 Weapons=0
 
 [Sounds]

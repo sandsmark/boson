@@ -28,9 +28,13 @@ Shield=0
 SightRange=8
 SupportMiniMap=false
 TerrainType=0
-UnitDepth=1.48
-UnitHeight=2
-UnitWidth=2
+#UnitDepth=1.48
+#UnitHeight=2
+#UnitWidth=2
+UnitDepth=3.108
+UnitHeight=4.2
+UnitWidth=4.2
+
 Weapons=0
 
 [RefineryPlugin]

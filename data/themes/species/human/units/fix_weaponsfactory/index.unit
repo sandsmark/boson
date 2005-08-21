@@ -28,9 +28,9 @@ Shield=0
 SightRange=8
 SupportMiniMap=false
 TerrainType=0
-UnitDepth=0.98
-UnitHeight=2
-UnitWidth=2
+UnitDepth=1.372
+UnitHeight=2.8
+UnitWidth=2.8
 Weapons=0
 
 [ProductionPlugin]

@@ -24,9 +24,9 @@ Shield=0
 SightRange=7
 SupportMiniMap=false
 TerrainType=0
-UnitDepth=0.5
-UnitHeight=1
-UnitWidth=1
+UnitDepth=0.375
+UnitHeight=0.75
+UnitWidth=0.75
 Weapons=0
 
 [HarvesterPlugin]
