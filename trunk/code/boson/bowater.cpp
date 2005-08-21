@@ -49,6 +49,19 @@ class BoWaterData
     BoWaterData();
     ~BoWaterData();
 
+    bool isValidCorner(int x, int y) const
+    {
+      if(x < 0 || y < 0)
+      {
+        return false;
+      }
+      if (x >= width || y >= height)
+      {
+        return false;
+      }
+      return true;
+    }
+
 
     QPtrList<BoLake> lakes;
 
@@ -432,6 +445,10 @@ float BoWaterManager::groundHeight(int x, int y) const
     BO_NULL_ERROR(mData->map);
     return 0.0f;
   }
+  if(!mData->isValidCorner((int)x, (int)y))
+  {
+    return 0.0f;
+  }
   return mData->map->heightAtCorner(x, y);
 }
 
@@ -452,13 +469,17 @@ float BoWaterManager::groundHeightAt(float x, float y) const
 
 float BoWaterManager::waterDepthAtCorner(int x, int y)
 {
-  if(!underwater(x, y))
-  {
-    return 0.0f;
-  }
   if(!mData)
   {
     BO_NULL_ERROR(mData);
+    return 0.0f;
+  }
+  if(!mData->isValidCorner(x, y))
+  {
+    return 0.0f;
+  }
+  if(!underwater(x, y))
+  {
     return 0.0f;
   }
 
@@ -488,12 +509,21 @@ bool BoWaterManager::underwater(int x, int y)
     BO_NULL_ERROR(mData);
     return false;
   }
+  if(!mData->isValidCorner(x, y))
+  {
+    return false;
+  }
   return mData->underwater[y * mData->width + x];
 }
 
 void BoWaterManager::setUnderwater(int x, int y, bool underwater)
 {
   BO_CHECK_NULL_RET(mData);
+  if(!mData->isValidCorner(x, y))
+  {
+    boError() << k_funcinfo << "not a valid corner " << x << " " << y << endl;
+    return;
+  }
   mData->underwater[y * mData->width + x] = underwater;
 }
 
