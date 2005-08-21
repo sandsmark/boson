@@ -14,5 +14,4 @@ SupportMiniMap=false
 TerrainType=0
 UnitDepth=0.1
 UnitHeight=1
-UnitWidth=1
-
+UnitWidth=3.9
