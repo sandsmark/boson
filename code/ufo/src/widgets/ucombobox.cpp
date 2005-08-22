@@ -51,7 +51,7 @@ UComboBox::UComboBox()
 	, m_visRowCount(4)
 {
 	trackPointer(m_listBox);
-	trackPointer(m_textEdit);
+//	trackPointer(m_textEdit);
 	setLayout(new UBoxLayout(Horizontal));
 	add(getTextEdit());/*, UBorderLayout::Center);
 	UWidget * spacer = new UWidget();
@@ -67,7 +67,7 @@ UComboBox::UComboBox(const std::vector<UString> & listDataA)
 	, m_visRowCount(4)
 {
 	trackPointer(m_listBox);
-	trackPointer(m_textEdit);
+//	trackPointer(m_textEdit);
 	setLayout(new UBoxLayout(Horizontal));
 	add(getTextEdit());/*, UBorderLayout::Center);
 	UWidget * spacer = new UWidget();
