@@ -191,12 +191,14 @@ public:
 BosonUfoPlacementPreviewWidget::BosonUfoPlacementPreviewWidget()
 		: BoUfoCustomWidget()
 {
+ setName("BosonUfoPlacementPreviewWidget");
  d = new BosonUfoPlacementPreviewWidgetPrivate;
  d->mShowPreview = false;
 }
 
 BosonUfoPlacementPreviewWidget::~BosonUfoPlacementPreviewWidget()
 {
+ boDebug() << k_funcinfo << endl;
  quitGame();
  delete d;
 }
@@ -483,6 +485,7 @@ public:
 BosonUfoLineVisualizationWidget::BosonUfoLineVisualizationWidget()
 	: BoUfoCustomWidget()
 {
+ setName("BosonUfoLineVisualizationWidget");
  d = new BosonUfoLineVisualizationWidgetPrivate();
 
  connect(BosonPathVisualization::pathVisualization(),
@@ -493,6 +496,7 @@ BosonUfoLineVisualizationWidget::BosonUfoLineVisualizationWidget()
 
 BosonUfoLineVisualizationWidget::~BosonUfoLineVisualizationWidget()
 {
+ boDebug() << k_funcinfo << endl;
  delete d;
 }
 
@@ -617,6 +621,7 @@ public:
 BosonUfoCursorWidget::BosonUfoCursorWidget()
 	: BoUfoCustomWidget()
 {
+ setName("BosonUfoCursorWidget");
  d = new BosonUfoCursorWidgetPrivate();
  d->mCursorCollection = new BosonCursorCollection(this);
  connect(d->mCursorCollection, SIGNAL(signalSetWidgetCursor(BosonCursor*)),
@@ -625,6 +630,7 @@ BosonUfoCursorWidget::BosonUfoCursorWidget()
 
 BosonUfoCursorWidget::~BosonUfoCursorWidget()
 {
+ boDebug() << k_funcinfo << endl;
  delete d->mCursorCollection;
  delete d;
 }
@@ -723,12 +729,14 @@ public:
 BosonUfoSelectionRectWidget::BosonUfoSelectionRectWidget()
 	: BoUfoCustomWidget()
 {
+ setName("BosonUfoSelectionRectWidget");
  d = new BosonUfoSelectionRectWidgetPrivate();
  d->mSelectionRectVisible = false;
 }
 
 BosonUfoSelectionRectWidget::~BosonUfoSelectionRectWidget()
 {
+ boDebug() << k_funcinfo << endl;
  delete d;
 }
 
@@ -862,6 +870,7 @@ public:
 BosonUfoFPSGraphWidget::BosonUfoFPSGraphWidget()
 	: BoUfoCustomWidget()
 {
+ setName("BosonUfoFPSGraphWidget");
  d = new BosonUfoFPSGraphWidgetPrivate();
  QTimer* timer = new QTimer(this);
  connect(timer, SIGNAL(timeout()),
@@ -875,6 +884,7 @@ BosonUfoFPSGraphWidget::BosonUfoFPSGraphWidget()
 
 BosonUfoFPSGraphWidget::~BosonUfoFPSGraphWidget()
 {
+ boDebug() << k_funcinfo << endl;
  delete d;
 }
 
@@ -1032,6 +1042,7 @@ public:
 BosonUfoProfilingGraphWidget::BosonUfoProfilingGraphWidget()
 	: BoUfoCustomWidget()
 {
+ setName("BosonUfoProfilingGraphWidget");
  d = new BosonUfoProfilingGraphWidgetPrivate();
  d->mUpdateTimer = new QTimer(this);
  connect(d->mUpdateTimer, SIGNAL(timeout()),
@@ -1128,6 +1139,7 @@ BosonUfoProfilingGraphWidget::BosonUfoProfilingGraphWidget()
 
 BosonUfoProfilingGraphWidget::~BosonUfoProfilingGraphWidget()
 {
+ boDebug() << k_funcinfo << endl;
  d->mItems.setAutoDelete(true);
  d->mItems.clear();
  resetProfilingTypes();

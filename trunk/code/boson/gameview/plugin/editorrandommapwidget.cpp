@@ -626,6 +626,7 @@ EditorRandomMapWidget::EditorRandomMapWidget()
 
 EditorRandomMapWidget::~EditorRandomMapWidget()
 {
+ boDebug() << k_funcinfo << endl;
  delete d->mRandom;
  delete d;
 }

@@ -917,6 +917,8 @@ void BosonGameView::init()
  d->mInputInitialized = false;
  d->mFPSCounter = 0;
 
+ setName("BosonGameView");
+
  d->mViewData = new BosonViewData(this);
  BosonViewData::setGlobalViewData(d->mViewData);
 
@@ -1333,6 +1335,7 @@ void BosonGameView::initUfoGUI()
  // Otherwise the created widget won't be deleted!
 
  d->mLayeredPane = new BoUfoLayeredPane();
+ d->mLayeredPane->setName("GameViewLayeredPane");
  d->mLayeredPane->setOpaque(false);
  addWidget(d->mLayeredPane);
 
@@ -1349,6 +1352,7 @@ void BosonGameView::initUfoGUI()
  d->mUfoLineVisualizationWidget->setCanvas(canvas());
 
  BoUfoGameGUIContainer* ufoGameGUIContainer = new BoUfoGameGUIContainer();
+ ufoGameGUIContainer->setName("ufoGameGUIContainer");
  d->mUfoGameGUI = new BosonUfoGameGUI(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewFrustum, d->mViewport);
  d->mUfoGameGUI->setCursorWidgetPos(d->mCursorPos.gameViewPosPointer());
  d->mUfoGameGUI->setCursorCanvasVector(d->mCursorPos.canvasVectorPointer());
@@ -1362,6 +1366,7 @@ void BosonGameView::initUfoGUI()
  ufoGameGUIContainer->addWidget(d->mUfoGameGUI);
 
  d->mToolTipLabel = new BoUfoLabel();
+ d->mToolTipLabel->setName("ToolTipLabel");
  d->mToolTipLabel->setForegroundColor(Qt::white);
  d->mToolTips->setLabel(d->mToolTipLabel);
 
@@ -1387,6 +1392,7 @@ void BosonGameView::initUfoGUI()
 		d->mUfoSelectionRectWidget, SLOT(slotSelectionRectChanged(const QRect&)));
 
  d->mGameViewPluginWidgetContainer = new BoUfoWidget();
+ d->mGameViewPluginWidgetContainer->setName("GameViewPluginWidgetContainer");
 
  d->mLayeredPane->addWidget(d->mUfoCanvasWidget);
  d->mLayeredPane->addWidget(d->mUfoPlacementPreviewWidget);

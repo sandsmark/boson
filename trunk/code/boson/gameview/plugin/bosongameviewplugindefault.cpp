@@ -52,6 +52,7 @@ BosonGameViewPluginDefault::BosonGameViewPluginDefault()
 
 BosonGameViewPluginDefault::~BosonGameViewPluginDefault()
 {
+ boDebug() << k_funcinfo << endl;
  delete d;
 }
 
