@@ -2532,7 +2532,7 @@ void BosonGameView::slotGameOver()
 	winner = i18n("No winner in this game");
  }
  if (loser.isEmpty()) {
-	winner = i18n("No loser in this game");
+	loser = i18n("No loser in this game");
  }
 
  QString local;
