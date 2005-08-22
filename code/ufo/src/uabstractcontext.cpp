@@ -57,7 +57,8 @@ using namespace ufo;
 //#define DEBUG_FIRE_MOUSE_EVENT 1
 
 #if !OLD_EVENT_CODE
-void getVisibleWidgetsDFS(std::stack<UWidget*> * stack, UWidget * w, int x, int y);
+static void getVisibleWidgetsDFS(std::list<UWidget*> * stack, UWidget * w, int x, int y);
+static void updateVisibleWidgets(std::list<UWidget*> * stack);
 #endif
 
 UFO_IMPLEMENT_ABSTRACT_CLASS(UAbstractContext, UObject)
@@ -381,7 +382,7 @@ UAbstractContext::fireMouseEvent(UMouseEvent * e) {
 #if OLD_EVENT_CODE
 	UWidget * w = NULL;
 #else
-	std::stack<UWidget*> visibleWidgets;
+	std::list<UWidget*> visibleWidgetsStack;
 #endif
 
 	// if we have been dragging, send the release event to the drag widget.
@@ -393,12 +394,13 @@ UAbstractContext::fireMouseEvent(UMouseEvent * e) {
 	}
 #else
 	if (m_dragWidgetsStack.size() > 0) {
-		visibleWidgets = m_dragWidgetsStack;
+//		updateVisibleWidgets(&m_dragWidgetsStack);
+		visibleWidgetsStack = m_dragWidgetsStack;
 #ifdef DEBUG_FIRE_MOUSE_EVENT
 		std::cout << "fireMouseEvent: using dragWidgetsStack of size=" << m_dragWidgetsStack.size() << std::endl;
 #endif
 	} else {
-		getVisibleWidgetsDFS(&visibleWidgets, root, pos.x, pos.y);
+		getVisibleWidgetsDFS(&visibleWidgetsStack, root, pos.x, pos.y);
 	}
 #endif
 
@@ -406,16 +408,15 @@ UAbstractContext::fireMouseEvent(UMouseEvent * e) {
 #if OLD_EVENT_CODE
 		m_dragWidget = w;
 #else
-		m_dragWidgetsStack = visibleWidgets;
+		clearDragWidgetsStack();
+		addToDragWidgetsStack(visibleWidgetsStack);
 #endif
 	} else if (e->getType() == UEvent::MouseReleased && !e->hasMouseModifiers()) {
 		// all mouse buttons have been released, dragging is over
 #if OLD_EVENT_CODE
 		m_dragWidget = NULL;
 #else
-		while (m_dragWidgetsStack.size() > 0) {
-			m_dragWidgetsStack.pop();
-		}
+		clearDragWidgetsStack();
 #endif
 	}
 
@@ -438,7 +439,7 @@ UAbstractContext::fireMouseEvent(UMouseEvent * e) {
 		e->consume();
 	}
 #else
-	sendMouseEventToWidgets(visibleWidgets, e);
+	sendMouseEventToWidgets(visibleWidgetsStack, e);
 #endif
 }
 
@@ -477,9 +478,9 @@ UAbstractContext::fireMouseWheelEvent(UMouseWheelEvent * e) {
 		e->consume();
 	}
 #else
-	std::stack<UWidget*> visibleWidgets;
-	getVisibleWidgetsDFS(&visibleWidgets, root, pos.x, pos.y);
-	sendMouseWheelEventToWidgets(visibleWidgets, e);
+	std::list<UWidget*> visibleWidgetsStack;
+	getVisibleWidgetsDFS(&visibleWidgetsStack, root, pos.x, pos.y);
+	sendMouseWheelEventToWidgets(visibleWidgetsStack, e);
 #endif
 }
 
@@ -493,6 +494,15 @@ UAbstractContext::fireMouseMotionEvent(UMouseEvent * e) {
 		<< "REASON: this context has no root pane" << "\n";
 		return;
 	}
+
+	if (m_dragWidgetsStack.size() != 0) {
+		if (!e->hasMouseModifiers()) {
+			// AB: a MouseReleased event was not properly deliverd.
+			clearDragWidgetsStack();
+		}
+	}
+
+
 	bool consumed = false;
 
 	UPoint pos = e->getLocation();
@@ -531,7 +541,8 @@ UAbstractContext::fireMouseMotionEvent(UMouseEvent * e) {
 	}
 #else
 	if (m_dragWidgetsStack.size() > 0) {
-		std::stack<UWidget*> widgets = m_dragWidgetsStack; // make a copy
+//		updateVisibleWidgets(&m_dragWidgetsStack);
+		std::list<UWidget*> widgets = m_dragWidgetsStack; // make a copy
 
 		// lazily create a new mouse event
 		UMouseEvent * newE = new UMouseEvent(
@@ -586,9 +597,9 @@ UAbstractContext::fireMouseMotionEvent(UMouseEvent * e) {
 	}
 #else
 	if (m_dragWidgetsStack.size() == 0 && w == wbef) {
-		std::stack<UWidget*> visibleWidgets;
-		getVisibleWidgetsDFS(&visibleWidgets, root, pos.x, pos.y);
-		sendMouseMotionEventToWidgets(visibleWidgets, e);
+		std::list<UWidget*> visibleWidgetsStack;
+		getVisibleWidgetsDFS(&visibleWidgetsStack, root, pos.x, pos.y);
+		sendMouseMotionEventToWidgets(visibleWidgetsStack, e);
 	}
 #endif
 	// always send mouse enter and exit events
@@ -734,11 +745,11 @@ UAbstractContext::send(UWidget * receiver, UEvent * e) {
 #if !OLD_EVENT_CODE
 // we do a depth-first-search for visible widgets
 void
-getVisibleWidgetsDFS(std::stack<UWidget*> * stack, UWidget * w, int x, int y) {
+getVisibleWidgetsDFS(std::list<UWidget*> * stack, UWidget * w, int x, int y) {
 	if (!w) {
 		return;
 	}
-	stack->push(w);
+	stack->push_front(w);
 
 	// AB: we need to iterate the widgets in reverse order, so that the
 	// first widget will be on top of the stack.
@@ -760,7 +771,7 @@ getVisibleWidgetsDFS(std::stack<UWidget*> * stack, UWidget * w, int x, int y) {
 }
 
 bool
-UAbstractContext::sendMouseEventToWidgets(std::stack<UWidget*> & widgets, UMouseEvent * e) {
+UAbstractContext::sendMouseEventToWidgets(std::list<UWidget*> & widgets, UMouseEvent * e) {
 #ifdef DEBUG_FIRE_MOUSE_EVENT
 	std::cout << "sendMouseEventToWidgets: " << widgets.size() << " widgets. event: " << e->getType() << std::endl;
 #endif
@@ -770,7 +781,7 @@ UAbstractContext::sendMouseEventToWidgets(std::stack<UWidget*> & widgets, UMouse
 	pos.y -= m_bounds.y;
 
 	while (widgets.size() > 1) {
-		UWidget * w = widgets.top(); widgets.pop();
+		UWidget * w = widgets.front(); widgets.pop_front();
 		UPoint wRoot = w->getRootLocation();
 
 		// lazily create a new mouse event
@@ -794,14 +805,14 @@ UAbstractContext::sendMouseEventToWidgets(std::stack<UWidget*> & widgets, UMouse
 }
 
 bool
-UAbstractContext::sendMouseWheelEventToWidgets(std::stack<UWidget*> & widgets, UMouseWheelEvent * e) {
+UAbstractContext::sendMouseWheelEventToWidgets(std::list<UWidget*> & widgets, UMouseWheelEvent * e) {
 	UPoint pos = e->getLocation();
 	// translate with context location in device
 	pos.x -= m_bounds.x;
 	pos.y -= m_bounds.y;
 
 	while (widgets.size() != 0) {
-		UWidget * w = widgets.top(); widgets.pop();
+		UWidget * w = widgets.front(); widgets.pop_front();
 		UPoint wRoot = w->getRootLocation();
 
 		// lazily create a new mouse event
@@ -824,14 +835,14 @@ UAbstractContext::sendMouseWheelEventToWidgets(std::stack<UWidget*> & widgets, U
 }
 
 bool
-UAbstractContext::sendMouseMotionEventToWidgets(std::stack<UWidget*> & widgets, UMouseEvent * e) {
+UAbstractContext::sendMouseMotionEventToWidgets(std::list<UWidget*> & widgets, UMouseEvent * e) {
 	UPoint pos = e->getLocation();
 	// translate with context location in device
 	pos.x -= m_bounds.x;
 	pos.y -= m_bounds.y;
 
 	while (widgets.size() != 0) {
-		UWidget * w = widgets.top(); widgets.pop();
+		UWidget * w = widgets.front(); widgets.pop_front();
 		UPoint wRoot = w->getRootLocation();
 
 		// lazily create a new mouse event
@@ -852,6 +863,59 @@ UAbstractContext::sendMouseMotionEventToWidgets(std::stack<UWidget*> & widgets, 
 		}
 	}
 	return false;
+}
+
+void
+UAbstractContext::slotDragWidgetRemoved(UWidgetEvent * e) {
+	if (!e) {
+		return;
+	}
+	if (m_dragWidgetsStack.size() == 0) {
+		return;
+	}
+	removeFromDragWidgetsStack(e->getWidget());
+}
+
+void
+UAbstractContext::removeFromDragWidgetsStack(UWidget * w) {
+	w->sigWidgetRemoved().disconnect(slot(*this, &UAbstractContext::slotDragWidgetRemoved));
+	m_dragWidgetsStack.remove(w);
+}
+
+void
+UAbstractContext::addToDragWidgetsStack(const std::list<UWidget*> & addStack) {
+	for (std::list<UWidget*>::const_reverse_iterator it = addStack.rbegin(); it != addStack.rend(); ++it) {
+		UWidget * w = (*it);
+		w->sigWidgetRemoved().connect(slot(*this, &UAbstractContext::slotDragWidgetRemoved));
+		m_dragWidgetsStack.push_front(w);
+	}
+}
+
+void
+UAbstractContext::clearDragWidgetsStack() {
+	while (m_dragWidgetsStack.size() > 0) {
+		removeFromDragWidgetsStack(m_dragWidgetsStack.front());
+	}
+}
+
+void
+updateVisibleWidgets(std::list<UWidget*> * stack) {
+	if (!stack) {
+		return;
+	}
+	if (stack->size() == 0) {
+		return;
+	}
+	std::list<UWidget*> stack2;
+	for (std::list<UWidget*>::iterator it = stack->begin(); it != stack->end(); ++it) {
+		if (!(*it)->isVisible()) {
+			continue;
+		}
+		stack2.push_back(*it);
+	}
+	if (stack->size() != stack2.size()) {
+		*stack = stack2;
+	}
 }
 
 #endif // !OLD_EVENT_CODE

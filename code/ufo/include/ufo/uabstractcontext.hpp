@@ -31,9 +31,6 @@
 #include "ucontext.hpp"
 
 #define OLD_EVENT_CODE 0
-#if !OLD_EVENT_CODE
-#include <stack>
-#endif
 
 namespace ufo {
 
@@ -41,6 +38,7 @@ class UEvent;
 class UMouseEvent;
 class UMouseWheelEvent;
 class UKeyEvent;
+class UWidgetEvent;
 
 class UWidget;
 class UAbstractGraphics;
@@ -144,9 +142,14 @@ private: // Private functions
 	void sendToGrabber(UEvent * e);
 
 #if !OLD_EVENT_CODE
-	bool sendMouseEventToWidgets(std::stack<UWidget*> & widgets, UMouseEvent * e);
-	bool sendMouseWheelEventToWidgets(std::stack<UWidget*> & widgets, UMouseWheelEvent * e);
-	bool sendMouseMotionEventToWidgets(std::stack<UWidget*> & widgets, UMouseEvent * e);
+	bool sendMouseEventToWidgets(std::list<UWidget*> & widgets, UMouseEvent * e);
+	bool sendMouseWheelEventToWidgets(std::list<UWidget*> & widgets, UMouseWheelEvent * e);
+	bool sendMouseMotionEventToWidgets(std::list<UWidget*> & widgets, UMouseEvent * e);
+
+	void slotDragWidgetRemoved(UWidgetEvent*);
+	void addToDragWidgetsStack(const std::list<UWidget*> & addStack);
+	void removeFromDragWidgetsStack(UWidget* w);
+	void clearDragWidgetsStack();
 #endif
 
 protected: // Protected attributes
@@ -167,7 +170,7 @@ private: // Private attributes
 #if OLD_EVENT_CODE
 	UWidget * m_dragWidget;
 #else
-	std::stack<UWidget*> m_dragWidgetsStack;
+	std::list<UWidget*> m_dragWidgetsStack;
 #endif
 
 	USlot1<UEvent*> * m_eventGrabber;
