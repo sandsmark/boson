@@ -331,7 +331,6 @@ void SpeciesData::addTeamColor(const QColor& color)
 {
  TeamColorData* data = d->mTeamData[color.rgb()];
  if (data) {
-	boError() << k_funcinfo << "teamcolor " << color.rgb() << " already present" << endl;
 	return;
  }
  data = new TeamColorData;
