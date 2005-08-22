@@ -60,6 +60,8 @@ Patches applied currently:
   object is detached.
 - Backporting fix for a huge memory leak in uvertexarray.*: the getArray() array
   was never deleted
+- Patch to ucombobox.cpp to remove the trackPointer(m_textEdit) call, as
+  add(getTextEdit()) already calls this. This fixed a memory leak.
 
 
 
