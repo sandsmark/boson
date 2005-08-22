@@ -1,68 +1,8 @@
-This list is mostly obsolete. Use bugs.kde.org instead.
+Currently (August 2005) you can find TODO items at:
+* http://bugs.kde.org, product "boson"
+  Note that bugzilla allows to filter for "wishlist" items and actual bugs. This
+  makes finding an item much easier.
+* http://boson.eu.org/wiki
+* grep -r TODO code/
+* grep -r FIXME code/
 
-Game TODOs
-- waypoints
-- pathfinding doesn't support units with size > BO_TILE_SIZE. get rid of
-  MobileUnit::boundingRect() hack
-- let the player configure how often the different advance methods are called.
-  E.g. advanceIdle() when work()==WorkIdle and so on. We should use a
-  KGameProperty with PolicyClean, since it *must* be *exactly* the same value on
-  every client. A frontend with settings like "best performance" == call
-  advance methods seldom and stuff like this would also be nice
-- mark selected units, i.e. display the group number in the selectbox (and also
-  in the cmd frame for every unit)
-- maybe provide UnitGroups without keyboard, too. select units, click on a
-  (empty) button to store that group. another click on that button restores the
-  group. rmb on that button deletes it
-- cmd bunker should display "completed" for completed facilities in the cmd
-  frame.
-- Make shield reloading speed configurable
-- samsite should be more vulnerable when the doors are open. decrease armor
-  then. we need to provide some config entries for indes.unit for this,
-  specifying the frame number when armor changes. note that the frame number for
-  this must NOT depend on the .3ds file!
-- Add screenshots support to saving/loading widget
-- Add support for playing sound in a loop. E.g. for missile fly sound
-- Add support for miner sounds (mining/unloading)
-
-Editor (map, unit, scenario) TODOs
-- unit editor: add an additional page for the description of the unit (longer
-  text - should go into the handbook). Should be able to contain images and so
-  on. Maybe use plain docbook or so
-
-General TODOs
-- add revision (CVS) number of files to the connection protocol. If the versions
-  differ then deny connection. This ensures that all clients are at the smae
-  version. We need the revision number of each file - how to do add this
-  automatically?
-  We can do this using static const char filename_id = "$Id:";
-- transmit everything on startup over network (== map, unitProperties). This
-  saves us from a cheating player who (maybe just accidently) changed the files
-  (units/*/index.unit especially).
-- pixmaps on startup widgets should be centered horizontally
-- Use KMD5 to calculate checksum of map and unitProperties at the beginning of
-  game and transfer only needed things over network. Saves some traffic
-- Click+Move in minimap should move the rectangle (aka the screen position)
-- Debugging mode: when this is selected in the menu, the cmdframe is switched
-  into a "debugging" display. it just displays data about several aspects.
-  mainly about the cursor position - e.g. when the cursor is above a unit, is
-  should display the name/type/id and the position of the unit. also it should
-  display the actual screen and canvas/world position of the cursor, so that it
-  can be checked whether these values are corred (ie the unit is _really_ under
-  the cursor). we could display the cell coordinates that would be under the
-  cursor, if the unit was not there, as well.
-  we may of course display additional data, such as fps, map size, unit count,
-  ...
-
-Data TODOs
-- sound for destroyed facilities - shouldn't be speech i guess
-- missile sound - e.g. for the samsite
-- shipyard
-- airport
-- rewrite installation code:
-  -> when a dir is renamed currently the old remains on disk and therefore is
-     read by the game
-- the text on the startup pixmap should be translatable.
-- sounds for miner (mining/unloading, maybe when player commands unit to mine)
-- better shooting sounds
-- explosion sounds
