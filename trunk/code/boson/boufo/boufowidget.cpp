@@ -49,6 +49,8 @@
 
 #include <math.h>
 
+static bool g_boufoDebugDestruction = false;
+
 static QMap<ufo::UWidget*, BoUfoWidget*> g_ufoWidget2BoUfoWidget;
 
 static void applyFontToWidgetAndChildren(const ufo::UFont& font, ufo::UWidget* w)
@@ -1130,6 +1132,8 @@ BoUfoWidget::~BoUfoWidget()
 	mBackgroundImageDrawable->unreference();
  }
  g_ufoWidget2BoUfoWidget.remove(widget());
+
+ if (g_boufoDebugDestruction ) { boDebug() << k_funcinfo << name() << endl; }
 }
 
 void BoUfoWidget::uslotMouseEntered(ufo::UMouseEvent* e)
