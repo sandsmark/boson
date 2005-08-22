@@ -513,6 +513,12 @@ bool BoUfoManager::sendEvent(QEvent* e)
  // the libufo window - the window manager eats these events then)
  // so before dispatching an event, we update the keyboard state, if possible
  bool updateKeys = false;
+
+ // AB: sometime even the state of currently pressed buttons may become invalid:
+ //     if you press+hold a button and then open a model dialog (e.g. through a
+ //     timer) and then release the button, then the event won't ever get
+ //     delivered to the original widget.
+ bool updateButtons = false;
  Qt::ButtonState state;
  switch (e->type()) {
 	case QEvent::Wheel:
@@ -520,6 +526,8 @@ bool BoUfoManager::sendEvent(QEvent* e)
 		updateKeys = true;
 		break;
 	case QEvent::MouseMove:
+		updateButtons = true;
+		// fall through intended
 	case QEvent::MouseButtonPress:
 	case QEvent::MouseButtonRelease:
 	case QEvent::MouseButtonDblClick:
@@ -541,6 +549,19 @@ bool BoUfoManager::sendEvent(QEvent* e)
 
 	ufo::UMod_t modState = (ufo::UMod_t)((int)mouseState | (int)keyState);
 	display()->setModState(modState);
+ }
+ if (updateButtons) {
+	int x, y;
+	ufo::UMod_t mouseState = display()->getMouseState(&x, &y);
+	if (mouseState & ufo::UMod::LeftButton && !(state & Qt::LeftButton)) {
+		display()->dispatchMouseButtonUp(context(), x, y, ufo::UMod::LeftButton);
+	}
+	if (mouseState & ufo::UMod::MiddleButton && !(state & Qt::MidButton)) {
+		display()->dispatchMouseButtonUp(context(), x, y, ufo::UMod::MiddleButton);
+	}
+	if (mouseState & ufo::UMod::RightButton && !(state & Qt::RightButton)) {
+		display()->dispatchMouseButtonUp(context(), x, y, ufo::UMod::RightButton);
+	}
  }
 
  switch (e->type()) {
