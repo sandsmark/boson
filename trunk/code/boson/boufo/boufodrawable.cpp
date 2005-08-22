@@ -53,11 +53,12 @@ private:
 BoUfoDrawable::BoUfoDrawable()
 {
  mDrawable = new UMyDrawable(this);
+ mDrawable->reference();
 }
 
 BoUfoDrawable::~BoUfoDrawable()
 {
- delete mDrawable;
+ mDrawable->unreference();
 }
 
 
