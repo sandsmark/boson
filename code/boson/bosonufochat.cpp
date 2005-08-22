@@ -80,18 +80,22 @@ BosonUfoChat::BosonUfoChat() : BoUfoWidget()
 
  setLayoutClass(UVBoxLayout);
  d->mLabel = new BoUfoLabel();
+ d->mLabel->setName("ChatLabel");
  addWidget(d->mLabel);
 
  BoUfoWidget* hbox = new BoUfoWidget();
+ hbox->setName("ChatHBox");
  hbox->setLayoutClass(BoUfoWidget::UHBoxLayout);
  addWidget(hbox);
 
  d->mEdit = new BoUfoLineEdit();
+ d->mEdit->setName("ChatLineEdit");
  connect(d->mEdit, SIGNAL(signalActivated(const QString&)),
 		this, SLOT(slotSendText(const QString&)));
  hbox->addWidget(d->mEdit);
 
  d->mSendTo = new BoUfoComboBox();
+ d->mSendTo->setName("ChatSendToBox");
  hbox->addWidget(d->mSendTo);
 
  d->mSendToAllId = insertSendToAllSendingEntry();

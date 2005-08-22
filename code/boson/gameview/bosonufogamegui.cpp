@@ -304,6 +304,7 @@ BosonUfoGameGUI::BosonUfoGameGUI(const BoMatrix& modelview, const BoMatrix& proj
 		const BoFrustum& viewFrustum, const GLint* viewport)
 	: BoUfoWidget()
 {
+ setName("BosonUfoGameGUI");
  d = new BosonUfoGameGUIPrivate(modelview, projection, viewFrustum, viewport);
 
  QColor defaultColor = BoUfoLabel::defaultForegroundColor();
@@ -314,6 +315,7 @@ BosonUfoGameGUI::BosonUfoGameGUI(const BoMatrix& modelview, const BoMatrix& proj
 
 BosonUfoGameGUI::~BosonUfoGameGUI()
 {
+ boDebug() << k_funcinfo << endl;
  delete d;
 }
 
@@ -381,6 +383,7 @@ void BosonUfoGameGUI::initUfoWidgets()
 
 
  d->mUfoChat = new BosonUfoChat();
+ d->mUfoChat->setName("GameViewUfoChat");
  d->mUfoChat->setMessageId(BosonMessageIds::IdChat);
  widget->mUfoChatContainer->addWidget(d->mUfoChat);
 

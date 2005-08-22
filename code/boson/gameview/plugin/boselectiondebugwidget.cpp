@@ -65,6 +65,7 @@ public:
 BoSelectionDebugWidget::BoSelectionDebugWidget()
 		: BoUfoWidget()
 {
+ setName("BoSelectionDebugWidget");
  d = new BoSelectionDebugWidgetPrivate();
  mLocalPlayerIO = 0;
  mSelection = 0;
@@ -72,6 +73,7 @@ BoSelectionDebugWidget::BoSelectionDebugWidget()
  setLayoutClass(UVBoxLayout);
 
  d->mTabWidget = new BoUfoTabWidget();
+ d->mTabWidget->setName("SelectionDebugTabWidget");
  addWidget(d->mTabWidget);
 
  d->mSelectionWidget = new BoSelectionGroupDebugWidget();
@@ -84,6 +86,7 @@ BoSelectionDebugWidget::BoSelectionDebugWidget()
  d->mTabWidget->addTab(d->mLeaderXMLWidget, i18n("Leader XML"));
 
  BoUfoWidget* stretch = new BoUfoWidget();
+ stretch->setName("SelectionDebugWidgetStretch");
  stretch->setStretch(1);
  addWidget(stretch);
 
@@ -134,8 +137,10 @@ public:
 BoSelectionGroupDebugWidget::BoSelectionGroupDebugWidget()
 	: BoUfoWidget()
 {
+ setName("BoSelectionGroupDebugWidget");
  d = new BoSelectionGroupDebugWidgetPrivate;
  d->mText = new BoUfoTextEdit();
+ d->mText->setName("GroupDebugText");
  d->mText->setEditable(false);
  addWidget(d->mText);
 }
@@ -232,8 +237,10 @@ public:
 BoUnitDebugWidget::BoUnitDebugWidget()
 	: BoUfoWidget()
 {
+ setName("BoUnitDebugWidget");
  d = new BoUnitDebugWidgetPrivate;
  d->mText = new BoUfoTextEdit();
+ d->mText->setName("UnitDebugText");
  d->mText->setEditable(false);
  addWidget(d->mText);
 }
@@ -347,8 +354,10 @@ public:
 BoUnitXMLDebugWidget::BoUnitXMLDebugWidget()
 	: BoUfoWidget()
 {
+ setName("BoUnitXMLDebugWidget");
  d = new BoUnitXMLDebugWidgetPrivate;
  d->mText = new BoUfoTextEdit();
+ d->mText->setName("UnitXMLDebugText");
  d->mText->setEditable(false);
  addWidget(d->mText);
 }

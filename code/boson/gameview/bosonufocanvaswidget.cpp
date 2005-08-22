@@ -151,10 +151,11 @@ public:
 BosonUfoCanvasWidget::BosonUfoCanvasWidget()
 		: BoUfoCustomWidget()
 {
+ setName("BosonUfoCanvasWidget");
+
  d = new BosonUfoCanvasWidgetPrivate();
  BosonEffectPropertiesManager::initStatic();
  d->mEffectManager = new BosonEffectManager();
-
 
  d->mCanvasRenderer = new BosonCanvasRenderer();
  d->mCanvasRenderer->initGL();
@@ -174,11 +175,14 @@ BosonUfoCanvasWidget::BosonUfoCanvasWidget()
 
 BosonUfoCanvasWidget::~BosonUfoCanvasWidget()
 {
+ boDebug() << k_funcinfo << endl;
  quitGame();
  delete d->mCanvasRenderer;
  delete d->mEffectManager;
  BosonEffectPropertiesManager::deleteStatic();
  delete d;
+
+ boDebug() << k_funcinfo << "donee" << endl;
 }
 
 void BosonUfoCanvasWidget::setGameGLMatrices(const BoGLMatrices* m)

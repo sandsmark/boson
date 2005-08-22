@@ -287,6 +287,7 @@ void BosonMainWidget::initUfoGUI()
  contentWidget->setLayoutClass(BoUfoWidget::UFullLayout);
 
  d->mWidgetStack = (BoUfoWidgetStack*)BoUfoFactory::createWidget("BoUfoWidgetStack");
+ d->mWidgetStack->setName("WidgetStackOfMainWidget");
  contentWidget->addWidget(d->mWidgetStack);
 
  d->mStartup = new BoUfoStartupWidget();
