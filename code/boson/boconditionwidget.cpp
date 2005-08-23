@@ -566,7 +566,7 @@ bool BoEventMatchingWidget::displayEvent(const QDomElement& root)
  matching.setAttribute("IgnorePlayerId", false);
  matching.setAttribute("IgnoreData1", false);
  matching.setAttribute("IgnoreData2", false);
- matching.appendChild(root);
+ matching.appendChild(root.cloneNode());
  return displayEventMatching(matching);
 }
 
