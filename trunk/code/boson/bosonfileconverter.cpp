@@ -732,6 +732,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_To_0_10_80(QMap<QString, QBy
  canvasRoot.appendChild(canvasEventListener);
  QDomElement canvasConditions = canvasDoc.createElement("Conditions");
  canvasEventListener.appendChild(canvasConditions);
+#if 0
 {
 	boWarning() << k_funcinfo << "Adding a dummy condition for testing" << endl;
 	QDomElement cond = canvasDoc.createElement("Condition");
@@ -765,13 +766,12 @@ bool BosonFileConverter::convertPlayField_From_0_10_To_0_10_80(QMap<QString, QBy
 	QDomElement action = canvasDoc.createElement("Action");
 	action.setAttribute("Type", "Event");
 	cond.appendChild(action);
-#if 0
 	QDomElement actionEvent = event.cloneNode().toElement();
 	actionEvent.setAttribute("Name", "CustomStringEvent");
 	actionEvent.setAttribute("Data1", "Foobar");
 	action.appendChild(actionEvent);
-#endif
 }
+#endif
 
  QDomElement effects = canvasDoc.createElement("Effects");
  canvasRoot.appendChild(effects);
