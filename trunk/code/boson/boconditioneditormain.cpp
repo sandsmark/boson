@@ -40,6 +40,7 @@
 #include <qlistbox.h>
 #include <qptrstack.h>
 #include <qdom.h>
+#include <qfile.h>
 
 static const char *description =
     I18N_NOOP("BoCondition editor for Boson");
@@ -120,6 +121,10 @@ BoConditionEditorMain::BoConditionEditorMain()
  mEditConditions->setEnabled(false);
  topLayout->addWidget(mEditConditions);
 
+ mSelectSaveFile = new QPushButton(i18n("Save as..."), this);
+ connect(mSelectSaveFile, SIGNAL(clicked()),
+		this, SLOT(slotSelectSaveFile()));
+ topLayout->addWidget(mSelectSaveFile);
  mSelectFile = new QPushButton(i18n("File..."), this);
  connect(mSelectFile, SIGNAL(clicked()),
 		this, SLOT(slotSelectFile()));
@@ -206,6 +211,7 @@ void BoConditionEditorMain::slotLoadFile(const QString& file)
 
  mFileName->setText(file);
  mEditConditions->setEnabled(true);
+ mSelectSaveFile->setEnabled(true);
 }
 
 void BoConditionEditorMain::slotEditConditions()
@@ -257,6 +263,7 @@ void BoConditionEditorMain::reset()
  mFile = 0;
  mFileName->setText(i18n("No file loaded"));
  mEditConditions->setEnabled(false);
+ mSelectSaveFile->setEnabled(false);
  mConditions->clear();
  mItem2Element.clear();
  for (QMap<QListBoxItem*,QWidget*>::iterator it = mItem2Widget.begin(); it != mItem2Widget.end(); ++it) {
@@ -264,6 +271,7 @@ void BoConditionEditorMain::reset()
  }
  mItem2Widget.clear();
  mPlayerIds.clear();
+ mFile2XML.clear();
 }
 
 bool BoConditionEditorMain::loadXMLFile(const KArchiveFile* file)
@@ -305,6 +313,7 @@ bool BoConditionEditorMain::loadXMLFile(const KArchiveFile* file)
 	}
 	QListBoxText* item = new QListBoxText(mConditions, name);
 	mItem2Element.insert(item, e.cloneNode().toElement());
+	mFile2XML.insert(file, doc);
  }
 
  return true;
@@ -353,4 +362,98 @@ bool BoConditionEditorMain::parsePlayerIds(const KArchiveFile* file)
  mPlayerIds = ids;
  return true;
 }
+
+void BoConditionEditorMain::slotSelectSaveFile()
+{
+ QString file = KFileDialog::getSaveFileName(QString::null, "*.bpf *.bsg", this);
+ if (file.isEmpty()) {
+	return;
+ }
+ if (QFile::exists(file)) {
+	int r = KMessageBox::questionYesNo(this, i18n("The file %1 already exists. Overwrite?").arg(file));
+	if (r != KMessageBox::Yes) {
+		return;
+	}
+ }
+ slotSaveFile(file);
+}
+
+void BoConditionEditorMain::slotSaveFile(const QString& fileName)
+{
+ if (fileName.isEmpty()) {
+	return;
+ }
+ if (!mFile) {
+	return;
+ }
+ KTar save(fileName, QString::fromLatin1("application/x-gzip"));
+ if (!save.open(IO_WriteOnly)) {
+	KMessageBox::sorry(this, i18n("Could not open %1 for saving").arg(fileName));
+	return;
+ }
+ const KArchiveDirectory* fromRoot = mFile->directory();
+ if (!fromRoot) {
+	BO_NULL_ERROR(fromRoot);
+	return;
+ }
+ const KArchiveEntry* e = 0;
+ if (fromRoot->entries().count() != 1) {
+	boError() << k_funcinfo << "not exactly one toplevel entry" << endl;
+	return;
+ }
+ e = fromRoot->entry(fromRoot->entries()[0]);
+ if (!e->isDirectory()) {
+	boError() << k_funcinfo << "toplevel entry is not a directory" << endl;
+	return;
+ }
+ if (!saveFile(&save, e->name(), (const KArchiveDirectory*)e)) {
+	KMessageBox::sorry(this, i18n("Saving failed"));
+	save.close();
+	return;
+ }
+ save.close();
+}
+
+bool BoConditionEditorMain::saveFile(KTar* save, const QString& path, const KArchiveDirectory* from)
+{
+ if (!save || !from) {
+	return false;
+ }
+ QStringList entries = from->entries();
+ for (QStringList::iterator it = entries.begin(); it != entries.end(); ++it) {
+	const KArchiveEntry* e = from->entry(*it);
+	if (!e) {
+		BO_NULL_ERROR(e);
+		return false;
+	}
+	QString fullName = path + "/" + e->name();
+	if (e->isDirectory()) {
+		bool ret = saveFile(save, fullName, (const KArchiveDirectory*)e);
+		if (!ret) {
+			boError() << k_funcinfo << "error saving " << e->name() << " in " << path << endl;
+			return false;
+		}
+	} else if (e->isFile()) {
+		const KArchiveFile* f = (const KArchiveFile*)e;
+		if (mFile2XML.contains(f)) {
+			QDomDocument doc = mFile2XML[f];
+			QString xml = doc.toString();
+			if (!save->writeFile(fullName, from->user(), from->group(), xml.length(), xml.data())) {
+				boError() << k_funcinfo << "could not save " << fullName << endl;
+				return false;
+			}
+		} else {
+			if (!save->writeFile(fullName, from->user(), from->group(), f->size(), f->data())) {
+				boError() << k_funcinfo << "could not save " << fullName << endl;
+				return false;
+			}
+		}
+	} else {
+		boError() << k_funcinfo << fullName << " has unexpected type" << endl;
+		return false;
+	}
+ }
+ return true;
+}
+
 
