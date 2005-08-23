@@ -276,7 +276,7 @@ void BosonOrderWidget::slotMouseEnteredButton()
  boDebug() << k_funcinfo << "button: " << button << endl;
  if (button->type() == BosonOrderButton::ShowAction) {
 	const BoSpecificAction& action = button->action();
-	if (action.isProduceAction()) {
+	if (isProducibleOrPlaceable(action)) {
 		const UnitProperties* prop = action.productionOwner()->unitProperties(action.productionId());
 		emit signalUnitTypeHighlighted(prop);
 	}
@@ -289,7 +289,7 @@ void BosonOrderWidget::slotMouseLeftButton()
  boDebug() << k_funcinfo << "button: " << button << endl;
  if (button->type() == BosonOrderButton::ShowAction) {
 	const BoSpecificAction& action = button->action();
-	if (action.isProduceAction()) {
+	if (isProducibleOrPlaceable(action)) {
 		emit signalUnitTypeHighlighted(0);
 	}
  }
@@ -308,20 +308,32 @@ void BosonOrderWidget::slotMouseMoved(QMouseEvent* e)
 	}
 
 	const BoSpecificAction& action = button->action();
-	if (!action.isProduceAction()) {
+	if (!isProducibleOrPlaceable(action)) {
 		continue;
 	}
 
-	if (action.productionType() == ProduceUnit) {
-		const UnitProperties* prop = action.productionOwner()->unitProperties(action.productionId());
-		emit signalUnitTypeHighlighted(prop);
-		d->mButtonTimer->start(200);
-		return;
-	} else if (action.productionType() == ProduceTech) {
-		const UpgradeProperties* prop = action.productionOwner()->technologyProperties(action.productionId());
-		emit signalTechnologyHighlighted(prop);
-		d->mButtonTimer->start(200);
-		return;
+	BO_CHECK_NULL_RET(action.productionOwner());
+	if (action.isProduceAction()) {
+		if (action.productionType() == ProduceUnit) {
+			const UnitProperties* prop = action.productionOwner()->unitProperties(action.productionId());
+			emit signalUnitTypeHighlighted(prop);
+			d->mButtonTimer->start(200);
+			return;
+		} else if (action.productionType() == ProduceTech) {
+			const UpgradeProperties* prop = action.productionOwner()->technologyProperties(action.productionId());
+			emit signalTechnologyHighlighted(prop);
+			d->mButtonTimer->start(200);
+			return;
+		}
+	} else if (action.type() == ActionPlacementPreview) {
+		if (action.productionOwner()) { // unit placement
+			const UnitProperties* prop = action.productionOwner()->unitProperties(action.productionId());
+			emit signalUnitTypeHighlighted(prop);
+			d->mButtonTimer->start(200);
+			return;
+		} else { // ground placement
+			// AB: nothing yet.
+		}
 	}
  }
  emit signalUnitTypeHighlighted(0);
@@ -345,5 +357,14 @@ void BosonOrderWidget::slotCheckCursor()
  // None of the order buttons has mouse. Disable unit info
  emit signalUnitTypeHighlighted(0);
  d->mButtonTimer->stop();
+}
+
+// AB: the name sucks
+bool BosonOrderWidget::isProducibleOrPlaceable(const BoSpecificAction& action) const
+{
+ if (action.isProduceAction() || action.type() == ActionPlacementPreview) {
+	return true;
+ }
+ return false;
 }
 
