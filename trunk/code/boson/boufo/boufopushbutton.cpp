@@ -65,7 +65,18 @@ void BoUfoPushButton::init()
 
  // allow clicking the button + enable highlight effect
  setMouseEventsEnabled(true, true);
- setKeyEventsEnabled(true);
+
+ // AB: key events may be required for several tasks on buttons (using tab to
+ //     change to a different button or using return to activate a selected
+ //     button) but with the current ufo/boson event design they cause a lot of
+ //     trouble.
+ //     for example in the editor select a unit, then click some button (e.g.
+ //     one of the units in the commandframe) and then try to delete it using
+ //     "del". it won't work, because the button receives the key event and
+ //     therefore the KAction object won't.
+ //     (KActions get the key event only, if the focused widget does not take
+ //     key events)
+ setKeyEventsEnabled(false);
 
  // TODO:
  // it would be nice if we could use setOpaque(false), but still have a border
