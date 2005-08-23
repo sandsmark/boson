@@ -346,6 +346,7 @@ void BosonOrderButton::setGround(unsigned int groundType, const BosonGroundTheme
 
  mGroundType = groundType;
  mType = ShowGround;
+ mAction = BoSpecificAction();
 
  QPixmap pixmap;
  BosonGroundThemeData* data = boViewData->groundThemeData(theme);

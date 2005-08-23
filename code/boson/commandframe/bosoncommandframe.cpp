@@ -352,8 +352,8 @@ class BosonInfoWidget : public BoUfoCustomWidget
 public:
 	BosonInfoWidget();
 
-	void showUnit(const UnitProperties* prop);
-	void showTechnology(const UpgradeProperties* prop);
+	void showUnit(const UnitProperties* prop, bool gameMode = true);
+	void showTechnology(const UpgradeProperties* prop, bool gameMode = true);
 
 	virtual void paintWidget();
 
@@ -378,17 +378,22 @@ BosonInfoWidget::BosonInfoWidget()
  addWidget(mInfo);
 }
 
-void BosonInfoWidget::showUnit(const UnitProperties* prop)
+void BosonInfoWidget::showUnit(const UnitProperties* prop, bool gameMode)
 {
  if (!prop) {
 	hide();
 	return;
  }
 
- QString info = QString("%1\nMinerals: %2\nOil: %3")
-		.arg(prop->name()).arg(prop->mineralCost()).arg(prop->oilCost());
+ QString info;
+ if (gameMode) {
+	info = QString("%1\nMinerals: %2\nOil: %3")
+			.arg(prop->name()).arg(prop->mineralCost()).arg(prop->oilCost());
+ }
  if (!prop->description().isEmpty()) {
-	info.append("\n\n");
+	if (!info.isEmpty()) {
+		info.append("\n\n");
+	}
 	info.append(prop->description());
  }
 
@@ -396,17 +401,22 @@ void BosonInfoWidget::showUnit(const UnitProperties* prop)
  show();
 }
 
-void BosonInfoWidget::showTechnology(const UpgradeProperties* prop)
+void BosonInfoWidget::showTechnology(const UpgradeProperties* prop, bool gameMode)
 {
  if (!prop) {
 	hide();
 	return;
  }
 
- QString info = QString("%1\nMinerals: %2\nOil: %3")
-		.arg(prop->upgradeName()).arg(prop->mineralCost()).arg(prop->oilCost());
+ QString info;
+ if (gameMode) {
+	info = QString("%1\nMinerals: %2\nOil: %3")
+			.arg(prop->upgradeName()).arg(prop->mineralCost()).arg(prop->oilCost());
+ }
  if (!prop->upgradeDescription().isEmpty()) {
-	info.append("\n\n");
+	if (!info.isEmpty()) {
+		info.append("\n\n");
+	}
 	info.append(prop->upgradeDescription());
  }
 
@@ -586,6 +596,10 @@ void BosonCommandFrame::initPlacementWidget()
  d->mPlacementWidget = new BosonOrderWidget(this);
  d->mPlacementScrollWidget->addWidget(d->mPlacementWidget);
  d->mPlacementWidget->hide();
+ connect(d->mPlacementWidget, SIGNAL(signalUnitTypeHighlighted(const UnitProperties*)),
+		this, SLOT(slotUnitTypeHighlighted(const UnitProperties*)));
+ connect(d->mPlacementWidget, SIGNAL(signalTechnologyHighlighted(const UpgradeProperties*)),
+		this, SLOT(slotTechnologyHighlighted(const UpgradeProperties*)));
 
 }
 
@@ -1095,12 +1109,12 @@ void BosonCommandFrame::slotUpdateUnitConfig()
 
 void BosonCommandFrame::slotUnitTypeHighlighted(const UnitProperties* prop)
 {
- d->mInfoWidget->showUnit(prop);
+ d->mInfoWidget->showUnit(prop, d->mGameMode);
 }
 
 void BosonCommandFrame::slotTechnologyHighlighted(const UpgradeProperties* prop)
 {
- d->mInfoWidget->showTechnology(prop);
+ d->mInfoWidget->showTechnology(prop, d->mGameMode);
 }
 
 const QPoint* BosonCommandFrame::cursorRootPos() const

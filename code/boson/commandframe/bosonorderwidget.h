@@ -117,6 +117,14 @@ protected:
 	 **/
 	void showCellConfigWidgets();
 
+	/**
+	 * @return TRUE if @p action is producable or placable, i.e. a
+	 * information widget may display information about this action. See
+	 * also @ref signalUnitTypeHighlighted and @ref
+	 * signalTechnologyHighlighted
+	 **/
+	bool isProducibleOrPlaceable(const BoSpecificAction& action) const;
+
 protected slots:
 	void slotPlaceGround(unsigned int groundtype);
 
@@ -142,7 +150,18 @@ signals:
 	 **/
 	void signalSelectUnit(Unit*);
 
-	void signalUnitTypeHighlighted(const UnitProperties*);
+	/**
+	 * Emitted when the mouse is over a button containing a producable or
+	 * placable unittype. A receiving slot may want to display information
+	 * about this unittype to the user.
+	 **/
+	void signalUnitTypeHighlighted(const UnitProperties* prop);
+
+	/**
+	 * Emitted when the mouse is over a button containing a producable or
+	 * "placable" technology. A receiving slot may want to display information
+	 * about this technology to the user.
+	 **/
 	void signalTechnologyHighlighted(const UpgradeProperties*);
 
 private:
