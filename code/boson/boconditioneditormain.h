@@ -28,7 +28,9 @@ class QPushButton;
 class QListBox;
 class KTar;
 class KArchiveFile;
+class KArchiveDirectory;
 class QDomElement;
+class QDomDocument;
 class QListBoxItem;
 
 class BoConditionEditorMain : public QWidget
@@ -40,25 +42,30 @@ public:
 
 public slots:
 	void slotLoadFile(const QString&);
+	void slotSaveFile(const QString&);
 
 protected slots:
 	void slotSelectFile();
+	void slotSelectSaveFile();
 	void slotEditConditions();
 
 protected:
 	void reset();
 	bool loadXMLFile(const KArchiveFile*);
 	bool parsePlayerIds(const KArchiveFile*);
+	bool saveFile(KTar* save, const QString& path, const KArchiveDirectory* from);
 
 private:
 	QLabel* mFileName;
 	QPushButton* mSelectFile;
+	QPushButton* mSelectSaveFile;
 	QPushButton* mEditConditions;
 	QListBox* mConditions;
 
 	KTar* mFile;
 	QMap<QListBoxItem*, QDomElement> mItem2Element;
 	QMap<QListBoxItem*, QWidget*> mItem2Widget;
+	QMap<const KArchiveFile*, QDomDocument> mFile2XML;
 	QValueList<unsigned long int> mPlayerIds;
 };
 
