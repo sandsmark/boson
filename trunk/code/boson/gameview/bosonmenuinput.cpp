@@ -388,7 +388,7 @@ void BosonMenuInputData::initUfoEditorActions()
 
  KShortcut s;
  s.append(KKeySequence(QKeySequence(Qt::Key_Delete)));
- s.append(KKeySequence(QKeySequence(Qt::Key_D)));
+// s.append(KKeySequence(QKeySequence(Qt::Key_D))); // AB: "d" is "scroll right"
  (void)new BoUfoAction(i18n("Delete selected unit"), KShortcut(s), this,
 		SIGNAL(signalEditorDeleteSelectedUnits()), actionCollection(),
 		"editor_delete_selected_unit");
