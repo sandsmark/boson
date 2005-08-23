@@ -23,7 +23,7 @@ noinst_LTLIBRARIES = \
 		libborender.la \
 		libboinfo.la \
 		libbo3dsdebug.la
-bin_PROGRAMS = boson borender bounit bocursor boinfo bo3dsdebug
+bin_PROGRAMS = boson borender bounit bocursor boinfo bo3dsdebug boconditioneditor
 
 INCLUDES = -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl -I$(top_srcdir)/boson/boufo $(all_includes)
 
@@ -128,7 +128,6 @@ libboson_la_LIBADD = \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		$(top_builddir)/boson/script/libbosonscript.la \
-		$(top_builddir)/boson/boufo/libboufo.la \
 		$(LIB_MESHRENDERER) \
 		$(LIB_GROUNDRENDERER) \
 		$(LIB_GAMEVIEWPLUGIN) \
@@ -147,6 +146,7 @@ boson_LDADD = \
 		$(top_builddir)/boson/libboson.la \
 		$(top_builddir)/boson/libbosongameengine.la \
 		$(top_builddir)/boson/libbosoncommon.la \
+		$(top_builddir)/boson/boufo/libboufo.la \
 		$(LIB_BOMEMORY)
 boson_SOURCES = \
 		bosonfpscounter.cpp \
@@ -231,6 +231,7 @@ borender_LDADD = \
 		$(top_builddir)/boson/libboson.la \
 		$(top_builddir)/boson/libbosoncommon.la \
 		$(top_builddir)/boson/libborender.la \
+		$(top_builddir)/boson/boufo/libboufo.la \
 		$(LIB_BOMEMORY) -l3ds
 borender_SOURCES = \
 		bomaterialwidget.cpp \
@@ -275,6 +276,28 @@ bo3dsdebug_LDADD = \
 		-lkio $(LIB_KDEUI)
 bo3dsdebug_SOURCES = \
 		bo3dsdebugmain.cpp
+
+
+boconditioneditor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
+boconditioneditor_LDADD = \
+		$(top_builddir)/boson/libbosongameengine.la \
+		$(top_builddir)/boson/libbosoncommon.la \
+		$(top_builddir)/bogl/libbogl.la \
+		$(top_builddir)/bodebug/libbodebug.la \
+		$(top_builddir)/bogl/libbogl.la \
+		$(top_builddir)/math/libbomath.la \
+		$(top_builddir)/boson/info/libbosoninfo.la \
+		$(top_builddir)/boson/script/libbosonscript.la \
+		$(LIB_KGAME) \
+		$(LIB_KDEUI) \
+		$(LIB_KIO) \
+		-lXmu \
+		$(LIB_XRANDR) \
+		$(LIB_BOMEMORY)
+boconditioneditor_SOURCES = \
+		boconditionwidget.cpp \
+		boconditioneditormain.cpp
+
 
 METASOURCES = AUTO
 
