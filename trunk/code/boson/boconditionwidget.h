@@ -29,16 +29,15 @@ class QListBoxItem;
 class QLineEdit;
 class QPushButton;
 class QCheckBox;
+class QListBox;
 class KListBox;
 class KIntNumInput;
 
-class BoOneConditionWidget;
 class BoEventMatching;
 class BoEventMatchingWidget;
 
 class BoConditionWidgetPrivate;
 
-// displays/configures n conditions, using BoOneConditionWidget for each of them
 class BoConditionWidget : public QWidget
 {
 	Q_OBJECT
@@ -47,6 +46,7 @@ public:
 	virtual ~BoConditionWidget();
 
 	bool loadConditions(const QDomElement& root);
+	const QDomDocument& conditionsDocument();
 	QString toString();
 
 protected slots:
@@ -55,41 +55,45 @@ protected slots:
 	 **/
 	void slotAddCondition();
 
-	/**
-	 * Remove the last condition (i.e. the most recently added)
-	 **/
-	void slotRemoveCondition();
+	void slotShowCondition(int);
+	void slotShowAction();
+	void slotShowEvents();
+	void slotShowStatusConditions();
+	void slotDeleteCondition(int);
 
-	void slotEventMatchingUpdated(const QDomElement&);
-
-	void slotEditEventMatching(BoOneConditionWidget* c, int index, const QDomElement& m);
+protected:
+	void saveCurrentCondition();
+	void addCondition(const QDomElement& condition);
 
 private:
 	BoConditionWidgetPrivate* d;
 };
 
-// displays/configures a single condition only
-class BoOneConditionWidget : public QWidget
+class BoConditionEventsWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	BoOneConditionWidget(QWidget* parent);
-	~BoOneConditionWidget();
+	BoConditionEventsWidget(QWidget* parent);
+	~BoConditionEventsWidget();
+
+	void reset();
 
 	bool loadCondition(const QDomElement&);
-	QDomElement element();
+	QDomDocument eventsDocument();
 
 	void updateEventMatching(const QDomElement& root, int index);
 	void unselectEventMatching();
 	void reloadEventMatchings();
 
 signals:
-	void signalEditEventMatching(BoOneConditionWidget*, int index, const QDomElement&);
+	void signalEditEventMatching(BoConditionEventsWidget*, int index, const QDomElement&);
 
 protected slots:
 	void slotSelectedEventMatching(int);
 	void slotAddEventMatching();
 	void slotRemoveCurrentEventMatching();
+	void slotEditEventMatching(int index, const QDomElement& m);
+	void slotEventMatchingUpdated(const QDomElement& root);
 
 protected:
 	void updateEventMatching(int index, const BoEventMatching* m);
@@ -101,9 +105,26 @@ private:
 	KListBox* mEventMatchings;
 	QPushButton* mAddMatching;
 	QPushButton* mRemoveMatching;
-	BoEventMatchingWidget* mAction;
+	BoEventMatchingWidget* mEventMatchingWidget;
+	int mCurrentEventMatchingIndex;
 
 	QDomDocument* mConditionDocument;
+};
+
+class BoConditionActionWidget : public QWidget
+{
+	Q_OBJECT
+public:
+	BoConditionActionWidget(QWidget* parent);
+	~BoConditionActionWidget();
+
+	void reset();
+
+	bool loadCondition(const QDomElement&);
+	QDomDocument actionDocument();
+
+private:
+	BoEventMatchingWidget* mAction;
 };
 
 class BoEventMatchingWidget : public QWidget
@@ -148,6 +169,40 @@ private:
 	QCheckBox* mIgnoreData1;
 	QLineEdit* mData2;
 	QCheckBox* mIgnoreData2;
+};
+
+class BoConditionOverviewWidget : public QWidget
+{
+	Q_OBJECT
+public:
+	BoConditionOverviewWidget(QWidget* parent);
+	~BoConditionOverviewWidget();
+
+	void addCondition(const QString&);
+	void deleteCondition(int index);
+	int currentCondition() const;
+	void reset();
+
+signals:
+	void signalSelectCondition(int);
+	void signalShowAction();
+	void signalShowEvents();
+	void signalShowStatusConditions();
+
+	void signalAddNewCondition();
+	void signalDeleteCondition(int);
+
+private slots:
+	void slotDeleteCurrentCondition();
+
+private:
+	QListBox* mConditions;
+	QPushButton* mEvents;
+	QPushButton* mStatusConditions;
+	QPushButton* mAction;
+
+	QPushButton* mAddCondition;
+	QPushButton* mDeleteCondition;
 };
 
 #endif
