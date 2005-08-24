@@ -398,7 +398,7 @@ void BosonUfoChat::slotSendText(const QString& text)
 	//AB: this message is never received!! we need to connect to
 	//KPlayer::networkData!!!
 	//TODO
-	
+
  } else {
 	int toPlayer = 0;
 	if (!isSendToAllMessage(id) && isToPlayerMessage(id)) {
@@ -407,10 +407,13 @@ void BosonUfoChat::slotSendText(const QString& text)
 			boError() << k_funcinfo << "don't know that player (" << id << ")"
 					<< " - internal ERROR" << endl;
 		}
-	} 
+	}
 	int receiver = toPlayer;
 	game()->sendMessage(text, messageId(), receiver, sender);
  }
+
+ // Clear the lineedit widget
+ d->mEdit->setText("");
 }
 
 void BosonUfoChat::slotAddPlayer(KPlayer* p)
