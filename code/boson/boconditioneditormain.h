@@ -66,6 +66,7 @@ private:
 	QMap<QListBoxItem*, QDomElement> mItem2Element;
 	QMap<QListBoxItem*, QWidget*> mItem2Widget;
 	QMap<const KArchiveFile*, QDomDocument> mFile2XML;
+	QMap<const KArchiveFile*, QListBoxItem*> mFile2Item;
 	QValueList<unsigned long int> mPlayerIds;
 };
 

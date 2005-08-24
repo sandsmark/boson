@@ -98,7 +98,7 @@ BoConditionEditorMain::BoConditionEditorMain()
 {
  mFile = 0;
 
- QVBoxLayout* topLayout = new QVBoxLayout(this);
+ QVBoxLayout* topLayout = new QVBoxLayout(this, 5, 5);
 
  QHBoxLayout* hlayout = new QHBoxLayout(topLayout);
  QLabel* fileLabel = new QLabel(i18n("Current file:"), this);
@@ -233,6 +233,7 @@ void BoConditionEditorMain::slotEditConditions()
 	boError() << k_funcinfo << "NULL element" << endl;
 	return;
  }
+ e = e.cloneNode().toElement();
  if (mItem2Widget.contains(item)) {
 	BoConditionWidget* widget = (BoConditionWidget*)mItem2Widget[item];
 	int r = KMessageBox::questionYesNo(this, i18n("The conditions for this EventListener have been loaded already. Do you want to reload?"));
@@ -272,6 +273,7 @@ void BoConditionEditorMain::reset()
  mItem2Widget.clear();
  mPlayerIds.clear();
  mFile2XML.clear();
+ mFile2Item.clear();
 }
 
 bool BoConditionEditorMain::loadXMLFile(const KArchiveFile* file)
@@ -312,8 +314,9 @@ bool BoConditionEditorMain::loadXMLFile(const KArchiveFile* file)
 		name = i18n("Global conditions (%1)").arg(file->name());
 	}
 	QListBoxText* item = new QListBoxText(mConditions, name);
-	mItem2Element.insert(item, e.cloneNode().toElement());
+	mItem2Element.insert(item, e);
 	mFile2XML.insert(file, doc);
+	mFile2Item.insert(file, item);
  }
 
  return true;
@@ -437,6 +440,31 @@ bool BoConditionEditorMain::saveFile(KTar* save, const QString& path, const KArc
 		const KArchiveFile* f = (const KArchiveFile*)e;
 		if (mFile2XML.contains(f)) {
 			QDomDocument doc = mFile2XML[f];
+			if (doc.documentElement().isNull()) {
+				boError() << k_funcinfo << "NULL root element" << endl;
+				return false;
+			}
+			if (mFile2Item.contains(f)) {
+				QListBoxItem* item = mFile2Item[f];
+				QDomElement oldConditions;
+				QDomElement newConditions;
+				if (mItem2Element.contains(item)) {
+					oldConditions = mItem2Element[item];
+				}
+				if (mItem2Widget.contains(item)) {
+					BoConditionWidget* widget = (BoConditionWidget*)mItem2Widget[item];
+					QDomDocument conditionDoc = widget->conditionsDocument();
+					newConditions = conditionDoc.documentElement().cloneNode().toElement();
+					if (newConditions.isNull()) {
+						boError() << k_funcinfo << "NULL newConditions" << endl;
+						return false;
+					}
+				}
+				if (!oldConditions.isNull()) {
+					oldConditions.parentNode().replaceChild(newConditions, oldConditions);
+				}
+			}
+
 			QString xml = doc.toString();
 			if (!save->writeFile(fullName, from->user(), from->group(), xml.length(), xml.data())) {
 				boError() << k_funcinfo << "could not save " << fullName << endl;

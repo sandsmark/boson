@@ -25,6 +25,7 @@
 #include "boeventmatching.h"
 #include "boevent.h"
 #include "bodebug.h"
+#include "bocondition.h"
 
 #include <qlayout.h>
 #include <qlabel.h>
@@ -37,180 +38,404 @@
 #include <qcheckbox.h>
 #include <qdom.h>
 #include <qtooltip.h>
+#include <qwidgetstack.h>
 
 #include <klistbox.h>
 #include <klocale.h>
 #include <knuminput.h>
 #include <kmessagebox.h>
 
+BoConditionOverviewWidget::BoConditionOverviewWidget(QWidget* parent)
+	: QWidget(parent)
+{
+ QVBoxLayout* topLayout = new QVBoxLayout(this);
+
+ QVBoxLayout* vlayout = new QVBoxLayout(topLayout);
+ QLabel* conditionLabel = new QLabel(i18n("Conditions:"), this);
+ vlayout->addWidget(conditionLabel);
+ mConditions = new QListBox(this);
+ vlayout->addWidget(mConditions);
+ connect(mConditions, SIGNAL(highlighted(int)), this, SIGNAL(signalSelectCondition(int)));
+
+ QHBoxLayout* hlayout = new QHBoxLayout(topLayout);
+ mEvents = new QPushButton(i18n("Events"), this);
+ mStatusConditions = new QPushButton(i18n("Status Conditions"), this);
+ mAction = new QPushButton(i18n("Action"), this);
+ hlayout->addWidget(mEvents);
+ hlayout->addWidget(mStatusConditions);
+ hlayout->addWidget(mAction);
+ connect(mEvents, SIGNAL(clicked()), this, SIGNAL(signalShowEvents()));
+ connect(mStatusConditions, SIGNAL(clicked()), this, SIGNAL(signalShowStatusConditions()));
+ connect(mAction, SIGNAL(clicked()), this, SIGNAL(signalShowAction()));
+
+ hlayout = new QHBoxLayout(topLayout);
+ mAddCondition = new QPushButton(i18n("New Condition"), this);
+ mDeleteCondition = new QPushButton(i18n("Delete Condition"), this);
+ hlayout->addWidget(mAddCondition);
+ hlayout->addWidget(mDeleteCondition);
+ connect(mAddCondition, SIGNAL(clicked()), this, SIGNAL(signalAddNewCondition()));
+ connect(mDeleteCondition, SIGNAL(clicked()),
+		this, SLOT(slotDeleteCurrentCondition()));
+}
+
+BoConditionOverviewWidget::~BoConditionOverviewWidget()
+{
+}
+
+void BoConditionOverviewWidget::reset()
+{
+ mConditions->clear();
+ mEvents->setEnabled(false);
+ mStatusConditions->setEnabled(false);
+ mAction->setEnabled(false);
+}
+
+void BoConditionOverviewWidget::addCondition(const QString& name)
+{
+ new QListBoxText(mConditions, name);
+ mEvents->setEnabled(true);
+ mStatusConditions->setEnabled(true);
+ mAction->setEnabled(true);
+}
+
+void BoConditionOverviewWidget::slotDeleteCurrentCondition()
+{
+ int index = mConditions->currentItem();
+ if (index < 0) {
+	return;
+ }
+ emit signalDeleteCondition(index);
+}
+
+void BoConditionOverviewWidget::deleteCondition(int index)
+{
+ if (index < 0) {
+	return;
+ }
+ if ((unsigned int)index >= mConditions->count()) {
+	return;
+ }
+ mConditions->removeItem(index);
+ if (mConditions->count() == 0) {
+	reset();
+ }
+}
+
+int BoConditionOverviewWidget::currentCondition() const
+{
+ return mConditions->currentItem();
+}
+
 class BoConditionWidgetPrivate
 {
 public:
 	BoConditionWidgetPrivate()
 	{
-		mConditionsWidget = 0;
-		mEventMatchingWidget = 0;
-		mCurrentEventMatchingCondition = 0;
+		mOverview = 0;
+		mConditionAspect = 0;
+		mConditionEvents = 0;
+//		mConditionStatusConditions = 0;
+		mConditionAction = 0;
+
+		mConditionDocument = 0;
 	}
 
-	QVBox* mConditionsWidget;
-	QPtrList<BoOneConditionWidget> mConditions;
+	BoConditionOverviewWidget* mOverview;
+	QWidgetStack* mConditionAspect;
+	BoConditionEventsWidget* mConditionEvents;
+//	Foobar* mConditionStatusConditions;
+	BoConditionActionWidget* mConditionAction;
 
-	BoEventMatchingWidget* mEventMatchingWidget;
+	int mCurrentCondition;
 
-	BoOneConditionWidget* mCurrentEventMatchingCondition;
-	int mCurrentEventMatchingIndex;
+	QDomDocument* mConditionDocument;
 };
 
 BoConditionWidget::BoConditionWidget(QWidget* parent) : QWidget(parent)
 {
  d = new BoConditionWidgetPrivate;
- d->mConditions.setAutoDelete(true);
- d->mCurrentEventMatchingIndex = -1;
+ d->mCurrentCondition = -1;
+ d->mConditionDocument = new QDomDocument("Conditions");
+ d->mConditionDocument->appendChild(d->mConditionDocument->createElement("Conditions"));
+ QHBoxLayout* topLayout = new QHBoxLayout(this, 5, 5);
+ d->mOverview = new BoConditionOverviewWidget(this);
+ connect(d->mOverview, SIGNAL(signalSelectCondition(int)),
+		this, SLOT(slotShowCondition(int)));
+ connect(d->mOverview, SIGNAL(signalShowAction()),
+		this, SLOT(slotShowAction()));
+ connect(d->mOverview, SIGNAL(signalShowEvents()),
+		this, SLOT(slotShowEvents()));
+ connect(d->mOverview, SIGNAL(signalShowStatusConditions()),
+		this, SLOT(slotShowStatusConditions()));
+ connect(d->mOverview, SIGNAL(signalAddNewCondition()),
+		this, SLOT(slotAddCondition()));
+ connect(d->mOverview, SIGNAL(signalDeleteCondition(int)),
+		this, SLOT(slotDeleteCondition(int)));
+ topLayout->addWidget(d->mOverview);
 
- QVBoxLayout* layout = new QVBoxLayout(this);
-
- QVGroupBox* conditions = new QVGroupBox(i18n("Conditions"), this);
- layout->addWidget(conditions);
-
- d->mConditionsWidget = new QVBox(conditions);
-
- QHBox* moreLessWidget = new QHBox(conditions);
- QPushButton* more = new QPushButton(i18n("More"), moreLessWidget);
- connect(more, SIGNAL(clicked()), this, SLOT(slotAddCondition()));
-
- QPushButton* less = new QPushButton(i18n("Fewer"), moreLessWidget);
- connect(less, SIGNAL(clicked()), this, SLOT(slotRemoveCondition()));
-
- QVGroupBox* eventMatchingBox = new QVGroupBox(i18n("Current event matching"), this);
- layout->addWidget(eventMatchingBox);
- d->mEventMatchingWidget = new BoEventMatchingWidget(eventMatchingBox);
- connect(d->mEventMatchingWidget, SIGNAL(signalEventMatching(const QDomElement&)),
-		this, SLOT(slotEventMatchingUpdated(const QDomElement&)));
- d->mEventMatchingWidget->setEnabled(false);
- QToolTip::add(d->mEventMatchingWidget, i18n("Edit the currently selected event matching here"));
-
-
- slotAddCondition();
+ d->mConditionAspect = new QWidgetStack(this);
+ topLayout->addWidget(d->mConditionAspect);
+ d->mConditionEvents = new BoConditionEventsWidget(d->mConditionAspect);
+ d->mConditionAspect->addWidget(d->mConditionEvents);
+// d->mConditionStatusConditions = new BoOneConditionWidget(d->mConditionAspect);
+// d->mConditionAspect->addWidget(d->mConditionStatusConditions);
+ d->mConditionAction = new BoConditionActionWidget(d->mConditionAspect);
+ d->mConditionAspect->addWidget(d->mConditionAction);
 }
 
 BoConditionWidget::~BoConditionWidget()
 {
- d->mConditions.clear();
  delete d;
 }
 
 void BoConditionWidget::slotAddCondition()
 {
- BoOneConditionWidget* condition = new BoOneConditionWidget(d->mConditionsWidget);
- connect(condition, SIGNAL(signalEditEventMatching(BoOneConditionWidget*, int, const QDomElement&)),
-		this, SLOT(slotEditEventMatching(BoOneConditionWidget*, int, const QDomElement&)));
- condition->show();
+ QDomElement condition = d->mConditionDocument->createElement("Condition");
+ condition.appendChild(d->mConditionDocument->createElement("Events"));
+ condition.appendChild(d->mConditionDocument->createElement("StatusConditions"));
+ QDomElement action = d->mConditionDocument->createElement("Action");
+ action.setAttribute("Type", "Event");
+ QDomElement actionEvent = d->mConditionDocument->createElement("Event");
+ actionEvent.setAttribute("Name", "CustomStringEvent");
+ actionEvent.setAttribute("Id", QString::number(0));
+ actionEvent.setAttribute("UnitId", QString::number(0));
+ actionEvent.setAttribute("DelayedDelivery", QString::number(0));
+ actionEvent.setAttribute("HasLocation", QString::number(0));
+ actionEvent.setAttribute("Data1", "");
+ actionEvent.setAttribute("Data2", "");
+ actionEvent.setAttribute("Location.x", QString::number(0.0f));
+ actionEvent.setAttribute("Location.y", QString::number(0.0f));
+ actionEvent.setAttribute("Location.z", QString::number(0.0f));
+ action.appendChild(actionEvent);
+ condition.appendChild(action);
 
- d->mConditions.append(condition);
-}
 
-void BoConditionWidget::slotRemoveCondition()
-{
- if (d->mConditions.count() <= 1) {
+ BoCondition test;
+ if (!test.load(condition)) {
+	boError() << k_funcinfo << "cannot load new condition" << endl;
 	return;
  }
- d->mConditions.removeLast();
+
+ addCondition(condition);
 }
 
-void BoConditionWidget::slotEditEventMatching(BoOneConditionWidget* c, int index, const QDomElement& m)
+void BoConditionWidget::addCondition(const QDomElement& condition)
 {
- if (d->mEventMatchingWidget->isEnabled()) {
-	d->mEventMatchingWidget->slotApply();
- }
- QPtrListIterator<BoOneConditionWidget> it(d->mConditions);
- while (it.current()) {
-	if (it.current() == c) {
-		++it;
-		continue;
-	}
-	it.current()->unselectEventMatching();
-	++it;
- }
-
- d->mEventMatchingWidget->displayEventMatching(m);
- d->mCurrentEventMatchingCondition = c;
- d->mCurrentEventMatchingIndex = index;
+ d->mConditionDocument->documentElement().appendChild(condition.cloneNode());
+ d->mOverview->addCondition(i18n("Condition"));
 }
 
-void BoConditionWidget::slotEventMatchingUpdated(const QDomElement& root)
+void BoConditionWidget::slotDeleteCondition(int index)
 {
- // AB: we use this loop to make sure that mCurrentEventMatchingCondition is
- // actually a valid pointer
- QPtrListIterator<BoOneConditionWidget> it(d->mConditions);
- while (it.current()) {
-	if (it.current() != d->mCurrentEventMatchingCondition) {
-		++it;
+ if (index == d->mOverview->currentCondition()) {
+	// TODO: clear the widgets in d->mConditionAspect
+ }
+ d->mOverview->deleteCondition(index);
+}
+
+void BoConditionWidget::slotShowCondition(int index)
+{
+ if (index < 0) {
+	return;
+ }
+ saveCurrentCondition();
+ d->mConditionEvents->reset();
+// d->mConditionStatusCondition->reset();
+ d->mConditionAction->reset();
+ d->mCurrentCondition = index;
+ QDomElement root = d->mConditionDocument->documentElement();
+ int i = 0;
+ for (QDomNode n = root.firstChild(); !n.isNull(); n = n.nextSibling()) {
+	QDomElement e = n.toElement();
+	if (e.isNull()) {
 		continue;
 	}
-	it.current()->updateEventMatching(root, d->mCurrentEventMatchingIndex);
-	++it;
+	if (e.tagName() != "Condition") {
+		continue;
+	}
+	if (i == index) {
+		d->mConditionEvents->loadCondition(e);
+//		d->mConditionStatusConditions->loadCondition(e);
+		d->mConditionAction->loadCondition(e);
+		return;
+	}
+	i++;
+ }
+}
+
+void BoConditionWidget::slotShowAction()
+{
+ d->mConditionAspect->raiseWidget(d->mConditionAction);
+}
+
+void BoConditionWidget::slotShowEvents()
+{
+ d->mConditionAspect->raiseWidget(d->mConditionEvents);
+}
+
+void BoConditionWidget::slotShowStatusConditions()
+{
+// d->mConditionAspect->raiseWidget(d->mConditionStatusConditions);
+}
+
+void BoConditionWidget::saveCurrentCondition()
+{
+ if (d->mCurrentCondition < 0) {
+	return;
+ }
+ int i = 0;
+ QDomElement root = d->mConditionDocument->documentElement();
+ for (QDomNode n = root.firstChild(); !n.isNull(); n = n.nextSibling()) {
+	QDomElement e = n.toElement();
+	if (e.isNull()) {
+		continue;
+	}
+	if (e.tagName() != "Condition") {
+		continue;
+	}
+	if (i == d->mCurrentCondition) {
+		QDomDocument eventsDoc = d->mConditionEvents->eventsDocument();
+		QDomElement events = eventsDoc.documentElement().namedItem("Events").toElement();
+#if 0
+		QDomDocument statusConditionsDoc = d->mConditionStatusConditions->statusConditionsDocument();
+		QDomElement statusConditions = eventsDoc.namedItem("StatusConditions").toElement();
+#else
+		QDomElement statusConditions = d->mConditionDocument->createElement("StatusConditions");
+#endif
+		QDomDocument actionDoc = d->mConditionAction->actionDocument();
+		QDomElement action = actionDoc.namedItem("Action").toElement();
+
+		if (events.isNull()) {
+			boError() << k_funcinfo << "could not save Events" << endl;
+			return;
+		}
+		if (statusConditions.isNull()) {
+			boError() << k_funcinfo << "could not save StatusConditions" << endl;
+			return;
+		}
+		if (action.isNull()) {
+			boError() << k_funcinfo << "could not save Action" << endl;
+			return;
+		}
+		
+		while (e.hasChildNodes()) {
+			e.removeChild(e.firstChild());
+		}
+		e.appendChild(events.cloneNode());
+		e.appendChild(statusConditions.cloneNode());
+		e.appendChild(action.cloneNode());
+		return;
+	}
+	i++;
  }
 }
 
 QString BoConditionWidget::toString()
 {
- QDomDocument doc("Conditions");
- QDomElement root = doc.createElement("Conditions");
- doc.appendChild(root);
+ saveCurrentCondition();
 
- d->mEventMatchingWidget->slotApply();
+ return d->mConditionDocument->toString();
+}
 
- QPtrListIterator<BoOneConditionWidget> it(d->mConditions);
- while (it.current()) {
-	QDomElement e = it.current()->element();
-	root.appendChild(e.cloneNode());
-	++it;
- }
- return doc.toString();
+const QDomDocument& BoConditionWidget::conditionsDocument()
+{
+ saveCurrentCondition();
+ return *d->mConditionDocument;
 }
 
 bool BoConditionWidget::loadConditions(const QDomElement& root)
 {
+ d->mOverview->reset();
+ d->mConditionEvents->reset();
+// d->mConditionStatusConditions->reset();
+ d->mConditionAction->reset();
+ QDomElement localRoot = d->mConditionDocument->documentElement();
+ while (localRoot.hasChildNodes()) {
+	localRoot.removeChild(root.firstChild());
+ }
+
  QDomNodeList list = root.elementsByTagName("Condition");
+
+ // first test if conditions are valid
  for (unsigned int i = 0; i < list.count(); i++) {
-	if (d->mConditions.count() < i + 1) {
-		slotAddCondition();
-	}
 	QDomElement e = list.item(i).toElement();
-	BoOneConditionWidget* c = d->mConditions.at(i);
-	if (!c->loadCondition(e)) {
+	BoCondition test;
+	if (!test.load(e)) {
+		boError() << k_funcinfo << "cannot load condition " << i << endl;
 		return false;
 	}
  }
+
+ // now copy conditions
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement e = list.item(i).toElement();
+	addCondition(e);
+ }
+
  return true;
 }
 
 
-BoOneConditionWidget::BoOneConditionWidget(QWidget* parent) : QWidget(parent)
+BoConditionActionWidget::BoConditionActionWidget(QWidget* parent) : QWidget(parent)
 {
- // AB: the BoConditionWidget should have labels above all of these.
- // maybe we should add a bool isFirstWidget flag to BoOneConditionWidget and
- // display that label if the flag is true
-
  QHBoxLayout* layout = new QHBoxLayout(this);
+
+ // atm we will always emit "CustomStringEvent" with one parameter
+ // LABEL: Action (parameter to event)
+ mAction = new BoEventMatchingWidget(this, false);
+ QToolTip::add(mAction, i18n("This is the action that will be fired once the condition is met.\nCurrently only an event is supported."));
+
+ layout->addWidget(mAction);
+}
+
+BoConditionActionWidget::~BoConditionActionWidget()
+{
+}
+
+void BoConditionActionWidget::reset()
+{
+ mAction->slotClear();
+}
+
+QDomDocument BoConditionActionWidget::actionDocument()
+{
+ QDomDocument doc;
+ QDomElement action = doc.createElement("Action");
+ doc.appendChild(action);
+
+ action.setAttribute("Type", "Event");
+ QDomElement actionEvent = mAction->event();
+ action.appendChild(actionEvent);
+
+ return doc;
+}
+
+bool BoConditionActionWidget::loadCondition(const QDomElement& condition)
+{
+ if (condition.isNull()) {
+	return false;
+ }
+ if (condition.namedItem("Action").toElement().isNull()) {
+	boError() << k_funcinfo << "no Action tag" << endl;
+	return false;
+ }
+
+ if (!mAction->displayEvent(condition.namedItem("Action").namedItem("Event").toElement())) {
+	boError() << k_funcinfo << "cannot display Action Event" << endl;
+	return false;
+ }
+// mAction->setText(condition.attribute("EventCaused"));
+ return true;
+}
+
+
+BoConditionEventsWidget::BoConditionEventsWidget(QWidget* parent) : QWidget(parent)
+{
+ QVBoxLayout* topLayout = new QVBoxLayout(this);
+ QHBoxLayout* layout = new QHBoxLayout(topLayout);
 
  mConditionDocument = new QDomDocument("Condition");
  clearXML();
-
- // LABEL: "For player"
- mForPlayer = new QComboBox(this);
- int playerCount = 0; // TODO
- for (int i = 0; i < playerCount; i++) {
-	QString playerName; // TODO
-	mForPlayer->insertItem(i18n("For %1").arg(playerName));
- }
-
- // this is equal to creating playerCount conditions, one for each player in the
- // game.
- // actually this is exactly what this will do.
- // LABEL: Event Matchings
- mForPlayer->insertItem("For all players");
 
  mEventMatchings = new KListBox(this);
  connect(mEventMatchings, SIGNAL(highlighted(int)),
@@ -225,152 +450,32 @@ BoOneConditionWidget::BoOneConditionWidget(QWidget* parent) : QWidget(parent)
  connect(mRemoveMatching, SIGNAL(clicked()),
 		this, SLOT(slotRemoveCurrentEventMatching()));
 
- // atm we will always emit "CustomStringEvent" with one parameter
- // LABEL: Action (parameter to event)
- mAction = new BoEventMatchingWidget(this, false);
- QToolTip::add(mAction, i18n("This is the action that will be fired once the condition is met.\nCurrently only an event is supported."));
-
- layout->addWidget(mForPlayer);
  layout->addWidget(mEventMatchings);
  layout->addWidget(eventMatchingButtonsBox);
- layout->addWidget(mAction);
+
+ mEventMatchingWidget = new BoEventMatchingWidget(this);
+ connect(mEventMatchingWidget, SIGNAL(signalEventMatching(const QDomElement&)),
+		this, SLOT(slotEventMatchingUpdated(const QDomElement&)));
+ mEventMatchingWidget->setEnabled(false);
+ QToolTip::add(mEventMatchingWidget, i18n("Edit the currently selected event matching here"));
+ topLayout->addWidget(mEventMatchingWidget);
+
+ mCurrentEventMatchingIndex = -1;
 }
 
-BoOneConditionWidget::~BoOneConditionWidget()
+BoConditionEventsWidget::~BoConditionEventsWidget()
 {
  delete mConditionDocument;
 }
 
-void BoOneConditionWidget::updateEventMatching(const QDomElement& root, int index)
+void BoConditionEventsWidget::reset()
 {
- if (index < 0 || index >= (int)mEventMatchings->count()) {
-	return;
- }
- QDomNodeList eventMatchingList = mConditionDocument->documentElement().namedItem("Events").toElement().elementsByTagName("EventMatching");
- if (index >= (int)eventMatchingList.count()) {
-	return;
- }
- BoEventMatching* matching = new BoEventMatching();
- bool success = matching->load(root);
- if (success) {
-	boDebug() << k_funcinfo << "updating event matching " << index << endl;
-
-	QDomElement old = eventMatchingList.item(index).toElement();
-	mConditionDocument->documentElement().namedItem("Events").replaceChild(root.cloneNode(), old);
-
-	int currentItem = mEventMatchings->currentItem();
-	mEventMatchings->blockSignals(true);
-	mEventMatchings->changeItem(createEventMatchingItem(matching), index);
-	mEventMatchings->setCurrentItem(currentItem);
-	mEventMatchings->blockSignals(false);
- }
- delete matching;
- matching = 0;
- if (!success) {
-	boError() << k_funcinfo << "received invalid event matching" << endl;
-	return;
- }
+ clearXML();
+ reloadEventMatchings();
+ mEventMatchingWidget->setEnabled(false);
 }
 
-QDomElement BoOneConditionWidget::element()
-{
- QDomElement root = mConditionDocument->documentElement();
- 
- QDomElement action = root.ownerDocument().createElement("Action");
- root.appendChild(action);
-
- action.setAttribute("Type", "Event");
- QDomElement actionEvent = mAction->event();
- action.appendChild(actionEvent);
- return root;
-}
-
-QListBoxItem* BoOneConditionWidget::createEventMatchingItem(const BoEventMatching* m)
-{
- if (!m || !m->event()) {
-	return new QListBoxText("");
- }
- return new QListBoxText(m->event()->name());
-}
-
-void BoOneConditionWidget::updateEventMatching(int index, const BoEventMatching* m)
-{
- mEventMatchings->changeItem(createEventMatchingItem(m), index);
-}
-
-void BoOneConditionWidget::reloadEventMatchings()
-{
- unselectEventMatching();
- QDomElement root = mConditionDocument->documentElement();
- QDomElement events = root.namedItem("Events").toElement();
-
- mEventMatchings->clear();
- QDomNodeList list = events.elementsByTagName("EventMatching");
- boDebug() << k_funcinfo << "displaying " << list.count() << " event matchings" << endl;
- for (unsigned int i = 0; i < list.count(); i++) {
-	QDomElement e = list.item(i).toElement();
-	BoEventMatching* matching = new BoEventMatching();
-	bool success = matching->load(e);
-	QListBoxItem* item = 0;
-	if (matching->event()) {
-		item = createEventMatchingItem(matching);
-	} else {
-		success = false;
-	}
-	delete matching;
-	matching = 0;
-	if (!success) {
-		boError() << k_funcinfo << "unable to load event matching " << i << endl;
-		continue;
-	}
-	mEventMatchings->insertItem(item);
- }
-}
-
-void BoOneConditionWidget::unselectEventMatching()
-{
- if (mEventMatchings->currentItem() < 0) {
-	return;
- }
- mEventMatchings->clearFocus();
- mEventMatchings->clearSelection();
- mEventMatchings->setCurrentItem(-1);
-}
-
-void BoOneConditionWidget::slotSelectedEventMatching(int index)
-{
- boDebug() << k_funcinfo << index << endl;
- if (index < 0) {
-	return;
- }
- QDomElement root = mConditionDocument->documentElement();
- QDomElement events = root.namedItem("Events").toElement();
- QDomNodeList list = events.elementsByTagName("EventMatching");
- if (index >= (int)list.count()) {
-	boError() << k_funcinfo << "have only " << list.count() << " event matchings, need at least " << index + 1 << endl;
-	reloadEventMatchings();
-	return;
- }
- QDomElement e = list.item(index).toElement();
- if (e.isNull()) {
-	boError() << k_funcinfo << "item at " << index << " is not a valid element" << endl;
-	reloadEventMatchings();
-	return;
- }
- BoEventMatching* m = new BoEventMatching();
- bool success = m->load(e);
- delete m;
- m = 0;
- if (!success) {
-	boError() << k_funcinfo << "could not load event matching from internal document" << endl;
-	KMessageBox::sorry(this, i18n("Loading the event matching from the internal XML document failed. cannot edit."));
-	reloadEventMatchings();
-	return;
- }
- emit signalEditEventMatching(this, index, e);
-}
-
-void BoOneConditionWidget::slotAddEventMatching()
+void BoConditionEventsWidget::slotAddEventMatching()
 {
  boDebug() << k_funcinfo << "adding dummy event matching" << endl;
  QDomElement root = mConditionDocument->documentElement();
@@ -408,7 +513,133 @@ void BoOneConditionWidget::slotAddEventMatching()
  slotSelectedEventMatching(mEventMatchings->currentItem());
 }
 
-void BoOneConditionWidget::slotRemoveCurrentEventMatching()
+void BoConditionEventsWidget::reloadEventMatchings()
+{
+ unselectEventMatching();
+ QDomElement root = mConditionDocument->documentElement();
+ QDomElement events = root.namedItem("Events").toElement();
+
+ mEventMatchings->clear();
+ QDomNodeList list = events.elementsByTagName("EventMatching");
+ boDebug() << k_funcinfo << "displaying " << list.count() << " event matchings" << endl;
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement e = list.item(i).toElement();
+	BoEventMatching* matching = new BoEventMatching();
+	bool success = matching->load(e);
+	QListBoxItem* item = 0;
+	if (matching->event()) {
+		item = createEventMatchingItem(matching);
+	} else {
+		success = false;
+	}
+	delete matching;
+	matching = 0;
+	if (!success) {
+		boError() << k_funcinfo << "unable to load event matching " << i << endl;
+		delete item;
+		continue;
+	}
+	mEventMatchings->insertItem(item);
+ }
+}
+
+void BoConditionEventsWidget::unselectEventMatching()
+{
+ if (mEventMatchings->currentItem() < 0) {
+	return;
+ }
+ mEventMatchings->clearFocus();
+ mEventMatchings->clearSelection();
+ mEventMatchings->setCurrentItem(-1);
+}
+
+void BoConditionEventsWidget::updateEventMatching(const QDomElement& root, int index)
+{
+ if (index < 0 || index >= (int)mEventMatchings->count()) {
+	return;
+ }
+ QDomNodeList eventMatchingList = mConditionDocument->documentElement().namedItem("Events").toElement().elementsByTagName("EventMatching");
+ if (index >= (int)eventMatchingList.count()) {
+	return;
+ }
+ BoEventMatching* matching = new BoEventMatching();
+ bool success = matching->load(root);
+ if (success) {
+	boDebug() << k_funcinfo << "updating event matching " << index << endl;
+
+	QDomElement old = eventMatchingList.item(index).toElement();
+	mConditionDocument->documentElement().namedItem("Events").replaceChild(root.cloneNode(), old);
+
+	int currentItem = mEventMatchings->currentItem();
+	mEventMatchings->blockSignals(true);
+	mEventMatchings->changeItem(createEventMatchingItem(matching), index);
+	mEventMatchings->setCurrentItem(currentItem);
+	mEventMatchings->blockSignals(false);
+ }
+ delete matching;
+ matching = 0;
+ if (!success) {
+	boError() << k_funcinfo << "received invalid event matching" << endl;
+	return;
+ }
+}
+
+QDomDocument BoConditionEventsWidget::eventsDocument()
+{
+ if (mEventMatchingWidget->isEnabled()) {
+	mEventMatchingWidget->slotApply();
+ }
+ QDomDocument doc = mConditionDocument->cloneNode().toDocument();
+ return doc;
+}
+
+QListBoxItem* BoConditionEventsWidget::createEventMatchingItem(const BoEventMatching* m)
+{
+ if (!m || !m->event()) {
+	return new QListBoxText("");
+ }
+ return new QListBoxText(m->event()->name());
+}
+
+void BoConditionEventsWidget::slotSelectedEventMatching(int index)
+{
+ boDebug() << k_funcinfo << index << endl;
+ if (index < 0) {
+	return;
+ }
+ QDomElement root = mConditionDocument->documentElement();
+ QDomElement events = root.namedItem("Events").toElement();
+ QDomNodeList list = events.elementsByTagName("EventMatching");
+ if (index >= (int)list.count()) {
+	boError() << k_funcinfo << "have only " << list.count() << " event matchings, need at least " << index + 1 << endl;
+	reloadEventMatchings();
+	return;
+ }
+ QDomElement e = list.item(index).toElement();
+ if (e.isNull()) {
+	boError() << k_funcinfo << "item at " << index << " is not a valid element" << endl;
+	reloadEventMatchings();
+	return;
+ }
+ BoEventMatching* m = new BoEventMatching();
+ bool success = m->load(e);
+ delete m;
+ m = 0;
+ if (!success) {
+	boError() << k_funcinfo << "could not load event matching from internal document" << endl;
+	KMessageBox::sorry(this, i18n("Loading the event matching from the internal XML document failed. cannot edit."));
+	reloadEventMatchings();
+	return;
+ }
+ slotEditEventMatching(index, e);
+}
+
+void BoConditionEventsWidget::updateEventMatching(int index, const BoEventMatching* m)
+{
+ mEventMatchings->changeItem(createEventMatchingItem(m), index);
+}
+
+void BoConditionEventsWidget::slotRemoveCurrentEventMatching()
 {
  int current = mEventMatchings->currentItem();
  boDebug() << k_funcinfo << current << endl;
@@ -424,7 +655,7 @@ void BoOneConditionWidget::slotRemoveCurrentEventMatching()
 	return;
  }
  unselectEventMatching();
- emit signalEditEventMatching(this, current, QDomElement());
+ slotEditEventMatching(current, QDomElement());
 
  QDomElement root = mConditionDocument->documentElement();
  QDomElement events = root.namedItem("Events").toElement();
@@ -437,7 +668,7 @@ void BoOneConditionWidget::slotRemoveCurrentEventMatching()
  reloadEventMatchings();
 }
 
-void BoOneConditionWidget::clearXML()
+void BoConditionEventsWidget::clearXML()
 {
  QDomElement oldRoot = mConditionDocument->documentElement();
  mConditionDocument->removeChild(oldRoot);
@@ -450,7 +681,7 @@ void BoOneConditionWidget::clearXML()
  mConditionDocument->appendChild(root);
 }
 
-bool BoOneConditionWidget::loadCondition(const QDomElement& condition)
+bool BoConditionEventsWidget::loadCondition(const QDomElement& condition)
 {
  if (condition.isNull()) {
 	return false;
@@ -471,13 +702,37 @@ bool BoOneConditionWidget::loadCondition(const QDomElement& condition)
  }
  reloadEventMatchings();
 
- if (!mAction->displayEvent(condition.namedItem("Action").namedItem("Event").toElement())) {
-	boError() << k_funcinfo << "cannot display Action Event" << endl;
-	return false;
- }
-// mAction->setText(condition.attribute("EventCaused"));
  return true;
 }
+
+void BoConditionEventsWidget::slotEditEventMatching(int index, const QDomElement& m)
+{
+ if (mEventMatchingWidget->isEnabled()) {
+	mEventMatchingWidget->slotApply();
+ }
+ unselectEventMatching();
+
+ mCurrentEventMatchingIndex = index;
+ mEventMatchings->blockSignals(true);
+ mEventMatchings->setCurrentItem(index);
+ mEventMatchings->setSelected(index, true);
+ mEventMatchings->blockSignals(false);
+ mEventMatchingWidget->displayEventMatching(m);
+}
+
+void BoConditionEventsWidget::slotEventMatchingUpdated(const QDomElement& root)
+{
+ updateEventMatching(root, mCurrentEventMatchingIndex);
+}
+
+
+
+
+
+
+
+
+
 
 
 BoEventMatchingWidget::BoEventMatchingWidget(QWidget* parent, bool eventMatching) : QWidget(parent)
@@ -645,7 +900,7 @@ QDomElement BoEventMatchingWidget::event() const
 	return m;
  }
  QDomElement event = m.namedItem("Event").toElement();
- return event;
+ return event.cloneNode().toElement();
 }
 
 QDomElement BoEventMatchingWidget::eventMatching() const
