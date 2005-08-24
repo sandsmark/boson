@@ -2567,7 +2567,137 @@ QString BosonPath::debugText(bofixed x, bofixed y)
 
 QValueList<BoVector2Fixed> BosonPath::findLocations(Player* player, int x, int y, int n, int radius, ResourceType type)
 {
-  return QValueList<BoVector2Fixed>();
+  QValueList<BoVector2Fixed> locations;
+
+  QValueList<BosonPathNode> open;
+  BosonPathNode node, n2;
+  int diameterplusone = 2 * radius + 1;
+  bool* visited = new bool[diameterplusone * diameterplusone];
+  // Init VISITED set to false
+  for(int i = 0; i < diameterplusone * diameterplusone; i++)
+  {
+    visited[i] = false;
+  }
+#define VISITED(nx, ny)  visited[((ny) - y + radius) * diameterplusone + ((nx) - x + radius)]
+
+  node.x = x;
+  node.y = y;
+  open.append(node);
+  VISITED(node.x, node.y) = true;
+
+  int found = 0;
+
+
+  while(!open.isEmpty())
+  {
+    // Get first node of OPEN
+    node = open.first();
+    open.pop_front();
+
+    // Check it's children and add them to OPEN list
+    for(int dir = 1; dir < 9; dir++)
+    {
+      // First, set new node's position to be old's one
+      n2.x = node.x + mXOffset[dir];
+      n2.y = node.y + mYOffset[dir];
+
+      // Check if new node is within given radius
+      int dist = QMAX(QABS(x - n2.x), QABS(y - n2.y));
+      if(dist > radius)
+      {
+        continue;
+      }
+
+      // Make sure that position is valid
+      if((n2.x < 0) || (n2.y < 0) || (n2.x >= (int)mMap->width()) || (n2.y >= (int)mMap->height()))
+      {
+        continue;
+      }
+
+      // Check if cell is already in OPEN
+      if(VISITED(n2.x, n2.y))
+      {
+        continue;
+      }
+
+      // Add node to OPEN
+      open.append(n2);
+      VISITED(n2.x, n2.y) = true;
+
+      // Check if cell is fogged or not
+      if(player->isFogged(n2.x, n2.y))
+      {
+        continue;
+      }
+
+      // If it's not fogged, maybe it's what we're looking for
+      if(type == Minerals)
+      {
+        const BoItemList* items = cell(n2.x, n2.y)->items();
+        for(BoItemList::ConstIterator it = items->begin(); it != items->end(); ++it)
+        {
+          if(!RTTI::isUnit((*it)->rtti()))
+          {
+            continue;
+          }
+          Unit* u = (Unit*)*it;
+          if(u->isDestroyed())
+          {
+            continue;
+          }
+          ResourceMinePlugin* res = (ResourceMinePlugin*)u->plugin(UnitPlugin::ResourceMine);
+          if(res && res->canProvideMinerals() && (res->minerals() != 0))
+          {
+            locations.append(BoVector2Fixed(n2.x, n2.y));
+            found++;
+          }
+        }
+      }
+      else if(type == Oil)
+      {
+        const BoItemList* items = cell(n2.x, n2.y)->items();
+        for(BoItemList::ConstIterator it = items->begin(); it != items->end(); ++it)
+        {
+          if(!RTTI::isUnit((*it)->rtti()))
+          {
+            continue;
+          }
+          Unit* u = (Unit*)*it;
+          if(u->isDestroyed())
+          {
+            continue;
+          }
+          ResourceMinePlugin* res = (ResourceMinePlugin*)u->plugin(UnitPlugin::ResourceMine);
+          if(res && res->canProvideOil() && (res->oil() != 0))
+          {
+            locations.append(BoVector2Fixed(n2.x, n2.y));
+            found++;
+          }
+        }
+      }
+      else if(type == EnemyBuilding)
+      {
+        // TODO!
+      }
+      else if(type == EnemyUnit)
+      {
+        // TODO!
+      }
+
+      if(n > 0 && found >= n)
+      {
+        delete[] visited;
+        return locations;
+      }
+
+    }
+  }
+
+  boDebug() << k_funcinfo << "Found only " << found << " of " << n << " locations" << endl;
+  delete[] visited;
+  return locations;
+
+#undef VISITED
 }
 
 
