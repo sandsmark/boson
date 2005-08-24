@@ -282,11 +282,9 @@ boconditioneditor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boconditioneditor_LDADD = \
 		$(top_builddir)/boson/libbosongameengine.la \
 		$(top_builddir)/boson/libbosoncommon.la \
-		$(top_builddir)/bogl/libbogl.la \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/bogl/libbogl.la \
 		$(top_builddir)/math/libbomath.la \
-		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/boson/script/libbosonscript.la \
 		$(LIB_KGAME) \
 		$(LIB_KDEUI) \
