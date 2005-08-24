@@ -1220,10 +1220,12 @@ bool Unit::loadFromXML(const QDomElement& root)
 		boError() << k_funcinfo << "Error loading range attribute ('" << pathinfoxml.attribute("range") << "')" << endl;
 		return false;
 	}
-	pathInfo()->result = (BosonPath::Result)pathinfoxml.attribute("result").toInt(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "Error loading result attribute ('" << pathinfoxml.attribute("result") << "')" << endl;
-		return false;
+	if (root.hasAttribute(QString::fromLatin1("result"))) {
+		pathInfo()->result = (BosonPath::Result)pathinfoxml.attribute("result").toInt(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "Error loading result attribute ('" << pathinfoxml.attribute("result") << "')" << endl;
+			return false;
+		}
 	}
 	// target
 	unsigned int pathinfoTargetId = 0;
