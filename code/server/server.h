@@ -36,7 +36,7 @@ class Server : public KMessageServer
     Server(Q_UINT16 cookie, QObject* parent = 0);
     ~Server();
 
-    bool init(Q_UINT16 port);
+    bool init(Q_UINT16 port, Q_UINT16 webport);
 
     void setMaxClients(int max);
 

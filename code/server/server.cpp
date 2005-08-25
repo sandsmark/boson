@@ -64,14 +64,14 @@ Server::~Server()
   delete mGame;
 }
 
-bool Server::init(Q_UINT16 port)
+bool Server::init(Q_UINT16 port, Q_UINT16 webport)
 {
   mPort = port;
   bool ok = initNetwork(mPort);
   if(ok)
   {
     boDebug() << "Server listening on port " << mPort << endl;
-    mWeb = new WebInterface(this, port+1);
+    mWeb = new WebInterface(this, webport);
   }
 
   return ok;
