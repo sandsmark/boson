@@ -94,7 +94,7 @@ void BoConditionOverviewWidget::addCondition(const QString& name)
 {
  new QListBoxText(mConditions, name);
  mEvents->setEnabled(true);
- mStatusConditions->setEnabled(true);
+// mStatusConditions->setEnabled(true);
  mAction->setEnabled(true);
 }
 
@@ -181,6 +181,7 @@ BoConditionWidget::BoConditionWidget(QWidget* parent) : QWidget(parent)
 // d->mConditionAspect->addWidget(d->mConditionStatusConditions);
  d->mConditionAction = new BoConditionActionWidget(d->mConditionAspect);
  d->mConditionAspect->addWidget(d->mConditionAction);
+ d->mConditionAspect->raiseWidget(d->mConditionEvents);
 }
 
 BoConditionWidget::~BoConditionWidget()
@@ -443,8 +444,8 @@ BoConditionEventsWidget::BoConditionEventsWidget(QWidget* parent) : QWidget(pare
  QToolTip::add(mEventMatchings, i18n("A list of events that need to be matched before the action fires.\nALL of these events have to matched."));
 
  QVBox* eventMatchingButtonsBox = new QVBox(this);
- mAddMatching = new QPushButton(i18n("Add"), eventMatchingButtonsBox);
- mRemoveMatching = new QPushButton(i18n("Remove"), eventMatchingButtonsBox);
+ mAddMatching = new QPushButton(i18n("Add Event"), eventMatchingButtonsBox);
+ mRemoveMatching = new QPushButton(i18n("Remove Event"), eventMatchingButtonsBox);
  connect(mAddMatching, SIGNAL(clicked()),
 		this, SLOT(slotAddEventMatching()));
  connect(mRemoveMatching, SIGNAL(clicked()),
