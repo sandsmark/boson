@@ -43,10 +43,16 @@ Player::Player() : KPlayer()
     boError() << k_funcinfo << "can't find name property" << endl;
   }
   // TODO d->mFogged.registerData() or something like this
+  mOutOfGame.registerData(IdOutOfGame, dataHandler(),
+      KGamePropertyBase::PolicyLocal, "OutOfGame");
+  mHasLost.registerData(IdHasLost, dataHandler(),
+      KGamePropertyBase::PolicyLocal, "HasLost");
+  mHasWon.registerData(IdHasWon, dataHandler(),
+      KGamePropertyBase::PolicyLocal, "HasWon");
   mMinerals.registerData(IdMinerals, dataHandler(),
-      KGamePropertyBase::PolicyLocal, "MineralCost");
+      KGamePropertyBase::PolicyLocal, "Minerals");
   mOil.registerData(IdOil, dataHandler(),
-      KGamePropertyBase::PolicyLocal, "OilCost");
+      KGamePropertyBase::PolicyLocal, "Oil");
   mIsNeutralPlayer.registerData(IdIsNeutralPlayer, dataHandler(),
       KGamePropertyBase::PolicyLocal, "IsNeutralPlayer");
 
