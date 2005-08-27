@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2003 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2003-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2003-2005 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -186,9 +186,10 @@ class BoCamera
 /**
  * Game camera class for Boson
  *
- * Game camera differs from base camera in that it supports setting radius,
- * rotation, z, etc for camera and then recalculates camera's position and
- * lookAt vector itself, so you don't have to bother
+ * Game camera differs from base camera in that it supports setting rotation,
+ * rotation around x axis and distance from the lookAt point for camera and
+ * then recalculates camera's position and lookAt vector itself, so you don't
+ * have to bother
  *
  * Game camera also takes care of collision detection between camera and ground
  * to make sure that camera is always above the ground.
@@ -227,9 +228,9 @@ class BoGameCamera : public BoCamera
 
 
     // These will _move_ given things by given values
-    void changeZ(GLfloat diff);
-    void changeRadius(GLfloat diff);
+    void changeDistance(GLfloat diff);
     void changeRotation(GLfloat diff);
+    void changeXRotation(GLfloat diff);
 
     virtual void setLookAt(const BoVector3Float& pos);
     virtual void setCameraPos(const BoVector3Float& pos);
@@ -238,41 +239,30 @@ class BoGameCamera : public BoCamera
 
     // these will change the up and cameraPos vectors!
     /**
-     * Set camera's rotation (in degrees). Rotation is measured from y-axis, if
-     * it's 0, camera will look along y-axis.
+     * Set camera's rotation (in degrees). Camera is rotated around z-axis, so
+     * if it's 0, camera will look along y-axis.
      **/
     void setRotation(GLfloat r);
     /**
-     * Set distance between look-at point and camera's position on xy-plane.
-     * It means that if there would be a cylinder which lower center point would
-     * be at lookAt point and it's radius would be r, then camera would be
-     * somewhere along the edge of upper cap of this cylinder.
+     * Set camera's rotation around x-axis (in degrees). If it's 0, the camera
+     * will be looking straight from above, if it's 45, it will look diagonally
+     * and if it's 90, it will look at the horizon.
      **/
-    void setRadius(GLfloat r);
+    void setXRotation(GLfloat r);
     /**
-     * Set distance between lookAt point and camera in z-axis
-     * Note that it can also be < 0.0, e.g. when camera's z-coordinate is below 0
+     * Set distance between lookAt point and camera's position.
      **/
-    void setZ(GLfloat z);
+    void setDistance(GLfloat z);
 
-    /**
-     * This specifies how much camera is above the ground. Not that it's not
-     * distance between camera position and terrain's height at this point, but
-     * between camera's lookat point and terrain's height at this point.
-     **/
-    GLfloat z() const  { return mPosZ; }
+    GLfloat distance() const  { return mDistance; }
     GLfloat rotation() const  { return mRotation; }
-    GLfloat radius() const  { return mRadius; }
+    GLfloat xRotation() const  { return mXRotation; }
 
     void setCanvas(BosonCanvas* canvas)  { mCanvas = canvas; }
 
 
     virtual bool loadFromXML(const QDomElement& root);
     virtual bool saveAsXML(QDomElement& root);
-
-
-    float minCameraZ();
-    float maxCameraZ();
 
 
     /**
@@ -322,26 +312,18 @@ class BoGameCamera : public BoCamera
     void updateCamera();
 
     void checkRotation();
+    void checkXRotation();
 
-    /**
-     * Makes sure camera's readius is within limits (e.g. camera's angle is not
-     *  less than minimum angle)
-     **/
-    void checkRadius();
 
   private:
     void init();
-    static void initStatic();
 
   private:
     friend class BoAutoGameCamera;
-    GLfloat mPosZ;
     GLfloat mRotation;
-    GLfloat mRadius;
-
-    // Absolute z coordinate of cameraPos that we'll try to get. This should
-    //  always be equal to  lookAt().z() + z()
-    float mWantedAbsoluteZ;
+    GLfloat mXRotation;
+    GLfloat mDistance;
+    GLfloat mActualDistance;
 
     const BosonCanvas* mCanvas;
 

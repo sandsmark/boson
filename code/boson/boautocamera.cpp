@@ -525,9 +525,9 @@ BoAutoGameCamera& BoAutoGameCamera::operator=(const BoAutoGameCamera& c)
 {
   BoAutoCamera::operator=(c);
 
-  mZPoints = c.mZPoints;
+  mDistancePoints = c.mDistancePoints;
   mRotationPoints = c.mRotationPoints;
-  mRadiusPoints = c.mRadiusPoints;
+  mXRotationPoints = c.mXRotationPoints;
 
   return *this;
 }
@@ -536,28 +536,16 @@ void BoAutoGameCamera::init()
 {
 }
 
-void BoAutoGameCamera::changeZ(GLfloat diff)
+void BoAutoGameCamera::changeDistance(GLfloat diff)
 {
   InterpolationDataFloat d;
-  d.value = gameCamera()->z() + diff;
+  d.value = gameCamera()->distance() + diff;
   if(moveMode() == Immediate)
   {
-    gameCamera()->setZ(d.value);
+    gameCamera()->setDistance(d.value);
     return;
   }
-  mZPoints.append(d);
-}
-
-void BoAutoGameCamera::changeRadius(GLfloat diff)
-{
-  InterpolationDataFloat d;
-  d.value = gameCamera()->radius() + diff;
-  if(moveMode() == Immediate)
-  {
-    gameCamera()->setRadius(d.value);
-    return;
-  }
-  mRadiusPoints.append(d);
+  mDistancePoints.append(d);
 }
 
 void BoAutoGameCamera::changeRotation(GLfloat diff)
@@ -570,6 +558,18 @@ void BoAutoGameCamera::changeRotation(GLfloat diff)
     return;
   }
   mRotationPoints.append(d);
+}
+
+void BoAutoGameCamera::changeXRotation(GLfloat diff)
+{
+  InterpolationDataFloat d;
+  d.value = gameCamera()->xRotation() + diff;
+  if(moveMode() == Immediate)
+  {
+    gameCamera()->setXRotation(d.value);
+    return;
+  }
+  mXRotationPoints.append(d);
 }
 
 bool BoAutoGameCamera::saveAsXML(QDomElement& root)
@@ -585,18 +585,6 @@ bool BoAutoGameCamera::loadFromXML(const QDomElement& root)
   return ret;
 }
 
-void BoAutoGameCamera::setRadius(GLfloat r)
-{
-  InterpolationDataFloat d;
-  d.value = r;
-  if(moveMode() == Immediate)
-  {
-    gameCamera()->setRadius(d.value);
-    return;
-  }
-  mRadiusPoints.append(d);
-}
-
 void BoAutoGameCamera::setRotation(GLfloat r)
 {
   InterpolationDataFloat d;
@@ -609,16 +597,28 @@ void BoAutoGameCamera::setRotation(GLfloat r)
   mRotationPoints.append(d);
 }
 
-void BoAutoGameCamera::setZ(GLfloat z)
+void BoAutoGameCamera::setXRotation(GLfloat r)
 {
   InterpolationDataFloat d;
-  d.value = z;
+  d.value = r;
   if(moveMode() == Immediate)
   {
-    gameCamera()->setZ(d.value);
+    gameCamera()->setXRotation(d.value);
     return;
   }
-  mZPoints.append(d);
+  mXRotationPoints.append(d);
+}
+
+void BoAutoGameCamera::setDistance(GLfloat dist)
+{
+  InterpolationDataFloat d;
+  d.value = dist;
+  if(moveMode() == Immediate)
+  {
+    gameCamera()->setDistance(d.value);
+    return;
+  }
+  mDistancePoints.append(d);
 }
 
 bool BoAutoGameCamera::advanceVectors()
@@ -629,24 +629,24 @@ bool BoAutoGameCamera::advanceVectors()
     moving = true;
   }
 
-  float z;
+  float distance;
   float rotation;
-  float radius;
+  float xrotation;
 
-  if(getCurrentValue(mZPoints, currentTime(), z))
+  if(getCurrentValue(mDistancePoints, currentTime(), distance))
   {
     moving = true;
-    gameCamera()->setZ(z);
+    gameCamera()->setDistance(distance);
   }
   if(getCurrentValue(mRotationPoints, currentTime(), rotation))
   {
     moving = true;
     gameCamera()->setRotation(rotation);
   }
-  if(getCurrentValue(mRadiusPoints, currentTime(), radius))
+  if(getCurrentValue(mXRotationPoints, currentTime(), xrotation))
   {
     moving = true;
-    gameCamera()->setRadius(radius);
+    gameCamera()->setXRotation(xrotation);
   }
 
   return moving;
@@ -656,9 +656,9 @@ void BoAutoGameCamera::moveCompleted()
 {
   BoAutoCamera::moveCompleted();
 
-  mZPoints.clear();
+  mDistancePoints.clear();
   mRotationPoints.clear();
-  mRadiusPoints.clear();
+  mXRotationPoints.clear();
 }
 
 void BoAutoGameCamera::prepareSegmentInterpolation(float endtime)
@@ -666,12 +666,12 @@ void BoAutoGameCamera::prepareSegmentInterpolation(float endtime)
   BoAutoCamera::prepareSegmentInterpolation(endtime);
 
   // Make sure there's either 0 or 2 (start and final) points in each list
-  if(mZPoints.count())
+  if(mDistancePoints.count())
   {
-    float final = mZPoints.last().value;
-    mZPoints.clear();
-    mZPoints.append(InterpolationDataFloat(gameCamera()->z(), currentTime()));
-    mZPoints.append(InterpolationDataFloat(final, endtime));
+    float final = mDistancePoints.last().value;
+    mDistancePoints.clear();
+    mDistancePoints.append(InterpolationDataFloat(gameCamera()->distance(), currentTime()));
+    mDistancePoints.append(InterpolationDataFloat(final, endtime));
   }
   if(mRotationPoints.count())
   {
@@ -680,12 +680,12 @@ void BoAutoGameCamera::prepareSegmentInterpolation(float endtime)
     mRotationPoints.append(InterpolationDataFloat(gameCamera()->rotation(), currentTime()));
     mRotationPoints.append(InterpolationDataFloat(final, endtime));
   }
-  if(mRadiusPoints.count())
+  if(mXRotationPoints.count())
   {
-    float final = mRadiusPoints.last().value;
-    mRadiusPoints.clear();
-    mRadiusPoints.append(InterpolationDataFloat(gameCamera()->radius(), currentTime()));
-    mRadiusPoints.append(InterpolationDataFloat(final, endtime));
+    float final = mXRotationPoints.last().value;
+    mXRotationPoints.clear();
+    mXRotationPoints.append(InterpolationDataFloat(gameCamera()->xRotation(), currentTime()));
+    mXRotationPoints.append(InterpolationDataFloat(final, endtime));
   }
 }
 

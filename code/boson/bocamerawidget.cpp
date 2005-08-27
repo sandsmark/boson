@@ -826,7 +826,8 @@ public:
 		mLookAtY = 0;
 		mLookAtZ = 0;
 		mRotation = 0;
-		mRadius = 0;
+		mXRotation = 0;
+		mDistance = 0;
 
 		mGameRestrictions = 0;
 	}
@@ -834,7 +835,8 @@ public:
 	BoUfoNumInput* mLookAtY;
 	BoUfoNumInput* mLookAtZ;
 	BoUfoNumInput* mRotation;
-	BoUfoNumInput* mRadius;
+	BoUfoNumInput* mXRotation;
+	BoUfoNumInput* mDistance;
 
 	// allow to use any values, without game restrictions, for inputs
 	BoUfoCheckBox* mGameRestrictions;
@@ -851,19 +853,22 @@ BoUfoGameCameraWidget::BoUfoGameCameraWidget()
  d->mLookAtY = new BoUfoNumInput();
  d->mLookAtZ = new BoUfoNumInput();
  d->mRotation = new BoUfoNumInput();
- d->mRadius = new BoUfoNumInput();
+ d->mXRotation = new BoUfoNumInput();
+ d->mDistance = new BoUfoNumInput();
 
  layoutWidget->addWidget(d->mLookAtX);
  layoutWidget->addWidget(d->mLookAtY);
  layoutWidget->addWidget(d->mLookAtZ);
  layoutWidget->addWidget(d->mRotation);
- layoutWidget->addWidget(d->mRadius);
+ layoutWidget->addWidget(d->mXRotation);
+ layoutWidget->addWidget(d->mDistance);
 
  d->mLookAtX->setLabel(i18n("Look at X:"), AlignLeft | AlignVCenter);
  d->mLookAtY->setLabel(i18n("Look at Y:"), AlignLeft | AlignVCenter);
  d->mLookAtZ->setLabel(i18n("Look at Z:"), AlignLeft | AlignVCenter);
  d->mRotation->setLabel(i18n("Rotation:"), AlignLeft | AlignVCenter);
- d->mRadius->setLabel(i18n("Radius:"), AlignLeft | AlignVCenter);
+ d->mXRotation->setLabel(i18n("XRotation:"), AlignLeft | AlignVCenter);
+ d->mDistance->setLabel(i18n("Distance:"), AlignLeft | AlignVCenter);
 
  d->mGameRestrictions = new BoUfoCheckBox(i18n("Use game restrictions"), this);
  d->mGameRestrictions->setChecked(true);
@@ -876,7 +881,8 @@ BoUfoGameCameraWidget::BoUfoGameCameraWidget()
  connect(d->mLookAtY, SIGNAL(signalValueChanged(float)), this, SLOT(slotLookAtChanged()));
  connect(d->mLookAtZ, SIGNAL(signalValueChanged(float)), this, SLOT(slotLookAtChanged()));
  connect(d->mRotation, SIGNAL(signalValueChanged(float)), this, SLOT(slotRotationChanged()));
- connect(d->mRadius, SIGNAL(signalValueChanged(float)), this, SLOT(slotRadiusChanged()));
+ connect(d->mXRotation, SIGNAL(signalValueChanged(float)), this, SLOT(slotXRotationChanged()));
+ connect(d->mDistance, SIGNAL(signalValueChanged(float)), this, SLOT(slotDistanceChanged()));
 
 #warning fixme
  // FIXME: we probably need a puLargeInput or so here
@@ -903,8 +909,9 @@ void BoUfoGameCameraWidget::updateFromCamera()
  d->mLookAtX->setValue(gameCamera()->lookAt().x());
  d->mLookAtY->setValue(gameCamera()->lookAt().y());
  d->mLookAtZ->setValue(gameCamera()->lookAt().z());
- d->mRadius->setValue(gameCamera()->radius());
  d->mRotation->setValue(gameCamera()->rotation());
+ d->mXRotation->setValue(gameCamera()->xRotation());
+ d->mDistance->setValue(gameCamera()->distance());
 }
 
 void BoUfoGameCameraWidget::slotLookAtChanged()
@@ -922,10 +929,17 @@ void BoUfoGameCameraWidget::slotRotationChanged()
  emitSignalCameraChanged();
 }
 
-void BoUfoGameCameraWidget::slotRadiusChanged()
+void BoUfoGameCameraWidget::slotXRotationChanged()
+{
+ BO_CHECK_NULL_RET(gameCamera());
+ gameCamera()->setXRotation(d->mXRotation->value());
+ emitSignalCameraChanged();
+}
+
+void BoUfoGameCameraWidget::slotDistanceChanged()
 {
  BO_CHECK_NULL_RET(camera());
- gameCamera()->setRadius(d->mRadius->value());
+ gameCamera()->setDistance(d->mDistance->value());
  emitSignalCameraChanged();
 }
 
@@ -937,17 +951,20 @@ void BoUfoGameCameraWidget::slotToggleGameRestrictions()
 	d->mLookAtX->setRange(MIN_LOOKAT_X, MAX_LOOKAT_X);
 	d->mLookAtY->setRange(MIN_LOOKAT_Y, MAX_LOOKAT_Y);
 	d->mLookAtZ->setRange(-50.0f, 50.0f);
-	d->mRadius->setRange(-50.0f, 50.0f);
+	d->mXRotation->setRange(-180.0f, 180.0f);
+	d->mDistance->setRange(0.0f, 100.0f);
  } else {
 	d->mLookAtX->setRange(MIN_LOOKAT_X, MAX_LOOKAT_X);
 	d->mLookAtY->setRange(MIN_LOOKAT_Y, MAX_LOOKAT_Y);
 	d->mLookAtZ->setRange(MIN_LOOKAT_Z, MAX_LOOKAT_Z);
-	d->mRadius->setRange(MIN_LOOKAT_Z, MAX_LOOKAT_Z);
+	d->mXRotation->setRange(0.0f, 180.0f);
+	d->mDistance->setRange(MIN_LOOKAT_Z, MAX_LOOKAT_Z);
  }
  d->mLookAtX->setStepSize(0.1f);
  d->mLookAtY->setStepSize(0.1f);
  d->mLookAtZ->setStepSize(0.1f);
- d->mRadius->setStepSize(0.2f);
+ d->mXRotation->setStepSize(1.0f);
+ d->mDistance->setStepSize(0.5f);
 }
 
 

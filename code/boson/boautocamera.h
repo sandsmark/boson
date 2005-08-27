@@ -195,29 +195,28 @@ class BoAutoGameCamera : public BoAutoCamera
     // Also, they don't commit changes
     // If now is true, value is changed immediately (only this value, if other
     //  changes are being committed at the same time, they won't be cancelled)
-    void changeZ(GLfloat diff);
-    void changeRadius(GLfloat diff);
+    void changeDistance(GLfloat diff);
     void changeRotation(GLfloat diff);
+    void changeXRotation(GLfloat diff);
 
     /**
-     * Set camera's rotation (in degrees). Rotation is measured from y-axis, if
-     * it's 0, camera will look along y-axis.
+     * Set camera's rotation (in degrees). Camera is rotated around z-axis, so
+     * if it's 0, camera will look along y-axis.
      * Changes are not commited
      **/
     void setRotation(GLfloat r);
     /**
-     * Set distance between look-at point and camera's position on xy-plane.
-     * It means that if there would be a cylinder which lower center point would
-     * be at lookAt point and it's radius would be r, then camera would be
-     * somewhere along the edge of upper cap of this cylinder.
+     * Set camera's rotation around x-axis (in degrees). If it's 0, the camera
+     * will be looking straight from above, if it's 45, it will look diagonally
+     * and if it's 90, it will look at the horizon.
      * Changes are not commited
      **/
-    void setRadius(GLfloat r);
+    void setXRotation(GLfloat r);
     /**
-     * Set distance between lookAt point and camera in z-axis
+     * Set distance between lookAt point and camera's position.
      * Changes are not commited
      **/
-    void setZ(GLfloat z);
+    void setDistance(GLfloat z);
 
     virtual bool loadFromXML(const QDomElement& root);
     virtual bool saveAsXML(QDomElement& root);
@@ -230,9 +229,9 @@ class BoAutoGameCamera : public BoAutoCamera
     void init();
 
   private:
-    QValueList<InterpolationDataFloat> mZPoints;
+    QValueList<InterpolationDataFloat> mDistancePoints;
     QValueList<InterpolationDataFloat> mRotationPoints;
-    QValueList<InterpolationDataFloat> mRadiusPoints;
+    QValueList<InterpolationDataFloat> mXRotationPoints;
 };
 
 #endif
