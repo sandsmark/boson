@@ -164,17 +164,17 @@ float BosonScriptInterface::cameraRotation()
   return v;
 }
 
-float BosonScriptInterface::cameraRadius()
+float BosonScriptInterface::cameraXRotation()
 {
   float v;
-  emit signalGetCameraRadius(&v);
+  emit signalGetCameraXRotation(&v);
   return v;
 }
 
-float BosonScriptInterface::cameraZ()
+float BosonScriptInterface::cameraDistance()
 {
   float v;
-  emit signalGetCameraZ(&v);
+  emit signalGetCameraDistance(&v);
   return v;
 }
 
@@ -193,14 +193,14 @@ void BosonScriptInterface::setCameraRotation(float v)
   emit signalSetCameraRotation(v);
 }
 
-void BosonScriptInterface::setCameraRadius(float v)
+void BosonScriptInterface::setCameraXRotation(float v)
 {
-  emit signalSetCameraRadius(v);
+  emit signalSetCameraXRotation(v);
 }
 
-void BosonScriptInterface::setCameraZ(float v)
+void BosonScriptInterface::setCameraDistance(float v)
 {
-  emit signalSetCameraZ(v);
+  emit signalSetCameraDistance(v);
 }
 
 void BosonScriptInterface::setCameraMoveMode(int v)

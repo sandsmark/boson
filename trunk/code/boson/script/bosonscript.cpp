@@ -1143,14 +1143,14 @@ void BosonScript::setCameraRotation(float r)
   interface()->setCameraRotation(r);
 }
 
-void BosonScript::setCameraRadius(float r)
+void BosonScript::setCameraXRotation(float r)
 {
-  interface()->setCameraRadius(r);
+  interface()->setCameraXRotation(r);
 }
 
-void BosonScript::setCameraZ(float z)
+void BosonScript::setCameraDistance(float dist)
 {
-  interface()->setCameraZ(z);
+  interface()->setCameraDistance(dist);
 }
 
 void BosonScript::setCameraMoveMode(int mode)
@@ -1228,14 +1228,14 @@ float BosonScript::cameraRotation()
   return interface()->cameraRotation();
 }
 
-float BosonScript::cameraRadius()
+float BosonScript::cameraXRotation()
 {
-  return interface()->cameraRadius();
+  return interface()->cameraXRotation();
 }
 
-float BosonScript::cameraZ()
+float BosonScript::cameraDistance()
 {
-  return interface()->cameraZ();
+  return interface()->cameraDistance();
 }
 
 /*****  Light methods  *****/

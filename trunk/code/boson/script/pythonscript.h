@@ -120,8 +120,8 @@ class PythonScript : public BosonScript
 
     // Camera
     static PyObject* py_setCameraRotation(PyObject* self, PyObject* args);
-    static PyObject* py_setCameraRadius(PyObject* self, PyObject* args);
-    static PyObject* py_setCameraZ(PyObject* self, PyObject* args);
+    static PyObject* py_setCameraXRotation(PyObject* self, PyObject* args);
+    static PyObject* py_setCameraDistance(PyObject* self, PyObject* args);
     static PyObject* py_setCameraMoveMode(PyObject* self, PyObject* args);
     static PyObject* py_setCameraInterpolationMode(PyObject* self, PyObject* args);
     static PyObject* py_setCameraLookAt(PyObject* self, PyObject* args);
@@ -139,8 +139,8 @@ class PythonScript : public BosonScript
     static PyObject* py_cameraPos(PyObject* self, PyObject* args);
     static PyObject* py_cameraUp(PyObject* self, PyObject* args);
     static PyObject* py_cameraRotation(PyObject* self, PyObject* args);
-    static PyObject* py_cameraRadius(PyObject* self, PyObject* args);
-    static PyObject* py_cameraZ(PyObject* self, PyObject* args);
+    static PyObject* py_cameraXRotation(PyObject* self, PyObject* args);
+    static PyObject* py_cameraDistance(PyObject* self, PyObject* args);
 
 
     // Lights

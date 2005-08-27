@@ -329,7 +329,7 @@ private:
  *                                                      and enter "PressedCamera"
  * Pressed: "mouse move" otherwise: execute mouse move action and enter
  *                                  "PressedMoved"
- * 
+ *
  * PressedCamera: "button press": Stay in "PressedCamera" (error)
  * PressedCamera: "button release": Enter "Start"
  * PressedCamera: "mouse move" if camera modifier is pressed: execute mouse move
@@ -813,8 +813,8 @@ protected slots:
 	void slotGetCameraLookAt(BoVector3Float*);
 	void slotGetCameraUp(BoVector3Float*);
 	void slotGetCameraRotation(float*);
-	void slotGetCameraRadius(float*);
-	void slotGetCameraZ(float*);
+	void slotGetCameraXRotation(float*);
+	void slotGetCameraDistance(float*);
 	void slotSetUseCameraLimits(bool);
 	void slotSetCameraFreeMovement(bool);
 
@@ -826,8 +826,8 @@ protected slots:
 	void slotAddCameraLookAtPoint(const BoVector3Float&, float);
 	void slotAddCameraUpPoint(const BoVector3Float&, float);
 	void slotSetCameraRotation(float);
-	void slotSetCameraRadius(float);
-	void slotSetCameraZ(float);
+	void slotSetCameraXRotation(float);
+	void slotSetCameraDistance(float);
 	void slotSetCameraMoveMode(int);
 	void slotSetCameraInterpolationMode(int);
 	void slotCommitCameraChanges(int);

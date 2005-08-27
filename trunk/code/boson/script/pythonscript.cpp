@@ -93,8 +93,8 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"playerUnitsOfTypeCount", py_playerUnitsOfTypeCount, METH_VARARGS, 0 },
   // Camera
   { (char*)"setCameraRotation", py_setCameraRotation, METH_VARARGS, 0 },
-  { (char*)"setCameraRadius", py_setCameraRadius, METH_VARARGS, 0 },
-  { (char*)"setCameraZ", py_setCameraZ, METH_VARARGS, 0 },
+  { (char*)"setCameraXRotation", py_setCameraXRotation, METH_VARARGS, 0 },
+  { (char*)"setCameraDistance", py_setCameraDistance, METH_VARARGS, 0 },
   { (char*)"setCameraMoveMode", py_setCameraMoveMode, METH_VARARGS, 0 },
   { (char*)"setCameraInterpolationMode", py_setCameraInterpolationMode, METH_VARARGS, 0 },
   { (char*)"setCameraLookAt", py_setCameraLookAt, METH_VARARGS, 0 },
@@ -110,8 +110,8 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"cameraPos", py_cameraPos, METH_VARARGS, 0 },
   { (char*)"cameraUp", py_cameraUp, METH_VARARGS, 0 },
   { (char*)"cameraRotation", py_cameraRotation, METH_VARARGS, 0 },
-  { (char*)"cameraRadius", py_cameraRadius, METH_VARARGS, 0 },
-  { (char*)"cameraZ", py_cameraZ, METH_VARARGS, 0 },
+  { (char*)"cameraXRotation", py_cameraXRotation, METH_VARARGS, 0 },
+  { (char*)"cameraDistance", py_cameraDistance, METH_VARARGS, 0 },
   // Lights
   { (char*)"lightPos", py_lightPos, METH_VARARGS, 0 },
   { (char*)"lightAmbient", py_lightAmbient, METH_VARARGS, 0 },
@@ -535,19 +535,27 @@ bool PythonScript::advance()
 
 bool PythonScript::init()
 {
+  getPythonLock();
   PyObject* args = PyTuple_New(1);
   PyTuple_SetItem(args, 0, PyInt_FromLong(playerId()));
+  freePythonLock();
   int ret = callFunctionWithReturn("init", args);
+  getPythonLock();
   Py_DECREF(args);
+  freePythonLock();
   return (ret == 0);
 }
 
 void PythonScript::setPlayerId(int id)
 {
+  getPythonLock();
   PyObject* args = PyTuple_New(1);
   PyTuple_SetItem(args, 0, PyInt_FromLong(id));
+  freePythonLock();
   callFunction("setPlayerId", args);
+  getPythonLock();
   Py_DECREF(args);
+  freePythonLock();
 }
 
 bool PythonScript::save(QDataStream& stream)
@@ -1394,7 +1402,7 @@ PyObject* PythonScript::py_setCameraRotation(PyObject*, PyObject* args)
   return Py_None;
 }
 
-PyObject* PythonScript::py_setCameraRadius(PyObject*, PyObject* args)
+PyObject* PythonScript::py_setCameraXRotation(PyObject*, PyObject* args)
 {
   BO_CHECK_NULL_RET0(currentScript());
   float r;
@@ -1402,20 +1410,20 @@ PyObject* PythonScript::py_setCameraRadius(PyObject*, PyObject* args)
   {
     return 0;
   }
-  currentScript()->setCameraRadius(r);
+  currentScript()->setCameraXRotation(r);
   Py_INCREF(Py_None);
   return Py_None;
 }
 
-PyObject* PythonScript::py_setCameraZ(PyObject*, PyObject* args)
+PyObject* PythonScript::py_setCameraDistance(PyObject*, PyObject* args)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  float z;
-  if(!PyArg_ParseTuple(args, (char*)"f", &z))
+  float dist;
+  if(!PyArg_ParseTuple(args, (char*)"f", &dist))
   {
     return 0;
   }
-  currentScript()->setCameraZ(z);
+  currentScript()->setCameraDistance(dist);
   Py_INCREF(Py_None);
   return Py_None;
 }
@@ -1590,16 +1598,16 @@ PyObject* PythonScript::py_cameraRotation(PyObject*, PyObject*)
   return Py_BuildValue((char*)"f", currentScript()->cameraRotation());
 }
 
-PyObject* PythonScript::py_cameraRadius(PyObject*, PyObject*)
+PyObject* PythonScript::py_cameraXRotation(PyObject*, PyObject*)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  return Py_BuildValue((char*)"f", currentScript()->cameraRadius());
+  return Py_BuildValue((char*)"f", currentScript()->cameraXRotation());
 }
 
-PyObject* PythonScript::py_cameraZ(PyObject*, PyObject*)
+PyObject* PythonScript::py_cameraDistance(PyObject*, PyObject*)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  return Py_BuildValue((char*)"f", currentScript()->cameraZ());
+  return Py_BuildValue((char*)"f", currentScript()->cameraDistance());
 }
 
 
