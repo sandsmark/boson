@@ -2636,10 +2636,10 @@ void BosonGameViewScriptConnector::connectToScript(BosonScript* script)
 		this, SLOT(slotGetCameraUp(BoVector3Float*)));
  reconnect(i, SIGNAL(signalGetCameraRotation(float*)),
 		this, SLOT(slotGetCameraRotation(float*)));
- reconnect(i, SIGNAL(signalGetCameraRadius(float*)),
-		this, SLOT(slotGetCameraRadius(float*)));
- reconnect(i, SIGNAL(signalGetCameraZ(float*)),
-		this, SLOT(slotGetCameraZ(float*)));
+ reconnect(i, SIGNAL(signalGetCameraXRotation(float*)),
+		this, SLOT(slotGetCameraXRotation(float*)));
+ reconnect(i, SIGNAL(signalGetCameraDistance(float*)),
+		this, SLOT(slotGetCameraDistance(float*)));
  reconnect(i, SIGNAL(signalSetUseCameraLimits(bool)),
 		this, SLOT(slotSetUseCameraLimits(bool)));
  reconnect(i, SIGNAL(signalSetCameraFreeMovement(bool)),
@@ -2658,10 +2658,10 @@ void BosonGameViewScriptConnector::connectToScript(BosonScript* script)
 		this, SLOT(slotAddCameraUpPoint(const BoVector3Float&, float)));
  reconnect(i, SIGNAL(signalSetCameraRotation(float)),
 		this, SLOT(slotSetCameraRotation(float)));
- reconnect(i, SIGNAL(signalSetCameraRadius(float)),
-		this, SLOT(slotSetCameraRadius(float)));
- reconnect(i, SIGNAL(signalSetCameraZ(float)),
-		this, SLOT(slotSetCameraZ(float)));
+ reconnect(i, SIGNAL(signalSetCameraXRotation(float)),
+		this, SLOT(slotSetCameraXRotation(float)));
+ reconnect(i, SIGNAL(signalSetCameraDistance(float)),
+		this, SLOT(slotSetCameraDistance(float)));
  reconnect(i, SIGNAL(signalSetCameraMoveMode(int)),
 		this, SLOT(slotSetCameraMoveMode(int)));
  reconnect(i, SIGNAL(signalSetCameraInterpolationMode(int)),
@@ -2849,16 +2849,16 @@ void BosonGameViewScriptConnector::slotGetCameraRotation(float* v)
  *v = mDisplay->camera()->rotation();
 }
 
-void BosonGameViewScriptConnector::slotGetCameraRadius(float* v)
+void BosonGameViewScriptConnector::slotGetCameraXRotation(float* v)
 {
  BO_CHECK_NULL_RET(mDisplay->camera());
-// *v = mDisplay->camera()->radius();
+ *v = mDisplay->camera()->xRotation();
 }
 
-void BosonGameViewScriptConnector::slotGetCameraZ(float* v)
+void BosonGameViewScriptConnector::slotGetCameraDistance(float* v)
 {
  BO_CHECK_NULL_RET(mDisplay->camera());
-// *v = mDisplay->camera()->z();
+ *v = mDisplay->camera()->distance();
 }
 
 void BosonGameViewScriptConnector::slotSetUseCameraLimits(bool u)
@@ -2915,16 +2915,16 @@ void BosonGameViewScriptConnector::slotSetCameraRotation(float v)
  mDisplay->autoCamera()->setRotation(v);
 }
 
-void BosonGameViewScriptConnector::slotSetCameraRadius(float v)
+void BosonGameViewScriptConnector::slotSetCameraXRotation(float v)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
-// mDisplay->autoCamera()->setRadius(v);
+ mDisplay->autoCamera()->setXRotation(v);
 }
 
-void BosonGameViewScriptConnector::slotSetCameraZ(float v)
+void BosonGameViewScriptConnector::slotSetCameraDistance(float v)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
-// mDisplay->autoCamera()->setZ(v);
+ mDisplay->autoCamera()->setDistance(v);
 }
 
 void BosonGameViewScriptConnector::slotSetCameraMoveMode(int v)

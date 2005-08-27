@@ -387,8 +387,8 @@ class BosonScript
 
     // Camera
     void setCameraRotation(float r);
-    void setCameraRadius(float r);
-    void setCameraZ(float z);
+    void setCameraXRotation(float r);
+    void setCameraDistance(float dist);
     void setCameraMoveMode(int mode);
     void setCameraInterpolationMode(int mode);
     void setCameraLookAt(const BoVector3Float& pos);
@@ -405,8 +405,8 @@ class BosonScript
     BoVector3Float cameraPos();
     BoVector3Float cameraUp();
     float cameraRotation();
-    float cameraRadius();
-    float cameraZ();
+    float cameraXRotation();
+    float cameraDistance();
 
 
     // Lights
