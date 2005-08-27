@@ -354,7 +354,7 @@ BosonPath::BosonPath(BosonMap* map)
 BosonPath::~BosonPath()
 {
   delete[] mSlopeMap;
-  delete[] mForestMap;
+  //delete[] mForestMap;
 
   //mMap->removeColorMap("Forestation");
   mMap->removeColorMap("Slopes");
@@ -2526,7 +2526,7 @@ QString BosonPath::debugText(bofixed x, bofixed y)
 //  info += QString("  occupied: %1\n").arg(cellUnderCursor->isLandOccupied() ? "true" : "false");
 //  info += QString("  airoccupied: %1\n").arg(cellUnderCursor->isAirOccupied() ? "true" : "false");
   info += QString("  slope: %1\n").arg(mSlopeMap[pos]);
-  info += QString("  forest: %1\n").arg(mForestMap[pos]);
+  //info += QString("  forest: %1\n").arg(mForestMap[pos]);
 
   info += QString("Block pos: (%1; %2)\n").arg(cellx / mBlockSize).arg(celly / mBlockSize);
   info += QString("Passability for movedatas:\n");
