@@ -32,8 +32,8 @@ TerrainType=0
 #UnitHeight=2
 #UnitWidth=2
 UnitDepth=3.108
-UnitHeight=4.2
-UnitWidth=4.2
+UnitHeight=4.0
+UnitWidth=4.0
 
 Weapons=0
 
