@@ -654,9 +654,9 @@ void BosonUfoGameGUI::updateUfoLabelOpenGLCamera()
 		arg(cameraPos.y()).arg(cameraPos.z());
  text += i18n("Up: (%1; %2; %3)\n").arg(up.x()).
 		arg(up.y()).arg(up.z());
- text += i18n("Radius: %1\n").arg(camera()->radius());
- text += i18n("Height: %1\n").arg(camera()->z());
+ text += i18n("Distance: %1\n").arg(camera()->distance());
  text += i18n("Rotation: %1\n").arg(camera()->rotation());
+ text += i18n("XRotation: %1\n").arg(camera()->xRotation());
 
  d->mOpenGLCamera->setText(text);
 }
