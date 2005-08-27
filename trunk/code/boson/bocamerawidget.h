@@ -271,7 +271,8 @@ public:
 protected slots:
 	void slotLookAtChanged();
 	void slotRotationChanged();
-	void slotRadiusChanged();
+	void slotXRotationChanged();
+	void slotDistanceChanged();
 
 	void slotToggleGameRestrictions();
 

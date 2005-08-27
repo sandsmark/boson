@@ -880,7 +880,7 @@ void BosonMenuInput::slotZoomIn()
 
  float delta = 5;
 
- camera()->changeZ(-delta);
+ camera()->changeDistance(-delta);
 }
 
 void BosonMenuInput::slotZoomOut()
@@ -889,7 +889,7 @@ void BosonMenuInput::slotZoomOut()
 
  float delta = 5;
 
- camera()->changeZ(delta);
+ camera()->changeDistance(delta);
 }
 
 void BosonMenuInput::slotSetGrabMovie(bool grab)

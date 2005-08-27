@@ -373,7 +373,7 @@ void BoLeftMouseButtonState::actionAfterMove(const BoMouseEvent& e)
 void BoLeftMouseButtonState::cameraAction(const BoMouseEvent& e)
 {
  Q_UNUSED(e);
- camera()->changeZ(currentWidgetPosDiffY());
+ camera()->changeDistance(currentWidgetPosDiffY());
 }
 
 void BoLeftMouseButtonState::moveAction(const BoMouseEvent& e)
@@ -421,7 +421,7 @@ void BoRightMouseButtonState::cameraAction(const BoMouseEvent& e)
  Q_UNUSED(e);
  BO_CHECK_NULL_RET(camera());
  camera()->changeRotation(currentWidgetPosDiffX());
- camera()->changeRadius(currentWidgetPosDiffY());
+ camera()->changeXRotation(currentWidgetPosDiffY());
 }
 
 void BoRightMouseButtonState::moveAction(const BoMouseEvent& e)
@@ -1310,7 +1310,7 @@ void BosonGameView::zoom(float delta)
  BO_CHECK_NULL_RET(canvas());
  BO_CHECK_NULL_RET(canvas()->map());
 
- camera()->changeZ(delta);
+ camera()->changeDistance(delta);
 }
 
 void BosonGameView::slotResetViewProperties()
@@ -1342,6 +1342,7 @@ void BosonGameView::initUfoGUI()
  d->mUfoCanvasWidget = new BosonUfoCanvasWidget();
  d->mUfoCanvasWidget->setGameGLMatrices(d->mGameGLMatrices);
  d->mUfoCanvasWidget->setCamera(&d->mCamera);
+ d->mUfoCanvasWidget->setCanvas(canvas());
 
  d->mUfoPlacementPreviewWidget = new BosonUfoPlacementPreviewWidget();
  d->mUfoPlacementPreviewWidget->setGameGLMatrices(d->mGameGLMatrices);
@@ -2851,13 +2852,13 @@ void BosonGameViewScriptConnector::slotGetCameraRotation(float* v)
 void BosonGameViewScriptConnector::slotGetCameraRadius(float* v)
 {
  BO_CHECK_NULL_RET(mDisplay->camera());
- *v = mDisplay->camera()->radius();
+// *v = mDisplay->camera()->radius();
 }
 
 void BosonGameViewScriptConnector::slotGetCameraZ(float* v)
 {
  BO_CHECK_NULL_RET(mDisplay->camera());
- *v = mDisplay->camera()->z();
+// *v = mDisplay->camera()->z();
 }
 
 void BosonGameViewScriptConnector::slotSetUseCameraLimits(bool u)
@@ -2917,13 +2918,13 @@ void BosonGameViewScriptConnector::slotSetCameraRotation(float v)
 void BosonGameViewScriptConnector::slotSetCameraRadius(float v)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
- mDisplay->autoCamera()->setRadius(v);
+// mDisplay->autoCamera()->setRadius(v);
 }
 
 void BosonGameViewScriptConnector::slotSetCameraZ(float v)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
- mDisplay->autoCamera()->setZ(v);
+// mDisplay->autoCamera()->setZ(v);
 }
 
 void BosonGameViewScriptConnector::slotSetCameraMoveMode(int v)
