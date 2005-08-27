@@ -27,8 +27,8 @@ SightRange=8
 SupportMiniMap=false
 TerrainType=0
 UnitDepth=1.62
-UnitHeight=2.8
-UnitWidth=2.8
+UnitHeight=3.0
+UnitWidth=3.0
 Weapons=0
 
 [RefineryPlugin]
