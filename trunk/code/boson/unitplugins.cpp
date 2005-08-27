@@ -900,8 +900,8 @@ bool HarvesterPlugin::isNextTo(const Unit* u) const
  disty = QMAX(disty - 0.1, bofixed(0));
 
  bofixed allowedx, allowedy;
- allowedx = unit()->width() / 2 + u->width() / 2;
- allowedy = unit()->height() / 2 + u->height() / 2;
+ allowedx = ceilf(unit()->width()) / 2 + ceilf(u->width()) / 2;
+ allowedy = ceilf(unit()->height()) / 2 + ceilf(u->height()) / 2;
 
  if (distx <= allowedx && disty <= allowedy) {
 	return true;
