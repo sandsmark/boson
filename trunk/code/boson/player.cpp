@@ -108,9 +108,9 @@ Player::Player(bool isNeutralPlayer) : KPlayer()
  mHasWon.registerData(IdHasWon, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "HasWon");
  d->mMinerals.registerData(IdMinerals, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "MineralCost");
+		KGamePropertyBase::PolicyLocal, "Minerals");
  d->mOil.registerData(IdOil, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "OilCost");
+		KGamePropertyBase::PolicyLocal, "Oil");
  d->mIsNeutralPlayer.registerData(IdIsNeutralPlayer, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "IsNeutralPlayer");
  d->mIsNeutralPlayer = isNeutralPlayer;
