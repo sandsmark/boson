@@ -37,7 +37,10 @@ class Player : public KPlayer
       IdFogged = KGamePropertyBase::IdUser + 1,
       IdMinerals = KGamePropertyBase::IdUser + 2,
       IdOil = KGamePropertyBase::IdUser + 3,
-      IdIsNeutralPlayer = KGamePropertyBase::IdUser + 4
+      IdIsNeutralPlayer = KGamePropertyBase::IdUser + 4,
+      IdOutOfGame = KGamePropertyBase::IdUser + 5,
+      IdHasLost = KGamePropertyBase::IdUser + 6,
+      IdHasWon = KGamePropertyBase::IdUser + 7
     };
 
     Player();
@@ -60,6 +63,9 @@ class Player : public KPlayer
     KGameProperty<unsigned long int> mMinerals;
     KGameProperty<unsigned long int> mOil;
     KGamePropertyBool mIsNeutralPlayer;
+    KGameProperty<Q_UINT8> mOutOfGame;
+    KGameProperty<Q_UINT8> mHasLost;
+    KGameProperty<Q_UINT8> mHasWon;
 
     unsigned int mUnitCount;
 };
