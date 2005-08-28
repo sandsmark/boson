@@ -633,9 +633,10 @@ PyObject* PythonScript::saveModule(PyObject* module) const
     // Check if value is any of the known types
     // Note that I'm using Andi's coding style here to keep the code small
     // Skip certain internal Python data
-    if((strncmp(PyString_AsString(key), "__", 2) == 0) || (strcmp(PyString_AsString(key), "sys") == 0))
+    if((strncmp(PyString_AsString(key), "__", 2) == 0) || (strcmp(PyString_AsString(key), "sys") == 0) ||
+        (strcmp(PyString_AsString(key), "os") == 0) || (strcmp(PyString_AsString(key), "traceback") == 0))
     {
-      // Skip everything with name "__*" and "sys"
+      // Skip everything with name "__*", "sys", "os" or "traceback"
       continue;
     }
     // This is basically taken from w_object() in Python/marshal.c
