@@ -38,6 +38,9 @@
     <!-- AB: icon="icon.xpm" has been removed -->
       boson
     </binary>
+    <binary arch="any" libc="any">
+      boson.bin
+    </binary>
     <binary arch="any" libc="any" symlink="boserver">
       boserver
     </binary>
@@ -49,6 +52,9 @@
     </binary>
     <binary arch="any" libc="any" symlink="boufodesigner">
       boufodesigner
+    </binary>
+    <binary arch="any" libc="any" symlink="bocursor">
+      bocursor
     </binary>
     <!-- TODO?
     <binary arch="any" libc="any" symlink="boprofiling">
