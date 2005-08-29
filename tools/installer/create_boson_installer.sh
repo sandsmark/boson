@@ -19,7 +19,7 @@
 # some of these instructions are not strictly necessary, but by following them,
 # you can sometimes avoid modifying the path variables below.
 
-INSTALLER_VERSION="0.11pre"
+INSTALLER_VERSION="0.11"
 OS="Linux"
 ARCH="x86"
 LIBC="glibc-2.1"
@@ -34,7 +34,7 @@ SETUP_XML="../tools/installer/setup.xml"
 DESTINATION="boson_installer"
 
 # binaries to copy
-BINARIES="boson/boson boson/borender boson/boinfo boson/bocursor server/boserver" # bounit
+BINARIES="boson/boson boson/borender boson/boinfo boson/bocursor server/boserver boson/bounit boson/boufo/designer/boufodesigner"
 # binaries to copy to a special "bin/" subdir (programs which are called by boson itself)
 BINARIES_TO_BIN="bobmfconverter/bobmfconverter"
 
@@ -49,6 +49,8 @@ CODE_DATA_TO_SHARE_APPS="*ui.rc"
 KDELIBS_TO_SHARE_CONFIG_UI="kdeui/ui_standards.rc"
 # TODO: modelcache
 # TODO: music
+# TODO: applnk
+# TODO: icons
 
 if [ ! -r "$LOKI_SETUP" ]; then
 	echo "Cannot read directory $LOKI_SETUP"
