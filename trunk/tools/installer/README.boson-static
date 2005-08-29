@@ -92,11 +92,18 @@ cd openal/linux
 
  * I want to support arts output device, as we are a KDE game and therefore
    should support the KDE soundserver
+ * dlopen()ing the artsc library is required, as arts hardcodes the path to
+   libartscbackend.la. calling arts_init() will always use the hardcoded path,
+   so we cannot support systems that use other paths than mine does (and since
+   we install arts in dir separated from the actual system, _all_ systems will do)
  * vorbis is required.
  * alsa output makes at least sense.
- * smpeg is required for mp3
+ * use --enable-smpeg to support mp3, however keep in mind that there are
+   licensing restrictions on mp3 decoders. the official binary should not provide
+   an mp3 decoder.
+   -> you will need to compile a static SDL, too, that provides smpeg!
 
-./configure --enable-arts --enable-vorbis --enable-null --enable-waveout --enable-alsa --enable-optimizations --enable-smpeg
+./configure --enable-arts --enable-arts-dlopen --enable-vorbis --enable-null --enable-waveout --enable-alsa --enable-optimizations
 make
 cd ..
 
@@ -134,24 +141,6 @@ cd ..
    python/python2.4/Lib/ to our scripts directory
    (currently share/apps/boson/themes/scripts/pythonlib/):
    cp Lib/*py /path/to/package/share/apps/boson/themes/scripts/pythonlib/
-
-
-SDL:
-----
-----
-AB: I have used the debian sources for python.
- * download libsdl1.2_1.2.7+1.2.8cvs20041007.orig.tar.gz and libsdl1.2_1.2.7+1.2.8cvs20041007-4.1.diff.gz
- * untar it and apply the patch
- * untar libsdl-.../upstream/tarballs/SDL-...
- * move libsdl-.../upstream/tarballs/SDL-... to just SDL
-
-cd SDL
-
-AB: many of the options are not required. some are redundant. we just need a small library for smpeg.
-
-./configure --disable-atari-ldg --disable-sdl-dlopen --disable-directx --disable-stdio-redirect --disable-sigaction --disable-video-opengl --disable-video-gem --disable-video-xbios --disable-video-aalib --disable-video-vgl --disable-video-svga --disable-video-ggi --disable-video-ps2gs --disable-video-directfb --disable-video-fbcon --disable-video-photon --disable-video-dga --disable-video-x11-xme --disable-video-x11-xinerama --disable-video-xv --disable-video-x11-dgamouse --disable-video-x11 --disable-dga --disable-video-xm --disable-nasm --disable-mintaudio --disable-diskaudio --disable-nas --disable-arts --disable-arts-shared --disable-esd-shared --disable-esdtest --disable-esd --disable-alsa-shared --disable-cpuinfo --disable-file --disable-timers --disable-cdrom --disable-joystick --disable-events --disable-video --disable-debug
-make
-cd ..
 
 
 boson:
