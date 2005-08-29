@@ -1,13 +1,14 @@
 <?xml version="1.0" standalone="yes"?>
+
 <install product="boson"
          desc="Boson"
          version="0.11"
          uninstall="uninstall.sh"
          binarypath="/usr/bin"
          promptbinaries="yes"
-         express="yes"
          >
   <!-- AB: update_url="http://www.lokigames.com/updates/" has been removed -->
+  <!-- AB: express="yes" has been removed. most will have to use "expert" anyway. -->
   <!--
   <readme>
     README
