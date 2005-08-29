@@ -96,6 +96,10 @@ incomplete) list for boson:
 Copying files
 -------------
 -------------
+----------------------------------------------------------------------------
+The following describes the (obsolete) manual way.
+Use tools/installer/create_boson_installer.sh instead.
+----------------------------------------------------------------------------
 Once the setup.xml file has been written to image/setup.data/setup.xml, the
 files necessary for boson have to be copied to the image directory as well:
 cd loki_setup/image
