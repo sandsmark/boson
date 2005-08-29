@@ -34,7 +34,7 @@ SETUP_XML="../tools/installer/setup.xml"
 DESTINATION="boson_installer"
 
 # binaries to copy
-BINARIES="boson/boson boson/borender boson/boinfo boson/bocursor server/boserver boson/boufo/designer/boufodesigner" # boson/bounit
+BINARIES="boson/boson boson/boinfo boson/bocursor server/boserver boson/boufo/designer/boufodesigner" # boson/borender boson/bounit
 # binaries to copy to a special "bin/" subdir (programs which are called by boson itself)
 BINARIES_TO_BIN="bobmfconverter/bobmfconverter"
 
@@ -51,6 +51,7 @@ KDELIBS_TO_SHARE_CONFIG_UI="kdeui/ui_standards.rc"
 # TODO: music
 # TODO: applnk
 # TODO: icons
+# TODO: copy $DATA/pics/biglogo.png (converted to xpm) to $DESTINATION/image/setup.data/splash.xml
 
 if [ ! -r "$LOKI_SETUP" ]; then
 	echo "Cannot read directory $LOKI_SETUP"
@@ -117,6 +118,16 @@ copy_binaries() {
 			exit 1
 		fi
 	done
+
+	# finally replace the "boson" binary by a "boson" shellscript.
+	# this script preloads libGL.so, which is necessary for some systems
+	# (maybe nvidia only): dlopen()ing libGL.so after loading
+	# libpthread (which boson links against), fails on these systems
+	mv $binary_dest/boson $binary_dest/boson.bin
+	echo "#!/bin/bash" > $binary_dest/boson
+	echo "export LD_PRELOAD=libGL.so" >> $binary_dest/boson
+	echo "\$0.bin" >> $binary_dest/boson
+	chmod +x $binary_dest/boson
 }
 copy_data() {
 	mkdir -p "$DESTINATION/image/share/config"
