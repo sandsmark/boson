@@ -1309,12 +1309,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_85_To_0_11(QMap<QString, QBy
  }
  QDomElement kgameRoot = kgameDoc.documentElement();
 
-#if BOSON_VERSION_MICRO < 0x80 || BOSON_VERSION_MINOR >= 0x11
-#error replace the following by BOSON_SAVEGAME_FORMAT_VERSION_0_11
-#endif
-#define BO_VERSION BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x0A)
- kgameRoot.setAttribute("Version", BO_VERSION);
-#undef BO_VERSION
+ kgameRoot.setAttribute("Version", BOSON_SAVEGAME_FORMAT_VERSION_0_11);
 
  if (files.contains("external.xml") && files["external.xml"].size() > 0) {
 	QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
