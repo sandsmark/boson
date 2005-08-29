@@ -162,17 +162,9 @@ cvs up -A (or whatever)
 
 admin/acinclude.m4.in
 ---------------------
- * modify admin/acinclude.m4.in just like for kdelibs
-   do NOT use the acinclude.m4.in from kdelibs!
- * insert the line
-    kde_widgetdir="\${KDEPATH}/kdewidgets/.libs"
-   right before AC_SUBST(kde_widgetdir)
- * insert the lines
-    QTPATH="/home/andi/kde/boson/static/qt-copy/"
-    KDEPATH="/home/andi/kde/boson/static/kdelibs/"
-    AC_SUBST(QTPATH)
-    AC_SUBST(KDEPATH)
-   after the AC_SUBST(kde_widgetdir). (of course they should point to where you installed static kde/qt)
+ * modify admin/acinclude.m4.in to ignore the fact that KDE plugins for uic
+   are not found (see kdelibs)
+
 
 Makefile.ams
 ------------
@@ -190,22 +182,21 @@ Makefile.ams
           replace $(BO_LIB_OPENAL) by just $(top_builddir)/bosound/openal/libbosonsoundal.la
    * maybe boson/script/Makefile.am -> if we want to remove python dependency
  * add all these libraries to boson_LDADD (and borender_LDADD if you want this, too).
-   use the static versions! e.g. instead of -lkdeui use $(KDEPATH)/kdeui/.libs/libkdeui.a
-   ($(KDEPATH) will be added to the Makefiles later)
+   use the static versions! e.g. instead of -lkdeui use $(BO_STATIC_KDE_LIBS)/libkdeui.a
+   ($(BO_STATIC_KDE_LIBS) is provided by --with-static-kde-dir)
    -> note that you might need to add additional libs that were previously linked dynamically
       by the dynamic versions of these libs.  you will notice this when a linker error occurs
       at the end of the compilation (the Makefile.am can still be changed then)
    currently the following libraries need to be added:
-   * $(KDEPATH)/kio/.libs/libkio.a
-   * $(KDEPATH)/kdesu/.libs/libkdesu.a (kio dependency)
-   * $(KDEPATH)/kdeui/.libs/libkdeui.a
-   * $(KDEPATH)/kdecore/.libs/libkdecore.a
-   * $(KDEPATH)/kdecore/.libs/libkdefx.a (kdecore dependency)
-   * $(KDEPATH)/dcop/.libs/libDCOP.a (kdecore dependency)
-   * $(QTPATH)/lib/libqt-mt.a
+   * $(BO_STATIC_KDE_LIBS)/libkio.a
+   * $(BO_STATIC_KDE_LIBS)/libkdesu.a (kio dependency)
+   * $(BO_STATIC_KDE_LIBS)/libkdeui.a
+   * $(BO_STATIC_KDE_LIBS)/libkdecore.a
+   * $(BO_STATIC_KDE_LIBS)/libkdefx.a (kdecore dependency)
+   * $(BO_STATIC_KDE_LIBS)/libDCOP.a (kdecore dependency)
+   * $(BO_STATIC_QT_LIBS)/libqt-mt.a
    * -lart_lgp2 (kdecore dependency)  (note: this may link dynamically! might not be desired)
    * -lidn (kdecore dependency)  (note: this may link dynamically! might not be desired)
- * remove line kde_widget_LTLIBRARIES = bosonwidgets.la from bosonwidgets/plugin/Makefile.am
  * bobmfconverter/Makefile.am needs to be modified in the same manner as boson/Makefile.am.
    i.e. add more or less the same libraries to bobmfconverter_LDADD as you added to boson_LDADD
    -> actually much less: only qt and kdecore and their dependencies. just replace $(LIB_QT) and $(LIB_KDECORE) accordingly.
@@ -215,10 +206,27 @@ Makefile.ams
 
 make -f Makefile.cvs
 
-AB: remove if you dont want this
-export DO_DEBUG="--enable-debug=yes --enable-profile"
+./configure --disable-plugins --enable-static \
+                --with-qt-dir=/home/andi/kde/boson/static/qt-copy \
+                --with-static-qt-dir=/home/andi/kde/boson/static/qt-copy \
+                --with-static-kde-dir=/home/andi/kde/boson/static/kdelibs \
+                --enable-debug=yes
+NOTES:
+ * if configure complains about Qt not being installed and config.log contains
+   undefined references to X libs: modify the corresponding configure check in
+   acinclude.m4.in to link to these X libs.
+   the execute Makefile.cvs and ./configure again.
+ * --with-qt-dir and --with-static-qt-dir should be the same directory.
+   --with qt-dir exists because of the KDE build system. it could be removed,
+   but that would make maintaining the acinclude.m4.in much more difficult, so
+   we keep it.
+   the other one exists especially to be able to give an error when it was not
+   provided on the command line.
+ * --enable-debug=yes is of course optional, but highly recommended.
+   note that not using --enable-debug=yes produced different compiler
+   optimizations. using binaries with different compiler settings is much more
+   likely to produce out-of-sync errors.
 
-QTDIR=/home/andi/kde/boson/static/qt-copy KDEDIR=/home/andi/kde/boson/static/kdelibs ./configure $DO_DEBUG --disable-plugins --enable-static
 
 after configure:
 * AB: by some reason uic doesn't always honor includehints tags in the .ui file.
