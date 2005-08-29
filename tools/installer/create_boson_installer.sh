@@ -34,7 +34,7 @@ SETUP_XML="../tools/installer/setup.xml"
 DESTINATION="boson_installer"
 
 # binaries to copy
-BINARIES="boson/boson boson/borender boson/boinfo boson/bocursor server/boserver boson/bounit boson/boufo/designer/boufodesigner"
+BINARIES="boson/boson boson/borender boson/boinfo boson/bocursor server/boserver boson/boufo/designer/boufodesigner" # boson/bounit
 # binaries to copy to a special "bin/" subdir (programs which are called by boson itself)
 BINARIES_TO_BIN="bobmfconverter/bobmfconverter"
 

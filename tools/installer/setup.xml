@@ -47,9 +47,6 @@
     <binary arch="any" libc="any" symlink="boinfo">
       boinfo
     </binary>
-    <binary arch="any" libc="any" symlink="bounit">
-      bounit
-    </binary>
     <binary arch="any" libc="any" symlink="boufodesigner">
       boufodesigner
     </binary>
@@ -59,6 +56,9 @@
     </binary>
     <binary arch="any" libc="any" symlink="borender">
       borender
+    </binary>
+    <binary arch="any" libc="any" symlink="bounit">
+      bounit
     </binary>
     -->
     <files>
