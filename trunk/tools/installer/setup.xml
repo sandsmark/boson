@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="yes"?>
 <install product="boson"
          desc="Boson"
-         version="0.11pre"
+         version="0.11"
          uninstall="uninstall.sh"
          binarypath="/usr/bin"
          promptbinaries="yes"
@@ -46,13 +46,13 @@
     <binary arch="any" libc="any" symlink="boinfo">
       boinfo
     </binary>
-    <!-- TODO:
-    <binary arch="any" libc="any" symlink="boufodesigner">
-      boufodesigner
-    </binary>
     <binary arch="any" libc="any" symlink="bounit">
       bounit
     </binary>
+    <binary arch="any" libc="any" symlink="boufodesigner">
+      boufodesigner
+    </binary>
+    <!-- TODO?
     <binary arch="any" libc="any" symlink="boprofiling">
       boprofiling
     </binary>
@@ -65,6 +65,7 @@
       patches
     </files>
    </option>
+   <!--
    <option
        install="true"
        path="share/apps/boson/music/"
@@ -74,5 +75,6 @@
       music/*
     </files>
    </option>
+   -->
   </component>
 </install>
