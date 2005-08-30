@@ -39,7 +39,8 @@ FACILITIES = \
 	house2 \
 	road1-curve \
 	road1-straight \
-	well1
+	well1 \
+	bush1
 
 unitsdir = $(kde_datadir)/boson/themes/species/neutral/units
 
