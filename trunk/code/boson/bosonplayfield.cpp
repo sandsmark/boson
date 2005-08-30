@@ -347,14 +347,16 @@ boWarning() << k_funcinfo << "obsolete" << endl;
 
 QString BosonPlayField::defaultPlayField()
 {
+ QString _default = "weareunderattack.bpf";
+
  QStringList l = boData->availablePlayFields();
- if (l.contains(DEFAULT_PLAYFIELD)) {
-	return DEFAULT_PLAYFIELD;
+ if (l.contains(_default)) {
+	return _default;
  }
  if (l.count() == 0) {
 	return QString::null;
  }
- boWarning() << k_funcinfo << "cannot find " << DEFAULT_PLAYFIELD << " map - using " << l[0] << " instead" << endl;
+ boWarning() << k_funcinfo << "cannot find " << _default<< " map - using " << l[0] << " instead" << endl;
  return l[0];
 }
 

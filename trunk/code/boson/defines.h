@@ -72,9 +72,6 @@
 #define MAX_MAP_HEIGHT 500
 #define MAX_MAP_WIDTH 500
 
-// playfield that gets used by default
-#define DEFAULT_PLAYFIELD QString::fromLatin1("basic2.bpf")
-
 // the placement preview. alpha apply to both previews, the _DISALLOW_COLOR
 // only if the facility can't placed at that point.
 // AB: the red component will alway be 255 anyway.
@@ -84,8 +81,6 @@
 
 // default values
 // used for both BosonConfig and OptionsDialog
-#define DEFAULT_SOUND true
-#define DEFAULT_MUSIC true
 #define DEFAULT_USE_RMB_MOVE true
 #define DEFAULT_USE_MMB_MOVE true
 #define DEFAULT_GAME_SPEED 5
