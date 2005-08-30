@@ -68,6 +68,8 @@ public:
     QGuardedPtr<Player> mLocalPlayer;
 
     BoUfoColorChooser* mPlayerColor;
+
+    int mComputerPlayerNumber;
 };
 
 
@@ -84,6 +86,7 @@ BoUfoNewGameWidget::BoUfoNewGameWidget(BosonStartupNetwork* interface)
  mMaxPlayers = 0;
  mMinPlayers = 0;
  mInited = false; // Will become true once localplayer gets added
+ d->mComputerPlayerNumber = 1;
 
  d->mPlayerColor = new BoUfoColorChooser();
  mPlayerColorContainer->setLayoutClass(BoUfoWidget::UHBoxLayout);
@@ -212,15 +215,6 @@ void BoUfoNewGameWidget::initPlayFields()
     }
     initPlayFields(campaign);
  }
-
- if (boGame->isAdmin()) {
-    // load the map that was selected in a previous game
-    QString mapId = boConfig->readLocalPlayerMap();
-    if (mapId.isNull()) {
-        mapId = BosonPlayField::defaultPlayField();
-    }
-    networkInterface()->sendChangePlayField(mapId);
- }
 }
 
 void BoUfoNewGameWidget::initPlayFields(BosonCampaign* campaign)
@@ -310,6 +304,18 @@ void BoUfoNewGameWidget::updateColors()
  }
 
  d->mPlayerColor->highlightColor(p->teamColor());
+}
+
+void BoUfoNewGameWidget::initInitialPlayField()
+{
+ if (boGame->isAdmin()) {
+    // load the map that was selected in a previous game
+    QString mapId = boConfig->readLocalPlayerMap();
+    if (mapId.isNull()) {
+        mapId = BosonPlayField::defaultPlayField();
+    }
+    networkInterface()->sendChangePlayField(mapId);
+ }
 }
 
 /*****  Slots for networks commands  *****/
@@ -739,12 +745,6 @@ void BoUfoNewGameWidget::slotAddComputerPlayer()
     KMessageBox::sorry(0, i18n("You must be ADMIN to do this"));
     return;
  }
- if (boGame->playerCount() >= mMaxPlayers) {
-    KMessageBox::sorry(0, i18n("There are too many players in the game.\n"
-            "Current map supports only %1 players.\n").arg(mMaxPlayers),
-            i18n("Too many players"));
-    return;
- }
 
  Player* p = new Player();
 
@@ -752,7 +752,8 @@ void BoUfoNewGameWidget::slotAddComputerPlayer()
  // computer players with names that fit to the story (if we'll ever have one).
  // so the randomName() isn't required anyway.
 // p->setName(KGameMisc::randomName());
- p->setName(i18n("Player %1").arg(boGame->playerCount()));
+ p->setName(i18n("Computer %1").arg(d->mComputerPlayerNumber));
+ d->mComputerPlayerNumber++;
 
  // the color is dangerous concerning network and so!
  // it'd be better to first add the player and then change the color using a

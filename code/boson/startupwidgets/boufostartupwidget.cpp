@@ -147,6 +147,14 @@ void BoUfoStartupWidget::slotNewSinglePlayerGame(KCmdLineArgs* args)
  d->mSinglePlayer = true;
 
  newGame(args);
+ BoUfoNewGameWidget* w = (BoUfoNewGameWidget*)d->mWidgetStack->widget(IdNewGame);
+ if (w) {
+	if (boGame->isAdmin() && boGame->playerCount() <= 1) {
+		if (!args || !args->isSet("start") && !args->isSet("computer")) {
+			w->addAIPlayer();
+		}
+	}
+ }
 }
 
 void BoUfoStartupWidget::slotNewMultiPlayerGame(KCmdLineArgs* args)
@@ -357,6 +365,9 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 	// note that the new player ends up in boGame->playerList() once we
 	// return to the event loop only, NOT immediately
 	emit signalAddLocalPlayer();
+
+	// should be done _after_ adding the local player
+	((BoUfoNewGameWidget*)w)->initInitialPlayField();
  }
 }
 
