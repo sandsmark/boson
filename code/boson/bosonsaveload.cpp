@@ -595,6 +595,7 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 	}
 	if (!p->loadFromXML(player)) {
 		boError(270) << k_funcinfo << "failed loading player " << i << endl;
+		return false;
 	}
  }
  return true;
