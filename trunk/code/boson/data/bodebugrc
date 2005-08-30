@@ -62,8 +62,16 @@ InfoOutput=4
 [360]
 InfoOutput=4
 
+# AdvanceMove is off by default
+[401]
+InfoOutput=4
+
 # Harvester Advance is off by default
 [430]
+InfoOutput=4
+
+# BosonPath is off by default
+[500]
 InfoOutput=4
 
 # BoScript if off by default
