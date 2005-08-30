@@ -92,10 +92,10 @@ BosonAudioAL::BosonAudioAL() : BosonAudio()
  }
 
 
-#if AL_VERSION < 0xB002 // OpenAL 1.0
+#ifndef AL_BYTE_OFFSET // OpenAL 1.0
  alutLoadMP3_LOKI = (ALboolean (*)(ALuint, ALvoid*, ALint))alGetProcAddress((ALubyte*)"alutLoadMP3_LOKI");
  alutLoadVorbis_LOKI = (ALboolean (*)(ALuint, ALvoid*, ALint))alGetProcAddress((ALubyte*)"alutLoadVorbis_LOKI");
-#else
+#else // OpenAL 1.1
  alutLoadMP3_LOKI = (ALboolean (*)(ALuint, ALvoid*, ALint))alGetProcAddress((ALchar*)"alutLoadMP3_LOKI");
  alutLoadVorbis_LOKI = (ALboolean (*)(ALuint, ALvoid*, ALint))alGetProcAddress((ALchar*)"alutLoadVorbis_LOKI");
 #endif
