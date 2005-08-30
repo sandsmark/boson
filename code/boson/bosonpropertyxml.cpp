@@ -62,8 +62,9 @@ QString BosonPropertyXML::propertyValue(KGamePropertyBase* prop)
  } else if (*t == typeid(QString)) {
 	value = ((KGameProperty<QString>*)prop)->value();
  } else if (*t == typeid(Q_INT8)) {
-	// AB: do not use i18n() here!
-	value = ((KGameProperty<Q_INT8>*)prop)->value() ? QString::fromLatin1("True") : QString::fromLatin1("False");
+	value = QString::number(((KGameProperty<Q_INT8>*)prop)->value());
+ } else if (*t == typeid(Q_UINT8)) {
+	value = QString::number(((KGameProperty<Q_UINT8>*)prop)->value());
  }
  if (value.isNull()) {
 	emit signalRequestValue(prop, value);
@@ -106,16 +107,33 @@ void BosonPropertyXML::propertySetValue(KGamePropertyBase* prop, const QString& 
  } else if (*t == typeid(QString)) {
 	((KGameProperty<QString>*)prop)->setValue(value);
  } else if (*t == typeid(Q_INT8)) {
-	bool v = false;
+	Q_INT8 v = 0;
 	if (value == QString::fromLatin1("True")) {
-		v = true;
+		v = 1;
 	} else if (value == QString::fromLatin1("False")) {
-		v = false;
+		v = 0;
 	} else {
-		v = false;
-		ok = false;
+		short s = value.toShort(&ok);
+		if (s < -128 || s > 127) {
+			ok = false;
+		}
+		if (!ok) {
+			s = 0;
+		}
+		v = (Q_INT8)s;
 	}
 	((KGameProperty<Q_INT8>*)prop)->setValue(v);
+ } else if (*t == typeid(Q_UINT8)) {
+	Q_UINT8 v = 0;
+	unsigned short s = value.toUShort(&ok);
+	if (s > 255) {
+		ok = false;
+	}
+	if (!ok) {
+		s = 0;
+	}
+	v = (Q_UINT8)s;
+	((KGameProperty<Q_UINT8>*)prop)->setValue(v);
  } else {
 	emit signalRequestSetValue(prop, value);
  }
