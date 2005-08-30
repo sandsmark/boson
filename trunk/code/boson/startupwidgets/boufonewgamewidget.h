@@ -53,6 +53,8 @@ public:
 	 **/
 	void addAIPlayer();
 
+	void initInitialPlayField();
+
 public slots:
 	/**
 	 * This is used to enable or disable some widgets when user's admin
@@ -159,6 +161,7 @@ protected:
 	Player* localPlayer() const;
 
 	BosonStartupNetwork* networkInterface() const { return mNetworkInterface; }
+
 private:
 	void initLocalPlayer();
 	void initPlayFields();
