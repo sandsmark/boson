@@ -92,8 +92,13 @@ BosonAudioAL::BosonAudioAL() : BosonAudio()
  }
 
 
+#if AL_VERSION < 0xB002 // OpenAL 1.0
  alutLoadMP3_LOKI = (ALboolean (*)(ALuint, ALvoid*, ALint))alGetProcAddress((ALubyte*)"alutLoadMP3_LOKI");
  alutLoadVorbis_LOKI = (ALboolean (*)(ALuint, ALvoid*, ALint))alGetProcAddress((ALubyte*)"alutLoadVorbis_LOKI");
+#else
+ alutLoadMP3_LOKI = (ALboolean (*)(ALuint, ALvoid*, ALint))alGetProcAddress((ALchar*)"alutLoadMP3_LOKI");
+ alutLoadVorbis_LOKI = (ALboolean (*)(ALuint, ALvoid*, ALint))alGetProcAddress((ALchar*)"alutLoadVorbis_LOKI");
+#endif
 
 
  // warning: NULL if sound disabled (--nosound)!
@@ -181,7 +186,7 @@ bool BosonAudioAL::loadFileToBuffer(ALuint buffer, const QString& file)
 		char* data = new char[f.size()];
 		int l = f.readBlock(data, f.size());
 
-		// AB: OpenAL requires MP3 files to be encoded with a frequency 
+		// AB: OpenAL requires MP3 files to be encoded with a frequency
 		// of 44100 hz. we check for this first and discard any files
 		// that dont fit.
 		// AB: the first 4 bytes of a file are a header.
