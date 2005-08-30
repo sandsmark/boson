@@ -57,8 +57,6 @@ QString BosonPropertyXML::propertyValue(KGamePropertyBase* prop)
 	value = QString::number(((KGameProperty<float>*)prop)->value());
  } else if (*t == typeid(bofixed)) {
 	value = QString::number(((KGameProperty<bofixed>*)prop)->value());
- } else if (*t == typeid(char)) {
-	value = ((KGameProperty<char>*)prop)->value();
  } else if (*t == typeid(QString)) {
 	value = ((KGameProperty<QString>*)prop)->value();
  } else if (*t == typeid(Q_INT8)) {
@@ -100,10 +98,6 @@ void BosonPropertyXML::propertySetValue(KGamePropertyBase* prop, const QString& 
 	((KGameProperty<float>*)prop)->setValue(value.toFloat(&ok));
  } else if (*t == typeid(bofixed)) {
 	((KGameProperty<bofixed>*)prop)->setValue(value.toFloat(&ok));
- } else if (*t == typeid(char)) {
-	if (value.length() >= 1) {
-		((KGameProperty<char>*)prop)->setValue(value[0]);
-	}
  } else if (*t == typeid(QString)) {
 	((KGameProperty<QString>*)prop)->setValue(value);
  } else if (*t == typeid(Q_INT8)) {
