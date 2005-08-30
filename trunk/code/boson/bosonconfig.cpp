@@ -279,8 +279,8 @@ BosonConfig::BosonConfig(KConfig* conf)
  d->mDynamicEntries.setAutoDelete(false);
 
 
- addDynamicEntryBool("Sound", DEFAULT_SOUND);
- addDynamicEntryBool("Music", DEFAULT_MUSIC);
+ addDynamicEntryBool("Sound", false);
+ addDynamicEntryBool("Music", true);
  addDynamicEntryBool("MMBMove", DEFAULT_USE_MMB_MOVE);
  addDynamicEntryBool("RMBMove", DEFAULT_USE_RMB_MOVE);
  addDynamicEntryUInt("ArrowKeyStep", DEFAULT_ARROW_SCROLL_SPEED);
