@@ -301,6 +301,17 @@ UnitProperties* SpeciesTheme::nonConstUnitProperties(unsigned long int unitType)
  return d->mUnitProperties[unitType];
 }
 
+bool SpeciesTheme::hasUnitProperties(unsigned long int unitType) const
+{
+ if (unitType == 0) {
+	return false;
+ }
+ if (!d->mUnitProperties[unitType]) {
+	return false;
+ }
+ return true;
+}
+
 const UpgradeProperties* SpeciesTheme::technology(unsigned long int techType) const
 {
  return upgrade("Technology", techType);
@@ -540,6 +551,14 @@ bool SpeciesTheme::loadGameDataFromXML(const QDomElement& root)
 	if (!ok) {
 		boError() << k_funcinfo << "invalid number for Id of UnitType" << endl;
 		return false;
+	}
+	if (!hasUnitProperties(id)) {
+		boDebug() << k_funcinfo << "Have no UnitProperties for " << id << " - ignoring." << endl;
+		// AB: not an error. this may happen if the designer of a map
+		//     has non-default unittypes installed.
+		//     the unittypes are stored in the map then, even if they
+		//     are unused by the map.
+		continue;
 	}
 	UnitProperties* prop = nonConstUnitProperties(id);
 	if (!prop) {

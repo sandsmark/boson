@@ -131,6 +131,8 @@ public:
 	 **/
 	UnitProperties* nonConstUnitProperties(unsigned long int unitType) const;
 
+	bool hasUnitProperties(unsigned long int unitType) const;
+
 	/**
 	 * @return The technology with @p id. Equivalent to
 	 * upgrade("Technology", id)
