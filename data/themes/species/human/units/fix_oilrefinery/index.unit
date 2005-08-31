@@ -5,7 +5,7 @@ ConstructionSteps=20
 
 [Boson Unit]
 Armor=0
-ConstructedEffects=10011
+ConstructedEffects=10010,10011
 Description=Collected oil is brought here by oil harvesters for refining.
 DestroyedEffects=1011,3011,6011,7010
 ExplodingDamage=200
@@ -28,10 +28,7 @@ Shield=0
 SightRange=8
 SupportMiniMap=false
 TerrainType=0
-#UnitDepth=1.48
-#UnitHeight=2
-#UnitWidth=2
-UnitDepth=3.108
+UnitDepth=4.0
 UnitHeight=4.0
 UnitWidth=4.0
 
