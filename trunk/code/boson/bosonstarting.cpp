@@ -411,11 +411,12 @@ bool BosonStarting::addLoadGamePlayers(const QString& playersXML)
 		// loaded
 		return false;
 	}
-	if (boGame->findPlayer(id)) {
+	if (boGame->findPlayerByUserId(id)) {
 		boError(260) << k_funcinfo << "id " << id << " already in the game" << endl;
 		return false;
 	}
 	Player* player = new Player();
+	boWarning() << k_funcinfo << "probably call player->setUserId(id); here" << endl;
 	player->loadTheme(SpeciesTheme::speciesDirectory(species), color);
 
 	boGame->bosonAddPlayer(player);
@@ -483,7 +484,7 @@ void BosonStarting::sendStartingCompleted(bool success)
 		break;
 	}
 	QCString num;
-	num.setNum(p->id());
+	num.setNum(p->bosonId());
 	themeMD5 += QCString("Player ") + num + ":\n";
 	themeMD5 += "UnitProperties:\n" + theme->unitPropertiesMD5();
 	themeMD5 += "\n";
@@ -772,7 +773,7 @@ bool BosonStartingLoadPlayerData::startTask()
  }
  BosonProfiler profiler("LoadPlayerData");
 
- boDebug(270) << k_funcinfo << player()->id() << endl;
+ boDebug(270) << k_funcinfo << player()->bosonId() << endl;
  // Order of calls below is very important!!! Don't change this unless you're sure you know what you're doing!!!
 
  boViewData->addSpeciesTheme(player()->speciesTheme());
@@ -951,10 +952,12 @@ bool BosonStartingStartScenario::startTask()
 
  // map player number (aka index, as used by .bsg/.bpf) to player Id
  boProfiling->push("FixPlayerIds");
+#if 0
  if (!fixPlayerIds(*mFiles)) {
 	boError(270) << k_funcinfo << "could not replace player numbers by real player ids" << endl;
 	return false;
  }
+#endif
  boProfiling->pop();
 
  mGameView->setCanvas(mCanvas);
@@ -1051,13 +1054,13 @@ bool BosonStartingStartScenario::fixPlayerIds(QMap<QString, QByteArray>& files) 
 		// usual player.
 		// notice that the last player in boGame->playerList() is
 		// handled below, not here.
-		actualId = boGame->playerList()->at(i)->id();
+		actualId = ((Player*)boGame->playerList()->at(i))->bosonId();
 	}
 	if (i == playersList.count() - 1) {
 		// per definition the last player in the list is _always_ the
 		// neutral player (no actual player can chose to play this
 		// player).
-		actualId = boGame->playerList()->at(boGame->playerCount() - 1)->id();
+		actualId = ((Player*)boGame->playerList()->at(boGame->playerCount() - 1))->bosonId();
 	}
 
 	// this gives
