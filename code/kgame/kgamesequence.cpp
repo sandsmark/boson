@@ -58,7 +58,7 @@ KPlayer *KGameSequence::nextPlayer(KPlayer *last,bool exclusive)
  KPlayer *nextplayer, *minplayer;
  if (last)
  {
-   lastId = last->id();
+   lastId = last->kgameId();
  }
  else
  {
@@ -77,9 +77,9 @@ KPlayer *KGameSequence::nextPlayer(KPlayer *last,bool exclusive)
  for (player = game()->playerList()->first(); player != 0; player=game()->playerList()->next() )
  {
    // Find the first player for a cycle
-   if (player->id() < minId)
+   if (player->kgameId() < minId)
    {
-     minId=player->id();
+     minId=player->kgameId();
      minplayer=player;
    }
    if (player==last)
@@ -87,9 +87,9 @@ KPlayer *KGameSequence::nextPlayer(KPlayer *last,bool exclusive)
      continue;
    }
    // Find the next player which is bigger than the current one
-   if (player->id() > lastId && player->id() < nextId)
+   if (player->kgameId() > lastId && player->kgameId() < nextId)
    {
-     nextId=player->id();
+     nextId=player->kgameId();
      nextplayer=player;
    }
  }

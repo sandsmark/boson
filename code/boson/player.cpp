@@ -133,6 +133,11 @@ Player::~Player()
  boDebug() << k_funcinfo << "done" << endl;
 }
 
+int Player::bosonId() const
+{
+ return userId();
+}
+
 bool Player::isNeutralPlayer() const
 {
  return d->mIsNeutralPlayer;
@@ -278,7 +283,7 @@ void Player::unitDestroyed(Unit* unit)
  if (unit->unitProperties()->supportMiniMap()) {
 	if (!hasMiniMap()) {
 		BoEvent* event = new BoEvent("LostMinimap");
-		event->setPlayerId(id());
+		event->setPlayerId(bosonId());
 		event->setLocation(BoVector3Fixed(unit->x(), unit->y(), unit->z()));
 		boGame->queueEvent(event);
 	}
@@ -317,7 +322,7 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
  BosonItemPropertyHandler* p = (BosonItemPropertyHandler*)sender();
  if (!p->item()) {
 	boError() << k_funcinfo << "NULL parent item for property handler" << endl;
-	boDebug() << "player=" << id() << ",propId=" << prop->id() << endl;
+	boDebug() << "player=" << bosonId() << ",propId=" << prop->id() << endl;
 	return;
  }
  if (!RTTI::isUnit(p->item()->rtti())) {
@@ -584,14 +589,14 @@ void Player::facilityCompleted(Facility* fac)
 
  BoVector3Fixed location(fac->x(), fac->y(), fac->z());
  BoEvent* constructedEvent = new BoEvent("FacilityWithTypeConstructed", QString::number(fac->type()));
- constructedEvent->setPlayerId(id());
+ constructedEvent->setPlayerId(bosonId());
  constructedEvent->setUnitId(fac->id());
  constructedEvent->setLocation(location);
  boGame->queueEvent(constructedEvent);
 
  if (fac->unitProperties()->supportMiniMap()) {
 	BoEvent* miniMapEvent = new BoEvent("GainedMinimap");
-	miniMapEvent->setPlayerId(id());
+	miniMapEvent->setPlayerId(bosonId());
 	miniMapEvent->setLocation(location);
 	boGame->queueEvent(miniMapEvent);
  }
@@ -748,7 +753,7 @@ void Player::technologyResearched(ProductionPlugin* plugin, unsigned long int ty
  addUpgrade(prop);
 
  BoEvent* event = new BoEvent("TechnologyWithTypeResearched", QString::number(type), QString::number(plugin->unit()->id()));
- event->setPlayerId(id());
+ event->setPlayerId(bosonId());
  event->setLocation(BoVector3Fixed(plugin->unit()->x(), plugin->unit()->y(), plugin->unit()->z()));
  ((Boson*)game())->queueEvent(event);
 }
@@ -785,7 +790,7 @@ bool Player::saveAsXML(QDomElement& root)
  BosonCustomPropertyXML propertyXML;
  QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
  if (!propertyXML.saveAsXML(handler, dataHandler())) {
-	boError() << k_funcinfo << "Unable to save datahandler of player " << id() << endl;
+	boError() << k_funcinfo << "Unable to save datahandler of player " << bosonId() << endl;
 	return false;
  }
  root.appendChild(handler);
@@ -840,7 +845,7 @@ bool Player::loadFromXML(const QDomElement& root)
  BosonCustomPropertyXML propertyXML;
  QDomElement handler = root.namedItem(QString::fromLatin1("DataHandler")).toElement();
  if (!propertyXML.loadFromXML(handler, dataHandler())) {
-	boError(260) << k_funcinfo << "unable to load player data handler (player=" << this->id() << ")" << endl;
+	boError(260) << k_funcinfo << "unable to load player data handler (player=" << this->bosonId() << ")" << endl;
 	return false;
  }
 
@@ -943,7 +948,7 @@ bool Player::loadFogOfWar(const QDomElement& root)
 
 void Player::writeGameLog(QTextStream& log)
 {
- log << "Player: " << id() << endl;
+ log << "Player: " << bosonId() << endl;
  log << minerals() << " " << oil() << endl;
  log << mobilesCount() << " " << facilitiesCount() << endl;
 

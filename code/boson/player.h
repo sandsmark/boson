@@ -66,6 +66,8 @@ public:
 	Player(bool neutral = false);
 	virtual ~Player();
 
+	int bosonId() const;
+
 	/**
 	 * @return TRUE if this is the neutral player. Note that the neutral
 	 * player is always at (Boson::playerList()->count() - 1), i.e. it is

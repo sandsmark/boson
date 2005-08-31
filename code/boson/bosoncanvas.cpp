@@ -816,24 +816,24 @@ void BosonCanvas::destroyUnit(Unit* unit)
 
 	BoEvent* unitDestroyed = new BoEvent("UnitWithTypeDestroyed", QString::number(unit->type()));
 	unitDestroyed->setUnitId(unit->id());
-	unitDestroyed->setPlayerId(unit->owner()->id());
+	unitDestroyed->setPlayerId(unit->owner()->bosonId());
 	boGame->queueEvent(unitDestroyed);
 
 	// the following events are not emitted for the neutral player
 	if (owner != boGame->playerList()->at(boGame->playerCount() - 1)) {
 		if (owner->mobilesCount() == 0) {
 			BoEvent* event = new BoEvent("AllMobileUnitsDestroyed");
-			event->setPlayerId(unit->owner()->id());
+			event->setPlayerId(unit->owner()->bosonId());
 			boGame->queueEvent(event);
 		}
 		if (owner->facilitiesCount() == 0) {
 			BoEvent* allFacilitiesDestroyed = new BoEvent("AllFacilitiesDestroyed");
-			allFacilitiesDestroyed->setPlayerId(unit->owner()->id());
+			allFacilitiesDestroyed->setPlayerId(unit->owner()->bosonId());
 			boGame->queueEvent(allFacilitiesDestroyed);
 		}
 		if (owner->allUnits()->count() == 0) {
 			BoEvent* event = new BoEvent("AllUnitsDestroyed");
-			event->setPlayerId(unit->owner()->id());
+			event->setPlayerId(unit->owner()->bosonId());
 			boGame->queueEvent(event);
 		}
 	}
@@ -1232,7 +1232,7 @@ bool BosonCanvas::loadItemsFromXML(const QDomElement& root)
 		boError(260) << k_funcinfo << "PlayerId of Items Tag " << i << " is not a valid number" << endl;
 		continue;
 	}
-	Player* owner = (Player*)boGame->findPlayer(id);
+	Player* owner = (Player*)boGame->findPlayerByUserId(id);
 	if (!owner) {
 		// AB: this is totally valid. less players in game, than in the
 		// file.
@@ -1412,7 +1412,7 @@ BosonItem* BosonCanvas::createItemFromXML(const QDomElement& item, Player* owner
 	Unit* u = (Unit*)createItem(RTTI::UnitStart + type, owner, ItemType(type), pos, id);
 
 	if (!u) {
-		boError(260) << k_funcinfo << "could not create unit type=" << type << " for owner=" << owner->id() << endl;
+		boError(260) << k_funcinfo << "could not create unit type=" << type << " for owner=" << owner->bosonId() << endl;
 		return 0;
 	}
 
@@ -1525,10 +1525,10 @@ bool BosonCanvas::saveItemsAsXML(QDomElement& root) const
  for (KPlayer* p = boGame->playerList()->first(); p; p = boGame->playerList()->next()) {
 	QDomElement items = doc.createElement(QString::fromLatin1("Items"));
 
-	// note: we need to store the index in the list here, not the p->id() !
+	// note: we need to store the index in the list here, not the p->kgameId() !
 	items.setAttribute(QString::fromLatin1("PlayerId"), boGame->playerList()->findRef(p));
 	root.appendChild(items);
-	owner2Items.insert(p->id(), items);
+	owner2Items.insert(((Player*)p)->bosonId(), items);
  }
 
  BoItemList::Iterator it;
@@ -1539,7 +1539,7 @@ bool BosonCanvas::saveItemsAsXML(QDomElement& root) const
 		BO_NULL_ERROR(i->owner());
 		return false;
 	}
-	unsigned int id = i->owner()->id();
+	unsigned int id = i->owner()->bosonId();
 	items = owner2Items[id];
 	if (items.isNull()) {
 		boError() << k_funcinfo << "no Items element found" << endl;

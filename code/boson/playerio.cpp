@@ -57,7 +57,7 @@ const QString& PlayerIO::name() const
 
 unsigned long int PlayerIO::playerId() const
 {
- return player()->id();
+ return player()->bosonId();
 }
 
 bool PlayerIO::hasRtti(int rtti) const

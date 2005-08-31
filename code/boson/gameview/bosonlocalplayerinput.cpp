@@ -299,7 +299,7 @@ void BosonLocalPlayerInput::build(ProductionType type, Unit* factory, bofixed x,
 {
   boDebug() << k_funcinfo << endl;
 
-  BosonMessageMoveBuild message(type, factory->owner()->id(), factory->id(), BoVector2Fixed(x, y));
+  BosonMessageMoveBuild message(type, factory->owner()->bosonId(), factory->id(), BoVector2Fixed(x, y));
 
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
@@ -376,7 +376,7 @@ void BosonLocalPlayerInput::refine(const QPtrList<Unit>& units, Unit* refinery)
     ++it;
   }
 
-  BosonMessageMoveRefine message(refinery->owner()->id(), refinery->id(), refineUnits);
+  BosonMessageMoveRefine message(refinery->owner()->bosonId(), refinery->id(), refineUnits);
 
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
@@ -434,7 +434,7 @@ void BosonLocalPlayerInput::placeUnit(Player* owner, unsigned long int unitType,
       rotation = bofixed(boGame->random()->getLong(359));
     }
   }
-  BosonMessageEditorMovePlaceUnit message(unitType, owner->id(), BoVector2Fixed(x, y), rotation);
+  BosonMessageEditorMovePlaceUnit message(unitType, owner->bosonId(), BoVector2Fixed(x, y), rotation);
 
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);

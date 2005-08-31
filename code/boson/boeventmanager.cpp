@@ -28,10 +28,10 @@
 #include "bosonprofiling.h"
 #include "bodebug.h"
 #include "bosonmessageids.h"
+#include "player.h" // Player::bosonId()
 
 #include <kgame/kgameproperty.h>
 #include <kgame/kgamepropertyhandler.h>
-#include <kgame/kplayer.h> // KPlayer::id()
 
 #include <qdom.h>
 #include <qvaluevector.h>
@@ -137,7 +137,7 @@ bool BoEventManager::saveAsXML(QDomElement& root) const
  QPtrListIterator<KPlayer> playerIt(*boGame->playerList());
  while (playerIt.current()) {
 	int index = boGame->playerList()->findRef(playerIt.current());
-	playerId2Index.insert(playerIt.current()->id(), index);
+	playerId2Index.insert(((Player*)playerIt.current())->bosonId(), index);
 	++playerIt;
  }
  QPtrListIterator<BoEvent> it(d->mEvents);

@@ -1373,7 +1373,7 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
 		player->quitGame();
 		player->initMap(map);
 		if (!player->loadFromXML(playerElement)) {
-			boError() << k_funcinfo << "could not load player " << player->id() << " at index " << index << endl;
+			boError() << k_funcinfo << "could not load player " << player->bosonId() << " at index " << index << endl;
 			return false;
 		}
 	}
@@ -1389,7 +1389,7 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
  QDomNodeList canvasItemsList = canvasElement.elementsByTagName(QString::fromLatin1("Items"));
  for (unsigned int i = 0; i < canvasItemsList.count(); i++) {
 	QDomElement items = canvasItemsList.item(i).toElement();
-	items.setAttribute("PlayerId", mGame->playerList()->at(items.attribute("PlayerId").toUInt())->id());
+	items.setAttribute("PlayerId", ((Player*)mGame->playerList()->at(items.attribute("PlayerId").toUInt()))->bosonId());
  }
 
 
@@ -1424,7 +1424,7 @@ QByteArray BosonNetworkSyncer::createSyncMessage()
 		QDomElement player = doc.createElement("Player");
 		Player* p2 = (Player*)p;
 		if (!p2->saveAsXML(player)) {
-			boError() << k_funcinfo << "unable to save player " << p->id() << endl;
+			boError() << k_funcinfo << "unable to save player " << ((Player*)p)->bosonId() << endl;
 			return b;
 		}
 		players.appendChild(player);

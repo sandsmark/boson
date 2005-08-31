@@ -177,18 +177,20 @@ public:
       void setActive(bool v) {mActive=v;}
 
       /**
-       * Returns the id of the player
+       * Returns the internal id of the player
        *
-       * @return the player id
+       * @return the internal player id
        */
-      Q_UINT32 id() const; 
+      Q_UINT32 kgameId() const; 
 
-      /* Set the players id. This is done automatically by
+      /**
+       * @internal
+       * Set the internal players id. This is done automatically by
        * the game object when adding a new player!
        *
        * @param i the player id
        */
-      void setId(Q_UINT32 i);
+      void setKGameId(Q_UINT32 i);
 
       /**
        * Returns the user defined id of the player

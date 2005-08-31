@@ -231,7 +231,7 @@ bool BoEventListener::saveConditions(QDomElement& root) const
  QPtrListIterator<KPlayer> playerIt(*boGame->playerList());
  while (playerIt.current()) {
 	int index = boGame->playerList()->findRef(playerIt.current());
-	playerId2Index.insert(playerIt.current()->id(), index);
+	playerId2Index.insert(((Player*)playerIt.current())->bosonId(), index);
 	++playerIt;
  }
  QPtrListIterator<BoCondition> it(d->mConditions);
@@ -420,7 +420,7 @@ void BoCanvasEventListener::processEvent(const BoEvent* event)
 {
  PROFILE_METHOD
  if (event->name() == "AllUnitsDestroyed") {
-	Player* p = (Player*)boGame->findPlayer(event->playerId());
+	Player* p = (Player*)boGame->findPlayerByUserId(event->playerId());
 	if (!p) {
 		boError(360) << k_funcinfo << "could not find specified player " << event->playerId() << endl;
 		return;
@@ -429,7 +429,7 @@ void BoCanvasEventListener::processEvent(const BoEvent* event)
 
 	checkGameOverAndEndGame();
  } else if (event->name() == "PlayerLost") {
-	Player* p = (Player*)boGame->findPlayer(event->playerId());
+	Player* p = (Player*)boGame->findPlayerByUserId(event->playerId());
 	if (!p) {
 		boError(360) << k_funcinfo << "could not find specified player " << event->playerId() << endl;
 		return;
@@ -444,7 +444,7 @@ void BoCanvasEventListener::processEvent(const BoEvent* event)
 
 	boGame->slotAddChatSystemMessage(i18n("%1 has lost and is out of the game").arg(p->name()));
  } else if (event->name() == "PlayerWon") {
-	Player* p = (Player*)boGame->findPlayer(event->playerId());
+	Player* p = (Player*)boGame->findPlayerByUserId(event->playerId());
 	if (!p) {
 		boError(360) << k_funcinfo << "could not find specified player " << event->playerId() << endl;
 		return;
@@ -482,7 +482,7 @@ bool BoCanvasEventListener::checkGameOver(QPtrList<Player>* fullfilledWinningCon
 	Player* p = (Player*)boGame->playerList()->at(i);
 	if (p->allUnits()->count() > 0) {
 		fullfilled.append(p);
-		boDebug() << "FULLFILLED: " << p->id() << endl;
+		boDebug() << "FULLFILLED: " << p->bosonId() << endl;
 	}
  }
  if (fullfilled.count() <= 1) {
@@ -508,11 +508,11 @@ void BoCanvasEventListener::checkGameOverAndEndGame()
 		Player* p = (Player*)boGame->playerList()->at(i);
 		if (fullfilledWinningConditions.contains(p)) {
 			BoEvent* won = new BoEvent("PlayerWon");
-			won->setPlayerId(p->id());
+			won->setPlayerId(p->bosonId());
 			boGame->queueEvent(won);
 		} else {
 			BoEvent* lost = new BoEvent("PlayerLost");
-			lost->setPlayerId(p->id());
+			lost->setPlayerId(p->bosonId());
 			boGame->queueEvent(lost);
 		}
 	}
@@ -581,6 +581,6 @@ QString BoComputerPlayerEventListener::scriptFileName() const
 	BO_NULL_ERROR(playerIO()->player());
 	return QString();
  }
- return QString("ai-player_%1.py").arg(playerIO()->player()->id());
+ return QString("ai-player_%1.py").arg(playerIO()->player()->bosonId());
 }
 

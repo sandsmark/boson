@@ -361,7 +361,7 @@ void KGameDebugDialog::slotUpdatePlayerData(QListBoxItem* item)
 	return;
  }
 
- KPlayer* p = d->mGame->findPlayer(item->text().toInt());
+ KPlayer* p = d->mGame->findPlayerByKGameId(item->text().toInt());
 
  if (!p) {
 	boError(11001) << k_funcinfo << ": cannot find player" << endl;
@@ -373,7 +373,7 @@ void KGameDebugDialog::slotUpdatePlayerData(QListBoxItem* item)
  QString buf;
  buf.sprintf("%p", p);
  d->mPlayerAddress->setText(1, buf);
- d->mPlayerId->setText(1, QString::number(p->id()));
+ d->mPlayerId->setText(1, QString::number(p->kgameId()));
  d->mPlayerName->setText(1, p->name());
  d->mPlayerGroup->setText(1, p->group());
  d->mPlayerUserId->setText(1, QString::number(p->userId()));
@@ -460,7 +460,7 @@ void KGameDebugDialog::addPlayer(KPlayer* p)
 	return;
  }
 
- (void) new QListBoxText(d->mPlayerList, QString::number(p->id()));
+ (void) new QListBoxText(d->mPlayerList, QString::number(p->kgameId()));
  //TODO connect to signals, like deleted/removed, ...
 }
 
@@ -469,7 +469,7 @@ void KGameDebugDialog::removePlayer(QListBoxItem* i)
  if (!i || !d->mGame) {
 	return;
  }
- KPlayer* p = d->mGame->findPlayer(i->text().toInt());
+ KPlayer* p = d->mGame->findPlayerByKGameId(i->text().toInt());
  if (!p) {
 	return;
  }

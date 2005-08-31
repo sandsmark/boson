@@ -490,7 +490,7 @@ BosonPlayField* Boson::playField() const
 
 PlayerIO* Boson::findPlayerIO(Q_UINT32 id) const
 {
- Player* p = (Player*)findPlayer(id);
+ Player* p = (Player*)findPlayerByKGameId(id);
  if (p) {
 	return p->playerIO();
  }
@@ -537,6 +537,22 @@ void Boson::removeAllPlayers()
 bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 {
  return d->mPlayerInputHandler->playerInput(stream, (Player*)p);
+}
+
+void Boson::systemAddPlayer(KPlayer* p)
+{
+ BO_CHECK_NULL_RET(p);
+ if (p->userId() == 0) {
+	int userId = 128;
+	while (findPlayerByUserId(userId) != 0) {
+		userId++;
+	}
+	boDebug() << k_funcinfo << "player " << p->kgameId() << " gets userId " << userId << endl;
+	p->setUserId(userId);
+ } else {
+	boDebug() << k_funcinfo << "player " << p->kgameId() << " already has a userId: " << p->userId() << endl;
+ }
+ KGame::systemAddPlayer(p);
 }
 
 void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UINT32 sender)
@@ -633,7 +649,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		stream >> id;
 		stream >> species;
 		stream >> color;
-		Player* p = (Player*)findPlayer(id);
+		Player* p = (Player*)findPlayerByUserId(id);
 		if (!p) {
 			boError() << k_lineinfo << "Cannot find player " << id << endl;
 			return;
@@ -648,7 +664,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		Q_UINT32 color;
 		stream >> id;
 		stream >> color;
-		Player* p = (Player*)findPlayer(id);
+		Player* p = (Player*)findPlayerByUserId(id);
 		if (!p) {
 			boError() << k_lineinfo << "Cannot find player " << id << endl;
 			return;
@@ -680,11 +696,11 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		Player* p = 0;
 		Q_UINT32 id = 0;
 		stream >> id;
-		p = (Player*)findPlayer(id);
+		p = (Player*)findPlayerByUserId(id);
 		BO_CHECK_NULL_RET(p);
 		BO_CHECK_NULL_RET(d->mCanvas);
 		killPlayer(p);
-		slotAddChatSystemMessage(i18n("Debug"), i18n("Killed player %1 - %2").arg(p->id()).arg(p->name()));
+		slotAddChatSystemMessage(i18n("Debug"), i18n("Killed player %1 - %2").arg(p->bosonId()).arg(p->name()));
 		break;
 	}
 	case BosonMessageIds::IdModifyMinerals:
@@ -694,7 +710,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		Q_UINT32 id = 0;
 		stream >> id;
 		stream >> change;
-		p = (Player*)findPlayer(id);
+		p = (Player*)findPlayerByUserId(id);
 		BO_CHECK_NULL_RET(p);
 		if ((Q_INT32)p->minerals() + change < 0) {
 		}
@@ -708,7 +724,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		Q_UINT32 id = 0;
 		stream >> id;
 		stream >> change;
-		p = (Player*)findPlayer(id);
+		p = (Player*)findPlayerByUserId(id);
 		BO_CHECK_NULL_RET(p);
 		if ((Q_INT32)p->oil() + change < 0) {
 			p->setOil(0);
@@ -954,7 +970,7 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 	return;
  }
 #endif
- slotAddChatSystemMessage(i18n("Player %1(%2) left the game. Units of that player remain on the map.").arg(player->name()).arg(player->id()));
+ slotAddChatSystemMessage(i18n("Player %1(%2) left the game. Units of that player remain on the map.").arg(player->name()).arg(((Player*)player)->bosonId()));
 // boDebug() << k_funcinfo << endl;
 }
 
@@ -1006,7 +1022,7 @@ void Boson::slotPlayerJoinedGame(KPlayer* p)
 	// note the IO is added on only *one* client!
 	d->mComputerIOList.append((KGameComputerIO*)io);
  }
- slotAddChatSystemMessage(i18n("Player %1 - %2 joined").arg(p->id()).arg(p->name()));
+ slotAddChatSystemMessage(i18n("Player %1 - %2 joined").arg(((Player*)p)->bosonId()).arg(p->name()));
 }
 
 void Boson::slotPlayerLeftGame(KPlayer* p)
@@ -1018,7 +1034,7 @@ void Boson::slotPlayerLeftGame(KPlayer* p)
  if (io) {
 	d->mComputerIOList.removeRef((KGameComputerIO*)io);
  }
- slotAddChatSystemMessage(i18n("Player %1 - %2 left the game").arg(p->id()).arg(p->name()));
+ slotAddChatSystemMessage(i18n("Player %1 - %2 left the game").arg(((Player*)p)->bosonId()).arg(p->name()));
 
  ensureComputerIOListValid(this, d->mComputerIOList);
 }
@@ -1348,7 +1364,7 @@ void Boson::killPlayer(Player* player)
  }
  player->setMinerals(0);
  player->setOil(0);
- boDebug() << k_funcinfo << "player " << player->id() << " is out of game" << endl;
+ boDebug() << k_funcinfo << "player " << player->bosonId() << " is out of game" << endl;
 }
 
 void Boson::makeGameLog()
@@ -1374,7 +1390,7 @@ void Boson::makeUnitLog()
  ts << "CYCLE " << advanceCallsCount() << ":" << endl;
  QPtrListIterator<KPlayer> it(*playerList());
  while (it.current()) {
-	ts << "Player " << it.current()->id() << endl;;
+	ts << "Player " << ((Player*)it.current())->bosonId() << endl;
 	QPtrListIterator<Unit> uit(*((Player*)it.current())->allUnits());
 	while (uit.current()) {
 		Unit* u = uit.current();
@@ -1522,12 +1538,15 @@ bool Boson::addNeutralPlayer()
 	}
 	++it;
  }
+
+#warning TODO: use a fixed color for neutral player (that cant be selected by other players)
  QValueList<QColor> colors = availableTeamColors();
  if (colors.count() == 0) {
 	boError() << k_funcinfo << "no color for neutral player available. not enough colors." << endl;
 	return false;
  }
  Player* p = new Player(true);
+ p->setUserId(256);
  p->setName(i18n("Neutral"));
  p->loadTheme(SpeciesTheme::speciesDirectory("Neutral"), colors.first());
 
