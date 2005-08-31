@@ -1,0 +1,5 @@
+#include "facilities.wml" type="Units" name="Wolf" \
+        description="A Wolf doesn't look like a powerful unit. In fact it isn't the best place to sit during a war if you are alone. \
+        But the Wolf is cheap, easy to produce and the fastest land unit available. You don't want to be in a tank if there are ten wolfs." \
+        name2="wolf" type2="mob" \
+        before_url="tiger.html" before_text="Tiger" after_url="ship.html" after_text="Ship" up_url="index.html"

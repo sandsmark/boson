@@ -1,0 +1,100 @@
+AC_DEFUN([AC_BOSON_HAVE_OGG],
+[
+VORBISLIBS=""
+AC_MSG_CHECKING(for ogg/vorbis headers)
+ogg_vorbis=no
+AC_TRY_COMPILE([
+		#include <vorbis/codec.h>
+		#include <vorbis/vorbisfile.h>
+                ],[
+                ],[
+                ogg_vorbis=yes
+                ])
+AC_MSG_RESULT($ogg_vorbis)
+if test x$ogg_vorbis = xyes; then
+   dnl we need the ogg_vorbis_lib because otherwise we override LIBS !
+   AC_CHECK_LIB(vorbisfile,ov_open,ogg_vorbis_lib=yes,
+                ogg_vorbis=no,[-lvorbisfile -lvorbis -logg])
+fi
+
+dnl TODO we should check that OpenAL actually supports .ogg and .mp3 files
+])
+AC_BOSON_HAVE_OGG
+
+
+AC_DEFUN([AC_BOSON_HAVE_OPENAL],
+[
+AC_ARG_ENABLE(
+  openal,
+  [  --disable-openal        disable OpenAL sound],
+  boson_enable_openal=$enableval,
+  boson_enable_openal=yes
+)
+
+if test "x$boson_enable_openal" = "xno"; then
+  AC_MSG_WARN([OpenAL disabled])
+fi
+
+LIB_OPENAL=""
+BO_LIB_OPENAL=""
+
+dnl check for the OpenAL headers
+if test "x$boson_enable_openal" = "xyes"; then
+  AC_CHECK_HEADERS(AL/al.h,
+	bo_openal_header=yes,
+	bo_openal_header=no
+  )
+  if test "$bo_openal_header" = "no"; then
+    boson_enable_openal=no
+    AC_MSG_WARN([OpenAL headers not found. OpenAL sound disabled])
+  fi
+fi
+
+dnl check for the OpenAL lib
+if test "x$boson_enable_openal" = "xyes"; then
+  AC_LANG_SAVE
+  AC_LANG_CPLUSPLUS
+  bo_save_ldflags="$LDFLAGS"
+  bo_save_cxxflags="$CXXFLAGS"
+  bo_have_al=""
+  bo_lib_openal="-lopenal"
+  AC_MSG_CHECKING([for libopenal])
+  LDFLAGS="$LDFLAGS $bo_lib_openal"
+  CXXFLAGS="$CFLAGS"
+  AC_TRY_LINK(
+	[
+#include <AL/al.h>
+	], [
+alIsBuffer(0);
+	],
+	[bo_have_al=yes],
+	[bo_have_al=no]
+  )
+  if test "x$bo_have_al" != "xyes"; then
+    AC_MSG_RESULT([no])
+    AC_MSG_WARN([OpenAL library libopenal was not found - OpenAL sound disabled.])
+    boson_enable_openal=no
+  else
+    AC_MSG_RESULT([yes])
+  fi
+
+  AC_LANG_RESTORE
+  LDFLAGS=$bo_save_ldflags
+  CXXFLAGS=$bo_save_cxxflags
+
+  LIB_OPENAL="$bo_lib_openal"
+  BO_LIB_OPENAL="\$(top_builddir)/bosound/openal/libbosonsoundal.la"
+fi
+
+OPENAL_SUBDIR=
+if test "x$boson_enable_openal" = "xyes"; then
+  AC_DEFINE([BOSON_USE_OPENAL], 1, [Defines whether to use OpenAL sound])
+  AC_SUBST(LIB_OPENAL)
+  AC_SUBST(BO_LIB_OPENAL)
+  OPENAL_SUBDIR=openal
+
+fi
+AM_CONDITIONAL(include_bosound_openal, test -n "$OPENAL_SUBDIR")
+])
+AC_BOSON_HAVE_OPENAL
+

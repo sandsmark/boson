@@ -1,0 +1,34 @@
+# add all grounds directories here
+GROUNDS = earth
+
+# This is where it will all be installed
+groundsdir = $(kde_datadir)/boson/themes/grounds
+
+uninstall-local:
+	rm -rf $(groundsdir)
+install-data-local:
+	@$(mkinstalldirs) $(DESTDIR)$(groundsdir)
+	@for i in $(GROUNDS) ; do \
+		if test -d $(DESTDIR)$(groundsdir)/$$i; then \
+			echo "refreshing and removing $$i" ;\
+			rm -rf $(DESTDIR)$(groundsdir)/$$i;\
+		fi ;\
+		echo "installing $$i" ;\
+		dirs=`cd $(srcdir)/$$i && find . -type d | grep -v CVS`;\
+		mkdir -p $(DESTDIR)$(groundsdir)/$$i ;\
+		for j in $$dirs; do \
+			mkdir -p $(DESTDIR)$(groundsdir)/$$i/$$j ;\
+		done ;\
+		files=`cd $(srcdir)/$$i && find . -type f | grep -v CVS` ;\
+		for f in $$files; do \
+			if test -f $(srcdir)/$$i/$$f; then \
+				$(INSTALL_DATA) $(srcdir)/$$i/$$f $(DESTDIR)$(groundsdir)/$$i/$$f ;\
+			fi \
+		done \
+	done
+
+# we install the entire directory - so we need to add the entire directory to
+# the make dist target. remember to remove the CVS dirs here after doing a make
+# dist!
+EXTRA_DIST = $(GROUNDS)
+

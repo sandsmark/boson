@@ -1,0 +1,10 @@
+Makefile
+Makefile.in
+.deps
+.libs
+*.moc
+*.lo
+libbodebug.la
+libbodebug_la_meta_unload.*
+bodebugdcopiface.kidl
+bodebugdcopiface_skel.cpp

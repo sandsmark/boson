@@ -1,0 +1,25 @@
+#include "top.wml"
+
+    <h1>
+      Selecting and moving Units
+    </h1>
+        <h4>Selecting one unit</h4>
+        <p>
+        Just click on a unit to select it, if you like to add another one to your party hold down
+        the ctrl key for further selections.<br><br>
+        </p>
+        <h4>Selecting more units</h4>
+        <p>
+        Hold down the left mouse button and encircle the units you like to select.<br><br>
+        </p>
+        <h4>Selecting all units of the same type</h4>
+        <p>
+        To select e.g. all <a href="../units/leopard.html">Leopards</a> just double click one of them.<br>
+        </p>
+        <h4>Moving a unit:</h4>
+        <p>
+        Select a unit or a group and click with the right mouse button on the map or on the minimap.<br>
+        </p>
+
+#include "nav.wml" before_url="buildunit.html" before_text="Building units" after_url="equipment.html" after_text="Unit equipment" up_url="index.html"
+#include "footer.wml"

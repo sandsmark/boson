@@ -1,0 +1,10 @@
+Makefile
+Makefile.in
+.deps
+.libs
+*.moc
+*.lo
+libbogroundrendererplugin.la
+libbogroundrendererplugin_la_meta_unload.*
+libbogroundrenderer.la
+libbogroundrenderer_la_meta_unload.*

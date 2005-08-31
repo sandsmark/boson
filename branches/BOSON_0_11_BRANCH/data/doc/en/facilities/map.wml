@@ -1,0 +1,18 @@
+#include "top.wml"
+    <h1>
+      Facilities dependency tree
+    </h1>
+
+<:
+use make_tech_tree;
+make_tech_tree->draw_map(fixed);
+:>
+
+<p>
+
+<img src="map.jpg" border=0>
+
+</p>
+
+#include "nav.wml" before_url="index.html" before_text="Facilities" after_url="commandbunker.html" after_text="Command bunker" up_url="index.html"
+#include "footer.wml"

@@ -1,0 +1,339 @@
+This document tries to cover all possible mouse events that can occur in our big
+display. Please note that configurations are covered at a few places only (I've
+tried to keep most of them in mind, but I've focused on what the events should
+do by default).
+
+1. What we have
+---------------
+First of all I'd like to list what we are talking about
+
+1.1 Available Mouse Events
+--------------------------
+- Wheel (2.1)
+- MouseMove (2.2)
+- Press (2.3)
+- DblClick (2.4)
+- Release (2.5)
+
+The Release event is the most important event!
+
+1.1 Available modifiers
+-----------------------
+This is not so easy, as different events can have different modifiers. in
+general we have those:
+
+- Action locked (--> player clicked on an order button, such as "move",
+  "attack", ... and expects the unit to perform exactly that action now)
+- Shift
+- CTRL
+- MouseMove     (--> actually this is an event, but it can also be a modifier for
+  other events!)
+- Alt            --> This can't be used, since KWin grabs it :-(
+
+Note that the MouseMove event has the additional modifiers of whether a mouse
+button is currently pressed or not.
+
+1.2 Available Actions
+---------------------
+This is what can be done when an event occurs.
+- zoom view in/out                              (=> Wheel, MouseMove)
+- rotate view                                   (=> MouseMove)
+- move view                                     (=> MouseMove, Wheel, ButtonRelease(MMB))
+- select single unit                            (=> ButtonRelease (LMB))
+- select multiple units                         (=> ButtonRelease (LMB))
+- add single unit to current selection          (=> ButtonRelease (LMB))
+- add multiple units to current selection       (=> ButtonRelease (LMB))
+- remove single unit from current selection     (=> ButtonRelease (LMB))
+- remove multiple units from current selection  (=> ButtonRelease (LMB)) ?
+- select all units of a certain type of the local player
+                                                (=> ButtonRelease (DblClick))
+- select all units of a certain type of the local player that are on the screen
+                                                (=> ButtonRelease (DblClick))
+- order units to do something                   (=> ButtonRelease (RMB))
+  --> move, attack, mine, ...
+- order units to do something with action locked (i.e. unit action locked)
+                                                (=> ButtonRelease (LMB))
+- place productions                             (=> ButtonRelease (LMB))
+  --> equal to to action locked above.
+- rotate to-be-placed facility (when unit action is locked to facility
+  placement) by 90 degree
+                                                (=> ButtonRelease (RMB), Wheel?)
+- leave "action locked" mode                    (=> ButtonRelease (RMB))
+- draw selection rect                           (=> MouseMove)
+- remove selection rect                         (=> ButtonRelease (LMB))
+- update the cursor                             (=> MouseMove)
+- update placement preview                      (=> MouseMove)
+
+
+2. The events
+-------------
+Now let's have a look at all possible events and (as far as they make sense)
+their modifiers.
+
+2.1 Wheel
+---------
+A Wheel event can use only one of CTRL/Shift as actual modifier (to decide which
+action should be performed).
+The other one needs to available as an action modifier for the performed action
+- for example for zooming by default we zomm by the distance the wheel got
+moved, when the action modifier is pressed we need to zoom more (e.g. multiply
+by 3 or some other constant). This action modifier is the Control button
+(default in other applications that use the wheel as well).
+This leaves us the following combinations:
+Modifiers:
+- None                          zoom in/out
+- Shift is pressed              rotate the camera
+- Action locked                 Ignored. Has the same effect as if action wasn't
+                                locked. This is important because you may need
+                                to zoom/rotate the camera with action locked as
+                                well.
+
+Remember that all combinations can forward the CTRL is pressed status to their
+action. You can e.g. move the camera horizontally when it is not pressed and
+vertically when it is pressed.
+
+Available actions for this event:
+- Move the camera
+- Rotate the camera
+- Zoom camera in/out
+
+Possible action I could imagine for UnitAction is locked:
+- Rotate the facility by 90 degrees (in case we are in facility placement mode)
+- change attack style (offensive, defensive, ...) once we support something like
+  that
+
+TODO: offer a "ignore" for the shift modifier in BosonConfig configuration! then
+the shift modifier is ignored and the event behaves the same as without Shift
+pressed
+
+
+2.2 MouseMove
+-------------
+First of all there is one action that *always* needs to be done here:
+- update the cursor (i.e. display move/attack/default/... cursor depending on
+  the current cursor position).
+  Note that this also includes the placement preview in case UnitAction is
+  locked AND the unit action is a unit placement. Also for several UnitAction
+  locked modes there might be a different cursor that should get used.
+
+Modifiers:
+- None                          Do nothing (except that above).
+
+UPDATE: this isn't good. we use CTRL to force attack on a unit. imagine player
+presses CTRL, moves mouse to the position to attack and presses RMB. problem:
+now he had rotated the camera and fscked up his display. same about shift.
+- CTRL                          Rotate the view/camera?
+- Shift                         Zoom in/out?
+
+
+- Action locked                 Ignored. See above - the cursor might need to be
+                                updated to a different outlook, but otherwise
+                                this modifier does not influence the behavior of
+                                the other modifiers (this means Action locked +
+                                any other modifier would be equal to just the
+                                other modifier)
+- CTRL + Shift                  I propose the same as CTRL here.
+- LMB is down                   draw the selection rectangle.
+                                Any additional modifier is ignored. the modifier
+                                will be used for the ButtonRelease event.
+- MMB is down                   Currently unused.
+                                Any additional modifier is ignored. the modifier
+                                will be used for the ButtonRelease event.
+- RMB is down                   Move the camera by the distance that the mouse
+                                was moved since the last Move event (or since
+                                the button was pressed, whatever happened last).
+                                Any additional modifier is ignored. the modifier
+                                will be used for the ButtonRelease event.
+
+
+2.3 MouseButtonPress events
+---------------------------
+No actual actions should happen here, e.g. if LMB is clicked on a unit it should
+*not* get selected when the MouseButtonPress event occurs.
+
+The reason for this is pretty simple. Imagine a player has a unit selected
+presses the right mouse button somewhere on the map. Now the unit should move
+there, right? wrong. The player *pressed* the right mouse button, but he didn't
+click (i.e. he didn't release the button) and therefore probably wants to move
+the mouse with RMB down (which would move the camera).
+The same problem occurs with LMB (but not that extreme). Even if we would allow
+this for LMB (i.e. first select the unit below the cursor, then the player draws
+a selection rect and when he releases the button we select all units inside the
+rect) we would still have a problem - duplicated code. we'd need to do nearly
+the same in both Press and Release events. So it's better to move all code to
+Release event.
+
+This said there are only few things that should be done here - mainly updating
+variables. E.g. You need to toggle the "isDblClick" flag (see
+MouseButtonDblClick) back to "this is not a dbl click" and you might need to
+store the coordinates where the event occurs.
+For example for RMB moving we need the difference i.e. the distance that the
+mouse was moved on a MouseMove event. So you need to store where the movement
+started.
+
+
+2.4 MouseButtonDblClick events
+------------------------------
+Here *nothing* should happen. The actual actions should happen (just like for
+Press events) on MouseButtonRelease. Just a variable
+(member/global/static/whatever) should be changed here indicating that the
+release happens for a double click (remember that after a LMB double click the
+RMB could be released! so store the button that was pressed!)
+--> We need to do this because after a dbl click there will also be a Release
+event. we want to avoid that first we do some action (e.g. selecting all units
+of a type) for dbl click and then revert this action because on Release
+something else (select only this single unit under the cursor) happens.
+See MouseButtonPress for an explanation why we do the action on Release only.
+
+
+
+2.5 MouseButtonRelease events
+-----------------------------
+All actions for Press/DblClick events should be performed here (see
+MoudeButtonPress for an explanation on this).
+Basically this adds another modifier: isDoubleClick.
+
+We will now look at which actions should get performed for which modifier. Let's
+start with
+
+2.5.1 DoubleClicks
+-------------------
+(all stuff below applies to LMB, currently)
+Modifiers:
+- None                          This should perform one of the actions
+                                below.
+- UnitAction is locked          I have no idea what we could use this for here.
+                                But I am pretty sure it would be a bad idea. So
+                                we ignore this.
+- Shift                         This should perform another actions of the set
+                                below. Note that when this is configurable we
+                                should offer to *ignore* this modifier, i.e. to
+                                perform exactly the same action as for no
+                                modifier.
+- CTRL                          This is an action modifier, i.e. what it does
+                                depends on the performed action and it is used
+                                to configure that action. Usually instead of
+                                selecting units, we will *add* those units to
+                                the current selection. (i.e. we won't unselect
+                                the previous selection).
+                                Other uses are possible, depending on the
+                                actions.
+
+Possible actions:
+- select all units (of the local player) of the type of the unit below the
+  cursor.
+  By default this should be done when Shift is pressed (LMB).
+  CTRL should *add* them to the current selection
+- select all units (of the local player) of the type of the unit below the
+  cursor that are on the screen.
+  By default this should be done when no modifier is pressed (LMB).
+  CTRL should *add* them to the current selection
+AB: maybe we should swap default settings, i.e. without modifier select those
+that are on screen only, with modifier select all of that type.
+
+Are there any other actions possible here? Can we use RMB/MMB somehow here?
+
+
+2.5.2 Single Clicks
+-------------------
+Ok, this is more work :(
+Note that it would be pretty simple to swap LMB and RMB. maybe we support it one
+day... Anyway I refer to this as LMB and RMB anyway.
+
+2.5.2.1 Left mouse button (LMB)
+-------------------------------
+Modifiers:
+- None                          This should select the unit below the cursor and
+                                deselect any previous selection. If no unit is
+                                below the cursor this will just deselect all
+                                selected units.
+- MouseMove                     Meaning: the button was down while moving the
+                                mouse and now it gets Released. This should do
+                                exactly the same as for no modifiers, just that
+                                all units inside the selection rect will get
+                                selected, not just the one below the cursor.
+- Shift                         Currently unused.
+                                We could use this for Ben's photoshop feature,
+                                i.e. the same as without Shift, but except
+                                selecting units we deselect them.    TODO
+                                (UPDATE: now we use Shift for deselecting
+                                units).
+- CTRL                          This is an action modifier, i.e. what it does
+                                depends on the performed action and it is used
+                                to configure that action. Usually instead of
+                                selecting units, we will *add* those units to
+                                the current selection. (i.e. we won't unselect
+                                the previous selection).
+                                Other uses are possible, depending on the
+                                actions.
+- MouseMove + CTRL              CTRL has the same effect here as for no
+                                modifier.
+- MouseMove + Shift             Just as above with shift only - but this
+                                deselects all units in the selection rect.
+                                Note that selected units which are outside that
+                                rect must not be touched!
+- MouseMove + Shift + CTRL      The same as MouseMove + CTRL currently.
+- Shift + CTRL                  The same as CTRL, currently.
+- Action locked                 When the action is locked (i.e. the player
+                                selected one of the order buttons "move",
+                                "attack", ... or the facility placement) LMB
+                                will basically behave the same as RMB usually
+                                does (without modifiers)
+- Action locked + one or more of [MouseMove|Shift|CTRL]
+                                Currently unused. The same as
+                                just action locked.
+
+I can currently not imagine what else could/should be done for LMB. But I
+believe there should not be too much, as it is very important that the selection
+UI is as simple as possible, and LMB shouldn't be used for too much else.
+
+2.5.2.2 Middle mouse button (MMB)
+---------------------------------
+This is currently very simple :)
+Modifiers:
+- None                          Move the camer so that the cursor position is
+                                the center of the view.
+- CTRL                          Just as above this should be an "action
+                                modifier", i.e. what it does depends on the
+                                performed action.
+- One or more of [action locked|Shit|MouseMove]
+                                Currently unused. Simply ignore - should be
+                                treated as if no modifier was given.
+
+
+2.5.2.2 Right mouse button (RMB)
+--------------------------------
+RMB is our actual "action" button, I mean the button that orders units to do
+something.
+Modifiers:
+- None                          Order the selected units to perform a
+                                (unit-)action on the point that was clicked.
+                                ("unit action" means something like move,
+                                attack, mine, repair, ...)
+                                With CTRL pressed this will always enforce the
+                                action at that point (ignoring if and which
+                                unit is there). For example if a unit is
+                                selected then it would force attack that point,
+                                even if none or a friendly unit is there.
+                                The same might be possible for other actions
+                                (i.e. other actions than "attack").
+- CTRL                          Once again this is an "action modifier" (see
+                                above), i.e. what this does depends on the
+                                performed action.
+- Shift                         Currently unused
+- MouseMove                     (See LMB for explanation on the MouseMove
+                                modifier)
+                                This will stop RMB moving (probably - see 
+                                MouseMove event for more on this).
+                                *No* action must be performed here.
+- MouseMove + any other modifier        Same as just MouseMove. This might
+                                        conflict with RMB moving.
+- Action locked                 This will leave the "Action locked" mode.
+- Action locked + CTRL          Here we might do some things depending on the
+                                action locked mode. For example we could rotate
+                                a facility (when we are in facility placement
+                                mode) by 90 degree.
+- Action locked + Shift         Currently unused.
+- Action locked + CTRL + Shift  Just like Action locked + CTRL currently.
+
+

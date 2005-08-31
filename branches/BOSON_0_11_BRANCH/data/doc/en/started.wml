@@ -1,0 +1,40 @@
+#include "top.wml"
+    <h1>
+      Getting started
+    </h1>
+    <p>&nbsp;</p>
+      Minimum hardware requirements:<br>
+      <ul>
+       <li>500 MHz ix86 Prozessor *</li>
+       <li>256 MB RAM</li>
+       <li>3D accelerator card (a driver from the vendor is recommended because they are those which give the best performance)
+       <li>Optional: Sound card</li>
+     </ul>
+     Minimum software requirements:
+     <ul>
+        <li><a href="http://www.xfree86.org" target="_blank">XFree 4.x server</a> (with OpenGL support, 4.3 and Xrandr for resolution changing)</li>
+        <li><a href="http://www.xfree86.org" target="_blank">OpenGL <a> the OpenGL library (should be included in your XFree Server or graphics card driver)</li>
+        <li><a href="http://www.trolltech.com" target="_blank">QT 3.1</a> or better</li>
+        <li><a href="http://www.kde.org" target="_blank">kdelibs 3.1</a> or better (3.0 is untested)</li>
+        <li><a href="http://lib3ds.sourceforge.net" target="_blank">lib3ds</a> (Units and building rendering)</li>
+        <li><a href="http://www.python.org" target="_blank">Python 2.0</a> or better (2.3 is recommended) </li>
+        <li><a href="http://www.openal.org" target="_blank"> OpenAL (audio library)</li>
+        <li><a href="http://www.thewml.org" target="_blank">WML</a> and Perl - For the handbook, if you don't use a binary package</li>
+        <li>Perl Image::Magick - For the handbook technologie dependency tree image, if you don't use a binary package and want this image.</li>
+    </ul>
+    <p>
+    * Boson is known to work on AMD64, on other platforms it should work, but it is untested.<br>
+    &nbsp;&nbsp; Please send bug/sucesses reports to our <a href="mailto:boson-devel@lists.sourceforge.net">mailing list</a>.
+    <p>
+      Please note that since we do not yet provide precompiled binaries you will
+      need to install the development packages of these libraries as well (the
+      development packages usually have a -devel or -dev in their name).<br>
+    </p>
+    <p>
+      Now you can download boson - for instructions see <a href="http://boson.eu.org/download.php">http://boson.eu.org/download.php</a>.<br>
+      You need at least the packages &quot;code&quot; and &quot;data&quot;,
+      &quot;music&quot; is optional.
+    </p>
+
+#include "nav.wml" before_url="about.html" before_text="About Boson" after_url="installation.html" after_text="Installation" up_url="index.html"
+#include "footer.wml"

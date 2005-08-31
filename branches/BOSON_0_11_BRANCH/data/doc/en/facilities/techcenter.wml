@@ -1,0 +1,5 @@
+#include "facilities.wml" type="Facilities" name="Tech Center" \
+        description="As every war culture, you need to enhance your knowlege about science, materials, explosives and tactics.<br>\
+        The Tech Center is a place for all your scientists to create more or less useful <a href='../game/technologies.html'>upgrades</a>." \
+        name2="techcenter" type2="fix" \
+        before_url="comsat.html" before_text="Comsat" after_url="repairpad.html" after_text="Repair Pad" up_url="index.html"
