@@ -1,5 +1,6 @@
 from math import *
 from random import *
+from utils import *
 
 # This is just to be able to test the syntax whith you
 # Python interpreter on the console
