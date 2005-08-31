@@ -145,16 +145,6 @@ draw_bigbox_text("What has been changed since 0.10:
 
 </ul>");
 
-draw_bigbox_text("This is a list of features that we consider as
-  &quot;to-be-done&quot; for the next release.
-  <h2>TODO</h2>
-  <ul>
-     <li>libufo port: a lot of testing</li>
-     <li>Test the Sync protocol at least once in real life</li>
-     <li>Support calling script functions from BoCondition (optional for
-     release)</li>
-  </ul>
- ");
 draw_bigbox_end();
 main_area_end();
 
