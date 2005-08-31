@@ -134,7 +134,7 @@ make_makefile_am() {
 	done
 	echo " ." >> $makefile
 	echo "" >> $makefile
-	echo "INCLUDES = -I\$(top_srcdir)/`basename $DST`/include \$(all_includes)" >> $makefile
+	echo "INCLUDES = -I\$(top_srcdir)/`basename $DST`/include -I\$(top_srcdir)/bogl \$(all_includes)" >> $makefile
 	echo "" >> $makefile
 	echo "noinst_LTLIBRARIES = lib$lib.la" >> $makefile
 	echo "" >> $makefile
