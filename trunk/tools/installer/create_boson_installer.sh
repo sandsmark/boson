@@ -126,7 +126,7 @@ copy_binaries() {
 	mv $binary_dest/boson $binary_dest/boson.bin
 	echo "#!/bin/bash" > $binary_dest/boson
 	echo "export LD_PRELOAD=libGL.so" >> $binary_dest/boson
-	echo "\$0.bin" >> $binary_dest/boson
+	echo "\$0.bin \"$@\"" >> $binary_dest/boson
 	chmod +x $binary_dest/boson
 }
 copy_data() {
