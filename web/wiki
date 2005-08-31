@@ -1,1 +1,0 @@
-<?php chdir("/home/groups/b/bo/boson/htdocs/pmwiki/"); include("pmwiki.php"); ?>
