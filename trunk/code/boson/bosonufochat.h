@@ -56,7 +56,7 @@ public:
 	KGame* game() const;
 
 	/**
-	 * Equivalent to addMessage(game()->findPlayer(playerId));
+	 * Equivalent to addMessage(game()->findPlayerByKGameId(playerId));
 	 **/
 	void addMessage(unsigned int playerId, const QString& message);
 

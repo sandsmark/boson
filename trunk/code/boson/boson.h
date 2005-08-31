@@ -496,6 +496,8 @@ signals:
 protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);
 
+	virtual void systemAddPlayer(KPlayer* p);
+
 	/**
 	 * Create a game log (see @ref writeGameLog) and store it for later use (see
 	 * @ref saveGameLogs).

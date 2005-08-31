@@ -152,7 +152,7 @@ void ProductionPlugin::productionPlaced(Unit* produced)
 
  BoEvent* productionPlaced = new BoEvent("ProducedUnitWithTypePlaced", QString::number(produced->type()), QString::number(unit()->id()));
  productionPlaced->setUnitId(produced->id());
- productionPlaced->setPlayerId(produced->owner()->id());
+ productionPlaced->setPlayerId(produced->owner()->bosonId());
  productionPlaced->setLocation(BoVector3Fixed(produced->x(), produced->y(), produced->z()));
  boGame->queueEvent(productionPlaced);
 
@@ -243,7 +243,7 @@ void ProductionPlugin::addProduction(ProductionType type, unsigned long int id)
  }
  if (!eventName.isNull()) {
 	BoEvent* event = new BoEvent(eventName, QString::number(id), QString::number(unit()->id()));
-	event->setPlayerId(player()->id());
+	event->setPlayerId(player()->bosonId());
 	event->setLocation(BoVector3Fixed(unit()->x(), unit()->y(), unit()->z()));
 	game()->queueEvent(event);
  }
@@ -274,7 +274,7 @@ void ProductionPlugin::pauseProduction()
 
  if (!eventName.isNull()) {
 	BoEvent* event = new BoEvent(eventName, QString::number(currentProductionId()), QString::number(unit()->id()));
-	event->setPlayerId(player()->id());
+	event->setPlayerId(player()->bosonId());
 	event->setLocation(BoVector3Fixed(unit()->x(), unit()->y(), unit()->z()));
 	game()->queueEvent(event);
  }
@@ -305,7 +305,7 @@ void ProductionPlugin::unpauseProduction()
  }
  if (!eventName.isNull()) {
 	BoEvent* event = new BoEvent(eventName, QString::number(currentProductionId()), QString::number(unit()->id()));
-	event->setPlayerId(player()->id());
+	event->setPlayerId(player()->bosonId());
 	event->setLocation(BoVector3Fixed(unit()->x(), unit()->y(), unit()->z()));
 	game()->queueEvent(event);
  }
@@ -366,7 +366,7 @@ void ProductionPlugin::abortProduction(ProductionType type, unsigned long int id
 
  if (!eventName.isNull()) {
 	BoEvent* event = new BoEvent(eventName, QString::number(id), QString::number(unit()->id()));
-	event->setPlayerId(player()->id());
+	event->setPlayerId(player()->bosonId());
 	event->setLocation(BoVector3Fixed(unit()->x(), unit()->y(), unit()->z()));
 	game()->queueEvent(event);
  }
@@ -458,7 +458,7 @@ void ProductionPlugin::advance(unsigned int)
 
 		BoEvent* unitProduced = new BoEvent("UnitWithTypeProduced", QString::number(id),
 				QString::number(unit()->id()));
-		unitProduced->setPlayerId(player()->id());
+		unitProduced->setPlayerId(player()->bosonId());
 		game()->queueEvent(unitProduced);
 
 		if (prop->isFacility()) {

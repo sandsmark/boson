@@ -177,7 +177,7 @@ void BosonStartupNetwork::sendChangeTeamColor(Player* p, const QColor& color)
  BO_CHECK_NULL_RET(p);
  QByteArray b;
  QDataStream stream(b, IO_WriteOnly);
- stream << (Q_UINT32)p->id();
+ stream << (Q_UINT32)p->bosonId();
  stream << (Q_UINT32)color.rgb();
  mGame->sendMessage(b, BosonMessageIds::ChangeTeamColor);
 }
@@ -188,7 +188,7 @@ void BosonStartupNetwork::sendChangeSpecies(Player* p, const QString& species, c
  BO_CHECK_NULL_RET(p);
  QByteArray b;
  QDataStream stream(b, IO_WriteOnly);
- stream << (Q_UINT32)p->id();
+ stream << (Q_UINT32)p->bosonId();
  stream << species;
  stream << (Q_UINT32)color.rgb();
  mGame->sendMessage(b, BosonMessageIds::ChangeSpecies);

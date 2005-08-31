@@ -66,9 +66,14 @@ protected:
 	Unit* findUnit(unsigned long int id, Player* searchIn) const;
 
 	/**
-	 * Convenience method for (Player*)mGame->findPlayer(id)
+	 * Convenience method for (Player*)mGame->findPlayerByKGameId(id)
 	 **/
-	Player* findPlayer(unsigned long int id) const;
+	Player* findPlayerByKGameId(unsigned long int id) const;
+
+	/**
+	 * Convenience method for (Player*)mGame->findPlayerByUserId(id)
+	 **/
+	Player* findPlayerByUserId(int id) const;
 
 	BosonCanvas* canvas() const;
 

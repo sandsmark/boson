@@ -359,7 +359,7 @@ void BoUfoNewGameWidget::slotNetStart()
                 continue;
             }
             if (p->teamColor() == p2->teamColor()) {
-                KMessageBox::sorry(0, i18n("Cannot start game - player %1 (id=%2) and %3 (id=%4) have the same teamcolor.\nThis is not allowed!").arg(p->name()).arg(p->id()).arg(p2->name()).arg(p2->id()));
+                KMessageBox::sorry(0, i18n("Cannot start game - player %1 (id=%2) and %3 (id=%4) have the same teamcolor.\nThis is not allowed!").arg(p->name()).arg(p->bosonId()).arg(p2->name()).arg(p2->bosonId()));
                 return;
             }
         }
@@ -419,8 +419,8 @@ void BoUfoNewGameWidget::slotNetPlayerJoinedGame(KPlayer* p)
         // Localplayer added AI player
         boGame->slotAddChatSystemMessage("Boson", i18n("You added AI player %1 to the game").arg(p->name()));
     } else {
-        int gameID = KGameMessage::rawGameId(p->id());  // gameID == clientID
-        KPlayer* mainPlayer = boGame->findPlayer(KGameMessage::createPlayerId(1, gameID));
+        int gameID = KGameMessage::rawGameId(p->kgameId());  // gameID == clientID
+        KPlayer* mainPlayer = boGame->findPlayerByKGameId(KGameMessage::createPlayerId(1, gameID));
         if (mainPlayer == p) {
             // Another client connected
             boGame->slotAddChatSystemMessage("Boson", i18n("%1 joined the game").arg(p->name()));
@@ -614,7 +614,7 @@ void BoUfoNewGameWidget::slotNetPlayerNameChanged(Player* p)
         return;
     }
  }
- boWarning() << k_funcinfo << "could not find player " << p->id() << endl;
+ boWarning() << k_funcinfo << "could not find player " << p->bosonId() << endl;
 }
 
 void BoUfoNewGameWidget::slotNetSetLocalPlayer(Player* p)
@@ -653,7 +653,7 @@ void BoUfoNewGameWidget::slotPlayerNameChanged()
  // Non-admin players can only change names of non-virtual players
  if (!boGame->isAdmin() && mSelectedPlayer->isVirtual()) {
     // This shouldn't happen, name lineedit should be read-only in this case
-    boError() << k_funcinfo << "Can't set name for player " << p->id() << endl;
+    boError() << k_funcinfo << "Can't set name for player " << p->bosonId() << endl;
     mPlayerName->setText(p->name());
     return;
  }
@@ -677,7 +677,7 @@ void BoUfoNewGameWidget::slotPlayerColorChanged(int index)
  }
  BO_CHECK_NULL_RET(p);
  if (!boGame->isAdmin() && mSelectedPlayer->isVirtual()) {
-    boError() << k_funcinfo << "Can't set color for player " << mSelectedPlayer->id() << endl;
+    boError() << k_funcinfo << "Can't set color for player " << mSelectedPlayer->bosonId() << endl;
     KMessageBox::sorry(0, i18n("Only ADMIN can change color of other players!"));
     return;
  }
@@ -725,7 +725,7 @@ void BoUfoNewGameWidget::slotPlayerSpeciesChanged(int index)
     p = localPlayer();
  }
  if (!boGame->isAdmin() && mSelectedPlayer->isVirtual()) {
-    boError() << k_funcinfo << "Can't set species for player " << p->id() << endl;
+    boError() << k_funcinfo << "Can't set species for player " << p->bosonId() << endl;
     return;
  }
 

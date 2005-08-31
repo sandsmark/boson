@@ -417,7 +417,7 @@ QCString BosonSaveLoad::savePlayersAsXML()
 	// but we load from a file here.
 	QDomElement element = doc.createElement(QString::fromLatin1("Player"));
 	if (!((Player*)p)->saveAsXML(element)) {
-		boError() << k_funcinfo << "Unable to save player " << p->id() << endl;
+		boError() << k_funcinfo << "Unable to save player " << ((Player*)p)->bosonId() << endl;
 		return QCString();
 	}
 	root.appendChild(element);
@@ -569,13 +569,13 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 			boError(270) << k_funcinfo << "missing or invalid PlayerId attribute for Player tag " << j << endl;
 			continue;
 		}
-		if (p->id() != id) {
+		if (p->bosonId() != (int)id) {
 			continue;
 		}
 		player = e;
 	}
 	if (player.isNull()) {
-		boError(270) << k_funcinfo << "no Player tag found for player with id " << p->id() << endl;
+		boError(270) << k_funcinfo << "no Player tag found for player with id " << p->bosonId() << endl;
 		return false;
 	}
 	if (i == d->mBoson->playerList()->count() - 1) {
@@ -779,7 +779,7 @@ bool BosonSaveLoad::convertPlayerIdsToIndices(QMap<QString, QByteArray>& files) 
 		boError() << k_funcinfo << it.key() << " does not contain a valid number" << endl;
 		return false;
 	}
-	Player* p = (Player*)boGame->findPlayer(id);
+	Player* p = (Player*)boGame->findPlayerByUserId(id);
 	if (!p) {
 		boError() << k_funcinfo << "no player with id " << id << " in game" << endl;
 		return false;

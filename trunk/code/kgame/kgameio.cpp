@@ -79,7 +79,7 @@ void KGameIO::notifyTurn(bool b)
   if (sendit)
   {
     QDataStream ostream(buffer,IO_ReadOnly);
-    Q_UINT32 sender = player()->id();  // force correct sender
+    Q_UINT32 sender = player()->kgameId();  // force correct sender
     boDebug(11001) << "Prepare turn sendInput" << endl;
     sendInput(ostream, true, sender);
   }
@@ -308,7 +308,7 @@ void KGameProcessIO::initIO(KPlayer *p)
     emit signalIOAdded(this,stream,p,&sendit);
     if (sendit )
     {
-      Q_UINT32 sender = p->id();
+      Q_UINT32 sender = p->kgameId();
       boDebug(11001) <<  "Sending IOAdded to process player !!!!!!!!!!!!!! " << endl;
       sendSystemMessage(stream, KGameMessage::IdIOAdded, 0, sender);
     }
@@ -329,7 +329,7 @@ void KGameProcessIO::notifyTurn(bool b)
   emit signalPrepareTurn(stream,b,this,&sendit);
   if (sendit)
   {
-    Q_UINT32 sender=player()->id();
+    Q_UINT32 sender=player()->kgameId();
     boDebug(11001) <<  "Sending Turn to process player !!!!!!!!!!!!!! " << endl;
     sendSystemMessage(stream, KGameMessage::IdTurn, 0, sender);
   }
@@ -403,7 +403,7 @@ void KGameProcessIO::receivedMessage(const QByteArray& receiveBuffer)
   }
   else if (player())
   {
-    sender = player()->id();  // force correct sender
+    sender = player()->kgameId();  // force correct sender
     if (msgid==KGameMessage::IdPlayerInput) 
     {
       sendInput(ostream,true,sender);
