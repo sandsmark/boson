@@ -43,6 +43,10 @@ public:
 
 	virtual void render(int x, int y, int w, int h)
 	{
+		Q_UNUSED(x);
+		Q_UNUSED(y);
+		Q_UNUSED(w);
+		Q_UNUSED(h);
 		if (Bo3dTools::checkError()) {
 			boError() << k_funcinfo << "GL error at the beginning of this method" << endl;
 		}
@@ -106,8 +110,8 @@ BosonUfoMiniMap::BosonUfoMiniMap() : BoUfoWidget()
 
  connect(this, SIGNAL(signalMouseMoved(QMouseEvent*)),
 		this, SLOT(slotMouseEvent(QMouseEvent*)));
-// connect(this, SIGNAL(signalMouseDragged(ufo::UMouseEvent*)),
-//		this, SLOT(slotMouseEvent(ufo::UMouseEvent*)));
+ connect(this, SIGNAL(signalMouseDragged(QMouseEvent*)),
+		this, SLOT(slotMouseEvent(QMouseEvent*)));
  connect(this, SIGNAL(signalMousePressed(QMouseEvent*)),
 		this, SLOT(slotMouseEvent(QMouseEvent*)));
  connect(this, SIGNAL(signalMouseReleased(QMouseEvent*)),
@@ -153,7 +157,12 @@ void BosonUfoMiniMap::slotMouseEvent(QMouseEvent* e)
  // cursor position)
  switch (e->type()) {
 	case QMouseEvent::MouseMove:
-		e->ignore();
+		if (!(e->state() & Qt::LeftButton)) {
+			// MouseMove is ignored when LMB is not pressed only
+			e->ignore();
+		} else {
+			e->accept();
+		}
 		break;
 	default:
 		e->accept();
@@ -165,19 +174,26 @@ void BosonUfoMiniMap::slotMouseEvent(QMouseEvent* e)
 	return;
  }
 
+ int button = e->button();
  switch (e->type()) {
+	case QMouseEvent::MouseMove:
+		button = Qt::NoButton;
+		if (e->state() & Qt::LeftButton) {
+			button = Qt::LeftButton;
+		} else {
+			break;
+		}
+		// fall through intended, for LMB+Move
 	case QMouseEvent::MouseButtonPress:
 	{
-		if (e->button() == Qt::LeftButton) {
+		if (button == Qt::LeftButton) {
 			d->mGLMiniMap->emitSignalReCenterView(cell);
-		} else if (e->button() == Qt::RightButton) {
+		} else if (button == Qt::RightButton) {
 			d->mGLMiniMap->emitSignalMoveSelection(cell);
 		}
 		break;
 	}
 	case QMouseEvent::MouseButtonRelease:
-		break;
-	case QMouseEvent::MouseMove:
 		break;
 //	case QMouseEvent::MouseClicked:
 //		break;
