@@ -186,7 +186,7 @@ UBoProgress::paintFrame(UGraphics * g, const UColor& color) {
 }
 
 UDimension
-UBoProgress::getPreferredSize(const UDimension & maxSize) {
+UBoProgress::getPreferredSize(const UDimension & maxSize) const {
 	UDimension size;
 	if (getOrientation() == Horizontal) {
 		size = UDimension(PREFERRED_WIDTH, PREFERRED_HEIGHT);
