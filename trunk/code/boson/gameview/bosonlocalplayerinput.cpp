@@ -75,6 +75,11 @@ bool BosonLocalPlayerInput::initializeIO()
     // that player IO will be deleted later though, it is never really used
     PlayerIO* io = ((Player*)player())->playerIO();
     BoEventManager* manager = ((Boson*)game())->eventManager();
+
+    // AB: note that the event listener is neither loaded nor saved!
+    //     -> only the script is loaded (by initScript()) and saved (by the
+    //        manager), loadFromXML() is never called.
+    //     TODO: is this a bug or do we intend this?
     mEventListener = new BoLocalPlayerEventListener(io, manager, this);
     connect(mEventListener, SIGNAL(signalShowMiniMap(bool)),
             this, SIGNAL(signalShowMiniMap(bool)));

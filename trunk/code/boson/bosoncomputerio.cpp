@@ -70,6 +70,11 @@ bool BosonComputerIO::initializeIO()
 	return false;
  }
  BoEventManager* manager = boGame->eventManager();
+
+ // AB: note that the listener is neither loaded nor saved currently.
+ //     only the script is loaded (initScript()) and saved (by the manager), but
+ //     loadFromXML() is never called.
+ //     TODO: is this a bug or do we intend this?
  mEventListener = new BoComputerPlayerEventListener((Player*)player(), manager, this);
  if (!mEventListener->initScript()) {
 	boError() << k_funcinfo << "could not init script" << endl;
