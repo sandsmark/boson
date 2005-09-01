@@ -264,11 +264,6 @@ bool Game::loadGameData(const QByteArray& data)
     f.writeBlock(it.data());
   }*/
 
-  if(!fixPlayerIds(files))
-  {
-    return false;
-  }
-
   // Load map description and size
   if(!loadMapData(files))
   {
@@ -343,7 +338,7 @@ bool Game::loadPlayersData(QMap<QString, QByteArray>& files)
       boError(260) << k_funcinfo << "PlayerId of Items Tag " << i << " is not a valid number" << endl;
       continue;
     }
-    Player* owner = (Player*)findPlayer(id);
+    Player* owner = (Player*)findPlayerByUserId(id);
     if(!owner)
     {
       // AB: this is totally valid. less players in game, than in the
@@ -413,121 +408,4 @@ bool Game::unstreamPlayfieldFiles(QMap<QString, QByteArray>& files, const QByteA
   return true;
 }
 
-bool Game::fixPlayerIds(QMap<QString, QByteArray>& files)
-{
-  QByteArray playersXML = files["players.xml"];
-  QByteArray canvasXML = files["canvas.xml"];
-
-  QString errorMsg;
-  int line = 0, column = 0;
-
-  QDomDocument playersDoc;
-  if(!playersDoc.setContent(QString(playersXML), &errorMsg, &line, &column))
-  {
-    boError(270) << k_funcinfo << "unable to load playersXML - parse error at line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
-    return false;
-  }
-  QDomDocument canvasDoc;
-  if(!canvasDoc.setContent(QString(canvasXML), &errorMsg, &line, &column))
-  {
-    boError(270) << k_funcinfo << "unable to load canvasXML - parse error at line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
-    return false;
-  }
-
-  QDomElement playersRoot = playersDoc.documentElement();
-  QDomElement canvasRoot = canvasDoc.documentElement();
-
-  QDomNodeList playersList = playersRoot.elementsByTagName("Player");
-  int* actualIds = new int[playersList.count()];
-  for(unsigned int i = 0; i < playersList.count(); i++)
-  {
-    int actualId = 0;
-    if(i < playerCount() - 1)
-    {
-      // usual player.
-      // notice that the last player in boGame->playerList() is
-      // handled below, not here.
-      actualId = playerList()->at(i)->id();
-    }
-    if(i == playersList.count() - 1)
-    {
-      // per definition the last player in the list is _always_ the
-      // neutral player (no actual player can chose to play this
-      // player).
-      actualId = playerList()->at(playerCount() - 1)->id();
-    }
-
-    // this gives
-    // the valid id for players i = 0..(boGame->playerCount() - 2)
-    // 0 for i = (boGame->playerCount()-1) .. (playersList.count()-1)
-    // the id of boGame->playerCount()-1 for i = playersList.count()-1
-    actualIds[i] = actualId;
-  }
-
-  bool ret = true;
-  ret = ret & fixPlayerIds(actualIds, playersList.count(), playersRoot); // e.g. players
-  ret = ret & fixPlayerIds(actualIds, playersList.count(), canvasRoot); // e.g. items
-
-  delete[] actualIds;
-  actualIds = 0;
-
-  if(!ret)
-  {
-    boError(270) << k_funcinfo << "unable to fix player ids" << endl;
-    return false;
-  }
-
-  playersXML = playersDoc.toCString();
-  canvasXML = canvasDoc.toCString();
-
-  files.insert("players.xml", playersXML);
-  files.insert("canvas.xml", canvasXML);
-
-  return true;
-}
-
-bool Game::fixPlayerIds(int* actualIds, unsigned int players, QDomElement& root) const
-{
-  for(QDomNode n = root.firstChild(); !n.isNull(); n = n.nextSibling())
-  {
-    QDomElement e = n.toElement();
-    if (e.isNull())
-    {
-      continue;
-    }
-    if(!fixPlayerIds(actualIds, players, e))
-    {
-      boError(270) << k_funcinfo << "recursive call failed" << endl;
-      return false;
-    }
-  }
-  if(root.hasAttribute("PlayerId"))
-  {
-    bool ok;
-    unsigned long int id = root.attribute("PlayerId").toULong(&ok);
-    if(!ok)
-    {
-      boError(270) << k_funcinfo << "PlayerId is not a valid number" << endl;
-      return false;
-    }
-
-    // the file contains the _index_ only, so it must be
-    // < BOSON_MAX_PLAYERS.
-    // If (due to some bug) the file stores the actual ID, then it is
-    // >= 1025, i.e. > 1000
-    if(id > 1000)
-    {
-      boError(270) << k_funcinfo << "invalid PlayerId at this point: " << id << " -> probably the actual ID was stored, instead of expected index" << endl;
-      return false;
-    }
-    if(id >= players)
-    {
-      boError(270) << k_funcinfo << "invalid PlayerId: " << id << " must be < " << players << endl;
-      return false;
-    }
-    root.setAttribute("PlayerId", QString::number(actualIds[id]));
-
-  }
-  return true;
-}
 
