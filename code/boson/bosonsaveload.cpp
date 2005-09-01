@@ -560,7 +560,7 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 	for (unsigned int j = 0; j < list.count() && player.isNull(); j++) {
 		QDomElement e = list.item(j).toElement();
 		bool ok = false;
-		unsigned int id = e.attribute(QString::fromLatin1("PlayerId")).toUInt(&ok);
+		int id = e.attribute(QString::fromLatin1("PlayerId")).toInt(&ok);
 		if (!ok) {
 			boError(270) << k_funcinfo << "missing or invalid PlayerId attribute for Player tag " << j << endl;
 			continue;
@@ -574,7 +574,7 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 		boError(270) << k_funcinfo << "no Player tag found for player with id " << p->bosonId() << endl;
 		return false;
 	}
-	if (i == d->mBoson->playerList()->count() - 1) {
+	if (p->bosonId() == 256) {
 		boDebug(270) << k_funcinfo << "loading neutral player" << endl;
 		if (!player.hasAttribute("IsNeutral")) {
 			boError(270) << k_funcinfo << "file format error: missing IsNeutral attribute for neutral player" << endl;
