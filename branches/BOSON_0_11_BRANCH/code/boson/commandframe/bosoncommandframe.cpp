@@ -770,6 +770,13 @@ void BosonCommandFrame::setGameMode(bool game)
  }
  d->mGameMode = game;
 
+ int buttoncolumns = 3;
+ if (!game) {
+	buttoncolumns = 5;
+ }
+ d->mSelectionWidget->setGridLayoutColumns(buttoncolumns);
+ d->mPlacementWidget->setGridLayoutColumns(buttoncolumns);
+
  d->mUnitActionsBox->setVisible(game);
  d->mPlacementWidget->setVisible(!game);
  connectDisconnect(game,
