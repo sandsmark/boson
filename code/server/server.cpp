@@ -296,7 +296,7 @@ void Server::processStatusEvent(QDataStream& stream)
 
   if(name == "UnitWithTypeProduced")
   {
-    Player* owner = (Player*)mGame->findPlayer(playerid);
+    Player* owner = (Player*)mGame->findPlayerByUserId(playerid);
     if(owner)
     {
       owner->unitProduced();
@@ -304,7 +304,7 @@ void Server::processStatusEvent(QDataStream& stream)
   }
   else if(name == "UnitWithTypeDestroyed")
   {
-    Player* owner = (Player*)mGame->findPlayer(playerid);
+    Player* owner = (Player*)mGame->findPlayerByUserId(playerid);
     if(owner)
     {
       owner->unitDestroyed();
