@@ -73,7 +73,7 @@ public:
 		return m_framecolor;
 	}
 
-	virtual UDimension getPreferredSize(const UDimension & maxSize);
+	virtual UDimension getPreferredSize(const UDimension & maxSize) const;
 
 protected:
 	virtual void paintWidget(UGraphics* g);
