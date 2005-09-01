@@ -39,7 +39,7 @@ BoEventMatching::~BoEventMatching()
  delete mEvent;
 }
 
-bool BoEventMatching::save(QDomElement& root, const QMap<int, int>* playerId2Index) const
+bool BoEventMatching::saveAsXML(QDomElement& root) const
 {
  if (!mEvent) {
 	boError(360) << k_funcinfo << "cannot save a matching with NULL event" << endl;
@@ -47,7 +47,7 @@ bool BoEventMatching::save(QDomElement& root, const QMap<int, int>* playerId2Ind
  }
  QDomDocument doc = root.ownerDocument();
  QDomElement e = doc.createElement("Event");
- if (!mEvent->save(e, playerId2Index)) {
+ if (!mEvent->saveAsXML(e)) {
 	boError(360) << k_funcinfo << "cannot save event" << endl;
 	return false;
  }
@@ -59,7 +59,7 @@ bool BoEventMatching::save(QDomElement& root, const QMap<int, int>* playerId2Ind
  return true;
 }
 
-bool BoEventMatching::load(const QDomElement& root)
+bool BoEventMatching::loadFromXML(const QDomElement& root)
 {
  if (mEvent) {
 	boError(360) << k_funcinfo << "event not NULL" << endl;
@@ -71,7 +71,7 @@ bool BoEventMatching::load(const QDomElement& root)
 	return false;
  }
  mEvent = new BoEvent();
- if (!mEvent->load(e)) {
+ if (!mEvent->loadFromXML(e)) {
 	boError(360) << k_funcinfo << "could not load event" << endl;
 	return false;
  }

@@ -60,8 +60,8 @@ public:
 
 	virtual ~BoEvent();
 
-	virtual bool save(QDomElement& root, const QMap<int,int>* playerId2Index) const;
-	virtual bool load(const QDomElement& root);
+	virtual bool saveAsXML(QDomElement& root) const;
+	virtual bool loadFromXML(const QDomElement& root);
 
 	/**
 	 * @return TRUE if this event matches the event @p e under the matching

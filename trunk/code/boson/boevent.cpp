@@ -54,7 +54,7 @@ BoEvent::~BoEvent()
 {
 }
 
-bool BoEvent::save(QDomElement& root, const QMap<int, int>* playerId2Index) const
+bool BoEvent::saveAsXML(QDomElement& root) const
 {
  root.setAttribute("Name", name());
  root.setAttribute("Id", QString::number(id()));
@@ -68,27 +68,12 @@ bool BoEvent::save(QDomElement& root, const QMap<int, int>* playerId2Index) cons
 	return false;
  }
  if (mHasPlayerId) {
-	// just like in BosonCanvas, we save the _index_, not the ID. but load()
-	// will expect the _ID_, so there must be some class filling in the
-	// correct value before load() is called.
-	int index;
-	if (!playerId2Index) {
-		// here we save the actual Id (which is the index already)
-		// -> not used by the game itself
-		index = playerId();
-	} else {
-		if (!playerId2Index->contains(playerId())) {
-			boError(360) << k_funcinfo << "map does not contain playerId " << playerId() << endl;
-			return false;
-		}
-		index = (*playerId2Index)[playerId()];
-	}
-	root.setAttribute("PlayerId", QString::number(index));
+	root.setAttribute("PlayerId", QString::number(playerId()));
  }
  return true;
 }
 
-bool BoEvent::load(const QDomElement& root)
+bool BoEvent::loadFromXML(const QDomElement& root)
 {
  bool ok;
  mName = root.attribute("Name");

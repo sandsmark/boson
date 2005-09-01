@@ -1359,21 +1359,21 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
 			return false;
 		}
 		bool ok;
-		unsigned int index = playerElement.attribute("PlayerId").toUInt(&ok);
+		int id = playerElement.attribute("PlayerId").toInt(&ok);
 		if (!ok) {
 			return false;
 		}
-		if ((int)index != mGame->playerList()->findRef(kplayer)) {
-			boError() << k_funcinfo << "unexpected PlayerId attribute " << index << " expected " << mGame->playerList()->findRef(kplayer) << endl;
+		Player* player = (Player*)kplayer;
+		if (id != player->bosonId()) {
+			boError() << k_funcinfo << "unexpected PlayerId attribute " << id << " expected " << player->bosonId() << endl;
 			return false;
 		}
-		Player* player = (Player*)kplayer;
 		// Delete old data (e.g. units)
 		BosonMap* map = player->map();
 		player->quitGame();
 		player->initMap(map);
 		if (!player->loadFromXML(playerElement)) {
-			boError() << k_funcinfo << "could not load player " << player->bosonId() << " at index " << index << endl;
+			boError() << k_funcinfo << "could not load player " << player->bosonId() << endl;
 			return false;
 		}
 	}

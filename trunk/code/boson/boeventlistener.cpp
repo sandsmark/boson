@@ -105,8 +105,7 @@ bool BoEventListener::addCondition(BoCondition* c)
  return true;
 }
 
-// TODO: rename to saveAsXML()
-bool BoEventListener::save(QDomElement& root) const
+bool BoEventListener::saveAsXML(QDomElement& root) const
 {
  QDomDocument doc = root.ownerDocument();
  QDomElement conditions = doc.createElement("Conditions");
@@ -123,8 +122,7 @@ bool BoEventListener::save(QDomElement& root) const
  return true;
 }
 
-// TODO: rename to loadFromXML()
-bool BoEventListener::load(const QDomElement& root)
+bool BoEventListener::loadFromXML(const QDomElement& root)
 {
  QDomElement conditions = root.namedItem("Conditions").toElement();
  if (conditions.isNull()) {
@@ -227,17 +225,10 @@ bool BoEventListener::saveConditions(QDomElement& root) const
 {
  QDomDocument doc = root.ownerDocument();
 
- QMap<int, int> playerId2Index;
- QPtrListIterator<KPlayer> playerIt(*boGame->playerList());
- while (playerIt.current()) {
-	int index = boGame->playerList()->findRef(playerIt.current());
-	playerId2Index.insert(((Player*)playerIt.current())->bosonId(), index);
-	++playerIt;
- }
  QPtrListIterator<BoCondition> it(d->mConditions);
  while (it.current()) {
 	QDomElement e = doc.createElement("Condition");
-	if (!it.current()->save(e, &playerId2Index)) {
+	if (!it.current()->saveAsXML(e)) {
 		boError(360) << k_funcinfo << "unable to save condition" << endl;
 		return false;
 	}
@@ -259,7 +250,7 @@ bool BoEventListener::loadConditions(const QDomElement& root)
 		return false;
 	}
 	BoCondition* c = new BoCondition();
-	if (!c->load(e)) {
+	if (!c->loadFromXML(e)) {
 		boError(360) << k_funcinfo << "unable to load condition" << endl;
 		delete c;
 		return false;
