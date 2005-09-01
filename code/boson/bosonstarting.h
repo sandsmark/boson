@@ -490,32 +490,6 @@ protected:
 	virtual bool startTask();
 
 	/**
-	 * We cannot store the actual player ID in our files (.bsg/.bpf),
-	 * because the ID can be totally different when the game is loaded again
-	 * (remember: starting a new game is just a special case of loading a
-	 * game).
-	 *
-	 * Therefore we store the _index_ of the players in our files ("player
-	 * number"). But all load() methods (e.g. in BosonCanvas) expect the
-	 * _actual ID_, as that's what they need to load the files correctly.
-	 *
-	 * So we need to map the "player number" from the file, to the actual
-	 * player ID. This is done here.
-	 **/
-	bool fixPlayerIds(QMap<QString, QByteArray>& files) const;
-
-	/**
-	 * Fixes (recursively) all PlayerId tags in @p root and its children.
-	 *
-	 * @param actualIds An array containing the actual ID for every player
-	 * index
-	 * @param players The number of players. This is equal to the number of
-	 * elements in @p actualIds.
-	 **/
-	bool fixPlayerIds(int* actualIds, unsigned int players, QDomElement& root) const;
-	bool fixPlayerIdsInFileNames(int* actualIds, unsigned int players, QMap<QString, QByteArray>& files) const;
-
-	/**
 	 * Creates @ref BosonMoveData objects for all unitproperties
 	 **/
 	bool createMoveDatas();

@@ -775,10 +775,9 @@ bool Player::saveAsXML(QDomElement& root)
 	return false;
  }
 
- // note: we need to save the index in the list, not the actual id()
- root.setAttribute(QString::fromLatin1("PlayerId"), game()->playerList()->findRef(this));
+ root.setAttribute(QString::fromLatin1("PlayerId"), bosonId());
 
- if (game()->playerList()->findRef(this) == (int)game()->playerList()->count() - 1) {
+ if (bosonId() == 256) {
 	root.setAttribute(QString::fromLatin1("IsNeutral"), 1);
  }
 

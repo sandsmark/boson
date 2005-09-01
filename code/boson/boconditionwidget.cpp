@@ -212,7 +212,7 @@ void BoConditionWidget::slotAddCondition()
 
 
  BoCondition test;
- if (!test.load(condition)) {
+ if (!test.loadFromXML(condition)) {
 	boError() << k_funcinfo << "cannot load new condition" << endl;
 	return;
  }
@@ -361,7 +361,7 @@ bool BoConditionWidget::loadConditions(const QDomElement& root)
  for (unsigned int i = 0; i < list.count(); i++) {
 	QDomElement e = list.item(i).toElement();
 	BoCondition test;
-	if (!test.load(e)) {
+	if (!test.loadFromXML(e)) {
 		boError() << k_funcinfo << "cannot load condition " << i << endl;
 		return false;
 	}
@@ -490,7 +490,7 @@ void BoConditionEventsWidget::slotAddEventMatching()
  QDomElement event = mConditionDocument->createElement("Event");
  eventMatching.appendChild(event);
  BoEvent* saveEvent = new BoEvent("AllUnitsDestroyed");
- bool success = saveEvent->save(event, 0);
+ bool success = saveEvent->saveAsXML(event);
  delete saveEvent;
  saveEvent = 0;
  if (!success) {
@@ -499,7 +499,7 @@ void BoConditionEventsWidget::slotAddEventMatching()
 	return;
  }
  BoEventMatching* matching = new BoEventMatching();
- success = matching->load(eventMatching);
+ success = matching->loadFromXML(eventMatching);
  delete matching;
  matching = 0;
  if (!success) {
@@ -526,7 +526,7 @@ void BoConditionEventsWidget::reloadEventMatchings()
  for (unsigned int i = 0; i < list.count(); i++) {
 	QDomElement e = list.item(i).toElement();
 	BoEventMatching* matching = new BoEventMatching();
-	bool success = matching->load(e);
+	bool success = matching->loadFromXML(e);
 	QListBoxItem* item = 0;
 	if (matching->event()) {
 		item = createEventMatchingItem(matching);
@@ -564,7 +564,7 @@ void BoConditionEventsWidget::updateEventMatching(const QDomElement& root, int i
 	return;
  }
  BoEventMatching* matching = new BoEventMatching();
- bool success = matching->load(root);
+ bool success = matching->loadFromXML(root);
  if (success) {
 	boDebug() << k_funcinfo << "updating event matching " << index << endl;
 
@@ -623,7 +623,7 @@ void BoConditionEventsWidget::slotSelectedEventMatching(int index)
 	return;
  }
  BoEventMatching* m = new BoEventMatching();
- bool success = m->load(e);
+ bool success = m->loadFromXML(e);
  delete m;
  m = 0;
  if (!success) {
@@ -800,7 +800,7 @@ BoEventMatchingWidget::BoEventMatchingWidget(QWidget* parent, bool eventMatching
 	BoEvent e("CustomStringEvent", "Foobar");
 	QDomDocument doc;
 	QDomElement event = doc.createElement("Event");
-	e.save(event, 0);
+	e.saveAsXML(event);
 	displayEvent(event);
  }
 }
@@ -832,7 +832,7 @@ bool BoEventMatchingWidget::displayEventMatching(const QDomElement& matching)
  slotClear();
 
  BoEventMatching m;
- if (matching.isNull() || !m.load(matching)) {
+ if (matching.isNull() || !m.loadFromXML(matching)) {
 	setEnabled(false);
 	return false;
  }
@@ -924,7 +924,7 @@ QDomElement BoEventMatchingWidget::eventMatching() const
 	// note that 0 is an invalid ID!
 	saveEvent->setPlayerId(mPlayerId->value());
  }
- bool success = saveEvent->save(event, 0);
+ bool success = saveEvent->saveAsXML(event);
  delete saveEvent;
  saveEvent = 0;
  if (!success) {
@@ -933,7 +933,7 @@ QDomElement BoEventMatchingWidget::eventMatching() const
  }
 
  BoEventMatching* test = new BoEventMatching();
- success = test->load(root);
+ success = test->loadFromXML(root);
  delete test;
  test = 0;
  if (!success) {

@@ -242,10 +242,6 @@ bool BosonSaveLoad::saveToFiles(QMap<QString, QByteArray>& files)
  files.insert("canvas.xml", canvasXML);
  files.insert("external.xml", externalXML);
 
- if (!convertPlayerIdsToIndices(files)) {
-	return false;
- }
-
  return true;
 }
 
@@ -748,7 +744,7 @@ bool BosonSaveLoad::loadEventListenerScripts(const QMap<QString, QByteArray>& fi
  if (!boGame->eventManager()) {
 	return false;
  }
- return boGame->eventManager()->loadListenerScripts(files);
+ return boGame->eventManager()->loadEventListenerScripts(files);
 }
 
 bool BosonSaveLoad::saveEventListenerScripts(QMap<QString, QByteArray>* files)
@@ -760,43 +756,5 @@ bool BosonSaveLoad::saveEventListenerScripts(QMap<QString, QByteArray>* files)
 	return false;
  }
  return boGame->eventManager()->saveListenerScripts(files);
-}
-
-bool BosonSaveLoad::convertPlayerIdsToIndices(QMap<QString, QByteArray>& files) const
-{
- QStringList removeFiles;
- QMap<QString, QByteArray> addFiles;
- QRegExp hasPlayerId("-player_([0-9]+)");
- for (QMap<QString, QByteArray>::iterator it = files.begin(); it != files.end(); ++it) {
-	int pos = hasPlayerId.search(it.key());
-	if (pos < 0) {
-		continue;
-	}
-	QString number = hasPlayerId.cap(1);
-	bool ok;
-	unsigned int id = number.toUInt(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << it.key() << " does not contain a valid number" << endl;
-		return false;
-	}
-	Player* p = (Player*)boGame->findPlayerByUserId(id);
-	if (!p) {
-		boError() << k_funcinfo << "no player with id " << id << " in game" << endl;
-		return false;
-	}
-	QString file = it.key();
-	QByteArray b = it.data();
-	int index = boGame->playerList()->findRef(p);
-	file.replace(hasPlayerId, QString("-player_%1").arg(index));
-	removeFiles.append(it.key());
-	addFiles.insert(file, b);
- }
- for (QStringList::iterator it = removeFiles.begin(); it != removeFiles.end(); ++it) {
-	files.remove(*it);
- }
- for (QMap<QString, QByteArray>::iterator it = addFiles.begin(); it != addFiles.end(); ++it) {
-	files.insert(it.key(), it.data());
- }
- return true;
 }
 
