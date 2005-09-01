@@ -306,8 +306,8 @@ void BosonOrderButton::setUnit(Unit* unit)
  mUnit = unit;
  mType = ShowUnit;
  displayUnitPixmap(unit);
- connect(mUnit->owner(), SIGNAL(signalUnitChanged(Unit*)), this,
-		 SLOT(slotUnitChanged(Unit*)));
+ connect(mUnit->owner(), SIGNAL(signalUnitChanged(Unit*)),
+		this, SLOT(slotUnitChanged(Unit*)));
  slotUnitChanged(mUnit);
 
  show();
