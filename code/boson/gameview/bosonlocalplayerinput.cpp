@@ -211,7 +211,7 @@ void BosonLocalPlayerInput::layMine(const BoSpecificAction& action)
   QValueList<Q_ULONG> units;
   units.append(action.unit()->id());
   QValueList<Q_ULONG> weapons;
-  units.append(action.weapon()->id());
+  weapons.append(action.weapon()->id());
   BosonMessageMoveLayMine message(units, weapons);
 
   QByteArray b;
