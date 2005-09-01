@@ -821,7 +821,7 @@ bool Player::saveAsXML(QDomElement& root)
 
 bool Player::loadFromXML(const QDomElement& root)
 {
- boDebug(260) << k_funcinfo << endl;
+ boDebug(260) << k_funcinfo << bosonId() << endl;
  // this does NOT load the units!
 
  bool ok = false;
