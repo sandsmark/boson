@@ -319,7 +319,10 @@ void BosonUfoPlacementPreviewWidget::renderPlacementPreview()
  } else {
 	color = PLACEMENTPREVIEW_DISALLOW_COLOR;
  }
+ glPushAttrib(GL_ALL_ATTRIB_BITS);
+
  glEnable(GL_BLEND);
+ glDisable(GL_LIGHTING);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  glColor4ub(255, color, color, PLACEMENTPREVIEW_ALPHA);
  // Disable depth buffer writes. If we'd write to depth buffer, screen-to-world
@@ -398,6 +401,8 @@ void BosonUfoPlacementPreviewWidget::renderPlacementPreview()
  // AB: see above. if GL_REPLACES ever becomes default we have to set it
  // here again.
 // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+ glPopAttrib();
 }
 
 void BosonUfoPlacementPreviewWidget::setPlacementPreviewData(const UnitProperties* prop, bool canPlace, bool freeMode, bool useCollisionDetection)
