@@ -596,6 +596,7 @@ void BosonCommandFrame::initPlacementWidget()
  d->mPlacementWidget = new BosonOrderWidget(this);
  d->mPlacementScrollWidget->addWidget(d->mPlacementWidget);
  d->mPlacementWidget->hide();
+ d->mPlacementWidget->setGridLayoutColumns(5);
  connect(d->mPlacementWidget, SIGNAL(signalUnitTypeHighlighted(const UnitProperties*)),
 		this, SLOT(slotUnitTypeHighlighted(const UnitProperties*)));
  connect(d->mPlacementWidget, SIGNAL(signalTechnologyHighlighted(const UpgradeProperties*)),
