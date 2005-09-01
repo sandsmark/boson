@@ -245,14 +245,9 @@ bool BoEventManager::copyEventListenerScripts(const QMap<QString, QByteArray>& f
 }
 
 
-bool BoEventManager::loadEventListenerScripts(const QMap<QString, QByteArray>& files)
+bool BoEventManager::loadAllEventListenerScripts()
 {
  boDebug() << k_funcinfo << endl;
- if (!copyEventListenerScripts(files)) {
-	boError() << k_funcinfo << "copying scripts failed" << endl;
-	return false;
- }
-
  QPtrListIterator<BoEventListener> it(d->mEventListeners);
  for (; it.current(); ++it) {
 	QString name = it.current()->scriptFileName();
