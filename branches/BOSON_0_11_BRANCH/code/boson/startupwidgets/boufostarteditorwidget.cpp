@@ -550,6 +550,9 @@ QByteArray BoUfoStartEditorWidget::createNewMap()
 	p.setAttribute("PlayerId", i);
 	p.appendChild(playersDoc.createElement(QString::fromLatin1("Upgrades")));
 	playersRoot.appendChild(p);
+	QDomElement speciesTheme = playersDoc.createElement(QString::fromLatin1("SpeciesTheme"));
+	p.appendChild(speciesTheme);
+	speciesTheme.appendChild(playersDoc.createElement(QString::fromLatin1("UnitTypes")));
 
 	QDomElement items = canvasDoc.createElement(QString::fromLatin1("Items"));
 	items.setAttribute("PlayerId", i);
