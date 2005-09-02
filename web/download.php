@@ -29,6 +29,7 @@ include_once("counter.inc");
 
 /*****  Start of main stuff  *****/
 
+ $dl = $_GET['dl'];
 if($dl)
 {
   // User wanted to download something.
