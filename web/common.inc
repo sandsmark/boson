@@ -20,8 +20,8 @@
 
 
 /*****  Some variables  *****/
-$latestversion="0.10";
-$latestversiondate="2nd May 2004";
+$latestversion="0.11";
+$latestversiondate="3rd September 2005";
 
 $counter_file="counter";
 $news_file="news.text";
