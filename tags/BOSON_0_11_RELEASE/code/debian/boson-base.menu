@@ -1,0 +1,4 @@
+?package(boson-base):needs=X11 section=Games/Strategy\
+	hints="KDE,Games"\
+	title="Boson" command="/usr/games/boson"\
+	kderemove="y"

@@ -1,0 +1,24 @@
+Source: boson-base
+Section: games
+Priority: optional
+Maintainer: Mickael Marchand <marchand@kde.org>
+Build-Depends: debhelper (>> 4.0.0), libkdegames-dev, wml, libqt3-mt-dev, kdelibs4-dev, lib3ds-dev, docbook-to-man, kdemultimedia-dev, xutils, libarts1-dev, python2.3-dev, xlibmesa-gl-dev | nvidia-glx-dev
+Standards-Version: 3.6.1
+
+Package: boson
+Section: games
+Architecture: any
+Depends: boson-base, boson-data, boson-music
+Description: an OpenGL wargame for KDE
+ This is an OpenGL real-time strategy game, with the feeling of
+ Command&Conquer(tm) or StarCraft(tm) and OpenGL support.
+ It is designed to run on Unix (Linux) computers, and is built on top of the
+ libkdegames, kde and Qt libraries.
+
+Package: boson-base
+Architecture: any
+Depends: ${shlibs:Depends}, boson-data
+Recommends: boson-music
+Description: core package for Boson
+ Provides the binaries to run Boson.
+

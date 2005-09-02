@@ -1,0 +1,56 @@
+Every tile has a sice of BO_TILE_SIZE * BO_TILE_SIZE. BO_TILE_SIZE is defined in
+defines.h and is currently 48. This will probably not change and therefore every
+tile has a size of 48*48.
+
+The ground pixmap (currently only earth.png) consists of 32 (8*4) tiles horizonatlly
+and 39 (I hope...) tiles vertically. This means the pixmap consists of 32*39
+tiles each with a size of 48*48.
+
+I have not yet found out the correct order of the pixmaps so here is what I have
+so far.
+Everything I'm telling now refers to the horizontally couning, so e.g. the tile
+33 means the first tile in the second line.
+
+The tiles are grouped into transitions and types. Each transition is part of a
+group. One transition consists of 4 tiles which all belong to this transition
+and this type (aka groundType).
+
+The pixmap file starts with "without" a transition. IMHO this is a small bug as
+it should be transition_Unknown - but that doesn't matter.
+Without transition means that the tile just shows the plain pix. The order
+- "Unknown"
+- "Deep Water"
+- "Water"
+- "Grass"
+- "Desert"
+- "GrassMineral"
+- "GrassOil"
+as said above all these have four different tiles, so this makes 7*4=28 tiles.
+
+Now the real transition start. First the type is Grass->Water. Dunno how to
+describe this in boson... it might be that this has (in boson) the type water
+but it might be possible that this has the type grass... I will look at this
+someday.
+All following tiles are of this type Grass->Water. The Transition Order:
+- Up Left
+- Up Right
+- Down Left
+- Down Right
+- Up
+- Down
+- Left
+- Right
+(=> makes 8*4=32 tiles. )
+Where e.g. "Right" means that the Water is on the right side (the grass ends at
+the right).
+Now come the inverted tranitions (FIXME: dunno what inverted means...):
+- Up Left inverted
+- Up Right inverted
+- Down Left inverted
+- Down Right inverted
+(=> makes 4*4=16 tiles)
+==> makes 32+16=48 tiles.
+
+About the next i'm not fully sure (once again): It seems that this is the type
+"Water->Grass" as there seems to be more water than grass on the tiles.
+==> makes again 48 tiles.

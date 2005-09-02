@@ -1,0 +1,9 @@
+Makefile
+Makefile.in
+.deps
+.libs
+*.moc
+*.lo
+libbosonobjects.la
+libbosonobjects_la_meta_unload.*
+libbosonitems.la

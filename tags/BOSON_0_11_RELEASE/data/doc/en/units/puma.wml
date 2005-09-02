@@ -1,0 +1,4 @@
+#include "facilities.wml" type="Units" name="Puma" \
+        description="The puma is a basic helicopter, very usefull to defend your units against <a href='warthog.html'>Warthogs</a>." \
+        name2="puma" type2="mob" \
+        before_url="warthog.html" before_text="Warthog" after_url="koyote.html" after_text="Koyote" up_url="index.html"

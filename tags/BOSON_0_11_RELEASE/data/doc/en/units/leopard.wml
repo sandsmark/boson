@@ -1,0 +1,4 @@
+#include "facilities.wml" type="Units" name="Leopard" \
+        description="A heavy  tank with armor and a cannon." \
+        name2="leopard" type2="mob" \
+        before_url="grizzly.html" before_text="Grizzly" after_url="panther.html" after_text="Panther" up_url="index.html"

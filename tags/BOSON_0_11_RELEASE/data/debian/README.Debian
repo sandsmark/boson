@@ -1,0 +1,7 @@
+boson-data for Debian
+---------------------
+
+This package is necessary to get Boson running.
+It contains most of the runtime stuff (maps, music ...)
+
+ -- Mickael Marchand <marchand@kde.org>, Tue, 13 May 2003 16:51:31 +0200

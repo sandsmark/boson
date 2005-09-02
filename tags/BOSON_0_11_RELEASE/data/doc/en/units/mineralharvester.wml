@@ -1,0 +1,4 @@
+#include "facilities.wml" type="Units" name="Mineral Harvester" \
+        description="The Mineral Harvester transports minerals to a <a href='../facilities/mineralrefinery.html'>Mineral Refinery</a>." \
+        name2="mineralharvester" type2="mob" \
+        before_url="map.html" before_text="Unit dependency tree" after_url="oilharvester.html" after_text="Oil Harvester" up_url="index.html"

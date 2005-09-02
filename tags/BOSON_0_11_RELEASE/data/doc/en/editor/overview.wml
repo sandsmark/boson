@@ -1,0 +1,111 @@
+#include "top.wml"
+
+    <h1>
+      Overview
+    </h1>
+    <p>&nbsp;</p>
+    <h4>The startup screen</h4>
+    <p>
+    Here you can choose your map you wish to edit. You can edit an existing map or create a new one.<br>
+    Choose your ground theme, main ground tileset, size and required players.<br>
+    Note that you need to create a complete new map if you like to change this settings. Now you can start the editor.<br>
+    </p><p>&nbsp;</p>
+
+
+    <h4>The map</h4>
+    <p>
+    After the default map is created you will find your tools on the left site in the command frame and the menu bar.<br>
+    The map consists of many tiles which are coating the ground which can have heights and downs.
+    You can get a better overview over the ground when you enable "Show Cell Grid" in the "Debug" menu.<br><br>
+
+
+    <table border="0">
+    <tr>
+        <td colspan="2">
+            To change the height you have two ways:
+        </td>
+    </tr>
+    <tr>
+        <td></td>
+        <td>
+            <ul>
+                <li>Using a heightmap to specify the heights and downs of the whole map.<br>
+                A heightmap is a png file which shows the heights of the map with colors or black&amp;white tones.<br>
+                You can export and import that file over the "Editor" menu and edit it in you favorite program.
+                The whiter the parts in the png file the higher the cells in Boson.</li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <td valign="top"><img src="edit_height.png" class="image_border"></td>
+        <td>
+            <ul>
+                <li>Changing cells height by hand over the "Edit Height" function of the editor.<br>
+                Hold down the Ctrl key the reduce the height, without modifier you will increase the height.
+                Press the right mouse button to leave the edit height mode.</li>
+            </ul>
+        </td>
+    </tr>
+    </table>
+    </p><p>&nbsp;</p>
+
+
+    <h4>The ground</h4>
+    <p>
+    You can change the ground tiles if you select <i>Ground</i> from the second dropdown box. Just select
+    one, hold down the left mouse button and "draw" the tiles on the ground. Note that it is not possible to get
+    realistic water like you can see it in some maps through the editor. That needs to be done out of Boson
+    and is not yet supported nor documented.<br><br>
+
+    You can also export an image of the map with shows the usage of one tile (here texture) and edit the map
+    like a heightmap. You can e.g. blur the transitions between grass and other tiles.<br>
+    Just try it out if you like, but it is a little difficult and not documented.
+    </p><p>&nbsp;</p>
+
+
+    <h4>Map properties</h4>
+    <p>
+    Under the "Editor" menu you can change the map description and the available resources for each player.<br>
+    Note that you will always es the currently active player.
+    </p><p>&nbsp;</p>
+
+    <h4>The neutral player</h4>
+    <p>
+    The neutral player is used for neutral objects like trees. But also resources like mines and oil towers are here available.<br>
+    Place some trees on the map to give it a more realistic look.
+    </p><p>&nbsp;</p>
+
+
+    <h4>Conditions</h4>
+    <p>
+    Boson has support for different conditions, you can edit them in the "Edit global conditions" dialog under
+    the "Editor" menu, but it is not very userfriendly yet.<br><br>
+
+    Some general things you should know about conditions:
+    <ul>
+    <li>Boson doesn't really use winning conditions, Boson can only use lost conditions, the player for which that condition
+    doesn't apply will win the game.</li>
+    <li>There is one default lost condition with is not editable, it applies if a player lost all his/her units.</li>
+    <li>All conditions always match all players.</li>
+    </ul><br>
+
+    The dialog is split into two parts, the conditions, and the editor for a single event matching rule in the lower part.<br>
+    Now let us just start with a lost condition as an example:
+    <ul>
+        <li>Add an event matching rule with the "Add" button.</li>
+        <li>Change the event name from "AllUnitsDestroyed" to "UnitWithTypeDestroyed".</li>
+        <li>Set the "Unit Id" to the Id of a unit in your map (you can see the id in the Command Frame when you select a unit)
+        this can also be a facility, e.g. the Command Bunker.</li>
+        <li>Change the Event name of the Condition to "PlayerLost" and remove the "Foobar" from Data1.</li>
+        <li>Now you need to add the Player Id for which player this event should apply. Unfortunately you cannot see this id
+        in the Command Frame on the right or in the menu (<a href="http://bugs.kde.org/show_bug.cgi?id=92865" target="_blank">BR #92865</a>).
+        To get the Player Id go to the "Debug" menu and select "Debug KGame...". Under "Debug Players" you can see the
+        available player ids on the left, select them and find your player through "Player Name".</li>
+     </ul><br>
+
+    There are move events available, the Boson website has an overview of them in different versions
+    of Boson: <a href="http://boson.eu.org/wiki/Main/Events" target="_blank">http://boson.eu.org/wiki/Main/Events</a>
+    </p>
+
+#include "nav.wml" before_url="index.html" before_text="The Boson editor" after_url="facilities.html" after_text="Building facilities and units" up_url="index.html"
+#include "footer.wml"

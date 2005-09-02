@@ -1,0 +1,10 @@
+Makefile
+Makefile.in
+.deps
+.libs
+*.moc
+*.lo
+libbomeshrendererplugin.la
+libbomeshrendererplugin_la_meta_unload.*
+libbomeshrenderer.la
+libbomeshrenderer_la_meta_unload.*

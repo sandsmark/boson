@@ -1,0 +1,4 @@
+#include "facilities.wml" type="Units" name="Koyote" \
+        description="The Koyote is the next helicopter generation after the <a href='puma.html'>Puma</a> and is just more powerful." \
+        name2="koyote" type2="mob" \
+        before_url="puma.html" before_text="Puma" after_url="../editor/index.html" after_text="The Boson editor" up_url="index.html"

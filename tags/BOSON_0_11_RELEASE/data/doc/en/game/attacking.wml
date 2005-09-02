@@ -1,0 +1,17 @@
+#include "top.wml"
+    <h1>
+      Attacking
+    </h1>
+    <p>&nbsp;</p>
+    <p>
+    You can attack your enemy with your units and facilities.<br>
+    Your units will attack the enemy automatically if they are in range, but you can also order your units to do so.<br>
+    Take your units and click with the right mouse button on the target
+    (you will notice that the cursor has <a href="cursor.html">changed</a>).<br><br>
+    
+    Note that you cannot attack an air-unit with a land-unit. For example:
+    Attacking a <a href="../units/tornado.html">Tornado</a> with a <a href="../units/leopard.html">Leopard</a> doesn't help.
+    </p>
+    
+#include "nav.wml" before_url="equipment.html" before_text="Unit equipment" after_url="repairing.html" after_text="Repairing" up_url="index.html"
+#include "footer.wml"

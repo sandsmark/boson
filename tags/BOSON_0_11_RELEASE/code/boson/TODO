@@ -1,0 +1,8 @@
+Currently (August 2005) you can find TODO items at:
+* http://bugs.kde.org, product "boson"
+  Note that bugzilla allows to filter for "wishlist" items and actual bugs. This
+  makes finding an item much easier.
+* http://boson.eu.org/wiki
+* grep -r TODO code/
+* grep -r FIXME code/
+

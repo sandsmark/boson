@@ -1,0 +1,63 @@
+#include "top.wml"
+    <h1>
+      Installation
+    </h1>
+    <p>&nbsp;</p>
+    <h4>Using tarballs</h4>
+    <p>
+    You need:<br>
+     - boson-code-XXX.tar.bz2<br>
+     - boson-data-XXX.tar.bz2<br>
+     - boson-music-XXX.tar.bz2 (optional)<br><br>
+    You can also fetch boson-all-XXX.tar.bz2 which contains just everything.<br><br>
+
+    Now you have to do that for every package:
+    <pre>
+    tar xjvf boson-YYY-XXX.tar.bz2
+    cd "package_name"
+    ./configure
+    make
+    su -c "make install"
+    </pre>
+
+    <br>
+    <h4>Using CVS</h4>
+    <p>
+    CVS login:
+    <pre>
+    export CVSROOT=":pserver:anonymous@cvs.sourceforge.net:/cvsroot/boson"
+    cvs login
+    </pre>
+    Please just press the Enter key when you are prompted for a password.<br>
+    Now you can checkout the source.<br>
+    <pre>
+    cvs -z3 co -P code
+    cvs -z3 co -P data
+    </pre>
+    Compilation of code:
+    <pre>
+    cd code
+    make -f Makefile.cvs
+    ./configure
+    make
+    make install
+    </pre>
+    Compilation of data:
+    <pre>
+    cd data
+    make -f Makefile.cvs
+    ./configure
+    make
+    make install
+    </pre>
+    <br>
+    <h4>RPM / binary releases</h4>
+    <p>
+    There are rpm packages available on our File Release site on SourceForge.<br>
+    They are inofficial because we don't test them.<br>
+    If you feel like building a RPM for boson (for any platform), we'll be happy to put a link here and/or add them to our site.<br>
+
+
+
+#include "nav.wml" before_url="started.html" before_text="Getting started" after_url="game/index.html" after_text="In the game" up_url="index.html"
+#include "footer.wml"

@@ -1,0 +1,23 @@
+
+fonts_DATA = Dustismo_Roman.txf  Dustismo_sans.txf \
+	AvantGarde-Book.txf         Helvetica-Oblique.txf \
+	AvantGarde-BookOblique.txf  Helvetica.txf \
+	AvantGarde-Demi.txf         NewCenturySchlbk-Bold.txf \
+	AvantGarde-DemiOblique.txf  NewCenturySchlbk-BoldItalic.txf \
+	Bookman-Demi.txf            NewCenturySchlbk-Italic.txf \
+	Bookman-DemiItalic.txf      NewCenturySchlbk-Roman.txf \
+	Bookman-Light.txf           Palatino-Bold.txf \
+	Bookman-LightItalic.txf     Palatino-BoldItalic.txf \
+	Courier-Bold.txf            Palatino-Italic.txf \
+	Courier-BoldOblique.txf     Palatino-Roman.txf \
+	Courier-Oblique.txf         Times-Bold.txf \
+	Courier.txf                 Times-BoldItalic.txf \
+	Dustismo_Roman.txf          Times-Italic.txf \
+	Dustismo_sans.txf           Times-Roman.txf \
+	Helvetica-Bold.txf          ZapfChancery-MediumItalic.txf \
+	Helvetica-BoldOblique.txf
+
+
+fontsdir= $(kde_datadir)/boson/fonts
+
+EXTRA_DIST = $(fonts_DATA)

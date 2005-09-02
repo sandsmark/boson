@@ -1,0 +1,4 @@
+#include "facilities.wml" type="Facilities" name="Prison" \
+        description="The prison doesn't have any functionality yet." \
+        name2="prison" type2="fix" \
+        before_url="repairpad.html" before_text="Repair Pad" after_url="helipad.html" after_text="Helipad" up_url="index.html"
