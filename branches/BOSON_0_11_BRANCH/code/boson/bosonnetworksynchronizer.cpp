@@ -1332,8 +1332,6 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
  QString xml;
  stream >> xml;
 
- boDebug() << k_funcinfo << "Received sync message: " << endl << xml << endl;
-
  QDomDocument doc;
  if (!doc.setContent(xml)) {
 	boError() << k_funcinfo << "unable to load XML from stream" << endl;
