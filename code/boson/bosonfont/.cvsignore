@@ -1,8 +1,0 @@
-Makefile
-Makefile.in
-.deps
-.libs
-*.moc
-*.lo
-libbosonfont.la
-libbosonfont_la_meta_unload.*
