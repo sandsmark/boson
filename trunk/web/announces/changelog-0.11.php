@@ -70,7 +70,7 @@ draw_bigbox_text("This is a list of bigger changes between
     <li>Basic support for animated water (lakes and oceans are possible), not included in editor yet</li>
     <li>Simple terrain LOD (level of detail) system</li>
     <li>Light effect (dynamic lights)</li>
-    <li>Daylight effect</li>
+    <li>Daylight effect, realistically simulating Sun's movement</li>
     <li>Wind effect</li>
     <li>Bullet trail effect</li>
     <li>Environmental effects (can be used to create snow, rain, etc)</li>
@@ -88,6 +88,8 @@ draw_bigbox_text("This is a list of bigger changes between
     <li>Descriptions for produceable facilities are now displayed in the game</li>
     <li>Flying units have their own moving quirks</li>
     <li>New Pathfinder</li>
+    <li>Bomb-dropping is more realistic</li>
+    <li>Description widget, showing info about highlighted unit type when a factory is selected</li>
  </ul>
 
  <h3>Scripts / AI</h3>
@@ -138,7 +140,7 @@ draw_bigbox_text("This is a list of bigger changes between
     some more from branches. bosonwidget.cpp, 2001/11/09 - 2004/12/10, may it
     rest in peace.</li>
     <li>Complete game logic and game view separation</li>
-    <li>new upgrade architecture</li>
+    <li>New upgrade architecture</li>
  </ul>
 
 
