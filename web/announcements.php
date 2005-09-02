@@ -50,13 +50,13 @@ draw_bigbox_text("All Boson announcements:
     <li><a href=\"http://lists.kde.org/?l=kde-announce&m=94677285723944&amp;w=2\">Boson 0.3 announcement</a></li>
     <li><a href=\"http://lists.kde.org/?l=kde-announce&m=95700975705364&amp;w=2\">Boson 0.4 announcement</a></li>
     <li><a href=\"http://www.kdenews.org/972864519/\">Boson 0.5 announcement</a></li>
-    <li><a href=\"announces/boson-0.6.php\">Boson 0.6 press release</a></li>
-    <li><a href=\"announces/boson-0.6.1.php\">Boson 0.6.1 press release</a></li>
-    <li><a href=\"announces/boson-0.7.php\">Boson 0.7 press release</a></li>
-    <li><a href=\"announces/boson-0.8.php\">Boson 0.8 press release</a></li>
-    <li><a href=\"announces/boson-0.9.php\">Boson 0.9 press release</a></li>
-    <li><a href=\"announces/boson-0.9.1.php\">Boson 0.9.1 press release</a></li>
-    <li><a href=\"announces/boson-0.10.php\">Boson 0.10 press release</a></li>
+    <li><a href=\"announces/boson-0.6.php\">Boson 0.6 announcement</a></li>
+    <li><a href=\"announces/boson-0.6.1.php\">Boson 0.6.1 announcement</a></li>
+    <li><a href=\"announces/boson-0.7.php\">Boson 0.7 announcement</a></li>
+    <li><a href=\"announces/boson-0.8.php\">Boson 0.8 announcement</a></li>
+    <li><a href=\"announces/boson-0.9.php\">Boson 0.9 announcement</a></li>
+    <li><a href=\"announces/boson-0.9.1.php\">Boson 0.9.1 announcement</a></li>
+    <li><a href=\"announces/boson-0.10.php\">Boson 0.10 announcement</a></li>
     </ul>
     <p class=\"bigboxtext\">");
 draw_bigbox_end();
