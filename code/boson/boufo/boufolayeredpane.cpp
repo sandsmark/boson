@@ -53,7 +53,7 @@ BoUfoLayeredPane::~BoUfoLayeredPane()
 void BoUfoLayeredPane::addLayer(BoUfoWidget* w, int layer, int pos)
 {
  BO_CHECK_NULL_RET(w);
- BO_CHECK_NULL_RET(ufoWidget());
+ BO_CHECK_NULL_RET(widget());
  addWidget(w);
  setLayer(w, layer, pos);
 }
@@ -61,12 +61,12 @@ void BoUfoLayeredPane::addLayer(BoUfoWidget* w, int layer, int pos)
 void BoUfoLayeredPane::setLayer(BoUfoWidget* w, int layer, int pos)
 {
  BO_CHECK_NULL_RET(w);
- BO_CHECK_NULL_RET(ufoWidget());
- if (!dynamic_cast<ufo::ULayeredPane*>(ufoWidget())) {
+ BO_CHECK_NULL_RET(widget());
+ if (!dynamic_cast<ufo::ULayeredPane*>(widget())) {
 	boError() << k_funcinfo << "oops - not a ULayeredPane" << endl;
 	return;
  }
- dynamic_cast<ufo::ULayeredPane*>(ufoWidget())->setLayer(w->ufoWidget(), layer, pos);
+ dynamic_cast<ufo::ULayeredPane*>(widget())->setLayer(w->widget(), layer, pos);
 }
 
 

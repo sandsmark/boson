@@ -547,6 +547,7 @@ QByteArray BoUfoStartEditorWidget::createNewMap()
  canvasRoot.appendChild(canvasDoc.createElement(QString::fromLatin1("Effects")));
  for (int i = 0; i < maxPlayers + 1; i++) {
 	QDomElement p = playersDoc.createElement(QString::fromLatin1("Player"));
+	p.setAttribute("PlayerId", i);
 	p.appendChild(playersDoc.createElement(QString::fromLatin1("Upgrades")));
 	playersRoot.appendChild(p);
 	QDomElement speciesTheme = playersDoc.createElement(QString::fromLatin1("SpeciesTheme"));
@@ -554,15 +555,11 @@ QByteArray BoUfoStartEditorWidget::createNewMap()
 	speciesTheme.appendChild(playersDoc.createElement(QString::fromLatin1("UnitTypes")));
 
 	QDomElement items = canvasDoc.createElement(QString::fromLatin1("Items"));
+	items.setAttribute("PlayerId", i);
 	canvasRoot.appendChild(items);
 
-	if (i < maxPlayers) {
-		p.setAttribute("PlayerId", 128 + i);
-		items.setAttribute("PlayerId", 128 + i);
-	} else {
-		p.setAttribute("PlayerId", 256);
+	if (i == maxPlayers) {
 		p.setAttribute("IsNeutral", 1);
-		items.setAttribute("PlayerId", 256);
 	}
  }
  QDomElement canvasEventListener = canvasDoc.createElement(QString::fromLatin1("EventListener"));
@@ -577,13 +574,8 @@ QByteArray BoUfoStartEditorWidget::createNewMap()
  files.insert("scripts/eventlistener/game.py", QByteArray());
  files.insert("scripts/eventlistener/localplayer.py", QByteArray());
  files.insert("scripts/eventlistener/gamevieweventlistener.py", QByteArray());
- for (int i = 0; i < maxPlayers + 1; i++) {
-	if (i <= maxPlayers) {
-		files.insert(QString("scripts/eventlistener/ai-player_%1.py").arg(128 + i), QByteArray());
-	} else {
-		// neutral player
-		files.insert(QString("scripts/eventlistener/ai-player_%1.py").arg(256), QByteArray());
-	}
+ for (unsigned int i = 0; i < (unsigned int)(maxPlayers + 1); i++) {
+	files.insert(QString("scripts/eventlistener/ai-player_%1.py").arg(i), QByteArray());
  }
 
  QByteArray b = BosonPlayField::streamFiles(files);

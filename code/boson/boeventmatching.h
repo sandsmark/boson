@@ -56,8 +56,8 @@ public:
 		return mIgnoreData2;
 	}
 
-	bool saveAsXML(QDomElement& root) const;
-	bool loadFromXML(const QDomElement& root);
+	bool save(QDomElement& root, const QMap<int, int>* playerId2Index) const;
+	bool load(const QDomElement& root);
 
 	bool matches(const BoEvent* event) const;
 

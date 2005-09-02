@@ -28,10 +28,10 @@
 #include "bosonprofiling.h"
 #include "bodebug.h"
 #include "bosonmessageids.h"
-#include "player.h" // Player::bosonId()
 
 #include <kgame/kgameproperty.h>
 #include <kgame/kgamepropertyhandler.h>
+#include <kgame/kplayer.h> // KPlayer::id()
 
 #include <qdom.h>
 #include <qvaluevector.h>
@@ -133,10 +133,17 @@ bool BoEventManager::saveAsXML(QDomElement& root) const
  QDomElement events = doc.createElement(QString::fromLatin1("EventQueue"));
  root.appendChild(events);
 
+ QMap<int, int> playerId2Index;
+ QPtrListIterator<KPlayer> playerIt(*boGame->playerList());
+ while (playerIt.current()) {
+	int index = boGame->playerList()->findRef(playerIt.current());
+	playerId2Index.insert(playerIt.current()->id(), index);
+	++playerIt;
+ }
  QPtrListIterator<BoEvent> it(d->mEvents);
  while (it.current()) {
 	QDomElement e = doc.createElement(QString::fromLatin1("Event"));
-	if (!it.current()->saveAsXML(e)) {
+	if (!it.current()->save(e, &playerId2Index)) {
 		boError(360) << k_funcinfo << "error saving event" << endl;
 		return false;
 	}
@@ -172,7 +179,7 @@ bool BoEventManager::loadFromXML(const QDomElement& root)
 		return false;
 	}
 	BoEvent* event = new BoEvent();
-	if (!event->loadFromXML(e)) {
+	if (!event->load(e)) {
 		boError(360) << k_funcinfo << "could not load event" << endl;
 		delete event;
 		return false;
@@ -230,24 +237,20 @@ bool BoEventManager::saveListenerScripts(QMap<QString, QByteArray>* scripts) con
  return true;
 }
 
-bool BoEventManager::copyEventListenerScripts(const QMap<QString, QByteArray>& files)
+bool BoEventManager::loadListenerScripts(const QMap<QString, QByteArray>& files)
 {
+ boDebug() << k_funcinfo << endl;
  d->mAvailableScripts.clear();
- // AB: note that even if we don't one of the scripts in the current game,
- // then we still need to leave it the in memory. we might need it later,
- // e.g. when a human player is replaced by a computer io.
  for (QMap<QString, QByteArray>::const_iterator it = files.begin(); it != files.end(); ++it) {
 	if (it.key().startsWith("scripts/eventlistener/")) {
 		d->mAvailableScripts.insert(it.key(), it.data());
 	}
  }
- return true;
-}
 
+ // AB: note that even if we don't need a script from d->mAvailableScripts here
+ // now, then we still need to leave it the in memory. we might need it later,
+ // e.g. when a human player is replaced by a computer io.
 
-bool BoEventManager::loadAllEventListenerScripts()
-{
- boDebug() << k_funcinfo << endl;
  QPtrListIterator<BoEventListener> it(d->mEventListeners);
  for (; it.current(); ++it) {
 	QString name = it.current()->scriptFileName();

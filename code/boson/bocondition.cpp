@@ -46,8 +46,8 @@ public:
 
 	void fire();
 
-	bool saveActionAsXML(QDomElement& root) const;
-	bool loadActionFromXML(const QDomElement& root);
+	bool saveAction(QDomElement& root, const QMap<int, int>* playerId2Index) const;
+	bool loadAction(const QDomElement& root);
 
 private:
 	BoEvent* mEventCaused;
@@ -165,7 +165,7 @@ void BoCondition::processEvent(const BoEvent* event)
  processEvent(event);
 }
 
-bool BoCondition::saveAsXML(QDomElement& root) const
+bool BoCondition::save(QDomElement& root, const QMap<int, int>* playerId2Index) const
 {
  QDomDocument doc = root.ownerDocument();
  QDomElement eventsLeft = doc.createElement("Events");
@@ -173,7 +173,7 @@ bool BoCondition::saveAsXML(QDomElement& root) const
  QPtrListIterator<BoEventMatching> it(d->mEvents);
  while (it.current()) {
 	QDomElement m = doc.createElement("EventMatching");
-	if (!it.current()->saveAsXML(m)) {
+	if (!it.current()->save(m, playerId2Index)) {
 		boError(360) << k_funcinfo << "cannot save EventMatching" << endl;
 		return false;
 	}
@@ -206,7 +206,7 @@ bool BoCondition::saveAsXML(QDomElement& root) const
 
  QDomElement action = doc.createElement("Action");
  root.appendChild(action);
- if (!mAction->saveActionAsXML(action)) {
+ if (!mAction->saveAction(action, playerId2Index)) {
 	boError(360) << k_funcinfo << "could not save action" << endl;
 	return false;
  }
@@ -214,7 +214,7 @@ bool BoCondition::saveAsXML(QDomElement& root) const
  return true;
 }
 
-bool BoCondition::loadFromXML(const QDomElement& root)
+bool BoCondition::load(const QDomElement& root)
 {
  QDomElement events = root.namedItem("Events").toElement();
  if (events.isNull()) {
@@ -231,7 +231,7 @@ bool BoCondition::loadFromXML(const QDomElement& root)
 		return false;
 	}
 	BoEventMatching* matching = new BoEventMatching();
-	if (!matching->loadFromXML(m)) {
+	if (!matching->load(m)) {
 		boError(360) << k_funcinfo << "cannot load EventMatching " << i << endl;
 		delete matching;
 		return false;
@@ -271,7 +271,7 @@ bool BoCondition::loadFromXML(const QDomElement& root)
  }
  delete mAction;
  mAction = new BoConditionAction();
- if (!mAction->loadActionFromXML(action)) {
+ if (!mAction->loadAction(action)) {
 	boError(360) << k_funcinfo << "unable to load Action" << endl;
 	return false;
  }
@@ -351,7 +351,7 @@ bool BoCondition::reset()
  return ret;
 }
 
-bool BoConditionAction::saveActionAsXML(QDomElement& root) const
+bool BoConditionAction::saveAction(QDomElement& root, const QMap<int, int>* playerId2Index) const
 {
  QDomDocument doc = root.ownerDocument();
  QString type;
@@ -359,7 +359,7 @@ bool BoConditionAction::saveActionAsXML(QDomElement& root) const
 	type = "Event";
 	QDomElement actionEvent = doc.createElement("Event");
 	root.appendChild(actionEvent);
-	if (!mEventCaused->saveAsXML(actionEvent)) {
+	if (!mEventCaused->save(actionEvent, playerId2Index)) {
 		boError(360) << k_funcinfo << "cannot save event that is caused by condition" << endl;
 		return false;
 	}
@@ -386,7 +386,7 @@ bool BoConditionAction::saveActionAsXML(QDomElement& root) const
  return true;
 }
 
-bool BoConditionAction::loadActionFromXML(const QDomElement& root)
+bool BoConditionAction::loadAction(const QDomElement& root)
 {
  if (root.isNull()) {
 	boError(360) << k_funcinfo << "no Action tag" << endl;
@@ -406,7 +406,7 @@ bool BoConditionAction::loadActionFromXML(const QDomElement& root)
 	QDomElement actionEvent = root.namedItem("Event").toElement();
 	if (!actionEvent.isNull()) {
 		mEventCaused = new BoEvent();
-		if (!mEventCaused->loadFromXML(actionEvent)) {
+		if (!mEventCaused->load(actionEvent)) {
 			boError(360) << k_funcinfo << "cannot load event that is caused by condition" << endl;
 			delete mEventCaused;
 			mEventCaused = 0;
@@ -479,12 +479,12 @@ void BoConditionAction::fire()
  if (mEventCaused) {
 	QDomDocument doc;
 	QDomElement root = doc.createElement("Event");
-	if (!mEventCaused->saveAsXML(root)) {
+	if (!mEventCaused->save(root, 0)) {
 		boError(360) << k_funcinfo << "could not save event that is caused by condition" << endl;
 		return;
 	}
 	BoEvent* e = new BoEvent();
-	if (!e->loadFromXML(root)) {
+	if (!e->load(root)) {
 		boError(360) << k_funcinfo << "could not load event that is caused by condition" << endl;
 		delete e;
 		return;

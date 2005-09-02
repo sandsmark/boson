@@ -105,7 +105,8 @@ bool BoEventListener::addCondition(BoCondition* c)
  return true;
 }
 
-bool BoEventListener::saveAsXML(QDomElement& root) const
+// TODO: rename to saveAsXML()
+bool BoEventListener::save(QDomElement& root) const
 {
  QDomDocument doc = root.ownerDocument();
  QDomElement conditions = doc.createElement("Conditions");
@@ -122,7 +123,8 @@ bool BoEventListener::saveAsXML(QDomElement& root) const
  return true;
 }
 
-bool BoEventListener::loadFromXML(const QDomElement& root)
+// TODO: rename to loadFromXML()
+bool BoEventListener::load(const QDomElement& root)
 {
  QDomElement conditions = root.namedItem("Conditions").toElement();
  if (conditions.isNull()) {
@@ -225,10 +227,17 @@ bool BoEventListener::saveConditions(QDomElement& root) const
 {
  QDomDocument doc = root.ownerDocument();
 
+ QMap<int, int> playerId2Index;
+ QPtrListIterator<KPlayer> playerIt(*boGame->playerList());
+ while (playerIt.current()) {
+	int index = boGame->playerList()->findRef(playerIt.current());
+	playerId2Index.insert(playerIt.current()->id(), index);
+	++playerIt;
+ }
  QPtrListIterator<BoCondition> it(d->mConditions);
  while (it.current()) {
 	QDomElement e = doc.createElement("Condition");
-	if (!it.current()->saveAsXML(e)) {
+	if (!it.current()->save(e, &playerId2Index)) {
 		boError(360) << k_funcinfo << "unable to save condition" << endl;
 		return false;
 	}
@@ -250,7 +259,7 @@ bool BoEventListener::loadConditions(const QDomElement& root)
 		return false;
 	}
 	BoCondition* c = new BoCondition();
-	if (!c->loadFromXML(e)) {
+	if (!c->load(e)) {
 		boError(360) << k_funcinfo << "unable to load condition" << endl;
 		delete c;
 		return false;
@@ -411,7 +420,7 @@ void BoCanvasEventListener::processEvent(const BoEvent* event)
 {
  PROFILE_METHOD
  if (event->name() == "AllUnitsDestroyed") {
-	Player* p = (Player*)boGame->findPlayerByUserId(event->playerId());
+	Player* p = (Player*)boGame->findPlayer(event->playerId());
 	if (!p) {
 		boError(360) << k_funcinfo << "could not find specified player " << event->playerId() << endl;
 		return;
@@ -420,7 +429,7 @@ void BoCanvasEventListener::processEvent(const BoEvent* event)
 
 	checkGameOverAndEndGame();
  } else if (event->name() == "PlayerLost") {
-	Player* p = (Player*)boGame->findPlayerByUserId(event->playerId());
+	Player* p = (Player*)boGame->findPlayer(event->playerId());
 	if (!p) {
 		boError(360) << k_funcinfo << "could not find specified player " << event->playerId() << endl;
 		return;
@@ -435,7 +444,7 @@ void BoCanvasEventListener::processEvent(const BoEvent* event)
 
 	boGame->slotAddChatSystemMessage(i18n("%1 has lost and is out of the game").arg(p->name()));
  } else if (event->name() == "PlayerWon") {
-	Player* p = (Player*)boGame->findPlayerByUserId(event->playerId());
+	Player* p = (Player*)boGame->findPlayer(event->playerId());
 	if (!p) {
 		boError(360) << k_funcinfo << "could not find specified player " << event->playerId() << endl;
 		return;
@@ -473,7 +482,7 @@ bool BoCanvasEventListener::checkGameOver(QPtrList<Player>* fullfilledWinningCon
 	Player* p = (Player*)boGame->playerList()->at(i);
 	if (p->allUnits()->count() > 0) {
 		fullfilled.append(p);
-		boDebug() << "FULLFILLED: " << p->bosonId() << endl;
+		boDebug() << "FULLFILLED: " << p->id() << endl;
 	}
  }
  if (fullfilled.count() <= 1) {
@@ -499,11 +508,11 @@ void BoCanvasEventListener::checkGameOverAndEndGame()
 		Player* p = (Player*)boGame->playerList()->at(i);
 		if (fullfilledWinningConditions.contains(p)) {
 			BoEvent* won = new BoEvent("PlayerWon");
-			won->setPlayerId(p->bosonId());
+			won->setPlayerId(p->id());
 			boGame->queueEvent(won);
 		} else {
 			BoEvent* lost = new BoEvent("PlayerLost");
-			lost->setPlayerId(p->bosonId());
+			lost->setPlayerId(p->id());
 			boGame->queueEvent(lost);
 		}
 	}
@@ -572,6 +581,6 @@ QString BoComputerPlayerEventListener::scriptFileName() const
 	BO_NULL_ERROR(playerIO()->player());
 	return QString();
  }
- return QString("ai-player_%1.py").arg(playerIO()->player()->bosonId());
+ return QString("ai-player_%1.py").arg(playerIO()->player()->id());
 }
 

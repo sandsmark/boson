@@ -556,7 +556,7 @@ void BosonMenuInputData::slotDebugPlayer(int index)
 	return;
  }
 
- Q_UINT32 playerId = ((Player*)p)->bosonId();
+ Q_UINT32 playerId = p->id();
  switch (index) {
 	case ID_DEBUG_KILLPLAYER:
 		emit signalDebugKillPlayer(playerId);
@@ -968,7 +968,7 @@ void BosonMenuInput::slotUnfogAll(Player* pl)
 			p->unfog(x, y);
 		}
 	}
-	boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Unfogged player %1 - %2").arg(p->bosonId()).arg(p->name()));
+	boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Unfogged player %1 - %2").arg(p->id()).arg(p->name()));
  }
 }
 
@@ -1014,7 +1014,7 @@ void BosonMenuInput::slotEditConditions()
 					continue;
 				}
 				KPlayer* p = boGame->playerList()->at(index);
-				e.setAttribute("PlayerId", ((Player*)p)->bosonId());
+				e.setAttribute("PlayerId", p->id());
 			}
 		}
 

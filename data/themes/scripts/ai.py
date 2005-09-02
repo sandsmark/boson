@@ -17,6 +17,10 @@ def unitDestroyed(unitid, ownerid, pos):
   boprint("debug","unit with id %s destroyed" % unitid)
 
 def unitProduced(ownerid, pos, type, factorid):
+  global player
+  # Don't place other players' units
+  if(ownerid != player):
+    return
   boprint("debug","unit with id %s produced" % type)
   if(BoScript.isUnitTypeMobile(int(ownerid),int(type)) == False):
     boprint("debug", "Ok , building")

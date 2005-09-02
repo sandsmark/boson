@@ -183,7 +183,7 @@ void BosonUfoChat::slotReceivePrivateMessage(int msgid, const QByteArray& buffer
  if (!me || me != fromPlayer()) {
 	return;
  }
- slotReceiveMessage(msgid, buffer, me->kgameId(), sender);
+ slotReceiveMessage(msgid, buffer, me->id(), sender);
 }
 
 void BosonUfoChat::slotReceiveMessage(int msgid, const QByteArray& buffer, Q_UINT32, Q_UINT32 sender)
@@ -208,7 +208,7 @@ void BosonUfoChat::addMessage(unsigned int p, const QString& text)
 	boError() << k_funcinfo << "Set a KGame first" << endl;
 	return;
  }
- addMessage(game()->findPlayerByKGameId(p), text);
+ addMessage(game()->findPlayer(p), text);
 }
 
 void BosonUfoChat::addMessage(KPlayer* p, const QString& text)
@@ -382,11 +382,11 @@ void BosonUfoChat::slotSendText(const QString& text)
  BO_CHECK_NULL_RET(fromPlayer());
  BO_CHECK_NULL_RET(game());
 
- boDebug() << k_funcinfo << "from: " << fromPlayer()->kgameId() << "==" << fromPlayer()->name() << endl;
+ boDebug() << k_funcinfo << "from: " << fromPlayer()->id() << "==" << fromPlayer()->name() << endl;
 
  int id = sendingEntry();
 
- int sender = fromPlayer()->kgameId();
+ int sender = fromPlayer()->id();
  if (isToMyGroupMessage(id)) {
 	// note: there is currently no support for other groups than the players
 	// group! It might be useful to send to other groups, too
@@ -419,7 +419,7 @@ void BosonUfoChat::slotSendText(const QString& text)
 void BosonUfoChat::slotAddPlayer(KPlayer* p)
 {
  BO_CHECK_NULL_RET(p);
- if (d->mSendingEntryId2PlayerId.values().findIndex(p->kgameId()) >= 0) {
+ if (d->mSendingEntryId2PlayerId.values().findIndex(p->id()) >= 0) {
 	boError() << k_funcinfo << "player already added" << endl;
 	return;
  }
@@ -430,7 +430,7 @@ void BosonUfoChat::slotAddPlayer(KPlayer* p)
 		this, SLOT(slotReceivePrivateMessage(int, const QByteArray&, Q_UINT32, KPlayer*)));
 
  int id = insertPlayerSendingEntry(p->name(), -1, -1);
- d->mSendingEntryId2PlayerId.insert(id, p->kgameId());
+ d->mSendingEntryId2PlayerId.insert(id, p->id());
 }
 
 void BosonUfoChat::slotRemovePlayer(KPlayer* p)
@@ -441,7 +441,7 @@ void BosonUfoChat::slotRemovePlayer(KPlayer* p)
 
  int id = -1;
  for (QMap<int, int>::iterator it = d->mSendingEntryId2PlayerId.begin(); it != d->mSendingEntryId2PlayerId.end() && id < 0; ++it) {
-	if (p->kgameId() == (unsigned int)it.data()) {
+	if (p->id() == (unsigned int)it.data()) {
 		id = it.key();
 	}
  }
@@ -466,12 +466,12 @@ void BosonUfoChat::slotPropertyChanged(KGamePropertyBase* prop, KPlayer* p)
  if (prop->id() == KGamePropertyBase::IdName) {
 	int id =  -1;
 	for (QMap<int, int>::iterator it = d->mSendingEntryId2PlayerId.begin(); it != d->mSendingEntryId2PlayerId.end() && id < 0; ++it) {
-		if ((unsigned int)it.data() == p->kgameId()) {
+		if ((unsigned int)it.data() == p->id()) {
 			id = it.key();
 		}
 	}
 	if (id < 0) {
-		boError() << k_funcinfo << "don't know player " << p->kgameId() << endl;
+		boError() << k_funcinfo << "don't know player " << p->id() << endl;
 		return;
 	}
 	changeSendingEntry(p->name(), id);

@@ -1332,8 +1332,6 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
  QString xml;
  stream >> xml;
 
- boDebug() << k_funcinfo << "Received sync message: " << endl << xml << endl;
-
  QDomDocument doc;
  if (!doc.setContent(xml)) {
 	boError() << k_funcinfo << "unable to load XML from stream" << endl;
@@ -1359,21 +1357,21 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
 			return false;
 		}
 		bool ok;
-		int id = playerElement.attribute("PlayerId").toInt(&ok);
+		unsigned int index = playerElement.attribute("PlayerId").toUInt(&ok);
 		if (!ok) {
 			return false;
 		}
-		Player* player = (Player*)kplayer;
-		if (id != player->bosonId()) {
-			boError() << k_funcinfo << "unexpected PlayerId attribute " << id << " expected " << player->bosonId() << endl;
+		if ((int)index != mGame->playerList()->findRef(kplayer)) {
+			boError() << k_funcinfo << "unexpected PlayerId attribute " << index << " expected " << mGame->playerList()->findRef(kplayer) << endl;
 			return false;
 		}
+		Player* player = (Player*)kplayer;
 		// Delete old data (e.g. units)
 		BosonMap* map = player->map();
 		player->quitGame();
 		player->initMap(map);
 		if (!player->loadFromXML(playerElement)) {
-			boError() << k_funcinfo << "could not load player " << player->bosonId() << endl;
+			boError() << k_funcinfo << "could not load player " << player->id() << " at index " << index << endl;
 			return false;
 		}
 	}
@@ -1389,7 +1387,7 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
  QDomNodeList canvasItemsList = canvasElement.elementsByTagName(QString::fromLatin1("Items"));
  for (unsigned int i = 0; i < canvasItemsList.count(); i++) {
 	QDomElement items = canvasItemsList.item(i).toElement();
-	items.setAttribute("PlayerId", ((Player*)mGame->playerList()->at(items.attribute("PlayerId").toUInt()))->bosonId());
+	items.setAttribute("PlayerId", mGame->playerList()->at(items.attribute("PlayerId").toUInt())->id());
  }
 
 
@@ -1424,7 +1422,7 @@ QByteArray BosonNetworkSyncer::createSyncMessage()
 		QDomElement player = doc.createElement("Player");
 		Player* p2 = (Player*)p;
 		if (!p2->saveAsXML(player)) {
-			boError() << k_funcinfo << "unable to save player " << ((Player*)p)->bosonId() << endl;
+			boError() << k_funcinfo << "unable to save player " << p->id() << endl;
 			return b;
 		}
 		players.appendChild(player);

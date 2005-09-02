@@ -73,13 +73,10 @@ public:
 	 * This calls @ref BoEventListener::saveScript for all listeners.
 	 **/
 	bool saveListenerScripts(QMap<QString, QByteArray>* scripts) const;
-
-	bool copyEventListenerScripts(const QMap<QString, QByteArray>& scripts);
-
 	/**
 	 * This calls @ref BoEventListener::loadScript for all listeners.
 	 **/
-	bool loadAllEventListenerScripts();
+	bool loadListenerScripts(const QMap<QString, QByteArray>& scripts);
 
 	/**
 	 * Used by @ref BoEventListener.

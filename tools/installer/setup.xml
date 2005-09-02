@@ -38,10 +38,7 @@
     <!-- AB: icon="icon.xpm" has been removed -->
       boson
     </binary>
-    <binary arch="any"
-            libc="any"
-            symlink="boson.bin"
-            >
+    <binary arch="any" libc="any">
       boson.bin
     </binary>
     <binary arch="any" libc="any" symlink="boserver">

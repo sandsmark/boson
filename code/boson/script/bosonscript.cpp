@@ -97,7 +97,7 @@ void BosonScript::sendInput(int playerId, QDataStream& stream)
     return;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerId));
+  Player* p = (Player*)(game()->findPlayer(playerId));
 
   if(!p)
   {
@@ -153,7 +153,7 @@ bool BosonScript::areEnemies(int playerId1, int playerId2)
     return false;  // What to return here?
   }
 
-  Player* p1 = (Player*)(game()->findPlayerByUserId(playerId1));
+  Player* p1 = (Player*)(game()->findPlayer(playerId1));
 
   if(!p1)
   {
@@ -161,7 +161,7 @@ bool BosonScript::areEnemies(int playerId1, int playerId2)
     return false;
   }
 
-  Player* p2 = (Player*)(game()->findPlayerByUserId(playerId2));
+  Player* p2 = (Player*)(game()->findPlayer(playerId2));
 
   if(!p2)
   {
@@ -185,7 +185,7 @@ QValueList<int> BosonScript::allPlayers()
   QPtrListIterator<KPlayer> it(*(game()->playerList()));
   for (; it.current(); ++it)
   {
-    players.append(((Player*)it.current())->bosonId());
+    players.append(it.current()->id());
   }
 
   return players;
@@ -199,7 +199,7 @@ bool BosonScript::isNeutral(int playerId)
     return false;  // What to return here?
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerId));
+  Player* p = (Player*)(game()->findPlayer(playerId));
 
   if(!p)
   {
@@ -219,7 +219,7 @@ unsigned long int BosonScript::minerals(int playerId)
     return 0;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerId));
+  Player* p = (Player*)(game()->findPlayer(playerId));
 
   if(!p)
   {
@@ -253,7 +253,7 @@ unsigned long int BosonScript::oil(int playerId)
     return 0;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerId));
+  Player* p = (Player*)(game()->findPlayer(playerId));
 
   if(!p)
   {
@@ -287,7 +287,7 @@ QValueList<BoVector2Fixed> BosonScript::nearestMineralLocations(int playerId, in
     return QValueList<BoVector2Fixed>();
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerId));
+  Player* p = (Player*)(game()->findPlayer(playerId));
 
   if(!p)
   {
@@ -306,7 +306,7 @@ QValueList<BoVector2Fixed> BosonScript::nearestOilLocations(int playerId, int x,
     return QValueList<BoVector2Fixed>();
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerId));
+  Player* p = (Player*)(game()->findPlayer(playerId));
 
   if(!p)
   {
@@ -529,7 +529,7 @@ void BosonScript::placeProduction(int player, int factoryid, float x, float y)
     return;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(player));
+  Player* p = (Player*)(game()->findPlayer(player));
 
   if(!p)
   {
@@ -565,7 +565,7 @@ void BosonScript::placeProduction(int player, int factoryid, float x, float y)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  BosonMessageMoveBuild message((Q_UINT32)ProduceUnit, p->bosonId(), u->id(), BoVector2Fixed(x, y));
+  BosonMessageMoveBuild message((Q_UINT32)ProduceUnit, p->id(), u->id(), BoVector2Fixed(x, y));
   if(!message.save(stream))
   {
     boError() << k_funcinfo << "failed saving message " << message.messageId() << " to stream" << endl;
@@ -659,7 +659,7 @@ int BosonScript::unitOwner(int id)
     return -1;
   }
 
-  return u->owner()->bosonId();
+  return u->owner()->id();
 }
 
 int BosonScript::unitType(int id)
@@ -724,7 +724,7 @@ bool BosonScript::isUnitTypeMobile(int playerid, int type)
     return false;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerid));
+  Player* p = (Player*)(game()->findPlayer(playerid));
 
   if(!p)
   {
@@ -768,7 +768,7 @@ bool BosonScript::isUnitTypeAircraft(int playerid, int type)
     return false;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerid));
+  Player* p = (Player*)(game()->findPlayer(playerid));
 
   if(!p)
   {
@@ -813,7 +813,7 @@ bool BosonScript::canUnitTypeShoot(int playerid, int type)
     return false;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerid));
+  Player* p = (Player*)(game()->findPlayer(playerid));
 
   if(!p)
   {
@@ -881,7 +881,7 @@ bool BosonScript::canUnitTypeMineMinerals(int playerid, int type)
     return false;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerid));
+  Player* p = (Player*)(game()->findPlayer(playerid));
 
   if(!p)
   {
@@ -936,7 +936,7 @@ bool BosonScript::canUnitTypeMineOil(int playerid, int type)
     return false;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerid));
+  Player* p = (Player*)(game()->findPlayer(playerid));
 
   if(!p)
   {
@@ -1023,7 +1023,7 @@ QValueList<int> BosonScript::allPlayerUnits(int id)
     return list;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(id));
+  Player* p = (Player*)(game()->findPlayer(id));
 
   if(!p)
   {
@@ -1052,7 +1052,7 @@ int BosonScript::allPlayerUnitsCount(int id)
     return count;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(id));
+  Player* p = (Player*)(game()->findPlayer(id));
 
   if(!p)
   {
@@ -1080,7 +1080,7 @@ QValueList<int> BosonScript::playerUnitsOfType(int playerid, int type)
     return list;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerid));
+  Player* p = (Player*)(game()->findPlayer(playerid));
 
   if(!p)
   {
@@ -1112,7 +1112,7 @@ int BosonScript::playerUnitsOfTypeCount(int playerid, int type)
     return count;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerid));
+  Player* p = (Player*)(game()->findPlayer(playerid));
 
   if(!p)
   {
@@ -1486,7 +1486,7 @@ void BosonScript::unfogPlayer(int playerid)
     return;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerid));
+  Player* p = (Player*)(game()->findPlayer(playerid));
 
   if(!p)
   {

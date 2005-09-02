@@ -948,7 +948,7 @@ FormPreview::~FormPreview()
 BoUfoWidget* FormPreview::getWidgetAt(int x, int y)
 {
  ufo::UWidget* widget = 0;
- widget = mUfoManager->contentWidget()->ufoWidget()->getWidgetAt(x, y);
+ widget = mUfoManager->contentWidget()->widget()->getWidgetAt(x, y);
  if (!widget) {
 	return 0;
  }
@@ -968,13 +968,13 @@ BoUfoWidget* FormPreview::getContainerWidgetAt(int x, int y)
  if (!w) {
 	return w;
  }
- QDomElement e = mUfoWidget2Element[w->ufoWidget()];
+ QDomElement e = mUfoWidget2Element[w->widget()];
  QString className;
  if (!e.isNull()) {
 	className = e.namedItem("ClassName").toElement().text();
  }
  while (w && !isContainerWidget(className)) {
-	ufo::UWidget* widget = w->ufoWidget();
+	ufo::UWidget* widget = w->widget();
 	w = 0;
 	while (!w && widget) {
 		widget = widget->getParent();
@@ -983,7 +983,7 @@ BoUfoWidget* FormPreview::getContainerWidgetAt(int x, int y)
 	if (!w) {
 		return 0;
 	}
-	e = mUfoWidget2Element[w->ufoWidget()];
+	e = mUfoWidget2Element[w->widget()];
 	if (e.isNull()) {
 		boError() << k_funcinfo << "NULL element for BoUfoWidget() !" << endl;
 		return 0;
@@ -998,7 +998,7 @@ void FormPreview::updateGUI(const QDomElement& root)
  glInit();
  BO_CHECK_NULL_RET(mUfoManager);
  makeCurrent();
- mUfoManager->contentWidget()->ufoWidget()->removeAll();
+ mUfoManager->contentWidget()->widget()->removeAll();
  mContentWidget->loadPropertiesFromXML(root.namedItem("Properties").toElement());
 
  mUfoWidget2Element.clear();
@@ -1058,7 +1058,7 @@ void FormPreview::updateGUI(const QDomElement& root, BoUfoWidget* parent)
 
 	if (widget->name() == mNameOfSelectedWidget) {
 		// TODO: paint a rect around it or so
-		widget->ufoWidget()->setBorder(ufo::RaisedBevelBorder);
+		widget->widget()->setBorder(ufo::RaisedBevelBorder);
 	}
 
 	depth += 40;
@@ -1070,13 +1070,13 @@ void FormPreview::updateGUI(const QDomElement& root, BoUfoWidget* parent)
 void FormPreview::addWidget(BoUfoWidget* widget, const QDomElement& e)
 {
  BO_CHECK_NULL_RET(widget);
- BO_CHECK_NULL_RET(widget->ufoWidget());
+ BO_CHECK_NULL_RET(widget->widget());
  if (e.isNull()) {
 	boError() << k_funcinfo << "NULL element" << endl;
 	return;
  }
- mUfoWidget2Element.insert(widget->ufoWidget(), e);
- mUfoWidget2Widget.insert(widget->ufoWidget(), widget);
+ mUfoWidget2Element.insert(widget->widget(), e);
+ mUfoWidget2Widget.insert(widget->widget(), widget);
 }
 
 void FormPreview::setPlacementMode(bool m)
@@ -1157,7 +1157,7 @@ void FormPreview::mousePressEvent(QMouseEvent* e)
 	BoUfoWidget* w = getContainerWidgetAt(pos.x(), pos.y());
 	QDomElement parent;
 	if (w) {
-		parent = mUfoWidget2Element[w->ufoWidget()];
+		parent = mUfoWidget2Element[w->widget()];
 	}
 	emit signalPlaceWidget(parent);
  } else {
@@ -1210,8 +1210,8 @@ void FormPreview::selectWidgetUnderCursor()
 void FormPreview::selectWidget(BoUfoWidget* widget)
 {
  QDomElement widgetUnderCursor;
- if (widget && widget->ufoWidget()) {
-	widgetUnderCursor = mUfoWidget2Element[widget->ufoWidget()];
+ if (widget && widget->widget()) {
+	widgetUnderCursor = mUfoWidget2Element[widget->widget()];
  }
 
  emit signalSelectWidget(widgetUnderCursor);
@@ -1233,7 +1233,7 @@ void FormPreview::setSelectedWidget(const QDomElement& widget)
 
  BoUfoWidget* contentWidget = mUfoManager->contentWidget();
  BO_CHECK_NULL_RET(contentWidget);
- QDomElement root = mUfoWidget2Element[contentWidget->ufoWidget()];
+ QDomElement root = mUfoWidget2Element[contentWidget->widget()];
  if (root.isNull()) {
 	boError() << k_funcinfo << "cannot find root widget" << endl;
 	return;

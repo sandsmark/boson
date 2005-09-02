@@ -111,7 +111,7 @@ BoUfoStartupWidget::~BoUfoStartupWidget()
 void BoUfoStartupWidget::setLocalPlayer(Player* p)
 {
  d->mLocalPlayer = p;
- BoUfoNewGameWidget* w = (BoUfoNewGameWidget*)d->mWidgetStack->stackWidget(IdNewGame);
+ BoUfoNewGameWidget* w = (BoUfoNewGameWidget*)d->mWidgetStack->widget(IdNewGame);
  if (w) {
 	w->setLocalPlayer(d->mLocalPlayer);
  }
@@ -120,7 +120,7 @@ void BoUfoStartupWidget::setLocalPlayer(Player* p)
 void BoUfoStartupWidget::slotLoadGame()
 {
  showWidget(IdLoadSaveGame);
- BoUfoLoadSaveGameWidget* loadSave = (BoUfoLoadSaveGameWidget*)d->mWidgetStack->stackWidget(IdLoadSaveGame);
+ BoUfoLoadSaveGameWidget* loadSave = (BoUfoLoadSaveGameWidget*)d->mWidgetStack->widget(IdLoadSaveGame);
  if (!loadSave) {
 	boError() << k_funcinfo << "load/save widget hasn't been initialized?!" << endl;
 	return;
@@ -133,7 +133,7 @@ void BoUfoStartupWidget::slotSaveGame()
 {
  // TODO pause game!
  showWidget(IdLoadSaveGame);
- BoUfoLoadSaveGameWidget* loadSave = (BoUfoLoadSaveGameWidget*)d->mWidgetStack->stackWidget(IdLoadSaveGame);
+ BoUfoLoadSaveGameWidget* loadSave = (BoUfoLoadSaveGameWidget*)d->mWidgetStack->widget(IdLoadSaveGame);
  if (!loadSave) {
 	boError() << k_funcinfo << "load/save widget hasn't been initialized?!" << endl;
 	return;
@@ -147,7 +147,7 @@ void BoUfoStartupWidget::slotNewSinglePlayerGame(KCmdLineArgs* args)
  d->mSinglePlayer = true;
 
  newGame(args);
- BoUfoNewGameWidget* w = (BoUfoNewGameWidget*)d->mWidgetStack->stackWidget(IdNewGame);
+ BoUfoNewGameWidget* w = (BoUfoNewGameWidget*)d->mWidgetStack->widget(IdNewGame);
  if (w) {
 	if (boGame->isAdmin() && boGame->playerCount() <= 1) {
 		if (!args || !args->isSet("start") && !args->isSet("computer")) {
@@ -170,7 +170,7 @@ void BoUfoStartupWidget::newGame(KCmdLineArgs* args)
  if (!args) {
 	return;
  }
- BoUfoNewGameWidget* w = (BoUfoNewGameWidget*)d->mWidgetStack->stackWidget(IdNewGame);
+ BoUfoNewGameWidget* w = (BoUfoNewGameWidget*)d->mWidgetStack->widget(IdNewGame);
  if (!w) {
 	boError() << k_funcinfo << "Oops - NULL newgame widget" << endl;
 	return;
@@ -238,7 +238,7 @@ void BoUfoStartupWidget::showWidget(WidgetId widgetId)
 {
  initWidget(widgetId);
 
- if (!d->mWidgetStack->stackWidget((int)widgetId)) {
+ if (!d->mWidgetStack->widget((int)widgetId)) {
 	boError() << k_funcinfo << "NULL widget " << widgetId << endl;
 	return;
  }
@@ -248,7 +248,7 @@ void BoUfoStartupWidget::showWidget(WidgetId widgetId)
 
 void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 {
- if (d->mWidgetStack->stackWidget((int)widgetId)) {
+ if (d->mWidgetStack->widget((int)widgetId)) {
 	// already initialized
 	return;
  }
@@ -373,7 +373,7 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 
 BoUfoLoadingWidget* BoUfoStartupWidget::loadingWidget() const
 {
- return (BoUfoLoadingWidget*)d->mWidgetStack->stackWidget(IdLoading);
+ return (BoUfoLoadingWidget*)d->mWidgetStack->widget(IdLoading);
 }
 
 void BoUfoStartupWidget::showLoadingWidget()
@@ -458,7 +458,7 @@ void BoUfoStartupWidget::slotShowWelcomeWidget()
 
  // reset the game now:
  // first remove all widgets except the welcome widget
- BoUfoWidget* w = d->mWidgetStack->stackWidget((int)IdWelcome);
+ BoUfoWidget* w = d->mWidgetStack->widget((int)IdWelcome);
  if (w) {
 	d->mWidgetStack->removeStackWidget(w);
  }
@@ -493,7 +493,7 @@ void BoUfoStartupWidget::resetWidgets()
 
 void BoUfoStartupWidget::removeWidget(WidgetId widgetId)
 {
- BoUfoWidget* w = d->mWidgetStack->stackWidget((int)widgetId);
+ BoUfoWidget* w = d->mWidgetStack->widget((int)widgetId);
  if (w) {
 	d->mWidgetStack->removeStackWidget(w);
 	d->mWidgetStack->removeWidget(w);
@@ -507,7 +507,7 @@ BosonStartupNetwork* BoUfoStartupWidget::networkInterface() const
 
 void BoUfoStartupWidget::slotOfferingConnections()
 {
- BoUfoWidget* w = d->mWidgetStack->stackWidget(IdNewGame);
+ BoUfoWidget* w = d->mWidgetStack->widget(IdNewGame);
  if (!w) {
 	boError() << k_funcinfo << "No new game widget!!!" << endl;
 	return;
@@ -517,7 +517,7 @@ void BoUfoStartupWidget::slotOfferingConnections()
 
 void BoUfoStartupWidget::slotConnectingToServer()
 {
- BoUfoWidget* w = d->mWidgetStack->stackWidget(IdNewGame);
+ BoUfoWidget* w = d->mWidgetStack->widget(IdNewGame);
  if (!w) {
 	boError() << k_funcinfo << "No new game widget!!!" << endl;
 	return;
@@ -527,7 +527,7 @@ void BoUfoStartupWidget::slotConnectingToServer()
 
 void BoUfoStartupWidget::slotConnectedToServer()
 {
- BoUfoWidget* w = d->mWidgetStack->stackWidget(IdNewGame);
+ BoUfoWidget* w = d->mWidgetStack->widget(IdNewGame);
  if (!w) {
 	boError() << k_funcinfo << "No new game widget!!!" << endl;
 	return;

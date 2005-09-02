@@ -74,7 +74,7 @@ public:
 
 	ufo::UInternalFrame* frame() const
 	{
-		return (ufo::UInternalFrame*)ufoWidget();
+		return (ufo::UInternalFrame*)widget();
 	}
 	ufo::URootPane* rootPane() const
 	{

@@ -148,15 +148,15 @@ void BoUfoDebugWidget::setBoUfoManager(BoUfoManager* manager)
 		continue;
 	}
 	BoUfoWidget* w = (BoUfoWidget*)it.current();
-	if (!w->ufoWidget()) {
+	if (!w->widget()) {
 		boError() << k_funcinfo << "BoUfoWidget has NULL ufo widget" << endl;
 		continue;
 	}
-	if (d->mUfoWidget2BoUfoWidget.contains(w->ufoWidget())) {
+	if (d->mUfoWidget2BoUfoWidget.contains(w->widget())) {
 		boError() << k_funcinfo << "ufo widget already in map" << endl;
 		continue;
 	}
-	d->mUfoWidget2BoUfoWidget.insert(w->ufoWidget(), w);
+	d->mUfoWidget2BoUfoWidget.insert(w->widget(), w);
  }
 
  BO_CHECK_NULL_RET(d->mManager->rootPane());

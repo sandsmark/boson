@@ -44,7 +44,7 @@ void BoUfoListBox::init()
 
  ufo::UScrollPane* pane = new ufo::UScrollPane(mListBox);
  pane->setOpaque(false);
- ufoWidget()->add(pane);
+ widget()->add(pane);
 
  CONNECT_UFO_TO_QT(BoUfoListBox, mListBox, SelectionChanged);
 }

@@ -37,7 +37,6 @@
 #include <qimage.h>
 #include <qstringlist.h>
 #include <qmap.h>
-#include <qregexp.h>
 
 #include <math.h>
 
@@ -1344,76 +1343,6 @@ bool BosonFileConverter::convertPlayField_From_0_10_85_To_0_11(QMap<QString, QBy
  return true;
 }
 
-bool BosonFileConverter::convertPlayField_From_0_11_To_0_12(QMap<QString, QByteArray>& files)
-{
- QDomDocument kgameDoc(QString::fromLatin1("Boson"));
- if (!loadXMLDoc(&kgameDoc, files["kgame.xml"])) {
-	boError() << k_funcinfo << "could not load kgame.xml" << endl;
-	return false;
- }
- QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
- if (!loadXMLDoc(&canvasDoc, files["canvas.xml"])) {
-	boError() << k_funcinfo << "could not load canvas.xml" << endl;
-	return false;
- }
- QDomDocument playersDoc(QString::fromLatin1("Players"));
- if (!loadXMLDoc(&playersDoc, files["players.xml"])) {
-	boError() << k_funcinfo << "could not load players.xml" << endl;
-	return false;
- }
- QDomElement kgameRoot = kgameDoc.documentElement();
- QDomElement canvasRoot = canvasDoc.documentElement();
- QDomElement playersRoot = playersDoc.documentElement();
-
-#if BOSON_VERSION_MINOR < 0x12
- kgameRoot.setAttribute("Version", BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x03, 0x00));
-#else
-#error TODO: the above version to be BOSON_SAVEGAME_FORMAT_VERSION_0_12
- kgameRoot.setAttribute("Version", BOSON_SAVEGAME_FORMAT_VERSION_0_12);
-#endif
-
- QDomNodeList playersList = playersRoot.elementsByTagName("Player");
- if (playersList.count() < 2) {
-	// at least neutral player + 1 player must be present
-	boError() << k_funcinfo << "less than 2 Player tags found in players.xml file. This is an invalid file." << endl;
-	return false;
- }
- if (playersList.count() > 11) {
-	// 10 players + neutral player are maximum
-	boError() << k_funcinfo << "more than 11 Player tags found in players.xml. This is an invalid file." << endl;
-	return false;
- }
-
- int* actualIds = new int[playersList.count()];
- for (unsigned int i = 0; i < playersList.count(); i++) {
-	if (i < playersList.count() - 1) {
-		// an actual player
-		// the player IDs start at 128 and go up sequentially.
-		actualIds[i] = 128 + i;
-	} else if (i == playersList.count() - 1) {
-		// per definition the neutral player.
-		// the neutral player uses the special ID 256.
-		actualIds[i] = 256;
-	}
- }
-
- bool ret = true;
- ret = ret & convertPlayerIndicesToIds_post_0_11(actualIds, playersList.count(), playersRoot); // e.g. players
- ret = ret & convertPlayerIndicesToIds_post_0_11(actualIds, playersList.count(), canvasRoot); // e.g. items
- ret = ret & convertPlayerIndicesToIds_post_0_11(actualIds, playersList.count(), kgameRoot); // e.g. events
- ret = ret & convertPlayerIndicesToIdsInFileNames_post_0_11(actualIds, playersList.count(), files);
-
- delete[] actualIds;
- actualIds = 0;
-
-
- files.insert("players.xml", playersDoc.toString().utf8());
- files.insert("canvas.xml", canvasDoc.toString().utf8());
- files.insert("kgame.xml", kgameDoc.toString().utf8());
-
- return true;
-}
-
 void BosonFileConverter::removePropertyIds_0_9_1(const QDomNodeList& itemsList, const QStringList& ids)
 {
  for (unsigned int i = 0; i < itemsList.count(); i++) {
@@ -1432,83 +1361,6 @@ void BosonFileConverter::removePropertyIds_0_9_1(const QDomNodeList& itemsList, 
 		}
 	}
  }
-}
-
-bool BosonFileConverter::convertPlayerIndicesToIds_post_0_11(int* actualIds, unsigned int players, QDomElement& root)
-{
- for (QDomNode n = root.firstChild(); !n.isNull(); n = n.nextSibling()) {
-	QDomElement e = n.toElement();
-	if (e.isNull()) {
-		continue;
-	}
-	if (!convertPlayerIndicesToIds_post_0_11(actualIds, players, e)) {
-		boError(270) << k_funcinfo << "recursive call failed" << endl;
-		return false;
-	}
- }
- if (root.hasAttribute("PlayerId")) {
-	bool ok;
-	unsigned long int id = root.attribute("PlayerId").toULong(&ok);
-	if (!ok) {
-		boError(270) << k_funcinfo << "PlayerId is not a valid number" << endl;
-		return false;
-	}
-
-	// the file contains the _index_ only, so it must be
-	// < BOSON_MAX_PLAYERS.
-	// If (due to some bug) the file stores the actual ID, then it is
-	// >= 1025, i.e. > 1000
-	if (id > 1000) {
-		boError(270) << k_funcinfo << "invalid PlayerId at this point: " << id << " -> probably the actual ID was stored, instead of expected index" << endl;
-		return false;
-	}
-	if (id >= players) {
-		boError(270) << k_funcinfo << "invalid PlayerId: " << id << " must be < " << players << endl;
-		return false;
-	}
-	root.setAttribute("PlayerId", QString::number(actualIds[id]));
-
- }
- return true;
-}
-
-bool BosonFileConverter::convertPlayerIndicesToIdsInFileNames_post_0_11(int* actualIds, unsigned int players, QMap<QString, QByteArray>& files)
-{
- QMap<QString, QByteArray> addFiles;
- QStringList removeFiles;
- QRegExp hasPlayerId("-player_([0-9]+)");
- for (QMap<QString, QByteArray>::iterator it = files.begin(); it != files.end(); ++it) {
-	int pos = hasPlayerId.search(it.key());
-	if (pos < 0) {
-		continue;
-	}
-	QString number = hasPlayerId.cap(1);
-	bool ok;
-	unsigned int n = number.toUInt(&ok);
-	if (!ok) {
-		boError(270) << k_funcinfo << "not a valid number in " << it.key() << endl;
-		return false;
-	}
-	if (n >= players) {
-		boError(270) << k_funcinfo << "found file for player " << n << " but only " << players << " players available" << endl;
-		return false;
-	}
-
-	if (actualIds[n] > 0) {
-		QString file = it.key();
-		QByteArray b = it.data();
-		file.replace(hasPlayerId, QString("-player_%1").arg(actualIds[n]));
-		addFiles.insert(file, b);
-	}
-	removeFiles.append(it.key());
- }
- for (QStringList::iterator it = removeFiles.begin(); it != removeFiles.end(); ++it) {
-	files.remove(*it);
- }
- for (QMap<QString, QByteArray>::iterator it = addFiles.begin(); it != addFiles.end(); ++it) {
-	files.insert(it.key(), it.data());
- }
- return true;
 }
 
 bool BosonFileConverter::addGamePyScript_From_0_10_82_To_0_10_83(QByteArray& gamePy)

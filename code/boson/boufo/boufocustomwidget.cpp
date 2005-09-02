@@ -128,38 +128,38 @@ BoUfoCustomWidget::~BoUfoCustomWidget()
 
 void BoUfoCustomWidget::paint()
 {
- BO_CHECK_NULL_RET(ufoWidget());
+ BO_CHECK_NULL_RET(widget());
  ufo::UToolkit* tk = ufo::UToolkit::getToolkit();
  BO_CHECK_NULL_RET(tk);
  ufo::UContext* c = tk->getCurrentContext();
  BO_CHECK_NULL_RET(c);
  ufo::UGraphics* g = c->getGraphics();
  BO_CHECK_NULL_RET(g);
- ((UCustomWidgetRenderer*)ufoWidget())->ufoPaint(g);
+ ((UCustomWidgetRenderer*)widget())->ufoPaint(g);
 }
 
 void BoUfoCustomWidget::paintWidget()
 {
- BO_CHECK_NULL_RET(ufoWidget());
+ BO_CHECK_NULL_RET(widget());
  ufo::UToolkit* tk = ufo::UToolkit::getToolkit();
  BO_CHECK_NULL_RET(tk);
  ufo::UContext* c = tk->getCurrentContext();
  BO_CHECK_NULL_RET(c);
  ufo::UGraphics* g = c->getGraphics();
  BO_CHECK_NULL_RET(g);
- ((UCustomWidgetRenderer*)ufoWidget())->ufoPaintWidget(g);
+ ((UCustomWidgetRenderer*)widget())->ufoPaintWidget(g);
 }
 
 void BoUfoCustomWidget::paintBorder()
 {
- BO_CHECK_NULL_RET(ufoWidget());
+ BO_CHECK_NULL_RET(widget());
  ufo::UToolkit* tk = ufo::UToolkit::getToolkit();
  BO_CHECK_NULL_RET(tk);
  ufo::UContext* c = tk->getCurrentContext();
  BO_CHECK_NULL_RET(c);
  ufo::UGraphics* g = c->getGraphics();
  BO_CHECK_NULL_RET(g);
- ((UCustomWidgetRenderer*)ufoWidget())->ufoPaintBorder(g);
+ ((UCustomWidgetRenderer*)widget())->ufoPaintBorder(g);
 }
 
 

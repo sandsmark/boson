@@ -73,7 +73,7 @@ QString BoMessage::debug(KGame* game)
  QString r = QString("receiver=%3").arg(receiver);
  QString s = QString("sender=%2").arg(sender);
  if (KGameMessage::isPlayer(receiver)) {
-	KPlayer* p = game->findPlayerByKGameId(receiver);
+	KPlayer* p = game->findPlayer(receiver);
 	if (!p) {
 		r += QString("(player cant be found)");
 	} else {
@@ -90,7 +90,7 @@ QString BoMessage::debug(KGame* game)
  }
 
  if (KGameMessage::isPlayer(sender)) {
-	KPlayer* p = game->findPlayerByKGameId(receiver);
+	KPlayer* p = game->findPlayer(receiver);
 	if (!p) {
 		r += QString("(player cant be found)");
 	} else {

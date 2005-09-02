@@ -61,7 +61,7 @@ BoUfoLabel::BoUfoLabel(const QString& text)
 void BoUfoLabel::init()
 {
  setLayoutClass(UHBoxLayout);
- mLabel = (ufo::UBoLabel*)ufoWidget();
+ mLabel = (ufo::UBoLabel*)widget();
  mLabel->setOpaque(false);
  setForegroundColor(defaultForegroundColor());
  setKeyEventsEnabled(false);
@@ -70,13 +70,13 @@ void BoUfoLabel::init()
 void BoUfoLabel::setVerticalAlignment(VerticalAlignment a)
 {
  BoUfoWidget::setVerticalAlignment(a);
- mLabel->setVerticalAlignment(ufoWidget()->getVerticalAlignment());
+ mLabel->setVerticalAlignment(widget()->getVerticalAlignment());
 }
 
 void BoUfoLabel::setHorizontalAlignment(HorizontalAlignment a)
 {
  BoUfoWidget::setHorizontalAlignment(a);
- mLabel->setHorizontalAlignment(ufoWidget()->getHorizontalAlignment());
+ mLabel->setHorizontalAlignment(widget()->getHorizontalAlignment());
 }
 
 void BoUfoLabel::setDefaultForegroundColor(const QColor& c)

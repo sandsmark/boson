@@ -68,8 +68,8 @@ public:
 	 **/
 	virtual QString scriptFileName() const = 0;
 
-	virtual bool saveAsXML(QDomElement& root) const;
-	virtual bool loadFromXML(const QDomElement& root);
+	virtual bool save(QDomElement& root) const;
+	virtual bool load(const QDomElement& root);
 
 	bool saveScriptData(QByteArray* scriptData) const;
 	bool loadScript(const QByteArray& script, const QByteArray& scriptData);

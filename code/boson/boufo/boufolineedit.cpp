@@ -54,7 +54,7 @@ void BoUfoLineEdit::init()
 {
  setLayoutClass(UHBoxLayout);
  mLineEdit = new ufo::ULineEdit();
- ufoWidget()->add(mLineEdit);
+ widget()->add(mLineEdit);
 
  CONNECT_UFO_TO_QT(BoUfoLineEdit, mLineEdit, Activated);
 }

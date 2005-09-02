@@ -108,7 +108,7 @@ void KPlayer::init()
 
 KPlayer::~KPlayer()
 {
-  boDebug(11001) << k_funcinfo << ": this=" << this <<", id=" << this->kgameId() << endl;
+  boDebug(11001) << k_funcinfo << ": this=" << this <<", id=" << this->id() << endl;
 
   // Delete IODevices
   KGameIO *input;
@@ -176,7 +176,7 @@ bool KPlayer::forwardInput(QDataStream &msg,bool transmit,Q_UINT32 sender)
   }
 }
 
-void KPlayer::setKGameId(Q_UINT32 newid)
+void KPlayer::setId(Q_UINT32 newid)
 {
   // Needs to be after the sendProcess
   d->mId=newid;
@@ -195,7 +195,7 @@ void KPlayer::setName(const QString& name)
 const QString& KPlayer::name() const
 { return d->mName.value(); }
 
-Q_UINT32 KPlayer::kgameId() const
+Q_UINT32 KPlayer::id() const
 { return d->mId; }
 
 KGamePropertyHandler * KPlayer::dataHandler()
@@ -287,7 +287,7 @@ int KPlayer::calcIOValue()
 
 bool KPlayer::setTurn(bool b, bool exclusive)
 {
-  boDebug(11001) << k_funcinfo << ": " << kgameId() << " (" << this << ") to " << b << endl;
+  boDebug(11001) << k_funcinfo << ": " << id() << " (" << this << ") to " << b << endl;
   if (!isActive())
   {
     return false;
@@ -318,7 +318,7 @@ bool KPlayer::load(QDataStream &stream)
 {
   Q_INT32 id,priority;
   stream >> id >> priority;
-  setKGameId(id);
+  setId(id);
   setNetworkPriority(priority);
 
   // Load Player Data
@@ -342,7 +342,7 @@ bool KPlayer::load(QDataStream &stream)
 
 bool KPlayer::save(QDataStream &stream)
 {
-  stream << (Q_INT32)kgameId() << (Q_INT32)networkPriority();
+  stream << (Q_INT32)id() << (Q_INT32)networkPriority();
 
   d->mProperties.save(stream);
 
@@ -403,7 +403,7 @@ void KPlayer::sendProperty(int msgid, QDataStream& stream, bool* sent)
 {
   if (game())
   {
-    bool s = game()->sendPlayerProperty(msgid, stream, kgameId());
+    bool s = game()->sendPlayerProperty(msgid, stream, id());
     if (s)
     {
       *sent = true;
@@ -433,7 +433,7 @@ void KPlayer::Debug()
    boDebug(11001) << "------------------- KPLAYER -----------------------" << endl;
    boDebug(11001) << "this:    " << this << endl;
    boDebug(11001) << "rtti:    " << rtti() << endl;
-   boDebug(11001) << "id  :    " << kgameId() << endl;
+   boDebug(11001) << "id  :    " << id() << endl;
    boDebug(11001) << "Name :   " << name() << endl;
    boDebug(11001) << "Group:   " << group() << endl;
    boDebug(11001) << "Async:   " << asyncInput() << endl;

@@ -37,7 +37,7 @@ public:
 	void raiseStackWidget(int id);
 	void removeStackWidget(BoUfoWidget*);
 	void removeStackWidget(int id);
-	BoUfoWidget* stackWidget(int id) const;
+	BoUfoWidget* widget(int id) const;
 	BoUfoWidget* visibleWidget() const
 	{
 		return mVisibleWidget;

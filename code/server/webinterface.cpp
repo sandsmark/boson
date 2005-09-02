@@ -316,9 +316,9 @@ void WebInterface::writePlayerStats(QTextStream& os)
     {
         Player* p = (Player*)itP.current();
         if(p->name() != "Neutral")
-            os << "  &nbsp;&nbsp;" << p->userId() << ": " << p->name() << " - " << p->unitCount() << " units<br>\r\n";
+            os << "  &nbsp;&nbsp;" << p->id() << ": " << p->name() << " - " << p->unitCount() << " units<br>\r\n";
         else
-            os << "<i>  &nbsp;&nbsp;" << p->userId() << ": " << p->name() << " - " << p->unitCount() << " units</i><br>\r\n";
+            os << "<i>  &nbsp;&nbsp;" << p->id() << ": " << p->name() << " - " << p->unitCount() << " units</i><br>\r\n";
         ++itP;
     }
 }

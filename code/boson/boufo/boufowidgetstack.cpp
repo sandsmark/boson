@@ -102,7 +102,7 @@ void BoUfoWidgetStack::removeStackWidget(int id)
  if (id < 0) {
 	return;
  }
- BoUfoWidget* w = stackWidget(id);
+ BoUfoWidget* w = widget(id);
  mId2Widget->remove(id);
  if (mVisibleWidget == w) {
 	if (mId2Widget->count() > 0) {
@@ -113,7 +113,7 @@ void BoUfoWidgetStack::removeStackWidget(int id)
  }
 }
 
-BoUfoWidget* BoUfoWidgetStack::stackWidget(int id) const
+BoUfoWidget* BoUfoWidgetStack::widget(int id) const
 {
  if (id < 0) {
 	return 0;

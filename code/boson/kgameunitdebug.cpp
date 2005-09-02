@@ -307,7 +307,7 @@ void KGameUnitDebug::addUnit(Unit* unit)
 void KGameUnitDebug::update(QListViewItem* item, Unit* unit)
 {
  item->setText(d->mId, QString::number(unit->id()));
- item->setText(d->mOwner, QString::number(unit->owner() ? unit->owner()->bosonId() : 0));
+ item->setText(d->mOwner, QString::number(unit->owner() ? unit->owner()->id() : 0));
  item->setText(d->mRTTI, QString::number(unit->rtti()));
  item->setText(d->mX, QString::number(unit->x()));
  item->setText(d->mY, QString::number(unit->y()));

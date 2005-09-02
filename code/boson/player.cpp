@@ -133,11 +133,6 @@ Player::~Player()
  boDebug() << k_funcinfo << "done" << endl;
 }
 
-int Player::bosonId() const
-{
- return userId();
-}
-
 bool Player::isNeutralPlayer() const
 {
  return d->mIsNeutralPlayer;
@@ -283,7 +278,7 @@ void Player::unitDestroyed(Unit* unit)
  if (unit->unitProperties()->supportMiniMap()) {
 	if (!hasMiniMap()) {
 		BoEvent* event = new BoEvent("LostMinimap");
-		event->setPlayerId(bosonId());
+		event->setPlayerId(id());
 		event->setLocation(BoVector3Fixed(unit->x(), unit->y(), unit->z()));
 		boGame->queueEvent(event);
 	}
@@ -322,7 +317,7 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
  BosonItemPropertyHandler* p = (BosonItemPropertyHandler*)sender();
  if (!p->item()) {
 	boError() << k_funcinfo << "NULL parent item for property handler" << endl;
-	boDebug() << "player=" << bosonId() << ",propId=" << prop->id() << endl;
+	boDebug() << "player=" << id() << ",propId=" << prop->id() << endl;
 	return;
  }
  if (!RTTI::isUnit(p->item()->rtti())) {
@@ -589,14 +584,14 @@ void Player::facilityCompleted(Facility* fac)
 
  BoVector3Fixed location(fac->x(), fac->y(), fac->z());
  BoEvent* constructedEvent = new BoEvent("FacilityWithTypeConstructed", QString::number(fac->type()));
- constructedEvent->setPlayerId(bosonId());
+ constructedEvent->setPlayerId(id());
  constructedEvent->setUnitId(fac->id());
  constructedEvent->setLocation(location);
  boGame->queueEvent(constructedEvent);
 
  if (fac->unitProperties()->supportMiniMap()) {
 	BoEvent* miniMapEvent = new BoEvent("GainedMinimap");
-	miniMapEvent->setPlayerId(bosonId());
+	miniMapEvent->setPlayerId(id());
 	miniMapEvent->setLocation(location);
 	boGame->queueEvent(miniMapEvent);
  }
@@ -753,7 +748,7 @@ void Player::technologyResearched(ProductionPlugin* plugin, unsigned long int ty
  addUpgrade(prop);
 
  BoEvent* event = new BoEvent("TechnologyWithTypeResearched", QString::number(type), QString::number(plugin->unit()->id()));
- event->setPlayerId(bosonId());
+ event->setPlayerId(id());
  event->setLocation(BoVector3Fixed(plugin->unit()->x(), plugin->unit()->y(), plugin->unit()->z()));
  ((Boson*)game())->queueEvent(event);
 }
@@ -775,9 +770,10 @@ bool Player::saveAsXML(QDomElement& root)
 	return false;
  }
 
- root.setAttribute(QString::fromLatin1("PlayerId"), bosonId());
+ // note: we need to save the index in the list, not the actual id()
+ root.setAttribute(QString::fromLatin1("PlayerId"), game()->playerList()->findRef(this));
 
- if (bosonId() == 256) {
+ if (game()->playerList()->findRef(this) == (int)game()->playerList()->count() - 1) {
 	root.setAttribute(QString::fromLatin1("IsNeutral"), 1);
  }
 
@@ -789,7 +785,7 @@ bool Player::saveAsXML(QDomElement& root)
  BosonCustomPropertyXML propertyXML;
  QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
  if (!propertyXML.saveAsXML(handler, dataHandler())) {
-	boError() << k_funcinfo << "Unable to save datahandler of player " << bosonId() << endl;
+	boError() << k_funcinfo << "Unable to save datahandler of player " << id() << endl;
 	return false;
  }
  root.appendChild(handler);
@@ -821,7 +817,7 @@ bool Player::saveAsXML(QDomElement& root)
 
 bool Player::loadFromXML(const QDomElement& root)
 {
- boDebug(260) << k_funcinfo << bosonId() << endl;
+ boDebug(260) << k_funcinfo << endl;
  // this does NOT load the units!
 
  bool ok = false;
@@ -844,7 +840,7 @@ bool Player::loadFromXML(const QDomElement& root)
  BosonCustomPropertyXML propertyXML;
  QDomElement handler = root.namedItem(QString::fromLatin1("DataHandler")).toElement();
  if (!propertyXML.loadFromXML(handler, dataHandler())) {
-	boError(260) << k_funcinfo << "unable to load player data handler (player=" << this->bosonId() << ")" << endl;
+	boError(260) << k_funcinfo << "unable to load player data handler (player=" << this->id() << ")" << endl;
 	return false;
  }
 
@@ -947,7 +943,7 @@ bool Player::loadFogOfWar(const QDomElement& root)
 
 void Player::writeGameLog(QTextStream& log)
 {
- log << "Player: " << bosonId() << endl;
+ log << "Player: " << id() << endl;
  log << minerals() << " " << oil() << endl;
  log << mobilesCount() << " " << facilitiesCount() << endl;
 

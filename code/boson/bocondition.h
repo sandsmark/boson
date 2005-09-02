@@ -78,8 +78,8 @@ public:
 
 	void processEvent(const BoEvent* event);
 
-	virtual bool saveAsXML(QDomElement& root) const;
-	virtual bool loadFromXML(const QDomElement& root);
+	virtual bool save(QDomElement& root, const QMap<int, int>* playerId2Index) const;
+	virtual bool load(const QDomElement& root);
 
 	/**
 	 * Reset the condition - all events need to be received again.

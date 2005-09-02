@@ -62,14 +62,9 @@ Unit* BosonPlayerInputHandler::findUnit(unsigned long int id, Player* p) const
  return mGame->findUnit(id, p);
 }
 
-Player* BosonPlayerInputHandler::findPlayerByKGameId(unsigned long int id) const
+Player* BosonPlayerInputHandler::findPlayer(unsigned long int id) const
 {
- return (Player*)mGame->findPlayerByKGameId(id);
-}
-
-Player* BosonPlayerInputHandler::findPlayerByUserId(int id) const
-{
- return (Player*)mGame->findPlayerByUserId(id);
+ return (Player*)mGame->findPlayer(id);
 }
 
 bool BosonPlayerInputHandler::playerInput(QDataStream& stream, Player* player)
@@ -289,7 +284,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			break;
 		}
 		boDebug() << "MoveRefine" << endl;
-		Player* refineryOwner = findPlayerByUserId(message.mRefineryOwner);
+		Player* refineryOwner = findPlayer(message.mRefineryOwner);
 		if (!refineryOwner) {
 			boError() << k_lineinfo << "Cannot find player " << message.mRefineryOwner << endl;
 			break;
@@ -312,7 +307,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			Q_ULONG unitId = *it;
 			Unit* u = findUnit(unitId, player);
 			if (!u) {
-				boError() << k_lineinfo << "cannot find unit " << unitId << " for player " << player->bosonId() << endl;
+				boError() << k_lineinfo << "cannot find unit " << unitId << " for player " << player->id() << endl;
 				continue;
 			}
 			if (u->isDestroyed()) {
@@ -356,7 +351,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		stream >> repairOwnerId;
 		stream >> repairId;
 		stream >> unitCount;
-		Player* repairOwner= findPlayerByUserId(repairOwnerId);
+		Player* repairOwner= findPlayer(repairOwnerId);
 		if (!repairOwner) {
 			boError() << k_lineinfo << "Cannot find player " << repairOwnerId << endl;
 			break;
@@ -380,7 +375,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			stream >> unitId;
 			Unit* u = findUnit(unitId, player);
 			if (!u) {
-				boError() << k_lineinfo << "cannot find unit " << unitId << " for player " << player->bosonId()  << endl;
+				boError() << k_lineinfo << "cannot find unit " << unitId << " for player " << player->id()  << endl;
 				continue;
 			}
 			if (!u->isMobile()) {
@@ -400,7 +395,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			break;
 		}
 
-		Player* p = findPlayerByUserId(message.mOwner);
+		Player* p = findPlayer(message.mOwner);
 		if (!p) {
 			boError() << k_lineinfo << "Cannot find player " << message.mOwner << endl;
 			break;
@@ -442,7 +437,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		}
 		boDebug() << "MoveProduceStop" << endl;
 
-		Player* p = findPlayerByUserId(message.mOwner);
+		Player* p = findPlayer(message.mOwner);
 		if (!p) {
 			boError() << k_lineinfo << "Cannot find player " << message.mOwner << endl;
 			break;
@@ -497,7 +492,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			break;
 		}
 
-		Player* p = findPlayerByUserId(message.mOwner);
+		Player* p = findPlayer(message.mOwner);
 		if (!p) {
 			boError() << k_lineinfo << "Cannot find player " << message.mOwner << endl;
 			break;
@@ -647,7 +642,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			break;
 		}
 
-		Player* p = findPlayerByUserId(message.mOwner);
+		Player* p = findPlayer(message.mOwner);
 		if (!p) {
 			boError() << k_lineinfo << "Cannot find player " << message.mOwner << endl;
 			break;
@@ -670,7 +665,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			break;
 		}
 
-		Player* p = findPlayerByUserId(message.mOwner);
+		Player* p = findPlayer(message.mOwner);
 		if (!p) {
 			boError() << k_lineinfo << "Cannot find player " << message.mOwner << endl;
 			break;
@@ -872,16 +867,11 @@ Unit* BosonPlayerInputHandler::editorPlaceUnit(Q_UINT32 owner, Q_UINT32 unitType
  BO_CHECK_NULL_RET0(canvas());
 
  Player* p = 0;
-#warning FIXME?
-#if 0
  if (owner >= 1024) { // a KPlayer ID
 	p = findPlayer(owner);
  } else {
 	p = (Player*)mGame->playerList()->at(owner);
  }
-#else
- p = findPlayerByUserId(owner);
-#endif
  if (!p) {
 	boError() << k_lineinfo << "Cannot find player " << owner << endl;
 	return 0;
@@ -953,7 +943,7 @@ BosonMessageEditorMove* BosonPlayerInputHandler::createNewUndoDeleteItemsMessage
 	}
 	doc.appendChild(root);
 
-	m = new BosonMessageEditorMovePlaceUnit(u->type(), u->owner()->bosonId(), BoVector2Fixed(u->x(), u->y()), u->rotation());
+	m = new BosonMessageEditorMovePlaceUnit(u->type(), u->owner()->id(), BoVector2Fixed(u->x(), u->y()), u->rotation());
 	placeUnit.append(m);
 	QString xml = doc.toString();
 	unitData.append(xml);

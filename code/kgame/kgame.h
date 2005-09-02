@@ -132,36 +132,36 @@ public:
      *
      * @return the list of players
      */
-    KGamePlayerList* playerList();
+    KGamePlayerList *playerList();
 
     /**
      * The same as @ref playerList but returns a const pointer.
      **/
-    const KGamePlayerList* playerList() const;
+    const KGamePlayerList *playerList() const;
 
     /**
      * Returns a list of all inactive players
      * @return the list of players
      */
-    KGamePlayerList* inactivePlayerList();
+    KGamePlayerList *inactivePlayerList();
 
     /**
      * The same as @ref inactivePlayerList but returns a const pointer.
      **/
-    const KGamePlayerList* inactivePlayerList() const;
+    const KGamePlayerList *inactivePlayerList() const;
 
     /**
      * Returns a pointer to the game's KRandomSequence. This sequence is
      * identical for all network players!
      * @return KRandomSequence pointer
      */
-    KRandomSequence* random() const;
+    KRandomSequence *random() const;
 
     /**
      * @return The KGameSequence object that is currently in use.
      * @see setGameSequence
      **/
-    KGameSequence* gameSequence() const;
+    KGameSequence *gameSequence() const;
 
     /**
      * Is the game running
@@ -175,8 +175,7 @@ public:
      * @param id Player id
      * @return player object
      */
-    KPlayer* findPlayerByKGameId(Q_UINT32 id) const;
-    KPlayer* findPlayerByUserId(int id) const;
+    KPlayer *findPlayer(Q_UINT32 id) const;
 
     /**
      * Set a new @ref KGameSequence to control player management. By default
@@ -273,7 +272,7 @@ public:
      * @deprecated
      * Use @ref KGameSequence::nextPlayer instead
      **/
-    virtual KPlayer* nextPlayer(KPlayer *last,bool exclusive=true);
+    virtual KPlayer * nextPlayer(KPlayer *last,bool exclusive=true);
 
     // Input events
     /**
@@ -320,7 +319,7 @@ public:
     * @param io is the 'or'ed rtti of the KGameIO's
     * @param isvirtual true if player is virtual
     */
-    virtual KPlayer* createPlayer(int rtti,int io,bool isvirtual);
+    virtual KPlayer *createPlayer(int rtti,int io,bool isvirtual);
 
     // load/save
     /**
@@ -688,7 +687,7 @@ protected:
      * {
      *   Q_INT32 move;
      *   msg >>  move;
-     *   boDebug() << "  Player " << player->userId() << " moved to " << move <<
+     *   boDebug() << "  Player " << player->id() << " moved to " << move <<
      *   endl;
      *   return true;
      * }
@@ -712,7 +711,7 @@ protected:
     * @return the current player
     *
     **/
-    KPlayer* playerInputFinished(KPlayer *player);
+    KPlayer *playerInputFinished(KPlayer *player);
 
 
     /**
@@ -740,7 +739,7 @@ protected:
     * parameter. All <em>player ID's</em> which are written into this list
     * will be <em>removed</em> from the created game. You do this by an
     * \code
-    * inactivate.append(player->kgameId());
+    * inactivate.append(player->id());
     * \endcode
     *
     * @param oldplayer - the list of the network players
@@ -786,7 +785,7 @@ protected:
     * @param isvirtual will set the virtual flag true/false
     *
     **/
-    KPlayer* loadPlayer(QDataStream& stream,bool isvirtual=false);
+    KPlayer *loadPlayer(QDataStream& stream,bool isvirtual=false);
 
 
     /**
@@ -816,7 +815,7 @@ protected:
     /**
      * Finally adds a player to the game and therefore to the list.
      **/
-    virtual void systemAddPlayer(KPlayer* newplayer);
+    void systemAddPlayer(KPlayer* newplayer);
 
     /**
      * Removes a player from the game
@@ -825,7 +824,7 @@ protected:
      * as this Id is received systemRemovePlayer is called and the player is
      * removed directly.
      **/
-    virtual void systemRemovePlayer(KPlayer* player,bool deleteit);
+    void systemRemovePlayer(KPlayer* player,bool deleteit);
 
     /**
      * This member function will transmit e.g. all players to that client, as well as

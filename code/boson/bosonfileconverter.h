@@ -25,7 +25,6 @@ template<class T> class QValueList;
 template<class T, class T2> class QMap;
 class QDomDocument;
 class QDomNodeList;
-class QDomElement;
 class QStringList;
 
 class BosonFileConverter
@@ -74,7 +73,6 @@ public:
 	bool convertPlayField_From_0_10_83_To_0_10_84(QMap<QString, QByteArray>& files);
 	bool convertPlayField_From_0_10_84_To_0_10_85(QMap<QString, QByteArray>& files);
 	bool convertPlayField_From_0_10_85_To_0_11(QMap<QString, QByteArray>& files);
-	bool convertPlayField_From_0_11_To_0_12(QMap<QString, QByteArray>& files);
 
 	bool addDummyWaterXML_From_0_10_To_0_10_80(QByteArray& waterXML);
 
@@ -96,8 +94,6 @@ protected:
 	 * itemList
 	 **/
 	void removePropertyIds_0_9_1(const QDomNodeList& itemList, const QStringList& ids);
-	bool convertPlayerIndicesToIds_post_0_11(int* actualIds, unsigned int players, QDomElement& root);
-	bool convertPlayerIndicesToIdsInFileNames_post_0_11(int* actualIds, unsigned int players, QMap<QString, QByteArray>& files);
 };
 
 /**

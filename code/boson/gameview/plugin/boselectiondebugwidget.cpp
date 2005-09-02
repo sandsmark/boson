@@ -166,7 +166,7 @@ void BoSelectionGroupDebugWidget::update(BoSelection* selection)
 			.arg(leader->id())
 			.arg(leader->type())
 			.arg(owner->name())
-			.arg(owner->bosonId());
+			.arg(owner->id());
  } else {
 	text += i18n("Leader: NULL\n");
  }

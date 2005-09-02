@@ -41,7 +41,7 @@ void BoUfoComboBox::init()
 {
  setLayoutClass(UHBoxLayout);
  mComboBox = new ufo::UComboBox();
- ufoWidget()->add(mComboBox);
+ widget()->add(mComboBox);
 
  CONNECT_UFO_TO_QT(BoUfoComboBox, mComboBox, Activated);
  CONNECT_UFO_TO_QT(BoUfoComboBox, mComboBox, Highlighted);

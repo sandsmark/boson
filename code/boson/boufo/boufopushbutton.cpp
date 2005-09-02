@@ -58,7 +58,7 @@ BoUfoPushButton::BoUfoPushButton(const QString& text)
 
 void BoUfoPushButton::init()
 {
- mButton = (ufo::UButton*)ufoWidget();
+ mButton = (ufo::UButton*)widget();
 
  CONNECT_UFO_TO_QT(BoUfoPushButton, mButton, Activated);
  CONNECT_UFO_TO_QT(BoUfoPushButton, mButton, Highlighted);
@@ -93,13 +93,13 @@ void BoUfoPushButton::init()
 void BoUfoPushButton::setVerticalAlignment(VerticalAlignment a)
 {
  BoUfoWidget::setVerticalAlignment(a);
- mButton->setVerticalAlignment(ufoWidget()->getVerticalAlignment());
+ mButton->setVerticalAlignment(widget()->getVerticalAlignment());
 }
 
 void BoUfoPushButton::setHorizontalAlignment(HorizontalAlignment a)
 {
  BoUfoWidget::setHorizontalAlignment(a);
- mButton->setHorizontalAlignment(ufoWidget()->getHorizontalAlignment());
+ mButton->setHorizontalAlignment(widget()->getHorizontalAlignment());
 }
 
 void BoUfoPushButton::setOpaque(bool o)

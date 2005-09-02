@@ -79,6 +79,8 @@ class Game : public KGame
     bool loadPlayersData(QMap<QString, QByteArray>& files);
 
     bool unstreamPlayfieldFiles(QMap<QString, QByteArray>& files, const QByteArray& buffer);
+    bool fixPlayerIds(QMap<QString, QByteArray>& files);
+    bool fixPlayerIds(int* actualIds, unsigned int players, QDomElement& root) const;
 
   protected slots:
     void slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 receiver, Q_UINT32 sender);
