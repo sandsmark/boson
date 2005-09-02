@@ -45,7 +45,7 @@ void BoUfoProgress::init(Qt::Orientation o)
  mProgress = new ufo::UBoProgress();
 // mProgress->updateUI();
  setOrientation(o);
- widget()->add(mProgress);
+ ufoWidget()->add(mProgress);
 }
 
 void BoUfoProgress::setOpaque(bool o)

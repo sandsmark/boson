@@ -51,7 +51,7 @@ void BoUfoSlider::init(Qt::Orientation o)
  } else {
 	mSlider = new ufo::USlider(ufo::Vertical);
  }
- widget()->add(mSlider);
+ ufoWidget()->add(mSlider);
 
  CONNECT_UFO_TO_QT(BoUfoSlider, mSlider, ValueChanged);
 

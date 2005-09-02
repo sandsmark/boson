@@ -39,7 +39,7 @@ void BoUfoTextEdit::init()
 {
  setLayoutClass(UHBoxLayout);
  mTextEdit = new ufo::UTextEdit();
- widget()->add(mTextEdit);
+ ufoWidget()->add(mTextEdit);
 }
 
 void BoUfoTextEdit::setEditable(bool e)

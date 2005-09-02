@@ -37,7 +37,7 @@
 BoUfoGroupBox::BoUfoGroupBox()
 	: BoUfoWidget(new ufo::UGroupBox())
 {
- mGroupBox = (ufo::UGroupBox*)widget();
+ mGroupBox = (ufo::UGroupBox*)ufoWidget();
  setLayoutClass(UVBoxLayout);
  setForegroundColor(BoUfoLabel::defaultForegroundColor());
 }
@@ -45,7 +45,7 @@ BoUfoGroupBox::BoUfoGroupBox()
 BoUfoGroupBox::BoUfoGroupBox(const QString& title)
 	: BoUfoWidget(new ufo::UGroupBox())
 {
- mGroupBox = (ufo::UGroupBox*)widget();
+ mGroupBox = (ufo::UGroupBox*)ufoWidget();
  setLayoutClass(UVBoxLayout);
  setForegroundColor(BoUfoLabel::defaultForegroundColor());
  setTitle(title);

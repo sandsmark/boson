@@ -49,7 +49,7 @@ void BoUfoCheckBox::init()
 {
  setLayoutClass(UHBoxLayout);
  mCheckBox = new ufo::UCheckBox();
- widget()->add(mCheckBox);
+ ufoWidget()->add(mCheckBox);
  // AB: at least the background of the label must be transparent. unfortunately,
  // libufo uses UButton for the checkbox, so the actual checkbox and its label
  // are the same widget
