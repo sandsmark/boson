@@ -214,6 +214,15 @@ void Game::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 receive
       }
       mGameInited = false;
     }
+    case BosonMessageIds::IdNetworkSyncCheckACK:
+    {
+      if(sender == messageClient()->adminId())
+      {
+        // Fake ACK message
+        QByteArray b = buffer.copy();
+        sendMessage(b, BosonMessageIds::IdNetworkSyncCheckACK);
+      }
+    }
     case BosonMessageIds::IdGameIsStarted:
     {
       mCycle = 0;
