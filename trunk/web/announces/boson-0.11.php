@@ -131,7 +131,7 @@ Installation instructions are at <a href=\"http://boson.eu.org/install.php\">htt
 
 
 <p class=\"announcement\">
-The Boson Team
+The Boson Team<br>
  http://boson.eu.org
 </p>
 ");
