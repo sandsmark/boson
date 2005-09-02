@@ -56,6 +56,15 @@ echo "
       currently latest version available.</b><br><br>
     </td></tr>";
 
+draw_bigbox_subheader("Installer");
+draw_bigbox_text("This is the recommended way of getting Boson.<br>
+It includes mostly static binary of Boson which means you won't have to
+install anything else.<br>
+You ca download it from
+<a href=\"download.php?dl=boson-all-0.10.tar.bz2\">here</a>
+(26 426 KB) or via SF.net's web interface from
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=235412\">here</a>.<br><br>");
+
 draw_bigbox_subheader("All-in-one package");
 draw_bigbox_text("This is a big package that contains source code, data files
 and music. You do not need to download any package below if you download this
@@ -132,6 +141,8 @@ draw_bigbox_subheader("Older versions");
 draw_bigbox_text("Currently, you can download old releases only via
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087\">SF.net's web interface</a>.<br>
 Available versions are:<br>
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=235412\">Boson 0.10</a>
+(released on 2nd May 2004),<br>
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=197716\">Boson 0.9.1</a>
 (released on 16th November 2003),<br>
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=194601\">Boson 0.9</a>

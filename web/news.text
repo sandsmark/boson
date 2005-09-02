@@ -1,6 +1,31 @@
 [article]
+id=050902
+date=September 2nd 2005 22:15
+title=0.11 finally released!
+text=We know, it took way too long, but finally 0.11 is out!<br>
+    This time, in addition to the usual packages, we have an installer with a
+    precompiled binary which doesn't depend on Qt/KDE. This should be good news
+    for those who doesn't have KDE installed. You can find the installer as
+    well as all the other packages on the
+    <a href="download.php">download page</a>.<br>
+    You can read the official announcement
+    <a href="announces/boson-0.11.php">here</a> as well as
+    <a href="announces/changelog-0.10.php">the changelog</a>.<br>
+    Highlights of this release include
+    <a href="http://libufo.sf.net">LibUFO</a> port for user interface,
+    graphical improvements such as realistic water, new effects and fully
+    operational multiplayer support.<br>
+    Some <a href="screenshots.php">new screenshots</a> are also available.<br>
+    The release got delayed so much because the
+    <a href="authors.php">authors</a> have been busy lately and thus didn't
+    have enough time to work on Boson. We are still short of manpower so please
+    take a look at our <a href="wiki/Main/Jobs">jobs list</a> and help if you
+    can!
+    <br><br>
+
+[article]
 id=050508
-date=Mai 5th 2005 12:19
+date=May 5th 2005 12:19
 title=Status update
 text=Over a year is left since the last Boson release and you probably
     heard about the LibUFO port. <br>
@@ -13,7 +38,7 @@ text=Over a year is left since the last Boson release and you probably
     (GeForce FX+ or Radeon 9500+)<br>
     We've uploaded some <a href="screenshots.php">new screenshots</a> showing
     parts of the LibUFO port and of course, water rendering using shaders.<br>
-    Enjoy !
+    Enjoy !<br><br>
 
 [article]
 id=041223
