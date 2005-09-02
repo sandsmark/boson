@@ -469,7 +469,7 @@ void BosonUfoCanvasWidget::slotShotFired(BosonShot* shot, BosonWeapon* weapon)
  BO_CHECK_NULL_RET(weapon);
  BO_CHECK_NULL_RET(weapon->properties());
  BO_CHECK_NULL_RET(weapon->unit());
- BoVector3Fixed pos(shot->x(), shot->y(), shot->z());
+ BoVector3Fixed pos(weapon->unit()->centerX(), weapon->unit()->centerY(), weapon->unit()->z());
  d->mEffectManager->loadWeaponType(weapon->properties());
  addEffects(d->mEffectManager->newShootEffects(weapon->properties(), pos, weapon->unit()->rotation()));
 
