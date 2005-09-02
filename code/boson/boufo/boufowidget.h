@@ -167,7 +167,7 @@ public:
 		CssBorder = 101
 	};
 
-	ufo::UWidget* widget() const
+	ufo::UWidget* ufoWidget() const
 	{
 		return mWidget;
 	}

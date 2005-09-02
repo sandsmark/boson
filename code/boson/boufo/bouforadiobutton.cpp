@@ -134,7 +134,7 @@ void BoUfoRadioButton::init()
 {
  setLayoutClass(UHBoxLayout);
  mRadioButton = new ufo::URadioButton();
- widget()->add(mRadioButton);
+ ufoWidget()->add(mRadioButton);
  // AB: at least the background of the label must be transparent
  mRadioButton->setOpaque(false);
 

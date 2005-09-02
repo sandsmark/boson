@@ -420,7 +420,7 @@ void BoUfoWidget::init(ufo::UWidget* w)
  w->setBoUfoWidgetDeleter(new BoUfoWidgetDeleter(this));
 // w->setClipping(false);
 
- g_ufoWidget2BoUfoWidget.insert(widget(), this);
+ g_ufoWidget2BoUfoWidget.insert(ufoWidget(), this);
  mUsesOwnFont = false;
 
  mWidget->setOpaque(false);
@@ -458,25 +458,25 @@ void BoUfoWidget::init(ufo::UWidget* w)
 
 void BoUfoWidget::setFont(const BoUfoFontInfo& info)
 {
- BO_CHECK_NULL_RET(widget());
+ BO_CHECK_NULL_RET(ufoWidget());
  mUsesOwnFont = true;
 
- BoUfoManager* manager = BoUfoManager::ufoManagerForContext(widget()->getContext());
+ BoUfoManager* manager = BoUfoManager::ufoManagerForContext(ufoWidget()->getContext());
  BO_CHECK_NULL_RET(manager);
 
- applyFontToWidgetAndChildren(info.ufoFont(manager), widget());
+ applyFontToWidgetAndChildren(info.ufoFont(manager), ufoWidget());
 }
 
 void BoUfoWidget::unsetFont()
 {
- BO_CHECK_NULL_RET(widget());
+ BO_CHECK_NULL_RET(ufoWidget());
  mUsesOwnFont = false;
 
  ufo::UFont resetFont;
- if (widget()->getParent()) {
-	resetFont = widget()->getParent()->getFont();
+ if (ufoWidget()->getParent()) {
+	resetFont = ufoWidget()->getParent()->getFont();
  } else {
-	BoUfoManager* m = BoUfoManager::ufoManagerForContext(widget()->getContext());
+	BoUfoManager* m = BoUfoManager::ufoManagerForContext(ufoWidget()->getContext());
 	if (!m) {
 		BO_NULL_ERROR(m);
 	} else {
@@ -484,118 +484,118 @@ void BoUfoWidget::unsetFont()
 	}
  }
 
- applyFontToWidgetAndChildren(resetFont, widget());
+ applyFontToWidgetAndChildren(resetFont, ufoWidget());
 }
 
 void BoUfoWidget::setName(const char* name)
 {
  QObject::setName(name);
- if (widget()) {
-	widget()->setName(name);
+ if (ufoWidget()) {
+	ufoWidget()->setName(name);
  }
 }
 
 void BoUfoWidget::invalidate()
 {
 // boDebug() << k_funcinfo << endl;
- widget()->invalidateTree();
+ ufoWidget()->invalidateTree();
 }
 
 void BoUfoWidget::setMouseEventsEnabled(bool enabled, bool moveEnabled)
 {
- widget()->setEventState(ufo::UEvent::MousePressed, enabled);
- widget()->setEventState(ufo::UEvent::MouseReleased, enabled);
- widget()->setEventState(ufo::UEvent::MouseClicked, enabled);
- widget()->setEventState(ufo::UEvent::MouseWheel, enabled);
- widget()->setEventState(ufo::UEvent::MouseMoved, moveEnabled);
- widget()->setEventState(ufo::UEvent::MouseDragged, moveEnabled);
+ ufoWidget()->setEventState(ufo::UEvent::MousePressed, enabled);
+ ufoWidget()->setEventState(ufo::UEvent::MouseReleased, enabled);
+ ufoWidget()->setEventState(ufo::UEvent::MouseClicked, enabled);
+ ufoWidget()->setEventState(ufo::UEvent::MouseWheel, enabled);
+ ufoWidget()->setEventState(ufo::UEvent::MouseMoved, moveEnabled);
+ ufoWidget()->setEventState(ufo::UEvent::MouseDragged, moveEnabled);
 
  // AB: I do not consider these to be "move" events, however libufo does
  // (enabling one of these also enables MouseMoved).
- widget()->setEventState(ufo::UEvent::MouseEntered, moveEnabled);
- widget()->setEventState(ufo::UEvent::MouseExited, moveEnabled);
+ ufoWidget()->setEventState(ufo::UEvent::MouseEntered, moveEnabled);
+ ufoWidget()->setEventState(ufo::UEvent::MouseExited, moveEnabled);
 }
 
 void BoUfoWidget::setKeyEventsEnabled(bool enabled)
 {
- widget()->setEventState(ufo::UEvent::KeyPressed, enabled);
- widget()->setEventState(ufo::UEvent::KeyReleased, enabled);
- widget()->setEventState(ufo::UEvent::KeyTyped, enabled);
+ ufoWidget()->setEventState(ufo::UEvent::KeyPressed, enabled);
+ ufoWidget()->setEventState(ufo::UEvent::KeyReleased, enabled);
+ ufoWidget()->setEventState(ufo::UEvent::KeyTyped, enabled);
 }
 
 void BoUfoWidget::setFocusEventsEnabled(bool enabled)
 {
- widget()->setEventState(ufo::UEvent::FocusGained, enabled);
- widget()->setEventState(ufo::UEvent::FocusLost, enabled);
+ ufoWidget()->setEventState(ufo::UEvent::FocusGained, enabled);
+ ufoWidget()->setEventState(ufo::UEvent::FocusLost, enabled);
 }
 
 void BoUfoWidget::setWidgetEventsEnabled(bool enabled)
 {
- widget()->setEventState(ufo::UEvent::WidgetMoved, enabled);
- widget()->setEventState(ufo::UEvent::WidgetResized, enabled);
- widget()->setEventState(ufo::UEvent::WidgetShown, enabled);
- widget()->setEventState(ufo::UEvent::WidgetHidden, enabled);
+ ufoWidget()->setEventState(ufo::UEvent::WidgetMoved, enabled);
+ ufoWidget()->setEventState(ufo::UEvent::WidgetResized, enabled);
+ ufoWidget()->setEventState(ufo::UEvent::WidgetShown, enabled);
+ ufoWidget()->setEventState(ufo::UEvent::WidgetHidden, enabled);
 }
 
 void BoUfoWidget::addWidget(BoUfoWidget* w)
 {
- BO_CHECK_NULL_RET(widget());
+ BO_CHECK_NULL_RET(ufoWidget());
  BO_CHECK_NULL_RET(w);
- BO_CHECK_NULL_RET(w->widget());
- widget()->add(w->widget());
+ BO_CHECK_NULL_RET(w->ufoWidget());
+ ufoWidget()->add(w->ufoWidget());
 }
 
 bool BoUfoWidget::removeWidget(BoUfoWidget* w)
 {
- if (!widget()) {
-	BO_NULL_ERROR(widget());
+ if (!ufoWidget()) {
+	BO_NULL_ERROR(ufoWidget());
 	return false;
  }
- if (!widget()) {
-	BO_NULL_ERROR(widget());
+ if (!ufoWidget()) {
+	BO_NULL_ERROR(ufoWidget());
 	return false;
  }
  if (!w) {
 	BO_NULL_ERROR(w);
 	return false;
  }
- if (!w->widget()) {
-	BO_NULL_ERROR(w->widget());
+ if (!w->ufoWidget()) {
+	BO_NULL_ERROR(w->ufoWidget());
 	return false;
  }
- return widget()->remove(w->widget());
+ return ufoWidget()->remove(w->ufoWidget());
 }
 
 unsigned int BoUfoWidget::removeAllWidgets()
 {
- if (!widget()) {
-	BO_NULL_ERROR(widget());
+ if (!ufoWidget()) {
+	BO_NULL_ERROR(ufoWidget());
 	return 0;
  }
- return widget()->removeAll();
+ return ufoWidget()->removeAll();
 }
 
 unsigned int BoUfoWidget::widgetCount() const
 {
- if (!widget()) {
-	BO_NULL_ERROR(widget());
+ if (!ufoWidget()) {
+	BO_NULL_ERROR(ufoWidget());
 	return 0;
  }
- return widget()->getWidgetCount();
+ return ufoWidget()->getWidgetCount();
 }
 
 void BoUfoWidget::render(BoUfoManager* ufoManager)
 {
- BO_CHECK_NULL_RET(widget());
+ BO_CHECK_NULL_RET(ufoWidget());
  BO_CHECK_NULL_RET(ufoManager);
  BO_CHECK_NULL_RET(ufoManager->context());
  BO_CHECK_NULL_RET(ufoManager->context()->getGraphics());
- widget()->paint(ufoManager->context()->getGraphics());
+ ufoWidget()->paint(ufoManager->context()->getGraphics());
 }
 
 void BoUfoWidget::addSpacing(int spacing)
 {
- BO_CHECK_NULL_RET(widget());
+ BO_CHECK_NULL_RET(ufoWidget());
  BoUfoWidget* w = new BoUfoWidget();
  w->setSize(spacing, spacing);
  w->setMinimumWidth(spacing);
@@ -611,20 +611,20 @@ void BoUfoWidget::setVerticalAlignment(VerticalAlignment a)
  switch (a) {
 	default:
 	case AlignTop:
-		widget()->setVerticalAlignment(ufo::AlignTop);
+		ufoWidget()->setVerticalAlignment(ufo::AlignTop);
 		break;
 	case AlignBottom:
-		widget()->setVerticalAlignment(ufo::AlignBottom);
+		ufoWidget()->setVerticalAlignment(ufo::AlignBottom);
 		break;
 	case AlignVCenter:
-		widget()->setVerticalAlignment(ufo::AlignCenter);
+		ufoWidget()->setVerticalAlignment(ufo::AlignCenter);
 		break;
  }
 }
 
 BoUfoWidget::VerticalAlignment BoUfoWidget::verticalAlignment() const
 {
- ufo::Alignment v = widget()->getVerticalAlignment();
+ ufo::Alignment v = ufoWidget()->getVerticalAlignment();
  VerticalAlignment a;
  switch (v) {
 	case ufo::AlignTop:
@@ -646,20 +646,20 @@ void BoUfoWidget::setHorizontalAlignment(HorizontalAlignment a)
  switch (a) {
 	default:
 	case AlignLeft:
-		widget()->setHorizontalAlignment(ufo::AlignLeft);
+		ufoWidget()->setHorizontalAlignment(ufo::AlignLeft);
 		break;
 	case AlignRight:
-		widget()->setHorizontalAlignment(ufo::AlignRight);
+		ufoWidget()->setHorizontalAlignment(ufo::AlignRight);
 		break;
 	case AlignHCenter:
-		widget()->setHorizontalAlignment(ufo::AlignCenter);
+		ufoWidget()->setHorizontalAlignment(ufo::AlignCenter);
 		break;
  }
 }
 
 BoUfoWidget::HorizontalAlignment BoUfoWidget::horizontalAlignment() const
 {
- ufo::Alignment h = widget()->getHorizontalAlignment();
+ ufo::Alignment h = ufoWidget()->getHorizontalAlignment();
  HorizontalAlignment a;
  switch (h) {
 	case ufo::AlignLeft:
@@ -678,7 +678,7 @@ BoUfoWidget::HorizontalAlignment BoUfoWidget::horizontalAlignment() const
 
 BoUfoWidget::BorderType BoUfoWidget::borderType() const
 {
- ufo::BorderType b = widget()->getBorder();
+ ufo::BorderType b = ufoWidget()->getBorder();
  BorderType t;
  switch (b) {
 	default:
@@ -712,25 +712,25 @@ void BoUfoWidget::setBorderType(BoUfoWidget::BorderType t)
  switch (t) {
 	default:
 	case ufo::NoBorder:
-		widget()->setBorder(ufo::NoBorder);
+		ufoWidget()->setBorder(ufo::NoBorder);
 		break;
 	case ufo::BottomLineBorder:
-		widget()->setBorder(ufo::BottomLineBorder);
+		ufoWidget()->setBorder(ufo::BottomLineBorder);
 		break;
 	case ufo::LineBorder:
-		widget()->setBorder(ufo::LineBorder);
+		ufoWidget()->setBorder(ufo::LineBorder);
 		break;
 	case ufo::RaisedBevelBorder:
-		widget()->setBorder(ufo::RaisedBevelBorder);
+		ufoWidget()->setBorder(ufo::RaisedBevelBorder);
 		break;
 	case ufo::LoweredBevelBorder:
-		widget()->setBorder(ufo::LoweredBevelBorder);
+		ufoWidget()->setBorder(ufo::LoweredBevelBorder);
 		break;
 	case ufo::StyleBorder:
-		widget()->setBorder(ufo::StyleBorder);
+		ufoWidget()->setBorder(ufo::StyleBorder);
 		break;
 	case ufo::CssBorder:
-		widget()->setBorder(ufo::CssBorder);
+		ufoWidget()->setBorder(ufo::CssBorder);
 		break;
  }
 }
@@ -762,130 +762,130 @@ void BoUfoWidget::setLayoutClass(LayoutClass layout)
 
 void BoUfoWidget::setLayout(ufo::ULayoutManager* layout)
 {
- widget()->setLayout(layout);
+ ufoWidget()->setLayout(layout);
 }
 
 void BoUfoWidget::setEnabled(bool e)
 {
- widget()->setEnabled(e);
+ ufoWidget()->setEnabled(e);
 }
 
 bool BoUfoWidget::isEnabled() const
 {
- return widget()->isEnabled();
+ return ufoWidget()->isEnabled();
 }
 
 void BoUfoWidget::setOpaque(bool o)
 {
- widget()->setOpaque(o);
+ ufoWidget()->setOpaque(o);
 }
 
 bool BoUfoWidget::opaque() const
 {
- return widget()->isOpaque();
+ return ufoWidget()->isOpaque();
 }
 
 void BoUfoWidget::setSize(int w, int h)
 {
- widget()->setSize(w, h);
+ ufoWidget()->setSize(w, h);
 }
 
 void BoUfoWidget::setPos(int x, int y)
 {
- widget()->setLocation(x, y);
+ ufoWidget()->setLocation(x, y);
 }
 
 int BoUfoWidget::width() const
 {
- return widget()->getWidth();
+ return ufoWidget()->getWidth();
 }
 
 int BoUfoWidget::height() const
 {
- return widget()->getHeight();
+ return ufoWidget()->getHeight();
 }
 
 int BoUfoWidget::x() const
 {
- return widget()->getX();
+ return ufoWidget()->getX();
 }
 
 int BoUfoWidget::y() const
 {
- return widget()->getY();
+ return ufoWidget()->getY();
 }
 
 void BoUfoWidget::setMinimumWidth(int w)
 {
- ufo::UDimension s1 = widget()->getMinimumSize();
+ ufo::UDimension s1 = ufoWidget()->getMinimumSize();
  ufo::UDimension s(w, s1.getHeight());
  setMinimumSize(s);
 }
 
 int BoUfoWidget::minimumWidth() const
 {
- ufo::UDimension s = widget()->getMinimumSize();
+ ufo::UDimension s = ufoWidget()->getMinimumSize();
  return s.getWidth();
 }
 
 void BoUfoWidget::setMinimumHeight(int h)
 {
- ufo::UDimension s1 = widget()->getMinimumSize();
+ ufo::UDimension s1 = ufoWidget()->getMinimumSize();
  ufo::UDimension s(s1.getWidth(), h);
  setMinimumSize(s);
 }
 
 int BoUfoWidget::minimumHeight() const
 {
- ufo::UDimension s = widget()->getMinimumSize();
+ ufo::UDimension s = ufoWidget()->getMinimumSize();
  return s.getHeight();
 }
 
 void BoUfoWidget::setPreferredWidth(int w)
 {
- ufo::UDimension s1 = widget()->getPreferredSize();
+ ufo::UDimension s1 = ufoWidget()->getPreferredSize();
  ufo::UDimension s(w, s1.getHeight());
  setPreferredSize(s);
 }
 
 int BoUfoWidget::preferredWidth() const
 {
- ufo::UDimension s = widget()->getPreferredSize();
+ ufo::UDimension s = ufoWidget()->getPreferredSize();
  return s.getWidth();
 }
 
 void BoUfoWidget::setPreferredHeight(int h)
 {
- ufo::UDimension s1 = widget()->getPreferredSize();
+ ufo::UDimension s1 = ufoWidget()->getPreferredSize();
  ufo::UDimension s(s1.getWidth(), h);
  setPreferredSize(s);
 }
 
 int BoUfoWidget::preferredHeight() const
 {
- ufo::UDimension s = widget()->getPreferredSize();
+ ufo::UDimension s = ufoWidget()->getPreferredSize();
  return s.getHeight();
 }
 
 void BoUfoWidget::setMinimumSize(const ufo::UDimension& s)
 {
- widget()->setMinimumSize(s);
+ ufoWidget()->setMinimumSize(s);
 }
 
 void BoUfoWidget::setPreferredSize(const ufo::UDimension& s)
 {
- widget()->setPreferredSize(s);
+ ufoWidget()->setPreferredSize(s);
 }
 
 void BoUfoWidget::setVisible(bool v)
 {
- widget()->setVisible(v);
+ ufoWidget()->setVisible(v);
  invalidate(); // AB: libufo fails to do so
 }
 
 bool BoUfoWidget::isVisible() const
 {
- return widget()->isVisible();
+ return ufoWidget()->isVisible();
 }
 
 void BoUfoWidget::loadPropertiesFromXML(const QDomElement& root)
@@ -916,7 +916,7 @@ void BoUfoWidget::setBackground(BoUfoDrawable* drawable)
 
 void BoUfoWidget::setBackground(ufo::UDrawable* drawable)
 {
- widget()->setBackground(drawable);
+ ufoWidget()->setBackground(drawable);
  if (drawable) {
 	// AB: libufo should do this, I believe!
 	const ufo::UDimension& s = drawable->getDrawableSize();
@@ -959,8 +959,8 @@ QString BoUfoWidget::backgroundImageFile() const
 void BoUfoWidget::setForegroundColor(const QColor& c)
 {
  ufo::UColor color(c.red(), c.green(), c.blue());
- widget()->setForegroundColor(color);
- std::vector<ufo::UWidget*> widgets = widget()->getWidgets();
+ ufoWidget()->setForegroundColor(color);
+ std::vector<ufo::UWidget*> widgets = ufoWidget()->getWidgets();
  std::vector<ufo::UWidget*>::iterator it;
  for (it = widgets.begin(); it != widgets.end(); ++it) {
 	(*it)->setForegroundColor(color);
@@ -970,8 +970,8 @@ void BoUfoWidget::setForegroundColor(const QColor& c)
 void BoUfoWidget::setBackgroundColor(const QColor& c)
 {
  ufo::UColor color(c.red(), c.green(), c.blue());
- widget()->setBackgroundColor(color);
- std::vector<ufo::UWidget*> widgets = widget()->getWidgets();
+ ufoWidget()->setBackgroundColor(color);
+ std::vector<ufo::UWidget*> widgets = ufoWidget()->getWidgets();
  std::vector<ufo::UWidget*>::iterator it;
  for (it = widgets.begin(); it != widgets.end(); ++it) {
 	(*it)->setBackgroundColor(color);
@@ -1000,12 +1000,12 @@ void BoUfoWidget::loadProperties(const QMap<QString, QString>& properties)
 
 void BoUfoWidget::setConstraints(const QString& c)
 {
- widget()->put("layout", new ufo::UString(c.latin1()));
+ ufoWidget()->put("layout", new ufo::UString(c.latin1()));
 }
 
 QString BoUfoWidget::constraints() const
 {
- ufo::UObject* o = widget()->get("layout");
+ ufo::UObject* o = ufoWidget()->get("layout");
  if (!o) {
 	return QString::null;
  }
@@ -1015,12 +1015,12 @@ QString BoUfoWidget::constraints() const
 void BoUfoWidget::setGridLayoutColumns(int c)
 {
  QString s = QString::number(c);
- widget()->put("gridLayoutColumns", new ufo::UString(s.latin1()));
+ ufoWidget()->put("gridLayoutColumns", new ufo::UString(s.latin1()));
 }
 
 int BoUfoWidget::gridLayoutColumns() const
 {
- ufo::UObject* o = widget()->get("gridLayoutColumns");
+ ufo::UObject* o = ufoWidget()->get("gridLayoutColumns");
  if (!o) {
 	return -1;
  }
@@ -1036,12 +1036,12 @@ int BoUfoWidget::gridLayoutColumns() const
 void BoUfoWidget::setGridLayoutRows(int r)
 {
  QString s = QString::number(r);
- widget()->put("gridLayoutRows", new ufo::UString(s.latin1()));
+ ufoWidget()->put("gridLayoutRows", new ufo::UString(s.latin1()));
 }
 
 int BoUfoWidget::gridLayoutRows() const
 {
- ufo::UObject* o = widget()->get("gridLayoutRows");
+ ufo::UObject* o = ufoWidget()->get("gridLayoutRows");
  if (!o) {
 	return -1;
  }
@@ -1057,12 +1057,12 @@ int BoUfoWidget::gridLayoutRows() const
 void BoUfoWidget::setStretch(int factor)
 {
  QString f = QString::number(factor);
- widget()->put("stretch", new ufo::UString(f.latin1()));
+ ufoWidget()->put("stretch", new ufo::UString(f.latin1()));
 }
 
 int BoUfoWidget::stretch() const
 {
- ufo::UObject* o = widget()->get("stretch");
+ ufo::UObject* o = ufoWidget()->get("stretch");
  if (!o) {
 	return 0;
  }
@@ -1077,30 +1077,30 @@ int BoUfoWidget::stretch() const
 
 bool BoUfoWidget::hasMouse() const
 {
- return widget()->hasMouseFocus();
+ return ufoWidget()->hasMouseFocus();
 }
 
 QPoint BoUfoWidget::rootLocation() const
 {
- ufo::UPoint p = widget()->getRootLocation();
+ ufo::UPoint p = ufoWidget()->getRootLocation();
  return QPoint(p.x, p.y);
 }
 
 QPoint BoUfoWidget::mapFromRoot(const QPoint& pos) const
 {
- ufo::UPoint p = widget()->rootPointToPoint(pos.x(), pos.y());
+ ufo::UPoint p = ufoWidget()->rootPointToPoint(pos.x(), pos.y());
  return QPoint(p.x, p.y);
 }
 
 QPoint BoUfoWidget::mapToRoot(const QPoint& pos) const
 {
- ufo::UPoint p = widget()->pointToRootPoint(pos.x(), pos.y());
+ ufo::UPoint p = ufoWidget()->pointToRootPoint(pos.x(), pos.y());
  return QPoint(p.x, p.y);
 }
 
 QRect BoUfoWidget::widgetViewportRect() const
 {
- ufo::UContext* context = widget()->getContext();
+ ufo::UContext* context = ufoWidget()->getContext();
  if (!context) {
 	BO_NULL_ERROR(context);
 	return QRect(0, 0, width(), height());
@@ -1131,7 +1131,7 @@ BoUfoWidget::~BoUfoWidget()
  if (mBackgroundImageDrawable) {
 	mBackgroundImageDrawable->unreference();
  }
- g_ufoWidget2BoUfoWidget.remove(widget());
+ g_ufoWidget2BoUfoWidget.remove(ufoWidget());
 
  if (g_boufoDebugDestruction ) { boDebug() << k_funcinfo << name() << endl; }
 }
