@@ -281,15 +281,20 @@ add_screenshot("A village conquered by enemy with some stuff burning and smoking
 
 
 add_screenshot("And again, the new water rendering using shaders",
-    "<b>NEW:</b> 08. May 2005 (CVS)", "050508-5-thumb.jpg", "050508-5.jpg");
+    "08. May 2005 (CVS)", "050508-5-thumb.jpg", "050508-5.jpg");
 add_screenshot("Some selected units and water renderering using shaders",
-    "<b>NEW:</b> 08. May 2005 (CVS)", "050508-3-thumb.jpg", "050508-3.jpg");
+    "08. May 2005 (CVS)", "050508-3-thumb.jpg", "050508-3.jpg");
 add_screenshot("The new menu",
-    "<b>NEW:</b> 08. May 2005 (CVS)", "050508-4-thumb.jpg", "050508-4.jpg");
+    "08. May 2005 (CVS)", "050508-4-thumb.jpg", "050508-4.jpg");
 add_screenshot("The game is loading",
-    "<b>NEW:</b> 08. May 2005 (CVS)", "050508-2-thumb.jpg", "050508-2.jpg");
+    "08. May 2005 (CVS)", "050508-2-thumb.jpg", "050508-2.jpg");
 add_screenshot("The new 'start game' dialog",
-    "<b>NEW:</b> 08. May 2005 (CVS)", "050508-1-thumb.jpg", "050508-1.jpg");
+    "08. May 2005 (CVS)", "050508-1-thumb.jpg", "050508-1.jpg");
+
+add_screenshot("Enemy attacks",
+    "<b>NEW:</b> 3. September 2005 (0.11)", "0.11-2-thumb.jpg", "0.11-2.jpg");
+add_screenshot("Some units fighting, also showing ground detail using shaders",
+    "<b>NEW:</b> 3. September 2005 (0.11)", "0.11-1-thumb.jpg", "0.11-1.jpg");
 
 $ss_count = count($screens);
 
