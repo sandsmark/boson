@@ -2,16 +2,16 @@
 id=050902
 date=September 2nd 2005 22:15
 title=0.11 finally released!
-text=We know, it took way too long, but finally 0.11 is out!<br>
+text=It took a bit too long, but after 1.5 years of hard work, 0.11 is finally out!<br>
     This time, in addition to the usual packages, we have an installer with a
     precompiled binary which doesn't depend on Qt/KDE. This should be good news
-    for those who doesn't have KDE installed. You can find the installer as
+    for those who don't have KDE installed. You can find the installer as
     well as all the other packages on the
     <a href="download.php">download page</a>.<br>
     You can read the official announcement
     <a href="announces/boson-0.11.php">here</a> as well as
-    <a href="announces/changelog-0.10.php">the changelog</a>.<br>
-    Highlights of this release include
+    <a href="announces/changelog-0.11.php">the changelog</a>.<br>
+    Highlights of this release include a
     <a href="http://libufo.sf.net">LibUFO</a> port for user interface,
     graphical improvements such as realistic water, new effects and fully
     operational multiplayer support.<br>
