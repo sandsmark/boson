@@ -1,7 +1,7 @@
 <?php
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ function draw_link($title, $href, $style = "sidebarboxlink")
 {
 global $basedir;
 echo "
-&nbsp;&nbsp;<a class=\"$style\" href=\"$basedir$href\" $params>$title</a><br>";
+&nbsp;&nbsp;<a class=\"$style\" href=\"$basedir$href\">$title</a><br>";
 }
 
 function draw_extended_link($title, $href, $params, $style = "sidebarboxlink")
@@ -81,6 +81,7 @@ draw_link("Movies", "movies.php");
 draw_link("Download", "download.php");
 draw_link("Install", "install.php");
 draw_link("More information", "info.php");
+draw_link("Wiki", "http://boson.freehackers.org/pmwiki/pmwiki.php");
 draw_extended_link("FAQ", "http://boson.halux2001.de/handbook/en/faq.html", "target=\"_blank\"");
 echo "<br>";
 draw_link("Announcements", "announcements.php");
@@ -88,6 +89,7 @@ draw_link("Stories", "stories.php");
 echo "<br>";
 draw_link("Status", "status.php");
 draw_link("Contact us", "contact.php");
+draw_link("Authors", "authors.php");
 echo "<br>";
 draw_link("Related links", "links.php");
 draw_link("Change style", "options.php");
@@ -141,8 +143,8 @@ echo "
 // Copyright
 echo "
 <br><br>
-<font class=\"copyright\">(C) 2002-2003  <a class=\"copyright\" href=\"mailto:boson-devel@__NO_SPAM__lists.sourceforge.net\">
-The Boson Team</a></font><br>";
+<font class=\"copyright\">(C) 2002-2005<br>
+<a class=\"copyright\" href=\"mailto:boson-devel@__NO_SPAM__lists.sourceforge.net\">The Boson Team</a></font><br>";
 
 sidebar_box_end();
 }
@@ -169,6 +171,7 @@ draw_link("Boson 0.8", "announces/boson-0.8.php");
 draw_link("Boson 0.9", "announces/boson-0.9.php");
 draw_link("Boson 0.9.1", "announces/boson-0.9.1.php");
 draw_link("Boson 0.10", "announces/boson-0.10.php");
+draw_link("Boson 0.11", "announces/boson-0.11.php");
 sidebar_box_end();
 }
 

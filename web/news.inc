@@ -111,7 +111,7 @@ draw_bigbox_end();
 
 function get_article_array($max_num_articles = 10)
 {
-    global $news_file; 
+    global $news_file;
     $articles[] = new Article();
     $index = -1;
 
@@ -120,7 +120,7 @@ function get_article_array($max_num_articles = 10)
     //echo "retriving '$max_num_articles' number of articles\n";
 
 
-    while (!feof ($fd)) 
+    while (!feof ($fd))
     {
         $buffer = fgets($fd, 4096);
         if (preg_match("/\[(.*)\]/", $buffer, $matches))

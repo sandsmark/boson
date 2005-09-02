@@ -48,7 +48,7 @@ news_box_begin();
 $articles = get_article_array($all_news_max);
 for ($i = 0; $i < count($articles); $i++)
 {
-   $articles[$i]->print_me($fd);
+   $articles[$i]->print_me();
 }
 main_area_end();
 
