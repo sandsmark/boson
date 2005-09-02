@@ -58,8 +58,16 @@ main_area_begin();
 // About
 draw_bigbox_begin("About Boson");
 echo "<tr><td>Boson is an OpenGL real-time strategy game.
-	It is designed to run on Unix (Linux) computers, and is built on top of the
-	KDE, Qt and kdegames libraries.<br><br></td></tr>";
+  It is designed to run on Unix (Linux) computers, and is built on top of the
+  KDE, Qt and kdegames libraries.<br><br></td></tr>";
+draw_bigbox_end();
+
+// About
+draw_bigbox_begin("Help wanted!!!");
+echo "<tr><td>We are in need of additional team members, especially 3d designers.<br>
+  If you think you can help, please
+  <a href=\"mailto:boson-devel@__NO_SPAM__lists.sourceforge.net\">contact us</a>.<br>
+  You can find a list of jobs <a href=\"/wiki/Main/Jobs\">in our wiki</a>.<br><br></td></tr>";
 draw_bigbox_end();
 
 /*// We need you!
