@@ -81,42 +81,10 @@
 
 // default values
 // used for both BosonConfig and OptionsDialog
-#define DEFAULT_USE_RMB_MOVE true
-#define DEFAULT_USE_MMB_MOVE true
 #define DEFAULT_GAME_SPEED 5
-#define DEFAULT_CURSOR CursorOpenGL
-#define DEFAULT_CURSOR_DIR QString::null // QString::null means use BosonCursor::defaultTheme
-#define DEFAULT_CURSOR_EDGE_SENSITY 20
-#define DEFAULT_ARROW_SCROLL_SPEED 10
-#define DEFAULT_CMD_BUTTONS_PER_ROW 3
-#define DEFAULT_MINIMAP_SCALE 2.0
-#define DEFAULT_MINIMAP_ZOOM 1.0
-#define DEFAULT_UPDATE_INTERVAL 20
-#define DEFAULT_CHAT_SCREEN_REMOVE_TIME 10
-#define DEFAULT_CHAT_SCREEN_MAX_ITEMS 5
-#define DEFAULT_ALIGN_SELECTION_BOXES true
-#define DEFAULT_RMB_MOVES_WITH_ATTACK false
-#define DEFAULT_MOUSE_WHEEL_ACTION CameraZoom
-#define DEFAULT_MOUSE_WHEEL_SHIFT_ACTION CameraRotate
-#define DEFAULT_DEACTIVATE_WEAPON_SOUNDS false
-#define DEFAULT_USE_LIGHT true // not really supported yet
-#define DEFAULT_USE_MATERIALS false
-#define DEFAULT_TOOLTIP_UPDATE_PERIOD 300
-#define DEFAULT_TOOLTIP_CREATOR 1 // FIXME: should be BoToolTipCreator::Extended, but I don't want to include the file here
-#define DEFAULT_USE_LOD true
-#define DEFAULT_USE_VBO false  // Nvidia drivers doesn't properly support VBOs :-(
-#define DEFAULT_WATER_REFLECTIONS true
-#define DEFAULT_WATER_TRANSLUCENCY true
-#define DEFAULT_WATER_BUMPMAPPING true
-#define DEFAULT_WATER_ANIMATED_BUMPMAPS true
-#define DEFAULT_WATER_SHADERS true
-#define DEFAULT_TEXTURE_FILTER GL_LINEAR_MIPMAP_LINEAR
-#define DEFAULT_TEXTURE_COMPRESSION true
 
 // not in BosonConfig (not necessarily in OptionsDialog):
 #define DEFAULT_CHEAT_MODE true // by default cheating is *enabled* (debugging)
-#define DEFAULT_GROUND_RENDERER "BoDefaultGroundRenderer"
-#define DEFAULT_MESH_RENDERER "BoMeshRendererVertexArray"
 
 #endif
 
