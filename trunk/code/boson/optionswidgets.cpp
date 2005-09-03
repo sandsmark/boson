@@ -84,7 +84,7 @@ GeneralOptions::GeneralOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mGameSpeed->setRange(MIN_GAME_SPEED, MAX_GAME_SPEED);
  mGameSpeed->setLabel(i18n("Game speed"));
 
- mMiniMapScale = new KDoubleNumInput(DEFAULT_MINIMAP_SCALE, this);
+ mMiniMapScale = new KDoubleNumInput(boConfig->doubleDefaultValue("MiniMapScale"), this);
  mMiniMapScale->setRange(1.0, 5.0, 1);
  mMiniMapScale->setLabel(i18n("Mini Map scale factor"));
 
@@ -129,8 +129,8 @@ void GeneralOptions::load()
 void GeneralOptions::setDefaults()
 {
  setGameSpeed(DEFAULT_GAME_SPEED);
- setMiniMapScale(DEFAULT_MINIMAP_SCALE);
- setRMBMovesWithAttack(DEFAULT_RMB_MOVES_WITH_ATTACK);
+ setMiniMapScale(boConfig->doubleDefaultValue("MiniMapScale"));
+ setRMBMovesWithAttack(boConfig->boolDefaultValue("RMBMovesWithAttack"));
 }
 
 void GeneralOptions::setGameSpeed(int ms)
@@ -203,7 +203,7 @@ void CursorOptions::apply()
 
 void CursorOptions::setDefaults()
 {
- setCursor(DEFAULT_CURSOR);
+ setCursor((CursorMode)boConfig->intDefaultValue("CusorMode"));
  mCursorTheme->setCurrentItem(0);
 }
 
@@ -249,7 +249,7 @@ ScrollingOptions::ScrollingOptions(QWidget* parent) : QVBox(parent), OptionsWidg
  mCursorEdgeSensity = new KIntNumInput(hbox);
  mCursorEdgeSensity->setRange(0, 50);
 
- mArrowSpeed = new KIntNumInput(DEFAULT_ARROW_SCROLL_SPEED, this);
+ mArrowSpeed = new KIntNumInput(boConfig->uintDefaultValue("ArrowKeyStep"), this);
  mArrowSpeed->setRange(1, 200);
  mArrowSpeed->setLabel(i18n("Arrow key steps"));
 
@@ -271,8 +271,8 @@ ScrollingOptions::ScrollingOptions(QWidget* parent) : QVBox(parent), OptionsWidg
 	mMouseWheelShiftAction->insertItem(it.data(), it.key());
  }
 
- mMouseWheelAction->setCurrentItem((int)DEFAULT_MOUSE_WHEEL_ACTION);
- mMouseWheelShiftAction->setCurrentItem((int)DEFAULT_MOUSE_WHEEL_SHIFT_ACTION);
+ mMouseWheelAction->setCurrentItem(boConfig->intDefaultValue("MouseWheelAction"));
+ mMouseWheelShiftAction->setCurrentItem(boConfig->intDefaultValue("MouseWheelShiftAction"));
 }
 
 ScrollingOptions::~ScrollingOptions()
@@ -300,12 +300,12 @@ void ScrollingOptions::apply()
 
 void ScrollingOptions::setDefaults()
 {
- setArrowScrollSpeed(DEFAULT_ARROW_SCROLL_SPEED);
- setCursorEdgeSensity(DEFAULT_CURSOR_EDGE_SENSITY);
- setRMBScrolling(DEFAULT_USE_RMB_MOVE);
- setMMBScrolling(DEFAULT_USE_MMB_MOVE);
- mMouseWheelAction->setCurrentItem((int)DEFAULT_MOUSE_WHEEL_ACTION);
- mMouseWheelShiftAction->setCurrentItem((int)DEFAULT_MOUSE_WHEEL_SHIFT_ACTION);
+ setArrowScrollSpeed(boConfig->uintDefaultValue("ArrowKeyStep"));
+ setCursorEdgeSensity(boConfig->uintDefaultValue("CursorEdgeSensity"));
+ setRMBScrolling(boConfig->boolDefaultValue("RMBMove"));
+ setMMBScrolling(boConfig->boolDefaultValue("MMBMove"));
+ mMouseWheelAction->setCurrentItem(boConfig->intDefaultValue("MouseWheelAction"));
+ mMouseWheelShiftAction->setCurrentItem(boConfig->intDefaultValue("MouseWheelShiftAction"));
 }
 
 void ScrollingOptions::load()
@@ -394,7 +394,7 @@ void SoundOptions::setDefaults()
  for (; it != mCheckBox2UnitSoundEvent.end(); ++it) {
 	it.key()->setChecked(false);
  }
- weaponsounds->setChecked(DEFAULT_DEACTIVATE_WEAPON_SOUNDS);
+ weaponsounds->setChecked(boConfig->boolDefaultValue("DeactivateWeaponSounds"));
 }
 
 void SoundOptions::load()
@@ -479,7 +479,7 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  showDetails->setOn(false);
  slotShowDetails(false);
 
- mUpdateInterval = new KIntNumInput(DEFAULT_UPDATE_INTERVAL, mAdvanced);
+ mUpdateInterval = new KIntNumInput(boConfig->uintDefaultValue("GLUpdateInterval"), mAdvanced);
  mUpdateInterval->setRange(1, 100);
  mUpdateInterval->setLabel(i18n("Update interval (low values hurt performance)"));
  QToolTip::add(mUpdateInterval, i18n("The update interval specifies after how many milli seconds the scene gets re-rendered and therefore directly influence the frames per seconds. But low values prevent boson from doing other important tasks and therefore you might end up in a game that takes several seconds until your units react to your commands! 20ms are usually a good value."));
@@ -595,12 +595,12 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 	default:
 		boWarning(210) << k_funcinfo << "invalid value: " << speed << endl;
 	case Defaults:
-		setUpdateInterval(DEFAULT_UPDATE_INTERVAL);
-		setTextureFilter(DEFAULT_TEXTURE_FILTER);
-		mUseCompressedTextures->setChecked(DEFAULT_TEXTURE_COMPRESSION);
+		setUpdateInterval(boConfig->uintDefaultValue("GLUpdateInterval"));
+		setTextureFilter(boConfig->intDefaultValue("TextureFilter"));
+		mUseCompressedTextures->setChecked(boConfig->boolDefaultValue("TextureCompression"));
 		mUseColoredMipmaps->setChecked(false);
-		mUseLight->setChecked(DEFAULT_USE_LIGHT);
-		mUseMaterials->setChecked(DEFAULT_USE_MATERIALS);
+		mUseLight->setChecked(boConfig->boolDefaultValue("UseLight"));
+		mUseMaterials->setChecked(boConfig->boolDefaultValue("UseMaterials"));
 		setCurrentGroundRenderer(DEFAULT_GROUND_RENDERER);
 		mUseGroundShaders->setChecked(false);
 		setCurrentMeshRenderer(DEFAULT_MESH_RENDERER);
@@ -610,12 +610,12 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		break;
 	case BestQuality:
 		// we mostly use defaults here.
-		setUpdateInterval(DEFAULT_UPDATE_INTERVAL);
-		setTextureFilter(DEFAULT_TEXTURE_FILTER);
-		mUseCompressedTextures->setChecked(DEFAULT_TEXTURE_COMPRESSION);
+		setUpdateInterval(boConfig->uintDefaultValue("GLUpdateInterval"));
+		setTextureFilter(boConfig->intDefaultValue("TextureFilter"));
+		mUseCompressedTextures->setChecked(boConfig->boolDefaultValue("TextureCompression"));
 		mUseColoredMipmaps->setChecked(false);
-		mUseLight->setChecked(DEFAULT_USE_LIGHT);
-		mUseMaterials->setChecked(DEFAULT_USE_MATERIALS);
+		mUseLight->setChecked(boConfig->boolDefaultValue("UseLight"));
+		mUseMaterials->setChecked(boConfig->boolDefaultValue("UseMaterials"));
 		setCurrentGroundRenderer(DEFAULT_GROUND_RENDERER);
 		mUseGroundShaders->setChecked(true);
 		setCurrentMeshRenderer(DEFAULT_MESH_RENDERER);
@@ -624,7 +624,7 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mSmoothShading->setChecked(true);
 		break;
 	case Fastest:
-		setUpdateInterval(DEFAULT_UPDATE_INTERVAL);
+		setUpdateInterval(boConfig->uintDefaultValue("GLUpdateInterval"));
 		setTextureFilter(GL_LINEAR);  // Use bilinear maybe?
 		mUseCompressedTextures->setChecked(true);
 		mUseColoredMipmaps->setChecked(false);
@@ -775,13 +775,13 @@ void OpenGLOptions::setDefaults()
  mRenderingSpeed->setCurrentItem(0);
  slotRenderingSpeedChanged(0);
 
- setUpdateInterval(DEFAULT_UPDATE_INTERVAL);
- setTextureFilter(DEFAULT_TEXTURE_FILTER);
- mUseCompressedTextures->setChecked(DEFAULT_TEXTURE_COMPRESSION);
+ setUpdateInterval(boConfig->uintDefaultValue("GLUpdateInterval"));
+ setTextureFilter(boConfig->intDefaultValue("TextureFilter"));
+ mUseCompressedTextures->setChecked(boConfig->boolDefaultValue("TextureCompression"));
  mUseColoredMipmaps->setChecked(false);
- setAlignSelectionBoxes(DEFAULT_ALIGN_SELECTION_BOXES);
- mUseLight->setChecked(DEFAULT_USE_LIGHT);
- mUseMaterials->setChecked(DEFAULT_USE_MATERIALS);
+ setAlignSelectionBoxes(boConfig->boolDefaultValue("AlignSelectionBoxes"));
+ mUseLight->setChecked(boConfig->boolDefaultValue("UseLight"));
+ mUseMaterials->setChecked(boConfig->boolDefaultValue("UseMaterials"));
  setCurrentGroundRenderer(DEFAULT_GROUND_RENDERER);
  mUseGroundShaders->setChecked(false);
  setCurrentMeshRenderer(DEFAULT_MESH_RENDERER);
@@ -1024,11 +1024,11 @@ void WaterOptions::apply()
 
 void WaterOptions::setDefaults()
 {
- mShaders->setChecked(DEFAULT_WATER_SHADERS);
- mReflections->setChecked(DEFAULT_WATER_REFLECTIONS);
- mTranslucency->setChecked(DEFAULT_WATER_TRANSLUCENCY);
- mBumpmapping->setChecked(DEFAULT_WATER_BUMPMAPPING);
- mAnimatedBumpmaps->setChecked(DEFAULT_WATER_ANIMATED_BUMPMAPS);
+ mShaders->setChecked(boConfig->boolDefaultValue("WaterShaders"));
+ mReflections->setChecked(boConfig->boolDefaultValue("WaterReflections"));
+ mTranslucency->setChecked(boConfig->boolDefaultValue("WaterTranslucency"));
+ mBumpmapping->setChecked(boConfig->boolDefaultValue("WaterBumpmapping"));
+ mAnimatedBumpmaps->setChecked(boConfig->boolDefaultValue("WaterAnimatedBumpmaps"));
  slotEnableShaders(mShaders->isChecked());
 }
 
@@ -1056,12 +1056,12 @@ void WaterOptions::slotEnableShaders(bool)
 ChatOptions::ChatOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 {
 // QHBox* hbox = new QHBox(this);
- mScreenRemoveTime = new KIntNumInput(DEFAULT_CHAT_SCREEN_REMOVE_TIME, this);
+ mScreenRemoveTime = new KIntNumInput(boConfig->uintDefaultValue("ChatScreenRemoveTime"), this);
  mScreenRemoveTime->setRange(0, 400);
  mScreenRemoveTime->setLabel(i18n("Remove from screen after seconds (0 to remove never)"));
 
 // hbox = new QHBox(this);
- mScreenMaxItems = new KIntNumInput(DEFAULT_CHAT_SCREEN_REMOVE_TIME, this);
+ mScreenMaxItems = new KIntNumInput(boConfig->intDefaultValue("ChatScreenMaxItems"), this);
  mScreenMaxItems->setRange(-1, 40);
  mScreenMaxItems->setLabel(i18n("Maximal items on the screen (-1 is unlimited)"));
 }
@@ -1081,8 +1081,8 @@ void ChatOptions::apply()
 
 void ChatOptions::setDefaults()
 {
- setScreenRemoveTime(DEFAULT_CHAT_SCREEN_REMOVE_TIME);
- setScreenMaxItems(DEFAULT_CHAT_SCREEN_REMOVE_TIME);
+ setScreenRemoveTime(boConfig->uintDefaultValue("ChatScreenRemoveTime"));
+ setScreenMaxItems(boConfig->intDefaultValue("ChatScreenMaxItems"));
 }
 
 void ChatOptions::load()
@@ -1110,7 +1110,7 @@ ToolTipOptions::ToolTipOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  // you could reduce the update period to very low values to monitor changes
  // that change very often (you may want to use that in combination with pause),
  // such as waypoints (?), health, reload state, ...
- mUpdatePeriod = new KIntNumInput(DEFAULT_TOOLTIP_UPDATE_PERIOD, this);
+ mUpdatePeriod = new KIntNumInput(boConfig->intDefaultValue("ToolTipUpdatePeriod"), this);
  mUpdatePeriod->setRange(1, 500);
  mUpdatePeriod->setLabel(i18n("Update period. Low values lead to more current data. Debugging option - leave this at the default.)"));
 
@@ -1146,7 +1146,7 @@ void ToolTipOptions::apply()
 
 void ToolTipOptions::setDefaults()
 {
- mUpdatePeriod->setValue(DEFAULT_TOOLTIP_UPDATE_PERIOD);
+ mUpdatePeriod->setValue(boConfig->intDefaultValue("ToolTipUpdatePeriod"));
  BoToolTipCreatorFactory factory;
  QValueList<int> tips = factory.availableTipCreators();
  int index = -1;
