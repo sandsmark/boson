@@ -745,6 +745,7 @@ protected slots:
 	void slotUpdateOpenGLSettings();
 
 	void slotScroll(int);
+	void slotCenterOnSelectionGroup(int);
 
 	void slotWidgetResized();
 

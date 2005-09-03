@@ -73,6 +73,7 @@ signals: // game actions
 	void signalSyncNetwork();
 	void signalSelectSelectionGroup(int);
 	void signalCreateSelectionGroup(int);
+	void signalShowSelectionGroup(int);
 
 signals: // editor actions
 	void signalEditorSavePlayFieldAs();
@@ -158,6 +159,7 @@ signals:
 	void signalShowLight0Widget();
 	void signalSelectSelectionGroup(int);
 	void signalCreateSelectionGroup(int);
+	void signalShowSelectionGroup(int);
 	void signalPreferencesApply();
 	void signalUpdateOpenGLSettings();
 	void signalChangeCursor(int mode, const QString& cursorDir);

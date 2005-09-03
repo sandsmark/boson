@@ -1299,6 +1299,30 @@ void BosonGameView::slotScroll(int dir)
  }
 }
 
+void BosonGameView::slotCenterOnSelectionGroup(int n)
+{
+ BO_CHECK_NULL_RET(selection());
+ d->mSelectionGroups->slotSelectSelectionGroup(n);
+
+ // AB: you know games where ALT+num centers the center of the selection group?
+ //     you know situations when the group is spread over the whole map and when
+ //     centering on the center of that group not even a single unit of that
+ //     group is visible?
+ //     you too think that sucks?
+ //     I do!
+ //     -> we center on the leader only.
+ //
+ //     if we ever decide to center on the center of the map (i.e. take
+ //     positions of all units of the group into account), then we should do
+ //     1. check if all unis are on the screen
+ //     2. if not, center on the unit that is closest to the center of the group
+ Unit* leader = selection()->leader();
+ if (!leader) {
+	return;
+ }
+ slotReCenterDisplay(QPoint((int)leader->x(), (int)leader->y()));
+}
+
 void BosonGameView::rotate(float delta)
 {
  camera()->changeRotation(delta);
@@ -1852,6 +1876,8 @@ void BosonGameView::setGameMode(bool mode)
 			this, SLOT(slotScroll(int)));
 	connect(io, SIGNAL(signalCreateSelectionGroup(int)),
 			d->mSelectionGroups, SLOT(slotCreateSelectionGroup(int)));
+	connect(io, SIGNAL(signalShowSelectionGroup(int)),
+			this, SLOT(slotCenterOnSelectionGroup(int)));
 	connect(io, SIGNAL(signalPreferencesApply()),
 			this, SLOT(slotPreferencesApply()));
 	connect(io, SIGNAL(signalUpdateOpenGLSettings()),
