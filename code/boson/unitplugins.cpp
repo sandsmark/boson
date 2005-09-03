@@ -618,7 +618,7 @@ bool ProductionPlugin::contains(ProductionType type, unsigned long int id)
  return productionList().contains(pair);
 }
 
-QValueList<unsigned long int> ProductionPlugin::possibleUnitProductions() const
+QValueList<unsigned long int> ProductionPlugin::possibleUnitProductions(QValueList<unsigned long int>* impossibleUnits) const
 {
  QValueList<unsigned long int> ret;
  ProductionProperties* pp = (ProductionProperties*)properties(PluginProperties::Production);
@@ -634,19 +634,27 @@ QValueList<unsigned long int> ProductionPlugin::possibleUnitProductions() const
 
  QValueList<unsigned long int> unitsList = speciesTheme()->productions(pp->producerList());
 
+ if (impossibleUnits) {
+	impossibleUnits->clear();
+ }
+
  // Filter out things that player can't actually build (requirements aren't met yet)
  QValueList<unsigned long int>::Iterator it;
  it = unitsList.begin();
  for (; it != unitsList.end(); ++it) {
 	if (player()->canBuild(*it)) {
 		ret.append(*it);
+	} else {
+		if (impossibleUnits) {
+			impossibleUnits->append(*it);
+		}
 	}
  }
 
  return ret;
 }
 
-QValueList<unsigned long int> ProductionPlugin::possibleTechnologyProductions() const
+QValueList<unsigned long int> ProductionPlugin::possibleTechnologyProductions(QValueList<unsigned long int>* impossibleTechnologies) const
 {
  QValueList<unsigned long int> ret;
  ProductionProperties* pp = (ProductionProperties*)properties(PluginProperties::Production);
@@ -662,11 +670,19 @@ QValueList<unsigned long int> ProductionPlugin::possibleTechnologyProductions() 
 
  QValueList<unsigned long int> techList = speciesTheme()->technologies(pp->producerList());
 
+ if (impossibleTechnologies) {
+	impossibleTechnologies->clear();
+ }
+
  // Filter out things that player can't actually build (requirements aren't met yet)
  QValueList<unsigned long int>::Iterator it;
  for (it = techList.begin(); it != techList.end(); it++) {
 	if ((!player()->hasTechnology(*it)) && (player()->canResearchTech(*it))) {
 		ret.append(*it);
+	} else {
+		if (impossibleTechnologies) {
+			impossibleTechnologies->append(*it);
+		}
 	}
  }
 

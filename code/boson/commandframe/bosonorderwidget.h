@@ -73,6 +73,14 @@ public:
 	void setOrderButtons(const QValueList<BoSpecificAction>& actions);
 
 	/**
+	 * @overload
+	 *
+	 * This version takes an additional parameter that forces the actions
+	 * at the specified indices to be "grayed out".
+	 **/
+	void setOrderButtons(const QValueList<BoSpecificAction>& actions, const QValueList<int>& grayActionsOut);
+
+	/**
 	 * Use the @ref BosonGroundTheme, for the order buttons, i.e. allow
 	 * ground placing. See also @ref setGroundTheme.
 	 **/

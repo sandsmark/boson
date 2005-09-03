@@ -387,6 +387,8 @@ void BosonInfoWidget::showUnit(const UnitProperties* prop, bool gameMode)
 
  QString info;
  if (gameMode) {
+	// TODO: if the requirements are not met yet: display missing
+	// requirements
 	info = QString("%1\nMinerals: %2\nOil: %3")
 			.arg(prop->name()).arg(prop->mineralCost()).arg(prop->oilCost());
  }
@@ -410,6 +412,8 @@ void BosonInfoWidget::showTechnology(const UpgradeProperties* prop, bool gameMod
 
  QString info;
  if (gameMode) {
+	// TODO: if the requirements are not met yet: display missing
+	// requirements
 	info = QString("%1\nMinerals: %2\nOil: %3")
 			.arg(prop->upgradeName()).arg(prop->mineralCost()).arg(prop->oilCost());
  }
@@ -840,29 +844,40 @@ void BosonCommandFrame::setProduction(Unit* unit)
  }
  QValueList<BoSpecificAction> actions;
 
- QValueList<unsigned long int> unitsList = production->possibleUnitProductions();
- QValueList<unsigned long int>::Iterator it;
- it = unitsList.begin();
- for (; it != unitsList.end(); ++it) {
+ QValueList<int> grayOutActions;
+
+ QValueList<unsigned long int> grayedOutUnits;
+ QValueList<unsigned long int> unitsList = production->possibleUnitProductions(&grayedOutUnits);
+ QValueList<unsigned long int> allUnits = unitsList;
+ allUnits += grayedOutUnits;
+ for (QValueList<unsigned long int>::iterator it = allUnits.begin(); it != allUnits.end(); ++it) {
 	BoSpecificAction a(d->mProduceActions->produceActionFor(speciesTheme->unitProperties(*it)));
 	a.setType(ActionProduceUnit);
 	a.setProductionId(*it);
 	a.setUnit(unit);
 	actions.append(a);
+	if (grayedOutUnits.contains(*it)) {
+		grayOutActions.append(actions.count() - 1);
+	}
  }
 
- QValueList<unsigned long int> techList = production->possibleTechnologyProductions();
- QValueList<unsigned long int>::Iterator tit;  // tit = Technology ITerator ;-)
- for (tit = techList.begin(); tit != techList.end(); tit++) {
-	BoSpecificAction a(d->mProduceActions->produceActionFor(speciesTheme->technology(*tit), production->speciesTheme()));
+ QValueList<unsigned long int> grayedOutTechs;
+ QValueList<unsigned long int> techList = production->possibleTechnologyProductions(&grayedOutTechs);
+ QValueList<unsigned long int> allTechs = techList;
+ allTechs += grayedOutTechs;
+ for (QValueList<unsigned long int>::iterator it = allTechs.begin(); it != allTechs.end(); it++) {
+	BoSpecificAction a(d->mProduceActions->produceActionFor(speciesTheme->technology(*it), production->speciesTheme()));
 	a.setType(ActionProduceTech);
-	a.setProductionId(*tit);
+	a.setProductionId(*it);
 	a.setUnit(unit);
 	actions.append(a);
+	if (grayedOutTechs.contains(*it)) {
+		grayOutActions.append(actions.count() - 1);
+	}
  }
 
  // Set buttons
- d->mSelectionWidget->setOrderButtons(actions);
+ d->mSelectionWidget->setOrderButtons(actions, grayOutActions);
  d->mSelectionWidget->show();
 
  startStopUpdateTimer();
