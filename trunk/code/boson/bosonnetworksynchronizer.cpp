@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2004-2005 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1332,8 +1332,6 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
  QString xml;
  stream >> xml;
 
- boDebug() << k_funcinfo << "Received sync message: " << endl << xml << endl;
-
  QDomDocument doc;
  if (!doc.setContent(xml)) {
 	boError() << k_funcinfo << "unable to load XML from stream" << endl;
@@ -1347,27 +1345,35 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
 		boError() << k_funcinfo << "no Players tag found" << endl;
 		return false;
 	}
-	KPlayer* kplayer = mGame->playerList()->first();
-	QDomNode n = players.firstChild();
-	for (; !n.isNull(); n = n.nextSibling(), kplayer = mGame->playerList()->next()) {
-		QDomElement playerElement = n.toElement();
-		if (playerElement.isNull()) {
-			return false;
-		}
-		if (!kplayer) {
-			BO_NULL_ERROR(kplayer);
-			return false;
-		}
-		bool ok;
-		int id = playerElement.attribute("PlayerId").toInt(&ok);
-		if (!ok) {
-			return false;
-		}
+	for (KPlayer* kplayer = mGame->playerList()->first(); kplayer; kplayer = mGame->playerList()->next()) {
 		Player* player = (Player*)kplayer;
-		if (id != player->bosonId()) {
-			boError() << k_funcinfo << "unexpected PlayerId attribute " << id << " expected " << player->bosonId() << endl;
+		QDomElement playerElement;
+		for (QDomNode n = players.firstChild(); !n.isNull() && playerElement.isNull(); n = n.nextSibling()) {
+			QDomElement e = n.toElement();
+			if (e.isNull()) {
+				continue;
+			}
+			if (e.tagName() != "Player") {
+				continue;
+			}
+			bool ok = false;
+			int id = e.attribute(QString::fromLatin1("PlayerId")).toInt(&ok);
+			if (id < 0) {
+				ok = false;
+			}
+			if (!ok) {
+				boError() << k_funcinfo << "Invalid PlayerId attribute" << endl;
+				return false;
+			}
+			if (id == player->bosonId()) {
+				playerElement = e;
+			}
+		}
+		if (playerElement.isNull()) {
+			boError() << k_funcinfo << "No Player tag found for player " << player->bosonId() << endl;
 			return false;
 		}
+	
 		// Delete old data (e.g. units)
 		BosonMap* map = player->map();
 		player->quitGame();
@@ -1384,14 +1390,6 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
 	boError() << k_funcinfo << "no Canvas tag found" << endl;
 	return false;
  }
-
- // Replace PlayerId attributes with real player ids
- QDomNodeList canvasItemsList = canvasElement.elementsByTagName(QString::fromLatin1("Items"));
- for (unsigned int i = 0; i < canvasItemsList.count(); i++) {
-	QDomElement items = canvasItemsList.item(i).toElement();
-	items.setAttribute("PlayerId", ((Player*)mGame->playerList()->at(items.attribute("PlayerId").toUInt()))->bosonId());
- }
-
 
  BosonCanvas* canvas = mGame->canvasNonConst();
  canvas->quitGame();
