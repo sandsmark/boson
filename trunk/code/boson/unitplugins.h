@@ -237,10 +237,17 @@ public:
 	void abortProduction(ProductionType type, unsigned long int id);
 
 	QValueList<QPair<ProductionType, unsigned long int> > productionList() const { return mProductions; }
-	bool contains(ProductionType type, unsigned long int id); // { return productionList().contains(typeId); }
+	bool contains(ProductionType type, unsigned long int id); // { return productionList().contains(typeId);}
 
-	QValueList<unsigned long int> possibleUnitProductions() const;
-	QValueList<unsigned long int> possibleTechnologyProductions() const;
+	/**
+	 * @return A list with all unittypes that this plugin can currently
+	 * produce
+	 * @param impossible UnitProductions This list returns (if non-NULL) all
+	 * unittypes that cannot be produced currently, but could be, if the
+	 * necessary requirements were met.
+	 **/
+	QValueList<unsigned long int> possibleUnitProductions(QValueList<unsigned long int>* impossibleUnitProductions = 0) const;
+	QValueList<unsigned long int> possibleTechnologyProductions(QValueList<unsigned long int>* impossibleTechnologyProductions = 0) const;
 
 	/**
 	 * @return The percentage of the production progress. 0 means the

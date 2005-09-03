@@ -94,6 +94,7 @@ void BosonOrderWidget::ensureButtons(unsigned int number)
 		b->hide();
 		addWidget(b);
 		d->mOrderButton.insert(i, b);
+
 		connect(b, SIGNAL(signalPlaceGround(unsigned int)),
 				this, SLOT(slotPlaceGround(unsigned int)));
 		connect(b, SIGNAL(signalAction(const BoSpecificAction&)),
@@ -109,6 +110,11 @@ void BosonOrderWidget::ensureButtons(unsigned int number)
 }
 
 void BosonOrderWidget::setOrderButtons(const QValueList<BoSpecificAction>& actions)
+{
+ setOrderButtons(actions, QValueList<int>());
+}
+
+void BosonOrderWidget::setOrderButtons(const QValueList<BoSpecificAction>& actions, const QValueList<int>& grayActionsOut)
 {
  boDebug(220) << k_funcinfo << actions.count() << " actions" << endl;
 
@@ -134,7 +140,7 @@ void BosonOrderWidget::setOrderButtons(const QValueList<BoSpecificAction>& actio
  QPair<ProductionType, long unsigned int> pair;
  for (unsigned int i = 0; i < actions.count(); i++) {
 	d->mOrderButton[i]->setAction(actions[i]);
-	if (id > 0 && production) {
+	if (id > 0 && production) { // production has already started
 		pair.first = actions[i].productionType();
 		pair.second = actions[i].productionId();
 		int count = production->productionList().contains(pair);
@@ -150,9 +156,19 @@ void BosonOrderWidget::setOrderButtons(const QValueList<BoSpecificAction>& actio
 			d->mOrderButton[i]->setProductionCount(count);
 			d->mOrderButton[i]->setGrayOut(true);
 		}
-	} else {
+	} else { // no production started yet
 		resetButton(d->mOrderButton[i]);
 	}
+ }
+
+ for (QValueList<int>::const_iterator it = grayActionsOut.begin(); it != grayActionsOut.end(); ++it) {
+	int index = *it;
+	if (index < 0 || (unsigned int)index >= actions.count()) {
+		boError() << k_funcinfo << "invalid grayout index " << index << endl;
+		continue;
+	}
+	d->mOrderButton[index]->setGrayOut(true);
+	d->mOrderButton[index]->setEnabled(false);
  }
 
  d->mIsProduceAction = true;
@@ -200,6 +216,7 @@ void BosonOrderWidget::showUnits(const QPtrList<Unit>& units)
  i = 0;
  QPtrListIterator<Unit> it(units);
  for (; it.current(); ++it, i++) {
+	d->mOrderButton[i]->setEnabled(true);
 	if ((d->mOrderButton[i]->type() == BosonOrderButton::ShowUnit) && (d->mOrderButton[i]->unit() == it.current())) {
 		boDebug(220) << "unit already displayed - update..." << endl;
 		d->mOrderButton[i]->slotUnitChanged(it.current());
@@ -245,6 +262,7 @@ void BosonOrderWidget::resetButton(BosonOrderButton* button)
 {
  button->setProductionCount(0);
  button->setGrayOut(false);
+ button->setEnabled(true);
 }
 
 bool BosonOrderWidget::isProduceAction() const
@@ -367,4 +385,5 @@ bool BosonOrderWidget::isProducibleOrPlaceable(const BoSpecificAction& action) c
  }
  return false;
 }
+
 
