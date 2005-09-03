@@ -102,6 +102,7 @@ public:
 
 		mSelectMapper = 0;
 		mCreateMapper = 0;
+		mShowSelectionMapper = 0;
 	}
 
 	BoUfoActionCollection* mActionCollection;
@@ -119,6 +120,7 @@ public:
 
 	QSignalMapper* mSelectMapper;
 	QSignalMapper* mCreateMapper;
+	QSignalMapper* mShowSelectionMapper;
 };
 
 BosonMenuInputData::BosonMenuInputData(BoUfoActionCollection* collection)
@@ -340,10 +342,14 @@ void BosonMenuInputData::initUfoGameActions()
  d->mSelectMapper = new QSignalMapper(this);
  delete d->mCreateMapper;
  d->mCreateMapper = new QSignalMapper(this);
+ delete d->mShowSelectionMapper;
+ d->mShowSelectionMapper = new QSignalMapper(this);
  connect(d->mSelectMapper, SIGNAL(mapped(int)),
 		this, SIGNAL(signalSelectSelectionGroup(int)));
  connect(d->mCreateMapper, SIGNAL(mapped(int)),
 		this, SIGNAL(signalCreateSelectionGroup(int)));
+ connect(d->mShowSelectionMapper, SIGNAL(mapped(int)),
+		this, SIGNAL(signalShowSelectionGroup(int)));
 
  for (int i = 0; i < 10; i++) {
 	BoUfoAction* a = new BoUfoAction(i18n("Select Group %1").arg(i == 0 ? 10 : i),
@@ -356,6 +362,11 @@ void BosonMenuInputData::initUfoGameActions()
 			SLOT(map()), actionCollection(),
 			QString("create_group_%1").arg(i));
 	d->mCreateMapper->setMapping(a, i);
+	a = new BoUfoAction(i18n("Show Group %1").arg(i == 0 ? 10 : i),
+			Qt::ALT + Qt::Key_0 + i, d->mShowSelectionMapper,
+			SLOT(map()), actionCollection(),
+			QString("show_group_%1").arg(i));
+	d->mShowSelectionMapper->setMapping(a, i);
  }
 
 }
@@ -791,6 +802,8 @@ void BosonMenuInput::initIO(KPlayer* player)
 		this, SIGNAL(signalSelectSelectionGroup(int)));
  connect(mData, SIGNAL(signalCreateSelectionGroup(int)),
 		this, SIGNAL(signalCreateSelectionGroup(int)));
+ connect(mData, SIGNAL(signalShowSelectionGroup(int)),
+		this, SIGNAL(signalShowSelectionGroup(int)));
 
  // editor signals
  connect(mData, SIGNAL(signalEditorSavePlayFieldAs()),
