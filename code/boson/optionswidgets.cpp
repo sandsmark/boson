@@ -601,9 +601,9 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mUseColoredMipmaps->setChecked(false);
 		mUseLight->setChecked(boConfig->boolDefaultValue("UseLight"));
 		mUseMaterials->setChecked(boConfig->boolDefaultValue("UseMaterials"));
-		setCurrentGroundRenderer(DEFAULT_GROUND_RENDERER);
+		setCurrentGroundRenderer(boConfig->stringDefaultValue("GroundRendererClass"));
 		mUseGroundShaders->setChecked(false);
-		setCurrentMeshRenderer(DEFAULT_MESH_RENDERER);
+		setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
 		setUseLOD(true);
 		setDefaultLOD(0);
 		mSmoothShading->setChecked(true);
@@ -616,9 +616,9 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mUseColoredMipmaps->setChecked(false);
 		mUseLight->setChecked(boConfig->boolDefaultValue("UseLight"));
 		mUseMaterials->setChecked(boConfig->boolDefaultValue("UseMaterials"));
-		setCurrentGroundRenderer(DEFAULT_GROUND_RENDERER);
+		setCurrentGroundRenderer(boConfig->stringDefaultValue("GroundRendererClass"));
 		mUseGroundShaders->setChecked(true);
-		setCurrentMeshRenderer(DEFAULT_MESH_RENDERER);
+		setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
 		setUseLOD(true);
 		setDefaultLOD(0);
 		mSmoothShading->setChecked(true);
@@ -632,7 +632,7 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mUseMaterials->setChecked(false);
 		setCurrentGroundRenderer("BoFastGroundRenderer");
 		mUseGroundShaders->setChecked(false);
-		setCurrentMeshRenderer(DEFAULT_MESH_RENDERER);
+		setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
 		setUseLOD(true);
 		setDefaultLOD(5000);
 		mSmoothShading->setChecked(false);
@@ -782,10 +782,10 @@ void OpenGLOptions::setDefaults()
  setAlignSelectionBoxes(boConfig->boolDefaultValue("AlignSelectionBoxes"));
  mUseLight->setChecked(boConfig->boolDefaultValue("UseLight"));
  mUseMaterials->setChecked(boConfig->boolDefaultValue("UseMaterials"));
- setCurrentGroundRenderer(DEFAULT_GROUND_RENDERER);
+ setCurrentGroundRenderer(boConfig->stringDefaultValue("GroundRendererClass"));
  mUseGroundShaders->setChecked(false);
- setCurrentMeshRenderer(DEFAULT_MESH_RENDERER);
- setUseLOD(DEFAULT_USE_LOD);
+ setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
+ setUseLOD(boConfig->boolDefaultValue("UseLOD"));
  setDefaultLOD(0);
  mSmoothShading->setChecked(true);
  mResolution->setCurrentItem(0);
@@ -1151,7 +1151,7 @@ void ToolTipOptions::setDefaults()
  QValueList<int> tips = factory.availableTipCreators();
  int index = -1;
  for (unsigned int i = 0; i < tips.count(); i++) {
-	if (tips[i] == DEFAULT_TOOLTIP_CREATOR) {
+	if (tips[i] == boConfig->intDefaultValue("ToolTipCreator")) {
 		index = i;
 	}
  }
