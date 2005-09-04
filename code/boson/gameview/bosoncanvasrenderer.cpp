@@ -19,6 +19,7 @@
 */
 
 #include "bosoncanvasrenderer.h"
+#include "bosoncanvasrenderer.moc"
 
 #include "../../bomemory/bodummymemory.h"
 #include "../no_player.h"
@@ -56,8 +57,10 @@
 #include "../bocamera.h"
 #include "../boshader.h"
 #include "../bosonviewdata.h"
+#include "bosonlocalplayerinput.h"
 
 #include <qvaluevector.h>
+#include <qdatetime.h>
 
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -114,6 +117,246 @@ static BosonModel* renderSingleItem(
 
 
 
+// AB: a derived class may implement isDone() e.g. so that it does not depend on
+// constant time, but on a certain animation to be finished
+class BoVisualFeedback
+{
+public:
+	enum FeedbackRTTI {
+		FeedbackItemTint = 1,
+		FeedbackGroundDot
+	};
+public:
+	BoVisualFeedback(int durationMS = 500)
+	{
+		init();
+		mDurationMS = durationMS;
+	}
+	BoVisualFeedback(BoVector3Float pos, int durationMS = 500)
+	{
+		init();
+		mHavePos = true;
+		mPos = pos;
+		mDurationMS = durationMS;
+	}
+	BoVisualFeedback(const BosonItem* item, int durationMS = 500)
+	{
+		init();
+		mItem = item;
+		mDurationMS = durationMS;
+	}
+	virtual ~BoVisualFeedback()
+	{
+	}
+
+	virtual int rtti() const = 0;
+
+	virtual bool isDone() const
+	{
+		if (mDurationMS < 0) {
+			return false;
+		}
+		if (mStarted.elapsed() < mDurationMS) {
+			return false;
+		}
+		return true;
+	}
+
+	const BosonItem* item() const
+	{
+		return mItem;
+	}
+
+	bool havePosition() const
+	{
+		return mHavePos;
+	}
+	const BoVector3Float& position() const
+	{
+		return mPos;
+	}
+
+	virtual void paintGL() = 0;
+
+private:
+	void init()
+	{
+		mStarted.start();
+		mDurationMS = -1;
+		mHavePos = false;
+		mItem= 0;
+	}
+
+private:
+	QTime mStarted;
+	bool mHavePos;
+	BoVector3Float mPos;
+	const BosonItem* mItem;
+	int mDurationMS;
+};
+
+class BoVisualFeedbackItemTint : public BoVisualFeedback
+{
+public:
+	BoVisualFeedbackItemTint(const BosonItem* item, int durationMS = 500, const QColor& color = Qt::red)
+		: BoVisualFeedback(item, durationMS)
+	{
+		mColor = color;
+	}
+
+	virtual int rtti() const
+	{
+		return FeedbackItemTint;
+	}
+
+	const QColor& color() const
+	{
+		return mColor;
+	}
+
+	virtual void paintGL()
+	{
+	}
+
+private:
+	QColor mColor;
+};
+
+// a "dot" on the map
+// this is not actually supposed to be a "dot". it should be some kind of
+// marker, indicating that the user clicked here.
+class BoVisualFeedbackGroundDot : public BoVisualFeedback
+{
+public:
+	BoVisualFeedbackGroundDot(const BoVector3Float& pos, int durationMS = 500, const QColor& color = Qt::red)
+		: BoVisualFeedback(pos, durationMS)
+	{
+		mColor = color;
+	}
+
+	virtual int rtti() const
+	{
+		return FeedbackGroundDot;
+	}
+
+	const QColor& color() const
+	{
+		return mColor;
+	}
+
+	virtual void paintGL()
+	{
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_BLEND);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_DEPTH_TEST);
+		boTextureManager->disableTexturing();
+		glColor3ub(mColor.red(), mColor.green(), mColor.blue());
+		float x = position().x();
+		float y = position().y();
+		float z = position().z();
+		glBegin(GL_LINES);
+			glVertex3f(x - 0.25f, y - 0.25f, z);
+			glVertex3f(x, y, z);
+
+			glVertex3f(x - 0.25f, y + 0.25f, z);
+			glVertex3f(x, y, z);
+
+			glVertex3f(x + 0.25f, y - 0.25f, z);
+			glVertex3f(x, y, z);
+
+			glVertex3f(x + 0.25f, y + 0.25f, z);
+			glVertex3f(x, y, z);
+		glEnd();
+		glPopAttrib();
+	}
+
+private:
+	QColor mColor;
+};
+
+
+class BoVisualFeedbackContainer
+{
+public:
+	BoVisualFeedbackContainer()
+	{
+	}
+	~BoVisualFeedbackContainer()
+	{
+		while (!mFeedbacks.isEmpty()) {
+			BoVisualFeedback* f = mFeedbacks.take(0);
+			delete f;
+		}
+	}
+
+	void addFeedback(BoVisualFeedback* f)
+	{
+		mFeedbacks.append(f);
+		if (f->rtti() == BoVisualFeedback::FeedbackItemTint) {
+			mFeedbackItemTint.append(f);
+		}
+	}
+	void checkAlive()
+	{
+		QPtrList<BoVisualFeedback> dead;
+		for (QPtrListIterator<BoVisualFeedback> it(mFeedbacks); it.current(); ++it) {
+			if (it.current()->isDone()) {
+				dead.append(it.current());
+			}
+		}
+		while (!dead.isEmpty()) {
+			BoVisualFeedback* f = dead.take(0);
+			removeFeedback(f, true);
+		}
+	}
+	void removeFeedback(BoVisualFeedback* f, bool del)
+	{
+		mFeedbacks.removeRef(f);
+		mFeedbackItemTint.removeRef(f);
+		if (del) {
+			delete f;
+		}
+	}
+
+	void paintGL()
+	{
+		for (QPtrListIterator<BoVisualFeedback> it(mFeedbacks); it.current(); ++it) {
+			it.current()->paintGL();
+		}
+
+		checkAlive();
+	}
+
+	bool tintItem(const BosonItem* item) const
+	{
+		for (QPtrListIterator<BoVisualFeedback> it(mFeedbackItemTint); it.current(); ++it) {
+			BoVisualFeedbackItemTint* t = (BoVisualFeedbackItemTint*)it.current();
+			if (t->item() == item) {
+				return true;
+			}
+		}
+		return false;
+	}
+	QColor tintColor(const BosonItem* item) const
+	{
+		for (QPtrListIterator<BoVisualFeedback> it(mFeedbackItemTint); it.current(); ++it) {
+			BoVisualFeedbackItemTint* t = (BoVisualFeedbackItemTint*)it.current();
+			if (t->item() == item) {
+				return t->color();
+			}
+		}
+		return Qt::red;
+	}
+
+private:
+	QPtrList<BoVisualFeedback> mFeedbacks;
+	QPtrList<BoVisualFeedback> mFeedbackItemTint;
+};
+
+
+
+
 class BoVisibleEffects
 {
 public:
@@ -143,17 +386,19 @@ static void updateEffects(BoVisibleEffects& v);
 class BoRenderItem
 {
 public:
-	BoRenderItem() { modelId = 0; item = 0; itemRenderer = 0; }
-	BoRenderItem(unsigned int _modelId, BosonItem* _item, BosonItemRenderer* _itemRenderer)
+	BoRenderItem() { modelId = 0; item = 0; itemRenderer = 0; tintColor = QColor(255, 255, 255); }
+	BoRenderItem(unsigned int _modelId, BosonItem* _item, BosonItemRenderer* _itemRenderer, const QColor& _tintColor)
 	{
 		modelId = _modelId;
 		item = _item;
 		itemRenderer = _itemRenderer;
+		tintColor = _tintColor;
 	}
 
 	BosonItem* item;
 	unsigned int modelId;
 	BosonItemRenderer* itemRenderer;
+	QColor tintColor;
 };
 
 class BosonCanvasRendererPrivate
@@ -161,12 +406,16 @@ class BosonCanvasRendererPrivate
 public:
 	BosonCanvasRendererPrivate()
 	{
+		mCanvas = 0;
 		mSelectBoxData = 0;
+
+		mVisualFeedbacks = 0;
 
 		mGameMatrices = 0;
 		mCamera = 0;
 		mLocalPlayerIO = 0;
 	}
+	const BosonCanvas* mCanvas;
 	QValueVector<BoRenderItem> mRenderItemList;
 	SelectBoxData* mSelectBoxData;
 	BoVisibleEffects mVisibleEffects;
@@ -178,12 +427,15 @@ public:
 	int mTextureBindsWater;
 	int mTextureBindsParticles;
 
+	BoVisualFeedbackContainer* mVisualFeedbacks;
+
 	const BoGLMatrices* mGameMatrices;
 	BoGameCamera* mCamera;
 	PlayerIO* mLocalPlayerIO;
 };
 
 BosonCanvasRenderer::BosonCanvasRenderer()
+	: QObject(0, "canvasrenderer")
 {
  d = new BosonCanvasRendererPrivate();
  d->mRenderedItems = 0;
@@ -195,17 +447,24 @@ BosonCanvasRenderer::BosonCanvasRenderer()
  d->mTextureBindsParticles = 0;
 
  d->mVisibleEffects.mParticlesDirty = true;
+ d->mVisualFeedbacks = new BoVisualFeedbackContainer();
 }
 
 BosonCanvasRenderer::~BosonCanvasRenderer()
 {
  delete d->mSelectBoxData;
+ delete d->mVisualFeedbacks;
  delete d;
 }
 
 void BosonCanvasRenderer::initGL()
 {
  d->mSelectBoxData = new SelectBoxData();
+}
+
+void BosonCanvasRenderer::setCanvas(const BosonCanvas* canvas)
+{
+ d->mCanvas = canvas;
 }
 
 void BosonCanvasRenderer::setGameGLMatrices(const BoGLMatrices* m)
@@ -225,7 +484,27 @@ BoGameCamera* BosonCanvasRenderer::camera() const
 
 void BosonCanvasRenderer::setLocalPlayerIO(PlayerIO* io)
 {
+ if (localPlayerIO()) {
+	BosonLocalPlayerInput* i = (BosonLocalPlayerInput*)localPlayerIO()->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
+	if (i) {
+		disconnect(i, 0, this, 0);
+	}
+ }
+
  d->mLocalPlayerIO = io;
+
+ if (!localPlayerIO()) {
+	return;
+ }
+ BosonLocalPlayerInput* i = (BosonLocalPlayerInput*)localPlayerIO()->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
+ if (i) {
+	connect(i, SIGNAL(signalAttackUnit(const QPtrList<Unit>&, const Unit*)),
+			this, SLOT(slotAddFeedbackAttack(const QPtrList<Unit>&, const Unit*)));
+	connect(i, SIGNAL(signalMoveUnitsTo(const QPtrList<Unit>&, const BoVector2Fixed&, bool)),
+			this, SLOT(slotAddFeedbackMoveTo(const QPtrList<Unit>&, const BoVector2Fixed&, bool)));
+ } else {
+	boError() << k_funcinfo << "local player does not have any BosonLocalPlayerInput!" << endl;
+ }
 }
 
 PlayerIO* BosonCanvasRenderer::localPlayerIO() const
@@ -283,13 +562,13 @@ void BosonCanvasRenderer::reset()
  d->mVisibleEffects.mParticleList.clear();
 }
 
-void BosonCanvasRenderer::paintGL(const BosonCanvas* canvas, const QPtrList<BosonItemContainer>& allItems, const QPtrList<BosonEffect>& effects)
+void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, const QPtrList<BosonEffect>& effects)
 {
  PROFILE_METHOD;
  BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(camera());
  BO_CHECK_NULL_RET(d->mSelectBoxData);
- BO_CHECK_NULL_RET(canvas);
+ BO_CHECK_NULL_RET(d->mCanvas);
  BO_CHECK_NULL_RET(d->mGameMatrices);
 
 // boConfig->setBoolValue("UseLight", false);
@@ -307,12 +586,12 @@ void BosonCanvasRenderer::paintGL(const BosonCanvas* canvas, const QPtrList<Boso
  d->mTextureBindsWater = 0;
  d->mTextureBindsParticles = 0;
 
- createVisibleEffectsList(&d->mVisibleEffects, effects, canvas->mapWidth(), canvas->mapHeight());
+ createVisibleEffectsList(&d->mVisibleEffects, effects, d->mCanvas->mapWidth(), d->mCanvas->mapHeight());
  updateEffects(d->mVisibleEffects);
 
  renderFog(d->mVisibleEffects);
 
- renderGround(canvas->map());
+ renderGround(d->mCanvas->map());
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "after ground rendering" << endl;
@@ -338,6 +617,7 @@ void BosonCanvasRenderer::paintGL(const BosonCanvas* canvas, const QPtrList<Boso
  glDisable(GL_NORMALIZE);
 
  renderBulletTrailEffects(d->mVisibleEffects);
+ d->mVisualFeedbacks->paintGL();
 
  glMatrixMode(GL_PROJECTION);
  glLoadIdentity();
@@ -447,7 +727,27 @@ void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* rende
 		if (itemRenderer->model()) {
 			modelid = itemRenderer->model()->id();
 		}
-		renderItemList->append(BoRenderItem(modelid, item, itemRenderer));
+
+		// Units will be tinted accordingly to how much health they have left
+		QColor tintColor(255, 255, 255);
+		if (RTTI::isUnit(item->rtti())) {
+			Unit* u = (Unit*)item;
+			if (u->isDestroyed()) {
+				tintColor = QColor(102, 102, 102);
+			} else {
+				float f = u->health() / (float)u->maxHealth();
+				float a = f * 0.3f + 0.7f;
+				a = QMIN(a, 1.0f);
+				int c = (int)(255 * a);
+				tintColor = QColor(c, c, c);
+			}
+		}
+
+		if (d->mVisualFeedbacks->tintItem(item)) {
+			tintColor = d->mVisualFeedbacks->tintColor(item);
+		}
+
+		renderItemList->append(BoRenderItem(modelid, item, itemRenderer, tintColor));
 	}
  }
 }
@@ -531,17 +831,8 @@ void BosonCanvasRenderer::renderItems(const QPtrList<BosonItemContainer>& allCan
 	// width/height.
 	// but concerning z-position they are rendered from bottom to top!
 
-	// Units will be tinted accordingly to how much health they have left
-	if (RTTI::isUnit(item->rtti())) {
-		if (((Unit*)item)->isDestroyed()) {
-			glColor3f(0.4f, 0.4f, 0.4f);
-		} else {
-			float f = ((Unit*)item)->health() / (float)((Unit*)item)->maxHealth() * 0.3;
-			glColor3f(0.7f + f, 0.7f + f, 0.7f + f);
-		}
-	} else {
-		glColor3ub(255, 255, 255);
-	}
+	const QColor& c = d->mRenderItemList[i].tintColor;
+	glColor3ub(c.red(), c.green(), c.blue());
 
 	unsigned int lod;
 	currentModel = renderSingleItem(useLOD, camera(), item, itemRenderer, false, currentModel, &lod);
@@ -574,6 +865,9 @@ void BosonCanvasRenderer::renderItems(const QPtrList<BosonItemContainer>& allCan
 		BO_NULL_ERROR(itemRenderer);
 		continue;
 	}
+
+	const QColor& c = transparentModels[i].tintColor;
+	glColor3ub(c.red(), c.green(), c.blue());
 
 	currentModel = renderSingleItem(useLOD, camera(), item, itemRenderer, true, currentModel);
  }
@@ -1038,6 +1332,25 @@ void BosonCanvasRenderer::renderFadeEffects(BoVisibleEffects& visible)
 //	glPopMatrix();
 //	glMatrixMode(GL_MODELVIEW);
  }
+}
+
+void BosonCanvasRenderer::slotAddFeedbackAttack(const QPtrList<Unit>& attacker, const Unit* unit)
+{
+ // TODO: add some "ItemTint" for the items that were ordered to attack
+ BoVisualFeedbackItemTint* f = new BoVisualFeedbackItemTint(unit, 250, Qt::red);
+ d->mVisualFeedbacks->addFeedback(f);
+}
+
+void BosonCanvasRenderer::slotAddFeedbackMoveTo(const QPtrList<Unit>& units, const BoVector2Fixed& cell, bool withAttack)
+{
+ // TODO: add a green "ItemTint" for the items that were ordered to move
+ Q_UNUSED(withAttack);
+ BO_CHECK_NULL_RET(d->mCanvas);
+
+ float z = d->mCanvas->heightAtPoint(cell.x(), cell.y()) + 0.3f;
+ BoVector3Float pos(cell.x(), -cell.y(), z);
+ BoVisualFeedbackGroundDot* f = new BoVisualFeedbackGroundDot(pos, 500, Qt::green);
+ d->mVisualFeedbacks->addFeedback(f);
 }
 
 

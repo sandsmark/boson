@@ -124,6 +124,7 @@ void BosonItemEffects::updateEffectsRotation()
 
 
 
+
 class BosonUfoCanvasWidgetPrivate
 {
 public:
@@ -199,6 +200,7 @@ void BosonUfoCanvasWidget::setCamera(BoGameCamera* c)
 void BosonUfoCanvasWidget::setLocalPlayerIO(PlayerIO* io)
 {
  d->mLocalPlayerIO = io;
+ d->mCanvasRenderer->setLocalPlayerIO(d->mLocalPlayerIO);
 }
 
 void BosonUfoCanvasWidget::setCanvas(const BosonCanvas* canvas)
@@ -207,6 +209,7 @@ void BosonUfoCanvasWidget::setCanvas(const BosonCanvas* canvas)
 	disconnect(d->mCanvas, 0, this, 0);
  }
  d->mCanvas = canvas;
+ d->mCanvasRenderer->setCanvas(d->mCanvas);
  if (d->mCanvas) {
 	connect(d->mCanvas, SIGNAL(signalShotFired(BosonShot*, BosonWeapon*)),
 		this, SLOT(slotShotFired(BosonShot*, BosonWeapon*)));
@@ -688,7 +691,6 @@ void BosonUfoCanvasWidget::paintWidget()
 	boError() << k_funcinfo << "GL error at the beginning of this method" << endl;
  }
  d->mCanvasRenderer->setCamera(d->mCamera);
- d->mCanvasRenderer->setLocalPlayerIO(d->mLocalPlayerIO);
 
  // Store the original libufo matrices and set our 3d matrices
  glMatrixMode(GL_PROJECTION);
@@ -704,7 +706,7 @@ void BosonUfoCanvasWidget::paintWidget()
 		d->mGameGLMatrices->viewport()[2],
 		d->mGameGLMatrices->viewport()[3]);
 
- d->mCanvasRenderer->paintGL(d->mCanvas, boViewData->allItemContainers(), d->mEffects);
+ d->mCanvasRenderer->paintGL(boViewData->allItemContainers(), d->mEffects);
 
  glPopAttrib();
 

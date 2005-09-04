@@ -23,6 +23,7 @@
 #include "../defines.h"
 #include "../bo3dtools.h"
 
+#include <qobject.h>
 #include <qptrlist.h>
 
 class BosonCanvas;
@@ -74,8 +75,9 @@ class BosonCanvasRendererPrivate;
  *
  * @author Andreas Beckermann <b_mann@gmx.de
  **/
-class BosonCanvasRenderer
+class BosonCanvasRenderer : public QObject
 {
+	Q_OBJECT
 public:
 	BosonCanvasRenderer();
 	~BosonCanvasRenderer();
@@ -83,12 +85,13 @@ public:
 	void setGameGLMatrices(const BoGLMatrices*);
 	void setCamera(BoGameCamera* camera);
 	void setLocalPlayerIO(PlayerIO* io);
+	void setCanvas(const BosonCanvas* canvas);
 
 	void setParticlesDirty(bool dirty);
 
 	void reset();
 	void initGL();
-	void paintGL(const BosonCanvas* canvas, const QPtrList<BosonItemContainer>& allItems, const QPtrList<BosonEffect>& effects);
+	void paintGL(const QPtrList<BosonItemContainer>& allItems, const QPtrList<BosonEffect>& effects);
 	unsigned int renderedItems() const;
 	unsigned int renderedCells() const;
 	unsigned int renderedParticles() const;
@@ -100,6 +103,10 @@ public:
 	BoGameCamera* camera() const;
 	PlayerIO* localPlayerIO() const;
 	const BoFrustum& viewFrustum() const;
+
+protected slots:
+	void slotAddFeedbackAttack(const QPtrList<Unit>& attacker, const Unit* unit);
+	void slotAddFeedbackMoveTo(const QPtrList<Unit>& units, const BoVector2Fixed& pos, bool withAttack);
 
 protected:
 	void renderGround(const BosonMap*);
