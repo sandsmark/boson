@@ -271,6 +271,8 @@ void BosonLocalPlayerInput::moveWithoutAttack(const QPtrList<Unit>& units, bofix
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(msg);
+
+  emit signalMoveUnitsTo(units, BoVector2Fixed(x, y), false);
 }
 
 void BosonLocalPlayerInput::moveWithAttack(const QPtrList<Unit>& units, bofixed x, bofixed y)
@@ -298,6 +300,8 @@ void BosonLocalPlayerInput::moveWithAttack(const QPtrList<Unit>& units, bofixed 
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(msg);
+
+  emit signalMoveUnitsTo(units, BoVector2Fixed(x, y), true);
 }
 
 void BosonLocalPlayerInput::build(ProductionType type, Unit* factory, bofixed x, bofixed y)
@@ -340,6 +344,8 @@ void BosonLocalPlayerInput::attack(const QPtrList<Unit>& units, Unit* target)
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(msg);
+
+  emit signalAttackUnit(units, target);
 }
 
 void BosonLocalPlayerInput::dropBomb(Unit* u, int weapon, bofixed x, bofixed y)

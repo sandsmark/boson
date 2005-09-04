@@ -25,6 +25,7 @@
 
 #include "../global.h"
 #include "../bomath.h"
+#include "../../math/bovector.h"
 
 class BoSpecificAction;
 class Unit;
@@ -86,6 +87,25 @@ class BosonLocalPlayerInput : public KGameIO
     void placeUnit(Player* owner, unsigned long int unitType, bofixed x, bofixed y);
     void changeHeight(int x, int y, bofixed height);
     void changeHeight(const QValueList< QPair<QPoint, bofixed> >& heights);
+
+  signals:
+    /**
+     * Emitted when @p units have been ordered to @p pos.
+     *
+     * Note that when the signal is emitted, the message got sent over network
+     * only. The units won't move before that message is received from network
+     * again.
+     **/
+    void signalMoveUnitsTo(const QPtrList<Unit>& units, const BoVector2Fixed& pos, bool withAttack);
+
+    /**
+     * Emitted when @p units have been ordered to attack @p target
+     *
+     * Note that when the signal is emitted, the message got sent over network
+     * only. The units won't start before that message is received from network
+     * again.
+     **/
+    void signalAttackUnit(const QPtrList<Unit>& units, const Unit* target);
 
   protected slots:
     virtual void slotAction(const BoSpecificAction& action);
