@@ -143,6 +143,7 @@ public:
 	}
 
 	virtual void updateCursor() = 0;
+	void makeCursorInvalid();
 
 	/**
 	 * Select a single unit. You should prefer this to a direct @ref

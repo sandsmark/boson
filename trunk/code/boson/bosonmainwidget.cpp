@@ -1104,13 +1104,13 @@ void BosonMainWidget::slotSetWidgetCursor(BosonCursor* c)
 
 void BosonMainWidget::raiseWidget(BoUfoWidget* w)
 {
+ d->mWidgetStack->raiseStackWidget(w);
  if (w != d->mGameView) {
 	unsetCursor();
  } else {
 	// gameview widget is maximized by default
 	showMaximized();
  }
- d->mWidgetStack->raiseStackWidget(w);
 }
 
 void BosonMainWidget::slotDebugUfoWidgets()
