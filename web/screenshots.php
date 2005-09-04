@@ -291,6 +291,10 @@ add_screenshot("The game is loading",
 add_screenshot("The new 'start game' dialog",
     "08. May 2005 (CVS)", "050508-1-thumb.jpg", "050508-1.jpg");
 
+add_screenshot("",
+    "<b>NEW:</b> 4. September 2005 (0.11)", "0.11-4-thumb.jpg", "0.11-4.jpg");
+add_screenshot("",
+    "<b>NEW:</b> 4. September 2005 (0.11)", "0.11-3-thumb.jpg", "0.11-3.jpg");
 add_screenshot("Enemy attacks",
     "<b>NEW:</b> 3. September 2005 (0.11)", "0.11-2-thumb.jpg", "0.11-2.jpg");
 add_screenshot("Some units fighting, also showing ground detail using shaders",
