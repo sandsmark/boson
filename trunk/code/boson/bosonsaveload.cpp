@@ -692,12 +692,9 @@ bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
 		boError() << k_funcinfo << "invalid value for PlayerId attribute of Player tag" << endl;
 		return false;
 	}
-	if (id >= playerList.count()) {
+	if (id < 128) {
 		boError() << k_funcinfo << "invalid PlayerId for Player tag!" << endl;
 		return false;
-	}
-	if (id != i) {
-		boError() << k_funcinfo << "unexpected PlayerId " << id << " for Player tag - expected " << i << endl;
 	}
 	QDomElement handler = p.namedItem("DataHandler").toElement();
 	if (handler.isNull()) {
