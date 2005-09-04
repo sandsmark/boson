@@ -753,6 +753,7 @@ protected slots:
 	void slotWheelEvent(QWheelEvent* e);
 
 	void slotWidgetShown();
+	void slotWidgetHidden();
 
 	void slotGameOver();
 

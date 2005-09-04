@@ -1013,6 +1013,8 @@ void BosonGameView::init()
 		this, SLOT(slotWidgetResized()));
  connect(this, SIGNAL(signalWidgetShown(ufo::UWidgetEvent*)),
 		this, SLOT(slotWidgetShown()));
+ connect(this, SIGNAL(signalWidgetHidden(ufo::UWidgetEvent*)),
+		this, SLOT(slotWidgetHidden()));
  connect(this, SIGNAL(signalMouseWheel(QWheelEvent*)),
 		this, SLOT(slotWheelEvent(QWheelEvent*)));
  connect(this, SIGNAL(signalMouseMoved(QMouseEvent*)),
@@ -1820,6 +1822,13 @@ void BosonGameView::slotWidgetShown()
 {
  if (displayInput()) {
 	displayInput()->updateCursor();
+ }
+}
+
+void BosonGameView::slotWidgetHidden()
+{
+ if (displayInput()) {
+	displayInput()->makeCursorInvalid();
  }
 }
 

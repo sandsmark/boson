@@ -31,6 +31,7 @@
 #include "../rtti.h"
 #include "../playerio.h"
 #include "../unit.h"
+#include "../bosoncursor.h"
 #include "bosonlocalplayerinput.h"
 #include "../items/bosonitem.h"
 
@@ -231,3 +232,11 @@ void BosonGameViewInputBase::setPlacementDisableCollisions(bool disable)
 {
  mPlacementDisableCollisionDetection = disable;
 }
+
+void BosonGameViewInputBase::makeCursorInvalid()
+{
+ if (mCursor) {
+	mCursor->setCursor(-1);
+ }
+}
+
