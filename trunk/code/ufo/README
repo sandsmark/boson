@@ -62,6 +62,11 @@ Patches applied currently:
   was never deleted
 - Patch to ucombobox.cpp to remove the trackPointer(m_textEdit) call, as
   add(getTextEdit()) already calls this. This fixed a memory leak.
+- Patch to uobject.* to add sigDestroyed().
+- Patch to uobject.* to releasePointer() remove only a single occurance of the
+  pointer in the internal list. this fixes a memory leakwhen trackPointer() was
+  called multiple times (the object was removed from the list completely, but
+  unreferenced only once).
 
 
 

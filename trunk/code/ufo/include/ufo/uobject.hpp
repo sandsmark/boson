@@ -32,9 +32,7 @@
 
 #include "ucollectable.hpp"
 
-//#include "usignaldefs.h"
-//#include "signals/ufo_signals.hpp"
-//#include "signals/usignal.hpp"
+#include "signals/usignal.hpp"
 
 #include <string>
 #include <iostream>
@@ -233,27 +231,35 @@ public:
 	///
 
 	/** Increases the reference count of c by 1 and adds c to the internal
-	  * memory tracking list. Does nothing if c is
+	  * memory tracking list. Does nothing if c is NULL.
+	  * You may call trackPointer several times with the same pointer as
+	  * argument.
+	  * @see releasePointer
 	  * @param c The pointer this widget should track. May be NULL.
 	  * @return The added object or NULL on failure.
 	  */
 	UCollectable * trackPointer(UCollectable * c);
 	/** Increases the reference count of c by 1 and adds c to the internal
-	  * memory tracking list.
+	  * memory tracking list. Does nothing if c is NULL.
+	  * You may call trackPointer several times with the same pointer as
+	  * argument.
+	  * @see releasePointer
 	  * @param c The pointer this widget should track. May be NULL.
 	  * @return The added object or NULL on failure.
 	  */
 	const UCollectable * trackPointer(const UCollectable * c);
 
-	/** If c is in the memory tracking list, decreases the reference count
-	  *  of c by 1 and removes it from the memory tracking list.
+	/** Removes the first occurence of c from the memory tracking list and
+	  * decreases its reference count by 1.
+	  * @see trackPointer
 	  * @param c The pointer this widget should remove from its memory
 	  *  tracking list. May be NULL.
 	  * @return true on success.
 	  */
 	bool releasePointer(UCollectable * c);
-	/** If c is in the memory tracking list, decreases the reference count
-	  *  of c by 1 and removes it from the memory tracking list.
+	/** Removes the first occurence of c from the memory tracking list and
+	  * decreases its reference count by 1.
+	  * @see trackPointer
 	  * @param c The pointer this widget should remove from its memory
 	  *  tracking list. May be NULL.
 	  * @return true on success.
@@ -284,6 +290,16 @@ private:
 	std::string m_name;
 
 	std::list<const UCollectable*> m_pointers;
+
+public: // Public Signals
+	/** This signal is fired immediately before this object is destroyed
+	  * Please note that all information about subclass features is already
+	  * destroyed.
+	  */
+	USignal1<UObject*> & sigDestroyed();
+
+private: // Private Signals
+	USignal1<UObject*> m_sigDestroyed;
 };
 
 //
@@ -315,6 +331,12 @@ UObject::getName() const {
 inline void
 UObject::setName(const std::string & newNameA) {
 	m_name = newNameA;
+}
+
+// signals
+inline USignal1<UObject*> &
+UObject::sigDestroyed() {
+	return m_sigDestroyed;
 }
 
 } // namespace ufo
