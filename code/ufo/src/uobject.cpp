@@ -108,6 +108,7 @@ UObject::UObject(const UObject & obj) : UCollectable() {
 	nAllocated++;
 }
 UObject::~UObject() {
+	m_sigDestroyed(this);
 	releaseAllPointers();
 	nFreed++;
 }
@@ -170,10 +171,12 @@ UObject::trackPointer(const UCollectable * c) {
 
 bool
 UObject::releasePointer(UCollectable * c) {
-	unsigned int oldSize = m_pointers.size();
-	m_pointers.remove(c);
-	if (oldSize > m_pointers.size()) {
+	// removes the first occurence of c and unreferences it
+	std::list<const UCollectable*>::iterator iter;
+	iter = std::find(m_pointers.begin(), m_pointers.end(), c);
+	if (iter != m_pointers.end()) {
 		c->unreference();
+		m_pointers.erase(iter);
 		return true;
 	}
 	return false;
@@ -181,10 +184,12 @@ UObject::releasePointer(UCollectable * c) {
 
 bool
 UObject::releasePointer(const UCollectable * c) {
-	unsigned int oldSize = m_pointers.size();
-	m_pointers.remove(c);
-	if (oldSize > m_pointers.size()) {
+	// removes the first occurence of c and unreferences it
+	std::list<const UCollectable*>::iterator iter;
+	iter = std::find(m_pointers.begin(), m_pointers.end(), c);
+	if (iter != m_pointers.end()) {
 		c->unreference();
+		m_pointers.erase(iter);
 		return true;
 	}
 	return false;
