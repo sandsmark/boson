@@ -22,8 +22,9 @@ noinst_LTLIBRARIES = \
 		libbocursor.la \
 		libborender.la \
 		libboinfo.la \
-		libbo3dsdebug.la
-bin_PROGRAMS = boson borender bounit bocursor boinfo bo3dsdebug boconditioneditor
+		libbo3dsdebug.la \
+		libboprofiling.la
+bin_PROGRAMS = boson borender bounit bocursor boinfo bo3dsdebug boconditioneditor boprofiling
 
 INCLUDES = -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl -I$(top_srcdir)/boson/boufo $(all_includes)
 
@@ -295,6 +296,24 @@ boconditioneditor_LDADD = \
 boconditioneditor_SOURCES = \
 		boconditionwidget.cpp \
 		boconditioneditormain.cpp
+
+libboprofiling_la_SOURCES = \
+		bosonprofiling.cpp \
+		bosonprofilingdialog.cpp
+boprofiling_LDFLAGS = $(KDE_RPATH) $(all_libraries)
+boprofiling_LDADD = \
+		$(top_builddir)/boson/libboprofiling.la \
+		$(top_builddir)/boson/libbosoncommon.la \
+		$(top_builddir)/bodebug/libbodebug.la \
+		$(top_builddir)/bogl/libbogl.la \
+		$(top_builddir)/math/libbomath.la \
+		$(LIB_KDEUI) \
+		$(LIB_KIO) \
+		-lXmu \
+		$(LIB_XRANDR) \
+		$(LIB_BOMEMORY)
+boprofiling_SOURCES = \
+		boprofilingmain.cpp
 
 
 METASOURCES = AUTO

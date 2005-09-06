@@ -64,6 +64,9 @@ public:
 	BosonProfilingItem* clone() const;
 	const QPtrList<BosonProfilingItem>* children() const { return mChildren; }
 
+	bool save(QDataStream& stream) const;
+	bool load(QDataStream& stream);
+
 	/**
 	 * Finalize this profiling item by storing the current time as end time.
 	 * Once this has been called, @ref elapsed is valid.
@@ -122,6 +125,11 @@ public:
 	BosonProfilingStorage(const QString& name, int maxEntries);
 	~BosonProfilingStorage();
 
+	bool save(QDataStream& stream) const;
+	bool load(QDataStream& stream);
+
+	void clear();
+
 	const QString& name() const;
 	void setMaximalEntries(int max);
 	int maximalEntries() const;
@@ -152,6 +160,11 @@ public:
 	 * @return BoGlobal::boGlobal()->bosonProfiling();
 	 **/
 	static BosonProfiling* bosonProfiling();
+
+	bool save(QDataStream& stream) const;
+	bool load(QDataStream& stream);
+
+	BosonProfiling& operator=(const BosonProfiling& p);
 
 	/**
 	 * Start profiling something named @p name.

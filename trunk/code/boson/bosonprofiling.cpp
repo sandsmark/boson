@@ -72,6 +72,64 @@ BosonProfilingItem::~BosonProfilingItem()
  delete mName;
 }
 
+bool BosonProfilingItem::save(QDataStream& stream) const
+{
+ stream << (Q_INT8)mEnded;
+ stream << (Q_INT32)mStart.tv_sec;
+ stream << (Q_INT32)mStart.tv_usec;
+ stream << (Q_INT32)mEnd.tv_sec;
+ stream << (Q_INT32)mEnd.tv_usec;
+ if (mChildren) {
+	stream << (Q_UINT32)mChildren->count();
+	for (QPtrListIterator<BosonProfilingItem> it(*mChildren); it.current(); ++it) {
+		stream << it.current()->name();
+		if (!it.current()->save(stream)) {
+			return false;
+		}
+	}
+ } else {
+	stream << (Q_UINT32)0;
+ }
+ return true;
+}
+
+bool BosonProfilingItem::load(QDataStream& stream)
+{
+ Q_INT8 ended;
+ stream >> ended;
+ Q_INT32 startS;
+ Q_INT32 startUS;
+ Q_INT32 endS;
+ Q_INT32 endUS;
+ stream >> startS;
+ stream >> startUS;
+ stream >> endS;
+ stream >> endUS;
+ mStart.tv_sec = startS;
+ mStart.tv_usec = startUS;
+ mEnd.tv_sec = endS;
+ mEnd.tv_usec = endUS;
+ Q_UINT32 children;
+ stream >> children;
+ if (children > 1000000) {
+	boError() << k_funcinfo << "invalid childcount " << children << " of item " << name() << endl;
+	return false;
+ }
+ mEnded = false;
+ for (unsigned int i = 0; i < children; i++) {
+	QString name;
+	stream >> name;
+	BosonProfilingItem* item = new BosonProfilingItem(name);
+	if (!item->load(stream)) {
+		delete item;
+		return false;
+	}
+	addChild(item);
+ }
+ mEnded = ended;
+ return true;
+}
+
 BosonProfilingItem* BosonProfilingItem::clone() const
 {
  BosonProfilingItem* item = 0;
@@ -152,8 +210,7 @@ BosonProfilingStorage::BosonProfilingStorage(const QString& name, int maxEntries
 
 BosonProfilingStorage::~BosonProfilingStorage()
 {
- mItems->setAutoDelete(true);
- mItems->clear();
+ clear();
  delete mName;
  delete mItems;
 }
@@ -161,6 +218,51 @@ BosonProfilingStorage::~BosonProfilingStorage()
 const QString& BosonProfilingStorage::name() const
 {
  return *mName;
+}
+
+void BosonProfilingStorage::clear()
+{
+ mItems->setAutoDelete(true);
+ mItems->clear();
+}
+
+bool BosonProfilingStorage::save(QDataStream& stream) const
+{
+ stream << (Q_INT32)maximalEntries();
+ stream << (Q_UINT32)mItems->count();
+ for (QPtrListIterator<BosonProfilingItem> it(*mItems); it.current(); ++it) {
+	stream << it.current()->name();
+	if (!it.current()->save(stream)) {
+		return false;
+	}
+ }
+ return true;
+}
+
+bool BosonProfilingStorage::load(QDataStream& stream)
+{
+ clear();
+ Q_INT32 maxEntries;
+ stream >> maxEntries;
+ Q_UINT32 count;
+ stream >> count;
+ if (count > 1000000) {
+	boError() << k_funcinfo << "invalid item count " << count << endl;
+	return false;
+ }
+ setMaximalEntries(-1);
+ for (unsigned int i = 0; i < count; i++) {
+	QString name;
+	stream >> name;
+	BosonProfilingItem* item = new BosonProfilingItem(name);
+	if (!item->load(stream)) {
+		delete item;
+		return false;
+	}
+	addItem(item);
+ }
+ setMaximalEntries(maxEntries);
+ return true;
 }
 
 void BosonProfilingStorage::setMaximalEntries(int max)
@@ -248,6 +350,76 @@ BosonProfiling::~BosonProfiling()
 BosonProfiling* BosonProfiling::bosonProfiling()
 {
  return BoGlobal::boGlobal()->bosonProfiling();
+}
+
+BosonProfiling& BosonProfiling::operator=(const BosonProfiling& p)
+{
+ // AB: note that we do not touch d->mStack or d->mCurrentStorage!
+ //     -> all current data remains as-is and is not touched.
+
+ QByteArray b;
+ QDataStream writeStream(b, IO_WriteOnly);
+ if (!p.save(writeStream)) {
+	boError() << k_funcinfo << "unable to save data to stream" << endl;
+	return *this;
+ }
+ QDataStream readStream(b, IO_ReadOnly);
+ if (!load(readStream)) {
+	boError() << k_funcinfo << "unable to read data from stream" << endl;
+	return *this;
+ }
+ return *this;
+}
+
+bool BosonProfiling::save(QDataStream& stream) const
+{
+ // AB: do NOT store the current values (including the stacks)
+ stream << (Q_UINT32)d->mStorages.count();
+ for (QDictIterator<BosonProfilingStorage> it(d->mStorages); it.current(); ++it) {
+	stream << it.current()->name();
+	if (!it.current()->save(stream)) {
+		return false;
+	}
+ }
+ return true;
+}
+
+bool BosonProfiling::load(QDataStream& stream)
+{
+ // AB: we do NOT load/clear the current values (including the stacks)
+ for (QDictIterator<BosonProfilingStorage> it(d->mStorages); it.current(); ++it) {
+	it.current()->clear();
+ }
+
+ Q_UINT32 storages;
+ stream >> storages;
+ if (storages > 1000) {
+	boError() << k_funcinfo << "invalid storages count " << storages << endl;
+	return false;
+ }
+ for (unsigned int i = 0; i < storages; i++) {
+	QString name;
+	stream >> name;
+	if (name.isEmpty()) {
+		boError() << k_funcinfo << "empty storage name" << endl;
+		return false;
+	}
+	QString currentStorage = d->mCurrentStorage->name();
+	switchStorage(name); // ensure that storage really exists
+	bool ret = true;
+	if (!d->mStorages[name]) {
+		BO_NULL_ERROR(d->mStorages[name]);
+		ret = false;
+	} else {
+		ret = d->mStorages[name]->load(stream);
+	}
+	switchStorage(currentStorage);
+	if (!ret) {
+		boError() << k_funcinfo << "loading storage " << name << " failed" << endl;
+		return false;
+	}
+ }
+ return true;
 }
 
 const BosonProfilingItem* BosonProfiling::push(const QString& name)

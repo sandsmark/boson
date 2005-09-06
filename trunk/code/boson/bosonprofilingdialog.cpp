@@ -27,7 +27,6 @@
 
 #include <klocale.h>
 #include <klistview.h>
-#include <kfiledialog.h>
 #include <kmessagebox.h>
 
 #include <qlabel.h>
@@ -175,6 +174,7 @@ public:
 	KListView* mEvents;
 	KListView* mRawTree;
 
+	BosonProfiling mProfiling;
 	QPtrList<BosonProfilingItem> mItems;
 
 	ProfilingItem* mTopItem;
@@ -190,7 +190,7 @@ BosonProfilingDialog::BosonProfilingDialog(QWidget* parent, bool modal)
  initRawTreePage();
  initFilesPage();
 
- slotUpdate();
+ slotUpdateFromGlobalProfiling();
 }
 
 BosonProfilingDialog::~BosonProfilingDialog()
@@ -237,7 +237,6 @@ void BosonProfilingDialog::initRawTreePage()
 void BosonProfilingDialog::initFilesPage()
 {
  QVBox* vbox = addVBoxPage(i18n("&Files"));
-#if 0
  QHBox* hbox = new QHBox(vbox);
  QPushButton* open = new QPushButton(hbox);
  open->setText(i18n("&Load From File"));
@@ -246,11 +245,10 @@ void BosonProfilingDialog::initFilesPage()
  QPushButton* save = new QPushButton(hbox);
  save->setText(i18n("&Save To File"));
  connect(save, SIGNAL(clicked()), this, SLOT(slotSaveToFile()));
-#endif
 
  QPushButton* reset = new QPushButton(vbox);
  reset->setText(i18n("Update profiling data (inaccurate because the profiling dialog is on top of the GL screen!"));
- connect(reset, SIGNAL(clicked()), this, SLOT(slotUpdate()));
+ connect(reset, SIGNAL(clicked()), this, SLOT(slotUpdateFromGlobalProfiling()));
 }
 
 void BosonProfilingDialog::reset()
@@ -260,13 +258,23 @@ void BosonProfilingDialog::reset()
  resetFilesPage();
 }
 
+void BosonProfilingDialog::slotUpdateFromGlobalProfiling()
+{
+ d->mProfiling = *boProfiling;
+
+ // update data from d->mProfiling
+ slotUpdate();
+}
+
 void BosonProfilingDialog::slotUpdate()
 {
  d->mItems.setAutoDelete(true);
  d->mItems.clear();
  d->mItems.setAutoDelete(false);
 
- d->mItems = boProfiling->cloneItems();
+ // AB: d->mItems is kinda obsolete. we already clone all items by copying the
+ //     profiling object (to d->mProfiling).
+ d->mItems = d->mProfiling.cloneItems();
  delete d->mTopItem;
 
  d->mTopItem = new ProfilingItem(QString::null);
@@ -277,6 +285,61 @@ void BosonProfilingDialog::slotUpdate()
  }
 
  reset();
+}
+
+void BosonProfilingDialog::slotSaveToFile()
+{
+ QString file = BoFileDialog::getSaveFileName();
+ if (file.isEmpty()) {
+	return;
+ }
+ QFile f(file);
+ if (!f.open(IO_WriteOnly)) {
+	KMessageBox::sorry(this, i18n("File %1 could not be opened").arg(file));
+	return;
+ }
+ if (QFile::exists(file)) {
+	int ret = KMessageBox::questionYesNo(this, i18n("File %1 already exists. Overwrite?").arg(file));
+	if (ret != KMessageBox::Yes) {
+		return;
+	}
+ }
+ QDataStream stream(&f);
+ if (!d->mProfiling.save(stream)) {
+	KMessageBox::sorry(this, i18n("Error while saving to %1").arg(file));
+	return;
+ }
+ f.close();
+}
+
+void BosonProfilingDialog::slotLoadFromFile()
+{
+ int ret = KMessageBox::questionYesNo(this, i18n("This will clear all current profiling data. Do you reall want to load from a file?"));
+ if (ret != KMessageBox::Yes) {
+	return;
+ }
+ QString file = BoFileDialog::getOpenFileName();
+ if (file.isEmpty()) {
+	return;
+ }
+ loadFromFile(file);
+}
+
+void BosonProfilingDialog::loadFromFile(const QString& file)
+{
+ QFile f(file);
+ if (!f.open(IO_ReadOnly)) {
+	KMessageBox::sorry(this, i18n("File %1 could not be opened").arg(file));
+	return;
+ }
+ QDataStream stream(&f);
+ if (!d->mProfiling.load(stream)) {
+	KMessageBox::sorry(this, i18n("Error while loading from %1").arg(file));
+	return;
+ }
+ f.close();
+
+ slotUpdate();
 }
 
 void BosonProfilingDialog::resetFilesPage()

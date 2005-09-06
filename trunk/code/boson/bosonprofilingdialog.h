@@ -39,6 +39,8 @@ public:
 	BosonProfilingDialog(QWidget* parent, bool modal = false);
 	~BosonProfilingDialog();
 
+	void loadFromFile(const QString& file);
+
 protected:
 	void initEventsPage();
 	void initRawTreePage();
@@ -53,7 +55,10 @@ protected:
 	void initRawTreeProfilingItem(QListViewItemNumber*, BosonProfilingItem*, long int totalTime);
 
 protected slots:
+	void slotUpdateFromGlobalProfiling();
 	void slotUpdate();
+	void slotSaveToFile();
+	void slotLoadFromFile();
 
 private:
 	BosonProfilingDialogPrivate* d;
