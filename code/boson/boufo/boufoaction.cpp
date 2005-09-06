@@ -449,7 +449,7 @@ bool BoUfoXMLBuilder::makeUfoMenu(const QDomElement& parentElement, BoUfoMenuBar
 }
 
 
-class BoUfoActionDeleter : public ufo::UCollectable
+class BoUfoActionDeleter : public ufo::UBoUfoWidgetDeleter
 {
 public:
 	BoUfoActionDeleter(BoUfoAction* action, ufo::UWidget* widget)

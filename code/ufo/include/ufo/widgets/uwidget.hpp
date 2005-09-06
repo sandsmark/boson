@@ -112,6 +112,20 @@ class UStyleManager;
 class UStyleOption;
 class UWidgetModel;
 
+/**
+ * @internal
+ * WARNING: this is a BoUfo extension to libufo. It is NOT part of the
+ * libufo API!
+ **/
+class UFO_EXPORT UBoUfoWidgetDeleter : public UCollectable {
+public:
+	UBoUfoWidgetDeleter()
+	{
+	}
+	virtual void startPaint() {}
+	virtual void endPaint() {}
+};
+
 /** @short The base class for all widgets.
   * @ingroup widgets
   *
@@ -153,7 +167,7 @@ public:
 	 * WARNING: this is a BoUfo extension to libufo. It is NOT part of the
 	 * libufo API!
 	 **/
-	void setBoUfoWidgetDeleter(UCollectable* deleter);
+	void setBoUfoWidgetDeleter(UBoUfoWidgetDeleter* deleter);
 
 	/** @return True if this widget is currently visible on screen
 	  *  (mapped to screen). This means also, that all parent widgets are
@@ -1071,7 +1085,7 @@ private:  // Private attributes
 	UInputMap * m_ancestorInputMap;
 
 	// BoUfo extenstion
-	UCollectable* m_boUfoWidgetDeleter;
+	UBoUfoWidgetDeleter* m_boUfoWidgetDeleter;
 
 public: // Public Signals
 	// Mouse event signals

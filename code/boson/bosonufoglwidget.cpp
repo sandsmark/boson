@@ -21,11 +21,29 @@
 #include "bosonufoglwidget.moc"
 
 #include "../bomemory/bodummymemory.h"
-#include "boufo/boufo.h"
+#include "boufo/boufomanager.h"
+#include "boufo/boufowidget.h"
+#include "boufo/boufoprofiling.h"
 #include "bodebug.h"
 #include "bosonprofiling.h"
 
 #include <qapplication.h>
+
+class BoUfoRealProfiling : public BoUfoProfiling
+{
+public:
+	BoUfoRealProfiling()
+	{
+	}
+	void BoUfoRealProfiling::push(const QString& name)
+	{
+		boProfiling->push(name);
+	}
+	void BoUfoRealProfiling::pop()
+	{
+		boProfiling->pop();
+	}
+};
 
 BosonUfoGLWidget::BosonUfoGLWidget(QWidget* parent, const char* name, bool direct)
 	: BosonGLWidget(parent, name, direct)
@@ -60,6 +78,8 @@ void BosonUfoGLWidget::initUfo()
  mUfoManager = new BoUfoManager(width(), height());
  boProfiling->pop(); // "Create BoUfo Manager"
  boProfiling->popStorage();
+
+ BoUfoProfiling::setProfiling(new BoUfoRealProfiling());
 }
 
 bool BosonUfoGLWidget::eventFilter(QObject* o, QEvent* e)

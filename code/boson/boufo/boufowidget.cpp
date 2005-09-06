@@ -41,6 +41,7 @@
 #include "boufodrawable.h"
 #include "boufomanager.h"
 #include "boufofontinfo.h"
+#include "boufoprofiling.h"
 
 #include <qdom.h>
 #include <qimage.h>
@@ -385,7 +386,9 @@ ufo::UDimension BoUFullLayout::getPreferredLayoutSize(const ufo::UWidget* contai
 }
 
 
-class BoUfoWidgetDeleter : public ufo::UCollectable
+
+//#define DO_BOUFO_PAINT_PROFILING 1
+class BoUfoWidgetDeleter : public ufo::UBoUfoWidgetDeleter
 {
 public:
 	BoUfoWidgetDeleter(BoUfoWidget* w)
@@ -396,6 +399,19 @@ public:
 	{
 		delete mWidget;
 	}
+
+#ifdef DO_BOUFO_PAINT_PROFILING
+	virtual void startPaint()
+	{
+		BoUfoProfiling::profiling()->push(QString("BoUfo: %1 (%2)")
+				.arg(mWidget->className())
+				.arg(mWidget->name()));
+	}
+	virtual void endPaint()
+	{
+		BoUfoProfiling::profiling()->pop();
+	}
+#endif
 
 private:
 	BoUfoWidget* mWidget;

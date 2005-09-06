@@ -70,6 +70,26 @@
 
 using namespace ufo;
 
+class PaintNotifier
+{
+public:
+	PaintNotifier(UBoUfoWidgetDeleter* d)
+		: m_object(d)
+	{
+		if (m_object) {
+			m_object->startPaint();
+		}
+	}
+	~PaintNotifier()
+	{
+		if (m_object) {
+			m_object->endPaint();
+		}
+	}
+private:
+	UBoUfoWidgetDeleter* m_object;
+};
+
 UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(UWidget, UObject)
 
 UWidget * UWidget::sm_inputFocusWidget = NULL;
@@ -179,7 +199,7 @@ UWidget::~UWidget() {
 }
 
 void
-UWidget::setBoUfoWidgetDeleter(UCollectable* deleter) {
+UWidget::setBoUfoWidgetDeleter(UBoUfoWidgetDeleter* deleter) {
 	delete m_boUfoWidgetDeleter;
 	m_boUfoWidgetDeleter = deleter;
 }
@@ -546,9 +566,14 @@ UWidget::getBackground() const {
 //	return m_context->getUIManager()->getLookAndFeel();//m_lookAndFeel;
 //}
 
+
+#define DO_UFO_PROFILING 1
 void
 UWidget::paint(UGraphics * g) {
 	if (isVisible()) {
+#ifdef DO_UFO_PROFILING
+		PaintNotifier notifier(m_boUfoWidgetDeleter);
+#endif
 		if (!isValid()) {
 			validate();
 		}
