@@ -42,6 +42,7 @@
 #include "boufolayeredpane.h"
 #include "boufofontinfo.h"
 #include "boufoaction.h"
+#include "boufoprofiling.h"
 
 #include <kglobal.h>
 #include <kstandarddirs.h>
@@ -334,6 +335,12 @@ BoUfoManager::BoUfoManager(int w, int h, bool opaque)
 	// TODO: make sure that it is a UXToolkit
 	boDebug() << k_funcinfo << "have already a toolkit" << endl;
  }
+
+ if (!BoUfoProfiling::profiling()) {
+	BoUfoProfiling::setProfiling(new BoUfoProfiling());
+ }
+ BoUfoProfiling::reference();
+
  mDisplay = new ufo::UXDisplay("dummy");
 
  ufo::URectangle deviceRect(0, 0, w, h);
@@ -409,6 +416,8 @@ BoUfoManager::~BoUfoManager()
  delete mContext;
  boDebug() << k_funcinfo << "deleting display" << endl;
  delete mDisplay;
+
+ BoUfoProfiling::unreference();
 
  // TODO: do we have to delete the toolkit ?
  // -> there is only a single static instance of it, so that might be tricky.

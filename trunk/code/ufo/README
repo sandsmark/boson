@@ -3,8 +3,8 @@ This is a copy of libufo cvs with a couple of patches applied.
 libufo CVS checkout date: 2005/07/14
 
 Patches applied currently:
-- Patch to uwidget.hpp and uwidget.cpp to take a ufo::UCollectable* as widget
-  deleter. This object is deleted at the very first in the d'tor.
+- Patch to uwidget.hpp and uwidget.cpp to take a ufo::UCollectable* derivded
+  class as widget deleter. This object is deleted at the very first in the d'tor.
 - Patch to include/ufo/ufo_gl.hpp and usysteminfo.hpp to include bogl.h instead
   of gl.h and glu.h
 - Patch to ufo/include/ufo/usysteminfo.hpp and ufo/include/ufo/ux/uxglxdriver.hpp
@@ -67,6 +67,10 @@ Patches applied currently:
   pointer in the internal list. this fixes a memory leakwhen trackPointer() was
   called multiple times (the object was removed from the list completely, but
   unreferenced only once).
+- Patch to uwidget.cpp to use the widget deleter for profiling of the paint()
+  method.
+  The methods used are virtual and do nothing by default - it is up to the
+  user to implement real profiling.
 
 
 
