@@ -740,6 +740,7 @@ protected slots:
 	void slotEditorUndo();
 	void slotEditorRedo();
 
+
 	void slotShowLight0Widget();
 	void slotPreferencesApply();
 	void slotUpdateOpenGLSettings();

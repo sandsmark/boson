@@ -32,6 +32,8 @@ class BoMatrix;
 class BoFrustum;
 class BosonGroundTheme;
 class BosonGameFPSCounter;
+class BoDebugMessage;
+class Boson;
 class bofixed;
 template<class T> class BoRect;
 template<class T> class BoVector2;
@@ -57,6 +59,9 @@ public:
 	BosonUfoGameGUI(const BoMatrix& modelview, const BoMatrix& projection, const BoFrustum& viewFrustum, const GLint* viewport);
 	virtual ~BosonUfoGameGUI();
 
+	void bosonObjectCreated(Boson* boson);
+	void bosonObjectAboutToBeDestroyed(Boson* boson);
+
 	void setCursorWidgetPos(const QPoint* pos);
 	void setCursorRootPos(const QPoint* pos);
 	void setCursorCanvasVector(const BoVector3Fixed* v);
@@ -80,6 +85,11 @@ public slots:
 	void slotShowPlaceFacilities(PlayerIO*);
 	void slotShowPlaceMobiles(PlayerIO*);
 	void slotShowPlaceGround();
+
+protected slots:
+	void slotBoDebugOutput(const BoDebugMessage&);
+	void slotBoDebugWarning(const BoDebugMessage&);
+	void slotBoDebugError(const BoDebugMessage&);
 
 signals:
 	void signalSelectionChanged(BoSelection*);

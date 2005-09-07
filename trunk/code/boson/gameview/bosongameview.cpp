@@ -1524,11 +1524,13 @@ void BosonGameView::bosonObjectCreated(Boson* boson)
 		this, SLOT(slotChangeHeight(int, int)));
  connect(boson, SIGNAL(signalGameOver()),
 		this, SLOT(slotGameOver()));
+
+ d->mUfoGameGUI->bosonObjectCreated(boson);
 }
 
 void BosonGameView::bosonObjectAboutToBeDestroyed(Boson* boson)
 {
- Q_UNUSED(boson);
+ d->mUfoGameGUI->bosonObjectAboutToBeDestroyed(boson);
 }
 
 
@@ -2599,7 +2601,6 @@ void BosonGameView::slotGameOver()
 
  QTimer::singleShot(0, this, SIGNAL(signalEndGame()));
 }
-
 
 
 

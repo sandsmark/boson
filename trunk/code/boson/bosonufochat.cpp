@@ -40,11 +40,12 @@ public:
 	BosonUfoChatPrivate()
 	{
 		mLabel = 0;
+		mSendBox = 0;
 		mEdit = 0;
+		mSendTo = 0;
 
 		mGame = 0;
 		mFromPlayer = 0;
-		mSendTo = 0;
 	}
 
 	QStringList mMessages;
@@ -52,6 +53,7 @@ public:
 	QTimer mRemoveTimer;
 
 	BoUfoLabel* mLabel;
+	BoUfoHBox* mSendBox;
 	BoUfoLineEdit* mEdit;
 	BoUfoComboBox* mSendTo;
 
@@ -83,20 +85,19 @@ BosonUfoChat::BosonUfoChat() : BoUfoWidget()
  d->mLabel->setName("ChatLabel");
  addWidget(d->mLabel);
 
- BoUfoWidget* hbox = new BoUfoWidget();
- hbox->setName("ChatHBox");
- hbox->setLayoutClass(BoUfoWidget::UHBoxLayout);
- addWidget(hbox);
+ d->mSendBox = new BoUfoHBox();
+ d->mSendBox->setName("ChatSendBox");
+ addWidget(d->mSendBox);
 
  d->mEdit = new BoUfoLineEdit();
  d->mEdit->setName("ChatLineEdit");
  connect(d->mEdit, SIGNAL(signalActivated(const QString&)),
 		this, SLOT(slotSendText(const QString&)));
- hbox->addWidget(d->mEdit);
+ d->mSendBox->addWidget(d->mEdit);
 
  d->mSendTo = new BoUfoComboBox();
  d->mSendTo->setName("ChatSendToBox");
- hbox->addWidget(d->mSendTo);
+ d->mSendBox->addWidget(d->mSendTo);
 
  d->mSendToAllId = insertSendToAllSendingEntry();
 }
@@ -490,5 +491,10 @@ void BosonUfoChat::changeSendingEntry(const QString& text, int id)
 	return;
  }
  d->mSendTo->setItemText(index, text);
+}
+
+void BosonUfoChat::setSendBoxVisible(bool v)
+{
+ d->mSendBox->setVisible(v);
 }
 

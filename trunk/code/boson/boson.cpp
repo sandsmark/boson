@@ -35,7 +35,6 @@
 #include "global.h"
 #include "bosonprofiling.h"
 #include "bodebug.h"
-#include "bodebuglog.h"
 #include "bosonsaveload.h"
 #include "bosonconfig.h"
 #include "boevent.h"
@@ -380,21 +379,6 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
  }
  KCrash::setEmergencySaveFunction(emergencySave);
 #endif
-
- BoDebugLog* debugLog = BoDebugLog::debugLog();
- if (debugLog) {
-	connect(debugLog, SIGNAL(signalError(const BoDebugMessage&)),
-			this, SLOT(slotBoDebugError(const BoDebugMessage&)));
-	connect(debugLog, SIGNAL(signalWarn(const BoDebugMessage&)),
-			this, SLOT(slotBoDebugWarning(const BoDebugMessage&)));
-	connect(debugLog, SIGNAL(signalDebug(const BoDebugMessage&)),
-			this, SLOT(slotBoDebugOutput(const BoDebugMessage&)));
-
-	// we could provide config entries for these, that allow enabling _INFO
-	// as well
-	debugLog->setEmitSignal(BoDebug::KDEBUG_ERROR, true);
-	debugLog->setEmitSignal(BoDebug::KDEBUG_WARN, true);
- }
 
  ((BoEventLoop*)qApp->eventLoop())->setAdvanceMessageInterval(ADVANCE_INTERVAL);
  ((BoEventLoop*)qApp->eventLoop())->setAdvanceObject(this);
@@ -1703,45 +1687,6 @@ bool Boson::saveCanvasConditions(QDomElement& root) const
 const QPtrList<BoAdvanceMessageTimes>& Boson::advanceMessageTimes() const
 {
  return d->mAdvance->advanceMessageTimes();
-}
-
-void Boson::slotBoDebugOutput(const BoDebugMessage& m)
-{
- QString area = m.areaName();
- if (area.isEmpty()) {
-	area = i18n("Debug");
- }
- QString message = m.message();
- if (!message.isEmpty() && message[message.length() - 1] == '\n') {
-	message = message.left(message.length() - 1);
- }
- slotAddChatSystemMessage(area, i18n("DEBUG: %1").arg(message));
-}
-
-void Boson::slotBoDebugWarning(const BoDebugMessage& m)
-{
- QString area = m.areaName();
- if (area.isEmpty()) {
-	area = i18n("Debug");
- }
- QString message = m.message();
- if (!message.isEmpty() && message[message.length() - 1] == '\n') {
-	message = message.left(message.length() - 1);
- }
- slotAddChatSystemMessage(area, i18n("WARNING: %1").arg(message));
-}
-
-void Boson::slotBoDebugError(const BoDebugMessage& m)
-{
- QString area = m.areaName();
- if (area.isEmpty()) {
-	area = i18n("Debug");
- }
- QString message = m.message();
- if (!message.isEmpty() && message[message.length() - 1] == '\n') {
-	message = message.left(message.length() - 1);
- }
- slotAddChatSystemMessage(area, i18n("ERROR: %1").arg(message));
 }
 
 void Boson::slotClientLeftGame(int clientId, int oldgamestatus, KGame*)
