@@ -48,6 +48,7 @@
 #include "../bosonfpscounter.h"
 #include "../info/boinfo.h"
 #include "../info/bocurrentinfo.h"
+#include <bodebuglog.h>
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -292,6 +293,8 @@ public:
 	BoUfoLabel* mTextureMemory;
 	BoUfoLabel* mGamePaused;
 	BosonUfoChat* mUfoChat;
+	BosonUfoChat* mUfoErrorDisplay;
+	BosonUfoChat* mUfoDebugDisplay;
 	BosonUfoMiniMap* mUfoMiniMap;
 	BosonCommandFrame* mUfoCommandFrame;
 
@@ -311,6 +314,22 @@ BosonUfoGameGUI::BosonUfoGameGUI(const BoMatrix& modelview, const BoMatrix& proj
  BoUfoLabel::setDefaultForegroundColor(Qt::white);
  initUfoWidgets();
  BoUfoLabel::setDefaultForegroundColor(defaultColor);
+
+
+ BoDebugLog* debugLog = BoDebugLog::debugLog();
+ if (debugLog) {
+	connect(debugLog, SIGNAL(signalError(const BoDebugMessage&)),
+			this, SLOT(slotBoDebugError(const BoDebugMessage&)));
+	connect(debugLog, SIGNAL(signalWarn(const BoDebugMessage&)),
+			this, SLOT(slotBoDebugWarning(const BoDebugMessage&)));
+	connect(debugLog, SIGNAL(signalDebug(const BoDebugMessage&)),
+			this, SLOT(slotBoDebugOutput(const BoDebugMessage&)));
+
+	// we could provide config entries for these, that allow enabling _INFO
+	// as well
+	debugLog->setEmitSignal(BoDebug::KDEBUG_ERROR, true);
+	debugLog->setEmitSignal(BoDebug::KDEBUG_WARN, true);
+ }
 }
 
 BosonUfoGameGUI::~BosonUfoGameGUI()
@@ -319,6 +338,15 @@ BosonUfoGameGUI::~BosonUfoGameGUI()
  delete d;
 }
 
+void BosonUfoGameGUI::bosonObjectCreated(Boson* boson)
+{
+ Q_UNUSED(boson);
+}
+
+void BosonUfoGameGUI::bosonObjectAboutToBeDestroyed(Boson* boson)
+{
+ Q_UNUSED(boson);
+}
 
 void BosonUfoGameGUI::initUfoWidgets()
 {
@@ -381,6 +409,18 @@ void BosonUfoGameGUI::initUfoWidgets()
  widget->mMatricesDebugProjModContainer->addWidget(d->mMatricesDebugProjMod);
  widget->mMatricesDebugProjModInvContainer->addWidget(d->mMatricesDebugProjModInv);
 
+
+ d->mUfoDebugDisplay = new BosonUfoChat();
+ d->mUfoDebugDisplay->setName("GameViewDebugDisplay");
+ d->mUfoDebugDisplay->setMessageId(0); // no messages
+ d->mUfoDebugDisplay->setSendBoxVisible(false);
+ widget->mUfoChatContainer->addWidget(d->mUfoDebugDisplay);
+
+ d->mUfoErrorDisplay = new BosonUfoChat();
+ d->mUfoErrorDisplay->setName("GameViewErrorDisplay");
+ d->mUfoErrorDisplay->setMessageId(0); // no messages
+ d->mUfoErrorDisplay->setSendBoxVisible(false);
+ widget->mUfoChatContainer->addWidget(d->mUfoErrorDisplay);
 
  d->mUfoChat = new BosonUfoChat();
  d->mUfoChat->setName("GameViewUfoChat");
@@ -891,4 +931,47 @@ void BosonUfoGameGUI::addChatMessage(const QString& message)
 {
  d->mUfoChat->addMessage(message);
 }
+
+void BosonUfoGameGUI::slotBoDebugOutput(const BoDebugMessage& m)
+{
+ QString area = m.areaName();
+ QString message = m.message();
+ if (!message.isEmpty() && message[message.length() - 1] == '\n') {
+	message = message.left(message.length() - 1);
+ }
+ QString from = i18n("DEBUG: ");
+ if (!area.isEmpty()) {
+	from = i18n("DEBUG (%1): ").arg(area);
+ }
+ d->mUfoDebugDisplay->addMessage(i18n("%1: %2").arg(from).arg(message));
+}
+
+void BosonUfoGameGUI::slotBoDebugWarning(const BoDebugMessage& m)
+{
+ QString area = m.areaName();
+ QString message = m.message();
+ if (!message.isEmpty() && message[message.length() - 1] == '\n') {
+	message = message.left(message.length() - 1);
+ }
+ QString from = i18n("WARNING: ");
+ if (!area.isEmpty()) {
+	from = i18n("WARNING(%1): ").arg(area);
+ }
+ d->mUfoErrorDisplay->addMessage(i18n("%1: %2").arg(from).arg(message));
+}
+
+void BosonUfoGameGUI::slotBoDebugError(const BoDebugMessage& m)
+{
+ QString area = m.areaName();
+ QString message = m.message();
+ if (!message.isEmpty() && message[message.length() - 1] == '\n') {
+	message = message.left(message.length() - 1);
+ }
+ QString from = i18n("ERROR: ");
+ if (!area.isEmpty()) {
+	from = i18n("ERROR(%1): ").arg(area);
+ }
+ d->mUfoErrorDisplay->addMessage(i18n("%1: %2").arg(from).arg(message));
+}
+
 

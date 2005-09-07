@@ -39,7 +39,6 @@ class BoMessage;
 class BoEvent;
 class BoEventManager;
 class BoAdvanceMessageTimes;
-class BoDebugMessage;
 class bofixed;
 template<class T> class BoVector2;
 template<class T> class BoRect;
@@ -536,10 +535,6 @@ protected slots:
 	void slotPropertyChanged(KGamePropertyBase*);
 
 	void slotReceiveAdvance();
-
-	void slotBoDebugOutput(const BoDebugMessage&);
-	void slotBoDebugWarning(const BoDebugMessage&);
-	void slotBoDebugError(const BoDebugMessage&);
 
 	/**
 	 * Called when the winning conditions are fullfilled. See @ref

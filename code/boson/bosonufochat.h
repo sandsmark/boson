@@ -118,6 +118,8 @@ public:
 	bool isSendToAllMessage(int id) const;
 
 
+	void setSendBoxVisible(bool v);
+
 protected slots:
 	void slotUnsetKGame();
 	void slotReceivePrivateMessage(int msgid, const QByteArray& buffer, Q_UINT32 sender, KPlayer* me);
