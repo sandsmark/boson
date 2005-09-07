@@ -158,39 +158,84 @@ protected:
 			return false;
 		}
 
-		// FIXME: baseMenus/addMenus is not correct anymore - these maps
-		// may contains Action items, too
-		QMap<QString, QDomElement> baseMenus;
-		QMap<QString, QDomElement> addMenus;
+		QMap<QString, QDomElement> baseTopItems;
+		QMap<QString, QDomElement> addTopItems;
 		QStringList tags;
 		tags.append("Menu");
 		tags.append("Action");
-		getChildTags(tags, baseMenuBar, addMenuBar, baseMenus, addMenus);
+		getChildTags(tags, baseMenuBar, addMenuBar, baseTopItems, addTopItems);
 
 		QMap<QString, QDomElement>::Iterator it;
-		for (it = addMenus.begin(); it != addMenus.end(); ++it) {
+
+		// merge all items that exist in both, addTopItems and
+		// baseTopItems
+		for (it = addTopItems.begin(); it != addTopItems.end(); ++it) {
 			QString name = it.key();
-			QDomElement addMenu = it.data();
-			if (baseMenus.contains(name)) {
-				boDebug() << "merging menus " << name << endl;
-				QDomElement baseMenu = baseMenus[name];
-				if (baseMenu.tagName() != "Menu") {
+			QDomElement addItem = it.data();
+			if (baseTopItems.contains(name)) {
+				QDomElement baseItem = baseTopItems[name];
+				if (baseItem.tagName() != "Menu") {
 					boWarning() << k_funcinfo << name << " is not a menu. ignoring." << endl;
 					continue;
 				}
-				if (!mergeMenu(baseMenu, addMenu)) {
+				if (baseItem.tagName() != addItem.tagName()) {
+					boError() << k_funcinfo << name << " has different tagnames" << endl;
+					continue;
+				}
+				if (!mergeMenu(baseItem, addItem)) {
 					return false;
 				}
-			} else {
-				boDebug() << "adding " << it.key() << endl;
-				boWarning() << k_funcinfo << "custom menus/toplevel items ignore MergeLocal tags" << endl;
-#warning FIXME
-				// FIXME: append the child before a MergeLocal
-				// tag!!
-				baseMenuBar.appendChild(addMenu);
+			}
+		}
+		// remove all processed items from addTopItems
+		for (it = baseTopItems.begin(); it != baseTopItems.end(); ++it) {
+			addTopItems.remove(it.key());
+		}
+
+		// merge all items that exist in addTopItems only
+		// -> place them right before the corresponding MergeLocal tag
+		// but first create a element that contains all addTopItems.
+		QDomElement addItemsElement = addMenuBar.ownerDocument().createElement("Dummy");
+		for (it = addTopItems.begin(); it != addTopItems.end(); ++it) {
+			addItemsElement.appendChild(it.data());
+		}
+		for (QDomNode n = baseMenuBar.firstChild(); !n.isNull(); n = n.nextSibling()) {
+			QDomElement e = n.toElement();
+			if (e.isNull()) {
+				continue;
+			}
+			if (e.tagName() == "MergeLocal") {
+				QString mergeName = e.attribute("name");
+				mergeMenuItems(baseMenuBar, e, addItemsElement, mergeName);
 			}
 		}
 		return true;
+	}
+
+	void mergeMenuItems(QDomElement& baseMenu, QDomElement& mergeTag, QDomElement& addMenu, const QString& mergeName)
+	{
+		QDomElement it = addMenu.firstChild().toElement();
+		while (!it.isNull()) {
+			QDomElement child = it;
+			// we change it to the next sibling now,
+			// so that we can remove child from this
+			// doc
+			it = it.nextSibling().toElement();
+
+			if (child.tagName() != QString("Action") && child.tagName() != QString("Menu")) {
+				continue;
+			}
+			if (child.attribute("append").isEmpty() != mergeName.isEmpty()) {
+				continue;
+			}
+			if (!mergeName.isEmpty()) {
+				if (child.attribute("append") != mergeName) {
+					continue;
+				}
+			}
+			baseMenu.insertBefore(child.cloneNode(), mergeTag);
+			addMenu.removeChild(child);
+		}
 	}
 
 	void getChildTags(const QStringList& tagNames, QDomElement& baseRoot, QDomElement& addRoot, QMap<QString, QDomElement>& baseMenus, QMap<QString, QDomElement>& addMenus)
@@ -255,7 +300,6 @@ protected:
 				}
 			} else if (tag == QString("Merge") || tag == QString("MergeLocal") || tag == QString("DefineGroup")) {
 				// AB: Merge is totally unused by us
-				// AB: Merge is totally unused by us
 				element.removeChild(e);
 			}
 		}
@@ -288,28 +332,8 @@ bool BoUfoXMLBuilder::mergeMenu(QDomElement& baseMenu, QDomElement& addMenu)
 			continue;
 		}
 	} else if (tag == QString("MergeLocal")) {
-		QString name = e.attribute("name");
-		QDomElement it = addMenu.firstChild().toElement();
-		while (!it.isNull()) {
-			QDomElement child = it;
-			// we change it to the next sibling now,
-			// so that we can remove child from this
-			// doc
-			it = it.nextSibling().toElement();
-			if (child.tagName() != QString("Action") && child.tagName() != QString("Menu")) {
-				continue;
-			}
-			if (child.attribute("append").isEmpty() != name.isEmpty()) {
-				continue;
-			}
-			if (!name.isEmpty()) {
-				if (child.attribute("append") != name) {
-					continue;
-				}
-			}
-			baseMenu.insertBefore(child.cloneNode(), e);
-			addMenu.removeChild(child);
-		}
+		QString mergeName = e.attribute("name");
+		mergeMenuItems(baseMenu, e, addMenu, mergeName);
 	}
 	e = e.nextSibling().toElement();
  }
