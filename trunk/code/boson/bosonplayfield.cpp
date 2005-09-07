@@ -691,7 +691,6 @@ bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
 	return false;
  }
  if (!mFile) {
-	boWarning() << k_funcinfo << "NULL file - recreating file pointer" << endl;
 	mFile = new BPFFile(mFileName, true);
  }
  QByteArray heightMap = mFile->heightMapData();
