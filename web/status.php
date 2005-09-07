@@ -42,107 +42,19 @@ main_area_begin();
 
 // Contacts
 draw_bigbox_begin("Status");
-draw_bigbox_text("Most recent version, 0.10, was released on 2nd May 2004.
+draw_bigbox_text("Most recent version, 0.11, was released on 2nd September 2005.
   <br><br>");
 
 draw_bigbox_subheader("<a name=\"features\"></a>Feature list");
 
-draw_bigbox_text("What has been changed since 0.10:
+draw_bigbox_text("What has been changed since 0.11:
 <ul>
- <h3>General</h3>
- <ul>
-    <li>Start of porting boson to <a href=\"http://libufo.sourceforge.net\">libufo</a>
-    </li>
-    <li>Added a network sync protocol, now it is possible to <i>check</i> if the
-    clients are in sync. Additionally most sync errors can now be fixed.</li>
-    <li>Improvements to effects system (load/save, species independent, delaying)</li>
-    <li>Improvements to weapons</li>
-    <li>Very simple and experimental dedicated server</li>
- </ul>
-
-<!-- <h3>Sound</h3>
- <ul>
-     <li></li>
-</ul> -->
-
- <h3>Rendering</h3>
- <ul>
-    <li>Basic support for animated water (lakes and oceans are possible), not included in editor yet</li>
-    <li>Simple terrain LOD (level of detail) system</li>
-    <li>Light effect (dynamic lights)</li>
-    <li>Daylight effect</li>
-    <li>Wind effect</li>
-    <li>Bullet trail effect</li>
-    <li>Environmental effects (can be used to create snow, rain, etc)</li>
-    <li>Improved and much better-looking fog-of-war rendering for terrain</li>
-    <li>Support for anisotropic filtering for textures (better quality)</li>
-    <li>Support for water rendering using shaders</li>
- </ul>
-
- <h3>Game</h3>
- <ul>
-    <li>Support for winning conditions</li>
-    <li>Forbid placing refineries too close to resource mines</li>
-    <li>Skip rendering some frames when the game becomes overloaded. This
-    reserves more CPU power for the actual game tasks and keeps it playable</li>
-    <li>Descriptions for produceable facilities are now displayed in the game</li>
-    <li>Flying units have their own moving quirks</li>
-    <li>New Pathfinder</li>
- </ul>
-
- <h3>Scripts / AI</h3>
- <ul>
-    <li>Events support for scripts</li>
-    <li>Loading/saving for scripts</li>
-    <li>Many new script functions</li>
- </ul>
-
- <h3>Editor</h3>
- <ul>
-     <li>Basic widget to edit conditions</li>
-     <li>Improvements to unit placing</li>
-     <li>Support for undo/redo of unit placement/deletion</li>
- </ul>
-
-<h3>Data</h3>
-<ul>
-  <li>Added textured fonts from plib (not functional right now, due to the
-      libufo port)</li>
-  <li>Many new neutral models (trees, houses, etc)</li>
-  <li>Few new maps (Cross)</li>
-  <li>Scripts are now in data module</li>
-  <li>Some new effects</li>
-  <li>Sight and weapon ranges of units are much bigger now</li>
-  <li>Some new cursor themes</li>
-</ul>
-
- <h3>Internal</h3>
- <ul>
-    <li>New texture class and texture manager</li>
-    <li>Canvas coordinates are now same as cell coordinates (except that
-        they're floats, not ints)</li>
-    <li>Use new bofixed (fixed-precision number) data type in logic code to
-        prevent errors caused by rounding of floats</li>
-    <li>Unit speeds are now saved as cells/second in confg files. This makes
-        editing the files much easier</li>
-    <li>Weapon types are now saved as strings instead of ints in config files,
-        making them more readable</li>
-    <li>New profiling architecture</li>
-    <li>Adding a cache file format for model files (decreases startup times)</li>
-    <li>Adding an internal math library</li>
-    <li>Load libGL.so dynamically on startup using dlopen()</li>
-    <li>Compress map data before sending it over network</li>
-    <li>Game Event subsystem</li>
-    <li>Making game starting more modular</li>
-    <li>bosonwidget.cpp has been removed. It has seen 218 HEAD revisions and
-    some more from branches. bosonwidget.cpp, 2001/11/09 - 2004/12/10, may it
-    rest in peace.</li>
-    <li>Complete game logic and game view separation</li>
-    <li>new upgrade architecture</li>
- </ul>
-
-
-
+  <li>Major PlayerId redesign</li>
+  <li>Several bugfixes</li>
+  <li>Visual feedbacks when giving orders to units</li>
+  <li>Provide ALT+number to center on a selection</li>
+  <li>Show all production options in the commandframe, even those with unmet
+  requirements (grayed out then)</li>
 </ul>");
 
 draw_bigbox_end();
