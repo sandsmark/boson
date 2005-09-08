@@ -904,6 +904,16 @@ bool BoUfoWidget::isVisible() const
  return ufoWidget()->isVisible();
 }
 
+void BoUfoWidget::setTakesKeyboardFocus(bool f)
+{
+ ufoWidget()->setFocusable(f);
+}
+
+bool BoUfoWidget::takesKeyboardFocus() const
+{
+ return ufoWidget()->isFocusable();
+}
+
 void BoUfoWidget::loadPropertiesFromXML(const QDomElement& root)
 {
  if (root.isNull()) {

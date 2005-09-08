@@ -128,6 +128,7 @@ class BoUfoWidget : public QObject
 	Q_PROPERTY(HorizontalAlignment horizontalAlignment READ horizontalAlignment WRITE setHorizontalAlignment);
 	Q_PROPERTY(BorderType borderType READ borderType WRITE setBorderType);
 	Q_PROPERTY(int stretch READ stretch WRITE setStretch);
+	Q_PROPERTY(bool takesKeyboardFocus READ takesKeyboardFocus WRITE setTakesKeyboardFocus);
 	Q_ENUMS(LayoutClass);
 	Q_ENUMS(HorizontalAlignment);
 	Q_ENUMS(VerticalAlignment);
@@ -231,6 +232,9 @@ public:
 
 	void setEnabled(bool);
 	bool isEnabled() const;
+
+	void setTakesKeyboardFocus(bool);
+	bool takesKeyboardFocus() const;
 
 	/**
 	 * Add @p w as child to this widget. This is also adds @p w to the
