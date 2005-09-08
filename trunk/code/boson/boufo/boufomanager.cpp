@@ -353,7 +353,8 @@ BoUfoManager::BoUfoManager(int w, int h, bool opaque)
  mLayeredPaneWidget = 0;
  mContentPane = 0;
  mContentWidget = 0;
- mMenuBar = 0;
+ mMenuBarData = 0;
+ mToolBarData = 0;
  mActionCollection = 0;
 
  makeContextCurrent();
@@ -383,6 +384,17 @@ BoUfoManager::BoUfoManager(int w, int h, bool opaque)
 	rootPane()->setOpaque(opaque);
 	contentWidget()->setOpaque(opaque);
  }
+
+ mToolBarDockWidget = 0;
+ mToolBarContentWidget = 0;
+ if (mRootPane) {
+	mToolBarDockWidget = new ufo::UDockWidget();
+	mToolBarContentWidget = new BoUfoWidget();
+	mToolBarContentWidget->setLayoutClass(BoUfoWidget::UHBoxLayout);
+	mToolBarDockWidget->add(mToolBarContentWidget->ufoWidget());
+	mToolBarContentWidget->setName("boufotoolbarcontent");
+	mRootPane->addDockWidget(mToolBarDockWidget, ufo::TopDockWidgetArea);
+ }
 }
 
 BoUfoManager::~BoUfoManager()
@@ -405,7 +417,7 @@ BoUfoManager::~BoUfoManager()
 	}
  }
  delete mActionCollection;
- setMenuBar(0);
+ setMenuBarData(0);
  if (contentWidget()) {
 	boDebug() << k_funcinfo << "removing all widgets" << endl;
 	contentWidget()->removeAllWidgets();
@@ -470,17 +482,31 @@ void BoUfoManager::removeFrame(BoUfoInternalFrame* frame)
  rootPane()->removeFrame(frame->frame());
 }
 
-void BoUfoManager::setMenuBar(BoUfoMenuBar* m)
+void BoUfoManager::setMenuBarData(BoUfoMenuBar* m)
 {
  // warning: BoUfoMenuBar is NOT a BoUfoWidget! therefore it is NOT
  // deleted when the UMenuBar is deleted!
- BoUfoMenuBar* del = mMenuBar;
- mMenuBar = 0; // ~BoUfoMenuBar calls setMenuBar() which deletes mMenuBar
+ BoUfoMenuBar* del = mMenuBarData;
+ mMenuBarData = 0; // ~BoUfoMenuBar calls setMenuBar() which deletes mMenuBarData
  delete del;
  if (mRootPane && mRootPane->getMenuBar()) {
 	mRootPane->setMenuBar(0); // deletes the old menubar
  }
- mMenuBar = m;
+ mMenuBarData = m;
+}
+
+void BoUfoManager::setToolBarData(BoUfoToolBar* m)
+{
+ // warning: BoUfoToolBar is NOT a BoUfoWidget! therefore it is NOT
+ // deleted when the UMenuBar is deleted!
+ BoUfoToolBar* del = mToolBarData;
+ mToolBarData = 0; // ~BoUfoToolBar calls setToolBar() which deletes mToolBarData
+ delete del;
+ if (mToolBarContentWidget) {
+	mToolBarContentWidget->removeAllWidgets();
+	mToolBarContentWidget->setVisible(false);
+ }
+ mToolBarData = m;
 }
 
 void BoUfoManager::makeContextCurrent()
@@ -902,5 +928,12 @@ const BoUfoFontInfo& BoUfoManager::globalFont() const
  return *mGlobalFont;
 }
 
+BoUfoWidget* BoUfoManager::toolBarContentWidget()
+{
+ if (mToolBarContentWidget) {
+	mToolBarContentWidget->setVisible(true);
+ }
+ return mToolBarContentWidget;
+}
 
 

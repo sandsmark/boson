@@ -81,6 +81,8 @@ public slots:
 	 **/
 	virtual void slotActivated();
 
+	virtual void slotHighlighted();
+
 protected:
 	void addWidget(ufo::UWidget*);
 	void removeWidget(ufo::UWidget*, bool del = true);
@@ -386,7 +388,7 @@ class BoUfoMenuBarMenuPrivate;
  * @internal
  *
  * This represents a menu from the xml file (the *ui.rc one). This class
- * can create a libufo submenu structure (see @ref createUfoSubMenu), but this
+ * can create a libufo submenu structure (see @ref createMenuBarUfoSubMenu), but this
  * class does not store any libufo objects. Once they were created, they exist
  * in the libufo data structures only.
  *
@@ -410,7 +412,8 @@ public:
 	 **/
 	unsigned int itemCount() const;
 
-	void createUfoSubMenu(ufo::UWidget*);
+	void createUfoMenuBarSubMenu(ufo::UWidget*);
+	void createUfoToolBarSubMenu(ufo::UWidget*);
 
 protected:
 	const QValueList<BoUfoMenuBarItem*>& items() const;
@@ -430,17 +433,41 @@ public:
 	BoUfoMenuBar(BoUfoManager* parent, const char* name = 0);
 	~BoUfoMenuBar();
 
-	void createMenu();
+	void createMenuBar();
 
 	static void initMenuBar(BoUfoManager* m);
 
 	ufo::UMenuBar* ufoMenuBar() const;
 
 protected:
-	void clearUfo();
+	void clearUfoMenuBar();
 
 private:
 	BoUfoMenuBarPrivate* d;
+};
+
+class BoUfoToolBarPrivate;
+/**
+ * You should never need this class, it is used internally.
+ **/
+class BoUfoToolBar : public BoUfoMenuBarMenu
+{
+	Q_OBJECT
+public:
+	BoUfoToolBar(BoUfoManager* parent, const char* name = 0);
+	~BoUfoToolBar();
+
+	void createToolBar();
+
+	static void initToolBar(BoUfoManager* m);
+
+//	ufo::UMenuBar* ufoToolBar() const;
+
+protected:
+	void clearUfoToolBar();
+
+private:
+	BoUfoToolBarPrivate* d;
 };
 
 

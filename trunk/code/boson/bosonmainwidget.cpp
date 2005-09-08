@@ -1109,6 +1109,16 @@ void BosonMainWidget::raiseWidget(BoUfoWidget* w)
 	unsetCursor();
  } else {
 	// gameview widget is maximized by default
+	boDebug() << k_funcinfo << "maximized" << endl;
+#if 1
+	// AB: by some reason the showMaximized() call is ignored, if we dont do
+	// this
+	// (at least with the current toolbar that want about 2100 pixels in
+	// width)
+	QDesktopWidget* desktop = QApplication::desktop();
+	QRect r = desktop->availableGeometry(this);
+	resize(r.width(), r.height());
+#endif
 	showMaximized();
  }
 }
@@ -1139,19 +1149,20 @@ void BosonMainWidget::slotStartupPreferredSizeChanged()
  }
  int w = ufoManager()->rootPaneWidget()->preferredWidth();
  int h = ufoManager()->rootPaneWidget()->preferredHeight();
+
+ // make sure we don't exceed the maximum desktop size
+ QDesktopWidget* desktop = QApplication::desktop();
+ QRect r = desktop->availableGeometry(this);
+ w = QMIN(w, r.width());
+ h = QMIN(h, r.height());
+
  if (width() >= w && height() >= h) {
 	return;
  }
- QDesktopWidget* desktop = QApplication::desktop();
- QRect r = desktop->availableGeometry(this);
- if (width() < w) {
-	w = QMAX(w, width());
-	w = QMIN(w, r.width());
- }
- if (height() < h) {
-	h = QMAX(h, height());
-	h = QMIN(h, r.height());
- }
+ w = QMAX(w, width());
+ h = QMAX(h, height());
+ w = QMIN(w, r.width());
+ h = QMIN(h, r.height());
  resize(w, h);
 }
 

@@ -104,7 +104,6 @@ public:
 			boError() << k_funcinfo << "menubar merging failed" << endl;
 			return false;
 		}
-		// TODO: ToolBar tags
 
 		return true;
 	}
@@ -126,19 +125,8 @@ public:
 		}
 		return true;
 	}
-	bool makeGUI(BoUfoMenuBar* bar)
-	{
-		QDomElement root = mDoc.documentElement();
-		if (root.isNull()) {
-			return false;
-		}
-
-		bool ret = makeUfoMenuBar(bar);
-		if (!ret) {
-			boError() << k_funcinfo << "unable to create Ufo MenuBar" << endl;
-		}
-		return ret;
-	}
+	bool makeUfoMenuBar(BoUfoMenuBar* bar, const QString& name);
+	bool makeUfoToolBar(BoUfoToolBar* bar, const QString& name);
 
 protected:
 	bool mergeMenuBars(QDomElement& baseRoot, QDomElement& addRoot)
@@ -158,6 +146,47 @@ protected:
 			return false;
 		}
 
+		if (!mergeBars(baseMenuBar, addMenuBar)) {
+			boError() << k_funcinfo << "failed merging MenuBars" << endl;
+			return false;
+		}
+		for (QDomNode n = addRoot.firstChild(); !n.isNull(); n = n.nextSibling()) {
+			QDomElement e = n.toElement();
+			if (e.isNull()) {
+				continue;
+			}
+			if (e.tagName() != "ToolBar") {
+				continue;
+			}
+			QDomElement addToolBar = e;
+			QDomElement baseToolBar;
+			QString name = e.attribute("name");
+			for (QDomNode n2 = baseRoot.firstChild(); !n2.isNull() && baseToolBar.isNull(); n2 = n2.nextSibling()) {
+				QDomElement e2 = n2.toElement();
+				if (e2.isNull()) {
+					continue;
+				}
+				if (e2.tagName() != "ToolBar") {
+					continue;
+				}
+				if (e2.attribute("name") == name) {
+					baseToolBar = e2;
+				}
+			}
+			if (!baseToolBar.isNull()) {
+				if (!mergeBars(baseToolBar, addToolBar)) {
+					boError() << k_funcinfo << "failed merging ToolBars with name " << name << endl;
+					return false;
+				}
+			} else {
+				baseMenuBar.parentNode().appendChild(addToolBar);
+			}
+		}
+		return true;
+	}
+
+	bool mergeBars(QDomElement& baseMenuBar, QDomElement& addMenuBar)
+	{
 		QMap<QString, QDomElement> baseTopItems;
 		QMap<QString, QDomElement> addTopItems;
 		QStringList tags;
@@ -169,13 +198,14 @@ protected:
 
 		// merge all items that exist in both, addTopItems and
 		// baseTopItems
+		QStringList processedTopItems;
 		for (it = addTopItems.begin(); it != addTopItems.end(); ++it) {
 			QString name = it.key();
 			QDomElement addItem = it.data();
 			if (baseTopItems.contains(name)) {
 				QDomElement baseItem = baseTopItems[name];
 				if (baseItem.tagName() != "Menu") {
-					boWarning() << k_funcinfo << name << " is not a menu. ignoring." << endl;
+//					boWarning() << k_funcinfo << name << " is not a menu. ignoring." << endl;
 					continue;
 				}
 				if (baseItem.tagName() != addItem.tagName()) {
@@ -185,12 +215,14 @@ protected:
 				if (!mergeMenu(baseItem, addItem)) {
 					return false;
 				}
+				processedTopItems.append(name);
 			}
 		}
 		// remove all processed items from addTopItems
-		for (it = baseTopItems.begin(); it != baseTopItems.end(); ++it) {
-			addTopItems.remove(it.key());
+		for (QStringList::iterator it = processedTopItems.begin(); it != processedTopItems.end(); ++it) {
+			addTopItems.remove(*it);
 		}
+		processedTopItems.clear();
 
 		// merge all items that exist in addTopItems only
 		// -> place them right before the corresponding MergeLocal tag
@@ -199,6 +231,7 @@ protected:
 		for (it = addTopItems.begin(); it != addTopItems.end(); ++it) {
 			addItemsElement.appendChild(it.data());
 		}
+#if 0
 		for (QDomNode n = baseMenuBar.firstChild(); !n.isNull(); n = n.nextSibling()) {
 			QDomElement e = n.toElement();
 			if (e.isNull()) {
@@ -209,6 +242,9 @@ protected:
 				mergeMenuItems(baseMenuBar, e, addItemsElement, mergeName);
 			}
 		}
+#else
+		mergeMenu(baseMenuBar, addItemsElement);
+#endif
 		return true;
 	}
 
@@ -306,7 +342,6 @@ protected:
 		return true;
 	}
 
-	bool makeUfoMenuBar(BoUfoMenuBar* bar);
 	bool makeUfoMenu(const QDomElement& menuBar, BoUfoMenuBarMenu* ufoMenu);
 
 private:
@@ -403,8 +438,13 @@ bool BoUfoXMLBuilder::cleanElements(QDomElement& element)
 }
 
 
-bool BoUfoXMLBuilder::makeUfoMenuBar(BoUfoMenuBar* bar)
+bool BoUfoXMLBuilder::makeUfoMenuBar(BoUfoMenuBar* bar, const QString& name)
 {
+ if (!bar) {
+	BO_NULL_ERROR(bar);
+	return false;
+ }
+ Q_UNUSED(name); // atm we support one menubar only
  QDomElement root = mDoc.documentElement();
  QDomElement menuBar = root.namedItem("MenuBar").toElement();
  if (menuBar.isNull()) {
@@ -420,7 +460,37 @@ bool BoUfoXMLBuilder::makeUfoMenuBar(BoUfoMenuBar* bar)
 
  // creation of data structures completed.
  // create actual ufo menubar
- bar->createMenu();
+ bar->createMenuBar();
+
+ return true;
+}
+
+bool BoUfoXMLBuilder::makeUfoToolBar(BoUfoToolBar* bar, const QString& name)
+{
+ if (!bar) {
+	BO_NULL_ERROR(bar);
+	return false;
+ }
+ Q_UNUSED(name); // atm we support one toolbar only
+ QDomElement root = mDoc.documentElement();
+
+ // TODO: honor the "name" attribute of Toolbar tags, atm we support only one
+ // ToolBar
+ QDomElement toolBar = root.namedItem("ToolBar").toElement();
+ if (toolBar.isNull()) {
+	// null toolbar is 100% valid
+	return true;
+ }
+
+ bool ret = makeUfoMenu(toolBar, bar);
+ if (!ret) {
+	boError() << k_funcinfo << "cold not make ToolBar" << endl;
+	return false;
+ }
+
+ // creation of data structures completed.
+ // create actual toolbar
+ bar->createToolBar();
 
  return true;
 }
@@ -621,6 +691,10 @@ void BoUfoAction::slotActivated()
  emit signalActivated();
 }
 
+void BoUfoAction::slotHighlighted()
+{
+}
+
 void BoUfoAction::addWidget(ufo::UWidget* w)
 {
  d->mWidgets.removeRef(w);
@@ -653,12 +727,12 @@ void BoUfoAction::uslotActivated(ufo::UActionEvent*)
 
 void BoUfoAction::uslotHighlighted(ufo::UActionEvent*)
 {
+ slotHighlighted();
 }
 
 
 void BoUfoAction::plug(ufo::UWidget* w)
 {
- // TODO: toolbar?
  ufo::UMenuBar* menuBar = dynamic_cast<ufo::UMenuBar*>(w);
  ufo::UMenu* menu = dynamic_cast<ufo::UMenu*>(w);
  if (menuBar || menu) {
@@ -672,6 +746,16 @@ void BoUfoAction::plug(ufo::UWidget* w)
 
 	w->add(menuItem);
 	addWidget(menuItem);
+ } else {
+	BoUfoPushButton* button = new BoUfoPushButton(text());
+	button->ufoWidget()->setFont(w->getFont());
+	connect(button, SIGNAL(signalClicked()),
+			this, SLOT(slotActivated()));
+	connect(button, SIGNAL(signalHighlighted()),
+			this, SLOT(slotHighlighted()));
+
+	w->add(button->ufoWidget());
+	addWidget(button->ufoWidget());
  }
 }
 
@@ -711,6 +795,17 @@ void BoUfoToggleAction::plug(ufo::UWidget* w)
 
 	w->add(menuItem);
 	addWidget(menuItem);
+ } else {
+	BoUfoCheckBox* check = new BoUfoCheckBox(text());
+	check->ufoWidget()->setFont(w->getFont());
+	check->setChecked(isChecked());
+	connect(check, SIGNAL(signalActivated()),
+			this, SLOT(slotActivated()));
+	connect(check, SIGNAL(signalHighlighted()),
+			this, SLOT(slotHighlighted()));
+
+	w->add(check->ufoWidget());
+	addWidget(check->ufoWidget());
  }
 }
 
@@ -740,8 +835,13 @@ void BoUfoToggleAction::setChecked(bool c)
  QPtrList<ufo::UWidget> list = widgets();
  QPtrListIterator<ufo::UWidget> it(list);
  while (it.current()) {
-	ufo::UCheckBoxMenuItem* checkBox = dynamic_cast<ufo::UCheckBoxMenuItem*>(it.current());
-	if (checkBox) {
+	ufo::UCheckBoxMenuItem* checkBoxItem = dynamic_cast<ufo::UCheckBoxMenuItem*>(it.current());
+	ufo::UCheckBox* checkBox = dynamic_cast<ufo::UCheckBox*>(it.current());
+	if (checkBoxItem) {
+		if (checkBoxItem->isSelected() != isChecked()) {
+			checkBoxItem->setSelected(isChecked());
+		}
+	} else if (checkBox) {
 		if (checkBox->isSelected() != isChecked()) {
 			checkBox->setSelected(isChecked());
 		}
@@ -794,6 +894,10 @@ void BoUfoActionMenu::plug(ufo::UWidget* w)
 
 	w->add(m);
 	addWidget(m);
+ } else {
+	// toolbar
+	// TODO: toolbar
+	boDebug() << k_funcinfo << "submenus not yet supported for toolbars" << endl;
  }
  redoMenus();
 }
@@ -1143,7 +1247,8 @@ void BoUfoActionCollection::clearActions()
  boDebug() << k_funcinfo << endl;
  if (parent() && parent()->inherits("BoUfoManager")) {
 	BoUfoManager* m = (BoUfoManager*)parent();
-	m->setMenuBar(0);
+	m->setMenuBarData(0);
+	m->setToolBarData(0);
  }
  if (d->mParentCollection) {
 	QDictIterator<BoUfoAction> it(d->mActionDict);
@@ -1228,10 +1333,16 @@ bool BoUfoActionCollection::createGUI()
 	return false;
  }
  BoUfoManager* m = (BoUfoManager*)parent();
- m->setMenuBar(0);
+ m->setMenuBarData(0);
+ m->setToolBarData(0);
  BoUfoMenuBar::initMenuBar(m);
- if (!m->menuBar()) {
-	BO_NULL_ERROR(m->menuBar());
+ BoUfoToolBar::initToolBar(m);
+ if (!m->menuBarData()) {
+	BO_NULL_ERROR(m->menuBarData());
+	return false;
+ }
+ if (!m->toolBarData()) {
+	BO_NULL_ERROR(m->toolBarData());
 	return false;
  }
  BoUfoXMLBuilder builder(this);
@@ -1261,7 +1372,19 @@ bool BoUfoActionCollection::createGUI()
 	boError() << k_funcinfo << "failed cleaning the xml doc" << endl;
 	return false;
  }
- return builder.makeGUI(m->menuBar());
+ bool ret = true;
+ if (!builder.makeUfoMenuBar(m->menuBarData(), "MenuBar")) {
+	boError() << k_funcinfo << "building menubar GUI failed" << endl;
+	ret = false;
+ }
+
+ // TODO: honor the "name" attribute of Toolbar tags, atm we support only one
+ // ToolBar
+ if (!builder.makeUfoToolBar(m->toolBarData(), "ToolBar")) {
+	boError() << k_funcinfo << "building toolbar GUI failed" << endl;
+	ret = false;
+ }
+ return ret;
 }
 
 void BoUfoActionCollection::initActionCollection(BoUfoManager* m)
@@ -1283,13 +1406,13 @@ public:
 		mUfoManager = 0;
 		mActionCollection = 0;
 
-		mBar = 0;
+		mMenuBar = 0;
 	}
 
 	BoUfoManager* mUfoManager;
 	BoUfoActionCollection* mActionCollection;
 
-	ufo::UMenuBar* mBar;
+	ufo::UMenuBar* mMenuBar;
 };
 
 BoUfoMenuBar::BoUfoMenuBar(BoUfoManager* parent, const char* name)
@@ -1302,47 +1425,113 @@ BoUfoMenuBar::BoUfoMenuBar(BoUfoManager* parent, const char* name)
 
 BoUfoMenuBar::~BoUfoMenuBar()
 {
- clearUfo();
+ clearUfoMenuBar();
  delete d;
 }
 
 ufo::UMenuBar* BoUfoMenuBar::ufoMenuBar() const
 {
- return d->mBar;
+ return d->mMenuBar;
 }
 
-void BoUfoMenuBar::clearUfo()
+void BoUfoMenuBar::clearUfoMenuBar()
 {
- if (d->mBar && d->mUfoManager) {
-	d->mUfoManager->setMenuBar(0); // deletes the ufo menubar
-	d->mBar = 0;
+ if (d->mMenuBar && d->mUfoManager) {
+	d->mUfoManager->setMenuBarData(0); // deletes the ufo menubar
+	d->mMenuBar = 0;
  }
 }
 
-void BoUfoMenuBar::createMenu()
+void BoUfoMenuBar::createMenuBar()
 {
  BO_CHECK_NULL_RET(d->mUfoManager);
  BO_CHECK_NULL_RET(d->mUfoManager->rootPane());
  d->mUfoManager->makeContextCurrent();
- clearUfo();
- d->mBar = new ufo::UMenuBar();
- d->mBar->setFont(d->mUfoManager->rootPane()->getFont());
- d->mUfoManager->rootPane()->setMenuBar(d->mBar);
+ clearUfoMenuBar();
+ d->mMenuBar = new ufo::UMenuBar();
+ d->mMenuBar->setFont(d->mUfoManager->rootPane()->getFont());
+ d->mUfoManager->rootPane()->setMenuBar(d->mMenuBar);
 
  boDebug() << k_funcinfo << "creating submenus" << endl;
- createUfoSubMenu(d->mBar);
+ createUfoMenuBarSubMenu(d->mMenuBar);
 }
 
 void BoUfoMenuBar::initMenuBar(BoUfoManager* m)
 {
  BO_CHECK_NULL_RET(m);
  BO_CHECK_NULL_RET(m->actionCollection());
- if (m->menuBar()) {
+ if (m->menuBarData()) {
 	return;
  }
  BoUfoMenuBar* bar = new BoUfoMenuBar(m, "menubar");
- m->setMenuBar(bar);
+ m->setMenuBarData(bar);
 }
+
+
+class BoUfoToolBarPrivate
+{
+public:
+	BoUfoToolBarPrivate()
+	{
+		mUfoManager = 0;
+		mActionCollection = 0;
+
+		mMenuBar = 0;
+	}
+
+	BoUfoManager* mUfoManager;
+	BoUfoActionCollection* mActionCollection;
+
+	ufo::UMenuBar* mMenuBar;
+};
+
+BoUfoToolBar::BoUfoToolBar(BoUfoManager* parent, const char* name)
+	: BoUfoMenuBarMenu(QString::null, parent, name)
+{
+ d = new BoUfoToolBarPrivate;
+ d->mUfoManager = parent;
+ d->mActionCollection = parent->actionCollection();
+}
+
+BoUfoToolBar::~BoUfoToolBar()
+{
+ clearUfoToolBar();
+ delete d;
+}
+
+void BoUfoToolBar::clearUfoToolBar()
+{
+ if (d->mUfoManager && d->mUfoManager->toolBarContentWidget()) {
+	d->mUfoManager->toolBarContentWidget()->removeAllWidgets();
+	d->mUfoManager->toolBarContentWidget()->setVisible(false);
+ }
+}
+
+void BoUfoToolBar::createToolBar()
+{
+ BO_CHECK_NULL_RET(d->mUfoManager);
+ BO_CHECK_NULL_RET(d->mUfoManager->rootPane());
+ BO_CHECK_NULL_RET(d->mUfoManager->toolBarContentWidget());
+ d->mUfoManager->makeContextCurrent();
+ clearUfoToolBar();
+ d->mUfoManager->toolBarContentWidget()->ufoWidget()->setFont(d->mUfoManager->rootPane()->getFont());
+
+ boDebug() << k_funcinfo << "creating toolbar submenus" << endl;
+ createUfoToolBarSubMenu(d->mUfoManager->toolBarContentWidget()->ufoWidget());
+}
+
+void BoUfoToolBar::initToolBar(BoUfoManager* m)
+{
+ BO_CHECK_NULL_RET(m);
+ BO_CHECK_NULL_RET(m->actionCollection());
+ if (m->toolBarData()) {
+	return;
+ }
+ BoUfoToolBar* bar = new BoUfoToolBar(m, "toolbar");
+ m->setToolBarData(bar);
+}
+
+
 
 
 
@@ -1401,7 +1590,7 @@ const QValueList<BoUfoMenuBarItem*>& BoUfoMenuBarMenu::items() const
  return d->mItems;
 }
 
-void BoUfoMenuBarMenu::createUfoSubMenu(ufo::UWidget* parentWidget)
+void BoUfoMenuBarMenu::createUfoMenuBarSubMenu(ufo::UWidget* parentWidget)
 {
  BO_CHECK_NULL_RET(parentWidget);
 
@@ -1414,7 +1603,43 @@ void BoUfoMenuBarMenu::createUfoSubMenu(ufo::UWidget* parentWidget)
 		menu->setFont(parentWidget->getFont());
 		parentWidget->add(menu);
 
-		m->createUfoSubMenu(menu);
+		m->createUfoMenuBarSubMenu(menu);
+	} else {
+		BoUfoMenuBarItem* item = items()[i];
+		BoUfoAction* action = item->action();
+		if (!action) {
+			// e.g. a separator
+			ufo::UMenuItem* menuItem = 0;
+			menuItem = new ufo::UMenuItem(item->text().latin1());
+			menuItem->setFont(parentWidget->getFont());
+			parentWidget->add(menuItem);
+		} else {
+//			boDebug() << k_funcinfo << "plugging action " << action->name() << endl;
+			action->plug(parentWidget);
+		}
+	}
+ }
+}
+
+void BoUfoMenuBarMenu::createUfoToolBarSubMenu(ufo::UWidget* parentWidget)
+{
+ BO_CHECK_NULL_RET(parentWidget);
+
+ for (unsigned int i = 0; i < itemCount(); i++) {
+	if (items()[i]->isA("BoUfoMenuBarMenu")) {
+		BoUfoMenuBarMenu* m = (BoUfoMenuBarMenu*)items()[i];
+
+		// TODO: we could provide an icon
+#if 0
+		ufo::UMenu* menu = new ufo::UMenu(m->text().latin1());
+		menu->setFont(parentWidget->getFont());
+		parentWidget->add(menu);
+
+		m->createUfoToolBarSubMenu(menu);
+#else
+		boDebug() << k_funcinfo << "submenus not yet supported by toolbar (" << m->text() << ")" << endl;
+		m->createUfoToolBarSubMenu(parentWidget);
+#endif
 	} else {
 		BoUfoMenuBarItem* item = items()[i];
 		BoUfoAction* action = item->action();
