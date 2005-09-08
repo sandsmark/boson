@@ -10,4 +10,7 @@
     <Action name="debug_sync_network" />
   </Menu>
 </MenuBar>
+<ToolBar name="mainToolBar"><text>Main Toolbar</text>
+  <Action name="debug_sync_network" />
+</ToolBar>
 </kpartgui>

@@ -32,6 +32,7 @@ class QDomElement;
 
 class BoUfoActionCollection;
 class BoUfoMenuBar;
+class BoUfoToolBar;
 class BoUfoWidget;
 class BoUfoInternalFrame;
 class BoUfoLayeredPane;
@@ -69,6 +70,7 @@ namespace ufo {
 	class ULayeredPane;
 	class UWidgetUI;
 	class UButtonGroup;
+	class UDockWidget;
 
 
 	class UActionEvent;
@@ -215,11 +217,20 @@ public:
 	/**
 	 * Called internally. Use @ref BoUfoActionCollection to create menus.
 	 **/
-	void setMenuBar(BoUfoMenuBar* m);
-	BoUfoMenuBar* menuBar() const
+	void setMenuBarData(BoUfoMenuBar* m);
+	BoUfoMenuBar* menuBarData() const
 	{
-		return mMenuBar;
+		return mMenuBarData;
 	}
+	/**
+	 * Called internally.
+	 **/
+	void setToolBarData(BoUfoToolBar* m);
+	BoUfoToolBar* toolBarData() const
+	{
+		return mToolBarData;
+	}
+	BoUfoWidget* toolBarContentWidget();
 
 	bool sendEvent(QEvent* e);
 
@@ -255,8 +266,11 @@ private:
 	BoUfoWidget* mRootPaneWidget;
 
 	BoUfoActionCollection* mActionCollection;
-	BoUfoMenuBar* mMenuBar;
+	BoUfoMenuBar* mMenuBarData;
+	BoUfoToolBar* mToolBarData;
 	BoUfoFontInfo* mGlobalFont;
+	ufo::UDockWidget* mToolBarDockWidget;
+	BoUfoWidget* mToolBarContentWidget;
 };
 
 #endif

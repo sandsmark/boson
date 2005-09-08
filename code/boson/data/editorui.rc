@@ -25,7 +25,7 @@
     <Action name="editor_show_random_map_generation" />
   </Menu>
 </MenuBar>
-<ToolBar>
+<ToolBar name="mainToolBar"><text>Main Toolbar</text>
   <Action name="editor_player" />
   <Separator />
   <Action name="editor_place" />

@@ -42,5 +42,15 @@
     <Action name="options_zoom" />
   </Menu>
 </MenuBar>
+<ToolBar name="mainToolBar"><text>Main Toolbar</text>
+  <Action name="debug_map_coordinates" />
+  <Action name="debug_cell_grid" />
+  <Action name="debug_works" />
+  <Action name="debug_rendercounts" />
+  <Action name="debug_fps" />
+  <Action name="debug_advance_calls" />
+  <Action name="debug_profiling_graph" />
+  <Action name="debug_cpu_usage" />
+</ToolBar>
 </kpartgui>
 
