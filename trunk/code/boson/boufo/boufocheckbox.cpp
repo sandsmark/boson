@@ -33,12 +33,14 @@
 #include "boufolabel.h"
 #include <bodebug.h>
 
-BoUfoCheckBox::BoUfoCheckBox() : BoUfoWidget()
+BoUfoCheckBox::BoUfoCheckBox()
+	: BoUfoWidget(new ufo::UCheckBox())
 {
  init();
 }
 
-BoUfoCheckBox::BoUfoCheckBox(const QString& text, bool checked) : BoUfoWidget()
+BoUfoCheckBox::BoUfoCheckBox(const QString& text, bool checked)
+	: BoUfoWidget(new ufo::UCheckBox())
 {
  init();
  setText(text);
@@ -48,8 +50,7 @@ BoUfoCheckBox::BoUfoCheckBox(const QString& text, bool checked) : BoUfoWidget()
 void BoUfoCheckBox::init()
 {
  setLayoutClass(UHBoxLayout);
- mCheckBox = new ufo::UCheckBox();
- ufoWidget()->add(mCheckBox);
+ mCheckBox = (ufo::UCheckBox*)ufoWidget();
  // AB: at least the background of the label must be transparent. unfortunately,
  // libufo uses UButton for the checkbox, so the actual checkbox and its label
  // are the same widget
@@ -59,6 +60,8 @@ void BoUfoCheckBox::init()
 
  CONNECT_UFO_TO_QT(BoUfoCheckBox, mCheckBox, Activated);
  CONNECT_UFO_TO_QT(BoUfoCheckBox, mCheckBox, Highlighted);
+
+ setMouseEventsEnabled(true, true);
 }
 
 void BoUfoCheckBox::setOpaque(bool o)
