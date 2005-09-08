@@ -199,6 +199,7 @@ int BoOrderButtonDrawable::drawableHeight() const
 BoOrderButtonButton::BoOrderButtonButton()
 	: BoUfoPushButton()
 {
+ setTakesKeyboardFocus(false);
  connect(this, SIGNAL(signalMouseReleased(QMouseEvent*)),
 		this, SLOT(slotMouseReleaseEvent(QMouseEvent*)));
 
