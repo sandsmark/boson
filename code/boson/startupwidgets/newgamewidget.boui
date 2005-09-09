@@ -18,6 +18,7 @@
    <gridLayoutColumns/>
    <gridLayoutRows/>
    <borderType/>
+   <takesKeyboardFocus/>
   </Properties>
   <Widget>
    <ClassName>BoUfoWidget</ClassName>
@@ -37,6 +38,7 @@
     <gridLayoutColumns/>
     <gridLayoutRows/>
     <borderType/>
+    <takesKeyboardFocus/>
    </Properties>
    <Widget>
     <ClassName>BoUfoWidget</ClassName>
@@ -56,6 +58,7 @@
      <gridLayoutColumns/>
      <gridLayoutRows/>
      <borderType/>
+     <takesKeyboardFocus/>
     </Properties>
     <Widget>
      <ClassName>BoUfoGroupBox</ClassName>
@@ -76,6 +79,7 @@
       <gridLayoutRows/>
       <borderType/>
       <title>Choose Map</title>
+      <takesKeyboardFocus/>
      </Properties>
      <Widget>
       <ClassName>BoUfoWidget</ClassName>
@@ -95,16 +99,17 @@
        <horizontalAlignment/>
        <stretch/>
        <borderType/>
+       <takesKeyboardFocus/>
       </Properties>
       <Widget>
-       <ClassName>BoUfoWidget</ClassName>
+       <ClassName>BoUfoLabel</ClassName>
        <Properties>
         <name>mWidget47</name>
         <constraints/>
         <gridLayoutColumns/>
         <gridLayoutRows/>
         <opaque/>
-        <layout>UHBoxLayout</layout>
+        <layout/>
         <minimumWidth/>
         <minimumHeight/>
         <preferredWidth/>
@@ -112,13 +117,37 @@
         <backgroundImageFile/>
         <verticalAlignment/>
         <horizontalAlignment/>
-        <stretch/>
         <borderType/>
+        <stretch/>
+        <takesKeyboardFocus/>
+        <text>Available campaigns:</text>
+        <iconFile/>
+       </Properties>
+      </Widget>
+      <Widget>
+       <ClassName>BoUfoWidget</ClassName>
+       <Properties>
+        <name>mWidget48</name>
+        <constraints/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <opaque/>
+        <layout/>
+        <minimumWidth/>
+        <minimumHeight/>
+        <preferredWidth/>
+        <preferredHeight/>
+        <backgroundImageFile/>
+        <verticalAlignment/>
+        <horizontalAlignment/>
+        <borderType/>
+        <stretch/>
+        <takesKeyboardFocus/>
        </Properties>
        <Widget>
-        <ClassName>BoUfoLabel</ClassName>
+        <ClassName>BoUfoListBox</ClassName>
         <Properties>
-         <name>mWidget45</name>
+         <name>mSelectCampaign</name>
          <constraints/>
          <gridLayoutColumns/>
          <gridLayoutRows/>
@@ -126,39 +155,40 @@
          <layout/>
          <minimumWidth/>
          <minimumHeight/>
-         <preferredWidth/>
-         <preferredHeight/>
-         <backgroundImageFile/>
-         <verticalAlignment>AlignTop</verticalAlignment>
-         <horizontalAlignment/>
-         <stretch/>
-         <text>Available missions:</text>
-         <iconFile/>
-         <borderType/>
-        </Properties>
-       </Widget>
-       <Widget>
-        <ClassName>BoUfoLabel</ClassName>
-        <Properties>
-         <name>mWidget48</name>
-         <constraints/>
-         <gridLayoutColumns/>
-         <gridLayoutRows/>
-         <opaque/>
-         <layout/>
-         <minimumWidth/>
-         <minimumHeight/>
-         <preferredWidth/>
-         <preferredHeight/>
+         <preferredWidth>200</preferredWidth>
+         <preferredHeight>80</preferredHeight>
          <backgroundImageFile/>
          <verticalAlignment/>
          <horizontalAlignment/>
-         <stretch/>
-         <text/>
-         <iconFile/>
          <borderType/>
+         <stretch/>
+         <takesKeyboardFocus/>
+         <selection/>
         </Properties>
        </Widget>
+      </Widget>
+      <Widget>
+       <ClassName>BoUfoLabel</ClassName>
+       <Properties>
+        <name>mWidget45</name>
+        <constraints/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <opaque/>
+        <layout/>
+        <minimumWidth/>
+        <minimumHeight/>
+        <preferredWidth/>
+        <preferredHeight/>
+        <backgroundImageFile/>
+        <verticalAlignment>AlignTop</verticalAlignment>
+        <horizontalAlignment/>
+        <stretch/>
+        <text>Available missions:</text>
+        <iconFile/>
+        <borderType/>
+        <takesKeyboardFocus/>
+       </Properties>
       </Widget>
       <Widget>
        <ClassName>BoUfoWidget</ClassName>
@@ -178,12 +208,13 @@
         <horizontalAlignment/>
         <stretch>1</stretch>
         <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
        <Widget>
         <ClassName>BoUfoListBox</ClassName>
         <Properties>
          <selection/>
-         <preferredHeight>300</preferredHeight>
+         <preferredHeight>250</preferredHeight>
          <minimumHeight/>
          <opaque/>
          <constraints/>
@@ -198,6 +229,7 @@
          <gridLayoutColumns/>
          <gridLayoutRows/>
          <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
       </Widget>
@@ -220,6 +252,7 @@
        <gridLayoutColumns/>
        <gridLayoutRows/>
        <borderType/>
+       <takesKeyboardFocus/>
       </Properties>
       <Widget>
        <ClassName>BoUfoWidget</ClassName>
@@ -239,6 +272,7 @@
         <gridLayoutColumns/>
         <gridLayoutRows/>
         <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
@@ -260,6 +294,7 @@
          <gridLayoutColumns/>
          <gridLayoutRows/>
          <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
        <Widget>
@@ -282,6 +317,7 @@
          <gridLayoutColumns/>
          <gridLayoutRows/>
          <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
       </Widget>
@@ -303,6 +339,7 @@
         <gridLayoutColumns/>
         <gridLayoutRows/>
         <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
@@ -324,6 +361,7 @@
          <gridLayoutColumns/>
          <gridLayoutRows/>
          <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
        <Widget>
@@ -346,6 +384,7 @@
          <gridLayoutColumns/>
          <gridLayoutRows/>
          <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
       </Widget>
@@ -367,6 +406,7 @@
         <horizontalAlignment/>
         <stretch/>
         <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
@@ -388,6 +428,7 @@
          <text>Mission overview:</text>
          <iconFile/>
          <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
        <Widget>
@@ -410,6 +451,7 @@
          <text/>
          <iconFile/>
          <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
       </Widget>
@@ -433,6 +475,7 @@
         <gridLayoutColumns/>
         <gridLayoutRows/>
         <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
       </Widget>
       <Widget>
@@ -455,6 +498,7 @@
         <gridLayoutColumns/>
         <gridLayoutRows/>
         <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
       </Widget>
      </Widget>
@@ -477,6 +521,7 @@
       <gridLayoutColumns/>
       <gridLayoutRows/>
       <borderType/>
+      <takesKeyboardFocus/>
      </Properties>
     </Widget>
    </Widget>
@@ -498,6 +543,7 @@
      <gridLayoutColumns/>
      <gridLayoutRows/>
      <borderType/>
+     <takesKeyboardFocus/>
     </Properties>
     <Widget>
      <ClassName>BoUfoGroupBox</ClassName>
@@ -518,6 +564,7 @@
       <gridLayoutRows/>
       <borderType/>
       <title>Player options</title>
+      <takesKeyboardFocus/>
      </Properties>
      <Widget>
       <ClassName>BoUfoHBox</ClassName>
@@ -537,6 +584,7 @@
        <gridLayoutColumns/>
        <gridLayoutRows/>
        <borderType/>
+       <takesKeyboardFocus/>
       </Properties>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
@@ -558,6 +606,7 @@
         <gridLayoutColumns/>
         <gridLayoutRows/>
         <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
       </Widget>
       <Widget>
@@ -580,6 +629,7 @@
         <gridLayoutColumns/>
         <gridLayoutRows/>
         <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
       </Widget>
      </Widget>
@@ -601,6 +651,7 @@
        <gridLayoutColumns/>
        <gridLayoutRows/>
        <borderType/>
+       <takesKeyboardFocus/>
       </Properties>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
@@ -622,6 +673,7 @@
         <gridLayoutColumns/>
         <gridLayoutRows/>
         <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
       </Widget>
       <Widget>
@@ -642,6 +694,7 @@
         <gridLayoutColumns/>
         <gridLayoutRows/>
         <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
       </Widget>
      </Widget>
@@ -663,6 +716,7 @@
        <gridLayoutColumns/>
        <gridLayoutRows/>
        <borderType/>
+       <takesKeyboardFocus/>
       </Properties>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
@@ -684,6 +738,7 @@
         <gridLayoutColumns/>
         <gridLayoutRows/>
         <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
       </Widget>
       <Widget>
@@ -704,6 +759,7 @@
         <gridLayoutColumns/>
         <gridLayoutRows/>
         <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
       </Widget>
      </Widget>
@@ -727,6 +783,7 @@
        <gridLayoutColumns/>
        <gridLayoutRows/>
        <borderType/>
+       <takesKeyboardFocus/>
       </Properties>
      </Widget>
     </Widget>
@@ -748,6 +805,7 @@
       <gridLayoutColumns/>
       <gridLayoutRows/>
       <borderType/>
+      <takesKeyboardFocus/>
      </Properties>
      <Widget>
       <ClassName>BoUfoLabel</ClassName>
@@ -769,6 +827,7 @@
        <gridLayoutColumns/>
        <gridLayoutRows/>
        <borderType/>
+       <takesKeyboardFocus/>
       </Properties>
      </Widget>
      <Widget>
@@ -790,6 +849,7 @@
        <gridLayoutColumns/>
        <gridLayoutRows/>
        <borderType/>
+       <takesKeyboardFocus/>
       </Properties>
      </Widget>
      <Widget>
@@ -812,6 +872,7 @@
        <gridLayoutColumns/>
        <gridLayoutRows/>
        <borderType/>
+       <takesKeyboardFocus/>
       </Properties>
      </Widget>
      <Widget>
@@ -832,6 +893,7 @@
        <gridLayoutColumns/>
        <gridLayoutRows/>
        <borderType/>
+       <takesKeyboardFocus/>
       </Properties>
      </Widget>
     </Widget>
@@ -855,6 +917,7 @@
     <gridLayoutColumns/>
     <gridLayoutRows/>
     <borderType/>
+    <takesKeyboardFocus/>
    </Properties>
    <Widget>
     <ClassName>BoUfoWidget</ClassName>
@@ -870,10 +933,11 @@
      <backgroundImageFile/>
      <verticalAlignment/>
      <horizontalAlignment/>
-     <stretch></stretch>
+     <stretch/>
      <gridLayoutColumns/>
      <gridLayoutRows/>
      <borderType/>
+     <takesKeyboardFocus/>
     </Properties>
    </Widget>
    <Widget>
@@ -896,6 +960,7 @@
      <gridLayoutColumns/>
      <gridLayoutRows/>
      <borderType/>
+     <takesKeyboardFocus/>
     </Properties>
    </Widget>
    <Widget>
@@ -916,6 +981,7 @@
      <gridLayoutColumns/>
      <gridLayoutRows/>
      <borderType/>
+     <takesKeyboardFocus/>
     </Properties>
    </Widget>
    <Widget>
@@ -938,6 +1004,7 @@
      <gridLayoutColumns/>
      <gridLayoutRows/>
      <borderType/>
+     <takesKeyboardFocus/>
     </Properties>
    </Widget>
    <Widget>
@@ -954,15 +1021,21 @@
      <backgroundImageFile/>
      <verticalAlignment/>
      <horizontalAlignment/>
-     <stretch></stretch>
+     <stretch/>
      <gridLayoutColumns/>
      <gridLayoutRows/>
      <borderType/>
+     <takesKeyboardFocus/>
     </Properties>
    </Widget>
   </Widget>
  </Widgets>
  <Methods>
+  <Method return="void" visibility="protected" type="slot" name="slotCampaignSelected(int, int)" >
+   <Connections>
+    <Connection sender="mSelectCampaign" signal="signalSelectionChanged(int, int)" type="receiver" />
+   </Connections>
+  </Method>
   <Method return="void" visibility="protected" type="slot" name="slotAddComputerPlayer()" >
    <Connections>
     <Connection sender="mAddAIPlayer" signal="signalClicked()" type="receiver" />

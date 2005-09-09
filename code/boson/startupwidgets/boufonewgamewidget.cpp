@@ -49,16 +49,218 @@
 #warning TODO: implement!
 #define HAVE_CHAT_WIDGET 0
 
+class PlayFieldSelection
+{
+public:
+  PlayFieldSelection(BoUfoListBox* campaign, BoUfoListBox* playField)
+  {
+    BO_CHECK_NULL_RET(campaign);
+    BO_CHECK_NULL_RET(playField);
+    mSelectCampaign = campaign;
+    mSelectPlayField = playField;
+  }
+
+  void addCampaign(const BosonCampaign* campaign)
+  {
+    BO_CHECK_NULL_RET(campaign);
+    QString name = campaign->name();
+    if (name.isEmpty()) {
+      boWarning() << k_funcinfo << "empty campaign name - using <unnamed>" << endl;
+      name = i18n("<unnamed>");
+    }
+    boDebug() << "adding campaign " << name << endl;
+    mIndex2Campaign.insert(mSelectCampaign->count(), campaign);
+    mSelectCampaign->insertItem(name);
+
+    // AB: WARNING: we leave the current item uninitialized!
+    //     we expect the caller to also set the current campaign after adding
+    //     all campaigns!
+  }
+
+  void setAdmin(bool isAdmin)
+  {
+    mIsAdmin = isAdmin;
+    if (mIsAdmin) {
+       mSelectCampaign->setSelectionMode(BoUfoListBox::SingleSelection);
+       mSelectPlayField->setSelectionMode(BoUfoListBox::SingleSelection);
+    } else {
+       mSelectCampaign->setSelectionMode(BoUfoListBox::NoSelection);
+       mSelectPlayField->setSelectionMode(BoUfoListBox::NoSelection);
+    }
+  }
+  void updateCurrentPlayField()
+  {
+    int campaign = mSelectCampaign->selectedItem();
+    int playField = mSelectPlayField->selectedItem();
+
+    campaign = QMAX(campaign, 0);
+    campaign = QMIN(campaign, (int)(mIndex2Campaign.count() - 1));
+    setCurrentCampaignWithIndex(campaign);
+
+    playField = QMAX(playField, 0);
+    playField = QMIN(playField, (int)(mIndex2PlayFieldIdentifier.count() - 1));
+    setCurrentPlayFieldWithIndex(playField);
+  }
+
+  void setCurrentCampaignWithIndex(int index)
+  {
+    if (index < 0) {
+      boError() << k_funcinfo << "invalid index " << index << endl;
+      return;
+    }
+    if ((unsigned int)index >= mIndex2Campaign.count()) {
+      boError() << k_funcinfo << "index " << index << " exceeds count " << mIndex2Campaign.count() << endl;
+      return;
+    }
+    if (mIndex2Campaign.count() != mSelectCampaign->count()) {
+      boError() << k_funcinfo << "internal error" << endl;
+      return;
+    }
+    const BosonCampaign* campaign = mIndex2Campaign[index];
+    BO_CHECK_NULL_RET(campaign);
+    int old = mSelectCampaign->selectedItem();
+    if (old != index) {
+      if (!mIsAdmin) {
+          // If client isn't admin, it can't select the campaign, but we still have to
+          //  indicate selected campaign, so we temporarily set selection mode to single
+          mSelectCampaign->setSelectionMode(BoUfoListBox::SingleSelection);
+          mSelectCampaign->blockSignals(true);
+          mSelectCampaign->unselectAll();
+          mSelectCampaign->setItemSelected(index, true);
+          mSelectCampaign->blockSignals(false);
+          mSelectCampaign->setSelectionMode(BoUfoListBox::NoSelection);
+      } else {
+          mSelectCampaign->blockSignals(true);
+          mSelectCampaign->setItemSelected(index, true);
+          mSelectCampaign->blockSignals(false);
+      }
+    }
+    // AB: note that we have to update mSelectPlayField even if the new index
+    // already was selected - setCurrentCampaignWithIndex() is called by the
+    // slot that changes the listbox selection for the campaign!
+
+    mIndex2PlayFieldIdentifier.clear();
+    mSelectPlayField->clear();
+    QStringList list = campaign->playFields();
+    QStringList items;
+    for (unsigned int i = 0; i < list.count(); i++) {
+      BosonPlayField* field = boData->playField(list[i]);
+      if (!field) {
+        BO_NULL_ERROR(field);
+        continue;
+      }
+      int index = items.count();
+      items.append(field->playFieldName());
+      mIndex2PlayFieldIdentifier.insert(index, list[i]);
+    }
+
+    mSelectPlayField->setItems(items);
+
+    setCurrentPlayFieldWithIndex(0);
+  }
+
+  void setCurrentPlayFieldWithIndex(int index)
+  {
+    if (index < 0) {
+      boError() << k_funcinfo << "invalid index " << index << endl;
+      return;
+    }
+    if ((unsigned int)index >= mIndex2PlayFieldIdentifier.count()) {
+      boError() << k_funcinfo << "index " << index << " exceeds count " << mIndex2PlayFieldIdentifier.count() << endl;
+      return;
+    }
+    if (mIndex2PlayFieldIdentifier.count() != mSelectPlayField->count()) {
+      boError() << k_funcinfo << "internal error" << endl;
+      return;
+    }
+
+    int old = mSelectPlayField->selectedItem();
+    if (old != index) {
+      if (!mIsAdmin) {
+          // If client isn't admin, it can't select the map, but we still have to
+          //  indicate selected map, so we temporarily set selection mode to single
+          mSelectPlayField->setSelectionMode(BoUfoListBox::SingleSelection);
+          mSelectPlayField->blockSignals(true);
+          mSelectPlayField->unselectAll();
+          mSelectPlayField->setItemSelected(index, true);
+          mSelectPlayField->blockSignals(false);
+          mSelectPlayField->setSelectionMode(BoUfoListBox::NoSelection);
+      } else {
+          mSelectPlayField->blockSignals(true);
+          mSelectPlayField->setItemSelected(index, true);
+          mSelectPlayField->blockSignals(false);
+      }
+    }
+  }
+
+  void setCurrentPlayFieldWithIdentifier(const QString& identifier)
+  {
+    int campaignIndex = -1;
+    const BosonCampaign* campaign = 0;
+    for (QMap<int, const BosonCampaign*>::iterator it = mIndex2Campaign.begin(); it != mIndex2Campaign.end() && !campaign; ++it) {
+      const BosonCampaign* c = it.data();
+      if (!c) {
+        BO_NULL_ERROR(c);
+        continue;
+      }
+      if (c->playFields().contains(identifier)) {
+        campaignIndex = it.key();
+        campaign = c;
+      }
+    }
+    if (!campaign || campaignIndex < 0) {
+      boError() << k_funcinfo << "cannot find campaign for playfield " << identifier << endl;
+      return;
+    }
+
+    setCurrentCampaignWithIndex(campaignIndex);
+
+    int playFieldIndex = -1;
+    for (QMap<int, QString>::iterator it = mIndex2PlayFieldIdentifier.begin(); it != mIndex2PlayFieldIdentifier.end() && playFieldIndex < 0; ++it) {
+      if (it.data() == identifier) {
+        playFieldIndex = it.key();
+      }
+    }
+    if (playFieldIndex < 0) {
+      boError() << k_funcinfo << "could not find playfield " << identifier << endl;
+      return;
+    }
+    setCurrentPlayFieldWithIndex(playFieldIndex);
+  }
+
+  QString playFieldIdentifier() const
+  {
+    if (mSelectPlayField->selectedItem() < 0) {
+      return QString::null;
+    }
+    if (!mIndex2PlayFieldIdentifier.contains(mSelectPlayField->selectedItem())) {
+      return QString::null;
+    }
+    QString identifier = mIndex2PlayFieldIdentifier[mSelectPlayField->selectedItem()];
+    return identifier;
+  }
+
+private:
+  bool mIsAdmin;
+  BoUfoListBox* mSelectCampaign;
+  BoUfoListBox* mSelectPlayField;
+
+  QMap<int, const BosonCampaign*> mIndex2Campaign;
+  QMap<int, QString> mIndex2PlayFieldIdentifier;
+};
+
 class BoUfoNewGameWidgetPrivate
 {
 public:
     BoUfoNewGameWidgetPrivate()
     {
-        mLocalPlayer = 0;
+      mPlayFieldSelection = 0;
+      mLocalPlayer = 0;
 
-        mPlayerColor = 0;
+      mPlayerColor = 0;
     }
 
+    PlayFieldSelection* mPlayFieldSelection;
     QMap<int, KPlayer*> mItem2Player;
     QMap<int, QString> mItem2Map; // "item" is an index in the listbox now
 
@@ -88,6 +290,8 @@ BoUfoNewGameWidget::BoUfoNewGameWidget(BosonStartupNetwork* interface)
  mInited = false; // Will become true once localplayer gets added
  d->mComputerPlayerNumber = 1;
 
+ d->mPlayFieldSelection = new PlayFieldSelection(mSelectCampaign, mSelectMap);
+
  d->mPlayerColor = new BoUfoColorChooser();
  mPlayerColorContainer->setLayoutClass(BoUfoWidget::UHBoxLayout);
  mPlayerColorContainer->addWidget(d->mPlayerColor);
@@ -95,6 +299,8 @@ BoUfoNewGameWidget::BoUfoNewGameWidget(BosonStartupNetwork* interface)
         this, SLOT(slotPlayerColorChanged(int)));
 
  initPlayFields();
+ d->mPlayFieldSelection->setCurrentCampaignWithIndex(0);
+ d->mPlayFieldSelection->setCurrentPlayFieldWithIndex(0);
  initSpecies();
 
  connect(networkInterface(), SIGNAL(signalStartGameClicked()),
@@ -143,12 +349,7 @@ BoUfoNewGameWidget::~BoUfoNewGameWidget()
     boError() << k_funcinfo << "FIXME: Boson already deleted!" << endl;
  }
  boConfig->saveLocalPlayerColor(mLocalPlayerColor);
- QString playFieldIdentifier;
- if (mSelectMap->selectedItem() >= 0) {
-    if (d->mItem2Map.contains(mSelectMap->selectedItem())) {
-        playFieldIdentifier = d->mItem2Map[mSelectMap->selectedItem()];
-    }
- }
+ QString playFieldIdentifier = d->mPlayFieldSelection->playFieldIdentifier();
  if (!playFieldIdentifier.isEmpty()) {
     boConfig->saveLocalPlayerMap(playFieldIdentifier);
  }
@@ -204,7 +405,7 @@ void BoUfoNewGameWidget::initPlayFields()
  // Add default campaign
  BosonCampaign* defaultCampaign = boData->campaign(QString::fromLatin1(""));
  BO_CHECK_NULL_RET(defaultCampaign);
- initPlayFields(defaultCampaign);
+ d->mPlayFieldSelection->addCampaign(defaultCampaign);
 
  // Add other campaigns
  for (unsigned int i = 0; i < list.count(); i++) {
@@ -213,34 +414,8 @@ void BoUfoNewGameWidget::initPlayFields()
         BO_NULL_ERROR(campaign);
         continue;
     }
-    initPlayFields(campaign);
+    d->mPlayFieldSelection->addCampaign(campaign);
  }
-}
-
-void BoUfoNewGameWidget::initPlayFields(BosonCampaign* campaign)
-{
- boDebug() << k_funcinfo << endl;
- BO_CHECK_NULL_RET(campaign);
- QString campaingPrefix;
- if (campaign->identifier().isEmpty()) {
-    boDebug() << k_funcinfo << "default campaign" << endl;
- } else {
-    boDebug() << k_funcinfo << campaign->identifier() << endl;
-    campaingPrefix = campaign->name() + ": " ;
- }
- QStringList list = campaign->playFields();
- QStringList items = mSelectMap->items();
- for (unsigned int i = 0; i < list.count(); i++) {
-    BosonPlayField* field = boData->playField(list[i]);
-    if (!field) {
-        BO_NULL_ERROR(field);
-        continue;
-    }
-    int index = items.count();
-    items.append(campaingPrefix + field->playFieldName());
-    d->mItem2Map.insert(index, list[i]);
- }
- mSelectMap->setItems(items);
 }
 
 void BoUfoNewGameWidget::initSpecies()
@@ -327,7 +502,7 @@ void BoUfoNewGameWidget::slotNetStart()
     return;
  }
  // Check for map
- if (mSelectMap->selectedItem() < 0) {
+ if (d->mPlayFieldSelection->playFieldIdentifier().isEmpty()) {
     KMessageBox::sorry(0, i18n("No map selected. Select a map first!"));
     return;
  }
@@ -364,17 +539,13 @@ void BoUfoNewGameWidget::slotNetStart()
             }
         }
     }
-    if (mSelectMap->selectedItem() < 0) {
+
+    BosonPlayField* field = 0;
+    QString identifier = d->mPlayFieldSelection->playFieldIdentifier();
+    if (identifier.isNull()) {
         KMessageBox::sorry(0, i18n("You have to select a map first"));
         return;
     }
-
-    BosonPlayField* field = 0;
-    if (!d->mItem2Map.contains(mSelectMap->selectedItem())) {
-        KMessageBox::sorry(0, i18n("The selected item seems not to be a valid map. Please select a different map.\n(if you believe you have selected a valid map, you might have encountered a bug)"));
-        return;
-    }
-    QString identifier = d->mItem2Map[mSelectMap->selectedItem()];
     field = boData->playField(identifier);
 
     if (!field) {
@@ -426,9 +597,9 @@ void BoUfoNewGameWidget::slotNetPlayerJoinedGame(KPlayer* p)
             boGame->slotAddChatSystemMessage("Boson", i18n("%1 joined the game").arg(p->name()));
             if (boGame->isAdmin()) {
                 boDebug() << k_funcinfo << "new client connected - sending current playfield" << endl;
-                int item = mSelectMap->selectedItem();
-                if (item >= 0) {
-                    networkInterface()->sendChangePlayField(d->mItem2Map[item]);
+                QString identifier = d->mPlayFieldSelection->playFieldIdentifier();
+                if (!identifier.isEmpty()) {
+                    networkInterface()->sendChangePlayField(identifier);
                 }
             }
         } else if(!mainPlayer) {
@@ -517,37 +688,16 @@ void BoUfoNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
 {
  BO_CHECK_NULL_RET(field);
  boDebug() << k_funcinfo << "id: " << field->identifier() << endl;
+ d->mPlayFieldSelection->setCurrentPlayFieldWithIdentifier(field->identifier());
+ if (d->mPlayFieldSelection->playFieldIdentifier() != field->identifier()) {
+   boError() << k_funcinfo << "could not set correct playfield " << field->identifier() << endl;
+   field = boData->playField(d->mPlayFieldSelection->playFieldIdentifier());
+   BO_CHECK_NULL_RET(field);
+ }
  if (!field->isPreLoaded()) {
     // well, if that happens - something evil must have happened!
     boWarning() << k_funcinfo << "playfield not yet preloaded?!" << endl;
     field->preLoadPlayField(field->identifier());
- }
- QStringList list = boData->availablePlayFields();
- QMap<int, QString>::Iterator it;
- int item = -1;
- for (it = d->mItem2Map.begin(); it != d->mItem2Map.end() && (item < 0); ++it) {
-    if (it.data() == field->identifier()) {
-        item = it.key();
-        break;
-    }
- }
- if (item < 0) {
-    boError() << k_funcinfo << "Cannot find playfield item for " << field->identifier() << endl;
- } else {
-    if (!boGame->isAdmin()) {
-        // If client isn't admin, it can't select the map, but we still have to
-        //  indicate selected map, so we temporarily set selection mode to single
-        mSelectMap->setSelectionMode(BoUfoListBox::SingleSelection);
-        mSelectMap->blockSignals(true);
-        mSelectMap->unselectAll();
-        mSelectMap->setItemSelected(item, true);
-        mSelectMap->blockSignals(false);
-        mSelectMap->setSelectionMode(BoUfoListBox::NoSelection);
-    } else {
-        mSelectMap->blockSignals(true);
-        mSelectMap->setItemSelected(item, true);
-        mSelectMap->blockSignals(false);
-    }
  }
  mMinPlayers = field->information()->minPlayers();
  mMaxPlayers = field->information()->maxPlayers();
@@ -697,22 +847,20 @@ void BoUfoNewGameWidget::slotPlayFieldSelected(int first, int last)
  // one of these is selected _currently_. better just ignore them.
  Q_UNUSED(first);
  Q_UNUSED(last);
- int selected = mSelectMap->selectedItem();
- slotPlayFieldSelected(selected);
+ d->mPlayFieldSelection->updateCurrentPlayField();
+ QString identifier = d->mPlayFieldSelection->playFieldIdentifier();
+ networkInterface()->sendChangePlayField(identifier);
 }
 
-void BoUfoNewGameWidget::slotPlayFieldSelected(int index)
+void BoUfoNewGameWidget::slotCampaignSelected(int first, int last)
 {
- boDebug() << k_funcinfo << endl;
- if (index < 0) {
-   boError() << k_funcinfo << "index < 0: " << index << endl;
-   return;
- }
- if (!d->mItem2Map.contains(index)) {
-    boWarning() << k_funcinfo << "invalid item index " << index << endl;
-    return;
- }
- networkInterface()->sendChangePlayField(d->mItem2Map[index]);
+ // AB: first and last are barely usable. there is no way to find out _which_
+ // one of these is selected _currently_. better just ignore them.
+ Q_UNUSED(first);
+ Q_UNUSED(last);
+ d->mPlayFieldSelection->updateCurrentPlayField();
+ QString identifier = d->mPlayFieldSelection->playFieldIdentifier();
+ networkInterface()->sendChangePlayField(identifier);
 }
 
 void BoUfoNewGameWidget::slotPlayerSpeciesChanged(int index)
@@ -880,11 +1028,7 @@ void BoUfoNewGameWidget::slotSetAdmin(bool admin)
  boDebug() << k_funcinfo << endl;
  mStartGame->setEnabled(admin);
  mAddAIPlayer->setEnabled(admin);
- if (admin) {
-    mSelectMap->setSelectionMode(BoUfoListBox::SingleSelection);
- } else {
-    mSelectMap->setSelectionMode(BoUfoListBox::NoSelection);
- }
+ d->mPlayFieldSelection->setAdmin(admin);
 }
 
 void BoUfoNewGameWidget::slotOfferingConnections()
