@@ -84,7 +84,7 @@ protected slots: // implementations for the .ui slots
 	// actual action is performed!
 	virtual void slotPlayerNameChanged();
 	virtual void slotPlayFieldSelected(int, int);
-	virtual void slotPlayFieldSelected(int index);
+	virtual void slotCampaignSelected(int, int);
 	virtual void slotPlayerSpeciesChanged(int);
 	virtual void slotAddComputerPlayer();
 	virtual void slotRemovePlayer();
@@ -165,7 +165,6 @@ protected:
 private:
 	void initLocalPlayer();
 	void initPlayFields();
-	void initPlayFields(BosonCampaign*);
 	void initSpecies();
 	void updateColors();
 
