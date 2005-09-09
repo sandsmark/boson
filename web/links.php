@@ -68,7 +68,6 @@ draw_bigbox_text("
   <a href=\"http://www.libsdl.org/\" target=\"_blank\">SDL</a> Probably the most important unix game library<br>
   <a href=\"http://crystal.sourceforge.net/\" target=\"_blank\">Crystal Space</a> Portable 3D Game Development Kit<br>
   <a href=\"http://www.talula.demon.co.uk/allegro/\" target=\"_blank\">Allegro</a> A game programming library for C/C++ developers</br>
-  <a href=\"http://www.flipcode.com/\" target=\"_blank\">Flipcode</a> If you develop games but don't know flipcode you should really learn about it! Many good articles here as well as forums. Beginners should not miss the tutorials!<br>
   <a href=\"http://www.gamasutra.com/\" target=\"_blank\">Gamasutra</a> A LOT of high quality articles related to game programming. Usually you need to search in the archives a while to find what you can use.<br>
   <a href=\"http://www-cs-students.stanford.edu/~amitp/gameprog.html\" target=\"_blank\">Amits Game Programming Information</a> You can find answers to general questions on game programming here, but more important is probably the collection of links on AI and pathfinding.<br>
   <a href=\"http://www.planetquake.com/gg/fmp/fga.html\" target=\"_blank\">Free game arts</a> Collection of textures, models and so on. Not all are free (as in speech)!<br>
