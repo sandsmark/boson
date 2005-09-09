@@ -83,9 +83,13 @@ public:
     if (mIsAdmin) {
        mSelectCampaign->setSelectionMode(BoUfoListBox::SingleSelection);
        mSelectPlayField->setSelectionMode(BoUfoListBox::SingleSelection);
+       mSelectCampaign->setEnabled(true);
+       mSelectPlayField->setEnabled(true);
     } else {
        mSelectCampaign->setSelectionMode(BoUfoListBox::NoSelection);
        mSelectPlayField->setSelectionMode(BoUfoListBox::NoSelection);
+       mSelectCampaign->setEnabled(false);
+       mSelectPlayField->setEnabled(false);
     }
   }
   void updateCurrentPlayField()
