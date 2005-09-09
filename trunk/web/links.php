@@ -61,6 +61,9 @@ draw_bigbox_text("
   <a href=\"http://www.asc-hq.org/\" target=\"_blank\">ASC</a> Turn based strategy game<br>
   <a href=\"http://vegastrike.sourceforge.net/\" target=\"_blank\">Vegastrike</a> Open Source 3D space simulator. Not really related to boson (no RTS or so), but I consider this very important, so...<br>
   <a href=\"http://www.freeciv.org/\" target=\"_blank\">Freeciv</a> Strategy game. Neither real time nor OpenGL, but it is playable and since there aren't so many &quot;big&quot; free games that are playable it is listed here.<br>
+  <a href=\"http://www.glest.org/\" target=\"_blank\">Glest</a> Real time 3D strategy game for windows.<br>
+  <a href=\"http://taspring.clan-sy.com/\" target=\"_blank\">TA: Spring</a> Real time 3D strategy game for windows. A linux port is being worked on.<br>
+  <a href=\"http://www.cs.ualberta.ca/~mburo/orts/orts.html\" target=\"_blank\">ORTS</a> Real time 3D strategy game environment. ORTS is primarily meant for studying real-time AI problems.<br>
   <br>");
 draw_bigbox_subheader("Development");
 draw_bigbox_text("
