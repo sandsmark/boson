@@ -285,7 +285,6 @@ bool BosonPlayField::preLoadAllPlayFields()
  QStringList campaigns = findAvailableCampaigns();
  QStringList::Iterator campaignIt;
  for (campaignIt = campaigns.begin(); campaignIt != campaigns.end(); ++campaignIt) {
-	QString campaignName = *campaignIt;
 	if (BosonData::bosonData()->availableCampaigns().contains(*campaignIt)) {
 		if ((*campaignIt).isEmpty()) {
 			boError() << k_funcinfo << "trying to insert default campaing (random maps) twice!" << endl;
@@ -296,7 +295,11 @@ bool BosonPlayField::preLoadAllPlayFields()
 	}
 	QStringList list = findPlayFieldsOfCampaign(*campaignIt);
 	QStringList::Iterator it;
-	BosonCampaign* campaign = new BosonCampaign(*campaignIt, *campaignIt);
+	QString campaignName = *campaignIt;
+	if ((*campaignIt).isEmpty()) {
+		campaignName = i18n("Boson"); // default campaign
+	}
+	BosonCampaign* campaign = new BosonCampaign(*campaignIt, campaignName);
 	for (it = list.begin(); it != list.end(); ++it) {
 		BosonPlayField* playField = new BosonPlayField();
 		// this will also preload the playfield!
@@ -316,11 +319,7 @@ bool BosonPlayField::preLoadAllPlayFields()
 		campaign->addPlayField(playField);
 	}
 	if (campaign->playFieldCount() == 0) {
-		QString campaignName = *campaignIt;
-		if (campaignName.isEmpty()) {
-			campaignName = QString::fromLatin1("default");
-		}
-		boWarning() << k_funcinfo << "could not load any playfields for campaign " << campaignName << endl;
+		boWarning() << k_funcinfo << "could not load any playfields for campaign " << campaign->name() << endl;
 	}
 	if (!BosonData::bosonData()->insertCampaign(BosonCampaign::campaignDataObject(campaign))) {
 		boWarning() << k_funcinfo << "error on inserting campaign " << *campaignIt << endl;
