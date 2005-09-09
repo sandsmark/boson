@@ -1451,6 +1451,14 @@ void BoUfoMenuBar::createMenuBar()
  d->mMenuBar = new ufo::UMenuBar();
  d->mMenuBar->setFont(d->mUfoManager->rootPane()->getFont());
  d->mUfoManager->rootPane()->setMenuBar(d->mMenuBar);
+ if (d->mMenuBar->getParent()) {
+	// AB: this is a hack.
+	//     if the parent is ever changed in some way in libufo it'll stop
+	//     working.
+	//     actually libufo should make sure that the menubar is always on
+	//     top, but it doesn't, so we ensure this manually here.
+	d->mMenuBar->getParent()->setIndexOf(d->mMenuBar, 0);
+ }
 
  boDebug() << k_funcinfo << "creating submenus" << endl;
  createUfoMenuBarSubMenu(d->mMenuBar);
