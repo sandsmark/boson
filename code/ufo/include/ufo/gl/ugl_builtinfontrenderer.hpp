@@ -42,6 +42,7 @@ class UImageIO;
 
 class UFontPlugin;
 class UPluginBase;
+class UGL_BuiltinFontMetrics;
 
 // damn ms vc6
 struct UBuiltinFontStruct {
