@@ -277,6 +277,33 @@ public:
 		return BoPlane::intersectPlane(*this, plane, intersectionPoint, intersectionVector);
 	}
 
+	/**
+	* This returns the intersection of a line and a plane in @p intersection. Note
+	* that a line always has infinite length - line segments (finite length) are
+	* not handled here.
+	*
+	* This function assumes that an intersection actually exists, as this is what
+	* we need in this file. Checking whether an intersection exists, is pretty
+	* easy.
+	*
+	* @param linePoint Just a point on the line
+	* @param lineVector The line vector, i.e. the direction of the line. This is
+	* returned by @ref planes_intersect or can easily be calculated using (p0-p1)
+	* if p0 and p1 are two different points on the line.
+	**/
+	bool intersectLine(const BoVector3Float& linePoint, const BoVector3Float& lineVector, BoVector3Float* intersection) const;
+	bool intersectLineSegment(const BoVector3Float& linePoint1, const BoVector3Float& linePoint2, BoVector3Float* intersection) const;
+
+protected:
+	/**
+	* @param factor how often the @p lineVector has to be added to @p linePoint to
+	* get the intersection point. If @p factor is between 0 and 1, then the
+	* intersection point is on the line segment that starts at linePoint and ends
+	* with linePoint + lineVector.
+	* @return TRUE if the line intersects with the plane
+	**/
+	bool intersectLineInternal(const BoVector3Float& linePoint, const BoVector3Float& lineVector, float* factor) const;
+
 private:
 	BoVector3Float mNormal;
 	float mDistanceFromOrigin;
