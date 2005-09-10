@@ -135,6 +135,23 @@ BosonMenuInputData::~BosonMenuInputData()
  delete d;
 }
 
+void BosonMenuInputData::setLocalPlayerIO(PlayerIO* io)
+{
+ BO_CHECK_NULL_RET(io);
+ Player* p = io->player();
+ BO_CHECK_NULL_RET(p);
+ int current = d->mEditorPlayers.findRef((KPlayer*)p);
+ if (current < 0) {
+	boError() << k_funcinfo << "cannot find player " << p << " (" << io->playerId() << ") for IO " << io << endl;
+	return;
+ }
+ d->mActionEditorPlayer->blockSignals(true);
+ d->mActionEditorPlayer->setCurrentItem(current);
+ d->mActionEditorPlayer->blockSignals(false);
+
+ d->mActionEditorPlace->setCurrentItem(0);
+}
+
 BoUfoActionCollection* BosonMenuInputData::actionCollection() const
 {
  return d->mActionCollection;
@@ -377,7 +394,7 @@ void BosonMenuInputData::initUfoEditorActions()
 
 
  BoUfoStdAction::fileSaveAs(this, SIGNAL(signalEditorSavePlayFieldAs()), actionCollection(), "file_save_playfield_as");
- BoUfoAction* close = BoUfoStdAction::fileClose(this, SIGNAL(signalEndGame()), actionCollection());
+ BoUfoStdAction::fileClose(this, SIGNAL(signalEndGame()), actionCollection());
 
  // TODO
 // close->setText(i18n("&End Editor"));
@@ -399,7 +416,6 @@ void BosonMenuInputData::initUfoEditorActions()
 
  KShortcut s;
  s.append(KKeySequence(QKeySequence(Qt::Key_Delete)));
-// s.append(KKeySequence(QKeySequence(Qt::Key_D))); // AB: "d" is "scroll right"
  (void)new BoUfoAction(i18n("Delete selected unit"), KShortcut(s), this,
 		SIGNAL(signalEditorDeleteSelectedUnits()), actionCollection(),
 		"editor_delete_selected_unit");
@@ -483,31 +499,15 @@ void BosonMenuInputData::createEditorPlayerMenu()
  BO_CHECK_NULL_RET(boGame);
  BO_CHECK_NULL_RET(d->mActionEditorPlayer);
  QPtrList<KPlayer> players = *boGame->playerList();
- QPtrListIterator<KPlayer> it(players);
  QStringList items;
 
- int current = -1;
- while (it.current()) {
+ d->mEditorPlayers.clear();
+ d->mActionEditorPlayer->clear();
+ for (QPtrListIterator<KPlayer> it(players); it.current(); ++it) {
 	d->mEditorPlayers.append(it.current());
 	items.append(it.current()->name());
-#warning FIXME
-#if 0
-	if (localPlayerIO()) {
-		if (it.current() == (KPlayer*)localPlayerIO()->player()) {
-			current = items.count() - 1;
-		}
-	}
-#endif
-	++it;
  }
  d->mActionEditorPlayer->setItems(items);
-
- if (current >= 0) {
-	d->mActionEditorPlayer->setCurrentItem(current);
-
-	// AB: this causes a recursion
-//	slotEditorChangeLocalPlayer(current);
- }
 }
 
 void BosonMenuInputData::createDebugPlayersMenu()
@@ -739,6 +739,7 @@ void BosonMenuInput::initIO(KPlayer* player)
 
  mData = new BosonMenuInputData(actionCollection());
  mData->initUfoActions(mGameMode);
+ mData->setLocalPlayerIO(mPlayerIO);
 
  connect(mData, SIGNAL(signalScroll(int)),
 		this, SIGNAL(signalScroll(int)));

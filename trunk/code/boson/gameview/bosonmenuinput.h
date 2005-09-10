@@ -39,6 +39,8 @@ public:
 
 	void resetDefaults();
 
+	void setLocalPlayerIO(PlayerIO* io);
+
 signals:
 	void signalScroll(int direction);
 	void signalRotateLeft();
