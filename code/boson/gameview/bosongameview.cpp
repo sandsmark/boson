@@ -1861,10 +1861,6 @@ void BosonGameView::setGameMode(bool mode)
 	}
 
 	BosonMenuInput* io = new BosonMenuInput(mode);
-	io->setCamera(camera());
-	io->setPlayerIO(localPlayerIO());
-	io->setActionCollection(actionCollection());
-	localPlayerIO()->addGameIO(io);
 
 	connect(io, SIGNAL(signalToggleStatusbar(bool)),
 			this, SIGNAL(signalToggleStatusbar(bool)));
@@ -1917,6 +1913,10 @@ void BosonGameView::setGameMode(bool mode)
 	connect(this, SIGNAL(signalEditorHasRedo(const QString&)),
 			io, SLOT(slotEditorHasRedo(const QString&)));
 
+	io->setCamera(camera());
+	io->setPlayerIO(localPlayerIO());
+	io->setActionCollection(actionCollection());
+	localPlayerIO()->addGameIO(io);
  }
 }
 
