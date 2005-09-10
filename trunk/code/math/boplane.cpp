@@ -110,4 +110,60 @@ bool BoPlane::intersectPlane(const BoPlane& plane1, const BoPlane& plane2, BoVec
  return true;
 }
 
+bool BoPlane::intersectLine(const BoVector3Float& linePoint, const BoVector3Float& lineVector, BoVector3Float* intersection) const
+{
+ float factor;
+ if (!intersectLineInternal(linePoint, lineVector, &factor)) {
+	return false;
+ }
+ *intersection = linePoint + lineVector * factor;
+ return true;
+}
+
+bool BoPlane::intersectLineSegment(const BoVector3Float& linePoint1, const BoVector3Float& linePoint2, BoVector3Float* intersection) const
+{
+ float factor;
+ BoVector3Float lineVector = (linePoint2 - linePoint1);
+ if (!intersectLineInternal(linePoint1, lineVector, &factor)) {
+	return false;
+ }
+ if (factor < 0.0f || factor > 1.0f) {
+	return false;
+ }
+ *intersection = linePoint1 + lineVector * factor;
+ return true;
+}
+
+bool BoPlane::intersectLineInternal(const BoVector3Float& linePoint, const BoVector3Float& lineVector, float* factor) const
+{
+ // http://geometryalgorithms.com/Archive/algorithm_0104/algorithm_0104B.htm#intersect3D_SegPlane()
+ // provides a nice explanation of the maths in here
+
+ float NdotLine = BoVector3Float::dotProduct(normal(), lineVector);
+ if (fabsf(NdotLine) <= 0.001) {
+	// intersection still possible, if the line is on the plane.
+	return false;
+ }
+
+ // now we know the line _does_ intersect with the plane (let's call the point p)
+ // the vector from a point on the plane to p is perpendicular to the plane
+ // normal.
+ // That means their dot product is 0.
+ //
+ // i.e. normal * (point_on_plane - p) = 0
+ // "p" can also be written as linePoint + a * lineVector, with a being a
+ // certain real number. this makes:
+ // normal * (point_on_plane - (linePoint + a * lineVector)) = 0
+ // =>
+ // normal * (point_on_plane - linePoint) + a * normal * lineVector = 0
+ // =>
+ // a = (normal * (point_on_plane - linePoint)) / (normal * lineVector)
+
+ float foo = BoVector3Float::dotProduct(normal(), pointOnPlane() - linePoint);
+
+ float a = foo / NdotLine;
+
+ *factor = a;
+ return true;
+}
 
