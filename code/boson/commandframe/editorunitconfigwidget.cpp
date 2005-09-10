@@ -153,7 +153,22 @@ bool EditorUnitConfigWidget::display(Unit* unit)
 	mob = (MobileUnit*)unit;
  }
 
- d->mHealth->setRange(1, unit->maxHealth());
+ // AB: there cases when we _cannot_ set the correct health, due to internal
+ // rounding errors. for example consider maxHealth==3
+ // -> you cannot set health==1 correctly, as this would require
+ //    healthFactor==1/3, which cannot be represented using fixed or float point
+ //    variables (neither single nor double precision).
+ // --> so if healthFactor is _any_ value < 1/3 (even if it is _very_ close to
+ //     1/3) then maxHealth*healthFactor will be 0, not 1. (as casting to
+ //     integer just throughs the digits after the decimal point away)
+ // in most cases this impreciseness is harmless. but health == 0
+ // causes the unit to be unselected and unselectable. so we must avoid that
+ // case.
+ //
+ // we do so by setting a minimum value >= 2.
+ // here we use 10 for cosmetic reasons.
+ d->mHealth->setRange(QMIN(10, unit->maxHealth()), unit->maxHealth());
+
  d->mHealth->setValue(unit->health());
  if (!fac || (fac && fac->constructionSteps() == 0)) {
 	d->mConstructionStep->hide();
