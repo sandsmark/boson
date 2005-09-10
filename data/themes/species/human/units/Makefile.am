@@ -15,6 +15,7 @@ MOBILE_UNITS = \
 	mob_warthog \
 	mob_wolf
 FACILITIES = \
+	fix_airport \
 	fix_airturret \
 	fix_barracks \
 	fix_commandbunker \
