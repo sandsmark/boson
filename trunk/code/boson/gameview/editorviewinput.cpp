@@ -416,6 +416,10 @@ void EditorViewInput::placeUnit(unsigned long int unitType, Player* owner)
 	boError() << k_funcinfo << "owner != localplayer" << endl;
 	return;
  }
+ if (!owner->hasUnitWithType(unitType)) {
+	boError() << k_funcinfo << "player " << owner->bosonId() << " does not have a unit with type " << unitType << endl;
+	return;
+ }
  boDebug() << k_funcinfo << "now placing unit: " << unitType << " for " << localPlayerIO()->playerId() << "==" << localPlayerIO()->name() << endl;
  d->mPlacement.placeUnit(unitType, owner);
 }
@@ -476,6 +480,8 @@ void EditorViewInput::updatePlacementPreviewData()
 	}
 #warning do NOT use Player here! use PlayerIO
 	const UnitProperties* prop = d->mPlacement.owner()->unitProperties(d->mPlacement.unitType());
+
+	BO_CHECK_NULL_RET(prop);
 
 	bool canPlace = canvas()->canPlaceUnitAt(prop, BoVector2Fixed(cursorCanvasVector().x(), cursorCanvasVector().y()), 0);
 	emit signalSetPlacementPreviewData(prop, canPlace, placementFreePlacement(), !placementDisableCollisions());
