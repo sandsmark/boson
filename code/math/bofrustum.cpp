@@ -77,7 +77,7 @@ bofixed BoFrustum::sphereInFrustum(const BoVector3Fixed& pos, bofixed radius) co
  return distance + radius;
 }
 
-int BoFrustum::sphereCompleteInFrustum(const BoVector3Float& pos, float radius) const
+int BoFrustum::sphereCompleteInFrustum(const BoVector3Float& pos, float radius, float* dist) const
 {
  float distance;
  int c = 0;
@@ -90,13 +90,16 @@ int BoFrustum::sphereCompleteInFrustum(const BoVector3Float& pos, float radius) 
 		c++;
 	}
  }
+ if (dist) {
+	*dist = distance + radius;
+ }
  if (c == 6) {
 	return 2;
  }
  return 1;
 }
 
-int BoFrustum::sphereCompleteInFrustum(const BoVector3Fixed& pos, bofixed radius) const
+int BoFrustum::sphereCompleteInFrustum(const BoVector3Fixed& pos, bofixed radius, bofixed* dist) const
 {
  bofixed distance;
  int c = 0;
@@ -108,6 +111,9 @@ int BoFrustum::sphereCompleteInFrustum(const BoVector3Fixed& pos, bofixed radius
 	if (distance > radius) {
 		c++;
 	}
+ }
+ if (dist) {
+	*dist = distance + radius;
  }
  if (c == 6) {
 	return 2;
