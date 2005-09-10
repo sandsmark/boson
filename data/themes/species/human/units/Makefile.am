@@ -15,17 +15,19 @@ MOBILE_UNITS = \
 	mob_warthog \
 	mob_wolf
 FACILITIES = \
+	fix_airturret \
+	fix_barracks \
 	fix_commandbunker \
 	fix_comsat \
 	fix_helipad \
 	fix_mineralrefinery \
 	fix_oilrefinery \
 	fix_powerplant \
+	fix_prison \
 	fix_repairpad \
 	fix_samsite \
 	fix_techcenter \
 	fix_turret \
-	fix_airturret \
 	fix_weaponsfactory
 
 unitsdir = $(kde_datadir)/boson/themes/species/human/units
