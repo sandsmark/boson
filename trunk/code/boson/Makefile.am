@@ -198,8 +198,10 @@ bounit_LDADD = \
 		$(LIB_XRANDR) \
 		$(LIB_BOMEMORY)
 bounit_SOURCES = \
-		bounitmain.cpp bosonsearchpathswidget.ui \
-		bouniteditor.ui
+		bounitmain.cpp \
+		bosonsearchpathswidget.ui \
+		bouniteditorbase.ui \
+		bouniteditor.cpp
 
 libbocursor_la_SOURCES = \
 		boapplication.cpp \
