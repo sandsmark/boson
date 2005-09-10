@@ -37,6 +37,7 @@
 #include "../pluginproperties.h"
 #include "../unit.h"
 #include "../unitplugins.h"
+#include "../speciestheme.h"
 #include "../cell.h"
 #include "bodebug.h"
 #include "../boaction.h"
@@ -412,11 +413,13 @@ void EditorViewInput::placeUnit(unsigned long int unitType, Player* owner)
 	boError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
+ BO_CHECK_NULL_RET(localPlayerIO());
  if (owner != localPlayerIO()->player()) {
 	boError() << k_funcinfo << "owner != localplayer" << endl;
 	return;
  }
- if (!owner->hasUnitWithType(unitType)) {
+ BO_CHECK_NULL_RET(localPlayerIO()->speciesTheme());
+ if (!localPlayerIO()->speciesTheme()->hasUnitProperties(unitType)) {
 	boError() << k_funcinfo << "player " << owner->bosonId() << " does not have a unit with type " << unitType << endl;
 	return;
  }
