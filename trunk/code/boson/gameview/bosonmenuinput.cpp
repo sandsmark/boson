@@ -140,16 +140,18 @@ void BosonMenuInputData::setLocalPlayerIO(PlayerIO* io)
  BO_CHECK_NULL_RET(io);
  Player* p = io->player();
  BO_CHECK_NULL_RET(p);
- int current = d->mEditorPlayers.findRef((KPlayer*)p);
- if (current < 0) {
-	boError() << k_funcinfo << "cannot find player " << p << " (" << io->playerId() << ") for IO " << io << endl;
-	return;
- }
- d->mActionEditorPlayer->blockSignals(true);
- d->mActionEditorPlayer->setCurrentItem(current);
- d->mActionEditorPlayer->blockSignals(false);
+ if (d->mActionEditorPlayer) { // editor mode
+	int current = d->mEditorPlayers.findRef((KPlayer*)p);
+	if (current < 0) {
+		boError() << k_funcinfo << "cannot find player " << p << " (" << io->playerId() << ") for IO " << io << endl;
+		return;
+	}
+	d->mActionEditorPlayer->blockSignals(true);
+	d->mActionEditorPlayer->setCurrentItem(current);
+	d->mActionEditorPlayer->blockSignals(false);
 
- d->mActionEditorPlace->setCurrentItem(0);
+	d->mActionEditorPlace->setCurrentItem(0);
+ }
 }
 
 BoUfoActionCollection* BosonMenuInputData::actionCollection() const
@@ -671,15 +673,6 @@ void BosonMenuInputData::slotEditorChangeLocalPlayer(int index)
 	// AB: returning here is important: the signal causes the menu input to
 	// be deleted!
 	return;
-
-	// FIXME: when changing the player, we should select the previous
-	// "place" item again.
-#if 0
-	BO_CHECK_NULL_RET(d->mActionEditorPlace);
-	if (d->mActionEditorPlace->currentItem() >= 0) {
-		slotEditorPlace(d->mActionEditorPlace->currentItem());
-	}
-#endif
  } else {
 	boWarning() << k_funcinfo << "NULL player for index " << index << endl;
  }
@@ -738,8 +731,6 @@ void BosonMenuInput::initIO(KPlayer* player)
  BO_CHECK_NULL_RET(actionCollection());
 
  mData = new BosonMenuInputData(actionCollection());
- mData->initUfoActions(mGameMode);
- mData->setLocalPlayerIO(mPlayerIO);
 
  connect(mData, SIGNAL(signalScroll(int)),
 		this, SIGNAL(signalScroll(int)));
@@ -840,6 +831,8 @@ void BosonMenuInput::initIO(KPlayer* player)
  connect(mData, SIGNAL(signalEditorRedo()),
 		this, SIGNAL(signalEditorRedo()));
 
+ mData->initUfoActions(mGameMode);
+ mData->setLocalPlayerIO(mPlayerIO);
 }
 
 
