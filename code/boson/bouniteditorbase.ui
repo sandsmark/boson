@@ -1,16 +1,16 @@
-<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
-<class>BoUnitEditor</class>
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>BoUnitEditorBase</class>
 <comment>Editor widget for editing Boson units</comment>
 <author>Rivo Laks &lt;rivolaks@hot.ee&gt;</author>
 <widget class="QWidget">
     <property name="name">
-        <cstring>BoUnitEditor</cstring>
+        <cstring>BoUnitEditorBase</cstring>
     </property>
     <property name="geometry">
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>882</width>
+            <width>998</width>
             <height>622</height>
         </rect>
     </property>
@@ -3599,13 +3599,13 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
     <connection>
         <sender>mUnitTypeFacility</sender>
         <signal>stateChanged(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotTypeChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitTypeMobile</sender>
         <signal>stateChanged(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotTypeChanged()</slot>
     </connection>
     <connection>
@@ -3623,73 +3623,73 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
     <connection>
         <sender>mUnitsList</sender>
         <signal>highlighted(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotUnitSelected(int)</slot>
     </connection>
     <connection>
         <sender>mUnitTextureAdd</sender>
         <signal>clicked()</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotAddTexture()</slot>
     </connection>
     <connection>
         <sender>mUnitTextureRemove</sender>
         <signal>clicked()</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotRemoveTexture()</slot>
     </connection>
     <connection>
         <sender>mUnitIdAutoPick</sender>
         <signal>clicked()</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotAutoPickId()</slot>
     </connection>
     <connection>
         <sender>mUnitTexturesList</sender>
         <signal>selectionChanged()</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotCurrentTextureChanged()</slot>
     </connection>
     <connection>
         <sender>mWeaponsList</sender>
         <signal>highlighted(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotWeaponSelected(int)</slot>
     </connection>
     <connection>
         <sender>mWeaponsAdd</sender>
         <signal>clicked()</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotAddWeapon()</slot>
     </connection>
     <connection>
         <sender>mWeaponsRemove</sender>
         <signal>clicked()</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotRemoveWeapon()</slot>
     </connection>
     <connection>
         <sender>mSearchPathsButton</sender>
         <signal>clicked()</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotEditSearchPaths()</slot>
     </connection>
     <connection>
         <sender>mNewUnitButton</sender>
         <signal>clicked()</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotNewUnit()</slot>
     </connection>
     <connection>
         <sender>mOpenUnitButton</sender>
         <signal>clicked()</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotOpenUnit()</slot>
     </connection>
     <connection>
         <sender>mUnitSaveButton</sender>
         <signal>clicked()</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotSaveUnit()</slot>
     </connection>
     <connection>
@@ -3701,379 +3701,379 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
     <connection>
         <sender>mUnitTypeMobile</sender>
         <signal>toggled(bool)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitTypeFacility</sender>
         <signal>toggled(bool)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitName</sender>
         <signal>textChanged(const QString&amp;)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitId</sender>
         <signal>valueChanged(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitWidth</sender>
         <signal>valueChanged(double)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitHeight</sender>
         <signal>valueChanged(double)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitDepth</sender>
         <signal>valueChanged(double)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitHealth</sender>
         <signal>valueChanged(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitArmor</sender>
         <signal>valueChanged(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitShields</sender>
         <signal>valueChanged(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitMineralCost</sender>
         <signal>valueChanged(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitOilCost</sender>
         <signal>valueChanged(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitSight</sender>
         <signal>valueChanged(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitTerrain</sender>
         <signal>activated(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitSupportMiniMap</sender>
         <signal>toggled(bool)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitSpeed</sender>
         <signal>valueChanged(double)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitCanGoOnLand</sender>
         <signal>toggled(bool)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitCanGoOnWater</sender>
         <signal>toggled(bool)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitConstructionSteps</sender>
         <signal>valueChanged(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mWeaponName</sender>
         <signal>textChanged(const QString&amp;)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mWeaponDamage</sender>
         <signal>valueChanged(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mWeaponDamageRange</sender>
         <signal>valueChanged(double)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mWeaponReload</sender>
         <signal>valueChanged(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mWeaponRange</sender>
         <signal>valueChanged(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mWeaponSpeed</sender>
         <signal>valueChanged(double)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mWeaponCanShootAtAirUnits</sender>
         <signal>toggled(bool)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mWeaponCanShootAtLandUnits</sender>
         <signal>toggled(bool)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mWeaponModel</sender>
         <signal>textChanged(const QString&amp;)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mWeaponOffsetX</sender>
         <signal>valueChanged(double)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mWeaponOffsetY</sender>
         <signal>valueChanged(double)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mWeaponOffsetZ</sender>
         <signal>valueChanged(double)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mWeaponHeight</sender>
         <signal>valueChanged(double)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mWeaponShootEffects</sender>
         <signal>textChanged(const QString&amp;)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mWeaponFlyEffects</sender>
         <signal>textChanged(const QString&amp;)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mWeaponHitEffects</sender>
         <signal>textChanged(const QString&amp;)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitCanProduce</sender>
         <signal>toggled(bool)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitProducerList</sender>
         <signal>textChanged(const QString&amp;)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitCanHarvest</sender>
         <signal>toggled(bool)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitHarvestMinerals</sender>
         <signal>toggled(bool)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitHarvestOil</sender>
         <signal>toggled(bool)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitMaxResource</sender>
         <signal>valueChanged(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitMiningSpeed</sender>
         <signal>valueChanged(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitUnloadingSpeed</sender>
         <signal>valueChanged(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitCanRefine</sender>
         <signal>toggled(bool)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitRefineMinerals</sender>
         <signal>toggled(bool)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitRefineOil</sender>
         <signal>toggled(bool)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitCanRepair</sender>
         <signal>toggled(bool)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitProductionTime</sender>
         <signal>valueChanged(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitProducer</sender>
         <signal>valueChanged(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitRequirements</sender>
         <signal>textChanged(const QString&amp;)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitSoundOrderMove</sender>
         <signal>textChanged(const QString&amp;)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitSoundOrderAttack</sender>
         <signal>textChanged(const QString&amp;)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitSoundOrderSelect</sender>
         <signal>textChanged(const QString&amp;)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitSoundReportProduced</sender>
         <signal>textChanged(const QString&amp;)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitSoundReportDestroyed</sender>
         <signal>textChanged(const QString&amp;)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitSoundReportUnderAttack</sender>
         <signal>textChanged(const QString&amp;)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitConstructedEffects</sender>
         <signal>textChanged(const QString&amp;)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitDestroyedEffects</sender>
         <signal>textChanged(const QString&amp;)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitExplodingDamageRange</sender>
         <signal>valueChanged(double)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitExplodingDamage</sender>
         <signal>valueChanged(int)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitHitPointX</sender>
         <signal>valueChanged(double)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitHitPointY</sender>
         <signal>valueChanged(double)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
         <sender>mUnitHitPointZ</sender>
         <signal>valueChanged(double)</signal>
-        <receiver>BoUnitEditor</receiver>
+        <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
 </connections>
@@ -4082,51 +4082,29 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
     <include location="global" impldecl="in implementation">qvaluelist.h</include>
     <include location="global" impldecl="in implementation">qmap.h</include>
     <include location="local" impldecl="in implementation">bosonsearchpathswidget.h</include>
-    <include location="local" impldecl="in implementation">bouniteditor.ui.h</include>
 </includes>
 <forwards>
     <forward>class BosonWeaponProperties;</forward>
     <forward>class BosonSearchPathsWidget;</forward>
     <forward>class UnitProperties;</forward>
 </forwards>
-<variables>
-    <variable>bool mUnitLoaded;</variable>
-    <variable>int mCurrentWeapon;</variable>
-    <variable>QValueList&lt;int&gt; mUsedIds;</variable>
-    <variable>BosonSearchPathsWidget* mSearchPaths;</variable>
-    <variable>QMap&lt;int, QString&gt; mUnits;</variable>
-    <variable>UnitProperties* mUnit;</variable>
-    <variable>QPtrList&lt;BosonWeaponProperties&gt; mWeapons;</variable>
-    <variable>bool mConfigChanged;</variable>
-</variables>
 <slots>
-    <slot>slotTypeChanged()</slot>
-    <slot>slotUnitSelected( int index )</slot>
-    <slot>slotAddTexture()</slot>
-    <slot>slotRemoveTexture()</slot>
-    <slot>slotCurrentTextureChanged()</slot>
-    <slot>slotAutoPickId()</slot>
-    <slot>slotSaveUnit()</slot>
-    <slot>slotNewUnit()</slot>
-    <slot returnType="QStringList">verifyProperties()</slot>
-    <slot>slotLoadUnit( QString dir )</slot>
-    <slot>slotEditSearchPaths()</slot>
+    <slot specifier="pure virtual">slotTypeChanged()</slot>
+    <slot specifier="pure virtual">slotUnitSelected( int index )</slot>
+    <slot specifier="pure virtual">slotAddTexture()</slot>
+    <slot specifier="pure virtual">slotRemoveTexture()</slot>
+    <slot specifier="pure virtual">slotCurrentTextureChanged()</slot>
+    <slot specifier="pure virtual">slotAutoPickId()</slot>
+    <slot specifier="pure virtual">slotSaveUnit()</slot>
+    <slot specifier="pure virtual">slotNewUnit()</slot>
+    <slot specifier="pure virtual">slotEditSearchPaths()</slot>
     <slot>init()</slot>
-    <slot>slotHideSearchPaths()</slot>
-    <slot>loadUnitsList()</slot>
     <slot>destroy()</slot>
-    <slot>slotOpenUnit()</slot>
-    <slot>slotCanHarvestChanged()</slot>
-    <slot>slotCanProduceChanged()</slot>
-    <slot>slotUpdateUnitProperties()</slot>
-    <slot>slotUpdateWidgets()</slot>
-    <slot>slotUpdateWeaponProps()</slot>
-    <slot>slotAddWeapon()</slot>
-    <slot>slotWeaponSelected( int index )</slot>
-    <slot>slotRemoveWeapon()</slot>
-    <slot>slotUpdateWeaponWidgets()</slot>
-    <slot>slotConfigChanged()</slot>
-    <slot>updateConfigWidgets()</slot>
+    <slot specifier="pure virtual">slotOpenUnit()</slot>
+    <slot specifier="pure virtual">slotAddWeapon()</slot>
+    <slot specifier="pure virtual">slotWeaponSelected( int index )</slot>
+    <slot specifier="pure virtual">slotRemoveWeapon()</slot>
+    <slot specifier="pure virtual">slotConfigChanged()</slot>
 </slots>
 <layoutdefaults spacing="6" margin="11"/>
 <includehints>
