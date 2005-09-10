@@ -97,6 +97,15 @@ BoLight* BoLightManager::light(int id)
   return 0;
 }
 
+BoLight* BoLightManager::activeLight(int openglid)
+{
+  if(openglid < 0 || openglid >= (int)mActiveLights->count())
+  {
+    return 0;
+  }
+  return mActiveLights->at(openglid);
+}
+
 BoLight* BoLightManager::createLight()
 {
   BoLight* light = new BoLight(mNextLightId++);

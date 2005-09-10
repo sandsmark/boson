@@ -27,6 +27,8 @@ template<class T> class QValueVector;
 template<class T> class QValueList;
 class BoLight;
 
+#define boLightManager BoLightManager::manager()
+
 /**
  *
  **/
@@ -43,6 +45,7 @@ class BoLightManager
     BoLight* createLight();
     void deleteLight(int id);
     BoLight* light(int id);
+    BoLight* activeLight(int openglid);
 
     int activeLights() const;
 
