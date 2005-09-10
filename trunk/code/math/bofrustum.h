@@ -76,11 +76,13 @@ public:
 	 * This is similar to @ref sphereInFrustum, but will test whether the sphere
 	 * is completely in the frustum.
 	 *
+	 * @param dist if non-null, distance between object and near plane
+	 *
 	 * @return 0 if the sphere is not in the frustum at all, 1 if it is
 	 * partially in the frustum and 2 if the complete sphere is in the frustum.
 	 **/
-	int sphereCompleteInFrustum(const BoVector3Float&, float radius) const;
-	int sphereCompleteInFrustum(const BoVector3Fixed&, bofixed radius) const;
+	int sphereCompleteInFrustum(const BoVector3Float&, float radius, float* dist = 0) const;
+	int sphereCompleteInFrustum(const BoVector3Fixed&, bofixed radius, bofixed* dist = 0) const;
 
 	/**
 	 * @overload
