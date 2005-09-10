@@ -756,6 +756,16 @@ template<class T> class BoVector4
     {
       return BoVector4<T>(mData[0] - v.mData[0], mData[1] - v.mData[1], mData[2] - v.mData[2], mData[3] - v.mData[3]);
     }
+
+    inline BoVector4<T> operator/(float f) const
+    {
+      return BoVector4<T>(mData[0] / f, mData[1] / f, mData[2] / f, mData[3] / f);
+    }
+    inline BoVector4<T> operator*(float f) const
+    {
+      return BoVector4<T>(mData[0] * f, mData[1] * f, mData[2] * f, mData[3] * f);
+    }
+
     /**
      * @return The component / coordinate at @p i of this vector
      **/
