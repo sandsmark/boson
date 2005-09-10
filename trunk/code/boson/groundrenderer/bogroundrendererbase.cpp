@@ -892,3 +892,10 @@ BoColorMapRenderer* BoGroundRendererBase::getUpdatedColorMapRenderer(BoColorMap*
  return r;
 }
 
+void BoGroundRendererBase::cellHeightChanged(int, int, int, int)
+{
+#if FIX_EDGES
+ mCellListBuilder->copyHeightMap(mHeightMap2, mCurrentMap);
+#endif
+}
+

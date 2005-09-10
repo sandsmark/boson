@@ -118,6 +118,7 @@ public:
 	virtual void generateCellList(const BosonMap* map);
 
 	virtual void cellFogChanged(int x1, int y1, int x2, int y2);
+	virtual void cellHeightChanged(int x1, int y1, int x2, int y2);
 
 	virtual QString debugStringForPoint(const BoVector3Fixed& pos) const;
 
