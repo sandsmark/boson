@@ -1032,6 +1032,10 @@ void BosonCanvas::addToCells(BosonItem* item)
 
 bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const BoVector2Fixed& pos, ProductionPlugin* factory) const
 {
+ if (!prop) {
+	BO_NULL_ERROR(prop);
+	return false;
+ }
  bofixed width = prop->unitWidth();
  bofixed height = prop->unitHeight();
  if (width <= 0) {
