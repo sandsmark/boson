@@ -29,8 +29,6 @@
 class SpeciesTheme;
 class PluginProperties;
 class BosonWeaponProperties;
-class QCString;
-class QString;
 template<class T> class QValueList;
 template<class T> class QPtrList;
 template<class T> class QIntDict;
@@ -143,16 +141,6 @@ public:
 	 * and should be an absolute path.
 	 **/
 	bool loadUnitType(const QString& fileName, bool fullmode = true);
-
-	/**
-	 * Save UnitProperties to the file. This sets all values of UnitProperties. All values are
-	 * readOnly, as UnitProperties is meant to change never.
-	 *
-	 * The file should contain units/your_unit_dir/index.desktop at the end
-	 * and should be an absolute path.
-	 **/
-	bool saveUnitType(const QString& fileName);
-
 
 	/**
 	 * @return The @ref SpeciesTheme this property belongs to.
@@ -493,46 +481,6 @@ protected:
 	bool loadSoundNames(KSimpleConfig* conf);
 	bool loadWeapons(KSimpleConfig* conf);
 
-	bool saveMobileProperties(KSimpleConfig* conf);
-	bool saveFacilityProperties(KSimpleConfig* conf);
-	bool saveAllPluginProperties(KSimpleConfig* conf);
-	bool saveTextureNames(KSimpleConfig* conf);
-	bool saveSoundNames(KSimpleConfig* conf);
-
-	// Methods to set values. They are only meant to be used by unit
-	//  editor. Don't use them unless you know what you are doing
-	void setName(const QString& name);
-	void setTypeId(unsigned long int id)  { mTypeId = id; }
-	void setIsFacility(bool f) { mIsFacility = f; }
-	void setUnitWidth(bofixed unitWidth)  { mUnitWidth = unitWidth; }
-	void setUnitHeight(bofixed unitHeight)  { mUnitHeight = unitHeight; }
-	void setUnitDepth(bofixed unitDepth)  { mUnitDepth = unitDepth; }
-
-	void setProducer(unsigned int producer)  { mProducer = producer; }
-	void setTerrainType(TerrainType terrain)  { mTerrain = terrain; }
-	void setSupportMiniMap(bool supportMiniMap)  { mSupportMiniMap = supportMiniMap; }
-	void setRequirements(QValueList<unsigned long int> requirements);
-	void setDestroyedEffectIds(QValueList<unsigned long int> ids);
-	void setConstructedEffectIds(QValueList<unsigned long int> ids);
-	void setExplodingDamageRange(bofixed range)  { mExplodingDamageRange = range; }
-	void setExplodingDamage(long int damage)  { mExplodingDamage = damage; }
-	void setHitPoint(const BoVector3Fixed& hitpoint);
-	void setRemoveWreckageImmediately(bool remove)  { mRemoveWreckageImmediately = remove; }
-
-	// These only have effect if there is mobile or facility properties
-	void setConstructionSteps(unsigned int steps);
-	void setRotationSpeed(int speed);
-	void setCanGoOnLand(bool c);
-	void setCanGoOnWater(bool c);
-
-	void clearPlugins(bool deleteweapons = true);
-
-	void reset();
-
-	void addPlugin(PluginProperties* prop);
-	void addTextureMapping(QString shortname, QString longname);
-	void addSound(int event, QString filename);
-
 	TerrainType terrainType() const  { return mTerrain; }
 
 	friend class BoUnitEditor;
@@ -540,11 +488,11 @@ protected:
 private:
 	void init();
 
-private:
+protected:
 	class MobileProperties;
 	class FacilityProperties;
 
-private:
+protected:
 	UnitPropertiesPrivate* d;
 	SpeciesTheme* mTheme;
 	bool mFullMode;
