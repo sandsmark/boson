@@ -96,6 +96,48 @@ private:
 	BoUnitEditor* mEditor;
 };
 
+class BoMappingPageHandler : public QObject
+{
+	Q_OBJECT
+public:
+	BoMappingPageHandler(BoUnitEditor* parent);
+
+	void updateUnitProperties();
+	void updateWidget();
+
+public slots:
+	void slotAddTexture();
+	void slotRemoveTexture();
+	void slotCurrentTextureChanged();
+
+private:
+	BoUnitEditor* mEditor;
+};
+
+class BoWeaponPageHandler : public QObject
+{
+	Q_OBJECT
+public:
+	BoWeaponPageHandler(BoUnitEditor* parent);
+
+	void updateUnitProperties();
+	void updateWidget();
+
+	void updateWeaponProperties();
+	void updateWeaponWidgets();
+
+public slots:
+	void slotAddWeapon();
+	void slotWeaponSelected( int index );
+	void slotRemoveWeapon();
+
+private:
+	BoUnitEditor* mEditor;
+	int mCurrentWeapon;
+	QPtrList<BosonWeaponPropertiesEditor> mWeapons;
+};
+
+
 class BoUnitEditor : public BoUnitEditorBase
 {
 	Q_OBJECT
@@ -139,16 +181,18 @@ protected:
 
 protected:
 	bool mUnitLoaded;
-	int mCurrentWeapon;
 	QValueList<int> mUsedIds;
 	BosonSearchPathsWidget* mSearchPaths;
 	QMap<int, QString> mUnits;
 	EditorUnitProperties* mUnit;
-	QPtrList<BosonWeaponProperties> mWeapons;
 	bool mConfigChanged;
 
 	friend class BoProducerPageHandler;
+	friend class BoMappingPageHandler;
+	friend class BoWeaponPageHandler;
 	BoProducerPageHandler* mProducerPageHandler;
+	BoMappingPageHandler* mMappingPageHandler;
+	BoWeaponPageHandler* mWeaponPageHandler;
 
 private:
 	void init();

@@ -51,6 +51,7 @@ BosonWeaponProperties::BosonWeaponProperties(const UnitProperties* prop, unsigne
     mSpeed(          this, QString("Weapon_%1:Speed").arg(id-1), "MaxValue")
 {
   mId = id;
+  mEditorObject = 0;
 
   if(id < 1)
   {
@@ -60,6 +61,12 @@ BosonWeaponProperties::BosonWeaponProperties(const UnitProperties* prop, unsigne
 
 BosonWeaponProperties::~BosonWeaponProperties()
 {
+}
+
+void BosonWeaponProperties::setEditorObject(BosonWeaponPropertiesEditor* e)
+{
+  delete mEditorObject;
+  mEditorObject = e;
 }
 
 QString BosonWeaponProperties::name() const
@@ -429,11 +436,6 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, const BosonWeapon* wea
   return s;
 }
 
-void BosonWeaponProperties::setSound(int event, QString filename)
-{
-  mSounds.insert(event, filename);
-}
-
 QString BosonWeaponProperties::sound(int soundEvent) const
 {
   return mSounds[soundEvent];
@@ -456,6 +458,11 @@ void BosonWeaponProperties::loadAction(UnitAction type, KSimpleConfig* cfg, cons
     return;
   }
   mActionStrings.insert(type, cfg->readEntry(key, key));
+}
+
+void BosonWeaponPropertiesEditor::setSound(int event, const QString& filename)
+{
+  mProperties->mSounds.insert(event, filename);
 }
 
 

@@ -354,11 +354,12 @@ BoUnitEditor::~BoUnitEditor()
 void BoUnitEditor::init()
 {
  mProducerPageHandler = new BoProducerPageHandler(this);
+ mMappingPageHandler = new BoMappingPageHandler(this);
+ mWeaponPageHandler = new BoWeaponPageHandler(this);
 
  mUnitLoaded = false; // Bad hack
  mUnit = new EditorUnitProperties(0, false);
  mSearchPaths = new BosonSearchPathsWidget;
- mCurrentWeapon = -1;
  connect(mSearchPaths->mOkButton, SIGNAL(clicked()), this, SLOT(slotHideSearchPaths()));
  mSearchPaths->hide();
  // Load search paths
@@ -424,27 +425,17 @@ void BoUnitEditor::slotUnitSelected( int index)
 
 void BoUnitEditor::slotAddTexture()
 {
- if(mUnitTextureFrom->text().isEmpty() || mUnitTextureTo->text().isEmpty()) {
-	return;
- }
- (void)new QListViewItem(mUnitTexturesList, mUnitTextureFrom->text(),
-		mUnitTextureTo->text());
- mUnitTextureFrom->clear();
- mUnitTextureTo->clear();
- mConfigChanged = true;
- updateConfigWidgets();
+ mMappingPageHandler->slotAddTexture();
 }
 
 void BoUnitEditor::slotRemoveTexture()
 {
- delete mUnitTexturesList->currentItem();
- mConfigChanged = true;
- updateConfigWidgets();
+ mMappingPageHandler->slotRemoveTexture();
 }
 
 void BoUnitEditor::slotCurrentTextureChanged()
 {
- mUnitTextureRemove->setEnabled(mUnitTexturesList->currentItem() != 0);
+ mMappingPageHandler->slotCurrentTextureChanged();
 }
 
 void BoUnitEditor::slotAutoPickId()
@@ -678,14 +669,10 @@ void BoUnitEditor::updateUnitProperties()
  mUnit->insertULongBaseValue(mUnitSight->value(), "SightRange");
  mUnit->setTerrainType((UnitProperties::TerrainType)(mUnitTerrain->currentItem()));
  mUnit->setSupportMiniMap(mUnitSupportMiniMap->isChecked());
+
  // Weapons page
- // Sync current weapon first
- updateWeaponProperties();
- QPtrListIterator<BosonWeaponProperties> it(mWeapons);
- while(it.current() != 0) {
-	mUnit->addPlugin(it.current());
-	++it;
- }
+ mWeaponPageHandler->updateUnitProperties();
+
  // Plugins page
  if(mUnitCanProduce->isChecked()) {
 	ProductionProperties* p = new ProductionProperties(mUnit);
@@ -712,23 +699,8 @@ void BoUnitEditor::updateUnitProperties()
 	mUnit->addPlugin(p);
  }
 
- // Producing page
  mProducerPageHandler->updateUnitProperties();
-
- // Mapping page
- if(mUnitTexturesList->childCount() > 0) {
-	QListViewItemIterator it(mUnitTexturesList);
-	QStringList textures;
-	for (; it.current(); ++it) {
-		mUnit->addTextureMapping(it.current()->text(0), it.current()->text(1));
-	}
- }
- mUnit->addSound(SoundOrderMove, mUnitSoundOrderMove->text());
- mUnit->addSound(SoundOrderAttack, mUnitSoundOrderAttack->text());
- mUnit->addSound(SoundOrderSelect, mUnitSoundOrderSelect->text());
- mUnit->addSound(SoundReportProduced, mUnitSoundReportProduced->text());
- mUnit->addSound(SoundReportDestroyed, mUnitSoundReportDestroyed->text());
- mUnit->addSound(SoundReportUnderAttack, mUnitSoundReportUnderAttack->text());
+ mMappingPageHandler->updateUnitProperties();
 
  // Other page
  mUnit->setDestroyedEffectIds(stringToList(mUnitDestroyedEffects->text()));
@@ -752,6 +724,7 @@ void BoUnitEditor::updateWidgets()
  mUnitWidth->setValue(mUnit->unitWidth());
  mUnitHeight->setValue(mUnit->unitHeight());
  mUnitDepth->setValue(mUnit->unitDepth());
+
  // Properties page
  mUnitHealth->setValue(mUnit->ulongBaseValue("Health"));
  mUnitArmor->setValue(mUnit->ulongBaseValue("Armor"));
@@ -769,22 +742,10 @@ void BoUnitEditor::updateWidgets()
  mUnitCanGoOnLand->setChecked(mUnit->canGoOnLand());
  mUnitCanGoOnWater->setChecked(mUnit->canGoOnWater());
  mUnitConstructionSteps->setValue(mUnit->constructionSteps());
+
  // Weapons
- mWeapons.clear();
- mWeaponsList->clear();
- int weaponcounter = 0;
- mWeaponGroup->setEnabled(false);
- mCurrentWeapon = -1;
- QPtrListIterator<PluginProperties> it(*(mUnit->plugins()));
- while(it.current()) {
-	if(it.current()->pluginType() == PluginProperties::Weapon) {
-		BosonWeaponProperties* w = (BosonWeaponProperties*)(it.current());
-		mWeapons.insert(weaponcounter, w);
-		mWeaponsList->insertItem(w->weaponName(), weaponcounter);
-		weaponcounter++;
-	}
-	++it;
- }
+ mWeaponPageHandler->updateWidget();
+
  // Plugins page
  const ProductionProperties* productionProp = (ProductionProperties*)(mUnit->properties(PluginProperties::Production));
  bool canProduce = (productionProp != 0l);
@@ -815,22 +776,9 @@ void BoUnitEditor::updateWidgets()
  bool canRepair = (mUnit->properties(PluginProperties::Repair) != 0l);
  mUnitCanRepair->setChecked(canRepair);
 
- // Producing page
  mProducerPageHandler->updateWidget();
+ mMappingPageHandler->updateWidget();
 
- // Mapping page
- mUnitTexturesList->clear();
- QMap<QString, QString> textures = mUnit->longTextureNames();
- QMap<QString, QString>::Iterator tit;
- for(tit = textures.begin(); tit != textures.end(); ++tit) {
-	(void)new QListViewItem(mUnitTexturesList, tit.key(), tit.data());
- }
- mUnitSoundOrderMove->setText(mUnit->sound(SoundOrderMove));
- mUnitSoundOrderAttack->setText(mUnit->sound(SoundOrderAttack));
- mUnitSoundOrderSelect->setText(mUnit->sound(SoundOrderSelect));
- mUnitSoundReportProduced->setText(mUnit->sound(SoundReportProduced));
- mUnitSoundReportDestroyed->setText(mUnit->sound(SoundReportDestroyed));
- mUnitSoundReportUnderAttack->setText(mUnit->sound(SoundReportUnderAttack));
  // Other page
  mUnitDestroyedEffects->setText(listToString(mUnit->destroyedEffectIds()));
  mUnitConstructedEffects->setText(listToString(mUnit->constructedEffectIds()));
@@ -842,106 +790,21 @@ void BoUnitEditor::updateWidgets()
  mUnitHitPointZ->setValue(hitpoint.z());
 }
 
-void BoUnitEditor::updateWeaponProperties()
-{
- if(mCurrentWeapon == -1) {
-	return;
- }
- BosonWeaponProperties* w = mWeapons.at(mCurrentWeapon);
- w->setWeaponName(mWeaponName->text());
- w->insertLongWeaponBaseValue(mWeaponDamage->value(), "Damage");
- w->insertBoFixedWeaponBaseValue(mWeaponDamageRange->value(), "DamageRange");
- w->insertBoFixedWeaponBaseValue(mWeaponFullDamageRange->value(), "FullDamageRange");
- w->insertULongWeaponBaseValue(mWeaponReload->value(), "Reload");
- w->insertULongWeaponBaseValue(mWeaponRange->value(), "Range");
- w->insertBoFixedWeaponBaseValue(mWeaponSpeed->value(), "Speed");
- w->setCanShootAtAirUnits(mWeaponCanShootAtAirUnits->isChecked());
- w->setCanShootAtLandUnits(mWeaponCanShootAtLandUnits->isChecked());
- w->setModelFileName(mWeaponModel->text());
- w->setHeight(mWeaponHeight->value());
- BoVector3Fixed offset(mWeaponOffsetX->value(), mWeaponOffsetY->value(), mWeaponOffsetZ->value());
- w->setShootEffectIds(stringToList(mWeaponShootEffects->text()));
- w->setFlyEffectIds(stringToList(mWeaponFlyEffects->text()));
- w->setHitEffectIds(stringToList(mWeaponHitEffects->text()));
- w->setSound(SoundWeaponShoot, mWeaponSoundShoot->text());
-}
-
-
 void BoUnitEditor::slotAddWeapon()
 {
- // 0 is actually invalid id... but we don't care as it's only used for loading/saving games
- BosonWeaponProperties* w = new BosonWeaponProperties(mUnit, 0);
- w->reset();
- mWeapons.append(w);
- mWeaponsList->insertItem("New weapon", mWeapons.count() - 1);
- mWeaponsList->setCurrentItem(mWeapons.count() - 1);
- slotWeaponSelected(mWeapons.count() - 1);
- mConfigChanged = true;
- updateConfigWidgets();
+ mWeaponPageHandler->slotAddWeapon();
 }
 
 void BoUnitEditor::slotWeaponSelected( int index )
 {
- // Selecting another weapon modifies widget's contents, but we want to maintain old configChanged status
- bool configWasChanged = mConfigChanged;
- if(mCurrentWeapon != -1) {
-	updateWeaponProperties();
- }
- mCurrentWeapon = index;
- updateWeaponWidgets();
- mConfigChanged = configWasChanged;
- updateConfigWidgets();
+ mWeaponPageHandler->slotWeaponSelected(index);
 }
-
 
 void BoUnitEditor::slotRemoveWeapon()
 {
- if(mCurrentWeapon == -1) {
-	mWeaponsRemove->setEnabled(false);
-	return;
- }
- int item = mCurrentWeapon;
- mWeaponsList->removeItem(item);
- mWeapons.remove(item);
- if(mCurrentWeapon >= (signed int)(mWeaponsList->count())) {
-	mCurrentWeapon--;
- }
- updateWeaponWidgets();
- mConfigChanged = true;
- updateConfigWidgets();
+ mWeaponPageHandler->slotRemoveWeapon();
 }
 
-
-void BoUnitEditor::updateWeaponWidgets()
-{
- if(mCurrentWeapon == -1) {
-	mWeaponGroup->setEnabled(false);
-	mWeaponsRemove->setEnabled(false);
-	return;
- }
- mWeaponGroup->setEnabled(true);
- mWeaponsRemove->setEnabled(true);
- BosonWeaponProperties* w = mWeapons.at(mCurrentWeapon);
- mWeaponName->setText(w->weaponName());
- mWeaponDamage->setValue(w->damage());
- mWeaponDamageRange->setValue(w->damageRange());
- mWeaponFullDamageRange->setValue(w->fullDamageRange());
- mWeaponReload->setValue(w->reloadingTime());
- mWeaponRange->setValue(w->range());
- mWeaponCanShootAtAirUnits->setChecked(w->canShootAtAirUnits());
- mWeaponCanShootAtLandUnits->setChecked(w->canShootAtLandUnits());
- mWeaponSpeed->setValue(w->speed());
- mWeaponModel->setText(w->modelFileName());
- mWeaponHeight->setValue(w->height());
- BoVector3Fixed o = w->offset();
- mWeaponOffsetX->setValue(o.x());
- mWeaponOffsetY->setValue(o.y());
- mWeaponOffsetZ->setValue(o.z());
- mWeaponShootEffects->setText(listToString(w->shootEffectIds()));
- mWeaponFlyEffects->setText(listToString(w->flyEffectIds()));
- mWeaponHitEffects->setText(listToString(w->hitEffectIds()));
- mWeaponSoundShoot->setText(w->sound(SoundWeaponShoot));
-}
 
 
 void BoUnitEditor::slotConfigChanged()
@@ -982,5 +845,225 @@ void BoProducerPageHandler::updateWidget()
  mEditor->mUnitProductionTime->setValue(unit->productionTime());
  mEditor->mUnitProducer->setValue(unit->producer());
  mEditor->mUnitRequirements->setText(listToString(unit->requirements()));
+}
+
+
+BoMappingPageHandler::BoMappingPageHandler(BoUnitEditor* parent)
+	: QObject(parent)
+{
+ mEditor = parent;
+}
+
+void BoMappingPageHandler::updateUnitProperties()
+{
+ BO_CHECK_NULL_RET(mEditor);
+ BO_CHECK_NULL_RET(mEditor->mUnit);
+ EditorUnitProperties* unit = mEditor->mUnit;
+ if(mEditor->mUnitTexturesList->childCount() > 0) {
+	QListViewItemIterator it(mEditor->mUnitTexturesList);
+	QStringList textures;
+	for (; it.current(); ++it) {
+		unit->addTextureMapping(it.current()->text(0), it.current()->text(1));
+	}
+ }
+ unit->addSound(SoundOrderMove, mEditor->mUnitSoundOrderMove->text());
+ unit->addSound(SoundOrderAttack, mEditor->mUnitSoundOrderAttack->text());
+ unit->addSound(SoundOrderSelect, mEditor->mUnitSoundOrderSelect->text());
+ unit->addSound(SoundReportProduced, mEditor->mUnitSoundReportProduced->text());
+ unit->addSound(SoundReportDestroyed, mEditor->mUnitSoundReportDestroyed->text());
+ unit->addSound(SoundReportUnderAttack, mEditor->mUnitSoundReportUnderAttack->text());
+}
+
+void BoMappingPageHandler::updateWidget()
+{
+ BO_CHECK_NULL_RET(mEditor);
+ BO_CHECK_NULL_RET(mEditor->mUnit);
+ EditorUnitProperties* unit = mEditor->mUnit;
+
+ mEditor->mUnitTexturesList->clear();
+ QMap<QString, QString> textures = unit->longTextureNames();
+ for(QMap<QString, QString>::iterator it = textures.begin(); it != textures.end(); ++it) {
+	(void)new QListViewItem(mEditor->mUnitTexturesList, it.key(), it.data());
+ }
+ mEditor->mUnitSoundOrderMove->setText(unit->sound(SoundOrderMove));
+ mEditor->mUnitSoundOrderAttack->setText(unit->sound(SoundOrderAttack));
+ mEditor->mUnitSoundOrderSelect->setText(unit->sound(SoundOrderSelect));
+ mEditor->mUnitSoundReportProduced->setText(unit->sound(SoundReportProduced));
+ mEditor->mUnitSoundReportDestroyed->setText(unit->sound(SoundReportDestroyed));
+ mEditor->mUnitSoundReportUnderAttack->setText(unit->sound(SoundReportUnderAttack));
+}
+
+void BoMappingPageHandler::slotAddTexture()
+{
+ if(mEditor->mUnitTextureFrom->text().isEmpty() || mEditor->mUnitTextureTo->text().isEmpty()) {
+	return;
+ }
+ (void)new QListViewItem(mEditor->mUnitTexturesList, mEditor->mUnitTextureFrom->text(),
+		mEditor->mUnitTextureTo->text());
+ mEditor->mUnitTextureFrom->clear();
+ mEditor->mUnitTextureTo->clear();
+ mEditor->mConfigChanged = true;
+ mEditor->updateConfigWidgets();
+}
+
+void BoMappingPageHandler::slotRemoveTexture()
+{
+ QListViewItem* current = mEditor->mUnitTexturesList->currentItem();
+ delete current;
+ mEditor->mConfigChanged = true;
+ mEditor->updateConfigWidgets();
+}
+
+void BoMappingPageHandler::slotCurrentTextureChanged()
+{
+ mEditor->mUnitTextureRemove->setEnabled(mEditor->mUnitTexturesList->currentItem() != 0);
+}
+
+
+
+BoWeaponPageHandler::BoWeaponPageHandler(BoUnitEditor* parent)
+	: QObject(parent)
+{
+ mEditor = parent;
+
+ mCurrentWeapon = -1;
+}
+
+void BoWeaponPageHandler::updateUnitProperties()
+{
+ BO_CHECK_NULL_RET(mEditor);
+ BO_CHECK_NULL_RET(mEditor->mUnit);
+ EditorUnitProperties* unit = mEditor->mUnit;
+
+ // Sync current weapon first
+ updateWeaponProperties();
+ QPtrListIterator<BosonWeaponPropertiesEditor> it(mWeapons);
+ while(it.current() != 0) {
+	unit->addPlugin(it.current()->properties());
+	++it;
+ }
+}
+
+void BoWeaponPageHandler::updateWidget()
+{
+ BO_CHECK_NULL_RET(mEditor);
+ BO_CHECK_NULL_RET(mEditor->mUnit);
+ EditorUnitProperties* unit = mEditor->mUnit;
+
+ mWeapons.clear();
+ mEditor->mWeaponsList->clear();
+ int weaponCounter = 0;
+ mEditor->mWeaponGroup->setEnabled(false);
+ mCurrentWeapon = -1;
+ QPtrListIterator<PluginProperties> it(*(unit->plugins()));
+ while(it.current()) {
+	if(it.current()->pluginType() == PluginProperties::Weapon) {
+		BosonWeaponProperties* w = (BosonWeaponProperties*)(it.current());
+		w->setEditorObject(new BosonWeaponPropertiesEditor(w));
+		mWeapons.insert(weaponCounter, w->editorObject());
+		mEditor->mWeaponsList->insertItem(w->weaponName(), weaponCounter);
+		weaponCounter++;
+	}
+	++it;
+ }
+}
+
+void BoWeaponPageHandler::updateWeaponProperties()
+{
+ if(mCurrentWeapon == -1) {
+	return;
+ }
+ BosonWeaponPropertiesEditor* w = mWeapons.at(mCurrentWeapon);
+ w->setWeaponName(mEditor->mWeaponName->text());
+ w->insertLongWeaponBaseValue(mEditor->mWeaponDamage->value(), "Damage");
+ w->insertBoFixedWeaponBaseValue(mEditor->mWeaponDamageRange->value(), "DamageRange");
+ w->insertBoFixedWeaponBaseValue(mEditor->mWeaponFullDamageRange->value(), "FullDamageRange");
+ w->insertULongWeaponBaseValue(mEditor->mWeaponReload->value(), "Reload");
+ w->insertULongWeaponBaseValue(mEditor->mWeaponRange->value(), "Range");
+ w->insertBoFixedWeaponBaseValue(mEditor->mWeaponSpeed->value(), "Speed");
+ w->setCanShootAtAirUnits(mEditor->mWeaponCanShootAtAirUnits->isChecked());
+ w->setCanShootAtLandUnits(mEditor->mWeaponCanShootAtLandUnits->isChecked());
+ w->setModelFileName(mEditor->mWeaponModel->text());
+ w->setHeight(mEditor->mWeaponHeight->value());
+ BoVector3Fixed offset(mEditor->mWeaponOffsetX->value(), mEditor->mWeaponOffsetY->value(), mEditor->mWeaponOffsetZ->value());
+ w->setShootEffectIds(stringToList(mEditor->mWeaponShootEffects->text()));
+ w->setFlyEffectIds(stringToList(mEditor->mWeaponFlyEffects->text()));
+ w->setHitEffectIds(stringToList(mEditor->mWeaponHitEffects->text()));
+ w->setSound(SoundWeaponShoot, mEditor->mWeaponSoundShoot->text());
+}
+
+void BoWeaponPageHandler::slotAddWeapon()
+{
+ // 0 is actually invalid id... but we don't care as it's only used for loading/saving games
+ BosonWeaponProperties* w = new BosonWeaponProperties(mEditor->mUnit, 0);
+ w->setEditorObject(new BosonWeaponPropertiesEditor(w));
+ w->editorObject()->reset();
+ mWeapons.append(w->editorObject());
+ mEditor->mWeaponsList->insertItem("New weapon", mWeapons.count() - 1);
+ mEditor->mWeaponsList->setCurrentItem(mWeapons.count() - 1);
+ slotWeaponSelected(mWeapons.count() - 1);
+ mEditor->mConfigChanged = true;
+ mEditor->updateConfigWidgets();
+}
+
+void BoWeaponPageHandler::slotWeaponSelected( int index )
+{
+ // Selecting another weapon modifies widget's contents, but we want to maintain old configChanged status
+ bool configWasChanged = mEditor->mConfigChanged;
+ if(mCurrentWeapon != -1) {
+	updateWeaponProperties();
+ }
+ mCurrentWeapon = index;
+ updateWeaponWidgets();
+ mEditor->mConfigChanged = configWasChanged;
+ mEditor->updateConfigWidgets();
+}
+
+void BoWeaponPageHandler::slotRemoveWeapon()
+{
+ if(mCurrentWeapon == -1) {
+	mEditor->mWeaponsRemove->setEnabled(false);
+	return;
+ }
+ int item = mCurrentWeapon;
+ mEditor->mWeaponsList->removeItem(item);
+ mWeapons.remove(item);
+ if(mCurrentWeapon >= (signed int)(mEditor->mWeaponsList->count())) {
+	mCurrentWeapon--;
+ }
+ updateWeaponWidgets();
+ mEditor->mConfigChanged = true;
+ mEditor->updateConfigWidgets();
+}
+
+void BoWeaponPageHandler::updateWeaponWidgets()
+{
+ if(mCurrentWeapon == -1) {
+	mEditor->mWeaponGroup->setEnabled(false);
+	mEditor->mWeaponsRemove->setEnabled(false);
+	return;
+ }
+ mEditor->mWeaponGroup->setEnabled(true);
+ mEditor->mWeaponsRemove->setEnabled(true);
+ const BosonWeaponProperties* w = mWeapons.at(mCurrentWeapon)->properties();
+ mEditor->mWeaponName->setText(w->weaponName());
+ mEditor->mWeaponDamage->setValue(w->damage());
+ mEditor->mWeaponDamageRange->setValue(w->damageRange());
+ mEditor->mWeaponFullDamageRange->setValue(w->fullDamageRange());
+ mEditor->mWeaponReload->setValue(w->reloadingTime());
+ mEditor->mWeaponRange->setValue(w->range());
+ mEditor->mWeaponCanShootAtAirUnits->setChecked(w->canShootAtAirUnits());
+ mEditor->mWeaponCanShootAtLandUnits->setChecked(w->canShootAtLandUnits());
+ mEditor->mWeaponSpeed->setValue(w->speed());
+ mEditor->mWeaponModel->setText(w->modelFileName());
+ mEditor->mWeaponHeight->setValue(w->height());
+ BoVector3Fixed o = w->offset();
+ mEditor->mWeaponOffsetX->setValue(o.x());
+ mEditor->mWeaponOffsetY->setValue(o.y());
+ mEditor->mWeaponOffsetZ->setValue(o.z());
+ mEditor->mWeaponShootEffects->setText(listToString(w->shootEffectIds()));
+ mEditor->mWeaponFlyEffects->setText(listToString(w->flyEffectIds()));
+ mEditor->mWeaponHitEffects->setText(listToString(w->hitEffectIds()));
+ mEditor->mWeaponSoundShoot->setText(w->sound(SoundWeaponShoot));
 }
 
