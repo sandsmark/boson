@@ -2176,430 +2176,419 @@ See also full damage range.</string>
                         <property name="name">
                             <cstring>unnamed</cstring>
                         </property>
-                        <widget class="QCheckBox">
+                        <widget class="QTabWidget">
                             <property name="name">
-                                <cstring>mUnitCanProduce</cstring>
+                                <cstring>tabWidget3</cstring>
                             </property>
-                            <property name="text">
-                                <string>Unit can produce other units</string>
-                            </property>
-                            <property name="toolTip" stdset="0">
-                                <string>Whether this facility can produce other units</string>
-                            </property>
-                            <property name="whatsThis" stdset="0">
-                                <string>Whether this facility can produce other units/facilities (i.e. is a factory).</string>
-                            </property>
-                        </widget>
-                        <widget class="QGroupBox">
-                            <property name="name">
-                                <cstring>mUnitProducingGroup</cstring>
-                            </property>
-                            <property name="enabled">
-                                <bool>false</bool>
-                            </property>
-                            <property name="title">
-                                <string>Producing options</string>
-                            </property>
-                            <hbox>
+                            <widget class="QWidget">
                                 <property name="name">
-                                    <cstring>unnamed</cstring>
+                                    <cstring>tab</cstring>
                                 </property>
-                                <property name="margin">
-                                    <number>11</number>
-                                </property>
-                                <property name="spacing">
-                                    <number>6</number>
-                                </property>
-                                <widget class="QLabel">
+                                <attribute name="title">
+                                    <string>Production</string>
+                                </attribute>
+                                <vbox>
                                     <property name="name">
-                                        <cstring>mUnitProducerListLabel</cstring>
+                                        <cstring>unnamed</cstring>
                                     </property>
-                                    <property name="text">
-                                        <string>Producer List:</string>
-                                    </property>
-                                </widget>
-                                <spacer>
-                                    <property name="name">
-                                        <cstring>mUnitProducerListSpacer</cstring>
-                                    </property>
-                                    <property name="orientation">
-                                        <enum>Horizontal</enum>
-                                    </property>
-                                    <property name="sizeType">
-                                        <enum>Fixed</enum>
-                                    </property>
-                                    <property name="sizeHint">
-                                        <size>
-                                            <width>20</width>
-                                            <height>20</height>
-                                        </size>
-                                    </property>
-                                </spacer>
-                                <widget class="QLineEdit">
-                                    <property name="name">
-                                        <cstring>mUnitProducerList</cstring>
-                                    </property>
-                                    <property name="toolTip" stdset="0">
-                                        <string>A comma separated list of producer numbers</string>
-                                    </property>
-                                    <property name="whatsThis" stdset="0">
-                                        <string>&lt;p&gt;A comma separated list of &lt;i&gt;Producer&lt;/i&gt; numbers that this factory can produce.&lt;/p&gt;
-&lt;p&gt;Usually this is only a single number, e.g. simply "10" for the Command Bunker.&lt;/p&gt;</string>
-                                    </property>
-                                </widget>
-                            </hbox>
-                        </widget>
-                        <spacer>
-                            <property name="name">
-                                <cstring>Spacer29</cstring>
-                            </property>
-                            <property name="orientation">
-                                <enum>Vertical</enum>
-                            </property>
-                            <property name="sizeType">
-                                <enum>Fixed</enum>
-                            </property>
-                            <property name="sizeHint">
-                                <size>
-                                    <width>20</width>
-                                    <height>16</height>
-                                </size>
-                            </property>
-                        </spacer>
-                        <widget class="QCheckBox">
-                            <property name="name">
-                                <cstring>mUnitCanHarvest</cstring>
-                            </property>
-                            <property name="text">
-                                <string>Unit can harvest minerals or oil</string>
-                            </property>
-                            <property name="toolTip" stdset="0">
-                                <string>Whether this unit can harvest (mine) anything</string>
-                            </property>
-                            <property name="whatsThis" stdset="0">
-                                <string>Whether this unit can harvest (mine) anything (usually minerals or oil)</string>
-                            </property>
-                        </widget>
-                        <widget class="QGroupBox">
-                            <property name="name">
-                                <cstring>mUnitHarvestGroup</cstring>
-                            </property>
-                            <property name="enabled">
-                                <bool>false</bool>
-                            </property>
-                            <property name="title">
-                                <string>Harvesting options</string>
-                            </property>
-                            <vbox>
-                                <property name="name">
-                                    <cstring>unnamed</cstring>
-                                </property>
-                                <property name="margin">
-                                    <number>11</number>
-                                </property>
-                                <property name="spacing">
-                                    <number>6</number>
-                                </property>
-                                <widget class="QCheckBox">
-                                    <property name="name">
-                                        <cstring>mUnitHarvestMinerals</cstring>
-                                    </property>
-                                    <property name="text">
-                                        <string>Unit can harvest minerals</string>
-                                    </property>
-                                    <property name="toolTip" stdset="0">
-                                        <string>Whether this unit can harvest minerals</string>
-                                    </property>
-                                    <property name="whatsThis" stdset="0">
-                                        <string>&lt;p&gt;Whether this unit mine minerals. You usually need only one unit per species theme that can mine minerals (the minerals harvester).&lt;/p&gt;
-&lt;p&gt;Please note that one unit can only mine minerals &lt;b&gt;or&lt;/b&gt; oil, not both!&lt;/p&gt;</string>
-                                    </property>
-                                </widget>
-                                <widget class="QCheckBox">
-                                    <property name="name">
-                                        <cstring>mUnitHarvestOil</cstring>
-                                    </property>
-                                    <property name="text">
-                                        <string>Unit can harvest oil</string>
-                                    </property>
-                                    <property name="toolTip" stdset="0">
-                                        <string>Whether this unit can harvest oil</string>
-                                    </property>
-                                    <property name="whatsThis" stdset="0">
-                                        <string>&lt;p&gt;Whether this unit mine oil. You usually need only one unit per species theme that can mine oil (the oil harvester).&lt;/p&gt;
-&lt;p&gt;Please note that one unit can only mine minerals &lt;b&gt;or&lt;/b&gt; oil, not both!&lt;/p&gt;</string>
-                                    </property>
-                                </widget>
-                                <widget class="QLayoutWidget">
-                                    <property name="name">
-                                        <cstring>layout22</cstring>
-                                    </property>
-                                    <grid>
+                                    <widget class="QCheckBox">
                                         <property name="name">
-                                            <cstring>unnamed</cstring>
+                                            <cstring>mUnitCanProduce</cstring>
                                         </property>
-                                        <widget class="QLabel" row="2" column="0">
+                                        <property name="text">
+                                            <string>Unit can produce other units</string>
+                                        </property>
+                                        <property name="toolTip" stdset="0">
+                                            <string>Whether this facility can produce other units</string>
+                                        </property>
+                                        <property name="whatsThis" stdset="0">
+                                            <string>Whether this facility can produce other units/facilities (i.e. is a factory).</string>
+                                        </property>
+                                    </widget>
+                                    <widget class="QGroupBox">
+                                        <property name="name">
+                                            <cstring>mUnitProducingGroup</cstring>
+                                        </property>
+                                        <property name="enabled">
+                                            <bool>false</bool>
+                                        </property>
+                                        <property name="title">
+                                            <string>Producing options</string>
+                                        </property>
+                                        <hbox>
                                             <property name="name">
-                                                <cstring>mUnitUnloadingSpeedLabel</cstring>
+                                                <cstring>unnamed</cstring>
                                             </property>
-                                            <property name="text">
-                                                <string>Unloading speed:</string>
+                                            <property name="margin">
+                                                <number>11</number>
                                             </property>
-                                        </widget>
-                                        <widget class="QLabel" row="1" column="0">
-                                            <property name="name">
-                                                <cstring>mUnitMiningSpeedLabel</cstring>
+                                            <property name="spacing">
+                                                <number>6</number>
                                             </property>
-                                            <property name="text">
-                                                <string>Mining speed:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLabel" row="0" column="0">
-                                            <property name="name">
-                                                <cstring>mUnitMaxResourceLabel</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Max resources:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="KIntNumInput" row="1" column="2">
-                                            <property name="name">
-                                                <cstring>mUnitMiningSpeed</cstring>
-                                            </property>
-                                            <property name="value">
-                                                <number>10</number>
-                                            </property>
-                                            <property name="minValue">
-                                                <number>0</number>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>How fast this unit mines resources</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>How fast this unit mines resources (per advance call).</string>
-                                            </property>
-                                        </widget>
-                                        <spacer row="1" column="1">
-                                            <property name="name">
-                                                <cstring>mUnitMaxResourceSpacer_3</cstring>
-                                            </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
-                                            </property>
-                                            <property name="sizeType">
-                                                <enum>Fixed</enum>
-                                            </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>20</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                        <spacer row="2" column="1">
-                                            <property name="name">
-                                                <cstring>mUnitMaxResourceSpacer_3_2</cstring>
-                                            </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
-                                            </property>
-                                            <property name="sizeType">
-                                                <enum>Fixed</enum>
-                                            </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>20</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                        <widget class="KIntNumInput" row="0" column="2">
-                                            <property name="name">
-                                                <cstring>mUnitMaxResource</cstring>
-                                            </property>
-                                            <property name="value">
-                                                <number>100</number>
-                                            </property>
-                                            <property name="minValue">
-                                                <number>0</number>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>How many resources this unit can carry</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>The number of resources your unit can mine before it has to return to a refinery.</string>
-                                            </property>
-                                        </widget>
-                                        <spacer row="0" column="1">
-                                            <property name="name">
-                                                <cstring>mUnitMaxResourceSpacer</cstring>
-                                            </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
-                                            </property>
-                                            <property name="sizeType">
-                                                <enum>Fixed</enum>
-                                            </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>20</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                        <widget class="KIntNumInput" row="2" column="2">
-                                            <property name="name">
-                                                <cstring>mUnitUnloadingSpeed</cstring>
-                                            </property>
-                                            <property name="value">
-                                                <number>10</number>
-                                            </property>
-                                            <property name="minValue">
-                                                <number>0</number>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>How fast this unit unloads resources</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>How fast this unit unloads resources at the refinery (per advance call)</string>
-                                            </property>
-                                        </widget>
-                                    </grid>
-                                </widget>
-                            </vbox>
-                        </widget>
-                        <spacer>
-                            <property name="name">
-                                <cstring>Spacer29_2</cstring>
-                            </property>
-                            <property name="orientation">
-                                <enum>Vertical</enum>
-                            </property>
-                            <property name="sizeType">
-                                <enum>Fixed</enum>
-                            </property>
-                            <property name="sizeHint">
-                                <size>
-                                    <width>20</width>
-                                    <height>16</height>
-                                </size>
-                            </property>
-                        </spacer>
-                        <widget class="QCheckBox">
-                            <property name="name">
-                                <cstring>mUnitCanRefine</cstring>
-                            </property>
-                            <property name="text">
-                                <string>Unit can refine minerals or oil</string>
-                            </property>
-                            <property name="toolTip" stdset="0">
-                                <string>Whether this unit can refine (retrieve) anything</string>
-                            </property>
-                            <property name="whatsThis" stdset="0">
-                                <string>Whether this unit can refine (retrieve) anything (usually minerals or oil)</string>
-                            </property>
-                        </widget>
-                        <widget class="QGroupBox">
-                            <property name="name">
-                                <cstring>mUnitRefineGroup</cstring>
-                            </property>
-                            <property name="enabled">
-                                <bool>false</bool>
-                            </property>
-                            <property name="title">
-                                <string>Harvesting options</string>
-                            </property>
-                            <vbox>
+                                            <widget class="QLabel">
+                                                <property name="name">
+                                                    <cstring>mUnitProducerListLabel</cstring>
+                                                </property>
+                                                <property name="text">
+                                                    <string>Producer List:</string>
+                                                </property>
+                                            </widget>
+                                            <spacer>
+                                                <property name="name">
+                                                    <cstring>mUnitProducerListSpacer</cstring>
+                                                </property>
+                                                <property name="orientation">
+                                                    <enum>Horizontal</enum>
+                                                </property>
+                                                <property name="sizeType">
+                                                    <enum>Fixed</enum>
+                                                </property>
+                                                <property name="sizeHint">
+                                                    <size>
+                                                        <width>20</width>
+                                                        <height>20</height>
+                                                    </size>
+                                                </property>
+                                            </spacer>
+                                            <widget class="QLineEdit">
+                                                <property name="name">
+                                                    <cstring>mUnitProducerList</cstring>
+                                                </property>
+                                                <property name="toolTip" stdset="0">
+                                                    <string>A comma separated list of producer numbers</string>
+                                                </property>
+                                                <property name="whatsThis" stdset="0">
+                                                    <string>&lt;p&gt;A comma separated list of &lt;i&gt;Producer&lt;/i&gt; numbers that this factory can produce.&lt;/p&gt;
+&lt;p&gt;Usually this is only a single number, e.g. simply "10" for the Command Bunker.&lt;/p&gt;</string>
+                                                </property>
+                                            </widget>
+                                        </hbox>
+                                    </widget>
+                                </vbox>
+                            </widget>
+                            <widget class="QWidget">
                                 <property name="name">
-                                    <cstring>unnamed</cstring>
+                                    <cstring>tab</cstring>
                                 </property>
-                                <property name="margin">
-                                    <number>11</number>
-                                </property>
-                                <property name="spacing">
-                                    <number>6</number>
-                                </property>
-                                <widget class="QCheckBox">
+                                <attribute name="title">
+                                    <string>Harvester</string>
+                                </attribute>
+                                <vbox>
                                     <property name="name">
-                                        <cstring>mUnitRefineMinerals</cstring>
+                                        <cstring>unnamed</cstring>
                                     </property>
-                                    <property name="text">
-                                        <string>Unit can refine minerals</string>
-                                    </property>
-                                    <property name="toolTip" stdset="0">
-                                        <string>Whether this unit can refine minerals</string>
-                                    </property>
-                                    <property name="whatsThis" stdset="0">
-                                        <string>&lt;p&gt;Whether this unit refine minerals. You usually need only one unit per species theme that can refine minerals (the minerals refinery).&lt;/p&gt;
-&lt;p&gt;Please note that one unit can only refine minerals &lt;b&gt;or&lt;/b&gt; oil, not both!&lt;/p&gt;</string>
-                                    </property>
-                                </widget>
-                                <widget class="QCheckBox">
+                                    <widget class="QCheckBox">
+                                        <property name="name">
+                                            <cstring>mUnitCanHarvest</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Unit can harvest minerals or oil</string>
+                                        </property>
+                                        <property name="toolTip" stdset="0">
+                                            <string>Whether this unit can harvest (mine) anything</string>
+                                        </property>
+                                        <property name="whatsThis" stdset="0">
+                                            <string>Whether this unit can harvest (mine) anything (usually minerals or oil)</string>
+                                        </property>
+                                    </widget>
+                                    <widget class="QGroupBox">
+                                        <property name="name">
+                                            <cstring>mUnitHarvestGroup</cstring>
+                                        </property>
+                                        <property name="enabled">
+                                            <bool>false</bool>
+                                        </property>
+                                        <property name="title">
+                                            <string>Harvesting options</string>
+                                        </property>
+                                        <vbox>
+                                            <property name="name">
+                                                <cstring>unnamed</cstring>
+                                            </property>
+                                            <property name="margin">
+                                                <number>11</number>
+                                            </property>
+                                            <property name="spacing">
+                                                <number>6</number>
+                                            </property>
+                                            <widget class="QCheckBox">
+                                                <property name="name">
+                                                    <cstring>mUnitHarvestMinerals</cstring>
+                                                </property>
+                                                <property name="text">
+                                                    <string>Unit can harvest minerals</string>
+                                                </property>
+                                                <property name="toolTip" stdset="0">
+                                                    <string>Whether this unit can harvest minerals</string>
+                                                </property>
+                                                <property name="whatsThis" stdset="0">
+                                                    <string>&lt;p&gt;Whether this unit mine minerals. You usually need only one unit per species theme that can mine minerals (the minerals harvester).&lt;/p&gt;
+&lt;p&gt;Please note that one unit can only mine minerals &lt;b&gt;or&lt;/b&gt; oil, not both!&lt;/p&gt;</string>
+                                                </property>
+                                            </widget>
+                                            <widget class="QCheckBox">
+                                                <property name="name">
+                                                    <cstring>mUnitHarvestOil</cstring>
+                                                </property>
+                                                <property name="text">
+                                                    <string>Unit can harvest oil</string>
+                                                </property>
+                                                <property name="toolTip" stdset="0">
+                                                    <string>Whether this unit can harvest oil</string>
+                                                </property>
+                                                <property name="whatsThis" stdset="0">
+                                                    <string>&lt;p&gt;Whether this unit mine oil. You usually need only one unit per species theme that can mine oil (the oil harvester).&lt;/p&gt;
+&lt;p&gt;Please note that one unit can only mine minerals &lt;b&gt;or&lt;/b&gt; oil, not both!&lt;/p&gt;</string>
+                                                </property>
+                                            </widget>
+                                            <widget class="QLayoutWidget">
+                                                <property name="name">
+                                                    <cstring>layout22</cstring>
+                                                </property>
+                                                <grid>
+                                                    <property name="name">
+                                                        <cstring>unnamed</cstring>
+                                                    </property>
+                                                    <widget class="QLabel" row="2" column="0">
+                                                        <property name="name">
+                                                            <cstring>mUnitUnloadingSpeedLabel</cstring>
+                                                        </property>
+                                                        <property name="text">
+                                                            <string>Unloading speed:</string>
+                                                        </property>
+                                                    </widget>
+                                                    <widget class="QLabel" row="1" column="0">
+                                                        <property name="name">
+                                                            <cstring>mUnitMiningSpeedLabel</cstring>
+                                                        </property>
+                                                        <property name="text">
+                                                            <string>Mining speed:</string>
+                                                        </property>
+                                                    </widget>
+                                                    <widget class="QLabel" row="0" column="0">
+                                                        <property name="name">
+                                                            <cstring>mUnitMaxResourceLabel</cstring>
+                                                        </property>
+                                                        <property name="text">
+                                                            <string>Max resources:</string>
+                                                        </property>
+                                                    </widget>
+                                                    <widget class="KIntNumInput" row="1" column="2">
+                                                        <property name="name">
+                                                            <cstring>mUnitMiningSpeed</cstring>
+                                                        </property>
+                                                        <property name="value">
+                                                            <number>10</number>
+                                                        </property>
+                                                        <property name="minValue">
+                                                            <number>0</number>
+                                                        </property>
+                                                        <property name="toolTip" stdset="0">
+                                                            <string>How fast this unit mines resources</string>
+                                                        </property>
+                                                        <property name="whatsThis" stdset="0">
+                                                            <string>How fast this unit mines resources (per advance call).</string>
+                                                        </property>
+                                                    </widget>
+                                                    <spacer row="1" column="1">
+                                                        <property name="name">
+                                                            <cstring>mUnitMaxResourceSpacer_3</cstring>
+                                                        </property>
+                                                        <property name="orientation">
+                                                            <enum>Horizontal</enum>
+                                                        </property>
+                                                        <property name="sizeType">
+                                                            <enum>Fixed</enum>
+                                                        </property>
+                                                        <property name="sizeHint">
+                                                            <size>
+                                                                <width>20</width>
+                                                                <height>20</height>
+                                                            </size>
+                                                        </property>
+                                                    </spacer>
+                                                    <spacer row="2" column="1">
+                                                        <property name="name">
+                                                            <cstring>mUnitMaxResourceSpacer_3_2</cstring>
+                                                        </property>
+                                                        <property name="orientation">
+                                                            <enum>Horizontal</enum>
+                                                        </property>
+                                                        <property name="sizeType">
+                                                            <enum>Fixed</enum>
+                                                        </property>
+                                                        <property name="sizeHint">
+                                                            <size>
+                                                                <width>20</width>
+                                                                <height>20</height>
+                                                            </size>
+                                                        </property>
+                                                    </spacer>
+                                                    <widget class="KIntNumInput" row="0" column="2">
+                                                        <property name="name">
+                                                            <cstring>mUnitMaxResource</cstring>
+                                                        </property>
+                                                        <property name="value">
+                                                            <number>100</number>
+                                                        </property>
+                                                        <property name="minValue">
+                                                            <number>0</number>
+                                                        </property>
+                                                        <property name="toolTip" stdset="0">
+                                                            <string>How many resources this unit can carry</string>
+                                                        </property>
+                                                        <property name="whatsThis" stdset="0">
+                                                            <string>The number of resources your unit can mine before it has to return to a refinery.</string>
+                                                        </property>
+                                                    </widget>
+                                                    <spacer row="0" column="1">
+                                                        <property name="name">
+                                                            <cstring>mUnitMaxResourceSpacer</cstring>
+                                                        </property>
+                                                        <property name="orientation">
+                                                            <enum>Horizontal</enum>
+                                                        </property>
+                                                        <property name="sizeType">
+                                                            <enum>Fixed</enum>
+                                                        </property>
+                                                        <property name="sizeHint">
+                                                            <size>
+                                                                <width>20</width>
+                                                                <height>20</height>
+                                                            </size>
+                                                        </property>
+                                                    </spacer>
+                                                    <widget class="KIntNumInput" row="2" column="2">
+                                                        <property name="name">
+                                                            <cstring>mUnitUnloadingSpeed</cstring>
+                                                        </property>
+                                                        <property name="value">
+                                                            <number>10</number>
+                                                        </property>
+                                                        <property name="minValue">
+                                                            <number>0</number>
+                                                        </property>
+                                                        <property name="toolTip" stdset="0">
+                                                            <string>How fast this unit unloads resources</string>
+                                                        </property>
+                                                        <property name="whatsThis" stdset="0">
+                                                            <string>How fast this unit unloads resources at the refinery (per advance call)</string>
+                                                        </property>
+                                                    </widget>
+                                                </grid>
+                                            </widget>
+                                        </vbox>
+                                    </widget>
+                                </vbox>
+                            </widget>
+                            <widget class="QWidget">
+                                <property name="name">
+                                    <cstring>TabPage</cstring>
+                                </property>
+                                <attribute name="title">
+                                    <string>Refinery</string>
+                                </attribute>
+                                <vbox>
                                     <property name="name">
-                                        <cstring>mUnitRefineOil</cstring>
+                                        <cstring>unnamed</cstring>
                                     </property>
-                                    <property name="text">
-                                        <string>Unit can refine oil</string>
-                                    </property>
-                                    <property name="toolTip" stdset="0">
-                                        <string>Whether this unit can refine oil</string>
-                                    </property>
-                                    <property name="whatsThis" stdset="0">
-                                        <string>&lt;p&gt;Whether this unit refine oil. You usually need only one unit per species theme that can refine oil (the oil refinery).&lt;/p&gt;
+                                    <widget class="QCheckBox">
+                                        <property name="name">
+                                            <cstring>mUnitCanRefine</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Unit can refine minerals or oil</string>
+                                        </property>
+                                        <property name="toolTip" stdset="0">
+                                            <string>Whether this unit can refine (retrieve) anything</string>
+                                        </property>
+                                        <property name="whatsThis" stdset="0">
+                                            <string>Whether this unit can refine (retrieve) anything (usually minerals or oil)</string>
+                                        </property>
+                                    </widget>
+                                    <widget class="QGroupBox">
+                                        <property name="name">
+                                            <cstring>mUnitRefineGroup</cstring>
+                                        </property>
+                                        <property name="enabled">
+                                            <bool>false</bool>
+                                        </property>
+                                        <property name="title">
+                                            <string>Refinery options</string>
+                                        </property>
+                                        <vbox>
+                                            <property name="name">
+                                                <cstring>unnamed</cstring>
+                                            </property>
+                                            <property name="margin">
+                                                <number>11</number>
+                                            </property>
+                                            <property name="spacing">
+                                                <number>6</number>
+                                            </property>
+                                            <widget class="QCheckBox">
+                                                <property name="name">
+                                                    <cstring>mUnitRefineMinerals</cstring>
+                                                </property>
+                                                <property name="text">
+                                                    <string>Unit can refine minerals</string>
+                                                </property>
+                                                <property name="toolTip" stdset="0">
+                                                    <string>Whether this unit can refine minerals</string>
+                                                </property>
+                                                <property name="whatsThis" stdset="0">
+                                                    <string>&lt;p&gt;Whether this unit refine minerals. You usually need only one unit per species theme that can refine minerals (the minerals refinery).&lt;/p&gt;
 &lt;p&gt;Please note that one unit can only refine minerals &lt;b&gt;or&lt;/b&gt; oil, not both!&lt;/p&gt;</string>
+                                                </property>
+                                            </widget>
+                                            <widget class="QCheckBox">
+                                                <property name="name">
+                                                    <cstring>mUnitRefineOil</cstring>
+                                                </property>
+                                                <property name="text">
+                                                    <string>Unit can refine oil</string>
+                                                </property>
+                                                <property name="toolTip" stdset="0">
+                                                    <string>Whether this unit can refine oil</string>
+                                                </property>
+                                                <property name="whatsThis" stdset="0">
+                                                    <string>&lt;p&gt;Whether this unit refine oil. You usually need only one unit per species theme that can refine oil (the oil refinery).&lt;/p&gt;
+&lt;p&gt;Please note that one unit can only refine minerals &lt;b&gt;or&lt;/b&gt; oil, not both!&lt;/p&gt;</string>
+                                                </property>
+                                            </widget>
+                                        </vbox>
+                                    </widget>
+                                </vbox>
+                            </widget>
+                            <widget class="QWidget">
+                                <property name="name">
+                                    <cstring>TabPage</cstring>
+                                </property>
+                                <attribute name="title">
+                                    <string>Repair</string>
+                                </attribute>
+                                <vbox>
+                                    <property name="name">
+                                        <cstring>unnamed</cstring>
                                     </property>
-                                </widget>
-                            </vbox>
-                        </widget>
-                        <spacer>
-                            <property name="name">
-                                <cstring>Spacer29_2_3</cstring>
-                            </property>
-                            <property name="orientation">
-                                <enum>Vertical</enum>
-                            </property>
-                            <property name="sizeType">
-                                <enum>Fixed</enum>
-                            </property>
-                            <property name="sizeHint">
-                                <size>
-                                    <width>20</width>
-                                    <height>16</height>
-                                </size>
-                            </property>
-                        </spacer>
-                        <widget class="QCheckBox">
-                            <property name="name">
-                                <cstring>mUnitCanRepair</cstring>
-                            </property>
-                            <property name="text">
-                                <string>Unit can repair other units (NOTE: this is not yet supported by Boson)</string>
-                            </property>
-                            <property name="toolTip" stdset="0">
-                                <string>Whether your unit can repair other units</string>
-                            </property>
-                            <property name="whatsThis" stdset="0">
-                                <string>This defines if your unit can repair other units&lt;br&gt;
+                                    <widget class="QCheckBox">
+                                        <property name="name">
+                                            <cstring>mUnitCanRepair</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Unit can repair other units (NOTE: this is not yet supported by Boson)</string>
+                                        </property>
+                                        <property name="toolTip" stdset="0">
+                                            <string>Whether your unit can repair other units</string>
+                                        </property>
+                                        <property name="whatsThis" stdset="0">
+                                            <string>This defines if your unit can repair other units&lt;br&gt;
 Note that you must also use weapon damage &lt; 0 to repair (because at the moment, repairing works as shooting with negative weapon damage).</string>
-                            </property>
+                                        </property>
+                                    </widget>
+                                </vbox>
+                            </widget>
                         </widget>
-                        <spacer>
-                            <property name="name">
-                                <cstring>Spacer29_2_2</cstring>
-                            </property>
-                            <property name="orientation">
-                                <enum>Vertical</enum>
-                            </property>
-                            <property name="sizeType">
-                                <enum>Expanding</enum>
-                            </property>
-                            <property name="sizeHint">
-                                <size>
-                                    <width>20</width>
-                                    <height>16</height>
-                                </size>
-                            </property>
-                        </spacer>
                     </vbox>
                 </widget>
                 <widget class="QWidget">
