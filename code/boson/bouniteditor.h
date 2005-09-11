@@ -59,6 +59,12 @@ public:
 	void setRotationSpeed(int speed);
 	void setCanGoOnLand(bool c);
 	void setCanGoOnWater(bool c);
+	void setMaxSlope(bofixed);
+	void setCrushDamage(unsigned int);
+	void setWaterDepth(bofixed);
+	void setIsHelicopter(bool);
+	void setTurnRadius(bofixed);
+	void setPreferredAltitude(bofixed);
 
 	void reset();
 	void clearPlugins(bool deleteweapons = true);
@@ -111,6 +117,10 @@ public:
 	void updateWidget();
 
 public slots:
+
+protected:
+	UnitProperties::TerrainType currentTerrain() const;
+	void setCurrentTerrain(UnitProperties::TerrainType);
 
 private:
 	BoUnitEditor* mEditor;

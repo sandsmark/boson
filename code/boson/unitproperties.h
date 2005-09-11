@@ -108,9 +108,13 @@ class UnitProperties : public BoBaseValueCollection
 {
 public:
 	enum TerrainType {
-		Land = 0,
-		Water = 1,
-		Air = 2
+		TerrainLand = 1,
+		TerrainWater = 2,
+		TerrainAirPlane = 4,
+		TerrainAirHelicopter = 8,
+
+
+		TerrainMaskAir = (TerrainAirPlane | TerrainAirHelicopter)
 	};
 
 public:
@@ -122,11 +126,11 @@ public:
 	 * producer called "WarFactory", too!
 	 **/
 	enum Producer {
-		WarFactory = Land,
-		Shipyard = Water,
-		Airport = Air, // grrr - I have no good idea for a name... "airport" is definitely wrong as a producer name
-		Barracks = 3,
-		CommandBunker = 10
+		ProducerWarFactory = 0,
+		ProducerShipyard = 1,
+		ProducerAirport = 2, // grrr - I have no good idea for a name... "airport" is definitely wrong as a producer name
+		ProducerBarracks = 3,
+		ProducerCommandBunker = 10
 	};
 
 	UnitProperties(SpeciesTheme*, bool fullMode = true);
@@ -321,17 +325,17 @@ public:
 	/**
 	 * @return Whether this is an aircraft unit.
 	 **/
-	bool isAircraft() const { return mTerrain == Air; }
+	bool isAircraft() const { return (mTerrain & TerrainMaskAir); }
 
 	/**
 	 * @return Whether this is a ship
 	 **/
-	bool isShip() const { return mTerrain == Water; }
+	bool isShip() const { return (mTerrain & TerrainWater); }
 
 	/**
 	 * @return Whether this is a land unit.
 	 **/
-	bool isLand() const { return mTerrain == Land; }
+	bool isLand() const { return (mTerrain & TerrainLand); }
 
 	/**
 	 * @return Whether this unit can shoot at aircrafts.
@@ -527,7 +531,6 @@ protected:
 	BoUpgradeableProperty<bofixed> mDecelerationSpeed;
 
 	int mRotationSpeed;
-	bool mIsHelicopter;
 	bofixed mTurnRadius;
 	bofixed mPreferredAltitude;
 	bool mCanGoOnLand;
