@@ -35,7 +35,6 @@ class Unit;
 class QString;
 template<class T> class QIntDict;
 template<class T1, class T2> class QMap;
-class BosonWeaponPropertiesEditor;
 
 /**
  * @short This class holds properties for @ref BosonWeapon
@@ -54,12 +53,6 @@ class BosonWeaponProperties : public PluginProperties
      **/
     BosonWeaponProperties(const UnitProperties* prop, unsigned long int id);
     ~BosonWeaponProperties();
-
-    void setEditorObject(BosonWeaponPropertiesEditor* editor);
-    BosonWeaponPropertiesEditor* editorObject() const
-    {
-      return mEditorObject;
-    }
 
     /**
      * @return Whether this unit can shoot at aircrafts.
@@ -242,8 +235,6 @@ class BosonWeaponProperties : public PluginProperties
     bofixed mMaxFlyDistance;
     bofixed mTurningSpeed;
     bofixed mStartAngle;
-
-    BosonWeaponPropertiesEditor* mEditorObject;
 };
 
 
@@ -378,72 +369,6 @@ class BosonWeapon : public UnitPlugin
     BoUpgradeableProperty<bofixed> mSpeed;
 };
 
-
-class BosonWeaponPropertiesEditor
-{
-  public:
-    BosonWeaponPropertiesEditor(BosonWeaponProperties* p)
-    {
-      mProperties = p;
-    }
-    BosonWeaponProperties* properties() const
-    {
-      return mProperties;
-    }
-
-    void setWeaponName(const QString& str)
-    { mProperties->mName = str; }
-    void setCanShootAtAirUnits(bool can)
-    { mProperties->mCanShootAtAirUnits = can; }
-    void setCanShootAtLandUnits(bool can)
-    { mProperties->mCanShootAtLandUnits = can; }
-    void setAccelerationSpeed(bofixed speed)
-    { mProperties->mAccelerationSpeed = speed; }
-    void setModelFileName(const QString& file)
-    { mProperties->mModelFileName = file; }
-    void setShootEffectIds(const QValueList<unsigned long int>& ids)
-    { mProperties->mShootEffectIds = ids; }
-    void setFlyEffectIds(const QValueList<unsigned long int>& ids)
-    { mProperties->mFlyEffectIds = ids; }
-    void setHitEffectIds(const QValueList<unsigned long int>& ids)
-    { mProperties->mHitEffectIds = ids; }
-    void setOffset(BoVector3Fixed o)
-    { mProperties->mOffset = o; }
-    void setHeight(bofixed height)
-    { mProperties->mHeight = height; }
-    void setSound(int event, const QString& filename);
-    void setAutoUse(bool use)
-    { mProperties->mAutoUse = use; }
-    void setTakeTargetVeloIntoAccount(bool take)
-    { mProperties->mTakeTargetVeloIntoAccount = take; }
-    void setMaxFlyDistance(bofixed dist)
-    { mProperties->mMaxFlyDistance = dist; }
-    void setTurningSpeed(bofixed s)
-    { mProperties->mTurningSpeed = s; }
-    void setStartAngle(bofixed a)
-    { mProperties->mStartAngle = a; }
-
-    bool insertULongWeaponBaseValue(unsigned long int v, const QString& name, const QString& type = "MaxValue")
-    {
-      return mProperties->insertULongWeaponBaseValue(v, name, type);
-    }
-    bool insertLongWeaponBaseValue(long int v, const QString& name, const QString& type = "MaxValue")
-    {
-      return mProperties->insertULongWeaponBaseValue(v, name, type);
-    }
-    bool insertBoFixedWeaponBaseValue(bofixed v, const QString& name, const QString& type = "MaxValue")
-    {
-      return mProperties->insertULongWeaponBaseValue(v, name, type);
-    }
-
-    void reset()
-    {
-      mProperties->reset();
-    }
-
-  private:
-    BosonWeaponProperties* mProperties;
-};
 
 #endif // BOSONWEAPON_H
 

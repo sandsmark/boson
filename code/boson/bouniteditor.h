@@ -26,6 +26,7 @@
 #include "unitproperties.h"
 
 class BoUnitEditor;
+class BosonWeaponPropertiesEditor;
 
 class EditorUnitProperties : public UnitProperties
 {
@@ -83,6 +84,38 @@ private:
 	bool saveSoundNames(KSimpleConfig* conf);
 };
 
+
+class BoGeneralPageHandler : public QObject
+{
+	Q_OBJECT
+public:
+	BoGeneralPageHandler(BoUnitEditor* parent);
+
+	void updateUnitProperties();
+	void updateWidget();
+
+public slots:
+	void slotAutoPickId();
+
+private:
+	BoUnitEditor* mEditor;
+};
+
+class BoPropertiesPageHandler : public QObject
+{
+	Q_OBJECT
+public:
+	BoPropertiesPageHandler(BoUnitEditor* parent);
+
+	void updateUnitProperties();
+	void updateWidget();
+
+public slots:
+
+private:
+	BoUnitEditor* mEditor;
+};
+
 class BoProducerPageHandler : public QObject
 {
 	Q_OBJECT
@@ -119,6 +152,7 @@ class BoWeaponPageHandler : public QObject
 	Q_OBJECT
 public:
 	BoWeaponPageHandler(BoUnitEditor* parent);
+	~BoWeaponPageHandler();
 
 	void updateUnitProperties();
 	void updateWidget();
@@ -134,7 +168,37 @@ public slots:
 private:
 	BoUnitEditor* mEditor;
 	int mCurrentWeapon;
-	QPtrList<BosonWeaponPropertiesEditor> mWeapons;
+	QPtrList<BosonWeaponPropertiesEditor>* mWeapons;
+};
+
+class BoPluginsPageHandler : public QObject
+{
+	Q_OBJECT
+public:
+	BoPluginsPageHandler(BoUnitEditor* parent);
+
+	void updateUnitProperties();
+	void updateWidget();
+
+public slots:
+
+private:
+	BoUnitEditor* mEditor;
+};
+
+class BoOtherPageHandler : public QObject
+{
+	Q_OBJECT
+public:
+	BoOtherPageHandler(BoUnitEditor* parent);
+
+	void updateUnitProperties();
+	void updateWidget();
+
+public slots:
+
+private:
+	BoUnitEditor* mEditor;
 };
 
 
@@ -187,12 +251,20 @@ protected:
 	EditorUnitProperties* mUnit;
 	bool mConfigChanged;
 
+	friend class BoGeneralPageHandler;
+	friend class BoPropertiesPageHandler;
+	friend class BoWeaponPageHandler;
+	friend class BoPluginsPageHandler;
 	friend class BoProducerPageHandler;
 	friend class BoMappingPageHandler;
-	friend class BoWeaponPageHandler;
+	friend class BoOtherPageHandler;
+	BoGeneralPageHandler* mGeneralPageHandler;
+	BoPropertiesPageHandler* mPropertiesPageHandler;
+	BoWeaponPageHandler* mWeaponPageHandler;
+	BoPluginsPageHandler* mPluginsPageHandler;
 	BoProducerPageHandler* mProducerPageHandler;
 	BoMappingPageHandler* mMappingPageHandler;
-	BoWeaponPageHandler* mWeaponPageHandler;
+	BoOtherPageHandler* mOtherPageHandler;
 
 private:
 	void init();

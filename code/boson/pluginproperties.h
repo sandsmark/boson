@@ -26,6 +26,7 @@
 
 class UnitProperties;
 class SpeciesTheme;
+class PluginPropertiesEditor;
 
 class KSimpleConfig;
 
@@ -62,6 +63,24 @@ public:
 	PluginProperties(const UnitProperties* parent);
 	virtual ~PluginProperties();
 
+	/**
+	 * Use this (in the unit editor ! NEVER use this in the game!) to allow
+	 * editing the properties of this class.
+	 * See also @ref PluginPropertiesEditor
+	 **/
+	void setEditorObject(PluginPropertiesEditor* editor);
+
+	/**
+	 * @return NULL in the game. The object set by @ref setEditorObject in
+	 * the unit editor.
+	 * See also @ref PluginPropertiesEditor
+	 **/
+	PluginPropertiesEditor* editorObject() const
+	{
+		return mEditorObject;
+	}
+
+
 	SpeciesTheme* speciesTheme() const;
 	const UnitProperties* unitProperties() const { return mUnitProperties; }
 
@@ -86,6 +105,7 @@ public:
 
 private:
 	const UnitProperties* mUnitProperties;
+	PluginPropertiesEditor* mEditorObject;
 };
 
 class ProductionProperties : public PluginProperties
@@ -103,12 +123,10 @@ public:
 
 	QValueList<unsigned long int> producerList() const { return mProducerList; }
 
-protected:
-	void setProducerList(QValueList<unsigned long int> list)  { mProducerList = list; }
-	friend class BoUnitEditor;
-
 private:
 	QValueList<unsigned long int> mProducerList;
+
+	friend class ProductionPropertiesEditor;
 };
 
 class RepairProperties : public PluginProperties
@@ -125,6 +143,7 @@ public:
 	virtual int pluginType() const { return Repair; }
 
 private:
+	friend class RepairPropertiesEditor;
 };
 
 class HarvesterProperties : public PluginProperties
@@ -169,12 +188,6 @@ public:
 	unsigned int unloadingSpeed() const { return mUnloadingSpeed; }
 
 protected:
-	friend class BoUnitEditor;
-	void setCanMineMinerals(bool canMineMinerals)  { mCanMineMinerals = canMineMinerals; };
-	void setCanMineOil(bool canMineOil)  { mCanMineOil = canMineOil; };
-	void setMaxResources(unsigned int maxResources)  { mMaxResources = maxResources; };
-	void setMiningSpeed(unsigned int miningSpeed)  { mMiningSpeed = miningSpeed; };
-	void setUnloadingSpeed(unsigned int unloadingSpeed)  { mUnloadingSpeed = unloadingSpeed; };
 
 private:
 	bool mCanMineMinerals;
@@ -182,6 +195,8 @@ private:
 	unsigned int mMaxResources;
 	unsigned int mMiningSpeed;
 	unsigned int mUnloadingSpeed;
+
+	friend class HarvesterPropertiesEditor;
 };
 
 
@@ -208,15 +223,11 @@ public:
 	 **/
 	inline bool canRefineOil() const { return mCanRefineOil; }
 
-	
-protected:
-	friend class BoUnitEditor;
-	void setCanRefineMinerals(bool canRefineMinerals)  { mCanRefineMinerals = canRefineMinerals; };
-	void setCanRefineOil(bool canRefineOil)  { mCanRefineOil = canRefineOil; };
-
 private:
 	bool mCanRefineMinerals;
 	bool mCanRefineOil;
+
+	friend class RefineryPropertiesEditor;
 };
 
 class ResourceMineProperties : public PluginProperties
@@ -238,6 +249,26 @@ public:
 private:
 	bool mMinerals;
 	bool mOil;
+
+	friend class ResourceMinePropertiesEditor;
+};
+
+
+/**
+ * This class may be used from within the unit editor only. It can be used to
+ * modify the properties of a @ref PluginProperties object directly.
+ * @authorAndreas Beckermann <b_mann@gmx.de>
+ **/
+class PluginPropertiesEditor
+{
+public:
+	PluginPropertiesEditor(PluginProperties* properties)
+	{
+		mProperties = properties;
+	}
+
+private:
+	PluginProperties* mProperties;
 };
 
 #endif

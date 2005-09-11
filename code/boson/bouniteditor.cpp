@@ -310,6 +310,152 @@ bool EditorUnitProperties::saveSoundNames(KSimpleConfig* conf)
 }
 
 
+class BosonWeaponPropertiesEditor : public PluginPropertiesEditor
+{
+public:
+	BosonWeaponPropertiesEditor(BosonWeaponProperties* p)
+		: PluginPropertiesEditor(p)
+	{
+		mProperties = p;
+	}
+	BosonWeaponProperties* properties() const
+	{
+		return mProperties;
+	}
+
+	void setWeaponName(const QString& str)
+	{ mProperties->mName = str; }
+	void setCanShootAtAirUnits(bool can)
+	{ mProperties->mCanShootAtAirUnits = can; }
+	void setCanShootAtLandUnits(bool can)
+	{ mProperties->mCanShootAtLandUnits = can; }
+	void setAccelerationSpeed(bofixed speed)
+	{ mProperties->mAccelerationSpeed = speed; }
+	void setModelFileName(const QString& file)
+	{ mProperties->mModelFileName = file; }
+	void setShootEffectIds(const QValueList<unsigned long int>& ids)
+	{ mProperties->mShootEffectIds = ids; }
+	void setFlyEffectIds(const QValueList<unsigned long int>& ids)
+	{ mProperties->mFlyEffectIds = ids; }
+	void setHitEffectIds(const QValueList<unsigned long int>& ids)
+	{ mProperties->mHitEffectIds = ids; }
+	void setOffset(BoVector3Fixed o)
+	{ mProperties->mOffset = o; }
+	void setHeight(bofixed height)
+	{ mProperties->mHeight = height; }
+	void setSound(int event, const QString& filename);
+	void setAutoUse(bool use)
+	{ mProperties->mAutoUse = use; }
+	void setTakeTargetVeloIntoAccount(bool take)
+	{ mProperties->mTakeTargetVeloIntoAccount = take; }
+	void setMaxFlyDistance(bofixed dist)
+	{ mProperties->mMaxFlyDistance = dist; }
+	void setTurningSpeed(bofixed s)
+	{ mProperties->mTurningSpeed = s; }
+	void setStartAngle(bofixed a)
+	{ mProperties->mStartAngle = a; }
+
+	bool insertULongWeaponBaseValue(unsigned long int v, const QString& name, const QString& type = "MaxValue")
+	{
+		return mProperties->insertULongWeaponBaseValue(v, name, type);
+	}
+	bool insertLongWeaponBaseValue(long int v, const QString& name, const QString& type = "MaxValue")
+	{
+		return mProperties->insertULongWeaponBaseValue(v, name, type);
+	}
+	bool insertBoFixedWeaponBaseValue(bofixed v, const QString& name, const QString& type = "MaxValue")
+	{
+		return mProperties->insertULongWeaponBaseValue(v, name, type);
+	}
+
+	void reset()
+	{
+		mProperties->reset();
+	}
+
+private:
+	BosonWeaponProperties* mProperties;
+};
+
+void BosonWeaponPropertiesEditor::setSound(int event, const QString& filename)
+{
+ mProperties->mSounds.insert(event, filename);
+}
+
+class ProductionPropertiesEditor : public PluginPropertiesEditor
+{
+public:
+	ProductionPropertiesEditor(ProductionProperties* p)
+		: PluginPropertiesEditor(p)
+	{
+		mProperties = p;
+	}
+
+	void setProducerList(const QValueList<unsigned long int>& list)
+	{
+		mProperties->mProducerList = list;
+	}
+
+private:
+	ProductionProperties* mProperties;
+};
+
+class HarvesterPropertiesEditor : public PluginPropertiesEditor
+{
+public:
+	HarvesterPropertiesEditor(HarvesterProperties* p)
+		: PluginPropertiesEditor(p)
+	{
+		mProperties = p;
+	}
+
+	void setCanMineMinerals(bool canMineMinerals)
+	{
+		mProperties->mCanMineMinerals = canMineMinerals;
+	}
+	void setCanMineOil(bool canMineOil)
+	{
+		mProperties->mCanMineOil = canMineOil;
+	}
+	void setMaxResources(unsigned int maxResources)
+	{
+		mProperties->mMaxResources = maxResources;
+	}
+	void setMiningSpeed(unsigned int miningSpeed)
+	{
+		mProperties->mMiningSpeed = miningSpeed;
+	}
+	void setUnloadingSpeed(unsigned int unloadingSpeed)
+	{
+		mProperties->mUnloadingSpeed = unloadingSpeed;
+	}
+
+private:
+	HarvesterProperties* mProperties;
+};
+
+class RefineryPropertiesEditor : public PluginPropertiesEditor
+{
+public:
+	RefineryPropertiesEditor(RefineryProperties* p)
+		: PluginPropertiesEditor(p)
+	{
+		mProperties = p;
+	}
+
+	void setCanRefineMinerals(bool canRefineMinerals)
+	{
+		mProperties->mCanRefineMinerals = canRefineMinerals;
+	}
+	void setCanRefineOil(bool canRefineOil)
+	{
+		mProperties->mCanRefineOil = canRefineOil;
+	}
+
+private:
+	RefineryProperties* mProperties;
+};
+
 
 
 static QString listToString(const QValueList<unsigned long int>& list)
@@ -353,9 +499,13 @@ BoUnitEditor::~BoUnitEditor()
 
 void BoUnitEditor::init()
 {
+ mGeneralPageHandler = new BoGeneralPageHandler(this);
+ mPropertiesPageHandler = new BoPropertiesPageHandler(this);
+ mWeaponPageHandler = new BoWeaponPageHandler(this);
+ mPluginsPageHandler = new BoPluginsPageHandler(this);
  mProducerPageHandler = new BoProducerPageHandler(this);
  mMappingPageHandler = new BoMappingPageHandler(this);
- mWeaponPageHandler = new BoWeaponPageHandler(this);
+ mOtherPageHandler = new BoOtherPageHandler(this);
 
  mUnitLoaded = false; // Bad hack
  mUnit = new EditorUnitProperties(0, false);
@@ -440,21 +590,7 @@ void BoUnitEditor::slotCurrentTextureChanged()
 
 void BoUnitEditor::slotAutoPickId()
 {
- // Check if unit is facility or mobile; if facility, iterate through all
- //  facilities and pick next free id > 0; if it's mobile, iterate through all
- //  mobiles and pick next free id >= 10000
- int id;
- if(mUnitTypeFacility->isChecked()) {
-	id = 1;
- } else {
-	id = 10000;
- }
- while(mUsedIds.contains(id) > 0) {
-	id++;
- }
- mUnitId->setValue(id);
- mConfigChanged = true;
- updateConfigWidgets();
+ mGeneralPageHandler->slotAutoPickId();
 }
 
 void BoUnitEditor::slotSaveUnit()
@@ -637,157 +773,28 @@ void BoUnitEditor::slotOpenUnit()
  slotLoadUnit(dir);
 }
 
-
-
-
 void BoUnitEditor::updateUnitProperties()
 {
  mUnit->clearPlugins(true);
- // General page
- mUnit->setName(mUnitName->text());
- mUnit->setTypeId(mUnitId->value());
- mUnit->setUnitWidth((mUnitWidth->value()));
- mUnit->setUnitHeight((mUnitHeight->value()));
- mUnit->setUnitDepth(mUnitDepth->value());
 
- // Mobile/facility properties
- if(mUnitTypeFacility->isChecked()) {
-	mUnit->setIsFacility(true);
-	mUnit->setConstructionSteps(mUnitConstructionSteps->value());
- } else {
-	mUnit->setIsFacility(false);
-	mUnit->insertBoFixedBaseValue(bofixed(mUnitSpeed->value()), "Speed");
-	mUnit->setCanGoOnLand(mUnitCanGoOnLand->isChecked());
-	mUnit->setCanGoOnWater(mUnitCanGoOnWater->isChecked());
- }
- // Properties page
- mUnit->insertULongBaseValue(mUnitHealth->value(), "Health");
- mUnit->insertULongBaseValue(mUnitArmor->value(), "Armor");
- mUnit->insertULongBaseValue(mUnitShields->value(), "Shields");
- mUnit->insertULongBaseValue(mUnitMineralCost->value(), "MineralCost");
- mUnit->insertULongBaseValue(mUnitOilCost->value(), "OilCost");
- mUnit->insertULongBaseValue(mUnitSight->value(), "SightRange");
- mUnit->setTerrainType((UnitProperties::TerrainType)(mUnitTerrain->currentItem()));
- mUnit->setSupportMiniMap(mUnitSupportMiniMap->isChecked());
-
- // Weapons page
+ mGeneralPageHandler->updateUnitProperties();
+ mPropertiesPageHandler->updateUnitProperties();
  mWeaponPageHandler->updateUnitProperties();
-
- // Plugins page
- if(mUnitCanProduce->isChecked()) {
-	ProductionProperties* p = new ProductionProperties(mUnit);
-	p->setProducerList(stringToList(mUnitProducerList->text()));
-	mUnit->addPlugin(p);
- }
- if(mUnitCanHarvest->isChecked()) {
-	HarvesterProperties* p = new HarvesterProperties(mUnit);
-	p->setCanMineMinerals(mUnitHarvestMinerals->isChecked());
-	p->setCanMineOil(mUnitHarvestOil->isChecked());
-	p->setMaxResources(mUnitMaxResource->value());
-	p->setMiningSpeed(mUnitMiningSpeed->value());
-	p->setUnloadingSpeed(mUnitUnloadingSpeed->value());
-	mUnit->addPlugin(p);
- }
- if(mUnitCanRefine->isChecked()) {
-	RefineryProperties* p = new RefineryProperties(mUnit);
-	p->setCanRefineMinerals(mUnitRefineMinerals->isChecked());
-	p->setCanRefineOil(mUnitRefineOil->isChecked());
-	mUnit->addPlugin(p);
- }
- if(mUnitCanRepair->isChecked()) {
-	RepairProperties* p = new RepairProperties(mUnit);
-	mUnit->addPlugin(p);
- }
-
+ mPluginsPageHandler->updateUnitProperties();
  mProducerPageHandler->updateUnitProperties();
  mMappingPageHandler->updateUnitProperties();
-
- // Other page
- mUnit->setDestroyedEffectIds(stringToList(mUnitDestroyedEffects->text()));
- mUnit->setConstructedEffectIds(stringToList(mUnitConstructedEffects->text()));
- mUnit->setExplodingDamageRange(mUnitExplodingDamageRange->value());
- mUnit->setExplodingDamage(mUnitExplodingDamage->value());
- BoVector3Fixed hitpoint(mUnitHitPointX->value(), mUnitHitPointY->value(), mUnitHitPointZ->value());
- mUnit->setHitPoint(hitpoint);
+ mOtherPageHandler->updateUnitProperties();
 }
 
 void BoUnitEditor::updateWidgets()
 {
- // General page
- mUnitPath->setText(mUnit->unitPath());
- mUnitName->setText(mUnit->name());
- mUnitId->setValue(mUnit->typeId());
- bool isFac = mUnit->isFacility();    
- mUnitTypeFacility->setChecked(isFac);
- mUnitTypeMobile->setChecked(!isFac);
- slotTypeChanged();
- mUnitWidth->setValue(mUnit->unitWidth());
- mUnitHeight->setValue(mUnit->unitHeight());
- mUnitDepth->setValue(mUnit->unitDepth());
-
- // Properties page
- mUnitHealth->setValue(mUnit->ulongBaseValue("Health"));
- mUnitArmor->setValue(mUnit->ulongBaseValue("Armor"));
- mUnitShields->setValue(mUnit->ulongBaseValue("Shields"));
- mUnitMineralCost->setValue(mUnit->ulongBaseValue("MineralCost"));
- mUnitOilCost->setValue(mUnit->ulongBaseValue("OilCost"));
- mUnitSight->setValue(mUnit->ulongBaseValue("SightRange"));
- int terrain = (int)(mUnit->terrainType());
- mUnitTerrain->setCurrentItem(terrain);
- mUnitSupportMiniMap->setChecked(mUnit->supportMiniMap());
- // FIXME: UnitProperties only saves mobile *or* facility properties, but
- //  I'd like to have them both saved
- // TODO: This MUST be double, but Designer knows nothing about KDoubleNumInput
- mUnitSpeed->setValue(mUnit->bofixedBaseValue("Speed"));
- mUnitCanGoOnLand->setChecked(mUnit->canGoOnLand());
- mUnitCanGoOnWater->setChecked(mUnit->canGoOnWater());
- mUnitConstructionSteps->setValue(mUnit->constructionSteps());
-
- // Weapons
+ mGeneralPageHandler->updateWidget();
+ mPropertiesPageHandler->updateWidget();
  mWeaponPageHandler->updateWidget();
-
- // Plugins page
- const ProductionProperties* productionProp = (ProductionProperties*)(mUnit->properties(PluginProperties::Production));
- bool canProduce = (productionProp != 0l);
- mUnitCanProduce->setChecked(canProduce);
- mUnitProducingGroup->setEnabled(canProduce);
- if(canProduce) {
-	mUnitProducerList->setText(listToString(productionProp->producerList()));
- }
- const HarvesterProperties* harvesterProp = (HarvesterProperties*)(mUnit->properties(PluginProperties::Harvester));
- bool canHarvest = (harvesterProp != 0l);
- mUnitCanHarvest->setChecked(canHarvest);
- mUnitHarvestGroup->setEnabled(canHarvest);
- if(canHarvest) {
-	mUnitHarvestMinerals->setChecked(harvesterProp->canMineMinerals());
-	mUnitHarvestOil->setChecked(harvesterProp->canMineOil());
-	mUnitMaxResource->setValue(harvesterProp->maxResources());
-	mUnitMiningSpeed->setValue(harvesterProp->miningSpeed());
-	mUnitUnloadingSpeed->setValue(harvesterProp->unloadingSpeed());
- }
- const RefineryProperties* refineryProp = (RefineryProperties*)(mUnit->properties(PluginProperties::Refinery));
- bool canRefine = (refineryProp != 0l);
- mUnitCanRefine->setChecked(canRefine);
- mUnitRefineGroup->setEnabled(canRefine);
- if(canRefine) {
-	mUnitRefineMinerals->setChecked(refineryProp->canRefineMinerals());
-	mUnitRefineOil->setChecked(refineryProp->canRefineOil());
- }
- bool canRepair = (mUnit->properties(PluginProperties::Repair) != 0l);
- mUnitCanRepair->setChecked(canRepair);
-
+ mPluginsPageHandler->updateWidget();
  mProducerPageHandler->updateWidget();
  mMappingPageHandler->updateWidget();
-
- // Other page
- mUnitDestroyedEffects->setText(listToString(mUnit->destroyedEffectIds()));
- mUnitConstructedEffects->setText(listToString(mUnit->constructedEffectIds()));
- mUnitExplodingDamageRange->setValue(mUnit->explodingDamageRange());
- mUnitExplodingDamage->setValue(mUnit->explodingDamage());
- BoVector3Fixed hitpoint = mUnit->hitPoint();
- mUnitHitPointX->setValue(hitpoint.x());
- mUnitHitPointY->setValue(hitpoint.y());
- mUnitHitPointZ->setValue(hitpoint.z());
+ mOtherPageHandler->updateWidget();
 }
 
 void BoUnitEditor::slotAddWeapon()
@@ -805,8 +812,6 @@ void BoUnitEditor::slotRemoveWeapon()
  mWeaponPageHandler->slotRemoveWeapon();
 }
 
-
-
 void BoUnitEditor::slotConfigChanged()
 {
  // Unit config has changed
@@ -814,11 +819,127 @@ void BoUnitEditor::slotConfigChanged()
  updateConfigWidgets();
 }
 
-
 void BoUnitEditor::updateConfigWidgets()
 {
  mUnitSaveButton->setEnabled(mConfigChanged);
 }
+
+
+
+BoGeneralPageHandler::BoGeneralPageHandler(BoUnitEditor* parent)
+	: QObject(parent)
+{
+ mEditor = parent;
+}
+
+void BoGeneralPageHandler::updateUnitProperties()
+{
+ BO_CHECK_NULL_RET(mEditor);
+ BO_CHECK_NULL_RET(mEditor->mUnit);
+ EditorUnitProperties* unit = mEditor->mUnit;
+
+ unit->setName(mEditor->mUnitName->text());
+ unit->setTypeId(mEditor->mUnitId->value());
+ unit->setUnitWidth(mEditor->mUnitWidth->value());
+ unit->setUnitHeight(mEditor->mUnitHeight->value());
+ unit->setUnitDepth(mEditor->mUnitDepth->value());
+}
+
+void BoGeneralPageHandler::updateWidget()
+{
+ BO_CHECK_NULL_RET(mEditor);
+ BO_CHECK_NULL_RET(mEditor->mUnit);
+ EditorUnitProperties* unit = mEditor->mUnit;
+
+ mEditor->mUnitPath->setText(unit->unitPath());
+ mEditor->mUnitName->setText(unit->name());
+ mEditor->mUnitId->setValue(unit->typeId());
+ bool isFac = unit->isFacility();
+ mEditor->mUnitTypeFacility->setChecked(isFac);
+ mEditor->mUnitTypeMobile->setChecked(!isFac);
+ mEditor->slotTypeChanged();
+ mEditor->mUnitWidth->setValue(unit->unitWidth());
+ mEditor->mUnitHeight->setValue(unit->unitHeight());
+ mEditor->mUnitDepth->setValue(unit->unitDepth());
+}
+
+void BoGeneralPageHandler::slotAutoPickId()
+{
+ // Check if unit is facility or mobile; if facility, iterate through all
+ //  facilities and pick next free id > 0; if it's mobile, iterate through all
+ //  mobiles and pick next free id >= 10000
+ int id;
+ if(mEditor->mUnitTypeFacility->isChecked()) {
+	id = 1;
+ } else {
+	id = 10000;
+ }
+ while(mEditor->mUsedIds.contains(id) > 0) {
+	id++;
+ }
+ mEditor->mUnitId->setValue(id);
+ mEditor->mConfigChanged = true;
+ mEditor->updateConfigWidgets();
+}
+
+
+BoPropertiesPageHandler::BoPropertiesPageHandler(BoUnitEditor* parent)
+	: QObject(parent)
+{
+ mEditor = parent;
+}
+
+void BoPropertiesPageHandler::updateUnitProperties()
+{
+ BO_CHECK_NULL_RET(mEditor);
+ BO_CHECK_NULL_RET(mEditor->mUnit);
+ EditorUnitProperties* unit = mEditor->mUnit;
+
+ unit->insertULongBaseValue(mEditor->mUnitHealth->value(), "Health");
+ unit->insertULongBaseValue(mEditor->mUnitArmor->value(), "Armor");
+ unit->insertULongBaseValue(mEditor->mUnitShields->value(), "Shields");
+ unit->insertULongBaseValue(mEditor->mUnitMineralCost->value(), "MineralCost");
+ unit->insertULongBaseValue(mEditor->mUnitOilCost->value(), "OilCost");
+ unit->insertULongBaseValue(mEditor->mUnitSight->value(), "SightRange");
+ unit->setTerrainType((UnitProperties::TerrainType)(mEditor->mUnitTerrain->currentItem()));
+ unit->setSupportMiniMap(mEditor->mUnitSupportMiniMap->isChecked());
+
+ // Mobile/facility properties
+ if(mEditor->mUnitTypeFacility->isChecked()) {
+	unit->setIsFacility(true);
+	unit->setConstructionSteps(mEditor->mUnitConstructionSteps->value());
+ } else {
+	unit->setIsFacility(false);
+	unit->insertBoFixedBaseValue(bofixed(mEditor->mUnitSpeed->value()), "Speed");
+	unit->setCanGoOnLand(mEditor->mUnitCanGoOnLand->isChecked());
+	unit->setCanGoOnWater(mEditor->mUnitCanGoOnWater->isChecked());
+ }
+}
+
+void BoPropertiesPageHandler::updateWidget()
+{
+ BO_CHECK_NULL_RET(mEditor);
+ BO_CHECK_NULL_RET(mEditor->mUnit);
+ EditorUnitProperties* unit = mEditor->mUnit;
+
+ mEditor->mUnitHealth->setValue(unit->ulongBaseValue("Health"));
+ mEditor->mUnitArmor->setValue(unit->ulongBaseValue("Armor"));
+ mEditor->mUnitShields->setValue(unit->ulongBaseValue("Shields"));
+ mEditor->mUnitMineralCost->setValue(unit->ulongBaseValue("MineralCost"));
+ mEditor->mUnitOilCost->setValue(unit->ulongBaseValue("OilCost"));
+ mEditor->mUnitSight->setValue(unit->ulongBaseValue("SightRange"));
+ int terrain = (int)(unit->terrainType());
+ mEditor->mUnitTerrain->setCurrentItem(terrain);
+ mEditor->mUnitSupportMiniMap->setChecked(unit->supportMiniMap());
+ // FIXME: UnitProperties only saves mobile *or* facility properties, but
+ //  I'd like to have them both saved
+ // TODO: This MUST be double, but Designer knows nothing about KDoubleNumInput
+ mEditor->mUnitSpeed->setValue(unit->bofixedBaseValue("Speed"));
+ mEditor->mUnitCanGoOnLand->setChecked(unit->canGoOnLand());
+ mEditor->mUnitCanGoOnWater->setChecked(unit->canGoOnWater());
+ mEditor->mUnitConstructionSteps->setValue(unit->constructionSteps());
+}
+
 
 
 BoProducerPageHandler::BoProducerPageHandler(BoUnitEditor* parent)
@@ -927,6 +1048,13 @@ BoWeaponPageHandler::BoWeaponPageHandler(BoUnitEditor* parent)
  mEditor = parent;
 
  mCurrentWeapon = -1;
+
+ mWeapons = new QPtrList<BosonWeaponPropertiesEditor>();
+}
+
+BoWeaponPageHandler::~BoWeaponPageHandler()
+{
+ delete mWeapons;
 }
 
 void BoWeaponPageHandler::updateUnitProperties()
@@ -937,7 +1065,7 @@ void BoWeaponPageHandler::updateUnitProperties()
 
  // Sync current weapon first
  updateWeaponProperties();
- QPtrListIterator<BosonWeaponPropertiesEditor> it(mWeapons);
+ QPtrListIterator<BosonWeaponPropertiesEditor> it(*mWeapons);
  while(it.current() != 0) {
 	unit->addPlugin(it.current()->properties());
 	++it;
@@ -950,7 +1078,7 @@ void BoWeaponPageHandler::updateWidget()
  BO_CHECK_NULL_RET(mEditor->mUnit);
  EditorUnitProperties* unit = mEditor->mUnit;
 
- mWeapons.clear();
+ mWeapons->clear();
  mEditor->mWeaponsList->clear();
  int weaponCounter = 0;
  mEditor->mWeaponGroup->setEnabled(false);
@@ -960,7 +1088,7 @@ void BoWeaponPageHandler::updateWidget()
 	if(it.current()->pluginType() == PluginProperties::Weapon) {
 		BosonWeaponProperties* w = (BosonWeaponProperties*)(it.current());
 		w->setEditorObject(new BosonWeaponPropertiesEditor(w));
-		mWeapons.insert(weaponCounter, w->editorObject());
+		mWeapons->insert(weaponCounter, (BosonWeaponPropertiesEditor*)w->editorObject());
 		mEditor->mWeaponsList->insertItem(w->weaponName(), weaponCounter);
 		weaponCounter++;
 	}
@@ -973,7 +1101,7 @@ void BoWeaponPageHandler::updateWeaponProperties()
  if(mCurrentWeapon == -1) {
 	return;
  }
- BosonWeaponPropertiesEditor* w = mWeapons.at(mCurrentWeapon);
+ BosonWeaponPropertiesEditor* w = mWeapons->at(mCurrentWeapon);
  w->setWeaponName(mEditor->mWeaponName->text());
  w->insertLongWeaponBaseValue(mEditor->mWeaponDamage->value(), "Damage");
  w->insertBoFixedWeaponBaseValue(mEditor->mWeaponDamageRange->value(), "DamageRange");
@@ -997,11 +1125,11 @@ void BoWeaponPageHandler::slotAddWeapon()
  // 0 is actually invalid id... but we don't care as it's only used for loading/saving games
  BosonWeaponProperties* w = new BosonWeaponProperties(mEditor->mUnit, 0);
  w->setEditorObject(new BosonWeaponPropertiesEditor(w));
- w->editorObject()->reset();
- mWeapons.append(w->editorObject());
- mEditor->mWeaponsList->insertItem("New weapon", mWeapons.count() - 1);
- mEditor->mWeaponsList->setCurrentItem(mWeapons.count() - 1);
- slotWeaponSelected(mWeapons.count() - 1);
+ ((BosonWeaponPropertiesEditor*)w->editorObject())->reset();
+ mWeapons->append((BosonWeaponPropertiesEditor*)w->editorObject());
+ mEditor->mWeaponsList->insertItem("New weapon", mWeapons->count() - 1);
+ mEditor->mWeaponsList->setCurrentItem(mWeapons->count() - 1);
+ slotWeaponSelected(mWeapons->count() - 1);
  mEditor->mConfigChanged = true;
  mEditor->updateConfigWidgets();
 }
@@ -1027,7 +1155,7 @@ void BoWeaponPageHandler::slotRemoveWeapon()
  }
  int item = mCurrentWeapon;
  mEditor->mWeaponsList->removeItem(item);
- mWeapons.remove(item);
+ mWeapons->remove(item);
  if(mCurrentWeapon >= (signed int)(mEditor->mWeaponsList->count())) {
 	mCurrentWeapon--;
  }
@@ -1045,7 +1173,7 @@ void BoWeaponPageHandler::updateWeaponWidgets()
  }
  mEditor->mWeaponGroup->setEnabled(true);
  mEditor->mWeaponsRemove->setEnabled(true);
- const BosonWeaponProperties* w = mWeapons.at(mCurrentWeapon)->properties();
+ const BosonWeaponProperties* w = mWeapons->at(mCurrentWeapon)->properties();
  mEditor->mWeaponName->setText(w->weaponName());
  mEditor->mWeaponDamage->setValue(w->damage());
  mEditor->mWeaponDamageRange->setValue(w->damageRange());
@@ -1066,4 +1194,126 @@ void BoWeaponPageHandler::updateWeaponWidgets()
  mEditor->mWeaponHitEffects->setText(listToString(w->hitEffectIds()));
  mEditor->mWeaponSoundShoot->setText(w->sound(SoundWeaponShoot));
 }
+
+BoPluginsPageHandler::BoPluginsPageHandler(BoUnitEditor* parent)
+	: QObject(parent)
+{
+ mEditor = parent;
+}
+
+void BoPluginsPageHandler::updateUnitProperties()
+{
+ BO_CHECK_NULL_RET(mEditor);
+ BO_CHECK_NULL_RET(mEditor->mUnit);
+ EditorUnitProperties* unit = mEditor->mUnit;
+
+
+ if(mEditor->mUnitCanProduce->isChecked()) {
+	ProductionProperties* p = new ProductionProperties(unit);
+	ProductionPropertiesEditor* e = new ProductionPropertiesEditor(p);
+	p->setEditorObject(e);
+	e->setProducerList(stringToList(mEditor->mUnitProducerList->text()));
+	unit->addPlugin(p);
+ }
+ if(mEditor->mUnitCanHarvest->isChecked()) {
+	HarvesterProperties* p = new HarvesterProperties(unit);
+	HarvesterPropertiesEditor* e = new HarvesterPropertiesEditor(p);
+	p->setEditorObject(e);
+	e->setCanMineMinerals(mEditor->mUnitHarvestMinerals->isChecked());
+	e->setCanMineOil(mEditor->mUnitHarvestOil->isChecked());
+	e->setMaxResources(mEditor->mUnitMaxResource->value());
+	e->setMiningSpeed(mEditor->mUnitMiningSpeed->value());
+	e->setUnloadingSpeed(mEditor->mUnitUnloadingSpeed->value());
+	unit->addPlugin(p);
+ }
+ if(mEditor->mUnitCanRefine->isChecked()) {
+	RefineryProperties* p = new RefineryProperties(unit);
+	RefineryPropertiesEditor* e = new RefineryPropertiesEditor(p);
+	p->setEditorObject(e);
+	e->setCanRefineMinerals(mEditor->mUnitRefineMinerals->isChecked());
+	e->setCanRefineOil(mEditor->mUnitRefineOil->isChecked());
+	unit->addPlugin(p);
+ }
+ if(mEditor->mUnitCanRepair->isChecked()) {
+	RepairProperties* p = new RepairProperties(unit);
+	unit->addPlugin(p);
+ }
+
+}
+
+void BoPluginsPageHandler::updateWidget()
+{
+ BO_CHECK_NULL_RET(mEditor);
+ BO_CHECK_NULL_RET(mEditor->mUnit);
+ EditorUnitProperties* unit = mEditor->mUnit;
+
+ const ProductionProperties* productionProp = (ProductionProperties*)(unit->properties(PluginProperties::Production));
+ bool canProduce = (productionProp != 0l);
+ mEditor->mUnitCanProduce->setChecked(canProduce);
+ mEditor->mUnitProducingGroup->setEnabled(canProduce);
+ if(canProduce) {
+	mEditor->mUnitProducerList->setText(listToString(productionProp->producerList()));
+ }
+ const HarvesterProperties* harvesterProp = (HarvesterProperties*)(unit->properties(PluginProperties::Harvester));
+ bool canHarvest = (harvesterProp != 0l);
+ mEditor->mUnitCanHarvest->setChecked(canHarvest);
+ mEditor->mUnitHarvestGroup->setEnabled(canHarvest);
+ if(canHarvest) {
+	mEditor->mUnitHarvestMinerals->setChecked(harvesterProp->canMineMinerals());
+	mEditor->mUnitHarvestOil->setChecked(harvesterProp->canMineOil());
+	mEditor->mUnitMaxResource->setValue(harvesterProp->maxResources());
+	mEditor->mUnitMiningSpeed->setValue(harvesterProp->miningSpeed());
+	mEditor->mUnitUnloadingSpeed->setValue(harvesterProp->unloadingSpeed());
+ }
+ const RefineryProperties* refineryProp = (RefineryProperties*)(unit->properties(PluginProperties::Refinery));
+ bool canRefine = (refineryProp != 0l);
+ mEditor->mUnitCanRefine->setChecked(canRefine);
+ mEditor->mUnitRefineGroup->setEnabled(canRefine);
+ if(canRefine) {
+	mEditor->mUnitRefineMinerals->setChecked(refineryProp->canRefineMinerals());
+	mEditor->mUnitRefineOil->setChecked(refineryProp->canRefineOil());
+ }
+ bool canRepair = (unit->properties(PluginProperties::Repair) != 0l);
+ mEditor->mUnitCanRepair->setChecked(canRepair);
+}
+
+
+
+BoOtherPageHandler::BoOtherPageHandler(BoUnitEditor* parent)
+	: QObject(parent)
+{
+ mEditor = parent;
+}
+
+void BoOtherPageHandler::updateUnitProperties()
+{
+ BO_CHECK_NULL_RET(mEditor);
+ BO_CHECK_NULL_RET(mEditor->mUnit);
+ EditorUnitProperties* unit = mEditor->mUnit;
+
+ unit->setDestroyedEffectIds(stringToList(mEditor->mUnitDestroyedEffects->text()));
+ unit->setConstructedEffectIds(stringToList(mEditor->mUnitConstructedEffects->text()));
+ unit->setExplodingDamageRange(mEditor->mUnitExplodingDamageRange->value());
+ unit->setExplodingDamage(mEditor->mUnitExplodingDamage->value());
+ BoVector3Fixed hitpoint(mEditor->mUnitHitPointX->value(), mEditor->mUnitHitPointY->value(), mEditor->mUnitHitPointZ->value());
+ unit->setHitPoint(hitpoint);
+}
+
+void BoOtherPageHandler::updateWidget()
+{
+ BO_CHECK_NULL_RET(mEditor);
+ BO_CHECK_NULL_RET(mEditor->mUnit);
+ EditorUnitProperties* unit = mEditor->mUnit;
+
+ mEditor->mUnitDestroyedEffects->setText(listToString(unit->destroyedEffectIds()));
+ mEditor->mUnitConstructedEffects->setText(listToString(unit->constructedEffectIds()));
+ mEditor->mUnitExplodingDamageRange->setValue(unit->explodingDamageRange());
+ mEditor->mUnitExplodingDamage->setValue(unit->explodingDamage());
+ BoVector3Fixed hitpoint = unit->hitPoint();
+ mEditor->mUnitHitPointX->setValue(hitpoint.x());
+ mEditor->mUnitHitPointY->setValue(hitpoint.y());
+ mEditor->mUnitHitPointZ->setValue(hitpoint.z());
+}
+
+
 
