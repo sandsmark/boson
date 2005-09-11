@@ -21,11 +21,14 @@
 #include "bouniteditor.moc"
 
 #include "unitproperties.h"
+#include "unitpropertiesprivate.h"
 #include "bosonweapon.h"
 #include "pluginproperties.h"
 #include "bo3dtools.h"
 #include "bofiledialog.h"
 #include "bosonsearchpathswidget.h"
+#include "bodebug.h"
+#include "bosonconfig.h"
 
 #include <klocale.h>
 #include <kmessagebox.h>
@@ -50,6 +53,264 @@
 #include <qradiobutton.h>
 #include <qlabel.h>
 #include <qcombobox.h>
+
+
+EditorUnitProperties::EditorUnitProperties(SpeciesTheme* theme, bool fullMode)
+	: UnitProperties(theme, fullMode)
+{
+}
+
+void EditorUnitProperties::setName(const QString& n)
+{
+ d->mName = n;
+}
+
+void EditorUnitProperties::setRequirements(QValueList<unsigned long int> requirements)
+{
+ d->mRequirements = requirements;
+}
+
+void EditorUnitProperties::clearPlugins(bool deleteweapons)
+{
+ // FIXME: deleteweapons is very ugly hack here. In unit editor, we store
+ //  pointers to units, so we must not delete weapons here
+ if (!deleteweapons) {
+	d->mPlugins.setAutoDelete(false);
+	PluginProperties* p = d->mPlugins.first();
+	while (p) {
+		if (p->pluginType() != PluginProperties::Weapon) {
+			delete p;
+		}
+		d->mPlugins.remove();
+		p = d->mPlugins.current();
+	}
+	d->mPlugins.setAutoDelete(true);
+ } else {
+	d->mPlugins.clear();
+ }
+}
+
+void EditorUnitProperties::addPlugin(PluginProperties* prop)
+{
+ d->mPlugins.append(prop);
+}
+
+void EditorUnitProperties::setConstructionSteps(unsigned int steps)
+{
+ if (isFacility()) {
+	mConstructionFrames = steps;
+ }
+}
+
+void EditorUnitProperties::setRotationSpeed(int speed)
+{
+ if (isMobile()) {
+	mRotationSpeed = speed;
+ }
+}
+
+void EditorUnitProperties::setCanGoOnLand(bool c)
+{
+ if (isMobile()) {
+	mCanGoOnLand = c;
+ }
+}
+
+void EditorUnitProperties::setCanGoOnWater(bool c)
+{
+ if (isMobile()) {
+	mCanGoOnWater = c;
+ }
+}
+
+void EditorUnitProperties::addTextureMapping(QString shortname, QString longname)
+{
+ d->mTextureNames.insert(shortname, longname);
+}
+
+void EditorUnitProperties::addSound(int event, QString filename)
+{
+ d->mSounds.insert(event, filename);
+}
+
+void EditorUnitProperties::setDestroyedEffectIds(QValueList<unsigned long int> ids)
+{
+ d->mDestroyedEffectIds = ids;
+}
+
+void EditorUnitProperties::setConstructedEffectIds(QValueList<unsigned long int> ids)
+{
+ d->mConstructedEffectIds = ids;
+}
+
+void EditorUnitProperties::reset()
+{
+ if (mFullMode) {
+	// UnitProperties should be never reset in full mode (aka game mode)
+	boWarning() << k_funcinfo << "Resetting UnitProperties in full mode!!!" << endl;
+ }
+ clearPlugins(false); // reset() is only used by unit editor (this far), so don't delete weapons
+ // Set variables to default values
+ d->mUnitPath = "";
+ mTypeId = 0;
+ mTerrain = (TerrainType)0;
+ mUnitWidth = 1.0f;
+ mUnitHeight = 1.0f;
+ mUnitDepth = 1.0;
+ d->mName = i18n("Unknown");
+ insertULongBaseValue(100, "Health", "MaxValue");
+ insertULongBaseValue(5, "SightRange", "MaxValue");
+ insertULongBaseValue(100, "ProductionTime", "MaxValue");
+ insertULongBaseValue(100, "MineralCost", "MaxValue");
+ insertULongBaseValue(0, "OilCost", "MaxValue");
+ insertULongBaseValue(0, "Armor", "MaxValue");
+ insertULongBaseValue(0, "Shields", "MaxValue");
+ insertBoFixedBaseValue(0, "Speed", "MaxValue");
+ insertBoFixedBaseValue(2.0f / 20.0f / 20.0f, "AccelerationSpeed", "MaxValue");
+ insertBoFixedBaseValue(4.0f / 20.0f / 20.0f, "DecelerationSpeed", "MaxValue");
+ mSupportMiniMap = false;
+ d->mRequirements.clear();
+ d->mDestroyedEffectIds.clear();
+ d->mConstructedEffectIds.clear();
+ d->mHitPoint.reset();
+ mProducer = 0;
+ mExplodingDamage = 0;
+ mExplodingDamageRange = 0;
+ // Mobile stuff (because unit is mobile by default)
+ mIsFacility = false;
+ mRotationSpeed = (int)(45.0f * bofixedBaseValue("Speed"));
+ mCanGoOnLand = true;
+ mCanGoOnWater = false;
+ // Sounds
+ d->mSounds.clear();
+ d->mSounds.insert(SoundOrderMove, "order_move");
+ d->mSounds.insert(SoundOrderAttack, "order_attack");
+ d->mSounds.insert(SoundOrderSelect, "order_select");
+ d->mSounds.insert(SoundReportProduced, "report_produced");
+ d->mSounds.insert(SoundReportDestroyed, "report_destroyed");
+ d->mSounds.insert(SoundReportUnderAttack, "report_underattack");
+ // Clear other lists
+ d->mTextureNames.clear();
+}
+
+void EditorUnitProperties::setHitPoint(const BoVector3Fixed& hitpoint)
+{
+ d->mHitPoint = hitpoint;
+}
+
+bool EditorUnitProperties::saveUnitType(const QString& fileName)
+{
+ d->mUnitPath = fileName.left(fileName.length() - QString("index.unit").length());
+ KSimpleConfig conf(fileName);
+ conf.setGroup(QString::fromLatin1("Boson Unit"));
+
+ conf.writeEntry("Id", typeId());
+ conf.writeEntry("TerrainType", (int)mTerrain);
+ conf.writeEntry("UnitWidth", (double)mUnitWidth);
+ conf.writeEntry("UnitHeight", (double)mUnitHeight);
+ conf.writeEntry("UnitDepth", (double)mUnitDepth);
+ conf.writeEntry("Name", d->mName);
+ conf.writeEntry("Health", ulongBaseValue("Health", "MaxValue", 100));
+ conf.writeEntry("MineralCost", ulongBaseValue("MineralCost"));
+ conf.writeEntry("OilCost", ulongBaseValue("OilCost"));
+ conf.writeEntry("SightRange", ulongBaseValue("SightRange"));
+ // This is converted from advance calls to seconds
+ conf.writeEntry("ProductionTime", ulongBaseValue("ProductionTime") / 20.0f);
+ conf.writeEntry("Shield", ulongBaseValue("Shields"));
+ conf.writeEntry("Armor", ulongBaseValue("Armor"));
+ conf.writeEntry("SupportMiniMap", mSupportMiniMap);
+ conf.writeEntry("IsFacility", isFacility());
+ BosonConfig::writeUnsignedLongNumList(&conf, "Requirements", d->mRequirements);
+ conf.writeEntry("ExplodingDamage", mExplodingDamage);
+ conf.writeEntry("ExplodingDamageRange", (double)mExplodingDamageRange);
+ BoVector3Fixed tmpHitPoint(d->mHitPoint);
+ BosonConfig::writeEntry(&conf, "HitPoint", d->mHitPoint);
+ conf.writeEntry("Producer", mProducer);
+
+ BosonConfig::writeUnsignedLongNumList(&conf, "DestroyedEffects", d->mDestroyedEffectIds);
+ BosonConfig::writeUnsignedLongNumList(&conf, "ConstructedEffects", d->mConstructedEffectIds);
+
+ if (isFacility()) {
+	saveFacilityProperties(&conf);
+ } else {
+	saveMobileProperties(&conf);
+ }
+
+ saveAllPluginProperties(&conf);  // This saves weapons too
+ saveTextureNames(&conf);
+ saveSoundNames(&conf);
+
+ return true;
+}
+
+bool EditorUnitProperties::saveMobileProperties(KSimpleConfig* conf)
+{
+ conf->setGroup("Boson Mobile Unit");
+ // We multiply speeds with 20 because speeds in config files are cells/second,
+ //  but here we have cells/advance call
+ conf->writeEntry("Speed", bofixedBaseValue("Speed") * 20.0f);
+ conf->writeEntry("AccelerationSpeed", (double)bofixedBaseValue("AccelerationSpeed") * 20.0f * 20.0f);
+ conf->writeEntry("DecelerationSpeed", (double)bofixedBaseValue("DecelerationSpeed") * 20.0f * 20.0f);
+ conf->writeEntry("RotationSpeed", mRotationSpeed * 20.0f);
+ conf->writeEntry("CanGoOnLand", mCanGoOnLand);
+ conf->writeEntry("CanGoOnWater", mCanGoOnWater);
+ return true;
+}
+
+bool EditorUnitProperties::saveFacilityProperties(KSimpleConfig* conf)
+{
+ conf->setGroup("Boson Facility");
+ conf->writeEntry("ConstructionSteps", mConstructionFrames);
+ return true;
+}
+
+bool EditorUnitProperties::saveAllPluginProperties(KSimpleConfig* conf)
+{
+ int weaponcounter = 0;
+ QPtrListIterator<PluginProperties> it(d->mPlugins);
+ while (it.current()) {
+	if (it.current()->pluginType() == PluginProperties::Weapon)
+	{
+		conf->setGroup(QString("Weapon_%1").arg(weaponcounter++));
+	}
+	it.current()->savePlugin(conf);
+	++it;
+ }
+ conf->setGroup("Boson Unit");
+ conf->writeEntry("Weapons", weaponcounter);
+ return true;
+}
+
+bool EditorUnitProperties::saveTextureNames(KSimpleConfig* conf)
+{
+ if (d->mTextureNames.count() == 0) {
+	return true;
+ }
+ conf->setGroup("Textures");
+ QMap<QString, QString>::Iterator it;
+ QStringList textures;
+ for (it = d->mTextureNames.begin(); it != d->mTextureNames.end(); ++it) {
+	textures.append(it.key());
+	conf->writeEntry(it.key(), it.data());
+ }
+ conf->writeEntry("Textures", textures);
+ return true;
+}
+
+bool EditorUnitProperties::saveSoundNames(KSimpleConfig* conf)
+{
+ conf->setGroup("Sounds");
+ conf->writeEntry("OrderMove", d->mSounds[SoundOrderMove]);
+ conf->writeEntry("OrderAttack", d->mSounds[SoundOrderAttack]);
+ conf->writeEntry("OrderSelect", d->mSounds[SoundOrderSelect]);
+ conf->writeEntry("ReportProduced", d->mSounds[SoundReportProduced]);
+ conf->writeEntry("ReportDestroyed", d->mSounds[SoundReportDestroyed]);
+ conf->writeEntry("ReportUnderAttack", d->mSounds[SoundReportUnderAttack]);
+ return true;
+}
+
+
+
 
 static QString listToString(const QValueList<unsigned long int>& list)
 {
@@ -92,8 +353,10 @@ BoUnitEditor::~BoUnitEditor()
 
 void BoUnitEditor::init()
 {
+ mProducerPageHandler = new BoProducerPageHandler(this);
+
  mUnitLoaded = false; // Bad hack
- mUnit = new UnitProperties(false);
+ mUnit = new EditorUnitProperties(0, false);
  mSearchPaths = new BosonSearchPathsWidget;
  mCurrentWeapon = -1;
  connect(mSearchPaths->mOkButton, SIGNAL(clicked()), this, SLOT(slotHideSearchPaths()));
@@ -448,10 +711,10 @@ void BoUnitEditor::updateUnitProperties()
 	RepairProperties* p = new RepairProperties(mUnit);
 	mUnit->addPlugin(p);
  }
+
  // Producing page
- mUnit->insertULongBaseValue(mUnitProductionTime->value(), "ProductionTime");
- mUnit->setProducer(mUnitProducer->value());
- mUnit->setRequirements(stringToList(mUnitRequirements->text()));
+ mProducerPageHandler->updateUnitProperties();
+
  // Mapping page
  if(mUnitTexturesList->childCount() > 0) {
 	QListViewItemIterator it(mUnitTexturesList);
@@ -466,6 +729,7 @@ void BoUnitEditor::updateUnitProperties()
  mUnit->addSound(SoundReportProduced, mUnitSoundReportProduced->text());
  mUnit->addSound(SoundReportDestroyed, mUnitSoundReportDestroyed->text());
  mUnit->addSound(SoundReportUnderAttack, mUnitSoundReportUnderAttack->text());
+
  // Other page
  mUnit->setDestroyedEffectIds(stringToList(mUnitDestroyedEffects->text()));
  mUnit->setConstructedEffectIds(stringToList(mUnitConstructedEffects->text()));
@@ -550,10 +814,10 @@ void BoUnitEditor::updateWidgets()
  }
  bool canRepair = (mUnit->properties(PluginProperties::Repair) != 0l);
  mUnitCanRepair->setChecked(canRepair);
+
  // Producing page
- mUnitProductionTime->setValue(mUnit->productionTime());
- mUnitProducer->setValue(mUnit->producer());
- mUnitRequirements->setText(listToString(mUnit->requirements()));
+ mProducerPageHandler->updateWidget();
+
  // Mapping page
  mUnitTexturesList->clear();
  QMap<QString, QString> textures = mUnit->longTextureNames();
@@ -692,3 +956,31 @@ void BoUnitEditor::updateConfigWidgets()
 {
  mUnitSaveButton->setEnabled(mConfigChanged);
 }
+
+
+BoProducerPageHandler::BoProducerPageHandler(BoUnitEditor* parent)
+	: QObject(parent)
+{
+ mEditor = parent;
+}
+
+void BoProducerPageHandler::updateUnitProperties()
+{
+ BO_CHECK_NULL_RET(mEditor);
+ BO_CHECK_NULL_RET(mEditor->mUnit);
+ EditorUnitProperties* unit = mEditor->mUnit;
+ unit->insertULongBaseValue(mEditor->mUnitProductionTime->value(), "ProductionTime");
+ unit->setProducer(mEditor->mUnitProducer->value());
+ unit->setRequirements(stringToList(mEditor->mUnitRequirements->text()));
+}
+
+void BoProducerPageHandler::updateWidget()
+{
+ BO_CHECK_NULL_RET(mEditor);
+ BO_CHECK_NULL_RET(mEditor->mUnit);
+ EditorUnitProperties* unit = mEditor->mUnit;
+ mEditor->mUnitProductionTime->setValue(unit->productionTime());
+ mEditor->mUnitProducer->setValue(unit->producer());
+ mEditor->mUnitRequirements->setText(listToString(unit->requirements()));
+}
+

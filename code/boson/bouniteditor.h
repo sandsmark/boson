@@ -23,6 +23,78 @@
 #include "bouniteditorbase.h"
 
 #include "bosonweapon.h"
+#include "unitproperties.h"
+
+class BoUnitEditor;
+
+class EditorUnitProperties : public UnitProperties
+{
+public:
+	EditorUnitProperties(SpeciesTheme* theme, bool fullMode);
+
+
+	// Methods to set values. They are only meant to be used by unit
+	//  editor. Don't use them unless you know what you are doing
+	void setName(const QString& name);
+	void setTypeId(unsigned long int id)  { mTypeId = id; }
+	void setIsFacility(bool f) { mIsFacility = f; }
+	void setUnitWidth(bofixed unitWidth)  { mUnitWidth = unitWidth; }
+	void setUnitHeight(bofixed unitHeight)  { mUnitHeight = unitHeight; }
+	void setUnitDepth(bofixed unitDepth)  { mUnitDepth = unitDepth; }
+
+	void setProducer(unsigned int producer)  { mProducer = producer; }
+	void setTerrainType(TerrainType terrain)  { mTerrain = terrain; }
+	void setSupportMiniMap(bool supportMiniMap)  { mSupportMiniMap = supportMiniMap; }
+	void setRequirements(QValueList<unsigned long int> requirements);
+	void setDestroyedEffectIds(QValueList<unsigned long int> ids);
+	void setConstructedEffectIds(QValueList<unsigned long int> ids);
+	void setExplodingDamageRange(bofixed range)  { mExplodingDamageRange = range; }
+	void setExplodingDamage(long int damage)  { mExplodingDamage = damage; }
+	void setHitPoint(const BoVector3Fixed& hitpoint);
+	void setRemoveWreckageImmediately(bool remove)  { mRemoveWreckageImmediately = remove; }
+
+	// These only have effect if there is mobile or facility properties
+	void setConstructionSteps(unsigned int steps);
+	void setRotationSpeed(int speed);
+	void setCanGoOnLand(bool c);
+	void setCanGoOnWater(bool c);
+
+	void reset();
+	void clearPlugins(bool deleteweapons = true);
+
+	void addPlugin(PluginProperties* prop);
+	void addTextureMapping(QString shortname, QString longname);
+	void addSound(int event, QString filename);
+
+	/**
+	 * Save UnitProperties to the file. This sets all values of UnitProperties. All values are
+	 * readOnly, as UnitProperties is meant to change never.
+	 *
+	 * The file should contain units/your_unit_dir/index.desktop at the end
+	 * and should be an absolute path.
+	 **/
+	bool saveUnitType(const QString& fileName);
+
+private:
+	bool saveMobileProperties(KSimpleConfig* conf);
+	bool saveFacilityProperties(KSimpleConfig* conf);
+	bool saveAllPluginProperties(KSimpleConfig* conf);
+	bool saveTextureNames(KSimpleConfig* conf);
+	bool saveSoundNames(KSimpleConfig* conf);
+};
+
+class BoProducerPageHandler : public QObject
+{
+	Q_OBJECT
+public:
+	BoProducerPageHandler(BoUnitEditor* parent);
+
+	void updateUnitProperties();
+	void updateWidget();
+
+private:
+	BoUnitEditor* mEditor;
+};
 
 class BoUnitEditor : public BoUnitEditorBase
 {
@@ -30,6 +102,11 @@ class BoUnitEditor : public BoUnitEditorBase
 public:
 	BoUnitEditor(QWidget* parent = 0);
 	~BoUnitEditor();
+
+	EditorUnitProperties* unit() const
+	{
+		return mUnit;
+	}
 
 public slots:
 	virtual void slotTypeChanged();
@@ -66,9 +143,12 @@ protected:
 	QValueList<int> mUsedIds;
 	BosonSearchPathsWidget* mSearchPaths;
 	QMap<int, QString> mUnits;
-	UnitProperties* mUnit;
+	EditorUnitProperties* mUnit;
 	QPtrList<BosonWeaponProperties> mWeapons;
 	bool mConfigChanged;
+
+	friend class BoProducerPageHandler;
+	BoProducerPageHandler* mProducerPageHandler;
 
 private:
 	void init();
