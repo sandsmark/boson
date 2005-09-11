@@ -90,10 +90,10 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
 	boError() << "Invalid TypeId: " << typeId() << " in unit file " << fileName << endl;
 	// we continue - but we'll crash soon
  }
- mTerrain = (TerrainType)conf.readNumEntry("TerrainType", 0);
- if (mTerrain < 0 || mTerrain > 2) {
-	boWarning() << k_funcinfo << "Invalid TerrainType value: " << mTerrain << " for unit " << typeId() << ", defaulting to 0" << endl;
-	mTerrain = (TerrainType)0;
+ mTerrain = (TerrainType)conf.readNumEntry("TerrainType", (int)TerrainLand);
+ if (mTerrain <= 0 || mTerrain > 8) {
+	boWarning() << k_funcinfo << "Invalid TerrainType value: " << mTerrain << " for unit " << typeId() << ", defaulting to " << (int)TerrainLand << endl;
+	mTerrain = TerrainLand;
  }
  mUnitWidth = conf.readDoubleNumEntry("UnitWidth", 1.0);
  mUnitHeight = (conf.readDoubleNumEntry("UnitHeight", 1.0));
@@ -132,9 +132,17 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  loadMobileProperties(&conf);
 
  if (isFacility) {
-	mProducer = conf.readUnsignedNumEntry("Producer", (unsigned int)CommandBunker);
+	mProducer = conf.readUnsignedNumEntry("Producer", (unsigned int)ProducerCommandBunker);
  } else {
-	mProducer = conf.readUnsignedNumEntry("Producer", (unsigned int)mTerrain);
+	unsigned int defaultProducer = ProducerWarFactory;
+	if (mTerrain & TerrainLand) {
+		defaultProducer = ProducerWarFactory;
+	} else if (mTerrain & TerrainWater) {
+		defaultProducer = ProducerShipyard;
+	} else if (mTerrain & TerrainMaskAir) {
+		defaultProducer = ProducerAirport;
+	}
+	mProducer = conf.readUnsignedNumEntry("Producer", defaultProducer);
  }
 
  loadAllPluginProperties(&conf);
@@ -171,7 +179,6 @@ bool UnitProperties::loadMobileProperties(KSimpleConfig* conf)
  mWaterDepth = conf->readDoubleNumEntry("WaterDepth", 0.25);
 
  // Those are relevant only for aircrafts
- mIsHelicopter = conf->readBoolEntry("IsHelicopter", false);
  mTurnRadius = conf->readDoubleNumEntry("TurnRadius", 5);
  mPreferredAltitude = conf->readDoubleNumEntry("PreferredAltitude", 3);
  return true;
@@ -389,10 +396,7 @@ int UnitProperties::rotationSpeed() const
 
 bool UnitProperties::isHelicopter() const
 {
- if (!isMobile() || !isAircraft()) {
-	return false;
- }
- return mIsHelicopter;
+ return (mTerrain & TerrainAirHelicopter);
 }
 
 bofixed UnitProperties::turnRadius() const

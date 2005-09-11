@@ -123,6 +123,41 @@ void EditorUnitProperties::setCanGoOnWater(bool c)
  }
 }
 
+void EditorUnitProperties::setMaxSlope(bofixed s)
+{
+ if (isMobile()) {
+	mMaxSlope = s;
+ }
+}
+
+void EditorUnitProperties::setCrushDamage(unsigned int c)
+{
+ if (isMobile()) {
+	mCrushDamage = c;
+ }
+}
+
+void EditorUnitProperties::setWaterDepth(bofixed w)
+{
+ if (isMobile()) {
+	mWaterDepth = w;
+ }
+}
+
+void EditorUnitProperties::setTurnRadius(bofixed r)
+{
+ if (isMobile()) {
+	mTurnRadius = r;
+ }
+}
+
+void EditorUnitProperties::setPreferredAltitude(bofixed a)
+{
+ if (isMobile()) {
+	mPreferredAltitude = a;
+ }
+}
+
 void EditorUnitProperties::addTextureMapping(QString shortname, QString longname)
 {
  d->mTextureNames.insert(shortname, longname);
@@ -176,11 +211,18 @@ void EditorUnitProperties::reset()
  mProducer = 0;
  mExplodingDamage = 0;
  mExplodingDamageRange = 0;
+
  // Mobile stuff (because unit is mobile by default)
  mIsFacility = false;
- mRotationSpeed = (int)(45.0f * bofixedBaseValue("Speed"));
  mCanGoOnLand = true;
  mCanGoOnWater = false;
+ mRotationSpeed = (int)(45.0f * bofixedBaseValue("Speed"));
+ mMaxSlope = 30;
+ mCrushDamage = 0;
+ mWaterDepth = 0.25;
+ mTurnRadius = 5;
+ mPreferredAltitude = 3;
+
  // Sounds
  d->mSounds.clear();
  d->mSounds.insert(SoundOrderMove, "order_move");
@@ -254,6 +296,11 @@ bool EditorUnitProperties::saveMobileProperties(KSimpleConfig* conf)
  conf->writeEntry("RotationSpeed", mRotationSpeed * 20.0f);
  conf->writeEntry("CanGoOnLand", mCanGoOnLand);
  conf->writeEntry("CanGoOnWater", mCanGoOnWater);
+ conf->writeEntry("CrushDamage", (unsigned long int)mCrushDamage);
+ conf->writeEntry("MaxSlope", (double)mMaxSlope);
+ conf->writeEntry("WaterDepth", (double)mWaterDepth);
+ conf->writeEntry("TurnRadius", (double)mTurnRadius);
+ conf->writeEntry("PreferredAltitude", (double)mPreferredAltitude);
  return true;
 }
 
@@ -317,6 +364,9 @@ public:
 		: PluginPropertiesEditor(p)
 	{
 		mProperties = p;
+	}
+	~BosonWeaponPropertiesEditor()
+	{
 	}
 	BosonWeaponProperties* properties() const
 	{
@@ -539,7 +589,6 @@ void BoUnitEditor::init()
  mConfigChanged = false;
  updateConfigWidgets();
 }
-
 
 
 void BoUnitEditor::slotTypeChanged()
@@ -775,8 +824,6 @@ void BoUnitEditor::slotOpenUnit()
 
 void BoUnitEditor::updateUnitProperties()
 {
- mUnit->clearPlugins(true);
-
  mGeneralPageHandler->updateUnitProperties();
  mPropertiesPageHandler->updateUnitProperties();
  mWeaponPageHandler->updateUnitProperties();
@@ -889,6 +936,43 @@ BoPropertiesPageHandler::BoPropertiesPageHandler(BoUnitEditor* parent)
  mEditor = parent;
 }
 
+UnitProperties::TerrainType BoPropertiesPageHandler::currentTerrain() const
+{
+ switch (mEditor->mUnitTerrain->currentItem()) {
+	default:
+	case 0:
+		return UnitProperties::TerrainLand;
+	case 1:
+		return UnitProperties::TerrainWater;
+	case 2:
+		return UnitProperties::TerrainAirPlane;
+	case 3:
+		return UnitProperties::TerrainAirHelicopter;
+ }
+ return UnitProperties::TerrainLand;
+}
+
+void BoPropertiesPageHandler::setCurrentTerrain(UnitProperties::TerrainType t)
+{
+ switch (t) {
+	default:
+		boWarning() << k_funcinfo << "unexpected terrain " << (int)t << endl;
+		// fall through intended
+	case UnitProperties::TerrainLand:
+		mEditor->mUnitTerrain->setCurrentItem(0);
+		break;
+	case UnitProperties::TerrainWater:
+		mEditor->mUnitTerrain->setCurrentItem(1);
+		break;
+	case UnitProperties::TerrainAirPlane:
+		mEditor->mUnitTerrain->setCurrentItem(2);
+		break;
+	case UnitProperties::TerrainAirHelicopter:
+		mEditor->mUnitTerrain->setCurrentItem(3);
+		break;
+ }
+}
+
 void BoPropertiesPageHandler::updateUnitProperties()
 {
  BO_CHECK_NULL_RET(mEditor);
@@ -901,7 +985,7 @@ void BoPropertiesPageHandler::updateUnitProperties()
  unit->insertULongBaseValue(mEditor->mUnitMineralCost->value(), "MineralCost");
  unit->insertULongBaseValue(mEditor->mUnitOilCost->value(), "OilCost");
  unit->insertULongBaseValue(mEditor->mUnitSight->value(), "SightRange");
- unit->setTerrainType((UnitProperties::TerrainType)(mEditor->mUnitTerrain->currentItem()));
+ unit->setTerrainType(currentTerrain());
  unit->setSupportMiniMap(mEditor->mUnitSupportMiniMap->isChecked());
 
  // Mobile/facility properties
@@ -913,6 +997,14 @@ void BoPropertiesPageHandler::updateUnitProperties()
 	unit->insertBoFixedBaseValue(bofixed(mEditor->mUnitSpeed->value()), "Speed");
 	unit->setCanGoOnLand(mEditor->mUnitCanGoOnLand->isChecked());
 	unit->setCanGoOnWater(mEditor->mUnitCanGoOnWater->isChecked());
+	unit->insertBoFixedBaseValue(bofixed(mEditor->mUnitAccelerationSpeed->value() / 20.0 / 20.0), "AccelerationSpeed");
+	unit->insertBoFixedBaseValue(bofixed(mEditor->mUnitDecelerationSpeed->value() / 20.0 / 20.0), "DecelerationSpeed");
+	unit->insertBoFixedBaseValue(bofixed(mEditor->mUnitRotationSpeed->value() / 20.0), "RotationSpeed");
+	unit->setMaxSlope(bofixed(mEditor->mUnitMaxSlope->value()));
+	unit->setCrushDamage(mEditor->mUnitCrushDamage->value());
+	unit->setWaterDepth(bofixed(mEditor->mUnitWaterDepth->value()));
+	unit->setTurnRadius(bofixed(mEditor->mUnitTurnRadius->value()));
+	unit->setPreferredAltitude(bofixed(mEditor->mUnitPreferredAltitude->value()));
  }
 }
 
@@ -928,8 +1020,7 @@ void BoPropertiesPageHandler::updateWidget()
  mEditor->mUnitMineralCost->setValue(unit->ulongBaseValue("MineralCost"));
  mEditor->mUnitOilCost->setValue(unit->ulongBaseValue("OilCost"));
  mEditor->mUnitSight->setValue(unit->ulongBaseValue("SightRange"));
- int terrain = (int)(unit->terrainType());
- mEditor->mUnitTerrain->setCurrentItem(terrain);
+ setCurrentTerrain(unit->terrainType());
  mEditor->mUnitSupportMiniMap->setChecked(unit->supportMiniMap());
  // FIXME: UnitProperties only saves mobile *or* facility properties, but
  //  I'd like to have them both saved
@@ -938,6 +1029,14 @@ void BoPropertiesPageHandler::updateWidget()
  mEditor->mUnitCanGoOnLand->setChecked(unit->canGoOnLand());
  mEditor->mUnitCanGoOnWater->setChecked(unit->canGoOnWater());
  mEditor->mUnitConstructionSteps->setValue(unit->constructionSteps());
+ mEditor->mUnitAccelerationSpeed->setValue(unit->bofixedBaseValue("AccelerationSpeed"));
+ mEditor->mUnitDecelerationSpeed->setValue(unit->bofixedBaseValue("DecelerationSpeed"));
+ mEditor->mUnitRotationSpeed->setValue(unit->rotationSpeed());
+ mEditor->mUnitMaxSlope->setValue(unit->maxSlope());
+ mEditor->mUnitCrushDamage->setValue(unit->crushDamage());
+ mEditor->mUnitWaterDepth->setValue(unit->waterDepth());
+ mEditor->mUnitTurnRadius->setValue(unit->turnRadius());
+ mEditor->mUnitPreferredAltitude->setValue(unit->preferredAltitude());
 }
 
 
@@ -1101,7 +1200,12 @@ void BoWeaponPageHandler::updateWeaponProperties()
  if(mCurrentWeapon == -1) {
 	return;
  }
+ if(mCurrentWeapon >= (int)mWeapons->count()) {
+	boError() << k_funcinfo << endl;
+	return;
+ }
  BosonWeaponPropertiesEditor* w = mWeapons->at(mCurrentWeapon);
+ BO_CHECK_NULL_RET(w);
  w->setWeaponName(mEditor->mWeaponName->text());
  w->insertLongWeaponBaseValue(mEditor->mWeaponDamage->value(), "Damage");
  w->insertBoFixedWeaponBaseValue(mEditor->mWeaponDamageRange->value(), "DamageRange");

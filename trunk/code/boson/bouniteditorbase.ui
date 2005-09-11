@@ -11,7 +11,7 @@
             <x>0</x>
             <y>0</y>
             <width>998</width>
-            <height>622</height>
+            <height>819</height>
         </rect>
     </property>
     <property name="caption">
@@ -719,12 +719,6 @@ It clears all values to their default values</string>
                         <property name="name">
                             <cstring>unnamed</cstring>
                         </property>
-                        <property name="margin">
-                            <number>11</number>
-                        </property>
-                        <property name="spacing">
-                            <number>6</number>
-                        </property>
                         <widget class="QGroupBox">
                             <property name="name">
                                 <cstring>mCommonGroup</cstring>
@@ -870,7 +864,12 @@ When some unit shoots your unit and your unit has any shields, then amount of sh
                                             </item>
                                             <item>
                                                 <property name="text">
-                                                    <string>Air</string>
+                                                    <string>Air - Plane</string>
+                                                </property>
+                                            </item>
+                                            <item>
+                                                <property name="text">
+                                                    <string>Air - Helicopter</string>
                                                 </property>
                                             </item>
                                             <property name="name">
@@ -1068,17 +1067,11 @@ When other unit shoots at your unit, armor value is substracted from shooter's d
                         </widget>
                         <widget class="QLayoutWidget">
                             <property name="name">
-                                <cstring>Layout10</cstring>
+                                <cstring>layout34</cstring>
                             </property>
                             <hbox>
                                 <property name="name">
                                     <cstring>unnamed</cstring>
-                                </property>
-                                <property name="margin">
-                                    <number>0</number>
-                                </property>
-                                <property name="spacing">
-                                    <number>6</number>
                                 </property>
                                 <widget class="QGroupBox">
                                     <property name="name">
@@ -1179,6 +1172,415 @@ When other unit shoots at your unit, armor value is substracted from shooter's d
                                             <property name="whatsThis" stdset="0">
                                                 <string>Whether this unit can cross water tiles.</string>
                                             </property>
+                                        </widget>
+                                        <widget class="QLayoutWidget">
+                                            <property name="name">
+                                                <cstring>layout25</cstring>
+                                            </property>
+                                            <hbox>
+                                                <property name="name">
+                                                    <cstring>unnamed</cstring>
+                                                </property>
+                                                <widget class="QLabel">
+                                                    <property name="name">
+                                                        <cstring>mUnitSpeedLabel_2</cstring>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>Acceleration Speed:</string>
+                                                    </property>
+                                                </widget>
+                                                <spacer>
+                                                    <property name="name">
+                                                        <cstring>mUnitSpeedSpacer_2</cstring>
+                                                    </property>
+                                                    <property name="orientation">
+                                                        <enum>Horizontal</enum>
+                                                    </property>
+                                                    <property name="sizeType">
+                                                        <enum>Fixed</enum>
+                                                    </property>
+                                                    <property name="sizeHint">
+                                                        <size>
+                                                            <width>20</width>
+                                                            <height>20</height>
+                                                        </size>
+                                                    </property>
+                                                </spacer>
+                                                <widget class="KDoubleNumInput">
+                                                    <property name="name">
+                                                        <cstring>mUnitAccelerationSpeed</cstring>
+                                                    </property>
+                                                    <property name="maxValue">
+                                                        <number>30</number>
+                                                    </property>
+                                                    <property name="toolTip" stdset="0">
+                                                        <string>Speed of your unit</string>
+                                                    </property>
+                                                    <property name="whatsThis" stdset="0">
+                                                        <string>The number of pixels that a unit moves forward in every advance call. Don't use too high values and remember that the actual speed depends on the game speed!</string>
+                                                    </property>
+                                                </widget>
+                                            </hbox>
+                                        </widget>
+                                        <widget class="QLayoutWidget">
+                                            <property name="name">
+                                                <cstring>layout26</cstring>
+                                            </property>
+                                            <hbox>
+                                                <property name="name">
+                                                    <cstring>unnamed</cstring>
+                                                </property>
+                                                <widget class="QLabel">
+                                                    <property name="name">
+                                                        <cstring>mUnitSpeedLabel_3</cstring>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>Deceleration Speed:</string>
+                                                    </property>
+                                                </widget>
+                                                <spacer>
+                                                    <property name="name">
+                                                        <cstring>mUnitSpeedSpacer_3</cstring>
+                                                    </property>
+                                                    <property name="orientation">
+                                                        <enum>Horizontal</enum>
+                                                    </property>
+                                                    <property name="sizeType">
+                                                        <enum>Fixed</enum>
+                                                    </property>
+                                                    <property name="sizeHint">
+                                                        <size>
+                                                            <width>20</width>
+                                                            <height>20</height>
+                                                        </size>
+                                                    </property>
+                                                </spacer>
+                                                <widget class="KDoubleNumInput">
+                                                    <property name="name">
+                                                        <cstring>mUnitDecelerationSpeed</cstring>
+                                                    </property>
+                                                    <property name="maxValue">
+                                                        <number>30</number>
+                                                    </property>
+                                                    <property name="toolTip" stdset="0">
+                                                        <string>Speed of your unit</string>
+                                                    </property>
+                                                    <property name="whatsThis" stdset="0">
+                                                        <string>The number of pixels that a unit moves forward in every advance call. Don't use too high values and remember that the actual speed depends on the game speed!</string>
+                                                    </property>
+                                                </widget>
+                                            </hbox>
+                                        </widget>
+                                        <widget class="QLayoutWidget">
+                                            <property name="name">
+                                                <cstring>layout26_2</cstring>
+                                            </property>
+                                            <hbox>
+                                                <property name="name">
+                                                    <cstring>unnamed</cstring>
+                                                </property>
+                                                <widget class="QLabel">
+                                                    <property name="name">
+                                                        <cstring>mUnitSpeedLabel_3_2</cstring>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>Rotation Speed:</string>
+                                                    </property>
+                                                </widget>
+                                                <spacer>
+                                                    <property name="name">
+                                                        <cstring>mUnitSpeedSpacer_3_2</cstring>
+                                                    </property>
+                                                    <property name="orientation">
+                                                        <enum>Horizontal</enum>
+                                                    </property>
+                                                    <property name="sizeType">
+                                                        <enum>Fixed</enum>
+                                                    </property>
+                                                    <property name="sizeHint">
+                                                        <size>
+                                                            <width>20</width>
+                                                            <height>20</height>
+                                                        </size>
+                                                    </property>
+                                                </spacer>
+                                                <widget class="KDoubleNumInput">
+                                                    <property name="name">
+                                                        <cstring>mUnitRotationSpeed</cstring>
+                                                    </property>
+                                                    <property name="maxValue">
+                                                        <number>30</number>
+                                                    </property>
+                                                    <property name="toolTip" stdset="0">
+                                                        <string>Speed of your unit</string>
+                                                    </property>
+                                                    <property name="whatsThis" stdset="0">
+                                                        <string>The number of pixels that a unit moves forward in every advance call. Don't use too high values and remember that the actual speed depends on the game speed!</string>
+                                                    </property>
+                                                </widget>
+                                            </hbox>
+                                        </widget>
+                                        <widget class="QLayoutWidget">
+                                            <property name="name">
+                                                <cstring>layout28</cstring>
+                                            </property>
+                                            <hbox>
+                                                <property name="name">
+                                                    <cstring>unnamed</cstring>
+                                                </property>
+                                                <widget class="QLabel">
+                                                    <property name="name">
+                                                        <cstring>mUnitSpeedLabel_4</cstring>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>Max Slope:</string>
+                                                    </property>
+                                                </widget>
+                                                <spacer>
+                                                    <property name="name">
+                                                        <cstring>mUnitSpeedSpacer_4</cstring>
+                                                    </property>
+                                                    <property name="orientation">
+                                                        <enum>Horizontal</enum>
+                                                    </property>
+                                                    <property name="sizeType">
+                                                        <enum>Fixed</enum>
+                                                    </property>
+                                                    <property name="sizeHint">
+                                                        <size>
+                                                            <width>20</width>
+                                                            <height>20</height>
+                                                        </size>
+                                                    </property>
+                                                </spacer>
+                                                <widget class="KDoubleNumInput">
+                                                    <property name="name">
+                                                        <cstring>mUnitMaxSlope</cstring>
+                                                    </property>
+                                                    <property name="maxValue">
+                                                        <number>30</number>
+                                                    </property>
+                                                    <property name="toolTip" stdset="0">
+                                                        <string>Speed of your unit</string>
+                                                    </property>
+                                                    <property name="whatsThis" stdset="0">
+                                                        <string>The number of pixels that a unit moves forward in every advance call. Don't use too high values and remember that the actual speed depends on the game speed!</string>
+                                                    </property>
+                                                </widget>
+                                            </hbox>
+                                        </widget>
+                                        <widget class="QLayoutWidget">
+                                            <property name="name">
+                                                <cstring>layout33</cstring>
+                                            </property>
+                                            <hbox>
+                                                <property name="name">
+                                                    <cstring>unnamed</cstring>
+                                                </property>
+                                                <widget class="QLabel">
+                                                    <property name="name">
+                                                        <cstring>mUnitConstrucionStepsLabel_3</cstring>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>Crush damage:</string>
+                                                    </property>
+                                                </widget>
+                                                <spacer>
+                                                    <property name="name">
+                                                        <cstring>mUnitConstrucionStepsSpacer_3</cstring>
+                                                    </property>
+                                                    <property name="orientation">
+                                                        <enum>Horizontal</enum>
+                                                    </property>
+                                                    <property name="sizeType">
+                                                        <enum>Fixed</enum>
+                                                    </property>
+                                                    <property name="sizeHint">
+                                                        <size>
+                                                            <width>20</width>
+                                                            <height>20</height>
+                                                        </size>
+                                                    </property>
+                                                </spacer>
+                                                <widget class="KIntNumInput">
+                                                    <property name="name">
+                                                        <cstring>mUnitCrushDamage</cstring>
+                                                    </property>
+                                                    <property name="value">
+                                                        <number>4</number>
+                                                    </property>
+                                                    <property name="minValue">
+                                                        <number>0</number>
+                                                    </property>
+                                                    <property name="toolTip" stdset="0">
+                                                        <string>How many construction steps this unit has</string>
+                                                    </property>
+                                                    <property name="whatsThis" stdset="0">
+                                                        <string>How many construction steps this unit has&lt;br&gt;
+Construction steps are used to get feeling that your unit is constructed step by step</string>
+                                                    </property>
+                                                </widget>
+                                            </hbox>
+                                        </widget>
+                                        <widget class="QLayoutWidget">
+                                            <property name="name">
+                                                <cstring>layout29</cstring>
+                                            </property>
+                                            <hbox>
+                                                <property name="name">
+                                                    <cstring>unnamed</cstring>
+                                                </property>
+                                                <widget class="QLabel">
+                                                    <property name="name">
+                                                        <cstring>mUnitSpeedLabel_5</cstring>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>Water depth:</string>
+                                                    </property>
+                                                </widget>
+                                                <spacer>
+                                                    <property name="name">
+                                                        <cstring>mUnitSpeedSpacer_5</cstring>
+                                                    </property>
+                                                    <property name="orientation">
+                                                        <enum>Horizontal</enum>
+                                                    </property>
+                                                    <property name="sizeType">
+                                                        <enum>Fixed</enum>
+                                                    </property>
+                                                    <property name="sizeHint">
+                                                        <size>
+                                                            <width>20</width>
+                                                            <height>20</height>
+                                                        </size>
+                                                    </property>
+                                                </spacer>
+                                                <widget class="KDoubleNumInput">
+                                                    <property name="name">
+                                                        <cstring>mUnitWaterDepth</cstring>
+                                                    </property>
+                                                    <property name="maxValue">
+                                                        <number>30</number>
+                                                    </property>
+                                                    <property name="toolTip" stdset="0">
+                                                        <string>Speed of your unit</string>
+                                                    </property>
+                                                    <property name="whatsThis" stdset="0">
+                                                        <string>The number of pixels that a unit moves forward in every advance call. Don't use too high values and remember that the actual speed depends on the game speed!</string>
+                                                    </property>
+                                                </widget>
+                                            </hbox>
+                                        </widget>
+                                        <widget class="QGroupBox">
+                                            <property name="name">
+                                                <cstring>mAircraftOptions</cstring>
+                                            </property>
+                                            <property name="title">
+                                                <string>Aircrafts</string>
+                                            </property>
+                                            <vbox>
+                                                <property name="name">
+                                                    <cstring>unnamed</cstring>
+                                                </property>
+                                                <widget class="QLayoutWidget">
+                                                    <property name="name">
+                                                        <cstring>layout30</cstring>
+                                                    </property>
+                                                    <hbox>
+                                                        <property name="name">
+                                                            <cstring>unnamed</cstring>
+                                                        </property>
+                                                        <widget class="QLabel">
+                                                            <property name="name">
+                                                                <cstring>mUnitSpeedLabel_6</cstring>
+                                                            </property>
+                                                            <property name="text">
+                                                                <string>Turn radius:</string>
+                                                            </property>
+                                                        </widget>
+                                                        <spacer>
+                                                            <property name="name">
+                                                                <cstring>mUnitSpeedSpacer_6</cstring>
+                                                            </property>
+                                                            <property name="orientation">
+                                                                <enum>Horizontal</enum>
+                                                            </property>
+                                                            <property name="sizeType">
+                                                                <enum>Fixed</enum>
+                                                            </property>
+                                                            <property name="sizeHint">
+                                                                <size>
+                                                                    <width>20</width>
+                                                                    <height>20</height>
+                                                                </size>
+                                                            </property>
+                                                        </spacer>
+                                                        <widget class="KDoubleNumInput">
+                                                            <property name="name">
+                                                                <cstring>mUnitTurnRadius</cstring>
+                                                            </property>
+                                                            <property name="maxValue">
+                                                                <number>30</number>
+                                                            </property>
+                                                            <property name="toolTip" stdset="0">
+                                                                <string>Speed of your unit</string>
+                                                            </property>
+                                                            <property name="whatsThis" stdset="0">
+                                                                <string>The number of pixels that a unit moves forward in every advance call. Don't use too high values and remember that the actual speed depends on the game speed!</string>
+                                                            </property>
+                                                        </widget>
+                                                    </hbox>
+                                                </widget>
+                                                <widget class="QLayoutWidget">
+                                                    <property name="name">
+                                                        <cstring>layout31</cstring>
+                                                    </property>
+                                                    <hbox>
+                                                        <property name="name">
+                                                            <cstring>unnamed</cstring>
+                                                        </property>
+                                                        <widget class="QLabel">
+                                                            <property name="name">
+                                                                <cstring>mUnitSpeedLabel_7</cstring>
+                                                            </property>
+                                                            <property name="text">
+                                                                <string>Preferred altitude:</string>
+                                                            </property>
+                                                        </widget>
+                                                        <spacer>
+                                                            <property name="name">
+                                                                <cstring>mUnitSpeedSpacer_7</cstring>
+                                                            </property>
+                                                            <property name="orientation">
+                                                                <enum>Horizontal</enum>
+                                                            </property>
+                                                            <property name="sizeType">
+                                                                <enum>Fixed</enum>
+                                                            </property>
+                                                            <property name="sizeHint">
+                                                                <size>
+                                                                    <width>20</width>
+                                                                    <height>20</height>
+                                                                </size>
+                                                            </property>
+                                                        </spacer>
+                                                        <widget class="KDoubleNumInput">
+                                                            <property name="name">
+                                                                <cstring>mUnitPreferredAltitude</cstring>
+                                                            </property>
+                                                            <property name="maxValue">
+                                                                <number>30</number>
+                                                            </property>
+                                                            <property name="toolTip" stdset="0">
+                                                                <string>Speed of your unit</string>
+                                                            </property>
+                                                            <property name="whatsThis" stdset="0">
+                                                                <string>The number of pixels that a unit moves forward in every advance call. Don't use too high values and remember that the actual speed depends on the game speed!</string>
+                                                            </property>
+                                                        </widget>
+                                                    </hbox>
+                                                </widget>
+                                            </vbox>
                                         </widget>
                                     </vbox>
                                 </widget>
@@ -4065,6 +4467,54 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
         <receiver>BoUnitEditorBase</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
+    <connection>
+        <sender>mUnitAccelerationSpeed</sender>
+        <signal>valueChanged(double)</signal>
+        <receiver>BoUnitEditorBase</receiver>
+        <slot>slotConfigChanged()</slot>
+    </connection>
+    <connection>
+        <sender>mUnitDecelerationSpeed</sender>
+        <signal>valueChanged(double)</signal>
+        <receiver>BoUnitEditorBase</receiver>
+        <slot>slotConfigChanged()</slot>
+    </connection>
+    <connection>
+        <sender>mUnitRotationSpeed</sender>
+        <signal>valueChanged(double)</signal>
+        <receiver>BoUnitEditorBase</receiver>
+        <slot>slotConfigChanged()</slot>
+    </connection>
+    <connection>
+        <sender>mUnitMaxSlope</sender>
+        <signal>valueChanged(double)</signal>
+        <receiver>BoUnitEditorBase</receiver>
+        <slot>slotConfigChanged()</slot>
+    </connection>
+    <connection>
+        <sender>mUnitCrushDamage</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>BoUnitEditorBase</receiver>
+        <slot>slotConfigChanged()</slot>
+    </connection>
+    <connection>
+        <sender>mUnitWaterDepth</sender>
+        <signal>valueChanged(double)</signal>
+        <receiver>BoUnitEditorBase</receiver>
+        <slot>slotConfigChanged()</slot>
+    </connection>
+    <connection>
+        <sender>mUnitTurnRadius</sender>
+        <signal>valueChanged(double)</signal>
+        <receiver>BoUnitEditorBase</receiver>
+        <slot>slotConfigChanged()</slot>
+    </connection>
+    <connection>
+        <sender>mUnitPreferredAltitude</sender>
+        <signal>valueChanged(double)</signal>
+        <receiver>BoUnitEditorBase</receiver>
+        <slot>slotConfigChanged()</slot>
+    </connection>
 </connections>
 <includes>
     <include location="global" impldecl="in implementation">qptrlist.h</include>
@@ -4094,6 +4544,8 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
     <slot specifier="pure virtual">slotWeaponSelected( int index )</slot>
     <slot specifier="pure virtual">slotRemoveWeapon()</slot>
     <slot specifier="pure virtual">slotConfigChanged()</slot>
+    <slot>mUnitAccelerationSpeed_valueChanged( double )</slot>
+    <slot>slotUnitConfigChanged()</slot>
 </slots>
 <layoutdefaults spacing="6" margin="11"/>
 <includehints>
@@ -4101,6 +4553,22 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>klineedit.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
