@@ -1,11 +1,11 @@
-<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
-<class>BosonSearchPathsWidget</class>
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>BosonSearchPathsWidgetBase</class>
 <comment>Little widget to select paths
 Written for Boson Unit Editor, but may also be useful in other places</comment>
 <author>Rivo Laks &lt;rivolaks@hot.ee&gt;</author>
 <widget class="QWidget">
     <property name="name">
-        <cstring>BosonSearchPathsWidget</cstring>
+        <cstring>BosonSearchPathsWidgetBase</cstring>
     </property>
     <property name="geometry">
         <rect>
@@ -93,50 +93,42 @@ Written for Boson Unit Editor, but may also be useful in other places</comment>
     <connection>
         <sender>mBrowseButton</sender>
         <signal>clicked()</signal>
-        <receiver>BosonSearchPathsWidget</receiver>
+        <receiver>BosonSearchPathsWidgetBase</receiver>
         <slot>slotBrowse()</slot>
     </connection>
     <connection>
         <sender>mAddButton</sender>
         <signal>clicked()</signal>
-        <receiver>BosonSearchPathsWidget</receiver>
+        <receiver>BosonSearchPathsWidgetBase</receiver>
         <slot>slotAddPath()</slot>
     </connection>
     <connection>
         <sender>mRemoveButton</sender>
         <signal>clicked()</signal>
-        <receiver>BosonSearchPathsWidget</receiver>
+        <receiver>BosonSearchPathsWidgetBase</receiver>
         <slot>slotRemovePath()</slot>
     </connection>
     <connection>
         <sender>mCurrentPaths</sender>
         <signal>highlighted(int)</signal>
-        <receiver>BosonSearchPathsWidget</receiver>
+        <receiver>BosonSearchPathsWidgetBase</receiver>
         <slot>slotPathSelected(int)</slot>
     </connection>
     <connection>
         <sender>mNewPath</sender>
         <signal>textChanged(const QString&amp;)</signal>
-        <receiver>BosonSearchPathsWidget</receiver>
+        <receiver>BosonSearchPathsWidgetBase</receiver>
         <slot>slotCurrentPathChanged(const QString&amp;)</slot>
     </connection>
 </connections>
-<includes>
-    <include location="local" impldecl="in implementation">bosonsearchpathswidget.ui.h</include>
-</includes>
-<variables>
-    <variable access="private">int mCurrentPath;</variable>
-</variables>
 <slots>
     <slot>slotAppendPath( QString path )</slot>
-    <slot>slotSetPaths( QStringList paths )</slot>
-    <slot>slotRemovePath()</slot>
-    <slot>slotAddPath()</slot>
-    <slot>slotBrowse()</slot>
-    <slot returnType="QStringList">currentPaths()</slot>
-    <slot access="protected">slotPathSelected( int index )</slot>
-    <slot access="protected">slotCurrentPathChanged( const QString &amp; path )</slot>
-    <slot>init()</slot>
+    <slot specifier="pure virtual">slotSetPaths( QStringList paths )</slot>
+    <slot specifier="pure virtual">slotRemovePath()</slot>
+    <slot specifier="pure virtual">slotAddPath()</slot>
+    <slot specifier="pure virtual">slotBrowse()</slot>
+    <slot access="protected" specifier="pure virtual">slotPathSelected( int index )</slot>
+    <slot access="protected" specifier="pure virtual">slotCurrentPathChanged( const QString &amp; path )</slot>
 </slots>
 <layoutdefaults spacing="6" margin="11"/>
 </UI>
