@@ -20,7 +20,6 @@
 #include "bosonweapon.h"
 
 #include "../bomemory/bodummymemory.h"
-#include "speciestheme.h"
 #include "unit.h"
 #include "global.h"
 #include "bosoncanvas.h"
@@ -51,7 +50,6 @@ BosonWeaponProperties::BosonWeaponProperties(const UnitProperties* prop, unsigne
     mSpeed(          this, QString("Weapon_%1:Speed").arg(id-1), "MaxValue")
 {
   mId = id;
-  mEditorObject = 0;
 
   if(id < 1)
   {
@@ -61,12 +59,6 @@ BosonWeaponProperties::BosonWeaponProperties(const UnitProperties* prop, unsigne
 
 BosonWeaponProperties::~BosonWeaponProperties()
 {
-}
-
-void BosonWeaponProperties::setEditorObject(BosonWeaponPropertiesEditor* e)
-{
-  delete mEditorObject;
-  mEditorObject = e;
 }
 
 QString BosonWeaponProperties::name() const
@@ -448,21 +440,11 @@ QMap<int, QString> BosonWeaponProperties::sounds() const
 
 void BosonWeaponProperties::loadAction(UnitAction type, KSimpleConfig* cfg, const QString& key, bool useDefault)
 {
-  if(!speciesTheme())
-  {
-    // No speciestheme. We're probably in unit editor
-    return;
-  }
   if(!cfg->hasKey(key) && !useDefault)
   {
     return;
   }
   mActionStrings.insert(type, cfg->readEntry(key, key));
-}
-
-void BosonWeaponPropertiesEditor::setSound(int event, const QString& filename)
-{
-  mProperties->mSounds.insert(event, filename);
 }
 
 

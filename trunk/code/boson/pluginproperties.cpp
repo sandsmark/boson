@@ -32,10 +32,18 @@ PluginProperties::PluginProperties(const UnitProperties* parent)
 	: BoBaseValueCollection()
 {
  mUnitProperties = parent;
+ mEditorObject = 0;
 }
 
 PluginProperties::~PluginProperties()
 {
+ delete mEditorObject;
+}
+
+void PluginProperties::setEditorObject(PluginPropertiesEditor* e)
+{
+ delete mEditorObject;
+ mEditorObject = e;
 }
 
 SpeciesTheme* PluginProperties::speciesTheme() const
