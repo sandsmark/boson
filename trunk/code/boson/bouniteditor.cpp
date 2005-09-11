@@ -545,6 +545,8 @@ BoUnitEditor::~BoUnitEditor()
  KConfig* cfg = kapp->config();
  cfg->setGroup("Boson Unit Editor");
  cfg->writeEntry("SearchPaths", mSearchPaths->currentPaths());
+
+ delete mSearchPaths;
 }
 
 void BoUnitEditor::init()
@@ -559,7 +561,7 @@ void BoUnitEditor::init()
 
  mUnitLoaded = false; // Bad hack
  mUnit = new EditorUnitProperties(0, false);
- mSearchPaths = new BosonSearchPathsWidget;
+ mSearchPaths = new BosonSearchPathsWidget(0);
  connect(mSearchPaths->mOkButton, SIGNAL(clicked()), this, SLOT(slotHideSearchPaths()));
  mSearchPaths->hide();
  // Load search paths
