@@ -106,7 +106,7 @@ class UnitPropertiesPrivate;
  **/
 class UnitProperties : public BoBaseValueCollection
 {
-protected:
+public:
 	enum TerrainType {
 		Land = 0,
 		Water = 1,
@@ -470,6 +470,8 @@ public:
 	 **/
 	bool canGo(int x, int y);
 
+	TerrainType terrainType() const  { return mTerrain; }
+
 protected:
 	bool loadActions(KSimpleConfig* conf);
 	bool loadMobileProperties(KSimpleConfig* conf);
@@ -480,8 +482,6 @@ protected:
 	bool loadTextureNames(KSimpleConfig* conf);
 	bool loadSoundNames(KSimpleConfig* conf);
 	bool loadWeapons(KSimpleConfig* conf);
-
-	TerrainType terrainType() const  { return mTerrain; }
 
 	friend class BoUnitEditor;
 
