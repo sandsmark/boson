@@ -411,7 +411,7 @@ QStringList SpeciesTheme::allObjects(QStringList* files) const
  return objects;
 }
 
-QValueList<unsigned long int> SpeciesTheme::productions(QValueList<unsigned long int> producers) const
+QValueList<unsigned long int> SpeciesTheme::productions(const QValueList<unsigned long int>& producers) const
 {
  QValueList<unsigned long int> list;
  QIntDictIterator<UnitProperties> it(d->mUnitProperties);
@@ -424,7 +424,7 @@ QValueList<unsigned long int> SpeciesTheme::productions(QValueList<unsigned long
  return list;
 }
 
-QValueList<unsigned long int> SpeciesTheme::technologies(QValueList<unsigned long int> producers) const
+QValueList<unsigned long int> SpeciesTheme::technologies(const QValueList<unsigned long int>& producers) const
 {
  QValueList<unsigned long int> list;
  if (!d->mUpgrades["Technology"]) {
