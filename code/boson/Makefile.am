@@ -199,7 +199,8 @@ bounit_LDADD = \
 		$(LIB_BOMEMORY)
 bounit_SOURCES = \
 		bounitmain.cpp \
-		bosonsearchpathswidget.ui \
+		bosonsearchpathswidgetbase.ui \
+		bosonsearchpathswidget.cpp \
 		bouniteditorbase.ui \
 		bouniteditor.cpp
 
