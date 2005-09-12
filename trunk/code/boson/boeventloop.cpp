@@ -153,7 +153,7 @@ void BoEventLoop::receivedAdvanceMessage(int gameSpeed)
  d->mGameSpeed = gameSpeed;
 
  int missed = expected.msecsTo(d->mLastAdvanceMessage);
- boDebug(200) << k_funcinfo << "adavance message time missed by " << missed << endl;
+ boDebug(300) << k_funcinfo << "advance message time missed by " << missed << endl;
 
  if (gameSpeed <= 0) {
 	boError(300) << k_funcinfo << "received advance message with invalid gameSpeed " << gameSpeed << endl;
