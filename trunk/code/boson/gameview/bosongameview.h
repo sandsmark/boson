@@ -716,6 +716,8 @@ protected:
 
 
 protected slots:
+	bool slotAddLocalPlayerInput();
+	void slotAddMenuInput();
 	void slotResetViewProperties();
 
 	/**

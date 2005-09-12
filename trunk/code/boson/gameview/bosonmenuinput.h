@@ -53,6 +53,7 @@ signals:
 	void signalResetViewProperties();
 	void signalSetGrabMovie(bool);
 	void signalSetDebugMode(int);
+	void signalDebugEditPlayerInputs(Player* p);
 	void signalDebugKillPlayer(Q_UINT32 playerId);
 	void signalDebugModifyMinerals(Q_UINT32 playerId, int amount);
 	void signalDebugModifyOil(Q_UINT32 playerId, int amount);
@@ -169,6 +170,8 @@ signals:
 	void signalQuit();
 	void signalSaveGame();
 	void signalReloadGameViewPlugin();
+	void signalDebugAddLocalPlayerInput();
+	void signalDebugAddMenuInput();
 	void signalEditorChangeLocalPlayer(Player*);
 	void signalEditorShowPlaceFacilities();
 	void signalEditorShowPlaceMobiles();
@@ -185,6 +188,7 @@ protected slots:
 	void slotZoomOut();
 
 	void slotSetDebugMode(int);
+	void slotDebugEditPlayerInputs(Player* p);
 	void slotDebugKillPlayer(Q_UINT32 playerId);
 	void slotDebugModifyMinerals(Q_UINT32 playerId, int amount);
 	void slotDebugModifyOil(Q_UINT32 playerId, int amount);

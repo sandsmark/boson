@@ -44,6 +44,7 @@
 #include "../player.h"
 #include "../botexmapimportdialog.h"
 #include "../bofiledialog.h"
+#include "boeditplayerinputswidget.h"
 #ifdef BOSON_USE_BOMEMORY
 #include "../bomemory/bomemorydialog.h"
 #endif
@@ -83,6 +84,7 @@
 #define ID_DEBUG_ADD_10000_OIL 4
 #define ID_DEBUG_ADD_1000_OIL 5
 #define ID_DEBUG_SUB_1000_OIL 6
+#define ID_DEBUG_PLAYER_INPUT 7
 
 
 
@@ -533,6 +535,8 @@ void BosonMenuInputData::createDebugPlayersMenu()
 
 	connect(menu, SIGNAL(signalActivated(int)),
 			this, SLOT(slotDebugPlayer(int)));
+
+	menu->insertItem(i18n("Edit Inputs"), ID_DEBUG_PLAYER_INPUT);
 	menu->insertItem(i18n("Kill Player"), ID_DEBUG_KILLPLAYER);
 	menu->insertItem(i18n("Minerals += 10000"), ID_DEBUG_ADD_10000_MINERALS);
 	menu->insertItem(i18n("Minerals += 1000"), ID_DEBUG_ADD_1000_MINERALS);
@@ -546,7 +550,7 @@ void BosonMenuInputData::createDebugPlayersMenu()
  }
 }
 
-void BosonMenuInputData::slotDebugPlayer(int index)
+void BosonMenuInputData::slotDebugPlayer(int id)
 {
  BO_CHECK_NULL_RET(sender());
  if (!sender()->inherits("BoUfoActionMenu")) {
@@ -570,7 +574,10 @@ void BosonMenuInputData::slotDebugPlayer(int index)
  }
 
  Q_UINT32 playerId = ((Player*)p)->bosonId();
- switch (index) {
+ switch (id) {
+	case ID_DEBUG_PLAYER_INPUT:
+		emit signalDebugEditPlayerInputs((Player*)p);
+		break;
 	case ID_DEBUG_KILLPLAYER:
 		emit signalDebugKillPlayer(playerId);
 		break;
@@ -593,7 +600,7 @@ void BosonMenuInputData::slotDebugPlayer(int index)
 		emit signalDebugModifyOil(playerId, -1000);
 		break;
 	default:
-		boError() << k_funcinfo << "unknown index " << index << endl;
+		boError() << k_funcinfo << "unknown ID " << id << endl;
 		break;
  }
 }
@@ -752,6 +759,8 @@ void BosonMenuInput::initIO(KPlayer* player)
 		this, SLOT(slotSetGrabMovie(bool)));
  connect(mData, SIGNAL(signalSetDebugMode(int)),
 		this, SLOT(slotSetDebugMode(int)));
+ connect(mData, SIGNAL(signalDebugEditPlayerInputs(Player*)),
+		this, SLOT(slotDebugEditPlayerInputs(Player*)));
  connect(mData, SIGNAL(signalDebugKillPlayer(Q_UINT32)),
 		this, SLOT(slotDebugKillPlayer(Q_UINT32)));
  connect(mData, SIGNAL(signalDebugModifyMinerals(Q_UINT32, int)),
@@ -910,6 +919,28 @@ void BosonMenuInput::slotSetGrabMovie(bool grab)
 void BosonMenuInput::slotSetDebugMode(int index)
 {
  boConfig->setIntValue("DebugMode", (int)((BosonConfig::DebugMode)index));
+}
+
+void BosonMenuInput::slotDebugEditPlayerInputs(Player* p)
+{
+ BO_CHECK_NULL_RET(p);
+ KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Player Inputs"),
+		KDialogBase::Ok | KDialogBase::Cancel, KDialogBase::Ok, 0,
+		"playerinputs", true, true);
+ connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
+ QVBoxLayout* layout = new QVBoxLayout(dialog->plainPage());
+
+ BoEditPlayerInputsWidget* widget = new BoEditPlayerInputsWidget(dialog->plainPage());
+ layout->addWidget(widget);
+
+ widget->setPlayer(p);
+
+ connect(widget, SIGNAL(signalAddMenuInput()),
+		this, SIGNAL(signalDebugAddMenuInput()));
+ connect(widget, SIGNAL(signalAddLocalPlayerInput()),
+		this, SIGNAL(signalDebugAddLocalPlayerInput()));
+
+ dialog->show();
 }
 
 void BosonMenuInput::slotDebugKillPlayer(Q_UINT32 playerId)

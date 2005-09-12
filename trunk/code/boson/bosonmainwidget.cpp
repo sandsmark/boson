@@ -37,8 +37,6 @@
 #include "boufo/boufoaction.h"
 #include "bosonstarting.h"
 #include "gameview/bosongameview.h"
-#include "gameview/bosongameviewinput.h"
-#include "gameview/editorviewinput.h"
 #include "gameview/bosonlocalplayerinput.h"
 #include "startupwidgets/boufostartupwidget.h"
 #include "player.h"
@@ -722,26 +720,8 @@ bool BosonMainWidget::changeLocalPlayer(Player* p)
 	boError() << k_funcinfo << "NULL game object" << endl;
 	return false;
  }
- if (d->mLocalPlayer) {
-	KGameIO* oldIO = d->mLocalPlayer->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
-	if (oldIO) {
-		d->mLocalPlayer->removeGameIO(oldIO);
-	}
- }
  d->mLocalPlayer = p;
  if (d->mLocalPlayer) {
-	BosonLocalPlayerInput* input = new BosonLocalPlayerInput();
-	connect(input, SIGNAL(signalAction(const BoSpecificAction&)),
-			d->mGameView, SLOT(slotAction(const BoSpecificAction&)));
-	connect(input, SIGNAL(signalShowMiniMap(bool)),
-			d->mGameView, SLOT(slotShowMiniMap(bool)));
-	d->mLocalPlayer->addGameIO(input);
-	if (!input->initializeIO()) {
-		boError() << k_funcinfo << "IO could not be initialized" << endl;
-		changeLocalPlayer(0);
-		return false;
-	}
-
 	d->mGameView->setLocalPlayerIO(d->mLocalPlayer->playerIO());
  } else {
 	d->mGameView->setLocalPlayerIO(0);
@@ -987,20 +967,6 @@ void BosonMainWidget::slotGameStarted()
 
  // we don't need these anymore. lets save the memory.
  d->mStartup->resetWidgets();
-
- // Init some stuff
- if (d->mGameView->isInputInitialized()) {
-	boWarning() << k_funcinfo << "display input is already initialized?! probably quitGame() was not called" << endl;
- } else {
-	if (boGame->gameMode()) {
-		d->mGameView->setDisplayInput(new BosonGameViewInput());
-	} else {
-		d->mGameView->setDisplayInput(new EditorViewInput());
-	}
-	d->mGameView->setInputInitialized(true);
- }
- d->mGameView->setLocalPlayerIO(d->mLocalPlayer->playerIO());
-// d->mGameView->show();
 
  // Center home base if new game was started. If game is loaded, camera was
  //  already loaded as well
