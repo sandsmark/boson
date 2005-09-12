@@ -91,9 +91,19 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
 	// we continue - but we'll crash soon
  }
  mTerrain = (TerrainType)conf.readNumEntry("TerrainType", (int)TerrainLand);
- if (mTerrain <= 0 || mTerrain > 8) {
-	boWarning() << k_funcinfo << "Invalid TerrainType value: " << mTerrain << " for unit " << typeId() << ", defaulting to " << (int)TerrainLand << endl;
-	mTerrain = TerrainLand;
+ switch (mTerrain) {
+	case TerrainLand:
+	case TerrainWater:
+	case TerrainAirPlane:
+	case TerrainAirHelicopter:
+		break;
+	default:
+		// AB: atm only _one_ terrain type per unit is allowed.
+		//     so e.g. mTerrain = (TerrainLand | TerrainWater) is not
+		//     allowed.
+		boWarning() << k_funcinfo << "Invalid TerrainType value: " << mTerrain << " for unit " << typeId() << ", defaulting to " << (int)TerrainLand << endl;
+		mTerrain = TerrainLand;
+		break;
  }
  mUnitWidth = conf.readDoubleNumEntry("UnitWidth", 1.0);
  mUnitHeight = (conf.readDoubleNumEntry("UnitHeight", 1.0));
