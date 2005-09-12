@@ -640,7 +640,7 @@ void BosonCanvasRenderer::renderGround(const BosonMap* map)
  if (boConfig->boolValue("UseLight")) {
 	glEnable(GL_LIGHTING);
 	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
  } else {
 	glDisable(GL_COLOR_MATERIAL);
  }
@@ -764,6 +764,10 @@ void BosonCanvasRenderer::renderItems(const QPtrList<BosonItemContainer>& allCan
  if (boConfig->boolValue("UseLight")) {
 	glEnable(GL_LIGHTING);
 	glEnable(GL_NORMALIZE);
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+ } else {
+	glDisable(GL_COLOR_MATERIAL);
  }
 
  createRenderItemList(&d->mRenderItemList, allCanvasItems); // AB: this is very fast. < 1.5ms on experimental5 for me
