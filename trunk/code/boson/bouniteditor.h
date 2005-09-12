@@ -33,6 +33,8 @@ class EditorUnitProperties : public UnitProperties
 public:
 	EditorUnitProperties(SpeciesTheme* theme, bool fullMode);
 
+	TerrainType terrainType() const { return mTerrain; }
+
 
 	// Methods to set values. They are only meant to be used by unit
 	//  editor. Don't use them unless you know what you are doing

@@ -474,8 +474,6 @@ public:
 	 **/
 	bool canGo(int x, int y);
 
-	TerrainType terrainType() const  { return mTerrain; }
-
 protected:
 	bool loadActions(KSimpleConfig* conf);
 	bool loadMobileProperties(KSimpleConfig* conf);
