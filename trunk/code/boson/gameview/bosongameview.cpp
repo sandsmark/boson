@@ -1585,9 +1585,9 @@ void BosonGameView::setLocalPlayerIO(PlayerIO* io)
 	// the IO then!
 	disconnect((KPlayer*)previousPlayerIO->player(), SIGNAL(signalUnitChanged(Unit*)), this, 0);
 
-	KGameIO* oldIO = localPlayerIO()->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
+	KGameIO* oldIO = previousPlayerIO->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
 	if (oldIO) {
-		localPlayerIO()->removeGameIO(oldIO);
+		previousPlayerIO->removeGameIO(oldIO);
 	}
 
  }
