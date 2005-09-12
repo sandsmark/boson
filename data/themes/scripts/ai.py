@@ -12,11 +12,15 @@ except ImportError:
 
 cycle = 0
 player = -1
-  
+
 def unitDestroyed(unitid, ownerid, pos):
   boprint("debug","unit with id %s destroyed" % unitid)
 
 def unitProduced(ownerid, pos, type, factorid):
+  global player
+  # Don't place other players' units
+  if(ownerid != player):
+    return
   boprint("debug","unit with id %s produced" % type)
   if(BoScript.isUnitTypeMobile(int(ownerid),int(type)) == False):
     boprint("debug", "Ok , building")
@@ -40,11 +44,11 @@ def unitProduced(ownerid, pos, type, factorid):
       i = i + 1
     boprint("debug","placed tmpx %s,tmpy %s " % (tmpx,tmpy))
     BoScript.placeProduction(int(ownerid), int(factorid), tmpx, tmpy)
- 
+
 
 def unitPlaced(unitid,ownerid, pos, type):
   boprint("debug","unit with id %s and type  %s placed " % (unitid,type))
-    
+
 
 def init(id):
   global newProd,expl
