@@ -1,5 +1,5 @@
 # add your objects to objetcs_DATA (space separated) to make it install!
-objects_DATA = objects.boson
+objects_DATA = objects.boson fragment1.3ds
 
 # no further editing need here
 
