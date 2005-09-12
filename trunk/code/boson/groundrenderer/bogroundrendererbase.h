@@ -119,6 +119,7 @@ public:
 
 	virtual void cellFogChanged(int x1, int y1, int x2, int y2);
 	virtual void cellHeightChanged(int x1, int y1, int x2, int y2);
+	virtual void cellTextureChanged(int x1, int y1, int x2, int y2);
 
 	virtual QString debugStringForPoint(const BoVector3Fixed& pos) const;
 
@@ -163,6 +164,8 @@ protected:
 
 protected:
 	float* mHeightMap2;
+	float* mVertexArray;
+	unsigned char* mColorArray;
 
 private:
 	CellListBuilder* mCellListBuilder;
