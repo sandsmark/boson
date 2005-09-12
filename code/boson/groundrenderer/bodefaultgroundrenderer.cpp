@@ -31,6 +31,7 @@
 #include "../boson.h"
 #include "../botexture.h"
 #include "../boshader.h"
+#include "../bosonprofiling.h"
 #include "bocolormaprenderer.h"
 #include <bogl.h>
 #include <bodebug.h>
@@ -61,7 +62,7 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  BO_CHECK_NULL_RET(renderCells);
  BO_CHECK_NULL_RET(map);
  BO_CHECK_NULL_RET(map->texMap());
- BO_CHECK_NULL_RET(mHeightMap2);
+ BO_CHECK_NULL_RET(mVertexArray);
  BO_CHECK_NULL_RET(map->normalMap());
  BO_CHECK_NULL_RET(map->groundTheme());
  BO_CHECK_NULL_RET(currentGroundThemeData());
@@ -71,13 +72,16 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  }
  BosonGroundTheme* groundTheme = map->groundTheme();
 
- // AB: we can increase performance even more here. lets replace d->mRenderCells
- // by two array defining the coordinates of cells and the heightmap values.
- // we could use that as vertex array for example.
+ glEnableClientState(GL_VERTEX_ARRAY);
+ glEnableClientState(GL_NORMAL_ARRAY);
+ glEnableClientState(GL_COLOR_ARRAY);
+
+ glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+ glEnable(GL_COLOR_MATERIAL);
 
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	 // we draw the cells in different stages. depth test is now enabled in all
+ // we draw the cells in different stages. depth test is now enabled in all
  //  stages to prevent drawing errors. Depth func GL_LEQUAL makes sure all
  //  layers get rendered (they have same z values)
  // Maybe it should be set back to GL_LESS later?
@@ -95,6 +99,19 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  glMatrixMode(GL_TEXTURE);
 
  bool useShaders = boConfig->boolValue("UseGroundShaders");
+
+ unsigned int* indices = new unsigned int[cellsCount * 4];
+ for (unsigned int i = 0; i < cellsCount; i++) {
+	int x;
+	int y;
+	int w;
+	int h;
+	BoGroundRenderer::getCell(renderCells, i, &x, &y, &w, &h);
+	indices[i * 4 + 0] = map->cornerArrayPos(x, y);
+	indices[i * 4 + 1] = map->cornerArrayPos(x, y + h);
+	indices[i * 4 + 2] = map->cornerArrayPos(x + w, y + h);
+	indices[i * 4 + 3] = map->cornerArrayPos(x + w, y);
+ }
 
  unsigned int usedTextures = 0;
  unsigned int renderedQuads = 0;
@@ -122,13 +139,25 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 		groundData->shader->setUniform("bumpScale", groundData->groundType->bumpScale);
 		groundData->shader->setUniform("bumpBias", groundData->groundType->bumpBias);
 	}
-	// Render
-	unsigned int quads = renderCellsNow(renderCells, cellsCount, map->width() + 1, mHeightMap2, map->normalMap(), map->texMap(i));
-	if (quads != 0) {
-		usedTextures++;
+	unsigned char* colorPointer = mColorArray + (map->cornerArrayPos(map->width(), map->height()) + 1) * i * 4;
+	bool useTexture = false;
+	for (unsigned int i = 0; i < cellsCount * 4; i++) {
+		if (colorPointer[indices[i] * 4 + 3] != 0) {
+			useTexture = true;
+			break;
+		}
 	}
-	renderedQuads += quads;
+	if (!useTexture) {
+		continue;
+	}
+	usedTextures++;
+
+	glColorPointer(4, GL_UNSIGNED_BYTE, 0, colorPointer);
+	glDrawElements(GL_QUADS, cellsCount * 4, GL_UNSIGNED_INT, indices);
+
+	renderedQuads += cellsCount;
  }
+ delete[] indices;
  statistics()->setRenderedQuads(renderedQuads);
  statistics()->setUsedTextures(usedTextures);
  if (useShaders) {
@@ -141,6 +170,10 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  glLoadIdentity();
  glMatrixMode(GL_MODELVIEW);
 
+ glDisableClientState(GL_VERTEX_ARRAY);
+ glDisableClientState(GL_NORMAL_ARRAY);
+ glDisableClientState(GL_COLOR_ARRAY);
+
 #warning FIXME: does NOT belong to default renderer. belongs to base class.
  if (map->activeColorMap()) {
 	BoColorMapRenderer* renderer = getUpdatedColorMapRenderer(map->activeColorMap());
@@ -149,7 +182,7 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 		glPushAttrib(GL_ENABLE_BIT);
 		glDisable(GL_LIGHTING);
 		renderer->start(map);
-		renderCellColors(renderCells, cellsCount, map->width(), mHeightMap2);
+		renderCellColors(renderCells, cellsCount, map);
 		renderer->stop();
 		glPopAttrib();
 	}
@@ -165,90 +198,15 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  }
 }
 
-unsigned int BoDefaultGroundRenderer::renderCellsNow(int* cells, int count, int cornersWidth, const float* heightMap, const float* normalMap, const unsigned char* texMapStart)
-{
- unsigned int renderedQuads = 0;
- glBegin(GL_QUADS);
-
- for (int i = 0; i < count; i++) {
-	int x;
-	int y;
-	int w;
-	int h;
-	BoGroundRenderer::getCell(cells, i, &x, &y, &w, &h);
-	if (x < 0 || y < 0 || w < 0 || h < 0) {
-		boError() << k_funcinfo << x << " " << y << " " << w << " " << h << endl;
-		continue;
-	}
-
-	const int cellOffset = y * cornersWidth + x;
-	const unsigned char* texMapUpperLeft = texMapStart + cellOffset;
-	const float* heightMapUpperLeft = heightMap + cellOffset;
-
-	// offsets for corner arrays. just for convenience.
-	const int upperRightOffset = w;
-	const int lowerLeftOffset = cornersWidth * h;
-	const int lowerRightOffset = cornersWidth * h + w;
-
-	unsigned char upperLeftAlpha = *texMapUpperLeft;
-	unsigned char upperRightAlpha = *(texMapUpperLeft + upperRightOffset);
-	unsigned char lowerLeftAlpha = *(texMapUpperLeft + lowerLeftOffset);
-	unsigned char lowerRightAlpha = *(texMapUpperLeft + lowerRightOffset);
-
-	if ((upperLeftAlpha == 0) && (upperRightAlpha == 0) && (lowerLeftAlpha == 0) && (lowerRightAlpha == 0)) {
-		continue;
-	}
-
-	GLfloat cellXPos = (float)x;
-	GLfloat cellYPos = -(float)y;
-
-	float upperLeftHeight = *heightMapUpperLeft;
-	float upperRightHeight = *(heightMapUpperLeft + upperRightOffset);
-	float lowerLeftHeight = *(heightMapUpperLeft + lowerLeftOffset);
-	float lowerRightHeight = *(heightMapUpperLeft + lowerRightOffset);
-
-	const float* upperLeftNormal = normalMap + (y * cornersWidth + x) * 3;
-	const float* lowerLeftNormal = normalMap + ((y + h) * cornersWidth + x) * 3;
-	const float* lowerRightNormal = normalMap + ((y + h) * cornersWidth + (x + w)) * 3;
-	const float* upperRightNormal = normalMap + (y * cornersWidth + (x + w)) * 3;
-
-	// the material settings are ignored when light disabled, the color is
-	// ignored when light enabled.
-	BoMaterial::setDefaultAlpha((float)upperLeftAlpha / 255.0f);
-	glColor4ub(255, 255, 255, upperLeftAlpha);
-	glNormal3fv(upperLeftNormal);
-	glVertex3f(cellXPos, cellYPos, upperLeftHeight);
-
-	BoMaterial::setDefaultAlpha((float)lowerLeftAlpha / 255.0f);
-	glColor4ub(255, 255, 255, lowerLeftAlpha);
-	glNormal3fv(lowerLeftNormal);
-	glVertex3f(cellXPos, cellYPos - h, lowerLeftHeight);
-
-	BoMaterial::setDefaultAlpha((float)lowerRightAlpha / 255.0f);
-	glColor4ub(255, 255, 255, lowerRightAlpha);
-	glNormal3fv(lowerRightNormal);
-	glVertex3f(cellXPos + w, cellYPos - h, lowerRightHeight);
-
-	BoMaterial::setDefaultAlpha((float)upperRightAlpha / 255.0f);
-	glColor4ub(255, 255, 255, upperRightAlpha);
-	glNormal3fv(upperRightNormal);
-	glVertex3f(cellXPos + w, cellYPos, upperRightHeight);
-
-	renderedQuads++;
- }
- glEnd();
- BoMaterial::setDefaultAlpha(1.0f);
-
- return renderedQuads;
-}
-
-void BoDefaultGroundRenderer::renderCellColors(int* cells, int count, int width, const float* heightMap)
+void BoDefaultGroundRenderer::renderCellColors(int* cells, int count, const BosonMap* map)
 {
  const unsigned char alpha = 128;
- int cornersWidth = width + 1;
 
  glColor4ub(255, 255, 255, alpha);
 
+ glEnableClientState(GL_VERTEX_ARRAY);
+
+ glTranslatef(0.0f, 0.0f, 0.05f);
  glBegin(GL_QUADS);
 
  for (int i = 0; i < count; i++) {
@@ -258,27 +216,14 @@ void BoDefaultGroundRenderer::renderCellColors(int* cells, int count, int width,
 	int h;
 	BoGroundRenderer::getCell(cells, i, &x, &y, &w, &h);
 
-	int coloroffset = y * width + x;
-	int heightoffset = y * cornersWidth + x;
-	const float* heightMapUpperLeft = heightMap + heightoffset;
-
-	GLfloat cellXPos = (float)x;
-	GLfloat cellYPos = -(float)y;
-
-	float upperLeftHeight = *heightMapUpperLeft;
-	float upperRightHeight = *(heightMapUpperLeft + w);
-	float lowerLeftHeight = *(heightMapUpperLeft + cornersWidth * h);
-	float lowerRightHeight = *(heightMapUpperLeft + cornersWidth * h + w);
-
-	glVertex3f(cellXPos, cellYPos, upperLeftHeight + 0.05);
-
-	glVertex3f(cellXPos, cellYPos - h, lowerLeftHeight + 0.05);
-
-	glVertex3f(cellXPos + w, cellYPos - h, lowerRightHeight + 0.05);
-
-	glVertex3f(cellXPos + w, cellYPos, upperRightHeight + 0.05);
+	glArrayElement(map->cornerArrayPos(x, y));
+	glArrayElement(map->cornerArrayPos(x, y+h));
+	glArrayElement(map->cornerArrayPos(x+w, y+h));
+	glArrayElement(map->cornerArrayPos(x+w, y));
  }
  glEnd();
+ glTranslatef(0.0f, 0.0f, -0.05f);
+ glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 

@@ -42,17 +42,7 @@ protected:
 	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map);
 
 private:
-	/**
-	 * Render the @p cells with the current texture.
-	 *
-	 * This is used for texture mixing (blending must be enabled) - first
-	 * the cells are rendered with the first texture, then with the
-	 * second, ...
-	 *
-	 * One could optimize this by using multitexturing for example!
-	 **/
-	unsigned int renderCellsNow(int* cells, int count, int cornersWidth, const float* heightMap, const float* normalMap, const unsigned char* texMapStart);
-	void renderCellColors(int* cells, int count, int width, const float* heightMap);
+	void renderCellColors(int* cells, int count, const BosonMap* map);
 };
 
 #endif

@@ -31,6 +31,7 @@
 #include "../botexture.h"
 #include "../playerio.h"
 #include "../bosonviewdata.h"
+#include "../bosongroundtheme.h"
 #include "bocolormaprenderer.h"
 #include <bogl.h>
 #include <bodebug.h>
@@ -43,7 +44,6 @@
 #include <math.h>
 
 #define FIX_EDGES 1
-#define FIX_EDGES_1 0
 
 static int g_cellsVisibleCalls = 0;
 
@@ -91,7 +91,7 @@ public:
 		}
 	}
 
-	void copyHeightMap(float* heightMap, const BosonMap* map);
+	void copyHeightMap(float* vertexArray, float* heightMap, const BosonMap* map);
 
 	void setViewport(const int* p) { mViewport = p; }
 	const int* viewport() const { return mViewport; }
@@ -117,7 +117,7 @@ public:
 	virtual int* generateCellList(const BosonMap* map, int* renderCells, int* renderCellsSize, unsigned int* renderCellsCount) = 0;
 
 protected:
-	virtual void copyCustomHeightMap(float* heightMap, const BosonMap* map) = 0;
+	virtual void copyCustomHeightMap(float* vertexArray, float* heightMap, const BosonMap* map) = 0;
 
 protected:
 	int mMinX;
@@ -184,7 +184,7 @@ protected:
 
 	void recreateTree(const BosonMap* map);
 
-	virtual void copyCustomHeightMap(float* heightMap, const BosonMap* map);
+	virtual void copyCustomHeightMap(float* vertexArray, float* heightMap, const BosonMap* map);
 
 private:
 	// these variables are valid only while we are in generateCellList() !
@@ -196,7 +196,7 @@ private:
 	QMemArray< QPtrList<const BoQuadTreeNode>* > mLeafs;
 };
 
-void CellListBuilder::copyHeightMap(float* heightMap, const BosonMap* map)
+void CellListBuilder::copyHeightMap(float* vertexArray, float* heightMap, const BosonMap* map)
 {
  BO_CHECK_NULL_RET(heightMap);
  BO_CHECK_NULL_RET(map);
@@ -209,24 +209,21 @@ void CellListBuilder::copyHeightMap(float* heightMap, const BosonMap* map)
 
 	for (int x = mMinX; x <= mMaxX + 1; x++) { // +1 because we need _corners_ not cells
 		for (int y = mMinY; y <= mMaxY + 1; y++) {
+			// AB: note: we copy to both, heightMap and vertexArray.
+			// heightMap is deprecated from now on (default renderer
+			// does not use it anymore!), but some renderers may
+			// still use it.
+			// it (mHeightMap2) should be removed
 			heightMap[map->cornerArrayPos(x, y)] = map->heightAtCorner(x, y);
+			int index = map->cornerArrayPos(x, y) * 3 + 2;
+			vertexArray[index] = map->heightAtCorner(x, y);
 		}
 	}
- } else {
-#if FIX_EDGES_1
-	const float* h = map->heightMap();
-	for (int x = mMinX; x <= mMaxX; x++) { // <= because we need _corners_ not cells
-		for (int y = mMinY; y <= mMaxY; y++) {
-			const int index = map->cornerArrayPos(x, y);
-			heightMap[index] = h[index];
-		}
-	}
-#endif
  }
- copyCustomHeightMap(heightMap, map);
+ copyCustomHeightMap(vertexArray, heightMap, map);
 }
 
-void CellListBuilderTree::copyCustomHeightMap(float* heightMap, const BosonMap* map)
+void CellListBuilderTree::copyCustomHeightMap(float* vertexArray, float* heightMap, const BosonMap* map)
 {
  BosonProfiler prof("copyCustomHeightMap");
  if (mLeafs.size() <= 0) {
@@ -241,11 +238,6 @@ void CellListBuilderTree::copyCustomHeightMap(float* heightMap, const BosonMap* 
 	while (it.current()) {
 		const BoQuadTreeNode* node = it.current();
 		++it;
-#if FIX_EDGES_1
-		if (node->mNodeSize == 1) {
-			continue;
-		}
-#endif
 		const int l = node->left();
 		const int r = node->right();
 		const int t = node->top();
@@ -263,21 +255,29 @@ void CellListBuilderTree::copyCustomHeightMap(float* heightMap, const BosonMap* 
 		const float rightStep = (br - tr) / h;
 
 		// top and bottom border
-#if FIX_EDGES_1
-		for (int x = 1; x < w; x++) {
-#else
 		for (int x = 0; x <= w; x++) {
-#endif
-			heightMap[map->cornerArrayPos(l + x, t)] = tl + topStep * x;
-			heightMap[map->cornerArrayPos(l + x, b + 1)] = bl + bottomStep * x;
+			const int pos1 = map->cornerArrayPos(l + x, t);
+			const int pos2 = map->cornerArrayPos(l + x, b + 1);
+			const float h1 = tl + topStep * x;
+			const float h2 = bl + bottomStep * x;
+			heightMap[pos1] = h1;
+			heightMap[pos2] = h2;
+			vertexArray[pos1 * 3 + 2] = h1;
+			vertexArray[pos2 * 3 + 2] = h2;
 		}
 
 		// just like above, but for left/right border
 		// note that y==0 and y==h are not required, as it is covered
 		// above anyqay
 		for (int y = 1; y < h; y++) {
-			heightMap[map->cornerArrayPos(l, t + y)] = tl + leftStep * y;
-			heightMap[map->cornerArrayPos(r + 1, t + y)] = tr + rightStep * y;
+			const int pos1 = map->cornerArrayPos(l, t + y);
+			const int pos2 = map->cornerArrayPos(r + 1, t + y);
+			const float h1 = tl + leftStep * y;
+			const float h2 = tr + rightStep * y;
+			heightMap[pos1] = h1;
+			heightMap[pos2] = h2;
+			vertexArray[pos1 * 3 + 2] = h1;
+			vertexArray[pos2 * 3 + 2] = h2;
 		}
 	}
  }
@@ -710,7 +710,9 @@ BoGroundRendererBase::BoGroundRendererBase()
  mCellListBuilder = 0;
  mCurrentMap = 0;
  mCurrentGroundThemeData = 0;
- mHeightMap2 = 0;
+ mHeightMap2 = 0; // AB: kinda obsolete due to mVertexArray!
+ mVertexArray = 0;
+ mColorArray = 0;
  mCellListBuilder = 0;
  mFogTexture = 0;
 }
@@ -725,6 +727,8 @@ BoGroundRendererBase::~BoGroundRendererBase()
 #if FIX_EDGES
  delete[] mHeightMap2;
 #endif
+ delete[] mVertexArray;
+ delete[] mColorArray;
 }
 
 bool BoGroundRendererBase::initGroundRenderer()
@@ -769,6 +773,31 @@ void BoGroundRendererBase::updateMapCache(const BosonMap* map)
 	BO_NULL_ERROR(mHeightMap2);
  }
 #endif
+ int vertexCount = map->cornerArrayPos(map->width(), map->height()) + 1;
+ mVertexArray = new float[vertexCount * 3];
+ for (unsigned int x = 0; x <= map->width(); x++) {
+	for (unsigned int y = 0; y <= map->height(); y++) {
+		int pos = map->cornerArrayPos(x, y);
+		mVertexArray[pos * 3 + 0] = (float)x;
+		mVertexArray[pos * 3 + 1] = -((float)y);
+//		z coordinates (heights) are initialized later
+	}
+ }
+ mColorArray = new unsigned char[map->groundTheme()->groundTypeCount() * vertexCount * 4];
+ for (unsigned int t = 0; t < map->groundTheme()->groundTypeCount(); t++) {
+	for (unsigned int x = 0; x <= map->width(); x++) {
+		for (unsigned int y = 0; y <= map->height(); y++) {
+			unsigned char* colorArray = mColorArray + vertexCount * 4 * t;
+			int pos = map->cornerArrayPos(x, y);
+			colorArray[pos * 4 + 0] = 255;
+			colorArray[pos * 4 + 1] = 255;
+			colorArray[pos * 4 + 2] = 255;
+			colorArray[pos * 4 + 3] = 255;
+		}
+	}
+ }
+ cellTextureChanged(0, 0, map->width(), map->height());
+ boDebug() << k_funcinfo << "created arrays for " << vertexCount << " vertices" << endl;
 }
 
 void BoGroundRendererBase::generateCellList(const BosonMap* map)
@@ -803,7 +832,7 @@ void BoGroundRendererBase::generateCellList(const BosonMap* map)
  setRenderCellsCount(renderCellsCount);
 #if FIX_EDGES
  if (renderCellsCount > 0) {
-	mCellListBuilder->copyHeightMap(mHeightMap2, map);
+	mCellListBuilder->copyHeightMap(mVertexArray, mHeightMap2, map);
  }
 #endif
 }
@@ -863,6 +892,9 @@ void BoGroundRendererBase::renderVisibleCellsStart(const BosonMap* map)
 
  mFogTexture->setLocalPlayerIO(localPlayerIO());
  mFogTexture->start(map);
+ glVertexPointer(3, GL_FLOAT, 0, mVertexArray);
+ glNormalPointer(GL_FLOAT, 0, map->normalMap());
+ glColorPointer(4, GL_UNSIGNED_BYTE, 0, mColorArray);
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "at end of method" << endl;
  }
@@ -895,7 +927,22 @@ BoColorMapRenderer* BoGroundRendererBase::getUpdatedColorMapRenderer(BoColorMap*
 void BoGroundRendererBase::cellHeightChanged(int, int, int, int)
 {
 #if FIX_EDGES
- mCellListBuilder->copyHeightMap(mHeightMap2, mCurrentMap);
+ mCellListBuilder->copyHeightMap(mVertexArray, mHeightMap2, mCurrentMap);
 #endif
+}
+
+void BoGroundRendererBase::cellTextureChanged(int x1, int y1, int x2, int y2)
+{
+ BO_CHECK_NULL_RET(mCurrentMap);
+ BO_CHECK_NULL_RET(mColorArray);
+ for (unsigned int t = 0; t < mCurrentMap->groundTheme()->groundTypeCount(); t++) {
+	for (int x = x1; x <= x2; x++) {
+		for (int y = y1; y <= y2; y++) {
+			int pos = mCurrentMap->cornerArrayPos(x, y)
+				+ (mCurrentMap->cornerArrayPos(mCurrentMap->width(), mCurrentMap->height()) + 1) * t;
+			mColorArray[pos * 4 + 3] = mCurrentMap->texMapAlpha(t, x, y);
+		}
+	}
+ }
 }
 
