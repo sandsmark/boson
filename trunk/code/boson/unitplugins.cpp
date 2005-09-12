@@ -465,6 +465,8 @@ void ProductionPlugin::advance(unsigned int)
 			return;
 		}
 
+		boDebug() << k_funcinfo << "auto-placing unit "<< prop->typeId() << endl;
+
 		int tilex, tiley; // Position of lower-left corner of facility in tiles
 		int theight, twidth; // height and width of facility in tiles
 		int currentx, currenty; // Position of tile currently tested
