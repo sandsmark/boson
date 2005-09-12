@@ -19,6 +19,7 @@ libbosongameview_la_SOURCES = \
 	editorviewinput.cpp \
 	bosonlocalplayerinput.cpp \
 	bolocalplayereventlistener.cpp \
-	bosonmenuinput.cpp
+	bosonmenuinput.cpp \
+	boeditplayerinputswidget.cpp
 
 
