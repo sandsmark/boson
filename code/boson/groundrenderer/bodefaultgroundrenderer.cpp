@@ -133,7 +133,10 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 
  bool useShaders = boConfig->boolValue("UseGroundShaders");
 
- unsigned int* indices = new unsigned int[cellsCount * 4];
+#define USE_QUADS 0
+#if USE_QUADS
+ int indexCount = cellsCount * 4;
+ unsigned int* indices = new unsigned int[indexCount];
  for (unsigned int i = 0; i < cellsCount; i++) {
 	int x;
 	int y;
@@ -145,6 +148,71 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 	indices[i * 4 + 2] = map->cornerArrayPos(x + w, y + h);
 	indices[i * 4 + 3] = map->cornerArrayPos(x + w, y);
  }
+#else // USE_QUADS
+ QValueList<int> indexCountList;
+ int indexCount = cellsCount * 4; // AB: in worst case we need one strip per quad, i.e. cellsCount * 4 vertices. usually much less.
+ unsigned int* indices = new unsigned int[indexCount];
+ int previousEndX = -1;
+ int previousEndY = -1;
+ int previousStartY = -1;
+ bool start = true;
+ int pos = 0;
+ int totalIndexCount = 0;
+ for (unsigned int i = 0; i < cellsCount; i++) {
+	int x;
+	int y;
+	int w;
+	int h;
+	BoGroundRenderer::getCell(renderCells, i, &x, &y, &w, &h);
+	if ((previousEndX != x || previousStartY != y || previousEndY != y + h) && !start) {
+		// start a new strip
+		// -> note that we do not _have_ to do this: we could also
+		//    insert a dummy triangle and continue the strip (see below)
+		start = true;
+		totalIndexCount += pos;
+		indexCountList.append(pos);
+		pos = 0;
+	}
+	if (start) {
+		indices[totalIndexCount + pos++] = map->cornerArrayPos(x, y);
+		indices[totalIndexCount + pos++] = map->cornerArrayPos(x, y + h);
+		indices[totalIndexCount + pos++] = map->cornerArrayPos(x + w, y);
+		indices[totalIndexCount + pos++] = map->cornerArrayPos(x + w, y + h);
+		start = false;
+	} else {
+		// AB: when one of these parameters differs between two quads,
+		// we can do
+		// a) start a new strip
+		// b) insert a dummy triangle that is never being rendered
+		//    (width==0) to continue the strip
+		//
+		// it seems that there is no speed difference between these
+		// alternatives.
+		if (previousEndX == x && previousEndY == y + h && previousStartY == y) {
+			// same LOD level as previous quad - continue strip
+			indices[totalIndexCount + pos++] = map->cornerArrayPos(x + w, y);
+			indices[totalIndexCount + pos++] = map->cornerArrayPos(x + w, y + h);
+		} else {
+			// insert dummy triangle
+			indices[totalIndexCount + pos++] = map->cornerArrayPos(x, y);
+
+			// now the actual quad
+			indices[totalIndexCount + pos++] = map->cornerArrayPos(x, y + h);
+			indices[totalIndexCount + pos++] = map->cornerArrayPos(x + w, y);
+			indices[totalIndexCount + pos++] = map->cornerArrayPos(x + w, y + h);
+		}
+	}
+	previousEndX = x + w;
+	previousStartY = y;
+	previousEndY = y + h;
+
+ }
+ totalIndexCount += pos;
+ indexCountList.append(pos);
+
+ indexCount = totalIndexCount;
+// boDebug() << totalIndexCount << " " << cellsCount << " " << indexCountList.count() << endl;
+#endif
 
  unsigned int usedTextures = 0;
  unsigned int renderedQuads = 0;
@@ -172,9 +240,10 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 		groundData->shader->setUniform("bumpScale", groundData->groundType->bumpScale);
 		groundData->shader->setUniform("bumpBias", groundData->groundType->bumpBias);
 	}
+
 	unsigned char* colorPointer = mColorArray + (map->cornerArrayPos(map->width(), map->height()) + 1) * 4 * i;
 	bool useTexture = false;
-	for (unsigned int j = 0; j < cellsCount * 4; j++) {
+	for (int j = 0; j < indexCount; j++) {
 		if (colorPointer[indices[j] * 4 + 3] != 0) {
 			useTexture = true;
 			break;
@@ -190,7 +259,16 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 #else
 	glColorPointer(4, GL_UNSIGNED_BYTE, 0, colorPointer);
 #endif
-	glDrawElements(GL_QUADS, cellsCount * 4, GL_UNSIGNED_INT, indices);
+#if USE_QUADS
+	glDrawElements(GL_QUADS, indexCount, GL_UNSIGNED_INT, indices);
+#else
+	int start = 0;
+	for (QValueList<int>::const_iterator it = indexCountList.begin(); it != indexCountList.end(); ++it) {
+		int indexCount = *it;
+		glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, indices + start);
+		start += indexCount;
+	}
+#endif
 
 	renderedQuads += cellsCount;
  }
