@@ -169,6 +169,7 @@ public:
 
 	virtual QString debugStringForPoint(const BoVector3Fixed& pos) const
 	{
+		Q_UNUSED(pos);
 		return QString::null;
 	}
 
