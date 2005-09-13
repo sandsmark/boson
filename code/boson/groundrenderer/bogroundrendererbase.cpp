@@ -892,9 +892,6 @@ void BoGroundRendererBase::renderVisibleCellsStart(const BosonMap* map)
 
  mFogTexture->setLocalPlayerIO(localPlayerIO());
  mFogTexture->start(map);
- glVertexPointer(3, GL_FLOAT, 0, mVertexArray);
- glNormalPointer(GL_FLOAT, 0, map->normalMap());
- glColorPointer(4, GL_UNSIGNED_BYTE, 0, mColorArray);
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "at end of method" << endl;
  }
