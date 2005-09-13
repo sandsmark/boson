@@ -38,14 +38,31 @@
 
 #include <math.h>
 
+#define USE_VBOS 0
+
 
 BoDefaultGroundRenderer::BoDefaultGroundRenderer()
 	: BoGroundRendererBase()
 {
+ mCurrentMap = 0;
+ mVBOVertex = 0;
+ mVBONormal = 0;
+ mVBOColor = 0;
 }
 
 BoDefaultGroundRenderer::~BoDefaultGroundRenderer()
 {
+ boDebug() << k_funcinfo << endl;
+ clearVBOs();
+}
+
+void BoDefaultGroundRenderer::clearVBOs()
+{
+#if USE_VBOS
+ boglDeleteBuffers(1, &mVBOVertex);
+ boglDeleteBuffers(1, &mVBONormal);
+ boglDeleteBuffers(1, &mVBOColor);
+#endif
 }
 
 bool BoDefaultGroundRenderer::initGroundRenderer()
@@ -75,6 +92,22 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  glEnableClientState(GL_VERTEX_ARRAY);
  glEnableClientState(GL_NORMAL_ARRAY);
  glEnableClientState(GL_COLOR_ARRAY);
+
+#if USE_VBOS
+ boglBindBuffer(GL_ARRAY_BUFFER, mVBOVertex);
+ glVertexPointer(3, GL_FLOAT, 0, (void*)0);
+
+ boglBindBuffer(GL_ARRAY_BUFFER, mVBONormal);
+ glNormalPointer(GL_FLOAT, 0, (void*)0);
+
+ boglBindBuffer(GL_ARRAY_BUFFER, mVBOColor);
+#else
+ glVertexPointer(3, GL_FLOAT, 0, mVertexArray);
+ glNormalPointer(GL_FLOAT, 0, map->normalMap());
+#endif
+ // AB: we use textureCount different color pointers, so the glColorPointer()
+ // call comes later.
+ // (the color VBO remains bound)
 
  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
  glEnable(GL_COLOR_MATERIAL);
@@ -139,10 +172,10 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 		groundData->shader->setUniform("bumpScale", groundData->groundType->bumpScale);
 		groundData->shader->setUniform("bumpBias", groundData->groundType->bumpBias);
 	}
-	unsigned char* colorPointer = mColorArray + (map->cornerArrayPos(map->width(), map->height()) + 1) * i * 4;
+	unsigned char* colorPointer = mColorArray + (map->cornerArrayPos(map->width(), map->height()) + 1) * 4 * i;
 	bool useTexture = false;
-	for (unsigned int i = 0; i < cellsCount * 4; i++) {
-		if (colorPointer[indices[i] * 4 + 3] != 0) {
+	for (unsigned int j = 0; j < cellsCount * 4; j++) {
+		if (colorPointer[indices[j] * 4 + 3] != 0) {
 			useTexture = true;
 			break;
 		}
@@ -152,7 +185,11 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 	}
 	usedTextures++;
 
+#if USE_VBOS
+	glColorPointer(4, GL_UNSIGNED_BYTE, 0, (unsigned char*)0 + (map->cornerArrayPos(map->width(), map->height()) + 1) * 4 * i);
+#else
 	glColorPointer(4, GL_UNSIGNED_BYTE, 0, colorPointer);
+#endif
 	glDrawElements(GL_QUADS, cellsCount * 4, GL_UNSIGNED_INT, indices);
 
 	renderedQuads += cellsCount;
@@ -169,6 +206,8 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  }
  glLoadIdentity();
  glMatrixMode(GL_MODELVIEW);
+
+ boglBindBuffer(GL_ARRAY_BUFFER, 0);
 
  glDisableClientState(GL_VERTEX_ARRAY);
  glDisableClientState(GL_NORMAL_ARRAY);
@@ -226,4 +265,87 @@ void BoDefaultGroundRenderer::renderCellColors(int* cells, int count, const Boso
  glDisableClientState(GL_VERTEX_ARRAY);
 }
 
+// AB: we should place the VBO objects into the base class?!
+void BoDefaultGroundRenderer::updateMapCache(const BosonMap* map)
+{
+ bool newMap = false;
+ if (mCurrentMap != map) {
+	newMap = true;
+ }
+ BoGroundRendererBase::updateMapCache(map);
+ mCurrentMap = map;
+ if (!newMap) {
+	return;
+ }
+ clearVBOs();
+ if (!map) {
+	return;
+ }
+ boDebug() << k_funcinfo << map->width() << " " << map->height() << endl;
+#if USE_VBOS
+ boglGenBuffers(1, &mVBOVertex);
+ boglGenBuffers(1, &mVBONormal);
+ boglGenBuffers(1, &mVBOColor);
+
+ boDebug() << k_funcinfo << endl;
+
+ // apply data to the vertex VBO
+ updateVertexVBO();
+
+ // apply data to the color VBO (alpha values from the texmaps)
+ updateColorVBO();
+
+ // apply data to the normal VBO
+ int vertexCount = mCurrentMap->cornerArrayPos(mCurrentMap->width(), mCurrentMap->height()) + 1;
+ boglBindBuffer(GL_ARRAY_BUFFER, mVBONormal);
+ boglBufferData(GL_ARRAY_BUFFER, vertexCount * 3 * sizeof(float), map->normalMap(), GL_STATIC_DRAW);
+
+
+#endif
+}
+
+void BoDefaultGroundRenderer::cellHeightChanged(int x1, int y1, int x2, int y2)
+{
+ BoGroundRendererBase::cellHeightChanged(x1, y1, x2, y2);
+ updateVertexVBO();
+}
+
+void BoDefaultGroundRenderer::updateVertexVBO()
+{
+#if USE_VBOS
+ if (mVBOVertex == 0) {
+	return;
+ }
+ boDebug() << k_funcinfo << endl;
+ BO_CHECK_NULL_RET(mCurrentMap);
+ int vertexCount = mCurrentMap->cornerArrayPos(mCurrentMap->width(), mCurrentMap->height()) + 1;
+ boglBindBuffer(GL_ARRAY_BUFFER, mVBOVertex);
+ // AB: could probably be done more efficiently
+ boglBufferData(GL_ARRAY_BUFFER, vertexCount * 3 * sizeof(float), mVertexArray, GL_STATIC_DRAW);
+#endif
+}
+
+void BoDefaultGroundRenderer::cellTextureChanged(int x1, int y1, int x2, int y2)
+{
+ BoGroundRendererBase::cellTextureChanged(x1, y1, x2, y2);
+ updateColorVBO();
+}
+
+// TODO: make more efficient: only values in a given rect changed
+// -> however this would speed up certain tasks in editor only, so this is of
+// _very_ little importance
+void BoDefaultGroundRenderer::updateColorVBO()
+{
+#if USE_VBOS
+ if (mVBOColor == 0) {
+	return;
+ }
+ boDebug() << k_funcinfo << endl;
+ BO_CHECK_NULL_RET(mCurrentMap);
+ int vertexCount = mCurrentMap->cornerArrayPos(mCurrentMap->width(), mCurrentMap->height()) + 1;
+ boglBindBuffer(GL_ARRAY_BUFFER, mVBOColor);
+ // AB: could probably be done more efficiently
+ boglBufferData(GL_ARRAY_BUFFER, vertexCount * mCurrentMap->groundTheme()->groundTypeCount() * 4 * sizeof(unsigned char), mColorArray, GL_STATIC_DRAW);
+#endif
+}
 

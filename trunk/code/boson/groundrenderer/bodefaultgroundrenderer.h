@@ -41,8 +41,22 @@ public:
 protected:
 	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map);
 
+	virtual void updateMapCache(const BosonMap* map);
+	void cellTextureChanged(int x1, int y1, int x2, int y2);
+	void cellHeightChanged(int x1, int y1, int x2, int y2);
+
+	void clearVBOs();
+	void updateVertexVBO();
+	void updateColorVBO();
+
 private:
 	void renderCellColors(int* cells, int count, const BosonMap* map);
+
+private:
+	const BosonMap* mCurrentMap;
+	unsigned int mVBOVertex;
+	unsigned int mVBONormal;
+	unsigned int mVBOColor;
 };
 
 #endif
