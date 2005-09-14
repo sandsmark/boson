@@ -318,6 +318,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntryUInt("MaxProfilingEntriesAdvance", 200);
  addDynamicEntryUInt("MaxProfilingEntries", 1000);
  addDynamicEntryBool("UseGroundShaders", false);
+ addDynamicEntryBool("UseUnitShaders", false);
 
  addDynamicEntry(new BoConfigUIntEntry(this, "GroundRenderer", 0)); // obsolete
  addDynamicEntry(new BoConfigUIntEntry(this, "DefaultLOD", 0));

@@ -68,7 +68,7 @@ const QColor* BosonItemRenderer::teamColor() const
  return mItem->teamColor();
 }
 
-void BosonItemRenderer::renderItem(unsigned int lod, bool transparentmeshes)
+void BosonItemRenderer::renderItem(unsigned int lod, bool transparentmeshes, RenderFlags)
 {
  Q_UNUSED(lod);
 
@@ -129,7 +129,7 @@ void BosonItemRenderer::renderItem(unsigned int lod, bool transparentmeshes)
  glTranslatef(w/2, h/2, 0.0f);
 }
 
-bool BosonItemRenderer::itemInFrustum(const BoFrustum& frustum) const
+float BosonItemRenderer::itemInFrustum(const BoFrustum& frustum) const
 {
  if (!mItem) {
 	BO_NULL_ERROR(mItem);
@@ -140,7 +140,7 @@ bool BosonItemRenderer::itemInFrustum(const BoFrustum& frustum) const
  bofixed y = -((mItem->y() + mItem->height() / 2));
  bofixed z = mItem->z(); // this is already in the correct format!
  BoVector3Fixed pos(x, y, z);
- return frustum.sphereInFrustum(pos, boundingSphereRadius());
+ return (float)frustum.sphereInFrustum(pos, boundingSphereRadius());
 }
 
 
@@ -226,14 +226,14 @@ void BosonItemModelRenderer::animate()
  }
 }
 
-void BosonItemModelRenderer::renderItem(unsigned int lod, bool transparentmeshes)
+void BosonItemModelRenderer::renderItem(unsigned int lod, bool transparentmeshes, RenderFlags flags)
 {
  BO_CHECK_NULL_RET(mModel);
  BoLOD* l = mModel->lod(lod);
  BO_CHECK_NULL_RET(l);
  BoFrame* frame = l->frame((unsigned int)mCurrentFrame);
  BO_CHECK_NULL_RET(frame);
- frame->renderFrame(teamColor(), transparentmeshes);
+ frame->renderFrame(teamColor(), transparentmeshes, flags);
 }
 
 unsigned int BosonItemModelRenderer::lodCount() const

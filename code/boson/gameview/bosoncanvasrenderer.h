@@ -22,6 +22,7 @@
 
 #include "../defines.h"
 #include "../bo3dtools.h"
+#include "../global.h"
 
 #include <qobject.h>
 #include <qptrlist.h>
@@ -109,8 +110,8 @@ protected slots:
 	void slotAddFeedbackMoveTo(const QPtrList<Unit>& units, const BoVector2Fixed& pos, bool withAttack);
 
 protected:
-	void renderGround(const BosonMap*);
-	void renderItems(const QPtrList<BosonItemContainer>& allCanvasItems);
+	void renderGround(const BosonMap*, RenderFlags flags = Default);
+	void renderItems(RenderFlags flags = Default);
 	void renderSelections(const BoItemList* selectedItems);
 	void renderWater();
 	void renderFog(BoVisibleEffects&);
@@ -121,6 +122,11 @@ protected:
 	void createRenderItemList(QValueVector<BoRenderItem>* renderItemList, const QPtrList<BosonItemContainer>& allItems);
 	void createSelectionsList(BoItemList* selections, const QValueVector<BoRenderItem>* relevantItems);
 	void createVisibleEffectsList(BoVisibleEffects*, const QPtrList<BosonEffect>& allEffects, unsigned int mapWidth, unsigned int mapHeight);
+
+	void renderShadowMap(const BosonCanvas* canvas);
+	void activateShadowMap();
+	void deactivateShadowMap();
+	void extractViewFrustum(BoVector3Float* points, const BoFrustum& viewFrustum);
 
 	void renderBoundingBox(const BosonItem* item);
 	void renderBoundingBox(const BoVector3Float& c1, const BoVector3Float& c2);

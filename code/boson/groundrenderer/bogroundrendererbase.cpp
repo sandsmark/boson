@@ -113,8 +113,12 @@ public:
 	 * renderCells.
 	 * @param renderCellsCount Set this to the number of cells in @p
 	 * renderCells that are used (starting from 0), i.e. should be rendered.
+	 * @param mindist If non-null, distance between near plane and closest
+	 * visible cell.
+	 * @param maxdist If non-null, distance between near plane and farthest
+	 * visible cell.
 	 **/
-	virtual int* generateCellList(const BosonMap* map, int* renderCells, int* renderCellsSize, unsigned int* renderCellsCount) = 0;
+	virtual int* generateCellList(const BosonMap* map, int* renderCells, int* renderCellsSize, unsigned int* renderCellsCount, float* minDist = 0, float* maxDist = 0) = 0;
 
 protected:
 	virtual void copyCustomHeightMap(float* vertexArray, float* heightMap, const BosonMap* map) = 0;
@@ -157,7 +161,7 @@ public:
 		delete mRoot;
 	}
 
-	virtual int* generateCellList(const BosonMap* map, int* renderCells, int* renderCellsSize, unsigned int* renderCellsCount);
+	virtual int* generateCellList(const BosonMap* map, int* renderCells, int* renderCellsSize, unsigned int* renderCellsCount, float* minDist = 0, float* maxDist = 0);
 
 
 protected:
@@ -175,7 +179,7 @@ protected:
 	 * cell is visible (i.e. this returns FALSE) @p partially is set to
 	 * FALSE.
 	 **/
-	bool cellsVisible(const BoQuadTreeNode* node, bool* partially) const;
+	bool cellsVisible(const BoQuadTreeNode* node, bool* partially);
 
 	/**
 	 * Add all cells in the rect of the node to @p cells
@@ -192,6 +196,9 @@ private:
 	unsigned int mCount;
 
 	BoQuadTreeNode* mRoot;
+
+	float mMinDistance;
+	float mMaxDistance;
 
 	QMemArray< QPtrList<const BoQuadTreeNode>* > mLeafs;
 };
@@ -283,10 +290,12 @@ void CellListBuilderTree::copyCustomHeightMap(float* vertexArray, float* heightM
  }
 }
 
-int* CellListBuilderTree::generateCellList(const BosonMap* map, int* origRenderCells, int* renderCellsSize, unsigned int* renderCellsCount)
+int* CellListBuilderTree::generateCellList(const BosonMap* map, int* origRenderCells, int* renderCellsSize, unsigned int* renderCellsCount, float* minDist, float* maxDist)
 {
  mMinX = mMinY = -1;
  mMaxX = mMaxY = 0;
+ mMinDistance = 1000000.0f;
+ mMaxDistance = -1000000.0f;
  if (!map) {
 	BO_NULL_ERROR(map);
 	return origRenderCells;
@@ -310,7 +319,7 @@ int* CellListBuilderTree::generateCellList(const BosonMap* map, int* origRenderC
 
  for (int i = 0; i < (int)mLeafs.size(); i++) {
 	QPtrList<const BoQuadTreeNode>* list = mLeafs[i];
-	if (list) {
+if (list) {
 		list->clear();
 	}
  }
@@ -322,6 +331,12 @@ int* CellListBuilderTree::generateCellList(const BosonMap* map, int* origRenderC
  *renderCellsCount = mCount;
 // mMap = 0;
  mCount = 0;
+ if (minDist) {
+	*minDist = QMAX(0, mMinDistance);
+ }
+ if (maxDist) {
+	*maxDist = QMAX(0, mMaxDistance);
+ }
  return renderCells;
 }
 
@@ -365,7 +380,7 @@ void CellListBuilderTree::addCells(int* cells, const BoQuadTreeNode* node, int d
  }
 }
 
-bool CellListBuilderTree::cellsVisible(const BoQuadTreeNode* node, bool* partially) const
+bool CellListBuilderTree::cellsVisible(const BoQuadTreeNode* node, bool* partially)
 {
  g_cellsVisibleCalls++;
  if (!node) {
@@ -379,10 +394,6 @@ bool CellListBuilderTree::cellsVisible(const BoQuadTreeNode* node, bool* partial
 
  int w = (x2 + 1) - x; // + 1 because we need the right border of the cell!
  int h = (y2 + 1) - y;
- if (w * h <= 4) {
-	*partially = false;
-	return true;
- }
  float hmid = (float)x + ((float)w) / 2.0f;
  float vmid = (float)y + ((float)h) / 2.0f;
 
@@ -411,12 +422,16 @@ bool CellListBuilderTree::cellsVisible(const BoQuadTreeNode* node, bool* partial
  radius = sqrtf(radius); // turn dotProduct() into length()
  BoVector3Float center(hmid, -vmid, z);
 
- int ret = viewFrustum()->sphereCompleteInFrustum(center, radius);
+ float dist;
+ int ret = viewFrustum()->sphereCompleteInFrustum(center, radius, &dist);
  if (ret == 0) {
 	*partially = false;
 	return false;
- } else if (ret == 2 || (w == 1 && h == 1)) {
+ }
+ if (ret == 2 || (w == 1 && h == 1) || w * h <= 4) {
 	*partially = false;
+	mMinDistance = QMIN(mMinDistance, dist - 2*radius);
+	mMaxDistance = QMAX(mMaxDistance, dist);
  } else {
 	*partially = true;
  }
@@ -825,7 +840,10 @@ void BoGroundRendererBase::generateCellList(const BosonMap* map)
  int* originalList = renderCells();
  mCellListBuilder->setViewFrustum(viewFrustum());
  mCellListBuilder->setViewport(viewport());
- int* renderCells = mCellListBuilder->generateCellList(map, originalList, &renderCellsSize, &renderCellsCount);
+ float mindist, maxdist;
+ int* renderCells = mCellListBuilder->generateCellList(map, originalList, &renderCellsSize, &renderCellsCount, &mindist, &maxdist);
+ statistics()->setMinDistance(mindist);
+ statistics()->setMaxDistance(maxdist);
  if (renderCells != originalList) {
 	setRenderCells(renderCells, renderCellsSize);
  }

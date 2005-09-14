@@ -526,8 +526,8 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  hbox = new QHBox(mAdvanced);
  (void)new QLabel(i18n("Ground render:"), hbox);
  mGroundRenderer = new QComboBox(hbox);
- mUseGroundShaders = new QCheckBox(i18n("Use shaders for ground rendering"), mAdvanced);
- mUseGroundShaders->setEnabled(BosonGroundThemeData::shadersSupported());
+ mUseShaders = new QCheckBox(i18n("Gimme all the eyecandy!"), mAdvanced);
+ mUseShaders->setEnabled(BosonGroundThemeData::shadersSupported());
 
  mUseLOD = new QCheckBox(i18n("Use level of detail"), mAdvanced);
  hbox = new QHBox(mAdvanced);
@@ -602,7 +602,7 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mUseLight->setChecked(boConfig->boolDefaultValue("UseLight"));
 		mUseMaterials->setChecked(boConfig->boolDefaultValue("UseMaterials"));
 		setCurrentGroundRenderer(boConfig->stringDefaultValue("GroundRendererClass"));
-		mUseGroundShaders->setChecked(false);
+		mUseShaders->setChecked(false);
 		setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
 		setUseLOD(true);
 		setDefaultLOD(0);
@@ -617,7 +617,7 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mUseLight->setChecked(boConfig->boolDefaultValue("UseLight"));
 		mUseMaterials->setChecked(boConfig->boolDefaultValue("UseMaterials"));
 		setCurrentGroundRenderer(boConfig->stringDefaultValue("GroundRendererClass"));
-		mUseGroundShaders->setChecked(true);
+		mUseShaders->setChecked(true);
 		setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
 		setUseLOD(true);
 		setDefaultLOD(0);
@@ -631,7 +631,7 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mUseLight->setChecked(false);
 		mUseMaterials->setChecked(false);
 		setCurrentGroundRenderer("BoFastGroundRenderer");
-		mUseGroundShaders->setChecked(false);
+		mUseShaders->setChecked(false);
 		setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
 		setUseLOD(true);
 		setDefaultLOD(5000);
@@ -761,8 +761,9 @@ void OpenGLOptions::apply()
 		kapp->exit(1);
 	}
  }
- boConfig->setBoolValue("UseGroundShaders", mUseGroundShaders->isChecked());
- BosonGroundThemeData::setUseGroundShaders(mUseGroundShaders->isChecked());
+ boConfig->setBoolValue("UseGroundShaders", mUseShaders->isChecked());
+ boConfig->setBoolValue("UseUnitShaders", mUseShaders->isChecked());
+ BosonGroundThemeData::setUseGroundShaders(mUseShaders->isChecked());
 
 
  emit signalOpenGLSettingsUpdated();
@@ -783,7 +784,7 @@ void OpenGLOptions::setDefaults()
  mUseLight->setChecked(boConfig->boolDefaultValue("UseLight"));
  mUseMaterials->setChecked(boConfig->boolDefaultValue("UseMaterials"));
  setCurrentGroundRenderer(boConfig->stringDefaultValue("GroundRendererClass"));
- mUseGroundShaders->setChecked(false);
+ mUseShaders->setChecked(false);
  setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
  setUseLOD(boConfig->boolDefaultValue("UseLOD"));
  setDefaultLOD(0);
@@ -819,7 +820,7 @@ void OpenGLOptions::load()
 
  setCurrentMeshRenderer(BoMeshRendererManager::manager()->currentRendererName());
  setCurrentGroundRenderer(BoGroundRendererManager::manager()->currentRendererName());
- mUseGroundShaders->setChecked(boConfig->boolValue("UseGroundShaders"));
+ mUseShaders->setChecked(boConfig->boolValue("UseGroundShaders") && boConfig->boolValue("UseUnitShaders"));
 }
 
 void OpenGLOptions::setUpdateInterval(int ms)

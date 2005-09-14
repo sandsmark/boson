@@ -22,6 +22,7 @@
 #define BOMESH_H
 
 #include "bo3dtools.h"
+#include "global.h"
 #include <bogl.h>
 
 #include <qstring.h>
@@ -87,7 +88,7 @@ public:
 	const QString& name() const { return mName; }
 	void setName(const QString& name) { mName = name; }
 
-	void renderMesh(const BoMatrix* matrix, const QColor* color);
+	void renderMesh(const BoMatrix* matrix, const QColor* color, RenderFlags flags);
 
 	void renderVertexPoints(const BosonModel* model);
 

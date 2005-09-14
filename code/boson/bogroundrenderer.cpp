@@ -97,18 +97,10 @@ void BoGroundRenderer::setMatrices(const BoMatrix* modelviewMatrix, const BoMatr
  mViewport = viewport;
 }
 
-unsigned int BoGroundRenderer::renderCells(const BosonMap* map)
+unsigned int BoGroundRenderer::renderCells(const BosonMap* map, RenderFlags flags)
 {
  BO_CHECK_NULL_RET0(map);
  BO_CHECK_NULL_RET0(statistics());
-
- if (renderCellsCount() == 0) {
-	// this happens either when we have to generate the list first or if no
-	// cell is visible at all. The latter case isn't speed relevant, so we
-	// can simply re-generate then.
-	boDebug() << k_funcinfo << "generating cell list" << endl;
-	generateCellList(map);
- }
 
  BO_CHECK_NULL_RET0(localPlayerIO());
 
@@ -126,11 +118,13 @@ unsigned int BoGroundRenderer::renderCells(const BosonMap* map)
 
  // Render cells
  renderVisibleCellsStart(map);
- renderVisibleCells(renderCells, cellsCount, map);
+ renderVisibleCells(renderCells, cellsCount, map, flags);
  renderVisibleCellsStop(map);
 
- glEnable(GL_DEPTH_TEST);
- renderCellGrid(renderCells, cellsCount, heightMap, heightMapWidth);
+ if (!(flags & DepthOnly)) {
+	glEnable(GL_DEPTH_TEST);
+	renderCellGrid(renderCells, cellsCount, heightMap, heightMapWidth);
+ }
 
  delete[] renderCells;
 

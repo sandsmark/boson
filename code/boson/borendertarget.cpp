@@ -23,6 +23,9 @@
 #include "boglx.h"
 #include "bodebug.h"
 #include "botexture.h"
+#include "info/boinfo.h"
+
+#include <qstringlist.h>
 
 #include <string.h>
 
@@ -40,28 +43,49 @@ class BoRenderTarget::PBufferData
     GLXContext oldcontext;
 };
 
-
-BoRenderTarget::BoRenderTarget(int width, int height, int flags, BoTexture* tex)
+class BoRenderTarget::FBOData
 {
+  public:
+    GLuint framebuffer;
+    GLuint depthbuffer;
+};
+
+
+BoRenderTarget::BoRenderTarget(int width, int height, int flags, BoTexture* color, BoTexture* depth)
+{
+  const BoInfoGLCache* glInfo = BoInfo::boInfo()->gl();
+  QStringList extensions = glInfo->openGLExtensions();
+  // Use FBO if it's supported
+  /*if(extensions.contains("GL_EXT_framebuffer_object") && boglFramebufferTexture2D)
+  {
+    mType = FBO;
+  }
+  else*/
+  {
+    mType = PBuffer;
+  }
+
+  // Reset variables
   mTexture = 0;
+  mDepthTexture = 0;
   mPBufferData = 0;
+  mFBOData = 0;
   mValid = false;
 
   mWidth = width;
   mHeight = height;
   mFlags = flags;
 
-  // TODO: check for FBO
-  mType = PBuffer;
+  mTexture = color;
+  mDepthTexture = depth;
 
-  if(mType == PBuffer)
+  if(mType == FBO)
+  {
+    initFBO();
+  }
+  else
   {
     initPBuffer();
-  }
-
-  if(tex)
-  {
-    setTexture(tex);
   }
 }
 
@@ -79,6 +103,16 @@ BoRenderTarget::~BoRenderTarget()
     }
     delete mPBufferData;
   }
+  else if(mType == FBO && mFBOData)
+  {
+    // TODO: what if this changes during this object's lifetime?
+    if(!mDepthTexture)
+    {
+      boglDeleteRenderbuffers(1, &mFBOData->depthbuffer);
+    }
+    boglDeleteFramebuffers(1, &mFBOData->framebuffer);
+    delete mFBOData;
+  }
 }
 
 bool BoRenderTarget::enable()
@@ -89,20 +123,27 @@ bool BoRenderTarget::enable()
     return false;
   }
 
-  mPBufferData->oldpbuffer = glXGetCurrentDrawable();
-  mPBufferData->oldcontext = glXGetCurrentContext();
-
-  if(!glXMakeCurrent(mPBufferData->display, mPBufferData->pbuffer, mPBufferData->context))
+  if(mType == FBO)
   {
-    boError() << k_funcinfo << "Couldn't enable render target!" << endl;
-    return false;
+    boglBindFramebuffer(GL_FRAMEBUFFER, mFBOData->framebuffer);
   }
-  boTextureManager->invalidateCache();
+  else
+  {
+    mPBufferData->oldpbuffer = glXGetCurrentDrawable();
+    mPBufferData->oldcontext = glXGetCurrentContext();
+
+    if(!glXMakeCurrent(mPBufferData->display, mPBufferData->pbuffer, mPBufferData->context))
+    {
+      boError() << k_funcinfo << "Couldn't enable render target!" << endl;
+      return false;
+    }
+    boTextureManager->invalidateCache();
+  }
 
   return true;
 }
 
-bool BoRenderTarget::disable(bool updatetex)
+bool BoRenderTarget::disable()
 {
   if(!valid())
   {
@@ -110,38 +151,33 @@ bool BoRenderTarget::disable(bool updatetex)
     return false;
   }
 
-  // Copy PBuffer contents to the texture
-  if(updatetex)
+  if(mType == FBO)
   {
-    updateTexture();
+    boglBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
+  else
+  {
+    // Copy PBuffer contents to the texture
+    if(mTexture)
+    {
+      mTexture->bind();
+      glCopyTexSubImage2D(mTexture->type(), 0,  0, 0,  0, 0,  mWidth, mHeight);
+    }
+    if(mDepthTexture)
+    {
+      mDepthTexture->bind();
+      glCopyTexSubImage2D(mDepthTexture->type(), 0,  0, 0,  0, 0,  mWidth, mHeight);
+    }
 
-  if(!glXMakeCurrent(mPBufferData->display, mPBufferData->oldpbuffer, mPBufferData->oldcontext))
-  {
-    boError() << k_funcinfo << "Couldn't disable render target!" << endl;
-    return false;
+    if(!glXMakeCurrent(mPBufferData->display, mPBufferData->oldpbuffer, mPBufferData->oldcontext))
+    {
+      boError() << k_funcinfo << "Couldn't disable render target!" << endl;
+      return false;
+    }
+    boTextureManager->invalidateCache();
   }
-  boTextureManager->invalidateCache();
 
   return true;
-}
-
-void BoRenderTarget::updateTexture(BoTexture* tex)
-{
-  if(!tex)
-  {
-    tex = mTexture;
-  }
-  if(tex)
-  {
-    tex->bind();
-    glCopyTexSubImage2D(tex->type(), 0,  0, 0,  0, 0,  mWidth, mHeight);
-  }
-}
-
-void BoRenderTarget::setTexture(BoTexture* tex)
-{
-  mTexture = tex;
 }
 
 void BoRenderTarget::initPBuffer()
@@ -285,5 +321,31 @@ bool BoRenderTarget::createContext(int* attrib, int& i, int* pattrib, int& pi)
   mPBufferData->oldcontext = oldcontext;
 
   return true;
+}
+
+void BoRenderTarget::initFBO()
+{
+  mFBOData = new FBOData;
+  boglGenFramebuffers(1, &mFBOData->framebuffer);
+
+  boglBindFramebuffer(GL_FRAMEBUFFER, mFBOData->framebuffer);
+  boglFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTexture->id(), 0);
+  if(mDepthTexture)
+  {
+    boglFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mDepthTexture->id(), 0);
+  }
+  else
+  {
+    boglGenRenderbuffers(1, &mFBOData->depthbuffer);
+    boglBindRenderbuffer(GL_RENDERBUFFER, mFBOData->depthbuffer);
+    boglRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mWidth, mHeight);
+    boglFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mFBOData->depthbuffer);
+    boglBindRenderbuffer(GL_RENDERBUFFER, 0);
+  }
+  boglBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  // TODO: check validity!
+
+  mValid = true;
 }
 

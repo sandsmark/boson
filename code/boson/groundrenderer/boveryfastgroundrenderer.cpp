@@ -124,7 +124,7 @@ void BoVeryFastGroundRenderer::renderVisibleCellsStop(const BosonMap* map)
  boConfig->setBoolValue("TextureFOW", textureFOW);
 }
 
-void BoVeryFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cellsCount, const BosonMap* map)
+void BoVeryFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cellsCount, const BosonMap* map, RenderFlags flags)
 {
  BO_CHECK_NULL_RET(renderCells);
  BO_CHECK_NULL_RET(map);

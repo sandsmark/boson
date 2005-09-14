@@ -38,7 +38,7 @@ public:
 
 	virtual bool initGroundRenderer();
 
-	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map);
+	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map, RenderFlags flags);
 
 protected:
 	void updateMapCache(const BosonMap*);

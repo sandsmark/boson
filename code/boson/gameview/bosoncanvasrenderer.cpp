@@ -57,10 +57,14 @@
 #include "../bocamera.h"
 #include "../boshader.h"
 #include "../bosonviewdata.h"
+#include "../borendertarget.h"
 #include "bosonlocalplayerinput.h"
 
 #include <qvaluevector.h>
 #include <qdatetime.h>
+
+#include <kglobal.h>
+#include <kstandarddirs.h>
 
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -80,7 +84,8 @@ static BosonModel* renderSingleItem(
 		BosonItemRenderer* itemRenderer,
 		bool transparentMeshes,
 		BosonModel* currentModel,
-		unsigned int* _lod = 0)
+		unsigned int* _lod = 0,
+		RenderFlags flags = Default)
 {
  BO_CHECK_NULL_RET0(camera);
  BO_CHECK_NULL_RET0(item);
@@ -106,7 +111,7 @@ static BosonModel* renderSingleItem(
 	currentModel = itemRenderer->model();
 	currentModel->prepareRendering();
  }
- itemRenderer->renderItem(lod, transparentMeshes);
+ itemRenderer->renderItem(lod, transparentMeshes, flags);
  glColor3ub(255, 255, 255);
  glPopMatrix();
  if (_lod) {
@@ -414,6 +419,11 @@ public:
 		mGameMatrices = 0;
 		mCamera = 0;
 		mLocalPlayerIO = 0;
+
+		mShadowTarget = 0;
+		mShadowTexture = 0;
+		mShadowColorTexture = 0;
+		mUnitShader = 0;
 	}
 	const BosonCanvas* mCanvas;
 	QValueVector<BoRenderItem> mRenderItemList;
@@ -432,6 +442,16 @@ public:
 	const BoGLMatrices* mGameMatrices;
 	BoGameCamera* mCamera;
 	PlayerIO* mLocalPlayerIO;
+
+	float mMinItemDist;
+	float mMaxItemDist;
+
+	BoRenderTarget* mShadowTarget;
+	BoTexture* mShadowTexture;
+	BoTexture* mShadowColorTexture;
+	BoMatrix mShadowProjectionMatrix;
+	BoMatrix mShadowViewMatrix;
+	BoShader* mUnitShader;
 };
 
 BosonCanvasRenderer::BosonCanvasRenderer()
@@ -460,6 +480,18 @@ BosonCanvasRenderer::~BosonCanvasRenderer()
 void BosonCanvasRenderer::initGL()
 {
  d->mSelectBoxData = new SelectBoxData();
+
+ QStringList extensions = boglGetOpenGLExtensions();
+ if (extensions.contains("GL_ARB_shader_objects") && extensions.contains("GL_ARB_fragment_shader") &&
+		extensions.contains("GL_ARB_shadow")) {
+	// Load unit shader
+	QString path = KGlobal::dirs()->findResourceDir("data", "boson/themes/shaders/unit.shader");
+	if (path.isNull()) {
+		boWarning() << k_funcinfo << "No unit.shader file found!" << endl;
+		return;
+	}
+	d->mUnitShader = new BoShader(path + "boson/themes/shaders/unit.shader");
+ }
 }
 
 void BosonCanvasRenderer::setCanvas(const BosonCanvas* canvas)
@@ -586,10 +618,32 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
  d->mTextureBindsWater = 0;
  d->mTextureBindsParticles = 0;
 
+ // Find out the visible effects and update them
  createVisibleEffectsList(&d->mVisibleEffects, effects, d->mCanvas->mapWidth(), d->mCanvas->mapHeight());
  updateEffects(d->mVisibleEffects);
 
+
+ // Create list of visible items
+ createRenderItemList(&d->mRenderItemList, allItems); // AB: this is very fast. < 1.5ms on experimental5 for me
+
+ // Create list of visible terrain chunks and calculate their min/max distance
+ // Not necessary, it's done in BosonGameView::cameraChanged()
+ //BoGroundRendererManager::manager()->currentRenderer()->generateCellList(d->mCanvas->map());
+
+
+ bool useShadows = d->mUnitShader && boConfig->boolValue("UseUnitShaders");
+ if (useShadows) {
+	// Render the shadowmap
+	renderShadowMap(d->mCanvas);
+ }
+
+ // Activate fog effect (if any)
  renderFog(d->mVisibleEffects);
+
+ if (useShadows) {
+	activateShadowMap();
+ }
+
 
  renderGround(d->mCanvas->map());
 
@@ -598,7 +652,17 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
  }
 
 
- renderItems(allItems);
+ if (useShadows) {
+	d->mUnitShader->bind();
+	renderItems();
+	d->mUnitShader->unbind();
+ } else {
+	renderItems();
+ }
+
+ if (useShadows) {
+	deactivateShadowMap();
+ }
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "after item rendering" << endl;
@@ -612,12 +676,13 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
 
  renderParticles(d->mVisibleEffects);
 
- glDisable(GL_DEPTH_TEST);
  glDisable(GL_LIGHTING);
  glDisable(GL_NORMALIZE);
 
  renderBulletTrailEffects(d->mVisibleEffects);
  d->mVisualFeedbacks->paintGL();
+
+ glDisable(GL_DEPTH_TEST);
 
  glMatrixMode(GL_PROJECTION);
  glLoadIdentity();
@@ -628,16 +693,428 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
 
  renderFadeEffects(d->mVisibleEffects);
 
+ /* // Visualize shadow textures
+ glScalef(d->mGameMatrices->viewport()[2], d->mGameMatrices->viewport()[3], 1.0);
+ glDisable(GL_BLEND);
+ glDisable(GL_DEPTH_TEST);
+ boTextureManager->activateTextureUnit(0);
+ glColor3f(1, 1, 1);
+ d->mShadowColorTexture->bind();
+ glBegin(GL_QUADS);
+  glTexCoord2f(0.0, 0.0);
+  glVertex2f(0.05, 0.05);
+  glTexCoord2f(1.0, 0.0);
+  glVertex2f(0.4, 0.05);
+  glTexCoord2f(1.0, 1.0);
+  glVertex2f(0.4, 0.4);
+  glTexCoord2f(0.0, 1.0);
+  glVertex2f(0.05, 0.4);
+ glEnd();
+
+ d->mShadowTexture->bind();
+ glTexParameteri(d->mShadowTexture->type(), GL_TEXTURE_COMPARE_MODE, GL_NONE);
+ glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+ glBegin(GL_QUADS);
+  glTexCoord2f(0.0, 0.0);
+  glVertex2f(0.05, 0.45);
+  glTexCoord2f(1.0, 0.0);
+  glVertex2f(0.4, 0.45);
+  glTexCoord2f(1.0, 1.0);
+  glVertex2f(0.4, 0.8);
+  glTexCoord2f(0.0, 1.0);
+  glVertex2f(0.05, 0.8);
+ glEnd();
+ boTextureManager->disableTexturing();
+
+ glEnable(GL_BLEND);
+ glColor4f(0.5, 0.5, 0.5, 0.3);
+ glLineWidth(1.0);
+ glBegin(GL_LINE_LOOP);
+  glVertex2f(0.05, 0.05);
+  glVertex2f(0.4, 0.05);
+  glVertex2f(0.4, 0.4);
+  glVertex2f(0.05, 0.4);
+ glEnd();
+ glDisable(GL_BLEND);
+*/
  BoShader::setFogEnabled(false);
 }
 
-void BosonCanvasRenderer::renderGround(const BosonMap* map)
+void BosonCanvasRenderer::renderShadowMap(const BosonCanvas* canvas)
+{
+// Size of the shadow texture (more = better quality)
+#define SHADOWTEX_SIZE 2048
+ if (!d->mShadowTarget) {
+	// Init textures
+	d->mShadowTexture = new BoTexture(0, SHADOWTEX_SIZE, SHADOWTEX_SIZE,
+			BoTexture::FilterLinear | BoTexture::FormatDepth | BoTexture::DontCompress | BoTexture::ClampToEdge);
+	// TODO: try to remove this
+	d->mShadowColorTexture = new BoTexture(0, SHADOWTEX_SIZE, SHADOWTEX_SIZE,
+			BoTexture::FilterLinear | BoTexture::FormatRGBA | BoTexture::DontCompress | BoTexture::ClampToEdge);
+
+	// Init rendertarget
+	d->mShadowTarget = new BoRenderTarget(SHADOWTEX_SIZE, SHADOWTEX_SIZE,
+			BoRenderTarget::RGBA | BoRenderTarget::Depth, d->mShadowColorTexture, d->mShadowTexture);
+	boDebug() << k_funcinfo << "Target type: " << d->mShadowTarget->type() << endl;
+ }
+
+
+ // STEP 1:
+ // Calculate new temporary projection matrix which contains only stuff which
+ //  casts/receives shadows and is as small as possible.
+ // Note that side planes of the new frustum will be same as before, but we'll
+ //  change distances of near and far planes (to make the depth range as small
+ //  as possible).
+ BoGroundRendererStatistics* stats = BoGroundRendererManager::manager()->currentRenderer()->statistics();
+ // Distances of new near/far plane _from current near plane_
+ float neardist = QMIN(stats->minDistance(), d->mMinItemDist);
+ float fardist = QMAX(stats->maxDistance(), d->mMaxItemDist);
+ /*boDebug() << "Near plane will be pushed by " << neardist << "; far plane by " << fardist << endl <<
+		"  (items: " << d->mMinItemDist << "/" << d->mMaxItemDist <<
+		"; ground: " << stats->minDistance() << "/" << stats->maxDistance() << ")" << endl;*/
+ glMatrixMode(GL_PROJECTION);
+ glPushMatrix();
+ glLoadIdentity();
+ gluPerspective(d->mGameMatrices->fovY(), d->mGameMatrices->aspect(), BO_GL_NEAR_PLANE + neardist, BO_GL_NEAR_PLANE + fardist);
+ // Extract view frustum
+ BoMatrix compactProjectionMatrix = createMatrixFromOpenGL(GL_PROJECTION_MATRIX);
+ BoFrustum compactFrustum;
+ compactFrustum.loadViewFrustum(d->mGameMatrices->modelviewMatrix(), compactProjectionMatrix);
+ // Restore old matrix
+ glPopMatrix();
+ glMatrixMode(GL_MODELVIEW);
+
+ // Extract points from the compact viewfrustum
+ // Order of the vertices: BLF, BRF, BRN, BLN, TLF, TRF, TRN, TLN;
+ BoVector3Float F[8];
+ extractViewFrustum(F, compactFrustum);
+
+
+ // STEP 2:
+ // Calculate parameters for settings up view and projection matrices of the
+ //  light. This involves finding eye and lookat points as well as calculating
+ //  actual near/far plane distances for the light projection matrix so that
+ //  the resulting frustum fully contains our earlier-calculated "compact" view
+ //  frustum (which in turn contains all items and terrain relevant for
+ //  shadowing)
+ BoVector3Float lpos(boLightManager->activeLight(0)->position3());
+ BoVector3Float focus(camera()->lookAt());
+ // Calculate near and far plane distances for the light frustum
+ BoVector3Float lightViewDir(focus - lpos);
+ lightViewDir.normalize();
+ float near = (F[0] - lpos).dotProduct(lightViewDir);
+ float far = near;
+ for (int i = 1; i < 8; i++) {
+	// This is z-coordinate of F[i] in light eye space.
+	float d = (F[i] - lpos).dotProduct(lightViewDir);
+	near = QMIN(near, d);
+	far = QMAX(far, d);
+ }
+ /*boDebug() << k_funcinfo << "lpos: (" << lpos.x() << "; " << lpos.y() << "; " << lpos.z() << "); focus: (" <<
+		focus.x() << "; " << focus.y() << "; " << focus.z() << ");" <<
+		" dist: " << (focus - lpos).length() << "; near: " << near << "; far: " << far << endl;*/
+
+
+ // STEP 3:
+ // Set up initial light-space view and projection matrices as well as OpenGL
+ //  states.
+ // Note that I say initial because the matrices will be modified later to
+ //  maximize efficiency.
+ glPushAttrib(GL_ALL_ATTRIB_BITS);
+ d->mShadowTarget->enable();
+ // Set up the viewport
+ glViewport(0, 0, SHADOWTEX_SIZE, SHADOWTEX_SIZE);
+ // Clear framebuffer
+ glClearDepth(1.0);
+ glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+ // Init opengl states to reasonable values
+ glDepthFunc(GL_LEQUAL);
+ glEnable(GL_DEPTH_TEST);
+ glDepthMask(GL_TRUE);
+ glColorMask(0, 0, 0, 0);  // only for testing
+ glPolygonOffset(4, 15);  // TODO: tune this
+ glEnable(GL_POLYGON_OFFSET_FILL);
+
+ // Set up the perspective projection
+ glMatrixMode(GL_PROJECTION);
+ glPushMatrix();
+ glLoadIdentity();
+ gluPerspective(45, 1, near, far);
+ d->mShadowProjectionMatrix = createMatrixFromOpenGL(GL_PROJECTION_MATRIX);
+
+ // Set up view matrix
+ glMatrixMode(GL_MODELVIEW);
+ glPushMatrix();
+ glLoadIdentity();
+ gluLookAt(lpos.x(), lpos.y(), lpos.z(),   focus.x(), focus.y(), focus.z(),   0, 0, 1);
+ d->mShadowViewMatrix = createMatrixFromOpenGL(GL_MODELVIEW_MATRIX);
+ glDisable(GL_LIGHTING);  // just for testing
+ boLightManager->updateAllStates();
+
+
+ /*boDebug() << "View frustum in world space: NEAR: (" <<
+		F[3].x() << "; " << F[3].y() << "; " << F[3].z() << "); (" <<
+		F[2].x() << "; " << F[2].y() << "; " << F[2].z() << "); (" <<
+		F[6].x() << "; " << F[6].y() << "; " << F[6].z() << "); (" <<
+		F[7].x() << "; " << F[7].y() << "; " << F[7].z() << ");" << endl << "    FAR: (" <<
+		F[0].x() << "; " << F[0].y() << "; " << F[0].z() << "); (" <<
+		F[1].x() << "; " << F[1].y() << "; " << F[1].z() << "); (" <<
+		F[5].x() << "; " << F[5].y() << "; " << F[5].z() << "); (" <<
+		F[4].x() << "; " << F[4].y() << "; " << F[4].z() << ")" << endl;*/
+
+ // STEP 4:
+ // Modify projection matrix to maximize shadow texture efficiency (by using as
+ //  much of the shadow texture's area as possible).
+ // First tranform view frustum points into post-perspective space of the light
+ BoVector4Float E[8];
+ for (int i = 0; i < 8; i++) {
+	BoVector4Float tmp;
+	BoVector4Float in(F[i].x(), F[i].y(), F[i].z(), 1.0f);
+	d->mShadowViewMatrix.transform(&tmp, &in);
+	d->mShadowProjectionMatrix.transform(&E[i], &tmp);
+	// Divide by w to get eucleidian coordinates
+	E[i] = E[i] / E[i].w();
+ }
+ /*boDebug() << "View frustum in pp-space of light: NEAR: (" <<
+		E[3].x() << "; " << E[3].y() << "; " << E[3].z() << "; " << E[3].w() << "); (" <<
+		E[2].x() << "; " << E[2].y() << "; " << E[2].z() << "; " << E[2].w() << "); (" <<
+		E[6].x() << "; " << E[6].y() << "; " << E[6].z() << "; " << E[6].w() << "); (" <<
+		E[7].x() << "; " << E[7].y() << "; " << E[7].z() << "; " << E[7].w() << ");" << endl << "    FAR: (" <<
+		E[0].x() << "; " << E[0].y() << "; " << E[0].z() << "; " << E[0].w() << "); (" <<
+		E[1].x() << "; " << E[1].y() << "; " << E[1].z() << "; " << E[1].w() << "); (" <<
+		E[5].x() << "; " << E[5].y() << "; " << E[5].z() << "; " << E[5].w() << "); (" <<
+		E[4].x() << "; " << E[4].y() << "; " << E[4].z() << "; " << E[4].w() << ")" << endl;*/
+
+ // Translate and scale the projection matrix to obtain maximum usefulness
+ BoVector3Float Emin(E[0].x(), E[0].y(), E[0].z());
+ BoVector3Float Emax(E[0].x(), E[0].y(), E[0].z());
+ for (int i = 0; i < 8; i++) {
+	Emin.setX(QMIN(Emin.x(), E[i].x()));
+	Emin.setY(QMIN(Emin.y(), E[i].y()));
+	Emin.setZ(QMIN(Emin.z(), E[i].z()));
+	Emax.setX(QMAX(Emax.x(), E[i].x()));
+	Emax.setY(QMAX(Emax.y(), E[i].y()));
+	Emax.setZ(QMAX(Emax.z(), E[i].z()));
+ }
+
+ BoVector3Float Emid = (Emin + Emax) / 2;
+
+ glMatrixMode(GL_PROJECTION);
+ /*boDebug() << "mid: (" << Emid.x() << "; " << Emid.y() << "; " << Emid.z() << ")" << endl <<
+		"glTranslatef(" << -Emid.x() << ", " << -Emid.y() << ", " << -Emid.z() << ");" << endl <<
+		"glScalef(" << 2 / (Emax.x() - Emin.x()) << ", " << 2 / (Emax.y() - Emin.y()) << ", " << 2 / (Emax.z() - Emin.z()) << ");" << endl;*/
+ BoVector3Float scalev(2 / (Emax.x() - Emin.x()), 2 / (Emax.y() - Emin.y()), 2 / (Emax.z() - Emin.z()));
+ glScalef(scalev.x(), scalev.y(), scalev.z());
+ glTranslatef(-Emid.x() * scalev.x(), -Emid.y() * scalev.y(), -Emid.z() * scalev.z());
+ // Update our stored matrix
+ d->mShadowProjectionMatrix = createMatrixFromOpenGL(GL_PROJECTION_MATRIX);
+ glMatrixMode(GL_MODELVIEW);
+
+ /*for (int i = 0; i < 8; i++) {
+	BoVector4Float tmp;
+	BoVector4Float in(F[i].x(), F[i].y(), F[i].z(), 1.0f);
+	d->mShadowViewMatrix.transform(&tmp, &in);
+	d->mShadowProjectionMatrix.transform(&E[i], &tmp);
+	// Divide by w to get eucleidian coordinates
+	E[i] = E[i] / E[i].w();
+ }
+ boDebug() << "View frustum in modified pp-space of light: NEAR: (" <<
+		E[3].x() << "; " << E[3].y() << "; " << E[3].z() << "; " << E[3].w() << "); (" <<
+		E[2].x() << "; " << E[2].y() << "; " << E[2].z() << "; " << E[2].w() << "); (" <<
+		E[6].x() << "; " << E[6].y() << "; " << E[6].z() << "; " << E[6].w() << "); (" <<
+		E[7].x() << "; " << E[7].y() << "; " << E[7].z() << "; " << E[7].w() << ");" << endl << "    FAR: (" <<
+		E[0].x() << "; " << E[0].y() << "; " << E[0].z() << "; " << E[0].w() << "); (" <<
+		E[1].x() << "; " << E[1].y() << "; " << E[1].z() << "; " << E[1].w() << "); (" <<
+		E[5].x() << "; " << E[5].y() << "; " << E[5].z() << "; " << E[5].w() << "); (" <<
+		E[4].x() << "; " << E[4].y() << "; " << E[4].z() << "; " << E[4].w() << ")" << endl;*/
+
+#if 0
+ // Find centers of near and far plane
+ // TODO: find out if this approach really works
+ BoVector4Float nearCenter = (E[2] + E[3] + E[6] + E[7]) / 4;
+ BoVector4Float farCenter = (E[0] + E[1] + E[4] + E[5]) / 4;
+
+
+ // Calculate 2d convex hull of E
+ //int hullpoints = calculateConvexHull(E, 8);
+ BoVector3Float Emin(3, 3, 3);
+ BoVector3Float Emax(-3, -3, -3);
+ for (int i = 0; i < 8; i++) {
+	Emin.setX(QMIN(Emin.x(), E[i].x()));
+	Emin.setY(QMIN(Emin.y(), E[i].y()));
+	Emin.setZ(QMIN(Emin.z(), E[i].z()));
+	Emax.setX(QMAX(Emax.x(), E[i].x()));
+	Emax.setY(QMAX(Emax.y(), E[i].y()));
+	Emax.setZ(QMAX(Emax.z(), E[i].z()));
+ }
+
+ BoVector3Float Emid = (Emin + Emax) / 2;
+
+ glMatrixMode(GL_PROJECTION);
+ glTranslatef(-Emid.x(), -Emid.y(), -Emid.z());
+ glScalef(2 / (Emax.x() - Emin.x()), 2 / (Emax.y() - Emin.y()), 2 / (Emax.z() - Emin.z()));
+ glMatrixMode(GL_MODELVIEW);
+#endif
+
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "after shadow target setup" << endl;
+ }
+
+
+ // STEP 5: render everything that casts shadows!
+ renderGround(canvas->map(), DepthOnly);
+
+ renderItems(DepthOnly);
+
+
+ // Frustum lines
+ glDepthMask(GL_FALSE);
+ glLineWidth(5.0f);
+ glColor3f(255, 255, 192);
+ glBegin(GL_LINE_LOOP);
+  glVertex3fv(F[3].data());
+  glVertex3fv(F[2].data());
+  glVertex3fv(F[6].data());
+  glVertex3fv(F[7].data());
+ glEnd();
+ glBegin(GL_LINE_LOOP);
+  glVertex3fv(F[0].data());
+  glVertex3fv(F[1].data());
+  glVertex3fv(F[5].data());
+  glVertex3fv(F[4].data());
+ glEnd();
+ glBegin(GL_LINES);
+  glVertex3fv(F[3].data());
+  glVertex3fv(F[0].data());
+  glVertex3fv(F[2].data());
+  glVertex3fv(F[1].data());
+  glVertex3fv(F[6].data());
+  glVertex3fv(F[5].data());
+  glVertex3fv(F[7].data());
+  glVertex3fv(F[4].data());
+ glEnd();
+ glDepthMask(GL_TRUE);
+
+ // STEP 6: uninit everything
+ glDisable(GL_POLYGON_OFFSET_FILL);
+
+ glMatrixMode(GL_PROJECTION);
+ glPopMatrix();
+ glMatrixMode(GL_MODELVIEW);
+ glPopMatrix();
+
+ d->mShadowTarget->disable();
+ glPopAttrib();
+
+ // Done!
+#undef SHADOWTEX_SIZE
+}
+
+void BosonCanvasRenderer::extractViewFrustum(BoVector3Float* points, const BoFrustum& viewFrustum)
+{
+ // we have planes RIGHT, LEFT, BOTTOM, TOP, FAR, NEAR, we are going to name
+ // lines and points accordingly (point at LEFT/BOTTOM/NEAR planes is LBN)
+ const BoPlane& planeRight  = viewFrustum.right();
+ const BoPlane& planeLeft   = viewFrustum.left();
+ const BoPlane& planeBottom = viewFrustum.bottom();
+ const BoPlane& planeTop    = viewFrustum.top();
+ const BoPlane& planeFar    = viewFrustum.far();
+ const BoPlane& planeNear   = viewFrustum.near();
+
+ // intersecting lines first
+ // every line consists of a point and a direction
+ BoVector3Float LF_point;
+ BoVector3Float LF_dir;
+ BoPlane::intersectPlane(planeLeft, planeFar, &LF_point, &LF_dir);
+
+ BoVector3Float RF_point;
+ BoVector3Float RF_dir;
+ BoPlane::intersectPlane(planeRight, planeFar, &RF_point, &RF_dir);
+
+ BoVector3Float RN_point;
+ BoVector3Float RN_dir;
+ BoPlane::intersectPlane(planeRight, planeNear, &RN_point, &RN_dir);
+
+ BoVector3Float LN_point;
+ BoVector3Float LN_dir;
+ BoPlane::intersectPlane(planeLeft, planeNear, &LN_point, &LN_dir);
+
+ // now retrieve all points using the lines.
+ // note that we must not do line-line intersection, as that would be highly
+ // inaccurate. we use line-plane intersection instead, which provides more
+ // accurate results
+ // Order of the vertices: BLF, BRF, BRN, BLN, TLF, TRF, TRN, TLN;
+ planeBottom.intersectLine(LF_point, LF_dir, &points[0]);
+ planeBottom.intersectLine(RF_point, RF_dir, &points[1]);
+ planeBottom.intersectLine(RN_point, RN_dir, &points[2]);
+ planeBottom.intersectLine(LN_point, LN_dir, &points[3]);
+ planeTop.intersectLine(LF_point, LF_dir, &points[4]);
+ planeTop.intersectLine(RF_point, RF_dir, &points[5]);
+ planeTop.intersectLine(RN_point, RN_dir, &points[6]);
+ planeTop.intersectLine(LN_point, LN_dir, &points[7]);
+}
+
+void BosonCanvasRenderer::activateShadowMap()
+{
+ // Shadow tex will go to texunit 3
+ boTextureManager->activateTextureUnit(3);
+ d->mShadowTexture->bind();
+
+ BoMatrix texMatrix;
+ GLenum planes[] = { GL_S, GL_T, GL_R, GL_Q };
+ for(int i = 0; i < 4; i++)
+ {
+  BoVector4Float plane(texMatrix.data() + i*4);
+  glTexGenfv(planes[i], GL_EYE_PLANE, plane.data());
+  glTexGeni(planes[i], GL_TEXTURE_GEN_MODE, GL_EYE_LINEAR);
+ }
+ glEnable(GL_TEXTURE_GEN_S);
+ glEnable(GL_TEXTURE_GEN_T);
+ glEnable(GL_TEXTURE_GEN_R);
+ glEnable(GL_TEXTURE_GEN_Q);
+ glTexParameteri(d->mShadowTexture->type(), GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+ glTexParameteri(d->mShadowTexture->type(), GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+ glTexParameteri(d->mShadowTexture->type(), GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
+ glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+ glMatrixMode(GL_TEXTURE);
+ glLoadIdentity();
+ glTranslatef(0.5, 0.5, 0.5);
+ glScalef(0.5, 0.5, 0.5);
+ glMultMatrixf(d->mShadowProjectionMatrix.data());
+ glMultMatrixf(d->mShadowViewMatrix.data());
+ glMatrixMode(GL_MODELVIEW);
+
+
+ //glAlphaFunc(GL_GEQUAL, 0.99);
+ //glEnable(GL_ALPHA_TEST);
+ boTextureManager->activateTextureUnit(0);
+
+ //d->mShadowShader->bind();
+}
+
+void BosonCanvasRenderer::deactivateShadowMap()
+{
+ boTextureManager->activateTextureUnit(3);
+ glDisable(GL_TEXTURE_GEN_S);
+ glDisable(GL_TEXTURE_GEN_T);
+ glDisable(GL_TEXTURE_GEN_R);
+ glDisable(GL_TEXTURE_GEN_Q);
+ glMatrixMode(GL_TEXTURE);
+ glLoadIdentity();
+ glMatrixMode(GL_MODELVIEW);
+ boTextureManager->disableTexturing();
+ boTextureManager->activateTextureUnit(0);
+}
+
+void BosonCanvasRenderer::renderGround(const BosonMap* map, RenderFlags flags)
 {
  PROFILE_METHOD;
  BO_CHECK_NULL_RET(map);
  BoTextureManager::BoTextureBindCounter bindCounter(boTextureManager, &d->mTextureBindsCells);
  glEnable(GL_DEPTH_TEST);
- if (boConfig->boolValue("UseLight")) {
+ if (boConfig->boolValue("UseLight") && !(flags & DepthOnly)) {
 	glEnable(GL_LIGHTING);
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
@@ -646,7 +1123,7 @@ void BosonCanvasRenderer::renderGround(const BosonMap* map)
  }
 
  BO_CHECK_NULL_RET(BoGroundRendererManager::manager()->currentRenderer());
- d->mRenderedCells = BoGroundRendererManager::manager()->currentRenderer()->renderCells(map);
+ d->mRenderedCells = BoGroundRendererManager::manager()->currentRenderer()->renderCells(map, flags);
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error" << endl;
@@ -690,6 +1167,11 @@ void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* rende
  renderItemList->clear();
  renderItemList->reserve(allItems.count());
 
+ d->mMinItemDist = 1000000.0f;
+ d->mMaxItemDist = 0.0f;
+
+ BoVector3Float camerapos = camera()->cameraPos();
+
  for (QPtrListIterator<BosonItemContainer> it(allItems); it.current(); ++it) {
 	BosonItem* item = it.current()->item();
 	BosonItemRenderer* itemRenderer = it.current()->itemRenderer();
@@ -712,7 +1194,8 @@ void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* rende
 	// UPDATE: we could instead use the "sectors" that we are planning to
 	// use for collision detection and pathfinding also for the frustum
 	// tests (they wouldn't do floating point calculations)
-	if (!itemRenderer->itemInFrustum(viewFrustum())) {
+	float dist = itemRenderer->itemInFrustum(viewFrustum());
+	if (dist == 0.0f) {
 		// the unit is not visible, currently. no need to draw anything.
 		continue;
 	}
@@ -721,47 +1204,60 @@ void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* rende
 	// width/height.
 	// but concerning z-position they are rendered from bottom to top!
 
-	bool visible = localPlayerIO()->canSee(item);
-	if (visible) {
-		unsigned int modelid = 0;
-		if (itemRenderer->model()) {
-			modelid = itemRenderer->model()->id();
-		}
-
-		// Units will be tinted accordingly to how much health they have left
-		QColor tintColor(255, 255, 255);
-		if (RTTI::isUnit(item->rtti())) {
-			Unit* u = (Unit*)item;
-			if (u->isDestroyed()) {
-				tintColor = QColor(102, 102, 102);
-			} else {
-				float f = u->health() / (float)u->maxHealth();
-				float a = f * 0.3f + 0.7f;
-				a = QMIN(a, 1.0f);
-				int c = (int)(255 * a);
-				tintColor = QColor(c, c, c);
-			}
-		}
-
-		if (d->mVisualFeedbacks->tintItem(item)) {
-			tintColor = d->mVisualFeedbacks->tintColor(item);
-		}
-
-		renderItemList->append(BoRenderItem(modelid, item, itemRenderer, tintColor));
+	if (!localPlayerIO()->canSee(item)) {
+		continue;
 	}
+
+	unsigned int modelid = 0;
+	if (itemRenderer->model()) {
+		modelid = itemRenderer->model()->id();
+	}
+
+	// Units will be tinted accordingly to how much health they have left
+	QColor tintColor(255, 255, 255);
+	if (RTTI::isUnit(item->rtti())) {
+		Unit* u = (Unit*)item;
+		if (u->isDestroyed()) {
+			tintColor = QColor(102, 102, 102);
+		} else {
+			float f = u->health() / (float)u->maxHealth();
+			float a = f * 0.3f + 0.7f;
+			a = QMIN(a, 1.0f);
+			int c = (int)(255 * a);
+			tintColor = QColor(c, c, c);
+		}
+	}
+
+	if (d->mVisualFeedbacks->tintItem(item)) {
+		tintColor = d->mVisualFeedbacks->tintColor(item);
+	}
+
+	// TODO: what was this dist for? is it still necessary?
+	renderItemList->append(BoRenderItem(modelid, item, itemRenderer, tintColor));
+
+	d->mMinItemDist = QMIN(d->mMinItemDist, dist - 2*itemRenderer->boundingSphereRadius());
+	d->mMaxItemDist = QMAX(d->mMaxItemDist, dist);
+ }
+
+ d->mMinItemDist = QMAX(0, d->mMinItemDist);
+ d->mMaxItemDist = QMAX(0, d->mMaxItemDist);
+ if (renderItemList->isEmpty()) {
+	d->mMinItemDist = d->mMinItemDist = 0;
  }
 }
 
-void BosonCanvasRenderer::renderItems(const QPtrList<BosonItemContainer>& allCanvasItems)
+void BosonCanvasRenderer::renderItems(RenderFlags flags)
 {
  PROFILE_METHOD;
  BoTextureManager::BoTextureBindCounter bindCounter(boTextureManager, &d->mTextureBindsItems);
  BosonItemRenderer::startItemRendering();
- if (boConfig->boolValue("debug_wireframes")) {
+ if (boConfig->boolValue("debug_wireframes") && !(flags & DepthOnly)) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
  }
  glEnable(GL_DEPTH_TEST);
- if (boConfig->boolValue("UseLight")) {
+ glDisable(GL_ALPHA_TEST);
+ glDisable(GL_BLEND);
+ if (boConfig->boolValue("UseLight") && !(flags & DepthOnly)) {
 	glEnable(GL_LIGHTING);
 	glEnable(GL_NORMALIZE);
 	glEnable(GL_COLOR_MATERIAL);
@@ -769,9 +1265,6 @@ void BosonCanvasRenderer::renderItems(const QPtrList<BosonItemContainer>& allCan
  } else {
 	glDisable(GL_COLOR_MATERIAL);
  }
-
- createRenderItemList(&d->mRenderItemList, allCanvasItems); // AB: this is very fast. < 1.5ms on experimental5 for me
-
 
  unsigned int itemCount = d->mRenderItemList.count();
 
@@ -835,64 +1328,74 @@ void BosonCanvasRenderer::renderItems(const QPtrList<BosonItemContainer>& allCan
 	// width/height.
 	// but concerning z-position they are rendered from bottom to top!
 
-	const QColor& c = d->mRenderItemList[i].tintColor;
-	glColor3ub(c.red(), c.green(), c.blue());
+	if (!(flags & DepthOnly)) {
+		const QColor& c = d->mRenderItemList[i].tintColor;
+		glColor3ub(c.red(), c.green(), c.blue());
+	}
 
 	unsigned int lod;
-	currentModel = renderSingleItem(useLOD, camera(), item, itemRenderer, false, currentModel, &lod);
+	currentModel = renderSingleItem(useLOD, camera(), item, itemRenderer, false, currentModel, &lod, flags);
 
 
 	if (currentModel && currentModel->hasTransparentMeshes(lod)) {
 		transparentModels.append(d->mRenderItemList[i]);
 	}
 
-	if (boConfig->boolValue("debug_boundingboxes")) {
+	if (boConfig->boolValue("debug_boundingboxes") && !(flags & DepthOnly)) {
 		renderBoundingBox(item);
 	}
  }
 
- // Render semi-transparent meshes of the models
- // TODO: sort the models by depth
- glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT);
- glEnable(GL_DEPTH_TEST);
- //glDepthMask(GL_FALSE);
- glEnable(GL_BLEND);
- glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
- glEnable(GL_ALPHA_TEST);
- glAlphaFunc(GL_GEQUAL, 0.2);
- glDisable(GL_CULL_FACE);
- //glDisable(GL_LIGHTING);
- for (unsigned int i = 0; i < transparentModels.count(); i++) {
-	BosonItem* item = transparentModels[i].item;
-	BosonItemRenderer* itemRenderer = transparentModels[i].itemRenderer;
-	if (!itemRenderer) {
-		BO_NULL_ERROR(itemRenderer);
-		continue;
+ if (transparentModels.count() > 0) {
+	// Render semi-transparent meshes of the models
+	// TODO: sort the models by depth
+	glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT);
+	glEnable(GL_DEPTH_TEST);
+	//glDepthMask(GL_FALSE);
+	if (!(flags & DepthOnly)) {
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GEQUAL, 0.2);
+	glDisable(GL_CULL_FACE);
+	//glDisable(GL_LIGHTING);
+	for (unsigned int i = 0; i < transparentModels.count(); i++) {
+		BosonItem* item = transparentModels[i].item;
+		BosonItemRenderer* itemRenderer = transparentModels[i].itemRenderer;
+		if (!itemRenderer) {
+			BO_NULL_ERROR(itemRenderer);
+			continue;
+		}
 
-	const QColor& c = transparentModels[i].tintColor;
-	glColor3ub(c.red(), c.green(), c.blue());
+		if (!(flags & DepthOnly)) {
+			const QColor& c = transparentModels[i].tintColor;
+			glColor3ub(c.red(), c.green(), c.blue());
+		}
 
-	currentModel = renderSingleItem(useLOD, camera(), item, itemRenderer, true, currentModel);
+		unsigned int lod;
+		currentModel = renderSingleItem(useLOD, camera(), item, itemRenderer, true, currentModel, &lod, flags);
+	}
+	glPopAttrib();
  }
- glPopAttrib();
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error before rendering selections" << endl;
  }
 
- BoItemList* selectedItems = new BoItemList(0, false);
- createSelectionsList(selectedItems, &d->mRenderItemList);
- renderSelections(selectedItems);
- delete selectedItems;
- selectedItems = 0;
- if (Bo3dTools::checkError()) {
-	boError() << k_funcinfo << "OpenGL error after rendering selections" << endl;
+ if (!(flags & DepthOnly)) {
+	BoItemList* selectedItems = new BoItemList(0, false);
+	createSelectionsList(selectedItems, &d->mRenderItemList);
+	renderSelections(selectedItems);
+	delete selectedItems;
+	selectedItems = 0;
+	if (Bo3dTools::checkError()) {
+		boError() << k_funcinfo << "OpenGL error after rendering selections" << endl;
+	}
  }
 
  boTextureManager->invalidateCache();
  d->mRenderedItems += d->mRenderItemList.count();
- d->mRenderItemList.clear();
 
  BosonItemRenderer::stopItemRendering();
  if (boConfig->boolValue("debug_wireframes")) {

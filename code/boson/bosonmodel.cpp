@@ -183,7 +183,7 @@ BoMatrix* BoFrame::matrix(int index) const
  return mMatrices[index];
 }
 
-void BoFrame::renderFrame(const QColor* teamColor, bool transparentmeshes, int mode)
+void BoFrame::renderFrame(const QColor* teamColor, bool transparentmeshes, RenderFlags flags, int mode)
 {
  for (unsigned int i = 0; i < mNodeCount; i++) {
 	BoMatrix* m = mMatrices[i];
@@ -208,7 +208,7 @@ void BoFrame::renderFrame(const QColor* teamColor, bool transparentmeshes, int m
 	}
 	// TODO: either store (bool flags) or test if mMatrices[i] is identity
 	//  matrix. If it is, we can avoid glMultMatrix() call
-	mesh->renderMesh(m, teamColor);
+	mesh->renderMesh(m, teamColor, flags);
  }
 }
 
