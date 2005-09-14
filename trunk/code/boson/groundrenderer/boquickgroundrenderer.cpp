@@ -117,6 +117,8 @@ void BoQuickGroundRenderer::generateCellList(const BosonMap* map)
 
   // First pass
   // Find visible chunks and calculate lod level for them
+  float mindist = 1000000.0f;
+  float maxdist = -1000000.0f;
   for(unsigned int i = 0; i < mChunkCount; i++)
   {
     TerrainChunk* c = &mChunks[i];
@@ -144,6 +146,8 @@ void BoQuickGroundRenderer::generateCellList(const BosonMap* map)
     c->render = true;
     // Choose lod level for the chunk
     c->useLOD = chooseLOD(c, dist);
+    mindist = QMIN(mindist, dist - 2 * c->radius);
+    maxdist = QMAX(maxdist, dist);
   }
 
   // Second pass
@@ -203,9 +207,12 @@ void BoQuickGroundRenderer::generateCellList(const BosonMap* map)
 #endif
 
   mCellListDirty = false;
+
+  statistics()->setMinDistance(QMAX(0, mindist));
+  statistics()->setMaxDistance(QMAX(0, maxdist));
 }
 
-void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMap* map)
+void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMap* map, RenderFlags flags)
 {
   if(map != mMap)
   {
@@ -230,6 +237,7 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
   unsigned int* indices = new unsigned int[2 * (mChunkSize + 1)];
 
   bool useShaders = boConfig->boolValue("UseGroundShaders");
+  bool depthonly = flags & DepthOnly;
 
 
   glPushClientAttrib(GL_ALL_ATTRIB_BITS);
@@ -239,31 +247,38 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
   boglBindBuffer(GL_ARRAY_BUFFER, mVBOVertex);
   glVertexPointer(3, GL_FLOAT, 0, 0);
 
-  glEnableClientState(GL_NORMAL_ARRAY);
-  boglBindBuffer(GL_ARRAY_BUFFER, mVBONormal);
-  glNormalPointer(GL_FLOAT, 0, 0);
+  // We don't need normals and texture weights (stored in color) for depth pass
+  if(!depthonly)
+  {
+    glEnableClientState(GL_NORMAL_ARRAY);
+    boglBindBuffer(GL_ARRAY_BUFFER, mVBONormal);
+    glNormalPointer(GL_FLOAT, 0, 0);
 
-  glEnableClientState(GL_COLOR_ARRAY);
-  boglBindBuffer(GL_ARRAY_BUFFER, mVBOTexture);
+    glEnableClientState(GL_COLOR_ARRAY);
+    boglBindBuffer(GL_ARRAY_BUFFER, mVBOTexture);
+  }
 
 //  glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_TEXTURE_BIT);
   glPushAttrib(GL_ALL_ATTRIB_BITS);
 
   // Texture stuff
   // Use OpenGL's automatic texture coordinate generation.
-  boTextureManager->activateTextureUnit(0);
-  float texPlaneS[] = { 1.0, 0.0, 0.0, 0.0 };
-  float texPlaneT[] = { 0.0, 1.0, 0.0, 0.0 };
-  glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-  glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-  glEnable(GL_TEXTURE_GEN_S);
-  glEnable(GL_TEXTURE_GEN_T);
-  glTexGenfv(GL_S, GL_OBJECT_PLANE, texPlaneS);
-  glTexGenfv(GL_T, GL_OBJECT_PLANE, texPlaneT);
-  glMatrixMode(GL_TEXTURE);
+  if(!depthonly)
+  {
+    boTextureManager->activateTextureUnit(0);
+    float texPlaneS[] = { 1.0, 0.0, 0.0, 0.0 };
+    float texPlaneT[] = { 0.0, 1.0, 0.0, 0.0 };
+    glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
+    glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
+    glEnable(GL_TEXTURE_GEN_S);
+    glEnable(GL_TEXTURE_GEN_T);
+    glTexGenfv(GL_S, GL_OBJECT_PLANE, texPlaneS);
+    glTexGenfv(GL_T, GL_OBJECT_PLANE, texPlaneT);
+    glMatrixMode(GL_TEXTURE);
 
-  // Set blending function
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // Set blending function
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  }
 
   // Depth test
   glDepthFunc(GL_LEQUAL);
@@ -272,6 +287,11 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
   unsigned int groundcount = groundThemeData->groundTypeCount();
   for(unsigned int i = 0; i < groundcount; i++)
   {
+    // Depth pass needs only a single pass
+    if(depthonly && i > 0)
+    {
+      break;
+    }
     // If this is pass 2, enable blending (it's initially disabled)
     if(i == 1)
     {
@@ -285,17 +305,20 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
     for(unsigned int j = 0; j < mChunkCount; j++)
     {
       TerrainChunk* c = &mChunks[j];
-      if(!c->render)
+      if(!depthonly)
       {
-        continue;
-      }
-      if(!c->hastexture[i])
-      {
-        continue;
+        if(!c->render)
+        {
+          continue;
+        }
+        if(!c->hastexture[i])
+        {
+          continue;
+        }
       }
 
       // Init if necessary
-      if(!inited)
+      if(!depthonly && !inited)
       {
         BosonGroundTypeData* groundData = groundThemeData->groundTypeData(i);
         // Bind current texture
@@ -330,26 +353,30 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
 
   glLoadIdentity();
 
-  // Disable shader
-  if(useShaders)
+  if(!depthonly)
   {
-    boTextureManager->activateTextureUnit(2);
-    glLoadIdentity();
+    // Disable shader
+    if(useShaders)
+    {
+      boTextureManager->activateTextureUnit(2);
+      glLoadIdentity();
+      boTextureManager->disableTexturing();
+      boTextureManager->activateTextureUnit(0);
+      BoShader::unbind();
+    }
     boTextureManager->disableTexturing();
-    boTextureManager->activateTextureUnit(0);
-    BoShader::unbind();
-  }
-  boTextureManager->disableTexturing();
 
-  glMatrixMode(GL_MODELVIEW);
-  glDisable(GL_TEXTURE_GEN_S);
-  glDisable(GL_TEXTURE_GEN_T);
-  glDisable(GL_BLEND);
+    glMatrixMode(GL_MODELVIEW);
+    glDisable(GL_TEXTURE_GEN_S);
+    glDisable(GL_TEXTURE_GEN_T);
+    glDisable(GL_BLEND);
+  }
+
   glColor4ub(255, 255, 255, 255);
 
   // Render the color map if necessary
 #warning FIXME: does NOT belong to quick renderer. belongs to base class.
-  if(map->activeColorMap())
+  if(!depthonly && map->activeColorMap())
   {
     BoColorMapRenderer* renderer = getUpdatedColorMapRenderer(map->activeColorMap());
     if(renderer)
@@ -378,7 +405,7 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
   }
 
   // Optionally render the grid
-  if(mDrawGrid)
+  if(!depthonly && mDrawGrid)
   {
     glDisableClientState(GL_COLOR_ARRAY);
     glDisable(GL_LIGHTING);

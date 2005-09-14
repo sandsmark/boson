@@ -140,6 +140,11 @@ enum UnitAnimationModes {
 	UnitAnimationWreckage = 100
 };
 
+enum RenderFlags {
+	Default = 0,
+	DepthOnly = 256
+};
+
 enum ScrollDirection {
 	ScrollUp = 0,
 	ScrollRight = 1,

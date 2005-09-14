@@ -21,6 +21,8 @@
 
 #include <qobject.h>
 
+#include "../global.h"
+
 class Cell;
 class PlayerIO;
 class QString;
@@ -43,6 +45,8 @@ class BoGroundRendererStatistics
 public:
 	BoGroundRendererStatistics()
 	{
+		mMinDistance = 0.0;
+		mMaxDistance = 0.0;
 		clear();
 	}
 	~BoGroundRendererStatistics()
@@ -54,6 +58,7 @@ public:
 		mRenderedCells = 0;
 		mRenderedQuads = 0;
 		mUsedTextures = 0;
+		// Do not clear min/max distances here!
 	}
 
 	QString statisticsData() const;
@@ -70,6 +75,14 @@ public:
 	{
 		mUsedTextures = t;
 	}
+	void setMinDistance(float d)
+	{
+		mMinDistance = d;
+	}
+	void setMaxDistance(float d)
+	{
+		mMaxDistance = d;
+	}
 
 	unsigned int renderedCells() const
 	{
@@ -83,10 +96,20 @@ public:
 	{
 		return mUsedTextures;
 	}
+	float minDistance() const
+	{
+		return mMinDistance;
+	}
+	float maxDistance() const
+	{
+		return mMaxDistance;
+	}
 private:
 	unsigned int mRenderedCells;
 	unsigned int mRenderedQuads;
 	unsigned int mUsedTextures;
+	float mMinDistance;
+	float mMaxDistance;
 };
 
 /**
@@ -142,7 +165,7 @@ public:
 	 * could have been rendered three times, always with a different
 	 * texture, but will occur only once here!)
 	 **/
-	unsigned int renderCells(const BosonMap* map);
+	unsigned int renderCells(const BosonMap* map, RenderFlags flags);
 
 	void setLocalPlayerIO(PlayerIO* p)
 	{
@@ -274,7 +297,7 @@ protected:
 	 * Actually render the currently visible cells. Implemented by the
 	 * plugin.
 	 **/
-	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map) = 0;
+	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map, RenderFlags flags) = 0;
 	virtual void renderVisibleCellsStart(const BosonMap* map) { Q_UNUSED(map) }
 	virtual void renderVisibleCellsStop(const BosonMap* map) { Q_UNUSED(map) }
 

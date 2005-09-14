@@ -191,7 +191,7 @@ void BoMeshRenderer::stopModelRendering()
  completeFrameStatistics();
 }
 
-void BoMeshRenderer::renderMesh(const QColor* teamColor, BoMesh* mesh)
+void BoMeshRenderer::renderMesh(const QColor* teamColor, BoMesh* mesh, RenderFlags flags)
 {
  BO_CHECK_NULL_RET(mesh);
  BO_CHECK_NULL_RET(model());
@@ -199,7 +199,7 @@ void BoMeshRenderer::renderMesh(const QColor* teamColor, BoMesh* mesh)
  // to have that in a very fast O(1) way, i.e. only a pointer compare.
 
 
- unsigned int renderedPoints = render(teamColor, mesh);
+ unsigned int renderedPoints = render(teamColor, mesh, flags);
  if (renderedPoints > 0) {
 	currentStatistics()->addMesh(renderedPoints);
  }

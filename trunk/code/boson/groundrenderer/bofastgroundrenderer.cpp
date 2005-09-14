@@ -56,7 +56,7 @@ bool BoFastGroundRenderer::initGroundRenderer()
  return true;
 }
 
-void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cellsCount, const BosonMap* map)
+void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cellsCount, const BosonMap* map, RenderFlags flags)
 {
  BO_CHECK_NULL_RET(renderCells);
  BO_CHECK_NULL_RET(map);

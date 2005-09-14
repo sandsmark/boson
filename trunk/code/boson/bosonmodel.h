@@ -20,6 +20,8 @@
 #ifndef BOSONMODEL_H
 #define BOSONMODEL_H
 
+#include "global.h"
+
 #include <bogl.h>
 
 class KSimpleConfig;
@@ -139,7 +141,7 @@ public:
 	/**
 	 * @param lod See @ref BoMesh::renderMesh
 	 **/
-	void renderFrame(const QColor* teamColor, bool transparentmeshes = false, int mode = GL_RENDER);
+	void renderFrame(const QColor* teamColor, bool transparentmeshes = false, RenderFlags flags = Default, int mode = GL_RENDER);
 
 private:
 	void init();

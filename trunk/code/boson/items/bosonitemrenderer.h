@@ -20,6 +20,7 @@
 #define BOSONITEMRENDERER_H
 
 #include "../defines.h"
+#include "../global.h"
 #include <bogl.h>
 
 #include <qglobal.h>
@@ -73,12 +74,12 @@ public:
 	 * translated and rotated to the correct position.
 	 * @param lod See @ref BoFrame::renderFrame
 	 **/
-	virtual void renderItem(unsigned int lod = 0, bool transparentmeshes = false);
+	virtual void renderItem(unsigned int lod = 0, bool transparentmeshes = false, RenderFlags flags = Default);
 
 	/**
-	 * @return TRUE if this item is in the @p frustum, otherwise FALSE.
+	 * @return distance of the item from the NEAR plane (or 0 if it's not in @p frustum)
 	 **/
-	bool itemInFrustum(const BoFrustum& frustum) const;
+	float itemInFrustum(const BoFrustum& frustum) const;
 
 	virtual unsigned int preferredLod(float distanceFromCamera) const
 	{
@@ -129,7 +130,7 @@ public:
 	 * translated and rotated to the correct position.
 	 * @param lod See @ref BoFrame::renderFrame
 	 **/
-	virtual void renderItem(unsigned int lod = 0, bool transparentmeshes = false);
+	virtual void renderItem(unsigned int lod = 0, bool transparentmeshes = false, RenderFlags flags = Default);
 
 	/**
 	 * Set the animation mode.

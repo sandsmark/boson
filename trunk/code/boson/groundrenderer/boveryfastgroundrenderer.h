@@ -49,7 +49,7 @@ protected:
 	void updateMapCache(const BosonMap*);
 	void updateGroundThemeCache(const BosonGroundThemeData*);
 
-	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map);
+	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map, RenderFlags flags);
 	virtual void renderVisibleCellsStart(const BosonMap* map);
 	virtual void renderVisibleCellsStop(const BosonMap* map);
 

@@ -91,7 +91,7 @@ BoTexture* BoMesh::textureObject() const
  return 0;
 }
 
-void BoMesh::renderMesh(const BoMatrix* matrix, const QColor* teamColor)
+void BoMesh::renderMesh(const BoMatrix* matrix, const QColor* teamColor, RenderFlags flags)
 {
  BoMeshRenderer* renderer = BoMeshRendererManager::manager()->currentRenderer();
  if (!renderer) {
@@ -109,7 +109,7 @@ void BoMesh::renderMesh(const BoMatrix* matrix, const QColor* teamColor)
 
  glPushMatrix();
  glMultMatrixf(matrix->data());
- renderer->renderMesh(teamColor, this);
+ renderer->renderMesh(teamColor, this, flags);
  glPopMatrix();
 }
 

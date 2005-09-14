@@ -131,7 +131,7 @@ class BoQuickGroundRenderer : public BoGroundRenderer
     virtual void renderVisibleCellsStart(const BosonMap* map);
     virtual void renderVisibleCellsStop(const BosonMap* map);
 
-    virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map);
+    virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map, RenderFlags flags);
 
     void initMap(const BosonMap* map);
 

@@ -62,7 +62,7 @@ void BoMeshRendererImmediate::deinitFrame()
  glPopAttrib();
 }
 
-unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* mesh)
+unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* mesh, RenderFlags flags)
 {
  if (!model()) {
 	BO_NULL_ERROR(model());
@@ -89,25 +89,27 @@ unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* me
  //
  // so optimization should happen here - if possible at all...
 
- BoMaterial::activate(mesh->material());
- if (!mesh->material()) {
-	if (mesh->isTeamColor()) {
-		if (teamColor) {
+ if (!(flags & DepthOnly)) {
+	BoMaterial::activate(mesh->material());
+	if (!mesh->material()) {
+		if (mesh->isTeamColor()) {
+			if (teamColor) {
+				glPushAttrib(GL_CURRENT_BIT);
+				glColor3ub(teamColor->red(), teamColor->green(), teamColor->blue());
+				resetColor = true;
+			}
+		}
+	} else {
+		BoMaterial* mat = mesh->material();
+		if (mat->textureName().isEmpty()) {
 			glPushAttrib(GL_CURRENT_BIT);
-			glColor3ub(teamColor->red(), teamColor->green(), teamColor->blue());
+			glColor3fv(mat->diffuse().data());
 			resetColor = true;
 		}
-	}
- } else {
-	BoMaterial* mat = mesh->material();
-	if (mat->textureName().isEmpty()) {
-		glPushAttrib(GL_CURRENT_BIT);
-		glColor3fv(mat->diffuse().data());
-		resetColor = true;
-	}
-	if (mat->twoSided()) {
-		glDisable(GL_CULL_FACE);
-		resetCullFace = true;
+		if (mat->twoSided()) {
+			glDisable(GL_CULL_FACE);
+			resetCullFace = true;
+		}
 	}
  }
 

@@ -44,9 +44,10 @@ class BoRenderTarget
      * @param width width of the rendertarget
      * @param height height of the rendertarget
      * @param flags format flags for the rendertarget
-     * @param tex texture where the scene will be rendered onto
+     * @param color texture where the scene will be rendered onto
+     * @param depth if specified, depth will be rendered onto this depth-texture
      **/
-    BoRenderTarget(int width, int height, int flags = RGBA | Depth, BoTexture* tex = 0);
+    BoRenderTarget(int width, int height, int flags = RGBA | Depth, BoTexture* color = 0, BoTexture* depth = 0);
     ~BoRenderTarget();
 
     /**
@@ -58,25 +59,12 @@ class BoRenderTarget
     /**
      * Disables this render target, activating whichever target was active
      *  when @ref enable was called.
-     * @param updatetex whether to update the texture
      **/
-    bool disable(bool updatetex = true);
-
-    /**
-     * Updates the texture of this render target.
-     * You usually don't need to call this manually.
-     **/
-    void updateTexture(BoTexture* tex = 0);
+    bool disable();
 
     bool valid() const  { return mValid; }
     Type type() const  { return mType; }
     int flags() const  { return mFlags; }
-
-    /**
-     * Sets texture where the scene will be rendered for this render target.
-     * The texture's size must be at least as big as this render target.
-     **/
-    void setTexture(BoTexture* tex);
 
 
   protected:
@@ -91,10 +79,13 @@ class BoRenderTarget
     Type mType;
     int mFlags;
     BoTexture* mTexture;
+    BoTexture* mDepthTexture;
     bool mValid;
 
     class PBufferData;
     PBufferData* mPBufferData;
+    class FBOData;
+    FBOData* mFBOData;
 };
 
 #endif //BORENDERTARGET_H
