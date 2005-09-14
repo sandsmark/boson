@@ -55,6 +55,8 @@ draw_bigbox_text("What has been changed since 0.11:
   <li>Provide ALT+number to center on a selection</li>
   <li>Show all production options in the commandframe, even those with unmet
   requirements (grayed out then)</li>
+  <li>Powerplants now actually plant power</li>
+  <li>Shadow support</li>
 </ul>");
 
 draw_bigbox_end();
