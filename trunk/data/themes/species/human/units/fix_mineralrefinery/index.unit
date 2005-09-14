@@ -30,6 +30,7 @@ UnitDepth=2.1
 UnitHeight=3.0
 UnitWidth=3.0
 Weapons=0
+PowerConsumed=150
 
 [RefineryPlugin]
 CanRefineMinerals=true

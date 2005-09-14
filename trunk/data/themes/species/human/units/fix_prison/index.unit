@@ -25,6 +25,7 @@ UnitDepth=1
 UnitHeight=2
 UnitWidth=2
 Weapons=0
+PowerConsumed=200
 
 [Sounds]
 OrderAttack=order_attack

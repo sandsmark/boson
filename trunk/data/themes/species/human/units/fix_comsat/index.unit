@@ -28,6 +28,7 @@ UnitDepth=2.7
 UnitHeight=2.5
 UnitWidth=2.5
 Weapons=0
+PowerConsumed=200
 
 [Model]
 Animation-Idle-Start=0

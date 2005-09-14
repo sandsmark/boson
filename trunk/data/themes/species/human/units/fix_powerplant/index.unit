@@ -28,6 +28,7 @@ UnitDepth=1.125
 UnitHeight=3
 UnitWidth=3
 Weapons=0
+PowerGenerated=1500
 
 [Sounds]
 OrderAttack=order_attack
