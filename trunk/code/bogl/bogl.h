@@ -111,6 +111,19 @@ typedef void (*_boglUniform3fv) (GLint, GLsizei, const GLfloat *);
 typedef void (*_boglUniform4fv) (GLint, GLsizei, const GLfloat *);
 typedef void (*_boglUseProgram) (GLuint);
 
+typedef void (*_boglBindRenderbuffer) (GLenum, GLuint);
+typedef void (*_boglDeleteRenderbuffers) (GLsizei, const GLuint *);
+typedef void (*_boglGenRenderbuffers) (GLsizei, GLuint *);
+typedef void (*_boglRenderbufferStorage) (GLenum, GLenum, GLsizei, GLsizei);
+typedef void (*_boglBindFramebuffer) (GLenum, GLuint);
+typedef void (*_boglDeleteFramebuffers) (GLsizei, const GLuint *);
+typedef void (*_boglGenFramebuffers) (GLsizei, GLuint *);
+typedef GLenum (*_boglCheckFramebufferStatus) (GLenum);
+typedef void (*_boglFramebufferTexture2D) (GLenum, GLenum, GLenum, GLuint, GLint);
+typedef void (*_boglFramebufferRenderbuffer) (GLenum, GLenum, GLenum, GLuint);
+typedef void (*_boglGenerateMipmap) (GLenum);
+
+
 
 // Function pointers for extensions
 // Blendcolor
@@ -144,7 +157,18 @@ extern _boglUniform2fv boglUniform2fv;
 extern _boglUniform3fv boglUniform3fv;
 extern _boglUniform4fv boglUniform4fv;
 extern _boglUseProgram boglUseProgram;
-
+// FBO
+extern _boglBindRenderbuffer boglBindRenderbuffer;
+extern _boglDeleteRenderbuffers boglDeleteRenderbuffers;
+extern _boglGenRenderbuffers boglGenRenderbuffers;
+extern _boglRenderbufferStorage boglRenderbufferStorage;
+extern _boglBindFramebuffer boglBindFramebuffer;
+extern _boglDeleteFramebuffers boglDeleteFramebuffers;
+extern _boglGenFramebuffers boglGenFramebuffers;
+extern _boglCheckFramebufferStatus boglCheckFramebufferStatus;
+extern _boglFramebufferTexture2D boglFramebufferTexture2D;
+extern _boglFramebufferRenderbuffer boglFramebufferRenderbuffer;
+extern _boglGenerateMipmap boglGenerateMipmap;
 
 
 // Defines
@@ -292,6 +316,19 @@ extern _boglUseProgram boglUseProgram;
 #define GL_LINK_STATUS                    0x8B82
 #define GL_VERTEX_SHADER                  0x8B31
 #define GL_FRAGMENT_SHADER                0x8B30
+
+#ifndef GL_EXT_framebuffer_object
+#define GL_FRAMEBUFFER_UNSUPPORTED        0x8CDD
+#define GL_MAX_COLOR_ATTACHMENTS          0x8CDF
+#define GL_COLOR_ATTACHMENT0              0x8CE0
+#define GL_COLOR_ATTACHMENT1              0x8CE1
+#define GL_COLOR_ATTACHMENT2              0x8CE2
+#define GL_COLOR_ATTACHMENT3              0x8CE3
+#define GL_DEPTH_ATTACHMENT               0x8D00
+#define GL_STENCIL_ATTACHMENT             0x8D20
+#define GL_FRAMEBUFFER                    0x8D40
+#define GL_RENDERBUFFER                   0x8D41
+#endif
 
 
 // AB: defines for extensions:
