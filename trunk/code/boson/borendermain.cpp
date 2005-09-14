@@ -636,7 +636,7 @@ void ModelPreview::renderModel(int mode)
 		mModel->prepareRendering();
 
 #warning TODO: also render transparent meshes
-		f->renderFrame(0, false, mode);
+		f->renderFrame(0, false, Default, mode);
 		BosonModel::stopModelRendering();
 		if (mPlacementPreview) {
 			// AB: do not reset the actual color - if it will get
