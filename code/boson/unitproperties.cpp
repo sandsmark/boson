@@ -46,6 +46,8 @@ UnitProperties::UnitProperties(SpeciesTheme* theme, bool fullMode)
 	mOilCost(this, "OilCost", "MaxValue"),
 	mArmor(this, "Armor", "MaxValue"),
 	mShields(this, "Shields", "MaxValue"),
+	mPowerConsumed(this, "PowerConsumed", "MaxValue"),
+	mPowerGenerated(this, "PowerGenerated", "MaxValue"),
 	mSpeed(this, "Speed", "MaxValue"),
 	mAccelerationSpeed(this, "AccelerationSpeed", "MaxValue"),
 	mDecelerationSpeed(this, "DecelerationSpeed", "MaxValue")
@@ -118,6 +120,20 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  insertULongBaseValue(conf.readUnsignedLongNumEntry("OilCost", 0), "OilCost", "MaxValue");
  insertULongBaseValue(conf.readUnsignedLongNumEntry("Armor", 0), "Armor", "MaxValue");
  insertULongBaseValue(conf.readUnsignedLongNumEntry("Shield", 0), "Shields", "MaxValue");
+ unsigned long int powerGenerated = conf.readUnsignedLongNumEntry("PowerGenerated", 0);
+ unsigned long int powerConsumed = conf.readUnsignedLongNumEntry("PowerConsumed", 0);
+ if (powerGenerated > 0 && powerConsumed > 0) {
+	boWarning() << k_funcinfo << "both, PowerGenerated and PowerConsumed > 0" << endl;
+	if (powerGenerated > powerConsumed) {
+		powerGenerated -= powerConsumed;
+		powerConsumed = 0;
+	} else {
+		powerConsumed -= powerGenerated;
+		powerGenerated = 0;
+	}
+ }
+ insertULongBaseValue(powerGenerated, "PowerGenerated", "MaxValue");
+ insertULongBaseValue(powerConsumed, "PowerConsumed", "MaxValue");
  mSupportMiniMap = conf.readBoolEntry("SupportMiniMap", false);
  isFacility = conf.readBoolEntry("IsFacility", false);
  d->mRequirements = BosonConfig::readUnsignedLongNumList(&conf, "Requirements");

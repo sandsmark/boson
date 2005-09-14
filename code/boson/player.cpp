@@ -90,6 +90,7 @@ Player::Player(bool isNeutralPlayer) : KPlayer()
  mSpecies = 0;
  d = new PlayerPrivate;
  d->mFoggedCount = 0;
+ mPowerChargeForCurrentAdvanceCall = 0;
  setAsyncInput(true);
  connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)),
 		this, SLOT(slotNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)));
@@ -279,14 +280,6 @@ void Player::unitDestroyed(Unit* unit)
  } else {
 	statistics()->addLostMobileUnit(unit);
 	d->mMobilesCount--;
- }
- if (unit->unitProperties()->supportMiniMap()) {
-	if (!hasMiniMap()) {
-		BoEvent* event = new BoEvent("LostMinimap");
-		event->setPlayerId(bosonId());
-		event->setLocation(BoVector3Fixed(unit->x(), unit->y(), unit->z()));
-		boGame->queueEvent(event);
-	}
  }
 }
 
@@ -563,6 +556,12 @@ const QColor& Player::teamColor() const
 
 bool Player::hasMiniMap() const
 {
+ unsigned long int powerGenerated = 0;
+ unsigned long int powerConsumed = 0;
+ calculatePower(&powerGenerated, &powerConsumed);
+ if (powerGenerated < powerConsumed) {
+	return false;
+ }
  QPtrListIterator<Unit> it(d->mUnits);
  while (it.current()) {
 	if (it.current()->unitProperties()->supportMiniMap()) {
@@ -580,6 +579,74 @@ bool Player::hasMiniMap() const
  return false;
 }
 
+void Player::unchargeUnitsForAdvance()
+{
+ BosonProfiler prof("unchargeUnitsForAdvance");
+ for (QPtrListIterator<Unit> it(d->mUnits); it.current(); ++it) {
+	it.current()->unchargePowerForAdvance();
+ }
+}
+
+void Player::updatePowerChargeForCurrentAdvanceCall()
+{
+ unsigned long int powerGenerated = 0;
+ unsigned long int powerConsumed = 0;
+ calculatePower(&powerGenerated, &powerConsumed);
+
+ // the factor specifies how much the unit is influenced by the lack of power.
+ // 1.0 means that it works at full speed, 0.0 means it is disabled.
+ bofixed factor = 1.0f;
+ if (powerGenerated >= powerConsumed) {
+	// no lack of power.
+	factor = 1;
+ } else {
+	factor = ((float)powerGenerated) / ((float)powerConsumed);
+
+	// we use quadratic relationship currently
+	// this means:
+	// powerGenerated	speed
+	// 90%			80%
+	// 70%			50%
+	// 30%			10%
+	factor = factor * factor;
+
+	// if factor < 0.08 (i.e. speed is less than 8% of full speed), we
+	// disable the units completely.
+	if (factor < 0.08f) {
+		factor = 0;
+	}
+ }
+
+ if (factor < 0 || factor > 1) {
+	boError() << k_funcinfo << "invalid factor " << factor << endl;
+	factor = 1;
+ }
+ mPowerChargeForCurrentAdvanceCall = factor;
+}
+
+void Player::calculatePower(unsigned long int* _powerGenerated, unsigned long int* _powerConsumed) const
+{
+ // AB: this method takes O(n) !
+ //     note that it would be very hard to improve this:
+ //     * we cannot assume that only facilities generate/consume power
+ //       (atm this is the case, but this may change)
+ //     * we cannot maintain a list of units that generate/consume power, as
+ //       this list may change on the fly: using upgrades even units that cannot
+ //       generate/consume power may do so later
+ unsigned int powerGenerated = 0;
+ unsigned int powerConsumed = 0;
+ for (QPtrListIterator<Unit> it(d->mUnits); it.current(); ++it) {
+	powerGenerated += it.current()->powerGeneratedByUnit();
+	powerConsumed += it.current()->powerConsumedByUnit();
+ }
+ if (_powerGenerated) {
+	*_powerGenerated = powerGenerated;
+ }
+ if (_powerConsumed) {
+	*_powerConsumed = powerConsumed;
+ }
+}
+
 void Player::facilityCompleted(Facility* fac)
 {
  if (!fac) {
@@ -593,13 +660,6 @@ void Player::facilityCompleted(Facility* fac)
  constructedEvent->setUnitId(fac->id());
  constructedEvent->setLocation(location);
  boGame->queueEvent(constructedEvent);
-
- if (fac->unitProperties()->supportMiniMap()) {
-	BoEvent* miniMapEvent = new BoEvent("GainedMinimap");
-	miniMapEvent->setPlayerId(bosonId());
-	miniMapEvent->setLocation(location);
-	boGame->queueEvent(miniMapEvent);
- }
 }
 
 void Player::setOutOfGame()

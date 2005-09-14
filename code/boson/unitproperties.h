@@ -212,6 +212,9 @@ public:
 	 **/
 	unsigned long int oilCost() const { return mOilCost.value(upgradesCollection()); }
 
+	unsigned long int powerConsumed() const { return mPowerConsumed.value(upgradesCollection()); }
+	unsigned long int powerGenerated() const { return mPowerGenerated.value(upgradesCollection()); }
+
 	/**
 	 * @return Maximum sight range of units of this type. Note that for a
 	 * particular @ref Unit object of this type, this value might be larger,
@@ -515,6 +518,8 @@ protected:
 	BoUpgradeableProperty<unsigned long int> mOilCost;
 	BoUpgradeableProperty<unsigned long int> mArmor;
 	BoUpgradeableProperty<unsigned long int> mShields;
+	BoUpgradeableProperty<unsigned long int> mPowerConsumed;
+	BoUpgradeableProperty<unsigned long int> mPowerGenerated;
 	long int mExplodingDamage;
 	bofixed mExplodingDamageRange;
 	unsigned int mExplodingFragmentCount;

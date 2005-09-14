@@ -22,6 +22,7 @@
 
 #include <kplayer.h>
 #include <kgameproperty.h>
+#include "../math/bofixed.h"
 
 #ifdef NO_PLAYER_H_HERE
 #error No player.h include is allowed here
@@ -192,6 +193,31 @@ public:
 	bool hasMiniMap() const;
 
 	/**
+	 * Calculates the amount of power (i.e. electricity) the units of this
+	 * player generate and consume.
+	 *
+	 * If the player consumes more than he generates, then
+	 * certain tasks should be slower than usual (or not be functional at
+	 * all).
+	 **/
+	void Player::calculatePower(unsigned long int* powerGenerated = 0, unsigned long int* powerConsumed = 0) const;
+
+	/**
+	 * Removes the consumed power from the units.
+	 *
+	 * Should be called once per advance call, @em after the units (items)
+	 * were advanced. @em MUST be called exactly once per @ref chargeUnits
+	 * call in an advance call.
+	 **/
+	void Player::unchargeUnitsForAdvance();
+
+	void updatePowerChargeForCurrentAdvanceCall();
+	inline bofixed powerChargeForCurrentAdvanceCall() const
+	{
+		return mPowerChargeForCurrentAdvanceCall;
+	}
+
+	/**
 	 * @return If the player is already "destroyed", i.e. doesn't have the
 	 * right to do anything. Note that this doesn't check if the player has
 	 * units left or something, but simply returns what was checked before.
@@ -352,6 +378,8 @@ private:
 	KGameProperty<Q_UINT8> mOutOfGame;
 	KGameProperty<Q_UINT8> mHasLost;
 	KGameProperty<Q_UINT8> mHasWon;
+
+	bofixed mPowerChargeForCurrentAdvanceCall; // no need for KGameProperty. this is recalculated every advance call
 };
 
 #endif
