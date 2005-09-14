@@ -42,11 +42,14 @@ UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canva
 	mMaxHealth(prop, "Health", "MaxValue"),
 	mMaxArmor(prop, "Armor", "MaxValue"),
 	mMaxShields(prop, "Shields", "MaxValue"),
-	mMaxSightRange(prop, "SightRange", "MaxValue")
+	mMaxSightRange(prop, "SightRange", "MaxValue"),
+	mPowerGenerated(prop, "PowerGenerated", "MaxValue"),
+	mPowerConsumed(prop, "PowerConsumed", "MaxValue")
 {
  initStatic();
  mWeaponProperties = 0; // created on the fly in weaponDataHandler()
  mUnitProperties = prop; // WARNING: this might be 0 at this point! MUST be != 0 for Unit, but ScenarioUnit uses 0 here
+ mAdvanceWasChargedThisAdvanceCall = false;
 
  registerData(&mShieldReloadCounter, IdShieldReloadCounter);
  registerData(&mDeletionTimer, IdDeletionTimer);
@@ -57,6 +60,8 @@ UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canva
  registerData(&mArmorFactor, IdArmorFactor);
  registerData(&mShieldsFactor, IdShieldsFactor);
  registerData(&mSightRangeFactor, IdSightRangeFactor);
+ registerData(&mPowerChargeForAdvance, IdPowerChargeForAdvance);
+ registerData(&mPowerChargeForReload, IdPowerChargeForReload);
 
  // these properties are fully internal (i.e. nothing is displayed in any
  // widget) and they change very often. So we increase speed greatly by not
@@ -73,6 +78,8 @@ UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canva
  mArmorFactor.setLocal(0); // doesn't have any armor
  mShieldsFactor.setLocal(0); // doesn't have any shields
  mSightRangeFactor.setLocal(0);
+ mPowerChargeForAdvance.setLocal(0);
+ mPowerChargeForReload.setLocal(0);
 }
 
 UnitBase::~UnitBase()
@@ -119,6 +126,8 @@ void UnitBase::initStatic()
  addPropertyId(IdArmorFactor, QString::fromLatin1("ArmorFactor"));
  addPropertyId(IdShieldsFactor, QString::fromLatin1("ShieldsFactor"));
  addPropertyId(IdSightRangeFactor, QString::fromLatin1("SightRangeFactor"));
+ addPropertyId(IdPowerChargeForAdvance, QString::fromLatin1("PowerChargeForADvance"));
+ addPropertyId(IdPowerChargeForReload, QString::fromLatin1("PowerChargeForReload"));
  initialized = true;
 }
 
@@ -213,6 +222,65 @@ void UnitBase::setHealth(unsigned long int h)
  } else {
 	setHealthFactor(bofixed(1.0f));
  }
+}
+
+unsigned long int UnitBase::powerConsumedByUnit() const
+{
+ return mPowerConsumed.value(upgradesCollection());
+}
+
+unsigned long int UnitBase::powerGeneratedByUnit() const
+{
+ return mPowerGenerated.value(upgradesCollection());
+}
+
+void UnitBase::chargePowerForAdvance(bofixed factor)
+{
+ if (mPowerChargeForAdvance >= 1) {
+	boError() << k_funcinfo << "power charge (advance) already >= 1. must not happen." << endl;
+	return;
+ }
+ mPowerChargeForAdvance = mPowerChargeForAdvance + factor;
+}
+
+void UnitBase::chargePowerForReload(bofixed factor)
+{
+ if (mPowerChargeForReload >= 1) {
+	boError() << k_funcinfo << "power charge (reload) already >= 1. must not happen." << endl;
+	return;
+ }
+ mPowerChargeForReload = mPowerChargeForReload + factor;
+}
+
+void UnitBase::unchargePowerForAdvance()
+{
+ if (mPowerChargeForAdvance >= 1) {
+	mPowerChargeForAdvance = mPowerChargeForAdvance - 1;
+ }
+ mAdvanceWasChargedThisAdvanceCall = false;
+}
+
+void UnitBase::unchargePowerForReload()
+{
+ if (mPowerChargeForReload >= 1) {
+	mPowerChargeForReload = mPowerChargeForReload - 1;
+ }
+}
+
+bool UnitBase::requestPowerChargeForAdvance()
+{
+ if (mAdvanceWasChargedThisAdvanceCall) {
+	// AB: in theory it would be invalid to call this more than once per
+	// advance call. however sometimes units may call this indirectly, e.g.
+	// a harvester calls "refinery->requestPowerChargeForAdvance()" to find
+	// out whether the refinery is fully charged.
+	// -> in such a case we may have multiple calls per advance call and in
+	//    these cases it must be valid. therefore we do not emit an error.
+	return isChargedForAdvance();
+ }
+ mAdvanceWasChargedThisAdvanceCall = true;
+ chargePowerForAdvance(owner()->powerChargeForCurrentAdvanceCall());
+ return isChargedForAdvance();
 }
 
 unsigned long int UnitBase::type() const

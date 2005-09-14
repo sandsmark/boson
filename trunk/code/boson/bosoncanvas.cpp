@@ -140,6 +140,8 @@ public:
 	void advance(const BoItemList& allItems, unsigned int advanceCallsCount, bool advanceFlag);
 
 protected:
+	void chargeUnits(unsigned int advanceCallsCount, bool advanceFlag);
+	void unchargeUnits(unsigned int advanceCallsCount, bool advanceFlag);
 	void advanceItems(const BoItemList& allItems, unsigned int advanceCallsCount, bool advanceFlag);
 	void itemReload(const BoItemList& allItems, unsigned int advanceCallsCount); // calls BosonItem::advance()
 
@@ -158,6 +160,20 @@ private:
 void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCallsCount, bool advanceFlag)
 {
  boProfiling->push(prof_funcinfo + " - Whole method");
+
+ QMap<Player*, bool> player2HasMiniMap;
+ for (QPtrListIterator<KPlayer> it(*boGame->playerList()); it.current(); ++it) {
+	Player* p = (Player*)it.current();
+	if (p->bosonId() < 128 || p->bosonId() >= 512) {
+		// not a game player
+		continue;
+	}
+	player2HasMiniMap.insert(p, p->hasMiniMap());
+ }
+
+ boProfiling->push("Charge units");
+ chargeUnits(advanceCallsCount, advanceFlag);
+ boProfiling->pop(); // Advance Items
 
  unsigned int initialDestroyedUnitsCount = mCanvas->d->mDestroyedUnits.count();
 
@@ -178,6 +194,10 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
  notifyAboutDestroyedUnits(mCanvas->d->mDestroyedUnits, initialDestroyedUnitsCount, allItems);
  boProfiling->pop(); // Advance Maximal Advance Count
 
+ boProfiling->push("Unharge units");
+ unchargeUnits(advanceCallsCount, advanceFlag);
+ boProfiling->pop(); // Advance Items
+
  /*
   * This contains some things that need to be done "sometimes" only - currently
   * that is deletion of destroyed units and unused shots.
@@ -189,7 +209,53 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
  maximalAdvanceCountTasks(advanceCallsCount);
  boProfiling->pop(); // Advance Maximal Advance Count
 
+ for (QMap<Player*, bool>::const_iterator it = player2HasMiniMap.begin(); it != player2HasMiniMap.end(); ++it) {
+	Player* p = it.key();
+	bool had = it.data();
+	bool has = p->hasMiniMap();
+	if (has == had) {
+		continue;
+	}
+	if (has) {
+		BoEvent* miniMapEvent = new BoEvent("GainedMinimap");
+		miniMapEvent->setPlayerId(p->bosonId());
+		boGame->queueEvent(miniMapEvent);
+	} else {
+		BoEvent* event = new BoEvent("LostMinimap");
+		event->setPlayerId(p->bosonId());
+		boGame->queueEvent(event);
+	}
+ }
+
  boProfiling->pop(); // Whole method
+}
+
+void BoCanvasAdvance::chargeUnits(unsigned int advanceCallsCount, bool advanceFlag)
+{
+ Q_UNUSED(advanceCallsCount);
+ Q_UNUSED(advanceFlag);
+ for (QPtrListIterator<KPlayer> it(*boGame->playerList()); it.current(); ++it) {
+	Player* p = (Player*)it.current();
+	if (p->bosonId() < 128 || p->bosonId() >= 512) {
+		// not a game player
+		continue;
+	}
+	p->updatePowerChargeForCurrentAdvanceCall();
+ }
+}
+
+void BoCanvasAdvance::unchargeUnits(unsigned int advanceCallsCount, bool advanceFlag)
+{
+ Q_UNUSED(advanceCallsCount);
+ Q_UNUSED(advanceFlag);
+ for (QPtrListIterator<KPlayer> it(*boGame->playerList()); it.current(); ++it) {
+	Player* p = (Player*)it.current();
+	if (p->bosonId() < 128 || p->bosonId() >= 512) {
+		// not a game player
+		continue;
+	}
+	p->unchargeUnitsForAdvance();
+ }
 }
 
 void BoCanvasAdvance::advanceItems(const BoItemList& allItems, unsigned int advanceCallsCount, bool advanceFlag)

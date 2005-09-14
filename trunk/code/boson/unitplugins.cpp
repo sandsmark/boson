@@ -418,6 +418,10 @@ void ProductionPlugin::advance(unsigned int)
 	return;
  }
 
+ if (!unit()->requestPowerChargeForAdvance()) {
+	return;
+ }
+
 
 
  // a unit is completed as soon as mProductionState == player()->unitProperties(type)->productionTime()
@@ -1810,6 +1814,9 @@ unsigned int RefineryPlugin::refineMinerals(unsigned int minerals)
 	BO_NULL_ERROR(player());
 	return 0;
  }
+ if (!unit()->requestPowerChargeForAdvance()) {
+	return 0;
+ }
  player()->setMinerals(player()->minerals() + minerals);
  return minerals;
 }
@@ -1818,6 +1825,9 @@ unsigned int RefineryPlugin::refineOil(unsigned int oil)
 {
  if (!player()) {
 	BO_NULL_ERROR(player());
+	return 0;
+ }
+ if (!unit()->requestPowerChargeForAdvance()) {
 	return 0;
  }
  player()->setOil(player()->oil() + oil);

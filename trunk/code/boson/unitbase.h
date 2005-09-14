@@ -78,7 +78,9 @@ public:
 		IdHealthFactor = 512 + 20,
 		IdArmorFactor = 512 + 21,
 		IdShieldsFactor = 512 + 22,
-		IdSightRangeFactor = 512 + 23
+		IdSightRangeFactor = 512 + 23,
+		IdPowerChargeForAdvance = 512 + 24,
+		IdPowerChargeForReload = 512 + 25
 	};
 
 	/**
@@ -194,7 +196,7 @@ public:
 	virtual unsigned long int health() const;
 
 	/**
-	 * Change the health/power of this unit.
+	 * Change the health of this unit.
 	 **/
 	virtual void setHealth(unsigned long int h);
 
@@ -221,6 +223,9 @@ public:
 	unsigned long int armor() const;
 	void setArmor(unsigned long int armor);
 	unsigned long int maxArmor() const;
+
+	unsigned long int powerConsumedByUnit() const;
+	unsigned long int powerGeneratedByUnit() const;
 
 	/**
 	 * The type of the unit as described in the index.unit file of this
@@ -297,6 +302,63 @@ public:
 	void increaseDeletionTimer();
 	unsigned int deletionTimer() const;
 
+	/**
+	 * Charge the unit by a given @p factor. The factor must be a number
+	 * between 0 and 1, where 0 is a noop and 1 means to completely charge
+	 * the unit for this advance call.
+	 *
+	 * The factor is calculated by @ref Player, based on the amount of power
+	 * this player currently has and the amount of power this player
+	 * currently consumes.
+	 *
+	 * This method must not be called more than once per advance call.
+	 *
+	 * See also @ref unchargePowerForAdvance and @ref isChargedForAdvance
+	 **/
+	void chargePowerForAdvance(bofixed factor);
+	void chargePowerForReload(bofixed factor);
+
+	/**
+	 * This method is called once per advance call @em after (!!) the tasks
+	 * of this unit (i.e @ref advanceFunction) have been performed. If the
+	 * unit was charged in this advance call, it is uncharged (the power was
+	 * used), otherwise this method is a noop (unit is still charging).
+	 **/
+	void unchargePowerForAdvance();
+	void unchargePowerForReload();
+
+	/**
+	 * Most probably you want to use @ref requestPowerChargeForAdvance
+	 * instead!
+	 *
+	 * Note that this method is valid while an advance call is being
+	 * processed only. It's value is undefined if called after or before an
+	 * advance call.
+	 *
+	 * @return TRUE if this unit is fully charged, i.e. it can perform its
+	 * tasks in this advance call. Otherwise FALSE - the unit is supposed to
+	 * do NOTHING in the advance function that would require power. Note
+	 * that @ref reload is independent from this - see @ref
+	 * isChargedForReload
+	 **/
+	bool isChargedForAdvance() const
+	{
+		return mPowerChargeForAdvance >= 1;
+	}
+	bool isChargedForReload() const
+	{
+		return mPowerChargeForReload >= 1;
+	}
+
+	/**
+	 * Request the unit to be charged for this advance call. This may be
+	 * called once per advance call (at most) for a unit.
+	 *
+	 * @return TRUE if the unit is (after charging) fully charged, so it can
+	 * perform it's advance action. Otherwise FALSE - the unit is not fully
+	 * charged and must not perform any advance action that requires power.
+	 **/
+	bool requestPowerChargeForAdvance();
 
 	virtual void setMovingStatus(MovingStatus m) { mMovingStatus = m; }
 
@@ -374,11 +436,19 @@ private:
 	KGameProperty<bofixed> mShieldsFactor;
 	KGameProperty<bofixed> mSightRangeFactor;
 
+	KGameProperty<bofixed> mPowerChargeForAdvance;
+	KGameProperty<bofixed> mPowerChargeForReload;
+
 
 	BoUpgradeableProperty<unsigned long int> mMaxHealth;
 	BoUpgradeableProperty<unsigned long int> mMaxArmor;
 	BoUpgradeableProperty<unsigned long int> mMaxShields;
 	BoUpgradeableProperty<unsigned long int> mMaxSightRange;
+	BoUpgradeableProperty<unsigned long int> mPowerGenerated;
+	BoUpgradeableProperty<unsigned long int> mPowerConsumed;
+
+
+	bool mAdvanceWasChargedThisAdvanceCall; // updated every advance call, no need to save
 };
 
 #endif

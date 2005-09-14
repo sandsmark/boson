@@ -438,6 +438,10 @@ void Unit::reload(unsigned int count)
  if (isDestroyed()) {
 	return;
  }
+ chargePowerForReload(owner()->powerChargeForCurrentAdvanceCall());
+ if (!isChargedForReload()) {
+	return;
+ }
  // FIXME: this reloads _all_ weapons of _all_ units in _all_ advance calls.
  // however only very few weapons per advance call need to be reloaded. even in
  // big battles many weapons don't need to be reloaded (turrets of the player
@@ -458,6 +462,8 @@ void Unit::reload(unsigned int count)
  if (shields() < maxShields()) {
 	reloadShields(count);
  }
+
+ unchargePowerForReload();
 }
 
 void Unit::advanceNone(unsigned int)
