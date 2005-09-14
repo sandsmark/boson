@@ -15,10 +15,11 @@ void main()
   alpha = gl_Color.w;
 
   // Texture coordinate for accessing diffuse and normalmap textures
-  gl_TexCoord[0] = gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0);
+  gl_TexCoord[0] = gl_TextureMatrix[0] * gl_Vertex;
 
   // Texture coordinate for accessing fog texture
-  gl_TexCoord[1] = gl_TextureMatrix[1] * vec4(gl_Vertex.xyz, 1.0);
+  gl_TexCoord[1] = gl_TextureMatrix[1] * gl_Vertex;
+  gl_TexCoord[3] = gl_TextureMatrix[3] * gl_Vertex;
 
   // Calculate tangent and binormal
   vec3 tangent = normalize(vec3(gl_Normal.z, 0.0, -gl_Normal.x));
@@ -26,8 +27,8 @@ void main()
   // Calculate tangent-space light- and view-vectors
   vec3 l = lightPos - gl_Vertex.xyz;
   vec3 v = cameraPos - gl_Vertex.xyz;
-  tLightDir = normalize(vec3(dot(l, tangent),  dot(l, binormal),  dot(l, gl_Normal.xyz)));
-  tCameraDir = normalize(vec3(dot(v, tangent),  dot(v, binormal),  dot(v, gl_Normal.xyz)));
+  tLightDir = normalize(vec3(dot(l, tangent),  dot(l, binormal),  dot(l, gl_Normal)));
+  tCameraDir = normalize(vec3(dot(v, tangent),  dot(v, binormal),  dot(v, gl_Normal)));
 
   gl_Position = ftransform();
 
@@ -37,6 +38,7 @@ void main()
 
 
 <fragment>
+//#define MAKE_IT_FAST
 
 // Diffuse map
 uniform sampler2D texture_0;
@@ -44,6 +46,8 @@ uniform sampler2D texture_0;
 uniform sampler2D texture_1;
 // Bumpmap
 uniform sampler2D texture_2;
+// Shadowmap
+uniform sampler2DShadow texture_3;
 
 uniform float bumpScale;
 uniform float bumpBias;
@@ -71,8 +75,10 @@ void main()
 
   // Get height from normalmap (for parallax mapping)
   vec2 texcoord = gl_TexCoord[0].xy;
+#ifndef MAKE_IT_FAST
   float height = texture2D(texture_2, texcoord).a * bumpScale - bumpBias;
   texcoord += (tCameraDir.xy * height);
+#endif
 
   // Get the surface normal from normalmap
   vec3 normal = texture2D(texture_2, texcoord).rgb * 2.0 - 1.0;
@@ -88,7 +94,22 @@ void main()
   // Color from the diffuse texture
   vec3 basetexcolor = texture2D(texture_0, texcoord).rgb;
 
-  vec3 litcolor = basetexcolor * (diffuse + gl_LightSource[0].ambient.rgb);
+  // 6-sample PCF filtering
+#ifdef MAKE_IT_FAST
+  float shadow = shadow2DProj(texture_3, gl_TexCoord[3]).r;
+#else
+  vec3 spot = gl_TexCoord[3].stp / gl_TexCoord[3].q;
+  float ires = 1.0 / 1024;
+  float shadow = 0.0;
+  shadow += shadow2D(texture_3, vec3(spot.s       , spot.t - ires, spot.p)).r;
+  shadow += shadow2D(texture_3, vec3(spot.s - ires, spot.t       , spot.p)).r;
+  shadow += shadow2D(texture_3, vec3(spot.s       , spot.t       , spot.p)).r * 2;
+  shadow += shadow2D(texture_3, vec3(spot.s + ires, spot.t       , spot.p)).r;
+  shadow += shadow2D(texture_3, vec3(spot.s       , spot.t + ires, spot.p)).r;
+  shadow = (shadow / 6);
+#endif
+
+  vec3 litcolor = basetexcolor * (diffuse * shadow + gl_LightSource[0].ambient.rgb);
 
   float fog = 1.0;
   if(fogEnabled)
