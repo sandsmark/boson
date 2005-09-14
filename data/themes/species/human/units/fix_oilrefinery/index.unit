@@ -31,6 +31,7 @@ TerrainType=1
 UnitDepth=4.0
 UnitHeight=4.0
 UnitWidth=4.0
+PowerConsumed=150
 
 Weapons=0
 

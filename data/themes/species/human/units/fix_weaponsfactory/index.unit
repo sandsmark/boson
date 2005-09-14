@@ -32,6 +32,7 @@ UnitDepth=1.372
 UnitHeight=2.8
 UnitWidth=2.8
 Weapons=0
+PowerConsumed=300
 
 [ProductionPlugin]
 ProducerList=0

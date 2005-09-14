@@ -32,6 +32,7 @@ UnitDepth=1.05
 UnitHeight=4.5
 UnitWidth=4.5
 Weapons=0
+PowerGenerated=200
 
 [ProductionPlugin]
 ProducerList=10

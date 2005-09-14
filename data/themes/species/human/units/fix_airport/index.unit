@@ -28,6 +28,7 @@ UnitDepth=2.7
 UnitHeight=12
 UnitWidth=24
 Weapons=0
+PowerConsumed=100
 
 [Sounds]
 OrderAttack=order_attack
