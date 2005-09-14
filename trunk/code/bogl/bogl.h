@@ -330,6 +330,7 @@ extern _boglGenerateMipmap boglGenerateMipmap;
 #define GL_RENDERBUFFER                   0x8D41
 #endif
 
+#define GL_DEPTH_COMPONENT24              0x81A6
 #define GL_DEPTH_TEXTURE_MODE             0x884B
 #define GL_TEXTURE_COMPARE_MODE           0x884C
 #define GL_TEXTURE_COMPARE_FUNC           0x884D
