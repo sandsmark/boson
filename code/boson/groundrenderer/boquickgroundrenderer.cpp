@@ -835,13 +835,6 @@ void BoQuickGroundRenderer::initMap(const BosonMap* map)
       // Pass 2
       // Finds min/max height of the chunk
       // Inits hastexture flags
-      // Finds average normal and texture weight of the chunk
-      BoVector3Float avgNormal;
-      float* avgTexWeight = new float[mTextureCount];
-      for(unsigned int t = 0; t < mTextureCount; t++)
-      {
-        avgTexWeight[t] = 0.0f;
-      }
       chunk->minZ = chunk->maxZ = heightmap[map->cornerArrayPos(chunk->minX, chunk->minY)];
       for(unsigned int y = chunk->minY; y <= chunk->maxY; y++)
       {
@@ -855,62 +848,14 @@ void BoQuickGroundRenderer::initMap(const BosonMap* map)
             if(texmap[(t * mMapCW * mMapCH) + pos] > 0)
             {
               chunk->hastexture[t] = true;
-              avgTexWeight[t] += texmap[(t * mMapCW * mMapCH) + pos];
             }
           }
-          avgNormal += BoVector3Float(normalmap + 3 * pos);
         }
-      }
-      avgNormal.normalize();
-      for(unsigned int t = 0; t < mTextureCount; t++)
-      {
-        avgTexWeight[t] /= (chunk->maxX - chunk->minX) * (chunk->maxY - chunk->minY);
-        avgTexWeight[t] /= 255.0f;
       }
 
       // Pass 3
-      // Finds roughness of the chunk by summing dot products of every normal
-      //  and average normal
-      chunk->roughness = 0.0f;
-      float* textureRoughness = new float[mTextureCount];
-      for(unsigned int t = 0; t < mTextureCount; t++)
-      {
-        textureRoughness[t] = 0.0f;
-      }
-
-      for(unsigned int y = chunk->minY; y <= chunk->maxY; y++)
-      {
-        for(unsigned int x = chunk->minX; x <= chunk->maxX; x++)
-        {
-          int pos = map->cornerArrayPos(x, y);
-          chunk->roughness += (1.0f - BoVector3Float::dotProduct(avgNormal, BoVector3Float(normalmap + 3 * pos)));
-          for(unsigned int t = 0; t < mTextureCount; t++)
-          {
-            float texvalue = texmap[(t * mMapCW * mMapCH) + pos] / 255.0f;
-            textureRoughness[t] += QABS(texvalue - avgTexWeight[t]);
-          }
-        }
-      }
-      chunk->roughness = sqrt(1.0f + chunk->roughness) - 1.05f;
-      //boDebug() << k_funcinfo << "Roughness of cell at (" << chunk->minX << "; " << chunk->minY <<
-      //    ") is " << chunk->roughness << endl;
-      chunk->textureRoughnessTotal = 0.0f;
-      for(unsigned int t = 0; t < mTextureCount; t++)
-      {
-        if(textureRoughness[t] == 0.0f)
-        {
-          continue;
-        }
-        chunk->textureRoughnessTotal += textureRoughness[t];
-        /*textureRoughness[t] = (sqrt(1.0f + textureRoughness[t]) - 1.05f) / TEXROUGHNESS_MULTIPLIER;
-        boDebug() << k_funcinfo << "    Tex roughness for tex " << t << " is " <<
-            textureRoughness[t] << endl;*/
-      }
-      chunk->textureRoughnessTotal = (sqrt(1.0f + chunk->textureRoughnessTotal) - 1.05f) * TEXROUGHNESS_MULTIPLIER;
-      //boDebug() << k_funcinfo << "    Total tex roughness is " <<
-      //    chunk->textureRoughnessTotal << endl;
-      delete[] avgTexWeight;
-      delete[] textureRoughness;
+      // Finds roughness of the chunk
+      BoGroundRendererBase::getRoughnessInRect(map, &chunk->roughness, &chunk->textureRoughnessTotal, chunk->minX, chunk->minY, chunk->maxX, chunk->maxY);
 
       // Finally find center and radius of the chunk
       float halfdiffX = (chunk->maxX - chunk->minX) / 2.0f;

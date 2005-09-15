@@ -730,6 +730,8 @@ BoGroundRendererBase::BoGroundRendererBase()
  mColorArray = 0;
  mCellListBuilder = 0;
  mFogTexture = 0;
+ mUsedTextures = 0;
+ mUsedTexturesDirty = true;
 }
 
 BoGroundRendererBase::~BoGroundRendererBase()
@@ -744,6 +746,7 @@ BoGroundRendererBase::~BoGroundRendererBase()
 #endif
  delete[] mVertexArray;
  delete[] mColorArray;
+ delete[] mUsedTextures;
 }
 
 bool BoGroundRendererBase::initGroundRenderer()
@@ -778,6 +781,12 @@ void BoGroundRendererBase::updateMapCache(const BosonMap* map)
 
  mColorMapRenderers.setAutoDelete(true);
  mColorMapRenderers.clear();
+
+ delete[] mUsedTextures;
+ mUsedTextures = new bool[map->groundTheme()->groundTypeCount()];
+ for (unsigned int i = 0; i < map->groundTheme()->groundTypeCount(); i++) {
+	mUsedTextures[i] = true;
+ }
 
 #if FIX_EDGES
  delete[] mHeightMap2;
@@ -848,6 +857,10 @@ void BoGroundRendererBase::generateCellList(const BosonMap* map)
 	setRenderCells(renderCells, renderCellsSize);
  }
  setRenderCellsCount(renderCellsCount);
+ for (unsigned int i = 0; i < map->groundTheme()->groundTypeCount(); i++) {
+	mUsedTextures[i] = true;
+ }
+ mUsedTexturesDirty = true;
 #if FIX_EDGES
  if (renderCellsCount > 0) {
 	mCellListBuilder->copyHeightMap(mVertexArray, mHeightMap2, map);
@@ -959,5 +972,85 @@ void BoGroundRendererBase::cellTextureChanged(int x1, int y1, int x2, int y2)
 		}
 	}
  }
+}
+
+#define TEXROUGHNESS_MULTIPLIER 0.125f
+void BoGroundRendererBase::getRoughnessInRect(const BosonMap* map, float* _roughness, float* _textureRoughnessTotal, int x1, int y1, int x2, int y2)
+{
+ BO_CHECK_NULL_RET(map);
+ BO_CHECK_NULL_RET(map->groundTheme());
+ BO_CHECK_NULL_RET(_roughness);
+ BO_CHECK_NULL_RET(_textureRoughnessTotal);
+
+ if (x2 <= x1 || y2 <= y1) {
+	boError() << k_funcinfo << "invalid parameters" << endl;
+	return;
+ }
+
+ unsigned int textureCount = map->groundTheme()->groundTypeCount();
+
+ // AB: the "weight" of a texture is it's alpha value, i.e. the amount of the
+ // texture that is to be rendered for a cell.
+
+ // Finds average normal and texture weight of the chunk
+ BoVector3Float avgNormal;
+ float* avgTexWeight = new float[textureCount];
+ for(unsigned int t = 0; t < textureCount; t++) {
+	avgTexWeight[t] = 0.0f;
+ }
+ for (int y = y1; y <= y2; y++) {
+	for (int x = x1; x <= x2; x++) {
+		for (unsigned int t = 0; t < textureCount; t++) {
+			avgTexWeight[t] += map->texMapAlpha(t, x, y);
+		}
+		avgNormal += BoVector3Float(map->normalMap() + 3 * map->cornerArrayPos(x, y));
+	}
+ }
+ avgNormal.normalize();
+ for (unsigned int t = 0; t < textureCount; t++) {
+	avgTexWeight[t] /= (x2 - x1) * (y2 - y1);
+	avgTexWeight[t] /= 255.0f;
+ }
+
+
+ // Finds roughness of the rect by summing dot products of every normal
+ //  and average normal
+ float roughness = 0.0f;
+ float textureRoughnessTotal = 0.0f;
+ float* textureRoughness = new float[textureCount];
+ for (unsigned int t = 0; t < textureCount; t++) {
+	textureRoughness[t] = 0.0f;
+ }
+
+ for (int y = y1; y <= y2; y++) {
+	for (int x = x1; x <= x2; x++) {
+		int pos = map->cornerArrayPos(x, y);
+		roughness += (1.0f - BoVector3Float::dotProduct(avgNormal, BoVector3Float(map->normalMap() + 3 * pos)));
+		for (unsigned int t = 0; t < textureCount; t++) {
+			float texvalue = map->texMapAlpha(t, x, y) / 255.0f;
+			textureRoughness[t] += QABS(texvalue - avgTexWeight[t]);
+		}
+	}
+ }
+ roughness = sqrt(1.0f + roughness) - 1.05f;
+ //boDebug() << k_funcinfo << "Roughness of cell at (" << chunk->minX << "; " << chunk->minY <<
+ //    ") is " << chunk->roughness << endl;
+ textureRoughnessTotal = 0.0f;
+ for (unsigned int t = 0; t < textureCount; t++) {
+	if (textureRoughness[t] == 0.0f) {
+		continue;
+	}
+	textureRoughnessTotal += textureRoughness[t];
+	/*textureRoughness[t] = (sqrt(1.0f + textureRoughness[t]) - 1.05f) / TEXROUGHNESS_MULTIPLIER;
+	boDebug() << k_funcinfo << "Tex roughness for tex " << t << " is " <<
+		textureRoughness[t] << endl;*/
+ }
+ textureRoughnessTotal = (sqrt(1.0f + textureRoughnessTotal) - 1.05f) * TEXROUGHNESS_MULTIPLIER;
+ //boDebug() << k_funcinfo << "Total tex roughness is " << textureRoughnessTotal << endl;
+ delete[] avgTexWeight;
+ delete[] textureRoughness;
+
+ *_roughness = roughness;
+ *_textureRoughnessTotal = textureRoughnessTotal;
 }
 
