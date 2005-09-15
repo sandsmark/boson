@@ -274,11 +274,11 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
     glEnable(GL_TEXTURE_GEN_T);
     glTexGenfv(GL_S, GL_OBJECT_PLANE, texPlaneS);
     glTexGenfv(GL_T, GL_OBJECT_PLANE, texPlaneT);
-    glMatrixMode(GL_TEXTURE);
 
     // Set blending function
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   }
+  glMatrixMode(GL_TEXTURE);
 
   // Depth test
   glDepthFunc(GL_LEQUAL);
@@ -305,16 +305,13 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
     for(unsigned int j = 0; j < mChunkCount; j++)
     {
       TerrainChunk* c = &mChunks[j];
-      if(!depthonly)
+      if(!c->render)
       {
-        if(!c->render)
-        {
-          continue;
-        }
-        if(!c->hastexture[i])
-        {
-          continue;
-        }
+        continue;
+      }
+      if(!depthonly && !c->hastexture[i])
+      {
+        continue;
       }
 
       // Init if necessary
@@ -366,12 +363,12 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
     }
     boTextureManager->disableTexturing();
 
-    glMatrixMode(GL_MODELVIEW);
     glDisable(GL_TEXTURE_GEN_S);
     glDisable(GL_TEXTURE_GEN_T);
     glDisable(GL_BLEND);
   }
 
+  glMatrixMode(GL_MODELVIEW);
   glColor4ub(255, 255, 255, 255);
 
   // Render the color map if necessary
