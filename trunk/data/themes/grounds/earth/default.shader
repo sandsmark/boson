@@ -99,14 +99,14 @@ void main()
   float shadow = shadow2DProj(texture_3, gl_TexCoord[3]).r;
 #else
   vec3 spot = gl_TexCoord[3].stp / gl_TexCoord[3].q;
-  float ires = 1.0 / 1024;
+  float ires = 1.0 / 1024.0;
   float shadow = 0.0;
   shadow += shadow2D(texture_3, vec3(spot.s       , spot.t - ires, spot.p)).r;
   shadow += shadow2D(texture_3, vec3(spot.s - ires, spot.t       , spot.p)).r;
   shadow += shadow2D(texture_3, vec3(spot.s       , spot.t       , spot.p)).r * 2;
   shadow += shadow2D(texture_3, vec3(spot.s + ires, spot.t       , spot.p)).r;
   shadow += shadow2D(texture_3, vec3(spot.s       , spot.t + ires, spot.p)).r;
-  shadow = (shadow / 6);
+  shadow = (shadow / 6.0);
 #endif
 
   vec3 litcolor = basetexcolor * (diffuse * shadow + gl_LightSource[0].ambient.rgb);
