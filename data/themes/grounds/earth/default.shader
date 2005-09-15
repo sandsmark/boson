@@ -103,7 +103,7 @@ void main()
   float shadow = 0.0;
   shadow += shadow2D(texture_3, vec3(spot.s       , spot.t - ires, spot.p)).r;
   shadow += shadow2D(texture_3, vec3(spot.s - ires, spot.t       , spot.p)).r;
-  shadow += shadow2D(texture_3, vec3(spot.s       , spot.t       , spot.p)).r * 2;
+  shadow += shadow2D(texture_3, vec3(spot.s       , spot.t       , spot.p)).r * 2.0;
   shadow += shadow2D(texture_3, vec3(spot.s + ires, spot.t       , spot.p)).r;
   shadow += shadow2D(texture_3, vec3(spot.s       , spot.t + ires, spot.p)).r;
   shadow = (shadow / 6.0);
