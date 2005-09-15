@@ -243,7 +243,7 @@ int BoShader::uniformLocation(const QString& name)
 {
   if(!mUniformLocations)
   {
-    return 0;
+    return -1;
   }
   int* location = mUniformLocations->find(name);
   if(!location)
