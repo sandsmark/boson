@@ -268,6 +268,8 @@ bool EditorUnitProperties::saveUnitType(const QString& fileName)
  BoVector3Fixed tmpHitPoint(d->mHitPoint);
  BosonConfig::writeEntry(&conf, "HitPoint", d->mHitPoint);
  conf.writeEntry("Producer", mProducer);
+ conf.writeEntry("PowerGenerated", ulongBaseValue("PowerGenerated"));
+ conf.writeEntry("PowerConsumed", ulongBaseValue("PowerConsumed"));
 
  BosonConfig::writeUnsignedLongNumList(&conf, "DestroyedEffects", d->mDestroyedEffectIds);
  BosonConfig::writeUnsignedLongNumList(&conf, "ConstructedEffects", d->mConstructedEffectIds);
@@ -994,6 +996,13 @@ void BoPropertiesPageHandler::updateUnitProperties()
  if(mEditor->mUnitTypeFacility->isChecked()) {
 	unit->setIsFacility(true);
 	unit->setConstructionSteps(mEditor->mUnitConstructionSteps->value());
+
+	unit->insertULongBaseValue(mEditor->mPowerGenerated->value(), "PowerGenerated");
+	if (unit->ulongBaseValue("PowerGenerated") == 0) {
+		unit->insertULongBaseValue(mEditor->mPowerConsumed->value(), "PowerConsumed");
+	} else {
+		unit->insertULongBaseValue(0, "PowerConsumed");
+	}
  } else {
 	unit->setIsFacility(false);
 	unit->insertBoFixedBaseValue(bofixed(mEditor->mUnitSpeed->value()), "Speed");
@@ -1039,6 +1048,8 @@ void BoPropertiesPageHandler::updateWidget()
  mEditor->mUnitWaterDepth->setValue(unit->waterDepth());
  mEditor->mUnitTurnRadius->setValue(unit->turnRadius());
  mEditor->mUnitPreferredAltitude->setValue(unit->preferredAltitude());
+ mEditor->mPowerGenerated->setValue(unit->ulongBaseValue("PowerGenerated"));
+ mEditor->mPowerConsumed->setValue(unit->ulongBaseValue("PowerConsumed"));
 }
 
 

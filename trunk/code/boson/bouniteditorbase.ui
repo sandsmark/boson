@@ -1407,7 +1407,7 @@ When other unit shoots at your unit, armor value is substracted from shooter's d
                                                         <cstring>mUnitCrushDamage</cstring>
                                                     </property>
                                                     <property name="value">
-                                                        <number>4</number>
+                                                        <number>0</number>
                                                     </property>
                                                     <property name="minValue">
                                                         <number>0</number>
@@ -1649,6 +1649,112 @@ Construction steps are used to get feeling that your unit is constructed step by
                                                     </property>
                                                     <property name="value">
                                                         <number>4</number>
+                                                    </property>
+                                                    <property name="minValue">
+                                                        <number>0</number>
+                                                    </property>
+                                                    <property name="toolTip" stdset="0">
+                                                        <string>How many construction steps this unit has</string>
+                                                    </property>
+                                                    <property name="whatsThis" stdset="0">
+                                                        <string>How many construction steps this unit has&lt;br&gt;
+Construction steps are used to get feeling that your unit is constructed step by step</string>
+                                                    </property>
+                                                </widget>
+                                            </hbox>
+                                        </widget>
+                                        <widget class="QLayoutWidget">
+                                            <property name="name">
+                                                <cstring>layout30</cstring>
+                                            </property>
+                                            <hbox>
+                                                <property name="name">
+                                                    <cstring>unnamed</cstring>
+                                                </property>
+                                                <widget class="QLabel">
+                                                    <property name="name">
+                                                        <cstring>mUnitConstrucionStepsLabel_2</cstring>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>Generates power:</string>
+                                                    </property>
+                                                </widget>
+                                                <spacer>
+                                                    <property name="name">
+                                                        <cstring>mUnitConstrucionStepsSpacer_2</cstring>
+                                                    </property>
+                                                    <property name="orientation">
+                                                        <enum>Horizontal</enum>
+                                                    </property>
+                                                    <property name="sizeType">
+                                                        <enum>Fixed</enum>
+                                                    </property>
+                                                    <property name="sizeHint">
+                                                        <size>
+                                                            <width>20</width>
+                                                            <height>20</height>
+                                                        </size>
+                                                    </property>
+                                                </spacer>
+                                                <widget class="KIntNumInput">
+                                                    <property name="name">
+                                                        <cstring>mPowerGenerated</cstring>
+                                                    </property>
+                                                    <property name="value">
+                                                        <number>0</number>
+                                                    </property>
+                                                    <property name="minValue">
+                                                        <number>0</number>
+                                                    </property>
+                                                    <property name="toolTip" stdset="0">
+                                                        <string>How many construction steps this unit has</string>
+                                                    </property>
+                                                    <property name="whatsThis" stdset="0">
+                                                        <string>How many construction steps this unit has&lt;br&gt;
+Construction steps are used to get feeling that your unit is constructed step by step</string>
+                                                    </property>
+                                                </widget>
+                                            </hbox>
+                                        </widget>
+                                        <widget class="QLayoutWidget">
+                                            <property name="name">
+                                                <cstring>layout31</cstring>
+                                            </property>
+                                            <hbox>
+                                                <property name="name">
+                                                    <cstring>unnamed</cstring>
+                                                </property>
+                                                <widget class="QLabel">
+                                                    <property name="name">
+                                                        <cstring>mUnitConstrucionStepsLabel_4</cstring>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>Consumes power:</string>
+                                                    </property>
+                                                </widget>
+                                                <spacer>
+                                                    <property name="name">
+                                                        <cstring>mUnitConstrucionStepsSpacer_4</cstring>
+                                                    </property>
+                                                    <property name="orientation">
+                                                        <enum>Horizontal</enum>
+                                                    </property>
+                                                    <property name="sizeType">
+                                                        <enum>Fixed</enum>
+                                                    </property>
+                                                    <property name="sizeHint">
+                                                        <size>
+                                                            <width>20</width>
+                                                            <height>20</height>
+                                                        </size>
+                                                    </property>
+                                                </spacer>
+                                                <widget class="KIntNumInput">
+                                                    <property name="name">
+                                                        <cstring>mPowerConsumed</cstring>
+                                                    </property>
+                                                    <property name="value">
+                                                        <number>0</number>
                                                     </property>
                                                     <property name="minValue">
                                                         <number>0</number>
@@ -4553,6 +4659,10 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>klineedit.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
