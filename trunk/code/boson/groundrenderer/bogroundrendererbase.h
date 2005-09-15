@@ -145,6 +145,7 @@ public:
 		return mCurrentGroundThemeData;
 	}
 
+	static void getRoughnessInRect(const BosonMap* map, float* roughness, float* textureRoughnessTotal, int x1, int y1, int x2, int y2);
 protected:
 	virtual void renderVisibleCellsStart(const BosonMap* map);
 	virtual void renderVisibleCellsStop(const BosonMap* map);
@@ -162,10 +163,13 @@ protected:
 
 	BoColorMapRenderer* getUpdatedColorMapRenderer(BoColorMap*);
 
+
 protected:
 	float* mHeightMap2;
 	float* mVertexArray;
 	unsigned char* mColorArray;
+	bool* mUsedTextures;
+	bool mUsedTexturesDirty;
 
 private:
 	CellListBuilder* mCellListBuilder;
