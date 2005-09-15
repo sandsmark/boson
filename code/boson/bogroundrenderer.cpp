@@ -102,6 +102,14 @@ unsigned int BoGroundRenderer::renderCells(const BosonMap* map, RenderFlags flag
  BO_CHECK_NULL_RET0(map);
  BO_CHECK_NULL_RET0(statistics());
 
+ if (renderCellsCount() == 0) {
+	// this happens either when we have to generate the list first or if no
+	// cell is visible at all. The latter case isn't speed relevant, so we
+	// can simply re-generate then.
+	boDebug() << k_funcinfo << "generating cell list" << endl;
+	generateCellList(map);
+ }
+
  BO_CHECK_NULL_RET0(localPlayerIO());
 
  BO_CHECK_NULL_RET0(map);
