@@ -416,7 +416,7 @@ bool BosonStarting::addLoadGamePlayers(const QString& playersXML)
 		return false;
 	}
 	Player* player = new Player();
-	boWarning() << k_funcinfo << "probably call player->setUserId(id); here" << endl;
+	player->setUserId(id);
 	player->loadTheme(SpeciesTheme::speciesDirectory(species), color);
 
 	boGame->bosonAddPlayer(player);
