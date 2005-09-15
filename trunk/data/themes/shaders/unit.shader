@@ -74,7 +74,7 @@ void main()
 #ifdef USE_MATERIALS
   float specular = clamp(pow(dot(halfv, mynormal), gl_FrontMaterial.shininess), 0.0, 1.0);
 #else
-  float specular = clamp(pow(dot(halfv, mynormal), 64), 0.0, 1.0);
+  float specular = clamp(pow(dot(halfv, mynormal), 64.0), 0.0, 1.0);
 #endif
 #endif
   // Get diffuse texture color at this point
@@ -85,7 +85,7 @@ void main()
   float shadow = shadow2DProj(texture_3, gl_TexCoord[1]).r;
 #else
   // 3-sample PCF filtering
-  const float ires = 1.0 / 2048;
+  const float ires = 1.0 / 2048.0;
   vec3 spot = gl_TexCoord[1].stp / gl_TexCoord[1].q;
   float shadow = shadow2D(texture_3, vec3(spot.s - ires, spot.t + ires, spot.p)).r;
   shadow += shadow2D(texture_3, vec3(spot.s + ires, spot.t + ires, spot.p)).r;
