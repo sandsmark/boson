@@ -236,7 +236,24 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 	if (i == 1) {
 		glEnable(GL_BLEND);
 	}
+	unsigned char* colorPointer = mColorArray + (map->cornerArrayPos(map->width(), map->height()) + 1) * 4 * i;
 	if (!depthonly) {
+		if (mUsedTexturesDirty) {
+			mUsedTexturesDirty = false;
+			bool useTexture = false;
+			for (int j = 0; j < indexCount && !useTexture; j++) {
+				if (colorPointer[indices[j] * 4 + 3] != 0) {
+					useTexture = true;
+					break;
+				}
+				mUsedTextures[i] = useTexture;
+			}
+		}
+		if (!mUsedTextures[i]) {
+			continue;
+		}
+
+		usedTextures++;
 		BosonGroundTypeData* groundData = currentGroundThemeData()->groundTypeData(i);
 		// Bind texture
 		BoTexture* tex = groundData->currentTexture(boGame->advanceCallsCount());
@@ -257,19 +274,6 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 			groundData->shader->setUniform("bumpScale", groundData->groundType->bumpScale);
 			groundData->shader->setUniform("bumpBias", groundData->groundType->bumpBias);
 		}
-
-		unsigned char* colorPointer = mColorArray + (map->cornerArrayPos(map->width(), map->height()) + 1) * 4 * i;
-		bool useTexture = false;
-		for (int j = 0; j < indexCount; j++) {
-			if (colorPointer[indices[j] * 4 + 3] != 0) {
-				useTexture = true;
-				break;
-			}
-		}
-		if (!useTexture) {
-			continue;
-		}
-		usedTextures++;
 
 #if USE_VBOS
 		glColorPointer(4, GL_UNSIGNED_BYTE, 0, (unsigned char*)0 + (map->cornerArrayPos(map->width(), map->height()) + 1) * 4 * i);
