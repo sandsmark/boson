@@ -239,8 +239,12 @@ void BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
   mValid = true;
 }
 
-int BoShader::uniformLocation(QString name)
+int BoShader::uniformLocation(const QString& name)
 {
+  if(!mUniformLocations)
+  {
+    return 0;
+  }
   int* location = mUniformLocations->find(name);
   if(!location)
   {
@@ -251,7 +255,7 @@ int BoShader::uniformLocation(QString name)
   return *location;
 }
 
-bool BoShader::setUniform(QString name, float value)
+bool BoShader::setUniform(const QString& name, float value)
 {
   int location = uniformLocation(name);
   if(location >= 0)
@@ -261,7 +265,7 @@ bool BoShader::setUniform(QString name, float value)
   return (location >= 0);
 }
 
-bool BoShader::setUniform(QString name, int value)
+bool BoShader::setUniform(const QString& name, int value)
 {
   int location = uniformLocation(name);
   if(location >= 0)
@@ -271,7 +275,7 @@ bool BoShader::setUniform(QString name, int value)
   return (location >= 0);
 }
 
-bool BoShader::setUniform(QString name, bool value)
+bool BoShader::setUniform(const QString& name, bool value)
 {
   int location = uniformLocation(name);
   if(location >= 0)
@@ -281,7 +285,7 @@ bool BoShader::setUniform(QString name, bool value)
   return (location >= 0);
 }
 
-bool BoShader::setUniform(QString name, const BoVector2Float& value)
+bool BoShader::setUniform(const QString& name, const BoVector2Float& value)
 {
   int location = uniformLocation(name);
   if(location >= 0)
@@ -291,7 +295,7 @@ bool BoShader::setUniform(QString name, const BoVector2Float& value)
   return (location >= 0);
 }
 
-bool BoShader::setUniform(QString name, const BoVector3Float& value)
+bool BoShader::setUniform(const QString& name, const BoVector3Float& value)
 {
   int location = uniformLocation(name);
   if(location >= 0)
@@ -301,7 +305,7 @@ bool BoShader::setUniform(QString name, const BoVector3Float& value)
   return (location >= 0);
 }
 
-bool BoShader::setUniform(QString name, const BoVector4Float& value)
+bool BoShader::setUniform(const QString& name, const BoVector4Float& value)
 {
   int location = uniformLocation(name);
   if(location >= 0)
@@ -359,3 +363,6 @@ void BoShader::setActiveLights(int active)
   mActiveLights = active;
 }
 
+/*
+ * vim: et sw=2
+ */

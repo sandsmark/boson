@@ -71,14 +71,14 @@ class BoShader
     inline bool valid()  { return mValid; }
 
 
-    bool setUniform(QString name, float value);
-    bool setUniform(QString name, int value);
-    bool setUniform(QString name, bool value);
-    bool setUniform(QString name, const BoVector2Float& value);
-    bool setUniform(QString name, const BoVector3Float& value);
-    bool setUniform(QString name, const BoVector4Float& value);
+    bool setUniform(const QString& name, float value);
+    bool setUniform(const QString& name, int value);
+    bool setUniform(const QString& name, bool value);
+    bool setUniform(const QString& name, const BoVector2Float& value);
+    bool setUniform(const QString& name, const BoVector3Float& value);
+    bool setUniform(const QString& name, const BoVector4Float& value);
 
-    int uniformLocation(QString name);
+    int uniformLocation(const QString& name);
 
 
     static void setCameraPos(const BoVector3Float& pos);
@@ -107,3 +107,6 @@ class BoShader
 };
 
 #endif //BOSHADER_H
+/*
+ * vim: et sw=2
+ */
