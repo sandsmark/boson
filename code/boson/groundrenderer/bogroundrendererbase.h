@@ -59,7 +59,7 @@ public:
 
 	virtual BoQuadTreeNode* createNode(int l, int t, int r, int b) const;
 
-	void calculateRoughness(const BosonMap* map);
+	void calculateRoughness(const BosonMap* map, bool recursive = true);
 
 	/**
 	 * The "roughness" is a that indicates how many height differences and

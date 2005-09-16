@@ -69,24 +69,27 @@ BoQuadTreeNode* BoGroundQuadTreeNode::createNode(int l, int t, int r, int b) con
  return new BoGroundQuadTreeNode(l, t, r, b);
 }
 
-void BoGroundQuadTreeNode::calculateRoughness(const BosonMap* map)
+// TODO: also take neighboring cells into account!
+void BoGroundQuadTreeNode::calculateRoughness(const BosonMap* map, bool recursive)
 {
  int children = 0;
- if (topLeftNode()) {
-	children++;
-	((BoGroundQuadTreeNode*)topLeftNode())->calculateRoughness(map);
- }
- if (topRightNode()) {
-	children++;
-	((BoGroundQuadTreeNode*)topRightNode())->calculateRoughness(map);
- }
- if (bottomLeftNode()) {
-	children++;
-	((BoGroundQuadTreeNode*)bottomLeftNode())->calculateRoughness(map);
- }
- if (bottomRightNode()) {
-	children++;
-	((BoGroundQuadTreeNode*)bottomRightNode())->calculateRoughness(map);
+ if (recursive) {
+	if (topLeftNode()) {
+		children++;
+		((BoGroundQuadTreeNode*)topLeftNode())->calculateRoughness(map);
+	}
+	if (topRightNode()) {
+		children++;
+		((BoGroundQuadTreeNode*)topRightNode())->calculateRoughness(map);
+	}
+	if (bottomLeftNode()) {
+		children++;
+		((BoGroundQuadTreeNode*)bottomLeftNode())->calculateRoughness(map);
+	}
+	if (bottomRightNode()) {
+		children++;
+		((BoGroundQuadTreeNode*)bottomRightNode())->calculateRoughness(map);
+	}
  }
 
 
@@ -180,6 +183,26 @@ public:
 	 **/
 	virtual int* generateCellList(const BosonMap* map, int* renderCells, int* renderCellsSize, unsigned int* renderCellsCount, float* minDist = 0, float* maxDist = 0) = 0;
 
+	/**
+	 * Notify the object that the height of some cells have been changed.
+	 * This is reimplemented by @ref CellListBuilderTree because the tree
+	 * caches some values (e.g. roughness value for LOD).
+	 **/
+	virtual void cellHeightChanged(int x1, int y1, int x2, int y2)
+	{
+		Q_UNUSED(x1);
+		Q_UNUSED(y1);
+		Q_UNUSED(x2);
+		Q_UNUSED(y2);
+	}
+	virtual void cellTextureChanged(int x1, int y1, int x2, int y2)
+	{
+		Q_UNUSED(x1);
+		Q_UNUSED(y1);
+		Q_UNUSED(x2);
+		Q_UNUSED(y2);
+	}
+
 protected:
 	virtual void copyCustomHeightMap(float* vertexArray, float* heightMap, const BosonMap* map) = 0;
 
@@ -223,6 +246,8 @@ public:
 
 	virtual int* generateCellList(const BosonMap* map, int* renderCells, int* renderCellsSize, unsigned int* renderCellsCount, float* minDist = 0, float* maxDist = 0);
 
+	virtual void cellTextureChanged(int x1, int y1, int x2, int y2);
+	virtual void cellHeightChanged(int x1, int y1, int x2, int y2);
 
 protected:
 	/**
@@ -249,6 +274,8 @@ protected:
 	void recreateTree(const BosonMap* map);
 
 	virtual void copyCustomHeightMap(float* vertexArray, float* heightMap, const BosonMap* map);
+
+	void recalculateRoughnessInRect(int x1, int y1, int x2, int y2);
 
 private:
 	// these variables are valid only while we are in generateCellList() !
@@ -530,6 +557,45 @@ void CellListBuilderTree::recreateTree(const BosonMap* map)
  mRoot->calculateRoughness(map);
 }
 
+void CellListBuilderTree::cellHeightChanged(int x1, int y1, int x2, int y2)
+{
+ recalculateRoughnessInRect(x1, y1, x2, y2);
+}
+
+void CellListBuilderTree::cellTextureChanged(int x1, int y1, int x2, int y2)
+{
+ recalculateRoughnessInRect(x1, y1, x2, y2);
+}
+
+void CellListBuilderTree::recalculateRoughnessInRect(int x1, int y1, int x2, int y2)
+{
+ BO_CHECK_NULL_RET(mMap);
+ BO_CHECK_NULL_RET(mRoot);
+ QPtrList<BoGroundQuadTreeNode> stack;
+ stack.append(mRoot);
+ while (!stack.isEmpty()) {
+	BoGroundQuadTreeNode* node = stack.take(0);
+	if (!node->intersects(x1, y1, x2, y2)) {
+		continue;
+	}
+	node->calculateRoughness(mMap, false);
+
+	if (node->topLeftNode()) {
+		stack.append((BoGroundQuadTreeNode*)node->topLeftNode());
+	}
+	if (node->topRightNode()) {
+		stack.append((BoGroundQuadTreeNode*)node->topRightNode());
+	}
+	if (node->bottomLeftNode()) {
+		stack.append((BoGroundQuadTreeNode*)node->bottomLeftNode());
+	}
+	if (node->topRightNode()) {
+		stack.append((BoGroundQuadTreeNode*)node->topRightNode());
+	}
+ }
+}
+
+// TODO: atm these settings are too aggressive for editor!
 bool BoGroundRendererCellListLOD::doLOD(const BosonMap* map, const BoGroundQuadTreeNode* node) const
 {
  if (!node) {
@@ -1058,13 +1124,15 @@ BoColorMapRenderer* BoGroundRendererBase::getUpdatedColorMapRenderer(BoColorMap*
  return r;
 }
 
-void BoGroundRendererBase::cellHeightChanged(int, int, int, int)
+void BoGroundRendererBase::cellHeightChanged(int x1, int y1, int x2, int y2)
 {
+ BO_CHECK_NULL_RET(mCellListBuilder);
+
 #if FIX_EDGES
  mCellListBuilder->copyHeightMap(mVertexArray, mHeightMap2, mCurrentMap);
 #endif
 
- // TODO: change roughness values of tree nodes
+ mCellListBuilder->cellHeightChanged(x1, y1, x2, y2);
 }
 
 void BoGroundRendererBase::cellTextureChanged(int x1, int y1, int x2, int y2)
@@ -1081,7 +1149,9 @@ void BoGroundRendererBase::cellTextureChanged(int x1, int y1, int x2, int y2)
 	}
  }
 
- // TODO: change roughness values of tree nodes
+ BO_CHECK_NULL_RET(mCellListBuilder);
+ mCellListBuilder->cellTextureChanged(x1, y2, x2, y2);
+ mUsedTexturesDirty = true;
 }
 
 #define TEXROUGHNESS_MULTIPLIER 0.125f

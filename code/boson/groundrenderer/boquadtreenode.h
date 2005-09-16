@@ -136,6 +136,17 @@ public:
 	 **/
 	void createChilds(unsigned int width, unsigned int height);
 
+	bool intersects(int x1, int x2, int y1, int y2) const
+	{
+		if (x1 > right() || x2 < left()) {
+			return false;
+		}
+		if (y1 > bottom() || y2 < top()) {
+			return false;
+		}
+		return true;
+	}
+
 protected:
 	virtual BoQuadTreeNode* createNode(int l, int t, int r, int b) const;
 
