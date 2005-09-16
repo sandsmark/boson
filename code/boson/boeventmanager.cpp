@@ -189,7 +189,7 @@ bool BoEventManager::loadFromXML(const QDomElement& root)
 bool BoEventManager::saveListenerScripts(QMap<QString, QByteArray>* scripts) const
 {
  // save in 2 steps.
- // 1. save the actual scripts (d->mAvailableScripts)
+ // 1. save the actual scripts
  // 2. save the current script data (i.e. the variable values).
  //
  // note that in 1. we may save more scripts than we actually use - e.g. if
@@ -197,11 +197,9 @@ bool BoEventManager::saveListenerScripts(QMap<QString, QByteArray>* scripts) con
  // (later we may replace the human player by a computer player).
 
  // save all available scripts
- for (QMap<QString, QByteArray>::iterator it = d->mAvailableScripts.begin(); it != d->mAvailableScripts.end(); ++it) {
-	if (it.key().contains("/data/")) {
-		continue;
-	}
-	scripts->insert(it.key(), it.data());
+ QStringList scriptFiles = availableScriptFiles(false);
+ for (QStringList::iterator it = scriptFiles.begin(); it != scriptFiles.end(); ++it) {
+	scripts->insert(*it, scriptForFile(*it));
  }
 
  // save the current data of all currently used scripts
@@ -252,7 +250,7 @@ bool BoEventManager::loadAllEventListenerScripts()
  for (; it.current(); ++it) {
 	QString name = it.current()->scriptFileName();
 	QString fullScriptName = QString::fromLatin1("scripts/eventlistener/") + name;
-	if (!d->mAvailableScripts.contains(fullScriptName)) {
+	if (!haveScriptForFile(fullScriptName)) {
 		boError() << k_funcinfo << "no script with name " << fullScriptName << " available" << endl;
 		return false;
 	}
@@ -277,14 +275,14 @@ bool BoEventManager::loadEventListenerScript(BoEventListener* listener)
  }
  QString fullScriptName = QString::fromLatin1("scripts/eventlistener/") + name;
  QString fullScriptDataName = QString::fromLatin1("scripts/eventlistener/data/") + name;
- if (!d->mAvailableScripts.contains(fullScriptName)) {
+ if (!haveScriptForFile(fullScriptName)) {
 	// event manager hasn't loaded the scripts yet.
 	// note this is perfectly valid!
 	return true;
  }
  boDebug() << k_funcinfo << "loading listener script " << name << endl;
- QByteArray script = d->mAvailableScripts[fullScriptName];
- QByteArray scriptData = d->mAvailableScripts[fullScriptDataName];
+ QByteArray script = scriptForFile(fullScriptName);
+ QByteArray scriptData = scriptForFile(fullScriptDataName);
  if (!listener->loadScript(script, scriptData)) {
 	boError() << k_funcinfo << "unable to load listener script" << endl;
 	return false;
@@ -422,5 +420,36 @@ bool BoEventManager::knowEventName(const QCString& name) const
 	return false;
  }
  return true;
+}
+
+QStringList BoEventManager::availableScriptFiles(bool includeDataFiles) const
+{
+ QStringList files(d->mAvailableScripts.keys());
+ if (includeDataFiles) {
+	return files;
+ }
+ QStringList ret;
+ for (QStringList::iterator it = files.begin(); it != files.end(); ++it) {
+	if ((*it).contains("/data/")) {
+		ret.append(*it);
+	}
+ }
+ return ret;
+}
+
+bool BoEventManager::haveScriptForFile(const QString& file) const
+{
+ if (!d->mAvailableScripts.contains(file)) {
+	return false;
+ }
+ return true;
+}
+
+QByteArray BoEventManager::scriptForFile(const QString& file) const
+{
+ if (!haveScriptForFile(file)) {
+	return QByteArray();
+ }
+ return d->mAvailableScripts[file];
 }
 
