@@ -170,19 +170,67 @@ QByteArray BoCreateNewMap::createNewMap()
  desc.setName(mMapName);
  files.insert("C/description.xml", desc.toString().utf8());
  files.insert("scripts/eventlistener/game.py", QByteArray());
- files.insert("scripts/eventlistener/localplayer.py", QByteArray());
+ files.insert("scripts/eventlistener/localplayer.py", createNewLocalPlayerScript());
  files.insert("scripts/eventlistener/gamevieweventlistener.py", QByteArray());
  for (unsigned int i = 0; i < mPlayerCount + 1; i++) {
+	unsigned int id = 0;
 	if (i <= mPlayerCount) {
-		files.insert(QString("scripts/eventlistener/ai-player_%1.py").arg(128 + i), QByteArray());
+		id = 128 + i;
 	} else {
 		// neutral player
-		files.insert(QString("scripts/eventlistener/ai-player_%1.py").arg(256), QByteArray());
+		id = 256;
 	}
+	QByteArray script = createNewAIScript(id);
+	files.insert(QString("scripts/eventlistener/ai-player_%1.py").arg(id), script);
  }
 
  QByteArray b = BosonPlayField::streamFiles(files);
  boDebug() << k_funcinfo << "files got streamed" << endl;
  return b;
+}
+
+QByteArray BoCreateNewMap::createNewLocalPlayerScript() const
+{
+ QByteArray localPlayerPy;
+ QString script =
+	"import dayandnight\n"
+	"import wind\n"
+	"\n"
+	"player = -1\n"
+	"\n"
+	"def init(id):\n"
+	"  global player\n"
+	"  player = id\n"
+	"  dayandnight.init()\n"
+	"  wind.init()\n"
+	"\n"
+	"def setPlayerId(id):\n"
+	"  global player\n"
+	"  player = id\n"
+	"\n"
+	"def advance():\n"
+	"  dayandnight.advance()\n"
+	"  wind.advance()\n";
+ localPlayerPy.duplicate(script.latin1(), script.length());
+ return localPlayerPy;
+}
+
+QByteArray BoCreateNewMap::createNewAIScript(unsigned int playerId) const
+{
+ Q_UNUSED(playerId);
+ QByteArray aiPy;
+ QString script =
+	"import ai\n"
+	"\n"
+	"def init(id):\n"
+	"  ai.init(id)\n"
+	"\n"
+	"def setPlayerId(id):\n"
+	"  ai.setPlayerId(id)\n"
+	"\n"
+	"def advance():\n"
+	"  ai.advance()\n";
+ aiPy.duplicate(script.latin1(), script.length());
+ return aiPy;
 }
 
