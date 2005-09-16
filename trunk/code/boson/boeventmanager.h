@@ -86,6 +86,34 @@ public:
 	 **/
 	bool loadEventListenerScript(BoEventListener* listener);
 
+
+	/**
+	 * The "currently available scripts" are all scripts that belong to the
+	 * current map - AI scripts, localplayer script, canvas/game script, ...
+	 *
+	 * This includes scripts that are not in use (e.g. the AI script for
+	 * players played by humans)
+	 *
+	 * By default data files, that include the script and the saved values
+	 * of the variables in the script are not returned. Use dataFiles = TRUE
+	 * to include them, but note that they are not human readable.
+	 *
+	 * @return A list of filenames of the currently available scripts.
+	 **/
+	QStringList BoEventManager::availableScriptFiles(bool dataFiles = false) const;
+
+	/**
+	 * @return TRUE if a script for @p fileName is available, otherwise
+	 * FALSE. See also @ref availableScriptFiles.
+	 **/
+	bool haveScriptForFile(const QString& fileName) const;
+
+	/**
+	 * @return A @ref QByteArray containing the script that belongs to @p
+	 * fileName, or an empty object if @ref haveScriptForFile returns FALSE.
+	 **/
+	QByteArray scriptForFile(const QString& fileName) const;
+
 protected:
 	void deliverEvent(BoEvent* event);
 	void cacheStatusEvent(BoEvent* event);
