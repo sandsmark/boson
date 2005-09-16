@@ -36,6 +36,7 @@
 #include "../bosondata.h"
 #include "../bosonsaveload.h"
 #include "bosonstartupnetwork.h"
+#include "bocreatenewmap.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -473,11 +474,7 @@ QByteArray BoUfoStartEditorWidget::createNewMap()
  boDebug() << k_funcinfo << endl;
  unsigned int width = (unsigned int)mMapWidth->value();
  unsigned int height = (unsigned int)mMapHeight->value();
- if (!BosonMap::isValidMapGeo(width, height)) {
-	boError() << k_funcinfo << "invalid map geo" << endl;
-	KMessageBox::sorry(0, i18n("The desired map geo is not valid\nWidth=%1\nHeight=%2").arg(width).arg(height));
-	return QByteArray();
- }
+
  QStringList groundThemes = BosonData::bosonData()->availableGroundThemes();
  int themeIndex = mGroundTheme->currentItem();
  if (themeIndex < 0 || (unsigned int)themeIndex >= groundThemes.count()) {
@@ -496,22 +493,14 @@ QByteArray BoUfoStartEditorWidget::createNewMap()
 	KMessageBox::sorry(0, i18n("An error occured while loading the selected groundtheme"));
 	return QByteArray();
  }
- BosonPlayField playField;
- BosonMap* map = new BosonMap(0);
- playField.changeMap(map); // takes ownership and will delete it!
- if (!map->createNewMap(width, height, theme)) {
-	boError() << k_funcinfo << "map could not be created" << endl;
-	return QByteArray();
- }
- unsigned int groundtype = mFilling->currentItem();
- if (groundtype >= theme->groundTypeCount()) {
-	boError() << k_funcinfo << "invalid groundtype " << groundtype << endl;
-	KMessageBox::sorry(0, i18n("Could not fill the map with texture %1 - only %2 textures in groundTheme %3").arg(groundtype).arg(theme->groundTypeCount()).arg(themeId));
-	return QByteArray();
- }
- map->fill(groundtype);
 
- // we add dummy players in order to save them into the bytearray.
+ unsigned int groundType = mFilling->currentItem();
+ if (groundType >= theme->groundTypeCount()) {
+	boError() << k_funcinfo << "invalid groundtype " << groundType << endl;
+	KMessageBox::sorry(0, i18n("Could not fill the map with texture %1 - only %2 textures in groundTheme %3").arg(groundType).arg(theme->groundTypeCount()).arg(themeId));
+	return QByteArray();
+ }
+
  int maxPlayers = (int)mMaxPlayers->value();
  if (maxPlayers < 2) {
 	boError() << k_funcinfo << "maxPlayers < 2 does not make sense" << endl;
@@ -524,71 +513,15 @@ QByteArray BoUfoStartEditorWidget::createNewMap()
 	return QByteArray();
  }
 
- BosonSaveLoad* save = new BosonSaveLoad(boGame);
- save->setPlayField(&playField);
- boDebug() << k_funcinfo << "saving to playfield completed" << endl;
- QMap<QString, QByteArray> files;
- if (!save->saveToFiles(files)) {
-	delete save;
-	boError() << k_funcinfo << "error occured while saving" << endl;
-	KMessageBox::sorry(0, i18n("An error occured while saving the a game to a stream"));
-	return QByteArray();
- }
- boDebug() << k_funcinfo << "saving completed" << endl;
- playField.changeMap(0); // deletes the map!
 
- QDomDocument playersDoc(QString::fromLatin1("Players"));
- QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
- QDomElement playersRoot = playersDoc.createElement(QString::fromLatin1("Players"));
- QDomElement canvasRoot = canvasDoc.createElement(QString::fromLatin1("Canvas"));
- playersDoc.appendChild(playersRoot);
- canvasDoc.appendChild(canvasRoot);
- canvasRoot.appendChild(canvasDoc.createElement(QString::fromLatin1("DataHandler")));
- canvasRoot.appendChild(canvasDoc.createElement(QString::fromLatin1("Effects")));
- for (int i = 0; i < maxPlayers + 1; i++) {
-	QDomElement p = playersDoc.createElement(QString::fromLatin1("Player"));
-	p.appendChild(playersDoc.createElement(QString::fromLatin1("Upgrades")));
-	playersRoot.appendChild(p);
-	QDomElement speciesTheme = playersDoc.createElement(QString::fromLatin1("SpeciesTheme"));
-	p.appendChild(speciesTheme);
-	speciesTheme.appendChild(playersDoc.createElement(QString::fromLatin1("UnitTypes")));
+ BoCreateNewMap newMap;
+ newMap.setSize(width, height);
+ newMap.setGroundTheme(theme);
+ newMap.setGroundFilling(groundType);
+ newMap.setPlayerCount(maxPlayers);
+ newMap.setName(mMapName->text());
 
-	QDomElement items = canvasDoc.createElement(QString::fromLatin1("Items"));
-	canvasRoot.appendChild(items);
-
-	if (i < maxPlayers) {
-		p.setAttribute("PlayerId", 128 + i);
-		items.setAttribute("PlayerId", 128 + i);
-	} else {
-		p.setAttribute("PlayerId", 256);
-		p.setAttribute("IsNeutral", 1);
-		items.setAttribute("PlayerId", 256);
-	}
- }
- QDomElement canvasEventListener = canvasDoc.createElement(QString::fromLatin1("EventListener"));
- canvasRoot.appendChild(canvasEventListener);
- canvasEventListener.appendChild(canvasDoc.createElement(QString::fromLatin1("Conditions")));
- files.insert("players.xml", playersDoc.toCString());
- files.insert("canvas.xml", canvasDoc.toCString());
-
- BPFDescription desc;
- desc.setName(mMapName->text());
- files.insert("C/description.xml", desc.toString().utf8());
- files.insert("scripts/eventlistener/game.py", QByteArray());
- files.insert("scripts/eventlistener/localplayer.py", QByteArray());
- files.insert("scripts/eventlistener/gamevieweventlistener.py", QByteArray());
- for (int i = 0; i < maxPlayers + 1; i++) {
-	if (i <= maxPlayers) {
-		files.insert(QString("scripts/eventlistener/ai-player_%1.py").arg(128 + i), QByteArray());
-	} else {
-		// neutral player
-		files.insert(QString("scripts/eventlistener/ai-player_%1.py").arg(256), QByteArray());
-	}
- }
-
- QByteArray b = BosonPlayField::streamFiles(files);
- boDebug() << k_funcinfo << "files got streamed" << endl;
- return b;
+ return newMap.createNewMap();
 }
 
 void BoUfoStartEditorWidget::slotCancel()

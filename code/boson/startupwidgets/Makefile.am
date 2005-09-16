@@ -14,7 +14,8 @@ libbosonstartupwidgets_la_SOURCES = \
 	boufonetworkoptionswidget.cpp \
 	boufostarteditorwidgetbase.boui \
 	boufostarteditorwidget.cpp \
-	boufoloadsavegamewidget.cpp
+	boufoloadsavegamewidget.cpp \
+	bocreatenewmap.cpp
 
 METASOURCES = AUTO
 
