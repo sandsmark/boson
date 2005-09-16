@@ -80,6 +80,7 @@ BoEventListener::~BoEventListener()
 	mManager->removeEventListener(this);
  }
  d->mConditions.clear();
+ d->mEventHandlers.setAutoDelete(true);
  d->mEventHandlers.clear();
  delete d->mScript;
  delete d;
@@ -170,16 +171,15 @@ bool BoEventListener::loadScript(const QByteArray& script, const QByteArray& scr
 	return false;
  }
 
+ d->mEventHandlers.setAutoDelete(true);
+ d->mEventHandlers.clear();
+
  // AB: scriptData contains script + variable values. this is available when
  // loading saved games.
  // if scriptData is empty, we use script instead (e.g. a .bpf file)
  if (scriptData.size() != 0) {
 	d->mScript = createScriptParser();
 
-#warning FIXME: playerId
-	// the script may have saved the PlayerId into the script. we somehow
-	// must tell it the new Id.
-	// (we are loading a saved game here)
 	QDataStream stream(scriptData, IO_ReadOnly);
 	return d->mScript->load(stream);
  }
@@ -287,10 +287,26 @@ bool BoEventListener::saveEventHandlers(QDomElement& root) const
 bool BoEventListener::loadEventHandlers(const QDomElement& root)
 {
  boDebug(360) << k_funcinfo << endl;
+ d->mEventHandlers.setAutoDelete(true);
  d->mEventHandlers.clear();
  d->mNextEventHandlerId = 1;
  bool ok = false;
  QDomNodeList list = root.elementsByTagName("EventHandler");
+ if (list.count() > 0) {
+	if (!d->mEventHandlers.isEmpty()) {
+		// AB:
+		// * EventHandlers are added by the script. Either in init() or
+		//   at a later point.
+		//   When starting a new game, loadEventHandlers() should be a
+		//   noop (i.e. no "EventHandler" tag should be around)
+		// * When loading a game (.bsg file), d->mScript->init() is not
+		//   called and therefore the original eventhandlers are not
+		//   added by the script. Only those that were saved previously
+		//   should be added. This is what this method does.
+		boError() << k_funcinfo << "already loaded eventhandlers .. maybe init() was called? or maybe the xml file in a .bpf archive contains eventhandlers?" << endl;
+		return false;
+	}
+ }
  for (unsigned int i = 0; i < list.count(); i++) {
 	QDomElement e = list.item(i).toElement();
 	if (e.isNull()) {
@@ -388,6 +404,7 @@ void BoEventListener::addEventHandler(const QString& eventname, const QString& f
 
 void BoEventListener::removeEventHandler(int id)
 {
+ d->mEventHandlers.setAutoDelete(true);
  d->mEventHandlers.remove(id);
 }
 
