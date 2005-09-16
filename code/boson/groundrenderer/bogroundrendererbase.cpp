@@ -21,7 +21,6 @@
 #include "bogroundrendererbase.moc"
 
 #include "../../bomemory/bodummymemory.h"
-#include "boquadtreenode.h"
 #include "../bosonmap.h"
 #include "../bosonprofiling.h"
 #include "../defines.h"
@@ -49,6 +48,67 @@ static int g_cellsVisibleCalls = 0;
 
 // Whether to use glTexSubImage2D() to update texture. It seems to be buggy.
 #define USE_TEXSUBIMAGE
+
+BoGroundQuadTreeNode* BoGroundQuadTreeNode::createTree(unsigned int w, unsigned int h)
+{
+ if (w < 1) {
+	boError() << k_funcinfo << "invalid width: " << w << endl;
+	w = 1;
+ }
+ if (h < 1) {
+	boError() << k_funcinfo << "invalid height: " << h << endl;
+	h = 1;
+ }
+ BoGroundQuadTreeNode* root = new BoGroundQuadTreeNode(0, 0, w - 1, h - 1);
+ root->createChilds(w, h);
+ return root;
+}
+
+BoQuadTreeNode* BoGroundQuadTreeNode::createNode(int l, int t, int r, int b) const
+{
+ return new BoGroundQuadTreeNode(l, t, r, b);
+}
+
+void BoGroundQuadTreeNode::calculateRoughness(const BosonMap* map)
+{
+ int children = 0;
+ if (topLeftNode()) {
+	children++;
+	((BoGroundQuadTreeNode*)topLeftNode())->calculateRoughness(map);
+ }
+ if (topRightNode()) {
+	children++;
+	((BoGroundQuadTreeNode*)topRightNode())->calculateRoughness(map);
+ }
+ if (bottomLeftNode()) {
+	children++;
+	((BoGroundQuadTreeNode*)bottomLeftNode())->calculateRoughness(map);
+ }
+ if (bottomRightNode()) {
+	children++;
+	((BoGroundQuadTreeNode*)bottomRightNode())->calculateRoughness(map);
+ }
+
+
+ // TODO: we should calculate this for leafs only and use the value of the
+ // children for the parents.
+ // however this requires the getRoughnessInRect() method to be
+ // a) bugfree
+ // b) precise (e.g. no or only little rounding errors)
+ // therefore for now we go the slow way and calculate this for every node
+#if 0
+ if (children > 0) {
+	// ...
+	return;
+ }
+#else
+ float r;
+ float t;
+ BoGroundRendererBase::getRoughnessInRect(map, &r, &t, left(), top(), right(), bottom());
+ // AB: do NOT set directly! always use setRoughness()
+ setRoughness(r, t);
+#endif
+}
 
 /**
  * This class takes care of building a list (an array in this case) of cells
@@ -170,7 +230,7 @@ protected:
 	 * whether the cells in ((x,y),(x2,y2)) are visible and adds all visible
 	 * cells to @p cells.
 	 **/
-	void addVisibleCells(int* cells, const BoQuadTreeNode* node, int depth = 0);
+	void addVisibleCells(int* cells, const BoGroundQuadTreeNode* node, int depth = 0);
 
 	/**
 	 * @return Whether the cells in the rect of the node are visible.
@@ -179,12 +239,12 @@ protected:
 	 * cell is visible (i.e. this returns FALSE) @p partially is set to
 	 * FALSE.
 	 **/
-	bool cellsVisible(const BoQuadTreeNode* node, bool* partially);
+	bool cellsVisible(const BoGroundQuadTreeNode* node, bool* partially);
 
 	/**
 	 * Add all cells in the rect of the node to @p cells
 	 **/
-	void addCells(int* cells, const BoQuadTreeNode* node, int depth);
+	void addCells(int* cells, const BoGroundQuadTreeNode* node, int depth);
 
 	void recreateTree(const BosonMap* map);
 
@@ -195,12 +255,12 @@ private:
 	const BosonMap* mMap;
 	unsigned int mCount;
 
-	BoQuadTreeNode* mRoot;
+	BoGroundQuadTreeNode* mRoot;
 
 	float mMinDistance;
 	float mMaxDistance;
 
-	QMemArray< QPtrList<const BoQuadTreeNode>* > mLeafs;
+	QMemArray< QPtrList<const BoGroundQuadTreeNode>* > mLeafs;
 };
 
 void CellListBuilder::copyHeightMap(float* vertexArray, float* heightMap, const BosonMap* map)
@@ -237,13 +297,13 @@ void CellListBuilderTree::copyCustomHeightMap(float* vertexArray, float* heightM
 	return;
  }
  for (int i = (int)mLeafs.size() - 1; i >= 0; i--) {
-	QPtrList<const BoQuadTreeNode>* list = mLeafs[i];
+	QPtrList<const BoGroundQuadTreeNode>* list = mLeafs[i];
 	if (!list || list->isEmpty()) {
 		continue;
 	}
-	QPtrListIterator<const BoQuadTreeNode> it(*list);
+	QPtrListIterator<const BoGroundQuadTreeNode> it(*list);
 	while (it.current()) {
-		const BoQuadTreeNode* node = it.current();
+		const BoGroundQuadTreeNode* node = it.current();
 		++it;
 		const int l = node->left();
 		const int r = node->right();
@@ -318,7 +378,7 @@ int* CellListBuilderTree::generateCellList(const BosonMap* map, int* origRenderC
  mCount = 0;
 
  for (int i = 0; i < (int)mLeafs.size(); i++) {
-	QPtrList<const BoQuadTreeNode>* list = mLeafs[i];
+	QPtrList<const BoGroundQuadTreeNode>* list = mLeafs[i];
 if (list) {
 		list->clear();
 	}
@@ -340,7 +400,7 @@ if (list) {
  return renderCells;
 }
 
-void CellListBuilderTree::addCells(int* cells, const BoQuadTreeNode* node, int depth)
+void CellListBuilderTree::addCells(int* cells, const BoGroundQuadTreeNode* node, int depth)
 {
  if (!node) {
 	return;
@@ -356,7 +416,7 @@ void CellListBuilderTree::addCells(int* cells, const BoQuadTreeNode* node, int d
 		int s = mLeafs.size();
 		mLeafs.resize(depth + 1);
 		for (int i = s; i < (int)mLeafs.size(); i++) {
-			mLeafs[i] = new QPtrList<const BoQuadTreeNode>();
+			mLeafs[i] = new QPtrList<const BoGroundQuadTreeNode>();
 		}
 	}
 	mLeafs[depth]->append(node);
@@ -373,14 +433,14 @@ void CellListBuilderTree::addCells(int* cells, const BoQuadTreeNode* node, int d
 		mMaxY = b;
 	}
  } else {
-	addCells(cells, node->topLeftNode(), depth + 1);
-	addCells(cells, node->topRightNode(), depth + 1);
-	addCells(cells, node->bottomLeftNode(), depth + 1);
-	addCells(cells, node->bottomRightNode(), depth + 1);
+	addCells(cells, (BoGroundQuadTreeNode*)node->topLeftNode(), depth + 1);
+	addCells(cells, (BoGroundQuadTreeNode*)node->topRightNode(), depth + 1);
+	addCells(cells, (BoGroundQuadTreeNode*)node->bottomLeftNode(), depth + 1);
+	addCells(cells, (BoGroundQuadTreeNode*)node->bottomRightNode(), depth + 1);
  }
 }
 
-bool CellListBuilderTree::cellsVisible(const BoQuadTreeNode* node, bool* partially)
+bool CellListBuilderTree::cellsVisible(const BoGroundQuadTreeNode* node, bool* partially)
 {
  g_cellsVisibleCalls++;
  if (!node) {
@@ -438,7 +498,7 @@ bool CellListBuilderTree::cellsVisible(const BoQuadTreeNode* node, bool* partial
  return true;
 }
 
-void CellListBuilderTree::addVisibleCells(int* cells, const BoQuadTreeNode* node, int depth)
+void CellListBuilderTree::addVisibleCells(int* cells, const BoGroundQuadTreeNode* node, int depth)
 {
  if (!node) {
 	return;
@@ -449,10 +509,10 @@ void CellListBuilderTree::addVisibleCells(int* cells, const BoQuadTreeNode* node
 		// all cells visible
 		addCells(cells, node, depth);
 	} else {
-		addVisibleCells(cells, node->topLeftNode(), depth + 1);
-		addVisibleCells(cells, node->topRightNode(), depth + 1);
-		addVisibleCells(cells, node->bottomLeftNode(), depth + 1);
-		addVisibleCells(cells, node->bottomRightNode(), depth + 1);
+		addVisibleCells(cells, (BoGroundQuadTreeNode*)node->topLeftNode(), depth + 1);
+		addVisibleCells(cells, (BoGroundQuadTreeNode*)node->topRightNode(), depth + 1);
+		addVisibleCells(cells, (BoGroundQuadTreeNode*)node->bottomLeftNode(), depth + 1);
+		addVisibleCells(cells, (BoGroundQuadTreeNode*)node->bottomRightNode(), depth + 1);
 	}
  }
 }
@@ -461,16 +521,22 @@ void CellListBuilderTree::recreateTree(const BosonMap* map)
 {
  BO_CHECK_NULL_RET(map);
 
+ BosonProfiler prof("recreateTree");
+
  delete mRoot;
- mRoot = BoQuadTreeNode::createTree(map->width(), map->height());
+ mRoot = BoGroundQuadTreeNode::createTree(map->width(), map->height());
+
+ BosonProfiler prof2("calculate roughness");
+ mRoot->calculateRoughness(map);
 }
 
-
-bool BoGroundRendererCellListLOD::doLOD(const BosonMap* map, const BoQuadTreeNode* node) const
+bool BoGroundRendererCellListLOD::doLOD(const BosonMap* map, const BoGroundQuadTreeNode* node) const
 {
  if (!node) {
 	return false;
  }
+
+ // number of cells in this node.
  const int count = node->nodeSize();
  if (count == 1) {
 	return true;
@@ -481,17 +547,57 @@ bool BoGroundRendererCellListLOD::doLOD(const BosonMap* map, const BoQuadTreeNod
  // only. this is perfectly legal if the whole rect is inside the viewfrustum,
  // however if it is partially visible only, this may not be sufficient!
  float d = distanceFromPlane(plane, node, map);
+
+ // roughness indicates how many height/texture differences are in a node.
+ // this should be the primary indicator for LOD.
+ //
+ // plain roughness, independent of camera.
+ // high values mean more differences (show high detailed version ; don't do
+ // LOD)
+ float r = node->roughnessValue(1.0f);
+
+ // here we always do LOD, no matter how far from away from the camera we are
+ if (r < 2.0f && count < 50) {
+	return true;
+ }
+
+ // roughness divided by distance to camera.
+ // the lower the value, the less details should be shown.
+ // note that this is the opposite behaviour of plain roughness!
+ float e = r / d;
+
+ // this is like the previous one, but also takes the size of the node into
+ // account.
+ float e2 = r / (d / count);
+
+ if (e2 < 0.5f) {
+	return true;
+ }
+ if (e2 < 1.25f) {
+	return true;
+ }
+ if (e2 < 3.0f) {
+	return true;
+ }
+ if (e2 < 6.0f) {
+	return true;
+ }
+ if (e2 < 10.0f) {
+	return true;
+ }
+
+
+ // do LOD independent of roughness, only dependent on distance and size of node
  if (d > 240.0f && count <= 64 ||
-		d > 120.0f && count <= 16 ||
-		d > 40.0f && count <= 8 ||
+		d > 150.0f && count <= 16 ||
+		d > 60.0f && count <= 8 ||
 		d > 20.0f && count <= 2) {
-//	boDebug() << d << endl;
 	return true;
  }
  return false;
 }
 
-float BoGroundRendererCellListLOD::distanceFromPlane(const BoPlane& plane, const BoQuadTreeNode* node, const BosonMap* map) const
+float BoGroundRendererCellListLOD::distanceFromPlane(const BoPlane& plane, const BoGroundQuadTreeNode* node, const BosonMap* map) const
 {
  const int l = node->left();
  const int t = node->top();
@@ -957,6 +1063,8 @@ void BoGroundRendererBase::cellHeightChanged(int, int, int, int)
 #if FIX_EDGES
  mCellListBuilder->copyHeightMap(mVertexArray, mHeightMap2, mCurrentMap);
 #endif
+
+ // TODO: change roughness values of tree nodes
 }
 
 void BoGroundRendererBase::cellTextureChanged(int x1, int y1, int x2, int y2)
@@ -972,6 +1080,8 @@ void BoGroundRendererBase::cellTextureChanged(int x1, int y1, int x2, int y2)
 		}
 	}
  }
+
+ // TODO: change roughness values of tree nodes
 }
 
 #define TEXROUGHNESS_MULTIPLIER 0.125f
@@ -982,8 +1092,8 @@ void BoGroundRendererBase::getRoughnessInRect(const BosonMap* map, float* _rough
  BO_CHECK_NULL_RET(_roughness);
  BO_CHECK_NULL_RET(_textureRoughnessTotal);
 
- if (x2 <= x1 || y2 <= y1) {
-	boError() << k_funcinfo << "invalid parameters" << endl;
+ if (x2 < x1 || y2 < y1) {
+	boError() << k_funcinfo << "invalid parameters " << x1 << " " << x2 << " " << y1 << " " << y2 << endl;
 	return;
  }
 
@@ -1008,7 +1118,7 @@ void BoGroundRendererBase::getRoughnessInRect(const BosonMap* map, float* _rough
  }
  avgNormal.normalize();
  for (unsigned int t = 0; t < textureCount; t++) {
-	avgTexWeight[t] /= (x2 - x1) * (y2 - y1);
+	avgTexWeight[t] /= (x2 - x1 + 1) * (y2 - y1 + 1);
 	avgTexWeight[t] /= 255.0f;
  }
 
@@ -1037,9 +1147,6 @@ void BoGroundRendererBase::getRoughnessInRect(const BosonMap* map, float* _rough
  //    ") is " << chunk->roughness << endl;
  textureRoughnessTotal = 0.0f;
  for (unsigned int t = 0; t < textureCount; t++) {
-	if (textureRoughness[t] == 0.0f) {
-		continue;
-	}
 	textureRoughnessTotal += textureRoughness[t];
 	/*textureRoughness[t] = (sqrt(1.0f + textureRoughness[t]) - 1.05f) / TEXROUGHNESS_MULTIPLIER;
 	boDebug() << k_funcinfo << "Tex roughness for tex " << t << " is " <<

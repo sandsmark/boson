@@ -48,6 +48,11 @@ BoQuadTreeNode::~BoQuadTreeNode()
  delete mBottomRight;
 }
 
+BoQuadTreeNode* BoQuadTreeNode::createNode(int l, int t, int r, int b) const
+{
+ return new BoQuadTreeNode(l, t, r, b);
+}
+
 BoQuadTreeNode* BoQuadTreeNode::createTree(unsigned int w, unsigned int h)
 {
  if (w < 1) {
@@ -92,22 +97,22 @@ void BoQuadTreeNode::createChilds(unsigned int width, unsigned int height)
  int hmid = l + (r - l) / 2;
  int vmid = t + (b - t) / 2;
 
- mTopLeft = new BoQuadTreeNode(l, t, hmid, vmid);
+ mTopLeft = createNode(l, t, hmid, vmid);
  mTopLeft->createChilds(width, height);
 
  if (vmid + 1 <= b) {
 	// (t != b) => we have a bottom rect.
-	mBottomLeft = new BoQuadTreeNode(l, vmid + 1, hmid, b);
+	mBottomLeft = createNode(l, vmid + 1, hmid, b);
 	mBottomLeft->createChilds(width, height);
  }
  if (hmid + 1 <= r) {
 	// (l != r) => we have a right rect
-	mTopRight = new BoQuadTreeNode(hmid + 1, t, r, vmid);
+	mTopRight = createNode(hmid + 1, t, r, vmid);
 	mTopRight->createChilds(width, height);
  }
  if (vmid + 1 <= b && hmid + 1 <= r) {
 	// ((l != r) && (t != b)) => we have a bottom-right rect
-	mBottomRight = new BoQuadTreeNode(hmid + 1, vmid + 1, r, b);
+	mBottomRight = createNode(hmid + 1, vmid + 1, r, b);
 	mBottomRight->createChilds(width, height);
  }
 }

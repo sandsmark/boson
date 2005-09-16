@@ -38,7 +38,13 @@
 
 #include <math.h>
 
+// VBOs or plain vertex arrays
 #define USE_VBOS 0
+// quads or triangle strips
+// WARNING: atm triangle strips use the same indices, i.e. the same strips for
+//          all textures!
+//          -> slower
+#define USE_QUADS 1
 
 
 BoDefaultGroundRenderer::BoDefaultGroundRenderer()
@@ -48,12 +54,23 @@ BoDefaultGroundRenderer::BoDefaultGroundRenderer()
  mVBOVertex = 0;
  mVBONormal = 0;
  mVBOColor = 0;
+ mIndicesArray = 0;
+ mIndicesArraySize = 0;
+ mIndicesCount = 0;
+ mIndicesDirty = true;
 }
 
 BoDefaultGroundRenderer::~BoDefaultGroundRenderer()
 {
  boDebug() << k_funcinfo << endl;
  clearVBOs();
+ delete[] mIndicesArray;
+
+ boDebug() << k_funcinfo << mTextureIndices.count() << endl;
+ for (unsigned int i = 0; i < mTextureIndices.count(); i++) {
+	delete mTextureIndices[i];
+ }
+ mTextureIndices.clear();
 }
 
 void BoDefaultGroundRenderer::clearVBOs()
@@ -83,6 +100,10 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  BO_CHECK_NULL_RET(map->normalMap());
  BO_CHECK_NULL_RET(map->groundTheme());
  BO_CHECK_NULL_RET(currentGroundThemeData());
+
+ glPushAttrib(GL_ALL_ATTRIB_BITS);
+ glPushClientAttrib(GL_ALL_ATTRIB_BITS);
+
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "before method" << endl;
@@ -118,8 +139,8 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  // (the color VBO remains bound)
 
  if (!depthonly) {
-	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-	glEnable(GL_COLOR_MATERIAL);
+//	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+//	glEnable(GL_COLOR_MATERIAL);
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  }
@@ -145,86 +166,10 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 
  bool useShaders = boConfig->boolValue("UseGroundShaders");
 
-#define USE_QUADS 0
-#if USE_QUADS
- int indexCount = cellsCount * 4;
- unsigned int* indices = new unsigned int[indexCount];
- for (unsigned int i = 0; i < cellsCount; i++) {
-	int x;
-	int y;
-	int w;
-	int h;
-	BoGroundRenderer::getCell(renderCells, i, &x, &y, &w, &h);
-	indices[i * 4 + 0] = map->cornerArrayPos(x, y);
-	indices[i * 4 + 1] = map->cornerArrayPos(x, y + h);
-	indices[i * 4 + 2] = map->cornerArrayPos(x + w, y + h);
-	indices[i * 4 + 3] = map->cornerArrayPos(x + w, y);
+ if (mIndicesDirty || mUsedTexturesDirty) {
+	calculateIndices(renderCells, cellsCount, map);
  }
-#else // USE_QUADS
- QValueList<int> indexCountList;
- int indexCount = cellsCount * 4; // AB: in worst case we need one strip per quad, i.e. cellsCount * 4 vertices. usually much less.
- unsigned int* indices = new unsigned int[indexCount];
- int previousEndX = -1;
- int previousEndY = -1;
- int previousStartY = -1;
- bool start = true;
- int pos = 0;
- int totalIndexCount = 0;
- for (unsigned int i = 0; i < cellsCount; i++) {
-	int x;
-	int y;
-	int w;
-	int h;
-	BoGroundRenderer::getCell(renderCells, i, &x, &y, &w, &h);
-	if ((previousEndX != x || previousStartY != y || previousEndY != y + h) && !start) {
-		// start a new strip
-		// -> note that we do not _have_ to do this: we could also
-		//    insert a dummy triangle and continue the strip (see below)
-		start = true;
-		totalIndexCount += pos;
-		indexCountList.append(pos);
-		pos = 0;
-	}
-	if (start) {
-		indices[totalIndexCount + pos++] = map->cornerArrayPos(x, y);
-		indices[totalIndexCount + pos++] = map->cornerArrayPos(x, y + h);
-		indices[totalIndexCount + pos++] = map->cornerArrayPos(x + w, y);
-		indices[totalIndexCount + pos++] = map->cornerArrayPos(x + w, y + h);
-		start = false;
-	} else {
-		// AB: when one of these parameters differs between two quads,
-		// we can do
-		// a) start a new strip
-		// b) insert a dummy triangle that is never being rendered
-		//    (width==0) to continue the strip
-		//
-		// it seems that there is no speed difference between these
-		// alternatives.
-		if (previousEndX == x && previousEndY == y + h && previousStartY == y) {
-			// same LOD level as previous quad - continue strip
-			indices[totalIndexCount + pos++] = map->cornerArrayPos(x + w, y);
-			indices[totalIndexCount + pos++] = map->cornerArrayPos(x + w, y + h);
-		} else {
-			// insert dummy triangle
-			indices[totalIndexCount + pos++] = map->cornerArrayPos(x, y);
 
-			// now the actual quad
-			indices[totalIndexCount + pos++] = map->cornerArrayPos(x, y + h);
-			indices[totalIndexCount + pos++] = map->cornerArrayPos(x + w, y);
-			indices[totalIndexCount + pos++] = map->cornerArrayPos(x + w, y + h);
-		}
-	}
-	previousEndX = x + w;
-	previousStartY = y;
-	previousEndY = y + h;
-
- }
- totalIndexCount += pos;
- indexCountList.append(pos);
-
- indexCount = totalIndexCount;
-// boDebug() << totalIndexCount << " " << cellsCount << " " << indexCountList.count() << endl;
-#endif
 
  unsigned int usedTextures = 0;
  unsigned int renderedQuads = 0;
@@ -241,8 +186,8 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 		if (mUsedTexturesDirty) {
 			mUsedTexturesDirty = false;
 			bool useTexture = false;
-			for (int j = 0; j < indexCount && !useTexture; j++) {
-				if (colorPointer[indices[j] * 4 + 3] != 0) {
+			for (unsigned int j = 0; j < mIndicesCount && !useTexture; j++) {
+				if (colorPointer[mIndicesArray[j] * 4 + 3] != 0) {
 					useTexture = true;
 					break;
 				}
@@ -277,25 +222,36 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 
 #if USE_VBOS
 		glColorPointer(4, GL_UNSIGNED_BYTE, 0, (unsigned char*)0 + (map->cornerArrayPos(map->width(), map->height()) + 1) * 4 * i);
-#else
+#else // USE_VBOS
 		glColorPointer(4, GL_UNSIGNED_BYTE, 0, colorPointer);
-#endif
+#endif // USE_VBOS
 	}  // !depthonly
 
 #if USE_QUADS
-	glDrawElements(GL_QUADS, indexCount, GL_UNSIGNED_INT, indices);
+#if 1
+	QMemArray<unsigned int>& textureIndices = *mTextureIndices[i];
+	glDrawElements(GL_QUADS, textureIndices.count(), GL_UNSIGNED_INT, textureIndices.data());
 #else
+	glDrawElements(GL_QUADS, mIndicesCount, GL_UNSIGNED_INT, mIndicesArray);
+#endif
+#else // USE_QUADS
+#if 1
+	glDrawElements(GL_TRIANGLE_STRIP, mIndicesCount, GL_UNSIGNED_INT, mIndicesArray);
+#else
+	// AB: we could also use multiple triangle strips, instead of a single
+	// large one.
+	// however this is disabled atm.
 	int start = 0;
-	for (QValueList<int>::const_iterator it = indexCountList.begin(); it != indexCountList.end(); ++it) {
+	for (QValueList<int>::const_iterator it = mIndicesCountList.begin(); it != mIndicesCountList.end(); ++it) {
 		int indexCount = *it;
-		glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, indices + start);
+		glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, mIndicesArray + start);
 		start += indexCount;
 	}
-#endif
+#endif // 1
+#endif // USE_QUADS
 
 	renderedQuads += cellsCount;
  }
- delete[] indices;
  statistics()->setRenderedQuads(renderedQuads);
  statistics()->setUsedTextures(usedTextures);
  if (!depthonly) {
@@ -340,6 +296,9 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "at end of method" << endl;
  }
+
+ glPopClientAttrib();
+ glPopAttrib();
 }
 
 void BoDefaultGroundRenderer::renderCellColors(int* cells, int count, const BosonMap* map)
@@ -387,6 +346,10 @@ void BoDefaultGroundRenderer::updateMapCache(const BosonMap* map)
 	return;
  }
  boDebug() << k_funcinfo << map->width() << " " << map->height() << endl;
+ mTextureIndices.resize(map->groundTheme()->groundTypeCount());
+ for (unsigned int i = 0; i < map->groundTheme()->groundTypeCount(); i++) {
+	mTextureIndices[i] = new QMemArray<unsigned int>();
+ }
 #if USE_VBOS
  boglGenBuffers(1, &mVBOVertex);
  boglGenBuffers(1, &mVBONormal);
@@ -452,5 +415,160 @@ void BoDefaultGroundRenderer::updateColorVBO()
  // AB: could probably be done more efficiently
  boglBufferData(GL_ARRAY_BUFFER, vertexCount * mCurrentMap->groundTheme()->groundTypeCount() * 4 * sizeof(unsigned char), mColorArray, GL_STATIC_DRAW);
 #endif
+}
+
+void BoDefaultGroundRenderer::generateCellList(const BosonMap* map)
+{
+ BoGroundRendererBase::generateCellList(map);
+ mIndicesDirty = true;
+}
+
+
+void BoDefaultGroundRenderer::calculateIndices(int* renderCells, unsigned int cellsCount, const BosonMap* map)
+{
+ if (cellsCount < 1) {
+	boError() << k_funcinfo << endl;
+	return;
+ }
+ delete[] mIndicesArray;
+ mIndicesArray = 0;
+
+ if (mTextureIndices.count() != map->groundTheme()->groundTypeCount()) {
+	boError() << k_funcinfo << "oops" << endl;
+	return;
+ }
+
+#if USE_QUADS
+ mIndicesArraySize = cellsCount * 4;
+ mIndicesCount = mIndicesArraySize;
+ mIndicesArray = new unsigned int[mIndicesArraySize];
+
+ for (unsigned int i = 0; i < map->groundTheme()->groundTypeCount(); i++) {
+	QMemArray<unsigned int>& textureIndices = *mTextureIndices[i];
+	textureIndices.resize(cellsCount * 4);
+ }
+ for (unsigned int i = 0; i < cellsCount; i++) {
+	int x;
+	int y;
+	int w;
+	int h;
+	BoGroundRenderer::getCell(renderCells, i, &x, &y, &w, &h);
+	mIndicesArray[i * 4 + 0] = map->cornerArrayPos(x, y);
+	mIndicesArray[i * 4 + 1] = map->cornerArrayPos(x, y + h);
+	mIndicesArray[i * 4 + 2] = map->cornerArrayPos(x + w, y + h);
+	mIndicesArray[i * 4 + 3] = map->cornerArrayPos(x + w, y);
+ }
+ for (unsigned int i = 0; i < map->groundTheme()->groundTypeCount(); i++) {
+	QMemArray<unsigned int>& textureIndices = *mTextureIndices[i];
+	const unsigned char* colorPointer = mColorArray + (map->cornerArrayPos(map->width(), map->height()) + 1) * 4 * i;
+
+	unsigned int count = 0;
+	for (unsigned int j = 0; j < cellsCount; j++) {
+		int x;
+		int y;
+		int w;
+		int h;
+		BoGroundRenderer::getCell(renderCells, j, &x, &y, &w, &h);
+		int pos1 = map->cornerArrayPos(x, y);
+		int pos2 = map->cornerArrayPos(x, y + h);
+		int pos3 = map->cornerArrayPos(x + w, y + h);
+		int pos4 = map->cornerArrayPos(x + w, y);
+		if (colorPointer[pos1 * 4 + 3] != 0 ||
+				colorPointer[pos2 * 4 + 3] != 0 ||
+				colorPointer[pos3 * 4 + 3] != 0 ||
+				colorPointer[pos4 * 4 + 3] != 0) {
+			textureIndices[count + 0] = pos1;
+			textureIndices[count + 1] = pos2;
+			textureIndices[count + 2] = pos3;
+			textureIndices[count + 3] = pos4;
+			count += 4;
+		}
+	}
+
+	// shrinks the array or doesn't touch it at all
+	textureIndices.resize(count);
+
+	if (count == 0) {
+		mUsedTextures[i] = false;
+	} else {
+		mUsedTextures[i] = true;
+	}
+ }
+ mUsedTexturesDirty = false;
+#else // USE_QUADS
+ mIndicesArraySize = cellsCount * 4; // AB: in worst case we need one strip per quad, i.e. cellsCount * 4 vertices. usually much less.
+ mIndicesCount = mIndicesArraySize;
+ mIndicesArray = new unsigned int[mIndicesArraySize];
+ int previousEndX = -1;
+ int previousEndY = -1;
+ int previousStartY = -1;
+ bool start = true;
+ int pos = 0;
+ int totalIndexCount = 0;
+ for (unsigned int i = 0; i < cellsCount; i++) {
+	int x;
+	int y;
+	int w;
+	int h;
+	BoGroundRenderer::getCell(renderCells, i, &x, &y, &w, &h);
+
+#if 0
+	// start a new strip
+	//
+	// this must not happen atm - we use a single strip only. see
+	// also below.
+	if ((previousEndX != x || previousStartY != y || previousEndY != y + h) && !start) {
+		start = true;
+		totalIndexCount += pos;
+		mIndicesCountList.append(pos);
+		pos = 0;
+	}
+#endif
+
+	if (start) {
+		mIndicesArray[totalIndexCount + pos++] = map->cornerArrayPos(x, y);
+		mIndicesArray[totalIndexCount + pos++] = map->cornerArrayPos(x, y + h);
+		mIndicesArray[totalIndexCount + pos++] = map->cornerArrayPos(x + w, y);
+		mIndicesArray[totalIndexCount + pos++] = map->cornerArrayPos(x + w, y + h);
+		start = false;
+	} else {
+		// AB: when one of these parameters differs between two quads,
+		// we can do
+		// a) start a new strip
+		// b) insert a dummy triangle that is never being rendered
+		//    (width==0) to continue the strip
+		//
+		// it seems that there is no speed difference between these
+		// alternatives.
+		if (previousEndX == x && previousEndY == y + h && previousStartY == y) {
+			// same LOD level as previous quad - continue strip
+			mIndicesArray[totalIndexCount + pos++] = map->cornerArrayPos(x + w, y);
+			mIndicesArray[totalIndexCount + pos++] = map->cornerArrayPos(x + w, y + h);
+		} else {
+			// insert dummy triangle
+			mIndicesArray[totalIndexCount + pos++] = map->cornerArrayPos(x, y);
+
+			// now the actual quad
+			mIndicesArray[totalIndexCount + pos++] = map->cornerArrayPos(x, y + h);
+			mIndicesArray[totalIndexCount + pos++] = map->cornerArrayPos(x + w, y);
+			mIndicesArray[totalIndexCount + pos++] = map->cornerArrayPos(x + w, y + h);
+		}
+	}
+	previousEndX = x + w;
+	previousStartY = y;
+	previousEndY = y + h;
+
+ }
+ totalIndexCount += pos;
+#if 0
+ // this is used when we use multiple strips (see above).
+ // atm disabled.
+ mIndicesCountList.append(pos);
+#endif
+
+ mIndicesCount = totalIndexCount;
+#endif
+
+ mIndicesDirty = false;
 }
 

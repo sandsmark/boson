@@ -41,7 +41,6 @@
 
 
 #define ROUGHNESS_MULTIPLIER 100.0f
-#define TEXROUGHNESS_MULTIPLIER 0.125f
 
 
 #warning FIXME: use base class

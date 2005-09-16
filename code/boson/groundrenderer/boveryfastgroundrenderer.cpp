@@ -50,7 +50,7 @@ public:
 	{
 	}
 
-	virtual bool doLOD(const BosonMap* map, const BoQuadTreeNode* node) const
+	virtual bool doLOD(const BosonMap* map, const BoGroundQuadTreeNode* node) const
 	{
 		if (!node) {
 			return false;
