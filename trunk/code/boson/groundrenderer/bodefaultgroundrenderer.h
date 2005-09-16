@@ -21,6 +21,9 @@
 
 #include "bogroundrendererbase.h"
 
+#include <qmemarray.h>
+#include <qvaluevector.h>
+
 class PlayerIO;
 class QString;
 
@@ -40,6 +43,7 @@ public:
 
 protected:
 	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map, RenderFlags flags);
+	virtual void generateCellList(const BosonMap* map);
 
 	virtual void updateMapCache(const BosonMap* map);
 	void cellTextureChanged(int x1, int y1, int x2, int y2);
@@ -52,11 +56,22 @@ protected:
 private:
 	void renderCellColors(int* cells, int count, const BosonMap* map);
 
+	void calculateIndices(int* renderCells, unsigned int cellsCount, const BosonMap* map);
+
 private:
 	const BosonMap* mCurrentMap;
 	unsigned int mVBOVertex;
 	unsigned int mVBONormal;
 	unsigned int mVBOColor;
+
+	unsigned int* mIndicesArray;
+	unsigned int mIndicesArraySize;
+	unsigned int mIndicesCount;
+	bool mIndicesDirty;
+
+	QValueList<int> mIndicesCountList; // used by strips only atm
+
+	QValueVector< QMemArray<unsigned int>* > mTextureIndices;
 };
 
 #endif

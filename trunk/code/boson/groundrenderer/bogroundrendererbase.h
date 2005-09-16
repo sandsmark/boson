@@ -20,6 +20,7 @@
 #define BOGROUNDRENDERERBASE_H
 
 #include "../bogroundrenderer.h"
+#include "boquadtreenode.h"
 
 #include <qptrdict.h>
 
@@ -36,11 +37,62 @@ typedef BoVector3<float> BoVector3Float;
 
 class QRect;
 class CellListBuilder;
-class BoQuadTreeNode;
+class BoGroundQuadTreeNode;
 class BoGroundRendererCellListLOD;
 class BoColorMap;
 class BoColorMapRenderer;
 class BosonGroundThemeData;
+
+class BoGroundQuadTreeNode : public BoQuadTreeNode
+{
+public:
+	BoGroundQuadTreeNode(int l, int t, int r, int b)
+		:
+		BoQuadTreeNode(l, t, r, b),
+		mRoughnessMultiplier(100.0f)
+	{
+		mRoughness = 0.0f;
+		mTextureRoughnessTotal = 0.0f;
+		mRougnessPlusTextureRougnessTotalMulMultiplier = 0.0f;
+	}
+	static BoGroundQuadTreeNode* createTree(unsigned int width, unsigned int height);
+
+	virtual BoQuadTreeNode* createNode(int l, int t, int r, int b) const;
+
+	void calculateRoughness(const BosonMap* map);
+
+	/**
+	 * The "roughness" is a that indicates how many height differences and
+	 * how many texture differences in the node exist and how large they
+	 * are.
+	 *
+	 * This value should be used to choose an LOD level. A higher value
+	 * means a more detailed version should be shown, a lower version means
+	 * that less details should be shown.
+	 **/
+	float roughnessValue(float dist) const
+	{
+		return mRougnessPlusTextureRougnessTotalMulMultiplier / dist;
+	}
+
+
+protected:
+	void setRoughness(float r, float t)
+	{
+		mRoughness = r;
+		mTextureRoughnessTotal = t;
+
+		mRougnessPlusTextureRougnessTotalMulMultiplier = (mRoughness + mTextureRoughnessTotal) * mRoughnessMultiplier;
+	}
+
+private:
+	const float mRoughnessMultiplier;
+	float mRoughness;
+	float mTextureRoughnessTotal;
+
+	// cache for (mRougness + mTextureRougnessTotal) * roughnessMultiplier
+	float mRougnessPlusTextureRougnessTotalMulMultiplier;
+};
 
 
 class FogTexture
@@ -209,7 +261,7 @@ public:
 		return mViewFrustum;
 	}
 
-	float distanceFromPlane(const BoPlane& plane, const BoQuadTreeNode* node, const BosonMap* map) const;
+	float distanceFromPlane(const BoPlane& plane, const BoGroundQuadTreeNode* node, const BosonMap* map) const;
 
 	/**
 	 * @return TRUE if the @p node is supposed to be displayed as a single
@@ -217,7 +269,7 @@ public:
 	 * only, or if the distance from the player is high enough for this
 	 * level of detail.
 	 **/
-	virtual bool doLOD(const BosonMap* map, const BoQuadTreeNode* node) const;
+	virtual bool doLOD(const BosonMap* map, const BoGroundQuadTreeNode* node) const;
 
 protected:
 	const BoFrustum* mViewFrustum;

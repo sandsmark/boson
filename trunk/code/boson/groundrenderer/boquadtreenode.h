@@ -50,7 +50,7 @@ public:
 	 * most-bottom cell). This equals @p t if the height of the rect is 1.
 	 **/
 	BoQuadTreeNode(int l, int t, int r, int b);
-	~BoQuadTreeNode();
+	virtual ~BoQuadTreeNode();
 
 	/**
 	 * Create a quadtree on a map of size @p width * @p height.
@@ -130,12 +130,14 @@ public:
 		return mBottomRight;
 	}
 
-protected:
 	/**
 	 * @param width The width of the map (not of this node!)
 	 * @param height The height of the map (not of this node!)
 	 **/
 	void createChilds(unsigned int width, unsigned int height);
+
+protected:
+	virtual BoQuadTreeNode* createNode(int l, int t, int r, int b) const;
 
 private:
 	// AB: note that we cannot easily save additional information such as
