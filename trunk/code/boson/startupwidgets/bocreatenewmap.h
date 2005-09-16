@@ -47,6 +47,10 @@ public:
 	 **/
 	QByteArray createNewMap();
 
+protected:
+	QByteArray createNewLocalPlayerScript() const;
+	QByteArray createNewAIScript(unsigned int playerId) const;
+
 private:
 	unsigned int mWidth;
 	unsigned int mHeight;
