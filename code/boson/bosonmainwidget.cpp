@@ -316,6 +316,8 @@ void BosonMainWidget::initUfoGUI()
 		this, SLOT(close()));
  connect(d->mGameView, SIGNAL(signalSaveGame()),
 		this, SLOT(slotShowSaveGamePage()));
+ connect(d->mGameView, SIGNAL(signalLoadGame()),
+		this, SLOT(slotShowLoadGamePage()));
  connect(d->mGameView, SIGNAL(signalSetUpdateInterval(unsigned int)),
 		this, SLOT(slotSetUpdateInterval(unsigned int)));
  connect(d->mGameView, SIGNAL(signalSetWidgetCursor(BosonCursor*)),
@@ -824,8 +826,9 @@ void BosonMainWidget::slotLoadGame(const QString& fileName)
  if (fileName.isEmpty()) {
 	return;
  }
- if (!boGame) {
-//	reinitGame();
+ if (boGame) {
+	boDebug() << k_funcinfo << "non-NULL game - calling slotGameOver() first" << endl;
+	slotGameOver();
  }
  if (!d->mStarting) {
 	boError() << k_funcinfo << "NULL starting object!!" << endl;
@@ -1014,6 +1017,7 @@ bool BosonMainWidget::queryClose()
 
 void BosonMainWidget::slotShowLoadGamePage(KCmdLineArgs* args)
 {
+ // TODO: pause the game!
  if (!d->mStartup) {
 	boError() << k_funcinfo << "NULL startup widget" << endl;
 	return;

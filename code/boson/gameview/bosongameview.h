@@ -590,6 +590,7 @@ signals:
 	void signalToggleChatVisible();
 	void signalToggleStatusbar(bool);
 	void signalSaveGame();
+	void signalLoadGame();
 	void signalEndGame();
 	void signalQuit();
 	void signalEditorChangeLocalPlayer(Player*);
