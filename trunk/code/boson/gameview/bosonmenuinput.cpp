@@ -347,6 +347,7 @@ void BosonMenuInputData::initUfoGameActions()
  (void)BoUfoStdAction::gameQuit(this, SIGNAL(signalQuit()), actionCollection());
  (void)BoUfoStdAction::gameEnd(this, SIGNAL(signalEndGame()), actionCollection());
  (void)BoUfoStdAction::gameSave(this, SIGNAL(signalSaveGame()), actionCollection());
+ (void)BoUfoStdAction::gameLoad(this, SIGNAL(signalLoadGame()), actionCollection());
  (void)BoUfoStdAction::gamePause(boGame, SLOT(slotTogglePause()), actionCollection());
  (void)BoUfoStdAction::preferences(this, SIGNAL(signalPreferences()), actionCollection());
  (void)new BoUfoAction(i18n("Center &Home Base"),
@@ -795,6 +796,8 @@ void BosonMenuInput::initIO(KPlayer* player)
  // game signals
  connect(mData, SIGNAL(signalSaveGame()),
 		this, SIGNAL(signalSaveGame()));
+ connect(mData, SIGNAL(signalLoadGame()),
+		this, SIGNAL(signalLoadGame()));
  connect(mData, SIGNAL(signalCenterHomeBase()),
 		this, SLOT(slotCenterHomeBase()));
  connect(mData, SIGNAL(signalSyncNetwork()),

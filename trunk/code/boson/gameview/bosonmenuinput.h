@@ -72,6 +72,7 @@ signals:
 
 signals: // game actions
 	void signalSaveGame();
+	void signalLoadGame();
 	void signalCenterHomeBase();
 	void signalSyncNetwork();
 	void signalSelectSelectionGroup(int);
@@ -169,6 +170,7 @@ signals:
 	void signalEndGame();
 	void signalQuit();
 	void signalSaveGame();
+	void signalLoadGame();
 	void signalReloadGameViewPlugin();
 	void signalDebugAddLocalPlayerInput();
 	void signalDebugAddMenuInput();
