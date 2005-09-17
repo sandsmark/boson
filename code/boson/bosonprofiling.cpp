@@ -487,6 +487,7 @@ void BosonProfiling::setMaximalEntriesAllStorages(int max)
 
 void BosonProfiling::setMaximalEntries(int max)
 {
+ BO_CHECK_NULL_RET(d->mCurrentStorage);
  d->mCurrentStorage->setMaximalEntries(max);
 }
 
@@ -502,6 +503,30 @@ void BosonProfiling::setMaximalEntries(const QString& storage, int max)
  switchStorage(storage);
  setMaximalEntries(max);
  switchStorage(current);
+}
+
+void BosonProfiling::clearStorage()
+{
+ BO_CHECK_NULL_RET(d->mCurrentStorage);
+ d->mCurrentStorage->clear();
+}
+
+void BosonProfiling::clearStorage(const QString& storage)
+{
+ BO_CHECK_NULL_RET(d->mCurrentStorage);
+ QString current = d->mCurrentStorage->name();
+ switchStorage(storage);
+ clearStorage();
+ switchStorage(current);
+}
+
+void BosonProfiling::clearAllStorages()
+{
+ QDictIterator<BosonProfilingStorage> it(d->mStorages);
+ while (it.current()) {
+	clearStorage(it.current()->name());
+	++it;
+ }
 }
 
 
