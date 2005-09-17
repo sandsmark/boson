@@ -651,7 +651,7 @@ bool SpeciesData::loadUnitSounds(const UnitProperties* prop)
  BosonProfiler soundProfiling("UnitSound");
  QStringList sounds;
  QMap<int, QString> unitSounds = prop->sounds();
- QMap<int,QString>::Iterator it = unitSounds.begin();
+ QMap<int,QString>::const_iterator it = unitSounds.begin();
  for (; it != unitSounds.end(); ++it) {
 	sounds.append(*it);
  }
@@ -661,7 +661,7 @@ bool SpeciesData::loadUnitSounds(const UnitProperties* prop)
 	while (it.current()) {
 		if (it.current()->pluginType() == PluginProperties::Weapon) {
 			QMap<int, QString> weaponSounds = ((BosonWeaponProperties*)it.current())->sounds();
-			QMap<int, QString>::Iterator it = weaponSounds.begin();
+			QMap<int, QString>::const_iterator it = weaponSounds.begin();
 			for (; it != weaponSounds.end(); ++it) {
 				sounds.append(*it);
 			}
@@ -670,7 +670,6 @@ bool SpeciesData::loadUnitSounds(const UnitProperties* prop)
 	}
  }
  sound()->addUnitSounds(themePath(), sounds);
- soundProfiling.pop();
  return true;
 }
 
