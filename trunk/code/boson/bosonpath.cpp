@@ -556,6 +556,11 @@ void BosonPath::getPartialLowLevelPath(BosonPathInfo* info)
 
 BosonPath::Result BosonPath::getLowLevelPath(BosonPathInfo* info)
 {
+  if((((int)info->start.x()) == ((int)info->dest.x())) && (((int)info->start.y()) == ((int)info->dest.y())))
+  {
+    info->result = GoalReached;
+    return GoalReached;
+  }
   // Create data object
   BosonPathLowLevelData* data = new BosonPathLowLevelData;
 
@@ -566,11 +571,6 @@ BosonPath::Result BosonPath::getLowLevelPath(BosonPathInfo* info)
   data->starty = (int)info->start.y();
   data->destx = (int)info->dest.x();
   data->desty = (int)info->dest.y();
-  if((data->startx == data->destx) && (data->starty == data->desty))
-  {
-    info->result = GoalReached;
-    return GoalReached;
-  }
   //boDebug(500) << "Start: (" << data->startx << "; " << data->starty <<
   //    "); dest: (" << data->destx << "; " << data->desty << ");  range: " << info->range << endl;
 
