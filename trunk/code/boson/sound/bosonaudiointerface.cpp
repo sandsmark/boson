@@ -219,6 +219,7 @@ BosonSoundInterface* BosonAudioInterface::addSounds(const QString& species)
 
 BosonSoundInterface* BosonAudioInterface::soundInterface(const QString& species) const
 {
+ Q_UNUSED(species);
  return 0;
 }
 
@@ -335,22 +336,6 @@ bool BosonSoundInterface::sound() const
  return audioInterface()->sound();
 }
 
-QStringList BosonSoundInterface::nameToFiles(const QString& dir, const QString& name) const
-{
- QDir directory(dir);
- directory.setNameFilter(QString("%1_*.ogg;%2_*.wav").arg(name).arg(name));
- QStringList list = directory.entryList();
- // for "oder_select" we'd also get "order_select_cmdbunker_0.wav" which is
- // wrong. so:
- list = list.grep(QRegExp(QString("^%1_[0-9]{1,2}\\....").arg(name)));
- QStringList ret;
- for (unsigned int i = 0; i < list.count(); i++) {
-	QString file = directory.absPath() + QString::fromLatin1("/") + list[i];
-	ret.append(file);
- }
- return ret;
-}
-
 void BosonSoundInterface::playSound(const QString& file)
 {
  if (!sound()) {
@@ -385,19 +370,18 @@ void BosonSoundInterface::addUnitSounds(const QString& speciesPath, const QStrin
 
  QDir directory(path);
  directory.setNameFilter(QString("*.ogg;*.wav"));
- QStringList list = directory.entryList();
+ QStringList files = directory.entryList();
 
-
- QStringList::ConstIterator it;
+ QStringList::const_iterator it;
  for (it = sounds.begin(); it != sounds.end(); ++it) {
 	if ((*it).isEmpty()) {
 		continue;
 	}
 	QString name = *it;
-	QStringList list = nameToFiles(path, name);
-	QStringList::Iterator it2;
-	for (it2 = list.begin(); it2 != list.end(); ++it2) {
-		addEventSound(name, *it2);
+	QStringList list = files.grep(QRegExp(QString("^%1_[0-9]{1,2}\\....").arg(name)));
+	for (QStringList::const_iterator it2 = list.begin(); it2 != list.end(); ++it2) {
+		QString file = directory.absPath() + QString::fromLatin1("/") + *it2;
+		addEventSound(name, file);
 	}
  }
 }
