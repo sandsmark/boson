@@ -139,8 +139,8 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  // (the color VBO remains bound)
 
  if (!depthonly) {
-//	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-//	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+	glEnable(GL_COLOR_MATERIAL);
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  }
@@ -288,17 +288,14 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 	}
  }
 
- glDisable(GL_TEXTURE_GEN_S);
- glDisable(GL_TEXTURE_GEN_T);
- glDisable(GL_BLEND);
- glColor4ub(255, 255, 255, 255);
-
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "at end of method" << endl;
  }
 
  glPopClientAttrib();
  glPopAttrib();
+
+ boTextureManager->invalidateCache();
 }
 
 void BoDefaultGroundRenderer::renderCellColors(int* cells, int count, const BosonMap* map)
