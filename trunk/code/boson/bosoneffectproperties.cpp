@@ -75,8 +75,7 @@ void BosonEffectPropertiesManager::loadEffectProperties()
 {
   if(mEffectProperties.count() > 0)
   {
-    // already loaded???
-    boWarning() << k_funcinfo << mEffectProperties.count() << " effects already loaded!" << endl;
+    // already loaded
     return;
   }
 
