@@ -188,6 +188,7 @@ bool BoEventManager::loadFromXML(const QDomElement& root)
 
 bool BoEventManager::saveListenerScripts(QMap<QString, QByteArray>* scripts) const
 {
+ boDebug() << k_funcinfo << endl;
  // save in 2 steps.
  // 1. save the actual scripts
  // 2. save the current script data (i.e. the variable values).
@@ -430,7 +431,7 @@ QStringList BoEventManager::availableScriptFiles(bool includeDataFiles) const
  }
  QStringList ret;
  for (QStringList::iterator it = files.begin(); it != files.end(); ++it) {
-	if ((*it).contains("/data/")) {
+	if (!(*it).contains("/data/")) {
 		ret.append(*it);
 	}
  }
