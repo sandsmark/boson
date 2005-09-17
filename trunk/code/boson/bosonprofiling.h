@@ -194,6 +194,26 @@ public:
 	void pushStorage(const QString& name);
 	void popStorage();
 
+	/**
+	 * Clear all items from the current storage (see @ref switchStorage)
+	 * If there is an item currently
+	 * being profiled (@ref push was called more often than @ref pop), it is
+	 * not affected.
+	 **/
+	void clearStorage();
+
+	/**
+	 * @overload
+	 * Like the above version, but clears @p storage instead of the current
+	 * storage.
+	 **/
+	void clearStorage(const QString& storage);
+
+	/**
+	 * Like @ref clearStorage, but clears all storages.
+	 **/
+	void clearAllStorages();
+
 	void switchStorage(const QString& name);
 
 	/**

@@ -121,6 +121,8 @@ void BosonMainWidgetMenuInput::initUfoActions()
  // Debug
  (void)new BoUfoAction(i18n("&Profiling..."), KShortcut(), this,
 		SLOT(slotProfiling()), actionCollection(), "debug_profiling");
+ (void)new BoUfoAction(i18n("Clear profiling data"), KShortcut(), this,
+		SLOT(slotClearProfilingData()), actionCollection(), "debug_clear_profiling_data");
  (void)new BoUfoAction(i18n("&Debug KGame..."), KShortcut(), this,
 		SLOT(slotDebugKGame()), actionCollection(), "debug_kgame");
  (void)new BoUfoAction(i18n("Debug &BoDebug log..."), KShortcut(), this,
@@ -215,6 +217,11 @@ void BosonMainWidgetMenuInput::slotProfiling()
  BosonProfilingDialog* dialog = new BosonProfilingDialog(0, false);
  connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
  dialog->show();
+}
+
+void BosonMainWidgetMenuInput::slotClearProfilingData()
+{
+ boProfiling->clearAllStorages();
 }
 
 void BosonMainWidgetMenuInput::slotDebugKGame()
