@@ -559,11 +559,17 @@ void CellListBuilderTree::recreateTree(const BosonMap* map)
 
 void CellListBuilderTree::cellHeightChanged(int x1, int y1, int x2, int y2)
 {
+ if (!mMap) {
+	return;
+ }
  recalculateRoughnessInRect(x1, y1, x2, y2);
 }
 
 void CellListBuilderTree::cellTextureChanged(int x1, int y1, int x2, int y2)
 {
+ if (!mMap) {
+	return;
+ }
  recalculateRoughnessInRect(x1, y1, x2, y2);
 }
 
