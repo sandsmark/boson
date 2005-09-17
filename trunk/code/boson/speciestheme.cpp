@@ -201,6 +201,7 @@ bool SpeciesTheme::loadTechnologies()
 
 void SpeciesTheme::loadNewUnit(Unit* unit)
 {
+ PROFILE_METHOD
  if (!unit) {
 	boError() << k_funcinfo << "NULL unit" << endl;
 	return;

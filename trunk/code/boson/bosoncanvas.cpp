@@ -1250,6 +1250,7 @@ void BosonCanvas::deleteUnusedShots()
 
 bool BosonCanvas::loadFromXML(const QDomElement& root)
 {
+ PROFILE_METHOD
  if (root.isNull()) {
 	boError(260) << k_funcinfo << "NULL root node" << endl;
 	return false;
@@ -1283,6 +1284,12 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 
 bool BosonCanvas::loadItemsFromXML(const QDomElement& root)
 {
+ PROFILE_METHOD
+
+ // TODO: FIXME
+ // elementsByTagName() searches recursively, but we know that all Items tags
+ // are direct child of root!!
+ // -> this is speed relevant for large maps
  QDomNodeList list = root.elementsByTagName(QString::fromLatin1("Items"));
  QValueList<QDomElement> allItemElements;
  QValueList<BosonItem*> allItems;
@@ -1294,9 +1301,6 @@ bool BosonCanvas::loadItemsFromXML(const QDomElement& root)
 	}
 	bool ok = false;
 
-	// AB: WARNING: we store the _index_ in the playerList() in saveAsXML(),
-	// but here we expect the _actual ID_ of the player!
-	// -> it should get filled in on startup by BosonStarting or so
 	unsigned int id = items.attribute(QString::fromLatin1("PlayerId")).toUInt(&ok);
 	if (!ok) {
 		boError(260) << k_funcinfo << "PlayerId of Items Tag " << i << " is not a valid number" << endl;
@@ -1347,6 +1351,7 @@ bool BosonCanvas::loadItemsFromXML(const QDomElement& root)
 
 bool BosonCanvas::loadEventListenerFromXML(const QDomElement& root)
 {
+ PROFILE_METHOD
  QDomDocument doc = root.ownerDocument();
  QDomElement eventListener = root.namedItem("EventListener").toElement();
  if (eventListener.isNull()) {
@@ -1358,6 +1363,7 @@ bool BosonCanvas::loadEventListenerFromXML(const QDomElement& root)
 
 BosonItem* BosonCanvas::createItemFromXML(const QDomElement& item, Player* owner)
 {
+ PROFILE_METHOD
  if (item.isNull()) {
 	return 0;
  }
@@ -1453,6 +1459,7 @@ BosonItem* BosonCanvas::createItemFromXML(const QDomElement& item, Player* owner
 	boError(260) << k_funcinfo << "Invalid Id number for Item tag" << endl;
 	return 0;
  }
+
  if (id == 0) {
 	id = nextItemId();
  }
@@ -1486,13 +1493,9 @@ BosonItem* BosonCanvas::createItemFromXML(const QDomElement& item, Player* owner
 		return 0;
 	}
 
+
 	// Set additional properties
 	owner->addUnit(u, dataHandlerId);
-
-	if (u->speciesTheme()) {
-		u->speciesTheme()->loadNewUnit(u);
-	}
-
 
 	// AB: some units may depend on properties of other units - e.g. on
 	// whether a unit is constructed completely.
@@ -1531,6 +1534,7 @@ BosonItem* BosonCanvas::createItemFromXML(const QDomElement& item, Player* owner
 
 bool BosonCanvas::loadItemFromXML(const QDomElement& element, BosonItem* item)
 {
+ PROFILE_METHOD
  if (!item) {
 	return false;
  }
@@ -1713,6 +1717,7 @@ void BosonCanvas::deleteItems(QPtrList<BosonItem>& items)
 
 BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, const ItemType& type, const BoVector3Fixed& pos)
 {
+ PROFILE_METHOD
  BosonItem* item = createItem(rtti, owner, type, pos, nextItemId());
  if (!item) {
 	return 0;
@@ -1746,6 +1751,7 @@ BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, const ItemType& t
 
 BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type, const BoVector3Fixed& pos, unsigned long int id)
 {
+ PROFILE_METHOD
  BosonItem* item = 0;
  if (!onCanvas(pos)) {
 	boError() << k_funcinfo << "(" << pos[0] << "," << pos[1] << "," << pos[2] << ") is not on the canvas" << endl;
@@ -1783,6 +1789,7 @@ BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type
 
 Unit* BosonCanvas::createUnit(Player* owner, unsigned long int unitType)
 {
+ PROFILE_METHOD
  BO_CHECK_NULL_RET0(owner);
  SpeciesTheme* theme = owner->speciesTheme();
  BO_CHECK_NULL_RET0(theme); // BAAAAD - will crash
@@ -1809,6 +1816,7 @@ Unit* BosonCanvas::createUnit(Player* owner, unsigned long int unitType)
 
 BosonShot* BosonCanvas::createShot(Player* owner, unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId)
 {
+ PROFILE_METHOD
  BO_CHECK_NULL_RET0(owner);
  BosonShot* s = 0;
  switch (shotType) {
@@ -1892,6 +1900,7 @@ unsigned long int BosonCanvas::nextItemId()
 
 void BosonCanvas::initPathfinder()
 {
+ PROFILE_METHOD
  boDebug() << k_funcinfo << endl;
 
  if (d->mPathfinder) {
