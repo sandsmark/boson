@@ -176,7 +176,11 @@ bool BosonStarting::executeTasks(const QPtrList<BosonStartingTask>& tasks)
 	boDebug(270) << k_funcinfo << "starting task: " << it.current()->text() << endl;
 	emit signalLoadingStartTask(it.current()->text());
 	emit signalLoadingStartSubTask("");
-	if (!it.current()->start(duration)) {
+
+	boProfiling->push(QString("StartingTask: %1").arg(it.current()->text()));
+	bool completed = it.current()->start(duration);
+	boProfiling->pop();
+	if (!completed) {
 		boError(270) << k_funcinfo << "could not complete task " << it.current()->text() << endl;
 
 		return false;
