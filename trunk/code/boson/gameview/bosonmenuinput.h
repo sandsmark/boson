@@ -73,6 +73,8 @@ signals:
 signals: // game actions
 	void signalSaveGame();
 	void signalLoadGame();
+	void signalQuicksaveGame();
+	void signalQuickloadGame();
 	void signalCenterHomeBase();
 	void signalSyncNetwork();
 	void signalSelectSelectionGroup(int);
@@ -171,6 +173,8 @@ signals:
 	void signalQuit();
 	void signalSaveGame();
 	void signalLoadGame();
+	void signalQuicksaveGame();
+	void signalQuickloadGame();
 	void signalReloadGameViewPlugin();
 	void signalDebugAddLocalPlayerInput();
 	void signalDebugAddMenuInput();
@@ -207,6 +211,8 @@ protected slots:
 	void slotCenterHomeBase();
 	void slotSyncNetwork();
 	void slotEndGame();
+	void slotQuicksaveGame();
+	void slotQuickloadGame();
 
 	void slotEditorSavePlayFieldAs();
 	void slotEditorEditMapDescription();

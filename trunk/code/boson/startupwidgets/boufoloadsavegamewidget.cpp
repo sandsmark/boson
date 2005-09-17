@@ -146,12 +146,24 @@ void BoUfoLoadSaveGameWidget::slotCancel()
  QTimer::singleShot(0, this, SIGNAL(signalCancel()));
 }
 
-void BoUfoLoadSaveGameWidget::setDefaultDir()
+QString BoUfoLoadSaveGameWidget::defaultDir()
 {
  QString dir = KGlobal::dirs()->saveLocation("data",
 		KGlobal::instance()->instanceName() + "/savegames/",
 		true);
- d->mDir.cd(dir);
+ if (dir.isEmpty()) {
+	boError() << k_funcinfo << "cannot find default dir?!" << endl;
+	return QString::null;
+ }
+ if (dir.right(dir.length() - 1) != QString::fromLatin1("/")) {
+	dir += QString::fromLatin1("/");
+ }
+ return dir;
+}
+
+void BoUfoLoadSaveGameWidget::setDefaultDir()
+{
+ d->mDir.cd(defaultDir());
 }
 
 void BoUfoLoadSaveGameWidget::setDefaultSuffix()

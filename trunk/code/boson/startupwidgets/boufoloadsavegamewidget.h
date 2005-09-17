@@ -56,6 +56,8 @@ public:
 
 	virtual ~BoUfoLoadSaveGameWidget();
 
+	static QString defaultDir();
+
 	/**
 	 * Search in @p dir for games. All files matching suffix @ref
 	 * setSuffix will be displayed in this widget. Note that the list of
