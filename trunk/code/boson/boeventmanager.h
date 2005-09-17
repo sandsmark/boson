@@ -100,7 +100,7 @@ public:
 	 *
 	 * @return A list of filenames of the currently available scripts.
 	 **/
-	QStringList BoEventManager::availableScriptFiles(bool dataFiles = false) const;
+	QStringList availableScriptFiles(bool dataFiles = false) const;
 
 	/**
 	 * @return TRUE if a script for @p fileName is available, otherwise
