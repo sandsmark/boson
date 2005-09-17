@@ -368,6 +368,9 @@ void BosonSoundInterface::playSound(int id)
 
 void BosonSoundInterface::addUnitSounds(const QString& speciesPath, const QStringList& sounds)
 {
+ if (boConfig->boolValue("ForceDisableSound")) {
+	return;
+ }
  if (speciesPath.isEmpty()) {
 	return;
  }
@@ -379,6 +382,12 @@ void BosonSoundInterface::addUnitSounds(const QString& speciesPath, const QStrin
 	path += QString::fromLatin1("/");
  }
  path += QString::fromLatin1("sounds");
+
+ QDir directory(path);
+ directory.setNameFilter(QString("*.ogg;*.wav"));
+ QStringList list = directory.entryList();
+
+
  QStringList::ConstIterator it;
  for (it = sounds.begin(); it != sounds.end(); ++it) {
 	if ((*it).isEmpty()) {
@@ -395,6 +404,9 @@ void BosonSoundInterface::addUnitSounds(const QString& speciesPath, const QStrin
 
 void BosonSoundInterface::addEventSound(const QString& name, const QString& file)
 {
+ if (boConfig->boolValue("ForceDisableSound")) {
+	return;
+ }
  if (file.isEmpty()) {
 	boWarning(200) << k_funcinfo << "cannot add empty filename for " << name << endl;
 	return;
@@ -405,6 +417,9 @@ void BosonSoundInterface::addEventSound(const QString& name, const QString& file
 
 void BosonSoundInterface::addEventSound(int id, const QString& file)
 {
+ if (boConfig->boolValue("ForceDisableSound")) {
+	return;
+ }
  if (file.isEmpty()) {
 	boWarning(200) << k_funcinfo << "cannot add empty filename for " << id << endl;
 	return;
@@ -415,6 +430,9 @@ void BosonSoundInterface::addEventSound(int id, const QString& file)
 
 void BosonSoundInterface::addSounds(const QString& speciesPath, QMap<int, QString> sounds)
 {
+ if (boConfig->boolValue("ForceDisableSound")) {
+	return;
+ }
  QString path = speciesPath;
  if (path.right(1) != QString::fromLatin1("/")) {
 	path += QString::fromLatin1("/");
