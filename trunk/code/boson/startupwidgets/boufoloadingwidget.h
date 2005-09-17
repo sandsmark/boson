@@ -21,6 +21,8 @@
 
 #include <boufo/boufo.h>
 
+#include <qdatetime.h>
+
 class QString;
 
 class BoUfoLoadingWidget : public BoUfoWidget
@@ -39,10 +41,15 @@ class BoUfoLoadingWidget : public BoUfoWidget
 
   signals:
     void signalUpdateGL();
+
+  protected:
+    void updateGLWidget(bool force = false);
+
   private:
     BoUfoLabel* mLoadingTaskLabel;
     BoUfoLabel* mLoadingSubTaskLabel;
     BoUfoProgress* mProgress;
+    QTime mLastGLUpdate;
 };
 
 #endif // BOSONLOADINGWIDGET_H

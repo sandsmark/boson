@@ -69,6 +69,7 @@ BoUfoLoadingWidget::BoUfoLoadingWidget()
   mProgress->setStartColor(QColor(0, 0, 0));
   mProgress->setEndColor(QColor(222, 222, 222));
   addSpacing(20);
+  mLastGLUpdate.start();
 }
 
 BoUfoLoadingWidget::~BoUfoLoadingWidget()
@@ -83,7 +84,7 @@ void BoUfoLoadingWidget::setMaxDuration(unsigned int max)
 void BoUfoLoadingWidget::setDuration(unsigned int duration)
 {
   mProgress->setValue((double)duration);
-  emit signalUpdateGL();
+  updateGLWidget();
 }
 
 void BoUfoLoadingWidget::setCurrentTask(const QString& text)
@@ -93,11 +94,13 @@ void BoUfoLoadingWidget::setCurrentTask(const QString& text)
 #if 0
   mLoadingLabel->setPaletteForegroundColor( QColor( 255, 255, 255 ));
 #endif
+  updateGLWidget(true);
 }
 
 void BoUfoLoadingWidget::setCurrentSubTask(const QString& text)
 {
   mLoadingSubTaskLabel->setText(text);
+  updateGLWidget(); // AB: note: do NOT use force==true here
 }
 
 void BoUfoLoadingWidget::resetProgress()
@@ -107,6 +110,19 @@ void BoUfoLoadingWidget::resetProgress()
   setDuration(0);
   setCurrentTask("");
   setCurrentSubTask("");
+}
+
+void BoUfoLoadingWidget::updateGLWidget(bool force)
+{
+  // there is little point in updating the screen more often - all it does is
+  // slowing the loading down (every repaint takes a few ms)
+  const int maxFPS = 30;
+  if(!force && mLastGLUpdate.elapsed() < 1000/maxFPS)
+  {
+    return;
+  }
+  emit signalUpdateGL();
+  mLastGLUpdate.start();
 }
 
 /*
