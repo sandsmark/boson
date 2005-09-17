@@ -81,9 +81,9 @@ def advance():
     mine()
   if (cycle % 200) == 0:
     explore()
-#if (cycle % 20) == 0:
-	#   spawnSomeUnits()
-	#boprint("debug", "hi! advance")
+#  if (cycle % 20) == 0:
+     #spawnSomeUnits()
+  #boprint("debug", "hi! advance")
   oldAIAdvance()
 
 
@@ -133,12 +133,12 @@ def oldAIInit():
 
 def oldAIAdvance():
   global aidelay, aicycle, aiunit, aitarget
-	# AI will do something every aidelay advance calls
+  # AI will do something every aidelay advance calls
   aicycle = aicycle + 1
   if not aicycle == aidelay:
     return
   boprint("debug", "oldAIAdvance() executing")
-	#reset aicycle
+  #reset aicycle
   global player
   boprint("debug", "oldAIAdvance() called for player: %s" % player)
   aicycle = 0
@@ -228,8 +228,8 @@ def produce():
   boprint("debug", "production init")
   for u in units:
     if u not in newProd:
-		  newProd[u] = 0
-		  boprint("debug", "unit %s" % u)
+      newProd[u] = 0
+      boprint("debug", "unit %s" % u)
     if BoScript.isUnitMobile(u) == 0 and BoScript.canUnitProduce(u):
       boprint("debug", "production")
       prod=BoScript.productionTypes(u)
@@ -249,3 +249,4 @@ def produce():
         newProd[u] = 0
 
 
+# vim: et sw=2
