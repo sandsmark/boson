@@ -88,6 +88,6 @@ void BosonComputerIO::reaction()
  if (boConfig->doubleValue("AIDelay") == 0.0) {
 	return;
  }
- BosonProfiler p("BosonComputerIO::reaction()");
+// BosonProfiler p("BosonComputerIO::reaction()");
 }
 
