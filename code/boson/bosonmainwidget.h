@@ -165,7 +165,10 @@ protected slots:
 	 * loading procedure.
 	 **/
 	void slotLoadGame(const QString& fileName);
-	void slotSaveGame(const QString& fileName, const QString& description);
+	void slotSaveGame(const QString& fileName, const QString& description, bool forceOverwrite = false);
+
+	void slotQuickloadGame();
+	void slotQuicksaveGame();
 
 	void slotShowSaveGamePage();
 

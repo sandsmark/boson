@@ -591,6 +591,8 @@ signals:
 	void signalToggleStatusbar(bool);
 	void signalSaveGame();
 	void signalLoadGame();
+	void signalQuicksaveGame();
+	void signalQuickloadGame();
 	void signalEndGame();
 	void signalQuit();
 	void signalEditorChangeLocalPlayer(Player*);

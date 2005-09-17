@@ -1922,6 +1922,10 @@ void BosonGameView::slotAddMenuInput()
 			this, SIGNAL(signalSaveGame()));
 	connect(io, SIGNAL(signalLoadGame()),
 			this, SIGNAL(signalLoadGame()));
+	connect(io, SIGNAL(signalQuicksaveGame()),
+			this, SIGNAL(signalQuicksaveGame()));
+	connect(io, SIGNAL(signalQuickloadGame()),
+			this, SIGNAL(signalQuickloadGame()));
 	connect(io, SIGNAL(signalReloadGameViewPlugin()),
 			this, SLOT(slotReloadGameViewPlugin()));
 	connect(io, SIGNAL(signalDebugAddLocalPlayerInput()),

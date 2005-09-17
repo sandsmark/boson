@@ -39,6 +39,7 @@
 #include "gameview/bosongameview.h"
 #include "gameview/bosonlocalplayerinput.h"
 #include "startupwidgets/boufostartupwidget.h"
+#include "startupwidgets/boufoloadsavegamewidget.h" // for BoUfoLoadSaveGameWidget::defaultDir()
 #include "player.h"
 #include "bosonmessageids.h"
 #include "sound/bosonaudiointerface.h"
@@ -318,6 +319,10 @@ void BosonMainWidget::initUfoGUI()
 		this, SLOT(slotShowSaveGamePage()));
  connect(d->mGameView, SIGNAL(signalLoadGame()),
 		this, SLOT(slotShowLoadGamePage()));
+ connect(d->mGameView, SIGNAL(signalQuicksaveGame()),
+		this, SLOT(slotQuicksaveGame()));
+ connect(d->mGameView, SIGNAL(signalQuickloadGame()),
+		this, SLOT(slotQuickloadGame()));
  connect(d->mGameView, SIGNAL(signalSetUpdateInterval(unsigned int)),
 		this, SLOT(slotSetUpdateInterval(unsigned int)));
  connect(d->mGameView, SIGNAL(signalSetWidgetCursor(BosonCursor*)),
@@ -788,7 +793,7 @@ void BosonMainWidget::slotCancelLoadSave()
  }
 }
 
-void BosonMainWidget::slotSaveGame(const QString& fileName, const QString& description)
+void BosonMainWidget::slotSaveGame(const QString& fileName, const QString& description, bool forceOverwrite)
 {
  boDebug() << k_funcinfo << endl;
  QString file = fileName;
@@ -802,7 +807,7 @@ void BosonMainWidget::slotSaveGame(const QString& fileName, const QString& descr
  if (file.findRev('.') == -1) {
 	file += ".bsg";
  }
- if (KStandardDirs::exists(file)) {
+ if (!forceOverwrite && KStandardDirs::exists(file)) {
 	int r = KMessageBox::questionYesNo(this, i18n("File %1 already exists. Overwrite?").arg(file));
 	if (r != KMessageBox::Yes) {
 		return;
@@ -851,6 +856,36 @@ void BosonMainWidget::slotLoadGame(const QString& fileName)
 
  // actually start the game
  boGame->sendMessage(buffer, BosonMessageIds::IdNewGame);
+}
+
+void BosonMainWidget::slotQuicksaveGame()
+{
+ BO_CHECK_NULL_RET(d->mLocalPlayer);
+ BO_CHECK_NULL_RET(boGame);
+ QString dir = BoUfoLoadSaveGameWidget::defaultDir();
+ if (dir.isEmpty()) {
+	boError() << k_funcinfo << "cannot find default quicksave directory" << endl;
+	return;
+ }
+ slotSaveGame(dir + "quicksave.bsg", i18n("Quicksave"), true);
+
+ BO_CHECK_NULL_RET(d->mLocalPlayer);
+ BO_CHECK_NULL_RET(boGame);
+ boGame->slotAddChatSystemMessage(i18n("Quicksaving succeeded"), d->mLocalPlayer);
+}
+
+void BosonMainWidget::slotQuickloadGame()
+{
+ BO_CHECK_NULL_RET(d->mLocalPlayer);
+ QString dir = BoUfoLoadSaveGameWidget::defaultDir();
+ if (dir.isEmpty()) {
+	boError() << k_funcinfo << "cannot find default quicksave directory" << endl;
+	return;
+ }
+ slotLoadGame(dir + "quicksave.bsg");
+
+ // AB: note that loading works asynchonously. after returning here, we haven't
+ // started loading yet.
 }
 
 void BosonMainWidget::slotStartNewGame()

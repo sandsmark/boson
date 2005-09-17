@@ -350,6 +350,14 @@ void BosonMenuInputData::initUfoGameActions()
  (void)BoUfoStdAction::gameLoad(this, SIGNAL(signalLoadGame()), actionCollection());
  (void)BoUfoStdAction::gamePause(boGame, SLOT(slotTogglePause()), actionCollection());
  (void)BoUfoStdAction::preferences(this, SIGNAL(signalPreferences()), actionCollection());
+ (void)new BoUfoAction(i18n("Quicksave"),
+		KShortcut(Qt::Key_F5),
+		this, SIGNAL(signalQuicksaveGame()),
+		actionCollection(), "game_quicksave");
+ (void)new BoUfoAction(i18n("Quickload"),
+		KShortcut(Qt::Key_F7),
+		this, SIGNAL(signalQuickloadGame()),
+		actionCollection(), "game_quickload");
  (void)new BoUfoAction(i18n("Center &Home Base"),
 		KShortcut(Qt::Key_H),
 		this, SIGNAL(signalCenterHomeBase()),
@@ -798,6 +806,10 @@ void BosonMenuInput::initIO(KPlayer* player)
 		this, SIGNAL(signalSaveGame()));
  connect(mData, SIGNAL(signalLoadGame()),
 		this, SIGNAL(signalLoadGame()));
+ connect(mData, SIGNAL(signalQuicksaveGame()),
+		this, SLOT(slotQuicksaveGame()));
+ connect(mData, SIGNAL(signalQuickloadGame()),
+		this, SLOT(slotQuickloadGame()));
  connect(mData, SIGNAL(signalCenterHomeBase()),
 		this, SLOT(slotCenterHomeBase()));
  connect(mData, SIGNAL(signalSyncNetwork()),
@@ -1173,6 +1185,16 @@ void BosonMenuInput::slotSyncNetwork()
 void BosonMenuInput::slotEndGame()
 {
  QTimer::singleShot(0, this, SIGNAL(signalEndGame()));
+}
+
+void BosonMenuInput::slotQuicksaveGame()
+{
+ QTimer::singleShot(0, this, SIGNAL(signalQuicksaveGame()));
+}
+
+void BosonMenuInput::slotQuickloadGame()
+{
+ QTimer::singleShot(0, this, SIGNAL(signalQuickloadGame()));
 }
 
 void BosonMenuInput::slotEditorSavePlayFieldAs()
