@@ -2971,6 +2971,7 @@ void MobileUnit::flyInCircle()
 
 void MobileUnit::initCellIntersectionTable()
 {
+ PROFILE_METHOD
  // Go over all the cells in 11x11 area and store all the cells that the unit
  //  would be on if it would move from (0; 0) to a certain point in straight
  //  line

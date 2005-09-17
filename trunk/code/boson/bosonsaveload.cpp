@@ -455,6 +455,7 @@ QCString BosonSaveLoad::saveExternalAsXML()
 
 bool BosonSaveLoad::startFromFiles(const QMap<QString, QByteArray>& files)
 {
+ PROFILE_METHOD
  boDebug(270) << k_funcinfo << endl;
 
  QByteArray playersXML = files["players.xml"];
@@ -509,6 +510,7 @@ bool BosonSaveLoad::startFromFiles(const QMap<QString, QByteArray>& files)
 
 bool BosonSaveLoad::loadKGameFromXML(const QString& kgameXML)
 {
+ PROFILE_METHOD
  QDomDocument doc(QString::fromLatin1("Boson"));
  if (!loadXMLDoc(&doc, kgameXML)) {
 	addLoadError(SaveLoadError::LoadInvalidXML, i18n("Parsing error in kgame.xml"));
@@ -541,6 +543,7 @@ bool BosonSaveLoad::loadKGameFromXML(const QString& kgameXML)
 
 bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 {
+ PROFILE_METHOD
  boDebug(270) << k_funcinfo << endl;
  QDomDocument doc(QString::fromLatin1("Players"));
  if (!loadXMLDoc(&doc, playersXML)) {
@@ -599,6 +602,7 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 
 bool BosonSaveLoad::loadCanvasFromXML(const QString& xml)
 {
+ PROFILE_METHOD
  boDebug(270) << k_funcinfo << endl;
  QDomDocument doc(QString::fromLatin1("Canvas"));
  if (!loadXMLDoc(&doc, xml)) {
@@ -617,6 +621,7 @@ bool BosonSaveLoad::loadCanvasFromXML(const QString& xml)
 
 bool BosonSaveLoad::loadExternalFromXML(const QString& xml)
 {
+ PROFILE_METHOD
  boDebug() << k_funcinfo << endl;
 
  // external.xml is optional only, it's valid that it's missing
@@ -735,6 +740,7 @@ bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
 
 bool BosonSaveLoad::loadEventListenerScripts(const QMap<QString, QByteArray>& files)
 {
+ PROFILE_METHOD
  if (!boGame) {
 	return false;
  }
