@@ -657,8 +657,8 @@ void CellListBuilderTree::recalculateRoughnessInRect(int x1, int y1, int x2, int
 	if (node->bottomLeftNode()) {
 		stack.append((BoGroundQuadTreeNode*)node->bottomLeftNode());
 	}
-	if (node->topRightNode()) {
-		stack.append((BoGroundQuadTreeNode*)node->topRightNode());
+	if (node->bottomRightNode()) {
+		stack.append((BoGroundQuadTreeNode*)node->bottomRightNode());
 	}
  }
 }
@@ -1243,7 +1243,7 @@ void BoGroundRendererBase::cellTextureChanged(int x1, int y1, int x2, int y2)
  }
 
  BO_CHECK_NULL_RET(mCellListBuilder);
- mCellListBuilder->cellTextureChanged(x1, y2, x2, y2);
+ mCellListBuilder->cellTextureChanged(x1, y1, x2, y2);
  mUsedTexturesDirty = true;
 
  // re-generate the visible cells list (with new LOD settings
