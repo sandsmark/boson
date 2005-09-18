@@ -513,7 +513,7 @@ void BosonUfoGameGUI::updateUfoLabels()
  d->mFPSLabel->setText(i18n("FPS: %1\nSkipped FPS: %2").arg(fps, 0, 'f', 3).arg(skippedFPS, 0, 'f', 3));
  d->mFPSLabel->setVisible(boConfig->boolValue("debug_fps"));
 
- bool renderGroundRendererDebug = false;
+ bool renderGroundRendererDebug = boConfig->boolValue("debug_groundrenderer_debug");
  if (renderGroundRendererDebug) {
 	BoVector3Fixed cursor = BoVector3Fixed(cursorCanvasVector().x(), cursorCanvasVector().y(), boGame->canvas()->heightAtPoint(cursorCanvasVector().x(), cursorCanvasVector().y()));
 	cursor.canvasToWorld();
