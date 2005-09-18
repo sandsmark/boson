@@ -22,12 +22,13 @@
 #include "../../bomemory/bodummymemory.h"
 #include <bodebug.h>
 
-BoQuadTreeNode::BoQuadTreeNode(int l, int t, int r, int b)
+BoQuadTreeNode::BoQuadTreeNode(int l, int t, int r, int b, int depth)
 	: mLeft(l),
 	mTop(t),
 	mRight(r),
 	mBottom(b),
 	mNodeSize(0),
+	mDepth(depth),
 	mTopLeft(0),
 	mTopRight(0),
 	mBottomLeft(0),
@@ -48,9 +49,9 @@ BoQuadTreeNode::~BoQuadTreeNode()
  delete mBottomRight;
 }
 
-BoQuadTreeNode* BoQuadTreeNode::createNode(int l, int t, int r, int b) const
+BoQuadTreeNode* BoQuadTreeNode::createNode(int l, int t, int r, int b, int depth) const
 {
- return new BoQuadTreeNode(l, t, r, b);
+ return new BoQuadTreeNode(l, t, r, b, depth);
 }
 
 BoQuadTreeNode* BoQuadTreeNode::createTree(unsigned int w, unsigned int h)
@@ -63,7 +64,7 @@ BoQuadTreeNode* BoQuadTreeNode::createTree(unsigned int w, unsigned int h)
 	boError() << k_funcinfo << "invalid height: " << h << endl;
 	h = 1;
  }
- BoQuadTreeNode* root = new BoQuadTreeNode(0, 0, w - 1, h - 1);
+ BoQuadTreeNode* root = new BoQuadTreeNode(0, 0, w - 1, h - 1, 0);
  root->createChilds(w, h);
  return root;
 }
@@ -97,22 +98,22 @@ void BoQuadTreeNode::createChilds(unsigned int width, unsigned int height)
  int hmid = l + (r - l) / 2;
  int vmid = t + (b - t) / 2;
 
- mTopLeft = createNode(l, t, hmid, vmid);
+ mTopLeft = createNode(l, t, hmid, vmid, depth() + 1);
  mTopLeft->createChilds(width, height);
 
  if (vmid + 1 <= b) {
 	// (t != b) => we have a bottom rect.
-	mBottomLeft = createNode(l, vmid + 1, hmid, b);
+	mBottomLeft = createNode(l, vmid + 1, hmid, b, depth() + 1);
 	mBottomLeft->createChilds(width, height);
  }
  if (hmid + 1 <= r) {
 	// (l != r) => we have a right rect
-	mTopRight = createNode(hmid + 1, t, r, vmid);
+	mTopRight = createNode(hmid + 1, t, r, vmid, depth() + 1);
 	mTopRight->createChilds(width, height);
  }
  if (vmid + 1 <= b && hmid + 1 <= r) {
 	// ((l != r) && (t != b)) => we have a bottom-right rect
-	mBottomRight = createNode(hmid + 1, vmid + 1, r, b);
+	mBottomRight = createNode(hmid + 1, vmid + 1, r, b, depth() + 1);
 	mBottomRight->createChilds(width, height);
  }
 }

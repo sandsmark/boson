@@ -48,9 +48,18 @@ public:
 	 * most-right cell). This eqals @p l, if width of the rect is 1.
 	 * @param b The bottom side of the rect (i.e. the y coordinate of the
 	 * most-bottom cell). This equals @p t if the height of the rect is 1.
+	 * @param depth The depth of this node in the tree. See @ref depth.
 	 **/
-	BoQuadTreeNode(int l, int t, int r, int b);
+	BoQuadTreeNode(int l, int t, int r, int b, int depth = 0);
 	virtual ~BoQuadTreeNode();
+
+	/**
+	 * @return The depth of the node in the tree. The root is at 0.
+	 **/
+	int depth() const
+	{
+		return mDepth;
+	}
 
 	/**
 	 * Create a quadtree on a map of size @p width * @p height.
@@ -136,7 +145,7 @@ public:
 	 **/
 	void createChilds(unsigned int width, unsigned int height);
 
-	bool intersects(int x1, int x2, int y1, int y2) const
+	bool intersects(int x1, int y1, int x2, int y2) const
 	{
 		if (x1 > right() || x2 < left()) {
 			return false;
@@ -148,7 +157,7 @@ public:
 	}
 
 protected:
-	virtual BoQuadTreeNode* createNode(int l, int t, int r, int b) const;
+	virtual BoQuadTreeNode* createNode(int l, int t, int r, int b, int depth) const;
 
 private:
 	// AB: note that we cannot easily save additional information such as
@@ -160,6 +169,7 @@ private:
 	int mRight;
 	int mBottom;
 	int mNodeSize;
+	int mDepth;
 	BoQuadTreeNode* mTopLeft;
 	BoQuadTreeNode* mTopRight;
 	BoQuadTreeNode* mBottomLeft;

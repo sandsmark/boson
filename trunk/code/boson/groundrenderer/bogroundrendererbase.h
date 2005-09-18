@@ -46,9 +46,9 @@ class BosonGroundThemeData;
 class BoGroundQuadTreeNode : public BoQuadTreeNode
 {
 public:
-	BoGroundQuadTreeNode(int l, int t, int r, int b)
+	BoGroundQuadTreeNode(int l, int t, int r, int b, int depth)
 		:
-		BoQuadTreeNode(l, t, r, b),
+		BoQuadTreeNode(l, t, r, b, depth),
 		mRoughnessMultiplier(100.0f)
 	{
 		mRoughness = 0.0f;
@@ -57,7 +57,7 @@ public:
 	}
 	static BoGroundQuadTreeNode* createTree(unsigned int width, unsigned int height);
 
-	virtual BoQuadTreeNode* createNode(int l, int t, int r, int b) const;
+	virtual BoQuadTreeNode* createNode(int l, int t, int r, int b, int depth) const;
 
 	void calculateRoughness(const BosonMap* map, bool recursive = true);
 
