@@ -682,6 +682,10 @@ bool BoGroundRendererCellListLOD::doLOD(const BosonMap* map, const BoGroundQuadT
  // however if it is partially visible only, this may not be sufficient!
  float d = distanceFromPlane(plane, node, map);
 
+ if (d < 8.0f) {
+	return false;
+ }
+
  // roughness indicates how many height/texture differences are in a node.
  // this should be the primary indicator for LOD.
  //
@@ -702,7 +706,8 @@ bool BoGroundRendererCellListLOD::doLOD(const BosonMap* map, const BoGroundQuadT
 
  // this is like the previous one, but also takes the size of the node into
  // account.
- float e2 = r / (d / count);
+ // in addition the quadratic roughness is used, making it more important
+ float e2 = (r * r) / (d / count);
 
  if (e2 < 0.5f) {
 	return true;
@@ -1158,7 +1163,6 @@ QString BoGroundRendererBase::debugStringForPoint(const BoVector3Fixed& pos) con
 	s += QString("no node in tree for this position\n");
  } else {
 	float r_at_1 = node->roughnessValue(1.0f);
-	float r_at_near = node->roughnessValue(nearPlane->distance(pos.toFloat()));
 	s += QString("node dimensions: l=%1 r=%2 t=%3 b=%4\n")
 			.arg(node->left())
 			.arg(node->right())
@@ -1167,7 +1171,8 @@ QString BoGroundRendererBase::debugStringForPoint(const BoVector3Fixed& pos) con
 	s += QString("node size: %1\n").arg(node->nodeSize());
 	s += QString("depth: %1\n").arg(node->depth());
 	s += QString("roughness of node at distance=1: %1\n").arg(r_at_1);
-	s += QString("roughness of node at distance from near plane: %1\n").arg(r_at_near);
+	s += QString("roughness / distance: %1\n").arg(r_at_1 / nearPlane->distance(pos.toFloat()));
+	s += QString("roughness^2 / (distance / nodesize): %1\n").arg((r_at_1 * r_at_1) / (nearPlane->distance(pos.toFloat()) / node->nodeSize()));
  }
 
  return s;
