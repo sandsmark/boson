@@ -542,6 +542,8 @@ protected slots:
 	 **/
 	void slotGameOver();
 
+	void slotChangeTexMap(int x, int y, unsigned int textureCount, unsigned int* textures, unsigned char* alpha);
+
 private:
 	friend class BoAdvance;
 

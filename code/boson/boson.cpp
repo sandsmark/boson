@@ -321,7 +321,7 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
  d = new BosonPrivate;
  d->mPlayerInputHandler = new BosonPlayerInputHandler(this);
  connect(d->mPlayerInputHandler, SIGNAL(signalChangeTexMap(int, int, unsigned int, unsigned int*, unsigned char*)),
-		this, SIGNAL(signalChangeTexMap(int, int, unsigned int, unsigned int*, unsigned char*)));
+		this, SLOT(slotChangeTexMap(int, int, unsigned int, unsigned int*, unsigned char*)));
  connect(d->mPlayerInputHandler, SIGNAL(signalChangeHeight(int, int, float)),
 		this, SIGNAL(signalChangeHeight(int, int, float)));
 
@@ -461,10 +461,6 @@ void Boson::setPlayField(BosonPlayField* p)
 	return;
  }
  d->mPlayField = p;
- if (d->mPlayField) {
-	connect(this, SIGNAL(signalChangeTexMap(int, int, unsigned int, unsigned int*, unsigned char*)),
-			d->mPlayField->map(), SLOT(slotChangeTexMap(int, int, unsigned int, unsigned int*, unsigned char*)));
- }
 }
 
 BosonPlayField* Boson::playField() const
@@ -1739,4 +1735,13 @@ void Boson::slotGameOver()
 
  emit signalGameOver();
 }
+
+void Boson::slotChangeTexMap(int x, int y, unsigned int textureCount, unsigned int* textures, unsigned char* alpha)
+{
+ BO_CHECK_NULL_RET(d->mPlayField);
+ BO_CHECK_NULL_RET(d->mPlayField->map());
+ d->mPlayField->map()->slotChangeTexMap(x, y, textureCount, textures, alpha);
+ emit signalChangeTexMap(x, y, textureCount, textures, alpha);
+}
+
 
