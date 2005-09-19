@@ -24,9 +24,12 @@ def unitProduced(ownerid, pos, type, factorid):
   if(ownerid != ai.player):
     return
   boprint("debug","unit with id %s produced" % type)
-  if(BoScript.isUnitTypeMobile(int(ownerid),int(type)) == False):
+  placeUnit(factorid, type)
+
+def placeUnit(factory, unitType):
+  if(BoScript.isUnitTypeMobile(ai.player, int(unitType)) == False):
     boprint("debug", "Ok , building")
-    pos = BoScript.unitPosition(int(factorid))
+    pos = BoScript.unitPosition(int(factory))
     x = int(pos[0])
     y = int(pos[1])
     i = 0
@@ -45,10 +48,12 @@ def unitProduced(ownerid, pos, type, factorid):
         tmpy = y
       i = i + 1
     boprint("debug","placed tmpx %s,tmpy %s " % (tmpx,tmpy))
-    BoScript.placeProduction(int(ownerid), int(factorid), tmpx, tmpy)
+    BoScript.placeProduction(ai.player, int(factory), tmpx, tmpy)
 
 
-def unitPlaced(unitid,ownerid, pos, type):
+def unitPlaced(unitid, ownerid, pos, type):
+  if(ownerid != ai.player):
+    return
   boprint("debug","unit with id %s and type  %s placed " % (unitid,type))
 
 
@@ -71,7 +76,10 @@ def produce():
         produceFacilities(u)
       if canProduceMobiles:
         produceMobiles(u)
-
+    # AB; unitWork(u) == 9 means "WorkPlugin", which is e.g. produce
+    if BoScript.canUnitProduce(u) and BoScript.unitWork(u) == 9 and BoScript.hasUnitCompletedProduction(u):
+      boprint("debug", "start placement algorithm for unit %d" % u)
+      placeUnit(u, BoScript.completedProductionType(u))
 
 def produceFacilities(factory):
   boprint("debug", "produceFacilities()")
@@ -79,8 +87,8 @@ def produceFacilities(factory):
 
   # at first we make sure that we always have at least 1000 more than we need.
   boprint("debug", "  rule 1: power!")
-  powerGenerated = BoScript.powerGenerated(ai.player)
-  powerConsumed = BoScript.powerConsumed(ai.player)
+  powerGenerated = BoScript.powerGeneratedAfterConstructions(ai.player)
+  powerConsumed = BoScript.powerConsumedAfterConstructions(ai.player)
   if powerGenerated < powerConsumed + 1000:
     boprint("debug", "  rule 1: not fullfilled - powerGenerated=%d, powerConsumed=%d" % (powerGenerated, powerConsumed))
     # try to build a powerplant (ID=2)
