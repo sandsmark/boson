@@ -209,6 +209,11 @@ public:
 		Q_UNUSED(y2);
 	}
 
+	virtual void updateMapCache(const BosonMap* map)
+	{
+		Q_UNUSED(map);
+	}
+
 protected:
 	virtual void copyCustomHeightMap(float* vertexArray, float* heightMap, const BosonMap* map) = 0;
 
@@ -258,6 +263,8 @@ public:
 	virtual void cellHeightChanged(int x1, int y1, int x2, int y2);
 
 	const BoGroundQuadTreeNode* findVisibleNodeAt(const BoVector3Fixed& pos);
+
+	virtual void updateMapCache(const BosonMap* map);
 
 protected:
 	/**
@@ -397,6 +404,17 @@ void CellListBuilderTree::copyCustomHeightMap(float* vertexArray, float* heightM
  }
 }
 
+void CellListBuilderTree::updateMapCache(const BosonMap* map)
+{
+ if (mMap != map) {
+	mMap = 0;
+	boDebug() << k_funcinfo << "recreating map tree" << endl;
+	BosonProfiler prof("mapTreeGeneration");
+	recreateTree(map);
+ }
+ mMap = map;
+}
+
 int* CellListBuilderTree::generateCellList(const BosonMap* map, int* origRenderCells, int* renderCellsSize, unsigned int* renderCellsCount, float* minDist, float* maxDist)
 {
  mMinX = mMinY = -1;
@@ -415,13 +433,7 @@ int* CellListBuilderTree::generateCellList(const BosonMap* map, int* origRenderC
 	*renderCellsSize = map->width() * map->height();
 	renderCells = BoGroundRenderer::makeCellArray(*renderCellsSize);
  }
- if (mMap != map) {
-	mMap = 0;
-	boDebug() << k_funcinfo << "recreating map tree" << endl;
-	BosonProfiler prof("mapTreeGeneration");
-	recreateTree(map);
- }
- mMap = map;
+ updateMapCache(map);
  mCount = 0;
 
  for (int i = 0; i < (int)mLeafs.size(); i++) {
@@ -1065,6 +1077,7 @@ void BoGroundRendererBase::updateMapCache(const BosonMap* map)
 		}
 	}
  }
+ mCellListBuilder->updateMapCache(mCurrentMap);
  cellTextureChanged(0, 0, map->width(), map->height());
  boDebug() << k_funcinfo << "created arrays for " << vertexCount << " vertices" << endl;
 }
