@@ -252,6 +252,48 @@ unsigned long int BosonScript::powerConsumed(int playerId)
   return powerConsumed;
 }
 
+unsigned long int BosonScript::powerGeneratedAfterConstructions(int playerId)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return 0;
+  }
+
+  Player* p = (Player*)(game()->findPlayerByUserId(playerId));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerId << endl;
+    return 0;
+  }
+
+  unsigned long int powerGenerated = 0;
+  p->calculatePower(&powerGenerated, 0, true);
+  return powerGenerated;
+}
+
+unsigned long int BosonScript::powerConsumedAfterConstructions(int playerId)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return 0;
+  }
+
+  Player* p = (Player*)(game()->findPlayerByUserId(playerId));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerId << endl;
+    return 0;
+  }
+
+  unsigned long int powerConsumed = 0;
+  p->calculatePower(0, &powerConsumed, true);
+  return powerConsumed;
+}
+
 /*****  Resource methods  *****/
 unsigned long int BosonScript::minerals(int playerId)
 {
@@ -937,6 +979,35 @@ bool BosonScript::canUnitProduce(int id)
   }
 
   return (u->plugin(UnitPlugin::Production));
+}
+
+bool BosonScript::hasUnitCompletedProduction(int id)
+{
+  return (completedProductionType(id) > 0);
+}
+
+unsigned long int BosonScript::completedProductionType(int id)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return 0;
+  }
+
+  Unit* u = game()->findUnit(id, 0);
+  if(!u)
+  {
+    boError() << k_funcinfo << "No unit with id" << id << endl;
+    return 0;
+  }
+
+  ProductionPlugin* prod = (ProductionPlugin*)u->plugin(UnitPlugin::Production);
+  if(!prod)
+  {
+    // cannot produce
+    return 0;
+  }
+  return prod->completedProductionId();
 }
 
 bool BosonScript::canUnitMineMinerals(int id)
