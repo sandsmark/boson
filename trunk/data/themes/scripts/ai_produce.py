@@ -76,6 +76,10 @@ def produce():
         produceFacilities(u)
       if canProduceMobiles:
         produceMobiles(u)
+
+def place():
+  units = BoScript.allPlayerUnits(ai.player)
+  for u in units:
     # AB; unitWork(u) == 9 means "WorkPlugin", which is e.g. produce
     if BoScript.canUnitProduce(u) and BoScript.unitWork(u) == 9 and BoScript.hasUnitCompletedProduction(u):
       boprint("debug", "start placement algorithm for unit %d" % u)

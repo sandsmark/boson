@@ -49,6 +49,8 @@ def advance():
     boprint("debug", "produced method called, cycle: %s" % cycle)
     ai_produce.produce()
   if (cycle % 100) == 0:
+    ai_produce.place()
+  if (cycle % 100) == 0:
     boprint("debug", "mine method called, cycle: %s" % cycle)
     mine()
   if (cycle % 200) == 0:
