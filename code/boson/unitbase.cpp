@@ -126,7 +126,7 @@ void UnitBase::initStatic()
  addPropertyId(IdArmorFactor, QString::fromLatin1("ArmorFactor"));
  addPropertyId(IdShieldsFactor, QString::fromLatin1("ShieldsFactor"));
  addPropertyId(IdSightRangeFactor, QString::fromLatin1("SightRangeFactor"));
- addPropertyId(IdPowerChargeForAdvance, QString::fromLatin1("PowerChargeForADvance"));
+ addPropertyId(IdPowerChargeForAdvance, QString::fromLatin1("PowerChargeForAdvance"));
  addPropertyId(IdPowerChargeForReload, QString::fromLatin1("PowerChargeForReload"));
  initialized = true;
 }
