@@ -624,7 +624,7 @@ void Player::updatePowerChargeForCurrentAdvanceCall()
  mPowerChargeForCurrentAdvanceCall = factor;
 }
 
-void Player::calculatePower(unsigned long int* _powerGenerated, unsigned long int* _powerConsumed) const
+void Player::calculatePower(unsigned long int* _powerGenerated, unsigned long int* _powerConsumed, bool includeUnconstructedFacilities) const
 {
  // AB: this method takes O(n) !
  //     note that it would be very hard to improve this:
@@ -636,8 +636,16 @@ void Player::calculatePower(unsigned long int* _powerGenerated, unsigned long in
  unsigned int powerGenerated = 0;
  unsigned int powerConsumed = 0;
  for (QPtrListIterator<Unit> it(d->mUnits); it.current(); ++it) {
-	powerGenerated += it.current()->powerGeneratedByUnit();
 	powerConsumed += it.current()->powerConsumedByUnit();
+	if (!includeUnconstructedFacilities) {
+		if (it.current()->isFacility()) {
+			Facility* f = (Facility*)it.current();
+			if (!f->isConstructionComplete()) {
+				continue;
+			}
+		}
+	}
+	powerGenerated += it.current()->powerGeneratedByUnit();
  }
  if (_powerGenerated) {
 	*_powerGenerated = powerGenerated;
