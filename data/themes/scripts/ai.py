@@ -45,7 +45,7 @@ def advance():
   global cycle
   global player
   cycle = cycle + 1
-  if (cycle % 100) == 0 and BoScript.minerals(player)>500 and BoScript.oil(player)>500:
+  if (cycle % 100) == 0:
     boprint("debug", "produced method called, cycle: %s" % cycle)
     ai_produce.produce()
   if (cycle % 100) == 0:
