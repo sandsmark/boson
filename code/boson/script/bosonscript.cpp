@@ -210,6 +210,48 @@ bool BosonScript::isNeutral(int playerId)
   return p->isNeutralPlayer();
 }
 
+unsigned long int BosonScript::powerGenerated(int playerId)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return 0;
+  }
+
+  Player* p = (Player*)(game()->findPlayerByUserId(playerId));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerId << endl;
+    return 0;
+  }
+
+  unsigned long int powerGenerated = 0;
+  p->calculatePower(&powerGenerated, 0);
+  return powerGenerated;
+}
+
+unsigned long int BosonScript::powerConsumed(int playerId)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return 0;
+  }
+
+  Player* p = (Player*)(game()->findPlayerByUserId(playerId));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerId << endl;
+    return 0;
+  }
+
+  unsigned long int powerConsumed = 0;
+  p->calculatePower(0, &powerConsumed);
+  return powerConsumed;
+}
+
 /*****  Resource methods  *****/
 unsigned long int BosonScript::minerals(int playerId)
 {
@@ -574,6 +616,54 @@ void BosonScript::placeProduction(int player, int factoryid, float x, float y)
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(player, msg);
+}
+
+bool BosonScript::canPlaceProductionAt(int player, int factoryid, int unitType, float x, float y)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return false;
+  }
+  if(!canvas())
+  {
+    boError() << k_funcinfo << "NULL canvas" << endl;
+    return false;
+  }
+
+  Player* p = (Player*)(game()->findPlayerByUserId(player));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << player << endl;
+    return false;
+  }
+
+  Unit* u = game()->findUnit(factoryid, p);
+  if(!u)
+  {
+    boError() << k_funcinfo << "No unit with id" << factoryid << endl;
+    return false;
+  }
+  if(!u->speciesTheme())
+  {
+    BO_NULL_ERROR(u->speciesTheme());
+    return false;
+  }
+
+  ProductionPlugin* prod = (ProductionPlugin*)u->plugin(UnitPlugin::Production);
+  if(!prod)
+  {
+    boError() << k_funcinfo << "Unit " << factoryid << " doesn't have production plugin!" << endl;
+    return false;
+  }
+  const UnitProperties* prop = u->speciesTheme()->unitProperties(unitType);
+  if(!prop)
+  {
+    boError() << k_funcinfo << "no such unittype " << unitType << endl;
+    return false;
+  }
+  return canvas()->canPlaceUnitAt(prop, BoVector2Fixed(x, y), prod);
 }
 
 QValueList<int> BosonScript::unitsOnCell(int x, int y)

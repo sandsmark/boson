@@ -65,6 +65,8 @@ class PythonScript : public BosonScript
     static PyObject* py_areEnemies(PyObject* self, PyObject* args);
     static PyObject* py_allPlayers(PyObject* self, PyObject* args);
     static PyObject* py_isNeutral(PyObject* self, PyObject* args);
+    static PyObject* py_powerGenerated(PyObject* self, PyObject* args);
+    static PyObject* py_powerConsumed(PyObject* self, PyObject* args);
 
 
     // Resources
@@ -87,6 +89,7 @@ class PythonScript : public BosonScript
     static PyObject* py_produceUnit(PyObject* self, PyObject* args);
     static PyObject* py_spawnUnit(PyObject* self, PyObject* args);
     static PyObject* py_teleportUnit(PyObject* self, PyObject* args);
+    static PyObject* py_canPlaceProductionAt(PyObject* self, PyObject* args);
     static PyObject* py_placeProduction(PyObject* self, PyObject* args);
 
     static PyObject* py_unitsOnCell(PyObject* self, PyObject* args);

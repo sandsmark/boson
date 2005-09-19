@@ -48,6 +48,8 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"areEnemies", py_areEnemies, METH_VARARGS, 0 },
   { (char*)"allPlayers", py_allPlayers, METH_VARARGS, 0 },
   { (char*)"isNeutral", py_isNeutral, METH_VARARGS, 0 },
+  { (char*)"powerGenerated", py_powerGenerated, METH_VARARGS, 0 },
+  { (char*)"powerConsumed", py_powerConsumed, METH_VARARGS, 0 },
   // Resources
   { (char*)"minerals", py_minerals, METH_VARARGS, 0 },
   { (char*)"addMinerals", py_addMinerals, METH_VARARGS, 0 },
@@ -66,6 +68,7 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"produceUnit", py_produceUnit, METH_VARARGS, 0 },
   { (char*)"spawnUnit", py_spawnUnit, METH_VARARGS, 0 },
   { (char*)"teleportUnit", py_teleportUnit, METH_VARARGS, 0 },
+  { (char*)"canPlaceProductionAt", py_canPlaceProductionAt, METH_VARARGS, 0 },
   { (char*)"placeProduction", py_placeProduction, METH_VARARGS, 0 },
   { (char*)"unitsOnCell", py_unitsOnCell, METH_VARARGS, 0 },
   { (char*)"unitsInRect", py_unitsInRect, METH_VARARGS, 0 },
@@ -834,6 +837,28 @@ PyObject* PythonScript::py_isNeutral(PyObject*, PyObject* args)
   return Py_BuildValue((char*)"i", BosonScript::isNeutral(id) ? 1 : 0);
 }
 
+PyObject* PythonScript::py_powerGenerated(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", BosonScript::powerGenerated(id));
+}
+
+PyObject* PythonScript::py_powerConsumed(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", BosonScript::powerConsumed(id));
+}
+
 
 /*****  Resource functions  *****/
 PyObject* PythonScript::py_minerals(PyObject*, PyObject* args)
@@ -1087,6 +1112,20 @@ PyObject* PythonScript::py_teleportUnit(PyObject*, PyObject* args)
 
   Py_INCREF(Py_None);
   return Py_None;
+}
+
+PyObject* PythonScript::py_canPlaceProductionAt(PyObject*, PyObject* args)
+{
+  int player, factoryid, unitType;
+  float x, y;
+  if(!PyArg_ParseTuple(args, (char*)"iiiff", &player, &factoryid, &unitType, &x, &y))
+  {
+    return 0;
+  }
+
+  bool can = BosonScript::canPlaceProductionAt(player, factoryid, unitType, x, y);
+
+  return Py_BuildValue((char*)"i", can ? 1 : 0);
 }
 
 PyObject* PythonScript::py_placeProduction(PyObject*, PyObject* args)
