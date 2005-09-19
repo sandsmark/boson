@@ -67,6 +67,8 @@ class PythonScript : public BosonScript
     static PyObject* py_isNeutral(PyObject* self, PyObject* args);
     static PyObject* py_powerGenerated(PyObject* self, PyObject* args);
     static PyObject* py_powerConsumed(PyObject* self, PyObject* args);
+    static PyObject* py_powerGeneratedAfterConstructions(PyObject* self, PyObject* args);
+    static PyObject* py_powerConsumedAfterConstructions(PyObject* self, PyObject* args);
 
 
     // Resources
@@ -107,6 +109,8 @@ class PythonScript : public BosonScript
     static PyObject* py_canUnitShoot(PyObject* self, PyObject* args);
     static PyObject* py_canUnitTypeShoot(PyObject* self, PyObject* args);
     static PyObject* py_canUnitProduce(PyObject* self, PyObject* args);
+    static PyObject* py_hasUnitCompletedProduction(PyObject* self, PyObject* args);
+    static PyObject* py_completedProductionType(PyObject* self, PyObject* args);
     static PyObject* py_canUnitMineMinerals(PyObject* self, PyObject* args);
     static PyObject* py_canUnitTypeMineMinerals(PyObject* self, PyObject* args);
     static PyObject* py_canUnitMineOil(PyObject* self, PyObject* args);

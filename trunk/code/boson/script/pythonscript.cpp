@@ -50,6 +50,8 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"isNeutral", py_isNeutral, METH_VARARGS, 0 },
   { (char*)"powerGenerated", py_powerGenerated, METH_VARARGS, 0 },
   { (char*)"powerConsumed", py_powerConsumed, METH_VARARGS, 0 },
+  { (char*)"powerGeneratedAfterConstructions", py_powerGeneratedAfterConstructions, METH_VARARGS, 0 },
+  { (char*)"powerConsumedAfterConstructions", py_powerConsumedAfterConstructions, METH_VARARGS, 0 },
   // Resources
   { (char*)"minerals", py_minerals, METH_VARARGS, 0 },
   { (char*)"addMinerals", py_addMinerals, METH_VARARGS, 0 },
@@ -84,6 +86,8 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"canUnitShoot", py_canUnitShoot, METH_VARARGS, 0 },
   { (char*)"canUnitTypeShoot", py_canUnitTypeShoot, METH_VARARGS, 0 },
   { (char*)"canUnitProduce", py_canUnitProduce, METH_VARARGS, 0 },
+  { (char*)"hasUnitCompletedProduction", py_hasUnitCompletedProduction, METH_VARARGS, 0 },
+  { (char*)"completedProductionType", py_completedProductionType, METH_VARARGS, 0 },
   { (char*)"canUnitMineMinerals", py_canUnitMineMinerals, METH_VARARGS, 0 },
   { (char*)"canUnitTypeMineMinerals", py_canUnitTypeMineMinerals, METH_VARARGS, 0 },
   { (char*)"canUnitMineOil", py_canUnitMineOil, METH_VARARGS, 0 },
@@ -859,6 +863,28 @@ PyObject* PythonScript::py_powerConsumed(PyObject*, PyObject* args)
   return Py_BuildValue((char*)"i", BosonScript::powerConsumed(id));
 }
 
+PyObject* PythonScript::py_powerGeneratedAfterConstructions(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", BosonScript::powerGeneratedAfterConstructions(id));
+}
+
+PyObject* PythonScript::py_powerConsumedAfterConstructions(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", BosonScript::powerConsumedAfterConstructions(id));
+}
+
 
 /*****  Resource functions  *****/
 PyObject* PythonScript::py_minerals(PyObject*, PyObject* args)
@@ -1303,6 +1329,28 @@ PyObject* PythonScript::py_canUnitProduce(PyObject*, PyObject* args)
   }
 
   return Py_BuildValue((char*)"i", BosonScript::canUnitProduce(id) ? 1 : 0);
+}
+
+PyObject* PythonScript::py_hasUnitCompletedProduction(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", BosonScript::hasUnitCompletedProduction(id) ? 1 : 0);
+}
+
+PyObject* PythonScript::py_completedProductionType(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", BosonScript::completedProductionType(id));
 }
 
 PyObject* PythonScript::py_canUnitMineMinerals(PyObject*, PyObject* args)
