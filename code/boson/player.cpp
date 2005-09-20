@@ -1083,4 +1083,22 @@ const QValueList<const UpgradeProperties*>* Player::upgrades() const
  return d->mUpgradesCollection.upgrades();
 }
 
+void Player::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 sender)
+{
+ // TODO: maybe do this in KPlayer ?
+ if (sender == 0) {
+	boError() << k_funcinfo << "invalid sender 0 for msgid=" << msgid << endl;
+	return;
+ }
+ if (sender != KGameMessage::rawGameId(kgameId())) {
+	boError() << k_funcinfo
+			<< "client " << sender
+			<< " tried to control player on client "
+			<< KGameMessage::rawGameId(kgameId())
+			<< endl;
+	return;
+ }
+ KPlayer::networkTransmission(stream, msgid, sender);
+}
+
 
