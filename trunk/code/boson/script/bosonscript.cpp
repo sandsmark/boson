@@ -97,6 +97,24 @@ void BosonScript::sendInput(int playerId, QDataStream& stream)
     return;
   }
 
+  // AB:
+  // this prevents that the script author tries to send faked player inputs.
+  //
+  // do NOT remove this - unless you want to allow cheating...
+  //
+  // note however, that it implies that scripts that are for no specific player
+  // (global game scripts) cannot control units of any player.
+  // if we want to support that, we should add a "allowPlayerInputs" flag to the
+  // BosonScript object and check for it here. but it MUST be in C++, the script
+  // author must not be able to work around this restriction without modifying
+  // the code!
+  BO_CHECK_NULL_RET(BosonScript::currentScript());
+  if(playerId != BosonScript::currentScript()->playerId())
+  {
+    boError() << k_funcinfo << "tried to send input for player " << playerId << " but script is for player " << BosonScript::currentScript()->playerId() << endl;
+    return;
+  }
+
   Player* p = (Player*)(game()->findPlayerByUserId(playerId));
 
   if(!p)
