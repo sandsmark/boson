@@ -34,7 +34,6 @@ def init(id):
   expl = -1
 
   ai_old.oldAIInit()
-  ai_produce.init()
 
 def setPlayerId(id):
   global player

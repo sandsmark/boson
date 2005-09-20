@@ -15,10 +15,6 @@ except ImportError:
   boprint("error", "Couldn't import ai. Won't work.")
 
 
-def init():
-  boprint("debug","ai_produce.init()")
-  produce()
-
 def unitProduced(ownerid, pos, type, factorid):
   # Don't place other players' units
   if(ownerid != ai.player):
