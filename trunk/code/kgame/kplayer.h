@@ -105,7 +105,7 @@ public:
        *
        * @return list of devices
        */
-      KGameIOList *ioList();
+      KGameIOList* ioList();
 
       /**
        * sets the game the player belongs to. This
@@ -114,14 +114,14 @@ public:
        *
        * @param game the game
        */
-      void setGame(KGame *game) {mGame=game;}
+      void setGame(KGame* game) {mGame=game;}
 
       /**
        * Query to which game the player belongs to
        *
        * @return the game
        */
-      KGame *game() const {return mGame;}
+      KGame* game() const {return mGame;}
 
       /**
        * Set whether this player can make turns/input
@@ -246,12 +246,12 @@ public:
        * this player to be set up via network. Mostly internal
        * function
        */
-      KPlayer *networkPlayer() const;
+      KPlayer* networkPlayer() const;
 
       /**
        * Sets this network player replacement. Internal stuff 
        */
-      void setNetworkPlayer(KPlayer *p);
+      void setNetworkPlayer(KPlayer* p);
 
       // A name and group the player belongs to
       /**
@@ -287,7 +287,7 @@ public:
        * @param input the inut device
        * @return true if ok
        */
-      bool addGameIO(KGameIO *input);
+      bool addGameIO(KGameIO* input);
 
       /**
        * remove (and delete) a game IO device
@@ -299,7 +299,7 @@ public:
        * @param deleteit true (default) to delete the device otherwisse just remove it
        * @return true on ok
        */
-      bool removeGameIO(KGameIO *input=0,bool deleteit=true);
+      bool removeGameIO(KGameIO* input = 0, bool deleteit = true);
 
       /**
        * Finds the KGameIO devies with the given rtti code.
@@ -308,7 +308,7 @@ public:
        * @param rtti the rtti code to be searched for
        * @return the KGameIO device
        */
-      KGameIO *findRttiIO(int rtti) const;
+      KGameIO* findRttiIO(int rtti) const;
 
       /**
        * Checks whether this player has a IO device of the
@@ -332,12 +332,12 @@ public:
        * KGame::playerInput() (if player=false, ie the message *was* sent through
        * KGame::sendPlayerInput).
        */
-      virtual bool forwardInput(QDataStream &msg,bool transmit=true, Q_UINT32 sender=0);
+      virtual bool forwardInput(QDataStream& msg, bool transmit = true, Q_UINT32 sender = 0);
 
       /**
        * Forwards Message to the game object..internal use only
        */
-      virtual bool forwardMessage(QDataStream &msg,int msgid,Q_UINT32 receiver=0,Q_UINT32 sender=0);
+      virtual bool forwardMessage(QDataStream& msg, int msgid, Q_UINT32 receiver = 0, Q_UINT32 sender = 0);
 
       // Game logic
       /**
@@ -356,7 +356,7 @@ public:
        * @param exclusive true (default)/ false
        * @return should be void
        */
-      bool setTurn(bool b,bool exclusive=true);
+      bool setTurn(bool b, bool exclusive = true);
 
 
       // load/save
@@ -371,7 +371,7 @@ public:
       *
       * @return true?
       */
-      virtual bool load(QDataStream &stream);
+      virtual bool load(QDataStream& stream);
 
      /**
       * Save a player to a file OR to network. See also load
@@ -380,7 +380,7 @@ public:
       *
       * @return true?
       */
-      virtual bool save(QDataStream &stream);
+      virtual bool save(QDataStream& stream);
 
       /**
        * Receives a message
@@ -389,7 +389,7 @@ public:
        * @param stream The message itself
        * @param sender 
        **/
-      void networkTransmission(QDataStream &stream,int msgid,Q_UINT32 sender);
+      virtual void networkTransmission(QDataStream& stream, int msgid, Q_UINT32 sender);
 
       /**
        * Searches for a property of the player given its id. 
@@ -429,7 +429,7 @@ signals:
        *  means probably a user message. Connecting to this signal
        *  allowed to process it.
        */
-       void signalNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sender, KPlayer *me);
+       void signalNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sender, KPlayer* me);
 
        /**
         * This signal is emmited if a player property changes its value and
@@ -437,7 +437,7 @@ signals:
         * important signal as you should base the actions on a reaction
         * to this property changes.
         */
-       void signalPropertyChanged(KGamePropertyBase *property,KPlayer *me);
+       void signalPropertyChanged(KGamePropertyBase* property, KPlayer* me);
 
 protected slots:
       /**
@@ -447,14 +447,14 @@ protected slots:
       /**
        * Called by KGameProperty only! Internal function!
        **/
-      void emitSignal(KGamePropertyBase *me);
+      void emitSignal(KGamePropertyBase* me);
 
 
 private:
       void init();
 
 private:
-      KGame *mGame;
+      KGame* mGame;
       bool mActive;      // active player
 
       KPlayerPrivate* d;
