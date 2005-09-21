@@ -126,7 +126,13 @@ unsigned int BoGroundRenderer::renderCells(const BosonMap* map, RenderFlags flag
 
  // Render cells
  renderVisibleCellsStart(map);
- renderVisibleCells(renderCells, cellsCount, map, flags);
+ if (cellsCount > 0) {
+	renderVisibleCells(renderCells, cellsCount, map, flags);
+ } else {
+ // AB: we call renderVisibleCellsStart()/Stop() only to make sure that
+ // the GL states are in the expected states after ground rendering
+ // but no actual rendering required.
+ }
  renderVisibleCellsStop(map);
 
  if (!(flags & DepthOnly)) {
