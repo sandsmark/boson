@@ -279,8 +279,6 @@ public:
 		mCanvas = 0;
 		mPlayField = 0;
 
-		mLoadingStatus = BosonSaveLoad::NotLoaded;
-
 		mAdvance = 0;
 		mMessageDelayer = 0;
 
@@ -297,8 +295,6 @@ public:
 
 	KGamePropertyInt mGameSpeed;
 	KGamePropertyBool mGamePaused;
-
-	BosonSaveLoad::LoadingStatus mLoadingStatus;
 
 	QValueList<QByteArray> mGameLogs;
 	QValueList<QByteArray> mUnitLogs;
@@ -1223,8 +1219,6 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  // this as simple as possible
  boDebug() << k_funcinfo << endl;
 
- d->mLoadingStatus = BosonSaveLoad::LoadingInProgress;
-
  // Load magic data
  Q_UINT8 a, b1, b2, b3;
  Q_INT32 c;
@@ -1233,21 +1227,18 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  if ((a != 128) || (b1 != 'B' || b2 != 'S' || b3 != 'G')) {
 	// Error - not Boson SaveGame
 	boError() << k_funcinfo << "invalid magic cookie" << endl;
-	d->mLoadingStatus = BosonSaveLoad::InvalidFileFormat;
 	return false;
  }
  stream >> c;
  if (c != cookie()) {
 	// Error - wrong cookie
 	boError() << k_funcinfo << "Invalid cookie in header (found: " << c << "; should be: " << cookie() << ")" << endl;
-	d->mLoadingStatus = BosonSaveLoad::InvalidCookie;
 	return false;
  }
  stream >> v;
  if (v != BosonSaveLoad::latestSavegameVersion()) {
 	// Error - older version
 	boError() << k_funcinfo << "Unsupported format version (found: " << v << "; latest: " << BosonSaveLoad::latestSavegameVersion() << ")" << endl;
-	d->mLoadingStatus = BosonSaveLoad::InvalidVersion;
 	return false;
  }
 
@@ -1256,7 +1247,6 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  if (!KGame::loadgame(stream, network, reset)) {
 	// KGame loading error
 	boError() << k_funcinfo << "KGame loading error" << endl;
-	d->mLoadingStatus = BosonSaveLoad::KGameError;
 	return false;
  }
  boDebug() << k_funcinfo << "kgame loading successful" << endl;
@@ -1284,14 +1274,8 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
 	return false;
  }
 
- d->mLoadingStatus = BosonSaveLoad::LoadingCompleted;
  boDebug() << k_funcinfo << " done" << endl;
  return true;
-}
-
-int Boson::loadingStatus() const
-{
- return (int)d->mLoadingStatus;
 }
 
 bool Boson::advanceFlag() const

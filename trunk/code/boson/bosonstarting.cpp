@@ -327,7 +327,6 @@ QByteArray BosonStarting::loadGame(const QString& loadingFileName)
 {
  if (loadingFileName.isNull()) {
 	boError(260) << k_funcinfo << "Cannot load game with NULL filename" << endl;
-	//TODO: set Boson::loadingStatus()
 	return QByteArray();
  }
  BosonPlayField loadField;

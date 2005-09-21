@@ -115,33 +115,6 @@ class BosonSaveLoad : public QObject
 {
 	Q_OBJECT
 public:
-	/**
-	 * Describes current status when loading saved game
-	 * This is mostly used for error checking
-	 *
-	 * Possible values:
-	 * @li NotLoaded - Game is not yet loaded (loading method isn't called yet)
-	 * @li LoadingInProgress - Loading is in progress
-	 * @li LoadingCompleted - Loading is completed (successfully)
-	 * @li BSGFileError - Error in BSGFile. Most likely it wasn't Boson savegame
-	 * @li InvalidXML - Error in one of XML files.
-	 * @li InvalidFileFormat - File format was invalid (error)
-	 * @li InvalidCookie - Cookie in the file header was invalid (error)
-	 * @li InvalidVersion - SaveGame version was invalid. Probably the game was saved with too old version of Boson (error)
-	 * @li KGameError - Error while loading KGame stuff
-	 **/
-	enum LoadingStatus {
-		NotLoaded = 1,
-		LoadingInProgress,
-		LoadingCompleted,
-		BSGFileError,
-		InvalidXML,
-		InvalidFileFormat,
-		InvalidCookie,
-		InvalidVersion,
-		KGameError
-	};
-
 	BosonSaveLoad(Boson* parent);
 	~BosonSaveLoad();
 
