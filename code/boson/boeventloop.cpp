@@ -168,8 +168,13 @@ void BoEventLoop::receivedAdvanceMessage(int gameSpeed)
 bool BoEventLoop::processEvents(ProcessEventsFlags flags)
 {
  bool ret;
-// ret = QEventLoop::processEvents(flags & ~WaitForMore);
  ret = QEventLoop::processEvents(flags);
+ if (d->mAdvanceMessagesWaiting) {
+	ret = QEventLoop::processEvents(flags & ~WaitForMore);
+ } else {
+//	ret = QEventLoop::processEvents(flags & ~WaitForMore);
+	ret = QEventLoop::processEvents(flags);
+ }
 
  if (flags & (AllEvents | WaitForMore)) {
 	// probably this was called from enterLoop(), but if not it's still fine
@@ -187,7 +192,7 @@ bool BoEventLoop::processEvents(ProcessEventsFlags flags)
 		}
 	}
 
-	int maxCalls = 2;
+	int maxCalls = 4;
 	// we do now up to maxCalls advance calls, but in the optimal case we
 	// do only one.
 	for (int i = 0; i < maxCalls; i++) {
@@ -195,6 +200,8 @@ bool BoEventLoop::processEvents(ProcessEventsFlags flags)
 			QTime now = QTime::currentTime();
 			if (now.msecsTo(d->mNextAdvanceCall) <= 0) {
 				postAdvanceCallEvent();
+			} else {
+				i = maxCalls;
 			}
 		}
 	}
