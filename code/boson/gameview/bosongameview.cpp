@@ -2523,11 +2523,10 @@ void BosonGameView::paint()
 	boError() << k_funcinfo << "OpenGL error at start of " << k_funcinfo << endl;
  }
 
- if (boGame->delayedMessageCount() >= 10) {
-	// if >= 10 messages are delayed, we'll render at most less frames per
-	// second, so that we have more CPU time to deliver these messages
-	// TODO: also do that if at least 2 (even 1?) advance messages got
-	// delayed!
+ if (boGame->delayedAdvanceMessageCount() >= 2) {
+	// if there are delayed advance messages, we only ensure that we render
+	// a frame once in a while, but most CPU power goes to advance
+	// procedures.
 
 	long long time = gameFPSCounter()->counter()->timeSinceLastFrame(true);
 	if (time > 0 && time < 500000) {
