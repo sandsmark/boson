@@ -225,11 +225,6 @@ public:
 	virtual bool eventFilter(QObject* o, QEvent* event);
 
 	/**
-	 * @return See @ref BosonSaveLoad::LoadingStatus
-	 **/
-	int loadingStatus() const;
-
-	/**
 	 * See @ref Unit::advanceFunction2 for more info about this.
 	 * @return TRUE if @ref Unit::advanceFunction should get/is called or
 	 * FALSE if @ref Unit::advanceFunction2 is active.

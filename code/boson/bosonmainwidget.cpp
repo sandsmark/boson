@@ -1008,11 +1008,9 @@ void BosonMainWidget::slotGameStarted()
 
  // Center home base if new game was started. If game is loaded, camera was
  //  already loaded as well
- // FIXME: this is hackish but I don't know any other way of checking if game
- //  is loaded or new one here. Feel free to improve
- if (boGame->loadingStatus() != BosonSaveLoad::LoadingCompleted) {
-	d->mGameView->slotCenterHomeBase();
- }
+ // TODO: load the camera settings from XML if present. if not present, center
+ // hombase.
+ d->mGameView->slotCenterHomeBase();
 
  if (boGame->gameMode()) {
 	if (boGame->isAdmin()) {
