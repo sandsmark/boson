@@ -386,15 +386,16 @@ void BosonInfoWidget::showUnit(const UnitProperties* prop, bool gameMode)
  }
 
  QString info;
+ info = i18n("%1\n").arg(prop->name());
  if (gameMode) {
 	// TODO: if the requirements are not met yet: display missing
 	// requirements
-	info = QString("%1\nMinerals: %2\nOil: %3")
-			.arg(prop->name()).arg(prop->mineralCost()).arg(prop->oilCost());
+	info += QString("Minerals: %2\nOil: %3\n")
+			.arg(prop->mineralCost()).arg(prop->oilCost());
  }
  if (!prop->description().isEmpty()) {
 	if (!info.isEmpty()) {
-		info.append("\n\n");
+		info.append("\n");
 	}
 	info.append(prop->description());
  }
@@ -411,15 +412,16 @@ void BosonInfoWidget::showTechnology(const UpgradeProperties* prop, bool gameMod
  }
 
  QString info;
+ info = i18n("%1\n").arg(prop->upgradeName());
  if (gameMode) {
 	// TODO: if the requirements are not met yet: display missing
 	// requirements
-	info = QString("%1\nMinerals: %2\nOil: %3")
-			.arg(prop->upgradeName()).arg(prop->mineralCost()).arg(prop->oilCost());
+	info += i18n("Minerals: %2\nOil: %3\n")
+			.arg(prop->mineralCost()).arg(prop->oilCost());
  }
  if (!prop->upgradeDescription().isEmpty()) {
 	if (!info.isEmpty()) {
-		info.append("\n\n");
+		info.append("\n");
 	}
 	info.append(prop->upgradeDescription());
  }
