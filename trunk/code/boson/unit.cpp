@@ -1799,6 +1799,7 @@ class MobileUnit::MobileUnitPrivate
 public:
 	MobileUnitPrivate()
 	{
+		nextWaypointIntersections = 0;
 	}
 
 
@@ -2487,6 +2488,7 @@ void MobileUnit::advanceMoveCheck()
  int currentx = (int)(center().x() + xVelocity());
  int currenty = (int)(center().y() + yVelocity());
  d->nextCellX = -1;
+ BO_CHECK_NULL_RET(d->nextWaypointIntersections);
  for (unsigned int i = 0; i < d->nextWaypointIntersections->count(); i++) {
 	if (currentx == d->nextWaypointIntersections->at(i).x() && currenty == d->nextWaypointIntersections->at(i).y()) {
 		if (i+1 >= d->nextWaypointIntersections->count()) {
@@ -2863,6 +2865,8 @@ bool MobileUnit::loadFromXML(const QDomElement& root)
 		}
 	}
  }
+
+#warning TODO: nextWaypointIntersections
 
  return true;
 }
