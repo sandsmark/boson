@@ -105,6 +105,7 @@ protected:
 	void advanceEffects(float elapsed);
 	void setParticlesDirty(bool);
 	void addFacilityConstructedEffects(Unit* facility);
+	void initItemEffects();
 
 	BosonItemRenderer* createItemRendererFor(const BosonItemContainer* c);
 
