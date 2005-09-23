@@ -60,7 +60,8 @@ public:
 
 	/**
 	 * @return The filename of the script of this event listener. This is
-	 * only the filename, without the path. Example: "localplayer.py"
+	 * only the filename, without the path. Example: "localplayer.py". The
+	 * file is automatically in a scripts/eventlistener/ subdir.
 	 *
 	 * Note that <em>every</em> event listener <em>must</em> provide a
 	 * unique script filename, event if it does not make use of scripts. It will
@@ -68,7 +69,22 @@ public:
 	 **/
 	virtual QString scriptFileName() const = 0;
 
+	/**
+	 * @return The filename that the XML data of this eventlistener is saved
+	 * to.
+	 **/
+	virtual QString xmlFileName() const = 0;
+
+	/**
+	 * Do NOT call this manually! @ref
+	 * BoEventManager::saveAllEventListenersXML will do so!
+	 **/
 	virtual bool saveAsXML(QDomElement& root) const;
+
+	/**
+	 * Do NOT call this manually! @ref
+	 * BoEventManager::loadAllEventListenersXML will do so!
+	 **/
 	virtual bool loadFromXML(const QDomElement& root);
 
 	bool saveScriptData(QByteArray* scriptData) const;
@@ -139,6 +155,11 @@ public:
 		return QString("game.py");
 	}
 
+	virtual QString xmlFileName() const
+	{
+		return QString("canvas.xml");
+	}
+
 signals:
 	void signalGameOver();
 
@@ -174,6 +195,7 @@ public:
 	}
 
 	virtual QString scriptFileName() const;
+	virtual QString xmlFileName() const;
 
 	virtual void processEvent(const BoEvent* event);
 	virtual bool canSee(const BoEvent* event) const;

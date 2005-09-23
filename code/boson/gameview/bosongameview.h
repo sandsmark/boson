@@ -45,6 +45,7 @@ class BosonViewData;
 class KGameIO;
 class QDomElement;
 class Boson;
+class BosonLocalPlayerInput;
 
 
 
@@ -719,7 +720,7 @@ protected:
 
 
 protected slots:
-	bool slotAddLocalPlayerInput();
+	void slotPlugLocalPlayerInput();
 	void slotAddMenuInput();
 	void slotResetViewProperties();
 

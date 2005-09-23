@@ -610,7 +610,19 @@ void BosonMainWidget::slotAddLocalPlayer()
  }
  boDebug() << k_funcinfo << endl;
  Player* p = new Player;
- p->addGameIO(new BosonLocalPlayerInput()); // we can use the RTTI of this to identify the local player
+
+
+ BosonLocalPlayerInput* input = new BosonLocalPlayerInput();
+ p->addGameIO(input);
+ if (!input->initializeIO()) {
+	p->removeGameIO(input, true);
+
+	boError() << k_funcinfo << "localplayer IO could not be initialized. fatal error - quitting" << endl;
+	KMessageBox::sorry(this, i18n("internal error. could not initialize IO of local player. quitting now."));
+	exit(1);
+	return;
+ }
+
  boGame->bosonAddPlayer(p);
  if (d->mStartup) {
 	// this must be done _now_, we cannot delay it!
@@ -954,11 +966,6 @@ void BosonMainWidget::slotGameStarted()
 				return;
 			}
 			localPlayer = p;
-
-			// when starting the game, a player must not have a
-			// BosonLocalPlayerInput!
-			KGameIO* io = p->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
-			p->removeGameIO(io);
 		}
 	}
  }

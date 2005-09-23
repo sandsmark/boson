@@ -1257,10 +1257,6 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
  }
 
 
- if (!loadEventListenerFromXML(root)) {
-	boError(260) << k_funcinfo << "unable to load EventListener from XML" << endl;
-	return false;
- }
  if (!loadItemsFromXML(root)) {
 	boError(260) << k_funcinfo << "unable to load items from XML" << endl;
 	return false;
@@ -1347,18 +1343,6 @@ bool BosonCanvas::loadItemsFromXML(const QDomElement& root)
  boDebug(260) << k_funcinfo << "loaded " << itemCount << " items" << endl;
 
  return true;
-}
-
-bool BosonCanvas::loadEventListenerFromXML(const QDomElement& root)
-{
- PROFILE_METHOD
- QDomDocument doc = root.ownerDocument();
- QDomElement eventListener = root.namedItem("EventListener").toElement();
- if (eventListener.isNull()) {
-	boError(260) << k_funcinfo << "EventListener in not a valid element" << endl;
-	return false;
- }
- return d->mEventListener->loadFromXML(eventListener);
 }
 
 BosonItem* BosonCanvas::createItemFromXML(const QDomElement& item, Player* owner)
@@ -1556,10 +1540,6 @@ bool BosonCanvas::saveAsXML(QDomElement& root) const
 {
  boDebug() << k_funcinfo << endl;
 
- if (!saveEventListenerAsXML(root)) {
-	boError() << k_funcinfo << "cannot save event listener as XML" << endl;
-	return false;
- }
  if (!saveItemsAsXML(root)) {
 	boError() << k_funcinfo << "cannot save items as xml" << endl;
 	return false;
@@ -1582,14 +1562,6 @@ bool BosonCanvas::saveAsXML(QDomElement& root) const
 	return false;
  }
  return true;
-}
-
-bool BosonCanvas::saveEventListenerAsXML(QDomElement& root) const
-{
- QDomDocument doc = root.ownerDocument();
- QDomElement eventListener = doc.createElement("EventListener");
- root.appendChild(eventListener);
- return d->mEventListener->saveAsXML(eventListener);
 }
 
 bool BosonCanvas::saveItemsAsXML(QDomElement& root) const

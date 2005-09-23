@@ -176,7 +176,7 @@ signals:
 	void signalQuicksaveGame();
 	void signalQuickloadGame();
 	void signalReloadGameViewPlugin();
-	void signalDebugAddLocalPlayerInput();
+	void signalDebugAddedLocalPlayerInput();
 	void signalDebugAddMenuInput();
 	void signalEditorChangeLocalPlayer(Player*);
 	void signalEditorShowPlaceFacilities();

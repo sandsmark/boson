@@ -1344,7 +1344,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_85_To_0_11(QMap<QString, QBy
  return true;
 }
 
-bool BosonFileConverter::convertPlayField_From_0_11_To_0_12(QMap<QString, QByteArray>& files)
+bool BosonFileConverter::convertPlayField_From_0_11_To_0_11_80(QMap<QString, QByteArray>& files)
 {
  QDomDocument kgameDoc(QString::fromLatin1("Boson"));
  if (!loadXMLDoc(&kgameDoc, files["kgame.xml"])) {
@@ -1365,12 +1365,7 @@ bool BosonFileConverter::convertPlayField_From_0_11_To_0_12(QMap<QString, QByteA
  QDomElement canvasRoot = canvasDoc.documentElement();
  QDomElement playersRoot = playersDoc.documentElement();
 
-#if BOSON_VERSION_MINOR < 0x12
  kgameRoot.setAttribute("Version", BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x03, 0x00));
-#else
-#error TODO: the above version to be BOSON_SAVEGAME_FORMAT_VERSION_0_12
- kgameRoot.setAttribute("Version", BOSON_SAVEGAME_FORMAT_VERSION_0_12);
-#endif
 
  QDomNodeList playersList = playersRoot.elementsByTagName("Player");
  if (playersList.count() < 2) {
@@ -1411,6 +1406,77 @@ bool BosonFileConverter::convertPlayField_From_0_11_To_0_12(QMap<QString, QByteA
  files.insert("canvas.xml", canvasDoc.toString().utf8());
  files.insert("kgame.xml", kgameDoc.toString().utf8());
 
+ return true;
+}
+
+bool BosonFileConverter::convertPlayField_From_0_11_80_To_0_12(QMap<QString, QByteArray>& files)
+{
+ QDomDocument kgameDoc(QString::fromLatin1("Boson"));
+ if (!loadXMLDoc(&kgameDoc, files["kgame.xml"])) {
+	boError() << k_funcinfo << "could not load kgame.xml" << endl;
+	return false;
+ }
+ QDomDocument playersDoc(QString::fromLatin1("Players"));
+ if (!loadXMLDoc(&playersDoc, files["players.xml"])) {
+	boError() << k_funcinfo << "could not load players.xml" << endl;
+	return false;
+ }
+ QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
+ if (!loadXMLDoc(&canvasDoc, files["canvas.xml"])) {
+	boError() << k_funcinfo << "could not load canvas.xml" << endl;
+	return false;
+ }
+
+ QDomElement kgameRoot = kgameDoc.documentElement();
+ QDomElement playersRoot = playersDoc.documentElement();
+ QDomElement canvasRoot = canvasDoc.documentElement();
+
+#if BOSON_VERSION_MINOR < 0x12
+ kgameRoot.setAttribute("Version", BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x03, 0x01));
+#else
+#error TODO: the above version to be BOSON_SAVEGAME_FORMAT_VERSION_0_12
+ kgameRoot.setAttribute("Version", BOSON_SAVEGAME_FORMAT_VERSION_0_12);
+#endif
+
+ QDomElement canvasEventListenerInCanvas = canvasRoot.namedItem("EventListener").toElement();
+ if (canvasEventListenerInCanvas.isNull()) {
+	boError() << k_funcinfo << "NULL EventListener element in canvas.xml" << endl;
+	return false;
+ }
+ canvasRoot.removeChild(canvasEventListenerInCanvas);
+ QDomElement canvasEventListener = canvasEventListenerInCanvas.cloneNode().toElement();
+ QDomDocument canvasEventListenerDoc;
+ QDomElement canvasEventListenerRoot = canvasEventListenerDoc.createElement("EventListener");
+ canvasEventListenerDoc.appendChild(canvasEventListenerRoot);
+ canvasEventListenerRoot.appendChild(canvasEventListener);
+
+
+ // add dummy eventlistener xml files
+ QDomDocument eventListenerDoc;
+ QDomElement eventListenerRoot = eventListenerDoc.createElement("EventListener");
+ QDomElement eventListener = eventListenerDoc.createElement("EventListener");
+ eventListenerDoc.appendChild(eventListenerRoot);
+ eventListenerRoot.appendChild(eventListener);
+ QDomElement conditions = eventListenerDoc.createElement("Conditions");
+ eventListener.appendChild(conditions);
+ QDomElement handlers = eventListenerDoc.createElement("EventHandlers");
+ handlers.setAttribute("NextId", QString::number(1));
+ eventListener.appendChild(handlers);
+ QByteArray eventListenerXML = eventListenerDoc.toString().utf8();
+
+ QDomNodeList playersList = playersRoot.elementsByTagName("Player");
+ // AB: in files from Boson 0.11.80 we know that we have exactly
+ // playersList.count()-1 players (+ neutral player). they all are in sequence.
+ for (unsigned int i = 0; i < playersList.count() - 1; i++) {
+	files.insert(QString("eventlistener/ai-player_%1.xml").arg(128 + i), eventListenerXML);
+ }
+ files.insert("eventlistener/gameview.xml", eventListenerXML);
+ files.insert("eventlistener/commandframe.xml", eventListenerXML);
+ files.insert("eventlistener/localplayer.xml", eventListenerXML);
+ files.insert("eventlistener/canvas.xml", canvasEventListenerDoc.toString().utf8());
+
+ files.insert("kgame.xml", kgameDoc.toString().utf8());
+ files.insert("canvas.xml", canvasDoc.toString().utf8());
  return true;
 }
 

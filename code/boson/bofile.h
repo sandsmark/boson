@@ -266,6 +266,12 @@ public:
 	 **/
 	QMap<QString, QByteArray> scriptsData() const;
 
+	/**
+	 * @return The contents of all files in the eventlistener directory and all
+	 * subdirectories.
+	 **/
+	QMap<QString, QByteArray> eventListenerData() const;
+
 	static QString fileNameToIdentifier(const QString& fileName);
 
 private:

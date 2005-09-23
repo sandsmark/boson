@@ -338,6 +338,44 @@ QMap<QString, QByteArray> BPFFile::scriptsData() const
  return scripts;
 }
 
+QMap<QString, QByteArray> BPFFile::eventListenerData() const
+{
+ QMap<QString, QByteArray> eventListener;
+
+ if (!hasDirectory("eventlistener")) {
+	return eventListener;
+ }
+ typedef QPair<QString, const KArchiveDirectory*> MyPair;
+ QValueList<MyPair> dirs;
+ dirs.append(MyPair("eventlistener", (KArchiveDirectory*)topLevelDir()->entry("eventlistener")));
+ while (!dirs.isEmpty()) {
+	QPair<QString, const KArchiveDirectory*> pair = dirs[0];
+	dirs.pop_front();
+
+	QString dirName = pair.first;
+	const KArchiveDirectory* dir = pair.second;
+
+	QStringList entries = dir->entries();
+	QStringList::iterator it;
+	for (it = entries.begin(); it != entries.end(); ++it) {
+		const KArchiveEntry* e = dir->entry(*it);
+		if (!e) {
+			continue;
+		}
+		QString entryName = dirName + "/" + *it;
+		if (e->isFile()) {
+			const KArchiveFile* file = (const KArchiveFile*)e;
+			eventListener.insert(entryName, file->data());
+		} else if (e->isDirectory()) {
+			const KArchiveDirectory* d = (const KArchiveDirectory*)e;
+			dirs.append(MyPair(entryName, d));
+		}
+	}
+ }
+
+ return eventListener;
+}
+
 QString BPFFile::fileNameToIdentifier(const QString& fileName)
 {
  QFileInfo fileInfo(fileName);

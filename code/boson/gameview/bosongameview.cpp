@@ -1585,18 +1585,13 @@ void BosonGameView::setLocalPlayerIO(PlayerIO* io)
 	// the IO then!
 	disconnect((KPlayer*)previousPlayerIO->player(), SIGNAL(signalUnitChanged(Unit*)), this, 0);
 
+#warning might be required for editor
+#if 0
 	KGameIO* oldIO = previousPlayerIO->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
 	if (oldIO) {
 		previousPlayerIO->removeGameIO(oldIO);
 	}
-
- }
-
- if (localPlayerIO()) {
-	if (!slotAddLocalPlayerInput()) {
-		// TODO: inform the mainwidget?
-		// game starting failed?
-	}
+#endif
  }
 
  d->mUfoGameGUI->setLocalPlayerIO(localPlayerIO());
@@ -1610,6 +1605,10 @@ void BosonGameView::setLocalPlayerIO(PlayerIO* io)
 
  if (!localPlayerIO()) {
 	return;
+ }
+
+ if (localPlayerIO()->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI)) {
+	slotPlugLocalPlayerInput();
  }
 
  // at this point the game mode is already fixed, so calling this here should be
@@ -1928,8 +1927,8 @@ void BosonGameView::slotAddMenuInput()
 			this, SIGNAL(signalQuickloadGame()));
 	connect(io, SIGNAL(signalReloadGameViewPlugin()),
 			this, SLOT(slotReloadGameViewPlugin()));
-	connect(io, SIGNAL(signalDebugAddLocalPlayerInput()),
-			this, SLOT(slotAddLocalPlayerInput()));
+	connect(io, SIGNAL(signalDebugAddedLocalPlayerInput()),
+			this, SLOT(slotPlugLocalPlayerInput()));
 	connect(io, SIGNAL(signalDebugAddMenuInput()),
 			this, SLOT(slotAddMenuInput()));
 	connect(io, SIGNAL(signalEditorChangeLocalPlayer(Player*)),
@@ -1960,38 +1959,31 @@ void BosonGameView::slotAddMenuInput()
  }
 }
 
-bool BosonGameView::slotAddLocalPlayerInput()
+void BosonGameView::slotPlugLocalPlayerInput()
 {
- KGameIO* oldIO = localPlayerIO()->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
- if (oldIO) {
-	boWarning() << k_funcinfo << "IO already there" << endl;
-	return true;
- }
+ BO_CHECK_NULL_RET(localPlayerIO());
+ BosonLocalPlayerInput* input = (BosonLocalPlayerInput*)localPlayerIO()->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
+ BO_CHECK_NULL_RET(input);
+ disconnect(input, 0, this, 0);
 
- BosonLocalPlayerInput* input = new BosonLocalPlayerInput();
  connect(input, SIGNAL(signalAction(const BoSpecificAction&)),
 		this, SLOT(slotAction(const BoSpecificAction&)));
  connect(input, SIGNAL(signalShowMiniMap(bool)),
 		this, SLOT(slotShowMiniMap(bool)));
- localPlayerIO()->addGameIO(input);
- if (!input->initializeIO()) {
-	boError() << k_funcinfo << "IO could not be initialized" << endl;
-	localPlayerIO()->removeGameIO(input, true);
-	return false;
- }
 
+ setLocalPlayerScript(0);
  if (input->eventListener()) {
 	setLocalPlayerScript(input->eventListener()->script());
  }
-
- return true;
 }
 
 void BosonGameView::setLocalPlayerScript(BosonScript* script)
 {
  // AB: there is no need to save the pointer atm.
  // we just need to do these connects.
- d->mScriptConnector->connectToScript(script);
+ if (script) {
+	d->mScriptConnector->connectToScript(script);
+ }
 }
 
 BoLight* BosonGameView::light(int id) const

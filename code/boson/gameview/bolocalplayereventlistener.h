@@ -49,6 +49,12 @@ public:
 	{
 		return QString("localplayer.py");
 	}
+	virtual QString xmlFileName() const
+	{
+		// AB: note: in contrast to scriptFileName(), this filename is
+		// relative to the root
+		return QString("localplayer.xml");
+	}
 
 	virtual void processEvent(const BoEvent* event);
 	virtual bool canSee(const BoEvent* event) const;

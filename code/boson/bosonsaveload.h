@@ -38,75 +38,6 @@ class Player;
 
 template <class T, class T2> class QMap;
 
-class SaveLoadError
-{
-public:
-	enum ErrorType {
-		Unknown = 0,
-		General = 1,
-		LoadBSGFileError = 2,
-		LoadInvalidXML = 3,
-		LoadPlayersError = 4,
-		LoadInvalidVersion = 5,
-		InvalidFileFormat = 6
-	};
-
-	/**
-	 * @param text An additional text describing the error. There are
-	 * predefined messages available in this class, depending on the @p
-	 * type. When you provide a @p text it will be displayed as additional
-	 * information.
-	 **/
-	SaveLoadError(ErrorType type, const QString& text = QString::null, const QString& caption = QString::null);
-
-	const QString& caption() const
-	{
-		return mCaption;
-	}
-	/**
-	 * @return An error message. This message depends on the @ref type, but
-	 * you can provide additional information in the constructor. Note that
-	 * this message can be several lines long.
-	 **/
-	QString message() const;
-
-	ErrorType type() const
-	{
-		return mType;
-	}
-
-private:
-	ErrorType mType;
-	QString mCaption;
-	QString mText;
-};
-
-class LoadError : public SaveLoadError
-{
-public:
-	/**
-	 * @param text An additional text describing the error. There are
-	 * predefined messages available in this class, depending on the @p
-	 * type. When you provide a @p text it will be displayed as additional
-	 * information.
-	 * @param caption You will probably never need to touch this.
-	 **/
-	LoadError(ErrorType type, const QString& text = QString::null, const QString& caption = QString::null);
-};
-
-class SaveError : public SaveLoadError
-{
-public:
-	/**
-	 * @param text An additional text describing the error. There are
-	 * predefined messages available in this class, depending on the @p
-	 * type. When you provide a @p text it will be displayed as additional
-	 * information.
-	 * @param caption You will probably never need to touch this.
-	 **/
-	SaveError(ErrorType type, const QString& text = QString::null, const QString& caption = QString::null);
-};
-
 class BosonSaveLoadPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -141,17 +72,6 @@ public:
 	static bool saveToFile(const QMap<QString, QByteArray>& files, const QString& file);
 
 	/**
-	 * Start a game from a @p files QMap. The @p files should come from a
-	 * file that was saved using @ref saveToFile
-	 *
-	 * Note that the actual file and data loading all happens in @ref
-	 * BosonStarting. This just starts the actual game, i.e. makes sure that
-	 * items are added and so on. The playfield has been loaded already,
-	 * too.
-	 **/
-	bool startFromFiles(const QMap<QString, QByteArray>& files);
-
-	/**
 	 * Load the XML file in @p xml into @p doc and display an error message
 	 * if an error occured.
 	 * @return TRUE on success
@@ -170,9 +90,15 @@ public:
 	 **/
 	static unsigned long int latestSavegameVersion();
 
+
+	bool loadKGameFromXML(const QMap<QString, QByteArray>& files);
+	bool loadPlayersFromXML(const QMap<QString, QByteArray>& files);
+	bool loadCanvasFromXML(const QMap<QString, QByteArray>& files);
+	bool loadExternalFromXML(const QMap<QString, QByteArray>& files);
+	bool loadEventListenerScripts(const QMap<QString, QByteArray>& files);
+	bool loadEventListenersXML(const QMap<QString, QByteArray>& files);
+
 signals:
-	void signalLoadExternalStuff(QDataStream& stream);
-	void signalSaveExternalStuff(QDataStream& stream);
 	void signalLoadExternalStuffFromXML(const QDomElement& root);
 	void signalSaveExternalStuffAsXML(QDomElement& root);
 
@@ -185,22 +111,11 @@ protected:
 	QCString saveCanvasAsXML();
 	QCString saveExternalAsXML();
 	bool saveEventListenerScripts(QMap<QString, QByteArray>* files);
+	bool saveEventListenersXML(QMap<QString, QByteArray>* files);
 
 	bool loadVersionFromXML(const QString&); // takes kgame.xml
-	bool loadKGameFromXML(const QString&);
-	bool loadPlayersFromXML(const QString&);
-	bool loadCanvasFromXML(const QString&);
-	bool loadExternalFromXML(const QString&);
-	bool loadEventListenerScripts(const QMap<QString, QByteArray>& files);
 
 	bool convertSaveGameToPlayField(QMap<QString, QByteArray>& files);
-
-	/**
-	 * Add an error message to the error queue.
-	 **/
-	void addError(SaveLoadError* error);
-	void addSaveError(SaveLoadError::ErrorType, const QString& text = QString::null, const QString& caption = QString::null);
-	void addLoadError(SaveLoadError::ErrorType, const QString& text = QString::null, const QString& caption = QString::null);
 
 private:
 	void initBoson();
