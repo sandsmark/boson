@@ -152,7 +152,9 @@ bool BosonEffect::saveAsXML(QDomElement& root) const
     return false;
   }
   // Position and rotation
-  saveVector3AsXML(mPosition, root, "Position");
+  BoVector3Fixed canvasPos = mPosition;
+  canvasPos[1] *= -1; // AB: loading expects _canvas_ position of effects
+  saveVector3AsXML(canvasPos, root, "Position");
   saveVector3AsXML(mRotation, root, "Rotation");
 
   // Misc
