@@ -502,5 +502,45 @@ private:
 	BosonCanvas* mCanvas;
 };
 
+class BosonStartingCheckIOs : public BosonStartingTask
+{
+	Q_OBJECT
+public:
+	BosonStartingCheckIOs(const QString& text)
+		: BosonStartingTask(text)
+	{
+	}
+
+	virtual unsigned int taskDuration() const;
+
+protected:
+	virtual bool startTask();
+};
+
+class BosonStartingLoadEventListeners : public BosonStartingTask
+{
+	Q_OBJECT
+public:
+	BosonStartingLoadEventListeners(const QString& text)
+		: BosonStartingTask(text)
+	{
+	}
+
+	virtual unsigned int taskDuration() const;
+
+	void setFiles(QMap<QString, QByteArray>* files)
+	{
+		mFiles = files;
+	}
+
+public slots:
+
+protected:
+	virtual bool startTask();
+
+private:
+	QMap<QString, QByteArray>* mFiles;
+};
+
 #endif
 

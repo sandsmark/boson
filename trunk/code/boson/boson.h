@@ -348,8 +348,6 @@ public slots:
 	void slotSetGameSpeed(int speed);
 	void slotTogglePause();
 
-	void slotAdvanceComputerPlayers(unsigned int advanceCallsCount, bool advanceFlag);
-
 	/**
 	 * Add a system message for the local player only. Note that this does
 	 * <em>not</em> send a chat message over network. It is displayed on

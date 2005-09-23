@@ -46,6 +46,12 @@ public:
 	{
 		return "commandframeeventlistener.py";
 	}
+	virtual QString xmlFileName() const
+	{
+		// AB: note: in contrast to scriptFileName(), this filename is
+		// relative to the root
+		return "commandframe.xml";
+	}
 
 	virtual bool canSee(const BoEvent* event) const;
 

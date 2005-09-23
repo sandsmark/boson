@@ -46,7 +46,7 @@ class BoEventHandlerInfo
 public:
 	QString function;
 	QString args;
-	QString eventname;
+	QString eventName;
 };
 
 class BoEventListenerPrivate
@@ -70,6 +70,7 @@ BoEventListener::BoEventListener(BoEventManager* manager, QObject* parent)
  d = new BoEventListenerPrivate;
  d->mConditions.setAutoDelete(true);
  d->mEventHandlers.setAutoDelete(true);
+ d->mNextEventHandlerId = 1;
  mManager = manager;
  mManager->addEventListener(this);
 }
@@ -207,7 +208,7 @@ bool BoEventListener::loadScript(const QByteArray& script, const QByteArray& scr
 
  BoEventHandlerInfo* info = new BoEventHandlerInfo;
  info->function = "advance";
- info->eventname = "Advance";
+ info->eventName = "Advance";
  info->args = "";
  d->mEventHandlers.insert(1, info);
  d->mNextEventHandlerId = 2;
@@ -274,7 +275,7 @@ bool BoEventListener::saveEventHandlers(QDomElement& root) const
 	BoEventHandlerInfo* info = it.current();
 	QDomElement e = doc.createElement("EventHandler");
 	e.setAttribute("id", it.currentKey());
-	e.setAttribute("EventName", info->eventname);
+	e.setAttribute("EventName", info->eventName);
 	e.setAttribute("FunctionName", info->function);
 	e.setAttribute("FunctionArgs", info->args);
 	root.appendChild(e);
@@ -287,8 +288,6 @@ bool BoEventListener::saveEventHandlers(QDomElement& root) const
 bool BoEventListener::loadEventHandlers(const QDomElement& root)
 {
  boDebug(360) << k_funcinfo << endl;
- d->mEventHandlers.setAutoDelete(true);
- d->mEventHandlers.clear();
  d->mNextEventHandlerId = 1;
  bool ok = false;
  QDomNodeList list = root.elementsByTagName("EventHandler");
@@ -314,7 +313,7 @@ bool BoEventListener::loadEventHandlers(const QDomElement& root)
 		return false;
 	}
 	BoEventHandlerInfo* info = new BoEventHandlerInfo;
-	info->eventname = e.attribute("EventName");
+	info->eventName = e.attribute("EventName");
 	info->function = e.attribute("FunctionName");
 	info->args = e.attribute("FunctionArgs");
 	bool ok = false;
@@ -339,7 +338,7 @@ bool BoEventListener::loadEventHandlers(const QDomElement& root)
 void BoEventListener::deliverToConditions(const BoEvent* event)
 {
  PROFILE_METHOD
- boDebug(360) << k_funcinfo << "conditions: " << d->mConditions.count() << endl;
+// boDebug(360) << k_funcinfo << "conditions: " << d->mConditions.count() << endl;
  QPtrList<BoCondition> remove;
  QPtrListIterator<BoCondition> it(d->mConditions);
  while (it.current()) {
@@ -356,7 +355,7 @@ void BoEventListener::deliverToConditions(const BoEvent* event)
 	BoCondition* c = remove.take(0);
 	d->mConditions.removeRef(c);
  }
- boDebug(360) << k_funcinfo << "done" << endl;
+// boDebug(360) << k_funcinfo << "done" << endl;
 }
 
 void BoEventListener::deliverToScript(const BoEvent* event)
@@ -372,7 +371,7 @@ void BoEventListener::deliverToScript(const BoEvent* event)
  for( ; it.current(); ++it) {
 	BoEventHandlerInfo* info = it.current();
 
-	if (info->eventname.latin1() == event->name()) {
+	if (info->eventName.latin1() == event->name()) {
 		d->mScript->callEventHandler(event, info->function, info->args);
 	}
  }
@@ -391,11 +390,11 @@ void BoEventListener::receiveEvent(const BoEvent* event)
  processEvent(event);
 }
 
-void BoEventListener::addEventHandler(const QString& eventname, const QString& functionname, const QString& args, int* id)
+void BoEventListener::addEventHandler(const QString& eventName, const QString& functionName, const QString& args, int* id)
 {
  BoEventHandlerInfo* info = new BoEventHandlerInfo;
- info->function = functionname;
- info->eventname = eventname;
+ info->function = functionName;
+ info->eventName = eventName;
  info->args = args;
  d->mEventHandlers.insert(d->mNextEventHandlerId, info);
  *id = d->mNextEventHandlerId;
@@ -590,5 +589,18 @@ QString BoComputerPlayerEventListener::scriptFileName() const
 	return QString();
  }
  return QString("ai-player_%1.py").arg(playerIO()->player()->bosonId());
+}
+
+QString BoComputerPlayerEventListener::xmlFileName() const
+{
+ if (!playerIO()) {
+	BO_NULL_ERROR(playerIO());
+	return QString();
+ }
+ if (!playerIO()->player()) {
+	BO_NULL_ERROR(playerIO()->player());
+	return QString();
+ }
+ return QString("ai-player_%1.xml").arg(playerIO()->player()->bosonId());
 }
 

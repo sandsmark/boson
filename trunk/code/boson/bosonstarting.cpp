@@ -42,6 +42,8 @@
 #include "script/bosonscript.h"
 #include "unit.h"
 #include "bosonviewdata.h"
+#include "bosoncomputerio.h"
+#include "gameview/bosonlocalplayerinput.h"
 #include "gameview/bosongameview.h"
 
 #include <klocale.h>
@@ -311,6 +313,13 @@ bool BosonStarting::start()
  scenario->setFiles(&files);
  tasks.append(scenario);
 
+ BosonStartingCheckIOs* ios = new BosonStartingCheckIOs(i18n("Check IOs"));
+ tasks.append(ios);
+
+ BosonStartingLoadEventListeners* eventListeners = new BosonStartingLoadEventListeners(i18n("Load event listeners"));
+ eventListeners->setFiles(&files);
+ tasks.append(eventListeners);
+
  bool ret = executeTasks(tasks);
  tasks.setAutoDelete(true);
  tasks.clear();
@@ -419,6 +428,40 @@ bool BosonStarting::addLoadGamePlayers(const QString& playersXML)
 		return false;
 	}
 	Player* player = new Player();
+
+#warning TODO save and load IOs
+	// AB: the IOs of the players should be saved into the file for
+	// savegames. they should NOT be saved for playfield files!
+	//
+	// on loading we should
+	// * use the IOs requested by the user (e.g. it should be possible to
+	//   save a single player game and load it as a multiplayer game)
+	// * if none requested load the IO from the file
+
+	// as a replacement we currently simply add a localIO to the first
+	// player and a computer IO to all other players
+	if (id >= 128 && id < 256) {
+		if (i == 0) {
+			BosonLocalPlayerInput* io = new BosonLocalPlayerInput();
+			player->addGameIO(io);
+			if (!io->initializeIO()) {
+				boError() << k_funcinfo << "unable to initialize (local) IO for player " << id << endl;
+				player->removeGameIO(io, true);
+			} else {
+				boDebug() << k_funcinfo << "added local IO to player " << id << endl;
+			}
+		} else {
+			BosonComputerIO* io = new BosonComputerIO();
+			player->addGameIO(io);
+			if (!io->initializeIO()) {
+				boError() << k_funcinfo << "unable to initialize IO for player " << id << endl;
+				player->removeGameIO(io, true);
+			} else {
+				boDebug() << k_funcinfo << "added computer IO to player " << id << endl;
+			}
+		}
+	}
+
 	player->setUserId(id);
 	player->loadTheme(SpeciesTheme::speciesDirectory(species), color);
 
@@ -933,6 +976,7 @@ void BosonStartingStartScenario::setGameView(BosonGameView* gameView)
 
 bool BosonStartingStartScenario::startTask()
 {
+ PROFILE_METHOD
  if (!boGame) {
 	BO_NULL_ERROR(boGame);
 	return false;
@@ -955,13 +999,27 @@ bool BosonStartingStartScenario::startTask()
 
  mGameView->setCanvas(mCanvas);
 
- BosonSaveLoad* load = new BosonSaveLoad(boGame);
- if (!load->startFromFiles(*mFiles)) {
-	boError(270) << k_funcinfo << "failed starting game" << endl;
-	delete load;
+ BosonSaveLoad load(boGame);
+ if (!load.loadKGameFromXML(*mFiles)) {
+	boError(270) << k_funcinfo << "unable to load KGame from XML" << endl;
 	return false;
  }
- delete load;
+ if (!load.loadPlayersFromXML(*mFiles)) {
+	boError(270) << k_funcinfo << "unable to load players from XML" << endl;
+	return false;
+ }
+ boDebug(270) << k_funcinfo << boGame->playerCount() << " players loaded" << endl;
+
+ if (!load.loadCanvasFromXML(*mFiles)) {
+	boError(270) << k_funcinfo << "unable to load canvas from XML" << endl;
+	return false;
+ }
+
+ if (!load.loadExternalFromXML(*mFiles)) {
+	boError(270) << k_funcinfo << "unable to load external data from XML" << endl;
+	return false;
+ }
+
  return true;
 }
 
@@ -981,4 +1039,107 @@ bool BosonStartingStartScenario::createMoveDatas()
 
  return true;
 }
+
+
+bool BosonStartingCheckIOs::startTask()
+{
+ PROFILE_METHOD
+ if (!boGame) {
+	BO_NULL_ERROR(boGame);
+	return false;
+ }
+
+ if (!boGame) {
+	BO_NULL_ERROR(boGame);
+	return false;
+ }
+ for (unsigned int i = 0; i < boGame->playerCount(); i++) {
+	boDebug(270) << "init IO for player " << i << endl;
+	Player* p = (Player*)boGame->playerList()->at(i);
+	if (!p) {
+		BO_NULL_ERROR(p);
+		return false;
+	}
+	if (p->bosonId() < 128 || p->bosonId() >= 256) {
+		if (p->ioList()->count() > 0) {
+			boError() << k_funcinfo << "non-game player has a player IO?!" << endl;
+			// AB: might be useful sometimes (e.g. players that
+			// watch only could have a menuinput IO or so)
+			// but atm we don't allow this.
+			return false;
+		}
+	} else {
+		if (p->ioList()->count() == 0) {
+			boError() << k_funcinfo << "player " << p->bosonId() << " has no IO!" << endl;
+			return false;
+		}
+		for (QPtrListIterator<KGameIO> it(*p->ioList()); it.current(); ++it) {
+			boDebug() << k_funcinfo << "player " << p->bosonId() << " has IO: " << it.current()->rtti() << " - " << it.current() << endl;
+		}
+	}
+ }
+
+ return true;
+}
+
+unsigned int BosonStartingCheckIOs::taskDuration() const
+{
+ return 5;
+}
+
+
+
+bool BosonStartingLoadEventListeners::startTask()
+{
+ PROFILE_METHOD
+ if (!boGame) {
+	BO_NULL_ERROR(boGame);
+	return false;
+ }
+
+ if (!boGame->eventManager()) {
+	return false;
+ }
+ if (!mFiles) {
+	return false;
+ }
+ startSubTask(i18n("Scripts..."));
+ BosonSaveLoad load(boGame);
+ if (!load.loadEventListenerScripts(*mFiles)) {
+	boError(270) << k_funcinfo << "unable to load eventlistener scripts" << endl;
+	return false;
+ }
+ completeSubTask(25);
+
+ startSubTask(i18n("XML..."));
+ if (!load.loadEventListenersXML(*mFiles)) {
+	boError(270) << k_funcinfo << "unable to load eventlistener scripts" << endl;
+	return false;
+ }
+ completeSubTask(25);
+
+
+#warning TODO: clear variable data
+ // AB: after loading all scripts, we should clear the script data.
+ //     it has already been loaded into the scripts, so it is not required
+ //     anymore (WARNING: at THIS point this may NOT be the case! IOs are added
+ //     later!)
+ //     but when removing/adding IOs on the fly, we would always use the script
+ //     data of the moment when we saved the game, which is not intended.
+ //     instead the script should simply be reloaded in that case.
+ //
+ //     but to be able to clear the script data, we need to make sure that _ALL_
+ //     scripts have been loaded...
+ //
+ //     UPDATE: at this point all scripts should be loaded.
+
+ return true;
+}
+
+unsigned int BosonStartingLoadEventListeners::taskDuration() const
+{
+ return 50;
+}
+
+
 

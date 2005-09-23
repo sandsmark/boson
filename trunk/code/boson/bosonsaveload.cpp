@@ -43,49 +43,6 @@
 #include <qvaluelist.h>
 #include <qregexp.h>
 
-SaveLoadError::SaveLoadError(ErrorType type, const QString& text, const QString& caption)
-{
- mType = type;
- mCaption = caption;
- mText = text;
-}
-
-QString SaveLoadError::message() const
-{
- QString m;
- switch (type()) {
-	case Unknown:
-		m = i18n("Unknown error");
-		break;
-	case General:
-		m = i18n("General error");
-		break;
-	case LoadBSGFileError:
-		m = i18n(".bsg file error");
-		break;
-	case LoadInvalidXML:
-		m = i18n("Invalid XML");
-		break;
-	default:
-		m = i18n("Unknown error type (%1)").arg((int)type());
- }
- if (!mText.isEmpty()) {
-	m = i18n("%1\n\nAdditional information:\n%2").arg(m).arg(mText);
- }
- return m;
-}
-
-LoadError::LoadError(ErrorType type, const QString& text, const QString& caption)
-	: SaveLoadError(type, text, caption.isNull() ? i18n("Loading error") : caption)
-{
-}
-
-SaveError::SaveError(ErrorType type, const QString& text, const QString& caption)
-	: SaveLoadError(type, text, caption.isNull() ? i18n("Saving error") : caption)
-{
-}
-
-
 class BosonSaveLoadPrivate
 {
 public:
@@ -99,15 +56,12 @@ public:
 	Boson* mBoson;
 	BosonPlayField* mPlayField;
 	BosonCanvas* mCanvas;
-
-	QPtrQueue<SaveLoadError> mErrorQueue;
 };
 
 BosonSaveLoad::BosonSaveLoad(Boson* boson) : QObject(boson, "bosonsaveload")
 {
  d = new BosonSaveLoadPrivate;
  d->mBoson = boson;
- d->mErrorQueue.setAutoDelete(true);
 
  initBoson();
  d->mBoson->initSaveLoad(this);
@@ -115,7 +69,6 @@ BosonSaveLoad::BosonSaveLoad(Boson* boson) : QObject(boson, "bosonsaveload")
 
 BosonSaveLoad::~BosonSaveLoad()
 {
- d->mErrorQueue.clear();
  delete d;
 }
 
@@ -139,21 +92,6 @@ void BosonSaveLoad::setCanvas(BosonCanvas* canvas)
 void BosonSaveLoad::setPlayField(BosonPlayField* playField)
 {
  d->mPlayField = playField;
-}
-
-void BosonSaveLoad::addError(SaveLoadError* error)
-{
- d->mErrorQueue.enqueue(error);
-}
-
-void BosonSaveLoad::addLoadError(SaveLoadError::ErrorType type, const QString& text, const QString& caption)
-{
- addError(new LoadError(type, text, caption));
-}
-
-void BosonSaveLoad::addSaveError(SaveLoadError::ErrorType type, const QString& text, const QString& caption)
-{
- addError(new SaveError(type, text, caption));
 }
 
 unsigned long int BosonSaveLoad::latestSavegameVersion()
@@ -216,31 +154,34 @@ bool BosonSaveLoad::saveToFiles(QMap<QString, QByteArray>& files)
  if (kgameXML.isNull()) {
 	return false;
  }
+ files.insert("kgame.xml", kgameXML);
 
  QByteArray playersXML = savePlayersAsXML();
  if (playersXML.isNull()) {
 	return false;
  }
+ files.insert("players.xml", playersXML);
 
  QByteArray canvasXML = saveCanvasAsXML();
  if (canvasXML.isNull()) {
 	return false;
  }
+ files.insert("canvas.xml", canvasXML);
 
  QByteArray externalXML = saveExternalAsXML();
  if (externalXML.isNull()) {
 	return false;
  }
+ files.insert("external.xml", externalXML);
 
  if (!saveEventListenerScripts(&files)) {
 	boError() << k_funcinfo << "could not save event listener scripts" << endl;
 	return false;
  }
-
- files.insert("kgame.xml", kgameXML);
- files.insert("players.xml", playersXML);
- files.insert("canvas.xml", canvasXML);
- files.insert("external.xml", externalXML);
+ if (!saveEventListenersXML(&files)) {
+	boError() << k_funcinfo << "could not save event listener scripts" << endl;
+	return false;
+ }
 
  return true;
 }
@@ -262,6 +203,7 @@ bool BosonSaveLoad::saveToFile(const QMap<QString, QByteArray>& files, const QSt
 {
  boDebug() << k_funcinfo << file << endl;
  PROFILE_METHOD
+ QStringList writtenFiles;
  QByteArray kgameXML = files["kgame.xml"];
  QByteArray playersXML = files["players.xml"];
  QByteArray canvasXML = files["canvas.xml"];
@@ -315,40 +257,49 @@ bool BosonSaveLoad::saveToFile(const QMap<QString, QByteArray>& files, const QSt
 	boError() << k_funcinfo << "Could not write kgame.xml to " << file << endl;
 	return false;
  }
+ writtenFiles.append("kgame.xml");
  if (!f.writeFile(QString::fromLatin1("players.xml"), QString(playersXML))) {
 	boError() << k_funcinfo << "Could not write players.xml to " << file << endl;
 	return false;
  }
+ writtenFiles.append("players.xml");
  if (!f.writeFile(QString::fromLatin1("canvas.xml"), QString(canvasXML))) {
 	boError() << k_funcinfo << "Could not write canvas.xml to " << file << endl;
 	return false;
  }
+ writtenFiles.append("canvas.xml");
  if (!f.writeFile(QString::fromLatin1("external.xml"), QString(externalXML))) {
 	boError() << k_funcinfo << "Could not write external.xml to " << file << endl;
 	return false;
  }
+ writtenFiles.append("external.xml");
  if (!f.writeFile(QString::fromLatin1("map.xml"), QString(mapXML), QString::fromLatin1("map"))) {
 	boError() << k_funcinfo << "Could not write map to " << file << endl;
 	return false;
  }
+ writtenFiles.append("map/map.xml");
  if (!f.writeFile(QString::fromLatin1("water.xml"), QString(waterXML), QString::fromLatin1("map"))) {
 	boError() << k_funcinfo << "Could not write water to " << file << endl;
 	return false;
  }
+ writtenFiles.append("map/water.xml");
  if (!f.writeFile(QString::fromLatin1("heightmap.png"), heightMap, QString::fromLatin1("map"))) {
 	boError() << k_funcinfo << "Could not write map to " << file << endl;
 	return false;
  }
+ writtenFiles.append("map/heightmap.png");
  if (!f.writeFile(QString::fromLatin1("texmap"), texMap, QString::fromLatin1("map"))) {
 	boError() << k_funcinfo << "Could not write map to " << file << endl;
 	return false;
  }
+ writtenFiles.append("map/texmap");
  if (!f.writeFile(QString::fromLatin1("description.xml"), QString(descriptionXML), QString::fromLatin1("C"))) {
 	boError() << k_funcinfo << "Could not write map to " << file << endl;
 	return false;
  }
+ writtenFiles.append("C/description.xml");
 
- QStringList scripts = QStringList(files.keys()).grep("scripts");
+ QStringList scripts = QStringList(files.keys()).grep(QRegExp("^scripts"));
  for (QStringList::iterator it = scripts.begin(); it != scripts.end(); ++it) {
 	QString path = *it;
 	int lastSlash = path.findRev('/');
@@ -357,6 +308,34 @@ bool BosonSaveLoad::saveToFile(const QMap<QString, QByteArray>& files, const QSt
 	if (!f.writeFile(baseName, files[path], dir)) {
 		boError() << k_funcinfo << "Could not write " << baseName << " to " << file << endl;
 		return false;
+	}
+	writtenFiles.append(*it);
+ }
+
+ QStringList eventListener = QStringList(files.keys()).grep(QRegExp("^eventlistener"));
+ for (QStringList::iterator it = eventListener.begin(); it != eventListener.end(); ++it) {
+	QString path = *it;
+	int lastSlash = path.findRev('/');
+	QString dir = path.left(lastSlash);
+	QString baseName = path.right(path.length() - (lastSlash + 1));
+	bool ret = false;
+	if (baseName.endsWith(".xml")) {
+		ret = f.writeFile(baseName, QString(files[path]), dir);
+	} else {
+		ret = f.writeFile(baseName, files[path], dir);
+	}
+	if (!ret) {
+		boError() << k_funcinfo << "Could not write " << baseName << " to " << file << endl;
+		return false;
+	}
+	writtenFiles.append(*it);
+ }
+
+
+ QStringList allFiles = files.keys();
+ for (QStringList::iterator it = allFiles.begin(); it != allFiles.end(); ++it) {
+	if (!writtenFiles.contains(*it)) {
+		boWarning() << k_funcinfo << "file not written: " << *it << endl;
 	}
  }
  return true;
@@ -453,67 +432,16 @@ QCString BosonSaveLoad::saveExternalAsXML()
 }
 
 
-bool BosonSaveLoad::startFromFiles(const QMap<QString, QByteArray>& files)
+bool BosonSaveLoad::loadKGameFromXML(const QMap<QString, QByteArray>& files)
 {
  PROFILE_METHOD
- boDebug(270) << k_funcinfo << endl;
-
- QByteArray playersXML = files["players.xml"];
- QByteArray canvasXML = files["canvas.xml"];
- QByteArray kgameXML = files["kgame.xml"];
- QByteArray externalXML = files["external.xml"];
-
-  if (kgameXML.isEmpty()) {
+ QString kgameXML = QString(files["kgame.xml"]);
+ if (kgameXML.length() == 0) {
 	boError(270) << k_funcinfo << "Empty kgameXML" << endl;
-	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: kgame.xml"));
-	return false;
-  }
-  if (playersXML.isEmpty()) {
-	boError(270) << k_funcinfo << "Empty playersXML" << endl;
-	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: players.xml"));
 	return false;
  }
- if (canvasXML.isEmpty()) {
-	boError(270) << k_funcinfo << "Empty canvasXML" << endl;
-	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: canvas.xml"));
-	return false;
- }
-
- if (!loadKGameFromXML(kgameXML)) {
-	return false;
- }
- if (!loadPlayersFromXML(playersXML)) {
-	return false;
- }
- boDebug(270) << k_funcinfo << d->mBoson->playerCount() << " players loaded" << endl;
-
- boDebug(270) << k_funcinfo << "loading units" << endl;
-
- // Load canvas (items - i.e. units and shots)
- if (!loadCanvasFromXML(canvasXML)) {
-	addLoadError(SaveLoadError::General, i18n("error while loading canvas"));
-	return false;
- }
- if (!loadExternalFromXML(externalXML)) {
-	addLoadError(SaveLoadError::General, i18n("error while loading external data"));
-	return false;
- }
-
- if (!loadEventListenerScripts(files)) {
-	boError(270) << k_funcinfo << "could not load eventlistener scripts" << endl;
-	addLoadError(SaveLoadError::General, i18n("error while loading event listener scripts"));
-	return false;
- }
-
- return true;
-}
-
-bool BosonSaveLoad::loadKGameFromXML(const QString& kgameXML)
-{
- PROFILE_METHOD
  QDomDocument doc(QString::fromLatin1("Boson"));
  if (!loadXMLDoc(&doc, kgameXML)) {
-	addLoadError(SaveLoadError::LoadInvalidXML, i18n("Parsing error in kgame.xml"));
 	return false;
  }
  QDomElement root = doc.documentElement();
@@ -541,20 +469,23 @@ bool BosonSaveLoad::loadKGameFromXML(const QString& kgameXML)
  return true;
 }
 
-bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
+bool BosonSaveLoad::loadPlayersFromXML(const QMap<QString, QByteArray>& files)
 {
  PROFILE_METHOD
  boDebug(270) << k_funcinfo << endl;
+ QString playersXML = QString(files["players.xml"]);
+ if (playersXML.length() == 0) {
+	boError(270) << k_funcinfo << "Empty playersXML" << endl;
+	return false;
+ }
  QDomDocument doc(QString::fromLatin1("Players"));
  if (!loadXMLDoc(&doc, playersXML)) {
-	addLoadError(SaveLoadError::LoadInvalidXML, i18n("Parsing error in players.xml"));
 	return false;
  }
  QDomElement root = doc.documentElement();
  QDomNodeList list = root.elementsByTagName(QString::fromLatin1("Player"));
  if (list.count() < 1) {
 	boError(270) << k_funcinfo << "no Player tags in file" << endl;
-	addLoadError(SaveLoadError::LoadInvalidXML, i18n("No Player Tag in players.xml"));
 	return false;
  }
  for (unsigned int i = 0; i < d->mBoson->playerCount(); i++) {
@@ -600,29 +531,33 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
  return true;
 }
 
-bool BosonSaveLoad::loadCanvasFromXML(const QString& xml)
+bool BosonSaveLoad::loadCanvasFromXML(const QMap<QString, QByteArray>& files)
 {
  PROFILE_METHOD
  boDebug(270) << k_funcinfo << endl;
+ QString xml = QString(files["canvas.xml"]);
+ if (xml.length() == 0) {
+	boError(270) << k_funcinfo << "Empty canvas.xml" << endl;
+	return false;
+ }
  QDomDocument doc(QString::fromLatin1("Canvas"));
  if (!loadXMLDoc(&doc, xml)) {
-	addLoadError(SaveLoadError::LoadInvalidXML, i18n("Parsing error in canvas.xml"));
 	return false;
  }
  QDomElement root = doc.documentElement();
 
  if (!d->mCanvas->loadFromXML(root)) {
-	addLoadError(SaveLoadError::LoadInvalidXML, i18n("error while loading canvas.xml"));
 	return false;
  }
 
  return true;
 }
 
-bool BosonSaveLoad::loadExternalFromXML(const QString& xml)
+bool BosonSaveLoad::loadExternalFromXML(const QMap<QString, QByteArray>& files)
 {
  PROFILE_METHOD
- boDebug() << k_funcinfo << endl;
+ boDebug(270) << k_funcinfo << endl;
+ QString xml = QString(files["external.xml"]);
 
  // external.xml is optional only, it's valid that it's missing
  // if it is, we use a dummy document. this is meant to make sure that all
@@ -632,7 +567,6 @@ bool BosonSaveLoad::loadExternalFromXML(const QString& xml)
  if (xml.length() != 0) {
 	boDebug(260) << k_funcinfo << endl;
 	if (!loadXMLDoc(&doc, xml)) {
-		addLoadError(SaveLoadError::LoadInvalidXML, i18n("Parsing error in external.xml"));
 		return false;
 	}
  } else {
@@ -762,6 +696,29 @@ bool BosonSaveLoad::saveEventListenerScripts(QMap<QString, QByteArray>* files)
  if (!boGame->eventManager()) {
 	return false;
  }
- return boGame->eventManager()->saveListenerScripts(files);
+ return boGame->eventManager()->saveAllEventListenerScripts(files);
+}
+
+bool BosonSaveLoad::loadEventListenersXML(const QMap<QString, QByteArray>& files)
+{
+ PROFILE_METHOD
+ if (!boGame) {
+	return false;
+ }
+ if (!boGame->eventManager()) {
+	return false;
+ }
+ return boGame->eventManager()->loadAllEventListenersXML(files);
+}
+
+bool BosonSaveLoad::saveEventListenersXML(QMap<QString, QByteArray>* files)
+{
+ if (!boGame) {
+	return false;
+ }
+ if (!boGame->eventManager()) {
+	return false;
+ }
+ return boGame->eventManager()->saveAllEventListenersXML(files);
 }
 

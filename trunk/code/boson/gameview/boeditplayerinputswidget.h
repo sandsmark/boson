@@ -34,7 +34,7 @@ public:
 	void setPlayer(Player* p);
 
 signals:
-	void signalAddLocalPlayerInput();
+	void signalAddedLocalPlayerInput();
 	void signalAddMenuInput();
 
 protected slots:

@@ -954,8 +954,8 @@ void BosonMenuInput::slotDebugEditPlayerInputs(Player* p)
 
  connect(widget, SIGNAL(signalAddMenuInput()),
 		this, SIGNAL(signalDebugAddMenuInput()));
- connect(widget, SIGNAL(signalAddLocalPlayerInput()),
-		this, SIGNAL(signalDebugAddLocalPlayerInput()));
+ connect(widget, SIGNAL(signalAddedLocalPlayerInput()),
+		this, SIGNAL(signalDebugAddedLocalPlayerInput()));
 
  dialog->show();
 }

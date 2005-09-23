@@ -39,6 +39,12 @@ public:
 	{
 		return QString::fromLatin1("gamevieweventlistener.py");
 	}
+	virtual QString xmlFileName() const
+	{
+		// AB: note: in contrast to scriptFileName(), this filename is
+		// relative to the root
+		return QString::fromLatin1("gameview.xml");
+	}
 
 	virtual bool canSee(const BoEvent*) const
 	{

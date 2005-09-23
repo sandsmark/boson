@@ -72,16 +72,6 @@ Boson* Boson::mBoson = 0;
 //#define COLLECT_UNIT_LOGS
 
 /**
- * Function that checks whether the ComputerIO list is still valid (i.e. players
- * still in the game). If it is not, boson is quit with an error message. Evil
- * error.
- *
- * This is a debugging function - invalid pointers must not (never!) appear in
- * the list.
- **/
-static void ensureComputerIOListValid(Boson* boson, const QPtrList<KGameComputerIO>& computerIOList);
-
-/**
  * See @ref KCrash::setEmergencyFunction
  *
  * This tries to save log messages, especially the player input that was made
@@ -291,7 +281,6 @@ public:
 
 	BosonCanvas* mCanvas;
 	BosonPlayField* mPlayField;
-	QPtrList<KGameComputerIO> mComputerIOList;
 
 	KGamePropertyInt mGameSpeed;
 	KGamePropertyBool mGamePaused;
@@ -346,8 +335,6 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
  connect(this, SIGNAL(signalPlayerLeftGame(KPlayer*)),
 		this, SLOT(slotPlayerLeftGame(KPlayer*)));
- connect(this, SIGNAL(signalAdvance(unsigned int, bool)),
-		this, SLOT(slotAdvanceComputerPlayers(unsigned int, bool)));
  connect(this, SIGNAL(signalClientLeftGame(int, int, KGame*)),
 		this, SLOT(slotClientLeftGame(int, int, KGame*)));
  connect(dataHandler(), SIGNAL(signalPropertyChanged(KGamePropertyBase*)),
@@ -596,8 +583,6 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			break;
 		}
 		d->mGameIsOver = false;
-
-		ensureComputerIOListValid(this, d->mComputerIOList);
 
 		emit signalGameStarted();
 
@@ -993,11 +978,6 @@ void Boson::slotPlayerJoinedGame(KPlayer* p)
  if (!p) {
 	return;
  }
- KGameIO* io = p->findRttiIO(KGameIO::ComputerIO);
- if (io) {
-	// note the IO is added on only *one* client!
-	d->mComputerIOList.append((KGameComputerIO*)io);
- }
  slotAddChatSystemMessage(i18n("Player %1 - %2 joined").arg(((Player*)p)->bosonId()).arg(p->name()));
 }
 
@@ -1006,26 +986,7 @@ void Boson::slotPlayerLeftGame(KPlayer* p)
  if (!p) {
 	return;
  }
- KGameIO* io = p->findRttiIO(KGameIO::ComputerIO);
- if (io) {
-	d->mComputerIOList.removeRef((KGameComputerIO*)io);
- }
  slotAddChatSystemMessage(i18n("Player %1 - %2 left the game").arg(((Player*)p)->bosonId()).arg(p->name()));
-
- ensureComputerIOListValid(this, d->mComputerIOList);
-}
-
-void Boson::slotAdvanceComputerPlayers(unsigned int /*advanceCallsCount*/, bool /*advanceFlag*/)
-{
- // we use this to "advance" the computer player. This is a completely new concept
- // introduced to KGameIO just for boson. See KGaneComputerIO documentation for
- // more. Basically this means - let the computer do something.
- QPtrListIterator<KGameComputerIO> it(d->mComputerIOList);
-// boDebug() << "count = " << d->mComputerIOList.count() << endl;
- while (it.current()) {
-	it.current()->advance();
-	++it;
- }
 }
 
 QValueList<QColor> Boson::availableTeamColors() const
@@ -1519,49 +1480,6 @@ bool Boson::addNeutralPlayer()
  bosonAddPlayer(p);
  return true;
 }
-
-static void ensureComputerIOListValid(Boson* boson, const QPtrList<KGameComputerIO>& computerIOList)
-{
- if (!boson) {
-	BO_NULL_ERROR(boson);
-	return;
- }
- if (computerIOList.isEmpty()) {
-	return;
- }
- QPtrList<KGameComputerIO> validList;
- QPtrListIterator<KPlayer> playerIt(*boson->playerList());
- while (playerIt.current()) {
-	KGameComputerIO* io = (KGameComputerIO*)playerIt.current()->findRttiIO(KGameIO::ComputerIO);
-	++playerIt;
-
-	if (io) {
-		validList.append(io);
-	}
- }
-
- QPtrListIterator<KGameComputerIO> ioIt(computerIOList);
- while (ioIt.current()) {
-	KGameComputerIO* io = ioIt.current();
-	++ioIt;
-
-	// we must not access the pointer directly, we first have to find out
-	// that it is really valid
-	if (!validList.contains(io)) {
-		boError() << k_funcinfo << "ComputerIO " << io << " is an invalid pointer. quitting boson now. evil bug." << endl;
-		exit(1);
-		return;
-	}
-
-	// io should be a valid pointer. _if_ it still is invalid, it should
-	// crash now.
-	QString name = io->name();
-	int reactionPeriod = io->reactionPeriod();
-	boDebug() << k_funcinfo << name << " is a valid computer IO" << endl;
- }
-
-}
-
 
 
 // TODO: save all files in a certain directory, not in home

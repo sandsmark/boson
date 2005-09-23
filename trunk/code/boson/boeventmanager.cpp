@@ -186,7 +186,7 @@ bool BoEventManager::loadFromXML(const QDomElement& root)
  return true;
 }
 
-bool BoEventManager::saveListenerScripts(QMap<QString, QByteArray>* scripts) const
+bool BoEventManager::saveAllEventListenerScripts(QMap<QString, QByteArray>* scripts) const
 {
  boDebug() << k_funcinfo << endl;
  // save in 2 steps.
@@ -229,6 +229,52 @@ bool BoEventManager::saveListenerScripts(QMap<QString, QByteArray>* scripts) con
  return true;
 }
 
+bool BoEventManager::saveAllEventListenersXML(QMap<QString, QByteArray>* files) const
+{
+ boDebug() << k_funcinfo << endl;
+ for (QPtrListIterator<BoEventListener> it(d->mEventListeners); it.current(); ++it) {
+	QString name = it.current()->xmlFileName();
+	if (name.isEmpty()) {
+		boError() << k_funcinfo << "listener did not return an XML filename" << endl;
+		return false;
+	}
+	QString file = QString("eventlistener/") + name;
+
+	QDomDocument doc("EventListener");
+	QByteArray b = (*files)[file];
+	if (b.size() == 0) {
+		boDebug() << k_funcinfo << "no xml file yet for requested filename " << file << " - creating new file." << endl;
+
+		// AB we just use a dummy name for the root tag. it doesn't
+		// matter anyway.
+		// it will get a "EventListener" child tag later - that one is
+		// the important one.
+		QDomElement root = doc.createElement("EventListener");
+		doc.appendChild(root);
+	} else {
+		QString xml = QString(b);
+		if (!doc.setContent(xml)) {
+			boError() << k_funcinfo << "unable to load existing XML string" << endl;
+			return false;
+		}
+	}
+	QDomElement root = doc.documentElement();
+	QDomElement eventListener = root.namedItem("EventListener").toElement();
+	if (!eventListener.isNull()) {
+		root.removeChild(eventListener);
+	}
+	eventListener = doc.createElement("EventListener");
+	root.appendChild(eventListener);
+	if (!it.current()->saveAsXML(eventListener)) {
+		boError() << k_funcinfo << "unable to save event listener as XML" << endl;
+		return false;
+	}
+	QByteArray listenerXML = doc.toCString();
+	files->insert(file, listenerXML);
+ }
+ return true;
+}
+
 bool BoEventManager::copyEventListenerScripts(const QMap<QString, QByteArray>& files)
 {
  d->mAvailableScripts.clear();
@@ -257,6 +303,40 @@ bool BoEventManager::loadAllEventListenerScripts()
 	}
 	if (!it.current()->initScript()) {
 		boError() << k_funcinfo << "unable to initialize script of event listener" << endl;
+		return false;
+	}
+ }
+ return true;
+}
+
+bool BoEventManager::loadAllEventListenersXML(const QMap<QString, QByteArray>& files)
+{
+ boDebug() << k_funcinfo << endl;
+ for (QPtrListIterator<BoEventListener> it(d->mEventListeners); it.current(); ++it) {
+	QString name = it.current()->xmlFileName();
+	if (name.isEmpty()) {
+		boDebug() << k_funcinfo << "eventlistener requested no XML to be loaded" << endl;
+		continue;
+	}
+	QString file = QString("eventlistener/") + name;
+
+	QString xml = QString(files[file]);
+	if (xml.length() == 0) {
+		boError() << k_funcinfo << "no such file " << file << endl;
+	}
+	QDomDocument doc("EventListener");
+	if (!doc.setContent(xml)) {
+		boError() << k_funcinfo << "could not parse XML from file " << file << endl;
+		return false;
+	}
+	QDomElement root = doc.documentElement();
+	QDomElement eventListener = root.namedItem("EventListener").toElement();
+	if (eventListener.isNull()) {
+		boError() << k_funcinfo << "no xml element for eventlistener in " << file << endl;
+		return false;
+	}
+	if (!it.current()->loadFromXML(eventListener)) {
+		boError() << k_funcinfo << "unable to load eventlistener from file " << file << endl;
 		return false;
 	}
  }

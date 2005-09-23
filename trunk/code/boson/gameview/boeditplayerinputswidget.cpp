@@ -142,8 +142,16 @@ void BoEditPlayerInputsWidget::slotAddIO()
 		break;
 	}
 	case BosonLocalPlayerInput::LocalPlayerInputRTTI:
-		emit signalAddLocalPlayerInput();
+	{
+		BosonLocalPlayerInput* io = new BosonLocalPlayerInput();
+		d->mPlayer->addGameIO(io);
+		if (!io->initializeIO()) {
+			boError() << k_funcinfo << "could not initialize localplayer IO" << endl;
+			d->mPlayer->removeGameIO(io, true);
+		}
+		emit signalAddedLocalPlayerInput();
 		break;
+	}
 	case BosonMenuInput::RTTI:
 		emit signalAddMenuInput();
 		break;
