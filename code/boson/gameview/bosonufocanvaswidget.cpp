@@ -220,14 +220,24 @@ void BosonUfoCanvasWidget::setCanvas(const BosonCanvas* canvas)
 	connect(d->mCanvas, SIGNAL(signalFragmentCreated(BosonShotFragment*)),
 		this, SLOT(slotFragmentCreated(BosonShotFragment*)));
 
-	for (BoItemList::ConstIterator it = d->mCanvas->allItems()->begin(); it != d->mCanvas->allItems()->end(); ++it) {
-		if (RTTI::isUnit((*it)->rtti())) {
-			Unit* u = (Unit*)*it;
-			if (u->isFacility()) {
-				Facility* f = (Facility*)u;
-				if (f->isConstructionComplete()) {
-					addFacilityConstructedEffects(u);
-				}
+	initItemEffects();
+ }
+}
+
+void BosonUfoCanvasWidget::initItemEffects()
+{
+ boDebug() << k_funcinfo << endl;
+ if (d->mEffects.count() > 0) {
+	boDebug() << k_funcinfo << "effects already initialized. most likely loaded from xml - we are loading a game, no initializing required." << endl;
+	return;
+ }
+ for (BoItemList::ConstIterator it = d->mCanvas->allItems()->begin(); it != d->mCanvas->allItems()->end(); ++it) {
+	if (RTTI::isUnit((*it)->rtti())) {
+		Unit* u = (Unit*)*it;
+		if (u->isFacility()) {
+			Facility* f = (Facility*)u;
+			if (f->isConstructionComplete()) {
+				addFacilityConstructedEffects(u);
 			}
 		}
 	}
