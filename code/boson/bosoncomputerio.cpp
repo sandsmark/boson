@@ -71,6 +71,11 @@ bool BosonComputerIO::initializeIO()
  }
  BoEventManager* manager = boGame->eventManager();
 
+ if (!manager) {
+	BO_NULL_ERROR(manager);
+	return false;
+ }
+
  // AB: note that the listener is neither loaded nor saved currently.
  //     only the script is loaded (initScript()) and saved (by the manager), but
  //     loadFromXML() is never called.
@@ -85,9 +90,6 @@ bool BosonComputerIO::initializeIO()
 
 void BosonComputerIO::reaction()
 {
- if (boConfig->doubleValue("AIDelay") == 0.0) {
-	return;
- }
-// BosonProfiler p("BosonComputerIO::reaction()");
+ // AB: unused.
 }
 
