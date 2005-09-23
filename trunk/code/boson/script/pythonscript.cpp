@@ -28,6 +28,7 @@
 #include <qstring.h>
 #include <qfileinfo.h>
 #include <qstringlist.h>
+#include <qmap.h>
 
 #include "bodebug.h"
 #include "../bo3dtools.h"
@@ -565,6 +566,10 @@ void PythonScript::setPlayerId(int id)
   freePythonLock();
 }
 
+// TODO: check if the use of this variable is correct. if it is, integrate
+// into the class.
+QMap<PyObject*, PyObject*> g_seenModules;
+
 bool PythonScript::save(QDataStream& stream)
 {
   boDebug() << k_funcinfo << endl;
@@ -572,7 +577,9 @@ bool PythonScript::save(QDataStream& stream)
   getPythonLock();
 
   // Save main module to a PyObject
+  g_seenModules.clear();
   PyObject* savedmodule = saveModule(mMainModule);
+  g_seenModules.clear();
 
   // Save all items in savedict
 #ifdef Py_MARSHAL_VERSION
@@ -618,12 +625,15 @@ PyObject* PythonScript::saveModule(PyObject* module) const
    *       module can be empty, then module has no submodules.
    **/
   boDebug() << k_funcinfo << endl;
+
+
   // Find dictionary of the module
   PyObject* moduledict = PyModule_GetDict(module);
 
   // Top-level dictionary for this module. This is the one that contains two
   //  PyDicts with keys "variables" and "submodules"
   PyObject* maindict = PyDict_New();
+  g_seenModules.insert(module, maindict);
 
   // Create a dict containing submodules of this module
   PyObject* submodules = PyDict_New();
@@ -665,7 +675,11 @@ PyObject* PythonScript::saveModule(PyObject* module) const
     } else if(PyModule_Check(value)) {
       // Add module to submodules' list
       boDebug() << k_funcinfo << "Saving module '" << PyString_AsString(key) << "', exact: " << PyModule_CheckExact(value) << endl;
-      PyDict_SetItem(submodules, key, saveModule(value));
+      if (g_seenModules.contains(value)) {
+        boDebug() << k_funcinfo << "module already seen .. ignoring" << endl;
+      } else {
+        PyDict_SetItem(submodules, key, saveModule(value));
+      }
       continue;
     } else {
       // This is unknown type (most likely a function)
