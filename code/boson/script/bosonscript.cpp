@@ -21,7 +21,6 @@
 
 #include <bomemory/bodummymemory.h>
 #include "../bo3dtools.h"
-#include "../player.h"
 #include "../boson.h"
 #include "../bosonmessage.h"
 #include "../bosonmessageids.h"
@@ -43,6 +42,18 @@
 #include "../bosonmap.h"
 #include "bosonscriptinterface.h"
 #include "bodebug.h"
+
+#warning FIXME: remove
+// FIXME: don't include player.h, or more precisely: don't provide access to
+// it's methods from script functions. Player provides methods such as
+// allUnits() that simply should not be used in AI (which is the main part of
+// scripts).
+// use PlayerIO whenever possible (and in most cases: add methods to it, if it's
+// not).
+//
+// Even more important: the scripts should have access to the Player/PlayerIO
+// object of the player with ID playerId() only. not of other players.
+#include "../player.h"
 
 #include "pythonscript.h"
 
