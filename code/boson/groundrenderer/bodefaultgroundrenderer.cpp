@@ -266,7 +266,9 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 	glMatrixMode(GL_MODELVIEW);
  }
 
+#if USE_VBOS
  boglBindBuffer(GL_ARRAY_BUFFER, 0);
+#endif
 
  glDisableClientState(GL_VERTEX_ARRAY);
  if (!depthonly) {
