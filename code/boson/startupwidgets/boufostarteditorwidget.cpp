@@ -35,6 +35,7 @@
 #include "../bosongroundtheme.h"
 #include "../bosondata.h"
 #include "../bosonsaveload.h"
+#include "../gameview/bosonlocalplayerinput.h" // ugly. we should not include stuff from the gameview in here.
 #include "bosonstartupnetwork.h"
 #include "bocreatenewmap.h"
 #include "bodebug.h"
@@ -253,6 +254,21 @@ void BoUfoStartEditorWidget::slotNetStart()
 	// add dummy computer player
 	Player* p = new Player;
 	p->setName(i18n("Player %1").arg(i + 1));
+
+	// AB: all players can be controlled by the user in editor mode, so all
+	// have a localplayer input.
+	BosonLocalPlayerInput* input = new BosonLocalPlayerInput();
+	p->addGameIO(input);
+	if (!input->initializeIO()) {
+		p->removeGameIO(input, true);
+
+		boError() << k_funcinfo << "localplayer IO could not be initialized. fatal error - quitting" << endl;
+		KMessageBox::sorry(0, i18n("internal error. could not initialize IO of local player. quitting now."));
+		exit(1);
+		return;
+	}
+
+
 	QColor color = availableTeamColors.first();
 	availableTeamColors.pop_front();
 	p->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), color);
