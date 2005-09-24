@@ -442,6 +442,7 @@ void EditorViewInput::deleteSelectedUnits()
 {
  BO_CHECK_NULL_RET(selection());
  BO_CHECK_NULL_RET(canvas());
+ BO_CHECK_NULL_RET(localPlayerInput());
  boDebug() << k_funcinfo << endl;
  if (selection()->isEmpty()) {
 	boDebug() << k_funcinfo << "no unit selected" << endl;
