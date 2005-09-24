@@ -69,12 +69,18 @@ bool BosonLocalPlayerInput::initializeIO()
     return false;
   }
   boDebug() << k_funcinfo << endl;
-  if (game())
+  if (!boGame)
+  {
+    BO_NULL_ERROR(boGame);
+    return false;
+  }
+  else
+  // warning: p->game() is NULL at this point. using boGame here is ugly.
   {
     // note: a NULL game() _is_ possible on program startup.
     // that player IO will be deleted later though, it is never really used
     PlayerIO* io = ((Player*)player())->playerIO();
-    BoEventManager* manager = ((Boson*)game())->eventManager();
+    BoEventManager* manager = boGame->eventManager();
 
     // AB: note that the event listener is neither loaded nor saved!
     //     -> only the script is loaded (by initScript()) and saved (by the
