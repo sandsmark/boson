@@ -323,6 +323,7 @@ bool BoEventManager::loadAllEventListenersXML(const QMap<QString, QByteArray>& f
 	QString xml = QString(files[file]);
 	if (xml.length() == 0) {
 		boError() << k_funcinfo << "no such file " << file << endl;
+		return false;
 	}
 	QDomDocument doc("EventListener");
 	if (!doc.setContent(xml)) {
