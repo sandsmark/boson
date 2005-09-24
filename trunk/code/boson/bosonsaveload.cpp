@@ -708,7 +708,11 @@ bool BosonSaveLoad::loadEventListenersXML(const QMap<QString, QByteArray>& files
  if (!boGame->eventManager()) {
 	return false;
  }
- return boGame->eventManager()->loadAllEventListenersXML(files);
+ if (!boGame->eventManager()->copyEventListenerXML(files)) {
+	boError() << k_funcinfo << "unable to copy event listeners XML" << endl;
+	return false;
+ }
+ return boGame->eventManager()->loadAllEventListenersXML();
 }
 
 bool BosonSaveLoad::saveEventListenersXML(QMap<QString, QByteArray>* files)
