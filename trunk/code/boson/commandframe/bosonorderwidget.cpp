@@ -139,6 +139,7 @@ void BosonOrderWidget::setOrderButtons(const QValueList<BoSpecificAction>& actio
 
  QPair<ProductionType, long unsigned int> pair;
  for (unsigned int i = 0; i < actions.count(); i++) {
+	resetButton(d->mOrderButton[i]);
 	d->mOrderButton[i]->setAction(actions[i]);
 	if (id > 0 && production) { // production has already started
 		pair.first = actions[i].productionType();
