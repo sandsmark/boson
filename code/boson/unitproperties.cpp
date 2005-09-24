@@ -119,7 +119,7 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  insertULongBaseValue(conf.readUnsignedLongNumEntry("MineralCost", 100), "MineralCost", "MaxValue");
  insertULongBaseValue(conf.readUnsignedLongNumEntry("OilCost", 0), "OilCost", "MaxValue");
  insertULongBaseValue(conf.readUnsignedLongNumEntry("Armor", 0), "Armor", "MaxValue");
- insertULongBaseValue(conf.readUnsignedLongNumEntry("Shield", 0), "Shields", "MaxValue");
+ insertULongBaseValue(conf.readUnsignedLongNumEntry("Shields", 0), "Shields", "MaxValue");
  unsigned long int powerGenerated = conf.readUnsignedLongNumEntry("PowerGenerated", 0);
  unsigned long int powerConsumed = conf.readUnsignedLongNumEntry("PowerConsumed", 0);
  if (powerGenerated > 0 && powerConsumed > 0) {

@@ -24,7 +24,7 @@ OilCost=700
 Producer=10
 ProductionTime=40
 Requirements=5,2,3
-Shield=50
+Shields=50
 SightRange=12
 SupportMiniMap=false
 TerrainType=1
@@ -32,7 +32,7 @@ UnitDepth=1.512
 UnitHeight=2.8
 UnitWidth=2.8
 Weapons=0
-PowerConsumed=500
+PowerConsumed=600
 
 [ProductionPlugin]
 ProducerList=5

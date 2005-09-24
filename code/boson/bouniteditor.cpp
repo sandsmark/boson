@@ -258,7 +258,7 @@ bool EditorUnitProperties::saveUnitType(const QString& fileName)
  conf.writeEntry("SightRange", ulongBaseValue("SightRange"));
  // This is converted from advance calls to seconds
  conf.writeEntry("ProductionTime", ulongBaseValue("ProductionTime") / 20.0f);
- conf.writeEntry("Shield", ulongBaseValue("Shields"));
+ conf.writeEntry("Shields", ulongBaseValue("Shields"));
  conf.writeEntry("Armor", ulongBaseValue("Armor"));
  conf.writeEntry("SupportMiniMap", mSupportMiniMap);
  conf.writeEntry("IsFacility", isFacility());

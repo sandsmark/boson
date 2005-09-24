@@ -80,7 +80,7 @@ Health=Number
         Health, power, whatever. Make this greater and the unit will
         live longer.
         Must be > 0. Default is 100.
-Shield=Number
+Shields=Number
         Not yet supported.
         Default is 0.
 Armor=Number
