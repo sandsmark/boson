@@ -237,6 +237,11 @@ public:
 
 	BoItemList* unitsAtCells(const QPtrVector<const Cell>* cells) const;
 
+	/**
+	 * @return Player::calculatePower
+	 **/
+	void calculatePower(unsigned long int* powerGenerated = 0, unsigned long int* powerConsumed = 0, bool includeUnconstructedFacilities = false) const;
+
 private:
 	PlayerIOPrivate* d;
 	Player* mPlayer;
