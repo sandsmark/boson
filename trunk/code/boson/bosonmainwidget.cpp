@@ -962,6 +962,12 @@ void BosonMainWidget::slotGameStarted()
 				return;
 			}
 			if (localPlayer) {
+				if (!boGame->gameMode()) {
+					// in editor mode all players are
+					// actually "local".
+					// we use the first one as "localPlayer".
+					continue;
+				}
 				boError(270) << k_funcinfo << "two local players found?!" << endl;
 				return;
 			}
