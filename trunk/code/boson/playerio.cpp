@@ -353,4 +353,9 @@ bool PlayerIO::removeGameIO(KGameIO* io, bool deleteit)
  return player()->removeGameIO(io, deleteit);
 }
 
+void PlayerIO::calculatePower(unsigned long int* powerGenerated, unsigned long int* powerConsumed, bool includeUnconstructedFacilities) const
+{
+ player()->calculatePower(powerGenerated, powerConsumed, includeUnconstructedFacilities);
+}
+
 
