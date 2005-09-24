@@ -257,7 +257,7 @@ void BoUfoStartEditorWidget::slotNetStart()
 
 	// AB: all players can be controlled by the user in editor mode, so all
 	// have a localplayer input.
-	BosonLocalPlayerInput* input = new BosonLocalPlayerInput();
+	BosonLocalPlayerInput* input = new BosonLocalPlayerInput(false);
 	p->addGameIO(input);
 	if (!input->initializeIO()) {
 		p->removeGameIO(input, true);

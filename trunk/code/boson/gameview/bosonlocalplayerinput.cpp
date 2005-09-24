@@ -47,10 +47,11 @@
 
 // AB: because of the event listener the name "Input" is not correct anymore.
 // this class still handles input, but also output (as it reports events)
-BosonLocalPlayerInput::BosonLocalPlayerInput() : KGameIO()
+BosonLocalPlayerInput::BosonLocalPlayerInput(bool gameMode) : KGameIO()
 {
   boDebug() << k_funcinfo << endl;
   mEventListener = 0;
+  mGameMode = gameMode;
 }
 
 BosonLocalPlayerInput::~BosonLocalPlayerInput()
@@ -82,17 +83,20 @@ bool BosonLocalPlayerInput::initializeIO()
     PlayerIO* io = ((Player*)player())->playerIO();
     BoEventManager* manager = boGame->eventManager();
 
-    // AB: note that the event listener is neither loaded nor saved!
-    //     -> only the script is loaded (by initScript()) and saved (by the
-    //        manager), loadFromXML() is never called.
-    //     TODO: is this a bug or do we intend this?
-    mEventListener = new BoLocalPlayerEventListener(io, manager, this);
-    connect(mEventListener, SIGNAL(signalShowMiniMap(bool)),
-            this, SIGNAL(signalShowMiniMap(bool)));
-    if (!mEventListener->initScript())
+    if (mGameMode)
     {
-      boError() << k_funcinfo << "could not init script" << endl;
-      return false;
+      // AB: note that the event listener is neither loaded nor saved!
+      //     -> only the script is loaded (by initScript()) and saved (by the
+      //        manager), loadFromXML() is never called.
+      //     TODO: is this a bug or do we intend this?
+      mEventListener = new BoLocalPlayerEventListener(io, manager, this);
+      connect(mEventListener, SIGNAL(signalShowMiniMap(bool)),
+              this, SIGNAL(signalShowMiniMap(bool)));
+      if (!mEventListener->initScript())
+      {
+        boError() << k_funcinfo << "could not init script" << endl;
+        return false;
+      }
     }
   }
   return true;
