@@ -80,6 +80,7 @@ public:
 	bool saveAllEventListenersXML(QMap<QString, QByteArray>* scripts) const;
 
 	bool copyEventListenerScripts(const QMap<QString, QByteArray>& scripts);
+	bool copyEventListenerXML(const QMap<QString, QByteArray>& scripts);
 
 	/**
 	 * This calls @ref BoEventListener::loadScript for all listeners.
@@ -91,7 +92,7 @@ public:
 	 * that before this is called, @ref loadAllEventListenerScripts should
 	 * be called first, i.e. first load the scripts, then the XML.
 	 **/
-	bool loadAllEventListenersXML(const QMap<QString, QByteArray>& files);
+	bool loadAllEventListenersXML();
 
 	/**
 	 * Used by @ref BoEventListener.
@@ -125,6 +126,9 @@ public:
 	 * fileName, or an empty object if @ref haveScriptForFile returns FALSE.
 	 **/
 	QByteArray scriptForFile(const QString& fileName) const;
+
+
+	static QByteArray createEmptyEventListenerXML();
 
 protected:
 	void deliverEvent(BoEvent* event);

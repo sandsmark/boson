@@ -50,6 +50,7 @@ public:
 protected:
 	QByteArray createNewLocalPlayerScript() const;
 	QByteArray createNewAIScript(unsigned int playerId) const;
+	QByteArray createEmptyEventListenerXML() const;
 
 private:
 	unsigned int mWidth;

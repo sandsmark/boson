@@ -28,6 +28,7 @@
 #include "../bosonsaveload.h"
 #include "../defines.h"
 #include "../boson.h"
+#include "../boeventmanager.h"
 #include "bodebug.h"
 
 #include <kmessagebox.h>
@@ -172,6 +173,7 @@ QByteArray BoCreateNewMap::createNewMap()
  files.insert("scripts/eventlistener/game.py", QByteArray());
  files.insert("scripts/eventlistener/localplayer.py", createNewLocalPlayerScript());
  files.insert("scripts/eventlistener/gamevieweventlistener.py", QByteArray());
+ QByteArray eventListenerXML = createEmptyEventListenerXML();
  for (unsigned int i = 0; i < mPlayerCount + 1; i++) {
 	unsigned int id = 0;
 	if (i <= mPlayerCount) {
@@ -182,7 +184,13 @@ QByteArray BoCreateNewMap::createNewMap()
 	}
 	QByteArray script = createNewAIScript(id);
 	files.insert(QString("scripts/eventlistener/ai-player_%1.py").arg(id), script);
+
+	files.insert(QString("eventlistener/ai-player_%1.xml").arg(id), eventListenerXML);
  }
+ files.insert("eventlistener/gameview.xml", eventListenerXML);
+ files.insert("eventlistener/commandframe.xml", eventListenerXML);
+ files.insert("eventlistener/localplayer.xml", eventListenerXML);
+ files.insert("eventlistener/canvas.xml", eventListenerXML);
 
  QByteArray b = BosonPlayField::streamFiles(files);
  boDebug() << k_funcinfo << "files got streamed" << endl;
@@ -233,4 +241,10 @@ QByteArray BoCreateNewMap::createNewAIScript(unsigned int playerId) const
  aiPy.duplicate(script.latin1(), script.length());
  return aiPy;
 }
+
+QByteArray BoCreateNewMap::createEmptyEventListenerXML() const
+{
+ return BoEventManager::createEmptyEventListenerXML();
+}
+
 

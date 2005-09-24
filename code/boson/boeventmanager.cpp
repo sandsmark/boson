@@ -56,6 +56,7 @@ public:
 	QValueVector<QCString> mEventNames;
 
 	QMap<QString, QByteArray> mAvailableScripts;
+	QMap<QString, QByteArray> mEventListenerXML;
 };
 
 BoEventManager::BoEventManager(QObject* parent) : QObject(parent)
@@ -75,6 +76,7 @@ BoEventManager::BoEventManager(QObject* parent) : QObject(parent)
 BoEventManager::~BoEventManager()
 {
  d->mAvailableScripts.clear();
+ d->mEventListenerXML.clear();
  delete d;
 }
 
@@ -232,6 +234,17 @@ bool BoEventManager::saveAllEventListenerScripts(QMap<QString, QByteArray>* scri
 bool BoEventManager::saveAllEventListenersXML(QMap<QString, QByteArray>* files) const
 {
  boDebug() << k_funcinfo << endl;
+
+ // first save the initial data, as provided by copyEventListenerXML()
+ // this makes sure that we always save all eventlisteners that might be
+ // required for the map, including those of IOs that are currently not in use
+ // (but may be when loading a savegame later, or when starting a map when we
+ // save a playfield here)
+ for (QMap<QString, QByteArray>::iterator it = d->mEventListenerXML.begin(); it != d->mEventListenerXML.end(); ++it) {
+	files->insert(it.key(), it.data());
+ }
+
+ // replace the xml files with recent data
  for (QPtrListIterator<BoEventListener> it(d->mEventListeners); it.current(); ++it) {
 	QString name = it.current()->xmlFileName();
 	if (name.isEmpty()) {
@@ -278,7 +291,7 @@ bool BoEventManager::saveAllEventListenersXML(QMap<QString, QByteArray>* files) 
 bool BoEventManager::copyEventListenerScripts(const QMap<QString, QByteArray>& files)
 {
  d->mAvailableScripts.clear();
- // AB: note that even if we don't one of the scripts in the current game,
+ // AB: note that even if we don't use one of the scripts in the current game,
  // then we still need to leave it the in memory. we might need it later,
  // e.g. when a human player is replaced by a computer io.
  for (QMap<QString, QByteArray>::const_iterator it = files.begin(); it != files.end(); ++it) {
@@ -287,6 +300,34 @@ bool BoEventManager::copyEventListenerScripts(const QMap<QString, QByteArray>& f
 	}
  }
  return true;
+}
+
+bool BoEventManager::copyEventListenerXML(const QMap<QString, QByteArray>& files)
+{
+ // AB: this method is similar to copyEventListenerScripts(), but copies the XML
+ // files instead of the scripts.
+ d->mEventListenerXML.clear();
+ for (QMap<QString, QByteArray>::const_iterator it = files.begin(); it != files.end(); ++it) {
+	if (it.key().startsWith("eventlistener/") && it.key().endsWith(".xml")) {
+		d->mEventListenerXML.insert(it.key(), it.data());
+	}
+ }
+ return true;
+}
+
+QByteArray BoEventManager::createEmptyEventListenerXML()
+{
+ QDomDocument doc("EventListener");
+ QDomElement root = doc.createElement("EventListener");
+ QDomElement e = doc.createElement("EventListener");
+ doc.appendChild(root);
+ root.appendChild(e);
+ QDomElement conditions = doc.createElement("Conditions");
+ e.appendChild(conditions);
+ QDomElement handlers = doc.createElement("EventHandlers");
+ handlers.setAttribute("NextId", QString::number(1));
+ e.appendChild(handlers);
+ return doc.toString().utf8();
 }
 
 
@@ -309,7 +350,7 @@ bool BoEventManager::loadAllEventListenerScripts()
  return true;
 }
 
-bool BoEventManager::loadAllEventListenersXML(const QMap<QString, QByteArray>& files)
+bool BoEventManager::loadAllEventListenersXML()
 {
  boDebug() << k_funcinfo << endl;
  for (QPtrListIterator<BoEventListener> it(d->mEventListeners); it.current(); ++it) {
@@ -320,7 +361,7 @@ bool BoEventManager::loadAllEventListenersXML(const QMap<QString, QByteArray>& f
 	}
 	QString file = QString("eventlistener/") + name;
 
-	QString xml = QString(files[file]);
+	QString xml = QString(d->mEventListenerXML[file]);
 	if (xml.length() == 0) {
 		boError() << k_funcinfo << "no such file " << file << endl;
 		return false;
