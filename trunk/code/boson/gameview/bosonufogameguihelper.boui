@@ -15,6 +15,10 @@
    <verticalAlignment/>
    <horizontalAlignment/>
    <stretch/>
+   <gridLayoutColumns/>
+   <gridLayoutRows/>
+   <borderType/>
+   <takesKeyboardFocus/>
   </Properties>
   <Widget>
    <ClassName>BoUfoLayeredPane</ClassName>
@@ -31,6 +35,10 @@
     <verticalAlignment/>
     <horizontalAlignment/>
     <stretch/>
+    <gridLayoutColumns/>
+    <gridLayoutRows/>
+    <borderType/>
+    <takesKeyboardFocus/>
    </Properties>
    <Widget>
     <ClassName>BoUfoWidget</ClassName>
@@ -47,6 +55,10 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch/>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
+     <borderType/>
+     <takesKeyboardFocus/>
     </Properties>
     <Widget>
      <ClassName>BoUfoVBox</ClassName>
@@ -63,6 +75,10 @@
       <verticalAlignment/>
       <horizontalAlignment/>
       <stretch/>
+      <gridLayoutColumns/>
+      <gridLayoutRows/>
+      <borderType/>
+      <takesKeyboardFocus/>
      </Properties>
      <Widget>
       <ClassName>BoUfoWidget</ClassName>
@@ -79,6 +95,10 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <borderType/>
+       <takesKeyboardFocus/>
       </Properties>
      </Widget>
      <Widget>
@@ -96,6 +116,10 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <borderType/>
+       <takesKeyboardFocus/>
       </Properties>
      </Widget>
      <Widget>
@@ -113,6 +137,10 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <borderType/>
+       <takesKeyboardFocus/>
       </Properties>
       <Widget>
        <ClassName>BoUfoVBox</ClassName>
@@ -129,6 +157,10 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
@@ -147,6 +179,10 @@
          <stretch/>
          <text>Projection Matrix</text>
          <iconFile/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
        <Widget>
@@ -164,6 +200,10 @@
          <verticalAlignment/>
          <horizontalAlignment/>
          <stretch/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
        <Widget>
@@ -183,6 +223,10 @@
          <stretch/>
          <text>Modelview Matrix</text>
          <iconFile/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
        <Widget>
@@ -200,6 +244,10 @@
          <verticalAlignment/>
          <horizontalAlignment/>
          <stretch/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
        <Widget>
@@ -219,6 +267,10 @@
          <stretch/>
          <text>Projection * Modelview</text>
          <iconFile/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
        <Widget>
@@ -236,6 +288,10 @@
          <verticalAlignment/>
          <horizontalAlignment/>
          <stretch/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
        <Widget>
@@ -255,6 +311,10 @@
          <stretch/>
          <text>(Projection * Modelview)^(-1)</text>
          <iconFile/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
        <Widget>
@@ -272,6 +332,10 @@
          <verticalAlignment/>
          <horizontalAlignment/>
          <stretch/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
        <Widget>
@@ -291,6 +355,10 @@
          <stretch/>
          <text/>
          <iconFile/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
       </Widget>
@@ -311,6 +379,10 @@
         <stretch/>
         <text/>
         <iconFile/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
       </Widget>
       <Widget>
@@ -330,6 +402,10 @@
         <stretch/>
         <text/>
         <iconFile/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
       </Widget>
       <Widget>
@@ -349,6 +425,10 @@
         <stretch/>
         <text/>
         <iconFile/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
       </Widget>
       <Widget>
@@ -368,6 +448,10 @@
         <stretch/>
         <text/>
         <iconFile/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
       </Widget>
       <Widget>
@@ -387,6 +471,10 @@
         <stretch/>
         <text/>
         <iconFile/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
       </Widget>
      </Widget>
@@ -405,6 +493,10 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch>1</stretch>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <borderType/>
+       <takesKeyboardFocus/>
       </Properties>
      </Widget>
     </Widget>
@@ -423,6 +515,10 @@
       <verticalAlignment/>
       <horizontalAlignment/>
       <stretch>1</stretch>
+      <gridLayoutColumns/>
+      <gridLayoutRows/>
+      <borderType/>
+      <takesKeyboardFocus/>
      </Properties>
     </Widget>
     <Widget>
@@ -440,6 +536,10 @@
       <verticalAlignment/>
       <horizontalAlignment/>
       <stretch/>
+      <gridLayoutColumns/>
+      <gridLayoutRows/>
+      <borderType/>
+      <takesKeyboardFocus/>
      </Properties>
      <Widget>
       <ClassName>BoUfoHBox</ClassName>
@@ -456,6 +556,10 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <borderType/>
+       <takesKeyboardFocus/>
       </Properties>
       <Widget>
        <ClassName>BoUfoVBox</ClassName>
@@ -472,6 +576,10 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
@@ -490,6 +598,10 @@
          <stretch/>
          <text>Minerals: </text>
          <iconFile/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
        <Widget>
@@ -509,6 +621,56 @@
          <stretch/>
          <text>Oil: </text>
          <iconFile/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <borderType/>
+         <takesKeyboardFocus/>
+        </Properties>
+       </Widget>
+       <Widget>
+        <ClassName>BoUfoLabel</ClassName>
+        <Properties>
+         <name>mWidget47</name>
+         <constraints/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <opaque/>
+         <layout/>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <borderType/>
+         <stretch/>
+         <takesKeyboardFocus/>
+         <text>Power Generated:</text>
+         <iconFile/>
+        </Properties>
+       </Widget>
+       <Widget>
+        <ClassName>BoUfoLabel</ClassName>
+        <Properties>
+         <name>mWidget49</name>
+         <constraints/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <opaque/>
+         <layout/>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <borderType/>
+         <stretch/>
+         <takesKeyboardFocus/>
+         <text>Power Consumed:</text>
+         <iconFile/>
         </Properties>
        </Widget>
       </Widget>
@@ -527,6 +689,10 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
@@ -545,6 +711,10 @@
          <stretch/>
          <text/>
          <iconFile/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
        <Widget>
@@ -562,6 +732,56 @@
          <verticalAlignment/>
          <horizontalAlignment/>
          <stretch/>
+         <text/>
+         <iconFile/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <borderType/>
+         <takesKeyboardFocus/>
+        </Properties>
+       </Widget>
+       <Widget>
+        <ClassName>BoUfoLabel</ClassName>
+        <Properties>
+         <name>mPowerGeneratedLabel</name>
+         <constraints/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <opaque/>
+         <layout/>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <borderType/>
+         <stretch/>
+         <takesKeyboardFocus/>
+         <text></text>
+         <iconFile/>
+        </Properties>
+       </Widget>
+       <Widget>
+        <ClassName>BoUfoLabel</ClassName>
+        <Properties>
+         <name>mPowerConsumedLabel</name>
+         <constraints/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <opaque/>
+         <layout/>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <borderType/>
+         <stretch/>
+         <takesKeyboardFocus/>
          <text/>
          <iconFile/>
         </Properties>
@@ -583,6 +803,10 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <borderType/>
+       <takesKeyboardFocus/>
       </Properties>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
@@ -601,6 +825,10 @@
         <stretch/>
         <text>FPS</text>
         <iconFile/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
       </Widget>
       <Widget>
@@ -620,6 +848,10 @@
         <stretch/>
         <text/>
         <iconFile/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
       </Widget>
       <Widget>
@@ -637,6 +869,10 @@
         <verticalAlignment/>
         <horizontalAlignment/>
         <stretch/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
@@ -655,6 +891,10 @@
          <stretch/>
          <text/>
          <iconFile/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
        <Widget>
@@ -674,6 +914,10 @@
          <stretch/>
          <text/>
          <iconFile/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
        <Widget>
@@ -693,6 +937,10 @@
          <stretch/>
          <text/>
          <iconFile/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <borderType/>
+         <takesKeyboardFocus/>
         </Properties>
        </Widget>
       </Widget>
@@ -713,6 +961,10 @@
         <stretch/>
         <text/>
         <iconFile/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <borderType/>
+        <takesKeyboardFocus/>
        </Properties>
       </Widget>
      </Widget>
@@ -731,6 +983,10 @@
        <verticalAlignment/>
        <horizontalAlignment/>
        <stretch>1</stretch>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <borderType/>
+       <takesKeyboardFocus/>
       </Properties>
      </Widget>
     </Widget>
@@ -750,6 +1006,10 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch>1</stretch>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
+     <borderType/>
+     <takesKeyboardFocus/>
     </Properties>
     <Widget>
      <ClassName>BoUfoLabel</ClassName>
@@ -768,6 +1028,10 @@
       <stretch/>
       <text>The game is paused</text>
       <iconFile/>
+      <gridLayoutColumns/>
+      <gridLayoutRows/>
+      <borderType/>
+      <takesKeyboardFocus/>
      </Properties>
     </Widget>
    </Widget>
@@ -786,6 +1050,10 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <stretch/>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
+     <borderType/>
+     <takesKeyboardFocus/>
     </Properties>
     <Widget>
      <ClassName>BoUfoWidget</ClassName>
@@ -802,6 +1070,10 @@
       <verticalAlignment/>
       <horizontalAlignment/>
       <stretch>1</stretch>
+      <gridLayoutColumns/>
+      <gridLayoutRows/>
+      <borderType/>
+      <takesKeyboardFocus/>
      </Properties>
     </Widget>
     <Widget>
@@ -819,6 +1091,10 @@
       <verticalAlignment/>
       <horizontalAlignment/>
       <stretch/>
+      <gridLayoutColumns/>
+      <gridLayoutRows/>
+      <borderType/>
+      <takesKeyboardFocus/>
      </Properties>
     </Widget>
    </Widget>

@@ -232,6 +232,8 @@ public:
 		mResourcesBox = 0;
 		mMineralsLabel = 0;
 		mOilLabel = 0;
+		mPowerGeneratedLabel = 0;
+		mPowerConsumedLabel = 0;
 		mFPSLabel = 0;
 		mGroundRendererDebug = 0;
 		mMapCoordinates = 0;
@@ -273,6 +275,8 @@ public:
 	BoUfoHBox* mResourcesBox;
 	BoUfoLabel* mMineralsLabel;
 	BoUfoLabel* mOilLabel;
+	BoUfoLabel* mPowerGeneratedLabel;
+	BoUfoLabel* mPowerConsumedLabel;
 	BoUfoLabel* mFPSLabel;
 	BoUfoLabel* mGroundRendererDebug;
 	BoUfoVBox* mMapCoordinates;
@@ -368,6 +372,8 @@ void BosonUfoGameGUI::initUfoWidgets()
  d->mResourcesBox = widget->mResourcesBox;
  d->mMineralsLabel = widget->mMineralsLabel;
  d->mOilLabel = widget->mOilLabel;
+ d->mPowerGeneratedLabel = widget->mPowerGeneratedLabel;
+ d->mPowerConsumedLabel = widget->mPowerConsumedLabel;
  d->mFPSLabel = widget->mFPSLabel;
  d->mGroundRendererDebug = widget->mGroundRendererDebug;
  d->mMapCoordinates = widget->mMapCoordinates;
@@ -506,6 +512,10 @@ void BosonUfoGameGUI::updateUfoLabels()
  d->mMineralsLabel->setText(minerals);
  d->mOilLabel->setText(oil);
  d->mResourcesBox->setVisible(boConfig->boolValue("show_resources"));
+ unsigned long int powerGenerated, powerConsumed;
+ localPlayerIO()->calculatePower(&powerGenerated, &powerConsumed);
+ d->mPowerGeneratedLabel->setText(QString::number(powerGenerated));
+ d->mPowerConsumedLabel->setText(QString::number(powerConsumed));
 
  double fps;
  double skippedFPS;
