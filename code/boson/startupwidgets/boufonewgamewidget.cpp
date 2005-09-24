@@ -58,6 +58,7 @@ public:
     BO_CHECK_NULL_RET(playField);
     mSelectCampaign = campaign;
     mSelectPlayField = playField;
+    mIsAdmin = true;
   }
 
   void addCampaign(const BosonCampaign* campaign)
