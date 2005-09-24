@@ -1053,9 +1053,6 @@ bool BosonStartingCheckIOs::startTask()
 	BO_NULL_ERROR(boGame);
 	return false;
  }
- if (!boGame->gameMode()) {
-	return true;
- }
  for (unsigned int i = 0; i < boGame->playerCount(); i++) {
 	boDebug(270) << "init IO for player " << i << endl;
 	Player* p = (Player*)boGame->playerList()->at(i);
