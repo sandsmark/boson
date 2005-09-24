@@ -683,11 +683,13 @@ QValueList<unsigned long int> ProductionPlugin::possibleTechnologyProductions(QV
  // Filter out things that player can't actually build (requirements aren't met yet)
  QValueList<unsigned long int>::Iterator it;
  for (it = techList.begin(); it != techList.end(); it++) {
-	if ((!player()->hasTechnology(*it)) && (player()->canResearchTech(*it))) {
-		ret.append(*it);
-	} else {
-		if (impossibleTechnologies) {
-			impossibleTechnologies->append(*it);
+	if ((!player()->hasTechnology(*it))) {
+		if ((player()->canResearchTech(*it))) {
+			ret.append(*it);
+		} else {
+			if (impossibleTechnologies) {
+				impossibleTechnologies->append(*it);
+			}
 		}
 	}
  }
