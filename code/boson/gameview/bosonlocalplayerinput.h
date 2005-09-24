@@ -54,7 +54,7 @@ class BosonLocalPlayerInput : public KGameIO
       LocalPlayerInputRTTI = 125 // just any unique number
     };
   public:
-    BosonLocalPlayerInput();
+    BosonLocalPlayerInput(bool gameMode = true);
     virtual ~BosonLocalPlayerInput();
 
     /**
@@ -116,6 +116,7 @@ class BosonLocalPlayerInput : public KGameIO
 
   private:
     BoEventListener* mEventListener;
+    bool mGameMode;
 };
 
 #endif // BOSONLOCALPLAYERINPUT_H
