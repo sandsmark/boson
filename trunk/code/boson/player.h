@@ -214,7 +214,7 @@ public:
 	 * were advanced. @em MUST be called exactly once per @ref chargeUnits
 	 * call in an advance call.
 	 **/
-	void Player::unchargeUnitsForAdvance();
+	void unchargeUnitsForAdvance();
 
 	void updatePowerChargeForCurrentAdvanceCall();
 	inline bofixed powerChargeForCurrentAdvanceCall() const
