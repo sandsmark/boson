@@ -1796,6 +1796,7 @@ void BosonGameView::slotEditorShowPlaceGround()
 
 void BosonGameView::slotEditorDeleteSelectedUnits()
 {
+ BO_CHECK_NULL_RET(displayInput());
  displayInput()->deleteSelectedUnits();
 }
 
