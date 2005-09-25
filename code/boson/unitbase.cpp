@@ -438,7 +438,7 @@ void UnitBase::reloadShields(int by)
  // would allow configurable reload times more easily.
  if (mShieldReloadCounter >= MAX_SHIELD_RELOAD_COUNT) {
 	if (shields() < maxShields()) {
-		setShields(shields() + 1);
+		setShields(shields() + 2);
 	}
 	mShieldReloadCounter = 0;
  } else {
