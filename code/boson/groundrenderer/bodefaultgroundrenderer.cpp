@@ -371,6 +371,16 @@ void BoDefaultGroundRenderer::updateMapCache(const BosonMap* map)
 #endif
 }
 
+void BoDefaultGroundRenderer::cellFogChanged(int x1, int y1, int x2, int y2)
+{
+ BoGroundRendererBase::cellFogChanged(x1, y1, x2, y2);
+ if (!mIndicesDirty) {
+	if (isCellInRectVisible(x1, y1, x2, y2)) {
+		mIndicesDirty = true;
+	}
+ }
+}
+
 void BoDefaultGroundRenderer::cellHeightChanged(int x1, int y1, int x2, int y2)
 {
  BoGroundRendererBase::cellHeightChanged(x1, y1, x2, y2);

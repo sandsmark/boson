@@ -215,6 +215,12 @@ protected:
 
 	BoColorMapRenderer* getUpdatedColorMapRenderer(BoColorMap*);
 
+	/**
+	 * @return TRUE if at least one cell in the given rect is visble.
+	 * Otherwise FALSE.
+	 **/
+	bool isCellInRectVisible(int x1, int y1, int x2, int y2) const;
+
 
 protected:
 	float* mHeightMap2;

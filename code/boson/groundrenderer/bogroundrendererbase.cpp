@@ -262,7 +262,7 @@ public:
 	virtual void cellTextureChanged(int x1, int y1, int x2, int y2);
 	virtual void cellHeightChanged(int x1, int y1, int x2, int y2);
 
-	const BoGroundQuadTreeNode* findVisibleNodeAt(const BoVector3Fixed& pos);
+	const BoGroundQuadTreeNode* findVisibleNodeAt(int x, int y);
 
 	virtual void updateMapCache(const BosonMap* map);
 
@@ -459,7 +459,7 @@ if (list) {
  return renderCells;
 }
 
-const BoGroundQuadTreeNode* CellListBuilderTree::findVisibleNodeAt(const BoVector3Fixed& pos)
+const BoGroundQuadTreeNode* CellListBuilderTree::findVisibleNodeAt(int x, int y)
 {
  if (!mMap) {
 	return 0;
@@ -467,9 +467,6 @@ const BoGroundQuadTreeNode* CellListBuilderTree::findVisibleNodeAt(const BoVecto
  if (!mRoot) {
 	return 0;
  }
-
- int x = (int)pos.x();
- int y = (int)-pos.y();
 
  int x1 = x;
  int x2 = x;
@@ -1170,7 +1167,7 @@ QString BoGroundRendererBase::debugStringForPoint(const BoVector3Fixed& pos) con
 	return s;
  }
 
- const BoGroundQuadTreeNode* node = ((CellListBuilderTree*)mCellListBuilder)->findVisibleNodeAt(pos);
+ const BoGroundQuadTreeNode* node = ((CellListBuilderTree*)mCellListBuilder)->findVisibleNodeAt((int)pos.x(), (int)-pos.y());
 
  if (!node) {
 	s += QString("no node in tree for this position\n");
@@ -1343,5 +1340,22 @@ void BoGroundRendererBase::getRoughnessInRect(const BosonMap* map, float* _rough
 
  *_roughness = roughness;
  *_textureRoughnessTotal = textureRoughnessTotal;
+}
+
+bool BoGroundRendererBase::isCellInRectVisible(int x1, int y1, int x2, int y2) const
+{
+ if (!mCellListBuilder->isTreeBuilder()) {
+	return true;
+ }
+ CellListBuilderTree* tree = (CellListBuilderTree*)mCellListBuilder;
+ for (int x = x1; x <= x2; x++) {
+	for (int y = y1; y <= y2; y++) {
+		const BoGroundQuadTreeNode* node = tree->findVisibleNodeAt(x, y);
+		if (node) {
+			return true;
+		}
+	}
+ }
+ return false;
 }
 
