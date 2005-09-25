@@ -54,7 +54,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // AB: in contrast to KDE, we allow only (exactly) one MenuBar. No more, no
 // less.
 // AB: we try to use the kpartgui.dtd as far as possible, have a look at it for
@@ -553,11 +552,67 @@ public:
 	}
 	~BoUfoActionDeleter()
 	{
-		mAction->removeWidget(mWidget, false);
+		doDestructionAction(mAction, mWidget);
 	}
+
+	static void doDestructionAction(BoUfoAction* action, ufo::UWidget* widget)
+	{
+		action->removeWidget(widget, false);
+	}
+
 private:
 	BoUfoAction* mAction;
 	ufo::UWidget* mWidget;
+};
+
+class BoUfoToolBarPushButton : public BoUfoPushButton
+{
+public:
+	BoUfoToolBarPushButton(const QString& text)
+		: BoUfoPushButton(text)
+	{
+		mAction = 0;
+	}
+
+	void setBoUfoAction(BoUfoAction* action)
+	{
+		mAction = action;
+	}
+
+	~BoUfoToolBarPushButton()
+	{
+		BO_CHECK_NULL_RET(mAction);
+		// AB this does NOT delete the widget.
+		BoUfoActionDeleter::doDestructionAction(mAction, ufoWidget());
+	}
+
+private:
+	BoUfoAction* mAction;
+};
+
+class BoUfoToolBarCheckBox : public BoUfoCheckBox
+{
+public:
+	BoUfoToolBarCheckBox(const QString& text)
+		: BoUfoCheckBox(text)
+	{
+		mAction = 0;
+	}
+
+	void setBoUfoAction(BoUfoAction* action)
+	{
+		mAction = action;
+	}
+
+	~BoUfoToolBarCheckBox()
+	{
+		BO_CHECK_NULL_RET(mAction);
+		// AB this does NOT delete the widget.
+		BoUfoActionDeleter::doDestructionAction(mAction, ufoWidget());
+	}
+
+private:
+	BoUfoAction* mAction;
 };
 
 class BoUfoActionPrivate
@@ -747,8 +802,9 @@ void BoUfoAction::plug(ufo::UWidget* w)
 	w->add(menuItem);
 	addWidget(menuItem);
  } else {
-	BoUfoPushButton* button = new BoUfoPushButton(text());
+	BoUfoToolBarPushButton* button = new BoUfoToolBarPushButton(text());
 	button->ufoWidget()->setFont(w->getFont());
+	button->setBoUfoAction(this);
 	connect(button, SIGNAL(signalClicked()),
 			this, SLOT(slotActivated()));
 	connect(button, SIGNAL(signalHighlighted()),
@@ -796,8 +852,9 @@ void BoUfoToggleAction::plug(ufo::UWidget* w)
 	w->add(menuItem);
 	addWidget(menuItem);
  } else {
-	BoUfoCheckBox* check = new BoUfoCheckBox(text());
+	BoUfoToolBarCheckBox* check = new BoUfoToolBarCheckBox(text());
 	check->ufoWidget()->setFont(w->getFont());
+	check->setBoUfoAction(this);
 	check->setChecked(isChecked());
 	connect(check, SIGNAL(signalActivated()),
 			this, SLOT(slotActivated()));
