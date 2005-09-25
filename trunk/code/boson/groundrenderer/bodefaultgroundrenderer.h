@@ -41,13 +41,15 @@ public:
 
 	virtual bool initGroundRenderer();
 
+	virtual void cellFogChanged(int x1, int y1, int x2, int y2);
+	virtual void cellTextureChanged(int x1, int y1, int x2, int y2);
+	virtual void cellHeightChanged(int x1, int y1, int x2, int y2);
+
 protected:
 	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map, RenderFlags flags);
 	virtual void generateCellList(const BosonMap* map);
 
 	virtual void updateMapCache(const BosonMap* map);
-	void cellTextureChanged(int x1, int y1, int x2, int y2);
-	void cellHeightChanged(int x1, int y1, int x2, int y2);
 
 	void clearVBOs();
 	void updateVertexVBO();
