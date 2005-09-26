@@ -796,6 +796,7 @@ bool PythonScript::load(QDataStream& stream)
 /*****  Event functions  *****/
 PyObject* PythonScript::py_addEventHandler(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   char* eventname = 0;
   char* funcname = 0;
   char* funcargs = 0;
@@ -804,20 +805,21 @@ PyObject* PythonScript::py_addEventHandler(PyObject*, PyObject* args)
     return 0;
   }
 
-  int id = BosonScript::currentScript()->addEventHandler(eventname, funcname, funcargs);
+  int id = currentScript()->addEventHandler(eventname, funcname, funcargs);
 
   return Py_BuildValue((char*)"i", id);
 }
 
 PyObject* PythonScript::py_removeEventHandler(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  BosonScript::currentScript()->removeEventHandler(id);
+  currentScript()->removeEventHandler(id);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -826,101 +828,110 @@ PyObject* PythonScript::py_removeEventHandler(PyObject*, PyObject* args)
 /*****  Player functions  *****/
 PyObject* PythonScript::py_areEnemies(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id1, id2;
   if(!PyArg_ParseTuple(args, (char*)"ii", &id1, &id2))
   {
     return 0;
   }
 
-  bool enemies = BosonScript::areEnemies(id1, id2);
+  bool enemies = currentScript()->areEnemies(id1, id2);
 
   return Py_BuildValue((char*)"i", enemies ? 1 : 0);
 }
 
 PyObject* PythonScript::py_allPlayers(PyObject*, PyObject*)
 {
-  QValueList<int> players = BosonScript::allPlayers();
+  BO_CHECK_NULL_RET0(currentScript());
+  QValueList<int> players = currentScript()->allPlayers();
 
   return QValueListToPyList(&players);
 }
 
 PyObject* PythonScript::py_isNeutral(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::isNeutral(id) ? 1 : 0);
+  return Py_BuildValue((char*)"i", currentScript()->isNeutral(id) ? 1 : 0);
 }
 
 PyObject* PythonScript::py_powerGenerated(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::powerGenerated(id));
+  return Py_BuildValue((char*)"i", currentScript()->powerGenerated(id));
 }
 
 PyObject* PythonScript::py_powerConsumed(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::powerConsumed(id));
+  return Py_BuildValue((char*)"i", currentScript()->powerConsumed(id));
 }
 
 PyObject* PythonScript::py_powerGeneratedAfterConstructions(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::powerGeneratedAfterConstructions(id));
+  return Py_BuildValue((char*)"i", currentScript()->powerGeneratedAfterConstructions(id));
 }
 
 PyObject* PythonScript::py_powerConsumedAfterConstructions(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::powerConsumedAfterConstructions(id));
+  return Py_BuildValue((char*)"i", currentScript()->powerConsumedAfterConstructions(id));
 }
 
 
 /*****  Resource functions  *****/
 PyObject* PythonScript::py_minerals(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", (int)(BosonScript::minerals(id)));
+  return Py_BuildValue((char*)"i", (int)(currentScript()->minerals(id)));
 }
 
 PyObject* PythonScript::py_addMinerals(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id, amount;
   if(!PyArg_ParseTuple(args, (char*)"ii", &id, &amount))
   {
     return 0;
   }
 
-  BosonScript::addMinerals(id, amount);
+  currentScript()->addMinerals(id, amount);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -928,24 +939,26 @@ PyObject* PythonScript::py_addMinerals(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_oil(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", (int)(BosonScript::oil(id)));
+  return Py_BuildValue((char*)"i", (int)(currentScript()->oil(id)));
 }
 
 PyObject* PythonScript::py_addOil(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id, amount;
   if(!PyArg_ParseTuple(args, (char*)"ii", &id, &amount))
   {
     return 0;
   }
 
-  BosonScript::addOil(id, amount);
+  currentScript()->addOil(id, amount);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -953,13 +966,14 @@ PyObject* PythonScript::py_addOil(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_nearestMineralLocations(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int player, x, y, n, radius;
   if(!PyArg_ParseTuple(args, (char*)"iiiii", &player, &x, &y, &n, &radius))
   {
     return 0;
   }
 
-  QValueList<BoVector2Fixed> locations = BosonScript::nearestMineralLocations(player, x, y, n, radius);
+  QValueList<BoVector2Fixed> locations = currentScript()->nearestMineralLocations(player, x, y, n, radius);
 
   PyObject* pylist = PyList_New(locations.count());
 
@@ -980,13 +994,14 @@ PyObject* PythonScript::py_nearestMineralLocations(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_nearestOilLocations(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int player, x, y, n, radius;
   if(!PyArg_ParseTuple(args, (char*)"iiiii", &player, &x, &y, &n, &radius))
   {
     return 0;
   }
 
-  QValueList<BoVector2Fixed> locations = BosonScript::nearestOilLocations(player, x, y, n, radius);
+  QValueList<BoVector2Fixed> locations = currentScript()->nearestOilLocations(player, x, y, n, radius);
 
   PyObject* pylist = PyList_New(locations.count());
 
@@ -1009,6 +1024,7 @@ PyObject* PythonScript::py_nearestOilLocations(PyObject*, PyObject* args)
 /*****  Unit functions  *****/
 PyObject* PythonScript::py_moveUnit(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int player, id;
   float x, y;
   if(!PyArg_ParseTuple(args, (char*)"iiff", &player, &id, &x, &y))
@@ -1016,7 +1032,7 @@ PyObject* PythonScript::py_moveUnit(PyObject*, PyObject* args)
     return 0;
   }
 
-  BosonScript::moveUnit(player, id, x, y);
+  currentScript()->moveUnit(player, id, x, y);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1024,6 +1040,7 @@ PyObject* PythonScript::py_moveUnit(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_moveUnitWithAttacking(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int player, id;
   float x, y;
   if(!PyArg_ParseTuple(args, (char*)"iiff", &player, &id, &x, &y))
@@ -1031,7 +1048,7 @@ PyObject* PythonScript::py_moveUnitWithAttacking(PyObject*, PyObject* args)
     return 0;
   }
 
-  BosonScript::moveUnitWithAttacking(player, id, x, y);
+  currentScript()->moveUnitWithAttacking(player, id, x, y);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1039,13 +1056,14 @@ PyObject* PythonScript::py_moveUnitWithAttacking(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_attack(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int player, id, target;
   if(!PyArg_ParseTuple(args, (char*)"iii", &player, &id, &target))
   {
     return 0;
   }
 
-  BosonScript::attack(player, id, target);
+  currentScript()->attack(player, id, target);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1053,13 +1071,14 @@ PyObject* PythonScript::py_attack(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_stopUnit(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int player, id;
   if(!PyArg_ParseTuple(args, (char*)"ii", &player, &id))
   {
     return 0;
   }
 
-  BosonScript::stopUnit(player, id);
+  currentScript()->stopUnit(player, id);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1067,6 +1086,7 @@ PyObject* PythonScript::py_stopUnit(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_mineUnit(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int player, id;
   float x, y;
   if(!PyArg_ParseTuple(args, (char*)"iiff", &player, &id, &x, &y))
@@ -1074,7 +1094,7 @@ PyObject* PythonScript::py_mineUnit(PyObject*, PyObject* args)
     return 0;
   }
 
-  BosonScript::mineUnit(player, id, x, y);
+  currentScript()->mineUnit(player, id, x, y);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1082,6 +1102,7 @@ PyObject* PythonScript::py_mineUnit(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_setUnitRotation(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int player, id;
   float rot;
   if(!PyArg_ParseTuple(args, (char*)"iif", &player, &id, &rot))
@@ -1089,7 +1110,7 @@ PyObject* PythonScript::py_setUnitRotation(PyObject*, PyObject* args)
     return 0;
   }
 
-  BosonScript::setUnitRotation(player, id, rot);
+  currentScript()->setUnitRotation(player, id, rot);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1097,6 +1118,7 @@ PyObject* PythonScript::py_setUnitRotation(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_dropBomb(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int player, id, weapon;
   float x, y;
   if(!PyArg_ParseTuple(args, (char*)"iiiff", &player, &id, &weapon, &x, &y))
@@ -1104,7 +1126,7 @@ PyObject* PythonScript::py_dropBomb(PyObject*, PyObject* args)
     return 0;
   }
 
-  BosonScript::dropBomb(player, id, weapon, x, y);
+  currentScript()->dropBomb(player, id, weapon, x, y);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1112,13 +1134,14 @@ PyObject* PythonScript::py_dropBomb(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_produceUnit(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int player, factory, production;
   if(!PyArg_ParseTuple(args, (char*)"iii", &player, &factory, &production))
   {
     return 0;
   }
 
-  BosonScript::produceUnit(player, factory, production);
+  currentScript()->produceUnit(player, factory, production);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1126,6 +1149,7 @@ PyObject* PythonScript::py_produceUnit(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_spawnUnit(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int player, type;
   float x, y;
   if(!PyArg_ParseTuple(args, (char*)"iiff", &player, &type, &x, &y))
@@ -1133,7 +1157,7 @@ PyObject* PythonScript::py_spawnUnit(PyObject*, PyObject* args)
     return 0;
   }
 
-  BosonScript::spawnUnit(player, type, x, y);
+  currentScript()->spawnUnit(player, type, x, y);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1141,6 +1165,7 @@ PyObject* PythonScript::py_spawnUnit(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_teleportUnit(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int player, id;
   float x, y;
   if(!PyArg_ParseTuple(args, (char*)"iiff", &player, &id, &x, &y))
@@ -1148,7 +1173,7 @@ PyObject* PythonScript::py_teleportUnit(PyObject*, PyObject* args)
     return 0;
   }
 
-  BosonScript::teleportUnit(player, id, x, y);
+  currentScript()->teleportUnit(player, id, x, y);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1156,6 +1181,7 @@ PyObject* PythonScript::py_teleportUnit(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_canPlaceProductionAt(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int player, factoryid, unitType;
   float x, y;
   if(!PyArg_ParseTuple(args, (char*)"iiiff", &player, &factoryid, &unitType, &x, &y))
@@ -1163,13 +1189,14 @@ PyObject* PythonScript::py_canPlaceProductionAt(PyObject*, PyObject* args)
     return 0;
   }
 
-  bool can = BosonScript::canPlaceProductionAt(player, factoryid, unitType, x, y);
+  bool can = currentScript()->canPlaceProductionAt(player, factoryid, unitType, x, y);
 
   return Py_BuildValue((char*)"i", can ? 1 : 0);
 }
 
 PyObject* PythonScript::py_placeProduction(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int player, factoryid;
   float x, y;
   if(!PyArg_ParseTuple(args, (char*)"iiff", &player, &factoryid, &x, &y))
@@ -1177,7 +1204,7 @@ PyObject* PythonScript::py_placeProduction(PyObject*, PyObject* args)
     return 0;
   }
 
-  BosonScript::placeProduction(player, factoryid, x, y);
+  currentScript()->placeProduction(player, factoryid, x, y);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1185,258 +1212,281 @@ PyObject* PythonScript::py_placeProduction(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_unitsOnCell(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int x, y;
   if(!PyArg_ParseTuple(args, (char*)"ii", &x, &y))
   {
     return 0;
   }
 
-  QValueList<int> units = BosonScript::unitsOnCell(x, y);
+  QValueList<int> units = currentScript()->unitsOnCell(x, y);
 
   return QValueListToPyList(&units);
 }
 
 PyObject* PythonScript::py_unitsInRect(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int x1, y1, x2, y2;
   if(!PyArg_ParseTuple(args, (char*)"iiii", &x1, &y1, &x2, &y2))
   {
     return 0;
   }
 
-  QValueList<int> units = BosonScript::unitsInRect(x1, y1, x2, y2);
+  QValueList<int> units = currentScript()->unitsInRect(x1, y1, x2, y2);
 
   return QValueListToPyList(&units);
 }
 
 PyObject* PythonScript::py_cellOccupied(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int x, y;
   if(!PyArg_ParseTuple(args, (char*)"ii", &x, &y))
   {
     return 0;
   }
 
-  bool occupied = BosonScript::cellOccupied(x, y);
+  bool occupied = currentScript()->cellOccupied(x, y);
 
   return Py_BuildValue((char*)"i", occupied ? 1 : 0);
 }
 
 PyObject* PythonScript::py_unitPosition(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  BoVector2Fixed pos = BosonScript::unitPosition(id);
+  BoVector2Fixed pos = currentScript()->unitPosition(id);
 
   return Py_BuildValue((char*)"(ff)", (float)pos.x(), (float)pos.y());
 }
 
 PyObject* PythonScript::py_unitOwner(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::unitOwner(id));
+  return Py_BuildValue((char*)"i", currentScript()->unitOwner(id));
 }
 
 PyObject* PythonScript::py_unitType(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::unitType(id));
+  return Py_BuildValue((char*)"i", currentScript()->unitType(id));
 }
 
 PyObject* PythonScript::py_unitWork(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::unitWork(id));
+  return Py_BuildValue((char*)"i", currentScript()->unitWork(id));
 }
 
 PyObject* PythonScript::py_isUnitMobile(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::isUnitMobile(id) ? 1 : 0);
+  return Py_BuildValue((char*)"i", currentScript()->isUnitMobile(id) ? 1 : 0);
 }
 
 PyObject* PythonScript::py_isUnitTypeMobile(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int playerid, type;
   if(!PyArg_ParseTuple(args, (char*)"ii", &playerid, &type))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::isUnitTypeMobile(playerid, type) ? 1 : 0);
+  return Py_BuildValue((char*)"i", currentScript()->isUnitTypeMobile(playerid, type) ? 1 : 0);
 }
 
 PyObject* PythonScript::py_isUnitAircraft(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::isUnitAircraft(id) ? 1 : 0);
+  return Py_BuildValue((char*)"i", currentScript()->isUnitAircraft(id) ? 1 : 0);
 }
 
 PyObject* PythonScript::py_isUnitTypeAircraft(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int playerid, type;
   if(!PyArg_ParseTuple(args, (char*)"ii", &playerid, &type))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::isUnitTypeAircraft(playerid, type) ? 1 : 0);
+  return Py_BuildValue((char*)"i", currentScript()->isUnitTypeAircraft(playerid, type) ? 1 : 0);
 }
 
 PyObject* PythonScript::py_canUnitShoot(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::canUnitShoot(id) ? 1 : 0);
+  return Py_BuildValue((char*)"i", currentScript()->canUnitShoot(id) ? 1 : 0);
 }
 
 PyObject* PythonScript::py_canUnitTypeShoot(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int playerid, type;
   if(!PyArg_ParseTuple(args, (char*)"ii", &playerid, &type))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::canUnitTypeShoot(playerid, type) ? 1 : 0);
+  return Py_BuildValue((char*)"i", currentScript()->canUnitTypeShoot(playerid, type) ? 1 : 0);
 }
 
 PyObject* PythonScript::py_canUnitProduce(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::canUnitProduce(id) ? 1 : 0);
+  return Py_BuildValue((char*)"i", currentScript()->canUnitProduce(id) ? 1 : 0);
 }
 
 PyObject* PythonScript::py_hasUnitCompletedProduction(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::hasUnitCompletedProduction(id) ? 1 : 0);
+  return Py_BuildValue((char*)"i", currentScript()->hasUnitCompletedProduction(id) ? 1 : 0);
 }
 
 PyObject* PythonScript::py_completedProductionType(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::completedProductionType(id));
+  return Py_BuildValue((char*)"i", currentScript()->completedProductionType(id));
 }
 
 PyObject* PythonScript::py_canUnitMineMinerals(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::canUnitMineMinerals(id) ? 1 : 0);
+  return Py_BuildValue((char*)"i", currentScript()->canUnitMineMinerals(id) ? 1 : 0);
 }
 
 PyObject* PythonScript::py_canUnitTypeMineMinerals(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int playerid, type;
   if(!PyArg_ParseTuple(args, (char*)"ii", &playerid, &type))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::canUnitTypeMineMinerals(playerid, type) ? 1 : 0);
+  return Py_BuildValue((char*)"i", currentScript()->canUnitTypeMineMinerals(playerid, type) ? 1 : 0);
 }
 
 PyObject* PythonScript::py_canUnitMineOil(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::canUnitMineOil(id) ? 1 : 0);
+  return Py_BuildValue((char*)"i", currentScript()->canUnitMineOil(id) ? 1 : 0);
 }
 
 PyObject* PythonScript::py_canUnitTypeMineOil(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int playerid, type;
   if(!PyArg_ParseTuple(args, (char*)"ii", &playerid, &type))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::canUnitTypeMineOil(playerid, type) ? 1 : 0);
+  return Py_BuildValue((char*)"i", currentScript()->canUnitTypeMineOil(playerid, type) ? 1 : 0);
 }
 
 PyObject* PythonScript::py_productionTypes(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  QValueList<int> list = BosonScript::productionTypes(id);
+  QValueList<int> list = currentScript()->productionTypes(id);
 
   return QValueListToPyList(&list);
 }
 
 PyObject* PythonScript::py_isUnitAlive(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::isUnitAlive(id) ? 1 : 0);
+  return Py_BuildValue((char*)"i", currentScript()->isUnitAlive(id) ? 1 : 0);
 }
 
 PyObject* PythonScript::py_allPlayerUnits(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   // FIXME: current implementation of methods returning arrays is quite
   //  ineffiecient. First we usually get a list of units, then add ids of those
   //  units to id list and then covert id list to Python list. We could add ids
@@ -1447,20 +1497,21 @@ PyObject* PythonScript::py_allPlayerUnits(PyObject*, PyObject* args)
     return 0;
   }
 
-  QValueList<int> units = BosonScript::allPlayerUnits(id);
+  QValueList<int> units = currentScript()->allPlayerUnits(id);
 
   return QValueListToPyList(&units);
 }
 
 PyObject* PythonScript::py_allPlayerUnitsCount(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::allPlayerUnitsCount(id));
+  return Py_BuildValue((char*)"i", currentScript()->allPlayerUnitsCount(id));
 }
 
 PyObject* PythonScript::py_playerUnitsOfType(PyObject*, PyObject* args)
@@ -1471,20 +1522,21 @@ PyObject* PythonScript::py_playerUnitsOfType(PyObject*, PyObject* args)
     return 0;
   }
 
-  QValueList<int> units = BosonScript::playerUnitsOfType(id, type);
+  QValueList<int> units = currentScript()->playerUnitsOfType(id, type);
 
   return QValueListToPyList(&units);
 }
 
 PyObject* PythonScript::py_playerUnitsOfTypeCount(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id, type;
   if(!PyArg_ParseTuple(args, (char*)"ii", &id, &type))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::playerUnitsOfTypeCount(id, type));
+  return Py_BuildValue((char*)"i", currentScript()->playerUnitsOfTypeCount(id, type));
 }
 
 
@@ -1913,87 +1965,95 @@ PyObject* PythonScript::py_removeLight(PyObject*, PyObject* args)
 /*****  AI functions  *****/
 PyObject* PythonScript::py_aiDelay(PyObject*, PyObject*)
 {
-  return Py_BuildValue((char*)"f", BosonScript::aiDelay());
+  BO_CHECK_NULL_RET0(currentScript());
+  return Py_BuildValue((char*)"f", currentScript()->aiDelay());
 }
 
 /*****  Other functions  *****/
 PyObject* PythonScript::py_startBenchmark(PyObject*, PyObject*)
 {
-  BosonScript::startBenchmark();
+  BO_CHECK_NULL_RET0(currentScript());
+  currentScript()->startBenchmark();
   Py_INCREF(Py_None);
   return Py_None;
 }
 
 PyObject* PythonScript::py_endBenchmark(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   char* name = 0;
   if(!PyArg_ParseTuple(args, (char*)"|s", &name))
   {
     return 0;
   }
-  BosonScript::endBenchmark(QString(name));
+  currentScript()->endBenchmark(QString(name));
   Py_INCREF(Py_None);
   return Py_None;
 }
 
 PyObject* PythonScript::py_setRandomSeed(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int seed;
   if(!PyArg_ParseTuple(args, (char*)"i", &seed))
   {
     return 0;
   }
-  BosonScript::setRandomSeed(seed);
+  currentScript()->setRandomSeed(seed);
   Py_INCREF(Py_None);
   return Py_None;
 }
 
 PyObject* PythonScript::py_findPath(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int x1, y1, x2, y2;
   if(!PyArg_ParseTuple(args, (char*)"iiii", &x1, &y1, &x2, &y2))
   {
     return 0;
   }
-  BosonScript::findPath(x1, y1, x2, y2);
+  currentScript()->findPath(x1, y1, x2, y2);
   Py_INCREF(Py_None);
   return Py_None;
 }
 
 PyObject* PythonScript::py_addEffect(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   float x, y, z, rot = 0.0f;
   if(!PyArg_ParseTuple(args, (char*)"i(fff)|f", &id, &x, &y, &z, &rot))
   {
     return 0;
   }
-  BosonScript::addEffect(id, BoVector3Fixed(x, y, z), rot);
+  currentScript()->addEffect(id, BoVector3Fixed(x, y, z), rot);
   Py_INCREF(Py_None);
   return Py_None;
 }
 
 PyObject* PythonScript::py_addEffectToUnit(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int unitid, effectid;
   float x = 0, y = 0, z = 0, zrot = 0;
   if(!PyArg_ParseTuple(args, (char*)"ii|(fff)f", &unitid, &effectid, &x, &y, &z, &zrot))
   {
     return 0;
   }
-  BosonScript::addEffectToUnit(unitid, effectid, BoVector3Fixed(x, y, z), zrot);
+  currentScript()->addEffectToUnit(unitid, effectid, BoVector3Fixed(x, y, z), zrot);
   Py_INCREF(Py_None);
   return Py_None;
 }
 
 PyObject* PythonScript::py_advanceEffects(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int ticks;
   if(!PyArg_ParseTuple(args, (char*)"i", &ticks))
   {
     return 0;
   }
-  BosonScript::advanceEffects(ticks);
+  currentScript()->advanceEffects(ticks);
   Py_INCREF(Py_None);
   return Py_None;
 }
@@ -2001,37 +2061,41 @@ PyObject* PythonScript::py_advanceEffects(PyObject*, PyObject* args)
 PyObject* PythonScript::py_wind(PyObject*, PyObject*)
 {
   BO_CHECK_NULL_RET0(currentScript());
+  BO_CHECK_NULL_RET0(currentScript());
   const BoVector3Float& wind = currentScript()->wind();
   return Py_BuildValue((char*)"[f, f, f]", wind.x(), wind.y(), wind.z());
 }
 
 PyObject* PythonScript::py_setWind(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   float x = 0, y = 0, z = 0;
   if(!PyArg_ParseTuple(args, (char*)"(fff)", &x, &y, &z))
   {
     return 0;
   }
-  BosonScript::setWind(BoVector3Float(x, y, z));
+  currentScript()->setWind(BoVector3Float(x, y, z));
   Py_INCREF(Py_None);
   return Py_None;
 }
 
 PyObject* PythonScript::py_unfogPlayer(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int playerid;
   if(!PyArg_ParseTuple(args, (char*)"i", &playerid))
   {
     return 0;
   }
-  BosonScript::unfogPlayer(playerid);
+  currentScript()->unfogPlayer(playerid);
   Py_INCREF(Py_None);
   return Py_None;
 }
 
 PyObject* PythonScript::py_unfogAllPlayers(PyObject*, PyObject*)
 {
-  BosonScript::unfogAllPlayers();
+  BO_CHECK_NULL_RET0(currentScript());
+  currentScript()->unfogAllPlayers();
   Py_INCREF(Py_None);
   return Py_None;
 }
@@ -2053,13 +2117,14 @@ PyObject* PythonScript::py_setAcceptUserInput(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_addChatMessage(PyObject* self, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   char* from = 0;
   char* message = 0;
   if(!PyArg_ParseTuple(args, (char*)"ss", &from, &message))
   {
     return 0;
   }
-  BosonScript::addChatMessage(QString(from), QString(message));
+  currentScript()->addChatMessage(QString(from), QString(message));
   Py_INCREF(Py_None);
   return Py_None;
 }
