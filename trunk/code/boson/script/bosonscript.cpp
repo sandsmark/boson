@@ -214,7 +214,12 @@ QValueList<int> BosonScript::allPlayers()
   QPtrListIterator<KPlayer> it(*(game()->playerList()));
   for (; it.current(); ++it)
   {
-    players.append(((Player*)it.current())->bosonId());
+    Player* p = (Player*)it.current();
+    if(p->bosonId() < 128 || p->bosonId() >= 256)
+    {
+      continue;
+    }
+    players.append(p->bosonId());
   }
 
   return players;
