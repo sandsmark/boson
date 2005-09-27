@@ -236,11 +236,6 @@ bool BosonScript::isNeutral(int player) const
   return false;
 }
 
-unsigned long int BosonScript::powerGenerated() const
-{
-  return powerGenerated(playerId());
-}
-
 unsigned long int BosonScript::powerGenerated(int playerId) const
 {
   if(!game())
@@ -269,11 +264,6 @@ unsigned long int BosonScript::powerGenerated(int playerId) const
   return powerGenerated;
 }
 
-unsigned long int BosonScript::powerConsumed() const
-{
-  return powerConsumed(playerId());
-}
-
 unsigned long int BosonScript::powerConsumed(int playerId) const
 {
   if(!game())
@@ -295,11 +285,6 @@ unsigned long int BosonScript::powerConsumed(int playerId) const
   return powerConsumed;
 }
 
-unsigned long int BosonScript::powerGeneratedAfterConstructions() const
-{
-  return powerGeneratedAfterConstructions(playerId());
-}
-
 unsigned long int BosonScript::powerGeneratedAfterConstructions(int playerId) const
 {
   if(!game())
@@ -319,11 +304,6 @@ unsigned long int BosonScript::powerGeneratedAfterConstructions(int playerId) co
   unsigned long int powerGenerated = 0;
   p->calculatePower(&powerGenerated, 0, true);
   return powerGenerated;
-}
-
-unsigned long int BosonScript::powerConsumedAfterConstructions() const
-{
-  return powerConsumedAfterConstructions(playerId());
 }
 
 unsigned long int BosonScript::powerConsumedAfterConstructions(int playerId) const
@@ -367,11 +347,6 @@ unsigned long int BosonScript::minerals(int playerId) const
   return p->minerals();
 }
 
-unsigned long int BosonScript::minerals() const
-{
-  return minerals(playerId());
-}
-
 void BosonScript::addMinerals(int playerId, int amount)
 {
   if(!game())
@@ -404,11 +379,6 @@ unsigned long int BosonScript::oil(int playerId) const
   }
 
   return p->oil();
-}
-
-unsigned long int BosonScript::oil() const
-{
-  return oil(playerId());
 }
 
 void BosonScript::addOil(int playerId, int amount)
