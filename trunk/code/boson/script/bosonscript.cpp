@@ -98,9 +98,9 @@ BosonScript::~BosonScript()
   delete mInterface;
 }
 
-void BosonScript::sendInput(int playerId, QDataStream& stream)
+void BosonScript::sendInput(QDataStream& stream)
 {
-  boDebug() << k_funcinfo << "PlayerID: " << playerId << endl;
+  boDebug() << k_funcinfo << endl;
 
   if(!game())
   {
@@ -108,29 +108,11 @@ void BosonScript::sendInput(int playerId, QDataStream& stream)
     return;
   }
 
-  // AB:
-  // this prevents that the script author tries to send faked player inputs.
-  //
-  // do NOT remove this - unless you want to allow cheating...
-  //
-  // note however, that it implies that scripts that are for no specific player
-  // (global game scripts) cannot control units of any player.
-  // if we want to support that, we should add a "allowPlayerInputs" flag to the
-  // BosonScript object and check for it here. but it MUST be in C++, the script
-  // author must not be able to work around this restriction without modifying
-  // the code!
-  BO_CHECK_NULL_RET(BosonScript::currentScript());
-  if(playerId != BosonScript::currentScript()->playerId())
-  {
-    boError() << k_funcinfo << "tried to send input for player " << playerId << " but script is for player " << BosonScript::currentScript()->playerId() << endl;
-    return;
-  }
-
-  Player* p = (Player*)(game()->findPlayerByUserId(playerId));
+  Player* p = scriptPlayer();
 
   if(!p)
   {
-    boError() << k_funcinfo << "No player with id " << playerId << endl;
+    boError() << k_funcinfo << "No player with id " << playerId() << endl;
     return;
   }
 
@@ -174,7 +156,7 @@ void BosonScript::removeEventHandler(int id)
 
 
 /*****  Player methods  *****/
-bool BosonScript::areEnemies(int playerId1, int playerId2)
+bool BosonScript::areEnemies(int playerId1, int playerId2) const
 {
   if(!game())
   {
@@ -182,7 +164,7 @@ bool BosonScript::areEnemies(int playerId1, int playerId2)
     return false;  // What to return here?
   }
 
-  Player* p1 = (Player*)(game()->findPlayerByUserId(playerId1));
+  Player* p1 = findPlayerByUserId(playerId1);
 
   if(!p1)
   {
@@ -190,18 +172,15 @@ bool BosonScript::areEnemies(int playerId1, int playerId2)
     return false;
   }
 
-  Player* p2 = (Player*)(game()->findPlayerByUserId(playerId2));
-
-  if(!p2)
-  {
-    boError() << k_funcinfo << "No player with id " << playerId1 << endl;
-    return false;
-  }
-
-  return p1->isEnemy(p2);
+  return p1->isPlayerEnemy(playerId2);
 }
 
-QValueList<int> BosonScript::allPlayers()
+bool BosonScript::isEnemy(int p) const
+{
+  return areEnemies(playerId(), p);
+}
+
+QValueList<int> BosonScript::allPlayers() const
 {
   QValueList<int> players;
 
@@ -215,7 +194,7 @@ QValueList<int> BosonScript::allPlayers()
   for (; it.current(); ++it)
   {
     Player* p = (Player*)it.current();
-    if(p->bosonId() < 128 || p->bosonId() >= 256)
+    if(p->bosonId() < 128 || p->bosonId() >= 512)
     {
       continue;
     }
@@ -225,7 +204,7 @@ QValueList<int> BosonScript::allPlayers()
   return players;
 }
 
-bool BosonScript::isNeutral(int playerId)
+bool BosonScript::isNeutral(int player) const
 {
   if(!game())
   {
@@ -233,26 +212,51 @@ bool BosonScript::isNeutral(int playerId)
     return false;  // What to return here?
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerId));
-
-  if(!p)
+  if(playerId() != 0)
   {
-    boError() << k_funcinfo << "No player with id " << playerId << endl;
-    return false;
+    Player* p = scriptPlayer();
+    if(!p)
+    {
+      boError() << k_funcinfo << "NULL script player" << endl;
+      return false;
+    }
+    return p->isPlayerNeutral(player);
+  }
+  else
+  {
+    Player* p = findPlayerByUserId(player);
+    if(!p)
+    {
+      boError() << k_funcinfo << "No player with id " << player << endl;
+      return false;
+    }
+    return p->isNeutralPlayer();
   }
 
-  return p->isNeutralPlayer();
+  return false;
 }
 
-unsigned long int BosonScript::powerGenerated(int playerId)
+unsigned long int BosonScript::powerGenerated() const
+{
+  return powerGenerated(playerId());
+}
+
+unsigned long int BosonScript::powerGenerated(int playerId) const
 {
   if(!game())
   {
     boError() << k_funcinfo << "NULL game" << endl;
     return 0;
   }
+#if 0
+  if(!canAccessPlayer(playerId))
+  {
+    boWarning() << k_funcinfo << "player with ID " << playerId << " cannot be acessed from current script." << endl;
+    return 0;
+  }
+#endif
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerId));
+  Player* p = findPlayerByUserId(playerId);
 
   if(!p)
   {
@@ -265,7 +269,12 @@ unsigned long int BosonScript::powerGenerated(int playerId)
   return powerGenerated;
 }
 
-unsigned long int BosonScript::powerConsumed(int playerId)
+unsigned long int BosonScript::powerConsumed() const
+{
+  return powerConsumed(playerId());
+}
+
+unsigned long int BosonScript::powerConsumed(int playerId) const
 {
   if(!game())
   {
@@ -273,7 +282,7 @@ unsigned long int BosonScript::powerConsumed(int playerId)
     return 0;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerId));
+  Player* p = findPlayerByUserId(playerId);
 
   if(!p)
   {
@@ -286,7 +295,12 @@ unsigned long int BosonScript::powerConsumed(int playerId)
   return powerConsumed;
 }
 
-unsigned long int BosonScript::powerGeneratedAfterConstructions(int playerId)
+unsigned long int BosonScript::powerGeneratedAfterConstructions() const
+{
+  return powerGeneratedAfterConstructions(playerId());
+}
+
+unsigned long int BosonScript::powerGeneratedAfterConstructions(int playerId) const
 {
   if(!game())
   {
@@ -294,7 +308,7 @@ unsigned long int BosonScript::powerGeneratedAfterConstructions(int playerId)
     return 0;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerId));
+  Player* p = findPlayerByUserId(playerId);
 
   if(!p)
   {
@@ -307,7 +321,12 @@ unsigned long int BosonScript::powerGeneratedAfterConstructions(int playerId)
   return powerGenerated;
 }
 
-unsigned long int BosonScript::powerConsumedAfterConstructions(int playerId)
+unsigned long int BosonScript::powerConsumedAfterConstructions() const
+{
+  return powerConsumedAfterConstructions(playerId());
+}
+
+unsigned long int BosonScript::powerConsumedAfterConstructions(int playerId) const
 {
   if(!game())
   {
@@ -315,7 +334,7 @@ unsigned long int BosonScript::powerConsumedAfterConstructions(int playerId)
     return 0;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerId));
+  Player* p = findPlayerByUserId(playerId);
 
   if(!p)
   {
@@ -329,7 +348,7 @@ unsigned long int BosonScript::powerConsumedAfterConstructions(int playerId)
 }
 
 /*****  Resource methods  *****/
-unsigned long int BosonScript::minerals(int playerId)
+unsigned long int BosonScript::minerals(int playerId) const
 {
   if(!game())
   {
@@ -337,7 +356,7 @@ unsigned long int BosonScript::minerals(int playerId)
     return 0;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerId));
+  Player* p = findPlayerByUserId(playerId);
 
   if(!p)
   {
@@ -346,6 +365,11 @@ unsigned long int BosonScript::minerals(int playerId)
   }
 
   return p->minerals();
+}
+
+unsigned long int BosonScript::minerals() const
+{
+  return minerals(playerId());
 }
 
 void BosonScript::addMinerals(int playerId, int amount)
@@ -363,7 +387,7 @@ void BosonScript::addMinerals(int playerId, int amount)
   game()->sendMessage(b, BosonMessageIds::IdModifyMinerals);
 }
 
-unsigned long int BosonScript::oil(int playerId)
+unsigned long int BosonScript::oil(int playerId) const
 {
   if(!game())
   {
@@ -371,7 +395,7 @@ unsigned long int BosonScript::oil(int playerId)
     return 0;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerId));
+  Player* p = findPlayerByUserId(playerId);
 
   if(!p)
   {
@@ -380,6 +404,11 @@ unsigned long int BosonScript::oil(int playerId)
   }
 
   return p->oil();
+}
+
+unsigned long int BosonScript::oil() const
+{
+  return oil(playerId());
 }
 
 void BosonScript::addOil(int playerId, int amount)
@@ -397,7 +426,7 @@ void BosonScript::addOil(int playerId, int amount)
   game()->sendMessage(b, BosonMessageIds::IdModifyOil);
 }
 
-QValueList<BoVector2Fixed> BosonScript::nearestMineralLocations(int playerId, int x, int y, unsigned int n, unsigned int radius)
+QValueList<BoVector2Fixed> BosonScript::nearestMineralLocations(int x, int y, unsigned int n, unsigned int radius)
 {
   if(!game())
   {
@@ -405,18 +434,18 @@ QValueList<BoVector2Fixed> BosonScript::nearestMineralLocations(int playerId, in
     return QValueList<BoVector2Fixed>();
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerId));
+  Player* p = scriptPlayer();
 
   if(!p)
   {
-    boError() << k_funcinfo << "No player with id " << playerId << endl;
+    boError() << k_funcinfo << "No player with id " << playerId() << endl;
     return QValueList<BoVector2Fixed>();
   }
 
   return canvas()->pathfinder()->findLocations(p, x, y, n, radius, BosonPath::Minerals);
 }
 
-QValueList<BoVector2Fixed> BosonScript::nearestOilLocations(int playerId, int x, int y, unsigned int n, unsigned int radius)
+QValueList<BoVector2Fixed> BosonScript::nearestOilLocations(int x, int y, unsigned int n, unsigned int radius)
 {
   if(!game())
   {
@@ -424,11 +453,11 @@ QValueList<BoVector2Fixed> BosonScript::nearestOilLocations(int playerId, int x,
     return QValueList<BoVector2Fixed>();
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerId));
+  Player* p = scriptPlayer();
 
   if(!p)
   {
-    boError() << k_funcinfo << "No player with id " << playerId << endl;
+    boError() << k_funcinfo << "No player with id " << playerId() << endl;
     return QValueList<BoVector2Fixed>();
   }
 
@@ -437,7 +466,7 @@ QValueList<BoVector2Fixed> BosonScript::nearestOilLocations(int playerId, int x,
 
 
 /*****  Unit methods  *****/
-void BosonScript::moveUnit(int player, int id, float x, float y)
+void BosonScript::moveUnit(int id, float x, float y)
 {
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
@@ -452,10 +481,10 @@ void BosonScript::moveUnit(int player, int id, float x, float y)
   }
 
   QDataStream msg(b, IO_ReadOnly);
-  sendInput(player, msg);
+  sendInput(msg);
 }
 
-void BosonScript::moveUnitWithAttacking(int player, int id, float x, float y)
+void BosonScript::moveUnitWithAttacking(int id, float x, float y)
 {
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
@@ -470,10 +499,10 @@ void BosonScript::moveUnitWithAttacking(int player, int id, float x, float y)
   }
 
   QDataStream msg(b, IO_ReadOnly);
-  sendInput(player, msg);
+  sendInput(msg);
 }
 
-void BosonScript::attack(int player, int attackerId, int targetId)
+void BosonScript::attack(int attackerId, int targetId)
 {
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
@@ -488,10 +517,10 @@ void BosonScript::attack(int player, int attackerId, int targetId)
   }
 
   QDataStream msg(b, IO_ReadOnly);
-  sendInput(player, msg);
+  sendInput(msg);
 }
 
-void BosonScript::stopUnit(int player, int id)
+void BosonScript::stopUnit(int id)
 {
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
@@ -506,10 +535,10 @@ void BosonScript::stopUnit(int player, int id)
   }
 
   QDataStream msg(b, IO_WriteOnly);
-  sendInput(player, msg);
+  sendInput(msg);
 }
 
-void BosonScript::mineUnit(int player, int id, float x, float y)
+void BosonScript::mineUnit(int id, float x, float y)
 {
   // First we have to find resource mine
   // TODO: it sucks to do this here, perhaps we could have something like a
@@ -540,15 +569,15 @@ void BosonScript::mineUnit(int player, int id, float x, float y)
   }
 
   QDataStream msg(b, IO_ReadOnly);
-  sendInput(player, msg);
+  sendInput(msg);
 }
 
-void BosonScript::setUnitRotation(int player, int id, float rotation)
+void BosonScript::setUnitRotation(int id, float rotation)
 {
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  BosonMessageMoveRotate message(id, player, rotation);
+  BosonMessageMoveRotate message(id, playerId(), rotation);
   if(!message.save(stream))
   {
     boError() << k_funcinfo << "failed saving message " << message.messageId() << " to stream" << endl;
@@ -556,10 +585,10 @@ void BosonScript::setUnitRotation(int player, int id, float rotation)
   }
 
   QDataStream msg(b, IO_ReadOnly);
-  sendInput(player, msg);
+  sendInput(msg);
 }
 
-void BosonScript::dropBomb(int player, int id, int weapon, float x, float y)
+void BosonScript::dropBomb(int id, int weapon, float x, float y)
 {
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
@@ -576,15 +605,15 @@ void BosonScript::dropBomb(int player, int id, int weapon, float x, float y)
   }
 
   QDataStream msg(b, IO_ReadOnly);
-  sendInput(player, msg);
+  sendInput(msg);
 }
 
-void BosonScript::produceUnit(int player, int factory, int production)
+void BosonScript::produceUnit(int factory, int production)
 {
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  BosonMessageMoveProduce message((Q_UINT32)ProduceUnit, player, factory, production);
+  BosonMessageMoveProduce message((Q_UINT32)ProduceUnit, playerId(), factory, production);
   if(!message.save(stream))
   {
     boError() << k_funcinfo << "failed saving message " << message.messageId() << " to stream" << endl;
@@ -592,10 +621,10 @@ void BosonScript::produceUnit(int player, int factory, int production)
   }
 
   QDataStream msg(b, IO_ReadOnly);
-  sendInput(player, msg);
+  sendInput(msg);
 }
 
-void BosonScript::spawnUnit(int player, int type, float x, float y)
+void BosonScript::spawnUnit(int type, float x, float y)
 {
   if(!game())
   {
@@ -615,10 +644,10 @@ void BosonScript::spawnUnit(int player, int type, float x, float y)
 #endif
 
   QDataStream msg(b, IO_ReadOnly);
-  sendInput(player, msg);
+  sendInput(msg);
 }
 
-void BosonScript::teleportUnit(int player, int id, float x, float y)
+void BosonScript::teleportUnit(int id, float x, float y)
 {
   if(!game())
   {
@@ -628,7 +657,7 @@ void BosonScript::teleportUnit(int player, int id, float x, float y)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  BosonMessageMoveTeleport message(id, player, BoVector2Fixed(x, y));
+  BosonMessageMoveTeleport message(id, playerId(), BoVector2Fixed(x, y));
   if(!message.save(stream))
   {
     boError() << k_funcinfo << "failed saving message " << message.messageId() << " to stream" << endl;
@@ -636,10 +665,10 @@ void BosonScript::teleportUnit(int player, int id, float x, float y)
   }
 
   QDataStream msg(b, IO_ReadOnly);
-  sendInput(player, msg);
+  sendInput(msg);
 }
 
-void BosonScript::placeProduction(int player, int factoryid, float x, float y)
+void BosonScript::placeProduction(int factoryid, float x, float y)
 {
   if(!game())
   {
@@ -647,11 +676,11 @@ void BosonScript::placeProduction(int player, int factoryid, float x, float y)
     return;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(player));
+  Player* p = scriptPlayer();
 
   if(!p)
   {
-    boError() << k_funcinfo << "No player with id " << player << endl;
+    boError() << k_funcinfo << "No player with id " << playerId() << endl;
     return;
   }
 
@@ -691,10 +720,10 @@ void BosonScript::placeProduction(int player, int factoryid, float x, float y)
   }
 
   QDataStream msg(b, IO_ReadOnly);
-  sendInput(player, msg);
+  sendInput(msg);
 }
 
-bool BosonScript::canPlaceProductionAt(int player, int factoryid, int unitType, float x, float y)
+bool BosonScript::canPlaceProductionAt(int factoryid, int unitType, float x, float y)
 {
   if(!game())
   {
@@ -707,11 +736,11 @@ bool BosonScript::canPlaceProductionAt(int player, int factoryid, int unitType, 
     return false;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(player));
+  Player* p = scriptPlayer();
 
   if(!p)
   {
-    boError() << k_funcinfo << "No player with id " << player << endl;
+    boError() << k_funcinfo << "No player with id " << playerId() << endl;
     return false;
   }
 
@@ -742,7 +771,7 @@ bool BosonScript::canPlaceProductionAt(int player, int factoryid, int unitType, 
   return canvas()->canPlaceUnitAt(prop, BoVector2Fixed(x, y), prod);
 }
 
-QValueList<int> BosonScript::unitsOnCell(int x, int y)
+QValueList<int> BosonScript::unitsOnCell(int x, int y) const
 {
   QValueList<int> list;
   if(!canvas())
@@ -762,7 +791,7 @@ QValueList<int> BosonScript::unitsOnCell(int x, int y)
   return list;
 }
 
-QValueList<int> BosonScript::unitsInRect(int x1, int y1, int x2, int y2)
+QValueList<int> BosonScript::unitsInRect(int x1, int y1, int x2, int y2) const
 {
   QValueList<int> list;
   if(!canvas())
@@ -782,7 +811,7 @@ QValueList<int> BosonScript::unitsInRect(int x1, int y1, int x2, int y2)
   return list;
 }
 
-bool BosonScript::cellOccupied(int x, int y)
+bool BosonScript::cellOccupied(int x, int y) const
 {
   if(!canvas())
   {
@@ -792,7 +821,7 @@ bool BosonScript::cellOccupied(int x, int y)
   return canvas()->cellOccupied(x, y);
 }
 
-BoVector2Fixed BosonScript::unitPosition(int id)
+BoVector2Fixed BosonScript::unitPosition(int id) const
 {
   if(!game())
   {
@@ -810,7 +839,7 @@ BoVector2Fixed BosonScript::unitPosition(int id)
   return BoVector2Fixed(u->x(), u->y());
 }
 
-int BosonScript::unitOwner(int id)
+int BosonScript::unitOwner(int id) const
 {
   if(!game())
   {
@@ -828,7 +857,7 @@ int BosonScript::unitOwner(int id)
   return u->owner()->bosonId();
 }
 
-int BosonScript::unitType(int id)
+int BosonScript::unitType(int id) const
 {
   if(!game())
   {
@@ -846,7 +875,7 @@ int BosonScript::unitType(int id)
   return u->unitProperties()->typeId();
 }
 
-int BosonScript::unitWork(int id)
+int BosonScript::unitWork(int id) const
 {
   if(!game())
   {
@@ -864,7 +893,7 @@ int BosonScript::unitWork(int id)
   return (int)u->work();
 }
 
-bool BosonScript::isUnitMobile(int id)
+bool BosonScript::isUnitMobile(int id) const
 {
   if(!game())
   {
@@ -882,7 +911,7 @@ bool BosonScript::isUnitMobile(int id)
   return u->isMobile();
 }
 
-bool BosonScript::isUnitTypeMobile(int playerid, int type)
+bool BosonScript::isUnitTypeMobile(int playerId, int type) const
 {
   if(!game())
   {
@@ -890,25 +919,25 @@ bool BosonScript::isUnitTypeMobile(int playerid, int type)
     return false;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerid));
+  Player* p = findPlayerByUserId(playerId);
 
   if(!p)
   {
-    boError() << k_funcinfo << "No player with id " << playerid << endl;
+    boError() << k_funcinfo << "No player with id " << playerId << endl;
     return false;
   }
 
   const UnitProperties* prop = p->speciesTheme()->unitProperties(type);
   if(!prop)
   {
-    boError() << k_funcinfo << "No unit properties with typeid " << type << " for player with id " << playerid << endl;
+    boError() << k_funcinfo << "No unit properties with typeid " << type << " for player with id " << playerId << endl;
     return false;
   }
 
   return prop->isMobile();
 }
 
-bool BosonScript::isUnitAircraft(int id)
+bool BosonScript::isUnitAircraft(int id) const
 {
   if(!game())
   {
@@ -926,7 +955,7 @@ bool BosonScript::isUnitAircraft(int id)
   return u->unitProperties()->isAircraft();
 }
 
-bool BosonScript::isUnitTypeAircraft(int playerid, int type)
+bool BosonScript::isUnitTypeAircraft(int playerId, int type) const
 {
   if(!game())
   {
@@ -934,25 +963,25 @@ bool BosonScript::isUnitTypeAircraft(int playerid, int type)
     return false;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerid));
+  Player* p = findPlayerByUserId(playerId);
 
   if(!p)
   {
-    boError() << k_funcinfo << "No player with id " << playerid << endl;
+    boError() << k_funcinfo << "No player with id " << playerId << endl;
     return false;
   }
 
   const UnitProperties* prop = p->speciesTheme()->unitProperties(type);
   if(!prop)
   {
-    boError() << k_funcinfo << "No unit properties with typeid " << type << " for player with id " << playerid << endl;
+    boError() << k_funcinfo << "No unit properties with typeid " << type << " for player with id " << playerId << endl;
     return false;
   }
 
   return prop->isAircraft();
 }
 
-bool BosonScript::canUnitShoot(int id)
+bool BosonScript::canUnitShoot(int id) const
 {
   if(!game())
   {
@@ -970,7 +999,7 @@ bool BosonScript::canUnitShoot(int id)
   return u->unitProperties()->canShoot();
 }
 
-bool BosonScript::canUnitTypeShoot(int playerid, int type)
+bool BosonScript::canUnitTypeShoot(int playerId, int type) const
 {
   QValueList<int> list;
   if(!game())
@@ -979,25 +1008,25 @@ bool BosonScript::canUnitTypeShoot(int playerid, int type)
     return false;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerid));
+  Player* p = findPlayerByUserId(playerId);
 
   if(!p)
   {
-    boError() << k_funcinfo << "No player with id " << playerid << endl;
+    boError() << k_funcinfo << "No player with id " << playerId << endl;
     return false;
   }
 
   const UnitProperties* prop = p->speciesTheme()->unitProperties(type);
   if(!prop)
   {
-    boError() << k_funcinfo << "No unit properties with typeid " << type << " for player with id " << playerid << endl;
+    boError() << k_funcinfo << "No unit properties with typeid " << type << " for player with id " << playerId << endl;
     return false;
   }
 
   return prop->canShoot();
 }
 
-bool BosonScript::canUnitProduce(int id)
+bool BosonScript::canUnitProduce(int id) const
 {
   if(!game())
   {
@@ -1015,12 +1044,12 @@ bool BosonScript::canUnitProduce(int id)
   return (u->plugin(UnitPlugin::Production));
 }
 
-bool BosonScript::hasUnitCompletedProduction(int id)
+bool BosonScript::hasUnitCompletedProduction(int id) const
 {
   return (completedProductionType(id) > 0);
 }
 
-unsigned long int BosonScript::completedProductionType(int id)
+unsigned long int BosonScript::completedProductionType(int id) const
 {
   if(!game())
   {
@@ -1044,7 +1073,7 @@ unsigned long int BosonScript::completedProductionType(int id)
   return prod->completedProductionId();
 }
 
-bool BosonScript::canUnitMineMinerals(int id)
+bool BosonScript::canUnitMineMinerals(int id) const
 {
   if(!game())
   {
@@ -1067,7 +1096,7 @@ bool BosonScript::canUnitMineMinerals(int id)
   return false;
 }
 
-bool BosonScript::canUnitTypeMineMinerals(int playerid, int type)
+bool BosonScript::canUnitTypeMineMinerals(int playerId, int type) const
 {
   QValueList<int> list;
   if(!game())
@@ -1076,18 +1105,18 @@ bool BosonScript::canUnitTypeMineMinerals(int playerid, int type)
     return false;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerid));
+  Player* p = findPlayerByUserId(playerId);
 
   if(!p)
   {
-    boError() << k_funcinfo << "No player with id " << playerid << endl;
+    boError() << k_funcinfo << "No player with id " << playerId << endl;
     return false;
   }
 
   const UnitProperties* prop = p->speciesTheme()->unitProperties(type);
   if(!prop)
   {
-    boError() << k_funcinfo << "No unit properties with typeid " << type << " for player with id " << playerid << endl;
+    boError() << k_funcinfo << "No unit properties with typeid " << type << " for player with id " << playerId << endl;
     return false;
   }
 
@@ -1099,7 +1128,7 @@ bool BosonScript::canUnitTypeMineMinerals(int playerid, int type)
   return false;
 }
 
-bool BosonScript::canUnitMineOil(int id)
+bool BosonScript::canUnitMineOil(int id) const
 {
   if(!game())
   {
@@ -1122,7 +1151,7 @@ bool BosonScript::canUnitMineOil(int id)
   return false;
 }
 
-bool BosonScript::canUnitTypeMineOil(int playerid, int type)
+bool BosonScript::canUnitTypeMineOil(int playerId, int type) const
 {
   QValueList<int> list;
   if(!game())
@@ -1131,18 +1160,18 @@ bool BosonScript::canUnitTypeMineOil(int playerid, int type)
     return false;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerid));
+  Player* p = findPlayerByUserId(playerId);
 
   if(!p)
   {
-    boError() << k_funcinfo << "No player with id " << playerid << endl;
+    boError() << k_funcinfo << "No player with id " << playerId << endl;
     return false;
   }
 
   const UnitProperties* prop = p->speciesTheme()->unitProperties(type);
   if(!prop)
   {
-    boError() << k_funcinfo << "No unit properties with typeid " << type << " for player with id " << playerid << endl;
+    boError() << k_funcinfo << "No unit properties with typeid " << type << " for player with id " << playerId << endl;
     return false;
   }
 
@@ -1154,7 +1183,7 @@ bool BosonScript::canUnitTypeMineOil(int playerid, int type)
   return false;
 }
 
-QValueList<int> BosonScript::productionTypes(int id)
+QValueList<int> BosonScript::productionTypes(int id) const
 {
   QValueList<int> list;
 
@@ -1192,7 +1221,7 @@ QValueList<int> BosonScript::productionTypes(int id)
   return list;
 }
 
-bool BosonScript::isUnitAlive(int id)
+bool BosonScript::isUnitAlive(int id) const
 {
   if(!game())
   {
@@ -1209,7 +1238,7 @@ bool BosonScript::isUnitAlive(int id)
   return !u->isDestroyed();
 }
 
-QValueList<int> BosonScript::allPlayerUnits(int id)
+QValueList<int> BosonScript::allPlayerUnits(int id) const
 {
   QValueList<int> list;
   if(!game())
@@ -1218,7 +1247,7 @@ QValueList<int> BosonScript::allPlayerUnits(int id)
     return list;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(id));
+  Player* p = findPlayerByUserId(id);
 
   if(!p)
   {
@@ -1238,7 +1267,7 @@ QValueList<int> BosonScript::allPlayerUnits(int id)
   return list;
 }
 
-int BosonScript::allPlayerUnitsCount(int id)
+int BosonScript::allPlayerUnitsCount(int id) const
 {
   int count = 0;
   if(!game())
@@ -1247,7 +1276,7 @@ int BosonScript::allPlayerUnitsCount(int id)
     return count;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(id));
+  Player* p = findPlayerByUserId(id);
 
   if(!p)
   {
@@ -1266,7 +1295,8 @@ int BosonScript::allPlayerUnitsCount(int id)
   }
   return count;
 }
-QValueList<int> BosonScript::playerUnitsOfType(int playerid, int type)
+
+QValueList<int> BosonScript::playerUnitsOfType(int playerId, int type) const
 {
   QValueList<int> list;
   if(!game())
@@ -1275,11 +1305,11 @@ QValueList<int> BosonScript::playerUnitsOfType(int playerid, int type)
     return list;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerid));
+  Player* p = findPlayerByUserId(playerId);
 
   if(!p)
   {
-    boError() << k_funcinfo << "No player with id " << playerid << endl;
+    boError() << k_funcinfo << "No player with id " << playerId << endl;
     return list;
   }
 
@@ -1298,7 +1328,7 @@ QValueList<int> BosonScript::playerUnitsOfType(int playerid, int type)
   return list;
 }
 
-int BosonScript::playerUnitsOfTypeCount(int playerid, int type)
+int BosonScript::playerUnitsOfTypeCount(int playerId, int type) const
 {
   int count = 0;
   if(!game())
@@ -1307,11 +1337,11 @@ int BosonScript::playerUnitsOfTypeCount(int playerid, int type)
     return count;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerid));
+  Player* p = findPlayerByUserId(playerId);
 
   if(!p)
   {
-    boError() << k_funcinfo << "No player with id " << playerid << endl;
+    boError() << k_funcinfo << "No player with id " << playerId << endl;
     return count;
   }
 
@@ -1681,13 +1711,18 @@ void BosonScript::unfogPlayer(int playerid)
     return;
   }
 
-  Player* p = (Player*)(game()->findPlayerByUserId(playerid));
+  Player* p = findPlayerByUserId(playerid);
 
   if(!p)
   {
     boError() << k_funcinfo << "No player with id " << playerid << endl;
     return;
   }
+
+  // AB: this breaks network, unless it is executed on all clients. scripts
+  // cannot ensure that.
+  // this method should be removed.
+  boWarning() << k_funcinfo << "unfogging - may break network" << endl;
   for(unsigned int x = 0; x < map->width(); x++)
   {
     for(unsigned int y = 0; y < map->height(); y++)
@@ -1743,6 +1778,25 @@ void BosonScript::addChatMessage(const QString& from, const QString& message)
   }
 
   game()->slotAddChatSystemMessage(from, message);
+}
+
+Player* BosonScript::findPlayerByUserId(int id) const
+{
+  if(playerId() != 0)
+  {
+    if(id != playerId())
+    {
+      boError() << k_funcinfo << "script is not allowed to retrieve Player object of player " << id << ". only " << playerId() << " can be retrieved." << endl;
+      return 0;
+    }
+  }
+  BO_CHECK_NULL_RET0(game());
+  return (Player*)(game()->findPlayerByUserId(playerId()));
+}
+
+Player* BosonScript::scriptPlayer() const
+{
+  return findPlayerByUserId(playerId());
 }
 
 

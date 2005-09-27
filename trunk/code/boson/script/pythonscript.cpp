@@ -47,6 +47,7 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"removeEventHandler", py_removeEventHandler, METH_VARARGS, 0 },
   // Players
   { (char*)"areEnemies", py_areEnemies, METH_VARARGS, 0 },
+  { (char*)"isEnemy", py_isEnemy, METH_VARARGS, 0 },
   { (char*)"allPlayers", py_allPlayers, METH_VARARGS, 0 },
   { (char*)"isNeutral", py_isNeutral, METH_VARARGS, 0 },
   { (char*)"powerGenerated", py_powerGenerated, METH_VARARGS, 0 },
@@ -840,6 +841,20 @@ PyObject* PythonScript::py_areEnemies(PyObject*, PyObject* args)
   return Py_BuildValue((char*)"i", enemies ? 1 : 0);
 }
 
+PyObject* PythonScript::py_isEnemy(PyObject*, PyObject* args)
+{
+  BO_CHECK_NULL_RET0(currentScript());
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  bool enemy = currentScript()->isEnemy(id);
+
+  return Py_BuildValue((char*)"i", enemy ? 1 : 0);
+}
+
 PyObject* PythonScript::py_allPlayers(PyObject*, PyObject*)
 {
   BO_CHECK_NULL_RET0(currentScript());
@@ -967,13 +982,13 @@ PyObject* PythonScript::py_addOil(PyObject*, PyObject* args)
 PyObject* PythonScript::py_nearestMineralLocations(PyObject*, PyObject* args)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  int player, x, y, n, radius;
-  if(!PyArg_ParseTuple(args, (char*)"iiiii", &player, &x, &y, &n, &radius))
+  int x, y, n, radius;
+  if(!PyArg_ParseTuple(args, (char*)"iiii", &x, &y, &n, &radius))
   {
     return 0;
   }
 
-  QValueList<BoVector2Fixed> locations = currentScript()->nearestMineralLocations(player, x, y, n, radius);
+  QValueList<BoVector2Fixed> locations = currentScript()->nearestMineralLocations(x, y, n, radius);
 
   PyObject* pylist = PyList_New(locations.count());
 
@@ -995,13 +1010,13 @@ PyObject* PythonScript::py_nearestMineralLocations(PyObject*, PyObject* args)
 PyObject* PythonScript::py_nearestOilLocations(PyObject*, PyObject* args)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  int player, x, y, n, radius;
-  if(!PyArg_ParseTuple(args, (char*)"iiiii", &player, &x, &y, &n, &radius))
+  int x, y, n, radius;
+  if(!PyArg_ParseTuple(args, (char*)"iiii", &x, &y, &n, &radius))
   {
     return 0;
   }
 
-  QValueList<BoVector2Fixed> locations = currentScript()->nearestOilLocations(player, x, y, n, radius);
+  QValueList<BoVector2Fixed> locations = currentScript()->nearestOilLocations(x, y, n, radius);
 
   PyObject* pylist = PyList_New(locations.count());
 
@@ -1025,14 +1040,14 @@ PyObject* PythonScript::py_nearestOilLocations(PyObject*, PyObject* args)
 PyObject* PythonScript::py_moveUnit(PyObject*, PyObject* args)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  int player, id;
+  int id;
   float x, y;
-  if(!PyArg_ParseTuple(args, (char*)"iiff", &player, &id, &x, &y))
+  if(!PyArg_ParseTuple(args, (char*)"iff", &id, &x, &y))
   {
     return 0;
   }
 
-  currentScript()->moveUnit(player, id, x, y);
+  currentScript()->moveUnit(id, x, y);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1041,14 +1056,14 @@ PyObject* PythonScript::py_moveUnit(PyObject*, PyObject* args)
 PyObject* PythonScript::py_moveUnitWithAttacking(PyObject*, PyObject* args)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  int player, id;
+  int id;
   float x, y;
-  if(!PyArg_ParseTuple(args, (char*)"iiff", &player, &id, &x, &y))
+  if(!PyArg_ParseTuple(args, (char*)"iff", &id, &x, &y))
   {
     return 0;
   }
 
-  currentScript()->moveUnitWithAttacking(player, id, x, y);
+  currentScript()->moveUnitWithAttacking(id, x, y);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1057,13 +1072,13 @@ PyObject* PythonScript::py_moveUnitWithAttacking(PyObject*, PyObject* args)
 PyObject* PythonScript::py_attack(PyObject*, PyObject* args)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  int player, id, target;
-  if(!PyArg_ParseTuple(args, (char*)"iii", &player, &id, &target))
+  int id, target;
+  if(!PyArg_ParseTuple(args, (char*)"ii", &id, &target))
   {
     return 0;
   }
 
-  currentScript()->attack(player, id, target);
+  currentScript()->attack(id, target);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1072,13 +1087,13 @@ PyObject* PythonScript::py_attack(PyObject*, PyObject* args)
 PyObject* PythonScript::py_stopUnit(PyObject*, PyObject* args)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  int player, id;
-  if(!PyArg_ParseTuple(args, (char*)"ii", &player, &id))
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  currentScript()->stopUnit(player, id);
+  currentScript()->stopUnit(id);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1087,14 +1102,14 @@ PyObject* PythonScript::py_stopUnit(PyObject*, PyObject* args)
 PyObject* PythonScript::py_mineUnit(PyObject*, PyObject* args)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  int player, id;
+  int id;
   float x, y;
-  if(!PyArg_ParseTuple(args, (char*)"iiff", &player, &id, &x, &y))
+  if(!PyArg_ParseTuple(args, (char*)"iff", &id, &x, &y))
   {
     return 0;
   }
 
-  currentScript()->mineUnit(player, id, x, y);
+  currentScript()->mineUnit(id, x, y);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1103,14 +1118,14 @@ PyObject* PythonScript::py_mineUnit(PyObject*, PyObject* args)
 PyObject* PythonScript::py_setUnitRotation(PyObject*, PyObject* args)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  int player, id;
+  int id;
   float rot;
-  if(!PyArg_ParseTuple(args, (char*)"iif", &player, &id, &rot))
+  if(!PyArg_ParseTuple(args, (char*)"if", &id, &rot))
   {
     return 0;
   }
 
-  currentScript()->setUnitRotation(player, id, rot);
+  currentScript()->setUnitRotation(id, rot);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1119,14 +1134,14 @@ PyObject* PythonScript::py_setUnitRotation(PyObject*, PyObject* args)
 PyObject* PythonScript::py_dropBomb(PyObject*, PyObject* args)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  int player, id, weapon;
+  int id, weapon;
   float x, y;
-  if(!PyArg_ParseTuple(args, (char*)"iiiff", &player, &id, &weapon, &x, &y))
+  if(!PyArg_ParseTuple(args, (char*)"iiff", &id, &weapon, &x, &y))
   {
     return 0;
   }
 
-  currentScript()->dropBomb(player, id, weapon, x, y);
+  currentScript()->dropBomb(id, weapon, x, y);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1135,13 +1150,13 @@ PyObject* PythonScript::py_dropBomb(PyObject*, PyObject* args)
 PyObject* PythonScript::py_produceUnit(PyObject*, PyObject* args)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  int player, factory, production;
-  if(!PyArg_ParseTuple(args, (char*)"iii", &player, &factory, &production))
+  int factory, production;
+  if(!PyArg_ParseTuple(args, (char*)"ii", &factory, &production))
   {
     return 0;
   }
 
-  currentScript()->produceUnit(player, factory, production);
+  currentScript()->produceUnit(factory, production);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1150,14 +1165,14 @@ PyObject* PythonScript::py_produceUnit(PyObject*, PyObject* args)
 PyObject* PythonScript::py_spawnUnit(PyObject*, PyObject* args)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  int player, type;
+  int type;
   float x, y;
-  if(!PyArg_ParseTuple(args, (char*)"iiff", &player, &type, &x, &y))
+  if(!PyArg_ParseTuple(args, (char*)"iff", &type, &x, &y))
   {
     return 0;
   }
 
-  currentScript()->spawnUnit(player, type, x, y);
+  currentScript()->spawnUnit(type, x, y);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1166,14 +1181,14 @@ PyObject* PythonScript::py_spawnUnit(PyObject*, PyObject* args)
 PyObject* PythonScript::py_teleportUnit(PyObject*, PyObject* args)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  int player, id;
+  int id;
   float x, y;
-  if(!PyArg_ParseTuple(args, (char*)"iiff", &player, &id, &x, &y))
+  if(!PyArg_ParseTuple(args, (char*)"iff", &id, &x, &y))
   {
     return 0;
   }
 
-  currentScript()->teleportUnit(player, id, x, y);
+  currentScript()->teleportUnit(id, x, y);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1182,14 +1197,14 @@ PyObject* PythonScript::py_teleportUnit(PyObject*, PyObject* args)
 PyObject* PythonScript::py_canPlaceProductionAt(PyObject*, PyObject* args)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  int player, factoryid, unitType;
+  int factoryid, unitType;
   float x, y;
-  if(!PyArg_ParseTuple(args, (char*)"iiiff", &player, &factoryid, &unitType, &x, &y))
+  if(!PyArg_ParseTuple(args, (char*)"iiff", &factoryid, &unitType, &x, &y))
   {
     return 0;
   }
 
-  bool can = currentScript()->canPlaceProductionAt(player, factoryid, unitType, x, y);
+  bool can = currentScript()->canPlaceProductionAt(factoryid, unitType, x, y);
 
   return Py_BuildValue((char*)"i", can ? 1 : 0);
 }
@@ -1197,14 +1212,14 @@ PyObject* PythonScript::py_canPlaceProductionAt(PyObject*, PyObject* args)
 PyObject* PythonScript::py_placeProduction(PyObject*, PyObject* args)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  int player, factoryid;
+  int factoryid;
   float x, y;
-  if(!PyArg_ParseTuple(args, (char*)"iiff", &player, &factoryid, &x, &y))
+  if(!PyArg_ParseTuple(args, (char*)"iff", &factoryid, &x, &y))
   {
     return 0;
   }
 
-  currentScript()->placeProduction(player, factoryid, x, y);
+  currentScript()->placeProduction(factoryid, x, y);
 
   Py_INCREF(Py_None);
   return Py_None;

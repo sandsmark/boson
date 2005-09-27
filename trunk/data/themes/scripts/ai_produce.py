@@ -33,7 +33,7 @@ def placeUnit(factory, unitType):
 
     # AB: don't make unlimitied tries (avoid infinite loop)
     tries = 0
-    while BoScript.canPlaceProductionAt(ai.player, factory, unitType, int(tmpx), int(tmpy)) != 1 and tries < 30:
+    while BoScript.canPlaceProductionAt(factory, unitType, int(tmpx), int(tmpy)) != 1 and tries < 30:
       distance = randint(0, 20)
       tmpx = randint(x-distance, x+distance)
       tmpy = randint(y-distance, y+distance)
@@ -43,7 +43,7 @@ def placeUnit(factory, unitType):
         tmpy = y
       tries = tries + 1
     boprint("debug","placed tmpx %d,tmpy %d " % (tmpx,tmpy))
-    BoScript.placeProduction(ai.player, int(factory), tmpx, tmpy)
+    BoScript.placeProduction(int(factory), tmpx, tmpy)
 
 
 def unitPlaced(unitid, ownerid, pos, type):
@@ -93,7 +93,7 @@ def produceFacilities(factory):
     # try to build a powerplant (ID=2)
     for p in prod:
       if p == 2: # powerplant
-        BoScript.produceUnit(ai.player, factory, p)
+        BoScript.produceUnit(factory, p)
         return
     boprint("debug", "  rule 1: cannot fullfill rule")
 
@@ -104,7 +104,7 @@ def produceFacilities(factory):
     boprint("debug", "  rule 2: not fullfilled")
     for p in prod:
       if p == 3:
-        BoScript.produceUnit(ai.player, factory, p)
+        BoScript.produceUnit(factory, p)
         return
     boprint("debug", "  rule 2: cannot fullfill rule")
 
@@ -119,11 +119,11 @@ def produceFacilities(factory):
     #     refineries (we need more minerals to build them)
     for p in prod:
       if p == 13 and haveMineralRefinery < 1:
-        BoScript.produceUnit(ai.player, factory, p)
+        BoScript.produceUnit(factory, p)
         return
     for p in prod:
       if p == 8 and haveOilRefinery < 1:
-        BoScript.produceUnit(ai.player, factory, p)
+        BoScript.produceUnit(factory, p)
         return
     boprint("debug", "  rule 3: cannot fullfill rule")
 
@@ -148,13 +148,13 @@ def produceFacilities(factory):
     wantMoreAirTurrets = 0 # TODO
     for p in prod:
       if p == 10 and wantMoreTurrets > 0: # turret
-        BoScript.produceUnit(ai.player, factory, p)
+        BoScript.produceUnit(factory, p)
         return
       if p == 6 and wantMoreSamsites > 0: # samsite
-        BoScript.produceUnit(ai.player, factory, p)
+        BoScript.produceUnit(factory, p)
         return
       if p == 18 and wantMoreAirTurrets > 0: # airturret
-        BoScript.produceUnit(ai.player, factory, p)
+        BoScript.produceUnit(factory, p)
         return
     boprint("debug", "  rule 4: cannot fullfill rule")
 
@@ -175,13 +175,13 @@ def produceFacilities(factory):
     boprint("debug", "  rule 5: not fullfilled")
     for p in prod:
       if p == 14 and haveComsat < 1:
-        BoScript.produceUnit(ai.player, factory, p)
+        BoScript.produceUnit(factory, p)
         return
       if p == 1 and haveHelipad < 1:
-        BoScript.produceUnit(ai.player, factory, p)
+        BoScript.produceUnit(factory, p)
         return
       if p == 12 and haveTechcenter < 1:
-        BoScript.produceUnit(ai.player, factory, p)
+        BoScript.produceUnit(factory, p)
         return
     boprint("debug", "  rule 5: cannot fullfill rule")
 
@@ -192,7 +192,7 @@ def produceFacilities(factory):
     boprint("debug", "  rule 6: not fullfilled")
     for p in prod:
       if p == 2: # powerplant
-        BoScript.produceUnit(ai.player, factory, p)
+        BoScript.produceUnit(factory, p)
         return
     boprint("debug", "  rule 6: cannot fullfill rule")
 
@@ -207,13 +207,13 @@ def produceFacilities(factory):
     wantMoreAirTurrets = 0 # TODO
     for p in prod:
       if p == 10 and wantMoreTurrets > 0: # turret
-        BoScript.produceUnit(ai.player, factory, p)
+        BoScript.produceUnit(factory, p)
         return
       if p == 6 and wantMoreSamsites > 0: # samsite
-        BoScript.produceUnit(ai.player, factory, p)
+        BoScript.produceUnit(factory, p)
         return
       if p == 18 and wantMoreAirTurrets > 0: # airturret
-        BoScript.produceUnit(ai.player, factory, p)
+        BoScript.produceUnit(factory, p)
         return
     boprint("debug", "  rule 7: cannot fullfill rule")
 
@@ -237,11 +237,11 @@ def produceMobiles(factory):
     #     (we usually need more minerals faster than oil)
     for p in prod:
       if p == 10003 and haveMineralHarvesters < 1:
-        BoScript.produceUnit(ai.player, factory, p)
+        BoScript.produceUnit(factory, p)
         return
     for p in prod:
       if p == 10002 and haveOilHarvesters < 1:
-        BoScript.produceUnit(ai.player, factory, p)
+        BoScript.produceUnit(factory, p)
         return
     boprint("debug", "  rule 1: cannot fullfill rule.")
 
@@ -270,11 +270,11 @@ def produceMobiles(factory):
     boprint("debug", "  rule 2: not fullfilled")
     for p in prod:
       if p == 10003 and needMineralHarvesters > 0:
-        BoScript.produceUnit(ai.player, factory, p)
+        BoScript.produceUnit(factory, p)
         return
     for p in prod:
       if p == 10002 and needOilHarvesters > 0:
-        BoScript.produceUnit(ai.player, factory, p)
+        BoScript.produceUnit(factory, p)
         return
     boprint("debug", "  rule 2: cannot fullfill rule")
 
@@ -303,11 +303,11 @@ def produceMobiles(factory):
     boprint("debug", "  rule 4: not fullfilled")
     for p in prod:
       if p == 10003 and needMineralHarvesters > 0:
-        BoScript.produceUnit(ai.player, factory, p)
+        BoScript.produceUnit(factory, p)
         return
     for p in prod:
       if p == 10002 and needOilHarvesters > 0:
-        BoScript.produceUnit(ai.player, factory, p)
+        BoScript.produceUnit(factory, p)
         return
     boprint("debug", "  rule 4: cannot fullfill rule")
 
@@ -331,7 +331,7 @@ def produceMobiles(factory):
     for harvester in list:
       for p in prod:
         if p == harvester:
-          BoScript.produceUnit(ai.player, factory, p)
+          BoScript.produceUnit(factory, p)
           return
     boprint("debug", "  rule 5: cannot fullfill rule")
 
@@ -346,7 +346,7 @@ def produceMobiles(factory):
         allowedList = allowedList + [p]
   shuffle(allowedList)
   for p in allowedList:
-    BoScript.produceUnit(ai.player, factory, p)
+    BoScript.produceUnit(factory, p)
     return
 
   boprint("debug", "  rule 6: cannot fullfill rule")
@@ -364,7 +364,7 @@ def tryProduce(factory, type):
   prod = BoScript.productionTypes(factory)
   for p in prod:
     if p == type:
-      BoScript.produceUnit(ai.player, factory, p)
+      BoScript.produceUnit(factory, p)
       return 1
   return 0
 
