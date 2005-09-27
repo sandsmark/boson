@@ -24,6 +24,7 @@
 #include "../bomath.h"
 
 class Player;
+class PlayerIO;
 class Boson;
 class BosonCanvas;
 class Boson;
@@ -504,7 +505,9 @@ class BosonScript
     static void makeScriptCurrent(BosonScript*);
 
     Player* findPlayerByUserId(int id) const;
+    PlayerIO* findPlayerIOByUserId(int id) const;
     Player* scriptPlayer() const;
+    PlayerIO* scriptPlayerIO() const;
 
   private:
     static BosonScript* mCurrentScript;

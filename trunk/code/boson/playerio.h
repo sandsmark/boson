@@ -32,11 +32,14 @@ class KGameIO;
 class KGameIOList;
 class bofixed;
 class UpgradeProperties;
+template<class T> class BoVector2;
 template<class T> class BoVector3;
+typedef BoVector2<bofixed> BoVector2Fixed;
 typedef BoVector3<bofixed> BoVector3Fixed;
 
 template<class T> class QPtrVector;
 template<class T> class QPtrList;
+template<class T> class QValueList;
 class QObject;
 class QString;
 class QColor;
@@ -244,6 +247,22 @@ public:
 	 * @return Player::calculatePower
 	 **/
 	void calculatePower(unsigned long int* powerGenerated = 0, unsigned long int* powerConsumed = 0, bool includeUnconstructedFacilities = false) const;
+
+	/**
+	 * Finds n nearest mineral locations to point (x, y), that are visible
+	 * to the player.
+	 * At most radius tiles are searched.
+	 * If n is 0, all visible mineral mines in given are returned.
+	 **/
+	QValueList<BoVector2Fixed> nearestMineralLocations(const BosonCanvas* canvas, int x, int y, unsigned int n, unsigned int radius) const;
+
+	/**
+	 * Finds n nearest oil locations to point (x, y), that are visible to
+	 * the player.
+	 * At most radius tiles are searched.
+	 * If n is 0, all visible oil mines in given are returned.
+	 **/
+	QValueList<BoVector2Fixed> nearestOilLocations(const BosonCanvas* canvas, int x, int y, unsigned int n, unsigned int radius) const;
 
 private:
 	PlayerIOPrivate* d;

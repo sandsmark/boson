@@ -398,13 +398,7 @@ void BosonScript::addOil(int playerId, int amount)
 
 QValueList<BoVector2Fixed> BosonScript::nearestMineralLocations(int x, int y, unsigned int n, unsigned int radius)
 {
-  if(!game())
-  {
-    boError() << k_funcinfo << "NULL game" << endl;
-    return QValueList<BoVector2Fixed>();
-  }
-
-  Player* p = scriptPlayer();
+  PlayerIO* p = scriptPlayerIO();
 
   if(!p)
   {
@@ -412,18 +406,12 @@ QValueList<BoVector2Fixed> BosonScript::nearestMineralLocations(int x, int y, un
     return QValueList<BoVector2Fixed>();
   }
 
-  return canvas()->pathfinder()->findLocations(p, x, y, n, radius, BosonPath::Minerals);
+  return p->nearestMineralLocations(canvas(), x, y, n, radius);
 }
 
 QValueList<BoVector2Fixed> BosonScript::nearestOilLocations(int x, int y, unsigned int n, unsigned int radius)
 {
-  if(!game())
-  {
-    boError() << k_funcinfo << "NULL game" << endl;
-    return QValueList<BoVector2Fixed>();
-  }
-
-  Player* p = scriptPlayer();
+  PlayerIO* p = scriptPlayerIO();
 
   if(!p)
   {
@@ -431,7 +419,7 @@ QValueList<BoVector2Fixed> BosonScript::nearestOilLocations(int x, int y, unsign
     return QValueList<BoVector2Fixed>();
   }
 
-  return canvas()->pathfinder()->findLocations(p, x, y, n, radius, BosonPath::Oil);
+  return p->nearestOilLocations(canvas(), x, y, n, radius);
 }
 
 
@@ -1536,7 +1524,7 @@ void BosonScript::findPath(int x1, int y1, int x2, int y2)
  i.start = BoVector2Fixed(x1, y1);
  i.dest = BoVector2Fixed(x2, y2);
  boDebug() << k_funcinfo << "Let's go!" << endl;
- canvas()->pathfinder()->findPath(&i);
+ canvas()->pathFinder()->findPath(&i);
  boDebug() << k_funcinfo << "script path searching complete" << endl;
 #else
  boWarning() << k_funcinfo << "findPath() is only available with new pathfinder!" << endl;
@@ -1764,9 +1752,24 @@ Player* BosonScript::findPlayerByUserId(int id) const
   return (Player*)(game()->findPlayerByUserId(playerId()));
 }
 
+PlayerIO* BosonScript::findPlayerIOByUserId(int id) const
+{
+  Player* p = findPlayerByUserId(id);
+  if(p)
+  {
+    return p->playerIO();
+  }
+  return 0;
+}
+
 Player* BosonScript::scriptPlayer() const
 {
   return findPlayerByUserId(playerId());
+}
+
+PlayerIO* BosonScript::scriptPlayerIO() const
+{
+  return findPlayerIOByUserId(playerId());
 }
 
 

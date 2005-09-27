@@ -25,6 +25,7 @@
 #include "cell.h"
 #include "unit.h"
 #include "bosoncanvas.h"
+#include "bosonpath.h"
 #include "bosonmap.h"
 #include "unitproperties.h"
 
@@ -373,4 +374,30 @@ void PlayerIO::calculatePower(unsigned long int* powerGenerated, unsigned long i
  player()->calculatePower(powerGenerated, powerConsumed, includeUnconstructedFacilities);
 }
 
+
+QValueList<BoVector2Fixed> PlayerIO::nearestMineralLocations(const BosonCanvas* canvas, int x, int y, unsigned int n, unsigned int radius) const
+{
+ if (!canvas) {
+	BO_NULL_ERROR(canvas);
+	return QValueList<BoVector2Fixed>();
+ }
+ if (!canvas->pathFinder()) {
+	BO_NULL_ERROR(canvas->pathFinder());
+	return QValueList<BoVector2Fixed>();
+ }
+ return canvas->pathFinder()->findLocations(player(), x, y, n, radius, BosonPath::Minerals);
+}
+
+QValueList<BoVector2Fixed> PlayerIO::nearestOilLocations(const BosonCanvas* canvas, int x, int y, unsigned int n, unsigned int radius) const
+{
+ if (!canvas) {
+	BO_NULL_ERROR(canvas);
+	return QValueList<BoVector2Fixed>();
+ }
+ if (!canvas->pathFinder()) {
+	BO_NULL_ERROR(canvas->pathFinder());
+	return QValueList<BoVector2Fixed>();
+ }
+ return canvas->pathFinder()->findLocations(player(), x, y, n, radius, BosonPath::Oil);
+}
 

@@ -580,7 +580,7 @@ void BosonUfoGameGUI::updateUfoLabelPathFinderDebug()
  }
  d->mPathFinderDebug->setVisible(true);
 
- BosonPath* pf = boGame->canvas()->pathfinder();
+ BosonPath* pf = boGame->canvas()->pathFinder();
  d->mPathFinderDebug->setText(pf->debugText(cursorCanvasVector().x(), cursorCanvasVector().y()));
 }
 

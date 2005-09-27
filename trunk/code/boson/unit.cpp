@@ -140,7 +140,7 @@ Unit::~Unit()
 	delete *it;
  }
  delete[] d->mWeapons;
- if (canvas()->pathfinder()) {
+ if (canvas()->pathFinder()) {
 	// Release highlevel path here once we cache them
  }
  delete d;
@@ -2700,7 +2700,7 @@ bool MobileUnit::newPath()
  pathInfo()->start.set(centerX(), centerY());
 
  // Find path
- canvas()->pathfinder()->findPath(pathInfo());
+ canvas()->pathFinder()->findPath(pathInfo());
 
  if(pathInfo()->result == BosonPath::NoPath || pathInfo()->llpath.count() == 0) {
 	// Stop moving
