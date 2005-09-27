@@ -1240,7 +1240,7 @@ QValueList<int> BosonScript::allPlayerUnits(int id) const
     return list;
   }
 
-  QPtrList<Unit> units = p->allMyLivingUnits();
+  const QPtrList<Unit>& units = p->allMyLivingUnits();
   QPtrListIterator<Unit> it(units);
   while(it.current())
   {
@@ -1287,7 +1287,7 @@ QValueList<int> BosonScript::playerUnitsOfType(int playerId, int type) const
     return list;
   }
 
-  QPtrList<Unit> units = p->allMyLivingUnits();
+  const QPtrList<Unit>& units = p->allMyLivingUnits();
   QPtrListIterator<Unit> it(units);
   while(it.current())
   {
@@ -1303,6 +1303,50 @@ QValueList<int> BosonScript::playerUnitsOfType(int playerId, int type) const
 int BosonScript::playerUnitsOfTypeCount(int playerId, int type) const
 {
   return playerUnitsOfType(playerId, type).count();
+}
+
+QValueList<int> BosonScript::allUnitsVisibleFor(int id) const
+{
+  QValueList<int> list;
+
+  PlayerIO* p = findPlayerIOByUserId(id);
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << id << endl;
+    return list;
+  }
+
+  const QPtrList<Unit>& units = p->allUnits();
+  QPtrListIterator<Unit> it(units);
+  while(it.current())
+  {
+    list.append(it.current()->id());
+    ++it;
+  }
+  return list;
+}
+
+QValueList<int> BosonScript::allEnemyUnitsVisibleFor(int id) const
+{
+  QValueList<int> list;
+
+  PlayerIO* p = findPlayerIOByUserId(id);
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << id << endl;
+    return list;
+  }
+
+  const QPtrList<Unit>& units = p->allEnemyUnits();
+  QPtrListIterator<Unit> it(units);
+  while(it.current())
+  {
+    list.append(it.current()->id());
+    ++it;
+  }
+  return list;
 }
 
 
