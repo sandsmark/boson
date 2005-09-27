@@ -63,6 +63,7 @@ class PythonScript : public BosonScript
 
     // Players
     static PyObject* py_areEnemies(PyObject* self, PyObject* args);
+    static PyObject* py_isEnemy(PyObject* self, PyObject* args);
     static PyObject* py_allPlayers(PyObject* self, PyObject* args);
     static PyObject* py_isNeutral(PyObject* self, PyObject* args);
     static PyObject* py_powerGenerated(PyObject* self, PyObject* args);

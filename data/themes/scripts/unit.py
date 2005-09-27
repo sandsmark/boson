@@ -32,7 +32,7 @@ class Unit:
     Unit will attack the unit with the given target ID. In case the
     target is not in weapon range, the unit will move until the target
     is close enough to be attacked."""
-    BoScript.attack( self.mPlayer, self.mID, targetID )
+    BoScript.attack( self.mID, targetID )
 
   def canMineMinerals( self ):
     """@return @c true if the unit can mine minerals, otherwise @c false."""
@@ -54,7 +54,7 @@ class Unit:
 
   def dropBomb( self, weapon, x, y ):
     """Drops a bomb by using the specified weapon at the given position."""
-    BoScript.dropBomb( self.mPlayer, self.mID, weapon, x, y )
+    BoScript.dropBomb( self.mID, weapon, x, y )
 
   def isAircraft( self ):
     """@return @c true if the unit is an aircraft, otherwise @c false."""
@@ -70,19 +70,19 @@ class Unit:
 
   def mine( self, x, y ):
     """Sends the unit to the mine at (x,y)."""
-    BoScript.mineUnit( self.mPlayer, self.mID, x, y )
+    BoScript.mineUnit( self.mID, x, y )
 
   def move( self, x, y ):
     """
     Move unit to position x, y. The unit will go to the given poistion without
     attacking other units on its way."""
-    BoScript.moveUnit( self.mPlayer, self.mID, x, y )
+    BoScript.moveUnit( self.mID, x, y )
 
   def moveWithAttacking( self, x, y ):
     """
     The same as in @ref moveUnit, but the unit will attack enemy units
     on its way."""
-    BoScript.moveUnitWithAttacking( self.mPlayer, self.mID, x, y )
+    BoScript.moveUnitWithAttacking( self.mID, x, y )
 
   def owner( self ):
     """@return The owner of the unit."""
@@ -94,18 +94,18 @@ class Unit:
 
   def produceUnit( self, productID ):
     """Produces a unit of the given product ID."""
-    BoScript.produceUnit( self.mPlayer, self.mID, productID )
+    BoScript.produceUnit( self.mID, productID )
 
   def setRotation( self, rotation ):
     """Sets the unit's rotation to the given value."""
-    BoScript.setUnitRotation( self.mPlayer, self.mID, rotation )
+    BoScript.setUnitRotation( self.mID, rotation )
 
   def stop( self ):
     """Stops unit from doing anything and becomes idle. Note that even
     idle units shoot at any enemy units in range. If stop was called while
     the unit was attacking, then after calling stop() it may start to
     shoot at another unit."""
-    BoScript.stopUnit( self.mPlayer, self.mID )
+    BoScript.stopUnit( self.mID )
 
   def type( self ):
     """@return The type of the unit."""
@@ -113,7 +113,7 @@ class Unit:
 
   def teleport( self, x, y ):
     """Immediately moves the unit to position (x,y)."""
-    BoScript.teleportUnit( self.mPlayer, self.mID, x, y )
+    BoScript.teleportUnit( self.mID, x, y )
 
   def work( self ):
     """

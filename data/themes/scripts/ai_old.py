@@ -61,7 +61,7 @@ def oldAIAdvance():
         boprint("debug", "attacker set to %s" % attacker)
         boprint("debug", "Sending %s unit with id %s to attack" % (aiunit, attacker))
   targetpos = BoScript.unitPosition(aitarget)
-  BoScript.moveUnitWithAttacking(ai.player, attacker, targetpos[0], targetpos[1])
+  BoScript.moveUnitWithAttacking(attacker, targetpos[0], targetpos[1])
 
 
 def oldAIFindTarget():
@@ -70,7 +70,7 @@ def oldAIFindTarget():
   target = -1
   # iterate through all players
   for p in players:
-    if not BoScript.areEnemies(p, ai.player):
+    if not BoScript.isEnemy(p):
       continue
     units = BoScript.allPlayerUnits(p)
     # iterate through all units of player
