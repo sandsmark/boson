@@ -133,6 +133,16 @@ public:
 	 **/
 	const UpgradeProperties* technologyProperties(unsigned long int type) const;
 
+
+	/**
+	 * @return All currently visible units.
+	 *
+	 * Note that if you need the units of this player only, you should the
+	 * much faster @ref allMyUnits instead!
+	 **/
+	QPtrList<Unit> allUnits() const;
+	QPtrList<Unit> allEnemyUnits() const;
+
 	/**
 	 * @return Player::allUnits
 	 **/

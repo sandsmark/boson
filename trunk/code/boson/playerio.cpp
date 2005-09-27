@@ -120,6 +120,29 @@ bool PlayerIO::hasWon() const
  return player()->hasWon();
 }
 
+QPtrList<Unit> PlayerIO::allUnits() const
+{
+ QPtrList<Unit> list;
+ if (!canvas()) {
+	BO_NULL_ERROR(canvas());
+	return list;
+ }
+ for (BoItemList::ConstIterator it = canvas()->allItems()->begin(); it != canvas()->allItems()->end(); ++it) {
+	if (!RTTI::isUnit((*it)->rtti())) {
+		continue;
+	}
+	Unit* u = (Unit*)*it;
+	if (u->isDestroyed()) {
+		continue;
+	}
+	if (!canSee(u)) {
+		continue;
+	}
+	list.append(u);
+ }
+ return list;
+}
+
 QPtrList<Unit>* PlayerIO::allMyUnits() const
 {
  return player()->allUnits();
@@ -130,6 +153,18 @@ QPtrList<Unit> PlayerIO::allMyLivingUnits() const
  QPtrList<Unit> list;
  for (QPtrListIterator<Unit> it(*allMyUnits()); it.current(); ++it) {
 	if (!it.current()->isDestroyed()) {
+		list.append(it.current());
+	}
+ }
+ return list;
+}
+
+QPtrList<Unit> PlayerIO::allEnemyUnits() const
+{
+ QPtrList<Unit> list;
+ const QPtrList<Unit>& all = allUnits();
+ for (QPtrListIterator<Unit> it(all); it.current(); ++it) {
+	if (isEnemy(it.current())) {
 		list.append(it.current());
 	}
  }
