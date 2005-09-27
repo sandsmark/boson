@@ -302,6 +302,7 @@ public:
 	 * us. See also @ref isNeutral and @ref isAllied
 	 **/
 	bool isEnemy(const Player* player) const;
+	bool isPlayerEnemy(int id) const;
 
 	/**
 	 * A player is neutral to another player if it is neither an enemy nor
@@ -313,6 +314,7 @@ public:
 	 * and @ref isEnemy
 	 **/
 	bool isNeutral(const Player* p) const;
+	bool isPlayerNeutral(int id) const;
 
 	/**
 	 * An allied player will share some of their resources, such as sight
@@ -322,6 +324,7 @@ public:
 	 * also @ref isEnemy and @ref isNeutral
 	 **/
 	bool isAllied(const Player* p) const;
+	bool isPlayerAllied(int id) const;
 
 	int mobilesCount();
 	int facilitiesCount();

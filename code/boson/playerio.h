@@ -188,10 +188,13 @@ public:
 	bool hasMiniMap() const;
 
 	bool isEnemy(const Player* player) const;
+	bool isPlayerEnemy(int id) const;
 	bool isEnemy(const Unit* unit) const;
 	bool isNeutral(const Player*) const;
+	bool isPlayerNeutral(int id) const;
 	bool isNeutral(const Unit*) const;
 	bool isAllied(const Player*) const;
+	bool isPlayerAllied(int id) const;
 	bool isAllied(const Unit*) const;
 
 	/**
