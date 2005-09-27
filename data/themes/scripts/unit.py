@@ -121,3 +121,7 @@ class Unit:
     For a complete list of possible return values see unitbase.h .
     @return the ID of the current work."""
     return BoScript.unitWork( self.mID )
+  def sightRange( self ):
+    """
+    @return how many cells away the unit can see."""
+    return BoScript.sightRange( self.mID )
