@@ -81,6 +81,7 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"unitOwner", py_unitOwner, METH_VARARGS, 0 },
   { (char*)"unitType", py_unitType, METH_VARARGS, 0 },
   { (char*)"unitWork", py_unitWork, METH_VARARGS, 0 },
+  { (char*)"unitSightRange", py_unitWork, METH_VARARGS, 0 },
   { (char*)"isUnitMobile", py_isUnitMobile, METH_VARARGS, 0 },
   { (char*)"isUnitTypeMobile", py_isUnitTypeMobile, METH_VARARGS, 0 },
   { (char*)"isUnitAircraft", py_isUnitAircraft, METH_VARARGS, 0 },
@@ -1315,6 +1316,18 @@ PyObject* PythonScript::py_unitWork(PyObject*, PyObject* args)
   }
 
   return Py_BuildValue((char*)"i", currentScript()->unitWork(id));
+}
+
+PyObject* PythonScript::py_unitSightRange(PyObject*, PyObject* args)
+{
+  BO_CHECK_NULL_RET0(currentScript());
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", currentScript()->unitSightRange(id));
 }
 
 PyObject* PythonScript::py_isUnitMobile(PyObject*, PyObject* args)

@@ -330,6 +330,7 @@ class BosonScript
      * find out what different values mean.
      **/
     int unitWork(int id) const;
+    int unitSightRange(int id) const;
     /**
      * @return Whether unit with id id is mobile unit
      **/

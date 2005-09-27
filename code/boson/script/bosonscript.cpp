@@ -800,7 +800,7 @@ BoVector2Fixed BosonScript::unitPosition(int id) const
     return BoVector2Fixed(-1, -1);
   }
 
-  Unit* u = game()->findUnit(id, 0);
+  Unit* u = findUnit(id);
   if(!u)
   {
     boError() << k_funcinfo << "No unit with id" << id << endl;
@@ -818,7 +818,7 @@ int BosonScript::unitOwner(int id) const
     return -1;
   }
 
-  Unit* u = game()->findUnit(id, 0);
+  Unit* u = findUnit(id);
   if(!u)
   {
     boError() << k_funcinfo << "No unit with id" << id << endl;
@@ -836,7 +836,7 @@ int BosonScript::unitType(int id) const
     return -1;
   }
 
-  Unit* u = game()->findUnit(id, 0);
+  Unit* u = findUnit(id);
   if(!u)
   {
     boError() << k_funcinfo << "No unit with id" << id << endl;
@@ -848,13 +848,7 @@ int BosonScript::unitType(int id) const
 
 int BosonScript::unitWork(int id) const
 {
-  if(!game())
-  {
-    boError() << k_funcinfo << "NULL game" << endl;
-    return -1;
-  }
-
-  Unit* u = game()->findUnit(id, 0);
+  Unit* u = findUnit(id);
   if(!u)
   {
     boError() << k_funcinfo << "No unit with id" << id << endl;
@@ -862,6 +856,18 @@ int BosonScript::unitWork(int id) const
   }
 
   return (int)u->work();
+}
+
+int BosonScript::unitSightRange(int id) const
+{
+  Unit* u = findUnit(id);
+  if(!u)
+  {
+    boError() << k_funcinfo << "No unit with id" << id << endl;
+    return -1;
+  }
+
+  return (int)u->sightRange();
 }
 
 bool BosonScript::isUnitMobile(int id) const
@@ -872,7 +878,7 @@ bool BosonScript::isUnitMobile(int id) const
     return false;
   }
 
-  Unit* u = game()->findUnit(id, 0);
+  Unit* u = findUnit(id);
   if(!u)
   {
     boError() << k_funcinfo << "No unit with id" << id << endl;
@@ -960,7 +966,7 @@ bool BosonScript::canUnitShoot(int id) const
     return false;
   }
 
-  Unit* u = game()->findUnit(id, 0);
+  Unit* u = findUnit(id);
   if(!u)
   {
     boError() << k_funcinfo << "No unit with id" << id << endl;
@@ -1005,7 +1011,7 @@ bool BosonScript::canUnitProduce(int id) const
     return false;
   }
 
-  Unit* u = game()->findUnit(id, 0);
+  Unit* u = findUnit(id);
   if(!u)
   {
     boError() << k_funcinfo << "No unit with id" << id << endl;
@@ -1028,7 +1034,7 @@ unsigned long int BosonScript::completedProductionType(int id) const
     return 0;
   }
 
-  Unit* u = game()->findUnit(id, 0);
+  Unit* u = findUnit(id);
   if(!u)
   {
     boError() << k_funcinfo << "No unit with id" << id << endl;
@@ -1052,7 +1058,7 @@ bool BosonScript::canUnitMineMinerals(int id) const
     return false;
   }
 
-  Unit* u = game()->findUnit(id, 0);
+  Unit* u = findUnit(id);
   if(!u)
   {
     boError() << k_funcinfo << "No unit with id" << id << endl;
@@ -1107,7 +1113,7 @@ bool BosonScript::canUnitMineOil(int id) const
     return false;
   }
 
-  Unit* u = game()->findUnit(id, 0);
+  Unit* u = findUnit(id);
   if(!u)
   {
     boError() << k_funcinfo << "No unit with id" << id << endl;
@@ -1164,7 +1170,7 @@ QValueList<int> BosonScript::productionTypes(int id) const
     return list;
   }
 
-  Unit* u = game()->findUnit(id, 0);
+  Unit* u = findUnit(id);
   if(!u)
   {
     boError() << k_funcinfo << "No unit with id" << id << endl;
@@ -1200,7 +1206,7 @@ bool BosonScript::isUnitAlive(int id) const
     return false;
   }
 
-  Unit* u = game()->findUnit(id, 0);
+  Unit* u = findUnit(id);
   if(!u)
   {
     return false;
@@ -1540,7 +1546,7 @@ void BosonScript::addEffectToUnit(int unitid, unsigned int effectid, BoVector3Fi
     return;
   }
 
-  Unit* u = game()->findUnit(unitid, 0);
+  Unit* u = findUnit(unitid);
   if(!u)
   {
     boError() << k_funcinfo << "No unit with id" << unitid << endl;
