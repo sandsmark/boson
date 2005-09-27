@@ -16,30 +16,107 @@ try:
 except ImportError:
   boprint("error", "Couldn't import ai. Won't work.")
 
+try:
+  import unit
+except ImportError:
+  boprint("error", "Couldn't import unit. Won't work.")
+
+class AIExplorer:
+  def __init__(self, player):
+    self.mPlayer = player
+    self.mExplorer = 0
+
+  def explore(self):
+    boprint("debug", "exploring")
+    if self.mExplorer and not self.mExplorer.isAlive():
+      self.mExplorer = 0
+    if not self.mExplorer:
+      self.mExplorer = self.findExplorerUnit()
+      if not self.mExplorer:
+        boprint("debug", "no explorer unit found. not exploring.")
+        return
+    pos = self.mExplorer.position()
+    boprint("debug", "explore, explore unit: %s current position: %s" % (self.mExplorer.id(), pos))
+
+    exploreAt = self.findExploreLocation(self.mExplorer)
+    if exploreAt[0] == -1:
+      boprint("debug", "not exploring")
+      return
+
+    boprint("debug", "exploring with unit %s at: %s" % (self.mExplorer.id(), exploreAt))
+    self.mExplorer.move(exploreAt[0], exploreAt[1])
+
+
+  def isIdExploring(self, unitId):
+    if not self.mExplorer:
+      return False
+    if unitId == self.mExplorer.id():
+      return True
+    return False
+
+  def isUnitExploring(self, unit):
+    return isIdExploring(unit.id())
+
+
+  def findExplorerUnit(self):
+    units = BoScript.allPlayerUnits(self.mPlayer)
+    for u in units:
+      if BoScript.isUnitMobile(u):
+        if BoScript.canUnitMineMinerals(u) or BoScript.canUnitMineOil(u):
+          continue
+        pos = BoScript.unitPosition(u)
+        if pos[0] != -1:
+          return unit.Unit(self.mPlayer, u)
+    return 0
+
+
+  def findExploreLocation(self, unit):
+    pos = unit.position()
+
+    sightRange = unit.sightRange()
+    range = sightRange * 2
+
+    # randint's arguments must be integers, so convert pos to integer
+    posX = int(pos[0])
+    posY = int(pos[1])
+
+    x = randint(posX - 50, posX + 50)
+    y = randint(posY - 50, posY + 50)
+
+    return (x, y)
+
+
 
 module = "ai_attack"
 aiunit = -1
 aitarget = -1
-expl = -1
+explorerObject = 0
+
 
 def init():
-  global expl
   global module
+  global explorerObject
 
   module = "ai_attack for player %d" % ai.player
   boprint("debug", "%s called" % module)
-  expl = -1
+  explorerObject = AIExplorer(ai.player)
 
 def advance():
+  global explorerObject
   boprint("debug", "%s: advance()" % module)
+  if not explorerObject:
+    boprint("error", "%s: advanceExplore(): explorerObject not yet created" % module)
+    return
+
   if ai.cycle % 2 == 0:
     advanceExplore()
 #  if ai.cycle % 1 == 0: # always true
 #    advanceAttack()
 
 def advanceExplore():
+  global explorerObject
   boprint("debug", "%s: advanceExplore()" % module)
-  explore()
+  explorerObject.explore()
 
 def advanceAttack():
   global aiunit, aitarget
@@ -63,7 +140,7 @@ def advanceAttack():
       return
     u = units[aiunit]
     if BoScript.isUnitMobile(u):
-      if BoScript.canUnitShoot(u) and u != ai.expl:
+      if BoScript.canUnitShoot(u) and not explorerObject.isExploring(u):
         attacker = u
         boprint("debug", "attacker set to %s" % attacker)
         boprint("debug", "Sending %s unit with id %s to attack" % (aiunit, attacker))
@@ -95,50 +172,7 @@ def findTarget():
   return -1
 
 
-def explore():
-  global expl
-  boprint("debug", "exploring")
-  if expl != -1 and not BoScript.isUnitAlive(expl):
-    expl = -1
-  if expl == -1:
-    expl = findExplorerUnit()
-    if expl == -1:
-      boprint("debug", "no explorer unit found. not exploring.")
-      return
-  pos = BoScript.unitPosition(expl)
-  boprint("debug", "explore, explore unit: %s current position: %s" % (expl, pos))
 
-  exploreAt = findExploreLocation(expl)
-  if exploreAt[0] == -1:
-    boprint("debug", "not exploring")
-    return
-
-  boprint("debug", "exploring with unit %s at: %s" % (expl, exploreAt))
-  BoScript.moveUnit(expl, exploreAt[0], exploreAt[1])
-
-
-def findExplorerUnit():
-  units = BoScript.allPlayerUnits(ai.player)
-  for u in units:
-    if BoScript.isUnitMobile(u):
-      if BoScript.canUnitMineMinerals(u) or BoScript.canUnitMineOil(u):
-        continue
-      pos = BoScript.unitPosition(u)
-      if pos[0] != -1:
-        return u
-  return -1
-
-def findExploreLocation(unit):
-  pos = BoScript.unitPosition(unit)
-
-  # randint's arguments must be integers, so convert pos to integer
-  posX = int(pos[0])
-  posY = int(pos[1])
-
-  x = randint(posX - 50, posX + 50)
-  y = randint(posY - 50, posY + 50)
-
-  return (x, y)
-
+  
 
 # vim: et sw=2
