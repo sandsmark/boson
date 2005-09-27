@@ -164,7 +164,7 @@ bool BosonScript::areEnemies(int playerId1, int playerId2) const
     return false;  // What to return here?
   }
 
-  Player* p1 = findPlayerByUserId(playerId1);
+  PlayerIO* p1 = findPlayerIOByUserId(playerId1);
 
   if(!p1)
   {
@@ -251,7 +251,7 @@ unsigned long int BosonScript::powerGenerated(int playerId) const
   }
 #endif
 
-  Player* p = findPlayerByUserId(playerId);
+  PlayerIO* p = findPlayerIOByUserId(playerId);
 
   if(!p)
   {
@@ -272,7 +272,7 @@ unsigned long int BosonScript::powerConsumed(int playerId) const
     return 0;
   }
 
-  Player* p = findPlayerByUserId(playerId);
+  PlayerIO* p = findPlayerIOByUserId(playerId);
 
   if(!p)
   {
@@ -293,7 +293,7 @@ unsigned long int BosonScript::powerGeneratedAfterConstructions(int playerId) co
     return 0;
   }
 
-  Player* p = findPlayerByUserId(playerId);
+  PlayerIO* p = findPlayerIOByUserId(playerId);
 
   if(!p)
   {
@@ -314,7 +314,7 @@ unsigned long int BosonScript::powerConsumedAfterConstructions(int playerId) con
     return 0;
   }
 
-  Player* p = findPlayerByUserId(playerId);
+  PlayerIO* p = findPlayerIOByUserId(playerId);
 
   if(!p)
   {
@@ -336,7 +336,7 @@ unsigned long int BosonScript::minerals(int playerId) const
     return 0;
   }
 
-  Player* p = findPlayerByUserId(playerId);
+  PlayerIO* p = findPlayerIOByUserId(playerId);
 
   if(!p)
   {
@@ -370,7 +370,7 @@ unsigned long int BosonScript::oil(int playerId) const
     return 0;
   }
 
-  Player* p = findPlayerByUserId(playerId);
+  PlayerIO* p = findPlayerIOByUserId(playerId);
 
   if(!p)
   {
@@ -637,7 +637,7 @@ void BosonScript::placeProduction(int factoryid, float x, float y)
     return;
   }
 
-  Player* p = scriptPlayer();
+  PlayerIO* p = scriptPlayerIO();
 
   if(!p)
   {
@@ -645,7 +645,7 @@ void BosonScript::placeProduction(int factoryid, float x, float y)
     return;
   }
 
-  Unit* u = game()->findUnit(factoryid, p);
+  Unit* u = p->findUnit(factoryid);
   if(!u)
   {
     boError() << k_funcinfo << "No unit with id" << factoryid << endl;
@@ -673,7 +673,7 @@ void BosonScript::placeProduction(int factoryid, float x, float y)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
-  BosonMessageMoveBuild message((Q_UINT32)ProduceUnit, p->bosonId(), u->id(), BoVector2Fixed(x, y));
+  BosonMessageMoveBuild message((Q_UINT32)ProduceUnit, p->playerId(), u->id(), BoVector2Fixed(x, y));
   if(!message.save(stream))
   {
     boError() << k_funcinfo << "failed saving message " << message.messageId() << " to stream" << endl;
@@ -697,7 +697,7 @@ bool BosonScript::canPlaceProductionAt(int factoryid, int unitType, float x, flo
     return false;
   }
 
-  Player* p = scriptPlayer();
+  PlayerIO* p = scriptPlayerIO();
 
   if(!p)
   {
@@ -705,7 +705,7 @@ bool BosonScript::canPlaceProductionAt(int factoryid, int unitType, float x, flo
     return false;
   }
 
-  Unit* u = game()->findUnit(factoryid, p);
+  Unit* u = p->findUnit(factoryid);
   if(!u)
   {
     boError() << k_funcinfo << "No unit with id" << factoryid << endl;
@@ -880,7 +880,7 @@ bool BosonScript::isUnitTypeMobile(int playerId, int type) const
     return false;
   }
 
-  Player* p = findPlayerByUserId(playerId);
+  PlayerIO* p = findPlayerIOByUserId(playerId);
 
   if(!p)
   {
@@ -888,7 +888,7 @@ bool BosonScript::isUnitTypeMobile(int playerId, int type) const
     return false;
   }
 
-  const UnitProperties* prop = p->speciesTheme()->unitProperties(type);
+  const UnitProperties* prop = p->unitProperties(type);
   if(!prop)
   {
     boError() << k_funcinfo << "No unit properties with typeid " << type << " for player with id " << playerId << endl;
@@ -906,10 +906,10 @@ bool BosonScript::isUnitAircraft(int id) const
     return false;
   }
 
-  Unit* u = game()->findUnit(id, 0);
+  Unit* u = findUnit(id);
   if(!u)
   {
-    boError() << k_funcinfo << "No unit with id" << id << endl;
+    boError() << k_funcinfo << "No unit with id " << id << ", or unit not visible for script player" << endl;
     return false;
   }
 
@@ -924,7 +924,7 @@ bool BosonScript::isUnitTypeAircraft(int playerId, int type) const
     return false;
   }
 
-  Player* p = findPlayerByUserId(playerId);
+  PlayerIO* p = findPlayerIOByUserId(playerId);
 
   if(!p)
   {
@@ -932,7 +932,7 @@ bool BosonScript::isUnitTypeAircraft(int playerId, int type) const
     return false;
   }
 
-  const UnitProperties* prop = p->speciesTheme()->unitProperties(type);
+  const UnitProperties* prop = p->unitProperties(type);
   if(!prop)
   {
     boError() << k_funcinfo << "No unit properties with typeid " << type << " for player with id " << playerId << endl;
@@ -969,7 +969,7 @@ bool BosonScript::canUnitTypeShoot(int playerId, int type) const
     return false;
   }
 
-  Player* p = findPlayerByUserId(playerId);
+  PlayerIO* p = findPlayerIOByUserId(playerId);
 
   if(!p)
   {
@@ -977,7 +977,7 @@ bool BosonScript::canUnitTypeShoot(int playerId, int type) const
     return false;
   }
 
-  const UnitProperties* prop = p->speciesTheme()->unitProperties(type);
+  const UnitProperties* prop = p->unitProperties(type);
   if(!prop)
   {
     boError() << k_funcinfo << "No unit properties with typeid " << type << " for player with id " << playerId << endl;
@@ -1066,7 +1066,7 @@ bool BosonScript::canUnitTypeMineMinerals(int playerId, int type) const
     return false;
   }
 
-  Player* p = findPlayerByUserId(playerId);
+  PlayerIO* p = findPlayerIOByUserId(playerId);
 
   if(!p)
   {
@@ -1074,7 +1074,7 @@ bool BosonScript::canUnitTypeMineMinerals(int playerId, int type) const
     return false;
   }
 
-  const UnitProperties* prop = p->speciesTheme()->unitProperties(type);
+  const UnitProperties* prop = p->unitProperties(type);
   if(!prop)
   {
     boError() << k_funcinfo << "No unit properties with typeid " << type << " for player with id " << playerId << endl;
@@ -1121,7 +1121,7 @@ bool BosonScript::canUnitTypeMineOil(int playerId, int type) const
     return false;
   }
 
-  Player* p = findPlayerByUserId(playerId);
+  PlayerIO* p = findPlayerIOByUserId(playerId);
 
   if(!p)
   {
@@ -1129,7 +1129,7 @@ bool BosonScript::canUnitTypeMineOil(int playerId, int type) const
     return false;
   }
 
-  const UnitProperties* prop = p->speciesTheme()->unitProperties(type);
+  const UnitProperties* prop = p->unitProperties(type);
   if(!prop)
   {
     boError() << k_funcinfo << "No unit properties with typeid " << type << " for player with id " << playerId << endl;
@@ -1208,7 +1208,7 @@ QValueList<int> BosonScript::allPlayerUnits(int id) const
     return list;
   }
 
-  Player* p = findPlayerByUserId(id);
+  PlayerIO* p = findPlayerIOByUserId(id);
 
   if(!p)
   {
@@ -1216,13 +1216,11 @@ QValueList<int> BosonScript::allPlayerUnits(int id) const
     return list;
   }
 
-  QPtrListIterator<Unit> it(*(p->allUnits()));
+  QPtrList<Unit> units = p->allMyLivingUnits();
+  QPtrListIterator<Unit> it(units);
   while(it.current())
   {
-    if(!it.current()->isDestroyed())
-    {
-      list.append(it.current()->id());
-    }
+    list.append(it.current()->id());
     ++it;
   }
   return list;
@@ -1237,7 +1235,7 @@ int BosonScript::allPlayerUnitsCount(int id) const
     return count;
   }
 
-  Player* p = findPlayerByUserId(id);
+  PlayerIO* p = findPlayerIOByUserId(id);
 
   if(!p)
   {
@@ -1245,16 +1243,7 @@ int BosonScript::allPlayerUnitsCount(int id) const
     return count;
   }
 
-  QPtrListIterator<Unit> it(*(p->allUnits()));
-  while(it.current())
-  {
-    if(!it.current()->isDestroyed())
-    {
-      count++;
-    }
-    ++it;
-  }
-  return count;
+  return p->allMyLivingUnits().count();
 }
 
 QValueList<int> BosonScript::playerUnitsOfType(int playerId, int type) const
@@ -1266,7 +1255,7 @@ QValueList<int> BosonScript::playerUnitsOfType(int playerId, int type) const
     return list;
   }
 
-  Player* p = findPlayerByUserId(playerId);
+  PlayerIO* p = findPlayerIOByUserId(playerId);
 
   if(!p)
   {
@@ -1274,15 +1263,13 @@ QValueList<int> BosonScript::playerUnitsOfType(int playerId, int type) const
     return list;
   }
 
-  QPtrListIterator<Unit> it(*(p->allUnits()));
+  QPtrList<Unit> units = p->allMyLivingUnits();
+  QPtrListIterator<Unit> it(units);
   while(it.current())
   {
-    if(!it.current()->isDestroyed())
+    if((int)it.current()->type() == type)
     {
-      if((int)it.current()->type() == type)
-      {
-        list.append(it.current()->id());
-      }
+      list.append(it.current()->id());
     }
     ++it;
   }
@@ -1291,34 +1278,7 @@ QValueList<int> BosonScript::playerUnitsOfType(int playerId, int type) const
 
 int BosonScript::playerUnitsOfTypeCount(int playerId, int type) const
 {
-  int count = 0;
-  if(!game())
-  {
-    boError() << k_funcinfo << "NULL game" << endl;
-    return count;
-  }
-
-  Player* p = findPlayerByUserId(playerId);
-
-  if(!p)
-  {
-    boError() << k_funcinfo << "No player with id " << playerId << endl;
-    return count;
-  }
-
-  QPtrListIterator<Unit> it(*(p->allUnits()));
-  while(it.current())
-  {
-    if(!it.current()->isDestroyed())
-    {
-      if((int)it.current()->type() == type)
-      {
-        count++;
-      }
-    }
-    ++it;
-  }
-  return count;
+  return playerUnitsOfType(playerId, type).count();
 }
 
 
@@ -1775,6 +1735,24 @@ PlayerIO* BosonScript::scriptPlayerIO() const
   return findPlayerIOByUserId(playerId());
 }
 
+Unit* BosonScript::findUnit(unsigned long int id) const
+{
+  Unit* u = 0;
+  if(playerId() == 0)
+  {
+    // script may access everything
+    u = game()->findUnit(id, 0);
+  }
+  else
+  {
+    PlayerIO* p = scriptPlayerIO();
+    if(p)
+    {
+      u = p->findUnit(id);
+    }
+  }
+  return u;
+}
 
 /*
  * vim: et sw=2

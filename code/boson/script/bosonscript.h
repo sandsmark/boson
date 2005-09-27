@@ -29,6 +29,7 @@ class Boson;
 class BosonCanvas;
 class Boson;
 class BoEvent;
+class Unit;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
 template<class T> class BoVector4;
@@ -508,6 +509,7 @@ class BosonScript
     PlayerIO* findPlayerIOByUserId(int id) const;
     Player* scriptPlayer() const;
     PlayerIO* scriptPlayerIO() const;
+    Unit* findUnit(unsigned long int id) const;
 
   private:
     static BosonScript* mCurrentScript;
