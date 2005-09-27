@@ -214,7 +214,7 @@ bool BosonScript::isNeutral(int player) const
 
   if(playerId() != 0)
   {
-    Player* p = scriptPlayer();
+    PlayerIO* p = scriptPlayerIO();
     if(!p)
     {
       boError() << k_funcinfo << "NULL script player" << endl;
@@ -406,7 +406,7 @@ QValueList<BoVector2Fixed> BosonScript::nearestMineralLocations(int x, int y, un
     return QValueList<BoVector2Fixed>();
   }
 
-  return p->nearestMineralLocations(canvas(), x, y, n, radius);
+  return p->nearestMineralLocations(x, y, n, radius);
 }
 
 QValueList<BoVector2Fixed> BosonScript::nearestOilLocations(int x, int y, unsigned int n, unsigned int radius)
@@ -419,7 +419,7 @@ QValueList<BoVector2Fixed> BosonScript::nearestOilLocations(int x, int y, unsign
     return QValueList<BoVector2Fixed>();
   }
 
-  return p->nearestOilLocations(canvas(), x, y, n, radius);
+  return p->nearestOilLocations(x, y, n, radius);
 }
 
 
@@ -498,11 +498,14 @@ void BosonScript::stopUnit(int id)
 
 void BosonScript::mineUnit(int id, float x, float y)
 {
+  PlayerIO* p = scriptPlayerIO();
+  BO_CHECK_NULL_RET(p);
+
   // First we have to find resource mine
   // TODO: it sucks to do this here, perhaps we could have something like a
   //  MoveMineAt message which orders unit to move at specific point, not at
   //  some unit (then Boson would take care of finding resource mine unit).
-  Unit* resourceUnit = canvas()->findUnitAt(BoVector3Fixed(x, y, 0.0));
+  Unit* resourceUnit = p->findUnitAt(BoVector3Fixed(x, y, 0.0));
   if(!resourceUnit)
   {
     boError() << k_funcinfo << "No units found at (" << x << "; " << y << ")" << endl;
