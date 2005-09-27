@@ -207,6 +207,7 @@ class BosonScript
      * @em after all constructions have been completed
      **/
     unsigned long int powerGeneratedAfterConstructions(int playerId) const;
+    bool isCellFogged(int playerId, int x, int y) const;
 
 
     // Resources
@@ -483,6 +484,8 @@ class BosonScript
     void unfogAllPlayers();
     void setAcceptUserInput(bool accept);
     void addChatMessage(const QString& from, const QString& message);
+    int mapWidth() const;
+    int mapHeight() const;
 
 
   protected:

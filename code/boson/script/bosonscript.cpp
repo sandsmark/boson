@@ -308,12 +308,6 @@ unsigned long int BosonScript::powerGeneratedAfterConstructions(int playerId) co
 
 unsigned long int BosonScript::powerConsumedAfterConstructions(int playerId) const
 {
-  if(!game())
-  {
-    boError() << k_funcinfo << "NULL game" << endl;
-    return 0;
-  }
-
   PlayerIO* p = findPlayerIOByUserId(playerId);
 
   if(!p)
@@ -326,6 +320,20 @@ unsigned long int BosonScript::powerConsumedAfterConstructions(int playerId) con
   p->calculatePower(0, &powerConsumed, true);
   return powerConsumed;
 }
+
+bool BosonScript::isCellFogged(int playerId, int x, int y) const
+{
+  PlayerIO* p = findPlayerIOByUserId(playerId);
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerId << endl;
+    return 0;
+  }
+
+  return p->isFogged(x, y);
+}
+
 
 /*****  Resource methods  *****/
 unsigned long int BosonScript::minerals(int playerId) const
@@ -864,7 +872,7 @@ int BosonScript::unitSightRange(int id) const
   if(!u)
   {
     boError() << k_funcinfo << "No unit with id" << id << endl;
-    return -1;
+    return 0;
   }
 
   return (int)u->sightRange();
@@ -1716,6 +1724,27 @@ void BosonScript::addChatMessage(const QString& from, const QString& message)
 
   game()->slotAddChatSystemMessage(from, message);
 }
+
+int BosonScript::mapWidth() const
+{
+  if(!canvas())
+  {
+    boError() << k_funcinfo << "NULL canvas" << endl;
+    return 0;
+  }
+  return canvas()->mapWidth();
+}
+
+int BosonScript::mapHeight() const
+{
+  if(!canvas())
+  {
+    boError() << k_funcinfo << "NULL canvas" << endl;
+    return 0;
+  }
+  return canvas()->mapHeight();
+}
+
 
 Player* BosonScript::findPlayerByUserId(int id) const
 {

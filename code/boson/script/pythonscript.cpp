@@ -54,6 +54,7 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"powerConsumed", py_powerConsumed, METH_VARARGS, 0 },
   { (char*)"powerGeneratedAfterConstructions", py_powerGeneratedAfterConstructions, METH_VARARGS, 0 },
   { (char*)"powerConsumedAfterConstructions", py_powerConsumedAfterConstructions, METH_VARARGS, 0 },
+  { (char*)"isCellFogged", py_isCellFogged, METH_VARARGS, 0 },
   // Resources
   { (char*)"minerals", py_minerals, METH_VARARGS, 0 },
   { (char*)"addMinerals", py_addMinerals, METH_VARARGS, 0 },
@@ -81,7 +82,7 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"unitOwner", py_unitOwner, METH_VARARGS, 0 },
   { (char*)"unitType", py_unitType, METH_VARARGS, 0 },
   { (char*)"unitWork", py_unitWork, METH_VARARGS, 0 },
-  { (char*)"unitSightRange", py_unitWork, METH_VARARGS, 0 },
+  { (char*)"unitSightRange", py_unitSightRange, METH_VARARGS, 0 },
   { (char*)"isUnitMobile", py_isUnitMobile, METH_VARARGS, 0 },
   { (char*)"isUnitTypeMobile", py_isUnitTypeMobile, METH_VARARGS, 0 },
   { (char*)"isUnitAircraft", py_isUnitAircraft, METH_VARARGS, 0 },
@@ -153,6 +154,8 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"unfogAllPlayers", py_unfogAllPlayers, METH_VARARGS, 0 },
   { (char*)"setAcceptUserInput", py_setAcceptUserInput, METH_VARARGS, 0 },
   { (char*)"addChatMessage", py_addChatMessage, METH_VARARGS, 0 },
+  { (char*)"mapWidth", py_mapWidth, METH_VARARGS, 0 },
+  { (char*)"mapHeight", py_mapHeight, METH_VARARGS, 0 },
   //{ (char*)"", py_, METH_VARARGS, 0 },
   { 0, 0, 0, 0 }
 };
@@ -922,6 +925,19 @@ PyObject* PythonScript::py_powerConsumedAfterConstructions(PyObject*, PyObject* 
   }
 
   return Py_BuildValue((char*)"i", currentScript()->powerConsumedAfterConstructions(id));
+}
+
+PyObject* PythonScript::py_isCellFogged(PyObject*, PyObject* args)
+{
+  BO_CHECK_NULL_RET0(currentScript());
+  int player, x, y;
+  if(!PyArg_ParseTuple(args, (char*)"iii", &player, &x, &y))
+  {
+    return 0;
+  }
+
+  bool fogged = currentScript()->isCellFogged(player, x, y);
+  return Py_BuildValue((char*)"i", fogged ? 1 : 0);
 }
 
 
@@ -2155,6 +2171,18 @@ PyObject* PythonScript::py_addChatMessage(PyObject* self, PyObject* args)
   currentScript()->addChatMessage(QString(from), QString(message));
   Py_INCREF(Py_None);
   return Py_None;
+}
+
+PyObject* PythonScript::py_mapWidth(PyObject* self, PyObject* args)
+{
+  BO_CHECK_NULL_RET0(currentScript());
+  return Py_BuildValue((char*)"i", currentScript()->mapWidth());
+}
+
+PyObject* PythonScript::py_mapHeight(PyObject* self, PyObject* args)
+{
+  BO_CHECK_NULL_RET0(currentScript());
+  return Py_BuildValue((char*)"i", currentScript()->mapHeight());
 }
 
 /*****  Non-script functions  *****/
