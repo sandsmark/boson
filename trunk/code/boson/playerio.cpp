@@ -125,6 +125,17 @@ QPtrList<Unit>* PlayerIO::allMyUnits() const
  return player()->allUnits();
 }
 
+QPtrList<Unit> PlayerIO::allMyLivingUnits() const
+{
+ QPtrList<Unit> list;
+ for (QPtrListIterator<Unit> it(*allMyUnits()); it.current(); ++it) {
+	if (!it.current()->isDestroyed()) {
+		list.append(it.current());
+	}
+ }
+ return list;
+}
+
 const QColor& PlayerIO::teamColor() const
 {
  return player()->teamColor();
@@ -286,6 +297,21 @@ Unit* PlayerIO::findUnitAt(const BoVector3Fixed& canvasVector) const
 	return canvas()->findUnitAt(canvasVector);
  }
  return 0;
+}
+
+Unit* PlayerIO::findUnit(unsigned long int id) const
+{
+ // AB: note that player()->findUnit(id) is not correct here!
+ // -> id may be of a different player, too!
+ BO_CHECK_NULL_RET0(game());
+ Unit* u = game()->findUnit(id, 0);
+ if (!u) {
+	return 0;
+ }
+ if (!canSee(u)) {
+	return 0;
+ }
+ return u;
 }
 
 BoItemList* PlayerIO::unitsAtCells(const QPtrVector<const Cell>* cells) const

@@ -137,6 +137,7 @@ public:
 	 * @return Player::allUnits
 	 **/
 	QPtrList<Unit>* allMyUnits() const;
+	QPtrList<Unit> allMyLivingUnits() const;
 
 	/**
 	 * @return Whether the coordinates @p cellX, @p cellY are fogged for
@@ -251,6 +252,7 @@ public:
 	 * player.
 	 **/
 	Unit* findUnitAt(const BoVector3Fixed& canvasVector) const;
+	Unit* findUnit(unsigned long int unitId) const;
 
 	BoItemList* unitsAtCells(const QPtrVector<const Cell>* cells) const;
 
