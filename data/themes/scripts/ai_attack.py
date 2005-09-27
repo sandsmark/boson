@@ -2,7 +2,7 @@
 
 from sys import exit
 from utils import *
-from random import randint
+from random import randint, shuffle
 
 # This is just to be able to test the syntax whith your
 # Python interpreter on the console
@@ -55,7 +55,7 @@ class AIExplorer:
     return False
 
   def isUnitExploring(self, unit):
-    return isIdExploring(unit.id())
+    return self.isIdExploring(unit.id())
 
 
   def findExplorerUnit(self):
@@ -72,18 +72,57 @@ class AIExplorer:
 
   def findExploreLocation(self, unit):
     pos = unit.position()
+    boprint("debug", "%d, %s, %d" %(unit.id(), unit.position(), unit.sightRange()))
 
-    sightRange = unit.sightRange()
-    range = sightRange * 2
-
-    # randint's arguments must be integers, so convert pos to integer
+    # we use integers
     posX = int(pos[0])
     posY = int(pos[1])
 
-    x = randint(posX - 50, posX + 50)
-    y = randint(posY - 50, posY + 50)
+    w = BoScript.mapWidth()
+    h = BoScript.mapHeight()
 
-    return (x, y)
+    if unit.sightRange() < 2:
+      boprint("debug", "sightrange of unit %d too small (%d)" % (unit.id(), unit.sightRange()))
+      return (-1, -1)
+
+    sightRange2 = unit.sightRange() * 2
+    range = 0
+    maxRange = sightRange2 * 5
+    searchCells = []
+    # search in a distance up to maxRange cells away for fogged cells
+    # only every sightRange2-th cell is checked.
+    while range <= maxRange and len(searchCells) == 0:
+      range = range + sightRange2
+      minX = max(posX - range/2, 0)
+      minY = max(posY - range/2, 0)
+      maxX = min(posX + range/2, w - 1)
+      maxY = min(posY + range/2, h - 1)
+
+      # AB: we search in the rect
+      #     (posX-range/2, posY-range/2, posX+range/2, posY + range/2)
+      #     for fogged cells.
+      #     all cells that are found are added to searchCells.
+      #     every sightRange2-th cell is tested for being visibility
+      #     -> this is important so that we won't test 100*100 cells or so which
+      #        would be extremely slow!
+      x = minX
+      while x < maxX:
+        y = minY
+        while y < maxY:
+          if BoScript.isCellFogged(self.mPlayer, x, y):
+            searchCells = searchCells + [(x, y)]
+          y = y + sightRange2
+        x = x + sightRange2
+
+    if len(searchCells) == 0:
+      boprint("debug", "nothing to explore found within a range of %s around unit %s" % (maxRange, unit.id()))
+      return (-1, -1)
+
+    shuffle(searchCells)
+    # TODO: check if unit can actually go there (or rather at least nearby)
+    cell = searchCells[0]
+    boprint("debug", "found location to explore for unit %d: %s" % (unit.id(), cell))
+    return cell
 
 
 
@@ -110,8 +149,10 @@ def advance():
 
   if ai.cycle % 2 == 0:
     advanceExplore()
-#  if ai.cycle % 1 == 0: # always true
-#    advanceAttack()
+  if ai.cycle % 1 == 0: # always true
+    advanceAttack()
+
+  testFoo()
 
 def advanceExplore():
   global explorerObject
@@ -122,12 +163,13 @@ def advanceAttack():
   global aiunit, aitarget
   boprint("debug", "%s: advanceAttack()" % module)
   # check if target is still alive
-  if aitarget == -1 or BoScript.isUnitAlive(aitarget) == 0:
-    boprint("info", "Target not set")
+  if aitarget == -1 or not BoScript.isUnitAlive(aitarget):
+    boprint("debug", "searching for new target...")
     aitarget = findTarget()
     if aitarget == -1:
+      boprint("debug", "... no target found. nothing to do.")
       return
-  boprint("info", "Target is %s" % aitarget)
+  boprint("debug", "... target is now %s" % aitarget)
 
   # find attacker
   attacker = -1
@@ -140,39 +182,26 @@ def advanceAttack():
       return
     u = units[aiunit]
     if BoScript.isUnitMobile(u):
-      if BoScript.canUnitShoot(u) and not explorerObject.isExploring(u):
+      if BoScript.canUnitShoot(u) and not explorerObject.isIdExploring(u):
         attacker = u
-        boprint("debug", "attacker set to %s" % attacker)
-        boprint("debug", "Sending %s unit with id %s to attack" % (aiunit, attacker))
   targetpos = BoScript.unitPosition(aitarget)
+  boprint("debug", "ordering unit %s to attack targetpos %s containing target %s" % (attacker, targetpos, aitarget))
   BoScript.moveUnitWithAttacking(attacker, targetpos[0], targetpos[1])
 
 
 def findTarget():
   boprint("debug", "%s: findTarget()" % module)
-  players = BoScript.allPlayers()
   target = -1
-  # iterate through all players
-  for p in players:
-    if not BoScript.isEnemy(p):
-      continue
-    units = BoScript.allPlayerUnits(p)
-    # iterate through all units of player
-    for u in units:
-      if not BoScript.isUnitAlive(u):
-        continue
-      # FIXME: command center id is hardcoded
-      if BoScript.unitType(u) == 5:
-        return u
-      if target == -1:
-        target = u
-    # if cmdcenter wasn't found, return any other unit
-    return target
-  # nothing was found
-  return -1
+  units = BoScript.allEnemyUnitsVisibleFor(ai.player)
+  for u in units:
+    # FIXME: command center id is hardcoded
+    if BoScript.unitType(u) == 5:
+      return u
+    if target == -1:
+      target = u
+  # if cmdcenter wasn't found, return any other unit
+  return target
 
 
-
-  
 
 # vim: et sw=2
