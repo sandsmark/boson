@@ -2,6 +2,7 @@ from sys import exit
 from utils import *
 from random import randint
 
+aidelay = 0
 cycle = 0
 player = -1
 
@@ -25,6 +26,10 @@ def unitDestroyed(unitid, ownerid, pos):
 def init(id):
   #boprint_setDebugLevel("debug")
   boprint("debug", "AI Init called")
+
+  resetAIDelay()
+  boprint("debug", "aidelay set to %d" % aidelay)
+
   setPlayerId(id)
   BoScript.addEventHandler("UnitWithTypeProduced", "ai.unitProduced", "plab")
   BoScript.addEventHandler("ProducedUnitWithTypePlaced", "ai.unitPlaced", "upla")
@@ -36,26 +41,38 @@ def setPlayerId(id):
   global player
   player = id
 
+def resetAIDelay():
+  global aidelay
+  # AB: aiDelay() is in seconds - aiDelay * 20 is advance calls.
+  aidelay = int(BoScript.aiDelay() * 20)
+
 
 def advance():
   global cycle
   global player
+  global aidelay
+
+  # AI does something once aidelay reaches 0 only.
+  if aidelay >= 1:
+    aidelay = aidelay - 1
+    return
+  resetAIDelay()
+  if aidelay < 0:
+    boprint("debug", "aidelay < 0. AI disabled.")
+    return
+
   cycle = cycle + 1
-  # TODO: use aidelay !
-  if (cycle % 100) == 0:
+  if (cycle % 2) == 0:
     boprint("debug", "produced method called, cycle: %s" % cycle)
     ai_produce.produce()
-  if (cycle % 100) == 0:
+  if (cycle % 5) == 0:
+    # AB: this is only a fallback - the unit should be placed by the event
     ai_produce.place()
-  if (cycle % 100) == 0:
+  if (cycle % 2) == 0:
     boprint("debug", "mine method called, cycle: %s" % cycle)
     mine()
-  if (cycle % 200) == 0:
-    # TODO: move to ai_attack.advance()
-    ai_attack.explore()
 #  if (cycle % 20) == 0:
      #spawnSomeUnits()
-  #boprint("debug", "hi! advance")
   ai_attack.advance()
 
 
