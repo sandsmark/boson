@@ -688,13 +688,23 @@ BosonStatistics* Player::statistics() const
 
 bool Player::isEnemy(const Player* p) const
 {
- if (isAllied(p) || isNeutral(p)) {
+ return isPlayerEnemy(p->bosonId());
+}
+
+bool Player::isPlayerEnemy(int id) const
+{
+ if (isPlayerAllied(id) || isPlayerNeutral(id)) {
 	return false;
  }
  return true;
 }
 
 bool Player::isNeutral(const Player* p) const
+{
+ return isPlayerNeutral(p->bosonId());
+}
+
+bool Player::isPlayerNeutral(int id) const
 {
  // one day we might implement advanced relationships between players, so that
  // for two players A,B there may be the following cases:
@@ -703,7 +713,7 @@ bool Player::isNeutral(const Player* p) const
  // 3. A and B are neutral to each other
 
  // atm only the "neutral player" is neutral to another player.
- if ((const Player*)game()->playerList()->getLast() == p) {
+ if (id == 256) {
 	return true;
  }
  return false;
@@ -712,6 +722,16 @@ bool Player::isNeutral(const Player* p) const
 bool Player::isAllied(const Player* p) const
 {
  if (p == this) {
+	return true;
+ }
+
+ // allied players are not implemented yet
+ return false;
+}
+
+bool Player::isPlayerAllied(int id) const
+{
+ if (id == bosonId()) {
 	return true;
  }
 

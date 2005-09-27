@@ -180,6 +180,11 @@ bool PlayerIO::isEnemy(const Player* p) const
  return player()->isEnemy(p);
 }
 
+bool PlayerIO::isPlayerEnemy(int id) const
+{
+ return player()->isPlayerEnemy(id);
+}
+
 bool PlayerIO::isEnemy(const Unit* unit) const
 {
  if (!unit) {
@@ -193,6 +198,11 @@ bool PlayerIO::isNeutral(const Player* p) const
  return player()->isNeutral(p);
 }
 
+bool PlayerIO::isPlayerNeutral(int id) const
+{
+ return player()->isPlayerNeutral(id);
+}
+
 bool PlayerIO::isNeutral(const Unit* unit) const
 {
  if (!unit) {
@@ -204,6 +214,11 @@ bool PlayerIO::isNeutral(const Unit* unit) const
 bool PlayerIO::isAllied(const Player* p) const
 {
  return player()->isAllied(p);
+}
+
+bool PlayerIO::isPlayerAllied(int id) const
+{
+ return player()->isPlayerAllied(id);
 }
 
 bool PlayerIO::isAllied(const Unit* unit) const
