@@ -27,6 +27,9 @@ class Unit:
     self.mPlayer = player
     self.mID     = id
 
+  def id( self ):
+    return self.mID
+
   def attack( self, targetID ):
     """
     Unit will attack the unit with the given target ID. In case the
@@ -60,7 +63,7 @@ class Unit:
     """@return @c true if the unit is an aircraft, otherwise @c false."""
     return BoScript.isUnitAircraft( self.mID )
 
-  def isAircraft( self ):
+  def isAlive( self ):
     """@return @c true if the unit is alive, otherwise @c false."""
     return BoScript.isUnitAlive( self.mID )
 
@@ -124,4 +127,4 @@ class Unit:
   def sightRange( self ):
     """
     @return how many cells away the unit can see."""
-    return BoScript.sightRange( self.mID )
+    return BoScript.unitSightRange( self.mID )
