@@ -126,6 +126,8 @@ class PythonScript : public BosonScript
     static PyObject* py_allPlayerUnitsCount(PyObject* self, PyObject* args);
     static PyObject* py_playerUnitsOfType(PyObject* self, PyObject* args);
     static PyObject* py_playerUnitsOfTypeCount(PyObject* self, PyObject* args);
+    static PyObject* py_allUnitsVisibleFor(PyObject* self, PyObject* args);
+    static PyObject* py_allEnemyUnitsVisibleFor(PyObject* self, PyObject* args);
 
 
     // Camera

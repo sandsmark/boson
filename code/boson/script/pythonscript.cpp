@@ -102,6 +102,8 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"allPlayerUnitsCount", py_allPlayerUnitsCount, METH_VARARGS, 0 },
   { (char*)"playerUnitsOfType", py_playerUnitsOfType, METH_VARARGS, 0 },
   { (char*)"playerUnitsOfTypeCount", py_playerUnitsOfTypeCount, METH_VARARGS, 0 },
+  { (char*)"allUnitsVisibleFor", py_allUnitsVisibleFor, METH_VARARGS, 0 },
+  { (char*)"allEnemyUnitsVisibleFor", py_allEnemyUnitsVisibleFor, METH_VARARGS, 0 },
   // Camera
   { (char*)"setCameraRotation", py_setCameraRotation, METH_VARARGS, 0 },
   { (char*)"setCameraXRotation", py_setCameraXRotation, METH_VARARGS, 0 },
@@ -1581,6 +1583,42 @@ PyObject* PythonScript::py_playerUnitsOfTypeCount(PyObject*, PyObject* args)
   }
 
   return Py_BuildValue((char*)"i", currentScript()->playerUnitsOfTypeCount(id, type));
+}
+
+PyObject* PythonScript::py_allUnitsVisibleFor(PyObject*, PyObject* args)
+{
+  BO_CHECK_NULL_RET0(currentScript());
+  // FIXME: current implementation of methods returning arrays is quite
+  //  ineffiecient. First we usually get a list of units, then add ids of those
+  //  units to id list and then covert id list to Python list. We could add ids
+  //  directly to Python list.
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  QValueList<int> units = currentScript()->allUnitsVisibleFor(id);
+
+  return QValueListToPyList(&units);
+}
+
+PyObject* PythonScript::py_allEnemyUnitsVisibleFor(PyObject*, PyObject* args)
+{
+  BO_CHECK_NULL_RET0(currentScript());
+  // FIXME: current implementation of methods returning arrays is quite
+  //  ineffiecient. First we usually get a list of units, then add ids of those
+  //  units to id list and then covert id list to Python list. We could add ids
+  //  directly to Python list.
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  QValueList<int> units = currentScript()->allEnemyUnitsVisibleFor(id);
+
+  return QValueListToPyList(&units);
 }
 
 

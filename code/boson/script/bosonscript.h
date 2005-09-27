@@ -420,6 +420,9 @@ class BosonScript
      **/
     int playerUnitsOfTypeCount(int playerId, int type) const;
 
+    QValueList<int> allUnitsVisibleFor(int playerId) const;
+    QValueList<int> allEnemyUnitsVisibleFor(int playerId) const;
+
 
     // Camera
     void setCameraRotation(float r);
