@@ -13,9 +13,9 @@ except ImportError:
   boprint("error", "Couldn't import BoScript, something bad is going on, watch your back !")
 
 try:
-  import ai_produce, ai_old
+  import ai_produce, ai_attack
 except ImportError:
-  boprint("error", "Couldn't import ai_produce, ai_old. Won't work.")
+  boprint("error", "Couldn't import ai_produce, ai_attack. Won't work.")
 
 
 def unitDestroyed(unitid, ownerid, pos):
@@ -23,7 +23,6 @@ def unitDestroyed(unitid, ownerid, pos):
 
 
 def init(id):
-  global expl
   #boprint_setDebugLevel("debug")
   boprint("debug", "AI Init called")
   setPlayerId(id)
@@ -31,9 +30,7 @@ def init(id):
   BoScript.addEventHandler("ProducedUnitWithTypePlaced", "ai.unitPlaced", "upla")
   BoScript.addEventHandler("UnitWithTypeDestroyed", "ai.unitDestroyed", "upl")
 
-  expl = -1
-
-  ai_old.oldAIInit()
+  ai_attack.init()
 
 def setPlayerId(id):
   global player
@@ -44,6 +41,7 @@ def advance():
   global cycle
   global player
   cycle = cycle + 1
+  # TODO: use aidelay !
   if (cycle % 100) == 0:
     boprint("debug", "produced method called, cycle: %s" % cycle)
     ai_produce.produce()
@@ -53,42 +51,12 @@ def advance():
     boprint("debug", "mine method called, cycle: %s" % cycle)
     mine()
   if (cycle % 200) == 0:
-    explore()
+    # TODO: move to ai_attack.advance()
+    ai_attack.explore()
 #  if (cycle % 20) == 0:
      #spawnSomeUnits()
   #boprint("debug", "hi! advance")
-  ai_old.oldAIAdvance()
-
-
-def explore():
-  global player,expl
-  units = BoScript.allPlayerUnits(player)
-  unit = -1
-  if expl == -1 :
-    attacker = -1
-    while attacker == -1:
-      unit = unit + 1
-      if unit >= len(units):
-        unit = -1
-        boprint("info", "No units found, returning")
-        return
-      u = units[unit]
-      if BoScript.isUnitMobile(u):
-        if BoScript.canUnitShoot(u):
-          attacker = u
-          expl = u
-          pos = BoScript.unitPosition(expl)
-          if pos[0] == -1:
-            attacker = -1
-            expl = -1
-  pos = BoScript.unitPosition(expl)
-  boprint("debug", "explore, expl %s, pos %s" % (expl,pos))
-  # randint's arguments must be integers, so convert pos to integer
-  x = int(pos[0])
-  y = int(pos[1])
-  BoScript.moveUnit(expl,randint(x-50, x+50), randint(y-50,y+50))
-  if not BoScript.isUnitAlive(expl):
-    expl = -1
+  ai_attack.advance()
 
 
 def spawnSomeUnits():
