@@ -70,6 +70,7 @@ class PythonScript : public BosonScript
     static PyObject* py_powerConsumed(PyObject* self, PyObject* args);
     static PyObject* py_powerGeneratedAfterConstructions(PyObject* self, PyObject* args);
     static PyObject* py_powerConsumedAfterConstructions(PyObject* self, PyObject* args);
+    static PyObject* py_isCellFogged(PyObject* self, PyObject* args);
 
 
     // Resources
@@ -189,6 +190,8 @@ class PythonScript : public BosonScript
     static PyObject* py_unfogAllPlayers(PyObject* self, PyObject* args);
     static PyObject* py_setAcceptUserInput(PyObject* self, PyObject* args);
     static PyObject* py_addChatMessage(PyObject* self, PyObject* args);
+    static PyObject* py_mapWidth(PyObject* self, PyObject* args);
+    static PyObject* py_mapHeight(PyObject* self, PyObject* args);
 
   protected:
     static PyObject* QValueListToPyList(QValueList<int>* list);
