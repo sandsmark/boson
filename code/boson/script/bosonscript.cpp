@@ -347,17 +347,22 @@ unsigned long int BosonScript::minerals(int playerId) const
   return p->minerals();
 }
 
-void BosonScript::addMinerals(int playerId, int amount)
+void BosonScript::addMinerals(int player, int amount)
 {
   if(!game())
   {
     boError() << k_funcinfo << "NULL game" << endl;
     return;
   }
+  if (playerId() != 0)
+  {
+    boError() << k_funcinfo << "player scripts are not allowed to cheat." << endl;
+    return;
+  }
 
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
-  stream << (Q_UINT32)playerId;
+  stream << (Q_UINT32)player;
   stream << (Q_INT32)amount;
   game()->sendMessage(b, BosonMessageIds::IdModifyMinerals);
 }
@@ -381,17 +386,22 @@ unsigned long int BosonScript::oil(int playerId) const
   return p->oil();
 }
 
-void BosonScript::addOil(int playerId, int amount)
+void BosonScript::addOil(int player, int amount)
 {
   if(!game())
   {
     boError() << k_funcinfo << "NULL game" << endl;
     return;
   }
+  if (playerId() != 0)
+  {
+    boError() << k_funcinfo << "player scripts are not allowed to cheat." << endl;
+    return;
+  }
 
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
-  stream << (Q_UINT32)playerId;
+  stream << (Q_UINT32)player;
   stream << (Q_INT32)amount;
   game()->sendMessage(b, BosonMessageIds::IdModifyOil);
 }

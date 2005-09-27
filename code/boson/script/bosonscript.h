@@ -215,7 +215,6 @@ class BosonScript
      **/
     unsigned long int minerals(int playerId) const;
 
-#warning FIXME: limit access
     /**
      * Add given amount of minerals for player with id playerId
      **/
@@ -225,7 +224,6 @@ class BosonScript
      **/
     unsigned long int oil(int playerId) const;
 
-#warning FIXME: limit access
     /**
      * Add given amount of oil for player with id playerId
      **/
