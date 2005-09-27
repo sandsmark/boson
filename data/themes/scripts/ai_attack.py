@@ -17,32 +17,33 @@ except ImportError:
   boprint("error", "Couldn't import ai. Won't work.")
 
 
-module = "ai_attack for player %d" % ai.player
-aidelay = 0
-aicycle = 0
+module = "ai_attack"
 aiunit = -1
 aitarget = -1
+expl = -1
 
 def init():
-  boprint("debug", "%s called" % module)
   global expl
-  global aidelay
-  aidelay = int(BoScript.aiDelay() * 20)
-  boprint("debug", "%s: aidelay set to %d" % (module, aidelay))
+  global module
+
+  module = "ai_attack for player %d" % ai.player
+  boprint("debug", "%s called" % module)
   expl = -1
 
 def advance():
-  global aidelay, aicycle, aiunit, aitarget
-
-  # AI will do something every aidelay advance calls
-  aicycle = aicycle + 1
-  if not aicycle == aidelay:
-    return
-
   boprint("debug", "%s: advance()" % module)
-  #reset aicycle
-  aicycle = 0
+  if ai.cycle % 2 == 0:
+    advanceExplore()
+#  if ai.cycle % 1 == 0: # always true
+#    advanceAttack()
 
+def advanceExplore():
+  boprint("debug", "%s: advanceExplore()" % module)
+  explore()
+
+def advanceAttack():
+  global aiunit, aitarget
+  boprint("debug", "%s: advanceAttack()" % module)
   # check if target is still alive
   if aitarget == -1 or BoScript.isUnitAlive(aitarget) == 0:
     boprint("info", "Target not set")
@@ -97,35 +98,47 @@ def findTarget():
 def explore():
   global expl
   boprint("debug", "exploring")
-  units = BoScript.allPlayerUnits(ai.player)
-  unit = -1
-  if expl == -1 :
-    attacker = -1
-    while attacker == -1:
-      unit = unit + 1
-      if unit >= len(units):
-        unit = -1
-        boprint("info", "No units found, returning")
-        return
-      u = units[unit]
-      if BoScript.isUnitMobile(u):
-        if BoScript.canUnitShoot(u):
-          attacker = u
-          expl = u
-          pos = BoScript.unitPosition(expl)
-          if pos[0] == -1:
-            attacker = -1
-            expl = -1
-  pos = BoScript.unitPosition(expl)
-  boprint("debug", "explore, expl %s, pos %s" % (expl,pos))
-  # randint's arguments must be integers, so convert pos to integer
-  x = int(pos[0])
-  y = int(pos[1])
-  BoScript.moveUnit(expl,randint(x-50, x+50), randint(y-50,y+50))
-  boprint("debug", "exploring: %d to %d,%d" %(expl, x, y))
-  if not BoScript.isUnitAlive(expl):
+  if expl != -1 and not BoScript.isUnitAlive(expl):
     expl = -1
+  if expl == -1:
+    expl = findExplorerUnit()
+    if expl == -1:
+      boprint("debug", "no explorer unit found. not exploring.")
+      return
+  pos = BoScript.unitPosition(expl)
+  boprint("debug", "explore, explore unit: %s current position: %s" % (expl, pos))
 
+  exploreAt = findExploreLocation(expl)
+  if exploreAt[0] == -1:
+    boprint("debug", "not exploring")
+    return
+
+  boprint("debug", "exploring with unit %s at: %s" % (expl, exploreAt))
+  BoScript.moveUnit(expl, exploreAt[0], exploreAt[1])
+
+
+def findExplorerUnit():
+  units = BoScript.allPlayerUnits(ai.player)
+  for u in units:
+    if BoScript.isUnitMobile(u):
+      if BoScript.canUnitMineMinerals(u) or BoScript.canUnitMineOil(u):
+        continue
+      pos = BoScript.unitPosition(u)
+      if pos[0] != -1:
+        return u
+  return -1
+
+def findExploreLocation(unit):
+  pos = BoScript.unitPosition(unit)
+
+  # randint's arguments must be integers, so convert pos to integer
+  posX = int(pos[0])
+  posY = int(pos[1])
+
+  x = randint(posX - 50, posX + 50)
+  y = randint(posY - 50, posY + 50)
+
+  return (x, y)
 
 
 # vim: et sw=2
