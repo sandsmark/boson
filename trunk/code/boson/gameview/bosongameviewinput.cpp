@@ -131,7 +131,7 @@ void BosonGameViewInput::actionClicked(const BoMouseEvent& event)
  }
 
  Unit* unit = 0;
- unit = localPlayerIO()->findUnitAt(canvas(), event.canvasVector()); // also checks for canSee()
+ unit = localPlayerIO()->findUnitAt(event.canvasVector()); // also checks for canSee()
  if (!unit) {
 	//FIXME: first check if a the unit can produce! even mobile units can
 	//have the production plugin!!

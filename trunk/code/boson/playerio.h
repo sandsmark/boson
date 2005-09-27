@@ -19,6 +19,7 @@
 #ifndef PLAYERIO_H
 #define PLAYERIO_H
 
+class Boson;
 class Player;
 class Cell;
 class BosonItem;
@@ -70,6 +71,16 @@ public:
 	Player* player() const { return mPlayer; }
 	const QString& name() const;
 	unsigned long int playerId() const;
+
+	/**
+	 * @return Player::game()
+	 **/
+	const Boson* game() const;
+
+	/**
+	 * @return Boson::canvas() or NULL if @ref game is NULL
+	 **/
+	const BosonCanvas* canvas() const;
 
 	/**
 	 * @return Player::isOutOfGame
@@ -232,14 +243,14 @@ public:
 	/**
 	 * @return The item at @p canvasVector, if any.
 	 **/
-	BosonItem* findItemAt(const BosonCanvas* canvas, const BoVector3Fixed& canvasVector) const;
+	BosonItem* findItemAt(const BoVector3Fixed& canvasVector) const;
 
 	/**
 	 * @return The unit at @p canvasVector, if any. This returns any unit
 	 * that is visible to this player, also a unit that is not owned by this
 	 * player.
 	 **/
-	Unit* findUnitAt(const BosonCanvas* canvas, const BoVector3Fixed& canvasVector) const;
+	Unit* findUnitAt(const BoVector3Fixed& canvasVector) const;
 
 	BoItemList* unitsAtCells(const QPtrVector<const Cell>* cells) const;
 
@@ -254,7 +265,7 @@ public:
 	 * At most radius tiles are searched.
 	 * If n is 0, all visible mineral mines in given are returned.
 	 **/
-	QValueList<BoVector2Fixed> nearestMineralLocations(const BosonCanvas* canvas, int x, int y, unsigned int n, unsigned int radius) const;
+	QValueList<BoVector2Fixed> nearestMineralLocations(int x, int y, unsigned int n, unsigned int radius) const;
 
 	/**
 	 * Finds n nearest oil locations to point (x, y), that are visible to
@@ -262,7 +273,7 @@ public:
 	 * At most radius tiles are searched.
 	 * If n is 0, all visible oil mines in given are returned.
 	 **/
-	QValueList<BoVector2Fixed> nearestOilLocations(const BosonCanvas* canvas, int x, int y, unsigned int n, unsigned int radius) const;
+	QValueList<BoVector2Fixed> nearestOilLocations(int x, int y, unsigned int n, unsigned int radius) const;
 
 private:
 	PlayerIOPrivate* d;

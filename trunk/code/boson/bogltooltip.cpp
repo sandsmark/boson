@@ -281,7 +281,7 @@ void BoGLToolTip::slotTimeOut()
 
  // TODO: find out whether there is actually the canvas below the cursor and not
  // e.g. the command frame!
- BosonItem* item = mPlayerIO->findItemAt(mCanvas, d->mCursorCanvasVector);
+ BosonItem* item = mPlayerIO->findItemAt(d->mCursorCanvasVector);
  if (!item) {
 	hideTip();
 	return;

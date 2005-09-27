@@ -304,7 +304,7 @@ void BoLeftMouseButtonState::action(const BoMouseEvent& e)
 	return;
  }
 
- unit = localPlayerIO()->findUnitAt(canvas(), canvasVector);
+ unit = localPlayerIO()->findUnitAt(canvasVector);
  bool playSelectSound = false;
 
  if (e.controlButton()) {
@@ -2173,7 +2173,7 @@ void BosonGameView::removeSelectionRect(bool replace)
 		return;
 	}
 
-	unit = localPlayerIO()->findUnitAt(canvas(), canvasVector);
+	unit = localPlayerIO()->findUnitAt(canvasVector);
 	if (unit) {
 		boDebug() << k_funcinfo << "select unit at " << canvasVector.x() << "," << canvasVector.y() << " (canvas)" << endl;
 		displayInput()->selectSingle(unit, replace);
@@ -2478,7 +2478,7 @@ void BosonGameView::mouseEventReleaseDouble(ButtonState button, const BoMouseEve
 		// currently!
 		bool replace = !event.controlButton();
 		bool onScreenOnly = !event.shiftButton();
-		Unit* unit = localPlayerIO()->findUnitAt(canvas(), event.canvasVector());
+		Unit* unit = localPlayerIO()->findUnitAt(event.canvasVector());
 		if (unit) {
 			if (onScreenOnly) {
 				boDebug() << k_funcinfo << "TODO: select only those that are currently on the screen!" << endl;

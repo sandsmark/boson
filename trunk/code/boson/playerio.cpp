@@ -28,6 +28,7 @@
 #include "bosonpath.h"
 #include "bosonmap.h"
 #include "unitproperties.h"
+#include "boson.h"
 
 #include <qptrvector.h>
 #include <qptrlist.h>
@@ -59,6 +60,19 @@ const QString& PlayerIO::name() const
 unsigned long int PlayerIO::playerId() const
 {
  return player()->bosonId();
+}
+
+const Boson* PlayerIO::game() const
+{
+ return (Boson*)player()->game();
+}
+
+const BosonCanvas* PlayerIO::canvas() const
+{
+ if (!game()) {
+	return 0;
+ }
+ return game()->canvas();
 }
 
 bool PlayerIO::hasRtti(int rtti) const
@@ -256,20 +270,20 @@ QPoint PlayerIO::homeBase() const
 		(int)commandCenter->y());
 }
 
-BosonItem* PlayerIO::findItemAt(const BosonCanvas* canvas, const BoVector3Fixed& canvasVector) const
+BosonItem* PlayerIO::findItemAt(const BoVector3Fixed& canvasVector) const
 {
- BO_CHECK_NULL_RET0(canvas);
+ BO_CHECK_NULL_RET0(canvas());
  if (canSee(canvasVector)) {
-	return canvas->findItemAt(canvasVector);
+	return canvas()->findItemAt(canvasVector);
  }
  return 0;
 }
 
-Unit* PlayerIO::findUnitAt(const BosonCanvas* canvas, const BoVector3Fixed& canvasVector) const
+Unit* PlayerIO::findUnitAt(const BoVector3Fixed& canvasVector) const
 {
- BO_CHECK_NULL_RET0(canvas);
+ BO_CHECK_NULL_RET0(canvas());
  if (canSee(canvasVector)) {
-	return canvas->findUnitAt(canvasVector);
+	return canvas()->findUnitAt(canvasVector);
  }
  return 0;
 }
@@ -375,29 +389,29 @@ void PlayerIO::calculatePower(unsigned long int* powerGenerated, unsigned long i
 }
 
 
-QValueList<BoVector2Fixed> PlayerIO::nearestMineralLocations(const BosonCanvas* canvas, int x, int y, unsigned int n, unsigned int radius) const
+QValueList<BoVector2Fixed> PlayerIO::nearestMineralLocations(int x, int y, unsigned int n, unsigned int radius) const
 {
- if (!canvas) {
-	BO_NULL_ERROR(canvas);
+ if (!canvas()) {
+	BO_NULL_ERROR(canvas());
 	return QValueList<BoVector2Fixed>();
  }
- if (!canvas->pathFinder()) {
-	BO_NULL_ERROR(canvas->pathFinder());
+ if (!canvas()->pathFinder()) {
+	BO_NULL_ERROR(canvas()->pathFinder());
 	return QValueList<BoVector2Fixed>();
  }
- return canvas->pathFinder()->findLocations(player(), x, y, n, radius, BosonPath::Minerals);
+ return canvas()->pathFinder()->findLocations(player(), x, y, n, radius, BosonPath::Minerals);
 }
 
-QValueList<BoVector2Fixed> PlayerIO::nearestOilLocations(const BosonCanvas* canvas, int x, int y, unsigned int n, unsigned int radius) const
+QValueList<BoVector2Fixed> PlayerIO::nearestOilLocations(int x, int y, unsigned int n, unsigned int radius) const
 {
- if (!canvas) {
-	BO_NULL_ERROR(canvas);
+ if (!canvas()) {
+	BO_NULL_ERROR(canvas());
 	return QValueList<BoVector2Fixed>();
  }
- if (!canvas->pathFinder()) {
+ if (!canvas()->pathFinder()) {
 	BO_NULL_ERROR(canvas->pathFinder());
 	return QValueList<BoVector2Fixed>();
  }
- return canvas->pathFinder()->findLocations(player(), x, y, n, radius, BosonPath::Oil);
+ return canvas()->pathFinder()->findLocations(player(), x, y, n, radius, BosonPath::Oil);
 }
 
