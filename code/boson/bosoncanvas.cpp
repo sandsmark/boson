@@ -84,7 +84,7 @@ public:
 
 		mProperties = 0;
 
-		mPathfinder = 0;
+		mPathFinder = 0;
 
 		mEventListener = 0;
 	}
@@ -113,7 +113,7 @@ public:
 	// but for now we are safe.
 	KGameProperty<unsigned long int> mNextItemId;
 
-	BosonPath* mPathfinder;
+	BosonPath* mPathFinder;
 
 	BoCanvasEventListener* mEventListener;
 
@@ -187,7 +187,7 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
 
  // TODO: check when is it best to do this
  boProfiling->push("Advance Pathfinder");
- mCanvas->pathfinder()->advance();
+ mCanvas->pathFinder()->advance();
  boProfiling->pop(); // Advance Pathfinder
 
  boProfiling->push("Notify About Destroyed Units");
@@ -534,8 +534,8 @@ void BosonCanvas::quitGame()
 {
  // Delete pathfinder first. Otherwise lot of time would be spent recalculating
  //  regions (when units are removed), which is totally unnecessary
- delete d->mPathfinder;
- d->mPathfinder = 0;
+ delete d->mPathFinder;
+ d->mPathFinder = 0;
  deleteDestroyed();
  QMap<int, QPtrList<BosonItem> >::Iterator it;
  for (it = d->mWork2AdvanceList.begin(); it != d->mWork2AdvanceList.end(); ++it) {
@@ -1273,7 +1273,7 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 	return false;
  }
 
- initPathfinder();
+ initPathFinder();
  boDebug(260) << k_funcinfo << "done" << endl;
  return true;
 }
@@ -1547,10 +1547,10 @@ bool BosonCanvas::saveAsXML(QDomElement& root) const
 
  QDomDocument doc = root.ownerDocument();
  // Save pathfinder
- QDomElement pathfinderxml = doc.createElement(QString::fromLatin1("Pathfinder"));
- root.appendChild(pathfinderxml);
- if (d->mPathfinder) {
-	d->mPathfinder->saveAsXML(pathfinderxml);
+ QDomElement pathFinderXML = doc.createElement(QString::fromLatin1("Pathfinder"));
+ root.appendChild(pathFinderXML);
+ if (d->mPathFinder) {
+	d->mPathFinder->saveAsXML(pathFinderXML);
  }
 
  // Save datahandler
@@ -1870,22 +1870,22 @@ unsigned long int BosonCanvas::nextItemId()
  return d->mNextItemId;
 }
 
-void BosonCanvas::initPathfinder()
+void BosonCanvas::initPathFinder()
 {
  PROFILE_METHOD
  boDebug() << k_funcinfo << endl;
 
- if (d->mPathfinder) {
-	boError() << k_funcinfo << "Pathfinder already created!" << endl;
+ if (d->mPathFinder) {
+	boError() << k_funcinfo << "PathFinder already created!" << endl;
 	return;
  }
 
  boDebug() << k_funcinfo << "Constructing..." << endl;
- d->mPathfinder = new BosonPath(map());
+ d->mPathFinder = new BosonPath(map());
  boDebug() << k_funcinfo << "Constructing done!" << endl;
 
  boDebug() << k_funcinfo << "Initing..." << endl;
- d->mPathfinder->init(this);
+ d->mPathFinder->init(this);
 
  for (BoItemList::ConstIterator it = allItems()->begin(); it != allItems()->end(); ++it) {
 	if (RTTI::isUnit((*it)->rtti())) {
@@ -1898,15 +1898,15 @@ void BosonCanvas::initPathfinder()
  boDebug() << k_funcinfo << "DONE" << endl;
 }
 
-BosonPath* BosonCanvas::pathfinder() const
+BosonPath* BosonCanvas::pathFinder() const
 {
- return d->mPathfinder;
+ return d->mPathFinder;
 }
 
 void BosonCanvas::unitMovingStatusChanges(Unit* u, int oldstatus, int newstatus)
 {
- if (pathfinder()) {
-	pathfinder()->unitMovingStatusChanges(u, oldstatus, newstatus);
+ if (pathFinder()) {
+	pathFinder()->unitMovingStatusChanges(u, oldstatus, newstatus);
  }
 }
 

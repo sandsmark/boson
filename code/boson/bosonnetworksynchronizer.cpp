@@ -772,7 +772,7 @@ public:
 	{
 		mCanvasSync.setCanvas(canvas, advanceMessageCount, interval);
 		mPathSync.setMap(canvas->map());
-		mPathSync.setPathfinder(canvas->pathfinder());
+		mPathSync.setPathfinder(canvas->pathFinder());
 	}
 
 	virtual QByteArray makeLog();

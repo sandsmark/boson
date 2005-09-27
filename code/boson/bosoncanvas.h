@@ -153,8 +153,8 @@ public:
 
 	BosonCanvasStatistics* canvasStatistics() const;
 
-	void initPathfinder();
-	BosonPath* pathfinder() const;
+	void initPathFinder();
+	BosonPath* pathFinder() const;
 
 	inline BosonCollisions* collisions() const { return mCollisions; }
 
