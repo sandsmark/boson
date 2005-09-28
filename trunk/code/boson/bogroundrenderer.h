@@ -232,18 +232,6 @@ public:
 	virtual bool usable() const;
 
 protected:
-	/**
-	 * This generates an array of visible cells for the @p playerIO. It works
-	 * on the list previously created by @ref generateCellList. (i.e. on
-	 * @ref renderCells)
-	 *
-	 * This mainly checks for whether the cells are fogged.
-	 *
-	 * Note that you _MUST_ delete[] the array when you are done using it!
-	 * @param cellCount The number of cells in the array is returned here.
-	 **/
-	int* createVisibleCellList(int* cellCount, PlayerIO* playerIO);
-
 	void setRenderCells(int* renderCells, int renderCellsSize);
 	void setRenderCellsCount(unsigned int count);
 
