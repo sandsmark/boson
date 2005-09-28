@@ -1239,7 +1239,7 @@ void BoGroundRendererBase::cellHeightChanged(int x1, int y1, int x2, int y2)
 
  mCellListBuilder->cellHeightChanged(x1, y1, x2, y2);
 
- // re-generate the visible cells list (with new LOD settings
+ // re-generate the visible cells list (with new LOD settings)
  setRenderCellsCount(0);
 }
 
