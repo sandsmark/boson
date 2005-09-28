@@ -237,16 +237,16 @@ void postBosonConfigInit()
  }
  if (!args->isSet("ai")) {
 	boDebug() << k_funcinfo << "ai arg is not set" << endl;
-	boConfig->setDoubleValue("AIDelay", 0.0);
+	boConfig->setDoubleValue("AIDelay", -1.0);
  } else if (args->isSet("aidelay")) {
 	QString delay = args->getOption("aidelay");
 	bool ok;
-	boConfig->setDoubleValue("AIDelay", delay.toFloat(&ok));
-	boDebug() << k_funcinfo << "aidelay set to " << boConfig->doubleValue("AIDelay") << endl;
-	if (!ok) {
+	float aidelay = delay.toFloat(&ok);
+	if (ok) {
+		boConfig->setDoubleValue("AIDelay", aidelay);
+		boDebug() << k_funcinfo << "aidelay set to " << boConfig->doubleValue("AIDelay") << endl;
+	} else {
 		boError() << k_funcinfo << "aidelay is not a valid float!" << endl;
-		// Fall back to default
-		boConfig->setDoubleValue("AIDelay", 3.0);
 	}
  }
  if (args->isSet("indirect")) {
