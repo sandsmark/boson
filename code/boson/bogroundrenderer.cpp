@@ -38,7 +38,6 @@
 
 #include <math.h>
 
-
 BoGroundRenderer::BoGroundRenderer()
 {
  mModelviewMatrix = 0;
@@ -90,6 +89,7 @@ void BoGroundRenderer::setRenderCellsCount(unsigned int count)
  mRenderCellsCount = count;
 }
 
+
 void BoGroundRenderer::setMatrices(const BoMatrix* modelviewMatrix, const BoMatrix* projectionMatrix, const int* viewport)
 {
  mModelviewMatrix = modelviewMatrix;
@@ -110,8 +110,6 @@ unsigned int BoGroundRenderer::renderCells(const BosonMap* map, RenderFlags flag
 	generateCellList(map);
  }
 
- BO_CHECK_NULL_RET0(localPlayerIO());
-
  BO_CHECK_NULL_RET0(map);
  BO_CHECK_NULL_RET0(map->heightMap());
 
@@ -120,14 +118,12 @@ unsigned int BoGroundRenderer::renderCells(const BosonMap* map, RenderFlags flag
  const float* heightMap = map->heightMap(); // FIXME: use the heightmap of the cell renderer
  int heightMapWidth = map->width() + 1;
 
- int cellsCount = 0;
- int* renderCells = createVisibleCellList(&cellsCount, localPlayerIO());
- BO_CHECK_NULL_RET0(renderCells);
+ BO_CHECK_NULL_RET0(mRenderCells);
 
  // Render cells
  renderVisibleCellsStart(map);
- if (cellsCount > 0) {
-	renderVisibleCells(renderCells, cellsCount, map, flags);
+ if (renderCellsCount() > 0) {
+	renderVisibleCells(renderCells(), renderCellsCount(), map, flags);
  } else {
  // AB: we call renderVisibleCellsStart()/Stop() only to make sure that
  // the GL states are in the expected states after ground rendering
@@ -137,18 +133,16 @@ unsigned int BoGroundRenderer::renderCells(const BosonMap* map, RenderFlags flag
 
  if (!(flags & DepthOnly)) {
 	glEnable(GL_DEPTH_TEST);
-	renderCellGrid(renderCells, cellsCount, heightMap, heightMapWidth);
+	renderCellGrid(renderCells(), renderCellsCount(), heightMap, heightMapWidth);
  }
 
- delete[] renderCells;
-
- statistics()->setRenderedCells(cellsCount);
+ statistics()->setRenderedCells(renderCellsCount());
  if (statistics()->renderedQuads() == 0) {
 	// fill only, if the renderer didn't do itself
-	statistics()->setRenderedQuads(cellsCount);
+	statistics()->setRenderedQuads(renderCellsCount());
  }
 
- return cellsCount;
+ return renderCellsCount();
 }
 
 void BoGroundRenderer::renderCellGrid(int* cells, int cellsCount, const float* heightMap, int heightMapWidth)
@@ -194,61 +188,6 @@ void BoGroundRenderer::renderCellGrid(int* cells, int cellsCount, const float* h
  }
 }
 
-
-int* BoGroundRenderer::createVisibleCellList(int* cells, PlayerIO* playerIO)
-{
- BO_CHECK_NULL_RET0(playerIO);
- BO_CHECK_NULL_RET0(cells);
- int* renderCells = 0;
- if (renderCellsCount() > 0) {
-	renderCells = makeCellArray(renderCellsCount());
- } else {
-	// an array of size 0 isn't good.
-	renderCells = makeCellArray(1);
-	setCell(renderCells, 0, 0, 0, 1, 1);
- }
- int cellsCount = 0;
- for (unsigned int i = 0; i < renderCellsCount(); i++) {
-	int x;
-	int y;
-	int w;
-	int h;
-	getCell(this->renderCells(), i, &x, &y, &w, &h);
-	if (x < 0 || y < 0) {
-		continue;
-	}
-
-#warning FIXME: w,h
-	// FIXME: if w,h are not both 1, then there are 3 possible cases (see
-	// below, at isFogged()).
-
-#warning FIXME: w,h
-	// FIXME: w,h are not used. there are 3 cases possible:
-	// 1. the whole rect ((x,y),(x+w,y+h)) is fogged. ignore all cells (i.e.
-	//    "continue").
-	// 2. the whole rect is visible. leave cells in the array (i.e. do not
-	//    "continue").
-	// 3. parts of the rect are visible, other parts are not. in this case
-	//    we must split the rect up, probably into separate cells (i.e.
-	//    chunks with w==h==1). however then the renderCells array may get
-	//    _larger_ than it was before!
-	//    -> we must make sure that it can actually take all items (can
-	//       easily be done if it is at least as large as the number of
-	//       containing cells, not the number of its elements).
-
-	// AB: better solution: check *before* the cells get assigned to this
-	// class. localPlayerIO() is *very* ugly in this class
-	if (playerIO->isFogged(x, y)) {
-		// don't draw anything at all. the cell will just be black,
-		// because of the glClear() call.
-		continue;
-	}
-	setCell(renderCells, cellsCount, x, y, w, h);
-	cellsCount++;
- }
- *cells = cellsCount;
- return renderCells;
-}
 
 QString BoGroundRenderer::statisticsData() const
 {
