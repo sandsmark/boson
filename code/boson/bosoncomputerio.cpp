@@ -40,8 +40,6 @@
 BosonComputerIO::BosonComputerIO() : KGameComputerIO()
 {
  boDebug() << k_funcinfo << endl;
- // advance() method in script is called every advance call now, so it's
- //  script's job to to something useful only every aidelay() advance calls.
  mEventListener = 0;
 }
 
@@ -72,10 +70,6 @@ bool BosonComputerIO::initializeIO()
 	return false;
  }
 
- // AB: note that the listener is neither loaded nor saved currently.
- //     only the script is loaded (initScript()) and saved (by the manager), but
- //     loadFromXML() is never called.
- //     TODO: is this a bug or do we intend this?
  mEventListener = new BoComputerPlayerEventListener((Player*)player(), manager, this);
  if (!mEventListener->initScript()) {
 	boError() << k_funcinfo << "could not init script" << endl;
