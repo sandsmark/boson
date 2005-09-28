@@ -186,6 +186,9 @@ bool Unit::init()
  }
 
  loadWeapons();
+
+ speciesTheme()->loadNewUnit(this);
+
  return true;
 }
 

@@ -669,16 +669,18 @@ void BosonCanvas::updateSight(Unit* unit, bofixed, bofixed)
  int bottom = ((y + sight > d->mMap->height()) ?  d->mMap->height() :
 		y + sight) - y;
 
- sight *= sight;
+ int sight2 = sight * sight;
 // boDebug() << k_funcinfo << endl;
 // boDebug() << "left=" << left << ",right=" << right << endl;
 // boDebug() << "top=" << top << ",bottom=" << bottom << endl;
 
  for (int i = left; i < right; i++) {
 	for (int j = top; j < bottom; j++) {
-		if (i*i + j*j < (int)sight) {
-			if (unit->owner()->isFogged(x + i, y + j)) {
-				unit->owner()->unfog(x + i, y + j);
+		if (i*i + j*j < sight2) {
+			int cellX = x + i;
+			int cellY = y + j;
+			if (unit->owner()->isFogged(cellX, cellY)) {
+				unit->owner()->unfog(cellX, cellY);
 			}
 		} else {
 			//TODO
@@ -1782,7 +1784,6 @@ Unit* BosonCanvas::createUnit(Player* owner, unsigned long int unitType)
 	return 0;
  }
  unit->setMoveData(moveData(prop));
- theme->loadNewUnit(unit);
  return unit;
 }
 
