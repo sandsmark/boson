@@ -152,7 +152,6 @@ def advance():
   if ai.cycle % 1 == 0: # always true
     advanceAttack()
 
-  testFoo()
 
 def advanceExplore():
   global explorerObject
