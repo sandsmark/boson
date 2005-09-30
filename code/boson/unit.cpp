@@ -442,28 +442,39 @@ void Unit::reload(unsigned int count)
 	return;
  }
  chargePowerForReload(owner()->powerChargeForCurrentAdvanceCall());
- if (!isChargedForReload()) {
-	return;
+ bool unitConsumesPower = false;
+ if (powerConsumedByUnit() > 0) {
+	unitConsumesPower = true;
  }
- // FIXME: this reloads _all_ weapons of _all_ units in _all_ advance calls.
- // however only very few weapons per advance call need to be reloaded. even in
- // big battles many weapons don't need to be reloaded (turrets of the player
- // who is not under attack for example).
- // we should add weapons that need to be reloaded to a list and iterate that
- // list only (and remove wepons from the list once they got reloaded)
- // Reload weapons
- // AB: UPDATE: it has turned out that such a list will probably have a minor
- // influence on speed only. completely removing weapon reloading improves
- // performance slightly only.
+ bool isCharged = isChargedForReload();
  if (d->mWeapons[0]) {
 	BosonWeapon** w = &d->mWeapons[0];
 	for (; *w; w++) {
-		(*w)->reload(count);
+		// TODO
+#if 0
+		bool weaponRequiresPower = true;
+		if ((*w)->powerConsumedByWeapon == 0) {
+			weaponRequiresPower = false;
+		}
+#else
+		bool weaponRequiresPower = unitConsumesPower;
+#endif
+		if (isCharged || !weaponRequiresPower) {
+			(*w)->reload(count);
+		}
 	}
  }
 
+ // shield reloading always requires power (unless the unit doesn't consume
+ // power at all)
+ bool shieldsRequirePower = true;
+ if (!unitConsumesPower) {
+	shieldsRequirePower = false;
+ }
  if (shields() < maxShields()) {
-	reloadShields(count);
+	if (isCharged || !shieldsRequirePower) {
+		reloadShields(count);
+	}
  }
 
  unchargePowerForReload();
