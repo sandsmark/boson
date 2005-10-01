@@ -83,7 +83,7 @@ class Sun:
 cycle = 0
 enable = 1
 # How many cycles does one day last?
-duration = 2400  # that's 2 minutes
+duration = 9600  # that's 8 minutes, as we have 20 advance calls per second
 
 sun = Sun()
 # Start at 2005/05/13 08:00
