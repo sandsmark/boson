@@ -20,6 +20,8 @@ FACILITIES = \
 	fix_barracks \
 	fix_commandbunker \
 	fix_comsat \
+	fix_airradar \
+	fix_groundradar \
 	fix_helipad \
 	fix_mineralrefinery \
 	fix_oilrefinery \
