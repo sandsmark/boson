@@ -70,6 +70,7 @@ public:
 	unsigned int mFoggedCount; // helper variable, doesn't need to be saved
 	KGameProperty<unsigned long int> mMinerals;
 	KGameProperty<unsigned long int> mOil;
+	KGameProperty<unsigned long int> mGenericAmmunition;
 	KGamePropertyBool mIsNeutralPlayer;
 
 	BosonStatistics* mStatistics;
@@ -112,6 +113,8 @@ Player::Player(bool isNeutralPlayer) : KPlayer()
 		KGamePropertyBase::PolicyLocal, "Minerals");
  d->mOil.registerData(IdOil, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "Oil");
+ d->mGenericAmmunition.registerData(IdGenericAmmunition, dataHandler(),
+		KGamePropertyBase::PolicyLocal, "GenericAmmunition");
  d->mIsNeutralPlayer.registerData(IdIsNeutralPlayer, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "IsNeutralPlayer");
  d->mIsNeutralPlayer = isNeutralPlayer;
@@ -176,6 +179,7 @@ void Player::quitGame(bool destruct)
 	d->mStatistics = new BosonStatistics;
 	d->mMinerals.setLocal(0);
 	d->mOil.setLocal(0);
+	d->mGenericAmmunition.setLocal(0);
 	d->mFogged.resize(0);
  }
 }
@@ -535,6 +539,11 @@ unsigned long int Player::oil() const
  return d->mOil;
 }
 
+unsigned long int Player::genericAmmunition() const
+{
+ return d->mGenericAmmunition;
+}
+
 void Player::setOil(unsigned long int o)
 {
  d->mOil = o;
@@ -543,6 +552,23 @@ void Player::setOil(unsigned long int o)
 void Player::setMinerals(unsigned long int m)
 {
  d->mMinerals = m;
+}
+
+void Player::setGenericAmmunition(unsigned long int a)
+{
+ d->mGenericAmmunition = a;
+}
+
+unsigned long int Player::requestGenericAmmunition(unsigned long int requested)
+{
+ unsigned long int ammo = 0;
+ if (genericAmmunition() < requested) {
+	ammo = genericAmmunition();
+ } else {
+	ammo = requested;
+ }
+ setGenericAmmunition(genericAmmunition() - ammo);
+ return ammo;
 }
 
 const QColor& Player::teamColor() const
@@ -1036,7 +1062,7 @@ bool Player::loadFogOfWar(const QDomElement& root)
 void Player::writeGameLog(QTextStream& log)
 {
  log << "Player: " << bosonId() << endl;
- log << minerals() << " " << oil() << endl;
+ log << minerals() << " " << oil() << " " << genericAmmunition() << endl;
  log << mobilesCount() << " " << facilitiesCount() << endl;
 
  QPtrListIterator<Unit> it(d->mUnits);

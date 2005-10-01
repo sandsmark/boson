@@ -232,6 +232,7 @@ public:
 		mResourcesBox = 0;
 		mMineralsLabel = 0;
 		mOilLabel = 0;
+		mGenericAmmoLabel = 0;
 		mPowerGeneratedLabel = 0;
 		mPowerConsumedLabel = 0;
 		mFPSLabel = 0;
@@ -275,6 +276,7 @@ public:
 	BoUfoHBox* mResourcesBox;
 	BoUfoLabel* mMineralsLabel;
 	BoUfoLabel* mOilLabel;
+	BoUfoLabel* mGenericAmmoLabel;
 	BoUfoLabel* mPowerGeneratedLabel;
 	BoUfoLabel* mPowerConsumedLabel;
 	BoUfoLabel* mFPSLabel;
@@ -372,6 +374,7 @@ void BosonUfoGameGUI::initUfoWidgets()
  d->mResourcesBox = widget->mResourcesBox;
  d->mMineralsLabel = widget->mMineralsLabel;
  d->mOilLabel = widget->mOilLabel;
+ d->mGenericAmmoLabel = widget->mGenericAmmoLabel;
  d->mPowerGeneratedLabel = widget->mPowerGeneratedLabel;
  d->mPowerConsumedLabel = widget->mPowerConsumedLabel;
  d->mFPSLabel = widget->mFPSLabel;
@@ -509,8 +512,10 @@ void BosonUfoGameGUI::updateUfoLabels()
  BO_CHECK_NULL_RET(d->mFPSCounter);
  QString minerals = QString::number(localPlayerIO()->minerals());
  QString oil = QString::number(localPlayerIO()->oil());
+ QString genericAmmo = QString::number(localPlayerIO()->genericAmmunition());
  d->mMineralsLabel->setText(minerals);
  d->mOilLabel->setText(oil);
+ d->mGenericAmmoLabel->setText(genericAmmo);
  d->mResourcesBox->setVisible(boConfig->boolValue("show_resources"));
  unsigned long int powerGenerated, powerConsumed;
  localPlayerIO()->calculatePower(&powerGenerated, &powerConsumed);

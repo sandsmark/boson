@@ -186,6 +186,11 @@ unsigned long int PlayerIO::oil() const
  return player()->oil();
 }
 
+unsigned long int PlayerIO::genericAmmunition() const
+{
+ return player()->genericAmmunition();
+}
+
 BosonStatistics* PlayerIO::statistics() const
 {
  return player()->statistics();

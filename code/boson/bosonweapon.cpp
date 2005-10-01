@@ -47,7 +47,8 @@ BosonWeaponProperties::BosonWeaponProperties(const UnitProperties* prop, unsigne
     mDamageRange(    this, QString("Weapon_%1:DamageRange").arg(id-1), "MaxValue"),
     mFullDamageRange(this, QString("Weapon_%1:FullDamageRange").arg(id-1), "MaxValue"),
     mReloadingTime(  this, QString("Weapon_%1:Reload").arg(id-1), "MaxValue"),
-    mSpeed(          this, QString("Weapon_%1:Speed").arg(id-1), "MaxValue")
+    mSpeed(          this, QString("Weapon_%1:Speed").arg(id-1), "MaxValue"),
+    mRequiredGenericAmmunition(this, QString("Weapon_%1:RequiredGenericAmmunition").arg(id-1), "MaxValue")
 {
   mId = id;
 
@@ -158,6 +159,7 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg)
     boWarning() << k_funcinfo << "FullDamageRange must not be bigger than DamageRange!" << endl;
     insertBoFixedWeaponBaseValue(bofixedWeaponBaseValue("DamageRange"), "FullDamageRange", "MaxValue");
   }
+  insertBoFixedWeaponBaseValue(cfg->readDoubleNumEntry("RequiredGenericAmmunition", 1), "RequiredGenericAmmunition", "MaxValue");
   mCanShootAtAirUnits = cfg->readBoolEntry("CanShootAtAirUnits", false);
   mCanShootAtLandUnits = cfg->readBoolEntry("CanShootAtLandUnits", false);
   mHeight = cfg->readDoubleNumEntry("Height", 0.25);
@@ -234,6 +236,7 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   cfg->writeEntry("StartAngle", mStartAngle);
   cfg->writeEntry("Damage", damage());
   cfg->writeEntry("DamageRange", damageRange());
+  cfg->writeEntry("RequiredGenericAmmunition", requiredGenericAmmunition());
   cfg->writeEntry("CanShootAtAirUnits", mCanShootAtAirUnits);
   cfg->writeEntry("CanShootAtLandUnits", mCanShootAtLandUnits);
   cfg->writeEntry("Height", (double)mHeight);
@@ -255,6 +258,7 @@ void BosonWeaponProperties::reset()
   insertBoFixedWeaponBaseValue(0.25 * bofixedWeaponBaseValue("DamageRange"), "FullDamageRange", "MaxValue");
   insertULongWeaponBaseValue(0, "Reload", "MaxValue");
   insertBoFixedWeaponBaseValue(0, "Speed", "MaxValue");
+  insertULongWeaponBaseValue(1, "RequiredGenericAmmunition", "MaxValue");
   mAccelerationSpeed = 0;
   mTurningSpeed = tan(120 * DEG2RAD / 20.0f);
   mStartAngle = -1;
@@ -458,7 +462,8 @@ BosonWeapon::BosonWeapon(int weaponNumber, BosonWeaponProperties* prop, Unit* _u
     mDamageRange(    prop, QString("Weapon_%1:DamageRange").arg(prop->id()-1), "MaxValue"),
     mFullDamageRange(prop, QString("Weapon_%1:FullDamageRange").arg(prop->id()-1), "MaxValue"),
     mReloadingTime(  prop, QString("Weapon_%1:Reload").arg(prop->id()-1), "MaxValue"),
-    mSpeed(          prop, QString("Weapon_%1:Speed").arg(prop->id()-1), "MaxValue")
+    mSpeed(          prop, QString("Weapon_%1:Speed").arg(prop->id()-1), "MaxValue"),
+    mRequiredGenericAmmunition(prop, QString("Weapon_%1:RequiredGenericAmmunition").arg(prop->id()-1), "MaxValue")
 {
   mProp = prop;
   if (!unit())
@@ -466,8 +471,10 @@ BosonWeapon::BosonWeapon(int weaponNumber, BosonWeaponProperties* prop, Unit* _u
     boError() << k_funcinfo << "NULL unit" << endl;
   }
   registerWeaponData(weaponNumber, &mReloadCounter, IdReloadCounter);
+  registerWeaponData(weaponNumber, &mGenericAmmunition, IdGenericAmmunition);
   mReloadCounter.setLocal(0);
   mReloadCounter.setEmittingSignal(false);
+  mGenericAmmunition.setLocal(0);
 }
 
 BosonWeapon::~BosonWeapon()
@@ -502,6 +509,9 @@ void BosonWeapon::registerWeaponData(int weaponNumber, KGamePropertyBase* prop, 
    // I hope we won't need this anyway for weapons.
    case IdReloadCounter:
      name = QString::fromLatin1("ReloadCounter");
+     break;
+   case IdGenericAmmunition:
+     name = QString::fromLatin1("GenericAmmunition");
      break;
    default:
      break;
@@ -541,8 +551,35 @@ bool BosonWeapon::canShootAt(Unit* u) const
   }
 }
 
+void BosonWeapon::refillGenericAmmunition(Unit* owner)
+{
+  BO_CHECK_NULL_RET(owner);
+  if(reloaded())
+  {
+    return;
+  }
+  if(requiredGenericAmmunition() <= mGenericAmmunition)
+  {
+    boError() << k_funcinfo << "called, but don't require generic ammo" << endl;
+    return;
+  }
+  unsigned long int required = requiredGenericAmmunition() - mGenericAmmunition;
+  unsigned long int ammo = owner->requestGenericAmmunition(required);
+  if(ammo > required)
+  {
+    boError() << k_funcinfo << "got more ammo than requested. overflow?" << endl;
+    return;
+  }
+  mGenericAmmunition = mGenericAmmunition + ammo;
+}
+
 void BosonWeapon::shoot(Unit* u)
 {
+  if(!reloaded())
+  {
+    boDebug() << k_funcinfo << "need to reload weapon first" << endl;
+    return;
+  }
   BoVector3Fixed mypos(unit()->centerX(), unit()->centerY(), unit()->z());
   if(mProp->shotType() == BosonShot::Missile)
   {
@@ -573,6 +610,11 @@ void BosonWeapon::shoot(Unit* u)
 
 void BosonWeapon::shoot(const BoVector3Fixed& target)
 {
+  if (!reloaded())
+  {
+    boDebug() << k_funcinfo << "need to reload weapon first" << endl;
+    return;
+  }
   if (!unit())
   {
     boError() << k_funcinfo << "NULL unit" << endl;
@@ -583,6 +625,11 @@ void BosonWeapon::shoot(const BoVector3Fixed& target)
 
 void BosonWeapon::shoot(const BoVector3Fixed& pos, const BoVector3Fixed& target)
 {
+  if(!reloaded())
+  {
+    boDebug() << k_funcinfo << "need to reload weapon first" << endl;
+    return;
+  }
   if (!unit())
   {
     boError() << k_funcinfo << "NULL unit" << endl;
@@ -596,8 +643,13 @@ void BosonWeapon::shoot(const BoVector3Fixed& pos, const BoVector3Fixed& target)
 bool BosonWeapon::layMine()
 {
   boDebug() << k_funcinfo << "" << endl;
-  if (properties()->shotType() != BosonShot::Mine || !reloaded()) {
-    boDebug() << k_funcinfo << "weapon is not minelayer or not reloaded" << endl;
+  if(!reloaded())
+  {
+    boDebug() << k_funcinfo << "need to reload weapon first" << endl;
+    return false;
+  }
+  if (properties()->shotType() != BosonShot::Mine) {
+    boDebug() << k_funcinfo << "weapon is not minelayer" << endl;
     return false;
   }
   BoVector3Fixed pos(unit()->centerX(), unit()->centerY(), 0);
@@ -612,8 +664,13 @@ bool BosonWeapon::layMine()
 bool BosonWeapon::dropBomb(const BoVector2Fixed& hvelocity)
 {
   boDebug() << k_funcinfo << "" << endl;
-  if (properties()->shotType() != BosonShot::Bomb || !reloaded()) {
-    boDebug() << k_funcinfo << "weapon is not bomb or not reloaded" << endl;
+  if(!reloaded())
+  {
+    boDebug() << k_funcinfo << "need to reload weapon first" << endl;
+    return false;
+  }
+  if (properties()->shotType() != BosonShot::Bomb) {
+    boDebug() << k_funcinfo << "weapon is not bomb" << endl;
     return false;
   }
   BoVector3Fixed pos(unit()->centerX(), unit()->centerY(), unit()->z());
