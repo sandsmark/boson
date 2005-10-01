@@ -23,6 +23,9 @@ texture_DATA = \
 	concrt1.jpg \
 	concrt2.jpg \
 	concrt3.jpg \
+	concrt4.jpg \
+	concrt5.jpg \
+	concrt6.jpg \
 	crates1.jpg \
 	doors1.jpg \
 	doors2.jpg \
@@ -30,6 +33,7 @@ texture_DATA = \
 	doors4.jpg \
 	doors5.jpg \
 	doors6.jpg \
+	door9.jpg \
 	grid1.jpg \
 	grid2.jpg \
 	metal1.jpg \
@@ -67,6 +71,7 @@ texture_DATA = \
 	mslback1.jpg \
 	mslfrnt1.jpg \
 	pipe2.jpg \
+	rdrhull.jpg \
 	ring1.jpg \
 	roof1.jpg \
 	roof2.jpg \
