@@ -460,7 +460,7 @@ void Unit::reload(unsigned int count)
 		bool weaponRequiresPower = unitConsumesPower;
 #endif
 		if (isCharged || !weaponRequiresPower) {
-			(*w)->reload(count);
+			(*w)->reload(this, count);
 		}
 	}
  }
@@ -478,6 +478,15 @@ void Unit::reload(unsigned int count)
  }
 
  unchargePowerForReload();
+}
+
+unsigned long int Unit::requestGenericAmmunition(unsigned long int requested)
+{
+ if (!owner()) {
+	BO_NULL_ERROR(owner);
+	return 0;
+ }
+ return owner()->requestGenericAmmunition(requested);
 }
 
 void Unit::advanceNone(unsigned int)

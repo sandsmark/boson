@@ -198,6 +198,32 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
  unchargeUnits(advanceCallsCount, advanceFlag);
  boProfiling->pop(); // Advance Items
 
+
+ // TODO: use a condition for this code: every n advance call the condition
+ // should send an event "GainNewAmmo" for the players
+#if 1
+ // refill generic ammo of all players by a small amount, up to a certain value.
+ // TODO: use the actual _small_ amount once a "ammunition center" exists, where
+ // the player can build new ammo (to increase the refill rate)
+#if 0
+ const unsigned long int amount = 5;
+#else
+ const unsigned long int amount = 100;
+#endif
+ // if this value is reached, "free" refill stops. only using ammunition center
+ // (i.e. by producing new ammo), new ammo can be gained.
+ const unsigned long int maxAmmo = 1000;
+ for (QPtrListIterator<KPlayer> it(*boGame->playerList()); it.current(); ++it) {
+	Player* p = (Player*)it.current();
+	if (p->bosonId() < 128 || p->bosonId() >= 256) {
+		continue;
+	}
+	if (p->genericAmmunition() < maxAmmo) {
+		p->setGenericAmmunition(p->genericAmmunition() + amount);
+	}
+ }
+#endif
+
  /*
   * This contains some things that need to be done "sometimes" only - currently
   * that is deletion of destroyed units and unused shots.

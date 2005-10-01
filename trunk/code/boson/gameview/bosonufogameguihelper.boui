@@ -630,6 +630,29 @@
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
         <Properties>
+         <name>mWidget51</name>
+         <constraints/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <opaque/>
+         <layout/>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <borderType/>
+         <stretch/>
+         <takesKeyboardFocus/>
+         <text>Generic Ammo:</text>
+         <iconFile/>
+        </Properties>
+       </Widget>
+       <Widget>
+        <ClassName>BoUfoLabel</ClassName>
+        <Properties>
          <name>mWidget47</name>
          <constraints/>
          <gridLayoutColumns/>
@@ -743,6 +766,29 @@
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
         <Properties>
+         <name>mGenericAmmoLabel</name>
+         <constraints/>
+         <gridLayoutColumns/>
+         <gridLayoutRows/>
+         <opaque/>
+         <layout/>
+         <minimumWidth/>
+         <minimumHeight/>
+         <preferredWidth/>
+         <preferredHeight/>
+         <backgroundImageFile/>
+         <verticalAlignment/>
+         <horizontalAlignment/>
+         <borderType/>
+         <stretch/>
+         <takesKeyboardFocus/>
+         <text/>
+         <iconFile/>
+        </Properties>
+       </Widget>
+       <Widget>
+        <ClassName>BoUfoLabel</ClassName>
+        <Properties>
          <name>mPowerGeneratedLabel</name>
          <constraints/>
          <gridLayoutColumns/>
@@ -759,7 +805,7 @@
          <borderType/>
          <stretch/>
          <takesKeyboardFocus/>
-         <text></text>
+         <text/>
          <iconFile/>
         </Properties>
        </Widget>

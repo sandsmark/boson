@@ -287,6 +287,7 @@ public:
 			playersStream << (Q_UINT32)p->foggedCells();
 			playersStream << (Q_UINT32)p->minerals();
 			playersStream << (Q_UINT32)p->oil();
+			playersStream << (Q_UINT32)p->genericAmmunition();
 			++playerIt;
 		}
 		return playersBuffer;
@@ -306,11 +307,13 @@ protected:
 			DECLARE_UNSTREAM(Q_UINT32, fogged);
 			DECLARE_UNSTREAM(Q_UINT32, minerals);
 			DECLARE_UNSTREAM(Q_UINT32, oil);
+			DECLARE_UNSTREAM(Q_UINT32, genericAmmunition);
 
 #define CHECK(x,x2) if (x != x2) { return i18n("Different players in players log: variable %1: found %2, expected %3").arg(#x).arg(x2).arg(x); }
 			CHECK(fogged, fogged2);
 			CHECK(minerals, minerals2);
 			CHECK(oil, oil2);
+			CHECK(genericAmmunition, genericAmmunition2);
 #undef CHECK
 		}
 		return i18n("There is an error in the players log (MD5 sums don't match), but it could not be found.");

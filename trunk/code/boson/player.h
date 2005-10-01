@@ -57,7 +57,8 @@ public:
 		IdIsNeutralPlayer = KGamePropertyBase::IdUser + 4,
 		IdOutOfGame = KGamePropertyBase::IdUser + 5,
 		IdHasLost = KGamePropertyBase::IdUser + 6,
-		IdHasWon = KGamePropertyBase::IdUser + 7
+		IdHasWon = KGamePropertyBase::IdUser + 7,
+		IdGenericAmmunition = KGamePropertyBase::IdUser + 8
 	};
 
 	/**
@@ -155,8 +156,17 @@ public:
 
 	unsigned long int minerals() const;
 	unsigned long int oil() const;
+	unsigned long int genericAmmunition() const;
 	void setMinerals(unsigned long int m);
 	void setOil(unsigned long int o);
+	void setGenericAmmunition(unsigned long int a);
+
+	/**
+	 * @return A number between 0 and @p requested that represents the
+	 * amount of ammo that is delivered to the caller. The ammunition of the
+	 * player is reduced by this amount.
+	 **/
+	unsigned long int requestGenericAmmunition(unsigned long int requested);
 
 	void clearUpgrades();
 	void addUpgrade(const UpgradeProperties* upgrade);

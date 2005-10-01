@@ -235,6 +235,10 @@ public:
 	 **/
 	unsigned long int oil() const;
 	/**
+	 * @return @ref Player::genericAmmunition
+	 **/
+	unsigned long int genericAmmunition() const;
+	/**
 	 * @return @ref Player::statistics
 	 **/
 	BosonStatistics* statistics() const;

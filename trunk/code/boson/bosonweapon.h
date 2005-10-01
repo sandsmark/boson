@@ -116,6 +116,16 @@ class BosonWeaponProperties : public PluginProperties
      * It has effect only for missile weapons.
      **/
     bofixed turningSpeed() const  { return mTurningSpeed; }
+
+    /**
+     * @return The amount of "generic" ammunition required for one shot of this
+     * weapon.
+     **/
+    inline unsigned long int requiredGenericAmmunition() const
+    {
+      return mRequiredGenericAmmunition.value(upgradesCollection());
+    }
+
     /**
      * @return Filename of 3d model of shot of this weapon.
      * Only used in unit editor
@@ -217,6 +227,7 @@ class BosonWeaponProperties : public PluginProperties
     BoUpgradeableProperty<bofixed> mFullDamageRange;
     BoUpgradeableProperty<unsigned long int> mReloadingTime;
     BoUpgradeableProperty<bofixed> mSpeed;
+    BoUpgradeableProperty<unsigned long int> mRequiredGenericAmmunition;
     bool mCanShootAtAirUnits;
     bool mCanShootAtLandUnits;
     bofixed mAccelerationSpeed;
@@ -251,6 +262,7 @@ class BosonWeapon : public UnitPlugin
   public:
     enum PropertyIds {
       IdReloadCounter = KGamePropertyBase::IdUser + 0,
+      IdGenericAmmunition = KGamePropertyBase::IdUser + 1,
 
       LastPropertyId
     };
@@ -269,15 +281,12 @@ class BosonWeapon : public UnitPlugin
      **/
     virtual int pluginType() const { return UnitPlugin::Weapon; }
 
-    /**
-     * Reload the weapon.
-     **/
     virtual void advance(unsigned int advanceCallsCount)
     {
       Q_UNUSED(advanceCallsCount);
     }
 
-    inline void reload(unsigned int reloadBy)
+    void reload(Unit* owner, unsigned int reloadBy)
     {
       if(mReloadCounter > (int)reloadBy)
       {
@@ -286,6 +295,10 @@ class BosonWeapon : public UnitPlugin
       else
       {
         mReloadCounter = 0;
+      }
+      if(mReloadCounter == 0 && mGenericAmmunition < requiredGenericAmmunition())
+      {
+        refillGenericAmmunition(owner);
       }
     }
 
@@ -299,7 +312,18 @@ class BosonWeapon : public UnitPlugin
     /**
      * @return Whether this weapon is reloaded (ready to fire)
      **/
-    inline bool reloaded() const  { return (mReloadCounter == 0); }
+    inline bool reloaded() const
+    {
+      if(mReloadCounter != 0)
+      {
+        return false;
+      }
+      if(mGenericAmmunition < requiredGenericAmmunition())
+      {
+        return false;
+      }
+      return true;
+    }
 
     inline const BosonWeaponProperties* properties() const  { return mProp; }
 
@@ -351,15 +375,27 @@ class BosonWeapon : public UnitPlugin
      **/
     inline bofixed speed() const  { return mSpeed.value(upgradesCollection()); }
 
+    /**
+     * @return The amount of "generic" ammunition required for one shot of this
+     * weapon.
+     **/
+    inline unsigned long int requiredGenericAmmunition() const
+    {
+      return mRequiredGenericAmmunition.value(upgradesCollection());
+    }
+
 
   protected:
     void shoot(const BoVector3Fixed& pos, const BoVector3Fixed& target);
 
     void registerWeaponData(int weaponNumber, KGamePropertyBase* prop, int id, bool local = true);
 
+    void refillGenericAmmunition(Unit* owner);
+
   private:
     const BosonWeaponProperties* mProp;
     KGameProperty<int> mReloadCounter;
+    KGameProperty<unsigned long int> mGenericAmmunition;
 
     BoUpgradeableProperty<unsigned long int> mRange;
     BoUpgradeableProperty<long int> mDamage;
@@ -367,6 +403,7 @@ class BosonWeapon : public UnitPlugin
     BoUpgradeableProperty<bofixed> mFullDamageRange;
     BoUpgradeableProperty<unsigned long int> mReloadingTime;
     BoUpgradeableProperty<bofixed> mSpeed;
+    BoUpgradeableProperty<unsigned long int> mRequiredGenericAmmunition;
 };
 
 
