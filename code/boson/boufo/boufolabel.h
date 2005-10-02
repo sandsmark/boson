@@ -37,7 +37,6 @@ public:
 		return mLabel;
 	}
 
-	void setText(const QString& text);
 	QString text() const;
 	void setIcon(const BoUfoImage&);
 	void setIcon(const BoUfoDrawable& drawable);
@@ -68,6 +67,9 @@ public:
 	 * See @ref BoUfoWidget::setHorizontalAlignment
 	 **/
 	virtual void setHorizontalAlignment(HorizontalAlignment alignment);
+
+public slots:
+	void setText(const QString& text);
 
 protected:
 	virtual void setMinimumSize(const ufo::UDimension& size);

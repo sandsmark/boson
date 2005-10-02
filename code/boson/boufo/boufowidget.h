@@ -230,7 +230,6 @@ public:
 	virtual void setOpaque(bool);
 	virtual bool opaque() const;
 
-	void setEnabled(bool);
 	bool isEnabled() const;
 
 	void setTakesKeyboardFocus(bool);
@@ -351,9 +350,6 @@ public:
 	void setPreferredHeight(int h);
 	int preferredHeight() const;
 
-	void setVisible(bool);
-	void show() { setVisible(true); }
-	void hide() { setVisible(false); }
 	bool isVisible() const;
 
 	/**
@@ -438,6 +434,12 @@ public:
 	 **/
 	virtual void paintBorder() {}
 
+
+public slots:
+	void setVisible(bool);
+	void show() { setVisible(true); }
+	void hide() { setVisible(false); }
+	void setEnabled(bool);
 
 signals: // TODO: remove ufo::* parameters. use Qt or custom parameters only
 	void signalMouseEntered(ufo::UMouseEvent* e);
