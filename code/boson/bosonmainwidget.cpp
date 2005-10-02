@@ -403,7 +403,6 @@ void BosonMainWidget::paintGL()
  // buffer swapping might get disabled when a freme is skipped - reenable it
  setAutoBufferSwap(true);
 
- // AB: glClear() is NOT included in frame profiling anymore!
  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
  boTextureManager->clearStatistics();
