@@ -241,6 +241,7 @@ borender_SOURCES = \
 		bomaterialwidget.cpp \
 		bovectorinput.cpp \
 		kgamespeciesdebug.cpp \
+		borendergui.boui \
 		borendermain.cpp
 
 libboinfo_la_SOURCES = \
