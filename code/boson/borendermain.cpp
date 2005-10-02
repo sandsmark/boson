@@ -131,147 +131,245 @@ static KCmdLineOptions options[] =
 void postBosonConfigInit();
 
 
-class ModelPreviewPrivate
+class BoRenderGLWidgetPrivate
 {
 public:
-	ModelPreviewPrivate()
+	BoRenderGLWidgetPrivate()
 	{
 		mGUI = 0;
+		mModelDisplay = 0;
+
+		mMaterialWidget = 0;
+		mLightWidget = 0;
 	}
 	BoRenderGUI* mGUI;
+	ModelDisplay* mModelDisplay;
+	QPtrList<SpeciesTheme> mSpecies;
+	QPtrDict<SpeciesTheme> mAction2Species;
+
+	// TODO: use a BoUfo widget. don't use a separate window.
+	BoMaterialWidget* mMaterialWidget;
+	BoLightCameraWidget1* mLightWidget;
 };
 
-ModelPreview::ModelPreview(const QPtrList<SpeciesTheme>& species, QWidget* parent)
-	: BosonUfoGLWidget(parent, "modelpreview")
+BoRenderGLWidget::BoRenderGLWidget(QWidget* parent, bool direct)
+	: BosonUfoGLWidget(parent, "borenderglwidget", direct)
 {
- d = new ModelPreviewPrivate();
+ d = new BoRenderGLWidgetPrivate();
+}
 
- mSpecies.setAutoDelete(true);
+void BoRenderGLWidget::initWidget()
+{
+ d->mMaterialWidget = 0;
+ d->mSpecies.setAutoDelete(true);
  QStringList list = SpeciesTheme::availableSpecies();
  for (unsigned int i = 0; i < list.count(); i++) {
 	QString dir = list[i];
 	dir = dir.left(dir.length() - QString("index.species").length());
 	SpeciesTheme* s = new SpeciesTheme(dir, QColor());
-	mSpecies.append(s);
+	d->mSpecies.append(s);
 	s->readUnitConfigs(false);
  }
- mUpdateTimer = new QTimer(this);
- connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdateGL()));
- qApp->setGlobalMouseTracking(true);
- qApp->installEventFilter(this);
- setMouseTracking(true);
- setFocusPolicy(StrongFocus);
 
- mCurrentFrame = 0;
- mModel = 0;
- mCurrentLOD = 0;
- mMeshUnderMouse = -1;
- mSelectedMesh = -1;
- mLightWidget = 0;
- mMaterialWidget = 0;
- mViewData = new BosonViewData(this);
- BosonViewData::setGlobalViewData(mViewData);
-
-
- mMouseMoveDiff = new BoMouseMoveDiff;
-
- mPlacementPreview = false;
- mDisallowPlacement = false;
- mWireFrame = false;
- mRenderAxis = false;
- mRenderGrid = false;
-
-#if BOSONFONT
- mDefaultFont = 0;
-#endif
-
- mCamera = new BoCamera;
- mLight = 0;
-
- mFovY = 60.0f;
-
- connect(this, SIGNAL(signalFovYChanged(float)), this, SLOT(slotFovYChanged(float)));
- connect(this, SIGNAL(signalFrameChanged(int)), this, SLOT(slotFrameChanged(int)));
- connect(this, SIGNAL(signalLODChanged(int)), this, SLOT(slotLODChanged(int)));
-
- setMinimumSize(400, 400);
-
- boConfig->addDynamicEntry(new BoConfigBoolEntry(boConfig, "ShowVertexPoints", true));
- boConfig->addDynamicEntry(new BoConfigUIntEntry(boConfig, "VertexPointSize", 3));
- boConfig->addDynamicEntry(new BoConfigColorEntry(boConfig, "BoRenderBackgroundColor", QColor(183, 183, 183)));
- boConfig->addDynamicEntry(new BoConfigDoubleEntry(boConfig, "GridUnitSize", 0.1));
+ initGL();
 }
 
-ModelPreview::~ModelPreview()
+BoRenderGLWidget::~BoRenderGLWidget()
 {
- delete mViewData;
- delete mMaterialWidget;
- delete mLightWidget;
- qApp->setGlobalMouseTracking(false);
- resetModel();
- BoMeshRendererManager::manager()->unsetCurrentRenderer();
- delete mUpdateTimer;
- delete mMouseMoveDiff;
- if (mLight) {
-	BoLightManager::manager()->deleteLight(mLight->id());
- }
- delete mCamera;
- mSpecies.clear();
+ delete d->mLightWidget;
+ delete d->mMaterialWidget;
+ d->mSpecies.setAutoDelete(true);
+ d->mSpecies.clear();
  delete d;
- BoTextureManager::deleteStatic();
 }
 
-void ModelPreview::initializeGL()
+bool BoRenderGLWidget::parseCmdLineArgs(KCmdLineArgs* args)
 {
- if (isInitialized()) {
-	return;
+ QString theme;
+ unsigned long int typeId = 0;
+ QString unit;
+ QString object;
+
+ if (args->isSet("species")) {
+	theme = args->getOption("species");
  }
- static bool recursive = false;
- if (recursive) {
-	return;
+ if (args->isSet("unit")) {
+	if (theme.isEmpty()) {
+		theme = QString::fromLatin1("human");
+	}
+	unit = args->getOption("unit");
+ } else if (args->isSet("unit-id")) {
+	if (theme.isEmpty()) {
+		theme = QString::fromLatin1("human");
+	}
+	QString arg = args->getOption("unit-id");
+	bool ok = false;
+	typeId = arg.toULong(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "unit-id must be a number" << endl;
+		return 1;
+	}
+ } else if (args->isSet("object")) {
+	if (theme.isEmpty()) {
+		theme = QString::fromLatin1("human");
+	}
+	object = args->getOption("object");
  }
- recursive = true;
+ if (!theme.isEmpty()) {
+	if (typeId == 0 && unit.isEmpty() && object.isEmpty()) {
+		boError() << k_funcinfo << "you have to specify both species and unit/object!" << endl;
+		return 1;
+	} else if (typeId > 0) {
+		changeUnit(theme, typeId);
+	} else if (!unit.isEmpty()) {
+		changeUnit(theme, unit);
+	} else if (!object.isEmpty()) {
+		changeObject(theme, object);
+	} else {
+		boError() << k_funcinfo << "you have to specify both unit and species!" << endl;
+		return 1;
+	}
+ }
+
+
+
+ if (!loadCamera(args)){
+	return false;
+ }
+
+
+ if (args->isSet("fovy")) {
+	bool ok = false;
+	float f = args->getOption("fovy").toFloat(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "fovy must be a number" << endl;
+		return 1;
+	}
+	d->mGUI->mFrame->setValue(f);
+ }
+ if (args->isSet("frame")) {
+	bool ok = false;
+	int f = args->getOption("frame").toInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "frame must be a number" << endl;
+		return 1;
+	}
+	d->mGUI->mFrame->setValue(f);
+ }
+ if (args->isSet("lod")) {
+	bool ok = false;
+	int l = args->getOption("lod").toInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "lod must be a number" << endl;
+		return 1;
+	}
+	d->mGUI->mLOD->setValue(l);
+ }
+ return true;
+}
+
+bool BoRenderGLWidget::loadCamera(KCmdLineArgs* args)
+{
+ BoQuaternion quat = d->mModelDisplay->camera()->quaternion();
+ BoVector3Float cameraPos = d->mModelDisplay->camera()->cameraPos();
+
+ // in borender we use a first translate, then rotate approach, whereas the
+ // camera does it the other way round. we need to transform the vector first.
+ quat.transform(&cameraPos, &cameraPos);
+
+ if (args->isSet("camera-x")) {
+	bool ok = false;
+	float c = args->getOption("camera-x").toFloat(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "camera-x must be a number" << endl;
+		return false;
+	}
+	cameraPos.setX(c);
+ }
+ if (args->isSet("camera-y")) {
+	bool ok = false;
+	float c = args->getOption("camera-y").toFloat(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "camera-y must be a number" << endl;
+		return false;
+	}
+	cameraPos.setY(c);
+ }
+ if (args->isSet("camera-z")) {
+	bool ok = false;
+	float c = args->getOption("camera-z").toFloat(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "camera-z must be a number" << endl;
+		return false;
+	}
+	cameraPos.setZ(c);
+ }
+ if (args->isSet("rotate-x")) {
+	bool ok = false;
+	float r = args->getOption("rotate-x").toFloat(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "rotate-x must be a number" << endl;
+		return false;
+	}
+	BoQuaternion q;
+	q.setRotation(r, 0.0f, 0.0f);
+	quat.multiply(q);
+ }
+ if (args->isSet("rotate-y")) {
+	bool ok = false;
+	float r = args->getOption("rotate-y").toFloat(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "rotate-y must be a number" << endl;
+		return false;
+	}
+	BoQuaternion q;
+	q.setRotation(0.0f, r, 0.0f);
+	quat.multiply(q);
+ }
+ if (args->isSet("rotate-z")) {
+	bool ok = false;
+	float r = args->getOption("rotate-z").toFloat(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "rotate-z must be a number" << endl;
+		return false;
+	}
+	BoQuaternion q;
+	q.setRotation(0.0f, 0.0f, r);
+	quat.multiply(q);
+ }
+ // re-transform to gluLookAt() values
+ quat.inverse().transform(&cameraPos, &cameraPos);
+
+ BoVector3Float lookAt, up;
+ quat.matrix().toGluLookAt(&lookAt, &up, cameraPos);
+
+ d->mModelDisplay->camera()->setGluLookAt(cameraPos, lookAt, up);
+
+ return true;
+}
+
+void BoRenderGLWidget::initializeGL()
+{
+ boDebug() << k_funcinfo << endl;
  makeCurrent();
+ initUfo();
+ setUpdatesEnabled(false);
+
  BoTextureManager::initStatic();
  BoLightManager::initStatic();
  BoMeshRendererManager::initStatic();
-#if BOSONFONT
- delete mDefaultFont;
- BoFontInfo defaultFontInfo;
- defaultFontInfo.fromString(boConfig->stringValue("GLFont", QString::null));
- mDefaultFont = new BosonGLFont(defaultFontInfo);
-#endif
+ boTextureManager->initOpenGL();
+
  glClearColor(0.0, 0.0, 0.0, 0.0);
  glShadeModel(GL_FLAT);
  glDisable(GL_DITHER);
  glEnable(GL_BLEND);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
- if (mLight) {
-	BoLightManager::manager()->deleteLight(mLight->id());
- }
- mLight = BoLightManager::manager()->createLight();
- if (!mLight->isActive()) {
-	boWarning() << k_funcinfo << "light is inactive" << endl;
- }
- BoVector4Float lightDif(1.0f, 1.0f, 1.0f, 1.0f);
- BoVector4Float lightAmb(0.5f, 0.5f, 0.5f, 1.0f);
- BoVector3Float lightPos(-6000.0, 3000.0, 10000.0);
- mLight->setAmbient(lightAmb);
- mLight->setDiffuse(lightDif);
- mLight->setSpecular(lightDif);
- mLight->setDirectional(true);
- mLight->setEnabled(true);
-
- setUpdatesEnabled(false);
- mUpdateTimer->start(GL_UPDATE_TIMER);
-
  initUfoGUI();
-
- recursive = false;
 }
 
-void ModelPreview::initUfoGUI()
+void BoRenderGLWidget::initUfoGUI()
 {
  static bool initialized = false;
  if (initialized) {
@@ -279,54 +377,63 @@ void ModelPreview::initUfoGUI()
 	return;
  }
  initialized = true;
- initUfo();
-// ufoManager()->contentWidget()->setOpaque(true);
 
  d->mGUI = new BoRenderGUI();
  ufoManager()->contentWidget()->addWidget(d->mGUI);
 
- connect(this, SIGNAL(signalFovYChanged(float)),
-		d->mGUI->mFovY, SLOT(setValue(float)));
- connect(d->mGUI->mFovY, SIGNAL(signalValueChanged(float)),
-		this, SLOT(slotFovYChanged(float)));
- connect(this, SIGNAL(signalLODChanged(float)),
+ d->mModelDisplay = new ModelDisplay();
+ d->mGUI->mModelView->addWidget(d->mModelDisplay);
+ d->mModelDisplay->show();
+
+ connect(d->mModelDisplay, SIGNAL(signalLODChanged(float)),
 		d->mGUI->mLOD, SLOT(setValue(float)));
- connect(this, SIGNAL(signalMaxLODChanged(float)),
+ connect(d->mModelDisplay, SIGNAL(signalFovYChanged(float)),
+		d->mGUI->mFovY, SLOT(setValue(float)));
+ connect(d->mModelDisplay, SIGNAL(signalFrameChanged(float)),
+		d->mGUI->mFrame, SLOT(setValue(float)));
+ connect(d->mModelDisplay, SIGNAL(signalShowSelectedMeshLabel(bool)),
+		d->mGUI->mSelectedMeshLabel, SLOT(setVisible(bool)));
+ connect(d->mModelDisplay, SIGNAL(signalSelectedMeshLabel(const QString&)),
+		d->mGUI->mSelectedMeshLabel, SLOT(setText(const QString&)));
+ connect(d->mModelDisplay, SIGNAL(signalMeshUnderMouseLabel(const QString&)),
+		d->mGUI->mMeshUnderMouseLabel, SLOT(setText(const QString&)));
+
+ connect(d->mGUI->mFovY, SIGNAL(signalValueChanged(float)),
+		d->mModelDisplay, SLOT(slotFovYChanged(float)));
+ connect(d->mModelDisplay, SIGNAL(signalMaxLODChanged(float)),
 		d->mGUI->mLOD, SLOT(slotSetMaxValue(float)));
  connect(d->mGUI->mLOD, SIGNAL(signalValueChanged(float)),
-		this, SLOT(slotLODChanged(float)));
- connect(this, SIGNAL(signalMaxFramesChanged(float)),
+		d->mModelDisplay, SLOT(slotLODChanged(float)));
+ connect(d->mModelDisplay, SIGNAL(signalMaxFramesChanged(float)),
 		d->mGUI->mFrame, SLOT(slotSetMaxValue(float)));
- connect(this, SIGNAL(signalFrameChanged(float)),
-		d->mGUI->mFrame, SLOT(setValue(float)));
  connect(d->mGUI->mFrame, SIGNAL(signalValueChanged(float)),
-		this, SLOT(slotFrameChanged(float)));
+		d->mModelDisplay, SLOT(slotFrameChanged(float)));
  d->mGUI->mLOD->setRange(0.0f, 0.0f);
  d->mGUI->mFrame->setRange(0.0f, 0.0f);
 
  connect(d->mGUI->mHideButton, SIGNAL(signalClicked()),
-		this, SLOT(slotHideSelectedMesh()));
+		d->mModelDisplay, SLOT(slotHideSelectedMesh()));
  connect(d->mGUI->mHideOthersButton, SIGNAL(signalClicked()),
-		this, SLOT(slotHideUnSelectedMeshes()));
+		d->mModelDisplay, SLOT(slotHideUnSelectedMeshes()));
  connect(d->mGUI->mUnhideAllButton, SIGNAL(signalClicked()),
-		this, SLOT(slotUnHideAllMeshes()));
+		d->mModelDisplay, SLOT(slotUnHideAllMeshes()));
 
 
 
  connect(d->mGUI->mPlacement, SIGNAL(signalToggled(bool)),
-		this, SLOT(slotPlacementPreviewChanged(bool)));
+		d->mModelDisplay, SLOT(slotPlacementPreviewChanged(bool)));
  connect(d->mGUI->mDisallowPlacement, SIGNAL(signalToggled(bool)),
-		this, SLOT(slotDisallowPlacementChanged(bool)));
+		d->mModelDisplay, SLOT(slotDisallowPlacementChanged(bool)));
  connect(d->mGUI->mEnableWireframe, SIGNAL(signalToggled(bool)),
-		this, SLOT(slotWireFrameChanged(bool)));
+		d->mModelDisplay, SLOT(slotWireFrameChanged(bool)));
  connect(d->mGUI->mShowAxis, SIGNAL(signalToggled(bool)),
-		this, SLOT(slotRenderAxisChanged(bool)));
+		d->mModelDisplay, SLOT(slotRenderAxisChanged(bool)));
  connect(d->mGUI->mShowGrid, SIGNAL(signalToggled(bool)),
-		this, SLOT(slotRenderGridChanged(bool)));
+		d->mModelDisplay, SLOT(slotRenderGridChanged(bool)));
  connect(d->mGUI->mEnableLight, SIGNAL(signalToggled(bool)),
-		this, SLOT(slotEnableLight(bool)));
+		d->mModelDisplay, SLOT(slotEnableLight(bool)));
  connect(d->mGUI->mEnableMaterials, SIGNAL(signalToggled(bool)),
-		this, SLOT(slotEnableMaterials(bool)));
+		d->mModelDisplay, SLOT(slotEnableMaterials(bool)));
 
 
 
@@ -339,14 +446,14 @@ void ModelPreview::initUfoGUI()
  d->mGUI->mCameraContainer->addWidget(camera);
 #endif
  connect(d->mGUI->mDefaultsButton, SIGNAL(signalClicked()),
-		this, SLOT(slotResetView()));
-
- updateMeshUnderMouseLabel();
+		d->mModelDisplay, SLOT(slotResetView()));
 
  initUfoAction();
+
+ d->mModelDisplay->slotResetView();
 }
 
-void ModelPreview::initUfoAction()
+void BoRenderGLWidget::initUfoAction()
 {
  BoUfoActionCollection::initActionCollection(ufoManager());
  BoUfoActionCollection* actionCollection = ufoManager()->actionCollection();
@@ -354,8 +461,7 @@ void ModelPreview::initUfoAction()
 
  BoUfoActionMenu* modelMenu = new BoUfoActionMenu(i18n("&Model"),
 		 actionCollection, "model");
- QPtrListIterator<SpeciesTheme> it(mSpecies);
- for (; it.current(); ++it) {
+ for (QPtrListIterator<SpeciesTheme> it(d->mSpecies); it.current(); ++it) {
 	SpeciesTheme* s = it.current();
 	BoUfoActionMenu* menu = new BoUfoActionMenu(s->identifier(), actionCollection,
 			QString("model_species_%1").arg(s->identifier()));
@@ -366,8 +472,8 @@ void ModelPreview::initUfoAction()
 	menu->insert(selectUnit);
 	menu->insert(selectObject);
 
-	mAction2Species.insert(selectUnit, s);
-	mAction2Species.insert(selectObject, s);
+	d->mAction2Species.insert(selectUnit, s);
+	d->mAction2Species.insert(selectObject, s);
 
 
 	connect(selectUnit, SIGNAL(signalActivated(int)),
@@ -443,35 +549,521 @@ void ModelPreview::initUfoAction()
  }
 }
 
-void ModelPreview::setFont(const BoFontInfo& font)
+void BoRenderGLWidget::paintGL()
+{
+ QColor background = boConfig->colorValue("BoRenderBackgroundColor", Qt::black);
+ glClearColor((GLfloat)background.red() / 255.0f, (GLfloat)background.green() / 255.0f, background.blue() / 255.0f, 0.0f);
+ glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+ boTextureManager->clearStatistics();
+
+ if (ufoManager()) {
+	boTextureManager->invalidateCache();
+	glColor3ub(255, 255, 255);
+
+	ufoManager()->dispatchEvents();
+	ufoManager()->render(false);
+ }
+}
+
+void BoRenderGLWidget::slotShowVertexPoints(bool s)
+{
+ boConfig->setBoolValue("ShowVertexPoints", s);
+}
+
+// TODO: prevent displaying two dialogs of the same type at once!
+void BoRenderGLWidget::slotChangeVertexPointSize()
+{
+ unsigned int size = boConfig->uintValue("VertexPointSize");
+ BoUfoInputDialog::getIntegerWidget(ufoManager(), this, SLOT(slotSetVertexPointSize(int)),
+		i18n("Vertex point size (in pixels)"), i18n("Vertex point size"),
+
+		(int)size, 0, 500, 1);
+// emit signalChangeVertexPointSize(); // obsolete
+}
+
+// TODO: prevent displaying two dialogs of the same type at once!
+void BoRenderGLWidget::slotChangeGridUnitSize()
+{
+ float size = (float)boConfig->doubleValue("GridUnitSize", 0.1);
+ BoUfoInputDialog::getFloatWidget(ufoManager(), this, SLOT(slotSetGridUnitSize(float)),
+		i18n("Grid unit size"), i18n("Grid unit size"),
+
+		size, 0.0, 1.0, 0.1);
+// emit signalChangeVertexPointSize(); // obsolete
+}
+
+void BoRenderGLWidget::slotChangeBackgroundColor()
+{
+ QColor color = boConfig->colorValue("BoRenderBackgroundColor", QColor(183, 183, 183));
+ int result = KColorDialog::getColor(color, color, this);
+ if (result == KColorDialog::Accepted) {
+	boConfig->setColorValue("BoRenderBackgroundColor", color);
+ }
+}
+
+void BoRenderGLWidget::slotDebugModels()
+{
+ KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Debug Models"),
+		KDialogBase::Cancel, KDialogBase::Cancel, 0,
+		"debugmodelsdialog", false, true);
+ connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
+ QWidget* w = dialog->plainPage();
+ QVBoxLayout* l = new QVBoxLayout(w);
+ KGameModelDebug* models = new KGameModelDebug(w);
+ l->addWidget(models);
+
+ QPtrListIterator<SpeciesTheme> it(d->mSpecies);
+ for (; it.current(); ++it) {
+	SpeciesTheme* theme = it.current();
+
+	// units
+	QValueList<const UnitProperties*> prop = it.current()->allUnits();
+	QValueList<const UnitProperties*>::Iterator propIt;
+	for (propIt = prop.begin(); propIt != prop.end(); ++propIt) {
+		QStringList fileNames = SpeciesData::unitModelFiles();
+		bool found = false;
+		QString file;
+		for (QStringList::Iterator fit = fileNames.begin(); fit != fileNames.end(); ++fit) {
+			if (KStandardDirs::exists((*propIt)->unitPath() + *fit)) {
+				file = *fit;
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			boError() << k_funcinfo << "Cannot find model file file for " << (*propIt)->typeId() << endl;
+			continue;
+		}
+		file = (*propIt)->unitPath() + file;
+		models->addFile(file, QString("%1/%2").arg(theme->identifier()).arg((*propIt)->name()));
+	}
+
+	// objects
+	QStringList objectFiles;
+	QStringList objects = theme->allObjects(&objectFiles);
+	for (unsigned int i = 0; i < objects.count(); i++) {
+		QString file = theme->themePath() + QString::fromLatin1("objects/") + objectFiles[i];
+		models->addFile(file, objects[i]);
+	}
+
+	// add any files that we might have missed
+	models->addFiles(theme->themePath());
+ }
+ models->slotUpdate();
+
+ dialog->show();
+}
+
+void BoRenderGLWidget::slotDebugSpecies()
+{
+ KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Debug Species"),
+		KDialogBase::Cancel, KDialogBase::Cancel, 0,
+		"debugspeciesdialog", false, true);
+ connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
+ QWidget* w = dialog->plainPage();
+ QVBoxLayout* l = new QVBoxLayout(w);
+ KGameSpeciesDebug* species = new KGameSpeciesDebug(w);
+ l->addWidget(species);
+ species->loadSpecies();
+
+ dialog->show();
+}
+
+void BoRenderGLWidget::slotShowMaterialsWidget()
+{
+ if (!d->mMaterialWidget) {
+	d->mMaterialWidget = new BoMaterialWidget(0);
+ }
+ d->mMaterialWidget->clearMaterials();
+if (!d->mModelDisplay->model()) {
+	return;
+ }
+ BosonModel* model = d->mModelDisplay->model();
+ for (unsigned int i = 0; i < model->materialCount(); i++) {
+	d->mMaterialWidget->addMaterial(model->material(i));
+ }
+ d->mMaterialWidget->show();
+}
+
+void BoRenderGLWidget::slotShowLightWidget()
+{
+ if (!d->mLightWidget) {
+	d->mLightWidget = new BoLightCameraWidget1(0, true);
+	d->mLightWidget->setLight(d->mModelDisplay->light(), context());
+ }
+ d->mLightWidget->show();
+}
+
+void BoRenderGLWidget::slotReloadMeshRenderer()
+{
+ bool unusable = false;
+ bool r = BoMeshRendererManager::manager()->reloadPlugin(&unusable);
+ if (r) {
+	return;
+ }
+ boError() << "meshrenderer reloading failed" << endl;
+ if (unusable) {
+	KMessageBox::sorry(0, i18n("Reloading meshrenderer failed, library is now unusable. quitting."));
+	exit(1);
+ } else {
+	KMessageBox::sorry(0, i18n("Reloading meshrenderer failed but library should still be usable"));
+ }
+}
+
+void BoRenderGLWidget::slotReloadModelTextures()
+{
+ BO_CHECK_NULL_RET(BosonModelTextures::modelTextures());
+#warning TODO! (reloading textures)
+ //BosonModelTextures::modelTextures()->reloadTextures();
+}
+
+void BoRenderGLWidget::slotShowGLStates()
+{
+ boDebug() << k_funcinfo << endl;
+ BoGLStateWidget* w = new BoGLStateWidget(0, 0, WDestructiveClose);
+ w->show();
+}
+
+void BoRenderGLWidget::slotShowChangeFont()
 {
 #if BOSONFONT
- makeCurrent();
+ BoFontInfo f;
+ f = mDefaultFont->fontInfo();
+ int result = BosonGLFontChooser::getFont(f, this);
+ if (result == QDialog::Accepted) {
+	setFont(f);
+	boConfig->setStringValue("GLFont", fontInfo().toString());
+ }
+#endif
+}
+
+void BoRenderGLWidget::load(SpeciesTheme* s, const UnitProperties* prop)
+{
+ BO_CHECK_NULL_RET(s);
+ BO_CHECK_NULL_RET(prop);
+ boViewData->addSpeciesTheme(s);
+ SpeciesData* speciesData = boViewData->speciesData(s);
+ speciesData->loadUnitModel(prop, s->teamColor());
+ BosonModel* model = speciesData->unitModel(prop->typeId());
+ if (!model) {
+	BO_NULL_ERROR(model);
+ }
+ d->mModelDisplay->setModel(model);
+}
+
+void BoRenderGLWidget::loadObjectModel(SpeciesTheme* s, const QString& file)
+{
+ BO_CHECK_NULL_RET(s);
+ if (file.isEmpty()) {
+	boError() << k_funcinfo << "empty filename" << endl;
+	return;
+ }
+ boViewData->addSpeciesTheme(s);
+ SpeciesData* speciesData = boViewData->speciesData(s);
+ speciesData->loadObjects(s->teamColor());
+ BosonModel* model = speciesData->objectModel(file);
+ if (!model) {
+	BO_NULL_ERROR(model);
+ }
+ d->mModelDisplay->setModel(model);
+}
+
+SpeciesTheme* BoRenderGLWidget::findTheme(const QString& theme) const
+{
+ SpeciesTheme* s = 0;
+ for (QPtrListIterator<SpeciesTheme> it(d->mSpecies); it.current() && !s; ++it) {
+	if (it.current()->identifier().lower() == theme.lower()) {
+		s = it.current();
+	}
+ }
+ return s;
+}
+
+void BoRenderGLWidget::changeUnit(SpeciesTheme* s, const UnitProperties* prop)
+{
+ BO_CHECK_NULL_RET(s);
+ BO_CHECK_NULL_RET(prop);
+ // TODO: check/uncheck the menu items!
+
+ if (d->mMaterialWidget) {
+	d->mMaterialWidget->clearMaterials();
+	d->mMaterialWidget->hide();
+ }
+ load(s, prop);
+}
+
+void BoRenderGLWidget::changeObject(SpeciesTheme* s, const QString& objectModel)
+{
+ BO_CHECK_NULL_RET(s);
+ if (d->mMaterialWidget) {
+	d->mMaterialWidget->clearMaterials();
+	d->mMaterialWidget->hide();
+ }
+ loadObjectModel(s, objectModel);
+}
+
+void BoRenderGLWidget::changeUnit(const QString& theme, const QString& unit)
+{
+ SpeciesTheme* s = 0;
+ const UnitProperties* prop = 0;
+
+ s = findTheme(theme);
+ if (!s) {
+	boError() << k_funcinfo << "Could not find theme " << theme << endl;
+	return;
+ }
+ QValueList<const UnitProperties*> units = s->allUnits();
+ QValueList<const UnitProperties*>::Iterator i = units.begin();
+ for (; i != units.end() && !prop; ++i) {
+	const UnitProperties* p = *i;
+	// warning: this might cause trouble once we start translations! but we
+	// also have a way to use IDs directly so this is just a minor problem
+	if (p->name().lower() == unit.lower()) {
+		prop = p;
+	}
+ }
+ if (!prop) {
+	boError() << "Could not find unit " << unit << endl;
+ }
+ changeUnit(s, prop);
+}
+
+void BoRenderGLWidget::changeUnit(const QString& theme, unsigned long int type)
+{
+ SpeciesTheme* s = 0;
+ for (QPtrListIterator<SpeciesTheme> it(d->mSpecies); it.current() && !s; ++it) {
+	if (it.current()->identifier().lower() == theme.lower()) {
+		s = it.current();
+	}
+ }
+ if (!s) {
+	boError() << k_funcinfo << "Could not find theme " << theme << endl;
+	return;
+ }
+ const UnitProperties* prop = s->unitProperties(type);
+ if (!prop) {
+	boError() << k_funcinfo << "Could not find unit " << type << endl;
+	return;
+ }
+ changeUnit(s, prop);
+}
+
+void BoRenderGLWidget::changeObject(const QString& theme, const QString& object)
+{
+ SpeciesTheme* s = 0;
+
+ s = findTheme(theme);
+ if (!s) {
+	boError() << k_funcinfo << "Could not find theme " << theme << endl;
+	return;
+ }
+ changeObject(s, object);
+}
+
+void BoRenderGLWidget::slotSetGridUnitSize(float size)
+{
+ boConfig->setDoubleValue("GridUnitSize", size);
+}
+
+void BoRenderGLWidget::uncheckAllBut(BoUfoAction* action)
+{
+ if (!action || !action->isA("BoUfoSelectAction")) {
+	boError() << k_funcinfo << "not a valid BoUfoSelectAction" << endl;
+	return;
+ }
+ QPtrDictIterator<SpeciesTheme> it(d->mAction2Species);
+ for (; it.current(); ++it) {
+	BoUfoAction* a = (BoUfoAction*)it.currentKey();
+	if (a == action) {
+		continue;
+	}
+	if (!a->isA("BoUfoSelectAction")) {
+		continue;
+	}
+	((BoUfoSelectAction*)a)->setCurrentItem(-1);
+ }
+}
+
+void BoRenderGLWidget::slotUnitChanged(int index)
+{
+ if (!sender() || !sender()->inherits("BoUfoAction")) {
+	boError() << k_funcinfo << "sender() must inherit BoUfoAction" << endl;
+	return;
+ }
+ BoUfoAction* p = (BoUfoAction*)sender();
+ uncheckAllBut(p);
+ SpeciesTheme* s = d->mAction2Species[p];
+ BO_CHECK_NULL_RET(s);
+
+ QValueList<const UnitProperties*> props = s->allUnits();
+ if (index >= (int)props.count()) {
+	boError() << k_funcinfo << "index " << index << " out of range" << endl;
+	return;
+ }
+ unsigned long int type = props[index]->typeId();
+ const UnitProperties* prop = s->unitProperties(type);
+ if (!prop) {
+	boError() << k_funcinfo << "could not find unitproperties for index=" << index << " type=" << type << endl;
+	return;
+ }
+
+ changeUnit(s, prop);
+}
+
+void BoRenderGLWidget::slotObjectChanged(int index)
+{
+ if (!sender() || !sender()->inherits("BoUfoAction")) {
+	boError() << k_funcinfo << "sender() must inherit BoUfoAction" << endl;
+	return;
+ }
+ BoUfoAction* p = (BoUfoAction*)sender();
+ uncheckAllBut(p);
+ SpeciesTheme* s = d->mAction2Species[p];
+ BO_CHECK_NULL_RET(s);
+
+ QString object = s->allObjects()[index];
+ if (object.isEmpty()) {
+	boError() << k_funcinfo << "Can't find " << object << " (==" << index << ")" << endl;
+	return;
+ }
+ boDebug() << k_funcinfo << object << endl;
+ changeObject(s, object);
+}
+
+
+
+
+
+
+
+class ModelDisplayPrivate
+{
+public:
+	ModelDisplayPrivate()
+	{
+	}
+};
+
+ModelDisplay::ModelDisplay()
+	: BoUfoCustomWidget()
+{
+ d = new ModelDisplayPrivate();
+
+ qApp->setGlobalMouseTracking(true);
+
+ mCurrentFrame = 0;
+ mModel = 0;
+ mCurrentLOD = 0;
+ mMeshUnderMouse = -1;
+ mSelectedMesh = -1;
+ mViewData = new BosonViewData(this);
+ BosonViewData::setGlobalViewData(mViewData);
+
+
+ mMouseMoveDiff = new BoMouseMoveDiff;
+
+ mPlacementPreview = false;
+ mDisallowPlacement = false;
+ mWireFrame = false;
+ mRenderAxis = false;
+ mRenderGrid = false;
+
+#if BOSONFONT
+ mDefaultFont = 0;
+#endif
+
+ mCamera = new BoCamera;
+ mLight = 0;
+
+ mFovY = 60.0f;
+
+ boConfig->addDynamicEntry(new BoConfigBoolEntry(boConfig, "ShowVertexPoints", true));
+ boConfig->addDynamicEntry(new BoConfigUIntEntry(boConfig, "VertexPointSize", 3));
+ boConfig->addDynamicEntry(new BoConfigColorEntry(boConfig, "BoRenderBackgroundColor", QColor(183, 183, 183)));
+ boConfig->addDynamicEntry(new BoConfigDoubleEntry(boConfig, "GridUnitSize", 0.1));
+
+ connect(this, SIGNAL(signalMousePressed(QMouseEvent*)),
+		this, SLOT(slotMousePressEvent(QMouseEvent*)));
+ connect(this, SIGNAL(signalMouseMoved(QMouseEvent*)),
+		this, SLOT(slotMouseMoveEvent(QMouseEvent*)));
+ connect(this, SIGNAL(signalMouseDragged(QMouseEvent*)),
+		this, SLOT(slotMouseMoveEvent(QMouseEvent*)));
+ connect(this, SIGNAL(signalMouseReleased(QMouseEvent*)),
+		this, SLOT(slotMouseReleaseEvent(QMouseEvent*)));
+ connect(this, SIGNAL(signalMouseWheel(QWheelEvent*)),
+		this, SLOT(slotWheelEvent(QWheelEvent*)));
+
+ setMouseEventsEnabled(true, true);
+
+ initializeGL();
+}
+
+ModelDisplay::~ModelDisplay()
+{
+ delete mViewData;
+ qApp->setGlobalMouseTracking(false);
+ resetModel();
+ BoMeshRendererManager::manager()->unsetCurrentRenderer();
+ delete mMouseMoveDiff;
+ if (mLight) {
+	BoLightManager::manager()->deleteLight(mLight->id());
+ }
+ delete mCamera;
+ delete d;
+ BoTextureManager::deleteStatic();
+}
+
+void ModelDisplay::initializeGL()
+{
+#if BOSONFONT
+ delete mDefaultFont;
+ BoFontInfo defaultFontInfo;
+ defaultFontInfo.fromString(boConfig->stringValue("GLFont", QString::null));
+ mDefaultFont = new BosonGLFont(defaultFontInfo);
+#endif
+
+ if (mLight) {
+	BoLightManager::manager()->deleteLight(mLight->id());
+ }
+ mLight = BoLightManager::manager()->createLight();
+ if (!mLight->isActive()) {
+	boWarning() << k_funcinfo << "light is inactive" << endl;
+ }
+ BoVector4Float lightDif(1.0f, 1.0f, 1.0f, 1.0f);
+ BoVector4Float lightAmb(0.5f, 0.5f, 0.5f, 1.0f);
+ BoVector3Float lightPos(-6000.0, 3000.0, 10000.0);
+ mLight->setAmbient(lightAmb);
+ mLight->setDiffuse(lightDif);
+ mLight->setSpecular(lightDif);
+ mLight->setDirectional(true);
+ mLight->setEnabled(true);
+}
+
+void ModelDisplay::setFont(const BoFontInfo& font)
+{
+#if BOSONFONT
  delete mDefaultFont;
  mDefaultFont = new BosonGLFont(font);
 #endif
 }
 
-void ModelPreview::resizeGL(int w, int h)
-{
- glViewport(0, 0, w, h);
- glMatrixMode(GL_PROJECTION);
- glLoadIdentity();
- gluPerspective(mFovY, (float)w / (float)h, NEAR, FAR);
- glMatrixMode(GL_MODELVIEW);
- BosonUfoGLWidget::resizeGL(w, h);
-}
-
-void ModelPreview::paintGL()
+void ModelDisplay::paintWidget()
 {
  BO_CHECK_NULL_RET(camera());
+
+ glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+ glViewport(0, 0, width(), height());
+
+ glMatrixMode(GL_PROJECTION);
+ glPushMatrix();
+ glLoadIdentity();
+ gluPerspective(mFovY, (float)width() / (float)height(), NEAR, FAR);
+
  glMatrixMode(GL_MODELVIEW);
+ glPushMatrix();
  glLoadIdentity();
 
- QColor background = boConfig->colorValue("BoRenderBackgroundColor", Qt::black);
- glClearColor((GLfloat)background.red() / 255.0f, (GLfloat)background.green() / 255.0f, background.blue() / 255.0f, 0.0f);
-
- glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  glColor3ub(255, 255, 255);
 
  camera()->applyCameraToScene();
@@ -498,16 +1090,14 @@ void ModelPreview::paintGL()
 
  glDisable(GL_DEPTH_TEST);
 
- renderText();
-
- if (ufoManager()) {
-	ufoManager()->dispatchEvents();
-	glEnable(GL_BLEND);
-	ufoManager()->render();
- }
+ glMatrixMode(GL_PROJECTION);
+ glPopMatrix();
+ glMatrixMode(GL_MODELVIEW);
+ glPopMatrix();
+ glPopAttrib();
 }
 
-void ModelPreview::renderAxii()
+void ModelDisplay::renderAxii()
 {
  glPushAttrib(GL_ENABLE_BIT);
  glDisable(GL_TEXTURE_2D);
@@ -561,7 +1151,7 @@ void ModelPreview::renderAxii()
  glPopAttrib();
 }
 
-void ModelPreview::renderModel(int mode)
+void ModelDisplay::renderModel(int mode)
 {
  if (!haveModel()) {
 	return;
@@ -631,7 +1221,7 @@ void ModelPreview::renderModel(int mode)
  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
-void ModelPreview::renderGrid()
+void ModelDisplay::renderGrid()
 {
 #warning FIXME!!!
 #if 0
@@ -672,7 +1262,7 @@ void ModelPreview::renderGrid()
 #endif
 }
 
-void ModelPreview::renderMeshSelection()
+void ModelDisplay::renderMeshSelection()
 {
  if (!haveModel()) {
 	return;
@@ -729,47 +1319,10 @@ void ModelPreview::renderMeshSelection()
  glColor3ub(255, 255, 255);
 }
 
-void ModelPreview::renderText()
+void ModelDisplay::setModel(BosonModel* model)
 {
-}
-
-void ModelPreview::load(SpeciesTheme* s, const UnitProperties* prop)
-{
+ boDebug() << k_funcinfo << endl;
  resetModel();
- BO_CHECK_NULL_RET(s);
- BO_CHECK_NULL_RET(prop);
- makeCurrent();
- boViewData->addSpeciesTheme(s);
- SpeciesData* speciesData = boViewData->speciesData(s);
- speciesData->loadUnitModel(prop, s->teamColor());
- BosonModel* model = speciesData->unitModel(prop->typeId());
- if (!model) {
-	BO_NULL_ERROR(model);
- }
- setModel(model);
-}
-
-void ModelPreview::loadObjectModel(SpeciesTheme* s, const QString& file)
-{
- resetModel();
- BO_CHECK_NULL_RET(s);
- if (file.isEmpty()) {
-	boError() << k_funcinfo << "empty filename" << endl;
-	return;
- }
- makeCurrent();
- boViewData->addSpeciesTheme(s);
- SpeciesData* speciesData = boViewData->speciesData(s);
- speciesData->loadObjects(s->teamColor());
- BosonModel* model = speciesData->objectModel(file);
- if (!model) {
-	BO_NULL_ERROR(model);
- }
- setModel(model);
-}
-
-void ModelPreview::setModel(BosonModel* model)
-{
  mModel = model;
  if (mModel) {
 	unsigned int lodcount = mModel->lodCount();
@@ -779,120 +1332,12 @@ void ModelPreview::setModel(BosonModel* model)
 		mCurrentLOD = lodcount - 1;
 	}
 	unsigned int framecount = mModel->lod(mCurrentLOD)->frameCount();
-	emit signalMaxFramesChanged((int)(framecount - 1));
 	emit signalMaxFramesChanged((float)(framecount - 1));
  }
 }
 
-void ModelPreview::slotResetView()
-{
- BoVector3Float cameraPos(0.0f, 0.0f, 2.0f);
- BoVector3Float lookAt(0.0f, 0.0f, 0.0f);
- BoVector3Float up(0.0f, 50.0f, 0.0f);
- updateCamera(cameraPos, lookAt, up);
- emit signalFovYChanged(60.0);
- resizeGL(width(), height());
-}
 
-void ModelPreview::slotShowVertexPoints(bool s)
-{
- boConfig->setBoolValue("ShowVertexPoints", s);
-}
-
-// TODO: prevent displaying two dialogs of the same type at once!
-void ModelPreview::slotChangeVertexPointSize()
-{
- unsigned int size = boConfig->uintValue("VertexPointSize");
- BoUfoInputDialog::getIntegerWidget(ufoManager(), this, SLOT(slotSetVertexPointSize(int)),
-		i18n("Vertex point size (in pixels)"), i18n("Vertex point size"),
-
-		(int)size, 0, 500, 1);
-// emit signalChangeVertexPointSize(); // obsolete
-}
-
-// TODO: prevent displaying two dialogs of the same type at once!
-void ModelPreview::slotChangeGridUnitSize()
-{
- float size = (float)boConfig->doubleValue("GridUnitSize", 0.1);
- BoUfoInputDialog::getFloatWidget(ufoManager(), this, SLOT(slotSetGridUnitSize(float)),
-		i18n("Grid unit size"), i18n("Grid unit size"),
-
-		size, 0.0, 1.0, 0.1);
-// emit signalChangeVertexPointSize(); // obsolete
-}
-
-void ModelPreview::slotChangeBackgroundColor()
-{
- QColor color = boConfig->colorValue("BoRenderBackgroundColor", QColor(183, 183, 183));
- int result = KColorDialog::getColor(color, color, this);
- if (result == KColorDialog::Accepted) {
-	boConfig->setColorValue("BoRenderBackgroundColor", color);
- }
-}
-
-void ModelPreview::slotShowLightWidget()
-{
- if (!mLightWidget) {
-	mLightWidget = new BoLightCameraWidget1(0, true);
-	mLightWidget->setLight(light(), context());
- }
- mLightWidget->show();
-}
-
-void ModelPreview::slotDebugModels()
-{
- KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Debug Models"),
-		KDialogBase::Cancel, KDialogBase::Cancel, this,
-		"debugmodelsdialog", false, true);
- connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
- QWidget* w = dialog->plainPage();
- QVBoxLayout* l = new QVBoxLayout(w);
- KGameModelDebug* models = new KGameModelDebug(w);
- l->addWidget(models);
-
- QPtrListIterator<SpeciesTheme> it(mSpecies);
- for (; it.current(); ++it) {
-	SpeciesTheme* theme = it.current();
-
-	// units
-	QValueList<const UnitProperties*> prop = it.current()->allUnits();
-	QValueList<const UnitProperties*>::Iterator propIt;
-	for (propIt = prop.begin(); propIt != prop.end(); ++propIt) {
-		QStringList fileNames = SpeciesData::unitModelFiles();
-		bool found = false;
-		QString file;
-		for (QStringList::Iterator fit = fileNames.begin(); fit != fileNames.end(); ++fit) {
-			if (KStandardDirs::exists((*propIt)->unitPath() + *fit)) {
-				file = *fit;
-				found = true;
-				break;
-			}
-		}
-		if (!found) {
-			boError() << k_funcinfo << "Cannot find model file file for " << (*propIt)->typeId() << endl;
-			continue;
-		}
-		file = (*propIt)->unitPath() + file;
-		models->addFile(file, QString("%1/%2").arg(theme->identifier()).arg((*propIt)->name()));
-	}
-
-	// objects
-	QStringList objectFiles;
-	QStringList objects = theme->allObjects(&objectFiles);
-	for (unsigned int i = 0; i < objects.count(); i++) {
-		QString file = theme->themePath() + QString::fromLatin1("objects/") + objectFiles[i];
-		models->addFile(file, objects[i]);
-	}
-
-	// add any files that we might have missed
-	models->addFiles(theme->themePath());
- }
- models->slotUpdate();
-
- dialog->show();
-}
-
-void ModelPreview::slotDebugMemory()
+void ModelDisplay::slotDebugMemory()
 {
 #ifdef BOSON_USE_BOMEMORY
  boDebug() << k_funcinfo << endl;
@@ -905,267 +1350,27 @@ void ModelPreview::slotDebugMemory()
 #endif
 }
 
-void ModelPreview::slotDebugSpecies()
-{
- KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Debug Species"),
-		KDialogBase::Cancel, KDialogBase::Cancel, this,
-		"debugspeciesdialog", false, true);
- connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
- QWidget* w = dialog->plainPage();
- QVBoxLayout* l = new QVBoxLayout(w);
- KGameSpeciesDebug* species = new KGameSpeciesDebug(w);
- l->addWidget(species);
- species->loadSpecies();
-
- dialog->show();
-}
-
-void ModelPreview::slotShowMaterialsWidget()
-{
- if (!mMaterialWidget) {
-	mMaterialWidget = new BoMaterialWidget(0);
- }
- mMaterialWidget->clearMaterials();
-if (!model()) {
-	return;
- }
- BosonModel* model = this->model();
- for (unsigned int i = 0; i < model->materialCount(); i++) {
-	mMaterialWidget->addMaterial(model->material(i));
- }
- mMaterialWidget->show();
-}
-
-void ModelPreview::slotShowGLStates()
-{
- boDebug() << k_funcinfo << endl;
- BoGLStateWidget* w = new BoGLStateWidget(0, 0, WDestructiveClose);
- w->show();
-}
-
-void ModelPreview::slotReloadMeshRenderer()
-{
- bool unusable = false;
- bool r = BoMeshRendererManager::manager()->reloadPlugin(&unusable);
- if (r) {
-	return;
- }
- boError() << "meshrenderer reloading failed" << endl;
- if (unusable) {
-	KMessageBox::sorry(this, i18n("Reloading meshrenderer failed, library is now unusable. quitting."));
-	exit(1);
- } else {
-	KMessageBox::sorry(this, i18n("Reloading meshrenderer failed but library should still be usable"));
- }
-}
-
-void ModelPreview::slotReloadModelTextures()
-{
- BO_CHECK_NULL_RET(BosonModelTextures::modelTextures());
-#warning TODO! (reloading textures)
- //BosonModelTextures::modelTextures()->reloadTextures();
-}
-
-void ModelPreview::slotShowChangeFont()
-{
-#if BOSONFONT
- BoFontInfo f;
- f = mDefaultFont->fontInfo();
- int result = BosonGLFontChooser::getFont(f, this);
- if (result == QDialog::Accepted) {
-	setFont(f);
-	boConfig->setStringValue("GLFont", fontInfo().toString());
- }
-#endif
-}
 
 
 
-
-void ModelPreview::slotSetVertexPointSize(int size)
+void ModelDisplay::slotSetVertexPointSize(int size)
 {
  boDebug() << k_funcinfo << size << endl;
  boConfig->setUIntValue("VertexPointSize", size);
 }
 
-void ModelPreview::slotSetGridUnitSize(float size)
-{
- boConfig->setDoubleValue("GridUnitSize", size);
-}
-
-void ModelPreview::uncheckAllBut(BoUfoAction* action)
-{
- if (!action || !action->isA("BoUfoSelectAction")) {
-	boError() << k_funcinfo << "not a valid BoUfoSelectAction" << endl;
-	return;
- }
- QPtrDictIterator<SpeciesTheme> it(mAction2Species);
- for (; it.current(); ++it) {
-	BoUfoAction* a = (BoUfoAction*)it.currentKey();
-	if (a == action) {
-		continue;
-	}
-	if (!a->isA("BoUfoSelectAction")) {
-		continue;
-	}
-	((BoUfoSelectAction*)a)->setCurrentItem(-1);
- }
-}
-
-void ModelPreview::slotUnitChanged(int index)
-{
- if (!sender() || !sender()->inherits("BoUfoAction")) {
-	boError() << k_funcinfo << "sender() must inherit BoUfoAction" << endl;
-	return;
- }
- BoUfoAction* p = (BoUfoAction*)sender();
- uncheckAllBut(p);
- SpeciesTheme* s = mAction2Species[p];
- BO_CHECK_NULL_RET(s);
-
- QValueList<const UnitProperties*> props = s->allUnits();
- if (index >= (int)props.count()) {
-	boError() << k_funcinfo << "index " << index << " out of range" << endl;
-	return;
- }
- unsigned long int type = props[index]->typeId();
- const UnitProperties* prop = s->unitProperties(type);
- if (!prop) {
-	boError() << k_funcinfo << "could not find unitproperties for index=" << index << " type=" << type << endl;
-	return;
- }
-
- changeUnit(s, prop);
-}
-
-void ModelPreview::changeUnit(SpeciesTheme* s, const UnitProperties* prop)
-{
- BO_CHECK_NULL_RET(s);
- BO_CHECK_NULL_RET(prop);
- // TODO: check/uncheck the menu items!
-
- if (mMaterialWidget) {
-	mMaterialWidget->clearMaterials();
-	mMaterialWidget->hide();
- }
- load(s, prop);
-}
-
-void ModelPreview::changeObject(SpeciesTheme* s, const QString& objectModel)
-{
- BO_CHECK_NULL_RET(s);
- if (mMaterialWidget) {
-	mMaterialWidget->clearMaterials();
-	mMaterialWidget->hide();
- }
- loadObjectModel(s, objectModel);
-}
-
-SpeciesTheme* ModelPreview::findTheme(const QString& theme) const
-{
- SpeciesTheme* s = 0;
- QPtrListIterator<SpeciesTheme> it(mSpecies);
- for (; it.current() && !s; ++it) {
-	if (it.current()->identifier().lower() == theme.lower()) {
-		s = it.current();
-	}
- }
- return s;
-}
-
-void ModelPreview::changeUnit(const QString& theme, const QString& unit)
-{
- SpeciesTheme* s = 0;
- const UnitProperties* prop = 0;
-
- s = findTheme(theme);
- if (!s) {
-	boError() << k_funcinfo << "Could not find theme " << theme << endl;
-	return;
- }
- QValueList<const UnitProperties*> units = s->allUnits();
- QValueList<const UnitProperties*>::Iterator i = units.begin();
- for (; i != units.end() && !prop; ++i) {
-	const UnitProperties* p = *i;
-	// warning: this might cause trouble once we start translations! but we
-	// also have a way to use IDs directly so this is just a minor problem
-	if (p->name().lower() == unit.lower()) {
-		prop = p;
-	}
- }
- if (!prop) {
-	boError() << "Could not find unit " << unit << endl;
- }
- changeUnit(s, prop);
-}
-
-void ModelPreview::changeUnit(const QString& theme, unsigned long int type)
-{
- SpeciesTheme* s = 0;
- QPtrListIterator<SpeciesTheme> it(mSpecies);
- for (; it.current() && !s; ++it) {
-	if (it.current()->identifier().lower() == theme.lower()) {
-		s = it.current();
-	}
- }
- if (!s) {
-	boError() << k_funcinfo << "Could not find theme " << theme << endl;
-	return;
- }
- const UnitProperties* prop = s->unitProperties(type);
- if (!prop) {
-	boError() << k_funcinfo << "Could not find unit " << type << endl;
-	return;
- }
- changeUnit(s, prop);
-}
-
-void ModelPreview::changeObject(const QString& theme, const QString& object)
-{
- SpeciesTheme* s = 0;
-
- s = findTheme(theme);
- if (!s) {
-	boError() << k_funcinfo << "Could not find theme " << theme << endl;
-	return;
- }
- changeObject(s, object);
-}
-
-void ModelPreview::slotObjectChanged(int index)
-{
- if (!sender() || !sender()->inherits("BoUfoAction")) {
-	boError() << k_funcinfo << "sender() must inherit BoUfoAction" << endl;
-	return;
- }
- BoUfoAction* p = (BoUfoAction*)sender();
- uncheckAllBut(p);
- SpeciesTheme* s = mAction2Species[p];
- BO_CHECK_NULL_RET(s);
-
- QString object = s->allObjects()[index];
- if (object.isEmpty()) {
-	boError() << k_funcinfo << "Can't find " << object << " (==" << index << ")" << endl;
-	return;
- }
- boDebug() << k_funcinfo << object << endl;
- changeObject(s, object);
-}
-
-void ModelPreview::resetModel()
+void ModelDisplay::resetModel()
 {
  mModel = 0;
  mCurrentFrame = 0;
  mCurrentLOD = 0;
  mMeshUnderMouse = -1;
  mSelectedMesh = -1;
- updateMeshUnderMouseLabel();
+ updateMeshUnderMouse();
 }
 
-void ModelPreview::updateMeshUnderMouseLabel()
+void ModelDisplay::updateMeshUnderMouse()
 {
- BO_CHECK_NULL_RET(d->mGUI->mMeshUnderMouseLabel);
- BO_CHECK_NULL_RET(d->mGUI->mSelectedMeshLabel);
  QString meshUnderCursor;
  QString selectedMeshText;
  BoMesh* mesh = 0;
@@ -1203,17 +1408,17 @@ void ModelPreview::updateMeshUnderMouseLabel()
 				.arg(material);
 	}
  }
- d->mGUI->mMeshUnderMouseLabel->setText(i18n("Mesh under cursor: %1").arg(meshUnderCursor));
+ emit signalMeshUnderMouseLabel(i18n("Mesh under cursor: %1").arg(meshUnderCursor));
  if (selectedMeshText.isEmpty()) {
-	d->mGUI->mSelectedMeshLabel->hide();
-	d->mGUI->mSelectedMeshLabel->setText("");
+	emit signalShowSelectedMeshLabel(false);
+	emit signalSelectedMeshLabel("");
  } else {
-	d->mGUI->mSelectedMeshLabel->show();
-	d->mGUI->mSelectedMeshLabel->setText(selectedMeshText);
+	emit signalShowSelectedMeshLabel(true);
+	emit signalSelectedMeshLabel(selectedMeshText);
  }
 }
 
-void ModelPreview::updateCursorDisplay(const QPoint& pos)
+void ModelDisplay::updateCursorDisplay(const QPoint& pos)
 {
  mMeshUnderMouse = -1;
  if (!haveModel()) {
@@ -1233,10 +1438,10 @@ void ModelPreview::updateCursorDisplay(const QPoint& pos)
 	return;
  }
  mMeshUnderMouse = picked;
- updateMeshUnderMouseLabel();
+ updateMeshUnderMouse();
 }
 
-int ModelPreview::pickObject(const QPoint& cursor)
+int ModelDisplay::pickObject(const QPoint& cursor)
 {
  if (!haveModel()) {
 	return -1;
@@ -1318,23 +1523,8 @@ int ModelPreview::pickObject(const QPoint& cursor)
  return mesh;
 }
 
-bool ModelPreview::eventFilter(QObject* o, QEvent* e)
+void ModelDisplay::slotMousePressEvent(QMouseEvent* e)
 {
- switch (e->type()) {
-	case QEvent::MouseMove:
-		if (hasMouse()) {
-			updateCursorDisplay(((QMouseEvent*)e)->pos());
-		}
-		break;
-	default:
-		break;
- }
- return BosonUfoGLWidget::eventFilter(o, e);
-}
-
-void ModelPreview::mousePressEvent(QMouseEvent* e)
-{
- BosonUfoGLWidget::mousePressEvent(e);
  if (e->isAccepted()) {
 	return;
  }
@@ -1350,9 +1540,8 @@ void ModelPreview::mousePressEvent(QMouseEvent* e)
  }
 }
 
-void ModelPreview::mouseReleaseEvent(QMouseEvent* e)
+void ModelDisplay::slotMouseReleaseEvent(QMouseEvent* e)
 {
- BosonUfoGLWidget::mouseReleaseEvent(e);
  if (e->isAccepted()) {
 	return;
  }
@@ -1368,16 +1557,17 @@ void ModelPreview::mouseReleaseEvent(QMouseEvent* e)
  }
 }
 
-void ModelPreview::selectMesh(int mesh)
+void ModelDisplay::selectMesh(int mesh)
 {
  mSelectedMesh = mesh;
- updateMeshUnderMouseLabel();
+ updateMeshUnderMouse();
  emit signalMeshSelected(mesh);
 }
 
-void ModelPreview::mouseMoveEvent(QMouseEvent* e)
+void ModelDisplay::slotMouseMoveEvent(QMouseEvent* e)
 {
- BosonUfoGLWidget::mouseMoveEvent(e);
+ updateCursorDisplay(e->pos());
+
  if (e->isAccepted()) {
 	return;
  }
@@ -1420,10 +1610,9 @@ void ModelPreview::mouseMoveEvent(QMouseEvent* e)
  }
 }
 
-void ModelPreview::wheelEvent(QWheelEvent* e)
+void ModelDisplay::slotWheelEvent(QWheelEvent* e)
 {
  BO_CHECK_NULL_RET(camera());
- BosonUfoGLWidget::wheelEvent(e);
  if (e->isAccepted()) {
 	return;
  }
@@ -1449,17 +1638,15 @@ void ModelPreview::wheelEvent(QWheelEvent* e)
  updateCamera(eye, lookAt, up);
 }
 
-void ModelPreview::slotFrameChanged(int f)
+void ModelDisplay::slotFrameChanged(int f)
 {
  if (f != 0) {
 	if (!mModel || f < 0) {
-		emit signalFrameChanged((int)0);
-		emit signalFrameChanged((float)0.0f);
+		emit signalFrameChanged(0.0f);
 		return;
 	}
 	int frames = mModel->lod(mCurrentLOD)->frameCount();
 	if (f >= frames) {
-		emit signalFrameChanged((int)(frames - 1));
 		emit signalFrameChanged((float)(frames - 1));
 		return;
 	}
@@ -1467,16 +1654,14 @@ void ModelPreview::slotFrameChanged(int f)
  mCurrentFrame = f;
 }
 
-void ModelPreview::slotLODChanged(int l)
+void ModelDisplay::slotLODChanged(int l)
 {
  if (l != 0) {
 	if (!mModel || l < 0) {
-		emit signalLODChanged((int)0);
 		emit signalLODChanged((float)0.0f);
 		return;
 	}
 	if ((unsigned int)l >= mModel->lodCount()) {
-		emit signalLODChanged((int)(mModel->lodCount() - 1));
 		emit signalLODChanged((float)(mModel->lodCount() - 1));
 		return;
 	}
@@ -1484,12 +1669,12 @@ void ModelPreview::slotLODChanged(int l)
  mCurrentLOD = l;
 }
 
-void ModelPreview::updateCamera(const BoVector3Float& cameraPos, const BoQuaternion& q)
+void ModelDisplay::updateCamera(const BoVector3Float& cameraPos, const BoQuaternion& q)
 {
  updateCamera(cameraPos, q.matrix());
 }
 
-void ModelPreview::updateCamera(const BoVector3Float& cameraPos, const BoMatrix& rotationMatrix)
+void ModelDisplay::updateCamera(const BoVector3Float& cameraPos, const BoMatrix& rotationMatrix)
 {
  BoVector3Float lookAt;
  BoVector3Float up;
@@ -1497,14 +1682,14 @@ void ModelPreview::updateCamera(const BoVector3Float& cameraPos, const BoMatrix&
  updateCamera(cameraPos, lookAt, up);
 }
 
-void ModelPreview::updateCamera(const BoVector3Float& cameraPos, const BoVector3Float& lookAt, const BoVector3Float& up)
+void ModelDisplay::updateCamera(const BoVector3Float& cameraPos, const BoVector3Float& lookAt, const BoVector3Float& up)
 {
  BO_CHECK_NULL_RET(camera());
  camera()->setGluLookAt(cameraPos, lookAt, up);
  emit signalCameraChanged();
 }
 
-void ModelPreview::hideMesh(unsigned int mesh, bool hide)
+void ModelDisplay::hideMesh(unsigned int mesh, bool hide)
 {
 #warning FIXME!!! Do we even need this?
 #if 0
@@ -1530,7 +1715,7 @@ void ModelPreview::hideMesh(unsigned int mesh, bool hide)
 #endif
 }
 
-bool ModelPreview::isSelected(unsigned int mesh) const
+bool ModelDisplay::isSelected(unsigned int mesh) const
 {
  // AB: one day we will use a list of selected meshes
  if (mSelectedMesh < 0) {
@@ -1542,9 +1727,8 @@ bool ModelPreview::isSelected(unsigned int mesh) const
  return false;
 }
 
-void ModelPreview::slotHideSelectedMesh()
+void ModelDisplay::slotHideSelectedMesh()
 {
-#if 0
  if (!haveModel()) {
 	return;
  }
@@ -1552,12 +1736,10 @@ void ModelPreview::slotHideSelectedMesh()
 	return;
  }
  hideMesh((unsigned int)mSelectedMesh);
-#endif
 }
 
-void ModelPreview::slotHideUnSelectedMeshes()
+void ModelDisplay::slotHideUnSelectedMeshes()
 {
-#if 0
  if (!haveModel()) {
 	return;
  }
@@ -1567,6 +1749,7 @@ void ModelPreview::slotHideUnSelectedMeshes()
  if (mCurrentFrame < 0) {
 	return;
  }
+#if 0
  BoFrame* f = frame(mCurrentFrame);
  BO_CHECK_NULL_RET(f);
  for (unsigned int i = 0; i < f->meshCount(); i++) {
@@ -1578,9 +1761,8 @@ void ModelPreview::slotHideUnSelectedMeshes()
 #endif
 }
 
-void ModelPreview::slotUnHideAllMeshes()
+void ModelDisplay::slotUnHideAllMeshes()
 {
-#if 0
  boDebug() << k_funcinfo << endl;
  if (!haveModel()) {
 	return;
@@ -1588,6 +1770,7 @@ void ModelPreview::slotUnHideAllMeshes()
  if (mCurrentFrame < 0) {
 	return;
  }
+#if 0
  BoFrame* f = frame(mCurrentFrame);
  BO_CHECK_NULL_RET(f);
  for (unsigned int i = 0; i < f->meshCount(); i++) {
@@ -1596,15 +1779,25 @@ void ModelPreview::slotUnHideAllMeshes()
 #endif
 }
 
-void ModelPreview::slotEnableLight(bool e)
+void ModelDisplay::slotEnableLight(bool e)
 {
  boConfig->setBoolValue("UseLight", e);
 }
 
-void ModelPreview::slotEnableMaterials(bool e)
+void ModelDisplay::slotEnableMaterials(bool e)
 {
  boConfig->setBoolValue("UseMaterials", e);
 }
+
+void ModelDisplay::slotResetView()
+{
+ BoVector3Float cameraPos(0.0f, 0.0f, 2.0f);
+ BoVector3Float lookAt(0.0f, 0.0f, 0.0f);
+ BoVector3Float up(0.0f, 50.0f, 0.0f);
+ updateCamera(cameraPos, lookAt, up);
+ emit signalFovYChanged(60.0f);
+}
+
 
 
 
@@ -1613,124 +1806,36 @@ RenderMain::RenderMain() : KMainWindow()
  QWidget* w = new QWidget(this);
  QHBoxLayout* layout = new QHBoxLayout(w);
 
- // AB: note that this is not a "preview" anymore. it contains a lot of the
- // important control code, too.
- // this is mostly due to the libufo conversion. once we have completed that
- // conversion, we should change the general design of this program.
- mPreview = new ModelPreview(mSpecies, w);
- layout->addWidget(mPreview, 1);
- mPreview->show();
+ mGLWidget = new BoRenderGLWidget(w, boConfig->boolValue("ForceWantDirect", true));
+ mGLWidget->initWidget();
+ mGLWidget->setMinimumSize(400, 400);
+ layout->addWidget(mGLWidget, 1);
+ mGLWidget->setMouseTracking(true);
+ mGLWidget->setFocusPolicy(StrongFocus);
 
- mPreview->initGL();
-
- mPreview->slotResetView();
  setCentralWidget(w);
-
  mIface = new BoDebugDCOPIface();
+
+ mUpdateTimer = new QTimer(this);
+ connect(mUpdateTimer, SIGNAL(timeout()), mGLWidget, SLOT(slotUpdateGL()));
+ mUpdateTimer->start(GL_UPDATE_TIMER);
 }
 
 RenderMain::~RenderMain()
 {
  boConfig->save(false);
+ delete mUpdateTimer;
  delete mIface;
 }
 
-bool RenderMain::loadCamera(KCmdLineArgs* args)
+bool RenderMain::parseCmdLineArgs(KCmdLineArgs* args)
 {
- BoQuaternion quat = mPreview->camera()->quaternion();
- BoVector3Float cameraPos = mPreview->camera()->cameraPos();
-
- // in borender we use a first translate, then rotate approach, whereas the
- // camera does it the other way round. we need to transform the vector first.
- quat.transform(&cameraPos, &cameraPos);
-
- if (args->isSet("camera-x")) {
-	bool ok = false;
-	float c = args->getOption("camera-x").toFloat(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "camera-x must be a number" << endl;
-		return false;
-	}
-	cameraPos.setX(c);
+ if (!mGLWidget->parseCmdLineArgs(args)) {
+	return false;
  }
- if (args->isSet("camera-y")) {
-	bool ok = false;
-	float c = args->getOption("camera-y").toFloat(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "camera-y must be a number" << endl;
-		return false;
-	}
-	cameraPos.setY(c);
- }
- if (args->isSet("camera-z")) {
-	bool ok = false;
-	float c = args->getOption("camera-z").toFloat(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "camera-z must be a number" << endl;
-		return false;
-	}
-	cameraPos.setZ(c);
- }
- if (args->isSet("rotate-x")) {
-	bool ok = false;
-	float r = args->getOption("rotate-x").toFloat(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "rotate-x must be a number" << endl;
-		return false;
-	}
-	BoQuaternion q;
-	q.setRotation(r, 0.0f, 0.0f);
-	quat.multiply(q);
- }
- if (args->isSet("rotate-y")) {
-	bool ok = false;
-	float r = args->getOption("rotate-y").toFloat(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "rotate-y must be a number" << endl;
-		return false;
-	}
-	BoQuaternion q;
-	q.setRotation(0.0f, r, 0.0f);
-	quat.multiply(q);
- }
- if (args->isSet("rotate-z")) {
-	bool ok = false;
-	float r = args->getOption("rotate-z").toFloat(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "rotate-z must be a number" << endl;
-		return false;
-	}
-	BoQuaternion q;
-	q.setRotation(0.0f, 0.0f, r);
-	quat.multiply(q);
- }
- // re-transform to gluLookAt() values
- quat.inverse().transform(&cameraPos, &cameraPos);
-
- BoVector3Float lookAt, up;
- quat.matrix().toGluLookAt(&lookAt, &up, cameraPos);
-
- mPreview->camera()->setGluLookAt(cameraPos, lookAt, up);
-
  return true;
 }
 
-
-
-void RenderMain::changeUnit(const QString& theme, const QString& unit)
-{
- mPreview->changeUnit(theme, unit);
-}
-
-void RenderMain::changeUnit(const QString& theme, unsigned long int type)
-{
- mPreview->changeUnit(theme, type);
-}
-
-void RenderMain::changeObject(const QString& theme, const QString& object)
-{
- mPreview->changeObject(theme, object);
-}
 
 int main(int argc, char **argv)
 {
@@ -1755,102 +1860,28 @@ int main(int argc, char **argv)
  BoApplication app(argv0);
  QObject::connect(kapp, SIGNAL(lastWindowClosed()), kapp, SLOT(quit()));
 
+ if (args->isSet("indirect")) {
+	boWarning() << k_funcinfo << "use indirect rendering (slow!)" << endl;
+	boConfig->setBoolValue("ForceWantDirect", false);
+ }
+
  RenderMain* main = new RenderMain();
  kapp->setMainWidget(main);
  main->show();
 
  // the VBO meshrenderer (which isn't used by borender by default!) requires
  // this call. otherwise we get an undefined reference on plugin loading.
- // I have _no_ idea why this is required, as it's basically a noop.
+ // it's just a simple call to a BoInfo method, so that the linker is forced to
+ // export the symbols. otherwise it's a noop.
  (void)BoInfo::boInfo();
- // Init BoTexture stuff
- boTextureManager->initOpenGL();
-
- QString theme;
- unsigned long int typeId = 0;
- QString unit;
- QString object;
 
  if (args->isSet("maximized")) {
 	main->showMaximized();
  }
- if (args->isSet("indirect")) {
-	boWarning() << k_funcinfo << "use indirect rendering (slow!)" << endl;
-	boConfig->setBoolValue("ForceWantDirect", false);
- }
- if (args->isSet("species")) {
-	theme = args->getOption("species");
- }
- if (args->isSet("unit")) {
-	if (theme.isEmpty()) {
-		theme = QString::fromLatin1("human");
-	}
-	unit = args->getOption("unit");
- } else if (args->isSet("unit-id")) {
-	if (theme.isEmpty()) {
-		theme = QString::fromLatin1("human");
-	}
-	QString arg = args->getOption("unit-id");
-	bool ok = false;
-	typeId = arg.toULong(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "unit-id must be a number" << endl;
-		return 1;
-	}
- } else if (args->isSet("object")) {
-	if (theme.isEmpty()) {
-		theme = QString::fromLatin1("human");
-	}
-	object = args->getOption("object");
- }
- if (!theme.isEmpty()) {
-	if (typeId == 0 && unit.isEmpty() && object.isEmpty()) {
-		boError() << k_funcinfo << "you have to specify both species and unit/object!" << endl;
-		return 1;
-	} else if (typeId > 0) {
-		main->changeUnit(theme, typeId);
-	} else if (!unit.isEmpty()) {
-		main->changeUnit(theme, unit);
-	} else if (!object.isEmpty()) {
-		main->changeObject(theme, object);
-	} else {
-		boError() << k_funcinfo << "you have to specify both unit and species!" << endl;
-		return 1;
-	}
- }
 
- if (!main->loadCamera(args)) {
+ if (!main->parseCmdLineArgs(args)) {
 	return 1;
  }
-
- if (args->isSet("fovy")) {
-	bool ok = false;
-	float f = args->getOption("fovy").toFloat(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "fovy must be a number" << endl;
-		return 1;
-	}
-	main->emitSignalFovY(f);
- }
- if (args->isSet("frame")) {
-	bool ok = false;
-	int f = args->getOption("frame").toInt(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "frame must be a number" << endl;
-		return 1;
-	}
-	main->emitSignalFrame(f);
- }
- if (args->isSet("lod")) {
-	bool ok = false;
-	int l = args->getOption("lod").toInt(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "lod must be a number" << endl;
-		return 1;
-	}
-	main->emitSignalLOD(l);
- }
-
 
  args->clear();
 
