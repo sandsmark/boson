@@ -95,6 +95,7 @@ private slots:
 	void slotValueChanged(int v) { emit valueChanged((float)v); }
 };
 
+class ModelPreviewPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -287,14 +288,13 @@ private:
 
 private:
 	friend class RenderMain; // we need to emit signals from outside, in order to save lots of forwarding code
+	ModelPreviewPrivate* d;
 	QTimer* mUpdateTimer;
 	BosonModel* mModel;
 	int mCurrentFrame;
 	int mCurrentLOD;
 	int mMeshUnderMouse;
 	int mSelectedMesh;
-	BoUfoLabel* mMeshUnderMouseLabel;
-	BoUfoLabel* mSelectedMeshLabel;
 	BosonViewData* mViewData;
 
 	BosonGLFont* mDefaultFont;

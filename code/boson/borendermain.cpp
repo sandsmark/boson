@@ -48,6 +48,7 @@
 #include "boufo/boufo.h"
 #include "boufo/boufoaction.h"
 #include "info/boinfo.h"
+#include "borendergui.h"
 #ifdef BOSON_USE_BOMEMORY
 #include "bomemory/bomemorydialog.h"
 #endif
@@ -130,9 +131,21 @@ static KCmdLineOptions options[] =
 void postBosonConfigInit();
 
 
+class ModelPreviewPrivate
+{
+public:
+	ModelPreviewPrivate()
+	{
+		mGUI = 0;
+	}
+	BoRenderGUI* mGUI;
+};
+
 ModelPreview::ModelPreview(const QPtrList<SpeciesTheme>& species, QWidget* parent)
 	: BosonUfoGLWidget(parent, "modelpreview")
 {
+ d = new ModelPreviewPrivate();
+
  mSpecies.setAutoDelete(true);
  QStringList list = SpeciesTheme::availableSpecies();
  for (unsigned int i = 0; i < list.count(); i++) {
@@ -154,8 +167,6 @@ ModelPreview::ModelPreview(const QPtrList<SpeciesTheme>& species, QWidget* paren
  mCurrentLOD = 0;
  mMeshUnderMouse = -1;
  mSelectedMesh = -1;
- mMeshUnderMouseLabel = 0;
- mSelectedMeshLabel = 0;
  mLightWidget = 0;
  mMaterialWidget = 0;
  mViewData = new BosonViewData(this);
@@ -206,6 +217,7 @@ ModelPreview::~ModelPreview()
  }
  delete mCamera;
  mSpecies.clear();
+ delete d;
  BoTextureManager::deleteStatic();
 }
 
@@ -270,64 +282,51 @@ void ModelPreview::initUfoGUI()
  initUfo();
 // ufoManager()->contentWidget()->setOpaque(true);
 
- BoUfoVBox* topWidget = new BoUfoVBox();
-// topWidget->setOpaque(true);
- ufoManager()->contentWidget()->addWidget(topWidget);
+ d->mGUI = new BoRenderGUI();
+ ufoManager()->contentWidget()->addWidget(d->mGUI);
 
+ connect(this, SIGNAL(signalFovYChanged(float)),
+		d->mGUI->mFovY, SLOT(setValue(float)));
+ connect(d->mGUI->mFovY, SIGNAL(signalValueChanged(float)),
+		this, SLOT(slotFovYChanged(float)));
+ connect(this, SIGNAL(signalLODChanged(float)),
+		d->mGUI->mLOD, SLOT(setValue(float)));
+ connect(this, SIGNAL(signalMaxLODChanged(float)),
+		d->mGUI->mLOD, SLOT(slotSetMaxValue(float)));
+ connect(d->mGUI->mLOD, SIGNAL(signalValueChanged(float)),
+		this, SLOT(slotLODChanged(float)));
+ connect(this, SIGNAL(signalMaxFramesChanged(float)),
+		d->mGUI->mFrame, SLOT(slotSetMaxValue(float)));
+ connect(this, SIGNAL(signalFrameChanged(float)),
+		d->mGUI->mFrame, SLOT(setValue(float)));
+ connect(d->mGUI->mFrame, SIGNAL(signalValueChanged(float)),
+		this, SLOT(slotFrameChanged(float)));
+ d->mGUI->mLOD->setRange(0.0f, 0.0f);
+ d->mGUI->mFrame->setRange(0.0f, 0.0f);
 
- mMeshUnderMouseLabel = new BoUfoLabel();
- mSelectedMeshLabel = new BoUfoLabel();
- BoUfoNumInput* fovy = (BoUfoNumInput*)BoUfoFactory::createWidget("BoUfoNumInput");
- BoUfoNumInput* frame = (BoUfoNumInput*)BoUfoFactory::createWidget("BoUfoNumInput");
- BoUfoNumInput* lod = (BoUfoNumInput*)BoUfoFactory::createWidget("BoUfoNumInput");
- connect(this, SIGNAL(signalFovYChanged(float)), fovy, SLOT(setValue(float)));
- connect(fovy, SIGNAL(signalValueChanged(float)), this, SLOT(slotFovYChanged(float)));
- connect(this, SIGNAL(signalLODChanged(float)), lod, SLOT(setValue(float)));
- connect(this, SIGNAL(signalMaxLODChanged(float)), lod, SLOT(slotSetMaxValue(float)));
- connect(lod, SIGNAL(signalValueChanged(float)), this, SLOT(slotLODChanged(float)));
- connect(this, SIGNAL(signalMaxFramesChanged(float)), frame, SLOT(slotSetMaxValue(float)));
- connect(this, SIGNAL(signalFrameChanged(float)), frame, SLOT(setValue(float)));
- connect(frame, SIGNAL(signalValueChanged(float)), this, SLOT(slotFrameChanged(float)));
- fovy->setLabel(i18n("FovY"));
- fovy->setStepSize(1.0f);
- fovy->setRange(MIN_FOVY, MAX_FOVY);
- lod->setLabel(i18n("LOD"));
- lod->setStepSize(1.0f);
- lod->setRange(0.0f, 0.0f);
- frame->setLabel(i18n("Frame"));
- frame->setStepSize(1.0f);
- frame->setRange(0.0f, 0.0f);
-
- BoUfoHBox* hideWidget = new BoUfoHBox();
- BoUfoPushButton* hide = new BoUfoPushButton(i18n("Hide"));
- BoUfoPushButton* hideOthers = new BoUfoPushButton(i18n("Hide others"));
- BoUfoPushButton* unhideAll = new BoUfoPushButton(i18n("UnHide all"));
- hideWidget->addWidget(hide);
- hideWidget->addWidget(hideOthers);
- hideWidget->addWidget(unhideAll);
- connect(hide, SIGNAL(signalClicked()), this, SLOT(slotHideSelectedMesh()));
- connect(hideOthers, SIGNAL(signalClicked()), this, SLOT(slotHideUnSelectedMeshes()));
- connect(unhideAll, SIGNAL(signalClicked()), this, SLOT(slotUnHideAllMeshes()));
+ connect(d->mGUI->mHideButton, SIGNAL(signalClicked()),
+		this, SLOT(slotHideSelectedMesh()));
+ connect(d->mGUI->mHideOthersButton, SIGNAL(signalClicked()),
+		this, SLOT(slotHideUnSelectedMeshes()));
+ connect(d->mGUI->mUnhideAllButton, SIGNAL(signalClicked()),
+		this, SLOT(slotUnHideAllMeshes()));
 
 
 
- BoUfoHBox* placementWidget = new BoUfoHBox();
- BoUfoCheckBox* placement = new BoUfoCheckBox(i18n("Show placement preview"));
- BoUfoCheckBox* disallowPlacement= new BoUfoCheckBox(i18n("Disallow placement"));
- placementWidget->addWidget(placement);
- placementWidget->addWidget(disallowPlacement);
- BoUfoCheckBox* wireframe = new BoUfoCheckBox(i18n("Show wireframe"));
- BoUfoCheckBox* axis = new BoUfoCheckBox(i18n("Render axis"));
- BoUfoCheckBox* grid = new BoUfoCheckBox(i18n("Render grid"));
- BoUfoCheckBox* light = new BoUfoCheckBox(i18n("Enable Light"), boConfig->boolValue("UseLight"));
- BoUfoCheckBox* materials = new BoUfoCheckBox(i18n("Enable Materials"), boConfig->boolValue("UseMaterials"));
- connect(placement, SIGNAL(signalToggled(bool)), this, SLOT(slotPlacementPreviewChanged(bool)));
- connect(disallowPlacement, SIGNAL(signalToggled(bool)), this, SLOT(slotDisallowPlacementChanged(bool)));
- connect(wireframe, SIGNAL(signalToggled(bool)), this, SLOT(slotWireFrameChanged(bool)));
- connect(axis, SIGNAL(signalToggled(bool)), this, SLOT(slotRenderAxisChanged(bool)));
- connect(grid, SIGNAL(signalToggled(bool)), this, SLOT(slotRenderGridChanged(bool)));
- connect(light, SIGNAL(signalToggled(bool)), this, SLOT(slotEnableLight(bool)));
- connect(materials, SIGNAL(signalToggled(bool)), this, SLOT(slotEnableMaterials(bool)));
+ connect(d->mGUI->mPlacement, SIGNAL(signalToggled(bool)),
+		this, SLOT(slotPlacementPreviewChanged(bool)));
+ connect(d->mGUI->mDisallowPlacement, SIGNAL(signalToggled(bool)),
+		this, SLOT(slotDisallowPlacementChanged(bool)));
+ connect(d->mGUI->mEnableWireframe, SIGNAL(signalToggled(bool)),
+		this, SLOT(slotWireFrameChanged(bool)));
+ connect(d->mGUI->mShowAxis, SIGNAL(signalToggled(bool)),
+		this, SLOT(slotRenderAxisChanged(bool)));
+ connect(d->mGUI->mShowGrid, SIGNAL(signalToggled(bool)),
+		this, SLOT(slotRenderGridChanged(bool)));
+ connect(d->mGUI->mEnableLight, SIGNAL(signalToggled(bool)),
+		this, SLOT(slotEnableLight(bool)));
+ connect(d->mGUI->mEnableMaterials, SIGNAL(signalToggled(bool)),
+		this, SLOT(slotEnableMaterials(bool)));
 
 
 
@@ -337,32 +336,10 @@ void ModelPreview::initUfoGUI()
  BoUfoCameraWidget* camera = new BoUfoCameraWidget();
  camera->setCamera(mCamera);
  connect(this, SIGNAL(signalCameraChanged()), camera, SLOT(slotUpdateFromCamera()));
+ d->mGUI->mCameraContainer->addWidget(camera);
 #endif
- BoUfoPushButton* defaults = new BoUfoPushButton(i18n("Reset Defaults"));
- connect(defaults, SIGNAL(signalClicked()), this, SLOT(slotResetView()));
-
- topWidget->addSpacing(10); // TODO: add spacinghint and marginhint to layouts
- topWidget->addWidget(mMeshUnderMouseLabel);
- topWidget->addWidget(mSelectedMeshLabel);
-
- topWidget->addWidget(fovy);
- topWidget->addWidget(lod);
- topWidget->addWidget(frame);
- topWidget->addSpacing(10);
- topWidget->addWidget(hideWidget);
- topWidget->addSpacing(10);
- topWidget->addWidget(placementWidget);
- topWidget->addWidget(wireframe);
- topWidget->addWidget(axis);
- topWidget->addWidget(grid);
- topWidget->addWidget(light);
- topWidget->addWidget(materials);
- topWidget->addSpacing(50);
-#if UFO_CAMERA_WIDGET
- topWidget->addWidget(camera);
-#endif
- topWidget->addWidget(defaults);
- topWidget->addWidget(new BoUfoWidget()); // takes all remaining space
+ connect(d->mGUI->mDefaultsButton, SIGNAL(signalClicked()),
+		this, SLOT(slotResetView()));
 
  updateMeshUnderMouseLabel();
 
@@ -1187,8 +1164,8 @@ void ModelPreview::resetModel()
 
 void ModelPreview::updateMeshUnderMouseLabel()
 {
- BO_CHECK_NULL_RET(mMeshUnderMouseLabel);
- BO_CHECK_NULL_RET(mSelectedMeshLabel);
+ BO_CHECK_NULL_RET(d->mGUI->mMeshUnderMouseLabel);
+ BO_CHECK_NULL_RET(d->mGUI->mSelectedMeshLabel);
  QString meshUnderCursor;
  QString selectedMeshText;
  BoMesh* mesh = 0;
@@ -1226,13 +1203,13 @@ void ModelPreview::updateMeshUnderMouseLabel()
 				.arg(material);
 	}
  }
- mMeshUnderMouseLabel->setText(i18n("Mesh under cursor: %1").arg(meshUnderCursor));
+ d->mGUI->mMeshUnderMouseLabel->setText(i18n("Mesh under cursor: %1").arg(meshUnderCursor));
  if (selectedMeshText.isEmpty()) {
-	mSelectedMeshLabel->hide();
-	mSelectedMeshLabel->setText("");
+	d->mGUI->mSelectedMeshLabel->hide();
+	d->mGUI->mSelectedMeshLabel->setText("");
  } else {
-	mSelectedMeshLabel->show();
-	mSelectedMeshLabel->setText(selectedMeshText);
+	d->mGUI->mSelectedMeshLabel->show();
+	d->mGUI->mSelectedMeshLabel->setText(selectedMeshText);
  }
 }
 
