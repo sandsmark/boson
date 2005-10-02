@@ -21,15 +21,14 @@
 
 #include "bodebugdcopiface.h"
 #include "bosonufoglwidget.h"
+#include <boufo/boufocustomwidget.h>
 
 #include <qptrlist.h>
 #include <qptrdict.h>
 #include <qintdict.h>
 #include <qvaluelist.h>
-#include <qpushbutton.h>
 
 #include <kmainwindow.h>
-#include <knuminput.h>
 
 #define MIN_FOVY 0.0
 #define MAX_FOVY 180.0
@@ -59,76 +58,33 @@ class BosonViewData;
 template<class T> class BoVector3;
 typedef BoVector3<float> BoVector3Float;
 
-class KMyFloatNumInput : public KDoubleNumInput
-{
-	Q_OBJECT
-public:
-	KMyFloatNumInput(QWidget* parent) : KDoubleNumInput(parent)
-	{
-		connect(this, SIGNAL(valueChanged(double)), this, SLOT(slotValueChanged(double)));
-	}
-	~KMyFloatNumInput()
-	{}
-
-signals:
-	void valueChanged(float);
-
-private slots:
-	void slotValueChanged(double v) { emit valueChanged((float)v); }
-};
-
-class KMyIntNumInput : public KIntNumInput
-{
-	Q_OBJECT
-public:
-	KMyIntNumInput(QWidget* parent) : KIntNumInput(parent)
-	{
-		connect(this, SIGNAL(valueChanged(int)), this, SLOT(slotValueChanged(int)));
-	}
-	~KMyIntNumInput()
-	{}
-
-signals:
-	void valueChanged(float);
-
-private slots:
-	void slotValueChanged(int v) { emit valueChanged((float)v); }
-};
-
-class ModelPreviewPrivate;
+class ModelDisplayPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class ModelPreview : public BosonUfoGLWidget
+class ModelDisplay : public BoUfoCustomWidget
 {
 	Q_OBJECT
 public:
-	ModelPreview(const QPtrList<SpeciesTheme>&, QWidget*);
-	~ModelPreview();
+	ModelDisplay();
+	~ModelDisplay();
 
-	virtual void initializeGL();
-	virtual void paintGL();
-	virtual void resizeGL(int, int);
+	virtual void paintWidget();
 
 	void setFont(const BoFontInfo& font);
 
-	void load(SpeciesTheme* s, const UnitProperties* prop);
-	void loadObjectModel(SpeciesTheme* s, const QString& file);
 	void resetModel();
 
 	BoCamera* camera() const { return mCamera; }
 	BoLight* light() const { return mLight; }
 	BosonModel* model() const { return mModel; }
 
-	void changeUnit(const QString& speciesIdentifier, const QString& unit);
-	void changeUnit(const QString& speciesIdentifier, unsigned long int unitType);
-	void changeObject(const QString& speciesIdentifier, const QString& file);
-
-	void changeUnit(SpeciesTheme* s, const UnitProperties* prop);
-	void changeObject(SpeciesTheme* s, const QString& file);
+	void setModel(BosonModel*);
 
 signals:
-	void signalFovYChanged(float);
+	void signalShowSelectedMeshLabel(bool);
+	void signalSelectedMeshLabel(const QString&);
+	void signalMeshUnderMouseLabel(const QString&);
 
 	void signalRotateXChanged(float);
 	void signalRotateYChanged(float);
@@ -138,14 +94,11 @@ signals:
 	void signalCameraZChanged(float);
 	void signalCameraChanged();
 
-	void signalFrameChanged(int);
+	void signalFovYChanged(float);
 	void signalFrameChanged(float);
-	void signalLODChanged(int);
 	void signalLODChanged(float);
 
-	void signalMaxFramesChanged(int);
 	void signalMaxFramesChanged(float);
-	void signalMaxLODChanged(int);
 	void signalMaxLODChanged(float);
 
 	void signalMeshSelected(int);
@@ -171,7 +124,6 @@ public slots:
 	{
 		if (f >= MIN_FOVY && f <= MAX_FOVY) {
 			mFovY = f;
-			resizeGL(width(), height());
 		}
 	}
 	void slotFrameChanged(float f)
@@ -210,34 +162,18 @@ public slots:
 	void slotUnHideAllMeshes();
 	void slotEnableLight(bool);
 	void slotEnableMaterials(bool);
-	void slotShowVertexPoints(bool);
-	void slotChangeVertexPointSize();
-	void slotChangeGridUnitSize();
-
-	void slotUnitChanged(int);
-	void slotObjectChanged(int);
 
 	void slotSetVertexPointSize(int);
-	void slotSetGridUnitSize(float);
 
-	void slotChangeBackgroundColor();
-	void slotShowLightWidget();
-	void slotDebugModels();
 	void slotDebugMemory();
-	void slotDebugSpecies();
-	void slotShowMaterialsWidget();
-	void slotShowGLStates();
-	void slotReloadModelTextures();
-	void slotReloadMeshRenderer();
-	void slotShowChangeFont();
+
+protected slots:
+	void slotMousePressEvent(QMouseEvent*);
+	void slotMouseMoveEvent(QMouseEvent*);
+	void slotMouseReleaseEvent(QMouseEvent*);
+	void slotWheelEvent(QWheelEvent*);
 
 protected:
-	virtual bool eventFilter(QObject* o, QEvent* e);
-	virtual void mouseMoveEvent(QMouseEvent*);
-	virtual void mousePressEvent(QMouseEvent*);
-	virtual void mouseReleaseEvent(QMouseEvent*);
-	virtual void wheelEvent(QWheelEvent*);
-
 	void renderAxii();
 	void renderModel(int mode = -1);
 	void renderGrid();
@@ -252,13 +188,11 @@ protected:
 		return false;
 	}
 
-	void setModel(BosonModel*);
-
 	void updateCamera(const BoVector3Float& cameraPos, const BoQuaternion& q);
 	void updateCamera(const BoVector3Float& cameraPos, const BoMatrix& rotationMatrix);
 	void updateCamera(const BoVector3Float& cameraPos, const BoVector3Float& lookAt, const BoVector3Float& up);
 
-	void updateMeshUnderMouseLabel();
+	void updateMeshUnderMouse();
 
 	/**
 	 * Use -1 to select nothing.
@@ -278,18 +212,12 @@ protected:
 	void updateCursorDisplay(const QPoint& pos);
 	int pickObject(const QPoint& pos);
 
-	void uncheckAllBut(BoUfoAction*); // BAH!
-
-	SpeciesTheme* findTheme(const QString& theme) const;
-
 private:
-	void initUfoGUI();
-	void initUfoAction();
+	void initializeGL();
 
 private:
 	friend class RenderMain; // we need to emit signals from outside, in order to save lots of forwarding code
-	ModelPreviewPrivate* d;
-	QTimer* mUpdateTimer;
+	ModelDisplayPrivate* d;
 	BosonModel* mModel;
 	int mCurrentFrame;
 	int mCurrentLOD;
@@ -311,13 +239,66 @@ private:
 
 	BoCamera* mCamera;
 	BoLight* mLight;
+};
 
-	QPtrList<SpeciesTheme> mSpecies;
-	QPtrDict<SpeciesTheme> mAction2Species;
+class BoRenderGLWidgetPrivate;
+class BoRenderGLWidget : public BosonUfoGLWidget
+{
+	Q_OBJECT
+public:
+	BoRenderGLWidget(QWidget* parent, bool direct);
+	~BoRenderGLWidget();
 
-	// TODO: use a BoUfo widget. don't use a separate window.
-	BoLightCameraWidget1* mLightWidget;
-	BoMaterialWidget* mMaterialWidget;
+	void initWidget();
+
+	bool parseCmdLineArgs(KCmdLineArgs*);
+
+	void load(SpeciesTheme* s, const UnitProperties* prop);
+	void loadObjectModel(SpeciesTheme* s, const QString& file);
+
+	void changeUnit(const QString& speciesIdentifier, const QString& unit);
+	void changeUnit(const QString& speciesIdentifier, unsigned long int unitType);
+	void changeObject(const QString& speciesIdentifier, const QString& file);
+
+	void changeUnit(SpeciesTheme* s, const UnitProperties* prop);
+	void changeObject(SpeciesTheme* s, const QString& file);
+
+
+protected:
+	virtual void initializeGL();
+	virtual void paintGL();
+
+	bool loadCamera(KCmdLineArgs*);
+	SpeciesTheme* findTheme(const QString& theme) const;
+	void uncheckAllBut(BoUfoAction*); // BAH!
+
+protected slots:
+	void slotShowVertexPoints(bool);
+	void slotChangeVertexPointSize();
+	void slotChangeGridUnitSize();
+	void slotChangeBackgroundColor();
+	void slotDebugModels();
+	void slotDebugSpecies();
+	void slotShowMaterialsWidget();
+	void slotShowLightWidget();
+	void slotSetGridUnitSize(float);
+	void slotUnitChanged(int);
+	void slotObjectChanged(int);
+	void slotReloadModelTextures();
+	void slotReloadMeshRenderer();
+	void slotShowGLStates();
+	void slotShowChangeFont();
+
+
+
+
+private:
+	void initUfoGUI();
+	void initUfoAction();
+
+private:
+	BoRenderGLWidgetPrivate* d;
+
 };
 
 /**
@@ -332,19 +313,11 @@ public:
 	RenderMain();
 	~RenderMain();
 
-	bool loadCamera(KCmdLineArgs*);
-
-	void changeUnit(const QString& speciesIdentifier, const QString& unit);
-	void changeUnit(const QString& speciesIdentifier, unsigned long int unitType);
-	void changeObject(const QString& speciesIdentifier, const QString& file);
-
-	void emitSignalFovY(float f) { emit mPreview->signalFovYChanged(f); }
-	void emitSignalFrame(int f) { emit mPreview->signalFrameChanged(f); }
-	void emitSignalLOD(int l) { emit mPreview->signalLODChanged(l); }
+	bool parseCmdLineArgs(KCmdLineArgs*);
 
 private:
-	ModelPreview* mPreview;
-	QPtrList<SpeciesTheme> mSpecies;
+	BoRenderGLWidget* mGLWidget;
+	QTimer* mUpdateTimer;
 	BoDebugDCOPIface* mIface;
 };
 
