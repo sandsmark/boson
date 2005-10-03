@@ -36,8 +36,8 @@ UnitWidth=1
 Weapons=1
 
 [Model]
-Animation-Idle-Start=0
-Animation-Idle-End=48
+Animation-Idle-Start=100
+Animation-Idle-End=200
 Animation-Idle-Speed=2
 
 [Sounds]
