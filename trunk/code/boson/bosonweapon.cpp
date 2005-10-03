@@ -48,7 +48,7 @@ BosonWeaponProperties::BosonWeaponProperties(const UnitProperties* prop, unsigne
     mFullDamageRange(this, QString("Weapon_%1:FullDamageRange").arg(id-1), "MaxValue"),
     mReloadingTime(  this, QString("Weapon_%1:Reload").arg(id-1), "MaxValue"),
     mSpeed(          this, QString("Weapon_%1:Speed").arg(id-1), "MaxValue"),
-    mRequiredGenericAmmunition(this, QString("Weapon_%1:RequiredGenericAmmunition").arg(id-1), "MaxValue")
+    mRequiredAmmunition(this, QString("Weapon_%1:RequiredAmmunition").arg(id-1), "MaxValue")
 {
   mId = id;
 
@@ -159,7 +159,7 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg)
     boWarning() << k_funcinfo << "FullDamageRange must not be bigger than DamageRange!" << endl;
     insertBoFixedWeaponBaseValue(bofixedWeaponBaseValue("DamageRange"), "FullDamageRange", "MaxValue");
   }
-  insertBoFixedWeaponBaseValue(cfg->readDoubleNumEntry("RequiredGenericAmmunition", 1), "RequiredGenericAmmunition", "MaxValue");
+  insertBoFixedWeaponBaseValue(cfg->readDoubleNumEntry("RequiredAmmunition", 1), "RequiredAmmunition", "MaxValue");
   mCanShootAtAirUnits = cfg->readBoolEntry("CanShootAtAirUnits", false);
   mCanShootAtLandUnits = cfg->readBoolEntry("CanShootAtLandUnits", false);
   mHeight = cfg->readDoubleNumEntry("Height", 0.25);
@@ -169,6 +169,7 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg)
   {
     boWarning() << k_funcinfo << "AutoUse=true doesn't make sense for mines and bombs" << endl;
   }
+  mAmmunitionType = cfg->readEntry("AmmunitionType", "Generic");
   mTakeTargetVeloIntoAccount = cfg->readBoolEntry("TakeTargetVeloIntoAccount", false);
   mShootEffectIds = BosonConfig::readUnsignedLongNumList(cfg, "ShootEffects");
   mFlyEffectIds = BosonConfig::readUnsignedLongNumList(cfg, "FlyEffects");
@@ -236,7 +237,7 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   cfg->writeEntry("StartAngle", mStartAngle);
   cfg->writeEntry("Damage", damage());
   cfg->writeEntry("DamageRange", damageRange());
-  cfg->writeEntry("RequiredGenericAmmunition", requiredGenericAmmunition());
+  cfg->writeEntry("RequiredAmmunition", requiredAmmunition());
   cfg->writeEntry("CanShootAtAirUnits", mCanShootAtAirUnits);
   cfg->writeEntry("CanShootAtLandUnits", mCanShootAtLandUnits);
   cfg->writeEntry("Height", (double)mHeight);
@@ -258,7 +259,7 @@ void BosonWeaponProperties::reset()
   insertBoFixedWeaponBaseValue(0.25 * bofixedWeaponBaseValue("DamageRange"), "FullDamageRange", "MaxValue");
   insertULongWeaponBaseValue(0, "Reload", "MaxValue");
   insertBoFixedWeaponBaseValue(0, "Speed", "MaxValue");
-  insertULongWeaponBaseValue(1, "RequiredGenericAmmunition", "MaxValue");
+  insertULongWeaponBaseValue(1, "RequiredAmmunition", "MaxValue");
   mAccelerationSpeed = 0;
   mTurningSpeed = tan(120 * DEG2RAD / 20.0f);
   mStartAngle = -1;
@@ -463,7 +464,7 @@ BosonWeapon::BosonWeapon(int weaponNumber, BosonWeaponProperties* prop, Unit* _u
     mFullDamageRange(prop, QString("Weapon_%1:FullDamageRange").arg(prop->id()-1), "MaxValue"),
     mReloadingTime(  prop, QString("Weapon_%1:Reload").arg(prop->id()-1), "MaxValue"),
     mSpeed(          prop, QString("Weapon_%1:Speed").arg(prop->id()-1), "MaxValue"),
-    mRequiredGenericAmmunition(prop, QString("Weapon_%1:RequiredGenericAmmunition").arg(prop->id()-1), "MaxValue")
+    mRequiredAmmunition(prop, QString("Weapon_%1:RequiredAmmunition").arg(prop->id()-1), "MaxValue")
 {
   mProp = prop;
   if (!unit())
@@ -471,10 +472,10 @@ BosonWeapon::BosonWeapon(int weaponNumber, BosonWeaponProperties* prop, Unit* _u
     boError() << k_funcinfo << "NULL unit" << endl;
   }
   registerWeaponData(weaponNumber, &mReloadCounter, IdReloadCounter);
-  registerWeaponData(weaponNumber, &mGenericAmmunition, IdGenericAmmunition);
+  registerWeaponData(weaponNumber, &mAmmunition, IdAmmunition);
   mReloadCounter.setLocal(0);
   mReloadCounter.setEmittingSignal(false);
-  mGenericAmmunition.setLocal(0);
+  mAmmunition.setLocal(0);
 }
 
 BosonWeapon::~BosonWeapon()
@@ -510,8 +511,8 @@ void BosonWeapon::registerWeaponData(int weaponNumber, KGamePropertyBase* prop, 
    case IdReloadCounter:
      name = QString::fromLatin1("ReloadCounter");
      break;
-   case IdGenericAmmunition:
-     name = QString::fromLatin1("GenericAmmunition");
+   case IdAmmunition:
+     name = QString::fromLatin1("Ammunition");
      break;
    default:
      break;
@@ -551,26 +552,29 @@ bool BosonWeapon::canShootAt(Unit* u) const
   }
 }
 
-void BosonWeapon::refillGenericAmmunition(Unit* owner)
+void BosonWeapon::refillAmmunition(Unit* owner)
 {
   BO_CHECK_NULL_RET(owner);
   if(reloaded())
   {
     return;
   }
-  if(requiredGenericAmmunition() <= mGenericAmmunition)
+  boDebug(610) << k_funcinfo << "owner unit: " << owner->id() << " required ammo: " << requiredAmmunition() << " of type " << ammunitionType() << " have: " << mAmmunition << endl;
+  if(requiredAmmunition() <= mAmmunition)
   {
-    boError() << k_funcinfo << "called, but don't require generic ammo" << endl;
+    boError() << k_funcinfo << "called, but don't require ammo" << endl;
     return;
   }
-  unsigned long int required = requiredGenericAmmunition() - mGenericAmmunition;
-  unsigned long int ammo = owner->requestGenericAmmunition(required);
+  unsigned long int required = requiredAmmunition() - mAmmunition;
+  unsigned long int ammo = owner->requestAmmunition(ammunitionType(), required);
+  boDebug(610) << k_funcinfo << "requested " << required << " ammo, received " << ammo << endl;
   if(ammo > required)
   {
     boError() << k_funcinfo << "got more ammo than requested. overflow?" << endl;
     return;
   }
-  mGenericAmmunition = mGenericAmmunition + ammo;
+  mAmmunition = mAmmunition + ammo;
+  boDebug(610) << k_funcinfo << "ammunition now: << " << mAmmunition << endl;
 }
 
 void BosonWeapon::shoot(Unit* u)

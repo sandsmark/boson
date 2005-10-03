@@ -202,7 +202,7 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
  // TODO: use a condition for this code: every n advance call the condition
  // should send an event "GainNewAmmo" for the players
 #if 1
- // refill generic ammo of all players by a small amount, up to a certain value.
+ // refill "Generic" ammo of all players by a small amount, up to a certain value.
  // TODO: use the actual _small_ amount once a "ammunition center" exists, where
  // the player can build new ammo (to increase the refill rate)
 #if 0
@@ -218,8 +218,9 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
 	if (p->bosonId() < 128 || p->bosonId() >= 256) {
 		continue;
 	}
-	if (p->genericAmmunition() < maxAmmo) {
-		p->setGenericAmmunition(p->genericAmmunition() + amount);
+	QString type = "Generic";
+	if (p->ammunition(type) < maxAmmo) {
+		p->setAmmunition(type, p->ammunition(type) + amount);
 	}
  }
 #endif

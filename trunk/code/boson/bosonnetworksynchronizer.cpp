@@ -287,7 +287,7 @@ public:
 			playersStream << (Q_UINT32)p->foggedCells();
 			playersStream << (Q_UINT32)p->minerals();
 			playersStream << (Q_UINT32)p->oil();
-			playersStream << (Q_UINT32)p->genericAmmunition();
+			playersStream << (Q_UINT32)p->ammunition("Generic");
 			++playerIt;
 		}
 		return playersBuffer;

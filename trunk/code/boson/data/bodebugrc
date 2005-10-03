@@ -74,6 +74,10 @@ InfoOutput=4
 [500]
 InfoOutput=4
 
+# Ammunition is off by default
+[610]
+InfoOutput=4
+
 # BoScript if off by default
 [700]
 InfoOutput=4
