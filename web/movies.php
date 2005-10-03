@@ -52,6 +52,13 @@ main_area_begin();
 
 // Contacts
 draw_bigbox_begin("The movies");
+draw_bigbox_subheader("WARNING");
+draw_bigbox_text("Those movies are more than two years old and thus do NOT
+    reflect Boson's cirrent state.<br>
+    The <a href=\"screenshots.php\">screenshots</a> give a better idea of
+    Boson's current look.
+    <br><br>");
+
 draw_bigbox_text("You can download the Boson-movies here.<br>
     They are rendered completely in Boson, except for intro/outro sequences<br>
     They do not show actual gameplay, as scripts were used to make them, but
@@ -71,6 +78,7 @@ draw_bigbox_text("You can download the Boson-movies here.<br>
     All movies are encoded using <a href=\"http://www.xvid.org\">XViD codec</a>.<br>
     Unfortunately, the movies have no sound.
     <br><br>");
+
 draw_bigbox_subheader("Movie 1");
 draw_bigbox_text("This is the first movie<br>
     It's lenght is 1:39 and it consists of two scenes. First scene shows an
