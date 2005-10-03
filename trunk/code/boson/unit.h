@@ -490,6 +490,13 @@ public:
 
 	virtual void flyInCircle() {}
 
+	/**
+	 * Called when the unit wants to move to another position. It may be
+	 * possible that the heights of the cells at the new position are
+	 * different and therefore the unit needs to move in z direction and
+	 * maybe rotate around x and y axis.
+	 **/
+	void updateZ(bofixed moveByX, bofixed moveByY, bofixed* moveZ, bofixed* rotateX, bofixed* rotateY);
 
 protected:
 	void shootAt(BosonWeapon* w, Unit* target);
@@ -541,18 +548,6 @@ protected:
 	 **/
 	void pathPointDone();
 
-
-	/**
-	 * Called when the unit wants to move to another position. It may be
-	 * possible that the heights of the cells at the new position are
-	 * different and therefore the unit needs to move in z direction and
-	 * maybe rotate around x and y axis.
-	 *
-	 * Currently rotateX and rotateY are set to 0.0, since it is not yet
-	 * implemented. moveZ is simply set to the highest z value of the
-	 * corners of all cells it occupies.
-	 **/
-	void updateZ(bofixed moveByX, bofixed moveByY, bofixed* moveZ, bofixed* rotateX, bofixed* rotateY);
 
 	virtual const QColor* teamColor() const;
 

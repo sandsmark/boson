@@ -965,6 +965,17 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
 	return false;
  }
 
+ if (!unit->isFlying()) {
+	bofixed rotateX = 0.0f;
+	bofixed rotateY = 0.0f;
+	bofixed moveZ;
+	unit->updateZ(0, 0, &moveZ, &rotateX, &rotateY);
+	unit->setXRotation(rotateX);
+	unit->setYRotation(rotateY);
+	((BosonItem*)unit)->moveBy(0, 0, moveZ);
+ }
+
+
  // the current production is done.
  factory->productionPlaced(unit);
 
