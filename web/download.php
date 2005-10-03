@@ -29,11 +29,11 @@ include_once("counter.inc");
 
 /*****  Start of main stuff  *****/
 
- $dl = $_GET['dl'];
-if($dl)
+if(array_key_exists("dl", $_GET))
 {
   // User wanted to download something.
   // Count download and redirect browser
+  $dl = $_GET['dl'];
   counter2_download($dl);
   header("Location: http://prdownloads.sourceforge.net/boson/".$dl."?download");
   exit;
