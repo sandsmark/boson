@@ -267,3 +267,57 @@ void ResourceMineProperties::savePlugin(KSimpleConfig* config)
  config->writeEntry("CanProvideOil", mOil);
 }
 
+AmmunitionStorageProperties::AmmunitionStorageProperties(const UnitProperties* parent)
+		: PluginProperties(parent)
+{
+}
+
+AmmunitionStorageProperties::~AmmunitionStorageProperties()
+{
+}
+
+QString AmmunitionStorageProperties::propertyGroup()
+{
+ return QString::fromLatin1("AmmunitionStoragePlugin");
+}
+
+QString AmmunitionStorageProperties::name() const
+{
+ return i18n("Ammunition Storage Plugin");
+}
+
+void AmmunitionStorageProperties::loadPlugin(KSimpleConfig* config)
+{
+ if (!config->hasGroup(propertyGroup())) {
+	boError() << k_funcinfo << "unit has no production plugin" << endl;
+	return;
+ }
+ config->setGroup(propertyGroup());
+ mCanStore = config->readListEntry("CanStore");
+ mMustBePickedUp = config->readListEntry("MustBePickedUp");
+}
+
+void AmmunitionStorageProperties::savePlugin(KSimpleConfig* config)
+{
+ config->setGroup(propertyGroup());
+ config->writeEntry("CanStore", mCanStore);
+ config->writeEntry("MustBePickedUp", mMustBePickedUp);
+}
+
+bool AmmunitionStorageProperties::mustBePickedUp(const QString& type) const
+{
+ if (mMustBePickedUp.contains(type)) {
+	return true;
+ }
+ return false;
+}
+
+bool AmmunitionStorageProperties::canStore(const QString& type) const
+{
+ if (mCanStore.contains(type)) {
+	return true;
+ }
+ return false;
+}
+
+

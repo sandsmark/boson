@@ -234,6 +234,9 @@ bool UnitProperties::loadAllPluginProperties(KSimpleConfig* conf)
  if (conf->hasGroup(ResourceMineProperties::propertyGroup())) {
 	loadPluginProperties(new ResourceMineProperties(this), conf);
  }
+ if (conf->hasGroup(AmmunitionStorageProperties::propertyGroup())) {
+	loadPluginProperties(new AmmunitionStorageProperties(this), conf);
+ }
  return true;
 }
 

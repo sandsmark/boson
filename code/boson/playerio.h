@@ -235,9 +235,9 @@ public:
 	 **/
 	unsigned long int oil() const;
 	/**
-	 * @return @ref Player::genericAmmunition
+	 * @return @ref Player::ammunition
 	 **/
-	unsigned long int genericAmmunition() const;
+	unsigned long int ammunition(const QString& type) const;
 	/**
 	 * @return @ref Player::statistics
 	 **/

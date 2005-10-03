@@ -26,6 +26,7 @@
 #include "bogameproperty.h"
 
 #include <qvaluelist.h>
+#include <qmap.h>
 #include <qpair.h>
 
 class Unit;
@@ -62,6 +63,7 @@ public:
 		Mining = 6, // placing mine (the exploding ones)
 		ResourceMine = 7,
 		Refinery = 8,
+		AmmunitionStorage = 9,
 
 		PluginEnd // MUST be the last entry!
 	};
@@ -164,6 +166,9 @@ public:
 	 * target.
 	 **/
 	virtual bool loadFromXML(const QDomElement& root) = 0;
+
+protected:
+	bool isNextTo(const Unit* unit) const;
 
 private:
 	Unit* mUnit;
@@ -386,7 +391,6 @@ public:
 protected:
 	bool isAtResourceMine() const;
 	bool isAtRefinery() const;
-	bool isNextTo(const Unit* unit) const;
 
 	ResourceMinePlugin* findClosestResourceMine() const;
 	RefineryPlugin* findClosestRefinery() const;
@@ -565,6 +569,69 @@ public:
 
 	virtual void unitDestroyed(Unit*);
 	virtual void itemRemoved(BosonItem*);
+};
+
+class AmmunitionStoragePlugin : public UnitPlugin
+{
+public:
+	AmmunitionStoragePlugin (Unit* owner);
+	~AmmunitionStoragePlugin();
+
+	virtual int pluginType() const { return AmmunitionStorage; }
+
+	virtual bool loadFromXML(const QDomElement& root);
+	virtual bool saveAsXML(QDomElement& root) const;
+	virtual void advance(unsigned int advanceCallsCount);
+
+	virtual void unitDestroyed(Unit*);
+	virtual void itemRemoved(BosonItem*);
+
+	/**
+	 * @return TRUE if the ammo @p type must be picked up from the unit that has
+	 * this plugin. If FALSE, the ammo can be used by a unit even if it is
+	 * on the other side of the map.
+	 **/
+	bool mustBePickedUp(const QString& type) const;
+
+	bool canStore(const QString& type) const;
+
+	unsigned long int requestAmmunitionGlobally(const QString& type, unsigned long int requested);
+
+	/**
+	 * Like @ref requestAmmunitionGlobally, but this implies that the unit
+	 * requesting the ammunition is close enough to actually pick the ammo
+	 * up itself.
+	 *
+	 * @param picksUp The unit that picks up the ammunition. Note that the
+	 * plugin may decide not to give any ammunition to that unit. See @p
+	 * denies
+	 * @param denied If non-NULL, then this is set to TRUE if the plugin
+	 * decided not to give ammunition to the unit @p picksUp, most likely it
+	 * is not close enough.
+	 **/
+	unsigned long int pickupAmmunition(Unit* picksUp, const QString& type, unsigned long int requested, bool* denied = 0);
+
+	unsigned long int ammunitionStored(const QString& type) const;
+
+	/**
+	 * Try to put an amount of @p ammo of type @p type into the storage.
+	 * This is usually successful, but if there is limited capacity, this
+	 * might fail
+	 * @return The amount of ammo that was actually stored. Always <= @p
+	 * ammo.
+	 **/
+	unsigned long int tryToFillStorage(const QString& type, unsigned long int ammo);
+
+protected:
+	int changeAmmunition(const QString& type, int change);
+
+	/**
+	 * @internal
+	 **/
+	unsigned long int giveAmmunition(const QString& type, unsigned long int requested);
+
+private:
+	QMap<QString, unsigned long int> mAmmunitionStorage;
 };
 
 #endif

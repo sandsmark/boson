@@ -58,7 +58,8 @@ public:
 		Harvester = 2,
 		Refinery = 3,
 		Weapon = 4,
-		ResourceMine = 5
+		ResourceMine = 5,
+		AmmunitionStorage = 6
 	};
 	PluginProperties(const UnitProperties* parent);
 	virtual ~PluginProperties();
@@ -251,6 +252,36 @@ private:
 	bool mOil;
 
 	friend class ResourceMinePropertiesEditor;
+};
+
+class AmmunitionStorageProperties : public PluginProperties
+{
+public:
+	AmmunitionStorageProperties(const UnitProperties* parent);
+	~AmmunitionStorageProperties();
+
+	static QString propertyGroup();
+
+	virtual QString name() const;
+	virtual void loadPlugin(KSimpleConfig* config);
+	virtual void savePlugin(KSimpleConfig* config);
+	virtual int pluginType() const { return AmmunitionStorage; }
+
+	/**
+	 * @return See @ref AmmunitionStoragePlugin::mustBePickedUp
+	 **/
+	bool mustBePickedUp(const QString& type) const;
+
+	/**
+	 * @return TRUE if this plugin can store @p type, otherwise FALSE.
+	 **/
+	bool canStore(const QString& type) const;
+
+private:
+	friend class AmmunitionStoragePropertiesEditor;
+
+	QValueList<QString> mCanStore;
+	QValueList<QString> mMustBePickedUp;
 };
 
 

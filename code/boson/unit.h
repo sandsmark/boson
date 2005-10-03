@@ -165,14 +165,13 @@ public:
 	virtual void reload(unsigned int count);
 
 	/**
-	 * Called by @ref BosonWeapon to actually reload the (generic)
-	 * ammunition of the weapon. This method cannot refill any special kind
-	 * of ammunition.
+	 * Called by @ref BosonWeapon to actually reload the
+	 * ammunition of the weapon.
 	 *
 	 * @return A value between 0 and @p requested, representing the amount
 	 * by which the weapon gets refilled.
 	 **/
-	unsigned long int requestGenericAmmunition(unsigned long int requested);
+	unsigned long int requestAmmunition(const QString& type, unsigned long int requested);
 
 	/**
 	 * Call the advance*() function that is currently used. The advance

@@ -184,6 +184,9 @@ bool Unit::init()
  if (prop->properties(PluginProperties::ResourceMine)) {
 	d->mPlugins.append(new ResourceMinePlugin(this));
  }
+ if (prop->properties(PluginProperties::AmmunitionStorage)) {
+	d->mPlugins.append(new AmmunitionStoragePlugin(this));
+ }
 
  loadWeapons();
 
@@ -480,13 +483,62 @@ void Unit::reload(unsigned int count)
  unchargePowerForReload();
 }
 
-unsigned long int Unit::requestGenericAmmunition(unsigned long int requested)
+unsigned long int Unit::requestAmmunition(const QString& type, unsigned long int requested)
 {
  if (!owner()) {
 	BO_NULL_ERROR(owner);
 	return 0;
  }
- return owner()->requestGenericAmmunition(requested);
+
+ // AB: there are 3 places where ammunition could be takes from
+ // 1. the global "pool" of the player. this ammunition "just exists" and is
+ //    bound to a player only (not to e.g. a facility)
+ // 2. the globally accessible ammunition that is stored in some storage unit
+ //    (usually a facility that produces the ammo). it is destroyed when that
+ //    storage unit is destroyed, but can be accessed globally, without the need
+ //    to pick it up.
+ // 3. ammunition that needs to be picked up at a unit.
+
+ // this searches for ammo of type 1 and 2
+ unsigned long int ammo = owner()->requestAmmunition(type, requested);
+ if (ammo > requested) {
+	boError(610) << k_funcinfo << "received more ammo than requested" << endl;
+	ammo = requested;
+ }
+ if (ammo == requested) {
+	return ammo;
+ }
+
+ boDebug(610) << k_funcinfo << "searching for unit to pick ammo up from" << endl;
+ for (QPtrListIterator<Unit> it(*owner()->allUnits()); it.current(); ++it) {
+	if (it.current()->isDestroyed()) {
+		continue;
+	}
+	Unit* unit = it.current();
+	AmmunitionStoragePlugin* storage = (AmmunitionStoragePlugin*)unit->plugin(UnitPlugin::AmmunitionStorage);
+	if (!storage) {
+		continue;
+	}
+	if (storage->ammunitionStored(type) == 0) {
+		continue;
+	}
+
+	bool denied = false;
+	ammo += storage->pickupAmmunition(this, type, requested - ammo, &denied);
+	if (ammo > requested) {
+		boError(610) << k_funcinfo << "received more ammo than requested" << endl;
+		ammo = requested;
+	}
+	if (ammo == requested) {
+		return ammo;
+	}
+	if (denied) {
+		boDebug(610) << k_funcinfo << id() << ": picking up from unit " << storage->unit()->id() << " denied" << endl;
+	}
+ }
+
+
+ return ammo;
 }
 
 void Unit::advanceNone(unsigned int)

@@ -57,8 +57,7 @@ public:
 		IdIsNeutralPlayer = KGamePropertyBase::IdUser + 4,
 		IdOutOfGame = KGamePropertyBase::IdUser + 5,
 		IdHasLost = KGamePropertyBase::IdUser + 6,
-		IdHasWon = KGamePropertyBase::IdUser + 7,
-		IdGenericAmmunition = KGamePropertyBase::IdUser + 8
+		IdHasWon = KGamePropertyBase::IdUser + 7
 	};
 
 	/**
@@ -156,17 +155,24 @@ public:
 
 	unsigned long int minerals() const;
 	unsigned long int oil() const;
-	unsigned long int genericAmmunition() const;
 	void setMinerals(unsigned long int m);
 	void setOil(unsigned long int o);
-	void setGenericAmmunition(unsigned long int a);
+
+	/**
+	 * @return The amount of ammunition of type @p type in the "global
+	 * pool", i.e. the amount of ammunition that ist "just there" and can be
+	 * used by units from everywhere (they don't need to go to a certain
+	 * pouint and pick it up).
+	 **/
+	unsigned long int ammunition(const QString& type) const;
+	void setAmmunition(const QString& type, unsigned long int a);
 
 	/**
 	 * @return A number between 0 and @p requested that represents the
 	 * amount of ammo that is delivered to the caller. The ammunition of the
 	 * player is reduced by this amount.
 	 **/
-	unsigned long int requestGenericAmmunition(unsigned long int requested);
+	unsigned long int requestAmmunition(const QString& type, unsigned long int requested);
 
 	void clearUpgrades();
 	void addUpgrade(const UpgradeProperties* upgrade);
@@ -389,7 +395,9 @@ public slots:
 
 protected:
 	bool saveFogOfWar(QDomElement& root) const;
+	bool saveAmmunition(QDomElement& root) const;
 	bool loadFogOfWar(const QDomElement& root);
+	bool loadAmmunition(const QDomElement& root);
 
 private:
 	PlayerPrivate* d;

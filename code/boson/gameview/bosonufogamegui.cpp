@@ -512,7 +512,7 @@ void BosonUfoGameGUI::updateUfoLabels()
  BO_CHECK_NULL_RET(d->mFPSCounter);
  QString minerals = QString::number(localPlayerIO()->minerals());
  QString oil = QString::number(localPlayerIO()->oil());
- QString genericAmmo = QString::number(localPlayerIO()->genericAmmunition());
+ QString genericAmmo = QString::number(localPlayerIO()->ammunition("Generic"));
  d->mMineralsLabel->setText(minerals);
  d->mOilLabel->setText(oil);
  d->mGenericAmmoLabel->setText(genericAmmo);
