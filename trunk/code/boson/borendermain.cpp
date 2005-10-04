@@ -352,6 +352,7 @@ void BoRenderGLWidget::initializeGL()
 {
  boDebug() << k_funcinfo << endl;
  makeCurrent();
+ BoInfo::boInfo()->update(this);
  initUfo();
  setUpdatesEnabled(false);
 
@@ -1078,7 +1079,7 @@ void ModelDisplay::paintWidget()
  if (boConfig->boolValue("UseLight")) {
 	glEnable(GL_LIGHTING);
 	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 	glEnable(GL_NORMALIZE);
  }
 
@@ -1165,8 +1166,6 @@ void ModelDisplay::renderModel(int mode)
 	glEnable(GL_TEXTURE_2D);
  }
  glEnable(GL_DEPTH_TEST);
- glEnableClientState(GL_VERTEX_ARRAY);
- glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
  // AB: if these are enabled we can't use triangle strips by any reason.
  // AB: we don't use triangle strips atm (and there are ways so that we still
@@ -1200,6 +1199,9 @@ void ModelDisplay::renderModel(int mode)
 			glDisable(GL_TEXTURE_2D);
 		}
 		BosonModel::startModelRendering();
+			glEnable(GL_DEPTH_TEST);
+			glDisable(GL_BLEND);
+			glDisable(GL_ALPHA_TEST);
 		mModel->prepareRendering();
 
 #warning TODO: also render transparent meshes
@@ -1217,8 +1219,6 @@ void ModelDisplay::renderModel(int mode)
  BoMaterial::deactivate();
 
  glPopAttrib();
- glDisableClientState(GL_VERTEX_ARRAY);
- glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 void ModelDisplay::renderGrid()
@@ -1868,13 +1868,6 @@ int main(int argc, char **argv)
  RenderMain* main = new RenderMain();
  kapp->setMainWidget(main);
  main->show();
-
- // the VBO meshrenderer (which isn't used by borender by default!) requires
- // this call. otherwise we get an undefined reference on plugin loading.
- // it's just a simple call to a BoInfo method, so that the linker is forced to
- // export the symbols. otherwise it's a noop.
- (void)BoInfo::boInfo();
-
  if (args->isSet("maximized")) {
 	main->showMaximized();
  }
