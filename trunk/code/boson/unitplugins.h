@@ -283,6 +283,8 @@ protected:
 private:
 	QValueList<QPair<ProductionType, unsigned long int> > mProductions;
 	KGameProperty<unsigned int> mProductionState;
+	KGameProperty<unsigned long int> mMineralsPaid;
+	KGameProperty<unsigned long int> mOilPaid;
 };
 
 /**

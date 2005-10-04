@@ -90,7 +90,9 @@ public:
 		IdResourceMineMinerals = 1536 + 8,
 		IdResourceMineOil = 1536 + 9,
 		IdBombingDropDist = 1536 + 10,
-		IdBombingLastDistFromDropPoint = 1536 + 11
+		IdBombingLastDistFromDropPoint = 1536 + 11,
+		IdMineralsPaid = 1536 + 12,
+		IdOilPaid = 1536 + 13
 	};
 
 	Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);

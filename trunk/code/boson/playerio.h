@@ -234,6 +234,9 @@ public:
 	 * @return @ref Player::oil
 	 **/
 	unsigned long int oil() const;
+	bool useMinerals(unsigned long int amount);
+	bool useOil(unsigned long int amount);
+	bool useResources(unsigned long int mineralamount, unsigned long int oilamount);
 	/**
 	 * @return @ref Player::ammunition
 	 **/
