@@ -186,6 +186,21 @@ unsigned long int PlayerIO::oil() const
  return player()->oil();
 }
 
+bool PlayerIO::useMinerals(unsigned long int amount)
+{
+ return player()->useMinerals(amount);
+}
+
+bool PlayerIO::useOil(unsigned long int amount)
+{
+ return player()->useOil(amount);
+}
+
+bool PlayerIO::useResources(unsigned long int mineralamount, unsigned long int oilamount)
+{
+ return player()->useResources(mineralamount, oilamount);
+}
+
 unsigned long int PlayerIO::ammunition(const QString& type) const
 {
  return player()->ammunition(type);

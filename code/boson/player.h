@@ -159,6 +159,27 @@ public:
 	void setOil(unsigned long int o);
 
 	/**
+	 * Use up given amount of player's minerals.
+	 * If player currently has less minerals than @p amount, FALSE is returned
+	 * immediately. Otherwise, player's amount of minerals is decreased by the
+	 * @p amount and TRUE is returned.
+	 **/
+	bool useMinerals(unsigned long int amount);
+	/**
+	 * Use up given amount of player's oil.
+	 * If player currently has less oil than @p amount, FALSE is returned
+	 * immediately. Otherwise, player's amount of oil is decreased by the
+	 * @p amount and TRUE is returned.
+	 **/
+	bool useOil(unsigned long int amount);
+	/**
+	 * Use up given amount of player's minerals and oil.
+	 * This is same as calling both @ref useMinerals and @ref useOil except that
+	 * either both or none of the resources is decreased.
+	 **/
+	bool useResources(unsigned long int mineralamount, unsigned long int oilamount);
+
+	/**
 	 * @return The amount of ammunition of type @p type in the "global
 	 * pool", i.e. the amount of ammunition that ist "just there" and can be
 	 * used by units from everywhere (they don't need to go to a certain

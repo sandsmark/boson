@@ -136,9 +136,15 @@ ProductionPlugin::ProductionPlugin(Unit* unit) : UnitPlugin(unit)
 {
 // unit->registerData(&mProductions, Unit::IdProductions);
  unit->registerData(&mProductionState, Unit::IdProductionState);
+ unit->registerData(&mMineralsPaid, Unit::IdMineralsPaid);
+ unit->registerData(&mOilPaid, Unit::IdOilPaid);
  mProductionState.setLocal(0);
+ mMineralsPaid.setLocal(0);
+ mOilPaid.setLocal(0);
 // mProductions.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
  mProductionState.setEmittingSignal(false); // called quite often - not emitting will increase speed a little bit
+ mMineralsPaid.setEmittingSignal(false);
+ mOilPaid.setEmittingSignal(false);
 }
 
 ProductionPlugin::~ProductionPlugin()
@@ -189,6 +195,8 @@ void ProductionPlugin::productionPlaced(Unit* produced)
  boGame->queueEvent(productionPlaced);
 
  // the current production is done.
+ mMineralsPaid = 0;
+ mOilPaid = 0;
  removeProduction();
 }
 
@@ -205,9 +213,6 @@ void ProductionPlugin::addProduction(ProductionType type, unsigned long int id)
 	return;
  }
 
- unsigned long int mineralCost = 0;
- unsigned long int oilCost = 0;
-
  if (type == ProduceUnit) {
 	const UnitProperties* prop = speciesTheme()->unitProperties(id);
 	if (!prop) {
@@ -219,9 +224,6 @@ void ProductionPlugin::addProduction(ProductionType type, unsigned long int id)
 		game()->slotAddChatSystemMessage(i18n("Cannot produce unit %1").arg(prop->name()), player());
 		return;
 	}
-
-	mineralCost = prop->mineralCost();
-	oilCost = prop->oilCost();
  } else if (type == ProduceTech) {
 	const UpgradeProperties* prop = speciesTheme()->technology(id);
 	if (!prop) {
@@ -233,24 +235,10 @@ void ProductionPlugin::addProduction(ProductionType type, unsigned long int id)
 		game()->slotAddChatSystemMessage(i18n("Cannot produce technology %1").arg(prop->upgradeName()), player());
 		return;
 	}
-
-	mineralCost = prop->mineralCost();
-	oilCost = prop->oilCost();
  } else {
 	boError() << k_funcinfo << "Invalid productionType: " << (int)type << endl;
 	return;
  }
-
- if (player()->minerals() < mineralCost) {
-	game()->slotAddChatSystemMessage(i18n("You have not enough minerals!"), player());
-	return;
- }
- if (player()->oil() < oilCost) {
-	game()->slotAddChatSystemMessage(i18n("You have not enough oil!"), player());
-	return;
- }
- player()->setMinerals(player()->minerals() - mineralCost);
- player()->setOil(player()->oil() - oilCost);
 
 
  bool start = false;
@@ -351,30 +339,6 @@ void ProductionPlugin::abortProduction(ProductionType type, unsigned long int id
 	return;
  }
 
- unsigned long int mineralCost = 0, oilCost = 0;
-
- if (type == ProduceUnit) {
-	const UnitProperties* prop = player()->unitProperties(id);
-	if (!prop) {
-		boError() << k_lineinfo << "NULL unit properties (EVIL BUG)" << endl;
-		return;
-	}
-	mineralCost = prop->mineralCost();
-	oilCost = prop->oilCost();
- } else if (type == ProduceTech) {
-	const UpgradeProperties* prop = player()->speciesTheme()->technology(id);
-	if (!prop) {
-		boError() << k_lineinfo << "NULL technology properties (EVIL BUG)" << endl;
-		return;
-	}
-	mineralCost = prop->mineralCost();
-	oilCost = prop->oilCost();
- } else {
-	boError() << k_funcinfo << "Invalid productionType: " << (int)type << endl;
-	return;
- }
-
-
  QString eventTypeParameter = QString::number(id);
  QCString eventName;
  if (type == ProduceUnit) {
@@ -389,12 +353,6 @@ void ProductionPlugin::abortProduction(ProductionType type, unsigned long int id
 	boError() << k_funcinfo << "no such production available" << endl;
 	return;
  }
-
- // FIXME: money should be paid when the production is
- // actually started! (currently it is paid as soon as an
- // item is added to the queue)
- player()->setMinerals(player()->minerals() + mineralCost);
- player()->setOil(player()->oil() + oilCost);
 
  if (!eventName.isNull()) {
 	BoEvent* event = new BoEvent(eventName, QString::number(id), QString::number(unit()->id()));
@@ -418,6 +376,11 @@ bool ProductionPlugin::removeProduction(ProductionType type, unsigned long int i
 	if ((mProductions[i].first == type) && (mProductions[i].second == id)) {
 		boDebug() << k_funcinfo << "remove; type: " << type << ", id: " << id << endl;
 		mProductions.remove(mProductions.at(i));
+		// Return resources to the player
+		player()->setMinerals(player()->minerals() + mMineralsPaid);
+		player()->setOil(player()->oil() + mOilPaid);
+		mMineralsPaid = 0;
+		mOilPaid = 0;
 		if (i == 0) {
 			mProductionState = 0; // start next production (if any)
 		}
@@ -447,6 +410,8 @@ void ProductionPlugin::advance(unsigned int)
  if (id <= 0) { // no production
 	unit()->setWork(Unit::WorkIdle);
 	mProductionState = 0;
+	mMineralsPaid = 0;
+	mOilPaid = 0;
 	return;
  }
 
@@ -545,7 +510,30 @@ void ProductionPlugin::advance(unsigned int)
 				i18n("%1 could not be placed on the map - no free cell found. Place it manuall!").arg(prop->name()),
 				player());
 	} else {
-		mProductionState = mProductionState + 1;
+		// Make sure the player has enough resources
+		unsigned long int mineralCost = 0, oilCost = 0;
+		if (currentProductionType() == ProduceUnit) {
+			mineralCost = speciesTheme()->unitProperties(currentProductionId())->mineralCost();
+			oilCost = speciesTheme()->unitProperties(currentProductionId())->oilCost();
+		} else if (currentProductionType() == ProduceTech) {
+			mineralCost = speciesTheme()->technology(currentProductionId())->mineralCost();
+			oilCost = speciesTheme()->technology(currentProductionId())->oilCost();
+		}
+		float factor = (mProductionState + 1) / (float)productionTime;
+		if (mProductionState + 1 == productionTime) {
+			// Work around possible precision issues
+			factor = 1.0f;
+		}
+		// How much we have to pay this advance call?
+		unsigned long int payMinerals = (unsigned long int)(factor * mineralCost) - mMineralsPaid;
+		unsigned long int payOil = (unsigned long int)(factor * oilCost) - mOilPaid;
+		if (player()->useResources(payMinerals, payOil)) {
+			mProductionState = mProductionState + 1;
+			mMineralsPaid = mMineralsPaid + payMinerals;
+			mOilPaid = mOilPaid + payOil;
+		} else {
+			// TODO: maybe show a warning in the chat?
+		}
 	}
  }
 }

@@ -222,6 +222,8 @@ void Unit::initStatic()
  addPropertyId(IdResourceMineOil, QString::fromLatin1("ResourceMineOil"));
  addPropertyId(IdBombingDropDist, QString::fromLatin1("IdBombingDropDist"));
  addPropertyId(IdBombingLastDistFromDropPoint, QString::fromLatin1("IdBombingLastDistFromDropPoint"));
+ addPropertyId(IdMineralsPaid, QString::fromLatin1("IdMineralsPaid"));
+ addPropertyId(IdOilPaid, QString::fromLatin1("IdOilPaid"));
 
  mInitialized = true;
 }

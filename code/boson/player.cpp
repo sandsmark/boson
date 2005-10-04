@@ -556,6 +556,37 @@ void Player::setMinerals(unsigned long int m)
  d->mMinerals = m;
 }
 
+bool Player::useMinerals(unsigned long int amount)
+{
+ if (minerals() < amount) {
+	return false;
+ } else {
+	setMinerals(minerals() - amount);
+	return true;
+ }
+}
+
+bool Player::useOil(unsigned long int amount)
+{
+ if (oil() < amount) {
+	return false;
+ } else {
+	setOil(oil() - amount);
+	return true;
+ }
+}
+
+bool Player::useResources(unsigned long int mineralamount, unsigned long int oilamount)
+{
+ if (minerals() < mineralamount || oil() < oilamount) {
+	return false;
+ } else {
+	setMinerals(minerals() - mineralamount);
+	setOil(oil() - oilamount);
+	return true;
+ }
+}
+
 void Player::setAmmunition(const QString& type, unsigned long int a)
 {
  d->mAmmunition.insert(type, a);
