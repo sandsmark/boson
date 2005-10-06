@@ -320,6 +320,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntryBool("UseGroundShaders", false);
  addDynamicEntryBool("UseUnitShaders", false);
  addDynamicEntryString("ShaderSuffixes", "-med,-low");
+ addDynamicEntryInt("ShadowMapResolution", 2048);
 
  addDynamicEntry(new BoConfigUIntEntry(this, "GroundRenderer", 0)); // obsolete
  addDynamicEntry(new BoConfigUIntEntry(this, "DefaultLOD", 0));

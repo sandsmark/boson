@@ -738,17 +738,21 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
 void BosonCanvasRenderer::renderShadowMap(const BosonCanvas* canvas)
 {
 // Size of the shadow texture (more = better quality)
-#define SHADOWTEX_SIZE 2048
- if (!d->mShadowTarget) {
+ int shadowResolution = boConfig->intValue("ShadowMapResolution");
+ if (!d->mShadowTarget || d->mShadowTarget->width() != shadowResolution) {
+	// Cleanup
+	delete d->mShadowTexture;
+	delete d->mShadowColorTexture;
+	delete d->mShadowTarget;
 	// Init textures
-	d->mShadowTexture = new BoTexture(0, SHADOWTEX_SIZE, SHADOWTEX_SIZE,
+	d->mShadowTexture = new BoTexture(0, shadowResolution, shadowResolution,
 			BoTexture::FilterLinear | BoTexture::FormatDepth | BoTexture::DontCompress | BoTexture::ClampToEdge);
 	// TODO: try to remove this
-	d->mShadowColorTexture = new BoTexture(0, SHADOWTEX_SIZE, SHADOWTEX_SIZE,
+	d->mShadowColorTexture = new BoTexture(0, shadowResolution, shadowResolution,
 			BoTexture::FilterLinear | BoTexture::FormatRGBA | BoTexture::DontCompress | BoTexture::ClampToEdge);
 
 	// Init rendertarget
-	d->mShadowTarget = new BoRenderTarget(SHADOWTEX_SIZE, SHADOWTEX_SIZE,
+	d->mShadowTarget = new BoRenderTarget(shadowResolution, shadowResolution,
 			BoRenderTarget::RGBA | BoRenderTarget::Depth, d->mShadowColorTexture, d->mShadowTexture);
 	boDebug() << k_funcinfo << "Target type: " << d->mShadowTarget->type() << endl;
  }
@@ -818,7 +822,7 @@ void BosonCanvasRenderer::renderShadowMap(const BosonCanvas* canvas)
  glPushAttrib(GL_ALL_ATTRIB_BITS);
  d->mShadowTarget->enable();
  // Set up the viewport
- glViewport(0, 0, SHADOWTEX_SIZE, SHADOWTEX_SIZE);
+ glViewport(0, 0, shadowResolution, shadowResolution);
  // Clear framebuffer
  glClearDepth(1.0);
  glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -1003,7 +1007,6 @@ void BosonCanvasRenderer::renderShadowMap(const BosonCanvas* canvas)
  glPopAttrib();
 
  // Done!
-#undef SHADOWTEX_SIZE
 }
 
 void BosonCanvasRenderer::extractViewFrustum(BoVector3Float* points, const BoFrustum& viewFrustum)
