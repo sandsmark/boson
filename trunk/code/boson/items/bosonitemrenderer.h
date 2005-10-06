@@ -168,8 +168,7 @@ private:
 	float mCurrentFrame;
 
 	// one matrix per mesh ("node") per frame
-	QValueVector< QValueVector<BoMatrix*> > mItemMatrices;
-	QValueVector<BoMatrix*> mItemMatrixObjects;
+	QValueVector< QValueVector<const BoMatrix*> > mItemMatrices;
 };
 
 #endif

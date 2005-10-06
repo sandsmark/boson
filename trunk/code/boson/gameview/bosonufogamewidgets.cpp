@@ -374,7 +374,7 @@ void BosonUfoPlacementPreviewWidget::renderPlacementPreview()
 	BoFrame* f = d->mPlacementPreview.model()->lod(0)->frame(0);
 	BosonModel::startModelRendering();
 	d->mPlacementPreview.model()->prepareRendering();
-	QValueVector<BoMatrix*> itemMatrices(f->nodeCount());
+	QValueVector<const BoMatrix*> itemMatrices(f->nodeCount());
 	f->renderFrame(itemMatrices, &localPlayerIO()->teamColor());
 	BosonModel::stopModelRendering();
  } else if (groundPreview) {
