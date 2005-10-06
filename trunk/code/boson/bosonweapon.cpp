@@ -171,11 +171,11 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg)
   {
     boWarning() << k_funcinfo << "AutoUse=true doesn't make sense for mines and bombs" << endl;
   }
-  QString turretMesh = cfg->readEntry("TurretMesh");
-  if(!turretMesh.isEmpty())
+  QStringList turretMeshes = cfg->readListEntry("TurretMeshes");
+  if(!turretMeshes.isEmpty())
   {
     BosonWeaponTurretProperties* turret = new BosonWeaponTurretProperties();
-    turret->setMeshName(turretMesh);
+    turret->setMeshNames(turretMeshes);
     // TODO: read further settings, such as initial rotation, max/min rotation, ...
     mTurret = turret;
   }
@@ -710,22 +710,38 @@ bool BosonWeapon::dropBomb(const BoVector2Fixed& hvelocity)
 
 /*****  BosonWeaponTurretProperties  *****/
 
+class BosonWeaponTurretPropertiesPrivate
+{
+  public:
+    BosonWeaponTurretPropertiesPrivate()
+    {
+    }
+    QStringList meshNames;
+};
+
 BosonWeaponTurretProperties::BosonWeaponTurretProperties()
 {
+  d = new BosonWeaponTurretPropertiesPrivate;
 }
 
 BosonWeaponTurretProperties::~BosonWeaponTurretProperties()
 {
+  delete d;
 }
 
-void BosonWeaponTurretProperties::setMeshName(const QString& name)
+void BosonWeaponTurretProperties::setMeshNames(const QStringList& names)
 {
-  mMeshName = name;
+  d->meshNames = names;
 }
 
-const QString& BosonWeaponTurretProperties::meshName() const
+const QStringList& BosonWeaponTurretProperties::meshNames() const
 {
-  return mMeshName;
+  return d->meshNames;
+}
+
+bool BosonWeaponTurretProperties::isMeshPartOfTurret(const QString& meshName) const
+{
+  return meshNames().contains(meshName);
 }
 
 
@@ -753,14 +769,19 @@ void BosonWeaponTurret::pointTo(const BoVector3Fixed& direction)
   mMeshMatrix->setLookAtRotation(BoVector3Float(0, 0, 0), dir, up);
 }
 
-const QString& BosonWeaponTurret::meshName() const
+const QStringList& BosonWeaponTurret::meshNames() const
 {
-  return mProperties->meshName();
+  return mProperties->meshNames();
 }
 
 void BosonWeaponTurret::setMeshMatrix(BoMatrix* matrix)
 {
   mMeshMatrix = matrix;
+}
+
+bool BosonWeaponTurret::isMeshPartOfTurret(const QString& meshName) const
+{
+  return mProperties->isMeshPartOfTurret(meshName);
 }
 
 
