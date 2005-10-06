@@ -113,6 +113,9 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  d->mName = conf.readEntry("Name", i18n("Unknown"));
  d->mDescription = conf.readEntry("Description", QString::null);
  insertULongBaseValue(conf.readUnsignedLongNumEntry("Health", 100), "Health", "MaxValue");
+ if (ulongBaseValue("Health") == 0) {
+	boError() << k_funcinfo << "health of unit " << mTypeId << " (" << d->mName << ") is 0" << endl;
+ }
  insertULongBaseValue(conf.readUnsignedLongNumEntry("SightRange", 5), "SightRange", "MaxValue");
  // We convert this from seconds to advance calls
  insertULongBaseValue((unsigned long int)(conf.readDoubleNumEntry("ProductionTime", 5) * 20.0f), "ProductionTime", "MaxValue");
