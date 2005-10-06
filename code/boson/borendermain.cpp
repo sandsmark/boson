@@ -1217,7 +1217,7 @@ void ModelDisplay::renderModel(int mode)
 		*g_mat = BoMatrix();
 		g_mat->rotate(g_rot, 0.0, 0.0, 1.0);
 
-		QValueVector<BoMatrix*> itemMatrices(f->nodeCount());
+		QValueVector<const BoMatrix*> itemMatrices(f->nodeCount());
 		for (unsigned int i = 0; i < f->nodeCount(); i++) {
 			BoMesh* mesh = f->mesh(i);
 			if (mesh->name() != "turret" && mesh->name() != "gun") {

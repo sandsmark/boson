@@ -754,7 +754,6 @@ bool BosonWeaponTurretProperties::isMeshPartOfTurret(const QString& meshName) co
 BosonWeaponTurret::BosonWeaponTurret(const BosonWeaponTurretProperties* p)
 {
   mProperties = p;
-  mMeshMatrix = 0;
 }
 
 BosonWeaponTurret::~BosonWeaponTurret()
@@ -763,31 +762,22 @@ BosonWeaponTurret::~BosonWeaponTurret()
 
 void BosonWeaponTurret::pointTo(const BoVector3Fixed& direction)
 {
-  if (!mMeshMatrix)
-  {
-    return;
-  }
   // AB: atm we support rotations around the z axis only
   BoVector3Float dir(direction[0], direction[1], 0.0f);
   BoVector3Float up(0, 0, 1);
   BoMatrix m;
   m.setLookAtRotation(BoVector3Float(0, 0, 0), dir, up);
 
-  *mMeshMatrix = BoMatrix();
+  mMeshMatrix = BoMatrix();
 
   // make the matrix look down the (positive) y axis, with up vector at (0,0,1)
-  mMeshMatrix->rotate(90.0f, 1.0f, 0.0f, 0.0f);
-  mMeshMatrix->multiply(&m);
+  mMeshMatrix.rotate(90.0f, 1.0f, 0.0f, 0.0f);
+  mMeshMatrix.multiply(&m);
 }
 
 const QStringList& BosonWeaponTurret::meshNames() const
 {
   return mProperties->meshNames();
-}
-
-void BosonWeaponTurret::setMeshMatrix(BoMatrix* matrix)
-{
-  mMeshMatrix = matrix;
 }
 
 bool BosonWeaponTurret::isMeshPartOfTurret(const QString& meshName) const

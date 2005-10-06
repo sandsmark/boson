@@ -483,16 +483,15 @@ class BosonWeaponTurret
 
     const QStringList& meshNames() const;
 
-    /**
-     * Set the matrix that is applied before the mesh of this weapon turret (see @ref
-     * setMeshName) is rendered. This matrix should be used to actually point
-     * the turret into the correct direction.
-     *
-     * Ownership of this matrix is NOT taken, it is NOT deleted on destruction.
-     **/
     void setMeshMatrix(BoMatrix* matrix);
 
-    const BoMatrix* meshMatrix() const
+    /**
+     * @return The matrix that describes how the corresponding meshes of this
+     * turret should be rotated. Note that this matrix depends on the gameengine
+     * only, i.e. it can not only be used for rendering, but also for game
+     * relevant tasks.
+     **/
+    const BoMatrix& meshMatrix() const
     {
       return mMeshMatrix;
     }
@@ -513,7 +512,7 @@ class BosonWeaponTurret
 
   private:
     const BosonWeaponTurretProperties* mProperties;
-    BoMatrix* mMeshMatrix;
+    BoMatrix mMeshMatrix;
 };
 
 #endif // BOSONWEAPON_H

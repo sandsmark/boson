@@ -183,7 +183,7 @@ BoMatrix* BoFrame::matrix(int index) const
  return mMatrices[index];
 }
 
-void BoFrame::renderFrame(const QValueVector<BoMatrix*>& itemMatrices,const QColor* teamColor, bool transparentmeshes, RenderFlags flags, int mode)
+void BoFrame::renderFrame(const QValueVector<const BoMatrix*>& itemMatrices,const QColor* teamColor, bool transparentmeshes, RenderFlags flags, int mode)
 {
  if (itemMatrices.count() != mNodeCount) {
 	boError() << k_funcinfo << "must have exactly one item matrix per node" << endl;

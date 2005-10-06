@@ -158,10 +158,6 @@ BosonItemModelRenderer::BosonItemModelRenderer(BosonItem* item)
 
 BosonItemModelRenderer::~BosonItemModelRenderer()
 {
- for (unsigned int i = 0; i < mItemMatrixObjects.count(); i++) {
-	delete mItemMatrixObjects[i];
- }
- mItemMatrixObjects.clear();
  mItemMatrices.clear();
 }
 
@@ -204,9 +200,7 @@ bool BosonItemModelRenderer::setModel(BosonModel* model)
 		if (!t) {
 			continue;
 		}
-		BoMatrix* matrix = new BoMatrix();
-		t->setMeshMatrix(matrix);
-		mItemMatrixObjects.append(matrix);
+		const BoMatrix* matrix = &t->meshMatrix();
 		for (unsigned int i = 0; i < mItemMatrices.count(); i++) {
 			BoFrame* frame = lod->frame(i);
 			if (!frame) {
