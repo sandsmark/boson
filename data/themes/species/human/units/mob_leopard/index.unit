@@ -68,3 +68,4 @@ Speed=8
 TakeTargetVeloIntoAccount=true
 Type=Rocket
 Model=bullet
+TurretMeshes=Gun,Turret,MachinegunBarrel,Machinegun,MachineGunHolder,MachineGunRing,TurretTower,AntennaHolder,Antenna,TurretLaserSight,TurretExtension
