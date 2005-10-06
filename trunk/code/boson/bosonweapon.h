@@ -36,6 +36,9 @@ class QString;
 template<class T> class QIntDict;
 template<class T1, class T2> class QMap;
 
+class BosonWeaponTurretProperties;
+class BosonWeaponTurret;
+
 /**
  * @short This class holds properties for @ref BosonWeapon
  *
@@ -197,6 +200,11 @@ class BosonWeaponProperties : public PluginProperties
 
     const QMap<int, QString>* actionStrings() const  { return &mActionStrings; }
 
+    const BosonWeaponTurretProperties* turret() const
+    {
+      return mTurret;
+    }
+
 
 
   protected:
@@ -251,6 +259,7 @@ class BosonWeaponProperties : public PluginProperties
     bofixed mTurningSpeed;
     bofixed mStartAngle;
     QString mAmmunitionType;
+    const BosonWeaponTurretProperties* mTurret;
 };
 
 
@@ -394,6 +403,11 @@ class BosonWeapon : public UnitPlugin
       return mProp->ammunitionType();
     }
 
+    BosonWeaponTurret* turret() const
+    {
+      return mTurret;
+    }
+
 
   protected:
     void shoot(const BoVector3Fixed& pos, const BoVector3Fixed& target);
@@ -414,8 +428,62 @@ class BosonWeapon : public UnitPlugin
     BoUpgradeableProperty<unsigned long int> mReloadingTime;
     BoUpgradeableProperty<bofixed> mSpeed;
     BoUpgradeableProperty<unsigned long int> mRequiredAmmunition;
+
+    BosonWeaponTurret* mTurret;
 };
 
+
+class BosonWeaponTurretProperties
+{
+  public:
+    BosonWeaponTurretProperties();
+    ~BosonWeaponTurretProperties();
+
+    /**
+     * Set the @p name of the mesh that represents the turret.
+     **/
+    void setMeshName(const QString& name);
+    const QString& meshName() const;
+
+  private:
+    QString mMeshName;
+};
+
+class BosonWeaponTurret
+{
+  public:
+    BosonWeaponTurret(const BosonWeaponTurretProperties* prop);
+    ~BosonWeaponTurret();
+
+    const QString& meshName() const;
+
+    /**
+     * Set the matrix that is applied before the mesh of this weapon turret (see @ref
+     * setMeshName) is rendered. This matrix should be used to actually point
+     * the turret into the correct direction.
+     *
+     * Ownership of this matrix is NOT taken, it is NOT deleted on destruction.
+     **/
+    void setMeshMatrix(BoMatrix* matrix);
+
+    const BoMatrix* meshMatrix() const
+    {
+      return mMeshMatrix;
+    }
+
+
+    /**
+     * Applies a rotation to the @ref meshMatrix so that the turret points into
+     * the direction contained in @p direction. This method assumes that @p
+     * direction is actually a direction, i.e. the turret is at position
+     * (0,0,0).
+     **/
+    void pointTo(const BoVector3Fixed& direction);
+
+  private:
+    const BosonWeaponTurretProperties* mProperties;
+    BoMatrix* mMeshMatrix;
+};
 
 #endif // BOSONWEAPON_H
 

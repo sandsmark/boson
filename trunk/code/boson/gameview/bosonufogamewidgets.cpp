@@ -45,6 +45,7 @@
 
 #include <qtimer.h>
 #include <qvaluelist.h>
+#include <qvaluevector.h>
 
 
 class PlacementPreview
@@ -373,7 +374,8 @@ void BosonUfoPlacementPreviewWidget::renderPlacementPreview()
 	BoFrame* f = d->mPlacementPreview.model()->lod(0)->frame(0);
 	BosonModel::startModelRendering();
 	d->mPlacementPreview.model()->prepareRendering();
-	f->renderFrame(&localPlayerIO()->teamColor());
+	QValueVector<BoMatrix*> itemMatrices(f->nodeCount());
+	f->renderFrame(itemMatrices, &localPlayerIO()->teamColor());
 	BosonModel::stopModelRendering();
  } else if (groundPreview) {
 #warning TODO: cell placement preview

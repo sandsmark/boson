@@ -20,9 +20,13 @@
 
 #include "../../bomemory/bodummymemory.h"
 #include "../bosonmodel.h"
+#include "../bomesh.h"
 #include "../bo3dtools.h"
 #include "../bosonconfig.h"
 #include "../boson.h"
+#include "../unit.h"
+#include "../bosonweapon.h"
+#include "../rtti.h"
 #include "bosonitem.h"
 #include "bodebug.h"
 
@@ -154,6 +158,11 @@ BosonItemModelRenderer::BosonItemModelRenderer(BosonItem* item)
 
 BosonItemModelRenderer::~BosonItemModelRenderer()
 {
+ for (unsigned int i = 0; i < mItemMatrixObjects.count(); i++) {
+	delete mItemMatrixObjects[i];
+ }
+ mItemMatrixObjects.clear();
+ mItemMatrices.clear();
 }
 
 bool BosonItemModelRenderer::setModel(BosonModel* model)
@@ -165,6 +174,61 @@ bool BosonItemModelRenderer::setModel(BosonModel* model)
  }
 
  setBoundingSphereRadius(model->boundingSphereRadius());
+
+ BoLOD* lod = mModel->lod(0);
+ if (!lod) {
+	BO_NULL_ERROR(lod);
+	return false;
+ }
+ mItemMatrices.resize(lod->frameCount());
+ for (unsigned int i = 0; i < mItemMatrices.count(); i++) {
+	BoFrame* frame = lod->frame(i);
+	if (!frame) {
+		BO_NULL_ERROR(frame);
+		return false;
+	}
+	mItemMatrices[i].resize(frame->nodeCount());
+	for (unsigned int j = 0; j < mItemMatrices[i].count(); j++) {
+		(mItemMatrices[i])[j] = 0;
+	}
+ }
+
+ if (::RTTI::isUnit(item()->rtti())) {
+	Unit* u = (Unit*)item();
+	int id = 0;
+	while (u->weapon(id)) {
+		BosonWeapon* w = u->weapon(id);
+		id++;
+
+		BosonWeaponTurret* t = w->turret();
+		if (!t) {
+			continue;
+		}
+		QString meshName = t->meshName();
+		if (meshName.isEmpty()) {
+			continue;
+		}
+		BoMatrix* matrix = new BoMatrix();
+		mItemMatrixObjects.append(matrix);
+		for (unsigned int i = 0; i < mItemMatrices.count(); i++) {
+			BoFrame* frame = lod->frame(i);
+			if (!frame) {
+				BO_NULL_ERROR(frame);
+				return false;
+			}
+			for (unsigned int j = 0; j < mItemMatrices[i].count(); j++) {
+				BoMesh* mesh = frame->mesh(j);
+				if (!mesh) {
+					BO_NULL_ERROR(mesh);
+					return false;
+				}
+				if (mesh->name() == meshName) {
+					(mItemMatrices[i])[j] = matrix;
+				}
+			}
+		}
+	}
+ }
 
  return true;
 }
@@ -233,7 +297,11 @@ void BosonItemModelRenderer::renderItem(unsigned int lod, bool transparentmeshes
  BO_CHECK_NULL_RET(l);
  BoFrame* frame = l->frame((unsigned int)mCurrentFrame);
  BO_CHECK_NULL_RET(frame);
- frame->renderFrame(teamColor(), transparentmeshes, flags);
+ if ((unsigned int)mCurrentFrame >= mItemMatrices.count()) {
+	boError() << k_funcinfo << "frame " << (unsigned int)mCurrentFrame << " is out of range for item matrices" << endl;
+	return;
+ }
+ frame->renderFrame(mItemMatrices[(unsigned int)mCurrentFrame], teamColor(), transparentmeshes, flags);
 }
 
 unsigned int BosonItemModelRenderer::lodCount() const
