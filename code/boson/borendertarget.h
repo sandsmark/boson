@@ -65,6 +65,8 @@ class BoRenderTarget
     bool valid() const  { return mValid; }
     Type type() const  { return mType; }
     int flags() const  { return mFlags; }
+    int width() const  { return mWidth; }
+    int height() const  { return mHeight; }
 
 
   protected:
