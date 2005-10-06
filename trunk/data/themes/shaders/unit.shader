@@ -24,8 +24,10 @@ void main()
   vec4 eyevertex = gl_ModelViewMatrix * gl_Vertex;
   vertex = eucleidian(eyevertex);
   tolight = normalize(eucleidian(gl_ModelViewMatrix * vec4(lightPos, 1.0)) - vertex);
+#ifdef USE_SPECULAR
   // Camera is at (0; 0; 0) in eye space, so this is the direction to it.
   tocamera = normalize(vec3(-vertex));
+#endif
 
 
   gl_TexCoord[1].s = dot(eyevertex, gl_EyePlaneS[3]);
@@ -55,33 +57,37 @@ varying vec3 tolight;
 varying vec3 tocamera;
 varying vec3 color;
 
+float specularStrength(vec3 lightdir, vec3 cameradir, vec3 normal)
+{
+  // Calculate specular light strength
+  vec3 halfv = normalize(lightdir + cameradir);
+#ifdef USE_MATERIALS
+  return clamp(pow(dot(halfv, normal), gl_FrontMaterial.shininess), 0.0, 1.0);
+#else
+  return clamp(pow(dot(halfv, normal), 64.0), 0.0, 1.0);
+#endif
+}
+
 void main()
 {
   // Normalize the vectors
   vec3 mynormal = normalize(normal);
   // We could normalize those as well on faster cards
   vec3 lightdir = tolight;
-  vec3 cameradir = tocamera;
 
   // Diffuse light strength
   float NdotL = max(0.0, dot(mynormal, lightdir));
 
-#ifdef MAKE_IT_FAST
+#ifndef USE_SPECULAR
   const float specular = 0.0;
 #else
-  // Calculate specular light strength
-  vec3 halfv = normalize(lightdir + cameradir);
-#ifdef USE_MATERIALS
-  float specular = clamp(pow(dot(halfv, mynormal), gl_FrontMaterial.shininess), 0.0, 1.0);
-#else
-  float specular = clamp(pow(dot(halfv, mynormal), 64.0), 0.0, 1.0);
-#endif
+  const float specular = specularStrength(lightdir, tocamera, mynormal);
 #endif
   // Get diffuse texture color at this point
   vec4 texcolor = texture2D(texture_0, gl_TexCoord[0].xy);
 
   // Get shadow strength at this point
-#ifdef MAKE_IT_FAST
+#ifndef USE_PCF_SHADOWS
   float shadow = shadow2DProj(texture_3, gl_TexCoord[1]).r;
 #else
   // 3-sample PCF filtering
@@ -96,11 +102,11 @@ void main()
 
   // Calculate final color of the surface
 #ifdef USE_MATERIALS
-  vec3 litcolor = (gl_FrontMaterial.ambient.rgb * gl_LightSource[0].ambient.rgb +
+  vec3 litcolor = (gl_FrontMaterial.ambient.rgb * gl_LightSource[0].ambient.rgb * color +
       shadow * NdotL * gl_FrontMaterial.diffuse.rgb * gl_LightSource[0].diffuse.rgb) * texcolor.rgb * color +
       shadow * specular * gl_FrontMaterial.specular.rgb * gl_LightSource[0].specular.rgb;
 #else
-  vec3 litcolor = (vec3(0.8, 0.8, 0.8) * gl_LightSource[0].ambient.rgb +
+  vec3 litcolor = (vec3(0.8, 0.8, 0.8) * gl_LightSource[0].ambient.rgb * color +
       shadow * NdotL * vec3(0.8, 0.8, 0.8) * gl_LightSource[0].diffuse.rgb) * texcolor.rgb * color +
       shadow * specular * vec3(0.8, 0.8, 0.8) * gl_LightSource[0].specular.rgb;
 #endif
