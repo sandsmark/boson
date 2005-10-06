@@ -36,6 +36,7 @@
 #include "info/boinfo.h"
 #include "botexture.h"
 #include "bosongroundthemedata.h"
+#include "boshader.h"
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -526,9 +527,16 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  hbox = new QHBox(mAdvanced);
  (void)new QLabel(i18n("Ground render:"), hbox);
  mGroundRenderer = new QComboBox(hbox);
- mUseShaders = new QCheckBox(i18n("Gimme all the eyecandy!"), mAdvanced);
+ mUseShaders = new QCheckBox(i18n("Use shaders (and shadows)"), mAdvanced);
  mUseShaders->setEnabled(BosonGroundThemeData::shadersSupported());
-
+ hbox = new QHBox(mAdvanced);
+ (void)new QLabel(i18n("Shader quality:"), hbox);
+ mShaderQuality = new QComboBox(hbox);
+ mShaderQuality->setEnabled(BosonGroundThemeData::shadersSupported());
+ mShaderQuality->insertItem(i18n("High"));
+ mShaderQuality->insertItem(i18n("Medium"));
+ mShaderQuality->insertItem(i18n("Low"));
+ mShaderQuality->setCurrentItem(1);
  mUseLOD = new QCheckBox(i18n("Use level of detail"), mAdvanced);
  hbox = new QHBox(mAdvanced);
  (void)new QLabel(i18n("Default level of detail:"), hbox);
@@ -599,14 +607,17 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		setTextureFilter(boConfig->intDefaultValue("TextureFilter"));
 		mUseCompressedTextures->setChecked(boConfig->boolDefaultValue("TextureCompression"));
 		mUseColoredMipmaps->setChecked(false);
+		 setAlignSelectionBoxes(boConfig->boolDefaultValue("AlignSelectionBoxes"));
 		mUseLight->setChecked(boConfig->boolDefaultValue("UseLight"));
 		mUseMaterials->setChecked(boConfig->boolDefaultValue("UseMaterials"));
 		setCurrentGroundRenderer(boConfig->stringDefaultValue("GroundRendererClass"));
 		mUseShaders->setChecked(false);
+		mShaderQuality->setCurrentItem(shaderSuffixesToItem("-med"));
 		setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
-		setUseLOD(true);
+		setUseLOD(boConfig->boolDefaultValue("UseLOD"));
 		setDefaultLOD(0);
 		mSmoothShading->setChecked(true);
+		mResolution->setCurrentItem(0);
 		break;
 	case BestQuality:
 		// we mostly use defaults here.
@@ -618,6 +629,7 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mUseMaterials->setChecked(boConfig->boolDefaultValue("UseMaterials"));
 		setCurrentGroundRenderer(boConfig->stringDefaultValue("GroundRendererClass"));
 		mUseShaders->setChecked(true);
+		mShaderQuality->setCurrentItem(shaderSuffixesToItem("-hi"));
 		setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
 		setUseLOD(true);
 		setDefaultLOD(0);
@@ -632,6 +644,7 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mUseMaterials->setChecked(false);
 		setCurrentGroundRenderer("BoFastGroundRenderer");
 		mUseShaders->setChecked(false);
+		mShaderQuality->setCurrentItem(shaderSuffixesToItem("-low"));
 		setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
 		setUseLOD(true);
 		setDefaultLOD(5000);
@@ -662,6 +675,35 @@ void OpenGLOptions::slotChangeFont()
 	mFont->setText(mFontInfo->guiName());
  }
 #endif
+}
+
+QString OpenGLOptions::shaderSuffixes()
+{
+ QString suffixes;
+ if (mShaderQuality->currentItem() <= 0) {
+	suffixes += "-hi,";
+ }
+ if (mShaderQuality->currentItem() <= 1) {
+	suffixes += "-med,";
+ }
+ if (mShaderQuality->currentItem() <= 2) {
+	suffixes += "-low,";
+ }
+
+ return suffixes;
+}
+
+int OpenGLOptions::shaderSuffixesToItem(const QString& suffixes)
+{
+ if (suffixes.contains("hi")) {
+	return 0;
+ } else if (suffixes.contains("med")) {
+	return 1;
+ } else if (suffixes.contains("low")) {
+	return 2;
+ } else {
+	return 1;  // Fallback to medium
+ }
 }
 
 void OpenGLOptions::apply()
@@ -765,6 +807,11 @@ void OpenGLOptions::apply()
  boConfig->setBoolValue("UseUnitShaders", mUseShaders->isChecked());
  BosonGroundThemeData::setUseGroundShaders(mUseShaders->isChecked());
 
+ if (shaderSuffixes() != boConfig->stringValue("ShaderSuffixes")) {
+	boConfig->setStringValue("ShaderSuffixes", shaderSuffixes());
+	boShaderManager->reloadShaders();
+ }
+
 
  emit signalOpenGLSettingsUpdated();
 
@@ -775,21 +822,6 @@ void OpenGLOptions::setDefaults()
 {
  mRenderingSpeed->setCurrentItem(0);
  slotRenderingSpeedChanged(0);
-
- setUpdateInterval(boConfig->uintDefaultValue("GLUpdateInterval"));
- setTextureFilter(boConfig->intDefaultValue("TextureFilter"));
- mUseCompressedTextures->setChecked(boConfig->boolDefaultValue("TextureCompression"));
- mUseColoredMipmaps->setChecked(false);
- setAlignSelectionBoxes(boConfig->boolDefaultValue("AlignSelectionBoxes"));
- mUseLight->setChecked(boConfig->boolDefaultValue("UseLight"));
- mUseMaterials->setChecked(boConfig->boolDefaultValue("UseMaterials"));
- setCurrentGroundRenderer(boConfig->stringDefaultValue("GroundRendererClass"));
- mUseShaders->setChecked(false);
- setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
- setUseLOD(boConfig->boolDefaultValue("UseLOD"));
- setDefaultLOD(0);
- mSmoothShading->setChecked(true);
- mResolution->setCurrentItem(0);
 }
 
 void OpenGLOptions::load()
@@ -821,6 +853,7 @@ void OpenGLOptions::load()
  setCurrentMeshRenderer(BoMeshRendererManager::manager()->currentRendererName());
  setCurrentGroundRenderer(BoGroundRendererManager::manager()->currentRendererName());
  mUseShaders->setChecked(boConfig->boolValue("UseGroundShaders") && boConfig->boolValue("UseUnitShaders"));
+ mShaderQuality->setCurrentItem(shaderSuffixesToItem(boConfig->stringValue("ShaderSuffixes")));
 }
 
 void OpenGLOptions::setUpdateInterval(int ms)

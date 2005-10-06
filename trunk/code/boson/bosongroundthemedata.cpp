@@ -233,11 +233,10 @@ void BosonGroundThemeData::loadShaders(const QString& dirName, BosonGroundTypeDa
  }
 
  // Load shader
- QString shaderFile = dirName + "/" + ground->groundType->shaderFile;
- ground->shader = d->mShaders[shaderFile];
+ ground->shader = d->mShaders[ground->groundType->shaderFile];
  if (!ground->shader) {
-	ground->shader = new BoShader(shaderFile);
-	d->mShaders.insert(shaderFile, ground->shader);
+	ground->shader = new BoShader(ground->groundType->shaderFile);
+	d->mShaders.insert(ground->groundType->shaderFile, ground->shader);
  }
 }
 

@@ -23,10 +23,116 @@
 #include "bogl.h"
 #include "bodebug.h"
 #include "bolight.h"
+#include "bosonconfig.h"
 
 #include <qstring.h>
 #include <qdict.h>
 #include <qfile.h>
+#include <qregexp.h>
+
+#include <kglobal.h>
+#include <kstandarddirs.h>
+
+
+
+BoShaderManager* BoShaderManager::mShaderManager = 0;
+
+BoShaderManager* BoShaderManager::shaderManager()
+{
+  if(!mShaderManager)
+  {
+    mShaderManager = new BoShaderManager();
+  }
+
+  return mShaderManager;
+}
+
+BoShaderManager::BoShaderManager()
+{
+  mKnownShaderFiles.setAutoDelete(true);
+  shaderSuffixesChanged();
+}
+
+BoShaderManager::~BoShaderManager()
+{
+  mKnownShaderFiles.clear();
+}
+
+void BoShaderManager::reloadShaders()
+{
+  shaderSuffixesChanged();
+  // Reload all shaders
+  QPtrListIterator<BoShader> it(mShaders);
+  while(it.current())
+  {
+    it.current()->reload();
+    ++it;
+  }
+}
+
+const QString& BoShaderManager::getFullFilename(const QString& shadername)
+{
+  // Check if we have a cached filename
+  QString* filename = mKnownShaderFiles.find(shadername);
+  if(!filename)
+  {
+    // Find the shader file
+    filename = new QString;
+    // Try to use the filename directly at first
+    QString path = KGlobal::dirs()->findResourceDir("data", "boson/themes/shaders/" + shadername);
+    if(!path.isNull())
+    {
+      // Use this file
+      *filename = path + "boson/themes/shaders/" + shadername;
+      // FIXME: code duplication
+      // Add the filename to the cache
+      mKnownShaderFiles.insert(shadername, filename);
+      return *filename;
+    }
+    // If direct filename didn't work, try with suffixes
+    for(QStringList::Iterator it = mSuffixList.begin(); it != mSuffixList.end(); ++it)
+    {
+      QString path = KGlobal::dirs()->findResourceDir("data", "boson/themes/shaders/" + shadername + *it + ".shader");
+      if(!path.isNull())
+      {
+        // Use this file
+        *filename = path + "boson/themes/shaders/" + shadername + *it + ".shader";
+        break;
+      }
+    }
+    // Make sure something was found
+    if(filename->isNull())
+    {
+      boError(130) << k_funcinfo << "Couldn't find any matching files for shader '" << shadername << "'" << endl;
+      delete filename;
+      return QString::null;
+    }
+    // Add the filename to the cache
+    mKnownShaderFiles.insert(shadername, filename);
+  }
+  return *filename;
+}
+
+void BoShaderManager::shaderSuffixesChanged()
+{
+  // Clear old cached filenames
+  mKnownShaderFiles.clear();
+  // Create new suffixes list
+  boDebug(130) << k_funcinfo << "suffixes: " << boConfig->stringValue("ShaderSuffixes") << endl;
+  mSuffixList = QStringList::split(QChar(','), boConfig->stringValue("ShaderSuffixes"));
+  mSuffixList.append("");
+}
+
+void BoShaderManager::registerShader(BoShader* shader)
+{
+  mShaders.append(shader);
+}
+
+void BoShaderManager::unregisterShader(BoShader* shader)
+{
+  mShaders.remove(shader);
+}
+
 
 
 BoShader* BoShader::mCurrentShader = 0;
@@ -43,69 +149,23 @@ BoShader::BoShader(const QString& vertex, const QString& fragment)
   mProgram = 0;
   mValid = false;
 
-  load(vertex, fragment);
+  if(load(vertex, fragment))
+  {
+    boShaderManager->registerShader(this);
+  }
 }
 
-BoShader::BoShader(const QString& file)
+BoShader::BoShader(const QString& name)
 {
   mUniformLocations = 0;
   mProgram = 0;
   mValid = false;
+  mName = name;
 
-  QFile f(file);
-  if(!f.open(IO_ReadOnly))
+  if(load(name))
   {
-    boError(130) << k_funcinfo << "Couldn't open " << file << " for reading!" << endl;
-    return;
+    boShaderManager->registerShader(this);
   }
-
-  QString vertexsrc;
-  QString fragmentsrc;
-
-#define READ_NOTHING 0
-#define READ_VERTEXSRC 1
-#define READ_FRAGMENTSRC 2
-
-  // What we're reading atm
-  int reading = READ_NOTHING;
-
-  // Read through the file
-  while(!f.atEnd())
-  {
-    // Read next line into buffer
-    QString buffer;
-    f.readLine(buffer, 4096);
-    // Check for source markers
-    if(buffer.startsWith("<vertex>"))
-    {
-      reading = READ_VERTEXSRC;
-      continue;
-    }
-    else if(buffer.startsWith("<fragment>"))
-    {
-      reading = READ_FRAGMENTSRC;
-      continue;
-    }
-
-    // Append line to source
-    if(reading == READ_VERTEXSRC)
-    {
-      vertexsrc += buffer;
-    }
-    else if(reading == READ_FRAGMENTSRC)
-    {
-      fragmentsrc += buffer;
-    }
-  }
-
-  //boDebug() << k_funcinfo << "Loaded vertex shader source : \n'" << vertexsrc << "'" << endl;
-  //boDebug() << k_funcinfo << "Loaded fragment shader source : \n'" << fragmentsrc << "'" << endl;
-
-#undef READ_NOTHING
-#undef READ_VERTEXSRC
-#undef READ_FRAGMENTSRC
-
-  load(vertexsrc, fragmentsrc);
 }
 
 BoShader::~BoShader()
@@ -126,17 +186,41 @@ BoShader::~BoShader()
   }
 }
 
-void BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
+bool BoShader::load(const QString& name)
+{
+  QString filename = boShaderManager->getFullFilename(name);
+  QFile f(filename);
+  if(!f.open(IO_ReadOnly))
+  {
+    boError(130) << k_funcinfo << "Couldn't open " << filename << " for reading!" << endl;
+    return false;
+  }
+
+  QString contents(f.readAll());
+
+  QString vertexsrc = preprocessSource(contents, VertexOnly);
+  QString fragmentsrc = preprocessSource(contents, FragmentOnly);
+
+
+  if(!load(vertexsrc, fragmentsrc))
+  {
+    boError() << k_funcinfo << "Couldn't load shader '" << name << "' from '" << filename << "'" << endl;
+    return false;
+  }
+  return true;
+}
+
+bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
 {
   if(fragmentsrc.isEmpty() && vertexsrc.isEmpty())
   {
     boError(130) << k_funcinfo << "No shader sources given!" << endl;
-    return;
+    return false;
   }
   if(!boglCreateProgram)
   {
     boError(130) << k_funcinfo << "Shaders aren't supported!" << endl;
-    return;
+    return false;
   }
 
   // Create program object
@@ -165,7 +249,7 @@ void BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
     if(!compiled)
     {
       boError(130) << k_funcinfo << "Couldn't compile vertex shader!" << endl << log;
-      return;
+      return false;
     }
     else if(logsize > 0)
     {
@@ -195,7 +279,7 @@ void BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
     if(!compiled)
     {
       boError(130) << k_funcinfo << "Couldn't compile fragment shader!" << endl << log;
-      return;
+      return false;
     }
     else if(logsize > 0)
     {
@@ -217,7 +301,7 @@ void BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
   if(!linked)
   {
     boError(130) << k_funcinfo << "Couldn't link the program!" << endl << log;
-    return;
+    return false;
   }
   else if(logsize > 0)
   {
@@ -237,6 +321,101 @@ void BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
   unbind();
 
   mValid = true;
+
+  return true;
+}
+
+QString BoShader::preprocessSource(const QString& source, FilterType filter)
+{
+  // Whether to ignore what is being read (until next <...> marker)
+  bool ignore = false;
+
+  // Read through the string, line by line
+  QStringList lines = QStringList::split(QChar('\n'), source, true);
+  QString result;
+
+  for(QStringList::Iterator it = lines.begin(); it != lines.end(); ++it)
+  {
+    QString line = *it;
+    // Check for source markers
+    if(line.startsWith("<vertex>"))
+    {
+      ignore = (filter == FragmentOnly);
+      continue;
+    }
+    else if(line.startsWith("<fragment>"))
+    {
+      ignore = (filter == VertexOnly);
+      continue;
+    }
+    else if(line.startsWith("<all>"))
+    {
+      ignore = false;
+      continue;
+    }
+    // Throw away ignored lines
+    if(ignore)
+    {
+      continue;
+    }
+
+    // Check for #include directive
+    if(line.startsWith("#include"))
+    {
+      // Find out the name of the #included shader
+      QRegExp namefinder("#include [<\"]([a-zA-Z0-9\\-_\\.]*)[>\"]");
+      namefinder.search(line);
+      QString includedname = namefinder.cap(1);
+      boDebug(130) << k_funcinfo << "Including " << includedname << endl;
+      // Get the full filename
+      QString filename = boShaderManager->getFullFilename(includedname);
+      QFile f(filename);
+      if(!f.open(IO_ReadOnly))
+      {
+        boError(130) << k_funcinfo << "Couldn't open " << filename << " for reading!" << endl;
+        // Keep going
+        continue;
+      }
+      // Include the file
+      result += preprocessSource(QString(f.readAll()), filter);
+    }
+    else
+    {
+      result += line;
+    }
+    result += '\n';
+  }
+
+  //boDebug() << k_funcinfo << "Loaded vertex shader source : \n'" << vertexsrc << "'" << endl;
+  //boDebug() << k_funcinfo << "Loaded fragment shader source : \n'" << fragmentsrc << "'" << endl;
+  return result;
+}
+
+void BoShader::reload()
+{
+  if(mName.isEmpty())
+  {
+    // Custom shaders can't be reloaded
+    return;
+  }
+
+  // Cleanup
+  if(mUniformLocations)
+  {
+    mUniformLocations->clear();
+    delete mUniformLocations;
+  }
+  if(mProgram)
+  {
+    if(mCurrentShader == this)
+    {
+      unbind();
+    }
+    boglDeleteProgram(mProgram);
+  }
+
+  // Reload
+  load(mName);
 }
 
 int BoShader::uniformLocation(const QString& name)

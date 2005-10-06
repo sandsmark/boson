@@ -221,7 +221,7 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
 	ground->bumpScale = (float)(conf.readDoubleNumEntry("BumpScale", 0.04f));
 	ground->bumpBias = (float)(conf.readDoubleNumEntry("BumpBias", 0.5f)) * ground->bumpScale;
 	ground->textureSize = (float)(conf.readDoubleNumEntry("TextureSize", 5.0f));
-	ground->shaderFile = conf.readEntry("Shader", "default.shader");
+	ground->shaderFile = conf.readEntry("Shader", "ground-default");
 	BoVector3Float color = BosonConfig::readBoVector3FloatEntry(&conf, "MiniMapColor");
 	ground->color = qRgb((int)color.x(), (int)color.y(), (int)color.z());
 	ground->animationDelay = conf.readUnsignedNumEntry("AnimationDelay", 1);

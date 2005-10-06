@@ -485,12 +485,7 @@ void BosonCanvasRenderer::initGL()
  if (extensions.contains("GL_ARB_shader_objects") && extensions.contains("GL_ARB_fragment_shader") &&
 		extensions.contains("GL_ARB_shadow")) {
 	// Load unit shader
-	QString path = KGlobal::dirs()->findResourceDir("data", "boson/themes/shaders/unit.shader");
-	if (path.isNull()) {
-		boWarning() << k_funcinfo << "No unit.shader file found!" << endl;
-		return;
-	}
-	d->mUnitShader = new BoShader(path + "boson/themes/shaders/unit.shader");
+	d->mUnitShader = new BoShader("unit");
  }
 }
 
