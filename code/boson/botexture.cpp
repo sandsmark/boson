@@ -555,11 +555,11 @@ int BoTexture::memoryUsed() const
   // Compression
   if(boTextureManager->supportsTextureCompression() && boTextureManager->useTextureCompression())
   {
-    if(mOptions & FormatDepth)
+    if((mOptions & DontCompress) || (mOptions & FormatDepth))
     {
-      // Depth textures aren't compressed
+      // No compression
     }
-    if(mOptions & FormatRGB)
+    else if(mOptions & FormatRGB)
     {
       // GL_COMPRESSED_RGB_S3TC_DXT1_EXT format uses 64 bits (8 bytes) of image
       //  data for every 4x4 block
