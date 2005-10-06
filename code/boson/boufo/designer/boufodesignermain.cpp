@@ -367,8 +367,7 @@ void FormPreview::updateGUI(const QDomElement& root, BoUfoWidget* parent)
 	}
 
 	if (widget->name() == mNameOfSelectedWidget) {
-		// TODO: paint a rect around it or so
-		widget->ufoWidget()->setBorder(ufo::RaisedBevelBorder);
+		widget->setBorderType(BoUfoWidget::LineBorder);
 	}
 
 	depth += 40;
