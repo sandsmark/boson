@@ -195,7 +195,7 @@ bool BosonItemModelRenderer::setModel(BosonModel* model)
 
  if (::RTTI::isUnit(item()->rtti())) {
 	Unit* u = (Unit*)item();
-	int id = 0;
+	int id = 1;
 	while (u->weapon(id)) {
 		BosonWeapon* w = u->weapon(id);
 		id++;
@@ -205,6 +205,7 @@ bool BosonItemModelRenderer::setModel(BosonModel* model)
 			continue;
 		}
 		BoMatrix* matrix = new BoMatrix();
+		t->setMeshMatrix(matrix);
 		mItemMatrixObjects.append(matrix);
 		for (unsigned int i = 0; i < mItemMatrices.count(); i++) {
 			BoFrame* frame = lod->frame(i);
