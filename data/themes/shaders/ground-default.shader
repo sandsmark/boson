@@ -38,7 +38,6 @@ void main()
 
 
 <fragment>
-//#define MAKE_IT_FAST
 
 // Diffuse map
 uniform sampler2D texture_0;
@@ -75,7 +74,7 @@ void main()
 
   // Get height from normalmap (for parallax mapping)
   vec2 texcoord = gl_TexCoord[0].xy;
-#ifndef MAKE_IT_FAST
+#ifdef USE_PARALLAX_MAPPING
   float height = texture2D(texture_2, texcoord).a * bumpScale - bumpBias;
   texcoord += (tCameraDir.xy * height);
 #endif
@@ -95,7 +94,7 @@ void main()
   vec3 basetexcolor = texture2D(texture_0, texcoord).rgb;
 
   // 6-sample PCF filtering
-#ifdef MAKE_IT_FAST
+#ifndef USE_PCF_SHADOWS
   float shadow = shadow2DProj(texture_3, gl_TexCoord[3]).r;
 #else
   vec3 spot = gl_TexCoord[3].stp / gl_TexCoord[3].q;
