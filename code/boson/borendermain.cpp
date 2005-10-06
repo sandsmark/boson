@@ -1207,22 +1207,23 @@ void ModelDisplay::renderModel(int mode)
 			glDisable(GL_ALPHA_TEST);
 		mModel->prepareRendering();
 
+		g_rot += 5.0f;
+		if (g_rot > 270) {
+			g_rot = 0.0f;
+		}
+		if (!g_mat) {
+			g_mat = new BoMatrix();
+		}
+		*g_mat = BoMatrix();
+		g_mat->rotate(g_rot, 0.0, 0.0, 1.0);
+
 		QValueVector<BoMatrix*> itemMatrices(f->nodeCount());
 		for (unsigned int i = 0; i < f->nodeCount(); i++) {
 			BoMesh* mesh = f->mesh(i);
-			if (mesh->name() != "turret") {
+			if (mesh->name() != "turret" && mesh->name() != "gun") {
 				continue;
 			}
-			if (!g_mat) {
-				g_mat = new BoMatrix();
-			}
 			itemMatrices[i] = g_mat;
-			*g_mat = BoMatrix();
-			g_mat->rotate(g_rot, 0.0, 0.0, 1.0);
-			g_rot += 5.0f;
-			if (g_rot > 270) {
-				g_rot = 0.0f;
-			}
 		}
 #warning TODO: also render transparent meshes
 		f->renderFrame(itemMatrices, 0, false, Default, mode);

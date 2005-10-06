@@ -204,10 +204,6 @@ bool BosonItemModelRenderer::setModel(BosonModel* model)
 		if (!t) {
 			continue;
 		}
-		QString meshName = t->meshName();
-		if (meshName.isEmpty()) {
-			continue;
-		}
 		BoMatrix* matrix = new BoMatrix();
 		mItemMatrixObjects.append(matrix);
 		for (unsigned int i = 0; i < mItemMatrices.count(); i++) {
@@ -222,7 +218,7 @@ bool BosonItemModelRenderer::setModel(BosonModel* model)
 					BO_NULL_ERROR(mesh);
 					return false;
 				}
-				if (mesh->name() == meshName) {
+				if (t->isMeshPartOfTurret(mesh->name())) {
 					(mItemMatrices[i])[j] = matrix;
 				}
 			}

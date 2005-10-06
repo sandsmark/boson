@@ -433,6 +433,17 @@ class BosonWeapon : public UnitPlugin
 };
 
 
+class BosonWeaponTurretPropertiesPrivate;
+/**
+ * This class contains the data for a weapon turret that is stored in the
+ * index.unit file. All data in here are constant, they should not change while
+ * the game is running.
+ *
+ * This class is a helper class for @ref BosonWeaponTurret.
+ *
+ * See @ref BosonWeaponTurret for the actual turret class.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BosonWeaponTurretProperties
 {
   public:
@@ -442,20 +453,35 @@ class BosonWeaponTurretProperties
     /**
      * Set the @p name of the mesh that represents the turret.
      **/
-    void setMeshName(const QString& name);
-    const QString& meshName() const;
+    void setMeshNames(const QStringList& names);
+    const QStringList& meshNames() const;
+
+    /**
+     * @return Whether @p meshName is meant to be rotated by this weapon turret,
+     * i.e. whether it is contained in @ref meshNames.
+     **/
+    bool isMeshPartOfTurret(const QString& meshName) const;
 
   private:
-    QString mMeshName;
+    BosonWeaponTurretPropertiesPrivate* d;
 };
 
+/**
+ * This class represents a turret in the gameengine, i.e. a mesh that is rotated
+ * towards the direction the weapon fires to.
+ *
+ * The @ref meshMatrix should be used to control the rotation of the
+ * corresponding @ref BoMesh in the @ref BosonModel.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BosonWeaponTurret
 {
   public:
     BosonWeaponTurret(const BosonWeaponTurretProperties* prop);
     ~BosonWeaponTurret();
 
-    const QString& meshName() const;
+    const QStringList& meshNames() const;
 
     /**
      * Set the matrix that is applied before the mesh of this weapon turret (see @ref
@@ -470,6 +496,11 @@ class BosonWeaponTurret
     {
       return mMeshMatrix;
     }
+
+    /**
+     * See @ref BosonWeaponTurretProperties::isMeshPartOfTurret
+     **/
+    bool isMeshPartOfTurret(const QString& meshName) const;
 
 
     /**
