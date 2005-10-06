@@ -219,7 +219,10 @@ protected:
 	void setCurrentGroundRenderer(const QString&);
 
 	QString shaderSuffixes();
-	int shaderSuffixesToItem(const QString& suffixes);
+	int shaderSuffixesToIndex(const QString& suffixes);
+
+	int shadowMapResolutionToIndex(int resolution);
+	int indexToShadowMapResolution(int index);
 
 protected slots:
 	void slotRenderingSpeedChanged(int);
@@ -249,6 +252,7 @@ private:
 	QComboBox* mGroundRenderer;
 	QCheckBox* mUseShaders;
 	QComboBox* mShaderQuality;
+	QComboBox* mShadowQuality;
 	QCheckBox* mUseLOD;
 	QComboBox* mDefaultLOD;
 	QPushButton* mFont;

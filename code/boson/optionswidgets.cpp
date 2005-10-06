@@ -527,6 +527,7 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  hbox = new QHBox(mAdvanced);
  (void)new QLabel(i18n("Ground render:"), hbox);
  mGroundRenderer = new QComboBox(hbox);
+
  mUseShaders = new QCheckBox(i18n("Use shaders (and shadows)"), mAdvanced);
  mUseShaders->setEnabled(BosonGroundThemeData::shadersSupported());
  hbox = new QHBox(mAdvanced);
@@ -537,6 +538,14 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mShaderQuality->insertItem(i18n("Medium"));
  mShaderQuality->insertItem(i18n("Low"));
  mShaderQuality->setCurrentItem(1);
+ hbox = new QHBox(mAdvanced);
+ (void)new QLabel(i18n("Shadow quality:"), hbox);
+ mShadowQuality = new QComboBox(hbox);
+ mShadowQuality->insertItem(i18n("High"));
+ mShadowQuality->insertItem(i18n("Medium"));
+ mShadowQuality->insertItem(i18n("Low"));
+ mShadowQuality->setCurrentItem(0);
+
  mUseLOD = new QCheckBox(i18n("Use level of detail"), mAdvanced);
  hbox = new QHBox(mAdvanced);
  (void)new QLabel(i18n("Default level of detail:"), hbox);
@@ -612,7 +621,8 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mUseMaterials->setChecked(boConfig->boolDefaultValue("UseMaterials"));
 		setCurrentGroundRenderer(boConfig->stringDefaultValue("GroundRendererClass"));
 		mUseShaders->setChecked(false);
-		mShaderQuality->setCurrentItem(shaderSuffixesToItem("-med"));
+		mShaderQuality->setCurrentItem(shaderSuffixesToIndex("-med"));
+		mShadowQuality->setCurrentItem(shadowMapResolutionToIndex(2048));
 		setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
 		setUseLOD(boConfig->boolDefaultValue("UseLOD"));
 		setDefaultLOD(0);
@@ -629,7 +639,8 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mUseMaterials->setChecked(boConfig->boolDefaultValue("UseMaterials"));
 		setCurrentGroundRenderer(boConfig->stringDefaultValue("GroundRendererClass"));
 		mUseShaders->setChecked(true);
-		mShaderQuality->setCurrentItem(shaderSuffixesToItem("-hi"));
+		mShaderQuality->setCurrentItem(0); // upmost item is the best-quality one
+		mShadowQuality->setCurrentItem(0); // upmost item is the best-quality one
 		setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
 		setUseLOD(true);
 		setDefaultLOD(0);
@@ -644,7 +655,8 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mUseMaterials->setChecked(false);
 		setCurrentGroundRenderer("BoFastGroundRenderer");
 		mUseShaders->setChecked(false);
-		mShaderQuality->setCurrentItem(shaderSuffixesToItem("-low"));
+		mShaderQuality->setCurrentItem(shaderSuffixesToIndex("-low"));
+		mShadowQuality->setCurrentItem(shadowMapResolutionToIndex(512));
 		setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
 		setUseLOD(true);
 		setDefaultLOD(5000);
@@ -693,7 +705,7 @@ QString OpenGLOptions::shaderSuffixes()
  return suffixes;
 }
 
-int OpenGLOptions::shaderSuffixesToItem(const QString& suffixes)
+int OpenGLOptions::shaderSuffixesToIndex(const QString& suffixes)
 {
  if (suffixes.contains("hi")) {
 	return 0;
@@ -703,6 +715,29 @@ int OpenGLOptions::shaderSuffixesToItem(const QString& suffixes)
 	return 2;
  } else {
 	return 1;  // Fallback to medium
+ }
+}
+
+int OpenGLOptions::shadowMapResolutionToIndex(int resolution)
+{
+ if (resolution == 2048) {
+	return 0;
+ } else if (resolution == 1024) {
+	return 1;
+ } else if (resolution == 512) {
+	return 2;
+ } else {
+	return 0;  // Fallback to 2048
+ }
+}
+
+int OpenGLOptions::indexToShadowMapResolution(int index)
+{
+ const int resolutions[] = { 2048, 1024, 512 };
+ if (index > 2) {
+	return 2048;  // default
+ } else {
+	return resolutions[index];
  }
 }
 
@@ -811,6 +846,9 @@ void OpenGLOptions::apply()
 	boConfig->setStringValue("ShaderSuffixes", shaderSuffixes());
 	boShaderManager->reloadShaders();
  }
+ if (indexToShadowMapResolution(mShadowQuality->currentItem()) != boConfig->intValue("ShadowMapResolution")) {
+	boConfig->setIntValue("ShadowMapResolution", indexToShadowMapResolution(mShadowQuality->currentItem()));
+ }
 
 
  emit signalOpenGLSettingsUpdated();
@@ -853,7 +891,8 @@ void OpenGLOptions::load()
  setCurrentMeshRenderer(BoMeshRendererManager::manager()->currentRendererName());
  setCurrentGroundRenderer(BoGroundRendererManager::manager()->currentRendererName());
  mUseShaders->setChecked(boConfig->boolValue("UseGroundShaders") && boConfig->boolValue("UseUnitShaders"));
- mShaderQuality->setCurrentItem(shaderSuffixesToItem(boConfig->stringValue("ShaderSuffixes")));
+ mShaderQuality->setCurrentItem(shaderSuffixesToIndex(boConfig->stringValue("ShaderSuffixes")));
+ mShadowQuality->setCurrentItem(shadowMapResolutionToIndex(boConfig->intValue("ShadowMapResolution")));
 }
 
 void OpenGLOptions::setUpdateInterval(int ms)
