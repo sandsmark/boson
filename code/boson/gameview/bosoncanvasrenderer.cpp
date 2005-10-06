@@ -77,6 +77,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+
 static BosonModel* renderSingleItem(
 		bool useLOD,
 		BoCamera* camera,
@@ -730,8 +731,8 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
   glVertex2f(0.4, 0.4);
   glVertex2f(0.05, 0.4);
  glEnd();
- glDisable(GL_BLEND);
-*/
+ glDisable(GL_BLEND);*/
+
  BoShader::setFogEnabled(false);
 }
 
@@ -747,13 +748,13 @@ void BosonCanvasRenderer::renderShadowMap(const BosonCanvas* canvas)
 	// Init textures
 	d->mShadowTexture = new BoTexture(0, shadowResolution, shadowResolution,
 			BoTexture::FilterLinear | BoTexture::FormatDepth | BoTexture::DontCompress | BoTexture::ClampToEdge);
-	// TODO: try to remove this
-	d->mShadowColorTexture = new BoTexture(0, shadowResolution, shadowResolution,
-			BoTexture::FilterLinear | BoTexture::FormatRGBA | BoTexture::DontCompress | BoTexture::ClampToEdge);
+	// This is not used because we only need depth. It's here just for debugging
+	//d->mShadowColorTexture = new BoTexture(0, shadowResolution, shadowResolution,
+	//		BoTexture::FilterLinear | BoTexture::FormatRGBA | BoTexture::DontCompress | BoTexture::ClampToEdge);
 
 	// Init rendertarget
 	d->mShadowTarget = new BoRenderTarget(shadowResolution, shadowResolution,
-			BoRenderTarget::RGBA | BoRenderTarget::Depth, d->mShadowColorTexture, d->mShadowTexture);
+			BoRenderTarget::RGBA | BoRenderTarget::Depth, 0, d->mShadowTexture);
 	boDebug() << k_funcinfo << "Target type: " << d->mShadowTarget->type() << endl;
  }
 
@@ -823,6 +824,7 @@ void BosonCanvasRenderer::renderShadowMap(const BosonCanvas* canvas)
  d->mShadowTarget->enable();
  // Set up the viewport
  glViewport(0, 0, shadowResolution, shadowResolution);
+ glDisable(GL_SCISSOR_TEST);
  // Clear framebuffer
  glClearDepth(1.0);
  glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
