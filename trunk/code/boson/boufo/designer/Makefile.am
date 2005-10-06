@@ -15,7 +15,9 @@ boufodesigner_LDADD = \
 		$(LIB_KDECORE) \
 		$(LIB_BOMEMORY)
 boufodesigner_SOURCES = \
-		boufodesignermain.cpp
+		boufodesignermain.cpp \
+		bosignalsslotseditor.cpp \
+		main.cpp
 
 
 
