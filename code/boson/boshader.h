@@ -22,11 +22,51 @@
 
 #include "bo3dtools.h"
 
-class QString;
-template<class T> class QDict;
+#include <qstringlist.h>
+#include <qptrlist.h>
+#include <qdict.h>
 
 class BoLight;
 
+class BoShader;
+
+
+
+#define boShaderManager BoShaderManager::shaderManager()
+
+class BoShaderManager
+{
+  public:
+    BoShaderManager();
+    ~BoShaderManager();
+
+    static BoShaderManager* shaderManager();
+
+    /**
+     * Reloads all shaders.
+     * Call this e.g. when config changes
+     **/
+    void reloadShaders();
+    void shaderSuffixesChanged();
+
+    /**
+     * @return full filename to use for shader with given name.
+     * The name might be e.g. "unit" and returned filename could be
+     * ".../unit-hi.shader" (when high-quality shaders are enabled).
+     **/
+    const QString& getFullFilename(const QString& shadername);
+
+    void registerShader(BoShader* shader);
+    void unregisterShader(BoShader* shader);
+
+
+  private:
+    static BoShaderManager* mShaderManager;
+
+    QPtrList<BoShader> mShaders;
+    QStringList mSuffixList;
+    QDict<QString> mKnownShaderFiles;
+};
 
 /**
  * @short Shader object
@@ -51,11 +91,14 @@ class BoShader
      **/
     BoShader(const QString& vertex, const QString& fragment);
     /**
-     * Loads shader sources from a specified file.
+     * Loads shader sources from a file.
+     * Filename is automatically created by adding a suffix and ".shader" to
+     *  the filename, where suffix might be e.g. "-low", "-hi" (depending on
+     *  shader quality level) or nothing.
      * Vertex shader's source must be preceeded by '<vertex>' marker and
      *  fragment shader's source by '<fragment>' marker.
      **/
-    BoShader(const QString& file);
+    BoShader(const QString& name);
     ~BoShader();
 
     /**
@@ -69,6 +112,8 @@ class BoShader
 
     inline unsigned int id()  { return mProgram; }
     inline bool valid()  { return mValid; }
+
+    void reload();
 
 
     bool setUniform(const QString& name, float value);
@@ -89,12 +134,17 @@ class BoShader
 
 
   protected:
-    void load(const QString& vertexsrc, const QString& fragmentsrc);
+    enum FilterType { All = 0, VertexOnly, FragmentOnly };
+
+    bool load(const QString& vertexsrc, const QString& fragmentsrc);
+    bool load(const QString& name);
+    QString preprocessSource(const QString& source, FilterType filter);
 
 
   private:
     unsigned int mProgram;
     bool mValid;
+    QString mName;
 
     QDict<int>* mUniformLocations;
 

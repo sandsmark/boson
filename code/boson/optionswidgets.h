@@ -218,6 +218,9 @@ protected:
 	void setCurrentMeshRenderer(const QString&);
 	void setCurrentGroundRenderer(const QString&);
 
+	QString shaderSuffixes();
+	int shaderSuffixesToItem(const QString& suffixes);
+
 protected slots:
 	void slotRenderingSpeedChanged(int);
 	void slotEnableATIDepthWorkaround(bool);
@@ -245,6 +248,7 @@ private:
 	QCheckBox* mUseMaterials;
 	QComboBox* mGroundRenderer;
 	QCheckBox* mUseShaders;
+	QComboBox* mShaderQuality;
 	QCheckBox* mUseLOD;
 	QComboBox* mDefaultLOD;
 	QPushButton* mFont;

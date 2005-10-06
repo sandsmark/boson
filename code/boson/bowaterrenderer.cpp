@@ -1531,10 +1531,10 @@ void BoWaterRenderer::loadNecessaryTextures()
   if(mEnableShader)
   {
     delete mShader;
-    mShader = new BoShader(path + "water.shader");
+    mShader = new BoShader("water");
     if(!mShader->valid())
     {
-      boDebug() << k_funcinfo << "Shader loading failed (from file '" << path << "water.shader'), disabling shader" << endl;
+      boDebug() << k_funcinfo << "Shader loading failed, disabling shader" << endl;
       delete mShader;
       mShader = 0;
       mEnableShader = false;
