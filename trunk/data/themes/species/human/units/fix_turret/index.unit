@@ -61,3 +61,4 @@ SoundShoot=shoot
 Speed=15
 TakeTargetVeloIntoAccount=true
 Type=Rocket
+TurretMeshes=turret,gun
