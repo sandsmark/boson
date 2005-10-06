@@ -24,6 +24,7 @@
 #include <bogl.h>
 
 #include <qglobal.h>
+#include <qvaluevector.h>
 
 class BosonModel;
 class BosonAnimation;
@@ -31,6 +32,7 @@ class BoFrame;
 class Player;
 class BosonItem;
 class BoFrustum;
+class BoMatrix;
 
 class QColor;
 class QString;
@@ -164,6 +166,10 @@ private:
 	BosonModel* mModel;
 	BosonAnimation* mCurrentAnimation;
 	float mCurrentFrame;
+
+	// one matrix per mesh ("node") per frame
+	QValueVector< QValueVector<BoMatrix*> > mItemMatrices;
+	QValueVector<BoMatrix*> mItemMatrixObjects;
 };
 
 #endif

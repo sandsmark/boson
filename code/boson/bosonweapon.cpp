@@ -51,6 +51,7 @@ BosonWeaponProperties::BosonWeaponProperties(const UnitProperties* prop, unsigne
     mRequiredAmmunition(this, QString("Weapon_%1:RequiredAmmunition").arg(id-1), "MaxValue")
 {
   mId = id;
+  mTurret = 0;
 
   if(id < 1)
   {
@@ -60,6 +61,7 @@ BosonWeaponProperties::BosonWeaponProperties(const UnitProperties* prop, unsigne
 
 BosonWeaponProperties::~BosonWeaponProperties()
 {
+  delete mTurret;
 }
 
 QString BosonWeaponProperties::name() const
@@ -168,6 +170,14 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg)
   if(mAutoUse && (mShotType == BosonShot::Mine || mShotType == BosonShot::Bomb))
   {
     boWarning() << k_funcinfo << "AutoUse=true doesn't make sense for mines and bombs" << endl;
+  }
+  QString turretMesh = cfg->readEntry("TurretMesh");
+  if(!turretMesh.isEmpty())
+  {
+    BosonWeaponTurretProperties* turret = new BosonWeaponTurretProperties();
+    turret->setMeshName(turretMesh);
+    // TODO: read further settings, such as initial rotation, max/min rotation, ...
+    mTurret = turret;
   }
   mAmmunitionType = cfg->readEntry("AmmunitionType", "Generic");
   mTakeTargetVeloIntoAccount = cfg->readBoolEntry("TakeTargetVeloIntoAccount", false);
@@ -467,6 +477,7 @@ BosonWeapon::BosonWeapon(int weaponNumber, BosonWeaponProperties* prop, Unit* _u
     mRequiredAmmunition(prop, QString("Weapon_%1:RequiredAmmunition").arg(prop->id()-1), "MaxValue")
 {
   mProp = prop;
+  mTurret = 0;
   if (!unit())
   {
     boError() << k_funcinfo << "NULL unit" << endl;
@@ -476,10 +487,16 @@ BosonWeapon::BosonWeapon(int weaponNumber, BosonWeaponProperties* prop, Unit* _u
   mReloadCounter.setLocal(0);
   mReloadCounter.setEmittingSignal(false);
   mAmmunition.setLocal(0);
+
+  if (mProp->turret())
+  {
+    mTurret = new BosonWeaponTurret(mProp->turret());
+  }
 }
 
 BosonWeapon::~BosonWeapon()
 {
+  delete mTurret;
 }
 
 void BosonWeapon::registerWeaponData(int weaponNumber, KGamePropertyBase* prop, int id, bool local)
@@ -687,6 +704,65 @@ bool BosonWeapon::dropBomb(const BoVector2Fixed& hvelocity)
   boDebug() << k_funcinfo << "done" << endl;
   return true;
 }
+
+
+
+
+/*****  BosonWeaponTurretProperties  *****/
+
+BosonWeaponTurretProperties::BosonWeaponTurretProperties()
+{
+}
+
+BosonWeaponTurretProperties::~BosonWeaponTurretProperties()
+{
+}
+
+void BosonWeaponTurretProperties::setMeshName(const QString& name)
+{
+  mMeshName = name;
+}
+
+const QString& BosonWeaponTurretProperties::meshName() const
+{
+  return mMeshName;
+}
+
+
+/*****  BosonWeaponTurret  *****/
+
+BosonWeaponTurret::BosonWeaponTurret(const BosonWeaponTurretProperties* p)
+{
+  mProperties = p;
+  mMeshMatrix = 0;
+}
+
+BosonWeaponTurret::~BosonWeaponTurret()
+{
+}
+
+void BosonWeaponTurret::pointTo(const BoVector3Fixed& direction)
+{
+  if (!mMeshMatrix)
+  {
+    return;
+  }
+  // AB: pretty much a dummy implementation
+  BoVector3Float dir(direction[0], direction[1], direction[2]);
+  BoVector3Float up(0, 0, 1);
+  mMeshMatrix->setLookAtRotation(BoVector3Float(0, 0, 0), dir, up);
+}
+
+const QString& BosonWeaponTurret::meshName() const
+{
+  return mProperties->meshName();
+}
+
+void BosonWeaponTurret::setMeshMatrix(BoMatrix* matrix)
+{
+  mMeshMatrix = matrix;
+}
+
 
 /*
  * vim: et sw=2

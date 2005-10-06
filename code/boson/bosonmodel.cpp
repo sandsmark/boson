@@ -183,8 +183,12 @@ BoMatrix* BoFrame::matrix(int index) const
  return mMatrices[index];
 }
 
-void BoFrame::renderFrame(const QColor* teamColor, bool transparentmeshes, RenderFlags flags, int mode)
+void BoFrame::renderFrame(const QValueVector<BoMatrix*>& itemMatrices,const QColor* teamColor, bool transparentmeshes, RenderFlags flags, int mode)
 {
+ if (itemMatrices.count() != mNodeCount) {
+	boError() << k_funcinfo << "must have exactly one item matrix per node" << endl;
+	return;
+ }
  for (unsigned int i = 0; i < mNodeCount; i++) {
 	BoMatrix* m = mMatrices[i];
 	BoMesh* mesh = mMeshes[i];
@@ -206,9 +210,8 @@ void BoFrame::renderFrame(const QColor* teamColor, bool transparentmeshes, Rende
 	if (mode == GL_SELECT) {
 		glLoadName(i);
 	}
-	// TODO: either store (bool flags) or test if mMatrices[i] is identity
-	//  matrix. If it is, we can avoid glMultMatrix() call
-	mesh->renderMesh(m, teamColor, flags);
+	const BoMatrix* itemMatrix = itemMatrices[i];
+	mesh->renderMesh(itemMatrix, m, teamColor, flags);
  }
 }
 

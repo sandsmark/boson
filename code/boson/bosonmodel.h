@@ -35,6 +35,7 @@ class BoMaterial;
 template<class T> class BoVector3;
 typedef BoVector3<float> BoVector3Float;
 template<class T> class QPtrList;
+template<class T> class QValueVector;
 template<class T, class T2> class QMap;
 template<class T> class QIntDict;
 class BoMeshRendererModelData;
@@ -141,7 +142,7 @@ public:
 	/**
 	 * @param lod See @ref BoMesh::renderMesh
 	 **/
-	void renderFrame(const QColor* teamColor, bool transparentmeshes = false, RenderFlags flags = Default, int mode = GL_RENDER);
+	void renderFrame(const QValueVector<BoMatrix*>& itemMatrices, const QColor* teamColor, bool transparentmeshes = false, RenderFlags flags = Default, int mode = GL_RENDER);
 
 private:
 	void init();

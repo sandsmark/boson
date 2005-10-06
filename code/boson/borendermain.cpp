@@ -84,6 +84,9 @@
 #define BORENDER_DEFAULT_LIGHT_ENABLED true
 #define BORENDER_DEFAULT_MATERIALS_ENABLED true
 
+static BoMatrix* g_mat = 0;
+static float g_rot = 0.0;
+
 
 // TODO (libufo):
 // - find out whether a mouse event was taken and stop processing it in
@@ -1204,8 +1207,25 @@ void ModelDisplay::renderModel(int mode)
 			glDisable(GL_ALPHA_TEST);
 		mModel->prepareRendering();
 
+		QValueVector<BoMatrix*> itemMatrices(f->nodeCount());
+		for (unsigned int i = 0; i < f->nodeCount(); i++) {
+			BoMesh* mesh = f->mesh(i);
+			if (mesh->name() != "turret") {
+				continue;
+			}
+			if (!g_mat) {
+				g_mat = new BoMatrix();
+			}
+			itemMatrices[i] = g_mat;
+			*g_mat = BoMatrix();
+			g_mat->rotate(g_rot, 0.0, 0.0, 1.0);
+			g_rot += 5.0f;
+			if (g_rot > 270) {
+				g_rot = 0.0f;
+			}
+		}
 #warning TODO: also render transparent meshes
-		f->renderFrame(0, false, Default, mode);
+		f->renderFrame(itemMatrices, 0, false, Default, mode);
 		BosonModel::stopModelRendering();
 		if (mPlacementPreview) {
 			// AB: do not reset the actual color - if it will get
