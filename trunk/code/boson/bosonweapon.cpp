@@ -591,7 +591,7 @@ void BosonWeapon::refillAmmunition(Unit* owner)
     return;
   }
   mAmmunition = mAmmunition + ammo;
-  boDebug(610) << k_funcinfo << "ammunition now: << " << mAmmunition << endl;
+  boDebug(610) << k_funcinfo << "ammunition now: " << mAmmunition << endl;
 }
 
 void BosonWeapon::shoot(Unit* u)
@@ -655,6 +655,10 @@ void BosonWeapon::shoot(const BoVector3Fixed& pos, const BoVector3Fixed& target)
   {
     boError() << k_funcinfo << "NULL unit" << endl;
     return;
+  }
+  if(turret())
+  {
+    turret()->pointTo(target - pos);
   }
   BosonShot* shot = mProp->newShot(unit(), this, pos, target);
   canvas()->shotFired(shot, this);
@@ -763,10 +767,17 @@ void BosonWeaponTurret::pointTo(const BoVector3Fixed& direction)
   {
     return;
   }
-  // AB: pretty much a dummy implementation
-  BoVector3Float dir(direction[0], direction[1], direction[2]);
+  // AB: atm we support rotations around the z axis only
+  BoVector3Float dir(direction[0], direction[1], 0.0f);
   BoVector3Float up(0, 0, 1);
-  mMeshMatrix->setLookAtRotation(BoVector3Float(0, 0, 0), dir, up);
+  BoMatrix m;
+  m.setLookAtRotation(BoVector3Float(0, 0, 0), dir, up);
+
+  *mMeshMatrix = BoMatrix();
+
+  // make the matrix look down the (positive) y axis, with up vector at (0,0,1)
+  mMeshMatrix->rotate(90.0f, 1.0f, 0.0f, 0.0f);
+  mMeshMatrix->multiply(&m);
 }
 
 const QStringList& BosonWeaponTurret::meshNames() const
