@@ -596,6 +596,7 @@ void BoRenderGLWidget::slotApplyTurretProperties(BoEditTurretPropertiesDialog* d
 {
  BO_CHECK_NULL_RET(dialog);
  d->mModelDisplay->setTurretMeshes(dialog->turretMeshes());
+ d->mModelDisplay->setTurretInitialZRotation(dialog->initialZRotation());
 }
 
 void BoRenderGLWidget::slotShowVertexPoints(bool s)
@@ -990,6 +991,7 @@ ModelDisplay::ModelDisplay()
  mMeshUnderMouse = -1;
  mSelectedMesh = -1;
  mTurretMeshesEnabled = false;
+ mTurretInitialZRotation = 0.0f;
  mTurretRotation = 0.0f;
  mViewData = new BosonViewData(this);
  BosonViewData::setGlobalViewData(mViewData);
@@ -1244,11 +1246,24 @@ void ModelDisplay::renderModel(int mode)
 		mModel->prepareRendering();
 
 		mTurretRotation += 5.0f;
-		if (mTurretRotation > 270.0f) {
+		if (mTurretRotation > 230.0f) {
 			mTurretRotation = 0.0f;
 		}
 		mTurretMatrix = BoMatrix();
-		mTurretMatrix.rotate(mTurretRotation, 0.0, 0.0, 1.0);
+		mTurretMatrix.rotate(mTurretInitialZRotation, 0.0f, 0.0f, -1.0f);
+		mTurretMatrix.rotate(90.0f, 1.0f, 0.0f, 0.0f);
+
+		BoVector3Float v(0.0f, 1.0f, 0.0f);
+		{
+			BoMatrix rot;
+			rot.rotate(mTurretRotation, 0.0, 0.0, 1.0);
+			BoVector3Float v2 = v;
+			rot.transform(&v, &v2);
+		}
+		BoMatrix lookAt;
+		lookAt.setLookAtRotation(BoVector3Float(0, 0, 0), v, BoVector3Float(0, 0, 1));
+
+		mTurretMatrix.multiply(&lookAt);
 
 		QValueVector<const BoMatrix*> itemMatrices(f->nodeCount());
 		for (unsigned int i = 0; i < f->nodeCount(); i++) {

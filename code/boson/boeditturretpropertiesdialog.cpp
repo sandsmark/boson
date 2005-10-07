@@ -25,6 +25,7 @@
 #include <klocale.h>
 #include <klistview.h>
 #include <kmessagebox.h>
+#include <knuminput.h>
 
 #include <qlabel.h>
 #include <qlayout.h>
@@ -85,11 +86,13 @@ class BoEditTurretPropertiesDialogPrivate
 public:
 	BoEditTurretPropertiesDialogPrivate()
 	{
+		mInitialZRotation = 0;
 		mTurretMeshes = 0;
 		mTurretMeshesListView = 0;
 	}
 	QLineEdit* mTurretMeshes;
 	BoCheckListView* mTurretMeshesListView;
+	KIntNumInput* mInitialZRotation;
 };
 
 BoEditTurretPropertiesDialog::BoEditTurretPropertiesDialog(QWidget* parent, bool modal)
@@ -99,6 +102,10 @@ BoEditTurretPropertiesDialog::BoEditTurretPropertiesDialog(QWidget* parent, bool
  d = new BoEditTurretPropertiesDialogPrivate();
 
  QVBoxLayout* layout = new QVBoxLayout(plainPage());
+ d->mInitialZRotation = new KIntNumInput(plainPage());
+ d->mInitialZRotation->setRange(0, 360, 1, true);
+ d->mInitialZRotation->setLabel(i18n("Initial Z rotation"));
+ layout->addWidget(d->mInitialZRotation);
  QLabel* meshesLabel = new QLabel(i18n("Turret Meshes:"), plainPage());
  d->mTurretMeshes = new QLineEdit(plainPage());
  connect(d->mTurretMeshes, SIGNAL(textChanged(const QString&)),
@@ -148,6 +155,11 @@ void BoEditTurretPropertiesDialog::setTurretMeshes(const QStringList& list)
 QStringList BoEditTurretPropertiesDialog::turretMeshes() const
 {
  return QStringList::split(',', d->mTurretMeshes->text());
+}
+
+float BoEditTurretPropertiesDialog::initialZRotation() const
+{
+ return (float)d->mInitialZRotation->value();
 }
 
 void BoEditTurretPropertiesDialog::addMesh(Lib3dsNode* node, QListViewItem* parent)

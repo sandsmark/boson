@@ -171,13 +171,14 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg)
   {
     boWarning() << k_funcinfo << "AutoUse=true doesn't make sense for mines and bombs" << endl;
   }
-  QStringList turretMeshes = cfg->readListEntry("TurretMeshes");
-  if(!turretMeshes.isEmpty())
+  if(!cfg->readListEntry("TurretMeshes").isEmpty())
   {
-    BosonWeaponTurretProperties* turret = new BosonWeaponTurretProperties();
-    turret->setMeshNames(turretMeshes);
-    // TODO: read further settings, such as initial rotation, max/min rotation, ...
-    mTurret = turret;
+    mTurret = new BosonWeaponTurretProperties();
+    if(!mTurret->loadTurret(cfg))
+    {
+      boError() << k_funcinfo << "could not load the turret" << endl;
+      // TODO: return false
+    }
   }
   mAmmunitionType = cfg->readEntry("AmmunitionType", "Generic");
   mTakeTargetVeloIntoAccount = cfg->readBoolEntry("TakeTargetVeloIntoAccount", false);
@@ -258,6 +259,14 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   cfg->writeEntry("SoundShoot", mSounds[SoundWeaponShoot]);
   cfg->writeEntry("SoundFly", mSounds[SoundWeaponFly]);
   cfg->writeEntry("SoundHit", mSounds[SoundWeaponHit]);
+  if(turret())
+  {
+    if(!mTurret->saveTurret(cfg))
+    {
+      boError() << k_funcinfo << "could not save the turret" << endl;
+      // TODO: return false
+    }
+  }
 }
 
 void BosonWeaponProperties::reset()
@@ -721,11 +730,14 @@ class BosonWeaponTurretPropertiesPrivate
     {
     }
     QStringList meshNames;
+    BoMatrix initialMeshMatrix;
+    float initialZRotation;
 };
 
 BosonWeaponTurretProperties::BosonWeaponTurretProperties()
 {
   d = new BosonWeaponTurretPropertiesPrivate;
+  d->initialZRotation = 0.0f;
 }
 
 BosonWeaponTurretProperties::~BosonWeaponTurretProperties()
@@ -733,14 +745,37 @@ BosonWeaponTurretProperties::~BosonWeaponTurretProperties()
   delete d;
 }
 
-void BosonWeaponTurretProperties::setMeshNames(const QStringList& names)
+bool BosonWeaponTurretProperties::loadTurret(KSimpleConfig* cfg)
 {
-  d->meshNames = names;
+
+  d->meshNames = cfg->readListEntry("TurretMeshes");
+  d->initialZRotation = cfg->readDoubleNumEntry("TurretInitialZRotation", 0.0);
+
+
+  d->initialMeshMatrix.rotate(d->initialZRotation, 0.0f, 0.0f, -1.0f);
+
+  // rotate the matrix to look down the positive y axis with up vector being
+  // (0,0,1).
+  d->initialMeshMatrix.rotate(90.0f, 1.0f, 0.0f, 0.0f);
+
+  return true;
+}
+
+bool BosonWeaponTurretProperties::saveTurret(KSimpleConfig* cfg) const
+{
+  cfg->writeEntry("TurretMeshes", d->meshNames);
+  cfg->writeEntry("TurretInitialZRotation", d->initialZRotation);
+  return true;
 }
 
 const QStringList& BosonWeaponTurretProperties::meshNames() const
 {
   return d->meshNames;
+}
+
+const BoMatrix& BosonWeaponTurretProperties::initialMeshMatrix() const
+{
+  return d->initialMeshMatrix;
 }
 
 bool BosonWeaponTurretProperties::isMeshPartOfTurret(const QString& meshName) const
@@ -768,10 +803,7 @@ void BosonWeaponTurret::pointTo(const BoVector3Fixed& direction)
   BoMatrix m;
   m.setLookAtRotation(BoVector3Float(0, 0, 0), dir, up);
 
-  mMeshMatrix = BoMatrix();
-
-  // make the matrix look down the (positive) y axis, with up vector at (0,0,1)
-  mMeshMatrix.rotate(90.0f, 1.0f, 0.0f, 0.0f);
+  mMeshMatrix = mProperties->initialMeshMatrix();
   mMeshMatrix.multiply(&m);
 }
 

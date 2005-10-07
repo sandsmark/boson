@@ -93,6 +93,10 @@ public:
 	{
 		mTurretMeshesEnabled = e;
 	}
+	void setTurretInitialZRotation(float r)
+	{
+		mTurretInitialZRotation = r;
+	}
 
 signals:
 	void signalShowSelectedMeshLabel(bool);
@@ -238,6 +242,7 @@ private:
 	int mSelectedMesh;
 	QStringList mTurretMeshes;
 	bool mTurretMeshesEnabled;
+	float mTurretInitialZRotation;
 	float mTurretRotation;
 	BoMatrix mTurretMatrix;
 	BosonViewData* mViewData;
