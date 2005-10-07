@@ -22,11 +22,13 @@
 #include "bodebugdcopiface.h"
 #include "bosonufoglwidget.h"
 #include <boufo/boufocustomwidget.h>
+#include "bo3dtools.h"
 
 #include <qptrlist.h>
 #include <qptrdict.h>
 #include <qintdict.h>
 #include <qvaluelist.h>
+#include <qstringlist.h>
 
 #include <kmainwindow.h>
 
@@ -55,6 +57,7 @@ class BoUfoManager;
 class BoUfoLabel;
 class BoUfoAction;
 class BosonViewData;
+class BoEditTurretPropertiesDialog;
 template<class T> class BoVector3;
 typedef BoVector3<float> BoVector3Float;
 
@@ -80,6 +83,16 @@ public:
 	BosonModel* model() const { return mModel; }
 
 	void setModel(BosonModel*);
+
+	void setTurretMeshes(const QStringList& meshes);
+	const QStringList& turretMeshes() const
+	{
+		return mTurretMeshes;
+	}
+	void setTurretMeshesEnabled(bool e)
+	{
+		mTurretMeshesEnabled = e;
+	}
 
 signals:
 	void signalShowSelectedMeshLabel(bool);
@@ -223,6 +236,10 @@ private:
 	int mCurrentLOD;
 	int mMeshUnderMouse;
 	int mSelectedMesh;
+	QStringList mTurretMeshes;
+	bool mTurretMeshesEnabled;
+	float mTurretRotation;
+	BoMatrix mTurretMatrix;
 	BosonViewData* mViewData;
 
 	BosonGLFont* mDefaultFont;
@@ -288,7 +305,10 @@ protected slots:
 	void slotReloadMeshRenderer();
 	void slotShowGLStates();
 	void slotShowChangeFont();
+	void slotShowTurretToggled(bool);
+	void slotEditTurretProperties();
 
+	void slotApplyTurretProperties(BoEditTurretPropertiesDialog*);
 
 
 

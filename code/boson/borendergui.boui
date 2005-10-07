@@ -582,6 +582,52 @@
       </Properties>
      </Widget>
      <Widget>
+      <ClassName>BoUfoCheckBox</ClassName>
+      <Properties>
+       <name>mDebugTurret</name>
+       <constraints/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <opaque/>
+       <layout/>
+       <minimumWidth/>
+       <minimumHeight/>
+       <preferredWidth/>
+       <preferredHeight/>
+       <backgroundImageFile/>
+       <verticalAlignment/>
+       <horizontalAlignment/>
+       <borderType/>
+       <stretch/>
+       <takesKeyboardFocus/>
+       <text>Debug turret</text>
+       <checked/>
+      </Properties>
+     </Widget>
+     <Widget>
+      <ClassName>BoUfoPushButton</ClassName>
+      <Properties>
+       <name>mEditTurretProperties</name>
+       <constraints/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <opaque/>
+       <layout/>
+       <minimumWidth/>
+       <minimumHeight/>
+       <preferredWidth/>
+       <preferredHeight/>
+       <backgroundImageFile/>
+       <verticalAlignment/>
+       <horizontalAlignment/>
+       <borderType/>
+       <stretch/>
+       <takesKeyboardFocus/>
+       <text>Edit turret properties...</text>
+       <iconFile/>
+      </Properties>
+     </Widget>
+     <Widget>
       <ClassName>BoUfoWidget</ClassName>
       <Properties>
        <name>mSpacingWidget18</name>
