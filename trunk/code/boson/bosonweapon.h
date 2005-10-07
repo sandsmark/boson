@@ -259,7 +259,7 @@ class BosonWeaponProperties : public PluginProperties
     bofixed mTurningSpeed;
     bofixed mStartAngle;
     QString mAmmunitionType;
-    const BosonWeaponTurretProperties* mTurret;
+    BosonWeaponTurretProperties* mTurret;
 };
 
 
@@ -450,17 +450,27 @@ class BosonWeaponTurretProperties
     BosonWeaponTurretProperties();
     ~BosonWeaponTurretProperties();
 
+    bool loadTurret(KSimpleConfig* config);
+    bool saveTurret(KSimpleConfig* config) const;
+
     /**
-     * Set the @p name of the mesh that represents the turret.
+     * @return The names of the meshes that are part of this turret. See also
+     * @ref BoMesh::name and @ref isMeshPartOfTurret.
      **/
-    void setMeshNames(const QStringList& names);
     const QStringList& meshNames() const;
 
     /**
      * @return Whether @p meshName is meant to be rotated by this weapon turret,
-     * i.e. whether it is contained in @ref meshNames.
+     * i.e. whether it is contained in @ref meshNames. See also @ref
+     * BoMesh::name
      **/
     bool isMeshPartOfTurret(const QString& meshName) const;
+
+    /**
+     * @return The matrix that is applied to the meshes in their unrotated
+     * state.
+     **/
+    const BoMatrix& initialMeshMatrix() const;
 
   private:
     BosonWeaponTurretPropertiesPrivate* d;

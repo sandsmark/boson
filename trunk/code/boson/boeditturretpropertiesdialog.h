@@ -41,6 +41,7 @@ public:
 	void setModelFile(const QString& file);
 	void setTurretMeshes(const QStringList& list);
 	QStringList turretMeshes() const;
+	float initialZRotation() const;
 
 signals:
 	void signalApply(BoEditTurretPropertiesDialog*);
