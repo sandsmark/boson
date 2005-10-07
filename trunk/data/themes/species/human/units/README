@@ -439,6 +439,16 @@ TurretMeshes=List
         List of mesh names (of the unit model) that are considered to be the
         "turret" of this weapon. These meshes are rotated towards the point this
         weapon shoots at.
+        This list must contain _ALL_ meshes that are part of the turret,
+        otherwise you will experience unusual behaviour. For example if a model
+        has a layout like this:
+        - Base
+          - Turret
+            - Gun
+            - Gun2
+              - SomeNicePartOfGun2
+          - SomeOtherMesh
+        then the list should contain Turret,Gun,Gun2,SomeNicePartOfGun2.
 AmmunitionType=String
         The name of the ammunition this weapon uses.
         This can be any name you like, however it doesn't make any sense to use
