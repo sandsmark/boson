@@ -49,6 +49,7 @@
 #include "boufo/boufoaction.h"
 #include "info/boinfo.h"
 #include "borendergui.h"
+#include "boeditturretpropertiesdialog.h"
 #ifdef BOSON_USE_BOMEMORY
 #include "bomemory/bomemorydialog.h"
 #endif
@@ -83,15 +84,6 @@
 
 #define BORENDER_DEFAULT_LIGHT_ENABLED true
 #define BORENDER_DEFAULT_MATERIALS_ENABLED true
-
-static BoMatrix* g_mat = 0;
-static float g_rot = 0.0;
-
-
-// TODO (libufo):
-// - find out whether a mouse event was taken and stop processing it in
-//   mouse*Event()
-
 
 static const char *description =
     I18N_NOOP("Rendering tester for Boson");
@@ -438,6 +430,10 @@ void BoRenderGLWidget::initUfoGUI()
 		d->mModelDisplay, SLOT(slotEnableLight(bool)));
  connect(d->mGUI->mEnableMaterials, SIGNAL(signalToggled(bool)),
 		d->mModelDisplay, SLOT(slotEnableMaterials(bool)));
+ connect(d->mGUI->mDebugTurret, SIGNAL(signalToggled(bool)),
+		this, SLOT(slotShowTurretToggled(bool)));
+ connect(d->mGUI->mEditTurretProperties, SIGNAL(signalClicked()),
+		this, SLOT(slotEditTurretProperties()));
 
 
 
@@ -454,6 +450,7 @@ void BoRenderGLWidget::initUfoGUI()
 
  initUfoAction();
 
+ slotShowTurretToggled(false);
  d->mModelDisplay->slotResetView();
 }
 
@@ -567,6 +564,38 @@ void BoRenderGLWidget::paintGL()
 	ufoManager()->dispatchEvents();
 	ufoManager()->render(false);
  }
+}
+
+void BoRenderGLWidget::slotShowTurretToggled(bool show)
+{
+ if (show) {
+	d->mGUI->mEditTurretProperties->setEnabled(true);
+	d->mModelDisplay->setTurretMeshesEnabled(true);
+ } else {
+	d->mGUI->mEditTurretProperties->setEnabled(false);
+	d->mModelDisplay->setTurretMeshesEnabled(false);
+ }
+}
+
+void BoRenderGLWidget::slotEditTurretProperties()
+{
+ if (!d->mModelDisplay->model()) {
+	KMessageBox::information(this, i18n("You need to load a model first"));
+	return;
+ }
+ BoEditTurretPropertiesDialog* dialog = new BoEditTurretPropertiesDialog(this, false);
+ connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
+ dialog->setModelFile(d->mModelDisplay->model()->file());
+ dialog->setTurretMeshes(d->mModelDisplay->turretMeshes());
+ connect(dialog, SIGNAL(signalApply(BoEditTurretPropertiesDialog*)),
+	this, SLOT(slotApplyTurretProperties(BoEditTurretPropertiesDialog*)));
+ dialog->show();
+}
+
+void BoRenderGLWidget::slotApplyTurretProperties(BoEditTurretPropertiesDialog* dialog)
+{
+ BO_CHECK_NULL_RET(dialog);
+ d->mModelDisplay->setTurretMeshes(dialog->turretMeshes());
 }
 
 void BoRenderGLWidget::slotShowVertexPoints(bool s)
@@ -960,6 +989,8 @@ ModelDisplay::ModelDisplay()
  mCurrentLOD = 0;
  mMeshUnderMouse = -1;
  mSelectedMesh = -1;
+ mTurretMeshesEnabled = false;
+ mTurretRotation = 0.0f;
  mViewData = new BosonViewData(this);
  BosonViewData::setGlobalViewData(mViewData);
 
@@ -1041,6 +1072,11 @@ void ModelDisplay::initializeGL()
  mLight->setSpecular(lightDif);
  mLight->setDirectional(true);
  mLight->setEnabled(true);
+}
+
+void ModelDisplay::setTurretMeshes(const QStringList& meshes)
+{
+ mTurretMeshes = meshes;
 }
 
 void ModelDisplay::setFont(const BoFontInfo& font)
@@ -1207,23 +1243,20 @@ void ModelDisplay::renderModel(int mode)
 			glDisable(GL_ALPHA_TEST);
 		mModel->prepareRendering();
 
-		g_rot += 5.0f;
-		if (g_rot > 270) {
-			g_rot = 0.0f;
+		mTurretRotation += 5.0f;
+		if (mTurretRotation > 270.0f) {
+			mTurretRotation = 0.0f;
 		}
-		if (!g_mat) {
-			g_mat = new BoMatrix();
-		}
-		*g_mat = BoMatrix();
-		g_mat->rotate(g_rot, 0.0, 0.0, 1.0);
+		mTurretMatrix = BoMatrix();
+		mTurretMatrix.rotate(mTurretRotation, 0.0, 0.0, 1.0);
 
 		QValueVector<const BoMatrix*> itemMatrices(f->nodeCount());
 		for (unsigned int i = 0; i < f->nodeCount(); i++) {
 			BoMesh* mesh = f->mesh(i);
-			if (mesh->name() != "turret" && mesh->name() != "gun") {
+			if (!mTurretMeshesEnabled || !mTurretMeshes.contains(mesh->name())) {
 				continue;
 			}
-			itemMatrices[i] = g_mat;
+			itemMatrices[i] = &mTurretMatrix;
 		}
 #warning TODO: also render transparent meshes
 		f->renderFrame(itemMatrices, 0, false, Default, mode);
