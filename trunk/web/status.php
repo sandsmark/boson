@@ -57,6 +57,8 @@ draw_bigbox_text("What has been changed since 0.11:
   requirements (grayed out then)</li>
   <li>Powerplants now actually plant power</li>
   <li>Shadow support</li>
+  <li>Turrets turn towards their target</li>
+  <li>Weapons use ammunition</li>
 </ul>");
 
 draw_bigbox_end();
