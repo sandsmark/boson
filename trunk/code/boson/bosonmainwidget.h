@@ -189,6 +189,7 @@ protected slots:
 	 **/
 	void slotSetWidgetCursor(BosonCursor* c);
 
+	void slotPreferences();
 	void slotPreferencesApply();
 	void slotDebugUfoWidgets();
 
