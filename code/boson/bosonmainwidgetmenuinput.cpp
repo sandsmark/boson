@@ -36,6 +36,7 @@
 #include "kgameadvancemessagesdebug.h"
 #include "boglstatewidget.h"
 #include "bofullscreen.h"
+#include "optionsdialog.h"
 
 #include <kgame/kgamedebugdialog.h>
 
@@ -102,6 +103,7 @@ void BosonMainWidgetMenuInput::initUfoActions()
 
 
  // Settings
+ (void)BoUfoStdAction::preferences(this, SLOT(slotPreferences()), actionCollection());
  BoUfoToggleAction* sound = new BoUfoToggleAction(i18n("Soun&d"),
 		KShortcut(), this, SLOT(slotToggleSound()),
 		actionCollection(), "options_sound");
@@ -402,5 +404,24 @@ void BosonMainWidgetMenuInput::slotToggleFullScreen(bool fullScreen)
  }
 }
 
+
+void BosonMainWidgetMenuInput::slotPreferences()
+{
+ OptionsDialog* dlg = new OptionsDialog(0);
+ dlg->slotLoad();
+
+ // FIXME: is this called if quit with "cancel" ?
+ connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater()));
+
+ connect(dlg, SIGNAL(signalCursorChanged(int, const QString&)),
+		this, SIGNAL(signalChangeCursor(int, const QString&)));
+ connect(dlg, SIGNAL(signalApply()),
+		this, SIGNAL(signalPreferencesApply()));
+// connect(dlg, SIGNAL(signalFontChanged(const BoFontInfo&)),
+//		displayManager(), SLOT(slotChangeFont(const BoFontInfo&)));
+
+ dlg->show();
+
+}
 
 

@@ -41,6 +41,8 @@ public:
 
 signals:
 	void signalDebugUfoWidgets();
+	void signalPreferencesApply();
+	void signalChangeCursor(int mode, const QString& cursorDir);
 
 protected slots:
 	void slotToggleSound();
@@ -59,6 +61,7 @@ protected slots:
 	void slotShowGLStates();
 	void slotCrashBoson();
 	void slotToggleFullScreen(bool fullScreen);
+	void slotPreferences();
 
 private:
 	void init(BoUfoActionCollection* parentCollection);

@@ -50,12 +50,6 @@ public:
 	virtual void load() = 0; // load from current game values
 	virtual void apply() = 0;
 	virtual void setDefaults() = 0; // reset to hardcoded defaults
-
-	Boson* game() const { return mGame; }
-	void setGame(Boson* g) { mGame = g; }
-
-private:
-	Boson* mGame;
 };
 
 class GeneralOptions : public QVBox, public OptionsWidget

@@ -24,7 +24,6 @@
 #include "bosonconfig.h"
 #include "bosoncursor.h"
 #include "bosonmodeltextures.h"
-#include "boson.h"
 #include "defines.h"
 #include "bodebug.h"
 #include "bogltooltip.h"
@@ -65,7 +64,6 @@
 
 OptionsWidget::OptionsWidget()
 {
- mGame = 0;
 }
 
 OptionsWidget::~OptionsWidget()
@@ -101,13 +99,7 @@ GeneralOptions::~GeneralOptions()
 void GeneralOptions::apply()
 {
  boDebug(210) << k_funcinfo << endl;
- if (!game()) {
-	boError(210) << k_funcinfo << "NULL game" << endl;
-	return;
- }
- if (mGameSpeed->value() != game()->gameSpeed()) {
-	game()->slotSetGameSpeed(mGameSpeed->value());
- }
+ boConfig->setIntValue("GameSpeed", mGameSpeed->value());
  boConfig->setDoubleValue("MiniMapScale", mMiniMapScale->value());
  QString file;
 
@@ -117,18 +109,14 @@ void GeneralOptions::apply()
 
 void GeneralOptions::load()
 {
- if (!game()) {
-	boError(210) << k_funcinfo << "NULL game" << endl;
-	return;
- }
- setGameSpeed(game()->gameSpeed());
+ setGameSpeed(boConfig->intValue("GameSpeed"));
  setMiniMapScale(boConfig->doubleValue("MiniMapScale"));
  setRMBMovesWithAttack(boConfig->boolValue("RMBMovesWithAttack"));
 }
 
 void GeneralOptions::setDefaults()
 {
- setGameSpeed(DEFAULT_GAME_SPEED);
+ setGameSpeed(boConfig->intDefaultValue("GameSpeed"));
  setMiniMapScale(boConfig->doubleDefaultValue("MiniMapScale"));
  setRMBMovesWithAttack(boConfig->boolDefaultValue("RMBMovesWithAttack"));
 }
@@ -849,8 +837,6 @@ void OpenGLOptions::apply()
 	boConfig->setIntValue("ShadowMapResolution", indexToShadowMapResolution(mShadowQuality->currentItem()));
  }
 
-
- emit signalOpenGLSettingsUpdated();
 
  boDebug(210) << k_funcinfo << "done" << endl;
 }

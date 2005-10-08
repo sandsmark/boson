@@ -281,6 +281,8 @@ void BosonMainWidget::initUfoGUI()
  d->mMenuInput = new BosonMainWidgetMenuInput(ufoManager()->actionCollection(), this);
  connect(d->mMenuInput, SIGNAL(signalDebugUfoWidgets()),
 		this, SLOT(slotDebugUfoWidgets()));
+ connect(d->mMenuInput, SIGNAL(signalPreferencesApply()),
+		this, SLOT(slotPreferencesApply()));
 
  BoUfoWidget* contentWidget = ufoManager()->contentWidget();
  contentWidget->setLayoutClass(BoUfoWidget::UFullLayout);
@@ -323,8 +325,6 @@ void BosonMainWidget::initUfoGUI()
 		this, SLOT(slotQuicksaveGame()));
  connect(d->mGameView, SIGNAL(signalQuickloadGame()),
 		this, SLOT(slotQuickloadGame()));
- connect(d->mGameView, SIGNAL(signalSetUpdateInterval(unsigned int)),
-		this, SLOT(slotSetUpdateInterval(unsigned int)));
  connect(d->mGameView, SIGNAL(signalSetWidgetCursor(BosonCursor*)),
 		this, SLOT(slotSetWidgetCursor(BosonCursor*)));
  d->mGameView->setGameFPSCounter(new BosonGameFPSCounter(d->mFPSCounter));
@@ -707,7 +707,6 @@ void BosonMainWidget::saveConfig()
  }
  if (boGame->gameMode()) {
 	BosonConfig::saveLocalPlayerName(d->mLocalPlayer->name());
-	BosonConfig::saveGameSpeed(boGame->gameSpeed());
  } else {
  }
 }
@@ -1029,7 +1028,7 @@ void BosonMainWidget::slotGameStarted()
 		if (boGame->gameSpeed() == 0) {
 			// don't do this if gameSpeed() != 0, as it was set already
 			// (e.g. due to a savegame)
-			boGame->slotSetGameSpeed(BosonConfig::readGameSpeed());
+			boGame->slotSetGameSpeed(boConfig->intValue("GameSpeed"));
 		}
 	}
 	boMusic->startLoop();
@@ -1135,6 +1134,22 @@ void BosonMainWidget::raiseWidget(BoUfoWidget* w)
 	resize(r.width(), r.height());
 #endif
 	showMaximized();
+ }
+}
+
+void BosonMainWidget::slotPreferencesApply()
+{
+ // apply all options from boConfig to boson, that need to be applied. all
+ // options that are stored in boConfig only don't need to be touched.
+ // AB: cursor is still a special case and not handled here.
+ boDebug() << k_funcinfo << endl;
+ d->mGameView->setToolTipCreator(boConfig->intValue("ToolTipCreator"));
+ d->mGameView->setToolTipUpdatePeriod(boConfig->intValue("ToolTipUpdatePeriod"));
+ slotSetUpdateInterval(boConfig->uintValue("GLUpdateInterval"));
+ if (boGame) {
+	if (boGame->gameSpeed() != boConfig->intValue("GameSpeed")) {
+		boGame->slotSetGameSpeed(boConfig->intValue("GameSpeed"));
+	}
  }
 }
 

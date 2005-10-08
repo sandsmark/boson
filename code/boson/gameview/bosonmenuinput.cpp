@@ -37,7 +37,6 @@
 #include "../bosonplayfield.h"
 #include "../bosonmap.h"
 #include "../bosongroundtheme.h"
-#include "../optionsdialog.h"
 #include "../bogroundrenderermanager.h"
 #include "../bomeshrenderermanager.h"
 #include "../playerio.h"
@@ -351,7 +350,6 @@ void BosonMenuInputData::initUfoGameActions()
  (void)BoUfoStdAction::gameSave(this, SIGNAL(signalSaveGame()), actionCollection());
  (void)BoUfoStdAction::gameLoad(this, SIGNAL(signalLoadGame()), actionCollection());
  (void)BoUfoStdAction::gamePause(boGame, SLOT(slotTogglePause()), actionCollection());
- (void)BoUfoStdAction::preferences(this, SIGNAL(signalPreferences()), actionCollection());
  (void)new BoUfoAction(i18n("Quicksave"),
 		KShortcut(Qt::Key_F5),
 		this, SIGNAL(signalQuicksaveGame()),
@@ -414,7 +412,6 @@ void BosonMenuInputData::initUfoEditorActions()
  // TODO
 // close->setText(i18n("&End Editor"));
  BoUfoStdAction::fileQuit(this, SIGNAL(signalQuit()), actionCollection());
- (void)BoUfoStdAction::preferences(this, SIGNAL(signalPreferences()), actionCollection());
 
  d->mActionEditorPlayer = new BoUfoSelectAction(i18n("&Player"), 0, 0, actionCollection(), "editor_player");
  connect(d->mActionEditorPlayer, SIGNAL(signalActivated(int)),
@@ -472,8 +469,6 @@ void BosonMenuInputData::initUfoEditorActions()
  BoUfoStdAction::editRedo(this, SIGNAL(signalEditorRedo()), actionCollection());
  actionCollection()->action("edit_undo")->setEnabled(false);
  actionCollection()->action("edit_redo")->setEnabled(false);
-
-// KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection()); // FIXME: slotEditorPreferences()
 
  createEditorPlayerMenu();
  d->mActionEditorPlace->setCurrentItem(0);
@@ -800,8 +795,6 @@ void BosonMenuInput::initIO(KPlayer* player)
 		this, SLOT(slotEndGame()));
  connect(mData, SIGNAL(signalQuit()),
 		this, SIGNAL(signalQuit()));
- connect(mData, SIGNAL(signalPreferences()),
-		this, SLOT(slotPreferences()));
 
  // game signals
  connect(mData, SIGNAL(signalSaveGame()),
@@ -1141,31 +1134,6 @@ void BosonMenuInput::slotDebugMemory()
  dialog->show();
  boDebug() << k_funcinfo << "done" << endl;
 #endif
-}
-
-void BosonMenuInput::slotPreferences()
-{
- if (!boGame) {
-	boWarning() << k_funcinfo << "NULL boGame object" << endl;
-	return;
- }
- OptionsDialog* dlg = new OptionsDialog(!boGame->gameMode(), 0);
- dlg->setGame(boGame);
- dlg->setPlayer(playerIO()->player());
- dlg->slotLoad();
-
- connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater())); // seems not to be called if you quit with "cancel"!
-
- connect(dlg, SIGNAL(signalCursorChanged(int, const QString&)),
-		this, SIGNAL(signalChangeCursor(int, const QString&)));
- connect(dlg, SIGNAL(signalOpenGLSettingsUpdated()),
-		this, SIGNAL(signalUpdateOpenGLSettings()));
- connect(dlg, SIGNAL(signalApply()),
-		this, SIGNAL(signalPreferencesApply()));
-// connect(dlg, SIGNAL(signalFontChanged(const BoFontInfo&)),
-//		displayManager(), SLOT(slotChangeFont(const BoFontInfo&)));
-
- dlg->show();
 }
 
 void BosonMenuInput::slotCenterHomeBase()

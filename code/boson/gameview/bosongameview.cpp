@@ -1026,8 +1026,6 @@ void BosonGameView::init()
 
  setMouseEventsEnabled(true, true);
  setFocusEventsEnabled(true);
-
- updateOpenGLSettings();
 }
 
 void BosonGameView::quitGame()
@@ -1836,10 +1834,17 @@ void BosonGameView::slotWidgetHidden()
  }
 }
 
+void BosonGameView::slotChangeCursor(int mode, const QString& dir)
+{
+ if (boGame && boGame->gameMode()) {
+	d->mUfoCursorWidget->slotChangeCursor(mode, dir);
+ }
+}
+
 void BosonGameView::resetGameMode()
 {
  d->mGameMode = true;
- d->mUfoCursorWidget->slotChangeCursor(boConfig->intValue("CursorMode"), boConfig->stringValue("CursorDir"));
+ slotChangeCursor(boConfig->intValue("CursorMode"), boConfig->stringValue("CursorDir"));
 
  delete d->mInput;
  d->mInput = 0;
@@ -1908,12 +1913,6 @@ void BosonGameView::slotAddMenuInput()
 			d->mSelectionGroups, SLOT(slotCreateSelectionGroup(int)));
 	connect(io, SIGNAL(signalShowSelectionGroup(int)),
 			this, SLOT(slotCenterOnSelectionGroup(int)));
-	connect(io, SIGNAL(signalPreferencesApply()),
-			this, SLOT(slotPreferencesApply()));
-	connect(io, SIGNAL(signalUpdateOpenGLSettings()),
-			this, SLOT(slotUpdateOpenGLSettings()));
-	connect(io, SIGNAL(signalChangeCursor(int, const QString&)),
-			d->mUfoCursorWidget, SLOT(slotChangeCursor(int, const QString&)));
 	connect(io, SIGNAL(signalEndGame()),
 			this, SIGNAL(signalEndGame()));
 	connect(io, SIGNAL(signalQuit()),
@@ -2099,33 +2098,6 @@ void BosonGameView::saveAsXML(QDomElement& root)
  QDomElement sel = doc.createElement(QString::fromLatin1("Selection"));
  selection()->saveAsXML(sel);
  display.appendChild(sel);
-}
-
-void BosonGameView::updateOpenGLSettings()
-{
- // AB: note there seems to be hardly a difference between flat and smooth
- // shading (in both quality and speed)
- if (boConfig->boolValue("SmoothShading", true)) {
-	glShadeModel(GL_SMOOTH);
- } else {
-	glShadeModel(GL_FLAT);
- }
-}
-
-void BosonGameView::slotUpdateOpenGLSettings()
-{
- updateOpenGLSettings();
-}
-
-void BosonGameView::slotPreferencesApply()
-{
- // apply all options from boConfig to boson, that need to be applied. all
- // options that are stored in boConfig only don't need to be touched.
- // AB: cursor is still a special case and not handled here.
- boDebug() << k_funcinfo << endl;
- setToolTipCreator(boConfig->intValue("ToolTipCreator"));
- setToolTipUpdatePeriod(boConfig->intValue("ToolTipUpdatePeriod"));
- emit signalSetUpdateInterval(boConfig->uintValue("GLUpdateInterval"));
 }
 
 void BosonGameView::setFont(const BoFontInfo& font)
@@ -2529,8 +2501,15 @@ void BosonGameView::paint()
 	}
  }
 
-
  glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+ // AB: note there seems to be hardly a difference between flat and smooth
+ // shading (in both quality and speed)
+ if (boConfig->boolValue("SmoothShading", true)) {
+	glShadeModel(GL_SMOOTH);
+ } else {
+	glShadeModel(GL_FLAT);
+ }
 
  boTextureManager->invalidateCache();
 

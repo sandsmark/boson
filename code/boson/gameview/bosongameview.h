@@ -550,8 +550,6 @@ public:
 	BoLight* newLight();
 	void removeLight(int id);
 
-	void updateOpenGLSettings();
-
 	virtual void paint();
 	virtual void paintWidget();
 
@@ -561,6 +559,7 @@ public slots:
 	 **/
 	void slotReCenterDisplay(const QPoint& pos);
 	void slotCenterHomeBase();
+	void slotChangeCursor(int mode, const QString& dir);
 
 	/**
 	 * In case the unit has been destroyed make sure that it's removed from
@@ -599,7 +598,6 @@ signals:
 	void signalEditorChangeLocalPlayer(Player*);
 	void signalEditorHasUndo(const QString&);
 	void signalEditorHasRedo(const QString&);
-	void signalSetUpdateInterval(unsigned int ms);
 
 	/**
 	 * See @ref BosonCursorCollection::signalSetWidgetCursor
@@ -748,8 +746,6 @@ protected slots:
 
 
 	void slotShowLight0Widget();
-	void slotPreferencesApply();
-	void slotUpdateOpenGLSettings();
 
 	void slotScroll(int);
 	void slotCenterOnSelectionGroup(int);
