@@ -66,7 +66,6 @@
 OptionsWidget::OptionsWidget()
 {
  mGame = 0;
- mPlayer = 0;
 }
 
 OptionsWidget::~OptionsWidget()

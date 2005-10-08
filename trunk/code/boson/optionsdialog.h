@@ -42,8 +42,6 @@ public:
 	void setGame(Boson* boson);
 	void setPlayer(Player* localPlayer);
 
-	void setCursor(CursorMode mode);
-
 signals:
 	void signalCursorChanged(int index, const QString& cursorDir);
 	void signalOpenGLSettingsUpdated();
