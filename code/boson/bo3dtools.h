@@ -80,6 +80,9 @@ bool saveVector4AsXML(const BoVector4Fixed&, QDomElement& root, const QString& n
 bool loadVector4FromXML(BoVector4Float*, const QDomElement& root, const QString& name);
 bool loadVector4FromXML(BoVector4Fixed*, const QDomElement& root, const QString& name);
 
+bool saveMatrixAsXML(const BoMatrix& matrix, QDomElement& root);
+bool loadMatrixFromXML(BoMatrix* matrix, const QDomElement& root);
+
 // convenience function to convert a BoVector into a string for debugging
 QString debugStringVector(const BoVector3Float&, int prec);
 QString debugStringVector(const BoVector3Fixed&, int prec);
