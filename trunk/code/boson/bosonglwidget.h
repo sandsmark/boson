@@ -156,7 +156,7 @@ public:
 	QImage screenShot();
 
 public slots:
-	void slotUpdateGL();
+	virtual void slotUpdateGL();
 
 protected:
 	void initGL();
