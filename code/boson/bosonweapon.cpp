@@ -672,6 +672,7 @@ void BosonWeapon::shoot(const BoVector3Fixed& pos, const BoVector3Fixed& target)
   BosonShot* shot = mProp->newShot(unit(), this, pos, target);
   canvas()->shotFired(shot, this);
   mReloadCounter = reloadingTime();
+  mAmmunition = 0;
 }
 
 bool BosonWeapon::layMine()
@@ -714,6 +715,7 @@ bool BosonWeapon::dropBomb(const BoVector2Fixed& hvelocity)
   bomb->setHorizontalVelocity(hvelocity);
   canvas()->shotFired(bomb, this);
   mReloadCounter = reloadingTime();
+  mAmmunition = 0;
   boDebug() << k_funcinfo << "done" << endl;
   return true;
 }
@@ -805,6 +807,8 @@ void BosonWeaponTurret::pointTo(const BoVector3Fixed& direction)
 
   mMeshMatrix = mProperties->initialMeshMatrix();
   mMeshMatrix.multiply(&m);
+
+  // TODO: save mesh matrix (KGameProperty?)
 }
 
 const QStringList& BosonWeaponTurret::meshNames() const
