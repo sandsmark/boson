@@ -51,15 +51,11 @@ public:
 	virtual void apply() = 0;
 	virtual void setDefaults() = 0; // reset to hardcoded defaults
 
-	Player* localPlayer() const { return mPlayer; }
 	Boson* game() const { return mGame; }
-
-	void setLocalPlayer(Player* p) { mPlayer = p; }
 	void setGame(Boson* g) { mGame = g; }
 
 private:
 	Boson* mGame;
-	Player* mPlayer;
 };
 
 class GeneralOptions : public QVBox, public OptionsWidget

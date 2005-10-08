@@ -43,9 +43,15 @@ public:
 	CursorOptions* mCursorOptions;
 };
 
-OptionsDialog::OptionsDialog(bool editor, QWidget* parent, bool modal)
-		: KDialogBase(Tabbed, i18n("Boson Options"), Ok|Apply|Default,
-		Cancel, parent, "bosonoptionsdialog", modal, true)
+OptionsDialog::OptionsDialog(bool editor, QWidget*, bool/*modal*/)
+	: KDialogBase(Tabbed,
+			i18n("Boson Options"),
+			Ok|Apply|Default,
+			Cancel,
+			/*parent*/0,
+			"bosonoptionsdialog",
+			/*modal*/false,
+			true)
 {
  d = new OptionsDialogPrivate;
 
@@ -147,18 +153,6 @@ void OptionsDialog::setGame(Boson* game)
 
 void OptionsDialog::setPlayer(Player* p)
 {
- QPtrListIterator<OptionsWidget> it(d->mOptionsWidgets);
- for (; it.current(); ++it) {
-	it.current()->setLocalPlayer(p);
- }
-}
-
-void OptionsDialog::setCursor(CursorMode mode)
-{
- if (!d->mCursorOptions) {
-	return;
- }
- d->mCursorOptions->setCursor(mode);
 }
 
 void OptionsDialog::slotLoad()
