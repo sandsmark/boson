@@ -1409,7 +1409,7 @@ bool BosonFileConverter::convertPlayField_From_0_11_To_0_11_80(QMap<QString, QBy
  return true;
 }
 
-bool BosonFileConverter::convertPlayField_From_0_11_80_To_0_12(QMap<QString, QByteArray>& files)
+bool BosonFileConverter::convertPlayField_From_0_11_80_To_0_11_81(QMap<QString, QByteArray>& files)
 {
  QDomDocument kgameDoc(QString::fromLatin1("Boson"));
  if (!loadXMLDoc(&kgameDoc, files["kgame.xml"])) {
@@ -1431,12 +1431,7 @@ bool BosonFileConverter::convertPlayField_From_0_11_80_To_0_12(QMap<QString, QBy
  QDomElement playersRoot = playersDoc.documentElement();
  QDomElement canvasRoot = canvasDoc.documentElement();
 
-#if BOSON_VERSION_MINOR < 0x12
  kgameRoot.setAttribute("Version", BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x03, 0x01));
-#else
-#error TODO: the above version to be BOSON_SAVEGAME_FORMAT_VERSION_0_12
- kgameRoot.setAttribute("Version", BOSON_SAVEGAME_FORMAT_VERSION_0_12);
-#endif
 
  QDomElement canvasEventListenerInCanvas = canvasRoot.namedItem("EventListener").toElement();
  if (canvasEventListenerInCanvas.isNull()) {
@@ -1474,6 +1469,62 @@ bool BosonFileConverter::convertPlayField_From_0_11_80_To_0_12(QMap<QString, QBy
  files.insert("eventlistener/commandframe.xml", eventListenerXML);
  files.insert("eventlistener/localplayer.xml", eventListenerXML);
  files.insert("eventlistener/canvas.xml", canvasEventListenerDoc.toString().utf8());
+
+ files.insert("kgame.xml", kgameDoc.toString().utf8());
+ files.insert("canvas.xml", canvasDoc.toString().utf8());
+ return true;
+}
+
+bool BosonFileConverter::convertPlayField_From_0_11_81_To_0_12(QMap<QString, QByteArray>& files)
+{
+ QDomDocument kgameDoc(QString::fromLatin1("Boson"));
+ if (!loadXMLDoc(&kgameDoc, files["kgame.xml"])) {
+	boError() << k_funcinfo << "could not load kgame.xml" << endl;
+	return false;
+ }
+ QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
+ if (!loadXMLDoc(&canvasDoc, files["canvas.xml"])) {
+	boError() << k_funcinfo << "could not load canvas.xml" << endl;
+	return false;
+ }
+
+ QDomElement kgameRoot = kgameDoc.documentElement();
+ QDomElement canvasRoot = canvasDoc.documentElement();
+
+#if BOSON_VERSION_MINOR < 0x12
+ kgameRoot.setAttribute("Version", BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x03, 0x02));
+#else
+#error TODO: the above version to be BOSON_SAVEGAME_FORMAT_VERSION_0_12
+ kgameRoot.setAttribute("Version", BOSON_SAVEGAME_FORMAT_VERSION_0_12);
+#endif
+
+ // retrieve all UnitPlugins, including all weapons
+ QDomNodeList unitPlugins = canvasRoot.elementsByTagName("UnitPlugin");
+ for (unsigned int i = 0; i < unitPlugins.count(); i++) {
+	QDomElement e = unitPlugins.item(i).toElement();
+	bool ok;
+	int type = e.attribute("Type").toInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "invalid Type attribute" << endl;
+		return false;
+	}
+	if (type != 4) { // not a UnitPlugin::Weapon
+		continue;
+	}
+	// AB: we add a TurretMeshMatrix to all weapons, even those that dont
+	// have a turret. the element is simply ignored for these then.
+	QDomElement matrix = canvasDoc.createElement("TurretMeshMatrix");
+	for (int i = 1; i <= 4; i++) {
+		QDomElement row = canvasDoc.createElement("Row");
+		for (int j = 1; j <= 4; j++) {
+			QDomElement column = canvasDoc.createElement("Column");
+			column.setAttribute("Value", (i == j) ? 1.0 : 0.0);
+			row.appendChild(column);
+		}
+		matrix.appendChild(row);
+	}
+	e.appendChild(matrix);
+ }
 
  files.insert("kgame.xml", kgameDoc.toString().utf8());
  files.insert("canvas.xml", canvasDoc.toString().utf8());

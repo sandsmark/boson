@@ -1117,7 +1117,7 @@ bool BosonPlayField::convertFilesToCurrentFormat(QMap<QString, QByteArray>& dest
 		boDebug() << k_funcinfo << "converting from 0.11 to 0.11.80 format" << endl;
 		BosonFileConverter converter;
 		if (!converter.convertPlayField_From_0_11_To_0_11_80(destFiles)) {
-			boError() << k_funcinfo << "could not convert from boson 0.11 to boson 0.12 file format" << endl;
+			boError() << k_funcinfo << "could not convert from boson 0.11 to boson 0.11.80 file format" << endl;
 			ret = false;
 		} else {
 			ret = true;
@@ -1126,10 +1126,24 @@ bool BosonPlayField::convertFilesToCurrentFormat(QMap<QString, QByteArray>& dest
 	}
 	case BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x03, 0x00): // development version ("0.11.80")
 	{
-		boDebug() << k_funcinfo << "converting from 0.11.80 to 0.12 format" << endl;
+		boDebug() << k_funcinfo << "converting from 0.11.80 to 0.11.81 format" << endl;
 		BosonFileConverter converter;
-		if (!converter.convertPlayField_From_0_11_80_To_0_12(destFiles)) {
-			boError() << k_funcinfo << "could not convert from boson 0.11 to boson 0.12 file format" << endl;
+		if (!converter.convertPlayField_From_0_11_80_To_0_11_81(destFiles)) {
+			boError() << k_funcinfo << "could not convert from boson 0.11.80 to boson 0.11.81 file format" << endl;
+			ret = false;
+		} else {
+			ret = true;
+		}
+		break;
+	}
+	case BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x03, 0x01): // development version ("0.11.81")
+	{
+		const char* from = "0.11.81";
+		const char* to = "0.12";
+		boDebug() << k_funcinfo << "converting from " << from << " to " << to << " format" << endl;
+		BosonFileConverter converter;
+		if (!converter.convertPlayField_From_0_11_81_To_0_12(destFiles)) {
+			boError() << k_funcinfo << "could not convert from boson " << from << " to boson " << to << " file format" << endl;
 			ret = false;
 		} else {
 			ret = true;

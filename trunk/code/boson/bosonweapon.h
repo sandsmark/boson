@@ -275,6 +275,7 @@ class BosonWeapon : public UnitPlugin
 {
   public:
     enum PropertyIds {
+      // AB: up to 100 IDs supported per weapon
       IdReloadCounter = KGamePropertyBase::IdUser + 0,
       IdAmmunition = KGamePropertyBase::IdUser + 1,
 
@@ -490,6 +491,9 @@ class BosonWeaponTurret
   public:
     BosonWeaponTurret(const BosonWeaponTurretProperties* prop);
     ~BosonWeaponTurret();
+
+    bool saveAsXML(QDomElement& root) const;
+    bool loadFromXML(const QDomElement& root);
 
     const QStringList& meshNames() const;
 
