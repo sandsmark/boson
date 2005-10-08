@@ -26,10 +26,13 @@
 #include "bodebug.h"
 #include "bosonconfig.h"
 #include "unitproperties.h"
+#include "bo3dtools.h"
 
 #include <math.h>
 
 #include <ksimpleconfig.h>
+
+#include <qdom.h>
 
 // Degrees to radians conversion (AB: from mesa/src/macros.h)
 #define DEG2RAD (M_PI/180.0)
@@ -549,20 +552,38 @@ void BosonWeapon::registerWeaponData(int weaponNumber, KGamePropertyBase* prop, 
    // a name isn't necessary, so don't return
  }
  id += weaponNumber * 100; // we support up to 100 IDs per weapon. we'll never use them.
+ if (BosonWeapon::LastPropertyId >= KGamePropertyBase::IdUser + 100)
+ {
+   boError() << k_funcinfo << "only up to 100 IDs per weapon supported" << endl;
+ }
  prop->registerData(id, unit()->weaponDataHandler(),
 		local ? KGamePropertyBase::PolicyLocal : KGamePropertyBase::PolicyClean,
 		name);
 }
 
-bool BosonWeapon::saveAsXML(QDomElement& /*root*/) const
+bool BosonWeapon::saveAsXML(QDomElement& root) const
 {
- // AB: nothing to do here.
+ if(turret())
+ {
+   if(!turret()->saveAsXML(root))
+   {
+     boError() << k_funcinfo << "saving turret failed" << endl;
+     return false;
+   }
+ }
  return true;
 }
 
-bool BosonWeapon::loadFromXML(const QDomElement& /*root*/)
+bool BosonWeapon::loadFromXML(const QDomElement& root)
 {
- // AB: nothing to do here.
+ if(turret())
+ {
+   if(!mTurret->loadFromXML(root))
+   {
+     boError() << k_funcinfo << "loading turret failed" << endl;
+     return false;
+   }
+ }
  return true;
 }
 
@@ -797,6 +818,35 @@ BosonWeaponTurret::~BosonWeaponTurret()
 {
 }
 
+bool BosonWeaponTurret::saveAsXML(QDomElement& root) const
+{
+  QDomDocument doc = root.ownerDocument();
+  QDomElement turretMeshMatrix = doc.createElement("TurretMeshMatrix");
+  if(!saveMatrixAsXML(mMeshMatrix, turretMeshMatrix))
+  {
+    boError() << k_funcinfo << "unable to save TurretMeshMatrix" << endl;
+    return false;
+  }
+  root.appendChild(turretMeshMatrix);
+  return true;
+}
+
+bool BosonWeaponTurret::loadFromXML(const QDomElement& root)
+{
+  QDomElement turretMeshMatrix = root.namedItem("TurretMeshMatrix").toElement();
+  if(turretMeshMatrix.isNull())
+  {
+    boError() << k_funcinfo << "no TurretMeshMatrix tag" << endl;
+    return false;
+  }
+  if(!loadMatrixFromXML(&mMeshMatrix, turretMeshMatrix))
+  {
+    boError() << k_funcinfo << "unable to load TurretMeshMatrix" << endl;
+    return false;
+  }
+  return true;
+}
+
 void BosonWeaponTurret::pointTo(const BoVector3Fixed& direction)
 {
   // AB: atm we support rotations around the z axis only
@@ -807,8 +857,6 @@ void BosonWeaponTurret::pointTo(const BoVector3Fixed& direction)
 
   mMeshMatrix = mProperties->initialMeshMatrix();
   mMeshMatrix.multiply(&m);
-
-  // TODO: save mesh matrix (KGameProperty?)
 }
 
 const QStringList& BosonWeaponTurret::meshNames() const
