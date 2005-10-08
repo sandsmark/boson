@@ -140,6 +140,8 @@ signals:
 
 	void signalPreferredSizeChanged();
 
+	void signalPreferences();
+
 protected:
 	void initWidget(WidgetId widgetId);
 	void removeWidget(WidgetId widgetId);

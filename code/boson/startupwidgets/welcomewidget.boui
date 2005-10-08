@@ -18,6 +18,7 @@
    <gridLayoutColumns/>
    <gridLayoutRows/>
    <borderType/>
+   <takesKeyboardFocus/>
   </Properties>
   <Widget>
    <ClassName>BoUfoWidget</ClassName>
@@ -37,6 +38,7 @@
     <gridLayoutColumns/>
     <gridLayoutRows/>
     <borderType/>
+    <takesKeyboardFocus/>
    </Properties>
    <Widget>
     <ClassName>BoUfoLabel</ClassName>
@@ -58,6 +60,7 @@
      <gridLayoutColumns/>
      <gridLayoutRows/>
      <borderType/>
+     <takesKeyboardFocus/>
     </Properties>
    </Widget>
   </Widget>
@@ -79,6 +82,7 @@
     <gridLayoutColumns/>
     <gridLayoutRows/>
     <borderType/>
+    <takesKeyboardFocus/>
    </Properties>
   </Widget>
   <Widget>
@@ -101,6 +105,7 @@
     <gridLayoutColumns/>
     <gridLayoutRows/>
     <borderType/>
+    <takesKeyboardFocus/>
    </Properties>
   </Widget>
   <Widget>
@@ -121,6 +126,7 @@
     <gridLayoutColumns/>
     <gridLayoutRows/>
     <borderType/>
+    <takesKeyboardFocus/>
    </Properties>
   </Widget>
   <Widget>
@@ -141,6 +147,7 @@
     <gridLayoutColumns/>
     <gridLayoutRows/>
     <borderType/>
+    <takesKeyboardFocus/>
    </Properties>
    <Widget>
     <ClassName>BoUfoWidget</ClassName>
@@ -160,6 +167,7 @@
      <gridLayoutColumns/>
      <gridLayoutRows/>
      <borderType/>
+     <takesKeyboardFocus/>
     </Properties>
    </Widget>
    <Widget>
@@ -182,6 +190,7 @@
      <gridLayoutColumns/>
      <gridLayoutRows/>
      <borderType/>
+     <takesKeyboardFocus/>
     </Properties>
    </Widget>
    <Widget>
@@ -202,6 +211,7 @@
      <horizontalAlignment/>
      <borderType/>
      <stretch>1</stretch>
+     <takesKeyboardFocus/>
     </Properties>
    </Widget>
    <Widget>
@@ -224,6 +234,7 @@
      <stretch/>
      <text>Start &amp;Multiplayer Game</text>
      <iconFile/>
+     <takesKeyboardFocus/>
     </Properties>
    </Widget>
    <Widget>
@@ -244,6 +255,7 @@
      <gridLayoutColumns/>
      <gridLayoutRows/>
      <borderType/>
+     <takesKeyboardFocus/>
     </Properties>
    </Widget>
    <Widget>
@@ -266,6 +278,7 @@
      <gridLayoutColumns/>
      <gridLayoutRows/>
      <borderType/>
+     <takesKeyboardFocus/>
     </Properties>
    </Widget>
    <Widget>
@@ -286,6 +299,7 @@
      <gridLayoutColumns/>
      <gridLayoutRows/>
      <borderType/>
+     <takesKeyboardFocus/>
     </Properties>
    </Widget>
    <Widget>
@@ -308,6 +322,7 @@
      <gridLayoutColumns/>
      <gridLayoutRows/>
      <borderType/>
+     <takesKeyboardFocus/>
     </Properties>
    </Widget>
    <Widget>
@@ -328,6 +343,51 @@
      <gridLayoutColumns/>
      <gridLayoutRows/>
      <borderType/>
+     <takesKeyboardFocus/>
+    </Properties>
+   </Widget>
+   <Widget>
+    <ClassName>BoUfoPushButton</ClassName>
+    <Properties>
+     <name>mOptions</name>
+     <constraints/>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
+     <opaque/>
+     <layout/>
+     <minimumWidth/>
+     <minimumHeight/>
+     <preferredWidth/>
+     <preferredHeight/>
+     <backgroundImageFile/>
+     <verticalAlignment/>
+     <horizontalAlignment/>
+     <borderType/>
+     <stretch/>
+     <takesKeyboardFocus/>
+     <text>Options</text>
+     <iconFile/>
+    </Properties>
+   </Widget>
+   <Widget>
+    <ClassName>BoUfoWidget</ClassName>
+    <Properties>
+     <name>mWidget19</name>
+     <constraints/>
+     <gridLayoutColumns/>
+     <gridLayoutRows/>
+     <opaque/>
+     <layout/>
+     <minimumWidth/>
+     <minimumHeight/>
+     <preferredWidth/>
+     <preferredHeight/>
+     <backgroundImageFile/>
+     <verticalAlignment/>
+     <horizontalAlignment/>
+     <borderType/>
+     <stretch>1</stretch>
+     <takesKeyboardFocus/>
     </Properties>
    </Widget>
    <Widget>
@@ -350,6 +410,7 @@
      <gridLayoutColumns/>
      <gridLayoutRows/>
      <borderType/>
+     <takesKeyboardFocus/>
     </Properties>
    </Widget>
    <Widget>
@@ -370,11 +431,17 @@
      <gridLayoutColumns/>
      <gridLayoutRows/>
      <borderType/>
+     <takesKeyboardFocus/>
     </Properties>
    </Widget>
   </Widget>
  </Widgets>
  <Methods>
+  <Method return="void" visibility="public" type="signal" name="signalPreferences()" >
+   <Connections>
+    <Connection sender="mOptions" signal="signalClicked()" type="receiver" />
+   </Connections>
+  </Method>
   <Method return="void" visibility="public" type="signal" name="signalLoadGame()" >
    <Connections>
     <Connection sender="mLoadGame" signal="signalClicked()" type="receiver" />

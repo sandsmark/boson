@@ -53,6 +53,7 @@
 #include "boufo/boufodebugwidget.h"
 #include "boufo/boufofactory.h"
 #include "bodebug.h"
+#include "optionsdialog.h"
 
 #include <klocale.h>
 #include <kmessagebox.h>
@@ -281,8 +282,8 @@ void BosonMainWidget::initUfoGUI()
  d->mMenuInput = new BosonMainWidgetMenuInput(ufoManager()->actionCollection(), this);
  connect(d->mMenuInput, SIGNAL(signalDebugUfoWidgets()),
 		this, SLOT(slotDebugUfoWidgets()));
- connect(d->mMenuInput, SIGNAL(signalPreferencesApply()),
-		this, SLOT(slotPreferencesApply()));
+ connect(d->mMenuInput, SIGNAL(signalPreferences()),
+		this, SLOT(slotPreferences()));
 
  BoUfoWidget* contentWidget = ufoManager()->contentWidget();
  contentWidget->setLayoutClass(BoUfoWidget::UFullLayout);
@@ -300,6 +301,7 @@ void BosonMainWidget::initUfoGUI()
  connect(d->mStartup, SIGNAL(signalResetGame()),
 		this, SLOT(slotResetGame()));
  connect(d->mStartup, SIGNAL(signalQuit()), this, SLOT(close()));
+ connect(d->mStartup, SIGNAL(signalPreferences()), this, SLOT(slotPreferences()));
  connect(d->mStartup, SIGNAL(signalLoadGame(const QString&)),
 		this, SLOT(slotLoadGame(const QString&)));
  connect(d->mStartup, SIGNAL(signalSaveGame(const QString&, const QString&)),
@@ -1137,6 +1139,24 @@ void BosonMainWidget::raiseWidget(BoUfoWidget* w)
  }
 }
 
+void BosonMainWidget::slotPreferences()
+{
+ OptionsDialog* dlg = new OptionsDialog(0);
+ dlg->slotLoad();
+
+ // FIXME: is this called if quit with "cancel" ?
+ connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater()));
+
+ connect(dlg, SIGNAL(signalCursorChanged(int, const QString&)),
+		d->mGameView, SLOT(slotChangeCursor(int, const QString&)));
+ connect(dlg, SIGNAL(signalApply()),
+		this, SLOT(slotPreferencesApply()));
+// connect(dlg, SIGNAL(signalFontChanged(const BoFontInfo&)),
+//		displayManager(), SLOT(slotChangeFont(const BoFontInfo&)));
+
+ dlg->show();
+
+}
 void BosonMainWidget::slotPreferencesApply()
 {
  // apply all options from boConfig to boson, that need to be applied. all

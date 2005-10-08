@@ -262,6 +262,7 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 		connect(welcome, SIGNAL(signalNewMPGame()), this, SLOT(slotNewMultiPlayerGame()));
 		connect(welcome, SIGNAL(signalLoadGame()), this, SLOT(slotLoadGame()));
 		connect(welcome, SIGNAL(signalStartEditor()), this, SLOT(slotStartEditor()));
+		connect(welcome, SIGNAL(signalPreferences()), this, SIGNAL(signalPreferences()));
 		w = welcome;
 		break;
 	}
