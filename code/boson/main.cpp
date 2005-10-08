@@ -138,7 +138,7 @@ int main(int argc, char **argv)
  bool forceWantDirect = boConfig->boolValue("ForceWantDirect");
  BosonMainWidget* top = new BosonMainWidget(0, forceWantDirect);
  if (!top->directRendering()) {
-	KMessageBox::information(0, i18n("Direct rendering is NOT enabled - boson will run very slow. You should ensure that direct rendering is enabled!"));
+	KMessageBox::information(0, i18n("Direct rendering is NOT enabled! 3d acceleration is DISABLED.\nBoson will very slow (seconds per frame instead of frames per second).\n\nIf you are sure that your 3d drivers are installed correctly and support 3d acceleration, please let us know about this problem and help us fixing it: boson-devel@lists.sourceforge.net"));
  }
  app.setMainWidget(top);
  top->show();
