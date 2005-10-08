@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2002 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ class Player;
 class Boson;
 class BoFontInfo;
 
+class OptionsDialogPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -36,15 +37,11 @@ class OptionsDialog : public KDialogBase
 {
 	Q_OBJECT
 public:
-	OptionsDialog(bool editor, QWidget* parent, bool modal = false);
+	OptionsDialog(QWidget* parent = 0);
 	~OptionsDialog();
-
-	void setGame(Boson* boson);
-	void setPlayer(Player* localPlayer);
 
 signals:
 	void signalCursorChanged(int index, const QString& cursorDir);
-	void signalOpenGLSettingsUpdated();
 	void signalFontChanged(const BoFontInfo&);
 
 	/**
@@ -81,7 +78,6 @@ protected:
 	void addOptions(OptionsWidget* o);
 
 private:
-	class OptionsDialogPrivate;
 	OptionsDialogPrivate* d;
 
 };

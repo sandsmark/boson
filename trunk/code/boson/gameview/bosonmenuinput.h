@@ -166,9 +166,6 @@ signals:
 	void signalSelectSelectionGroup(int);
 	void signalCreateSelectionGroup(int);
 	void signalShowSelectionGroup(int);
-	void signalPreferencesApply();
-	void signalUpdateOpenGLSettings();
-	void signalChangeCursor(int mode, const QString& cursorDir);
 	void signalEndGame();
 	void signalQuit();
 	void signalSaveGame();
@@ -205,7 +202,6 @@ protected slots:
 	void slotReloadMeshRenderer();
 	void slotReloadGroundRenderer();
 	void slotDebugMemory();
-	void slotPreferences();
 	void slotSetGrabMovie(bool);
 
 	void slotCenterHomeBase();

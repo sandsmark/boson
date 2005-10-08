@@ -333,6 +333,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntry(new BoConfigStringEntry(this, "GameViewPlugin", "BosonGameViewDefault"));
  addDynamicEntry(new BoConfigBoolEntry(this, "EditorShowRandomMapGenerationWidget", false));
  addDynamicEntry(new BoConfigBoolEntry(this, "ShowUnitDebugWidget", false));
+ addDynamicEntry(new BoConfigIntEntry(this, "GameSpeed", DEFAULT_GAME_SPEED));
 
 
  // the following are NOT stored into the config file
@@ -648,29 +649,6 @@ void BosonConfig::saveEditorCreateNewMap(bool createnew, KConfig* conf)
  conf->setGroup("Editor");
  conf->writeEntry("CreateNewMap", createnew);
  conf->setGroup(oldGroup);
-}
-
-void BosonConfig::saveGameSpeed(int speed, KConfig* conf)
-{
- if (!conf) {
-	conf = kapp->config();
- }
- QString oldGroup = conf->group();
- conf->setGroup("Boson");
- conf->writeEntry("Speed", speed);
- conf->setGroup(oldGroup);
-}
-
-int BosonConfig::readGameSpeed(KConfig* conf)
-{
- if (!conf) {
-	conf = kapp->config();
- }
- QString oldGroup = conf->group();
- conf->setGroup("Boson");
- int speed = conf->readNumEntry("Speed", DEFAULT_GAME_SPEED);
- conf->setGroup(oldGroup);
- return speed;
 }
 
 void BosonConfig::reset(KConfig* conf)

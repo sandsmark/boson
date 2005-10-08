@@ -226,7 +226,8 @@ class BoConfigIntListEntry; // forwarding, since i dont want to #include <qvalue
  * using BosonConfig::readFooBar() and finally save the value using
  * BosonConfig::saveFooBar(). You should not need to access these values all
  * over Boson but just at a single point. Examples for this type of config
- * entries are @ref readChatFramePosition and @ref readGameSpeed. You don't need
+ * entries are @ref readChatFramePosition and @ref readGameSpeed (AB: the latter
+ * is obsolete). You don't need
  * a BosonConfig object for this as the read/save methods are static.
  * @short Global configuration class for Boson
  *
@@ -304,9 +305,6 @@ public:
 
 	static bool readEditorCreateNewMap(KConfig* conf = 0);
 	static void saveEditorCreateNewMap(bool createnew, KConfig* conf = 0);
-
-	static void saveGameSpeed(int speed, KConfig* conf = 0);
-	static int readGameSpeed(KConfig* conf = 0);
 
 // below we have config options that are stored in this class (and saved in
 // save())

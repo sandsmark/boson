@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2002 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,40 +32,34 @@
 
 #include "optionsdialog.moc"
 
-class OptionsDialog::OptionsDialogPrivate
+class OptionsDialogPrivate
 {
 public:
 	OptionsDialogPrivate()
 	{
-		mCursorOptions = 0;
 	}
 	QPtrList<OptionsWidget> mOptionsWidgets;
-	CursorOptions* mCursorOptions;
 };
 
-OptionsDialog::OptionsDialog(bool editor, QWidget*, bool/*modal*/)
+OptionsDialog::OptionsDialog(QWidget* parent)
 	: KDialogBase(Tabbed,
 			i18n("Boson Options"),
 			Ok|Apply|Default,
 			Cancel,
-			/*parent*/0,
+			parent,
 			"bosonoptionsdialog",
 			/*modal*/false,
 			true)
 {
  d = new OptionsDialogPrivate;
 
- if (!editor) {
-	initGeneralPage();
-	initCursorPage();
- }
+ initGeneralPage();
+ initCursorPage();
  initScrollingPage();
- if (!editor) {
-	initSoundsPage();
- }
+ initSoundsPage();
  initOpenGLPage();
  initWaterPage();
- initChatPage(); // in editor for chat messages
+ initChatPage();
  initToolTipPage();
 }
 
@@ -89,7 +83,6 @@ void OptionsDialog::initCursorPage()
  connect(o, SIGNAL(signalCursorChanged(int, const QString&)),
 		this, SIGNAL(signalCursorChanged(int, const QString&)));
  addOptions(o);
- d->mCursorOptions = o;
 }
 
 void OptionsDialog::initScrollingPage()
@@ -110,8 +103,6 @@ void OptionsDialog::initOpenGLPage()
 {
  QVBox* vbox = addVBoxPage(i18n("&OpenGL"));
  OpenGLOptions* o = new OpenGLOptions(vbox);
- connect(o, SIGNAL(signalOpenGLSettingsUpdated()),
-		this, SIGNAL(signalOpenGLSettingsUpdated()));
  connect(o, SIGNAL(signalFontChanged(const BoFontInfo&)),
 		this, SIGNAL(signalFontChanged(const BoFontInfo&)));
  addOptions(o);
@@ -141,18 +132,6 @@ void OptionsDialog::initToolTipPage()
 void OptionsDialog::addOptions(OptionsWidget* o)
 {
  d->mOptionsWidgets.append(o);
-}
-
-void OptionsDialog::setGame(Boson* game)
-{
- QPtrListIterator<OptionsWidget> it(d->mOptionsWidgets);
- for (; it.current(); ++it) {
-	it.current()->setGame(game);
- }
-}
-
-void OptionsDialog::setPlayer(Player* p)
-{
 }
 
 void OptionsDialog::slotLoad()
