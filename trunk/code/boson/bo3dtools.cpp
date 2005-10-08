@@ -98,6 +98,72 @@ bool loadVector2FromXML(BoVector2Fixed* v, const QDomElement& root, const QStrin
   return ret;
 }
 
+bool saveMatrixAsXML(const BoMatrix& m, QDomElement& root)
+{
+  QDomDocument doc = root.ownerDocument();
+  for(int row = 1; row <= 4; row++)
+  {
+    QDomElement r = doc.createElement("Row");
+    for(int column = 1; column <= 4; column++)
+    {
+      QDomElement c = doc.createElement("Column");
+      c.setAttribute("Value", m.element(row, column));
+      r.appendChild(c);
+    }
+    root.appendChild(r);
+  }
+  return true;
+}
+
+bool loadMatrixFromXML(BoMatrix* m, const QDomElement& root)
+{
+  int row = 1;
+  for(QDomNode n = root.firstChild(); !n.isNull(); n = n.nextSibling())
+  {
+    QDomElement r = n.toElement();
+    if(r.isNull() || r.tagName() != "Row")
+    {
+      continue;
+    }
+    int column = 1;
+    for(QDomNode n2 = r.firstChild(); !n2.isNull(); n2 = n2.nextSibling())
+    {
+      QDomElement c = n2.toElement();
+      if(c.isNull() || c.tagName() != "Column")
+      {
+        continue;
+      }
+      QString value = c.attribute("Value");
+      if(value.isEmpty())
+      {
+        boError() << k_funcinfo << "no Value for column " << column << " of row " << row << endl;
+        return false;
+      }
+      bool ok;
+      float v = value.toDouble(&ok);
+      if(!ok)
+      {
+        boError() << k_funcinfo << "invalid Value for column " << column << " of row " << row << endl;
+        return false;
+      }
+      m->setElement(row, column, v);
+      column++;
+    }
+    if (column != 5)
+    {
+      boError() << k_funcinfo << "need exactly 4 columns. have: "<< column - 1 << endl;
+      return false;
+    }
+    row++;
+  }
+  if (row != 5)
+  {
+    boError() << k_funcinfo << "need exactly 4 rows. have: "<< row - 1 << endl;
+    return false;
+  }
+  return true;
+}
+
 QDataStream& operator<<(QDataStream& s, const BoVector2Fixed& v)
 {
   return s << v[0] << v[1];
