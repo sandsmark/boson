@@ -2,7 +2,7 @@
 ConstructionSteps=0
 
 [Boson Unit]
-Name=Tree3 (doesn't work yet)
+Name=Tree3
 Health=30
 Id=7
 DestroyedEffects=22000
