@@ -1461,7 +1461,7 @@ unsigned int Boson::advanceCallsCount() const
  return d->mAdvance->advanceCallsCount();
 }
 
-bool Boson::addNeutralPlayer()
+Player* Boson::addNeutralPlayer()
 {
  QPtrListIterator<KPlayer> it(*playerList());
  while (it.current()) {
@@ -1479,7 +1479,7 @@ bool Boson::addNeutralPlayer()
  QValueList<QColor> colors = availableTeamColors();
  if (colors.count() == 0) {
 	boError() << k_funcinfo << "no color for neutral player available. not enough colors." << endl;
-	return false;
+	return 0;
  }
  Player* p = new Player(true);
  p->setUserId(256);
@@ -1489,7 +1489,7 @@ bool Boson::addNeutralPlayer()
  // will send a request for adding a player. player is added once the request is
  // received.
  bosonAddPlayer(p);
- return true;
+ return p;
 }
 
 
