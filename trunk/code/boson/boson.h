@@ -140,9 +140,9 @@ public:
 	 *
 	 * This method will send a network message using @ref bosonAddPlayer.
 	 * The player is added once the message is received!
-	 * @return TRUE on success, FALSE on failure
+	 * @return 0 on failure, otherwise the player pointer
 	 **/
-	bool addNeutralPlayer();
+	Player* addNeutralPlayer();
 
 	void removeAllPlayers();
 

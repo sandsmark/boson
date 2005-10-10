@@ -27,6 +27,7 @@
 #include "../bosonmessageids.h"
 #include "../bosondata.h"
 #include "../defines.h"
+#include "../gameview/bosonlocalplayerinput.h" // ugly. we should not include stuff from the gameview in here.
 #include "bodebug.h"
 
 #include <kgame/kplayer.h>
@@ -151,9 +152,20 @@ bool BosonStartupNetwork::sendNewGame(BosonPlayField* field, bool editor, const 
 	// we increase the limit for the neutral player only!
 	mGame->setMaxPlayers(mGame->maxPlayers() + 1);
  }
- if (!mGame->addNeutralPlayer()) {
+ Player* neutralPlayer = mGame->addNeutralPlayer();
+ if (!neutralPlayer) {
 	boError() << k_funcinfo << "unable to add neutral player. cannot send newgame message." << endl;
 	return false;
+ }
+ if (editor) {
+	BosonLocalPlayerInput* io = new BosonLocalPlayerInput(false);
+	neutralPlayer->addGameIO(io);
+	if (!io->initializeIO()) {
+		neutralPlayer->removeGameIO(io, true);
+
+		boError() << k_funcinfo << "could not initialize IO for neutral player" << endl;
+		return false;
+	}
  }
 
  QByteArray compresseddata = qCompress(data);

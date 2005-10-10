@@ -1060,7 +1060,19 @@ bool BosonStartingCheckIOs::startTask()
 		BO_NULL_ERROR(p);
 		return false;
 	}
-	if (p->bosonId() < 128 || p->bosonId() >= 256) {
+	bool expectIO = true;
+	if (p->bosonId() < 128) {
+		expectIO = false;
+	} else if (p->bosonId() >= 256) {
+		// neutral players must have an IO in editor mode, but must not
+		// have any IO in game mode
+		if (boGame->gameMode()) {
+			expectIO = false;
+		} else if (p->bosonId() >= 512) {
+			expectIO = false;
+		}
+	}
+	if (!expectIO) {
 		if (p->ioList()->count() > 0) {
 			boError() << k_funcinfo << "non-game player has a player IO?!" << endl;
 			// AB: might be useful sometimes (e.g. players that
