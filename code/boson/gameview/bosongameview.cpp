@@ -1838,6 +1838,8 @@ void BosonGameView::slotChangeCursor(int mode, const QString& dir)
 {
  if (boGame && boGame->gameMode()) {
 	d->mUfoCursorWidget->slotChangeCursor(mode, dir);
+ } else {
+	d->mUfoCursorWidget->slotChangeCursor(CursorKDE, boConfig->stringValue("CursorDir"));
  }
 }
 
