@@ -48,6 +48,7 @@ class BoRenderTarget::FBOData
   public:
     GLuint framebuffer;
     GLuint depthbuffer;
+    GLuint colorbuffer;
 };
 
 
@@ -56,11 +57,11 @@ BoRenderTarget::BoRenderTarget(int width, int height, int flags, BoTexture* colo
   const BoInfoGLCache* glInfo = BoInfo::boInfo()->gl();
   QStringList extensions = glInfo->openGLExtensions();
   // Use FBO if it's supported
-  /*if(extensions.contains("GL_EXT_framebuffer_object") && boglFramebufferTexture2D)
+  if(extensions.contains("GL_EXT_framebuffer_object") && boglFramebufferTexture2D)
   {
     mType = FBO;
   }
-  else*/
+  else
   {
     mType = PBuffer;
   }
@@ -106,9 +107,13 @@ BoRenderTarget::~BoRenderTarget()
   else if(mType == FBO && mFBOData)
   {
     // TODO: what if this changes during this object's lifetime?
-    if(!mDepthTexture)
+    if(!mDepthTexture && (mFlags & Depth))
     {
       boglDeleteRenderbuffers(1, &mFBOData->depthbuffer);
+    }
+    if(!mTexture && (mFlags & RGB || mFlags & RGBA))
+    {
+      boglDeleteRenderbuffers(1, &mFBOData->colorbuffer);
     }
     boglDeleteFramebuffers(1, &mFBOData->framebuffer);
     delete mFBOData;
@@ -158,12 +163,12 @@ bool BoRenderTarget::disable()
   else
   {
     // Copy PBuffer contents to the texture
-    if(mTexture)
+    if(mTexture && (mFlags & RGB || mFlags & RGBA))
     {
       mTexture->bind();
       glCopyTexSubImage2D(mTexture->type(), 0,  0, 0,  0, 0,  mWidth, mHeight);
     }
-    if(mDepthTexture)
+    if(mDepthTexture && (mFlags & Depth))
     {
       mDepthTexture->bind();
       glCopyTexSubImage2D(mDepthTexture->type(), 0,  0, 0,  0, 0,  mWidth, mHeight);
@@ -327,24 +332,55 @@ void BoRenderTarget::initFBO()
 {
   mFBOData = new FBOData;
   boglGenFramebuffers(1, &mFBOData->framebuffer);
-
   boglBindFramebuffer(GL_FRAMEBUFFER, mFBOData->framebuffer);
-  boglFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTexture->id(), 0);
-  if(mDepthTexture)
+
+  if(mFlags & RGB || mFlags & RGBA)
   {
-    boglFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mDepthTexture->id(), 0);
+    if(mTexture)
+    {
+      boglFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTexture->id(), 0);
+    }
+    else
+    {
+      boglGenRenderbuffers(1, &mFBOData->colorbuffer);
+      boglBindRenderbuffer(GL_RENDERBUFFER, mFBOData->colorbuffer);
+      boglRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, mWidth, mHeight);
+      boglFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, mFBOData->colorbuffer);
+      boglBindRenderbuffer(GL_RENDERBUFFER, 0);
+    }
   }
   else
   {
-    boglGenRenderbuffers(1, &mFBOData->depthbuffer);
-    boglBindRenderbuffer(GL_RENDERBUFFER, mFBOData->depthbuffer);
-    boglRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mWidth, mHeight);
-    boglFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mFBOData->depthbuffer);
-    boglBindRenderbuffer(GL_RENDERBUFFER, 0);
+    boglFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 0, 0, 0);
   }
-  boglBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-  // TODO: check validity!
+  if(mFlags & Depth)
+  {
+    if(mDepthTexture)
+    {
+      boglFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mDepthTexture->id(), 0);
+    }
+    else
+    {
+      boglGenRenderbuffers(1, &mFBOData->depthbuffer);
+      boglBindRenderbuffer(GL_RENDERBUFFER, mFBOData->depthbuffer);
+      boglRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mWidth, mHeight);
+      boglFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mFBOData->depthbuffer);
+      boglBindRenderbuffer(GL_RENDERBUFFER, 0);
+    }
+  }
+  else
+  {
+    boglFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+  }
+
+  GLenum status = boglCheckFramebufferStatus(GL_FRAMEBUFFER);
+  if(status != GL_FRAMEBUFFER_COMPLETE)
+  {
+    boError() << k_funcinfo << "Invalid fb status: " << status << endl;
+  }
+
+  boglBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   mValid = true;
 }
