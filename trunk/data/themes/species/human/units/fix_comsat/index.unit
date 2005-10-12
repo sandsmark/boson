@@ -30,6 +30,10 @@ UnitWidth=2.5
 Weapons=0
 PowerConsumed=200
 
+[RadarPlugin]
+TransmittedPower=20000
+MinReceivedPower=0.001
+
 [Model]
 Animation-Idle-Start=0
 Animation-Idle-End=49
