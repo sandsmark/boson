@@ -107,7 +107,7 @@ public slots:
 	void slotUnitMoved(Unit* unit, bofixed oldX, bofixed oldY);
 	void slotUnitRemoved(Unit* unit);
 	void slotItemAdded(BosonItem* item);
-	void slotFacilityConstructed(Facility* fac);
+	void slotFacilityConstructed(Unit* u);
 
 	void slotUnfog(int x, int y);
 	void slotFog(int x, int y);
