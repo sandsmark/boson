@@ -390,6 +390,12 @@ public:
 		return mUpgradesCollection;
 	}
 
+	/**
+	 * @return how many percentage of maximum health this unit has
+	 * Note that the returned value is in range 0-1, not 0-100!
+	 **/
+	inline bofixed healthFactor() const { return mHealthFactor; }
+
 protected:
 	/**
 	 * Should get called in every @ref Unit::advance call. This counts the
@@ -400,11 +406,6 @@ protected:
 	 **/
 	void reloadShields(int by = 1);
 
-	/**
-	 * @return how many percentage of maximum health this unit has
-	 * Note that the returned value is in range 0-1, not 0-100!
-	 **/
-	inline bofixed healthFactor() const { return mHealthFactor; }
 	inline void setHealthFactor(bofixed f) { mHealthFactor = f; }
 
 	inline bofixed armorFactor() const { return mArmorFactor; }
