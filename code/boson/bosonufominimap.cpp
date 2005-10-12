@@ -24,6 +24,7 @@
 #include "bosonglminimap.h"
 #include "botexture.h"
 #include "bosonmap.h"
+#include "bosoncanvas.h"
 #include "bosonprofiling.h"
 
 #include <bodebug.h>
@@ -210,7 +211,7 @@ QPoint BosonUfoMiniMap::widgetToCell(const QPoint& pos)
  if (!d->mGLMiniMap) {
 	return QPoint();
  }
- BosonMap* map = d->mGLMiniMap->map();
+ BosonMap* map = d->mGLMiniMap->canvas()->map();
  if (!map) {
 	return QPoint();
  }

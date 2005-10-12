@@ -64,6 +64,7 @@ public:
 		ResourceMine = 7,
 		Refinery = 8,
 		AmmunitionStorage = 9,
+		Radar = 10,
 
 		PluginEnd // MUST be the last entry!
 	};
@@ -634,6 +635,36 @@ protected:
 
 private:
 	QMap<QString, unsigned long int> mAmmunitionStorage;
+};
+
+class RadarPlugin : public UnitPlugin
+{
+public:
+	RadarPlugin (Unit* owner);
+	~RadarPlugin();
+
+	virtual int pluginType() const { return Radar; }
+
+	virtual bool loadFromXML(const QDomElement& root);
+	virtual bool saveAsXML(QDomElement& root) const;
+	virtual void advance(unsigned int advanceCallsCount);
+
+	virtual void unitDestroyed(Unit*);
+	virtual void itemRemoved(BosonItem*);
+
+	/**
+	 * @return Power transmitted by the transmitter antenna.
+	 * Note that this has _no_ correspondance to the power resource.
+	 **/
+	float transmittedPower() const;
+
+	/**
+	 * @return Minimum received power to notice the target
+	 **/
+	float minReceivedPower() const;
+
+private:
+
 };
 
 #endif

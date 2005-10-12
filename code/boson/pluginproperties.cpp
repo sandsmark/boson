@@ -321,3 +321,40 @@ bool AmmunitionStorageProperties::canStore(const QString& type) const
 }
 
 
+RadarProperties::RadarProperties(const UnitProperties* parent)
+		: PluginProperties(parent)
+{
+}
+
+RadarProperties::~RadarProperties()
+{
+}
+
+QString RadarProperties::propertyGroup()
+{
+ return QString::fromLatin1("RadarPlugin");
+}
+
+QString RadarProperties::name() const
+{
+ return i18n("Radar Plugin");
+}
+
+void RadarProperties::loadPlugin(KSimpleConfig* config)
+{
+ if (!config->hasGroup(propertyGroup())) {
+	boError() << k_funcinfo << "unit has no production plugin" << endl;
+	return;
+ }
+ config->setGroup(propertyGroup());
+ mTransmittedPower = config->readDoubleNumEntry("TransmittedPower", 10000.0f);
+ mMinReceivedPower = config->readDoubleNumEntry("MinReceivedPower", 0.001f);
+}
+
+void RadarProperties::savePlugin(KSimpleConfig* config)
+{
+ config->setGroup(propertyGroup());
+ config->writeEntry("TransmittedPower", mTransmittedPower);
+ config->writeEntry("MinReceivedPower", mMinReceivedPower);
+}
+

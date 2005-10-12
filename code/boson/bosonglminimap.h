@@ -28,7 +28,6 @@
 class Player;
 class PlayerIO;
 class Unit;
-class BosonMap;
 class BosonCanvas;
 class BosonGLMiniMapRenderer;
 class BosonGroundTheme;
@@ -36,12 +35,15 @@ class Cell;
 class KGameIO;
 class BoGLMatrices;
 class BoTexture;
+class BosonItem;
+class Facility;
 
 class QPixmap;
 class QPainter;
 class QPaintEvent;
 class QMouseEvent;
 template<class T> class QPtrVector;
+template<class T> class QPtrList;
 
 class BosonGLMiniMapPrivate;
 /**
@@ -56,7 +58,7 @@ public:
 
 	void quitGame();
 
-	void createMap(BosonMap* map, const BoGLMatrices*);
+	void createMap(BosonCanvas* canvas, const BoGLMatrices*);
 	void setLocalPlayerIO(PlayerIO*);
 
 	void renderMiniMap();
@@ -65,7 +67,7 @@ public:
 	unsigned int miniMapHeight() const;
 	bool showMiniMap() const;
 
-	BosonMap* map() const { return mMap; }
+	BosonCanvas* canvas() const { return mCanvas; }
 	PlayerIO* localPlayerIO() const { return mLocalPlayerIO; }
 	float zoom() const;
 	BosonGroundTheme* groundTheme() const;
@@ -92,6 +94,8 @@ public:
 	void emitSignalReCenterView(const QPoint& pos);
 	void emitSignalMoveSelection(const QPoint& pos);
 
+	QPtrList<Unit>* radarList() const;
+
 
 public slots:
 	/**
@@ -102,6 +106,8 @@ public slots:
 
 	void slotUnitMoved(Unit* unit, bofixed oldX, bofixed oldY);
 	void slotUnitRemoved(Unit* unit);
+	void slotItemAdded(BosonItem* item);
+	void slotFacilityConstructed(Facility* fac);
 
 	void slotUnfog(int x, int y);
 	void slotFog(int x, int y);
@@ -117,6 +123,8 @@ public slots:
 	void slotZoomDefault();
 
 	void slotUpdateTerrainAtCorner(int x, int y);
+
+	void slotAdvance(unsigned int advanceCallsCount);
 
 signals:
 	void signalReCenterView(const QPoint& pos);
@@ -158,7 +166,7 @@ protected:
 private:
 	BosonGLMiniMapPrivate* d;
 	PlayerIO* mLocalPlayerIO;
-	BosonMap* mMap;
+	BosonCanvas* mCanvas;
 
 	BosonGLMiniMapRenderer* mRenderer;
 };
@@ -171,7 +179,7 @@ class BosonGLMiniMapRendererPrivate;
  * separatw widget to render it. later we may render directly into the big
  * display)
  *
- * This class also creates/stores/manages all minimap textures/images (the 
+ * This class also creates/stores/manages all minimap textures/images (the
  * actual map as well as the logo that is displayed when no map is visible and
  * all other minimap textures/images).
  **/
@@ -204,6 +212,7 @@ public:
 	{
 		mZoom = zoom;
 	}
+	void setCanvas(BosonCanvas* canvas) { mCanvas = canvas; }
 	/**
 	 * @param alignmentFlags See @ref Qt::AlignmentFlags. You can OR
 	 * together either @ref Qt::Alignleft or @ref Qt::AlignRight and @ref
@@ -231,7 +240,7 @@ public:
 	 **/
 	bool windowToCell(const QPoint& pos, QPoint* cell) const;
 
-	void render();
+	void render(QPtrList<Unit>* radars);
 
 	void setPoint(int x, int y, const QColor& color, GLubyte* textureData, BoTexture* texture);
 	void unsetPoint(int x, int y, GLubyte* textureData, BoTexture* texture);
@@ -240,7 +249,6 @@ public:
 	void setTerrainPoint(int x, int y, const QColor& color);
 	void setWaterPoint(int x, int y, bool isWater);
 	void setFoggedPoint(int x, int y, bool isFogged);
-	void setUnitPoint(int x, int y, const QColor& color, bool hasUnit);
 
 	/**
 	 * Disable updates before calling @ref setPoint (e.g. using @ref
@@ -250,11 +258,16 @@ public:
 	 **/
 	void setUpdatesEnabled(bool);
 
+	void advance(unsigned int advanceCallsCount);
+
 protected:
-	void renderMiniMap();
+	void renderMiniMap(QPtrList<Unit>* radars);
 	void renderCamera();
 	void renderLogo();
 	void renderGimmicks(); // zoom buttons, minimap frame, ...
+
+	void updateRadarTexture(QPtrList<Unit>* radars);
+	void renderRadarRangeIndicators(QPtrList<Unit>* radarlist);
 
 
 	/**
@@ -294,6 +307,7 @@ private:
 	unsigned int mPosY;
 
 	bool mUseFog; // useful for the editor to disable the fog of war
+	BosonCanvas* mCanvas;
 };
 
 #endif

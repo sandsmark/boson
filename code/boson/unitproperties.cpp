@@ -240,6 +240,9 @@ bool UnitProperties::loadAllPluginProperties(KSimpleConfig* conf)
  if (conf->hasGroup(AmmunitionStorageProperties::propertyGroup())) {
 	loadPluginProperties(new AmmunitionStorageProperties(this), conf);
  }
+ if (conf->hasGroup(RadarProperties::propertyGroup())) {
+	loadPluginProperties(new RadarProperties(this), conf);
+ }
  return true;
 }
 

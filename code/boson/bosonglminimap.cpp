@@ -35,6 +35,10 @@
 #include "bodebug.h"
 #include "botexture.h"
 #include "bosonglwidget.h"
+#include "rtti.h"
+#include "unitplugins.h"
+#include "bosoncanvas.h"
+#include "borendertarget.h"
 #include <bogl.h>
 
 #include <klocale.h>
@@ -46,6 +50,7 @@
 #include <qvaluelist.h>
 #include <qfileinfo.h>
 #include <qptrvector.h>
+#include <qvaluevector.h>
 #include <qgl.h>
 
 #define COLOR_UNKNOWN Qt::black // fog of war
@@ -73,6 +78,8 @@ public:
 	QImage mZoomIn;
 	QImage mZoomOut;
 	QImage mZoomDefault;
+
+	QPtrList<Unit> mRadars;
 };
 
 BosonGLMiniMap::BosonGLMiniMap(QObject* parent, const char* name) : QObject(parent, name ? name : "glminimap")
@@ -84,7 +91,7 @@ BosonGLMiniMap::BosonGLMiniMap(QObject* parent, const char* name) : QObject(pare
 
  mRenderer = 0;
  mLocalPlayerIO = 0;
- mMap = 0;
+ mCanvas = 0;
 
  setImageTheme(QString::fromLatin1("standard"));
  slotShowMiniMap(false);
@@ -102,14 +109,23 @@ void BosonGLMiniMap::quitGame()
  setLocalPlayerIO(0);
  delete mRenderer;
  mRenderer = 0;
- mMap = 0;
+ mCanvas = 0;
 }
 
 void BosonGLMiniMap::setLocalPlayerIO(PlayerIO* io)
 {
+ if (mLocalPlayerIO) {
+	// FIXME: this is hackish
+	mLocalPlayerIO->player()->disconnect(this);
+ }
+
  mLocalPlayerIO = io;
  if (!io) {
 	slotShowMiniMap(false);
+ } else {
+	// FIXME: this is hackish
+	connect(io->player(), SIGNAL(signalFacilityConstructed(Facility*)),
+			this, SLOT(slotFacilityConstructed(Facility*)));
  }
 }
 
@@ -147,11 +163,6 @@ void BosonGLMiniMap::slotUnitMoved(Unit* unit, bofixed oldX, bofixed oldY)
 	return;
  }
  BO_CHECK_NULL_RET(unit);
- QPtrVector<Cell> newCells;
- QPtrVector<Cell> oldCells;
- makeCellList(&newCells, unit, unit->x(), unit->y());
- makeCellList(&oldCells, unit, oldX, oldY);
- moveUnit(unit, &newCells, &oldCells);
 }
 
 void BosonGLMiniMap::slotUnitRemoved(Unit* unit)
@@ -159,79 +170,43 @@ void BosonGLMiniMap::slotUnitRemoved(Unit* unit)
  if (!hasMap()) {
 	return;
  }
- BO_CHECK_NULL_RET(unit)
- QPtrVector<Cell> cells;
- makeCellList(&cells, unit, unit->x(), unit->y());
- moveUnit(unit, &cells, 0);
+ BO_CHECK_NULL_RET(unit);
+ d->mRadars.remove(unit);
 }
 
-void BosonGLMiniMap::makeCellList(QPtrVector<Cell>* cells, const Unit* unit, bofixed x, bofixed y)
+void BosonGLMiniMap::slotItemAdded(BosonItem* item)
 {
  if (!hasMap()) {
 	return;
  }
- BO_CHECK_NULL_RET(map());
- BO_CHECK_NULL_RET(unit);
- bofixed right = QMIN(x + unit->width(), bofixed(map()->width()));
- bofixed bottom = QMIN(y + unit->height(), bofixed(map()->height()));
- BosonItem::makeCells(map()->cells(), cells, BoRectFixed(x, y, right, bottom), map()->width(), map()->height());
-}
-
-
-void BosonGLMiniMap::moveUnit(Unit* unit, const QPtrVector<Cell>* newCells, const QPtrVector<Cell>* oldCells)
-{
- if (!hasMap()) {
+ BO_CHECK_NULL_RET(mLocalPlayerIO);
+ BO_CHECK_NULL_RET(item);
+ // We're interested only in radars of the localplayer
+ if (!RTTI::isUnit(item->rtti())) {
 	return;
  }
- // all parameters use cell coordinates!
- // note that using unit->x() and unit->y() as well as unit->cells() and such
- // stuff can be undefined at this point! especially when adding units
- // (oldX==oldY==-1)!
- BO_CHECK_NULL_RET(map());
- BO_CHECK_NULL_RET(unit);
- BO_CHECK_NULL_RET(newCells);
- if (oldCells && newCells->count() == oldCells->count()) {
-	if (!unit->isDestroyed()) {
-		bool moved = false;
-		for (unsigned int i = 0; i < newCells->count() && !moved; i++) {
-			if (newCells->at(i) != oldCells->at(i)) {
-				moved = true;
-			}
-		}
-		if (!moved) {
-			// Unit is still on the same cells. Don't update (performance)
-			return;
-		}
-	} else {
-		// don't return - probably remove unit from the minimap
-	}
+ Unit* u = (Unit*)item;
+ if (u->owner() != localPlayerIO()->player()) {
+	return;
  }
+ const RadarPlugin* prop = (RadarPlugin*)u->plugin(UnitPlugin::Radar);
+ if (!prop) {
+	return;
+ }
+ // Add it to our radars list
+ d->mRadars.append(u);
+}
 
- if (oldCells && oldCells->count() != 0) {
-	// unit is moving.
-	for (unsigned int i = 0; i < oldCells->count(); i++) {
-		bool found = false;
-		for (unsigned int j = 0; j < newCells->count(); j++) {
-			if (newCells->at(j) == oldCells->at(i)) {
-				found = true;
-				break;
-			}
-		}
-		if (!found) {
-			Cell* c = oldCells->at(i);
-			if (c) {
-				updateUnitsAtCell(c->x(), c->y());
-			}
-		}
-	}
- }
- for (unsigned int i = 0; i < newCells->count(); i++) {
-	Cell* c = newCells->at(i);
-	if (!c) {
-		continue;
-	}
-	updateUnitsAtCell(c->x(), c->y());
- }
+void BosonGLMiniMap::slotFacilityConstructed(Facility* fac)
+{
+ // Facilities have the construction phase so they have to be rechecked
+ //  (whether they are radars) once they are constructed.
+ slotItemAdded(fac);
+}
+
+QPtrList<Unit>* BosonGLMiniMap::radarList() const
+{
+ return &d->mRadars;
 }
 
 void BosonGLMiniMap::slotUpdateTerrainAtCorner(int x, int y)
@@ -239,36 +214,12 @@ void BosonGLMiniMap::slotUpdateTerrainAtCorner(int x, int y)
  calculateGround(x, y);
 }
 
-void BosonGLMiniMap::updateUnitsAtCell(int x, int y)
-{
- if (!hasMap()) {
-	return;
- }
- BO_CHECK_NULL_RET(map());
- Cell* cell = map()->cell(x, y);
- BO_CHECK_NULL_RET(cell);
- BO_CHECK_NULL_RET(mRenderer);
-
- QValueList<Unit*> list = cell->items()->units(false);
-
- for (QValueList<Unit*>::iterator it = list.begin(); it != list.end(); ++it) {
-	Unit* u = *it;
-	if (u->isDestroyed()) {
-		continue;
-	}
-	mRenderer->setUnitPoint(x, y, u->owner()->teamColor(), true);
-	return;
- }
- mRenderer->setUnitPoint(x, y, QColor(0, 0, 0), false);
-}
-
-
 void BosonGLMiniMap::initFogOfWar(PlayerIO* p)
 {
  if (!hasMap()) {
 	return;
  }
- BO_CHECK_NULL_RET(map());
+ BO_CHECK_NULL_RET(canvas());
  boDebug() << k_funcinfo << endl;
 
  if (mRenderer) {
@@ -279,14 +230,14 @@ void BosonGLMiniMap::initFogOfWar(PlayerIO* p)
  if (!p) {
 	// a NULL playerIO means that we should display the complete map. fog of
 	// war gets disabled.
-	for (unsigned int i = 0; i < map()->width(); i++) {
-		for (unsigned int j = 0; j < map()->height(); j++) {
+	for (unsigned int i = 0; i < canvas()->mapWidth(); i++) {
+		for (unsigned int j = 0; j < canvas()->mapHeight(); j++) {
 			slotUnfog(i, j);
 		}
 	}
  } else {
-	for (unsigned int i = 0; i < map()->width(); i++) {
-		for (unsigned int j = 0; j < map()->height(); j++) {
+	for (unsigned int i = 0; i < canvas()->mapWidth(); i++) {
+		for (unsigned int j = 0; j < canvas()->mapHeight(); j++) {
 			if (p && !p->canSee(i, j)) {
 				slotFog(i, j);
 			} else {
@@ -308,10 +259,10 @@ float BosonGLMiniMap::zoom() const
 
 BosonGroundTheme* BosonGLMiniMap::groundTheme() const
 {
- if (!map()) {
+ if (!canvas()) {
 	return 0;
  }
- return map()->groundTheme();
+ return canvas()->map()->groundTheme();
 }
 
 void BosonGLMiniMap::calculateGround(int x, int y)
@@ -321,9 +272,10 @@ void BosonGLMiniMap::calculateGround(int x, int y)
  }
  BO_CHECK_NULL_RET(mRenderer);
  BO_CHECK_NULL_RET(groundTheme());
- BO_CHECK_NULL_RET(map());
- BO_CHECK_NULL_RET(map()->texMap());
- if (!map()->isValidCell(x, y)) {
+ BO_CHECK_NULL_RET(canvas());
+ BosonMap* map = canvas()->map();
+ BO_CHECK_NULL_RET(map->texMap());
+ if (!map->isValidCell(x, y)) {
 	return;
  }
 
@@ -341,7 +293,7 @@ void BosonGLMiniMap::calculateGround(int x, int y)
 	int cornerBlue = 0;
 
 	for (unsigned int i = 0; i < groundTheme()->groundTypeCount(); i++) {
-		int alpha = (int)map()->texMapAlpha(i, cornerX[j], cornerY[j]);
+		int alpha = (int)map->texMapAlpha(i, cornerX[j], cornerY[j]);
 		alphaSum += alpha;
 
 		QRgb rgb = groundTheme()->groundType(i)->color;
@@ -370,7 +322,7 @@ void BosonGLMiniMap::calculateGround(int x, int y)
  b /= 4;
 
  mRenderer->setTerrainPoint(x, y, QColor(r, g, b));
- mRenderer->setWaterPoint(x, y, map()->cell(x, y)->isWater());
+ mRenderer->setWaterPoint(x, y, canvas()->cell(x, y)->isWater());
 }
 
 void BosonGLMiniMap::setImageTheme(const QString& theme)
@@ -386,9 +338,9 @@ void BosonGLMiniMap::setImageTheme(const QString& theme)
 	if (d->mLogo.isNull()) {
 		// create a dummy pixmap to avoid a crash
 		int w, h;
-		if (mMap) {
-			w = mMap->width();
-			h = mMap->height();
+		if (canvas()) {
+			w = canvas()->mapWidth();
+			h = canvas()->mapHeight();
 		} else {
 			w = 100;
 			h = 100;
@@ -464,27 +416,21 @@ QImage BosonGLMiniMap::imageFromTheme(const QString& file, const QString& theme)
 }
 
 
-void BosonGLMiniMap::createMap(BosonMap* map, const BoGLMatrices* gameGLMatrices)
+void BosonGLMiniMap::createMap(BosonCanvas* c, const BoGLMatrices* gameGLMatrices)
 {
- BO_CHECK_NULL_RET(map);
+ BO_CHECK_NULL_RET(c);
  boDebug() << k_funcinfo << endl;
- mMap = map;
+ mCanvas = c;
  delete mRenderer;
  mRenderer = new BosonGLMiniMapRenderer(gameGLMatrices);
- mRenderer->createMap(map->width(), map->height(), map->groundTheme());
+ mRenderer->createMap(c->mapWidth(), c->mapHeight(), c->map()->groundTheme());
  if (!d->mImageTheme.isEmpty()) {
 	setImageTheme(d->mImageTheme);
  }
  boDebug() << k_funcinfo << "initializing ground" << endl;
- for (unsigned int x = 0; x < map->width(); x++) {
-	for (unsigned int y = 0; y < map->height(); y++) {
+ for (unsigned int x = 0; x < c->mapWidth(); x++) {
+	for (unsigned int y = 0; y < c->mapHeight(); y++) {
 		calculateGround(x, y);
-	}
- }
- boDebug() << k_funcinfo << "initializing units" << endl;
- for (unsigned int x = 0; x < map->width(); x++) {
-	for (unsigned int y = 0; y < map->height(); y++) {
-		updateUnitsAtCell(x, y);
 	}
  }
  boDebug() << k_funcinfo << "done" << endl;
@@ -511,8 +457,15 @@ void BosonGLMiniMap::renderMiniMap()
  }
  mRenderer->setZoom(zoom());
  mRenderer->setAlignment(Qt::Left | Qt::Top);
+ mRenderer->setCanvas(mCanvas);
 
- mRenderer->render();
+ mRenderer->render(radarList());
+}
+
+void BosonGLMiniMap::slotAdvance(unsigned int advanceCallsCount)
+{
+ BO_CHECK_NULL_RET(mRenderer);
+ mRenderer->advance(advanceCallsCount);
 }
 
 unsigned int BosonGLMiniMap::miniMapWidth() const
@@ -536,10 +489,10 @@ void BosonGLMiniMap::slotUnfog(int x, int y)
  if (!hasMap()) {
 	return;
  }
- if (!map()) {
+ if (!canvas()) {
 	return;
  }
- BO_CHECK_NULL_RET(map()->cell(x, y));
+ BO_CHECK_NULL_RET(canvas()->cell(x, y));
  BO_CHECK_NULL_RET(mRenderer);
  mRenderer->setFoggedPoint(x, y, false);
 }
@@ -549,10 +502,10 @@ void BosonGLMiniMap::slotFog(int x, int y)
  if (!hasMap()) {
 	return;
  }
- if (!map()) {
+ if (!canvas()) {
 	return;
  }
- BO_CHECK_NULL_RET(map()->cell(x, y));
+ BO_CHECK_NULL_RET(canvas()->cell(x, y));
  BO_CHECK_NULL_RET(mRenderer);
  mRenderer->setFoggedPoint(x, y, true);
 }
@@ -642,7 +595,7 @@ void BosonGLMiniMap::emitSignalMoveSelection(const QPoint& cell)
 
 bool BosonGLMiniMap::hasMap() const
 {
- return (mMap && mRenderer);
+ return (mCanvas && mRenderer);
 }
 
 
@@ -655,14 +608,15 @@ public:
 		mGameGLMatrices = 0;
 		mTerrainTexture = 0;
 		mWaterTexture = 0;
-		mUnitsTexture = 0;
 		mFogTexture = 0;
 		mGLTerrainTexture = 0;
 		mGLWaterTexture = 0;
 		mGLUnitsTexture = 0;
 		mGLFogTexture = 0;
+		mUnitTarget = 0;
 
 		mLogoTexture = 0;
+		mRadarRangeTexture = 0;
 	}
 	BoMatrix mModelviewMatrix;
 	QImage mOrigLogo;
@@ -670,7 +624,6 @@ public:
 
 	GLubyte* mTerrainTexture;
 	GLubyte* mWaterTexture;
-	GLubyte* mUnitsTexture;
 	GLubyte* mFogTexture;
 	int mMapTextureWidth;
 	int mMapTextureHeight;
@@ -679,11 +632,15 @@ public:
 	BoTexture* mGLUnitsTexture;
 	BoTexture* mGLFogTexture;
 
+	BoRenderTarget* mUnitTarget;
+
 	BoTexture* mLogoTexture;
+	BoTexture* mRadarRangeTexture;
 
 
 	bool mUpdatesEnabled;
 	int mMiniMapChangesSinceRendering;
+	int mAdvanceCallsSinceLastUpdate;
 	QMap<GLubyte*, bool> mTextureUpdatesEnabled;
 };
 
@@ -705,25 +662,36 @@ BosonGLMiniMapRenderer::BosonGLMiniMapRenderer(const BoGLMatrices* gameGLMatrice
  d->mMapTextureHeight = 0;
  d->mUpdatesEnabled = true;
  d->mMiniMapChangesSinceRendering = 0;
+ d->mAdvanceCallsSinceLastUpdate = 10000;
 
  mPosX = distanceFromEdge();
  mPosY = distanceFromEdge();
 
  // default size of the displayed minimap quad
  setMiniMapSize(150, 150);
+
+ // Load the radar range texture
+ QString path = KGlobal::dirs()->findResourceDir("data", "boson/themes/ui/standard/circle-constant.png");
+ if (path.isNull()) {
+	boError() << k_funcinfo << "Couldn't find radar range texture" << endl;
+	return;
+ }
+ d->mRadarRangeTexture = new BoTexture(path + "boson/themes/ui/standard/circle-constant.png",
+		BoTexture::FilterLinearMipmapLinear | BoTexture::FormatRGBA);
 }
 
 BosonGLMiniMapRenderer::~BosonGLMiniMapRenderer()
 {
+ delete d->mUnitTarget;
  delete d->mGLTerrainTexture;
  delete d->mGLWaterTexture;
  delete d->mGLUnitsTexture;
  delete d->mGLFogTexture;
  delete[] d->mTerrainTexture;
  delete[] d->mWaterTexture;
- delete[] d->mUnitsTexture;
  delete[] d->mFogTexture;
  delete d->mLogoTexture;
+ delete d->mRadarRangeTexture;
  delete d;
 }
 
@@ -750,13 +718,15 @@ void BosonGLMiniMapRenderer::setUpdatesEnabled(bool e)
 			BoTexture::DontCompress | BoTexture::DontGenMipmaps);
 	d->mTextureUpdatesEnabled[d->mWaterTexture] = true;
  }
- if (!wasEnabled || !d->mTextureUpdatesEnabled[d->mUnitsTexture]) {
+ if (!wasEnabled) {
+	delete d->mUnitTarget;
 	delete d->mGLUnitsTexture;
-	d->mGLUnitsTexture = new BoTexture(d->mUnitsTexture,
+	d->mGLUnitsTexture = new BoTexture(0,
 			d->mMapTextureWidth, d->mMapTextureHeight,
 			BoTexture::FilterLinear | BoTexture::FormatRGBA |
 			BoTexture::DontCompress | BoTexture::DontGenMipmaps);
-	d->mTextureUpdatesEnabled[d->mUnitsTexture] = true;
+	d->mUnitTarget = new BoRenderTarget(d->mMapTextureWidth, d->mMapTextureHeight,
+			BoRenderTarget::RGBA, d->mGLUnitsTexture);
  }
  if (!wasEnabled || !d->mTextureUpdatesEnabled[d->mFogTexture]) {
 	delete d->mGLFogTexture;
@@ -788,11 +758,9 @@ void BosonGLMiniMapRenderer::createMap(unsigned int w, unsigned int h, BosonGrou
 
  delete[] d->mTerrainTexture;
  delete[] d->mWaterTexture;
- delete[] d->mUnitsTexture;
  delete[] d->mFogTexture;
  d->mTerrainTexture = new GLubyte[w2 * h2 * 4];
  d->mWaterTexture = new GLubyte[w2 * h2 * 4];
- d->mUnitsTexture = new GLubyte[w2 * h2 * 4];
  d->mFogTexture = new GLubyte[w2 * h2 * 4];
  d->mMapTextureWidth = w2;
  d->mMapTextureHeight = h2;
@@ -800,7 +768,6 @@ void BosonGLMiniMapRenderer::createMap(unsigned int w, unsigned int h, BosonGrou
  QValueList<GLubyte*> textures;
  textures.append(d->mTerrainTexture);
  textures.append(d->mWaterTexture);
- textures.append(d->mUnitsTexture);
  textures.append(d->mFogTexture);
  for (QValueList<GLubyte*>::iterator it = textures.begin(); it != textures.end(); ++it) {
 	GLubyte* texture = (*it);
@@ -835,14 +802,19 @@ void BosonGLMiniMapRenderer::createMap(unsigned int w, unsigned int h, BosonGrou
  setUpdatesEnabled(true);
 }
 
-void BosonGLMiniMapRenderer::render()
+void BosonGLMiniMapRenderer::advance(unsigned int advanceCallsCount)
+{
+ d->mAdvanceCallsSinceLastUpdate++;
+}
+
+void BosonGLMiniMapRenderer::render(QPtrList<Unit>* radars)
 {
  glColor3ub(255, 255, 255);
  d->mMiniMapChangesSinceRendering = 0;
  renderGimmicks();
  switch (mType) {
 	case MiniMap:
-		renderMiniMap();
+		renderMiniMap(radars);
 		break;
 	case Logo:
 		renderLogo();
@@ -882,20 +854,24 @@ void BosonGLMiniMapRenderer::renderLogo()
  boTextureManager->invalidateCache();
 }
 
-void BosonGLMiniMapRenderer::renderMiniMap()
+void BosonGLMiniMapRenderer::renderMiniMap(QPtrList<Unit>* radars)
 {
  BO_CHECK_NULL_RET(d->mTerrainTexture);
  BO_CHECK_NULL_RET(d->mWaterTexture);
- BO_CHECK_NULL_RET(d->mUnitsTexture);
  BO_CHECK_NULL_RET(d->mFogTexture);
  BO_CHECK_NULL_RET(d->mGLTerrainTexture);
  BO_CHECK_NULL_RET(d->mGLWaterTexture);
- BO_CHECK_NULL_RET(d->mGLUnitsTexture);
  BO_CHECK_NULL_RET(d->mGLFogTexture);
  glPushMatrix();
 
  // AB: this is only for pre-ufo use
 // glLoadIdentity();
+
+ if (d->mAdvanceCallsSinceLastUpdate >= 40) {
+	d->mUnitTarget->enable();
+	updateRadarTexture(radars);
+	d->mUnitTarget->disable();
+ }
 
  glPushAttrib(GL_ENABLE_BIT);
  glEnable(GL_TEXTURE_2D);
@@ -915,12 +891,25 @@ void BosonGLMiniMapRenderer::renderMiniMap()
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  d->mGLWaterTexture->bind();
  renderQuad();
- d->mGLUnitsTexture->bind();
- renderQuad();
  if (mUseFog) {
 	d->mGLFogTexture->bind();
 	renderQuad();
  }
+ // Darken the terrain to make radar blips more visible
+ glEnable(GL_BLEND);
+ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+ glDisable(GL_TEXTURE_2D);
+ glColor4f(0.0, 0.0, 0.0, 0.6);
+ renderQuad();
+ glColor4f(1.0, 1.0, 1.0, 1.0);
+ glEnable(GL_TEXTURE_2D);
+
+ d->mGLUnitsTexture->bind();
+ glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+ renderQuad();
+ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+ renderRadarRangeIndicators(radars);
 
  glDisable(GL_BLEND);
 
@@ -928,6 +917,153 @@ void BosonGLMiniMapRenderer::renderMiniMap()
 
  glPopAttrib();
  glPopMatrix();
+}
+
+void BosonGLMiniMapRenderer::updateRadarTexture(QPtrList<Unit>* radarlist)
+{
+ d->mAdvanceCallsSinceLastUpdate = 0;
+ // Init rendering
+ glPushAttrib(GL_ALL_ATTRIB_BITS);
+ glViewport(0, 0, d->mMapTextureWidth, d->mMapTextureHeight);
+ glDisable(GL_SCISSOR_TEST);
+ glClear(GL_COLOR_BUFFER_BIT);
+ if (radarlist->isEmpty()) {
+	glPopAttrib();
+	return;
+ }
+
+ glMatrixMode(GL_MODELVIEW);
+ glPushMatrix();
+ glLoadIdentity();
+ glMatrixMode(GL_PROJECTION);
+ glPushMatrix();
+ glLoadIdentity();
+ gluOrtho2D(0.0f, miniMapWidth(), 0.0f, miniMapHeight());
+ glDisable(GL_DEPTH_TEST);
+
+ // Create a vector of radars and their ranges
+ QValueVector<const RadarPlugin*> radars;
+ QValueVector<float> ranges;
+ QValueVector<BoVector2Float> centers;
+
+ float minx = 1000000.0f, maxx = -1000000.0f, miny = 1000000.0f, maxy = -1000000.0f;
+ for (QPtrListIterator<Unit> it(*radarlist); it.current(); ++it) {
+	const RadarPlugin* prop = (RadarPlugin*)it.current()->plugin(UnitPlugin::Radar);
+	// Add radar and it's center to the vectors
+	radars.append(prop);
+	centers.append(it.current()->center().toFloat());
+	// Maximum range of the radar
+	// See below for the radar equation, here we calculate maximum distance of an
+	//  object with size = 0.5 so that it's still detected by the radar
+	float maxrange = powf((prop->transmittedPower() * 3.0f) / prop->minReceivedPower(), 0.25f);
+	ranges.append(maxrange * maxrange);
+	// Update bbox of the radar-affected area
+	minx = QMIN(minx, (float)it.current()->x() - maxrange);
+	maxx = QMAX(maxx, (float)it.current()->x() + maxrange);
+	miny = QMIN(miny, (float)it.current()->y() - maxrange);
+	maxy = QMAX(maxy, (float)it.current()->y() + maxrange);
+ }
+ BoRectFixed area((int)QMAX(0.0f, minx),  (int)QMAX(0.0f, miny),
+		(int)QMIN(mMapWidth, maxx + 1),  (int)QMIN(mMapHeight, maxy + 1));
+
+ // Get a list of all items in the affected area
+ BoItemList* items = mCanvas->collisions()->collisionsAtCells(area, 0, false);
+
+
+ // For every item, see if it's visible by the radar and render a dot if it is.
+ // To determine whether the item is detected by the radar (and how well it's
+ //  detected), we use simplified radar equation:
+ //      R = (T * S) / (D^4)
+ //  where R - received power
+ //        T - transmitter power
+ //        S - size of the object (how well it reflects the signal)
+ //        D - distance between radar and the object
+ // See http://en.wikipedia.org/wiki/Radar for more info about radars and
+ //  radar equation.
+
+ // Use additive blending
+ glEnable(GL_BLEND);
+ glDisable(GL_TEXTURE_2D);
+ glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+ glEnable(GL_POINT_SMOOTH);
+ glPointSize(3.0f);
+ float scale = miniMapWidth() / (float)QMAX(d->mMapTextureWidth, d->mMapTextureHeight);
+ BoVector4Float basecolor(-0.05, -0.05, -0.02, 0.8);
+ BoVector4Float addcolor(0.03, 0.1, 0.01, 0.0);
+
+ glBegin(GL_POINTS);
+ BoItemList::ConstIterator it;
+ for (it = items->begin(); it != items->end(); ++it) {
+	if (!RTTI::isUnit((*it)->rtti())) {
+		continue;
+	}
+	BoVector2Float itempos = (*it)->center().toFloat();
+	float strongestsignal = 0.0f;
+	// Go through all the radars and pick the one with the strongest signal
+	for (unsigned int i = 0; i < radars.count(); i++) {
+		float distsqr = (itempos - centers[i]).dotProduct();
+		if (distsqr > ranges[i]) {
+			// Most likely not visible to this radar
+			continue;
+		} else {
+			float receivedpower = (radars[i]->transmittedPower() * (float)(*it)->width()) / (distsqr * distsqr);
+			// We additonally divide by minReceivedPower() to get "signal strength"
+			strongestsignal = QMAX(strongestsignal, receivedpower / radars[i]->minReceivedPower());
+		}
+	}
+	if (strongestsignal >= 1.0f) {
+		// Signal was picked up by at least one radar.
+		// Render the dot
+		glColor4fv((basecolor + addcolor * strongestsignal).data());
+		glVertex3f(itempos.x() * scale, itempos.y() * scale, 0.0f);
+	}
+ }
+ glEnd();
+
+ glPopMatrix();
+ glMatrixMode(GL_MODELVIEW);
+ glPopMatrix();
+ glPopAttrib();
+}
+
+void BosonGLMiniMapRenderer::renderRadarRangeIndicators(QPtrList<Unit>* radarlist)
+{
+ BO_CHECK_NULL_RET(d->mRadarRangeTexture);
+
+ if (d->mAdvanceCallsSinceLastUpdate >= 20) {
+	return;
+ }
+
+ d->mRadarRangeTexture->bind();
+ glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_SCISSOR_BIT);
+ glEnable(GL_BLEND);
+ glScissor(0, d->mGameGLMatrices->viewport()[3] - miniMapHeight(), miniMapWidth(), miniMapHeight());
+ glEnable(GL_SCISSOR_TEST);
+ float scale = miniMapWidth() / (float)QMAX(mMapWidth, mMapHeight);
+ glPushMatrix();
+ glTranslatef(0.0f, ((float)miniMapHeight()), 0.0f);
+ glScalef(scale, scale, 0.0f);
+
+ float progress = d->mAdvanceCallsSinceLastUpdate / 20.0f;
+ for (QPtrListIterator<Unit> it(*radarlist); it.current(); ++it) {
+	BoVector2Float pos = it.current()->center().toFloat();
+	const RadarPlugin* prop = (RadarPlugin*)it.current()->plugin(UnitPlugin::Radar);
+	float range = powf(prop->transmittedPower() / prop->minReceivedPower(), 0.25f) * progress;
+	glColor4f(0.0, 0.8, 0.0, 0.5 - 0.5 * progress);
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(pos.x() - range, -(pos.y() + range), 0);
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(pos.x() + range, -(pos.y() + range), 0);
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(pos.x() + range, -(pos.y() - range), 0);
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(pos.x() - range, -(pos.y() - range), 0);
+	glEnd();
+ }
+
+ glPopMatrix();
+ glPopAttrib();
 }
 
 void BosonGLMiniMapRenderer::renderQuad()
@@ -1081,7 +1217,7 @@ void BosonGLMiniMapRenderer::renderCamera()
  TLN.setY((TLN.y() * miniMapHeight()) / mMapHeight + (float)miniMapHeight());
 
  // Render a semitransparent yellow quad to better illustrate the visible area
- glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT);
+ glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_SCISSOR_BIT);
  glEnable(GL_BLEND);
  glShadeModel(GL_SMOOTH);
  glScissor(0, d->mGameGLMatrices->viewport()[3] - miniMapHeight(), miniMapWidth(), miniMapHeight());
@@ -1130,15 +1266,6 @@ void BosonGLMiniMapRenderer::setWaterPoint(int x, int y, bool isWater)
 	setColor(x, y, QColor(0, 64, 192), alpha, d->mWaterTexture, d->mGLWaterTexture);
  } else {
 	unsetPoint(x, y, d->mWaterTexture, d->mGLWaterTexture);
- }
-}
-
-void BosonGLMiniMapRenderer::setUnitPoint(int x, int y, const QColor& color, bool hasUnit)
-{
- if (!hasUnit) {
-	unsetPoint(x, y, d->mUnitsTexture, d->mGLUnitsTexture);
- } else {
-	setPoint(x, y, color, d->mUnitsTexture, d->mGLUnitsTexture);
  }
 }
 

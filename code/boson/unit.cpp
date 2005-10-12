@@ -187,6 +187,9 @@ bool Unit::init()
  if (prop->properties(PluginProperties::AmmunitionStorage)) {
 	d->mPlugins.append(new AmmunitionStoragePlugin(this));
  }
+ if (prop->properties(PluginProperties::Radar)) {
+	d->mPlugins.append(new RadarPlugin(this));
+ }
 
  loadWeapons();
 
