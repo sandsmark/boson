@@ -400,6 +400,7 @@ signals:
 	void signalLoadUnit(unsigned long int unitType, unsigned long int id, Player* owner);
 
 	void signalUnitChanged(Unit* unit);
+	void signalFacilityConstructed(Facility* fac);
 
 	void signalFog(int x, int y);
 	void signalUnfog(int x, int y);
