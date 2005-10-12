@@ -762,7 +762,6 @@ void Player::facilityCompleted(Facility* fac)
  constructedEvent->setUnitId(fac->id());
  constructedEvent->setLocation(location);
  boGame->queueEvent(constructedEvent);
- emit signalFacilityConstructed(fac);
 }
 
 void Player::setOutOfGame()

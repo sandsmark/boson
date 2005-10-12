@@ -114,18 +114,9 @@ void BosonGLMiniMap::quitGame()
 
 void BosonGLMiniMap::setLocalPlayerIO(PlayerIO* io)
 {
- if (mLocalPlayerIO) {
-	// FIXME: this is hackish
-	mLocalPlayerIO->player()->disconnect(this);
- }
-
  mLocalPlayerIO = io;
  if (!io) {
 	slotShowMiniMap(false);
- } else {
-	// FIXME: this is hackish
-	connect(io->player(), SIGNAL(signalFacilityConstructed(Facility*)),
-			this, SLOT(slotFacilityConstructed(Facility*)));
  }
 }
 
@@ -197,7 +188,7 @@ void BosonGLMiniMap::slotItemAdded(BosonItem* item)
  d->mRadars.append(u);
 }
 
-void BosonGLMiniMap::slotFacilityConstructed(Facility* fac)
+void BosonGLMiniMap::slotFacilityConstructed(Unit* fac)
 {
  // Facilities have the construction phase so they have to be rechecked
  //  (whether they are radars) once they are constructed.
