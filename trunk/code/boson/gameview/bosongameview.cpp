@@ -1486,6 +1486,10 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
 		d->mGLMiniMap, SLOT(slotUnitMoved(Unit*, bofixed, bofixed)));
 	connect(mCanvas, SIGNAL(signalUnitRemoved(Unit*)),
 		d->mGLMiniMap, SLOT(slotUnitRemoved(Unit*)));
+	connect(mCanvas, SIGNAL(signalItemAdded(BosonItem*)),
+		d->mGLMiniMap, SLOT(slotItemAdded(BosonItem*)));
+	connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
+			d->mGLMiniMap, SLOT(slotAdvance(unsigned int)));
 
 	connect(d->mGLMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
 			this, SLOT(slotReCenterDisplay(const QPoint&)));
@@ -1500,12 +1504,10 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
 
  boDebug() << k_funcinfo << endl;
 
- BO_CHECK_NULL_RET(mCanvas->map());
- BosonMap* map = mCanvas->map();
- d->mGLMiniMap->createMap(map, d->mGameGLMatrices);
+ d->mGLMiniMap->createMap(mCanvas, d->mGameGLMatrices);
 
  if (!boGame->gameMode()) { // AB: is this valid at this point?
-	d->mUfoGameGUI->setGroundTheme(map->groundTheme());
+	d->mUfoGameGUI->setGroundTheme(mCanvas->map()->groundTheme());
  }
 
 }

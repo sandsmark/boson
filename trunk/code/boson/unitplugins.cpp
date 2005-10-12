@@ -2018,3 +2018,51 @@ int AmmunitionStoragePlugin::changeAmmunition(const QString& type, int change)
 }
 
 
+RadarPlugin::RadarPlugin(Unit* owner)
+		: UnitPlugin(owner)
+{
+}
+RadarPlugin::~RadarPlugin()
+{
+}
+
+bool RadarPlugin::saveAsXML(QDomElement& root) const
+{
+ return true;
+}
+
+bool RadarPlugin::loadFromXML(const QDomElement& root)
+{
+ return true;
+}
+
+void RadarPlugin::advance(unsigned int)
+{
+}
+
+void RadarPlugin::unitDestroyed(Unit*)
+{
+}
+
+void RadarPlugin::itemRemoved(BosonItem*)
+{
+}
+
+float RadarPlugin::transmittedPower() const
+{
+ const RadarProperties * prop = (RadarProperties*)unit()->properties(PluginProperties::Radar);
+ if (!prop) {
+	return 0.0f;
+ }
+ return prop->transmittedPower() * (float)unit()->healthFactor();
+}
+
+float RadarPlugin::minReceivedPower() const
+{
+ const RadarProperties * prop = (RadarProperties*)unit()->properties(PluginProperties::Radar);
+ if (!prop) {
+	return 0.0f;
+ }
+ return prop->minReceivedPower();
+}
+

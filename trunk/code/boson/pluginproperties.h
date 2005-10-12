@@ -31,7 +31,7 @@ class PluginPropertiesEditor;
 class KSimpleConfig;
 
 // note that we can have PluginProperties that do <em>not</em> have any UnitPlugin, and
-// we can also have UnitPlugins that <em>don't</em> have any 
+// we can also have UnitPlugins that <em>don't</em> have any
 /**
  * The PluginProperties class extends the properties of @ref UnitProperties.
  * Every derived class must provide a static propertyGroup function returning
@@ -59,7 +59,8 @@ public:
 		Refinery = 3,
 		Weapon = 4,
 		ResourceMine = 5,
-		AmmunitionStorage = 6
+		AmmunitionStorage = 6,
+		Radar = 7
 	};
 	PluginProperties(const UnitProperties* parent);
 	virtual ~PluginProperties();
@@ -282,6 +283,35 @@ private:
 
 	QValueList<QString> mCanStore;
 	QValueList<QString> mMustBePickedUp;
+};
+
+class RadarProperties : public PluginProperties
+{
+public:
+	RadarProperties(const UnitProperties* parent);
+	~RadarProperties();
+
+	static QString propertyGroup();
+
+	virtual QString name() const;
+	virtual void loadPlugin(KSimpleConfig* config);
+	virtual void savePlugin(KSimpleConfig* config);
+	virtual int pluginType() const { return Radar; }
+
+	/**
+	 * @return Power transmitted by the transmitter antenna.
+	 * Note that this has _no_ correspondance to the power resource.
+	 **/
+	float transmittedPower() const { return mTransmittedPower; }
+
+	/**
+	 * @return Minimum received power to notice the target
+	 **/
+	float minReceivedPower() const { return mMinReceivedPower; }
+
+private:
+	float mTransmittedPower;
+	float mMinReceivedPower;
 };
 
 
