@@ -2066,3 +2066,21 @@ float RadarPlugin::minReceivedPower() const
  return prop->minReceivedPower();
 }
 
+bool RadarPlugin::detectsLandUnits() const
+{
+ const RadarProperties * prop = (RadarProperties*)unit()->properties(PluginProperties::Radar);
+ if (!prop) {
+	return false;
+ }
+ return prop->detectsLandUnits();
+}
+
+bool RadarPlugin::detectsAirUnits() const
+{
+ const RadarProperties * prop = (RadarProperties*)unit()->properties(PluginProperties::Radar);
+ if (!prop) {
+	return false;
+ }
+ return prop->detectsAirUnits();
+}
+

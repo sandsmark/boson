@@ -349,6 +349,8 @@ void RadarProperties::loadPlugin(KSimpleConfig* config)
  config->setGroup(propertyGroup());
  mTransmittedPower = config->readDoubleNumEntry("TransmittedPower", 10000.0f);
  mMinReceivedPower = config->readDoubleNumEntry("MinReceivedPower", 0.001f);
+ mDetectsLandUnits = config->readBoolEntry("DetectsLandUnits", true);
+ mDetectsAirUnits = config->readBoolEntry("DetectsAirUnits", true);
 }
 
 void RadarProperties::savePlugin(KSimpleConfig* config)

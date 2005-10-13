@@ -309,9 +309,14 @@ public:
 	 **/
 	float minReceivedPower() const { return mMinReceivedPower; }
 
+	bool detectsLandUnits() const { return mDetectsLandUnits; }
+	bool detectsAirUnits() const { return mDetectsAirUnits; }
+
 private:
 	float mTransmittedPower;
 	float mMinReceivedPower;
+	bool mDetectsLandUnits;
+	bool mDetectsAirUnits;
 };
 
 
