@@ -663,8 +663,8 @@ public:
 	 **/
 	float minReceivedPower() const;
 
-private:
-
+	bool detectsLandUnits() const;
+	bool detectsAirUnits() const;
 };
 
 #endif

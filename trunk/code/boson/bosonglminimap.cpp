@@ -989,9 +989,14 @@ void BosonGLMiniMapRenderer::updateRadarTexture(QPtrList<Unit>* radarlist)
 		continue;
 	}
 	BoVector2Float itempos = (*it)->center().toFloat();
+	bool flying = ((Unit*)(*it))->isFlying();
 	float strongestsignal = 0.0f;
 	// Go through all the radars and pick the one with the strongest signal
 	for (unsigned int i = 0; i < radars.count(); i++) {
+		if ((flying && !radars[i]->detectsAirUnits()) || (!flying && !radars[i]->detectsLandUnits())) {
+			// This radar can't detect this unit
+			continue;
+		}
 		float distsqr = (itempos - centers[i]).dotProduct();
 		if (distsqr > ranges[i]) {
 			// Most likely not visible to this radar
