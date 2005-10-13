@@ -48,6 +48,15 @@ template<class T> class BoVector2
     BoVector2(const BoVector2& v)  { set(v); }
     ~BoVector2()  {}
 
+    BoVector2<float> toFloat() const
+    {
+      return BoVector2<float>(mData[0], mData[1]);
+    }
+    BoVector2<bofixed> toFixed() const
+    {
+      return BoVector2<bofixed>(mData[0], mData[1]);
+    }
+
     /**
      * Make this vector a null vector.
      **/
