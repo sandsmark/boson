@@ -25,8 +25,8 @@ SightRange=15
 SupportMiniMap=true
 TerrainType=1
 UnitDepth=2
-UnitHeight=1.8
-UnitWidth=2
+UnitHeight=3
+UnitWidth=3
 Weapons=0
 PowerConsumed=200
 
@@ -34,6 +34,12 @@ PowerConsumed=200
 Animation-Idle-Start=0
 Animation-Idle-End=99
 Animation-Idle-Speed=1
+
+[RadarPlugin]
+TransmittedPower=25000
+MinReceivedPower=0.00025
+DetectsAirUnits=true
+DetectsLandUnits=false
 
 [Sounds]
 OrderAttack=order_attack

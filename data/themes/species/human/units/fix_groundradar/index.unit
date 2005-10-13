@@ -24,11 +24,18 @@ Shields=0
 SightRange=15
 SupportMiniMap=true
 TerrainType=1
-UnitDepth=2.5
-UnitHeight=4
-UnitWidth=2.5
+UnitDepth=8
+UnitHeight=5
+UnitWidth=5
 Weapons=0
 PowerConsumed=200
+
+[RadarPlugin]
+TransmittedPower=20000
+MinReceivedPower=0.001
+DetectsAirUnits=false
+DetectsLandUnits=true
+
 
 [Sounds]
 OrderAttack=order_attack
