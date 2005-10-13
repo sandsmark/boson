@@ -31,8 +31,8 @@ Weapons=0
 PowerConsumed=200
 
 [RadarPlugin]
-TransmittedPower=20000
-MinReceivedPower=0.001
+TransmittedPower=10000
+MinReceivedPower=0.003
 
 [Model]
 Animation-Idle-Start=0
