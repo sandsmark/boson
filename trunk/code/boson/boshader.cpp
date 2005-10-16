@@ -305,7 +305,7 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
   }
   else if(logsize > 0)
   {
-    boDebug(130) << "Shader linking log:" << endl << log;
+    boDebug(130) << "Shader linking log:" << endl << log << endl;
   }
 
   // Create uniform locations dict
