@@ -16,11 +16,11 @@ report_sounds = \
 sounds_DATA = \
   radar_pulse.ogg \
   shoot.ogg \
-  shot1.ogg \
-  shot2.ogg \
-  shot3.ogg \
-  shot4.ogg \
-  shot5.ogg \
+  shot_1.ogg \
+  shot_2.ogg \
+  shot_3.ogg \
+  shot_4.ogg \
+  shot_5.ogg \
   engine1_start.ogg \
   engine1_stop.ogg \
   engine1_idle.ogg \
