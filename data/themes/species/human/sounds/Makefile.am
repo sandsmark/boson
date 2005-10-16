@@ -16,6 +16,16 @@ report_sounds = \
 sounds_DATA = \
   radar_pulse.ogg \
   shoot.ogg \
+  shot1.ogg \
+  shot2.ogg \
+  shot3.ogg \
+  shot4.ogg \
+  shot5.ogg \
+  engine1_start.ogg \
+  engine1_stop.ogg \
+  engine1_idle.ogg \
+  explosion_1.ogg \
+  machine_gun_2.ogg \
   $(order_sounds) \
   $(report_sounds)
 
