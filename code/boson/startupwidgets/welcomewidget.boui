@@ -4,7 +4,7 @@
   <ClassName>BoUfoWidget</ClassName>
   <Properties>
    <opaque>false</opaque>
-   <minimumHeight></minimumHeight>
+   <minimumHeight/>
    <preferredHeight>580</preferredHeight>
    <constraints/>
    <verticalAlignment/>
@@ -12,7 +12,7 @@
    <horizontalAlignment>AlignHCenter</horizontalAlignment>
    <layout>UVBoxLayout</layout>
    <name>BoUfoWelcomeWidget</name>
-   <minimumWidth></minimumWidth>
+   <minimumWidth/>
    <backgroundImageFile/>
    <stretch/>
    <gridLayoutColumns/>
@@ -29,9 +29,9 @@
     <gridLayoutRows/>
     <opaque/>
     <layout/>
-    <minimumWidth></minimumWidth>
+    <minimumWidth/>
     <minimumHeight>20</minimumHeight>
-    <preferredWidth></preferredWidth>
+    <preferredWidth/>
     <preferredHeight>20</preferredHeight>
     <backgroundImageFile/>
     <verticalAlignment/>
@@ -216,7 +216,7 @@
        <opaque>FALSE</opaque>
        <constraints/>
        <verticalAlignment/>
-       <preferredWidth>200</preferredWidth>
+       <preferredWidth></preferredWidth>
        <horizontalAlignment>AlignLeft</horizontalAlignment>
        <layout/>
        <name>mStartSPGame</name>
@@ -242,7 +242,7 @@
        <layout/>
        <minimumWidth/>
        <minimumHeight/>
-       <preferredWidth>200</preferredWidth>
+       <preferredWidth></preferredWidth>
        <preferredHeight/>
        <backgroundImageFile/>
        <verticalAlignment/>
@@ -262,7 +262,7 @@
        <opaque>FALSE</opaque>
        <constraints/>
        <verticalAlignment/>
-       <preferredWidth>200</preferredWidth>
+       <preferredWidth></preferredWidth>
        <horizontalAlignment>AlignLeft</horizontalAlignment>
        <layout/>
        <name>mLoadGame</name>
@@ -285,7 +285,7 @@
        <opaque>FALSE</opaque>
        <constraints/>
        <verticalAlignment/>
-       <preferredWidth>200</preferredWidth>
+       <preferredWidth></preferredWidth>
        <horizontalAlignment>AlignLeft</horizontalAlignment>
        <layout/>
        <name>mStartEditor</name>
@@ -311,7 +311,7 @@
        <layout/>
        <minimumWidth/>
        <minimumHeight/>
-       <preferredWidth>200</preferredWidth>
+       <preferredWidth></preferredWidth>
        <preferredHeight/>
        <backgroundImageFile/>
        <verticalAlignment/>
@@ -331,7 +331,7 @@
        <opaque>FALSE</opaque>
        <constraints/>
        <verticalAlignment/>
-       <preferredWidth>200</preferredWidth>
+       <preferredWidth></preferredWidth>
        <horizontalAlignment>AlignLeft</horizontalAlignment>
        <layout/>
        <name>mQuit</name>
