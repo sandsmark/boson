@@ -20,7 +20,7 @@ class Sun:
     self.alt = 0
     self.az = 0
     self.lon = 24.85
-    self.lat = 58.633
+    self.lat = 48.633
     self.tzoffset = time.timezone / 3600.0
     if time.daylight != 0:
       self.tzoffset = time.altzone / 3600.0
@@ -86,8 +86,8 @@ enable = 1
 duration = 9600  # that's 8 minutes, as we have 20 advance calls per second
 
 sun = Sun()
-# Start at 2005/05/13 08:00
-curtime_ = time.struct_time((2005, 5, 13,   8, 0, 0,   0, 1, -1))
+# Start at 2005/06/13 08:00
+curtime_ = time.struct_time((2005, 6, 13,   8, 0, 0,   0, 1, -1))
 curtime = time.mktime(curtime_)
 sun.update(curtime)
 
@@ -118,7 +118,7 @@ def advance():
 
 def setTime(hour, min, sec = 0):
   global curtime
-  mytime_ = time.struct_time((2005, 5, 13,   hour, min, sec,   0, 1, -1))
+  mytime_ = time.struct_time((2005, 6, 13,   hour, min, sec,   0, 1, -1))
   curtime = time.mktime(mytime_)
   sun.update(curtime)
   updateLighting()
@@ -135,7 +135,7 @@ def advanceDay(cycle):
     return
 
   # Light is updated every updatetime advance calls
-  updatetime = 5
+  updatetime = 2
 
   if (cycle % updatetime) != 0:
     return
@@ -177,8 +177,8 @@ def updateLighting():
   ### Light colors:
   # Base intensities for ambient and diffuse colors
   baseambientday = 0.4  # Ambient color at day
-  baseambientnight = 0.2  # Ambient color at night
-  basediffuseday = 0.7  # Diffuse color at day
+  baseambientnight = 0.3  # Ambient color at night
+  basediffuseday = 0.9  # Diffuse color at day
   basediffusenight = 0.0  # Diffuse color at night
 
 
