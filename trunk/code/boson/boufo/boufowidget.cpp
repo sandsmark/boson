@@ -43,6 +43,9 @@
 #include "boufofontinfo.h"
 #include "boufoprofiling.h"
 
+#include <kglobal.h>
+#include <kstandarddirs.h>
+
 #include <qdom.h>
 #include <qimage.h>
 
@@ -962,10 +965,18 @@ void BoUfoWidget::setBackgroundImage(const BoUfoImage& img)
  setBackground(img.image()); // ufo::UImage is a ufo::UDrawable
 }
 
-void BoUfoWidget::setBackgroundImageFile(const QString& file)
+void BoUfoWidget::setBackgroundImageFile(const QString& file_)
 {
- if (!file.isEmpty()) {
+ QString file = file_;
+ if (!file_.isEmpty()) {
 	QImage img;
+	if (KGlobal::_instance) { // NULL in boufodesigner
+		file = locate("data", "boson/" + file_);
+		if (file.isEmpty()) {
+			boDebug() << k_funcinfo << "file " << file_ << " not found" << endl;
+			file = file_;
+		}
+	}
 	if (!img.load(file)) {
 		boError() << k_funcinfo << file << " could not be loaded" << endl;
 		return;
