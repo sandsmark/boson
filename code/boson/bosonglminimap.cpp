@@ -51,6 +51,7 @@
 #include <qfileinfo.h>
 #include <qptrvector.h>
 #include <qvaluevector.h>
+#include <qptrlist.h>
 #include <qgl.h>
 
 #define COLOR_UNKNOWN Qt::black // fog of war
@@ -449,6 +450,7 @@ void BosonGLMiniMap::renderMiniMap()
  mRenderer->setZoom(zoom());
  mRenderer->setAlignment(Qt::Left | Qt::Top);
  mRenderer->setCanvas(mCanvas);
+ mRenderer->setLocalPlayerIO(localPlayerIO());
 
  mRenderer->render(radarList());
 }
@@ -988,8 +990,22 @@ void BosonGLMiniMapRenderer::updateRadarTexture(QPtrList<Unit>* radarlist)
 	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
 	}
-	BoVector2Float itempos = (*it)->center().toFloat();
-	bool flying = ((Unit*)(*it))->isFlying();
+	Unit* u = (Unit*)*it;
+	if (u->isDestroyed()) {
+		continue;
+	} else if (u->owner() == mLocalPlayerIO->player()) {
+		// Player's own units will be rendered separately
+		continue;
+	}
+	BoVector2Float itempos = u->center().toFloat();
+	if (mLocalPlayerIO->canSee(u) && mLocalPlayerIO->isEnemy(u)) {
+		// Visible enemies will be shown as red dots
+		// TODO: render all visible enemies, not just those in radar range
+		glColor4f(0.7, 0.0, 0.0, 1.0);
+		glVertex3f(itempos.x() * scale, itempos.y() * scale, 0.0f);
+		continue;
+	}
+	bool flying = u->isFlying();
 	float strongestsignal = 0.0f;
 	// Go through all the radars and pick the one with the strongest signal
 	for (unsigned int i = 0; i < radars.count(); i++) {
@@ -1002,7 +1018,7 @@ void BosonGLMiniMapRenderer::updateRadarTexture(QPtrList<Unit>* radarlist)
 			// Most likely not visible to this radar
 			continue;
 		} else {
-			float receivedpower = (radars[i]->transmittedPower() * (float)(*it)->width()) / (distsqr * distsqr);
+			float receivedpower = (radars[i]->transmittedPower() * (float)u->width()) / (distsqr * distsqr);
 			// We additonally divide by minReceivedPower() to get "signal strength"
 			strongestsignal = QMAX(strongestsignal, receivedpower / radars[i]->minReceivedPower());
 		}
@@ -1013,6 +1029,16 @@ void BosonGLMiniMapRenderer::updateRadarTexture(QPtrList<Unit>* radarlist)
 		glColor4fv((basecolor + addcolor * strongestsignal).data());
 		glVertex3f(itempos.x() * scale, itempos.y() * scale, 0.0f);
 	}
+ }
+ QPtrListIterator<Unit> playerUnitsIt(*mLocalPlayerIO->allMyUnits());
+ glColor4f(0.2, 0.2, 1.0, 1.0);
+ while (playerUnitsIt.current()) {
+	if (playerUnitsIt.current()->isDestroyed()) {
+		continue;
+	}
+	BoVector2Float itempos = playerUnitsIt.current()->center().toFloat();
+	glVertex3f(itempos.x() * scale, itempos.y() * scale, 0.0f);
+	++playerUnitsIt;
  }
  glEnd();
 
