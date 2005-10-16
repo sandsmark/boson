@@ -213,6 +213,7 @@ public:
 		mZoom = zoom;
 	}
 	void setCanvas(BosonCanvas* canvas) { mCanvas = canvas; }
+	void setLocalPlayerIO(PlayerIO* io) { mLocalPlayerIO = io; }
 	/**
 	 * @param alignmentFlags See @ref Qt::AlignmentFlags. You can OR
 	 * together either @ref Qt::Alignleft or @ref Qt::AlignRight and @ref
@@ -308,6 +309,7 @@ private:
 
 	bool mUseFog; // useful for the editor to disable the fog of war
 	BosonCanvas* mCanvas;
+	PlayerIO* mLocalPlayerIO;
 };
 
 #endif
