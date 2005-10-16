@@ -50,7 +50,10 @@ BosonAudio* BosonAudio::create()
 	return BosonAudioAL::create();
 #else
 #warning OpenAL not available - sound disabled
-	return new BosonAudio;
+	BosonAudio* a = new BosonAudio;
+	a->setMusic(false);
+	a->setSound(false);
+	boWarning(200) << k_funcinfo << "boson was compiled without OpenAL support. sound disabled." << endl;
 #endif
  }
  return 0;
