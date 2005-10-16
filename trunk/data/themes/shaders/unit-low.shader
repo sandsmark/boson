@@ -21,7 +21,7 @@ void main()
   vec3 vertex = eucleidian(eyevertex);
   vec3 tolight = normalize(eucleidian(gl_ModelViewMatrix * vec4(lightPos, 1.0)) - vertex);
 
-  vec3 diffuse = dot(normal, tolight) * gl_LightSource[0].diffuse.rgb;
+  diffuse = dot(normal, tolight) * gl_LightSource[0].diffuse.rgb;
 
 
   gl_TexCoord[1].s = dot(eyevertex, gl_EyePlaneS[3]);
@@ -49,7 +49,7 @@ void main()
   // Get shadow strength at this point
   float shadow = shadow2DProj(texture_3, gl_TexCoord[1]).r;
 
-  vec3 litcolor = texcolor.rgb * (gl_LightSource[0].ambient.rgb + shadow * diffuse);
+  vec3 litcolor = texcolor.rgb * (gl_LightSource[0].ambient.rgb + shadow * diffuse) * color;
 
   gl_FragColor = vec4(litcolor, texcolor.a);
 }
