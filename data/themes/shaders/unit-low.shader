@@ -19,7 +19,8 @@ void main()
   vec3 normal = normalize(gl_NormalMatrix * gl_Normal);
   vec4 eyevertex = gl_ModelViewMatrix * gl_Vertex;
   vec3 vertex = eucleidian(eyevertex);
-  vec3 tolight = normalize(eucleidian(gl_ModelViewMatrix * vec4(lightPos, 1.0)) - vertex);
+  // FIXME: this assumes we're using directional light
+  vec3 tolight = normalize(vec3(gl_LightSource[0].position));
 
   diffuse = dot(normal, tolight) * gl_LightSource[0].diffuse.rgb;
 
