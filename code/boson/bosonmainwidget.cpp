@@ -238,7 +238,7 @@ void BosonMainWidget::initializeGL()
  glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
 #if 0
-#warning FIXME: is extenstion there?
+#warning FIXME: is extension there?
  // AB: if everything is inside the view volume we can use this to skip the
  // volume clipping tests. should be faster
  // FIXME: do we actually render stuff thats inside the view volume only?
