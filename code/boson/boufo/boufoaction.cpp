@@ -1470,12 +1470,14 @@ public:
 	BoUfoActionCollection* mActionCollection;
 
 	ufo::UMenuBar* mMenuBar;
+	bool mIsVisible;
 };
 
 BoUfoMenuBar::BoUfoMenuBar(BoUfoManager* parent, const char* name)
 	: BoUfoMenuBarMenu(QString::null, parent, name)
 {
  d = new BoUfoMenuBarPrivate;
+ d->mIsVisible = true;
  d->mUfoManager = parent;
  d->mActionCollection = parent->actionCollection();
 }
@@ -1484,6 +1486,14 @@ BoUfoMenuBar::~BoUfoMenuBar()
 {
  clearUfoMenuBar();
  delete d;
+}
+
+void BoUfoMenuBar::setVisible(bool v)
+{
+ d->mIsVisible = v;
+ if (ufoMenuBar()) {
+	ufoMenuBar()->setVisible(v);
+ }
 }
 
 ufo::UMenuBar* BoUfoMenuBar::ufoMenuBar() const
@@ -1506,6 +1516,7 @@ void BoUfoMenuBar::createMenuBar()
  d->mUfoManager->makeContextCurrent();
  clearUfoMenuBar();
  d->mMenuBar = new ufo::UMenuBar();
+ d->mMenuBar->setVisible(d->mIsVisible);
  d->mMenuBar->setFont(d->mUfoManager->rootPane()->getFont());
  d->mUfoManager->rootPane()->setMenuBar(d->mMenuBar);
  if (d->mMenuBar->getParent()) {
@@ -1540,20 +1551,19 @@ public:
 	{
 		mUfoManager = 0;
 		mActionCollection = 0;
-
-		mMenuBar = 0;
 	}
 
 	BoUfoManager* mUfoManager;
 	BoUfoActionCollection* mActionCollection;
 
-	ufo::UMenuBar* mMenuBar;
+	bool mIsVisible;
 };
 
 BoUfoToolBar::BoUfoToolBar(BoUfoManager* parent, const char* name)
 	: BoUfoMenuBarMenu(QString::null, parent, name)
 {
  d = new BoUfoToolBarPrivate;
+ d->mIsVisible = true;
  d->mUfoManager = parent;
  d->mActionCollection = parent->actionCollection();
 }
@@ -1562,6 +1572,14 @@ BoUfoToolBar::~BoUfoToolBar()
 {
  clearUfoToolBar();
  delete d;
+}
+
+void BoUfoToolBar::setVisible(bool v)
+{
+ d->mIsVisible = v;
+ if (d->mUfoManager && d->mUfoManager->toolBarContentWidget()) {
+	d->mUfoManager->toolBarContentWidget()->setVisible(d->mIsVisible);
+ }
 }
 
 void BoUfoToolBar::clearUfoToolBar()
@@ -1579,7 +1597,9 @@ void BoUfoToolBar::createToolBar()
  BO_CHECK_NULL_RET(d->mUfoManager->toolBarContentWidget());
  d->mUfoManager->makeContextCurrent();
  clearUfoToolBar();
+ BO_CHECK_NULL_RET(d->mUfoManager->toolBarContentWidget());
  d->mUfoManager->toolBarContentWidget()->ufoWidget()->setFont(d->mUfoManager->rootPane()->getFont());
+ d->mUfoManager->toolBarContentWidget()->setVisible(d->mIsVisible);
 
  boDebug() << k_funcinfo << "creating toolbar submenus" << endl;
  createUfoToolBarSubMenu(d->mUfoManager->toolBarContentWidget()->ufoWidget());

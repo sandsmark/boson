@@ -433,6 +433,8 @@ public:
 	BoUfoMenuBar(BoUfoManager* parent, const char* name = 0);
 	~BoUfoMenuBar();
 
+	void setVisible(bool v);
+
 	void createMenuBar();
 
 	static void initMenuBar(BoUfoManager* m);
@@ -456,6 +458,8 @@ class BoUfoToolBar : public BoUfoMenuBarMenu
 public:
 	BoUfoToolBar(BoUfoManager* parent, const char* name = 0);
 	~BoUfoToolBar();
+
+	void setVisible(bool v);
 
 	void createToolBar();
 
