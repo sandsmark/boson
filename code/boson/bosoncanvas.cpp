@@ -402,7 +402,6 @@ void BoCanvasAdvance::advanceFunctionAndMove(unsigned int advanceCallsCount, boo
 
 		if (s->xVelocity() || s->yVelocity() || s->zVelocity()) {
 			s->moveBy(s->xVelocity(), s->yVelocity(), s->zVelocity());
-			s->setVelocity(0, 0, 0);
 		}
 	}
  }
@@ -1736,16 +1735,7 @@ BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, const ItemType& t
 		return item;
 	}
 	theme->loadNewUnit(unit);
-	if (unit->isFlying()) {
-		// AB: we have currently not decided how to treat flying units,
-		// so we just place them at a height of 2.0 on construction.
-		// note that on loading units this may break the positions and
-		// when the height of the ground is at 2.0, we don't recognize
-		// that either.
-		unit->move(unit->x(), unit->y(), 2.0f);
-	}
  }
-
 
  return item;
 }
