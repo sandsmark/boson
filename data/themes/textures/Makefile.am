@@ -133,7 +133,11 @@ texture_DATA = \
 	wall9.jpg \
 	window3.jpg \
 	brick1.jpg \
-	bush-1.png
+	bush-1.png \
+	basgunt1.png \
+	basgunt2.png \
+	3ds_ceme.png \
+	3ds_meta.png
 
 # no further editing need here
 
