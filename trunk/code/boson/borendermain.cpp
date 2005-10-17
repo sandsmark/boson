@@ -125,6 +125,23 @@ static KCmdLineOptions options[] =
 
 void postBosonConfigInit();
 
+static void startTransparentFrameRendering()
+{
+ glPushAttrib(GL_ALL_ATTRIB_BITS);
+ glEnable(GL_DEPTH_TEST);
+ glEnable(GL_BLEND);
+ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+ glEnable(GL_ALPHA_TEST);
+ glAlphaFunc(GL_GEQUAL, 0.2);
+ glDisable(GL_CULL_FACE);
+}
+
+static void stopTransparentFrameRendering()
+{
+ glPopAttrib();
+}
+
+
 
 class BoRenderGLWidgetPrivate
 {
@@ -1273,8 +1290,14 @@ void ModelDisplay::renderModel(int mode)
 			}
 			itemMatrices[i] = &mTurretMatrix;
 		}
-#warning TODO: also render transparent meshes
 		f->renderFrame(itemMatrices, 0, false, Default, mode);
+		startTransparentFrameRendering();
+		if (mode == GL_SELECT) {
+			glDisable(GL_BLEND);
+			glDisable(GL_TEXTURE_2D);
+		}
+		f->renderFrame(itemMatrices, 0, true, Default, mode);
+		stopTransparentFrameRendering();
 		BosonModel::stopModelRendering();
 		if (mPlacementPreview) {
 			// AB: do not reset the actual color - if it will get
