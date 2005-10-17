@@ -285,6 +285,11 @@ public:
 	void changeUnit(SpeciesTheme* s, const UnitProperties* prop);
 	void changeObject(SpeciesTheme* s, const QString& file);
 
+public slots:
+	void slotToggleShowGUI();
+	void slotSetGUIVisible(bool);
+	void slotSetShowMenubar(bool v);
+	void slotApplyShowMenubar();
 
 protected:
 	virtual void initializeGL();

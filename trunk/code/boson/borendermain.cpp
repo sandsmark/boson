@@ -473,6 +473,7 @@ void BoRenderGLWidget::initUfoGUI()
 
  initUfoAction();
 
+ d->mGUI->mEnableLight->setChecked(boConfig->boolValue("UseLight", true));
  slotShowTurretToggled(false);
  d->mModelDisplay->slotResetView();
 }
@@ -482,6 +483,13 @@ void BoRenderGLWidget::initUfoAction()
  BoUfoActionCollection::initActionCollection(ufoManager());
  BoUfoActionCollection* actionCollection = ufoManager()->actionCollection();
  BO_CHECK_NULL_RET(actionCollection);
+ actionCollection->setAccelWidget(this);
+
+ (void)new BoUfoAction(i18n("Toggle GUI"), KShortcut(Qt::CTRL + Qt::Key_G),
+		this, SLOT(slotToggleShowGUI()),
+		actionCollection, "options_toggle_show_gui");
+ BoUfoStdAction::showMenubar(this, SLOT(slotApplyShowMenubar()), actionCollection);
+ ((BoUfoToggleAction*)actionCollection->action("options_show_menubar"))->setChecked(true);
 
  BoUfoActionMenu* modelMenu = new BoUfoActionMenu(i18n("&Model"),
 		 actionCollection, "model");
@@ -587,6 +595,39 @@ void BoRenderGLWidget::paintGL()
 	ufoManager()->dispatchEvents();
 	ufoManager()->render(false);
  }
+}
+
+void BoRenderGLWidget::slotToggleShowGUI()
+{
+ bool v = d->mGUI->mGUI->isVisible();
+ boDebug() << k_funcinfo << !v << endl;
+ slotSetGUIVisible(!v);
+}
+
+void BoRenderGLWidget::slotSetGUIVisible(bool v)
+{
+ d->mGUI->mGUI->setVisible(v);
+}
+
+void BoRenderGLWidget::slotApplyShowMenubar()
+{
+ BO_CHECK_NULL_RET(ufoManager());
+ BO_CHECK_NULL_RET(ufoManager()->menuBarData());
+ BoUfoActionCollection* c = ufoManager()->actionCollection();
+ BO_CHECK_NULL_RET(c);
+ BoUfoToggleAction* t = (BoUfoToggleAction*)c->action("options_show_menubar");
+ BO_CHECK_NULL_RET(t);
+ ufoManager()->menuBarData()->setVisible(t->isChecked());
+}
+
+void BoRenderGLWidget::slotSetShowMenubar(bool v)
+{
+ BO_CHECK_NULL_RET(ufoManager());
+ BoUfoActionCollection* c = ufoManager()->actionCollection();
+ BO_CHECK_NULL_RET(c);
+ BoUfoToggleAction* t = (BoUfoToggleAction*)c->action("options_show_menubar");
+ BO_CHECK_NULL_RET(t);
+ t->setChecked(v);
 }
 
 void BoRenderGLWidget::slotShowTurretToggled(bool show)
@@ -1936,7 +1977,11 @@ bool RenderMain::parseCmdLineArgs(KCmdLineArgs* args)
 	// it .. for now
 	boConfig->setBoolValue("UseLight", false);
 
+	mGLWidget->slotSetGUIVisible(false);
+	mGLWidget->slotSetShowMenubar(false);
 	QPixmap p = mGLWidget->renderPixmap(0, 0, false);
+	mGLWidget->slotSetShowMenubar(true);
+	mGLWidget->slotSetGUIVisible(true);
 
 	if (p.isNull()) {
 		boError() << k_funcinfo << "rendering to pixmap failed" << endl;
