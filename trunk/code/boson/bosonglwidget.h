@@ -155,6 +155,8 @@ public:
 
 	QImage screenShot();
 
+	virtual QPixmap renderPixmap(int w = 0, int h = 0, bool useContext = FALSE);
+
 public slots:
 	virtual void slotUpdateGL();
 
@@ -177,6 +179,7 @@ protected:
 
 private:
 	void init();
+	bool renderCxPm( QPixmap* pm );
 
 private:
 	class BosonGLWidgetPrivate;
