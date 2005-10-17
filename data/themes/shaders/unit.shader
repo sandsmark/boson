@@ -78,9 +78,9 @@ void main()
   float NdotL = max(0.0, dot(mynormal, lightdir));
 
 #ifndef USE_SPECULAR
-  const float specular = 0.0;
+  float specular = 0.0;
 #else
-  const float specular = specularStrength(lightdir, tocamera, mynormal);
+  float specular = specularStrength(lightdir, tocamera, mynormal);
 #endif
   // Get diffuse texture color at this point
   vec4 texcolor = texture2D(texture_0, gl_TexCoord[0].xy);
