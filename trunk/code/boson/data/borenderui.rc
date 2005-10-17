@@ -14,6 +14,7 @@
   </Menu>
   <Menu name="settings" group="settingsmenu"><text>&amp;Settings</text>
     <Action name="options_show_vertex_points" />
+    <Action name="options_toggle_show_gui" />
     <Action name="options_vertex_point_size" />
     <Action name="options_grid_unit_size" />
     <Action name="options_background_color" />
