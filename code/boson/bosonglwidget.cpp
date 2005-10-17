@@ -42,6 +42,21 @@
 #include <X11/Xatom.h>
 #include <X11/Xmu/StdCmap.h>
 
+class BoPixmap : public QPixmap
+{
+public:
+	QPaintDeviceX11Data* getX11DataFoo(bool def) const
+	{
+		return getX11Data(def);
+	}
+	void setX11DataFoo(const QPaintDeviceX11Data* data)
+	{
+		setX11Data(data);
+	}
+};
+
+static void *gl_pixmap_visual = 0;
+
 #define USE_COLORMAP 1
 
 #if USE_COLORMAP
@@ -776,5 +791,176 @@ QImage BosonGLWidget::screenShot()
  return image;
 }
 
+
+QPixmap BosonGLWidget::renderPixmap(int w, int h, bool useContext)
+{
+ QSize sz = size();
+ if ( (w > 0) && (h > 0) ) {
+	sz = QSize( w, h );
+ }
+ BoPixmap pm;
+ pm.resize( sz );
+
+#if defined(Q_WS_X11)
+ // If we are using OpenGL widgets we HAVE to make sure that
+ // the default visual is GL enabled, otherwise it will wreck
+ // havock when e.g trying to render to GLXPixmaps via
+ // QPixmap. This is because QPixmap is always created with a
+ // QPaintDevice that uses x_appvisual per default. Preferably,
+ // use a visual that has depth and stencil buffers.
+
+ if (!gl_pixmap_visual) {
+	int nvis;
+	Visual *vis = (Visual *) QPaintDevice::x11AppVisual();
+	int screen = QPaintDevice::x11AppScreen();
+	Display *appDpy = QPaintDevice::x11AppDisplay();
+	XVisualInfo * vi;
+	XVisualInfo visInfo;
+	memset( &visInfo, 0, sizeof(XVisualInfo) );
+	visInfo.visualid = XVisualIDFromVisual( vis );
+	visInfo.screen = screen;
+	vi = XGetVisualInfo( appDpy, VisualIDMask | VisualScreenMask, &visInfo, &nvis );
+	if ( vi ) {
+		int useGL;
+		int ret = glXGetConfig( appDpy, vi, GLX_USE_GL, &useGL );
+		if ( ret != 0 || !useGL ) {
+			// We have to find another visual that is GL capable
+			int i;
+			XVisualInfo * visuals;
+			memset( &visInfo, 0, sizeof(XVisualInfo) );
+			visInfo.screen = screen;
+			visInfo.c_class = vi->c_class;
+			visInfo.depth = vi->depth;
+			visuals = XGetVisualInfo( appDpy, VisualClassMask |
+					  VisualDepthMask |
+					  VisualScreenMask, &visInfo,
+					  &nvis );
+			if ( visuals ) {
+				for ( i = 0; i < nvis; i++ ) {
+					int ret = glXGetConfig( appDpy, &visuals[i], GLX_USE_GL, &useGL );
+					if ( ret == 0 && useGL ) {
+						vis = visuals[i].visual;
+						break;
+					}
+				}
+				XFree( visuals );
+			}
+		}
+		XFree( vi );
+	}
+	gl_pixmap_visual = vis;
+ }
+
+ if (gl_pixmap_visual != QPaintDevice::x11AppVisual()) {
+	int nvis = 0;
+	XVisualInfo visInfo;
+	memset( &visInfo, 0, sizeof(XVisualInfo) );
+	visInfo.visualid = XVisualIDFromVisual( (Visual *) gl_pixmap_visual );
+	visInfo.screen = QPaintDevice::x11AppScreen();
+	XVisualInfo *vi = XGetVisualInfo( QPaintDevice::x11AppDisplay(), VisualIDMask | VisualScreenMask,
+					  &visInfo, &nvis );
+	if (vi) {
+		QPaintDeviceX11Data* xd = pm.getX11DataFoo( TRUE );
+		xd->x_depth = vi->depth;
+		xd->x_visual = (Visual *) gl_pixmap_visual;
+		pm.setX11DataFoo( xd );
+		XFree(vi);
+	}
+ }
+#else
+#error foo
+#endif
+
+ d->mContext->doneCurrent();
+
+ bool success = TRUE;
+
+ if ( useContext && isValid() && renderCxPm( &pm ) ) {
+	boDebug() << k_funcinfo << "renderCxPm() succeeded" << endl;
+	return pm;
+ }
+
+#if 0
+ // AB: QGLWidget:
+ QGLFormat fmt = d->mContext->requestedFormat();
+ fmt.setDirectRendering( FALSE );		// Direct is unlikely to work
+ fmt.setDoubleBuffer( FALSE );		// We don't need dbl buf
+#endif
+
+ BoContext* ocx = d->mContext;
+ bool wasCurrent = (BoContext::currentContext() == ocx );
+ ocx->doneCurrent();
+#if 0
+ // AB: QGLWidget:
+ d->mContext = new BoContext( fmt, &pm );
+#else
+ d->mContext = new BoContext( &pm );
+#endif
+ d->mContext->create(false, false);
+
+ if ( d->mContext->isValid() ) {
+	slotUpdateGL();
+ } else {
+	success = FALSE;
+ }
+
+ delete d->mContext;
+ d->mContext = ocx;
+
+ if ( wasCurrent ) {
+	ocx->makeCurrent();
+ }
+
+ if ( success ) {
+#if defined(Q_WS_X11)
+	if (gl_pixmap_visual != QPaintDevice::x11AppVisual()) {
+		QImage image = pm.convertToImage();
+		QPixmap p;
+		p = image;
+		return p;
+	}
+#endif
+	return pm;
+ } else {
+	return QPixmap();
+ }
+}
+
+bool BosonGLWidget::renderCxPm( QPixmap* pm )
+{
+  if ( ((XVisualInfo*)d->mContext->mVi)->depth != pm->depth() ) {
+	return FALSE;
+  }
+
+ GLXPixmap glPm;
+#if defined(GLX_MESA_pixmap_colormap) && defined(QGL_USE_MESA_EXT)
+ glPm = glXCreateGLXPixmapMESA( x11Display(),
+				(XVisualInfo*)d->mContext->mVi,
+				(Pixmap)pm->handle(),
+				choose_cmap( pm->x11Display(),
+				(XVisualInfo*)d->mContext->mVi ) );
+#else
+ glPm = (Q_UINT32)glXCreateGLXPixmap( x11Display(),
+					(XVisualInfo*)d->mContext->mVi,
+					(Pixmap)pm->handle() );
+#endif
+
+ if ( !glXMakeCurrent( x11Display(), glPm, (GLXContext)d->mContext->d->mContext ) ) {
+	glXDestroyGLXPixmap( x11Display(), glPm );
+	return FALSE;
+ }
+
+ glDrawBuffer( GL_FRONT );
+ if ( !d->mContext->isInitialized() ) {
+	initGL();
+ }
+ resizeGL( pm->width(), pm->height() );
+ paintGL();
+ glFlush();
+ makeCurrent();
+ glXDestroyGLXPixmap( x11Display(), glPm );
+ resizeGL( width(), height() );
+ return TRUE;
+}
 
 
