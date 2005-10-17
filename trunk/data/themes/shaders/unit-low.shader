@@ -1,28 +1,21 @@
 <vertex>
 
-uniform vec3 lightPos;
-uniform bool fogEnabled;
-
+varying vec3 ambient;
 varying vec3 diffuse;
-varying vec3 color;
-
-vec3 eucleidian(vec4 h) { return vec3(h.xyz / h.w); }
 
 void main()
 {
-  gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
-
-  color = gl_Color.rgb;
+  gl_TexCoord[0] = gl_MultiTexCoord0;
 
   // Transform everything into eye space. We can't use untranformed stuff
   //  because models use matrix transformations.
   vec3 normal = normalize(gl_NormalMatrix * gl_Normal);
   vec4 eyevertex = gl_ModelViewMatrix * gl_Vertex;
-  vec3 vertex = eucleidian(eyevertex);
   // FIXME: this assumes we're using directional light
-  vec3 tolight = normalize(vec3(gl_LightSource[0].position));
+  vec3 tolight = normalize(gl_LightSource[0].position.xyz);
 
-  diffuse = dot(normal, tolight) * gl_LightSource[0].diffuse.rgb;
+  ambient = gl_LightSource[0].ambient.rgb * gl_Color.rgb;
+  diffuse = dot(normal, tolight) * gl_LightSource[0].diffuse.rgb * gl_Color.rgb;
 
 
   gl_TexCoord[1].s = dot(eyevertex, gl_EyePlaneS[3]);
@@ -34,13 +27,14 @@ void main()
   gl_Position = ftransform();
 }
 
+
 <fragment>
 
 uniform sampler2D texture_0;
 uniform sampler2DShadow texture_3;
 
+varying vec3 ambient;
 varying vec3 diffuse;
-varying vec3 color;
 
 void main()
 {
@@ -50,7 +44,5 @@ void main()
   // Get shadow strength at this point
   float shadow = shadow2DProj(texture_3, gl_TexCoord[1]).r;
 
-  vec3 litcolor = texcolor.rgb * (gl_LightSource[0].ambient.rgb + shadow * diffuse) * color;
-
-  gl_FragColor = vec4(litcolor, texcolor.a);
+  gl_FragColor = vec4(texcolor.rgb * (ambient + shadow * diffuse), texcolor.a);
 }
