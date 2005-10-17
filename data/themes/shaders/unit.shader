@@ -1,7 +1,5 @@
 <vertex>
 
-uniform vec3 lightPos;
-uniform vec3 cameraPos;
 uniform bool fogEnabled;
 
 varying vec3 normal;
@@ -23,7 +21,8 @@ void main()
   normal = gl_NormalMatrix * gl_Normal;
   vec4 eyevertex = gl_ModelViewMatrix * gl_Vertex;
   vertex = eucleidian(eyevertex);
-  tolight = normalize(eucleidian(gl_ModelViewMatrix * vec4(lightPos, 1.0)) - vertex);
+  // FIXME: this assumes we're using directional light
+  tolight = normalize(vec3(gl_LightSource[0].position));
 #ifdef USE_SPECULAR
   // Camera is at (0; 0; 0) in eye space, so this is the direction to it.
   tocamera = normalize(vec3(-vertex));
@@ -87,6 +86,19 @@ void main()
   vec4 texcolor = texture2D(texture_0, gl_TexCoord[0].xy);
 
   // Get shadow strength at this point
+#ifdef USE_HQ_PCF_SHADOWS
+  float shadow = 0.0;
+  const float ires = 1.0 / 2048.0;
+  vec3 spot = gl_TexCoord[3].stp / gl_TexCoord[3].q;
+  for(float x = -2.0; x <= 2.0; x++)
+  {
+    for(float y = -2.0; y <= 2.0; y++)
+    {
+      shadow += shadow2D(texture_3, vec3(spot.s + x*ires, spot.t + y*ires, spot.p)).r;
+    }
+  }
+  shadow /= 25.0;
+#else
 #ifndef USE_PCF_SHADOWS
   float shadow = shadow2DProj(texture_3, gl_TexCoord[1]).r;
 #else
@@ -97,6 +109,7 @@ void main()
   shadow += shadow2D(texture_3, vec3(spot.s + ires, spot.t + ires, spot.p)).r;
   shadow += shadow2D(texture_3, vec3(spot.s, spot.t - ires, spot.p)).r;
   shadow /= 3.0;
+#endif
 #endif
 
 
