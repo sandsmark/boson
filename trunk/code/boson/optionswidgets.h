@@ -119,6 +119,7 @@ public:
 	void setCursorEdgeSensity(int);
 	void setRMBScrolling(bool);
 	void setMMBScrolling(bool);
+	void setWheelMoveZoom(bool);
 	void setMouseWheelAction(CameraAction action);
 	void setMouseWheelShiftAction(CameraAction action);
 
@@ -126,6 +127,7 @@ private:
 	KIntNumInput* mArrowSpeed;
 	QCheckBox* mRMBScrolling;
 	QCheckBox* mMMBScrolling;
+	QCheckBox* mWheelMoveZoom;
 	KIntNumInput* mCursorEdgeSensity;
 	QComboBox* mMouseWheelAction;
 	QComboBox* mMouseWheelShiftAction;
