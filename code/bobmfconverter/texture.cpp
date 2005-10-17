@@ -37,6 +37,7 @@ Texture::Texture(const QString& filename)
 
   if(filename.lower().endsWith(".png"))
   {
+#warning this leads to wrong results with -noloadtex
     mHasTransparency = true;
   }
 }
@@ -48,6 +49,7 @@ bool Texture::load()
     // Texture is already loaded
     return true;
   }
+  boDebug() << k_funcinfo << "loading texture " << mFilename << endl;
 
   // Find out complete file path of the texture file (e.g. /foo/bar.jpg)
   QString filepath;
@@ -99,6 +101,10 @@ bool Texture::load()
           mHasTransparency = true;
           break;
         }
+#warning AB: I believe the next line is required
+#if 0
+        p++;
+#endif
       }
       if(mHasTransparency)
       {
@@ -177,3 +183,6 @@ const QStringList& Texture::texturePaths()
   return mTexturePaths;
 }
 
+/*
+ * vim: et sw=2
+ */
