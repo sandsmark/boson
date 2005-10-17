@@ -521,10 +521,11 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  (void)new QLabel(i18n("Shader quality:"), hbox);
  mShaderQuality = new QComboBox(hbox);
  mShaderQuality->setEnabled(BosonGroundThemeData::shadersSupported());
+ mShaderQuality->insertItem(i18n("Extreme"));
  mShaderQuality->insertItem(i18n("High"));
  mShaderQuality->insertItem(i18n("Medium"));
  mShaderQuality->insertItem(i18n("Low"));
- mShaderQuality->setCurrentItem(1);
+ mShaderQuality->setCurrentItem(2);
  hbox = new QHBox(mAdvanced);
  (void)new QLabel(i18n("Shadow quality:"), hbox);
  mShadowQuality = new QComboBox(hbox);
@@ -680,12 +681,15 @@ QString OpenGLOptions::shaderSuffixes()
 {
  QString suffixes;
  if (mShaderQuality->currentItem() <= 0) {
-	suffixes += "-hi,";
+	suffixes += "-vhi,";
  }
  if (mShaderQuality->currentItem() <= 1) {
-	suffixes += "-med,";
+	suffixes += "-hi,";
  }
  if (mShaderQuality->currentItem() <= 2) {
+	suffixes += "-med,";
+ }
+ if (mShaderQuality->currentItem() <= 3) {
 	suffixes += "-low,";
  }
 
@@ -694,14 +698,16 @@ QString OpenGLOptions::shaderSuffixes()
 
 int OpenGLOptions::shaderSuffixesToIndex(const QString& suffixes)
 {
- if (suffixes.contains("hi")) {
+ if (suffixes.contains("vhi")) {
 	return 0;
- } else if (suffixes.contains("med")) {
+ } else if (suffixes.contains("hi")) {
 	return 1;
- } else if (suffixes.contains("low")) {
+ } else if (suffixes.contains("med")) {
 	return 2;
+ } else if (suffixes.contains("low")) {
+	return 3;
  } else {
-	return 1;  // Fallback to medium
+	return 2;  // Fallback to medium
  }
 }
 
