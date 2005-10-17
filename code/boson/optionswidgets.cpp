@@ -233,6 +233,10 @@ ScrollingOptions::ScrollingOptions(QWidget* parent) : QVBox(parent), OptionsWidg
  mMMBScrolling = new QCheckBox(hbox);
 
  hbox = new QHBox(this);
+ (void)new QLabel(i18n("Enable Zoom'nScroll"), hbox);
+ mWheelMoveZoom = new QCheckBox(hbox);
+
+ hbox = new QHBox(this);
  (void)new QLabel(i18n("Sensity of cursor at edge of the window scrolling (0 for disabled)"), hbox);
  mCursorEdgeSensity = new KIntNumInput(hbox);
  mCursorEdgeSensity->setRange(0, 50);
@@ -273,6 +277,7 @@ void ScrollingOptions::apply()
  boDebug(210) << k_funcinfo << endl;
  boConfig->setBoolValue("RMBMove", mRMBScrolling->isChecked());
  boConfig->setBoolValue("MMBMove", mMMBScrolling->isChecked());
+ boConfig->setBoolValue("WheelMoveZoom", mWheelMoveZoom->isChecked());
  if (mCursorEdgeSensity->value() < 0) {
 	mCursorEdgeSensity->setValue(0);
  }
@@ -292,6 +297,7 @@ void ScrollingOptions::setDefaults()
  setCursorEdgeSensity(boConfig->uintDefaultValue("CursorEdgeSensity"));
  setRMBScrolling(boConfig->boolDefaultValue("RMBMove"));
  setMMBScrolling(boConfig->boolDefaultValue("MMBMove"));
+ setWheelMoveZoom(boConfig->boolDefaultValue("WheelMoveZoom"));
  mMouseWheelAction->setCurrentItem(boConfig->intDefaultValue("MouseWheelAction"));
  mMouseWheelShiftAction->setCurrentItem(boConfig->intDefaultValue("MouseWheelShiftAction"));
 }
@@ -302,6 +308,7 @@ void ScrollingOptions::load()
  setCursorEdgeSensity(boConfig->uintValue("CursorEdgeSensity"));
  setRMBScrolling(boConfig->boolValue("RMBMove"));
  setMMBScrolling(boConfig->boolValue("MMBMove"));
+ setWheelMoveZoom(boConfig->boolValue("WheelMoveZoom"));
  setMouseWheelAction((CameraAction)boConfig->intValue("MouseWheelAction"));
  setMouseWheelShiftAction((CameraAction)boConfig->intValue("MouseWheelShiftAction"));
 }
@@ -324,6 +331,11 @@ void ScrollingOptions::setRMBScrolling(bool on)
 void ScrollingOptions::setMMBScrolling(bool on)
 {
  mMMBScrolling->setChecked(on);
+}
+
+void ScrollingOptions::setWheelMoveZoom(bool on)
+{
+ mWheelMoveZoom->setChecked(on);
 }
 
 void ScrollingOptions::setMouseWheelAction(CameraAction action)

@@ -283,6 +283,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntryBool("Music", true);
  addDynamicEntryBool("MMBMove", true);
  addDynamicEntryBool("RMBMove", true);
+ addDynamicEntryBool("WheelMoveZoom", false); // whether we center the screen on the mouse on mouse wheel zoom
  addDynamicEntryUInt("ArrowKeyStep", 10);
  addDynamicEntryUInt("CursorEdgeSensity", 20);
  addDynamicEntryUInt("GLUpdateInterval", 20);

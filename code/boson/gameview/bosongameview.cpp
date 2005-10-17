@@ -2380,7 +2380,48 @@ void BosonGameView::mouseEventWheel(float delta, Orientation orientation, const 
 		} else {
 			delta *= 1; // no effect, btw
 		}
+		
+		//bricofoy's scrolling stuff
+
+		if (boConfig->boolValue("WheelMoveZoom")) {
+			int threshold = 3; // hardcoded, TODO: use boConfig instead
+			static int lastX = 0, lastY = 0;
+
+			if (delta < 0) { //we scroll only when zooming in, not when zooming out
+				int curX, curY;
+				float posX, posY, posZ;
+				boEvent.worldPos(&posX, &posY, &posZ);
+				int cellX, cellY;
+				cellX = (int)(posX);
+				cellY = (int)(-posY);
+
+				QWidget* w = qApp->focusWidget();
+				BO_CHECK_NULL_RET(w);
+				QPoint pos = w->mapToGlobal(QPoint(w->width()/2, w->height()/2));
+				QPoint pos2 = QCursor::pos();
+	
+				curX = pos2.x();
+				curY = pos2.y();
+
+				int dx = lastX - curX;
+				int dy = lastY - curY;
+				int dx2 = dx * dx;
+				int dy2 = dy * dy;
+				int t2 = threshold * threshold;
+				if (dx2 > t2 || dy2 > t2) {
+					slotReCenterDisplay(QPoint(cellX, cellY));
+					displayInput()->updateCursor();
+					QCursor::setPos(pos);
+					curX = pos.x();
+					curY = pos.y();
+				}
+				lastX = curX;
+				lastY = curY;
+			}
+		}
+		//end bricofoy's scrolling stuff
 		zoom(delta);
+
 		break;
 	case CameraRotate:
 		if (boEvent.controlButton()) {
