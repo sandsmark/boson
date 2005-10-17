@@ -93,12 +93,25 @@ void main()
   // Color from the diffuse texture
   vec3 basetexcolor = texture2D(texture_0, texcoord).rgb;
 
-  // 6-sample PCF filtering
+#ifdef USE_HQ_PCF_SHADOWS
+  float shadow = 0.0;
+  const float ires = 1.0 / 2048.0;
+  vec3 spot = gl_TexCoord[3].stp / gl_TexCoord[3].q;
+  for(float x = -2.0; x <= 2.0; x++)
+  {
+    for(float y = -2.0; y <= 2.0; y++)
+    {
+      shadow += shadow2D(texture_3, vec3(spot.s + x*ires, spot.t + y*ires, spot.p)).r;
+    }
+  }
+  shadow /= 25.0;
+#else
 #ifndef USE_PCF_SHADOWS
   float shadow = shadow2DProj(texture_3, gl_TexCoord[3]).r;
 #else
+  // 5-sample PCF filtering
   vec3 spot = gl_TexCoord[3].stp / gl_TexCoord[3].q;
-  float ires = 1.0 / 1024.0;
+  float ires = 1.0 / 2048.0;
   float shadow = 0.0;
   shadow += shadow2D(texture_3, vec3(spot.s       , spot.t - ires, spot.p)).r;
   shadow += shadow2D(texture_3, vec3(spot.s - ires, spot.t       , spot.p)).r;
@@ -106,6 +119,7 @@ void main()
   shadow += shadow2D(texture_3, vec3(spot.s + ires, spot.t       , spot.p)).r;
   shadow += shadow2D(texture_3, vec3(spot.s       , spot.t + ires, spot.p)).r;
   shadow = (shadow / 6.0);
+#endif
 #endif
 
   vec3 litcolor = basetexcolor * (diffuse * shadow + gl_LightSource[0].ambient.rgb);
