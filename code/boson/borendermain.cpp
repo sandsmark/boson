@@ -120,6 +120,7 @@ static KCmdLineOptions options[] =
     { "l", 0, 0 },
     { "lod <number>", I18N_NOOP("Initially displayed LOD"), 0 },
     { "indirect", I18N_NOOP("Use Indirect rendering (sloooow!!). debugging only."), 0 },
+    { "pixmap <filename>", I18N_NOOP("Render to pixmap."), "" },
     { 0, 0, 0 }
 };
 
@@ -365,13 +366,16 @@ void BoRenderGLWidget::initializeGL()
  boDebug() << k_funcinfo << endl;
  makeCurrent();
  BoInfo::boInfo()->update(this);
- initUfo();
  setUpdatesEnabled(false);
 
  BoTextureManager::initStatic();
  BoLightManager::initStatic();
  BoMeshRendererManager::initStatic();
  boTextureManager->initOpenGL();
+
+ // in case we are rendering to a pixmap:
+ boTextureManager->reloadTextures();
+ // TODO: reload light?
 
  glClearColor(0.0, 0.0, 0.0, 0.0);
  glShadeModel(GL_FLAT);
@@ -390,6 +394,8 @@ void BoRenderGLWidget::initUfoGUI()
 	return;
  }
  initialized = true;
+
+ initUfo();
 
  d->mGUI = new BoRenderGUI();
  ufoManager()->contentWidget()->addWidget(d->mGUI);
@@ -1925,6 +1931,23 @@ bool RenderMain::parseCmdLineArgs(KCmdLineArgs* args)
  if (!mGLWidget->parseCmdLineArgs(args)) {
 	return false;
  }
+ if (args->isSet("pixmap")) {
+	// AB: lights are not reloaded by initializeGL(), so we need to disable
+	// it .. for now
+	boConfig->setBoolValue("UseLight", false);
+
+	QPixmap p = mGLWidget->renderPixmap(0, 0, false);
+
+	if (p.isNull()) {
+		boError() << k_funcinfo << "rendering to pixmap failed" << endl;
+	}
+	QString file = args->getOption("pixmap");
+	if (p.save(file, "JPEG")) {
+		boDebug() << k_funcinfo << "saving pixmap to " << file << endl;
+	} else {
+		boError() << k_funcinfo << "saving pixmap to " << file << " failed" << endl;
+	}
+ }
  return true;
 }
 
@@ -1952,7 +1975,7 @@ int main(int argc, char **argv)
  BoApplication app(argv0);
  QObject::connect(kapp, SIGNAL(lastWindowClosed()), kapp, SLOT(quit()));
 
- if (args->isSet("indirect")) {
+ if (args->isSet("indirect") || args->isSet("pixmap")) {
 	boWarning() << k_funcinfo << "use indirect rendering (slow!)" << endl;
 	boConfig->setBoolValue("ForceWantDirect", false);
  }
@@ -1960,6 +1983,12 @@ int main(int argc, char **argv)
  RenderMain* main = new RenderMain();
  kapp->setMainWidget(main);
  main->show();
+ bool renderToPixmap = false;
+ if (args->isSet("pixmap")) {
+	boDebug() << k_funcinfo << "rendering to pixmap" << endl;
+	main->hide();
+	renderToPixmap = true;
+ }
  if (args->isSet("maximized")) {
 	main->showMaximized();
  }
@@ -1970,6 +1999,9 @@ int main(int argc, char **argv)
 
  args->clear();
 
+ if (renderToPixmap) {
+	return 0;
+ }
  return app.exec();
 }
 
