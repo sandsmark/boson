@@ -589,6 +589,10 @@ void doModelProcessing(Model* m)
     // Load textures
     m->loadTextures();
   }
+  else
+  {
+    boDebug() << "not loading textures due to request." << endl;
+  }
 
   if(tex_converttolowercase)
   {
@@ -684,3 +688,7 @@ void doModelProcessing(Model* m)
     loderror *= lod_errormod;
   }
 }
+
+/*
+ * vim: et sw=2
+ */
