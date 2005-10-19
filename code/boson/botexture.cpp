@@ -724,11 +724,6 @@ void BoTexture::reload()
 
   boDebug() << k_funcinfo << "Reloading texture from " << mFilePath << endl;
 
-  // Delete old texture
-  glDeleteTextures(1, &mId);
-
-  // Create new texture
-  glGenTextures(1, &mId);
   applyOptions();
   // Reset dimensions
   mWidth = mHeight = mDepth = 0;
