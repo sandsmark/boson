@@ -114,6 +114,7 @@ static KCmdLineOptions options[] =
     { "rotate-y <number>", I18N_NOOP("Rotation around the Y-axis"), 0 },
     { "rz", 0, 0 },
     { "rotate-z <number>", I18N_NOOP("Rotation around the Z-axis"), 0 },
+    { "lookAtCenter", I18N_NOOP("Rotate the camera so, that it looks at the center, i.e. (0,0,0)"), 0 },
     { "fovy <number>", I18N_NOOP("Field of view (zooming)"), "60.0" },
     { "f", 0, 0 },
     { "frame <number>", I18N_NOOP("Initially displayed frame"), 0 },
@@ -353,8 +354,19 @@ bool BoRenderGLWidget::loadCamera(KCmdLineArgs* args)
  // re-transform to gluLookAt() values
  quat.inverse().transform(&cameraPos, &cameraPos);
 
+ if (args->isSet("lookAtCenter")) {
+	if (args->isSet("rotate-x") ||
+			args->isSet("rotate-y") ||
+			args->isSet("rotate-z")) {
+		boWarning() << "--rotate-x, --rotate-y and --rotate-z are ignored when --lookAtCenter was specified!" << endl;
+	}
+	BoVector3Float lookAt = BoVector3Float(0, 0, 0);
+	BoVector3Float up = BoVector3Float(0, 0, 1);
+	quat.setRotation(cameraPos, lookAt, up);
+ }
+
  BoVector3Float lookAt, up;
- quat.matrix().toGluLookAt(&lookAt, &up, cameraPos);
+ quat.matrix().toGluLookAt(&lookAt, &up, BoVector3Float(0, 0, 0));
 
  d->mModelDisplay->camera()->setGluLookAt(cameraPos, lookAt, up);
 
