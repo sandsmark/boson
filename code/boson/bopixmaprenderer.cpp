@@ -76,7 +76,9 @@ void BoPixmapRenderer::setWidget(BosonGLWidget* w)
  d->mContext->makeCurrent();
  boDebug() << "context current done" << endl;
 
- boTextureManager->reloadTextures();
+ if (boTextureManager) {
+	boTextureManager->reloadTextures();
+ }
 
  if (!d->mContext->isValid()) {
 	boError() << k_funcinfo << "invalid context" << endl;
