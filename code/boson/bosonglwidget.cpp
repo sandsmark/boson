@@ -880,18 +880,14 @@ QPixmap BosonGLWidget::renderPixmap(int w, int h, bool useContext)
 	return pm;
  }
 
-#if 0
- // AB: QGLWidget:
- QGLFormat fmt = d->mContext->requestedFormat();
- fmt.setDirectRendering( FALSE );		// Direct is unlikely to work
- fmt.setDoubleBuffer( FALSE );		// We don't need dbl buf
-#endif
-
  BoContext* ocx = d->mContext;
  bool wasCurrent = (BoContext::currentContext() == ocx );
  ocx->doneCurrent();
 #if 0
  // AB: QGLWidget:
+ QGLFormat fmt = d->mContext->requestedFormat();
+ fmt.setDirectRendering( FALSE );		// Direct is unlikely to work
+ fmt.setDoubleBuffer( FALSE );		// We don't need dbl buf
  d->mContext = new BoContext( fmt, &pm );
 #else
  d->mContext = new BoContext( &pm );
