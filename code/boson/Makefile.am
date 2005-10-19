@@ -244,6 +244,7 @@ borender_SOURCES = \
 		borendergui.boui \
 		borendermain.cpp \
 		borenderrendermodel.cpp \
+		bopixmaprenderer.cpp \
 		boeditturretpropertiesdialog.cpp
 
 libboinfo_la_SOURCES = \

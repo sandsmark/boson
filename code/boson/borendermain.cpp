@@ -59,6 +59,7 @@
 #include "bosonfont/bosonglfontchooser.h"
 #endif
 #include "borenderrendermodel.h"
+#include "bopixmaprenderer.h"
 #include <bogl.h>
 
 #include <kcmdlineargs.h>
@@ -1622,7 +1623,9 @@ bool RenderMain::parseCmdLineArgs(KCmdLineArgs* args)
 
 	mGLWidget->slotSetGUIVisible(false);
 	mGLWidget->slotSetShowMenubar(false);
-	QPixmap p = mGLWidget->renderPixmap(0, 0, false);
+	BoPixmapRenderer r;
+	r.setWidget(mGLWidget);
+	QPixmap p = r.getPixmap();
 	mGLWidget->slotSetShowMenubar(true);
 	mGLWidget->slotSetGUIVisible(true);
 
