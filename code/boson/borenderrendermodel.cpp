@@ -28,7 +28,6 @@
 #include "bomesh.h"
 #include "bolight.h"
 #include "bomeshrenderermanager.h"
-//#include "bomeshrenderer.h"
 #include "bomaterial.h"
 #include <bogl.h>
 
@@ -173,7 +172,7 @@ void BoRenderRenderModel::setSelectedMesh(int m)
  BoLOD* lod = mModel->lod(mCurrentLOD);
  BoFrame* f = 0;
  if (lod) {
-	lod->frame(mCurrentFrame);
+	f = lod->frame(mCurrentFrame);
  }
  if (!f) {
 	mSelectedMesh = -1;
