@@ -243,6 +243,7 @@ borender_SOURCES = \
 		kgamespeciesdebug.cpp \
 		borendergui.boui \
 		borendermain.cpp \
+		borenderrendermodel.cpp \
 		boeditturretpropertiesdialog.cpp
 
 libboinfo_la_SOURCES = \

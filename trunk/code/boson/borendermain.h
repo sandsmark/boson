@@ -32,9 +32,6 @@
 
 #include <kmainwindow.h>
 
-#define MIN_FOVY 0.0
-#define MAX_FOVY 180.0
-
 
 class BoMouseMoveDiff;
 class SpeciesTheme;
@@ -74,29 +71,21 @@ public:
 
 	virtual void paintWidget();
 
+	const BosonModel* model() const;
+	BoCamera* camera() const;
+	BoLight* light() const;
+
 	void setFont(const BoFontInfo& font);
-
-	void resetModel();
-
-	BoCamera* camera() const { return mCamera; }
-	BoLight* light() const { return mLight; }
-	BosonModel* model() const { return mModel; }
-
 	void setModel(BosonModel*);
 
 	void setTurretMeshes(const QStringList& meshes);
-	const QStringList& turretMeshes() const
-	{
-		return mTurretMeshes;
-	}
-	void setTurretMeshesEnabled(bool e)
-	{
-		mTurretMeshesEnabled = e;
-	}
-	void setTurretInitialZRotation(float r)
-	{
-		mTurretInitialZRotation = r;
-	}
+	const QStringList& turretMeshes() const;
+	void setTurretMeshesEnabled(bool e);
+	void setTurretInitialZRotation(float r);
+
+	void updateCamera(const BoVector3Float& cameraPos, const BoQuaternion& q);
+	void updateCamera(const BoVector3Float& cameraPos, const BoMatrix& rotationMatrix);
+	void updateCamera(const BoVector3Float& cameraPos, const BoVector3Float& lookAt, const BoVector3Float& up);
 
 signals:
 	void signalShowSelectedMeshLabel(bool);
@@ -137,12 +126,7 @@ signals:
 
 public slots:
 	void slotResetView();
-	void slotFovYChanged(float f)
-	{
-		if (f >= MIN_FOVY && f <= MAX_FOVY) {
-			mFovY = f;
-		}
-	}
+	void slotFovYChanged(float f);
 	void slotFrameChanged(float f)
 	{
 		slotFrameChanged((int)f);
@@ -153,18 +137,9 @@ public slots:
 		slotLODChanged((int)l);
 	}
 	void slotLODChanged(int l);
-	void slotPlacementPreviewChanged(bool on)
-	{
-		mPlacementPreview = on;
-	}
-	void slotDisallowPlacementChanged(bool on)
-	{
-		mDisallowPlacement = on;
-	}
-	void slotWireFrameChanged(bool on)
-	{
-		mWireFrame = on;
-	}
+	void slotPlacementPreviewChanged(bool on);
+	void slotDisallowPlacementChanged(bool on);
+	void slotWireFrameChanged(bool on);
 	void slotRenderAxisChanged(bool on)
 	{
 		mRenderAxis = on;
@@ -190,24 +165,11 @@ protected slots:
 	void slotMouseReleaseEvent(QMouseEvent*);
 	void slotWheelEvent(QWheelEvent*);
 
+	void slotResetModel();
+
 protected:
 	void renderAxii();
-	void renderModel(int mode = -1);
 	void renderGrid();
-	void renderMeshSelection();
-	void renderText();
-
-	bool haveModel() const
-	{
-		if (mModel && mCurrentFrame >= 0) {
-			return true;
-		}
-		return false;
-	}
-
-	void updateCamera(const BoVector3Float& cameraPos, const BoQuaternion& q);
-	void updateCamera(const BoVector3Float& cameraPos, const BoMatrix& rotationMatrix);
-	void updateCamera(const BoVector3Float& cameraPos, const BoVector3Float& lookAt, const BoVector3Float& up);
 
 	void updateMeshUnderMouse();
 
@@ -216,18 +178,10 @@ protected:
 	 **/
 	void selectMesh(int mesh);
 
-	bool isSelected(unsigned int mesh) const;
-
-	/**
-	 * Hide @p mesh in all frames
-	 **/
-	void hideMesh(unsigned int mesh, bool hide = true);
-
 	/**
 	 * Update the text that displays information on what is under the cursor
 	 **/
 	void updateCursorDisplay(const QPoint& pos);
-	int pickObject(const QPoint& pos);
 
 private:
 	void initializeGL();
@@ -235,32 +189,19 @@ private:
 private:
 	friend class RenderMain; // we need to emit signals from outside, in order to save lots of forwarding code
 	ModelDisplayPrivate* d;
-	BosonModel* mModel;
-	int mCurrentFrame;
-	int mCurrentLOD;
 	int mMeshUnderMouse;
 	int mSelectedMesh;
-	QStringList mTurretMeshes;
-	bool mTurretMeshesEnabled;
-	float mTurretInitialZRotation;
-	float mTurretRotation;
-	BoMatrix mTurretMatrix;
 	BosonViewData* mViewData;
 
 	BosonGLFont* mDefaultFont;
 
 	float mFovY; // we allow real zooming here!
 
-	bool mPlacementPreview;
-	bool mDisallowPlacement;
 	bool mWireFrame;
 	bool mRenderAxis;
 	bool mRenderGrid;
 
 	BoMouseMoveDiff* mMouseMoveDiff;
-
-	BoCamera* mCamera;
-	BoLight* mLight;
 };
 
 class BoRenderGLWidgetPrivate;

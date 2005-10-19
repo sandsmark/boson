@@ -58,6 +58,7 @@
 #include "bosonfont/bosonglfont.h"
 #include "bosonfont/bosonglfontchooser.h"
 #endif
+#include "borenderrendermodel.h"
 #include <bogl.h>
 
 #include <kcmdlineargs.h>
@@ -126,22 +127,6 @@ static KCmdLineOptions options[] =
 };
 
 void postBosonConfigInit();
-
-static void startTransparentFrameRendering()
-{
- glPushAttrib(GL_ALL_ATTRIB_BITS);
- glEnable(GL_DEPTH_TEST);
- glEnable(GL_BLEND);
- glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
- glEnable(GL_ALPHA_TEST);
- glAlphaFunc(GL_GEQUAL, 0.2);
- glDisable(GL_CULL_FACE);
-}
-
-static void stopTransparentFrameRendering()
-{
- glPopAttrib();
-}
 
 
 
@@ -368,7 +353,7 @@ bool BoRenderGLWidget::loadCamera(KCmdLineArgs* args)
  BoVector3Float lookAt, up;
  quat.matrix().toGluLookAt(&lookAt, &up, BoVector3Float(0, 0, 0));
 
- d->mModelDisplay->camera()->setGluLookAt(cameraPos, lookAt, up);
+ d->mModelDisplay->updateCamera(cameraPos, lookAt, up);
 
  return true;
 }
@@ -476,7 +461,7 @@ void BoRenderGLWidget::initUfoGUI()
 #if UFO_CAMERA_WIDGET
  // AB: atm this causes problems with the camera.
  BoUfoCameraWidget* camera = new BoUfoCameraWidget();
- camera->setCamera(mCamera);
+ camera->setCamera(d->mRenderModel->camera());
  connect(this, SIGNAL(signalCameraChanged()), camera, SLOT(slotUpdateFromCamera()));
  d->mGUI->mCameraContainer->addWidget(camera);
 #endif
@@ -788,7 +773,7 @@ void BoRenderGLWidget::slotShowMaterialsWidget()
 if (!d->mModelDisplay->model()) {
 	return;
  }
- BosonModel* model = d->mModelDisplay->model();
+ const BosonModel* model = d->mModelDisplay->model();
  for (unsigned int i = 0; i < model->materialCount(); i++) {
 	d->mMaterialWidget->addMaterial(model->material(i));
  }
@@ -1051,42 +1036,33 @@ class ModelDisplayPrivate
 public:
 	ModelDisplayPrivate()
 	{
+		mRenderModel = 0;
 	}
+	BoRenderRenderModel* mRenderModel;
 };
 
 ModelDisplay::ModelDisplay()
 	: BoUfoCustomWidget()
 {
  d = new ModelDisplayPrivate();
+ d->mRenderModel = 0;
 
  qApp->setGlobalMouseTracking(true);
 
- mCurrentFrame = 0;
- mModel = 0;
- mCurrentLOD = 0;
  mMeshUnderMouse = -1;
  mSelectedMesh = -1;
- mTurretMeshesEnabled = false;
- mTurretInitialZRotation = 0.0f;
- mTurretRotation = 0.0f;
  mViewData = new BosonViewData(this);
  BosonViewData::setGlobalViewData(mViewData);
 
 
  mMouseMoveDiff = new BoMouseMoveDiff;
 
- mPlacementPreview = false;
- mDisallowPlacement = false;
- mWireFrame = false;
  mRenderAxis = false;
  mRenderGrid = false;
 
 #if BOSONFONT
  mDefaultFont = 0;
 #endif
-
- mCamera = new BoCamera;
- mLight = 0;
 
  mFovY = 60.0f;
 
@@ -1115,13 +1091,9 @@ ModelDisplay::~ModelDisplay()
 {
  delete mViewData;
  qApp->setGlobalMouseTracking(false);
- resetModel();
  BoMeshRendererManager::manager()->unsetCurrentRenderer();
  delete mMouseMoveDiff;
- if (mLight) {
-	BoLightManager::manager()->deleteLight(mLight->id());
- }
- delete mCamera;
+ delete d->mRenderModel;
  delete d;
  BoTextureManager::deleteStatic();
 }
@@ -1135,26 +1107,57 @@ void ModelDisplay::initializeGL()
  mDefaultFont = new BosonGLFont(defaultFontInfo);
 #endif
 
- if (mLight) {
-	BoLightManager::manager()->deleteLight(mLight->id());
+ if (d->mRenderModel) {
+	return;
  }
- mLight = BoLightManager::manager()->createLight();
- if (!mLight->isActive()) {
-	boWarning() << k_funcinfo << "light is inactive" << endl;
- }
- BoVector4Float lightDif(1.0f, 1.0f, 1.0f, 1.0f);
- BoVector4Float lightAmb(0.5f, 0.5f, 0.5f, 1.0f);
- BoVector3Float lightPos(-6000.0, 3000.0, 10000.0);
- mLight->setAmbient(lightAmb);
- mLight->setDiffuse(lightDif);
- mLight->setSpecular(lightDif);
- mLight->setDirectional(true);
- mLight->setEnabled(true);
+ d->mRenderModel = new BoRenderRenderModel(this);
+ connect(d->mRenderModel, SIGNAL(signalMaxFramesChanged(float)),
+		this, SIGNAL(signalMaxFramesChanged(float)));
+ connect(d->mRenderModel, SIGNAL(signalMaxLODChanged(float)),
+		this, SIGNAL(signalMaxLODChanged(float)));
+ connect(d->mRenderModel, SIGNAL(signalFrameChanged(float)),
+		this, SIGNAL(signalFrameChanged(float)));
+ connect(d->mRenderModel, SIGNAL(signalLODChanged(float)),
+		this, SIGNAL(signalLODChanged(float)));
+ connect(d->mRenderModel, SIGNAL(signalCameraChanged()),
+		this, SIGNAL(signalCameraChanged()));
+ connect(d->mRenderModel, SIGNAL(signalResetModel()),
+		this, SLOT(slotResetModel()));
+}
+
+const BosonModel* ModelDisplay::model() const
+{
+ return d->mRenderModel->model();
+}
+
+BoCamera* ModelDisplay::camera() const
+{
+ return d->mRenderModel->camera();
+}
+
+BoLight* ModelDisplay::light() const
+{
+ return d->mRenderModel->light();
 }
 
 void ModelDisplay::setTurretMeshes(const QStringList& meshes)
 {
- mTurretMeshes = meshes;
+ d->mRenderModel->setTurretMeshes(meshes);
+}
+
+const QStringList& ModelDisplay::turretMeshes() const
+{
+ return d->mRenderModel->turretMeshes();
+}
+
+void ModelDisplay::setTurretMeshesEnabled(bool e)
+{
+ d->mRenderModel->setTurretMeshesEnabled(e);
+}
+
+void ModelDisplay::setTurretInitialZRotation(float r)
+{
+ d->mRenderModel->setTurretInitialZRotation(r);
 }
 
 void ModelDisplay::setFont(const BoFontInfo& font)
@@ -1163,6 +1166,21 @@ void ModelDisplay::setFont(const BoFontInfo& font)
  delete mDefaultFont;
  mDefaultFont = new BosonGLFont(font);
 #endif
+}
+
+void ModelDisplay::slotPlacementPreviewChanged(bool on)
+{
+ d->mRenderModel->slotPlacementPreviewChanged(on);
+}
+
+void ModelDisplay::slotDisallowPlacementChanged(bool on)
+{
+ d->mRenderModel->slotDisallowPlacementChanged(on);
+}
+
+void ModelDisplay::slotWireFrameChanged(bool on)
+{
+ d->mRenderModel->slotWireFrameChanged(on);
 }
 
 void ModelDisplay::paintWidget()
@@ -1177,40 +1195,25 @@ void ModelDisplay::paintWidget()
  glPushMatrix();
  glLoadIdentity();
  gluPerspective(mFovY, (float)width() / (float)height(), NEAR, FAR);
-
  glMatrixMode(GL_MODELVIEW);
- glPushMatrix();
- glLoadIdentity();
-
  glColor3ub(255, 255, 255);
 
- camera()->applyCameraToScene();
 
+ glPushMatrix();
+ glLoadIdentity();
+ camera()->applyCameraToScene();
  if (mRenderGrid) {
 	renderGrid();
  }
  if (mRenderAxis) {
 	renderAxii();
  }
+ glPopMatrix();
 
- if (boConfig->boolValue("UseLight")) {
-	glEnable(GL_LIGHTING);
-	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-	glEnable(GL_NORMALIZE);
- }
-
- renderModel();
- renderMeshSelection();
-
- glDisable(GL_LIGHTING);
- glDisable(GL_NORMALIZE);
-
- glDisable(GL_DEPTH_TEST);
+ boTextureManager->invalidateCache();
+ d->mRenderModel->render();
 
  glMatrixMode(GL_PROJECTION);
- glPopMatrix();
- glMatrixMode(GL_MODELVIEW);
  glPopMatrix();
  glPopAttrib();
 }
@@ -1269,109 +1272,6 @@ void ModelDisplay::renderAxii()
  glPopAttrib();
 }
 
-void ModelDisplay::renderModel(int mode)
-{
- if (!haveModel()) {
-	return;
- }
-
- glPushAttrib(GL_ENABLE_BIT | GL_POLYGON_BIT); // doesnt include client states
-
- if (mWireFrame) {
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
- } else {
-	glEnable(GL_TEXTURE_2D);
- }
- glEnable(GL_DEPTH_TEST);
-
- // AB: if these are enabled we can't use triangle strips by any reason.
- // AB: we don't use triangle strips atm (and there are ways so that we still
- // can use backface culling). but i leave this out, as borender rendering speed
- // isn't critical and it may be easier to debug certain things.
-// glEnable(GL_CULL_FACE);
-// glCullFace(GL_BACK);
-
- if (mModel && mCurrentLOD >= 0) {
-	BoLOD* lod = mModel->lod(mCurrentLOD);
-	BoFrame* f = lod->frame(mCurrentFrame);
-	if (f) {
-		if (mPlacementPreview) {
-			glEnable(GL_BLEND);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE); // default anyway - redundant call
-			GLubyte r, g, b, a;
-			a = PLACEMENTPREVIEW_ALPHA;
-			r = 255;
-			if (mDisallowPlacement) {
-				g = PLACEMENTPREVIEW_DISALLOW_COLOR;
-				b = PLACEMENTPREVIEW_DISALLOW_COLOR;
-			} else {
-				g = 255;
-				b = 255;
-			}
-			glColor4ub(r, g, b, a);
-		}
-
-		if (mode == GL_SELECT) {
-			glDisable(GL_BLEND);
-			glDisable(GL_TEXTURE_2D);
-		}
-		BosonModel::startModelRendering();
-			glEnable(GL_DEPTH_TEST);
-			glDisable(GL_BLEND);
-			glDisable(GL_ALPHA_TEST);
-		mModel->prepareRendering();
-
-		mTurretRotation += 5.0f;
-		if (mTurretRotation > 230.0f) {
-			mTurretRotation = 0.0f;
-		}
-		mTurretMatrix = BoMatrix();
-		mTurretMatrix.rotate(mTurretInitialZRotation, 0.0f, 0.0f, -1.0f);
-		mTurretMatrix.rotate(90.0f, 1.0f, 0.0f, 0.0f);
-
-		BoVector3Float v(0.0f, 1.0f, 0.0f);
-		{
-			BoMatrix rot;
-			rot.rotate(mTurretRotation, 0.0, 0.0, 1.0);
-			BoVector3Float v2 = v;
-			rot.transform(&v, &v2);
-		}
-		BoMatrix lookAt;
-		lookAt.setLookAtRotation(BoVector3Float(0, 0, 0), v, BoVector3Float(0, 0, 1));
-
-		mTurretMatrix.multiply(&lookAt);
-
-		QValueVector<const BoMatrix*> itemMatrices(f->nodeCount());
-		for (unsigned int i = 0; i < f->nodeCount(); i++) {
-			BoMesh* mesh = f->mesh(i);
-			if (!mTurretMeshesEnabled || !mTurretMeshes.contains(mesh->name())) {
-				continue;
-			}
-			itemMatrices[i] = &mTurretMatrix;
-		}
-		f->renderFrame(itemMatrices, 0, false, Default, mode);
-		startTransparentFrameRendering();
-		if (mode == GL_SELECT) {
-			glDisable(GL_BLEND);
-			glDisable(GL_TEXTURE_2D);
-		}
-		f->renderFrame(itemMatrices, 0, true, Default, mode);
-		stopTransparentFrameRendering();
-		BosonModel::stopModelRendering();
-		if (mPlacementPreview) {
-			// AB: do not reset the actual color - if it will get
-			// used it will be set again anyway.
-			glColor4ub(255, 255, 255, 255);
-		}
-	} else {
-		boError() << k_funcinfo << "NULL frame" << endl;
-	}
- }
- BoMaterial::deactivate();
-
- glPopAttrib();
-}
-
 void ModelDisplay::renderGrid()
 {
 #warning FIXME!!!
@@ -1413,78 +1313,10 @@ void ModelDisplay::renderGrid()
 #endif
 }
 
-void ModelDisplay::renderMeshSelection()
-{
- if (!haveModel()) {
-	return;
- }
- if (mSelectedMesh < 0) {
-	return;
- }
- if (mCurrentLOD < 0 || mCurrentFrame < 0) {
-	return;
- }
- if ((unsigned int)mCurrentLOD >= mModel->lodCount()) {
-	return;
- }
-
- BoLOD* lod = mModel->lod(mCurrentLOD);
- if ((unsigned int)mCurrentFrame >= lod->frameCount()) {
-	return;
- }
-
- BoFrame* f = lod->frame(mCurrentFrame);
- if ((unsigned int)mSelectedMesh >= f->nodeCount()) {
-	return;
- }
- BoMesh* mesh = f->mesh(mSelectedMesh);
- if (!mesh) {
-	return;
- }
- BoMatrix* matrix = f->matrix(mSelectedMesh);
- if (!matrix) {
-	return;
- }
-
- glPushAttrib(GL_POLYGON_BIT | GL_ENABLE_BIT | GL_CURRENT_BIT);
- glPushMatrix();
- glMultMatrixf(matrix->data());
- glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
- glColor3ub(0, 255, 0);
- glDisable(GL_TEXTURE_2D);
- glDisable(GL_LIGHTING);
-#warning FIXME!!!
- //mesh->renderBoundingObject();
- glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
- if (boConfig->boolValue("ShowVertexPoints")) {
-	glColor3ub(0, 255, 0);
-	float size = (float)boConfig->uintValue("VertexPointSize", 3);
-	glPointSize(size);
-	glDisable(GL_DEPTH_TEST);
-	mesh->renderVertexPoints(mModel);
- }
-
- glPopMatrix();
- glPopAttrib();
- glColor3ub(255, 255, 255);
-}
-
 void ModelDisplay::setModel(BosonModel* model)
 {
  boDebug() << k_funcinfo << endl;
- resetModel();
- mModel = model;
- if (mModel) {
-	unsigned int lodcount = mModel->lodCount();
-	emit signalMaxLODChanged((int)(lodcount - 1));
-	emit signalMaxLODChanged((float)(lodcount - 1));
-	if ((unsigned int)mCurrentLOD >= lodcount) {
-		mCurrentLOD = lodcount - 1;
-	}
-	unsigned int framecount = mModel->lod(mCurrentLOD)->frameCount();
-	emit signalMaxFramesChanged((float)(framecount - 1));
- }
+ d->mRenderModel->setModel(model);
 }
 
 
@@ -1510,11 +1342,8 @@ void ModelDisplay::slotSetVertexPointSize(int size)
  boConfig->setUIntValue("VertexPointSize", size);
 }
 
-void ModelDisplay::resetModel()
+void ModelDisplay::slotResetModel()
 {
- mModel = 0;
- mCurrentFrame = 0;
- mCurrentLOD = 0;
  mMeshUnderMouse = -1;
  mSelectedMesh = -1;
  updateMeshUnderMouse();
@@ -1526,17 +1355,7 @@ void ModelDisplay::updateMeshUnderMouse()
  QString selectedMeshText;
  BoMesh* mesh = 0;
  if (mMeshUnderMouse >= 0) {
-	if (mModel && mCurrentLOD >= 0 && mCurrentFrame >= 0) {
-		BoLOD* lod = mModel->lod(mCurrentLOD);
-		BoFrame* f = lod->frame(mCurrentFrame);
-		if (f) {
-			if ((unsigned int)mMeshUnderMouse >= f->nodeCount()) {
-				f = 0;
-			} else {
-				mesh = f->mesh(mMeshUnderMouse);
-			}
-		}
-	}
+	mesh = d->mRenderModel->meshWithIndex(mMeshUnderMouse);
 	if (mesh) {
 		meshUnderCursor = mesh->name();
 	}
@@ -1545,6 +1364,7 @@ void ModelDisplay::updateMeshUnderMouse()
 	meshUnderCursor = i18n("(no mesh under cursor)");
  }
  if (mSelectedMesh >= 0) {
+	mesh = d->mRenderModel->meshWithIndex(mSelectedMesh);
 	if (mesh) {
 		QString name = mesh->name();
 		QString material;
@@ -1572,106 +1392,12 @@ void ModelDisplay::updateMeshUnderMouse()
 void ModelDisplay::updateCursorDisplay(const QPoint& pos)
 {
  mMeshUnderMouse = -1;
- if (!haveModel()) {
+ if (!d->mRenderModel->haveModel()) {
 	return;
  }
- int picked = pickObject(pos);
- if (picked < 0) {
-	return;
- }
- BoLOD* lod = mModel->lod(mCurrentLOD);
- BoFrame* f = lod->frame(mCurrentFrame);
- if (!f) {
-	return;
- }
- if ((unsigned int)picked >= f->nodeCount()) {
-	boError() << k_funcinfo << "invalid mesh number: " << picked << endl;
-	return;
- }
+ int picked = d->mRenderModel->pickObject(pos, mFovY, NEAR, FAR);
  mMeshUnderMouse = picked;
  updateMeshUnderMouse();
-}
-
-int ModelDisplay::pickObject(const QPoint& cursor)
-{
- if (!haveModel()) {
-	return -1;
- }
- BoLOD* lod = mModel->lod(mCurrentLOD);
- BoFrame* f = lod->frame(mCurrentFrame);
- if (!f) {
-	return -1;
- }
- const int bufferSize = 256;
- unsigned int buffer[bufferSize];
- int viewport[4];
-
- glGetIntegerv(GL_VIEWPORT, viewport);
-
- glSelectBuffer(bufferSize, buffer);
-
-
- glRenderMode(GL_SELECT);
- glInitNames();
- glPushName(0);
-
- glMatrixMode(GL_PROJECTION);
- glPushMatrix();
- glLoadIdentity();
- gluPickMatrix((GLdouble)cursor.x(), (GLdouble)(viewport[3] - cursor.y()), 1.0, 10, viewport);
- gluPerspective(mFovY, (float)viewport[2] / (float)viewport[3], NEAR, FAR);
- glMatrixMode(GL_MODELVIEW);
- glPushMatrix();
- glLoadIdentity();
-
- camera()->applyCameraToScene();
- glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
- glColor3f(1.0f, 1.0f, 1.0f);
-
-
- renderModel(GL_SELECT);
-
-
- glMatrixMode(GL_PROJECTION);
- glPopMatrix();
- glMatrixMode(GL_MODELVIEW);
- glPopMatrix();
- int hits = glRenderMode(GL_RENDER);
- int pos = 0;
- unsigned int closestZ = 0xFFFFFFFF;
- int mesh = -1;
- for (int i = 0; i < hits; i++) {
-	unsigned int names = buffer[pos];
-	pos++;
-	unsigned int minZ = buffer[pos]; // note: depth is [0;1] and multiplied by 2^32-1
-	pos++;
-//	unsigned int maxZ = buffer[pos];
-	pos++;
-	if (names != 1) {
-		boWarning() << k_funcinfo << "more than 1 name - not supported!" << endl;
-		for (unsigned int j = 0; j < names; j++) {
-			pos++;
-		}
-		continue;
-	}
-	unsigned int name = buffer[pos];
-	BoMesh* m = 0;
-	if (name < f->nodeCount()) {
-		m = f->mesh(name);
-	}
-	if (m) {
-//		boDebug() << k_funcinfo << m->name() << endl;
-		if (minZ < closestZ) {
-			mesh = name;
-			closestZ = minZ;
-		}
-	} else {
-		boWarning() << k_funcinfo << "no such mesh: " << name << endl;
-	}
-	pos++;
- }
-
- return mesh;
 }
 
 void ModelDisplay::slotMousePressEvent(QMouseEvent* e)
@@ -1710,6 +1436,7 @@ void ModelDisplay::slotMouseReleaseEvent(QMouseEvent* e)
 
 void ModelDisplay::selectMesh(int mesh)
 {
+ d->mRenderModel->setSelectedMesh(mesh);
  mSelectedMesh = mesh;
  updateMeshUnderMouse();
  emit signalMeshSelected(mesh);
@@ -1757,7 +1484,7 @@ void ModelDisplay::slotMouseMoveEvent(QMouseEvent* e)
 	BoQuaternion inv = q2.conjugate(); // equal to inverse() (as q2 is normalized) but faster
 	inv.transform(&cameraPos, &cameraPos);
 
-	updateCamera(cameraPos, q2);
+	d->mRenderModel->updateCamera(cameraPos, q2);
  }
 }
 
@@ -1786,148 +1513,37 @@ void ModelDisplay::slotWheelEvent(QWheelEvent* e)
 
  eye.add(orientation * -delta);
  lookAt.add(orientation * -delta);
- updateCamera(eye, lookAt, up);
+ d->mRenderModel->updateCamera(eye, lookAt, up);
+}
+
+void ModelDisplay::slotFovYChanged(float f)
+{
+ mFovY = f;
 }
 
 void ModelDisplay::slotFrameChanged(int f)
 {
- if (f != 0) {
-	if (!mModel || f < 0) {
-		emit signalFrameChanged(0.0f);
-		return;
-	}
-	int frames = mModel->lod(mCurrentLOD)->frameCount();
-	if (f >= frames) {
-		emit signalFrameChanged((float)(frames - 1));
-		return;
-	}
-  }
- mCurrentFrame = f;
+ d->mRenderModel->slotFrameChanged(f);
 }
 
 void ModelDisplay::slotLODChanged(int l)
 {
- if (l != 0) {
-	if (!mModel || l < 0) {
-		emit signalLODChanged((float)0.0f);
-		return;
-	}
-	if ((unsigned int)l >= mModel->lodCount()) {
-		emit signalLODChanged((float)(mModel->lodCount() - 1));
-		return;
-	}
-  }
- mCurrentLOD = l;
-}
-
-void ModelDisplay::updateCamera(const BoVector3Float& cameraPos, const BoQuaternion& q)
-{
- updateCamera(cameraPos, q.matrix());
-}
-
-void ModelDisplay::updateCamera(const BoVector3Float& cameraPos, const BoMatrix& rotationMatrix)
-{
- BoVector3Float lookAt;
- BoVector3Float up;
- rotationMatrix.toGluLookAt(&lookAt, &up, cameraPos);
- updateCamera(cameraPos, lookAt, up);
-}
-
-void ModelDisplay::updateCamera(const BoVector3Float& cameraPos, const BoVector3Float& lookAt, const BoVector3Float& up)
-{
- BO_CHECK_NULL_RET(camera());
- camera()->setGluLookAt(cameraPos, lookAt, up);
- emit signalCameraChanged();
-}
-
-void ModelDisplay::hideMesh(unsigned int mesh, bool hide)
-{
-#warning FIXME!!! Do we even need this?
-#if 0
- if (!haveModel()) {
-	return;
- }
- BoLOD* l = mModel->lod(mCurrentLOD);
- for (unsigned int i = 0; i < lod->frameCount(); i++) {
-	BoFrame* f = lod->frame(i);
-	if (mesh >= f->nodeCount()) {
-		boWarning() << k_funcinfo << "mesh does not exist: " << mesh << " meshes in frame: " << f->nodeCount() << endl;
-		return;
-	}
-	if (!f) {
-		boWarning() << k_funcinfo << "NULL frame " << i << endl;
-		continue;
-	}
-	f->setHidden(mesh, hide);
- }
- if (isSelected(mesh)) {
-	selectMesh(-1);
- }
-#endif
-}
-
-bool ModelDisplay::isSelected(unsigned int mesh) const
-{
- // AB: one day we will use a list of selected meshes
- if (mSelectedMesh < 0) {
-	return false;
- }
- if ((unsigned int)mSelectedMesh == mesh) {
-	return true;
- }
- return false;
+ d->mRenderModel->slotLODChanged(l);
 }
 
 void ModelDisplay::slotHideSelectedMesh()
 {
- if (!haveModel()) {
-	return;
- }
- if (mSelectedMesh < 0) {
-	return;
- }
- hideMesh((unsigned int)mSelectedMesh);
+ d->mRenderModel->slotHideSelectedMesh();
 }
 
 void ModelDisplay::slotHideUnSelectedMeshes()
 {
- if (!haveModel()) {
-	return;
- }
- if (mSelectedMesh < 0) {
-	return;
- }
- if (mCurrentFrame < 0) {
-	return;
- }
-#if 0
- BoFrame* f = frame(mCurrentFrame);
- BO_CHECK_NULL_RET(f);
- for (unsigned int i = 0; i < f->meshCount(); i++) {
-	if (i == (unsigned int)mSelectedMesh) {
-		continue;
-	}
-	hideMesh(i);
- }
-#endif
+ d->mRenderModel->slotHideUnSelectedMeshes();
 }
 
 void ModelDisplay::slotUnHideAllMeshes()
 {
- boDebug() << k_funcinfo << endl;
- if (!haveModel()) {
-	return;
- }
- if (mCurrentFrame < 0) {
-	return;
- }
-#if 0
- BoFrame* f = frame(mCurrentFrame);
- BO_CHECK_NULL_RET(f);
- for (unsigned int i = 0; i < f->meshCount(); i++) {
-	hideMesh(i, false);
- }
-#endif
+ d->mRenderModel->slotUnHideAllMeshes();
 }
 
 void ModelDisplay::slotEnableLight(bool e)
@@ -1945,8 +1561,23 @@ void ModelDisplay::slotResetView()
  BoVector3Float cameraPos(0.0f, 0.0f, 2.0f);
  BoVector3Float lookAt(0.0f, 0.0f, 0.0f);
  BoVector3Float up(0.0f, 50.0f, 0.0f);
- updateCamera(cameraPos, lookAt, up);
+ d->mRenderModel->updateCamera(cameraPos, lookAt, up);
  emit signalFovYChanged(60.0f);
+}
+
+void ModelDisplay::updateCamera(const BoVector3Float& cameraPos, const BoQuaternion& q)
+{
+ d->mRenderModel->updateCamera(cameraPos, q);
+}
+
+void ModelDisplay::updateCamera(const BoVector3Float& cameraPos, const BoMatrix& rotationMatrix)
+{
+ d->mRenderModel->updateCamera(cameraPos, rotationMatrix);
+}
+
+void ModelDisplay::updateCamera(const BoVector3Float& cameraPos, const BoVector3Float& lookAt, const BoVector3Float& up)
+{
+ d->mRenderModel->updateCamera(cameraPos, lookAt, up);
 }
 
 
