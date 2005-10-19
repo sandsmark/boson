@@ -384,10 +384,6 @@ protected:
 	 **/
 	const QString& baseDirectory() const;
 
-	void generateLOD();
-
-	QString cachedModelFilename(const QCString& md5, const QString& originalmodel, const QString& configfile);
-
 private:
 	void init();
 
