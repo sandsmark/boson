@@ -645,15 +645,13 @@ QCString BoBMFLoad::calculateHash(const QString& modelfilename, const QString& c
     boError() << k_funcinfo << "could not open model file " << modelfilename << endl;
     return QCString();
   }
-  QFile configfile(configfilename);
-  if(!configfile.open(IO_ReadOnly))
-  {
-    boError() << k_funcinfo << "could not open config file " << configfilename << endl;
-    return QCString();
-  }
 
   KMD5 md5(modelfile.readAll());
-  md5.update(configfile.readAll());
+  QFile configfile(configfilename);
+  if(configfile.open(IO_ReadOnly))
+  {
+    md5.update(configfile.readAll());
+  }
   return md5.hexDigest();
 }
 
