@@ -554,7 +554,7 @@ bool BoUfoManager::sendEvent(QEvent* e)
  //     timer) and then release the button, then the event won't ever get
  //     delivered to the original widget.
  bool updateButtons = false;
- Qt::ButtonState state;
+ Qt::ButtonState state = Qt::NoButton;
  switch (e->type()) {
 	case QEvent::Wheel:
 		state = ((QWheelEvent*)e)->state();
