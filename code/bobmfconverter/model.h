@@ -82,6 +82,7 @@ class Model
     void setMaterials(const QValueVector<Material*>& materials);
 
     void updateBoundingBox(unsigned int baseframe);
+    void removeEmptyMeshes();
 
     const BoVector3Float& minCoord() const  { return mMinCoord; }
     const BoVector3Float& maxCoord() const  { return mMaxCoord; }
