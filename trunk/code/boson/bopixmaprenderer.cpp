@@ -47,7 +47,7 @@ BoPixmapRenderer::BoPixmapRenderer()
  mGLWidget = 0;
 }
 
-void BoPixmapRenderer::setWidget(BosonGLWidget* w)
+void BoPixmapRenderer::setWidget(BosonGLWidget* w, int width, int height)
 {
  if (mGLWidget) {
 	boError() << k_funcinfo << "already a widget set" << endl;
@@ -55,9 +55,11 @@ void BoPixmapRenderer::setWidget(BosonGLWidget* w)
  }
  mGLWidget = w;
 
- d->mPixmap.resize(mGLWidget->width(), mGLWidget->height());
-
- // TODO: QGLContext::doneCurrent() ?
+ if (width < 0 || height < 0) {
+	width = mGLWidget->width();
+	height = mGLWidget->height();
+ }
+ d->mPixmap.resize(width, height);
 
  d->mOldContext = mGLWidget->context();
  if (d->mOldContext) {
@@ -90,6 +92,8 @@ void BoPixmapRenderer::setWidget(BosonGLWidget* w)
  // context commands in BosonBigDisplayBase will be directed to the new context,
  // without any code changes.
  mGLWidget->switchContext(d->mContext);
+
+ mGLWidget->resize(width, height);
 }
 
 BoPixmapRenderer::~BoPixmapRenderer()
@@ -119,8 +123,6 @@ void BoPixmapRenderer::startPixmap()
 {
  BO_CHECK_NULL_RET(d->mContext);
  d->mContext->makeCurrent();
- // here we should resize d->mPixmap!
- // BUT: we cannot, since we have a context on it... can we resize anyway?
 }
 
 QPixmap BoPixmapRenderer::pixmapDone(bool store)
@@ -128,10 +130,14 @@ QPixmap BoPixmapRenderer::pixmapDone(bool store)
  if (!mGLWidget || !d->mContext) {
 	return QPixmap();
  }
+ QPixmap p = d->mPixmap;
+ // manually do this, as the GL methods won't do so!
+ p.detach();
+
  if (store) {
-	d->mPixmaps.append(d->mPixmap);
+	d->mPixmaps.append(p);
  }
- return d->mPixmap;
+ return p;
 }
 
 void BoPixmapRenderer::flush(const QString& prefix)

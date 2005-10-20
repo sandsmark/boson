@@ -34,7 +34,7 @@ public:
 	BoPixmapRenderer();
 	~BoPixmapRenderer();
 
-	void setWidget(BosonGLWidget* w);
+	void setWidget(BosonGLWidget* w, int width = -1, int height = -1);
 
 	/**
 	 * Uses @ref startPixmap, @ref BosonGLWidget::slotUpdateGL and @ref
