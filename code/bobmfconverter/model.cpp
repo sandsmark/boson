@@ -248,22 +248,70 @@ void Model::smoothAllFaces()
 
 void Model::removeEmptyMeshes()
 {
+  // TODO: maybe this should be moved to some processor?
   for(unsigned int i = 0; i < lodCount(); i++)
   {
     LOD* l = lod(i);
+
     QValueVector<Mesh*> meshes;
+    QValueVector<Mesh*> removedmeshes;
     for(unsigned int j = 0; j < l->meshCount(); j++)
     {
       Mesh* m = l->mesh(j);
       if(m->vertexCount() == 0 || m->faceCount() == 0)
       {
-        // Remove this invalid mesh
-        delete m;
+        // Schedule for removal
+        removedmeshes.append(m);
         continue;
       }
       meshes.append(m);
     }
+
+    if(removedmeshes.isEmpty())
+    {
+      // Data didn't change
+      continue;
+    }
+
+    // Some meshes should be removed.
+    // Set new mesh list
     l->setMeshes(meshes);
+    // Remove removed meshes from frames
+    for(unsigned int j = 0; j < l->frameCount(); j++)
+    {
+      Frame* f = l->frame(j);
+      QValueVector<Mesh*> newmeshes;
+      QValueVector<BoMatrix*> newmatrices;
+      for(unsigned int k = 0; k < f->nodeCount(); k++)
+      {
+        if(qFind(removedmeshes.begin(), removedmeshes.end(), f->mesh(k)) == removedmeshes.end())
+        {
+          // This node doesn't have a removed mesh
+          newmeshes.append(f->mesh(k));
+          if(f->mesh(k)->vertexCount() == 0)
+          {
+            boError() << k_funcinfo << "Addding invalid mesh" << endl;
+          }
+          newmatrices.append(f->matrix(k));
+        }
+      }
+      // Create temporary Mesh*/BoMatrix* arrays
+      Mesh** setmeshes = new Mesh*[newmeshes.count()];
+      BoMatrix** setmatrices = new BoMatrix*[newmeshes.count()];
+      for(unsigned int k = 0; k < newmeshes.count(); k++)
+      {
+        setmeshes[k] = newmeshes[k];
+        setmatrices[k] = newmatrices[k];
+      }
+      // Replace arrays in the frame
+      f->replaceNodes(setmatrices, setmeshes, newmeshes.count());
+    }
+
+    // Delete removed meshes
+    for(unsigned int j = 0; j < removedmeshes.count(); j++)
+    {
+      delete removedmeshes[j];
+    }
   }
 }
 
