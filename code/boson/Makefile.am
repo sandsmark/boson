@@ -24,7 +24,7 @@ noinst_LTLIBRARIES = \
 		libboinfo.la \
 		libbo3dsdebug.la \
 		libboprofiling.la
-bin_PROGRAMS = boson borender bounit bocursor boinfo bo3dsdebug boconditioneditor boprofiling
+bin_PROGRAMS = boson borender bounit bocursor boinfo bo3dsdebug boconditioneditor boprofiling bomodelpixmaps
 
 INCLUDES = -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl -I$(top_srcdir)/boson/boufo $(all_includes)
 
@@ -236,6 +236,7 @@ borender_LDADD = \
 		$(top_builddir)/boson/libbosoncommon.la \
 		$(top_builddir)/boson/libborender.la \
 		$(top_builddir)/boson/boufo/libboufo.la \
+		$(LIB_KGAME) \
 		$(LIB_BOMEMORY) -l3ds
 borender_SOURCES = \
 		bomaterialwidget.cpp \
@@ -246,6 +247,24 @@ borender_SOURCES = \
 		borenderrendermodel.cpp \
 		bopixmaprenderer.cpp \
 		boeditturretpropertiesdialog.cpp
+
+bomodelpixmaps_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker --export-dynamic
+bomodelpixmaps_LDADD = \
+		$(top_builddir)/math/libbomath.la \
+		$(top_builddir)/boson/libboson.la \
+		$(top_builddir)/boson/libbosongameengine.la \
+		$(top_builddir)/boson/libbosoncommon.la \
+		$(top_builddir)/boson/boufo/libboufo.la \
+		$(top_builddir)/boson/script/libbosonscript.la \
+		$(LIB_KGAME) \
+		$(LIB_KIO) \
+		$(LIB_BOMEMORY) -l3ds
+bomodelpixmaps_SOURCES = \
+		bomodelpixmaps.cpp \
+		bomodelpixmapsgui.ui \
+		borenderrendermodel.cpp \
+		bopixmaprenderer.cpp
+
 
 libboinfo_la_SOURCES = \
 		boapplication.cpp \

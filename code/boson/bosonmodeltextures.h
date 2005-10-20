@@ -70,6 +70,12 @@ public:
 	 **/
 	const QString& texturePath() const;
 
+	/**
+	 * Set a custom texture path. This replaces the initial texture path
+	 * that is found automatically.
+	 **/
+	void setTexturePath(const QString& dir);
+
 protected:
 	/**
 	 * Create the static object of this class (see @ref modelTextures). This
