@@ -111,6 +111,7 @@ bool Model::loadTextures()
 
 void Model::prepareForSaving(unsigned int baseframe)
 {
+  removeEmptyMeshes();
   updateBoundingBox(baseframe);
   updateIds();
   updateRadius(baseframe);
@@ -242,6 +243,27 @@ void Model::smoothAllFaces()
     {
       l->mesh(j)->smoothAllFaces();
     }
+  }
+}
+
+void Model::removeEmptyMeshes()
+{
+  for(unsigned int i = 0; i < lodCount(); i++)
+  {
+    LOD* l = lod(i);
+    QValueVector<Mesh*> meshes;
+    for(unsigned int j = 0; j < l->meshCount(); j++)
+    {
+      Mesh* m = l->mesh(j);
+      if(m->vertexCount() == 0 || m->faceCount() == 0)
+      {
+        // Remove this invalid mesh
+        delete m;
+        continue;
+      }
+      meshes.append(m);
+    }
+    l->setMeshes(meshes);
   }
 }
 
