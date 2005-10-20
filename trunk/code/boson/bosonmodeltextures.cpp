@@ -157,6 +157,11 @@ BoTexture* BosonModelTextures::texture(const QString& texName) const
  return d->mName2Texture[texName];
 }
 
+void BosonModelTextures::setTexturePath(const QString& dir)
+{
+ d->mTexturePath = dir;
+}
+
 const QString& BosonModelTextures::texturePath() const
 {
  return d->mTexturePath;
