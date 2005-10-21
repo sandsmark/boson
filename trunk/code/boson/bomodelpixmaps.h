@@ -124,9 +124,14 @@ public:
 	const BosonModel* model() const;
 	BoCamera* camera() const;
 
+	void updateBaseProjectionMatrix();
+	const BoMatrix& baseProjectionMatrix() const;
+	void setProjectionMatrix(const BoMatrix& matrix);
+
 protected:
 	virtual void initializeGL();
 	virtual void paintGL();
+	virtual void resizeGL(int width, int height);
 
 private:
 	BoModelPixmapsGLWidgetPrivate* d;
@@ -163,6 +168,8 @@ protected:
 	void retrievePixmaps();
 	void reset();
 	void addTextureCopyright(const QString&);
+	void fitModelIntoView(const BoVector3Float& cameraPos, const BoVector3Float& lookAt,
+			const BoVector3Float& up);
 
 	void displayLabels(int count);
 
