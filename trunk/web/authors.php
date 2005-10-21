@@ -83,6 +83,8 @@ draw_bigbox_begin("Authors of Boson");
         "Graphics of the main themes (earth, humans), homepage design");
     add_author("Felix Seeger", "felix.seeger@gmx.de",
         "Boson Handbook, testing & bugreporting");
+    add_author("Christopher J. Jepson (Xenthorious)", "xenthorious@yahoo.com",
+        "Modeling & texturing");
     add_author("Thomas Capricelli", "orzel@freehackers.org",
         "Initial design and implementation, initial homepage, mailing-list maintainer");
     add_author("Nils Trzebin", "",
