@@ -90,6 +90,7 @@ int main(int argc, char **argv)
  about.addAuthor("Andreas Beckermann", I18N_NOOP("Coding & Current Maintainer"), "b_mann@gmx.de");
  about.addAuthor("Rivo Laks", I18N_NOOP("Coding & Homepage Redesign"), "rivolaks@hot.ee");
  about.addAuthor("Felix Seeger", I18N_NOOP("Documentation"), "felix.seeger@gmx.de");
+ about.addAuthor("Christopher J. Jepson (Xenthorious)", I18N_NOOP("Modeling & texturing"), "xenthorious@yahoo.com");
 
  // first tell BoGlobal that we need to do extra stuff after BosonConfig's
  // initialization
