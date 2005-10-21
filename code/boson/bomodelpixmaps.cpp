@@ -447,13 +447,9 @@ BoModelPixmaps::BoModelPixmaps()
 		this, SLOT(slotPackageIt()));
  QWidget* pixmapsWidget = d->mGUI->mTabWidget->page(0);
  BO_CHECK_NULL_RET(pixmapsWidget);
- QGridLayout* grid = new QGridLayout(pixmapsWidget, -1, 3);
- for (int i = 0; i < 6; i++) {
-	QLabel* l = new QLabel(pixmapsWidget);
-	l->resize(PIXMAP_THUMBNAIL_WIDTH, PIXMAP_THUMBNAIL_HEIGHT);
-	grid->addWidget(l, i / 3, i % 3);
-	mModelPixmapLabels.append(l);
- }
+ mModelPixmapLabelsLayout = new QGridLayout(pixmapsWidget, -1, 3);
+ displayLabels(6);
+
  setCentralWidget(d->mGUI);
 
  mTextureCopyright.setAutoDelete(true);
@@ -617,6 +613,26 @@ void BoModelPixmaps::retrievePixmaps()
  QValueList<BoVector3Float> upList;
  QValueList<QString> namesList;
 
+ cameraPosList.append(BoVector3Float(2.0f, 2.0f, 2.0f));
+ lookAtList.append(BoVector3Float(0.0f, 0.0f, 0.0f));
+ upList.append(BoVector3Float(0.0f, 0.0f, 50.0f));
+ namesList.append("bird1");
+
+ cameraPosList.append(BoVector3Float(-2.0f, 2.0f, 2.0f));
+ lookAtList.append(BoVector3Float(0.0f, 0.0f, 0.0f));
+ upList.append(BoVector3Float(0.0f, 0.0f, 50.0f));
+ namesList.append("bird2");
+
+ cameraPosList.append(BoVector3Float(2.0f, -2.0f, 2.0f));
+ lookAtList.append(BoVector3Float(0.0f, 0.0f, 0.0f));
+ upList.append(BoVector3Float(0.0f, 0.0f, 50.0f));
+ namesList.append("bird3");
+
+ cameraPosList.append(BoVector3Float(-2.0f, -2.0f, 2.0f));
+ lookAtList.append(BoVector3Float(0.0f, 0.0f, 0.0f));
+ upList.append(BoVector3Float(0.0f, 0.0f, 50.0f));
+ namesList.append("bird4");
+
  cameraPosList.append(BoVector3Float(0.0f, 0.0f, 2.0f));
  lookAtList.append(BoVector3Float(0.0f, 0.0f, 0.0f));
  upList.append(BoVector3Float(0.0f, 50.0f, 0.0f));
@@ -647,16 +663,20 @@ void BoModelPixmaps::retrievePixmaps()
  upList.append(BoVector3Float(0.0f, 0.0f, 50.0f));
  namesList.append("left");
 
+ for (unsigned int i = 0; i < namesList.count(); i++) {
+	if (namesList.contains(namesList[i]) > 1) {
+		boError() << k_funcinfo << "name " << namesList[i] << " used more than once" << endl;
+		return;
+	}
+ }
+
  if (cameraPosList.count() != lookAtList.count()
 		|| cameraPosList.count() != upList.count()
 		|| cameraPosList.count() != namesList.count()) {
 	boError() << k_funcinfo << endl;
 	return;
  }
- if (cameraPosList.count() > mModelPixmapLabels.count()) {
-	boError() << k_funcinfo << "too many camera positions" << endl;
-	return;
- }
+ displayLabels(cameraPosList.count());
  mModelPixmaps.setAutoDelete(true);
  mModelPixmaps.clear();
  for (unsigned int i = 0; i < cameraPosList.count(); i++) {
@@ -908,6 +928,23 @@ void BoModelPixmaps::packageIt(const QString& fileName)
  tar.close();
 }
 
+void BoModelPixmaps::displayLabels(int count)
+{
+ QWidget* pixmapsWidget = d->mGUI->mTabWidget->page(0);
+ BO_CHECK_NULL_RET(pixmapsWidget);
+ for (int i = mModelPixmapLabels.count(); i < count; i++) {
+	QLabel* l = new QLabel(pixmapsWidget);
+	l->resize(PIXMAP_THUMBNAIL_WIDTH, PIXMAP_THUMBNAIL_HEIGHT);
+	mModelPixmapLabelsLayout->addWidget(l, i / 3, i % 3);
+	mModelPixmapLabels.append(l);
+ }
+ for (int i = 0; i < count; i++) {
+	mModelPixmapLabels.at(i)->show();
+ }
+ for (int i = count; i < (int)mModelPixmapLabels.count(); i++) {
+	mModelPixmapLabels.at(i)->hide();
+ }
+}
 
 
 
