@@ -66,8 +66,8 @@
 #include <math.h>
 #include <stdlib.h>
 
-#define NEAR 1.0
-#define FAR 100.0
+#define NEAR 0.125
+#define FAR 64.0
 
 static const char *description =
     I18N_NOOP("Model Pixmaps for Boson");
@@ -163,6 +163,9 @@ public:
 	float mFovY;
 
 	BosonModel* mModel;
+
+	BoMatrix mProjectionMatrix;
+	BoMatrix mBaseProjectionMatrix;
 };
 
 BoModelPixmapsGLWidget::BoModelPixmapsGLWidget(QWidget* parent)
@@ -343,6 +346,34 @@ void BoModelPixmapsGLWidget::initializeGL()
 	return;
  }
  d->mRenderModel = new BoRenderRenderModel(this);
+
+ updateBaseProjectionMatrix();
+}
+
+const BoMatrix& BoModelPixmapsGLWidget::baseProjectionMatrix() const
+{
+ return d->mBaseProjectionMatrix;
+}
+
+void BoModelPixmapsGLWidget::resizeGL(int width, int height)
+{
+ BosonGLWidget::resizeGL(width, height);
+ updateBaseProjectionMatrix();
+}
+
+void BoModelPixmapsGLWidget::updateBaseProjectionMatrix()
+{
+ glMatrixMode(GL_PROJECTION);
+ glLoadIdentity();
+ gluPerspective(d->mFovY, (float)width() / (float)height(), NEAR, FAR);
+ d->mBaseProjectionMatrix = createMatrixFromOpenGL(GL_PROJECTION_MATRIX);
+ glMatrixMode(GL_MODELVIEW);
+ d->mProjectionMatrix = d->mBaseProjectionMatrix;
+}
+
+void BoModelPixmapsGLWidget::setProjectionMatrix(const BoMatrix& matrix)
+{
+ d->mProjectionMatrix = matrix;
 }
 
 void BoModelPixmapsGLWidget::paintGL()
@@ -360,8 +391,7 @@ void BoModelPixmapsGLWidget::paintGL()
 
  glMatrixMode(GL_PROJECTION);
  glPushMatrix();
- glLoadIdentity();
- gluPerspective(d->mFovY, (float)width() / (float)height(), NEAR, FAR);
+ glLoadMatrixf(d->mProjectionMatrix.data());
  glMatrixMode(GL_MODELVIEW);
  glColor3ub(255, 255, 255);
 
@@ -613,6 +643,10 @@ void BoModelPixmaps::retrievePixmaps()
  QValueList<BoVector3Float> upList;
  QValueList<QString> namesList;
 
+ BoVector3Float center = (mGLWidget->model()->boundingBoxMin() + mGLWidget->model()->boundingBoxMax()) / 2;
+ BoVector3Float dimensions = mGLWidget->model()->boundingBoxMax() - mGLWidget->model()->boundingBoxMin();
+ float size = dimensions.length();
+
  cameraPosList.append(BoVector3Float(2.0f, 2.0f, 2.0f));
  lookAtList.append(BoVector3Float(0.0f, 0.0f, 0.0f));
  upList.append(BoVector3Float(0.0f, 0.0f, 50.0f));
@@ -679,9 +713,10 @@ void BoModelPixmaps::retrievePixmaps()
  displayLabels(cameraPosList.count());
  mModelPixmaps.setAutoDelete(true);
  mModelPixmaps.clear();
+ mGLWidget->updateBaseProjectionMatrix();
  for (unsigned int i = 0; i < cameraPosList.count(); i++) {
-	BoVector3Float cameraPos = cameraPosList[i];
-	BoVector3Float lookAt = lookAtList[i];
+	BoVector3Float cameraPos = center + cameraPosList[i] * size;
+	BoVector3Float lookAt = center + lookAtList[i];
 	BoVector3Float up = upList[i];
 	QString name = namesList[i];
 
@@ -691,6 +726,7 @@ void BoModelPixmaps::retrievePixmaps()
 	}
 
 	mGLWidget->camera()->setGluLookAt(cameraPos, lookAt, up);
+	fitModelIntoView(cameraPos, lookAt, up);
 	QPixmap p = mPixmapRenderer->getPixmap();
 
 	QImage img = p.convertToImage();
@@ -708,6 +744,67 @@ void BoModelPixmaps::retrievePixmaps()
  for (unsigned int i = 0; i < mModelPixmaps.count(); i++) {
 	mModelPixmapLabels[i]->setPixmap(mModelPixmaps.at(i)->thumbnail());
  }
+}
+
+void BoModelPixmaps::fitModelIntoView(const BoVector3Float& cameraPos, const BoVector3Float& lookAt,
+	const BoVector3Float& up)
+{
+ // Calculate model's bbox vertices
+ BoVector3Float modelMin = mGLWidget->model()->boundingBoxMin();
+ BoVector3Float modelMax = mGLWidget->model()->boundingBoxMax();
+ BoVector3Float boundingBoxVertices[8];
+ boundingBoxVertices[0].set(modelMin.x(), modelMin.y(), modelMin.z());
+ boundingBoxVertices[1].set(modelMax.x(), modelMin.y(), modelMin.z());
+ boundingBoxVertices[2].set(modelMax.x(), modelMax.y(), modelMin.z());
+ boundingBoxVertices[3].set(modelMin.x(), modelMax.y(), modelMin.z());
+ boundingBoxVertices[4].set(modelMin.x(), modelMin.y(), modelMax.z());
+ boundingBoxVertices[5].set(modelMax.x(), modelMin.y(), modelMax.z());
+ boundingBoxVertices[6].set(modelMax.x(), modelMax.y(), modelMax.z());
+ boundingBoxVertices[7].set(modelMin.x(), modelMax.y(), modelMax.z());
+
+ // Create projection and modelview matrices
+ BoMatrix modelviewMatrix;
+ modelviewMatrix.setLookAtRotation(cameraPos, lookAt, up);
+ modelviewMatrix.translate(-cameraPos.x(), -cameraPos.y(), -cameraPos.z());
+ BoMatrix projectionMatrix = mGLWidget->baseProjectionMatrix();
+
+ // Transform the bbox vertices into clip space
+ BoVector4Float E[8];
+ for (int i = 0; i < 8; i++) {
+	BoVector4Float tmp;
+	BoVector4Float in(boundingBoxVertices[i].x(), boundingBoxVertices[i].y(), boundingBoxVertices[i].z(), 1.0f);
+	modelviewMatrix.transform(&tmp, &in);
+	projectionMatrix.transform(&E[i], &tmp);
+	// Divide by w to get eucleidian coordinates
+	E[i] = E[i] / E[i].w();
+ }
+
+ // Find min/max of the transformed points
+ BoVector3Float Emin(E[0].x(), E[0].y(), E[0].z());
+ BoVector3Float Emax(E[0].x(), E[0].y(), E[0].z());
+ for (int i = 0; i < 8; i++) {
+	Emin.setX(QMIN(Emin.x(), E[i].x()));
+	Emin.setY(QMIN(Emin.y(), E[i].y()));
+	Emin.setZ(QMIN(Emin.z(), E[i].z()));
+	Emax.setX(QMAX(Emax.x(), E[i].x()));
+	Emax.setY(QMAX(Emax.y(), E[i].y()));
+	Emax.setZ(QMAX(Emax.z(), E[i].z()));
+ }
+ //boDebug() << "min: (" << Emin.x() << "; " << Emin.y() << "; " << Emin.z() << ")" << endl;
+ //boDebug() << "max: (" << Emax.x() << "; " << Emax.y() << "; " << Emax.z() << ")" << endl;
+
+ BoVector3Float Emid = (Emin + Emax) / 2;
+
+ // Change the projection matrix
+ float scale = QMIN(2 / (Emax.x() - Emin.x()),  2 / (Emax.y() - Emin.y()));
+ scale /= 1.15f;  // To get some border
+ float translateX = -Emid.x(); // Should be 0 or very close to it
+ float translateY = -Emid.y(); // Should be 0 or very close to it
+ //boDebug() << "scale: (" << scale << endl;
+ //boDebug() << "trans: (" << translateX << "; " << translateY << ")" << endl;
+ projectionMatrix.scale(scale, scale, 1.0f);
+ projectionMatrix.translate(translateX, translateY, 0.0f);
+ mGLWidget->setProjectionMatrix(projectionMatrix);
 }
 
 void BoModelPixmaps::addTextureCopyright(const QString& file)
