@@ -398,8 +398,8 @@ void BoModelPixmapsGLWidget::resetModel()
 
 #define PIXMAP_WIDTH 600
 #define PIXMAP_HEIGHT 400
-#define PIXMAP_THUMBNAIL_WIDTH 300
-#define PIXMAP_THUMBNAIL_HEIGHT 200
+#define PIXMAP_THUMBNAIL_WIDTH 150
+#define PIXMAP_THUMBNAIL_HEIGHT 100
 
 class BoModelPixmapsPrivate
 {
@@ -501,6 +501,21 @@ void BoModelPixmaps::selectModelFile(const QString& file)
  mModelFileName = file;
  d->mGUI->mModelFile->setText(mModelFileName);
  retrievePixmaps();
+
+ QFileInfo fileInfo(mModelFileName);
+ QString copyrightFile = fileInfo.dirPath() + "/" + fileInfo.baseName() + ".copyright";
+ if (QFile::exists(copyrightFile)) {
+	KSimpleConfig conf(copyrightFile);
+	if (!conf.hasGroup("Copyright")) {
+		boWarning() << k_funcinfo << "no Copyright group found in file " << copyrightFile << endl;
+	} else {
+		conf.setGroup("Copyright");
+		d->mGUI->mModelAuthor->setText(conf.readEntry("Author"));
+		d->mGUI->mModelLicense->setText(conf.readEntry("License"));
+	}
+ } else {
+	boDebug() << k_funcinfo << "no .copyright file for model " << mModelFileName << endl;
+ }
 
  const BosonModel* model = mGLWidget->model();
  BO_CHECK_NULL_RET(model);
@@ -878,7 +893,13 @@ void BoModelPixmaps::packageIt(const QString& fileName)
  QByteArray summaryData;
  QTextStream summary(summaryData, IO_WriteOnly);
  summary << "Summary\n";
-// summary << "Model license: " <<   << "\n";
+ summary << "Model license: ";
+ if (d->mGUI->mModelLicense->text().isEmpty()) {
+	summary << i18n("Unclear");
+ } else {
+	summary << d->mGUI->mModelLicense->text();
+ }
+ summary << "\n";
  summary << "Texture licenses: " << textureLicenses.join(",") << "\n";
  summary << "\n";
 
