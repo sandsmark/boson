@@ -35,6 +35,7 @@ class BoCamera;
 class KCmdLineArgs;
 class QPushButton;
 class QLabel;
+class QGridLayout;
 
 class BoTextureCopyright : public QWidget
 {
@@ -163,6 +164,8 @@ protected:
 	void reset();
 	void addTextureCopyright(const QString&);
 
+	void displayLabels(int count);
+
 private:
 	BoModelPixmapsPrivate* d;
 	BoDebugDCOPIface* mIface;
@@ -172,6 +175,7 @@ private:
 	QString mModelFileName;
 	QPushButton* mModelFile;
 	QPtrList<BoModelPixmapCollection> mModelPixmaps;
+	QGridLayout* mModelPixmapLabelsLayout;
 	QValueVector<QLabel*> mModelPixmapLabels;
 	QPtrList<BoTextureCopyright> mTextureCopyright;
 };
