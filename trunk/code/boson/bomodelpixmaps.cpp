@@ -62,6 +62,7 @@
 #include <qlineedit.h>
 #include <qfile.h>
 #include <qbuffer.h>
+#include <qimage.h>
 
 #include <math.h>
 #include <stdlib.h>
