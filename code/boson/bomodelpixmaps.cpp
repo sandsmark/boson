@@ -414,7 +414,11 @@ bool BoModelPixmapsGLWidget::loadModel(const QString& file)
  delete d->mModel;
  d->mModel = new BosonModel(info.dirPath(true) + "/", info.fileName());
  bool ret = d->mModel->loadModel(QString::null);
- d->mRenderModel->setModel(d->mModel);
+ if (ret) {
+	d->mRenderModel->setModel(d->mModel);
+ } else {
+	d->mRenderModel->setModel(0);
+}
  return ret;
 }
 
