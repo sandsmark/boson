@@ -86,6 +86,8 @@ class BoTexture
      *  mipmap filter)
      * @li DontCompress doesn't compress the texture (when texture compression
      *  is available)
+     * @li EnableNPOT enables usage of non-power-of-two textures, when
+     *  supported, saving some texture memory.
      **/
     enum Options
     {
@@ -104,6 +106,7 @@ class BoTexture
       // Misc
       DontGenMipmaps = 1024,
       DontCompress = 2048,
+      EnableNPOT = 4096,
       // Wrapping
       ClampToEdge = 8192
     };
@@ -406,6 +409,7 @@ class BoTextureManager
     bool supportsTextureCube() const  { return mSupportsTextureCube; }
     bool supportsGenerateMipmap() const  { return mSupportsGenerateMipmap; }
     bool supportsTextureCompression() const  { return mSupportsTextureCompressionS3TC; }
+    bool supportsNPOTTextures() const  { return mSupportsNPOTTextures; }
     bool supportsAnisotropicFiltering() const  { return (mMaxAnisotropy > 1); }
 
     int maxTextureSize() const  { return mMaxTextureSize; }
@@ -475,6 +479,7 @@ class BoTextureManager
     bool mSupportsTextureCube;
     bool mSupportsGenerateMipmap;
     bool mSupportsTextureCompressionS3TC;
+    bool mSupportsNPOTTextures;
     int mMaxTextureSize;
     int mMax3DTextureSize;
     int mMaxCubeTextureSize;

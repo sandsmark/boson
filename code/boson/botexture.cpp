@@ -424,17 +424,17 @@ unsigned char* BoTexture::ensureCorrectSize(unsigned char* data, int &width, int
     return data;
   }
 
-  // Ensure correct width
-  int newW = nextPower2(width);
-  if(newW > maxSize)
+  // Ensure correct width and height
+  int newW, newH;
+  if((mOptions & EnableNPOT) && boTextureManager->supportsNPOTTextures())
   {
-    newW = maxSize;
+    newW = QMIN(width, maxSize);
+    newH = QMIN(height, maxSize);
   }
-  // Ensure correct height
-  int newH = nextPower2(height);
-  if(newH > maxSize)
+  else
   {
-    newH = maxSize;
+    newW = QMIN(nextPower2(width), maxSize);
+    newH = QMIN(nextPower2(height), maxSize);
   }
 
   if(!data)
@@ -905,6 +905,13 @@ void BoTextureManager::initOpenGL()
   if(!mSupportsTextureCompressionS3TC)
   {
     boDebug() << k_funcinfo << "S3TC texture compression is not supported!" << endl;
+  }
+
+  // Check if NPOT (non-power-of-two) textures are supported
+  mSupportsNPOTTextures = glInfo->supportsNPOTTextures();
+  if(!mSupportsNPOTTextures)
+  {
+    boDebug() << k_funcinfo << "NPOT textures are not supported!" << endl;
   }
 
   // Check if anisotropic texture filtering is supported

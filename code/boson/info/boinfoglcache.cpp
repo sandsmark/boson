@@ -82,6 +82,7 @@ public:
 	bool mSupportsTextureCompressionS3TC;
 	bool mSupportsTextureCube;
 	bool mSupportsTexture3D;
+	bool mSupportsNPOTTextures;
 };
 
 BoInfoGLCache::BoInfoGLCache(BoInfo* info)
@@ -174,6 +175,8 @@ void BoInfoGLCache::update()
 	d->mSupportsTextureCube = true;
  }
  d->mMaxCubeMapTextureSize = getIntFromList(glValues, "GL_MAX_CUBE_MAP_TEXTURE_SIZE", 0);
+
+ d->mSupportsNPOTTextures = d->mOpenGLExtensions.contains("GL_ARB_texture_non_power_of_two");
 
  d->mMaxTextureMaxAnisotropy = getIntFromList(glValues, "GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT", 1);
 
@@ -360,6 +363,14 @@ bool BoInfoGLCache::supportsTextureCube() const
 	updateConst();
  }
  return d->mSupportsTextureCube;
+}
+
+bool BoInfoGLCache::supportsNPOTTextures() const
+{
+ if (d->mCacheDirty) {
+	updateConst();
+ }
+ return d->mSupportsNPOTTextures;
 }
 
 int BoInfoGLCache::maxTextureMaxAnisotropy() const

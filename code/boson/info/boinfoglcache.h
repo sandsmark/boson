@@ -106,6 +106,7 @@ public:
 	bool supportsTextureCompressionS3TC() const;
 	bool supportsTexture3D() const;
 	bool supportsTextureCube() const;
+	bool supportsNPOTTextures() const;
 
 protected:
 	int getInt(int key) const;
