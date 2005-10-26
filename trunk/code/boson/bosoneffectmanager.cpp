@@ -177,6 +177,14 @@ bool BosonEffectManager::loadWeaponType(const BosonWeaponProperties* prop)
  return true;
 }
 
+QPtrList<BosonEffect> BosonEffectManager::newEffects(unsigned int id, const BoVector3Fixed& pos, bofixed zrot) const
+{
+ QValueList<unsigned long int> ids;
+ ids.append(id);
+ QPtrList<BosonEffectProperties> effectProperties = BosonEffectProperties::loadEffectProperties(ids);
+ return BosonEffectProperties::newEffects(&effectProperties, pos, BoVector3Fixed(0, 0, zrot));
+}
+
 QPtrList<BosonEffect> BosonEffectManager::newDestroyedEffects(const UnitProperties* prop, float x, float y, float z) const
 {
  if (!prop) {

@@ -284,6 +284,25 @@ void BosonUfoCanvasWidget::addEffects(const QPtrList<BosonEffect>& effects)
  }
 }
 
+void BosonUfoCanvasWidget::createEffect(unsigned int id, const BoVector3Fixed& pos, bofixed zrot)
+{
+ addEffects(d->mEffectManager->newEffects(id, pos, zrot));
+}
+
+void BosonUfoCanvasWidget::createAttachedEffect(int itemid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot)
+{
+ BosonItem* item = d->mCanvas->findItem(itemid);
+ if (!item) {
+	boError() << k_funcinfo << "No item with id " << itemid << endl;
+	return;
+ }
+ BosonItemContainer* c = boViewData->itemContainer(item);
+ BO_CHECK_NULL_RET(c);
+ BosonItemEffects* effects = c->effects();
+ BO_CHECK_NULL_RET(effects);
+ effects->setEffects(d->mEffectManager->newEffects(effectid, offset, zrot), &d->mEffects);
+}
+
 void BosonUfoCanvasWidget::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag)
 {
  Q_UNUSED(advanceFlag);

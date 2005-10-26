@@ -87,6 +87,10 @@ public:
 	bool loadEffectsFromXML(const QDomElement& root);
 	bool saveEffectsAsXML(QDomElement& root) const;
 
+	void createEffect(unsigned int id, const BoVector3Fixed& pos, bofixed zrot);
+	void createAttachedEffect(int unitid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot);
+	void advanceEffects(float elapsed);
+
 public slots:
 	void slotAddItemContainerData(BosonItemContainer* c);
 	void slotRemoveItemContainerData(BosonItemContainer* c);
@@ -102,7 +106,6 @@ protected:
 	void addEffect(BosonEffect* effect);
 	void addEffects(const QPtrList<BosonEffect>& effects);
 	void animateItems(unsigned int advanceCallsCount);
-	void advanceEffects(float elapsed);
 	void setParticlesDirty(bool);
 	void addFacilityConstructedEffects(Unit* facility);
 	void initItemEffects();

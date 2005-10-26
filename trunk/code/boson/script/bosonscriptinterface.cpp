@@ -18,11 +18,12 @@
 */
 
 #include "bosonscriptinterface.h"
-#include "bosonscriptinterface.moc"
 
 #include "../../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "../bo3dtools.h"
+
+#include "bosonscriptinterface.moc"
 
 BosonScriptInterface::BosonScriptInterface(QObject* parent, const char* name) : QObject(parent, name)
 {
@@ -251,5 +252,32 @@ void BosonScriptInterface::commitCameraChanges(int ticks)
 void BosonScriptInterface::setAcceptUserInput(bool accept)
 {
   emit signalSetAcceptUserInput(accept);
+}
+
+void BosonScriptInterface::addEffect(unsigned int id, const BoVector3Fixed& pos, bofixed zrot)
+{
+  emit signalAddEffect(id, pos, zrot);
+}
+
+void BosonScriptInterface::addEffectToUnit(int unitid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot)
+{
+  emit signalAddEffectToUnit(unitid, effectid, offset, zrot);
+}
+
+void BosonScriptInterface::advanceEffects(int ticks)
+{
+  emit signalAdvanceEffects(ticks);
+}
+
+void BosonScriptInterface::setWind(const BoVector3Float& wind)
+{
+  emit signalSetWind(wind);
+}
+
+BoVector3Float BosonScriptInterface::wind()
+{
+  BoVector3Float w;
+  emit signalGetWind(&w);
+  return w;
 }
 

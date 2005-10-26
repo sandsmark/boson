@@ -39,6 +39,8 @@ public:
 	bool loadUnitType(const UnitProperties* prop);
 	bool loadWeaponType(const BosonWeaponProperties* prop);
 
+	QPtrList<BosonEffect> newEffects(unsigned int id, const BoVector3Fixed& pos, bofixed zrot) const;
+
 	QPtrList<BosonEffect> newDestroyedEffects(const UnitProperties* prop, float x, float y, float z) const;
 	QPtrList<BosonEffect> newConstructedEffects(const UnitProperties* prop, float x, float y, float z) const;
 	QPtrList<BosonEffect> newExplodingFragmentFlyEffects(const UnitProperties* prop, const BoVector3Fixed& pos) const;
