@@ -550,6 +550,10 @@ public:
 	BoLight* newLight();
 	void removeLight(int id);
 
+	void addEffect(unsigned int id, const BoVector3Fixed& pos, bofixed zrot);
+	void addEffectToUnit(int unitid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot);
+	void advanceEffects(int ticks);
+
 	virtual void paint();
 	virtual void paintWidget();
 
@@ -837,6 +841,13 @@ protected slots:
 	void slotSetCameraInterpolationMode(int);
 	void slotCommitCameraChanges(int);
 	void slotSetAcceptUserInput(bool);
+
+	/*  Effects  */
+	void slotAddEffect(unsigned int id, const BoVector3Fixed& pos, bofixed zrot);
+	void slotAddEffectToUnit(int unitid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot);
+	void slotAdvanceEffects(int ticks);
+	void slotSetWind(const BoVector3Float& wind);
+	void slotGetWind(BoVector3Float* wind);
 
 protected:
 	void reconnect(const QObject*, const char*, const QObject*, const char*);

@@ -107,6 +107,12 @@ class BosonScriptInterface : public QObject
     void commitCameraChanges(int ticks);
     void setAcceptUserInput(bool accept);
 
+    /*  Effects  */
+    void addEffect(unsigned int id, const BoVector3Fixed& pos, bofixed zrot);
+    void addEffectToUnit(int unitid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot);
+    void advanceEffects(int ticks);
+    void setWind(const BoVector3Float& wind);
+    BoVector3Float wind();
 
   signals:
     /*  Events  */
@@ -153,6 +159,13 @@ class BosonScriptInterface : public QObject
     void signalSetCameraInterpolationMode(int);
     void signalCommitCameraChanges(int);
     void signalSetAcceptUserInput(bool);
+
+    /*  Effects  */
+    void signalAddEffect(unsigned int id, const BoVector3Fixed& pos, bofixed zrot);
+    void signalAddEffectToUnit(int unitid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot);
+    void signalAdvanceEffects(int ticks);
+    void signalSetWind(const BoVector3Float& wind);
+    void signalGetWind(BoVector3Float*);
 };
 
 #endif

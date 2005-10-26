@@ -482,7 +482,7 @@ class BosonScript
     void addEffectToUnit(int unitid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot = 0);
     void advanceEffects(int ticks);
     void setWind(const BoVector3Float& wind);
-    const BoVector3Float& wind();
+    BoVector3Float wind();
     void unfogPlayer(int playerid);
     void unfogAllPlayers();
     void setAcceptUserInput(bool accept);

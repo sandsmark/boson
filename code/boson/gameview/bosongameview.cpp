@@ -81,6 +81,7 @@
 #include "../bosongameviewpluginbase.h"
 #include "../bosonviewdata.h"
 #include "bosongamevieweventlistener.h"
+#include "../bosoneffectpropertiesparticle.h"
 
 #include <kgame/kgameio.h>
 #include <kgame/kplayer.h>
@@ -2380,7 +2381,7 @@ void BosonGameView::mouseEventWheel(float delta, Orientation orientation, const 
 		} else {
 			delta *= 1; // no effect, btw
 		}
-		
+
 		//bricofoy's scrolling stuff
 
 		if (boConfig->boolValue("WheelMoveZoom")) {
@@ -2399,7 +2400,7 @@ void BosonGameView::mouseEventWheel(float delta, Orientation orientation, const 
 				BO_CHECK_NULL_RET(w);
 				QPoint pos = w->mapToGlobal(QPoint(w->width()/2, w->height()/2));
 				QPoint pos2 = QCursor::pos();
-	
+
 				curX = pos2.x();
 				curY = pos2.y();
 
@@ -2680,6 +2681,21 @@ void BosonGameView::slotGameOver()
  QTimer::singleShot(0, this, SIGNAL(signalEndGame()));
 }
 
+void BosonGameView::addEffect(unsigned int id, const BoVector3Fixed& pos, bofixed zrot)
+{
+ d->mUfoCanvasWidget->createEffect(id, pos, zrot);
+}
+
+void BosonGameView::addEffectToUnit(int unitid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot)
+{
+ d->mUfoCanvasWidget->createAttachedEffect(unitid, effectid, offset, zrot);
+}
+
+void BosonGameView::advanceEffects(int ticks)
+{
+ d->mUfoCanvasWidget->advanceEffects(ticks * 0.05);
+}
+
 
 
 
@@ -2784,6 +2800,17 @@ void BosonGameViewScriptConnector::connectToScript(BosonScript* script)
 		this, SLOT(slotCommitCameraChanges(int)));
  reconnect(i, SIGNAL(signalSetAcceptUserInput(bool)),
 		this, SLOT(slotSetAcceptUserInput(bool)));
+
+ reconnect(i, SIGNAL(signalAddEffect(unsigned int, const BoVector3Fixed&, bofixed)),
+		this, SLOT(slotAddEffect(unsigned int, const BoVector3Fixed&, bofixed)));
+ reconnect(i, SIGNAL(signalAddEffectToUnit(int, unsigned int, BoVector3Fixed, bofixed)),
+		this, SLOT(slotAddEffectToUnit(int, unsigned int, BoVector3Fixed, bofixed)));
+ reconnect(i, SIGNAL(signalAdvanceEffects(int)),
+		this, SLOT(slotAdvanceEffects(int)));
+ reconnect(i, SIGNAL(signalSetWind(const BoVector3Float&)),
+		this, SLOT(slotSetWind(const BoVector3Float&)));
+ reconnect(i, SIGNAL(signalGetWind(BoVector3Float*)),
+		this, SLOT(slotGetWind(BoVector3Float*)));
 }
 
 void BosonGameViewScriptConnector::slotAddLight(int* id)
@@ -3067,5 +3094,30 @@ void BosonGameViewScriptConnector::slotSetAcceptUserInput(bool accept)
 	(*it)->blockSignals(!accept);
 	++it;
  }
+}
+
+void BosonGameViewScriptConnector::slotAddEffect(unsigned int id, const BoVector3Fixed& pos, bofixed zrot)
+{
+ mDisplay->addEffect(id, pos, zrot);
+}
+
+void BosonGameViewScriptConnector::slotAddEffectToUnit(int unitid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot)
+{
+ mDisplay->addEffectToUnit(unitid, effectid, offset, zrot);
+}
+
+void BosonGameViewScriptConnector::slotAdvanceEffects(int ticks)
+{
+ mDisplay->advanceEffects(ticks);
+}
+
+void BosonGameViewScriptConnector::slotSetWind(const BoVector3Float& wind)
+{
+ BosonEffectPropertiesParticle::setWind(wind);
+}
+
+void BosonGameViewScriptConnector::slotGetWind(BoVector3Float* wind)
+{
+ *wind = BosonEffectPropertiesParticle::wind();
 }
 

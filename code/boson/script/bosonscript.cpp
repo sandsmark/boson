@@ -1549,7 +1549,6 @@ void BosonScript::setRandomSeed(long int seed)
 
 void BosonScript::findPath(int x1, int y1, int x2, int y2)
 {
-#ifdef PATHFINDER_TNG
  boDebug() << k_funcinfo << "Trying searching script path" << endl;
  BosonPathInfo i;
  i.start = BoVector2Fixed(x1, y1);
@@ -1557,128 +1556,36 @@ void BosonScript::findPath(int x1, int y1, int x2, int y2)
  boDebug() << k_funcinfo << "Let's go!" << endl;
  canvas()->pathFinder()->findPath(&i);
  boDebug() << k_funcinfo << "script path searching complete" << endl;
-#else
- boWarning() << k_funcinfo << "findPath() is only available with new pathfinder!" << endl;
-#endif
 }
 
 void BosonScript::addEffect(unsigned int id, BoVector3Fixed pos, bofixed zrot)
 {
-  if(!game())
-  {
-    boError() << k_funcinfo << "NULL game" << endl;
-    return;
-  }
-
-#warning FIXME: addEffect
-  boError() << k_funcinfo << "currently not supported" << endl;
-#if 0
-  const BosonEffectProperties* prop = boEffectPropertiesManager->effectProperties(id);
-  if(!prop)
-  {
-    boError() << k_funcinfo << "No effect properties with id " << id << endl;
-    return;
-  }
-  QPtrList<BosonEffect> list = BosonEffectProperties::newEffects(prop, pos, BoVector3Fixed(0, 0, zrot));
-  BosonCanvas* c = boGame->canvasNonConst();
-  c->addEffects(list);
-#endif
+  interface()->addEffect(id, pos, zrot);
 }
 
 void BosonScript::addEffectToUnit(int unitid, unsigned int effectid)
 {
-  addEffectToUnit(unitid, effectid, BoVector3Fixed());
+  interface()->addEffectToUnit(unitid, effectid, BoVector3Fixed(), 0);
 }
 
 void BosonScript::addEffectToUnit(int unitid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot)
 {
-  if(!game())
-  {
-    boError() << k_funcinfo << "NULL game" << endl;
-    return;
-  }
-
-  Unit* u = findUnit(unitid);
-  if(!u)
-  {
-    boError() << k_funcinfo << "No unit with id" << unitid << endl;
-    return;
-  }
-
-#warning FIXME: addEffectToUnit
-  boError() << k_funcinfo << "currently not supported" << endl;
-
-#if 0
-  const BosonEffectProperties* prop = boEffectPropertiesManager->effectProperties(effectid);
-  if(!prop)
-  {
-    boError() << k_funcinfo << "No effect properties with id " << effectid << endl;
-    return;
-  }
-  BoVector3Fixed pos(u->centerX(), u->centerY(), u->z());
-  pos += offset;
-  BoVector3Fixed rot(u->xRotation(), u->yRotation(), u->rotation());
-  rot.setZ(rot.z() + zrot);
-  QPtrList<BosonEffect> list = BosonEffectProperties::newEffects(prop, pos, rot);
-  QPtrListIterator<BosonEffect> it(list);
-  while(it.current())
-  {
-    u->addEffect(*it);
-    ++it;
-  }
-#endif
+  interface()->addEffectToUnit(unitid, effectid, offset, zrot);
 }
 
 void BosonScript::advanceEffects(int ticks)
 {
-  if(!game())
-  {
-    boError() << k_funcinfo << "NULL game" << endl;
-    return;
-  }
-
-#warning fixme: advanceEffects
-  boError() << k_funcinfo << "currently not supported" << endl;
-#if 0
-  QPtrListIterator<BosonEffect> it(*game()->canvas()->effects());
-  while(it.current())
-  {
-    BosonEffect* e = it.current();
-    for(int i = 0; i < ticks; i++)
-    {
-      // This code is taken from BoCanvasAdvance::updateEffects()
-      if(!e->hasStarted())
-      {
-        e->update(0.05f);
-      }
-      else
-      {
-        e->markUpdate(0.05f);
-      }
-    }
-    ++it;
-  }
-#endif
+  interface()->advanceEffects(ticks);
 }
 
 void BosonScript::setWind(const BoVector3Float& wind)
 {
-#if 0
-  BosonEffectPropertiesParticle::setWind(wind);
-#else
-#warning FIXME
-#endif
+  interface()->setWind(wind);
 }
 
-static BoVector3Float g_wind(0.2, 0.1, 0.0);
-const BoVector3Float& BosonScript::wind()
+BoVector3Float BosonScript::wind()
 {
-#if 0
-  return BosonEffectPropertiesParticle::wind();
-#else
-#warning FIXME
-  return g_wind;
-#endif
+  return interface()->wind();
 }
 
 void BosonScript::unfogPlayer(int playerid)
