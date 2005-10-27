@@ -425,6 +425,10 @@ public:
 		mShadowTexture = 0;
 		mShadowColorTexture = 0;
 		mUnitShader = 0;
+
+		mMainSceneTarget = 0;
+		mMainSceneColorTexture = 0;
+		mMainSceneDepthTexture = 0;
 	}
 	const BosonCanvas* mCanvas;
 	QValueVector<BoRenderItem> mRenderItemList;
@@ -453,6 +457,10 @@ public:
 	BoMatrix mShadowProjectionMatrix;
 	BoMatrix mShadowViewMatrix;
 	BoShader* mUnitShader;
+
+	BoRenderTarget* mMainSceneTarget;
+	BoTexture* mMainSceneColorTexture;
+	BoTexture* mMainSceneDepthTexture;
 };
 
 BosonCanvasRenderer::BosonCanvasRenderer()
@@ -633,6 +641,11 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
 	renderShadowMap(d->mCanvas);
  }
 
+ bool renderToTexture = mustRenderToTexture(d->mVisibleEffects);
+ if (renderToTexture) {
+	startRenderingToTexture();
+ }
+
  // Activate fog effect (if any)
  renderFog(d->mVisibleEffects);
 
@@ -678,6 +691,12 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
  renderBulletTrailEffects(d->mVisibleEffects);
  d->mVisualFeedbacks->paintGL();
 
+ if (renderToTexture) {
+	stopRenderingToTexture();
+ }
+
+ glDisable(GL_LIGHTING);
+ glDisable(GL_NORMALIZE);
  glDisable(GL_DEPTH_TEST);
 
  glMatrixMode(GL_PROJECTION);
@@ -686,6 +705,27 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
  glMatrixMode(GL_MODELVIEW);
  glLoadIdentity();
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+ if (renderToTexture) {
+	// Render scene texture
+	glDisable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
+	boTextureManager->activateTextureUnit(0);
+	glColor3f(1, 1, 1);
+	d->mMainSceneColorTexture->bind();
+	float maxTextureXCoord = d->mMainSceneColorTexture->width() / (float)d->mGameMatrices->viewport()[2];
+	float maxTextureYCoord = d->mMainSceneColorTexture->height() / (float)d->mGameMatrices->viewport()[3];
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0, 0.0);
+		glVertex2f(0.0, 0.0);
+		glTexCoord2f(maxTextureXCoord, 0.0);
+		glVertex2f((GLfloat)d->mGameMatrices->viewport()[2], 0.0);
+		glTexCoord2f(maxTextureXCoord, maxTextureYCoord);
+		glVertex2f((GLfloat)d->mGameMatrices->viewport()[2], (GLfloat)d->mGameMatrices->viewport()[3]);
+		glTexCoord2f(0.0,maxTextureYCoord);
+		glVertex2f(0.0, (GLfloat)d->mGameMatrices->viewport()[3]);
+	glEnd();
+ }
 
  renderFadeEffects(d->mVisibleEffects);
 
@@ -1158,6 +1198,76 @@ void BosonCanvasRenderer::renderBoundingBox(const BoVector3Float& c1, const BoVe
 	glVertex3f(c2.x(), c2.y(), c1.z());  glVertex3f(c2.x(), c2.y(), c2.z());
 	glVertex3f(c1.x(), c2.y(), c1.z());  glVertex3f(c1.x(), c2.y(), c2.z());
  glEnd();
+}
+
+bool BosonCanvasRenderer::mustRenderToTexture(BoVisibleEffects& visible)
+{
+ // TODO: use dedicated boconfig key
+ if (!boConfig->boolValue("UseUnitShaders")) {
+	return false;
+ }
+
+ QPtrListIterator<BosonEffectFade> it(visible.mFadeEffects);
+ while (it.current()) {
+	if (it.current()->shader()) {
+		return true;
+	}
+	++it;
+ }
+ return false;
+}
+
+void BosonCanvasRenderer::startRenderingToTexture()
+{
+ int widgetwidth = d->mGameMatrices->viewport()[2];
+ int widgetheight = d->mGameMatrices->viewport()[3];
+
+ if (!d->mMainSceneTarget ||
+		(widgetwidth != d->mMainSceneTarget->width()) || (widgetheight != d->mMainSceneTarget->height())) {
+	// Cleanup
+	delete d->mMainSceneColorTexture;
+	delete d->mMainSceneDepthTexture;
+	delete d->mMainSceneTarget;
+	// Init textures
+	d->mMainSceneColorTexture = new BoTexture(0, widgetwidth, widgetheight,
+			BoTexture::FilterLinear | BoTexture::FormatRGBA | BoTexture::DontCompress |
+			BoTexture::ClampToEdge | BoTexture::EnableNPOT);
+	d->mMainSceneDepthTexture = new BoTexture(0, widgetwidth, widgetheight,
+			BoTexture::FilterLinear | BoTexture::FormatDepth | BoTexture::DontCompress |
+			BoTexture::ClampToEdge | BoTexture::EnableNPOT);
+
+	// Init rendertarget
+	d->mMainSceneTarget = new BoRenderTarget(widgetwidth, widgetheight,
+			BoRenderTarget::RGBA | BoRenderTarget::Depth, d->mMainSceneColorTexture, d->mMainSceneDepthTexture);
+	boDebug() << k_funcinfo << "Target type: " << d->mShadowTarget->type() << endl;
+ }
+
+ // Enable the rendertarget
+ glPushAttrib(GL_ALL_ATTRIB_BITS);
+ d->mMainSceneTarget->enable();
+
+ // Load viewport and matrices
+ glViewport(d->mGameMatrices->viewport()[0], d->mGameMatrices->viewport()[1],
+		d->mGameMatrices->viewport()[2], d->mGameMatrices->viewport()[3]);
+ glMatrixMode(GL_PROJECTION);
+ glLoadMatrixf(d->mGameMatrices->projectionMatrix().data());
+ glMatrixMode(GL_MODELVIEW);
+ glLoadMatrixf(d->mGameMatrices->modelviewMatrix().data());
+
+ // Clear framebuffer
+ glClearDepth(1.0);
+ glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+ // Init some opengl states
+ glDisable(GL_SCISSOR_TEST);
+ glDepthFunc(GL_LEQUAL);
+ glEnable(GL_DEPTH_TEST);
+}
+
+void BosonCanvasRenderer::stopRenderingToTexture()
+{
+ d->mMainSceneTarget->disable();
+ glPopAttrib();
 }
 
 void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* renderItemList, const QPtrList<BosonItemContainer>& allItems)
@@ -1813,32 +1923,87 @@ void BosonCanvasRenderer::renderFadeEffects(BoVisibleEffects& visible)
 {
  PROFILE_METHOD;
  BO_CHECK_NULL_RET(d->mGameMatrices);
- if (!visible.mFadeEffects.isEmpty()) {
-	BosonEffectFade* f;
-//	glMatrixMode(GL_PROJECTION);
-//	glPushMatrix();
-	// Scale so that (0; 0) is bottom-left corner of the viewport and (1; 1) is
-	//  top-right corner
-//	glScalef(1 / (GLfloat)d->mViewport[2], 1 / (GLfloat)d->mViewport[3], 1);
-	// FIXME!!!
-	float xscale = (GLfloat)d->mGameMatrices->viewport()[2];
-	float yscale = (GLfloat)d->mGameMatrices->viewport()[3];
-	glEnable(GL_BLEND);
-	boTextureManager->disableTexturing();
-	QPtrListIterator<BosonEffectFade> it(visible.mFadeEffects);
-	while (it.current()) {
-		f = it.current();
-		glBlendFunc(f->blendFunc()[0], f->blendFunc()[1]);
-		glColor4fv(f->color().data());
-		BoVector4Fixed geo = f->geometry();  // x, y, w, h
-		glRectf(geo[0] * xscale, geo[1] * yscale, (geo[0] + geo[2]) * xscale, (geo[1] + geo[3]) * yscale);  // x, y, x2, y2
-		++it;
-	}
-	glDisable(GL_BLEND);
-	glColor3ub(255, 255, 255);
-//	glPopMatrix();
-//	glMatrixMode(GL_MODELVIEW);
+ if (visible.mFadeEffects.isEmpty()) {
+	return;
  }
+
+ // TODO: use dedicated boconfig key
+ bool enableShaderEffects = boConfig->boolValue("UseUnitShaders");
+
+
+ BosonEffectFade* f;
+ glMatrixMode(GL_MODELVIEW);
+ glPushMatrix();
+ // Scale so that (0; 0) is bottom-left corner of the viewport and (1; 1) is
+ //  top-right corner
+ glScalef((GLfloat)d->mGameMatrices->viewport()[2], (GLfloat)d->mGameMatrices->viewport()[3], 1);
+ // FIXME!!!
+ //float xscale = (GLfloat)d->mGameMatrices->viewport()[2];
+ //float yscale = (GLfloat)d->mGameMatrices->viewport()[3];
+ glEnable(GL_BLEND);
+
+ boTextureManager->activateTextureUnit(0);
+ boTextureManager->disableTexturing();
+ glMatrixMode(GL_TEXTURE);
+
+ // Render all effects
+ QPtrListIterator<BosonEffectFade> it(visible.mFadeEffects);
+ for (; it.current(); ++it) {
+	f = it.current();
+
+	if (f->shader()) {
+		if (!enableShaderEffects) {
+			continue;
+		}
+		// Bind shader
+		f->shader()->bind();
+		f->shader()->setUniform("pixelWidth", 1.0f / d->mGameMatrices->viewport()[2]);
+		f->shader()->setUniform("pixelHeight", 1.0f / d->mGameMatrices->viewport()[3]);
+		// We'll modify texture matrices so that (1; 1) is always top-right corner
+		//  of the _screen_, no matter what the texture size is.
+		float texScaleX =  (float)d->mGameMatrices->viewport()[2] / d->mMainSceneColorTexture->width();
+		float texScaleY = (float)d->mGameMatrices->viewport()[3] / d->mMainSceneColorTexture->height();
+		// Bind scene color tex to texunit 3 and change tex matrix
+		boTextureManager->activateTextureUnit(3);
+		d->mMainSceneColorTexture->bind();
+		glLoadIdentity();
+		glScalef(texScaleX, texScaleY, 1.0);
+		// Bind scene depth tex to texunit 2 and change tex matrix
+		boTextureManager->activateTextureUnit(2);
+		d->mMainSceneDepthTexture->bind();
+		glLoadIdentity();
+		glScalef(texScaleX, texScaleY, 1.0);
+	}
+
+	glBlendFunc(f->blendFunc()[0], f->blendFunc()[1]);
+	glColor4fv(f->color().data());
+
+	BoVector4Fixed geo = f->geometry();  // x, y, w, h
+	glBegin(GL_QUADS);
+		glTexCoord2f(geo[0], geo[1]);
+		glVertex2f(geo[0], geo[1]);
+		glTexCoord2f(geo[0] + geo[2], geo[1]);
+		glVertex2f(geo[0] + geo[2], geo[1]);
+		glTexCoord2f(geo[0] + geo[2], geo[1] + geo[3]);
+		glVertex2f(geo[0] + geo[2], geo[1] + geo[3]);
+		glTexCoord2f(geo[0], geo[1] + geo[3]);
+		glVertex2f(geo[0], geo[1] + geo[3]);
+	glEnd();
+
+	if (f->shader()) {
+		f->shader()->unbind();
+		boTextureManager->activateTextureUnit(3);
+		boTextureManager->disableTexturing();
+		glLoadIdentity();
+		boTextureManager->activateTextureUnit(2);
+		boTextureManager->disableTexturing();
+		glLoadIdentity();
+	}
+ }
+ glDisable(GL_BLEND);
+ glColor3ub(255, 255, 255);
+ glMatrixMode(GL_MODELVIEW);
+ glPopMatrix();
 }
 
 void BosonCanvasRenderer::slotAddFeedbackAttack(const QPtrList<Unit>& attacker, const Unit* unit)

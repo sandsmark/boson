@@ -127,6 +127,9 @@ protected:
 	void activateShadowMap();
 	void deactivateShadowMap();
 	void extractViewFrustum(BoVector3Float* points, const BoFrustum& viewFrustum);
+	bool mustRenderToTexture(BoVisibleEffects& visible);
+	void startRenderingToTexture();
+	void stopRenderingToTexture();
 
 	void renderBoundingBox(const BosonItem* item);
 	void renderBoundingBox(const BoVector3Float& c1, const BoVector3Float& c2);
