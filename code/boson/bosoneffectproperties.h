@@ -27,11 +27,11 @@
 #include <qptrlist.h>
 #include <qvaluelist.h>
 #include <qintdict.h>
+#include <qstring.h>
 
 
 class BosonEffectProperties;
 class KSimpleConfig;
-class QString;
 class SpeciesTheme;
 class SpeciesData;
 
@@ -233,6 +233,7 @@ class BosonEffectPropertiesFade : public BosonEffectProperties
 {
   public:
     BosonEffectPropertiesFade();
+    ~BosonEffectPropertiesFade();
 
 
     virtual BosonEffect::Type type() const  { return BosonEffect::Fade; };
@@ -249,6 +250,7 @@ class BosonEffectPropertiesFade : public BosonEffectProperties
     const BoVector4Fixed& geometry() const  { return mGeometry; }
     float time() const  { return mTime; }
     const int* blendFunc() const  { return mBlendFunc; }
+    BoShader* shader() const  { return mShader; }
 
 
   protected:
@@ -260,6 +262,8 @@ class BosonEffectPropertiesFade : public BosonEffectProperties
     BoVector4Fixed mGeometry;  // geometry: x, y, w, h
     float mTime;
     int mBlendFunc[2];
+    BoShader* mShader;
+    QString mShaderFilename;
 };
 
 

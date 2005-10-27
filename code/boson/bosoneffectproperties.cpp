@@ -26,6 +26,7 @@
 #include "bosonconfig.h"
 #include "bodebug.h"
 #include "speciesdata.h"
+#include "boshader.h"
 
 #include <ksimpleconfig.h>
 #include <kglobal.h>
@@ -400,6 +401,11 @@ BosonEffectPropertiesFade::BosonEffectPropertiesFade() : BosonEffectProperties()
   reset();
 }
 
+BosonEffectPropertiesFade::~BosonEffectPropertiesFade()
+{
+  delete mShader;
+}
+
 void BosonEffectPropertiesFade::reset()
 {
   // Reset all variables to their default values
@@ -409,6 +415,7 @@ void BosonEffectPropertiesFade::reset()
   mTime = 0;
   mBlendFunc[0] = GL_SRC_ALPHA;
   mBlendFunc[1] = GL_ONE_MINUS_SRC_ALPHA;
+  mShader = 0;
 }
 
 bool BosonEffectPropertiesFade::load(KSimpleConfig* cfg, const QString& group, bool inherited)
@@ -432,6 +439,13 @@ bool BosonEffectPropertiesFade::load(KSimpleConfig* cfg, const QString& group, b
   {
     mBlendFunc[0] = glblendfunc;
   }
+  mShaderFilename = cfg->readEntry("Shader");
+
+  if(!inherited && !mShaderFilename.isEmpty())
+  {
+    mShader = new BoShader(mShaderFilename);
+  }
+
   return true;
 }
 

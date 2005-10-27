@@ -33,6 +33,7 @@ class BosonEffectPropertiesFog;
 class BosonEffectPropertiesLight;
 class BosonEffectPropertiesBulletTrail;
 class BoLight;
+class BoShader;
 
 
 /**
@@ -293,8 +294,8 @@ class BosonEffectFog : public BosonEffect
  *  Rectangle will smoothly change from start color to end color during it's
  *  life (given in seconds). If life is set to -1, fade effect will last until
  *  you call @ref makeObsolete and no blending will be done. You can also
- *  specify you own custom OpenGL blending functions, defaults are GL_SRC_ALPHA
- *  and GL_ONE_MINUS_SRC_ALPHA.
+ *  specify your own custom OpenGL blending functions, defaults are
+ *  GL_SRC_ALPHA and GL_ONE_MINUS_SRC_ALPHA.
  *
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
@@ -338,6 +339,11 @@ class BosonEffectFade : public BosonEffect
      *  funtions for this effect.
      **/
     const int* blendFunc() const  { return mBlendFunc; }
+    /**
+     * @return Shader which should be used when rendering this effect.
+     * When it's NULL, no shader should be used.
+     **/
+    BoShader* shader() const;
 
 
     virtual bool saveAsXML(QDomElement& root) const;
