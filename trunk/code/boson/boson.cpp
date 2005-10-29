@@ -1059,6 +1059,36 @@ void Boson::networkTransmission(BoMessage* m)
  m->deliveredOnAdvanceCallsCount = advanceCallsCount();
  d->mMessageLogger.append(m);
  QDataStream s(m->byteArray, IO_ReadOnly);
+ if (m->msgid == KGameMessage::IdSetupGame) {
+	// AB: this (IdSetupGame) is the first step of KGame network initialization.
+	//     this message is received by the client (non-ADMIN) only.
+
+
+	for (unsigned int i = 0; i < playerCount(); i++) {
+		// AB: all client players will be added again by the KGame
+		//     initialization:
+		//     the setupGame() inactivates the players and in
+		//     setupGameContinue() they are reactivated again (by the
+		//     ADMIN).
+		//
+		//     this "reactivation" is very buggy in KGame: the ADMIN
+		//     cannot activate it, as it doesn't have these player
+		//     objects yet (those that are created into the
+		//     newPlayerList are deleted at the end of
+		//     setupGameContinue() due to auto deletion).
+		//     however the "reactivation" is received by the client
+		//     which calls addPlayer() and this one eventually adds the
+		//     new player on the ADMIN, too.
+		//
+		//     however the player is then added with the (old)
+		//     client-side user ID - the ADMIN has never a chance to
+		//     assign the correct ID.
+		//
+		//     Therefore we assign the (invalid) ID 0 here which causes
+		//     both clients to pick a new ID when the player is added.
+		playerList()->at(i)->setUserId(0);
+	}
+ }
  KGame::networkTransmission(s, m->msgid, m->receiver, m->sender, m->clientId);
 }
 
@@ -1655,36 +1685,5 @@ void Boson::slotChangeTexMap(int x, int y, unsigned int textureCount, unsigned i
  BO_CHECK_NULL_RET(d->mPlayField->map());
  d->mPlayField->map()->slotChangeTexMap(x, y, textureCount, textures, alpha);
  emit signalChangeTexMap(x, y, textureCount, textures, alpha);
-}
-
-// called by KGame when a new client connects.
-// this method is part of the KGame connection process. it is called by the
-// MASTER, shortly before the "IdGameLoad" message is sent to the client, which
-// causes the client to load the game from the saved stream.
-// (the stream will be saved by the MASTER _after_ this method was called)
-void Boson::newPlayersJoin(KGamePlayerList* oldPlayers,
-		KGamePlayerList* newPlayers,
-		QValueList<int>& inactivate)
-{
- KGame::newPlayersJoin(oldPlayers, newPlayers, inactivate); // noop
-
- // AB: the Player object already have an ID (from their original client). we
- //     need to make sure that when finding new IDs these objects don't get in
- //     the way.
- for (KPlayer* kp = newPlayers->first(); kp; kp = newPlayers->next()) {
-	Player* p = (Player*)kp;
-	p->setUserId(0);
- }
-
- // set new IDs to the players
- for (KPlayer* kp = newPlayers->first(); kp; kp = newPlayers->next()) {
-	Player* p = (Player*)kp;
-
-	int userId = 128;
-	while (findPlayerByUserId(userId) != 0) {
-		userId++;
-	}
-	p->setUserId(userId);
- }
 }
 
