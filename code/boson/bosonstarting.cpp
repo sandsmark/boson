@@ -1061,7 +1061,7 @@ bool BosonStartingCheckIOs::startTask()
 		return false;
 	}
 	bool expectIO = true;
-	if (p->bosonId() < 128) {
+	if (p->bosonId() < 128 || p->isVirtual()) {
 		expectIO = false;
 	} else if (p->bosonId() >= 256) {
 		// neutral players must have an IO in editor mode, but must not
