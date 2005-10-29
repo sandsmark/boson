@@ -239,6 +239,37 @@ bool BosonStarting::start()
 	return false;
  }
 
+ // check if player IDs are valid
+ {
+	QValueList<int> players;
+	QValueList<int> watchPlayers;
+	for (unsigned i = 0; i < boGame->playerCount(); i++) {
+		Player* p = (Player*)boGame->playerList()->at(i);
+		int id = p->bosonId();
+		if (id < 128) {
+			// IDs < 128 are invalid.
+			boError() << k_funcinfo << "Invalid player ID " << id << " for player with KGame ID " << p->kgameId() << endl;
+			return false;
+		}
+		if (id >= 512) {
+			boDebug() << k_funcinfo << "player with KGame ID " << p->kgameId() << " is just watching the game. no active player" << endl;
+			if (watchPlayers.contains(id)) {
+				// AB: note that duplicated IDs are (currently)
+				// allowed here, but should not appear anyway.
+				boWarning() << k_funcinfo << "already have a player with ID " << id << endl;
+			}
+			watchPlayers.append(id);
+		} else {
+			// player ID 128..511 are game players (256-511 are
+			// non-playable players)
+			if (players.contains(id)) {
+				boError() << k_funcinfo << "have more than one player with ID " << id << " - this is not allowed. aborting." << endl;
+				return false;
+			}
+		}
+	}
+ }
+
  QMap<QString, QByteArray> files;
  if (!BosonPlayField::unstreamFiles(files, mNewGameData)) {
 	boError(270) << k_funcinfo << "invalid newgame stream" << endl;
