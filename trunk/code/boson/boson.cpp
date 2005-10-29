@@ -1657,4 +1657,34 @@ void Boson::slotChangeTexMap(int x, int y, unsigned int textureCount, unsigned i
  emit signalChangeTexMap(x, y, textureCount, textures, alpha);
 }
 
+// called by KGame when a new client connects.
+// this method is part of the KGame connection process. it is called by the
+// MASTER, shortly before the "IdGameLoad" message is sent to the client, which
+// causes the client to load the game from the saved stream.
+// (the stream will be saved by the MASTER _after_ this method was called)
+void Boson::newPlayersJoin(KGamePlayerList* oldPlayers,
+		KGamePlayerList* newPlayers,
+		QValueList<int>& inactivate)
+{
+ KGame::newPlayersJoin(oldPlayers, newPlayers, inactivate); // noop
+
+ // AB: the Player object already have an ID (from their original client). we
+ //     need to make sure that when finding new IDs these objects don't get in
+ //     the way.
+ for (KPlayer* kp = newPlayers->first(); kp; kp = newPlayers->next()) {
+	Player* p = (Player*)kp;
+	p->setUserId(0);
+ }
+
+ // set new IDs to the players
+ for (KPlayer* kp = newPlayers->first(); kp; kp = newPlayers->next()) {
+	Player* p = (Player*)kp;
+
+	int userId = 128;
+	while (findPlayerByUserId(userId) != 0) {
+		userId++;
+	}
+	p->setUserId(userId);
+ }
+}
 

@@ -501,6 +501,10 @@ protected:
 
 	void clearUndoStacks();
 
+	virtual void newPlayersJoin(KGamePlayerList* oldPlayers,
+			KGamePlayerList* newPlayers,
+			QValueList<int>& inactivate);
+
 protected slots:
 	/**
 	 * A network message arrived. Most game logic stuff is done here as
