@@ -1089,6 +1089,23 @@ void Boson::networkTransmission(BoMessage* m)
 		playerList()->at(i)->setUserId(0);
 	}
  }
+
+ // AB: we cannot do access control with "sender", as this field can be provided
+ //     to KGame::sendSystemMessage(), i.e. is given by the sender.
+ //     However the clientId parameter is provided on this side of the
+ //     connection, i.e. by a trustworthy source.
+ //     So we need to check if sender actually matches the clientId and then we
+ //     can ignore clientId (KGame does so - after this point clientId will be
+ //     dropped!)
+ //
+ //     code not activated, as it is untested.
+#if 0
+ if (KGameMessage::rawGameId(m->sender) != m->clientId) {
+	boError() << k_funcinfo << "sender lied. sender said he was " << m->sender << " but actually " << m->clientId << " sent this message. not accepting." << endl;
+	return;
+ }
+#endif
+
  KGame::networkTransmission(s, m->msgid, m->receiver, m->sender, m->clientId);
 }
 
