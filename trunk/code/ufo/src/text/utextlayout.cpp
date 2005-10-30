@@ -308,7 +308,7 @@ UTextLayout::layout() {
 		}
 		index++;
 	}
-	if (lineStart < m_length || m_text[m_length - 1] == '\n') {
+	if (lineStart < m_length || (m_length && m_text[m_length - 1] == '\n')) {
 		UTextLine line(lineStart, m_length - lineStart, lineHeight, pos);
 		m_lines.push_back(line);
 	}
