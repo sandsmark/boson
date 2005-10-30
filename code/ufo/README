@@ -71,6 +71,9 @@ Patches applied currently:
   method.
   The methods used are virtual and do nothing by default - it is up to the
   user to implement real profiling.
+- Patch to utextlayout.cpp to avoid a crash because if an unexpected m_length
+  value.
+  The crash appeared on at least one amd64 system.
 
 
 
