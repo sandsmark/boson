@@ -312,7 +312,7 @@ QStringList SpeciesData::unitModelFiles()
 {
  QStringList list;
  list.append("unit.3ds");
- //list.append("unit.ac");
+ list.append("unit.ac");
  return list;
 }
 
