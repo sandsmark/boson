@@ -74,8 +74,8 @@ class Face
      **/
     Vertex** vertices() const  { return mVertices; }
 
-    Vertex* vertex(unsigned int i) const  { return mVertices[i]; }
-    void setVertex(unsigned int i, Vertex* v)  { mVertices[i] = v; }
+    Vertex* vertex(unsigned int i) const;
+    void setVertex(unsigned int i, Vertex* v);
 
     /**
      * Number of vertices in this face
@@ -127,8 +127,8 @@ class Mesh
     int id() const  { return mId; }
     void setId(int id)  { mId = id; }
 
-    Vertex* vertex(unsigned int i) const  { return mVertices[i]; }
-    Face* face(unsigned int i) const  { return mFaces[i]; }
+    Vertex* vertex(unsigned int i) const;
+    Face* face(unsigned int i) const;
 
     Vertex** vertices() const  { return mVertices; }
     Face** faces() const  { return mFaces; }
