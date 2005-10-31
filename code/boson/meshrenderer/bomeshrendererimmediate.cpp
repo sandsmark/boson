@@ -125,16 +125,18 @@ unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* me
 		} else {
 			index = ((Q_UINT32*)mesh->indices())[i];
 		}
-		glVertex3fv(model()->pointArray() + (index * pointsize + 0));
-		glNormal3fv(model()->pointArray() + (index * pointsize + 3));
-		glTexCoord2fv(model()->pointArray() + (index * pointsize + 6));
+		const float* p = model()->pointArray() + (index * BoMesh::pointSize());
+		glNormal3fv(p + BoMesh::normalPos());
+		glTexCoord2fv(p + BoMesh::texelPos());
+		glVertex3fv(p + BoMesh::vertexPos());
 		renderedPoints++;
 	}
  } else {
 	for (unsigned int i = 0; i < mesh->pointCount(); i++) {
-		glVertex3fv(pointArray + (i * pointsize + 0));
-		glNormal3fv(pointArray + (i * pointsize + 3));
-		glTexCoord2fv(pointArray + (i * pointsize + 6));
+		const float* p = pointArray + (i * pointsize);
+		glNormal3fv(p + BoMesh::normalPos());
+		glTexCoord2fv(p + BoMesh::texelPos());
+		glVertex3fv(p + BoMesh::vertexPos());
 		renderedPoints++;
 	}
  }
