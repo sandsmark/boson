@@ -5,7 +5,8 @@ noinst_LTLIBRARIES = libloaders.la
 METASOURCES = AUTO
 
 libloaders_la_SOURCES = \
-	loader-3ds.cpp
+	loader-3ds.cpp \
+	loader-ac.cpp
 
 
 

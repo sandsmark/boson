@@ -20,8 +20,10 @@
 #include "loader.h"
 
 #include "loaders/loader-3ds.h"
+#include "loaders/loader-ac.h"
 
 #include "model.h"
+#include "debug.h"
 
 
 Loader::Loader(Model* m, LOD* l, const QString& file)
@@ -37,6 +39,22 @@ Loader::~Loader()
 
 Loader* Loader::createLoader(Model* m, LOD* l, const QString& filename)
 {
-  return (Loader*)(new Loader3DS(m, l, filename));
+  if(filename.endsWith(".3ds"))
+  {
+    return (Loader*)(new Loader3DS(m, l, filename));
+  }
+  else if(filename.endsWith(".ac"))
+  {
+    return (Loader*)(new LoaderAC(m, l, filename));
+  }
+  else
+  {
+    boError() << k_funcinfo << "unrecognized file format of " << filename << endl;
+    return 0;
+  }
 }
+
+/*
+ * vim: et sw=2
+ */
 
