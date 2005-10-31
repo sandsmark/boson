@@ -148,10 +148,8 @@ bool BoRenderTarget::enable()
   return true;
 }
 
-#include "bosonprofiling.h"
 bool BoRenderTarget::disable()
 {
-	PROFILE_METHOD;
   if(!valid())
   {
     boError() << k_funcinfo << "Can't disable invalid render target!" << endl;
@@ -160,44 +158,29 @@ bool BoRenderTarget::disable()
 
   if(mType == FBO)
   {
-	  BosonProfiler prof("FOO1");
     boglBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glFinish();
   }
   else
   {
-	  BosonProfiler prof("FOOX");
     // Copy PBuffer contents to the texture
     if(mTexture && (mFlags & RGB || mFlags & RGBA))
     {
-	  BosonProfiler prof("FOO2");
       mTexture->bind();
-    glFinish();
-	  BosonProfiler prof2("FOO2.2");
       glCopyTexSubImage2D(mTexture->type(), 0,  0, 0,  0, 0,  mWidth, mHeight);
-    glFinish();
     }
     if(mDepthTexture && (mFlags & Depth))
     {
-	  BosonProfiler prof("FOO3");
       mDepthTexture->bind();
-    glFinish();
-	  BosonProfiler prof2("FOO3.2");
       glCopyTexSubImage2D(mDepthTexture->type(), 0,  0, 0,  0, 0,  mWidth, mHeight);
-    glFinish();
     }
 
-     BosonProfiler foo4("FOO4");
     if(!glXMakeCurrent(mPBufferData->display, mPBufferData->oldpbuffer, mPBufferData->oldcontext))
     {
       boError() << k_funcinfo << "Couldn't disable render target!" << endl;
       return false;
     }
-    glFinish();
-    foo4.pop();
     boTextureManager->invalidateCache();
   }
-    glFinish();
 
   return true;
 }
