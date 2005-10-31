@@ -46,9 +46,18 @@ bool Model::load(const QString& file)
   createBaseLOD();
 
   Loader* l = Loader::createLoader(this, baseLOD(), file);
+  if(!l)
+  {
+    boError() << k_funcinfo << "could not create a loader for " << file << endl;
+    return false;
+  }
   bool ret = l->load();
 
   delete l;
+  if (!ret)
+  {
+    boWarning() << k_funcinfo << "unable to load file " << file << endl;
+  }
   return ret;
 }
 
@@ -408,3 +417,6 @@ void Model::updateRadius(unsigned int baseframe)
   mRadius = sqrt(maxdist);
 }
 
+/*
+ * vim: et sw=2
+ */
