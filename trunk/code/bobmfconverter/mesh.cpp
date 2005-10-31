@@ -23,6 +23,26 @@
 #include "debug.h"
 #include "bmf.h"
 
+Vertex* Face::vertex(unsigned int i) const
+{
+  if(i >= mNumVertices)
+  {
+    boError() << k_funcinfo << "index out of bounds: " << i << endl;
+    return 0;
+  }
+  return mVertices[i];
+}
+
+void Face::setVertex(unsigned int i, Vertex* v)
+{
+  if(i >= mNumVertices)
+  {
+    boError() << k_funcinfo << "index out of bounds: " << i << endl;
+    return;
+  }
+  mVertices[i] = v;
+}
+
 
 Mesh::Mesh()
 {
@@ -102,6 +122,26 @@ Mesh::~Mesh()
     delete mFaces[i];
   }
   delete[] mFaces;
+}
+
+Vertex* Mesh::vertex(unsigned int i) const
+{
+  if(i >= vertexCount())
+  {
+    boError() << k_funcinfo << "index out of bounds: " << i << endl;
+    return 0;
+  }
+  return mVertices[i];
+}
+
+Face* Mesh::face(unsigned int i) const
+{
+  if(i >= faceCount())
+  {
+    boError() << k_funcinfo << "index out of bounds: " << i << endl;
+    return 0;
+  }
+  return mFaces[i];
 }
 
 void Mesh::allocateVertices(int n)
@@ -350,3 +390,6 @@ void Mesh::loadingCompleted()
   }
 }
 
+/*
+ * vim: et sw=2
+ */
