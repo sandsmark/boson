@@ -79,6 +79,9 @@ static KCmdLineOptions options[] =
 {
     { "package", I18N_NOOP("Automatically package all files loaded from cmd line"), 0 },
     { "+[files]", I18N_NOOP("Files for --package"), 0 },
+    { "xrotation <rotation>", I18N_NOOP("Initial X rotation"), 0 },
+    { "yrotation <rotation>", I18N_NOOP("Initial Y rotation"), 0 },
+    { "zrotation <rotation>", I18N_NOOP("Initial Z rotation"), 0 },
     { 0, 0, 0 }
 };
 
@@ -509,6 +512,33 @@ bool BoModelPixmaps::parseCmdLineArgs(KCmdLineArgs* args)
  if (!mGLWidget->parseCmdLineArgs(args)) {
 	return false;
  }
+ if (args->isSet("xrotation")) {
+	bool ok;
+	args->getOption("xrotation").toDouble(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "value for xrotation is not a valid number" << endl;
+		return false;
+	}
+	d->mGUI->mRotationX->setText(args->getOption("xrotation"));
+ }
+ if (args->isSet("yrotation")) {
+	bool ok;
+	args->getOption("yrotation").toDouble(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "value for yrotation is not a valid number" << endl;
+		return false;
+	}
+	d->mGUI->mRotationY->setText(args->getOption("yrotation"));
+ }
+ if (args->isSet("zrotation")) {
+	bool ok;
+	args->getOption("zrotation").toDouble(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "value for zrotation is not a valid number" << endl;
+		return false;
+	}
+	d->mGUI->mRotationZ->setText(args->getOption("zrotation"));
+ }
  return true;
 }
 
@@ -518,12 +548,12 @@ void BoModelPixmaps::slotSelectModelFile()
  if (file.isEmpty()) {
 	return;
  }
- reset();
  selectModelFile(file);
 }
 
 void BoModelPixmaps::selectModelFile(const QString& file)
 {
+ reset();
  if (!mGLWidget->loadModel(file)) {
 	KMessageBox::sorry(this, i18n("Unable to load from file %1").arg(file));
 	reset();
@@ -534,7 +564,7 @@ void BoModelPixmaps::selectModelFile(const QString& file)
  retrievePixmaps();
 
  QFileInfo fileInfo(mModelFileName);
- QString copyrightFile = fileInfo.dirPath() + "/" + fileInfo.baseName() + ".copyright";
+ QString copyrightFile = fileInfo.dirPath(true) + "/" + fileInfo.baseName() + ".copyright";
  if (QFile::exists(copyrightFile)) {
 	KSimpleConfig conf(copyrightFile);
 	if (!conf.hasGroup("Copyright")) {
@@ -560,7 +590,9 @@ void BoModelPixmaps::selectModelFile(const QString& file)
 	if (mat->textureName().isEmpty()) {
 		continue;
 	}
-	textures.append(mat->textureName());
+	if (!textures.contains(mat->textureName())) {
+		textures.append(mat->textureName());
+	}
  }
 
  QStringList found;
@@ -719,11 +751,41 @@ void BoModelPixmaps::retrievePixmaps()
  mModelPixmaps.setAutoDelete(true);
  mModelPixmaps.clear();
  mGLWidget->updateBaseProjectionMatrix();
+
+ // unify the model to a default rotation
+ BoMatrix unifyModelMatrix = BoMatrix();
+ bool ok;
+ float rotX = d->mGUI->mRotationX->text().toDouble(&ok);
+ if (!ok) {
+	boError() << k_funcinfo << "value for x rotation not a valid number" << endl;
+	rotX = 0.0f;
+ }
+ float rotY = d->mGUI->mRotationY->text().toDouble(&ok);
+ if (!ok) {
+	boError() << k_funcinfo << "value for y rotation not a valid number" << endl;
+	rotY = 0.0f;
+ }
+ float rotZ = d->mGUI->mRotationZ->text().toDouble(&ok);
+ if (!ok) {
+	boError() << k_funcinfo << "value for z rotation not a valid number" << endl;
+	rotZ = 0.0f;
+ }
+ unifyModelMatrix.rotate(rotX, 1.0f, 0.0f, 0.0f);
+ unifyModelMatrix.rotate(rotY, 0.0f, 1.0f, 0.0f);
+ unifyModelMatrix.rotate(rotZ, 0.0f, 0.0f, 1.0f);
+
  for (unsigned int i = 0; i < cameraPosList.count(); i++) {
-	BoVector3Float cameraPos = center + cameraPosList[i] * size;
-	BoVector3Float lookAt = center + lookAtList[i];
-	BoVector3Float up = upList[i];
+	BoVector3Float cameraPos_ = center + cameraPosList[i] * size;
+	BoVector3Float lookAt_ = center + lookAtList[i];
+	BoVector3Float up_ = upList[i];
 	QString name = namesList[i];
+
+	BoVector3Float cameraPos;
+	BoVector3Float lookAt;
+	BoVector3Float up;
+	unifyModelMatrix.transform(&cameraPos, &cameraPos_);
+	unifyModelMatrix.transform(&lookAt, &lookAt_);
+	unifyModelMatrix.transform(&up, &up_);
 
 	if (name.isEmpty()) {
 		boError() << k_funcinfo << "empty name for pixmap " << i << endl;
