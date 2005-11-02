@@ -21,6 +21,7 @@
 
 #include "loaders/loader-3ds.h"
 #include "loaders/loader-ac.h"
+#include "loaders/loader-md2.h"
 
 #include "model.h"
 #include "debug.h"
@@ -39,13 +40,17 @@ Loader::~Loader()
 
 Loader* Loader::createLoader(Model* m, LOD* l, const QString& filename)
 {
-  if(filename.endsWith(".3ds"))
+  if(filename.lower().endsWith(".3ds"))
   {
     return (Loader*)(new Loader3DS(m, l, filename));
   }
-  else if(filename.endsWith(".ac"))
+  else if(filename.lower().endsWith(".ac"))
   {
     return (Loader*)(new LoaderAC(m, l, filename));
+  }
+  else if(filename.lower().endsWith(".md2"))
+  {
+    return (Loader*)(new LoaderMD2(m, l, filename));
   }
   else
   {
