@@ -6,7 +6,8 @@ METASOURCES = AUTO
 
 libloaders_la_SOURCES = \
 	loader-3ds.cpp \
-	loader-ac.cpp
+	loader-ac.cpp \
+	loader-md2.cpp
 
 
 
