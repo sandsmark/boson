@@ -2,6 +2,7 @@
 
 SUBDIRS = \
 		data \
+		imageio \
 		bosonfont \
 		boufo \
 		bosonwidgets \
@@ -147,6 +148,7 @@ boson_LDADD = \
 		$(top_builddir)/boson/libboson.la \
 		$(top_builddir)/boson/libbosongameengine.la \
 		$(top_builddir)/boson/libbosoncommon.la \
+		$(top_builddir)/boson/imageio/libboimageio.la \
 		$(top_builddir)/boson/boufo/libboufo.la \
 		$(LIB_BOMEMORY)
 boson_SOURCES = \
@@ -185,6 +187,7 @@ bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bounit_LDADD = \
 		$(top_builddir)/boson/libbosongameengine.la \
 		$(top_builddir)/boson/libbosoncommon.la \
+		$(top_builddir)/boson/imageio/libboimageio.la \
 		$(top_builddir)/bogl/libbogl.la \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/bogl/libbogl.la \
@@ -219,6 +222,7 @@ bocursor_LDADD = \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/libbocursor.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
+		$(top_builddir)/boson/imageio/libboimageio.la \
 		$(LIB_BOMEMORY) \
 		$(LIB_KDEUI) \
 		$(LIB_KIO) \
@@ -234,6 +238,7 @@ borender_LDADD = \
 		$(top_builddir)/boson/libbosongameengine.la \
 		$(top_builddir)/boson/libboson.la \
 		$(top_builddir)/boson/libbosoncommon.la \
+		$(top_builddir)/boson/imageio/libboimageio.la \
 		$(top_builddir)/boson/libborender.la \
 		$(top_builddir)/boson/boufo/libboufo.la \
 		$(LIB_KGAME) \
@@ -254,6 +259,7 @@ bomodelpixmaps_LDADD = \
 		$(top_builddir)/boson/libboson.la \
 		$(top_builddir)/boson/libbosongameengine.la \
 		$(top_builddir)/boson/libbosoncommon.la \
+		$(top_builddir)/boson/imageio/libboimageio.la \
 		$(top_builddir)/boson/boufo/libboufo.la \
 		$(top_builddir)/boson/script/libbosonscript.la \
 		$(LIB_KGAME) \
@@ -277,6 +283,7 @@ boinfo_LDADD = \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/math/libbomath.la \
 		$(top_builddir)/bogl/libbogl.la \
+		$(top_builddir)/boson/imageio/libboimageio.la \
 		$(LIB_BOMEMORY) \
 		-lkio $(LIB_KDEUI) \
 		-lXmu
@@ -298,6 +305,7 @@ bo3dsdebug_LDADD = \
 		$(top_builddir)/bogl/libbogl.la \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/boufo/libboufo.la \
+		$(top_builddir)/boson/imageio/libboimageio.la \
 		$(LIB_BOMEMORY) \
 		-l3ds \
 		-lkio $(LIB_KDEUI)
@@ -309,6 +317,7 @@ boconditioneditor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boconditioneditor_LDADD = \
 		$(top_builddir)/boson/libbosongameengine.la \
 		$(top_builddir)/boson/libbosoncommon.la \
+		$(top_builddir)/boson/imageio/libboimageio.la \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/bogl/libbogl.la \
 		$(top_builddir)/math/libbomath.la \
@@ -330,6 +339,7 @@ boprofiling_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boprofiling_LDADD = \
 		$(top_builddir)/boson/libboprofiling.la \
 		$(top_builddir)/boson/libbosoncommon.la \
+		$(top_builddir)/boson/imageio/libboimageio.la \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/bogl/libbogl.la \
 		$(top_builddir)/math/libbomath.la \
