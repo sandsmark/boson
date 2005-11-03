@@ -410,7 +410,7 @@ bool LoaderMD2::load()
  //                this also leads to a new problem: some models might not
  //                specify a skin at all (as it is not relevant for the .md2
  //                data) but use one anyway, e.g. use model.md2 for the model
- //                and use a mode.tga texture for it.
+ //                and use a model.tga texture for it.
  model()->addMaterial(material);
  QString texture;
  if (header.mNumSkins > 0) {
@@ -446,8 +446,8 @@ bool LoaderMD2::load()
 	exts.append(".xpm");
 	exts.append(".gif");
 	exts.append(".pnm");
-//	exts.append(".tga");
-//	exts.append(".pcx");
+	exts.append(".tga");
+	exts.append(".pcx");
 	QString baseNameLower = fileInfo.baseName().lower();
 	for (unsigned int i = 0; texture.isNull() && i < exts.count(); i++) {
 		int index = listLower.findIndex(baseNameLower + exts[i]);
