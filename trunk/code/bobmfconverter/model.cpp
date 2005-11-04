@@ -176,6 +176,10 @@ void Model::setTextures(const QDict<Texture>& textures)
 
 Texture* Model::getTexture(const QString& filename)
 {
+  if(filename.isEmpty())
+  {
+    return 0;
+  }
   Texture* t = mTextures[filename];
   if(!t)
   {
