@@ -41,6 +41,7 @@
 #define SURFACE_TWOSIDED (1<<5)
 
 // AB: see http://linux.ucla.edu/~phaethon/q3a/formats/md2-schoenblum.html
+//     or http://www.icculus.org/homepages/phaethon/q3/formats/md2-schoenblum.html
 
 class MD2Header
 {
