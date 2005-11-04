@@ -29,6 +29,14 @@ class Mesh;
 class Face;
 
 
+/**
+ * MD2 is a model file format pretty popular for games. It has nothing to do
+ * with the MD4 algorithm.
+ *
+ * It is used by Quake2.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class LoaderMD2 : public Loader
 {
 public:
