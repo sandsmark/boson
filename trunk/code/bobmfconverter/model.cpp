@@ -52,13 +52,98 @@ bool Model::load(const QString& file)
     return false;
   }
   bool ret = l->load();
+  if(ret)
+  {
+    ret = checkLoadedModel();
+    if(!ret)
+    {
+      boError() << k_funcinfo << "loader reported success, but model is not valid" << endl;
+      // do NOT return (loader must be deleted)
+    }
+  }
 
   delete l;
-  if (!ret)
+  if(!ret)
   {
     boWarning() << k_funcinfo << "unable to load file " << file << endl;
   }
   return ret;
+}
+
+bool Model::checkLoadedModel() const
+{
+  LOD* lod = baseLOD();
+  if(!lod)
+  {
+    BO_NULL_ERROR(lod);
+    return false;
+  }
+  for(unsigned int i = 0; i < materialCount(); i++)
+  {
+    if(!material(i))
+    {
+      boError(100) << k_funcinfo << "NULL material " << i << endl;
+      return false;
+    }
+  }
+  for(unsigned int i = 0; i < lod->meshCount(); i++)
+  {
+    if(!lod->mesh(i))
+    {
+      boError(100) << k_funcinfo << "NULL mesh" << i << endl;
+      return false;
+    }
+    Mesh* mesh = lod->mesh(i);
+    if(!mesh->vertices())
+    {
+      BO_NULL_ERROR(mesh->vertices());
+      return false;
+    }
+    if(!mesh->faces())
+    {
+      BO_NULL_ERROR(mesh->faces());
+      return false;
+    }
+    for(unsigned int j = 0; j < mesh->vertexCount(); j++)
+    {
+      if(!mesh->vertex(j))
+      {
+        boError(100) << k_funcinfo << "NULL vertex " << j << " in mesh " << i << endl;
+        return false;
+      }
+    }
+    for(unsigned int j = 0; j < mesh->faceCount(); j++)
+    {
+      if(!mesh->face(j))
+      {
+        boError(100) << k_funcinfo << "NULL face " << j << " in mesh " << i << endl;
+        return false;
+      }
+    }
+  }
+  for(unsigned int i = 0; i < lod->frameCount(); i++)
+  {
+    if(!lod->frame(i))
+    {
+      boError(100) << k_funcinfo << "NULL frame" << i << endl;
+      return false;
+    }
+    Frame* f = lod->frame(i);
+    for(unsigned int j = 0; j < f->nodeCount(); j++)
+    {
+      if(!f->mesh(j))
+      {
+        boError(100) << k_funcinfo << "NULL mesh " << j << " in frame " << i << endl;
+        return false;
+      }
+      if(!f->matrix(j))
+      {
+        boError(100) << k_funcinfo << "NULL matrix " << j << " in frame " << i << endl;
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 bool Model::save(const QString& file)
