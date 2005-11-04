@@ -174,7 +174,7 @@ bool processCommandLine(int argc, char** argv)
     QString arg = QString(argv[i]);
     QString larg = arg.lower();
 
-    if(larg == "-h" || larg == "-help")
+    if(larg == "-h" || larg == "-help" || larg == "--help")
     {
       QString usage = QString("Usage: %1 [arguments] <filename>\n").arg(argv[0]);
       usage += "\n";
