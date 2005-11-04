@@ -76,7 +76,7 @@ class Model
     LOD* baseLOD() const  { return lod(0); }
     unsigned int lodCount() const  { return mLODs.count(); }
 
-    Material* material(unsigned int i)  { return mMaterials[i]; }
+    Material* material(unsigned int i) const  { return mMaterials[i]; }
     unsigned int addMaterial(Material* m);
     unsigned int materialCount() const  { return mMaterials.count(); }
     void setMaterials(const QValueVector<Material*>& materials);
@@ -129,6 +129,8 @@ class Model
     unsigned int indexArraySize()  { return mIndexArraySize; }
     unsigned int indexArrayType()  { return mIndexArrayType; }
 
+  protected:
+    bool checkLoadedModel() const;
 
   private:
     QValueVector<LOD*> mLODs;
