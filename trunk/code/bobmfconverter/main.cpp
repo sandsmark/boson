@@ -18,7 +18,6 @@
 */
 
 #include "model.h"
-#include "loader.h"
 #include "debug.h"
 #include "lod.h"
 #include "frame.h"
