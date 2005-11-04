@@ -48,6 +48,12 @@ class MD2Header
 public:
 	bool load(QDataStream& stream);
 
+	static const int MD2_MAX_TRIANGLES = 4096;
+	static const int MD2_MAX_VERTICES = 2048;
+	static const int MD2_MAX_TEXTURE_COORDINATES = 2048;
+	static const int MD2_MAX_FRAMES = 512;
+	static const int MD2_MAX_SKINS = 32;
+
 	Q_INT32 mMagic;
 	Q_INT32 mVersion;
 	Q_INT32 mSkinWidth;
@@ -258,6 +264,27 @@ bool MD2Header::load(QDataStream& stream)
  stream >> mOffsetFrames;
  stream >> mOffsetGLCommands;
  stream >> mOffsetEnd;
+
+ if (mNumSkins > MD2_MAX_SKINS) {
+	boError(100) << k_funcinfo << "too many skins: " << mNumSkins << endl;
+	return false;
+ }
+ if (mNumVertices > MD2_MAX_VERTICES) {
+	boError(100) << k_funcinfo << "too many vertices: " << mNumVertices << endl;
+	return false;
+ }
+ if (mNumTexCoords > MD2_MAX_TEXTURE_COORDINATES) {
+	boError(100) << k_funcinfo << "too many texture coordinates: " << mNumTexCoords << endl;
+	return false;
+ }
+ if (mNumTriangles > MD2_MAX_TRIANGLES) {
+	boError(100) << k_funcinfo << "too many triangles: " << mNumTriangles << endl;
+	return false;
+ }
+ if (mNumFrames > MD2_MAX_FRAMES) {
+	boError(100) << k_funcinfo << "too many frames: " << mNumFrames << endl;
+	return false;
+ }
 
 #if 0
  boDebug(100) << "num skins: " << mNumSkins << endl;
