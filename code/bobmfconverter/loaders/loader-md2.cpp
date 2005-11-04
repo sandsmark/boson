@@ -466,7 +466,9 @@ bool LoaderMD2::load()
 		boDebug(100) << k_funcinfo << "using texture " << texture << endl;
 	}
  }
- material->setTexture(model()->getTexture(texture));
+ if (!texture.isEmpty()) {
+	material->setTexture(model()->getTexture(texture));
+ }
 
  for (int i = 0; i < header.mNumFrames; i++) {
 	MD2Frame* md2Frame = frames.at(i);
