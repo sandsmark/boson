@@ -26,6 +26,10 @@ class QString;
 class BoUfoProfiling
 {
 public:
+	virtual ~BoUfoProfiling()
+	{
+	}
+
 	static BoUfoProfiling* profiling()
 	{
 		return mProfiling;
