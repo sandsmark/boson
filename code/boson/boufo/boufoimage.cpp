@@ -125,6 +125,7 @@ BoUfoImage& BoUfoImage::operator=(const BoUfoImage& img)
 	mImage = 0;
  }
  load(img);
+ return *this;
 }
 
 void BoUfoImage::load(const QPixmap& p)
