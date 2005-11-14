@@ -673,12 +673,15 @@ void BoUfoAction::init(BoUfoActionCollection* parent, const QString& text, const
 void BoUfoAction::initShortcut()
 {
  if (qstrcmp(name(), "unnamed") == 0) {
+	boDebug() << k_funcinfo << "won't initialize shortcut for unnamed action" << endl;
 	return;
  }
  if (!mParentCollection) {
+	boDebug() << k_funcinfo << "won't initialize shortcut for action without parent collection" << endl;
 	return;
  }
  if (!mParentCollection->kaccel()) {
+	boDebug() << k_funcinfo << "parent collection has no accel object. delay shortcut initialization until setAccelWidget() was called." << endl;
 	return;
  }
  insertToKAccel(mParentCollection->kaccel());
