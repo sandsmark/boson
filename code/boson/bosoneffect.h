@@ -343,7 +343,9 @@ class BosonEffectFade : public BosonEffect
      * @return Shader which should be used when rendering this effect.
      * When it's NULL, no shader should be used.
      **/
-    BoShader* shader() const;
+    BoShader* shader(int pass) const;
+    int downscale(int pass) const;
+    int passes() const;
 
 
     virtual bool saveAsXML(QDomElement& root) const;

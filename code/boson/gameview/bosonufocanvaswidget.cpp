@@ -161,6 +161,8 @@ BosonUfoCanvasWidget::BosonUfoCanvasWidget()
  d->mCanvasRenderer = new BosonCanvasRenderer();
  d->mCanvasRenderer->initGL();
 
+ connect(this, SIGNAL(signalWidgetResized()), d->mCanvasRenderer, SLOT(slotWidgetResized()));
+
  if (!boViewData) {
 	BO_NULL_ERROR(boViewData);
 	return;

@@ -250,7 +250,9 @@ class BosonEffectPropertiesFade : public BosonEffectProperties
     const BoVector4Fixed& geometry() const  { return mGeometry; }
     float time() const  { return mTime; }
     const int* blendFunc() const  { return mBlendFunc; }
-    BoShader* shader() const  { return mShader; }
+    BoShader* shader(int pass) const  { return mShader[pass]; }
+    int downscale(int pass) const  { return mDownscaleFactor[pass]; }
+    int passes() const  { return mPasses; }
 
 
   protected:
@@ -262,8 +264,11 @@ class BosonEffectPropertiesFade : public BosonEffectProperties
     BoVector4Fixed mGeometry;  // geometry: x, y, w, h
     float mTime;
     int mBlendFunc[2];
-    BoShader* mShader;
-    QString mShaderFilename;
+
+    int mPasses;
+    BoShader** mShader;
+    QString* mShaderFilename;
+    int* mDownscaleFactor;
 };
 
 

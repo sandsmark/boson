@@ -319,9 +319,19 @@ void BosonEffectFade::makeObsolete()
   BosonEffect::makeObsolete();
 }
 
-BoShader* BosonEffectFade::shader() const
+BoShader* BosonEffectFade::shader(int pass) const
 {
-  return mProperties->shader();
+  return mProperties->shader(pass);
+}
+
+int BosonEffectFade::downscale(int pass) const
+{
+ return mProperties->downscale(pass);
+}
+
+int BosonEffectFade::passes() const
+{
+ return mProperties->passes();
 }
 
 bool BosonEffectFade::saveAsXML(QDomElement& root) const
