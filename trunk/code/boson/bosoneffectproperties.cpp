@@ -403,7 +403,13 @@ BosonEffectPropertiesFade::BosonEffectPropertiesFade() : BosonEffectProperties()
 
 BosonEffectPropertiesFade::~BosonEffectPropertiesFade()
 {
-  delete mShader;
+  for (int i = 0; i < mPasses; i++)
+  {
+    delete mShader[i];
+  }
+  delete[] mShader;
+  delete[] mShaderFilename;
+  delete[] mDownscaleFactor;
 }
 
 void BosonEffectPropertiesFade::reset()
@@ -415,7 +421,11 @@ void BosonEffectPropertiesFade::reset()
   mTime = 0;
   mBlendFunc[0] = GL_SRC_ALPHA;
   mBlendFunc[1] = GL_ONE_MINUS_SRC_ALPHA;
+
+  mPasses = 0;
   mShader = 0;
+  mShaderFilename = 0;
+  mDownscaleFactor = 0;
 }
 
 bool BosonEffectPropertiesFade::load(KSimpleConfig* cfg, const QString& group, bool inherited)
@@ -439,11 +449,57 @@ bool BosonEffectPropertiesFade::load(KSimpleConfig* cfg, const QString& group, b
   {
     mBlendFunc[0] = glblendfunc;
   }
-  mShaderFilename = cfg->readEntry("Shader");
 
-  if(!inherited && !mShaderFilename.isEmpty())
+  if(inherited)
   {
-    mShader = new BoShader(mShaderFilename);
+    // Pass-dependant stuff and number of passes do not support inheritance at this point
+    return true;
+  }
+
+  // Load the number of passes
+  mPasses = cfg->readNumEntry("Passes", mPasses);
+  if(mPasses < 0 || mPasses > 10)
+  {
+    boError() << k_funcinfo << "Passes count of out bounds: " << mPasses << ", resetting to 0" << endl;
+    mPasses = 0;
+  }
+
+  // If we don't use shader, then that's it
+  if(mPasses == 0)
+  {
+    return true;
+  }
+
+  // Create arrays for everything which depends on the number of passes
+  mShader = new BoShader*[mPasses];
+  mShaderFilename = new QString[mPasses];
+  mDownscaleFactor = new int[mPasses];
+  for(int i = 0; i < mPasses; i++)
+  {
+    mShader[i] = 0;
+  }
+
+  // And load pass-dependand values
+  mShaderFilename[0] = cfg->readEntry("Shader");
+  mDownscaleFactor[0] = cfg->readNumEntry("Downscale", 1);
+
+  for(int i = 1; i < mPasses; i++)
+  {
+    mShaderFilename[i] = cfg->readEntry(QString("Shader%1").arg(i+1));
+    mDownscaleFactor[i] = cfg->readNumEntry(QString("Downscale%1").arg(i+1), 1);
+  }
+
+  // Load shaders
+  for(int i = 0; i < mPasses; i++)
+  {
+    if(mShaderFilename[i].isEmpty())
+    {
+      boError() << k_funcinfo << "Empty shader filename for pass " << i+1 << endl;
+      return false;
+    }
+    boDebug(150) << k_funcinfo << "Loading shader of pass " << i+1 << ": " << mShaderFilename[i] << endl;
+    mShader[i] = new BoShader(mShaderFilename[i]);
+    // TODO: check if shader was loaded correctly and return false if it wasn't
   }
 
   return true;

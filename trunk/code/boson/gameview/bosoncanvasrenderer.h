@@ -108,6 +108,7 @@ public:
 protected slots:
 	void slotAddFeedbackAttack(const QPtrList<Unit>& attacker, const Unit* unit);
 	void slotAddFeedbackMoveTo(const QPtrList<Unit>& units, const BoVector2Fixed& pos, bool withAttack);
+	void slotWidgetResized();
 
 protected:
 	void renderGround(const BosonMap*, RenderFlags flags = Default);
