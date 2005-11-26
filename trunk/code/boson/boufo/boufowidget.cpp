@@ -556,6 +556,51 @@ void BoUfoWidget::setWidgetEventsEnabled(bool enabled)
  ufoWidget()->setEventState(ufo::UEvent::WidgetHidden, enabled);
 }
 
+bool BoUfoWidget::isMouseEventsEnabled() const
+{
+ bool e = true;
+ e = (e && ufoWidget()->isEventEnabled(ufo::UEvent::MousePressed));
+ e = (e && ufoWidget()->isEventEnabled(ufo::UEvent::MouseReleased));
+ e = (e && ufoWidget()->isEventEnabled(ufo::UEvent::MouseClicked));
+ e = (e && ufoWidget()->isEventEnabled(ufo::UEvent::MouseWheel));
+ return e;
+}
+
+bool BoUfoWidget::isMouseMoveEventsEnabled() const
+{
+ bool e = true;
+ e = (e && ufoWidget()->isEventEnabled(ufo::UEvent::MouseMoved));
+ e = (e && ufoWidget()->isEventEnabled(ufo::UEvent::MouseDragged));
+ return e;
+}
+
+bool BoUfoWidget::isKeyEventsEnabled() const
+{
+ bool e = true;
+ e = (e && ufoWidget()->isEventEnabled(ufo::UEvent::KeyPressed));
+ e = (e && ufoWidget()->isEventEnabled(ufo::UEvent::KeyReleased));
+ e = (e && ufoWidget()->isEventEnabled(ufo::UEvent::KeyTyped));
+ return e;
+}
+
+bool BoUfoWidget::isFocusEventsEnabled() const
+{
+ bool e = true;
+ e = (e && ufoWidget()->isEventEnabled(ufo::UEvent::FocusGained));
+ e = (e && ufoWidget()->isEventEnabled(ufo::UEvent::FocusLost));
+ return e;
+}
+
+bool BoUfoWidget::isWidgetEventsEnabled() const
+{
+ bool e = true;
+ e = (e && ufoWidget()->isEventEnabled(ufo::UEvent::WidgetMoved));
+ e = (e && ufoWidget()->isEventEnabled(ufo::UEvent::WidgetResized));
+ e = (e && ufoWidget()->isEventEnabled(ufo::UEvent::WidgetShown));
+ e = (e && ufoWidget()->isEventEnabled(ufo::UEvent::WidgetHidden));
+ return e;
+}
+
 void BoUfoWidget::addWidget(BoUfoWidget* w)
 {
  BO_CHECK_NULL_RET(ufoWidget());
