@@ -380,6 +380,11 @@ public:
 	void setKeyEventsEnabled(bool enabled);
 	void setFocusEventsEnabled(bool enabled);
 	void setWidgetEventsEnabled(bool enabled);
+	bool isMouseEventsEnabled() const;
+	bool isMouseMoveEventsEnabled() const;
+	bool isKeyEventsEnabled() const;
+	bool isFocusEventsEnabled() const;
+	bool isWidgetEventsEnabled() const;
 	bool hasMouse() const;
 
 	void setFont(const BoUfoFontInfo& info);
