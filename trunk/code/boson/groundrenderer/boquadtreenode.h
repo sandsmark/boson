@@ -156,6 +156,15 @@ public:
 		return true;
 	}
 
+	bool contains(int x1, int y1, int x2, int y2) const
+	{
+		if (x1 >= left() && x2 <= right() && y1 >= top() && y2 <= bottom()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 protected:
 	virtual BoQuadTreeNode* createNode(int l, int t, int r, int b, int depth) const;
 
