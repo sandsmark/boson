@@ -19,12 +19,12 @@
 # some of these instructions are not strictly necessary, but by following them,
 # you can sometimes avoid modifying the path variables below.
 
-INSTALLER_VERSION="0.11"
+INSTALLER_VERSION="0.12pre"
 OS="Linux"
 ARCH="x86"
 LIBC="glibc-2.1"
 LOKI_SETUP="loki_setup"
-CODE="code"
+CODE="code-head"
 CODE_BUILD="$CODE/build"
 DATA_INSTALLATION="data_installation"
 KDELIBS_CODE="kdelibs"
