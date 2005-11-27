@@ -2,7 +2,7 @@
 
 <install product="boson"
          desc="Boson"
-         version="0.11"
+         version="0.12pre"
          uninstall="uninstall.sh"
          binarypath="/usr/bin"
          promptbinaries="yes"
@@ -17,7 +17,7 @@
   <eula>
    COPYING
   </eula>
-  <component name="Default" version="0.11pre" default="yes">
+  <component name="Default" version="0.12pre" default="yes">
    <option install="true" required="true">
     Base Install
     <lang lang="fr">Installation de base</lang>
