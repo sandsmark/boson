@@ -48,54 +48,58 @@ namespace ufo {
 
 class UFO_EXPORT URectangle {
 public:
-	URectangle();
-	URectangle(int x, int y, int w, int h);
-	URectangle(const UPoint & p, const UDimension & d);
+	inline URectangle();
+	inline URectangle(int x, int y, int w, int h);
+	inline URectangle(const UPoint & p, const UDimension & d);
 	/** Computes a rectangle between two points. */
-	URectangle(const UPoint & p1, const UPoint & p2);
+	inline URectangle(const UPoint & p1, const UPoint & p2);
 	/** Creates a rectangle with locatin 0,0 and the given size. */
-	URectangle(const UDimension & d);
+	inline URectangle(const UDimension & d);
 
-	UPoint getLocation() const;
-	UDimension getSize() const;
+	inline UPoint getLocation() const;
+	inline UDimension getSize() const;
 
-	void setBounds(int x, int y, int w, int h);
-	void setBounds(const URectangle & rect);
+	inline void setBounds(int x, int y, int w, int h);
+	inline void setBounds(const URectangle & rect);
 
 	/** @return True when the given point pos is inside the rectangle
 	  * or on the edge of the rectangle
 	  */
-	bool contains(const UPoint & pos) const;
+	inline bool contains(const UPoint & pos) const;
 
+	/** @return True if both, width and height are not equal to @p invalid
+	  * @see invalid
+	  */
+	inline bool isValid() const;
 	/** @return True if the width and height are equal to @p invalid
 	  * @see invalid
 	  */
-	bool isInvalid() const;
+	inline bool isInvalid() const;
 	/** @return True if width or height is equal to 0. */
-	bool isEmpty() const;
+	inline bool isEmpty() const;
 
 	/** Clamps this URectangle to have at most the dimension of
 	  * the given @p maxDim. Does nothing if maxDim is smaller than
 	  * the size of this rectangle.
 	  */
-	void clamp(const UDimension & maxDim);
+	inline void clamp(const UDimension & maxDim);
 	/** Expands this URectangle to have at least the dimension of
 	  * the given @p minDim. Does nothing if minDim is bigger than
 	  * the size of this rectangle.
 	  */
-	void expand(const UDimension & minDim);
+	inline void expand(const UDimension & minDim);
 
 	/** Intersects this rectangle with the given rectangle
 	  */
-	void intersect(const URectangle & rect);
+	inline void intersect(const URectangle & rect);
 	/** Unites this rectangle with the given rectangle.
 	  * @see computeUnion
 	  */
-	void unite(const URectangle & rect);
+	inline void unite(const URectangle & rect);
 
 	/** @return The union of this rectangle and the given rectangle
 	  */
-	URectangle computeUnion(const URectangle & src) const;
+	inline URectangle computeUnion(const URectangle & src) const;
 
 	/** computes the rectangle that contains both src rectangles and
 	  * saves the values in the dest rectangle within creating a new one.
@@ -103,47 +107,48 @@ public:
 	  * <code>URectangle::computeUnion(src, src2, src);</code>
 	  * @return dest
 	  */
-	static URectangle * computeUnion(const URectangle & src1,
+	inline static URectangle * computeUnion(const URectangle & src1,
 		const URectangle & src2, URectangle * dest);
 
 public: // Public operators
-	bool operator()() const { return !(isEmpty()); }
-	bool operator!() const { return isEmpty(); }
+	/** @see isValid
+	  * @return True if width and height have both "valid" values.
+	  */
+	inline bool operator()() const;
+	/** @see isInvalid
+	  * @return True if width or height is "invalid".
+	  */
+	inline bool operator!() const;
 
 
 	/** Moves this rectangle using the coordinates of the given point
 	  * @return Reference to this rectangle.
 	  */
-	URectangle & operator+=(const UPoint & p);
+	inline URectangle & operator+=(const UPoint & p);
 	/** Moves this rectangle using the coordinates of the given point
 	  * @return Reference to this rectangle.
 	  */
-	URectangle & operator-=(const UPoint & p);
+	inline URectangle & operator-=(const UPoint & p);
 
 	/** Increases this rectangle using the given dimension
 	  * @return Reference to this rectangle.
 	  */
-	URectangle & operator+=(const UDimension & dim);
+	inline URectangle & operator+=(const UDimension & dim);
 	/** Shrinks this rectangle using the given dimension
 	  * @return Reference to this rectangle.
 	  */
-	URectangle & operator-=(const UDimension & dim);
+	inline URectangle & operator-=(const UDimension & dim);
 
 	/** Increases this rectangle using the given insets
 	  * @return Reference to this rectangle.
 	  */
-	URectangle & operator+=(const UInsets & insets);
+	inline URectangle & operator+=(const UInsets & insets);
 	/** Shrinks this rectangle using the given insets
 	  * @return Reference to this rectangle.
 	  */
-	URectangle & operator-=(const UInsets & insets);
+	inline URectangle & operator-=(const UInsets & insets);
 
-	friend std::ostream & operator<<(std::ostream & os, const URectangle & o);
-/*
-	UObject * clone() const;
-protected:  // Protected methods
-	std::ostream & paramString(std::ostream & os) const;
-*/
+	inline friend std::ostream & operator<<(std::ostream & os, const URectangle & o);
 public:  // Public attributes
 	int x;
 	int y;
@@ -157,18 +162,18 @@ public: // Public static attributes
 //
 // public operators
 //
-UFO_EXPORT URectangle operator+(const URectangle & rect, const UPoint & p);
-UFO_EXPORT URectangle operator-(const URectangle & rect, const UPoint & p);
+inline URectangle operator+(const URectangle & rect, const UPoint & p);
+inline URectangle operator-(const URectangle & rect, const UPoint & p);
 
-UFO_EXPORT URectangle operator+(const URectangle & rect, const UDimension & dim);
-UFO_EXPORT URectangle operator-(const URectangle & rect, const UDimension & dim);
+inline URectangle operator+(const URectangle & rect, const UDimension & dim);
+inline URectangle operator-(const URectangle & rect, const UDimension & dim);
 
-UFO_EXPORT URectangle operator+(const URectangle & rect, const UInsets & in);
-UFO_EXPORT URectangle operator-(const URectangle & rect, const UInsets & in);
+inline URectangle operator+(const URectangle & rect, const UInsets & in);
+inline URectangle operator-(const URectangle & rect, const UInsets & in);
 
 /// Equality
-UFO_EXPORT bool operator==(const URectangle & r1,const URectangle & r2);
-UFO_EXPORT bool operator!=(const URectangle & r1,const URectangle & r2);
+inline bool operator==(const URectangle & r1,const URectangle & r2);
+inline bool operator!=(const URectangle & r1,const URectangle & r2);
 
 /** wrapper class for URectangle derived from UObject
   * @author Johannes Schmidt
@@ -176,12 +181,12 @@ UFO_EXPORT bool operator!=(const URectangle & r1,const URectangle & r2);
 class UFO_EXPORT URectangleObject : public URectangle, public UObject {
 	UFO_DECLARE_DYNAMIC_CLASS(URectangleObject)
 public:
-	URectangleObject();
-	URectangleObject(const URectangle & rect);
-	URectangleObject(int x, int y, int w, int h);
-	URectangleObject(const UPoint & p, const UDimension & d);
+	inline URectangleObject();
+	inline URectangleObject(const URectangle & rect);
+	inline URectangleObject(int x, int y, int w, int h);
+	inline URectangleObject(const UPoint & p, const UDimension & d);
 	/** Computes a rectangle between two points. */
-	URectangleObject(const UPoint & p1, const UPoint & p2);
+	inline URectangleObject(const UPoint & p1, const UPoint & p2);
 
 	//
 	// overrides UObject
@@ -273,7 +278,7 @@ URectangle::intersect(const URectangle & rect) {
 	int x2 = std::min(x + w, rect.x + rect.w);
 	int y2 = std::min(y + h, rect.y + rect.h);
 
-	setBounds(x1, y1, x2 - x1 + 1, y2 - y1 + 1);
+	setBounds(x1, y1, x2 - x1, y2 - y1);
 	w = std::max(w, 0);
 	h = std::max(h, 0);
 }
@@ -324,6 +329,14 @@ URectangle::isInvalid() const {
 }
 
 inline bool
+URectangle::isValid() const {
+	return (x != URectangle::invalid.x &&
+		y != URectangle::invalid.y &&
+		w != URectangle::invalid.w &&
+		h != URectangle::invalid.h);
+}
+
+inline bool
 URectangle::isEmpty() const {
 	return (!(w && h));
 }
@@ -332,6 +345,16 @@ inline std::ostream &
 operator<<(std::ostream & os, const URectangle & o) {
 	return os << "URectangle[" << o.x << "," << o.y
 		<< "," << o.w << "x" << o.h << "]";
+}
+
+inline bool
+URectangle::operator()() const {
+	return isValid();
+}
+
+inline bool
+URectangle::operator!() const {
+	return !isValid();
 }
 
 inline URectangle &

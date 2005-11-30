@@ -90,6 +90,8 @@ public: // Implements UGraphics
 	virtual void setClipRect(const URectangle & rect);
 	virtual URectangle getClipRect() const;
 
+	virtual void setLineWidth(float width);
+	virtual float getLineWidth() const;
 
 	virtual void translate(float x, float y);
 	virtual float getTranslationX() const;

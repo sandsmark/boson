@@ -42,7 +42,7 @@ _createCompoundModel(UWidgetModel * model, const std::string & text, UIcon * ico
 	c->icon = icon;
 	c->text = text;
 	c->acceleratorIndex = -1;
-	c->buttonFeatures = UCompoundModel::None;
+	//c->buttonFeatures = UCompoundModel::None;
 	delete (model);
 	return c;
 }
@@ -101,13 +101,13 @@ UCompound::setText(const std::string & text) {
 	// oops, we have to filter & character for accelerator indices
 	std::string::size_type index = text.find('&');
 	if (index < text.length() - 1 && text[index + 1] != '&') {
-		updateMnemonic();
-
 		std::string newtext(text);
 		newtext.erase(index, 1);
 
 		getCompoundModel()->text = newtext;
 		getCompoundModel()->acceleratorIndex = index;
+
+		updateMnemonic();
 	} else {
 		getCompoundModel()->text = text;
 		getCompoundModel()->acceleratorIndex = -1;
@@ -163,8 +163,10 @@ UCompound::setIconTextGap(int iconTextGap) {
 
 void
 UCompound::processStateChangeEvent(uint32_t state) {
-	(static_cast<UCompoundModel*>(m_model))->icon = getIcon();
 	UWidget::processStateChangeEvent(state);
+	if (isVisible() || state & WidgetVisible) {
+		(static_cast<UCompoundModel*>(m_model))->icon = getIcon();
+	}
 	if (state & WidgetVisible) {
 		updateMnemonic();
 	}

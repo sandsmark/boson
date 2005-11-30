@@ -57,7 +57,7 @@ UPopupMenu::UPopupMenu()
 	, m_popupLocation()
 	, m_closeSlot(slot(*this, &UPopupMenu::popupCloseSlot))
 {
-	setLayout(new UBoxLayout(Vertical));
+	setLayout(new UBoxLayout(Vertical, 0, 0));
 	setCssType("popupmenu");
 }
 
@@ -66,7 +66,7 @@ UPopupMenu::UPopupMenu(UWidget * invoker)
 	, m_popupLocation()
 	, m_closeSlot(slot(*this, &UPopupMenu::popupCloseSlot))
 {
-	setLayout(new UBoxLayout(Vertical));
+	setLayout(new UBoxLayout(Vertical, 0, 0));
 	setCssType("popupmenu");
 }
 

@@ -77,7 +77,12 @@ UXSDLDriver::UXSDLDriver(const char * sdlPath)
 
 		m_isValid = m_sdlLib->load(UFO_SDL_LIB);
 	}
+	if (!m_isValid) {
+		uWarning() << "Couldn't load SDL library.\n";
+		return;
+	}
 	s_sdl_driver = this;
+
 
 #define UFO_SDL_PROC(ret,func,params) \
 { \
@@ -387,7 +392,8 @@ UXSDLDriver::pushSDLEvents(UXContext * uxcontext, SDL_Event * events, int numEve
 						events[i].resize.w, events[i].resize.h, 0, 0);
 				}
 #if !defined(UFO_GFX_X11)
-				display->pushEvent(new UEvent(this, UEvent::Refresh));
+				// FIXME: recheck that passing NULL does not produce problems
+				display->pushEvent(new UEvent(NULL, UEvent::Refresh));
 				//uxcontext->getContextGroup()->refresh();
 #endif
 			}

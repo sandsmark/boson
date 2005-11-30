@@ -59,6 +59,7 @@
 #include "ufo/events/uevents.hpp"
 
 #include "ufo/layouts/ulayoutmanager.hpp"
+#include "ufo/layouts/uboxlayout.hpp"
 
 //#include "ufo/borders/uborder.hpp"
 
@@ -96,6 +97,8 @@ UWidget * UWidget::sm_inputFocusWidget = NULL;
 UWidget * UWidget::sm_mouseFocusWidget = NULL;
 UWidget * UWidget::sm_dragWidget = NULL;
 
+static UBoxLayout ufo_defaultLayout;
+
 UWidget::UWidget()
 	: m_context(NULL)
 	, m_model(new UWidgetModel())
@@ -105,16 +108,16 @@ UWidget::UWidget()
 	, m_isFocusable(true)
 	, m_isInValidHierarchy(false)
 	, m_hasInvalidLayout(false)
+	, m_styleHintsDetached(false)
 	, m_eventState(0xffffffff)//MouseEvents | MouseMotionEvents) // FIXME
 	, m_parent(NULL)
 	, m_children()
-	, m_layout(NULL)
+	, m_layout(&ufo_defaultLayout)
 	, m_popupMenu(NULL)
 	, m_cssType("widget")
 	, m_cssClass()
 	, m_style(NULL)
 	, m_styleHints(NULL)
-	, m_styleHintsDetached(false)
 	, m_bounds()
 	, m_clipBounds(URectangle::invalid)
 	, m_cachedRootLocation(UPoint::invalid)
@@ -143,6 +146,7 @@ UWidget::UWidget(ULayoutManager * layout)
 	, m_isFocusable(true)
 	, m_isInValidHierarchy(false)
 	, m_hasInvalidLayout(false)
+	, m_styleHintsDetached(false)
 	, m_eventState(0xffffffff)//MouseEvents | MouseMotionEvents) // FIXME
 	, m_parent(NULL)
 	, m_children()
@@ -152,7 +156,6 @@ UWidget::UWidget(ULayoutManager * layout)
 	, m_cssClass()
 	, m_style(NULL)
 	, m_styleHints(NULL)
-	, m_styleHintsDetached(false)
 	, m_bounds()
 	, m_clipBounds(URectangle::invalid)
 	, m_cachedRootLocation(UPoint::invalid)
@@ -206,6 +209,7 @@ UWidget::setBoUfoWidgetDeleter(UBoUfoWidgetDeleter* deleter) {
 
 void
 UWidget::setVisible(bool v) {
+	// This explicitely shows/hides the widgets
 	if (!v) {
 		setState(WidgetForceInvisible);
 	} else {
@@ -214,21 +218,7 @@ UWidget::setVisible(bool v) {
 	if (v == testState(WidgetVisible)) {
 		return;
 	}
-/*
-	if (v) {
-		m_isVisible = true;
-		UWidgetEvent * e = new UWidgetEvent(this, UEvent::WidgetShown);
-		processWidgetEvent(e);
-	} else {
-		// widget about to hide
-		UWidgetEvent * e = new UWidgetEvent(this, UEvent::WidgetHidden);
-		processWidgetEvent(e);
-		resetFocus();
-		m_isVisible = false;
-	}
-	invalidate();
-	repaint();
-*/
+
 	if (v && getParent() && !getParent()->isVisible()) {
 		return;
 	}
@@ -240,6 +230,7 @@ UWidget::setChildrenVisible(bool b) {
 	if (b && testState(WidgetForceInvisible)) {
 		return;
 	}
+	// this implicitely shows/hides the window
 	if (b != testState(WidgetVisible)) {
 		if (b) {
 			// show self
@@ -247,7 +238,7 @@ UWidget::setChildrenVisible(bool b) {
 			UWidgetEvent * e = new UWidgetEvent(this, UEvent::WidgetShown);
 			processWidgetEvent(e);
 		} else if (!b) {
-			// show self
+			// hide self
 			setState(WidgetVisible, false);
 			UWidgetEvent * e = new UWidgetEvent(this, UEvent::WidgetHidden);
 			processWidgetEvent(e);
@@ -566,7 +557,6 @@ UWidget::getBackground() const {
 //	return m_context->getUIManager()->getLookAndFeel();//m_lookAndFeel;
 //}
 
-
 #define DO_UFO_PROFILING 1
 void
 UWidget::paint(UGraphics * g) {
@@ -781,16 +771,18 @@ UWidget::getPopupMenu() const {
 
 
 bool
-UWidget::removeImpl(std::vector<UWidget*>::iterator iter) {
-	if (iter != m_children.end()) {
-		(*iter)->setChildrenVisible(false);
-		(*iter)->removedFromHierarchy();
-		(*iter)->m_parent = NULL;
+UWidget::removeImpl(int index) {
+	if (m_children.size() > index ) {
+		UWidget * ret = m_children[index];
+
+		ret->setChildrenVisible(false);
+		ret->removedFromHierarchy();
+		ret->m_parent = NULL;
 
 		// remove from mem manager
-		releasePointer((*iter));
+		releasePointer(ret);
 
-		m_children.erase(iter);
+		m_children.erase(m_children.begin() + index);
 
 		invalidateTree();
 		return true;
@@ -803,15 +795,12 @@ UWidget::remove(UWidget * w) {
 	std::vector<UWidget*>::iterator iter = std::find(m_children.begin(),
 		m_children.end(), w);
 
-	return removeImpl(iter);
+	return removeImpl(iter - m_children.begin());
 }
 
 bool
 UWidget::remove(unsigned int n) {
-	if (m_children.size() > n ) {
-		return removeImpl(m_children.begin() + n);
-	}
-	return false;
+	return removeImpl(n);
 }
 
 UWidget *
@@ -821,7 +810,7 @@ UWidget::removeAndReturn(unsigned int n) {
 		if (ret) {
 			ret->reference();
 		}
-		removeImpl(m_children.begin() + n);
+		removeImpl(n);
 		return ret;
 	}
 	return NULL;
@@ -829,12 +818,14 @@ UWidget::removeAndReturn(unsigned int n) {
 
 unsigned int
 UWidget::removeAll() {
-	unsigned int size = m_children.size();
-
-	while (removeImpl(m_children.begin())) {}
+	unsigned int count = 0;
+	while (removeImpl(0)) {
+		count++;
+	}
+	// count should be exactly the former widget count ...
 
 	invalidate();
-	return size;
+	return count;
 }
 
 
@@ -1204,7 +1195,7 @@ UWidget::dispatchEvent(UEvent * e) {
 		processEvent(e);
 		propagate = !e->isConsumed();
 	}
-#if 0
+#if 0 // libufo event code (not ULayeredWidget compatible)
 	if (propagate && m_parent && dynamic_cast<UInputEvent*>(e) &&
 			e->getType() != UEvent::MouseEntered &&
 			e->getType() != UEvent::MouseExited) {
@@ -1447,8 +1438,8 @@ UWidget::setIndexOf(UWidget * w, int index) {
 		} else {
 			m_children.insert(m_children.begin() + index, w);
 		}
-		int min_pos = std::min(index, old_pos);
-		for (int i = min_pos; i < m_children.size(); ++i) {
+		unsigned int min_pos = std::min(index, old_pos);
+		for (unsigned int i = min_pos; i < m_children.size(); ++i) {
 			getWidget(i)->processWidgetEvent(
 				new UWidgetEvent(getWidget(i), UEvent::WidgetZOrderChanged)
 			);
@@ -1816,7 +1807,7 @@ UWidget::notifyKeyBindingAction(const UKeyStroke & ks, UKeyEvent * e, InputCondi
 
 
 static std::list<std::pair<UKeyStroke, UWidget*> > ufo_s_shortcuts;
-static int ufo_s_oldIndex = 0;
+static unsigned int ufo_s_oldIndex = 0;
 static UKeyStroke ufo_s_oldStroke;
 
 void

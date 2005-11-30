@@ -48,52 +48,52 @@ namespace ufo {
 class UFO_EXPORT UInsets {
 public:
 	/** Creates an empty insets object. */
-	UInsets();
+	inline UInsets();
 	/** Creates an insets object with the given values.
 	  * @param top The inset at top
 	  * @param top The inset at left
 	  * @param top The inset at bottom
 	  * @param top The inset at right
 	  */
-	UInsets(int top, int left, int bottom, int right);
+	inline UInsets(int top, int left, int bottom, int right);
 
-	int getTop() const;
-	int getLeft() const;
-	int getBottom() const;
-	int getRight() const;
+	inline int getTop() const;
+	inline int getLeft() const;
+	inline int getBottom() const;
+	inline int getRight() const;
 
 	/** @return The total insets in horizontal direction, i.e. left + right. */
-	int getHorizontal() const;
+	inline int getHorizontal() const;
 	/** @return The total insets in vertical direction, i.e. top + bottom. */
-	int getVertical() const;
+	inline int getVertical() const;
 
 	/** Increases the insets by the given insets, that means add @p add.top
 	  * to this.top etc.
 	  */
-	void grow(const UInsets & add);
+	inline void grow(const UInsets & add);
 
 	/** @return True if all insets are exactly 0. */
-	bool isEmpty() const;
+	inline bool isEmpty() const;
 
 public: // Public operators
 	/** @return True if one of the insets is non-zero. */
-	bool operator()() { return !(isEmpty()); }
+	inline bool operator()();
 	/** @return True if all insets are exactly 0. */
-	bool operator!() { return isEmpty(); }
+	inline bool operator!();
 
 	/** Increases the insets by the given insets, that means add @p add.top
 	  * to this.top etc.
 	  * @return Reference to this insets object.
 	  */
-	UInsets & operator+=(const UInsets & in);
+	inline UInsets & operator+=(const UInsets & in);
 
 	/** Decreases the insets by the given insets, that means substract
 	  * @p add.top to this.top etc.
 	  * @return Reference to this insets object.
 	  */
-	UInsets & operator-=(const UInsets & in);
+	inline UInsets & operator-=(const UInsets & in);
 
-	friend std::ostream & operator<<(std::ostream & os, const UInsets & o);
+	inline friend std::ostream & operator<<(std::ostream & os, const UInsets & o);
 
 public:  // Public attributes
 	int top;
@@ -106,12 +106,12 @@ public:  // Public attributes
 //
 // public operators
 //
-UFO_EXPORT UInsets operator+(const UInsets & in1, const UInsets & in2);
-UFO_EXPORT UInsets operator-(const UInsets & in1, const UInsets & in2);
+inline UInsets operator+(const UInsets & in1, const UInsets & in2);
+inline UInsets operator-(const UInsets & in1, const UInsets & in2);
 
 /// Equality
-UFO_EXPORT bool operator==(const UInsets & in1,const UInsets & in2);
-UFO_EXPORT bool operator!=(const UInsets & in1,const UInsets & in2);
+inline bool operator==(const UInsets & in1,const UInsets & in2);
+inline bool operator!=(const UInsets & in1,const UInsets & in2);
 
 
 /** wrapper class for UInsets derived from UObject
@@ -192,6 +192,16 @@ UInsets::grow(const UInsets & add) {
 inline bool
 UInsets::isEmpty() const {
 	return (!(top && left && bottom && right));
+}
+
+inline bool
+UInsets::operator()() {
+	return !(isEmpty());
+}
+
+inline bool
+UInsets::operator!() {
+	return isEmpty();
 }
 
 

@@ -57,7 +57,7 @@ public:
 		trackPointer(m_popupWidget);
 
 		m_popupWidget->setLayout(new UBorderLayout());
-		m_popupWidget->setOpacity(0.0f);
+		m_popupWidget->setCssClass("transparent");
 		m_popupWidget->add(content);
 		m_popupWidget->setLocation(m_owner->pointToRootPoint(desiredBounds.getLocation()));
 

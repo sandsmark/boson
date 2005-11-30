@@ -14,8 +14,8 @@ libufo_la_SOURCES = \
 	ubuttongroup.cpp \
 	ucollectable.cpp \
 	ucontextgroup.cpp \
-	ufo_debug.cpp \
 	ufocusmanager.cpp \
+	ufo_debug.cpp \
 	ukeystroke.cpp \
 	umenumanager.cpp \
 	uobject.cpp \

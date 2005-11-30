@@ -120,7 +120,6 @@ void
 UTextLayout::render(UGraphics * g, const URectangle & rect, const UPoint & offset) {
 	layout();
 	int m_tabSize = 4;
-	int fontHeight = m_font.getFontMetrics()->getHeight();
 	int tabMultiplier = m_font.getFontMetrics()->getMaxCharWidth();
 
 	UFontRenderer * renderer = m_font.getRenderer();
@@ -207,7 +206,7 @@ UTextLayout::viewToModel(const UPoint & pos) {
 
 	unsigned int index = line.getOffset();
 
-	unsigned int left = 0;
+	int left = 0;
 
 	for (;index < line.getOffset() + line.getLength() && index < m_length;
 			++index) {
@@ -286,7 +285,7 @@ UTextLayout::layout() {
 			int addWidth = metrics->getCharWidth(m_text[index]);
 
 			if (width + addWidth >= maxWidth) {
-				int wrap_index = (index > 0) ? index - 1 : 0;
+				unsigned int wrap_index = (index > 0) ? index - 1 : 0;
 				char c = m_text[wrap_index];
 				while (!isWrapCharacter(c) && wrap_index > lineStart) {
 					--wrap_index;
@@ -296,6 +295,8 @@ UTextLayout::layout() {
 					wrap_index = (index > 0) ? index - 1 : 0;
 				}
 				if (wrap_index < lineStart) {
+					// shouldn't happen?
+					// but otherwise we would get a line length of -1
 					wrap_index = lineStart;
 				}
 				UTextLine line(lineStart, wrap_index - lineStart, lineHeight, pos);

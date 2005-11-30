@@ -37,6 +37,8 @@
 
 #include "ufo/usharedlib.hpp"
 
+#include "ufo/util/ufilearchive.hpp"
+
 // pre register font plugins
 #include "ufo/font/utexturefont.hpp"
 
@@ -87,6 +89,7 @@ UAbstractToolkit::UAbstractToolkit(UProperties * prop)
 		m_properties->put("tmp_dir", prop->get("tmp_dir"));
 
 		m_properties->put("prg_name", prop->get("prg_name"));
+		m_properties->put("file_name", prop->get("file_name"));
 	}
 	// try GLib code to fill missing values
 	initMissing();
@@ -197,20 +200,14 @@ UAbstractToolkit::loadPlugin(UPluginInfo plugin) {
 	UPluginBase * pluginBase = plugin.create();
 	if (plugin.category == "font") {
 		if (UFontPlugin * fontPlugin = dynamic_cast<UFontPlugin*>(pluginBase)) {
-			m_fontPlugins[plugin] = fontPlugin;
-		}
-	}
-
-	if (plugin.category == "look_and_feel") {
-		if (ULAFPlugin * lafPlugin = dynamic_cast<ULAFPlugin*>(pluginBase)) {
-			m_lafPlugins[plugin] = lafPlugin;
+			m_fontPlugins.push_back(std::make_pair(plugin, fontPlugin));
 		}
 	}
 
 	if (plugin.category == "video_driver") {
 		if (UVideoPlugin * videoPlugin =
 				dynamic_cast<UVideoPlugin*>(pluginBase)) {
-			m_videoPlugins[plugin] = videoPlugin;
+			m_videoPlugins.push_back(std::make_pair(plugin, videoPlugin));
 		}
 	}
 }
@@ -235,22 +232,35 @@ UAbstractToolkit::unloadPlugin(const std::string & pluginName) {
 
 void
 UAbstractToolkit::unloadPlugin(UPluginInfo plugin) {
-	// FIXME
-	// only checks for laf and font plugins
-	UPluginBase * pluginImpl;
-	pluginImpl = m_fontPlugins[plugin];
-	m_fontPlugins.erase(plugin);
+	// FIXME: only checks for video and font plugins
+	UPluginBase * pluginImpl = NULL;
 
-	if (pluginImpl == NULL) {
-		pluginImpl = m_lafPlugins[plugin];
-		m_lafPlugins.erase(plugin);
+	for (FontPluginCache::iterator font_iter = m_fontPlugins.begin();
+			font_iter != m_fontPlugins.end();
+			++font_iter) {
+		if ((*font_iter).first == plugin) {
+			pluginImpl = (*font_iter).second;
+			m_fontPlugins.erase(font_iter);
+			break;
+		}
+	}
+	if (!pluginImpl)
+	for (VideoPluginCache::iterator video_iter = m_videoPlugins.begin();
+			video_iter != m_videoPlugins.end();
+			++video_iter) {
+		if ((*video_iter).first == plugin) {
+			pluginImpl = (*video_iter).second;
+			m_videoPlugins.erase(video_iter);
+			break;
+		}
 	}
 
 	if (pluginImpl != NULL) {
 		plugin.destroy(pluginImpl);
+		// Note: pluginImpl is now deleted
 		if (plugin.lib != NULL) {
 			plugin.lib->unload();
-			delete(plugin.lib);
+			delete (plugin.lib);
 		}
 	}
 }
@@ -264,10 +274,10 @@ UAbstractToolkit::getPluginInfos() const {
 			++font_iter) {
 		ret.push_back((*font_iter).first);
 	}
-	for (LAFPluginCache::const_iterator laf_iter = m_lafPlugins.begin();
-			laf_iter != m_lafPlugins.end();
-			++laf_iter) {
-		ret.push_back((*laf_iter).first);
+	for (VideoPluginCache::const_iterator video_iter = m_videoPlugins.begin();
+			video_iter != m_videoPlugins.end();
+			++video_iter) {
+		ret.push_back((*video_iter).first);
 	}
 	return ret;
 }
@@ -469,16 +479,6 @@ UAbstractToolkit::initPlugins() {
 	theme.destroy = &UThemeLookAndFeel::destroyPlugin;
 	loadPlugin(theme);
 */
-	// backend plugin
-#ifdef UFO_USE_SDL
-	UPluginInfo sdlDriver;
-	sdlDriver.lib = NULL;
-	sdlDriver.category = "video_driver";
-	sdlDriver.feature = "SDL";
-	sdlDriver.create = &UXSDLDriver::createPlugin;
-	sdlDriver.destroy = &UXSDLDriver::destroyPlugin;
-	loadPlugin(sdlDriver);
-#endif
 #ifdef UFO_USE_GLX
 	UPluginInfo glxDriver;
 	glxDriver.lib = NULL;
@@ -497,6 +497,16 @@ UAbstractToolkit::initPlugins() {
 	wglDriver.destroy = &UXWGLDriver::destroyPlugin;
 	loadPlugin(wglDriver);
 #endif
+	// backend plugin
+#ifdef UFO_USE_SDL
+	UPluginInfo sdlDriver;
+	sdlDriver.lib = NULL;
+	sdlDriver.category = "video_driver";
+	sdlDriver.feature = "SDL";
+	sdlDriver.create = &UXSDLDriver::createPlugin;
+	sdlDriver.destroy = &UXSDLDriver::destroyPlugin;
+	loadPlugin(sdlDriver);
+#endif
 }
 
 
@@ -514,6 +524,112 @@ UAbstractToolkit::initPlugins() {
 #  include <ctype.h>
 #endif // UFO_OS_WIN32
 
+//
+// The Unix part is taken from public domain project relocbin
+// at autopackage.org
+static std::string
+ufo_getModuleFileName() {
+#ifdef UFO_OS_WIN32
+	unsigned int buflen;
+	TCHAR buffer[MAX_PATH];
+	buflen = GetModuleFileName(NULL, buffer, MAX_PATH);
+	return std::string(buffer, buflen);
+#else
+	#define SIZE PATH_MAX + 100
+	FILE *f;
+	size_t address_string_len;
+	char *address_string, line[SIZE], *found;
+
+	const char * symbol = "";
+
+	f = fopen ("/proc/self/maps", "r");
+	if (f == NULL)
+		return "";
+
+	address_string_len = 4;
+	address_string = (char *) malloc (address_string_len);
+	found = (char *) NULL;
+
+	while (!feof (f)) {
+		char *start_addr, *end_addr, *end_addr_end, *file;
+		void *start_addr_p, *end_addr_p;
+		size_t len;
+
+		if (fgets (line, SIZE, f) == NULL)
+			break;
+
+		/* Sanity check. */
+		if (strstr (line, " r-xp ") == NULL || strchr (line, '/') == NULL)
+			continue;
+
+		/* Parse line. */
+		start_addr = line;
+		end_addr = strchr (line, '-');
+		file = strchr (line, '/');
+
+		/* More sanity check. */
+		if (!(file > end_addr && end_addr != NULL && end_addr[0] == '-'))
+			continue;
+
+		end_addr[0] = '\0';
+		end_addr++;
+		end_addr_end = strchr (end_addr, ' ');
+		if (end_addr_end == NULL)
+			continue;
+
+		end_addr_end[0] = '\0';
+		len = strlen (file);
+		if (len == 0)
+			continue;
+		if (file[len - 1] == '\n')
+			file[len - 1] = '\0';
+
+		/* Get rid of "(deleted)" from the filename. */
+		len = strlen (file);
+		if (len > 10 && strcmp (file + len - 10, " (deleted)") == 0)
+			file[len - 10] = '\0';
+
+		/* I don't know whether this can happen but better safe than sorry. */
+		len = strlen (start_addr);
+		if (len != strlen (end_addr))
+			continue;
+
+
+		/* Transform the addresses into a string in the form of 0xdeadbeef,
+		 * then transform that into a pointer. */
+		if (address_string_len < len + 3) {
+			address_string_len = len + 3;
+			address_string = (char *) realloc (address_string, address_string_len);
+		}
+
+		memcpy (address_string, "0x", 2);
+		memcpy (address_string + 2, start_addr, len);
+		address_string[2 + len] = '\0';
+		sscanf (address_string, "%p", &start_addr_p);
+
+		memcpy (address_string, "0x", 2);
+		memcpy (address_string + 2, end_addr, len);
+		address_string[2 + len] = '\0';
+		sscanf (address_string, "%p", &end_addr_p);
+
+
+		if (symbol >= start_addr_p && symbol < end_addr_p) {
+			found = file;
+			break;
+		}
+	}
+
+	free (address_string);
+	fclose (f);
+
+	if (found == NULL) {
+		return "";
+	} else {
+		return found;
+	}
+#endif
+}
+
 /** Several parts of this code are taken from the GLib 2.2.1 sources,
   * Thanks guys!
   * Glib sources availabe at http://www.gtk.org, released under the GNU LGPL
@@ -521,44 +637,11 @@ UAbstractToolkit::initPlugins() {
 void
 UAbstractToolkit::initMissing() {
 	//
-	// look and feel
-	//
-	if (getenv("UFO_LOOK_AND_FEEL")) {
-		// overwrite with env var
-		m_properties->put("look_and_feel", getenv("UFO_LOOK_AND_FEEL"));
-	} else if (m_properties->get("look_and_feel").empty()) {
-		// set cross-platform look and feel
-		m_properties->put("look_and_feel", "theme");
-	}
-
-	// FIXME
-	// should this be here?
-	if (getenv("UFO_THEME_CONFIG")) {
-		// overwrite with env var
-		m_properties->put("theme_config", getenv("UFO_THEME_CONFIG"));
-	}/* else if (m_properties->get("theme_config").empty()) {
-		// set cross-platform look and feel config file
-		m_properties->put("theme_config", "blue.theme");
-	}*/
-
-	//
 	// video driver
 	//
 	if (getenv("UFO_VIDEO_DRIVER")) {
 		// overwrite with env var
 		m_properties->put("video_driver", getenv("UFO_VIDEO_DRIVER"));
-	}
-
-	//
-	// data dir
-	//
-	if (getenv("UFO_DATA_DIR")) {
-		// overwrite with env var
-		m_properties->put("data_dir", getenv("UFO_DATA_DIR"));
-	} else if (m_properties->get("data_dir").empty()) {
-		// set cross-platform font dir
-		std::string data_dir = UFO_DATADIR;
-		m_properties->put("data_dir", data_dir);
 	}
 
 	//
@@ -581,6 +664,47 @@ UAbstractToolkit::initMissing() {
 		font_dir.append("/font");
 		m_properties->put("font_dir", font_dir);
 	}
+
+	// the modul file name
+	std::string file_name;
+	if (getenv("UFO_FILE_NAME")) {
+		file_name = getenv("UFO_FILE_NAME");
+	} else if (m_properties->get("file_name").empty()) {
+		file_name = ufo_getModuleFileName();
+	}
+	m_properties->put("file_name", file_name);
+
+	//
+	// data dir
+	//
+	if (getenv("UFO_DATA_DIR")) {
+		// overwrite with env var
+		m_properties->put("data_dir", getenv("UFO_DATA_DIR"));
+	} else if (m_properties->get("data_dir").empty()) {
+		// set cross-platform font dir
+		std::string data_dir;
+#ifndef UFO_OS_WIN32
+		if (!file_name.empty()) {
+			data_dir = UFileArchive::dirName(
+				UFileArchive::dirName(m_properties->get("file_name"))
+			);
+			data_dir.append("/share/ufo");
+		} else {
+			// FIXME: did not find module filename, try configure data dir
+			data_dir = UFO_DATADIR;
+		}
+#else
+		if (!file_name.empty()) {
+			data_dir = UFileArchive::dirName(m_properties->get("file_name"));
+			data_dir.append("/data");
+		} else {
+			// FIXME: did not find module filename, try configure data dir
+			data_dir = UFO_DATADIR;
+		}
+#endif
+		m_properties->put("data_dir", data_dir);
+	}
+
 
 	// temporary variables to check properties
 	std::string tmp_dir;
@@ -609,11 +733,11 @@ UAbstractToolkit::initMissing() {
 	}
 
 	if (tmp_dir.empty()) {
-#ifndef UFO_OS_WIN32 //G_OS_WIN32
+#ifndef UFO_OS_WIN32
 		m_properties->put("tmp_dir", "/tmp");
-#else /* G_OS_WIN32 */
+#else // UFO_OS_WIN32
 		m_properties->put("tmp_dir", "C:/windows/temp"); // "C:\\"
-#endif /* G_OS_WIN32 */
+#endif // !UFO_OS_WIN32
 	} else {
 		m_properties->put("tmp_dir", tmp_dir);
 	}
@@ -722,6 +846,7 @@ UAbstractToolkit::privateQueryFont(const UFontInfo & fontInfo, std::string * ren
 		for (; iter != m_fontPlugins.end(); ++iter) {
 			if ((*iter).first.feature == type) {
 				ret = ((*iter).second)->queryFont(fontInfo);
+				break;
 			}
 		}
 

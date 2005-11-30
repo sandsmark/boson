@@ -51,6 +51,8 @@ public:
 	UStyleManager();
 	UStyleManager(UStyle * style,
 		std::map<std::string, UStyleHints*> hints);
+	/** Deletes all style hints objects created by this style manager. */
+	virtual ~UStyleManager();
 
 	/** @return The style object used for painting. */
 	UStyle * getStyle();
@@ -74,6 +76,7 @@ public:
 	/** Loads a CSS style sheet file. */
 	void loadStyleSheet(const std::string & fileName);
 
+	/** Puts a copy of the given style hints in the cache. */
 	void putStyleHints(const std::string & classid, UStyleHints * styleHints);
 	void putStyleHints(
 		const std::string & type,

@@ -56,7 +56,7 @@ class UFO_EXPORT UXWGLDriver : public UVideoDriver {
 	UFO_DECLARE_DYNAMIC_CLASS(UXWGLDriver)
 public:
 	UXWGLDriver();
-	~UXWGLDriver();
+	virtual ~UXWGLDriver();
 
 public: // Implements UVideoDriver
 	virtual bool init();
@@ -74,6 +74,7 @@ public: // Implements UVideoDriver
 UFO_WGL_PROC(BOOL,wglMakeCurrent,(HDC, HGLRC))
 UFO_WGL_PROC(HGLRC,wglCreateContext,(HDC))
 UFO_WGL_PROC(BOOL,wglDeleteContext,(HGLRC))
+UFO_WGL_PROC(BOOL,wglShareLists,(HGLRC, HGLRC))
 #undef UFO_WGL_PROC
 
 public: // Public methods

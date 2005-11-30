@@ -50,6 +50,7 @@
 #include <bogl.h>
 #include <boglx.h>
 #include <X11/Xlib.h>
+#include <GL/glu.h>
 
 namespace ufo {
 struct USystemInfo {

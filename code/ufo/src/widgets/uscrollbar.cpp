@@ -40,9 +40,9 @@ UScrollBar::UScrollBar(Orientation orientation,
 		int valueA, int visAmountA ,
 		int minA, int maxA)
 	: UAbstractSlider()
-	, m_visAmount(visAmountA)
-	, m_mousePress()
 	, m_isDragging(false)
+	, m_mousePress()
+	, m_visAmount(visAmountA)
 {
 	if (orientation != Horizontal) {
 		setOrientation(orientation);
@@ -91,7 +91,6 @@ UScrollBar::processMouseEvent(UMouseEvent * e) {
 	switch (e->getType()) {
 		case UEvent::MousePressed: {
 			e->consume();
-			UPoint pos = e->getLocation();
 			UStyle::SubControls subctrl = getStyle()->getSubControlAt(
 				UStyle::CE_ScrollBar, getSize(), getStyleHints(),
 				getModel(), e->getLocation()
@@ -119,6 +118,8 @@ UScrollBar::processMouseEvent(UMouseEvent * e) {
 				break;
 				case UStyle::SC_ScrollBarAddPage:
 					setValue(getValue() + getBlockIncrement());
+				break;
+				default:
 				break;
 			}
 		}
@@ -154,6 +155,8 @@ UScrollBar::processMouseEvent(UMouseEvent * e) {
 			}
 			setValue(getValue() + idelta);
 		}
+		break;
+		default:
 		break;
 	}
 

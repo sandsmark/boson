@@ -236,10 +236,11 @@ UColor::UColor(const double rgba[], bool hasAlpha)
 
 UColor
 UColor::darker() const {
-	float temp[3];
+	float temp[4];
 	temp[0] = m_farr[0] * FACTOR;
 	temp[1] = m_farr[1] * FACTOR;
 	temp[2] = m_farr[2] * FACTOR;
+	temp[3] = m_farr[3];
 
 	// clamp
 	for (int i = 0;i < 3; i++) {
@@ -247,27 +248,28 @@ UColor::darker() const {
 			temp[i] = 0.f;
 		}
 	}
-	return UColor(temp);
+	return UColor(temp, true);
 }
 
 UColor
 UColor::brighter() const {
 	// if is entirely black don't calculate other minima
 	if (isBlack()) {
-		return UColor(MIN_VAL, MIN_VAL, MIN_VAL);
+		return UColor(MIN_VAL, MIN_VAL, MIN_VAL, getAlpha());
 	} else {
 		// create temporary values, we do not want to modify this color
-		float temp[3];
+		float temp[4];
 		temp[0] = m_farr[0] / FACTOR;
 		temp[1] = m_farr[1] / FACTOR;
 		temp[2] = m_farr[2] / FACTOR;
+		temp[3] = m_farr[3];
 
 		// clamp
 		for (int i = 0;i < 3; i++) {
 			temp[i] = std::max(MIN_VAL, temp[i]);
 			temp[i] = std::min(temp[i], 1.0f);
 		}
-		return UColor(temp);
+		return UColor(temp, true);
 	}
 }
 

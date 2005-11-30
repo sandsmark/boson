@@ -125,7 +125,6 @@ ULineEdit::processKeyEvent(UKeyEvent * e) {
 		UWidget::processKeyEvent(e);
 	}
 	UDocument * doc = getDocument();
-	UTextLayout * textLayout = getTextLayout();
 
 	char keyChar[1];
 	UCaret * caret = getCaret();

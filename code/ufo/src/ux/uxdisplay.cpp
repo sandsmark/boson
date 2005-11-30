@@ -63,6 +63,7 @@ public: // Implements UVideoDriver
 	virtual void quit() {
 		if (m_createdGLDriver) {
 			delete (ugl_driver);
+			ugl_driver = NULL;
 		}
 		m_isInit = false;
 	}
@@ -477,7 +478,8 @@ UXDisplay::keyDown(UContext * context,
 	// FIXME keytyped: is this correct?
 	// FIXME: create key type event only if key press wasn't consumed.
 	//  How do we check whether key press wasn't consumed?
-	if (! /*std::*/iscntrl(keyChar)) {
+	if (! /*std::*/iscntrl(keyChar) &&
+			!(modifiers & UMod::Ctrl) && !(modifiers & UMod::Alt)) {
 		UKeyEvent* e = new UKeyEvent(
 			context->getRootPane(),  // source
 			UEvent::KeyTyped,

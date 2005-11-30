@@ -241,9 +241,6 @@ UFont::queryAndLoad(const UFontInfo & fontInfo) {
 		fontContextCache.erase(info);
 		m_renderer = tk->createFontRenderer(info);
 		fontContextCache[m_renderer->getFontInfo()] = m_renderer;
-		display->addVolatileData(m_renderer);
-		//static int nfonts = 0;
-		//std::cerr << "created " << ++nfonts << " fonts\n";
 	}
 
 	m_infoCache = m_renderer->getFontInfo();
@@ -253,13 +250,11 @@ UFont::queryAndLoad(const UFontInfo & fontInfo) {
 void
 UFont::dispose() {
 	// ref count == 1: we have to remove it from the cache
-	if (UDisplay::getDefault() && m_renderer && m_renderer->getReferenceCount() == 1) {
-		UDisplay * display = UDisplay::getDefault();
+	if (m_renderer && m_renderer->getReferenceCount() == 1) {
 		// FIXME: see above
 		//fontCache_t fontContextCache = sm_fontCache[display];
 		if (fontContextCache[m_renderer->getFontInfo()]) {
 			fontContextCache.erase(m_renderer->getFontInfo());
-			display->removeVolatileData(m_renderer);
 		}
 	}
 	if (m_renderer) {

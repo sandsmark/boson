@@ -29,9 +29,9 @@
 #define UFO_CONFIG_MSVC_H
 
 // disable win32 warnings on exporting STL objects
-#pragma warning(disable: 4231)
+#pragma warning(disable: 4231) // nonstandard extension used : 'extern' before template explicit instantiation
 #pragma warning(disable: 4244) // 'conversion' conversion from 'type1' to 'type2', possible loss of data
-#pragma warning(disable: 4251)
+#pragma warning(disable: 4251) // class 'A' needs to have dll interface for to be used by clients of class 'B'.
 #pragma warning(disable: 4275) // non - DLL-interface classkey 'identifier' used as base for DLL-interface classkey 'identifier'
 
 #pragma warning(disable: 4355) // 'this' : used in base member initializer list

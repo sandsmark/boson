@@ -54,7 +54,9 @@ public:
 	  * @param text The initial text
 	  */
 	UTextWidget(const std::string & text);
+	virtual ~UTextWidget();
 
+public: // Public methods
 	/** Sets the content type. This may change the document class.
 	  * So far, only plain text documents are supported.
 	  */

@@ -152,6 +152,7 @@ private: // Private functions
 	void clearDragWidgetsStack();
 #endif
 
+
 protected: // Protected attributes
 	/** */
 	UContextGroup * m_contextGroup;
@@ -172,6 +173,7 @@ private: // Private attributes
 #else
 	std::list<UWidget*> m_dragWidgetsStack;
 #endif
+
 
 	USlot1<UEvent*> * m_eventGrabber;
 	UPoint m_posBeforeGrabbing;

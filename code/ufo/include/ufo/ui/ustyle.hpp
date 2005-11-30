@@ -88,7 +88,8 @@ public: // Public types
 		PE_FrameTabWidget,
 		PE_FrameStatusBar,
 		PE_FrameLineEdit,
-		PE_FrameFocusRect
+		PE_FrameFocusRect,
+		PE_Gripper
 	};
 	enum ComponentElement {
 		CE_Widget,
@@ -167,7 +168,10 @@ public: // basic drawing
 		const UStyleHints * hints,
 		uint32_t widgetState) = 0;
 
-	/** Paints a component of a widget resp. the whole widget. */
+	/** Paints a component of a widget resp. the whole widget.
+	  * For most components, this is only a call to paintModelBackground and
+	  * paintModel.
+	  */
 	virtual void paintComponent(UGraphics * g,
 		ComponentElement elem,
 		const URectangle & rect,
@@ -251,10 +255,62 @@ public: // basic drawing
 		URectangle * textRect,
 		URectangle * iconRect) = 0;
 
-	/** May be used to install style properties. */
+	/** Stub method. Configures a widget to be used with this style.
+	  * Not yet implementd.
+	  */
 	virtual void install(UWidget * w) = 0;
-	/** Uninstalls formerly installed properties. */
 	virtual void uninstall(UWidget * w) = 0;
+#if 0 
+// API ideas
+	/** @return The preferred contents size for the given model.
+	  */
+	virtual UDimension getPreferredSizeFromModel(
+		ComponentElement elem,
+		const UDimension & maxSize,
+		const UStyleHints * hints,
+		const UWidgetModel * model,
+		UWidget * w = NULL) = 0;
+
+	/** Paints the background for the given component element,
+	  * eventually using the given model.
+	  */
+	virtual void paintModelBackground(
+		ComponentElement elem,
+		const URectangle & rect,
+		const UStyleHints * hints,
+		const UWidgetModel * model,
+		UWidget * w = NULL) = 0;
+
+	/** Paints the contents of the given model.
+	  * This may be a label and icon of buttons, text of text widgets etc.
+	  */
+	virtual void paintModel(
+		ComponentElement elem,
+		const URectangle & rect,
+		const UStyleHints * hints,
+		const UWidgetModel * model,
+		UWidget * w = NULL) = 0;
+
+	/** Returns a two dimensional model index currently represented as UPoint.
+	  *
+	  */
+	virtual UPoint viewToModel(
+		ComponentElement elem,
+		const URectangle & rect,
+		const UStyleHints * hints,
+		const UWidgetModel * model,
+		const UPoint & pos,
+		UWidget * w = NULL) = 0;
+
+	/** @return The bounding rectangle of a model index.*/
+	virtual URectangle modelToView(
+		ComponentElement elem,
+		const URectangle & rect,
+		const UStyleHints * hints,
+		const UWidgetModel * model,
+		const UPoint & pos,
+		UWidget * w = NULL) = 0;
+#endif
 };
 
 } // namespace ufo

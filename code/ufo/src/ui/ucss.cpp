@@ -46,6 +46,17 @@ UCss::UCss(const std::string & filename) {
 	load(filename);
 }
 
+UCss::~UCss() {
+	for (std::map<std::string, UStyleHints*>::iterator iter = m_hints.begin();
+			iter != m_hints.end();
+			++iter) {
+		if ((*iter).second) {
+			delete ((*iter).second);
+		}
+	}
+	m_hints.clear();
+}
+
 void
 UCss::load(const std::string & filename) {
 	std::ifstream stream(filename.c_str());
@@ -67,12 +78,14 @@ ufo_css_eatWhitespaces(std::istream & stream) {
 	return ret;
 }
 
-// eats comment lines and empty lines
-// returns the comment
-void
-ufo_css_eatComments(std::istream & stream) {
-	char comment1;
-	char comment2;
+// Checks whether a comment is following.
+// If yes, eats it and returns true.
+// Otherwise false.
+bool
+ufo_css_eatComment(std::istream & stream) {
+	char comment1 = 0;
+	char comment2 = 0;
+	bool comment_eaten = false;
 
 	ufo_css_eatWhitespaces(stream);
 	if (stream) stream >> comment1;
@@ -82,8 +95,11 @@ ufo_css_eatComments(std::istream & stream) {
 		if (comment2 == '*') {
 			comment1 = 0;
 			comment2 = 0;
+			comment_eaten = true;
 			do {
-				if (stream) stream >> comment1;
+				do {
+					if (stream) stream >> comment1;
+				} while (comment1 != '*' && stream);
 				if (stream) stream >> comment2;
 			} while (comment1 != '*' && comment2 != '/' && stream);
 		} else {
@@ -91,6 +107,16 @@ ufo_css_eatComments(std::istream & stream) {
 		}
 	} else {
 		stream.putback(comment1);
+	}
+	return comment_eaten;
+}
+
+// eats comment lines and empty lines
+void
+ufo_css_eatComments(std::istream & stream) {
+	bool eat_comment = true;
+	while(eat_comment) {
+		eat_comment = ufo_css_eatComment(stream);
 	}
 }
 

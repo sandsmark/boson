@@ -26,7 +26,7 @@
  ***************************************************************************/
 
 
-// The builtin font data has been automatically generated 
+// The builtin font data has been automatically generated
 // by the ugenfonts utility.
 
 // It is based on the freeglut genfonts utility:
@@ -42,115 +42,115 @@ using namespace ufo;
 
 /*
  * Following fonts are defined in this file:
- * 
+ *
  * 1. s_font_fixed8x13 <-misc-fixed-medium-r-normal--13-120-75-75-C-80-iso8859-1>
  * 2. s_font_helvetica10 <-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1>
  * 3. s_font_helvetica12 <-adobe-helvetica-medium-r-normal--12-120-75-75-p-67-iso8859-1>
  * 4. s_font_timesRoman10 <-adobe-times-medium-r-normal--10-100-75-75-p-54-iso8859-1>
  */
 
-static const uint8_t fixed8x13_Character_032[] = {  3,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}; /* " " */
-static const uint8_t fixed8x13_Character_097[] = {  7,  0,  0,116,140,132,124,  4,120,  0,  0,  0,  0,  0}; /* "a" */
-static const uint8_t fixed8x13_Character_098[] = {  7,  0,  0,184,196,132,132,196,184,128,128,128,  0,  0}; /* "b" */
-static const uint8_t fixed8x13_Character_099[] = {  7,  0,  0,120,132,128,128,132,120,  0,  0,  0,  0,  0}; /* "c" */
-static const uint8_t fixed8x13_Character_100[] = {  7,  0,  0,116,140,132,132,140,116,  4,  4,  4,  0,  0}; /* "d" */
-static const uint8_t fixed8x13_Character_101[] = {  7,  0,  0,120,132,128,252,132,120,  0,  0,  0,  0,  0}; /* "e" */
-static const uint8_t fixed8x13_Character_102[] = {  7,  0,  0, 64, 64, 64, 64,248, 64, 64, 68, 56,  0,  0}; /* "f" */
-static const uint8_t fixed8x13_Character_103[] = {  7,120,132,120,128,112,136,136,116,  0,  0,  0,  0,  0}; /* "g" */
-static const uint8_t fixed8x13_Character_104[] = {  7,  0,  0,132,132,132,132,196,184,128,128,128,  0,  0}; /* "h" */
-static const uint8_t fixed8x13_Character_105[] = {  6,  0,  0,248, 32, 32, 32, 32, 96,  0, 32,  0,  0,  0}; /* "i" */
-static const uint8_t fixed8x13_Character_106[] = {  6,112,136,136,  8,  8,  8,  8, 24,  0,  8,  0,  0,  0}; /* "j" */
-static const uint8_t fixed8x13_Character_107[] = {  7,  0,  0,132,136,144,224,144,136,128,128,128,  0,  0}; /* "k" */
-static const uint8_t fixed8x13_Character_108[] = {  6,  0,  0,248, 32, 32, 32, 32, 32, 32, 32, 96,  0,  0}; /* "l" */
+static const uint8_t fixed8x13_Character_032[] = {  8,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}; /* " " */
+static const uint8_t fixed8x13_Character_097[] = {  8,  0,  0,116,140,132,124,  4,120,  0,  0,  0,  0,  0}; /* "a" */
+static const uint8_t fixed8x13_Character_098[] = {  8,  0,  0,184,196,132,132,196,184,128,128,128,  0,  0}; /* "b" */
+static const uint8_t fixed8x13_Character_099[] = {  8,  0,  0,120,132,128,128,132,120,  0,  0,  0,  0,  0}; /* "c" */
+static const uint8_t fixed8x13_Character_100[] = {  8,  0,  0,116,140,132,132,140,116,  4,  4,  4,  0,  0}; /* "d" */
+static const uint8_t fixed8x13_Character_101[] = {  8,  0,  0,120,132,128,252,132,120,  0,  0,  0,  0,  0}; /* "e" */
+static const uint8_t fixed8x13_Character_102[] = {  8,  0,  0, 64, 64, 64, 64,248, 64, 64, 68, 56,  0,  0}; /* "f" */
+static const uint8_t fixed8x13_Character_103[] = {  8,120,132,120,128,112,136,136,116,  0,  0,  0,  0,  0}; /* "g" */
+static const uint8_t fixed8x13_Character_104[] = {  8,  0,  0,132,132,132,132,196,184,128,128,128,  0,  0}; /* "h" */
+static const uint8_t fixed8x13_Character_105[] = {  8,  0,  0,248, 32, 32, 32, 32, 96,  0, 32,  0,  0,  0}; /* "i" */
+static const uint8_t fixed8x13_Character_106[] = {  8,112,136,136,  8,  8,  8,  8, 24,  0,  8,  0,  0,  0}; /* "j" */
+static const uint8_t fixed8x13_Character_107[] = {  8,  0,  0,132,136,144,224,144,136,128,128,128,  0,  0}; /* "k" */
+static const uint8_t fixed8x13_Character_108[] = {  8,  0,  0,248, 32, 32, 32, 32, 32, 32, 32, 96,  0,  0}; /* "l" */
 static const uint8_t fixed8x13_Character_109[] = {  8,  0,  0,130,146,146,146,146,236,  0,  0,  0,  0,  0}; /* "m" */
-static const uint8_t fixed8x13_Character_110[] = {  7,  0,  0,132,132,132,132,196,184,  0,  0,  0,  0,  0}; /* "n" */
-static const uint8_t fixed8x13_Character_111[] = {  7,  0,  0,120,132,132,132,132,120,  0,  0,  0,  0,  0}; /* "o" */
-static const uint8_t fixed8x13_Character_112[] = {  7,128,128,128,184,196,132,196,184,  0,  0,  0,  0,  0}; /* "p" */
-static const uint8_t fixed8x13_Character_113[] = {  7,  4,  4,  4,116,140,132,140,116,  0,  0,  0,  0,  0}; /* "q" */
-static const uint8_t fixed8x13_Character_114[] = {  7,  0,  0, 64, 64, 64, 64, 68,184,  0,  0,  0,  0,  0}; /* "r" */
-static const uint8_t fixed8x13_Character_115[] = {  7,  0,  0,120,132, 24, 96,132,120,  0,  0,  0,  0,  0}; /* "s" */
-static const uint8_t fixed8x13_Character_116[] = {  7,  0,  0, 56, 68, 64, 64, 64,248, 64, 64,  0,  0,  0}; /* "t" */
-static const uint8_t fixed8x13_Character_117[] = {  7,  0,  0,116,136,136,136,136,136,  0,  0,  0,  0,  0}; /* "u" */
+static const uint8_t fixed8x13_Character_110[] = {  8,  0,  0,132,132,132,132,196,184,  0,  0,  0,  0,  0}; /* "n" */
+static const uint8_t fixed8x13_Character_111[] = {  8,  0,  0,120,132,132,132,132,120,  0,  0,  0,  0,  0}; /* "o" */
+static const uint8_t fixed8x13_Character_112[] = {  8,128,128,128,184,196,132,196,184,  0,  0,  0,  0,  0}; /* "p" */
+static const uint8_t fixed8x13_Character_113[] = {  8,  4,  4,  4,116,140,132,140,116,  0,  0,  0,  0,  0}; /* "q" */
+static const uint8_t fixed8x13_Character_114[] = {  8,  0,  0, 64, 64, 64, 64, 68,184,  0,  0,  0,  0,  0}; /* "r" */
+static const uint8_t fixed8x13_Character_115[] = {  8,  0,  0,120,132, 24, 96,132,120,  0,  0,  0,  0,  0}; /* "s" */
+static const uint8_t fixed8x13_Character_116[] = {  8,  0,  0, 56, 68, 64, 64, 64,248, 64, 64,  0,  0,  0}; /* "t" */
+static const uint8_t fixed8x13_Character_117[] = {  8,  0,  0,116,136,136,136,136,136,  0,  0,  0,  0,  0}; /* "u" */
 static const uint8_t fixed8x13_Character_119[] = {  8,  0,  0, 68,170,146,146,130,130,  0,  0,  0,  0,  0}; /* "w" */
-static const uint8_t fixed8x13_Character_118[] = {  6,  0,  0, 32, 80, 80,136,136,136,  0,  0,  0,  0,  0}; /* "v" */
-static const uint8_t fixed8x13_Character_120[] = {  7,  0,  0,132, 72, 48, 48, 72,132,  0,  0,  0,  0,  0}; /* "x" */
-static const uint8_t fixed8x13_Character_121[] = {  7,120,132,  4,116,140,132,132,132,  0,  0,  0,  0,  0}; /* "y" */
-static const uint8_t fixed8x13_Character_122[] = {  7,  0,  0,252, 64, 32, 16,  8,252,  0,  0,  0,  0,  0}; /* "z" */
-static const uint8_t fixed8x13_Character_065[] = {  7,  0,  0,132,132,132,252,132,132,132, 72, 48,  0,  0}; /* "A" */
-static const uint8_t fixed8x13_Character_066[] = {  7,  0,  0,240,136,132,136,240,136,132,136,240,  0,  0}; /* "B" */
-static const uint8_t fixed8x13_Character_067[] = {  7,  0,  0,120,132,128,128,128,128,128,132,120,  0,  0}; /* "C" */
-static const uint8_t fixed8x13_Character_068[] = {  7,  0,  0,240,136,132,132,132,132,132,136,240,  0,  0}; /* "D" */
-static const uint8_t fixed8x13_Character_069[] = {  7,  0,  0,252,128,128,128,240,128,128,128,252,  0,  0}; /* "E" */
-static const uint8_t fixed8x13_Character_070[] = {  7,  0,  0,128,128,128,128,240,128,128,128,252,  0,  0}; /* "F" */
-static const uint8_t fixed8x13_Character_071[] = {  7,  0,  0,116,140,132,156,128,128,128,132,120,  0,  0}; /* "G" */
-static const uint8_t fixed8x13_Character_072[] = {  7,  0,  0,132,132,132,132,252,132,132,132,132,  0,  0}; /* "H" */
-static const uint8_t fixed8x13_Character_073[] = {  6,  0,  0,248, 32, 32, 32, 32, 32, 32, 32,248,  0,  0}; /* "I" */
+static const uint8_t fixed8x13_Character_118[] = {  8,  0,  0, 32, 80, 80,136,136,136,  0,  0,  0,  0,  0}; /* "v" */
+static const uint8_t fixed8x13_Character_120[] = {  8,  0,  0,132, 72, 48, 48, 72,132,  0,  0,  0,  0,  0}; /* "x" */
+static const uint8_t fixed8x13_Character_121[] = {  8,120,132,  4,116,140,132,132,132,  0,  0,  0,  0,  0}; /* "y" */
+static const uint8_t fixed8x13_Character_122[] = {  8,  0,  0,252, 64, 32, 16,  8,252,  0,  0,  0,  0,  0}; /* "z" */
+static const uint8_t fixed8x13_Character_065[] = {  8,  0,  0,132,132,132,252,132,132,132, 72, 48,  0,  0}; /* "A" */
+static const uint8_t fixed8x13_Character_066[] = {  8,  0,  0,240,136,132,136,240,136,132,136,240,  0,  0}; /* "B" */
+static const uint8_t fixed8x13_Character_067[] = {  8,  0,  0,120,132,128,128,128,128,128,132,120,  0,  0}; /* "C" */
+static const uint8_t fixed8x13_Character_068[] = {  8,  0,  0,240,136,132,132,132,132,132,136,240,  0,  0}; /* "D" */
+static const uint8_t fixed8x13_Character_069[] = {  8,  0,  0,252,128,128,128,240,128,128,128,252,  0,  0}; /* "E" */
+static const uint8_t fixed8x13_Character_070[] = {  8,  0,  0,128,128,128,128,240,128,128,128,252,  0,  0}; /* "F" */
+static const uint8_t fixed8x13_Character_071[] = {  8,  0,  0,116,140,132,156,128,128,128,132,120,  0,  0}; /* "G" */
+static const uint8_t fixed8x13_Character_072[] = {  8,  0,  0,132,132,132,132,252,132,132,132,132,  0,  0}; /* "H" */
+static const uint8_t fixed8x13_Character_073[] = {  8,  0,  0,248, 32, 32, 32, 32, 32, 32, 32,248,  0,  0}; /* "I" */
 static const uint8_t fixed8x13_Character_074[] = {  8,  0,  0,112,136,  8,  8,  8,  8,  8,  8, 62,  0,  0}; /* "J" */
-static const uint8_t fixed8x13_Character_075[] = {  7,  0,  0,132,136,144,160,192,160,144,136,132,  0,  0}; /* "K" */
-static const uint8_t fixed8x13_Character_076[] = {  7,  0,  0,252,128,128,128,128,128,128,128,128,  0,  0}; /* "L" */
+static const uint8_t fixed8x13_Character_075[] = {  8,  0,  0,132,136,144,160,192,160,144,136,132,  0,  0}; /* "K" */
+static const uint8_t fixed8x13_Character_076[] = {  8,  0,  0,252,128,128,128,128,128,128,128,128,  0,  0}; /* "L" */
 static const uint8_t fixed8x13_Character_077[] = {  8,  0,  0,130,130,130,146,146,170,198,130,130,  0,  0}; /* "M" */
-static const uint8_t fixed8x13_Character_078[] = {  7,  0,  0,132,132,132,140,148,164,196,132,132,  0,  0}; /* "N" */
-static const uint8_t fixed8x13_Character_079[] = {  7,  0,  0,120,132,132,132,132,132,132,132,120,  0,  0}; /* "O" */
-static const uint8_t fixed8x13_Character_080[] = {  7,  0,  0,128,128,128,128,248,132,132,132,248,  0,  0}; /* "P" */
-static const uint8_t fixed8x13_Character_081[] = {  7,  0,  4,120,148,164,132,132,132,132,132,120,  0,  0}; /* "Q" */
-static const uint8_t fixed8x13_Character_082[] = {  7,  0,  0,132,136,144,160,248,132,132,132,248,  0,  0}; /* "R" */
-static const uint8_t fixed8x13_Character_083[] = {  7,  0,  0,120,132,  4,  4,120,128,128,132,120,  0,  0}; /* "S" */
+static const uint8_t fixed8x13_Character_078[] = {  8,  0,  0,132,132,132,140,148,164,196,132,132,  0,  0}; /* "N" */
+static const uint8_t fixed8x13_Character_079[] = {  8,  0,  0,120,132,132,132,132,132,132,132,120,  0,  0}; /* "O" */
+static const uint8_t fixed8x13_Character_080[] = {  8,  0,  0,128,128,128,128,248,132,132,132,248,  0,  0}; /* "P" */
+static const uint8_t fixed8x13_Character_081[] = {  8,  0,  4,120,148,164,132,132,132,132,132,120,  0,  0}; /* "Q" */
+static const uint8_t fixed8x13_Character_082[] = {  8,  0,  0,132,136,144,160,248,132,132,132,248,  0,  0}; /* "R" */
+static const uint8_t fixed8x13_Character_083[] = {  8,  0,  0,120,132,  4,  4,120,128,128,132,120,  0,  0}; /* "S" */
 static const uint8_t fixed8x13_Character_084[] = {  8,  0,  0, 16, 16, 16, 16, 16, 16, 16, 16,254,  0,  0}; /* "T" */
-static const uint8_t fixed8x13_Character_085[] = {  7,  0,  0,120,132,132,132,132,132,132,132,132,  0,  0}; /* "U" */
+static const uint8_t fixed8x13_Character_085[] = {  8,  0,  0,120,132,132,132,132,132,132,132,132,  0,  0}; /* "U" */
 static const uint8_t fixed8x13_Character_087[] = {  8,  0,  0, 68,170,146,146,146,130,130,130,130,  0,  0}; /* "W" */
 static const uint8_t fixed8x13_Character_086[] = {  8,  0,  0, 16, 40, 40, 40, 68, 68, 68,130,130,  0,  0}; /* "V" */
 static const uint8_t fixed8x13_Character_088[] = {  8,  0,  0,130,130, 68, 40, 16, 40, 68,130,130,  0,  0}; /* "X" */
 static const uint8_t fixed8x13_Character_089[] = {  8,  0,  0, 16, 16, 16, 16, 16, 40, 68,130,130,  0,  0}; /* "Y" */
-static const uint8_t fixed8x13_Character_090[] = {  7,  0,  0,252,128,128, 64, 32, 16,  8,  4,252,  0,  0}; /* "Z" */
-static const uint8_t fixed8x13_Character_048[] = {  7,  0,  0, 48, 72,132,132,132,132,132, 72, 48,  0,  0}; /* "0" */
-static const uint8_t fixed8x13_Character_049[] = {  6,  0,  0,248, 32, 32, 32, 32, 32,160, 96, 32,  0,  0}; /* "1" */
-static const uint8_t fixed8x13_Character_050[] = {  7,  0,  0,252,128, 64, 48,  8,  4,132,132,120,  0,  0}; /* "2" */
-static const uint8_t fixed8x13_Character_051[] = {  7,  0,  0,120,132,  4,  4, 56, 16,  8,  4,252,  0,  0}; /* "3" */
-static const uint8_t fixed8x13_Character_052[] = {  7,  0,  0,  8,  8,252,136,136, 72, 40, 24,  8,  0,  0}; /* "4" */
-static const uint8_t fixed8x13_Character_053[] = {  7,  0,  0,120,132,  4,  4,196,184,128,128,252,  0,  0}; /* "5" */
-static const uint8_t fixed8x13_Character_054[] = {  7,  0,  0,120,132,132,196,184,128,128, 64, 56,  0,  0}; /* "6" */
-static const uint8_t fixed8x13_Character_055[] = {  7,  0,  0, 64, 64, 32, 32, 16, 16,  8,  4,252,  0,  0}; /* "7" */
-static const uint8_t fixed8x13_Character_056[] = {  7,  0,  0,120,132,132,132,120,132,132,132,120,  0,  0}; /* "8" */
-static const uint8_t fixed8x13_Character_057[] = {  7,  0,  0,112,  8,  4,  4,116,140,132,132,120,  0,  0}; /* "9" */
-static const uint8_t fixed8x13_Character_246[] = {  7,  0,  0,120,132,132,132,132,120,  0, 72, 72,  0,  0}; /* "ö" */
-static const uint8_t fixed8x13_Character_228[] = {  7,  0,  0,116,140,132,124,  4,120,  0, 72, 72,  0,  0}; /* "ä" */
-static const uint8_t fixed8x13_Character_252[] = {  7,  0,  0,116,136,136,136,136,136,  0, 80, 80,  0,  0}; /* "ü" */
+static const uint8_t fixed8x13_Character_090[] = {  8,  0,  0,252,128,128, 64, 32, 16,  8,  4,252,  0,  0}; /* "Z" */
+static const uint8_t fixed8x13_Character_048[] = {  8,  0,  0, 48, 72,132,132,132,132,132, 72, 48,  0,  0}; /* "0" */
+static const uint8_t fixed8x13_Character_049[] = {  8,  0,  0,248, 32, 32, 32, 32, 32,160, 96, 32,  0,  0}; /* "1" */
+static const uint8_t fixed8x13_Character_050[] = {  8,  0,  0,252,128, 64, 48,  8,  4,132,132,120,  0,  0}; /* "2" */
+static const uint8_t fixed8x13_Character_051[] = {  8,  0,  0,120,132,  4,  4, 56, 16,  8,  4,252,  0,  0}; /* "3" */
+static const uint8_t fixed8x13_Character_052[] = {  8,  0,  0,  8,  8,252,136,136, 72, 40, 24,  8,  0,  0}; /* "4" */
+static const uint8_t fixed8x13_Character_053[] = {  8,  0,  0,120,132,  4,  4,196,184,128,128,252,  0,  0}; /* "5" */
+static const uint8_t fixed8x13_Character_054[] = {  8,  0,  0,120,132,132,196,184,128,128, 64, 56,  0,  0}; /* "6" */
+static const uint8_t fixed8x13_Character_055[] = {  8,  0,  0, 64, 64, 32, 32, 16, 16,  8,  4,252,  0,  0}; /* "7" */
+static const uint8_t fixed8x13_Character_056[] = {  8,  0,  0,120,132,132,132,120,132,132,132,120,  0,  0}; /* "8" */
+static const uint8_t fixed8x13_Character_057[] = {  8,  0,  0,112,  8,  4,  4,116,140,132,132,120,  0,  0}; /* "9" */
+static const uint8_t fixed8x13_Character_246[] = {  8,  0,  0,120,132,132,132,132,120,  0, 72, 72,  0,  0}; /* "ö" */
+static const uint8_t fixed8x13_Character_228[] = {  8,  0,  0,116,140,132,124,  4,120,  0, 72, 72,  0,  0}; /* "ä" */
+static const uint8_t fixed8x13_Character_252[] = {  8,  0,  0,116,136,136,136,136,136,  0, 80, 80,  0,  0}; /* "ü" */
 static const uint8_t fixed8x13_Character_214[] = {  8,  0,  0,124,130,130,130,130,130,124,  0, 68, 68,  0}; /* "Ö" */
-static const uint8_t fixed8x13_Character_196[] = {  7,  0,  0,132,132,252,132,132, 72, 48,  0, 72, 72,  0}; /* "Ä" */
-static const uint8_t fixed8x13_Character_220[] = {  7,  0,  0,120,132,132,132,132,132,132,  0, 72, 72,  0}; /* "Ü" */
-static const uint8_t fixed8x13_Character_223[] = {  7,  0,  0,184,132,132,152,160,144,136,136,112,  0,  0}; /* "ß" */
-static const uint8_t fixed8x13_Character_096[] = {  3,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 64,128,  0}; /* "`" */
-static const uint8_t fixed8x13_Character_039[] = {  2,  0,  0,  0,  0,  0,  0,  0,  0,128,128,128,  0,  0}; /* "'" */
-static const uint8_t fixed8x13_Character_124[] = {  2,  0,  0,128,128,128,128,128,128,128,128,128,  0,  0}; /* "|" */
-static const uint8_t fixed8x13_Character_126[] = {  6,  0,  0,  0,  0,  0,  0,  0,  0,144,168, 72,  0,  0}; /* "~" */
-static const uint8_t fixed8x13_Character_033[] = {  2,  0,  0,128,  0,128,128,128,128,128,128,128,  0,  0}; /* "!" */
-static const uint8_t fixed8x13_Character_064[] = {  7,  0,  0,120,128,148,172,164,156,132,132,120,  0,  0}; /* "@" */
-static const uint8_t fixed8x13_Character_035[] = {  7,  0,  0,  0, 72, 72,252, 72,252, 72, 72,  0,  0,  0}; /* "#" */
-static const uint8_t fixed8x13_Character_036[] = {  6,  0,  0, 32,240, 40, 40,112,160,160,120, 32,  0,  0}; /* "$" */
-static const uint8_t fixed8x13_Character_037[] = {  7,  0,  0,136, 84, 72, 32, 16, 16, 72,164, 68,  0,  0}; /* "%" */
-static const uint8_t fixed8x13_Character_094[] = {  6,  0,  0,  0,  0,  0,  0,  0,  0,136, 80, 32,  0,  0}; /* "^" */
-static const uint8_t fixed8x13_Character_038[] = {  7,  0,  0,116,136,148, 96,144,144, 96,  0,  0,  0,  0}; /* "&" */
-static const uint8_t fixed8x13_Character_042[] = {  7,  0,  0,  0,  0,  0,  0, 72, 48,252, 48, 72,  0,  0}; /* "*" */
-static const uint8_t fixed8x13_Character_040[] = {  4,  0,  0, 32, 64, 64,128,128,128, 64, 64, 32,  0,  0}; /* "(" */
-static const uint8_t fixed8x13_Character_041[] = {  4,  0,  0,128, 64, 64, 32, 32, 32, 64, 64,128,  0,  0}; /* ")" */
-static const uint8_t fixed8x13_Character_045[] = {  6,  0,  0,  0,  0,  0,  0,248,  0,  0,  0,  0,  0,  0}; /* "-" */
+static const uint8_t fixed8x13_Character_196[] = {  8,  0,  0,132,132,252,132,132, 72, 48,  0, 72, 72,  0}; /* "Ä" */
+static const uint8_t fixed8x13_Character_220[] = {  8,  0,  0,120,132,132,132,132,132,132,  0, 72, 72,  0}; /* "Ü" */
+static const uint8_t fixed8x13_Character_223[] = {  8,  0,  0,184,132,132,152,160,144,136,136,112,  0,  0}; /* "ß" */
+static const uint8_t fixed8x13_Character_096[] = {  8,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 64,128,  0}; /* "`" */
+static const uint8_t fixed8x13_Character_039[] = {  8,  0,  0,  0,  0,  0,  0,  0,  0,128,128,128,  0,  0}; /* "'" */
+static const uint8_t fixed8x13_Character_124[] = {  8,  0,  0,128,128,128,128,128,128,128,128,128,  0,  0}; /* "|" */
+static const uint8_t fixed8x13_Character_126[] = {  8,  0,  0,  0,  0,  0,  0,  0,  0,144,168, 72,  0,  0}; /* "~" */
+static const uint8_t fixed8x13_Character_033[] = {  8,  0,  0,128,  0,128,128,128,128,128,128,128,  0,  0}; /* "!" */
+static const uint8_t fixed8x13_Character_064[] = {  8,  0,  0,120,128,148,172,164,156,132,132,120,  0,  0}; /* "@" */
+static const uint8_t fixed8x13_Character_035[] = {  8,  0,  0,  0, 72, 72,252, 72,252, 72, 72,  0,  0,  0}; /* "#" */
+static const uint8_t fixed8x13_Character_036[] = {  8,  0,  0, 32,240, 40, 40,112,160,160,120, 32,  0,  0}; /* "$" */
+static const uint8_t fixed8x13_Character_037[] = {  8,  0,  0,136, 84, 72, 32, 16, 16, 72,164, 68,  0,  0}; /* "%" */
+static const uint8_t fixed8x13_Character_094[] = {  8,  0,  0,  0,  0,  0,  0,  0,  0,136, 80, 32,  0,  0}; /* "^" */
+static const uint8_t fixed8x13_Character_038[] = {  8,  0,  0,116,136,148, 96,144,144, 96,  0,  0,  0,  0}; /* "&" */
+static const uint8_t fixed8x13_Character_042[] = {  8,  0,  0,  0,  0,  0,  0, 72, 48,252, 48, 72,  0,  0}; /* "*" */
+static const uint8_t fixed8x13_Character_040[] = {  8,  0,  0, 32, 64, 64,128,128,128, 64, 64, 32,  0,  0}; /* "(" */
+static const uint8_t fixed8x13_Character_041[] = {  8,  0,  0,128, 64, 64, 32, 32, 32, 64, 64,128,  0,  0}; /* ")" */
+static const uint8_t fixed8x13_Character_045[] = {  8,  0,  0,  0,  0,  0,  0,248,  0,  0,  0,  0,  0,  0}; /* "-" */
 static const uint8_t fixed8x13_Character_095[] = {  8,  0,254,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}; /* "_" */
-static const uint8_t fixed8x13_Character_061[] = {  7,  0,  0,  0,  0,252,  0,  0,252,  0,  0,  0,  0,  0}; /* "=" */
-static const uint8_t fixed8x13_Character_043[] = {  6,  0,  0,  0,  0, 32, 32,248, 32, 32,  0,  0,  0,  0}; /* "+" */
-static const uint8_t fixed8x13_Character_091[] = {  5,  0,  0,240,128,128,128,128,128,128,128,240,  0,  0}; /* "[" */
-static const uint8_t fixed8x13_Character_123[] = {  6,  0,  0, 56, 64, 64, 32,192, 32, 64, 64, 56,  0,  0}; /* "{" */
-static const uint8_t fixed8x13_Character_125[] = {  6,  0,  0,224, 16, 16, 32, 24, 32, 16, 16,224,  0,  0}; /* "}" */
-static const uint8_t fixed8x13_Character_093[] = {  5,  0,  0,240, 16, 16, 16, 16, 16, 16, 16,240,  0,  0}; /* "]" */
-static const uint8_t fixed8x13_Character_059[] = {  5,  0,128, 96,112,  0,  0, 32,112, 32,  0,  0,  0,  0}; /* ";" */
-static const uint8_t fixed8x13_Character_058[] = {  4,  0, 64,224, 64,  0,  0, 64,224, 64,  0,  0,  0,  0}; /* ":" */
-static const uint8_t fixed8x13_Character_044[] = {  5,  0,128, 96,112,  0,  0,  0,  0,  0,  0,  0,  0,  0}; /* "," */
-static const uint8_t fixed8x13_Character_046[] = {  4,  0, 64,224, 64,  0,  0,  0,  0,  0,  0,  0,  0,  0}; /* "." */
-static const uint8_t fixed8x13_Character_060[] = {  6,  0,  0,  8, 16, 32, 64,128, 64, 32, 16,  8,  0,  0}; /* "<" */
-static const uint8_t fixed8x13_Character_062[] = {  6,  0,  0,128, 64, 32, 16,  8, 16, 32, 64,128,  0,  0}; /* ">" */
+static const uint8_t fixed8x13_Character_061[] = {  8,  0,  0,  0,  0,252,  0,  0,252,  0,  0,  0,  0,  0}; /* "=" */
+static const uint8_t fixed8x13_Character_043[] = {  8,  0,  0,  0,  0, 32, 32,248, 32, 32,  0,  0,  0,  0}; /* "+" */
+static const uint8_t fixed8x13_Character_091[] = {  8,  0,  0,240,128,128,128,128,128,128,128,240,  0,  0}; /* "[" */
+static const uint8_t fixed8x13_Character_123[] = {  8,  0,  0, 56, 64, 64, 32,192, 32, 64, 64, 56,  0,  0}; /* "{" */
+static const uint8_t fixed8x13_Character_125[] = {  8,  0,  0,224, 16, 16, 32, 24, 32, 16, 16,224,  0,  0}; /* "}" */
+static const uint8_t fixed8x13_Character_093[] = {  8,  0,  0,240, 16, 16, 16, 16, 16, 16, 16,240,  0,  0}; /* "]" */
+static const uint8_t fixed8x13_Character_059[] = {  8,  0,128, 96,112,  0,  0, 32,112, 32,  0,  0,  0,  0}; /* ";" */
+static const uint8_t fixed8x13_Character_058[] = {  8,  0, 64,224, 64,  0,  0, 64,224, 64,  0,  0,  0,  0}; /* ":" */
+static const uint8_t fixed8x13_Character_044[] = {  8,  0,128, 96,112,  0,  0,  0,  0,  0,  0,  0,  0,  0}; /* "," */
+static const uint8_t fixed8x13_Character_046[] = {  8,  0, 64,224, 64,  0,  0,  0,  0,  0,  0,  0,  0,  0}; /* "." */
+static const uint8_t fixed8x13_Character_060[] = {  8,  0,  0,  8, 16, 32, 64,128, 64, 32, 16,  8,  0,  0}; /* "<" */
+static const uint8_t fixed8x13_Character_062[] = {  8,  0,  0,128, 64, 32, 16,  8, 16, 32, 64,128,  0,  0}; /* ">" */
 static const uint8_t fixed8x13_Character_047[] = {  8,  0,  0,128,128, 64, 32, 16,  8,  4,  2,  2,  0,  0}; /* "/" */
-static const uint8_t fixed8x13_Character_063[] = {  7,  0,  0, 16,  0, 16, 16,  8,  4,132,132,120,  0,  0}; /* "?" */
+static const uint8_t fixed8x13_Character_063[] = {  8,  0,  0, 16,  0, 16, 16,  8,  4,132,132,120,  0,  0}; /* "?" */
 static const uint8_t fixed8x13_Character_092[] = {  8,  0,  0,  2,  2,  4,  8, 16, 32, 64,128,128,  0,  0}; /* "\" */
-static const uint8_t fixed8x13_Character_034[] = {  5,  0,  0,  0,  0,  0,  0,  0,  0,144,144,144,  0,  0}; /* """ */
+static const uint8_t fixed8x13_Character_034[] = {  8,  0,  0,  0,  0,  0,  0,  0,  0,144,144,144,  0,  0}; /* """ */
 
 /* The font characters mapping: */
 const uint8_t * s_fixed8x13_characters[] = {

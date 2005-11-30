@@ -52,7 +52,7 @@ UVertexArray::setOffset(float x, float y) {
 void
 UVertexArray::add(float x, float y) {
 	m_vertices.push_back(std::make_pair(x, y));
-	if (m_colors.size()) {
+	if (m_colors.size() && m_vertices.size() > m_colors.size()) {
 		m_colors.push_back(m_colors[m_colors.size() - 1]);
 	}
 }
@@ -60,7 +60,7 @@ UVertexArray::add(float x, float y) {
 void
 UVertexArray::setColor(const UColor & col) {
 	if (m_colors.size() == 0 && m_vertices.size() > 0) {
-		for (int i = 0; i < m_vertices.size(); ++i) {
+		for (unsigned int i = 0; i < m_vertices.size(); ++i) {
 			m_colors.push_back(UColor::black);
 		}
 	}
@@ -102,7 +102,7 @@ UVertexArray::getArray() {
 	if (m_array) {
 		return m_array;
 	}
-	
+
 	// create a new array
 	if (m_type == V3F) {
 		float * ret = new float[getCount() * 3];

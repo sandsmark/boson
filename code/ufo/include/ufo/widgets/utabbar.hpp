@@ -4,8 +4,8 @@
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
-    file              : src/ubuttongroup.cpp
-    begin             : Mon Dec 22 2003
+    file              : include/ufo/widgets/utabbar.hpp
+    begin             : Fri Sep 23 2005
     $Id$
  ***************************************************************************/
 
@@ -25,66 +25,66 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA *
  ***************************************************************************/
 
-#include "ufo/ubuttongroup.hpp"
+#ifndef UTABBAR_HPP
+#define UTABBAR_HPP
 
-#include "ufo/widgets/ubutton.hpp"
-// special case for radio buttons
-#include "ufo/widgets/uradiobutton.hpp"
+#include "uwidget.hpp"
 
-using namespace ufo;
+namespace ufo {
 
-UFO_IMPLEMENT_DYNAMIC_CLASS(UButtonGroup, UObject)
+/** @short A tab bar provides a box of tabs which may be used to select
+  *  tab panels of a tab widgets.
+  * @ingroup widgets
+  *
+  *
+  * @author Johannes Schmidt
+  */
+class UFO_EXPORT UTabBar : public UWidget {
+	UFO_DECLARE_CLASS(UTabBar)
+public:
+	UTabBar();
+	virtual ~UTabBar();
 
-UButtonGroup::UButtonGroup()
-	: m_buttons()
-	, m_selectedButton(NULL)
-{}
+public: // Public methods
+	void addTab(const std::string & label);
+	/** Removes the tab at the given index and eventually resets
+	  * the selected index.
+	  */
+	void removeTab(int index);
 
-void
-UButtonGroup::addButton(UButton * button) {
-	m_buttons.push_back(button);
-	button->setButtonGroup(this);
+	void setSelectedIndex(int index);
+	int getSelectedIndex() const;
 
-	if (button->isSelected()) {
-		if (m_selectedButton == NULL) {
-			m_selectedButton = button;
-		} else {
-			button->setSelected(false);
-		}
-	}
+	/** Returns the label of the tab bar tab with the given index
+	  * or "" if the index is out of range.
+	  */
+	std::string getTabText(int index) const;
+	/** Returns the index of the tab bar tab with the given label
+	  * or -1 if no tab has this label.
+	  */
+	int getTabIndex(const std::string & label) const;
+
+	int getTabCount() const;
+
+private:
+	int m_selectedIndex;
+
+public: // Public signals
+	USignal1<UTabBar*> & sigSelectionChanged();
+
+private: // Private signals
+	USignal1<UTabBar*> m_sigSelectionChanged;
+};
+
+//
+// inline implementation
+//
+
+inline USignal1<UTabBar*> &
+UTabBar::sigSelectionChanged() {
+	return m_sigSelectionChanged;
 }
 
-void
-UButtonGroup::removeButton(UButton * button) {
-	//m_buttons.push_back(button);
-	// FIXME
-	if (button == m_selectedButton) {
-		button->setSelected(false);
-		m_selectedButton = NULL;
-	}
-	m_buttons.erase(std::find(m_buttons.begin(), m_buttons.end(), button));
-}
+} // namespace ufo
 
-void
-UButtonGroup::setSelectedButton(UButton * button, bool selected) {
-	if (!selected) {
-		if (button == m_selectedButton && !dynamic_cast<URadioButton*>(button)) {
-			m_selectedButton->setSelected(false);
-			m_selectedButton = NULL;
-		}
-	} else
-	if (button) {
-		if (m_selectedButton && m_selectedButton != button) {
-			m_selectedButton->setSelected(false);
-		}
-		m_selectedButton = button;
-		if (!m_selectedButton->isSelected()) {
-			m_selectedButton->setSelected(true);
-		}
-	}
-}
-
-UButton *
-UButtonGroup::getSelectedButton() const {
-	return m_selectedButton;
-}
+#endif // UTABBAR_HPP

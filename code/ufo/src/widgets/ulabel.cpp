@@ -61,6 +61,20 @@ ULabel::ULabel(const std::string & text, UIcon * icon)
 	setCssType("label");
 }
 
+ULabel::ULabel(const std::string & text, UWidget * buddy)
+	: UCompound(text)
+	, m_buddy(buddy)
+{
+	setCssType("label");
+}
+
+ULabel::ULabel(const std::string & text, UIcon * icon, UWidget * buddy)
+	: UCompound(text, icon)
+	, m_buddy(buddy)
+{
+	setCssType("label");
+}
+
 void
 ULabel::setBuddy(UWidget * buddy) {
 	m_buddy = buddy;

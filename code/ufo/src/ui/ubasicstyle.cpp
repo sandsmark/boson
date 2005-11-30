@@ -27,8 +27,6 @@
 
 #include "ufo/ui/ubasicstyle.hpp"
 
-//#include "ufo/gl/ugl_driver.hpp"
-
 #include "ufo/ui/ustyle.hpp"
 #include "ufo/ui/ustylehints.hpp"
 #include "ufo/widgets/uwidget.hpp"
@@ -84,30 +82,30 @@ basicstyle_paintIndicatorArrow(
 			x[2] = middle_x - 2*half_size;
 			y[0] = middle_y - half_size;
 			y[1] = y[2] = middle_y + half_size;
-			break;
+		break;
 		case UStyle::PE_IndicatorArrowDown:
 			x[0] = middle_x;
 			x[1] = middle_x - 2*half_size;
 			x[2] = middle_x + 2*half_size;
 			y[0] = middle_y + half_size;
 			y[1] = y[2] = middle_y - half_size;
-			break;
+		break;
 		case UStyle::PE_IndicatorArrowLeft:
 			x[0] = middle_x - half_size;
 			x[1] = x[2] = middle_x + half_size;
 			y[0] = middle_y;
 			y[1] = middle_y - 2*half_size;
 			y[2] = middle_y + 2*half_size;
-			break;
+		break;
 		case UStyle::PE_IndicatorArrowRight:
+		// shouldn't happen, but use right arrow as default
+		default:
 			x[0] = middle_x + half_size;
 			x[1] = x[2] = middle_x - half_size;
 			y[0] = middle_y;
 			y[1] = middle_y + 2*half_size;
 			y[2] = middle_y - 2*half_size;
-			break;
-		default:
-			break;
+		break;
 	}
 
 	g->setColor(color);
@@ -168,8 +166,21 @@ UBasicStyle::paintPrimitive(
 				hints->palette.foreground(), widgetState);
 		break;
 
+		case PE_Gripper: {
+			UColor dark = hints->palette.background().darker();
+			UColor light = hints->palette.background().brighter();
+			// FIXME: wow, very inefficient
+			for (int x = 2; x <= rect.w - 2; x += 4) {
+				for (int y = 2; y <= rect.h - 2; y += 4) {
+					g->setColor(dark);
+					g->fillRect(rect.x + x, rect.y + y, 2, 2);
+					g->setColor(light);
+					g->fillRect(rect.x + x + 1, rect.y + y + 1, 1, 1);
+				}
+			}
+		}
+		break;
 		case PE_IndicatorCheckBox:
-		case PE_IndicatorRadioButton:
 			if (widgetState & WidgetDisabled) {
 				g->setColor(UColor::gray);
 			} else {
@@ -179,6 +190,23 @@ UBasicStyle::paintPrimitive(
 			g->setColor(UColor::white);
 			g->fillRect(rect - UInsets(1, 1, 1, 1));
 		break;
+		case PE_IndicatorRadioButton: {
+			UVertexArray array;
+			array.add(rect.x + 4, rect.y + 0);
+			array.add(rect.x + 0, rect.y + 4);
+			array.add(rect.x + 0, rect.y + 6);
+			array.add(rect.x + 4, rect.y + 10);
+			array.add(rect.x + 6, rect.y + 10);
+			array.add(rect.x + 10, rect.y + 6);
+			array.add(rect.x + 10, rect.y + 4);
+			array.add(rect.x + 6, rect.y + 0);
+			array.add(rect.x + 4, rect.y + 0);
+			g->setColor(UColor::white);
+			g->drawVertexArray(UGraphics::TriangleFan, &array);
+			g->setColor(UColor::gray);
+			g->drawVertexArray(UGraphics::LineStrip, &array);
+		}
+		break;
 		case PE_IndicatorCheckBoxMask:
 			if (widgetState & WidgetDisabled) {
 				g->setColor(UColor::gray);
@@ -186,8 +214,12 @@ UBasicStyle::paintPrimitive(
 				g->setColor(UColor::black);
 			}
 			if (widgetState & WidgetSelected) {
-				g->drawLine(rect.x + 2, rect.y + 2, rect.x + rect.w - 3, rect.y + rect.h - 3);
-				g->drawLine(rect.x + rect.w - 4, rect.y + 2, rect.x + 1, rect.y + rect.h - 3);
+				//g->setLineWidth(2);
+				g->drawLine(rect.x + 2, rect.y + 2, rect.x + rect.w - 2, rect.y + rect.h - 2);
+				g->drawLine(rect.x + 3, rect.y + 2, rect.x + rect.w - 1, rect.y + rect.h - 2);
+				g->drawLine(rect.x + 2, rect.y + rect.h - 3, rect.x + rect.w - 2, rect.y + 1);
+				g->drawLine(rect.x + 3, rect.y + rect.h - 3, rect.x + rect.w - 1, rect.y + 1);
+				//g->setLineWidth(1);
 			}
 		break;
 		case PE_IndicatorRadioButtonMask:
@@ -208,6 +240,7 @@ UBasicStyle::paintPrimitive(
 				array.add(rect.x + 6, rect.y + 2);
 				array.add(rect.x + 4, rect.y + 2);
 				g->drawVertexArray(UGraphics::LineStrip, &array);
+				g->drawVertexArray(UGraphics::TriangleFan, &array);
 			}
 		break;
 		case PE_IndicatorButtonDropDown:
@@ -229,15 +262,26 @@ UBasicStyle::paintPrimitive(
 		case PE_PanelButtonTool:
 			if (hints->opacity) {
 				UColor col(hints->palette.background());
-				if (widgetState & (WidgetPressed)) {
+				if (widgetState & (WidgetPressed | WidgetSelected)) {
 					col = col.darker();
 				}
 				col.getFloat()[3] = hints->opacity;
-				g->setColor(col);
+				g->setColor(col.brighter());
 				// don't paint edges (frame)
 				g->drawLine(rect.x + 2, rect.y + 1, rect.x + rect.w - 2, rect.y + 1);
-				g->fillRect(rect.x + 1, rect.y + 2, rect.w - 2, rect.h - 4);
-				g->drawLine(rect.x + 2, rect.y + rect.h - 2, rect.x + rect.w - 2, rect.y + rect.h - 2);
+
+				UVertexArray bg;
+				bg.setColor(col.brighter());
+				bg.add(rect.x + 1, rect.y + 1);
+				bg.add(rect.x + rect.w, rect.y + 1);
+				bg.setColor(col);
+				bg.add(rect.x + rect.w, rect.y + rect.h - 1);
+				bg.add(rect.x + 1, rect.y + rect.h - 1);
+				g->drawVertexArray(UGraphics::TriangleFan, &bg);
+
+				g->setColor(col);
+				//g->fillRect(rect.x + 1, rect.y + 2, rect.w - 2, rect.h - 4);
+				g->drawLine(rect.x + 2, rect.y + rect.h - 1, rect.x + rect.w - 2, rect.y + rect.h - 1);
 			}
 			if (widgetState & (WidgetSelected | WidgetHasMouseFocus)) {
 				UColor col(hints->palette.highlight());
@@ -349,6 +393,11 @@ UBasicStyle::paintPrimitive(
 			ugl_driver->glPopAttrib();
 			#endif
 		}
+		break;
+		case PE_PanelToolBar:
+			// FIXME: not yet implemented
+		break;
+		default:
 		break;
 	}
 }
@@ -608,6 +657,13 @@ UBasicStyle::getInsets(
 			// arrows
 			return ret + UInsets(0, 0, 0, 16);
 		break;
+		case CE_Slider:
+			if (hints->orientation == Vertical) {
+				return ret + UInsets(0, 0, 0, 14);
+			} else {
+				return ret + UInsets(14, 0, 0, 0);
+			}
+		break;
 		case CE_MenuItem: {
 			const UMenuItemModel * item = static_cast<const UMenuItemModel*>(model);
 			if (item->buttonFeatures & UMenuItemModel::HasMenu) {
@@ -632,6 +688,10 @@ UBasicStyle::getInsets(
 		case CE_InternalFrame:
 			// plus border
 			return ret + UInsets(2, 3, 3, 3);
+		break;
+		case CE_TabBarTab:
+			// plus border
+			return ret + UInsets(3, 3, 2, 3);
 		break;
 		default:
 			return ret;
@@ -679,7 +739,8 @@ UBasicStyle::paintComponent(UGraphics * g,
 		}
 		break;
 		case  CE_CheckBox: {
-			paintPrimitive(g, PE_PanelButtonBevel, rect, hints, model->widgetState);
+			//paintPrimitive(g, PE_PanelButtonBevel, rect, hints, model->widgetState);
+			paintPrimitive(g, PE_PanelWidget, rect, hints, model->widgetState);
 			//const UCompoundModel * compound = static_cast<const UCompoundModel*>(model);
 			URectangle icon_rect(0, rect.h / 2 - 6, 12, 12);
 			//if (compound->icon == NULL) {
@@ -691,8 +752,9 @@ UBasicStyle::paintComponent(UGraphics * g,
 		}
 		break;
 		case  CE_RadioButton: {
-			paintPrimitive(g, PE_PanelButtonBevel, rect, hints, model->widgetState);
+			//paintPrimitive(g, PE_PanelButtonBevel, rect, hints, model->widgetState);
 			//const UCompoundModel * compound = static_cast<const UCompoundModel*>(model);
+			paintPrimitive(g, PE_PanelWidget, rect, hints, model->widgetState);
 			URectangle icon_rect(0, rect.h / 2 - 6, 12, 12);
 			//if (compound->icon == NULL) {
 				paintPrimitive(g, PE_IndicatorRadioButton, icon_rect, hints, model->widgetState);
@@ -704,11 +766,21 @@ UBasicStyle::paintComponent(UGraphics * g,
 		break;
 		case  CE_MenuItem: {
 			const UMenuItemModel * menuItem = static_cast<const UMenuItemModel*>(model);
-			//paintPrimitive(g, PE_WidgetBackground, model, w);
+			//paintPrimitive(g, PE_PanelWidget, rect, hints, model->widgetState);
 			if (menuItem->widgetState & WidgetHasMouseFocus ||
 				menuItem->widgetState & WidgetHighlighted) {
-				g->setColor(hints->palette.highlight());
-				g->fillRect(rect);
+
+				UVertexArray bg;
+				bg.setColor(hints->palette.highlight().brighter());
+				bg.add(rect.x, rect.y);
+				bg.add(rect.x + rect.w, rect.y);
+				bg.setColor(hints->palette.highlight());
+				bg.add(rect.x + rect.w, rect.y + rect.h);
+				bg.add(rect.x, rect.y + rect.h);
+				g->drawVertexArray(UGraphics::TriangleFan, &bg);
+
+				//g->setColor(hints->palette.highlight());
+				//g->fillRect(rect);
 			}
 			URectangle icon_rect(0, rect.h / 2 - 6, 12, 12);
 			URectangle compound_rect(rect - insets);
@@ -892,6 +964,7 @@ UBasicStyle::paintComponent(UGraphics * g,
 					g->setColor(hints->palette.highlight());
 				}
 				g->fillRect(slider_rect);
+				paintPrimitive(g, PE_Gripper, slider_rect - UInsets(2, 0, 2, 0), hints, model->widgetState);
 				g->setColor(hints->palette.highlight().darker());
 				g->drawRect(slider_rect);
 			}
@@ -918,8 +991,17 @@ UBasicStyle::paintComponent(UGraphics * g,
 			int width = int(rect.w * float(pModel->value) /
 				(pModel->maximum - pModel->minimum)
 			);
-			g->setColor(hints->palette.highlight());
-			g->fillRect(rect.x, rect.y, width, rect.h);
+			//g->setColor(hints->palette.highlight());
+			//g->fillRect(rect.x, rect.y, width, rect.h);
+			UVertexArray bg;
+			bg.setColor(hints->palette.highlight().darker());
+			bg.add(rect.x, rect.y);
+			bg.add(rect.x + width, rect.y);
+			bg.setColor(hints->palette.highlight().brighter());
+			bg.add(rect.x + width, rect.y + rect.h);
+			bg.add(rect.x, rect.y + rect.h);
+			g->drawVertexArray(UGraphics::TriangleFan, &bg);
+
 			paintBorder(g, LineBorder, rect, hints, model->widgetState);
 			if (pModel->textVisible) {
 				g->setColor(hints->palette.text());
@@ -941,12 +1023,17 @@ UBasicStyle::paintComponent(UGraphics * g,
 			const USliderModel * sliderModel = static_cast<const USliderModel*>(model);
 			paintPrimitive(g, PE_PanelWidget, rect, hints, model->widgetState);
 
-			// slider knob
+			// slider groove
 			if (sliderModel->subControls & SC_SliderGroove) {
+/*
 				UPoint left(5, rect.h / 2);
 				UPoint right(rect.w - 5, left.y);
 				g->setColor(hints->palette.dark());
 				g->drawLine(left, right);
+*/
+				int mid_y = rect.h / 2;
+				g->setColor(hints->palette.background().darker());
+				g->drawRect(URectangle(0, mid_y - 2, rect.w, 4));
 			}
 
 			// slider knob
@@ -954,6 +1041,7 @@ UBasicStyle::paintComponent(UGraphics * g,
 				URectangle slider_rect(getSubControlBounds(elem, rect,
 					hints, model, SC_SliderHandle)
 				);
+				/*
 				if (sliderModel->activeSubControls & SC_SliderHandle) {
 					g->setColor(hints->palette.highlight().brighter());
 				} else {
@@ -962,6 +1050,11 @@ UBasicStyle::paintComponent(UGraphics * g,
 				g->fillRect(slider_rect);
 				g->setColor(hints->palette.highlight().darker());
 				g->drawRect(slider_rect);
+				*/
+				paintPrimitive(g, PE_PanelButtonBevel, slider_rect, hints, model->widgetState);
+				paintPrimitive(g, PE_FrameButtonBevel, slider_rect, hints, model->widgetState);
+
+				paintPrimitive(g, PE_Gripper, slider_rect - UInsets(2, 1, 2, 1), hints, model->widgetState);
 			}
 		}
 		break;
@@ -1109,7 +1202,48 @@ UBasicStyle::paintComponent(UGraphics * g,
 		break;
 		case  CE_Splitter:
 		break;
-		case  CE_TabBarTab:
+		case  CE_TabBarTab: {
+			//paintPrimitive(g, PE_PanelButtonBevel, rect, hints, model->widgetState);
+
+			if (hints->opacity) {
+				UColor col(hints->palette.background());
+				if (model->widgetState & (WidgetPressed | WidgetSelected)) {
+					col = col.darker();
+				}
+				col.getFloat()[3] = hints->opacity;
+				g->setColor(col.brighter());
+				// don't paint edges (frame)
+				g->drawLine(rect.x + 2, rect.y + 1, rect.x + rect.w - 2, rect.y + 1);
+
+				UVertexArray bg;
+				bg.setColor(col.brighter());
+				bg.add(rect.x + 1, rect.y + 2);
+				bg.add(rect.x + rect.w, rect.y + 2);
+				bg.setColor(col);
+				bg.add(rect.x + rect.w, rect.y + rect.h);
+				bg.add(rect.x + 1, rect.y + rect.h);
+				g->drawVertexArray(UGraphics::TriangleFan, &bg);
+			}
+
+			paintComponent(g, CE_Compound, rect - insets, hints, model);
+
+			g->setColor(hints->palette.background().darker());
+			UVertexArray array;
+			if (model->widgetState & WidgetSelected) {
+				array.add(rect.x, rect.y + rect.h);
+				array.add(rect.x, rect.y + 2);
+				array.add(rect.x + 2, rect.y);
+				array.add(rect.x + rect.w - 3, rect.y);
+				array.add(rect.x + rect.w - 1, rect.y + 2);
+				array.add(rect.x + rect.w - 1, rect.y + rect.h);
+			} else {
+				array.add(rect.x, rect.y + rect.h);
+				array.add(rect.x, rect.y + 2);
+				array.add(rect.x + rect.w - 1, rect.y + 2);
+				array.add(rect.x + rect.w - 1, rect.y + rect.h);
+			}
+			g->drawVertexArray(UGraphics::LineStrip, &array);
+		}
 		break;
 		case CE_GroupBox: {
 			const UGroupBoxModel * box = static_cast<const UGroupBoxModel*>(model);
@@ -1130,6 +1264,12 @@ UBasicStyle::paintComponent(UGraphics * g,
 			g->setColor(hints->palette.foreground());
 			g->drawString(box->text, 5, 0);
 		}
+		break;
+		case CE_StaticText:
+		case CE_ToolButton:
+			// FIXME: not yet implemented
+		break;
+		default:
 		break;
 	}
 }
@@ -1164,6 +1304,8 @@ UBasicStyle::getBorderInsets(ComponentElement elem, const UStyleHints * hints)
 				break;
 				case CE_InternalFrame:
 					return UInsets(2, 3, 3, 3);
+				break;
+				default:
 				break;
 			}
 		break;
@@ -1216,9 +1358,9 @@ UBasicStyle::getSubControlAt(
 		case  CE_Slider: {
 			URectangle rect = getSubControlBounds(elem, rect, hints, model, SC_SliderHandle);
 			if (rect.contains(pos)) {
-				SC_SliderHandle;
+				return SC_SliderHandle;
 			} else {
-				SC_SliderGroove;
+				return SC_SliderGroove;
 			}
 		}
 		break;
@@ -1258,6 +1400,8 @@ UBasicStyle::getSubControlAt(
 			}
 		}
 		break;
+		default:
+		break;
 	}
 	return SC_None;
 }
@@ -1275,7 +1419,8 @@ UBasicStyle::getSubControlBounds(
 	switch (elem) {
 		case CE_Slider: {
 			const USliderModel * sliderModel = static_cast<const USliderModel*>(model);
-			int width = 10;
+			int width = 8;
+			int height = 14;
 			int maxlen = (hints->orientation == Vertical) ? rect.h : rect.w;
 			int pos = basicstyle_sliderModelToView(
 				sliderModel->minimum,
@@ -1285,13 +1430,15 @@ UBasicStyle::getSubControlBounds(
 			switch (subElem) {
 				case  SC_SliderHandle: {
 					if (hints->orientation == Vertical) {
-						ret.setBounds(rect.x + rect.w / 2 - width / 2, pos,
-							width, width);
+						ret.setBounds(rect.x + rect.w / 2 - height / 2, pos,
+							height, width);
 					} else {
-						ret.setBounds(pos, rect.y + rect.h / 2 - width / 2,
-							width, width);
+						ret.setBounds(pos, rect.y + rect.h / 2 - height / 2,
+							width, height);
 					}
 				}
+				break;
+				default:
 				break;
 			}
 		}
@@ -1303,7 +1450,6 @@ UBasicStyle::getSubControlBounds(
 			maxlen -= 2*width;
 			int range = sliderModel->maximum - sliderModel->minimum;
 			int sliderlen = (sliderModel->blockIncrement * maxlen) / (range + sliderModel->blockIncrement);
-			int pos;
 			int sliderstart = width + basicstyle_sliderModelToView(
 				sliderModel->minimum,
 				sliderModel->maximum,
@@ -1355,6 +1501,8 @@ UBasicStyle::getSubControlBounds(
 						ret.setBounds(sliderstart, 0, sliderlen, width);
 					}
 				break;
+				default:
+				break;
 			}
 		}
 		break;
@@ -1367,6 +1515,8 @@ UBasicStyle::getSubControlBounds(
 				break;
 				case SC_ComboBoxListBoxPopup:
 				break;
+				default:
+				break;
 			}
 		break;
 		case CE_SpinBox:
@@ -1378,6 +1528,8 @@ UBasicStyle::getSubControlBounds(
 				break;
 				case SC_SpinBoxDown:
 					ret.setBounds(rect.w - 12, 8, 12, 8);
+				break;
+				default:
 				break;
 			}
 		break;
@@ -1404,9 +1556,13 @@ UBasicStyle::getSubControlBounds(
 						ret.setBounds(20, y, metrics->getStringWidth(titleBar->text), metrics->getHeight());
 					}
 					break;
+					default:
+					break;
 				}
 			}
 		}
+		break;
+		default:
 		break;
 	}
 	return ret;

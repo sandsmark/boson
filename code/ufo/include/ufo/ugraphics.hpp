@@ -109,12 +109,18 @@ public: // extended methods
 	  */
 	virtual UImageIO * dump() = 0;
 
-	/** @deprecated */
+	/** Explicitly resets attributes. Is also called by @p begin.
+	  * This might be interesting if calling @p begin is not an option.
+	  * @see begin
+	  */
 	virtual void resetDeviceAttributes() {}
-	/** @deprecated */
+	/** Explicitly resets the view matrix. Is also called by @p begin.
+	  * This might be interesting if calling @p begin is not an option.
+	  * @see begin
+	  */
 	virtual void resetDeviceViewMatrix() {}
 	/** @deprecated */
-	virtual void flush() {}
+	void flush() {}
 
 	virtual void setEnabled(GCState state, bool b) = 0;
 	virtual bool isEnabled(GCState state) const = 0;
@@ -160,6 +166,8 @@ public: //
 	/** Returns the clip rect in root coordinates. */
 	virtual URectangle getClipRect() const = 0;
 
+	virtual void setLineWidth(float width) = 0;
+	virtual float getLineWidth() const = 0;
 public: //
 	/** Translates the coordinate system by the given x and y values. */
 	virtual void translate(float x, float y) = 0;

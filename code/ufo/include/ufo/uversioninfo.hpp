@@ -37,7 +37,7 @@
 */
 #define UFO_MAJOR_VERSION	0
 #define UFO_MINOR_VERSION	8
-#define UFO_MICRO_VERSION	0
+#define UFO_MICRO_VERSION	4
 
 namespace ufo {
 struct UVersionInfo {

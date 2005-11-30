@@ -32,7 +32,7 @@
 #include "../uvideodevice.hpp"
 
 #include "../events/ukeysym.hpp"
-#include <boglx.h>
+#include "GL/glx.h"
 #include <X11/Xlib.h>
 
 namespace ufo {
@@ -54,6 +54,7 @@ class UFO_EXPORT UXGLXDriver : public UVideoDriver {
 	UFO_DECLARE_DYNAMIC_CLASS(UXGLXDriver)
 public:
 	UXGLXDriver();
+	virtual ~UXGLXDriver();
 
 public: // Implements UVideoDriver
 	virtual bool init();
@@ -89,6 +90,11 @@ public: // Public methods
 	wchar_t mapX11Unicode(const XKeyEvent & xkey);
 	UMod::Modifier mapX11Modifiers(int modifiers);
 
+protected:
+	friend class UXGLXDevice;
+	/** Removes device from device list. */
+	void destroyed(UXGLXDevice * device);
+
 public: // plugin methods
 	static UPluginBase * createPlugin();
 	static void destroyPlugin(UPluginBase * plugin);
@@ -116,6 +122,7 @@ class UFO_EXPORT UXGLXDevice : public UVideoDevice {
 	UFO_DECLARE_DYNAMIC_CLASS(UXGLXDevice)
 public:
 	UXGLXDevice(UXGLXDriver * driver);
+	virtual ~UXGLXDevice();
 public: // Implements UVideoDevice
 	virtual void setSize(int w, int h);
 	virtual UDimension getSize() const;

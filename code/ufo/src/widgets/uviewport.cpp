@@ -91,7 +91,7 @@ UViewport::UViewport()
 	setLayout(createLayoutManager());
 	setClipping(true);
 	// FIXME: should this be set via style sheets?
-	setOpaque(false);
+	setCssClass("transparent");
 }
 
 void
@@ -153,7 +153,7 @@ UViewport::scrollRectToVisible(const URectangle & rect) {
 		return;
 	}
 
-	const UPoint & p = m_view->getLocation();
+	//const UPoint & p = m_view->getLocation();
 
 	// x vlaue
 

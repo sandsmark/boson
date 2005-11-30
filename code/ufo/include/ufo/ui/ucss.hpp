@@ -32,6 +32,8 @@ class UFO_EXPORT UCss : public UObject {
 public:
 	UCss();
 	UCss(const std::string & filename);
+	/** Deletes all style hints created by this object. */
+	virtual ~UCss();
 
 	void load(const std::string & filename);
 	void load(std::istream & stream);

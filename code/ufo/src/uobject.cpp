@@ -108,6 +108,11 @@ UObject::UObject(const UObject & obj) : UCollectable() {
 	nAllocated++;
 }
 UObject::~UObject() {
+	for (std::list<UObjectSlotNode*>::iterator iter = m_objectSlots.begin();
+			iter != m_objectSlots.end();
+			++iter) {
+		(*iter)->notify(true);
+	}
 	m_sigDestroyed(this);
 	releaseAllPointers();
 	nFreed++;

@@ -53,7 +53,7 @@ _createMenuItemModel(UCompoundModel * model, int checkType,
 	c->icon = model->icon;
 	c->text = model->text;
 	c->acceleratorIndex = model->acceleratorIndex;
-	c->buttonFeatures = model->buttonFeatures;
+	c->buttonFeatures = UMenuItemModel::None;;//model->buttonFeatures;
 	c->checkType = checkType;
 	c->maxIconWidth = maxIconWidth;
 	c->shortcut = shortcut;
@@ -151,6 +151,8 @@ UMenuItem::processMouseEvent(UMouseEvent * e) {
 			} else {
 				UMenuManager::getMenuManager()->highlightItem(this);
 			}
+		break;
+		default:
 		break;
 	}
 	UWidget::processMouseEvent(e);

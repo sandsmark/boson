@@ -75,6 +75,7 @@ UXFrame::setVisible(bool vis) {
 	if (vis) {
 		m_videoDevice->show();
 		m_isVisible = true;
+		UToolkit::getToolkit()->makeContextCurrent(m_context);
 	} else {
 		m_isVisible = false;
 		m_videoDevice->hide();

@@ -58,10 +58,10 @@ public:
 	UString(const std::string & str);
 
 public: // operators
-	bool operator ==(UString & str) const;
-	bool operator ==(const UString & str) const;
+	inline bool operator ==(UString & str) const;
+	inline bool operator ==(const UString & str) const;
 
-	bool operator ==(const std::string & str) const;
+	inline bool operator ==(const std::string & str) const;
 
 	UString & operator =(char * str);
 	UString & operator =(const char * str);
@@ -76,7 +76,7 @@ public: // Public methods
 	  * This string should not be stored as it may be invalid when the UString
 	  * objet gets out of scope.
 	  */
-	const std::string & str() const;
+	inline const std::string & str() const;
 	/** Returns a reference to the internal string.
 	  * Be careful, this changes the internal string for all UString objects
 	  * which are using the shared string.
@@ -85,10 +85,10 @@ public: // Public methods
 	  * objet gets out of scope.
 	  * @see detach
 	  */
-	std::string & str();
+	inline std::string & str();
 
 	/** Returns a const char pointer to the shared string object. */
-	const char * c_str() const;
+	inline const char * c_str() const;
 
 	/** Creates a local copy of the shared string. */
 	void detach();

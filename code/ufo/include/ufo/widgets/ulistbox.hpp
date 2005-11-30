@@ -129,8 +129,8 @@ protected: // Overrides UWidget
 	virtual void paintWidget(UGraphics * g);
 	virtual UDimension getContentsSize(const UDimension & maxSize) const;
 	virtual void processMouseEvent(UMouseEvent * e);
-	virtual void addedToHierarchy();
-	virtual void removedFromHierarchy();
+	virtual void processKeyEvent(UKeyEvent * e);
+	virtual void processWidgetEvent(UWidgetEvent * e);
 
 public: // Public signals
 	/** UListBox * listBox, int firstIndex, int lastIndex */

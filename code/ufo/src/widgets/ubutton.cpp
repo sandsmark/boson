@@ -227,7 +227,7 @@ void
 UButton::activate() {
 	if (isToggable()) {
 		if (m_buttonGroup) {
-			m_buttonGroup->setSelectedButton(this, true);
+			m_buttonGroup->setSelectedButton(this, !isSelected());
 		} else {
 			setSelected(!isSelected());
 		}
@@ -355,6 +355,8 @@ UButton::processMouseEvent(UMouseEvent * e) {
 				setPressed(false);
 			}
 		break;
+		default:
+		break;
 	}
 	UWidget::processMouseEvent(e);
 }
@@ -408,22 +410,38 @@ UButton::setAccelerator(const UKeyStroke & stroke) {
 	}
 	m_accelerator = stroke;
 
-	// search for accel index (i.e. whether this is a mnemonic accelerator
-	std::string text(getText());
-	unsigned int index;
+	// check whether this is a mnemonic accelerator
+	if (stroke.getModifiers() == UMod::Alt) {
+		// release old mnemonic
+		if (getCompoundModel()->acceleratorIndex != -1) {
+			std::string accel("Alt+");
+			accel += '+';
+			accel += getText()[getCompoundModel()->acceleratorIndex];
 
-	// try lower case first
-	index = text.find(char(/*std::*/tolower(stroke.getKeyCode() + 32)));
-	if (index < text.length()) {
-		getCompoundModel()->acceleratorIndex = index;
-	} else {
-		index = text.find(char(stroke.getKeyCode()));
-		if (index < text.length()) {
-			getCompoundModel()->acceleratorIndex = index;
+			releaseShortcut(accel);
 		}
-	}
+		// grab new mnemonic
+		std::string text(getText());
+		std::string::size_type index;
+		// try lower case first
+		index = text.find(char(/*std::*/tolower(stroke.getKeyCode() + 32)));
 
-	grabShortcut(stroke);
+		if (index >= text.length()) {
+			// now normal
+			index = text.find(char(stroke.getKeyCode()));
+			if (index >= text.length()) {
+				//FIXME: oops, nothing
+				getCompoundModel()->acceleratorIndex = -1;
+				updateMnemonic();
+				return;
+			}
+		}
+		getCompoundModel()->acceleratorIndex = int(index);
+		updateMnemonic();
+	} else {
+		// no mnemonic, grab it ourself
+		grabShortcut(stroke);
+	}
 }
 
 UKeyStroke
@@ -433,5 +451,5 @@ UButton::getAccelerator() const {
 
 int
 UButton::getAcceleratorIndex() const {
-	return m_acceleratorIndex;
+	return getCompoundModel()->acceleratorIndex;
 }

@@ -47,106 +47,110 @@ class UFO_EXPORT UDimension {
 public:
 	/** Creates an empty dimension (width == 0 and height == 0).
 	  */
-	UDimension();
+	inline UDimension();
 	/** Creates a dimension with the given width and height.
 	  * @param w The width
 	  * @param h The height
 	  */
-	UDimension(int w, int h);
+	inline UDimension(int w, int h);
 
 	/** @return The width of this dimension. */
-	int getWidth() const;
+	inline int getWidth() const;
 	/** @return The height of this dimension. */
-	int getHeight() const;
+	inline int getHeight() const;
 
 
 	/** @return True if both, width and height are equal to @p invalid
 	  * @see invalid
 	  */
-	bool isInvalid() const;
+	inline bool isInvalid() const;
 	/** @return True if both, width and height are not equal to @p invalid
 	  * @see invalid
 	  */
-	bool isValid() const;
+	inline bool isValid() const;
 	/** @return True if width or height is equal to 0. */
-	bool isEmpty() const;
+	inline bool isEmpty() const;
 
 	/** Clamps this UDimension to have at most the dimension of
 	  * the given @p maxDim. Does nothing if maxDim is smaller than
 	  * this UDimension.
 	  */
-	void clamp(const UDimension & maxDim);
+	inline void clamp(const UDimension & maxDim);
 	/** Expands this UDimension to have at least the dimension of
 	  * the given @p minDim. Does nothing if minDim is bigger than
 	  * this UDimension.
 	  */
-	void expand(const UDimension & minDim);
+	inline void expand(const UDimension & minDim);
 
 	/** If width resp. height of this dimension is equal to @p invalid,
 	  * it is replaced by the width resp. height of the given dimension.
 	  * @param dim The dimension which should be used for updates
 	  *  of invalid values
 	  */
-	void update(const UDimension & dim);
+	inline void update(const UDimension & dim);
 	/** If width resp. height of the given dimension is not euqal to
 	  * @p invalid, the width resp. height of this dimension is replaced by
 	  * this value.
 	  * @param dim The dimension whose valid values replaces the values
 	  *  of this dimension.
 	  */
-	void transcribe(const UDimension & dim);
+	inline void transcribe(const UDimension & dim);
 
 	/** Sets the size of this dimension to the given values.
 	  * @param w The new width
 	  * @param h The new height
 	  */
-	void setSize(int w, int h);
+	inline void setSize(int w, int h);
 	/** This method is for convenience and mimics the API of widget types.
 	  * @return A copy of this dimension object.
 	  */
-	UDimension getSize() const;
+	inline UDimension getSize() const;
 public: // Public operators
-	/** @return True if width and height are both not zero. */
-	bool operator()() { return !(isEmpty()); }
-	/** @return True if width or height is equal to 0. */
-	bool operator!() { return isEmpty(); }
+	/** @see isValid
+	  * @return True if width and height have both "valid" values.
+	  */
+	inline bool operator()() const;
+	/** @see isInvalid
+	  * @return True if width or height is "invalid".
+	  */
+	inline bool operator!() const;
 
 	/** Adds dimension @p dim to this dimension
 	  * @return Reference to this dimension.
 	  */
-	UDimension & operator+=(const UDimension & dim);
+	inline UDimension & operator+=(const UDimension & dim);
 	/** Subtracts dimension @p dim from this dimension
 	  * @return Reference to this dimension.
 	  */
-	UDimension & operator-=(const UDimension & dim);
+	inline UDimension & operator-=(const UDimension & dim);
 
 	/** Increases this dimension using the given insets
 	  * @return Reference to this rectangle.
 	  */
-	UDimension & operator+=(const UInsets & insets);
+	inline UDimension & operator+=(const UInsets & insets);
 	/** Shrinks this dimension using the given insets
 	  * @return Reference to this rectangle.
 	  */
-	UDimension & operator-=(const UInsets & insets);
+	inline UDimension & operator-=(const UInsets & insets);
 
 	/** Multiplies @p c with both width and height of this dimension.
 	  * @return Reference to this dimension.
 	  */
-	UDimension & operator*=(int c);
+	inline UDimension & operator*=(int c);
 	/** Multiplies @p c with both width and height of this dimension.
 	  * @return Reference to this dimension.
 	  */
-	UDimension & operator*=(double c);
+	inline UDimension & operator*=(double c);
 	/** Divides both width and height by @p c.
 	  * @return Reference to this dimension.
 	  */
-	UDimension & operator/=(int c);
+	inline UDimension & operator/=(int c);
 	/** Divides both width and height by @p c.
 	  * @return Reference to this dimension.
 	  */
-	UDimension & operator/=(double c);
+	inline UDimension & operator/=(double c);
 
-	friend std::ostream & operator<<(std::ostream & os, const UDimension & o);
+	inline friend std::ostream & operator<<(std::ostream & os, const UDimension & o);
 public:  // Public attributes
 	/** The width of this dimension object. */
 	int w;
@@ -160,20 +164,20 @@ public: // Public static attributes
 //
 // public operators
 //
-UFO_EXPORT UDimension operator+(const UDimension & dim1, const UDimension & dim2);
-UFO_EXPORT UDimension operator-(const UDimension & dim1, const UDimension & dim2);
-UFO_EXPORT UDimension operator+(const UDimension & dim, const UInsets & in);
-UFO_EXPORT UDimension operator-(const UDimension & dim, const UInsets & in);
-UFO_EXPORT UDimension operator*(const UDimension & dim, int c);
-UFO_EXPORT UDimension operator*(int c, const UDimension & p);
-UFO_EXPORT UDimension operator*(const UDimension & dim, double c);
-UFO_EXPORT UDimension operator*(double c, const UDimension & p);
-UFO_EXPORT UDimension operator/(const UDimension & dim, int c);
-UFO_EXPORT UDimension operator/(const UDimension & dim, double c);
+inline UDimension operator+(const UDimension & dim1, const UDimension & dim2);
+inline UDimension operator-(const UDimension & dim1, const UDimension & dim2);
+inline UDimension operator+(const UDimension & dim, const UInsets & in);
+inline UDimension operator-(const UDimension & dim, const UInsets & in);
+inline UDimension operator*(const UDimension & dim, int c);
+inline UDimension operator*(int c, const UDimension & p);
+inline UDimension operator*(const UDimension & dim, double c);
+inline UDimension operator*(double c, const UDimension & p);
+inline UDimension operator/(const UDimension & dim, int c);
+inline UDimension operator/(const UDimension & dim, double c);
 
 /// Equality
-UFO_EXPORT bool operator==(const UDimension & dim1,const UDimension & dim2);
-UFO_EXPORT bool operator!=(const UDimension & dim1,const UDimension & dim2);
+inline bool operator==(const UDimension & dim1,const UDimension & dim2);
+inline bool operator!=(const UDimension & dim1,const UDimension & dim2);
 
 
 /** wrapper class for UDimension which is derived from UObject.
@@ -182,9 +186,9 @@ UFO_EXPORT bool operator!=(const UDimension & dim1,const UDimension & dim2);
 class UFO_EXPORT UDimensionObject : public UDimension, public UObject {
 	UFO_DECLARE_DYNAMIC_CLASS(UDimensionObject)
 public:
-	UDimensionObject();
-	UDimensionObject(const UDimension & dim);
-	UDimensionObject(int w, int h);
+	inline UDimensionObject();
+	inline UDimensionObject(const UDimension & dim);
+	inline UDimensionObject(int w, int h);
 
 	//
 	// overrides UObject
@@ -276,6 +280,15 @@ UDimension::getSize() const {
 	return UDimension(w, h);
 }
 
+inline bool
+UDimension::operator()() const {
+	return isValid();
+}
+
+inline bool
+UDimension::operator!() const {
+	return !isValid();
+}
 
 
 inline UDimension &

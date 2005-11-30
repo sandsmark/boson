@@ -23,8 +23,8 @@ libwidgets_la_SOURCES = \
 	ulayeredpane.cpp \
 	ulineedit.cpp \
 	ulistbox.cpp \
-	umenu.cpp \
 	umenubar.cpp \
+	umenu.cpp \
 	umenuitem.cpp \
 	upopupmenu.cpp \
 	uprogressbar.cpp \
@@ -36,6 +36,9 @@ libwidgets_la_SOURCES = \
 	useparator.cpp \
 	uslider.cpp \
 	uspinbox.cpp \
+	ustackwidget.cpp \
+	utabbar.cpp \
+	utabwidget.cpp \
 	utextedit.cpp \
 	utextwidget.cpp \
 	uviewport.cpp \

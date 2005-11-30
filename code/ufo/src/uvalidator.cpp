@@ -154,7 +154,6 @@ UDoubleValidator::validate(std::string * text, int * pos) const {
 	if (text->find(' ') != std::string::npos) {
 		return Invalid;
 	}
-	bool ok = false;
 
 	UIStringStream stream(*text);
 
@@ -169,12 +168,12 @@ UDoubleValidator::validate(std::string * text, int * pos) const {
 	std::string::size_type i = text->find('.');
 	if (i < std::string::npos) {
 		i++;
-		int index = i;
+		unsigned int index = i;
 		while (index < text->length() && isdigit((*text)[index])) {
 			index++;
 		}
 
-		if (index - i > m_decimals) {
+		if (int(index - i) > m_decimals) {
 			return Intermediate;
 		}
 	}
