@@ -1,6 +1,6 @@
 This is a copy of libufo cvs with a couple of patches applied.
 
-libufo CVS checkout date: 2005/07/14
+libufo CVS checkout date: 2005/12/01
 
 Patches applied currently:
 - Patch to uwidget.hpp and uwidget.cpp to take a ufo::UCollectable* derivded
@@ -14,20 +14,14 @@ Patches applied currently:
   * widgets use remaining space
   * support for "stretch" property
   -> in general: use our own code, instead of the libufo code
-- Patch to urootpane.cpp and udesktoppane.cpp to fix URootPane::setMenuBar()
-  when there is already a menubar set. I.e. fix menubar removal.
-  For this UDesktopPane::removeDockWidget() got implemented.
-  (patch is also in official libufo cvs (05/07/19))
 - Patch to ulayeredpane.cpp to insert new widgets at the beginning of a layer
   (which makes it the last widget that is painted), if not specified otherwise
 - Patch to ugl_driver.cpp to use bogl functions instead of loading the OpenGL
   library once again
-- Patch to ustylehints.cpp to avoid uninitialized values (especially bordertype)
-  (patch is also in official libufo cvs (05/07/19))
-- Patch to ubasicstyle.cpp to use icon_size.h instead of .w, when calculating
-  the height in getCompountPreferredSize()
-  (patch is also in official libufo cvs (05/07/19))
-- Patch to uabstractcontext.hpp, uabstractcontext.cpp, uwidget.cpp and ubasicmenuitemui.cpp
+- Patch to signal/uobjectslot.hpp:
+  Replacing the static_cast by a dynamic_cast in the ufo::UObjectSlot c'tor, in
+  order to make it compile
+- Patch to uabstractcontext.hpp, uabstractcontext.cpp and uwidget.cpp
   to improve events for our needs:
   Instead of delivering a mouse event to root->getVisibleWidgetAt(), we
   implement a getVisibleWidgetsDFS() function, that starts at the root and finds
@@ -39,41 +33,10 @@ Patches applied currently:
   topmost layer only and to the layered pane itself, if the widget was not
   interested in that event. Now the event is first delivered to the topmost
   layer, then to the layers below it, then to the layered pane.
-  ubasicmenuitemui.cpp had to be patched, because mousePressed() needs to
-  consume events for items as well, not only for menus.
-  UPDATE: AB: after the update to libufo CVS of 05/07/14, the menuitems were NOT
-              patched again. we may need to do though, so. the code is now in
-              umenuitem.cpp (ubasicmenuitemui.cpp doesnt exist anymore)
-- Patch to uwidget.cpp to return (0,0) instead of maxSize when maxSize is 0 in
-  one direction in getPreferredSize().
-- Patch to uinternalframe.cpp to initialize m_frameState
-- Porting menu patch from official libufo cvs (05/07/19)
-- Fix invalid memory access in utextwidget.cpp
-- Fix a crash in utextlayout.cpp due to a uint underflow for the line length
-- Fix to umenumanager.cpp to consume() mouse press events for menu items (before
-  it consumed press events for menus only). This makes sure that a press event
-  is not propagated to the parents (and siblings in a layered pane).
-- Patch to umenumanager.cpp: Fixing highligt state of activated menu item.
-  backported from libufo cvs, 05/08/15, revision 1.14
-- Porting menu patch (ufocusmanager.cpp, revision 1.8) from official libufo cvs (05/08/15)
-- Backporting fix for memory leak in uwdget.cpp: delete m_styleHints, if the
-  object is detached.
-- Backporting fix for a huge memory leak in uvertexarray.*: the getArray() array
-  was never deleted
-- Patch to ucombobox.cpp to remove the trackPointer(m_textEdit) call, as
-  add(getTextEdit()) already calls this. This fixed a memory leak.
-- Patch to uobject.* to add sigDestroyed().
-- Patch to uobject.* to releasePointer() remove only a single occurance of the
-  pointer in the internal list. this fixes a memory leakwhen trackPointer() was
-  called multiple times (the object was removed from the list completely, but
-  unreferenced only once).
 - Patch to uwidget.cpp to use the widget deleter for profiling of the paint()
   method.
   The methods used are virtual and do nothing by default - it is up to the
   user to implement real profiling.
-- Patch to utextlayout.cpp to avoid a crash because if an unexpected m_length
-  value.
-  The crash appeared on at least one amd64 system.
 
 
 

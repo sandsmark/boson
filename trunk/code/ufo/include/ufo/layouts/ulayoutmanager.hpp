@@ -62,7 +62,7 @@ public:
 public: // deprecated
 	/** @deprecated */
 	virtual UDimension
-	getMinimumLayoutSize(const UWidget * container) const { return UDimension(); }
+	getMinimumLayoutSize(const UWidget * /* container */) const { return UDimension(); }
 };
 
 } // namespace ufo

@@ -29,6 +29,7 @@
 
 #include "ufo/widgets/uitem.hpp"
 #include "ufo/events/umouseevent.hpp"
+#include "ufo/events/ukeyevent.hpp"
 
 
 using namespace ufo;
@@ -143,12 +144,14 @@ void
 UListBox::paintWidget(UGraphics * g) {
 	//UWidget::paintWidget(g);
 
-	UInsets insets = getInsets();
+	//UInsets insets = getInsets();
 	// painting cells
+/*
 	int x = insets.left;
 	int y = insets.top;
 	const UColor & background = getBackgroundColor();
 	const UColor & foreground = getForegroundColor();
+*/
 	const std::vector<UItem*> & items = getItems();
 	const UStyleHints * hints = getStyleHints();
 	URectangle rect = getInnerBounds();
@@ -204,31 +207,56 @@ UListBox::processMouseEvent(UMouseEvent * e) {
 	switch (e->getType()) {
 		case UEvent::MousePressed:
 			e->consume();
-
-			int index = locationToIndex(e->getLocation());
-			setSelectedIndex(index);
+			setSelectedIndex(locationToIndex(e->getLocation()));
+		break;
+		default:
 		break;
 	}
 	UWidget::processMouseEvent(e);
 }
 
 void
-UListBox::addedToHierarchy() {
-	UWidget::addedToHierarchy();
-	for (std::vector<UItem*>::const_iterator iter = m_items.begin();
-			iter != m_items.end();
-			++iter) {
-		(*iter)->install(this);
+UListBox::processKeyEvent(UKeyEvent * e) {
+	if (e->isConsumed()) {
+		UWidget::processKeyEvent(e);
+		return;
 	}
+
+	int cur = getSelectedIndex();
+	if (e->getType() == UEvent::KeyPressed) {
+		switch (e->getKeyCode()) {
+			case UKey::UK_KP_DOWN:
+			case UKey::UK_DOWN:
+				setSelectedIndex(cur + 1);
+				e->consume();
+			break;
+			case UKey::UK_KP_UP:
+			case UKey::UK_UP: {
+				setSelectedIndex((cur) ? cur - 1 : 0);
+				e->consume();
+			}
+			break;
+			default:
+			break;
+		}
+	}
+	UWidget::processKeyEvent(e);
 }
 
 void
-UListBox::removedFromHierarchy() {
-	UWidget::removedFromHierarchy();
-	for (std::vector<UItem*>::const_iterator iter = m_items.begin();
-			iter != m_items.end();
-			++iter) {
-		(*iter)->uninstall(this);
+UListBox::processWidgetEvent(UWidgetEvent * e) {
+	if (e->getType() == UEvent::WidgetAdded) {
+		for (std::vector<UItem*>::const_iterator iter = m_items.begin();
+				iter != m_items.end();
+				++iter) {
+			(*iter)->install(this);
+		}
+	} else if (e->getType() == UEvent::WidgetAdded) {
+		for (std::vector<UItem*>::const_iterator iter = m_items.begin();
+				iter != m_items.end();
+				++iter) {
+			(*iter)->uninstall(this);
+		}
 	}
 }
 

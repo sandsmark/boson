@@ -167,6 +167,8 @@ private:
 
 namespace ufo {
 
+struct UObjectSlotNode;
+
 /** @short This is the base class for all dynamic UFO objects.
   * @ingroup core
   *
@@ -175,6 +177,7 @@ namespace ufo {
 
 class UFO_EXPORT UObject : public virtual UCollectable {
 	UFO_DECLARE_CLASS(UObject)
+	friend struct UObjectSlotNode;
 public:
 	UObject();
 	UObject(const UObject &);
@@ -290,6 +293,7 @@ private:
 	std::string m_name;
 
 	std::list<const UCollectable*> m_pointers;
+	std::list<UObjectSlotNode*> m_objectSlots;
 
 public: // Public Signals
 	/** This signal is fired immediately before this object is destroyed

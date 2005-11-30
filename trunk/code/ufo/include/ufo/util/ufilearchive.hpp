@@ -49,14 +49,28 @@ class UFO_EXPORT UFileArchive : public UObject  {
 	UFO_DECLARE_DYNAMIC_CLASS(UFileArchive)
 public: // Public static methods
 	/** Checks if a file exists
-	  * @param fileNameA file to check
+	  * @param fileName file to check
 	  * @return true if the file exists
 	  */
 	static bool exists(const std::string & fileName);
 	/** Reads the contents of the given directory.
-	  * Returns an empty vector when the given directory is a file.
+	  * @return A vector with all files found in the given directory
 	  */
-	static std::vector<std::string> readDir(const std::string & dirName);
+	static std::vector<std::string> readDir(const std::string & path);
+
+	/** Determins the directory component of a given path.
+	  * Example:
+	  * @code
+	  * dirNname ("/usr/local/foobar");  --> Returns: "/usr/local"
+	  * @endcode
+	  * @return The directory name
+	  */
+	static std::string dirName(const std::string & path);
+
+	/** Determines if the given path is really a directory.
+	  * @return True if path is a directory, otherwise false.
+	  */
+	static bool isDirectory(const std::string & path);
 
 	static UFileArchive * getDefault();
 	static void setDefault(UFileArchive * archive);
@@ -68,9 +82,6 @@ public: // c'tors
 	UFileArchive(const std::string & searchPath);
 
 public: // Public methods
-	/** adds some generic search directories */
-	//static void init();
-
 	/** adds a further directory to the search path. */
 	void addArchive(const std::string & arc);
 	/** removes the given directory from the search path */
@@ -78,7 +89,7 @@ public: // Public methods
 	/** cleans up the search path */
 	void removeAllArchives();
 
-	/** Adds a colon separated list to the search path. */
+	/** Adds a colon (i.e. ':') separated list to the search path. */
 	void addSearchPath(const std::string & searchPath);
 	/** Returns a colon separated list of the search path.
 	  * Can be tokenized via UString tokenizer.
@@ -90,34 +101,17 @@ public: // Public methods
 	  */
 	std::vector<std::string> getSearchPathAsVector() const;
 
-	/** Checks if a file exists in the archive
-	  * @param fileNameA file to check
+	/** Checks if a file with the given file name exists in the search path
+	  * @param fileName file to check
 	  * @return true if the file exists
 	  */
-	bool existsInArchive(const std::string & fileNameA);
+	bool existsInArchive(const std::string & fileName);
 
-	/** Returns the full path name of the given file name
-	  * if found in the archive.
-	  * Otherwise returns an empty string.
+	/** @param fileName file to search for
+	  * @return The full path name of the given file name
+	  *  if found in the search path, otherwise an empty string.
 	  */
-	std::string getAbsolutePath(const std::string & fileNameA) const;
-
-	/** Creates a file stream by teh given attributes.
-	  * This is done by iterating through the search path.
-	  * This method does not return NULL, but may return an
-	  * file stream which fails on operations
-	  * (i.e. ifstream::fail returns true).
-	  *
-	  * Please note: The created file stream has to be closed and deleted
-	  * by destroyFileStream!
-	  * @see destroyFileStream
-	  */
-	std::ifstream * createFileStream(const std::string & fileNameA,
-		std::ios_base::openmode modeA = std::ios_base::in);
-
-	/** Closes and destroys a file stream object created by createFileStream.
-	  */
-	void destroyFileStream(std::ifstream * fstream);
+	std::string getAbsolutePath(const std::string & fileName) const;
 
 private: // Private static methods
 	static UFileArchive * createInstance();

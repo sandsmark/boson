@@ -4,8 +4,8 @@
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
-    file              : include/ufo/widgets/ulabel.hpp
-    begin             : Wed May 23 2001
+    file              : include/ufo/widgets/utabwidget.hpp
+    begin             : Fri Sep 23 2005
     $Id$
  ***************************************************************************/
 
@@ -25,55 +25,77 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA *
  ***************************************************************************/
 
-#ifndef ULABEL_HPP
-#define ULABEL_HPP
+#ifndef UTABWIDGET_HPP
+#define UTABWIDGET_HPP
 
-#include "ucompound.hpp"
+#include "uwidget.hpp"
 
 namespace ufo {
 
-class UIcon;
+class UStackWidget;
+class UTabBar;
 
-/** @short A short, static, non-wrapping text field used to describe a
-  * nearby control or to display an icon.
+/** @short A tab widget provides a stack of widgets which order
+  *  may be changed via tabs.
   * @ingroup widgets
+  *
   *
   * @author Johannes Schmidt
   */
-
-class UFO_EXPORT ULabel : public UCompound {
-	UFO_DECLARE_DYNAMIC_CLASS(ULabel)
-	UFO_UI_CLASS(ULabelUI)
-	UFO_STYLE_TYPE(UStyle::CE_Label)
+class UFO_EXPORT UTabWidget : public UWidget {
+	UFO_DECLARE_CLASS(UTabWidget)
 public:
-	ULabel();
-	ULabel(UIcon * icon);
-	ULabel(const std::string & text, UIcon * icon = NULL);
-	/** Creates a label with given text and sets @p buddy as buddy widget.
-	  * @see setBuddy
-	  */
-	ULabel(const std::string & text, UWidget * buddy);
-	/** Creates a label with given text and icon and
-	  * sets @p buddy as buddy widget.
-	  * @see setBuddy
-	  */
-	ULabel(const std::string & text, UIcon * icon, UWidget * buddy);
+	UTabWidget();
+	virtual ~UTabWidget();
 
-	/** Sets the buddy or control widget. If the shortcut mnemonic of this
-	  * label is pressed, the buddy is focused and if it is a button control,
-	  * it will be activated.
-	  */
-	void setBuddy(UWidget * buddy);
-	/** @see setBuddy */
-	UWidget * getBuddy() const;
+public: // Public methods
+	void addTab(UWidget * child, const std::string & label);
+	void removeTab(int index);
 
-protected:  // Overrides UWidget
-	virtual UDimension getContentsSize(const UDimension & maxSize) const;
-	virtual void processShortcutEvent(UShortcutEvent * e);
+	/** Returns the label of the tab bar tab with the given index
+	  * or "" if the index is out of range.
+	  */
+	std::string getTabText(int index) const;
+	/** Returns the tab page with the given index
+	  * or NULL if the index is out of range.
+	  */
+	UWidget * getTabWidget(int index) const;
+
+	/** Returns the index of the tab bar tab with the given label
+	  * or -1 if no tab has this label.
+	  */
+	int getTabIndex(const std::string & label) const;
+	/** Returns the tab index for the given child (or -1). */
+	int getTabIndex(UWidget * child) const;
+
+	void setSelectedIndex(int index);
+	int getSelectedIndex() const;
+
+	int getTabCount() const;
+
+protected: // Protected methods
+	virtual void slotTabSelected(UTabBar * bar);
+
+public: // Public signals
+	USignal1<UTabWidget*> & sigSelectionChanged();
+
+private: // Private signals
+	USignal1<UTabWidget*> m_sigSelectionChanged;
+
 private:
-	UWidget * m_buddy;
+	UStackWidget * m_stackWidget;
+	UTabBar * m_tabBar;
 };
+
+//
+// inline implementation
+//
+
+inline USignal1<UTabWidget*> &
+UTabWidget::sigSelectionChanged() {
+	return m_sigSelectionChanged;
+}
 
 } // namespace ufo
 
-#endif // ULABEL_HPP
+#endif // UTABWIDGET_HPP

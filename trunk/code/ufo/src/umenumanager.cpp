@@ -116,7 +116,7 @@ UMenuManager::processKeyEvent(UKeyEvent * e) {
 			case UKey::UK_KP_LEFT:
 			case UKey::UK_LEFT:
 				if (topLevel) {
-					highlightPreviousSibling(menu);
+					highlightPreviousTopLevel(menu);
 				} else {
 					UMenu * parentMenu = item->getParentMenu();
 					if (parentMenu && !parentMenu->isTopLevelMenu()) {
@@ -131,7 +131,7 @@ UMenuManager::processKeyEvent(UKeyEvent * e) {
 			case UKey::UK_KP_RIGHT:
 			case UKey::UK_RIGHT:
 				if (topLevel) {
-					highlightNextSibling(menu);
+					highlightNextTopLevel(menu);
 				} else if (menu) {
 					recalcPathWithLeaf(dynamic_cast<UMenuItem*>(menu->getPopupMenu()->getWidget(0)));
 				} else {
@@ -147,6 +147,8 @@ UMenuManager::processKeyEvent(UKeyEvent * e) {
 			break;
 			case UKey::UK_ESCAPE:
 				clearPath();
+			break;
+			default:
 			break;
 		}
 	}
@@ -208,6 +210,8 @@ UMenuManager::processMouseEvent(UMouseEvent * e) {
 				highlightItem(dynamic_cast<UMenuItem*>(e->getWidget()));
 			}
 			e->consume();
+		break;
+		default:
 		break;
 	}
 }
@@ -293,7 +297,7 @@ UMenuManager::recalcPathWithLeaf(UMenuItem * item) {
 	}
 	// parent menus of item
 	std::vector<UMenu*> parents;
-	UMenu * menu = dynamic_cast<UMenu*>(item);
+	//UMenu * menu = dynamic_cast<UMenu*>(item);
 
 	UMenu * temp = dynamic_cast<UMenu*>(item->getParentMenu());
 	while (temp) {
@@ -320,6 +324,10 @@ UMenuManager::recalcPathWithLeaf(UMenuItem * item) {
 		} else {
 			break;
 		}
+	}
+	// special case for deselecting top level menu
+	if (!parents.size() && m_menuPath.size() && *(m_menuPath.begin()) == item) {
+		++path_iter;
 	}
 
 	// clear all non-identical parents
@@ -354,8 +362,8 @@ UMenuManager::highlightNextSibling(UMenuItem * item) {
 	if (!parent || !parent->getWidgetCount()) {
 		return;
 	}
-	int startIndex = parent->getIndexOf(item);
-	int index = startIndex;
+	unsigned int startIndex = parent->getIndexOf(item);
+	unsigned int index = startIndex;
 	do {
 		index++;
 		if (index >= parent->getWidgetCount()) {
@@ -398,8 +406,8 @@ UMenuManager::highlightNextTopLevel(UMenuItem * item) {
 	if (!parent || !parent->getWidgetCount()) {
 		return;
 	}
-	int startIndex = parent->getIndexOf(menu);
-	int index = startIndex;
+	unsigned int startIndex = parent->getIndexOf(menu);
+	unsigned int index = startIndex;
 	do {
 		index++;
 		if (index >= parent->getWidgetCount()) {

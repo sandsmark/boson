@@ -74,7 +74,7 @@ UImageIO::UImageIO()
 	, m_data(NULL)
 	, m_size()
 	, m_components(0)
-	//, m_filterRule(NoFilterRule) 
+	//, m_filterRule(NoFilterRule)
 {
 }
 
@@ -83,7 +83,7 @@ UImageIO::UImageIO(const std::string & fileNameA)
 		, m_data(NULL)
 		, m_size()
 		, m_components(0)
-		//, m_filterRule(NoFilterRule) 
+		//, m_filterRule(NoFilterRule)
 {
 	load(fileNameA);
 }
@@ -93,7 +93,7 @@ UImageIO::UImageIO(UImageIO::IStream & streamA, const std::string & extensionA)
 		, m_data(NULL)
 		, m_size()
 		, m_components(0)
-		//, m_filterRule(NoFilterRule) 
+		//, m_filterRule(NoFilterRule)
 {
 	load(streamA, extensionA);
 }
@@ -107,8 +107,7 @@ UImageIO::UImageIO(unsigned char * dataA, int widthA, int heightA, int component
 {
 	m_data = new unsigned char[widthA * heightA * componentsA];
 	//
-	//FIXME !
-	//use memcpy or similar
+	//FIXME use memcpy or similar
 	for (int i = 0; i < widthA * heightA * componentsA; ++i) {
 		m_data[i] = dataA[i];
 	}
@@ -157,25 +156,22 @@ bool
 UImageIO::loadFromArchive(const std::string & fileNameA) {
 	m_comment = fileNameA;
 
-	std::ifstream * fileStream = UFileArchive::getDefault()->createFileStream(
-		fileNameA,
-		std::ios_base::in | std::ios_base::binary
-	);
-	
-	if (!*fileStream) {
+	std::string absolutPath = UFileArchive::getDefault()->getAbsolutePath(fileNameA);
+
+	if (absolutPath.empty()) {
 		// NULL pointers should happen
 		uError() << "UImageIO: file " << fileNameA
 		<< " does not exist in the default file archive" << "\n";
 		return false;
 	}
-	
-	bool valid = load(*fileStream, getFileExtension(fileNameA));
+
+	std::ifstream fileStream(absolutPath.c_str(), std::ios_base::in | std::ios_base::binary);
+
+	bool valid = load(fileStream, getFileExtension(fileNameA));
 
 	if (!valid) {
-		uError() << "UImageIO: Failed to load image " << fileNameA << "\n";
+		uError() << "UImageIO: Failed to load image " << absolutPath << "\n";
 	}
-	// dispose data
-	UFileArchive::getDefault()->destroyFileStream(fileStream);
 
 	return valid;
 }

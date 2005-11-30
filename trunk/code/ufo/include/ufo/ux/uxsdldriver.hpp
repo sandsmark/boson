@@ -52,7 +52,7 @@ class UFO_EXPORT UXSDLDriver : public UVideoDriver {
 	UFO_DECLARE_DYNAMIC_CLASS(UXSDLDriver)
 public:
 	UXSDLDriver(const char * sdlPath = "");
-	~UXSDLDriver();
+	virtual ~UXSDLDriver();
 
 public: // Implements UVideoDriver
 	virtual bool init();

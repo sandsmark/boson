@@ -115,11 +115,9 @@ private: // Private methods
 
 private: // Private attributes
 	UProperties * m_properties;
-	typedef std::map<UPluginInfo, UFontPlugin*> FontPluginCache;
-	typedef std::map<UPluginInfo, ULAFPlugin*> LAFPluginCache;
-	typedef std::map<UPluginInfo, UVideoPlugin*> VideoPluginCache;
+	typedef std::list<std::pair<UPluginInfo, UFontPlugin*> > FontPluginCache;
+	typedef std::list<std::pair<UPluginInfo, UVideoPlugin*> > VideoPluginCache;
 	FontPluginCache m_fontPlugins;
-	LAFPluginCache m_lafPlugins;
 	VideoPluginCache m_videoPlugins;
 };
 

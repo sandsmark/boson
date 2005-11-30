@@ -58,10 +58,10 @@ UDesktopPane::UDesktopPane()
 	, m_bottomDock(new UWidget())
 	, m_rightDock(new UWidget())
 {
-	m_topDock->setOpaque(false);
-	m_leftDock->setOpaque(false);
-	m_bottomDock->setOpaque(false);
-	m_rightDock->setOpaque(false);
+	m_topDock->setCssClass("transparent");
+	m_leftDock->setCssClass("transparent");
+	m_bottomDock->setCssClass("transparent");
+	m_rightDock->setCssClass("transparent");
 
 	m_topDock->setLayout(new UBoxLayout(Vertical, 0, 0));
 	m_bottomDock->setLayout(new UBoxLayout(Vertical, 0, 0));
@@ -111,6 +111,10 @@ UDesktopPane::addDockWidget(UDockWidget * w, DockWidgetArea area) {
 		case RightDockWidgetArea:
 			m_rightDock->add(w);
 			w->setOrientation(Vertical);
+		break;
+		case AllDockWidgetAreas:
+		// FIXME: what does this mean?
+		// seems to be non-sense here
 		break;
 	}
 }
@@ -179,7 +183,7 @@ UDesktopPane::raise(UInternalFrame * frame) {
 	bool topmost = true;
 	// check for stays on top
 	// FIXME: checks only for the top most
-	int first = getLayerBegin(getLayer(frame));
+	unsigned int first = getLayerBegin(getLayer(frame));
 	if (first >= 0 && first < getWidgetCount()) {
 		if (UInternalFrame * tempFrame = dynamic_cast<UInternalFrame*>(getWidget(first))) {
 			if (tempFrame->getFrameState() & FrameModal ||
@@ -287,6 +291,8 @@ UDesktopPane::processWidgetEvent(UWidgetEvent * e) {
 				*this, &UDesktopPane::eventListener)
 			);
 		break;
+		default:
+		break;
 	}
 }
 
@@ -314,6 +320,8 @@ UDesktopPane::eventListener(UEvent * e) {
 				raise(frame);
 			}
 		}
+		break;
+		default:
 		break;
 	}
 }

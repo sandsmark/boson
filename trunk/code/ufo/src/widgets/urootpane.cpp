@@ -77,7 +77,9 @@ URootPane::URootPane()
 
 void
 URootPane::setMenuBar(UMenuBar * menuBar) {
-	if (m_menuBar && m_menuBar->getParent() && m_menuBar->getParent()->getParent() == m_desktopPane) {
+	// FIXME: take a closer look on that
+	if (m_menuBar && m_menuBar->getParent() &&
+		m_menuBar->getParent()->getParent() == m_desktopPane) {
 		m_desktopPane->removeDockWidget(m_menuBar);
 	}
 	m_menuBar = menuBar;
@@ -95,7 +97,7 @@ URootPane::getMenuBar( ) {
 UWidget *
 URootPane::createContentPane() const {
 	UWidget * contentPane = new UWidget();
-	contentPane->setOpaque(false);
+	contentPane->setCssClass("transparent");
 	return contentPane;
 }
 
@@ -252,7 +254,7 @@ URootLayout::getPreferredLayoutSize(const UWidget * container,
 void
 URootLayout::layoutContainer(const UWidget * parent) {
 	URectangle rect = parent->getInnerBounds();
-	int top = 0;
+	//int top = 0;
 
 	m_rootPane->m_desktopPane->setBounds(rect);
 

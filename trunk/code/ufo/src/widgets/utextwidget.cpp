@@ -46,50 +46,62 @@ UFO_IMPLEMENT_DYNAMIC_CLASS(UTextWidget, UScrollableWidget)
 std::string UTextWidget::m_textBuffer;
 //UAttributeSet * UTextWidget::m_attributeBuffer = NULL;
 
+UTextModel *
+_createTextModel(UWidgetModel * model, UDocument * document, UTextLayout * layout) {
+	UTextModel * textModel = new UTextModel();
+	textModel->widgetState = model->widgetState;
+	textModel->document = document;
+	textModel->textLayout = layout;
+	delete (model);
+	return textModel;
+}
+
 UTextWidget::UTextWidget()
 	: UScrollableWidget()
 	//, std::streambuf()
-	, m_type()
 	, m_doc(NULL)
 	, m_textLayout(new UTextLayout())
+	, m_type()
 	, m_columns(0)
 	, m_rows(0)
 {
 	setCssType("textwidget");
+	m_model = _createTextModel(m_model, m_doc, m_textLayout);
+
 	setContentType("text/plain");
 	setText("");
+	// FIXME: is this correct?
 	setFocusable(false);
 
-	UTextModel * textModel = new UTextModel();
-	textModel->widgetState = m_model->widgetState;
-	textModel->document = getDocument();
-	textModel->textLayout = m_textLayout;
-	delete (m_model);
-	m_model = textModel;
-	m_doc->sigTextReplaced().connect(slot(*this, &UTextWidget::docChanged));
+	if (m_doc) {
+		m_doc->sigTextReplaced().connect(slot(*this, &UTextWidget::docChanged));
+	}
 }
 
 UTextWidget::UTextWidget(const std::string & text)
 	: UScrollableWidget()
 	//, std::streambuf()
-	, m_type()
 	, m_doc(NULL)
 	, m_textLayout(new UTextLayout())
+	, m_type()
 	, m_columns(0)
 	, m_rows(0)
 {
 	setCssType("textwidget");
+	m_model = _createTextModel(m_model, m_doc, m_textLayout);
+
 	setContentType("text/plain");
 	setText(text);
+	// FIXME: is this correct?
 	setFocusable(false);
 
-	UTextModel * textModel = new UTextModel();
-	textModel->widgetState = m_model->widgetState;
-	textModel->document = getDocument();
-	textModel->textLayout = m_textLayout;
-	delete (m_model);
-	m_model = textModel;
-	m_doc->sigTextReplaced().connect(slot(*this, &UTextWidget::docChanged));
+	if (m_doc) {
+		m_doc->sigTextReplaced().connect(slot(*this, &UTextWidget::docChanged));
+	}
+}
+
+UTextWidget::~UTextWidget() {
+	delete (m_textLayout);
 }
 
 void
@@ -126,19 +138,13 @@ UTextWidget::setDocument(UDocument * documentA) {
 		releasePointer(m_doc);
 	}
 
-	bool hadDoc = m_doc;
-
 	m_doc = documentA;
 	trackPointer(m_doc);
 
 	caret = getCaret();
 	caret->setPosition(mark);
 	caret->movePosition(position);
-	if (hadDoc) { // false in c'tor only
-		// AB: in c'tor getTextModel() does _NOT_ return a text model
-		// yet! we must not use it!
-		getTextModel()->document = m_doc;
-	}
+	getTextModel()->document = m_doc;
 
 	m_doc->sigTextReplaced().connect(slot(*this, &UTextWidget::docChanged));
 }
@@ -313,6 +319,7 @@ UTextWidget::getContentsSize(const UDimension & maxSize) const {
 
 void
 UTextWidget::processMouseEvent(UMouseEvent * e) {
+	if (isFocusable())
 	switch (e->getType()) {
 		case UEvent::MousePressed: {
 			e->consume();
@@ -330,6 +337,8 @@ UTextWidget::processMouseEvent(UMouseEvent * e) {
 			moveCaretPosition(m_textLayout->viewToModel(pos));
 			repaint();
 		}
+		break;
+		default:
 		break;
 	}
 	UWidget::processMouseEvent(e);

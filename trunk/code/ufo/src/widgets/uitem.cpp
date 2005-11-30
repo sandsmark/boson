@@ -76,9 +76,9 @@ UStringItem::paintItem(
 		bg = hints->palette.highlight();
 	} else {
 		bg = hints->palette.base();
-	}
-	if (hints->opacity != 1.0f) {
-		bg.getFloat()[3] = hints->opacity;
+		if (hints->opacity != 1.0f) {
+			bg.getFloat()[3] = hints->opacity;
+		}
 	}
 	g->setColor(bg);
 	int height = g->getStringSize(m_text).getHeight();

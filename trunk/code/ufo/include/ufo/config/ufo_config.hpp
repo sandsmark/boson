@@ -35,8 +35,7 @@
 #if defined HAVE_CONFIG_H
 // this is our auto configured config header
 #include "ufo_config_gnu.hpp"
-#elif defined(WIN32)
-//&& defined(_MSC_VER)
+#elif defined(WIN32) && defined(_MSC_VER)
 // use msvc header for win 32 targets without configure
 #include "ufo_config_msvc.hpp"
 #else

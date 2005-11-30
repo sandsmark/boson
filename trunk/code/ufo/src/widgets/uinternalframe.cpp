@@ -95,7 +95,7 @@ UInternalFrame::UInternalFrame()
 	, m_frameState(0)
 {
 	setCssType("internalframe");
-	setOpaque(false);
+	setCssClass("transparent");
 	setLayout(new UBorderLayout(0, 0));
 	add(new _TitleBar(this), UBorderLayout::North);
 	add(m_rootPane);
@@ -109,7 +109,7 @@ UInternalFrame::UInternalFrame(const std::string & title)
 	, m_frameState(0)
 {
 	setCssType("internalframe");
-	setOpaque(false);
+	setCssClass("transparent");
 	setLayout(new UBorderLayout(0, 0));
 	add(new _TitleBar(this), UBorderLayout::North);
 	add(m_rootPane);
@@ -122,7 +122,7 @@ UInternalFrame::UInternalFrame(uint32_t frameStyle)
 	, m_frameState(0)
 {
 	setCssType("internalframe");
-	setOpaque(false);
+	setCssClass("transparent");
 	setLayout(new UBorderLayout(0, 0));
 	add(new _TitleBar(this), UBorderLayout::North);
 	add(m_rootPane);
@@ -135,7 +135,7 @@ UInternalFrame::UInternalFrame(const std::string & title, uint32_t frameStyle)
 	, m_frameState(0)
 {
 	setCssType("internalframe");
-	setOpaque(false);
+	setCssClass("transparent");
 	setLayout(new UBorderLayout(0, 0));
 	add(new _TitleBar(this), UBorderLayout::North);
 	add(m_rootPane);
@@ -300,6 +300,8 @@ UInternalFrame::processMouseEvent(UMouseEvent * e) {
 			horizontal = 0;
 			vertical = 0;
 		break;
+		default:
+		break;
 	}
 	UWidget::processMouseEvent(e);
 }
@@ -320,6 +322,8 @@ UInternalFrame::processWidgetEvent(UWidgetEvent * e) {
 		break;
 		case UEvent::WidgetRemoved:
 			m_desktop = NULL;
+		break;
+		default:
 		break;
 	}
 	UWidget::processWidgetEvent(e);
@@ -424,6 +428,8 @@ _TitleBar::processMouseEvent(UMouseEvent * e) {
 						}
 					}
 				break;
+				default:
+				break;
 			}
 			repaint();
 			model->activeSubControls = UStyle::SC_None;
@@ -439,6 +445,8 @@ _TitleBar::processMouseEvent(UMouseEvent * e) {
 				}
 			}
 		}
+		break;
+		default:
 		break;
 	}
 	UWidget::processMouseEvent(e);

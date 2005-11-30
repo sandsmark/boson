@@ -99,8 +99,8 @@ public:
 	virtual ~UPalette();
 
 
-	void setColor(ColorRole role, const UColor & color);
-	const UColor & getColor(ColorRole role) const;
+	inline void setColor(ColorRole role, const UColor & color);
+	inline const UColor & getColor(ColorRole role) const;
 
 	/** Every color of @p pal which is no default color of the default
 	  * constructor overwrites the appropriate value of this palette.
@@ -142,7 +142,7 @@ public:
 
 public: // Public operators
 	bool operator==(const UPalette & pal) const;
-	bool operator!=(const UPalette & pal) const;
+	inline bool operator!=(const UPalette & pal) const;
 
 protected: // Overrides UObject
 	virtual std::ostream & paramString(std::ostream & os) const;

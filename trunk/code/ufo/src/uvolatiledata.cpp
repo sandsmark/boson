@@ -42,8 +42,16 @@ UVolatileData::UVolatileData(UDisplay * display)
 	if (display == NULL && UDisplay::getDefault()) {
 		m_display = UDisplay::getDefault();
 	}
+	if (m_display) {
+		m_display->addVolatileData(this);
+	}
 }
 
+UVolatileData::~UVolatileData() {
+	if (m_display) {
+		m_display->removeVolatileData(this);
+	}
+}
 
 bool
 UVolatileData::needsRefresh() const {

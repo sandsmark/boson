@@ -85,8 +85,6 @@ UAbstractDisplay::addVolatileData(UVolatileData * vdata) {
 	if (std::find(m_volatileData.begin(), m_volatileData.end(), vdata) ==
 			m_volatileData.end()) {
 		m_volatileData.push_back(vdata);
-		// references the volatile data
-		vdata->reference();
 	}
 }
 
@@ -97,7 +95,6 @@ UAbstractDisplay::removeVolatileData(UVolatileData * vdata) {
 
 	if (iter != m_volatileData.end()) {
 		m_volatileData.erase(iter);
-		vdata->unreference();
 	}
 }
 
@@ -279,9 +276,20 @@ UAbstractDisplay::privateDispatchEvent(UEvent * e) {
 			return true;
 		break;
 		case UEvent::Refresh: {
-			for(std::list<UVolatileData*>::iterator iter = m_volatileData.begin();
-					iter != m_volatileData.end(); ++iter) {
+			// refresh volatile data and remove unused data
+			std::list<UVolatileData*>::iterator iter = m_volatileData.begin();
+			std::list<UVolatileData*>::iterator next_iter;
+			while (iter != m_volatileData.end()) {
+				next_iter = ++iter;
 				(*iter)->refresh();
+				iter = next_iter;
+			}
+			// refresh contexts
+			std::vector<UContext*> contexts = getContexts();
+			for(std::vector<UContext*>::iterator citer = contexts.begin();
+					citer != contexts.end();
+					++citer) {
+				(*citer)->refresh();
 			}
 		}
 		break;

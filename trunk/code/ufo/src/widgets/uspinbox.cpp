@@ -110,7 +110,7 @@ USpinBox::setMaximum(float max) {
 void
 USpinBox::setRange(float min, float max) {
 	setMinimum(min);
-	setMaximum(min);
+	setMaximum(max);
 }
 
 float
@@ -144,7 +144,6 @@ USpinBox::processMouseEvent(UMouseEvent * e) {
 	switch (e->getType()) {
 		case UEvent::MousePressed: {
 			e->consume();
-			UPoint pos = e->getLocation();
 			UStyle::SubControls subctrl = getStyle()->getSubControlAt(
 				UStyle::CE_SpinBox, getSize(), getStyleHints(),
 				getModel(), e->getLocation()
@@ -159,6 +158,8 @@ USpinBox::processMouseEvent(UMouseEvent * e) {
 					setValue(m_lineEdit->getDouble() - 1);
 					repaint();
 				break;
+				default:
+				break;
 			}
 		}
 		break;
@@ -166,6 +167,8 @@ USpinBox::processMouseEvent(UMouseEvent * e) {
 			e->consume();
 			getSpinBoxModel()->activeSubControls = UStyle::SC_None;
 			repaint();
+		break;
+		default:
 		break;
 	}
 	UWidget::processMouseEvent(e);

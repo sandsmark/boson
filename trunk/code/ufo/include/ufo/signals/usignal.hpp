@@ -64,6 +64,20 @@ public:
 				iter != _slots.end();
 				++iter) {
 			if ((*iter)->equals(slot)) {
+				(*iter)->node()->notify(false);
+				ret = true;
+				break;
+			}
+		}
+		return ret;
+	}
+protected:
+	bool final_remove(const USlotBase * slot) {
+		bool ret = false;
+		for (SlotIterator iter = _slots.begin();
+				iter != _slots.end();
+				++iter) {
+			if ((*iter)->equals(slot)) {
 				// remove garbage
 				delete (*iter);
 				_slots.erase(iter);
@@ -98,11 +112,15 @@ public:
 		emit();
 	}
 	void emit() {
-		for (SlotIterator next_iter = _slots.begin(), iter = _slots.begin();
-				iter != _slots.end(); iter = next_iter) {
-			++next_iter;
+		for (SlotIterator iter = _slots.begin();iter != _slots.end();) {
 			InSlotType * slot = static_cast<InSlotType*>(*iter);
-			(*slot)();
+			if (!slot->node()->died()) {
+				(*slot)();
+			}
+			++iter;
+			if (slot->node()->died()) {
+				final_remove(slot);
+			}
 		}
 	}
 };
@@ -123,11 +141,15 @@ public:
 		emit(p1);
 	}
 	void emit(typename UTrait<P1>::ref p1) {
-		for (SlotIterator next_iter = _slots.begin(), iter = _slots.begin();
-				iter != _slots.end(); iter = next_iter) {
-			++next_iter;
+		for (SlotIterator iter = _slots.begin();iter != _slots.end();) {
 			InSlotType * slot = static_cast<InSlotType*>(*iter);
-			(*slot)(p1);
+			if (!slot->node()->died()) {
+				(*slot)(p1);
+			}
+			++iter;
+			if (slot->node()->died()) {
+				final_remove(slot);
+			}
 		}
 	}
 };
@@ -149,11 +171,15 @@ public:
 		emit(p1, p2);
 	}
 	void emit(typename UTrait<P1>::ref p1, typename UTrait<P2>::ref p2) {
-		for (SlotIterator next_iter = _slots.begin(), iter = _slots.begin();
-				iter != _slots.end(); iter = next_iter) {
-			++next_iter;
+		for (SlotIterator iter = _slots.begin();iter != _slots.end();) {
 			InSlotType * slot = static_cast<InSlotType*>(*iter);
-			(*slot)(p1, p2);
+			if (!slot->node()->died()) {
+				(*slot)(p1, p2);
+			}
+			++iter;
+			if (slot->node()->died()) {
+				final_remove(slot);
+			}
 		}
 	}
 };
@@ -177,11 +203,15 @@ public:
 	}
 	void emit(typename UTrait<P1>::ref p1, typename UTrait<P2>::ref p2,
 			typename UTrait<P3>::ref p3) {
-		for (SlotIterator next_iter = _slots.begin(), iter = _slots.begin();
-				iter != _slots.end(); iter = next_iter) {
-			++next_iter;
+		for (SlotIterator iter = _slots.begin();iter != _slots.end();) {
 			InSlotType * slot = static_cast<InSlotType*>(*iter);
-			(*slot)(p1, p2, p3);
+			if (!slot->node()->died()) {
+				(*slot)(p1, p2, p3);
+			}
+			++iter;
+			if (slot->node()->died()) {
+				final_remove(slot);
+			}
 		}
 	}
 };
@@ -204,11 +234,15 @@ public:
 	}
 	void emit(typename UTrait<P1>::ref p1, typename UTrait<P2>::ref p2,
 			typename UTrait<P3>::ref p3, typename UTrait<P4>::ref p4) {
-		for (SlotIterator next_iter = _slots.begin(), iter = _slots.begin();
-				iter != _slots.end(); iter = next_iter) {
-			++next_iter;
+		for (SlotIterator iter = _slots.begin();iter != _slots.end();) {
 			InSlotType * slot = static_cast<InSlotType*>(*iter);
-			(*slot)(p1, p2, p3, p4);
+			if (!slot->node()->died()) {
+				(*slot)(p1, p2, p3, p4);
+			}
+			++iter;
+			if (slot->node()->died()) {
+				final_remove(slot);
+			}
 		}
 	}
 };

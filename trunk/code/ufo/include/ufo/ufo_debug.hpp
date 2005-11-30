@@ -71,13 +71,18 @@ public: // typedefs
 public:
 	UDebugStream(std::streambuf * buf) : m_stream(new ostream_type(buf)) {}
 
+#ifdef UFO_DEBUG
 	UDebugStream &
 	operator<<(ostream_type & (*pf)(ostream_type &)) {
-#ifdef UFO_DEBUG
 			*m_stream << (pf);
-#endif
 		return *this;
 	}
+#else
+	UDebugStream &
+	operator<<(ostream_type & (* /* pf */)(ostream_type &)) {
+		return *this;
+	}
+#endif
 
 	template<typename T>
 	UDebugStream &

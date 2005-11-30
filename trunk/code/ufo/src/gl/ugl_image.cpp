@@ -316,10 +316,10 @@ UGL_Image::ensureImage() {
 	}
 	if (!m_autoRefresh) {
 		dispose();
-	}
+	}/*
 	if (m_isValid) {
 		getDisplay()->addVolatileData(this);
-	}
+	}*/
 }
 
 #ifndef GL_BGR

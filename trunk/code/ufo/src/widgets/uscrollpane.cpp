@@ -62,14 +62,14 @@ UScrollPane::UScrollPane(UScrollableWidget * viewA)
 
 	setEventState(UEvent::MouseWheel, true);
 
+	// FIXME: should this be set via style sheets?
+	setCssClass("transparent");
+
 	// FIXME !
 	// to UI class?
 	//setBorder(UBorderFactory::createBevelBorder(Lowered));
-	setBorder(LoweredBevelBorder);//UBorderFactory::createBevelBorder(Lowered));
+	//setBorder(LoweredBevelBorder);//UBorderFactory::createBevelBorder(Lowered));
 	//setBorder(UBorderFactory::createLineBorder(UColor::red));
-
-	// FIXME: should this be set via style sheets?
-	setOpaque(false);
 }
 
 
@@ -142,6 +142,8 @@ UScrollPane::processWidgetEvent(UWidgetEvent * e) {
 		break;
 		case UEvent::WidgetResized:
 			installScrollable();
+		break;
+		default:
 		break;
 	}
 	UWidget::processWidgetEvent(e);

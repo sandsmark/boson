@@ -31,6 +31,7 @@
 #include "../uobject.hpp"
 
 #include "../util/urectangle.hpp"
+#include "../signals/ufo_signals.hpp"
 
 #include <map>
 
@@ -59,8 +60,10 @@ class UFO_EXPORT UXul : public UObject {
 public:
 	UXul();
 	UXul(const std::string & guiFile);
+	UXul(const std::string & guiFile, std::map<std::string, UActionSlot> map);
 	virtual ~UXul();
 	void load(const std::string & guiFile);
+	void setActionMap(std::map<std::string, UActionSlot> map);
 	/** Creates a root pane with widgets created according
 	  *  the previous loaded XUL file.
 	  */
@@ -77,6 +80,7 @@ private: // Private attributes
 	URootPane * m_root;
 	std::string m_title;
 	std::map<std::string, UWidget*> m_map;
+	std::map<std::string, UActionSlot> m_actionMap;
 };
 
 } // namespace ufo

@@ -281,6 +281,7 @@ UTextEdit::processKeyEvent(UKeyEvent * e) {
 
 void
 UTextEdit::processMouseEvent(UMouseEvent * e) {
+	if (isFocusable())
 	switch (e->getType()) {
 		case UEvent::MousePressed: {
 			e->consume();
@@ -301,6 +302,8 @@ UTextEdit::processMouseEvent(UMouseEvent * e) {
 			moveCaretPosition(getTextLayout()->viewToModel(pos));//getRenderer()->viewToModel(m_doc, pos, getFont()));
 			repaint();
 		}
+		break;
+		default:
 		break;
 	}
 	UWidget::processMouseEvent(e);

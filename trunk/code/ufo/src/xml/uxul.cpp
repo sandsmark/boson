@@ -36,6 +36,8 @@
 #include "ufo/widgets/ubutton.hpp"
 #include "ufo/widgets/ucombobox.hpp"
 #include "ufo/widgets/ucheckbox.hpp"
+#include "ufo/widgets/ugroupbox.hpp"
+#include "ufo/widgets/ustackwidget.hpp"
 #include "ufo/widgets/uradiobutton.hpp"
 #include "ufo/widgets/ulabel.hpp"
 #include "ufo/widgets/ulistbox.hpp"
@@ -44,6 +46,7 @@
 #include "ufo/widgets/umenuitem.hpp"
 #include "ufo/widgets/ucheckboxmenuitem.hpp"
 #include "ufo/widgets/umenubar.hpp"
+#include "ufo/widgets/utabwidget.hpp"
 #include "ufo/widgets/utextedit.hpp"
 #include "ufo/widgets/ulineedit.hpp"
 #include "ufo/widgets/uslider.hpp"
@@ -75,11 +78,26 @@ UFO_IMPLEMENT_DYNAMIC_CLASS(UXul, UObject)
 UXul::UXul()
 	: m_doc(NULL)
 	, m_root(NULL)
+	, m_title()
+	, m_map()
+	, m_actionMap()
 {}
 
 UXul::UXul(const std::string & guiFile)
 	: m_doc(NULL)
 	, m_root(NULL)
+	, m_title()
+	, m_map()
+	, m_actionMap()
+{
+	load(guiFile);
+}
+UXul::UXul(const std::string & guiFile, std::map<std::string, UActionSlot> map)
+	: m_doc(NULL)
+	, m_root(NULL)
+	, m_title()
+	, m_map()
+	, m_actionMap(map)
 {
 	load(guiFile);
 }
@@ -153,6 +171,7 @@ createLayout(TiXmlElement * element, UWidget * widget) {
 
 // ugh, very ugly
 static std::map<std::string, UWidget*> * s_map = NULL;
+static std::map<std::string, UActionSlot> * s_actionMap = NULL;
 
 void
 genericWidget(TiXmlElement * element, UWidget * widget) {
@@ -176,14 +195,14 @@ genericWidget(TiXmlElement * element, UWidget * widget) {
 		UCss::parseBlock(stream, hints);
 		widget->setStyleHints(hints);
 	}
-
-	UDimension prefSize;
+/*
+	UDimension prefSize;//widget->getPreferredSize());
 	element->QueryIntAttribute("width", &(prefSize.w));
 	element->QueryIntAttribute("height", &(prefSize.h));
 	if (!prefSize.isEmpty()) {
 		widget->setPreferredSize(prefSize);
 	}
-
+*/
 	if (s_map) {
 		if (element->Attribute("id")) {
 			(*s_map)[element->Attribute("id")] = widget;
@@ -209,15 +228,46 @@ genericWidget(TiXmlElement * element, UWidget * widget) {
 	}
 }
 
+void
+genericButton(TiXmlElement * element, UButton * button) {
+	genericWidget(element, button);
+	if (element->Attribute("label")) {
+		button->setText(element->Attribute("label"));
+	}
+	if (element->Attribute("accesskey")) {
+		std::string accel("Alt+");
+		accel.append(element->Attribute("accesskey"));
+		button->setAccelerator(accel);
+	}
+
+	if (isTrue(element->Attribute("checked"))) {
+		button->setSelected(true);
+	}
+	if (element->Attribute("image")) {
+		button->setIcon(new UImageIcon(element->Attribute("image")));
+	}
+
+	if (element->Attribute("oncommand")) {
+		std::string command(element->Attribute("oncommand"));
+
+		// search in the action map
+		for (std::map<std::string, UActionSlot>::iterator iter = s_actionMap->begin();
+				iter != s_actionMap->end();
+				++iter) {
+			if ((*iter).first == command) {
+				button->sigActivated().connect((*s_actionMap)[command]);
+			}
+		}
+	}
+}
+
 UMenu *
 createMenu(TiXmlElement * elem) {
 	//if (elem->Value() != "menu") {
 	//	return NULL;
 	//}
 	UMenu * menu = new UMenu();
-	if (elem->Attribute("label"))
-		menu->setText(elem->Attribute("label"));
-	genericWidget(elem, menu);
+	genericButton(elem, menu);
 
 	TiXmlElement* popupElement = elem->FirstChildElement();
 	std::string value = UString(popupElement->Value()).lowerCase();
@@ -228,7 +278,7 @@ createMenu(TiXmlElement * elem) {
 	for(; menuElement; menuElement = menuElement->NextSiblingElement()) {
 		std::string value = UString(menuElement->Value()).lowerCase();
 		if ("menuitem" == value) {
-			UMenuItem * item;
+			UMenuItem * item = NULL;
 			if (menuElement->Attribute("type")) {
 				std::string type(menuElement->Attribute("type"));
 				if ("checkbox" == type) {
@@ -236,15 +286,10 @@ createMenu(TiXmlElement * elem) {
 				} else if ("radio" == type) {
 					// FIXME:
 				}
-				if (isTrue(menuElement->Attribute("checked"))) {
-					item->setSelected(true);
-				}
 			} else {
 				item = new UMenuItem();
 			}
-			genericWidget(menuElement, item);
-			if (menuElement->Attribute("label"))
-				item->setText(menuElement->Attribute("label"));
+			genericButton(menuElement, item);
 			menu->add(item);
 		} else if ("menuseparator" == value) {
 			menu->addSeparator();
@@ -262,7 +307,6 @@ createMenuBar(TiXmlElement * elem, URootPane * root) {
 	//}
 	UMenuBar * mbar = new UMenuBar();
 	genericWidget(elem, mbar);
-	UMenu * menu;
 	TiXmlElement* menuElement = elem->FirstChildElement();
 	for(; menuElement; menuElement = menuElement->NextSiblingElement()) {
 		std::string value = UString(menuElement->Value()).lowerCase();
@@ -285,12 +329,7 @@ createRadioGroup(TiXmlElement * elem, UWidget * container) {
 		std::string value = UString(radioElement->Value()).lowerCase();
 		if ("radio" == value) {
 			URadioButton * radioButton = new URadioButton();
-			genericWidget(radioElement, radioButton);
-			if (radioElement->Attribute("label"))
-				radioButton->setText(radioElement->Attribute("label"));
-			if (isTrue(radioElement->Attribute("checked"))) {
-				radioButton->setSelected(true);
-			}
+			genericButton(radioElement, radioButton);
 			radioButton->setButtonGroup(buttonGroup);
 			container->add(radioButton);
 		}
@@ -337,6 +376,44 @@ createComboBox(TiXmlElement * elem) {
 	return box;
 }
 
+void
+createChildren(TiXmlElement * elem, UWidget * container);
+
+UTabWidget *
+createTabBox(TiXmlElement * elem) {
+	std::vector<std::string> m_tabs;
+	std::vector<UWidget*> m_panels;
+
+	if (TiXmlElement * tabs = elem->FirstChildElement("tabs")) {
+		TiXmlElement* tabElement = tabs->FirstChildElement();
+		for(; tabElement; tabElement = tabElement->NextSiblingElement()) {
+			std::string value = UString(tabElement->Value()).lowerCase();
+			if ("tab" == value && tabElement->Attribute("label")) {
+				m_tabs.push_back(tabElement->Attribute("label"));
+			}
+		}
+	}
+	if (TiXmlElement * panels = elem->FirstChildElement("tabpanels")) {
+		TiXmlElement* panelElement = panels->FirstChildElement();
+		for(; panelElement; panelElement = panelElement->NextSiblingElement()) {
+			std::string value = UString(panelElement->Value()).lowerCase();
+			if ("tabpanel" == value) {
+				UWidget * tabPanel = new UWidget();
+				genericWidget(panelElement, tabPanel);
+				createLayout(panelElement, tabPanel);
+				createChildren(panelElement, tabPanel);
+				m_panels.push_back(tabPanel);
+			}
+		}
+	}
+	UTabWidget * tabBox = new UTabWidget();
+	unsigned int min_size = std::min(m_tabs.size(), m_panels.size());
+	for (unsigned int i = 0; i < min_size; ++i) {
+		tabBox->addTab(m_panels[i], m_tabs[i]);
+	}
+	return tabBox;
+}
+
 
 void
 createChildren(TiXmlElement * elem, UWidget * container) {
@@ -358,37 +435,56 @@ createChildren(TiXmlElement * elem, UWidget * container) {
 			container->add(widget);
 			// recursively create children
 			createChildren(widgetElement, widget);
+		} else if ("groupbox" == value) {
+			UGroupBox * box = new UGroupBox();
+			genericWidget(widgetElement, box);
+			if (TiXmlElement * caption = widgetElement->FirstChildElement("caption")) {
+				if (caption->Attribute("label")) {
+					box->setTitle(caption->Attribute("label"));
+				}
+			}
+			container->add(box);
+			// recursively create children
+			createChildren(widgetElement, box);
+		} else if ("deck" == value) {
+			UStackWidget * deck = new UStackWidget(1);
+			genericWidget(widgetElement, deck);
+			container->add(deck);
+			// recursively create children
+			createChildren(widgetElement, deck);
+		} else if ("stack" == value) {
+			UStackWidget * stack = new UStackWidget(0);
+			genericWidget(widgetElement, stack);
+			container->add(stack);
+			// recursively create children
+			createChildren(widgetElement, stack);
 		} else if ("button" == value) {
 			UButton * button = new UButton();
-			genericWidget(widgetElement, button);
-			if (widgetElement->Attribute("label"))
-				button->setText(widgetElement->Attribute("label"));
-			if (widgetElement->Attribute("image"))
-				button->setIcon(new UImageIcon(widgetElement->Attribute("image")));
+			genericButton(widgetElement, button);
 			container->add(button);
 		} else if ("checkbox" == value) {
 			UCheckBox * checkBox = new UCheckBox();
-			genericWidget(widgetElement, checkBox);
-			if (widgetElement->Attribute("label"))
-				checkBox->setText(widgetElement->Attribute("label"));
-			if (isTrue(widgetElement->Attribute("checked"))) {
-				checkBox->setSelected(true);
-			}
+			genericButton(widgetElement, checkBox);
 			container->add(checkBox);
 		} else if ("radio" == value) {
 			URadioButton * radioButton = new URadioButton();
-			genericWidget(widgetElement, radioButton);
-			if (widgetElement->Attribute("label"))
-				radioButton->setText(widgetElement->Attribute("label"));
-			if (isTrue(widgetElement->Attribute("checked"))) {
-				radioButton->setSelected(true);
-			}
+			genericButton(widgetElement, radioButton);
 			container->add(radioButton);
 		} else if ("label" == value) {
 			ULabel * label = new ULabel();
 			genericWidget(widgetElement, label);
-			if (widgetElement->Attribute("value"))
-				label->setText(widgetElement->Attribute("value"));
+			char accesskey = 0;
+			if (widgetElement->Attribute("accesskey")) {
+				accesskey = (widgetElement->Attribute("accesskey"))[0];
+			}
+			if (widgetElement->Attribute("value")) {
+				std::string text = widgetElement->Attribute("value");
+				std::string::size_type index = text.find(accesskey);
+				if (index < text.length()) {
+					text.insert(index, 1, '&');
+				}
+				label->setText(text);
+			}
 			if (widgetElement->Attribute("control")) {
 				std::string ctrl = widgetElement->Attribute("control");
 				if ((*s_map)[ctrl])
@@ -470,6 +566,10 @@ createChildren(TiXmlElement * elem, UWidget * container) {
 			container->add(box);
 		} else if ("radiogroup" == value) {
 			createRadioGroup(widgetElement, container);
+		} else if ("tabbox" == value) {
+			UTabWidget * tabBox = createTabBox(widgetElement);
+			genericWidget(widgetElement, tabBox);
+			container->add(tabBox);
 		}
 
 		// generic widget attributes
@@ -484,21 +584,30 @@ UXul::load(const std::string & guiFile) {
 	m_doc = new TiXmlDocument(guiFile.c_str());
 	bool loadOkay = m_doc->LoadFile();
 	if (!loadOkay) {
-		//sprintf(m_error, "Could not load test file 'demotest.xml'. Error='%s'. Exiting.\n",
-		//doc.ErrorDesc( );
-		//exit( 1 );
+		uError() << "Couldn't load file: " << guiFile << "\n"
+		<< m_doc->ErrorDesc() << "\n";
+		delete (m_doc);
+		m_doc = NULL;
 	}
+}
+
+void
+UXul::setActionMap(std::map<std::string, UActionSlot> map) {
+	m_actionMap = map;
 }
 
 URootPane *
 UXul::createRootPane() {
+	if (!m_doc) {
+		uError() << "no XML document loaded.\n";
+		return NULL;
+	}
 	if (!m_root) {
 		m_root = new URootPane();
 		UWidget * content = m_root->getContentPane();
 
 		TiXmlNode* node = 0;
 		TiXmlElement* windowElement = 0;
-		TiXmlElement* widgetElement = 0;
 
 		node = m_doc->FirstChild();
 
@@ -549,6 +658,7 @@ UXul::createRootPane() {
 
 		// oops, this is tricky
 		s_map = &m_map;
+		s_actionMap = &m_actionMap;
 		genericWidget(windowElement, m_root);
 		genericWidget(windowElement, content);
 
@@ -560,15 +670,19 @@ UXul::createRootPane() {
 
 UXFrame *
 UXul::createFrame() {
+	if (!m_doc) {
+		uError() << "no XML document loaded.\n";
+		return NULL;
+	}
 	UXFrame * frame = static_cast<UXDisplay*>(UXDisplay::getDefault())->createFrame();
 
+	createRootPane();
 	// some base values
 	if (m_title != "") {
 		frame->setTitle(m_title);
 	} else {
 		frame->setTitle("XUL frame");
 	}
-	createRootPane();
 	//frame->setBounds(0, 0, 1, 1);
 	UDimension dim = m_root->getPreferredSize();
 	if (dim.isEmpty()) {

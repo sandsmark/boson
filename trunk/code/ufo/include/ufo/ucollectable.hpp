@@ -68,7 +68,7 @@ public:
 	// FIXME
 	// hm, evil
 	void * operator new(std::size_t size);
-	void operator delete(void * p, std::size_t size);
+	inline void operator delete(void * p, std::size_t /* size */);
 private:
 	mutable unsigned int m_refCount  : 31;
 	unsigned int m_isDynamic :  1;
@@ -103,7 +103,7 @@ UCollectable::getReferenceCount() const {
 }
 
 inline void
-UCollectable::operator delete(void * p, std::size_t size) {
+UCollectable::operator delete(void * p, std::size_t /* size */) {
 	::operator delete(p);
 }
 

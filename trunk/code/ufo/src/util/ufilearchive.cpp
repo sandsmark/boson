@@ -37,6 +37,7 @@
 #ifdef UFO_OS_UNIX
 #include <cstring>
 #include <dirent.h>
+#include <sys/stat.h>
 #endif
 
 using namespace ufo;
@@ -59,7 +60,7 @@ UFileArchive::exists(const std::string & fileName) {
 	return false;
 }
 
-// this code is shamelessly stolen from the LGPL'ed PhysicsFS
+// this code is inspired PhysicsFS
 // by Ryan C. Gordon -- http://icculus.org/physfs/
 std::vector<std::string>
 UFileArchive::readDir(const std::string & dirName) {
@@ -78,24 +79,12 @@ UFileArchive::readDir(const std::string & dirName) {
 			// we're done.
 			break;
 		}
-		if (strcmp(ent->d_name, ".") == 0) { continue; }
-		if (strcmp(ent->d_name, "..") == 0) { continue; }
-/* FIXME !
-following sym links might compromise the system security
-		if (omitSymLinks) {
-			char *p;
-			int len = strlen(ent->d_name) + dlen + 1;
-			if (len > bufsize) {
-				p = realloc(buf, len);
-				if (p == NULL) { continue; }
-				buf = p;
-				bufsize = len;
-			} // if
-
-			strcpy(buf + dlen, ent->d_name);
-			if (__PHYSFS_platformIsSymLink(buf)) { continue; }
-		} // if
-*/
+		if (strcmp(ent->d_name, ".") == 0 ||
+				strcmp(ent->d_name, "..") == 0) {
+			// omit . and ..
+			continue;
+		}
+		// FIXME: should we omit sym links?
 		ret.push_back(ent->d_name);
     } // while
 	closedir(dir);
@@ -119,9 +108,11 @@ following sym links might compromise the system security
 
 	do
 	{
-		if (strcmp(ent.cFileName, ".") == 0) { continue; }
-		if (strcmp(ent.cFileName, "..") == 0) { continue; }
-
+		if (strcmp(ent.cFileName, ".") == 0 ||
+				strcmp(ent.cFileName, "..") == 0) {
+			// omit . and ..
+			continue;
+		}
 		ret.push_back(ent.cFileName);
 
 	} while (FindNextFile(dir, &ent) != 0);
@@ -129,6 +120,40 @@ following sym links might compromise the system security
 	FindClose(dir);
 #endif
 	return ret;
+}
+
+std::string
+UFileArchive::dirName(const std::string & path) {
+	std::string::size_type pos = path.size();
+	// eliminate trailing slashes
+	if (path[path.size() - 1] == '/') {
+		pos = path.find_last_not_of('/');
+	}
+	// search directory slash
+	pos = path.find_last_of('/', pos);
+	// eliminate all slashes
+	pos = path.find_last_not_of('/', pos);
+
+	if (pos == std::string::npos) {
+		return "/";
+	}
+	return path.substr(0, pos + 1);
+}
+
+bool
+UFileArchive::isDirectory(const std::string & path) {
+#if defined(UFO_OS_UNIX)
+	struct stat statbuf;
+	if (stat(path.c_str(), &statbuf) == -1) {
+		// FIXME: process strerror(errno)?
+		return false;
+	}
+	return S_ISDIR(statbuf.st_mode);
+#elif defined(UFO_OS_WIN32) // !UFO_OS_UNIX
+    return ((GetFileAttributes(path.c_str()) & FILE_ATTRIBUTE_DIRECTORY) != 0);
+#else
+	return false;
+#endif
 }
 
 //
@@ -204,13 +229,7 @@ UFileArchive::getSearchPathAsVector() const {
 
 bool
 UFileArchive::existsInArchive(const std::string & fileName) {
-	std::ifstream * stream = createFileStream(fileName);
-	if (*stream) {
-		stream->close();
-		delete(stream);
-		return true;
-	}
-	return false;
+	return (getAbsolutePath(fileName) != "");
 }
 
 
@@ -225,39 +244,6 @@ UFileArchive::getAbsolutePath(const std::string & fileNameA) const {
 		}
 	}
 	return "";
-}
-
-std::ifstream *
-UFileArchive::createFileStream(const std::string & fileNameA,
-		std::ios_base::openmode modeA) {
-	std::ifstream * file = NULL;
-	for (std::vector<std::string>::const_iterator iter = m_archives.begin();
-			iter != m_archives.end(); ++iter) {
-		std::string newFileName(*iter);
-		newFileName += '/';
-		newFileName.append(fileNameA);
-
-		file = new std::ifstream(newFileName.c_str(), modeA);
-
-		if (file) {
-			if (*file) { // valid file stream
-				return file;
-			} else { // free memory
-				delete (file);
-			}
-		}
-	}
-	file = new std::ifstream(fileNameA.c_str(), modeA);
-	// This may be invalid
-	return file;
-}
-
-void
-UFileArchive::destroyFileStream(std::ifstream * fstream) {
-	if (fstream) {
-		fstream->close();
-		delete (fstream);
-	}
 }
 
 // FIXME

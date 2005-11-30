@@ -43,59 +43,59 @@ namespace ufo {
 
 class UFO_EXPORT UPoint {
 public:
-	UPoint();
-	UPoint(int x, int y);
+	inline UPoint();
+	inline UPoint(int x, int y);
 
-	int getX() const;
-	void setX(int x);
+	inline int getX() const;
+	inline void setX(int x);
 
-	int getY() const;
-	void setY(int y);
+	inline int getY() const;
+	inline void setY(int y);
 
 	/** for convenience */
-	void setLocation(const UPoint & p);
+	inline void setLocation(const UPoint & p);
 	/** Returns a copy. For convenience */
-	UPoint getLocation() const;
+	inline UPoint getLocation() const;
 
 	/** This method is for convenience. It adds p to this point.*/
-	void translate(const UPoint & p);
+	inline void translate(const UPoint & p);
 
 	/** @return True if the width and height are equal to @p invalid
 	  * @see invalid
 	  */
-	bool isInvalid() const;
+	inline bool isInvalid() const;
 	/** @return True if both, x and y are exactly 0. */
-	bool isNull() const;
+	inline bool isNull() const;
 
 	/** Adds point p to this point
 	  * @return Reference to this point.
 	  */
-	UPoint & operator+=(const UPoint & p);
+	inline UPoint & operator+=(const UPoint & p);
 	/** Subtracts point p from this point
 	  * @return Reference to this point.
 	  */
-	UPoint & operator-=(const UPoint & p);
+	inline UPoint & operator-=(const UPoint & p);
 	/** Multiplies c to both x and y coordinate of this point.
 	  * @return Reference to this point.
 	  */
-	UPoint & operator*=(int c);
+	inline UPoint & operator*=(int c);
 	/** Multiplies c to both x and y coordinate of this point.
 	  * Truncates the values to integers.
 	  * @return Reference to this point.
 	  */
-	UPoint & operator*=(double c);
+	inline UPoint & operator*=(double c);
 	/** Divides both x and y by c.
 	  * Truncates the values to integers.
 	  * @return Reference to this point.
 	  */
-	UPoint & operator/=(int c);
+	inline UPoint & operator/=(int c);
 	/** Divides both x and y by c.
 	  * Truncates the values to integers.
 	  * @return Reference to this point.
 	  */
-	UPoint & operator/=(double c);
+	inline UPoint & operator/=(double c);
 
-	friend std::ostream & operator<<(std::ostream & os, const UPoint & o);
+	inline friend std::ostream & operator<<(std::ostream & os, const UPoint & o);
 
 public:  // Public attributes
 	int x;
@@ -107,20 +107,20 @@ public: // Public static attributes
 //
 // public operators
 //
-UFO_EXPORT UPoint operator+(const UPoint & p1, const UPoint & p2);
-UFO_EXPORT UPoint operator-(const UPoint & p1, const UPoint & p2);
+inline UPoint operator+(const UPoint & p1, const UPoint & p2);
+inline UPoint operator-(const UPoint & p1, const UPoint & p2);
 // equivalent to UPoint(0, 0) - p.
-UFO_EXPORT UPoint operator-(const UPoint & p);
-UFO_EXPORT UPoint operator*(const UPoint & p, int c);
-UFO_EXPORT UPoint operator*(int c, const UPoint & p);
-UFO_EXPORT UPoint operator*(const UPoint & p, double c);
-UFO_EXPORT UPoint operator*(double c, const UPoint & p);
-UFO_EXPORT UPoint operator/(const UPoint & p, int c);
-UFO_EXPORT UPoint operator/(const UPoint & p, double c);
+inline UPoint operator-(const UPoint & p);
+inline UPoint operator*(const UPoint & p, int c);
+inline UPoint operator*(int c, const UPoint & p);
+inline UPoint operator*(const UPoint & p, double c);
+inline UPoint operator*(double c, const UPoint & p);
+inline UPoint operator/(const UPoint & p, int c);
+inline UPoint operator/(const UPoint & p, double c);
 
 /// Equality
-UFO_EXPORT bool operator==(const UPoint & p1,const UPoint & p2);
-UFO_EXPORT bool operator!=(const UPoint & p1,const UPoint & p2);
+inline bool operator==(const UPoint & p1,const UPoint & p2);
+inline bool operator!=(const UPoint & p1,const UPoint & p2);
 
 /** wrapper class for UDimension which is derived from UObject.
   *@author Johannes Schmidt
@@ -128,9 +128,9 @@ UFO_EXPORT bool operator!=(const UPoint & p1,const UPoint & p2);
 class UFO_EXPORT UPointObject : public UPoint, public UObject {
 	UFO_DECLARE_DYNAMIC_CLASS(UPointObject)
 public:
-	UPointObject();
-	UPointObject(const UPoint & p);
-	UPointObject(int w, int h);
+	inline UPointObject();
+	inline UPointObject(const UPoint & p);
+	inline UPointObject(int w, int h);
 
 	//
 	// overrides UObject

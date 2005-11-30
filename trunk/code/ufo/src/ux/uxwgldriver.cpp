@@ -158,6 +158,7 @@ UXWGLDriver::init() {
 UFO_WGL_PROC(BOOL,wglMakeCurrent,(HDC, HGLRC))
 UFO_WGL_PROC(HGLRC,wglCreateContext,(HDC))
 UFO_WGL_PROC(BOOL,wglDeleteContext,(HGLRC))
+UFO_WGL_PROC(BOOL,wglShareLists,(HGLRC, HGLRC))
 #undef UFO_WGL_PROC
 
 	WNDCLASS wc;
@@ -1081,6 +1082,7 @@ UXWGLDevice::makeContextCurrent() {
 	m_wglDriver->wglMakeCurrent(m_dc, m_glContext);
 }
 
+static HGLRC s_wgl_shared_context = NULL;
 bool
 UXWGLDevice::show() {
 	WNDCLASS wc;
@@ -1134,6 +1136,11 @@ UXWGLDevice::show() {
 	setupPixelFormat(PFD_MAIN_PLANE);
 	m_glContext = m_wglDriver->wglCreateContext(m_dc);
 	makeContextCurrent();
+	if (s_wgl_shared_context == NULL) {
+		s_wgl_shared_context = m_glContext;
+	} else {
+		m_wglDriver->wglShareLists(m_glContext, s_wgl_shared_context);
+	}
 
 	//setSizeHints();
 	setWMHints();
@@ -1154,6 +1161,9 @@ UXWGLDevice::show() {
 
 void
 UXWGLDevice::hide() {
+	if (s_wgl_shared_context == m_glContext) {
+		s_wgl_shared_context = NULL;
+	}
 	m_wglDriver->wglDeleteContext(m_glContext);
 	m_glContext = NULL;
 

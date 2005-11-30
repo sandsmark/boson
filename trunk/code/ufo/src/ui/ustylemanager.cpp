@@ -83,15 +83,12 @@ UStyleManager::UStyleManager()
 	hints->palette = palette;
 	hints->opacity = 1.0f;
 	hints->background = NULL;
-
 	m_hints["default"] = hints;
 
 
-	// FIXME: mem leak
 	UStyleHints * widget = new UStyleHints();
 	m_hints["widget"] = widget;
 
-	// FIXME: mem leak
 	UStyleHints * buttons = new UStyleHints();
 	buttons->border->borderType = StyleBorder;
 	buttons->margin = UInsets(2, 3, 2, 3);
@@ -99,45 +96,40 @@ UStyleManager::UStyleManager()
 	buttons->vAlignment = AlignCenter;
 	m_hints["button"] = buttons;
 
-	// FIXME: mem leak
 	UStyleHints * menuitem = new UStyleHints();
 	menuitem->margin = UInsets(2, 2, 2, 2);
 	menuitem->border->borderType = StyleBorder;
 	menuitem->hAlignment = AlignLeft;
 	m_hints["menuitem"] = menuitem;
 
-	// FIXME: mem leak
 	UStyleHints * separator = new UStyleHints();
 	m_hints["separator"] = separator;
 
-	// FIXME: mem leak
 	UStyleHints * menubar = new UStyleHints();
 	menubar->border->borderType = BottomLineBorder;
 	menubar->border->color[0] = UColor(0.53f, 0.53f, 0.50f);
-
 	m_hints["menubar"] = menubar;
 
-
-	// FIXME: mem leak
 	UStyleHints * popup = new UStyleHints();
 	popup->border->borderType = LineBorder;
 	popup->hAlignment = AlignStretch;
 	popup->vAlignment = AlignStart;
 	m_hints["popupmenu"] = popup;
 
-	// FIXME: mem leak
-
 	UStyleHints * iframe = new UStyleHints();
 	iframe->border->borderType = StyleBorder;
 	m_hints["internalframe"] = iframe;
 
-	// FIXME: mem leak
 	UStyleHints * textedit = new UStyleHints();
 	textedit->border->borderType = LineBorder;
 	textedit->border->color[0] = UColor(0.0f, 0.0f, 0.0f);
 
 	m_hints["textedit"] = textedit;
-	m_hints["listbox"] = textedit;
+	m_hints["listbox"] = textedit->clone();
+
+	UStyleHints * transparent = new UStyleHints();
+	transparent->opacity = 0.0f;
+	m_hints[".transparent"] = transparent;
 }
 
 UStyleManager::UStyleManager(UStyle * style,
@@ -145,6 +137,20 @@ UStyleManager::UStyleManager(UStyle * style,
 	: m_style(style)
 	, m_hints(hints)
 {
+}
+
+UStyleManager::~UStyleManager() {
+	for (std::map<std::string, UStyleHints*>::iterator iter = m_hints.begin();
+			iter != m_hints.end();
+			++iter) {
+		if ((*iter).second) {
+			delete ((*iter).second);
+		}
+	}
+	m_hints.clear();
+	if (m_style) {
+		m_style->unreference();
+	}
 }
 
 
@@ -216,7 +222,9 @@ concat(const std::string & type,
 
 void
 UStyleManager::putStyleHints(const std::string & classid, UStyleHints * styleHints) {
-	m_hints[classid] = styleHints;
+	if (styleHints) {
+		m_hints[classid] = styleHints->clone();;
+	}
 }
 
 void
@@ -225,7 +233,9 @@ UStyleManager::putStyleHints(
 		const std::string & classId,
 		const std::string & name,
 		UStyleHints * styleHints) {
-	m_hints[concat(type, classId, name)] = styleHints;
+	if (styleHints) {
+		m_hints[concat(type, classId, name)] = styleHints->clone();;
+	}
 }
 
 UStyleHints *
@@ -235,9 +245,10 @@ UStyleManager::getStyleHints(
 		const std::string & name) {
 	// FIXME: we get only
 	UStyleHints * hints = NULL;
-	if (m_hints[concat(type, classId, "")]) {
-		m_hints[concat(type, classId, "")]->update(m_hints["default"]);
-		return m_hints[concat(type, classId, "")];
+	std::string type_class(concat(type, classId, ""));
+	if (m_hints[type_class]) {
+		m_hints[type_class]->update(m_hints["default"]);
+		return m_hints[type_class];
 	} else if (m_hints[type]) {
 		hints = m_hints[type];
 	}/* else if (m_parent) {
@@ -250,7 +261,6 @@ UStyleManager::getStyleHints(
 	}
 	// have we CSS style?
 	if (m_hints[concat("", classId, "")]) {
-		// FIXME: mem leak
 		hints = hints->clone();
 		hints->transcribe(m_hints[concat("", classId, "")]);
 		// save a copy
@@ -269,8 +279,9 @@ UStyleManager::loadStyleSheet(const std::string & fileName) {
 		if (m_hints[(*iter).first]) {
 			m_hints[(*iter).first]->transcribe((*iter).second);
 		} else {
-			(*iter).second->update(getStyleHints((*iter).first));
-			m_hints[(*iter).first] = (*iter).second;
+			UStyleHints * hints = ((*iter).second)->clone();
+			hints->update(getStyleHints((*iter).first));
+			m_hints[(*iter).first] = hints;
 		}
 	}
 }

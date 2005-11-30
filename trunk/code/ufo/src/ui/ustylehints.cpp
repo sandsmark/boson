@@ -79,20 +79,20 @@ UStyleHints::transcribe(UStyleHints * hints) {
 	maximumSize.transcribe(hints->maximumSize);
 	preferredSize.transcribe(hints->preferredSize);
 	// FIXME:
-	if (hints->border->borderType == NoBorder) {
+	if (hints->border->borderType != NoBorder) {
 		border->borderType = hints->border->borderType;
 	}
 	for (int i = 0; i < 4; ++i) {
-		if (hints->border->color[i] == UColor()) {
+		if (hints->border->color[i] != UColor()) {
 			border->color[i] = hints->border->color[i];
 		}
-		if (hints->border->style[i] == NoBorderStyle) {
+		if (hints->border->style[i] != NoBorderStyle) {
 			border->style[i] = hints->border->style[i];
 		}
-		if (hints->border->width[i] == 0) {
+		if (hints->border->width[i] != 0) {
 			border->width[i] = hints->border->width[i];
 		}
-		if (hints->border->radius[i] == 0) {
+		if (hints->border->radius[i] != 0) {
 			border->radius[i] = hints->border->radius[i];
 		}
 	}

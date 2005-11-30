@@ -39,6 +39,7 @@ namespace ufo {
 class UIcon;
 class UDocument;
 class UTextLayout;
+
 /** @short A widget model represents the application data of a widget
   *  which is painted by UStyle and modified by UWidget.
   * @ingroup internal
@@ -82,16 +83,33 @@ public:
   */
 class UCompoundModel : public UWidgetModel {
 public:
+	std::string text;
+	UIcon * icon;
+	int acceleratorIndex;
+};
+
+/** @short The button model represents the application data of a generic
+  *  button (including check boxes and radio buttons).
+  * @ingroup internal
+  *
+  * @author Johannes Schmidt
+  */
+class UButtonModel : public UCompoundModel {
+public:
 	enum ButtonFeatures {
 		None = 0,
 		Flat = 1,
 		DefaultButton = 2,
 		HasMenu = 4
 	};
-	std::string text;
-	UIcon * icon;
-	int acceleratorIndex;
-	uint32_t buttonFeatures;
+	enum CheckType {
+		NotCheckable = 0,
+		Exclusive,
+		NonExclusive
+	};
+	int buttonFeatures;
+	int checkType;
+	UKeyStroke shortcut;
 };
 
 /** @short The menu item model represents the application data of a menu item
@@ -100,12 +118,9 @@ public:
   *
   * @author Johannes Schmidt
   */
-class UMenuItemModel : public UCompoundModel {
+class UMenuItemModel : public UButtonModel {
 public:
-	enum CheckType { NotCheckable = 0, Exclusive, NonExclusive };
-	int checkType;
 	int maxIconWidth;
-	UKeyStroke shortcut;
 };
 
 /** @short The group box model represents the application data of a group box.

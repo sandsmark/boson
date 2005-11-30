@@ -67,12 +67,16 @@ UXGLXDriver::UXGLXDriver()
 	m_display = dynamic_cast<UXDisplay*>(UDisplay::getDefault());
 }
 
+UXGLXDriver::~UXGLXDriver() {
+	quit();
+}
+
 bool
 UXGLXDriver::init() {
 	// Get it from DISPLAY environment variable?
 	m_x11Display = XOpenDisplay(XDisplayName(NULL));
 
-	if (m_x11Display == NULL ) {
+	if (m_x11Display == NULL) {
 		uError() << "Couldn't open X11 display\n";
 		return false;
 	}
@@ -129,11 +133,21 @@ UXGLXDriver::isInitialized() {
 
 void
 UXGLXDriver::quit() {
-	XSync(m_x11Display, false);
+	if (!m_isInit) {
+		return;
+	}
+	XSync(m_x11Display, true);
+	// hide all windows
+	for (std::vector<UXGLXDevice*>::iterator iter = m_windowMap.begin();
+			iter != m_windowMap.end(); ++iter) {
+		delete (*iter);
+	}
+
 	XCloseDisplay(m_x11Display);
 	// delete opengl driver
 	if (m_createdGLDriver) {
 		delete (ugl_driver);
+		ugl_driver = NULL;
 	}
 	m_isInit = false;
 }
@@ -192,15 +206,18 @@ UXGLXDriver::getContextFromWindow(int window) const {
 	}
 	return NULL;
 }
-/*
-	std::map<int, UXGLXDevice*>::const_iterator iter = m_windowMap.find(window);
 
-	if (iter != m_windowMap.end() && ((*iter).second)) {
-		std::cerr << (*iter).second << "\n" << ((*iter).second)->getFrame() << "\n";
-		return ((*iter).second)->getFrame()->getContext();
+void
+UXGLXDriver::destroyed(UXGLXDevice * device) {
+	for (std::vector<UXGLXDevice*>::iterator iter = m_windowMap.begin();
+			iter != m_windowMap.end(); ++iter) {
+		if ((*iter) == device) {
+			m_windowMap.erase(iter);
+			break;
+		}
 	}
-	return NULL;
-}*/
+}
+
 
 void
 UXGLXDriver::initKeymap() {
@@ -647,7 +664,7 @@ UXGLXDriver::pushXEvent(UXContext * context, const XEvent & event) {
 				(event.xclient.data.l[0] == m_deleteWindowAtom)) {
 			int visFrames = 0;
 			std::vector<UXFrame*> frames = m_display->getFrames();
-			for (int i = 0; i < frames.size(); ++i) {
+			for (unsigned int i = 0; i < frames.size(); ++i) {
 				if (frames[i]->isVisible()) {
 					visFrames++;
 				}
@@ -696,7 +713,7 @@ public:
 		}
 	}
 	virtual bool isAvailable() {
-		Display *display = display = XOpenDisplay(NULL);
+		Display * display = XOpenDisplay(NULL);
 		if (display != NULL) {
 			XCloseDisplay(display);
 		}
@@ -760,6 +777,11 @@ UXGLXDevice::UXGLXDevice(UXGLXDriver * driver)
 	m_attributes[GLX_ACCUM_GREEN_SIZE] = 0;
 	m_attributes[GLX_ACCUM_BLUE_SIZE] = 0;
 	m_attributes[GLX_ACCUM_ALPHA_SIZE] = 0;
+}
+
+UXGLXDevice::~UXGLXDevice() {
+	hide();
+	m_glxDriver->destroyed(this);
 }
 
 void
@@ -860,7 +882,7 @@ UXGLXDevice::show() {
 	XVisualInfo * visualinfo = chooseVisual();
 
 	XSetWindowAttributes winAttr;
-	XSizeHints sizeHints;
+	//XSizeHints sizeHints;
 	uint32_t mask;
 
 	// windows attributes
@@ -932,10 +954,14 @@ UXGLXDevice::show() {
 	// And finally, raise the window
 	//XMapRaised(m_glxDriver->getX11Display(), m_window);
 
+	return true;
 }
 
 void
 UXGLXDevice::hide() {
+	if (!m_isVisible) {
+		return;
+	}
 	if (s_glx_shared_context == m_glContext) {
 		s_glx_shared_context = NULL;
 	}

@@ -75,6 +75,8 @@ void
 UGL_Graphics::resetDeviceAttributes() {
 	ugl_driver->glDisable(GL_TEXTURE_2D);
 	ugl_driver->glDisable(GL_DEPTH_TEST);
+	ugl_driver->glDisable(GL_LIGHTING);
+	ugl_driver->glCullFace(GL_FRONT);
 
 	ugl_driver->glShadeModel(GL_FLAT);
 
@@ -88,8 +90,18 @@ void
 UGL_Graphics::resetDeviceViewMatrix() {
 	UContext * context = getContext();
 
-	const URectangle & deviceBounds = context->getDeviceBounds();
-	const URectangle & contextBounds = context->getContextBounds();
+	URectangle deviceBounds;
+	URectangle contextBounds;
+	if (context) {
+		deviceBounds = context->getDeviceBounds();
+		contextBounds = context->getContextBounds();
+	} else {
+		// assume full gl viewport
+		int vport[4];
+		ugl_driver->glGetIntegerv(GL_VIEWPORT, vport);
+		deviceBounds = URectangle(vport[0], vport[1] + vport[3], vport[2], vport[3]);
+		contextBounds = deviceBounds;
+	}
 
 	ugl_driver->glViewport(
 		contextBounds.x,
@@ -101,6 +113,9 @@ UGL_Graphics::resetDeviceViewMatrix() {
 	ugl_driver->glMatrixMode(GL_PROJECTION);
 	ugl_driver->glLoadIdentity();
 
+	// set the ortho projection matrix using an offset of 3/8
+	// to eliminate graphic bugs with coordinates drawn at pixel boundaries.
+	// see the red book, appendix ?
 	ugl_driver->glOrtho(
 		0,
 		contextBounds.w,
@@ -109,23 +124,12 @@ UGL_Graphics::resetDeviceViewMatrix() {
 		-100,
 		100
 	);
-	ugl_driver->glTranslatef(0.375, 0.375, 0);
-
-	// set the ortho projection matrix using an offset of 3/8
-	// to eliminate graphic bugs with coordinates drawn at pixel boundaries.
-	// thanks to Paul Martz
-	/*ugl_driver->glOrtho(
-		-0.375,
-		contextBounds.w - 0.375,
-		contextBounds.h - 0.375,
-		-0.375,
-		-100,
-		100
-	);*/
-
+	//ugl_driver->glTranslatef(0.375, 0.375, 0);
 
 	ugl_driver->glMatrixMode(GL_MODELVIEW);
 	ugl_driver->glLoadIdentity();
+
+	ugl_driver->glTranslatef(getTranslationX(), getTranslationY(), 0);
 }
 
 
@@ -168,53 +172,9 @@ UGL_Graphics::begin() {
 	ugl_driver->glPushMatrix();
 
 	// reset states
-	ugl_driver->glDisable(GL_TEXTURE_2D);
-	ugl_driver->glDisable(GL_DEPTH_TEST);
-
-	ugl_driver->glShadeModel(GL_FLAT);
-
-	ugl_driver->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	resetDeviceAttributes();
+	resetDeviceViewMatrix();
 	ugl_driver->glFlush();
-
-	// set up viewport
-	UContext * context = getContext();
-
-	URectangle deviceBounds;
-	URectangle contextBounds;
-	if (context) {
-		deviceBounds = context->getDeviceBounds();
-		contextBounds = context->getContextBounds();
-	} else {
-		// assume full gl viewport
-		int vport[4];
-		ugl_driver->glGetIntegerv(GL_VIEWPORT, vport);
-		deviceBounds = URectangle(vport[0], vport[1] + vport[3], vport[2], vport[3]);
-		contextBounds = deviceBounds;
-	}
-
-	ugl_driver->glViewport(
-		contextBounds.x,
-		deviceBounds.h - contextBounds.y - contextBounds.h,
-		contextBounds.w,
-		contextBounds.h
-	);
-
-	ugl_driver->glMatrixMode(GL_PROJECTION);
-	ugl_driver->glLoadIdentity();
-
-	ugl_driver->glOrtho(
-		0,
-		contextBounds.w,
-		contextBounds.h,
-		0,
-		-100,
-		100
-	);
-	ugl_driver->glTranslatef(0.375, 0.375, 0);
-
-	ugl_driver->glMatrixMode(GL_MODELVIEW);
-	ugl_driver->glLoadIdentity();
-	ugl_driver->glTranslatef(getTranslationX(), getTranslationY(), 0);
 }
 
 void
@@ -250,12 +210,42 @@ UGL_Graphics::clear() {
 }
 
 void
-UGL_Graphics::setEnabled(GCState state, bool b) {
+UGL_Graphics::setEnabled(GCState state, bool b) {/*
+	static bool has_blend_enabled = false;
+	if (state == LineAntialiasing) {
+		if (b) {
+			ugl_driver->glEnable(GL_LINE_SMOOTH);
+			setEnabled(Blending, true);
+		} else {
+			ugl_driver->glDisable(GL_LINE_SMOOTH);
+			if (has_blend_enabled) {
+				setEnabled(Blending, false);
+			}
+		}
+	} else if (state == Blending) {
+		if (b) {
+			if (!has_blend_enabled && !isEnabled(Blending)) {
+				has_blend_enabled = true;
+			}
+			ugl_driver->glEnable(GL_BLEND);
+			ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		} else {
+			ugl_driver->glEnable(GL_LINE_SMOOTH);
+			has_blend_enabled = false;
+		}
+	}*/
 }
 
 bool
 UGL_Graphics::isEnabled(GCState state) const {
-	return false;
+	GLboolean ret[1];
+	ret[0] = 0;
+	if (state == LineAntialiasing) {
+		ugl_driver->glGetBooleanv(GL_LINE_SMOOTH, ret);
+	} else if (state == Blending) {
+		ugl_driver->glGetBooleanv(GL_BLEND, ret);
+	}
+	return ret[0];
 }
 
 // FIXME
@@ -317,14 +307,23 @@ UGL_Graphics::dump() {
 
 void
 UGL_Graphics::setColor(const UColor & color) {
+	bool toggleAlpha = false;
+	if ((m_color.getAlpha() == 1.0f && color.getAlpha() < 1.0f) ||
+		(color.getAlpha() == 1.0f && m_color.getAlpha() < 1.0f)) {
+		toggleAlpha = true;
+	}
 	m_color = color;
 
 	ugl_driver->glColor4fv(m_color.getFloat());
-	if (color.getAlpha() < 1.0f) {
-		ugl_driver->glEnable(GL_BLEND);
-		ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	} else {
-		ugl_driver->glDisable(GL_BLEND);
+	// FIXME: calling those functions between an glBegin()/glEnd()
+	// section is an invalid operation
+	if (toggleAlpha) {
+		if (color.getAlpha() < 1.0f) {
+			ugl_driver->glEnable(GL_BLEND);
+			ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		} else {
+			ugl_driver->glDisable(GL_BLEND);
+		}
 	}
 }
 
@@ -394,6 +393,18 @@ UGL_Graphics::getClipRect() const {
 }
 
 void
+UGL_Graphics::setLineWidth(float width) {
+	ugl_driver->glLineWidth(width);
+}
+
+float
+UGL_Graphics::getLineWidth() const {
+	float ret[1];
+	ugl_driver->glGetFloatv(GL_LINE_WIDTH, ret);
+	return ret[0];
+}
+
+void
 UGL_Graphics::drawString(const std::string & text, int x, int y) {
 	m_font.getRenderer()->drawString(this, text.data(), text.length(), x, y);
 }
@@ -428,17 +439,19 @@ UGL_Graphics::getTranslationY() const {
 //
 // basic drawing operations
 //
-
+static float ufo_line_add =  0.375f;
 void
 UGL_Graphics::drawRect(const URectangle & rect) {
 	// -1 is correct, as lines are drawn like rectangles with
 	// width 1 measured in y direction
+	ugl_driver->glTranslatef(ufo_line_add, ufo_line_add, 0);
 	ugl_driver->glBegin(GL_LINE_LOOP);
 	ugl_driver->glVertex2i(rect.x, rect.y);
 	ugl_driver->glVertex2i(rect.x, rect.y + rect.h - 1);
 	ugl_driver->glVertex2i(rect.x + rect.w - 1, rect.y + rect.h - 1);
 	ugl_driver->glVertex2i(rect.x + rect.w - 1, rect.y);
 	ugl_driver->glEnd();
+	ugl_driver->glTranslatef(-ufo_line_add, -ufo_line_add, 0);
 }
 
 void
@@ -448,26 +461,33 @@ UGL_Graphics::fillRect(const URectangle & rect) {
 
 void
 UGL_Graphics::drawLine(const UPoint & p1, const UPoint & p2) {
+	ugl_driver->glTranslatef(ufo_line_add, ufo_line_add, 0);
 	ugl_driver->glBegin(GL_LINES);
 	ugl_driver->glVertex2i(p1.x, p1.y);
 	ugl_driver->glVertex2i(p2.x, p2.y);
 	ugl_driver->glEnd();
+	ugl_driver->glTranslatef(-ufo_line_add, -ufo_line_add, 0);
 }
 void
 UGL_Graphics::drawVertexArray(VertexType type, UVertexArray * buffer) {
 	int glType;
+			ugl_driver->glTranslatef(ufo_line_add, ufo_line_add, 0);
 	switch (type) {
 		case Lines:
 			glType = GL_LINES;
 		break;
 		case LineStrip:
 			glType = GL_LINE_STRIP;
+			//ugl_driver->glTranslatef(ufo_line_add, ufo_line_add, 0);
 		break;
 		case Triangles:
 			glType = GL_TRIANGLES;
 		break;
 		case TriangleStrip:
 			glType = GL_TRIANGLE_STRIP;
+		break;
+		case TriangleFan:
+			glType = GL_TRIANGLE_FAN;
 		break;
 		default:
 			glType = GL_LINE_STRIP;
@@ -477,8 +497,20 @@ UGL_Graphics::drawVertexArray(VertexType type, UVertexArray * buffer) {
 		ugl_driver->glInterleavedArrays(GL_V3F, 0, buffer->getArray());
 		ugl_driver->glDrawArrays(glType, 0, buffer->getCount());
 	} else if (buffer->getType() == UVertexArray::C3F_V3F) {
+		ugl_driver->glShadeModel(GL_SMOOTH);
 		ugl_driver->glInterleavedArrays(GL_C3F_V3F, 0, buffer->getArray());
 		ugl_driver->glDrawArrays(glType, 0, buffer->getCount());
+		ugl_driver->glShadeModel(GL_FLAT);
+	}
+			ugl_driver->glTranslatef(-ufo_line_add, -ufo_line_add, 0);
+	switch (type) {
+		case Lines:
+			glType = GL_LINES;
+		break;
+		case LineStrip:
+			glType = GL_LINE_STRIP;
+			//ugl_driver->glTranslatef(-ufo_line_add, -ufo_line_add, 0);
+		break;
 	}
 }
 

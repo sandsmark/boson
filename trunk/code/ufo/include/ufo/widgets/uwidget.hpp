@@ -112,6 +112,7 @@ class UStyleManager;
 class UStyleOption;
 class UWidgetModel;
 
+
 /**
  * @internal
  * WARNING: this is a BoUfo extension to libufo. It is NOT part of the
@@ -126,9 +127,19 @@ public:
 	virtual void endPaint() {}
 };
 
+
+
 /** @short The base class for all widgets.
   * @ingroup widgets
   *
+  * Every UFO widget is derived from UWidget.
+  * All base functionality is provided by this class, i.e.
+  * input event processing, sizing, container functionality
+  * (adding other widgets), layouting
+  * (using layout managers, default is UBoxLayout),
+  * several widget attributes, ...
+  *
+  * @see UBoxLayout
   * @author Johannes Schmidt
   */
 
@@ -168,6 +179,8 @@ public:
 	 * libufo API!
 	 **/
 	void setBoUfoWidgetDeleter(UBoUfoWidgetDeleter* deleter);
+
+
 
 	/** @return True if this widget is currently visible on screen
 	  *  (mapped to screen). This means also, that all parent widgets are
@@ -225,7 +238,7 @@ public:
 	virtual bool isActive() const;
 
 	/** Many attributes of a widget can only be stated when it is
-	  * within a valid containment hierarchy.
+	  * within a valid containment hierarchy (and mapped to screen).
 	  * For example, the correct UI object can be determined only if
 	  *  the top level widget belongs to a UFO context.
 	  * @see sigWidgetAdded
@@ -235,23 +248,19 @@ public:
 	  *  visible on screen.
 	  */
 	virtual bool isInValidHierarchy() const;
-	/** Returns true when this widget has a UI object (responsible for
-	  * drawing and event handling) and
-	  * a layout manager has laid out all children.
+	/** Returns true if the layout manager has laid out all children.
 	  */
 	bool isValid() const;
-	/** relayouts the container and checks whether the ui delegate is valid.
-	  * If this widget has never been validated ( e.g. after construction ),
-	  *  the ui delegate isn´t valid
+	/** Relayouts the container.
 	  *
-	  * @see updateUI
 	  * @see ULayoutManager
 	  */
 	virtual void validate();
 	virtual void validateSelf();
 
-	/** Invalidates the specified attributes of this widget. This is called by
-	  * invalidate.
+	/** Invalidates the specified attributes of this widget and forces
+	  * a relayout of child widgets.
+	  * This is called by invalidate.
 	  * @see invalidate
 	  */
 	virtual void invalidateSelf();
@@ -760,7 +769,10 @@ public:
 
 	/** @return The layout manager used by this widget. */
 	ULayoutManager * getLayout() const;
-	/** Sets the layout manager for this widget. */
+	/** Sets the layout manager for this widget.
+	  * The default layout manager is UBoxLayout
+	  * @see UBoxLayout
+	  */
 	void setLayout(ULayoutManager * layout);
 
 	/** This method returns a size hint used by the layout manager to compute
@@ -891,7 +903,10 @@ protected:  // Protected methods
 	  * @see UBorderLayout
 	  */
 	virtual void addImpl(UWidget * w, UObject * constraints, int index);
-	virtual bool removeImpl(std::vector<UWidget*>::iterator iter);
+	/** Removes the widget at the given index.
+	  * @return True if succesfull
+	  */
+	virtual bool removeImpl(int index);
 
 	/** Notifies recursively all childs that they have been added to
 	  * a valid containment hierarchy.
@@ -976,7 +991,7 @@ protected:  // Protected methods
 	virtual UDimension getContentsSize(const UDimension & maxSize) const;
 	void detachStyleHints();
 
-protected:  // Protected methods
+public:  // Protected methods
 	bool testState(uint32_t state) const;
 	void setState(uint32_t state, bool b = true);
 	void setStates(uint32_t states);
@@ -1392,14 +1407,9 @@ UWidget::contains(const UPoint & p) const {
 	return (p.x >= 0 && p.x < getWidth() && p.y >= 0 && p.y < getHeight());
 }
 
-inline bool
-UWidget::containsRootPoint(int x, int y) const {
-	return contains(rootPointToPoint(x, y));
-}
-
-inline bool
-UWidget::containsRootPoint(const UPoint & p) const {
-	return contains(rootPointToPoint(p));
+inline UPoint
+UWidget::pointToRootPoint(const UPoint & p) const {
+	return (p + getRootLocation());
 }
 
 inline UPoint
@@ -1408,8 +1418,8 @@ UWidget::pointToRootPoint(int x, int y) const {
 }
 
 inline UPoint
-UWidget::pointToRootPoint(const UPoint & p) const {
-	return (p + getRootLocation());
+UWidget::rootPointToPoint(const UPoint & p) const {
+	return (p - getRootLocation());
 }
 
 inline UPoint
@@ -1417,9 +1427,14 @@ UWidget::rootPointToPoint(int x, int y) const {
 	return rootPointToPoint(UPoint(x, y));
 }
 
-inline UPoint
-UWidget::rootPointToPoint(const UPoint & p) const {
-	return (p - getRootLocation());
+inline bool
+UWidget::containsRootPoint(int x, int y) const {
+	return contains(rootPointToPoint(x, y));
+}
+
+inline bool
+UWidget::containsRootPoint(const UPoint & p) const {
+	return contains(rootPointToPoint(p));
 }
 
 

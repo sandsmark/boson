@@ -40,8 +40,8 @@ UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(USlider, UAbstractSlider)
 
 USlider::USlider()
 	: UAbstractSlider()
-	, m_mousePress()
 	, m_isDragging(false)
+	, m_mousePress()
 {
 	// init sub controls for style
 	getSliderModel()->subControls = UStyle::SubControls(
@@ -53,8 +53,8 @@ USlider::USlider()
 
 USlider::USlider(Orientation orientation)
 	: UAbstractSlider()
-	, m_mousePress()
 	, m_isDragging(false)
+	, m_mousePress()
 {
 	setOrientation(orientation);
 	// init sub controls for style
@@ -67,8 +67,8 @@ USlider::USlider(Orientation orientation)
 
 USlider::USlider(int min, int max, int value)
 	: UAbstractSlider()
-	, m_mousePress()
 	, m_isDragging(false)
+	, m_mousePress()
 {
 	setRange(min, max);
 	setValue(value);
@@ -82,8 +82,8 @@ USlider::USlider(int min, int max, int value)
 
 USlider::USlider(Orientation orientation, int min, int max, int value)
 	: UAbstractSlider()
-	, m_mousePress()
 	, m_isDragging(false)
+	, m_mousePress()
 {
 	setOrientation(orientation);
 	setRange(min, max);
@@ -99,9 +99,9 @@ USlider::USlider(Orientation orientation, int min, int max, int value)
 UDimension
 USlider::getContentsSize(const UDimension & maxSize) const {
 	if (getStyleHints()->orientation == Vertical) {
-		return UDimension(10, 100);
+		return UDimension(0, 100);
 	} else {
-		return UDimension(100, 10);
+		return UDimension(100, 0);
 	}
 }
 
@@ -178,6 +178,8 @@ USlider::processMouseEvent(UMouseEvent * e) {
 			}
 			setValue(getValue() + idelta);
 		}
+		break;
+		default:
 		break;
 	}
 

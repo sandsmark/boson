@@ -42,21 +42,29 @@ typedef void (*ProxyPtr)(void*);
 typedef void (*FuncPtr)(void*);
 
 struct UFO_EXPORT USlotNode {
+	USlotNode() : m_died(false) {}
+	USlotNode(FuncPtr proxy) : _proxy(proxy), m_died(false) {}
 	virtual ~USlotNode() {}
 
 	// message from child that it has died and we should start
 	// our shut down.  If from_child is true, we do not need
 	// to clean up the child links.
-	virtual void notify(bool from_child) {}
+	virtual void notify(bool /* from_child */) {
+		m_died = true;
+	}
+	virtual bool died() { return m_died; }
 
-	virtual bool equals(const USlotNode * node) const { return false; }
+	virtual bool equals(const USlotNode * /* node */) const { return false; }
 
 	bool connected() { return _proxy != NULL; }
 
-	USlotNode(FuncPtr proxy) : _proxy(proxy) {}
-
-	/** A proxy func which does the actual callback calling. */
+public: // Public attributes
+	/** A proxy func which does the actual callback calling.
+	  * FIXME: make this private.
+	  */
 	ProxyPtr _proxy;
+private: // Private attributes
+	bool m_died;
 };
 
 /** Base class for slot templates.
@@ -64,7 +72,7 @@ struct UFO_EXPORT USlotNode {
   */
 
 class UFO_EXPORT USlotBase {
-public: 
+public:
 	USlotBase() : _node(0) {}
 	USlotBase(USlotNode * node) : _node(node) {}
 	~USlotBase() {}
@@ -100,7 +108,7 @@ public:
 	//typedef typename Trait<R>::type RType;
 	typedef void (*Callback)();
 	typedef void (*Proxy)(void*);
-	
+
 	void operator()() {
 		if (!node()) return;
 		//if (!node_->valid()) { clear(); return RType(); }
@@ -114,7 +122,7 @@ template <typename P1>
 class UFO_EXPORT USlot1 : public USlotBase {
 public:
 	typedef void (*Proxy)(typename UTrait<P1>::ref, void*);
-	
+
 	void operator ()(typename UTrait<P1>::ref p1) {
 		if (!node()) return;
 		//if (!node_->valid()) { clear(); return RType(); }
@@ -128,7 +136,7 @@ template <typename P1, typename P2>
 class UFO_EXPORT USlot2 : public USlotBase {
 public:
 	typedef void (*Proxy)(typename UTrait<P1>::ref, typename UTrait<P2>::ref, void*);
-	
+
 	void operator ()(typename UTrait<P1>::ref p1, typename UTrait<P2>::ref p2) {
 		if (!node()) return;
 		//if (!node_->valid()) { clear(); return RType(); }

@@ -44,6 +44,7 @@ class UVolatileData : public virtual UObject {
 	UFO_DECLARE_ABSTRACT_CLASS(UVolatileData)
 public: // constructor
 	UVolatileData(UDisplay * display = NULL);
+	virtual ~UVolatileData();
 
 public: // Public virtual methods
 	virtual void refresh() = 0;
