@@ -28,6 +28,10 @@
 #include <ufo/widgets/uslider.hpp>
 #include <ufo/ui/uuidefs.hpp>
 #include "ufoext/ubogridlayout.h"
+#include "ufoext/uboboxlayout.h"
+
+// AB: UBoxLayout is deprecated for us. Use UBoBoxLayout instead.
+#define UBoxLayout UBoxLayoutDontUse
 
 // AB: make sure that we are compatible to system that have QT_NO_STL defined
 #ifndef QT_NO_STL
@@ -807,10 +811,10 @@ void BoUfoWidget::setLayoutClass(LayoutClass layout)
 		setLayout(0);
 		break;
 	case UHBoxLayout:
-		setLayout(new ufo::UBoxLayout(ufo::Horizontal));
+		setLayout(new ufo::UBoBoxLayout(ufo::Horizontal));
 		break;
 	case UVBoxLayout:
-		setLayout(new ufo::UBoxLayout(ufo::Vertical));
+		setLayout(new ufo::UBoBoxLayout(ufo::Vertical));
 		break;
 	case UBorderLayout:
 		setLayout(new ufo::UBorderLayout());
