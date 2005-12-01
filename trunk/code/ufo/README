@@ -10,10 +10,6 @@ Patches applied currently:
 - Patch to ufo/include/ufo/usysteminfo.hpp and ufo/include/ufo/ux/uxglxdriver.hpp
   to include boglx.h instead of glx.h
   note that this must be included before X11/Xlib.h
-- Patch to uboxlayout.cpp:
-  * widgets use remaining space
-  * support for "stretch" property
-  -> in general: use our own code, instead of the libufo code
 - Patch to ulayeredpane.cpp to insert new widgets at the beginning of a layer
   (which makes it the last widget that is painted), if not specified otherwise
 - Patch to ugl_driver.cpp to use bogl functions instead of loading the OpenGL
