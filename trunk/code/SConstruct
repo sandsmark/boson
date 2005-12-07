@@ -52,6 +52,8 @@ boson_modules += ' openal'
 boson_modules += ' boson_openal'
 boson_modules += ' boson_static'
 boson_modules += ' boson_boui'
+boson_modules += ' boson_plugins'
+boson_modules += ' boson'
 
 ## Import the main configuration tool
 from generic import configure
