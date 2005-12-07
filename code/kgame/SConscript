@@ -1,0 +1,38 @@
+Import('env')
+
+kmessage_sources = """
+	kmessageio.cpp
+	kmessageserver.cpp
+	kmessageclient.cpp
+"""
+
+kgame_sources = """
+	kgame.cpp
+	kplayer.cpp
+	kgamenetwork.cpp
+	kgameproperty.cpp
+	kgamemessage.cpp
+	kgameio.cpp
+	kgameprocess.cpp
+	kgamechat.cpp
+	kgamepropertyhandler.cpp
+	kgameerror.cpp
+	kgamesequence.cpp
+"""
+
+dialogs_sources = """
+	kgamedebugdialog.cpp
+"""
+
+libkdegames_sources = """
+	kchatbase.cpp
+	kgameprogress.cpp
+	kstdgameaction.cpp
+"""
+
+kgame = env.kobject('staticlib')
+kgame.target = 'libkgame'
+kgame.includes = '../bodebug'
+kgame.source = kmessage_sources + kgame_sources + dialogs_sources + libkdegames_sources
+kgame.execute()
+

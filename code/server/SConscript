@@ -1,0 +1,15 @@
+Import('env')
+
+boserver = env.kobject('program')
+boserver.target = 'boserver'
+boserver.includes = '../bodebug'
+boserver.libs = 'qt-mt kdecore kgame'
+boserver.source = """
+	main.cpp
+	server.cpp
+	webinterface.cpp
+	game.cpp
+	player.cpp
+"""
+boserver.execute()
+

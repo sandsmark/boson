@@ -1,0 +1,25 @@
+Import('env')
+
+lib = env.kobject('staticlib')
+lib.target = 'libplugin.a'
+lib.includes = '../../bodebug ../../bogl'
+lib.source = """
+		bogroundrendererfactory.cpp
+		bodefaultgroundrenderer.cpp
+		bofastgroundrenderer.cpp
+		boveryfastgroundrenderer.cpp
+		boquickgroundrenderer.cpp
+		bogroundrendererbase.cpp
+		bocolormaprenderer.cpp
+		boquadtreenode.cpp
+"""
+lib.execute()
+
+
+plugin= env.kobject('staticlib')
+plugin.target = 'libplugin.so'
+plugin.includes = '../../bodebug ../../bogl'
+#plugin.libs = './libplugin.a'
+plugin.source = lib.source
+plugin.execute()
+

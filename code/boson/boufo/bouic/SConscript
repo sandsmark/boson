@@ -1,0 +1,13 @@
+Import('env')
+
+bouic= env.kobject('program')
+bouic.target = 'bouic'
+bouic.libs = 'qt-mt'
+bouic.includes = '../../../bodebug'
+
+bouic.source = """
+	bouic.cpp
+"""
+bouic.execute()
+
+

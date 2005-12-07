@@ -1,0 +1,22 @@
+Import('env')
+
+lib = env.kobject('staticlib')
+lib.target = 'libplugin.a'
+lib.includes = '../../bodebug ../../bogl'
+lib.source = """
+	bomeshrendererfactory.cpp
+	bomeshrendererimmediate.cpp
+	bomeshrenderersemiimmediate.cpp
+	bomeshrenderervertexarray.cpp
+	bomeshrenderervbo.cpp
+"""
+lib.execute()
+
+
+plugin= env.kobject('staticlib')
+plugin.target = 'libplugin.so'
+plugin.includes = '../../bodebug ../../bogl'
+#plugin.libs = './libplugin.a'
+plugin.source = lib.source
+plugin.execute()
+
