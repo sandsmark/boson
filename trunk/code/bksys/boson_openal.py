@@ -6,12 +6,27 @@ def exists(env):
 	return true
 
 def generate(env):
-	lib_bosound = 'bosound/libbosonsound.a bosound/libbosonsoundcommon.a'
+	import os
+
+	# local libs
+	lib_bosound = ['bosound/libbosonsound.a', 'bosound/libbosonsoundcommon.a']
 	if env['LIB_OPENAL']:
-		lib_bosound = lib_bosound + 'bosound/openal/libbosonsounopenal.a' + ' openal'
+		lib_bosound.append('bosound/openal/libbosonsoundopenal.a')
+
+	tmp = lib_bosound
+	lib_bosound = []
+	abspath = os.path.abspath('.')
+	if env['_BUILDDIR_']:
+		abspath += '/' + env['_BUILDDIR_']
+	for dir in tmp:
+		lib_bosound.append(abspath + '/' + dir)
+
+	# global libs
+	if env['LIB_OPENAL']:
+		lib_bosound.append('openal')
+
 	env['LIB_BOSOUND'] = lib_bosound
 
-	import os
 	if env['HELP']:
 		return
 	if not env['HELP'] and (env['_CONFIGURE_']):
