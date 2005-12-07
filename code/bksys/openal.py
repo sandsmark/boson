@@ -54,9 +54,9 @@ def generate(env):
 		dest = open(env.join(env['_BUILDDIR_'], 'config-openal.h'), 'w')
 		dest.write('#define HAVE_OPENAL ')
 		if have_al:
-			dest.write('true\n')
+			dest.write('1\n')
 		else:
-			dest.write('false\n')
+			dest.write('0\n')
 		dest.close()
 		env['_CONFIG_H_'].append('openal')
 
