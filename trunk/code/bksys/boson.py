@@ -4,6 +4,9 @@ def exists(env):
 	return true
 
 def generate(env):
+	if env['HELP']:
+		return
+
 	import kde3
 	class boobject(env.kobject):
 		def __init__(self, val, senv=None):
