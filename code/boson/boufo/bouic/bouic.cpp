@@ -116,10 +116,14 @@ bool openFile(const QString& fileName, QDomDocument* doc)
  return true;
 }
 
-bool saveTo(const QString& fileBase, QDomDocument& doc)
+bool saveTo(const QString& _fileBase, QDomDocument& doc)
 {
- QFile fileCpp(fileBase + ".cpp");
- QFile fileH(fileBase + ".h");
+ QFile fileCpp(_fileBase + ".cpp");
+ QFile fileH(_fileBase + ".h");
+ QString fileBase = _fileBase;
+ if (fileBase.contains('/')) {
+	fileBase = fileBase.right(fileBase.length() - fileBase.findRev('/') - 1);
+ }
  if (!fileCpp.open(IO_WriteOnly)) {
 	fprintf(stderr, "Could not open %s.cpp for writing\n", fileBase.latin1());
 	return false;
