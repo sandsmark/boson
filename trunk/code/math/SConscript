@@ -1,0 +1,18 @@
+Import('env')
+
+math = env.kobject('staticlib')
+math.target = 'libbomath'
+math.source = """
+	bomath.cpp
+	bofixed.cpp
+	bo3dtoolsbase.cpp
+	bovector.cpp
+	borect.cpp
+	borect.cpp
+	bomatrix.cpp
+	boquaternion.cpp
+	boplane.cpp
+	bofrustum.cpp
+	boglmatrices.cpp
+"""
+math.execute()

@@ -1,0 +1,439 @@
+Import('env')
+
+#env.PrependUnique(CPPPATH = ['../kgame'])
+#env.PrependUnique(CPPPATH = ['../ufo'])
+
+env.subdirs(['script', 'info', 'gameview', 'boufo'])
+
+libcommon = env.kobject('staticlib')
+libcommon.target = 'libcommon'
+libcommon.includes = '../bodebug ../bogl'
+libcommon.source = """
+	boapplication.cpp
+	boglobal.cpp
+	bosonconfig.cpp
+	bosondata.cpp
+	bomath.cpp
+	bo3dtools.cpp
+	bosonprofiling.cpp
+	bopluginmanager.cpp
+"""
+libcommon.env = env
+libcommon.execute()
+
+libimageio = env.kobject('staticlib')
+libimageio.target = 'libimageio'
+#libimageio.includes = '../bodebug ../bogl'
+libimageio.source = """
+	imageio/boimageio.cpp
+	imageio/tga.cpp
+	imageio/pcx.cpp
+"""
+libimageio.env = env
+libimageio.execute()
+
+
+libgameengine = env.kobject('staticlib')
+libgameengine.target = 'libgameengine'
+libgameengine.includes = '../bodebug ../bogl ../boson/boufo'
+libgameengine.includes += ' items/' # for .moc files
+libgameengine.source = """
+	boeventloop.cpp
+	boupgradeableproperty.cpp
+	unitbase.cpp
+	unit.cpp
+	unitproperties.cpp
+	pluginproperties.cpp
+	unitplugins.cpp
+	upgradeproperties.cpp
+	bosonweapon.cpp
+	boitemlist.cpp
+	boitemlisthandler.cpp
+	bosonplayfield.cpp
+	bosonmap.cpp
+	cell.cpp
+	bofile.cpp
+	bpfdescription.cpp
+	bosonfileconverter.cpp
+	bosoncampaign.cpp
+	bosonmessage.cpp
+	boson.cpp
+	bomessage.cpp
+	bosoncanvas.cpp
+	bosoncanvasstatistics.cpp
+	bosoncollisions.cpp
+	bosonnetworksynchronizer.cpp
+	speciestheme.cpp
+	player.cpp
+	playerio.cpp
+	bosoncomputerio.cpp
+	bosonpath.cpp
+	bosonstatistics.cpp 
+	bogameproperty.cpp
+	bosonpropertyxml.cpp
+	bosonplayerinputhandler.cpp
+	bobincoder.cpp
+	boevent.cpp
+	boeventmatching.cpp
+	boeventlistener.cpp
+	boeventmanager.cpp
+	bocondition.cpp
+	bowater.cpp
+	bosonsaveload.cpp
+	bosongroundtheme.cpp
+	items/bosonitem.cpp
+	items/bosonshot.cpp
+	items/bosonitempropertyhandler.cpp
+"""
+libgameengine.env = env
+libgameengine.execute()
+
+
+startupwidgets_sources = """
+	startupwidgets/boufocolorchooser.cpp
+	startupwidgets/bosonstartupnetwork.cpp
+	startupwidgets/welcomewidget.boui
+	startupwidgets/newgamewidget.boui
+	startupwidgets/boufonewgamewidget.cpp
+	startupwidgets/boufostartupwidget.cpp
+	startupwidgets/boufoloadingwidget.cpp
+	startupwidgets/boufonetworkoptionswidgetbase.boui
+	startupwidgets/boufonetworkoptionswidget.cpp
+	startupwidgets/boufostarteditorwidgetbase.boui
+	startupwidgets/boufostarteditorwidget.cpp
+	startupwidgets/boufoloadsavegamewidget.cpp
+	startupwidgets/bocreatenewmap.cpp
+"""
+#startupwidgets_sources = """
+#	startupwidgets/welcomewidget.boui
+#"""
+
+commandframe_sources = """
+	commandframe/bosoncommandframe.cpp
+	commandframe/bosonorderwidget.cpp
+	commandframe/bosonorderbutton.cpp
+	commandframe/boactionswidget.cpp
+	commandframe/bosonunitview.cpp
+	commandframe/editorunitconfigwidget.cpp
+	commandframe/bocommandframeeventlistener.cpp
+"""
+
+gameview_sources = """
+	items/bosonitemrenderer.cpp
+	gameview/bosonufogameguihelper.boui
+	gameview/bosonufogamegui.cpp
+	gameview/bosonufocanvaswidget.cpp
+	gameview/bosonufogamewidgets.cpp
+	gameview/bosongameview.cpp
+	gameview/bosongamevieweventlistener.cpp
+	gameview/bosoncanvasrenderer.cpp
+	gameview/bosongameviewinputbase.cpp
+	gameview/bosongameviewinput.cpp
+	gameview/editorviewinput.cpp
+	gameview/bosonlocalplayerinput.cpp
+	gameview/bolocalplayereventlistener.cpp
+	gameview/bosonmenuinput.cpp
+	gameview/boeditplayerinputswidget.cpp
+"""
+
+
+boufo_lib = """
+	./boufo/libboufo.a
+	../ufo/src/libufo.a
+"""
+
+
+libboson = env.kobject('staticlib')
+libboson.target = 'libboson'
+libboson.includes = '../bodebug ../bogl ../boson/boufo ../bosound'
+libboson.includes += ' bosonwidgets/' # for .moc files
+libboson.source = """
+	bosonviewdata.cpp
+	boselection.cpp
+	botooltipcreator.cpp
+	bosonglwidget.cpp
+	bosonufoglwidget.cpp
+	bomousemovediff.cpp
+	bomatrixwidget.cpp
+	bocamerawidget.cpp
+	boorbiterwidget.cpp
+	bosonufochat.cpp
+	bosonprofilingdialog.cpp
+	bpfdescriptiondialog.cpp
+	boglstatewidget.cpp
+	bodebuglogdialog.cpp
+	bofullscreen.cpp
+	bocamera.cpp
+	boautocamera.cpp
+	bosoncursor.cpp
+	bosonmodel.cpp
+	bosonmodeltextures.cpp
+	bomesh.cpp
+	bomeshrenderer.cpp
+	bomeshrenderermanager.cpp
+	bomaterial.cpp
+	bolight.cpp
+	botexture.cpp
+	bobmfload.cpp
+	boshader.cpp
+	speciesdata.cpp
+	boaction.cpp
+	bosongroundthemedata.cpp
+	borendertarget.cpp
+	bosonwidgets/bonuminput.cpp
+	sound/bosonaudiointerface.cpp
+"""
+
+for dir in env['LIBPATH_X11']:
+	libboson.libpaths += dir
+
+libboson_lib = 'libboson.a '
+libboson_lib += """
+	../bodebug/libbodebug.a
+	../bogl/libbogl.a
+	../math/libbomath.a
+	./script/libbosonscript.a
+""" + env['LIB_PYTHON'] + """
+	./info/libbosoninfo.a
+"""
+for lib in env['LIB_BOSOUND']:
+	libboson_lib += ' ' + lib
+libboson_lib += """
+	../kgame/libkgame.a
+	kdeui
+	kio
+	3ds
+	Xmu
+"""
+
+# TODO: only if present
+libboson_lib += ' Xrandr'
+
+# AB: I don't really have a clue what I am doing here. However it is necessary
+#     in order to make one feature of scons work in bksys: allowing to compile
+#     one file into multiple programs. doing program1.source += 'file.cpp' and
+#     program2.source += 'file.cpp' in bksys leads to the following warning:
+#       scons: warning: Two different environments were specified for target file.o
+#     the reason is that a kobject() call creates a new environment in the
+#     kobject object.
+#     -> so we force bksys to use the same environment for all objects and be
+#        happy. I am pretty sure this will have undesired side effects in some
+#        situations (i.e. whenever separate environments are actually required),
+#        but I have not (yet!) encountered any
+libboson.env = env
+libboson.execute()
+
+
+
+
+boson = env.kobject('program')
+boson.target = 'boson'
+boson.includes = '../bodebug ../bogl ../boson/boufo'
+boson.includes = ' commandframe/ gameview/ startupwidgets/' # for .moc files
+boson.libs = libboson_lib + ' libcommon.a libgameengine.a'
+boson.libs += boufo_lib
+boson.source = """
+	bosonfpscounter.cpp
+	bosonmainwidget.cpp
+	bosonmainwidgetmenuinput.cpp
+	boufoactionext.cpp
+	bogltooltip.cpp
+	bosonglminimap.cpp
+	bosonufominimap.cpp
+	optionsdialog.cpp
+	optionswidgets.cpp
+	bogroundrenderer.cpp
+	bogroundrenderermanager.cpp
+	kgameunitdebug.cpp
+	kgameadvancemessagesdebug.cpp
+	kgameplayerdebug.cpp
+	kgamecelldebug.cpp
+	gameoverdialog.cpp
+	bocheckinstallation.cpp
+	bosonstarting.cpp
+	bosongameviewpluginbase.cpp
+	bosongameviewpluginmanager.cpp
+	bosoneffectmanager.cpp
+	bosoneffect.cpp
+	bosoneffectproperties.cpp
+	bosoneffectparticle.cpp
+	bosoneffectpropertiesparticle.cpp 
+	botexmapimportdialog.cpp
+	boconditionwidget.cpp
+	bowaterrenderer.cpp
+	selectbox.cpp
+	main.cpp
+"""
+boson.source += startupwidgets_sources
+boson.source += commandframe_sources
+boson.source += gameview_sources
+boson.env = env
+boson.execute()
+
+
+bounit = env.kobject('program')
+bounit.target = 'bounit'
+bounit.includes = '../bodebug ../bogl ../boson/boufo'
+bounit.libs = """
+	libcommon.a
+	libgameengine.a
+	../bodebug/libbodebug.a
+	../bogl/libbogl.a
+	../math/libbomath.a
+	./script/libbosonscript.a
+	./info/libbosoninfo.a
+	kgame
+	kdeui
+	kio
+	Xmu
+"""
+# TODO: only if present
+bounit.libs += ' Xrandr'
+bounit.source = """
+	bounitmain.cpp
+	bosonsearchpathswidgetbase.ui
+	bosonsearchpathswidget.cpp
+	bouniteditorbase.ui
+	bouniteditor.cpp
+"""
+bounit.env = env
+bounit.execute()
+
+
+bocursor = env.kobject('program')
+bocursor.target = 'bocursor'
+bocursor.includes = '../bodebug ../bogl ../boson/boufo'
+bocursor.libs = """
+	../bodebug/libbodebug.a
+	../bogl/libbogl.a
+	../math/libbomath.a
+	./info/libbosoninfo.a
+	./libcommon.a
+	kdeui
+	kio
+	Xmu
+"""
+bocursor.source = """
+	bosoncursor.cpp
+	botexture.cpp
+	bosonglwidget.cpp
+
+	bocursormain.cpp
+	bosoncursoreditor.cpp
+"""
+bocursor.env = env
+bocursor.execute()
+
+borender = env.kobject('program')
+borender.target = 'borender'
+borender.includes = '../bodebug ../bogl ../boson/boufo'
+borender.libs = libboson_lib + """
+	3ds
+	libcommon.a
+"""
+borender.libs += boufo_lib
+borender.source = """
+	kgamemodeldebug.cpp
+	bomaterialwidget.cpp
+	bovectorinput.cpp
+	kgamespeciesdebug.cpp
+	borendermain.cpp
+	borendergui.boui
+	borenderrendermodel.cpp
+	bopixmaprenderer.cpp
+	boeditturretpropertiesdialog.cpp
+"""
+borender.env = env
+borender.execute()
+
+boinfo = env.kobject('program')
+boinfo.target = 'boinfo'
+boinfo.includes = '../bodebug ../bogl ../boson/boufo'
+boinfo.libs = """
+	../bodebug/libbodebug.a
+	../bogl/libbogl.a
+	../math/libbomath.a
+	./info/libbosoninfo.a
+	./libcommon.a
+	kio
+	kdeui
+	Xmu
+"""
+boinfo.source = """
+	bosonglwidget.cpp
+	boinfomain.cpp
+"""
+boinfo.env = env
+boinfo.execute()
+
+bo3dsdebug = env.kobject('program')
+bo3dsdebug.target = 'bo3dsdebug'
+bo3dsdebug.includes = '../bodebug ../bogl ../boson/boufo'
+bo3dsdebug.libs = """
+	./libimageio.a
+	../bodebug/libbodebug.a
+	./libcommon.a
+	../math/libbomath.a
+	../bogl/libbogl.a
+	3ds
+	kio
+	kdeui
+"""
+bo3dsdebug.libs += boufo_lib
+bo3dsdebug.source = """
+	kgamemodeldebug.cpp
+	bomatrixwidget.cpp
+
+	bo3dsdebugmain.cpp
+"""
+bo3dsdebug.env = env
+bo3dsdebug.execute()
+
+boconditioneditor = env.kobject('program')
+boconditioneditor.target = 'boconditioneditor'
+boconditioneditor.includes = '../bodebug ../bogl ../boson/boufo'
+boconditioneditor.libs = """
+	libcommon.a
+	libgameengine.a
+	../bodebug/libbodebug.a
+	../bogl/libbogl.a
+	../math/libbomath.a
+	./script/libbosonscript.a
+	kgame
+	kdeui
+	kio
+	Xmu
+"""
+# TODO: only if present
+boconditioneditor.libs += ' Xrandr'
+boconditioneditor.source = """
+	boconditionwidget.cpp
+	boconditioneditormain.cpp
+"""
+boconditioneditor.env = env
+boconditioneditor.execute()
+
+
+boprofiling = env.kobject('program')
+boprofiling.target = 'boprofiling'
+boprofiling.includes = '../bodebug ../bogl ../boson/boufo'
+boprofiling.libs = """
+	libcommon.a
+	../bodebug/libbodebug.a
+	../bogl/libbogl.a
+	../math/libbomath.a
+	kdeui
+	kio
+	Xmu
+"""
+# TODO: only if present
+boprofiling.libs = ' Xrandr'
+boprofiling.source = """
+	bosonprofilingdialog.cpp
+	boprofilingmain.cpp
+"""
+boprofiling.env = env
+boprofiling.execute()
+
+
+

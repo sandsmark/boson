@@ -1,0 +1,11 @@
+Import('env')
+
+bogl = env.kobject('staticlib')
+bogl.target = 'libbogl'
+bogl.includes = '../bodebug'
+bogl.source = """
+	bogl.cpp
+	bogl_resolve.cpp
+"""
+bogl.execute()
+
