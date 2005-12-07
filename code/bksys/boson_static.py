@@ -35,6 +35,7 @@ def generate(env):
 			dest.write('1\n')
 			env['BOSON_DO_STATIC']=True
 		else:
+			env['BOSON_DO_STATIC']=False
 			dest.write('0\n')
 
 		dest.write('#define USE_BO_PLUGINS ')
@@ -42,6 +43,7 @@ def generate(env):
 			dest.write('1\n')
 			env['BOSON_USE_PLUGINS']=True
 		else:
+			env['BOSON_USE_PLUGINS']=False
 			dest.write('0\n')
 
 		dest.close()
