@@ -1,25 +1,26 @@
 Import('env')
 
-lib = env.kobject('staticlib')
-lib.target = 'libplugin.a'
-lib.includes = '../../bodebug ../../bogl'
-lib.source = """
-		bogroundrendererfactory.cpp
-		bodefaultgroundrenderer.cpp
-		bofastgroundrenderer.cpp
-		boveryfastgroundrenderer.cpp
-		boquickgroundrenderer.cpp
-		bogroundrendererbase.cpp
-		bocolormaprenderer.cpp
-		boquadtreenode.cpp
+groundrenderer_sources = """
+	bogroundrendererfactory.cpp
+	bodefaultgroundrenderer.cpp
+	bofastgroundrenderer.cpp
+	boveryfastgroundrenderer.cpp
+	boquickgroundrenderer.cpp
+	bogroundrendererbase.cpp
+	bocolormaprenderer.cpp
+	boquadtreenode.cpp
 """
-lib.execute()
 
-
-plugin= env.kobject('staticlib')
-plugin.target = 'libplugin.so'
-plugin.includes = '../../bodebug ../../bogl'
-#plugin.libs = './libplugin.a'
-plugin.source = lib.source
-plugin.execute()
+if env['BOSON_DO_STATIC']:
+	lib = env.kobject('staticlib')
+	lib.target = 'libbogroundrendererplugin_static'
+	lib.includes = '../../bodebug ../../bogl'
+	lib.source = groundrenderer_sources
+	lib.execute()
+else:
+	plugin = env.boobject('boplugin')
+	plugin.target = 'libbogroundrendererplugin'
+	plugin.includes = '../../bodebug ../../bogl'
+	plugin.source = groundrenderer_sources
+	plugin.execute()
 
