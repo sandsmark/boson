@@ -49,6 +49,10 @@ public:
 	{
 	}
 
+	virtual ~BosonAbstractMusicInterface()
+	{
+	}
+
 	/**
 	 * Play a previously loaded file. See @ref load
 	 **/
@@ -91,6 +95,10 @@ class BosonAbstractSoundInterface
 {
 public:
 	BosonAbstractSoundInterface()
+	{
+	}
+
+	virtual ~BosonAbstractSoundInterface()
 	{
 	}
 
