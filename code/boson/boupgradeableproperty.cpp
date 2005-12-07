@@ -32,6 +32,9 @@ public:
 	BaseValueEntryBase()
 	{
 	}
+	virtual ~BaseValueEntryBase()
+	{
+	}
 	virtual unsigned long int toULong() const = 0;
 	virtual long int toLong() const = 0;
 	virtual bofixed toBoFixed() const = 0;
