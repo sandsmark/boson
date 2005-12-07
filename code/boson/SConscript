@@ -1,5 +1,8 @@
 Import('env')
 
+if env['BOSON_USE_PLUGINS']:
+	env.KDEaddflags_link('-Xlinker --export-dynamic')
+
 #env.PrependUnique(CPPPATH = ['../kgame'])
 #env.PrependUnique(CPPPATH = ['../ufo'])
 
