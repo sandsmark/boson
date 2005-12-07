@@ -7,19 +7,18 @@ source = """
 	editorrandommapwidget.cpp
 """
 
-lib = env.kobject('staticlib')
-lib.target = 'libplugin_static'
-lib.includes = '../../../bodebug ../../../bogl'
-lib.source = source
-lib.env = env
-lib.execute()
-
-
-plugin = env.kobject('shlib')
-plugin.target = 'libplugin'
-plugin.includes = '../../../bodebug ../../../bogl'
-#plugin.libs = './libplugin.a'
-plugin.source = source
-plugin.env = env
-plugin.execute()
+if env['BOSON_DO_STATIC']:
+	lib = env.kobject('staticlib')
+	lib.target = 'libbosongameviewplugin_static'
+	lib.includes = '../../../bodebug ../../../bogl'
+	lib.source = source
+	lib.env = env
+	lib.execute()
+else:
+	plugin = env.boobject('boplugin')
+	plugin.target = 'libbosongameviewplugin'
+	plugin.includes = '../../../bodebug ../../../bogl'
+	plugin.source = source
+	plugin.env = env
+	plugin.execute()
 
