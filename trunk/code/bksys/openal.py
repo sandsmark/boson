@@ -43,7 +43,7 @@ def generate(env):
 		else:
 			if have_al_lib:
 				env.pprint('YELLOW', 'OpenAL headers not found (only library found).')
-			elif have_al_headers:
+			elif have_al_header:
 				env.pprint('YELLOW', 'OpenAL library not found.')
 			else:
 				env.pprint('YELLOW', 'OpenAL not found (headers and library missing).')
