@@ -146,11 +146,7 @@ boufo_lib = """
 """
 
 
-libboson = env.kobject('staticlib')
-libboson.target = 'libboson'
-libboson.includes = '../bodebug ../bogl ../boson/boufo ../bosound'
-libboson.includes += ' bosonwidgets/' # for .moc files
-libboson.source = """
+libboson_source = """
 	bosonviewdata.cpp
 	boselection.cpp
 	botooltipcreator.cpp
@@ -186,22 +182,18 @@ libboson.source = """
 	bosonwidgets/bonuminput.cpp
 	sound/bosonaudiointerface.cpp
 """
+libboson_includes = '../bodebug ../bogl ../boson/boufo ../bosound'
+libboson_includes += ' bosonwidgets ' # for .moc files
 
-for dir in env['LIBPATH_X11']:
-	libboson.libpaths += dir
-
-libboson_lib = 'libboson.a '
-libboson_lib += """
+libboson_libpaths = ' '.join(env['LIBPATH_X11'])
+libboson_lib = """
 	../bodebug/libbodebug.a
 	../bogl/libbogl.a
 	../math/libbomath.a
 	./script/libbosonscript.a
 """ + env['LIB_PYTHON'] + """
 	./info/libbosoninfo.a
-"""
-for lib in env['LIB_BOSOUND']:
-	libboson_lib += ' ' + lib
-libboson_lib += """
+""" + ' '.join(env['LIB_BOSOUND']) + """
 	../kgame/libkgame.a
 	kdeui
 	kio
@@ -212,30 +204,19 @@ libboson_lib += """
 # TODO: only if present
 libboson_lib += ' Xrandr'
 
-# AB: I don't really have a clue what I am doing here. However it is necessary
-#     in order to make one feature of scons work in bksys: allowing to compile
-#     one file into multiple programs. doing program1.source += 'file.cpp' and
-#     program2.source += 'file.cpp' in bksys leads to the following warning:
-#       scons: warning: Two different environments were specified for target file.o
-#     the reason is that a kobject() call creates a new environment in the
-#     kobject object.
-#     -> so we force bksys to use the same environment for all objects and be
-#        happy. I am pretty sure this will have undesired side effects in some
-#        situations (i.e. whenever separate environments are actually required),
-#        but I have not (yet!) encountered any
-libboson.env = env
-libboson.execute()
-
 
 
 
 boson = env.kobject('program')
 boson.target = 'boson'
 boson.includes = '../bodebug ../bogl ../boson/boufo'
-boson.includes = ' commandframe/ gameview/ startupwidgets/' # for .moc files
+boson.includes += ' commandframe/ gameview/ startupwidgets/ ' # for .moc files
+boson.includes += libboson_includes
 boson.libs = libboson_lib + ' libcommon.a libgameengine.a'
 boson.libs += boufo_lib
-boson.source = """
+boson.libpaths += libboson_libpaths
+boson.source += libboson_source
+boson.source += """
 	bosonfpscounter.cpp
 	bosonmainwidget.cpp
 	bosonmainwidgetmenuinput.cpp
@@ -270,13 +251,27 @@ boson.source = """
 boson.source += startupwidgets_sources
 boson.source += commandframe_sources
 boson.source += gameview_sources
+
+# AB: I don't really have a clue what I am doing here. However it is necessary
+#     in order to make one feature of scons work in bksys: allowing to compile
+#     one file into multiple programs. doing program1.source += 'file.cpp' and
+#     program2.source += 'file.cpp' in bksys leads to the following warning:
+#       scons: warning: Two different environments were specified for target file.o
+#     the reason is that a kobject() call creates a new environment in the
+#     kobject object.
+#     -> so we force bksys to use the same environment for all objects and be
+#        happy. I am pretty sure this will have undesired side effects in some
+#        situations (i.e. whenever separate environments are actually required),
+#        but I have not (yet!) encountered any
 boson.env = env
+
 boson.execute()
 
 
 bounit = env.kobject('program')
 bounit.target = 'bounit'
 bounit.includes = '../bodebug ../bogl ../boson/boufo'
+bounit.libpaths += libboson_libpaths
 bounit.libs = """
 	libcommon.a
 	libgameengine.a
@@ -306,6 +301,7 @@ bounit.execute()
 bocursor = env.kobject('program')
 bocursor.target = 'bocursor'
 bocursor.includes = '../bodebug ../bogl ../boson/boufo'
+bocursor.libpaths += libboson_libpaths
 bocursor.libs = """
 	../bodebug/libbodebug.a
 	../bogl/libbogl.a
@@ -330,12 +326,15 @@ bocursor.execute()
 borender = env.kobject('program')
 borender.target = 'borender'
 borender.includes = '../bodebug ../bogl ../boson/boufo'
+borender.includes += libboson_includes
 borender.libs = libboson_lib + """
 	3ds
 	libcommon.a
 """
 borender.libs += boufo_lib
-borender.source = """
+borender.libpaths += libboson_libpaths
+borender.source = libboson_source
+borender.source += """
 	kgamemodeldebug.cpp
 	bomaterialwidget.cpp
 	bovectorinput.cpp
@@ -352,6 +351,7 @@ borender.execute()
 boinfo = env.kobject('program')
 boinfo.target = 'boinfo'
 boinfo.includes = '../bodebug ../bogl ../boson/boufo'
+boinfo.libpaths += libboson_libpaths
 boinfo.libs = """
 	../bodebug/libbodebug.a
 	../bogl/libbogl.a
@@ -395,6 +395,7 @@ bo3dsdebug.execute()
 boconditioneditor = env.kobject('program')
 boconditioneditor.target = 'boconditioneditor'
 boconditioneditor.includes = '../bodebug ../bogl ../boson/boufo'
+boconditioneditor.libpaths += libboson_libpaths
 boconditioneditor.libs = """
 	libcommon.a
 	libgameengine.a
@@ -420,6 +421,7 @@ boconditioneditor.execute()
 boprofiling = env.kobject('program')
 boprofiling.target = 'boprofiling'
 boprofiling.includes = '../bodebug ../bogl ../boson/boufo'
+boprofiling.libpaths += libboson_libpaths
 boprofiling.libs = """
 	libcommon.a
 	../bodebug/libbodebug.a
