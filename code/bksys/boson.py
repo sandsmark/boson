@@ -34,5 +34,22 @@ def generate(env):
 				self.instdir = env['BOSON_PLUGIN_DIR']
 			env.kobject.execute(self)
 
+	import os
+	# TODO: somehow make sure that dir actually points to the source
+	# directory (not to build dir)
+	def installDirectory(env, destination, dir):
+		abspath = os.path.abspath(dir)
+		for i in os.listdir(abspath):
+			target = destination + '/' + dir
+			env.Alias('install', target)
+			if os.path.isfile(abspath + '/' + i):
+				env.Install(target, dir + '/' + i)
+			elif os.path.isdir(abspath + '/' + i):
+				if i == 'CVS' or i == '.svn':
+					continue
+				installDirectory(env, destination, dir + '/' + i)
+
+
+	SConsEnvironment.installDirectory = installDirectory
 	SConsEnvironment.boobject = boobject
 
