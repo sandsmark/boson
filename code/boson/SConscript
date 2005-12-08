@@ -1,7 +1,14 @@
 Import('env')
 
+lib_meshrendererplugin = ''
+lib_groundrendererplugin = ''
+lib_gameviewplugin = ''
 if env['BOSON_USE_PLUGINS']:
 	env.KDEaddflags_link('-Xlinker --export-dynamic')
+else:
+	lib_meshrendererplugin = ' meshrenderer/libbomeshrendererplugin_static.a '
+	lib_groundrendererplugin = ' groundrenderer/libbogroundrendererplugin_static.a '
+	lib_gameviewplugin = ' gameview/plugin/libbosongameviewplugin_static.a '
 
 #env.PrependUnique(CPPPATH = ['../kgame'])
 #env.PrependUnique(CPPPATH = ['../ufo'])
@@ -191,7 +198,7 @@ libboson_lib = """
 	../bogl/libbogl.a
 	../math/libbomath.a
 	./script/libbosonscript.a
-""" + env['LIB_PYTHON'] + """
+""" + env['LIB_PYTHON'] + lib_meshrendererplugin + """
 	./info/libbosoninfo.a
 """ + ' '.join(env['LIB_BOSOUND']) + """
 	../kgame/libkgame.a
@@ -214,6 +221,8 @@ boson.includes += ' commandframe/ gameview/ startupwidgets/ ' # for .moc files
 boson.includes += libboson_includes
 boson.libs = libboson_lib + ' libcommon.a libgameengine.a'
 boson.libs += boufo_lib
+boson.libs += lib_groundrendererplugin
+boson.libs += lib_gameviewplugin
 boson.libpaths += libboson_libpaths
 boson.source += libboson_source
 boson.source += """
