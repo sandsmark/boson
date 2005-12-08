@@ -48,6 +48,13 @@ def generate(env):
 	bouiscan = Scanner(function = boui_scan, skeys = ['.boui'])
 	env.Append(SCANNERS = bouiscan)
 
+	print "TODO: Review this code (bouic scons code)!"
+	# AB: review the following code and adapt according to
+	#     http://www.scons.org/doc/HTML/scons-user.html#AEN1795
+	#     !
+	#     -> just prefix a path with '#' to make it point to the
+	#        top-directory
+
 	import os
 	abspath = os.path.abspath('.')
 	if env['_BUILDDIR_']:
