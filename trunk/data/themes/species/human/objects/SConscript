@@ -1,0 +1,15 @@
+Import('env')
+
+data = """
+	objects.boson
+	missile.3ds
+	daisycutter.3ds
+	mine.3ds
+	fragment1.3ds
+	bullet.3ds
+"""
+
+destinationdir = env['KDEDATA'] + '/boson/themes/species/human/objects'
+
+env.Install(destinationdir, env.make_list(data))
+env.Alias('install', destinationdir)

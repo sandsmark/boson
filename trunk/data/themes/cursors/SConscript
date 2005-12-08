@@ -1,0 +1,14 @@
+Import('env')
+
+cursors = """
+	alternative
+	modern1
+	futuristic
+	nato-standard
+"""
+
+cursordir = env['KDEDATA'] + '/boson/themes/cursors'
+
+for i in env.make_list(cursors):
+	env.installDirectory(cursordir, i)
+

@@ -1,0 +1,20 @@
+Import('env')
+
+shaders = """
+	ground-default-hi.shader
+	ground-default-vhi.shader
+	ground-default-low.shader
+	ground-default-med.shader
+	ground-default.shader
+	unit-hi.shader
+	unit-vhi.shader
+	unit-low.shader
+	unit-med.shader
+	unit.shader
+	water.shader
+"""
+shadersdir = env['KDEDATA'] + '/boson/themes/shaders'
+
+env.Install(shadersdir, env.make_list(shaders))
+env.Alias('install', shadersdir)
+

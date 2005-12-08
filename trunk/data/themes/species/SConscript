@@ -1,0 +1,10 @@
+Import('env')
+
+
+species = """
+	human
+	neutral
+"""
+
+env.subdirs(species)
+

@@ -1,0 +1,3 @@
+Import('env')
+
+print "doc/en/SConscript: TODO!"
