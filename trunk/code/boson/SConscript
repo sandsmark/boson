@@ -6,7 +6,7 @@ if env['BOSON_USE_PLUGINS']:
 #env.PrependUnique(CPPPATH = ['../kgame'])
 #env.PrependUnique(CPPPATH = ['../ufo'])
 
-env.subdirs(['script', 'info', 'gameview', 'boufo', 'meshrenderer', 'groundrenderer'])
+env.subdirs(['script', 'info', 'gameview/plugin', 'boufo', 'meshrenderer', 'groundrenderer'])
 
 libcommon = env.kobject('staticlib')
 libcommon.target = 'libcommon'
