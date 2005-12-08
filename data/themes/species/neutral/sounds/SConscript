@@ -1,0 +1,10 @@
+Import('env')
+
+data = """
+	rain_0.ogg
+"""
+
+destinationdir = env['KDEDATA'] + '/boson/themes/species/neutral/sounds'
+
+env.Install(destinationdir, env.make_list(data))
+env.Alias('install', destinationdir)

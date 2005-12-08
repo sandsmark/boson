@@ -1,0 +1,56 @@
+Import('env')
+
+import os
+
+maxdepth = 1
+def findMaps(dir, depth = 0):
+	if depth > maxdepth:
+		return []
+	if not os.path.exists(dir):
+		return ['']
+	list = os.listdir(dir)
+
+	ret = []
+	for i in list:
+		if not os.path.isfile(i):
+			continue
+		if i.endswith('.bpf'):
+			ret.append(dir + '/' + i)
+
+	for i in list:
+		if os.path.isdir(dir + '/' + i):
+			ret += findMaps(dir + '/' + i, depth + 1)
+
+	if depth == 0:
+		# don't return the whole (relative) path, only the subdir parts
+		# -> strip 'dir' + '/' at depth==0.
+		tmp = ret
+		ret = []
+		for i in tmp:
+			ret.append(i[len(dir) + 1:])
+	return ret
+
+
+
+dir = '.' # FIXME: this points to build/maps/. we want just maps/.
+
+# HACK!
+print "mapsdir: FIXME! (HACK!)"
+dir = '../../maps'
+
+maps = findMaps(dir)
+
+
+mapsdir = env['KDEDATA'] + '/boson/maps/'
+
+
+# TODO: rm -rf mapsdir before installing anything. this should make sure that
+#       old files (from a previous version) are not around anymore
+print "TODO: delete the old mapsdir"
+
+for i in env.make_list(maps):
+	subdir = os.path.dirname(i)
+	env.Install(mapsdir + '/' + subdir, i)
+
+env.Alias('install', mapsdir)
+

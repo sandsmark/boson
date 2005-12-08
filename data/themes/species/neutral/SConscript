@@ -1,0 +1,14 @@
+Import('env')
+
+env.subdirs(['objects', 'units', 'sounds'])
+
+data = """
+	index.species
+	index.technologies
+"""
+
+destinationdir = env['KDEDATA'] + '/boson/themes/species/neutral'
+
+env.Install(destinationdir, env.make_list(data))
+env.Alias('install', destinationdir)
+

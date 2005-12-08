@@ -1,0 +1,11 @@
+Import('env')
+
+grounds = """
+	earth
+"""
+
+groundsdir = env['KDEDATA'] + '/boson/themes/grounds'
+
+print "TODO: delete old groundsdir before installing"
+for i in env.make_list(grounds):
+	env.installDirectory(groundsdir, i)

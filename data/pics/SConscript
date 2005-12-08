@@ -1,0 +1,14 @@
+Import('env')
+
+pics = """
+	boson-startup-bg.png
+	boson-startup-textframe.png
+	boson-startup-logo.png
+	boson-startup-banner.png
+"""
+
+picsdir = env['KDEDATA'] + '/boson/pics'
+
+env.Install(picsdir, env.make_list(pics))
+env.Alias('install', picsdir)
+

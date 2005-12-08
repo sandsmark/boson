@@ -1,0 +1,56 @@
+Import('env')
+
+import os
+
+# TODO: retrieve the list of music files (recursively)
+# -> find a list of directories containing index.music files
+# --> then add directory/index.music and all *.ogg and *.mp3 files to 
+
+maxdepth = 1
+def findMusic(dir, depth = 0):
+	if depth > maxdepth:
+		return []
+	if not os.path.exists(dir):
+		return ['']
+	list = os.listdir(dir)
+	ret = []
+	if 'index.music' in list:
+		ret.append(dir + '/index.music')
+		for i in list:
+			if not os.path.isfile(i):
+				continue
+			if i.endswith('.ogg') or i.endswith('.mp3'):
+				ret.append(dir + '/' + i)
+	for i in list:
+		if os.path.isdir(dir + '/' + i):
+			ret += findMusic(dir + '/' + i, depth + 1)
+
+	if depth == 0:
+		# don't return the whole (relative) path, only the subdir parts
+		# -> strip 'dir' + '/' at depth==0.
+		tmp = ret
+		ret = []
+		for i in tmp:
+			ret.append(i[len(dir) + 1:])
+	return ret
+
+dir = '.' # FIXME: this points to build/music/. we want just music/.
+
+# HACK!
+print "musicdir: FIXME! (HACK!)"
+dir = '../../music'
+
+
+music = findMusic(dir)
+musicdir = env['KDEDATA'] + '/boson/music/'
+
+# TODO: rm -rf musicdir before installing anything. this should make sure that
+#       old files (from a previous version) are not around anymore
+print "TODO: delete the old musicsdir"
+
+for i in env.make_list(music):
+	subdir = os.path.dirname(i)
+	env.Install(musicdir + '/' + subdir, i)
+
+env.Alias('install', musicdir)
+
