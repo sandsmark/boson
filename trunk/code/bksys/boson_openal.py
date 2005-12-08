@@ -6,6 +6,9 @@ def exists(env):
 	return true
 
 def generate(env):
+	if env['HELP']:
+		return
+
 	import os
 
 	# local libs
@@ -27,8 +30,6 @@ def generate(env):
 
 	env['LIB_BOSOUND'] = lib_bosound
 
-	if env['HELP']:
-		return
 	if not env['HELP'] and (env['_CONFIGURE_']):
 		if not os.path.exists(env['_BUILDDIR_']): os.mkdir(env['_BUILDDIR_'])
 		dest = open(env.join(env['_BUILDDIR_'], 'config-boson_openal.h'), 'w')
