@@ -7,7 +7,7 @@ source = """
 	editorrandommapwidget.cpp
 """
 
-if env['BOSON_DO_STATIC']:
+if not env['BOSON_USE_PLUGINS']:
 	lib = env.kobject('staticlib')
 	lib.target = 'libbosongameviewplugin_static'
 	lib.includes = '../../../bodebug ../../../bogl'
