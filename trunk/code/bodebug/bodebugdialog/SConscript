@@ -3,11 +3,12 @@ Import('env')
 bodebugdialog = env.kobject('program')
 bodebugdialog.target = 'bodebugdialog'
 bodebugdialog.libs = """
-	../../bomemory/libbomemory.a
 	../libbodebug.a
 	kdeui
 	qt-mt
 """
+if env['LIB_BOMEMORY']:
+	bodebugdialog.libs += ' ' + env['LIB_BOMEMORY']
 bodebugdialog.source = """
 	boabstractdebugdialog.cpp
 	bodebugdialog.cpp
