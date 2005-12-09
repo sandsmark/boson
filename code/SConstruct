@@ -54,6 +54,7 @@ boson_modules += ' boson_openal'
 boson_modules += ' boson_static'
 boson_modules += ' boson_boui'
 boson_modules += ' boson_plugins'
+boson_modules += ' boson_bomemory'
 boson_modules += ' boson'
 
 ## Import the main configuration tool
@@ -107,10 +108,12 @@ env.AppendUnique(CXXFLAGS = ['-Wno-non-virtual-dtor'])
 # SCRIPTS FOR BUILDING THE TARGETS
 ###################################################################
 
-subdirs="""
+subdirs = ''
+if env['LIB_BOMEMORY']:
+	subdirs += 'bomemory'
+subdirs += """
 	math
 	bobmfconverter
-	bomemory
 	bodebug
 	bogl
 	kgame
@@ -120,7 +123,6 @@ subdirs="""
 """
 #server
 
-# TODO: bomemory only if explicitly requested by user!
 # TODO: libboson_libs: Xrandr only if present
 # TODO: ground/mesh renderer / gameviewplugin: static/dynamic !
 # TODO: bofullscreen.cpp: HAVE_XFREE86_XRANDR
