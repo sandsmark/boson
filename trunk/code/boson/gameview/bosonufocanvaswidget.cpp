@@ -52,6 +52,7 @@
 #include <qtimer.h>
 #include <qvaluelist.h>
 #include <qptrdict.h>
+#include <qptrlist.h>
 #include <qdom.h>
 
 
@@ -162,18 +163,6 @@ BosonUfoCanvasWidget::BosonUfoCanvasWidget()
  d->mCanvasRenderer->initGL();
 
  connect(this, SIGNAL(signalWidgetResized()), d->mCanvasRenderer, SLOT(slotWidgetResized()));
-
- if (!boViewData) {
-	BO_NULL_ERROR(boViewData);
-	return;
- }
- connect(boViewData, SIGNAL(signalItemContainerAdded(BosonItemContainer*)),
-		this, SLOT(slotAddItemContainerData(BosonItemContainer*)));
- connect(boViewData, SIGNAL(signalItemContainerAboutToBeRemoved(BosonItemContainer*)),
-		this, SLOT(slotRemoveItemContainerData(BosonItemContainer*)));
- if (boViewData->allItemContainers().count() > 0) {
-	boError() << k_funcinfo << "itemcontainer list should be empty at this point" << endl;
- }
 }
 
 BosonUfoCanvasWidget::~BosonUfoCanvasWidget()
@@ -186,6 +175,41 @@ BosonUfoCanvasWidget::~BosonUfoCanvasWidget()
  delete d;
 
  boDebug() << k_funcinfo << "donee" << endl;
+}
+
+bool BosonUfoCanvasWidget::initializeItems()
+{
+ if (!boViewData) {
+	BO_NULL_ERROR(boViewData);
+	return false;
+ }
+ disconnect(boViewData, 0, this, 0);
+ connect(boViewData, SIGNAL(signalItemContainerAdded(BosonItemContainer*)),
+		this, SLOT(slotAddItemContainerData(BosonItemContainer*)));
+ connect(boViewData, SIGNAL(signalItemContainerAboutToBeRemoved(BosonItemContainer*)),
+		this, SLOT(slotRemoveItemContainerData(BosonItemContainer*)));
+
+ for (QPtrListIterator<BosonItemContainer> it(boViewData->allItemContainers()); it.current(); ++it) {
+	if (it.current()->effects()) {
+		boError() << k_funcinfo << "container already has effects. double initializing!" << endl;
+		return false;
+	}
+	if (it.current()->itemRenderer()) {
+		boError() << k_funcinfo << "container already has an item renderer. double initializing!" << endl;
+		return false;
+	}
+ }
+ for (QPtrListIterator<BosonItemContainer> it(boViewData->allItemContainers()); it.current(); ++it) {
+	slotAddItemContainerData(it.current());
+ }
+
+ if (!d->mCanvas) {
+	BO_NULL_ERROR(d->mCanvas);
+	return false;
+ }
+ initItemEffects();
+
+ return true;
 }
 
 void BosonUfoCanvasWidget::setGameGLMatrices(const BoGLMatrices* m)
@@ -221,8 +245,6 @@ void BosonUfoCanvasWidget::setCanvas(const BosonCanvas* canvas)
 		this, SLOT(slotUnitDestroyed(Unit*)));
 	connect(d->mCanvas, SIGNAL(signalFragmentCreated(BosonShotFragment*)),
 		this, SLOT(slotFragmentCreated(BosonShotFragment*)));
-
-	initItemEffects();
  }
 }
 
@@ -272,6 +294,9 @@ void BosonUfoCanvasWidget::quitGame()
 	}
 	delete e;
  }
+
+ disconnect(boViewData, SIGNAL(signalItemContainerAdded(BosonItemContainer*)),
+		this, 0);
 }
 
 void BosonUfoCanvasWidget::addEffect(BosonEffect* e)
@@ -335,6 +360,10 @@ void BosonUfoCanvasWidget::advanceEffects(float elapsed)
  QPtrList<BosonEffect> removeEffects;
  for (QPtrListIterator<BosonItemContainer> it(boViewData->allItemContainers()); it.current(); ++it) {
 	BosonItemEffects* e = it.current()->effects();
+	if (!e) {
+		BO_NULL_ERROR(e);
+		return;
+	}
 	if (!e->item()) {
 		continue;
 	}
@@ -648,9 +677,15 @@ void BosonUfoCanvasWidget::slotAddItemContainerData(BosonItemContainer* c)
 	return;
  }
 
+ if (c->effects()) {
+	boWarning() << k_funcinfo << "container effects non-NULL. probably memory leak" << endl;
+ }
  BosonItemEffects* effects = new BosonItemEffects(item);
  c->setEffects(effects);
 
+ if (c->itemRenderer()) {
+	boWarning() << k_funcinfo << "container itemrenderer non-NULL. probably memory leak" << endl;
+ }
  BosonItemRenderer* itemRenderer = createItemRendererFor(c);
  if (!itemRenderer) {
 	boWarning() << k_funcinfo << "unable to initialize item renderer for item " << item->id() << endl;

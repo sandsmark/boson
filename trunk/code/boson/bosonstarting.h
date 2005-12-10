@@ -32,6 +32,8 @@ template<class T> class QPtrList;
 template<class T1, class T2> class QMap;
 class BosonStartingTask;
 
+class BosonGameStarting;
+class BosonGUIStarting;
 class BosonStartingPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -164,10 +166,41 @@ signals:
 	void signalCanvas(BosonCanvas* canvas);
 
 private:
+	friend class BosonGameStarting;
+	friend class BosonGUIStarting;
+
+private:
 	BosonStartingPrivate* d;
 
 	QByteArray mNewGameData;
 	BosonPlayField* mDestPlayField;
+};
+
+class BosonGameStarting : public QObject
+{
+public:
+	BosonGameStarting(BosonStarting* starting, QObject* parent);
+	~BosonGameStarting();
+
+	bool createTasks(QMap<QString, QByteArray>* files, QPtrList<BosonStartingTask>* tasks);
+
+private:
+	BosonStarting* mStarting;
+};
+
+class BosonGUIStarting : public QObject
+{
+public:
+	BosonGUIStarting(BosonStarting* starting, QObject* parent);
+	~BosonGUIStarting();
+
+	void setGameView(BosonGameView* gameView);
+
+	bool createTasks(QMap<QString, QByteArray>* files, QPtrList<BosonStartingTask>* tasks);
+
+private:
+	BosonStarting* mStarting;
+	BosonGameView* mGameView;
 };
 
 
@@ -385,11 +418,36 @@ protected:
 	virtual bool startTask();
 };
 
-class BosonStartingLoadPlayerData : public BosonStartingTask
+class BosonStartingLoadPlayerGameData : public BosonStartingTask
 {
 	Q_OBJECT
 public:
-	BosonStartingLoadPlayerData(const QString& text)
+	BosonStartingLoadPlayerGameData(const QString& text)
+		: BosonStartingTask(text)
+	{
+		mPlayer = 0;
+	}
+
+	virtual unsigned int taskDuration() const;
+
+	void setPlayer(Player* p);
+	Player* player() const
+	{
+		return mPlayer;
+	}
+
+protected:
+	virtual bool startTask();
+
+private:
+	Player* mPlayer;
+};
+
+class BosonStartingLoadPlayerGUIData : public BosonStartingTask
+{
+	Q_OBJECT
+public:
+	BosonStartingLoadPlayerGUIData(const QString& text)
 		: BosonStartingTask(text)
 	{
 		mPlayer = 0;
@@ -455,8 +513,6 @@ public:
 	BosonStartingStartScenario(const QString& text)
 		: BosonStartingTask(text)
 	{
-		mGameView = 0;
-		mDestPlayField = 0;
 		mFiles = 0;
 
 		mCanvas = 0;
@@ -464,23 +520,12 @@ public:
 
 	virtual unsigned int taskDuration() const;
 
-	void setGameView(BosonGameView* gameView);
-
-	BosonPlayField* playField() const
-	{
-		return mDestPlayField;
-	}
-
 	void setFiles(QMap<QString, QByteArray>* files)
 	{
 		mFiles = files;
 	}
 
 public slots:
-	void slotSetDestPlayField(BosonPlayField* dest)
-	{
-		mDestPlayField = dest;
-	}
 	void slotSetCanvas(BosonCanvas* canvas)
 	{
 		mCanvas = canvas;
@@ -495,8 +540,44 @@ protected:
 	bool createMoveDatas();
 
 private:
+	QMap<QString, QByteArray>* mFiles;
+
+	BosonCanvas* mCanvas;
+};
+
+class BosonStartingStartScenarioGUI : public BosonStartingTask
+{
+	Q_OBJECT
+public:
+	BosonStartingStartScenarioGUI(const QString& text)
+		: BosonStartingTask(text)
+	{
+		mGameView = 0;
+		mFiles = 0;
+
+		mCanvas = 0;
+	}
+
+	virtual unsigned int taskDuration() const;
+
+	void setGameView(BosonGameView* gameView);
+
+	void setFiles(QMap<QString, QByteArray>* files)
+	{
+		mFiles = files;
+	}
+
+public slots:
+	void slotSetCanvas(BosonCanvas* canvas)
+	{
+		mCanvas = canvas;
+	}
+
+protected:
+	virtual bool startTask();
+
+private:
 	BosonGameView* mGameView;
-	BosonPlayField* mDestPlayField;
 	QMap<QString, QByteArray>* mFiles;
 
 	BosonCanvas* mCanvas;

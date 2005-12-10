@@ -545,6 +545,11 @@ public:
 
 	void addChatMessage(const QString& message);
 
+	/**
+	 * Called once after starting a game, to initialize the items that are
+	 * already in the game.
+	 **/
+	bool initializeItems();
 
 	BoLight* light(int id) const;
 	BoLight* newLight();
