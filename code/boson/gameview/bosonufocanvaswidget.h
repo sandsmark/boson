@@ -73,6 +73,12 @@ public:
 	BosonUfoCanvasWidget();
 	virtual ~BosonUfoCanvasWidget();
 
+	/**
+	 * Called once after game starting to initialize the items that are
+	 * already in the game.
+	 **/
+	bool initializeItems();
+
 	void setGameGLMatrices(const BoGLMatrices*);
 	void setCamera(BoGameCamera* c);
 	void setLocalPlayerIO(PlayerIO* io);

@@ -1063,6 +1063,15 @@ void BosonGameView::quitGame()
  d->mLightWidget = 0;
 }
 
+bool BosonGameView::initializeItems()
+{
+ if (!d->mUfoCanvasWidget->initializeItems()) {
+	boError() << k_funcinfo << "ufo canvas widget could not initialize items" << endl;
+	return false;
+ }
+ return true;
+}
+
 void BosonGameView::slotWidgetResized()
 {
  int w = width();
@@ -1464,6 +1473,7 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
  }
  d->mEventListener = new BosonGameViewEventListener(boGame->eventManager(), this);
  d->mEventListener->setCanvas(mCanvas);
+
  connect(d->mEventListener, SIGNAL(signalFacilityConstructed(Unit*)),
 		d->mUfoCanvasWidget, SLOT(slotFacilityConstructed(Unit*)));
 

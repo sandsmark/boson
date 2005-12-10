@@ -41,6 +41,7 @@
 #include "bowaterrenderer.h"
 #include "script/bosonscript.h"
 #include "unit.h"
+#include "boitemlist.h"
 #include "bosonviewdata.h"
 #include "bosoncomputerio.h"
 #include "gameview/bosonlocalplayerinput.h"
@@ -53,6 +54,8 @@
 #include <qdom.h>
 #include <qmap.h>
 #include <qregexp.h>
+
+#define DO_GUI_INIT_ON_DATA_INIT 1
 
 /**
  * Calls @ref Boson::lock on construction and @ref Boson::unlock on destruction,
@@ -99,6 +102,210 @@ public:
 
 	BosonGameView* mGameView;
 };
+
+BosonGameStarting::BosonGameStarting(BosonStarting* starting, QObject* parent)
+	: QObject(parent)
+{
+ mStarting = starting;
+}
+
+BosonGameStarting::~BosonGameStarting()
+{
+}
+
+bool BosonGameStarting::createTasks(QMap<QString, QByteArray>* files, QPtrList<BosonStartingTask>* tasks)
+{
+ if (!mStarting) {
+	BO_NULL_ERROR(mStarting);
+	return false;
+ }
+ if (!files) {
+	BO_NULL_ERROR(files);
+	return false;
+ }
+
+ boDebug(270) << k_funcinfo << endl;
+ if (!boGame) {
+	boError(270) << k_funcinfo << "NULL boson object" << endl;
+	return false;
+ }
+ if (boGame->gameStatus() != KGame::Init) {
+	boError(270) << k_funcinfo
+		<< "Boson must be in init status to receive map!" << endl
+		<< "Current status: " << boGame->gameStatus() << endl;
+	return false;
+ }
+ if (boGame->playerCount() < 2) {
+	boError(270) << k_funcinfo << "not enough players in game. there must be at least a real player and a (internal) neutral player" << endl;
+	return false;
+ }
+
+ // check if player IDs are valid
+ {
+	QValueList<int> players;
+	QValueList<int> watchPlayers;
+	for (unsigned i = 0; i < boGame->playerCount(); i++) {
+		Player* p = (Player*)boGame->playerList()->at(i);
+		int id = p->bosonId();
+		if (id < 128) {
+			// IDs < 128 are invalid.
+			boError() << k_funcinfo << "Invalid player ID " << id << " for player with KGame ID " << p->kgameId() << endl;
+			return false;
+		}
+		if (id >= 512) {
+			boDebug() << k_funcinfo << "player with KGame ID " << p->kgameId() << " is just watching the game. no active player" << endl;
+			if (watchPlayers.contains(id)) {
+				// AB: note that duplicated IDs are (currently)
+				// allowed here, but should not appear anyway.
+				boWarning() << k_funcinfo << "already have a player with ID " << id << endl;
+			}
+			watchPlayers.append(id);
+		} else {
+			// player ID 128..511 are game players (256-511 are
+			// non-playable players)
+			if (players.contains(id)) {
+				boError() << k_funcinfo << "have more than one player with ID " << id << " - this is not allowed. aborting." << endl;
+				return false;
+			}
+		}
+	}
+ }
+
+
+
+ BosonStartingLoadPlayField* loadPlayField = new BosonStartingLoadPlayField(i18n("Load PlayField"));
+ connect(loadPlayField, SIGNAL(signalPlayFieldCreated(BosonPlayField*, bool*)),
+		mStarting, SLOT(slotPlayFieldCreated(BosonPlayField*, bool*)));
+ loadPlayField->setFiles(files);
+ tasks->append(loadPlayField);
+
+ BosonStartingCreateCanvas* createCanvas = new BosonStartingCreateCanvas(i18n("Create Canvas"));
+ connect(mStarting, SIGNAL(signalDestPlayField(BosonPlayField*)),
+		createCanvas, SLOT(slotSetDestPlayField(BosonPlayField*)));
+ connect(createCanvas, SIGNAL(signalCanvasCreated(BosonCanvas*)),
+		mStarting, SIGNAL(signalCanvas(BosonCanvas*)));
+ tasks->append(createCanvas);
+
+
+ // AB: We can't do this
+ // when players are initialized, as the map must be known to them once we start
+ // loading the units (for *loading* games)
+ BosonStartingInitPlayerMap* playerMap = new BosonStartingInitPlayerMap(i18n("Init Player Map"));
+ connect(mStarting, SIGNAL(signalDestPlayField(BosonPlayField*)),
+		playerMap, SLOT(slotSetDestPlayField(BosonPlayField*)));
+ tasks->append(playerMap);
+
+ BosonStartingInitScript* script = new BosonStartingInitScript(i18n("Init Script"));
+ connect(mStarting, SIGNAL(signalCanvas(BosonCanvas*)),
+		script, SLOT(slotSetCanvas(BosonCanvas*)));
+ tasks->append(script);
+
+
+ for (QPtrListIterator<KPlayer> it(*(boGame->playerList())); it.current(); ++it) {
+	Player* p = (Player*)it.current();
+	QString text;
+	unsigned int index = boGame->playerList()->find(it.current());
+	if (index < boGame->playerCount() - 1) {
+		text = i18n("Load player game data of player %1 (of %2)").arg(index + 1).arg(boGame->playerCount() - 1);
+	} else {
+		text = i18n("Load player game data of neutral player");
+	}
+	BosonStartingLoadPlayerGameData* playerData = new BosonStartingLoadPlayerGameData(text);
+	playerData->setPlayer(p);
+	tasks->append(playerData);
+ }
+
+
+ BosonStartingStartScenario* scenario = new BosonStartingStartScenario(i18n("Start Scenario"));
+ connect(mStarting, SIGNAL(signalCanvas(BosonCanvas*)),
+		scenario, SLOT(slotSetCanvas(BosonCanvas*)));
+ scenario->setFiles(files);
+ tasks->append(scenario);
+
+
+ return true;
+}
+
+
+BosonGUIStarting::BosonGUIStarting(BosonStarting* starting, QObject* parent)
+	: QObject(parent)
+{
+ mStarting = starting;
+ mGameView = 0;
+}
+
+BosonGUIStarting::~BosonGUIStarting()
+{
+}
+
+void BosonGUIStarting::setGameView(BosonGameView* gameView)
+{
+ mGameView = gameView;
+}
+
+bool BosonGUIStarting::createTasks(QMap<QString, QByteArray>* files, QPtrList<BosonStartingTask>* tasks)
+{
+ if (!mStarting) {
+	BO_NULL_ERROR(mStarting);
+	return false;
+ }
+ if (!files) {
+	BO_NULL_ERROR(files);
+	return false;
+ }
+ if (!mGameView) {
+	BO_NULL_ERROR(mGameView);
+	return false;
+ }
+
+
+ BosonStartingLoadTiles* tiles = new BosonStartingLoadTiles(i18n("Load Tiles"));
+ connect(mStarting, SIGNAL(signalDestPlayField(BosonPlayField*)),
+		tiles, SLOT(slotSetDestPlayField(BosonPlayField*)));
+ tasks->append(tiles);
+
+ BosonStartingLoadWater* water = new BosonStartingLoadWater(i18n("Load Water"));
+ connect(mStarting, SIGNAL(signalDestPlayField(BosonPlayField*)),
+		water, SLOT(slotSetDestPlayField(BosonPlayField*)));
+ tasks->append(water);
+
+
+ BosonStartingLoadEffects* effects = new BosonStartingLoadEffects(i18n("Load Effects"));
+ tasks->append(effects);
+
+ for (QPtrListIterator<KPlayer> it(*(boGame->playerList())); it.current(); ++it) {
+	Player* p = (Player*)it.current();
+	QString text;
+	unsigned int index = boGame->playerList()->find(it.current());
+	if (index < boGame->playerCount() - 1) {
+		text = i18n("Load player data of player %1 (of %2)").arg(index + 1).arg(boGame->playerCount() - 1);
+	} else {
+		text = i18n("Load player data of neutral player");
+	}
+	BosonStartingLoadPlayerGUIData* playerData = new BosonStartingLoadPlayerGUIData(text);
+	playerData->setPlayer(p);
+	tasks->append(playerData);
+ }
+
+
+ BosonStartingStartScenarioGUI* scenarioGUI = new BosonStartingStartScenarioGUI(i18n("Start Scenario (GUI)"));
+ connect(mStarting, SIGNAL(signalCanvas(BosonCanvas*)),
+		scenarioGUI, SLOT(slotSetCanvas(BosonCanvas*)));
+ scenarioGUI->setGameView(mGameView);
+ scenarioGUI->setFiles(files);
+ tasks->append(scenarioGUI);
+
+
+
+
+
+ BosonStartingCheckIOs* ios = new BosonStartingCheckIOs(i18n("Check IOs"));
+ tasks->append(ios);
+
+ return true;
+}
+
+
 
 BosonStarting::BosonStarting(QObject* parent) : QObject(parent, "bosonstarting")
 {
@@ -212,6 +419,11 @@ void BosonStarting::slotPlayFieldCreated(BosonPlayField* playField, bool* ownerC
 	BO_NULL_ERROR(ownerChanged);
 	return;
  }
+ if (!playField) {
+	BO_NULL_ERROR(playField);
+	// don't return
+ }
+ boDebug() << k_funcinfo << endl;
  mDestPlayField = playField;
  *ownerChanged = true;
 
@@ -234,41 +446,7 @@ bool BosonStarting::start()
 		<< "Current status: " << boGame->gameStatus() << endl;
 	return false;
  }
- if (boGame->playerCount() < 2) {
-	boError(270) << k_funcinfo << "not enough players in game. there must be at least a real player and a (internal) neutral player" << endl;
-	return false;
- }
-
- // check if player IDs are valid
- {
-	QValueList<int> players;
-	QValueList<int> watchPlayers;
-	for (unsigned i = 0; i < boGame->playerCount(); i++) {
-		Player* p = (Player*)boGame->playerList()->at(i);
-		int id = p->bosonId();
-		if (id < 128) {
-			// IDs < 128 are invalid.
-			boError() << k_funcinfo << "Invalid player ID " << id << " for player with KGame ID " << p->kgameId() << endl;
-			return false;
-		}
-		if (id >= 512) {
-			boDebug() << k_funcinfo << "player with KGame ID " << p->kgameId() << " is just watching the game. no active player" << endl;
-			if (watchPlayers.contains(id)) {
-				// AB: note that duplicated IDs are (currently)
-				// allowed here, but should not appear anyway.
-				boWarning() << k_funcinfo << "already have a player with ID " << id << endl;
-			}
-			watchPlayers.append(id);
-		} else {
-			// player ID 128..511 are game players (256-511 are
-			// non-playable players)
-			if (players.contains(id)) {
-				boError() << k_funcinfo << "have more than one player with ID " << id << " - this is not allowed. aborting." << endl;
-				return false;
-			}
-		}
-	}
- }
+ BosonStartingBosonLocker lock(boGame); // calls Boson::lock() and unlocks it again on destruction
 
  QMap<QString, QByteArray> files;
  if (!BosonPlayField::unstreamFiles(files, mNewGameData)) {
@@ -276,80 +454,37 @@ bool BosonStarting::start()
 	return false;
  }
 
- BosonStartingBosonLocker lock(boGame); // calls Boson::lock() and unlocks it again on destruction
 
  QPtrList<BosonStartingTask> tasks;
  tasks.setAutoDelete(true);
 
- BosonStartingLoadPlayField* loadPlayField = new BosonStartingLoadPlayField(i18n("Load PlayField"));
- connect(loadPlayField, SIGNAL(signalPlayFieldCreated(BosonPlayField*, bool*)),
-		this, SLOT(slotPlayFieldCreated(BosonPlayField*, bool*)));
- loadPlayField->setFiles(&files);
- tasks.append(loadPlayField);
 
- BosonStartingCreateCanvas* createCanvas = new BosonStartingCreateCanvas(i18n("Create Canvas"));
- connect(this, SIGNAL(signalDestPlayField(BosonPlayField*)),
-		createCanvas, SLOT(slotSetDestPlayField(BosonPlayField*)));
- connect(createCanvas, SIGNAL(signalCanvasCreated(BosonCanvas*)),
-		this, SIGNAL(signalCanvas(BosonCanvas*)));
- tasks.append(createCanvas);
-
-
- // AB: We can't do this
- // when players are initialized, as the map must be known to them once we start
- // loading the units (for *loading* games)
- BosonStartingInitPlayerMap* playerMap = new BosonStartingInitPlayerMap(i18n("Init Player Map"));
- connect(this, SIGNAL(signalDestPlayField(BosonPlayField*)),
-		playerMap, SLOT(slotSetDestPlayField(BosonPlayField*)));
- tasks.append(playerMap);
-
- BosonStartingInitScript* script = new BosonStartingInitScript(i18n("Init Script"));
- connect(this, SIGNAL(signalCanvas(BosonCanvas*)),
-		script, SLOT(slotSetCanvas(BosonCanvas*)));
- tasks.append(script);
-
- BosonStartingLoadTiles* tiles = new BosonStartingLoadTiles(i18n("Load Tiles"));
- connect(this, SIGNAL(signalDestPlayField(BosonPlayField*)),
-		tiles, SLOT(slotSetDestPlayField(BosonPlayField*)));
- tasks.append(tiles);
-
- BosonStartingLoadEffects* effects = new BosonStartingLoadEffects(i18n("Load Effects"));
- tasks.append(effects);
-
- for (QPtrListIterator<KPlayer> it(*(boGame->playerList())); it.current(); ++it) {
-	Player* p = (Player*)it.current();
-	QString text;
-	unsigned int index = boGame->playerList()->find(it.current());
-	if (index < boGame->playerCount() - 1) {
-		text = i18n("Load player data of player %1 (of %2)").arg(index + 1).arg(boGame->playerCount() - 1);
-	} else {
-		text = i18n("Load player data of neutral player");
-	}
-	BosonStartingLoadPlayerData* playerData = new BosonStartingLoadPlayerData(text);
-	playerData->setPlayer(p);
-	tasks.append(playerData);
+ BosonGameStarting gameStarting(this, this);
+ if (!gameStarting.createTasks(&files, &tasks)) {
+	boError(270) << k_funcinfo << "game engine tasks cannot be created" << endl;
+	return false;
  }
 
- BosonStartingLoadWater* water = new BosonStartingLoadWater(i18n("Load Water"));
- connect(this, SIGNAL(signalDestPlayField(BosonPlayField*)),
-		water, SLOT(slotSetDestPlayField(BosonPlayField*)));
- tasks.append(water);
 
- BosonStartingStartScenario* scenario = new BosonStartingStartScenario(i18n("Start Scenario"));
- connect(this, SIGNAL(signalDestPlayField(BosonPlayField*)),
-		scenario, SLOT(slotSetDestPlayField(BosonPlayField*)));
- connect(this, SIGNAL(signalCanvas(BosonCanvas*)),
-		scenario, SLOT(slotSetCanvas(BosonCanvas*)));
- scenario->setGameView(d->mGameView);
- scenario->setFiles(&files);
- tasks.append(scenario);
+ BosonGUIStarting guiStarting(this, this);
+ guiStarting.setGameView(d->mGameView);
+ if (!guiStarting.createTasks(&files, &tasks)) {
+	boError(270) << k_funcinfo << "GUI tasks cannot be created" << endl;
+	return false;
+ }
 
- BosonStartingCheckIOs* ios = new BosonStartingCheckIOs(i18n("Check IOs"));
- tasks.append(ios);
+
+#if DO_GUI_INIT_ON_DATA_INIT
+#warning TODO: split up?
+ // AB: this should be split up. there are eventlisteners for both, for the game
+ // engine (canvas eventlistener) and the GUI (localplayer eventlistener)
+ // -> we should split them into two different tasks
 
  BosonStartingLoadEventListeners* eventListeners = new BosonStartingLoadEventListeners(i18n("Load event listeners"));
  eventListeners->setFiles(&files);
  tasks.append(eventListeners);
+#endif
+
 
  bool ret = executeTasks(tasks);
  tasks.setAutoDelete(true);
@@ -672,7 +807,7 @@ bool BosonStartingLoadPlayField::startTask()
  bool ownerChanged = false;
  emit signalPlayFieldCreated(playField, &ownerChanged);
  if (!ownerChanged) {
-	boError(270) << k_funcinfo << "owner not changed, connect to signal!" << endl;
+	boError(270) << k_funcinfo << "playfield owner not changed, connect to signal!" << endl;
 	delete playField;
 	return false;
  }
@@ -720,10 +855,6 @@ bool BosonStartingCreateCanvas::startTask()
 	return false;
  }
  canvas->setMap(playField()->map());
- connect(canvas, SIGNAL(signalItemAdded(BosonItem*)),
-		boViewData, SLOT(slotAddItemContainerFor(BosonItem*)));
- connect(canvas, SIGNAL(signalRemovedItem(BosonItem*)),
-		boViewData, SLOT(slotRemoveItemContainerFor(BosonItem*)));
 
  emit signalCanvasCreated(canvas);
 
@@ -834,7 +965,8 @@ unsigned int BosonStartingLoadEffects::taskDuration() const
  return 100;
 }
 
-bool BosonStartingLoadPlayerData::startTask()
+
+bool BosonStartingLoadPlayerGameData::startTask()
 {
  boDebug(270) << k_funcinfo << endl;
  if (!boGame) {
@@ -848,7 +980,54 @@ bool BosonStartingLoadPlayerData::startTask()
 	BO_NULL_ERROR(player()->speciesTheme());
 	return false;
  }
- BosonProfiler profiler("LoadPlayerData");
+ BosonProfiler profiler("LoadPlayerGameData");
+
+ boDebug(270) << k_funcinfo << player()->bosonId() << endl;
+
+ if (!player()->speciesTheme()->readUnitConfigs()) {
+	boError(270) << k_funcinfo << "reading unit configs failed" << endl;
+	return false;
+ }
+
+ if (!player()->speciesTheme()->loadTechnologies()) {
+	boError(270) << k_funcinfo << "loading technologies failed" << endl;
+	return false;
+ }
+
+ boDebug(270) << k_funcinfo << "done" << endl;
+ return true;
+}
+
+unsigned int BosonStartingLoadPlayerGameData::taskDuration() const
+{
+ if (!player()) {
+	return 0;
+ }
+ return 200;
+}
+
+void BosonStartingLoadPlayerGameData::setPlayer(Player* p)
+{
+ mPlayer = p;
+}
+
+
+
+bool BosonStartingLoadPlayerGUIData::startTask()
+{
+ boDebug(270) << k_funcinfo << endl;
+ if (!boGame) {
+	return false;
+ }
+ if (!player()) {
+	BO_NULL_ERROR(player());
+	return false;
+ }
+ if (!player()->speciesTheme()) {
+	BO_NULL_ERROR(player()->speciesTheme());
+	return false;
+ }
+ BosonProfiler profiler("LoadPlayerGUIData");
 
  boDebug(270) << k_funcinfo << player()->bosonId() << endl;
  // Order of calls below is very important!!! Don't change this unless you're sure you know what you're doing!!!
@@ -878,25 +1057,9 @@ bool BosonStartingLoadPlayerData::startTask()
  mDuration = 50;
  completeSubTask(mDuration);
 
- startSubTask(i18n("Unit config files..."));
- if (!player()->speciesTheme()->readUnitConfigs()) {
-	boError(270) << k_funcinfo << "reading unit configs failed" << endl;
-	return false;
- }
- mDuration = 150;
- completeSubTask(mDuration);
-
  if (!loadUnitDatas()) {
 	return false;
  }
-
- startSubTask(i18n("Technologies..."));
- if (!player()->speciesTheme()->loadTechnologies()) {
-	boError(270) << k_funcinfo << "loading technologies failed" << endl;
-	return false;
- }
- mDuration = durationBeforeUnitLoading() + loadUnitDuration() + 50;
- completeSubTask(mDuration);
 
  // AB: atm only the sounds of the local player are required, but I believe this
  // can easily change.
@@ -905,7 +1068,7 @@ bool BosonStartingLoadPlayerData::startTask()
 	boError(270) << k_funcinfo << "loading general sounds failed" << endl;
 	return false;
  }
- mDuration = durationBeforeUnitLoading() + loadUnitDuration() + 100;
+ mDuration = loadUnitDuration() + 50;
  completeSubTask(mDuration);
 
 
@@ -913,32 +1076,32 @@ bool BosonStartingLoadPlayerData::startTask()
  return true;
 }
 
-unsigned int BosonStartingLoadPlayerData::taskDuration() const
+unsigned int BosonStartingLoadPlayerGUIData::taskDuration() const
 {
  if (!player()) {
 	return 0;
  }
- return durationBeforeUnitLoading() + loadUnitDuration() + 100;
+ return loadUnitDuration() + 50;
 }
 
-void BosonStartingLoadPlayerData::setPlayer(Player* p)
+void BosonStartingLoadPlayerGUIData::setPlayer(Player* p)
 {
  mPlayer = p;
 }
 
-unsigned int BosonStartingLoadPlayerData::durationBeforeUnitLoading() const
+unsigned int BosonStartingLoadPlayerGUIData::durationBeforeUnitLoading() const
 {
- return 150;
+ return 50;
 }
 
-unsigned int BosonStartingLoadPlayerData::loadUnitDuration() const
+unsigned int BosonStartingLoadPlayerGUIData::loadUnitDuration() const
 {
  // AB: it would be nicer to use unitCount * 100 or so, but we don't have
  // unitCount yet, as speciestheme isn't fully loaded yet.
  return 1500;
 }
 
-bool BosonStartingLoadPlayerData::loadUnitDatas()
+bool BosonStartingLoadPlayerGUIData::loadUnitDatas()
 {
  startSubTask(i18n("Units..."));
 
@@ -1000,24 +1163,11 @@ unsigned int BosonStartingLoadWater::taskDuration() const
  return 100;
 }
 
-void BosonStartingStartScenario::setGameView(BosonGameView* gameView)
-{
- mGameView = gameView;
-}
-
 bool BosonStartingStartScenario::startTask()
 {
  PROFILE_METHOD
  if (!boGame) {
 	BO_NULL_ERROR(boGame);
-	return false;
- }
- if (!mDestPlayField) {
-	BO_NULL_ERROR(mDestPlayField);
-	return false;
- }
- if (!mGameView) {
-	BO_NULL_ERROR(mGameView);
 	return false;
  }
 
@@ -1027,8 +1177,6 @@ bool BosonStartingStartScenario::startTask()
  }
 
  MobileUnit::initCellIntersectionTable();
-
- mGameView->setCanvas(mCanvas);
 
  BosonSaveLoad load(boGame);
  if (!load.loadKGameFromXML(*mFiles)) {
@@ -1043,11 +1191,6 @@ bool BosonStartingStartScenario::startTask()
 
  if (!load.loadCanvasFromXML(*mFiles)) {
 	boError(270) << k_funcinfo << "unable to load canvas from XML" << endl;
-	return false;
- }
-
- if (!load.loadExternalFromXML(*mFiles)) {
-	boError(270) << k_funcinfo << "unable to load external data from XML" << endl;
 	return false;
  }
 
@@ -1069,6 +1212,72 @@ bool BosonStartingStartScenario::createMoveDatas()
  // TODO
 
  return true;
+}
+
+void BosonStartingStartScenarioGUI::setGameView(BosonGameView* gameView)
+{
+ mGameView = gameView;
+}
+
+bool BosonStartingStartScenarioGUI::startTask()
+{
+ PROFILE_METHOD
+ if (!boGame) {
+	BO_NULL_ERROR(boGame);
+	return false;
+ }
+ if (!mGameView) {
+	BO_NULL_ERROR(mGameView);
+	return false;
+ }
+
+ mGameView->setCanvas(mCanvas);
+
+#if DO_GUI_INIT_ON_DATA_INIT
+ disconnect(mCanvas, 0, boViewData, 0);
+ if (boViewData->allItemContainers().count() > 0) {
+	boError() << k_funcinfo << "there are already item containers left in boViewData (probably from a previous game?). this might be a significant memory leak!" << endl;
+	while (boViewData->allItemContainers().count() > 0) {
+		BosonItemContainer* c = (boViewData->allItemContainers()).getFirst();
+		if (!c) {
+			BO_NULL_ERROR(c);
+			return false;
+		}
+		if (!c->item()) {
+			BO_NULL_ERROR(c->item());
+			return false;
+		}
+		boViewData->slotRemoveItemContainerFor(c->item());
+	}
+ }
+ connect(mCanvas, SIGNAL(signalItemAdded(BosonItem*)),
+		boViewData, SLOT(slotAddItemContainerFor(BosonItem*)));
+ connect(mCanvas, SIGNAL(signalRemovedItem(BosonItem*)),
+		boViewData, SLOT(slotRemoveItemContainerFor(BosonItem*)));
+ for (BoItemList::iterator it = mCanvas->allItems()->begin(); it != mCanvas->allItems()->end(); ++it) {
+	boViewData->slotAddItemContainerFor(*it);
+ }
+#endif
+
+ if (!mGameView->initializeItems()) {
+	boError() << k_funcinfo << "initializing items failed" << endl;
+	return false;
+ }
+
+ BosonSaveLoad load(boGame);
+
+ // TODO: rename to "loadGameViewFromXML()"
+ if (!load.loadExternalFromXML(*mFiles)) {
+	boError(270) << k_funcinfo << "unable to load external data from XML" << endl;
+	return false;
+ }
+
+ return true;
+}
+
+unsigned int BosonStartingStartScenarioGUI::taskDuration() const
+{
+ return 500;
 }
 
 
