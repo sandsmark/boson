@@ -118,6 +118,8 @@ void BosonGLMiniMap::setLocalPlayerIO(PlayerIO* io)
  mLocalPlayerIO = io;
  if (!io) {
 	slotShowMiniMap(false);
+ } else {
+	initializeItems();
  }
 }
 
@@ -425,7 +427,26 @@ void BosonGLMiniMap::createMap(BosonCanvas* c, const BoGLMatrices* gameGLMatrice
 		calculateGround(x, y);
 	}
  }
+ boDebug() << k_funcinfo << "initializing ground done" << endl;
+ if (mLocalPlayerIO) {
+	initializeItems();
+ } else {
+	boDebug() << k_funcinfo << "no localplayerIO yet - initiale items later" << endl;
+ }
  boDebug() << k_funcinfo << "done" << endl;
+}
+
+void BosonGLMiniMap::initializeItems()
+{
+ BO_CHECK_NULL_RET(mLocalPlayerIO);
+ BO_CHECK_NULL_RET(mCanvas);
+ boDebug() << k_funcinfo << "initializing items" << endl;
+ d->mRadars.clear();
+ BoItemList* allItems = mCanvas->allItems();
+ for (BoItemList::iterator it = allItems->begin(); it != allItems->end(); ++it) {
+	slotItemAdded(*it);
+ }
+ boDebug() << k_funcinfo << "initializing items done" << endl;
 }
 
 void BosonGLMiniMap::renderMiniMap()

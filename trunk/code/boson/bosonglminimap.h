@@ -163,6 +163,8 @@ protected:
 	 **/
 	void calculateGround(int x, int y);
 
+	void initializeItems();
+
 private:
 	BosonGLMiniMapPrivate* d;
 	PlayerIO* mLocalPlayerIO;
