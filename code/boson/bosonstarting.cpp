@@ -135,7 +135,7 @@ QString BosonStarting::logFile() const
  return d->mLoadFromLogFile;
 }
 
-void BosonStarting::startNewGame()
+void BosonStarting::slotStartNewGameWithTimer()
 {
  boDebug(270) << k_funcinfo << endl;
 

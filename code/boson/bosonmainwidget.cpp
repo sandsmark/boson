@@ -939,7 +939,7 @@ void BosonMainWidget::slotStartNewGame()
  //
  // Note that this return immediately - the loading is started using a
  // QTimer::singleShot()
- d->mStarting->startNewGame();
+ d->mStarting->slotStartNewGameWithTimer();
 }
 
 // TODO: when this fails we should go back to the welcome widget!
