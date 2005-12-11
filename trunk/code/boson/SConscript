@@ -10,6 +10,9 @@ else:
 	lib_groundrendererplugin = ' groundrenderer/libbogroundrendererplugin_static.a '
 	lib_gameviewplugin = ' gameview/plugin/libbosongameviewplugin_static.a '
 
+if env['BOSON_DO_STATIC']:
+	env.KDEaddflags_link('-static')
+
 #env.PrependUnique(CPPPATH = ['../kgame'])
 #env.PrependUnique(CPPPATH = ['../ufo'])
 
@@ -91,6 +94,7 @@ libgameengine.source = """
 	bowater.cpp
 	bosonsaveload.cpp
 	bosongroundtheme.cpp
+	bosongameengine.cpp
 	items/bosonitem.cpp
 	items/bosonshot.cpp
 	items/bosonitempropertyhandler.cpp
@@ -244,6 +248,8 @@ boson.source += """
 	gameoverdialog.cpp
 	bocheckinstallation.cpp
 	bosonstarting.cpp
+	bosongameenginestarting.cpp
+	bosonguistarting.cpp
 	bosongameviewpluginbase.cpp
 	bosongameviewpluginmanager.cpp
 	bosoneffectmanager.cpp
@@ -275,6 +281,27 @@ boson.source += gameview_sources
 boson.env = env
 
 boson.execute()
+
+
+bosonNoGUI = env.kobject('program')
+bosonNoGUI.target = 'boson-no-gui'
+bosonNoGUI.includes = '../bodebug'
+bosonNoGUI.includes += libboson_includes
+bosonNoGUI.libs = libboson_lib + ' libcommon.a libgameengine.a'
+bosonNoGUI.libs += boufo_lib
+bosonNoGUI.libpaths += libboson_libpaths
+bosonNoGUI.source += libboson_source
+bosonNoGUI.source += """
+	bocheckinstallation.cpp
+	bosonstarting.cpp
+	mainnogui.cpp
+"""
+
+bosonNoGUI.env = env
+
+bosonNoGUI.execute()
+
+
 
 
 bounit = env.kobject('program')

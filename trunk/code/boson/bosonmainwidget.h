@@ -47,6 +47,8 @@ class BoGLMatrices;
 class BoRenderItem;
 class BosonCursor;
 class BoUfoWidget;
+class BosonGameEngine;
+class Boson;
 
 class KGameChat;
 class KGameIO;
@@ -68,6 +70,8 @@ public:
 	BosonMainWidget(QWidget* parent, bool wantDirect = true);
 	virtual ~BosonMainWidget();
 
+	void setGameEngine(BosonGameEngine*);
+
 
 	/**
 	 * Grab a frame for a movie. The returned @ref QByteArray contains
@@ -76,8 +80,6 @@ public:
 	 * only or something similar.
 	 **/
 	QByteArray grabMovieFrame();
-
-	bool preloadData();
 
 public slots:
 	/**
@@ -151,6 +153,7 @@ protected:
 	void raiseWidget(BoUfoWidget*);
 
 protected slots:
+	void slotBosonObjectAboutToBeDestroyed(Boson*);
 	void slotChangeLocalPlayer(Player* p);
 
 	/**
@@ -195,6 +198,18 @@ protected slots:
 
 	void slotStartupPreferredSizeChanged();
 
+
+private:
+	/**
+	 * Prepare for loading a game. This loads the playfield from @ref
+	 * fileName and adds the players necessary for loading the game.
+	 * @return An empty @ref QByteArray if an error occurred or the data
+	 * necessary for @ref BosonStarting (such as the playField) if it
+	 * succeeded.
+	 **/
+	QByteArray prepareLoadGame(const QString& loadingFileName);
+
+	bool addLoadGamePlayers(const QString& playersXML);
 
 private:
 	void init();

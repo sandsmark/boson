@@ -26,14 +26,12 @@ class BosonPlayField;
 class Player;
 class Boson;
 class BosonCanvas;
-class BosonGameView;
 class QDomElement;
 template<class T> class QPtrList;
 template<class T1, class T2> class QMap;
 class BosonStartingTask;
 
-class BosonGameStarting;
-class BosonGUIStarting;
+class BosonStartingTaskCreator;
 class BosonStartingPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -45,7 +43,18 @@ public:
 	BosonStarting(QObject* parent);
 	~BosonStarting();
 
-	void setGameView(BosonGameView* gameView);
+	/**
+	 * Add an object that creates @ref BosonStartingTask objects when a game
+	 * is being started. These @ref BosonStartingTask represent the actual
+	 * "starting" procedure.
+	 *
+	 * Note that just like @ref BosonStartingTask objects,
+	 * @ref BosonStartingTaskCreator objects are processed in order. That
+	 * means the tasks of the first creator are created first!
+	 *
+	 * This class takes ownershipt of the @p creator.
+	 **/
+	void addTaskCreator(BosonStartingTaskCreator* creator);
 
 	void setEditorMap(const QByteArray& buffer);
 
@@ -53,15 +62,6 @@ public:
 	QString logFile() const;
 
 	void startNewGame();
-
-	/**
-	 * Prepare for loading a game. This loads the playfield from @ref
-	 * fileName and adds the players necessary for loading the game.
-	 * @return An empty @ref QByteArray if an error occurred or the data
-	 * necessary for @ref setNewGameData (such as the playField) if it
-	 * succeeded.
-	 **/
-	QByteArray loadGame(const QString& fileName);
 
 	/**
 	 * Check whether there are events and process them. See @ref
@@ -148,15 +148,7 @@ protected:
 
 	bool start();
 
-
-
-	/**
-	 * Add the players for a loaded game.
-	 **/
-	bool addLoadGamePlayers(const QString& playersXML);
-
 	void sendStartingCompleted(bool success);
-
 	bool checkStartingCompletedMessages() const;
 
 	bool executeTasks(const QPtrList<BosonStartingTask>& tasks);
@@ -176,33 +168,27 @@ private:
 	BosonPlayField* mDestPlayField;
 };
 
-class BosonGameStarting : public QObject
+
+class BosonStartingTaskCreator : public QObject
 {
+	Q_OBJECT
 public:
-	BosonGameStarting(BosonStarting* starting, QObject* parent);
-	~BosonGameStarting();
+	BosonStartingTaskCreator(QObject* parent);
+	~BosonStartingTaskCreator();
 
-	bool createTasks(QMap<QString, QByteArray>* files, QPtrList<BosonStartingTask>* tasks);
+	virtual void setFiles(QMap<QString, QByteArray>* files)
+	{
+		Q_UNUSED(files);
+	}
 
-private:
-	BosonStarting* mStarting;
+	virtual bool createTasks(QPtrList<BosonStartingTask>* tasks) = 0;
+
+	/**
+	 * @return A name describing this class. Should be i18n'ed, as this name
+	 * is supposed to be used in error messages.
+	 **/
+	virtual QString creatorName() const = 0;
 };
-
-class BosonGUIStarting : public QObject
-{
-public:
-	BosonGUIStarting(BosonStarting* starting, QObject* parent);
-	~BosonGUIStarting();
-
-	void setGameView(BosonGameView* gameView);
-
-	bool createTasks(QMap<QString, QByteArray>* files, QPtrList<BosonStartingTask>* tasks);
-
-private:
-	BosonStarting* mStarting;
-	BosonGameView* mGameView;
-};
-
 
 class BosonStartingTask : public QObject
 {
@@ -259,344 +245,6 @@ private:
 	unsigned int mTimePassed;
 };
 
-class BosonStartingLoadPlayField : public BosonStartingTask
-{
-	Q_OBJECT
-public:
-	BosonStartingLoadPlayField(const QString& text)
-		: BosonStartingTask(text)
-	{
-	}
-
-	virtual unsigned int taskDuration() const;
-
-	void setFiles(QMap<QString, QByteArray>* files)
-	{
-		mFiles = files;
-	}
-
-signals:
-	void signalPlayFieldCreated(BosonPlayField* playField, bool* ownerChanged);
-
-protected:
-	virtual bool startTask();
-
-private:
-	QMap<QString, QByteArray>* mFiles;
-};
-
-class BosonStartingCreateCanvas : public BosonStartingTask
-{
-	Q_OBJECT
-public:
-	BosonStartingCreateCanvas(const QString& text)
-		: BosonStartingTask(text)
-	{
-		mDestPlayField = 0;
-	}
-
-	virtual unsigned int taskDuration() const;
-
-	BosonPlayField* playField() const
-	{
-		return mDestPlayField;
-	}
-
-signals:
-	void signalCanvasCreated(BosonCanvas* canvas);
-
-public slots:
-	void slotSetDestPlayField(BosonPlayField* dest)
-	{
-		mDestPlayField = dest;
-	}
-
-protected:
-	virtual bool startTask();
-
-private:
-	BosonPlayField* mDestPlayField;
-};
-
-class BosonStartingInitPlayerMap : public BosonStartingTask
-{
-	Q_OBJECT
-public:
-	BosonStartingInitPlayerMap(const QString& text)
-		: BosonStartingTask(text)
-	{
-		mDestPlayField = 0;
-	}
-
-	virtual unsigned int taskDuration() const;
-
-	BosonPlayField* playField() const
-	{
-		return mDestPlayField;
-	}
-
-public slots:
-	void slotSetDestPlayField(BosonPlayField* dest)
-	{
-		mDestPlayField = dest;
-	}
-
-protected:
-	virtual bool startTask();
-
-private:
-	BosonPlayField* mDestPlayField;
-};
-
-class BosonStartingInitScript : public BosonStartingTask
-{
-	Q_OBJECT
-public:
-	BosonStartingInitScript(const QString& text)
-		: BosonStartingTask(text)
-	{
-		mCanvas = 0;
-	}
-
-	virtual unsigned int taskDuration() const;
-
-public slots:
-	void slotSetCanvas(BosonCanvas* canvas)
-	{
-		mCanvas = canvas;
-	}
-
-protected:
-	virtual bool startTask();
-
-private:
-	BosonCanvas* mCanvas;
-};
-
-class BosonStartingLoadTiles : public BosonStartingTask
-{
-	Q_OBJECT
-public:
-	BosonStartingLoadTiles(const QString& text)
-		: BosonStartingTask(text)
-	{
-		mDestPlayField = 0;
-	}
-
-	virtual unsigned int taskDuration() const;
-
-	BosonPlayField* playField() const
-	{
-		return mDestPlayField;
-	}
-
-public slots:
-	void slotSetDestPlayField(BosonPlayField* dest)
-	{
-		mDestPlayField = dest;
-	}
-
-protected:
-	virtual bool startTask();
-
-private:
-	BosonPlayField* mDestPlayField;
-};
-
-class BosonStartingLoadEffects : public BosonStartingTask
-{
-	Q_OBJECT
-public:
-	BosonStartingLoadEffects(const QString& text)
-		: BosonStartingTask(text)
-	{
-	}
-
-	virtual unsigned int taskDuration() const;
-
-protected:
-	virtual bool startTask();
-};
-
-class BosonStartingLoadPlayerGameData : public BosonStartingTask
-{
-	Q_OBJECT
-public:
-	BosonStartingLoadPlayerGameData(const QString& text)
-		: BosonStartingTask(text)
-	{
-		mPlayer = 0;
-	}
-
-	virtual unsigned int taskDuration() const;
-
-	void setPlayer(Player* p);
-	Player* player() const
-	{
-		return mPlayer;
-	}
-
-protected:
-	virtual bool startTask();
-
-private:
-	Player* mPlayer;
-};
-
-class BosonStartingLoadPlayerGUIData : public BosonStartingTask
-{
-	Q_OBJECT
-public:
-	BosonStartingLoadPlayerGUIData(const QString& text)
-		: BosonStartingTask(text)
-	{
-		mPlayer = 0;
-		mDuration = 0;
-	}
-
-	virtual unsigned int taskDuration() const;
-
-	void setPlayer(Player* p);
-	Player* player() const
-	{
-		return mPlayer;
-	}
-
-protected:
-	virtual bool startTask();
-
-	bool loadUnitDatas();
-
-	unsigned int durationBeforeUnitLoading() const;
-	unsigned int loadUnitDuration() const;
-
-private:
-	Player* mPlayer;
-
-	unsigned int mDuration;
-};
-
-class BosonStartingLoadWater : public BosonStartingTask
-{
-	Q_OBJECT
-public:
-	BosonStartingLoadWater(const QString& text)
-		: BosonStartingTask(text)
-	{
-		mDestPlayField = 0;
-	}
-
-	virtual unsigned int taskDuration() const;
-
-	BosonPlayField* playField() const
-	{
-		return mDestPlayField;
-	}
-
-public slots:
-	void slotSetDestPlayField(BosonPlayField* dest)
-	{
-		mDestPlayField = dest;
-	}
-
-protected:
-	virtual bool startTask();
-
-private:
-	BosonPlayField* mDestPlayField;
-};
-
-class BosonStartingStartScenario : public BosonStartingTask
-{
-	Q_OBJECT
-public:
-	BosonStartingStartScenario(const QString& text)
-		: BosonStartingTask(text)
-	{
-		mFiles = 0;
-
-		mCanvas = 0;
-	}
-
-	virtual unsigned int taskDuration() const;
-
-	void setFiles(QMap<QString, QByteArray>* files)
-	{
-		mFiles = files;
-	}
-
-public slots:
-	void slotSetCanvas(BosonCanvas* canvas)
-	{
-		mCanvas = canvas;
-	}
-
-protected:
-	virtual bool startTask();
-
-	/**
-	 * Creates @ref BosonMoveData objects for all unitproperties
-	 **/
-	bool createMoveDatas();
-
-private:
-	QMap<QString, QByteArray>* mFiles;
-
-	BosonCanvas* mCanvas;
-};
-
-class BosonStartingStartScenarioGUI : public BosonStartingTask
-{
-	Q_OBJECT
-public:
-	BosonStartingStartScenarioGUI(const QString& text)
-		: BosonStartingTask(text)
-	{
-		mGameView = 0;
-		mFiles = 0;
-
-		mCanvas = 0;
-	}
-
-	virtual unsigned int taskDuration() const;
-
-	void setGameView(BosonGameView* gameView);
-
-	void setFiles(QMap<QString, QByteArray>* files)
-	{
-		mFiles = files;
-	}
-
-public slots:
-	void slotSetCanvas(BosonCanvas* canvas)
-	{
-		mCanvas = canvas;
-	}
-
-protected:
-	virtual bool startTask();
-
-private:
-	BosonGameView* mGameView;
-	QMap<QString, QByteArray>* mFiles;
-
-	BosonCanvas* mCanvas;
-};
-
-class BosonStartingCheckIOs : public BosonStartingTask
-{
-	Q_OBJECT
-public:
-	BosonStartingCheckIOs(const QString& text)
-		: BosonStartingTask(text)
-	{
-	}
-
-	virtual unsigned int taskDuration() const;
-
-protected:
-	virtual bool startTask();
-};
 
 class BosonStartingLoadEventListeners : public BosonStartingTask
 {
