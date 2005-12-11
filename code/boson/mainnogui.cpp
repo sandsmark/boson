@@ -30,6 +30,12 @@
 #include "bosongameengine.h"
 #include "player.h"
 #include "boson.h"
+#include "bosonstarting.h"
+#include "bosongameenginestarting.h"
+#include "bosonmessageids.h"
+#include "bosonplayfield.h"
+#include "bosondata.h"
+#include "speciestheme.h"
 #include <config.h>
 
 #include <kaboutdata.h>
@@ -55,7 +61,8 @@ static KCmdLineOptions options[] =
 };
 
 
-void postBosonConfigInit();
+static void postBosonConfigInit();
+static QByteArray loadPlayFieldFromDisk(KCmdLineArgs* args);
 
 
 int main(int argc, char **argv)
@@ -113,6 +120,7 @@ int main(int argc, char **argv)
 #endif
 
  BosonGameEngine* gameEngine = new BosonGameEngine(0);
+ BosonStarting* starting = new BosonStarting(0);
 
  if (!gameEngine->preloadData()) {
 	boError() << k_funcinfo << "unable to preload some data" << endl;
@@ -135,6 +143,7 @@ int main(int argc, char **argv)
 	boDebug() << k_funcinfo << "starting new game" << endl;
 
 	Player* localPlayer = new Player;
+	localPlayer->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), Qt::red);
 #if 0
 	BosonLocalPlayerInput* input = new BosonLocalPlayerInput();
 	p->addGameIO(input);
@@ -145,13 +154,33 @@ int main(int argc, char **argv)
 #endif
 	boGame->bosonAddPlayer(localPlayer);
 
-	// TODO: BoUfoNewGameWidget::slotStartGame()
-	// -> networkInterface()->sendStartGameClicked();
+	BosonGameEngineStarting* game = new BosonGameEngineStarting(starting, starting);
+	starting->addTaskCreator(game);
+
+	boGame->addNeutralPlayer();
  }
 
+ QByteArray gameData = loadPlayFieldFromDisk(args);
+ if (gameData.size() == 0) {
+	boError() << k_funcinfo << "unable to load playfield from disk" << endl;
+	return 1;
+ }
+
+ QObject::connect(boGame, SIGNAL(signalSetNewGameData(const QByteArray&, bool*)),
+		starting, SLOT(slotSetNewGameData(const QByteArray&, bool*)));
+ QObject::connect(boGame, SIGNAL(signalStartNewGame()),
+		starting, SLOT(slotStartNewGameWithTimer()));
+ QByteArray buffer;
+ QDataStream stream(buffer, IO_WriteOnly);
+ stream << (Q_INT8)1; // game mode (not editor)
+ stream << qCompress(gameData);
+ boGame->sendMessage(buffer, BosonMessageIds::IdNewGame);
+
+ boDebug() << "starting main loop" << endl;
  int ret = app.exec();
 
  delete iface;
+ delete starting;
  delete gameEngine;
 
  return ret;
@@ -187,5 +216,31 @@ void postBosonConfigInit()
 		boError() << k_funcinfo << "aidelay is not a valid float!" << endl;
 	}
  }
+}
+
+QByteArray loadPlayFieldFromDisk(KCmdLineArgs* args)
+{
+ if (!args) {
+	return QByteArray();
+ }
+ QString identifier;
+ if (args->isSet("playfield")) {
+	identifier = args->getOption("playfield");
+ } else {
+	identifier = BosonPlayField::defaultPlayField();
+ }
+ BosonPlayField* field = boData->playField(identifier);
+ if (!field) {
+	boError() << k_funcinfo << "no playfield " << identifier << endl;
+	return QByteArray();
+ }
+ if (!field->isPreLoaded()) {
+	boError() << k_funcinfo << "playfield " << identifier << " has no yet been preloaded?!" << endl;
+	return QByteArray();
+ }
+
+ boDebug() << k_funcinfo << "loading " << identifier << endl;
+ QByteArray data = field->loadFromDiskToStream();
+ return data;
 }
 
