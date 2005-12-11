@@ -36,6 +36,8 @@
 #include "boufo/boufo.h"
 #include "boufo/boufoaction.h"
 #include "bosonstarting.h"
+#include "bosongameenginestarting.h"
+#include "bosonguistarting.h"
 #include "gameview/bosongameview.h"
 #include "gameview/bosonlocalplayerinput.h"
 #include "startupwidgets/boufostartupwidget.h"
@@ -54,6 +56,9 @@
 #include "boufo/boufofactory.h"
 #include "bodebug.h"
 #include "optionsdialog.h"
+#include "bosongameengine.h"
+#include "bosoncomputerio.h"
+#include "speciestheme.h"
 
 #include <klocale.h>
 #include <kmessagebox.h>
@@ -91,6 +96,7 @@ class BosonMainWidgetPrivate
 public:
 	BosonMainWidgetPrivate()
 	{
+		mGameEngine = 0;
 		mWidgetStack = 0;
 		mStartup = 0;
 		mGameView = 0;
@@ -103,6 +109,7 @@ public:
 		mStarting = 0;
 	}
 
+	BosonGameEngine* mGameEngine;
 	BoUfoWidgetStack* mWidgetStack;
 	BoUfoStartupWidget* mStartup;
 	BosonGameView* mGameView;
@@ -350,17 +357,23 @@ void BosonMainWidget::initUfoGUI()
  boDebug() << k_funcinfo << "done" << endl;
 }
 
-bool BosonMainWidget::preloadData()
+void BosonMainWidget::setGameEngine(BosonGameEngine* gameEngine)
 {
- if (!BosonGroundTheme::createGroundThemeList()) {
-	boError() << "Unable to load groundThemes. Check your installation!" << endl;
-	return false;
+ if (d->mGameEngine) {
+	disconnect(d->mGameEngine, 0, this, 0);
  }
- if (!BosonPlayField::preLoadAllPlayFields()) {
-	boError() << k_funcinfo << "Unable to preload playFields. Check your installation!" << endl;
-	return false;
+ d->mGameEngine = gameEngine;
+ if (d->mGameEngine) {
+	connect(d->mGameEngine, SIGNAL(signalBosonObjectAboutToBeDestroyed(Boson*)),
+			this, SLOT(slotBosonObjectAboutToBeDestroyed(Boson*)));
  }
- return true;
+}
+
+void BosonMainWidget::slotBosonObjectAboutToBeDestroyed(Boson* b)
+{
+ if (d->mGameView) {
+	d->mGameView->bosonObjectAboutToBeDestroyed(b);
+ }
 }
 
 void BosonMainWidget::resizeGL(int w, int h)
@@ -540,11 +553,7 @@ void BosonMainWidget::grabMovieFrameAndSave()
 
 void BosonMainWidget::initBoson()
 {
- if (Boson::boson()) {
-	boWarning() << k_funcinfo << "Oops - Boson object already present! deleting..." << endl;
-	deleteBoson();
- }
- Boson::initBoson();
+ d->mGameEngine->initGame();
  if (!d->mStarting) {
 	BO_NULL_ERROR(d->mStarting);
  }
@@ -587,14 +596,13 @@ void BosonMainWidget::deleteBoson()
 void BosonMainWidget::endGame()
 {
  boDebug() << k_funcinfo << endl;
+ BO_CHECK_NULL_RET(d->mGameEngine);
  d->mFPSCounter->reset();
  if (d->mGameView) {
 	d->mGameView->quitGame();
  }
- if (boGame) {
-	boGame->quitGame();
- }
- deleteBoson();  // Easiest way to reset game info
+
+ d->mGameEngine->endGameAndDeleteBoson();
  delete d->mStarting;
  d->mStarting = 0;
  boDebug() << k_funcinfo << "done" << endl;
@@ -635,11 +643,6 @@ void BosonMainWidget::slotAddLocalPlayer()
 
 void BosonMainWidget::slotResetGame()
 {
- if (boGame) {
-	// Delete all players to remove added AI and local player (will get
-	// added by newgame widget)
-	boGame->removeAllPlayers();
- }
  reinitGame();
 }
 
@@ -758,7 +761,7 @@ void BosonMainWidget::reinitGame()
  endGame();
 
  delete d->mStarting;
- d->mStarting = new BosonStarting(this); // manages startup of games
+ d->mStarting = new BosonStarting(this);
  connect(d->mStarting, SIGNAL(signalLoadingMaxDuration(unsigned int)),
 		d->mStartup, SLOT(slotLoadingMaxDuration(unsigned int)));
  connect(d->mStarting, SIGNAL(signalLoadingTaskCompleted(unsigned int)),
@@ -769,7 +772,12 @@ void BosonMainWidget::reinitGame()
 		d->mStartup, SLOT(slotLoadingStartSubTask(const QString&)));
  connect(d->mStarting, SIGNAL(signalStartingFailed()),
 		this, SLOT(slotStartingFailed()));
- d->mStarting->setGameView(d->mGameView);
+
+ BosonGameEngineStarting* gameStarting = new BosonGameEngineStarting(d->mStarting, d->mStarting);
+ d->mStarting->addTaskCreator(gameStarting);
+ BosonGUIStarting* guiStarting = new BosonGUIStarting(d->mStarting, d->mStarting);
+ guiStarting->setGameView(d->mGameView);
+ d->mStarting->addTaskCreator(guiStarting);
 
  initBoson();
 }
@@ -854,7 +862,7 @@ void BosonMainWidget::slotLoadGame(const QString& fileName)
  }
 
  // load the file into memory
- QByteArray data = d->mStarting->loadGame(fileName);
+ QByteArray data = prepareLoadGame(fileName);
  if (data.size() == 0) {
 	boError() << k_funcinfo << "failed loading from file" << endl;
 	return;
@@ -1216,4 +1224,137 @@ void BosonMainWidget::slotStartupPreferredSizeChanged()
  h = QMIN(h, r.height());
  resize(w, h);
 }
+
+QByteArray BosonMainWidget::prepareLoadGame(const QString& loadingFileName)
+{
+ if (loadingFileName.isNull()) {
+	boError(260) << k_funcinfo << "Cannot load game with NULL filename" << endl;
+	return QByteArray();
+ }
+ BosonPlayField loadField;
+ if (!loadField.preLoadPlayField(loadingFileName)) {
+	boError(260) << k_funcinfo << "could not preload " << loadingFileName << endl;
+	return QByteArray();
+ }
+
+ QMap<QString, QByteArray> files;
+ if (!loadField.loadFromDiskToFiles(files)) {
+	boError(260) << k_funcinfo << "could not load " << loadingFileName << endl;
+	return QByteArray();
+ }
+ QByteArray playField = BosonPlayField::streamFiles(files);
+ if (playField.size() == 0) {
+	boError(260) << k_funcinfo << "empty playfield loaded from " << loadingFileName << endl;
+	return QByteArray();
+ }
+
+ if (!files.contains("players.xml")) {
+	boError(260) << k_funcinfo << "did not find players.xml" << endl;
+	return QByteArray();
+ }
+ if (!addLoadGamePlayers(files["players.xml"])) {
+	boError(260) << k_funcinfo << "adding players failed" << endl;
+	return QByteArray();
+ }
+
+ boDebug(270) << k_funcinfo << "done" << endl;
+
+ return playField;
+}
+
+// note: this method is _incompatible_ with network!!
+// if we want loading games to be network compatible, we need to add the players
+// _before_ loading the game.
+bool BosonMainWidget::addLoadGamePlayers(const QString& playersXML)
+{
+ QDomDocument playersDoc;
+ if (!playersDoc.setContent(playersXML)) {
+	boError(260) << k_funcinfo << "error loading players.xml" << endl;
+	return false;
+ }
+ QDomElement playersRoot = playersDoc.documentElement();
+ if (boGame->playerCount() != 0) {
+	boError(260) << k_funcinfo << "no player are allowed at this point" << endl;
+	return false;
+ }
+ QDomNodeList list = playersRoot.elementsByTagName("Player");
+ if (list.count() == 0) {
+	boError(260) << k_funcinfo << "no players in savegame" << endl;
+	return false;
+ }
+ boDebug(260) << k_funcinfo << "adding " << list.count() << " players" << endl;
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement p = list.item(i).toElement();
+	bool ok = false;
+	unsigned int id = p.attribute("PlayerId").toUInt(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "invalid PlayerId" << endl;
+		return false;
+	}
+	QDomElement speciesTheme = p.namedItem("SpeciesTheme").toElement();
+	if (speciesTheme.isNull()) {
+		boError(260) << k_funcinfo << "NULL SpeciesTheme tag for player " << i<< endl;
+		return false;
+	}
+	QString species = speciesTheme.attribute(QString::fromLatin1("Identifier"));
+	QColor color;
+	color.setRgb(speciesTheme.attribute(QString::fromLatin1("TeamColor")).toUInt(&ok));
+	if (!ok) {
+		boError(260) << k_funcinfo << "invalid teamcolor" << endl;
+		return false;
+	}
+	if (species.isEmpty()) {
+		boError(260) << k_funcinfo << "invalid SpeciesTheme" << endl;
+		// TODO: check whether species actually exists and can get
+		// loaded
+		return false;
+	}
+	if (boGame->findPlayerByUserId(id)) {
+		boError(260) << k_funcinfo << "id " << id << " already in the game" << endl;
+		return false;
+	}
+	Player* player = new Player();
+
+#warning TODO save and load IOs
+	// AB: the IOs of the players should be saved into the file for
+	// savegames. they should NOT be saved for playfield files!
+	//
+	// on loading we should
+	// * use the IOs requested by the user (e.g. it should be possible to
+	//   save a single player game and load it as a multiplayer game)
+	// * if none requested load the IO from the file
+
+	// as a replacement we currently simply add a localIO to the first
+	// player and a computer IO to all other players
+	if (id >= 128 && id < 256) {
+		if (i == 0) {
+			BosonLocalPlayerInput* io = new BosonLocalPlayerInput();
+			player->addGameIO(io);
+			if (!io->initializeIO()) {
+				boError() << k_funcinfo << "unable to initialize (local) IO for player " << id << endl;
+				player->removeGameIO(io, true);
+			} else {
+				boDebug() << k_funcinfo << "added local IO to player " << id << endl;
+			}
+		} else {
+			BosonComputerIO* io = new BosonComputerIO();
+			player->addGameIO(io);
+			if (!io->initializeIO()) {
+				boError() << k_funcinfo << "unable to initialize IO for player " << id << endl;
+				player->removeGameIO(io, true);
+			} else {
+				boDebug() << k_funcinfo << "added computer IO to player " << id << endl;
+			}
+		}
+	}
+
+	player->setUserId(id);
+	player->loadTheme(SpeciesTheme::speciesDirectory(species), color);
+
+	boGame->bosonAddPlayer(player);
+ }
+
+ return true;
+}
+
 

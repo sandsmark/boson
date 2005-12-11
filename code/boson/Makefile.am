@@ -72,7 +72,8 @@ libbosongameengine_la_SOURCES = \
 		bocondition.cpp \
 		bowater.cpp \
 		bosonsaveload.cpp \
-		bosongroundtheme.cpp
+		bosongroundtheme.cpp \
+		bosongameengine.cpp
 
 libbosoncommon_la_SOURCES = \
 		boapplication.cpp \
@@ -170,6 +171,8 @@ boson_SOURCES = \
 		gameoverdialog.cpp \
 		bocheckinstallation.cpp \
 		bosonstarting.cpp \
+		bosongameenginestarting.cpp \
+		bosonguistarting.cpp \
 		bosongameviewpluginbase.cpp \
 		bosongameviewpluginmanager.cpp \
 		bosoneffectmanager.cpp \
