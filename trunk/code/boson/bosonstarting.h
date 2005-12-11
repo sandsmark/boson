@@ -61,8 +61,6 @@ public:
 	void setLoadFromLogFile(const QString& file);
 	QString logFile() const;
 
-	void startNewGame();
-
 	/**
 	 * Check whether there are events and process them. See @ref
 	 * QApplication::processEvents.
@@ -83,6 +81,16 @@ public:
 	void checkEvents();
 
 public slots:
+	/**
+	 * Start the game starting (see @ref slotStart) using a timer.
+	 *
+	 * The asynchronous starting (i.e. the timer) makes sure that the
+	 * starting is not called from the middle of some method. This is very
+	 * important, as we use @ref QApplication::processEvents in the game
+	 * starting procedure.
+	 **/
+	void slotStartNewGameWithTimer();
+
 	/**
 	 * Called by @ref Boson once a message indicating that a client
 	 * completed game starting has been received.
