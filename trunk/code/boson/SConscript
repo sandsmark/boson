@@ -292,6 +292,7 @@ bosonNoGUI.libs += boufo_lib
 bosonNoGUI.libpaths += libboson_libpaths
 bosonNoGUI.source += libboson_source
 bosonNoGUI.source += """
+	bosoncomputerio.cpp
 	bocheckinstallation.cpp
 	mainnogui.cpp
 """
