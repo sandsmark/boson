@@ -131,11 +131,11 @@ void BoUfoDebugWidget::setBoUfoManager(BoUfoManager* manager)
 {
  d->mManager = manager;
  d->mToolkitLabel->setText(i18n("Ufo toolkit: 0x%1").
-		arg(QString::number((unsigned int)manager->toolkit(), 16)));
+		arg(QString::number((unsigned long int)manager->toolkit(), 16)));
  d->mDisplayLabel->setText(i18n("Ufo display: 0x%1").
-		arg(QString::number((unsigned int)manager->display(), 16)));
+		arg(QString::number((unsigned long int)manager->display(), 16)));
  d->mContextLabel->setText(i18n("Ufo context: 0x%1").
-		arg(QString::number((unsigned int)manager->context(), 16)));
+		arg(QString::number((unsigned long int)manager->context(), 16)));
 
  d->mListView->clear();
  d->mDetailedWidgetView->setWidget(0, 0);
@@ -170,8 +170,8 @@ void BoUfoDebugWidget::addWidget(ufo::UWidget* ufoWidget, QListViewItem* item)
  d->mItem2Widget.insert(item, ufoWidget);
  const ufo::UClassInfo* classInfo = ufoWidget->getClassInfo();
  item->setOpen(true);
- item->setText(0, QString("0x") + QString::number((unsigned int)ufoWidget, 16));
- QString boufoWidgetText = QString("0x") + QString::number((unsigned int)boufoWidget, 16);
+ item->setText(0, QString("0x") + QString::number((unsigned long int)ufoWidget, 16));
+ QString boufoWidgetText = QString("0x") + QString::number((unsigned long int)boufoWidget, 16);
  if (boufoWidget) {
 	if (QString(boufoWidget->name()) != QString("unnamed")) {
 		boufoWidgetText = i18n("%1 (%2)").arg(boufoWidgetText).arg(boufoWidget->name());
@@ -320,9 +320,9 @@ void BoUfoDebugSingleWidget::setWidget(ufo::UWidget* u, BoUfoWidget* w)
  }
  show();
  d->mUfoWidget->setText(i18n("Selected Ufo Widget: 0x%1").
-		arg(QString::number((unsigned int)u, 16)));
+		arg(QString::number((unsigned long int)u, 16)));
  d->mBoUfoWidget->setText(i18n("BoUfo Widget: 0x%1%2").
-		arg(QString::number((unsigned int)w, 16)).
+		arg(QString::number((unsigned long int)w, 16)).
 		arg(w ? (QString(" (%1)").arg(w->name())) : QString("")));
  d->mUfoString->setText(i18n("Ufo widget string: %1").
 		arg(u->toString().c_str()));
