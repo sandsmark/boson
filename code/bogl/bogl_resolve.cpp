@@ -35,6 +35,9 @@
 
 static QLibrary* loadLibrary(const QString& fileName);
 static QLibrary* loadLibraryFromFile(const QString& file);
+static void scanLdSoConf(QStringList* dirs, const QString& file, QStringList* scannedFiles = 0);
+static QStringList resolveWildcards(const QString& argument);
+static void resolveWildcards(QStringList* files, const QString& argument);
 
 static bool boglResolveOpenGLSymbols(QLibrary& gl);
 static bool boglResolveGLUSymbols(QLibrary& glu);
@@ -1978,22 +1981,20 @@ static bool boglResolveGLXSymbols(QLibrary& gl)
 static QLibrary* loadLibrary(const QString& name)
 {
  // "name" is not a file at this point, but it is good enough here.
- QLibrary* lib = loadLibraryFromFile(name);
- if (lib) {
-	return lib;
- }
-
  if (name.startsWith("/")) {
+	QLibrary* lib = loadLibraryFromFile(name);
+	if (lib) {
+		return lib;
+	}
 	boError() << k_funcinfo << "library " << name << " could not be loaded" << endl;
 	return 0;
- }
-
- if (name.contains("/")) {
+ } else if (name.contains("/")) {
 	boError() << k_funcinfo << "library " << name << " could not be loaded. filename guessing is not supported for relative paths." << endl;
 	return 0;
  }
 
- boWarning() << k_funcinfo << "library " << name << " could not be loaded using standard QLibrary/dlopen(). Trying to guess correct filename" << endl;
+// boWarning() << k_funcinfo << "library " << name << " could not be loaded using standard QLibrary/dlopen(). Trying to guess correct filename" << endl;
+ boDebug() << k_funcinfo << "Trying to guess correct filename for libGL" << endl;
 
  // we are trying to emulate the search order of dlopen() now:
  // 1. if exectuable file contains a DT_RPATH tag and no DT_RUNPATH, then
@@ -2023,31 +2024,7 @@ static QLibrary* loadLibrary(const QString& name)
 
  dirs += QStringList::split(':', QString(getenv(ld_library_path)));
 
- if (QFile::exists("/etc/ld.so.conf")) {
-	QFile conf("/etc/ld.so.conf");
-	if (conf.open(IO_ReadOnly)) {
-		// AB: we use lines that begin with '/' only (whitespaces
-		// ignored)
-		QTextStream s(&conf);
-		while (!s.atEnd()) {
-			QString line;
-			s >> line;
-
-			line = line.stripWhiteSpace();
-			if (!line.startsWith("/")) {
-				continue;
-			}
-
-			// remove comments
-			if (line.find('#') >= 0) {
-				line = line.left(line.find('#') + 1);
-			}
-			line = line.stripWhiteSpace();
-
-			dirs.append(line);
-		}
-	}
- }
+ scanLdSoConf(&dirs, "/etc/ld.so.conf");
 
  dirs.append("/lib");
  dirs.append("/usr/lib");
@@ -2062,6 +2039,7 @@ static QLibrary* loadLibrary(const QString& name)
 
  dirs.append("/usr/X11R6/lib");
 
+ QLibrary* lib = 0;
  QString suffix = ".so";
  for (QStringList::iterator dirit = dirs.begin(); dirit != dirs.end(); ++dirit) {
 	QString dirname = *dirit;
@@ -2118,5 +2096,121 @@ static QLibrary* loadLibraryFromFile(const QString& file)
 	lib = 0;
  }
  return lib;
+}
+
+static void scanLdSoConf(QStringList* dirs, const QString& file, QStringList* scannedFiles)
+{
+ QStringList scanned;
+ if (!dirs) {
+	BO_NULL_ERROR(dirs);
+	return;
+ }
+ if (!scannedFiles) {
+	scannedFiles = &scanned;
+ }
+ if (scannedFiles->contains(file)) {
+	return;
+ }
+ if (!QFile::exists(file)) {
+	return;
+ }
+ scannedFiles->append(file);
+ QFile conf(file);
+ if (conf.open(IO_ReadOnly)) {
+	// AB: we use lines that begin with '/' only (whitespaces
+	//     ignored)
+	// AB: we also use lines that start with "include", which is used by a
+	//     fedora core patch to glibc.
+	QTextStream s(&conf);
+	while (!s.atEnd()) {
+		QString line;
+		line = s.readLine();
+
+		// remove comments
+		if (line.find('#') >= 0) {
+			line = line.left(line.find('#') + 1);
+		}
+
+		line = line.stripWhiteSpace();
+		if (line.startsWith("include")) {
+			QString inc = line.right(line.length() - QString("include").length());
+			inc = inc.stripWhiteSpace();
+			if (!inc.startsWith("/")) {
+				inc = QString("/etc/") + inc;
+			}
+			QDir dir;
+			QStringList incFiles = resolveWildcards(inc);
+			for (unsigned int i = 0; i < incFiles.count(); i++) {
+				scanLdSoConf(dirs, incFiles[i], scannedFiles);
+			}
+
+			continue;
+		} else if (!line.startsWith("/")) {
+			continue;
+		}
+
+		dirs->append(line);
+	}
+ }
+}
+
+QStringList resolveWildcards(const QString& argument)
+{
+ QStringList list;
+ resolveWildcards(&list, argument);
+ return list;
+}
+
+void resolveWildcards(QStringList* files, const QString& argument)
+{
+ if (!files) {
+	BO_NULL_ERROR(files);
+	return;
+ }
+ if (argument.isEmpty()) {
+	return;
+ }
+ if (argument[0] != '/') {
+	boDebug() << k_funcinfo << "argument \"" << argument << "\" did not start with '/', relative filenames are not supported." << endl;
+	return;
+ }
+ int index1 = argument.find("*");
+ int index2 = argument.find("?");
+ if (index1 < 0 && index2 < 0) {
+	files->append(argument);
+	return;
+ }
+ int index = index1;
+ if (index2 >= 0 && index2 < index1 || index1 < 0) {
+	index = index2;
+ }
+ if (index < 0) {
+	boError() << k_funcinfo << "oops" << endl;
+	return;
+ }
+ QString prefix = argument.left(index); // everything before the first '*' or '?'
+ QString dirname = prefix.left(prefix.findRev("/")); // the dirname in prefix
+ QDir dir(dirname);
+ if (!dir.exists()) {
+	boDebug() << "directory " << dirname << " does not exist" << endl;
+	return;
+ }
+ QString afterDir = argument.right(argument.length() - (dirname.length() + 1));
+ QString inDir;
+ QString suffixDir;
+ if (afterDir.find('/') >= 0) {
+	// note: suffixDir includes leading '/'
+	suffixDir = afterDir.right(afterDir.length() - (afterDir.find('/')));
+	inDir = afterDir.left(afterDir.find('/'));
+ } else {
+	inDir = afterDir;
+ }
+
+ // argument == dirname + '/' + inDir + suffixDir
+
+ QStringList entries = dir.entryList(inDir, QDir::Readable | QDir::Files | QDir::Dirs);
+ for (QStringList::iterator it = entries.begin(); it != entries.end(); ++it) {
+	resolveWildcards(files, dirname + '/' + *it + suffixDir);
+ }
 }
 
