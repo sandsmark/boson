@@ -31,8 +31,26 @@ libcommon.source = """
 	bosonprofiling.cpp
 	bopluginmanager.cpp
 """
-libcommon.env = env
 libcommon.execute()
+
+libcommon_libpaths = ' '.join(env['LIBPATH_X11'])
+libcommon_libs = """
+	../bodebug/libbodebug.a
+	../bogl/libbogl.a
+	../math/libbomath.a
+	./libimageio.a
+	kdeui
+	Xmu
+"""
+
+libgameengine_libs = """
+	./script/libbosonscript.a
+""" + env['LIB_PYTHON'] + """
+	../kgame/libkgame.a
+	kio
+"""
+
+
 
 libimageio = env.kobject('staticlib')
 libimageio.target = 'libimageio'
@@ -42,7 +60,6 @@ libimageio.source = """
 	imageio/tga.cpp
 	imageio/pcx.cpp
 """
-libimageio.env = env
 libimageio.execute()
 
 
@@ -101,7 +118,6 @@ libgameengine.source = """
 	items/bosonshot.cpp
 	items/bosonitempropertyhandler.cpp
 """
-libgameengine.env = env
 libgameengine.execute()
 
 
@@ -198,24 +214,15 @@ libboson_source = """
 libboson_includes = '../bodebug ../bogl ../boson/boufo ../bosound'
 libboson_includes += ' bosonwidgets ' # for .moc files
 
-libboson_libpaths = ' '.join(env['LIBPATH_X11'])
-libboson_lib = """
-	../bodebug/libbodebug.a
-	../bogl/libbogl.a
-	../math/libbomath.a
-	./script/libbosonscript.a
-""" + env['LIB_PYTHON'] + lib_meshrendererplugin + """
+libboson_libs = lib_meshrendererplugin + """
 	./info/libbosoninfo.a
 """ + ' '.join(env['LIB_BOSOUND']) + """
-	../kgame/libkgame.a
-	kdeui
 	kio
 	3ds
-	Xmu
-"""
+""" + libgameengine_libs + libcommon_libs
 
 # TODO: only if present
-libboson_lib += ' Xrandr'
+libboson_libs += ' Xrandr'
 
 
 
@@ -225,11 +232,11 @@ boson.target = 'boson'
 boson.includes = '../bodebug ../bogl ../boson/boufo'
 boson.includes += ' commandframe/ gameview/ startupwidgets/ ' # for .moc files
 boson.includes += libboson_includes
-boson.libs = libboson_lib + ' libcommon.a libgameengine.a'
+boson.libs = libboson_libs + ' libcommon.a libgameengine.a'
 boson.libs += boufo_lib
 boson.libs += lib_groundrendererplugin
 boson.libs += lib_gameviewplugin
-boson.libpaths += libboson_libpaths
+boson.libpaths += libcommon_libpaths
 boson.source += libboson_source
 boson.source += """
 	bosonfpscounter.cpp
@@ -278,6 +285,8 @@ boson.source += gameview_sources
 #        happy. I am pretty sure this will have undesired side effects in some
 #        situations (i.e. whenever separate environments are actually required),
 #        but I have not (yet!) encountered any
+#        UPDATE: one side effect: kobject.libs += 'foobar' adds 'foobar' to all
+#                kobjects, not just the one it should be added to
 boson.env = env
 
 boson.execute()
@@ -287,17 +296,18 @@ bosonNoGUI = env.kobject('program')
 bosonNoGUI.target = 'boson-no-gui'
 bosonNoGUI.includes = '../bodebug'
 bosonNoGUI.includes += libboson_includes
-bosonNoGUI.libs = libboson_lib + ' libcommon.a libgameengine.a'
+bosonNoGUI.libs = ' libgameengine.a'
+bosonNoGUI.libs += libgameengine_libs
 bosonNoGUI.libs += boufo_lib
-bosonNoGUI.libpaths += libboson_libpaths
-bosonNoGUI.source += libboson_source
+bosonNoGUI.libs += ' libcommon.a'
+bosonNoGUI.libs += libcommon_libs
+bosonNoGUI.libpaths += libcommon_libpaths
 bosonNoGUI.source += """
 	bosoncomputerio.cpp
 	bocheckinstallation.cpp
 	mainnogui.cpp
 """
 
-bosonNoGUI.env = env
 
 bosonNoGUI.execute()
 
@@ -307,19 +317,13 @@ bosonNoGUI.execute()
 bounit = env.kobject('program')
 bounit.target = 'bounit'
 bounit.includes = '../bodebug ../bogl ../boson/boufo'
-bounit.libpaths += libboson_libpaths
+bounit.libpaths += libcommon_libpaths
 bounit.libs = """
-	libcommon.a
 	libgameengine.a
-	../bodebug/libbodebug.a
-	../bogl/libbogl.a
-	../math/libbomath.a
-	./script/libbosonscript.a
+""" + libgameengine_libs + """
+	libcommon.a
+""" + libcommon_libs + """
 	./info/libbosoninfo.a
-	kgame
-	kdeui
-	kio
-	Xmu
 """
 # TODO: only if present
 bounit.libs += ' Xrandr'
@@ -330,14 +334,13 @@ bounit.source = """
 	bouniteditorbase.ui
 	bouniteditor.cpp
 """
-bounit.env = env
 bounit.execute()
 
 
 bocursor = env.kobject('program')
 bocursor.target = 'bocursor'
 bocursor.includes = '../bodebug ../bogl ../boson/boufo'
-bocursor.libpaths += libboson_libpaths
+bocursor.libpaths += libcommon_libpaths
 bocursor.libs = """
 	../bodebug/libbodebug.a
 	../bogl/libbogl.a
@@ -363,12 +366,12 @@ borender = env.kobject('program')
 borender.target = 'borender'
 borender.includes = '../bodebug ../bogl ../boson/boufo'
 borender.includes += libboson_includes
-borender.libs = libboson_lib + """
+borender.libs = libboson_libs + """
 	3ds
 	libcommon.a
 """
 borender.libs += boufo_lib
-borender.libpaths += libboson_libpaths
+borender.libpaths += libcommon_libpaths
 borender.source = libboson_source
 borender.source += """
 	kgamemodeldebug.cpp
@@ -387,7 +390,7 @@ borender.execute()
 boinfo = env.kobject('program')
 boinfo.target = 'boinfo'
 boinfo.includes = '../bodebug ../bogl ../boson/boufo'
-boinfo.libpaths += libboson_libpaths
+boinfo.libpaths += libcommon_libpaths
 boinfo.libs = """
 	../bodebug/libbodebug.a
 	../bogl/libbogl.a
@@ -431,7 +434,7 @@ bo3dsdebug.execute()
 boconditioneditor = env.kobject('program')
 boconditioneditor.target = 'boconditioneditor'
 boconditioneditor.includes = '../bodebug ../bogl ../boson/boufo'
-boconditioneditor.libpaths += libboson_libpaths
+boconditioneditor.libpaths += libcommon_libpaths
 boconditioneditor.libs = """
 	libcommon.a
 	libgameengine.a
@@ -457,7 +460,7 @@ boconditioneditor.execute()
 boprofiling = env.kobject('program')
 boprofiling.target = 'boprofiling'
 boprofiling.includes = '../bodebug ../bogl ../boson/boufo'
-boprofiling.libpaths += libboson_libpaths
+boprofiling.libpaths += libcommon_libpaths
 boprofiling.libs = """
 	libcommon.a
 	../bodebug/libbodebug.a
