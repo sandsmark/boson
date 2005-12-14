@@ -120,8 +120,8 @@ subdirs += """
 	bosound
 	ufo
 	boson
+	server
 """
-#server
 
 # TODO: libboson_libs: Xrandr only if present
 # TODO: ground/mesh renderer / gameviewplugin: static/dynamic !
