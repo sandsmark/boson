@@ -1,6 +1,6 @@
 Import('env')
 
-env.subdirs(['bouic'])
+env.subdirs(['bouic', 'designer'])
 
 ufoext_sources = """
 	ufoext/boufofontrenderer.cpp
