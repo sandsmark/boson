@@ -28,11 +28,8 @@ def generate(env):
 		if not os.path.exists(env['_BUILDDIR_']): os.mkdir(env['_BUILDDIR_'])
 		dest = open(env.join(env['_BUILDDIR_'], 'config-boson_bomemory.h'), 'w')
 
-		dest.write('#define BOSON_USE_BOMEMORY ')
 		if bomemory:
-			dest.write('1\n')
-		else:
-			dest.write('0\n')
+			dest.write('#define BOSON_USE_BOMEMORY 1\n')
 
 		dest.close()
 		env['_CONFIG_H_'].append('boson_bomemory')
