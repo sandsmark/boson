@@ -214,12 +214,15 @@ libboson_source = """
 libboson_includes = '../bodebug ../bogl ../boson/boufo ../bosound'
 libboson_includes += ' bosonwidgets ' # for .moc files
 
-libboson_libs = lib_meshrendererplugin + """
-	./info/libbosoninfo.a
-""" + ' '.join(env['LIB_BOSOUND']) + """
-	kio
-	3ds
-""" + libgameengine_libs + libcommon_libs
+libboson_libs = lib_meshrendererplugin
+libboson_libs += ' ./info/libbosoninfo.a '
+libboson_libs += ' '.join(env['LIB_BOSOUND'])
+libboson_libs += ' ./libgameengine.a'
+libboson_libs += libgameengine_libs
+libboson_libs += ' ./libcommon.a'
+libboson_libs += libcommon_libs
+libboson_libs += ' kio'
+libboson_libs += ' 3ds'
 
 # TODO: only if present
 libboson_libs += ' Xrandr'
@@ -232,10 +235,11 @@ boson.target = 'boson'
 boson.includes = '../bodebug ../bogl ../boson/boufo'
 boson.includes += ' commandframe/ gameview/ startupwidgets/ ' # for .moc files
 boson.includes += libboson_includes
-boson.libs = libboson_libs + ' libcommon.a libgameengine.a'
-boson.libs += boufo_lib
+boson.libs = ''
 boson.libs += lib_groundrendererplugin
 boson.libs += lib_gameviewplugin
+boson.libs += libboson_libs
+boson.libs += boufo_lib
 boson.libpaths += libcommon_libpaths
 boson.source += libboson_source
 boson.source += """
@@ -273,22 +277,6 @@ boson.source += """
 boson.source += startupwidgets_sources
 boson.source += commandframe_sources
 boson.source += gameview_sources
-
-# AB: I don't really have a clue what I am doing here. However it is necessary
-#     in order to make one feature of scons work in bksys: allowing to compile
-#     one file into multiple programs. doing program1.source += 'file.cpp' and
-#     program2.source += 'file.cpp' in bksys leads to the following warning:
-#       scons: warning: Two different environments were specified for target file.o
-#     the reason is that a kobject() call creates a new environment in the
-#     kobject object.
-#     -> so we force bksys to use the same environment for all objects and be
-#        happy. I am pretty sure this will have undesired side effects in some
-#        situations (i.e. whenever separate environments are actually required),
-#        but I have not (yet!) encountered any
-#        UPDATE: one side effect: kobject.libs += 'foobar' adds 'foobar' to all
-#                kobjects, not just the one it should be added to
-boson.env = env
-
 boson.execute()
 
 
@@ -341,16 +329,9 @@ bocursor = env.kobject('program')
 bocursor.target = 'bocursor'
 bocursor.includes = '../bodebug ../bogl ../boson/boufo'
 bocursor.libpaths += libcommon_libpaths
-bocursor.libs = """
-	../bodebug/libbodebug.a
-	../bogl/libbogl.a
-	../math/libbomath.a
-	./info/libbosoninfo.a
-	./libcommon.a
-	kdeui
-	kio
-	Xmu
-"""
+bocursor.libs = './info/libbosoninfo.a'
+bocursor.libs += ' ./libcommon.a' + libcommon_libs
+bocursor.libs += 'kio'
 bocursor.source = """
 	bosoncursor.cpp
 	botexture.cpp
@@ -359,7 +340,6 @@ bocursor.source = """
 	bocursormain.cpp
 	bosoncursoreditor.cpp
 """
-bocursor.env = env
 bocursor.execute()
 
 borender = env.kobject('program')
@@ -368,7 +348,6 @@ borender.includes = '../bodebug ../bogl ../boson/boufo'
 borender.includes += libboson_includes
 borender.libs = libboson_libs + """
 	3ds
-	libcommon.a
 """
 borender.libs += boufo_lib
 borender.libpaths += libcommon_libpaths
@@ -384,43 +363,28 @@ borender.source += """
 	bopixmaprenderer.cpp
 	boeditturretpropertiesdialog.cpp
 """
-borender.env = env
 borender.execute()
 
 boinfo = env.kobject('program')
 boinfo.target = 'boinfo'
 boinfo.includes = '../bodebug ../bogl ../boson/boufo'
 boinfo.libpaths += libcommon_libpaths
-boinfo.libs = """
-	../bodebug/libbodebug.a
-	../bogl/libbogl.a
-	../math/libbomath.a
-	./info/libbosoninfo.a
-	./libcommon.a
-	kio
-	kdeui
-	Xmu
-"""
+boinfo.libs = './info/libbosoninfo.a'
+boinfo.libs += ' libcommon.a ' + libcommon_libs
+boinfo.libs += 'kio'
 boinfo.source = """
 	bosonglwidget.cpp
 	boinfomain.cpp
 """
-boinfo.env = env
 boinfo.execute()
 
 bo3dsdebug = env.kobject('program')
 bo3dsdebug.target = 'bo3dsdebug'
 bo3dsdebug.includes = '../bodebug ../bogl ../boson/boufo'
-bo3dsdebug.libs = """
-	./libimageio.a
-	../bodebug/libbodebug.a
-	./libcommon.a
-	../math/libbomath.a
-	../bogl/libbogl.a
-	3ds
-	kio
-	kdeui
-"""
+bo3dsdebug.libpaths += libcommon_libpaths
+bo3dsdebug.libs = 'libcommon.a ' + libcommon_libs
+bo3dsdebug.libs += 'kio'
+bo3dsdebug.libs += ' 3ds'
 bo3dsdebug.libs += boufo_lib
 bo3dsdebug.source = """
 	kgamemodeldebug.cpp
@@ -428,32 +392,20 @@ bo3dsdebug.source = """
 
 	bo3dsdebugmain.cpp
 """
-bo3dsdebug.env = env
 bo3dsdebug.execute()
 
 boconditioneditor = env.kobject('program')
 boconditioneditor.target = 'boconditioneditor'
 boconditioneditor.includes = '../bodebug ../bogl ../boson/boufo'
 boconditioneditor.libpaths += libcommon_libpaths
-boconditioneditor.libs = """
-	libcommon.a
-	libgameengine.a
-	../bodebug/libbodebug.a
-	../bogl/libbogl.a
-	../math/libbomath.a
-	./script/libbosonscript.a
-	kgame
-	kdeui
-	kio
-	Xmu
-"""
+boconditioneditor.libs = './libgameengine.a ' + libgameengine_libs
+boconditioneditor.libs += './libcommon.a ' + libcommon_libs
 # TODO: only if present
 boconditioneditor.libs += ' Xrandr'
 boconditioneditor.source = """
 	boconditionwidget.cpp
 	boconditioneditormain.cpp
 """
-boconditioneditor.env = env
 boconditioneditor.execute()
 
 
@@ -461,22 +413,14 @@ boprofiling = env.kobject('program')
 boprofiling.target = 'boprofiling'
 boprofiling.includes = '../bodebug ../bogl ../boson/boufo'
 boprofiling.libpaths += libcommon_libpaths
-boprofiling.libs = """
-	libcommon.a
-	../bodebug/libbodebug.a
-	../bogl/libbogl.a
-	../math/libbomath.a
-	kdeui
-	kio
-	Xmu
-"""
+boprofiling.libs = 'libcommon.a ' + libcommon_libs
+boprofiling.libs += 'kio'
 # TODO: only if present
-boprofiling.libs = ' Xrandr'
+boprofiling.libs += ' Xrandr'
 boprofiling.source = """
 	bosonprofilingdialog.cpp
 	boprofilingmain.cpp
 """
-boprofiling.env = env
 boprofiling.execute()
 
 

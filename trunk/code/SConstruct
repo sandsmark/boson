@@ -103,6 +103,25 @@ env.PrependUnique(CXXFLAGS = ['-Ikgame', '-I.'])
 # like.
 env.AppendUnique(CXXFLAGS = ['-Wno-non-virtual-dtor'])
 
+# AB:
+# we have lots of things like
+#   program1 = env.kobject('program')
+#   program2 = env.kobject('program')
+#   program1.source += "source.cpp"
+#   program2.source += "source.cpp"
+# -> SCons does not like these, as two different kobject instances provide two
+#    different environments and one source should be in one environment only.
+#
+#    however this issue is not a problem, as the environments use the same flags
+#    (at least currently) and therefore build the source the same way.
+#    SCons therefore emits a warnings, but that is harmless.
+#    -> we don't want a zillion warnings (one per .cpp file), so we suppress it.
+#
+#    a nicer solution would be to somehow merge the environments for the source
+#    files...
+import SCons.Warnings
+SCons.Warnings.suppressWarningClass(SCons.Warnings.DuplicateEnvironmentWarning)
+
 
 ###################################################################
 # SCRIPTS FOR BUILDING THE TARGETS
