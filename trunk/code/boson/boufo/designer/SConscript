@@ -1,0 +1,22 @@
+Import('env')
+
+designer = env.kobject('program')
+designer.target = 'boufodesigner'
+designer.includes = '../../../bodebug ../../../bogl ../../../ufo/include ../'
+
+designer.source = """
+	boufodesignermain.cpp
+	bosignalsslotseditor.cpp
+	main.cpp
+"""
+
+designer.libs = """
+	../../../bodebug/libbodebug.a
+	../../../bogl/libbogl.a
+	../libboufo.a
+	../../../ufo/src/libufo.a
+	kdecore
+"""
+designer.execute()
+
+
