@@ -37,8 +37,10 @@ def generate(env):
 			if do_static:
 				if not 'qtdir' in env['ARGS']:
 					env.pprint('RED', 'You must use qtdir=<path> when using semi-static, to specify the path to the static Qt directory!')
+					env.Exit(1)
 				if not 'kdedir' in env['ARGS']:
 					env.pprint('RED', 'You must use kdedir=<path> when using semi-static, to specify the path to the static KDE directory!')
+					env.Exit(1)
 
 
 		if do_static:
