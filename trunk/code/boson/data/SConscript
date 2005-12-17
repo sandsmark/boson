@@ -1,0 +1,24 @@
+Import('env')
+
+# *ui.rc files
+env.KDEinstall('KDEDATA', 'boson', 'topui.rc')
+env.KDEinstall('KDEDATA', 'boson', 'bosonbaseui.rc')
+env.KDEinstall('KDEDATA', 'boson', 'bosonui.rc')
+env.KDEinstall('KDEDATA', 'boson', 'editorui.rc')
+env.KDEinstall('KDEDATA', 'boson', 'borenderui.rc')
+
+# bodebug files
+env.KDEinstall('KDECONFIG', '', 'bodebugrc')
+env.KDEinstall('KDECONFIG', '', 'bodebug.areas')
+
+# .desktop files
+env.KDEinstall('KDEMENU', 'Games/TacticStrategy/boson', 'boson.desktop')
+env.KDEinstall('KDEMENU', 'Games/TacticStrategy/boson', 'bounit.desktop')
+env.KDEinstall('KDEMENU', 'Games/TacticStrategy/boson', 'boinfo.desktop')
+
+# icons
+#env.KDEicon('boson')
+#env.KDEicon('boeditor')
+#env.KDEicon('hi22-action-bo_edit_height.png')
+env.KDEicon()
+
