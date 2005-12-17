@@ -25,6 +25,7 @@
 #include "../../bosonconfig.h"
 #include "editorrandommapwidget.h"
 #include "boselectiondebugwidget.h"
+#include "bodebugconfigswitches.h"
 
 #include <bodebug.h>
 
@@ -34,11 +35,13 @@ public:
 	BosonGameViewPluginDefaultPrivate()
 	{
 		mSelectionDebugWidget = 0;
+		mDebugRenderingConfig = 0;
 		mEditorRandomMapWidget = 0;
 	}
 	bool mInitialized;
 	bool mGameMode;
 	BoSelectionDebugWidget* mSelectionDebugWidget;
+	BoDebugConfigSwitches* mDebugRenderingConfig;
 	EditorRandomMapWidget* mEditorRandomMapWidget;
 };
 
@@ -70,8 +73,22 @@ void BosonGameViewPluginDefault::init()
  d->mSelectionDebugWidget = new BoSelectionDebugWidget();
  ufoWidget()->addWidget(d->mSelectionDebugWidget);
 
+ BoUfoWidget* w = new BoUfoWidget();
+ w->setLayoutClass(BoUfoWidget::UHBoxLayout);
+ d->mDebugRenderingConfig = new BoDebugConfigSwitches();
+ d->mDebugRenderingConfig ->setTemplate(BoDebugConfigSwitches::Rendering);
+ w->addWidget(d->mDebugRenderingConfig);
+ BoUfoWidget* stretch1 = new BoUfoWidget();
+ stretch1->setStretch(1);
+ w->addWidget(stretch1);
+ ufoWidget()->addWidget(w);
+
  d->mEditorRandomMapWidget = new EditorRandomMapWidget();
  ufoWidget()->addWidget(d->mEditorRandomMapWidget);
+
+ BoUfoWidget* stretch = new BoUfoWidget();
+ stretch->setStretch(1);
+ ufoWidget()->addWidget(stretch);
 
  BoUfoLabel::setDefaultForegroundColor(defaultColor);
 }
@@ -112,11 +129,18 @@ void BosonGameViewPluginDefault::setLocalPlayerIO(PlayerIO* io)
 void BosonGameViewPluginDefault::updateBeforePaint()
 {
  bool showUnitDebug = boConfig->boolValue("ShowUnitDebugWidget");
+ bool showRenderingConfig = boConfig->boolValue("debug_rendering_config");
  if (showUnitDebug != d->mSelectionDebugWidget->isVisible()) {
 	d->mSelectionDebugWidget->setVisible(showUnitDebug);
  }
  if (showUnitDebug) {
 	d->mSelectionDebugWidget->update();
+ }
+ if (showRenderingConfig != d->mDebugRenderingConfig->isVisible()) {
+	d->mDebugRenderingConfig->setVisible(showRenderingConfig);
+ }
+ if (showRenderingConfig) {
+	d->mDebugRenderingConfig->slotUpdate();
  }
 
  if (d->mGameMode) {
