@@ -795,19 +795,23 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
  }
 
 
- renderGround(d->mCanvas->map());
+ if (boConfig->boolValue("debug_render_ground")) {
+	renderGround(d->mCanvas->map());
+ }
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "after ground rendering" << endl;
  }
 
 
- if (useShadows) {
-	d->mUnitShader->bind();
-	renderItems();
-	d->mUnitShader->unbind();
- } else {
-	renderItems();
+ if (boConfig->boolValue("debug_render_items")) {
+	if (useShadows) {
+		d->mUnitShader->bind();
+		renderItems();
+		d->mUnitShader->unbind();
+	} else {
+		renderItems();
+	}
  }
 
  if (useShadows) {
@@ -818,13 +822,17 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
 	boError() << k_funcinfo << "after item rendering" << endl;
  }
 
- renderWater();
+ if (boConfig->boolValue("debug_render_water")) {
+	renderWater();
+ }
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "after water rendering" << endl;
  }
 
- renderParticles(d->mVisibleEffects);
+ if (boConfig->boolValue("debug_render_particles")) {
+	renderParticles(d->mVisibleEffects);
+ }
 
  glDisable(GL_LIGHTING);
  glDisable(GL_NORMALIZE);
@@ -849,6 +857,7 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
 
  if (renderToTexture) {
 	// Render scene texture
+	BosonProfiler prof("RenderToTexture: RenderSceneTexture");
 	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	boTextureManager->activateTextureUnit(0);

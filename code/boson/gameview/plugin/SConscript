@@ -5,6 +5,7 @@ source = """
 	bosongameviewplugindefault.cpp
 	boselectiondebugwidget.cpp
 	editorrandommapwidget.cpp
+	bodebugconfigswitches.cpp
 """
 
 if not env['BOSON_USE_PLUGINS']:
