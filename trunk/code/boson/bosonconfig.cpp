@@ -363,6 +363,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntryBool("debug_groundrenderer_debug", false, false);
  addDynamicEntryBool("show_resources", true, false);
  addDynamicEntryBool("debug_profiling_graph", false, false);
+ addDynamicEntryBool("debug_glfinish_before_profiling", false, false);
  addDynamicEntryBool("ForceDisableModelLoading", false, false); // command line arg! do NOT save to config
  addDynamicEntryBool("ForceDisableTextureCompression", false, false); // command line arg! do NOT save to config
  addDynamicEntryBool("TextureFOW", true, false);

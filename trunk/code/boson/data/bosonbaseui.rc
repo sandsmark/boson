@@ -24,6 +24,7 @@
     <Action name="debug_memory_usage" />
     <Action name="debug_memory_vmdata_only" />
     <Action name="debug_profiling_graph" />
+    <Action name="debug_glfinish_before_profiling" />
     <Action name="debug_cpu_usage" />
     <Action name="debug_groundrenderer_debug" />
     <Menu name="debug_lazy"><text>&amp;Lazyness</text>

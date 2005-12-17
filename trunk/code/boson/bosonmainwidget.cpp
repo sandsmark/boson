@@ -386,8 +386,24 @@ void BosonMainWidget::resizeGL(int w, int h)
  }
 }
 
+
+class BosonProfilingGlFinishPopTask : public BosonProfilingPopTask
+{
+public:
+	virtual void pop()
+	{
+		glFinish();
+	}
+};
+
 void BosonMainWidget::slotUpdateGL()
 {
+ BosonProfilingGlFinishPopTask popTask;
+ bool glFinishOnProfilingPop = boConfig->boolValue("debug_glfinish_before_profiling", false);
+ if (glFinishOnProfilingPop) {
+	boProfiling->setPopTask(&popTask);
+ }
+
  boProfiling->pushStorage("GL");
  boProfiling->push("slotUpdateGL");
 
@@ -402,6 +418,8 @@ void BosonMainWidget::slotUpdateGL()
 
  boProfiling->pop();
  boProfiling->popStorage();
+
+ boProfiling->setPopTask(0);
 }
 
 void BosonMainWidget::paintGL()

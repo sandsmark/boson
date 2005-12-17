@@ -145,6 +145,29 @@ private:
 	int mMaximalEntries;
 };
 
+/**
+ * Base class for a pop-task, i.e. a task that is executed in @ref
+ * BosonProfiling::pop.
+ *
+ * See @ref BosonProfiling::setPopTask
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BosonProfilingPopTask
+{
+public:
+	BosonProfilingPopTask()
+	{
+	}
+
+	virtual ~BosonProfilingPopTask()
+	{
+	}
+
+	/**
+	 * Called by @ref BosonProfiling::pop
+	 **/
+	virtual void pop() = 0;
+};
 
 class BosonProfilingPrivate;
 /**
@@ -261,6 +284,15 @@ public:
 	 **/
 	QPtrList<BosonProfilingItem> cloneItems() const;
 	QPtrList<BosonProfilingItem> cloneItems(const QString& storageName) const;
+
+	/**
+	 * Set object that adds an additional task to @ref pop. The
+	 * BosonProfilingPopTask::pop method of this object is called right
+	 * before @ref pop is called.
+	 *
+	 * By default the pop-task is NULL.
+	 **/
+	void setPopTask(BosonProfilingPopTask* task);
 
 private:
 	void init();
