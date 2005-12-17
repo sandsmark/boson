@@ -197,6 +197,7 @@ def detect_kde(env):
 
 	# kde-config options
 	kdec_opts = {'KDEBIN'    : 'exe',     'KDEAPPS'      : 'apps',
+		     'KDECONFIG' : 'config', # added by AB
 		     'KDEDATA'   : 'data',    'KDEICONS'     : 'icon',
 		     'KDEMODULE' : 'module',  'KDELOCALE'    : 'locale',
 		     'KDEKCFG'   : 'kcfg',    'KDEDOC'       : 'html',
@@ -312,6 +313,7 @@ def generate(env):
 		('KDEINCLUDE', 'inst path of the kde include files'),
 		('KDELIB', 'inst path of the kde libraries'),
 		('KDEMODULE', 'inst path of the parts and libs'),
+		('KDECONFIG', 'inst path of the config files'),
 		('KDEDATA', 'inst path of the application data'),
 		('KDELOCALE', ''), ('KDEDOC', ''), ('KDEKCFG', ''),
 		('KDEXDG', ''), ('KDEXDGDIR', ''), ('KDEMENU', ''),
