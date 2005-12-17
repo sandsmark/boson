@@ -310,6 +310,8 @@ public:
 	BosonProfilingPrivate()
 	{
 		mCurrentStorage = 0;
+
+		mPopTask = 0;
 	}
 	QPtrStack<BosonProfilingItem> mStack;
 
@@ -317,6 +319,8 @@ public:
 	BosonProfilingStorage* mCurrentStorage;
 	QDict<BosonProfilingStorage> mStorages;
 	QValueStack<QString> mStorageStack;
+
+	BosonProfilingPopTask* mPopTask;
 };
 
 
@@ -434,6 +438,9 @@ void BosonProfiling::pop()
  if (d->mStack.isEmpty()) {
 	boError() << k_funcinfo << "no items on the stack (stack underflow)" << endl;
 	return;
+ }
+ if (d->mPopTask) {
+	d->mPopTask->pop();
  }
  BosonProfilingItem* item = d->mStack.pop();
  item->stop();
@@ -630,6 +637,11 @@ QPtrList<BosonProfilingItem> BosonProfiling::cloneItems() const
 	++it;
  }
  return list;
+}
+
+void BosonProfiling::setPopTask(BosonProfilingPopTask* task)
+{
+ d->mPopTask = task;
 }
 
 BosonProfiler::BosonProfiler(const QString& name, const QString& storageName)
