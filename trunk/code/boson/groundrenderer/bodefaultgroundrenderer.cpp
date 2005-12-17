@@ -165,6 +165,7 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  }
 
  bool useShaders = boConfig->boolValue("UseGroundShaders");
+// useShaders = false;
 
  if (mIndicesDirty || mUsedTexturesDirty) {
 	calculateIndices(renderCells, cellsCount, map);
@@ -210,7 +211,11 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 			// Bind bump tex
 			boTextureManager->activateTextureUnit(2);
 			BoTexture* bumptex = groundData->currentBumpTexture(boGame->advanceCallsCount());
-			bumptex->bind();
+			if (bumptex) {
+				bumptex->bind();
+			} else {
+				BO_NULL_ERROR(bumptex);
+			}
 			glLoadIdentity();
 			glScalef(1.0f / groundData->groundType->textureSize, 1.0f / groundData->groundType->textureSize, 1.0);
 			boTextureManager->activateTextureUnit(0);
