@@ -19,3 +19,8 @@ autom4te.cache
 equivs
 fake_qt2_mt
 stamp-h1
+build
+cache
+scons
+scons.bat
+scons-local-*
