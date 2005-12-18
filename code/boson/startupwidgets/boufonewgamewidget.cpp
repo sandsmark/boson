@@ -721,6 +721,7 @@ void BoUfoNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  if (!description) {
     boWarning() << k_funcinfo << "NULL description" << endl;
     BosonPlayField::preLoadAllPlayFields();
+    description = field->description();
     if (!description) {
         boError() << k_funcinfo << "unable to load the description" << endl;
         return;
