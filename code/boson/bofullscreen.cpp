@@ -45,7 +45,7 @@
  **/
 static void bo_enter_orig_mode();
 
-#ifdef HAVE_XFREE86_XRANDR
+#ifdef HAVE_XRANDR
 // TODO: use QLibrary instead of linking to Xrandr!
 // -> no need for the #ifdef, less trouble for packagers, ...
 #include <X11/Xlib.h>
@@ -62,7 +62,7 @@ static bool bo_init_xrandr(Display* dpy, Window root);
 static void bo_deinit_xrandr();
 static void bo_xrr_enter_orig_mode();
 static bool bo_xrr_enter_mode(int mode, XRRScreenConfiguration* sc);
-#endif // HAVE_XFREE86_XRANDR
+#endif // HAVE_XRANDR
 
 static KStaticDeleter<BoFullScreen> sd;
 BoFullScreen* BoFullScreen::mBoFullScreen = 0;
@@ -91,9 +91,9 @@ BoFullScreen::~BoFullScreen()
  // will probably called twice, due to atexit()
  enterOriginalMode();
 
-#ifdef HAVE_XFREE86_XRANDR
+#ifdef HAVE_XRANDR
  bo_deinit_xrandr();
-#endif // HAVE_XFREE86_XRANDR
+#endif // HAVE_XRANDR
  delete d;
 }
 
@@ -108,7 +108,7 @@ void BoFullScreen::initStatic()
 
 void BoFullScreen::initModes()
 {
-#ifdef HAVE_XFREE86_XRANDR
+#ifdef HAVE_XRANDR
  if (!gUseXrandr) {
 	return;
  }
@@ -126,7 +126,7 @@ void BoFullScreen::initModes()
  if (!gUseXrandr) {
 	return;
  }
-#endif // HAVE_XFREE86_XRANDR
+#endif // HAVE_XRANDR
 }
 
 QStringList BoFullScreen::availableModes()
@@ -188,7 +188,7 @@ QStringList BoFullScreen::availableModeList()
 {
  QStringList list;
  initModes();
-#ifdef HAVE_XFREE86_XRANDR
+#ifdef HAVE_XRANDR
  if (!gUseXrandr) {
 	return list;
  }
@@ -206,7 +206,7 @@ QStringList BoFullScreen::availableModeList()
 	QString s = QString("%1x%2").arg(sizes[i].width).arg(sizes[i].height);
 	list.append(s);
  }
-#endif // HAVE_XFREE86_XRANDR
+#endif // HAVE_XRANDR
  return list;
 }
 
@@ -235,7 +235,7 @@ bool BoFullScreen::enterModeInList(int index)
 	resizeToFullScreen(w, r.width(), r.height());
 	return true;
  }
-#ifdef HAVE_XFREE86_XRANDR
+#ifdef HAVE_XRANDR
  if (!gUseXrandr) {
 	return false;
  }
@@ -250,7 +250,7 @@ bool BoFullScreen::enterModeInList(int index)
 	return false;
  }
  return bo_xrr_enter_mode(index, gXRRScreenConfig);
-#endif // HAVE_XFREE86_XRANDR
+#endif // HAVE_XRANDR
  return false;
 }
 
@@ -262,14 +262,14 @@ bool BoFullScreen::enterOriginalMode()
 
 static void bo_enter_orig_mode()
 {
-#ifdef HAVE_XFREE86_XRANDR
+#ifdef HAVE_XRANDR
  bo_xrr_enter_orig_mode();
  return;
-#endif // HAVE_XFREE86_XRANDR
+#endif // HAVE_XRANDR
 
 }
 
-#ifdef HAVE_XFREE86_XRANDR
+#ifdef HAVE_XRANDR
 static bool bo_init_xrandr(Display* dpy, Window root)
 {
  boDebug() << k_funcinfo << endl;
@@ -392,5 +392,5 @@ static bool bo_xrr_enter_mode(int mode, XRRScreenConfiguration* sc)
  }
  return true;
 }
-#endif // HAVE_XFREE86_XRANDR
+#endif // HAVE_XRANDR
 

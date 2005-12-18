@@ -223,9 +223,7 @@ libboson_libs += ' ./libcommon.a'
 libboson_libs += libcommon_libs
 libboson_libs += ' kio'
 libboson_libs += ' 3ds'
-
-# TODO: only if present
-libboson_libs += ' Xrandr'
+libboson_libs += ' ' + env['LIB_XRANDR']
 
 
 
@@ -313,8 +311,7 @@ bounit.libs = """
 """ + libcommon_libs + """
 	./info/libbosoninfo.a
 """
-# TODO: only if present
-bounit.libs += ' Xrandr'
+bounit.libs += ' ' + env['LIB_XRANDR']
 bounit.source = """
 	bounitmain.cpp
 	bosonsearchpathswidgetbase.ui
@@ -400,8 +397,7 @@ boconditioneditor.includes = '../bodebug ../bogl ../boson/boufo'
 boconditioneditor.libpaths += libcommon_libpaths
 boconditioneditor.libs = './libgameengine.a ' + libgameengine_libs
 boconditioneditor.libs += './libcommon.a ' + libcommon_libs
-# TODO: only if present
-boconditioneditor.libs += ' Xrandr'
+boconditioneditor.libs += ' ' + env['LIB_XRANDR']
 boconditioneditor.source = """
 	boconditionwidget.cpp
 	boconditioneditormain.cpp
@@ -416,7 +412,7 @@ boprofiling.libpaths += libcommon_libpaths
 boprofiling.libs = 'libcommon.a ' + libcommon_libs
 boprofiling.libs += 'kio'
 # TODO: only if present
-boprofiling.libs += ' Xrandr'
+boprofiling.libs += ' ' + env['LIB_XRANDR']
 boprofiling.source = """
 	bosonprofilingdialog.cpp
 	boprofilingmain.cpp

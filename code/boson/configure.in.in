@@ -200,7 +200,7 @@ XRRConfigSizes(conf, &count);
 
   if test "x$bo_xrandr_extension" = "xyes"; then
     AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_XFREE86_XRANDR, 1, [ Defines if you have the XFree86 Xrandr extension ])
+    AC_DEFINE_UNQUOTED(HAVE_XRANDR, 1, [ Defines if you have the XFree86 Xrandr extension ])
     LIB_XRANDR="$bo_lib_xrandr"
   else
     AC_MSG_RESULT([no])
