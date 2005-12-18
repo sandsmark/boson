@@ -154,7 +154,6 @@ void BoDebugConfigSwitches::slotChangeBooleanSwitch(const QString& key)
 	return;
  }
  bool v = d->mBooleanSwitches[key]->checked();
- boDebug() << k_funcinfo << key << " " << v << endl;
  boConfig->setBoolValue(key, v);
 }
 
