@@ -7,6 +7,78 @@ def generate(env):
 	if env['HELP']:
 		return
 
+	import generic
+	import SCons
+
+	class BoLib:
+		def __init__(self, lib):
+			self.lib = lib
+
+			self.dirname = None
+			self.filename = None
+			self.libname = None
+			self.linker_flag = ''
+
+	class BoSharedLib(BoLib):
+		def __init__(self, lib, local = True):
+			BoLib.__init__(self, lib)
+			self.linker_flag = '-Bdynamic'
+			if local:
+				import re
+				file = slashify(lib)
+
+				if sys.platform == 'darwin':
+					reg = re.compile("(.*)/lib(.*).(dep|la|so|dylib)$")
+				else:
+					reg = re.compile("(.*)/lib(.*).(dep|la|so)$")
+				result = reg.match(file)
+				if not result:
+					if sys.platform == 'darwin':
+						reg = re.compile("(.*)/lib(.*)\.(\d+)\.(dep|la|so|dylib)")
+					else:
+						reg = re.compile("(.*)/lib(.*)\.(dep|la|so)\.(\d+)")
+					result = reg.match(file)
+					if not result:
+						print "Unknown la file given "+file
+						return
+					dir  = result.group(1)
+					link = result.group(2)
+				else:
+					dir  = result.group(1)
+					link = result.group(2)
+
+				f = SCons.Node.FS.default_fs.File(file)
+				self.libname = link
+				self.dirname = f.dir.path
+				self.filename = f.name
+			else:
+				self.libname = lib
+				self.dirname = None
+				self.filename = None
+
+	class BoStaticLib(BoLib):
+		def __init__(self, lib, local = True):
+			BoLib.__init__(self, lib)
+			self.linker_flag = '-Bstatic'
+			if local:
+				import re
+				file = generic.slashify(lib)
+				reg = re.compile("(.*)/lib(.*)\.(dep|la|a)$")
+				result = reg.match(file)
+				if not result:
+					print "Unknown archive file given "+file
+					return
+
+				self.libname = result.group(2)
+
+				f = SCons.Node.FS.default_fs.File(file)
+				self.dirname = f.dir.path
+				self.filename = f.name
+			else:
+				print "WARNING: global static libs not yet handled propertly"
+				self.libname = lib
+
+
 	import kde3
 	class boobject(env.kobject):
 		def __init__(self, val, senv=None):
@@ -14,6 +86,7 @@ def generate(env):
 			if val == 'boplugin':
 				# give 'shlib' to kobject and genobj
 				val = 'shlib'
+			self.bo_libs = []
 			env.kobject.__init__(self, val, senv)
 		def execute(self):
 			if self.botype == 'boplugin':
@@ -32,7 +105,56 @@ def generate(env):
 				self.type = 'module'
 
 				self.instdir = env['BOSON_PLUGIN_DIR']
+
+
+			self._libflags = ''
+			linker_flag = ''
+			for lib in self.bo_libs:
+				print lib.linker_flag + ' ' + lib.libname
+				if lib.linker_flag != linker_flag:
+					self._libflags += ' -Wl,' + lib.linker_flag
+					linker_flag = lib.linker_flag
+				if lib.dirname:
+					self._libflags += ' -L' + lib.dirname
+				if lib.libname:
+					self._libflags += ' -l' + lib.libname
+			if linker_flag != '-Bdynamic':
+				self._libflags += ' -Wl,-Bdynamic'
+
+			if len(self._libflags)>0:
+				self.orenv.PrependUnique(_LIBFLAGS = self.orenv.make_list(self._libflags))
+
 			env.kobject.execute(self)
+
+		def boAddLibs(self, libs):
+			list = self.orenv.make_list(libs)
+			if self.orenv['WINDOWS']:
+				lext = ['.la','.dep']
+			else:
+				lext = ['.so', '.la', '.dylib','.dll','.dep']
+			sext = ['.a']
+
+			for lib in list:
+				sal = SCons.Util.splitext(lib)
+				if len(sal) > 1:
+					if (sal[-1] in lext) and (sys.platform == 'darwin'):
+						l = self.fixpath(sal[0]+'.dylib')[0]
+						self.bo_libs.append(BoSharedLib(l, True))
+					elif (sal[1] in lext) and (sys.platform != 'darwin'):
+						# rh: don't know if DEPFILE should be supported on darwin too
+						if self.orenv['DEPFILE']:
+							l = self.fixpath(sal[0]+'.dep')[0]
+							self.bo_libs.append(BoSharedLib(l, True))
+						elif self.orenv['LIBTOOL']:
+							l = self.fixpath(sal[0]+'.la')[0]
+							self.bo_libs.append(BoSharedLib(l, True))
+					elif sal[1] in sext:
+						l = self.fixpath(sal[0]+'.a')[0]
+						self.bo_libs.append(BoStaticLib(l, True))
+					else:
+						l = lib
+						self.bo_libs.append(BoSharedLib(l, False))
+
 
 	import os
 	# TODO: somehow make sure that dir actually points to the source
