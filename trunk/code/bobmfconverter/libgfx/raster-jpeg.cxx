@@ -9,6 +9,8 @@
 
  ************************************************************************/
 
+#define QT_CLEAN_NAMESPACE
+
 #include <gfx/gfx.h>
 #include <gfx/raster.h>
 
