@@ -129,7 +129,11 @@ class Model
     unsigned int indexArraySize()  { return mIndexArraySize; }
     unsigned int indexArrayType()  { return mIndexArrayType; }
 
-  protected:
+    /**
+     * Check whether the loaded model is valid (e.g. no NULL pointers where
+     * there shouldn't be any.
+     * @return TRUE if the model seems to be valid, FALSE if an error was found.
+     **/
     bool checkLoadedModel() const;
 
   private:
