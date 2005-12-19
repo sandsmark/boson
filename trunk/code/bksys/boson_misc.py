@@ -21,6 +21,8 @@ def generate(env):
 		define_header(dest, 'HAVE_SYS_TIME_H', conf.CheckCHeader('sys/time.h'))
 		define_header(dest, 'HAVE_SYS_STAT_H', conf.CheckCHeader('sys/stat.h'))
 		define_header(dest, 'HAVE_LIMITS_H', conf.CheckCHeader('limits.h'))
+		define_header(dest, 'HAVE_GETRUSAGE', conf.CheckFunc('getrusage'))
+		define_header(dest, 'HAVE_TIMES', conf.CheckFunc('times'))
 
 		dest.close()
 		env['_CONFIG_H_'].append('boson_misc')
