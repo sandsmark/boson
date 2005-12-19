@@ -44,7 +44,7 @@
 bool processCommandLine(int argc, char** argv);
 bool checkConfig();
 bool loadConfigFile(Model* m);
-void doModelProcessing(Model* m);
+bool doModelProcessing(Model* m);
 
 // Global variables - used for configuration
 QString infilename;
@@ -139,10 +139,25 @@ int main(int argc, char** argv)
   boDebug() << "Completing model loading..." << endl;
   m->loadingCompleted();
 
+  if(!m->checkLoadedModel())
+  {
+    boError() << k_funcinfo << "broken model loaded" << endl;
+    return 1;
+  }
+
 
   // Do all necessary processing
-  doModelProcessing(m);
+  if(!doModelProcessing(m))
+  {
+    boError() << k_funcinfo << "model processing failed. cannot load model." << endl;
+    return 1;
+  }
 
+  if(!m->checkLoadedModel())
+  {
+    boError() << k_funcinfo << "model processing broke model" << endl;
+    return 1;
+  }
 
   // Prepare the model for saving
   boDebug() << "Preparing model for saving..." << endl;
@@ -581,7 +596,7 @@ void saveLodFrameAC(Model* m, unsigned int lodi, unsigned int framei)
   out.close();
 }
 
-void doModelProcessing(Model* m)
+bool doModelProcessing(Model* m)
 {
   if(!tex_dontload)
   {
@@ -607,9 +622,21 @@ void doModelProcessing(Model* m)
 
   Processor::setBaseFrame(frame_base);
 
+  if(!m->checkLoadedModel())
+  {
+    boError() << k_funcinfo << "cannot process broken model" << endl;
+    return false;
+  }
+
   boDebug() << "Removing unused data..." << endl;
   UnusedDataRemover unuseddataremover(m, m->baseLOD());
   unuseddataremover.process();
+
+  if(!m->checkLoadedModel())
+  {
+    boError() << k_funcinfo << "UnusedDataRemover broke the model" << endl;
+    return false;
+  }
 
   if(!frames_keepall || frames_removeall)
   {
@@ -617,6 +644,11 @@ void doModelProcessing(Model* m)
     FrameOptimizer frameoptimizer(m, m->baseLOD());
     frameoptimizer.setRemoveAllFrames(frames_removeall);
     frameoptimizer.process();
+    if(!m->checkLoadedModel())
+    {
+      boError() << k_funcinfo << "FrameOptimizer broke the model" << endl;
+      return false;
+    }
   }
 
   boDebug() << "Transforming model..." << endl;
@@ -624,6 +656,12 @@ void doModelProcessing(Model* m)
   transformer.setModelSize(modelsize);
   transformer.setCenterModel(model_center);
   transformer.process();
+
+  if(!m->checkLoadedModel())
+  {
+    boError() << k_funcinfo << "Transforming broke the model" << endl;
+    return false;
+  }
 
   if(tex_optimize)
   {
@@ -633,19 +671,39 @@ void doModelProcessing(Model* m)
     textureoptimizer.setCombinedTexFilename(tex_name);
     textureoptimizer.setCombinedTexPath(tex_path);
     textureoptimizer.process();
+    if(!m->checkLoadedModel())
+    {
+      boError() << k_funcinfo << "Texture optimizing broke the model" << endl;
+      return false;
+    }
   }
 
   boDebug() << "Optimizing materials..." << endl;
   MaterialOptimizer materialoptimizer(m, m->baseLOD());
   materialoptimizer.process();
+  if(!m->checkLoadedModel())
+  {
+    boError() << k_funcinfo << "Material optimizing broke the model" << endl;
+    return false;
+  }
 
   boDebug() << "Optimizing meshes..." << endl;
   MeshOptimizer meshoptimizer(m, m->baseLOD());
   meshoptimizer.process();
+  if(!m->checkLoadedModel())
+  {
+    boError() << k_funcinfo << "Mesh optimizing broke the model" << endl;
+    return false;
+  }
 
   boDebug() << "Optimizing vertices..." << endl;
   VertexOptimizer vo(m, m->baseLOD());
   vo.process();
+  if(!m->checkLoadedModel())
+  {
+    boError() << k_funcinfo << "Vertex optimizing broke the model" << endl;
+    return false;
+  }
 
 
   boDebug() << "Calculating model's face normals..." << endl;
@@ -657,6 +715,12 @@ void doModelProcessing(Model* m)
 
   boDebug() << "Creating lods..." << endl;
   m->createLODs(numlods);
+
+  if(!m->checkLoadedModel())
+  {
+    boError() << k_funcinfo << "broken model after LOD creation" << endl;
+    return false;
+  }
 
   //boDebug() << "Quicksaving base LOD..." << endl;
   //saveLod(m, 0);
@@ -686,6 +750,7 @@ void doModelProcessing(Model* m)
 
     loderror *= lod_errormod;
   }
+  return true;
 }
 
 /*
