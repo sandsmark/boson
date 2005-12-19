@@ -76,6 +76,16 @@ bool Transformer::applyTransformations()
 
 bool Transformer::applyTransformations(LOD* lod, Mesh* mesh)
 {
+  if(!lod)
+  {
+    BO_NULL_ERROR(lod);
+    return false;
+  }
+  if(!mesh)
+  {
+    BO_NULL_ERROR(mesh);
+    return false;
+  }
   // Find all frame nodes that have this mesh
 
   // All matrices (in all frames) corresponding to that mesh
@@ -92,6 +102,11 @@ bool Transformer::applyTransformations(LOD* lod, Mesh* mesh)
     {
       if(f->mesh(j) == mesh)
       {
+        if(!f->matrix(j))
+        {
+          boError() << k_funcinfo << "NULL matrix at node " << j << " in frame " << i << " for mesh " << mesh->name() << endl;
+          return false;
+        }
         matrices.append(f->matrix(j));
         if(i == baseFrame())
         {
@@ -113,8 +128,8 @@ bool Transformer::applyTransformations(LOD* lod, Mesh* mesh)
   //  found node from some other frame.
   if(baseframematrices.count() == 0)
   {
-    boError() << k_funcinfo << "No matrices found for mesh " << mesh->name() <<
-        " found in base frame" << endl;
+    boError() << k_funcinfo << "No matrices for mesh " << mesh->name()
+        << " found in base frame" << endl;
     return false;
   }
 
@@ -236,7 +251,7 @@ float Transformer::transformedBBoxVolume(const BoVector3Float& origmin, const Bo
     max.setZ(QMAX(max.z(), v.z()));
   }
 
-  return (max.x() - min.x()) * (max.y() - min.y()) * (max.z() - min.z());
+  return fabsf((max.x() - min.x()) * (max.y() - min.y()) * (max.z() - min.z()));
 }
 
 #if 0
@@ -375,3 +390,6 @@ bool Transformer::resizeModel()
   return true;
 }
 
+/*
+ * vim: et sw=2
+ */
