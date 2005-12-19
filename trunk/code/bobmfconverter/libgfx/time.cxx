@@ -60,6 +60,11 @@ double get_cpu_time()
 }
 
 #elif defined(HAVE_TIMES)
+#include <time.h>
+#include <sys/times.h>
+#ifndef CLK_TCK
+#define CLK_TCK CLOCKS_PER_SEC
+#endif
 
 double get_cpu_time()
 {
