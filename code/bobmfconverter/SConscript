@@ -64,14 +64,14 @@ libmixkit_sources = """
 #INCLUDES = $(all_includes) -I$(top_srcdir)/bobmfconverter/libgfx
 #INCLUDES = $(all_includes) -I$(top_srcdir)/bobmfconverter/libgfx -I$(top_srcdir)/bobmfconverter/mixkit
 
-bobomfconverter = env.kobject('program')
-bobomfconverter.target = 'bobomfconverter'
-bobomfconverter.libs = '3ds qt-mt kdecore'
-bobomfconverter.includes = """
+bobmfconverter = env.kobject('program')
+bobmfconverter.target = 'bobmfconverter'
+bobmfconverter.libs = '3ds qt-mt kdecore'
+bobmfconverter.includes = """
 	libgfx
 	mixkit
 """
-bobomfconverter.source = """
+bobmfconverter.source = """
 	main.cpp
 	bo3dtools.cpp
 	frame.cpp
@@ -84,7 +84,7 @@ bobomfconverter.source = """
 	saver.cpp
 	texture.cpp
 """
-bobomfconverter.source += """
+bobmfconverter.source += """
 	processors/frameoptimizer.cpp
 	processors/lodcreator.cpp
 	processors/materialoptimizer.cpp
@@ -94,12 +94,12 @@ bobomfconverter.source += """
 	processors/unuseddataremover.cpp
 	processors/vertexoptimizer.cpp
 """
-bobomfconverter.source += """
+bobmfconverter.source += """
 	loaders/loader-3ds.cpp
 	loaders/loader-ac.cpp
 	loaders/loader-md2.cpp
 """
-bobomfconverter.source += libgfx_sources
-bobomfconverter.source += libmixkit_sources
-bobomfconverter.execute()
+bobmfconverter.source += libgfx_sources
+bobmfconverter.source += libmixkit_sources
+bobmfconverter.execute()
 
