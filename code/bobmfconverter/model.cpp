@@ -154,6 +154,11 @@ bool Model::save(const QString& file)
 
 void Model::createBaseLOD()
 {
+  if(lodCount() > 0)
+  {
+    boError() << k_funcinfo << "base LOD already created" << endl;
+    return;
+  }
   LOD* l = new LOD;
   mLODs.append(l);
 }
@@ -461,6 +466,11 @@ void Model::loadingCompleted()
 
 void Model::createLODs(unsigned int num)
 {
+  if(lodCount() < 1)
+  {
+    boError() << k_funcinfo << "need a base LOD first" << endl;
+    return;
+  }
   updateIds();
 
   for(unsigned int i = lodCount(); i < num; i++)
