@@ -21,6 +21,7 @@
 #include "frame.h"
 
 #include "bo3dtools.h"
+#include "debug.h"
 
 
 Frame::Frame()
@@ -74,12 +75,48 @@ void Frame::allocateNodes(unsigned int i)
   }
 }
 
-void Frame::replaceNodes(BoMatrix** matrices, Mesh** meshes, unsigned int count)
+void Frame::removeMesh(Mesh* mesh)
 {
-  delete mMeshes;
-  delete mMatrices;
+  unsigned int removeCount = 0;
+  for(unsigned int i = 0; i < mNodeCount; i++)
+  {
+    if(mMeshes[i] == mesh)
+    {
+      removeCount++;
+    }
+  }
+  unsigned int newNodeCount = mNodeCount - removeCount;
+  if(newNodeCount == 0)
+  {
+    boWarning() << k_funcinfo << "removing all remaining nodes" << endl;
+    delete[] mMeshes;
+    delete[] mMatrices;
+    return;
+  }
 
+  Mesh** meshes = new Mesh*[newNodeCount];
+  BoMatrix** matrices = new BoMatrix*[newNodeCount];
+  int index = 0;
+  for(unsigned int i = 0; i < mNodeCount; i++)
+  {
+    if(mMeshes[i] == mesh)
+    {
+      mMeshes[i] = 0;
+      delete mMatrices[i];
+      mMatrices[i] = 0;
+      continue;
+    }
+    meshes[index] = mMeshes[i];
+    matrices[index] = mMatrices[i];
+    index++;
+  }
+  mNodeCount = newNodeCount;
+  delete[] mMeshes;
+  delete[] mMatrices;
   mMeshes = meshes;
   mMatrices = matrices;
-  mNodeCount = count;
 }
+
+/*
+ * vim: et sw=2
+ */

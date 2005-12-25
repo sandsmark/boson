@@ -73,7 +73,7 @@ bool MeshOptimizer::process()
   if(validmeshes.count() != lod()->meshCount())
   {
     int oldcount = lod()->meshCount();
-    lod()->setMeshes(validmeshes);
+    lod()->removeAllMeshesBut(validmeshes);
     boDebug() << k_funcinfo << "Merged " << oldcount << " meshes into " << validmeshes.count() << endl;
   }
 
@@ -249,9 +249,6 @@ Mesh* MeshOptimizer::mergeMeshes(QValueList<Mesh*>* equal)
   Face** faces = new Face*[totalfaces];
   unsigned int vertexi = 0;
   unsigned int facei = 0;
-  // We store pointers to deleted meshes here so that we can later remove nodes
-  //  (in frames) that have such meshes.
-  QValueList<Mesh*> deletedmeshes;
 
   it = equal->begin();
   for(; it != equal->end(); ++it)
@@ -274,11 +271,6 @@ Mesh* MeshOptimizer::mergeMeshes(QValueList<Mesh*>* equal)
       //  vertex/face objects when the mesh is deleted
       other->replaceVertexList(0, 0);
       other->replaceFaceList(0, 0);
-      // Remove the mesh from all frames/nodes
-      // TODO!!!!!!!!!!!!!!!!!!!!!!11111
-      // Delete the mesh
-      deletedmeshes.append(other);
-      delete other;
     }
   }
   if(totalvertices != vertexi)
@@ -295,43 +287,6 @@ Mesh* MeshOptimizer::mergeMeshes(QValueList<Mesh*>* equal)
   // Replace face/vertex list in base mesh
   base->replaceVertexList(vertices, totalvertices);
   base->replaceFaceList(faces, totalfaces);
-
-  // Remove nodes with deleted meshes
-  boDebug() << k_funcinfo << "Removing unused nodes for " << deletedmeshes.count()
-      << " deleted meshes..." << endl;
-  for(unsigned int i = 0; i < lod()->frameCount(); i++)
-  {
-    Frame* f = lod()->frame(i);
-    QValueVector<Mesh*> newmeshes;
-    QValueVector<BoMatrix*> newmatrices;
-    for(unsigned int j = 0; j < f->nodeCount(); j++)
-    {
-      if(deletedmeshes.contains(f->mesh(j)))
-      {
-        // Delete the matrix too
-        delete f->matrix(j);
-      }
-      else
-      {
-        newmeshes.append(f->mesh(j));
-        newmatrices.append(f->matrix(j));
-      }
-    }
-    // Replace mesh/matrix lists if necessary
-    if(newmeshes.count() != f->nodeCount())
-    {
-      // Create temporary Mesh*/BoMatrix* arrays
-      Mesh** meshes = new Mesh*[newmeshes.count()];
-      BoMatrix** matrices = new BoMatrix*[newmeshes.count()];
-      for(unsigned int j = 0; j < newmeshes.count(); j++)
-      {
-        meshes[j] = newmeshes[j];
-        matrices[j] = newmatrices[j];
-      }
-      // Replace arrays in Frame
-      f->replaceNodes(matrices, meshes, newmeshes.count());
-    }
-  }
 
   boDebug() << k_funcinfo << "Merged " << totalvertices << " vertices and " <<
       totalfaces << " faces from " << equal->count() << " meshes" << endl;
