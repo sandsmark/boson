@@ -33,9 +33,10 @@
 #include <qdict.h>
 
 
-UnusedDataRemover::UnusedDataRemover(Model* m, LOD* l) : Processor(m, l)
+UnusedDataRemover::UnusedDataRemover() : Processor()
 {
   mProcessAll = true;
+  setName("UnusedDataRemover");
 }
 
 UnusedDataRemover::~UnusedDataRemover()

@@ -32,7 +32,7 @@ class Vertex;
 class VertexOptimizer : public Processor
 {
   public:
-    VertexOptimizer(Model* m, LOD* l);
+    VertexOptimizer();
     virtual ~VertexOptimizer();
 
     virtual bool process();

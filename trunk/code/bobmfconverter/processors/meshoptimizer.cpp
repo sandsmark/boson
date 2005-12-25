@@ -29,8 +29,9 @@
 #include <qvaluevector.h>
 
 
-MeshOptimizer::MeshOptimizer(Model* m, LOD* l) : Processor(m, l)
+MeshOptimizer::MeshOptimizer() : Processor()
 {
+  setName("MeshOptimizer");
 }
 
 MeshOptimizer::~MeshOptimizer()

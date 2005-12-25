@@ -34,7 +34,7 @@ typedef BoVector3<float> BoVector3Float;
 class Transformer : public Processor
 {
   public:
-    Transformer(Model* m, LOD* l);
+    Transformer();
     virtual ~Transformer();
 
     virtual bool process();

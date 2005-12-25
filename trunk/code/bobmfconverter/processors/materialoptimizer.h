@@ -31,7 +31,7 @@ class Material;
 class MaterialOptimizer : public Processor
 {
   public:
-    MaterialOptimizer(Model* m, LOD* l);
+    MaterialOptimizer();
     virtual ~MaterialOptimizer();
 
     virtual bool process();

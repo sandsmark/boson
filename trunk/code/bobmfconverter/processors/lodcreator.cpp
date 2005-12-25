@@ -30,17 +30,44 @@
 #include <mixkit/MxQSlim.h>
 
 
-LodCreator::LodCreator(Model* m, LOD* l) : Processor(m, l)
+LodCreator::LodCreator(int lodIndex) : Processor()
 {
+  mLODIndex = lodIndex;
   mMxModel = 0;
   mTargetFactor = -1;
   mMaxError = -1;
   mUseError = false;
   mUseBoth = false;
+  setName(QString("LOD Creator (LOD %1)").arg(lodIndex));
 }
 
 LodCreator::~LodCreator()
 {
+}
+
+bool LodCreator::initProcessor(Model* model)
+{
+  if(!Processor::initProcessor(model))
+  {
+    return false;
+  }
+  if(mLODIndex < 0)
+  {
+    return false;
+  }
+  if((unsigned int)mLODIndex >= model->lodCount())
+  {
+    boError() << k_funcinfo << "LOD index out of bounds: " << mLODIndex << " >= " << model->lodCount() << endl;
+    return false;
+  }
+  LOD* lod = model->lod(mLODIndex);
+  if(!lod)
+  {
+    BO_NULL_ERROR(lod);
+    return false;
+  }
+  setLOD(lod);
+  return true;
 }
 
 bool LodCreator::process()
@@ -244,3 +271,6 @@ bool LodCreator::updateMeshFromMxModel(Mesh* mesh, MxStdModel* model)
   return true;
 }
 
+/*
+ * vim: et sw=2
+ */

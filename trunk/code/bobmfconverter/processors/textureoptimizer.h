@@ -40,7 +40,7 @@ template<class T> class QValueList;
 class TextureOptimizer : public Processor
 {
   public:
-    TextureOptimizer(Model* m, LOD* l);
+    TextureOptimizer();
     virtual ~TextureOptimizer();
 
     virtual bool process();

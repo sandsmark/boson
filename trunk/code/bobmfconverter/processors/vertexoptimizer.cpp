@@ -93,8 +93,9 @@ class VertexOptimizer::VertexPtrVector : public QPtrVector<Vertex>
 };
 
 
-VertexOptimizer::VertexOptimizer(Model* m, LOD* l) : Processor(m, l)
+VertexOptimizer::VertexOptimizer() : Processor()
 {
+  setName("VertexOptimizer");
 }
 
 VertexOptimizer::~VertexOptimizer()
