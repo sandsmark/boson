@@ -75,6 +75,46 @@ void Frame::allocateNodes(unsigned int i)
   }
 }
 
+void Frame::setMatrix(unsigned int i, BoMatrix* m)
+{
+  if(i >= nodeCount())
+  {
+    boError() << k_funcinfo << "index " << i << " is out of bounds. nodeCount=" << nodeCount() << endl;
+    return;
+  }
+  mMatrices[i] = m;
+}
+
+BoMatrix* Frame::matrix(unsigned int i) const
+{
+  if(i >= nodeCount())
+  {
+    boError() << k_funcinfo << "index " << i << " is out of bounds. nodeCount=" << nodeCount() << endl;
+    return 0;
+  }
+  return mMatrices[i];
+}
+
+void Frame::setMesh(unsigned int i, Mesh* m)
+{
+  if(i >= nodeCount())
+  {
+    boError() << k_funcinfo << "index " << i << " is out of bounds. nodeCount=" << nodeCount() << endl;
+    return;
+  }
+  mMeshes[i] = m;
+}
+
+Mesh* Frame::mesh(unsigned int i) const
+{
+  if(i >= nodeCount())
+  {
+    boError() << k_funcinfo << "index " << i << " is out of bounds. nodeCount=" << nodeCount() << endl;
+    return 0;
+  }
+  return mMeshes[i];
+}
+
 void Frame::removeMesh(Mesh* mesh)
 {
   unsigned int removeCount = 0;
