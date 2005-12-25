@@ -48,6 +48,20 @@ LOD::LOD(LOD* base)
   }
 }
 
+LOD::~LOD()
+{
+  for(unsigned int i = 0; i < mFrames.count(); i++)
+  {
+    delete mFrames[i];
+  }
+  mFrames.clear();
+  for(unsigned int i = 0; i < mMeshes.count(); i++)
+  {
+    delete mMeshes[i];
+  }
+  mMeshes.clear();
+}
+
 unsigned int LOD::addMesh(Mesh* m)
 {
   m->setId(mMeshes.count());
@@ -61,8 +75,29 @@ unsigned int LOD::createFrame()
   return mFrames.count() - 1;
 }
 
-void LOD::setFrames(const QValueVector<Frame*>& frames)
+void LOD::removeAllFramesBut(const QValueVector<Frame*>& frames)
 {
+  if(frames.count() == 0)
+  {
+    boError() << k_funcinfo << "must keep at least one frame" << endl;
+    return;
+  }
+  for(QValueVector<Frame*>::const_iterator it = frames.begin(); it != frames.end(); ++it)
+  {
+    if(qFind(mFrames.begin(), mFrames.end(), *it) == mFrames.end())
+    {
+      boError() << k_funcinfo << "request contained unknown frame pointer. cannot handle request." << endl;
+      return;
+    }
+  }
+
+  for(QValueVector<Frame*>::iterator it = mFrames.begin(); it != mFrames.end(); ++it)
+  {
+    if(qFind(frames.begin(), frames.end(), *it) == frames.end())
+    {
+      delete *it;
+    }
+  }
   mFrames = frames;
 }
 
@@ -85,3 +120,6 @@ QString LOD::shortStats() const
       .arg(meshCount()).arg(totalvertexcount).arg(totalfacecount);
 }
 
+/*
+ * vim: et sw=2
+ */

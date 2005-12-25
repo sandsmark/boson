@@ -55,41 +55,35 @@ bool FrameOptimizer::process()
   // Go through all frames and remove identical ones
   // We only go through them linearly, because different animations may include
   //  equal frames.
-  QValueVector<Frame*> validframes;
-  Frame* lastframe = lod()->frame(0);
-  validframes.append(lastframe);
+  QValueVector<Frame*> validFrames;
+  Frame* lastFrame = lod()->frame(0);
+  validFrames.append(lastFrame);
 
   if(mRemoveAll)
   {
-    // Delete other frames
-    for(unsigned int i = 1; i < lod()->frameCount(); i++)
-    {
-      delete lod()->frame(i);
-    }
-
-    lod()->setFrames(validframes);
-    boDebug() << k_funcinfo << "Removed all frames (but the first one)" << endl;
+    boDebug() << k_funcinfo << "Removing all frames (but the first one)" << endl;
+    lod()->removeAllFramesBut(validFrames);
     return true;
   }
 
   for(unsigned int i = 1; i < lod()->frameCount(); i++)
   {
     Frame* f = lod()->frame(i);
-    // Check if lastframe and f are equal
+    // Check if lastFrame and f are equal
     bool equal = false;
     // FIXME: this needs meshes to be in same order in the frame
-    if(f->nodeCount() == lastframe->nodeCount())
+    if(f->nodeCount() == lastFrame->nodeCount())
     {
       // FIXME: this needs meshes to be in same order in the frame
       equal = true;
       for(unsigned int j = 0; j < f->nodeCount(); j++)
       {
-        if(f->mesh(j) != lastframe->mesh(j))
+        if(f->mesh(j) != lastFrame->mesh(j))
         {
           equal = false;
           break;
         }
-        else if(!f->matrix(j)->isEqual(*lastframe->matrix(j)))
+        else if(!f->matrix(j)->isEqual(*lastFrame->matrix(j)))
         {
           equal = false;
           break;
@@ -97,24 +91,20 @@ bool FrameOptimizer::process()
       }
     }
 
-    if(equal)
+    if(!equal)
     {
-      delete f;
-    }
-    else
-    {
-      validframes.append(f);
-      lastframe = f;
+      validFrames.append(f);
+      lastFrame = f;
     }
   }
 
-  if(validframes.count() != lod()->frameCount())
+  if(validFrames.count() != lod()->frameCount())
   {
     // Replace frames list
     // Just for debug
     int oldcount = lod()->frameCount();
-    int removedcount = lod()->frameCount() - validframes.count();
-    lod()->setFrames(validframes);
+    int removedcount = lod()->frameCount() - validFrames.count();
+    lod()->removeAllFramesBut(validFrames);
     boDebug() << k_funcinfo << "Removed " << removedcount << " duplicate frames of " <<
         oldcount << endl;
   }
@@ -122,3 +112,6 @@ bool FrameOptimizer::process()
   return true;
 }
 
+/*
+ * vim: et sw=2
+ */

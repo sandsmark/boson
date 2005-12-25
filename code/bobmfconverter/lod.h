@@ -33,6 +33,7 @@ class LOD
   public:
     LOD();
     LOD(LOD* base);
+    ~LOD();
 
     unsigned int addMesh(Mesh* m);
     Mesh* mesh(unsigned int i) const  { return mMeshes[i]; }
@@ -42,7 +43,7 @@ class LOD
     unsigned int createFrame();
     Frame* frame(unsigned int i) const  { return mFrames[i]; }
     unsigned int frameCount() const  { return mFrames.count(); }
-    void setFrames(const QValueVector<Frame*>& frames);
+    void removeAllFramesBut(const QValueVector<Frame*>& frames);
 
     float distance() const  { return mDist; }
     void setDistance(float dist)  { mDist = dist; }
