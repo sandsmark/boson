@@ -47,30 +47,30 @@ bool loadConfigFile(Model* m);
 bool doModelProcessing(Model* m);
 
 // Global variables - used for configuration
-QString infilename;
-QString outfilename;
-QString modelname;
-QString modelcomment;
-QString modelauthor;
-QString configfilename;
-unsigned int numlods = 5;
-float lod_factor = 0.5;
-bool smoothallfaces = false;
-bool lod_useerror = false;
-bool lod_useboth = false;
-float lod_baseerror = 0.075;
-float lod_errormod = 4.0;
-bool frames_removeall = false;
-unsigned int frame_base = 0;
-bool frames_keepall = true;
-float modelsize = 1.0;
-unsigned int tex_size = 512;
-QString tex_name;
-QString tex_path;
-bool tex_converttolowercase = false;
-bool tex_optimize = false;
-bool model_center = false;
-bool tex_dontload = false;
+QString g_inFileName;
+QString g_outFileName;
+QString g_modelName;
+QString g_modelComment;
+QString g_modelAuthor;
+QString g_configFileName;
+unsigned int g_numLods = 5;
+float g_lod_factor = 0.5;
+bool g_smoothAllFaces = false;
+bool g_lod_useError = false;
+bool g_lod_useBoth = false;
+float g_lod_baseError = 0.075;
+float g_lod_errorMod = 4.0;
+bool g_frames_removeAll = false;
+unsigned int g_frame_base = 0;
+bool g_frames_keepAll = true;
+float g_modelSize = 1.0;
+unsigned int g_tex_size = 512;
+QString g_tex_name;
+QString g_tex_path;
+bool g_tex_convertToLowerCase = false;
+bool g_tex_optimize = false;
+bool g_model_center = false;
+bool g_tex_dontLoad = false;
 
 
 double starttime;
@@ -117,12 +117,12 @@ int main(int argc, char** argv)
   Model* m = new Model();
 
   // Set model info
-  m->setName(modelname);
-  m->setComment(modelcomment);
-  m->setAuthor(modelauthor);
+  m->setName(g_modelName);
+  m->setComment(g_modelComment);
+  m->setAuthor(g_modelAuthor);
 
   // Load the model
-  if(!m->load(infilename))
+  if(!m->load(g_inFileName))
   {
     return 1;
   }
@@ -130,7 +130,7 @@ int main(int argc, char** argv)
   // Load the config file
   loadConfigFile(m);
 
-  if(smoothallfaces)
+  if(g_smoothAllFaces)
   {
     boDebug() << "Smoothing all faces..." << endl;
     m->smoothAllFaces();
@@ -161,11 +161,11 @@ int main(int argc, char** argv)
 
   // Prepare the model for saving
   boDebug() << "Preparing model for saving..." << endl;
-  m->prepareForSaving(frame_base);
+  m->prepareForSaving(g_frame_base);
 
   // Save the model
   boDebug() << "Saving model..." << endl;
-  m->save(outfilename);
+  m->save(g_outFileName);
 
   // Done!
   boDebug() << "All done!" << endl;
@@ -225,39 +225,39 @@ bool processCommandLine(int argc, char** argv)
     else if(larg == "-o" || larg == "-output")
     {
       NEXTARG(arg);
-      outfilename = arg;
+      g_outFileName = arg;
     }
     else if(larg == "-c" || larg == "-config")
     {
       NEXTARG(arg);
-      configfilename = arg;
+      g_configFileName = arg;
     }
     else if(larg == "-name")
     {
       NEXTARG(arg);
-      modelname = arg;
+      g_modelName = arg;
     }
     else if(larg == "-comment")
     {
       NEXTARG(arg);
-      modelcomment = arg;
+      g_modelComment = arg;
     }
     else if(larg == "-author")
     {
       NEXTARG(arg);
-      modelauthor = arg;
+      g_modelAuthor = arg;
     }
     else if(larg == "-lods")
     {
       // TODO: error checking for arguments which use int/float/whatever
       //  parameters
       NEXTARG(arg);
-      numlods = arg.toUInt();
+      g_numLods = arg.toUInt();
     }
     else if(larg == "-lodfactor")
     {
       NEXTARG(arg);
-      lod_factor = arg.toFloat();
+      g_lod_factor = arg.toFloat();
     }
     else if(larg == "-q" || larg == "-quick")
     {
@@ -265,49 +265,49 @@ bool processCommandLine(int argc, char** argv)
     }
     else if(larg == "-smoothall")
     {
-      smoothallfaces = true;
+      g_smoothAllFaces = true;
     }
     else if(larg == "-useerror")
     {
-      lod_useerror = true;
+      g_lod_useError = true;
     }
     else if(larg == "-useboth")
     {
-      lod_useerror = true;
-      lod_useboth = true;
+      g_lod_useError = true;
+      g_lod_useBoth = true;
     }
     else if(larg == "-baseerror")
     {
       NEXTARG(arg);
-      lod_baseerror = arg.toFloat();
+      g_lod_baseError = arg.toFloat();
     }
     else if(larg == "-errormod")
     {
       NEXTARG(arg);
-      lod_errormod = arg.toFloat();
+      g_lod_errorMod = arg.toFloat();
     }
     else if(larg == "-baseframe")
     {
       NEXTARG(arg);
-      frame_base = arg.toUInt();
+      g_frame_base = arg.toUInt();
     }
     else if(larg == "-noframes")
     {
-      frames_removeall = true;
+      g_frames_removeAll = true;
     }
     else if(larg == "-keepframes")
     {
-      frames_keepall = true;
+      g_frames_keepAll = true;
     }
     else if(larg == "-size")
     {
       NEXTARG(arg);
-      modelsize = arg.toFloat();
+      g_modelSize = arg.toFloat();
     }
     else if(larg == "-texsize")
     {
       NEXTARG(arg);
-      tex_size = arg.toUInt();
+      g_tex_size = arg.toUInt();
     }
     else if(larg == "-t")
     {
@@ -316,29 +316,29 @@ bool processCommandLine(int argc, char** argv)
     }
     else if(larg == "-texoptimize")
     {
-      tex_optimize = true;
+      g_tex_optimize = true;
     }
     else if(larg == "-texname")
     {
       NEXTARG(arg);
-      tex_name = arg;
+      g_tex_name = arg;
     }
     else if(larg == "-texpath")
     {
       NEXTARG(arg);
-      tex_path = arg;
+      g_tex_path = arg;
     }
     else if(larg == "-texnametolower")
     {
-      tex_converttolowercase = true;
+      g_tex_convertToLowerCase = true;
     }
     else if(larg == "-center")
     {
-      model_center = true;
+      g_model_center = true;
     }
     else if(larg == "-dontloadtex")
     {
-      tex_dontload = true;
+      g_tex_dontLoad = true;
     }
     else
     {
@@ -348,7 +348,7 @@ bool processCommandLine(int argc, char** argv)
         return false;
       }
 
-      infilename = arg;
+      g_inFileName = arg;
     }
   }
 
@@ -358,71 +358,71 @@ bool processCommandLine(int argc, char** argv)
 bool checkConfig()
 {
   // Check input file
-  if(infilename.isEmpty())
+  if(g_inFileName.isEmpty())
   {
     boError() << "No input file specified!" << endl;
     return false;
   }
-  QFileInfo infileinfo(infilename);
-  if(!infileinfo.exists())
+  QFileInfo inFileinfo(g_inFileName);
+  if(!inFileinfo.exists())
   {
-    boError() << "Input file '" << infilename << "' doesn't exist!" << endl;
+    boError() << "Input file '" << g_inFileName << "' doesn't exist!" << endl;
     return false;
   }
-  else if(!infileinfo.isReadable())
+  else if(!inFileinfo.isReadable())
   {
-    boError() << "Input file '" << infilename << "' isn't readable!" << endl;
+    boError() << "Input file '" << g_inFileName << "' isn't readable!" << endl;
     return false;
   }
 
   // Output file
-  if(outfilename.isEmpty())
+  if(g_outFileName.isEmpty())
   {
     // Create output filename by replacing input file's extension with '.bmf'
-    int i = infilename.findRev('.');
+    int i = g_inFileName.findRev('.');
     if(i == -1)
     {
       // Filename didn't have '.' in it. Just append '.bmf'
-      outfilename = infilename + ".bmf";
+      g_outFileName = g_inFileName + ".bmf";
     }
     else
     {
-      outfilename = infilename.left(i) + ".bmf";
+      g_outFileName = g_inFileName.left(i) + ".bmf";
     }
   }
 
   // Output texture file
-  if(tex_name.isEmpty())
+  if(g_tex_name.isEmpty())
   {
     // Create output texture filename by replacing input file's extension with
     //  '.jpg'
-    int i = infilename.findRev('.');
+    int i = g_inFileName.findRev('.');
     if(i == -1)
     {
       // Filename didn't have '.' in it. Just append '.jpg'
-      tex_name = infilename + ".jpg";
+      g_tex_name = g_inFileName + ".jpg";
     }
     else
     {
-      tex_name = infilename.left(i) + ".jpg";
+      g_tex_name = g_inFileName.left(i) + ".jpg";
     }
   }
 
   // Config file
-  if(!configfilename.isEmpty())
+  if(!g_configFileName.isEmpty())
   {
-    QFileInfo configfileinfo(configfilename);
-    if(!configfileinfo.exists())
+    QFileInfo configFileInfo(g_configFileName);
+    if(!configFileInfo.exists())
     {
-      boError() << "Config file '" << configfilename << "' doesn't exist!" << endl;
+      boError() << "Config file '" << g_configFileName << "' doesn't exist!" << endl;
       return false;
     }
-    else if(!configfileinfo.isReadable())
+    else if(!configFileInfo.isReadable())
     {
-      boError() << "Config file '" << configfilename << "' isn't readable!" << endl;
+      boError() << "Config file '" << g_configFileName << "' isn't readable!" << endl;
       return false;
     }
-    configfilename = configfileinfo.absFilePath();
+    g_configFileName = configFileInfo.absFilePath();
   }
 
   return true;
@@ -430,22 +430,22 @@ bool checkConfig()
 
 bool loadConfigFile(Model* m)
 {
-  if(configfilename.isEmpty())
+  if(g_configFileName.isEmpty())
   {
     return true;
   }
 
-  KSimpleConfig cfg(configfilename, true);
+  KSimpleConfig cfg(g_configFileName, true);
 
   // Load model size
   cfg.setGroup("Boson Unit");
-  modelsize = (float)cfg.readDoubleNumEntry("UnitWidth", modelsize);
+  g_modelSize = (float)cfg.readDoubleNumEntry("UnitWidth", g_modelSize);
 
   // Load entries from "Model" config group.
   // Note that size entry here takes preference over the one in "Boson Unit"
   //  group.
   cfg.setGroup("Model");
-  modelsize = (float)cfg.readDoubleNumEntry("Size", modelsize);
+  g_modelSize = (float)cfg.readDoubleNumEntry("Size", g_modelSize);
 
   return true;
 }
@@ -458,31 +458,31 @@ void saveLod(Model* m, unsigned int i)
 {
   LOD* l = m->lod(i);
 
-  ofstream out(QString("%1-%2.obj").arg(outfilename).arg(i));
+  ofstream out(QString("%1-%2.obj").arg(g_outFileName).arg(i));
 
-  QString vertexstr;
-  QString facestr;
+  QString vertexStr;
+  QString faceStr;
 
-  int vertexoffset = 1;
+  int vertexOffset = 1;
   for(unsigned int j = 0; j < l->meshCount(); j++)
   {
     Mesh* mesh = l->mesh(j);
     for(unsigned int i = 0; i < mesh->vertexCount(); i++)
     {
       BoVector3Float pos = mesh->vertex(i)->pos;
-      vertexstr += QString("v %1 %2 %3\n").arg(pos.x()).arg(pos.y()).arg(pos.z());
+      vertexStr += QString("v %1 %2 %3\n").arg(pos.x()).arg(pos.y()).arg(pos.z());
     }
     for(unsigned int i = 0; i < mesh->faceCount(); i++)
     {
       Face* f = mesh->face(i);
-      facestr += QString("f %1 %2 %3\n").arg(f->vertex(0)->id+vertexoffset)
-          .arg(f->vertex(1)->id+vertexoffset).arg(f->vertex(2)->id+vertexoffset);
+      faceStr += QString("f %1 %2 %3\n").arg(f->vertex(0)->id+vertexOffset)
+          .arg(f->vertex(1)->id+vertexOffset).arg(f->vertex(2)->id+vertexOffset);
     }
-    vertexoffset += mesh->vertexCount();
+    vertexOffset += mesh->vertexCount();
   }
 
-  out << vertexstr.latin1();
-  out << facestr.latin1();
+  out << vertexStr.latin1();
+  out << faceStr.latin1();
 
   out.close();
 }
@@ -492,12 +492,12 @@ void saveLodFrame(Model* m, unsigned int lodi, unsigned int framei)
   LOD* l = m->lod(lodi);
   Frame* f = l->frame(framei);
 
-  ofstream out(QString("%1-%2-%3.obj").arg(outfilename).arg(lodi).arg(framei));
+  ofstream out(QString("%1-%2-%3.obj").arg(g_outFileName).arg(lodi).arg(framei));
 
-  QString vertexstr;
-  QString facestr;
+  QString vertexStr;
+  QString faceStr;
 
-  int vertexoffset = 1;
+  int vertexOffset = 1;
   for(unsigned int i = 0; i < f->nodeCount(); i++)
   {
     Mesh* mesh = f->mesh(i);
@@ -507,20 +507,20 @@ void saveLodFrame(Model* m, unsigned int lodi, unsigned int framei)
     {
       BoVector3Float pos;
       matrix->transform(&pos, &mesh->vertex(j)->pos);
-      vertexstr += QString("v %1 %2 %3\n").arg(pos.x()).arg(pos.y()).arg(pos.z());
+      vertexStr += QString("v %1 %2 %3\n").arg(pos.x()).arg(pos.y()).arg(pos.z());
     }
     // Save faces
     for(unsigned int j = 0; j < mesh->faceCount(); j++)
     {
       Face* f = mesh->face(j);
-      facestr += QString("f %1 %2 %3\n").arg(f->vertex(0)->id+vertexoffset)
-          .arg(f->vertex(1)->id+vertexoffset).arg(f->vertex(2)->id+vertexoffset);
+      faceStr += QString("f %1 %2 %3\n").arg(f->vertex(0)->id+vertexOffset)
+          .arg(f->vertex(1)->id+vertexOffset).arg(f->vertex(2)->id+vertexOffset);
     }
-    vertexoffset += mesh->vertexCount();
+    vertexOffset += mesh->vertexCount();
   }
 
-  out << vertexstr.latin1();
-  out << facestr.latin1();
+  out << vertexStr.latin1();
+  out << faceStr.latin1();
 
   out.close();
 }
@@ -530,7 +530,7 @@ void saveLodFrameAC(Model* m, unsigned int lodi, unsigned int framei)
   LOD* l = m->lod(lodi);
   Frame* f = l->frame(framei);
 
-  ofstream out(QString("%1-%2-%3.ac").arg(outfilename).arg(lodi).arg(framei));
+  ofstream out(QString("%1-%2-%3.ac").arg(g_outFileName).arg(lodi).arg(framei));
 
   // AC3D header
   out << "AC3Db" << endl;
@@ -598,7 +598,7 @@ void saveLodFrameAC(Model* m, unsigned int lodi, unsigned int framei)
 
 bool doModelProcessing(Model* m)
 {
-  if(!tex_dontload)
+  if(!g_tex_dontLoad)
   {
     // Load textures
     m->loadTextures();
@@ -608,7 +608,7 @@ bool doModelProcessing(Model* m)
     boDebug() << "not loading textures due to request." << endl;
   }
 
-  if(tex_converttolowercase)
+  if(g_tex_convertToLowerCase)
   {
     // Convert texture names to lowercase
     QDictIterator<Texture> it(*m->texturesDict());
@@ -620,7 +620,7 @@ bool doModelProcessing(Model* m)
   }
   boDebug() << "LOD 0 had " << m->baseLOD()->shortStats() << endl;
 
-  Processor::setBaseFrame(frame_base);
+  Processor::setBaseFrame(g_frame_base);
 
   if(!m->checkLoadedModel())
   {
@@ -629,8 +629,8 @@ bool doModelProcessing(Model* m)
   }
 
   boDebug() << "Removing unused data..." << endl;
-  UnusedDataRemover unuseddataremover(m, m->baseLOD());
-  unuseddataremover.process();
+  UnusedDataRemover unusedDataRemover(m, m->baseLOD());
+  unusedDataRemover.process();
 
   if(!m->checkLoadedModel())
   {
@@ -638,12 +638,12 @@ bool doModelProcessing(Model* m)
     return false;
   }
 
-  if(!frames_keepall || frames_removeall)
+  if(!g_frames_keepAll || g_frames_removeAll)
   {
     boDebug() << "Removing duplicate frames..." << endl;
-    FrameOptimizer frameoptimizer(m, m->baseLOD());
-    frameoptimizer.setRemoveAllFrames(frames_removeall);
-    frameoptimizer.process();
+    FrameOptimizer frameOptimizer(m, m->baseLOD());
+    frameOptimizer.setRemoveAllFrames(g_frames_removeAll);
+    frameOptimizer.process();
     if(!m->checkLoadedModel())
     {
       boError() << k_funcinfo << "FrameOptimizer broke the model" << endl;
@@ -653,8 +653,8 @@ bool doModelProcessing(Model* m)
 
   boDebug() << "Transforming model..." << endl;
   Transformer transformer(m, m->baseLOD());
-  transformer.setModelSize(modelsize);
-  transformer.setCenterModel(model_center);
+  transformer.setModelSize(g_modelSize);
+  transformer.setCenterModel(g_model_center);
   transformer.process();
 
   if(!m->checkLoadedModel())
@@ -663,14 +663,14 @@ bool doModelProcessing(Model* m)
     return false;
   }
 
-  if(tex_optimize)
+  if(g_tex_optimize)
   {
     boDebug() << "Optimizing textures..." << endl;
-    TextureOptimizer textureoptimizer(m, m->baseLOD());
-    textureoptimizer.setCombinedTexSize(tex_size);
-    textureoptimizer.setCombinedTexFilename(tex_name);
-    textureoptimizer.setCombinedTexPath(tex_path);
-    textureoptimizer.process();
+    TextureOptimizer textureOptimizer(m, m->baseLOD());
+    textureOptimizer.setCombinedTexSize(g_tex_size);
+    textureOptimizer.setCombinedTexFilename(g_tex_name);
+    textureOptimizer.setCombinedTexPath(g_tex_path);
+    textureOptimizer.process();
     if(!m->checkLoadedModel())
     {
       boError() << k_funcinfo << "Texture optimizing broke the model" << endl;
@@ -679,8 +679,8 @@ bool doModelProcessing(Model* m)
   }
 
   boDebug() << "Optimizing materials..." << endl;
-  MaterialOptimizer materialoptimizer(m, m->baseLOD());
-  materialoptimizer.process();
+  MaterialOptimizer materialOptimizer(m, m->baseLOD());
+  materialOptimizer.process();
   if(!m->checkLoadedModel())
   {
     boError() << k_funcinfo << "Material optimizing broke the model" << endl;
@@ -688,8 +688,8 @@ bool doModelProcessing(Model* m)
   }
 
   boDebug() << "Optimizing meshes..." << endl;
-  MeshOptimizer meshoptimizer(m, m->baseLOD());
-  meshoptimizer.process();
+  MeshOptimizer meshOptimizer(m, m->baseLOD());
+  meshOptimizer.process();
   if(!m->checkLoadedModel())
   {
     boError() << k_funcinfo << "Mesh optimizing broke the model" << endl;
@@ -714,7 +714,7 @@ bool doModelProcessing(Model* m)
 
 
   boDebug() << "Creating lods..." << endl;
-  m->createLODs(numlods);
+  m->createLODs(g_numLods);
 
   if(!m->checkLoadedModel())
   {
@@ -729,26 +729,26 @@ bool doModelProcessing(Model* m)
   //saveLodFrameAC(m, 0, frame_base);
 //  saveLodFrameAC(m, 0, 10);
 
-  float targetfactor = 1.0f;
-  float loderror = lod_baseerror;
+  float targetFactor = 1.0f;
+  float lodError = g_lod_baseError;
   boDebug() << "LOD 0 has now " << m->baseLOD()->shortStats() << endl;
   boDebug() << "LOD 0 has " << m->baseLOD()->frameCount() << " frames and " <<
-      m->baseLOD()->frame(frame_base)->nodeCount() << " nodes in base frame" << endl;
-  for(unsigned int i = 1; i < numlods; i++)
+      m->baseLOD()->frame(g_frame_base)->nodeCount() << " nodes in base frame" << endl;
+  for(unsigned int i = 1; i < g_numLods; i++)
   {
-    targetfactor *= lod_factor;
-    LodCreator lodcreator(m, m->lod(i));
-    lodcreator.setFaceTargetFactor(targetfactor);
-    lodcreator.setMaxError(loderror);
-    lodcreator.setUseError(lod_useerror);
-    lodcreator.setUseBoth(lod_useboth);
-    lodcreator.process();
+    targetFactor *= g_lod_factor;
+    LodCreator lodCreator(m, m->lod(i));
+    lodCreator.setFaceTargetFactor(targetFactor);
+    lodCreator.setMaxError(lodError);
+    lodCreator.setUseError(g_lod_useError);
+    lodCreator.setUseBoth(g_lod_useBoth);
+    lodCreator.process();
     boDebug() << "LOD " << i << " has now " << m->lod(i)->shortStats() << endl;
     //saveLod(m, i);
     //saveLodFrameAC(m, i, frame_base);
     //boDebug() << "LOD quicksaved" << endl;
 
-    loderror *= lod_errormod;
+    lodError *= g_lod_errorMod;
   }
   return true;
 }
