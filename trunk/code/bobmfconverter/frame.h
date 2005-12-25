@@ -35,11 +35,11 @@ class Frame
     int id() const  { return mId; }
     void setId(int id)  { mId = id; }
 
-    BoMatrix* matrix(unsigned int i) const  { return mMatrices[i]; }
-    void setMatrix(unsigned int i, BoMatrix* m)  { mMatrices[i] = m; }
+    BoMatrix* matrix(unsigned int i) const ;
+    void setMatrix(unsigned int i, BoMatrix* m);
 
-    Mesh* mesh(unsigned int i) const  { return mMeshes[i]; }
-    void setMesh(unsigned int i, Mesh* m)  { mMeshes[i] = m; }
+    Mesh* mesh(unsigned int i) const;
+    void setMesh(unsigned int i, Mesh* m);
 
     void allocateNodes(unsigned int i);
     unsigned int nodeCount() const  { return mNodeCount; }
@@ -60,5 +60,9 @@ class Frame
     Mesh** mMeshes;
     unsigned int mNodeCount;
 };
+
+/*
+ * vim: et sw=2
+ */
 
 #endif //FRAME_H
