@@ -38,7 +38,8 @@ class LOD
     unsigned int addMesh(Mesh* m);
     Mesh* mesh(unsigned int i) const  { return mMeshes[i]; }
     unsigned int meshCount() const  { return mMeshes.count(); }
-    void setMeshes(const QValueVector<Mesh*>& meshes);
+    void removeAllMeshesBut(const QValueVector<Mesh*>& meshes);
+    void removeReferencesToMesh(Mesh* mesh);
 
     unsigned int createFrame();
     Frame* frame(unsigned int i) const  { return mFrames[i]; }

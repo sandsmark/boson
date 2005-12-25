@@ -73,34 +73,30 @@ bool UnusedDataRemover::processMeshes()
 {
   // Go through all meshes and see if they're used in any frame/node
 
-  QValueVector<Mesh*> validmeshes;
-  unsigned int removedcount = 0;
+  QValueVector<Mesh*> validMeshes;
+  unsigned int removedCount = 0;
   for(unsigned int i = 0; i < lod()->meshCount(); i++)
   {
     Mesh* m = lod()->mesh(i);
     if(isMeshValid(m))
     {
-      validmeshes.append(m);
+      validMeshes.append(m);
     }
     else
     {
-      // Make sure the mesh isn't in any nodes in any frames
-      removeMeshFromFrames(m);
-      // Delete the mesh
-      delete m;
-      removedcount++;
+      removedCount++;
     }
   }
 
-  if(removedcount == 0)
+  if(removedCount == 0)
   {
     return true;
   }
 
-  unsigned int oldcount = lod()->meshCount();
-  lod()->setMeshes(validmeshes);
+  unsigned int oldCount = lod()->meshCount();
+  lod()->removeAllMeshesBut(validMeshes);
 
-  boDebug() << k_funcinfo << "Removed " << removedcount << " meshes of " << oldcount << endl;
+  boDebug() << k_funcinfo << "Removed " << removedCount << " meshes of " << oldCount << endl;
   return true;
 }
 
@@ -225,51 +221,6 @@ bool UnusedDataRemover::isTextureValid(Texture* t)
   return false;
 }
 
-void UnusedDataRemover::removeMeshFromFrames(Mesh* m)
-{
-  unsigned int replaces = 0;
-  for(unsigned int i = 0; i < lod()->frameCount(); i++)
-  {
-    if(i == baseFrame())
-    {
-      continue;
-    }
-    Frame* f = lod()->frame(i);
-    QValueVector<Mesh*> newmeshes;
-    QValueVector<BoMatrix*> newmatrices;
-    bool havetoreplace = false;
-    for(unsigned int j = 0; j < f->nodeCount(); j++)
-    {
-      if(f->mesh(j) == m)
-      {
-        havetoreplace = true;
-        replaces++;
-      }
-      else
-      {
-        newmeshes.append(f->mesh(j));
-        newmatrices.append(f->matrix(j));
-      }
-    }
-    if(havetoreplace)
-    {
-      // Create temporary Mesh*/BoMatrix* arrays
-      Mesh** meshes = new Mesh*[newmeshes.count()];
-      BoMatrix** matrices = new BoMatrix*[newmeshes.count()];
-      for(unsigned int j = 0; j < newmeshes.count(); j++)
-      {
-        meshes[j] = newmeshes[j];
-        matrices[j] = newmatrices[j];
-      }
-      // Replace arrays in the frame
-      f->replaceNodes(matrices, meshes, newmeshes.count());
-    }
-  }
-
-  if(replaces)
-  {
-    boWarning() << k_funcinfo << "Removed " << replaces << " nodes containing mesh '" <<
-        m->name() << "'" << endl;
-  }
-}
-
+/*
+ * vim: et sw=2
+ */

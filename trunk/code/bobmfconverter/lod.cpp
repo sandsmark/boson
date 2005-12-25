@@ -24,6 +24,7 @@
 #include "debug.h"
 
 #include <qstring.h>
+#include <qvaluelist.h>
 
 
 LOD::LOD()
@@ -101,9 +102,55 @@ void LOD::removeAllFramesBut(const QValueVector<Frame*>& frames)
   mFrames = frames;
 }
 
-void LOD::setMeshes(const QValueVector<Mesh*>& meshes)
+void LOD::removeAllMeshesBut(const QValueVector<Mesh*>& meshes)
 {
+  if(meshes.count() == 0)
+  {
+    boError() << k_funcinfo << "must keep at least one mesh" << endl;
+    return;
+  }
+  for(QValueVector<Mesh*>::const_iterator it = meshes.begin(); it != meshes.end(); ++it)
+  {
+    if(qFind(mMeshes.begin(), mMeshes.end(), *it) == mMeshes.end())
+    {
+      boError() << k_funcinfo << "request contained unknown mesh pointer. cannot handle request." << endl;
+      return;
+    }
+  }
+
+  QValueList<Mesh*> deleteMeshes;
+  for(QValueVector<Mesh*>::iterator it = mMeshes.begin(); it != mMeshes.end(); ++it)
+  {
+    if(qFind(meshes.begin(), meshes.end(), *it) == meshes.end())
+    {
+      if(!deleteMeshes.contains(*it))
+      {
+        deleteMeshes.append(*it);
+      }
+    }
+  }
   mMeshes = meshes;
+
+  for(QValueList<Mesh*>::iterator it = deleteMeshes.begin(); it != deleteMeshes.end(); ++it)
+  {
+    removeReferencesToMesh(*it);
+    delete *it;
+  }
+}
+
+void LOD::removeReferencesToMesh(Mesh* mesh)
+{
+  BO_CHECK_NULL_RET(mesh);
+  for(unsigned int i = 0; i < frameCount(); i++)
+  {
+    Frame* f = frame(i);
+    BO_CHECK_NULL_RET(f);
+    f->removeMesh(mesh);
+  }
+  if (qFind(mMeshes.begin(), mMeshes.end(), mesh) != mMeshes.end())
+  {
+    boError() << k_funcinfo << "mMeshes still contains mesh " << mesh << ". cannot remove this reference" << endl;
+  }
 }
 
 QString LOD::shortStats() const

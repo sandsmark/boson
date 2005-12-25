@@ -49,7 +49,6 @@ class UnusedDataRemover : public Processor
     bool isMeshValid(Mesh* m);
     bool isMaterialValid(Material* m);
     bool isTextureValid(Texture* m);
-    void removeMeshFromFrames(Mesh* m);
 
 
   private:

@@ -43,8 +43,16 @@ class Frame
 
     void allocateNodes(unsigned int i);
     unsigned int nodeCount() const  { return mNodeCount; }
-    void replaceNodes(BoMatrix** matrices, Mesh** meshes, unsigned int count);
 
+    /**
+     * Remove the mesh @p mesh from the allocated list of meshes. If @p mesh is
+     * not referenced by this frame, then this method is a noop.
+     *
+     * If @p mesh is referenced by this frame, it is removed and the @ref
+     * nodeCount is reduced accordingly (@p mesh may be referenced multiple
+     * times!).
+     **/
+    void removeMesh(Mesh* mesh);
 
   private:
     int mId;
