@@ -32,7 +32,7 @@ class Vertex;
 class FrameOptimizer : public Processor
 {
   public:
-    FrameOptimizer(Model* m, LOD* l);
+    FrameOptimizer();
     virtual ~FrameOptimizer();
 
     virtual bool process();

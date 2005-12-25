@@ -29,9 +29,10 @@
 #include <qvaluevector.h>
 
 
-FrameOptimizer::FrameOptimizer(Model* m, LOD* l) : Processor(m, l)
+FrameOptimizer::FrameOptimizer() : Processor()
 {
   mRemoveAll = false;
+  setName("FrameOptimizer");
 }
 
 FrameOptimizer::~FrameOptimizer()

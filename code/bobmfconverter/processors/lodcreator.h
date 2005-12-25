@@ -32,9 +32,10 @@ class MxQSlim;
 class LodCreator : public Processor
 {
   public:
-    LodCreator(Model* m, LOD* l);
+    LodCreator(int lodIndex);
     virtual ~LodCreator();
 
+    virtual bool initProcessor(Model* model);
     virtual bool process();
 
     void setFaceTargetFactor(float factor)  { mTargetFactor = factor; }
@@ -60,6 +61,7 @@ class LodCreator : public Processor
 
 
   private:
+    int mLODIndex;
     MxStdModel* mMxModel;
     float mTargetFactor;
     float mMaxError;

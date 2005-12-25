@@ -31,8 +31,9 @@
 #define MAX_MATERIAL_DIFF 0.1f
 
 
-MaterialOptimizer::MaterialOptimizer(Model* m, LOD* l) : Processor(m, l)
+MaterialOptimizer::MaterialOptimizer() : Processor()
 {
+  setName("MaterialOptimizer");
 }
 
 MaterialOptimizer::~MaterialOptimizer()

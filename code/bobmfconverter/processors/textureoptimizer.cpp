@@ -72,9 +72,10 @@ class TextureOptimizer::TextureInfo
 };
 
 
-TextureOptimizer::TextureOptimizer(Model* m, LOD* l) : Processor(m, l)
+TextureOptimizer::TextureOptimizer() : Processor()
 {
   mTexSize = 512;
+  setName("TextureOptimizer");
 }
 
 TextureOptimizer::~TextureOptimizer()

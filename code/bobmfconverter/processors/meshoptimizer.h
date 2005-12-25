@@ -32,7 +32,7 @@ template<class T> class QValueList;
 class MeshOptimizer : public Processor
 {
   public:
-    MeshOptimizer(Model* m, LOD* l);
+    MeshOptimizer();
     virtual ~MeshOptimizer();
 
     virtual bool process();

@@ -29,10 +29,11 @@
 #include <qvaluelist.h>
 
 
-Transformer::Transformer(Model* m, LOD* l) : Processor(m, l)
+Transformer::Transformer() : Processor()
 {
   mModelSize = 1.0f;
   mCenterModel = false;
+  setName("TransformerOptimizer");
 }
 
 Transformer::~Transformer()

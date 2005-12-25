@@ -20,16 +20,46 @@
 
 #include "processor.h"
 
+#include "model.h"
+#include "debug.h"
+
 
 unsigned int Processor::mBaseFrame = 0;
 
 
-Processor::Processor(Model* m, LOD* l)
+Processor::Processor()
 {
-  mModel = m;
-  mLOD = l;
+  mName = "Unnamed";
+  mModel = 0;
+  mLOD = 0;
 }
 
 Processor::~Processor()
 {
 }
+
+bool Processor::initProcessor(Model* model)
+{
+  mModel = model;
+  if(!mModel)
+  {
+    BO_NULL_ERROR(mModel);
+    return false;
+  }
+  setLOD(mModel->baseLOD());
+  if(!mLOD)
+  {
+    BO_NULL_ERROR(mLOD);
+    return false;
+  }
+  return true;
+}
+
+void Processor::setLOD(LOD* lod)
+{
+  mLOD = lod;
+}
+
+/*
+ * vim: et sw=2
+ */

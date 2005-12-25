@@ -45,6 +45,7 @@ bool processCommandLine(int argc, char** argv);
 bool checkConfig();
 bool loadConfigFile(Model* m);
 bool doModelProcessing(Model* m);
+bool executeProcessors(Model* model, const QPtrList<Processor>& list);
 
 // Global variables - used for configuration
 QString g_inFileName;
@@ -628,82 +629,44 @@ bool doModelProcessing(Model* m)
     return false;
   }
 
-  boDebug() << "Removing unused data..." << endl;
-  UnusedDataRemover unusedDataRemover(m, m->baseLOD());
-  unusedDataRemover.process();
+  QPtrList<Processor> processorList;
+  processorList.setAutoDelete(true);
 
-  if(!m->checkLoadedModel())
-  {
-    boError() << k_funcinfo << "UnusedDataRemover broke the model" << endl;
-    return false;
-  }
-
+  processorList.append(new UnusedDataRemover);
   if(!g_frames_keepAll || g_frames_removeAll)
   {
-    boDebug() << "Removing duplicate frames..." << endl;
-    FrameOptimizer frameOptimizer(m, m->baseLOD());
-    frameOptimizer.setRemoveAllFrames(g_frames_removeAll);
-    frameOptimizer.process();
-    if(!m->checkLoadedModel())
-    {
-      boError() << k_funcinfo << "FrameOptimizer broke the model" << endl;
-      return false;
-    }
+    FrameOptimizer* frameOptimizer = new FrameOptimizer();
+    frameOptimizer->setName("DuplicateFrameRemover");
+    frameOptimizer->setRemoveAllFrames(g_frames_removeAll);
+    processorList.append(frameOptimizer);
   }
 
-  boDebug() << "Transforming model..." << endl;
-  Transformer transformer(m, m->baseLOD());
-  transformer.setModelSize(g_modelSize);
-  transformer.setCenterModel(g_model_center);
-  transformer.process();
-
-  if(!m->checkLoadedModel())
-  {
-    boError() << k_funcinfo << "Transforming broke the model" << endl;
-    return false;
-  }
+  Transformer* transformer = new Transformer();
+  transformer->setModelSize(g_modelSize);
+  transformer->setCenterModel(g_model_center);
+  processorList.append(transformer);
+  transformer = 0;
 
   if(g_tex_optimize)
   {
-    boDebug() << "Optimizing textures..." << endl;
-    TextureOptimizer textureOptimizer(m, m->baseLOD());
-    textureOptimizer.setCombinedTexSize(g_tex_size);
-    textureOptimizer.setCombinedTexFilename(g_tex_name);
-    textureOptimizer.setCombinedTexPath(g_tex_path);
-    textureOptimizer.process();
-    if(!m->checkLoadedModel())
-    {
-      boError() << k_funcinfo << "Texture optimizing broke the model" << endl;
-      return false;
-    }
+    TextureOptimizer* textureOptimizer = new TextureOptimizer();
+    textureOptimizer->setCombinedTexSize(g_tex_size);
+    textureOptimizer->setCombinedTexFilename(g_tex_name);
+    textureOptimizer->setCombinedTexPath(g_tex_path);
+    processorList.append(textureOptimizer);
   }
 
-  boDebug() << "Optimizing materials..." << endl;
-  MaterialOptimizer materialOptimizer(m, m->baseLOD());
-  materialOptimizer.process();
-  if(!m->checkLoadedModel())
-  {
-    boError() << k_funcinfo << "Material optimizing broke the model" << endl;
-    return false;
-  }
+  processorList.append(new MaterialOptimizer());
+  processorList.append(new MeshOptimizer());
+  processorList.append(new VertexOptimizer());
 
-  boDebug() << "Optimizing meshes..." << endl;
-  MeshOptimizer meshOptimizer(m, m->baseLOD());
-  meshOptimizer.process();
-  if(!m->checkLoadedModel())
-  {
-    boError() << k_funcinfo << "Mesh optimizing broke the model" << endl;
-    return false;
-  }
 
-  boDebug() << "Optimizing vertices..." << endl;
-  VertexOptimizer vo(m, m->baseLOD());
-  vo.process();
-  if(!m->checkLoadedModel())
+  if(!executeProcessors(m, processorList))
   {
-    boError() << k_funcinfo << "Vertex optimizing broke the model" << endl;
     return false;
   }
+  processorList.setAutoDelete(true);
+  processorList.clear();
 
 
   boDebug() << "Calculating model's face normals..." << endl;
@@ -712,43 +675,79 @@ bool doModelProcessing(Model* m)
   boDebug() << "Calculating model's vertex normals..." << endl;
   m->calculateVertexNormals();
 
-
   boDebug() << "Creating lods..." << endl;
   m->createLODs(g_numLods);
 
   if(!m->checkLoadedModel())
   {
-    boError() << k_funcinfo << "broken model after LOD creation" << endl;
+    boError() << k_funcinfo << "broken model after initial LOD creation" << endl;
     return false;
   }
 
-  //boDebug() << "Quicksaving base LOD..." << endl;
-  //saveLod(m, 0);
-
-  //boDebug() << "Quicksaving base frame in base LOD..." << endl;
-  //saveLodFrameAC(m, 0, frame_base);
-//  saveLodFrameAC(m, 0, 10);
-
   float targetFactor = 1.0f;
   float lodError = g_lod_baseError;
-  boDebug() << "LOD 0 has now " << m->baseLOD()->shortStats() << endl;
-  boDebug() << "LOD 0 has " << m->baseLOD()->frameCount() << " frames and " <<
-      m->baseLOD()->frame(g_frame_base)->nodeCount() << " nodes in base frame" << endl;
   for(unsigned int i = 1; i < g_numLods; i++)
   {
     targetFactor *= g_lod_factor;
-    LodCreator lodCreator(m, m->lod(i));
-    lodCreator.setFaceTargetFactor(targetFactor);
-    lodCreator.setMaxError(lodError);
-    lodCreator.setUseError(g_lod_useError);
-    lodCreator.setUseBoth(g_lod_useBoth);
-    lodCreator.process();
-    boDebug() << "LOD " << i << " has now " << m->lod(i)->shortStats() << endl;
-    //saveLod(m, i);
-    //saveLodFrameAC(m, i, frame_base);
-    //boDebug() << "LOD quicksaved" << endl;
+    LodCreator* lodCreator = new LodCreator(i);
+    lodCreator->setFaceTargetFactor(targetFactor);
+    lodCreator->setMaxError(lodError);
+    lodCreator->setUseError(g_lod_useError);
+    lodCreator->setUseBoth(g_lod_useBoth);
+    processorList.append(lodCreator);
 
     lodError *= g_lod_errorMod;
+  }
+
+
+
+  if(!executeProcessors(m, processorList))
+  {
+    return false;
+  }
+  processorList.setAutoDelete(true);
+  processorList.clear();
+
+  return true;
+}
+
+
+bool executeProcessors(Model* model, const QPtrList<Processor>& list)
+{
+  if(!model)
+  {
+    BO_NULL_ERROR(model);
+    return false;
+  }
+  if(!model->checkLoadedModel())
+  {
+    boError() << k_funcinfo << "cannot process broken model" << endl;
+    return false;
+  }
+  for(QPtrListIterator<Processor> it(list); it.current(); ++it)
+  {
+    QString name = it.current()->name();
+    if(name.isEmpty())
+    {
+      name = "Unnamed";
+    }
+    boDebug() << k_funcinfo << "starting " << name << endl;
+    if(!it.current()->initProcessor(model))
+    {
+      boError() << k_funcinfo << "initializing of processor " << name << " failed" << endl;
+      return false;
+    }
+    if(!it.current()->process())
+    {
+      boError() << k_funcinfo << "processor " << name << " failed" << endl;
+      return false;
+    }
+    if(!model->checkLoadedModel())
+    {
+      boError() << k_funcinfo << "model broken after executing processor " << name << ". Fix that processor!" << endl;
+      return false;
+    }
+    boDebug() << k_funcinfo << name << " succeeded" << endl;
   }
   return true;
 }

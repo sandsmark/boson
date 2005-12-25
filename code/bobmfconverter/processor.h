@@ -20,6 +20,7 @@
 #ifndef PROCESSOR_H
 #define PROCESSOR_H
 
+#include <qstring.h>
 
 class Model;
 class LOD;
@@ -28,8 +29,23 @@ class LOD;
 class Processor
 {
   public:
-    Processor(Model* m, LOD* l = 0);
+    Processor();
     virtual ~Processor();
+
+    /**
+     * Set a name for the processor, to be displayed in debug and error
+     * messages.
+     **/
+    void setName(const QString& name)
+    {
+      mName = name;
+    }
+    const QString& name() const
+    {
+      return mName;
+    }
+
+    virtual bool initProcessor(Model* model);
 
     virtual bool process() = 0;
 
@@ -40,12 +56,18 @@ class Processor
     static void setBaseFrame(unsigned int frame)  { mBaseFrame = frame; }
     static unsigned int baseFrame()  { return mBaseFrame; }
 
+  protected:
+    void setLOD(LOD* lod);
 
   private:
+    QString mName;
     Model* mModel;
     LOD* mLOD;
     static unsigned int mBaseFrame;
 };
 
 
+/*
+ * vim: et sw=2
+ */
 #endif //PROCESSOR_H

@@ -33,7 +33,7 @@ class Texture;
 class UnusedDataRemover : public Processor
 {
   public:
-    UnusedDataRemover(Model* m, LOD* l);
+    UnusedDataRemover();
     virtual ~UnusedDataRemover();
 
     virtual bool process();
