@@ -139,8 +139,8 @@ class Mesh
     void allocateVertices(int n);
     void allocateFaces(int n);
 
-    void replaceVertexList(Vertex** vertices, int count);
-    void replaceFaceList(Face** faces, int count);
+    void replaceVertexList(Vertex** vertices, unsigned int count);
+    void replaceFaceList(Face** faces, unsigned int count);
 
 
     void smoothAllFaces();
@@ -217,4 +217,7 @@ class Mesh
 };
 
 
+/*
+ * vim: et sw=2
+ */
 #endif // MESH_H
