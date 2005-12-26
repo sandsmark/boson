@@ -236,18 +236,18 @@ Mesh* MeshOptimizer::mergeMeshes(QValueList<Mesh*>* equal)
 
   QValueList<Mesh*>::Iterator it = equal->begin();
   // Pass 1: count faces/vertices in all meshes
-  unsigned int totalvertices = 0;
-  unsigned int totalfaces = 0;
+  unsigned int totalVertices = 0;
+  unsigned int totalFaces = 0;
   for(; it != equal->end(); ++it)
   {
-    totalvertices += (*it)->vertexCount();
-    totalfaces += (*it)->faceCount();
+    totalVertices += (*it)->vertexCount();
+    totalFaces += (*it)->faceCount();
   }
 
   // Pass 2: add all vertices and faces of other meshes to base mesh
   // Allocate arrays for meshes and vertices
-  Vertex** vertices = new Vertex*[totalvertices];
-  Face** faces = new Face*[totalfaces];
+  Vertex** vertices = new Vertex*[totalVertices];
+  Face** faces = new Face*[totalFaces];
   unsigned int vertexi = 0;
   unsigned int facei = 0;
 
@@ -274,23 +274,23 @@ Mesh* MeshOptimizer::mergeMeshes(QValueList<Mesh*>* equal)
       other->replaceFaceList(0, 0);
     }
   }
-  if(totalvertices != vertexi)
+  if(totalVertices != vertexi)
   {
-    boError() << "totalvertices != vertexi : " << totalvertices << " != " << vertexi << endl;
+    boError() << "totalVertices != vertexi : " << totalVertices << " != " << vertexi << endl;
     return 0;
   }
-  if(totalfaces != facei)
+  if(totalFaces != facei)
   {
-    boError() << "totalfaces != facei : " << totalfaces << " != " << facei << endl;
+    boError() << "totalFaces != facei : " << totalFaces << " != " << facei << endl;
     return 0;
   }
 
   // Replace face/vertex list in base mesh
-  base->replaceVertexList(vertices, totalvertices);
-  base->replaceFaceList(faces, totalfaces);
+  base->replaceVertexList(vertices, totalVertices);
+  base->replaceFaceList(faces, totalFaces);
 
-  boDebug() << k_funcinfo << "Merged " << totalvertices << " vertices and " <<
-      totalfaces << " faces from " << equal->count() << " meshes" << endl;
+  boDebug() << k_funcinfo << "Merged " << totalVertices << " vertices and " <<
+      totalFaces << " faces from " << equal->count() << " meshes" << endl;
 
   return base;
 }
