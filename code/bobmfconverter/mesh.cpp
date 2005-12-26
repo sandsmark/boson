@@ -157,9 +157,9 @@ void Mesh::allocateVertices(int n)
   }
 }
 
-void Mesh::replaceVertexList(Vertex** vertices, int count)
+void Mesh::replaceVertexList(Vertex** vertices, unsigned int count)
 {
-  delete[] mVertices;
+  delete[] vertices;
 
   mVertices = vertices;
   mVertexCount = count;
@@ -178,7 +178,7 @@ void Mesh::allocateFaces(int n)
   }
 }
 
-void Mesh::replaceFaceList(Face** faces, int count)
+void Mesh::replaceFaceList(Face** faces, unsigned int count)
 {
   delete[] mFaces;
 
