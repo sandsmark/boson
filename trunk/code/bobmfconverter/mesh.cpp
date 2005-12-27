@@ -159,7 +159,7 @@ void Mesh::allocateVertices(int n)
 
 void Mesh::replaceVertexList(Vertex** vertices, unsigned int count)
 {
-  delete[] vertices;
+  delete[] mVertices;
 
   mVertices = vertices;
   mVertexCount = count;
