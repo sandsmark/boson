@@ -67,7 +67,7 @@ static void keepLinesInRect(int w, int h, BoVector3Float& p1, BoVector3Float& p2
 
 #define USE_EXPERIMENTAL_QUADTREE_THINGY
 #ifdef USE_EXPERIMENTAL_QUADTREE_THINGY
-#include "groundrenderer/boquadtreenode.h"
+#include "boquadtreenode.h"
 
 class BosonMiniMapQuadtreeNode : public BoQuadTreeNode
 {
