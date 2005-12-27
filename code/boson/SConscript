@@ -270,6 +270,7 @@ boson.source += """
 	boconditionwidget.cpp
 	bowaterrenderer.cpp
 	selectbox.cpp
+	groundrenderer/boquadtreenode.cpp
 	main.cpp
 """
 boson.source += startupwidgets_sources

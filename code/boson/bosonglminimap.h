@@ -37,6 +37,7 @@ class BoGLMatrices;
 class BoTexture;
 class BosonItem;
 class Facility;
+class BosonMiniMapQuadtreeNode;
 
 class QPixmap;
 class QPainter;
@@ -95,6 +96,8 @@ public:
 	void emitSignalMoveSelection(const QPoint& pos);
 
 	QPtrList<Unit>* radarList() const;
+
+	BosonMiniMapQuadtreeNode* unitTree() const;
 
 
 public slots:
@@ -243,7 +246,7 @@ public:
 	 **/
 	bool windowToCell(const QPoint& pos, QPoint* cell) const;
 
-	void render(QPtrList<Unit>* radars);
+	void render(QPtrList<Unit>* radars, BosonMiniMapQuadtreeNode* unitTree);
 
 	void setPoint(int x, int y, const QColor& color, GLubyte* textureData, BoTexture* texture);
 	void unsetPoint(int x, int y, GLubyte* textureData, BoTexture* texture);
@@ -264,12 +267,12 @@ public:
 	void advance(unsigned int advanceCallsCount);
 
 protected:
-	void renderMiniMap(QPtrList<Unit>* radars);
+	void renderMiniMap(QPtrList<Unit>* radars, BosonMiniMapQuadtreeNode* unitTree);
 	void renderCamera();
 	void renderLogo();
 	void renderGimmicks(); // zoom buttons, minimap frame, ...
 
-	void updateRadarTexture(QPtrList<Unit>* radars);
+	void updateRadarTexture(QPtrList<Unit>* radars, BosonMiniMapQuadtreeNode* unitTree);
 	void renderRadarRangeIndicators(QPtrList<Unit>* radarlist);
 
 
