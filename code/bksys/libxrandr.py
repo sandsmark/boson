@@ -48,6 +48,7 @@ def generate(env):
 		if have_xrandr:
 			env['LIB_XRANDR'] = lib
 		else:
+			env['LIB_XRANDR'] = ''
 			if have_lib:
 				env.pprint('YELLOW', 'Xrandr headers not found (only library found).')
 			elif have_header:
