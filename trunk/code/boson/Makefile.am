@@ -73,7 +73,8 @@ libbosongameengine_la_SOURCES = \
 		bowater.cpp \
 		bosonsaveload.cpp \
 		bosongroundtheme.cpp \
-		bosongameengine.cpp
+		bosongameengine.cpp \
+		boquadtreenode.cpp
 
 libbosoncommon_la_SOURCES = \
 		boapplication.cpp \
@@ -184,7 +185,6 @@ boson_SOURCES = \
 		boconditionwidget.cpp \
 		bowaterrenderer.cpp \
 		selectbox.cpp \
-		groundrenderer/boquadtreenode.cpp \
 		main.cpp
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)

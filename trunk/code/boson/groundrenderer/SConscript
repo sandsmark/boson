@@ -8,7 +8,6 @@ groundrenderer_sources = """
 	boquickgroundrenderer.cpp
 	bogroundrendererbase.cpp
 	bocolormaprenderer.cpp
-	boquadtreenode.cpp
 """
 
 if not env['BOSON_USE_PLUGINS']:

@@ -114,6 +114,7 @@ libgameengine.source = """
 	bosongameengine.cpp
 	bosonstarting.cpp
 	bosongameenginestarting.cpp
+	boquadtreenode.cpp
 	items/bosonitem.cpp
 	items/bosonshot.cpp
 	items/bosonitempropertyhandler.cpp
@@ -270,7 +271,6 @@ boson.source += """
 	boconditionwidget.cpp
 	bowaterrenderer.cpp
 	selectbox.cpp
-	groundrenderer/boquadtreenode.cpp
 	main.cpp
 """
 boson.source += startupwidgets_sources
