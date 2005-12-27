@@ -39,6 +39,7 @@
 #include "unitplugins.h"
 #include "bosoncanvas.h"
 #include "borendertarget.h"
+#include "bosonprofiling.h"
 #include <bogl.h>
 
 #include <klocale.h>
@@ -62,11 +63,298 @@ static void cutLineZ0(BoVector3Float& p1_, BoVector3Float& p2_);
 static void drawLine(const BoVector3Float& p1_, const BoVector3Float& p2_, int w, int h);
 static void keepLinesInRect(int w, int h, BoVector3Float& p1, BoVector3Float& p2, bool* skip);
 
+
+
+#define USE_EXPERIMENTAL_QUADTREE_THINGY
+#ifdef USE_EXPERIMENTAL_QUADTREE_THINGY
+#include "groundrenderer/boquadtreenode.h"
+
+class BosonMiniMapQuadtreeNode : public BoQuadTreeNode
+{
+public:
+	// TODO: use BoRect<int> instead???
+	class IntRect
+	{
+	public:
+		IntRect(int _l, int _t, int _r, int _b) { l = _l; t = _t; r = _r; b = _b; }
+		IntRect() {}
+
+		bool operator==(const IntRect& rect) { return l == rect.l && t == rect.t && r == rect.r && b == rect.b; };
+
+		int l, t, r, b;
+	};
+
+
+	BosonMiniMapQuadtreeNode(int l, int t, int r, int b, int depth)
+			: BoQuadTreeNode(l, t, r, b, depth)
+	{
+		size = QMAX(r - l, b - t) + 1;
+	}
+
+	static BosonMiniMapQuadtreeNode* createTree(unsigned int width, unsigned int height);
+	virtual BoQuadTreeNode* createNode(int l, int t, int r, int b, int depth) const;
+
+	void addUnit(Unit* u);
+	void removeUnit(Unit* u);
+	void unitMoved(Unit* u, bofixed oldX, bofixed oldY);
+
+	BoItemList* approximateUnitsInRect(const BoRectFixed& rect) const;
+	void approximateUnitsInRect(const IntRect& rect, BoItemList* result) const;
+
+protected:
+	class UnitMovementInfo
+	{
+	public:
+		// Old bounding rect of the unit
+		IntRect oldRect;
+		// New bounding rect of the unit
+		IntRect newRect;
+	};
+
+	void addUnit(Unit* u, const IntRect& rect);
+	void removeUnit(Unit* u, const IntRect& rect);
+	void unitMoved(Unit* u, const UnitMovementInfo& moveinfo);
+
+	void addUnitToSelf(Unit* u);
+	void removeUnitFromSelf(Unit* u);
+
+
+	// TODO: move to parent class
+	inline bool contains(const BoRectFixed& r) const
+	{
+		return BoQuadTreeNode::contains((int)r.left(), (int)r.top(), (int)r.right(), (int)r.bottom());
+	}
+	inline bool intersects(const BoRectFixed& r) const
+	{
+		return BoQuadTreeNode::intersects((int)r.left(), (int)r.top(), (int)r.right(), (int)r.bottom());
+	}
+
+	inline bool contains(const IntRect& r) const
+	{
+		return BoQuadTreeNode::contains(r.l, r.t, r.r, r.b);
+	}
+	inline bool intersects(const IntRect& r) const
+	{
+		return BoQuadTreeNode::intersects(r.l, r.t, r.r, r.b);
+	}
+
+private:
+	int size;
+	static const int minLeafSize = 4;
+	// TODO: sort those by pointer address so that they can be binary searched
+	QValueVector<Unit*> flyingUnits;
+	QValueVector<Unit*> groundUnits;
+};
+
+
+BosonMiniMapQuadtreeNode* BosonMiniMapQuadtreeNode::createTree(unsigned int w, unsigned int h)
+{
+ if (w < 1) {
+	boError() << k_funcinfo << "invalid width: " << w << endl;
+	w = 1;
+ }
+ if (h < 1) {
+	boError() << k_funcinfo << "invalid height: " << h << endl;
+	h = 1;
+ }
+ BosonMiniMapQuadtreeNode* root = new BosonMiniMapQuadtreeNode(0, 0, w - 1, h - 1, 0);
+ root->createChilds(w, h);
+ return root;
+}
+
+BoQuadTreeNode* BosonMiniMapQuadtreeNode::createNode(int l, int t, int r, int b, int depth) const
+{
+ return new BosonMiniMapQuadtreeNode(l, t, r, b, depth);
+}
+
+BoItemList* BosonMiniMapQuadtreeNode::approximateUnitsInRect(const BoRectFixed& rect) const
+{
+ BoItemList* items = new BoItemList;
+ // TODO: round right and bottom upwards!
+ IntRect irect;
+ irect.l = (int)rect.left();
+ irect.t = (int)rect.top();
+ irect.r = (int)rect.right();
+ irect.b = (int)rect.bottom();
+ approximateUnitsInRect(irect, items);
+ return items;
+}
+
+void BosonMiniMapQuadtreeNode::approximateUnitsInRect(const IntRect& rect, BoItemList* result) const
+{
+ if (contains(rect) || size <= minLeafSize ||
+		((rect.l - rect.r >= size/2) && (rect.t - rect.b >= size/2))) {
+	for(unsigned int i = 0; i < groundUnits.count(); i++) {
+		result->append(groundUnits[i]);
+	}
+	for(unsigned int i = 0; i < flyingUnits.count(); i++) {
+		result->append(flyingUnits[i]);
+	}
+ } else {
+	// Query children
+	if (((BosonMiniMapQuadtreeNode*)topLeftNode())->intersects(rect)) {
+		((BosonMiniMapQuadtreeNode*)topLeftNode())->approximateUnitsInRect(rect, result);
+	}
+	if (((BosonMiniMapQuadtreeNode*)topRightNode())->intersects(rect)) {
+		((BosonMiniMapQuadtreeNode*)topRightNode())->approximateUnitsInRect(rect, result);
+	}
+	if (((BosonMiniMapQuadtreeNode*)bottomLeftNode())->intersects(rect)) {
+		((BosonMiniMapQuadtreeNode*)bottomLeftNode())->approximateUnitsInRect(rect, result);
+	}
+	if (((BosonMiniMapQuadtreeNode*)bottomRightNode())->intersects(rect)) {
+		((BosonMiniMapQuadtreeNode*)bottomRightNode())->approximateUnitsInRect(rect, result);
+	}
+ }
+}
+
+void BosonMiniMapQuadtreeNode::addUnit(Unit* u)
+{
+ //boDebug() << "QUADTREE: " << k_funcinfo << u->id() << endl;
+ addUnit(u, IntRect((int)u->leftEdge(), (int)u->topEdge(), (int)u->rightEdge(), (int)u->bottomEdge()));
+}
+
+void BosonMiniMapQuadtreeNode::addUnit(Unit* u, const IntRect& rect)
+{
+ // Add to self
+ addUnitToSelf(u);
+
+ if (size > minLeafSize) {
+	// Add to children
+	if (((BosonMiniMapQuadtreeNode*)topLeftNode())->intersects(rect)) {
+		((BosonMiniMapQuadtreeNode*)topLeftNode())->addUnit(u, rect);
+	}
+	if (((BosonMiniMapQuadtreeNode*)topRightNode())->intersects(rect)) {
+		((BosonMiniMapQuadtreeNode*)topRightNode())->addUnit(u, rect);
+	}
+	if (((BosonMiniMapQuadtreeNode*)bottomLeftNode())->intersects(rect)) {
+		((BosonMiniMapQuadtreeNode*)bottomLeftNode())->addUnit(u, rect);
+	}
+	if (((BosonMiniMapQuadtreeNode*)bottomRightNode())->intersects(rect)) {
+		((BosonMiniMapQuadtreeNode*)bottomRightNode())->addUnit(u, rect);
+	}
+ }
+}
+
+void BosonMiniMapQuadtreeNode::addUnitToSelf(Unit* u)
+{
+ // Add to self
+ if (u->isFlying()) {
+	//boDebug() << "QUADTREE: " << k_funcinfo << "size; " << size << "; adding flying unit " << u->id() << endl;
+	flyingUnits.append(u);
+ } else {
+	//boDebug() << "QUADTREE: " << k_funcinfo << "size; " << size << "; adding ground unit " << u->id() << endl;
+	groundUnits.append(u);
+ }
+ //boDebug() << "QUADTREE: " << k_funcinfo << "s: " << size << "; loc: (" << left() << "; " << top() <<
+//		"); I now have " << flyingUnits.count() << " flying and " << groundUnits.count() << " ground units" << endl;
+}
+
+void BosonMiniMapQuadtreeNode::removeUnit(Unit* u)
+{
+ //boDebug() << "QUADTREE: " << k_funcinfo << u->id() << endl;
+ removeUnit(u, IntRect((int)u->leftEdge(), (int)u->topEdge(), (int)u->rightEdge(), (int)u->bottomEdge()));
+}
+
+void BosonMiniMapQuadtreeNode::removeUnit(Unit* u, const IntRect& rect)
+{
+ // Remove from self
+ removeUnitFromSelf(u);
+
+ if (size > minLeafSize) {
+	// Remove from children
+	if (((BosonMiniMapQuadtreeNode*)topLeftNode())->intersects(rect)) {
+		((BosonMiniMapQuadtreeNode*)topLeftNode())->removeUnit(u, rect);
+	}
+	if (((BosonMiniMapQuadtreeNode*)topRightNode())->intersects(rect)) {
+		((BosonMiniMapQuadtreeNode*)topRightNode())->removeUnit(u, rect);
+	}
+	if (((BosonMiniMapQuadtreeNode*)bottomLeftNode())->intersects(rect)) {
+		((BosonMiniMapQuadtreeNode*)bottomLeftNode())->removeUnit(u, rect);
+	}
+	if (((BosonMiniMapQuadtreeNode*)bottomRightNode())->intersects(rect)) {
+		((BosonMiniMapQuadtreeNode*)bottomRightNode())->removeUnit(u, rect);
+	}
+ }
+}
+
+void BosonMiniMapQuadtreeNode::removeUnitFromSelf(Unit* u)
+{
+ //boDebug() << "QUADTREE: " << k_funcinfo << "size: " << size << endl;
+ // Remove from self
+ QValueVector<Unit*>::Iterator it;
+ QValueVector<Unit*>* container;
+ if (u->isFlying()) {
+	container = &flyingUnits;
+ } else {
+	container = &groundUnits;
+ }
+ bool removed = false;
+ for (it = container->begin(); it != container->end(); ++it) {
+	if (*it == u) {
+		//boDebug() << "QUADTREE: " << k_funcinfo << "removing " << u->id() << endl;
+		container->erase(it);
+		--it;
+		removed = true;
+	}
+ }
+ if(!removed) {
+	boError() << "QUADTREE: " << k_funcinfo << u->id() << " was not removed!" << endl;
+ }
+}
+
+void BosonMiniMapQuadtreeNode::unitMoved(Unit* u, bofixed oldX, bofixed oldY)
+{
+ bofixed deltax = u->x() - oldX;
+ bofixed deltay = u->y() - oldY;
+
+ UnitMovementInfo moveinfo;
+ moveinfo.newRect.l = (int)u->leftEdge();
+ moveinfo.newRect.t = (int)u->topEdge();
+ moveinfo.newRect.r = (int)u->rightEdge();
+ moveinfo.newRect.b = (int)u->bottomEdge();
+ moveinfo.oldRect.l = (int)(u->leftEdge() - deltax);
+ moveinfo.oldRect.t = (int)(u->topEdge() - deltay);
+ moveinfo.oldRect.r = (int)(u->rightEdge() - deltax);
+ moveinfo.oldRect.b = (int)(u->bottomEdge() - deltay);
+
+ if (moveinfo.newRect == moveinfo.oldRect) {
+	return;
+ }
+
+
+ unitMoved(u, moveinfo);
+}
+
+void BosonMiniMapQuadtreeNode::unitMoved(Unit* u, const UnitMovementInfo& moveinfo)
+{
+ bool didContain = intersects(moveinfo.oldRect);
+ bool nowContains = intersects(moveinfo.newRect);
+
+ if (didContain && !nowContains) {
+	// Unit is removed from this node as well as from it's child nodes
+	removeUnit(u, moveinfo.oldRect);
+ } else if (!didContain && nowContains) {
+	// Unit is added to this node as well as to it's child nodes
+	addUnit(u, moveinfo.newRect);
+ } else if(nowContains && size > minLeafSize) {
+	// Unit moved within this node. Notify children
+	((BosonMiniMapQuadtreeNode*)topLeftNode())->unitMoved(u, moveinfo);
+	((BosonMiniMapQuadtreeNode*)topRightNode())->unitMoved(u, moveinfo);
+	((BosonMiniMapQuadtreeNode*)bottomLeftNode())->unitMoved(u, moveinfo);
+	((BosonMiniMapQuadtreeNode*)bottomRightNode())->unitMoved(u, moveinfo);
+ }
+}
+
+#endif
+
+
+
 class BosonGLMiniMapPrivate
 {
 public:
 	BosonGLMiniMapPrivate()
 	{
+		mUnitTree = 0;
 	}
 	QString mImageTheme;
 
@@ -81,6 +369,7 @@ public:
 	QImage mZoomDefault;
 
 	QPtrList<Unit> mRadars;
+	BosonMiniMapQuadtreeNode* mUnitTree;
 };
 
 BosonGLMiniMap::BosonGLMiniMap(QObject* parent, const char* name) : QObject(parent, name ? name : "glminimap")
@@ -156,7 +445,12 @@ void BosonGLMiniMap::slotUnitMoved(Unit* unit, bofixed oldX, bofixed oldY)
  if (!hasMap()) {
 	return;
  }
- BO_CHECK_NULL_RET(unit);
+#ifdef USE_EXPERIMENTAL_QUADTREE_THINGY
+ BosonProfiler p("d->mUnitTree->unitMoved()");
+ if (d->mUnitTree) {
+	d->mUnitTree->unitMoved(unit, oldX, oldY);
+ }
+#endif
 }
 
 void BosonGLMiniMap::slotUnitRemoved(Unit* unit)
@@ -165,6 +459,11 @@ void BosonGLMiniMap::slotUnitRemoved(Unit* unit)
 	return;
  }
  BO_CHECK_NULL_RET(unit);
+#ifdef USE_EXPERIMENTAL_QUADTREE_THINGY
+ if (d->mUnitTree) {
+	d->mUnitTree->removeUnit(unit);
+ }
+#endif
  d->mRadars.remove(unit);
 }
 
@@ -180,6 +479,11 @@ void BosonGLMiniMap::slotItemAdded(BosonItem* item)
 	return;
  }
  Unit* u = (Unit*)item;
+#ifdef USE_EXPERIMENTAL_QUADTREE_THINGY
+ if (d->mUnitTree) {
+	d->mUnitTree->addUnit(u);
+ }
+#endif
  if (u->owner() != localPlayerIO()->player()) {
 	return;
  }
@@ -201,6 +505,11 @@ void BosonGLMiniMap::slotFacilityConstructed(Unit* fac)
 QPtrList<Unit>* BosonGLMiniMap::radarList() const
 {
  return &d->mRadars;
+}
+
+BosonMiniMapQuadtreeNode* BosonGLMiniMap::unitTree() const
+{
+ return d->mUnitTree;
 }
 
 void BosonGLMiniMap::slotUpdateTerrainAtCorner(int x, int y)
@@ -415,6 +724,12 @@ void BosonGLMiniMap::createMap(BosonCanvas* c, const BoGLMatrices* gameGLMatrice
  BO_CHECK_NULL_RET(c);
  boDebug() << k_funcinfo << endl;
  mCanvas = c;
+
+#ifdef USE_EXPERIMENTAL_QUADTREE_THINGY
+ delete d->mUnitTree;
+ d->mUnitTree = BosonMiniMapQuadtreeNode::createTree(c->mapWidth(), c->mapHeight());
+#endif
+
  delete mRenderer;
  mRenderer = new BosonGLMiniMapRenderer(gameGLMatrices);
  mRenderer->createMap(c->mapWidth(), c->mapHeight(), c->map()->groundTheme());
@@ -473,7 +788,7 @@ void BosonGLMiniMap::renderMiniMap()
  mRenderer->setCanvas(mCanvas);
  mRenderer->setLocalPlayerIO(localPlayerIO());
 
- mRenderer->render(radarList());
+ mRenderer->render(radarList(), unitTree());
 }
 
 void BosonGLMiniMap::slotAdvance(unsigned int advanceCallsCount)
@@ -821,14 +1136,14 @@ void BosonGLMiniMapRenderer::advance(unsigned int advanceCallsCount)
  d->mAdvanceCallsSinceLastUpdate++;
 }
 
-void BosonGLMiniMapRenderer::render(QPtrList<Unit>* radars)
+void BosonGLMiniMapRenderer::render(QPtrList<Unit>* radars, BosonMiniMapQuadtreeNode* unitTree)
 {
  glColor3ub(255, 255, 255);
  d->mMiniMapChangesSinceRendering = 0;
  renderGimmicks();
  switch (mType) {
 	case MiniMap:
-		renderMiniMap(radars);
+		renderMiniMap(radars, unitTree);
 		break;
 	case Logo:
 		renderLogo();
@@ -868,7 +1183,7 @@ void BosonGLMiniMapRenderer::renderLogo()
  boTextureManager->invalidateCache();
 }
 
-void BosonGLMiniMapRenderer::renderMiniMap(QPtrList<Unit>* radars)
+void BosonGLMiniMapRenderer::renderMiniMap(QPtrList<Unit>* radars, BosonMiniMapQuadtreeNode* unitTree)
 {
  BO_CHECK_NULL_RET(d->mTerrainTexture);
  BO_CHECK_NULL_RET(d->mWaterTexture);
@@ -883,7 +1198,7 @@ void BosonGLMiniMapRenderer::renderMiniMap(QPtrList<Unit>* radars)
 
  if (d->mAdvanceCallsSinceLastUpdate >= 40) {
 	d->mUnitTarget->enable();
-	updateRadarTexture(radars);
+	updateRadarTexture(radars, unitTree);
 	d->mUnitTarget->disable();
  }
 
@@ -933,7 +1248,7 @@ void BosonGLMiniMapRenderer::renderMiniMap(QPtrList<Unit>* radars)
  glPopMatrix();
 }
 
-void BosonGLMiniMapRenderer::updateRadarTexture(QPtrList<Unit>* radarlist)
+void BosonGLMiniMapRenderer::updateRadarTexture(QPtrList<Unit>* radarlist, BosonMiniMapQuadtreeNode* unitTree)
 {
  d->mAdvanceCallsSinceLastUpdate = 0;
  // Init rendering
@@ -981,7 +1296,15 @@ void BosonGLMiniMapRenderer::updateRadarTexture(QPtrList<Unit>* radarlist)
 		(int)QMIN(mMapWidth, maxx + 1),  (int)QMIN(mMapHeight, maxy + 1));
 
  // Get a list of all items in the affected area
+#ifdef USE_EXPERIMENTAL_QUADTREE_THINGY
+ BoItemList* items;
+ {
+ BosonProfiler p("unitTree->approximateUnitsInRect(area);");
+ items = unitTree->approximateUnitsInRect(area);
+ }
+#else
  BoItemList* items = mCanvas->collisions()->collisionsAtCells(area, 0, false);
+#endif
 
 
  // For every item, see if it's visible by the radar and render a dot if it is.

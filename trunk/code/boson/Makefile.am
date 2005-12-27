@@ -184,6 +184,7 @@ boson_SOURCES = \
 		boconditionwidget.cpp \
 		bowaterrenderer.cpp \
 		selectbox.cpp \
+		groundrenderer/boquadtreenode.cpp \
 		main.cpp
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
