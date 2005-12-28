@@ -141,6 +141,11 @@ bool Model::checkLoadedModel() const
         boError(100) << k_funcinfo << "NULL matrix " << j << " in frame " << i << endl;
         return false;
       }
+      if(f->matrix(j)->hasNaN())
+      {
+        boError(100) << k_funcinfo << "matrix " << j << " in frame " << i << " is invalid: has NaN entry" << endl;
+        return false;
+      }
     }
   }
   return true;
