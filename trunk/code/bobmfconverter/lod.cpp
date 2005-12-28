@@ -147,6 +147,11 @@ void LOD::removeReferencesToMesh(Mesh* mesh)
     BO_CHECK_NULL_RET(f);
     f->removeMesh(mesh);
   }
+
+  // AB: atm we require that a mesh is removed from this LOD object _before_
+  //     removeReferencesToMesh() is called.
+  //     -> we complain about this, if it was forgotten. we do NOT remove the
+  //        mesh from mMeshes on our own!
   if (qFind(mMeshes.begin(), mMeshes.end(), mesh) != mMeshes.end())
   {
     boError() << k_funcinfo << "mMeshes still contains mesh " << mesh << ". cannot remove this reference" << endl;
