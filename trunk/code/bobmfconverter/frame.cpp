@@ -47,22 +47,22 @@ Frame::Frame(Frame* f)
 
 Frame::~Frame()
 {
-  delete mMeshes;
+  delete[] mMeshes;
   for(unsigned int i = 0; i < mNodeCount; i++)
   {
     delete mMatrices[i];
   }
-  delete mMatrices;
+  delete[] mMatrices;
 }
 
 void Frame::allocateNodes(unsigned int i)
 {
-  delete mMeshes;
+  delete[] mMeshes;
   for(unsigned int j = 0; j < mNodeCount; j++)
   {
     delete mMatrices[j];
   }
-  delete mMatrices;
+  delete[] mMatrices;
 
   mMeshes = new Mesh*[i];
   mMatrices = new BoMatrix*[i];
@@ -130,13 +130,19 @@ void Frame::removeMesh(Mesh* mesh)
   {
     boWarning() << k_funcinfo << "removing all remaining nodes" << endl;
     delete[] mMeshes;
+    for(unsigned int i = 0; i < mNodeCount; i++)
+    {
+      delete mMatrices[i];
+    }
     delete[] mMatrices;
+    mMatrices = 0;
+    mMeshes = 0;
     return;
   }
 
   Mesh** meshes = new Mesh*[newNodeCount];
   BoMatrix** matrices = new BoMatrix*[newNodeCount];
-  int index = 0;
+  unsigned int index = 0;
   for(unsigned int i = 0; i < mNodeCount; i++)
   {
     if(mMeshes[i] == mesh)
@@ -144,11 +150,22 @@ void Frame::removeMesh(Mesh* mesh)
       mMeshes[i] = 0;
       delete mMatrices[i];
       mMatrices[i] = 0;
-      continue;
     }
-    meshes[index] = mMeshes[i];
-    matrices[index] = mMatrices[i];
-    index++;
+    else
+    {
+      meshes[index] = mMeshes[i];
+      matrices[index] = mMatrices[i];
+      index++;
+    }
+  }
+  if(index != newNodeCount)
+  {
+    boError() << k_funcinfo << "index (" << index << ") != newNodeCount (" << newNodeCount << ")" << endl;
+    for (unsigned int i = index; i < newNodeCount; i++)
+    {
+      meshes[i] = 0;
+      matrices[i] = 0;
+    }
   }
   mNodeCount = newNodeCount;
   delete[] mMeshes;
