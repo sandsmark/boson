@@ -1057,6 +1057,15 @@ class BoMatrix
       }
       return true;
     }
+    bool hasNaN() const
+    {
+      for (int i = 0; i < 16; i++) {
+        if (isnan(mData[i])) {
+          return true;
+        }
+      }
+      return false;
+    }
 
     /**
      * Translate (i.e. move) the matrix by x,y,z.
