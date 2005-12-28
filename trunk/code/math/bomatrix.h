@@ -155,6 +155,20 @@ class BoMatrix
     }
 
     /**
+     * @return TRUE if one of the matrix elements is NaN (not a number) and
+     * therefore the matrix is invalid. Otherwise FALSE.
+     **/
+    bool hasNaN() const
+    {
+      for (int i = 0; i < 16; i++) {
+        if (isnan(mData[i])) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    /**
      * Translate (i.e. move) the matrix by x,y,z.
      **/
     void translate(float x, float y, float z);
