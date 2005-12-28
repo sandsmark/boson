@@ -33,7 +33,7 @@ Transformer::Transformer() : Processor()
 {
   mModelSize = 1.0f;
   mCenterModel = false;
-  setName("TransformerOptimizer");
+  setName("Transformer");
 }
 
 Transformer::~Transformer()
@@ -53,6 +53,7 @@ bool Transformer::process()
   {
     return false;
   }
+
   // Pass 2: apply transformations (from frames) to all meshes
   if(!applyTransformations())
   {
@@ -103,15 +104,21 @@ bool Transformer::applyTransformations(LOD* lod, Mesh* mesh)
     {
       if(f->mesh(j) == mesh)
       {
-        if(!f->matrix(j))
+        BoMatrix* m = f->matrix(j);
+        if(!m)
         {
           boError() << k_funcinfo << "NULL matrix at node " << j << " in frame " << i << " for mesh " << mesh->name() << endl;
           return false;
         }
-        matrices.append(f->matrix(j));
+        if(m->hasNaN())
+        {
+          boError() << k_funcinfo << "matrix at node " << j << " in frame " << i << " for mesh " << mesh->name() << " has NaN entry!" << endl;
+          return false;
+        }
+        matrices.append(m);
         if(i == baseFrame())
         {
-          baseframematrices.append(f->matrix(j));
+          baseframematrices.append(m);
           baseframenodes.append(j);
         }
       }
@@ -174,6 +181,12 @@ bool Transformer::applyTransformations(LOD* lod, Mesh* mesh)
   {
     matrix = baseframematrices.first();
     mesh->setBaseNode(baseframenodes.first());
+  }
+
+  if(!matrix)
+  {
+    boError() << k_funcinfo << "NULL matrix" << endl;
+    return false;
   }
 
   if(matrix->isIdentity())
@@ -252,7 +265,13 @@ float Transformer::transformedBBoxVolume(const BoVector3Float& origmin, const Bo
     max.setZ(QMAX(max.z(), v.z()));
   }
 
-  return fabsf((max.x() - min.x()) * (max.y() - min.y()) * (max.z() - min.z()));
+  float ret = fabsf((max.x() - min.x()) * (max.y() - min.y()) * (max.z() - min.z()));
+  if(isnan(ret))
+  {
+    boError() << k_funcinfo << "calculated volume is not a number" << endl;
+    ret = 0.0f;
+  }
+  return ret;
 }
 
 #if 0
@@ -361,6 +380,16 @@ bool Transformer::resizeModel()
     // Model's height is bigger than width
     scale = modelSize() / (max.y() - min.y());
   }
+  if(isnan(scale))
+  {
+    boError() << k_funcinfo << "value of scale is not a number" << endl;
+    return false;
+  }
+  if(!isfinite(scale))
+  {
+    boError() << k_funcinfo << "infinite value for scale" << endl;
+    return false;
+  }
   BoVector3Float translate;
   if(centerModel())
   {
@@ -384,6 +413,11 @@ bool Transformer::resizeModel()
       BoMatrix* matrix = f2->matrix(i);
       BoMatrix tmp(transformmatrix);
       tmp.multiply(matrix);
+      if(tmp.hasNaN())
+      {
+        boError() << k_funcinfo << "calculated matrix has NaN entries" << endl;
+        return false;
+      }
       matrix->loadMatrix(tmp);
     }
   }
