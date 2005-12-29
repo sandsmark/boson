@@ -1073,7 +1073,10 @@ void KGame::setupGameContinue(QDataStream& stream, Q_UINT32 sender)
   QValueList<int> inactivateIds;
 
   KGamePlayerList newPlayerList;
+
+#warning why do we do this?
   newPlayerList.setAutoDelete(true);
+
   for (i=0;i<cnt;i++)
   {
     player=loadPlayer(stream,true);
@@ -1089,6 +1092,7 @@ void KGame::setupGameContinue(QDataStream& stream, Q_UINT32 sender)
     }
   }
 
+#warning this call is useless, as newPlayerList players is are deleted! (auto deletion)
   newPlayersJoin(playerList(),&newPlayerList,inactivateIds);
 
 
