@@ -13,13 +13,15 @@ libbosongameviewplugin_la_SOURCES = \
 		bosongameviewpluginfactory.cpp \
 		bosongameviewplugindefault.cpp \
 		boselectiondebugwidget.cpp \
-		editorrandommapwidget.cpp
+		editorrandommapwidget.cpp \
+		bodebugconfigswitches.cpp
 
 libbosongameviewext_la_SOURCES = \
 		bosongameviewpluginfactory.cpp \
 		bosongameviewplugindefault.cpp \
 		boselectiondebugwidget.cpp \
-		editorrandommapwidget.cpp
+		editorrandommapwidget.cpp \
+		bodebugconfigswitches.cpp
 
 pluginsdir = $(kde_datadir)/boson/gameviewplugins
 plugins_DATA =
