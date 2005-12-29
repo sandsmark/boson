@@ -1,5 +1,7 @@
 Import('env')
 
+env.subdirs('loaders/lib3ds_test')
+
 libgfx_sources = """
 	libgfx/geom3d.cxx
 	libgfx/geom4d.cxx
