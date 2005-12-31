@@ -51,10 +51,6 @@ static QString resolveSymlinks( const QString& path, int depth = 0 );
 BoApplication::BoApplication(const QCString& argv0, bool allowStyles, bool enableGUI)
 	: KApplication(allowStyles, enableGUI)
 {
- if (!boglResolveGLSymbols()) {
-//	boError() << k_funcinfo << "GL/GLU/GLX symbols could not be resolved" << endl;
-	qDebug("ERROR: GL/GLU/GLX symbols could not be resolved");
- }
  // this is for broken installations. people tend to install to /usr/local or
  // similar (which is 100% correct), but don't set $KDEDIRS (note that S)
  // correct. This is (I guess) a distribution bug in most (all?) distributions
@@ -83,6 +79,11 @@ BoApplication::BoApplication(const QCString& argv0, bool allowStyles, bool enabl
  qDebug("Using prefix: %s", applicationDirPath.latin1()); // do NOT use boDebug() here. we need to have the prefix before using that
  KGlobal::dirs()->addPrefix(applicationDirPath);
 #endif
+
+ if (!boglResolveGLSymbols()) {
+//	boError() << k_funcinfo << "GL/GLU/GLX symbols could not be resolved" << endl;
+	qDebug("ERROR: GL/GLU/GLX symbols could not be resolved");
+ }
 
  BoGlobal::initStatic();
  BoGlobal::boGlobal()->initGlobalObjects();
