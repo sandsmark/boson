@@ -11,7 +11,7 @@ def exists(env):
 
 def generate(env):
 	def findPythonLib(env, major, minor):
-		libname = 'libpython%d.%d' % (major, minor)
+		libname = 'python%d.%d' % (major, minor)
 		conf = env.Configure()
 		found = conf.CheckLib(libname)
 		env = conf.Finish()
