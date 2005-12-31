@@ -57,6 +57,7 @@ boson_modules += ' boson_boui'
 boson_modules += ' boson_plugins'
 boson_modules += ' boson_bomemory'
 boson_modules += ' boson'
+boson_modules += ' boson_static_libs'
 
 ## Import the main configuration tool
 from generic import configure
