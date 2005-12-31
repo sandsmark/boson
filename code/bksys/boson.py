@@ -10,6 +10,29 @@ def generate(env):
 	import generic
 	import SCons
 
+	class BoDummyLib:
+		def __init__(self, lib, static):
+			self.lib = lib
+			self.automatic = False
+
+			# only used when automatic == False
+			self.static = static
+
+	def createDummyLibs(self, libs, force_static = False, force_shared = False):
+		if (force_static and force_shared):
+			print "Can have either force_shared or force_static, not both"
+			force_static = False
+		libs = self.make_list(libs)
+		list = []
+		for lib in libs:
+			l = BoDummyLib(lib, force_static)
+			if force_static or force_shared:
+				l.automatic = False
+			else:
+				l.automatic = True
+			list.append(l)
+		return list
+
 	class BoLib:
 		def __init__(self, lib):
 			self.lib = lib
@@ -110,7 +133,6 @@ def generate(env):
 			self._libflags = ''
 			linker_flag = ''
 			for lib in self.bo_libs:
-				print lib.linker_flag + ' ' + lib.libname
 				if lib.linker_flag != linker_flag:
 					self._libflags += ' -Wl,' + lib.linker_flag
 					linker_flag = lib.linker_flag
@@ -121,12 +143,24 @@ def generate(env):
 			if linker_flag != '-Bdynamic':
 				self._libflags += ' -Wl,-Bdynamic'
 
+			if not self.env:
+				self.env = self.orenv.Copy()
 			if len(self._libflags)>0:
-				self.orenv.PrependUnique(_LIBFLAGS = self.orenv.make_list(self._libflags))
+				self.env.PrependUnique(_LIBFLAGS = self.orenv.make_list(self._libflags))
 
 			env.kobject.execute(self)
 
-		def boAddLibs(self, libs):
+		def boAddLibObjects(self, libs):
+			for lib in libs:
+				if lib.automatic == True:
+					self.boAddLibs(lib.lib)
+				else:
+					if lib.static == True:
+						self.boAddLibs(lib.lib, True)
+					else:
+						self.boAddLibs(lib.lib, False, True)
+
+		def boAddLibs(self, libs, force_static = False, force_shared = False):
 			list = self.orenv.make_list(libs)
 			if self.orenv['WINDOWS']:
 				lext = ['.la','.dep']
@@ -137,10 +171,10 @@ def generate(env):
 			for lib in list:
 				sal = SCons.Util.splitext(lib)
 				if len(sal) > 1:
-					if (sal[-1] in lext) and (sys.platform == 'darwin'):
+					if not force_shared and (sal[-1] in lext) and (sys.platform == 'darwin'):
 						l = self.fixpath(sal[0]+'.dylib')[0]
 						self.bo_libs.append(BoSharedLib(l, True))
-					elif (sal[1] in lext) and (sys.platform != 'darwin'):
+					elif not force_shared and (sal[1] in lext) and (sys.platform != 'darwin'):
 						# rh: don't know if DEPFILE should be supported on darwin too
 						if self.orenv['DEPFILE']:
 							l = self.fixpath(sal[0]+'.dep')[0]
@@ -148,12 +182,15 @@ def generate(env):
 						elif self.orenv['LIBTOOL']:
 							l = self.fixpath(sal[0]+'.la')[0]
 							self.bo_libs.append(BoSharedLib(l, True))
-					elif sal[1] in sext:
+					elif not force_shared and sal[1] in sext:
 						l = self.fixpath(sal[0]+'.a')[0]
 						self.bo_libs.append(BoStaticLib(l, True))
 					else:
 						l = lib
-						self.bo_libs.append(BoSharedLib(l, False))
+						if force_static:
+							self.bo_libs.append(BoStaticLib(l, False))
+						else:
+							self.bo_libs.append(BoSharedLib(l, False))
 
 
 	import os
@@ -174,4 +211,6 @@ def generate(env):
 
 	SConsEnvironment.installDirectory = installDirectory
 	SConsEnvironment.boobject = boobject
+	SConsEnvironment.BoDummyLib = BoDummyLib
+	SConsEnvironment.createDummyLibs = createDummyLibs
 
