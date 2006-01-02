@@ -10,8 +10,8 @@ else:
 	lib_groundrendererplugin = ' groundrenderer/libbogroundrendererplugin_static.a '
 	lib_gameviewplugin = ' gameview/plugin/libbosongameviewplugin_static.a '
 
-if env['BOSON_DO_STATIC']:
-	env.KDEaddflags_link('-static')
+#if env['BOSON_DO_STATIC']:
+#	env.KDEaddflags_link('-static')
 
 #env.PrependUnique(CPPPATH = ['../kgame'])
 #env.PrependUnique(CPPPATH = ['../ufo'])
@@ -39,16 +39,22 @@ libcommon_libs = """
 	../bogl/libbogl.a
 	../math/libbomath.a
 	./libimageio.a
-	kdeui
-	Xmu
 """
+
+libcommon_libs_objects = []
+libcommon_libs_objects += env.createDummyLibs('../bodebug/libbodebug.a ../bogl/libbogl.a ../math/libbomath.a ./libimageio.a')
+
 
 libgameengine_libs = """
 	./script/libbosonscript.a
 """ + env['LIB_PYTHON'] + """
 	../kgame/libkgame.a
-	kio
 """
+
+libgameengine_libs_objects = []
+libgameengine_libs_objects += env.createDummyLibs('./script/libbosonscript.a')
+libgameengine_libs_objects += env.createDummyLibs(env['LIB_PYTHON'], env['BOSON_DO_STATIC'])
+libgameengine_libs_objects += env.createDummyLibs('../kgame/libkgame.a')
 
 
 
@@ -226,20 +232,52 @@ libboson_libs += ' kio'
 libboson_libs += ' 3ds'
 libboson_libs += ' ' + env['LIB_XRANDR']
 
+libboson_libs_objects = []
+libboson_libs_objects += env.createDummyLibs([lib_meshrendererplugin, './info/libbosoninfo.a', './libgameengine.a', './libcommon.a'])
+libboson_libs_objects += env.createDummyLibs(env['LIB_BOSOUND'], env['BOSON_DO_STATIC'])
+
+if env['BOSON_DO_STATIC']:
+       # OpenAL dependencies
+
+       # FIXME: this is very system dependent !
+
+       libboson_libs_objects += env.createDummyLibs('vorbisfile vorbis ogg asound', env['BOSON_DO_STATIC'])
+#      libboson_libs_objects += env.createDummyLibs('artsc vorbisfile vorbis ogg asound', env['BOSON_DO_STATIC'])
+
+libboson_libs_objects += libgameengine_libs_objects
+libboson_libs_objects += libcommon_libs_objects
+
+libboson_libs_objects += env.createDummyLibs('3ds', env['BOSON_DO_STATIC'])
+libboson_libs_objects += env.createDummyLibs('kio kdesu', env['BOSON_DO_STATIC'])
+libboson_libs_objects += env.createDummyLibs('kdeui', env['BOSON_DO_STATIC'])
+libboson_libs_objects += env.createDummyLibs('kdecore', env['BOSON_DO_STATIC'])
+libboson_libs_objects += env.createDummyLibs(env['LIB_XRANDR'], env['BOSON_DO_STATIC'])
+
+libboson_libs_objects += env['LIB_KDECORE_DEPENDENCIES_OBJECTS']
+
+if env['BOSON_DO_STATIC']:
+       # for python
+       libboson_libs_objects += env.createDummyLibs('util', env['BOSON_DO_STATIC'])
 
 
 
-boson = env.kobject('program')
+
+
+boson = env.boobject('program')
 boson.target = 'boson'
 boson.includes = '../bodebug ../bogl ../boson/boufo'
 boson.includes += ' commandframe/ gameview/ startupwidgets/ ' # for .moc files
 boson.includes += libboson_includes
 boson.libs = ''
-boson.libs += lib_groundrendererplugin
-boson.libs += lib_gameviewplugin
-boson.libs += boufo_lib
-boson.libs += libboson_libs
+boson.boAddLibs(lib_groundrendererplugin)
+boson.boAddLibs(lib_gameviewplugin)
+boson.boAddLibs(boufo_lib)
+
 boson.libpaths += libcommon_libpaths
+if env['BOSON_DO_STATIC']:
+	# FIXME
+	boson.libpaths += ' /home/andi/kde/boson/static/openal/linux/src'
+
 boson.source += libboson_source
 boson.source += """
 	bosonfpscounter.cpp
@@ -276,6 +314,10 @@ boson.source += """
 boson.source += startupwidgets_sources
 boson.source += commandframe_sources
 boson.source += gameview_sources
+
+boson.boAddLibObjects(libboson_libs_objects)
+boson.libs = ''
+
 boson.execute()
 
 
@@ -284,10 +326,11 @@ bosonNoGUI.target = 'boson-no-gui'
 bosonNoGUI.includes = '../bodebug'
 bosonNoGUI.includes += libboson_includes
 bosonNoGUI.libs = ' libgameengine.a'
-bosonNoGUI.libs += libgameengine_libs
 bosonNoGUI.libs += boufo_lib
 bosonNoGUI.libs += ' libcommon.a'
+bosonNoGUI.libs += libgameengine_libs
 bosonNoGUI.libs += libcommon_libs
+bosonNoGUI.libs += ' kio kdecore qt-mt'
 bosonNoGUI.libpaths += libcommon_libpaths
 bosonNoGUI.source += """
 	bosoncomputerio.cpp
@@ -307,11 +350,10 @@ bounit.includes = '../bodebug ../bogl ../boson/boufo'
 bounit.libpaths += libcommon_libpaths
 bounit.libs = """
 	libgameengine.a
-""" + libgameengine_libs + """
 	libcommon.a
-""" + libcommon_libs + """
 	./info/libbosoninfo.a
-"""
+""" + libgameengine_libs + libcommon_libs
+bounit.libs += ' kio kdeui kdecore qt-mt Xmu'
 bounit.libs += ' ' + env['LIB_XRANDR']
 bounit.source = """
 	bounitmain.cpp
@@ -329,7 +371,7 @@ bocursor.includes = '../bodebug ../bogl ../boson/boufo'
 bocursor.libpaths += libcommon_libpaths
 bocursor.libs = './info/libbosoninfo.a'
 bocursor.libs += ' ./libcommon.a' + libcommon_libs
-bocursor.libs += 'kio'
+bocursor.libs += 'kio kdeui qt-mt Xmu'
 bocursor.source = """
 	bosoncursor.cpp
 	botexture.cpp
@@ -348,6 +390,7 @@ borender.libs = libboson_libs + """
 	3ds
 """
 borender.libs += boufo_lib
+borender.libs += " Xmu"
 borender.libpaths += libcommon_libpaths
 borender.source = libboson_source
 borender.source += """
@@ -363,17 +406,20 @@ borender.source += """
 """
 borender.execute()
 
-boinfo = env.kobject('program')
+boinfo = env.boobject('program')
 boinfo.target = 'boinfo'
 boinfo.includes = '../bodebug ../bogl ../boson/boufo'
 boinfo.libpaths += libcommon_libpaths
-boinfo.libs = './info/libbosoninfo.a'
-boinfo.libs += ' libcommon.a ' + libcommon_libs
-boinfo.libs += 'kio'
 boinfo.source = """
 	bosonglwidget.cpp
 	boinfomain.cpp
 """
+boinfo.libs = ''
+boinfo.boAddLibs('./info/libbosoninfo.a')
+boinfo.boAddLibs('libcommon.a')
+boinfo.boAddLibObjects(libcommon_libs_objects)
+boinfo.boAddLibObjects(env.createDummyLibs('kio kdesu kdeui kdecore', env['BOSON_DO_STATIC']))
+boinfo.boAddLibObjects(env['LIB_KDECORE_DEPENDENCIES_OBJECTS'])
 boinfo.execute()
 
 bo3dsdebug = env.kobject('program')
@@ -381,9 +427,9 @@ bo3dsdebug.target = 'bo3dsdebug'
 bo3dsdebug.includes = '../bodebug ../bogl ../boson/boufo'
 bo3dsdebug.libpaths += libcommon_libpaths
 bo3dsdebug.libs = 'libcommon.a ' + libcommon_libs
-bo3dsdebug.libs += 'kio'
-bo3dsdebug.libs += ' 3ds'
 bo3dsdebug.libs += boufo_lib
+bo3dsdebug.libs += ' 3ds'
+bo3dsdebug.libs += ' kio'
 bo3dsdebug.source = """
 	kgamemodeldebug.cpp
 	bomatrixwidget.cpp
@@ -399,6 +445,7 @@ boconditioneditor.libpaths += libcommon_libpaths
 boconditioneditor.libs = './libgameengine.a ' + libgameengine_libs
 boconditioneditor.libs += './libcommon.a ' + libcommon_libs
 boconditioneditor.libs += ' ' + env['LIB_XRANDR']
+boconditioneditor.libs += ' kio kdeui qt-mt Xmu'
 boconditioneditor.source = """
 	boconditionwidget.cpp
 	boconditioneditormain.cpp
@@ -411,7 +458,7 @@ boprofiling.target = 'boprofiling'
 boprofiling.includes = '../bodebug ../bogl ../boson/boufo'
 boprofiling.libpaths += libcommon_libpaths
 boprofiling.libs = 'libcommon.a ' + libcommon_libs
-boprofiling.libs += 'kio'
+boprofiling.libs += ' kio kdeui qt-mt Xmu'
 # TODO: only if present
 boprofiling.libs += ' ' + env['LIB_XRANDR']
 boprofiling.source = """
