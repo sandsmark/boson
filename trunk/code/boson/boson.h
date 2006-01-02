@@ -45,6 +45,7 @@ template<class T> class BoRect;
 typedef BoVector2<bofixed> BoVector2Fixed;
 typedef BoRect<bofixed> BoRectFixed;
 class BosonMessageEditorMove;
+class BosonNetworkTraffic;
 
 #define boGame Boson::boson()
 
@@ -281,6 +282,8 @@ public:
 
 	bool loadCanvasConditions(const QDomElement& root);
 	bool saveCanvasConditions(QDomElement& root) const;
+
+	const BosonNetworkTraffic* networkTraffic() const;
 
 	// for debugging
 	const QPtrList<BoAdvanceMessageTimes>& advanceMessageTimes() const;

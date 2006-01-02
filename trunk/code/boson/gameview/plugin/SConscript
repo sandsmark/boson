@@ -6,6 +6,7 @@ source = """
 	boselectiondebugwidget.cpp
 	editorrandommapwidget.cpp
 	bodebugconfigswitches.cpp
+	bonetworktrafficwidget.cpp
 """
 
 if not env['BOSON_USE_PLUGINS']:
