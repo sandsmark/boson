@@ -55,6 +55,7 @@ libbosongameengine_la_SOURCES = \
 		bosoncanvasstatistics.cpp \
 		bosoncollisions.cpp \
 		bosonnetworksynchronizer.cpp \
+		bosonnetworktraffic.cpp \
 		speciestheme.cpp \
 		player.cpp \
 		playerio.cpp \

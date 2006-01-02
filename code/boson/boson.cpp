@@ -42,6 +42,7 @@
 #include "bomessage.h"
 #include "bosonplayerinputhandler.h"
 #include "bosonnetworksynchronizer.h"
+#include "bosonnetworktraffic.h"
 #include "boeventloop.h"
 #include "bosonpath.h"
 #include "bosonmap.h"
@@ -276,6 +277,7 @@ public:
 
 		mPlayerInputHandler = 0;
 		mNetworkSynchronizer = 0;
+		mNetworkTraffic = 0;
 	}
 	QTimer* mGameTimer;
 
@@ -296,6 +298,7 @@ public:
 
 	BosonPlayerInputHandler* mPlayerInputHandler;
 	BosonNetworkSynchronizer* mNetworkSynchronizer;
+	BosonNetworkTraffic* mNetworkTraffic;
 
 	bool mGameIsOver;
 };
@@ -317,11 +320,13 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
  d->mAdvance = new BoAdvance(this);
  d->mMessageDelayer = new BoMessageDelayer(this);
  d->mNetworkSynchronizer = new BosonNetworkSynchronizer();
+ d->mNetworkTraffic = new BosonNetworkTraffic(this);
 
  d->mGameTimer = new QTimer(this);
 
  d->mNetworkSynchronizer->setGame(this);
  d->mNetworkSynchronizer->setMessageLogger(&d->mMessageLogger);
+ d->mNetworkTraffic->setBoson(this);
 
 
  mGameMode = true;
@@ -1638,6 +1643,11 @@ bool Boson::loadCanvasConditions(const QDomElement& root)
 bool Boson::saveCanvasConditions(QDomElement& root) const
 {
  return canvas()->saveConditions(root);
+}
+
+const BosonNetworkTraffic* Boson::networkTraffic() const
+{
+ return d->mNetworkTraffic;
 }
 
 const QPtrList<BoAdvanceMessageTimes>& Boson::advanceMessageTimes() const

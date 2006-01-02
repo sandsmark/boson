@@ -273,6 +273,8 @@ void BosonMenuInputData::initUfoActions(bool gameMode)
 		KShortcut(), 0, 0, actionCollection(), "debug_profiling_graph");
  (void)new BoUfoConfigToggleAction(i18n("Debug Rendering Config Switches"),
 		KShortcut(), 0, 0, actionCollection(), "debug_rendering_config");
+ (void)new BoUfoConfigToggleAction(i18n("Debug Network Traffic"),
+		KShortcut(), 0, 0, actionCollection(), "debug_network_traffic");
  (void)new BoUfoConfigToggleAction(i18n("glFinish() before profiling GL methods"),
 		KShortcut(), 0, 0, actionCollection(), "debug_glfinish_before_profiling");
  (void)new BoUfoConfigToggleAction(i18n("Debug Groundrenderer"),
