@@ -146,7 +146,8 @@ def generate(env):
 			if not self.env:
 				self.env = self.orenv.Copy()
 			if len(self._libflags)>0:
-				self.env.PrependUnique(_LIBFLAGS = self.orenv.make_list(self._libflags))
+				self.env.Prepend(_LIBFLAGS = self.orenv.make_list(self._libflags))
+
 
 			env.kobject.execute(self)
 
