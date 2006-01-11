@@ -93,11 +93,6 @@ class BosonScript
     virtual bool loadScriptFromString(const QString& string) = 0;
 
     /**
-     * Calls "advance" function in the script.
-     * Should be called every advance call
-     **/
-    virtual bool advance() = 0;
-    /**
      * Calls "init" function in the script.
      * Should be called immeditely after the game is started
      **/
