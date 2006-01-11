@@ -34,6 +34,14 @@
 #include "../bo3dtools.h"
 #include "../boevent.h"
 
+// note: for this to work, getPythonLock() must be called first
+#define CHECK_PYTHON_ERROR if(PyErr_Occurred() != NULL) \
+        { \
+          boError() << k_funcinfo << "(line: " << __LINE__ << ") Python error: " << endl; \
+          PyErr_Print(); \
+          PyErr_Clear(); \
+        }
+
 
 PyThreadState* PythonScript::mThreadState = 0;
 int PythonScript::mScriptInstances = 0;
@@ -194,9 +202,11 @@ PythonScript::~PythonScript()
   boDebug() << k_funcinfo << endl;
 
   getPythonLock();
+  CHECK_PYTHON_ERROR;
 
   Py_EndInterpreter(mInterpreter);
 
+  CHECK_PYTHON_ERROR;
   freePythonLock();
 
   mScriptInstances--;
@@ -266,6 +276,7 @@ bool PythonScript::loadScript(QString file)
 bool PythonScript::loadScriptFromString(const QString& string)
 {
   getPythonLock();
+  CHECK_PYTHON_ERROR;
 
   mMainModule = PyImport_AddModule((char*)"__main__");
   mDict = PyModule_GetDict(mMainModule);
@@ -291,6 +302,7 @@ bool PythonScript::loadScriptFromString(const QString& string)
   mLoadedScripts += string;
   mLoadedScripts += '\n';
 
+  CHECK_PYTHON_ERROR;
   freePythonLock();
   return true;
 }
@@ -311,6 +323,7 @@ void PythonScript::callFunction(const QString& function, PyObject* args)
   }
 
   getPythonLock();
+  CHECK_PYTHON_ERROR;
 
   PyObject* func = PyDict_GetItemString(mDict, (char*)function.ascii());
   if(!func)
@@ -346,6 +359,7 @@ void PythonScript::callFunction(const QString& function, PyObject* args)
     f.close();
   }*/
 
+  CHECK_PYTHON_ERROR;
   freePythonLock();
 }
 
@@ -369,6 +383,7 @@ int PythonScript::callFunctionWithReturn(const QString& function, PyObject* args
   }
 
   getPythonLock();
+  CHECK_PYTHON_ERROR;
 
   PyObject* func = PyDict_GetItemString(mDict, (char*)function.ascii());
   if(!func)
@@ -389,10 +404,27 @@ int PythonScript::callFunctionWithReturn(const QString& function, PyObject* args
   }
   else
   {
-    PyArg_Parse(pValue, (char*)"i", &ret);
+    // AB: FIXME: the return value doesn't seem to work as intended.
+    //     apparently we always get Py_None here.
+    //     -> try this by changing "init()" in ai.py to return a value. we still
+    //        get into the PyNone branch only.
+    if(pValue == Py_None)
+    {
+      ret = 0;
+    }
+    else if(pValue->ob_type == &PyInt_Type)
+    {
+      PyArg_Parse(pValue, (char*)"i", &ret);
+    }
+    else
+    {
+      boDebug() << "unhandled return value type" << endl;
+      ret = 0;
+    }
     Py_DECREF(pValue);
   }
 
+  CHECK_PYTHON_ERROR;
   freePythonLock();
   return ret;
 }
@@ -401,9 +433,11 @@ void PythonScript::execLine(const QString& line)
 {
   boDebug(700) << k_funcinfo << "line: " << line << endl;
   getPythonLock();
+  CHECK_PYTHON_ERROR;
 
   PyRun_SimpleString((char*)line.ascii());
 
+  CHECK_PYTHON_ERROR;
   freePythonLock();
 }
 
@@ -468,6 +502,10 @@ void PythonScript::callEventHandler(const BoEvent* e, const QString& function, c
     return;
   }
 
+  getPythonLock();
+  CHECK_PYTHON_ERROR;
+  freePythonLock();
+
 
   // Create the argument list for the function call
   PyObject* funcargs = PyTuple_New(args.length());
@@ -517,6 +555,7 @@ void PythonScript::callEventHandler(const BoEvent* e, const QString& function, c
   // TODO: make a callFunction() method which takes module as an argument. Then
   //  we could get rid of duplicated code here.
   getPythonLock();
+  CHECK_PYTHON_ERROR;
 
   PyObject* func = PyDict_GetItemString(dict, (char*)funcname.ascii());
   if(!func)
@@ -538,25 +577,23 @@ void PythonScript::callEventHandler(const BoEvent* e, const QString& function, c
     Py_DECREF(pValue);
   }
 
+  CHECK_PYTHON_ERROR;
   freePythonLock();
 
   Py_DECREF(funcargs);
 }
 
-bool PythonScript::advance()
-{
-  return (callFunctionWithReturn("advance") == 0);
-}
-
 bool PythonScript::init()
 {
   getPythonLock();
+  CHECK_PYTHON_ERROR;
   PyObject* args = PyTuple_New(1);
   PyTuple_SetItem(args, 0, PyInt_FromLong(playerId()));
   freePythonLock();
   int ret = callFunctionWithReturn("init", args);
   getPythonLock();
   Py_DECREF(args);
+  CHECK_PYTHON_ERROR;
   freePythonLock();
   return (ret == 0);
 }
@@ -564,12 +601,14 @@ bool PythonScript::init()
 void PythonScript::setPlayerId(int id)
 {
   getPythonLock();
+  CHECK_PYTHON_ERROR;
   PyObject* args = PyTuple_New(1);
   PyTuple_SetItem(args, 0, PyInt_FromLong(id));
   freePythonLock();
   callFunction("setPlayerId", args);
   getPythonLock();
   Py_DECREF(args);
+  CHECK_PYTHON_ERROR;
   freePythonLock();
 }
 
@@ -582,6 +621,7 @@ bool PythonScript::save(QDataStream& stream)
   boDebug() << k_funcinfo << endl;
 
   getPythonLock();
+  CHECK_PYTHON_ERROR;
 
   // Save main module to a PyObject
   g_seenModules.clear();
@@ -613,6 +653,7 @@ bool PythonScript::save(QDataStream& stream)
   //  NULL bytes.
   stream.writeBytes(PyString_AsString(data), PyString_Size(data));
 
+  CHECK_PYTHON_ERROR;
   freePythonLock();
 
   boDebug() << k_funcinfo << "END" << endl;
@@ -775,6 +816,7 @@ bool PythonScript::load(QDataStream& stream)
 
   // Load dict object from data
   getPythonLock();
+  CHECK_PYTHON_ERROR;
   PyObject* maindict = PyMarshal_ReadObjectFromString(data, datalen);
   if(!maindict)
   {
@@ -791,6 +833,7 @@ bool PythonScript::load(QDataStream& stream)
   // Load data
   getPythonLock();
   loadModule(mMainModule, maindict);
+  CHECK_PYTHON_ERROR;
   freePythonLock();
 
   delete[] data;

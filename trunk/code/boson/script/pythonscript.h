@@ -39,7 +39,6 @@ class PythonScript : public BosonScript
     virtual bool loadScript(QString file);
     virtual bool loadScriptFromString(const QString& string);
 
-    virtual bool advance();
     virtual bool init();
     virtual void setPlayerId(int id);
 
