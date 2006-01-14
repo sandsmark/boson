@@ -205,6 +205,15 @@ public:
 	 **/
 	static QString defaultPlayField();
 
+	/**
+	 * @return A list of all playfields (.bpf files) that are found on this
+	 * computer. This does not check whether they got already loaded.
+	 *
+	 * You usually should not use this method, but rather use @ref
+	 * BosonData::playField instead.
+	 **/
+	static QStringList findAvailablePlayFields();
+
 protected:
 	bool loadDescriptionFromFile(const QByteArray& xml);
 	bool loadMapFromFile(const QByteArray& xml, const QByteArray& heightMapImage, const QByteArray& texMap, const QByteArray& waterXML);
@@ -236,12 +245,6 @@ protected:
 	 * while doing so. Otherwise TRUE.
 	 **/
 	bool convertFilesToCurrentFormat(QMap<QString, QByteArray>& destFiles, unsigned int version, bool* handled);
-
-	/**
-	 * @return A list of all playfields (.bpf files) that are found on this
-	 * computer. This does not check whether they got already loaded.
-	 **/
-	static QStringList findAvailablePlayFields();
 
 	static QStringList findAvailableCampaigns();
 	static QStringList findPlayFieldsOfCampaign(const QString& campaign);
