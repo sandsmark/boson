@@ -245,13 +245,7 @@ void Server::processBosonMessage(QDataStream& stream, int msgid)
   }
   else if(msgid == BosonMessageIds::IdStatus)
   {
-    Q_UINT32 count;
-    stream >> count;
-    //boDebug() << "Got status msg with " << count << " events" << endl;
-    for(unsigned int i = 0; i < count; i++)
-    {
-      processStatusEvent(stream);
-    }
+    processStatusMessage(stream);
   }
   else if(msgid == BosonMessageIds::IdNetworkSyncCheckACK)
   {
@@ -273,90 +267,23 @@ void Server::processKGameMessage(QDataStream& stream, int msgid)
 {
 }
 
-void Server::processStatusEvent(QDataStream& stream)
+void Server::processStatusMessage(QDataStream& stream)
 {
-  QCString name;
-  Q_UINT32 id, playerid, unitid;
-  Q_UINT8 haslocation;
-  float locationx, locationy, locationz;
-  QString data1, data2;
-
-  // Load the event
-  stream >> name;
-  stream >> id;
-  stream >> playerid;
-  stream >> unitid;
-  stream >> haslocation;
-  if(haslocation)
+  Q_UINT32 playerCount;
+  stream >> playerCount;
+  for(unsigned int i = 0; i < playerCount; i++)
   {
-    stream >> locationx >> locationy >> locationz;
-  }
-  stream >> data1;
-  stream >> data2;
-
-  if(name == "UnitWithTypeProduced")
-  {
-    Player* owner = (Player*)mGame->findPlayerByUserId(playerid);
+    Q_UINT32 playerId;
+    Q_UINT32 mobiles;
+    Q_UINT32 facilities;
+    stream >> playerId;
+    stream >> mobiles;
+    stream >> facilities;
+    Player* owner = (Player*)mGame->findPlayerByUserId(playerId);
     if(owner)
     {
-      owner->unitProduced();
+      owner->setUnitCount(mobiles + facilities);
     }
-  }
-  else if(name == "UnitWithTypeDestroyed")
-  {
-    Player* owner = (Player*)mGame->findPlayerByUserId(playerid);
-    if(owner)
-    {
-      owner->unitDestroyed();
-    }
-  }
-  else if(name == "AllUnitsDestroyed")
-  {
-  }
-  else if(name == "LostMinimap")
-  {
-  }
-  else if(name == "GainedMinimap")
-  {
-  }
-  else if(name == "AllMobileUnitsDestroyed")
-  {
-  }
-  else if(name == "AllFacilitiesDestroyed")
-  {
-  }
-  else if(name == "AllUnitsWithTypeDestroyed")
-  {
-  }
-  else if(name == "ProducedUnitWithTypePlaced")
-  {
-  }
-  else if(name == "UnitsWithTypeDestroyedCount")
-  {
-  }
-  else if(name == "EnemyUnitsWithTypeDestroyedCount")
-  {
-  }
-  else if(name == "UnitsWithTypeLostCount")
-  {
-  }
-  else if(name == "UnitWithIdUnfogged")
-  {
-  }
-  else if(name == "UnitsWithTypeUnfogged")
-  {
-  }
-  else if(name == "PlayerLost")
-  {
-  }
-  else if(name == "Advance")
-  {
-  }
-  else if(name == "CustomEvent")
-  {
-  }
-  else if(name == "CustomStringEvent")
-  {
   }
 }
 
@@ -374,3 +301,6 @@ void Server::gameWasEnded()
   initNetwork(mPort);
 }
 
+/*
+ * vim: et sw=2
+ */
