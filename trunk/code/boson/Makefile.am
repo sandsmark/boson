@@ -61,6 +61,7 @@ libbosongameengine_la_SOURCES = \
 		playerio.cpp \
 		bosoncomputerio.cpp \
 		bosonpath.cpp \
+		bosongamestatistics.cpp \
 		bosonstatistics.cpp \
 		bogameproperty.cpp \
 		bosonpropertyxml.cpp \

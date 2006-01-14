@@ -30,6 +30,7 @@
 #include "speciestheme.h"
 #include "unitproperties.h"
 #include "bosoncanvas.h"
+#include "bosongamestatistics.h"
 #include "bosonstatistics.h"
 #include "bosonplayfield.h"
 #include "global.h"
@@ -278,6 +279,8 @@ public:
 		mPlayerInputHandler = 0;
 		mNetworkSynchronizer = 0;
 		mNetworkTraffic = 0;
+
+		mGameStatistics = 0;
 	}
 	QTimer* mGameTimer;
 
@@ -300,6 +303,8 @@ public:
 	BosonNetworkSynchronizer* mNetworkSynchronizer;
 	BosonNetworkTraffic* mNetworkTraffic;
 
+	BosonGameStatistics* mGameStatistics;
+
 	bool mGameIsOver;
 };
 
@@ -321,12 +326,14 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
  d->mMessageDelayer = new BoMessageDelayer(this);
  d->mNetworkSynchronizer = new BosonNetworkSynchronizer();
  d->mNetworkTraffic = new BosonNetworkTraffic(this);
+ d->mGameStatistics = new BosonGameStatistics(this);
 
  d->mGameTimer = new QTimer(this);
 
  d->mNetworkSynchronizer->setGame(this);
  d->mNetworkSynchronizer->setMessageLogger(&d->mMessageLogger);
  d->mNetworkTraffic->setBoson(this);
+ d->mGameStatistics->setGame(this);
 
 
  mGameMode = true;
@@ -377,6 +384,7 @@ Boson::~Boson()
  ((BoEventLoop*)qApp->eventLoop())->setAdvanceObject(0);
  KCrash::setEmergencySaveFunction(NULL);
  delete d->mNetworkSynchronizer;
+ delete d->mGameStatistics;
  delete d->mPlayerInputHandler;
  delete d->mMessageDelayer;
  delete d->mAdvance;
@@ -530,6 +538,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	case BosonMessageIds::AdvanceN:
 	{
 		d->mNetworkSynchronizer->receiveAdvanceMessage(d->mCanvas);
+		d->mGameStatistics->receiveAdvanceMessage(d->mCanvas);
 		d->mAdvance->receiveAdvanceMessage(gameSpeed());
 		break;
 	}

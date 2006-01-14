@@ -132,8 +132,6 @@ public:
 
 protected:
 	void deliverEvent(BoEvent* event);
-	void cacheStatusEvent(BoEvent* event);
-	void sendStatusEvents();
 	void declareEvents();
 
 private:
