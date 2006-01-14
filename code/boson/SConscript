@@ -105,7 +105,8 @@ libgameengine.source = """
 	playerio.cpp
 	bosoncomputerio.cpp
 	bosonpath.cpp
-	bosonstatistics.cpp 
+	bosongamestatistics.cpp
+	bosonstatistics.cpp
 	bogameproperty.cpp
 	bosonpropertyxml.cpp
 	bosonplayerinputhandler.cpp

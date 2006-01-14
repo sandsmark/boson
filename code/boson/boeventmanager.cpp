@@ -50,7 +50,6 @@ public:
 	KGameProperty<unsigned long int> mNextEventId;
 
 	QPtrList<BoEvent> mEvents;
-	QPtrList<BoEvent> mStatusEvents;
 	QPtrList<BoEventListener> mEventListeners;
 
 	QValueVector<QCString> mEventNames;
@@ -63,7 +62,6 @@ BoEventManager::BoEventManager(QObject* parent) : QObject(parent)
 {
  d = new BoEventManagerPrivate;
  d->mEvents.setAutoDelete(true);
- d->mStatusEvents.setAutoDelete(true);
 
  d->mProperties = new KGamePropertyHandler(this);
  d->mNextEventId.registerData(IdNextEvent, d->mProperties,
@@ -455,43 +453,7 @@ void BoEventManager::deliverEvent(BoEvent* event)
 	it.current()->receiveEvent(e);
 	++it;
  }
- cacheStatusEvent(event);
-}
-
-void BoEventManager::cacheStatusEvent(BoEvent* event)
-{
- d->mStatusEvents.append(event);
-}
-
-void BoEventManager::sendStatusEvents()
-{
- // Only ADMIN sends status messages (and only in game mode)
- if (!boGame->gameMode() || !boGame->isAdmin()) {
-	return;
- }
-
- QByteArray b;
- QDataStream stream(b, IO_WriteOnly);
- stream << (Q_UINT32)d->mStatusEvents.count();
-
- while (!d->mStatusEvents.isEmpty()) {
-	BoEvent* e = d->mStatusEvents.take(0);
-
-	stream << e->name();
-	stream << (Q_UINT32)e->id();
-	stream << (Q_UINT32)e->playerId();
-	stream << (Q_UINT32)e->unitId();
-	stream << (Q_UINT8)(e->hasLocation() ? 1 : 0);
-	if (e->hasLocation()) {
-		stream << e->location();
-	}
-	stream << e->data1().latin1();
-	stream << e->data2().latin1();
-
-	delete e;
- }
-
- boGame->sendMessage(b, BosonMessageIds::IdStatus);
+ delete event;
 }
 
 void BoEventManager::advance(unsigned int advanceCallsCount)
@@ -501,17 +463,13 @@ void BoEventManager::advance(unsigned int advanceCallsCount)
  while (!d->mEvents.isEmpty()) {
 	BoEvent* e = d->mEvents.take(0);
 	if (e->delayedDelivery() == 0) {
-		deliverEvent(e);
+		deliverEvent(e); // deletes the event
 	} else {
 		e->setDelayedDelivery(e->delayedDelivery() - 1);
 		remainingEvents.append(e);
 	}
  }
  d->mEvents = remainingEvents;
-
- if ((advanceCallsCount % 20) == 0) {
-	sendStatusEvents();
- }
 }
 
 void BoEventManager::addEventListener(BoEventListener* l)
