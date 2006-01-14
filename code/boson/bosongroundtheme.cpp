@@ -140,7 +140,7 @@ bool BosonGroundTheme::createGroundThemeList()
 	boWarning() << k_funcinfo << "groundthemes already loaded" << endl;
 	return true;
  }
- QStringList list = BosonData::availableFiles(QString::fromLatin1("themes/grounds/*/index.ground"));
+ QStringList list = groundThemeFiles();
  if (list.isEmpty()) {
 	boWarning() << k_funcinfo << "Cannot find any ground themes!" << endl;
 	return false;
@@ -164,6 +164,12 @@ bool BosonGroundTheme::createGroundThemeList()
 	return false;
  }
  return true;
+}
+
+QStringList BosonGroundTheme::groundThemeFiles()
+{
+ QStringList list = BosonData::availableFiles(QString::fromLatin1("themes/grounds/*/index.ground"));
+ return list;
 }
 
 
