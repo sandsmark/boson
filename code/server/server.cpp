@@ -245,10 +245,10 @@ void Server::processBosonMessage(QDataStream& stream, int msgid)
   }
   else if(msgid == BosonMessageIds::IdStatus)
   {
-    int count;
+    Q_UINT32 count;
     stream >> count;
     //boDebug() << "Got status msg with " << count << " events" << endl;
-    for(int i = 0; i < count; i++)
+    for(unsigned int i = 0; i < count; i++)
     {
       processStatusEvent(stream);
     }
