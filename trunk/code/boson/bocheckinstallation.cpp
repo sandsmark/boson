@@ -20,6 +20,8 @@
 
 #include "defines.h"
 #include "../bomemory/bodummymemory.h"
+#include "bosonplayfield.h"
+#include "bosongroundtheme.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -41,15 +43,12 @@ QString BoCheckInstallation::checkInstallation()
 	}
  }
 
-#warning TODO: check without preloading data
-#if 0
- if (!BosonGroundTheme::createGroundThemeList()) {
-	return i18n("Unable to load groundThemes. Check your installation!");
+ if (BosonGroundTheme::groundThemeFiles().count() == 0) {
+	return i18n("No ground themes found. Check your installation!");
  }
- if (!BosonPlayField::preLoadAllPlayFields()) {
-	return i18n("Unable to preload playFields. Check your installation!");
+ if (BosonPlayField::findAvailablePlayFields().count() == 0) {
+	return i18n("No playfields found. Check your installation!");
  }
-#endif
 
  if (KGlobal::dirs()->findResource("exe", "bobmfconverter").isNull()) {
 	if (KGlobal::dirs()->findExe("bobmfconverter").isNull()) {
