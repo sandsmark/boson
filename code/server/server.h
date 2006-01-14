@@ -66,6 +66,7 @@ class Server : public KMessageServer
     void processBosonMessage(QDataStream& stream, int msgid);
     void processKGameMessage(QDataStream& stream, int msgid);
 
+    void processStatusMessage(QDataStream& stream);
     void processStatusEvent(QDataStream& stream);
 
     void gameWasStarted();

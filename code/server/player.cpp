@@ -95,13 +95,4 @@ bool Player::save(QDataStream& stream)
   return true;
 }
 
-void Player::unitDestroyed()
-{
-  mUnitCount--;
-}
-
-void Player::unitProduced()
-{
-  mUnitCount++;
-}
 

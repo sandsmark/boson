@@ -52,10 +52,6 @@ class Player : public KPlayer
     unsigned int unitCount() const  { return mUnitCount; }
     void setUnitCount(unsigned int c)  { mUnitCount = c; }
 
-    void unitDestroyed();
-    void unitProduced();
-
-
   public slots:
     void slotNetworkData(int msgid, const QByteArray& msg, Q_UINT32 sender, KPlayer*);
 
