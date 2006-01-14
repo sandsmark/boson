@@ -80,9 +80,11 @@ BoApplication::BoApplication(const QCString& argv0, bool allowStyles, bool enabl
  KGlobal::dirs()->addPrefix(applicationDirPath);
 #endif
 
- if (!boglResolveGLSymbols()) {
-//	boError() << k_funcinfo << "GL/GLU/GLX symbols could not be resolved" << endl;
-	qDebug("ERROR: GL/GLU/GLX symbols could not be resolved");
+ if (enableGUI) {
+	if (!boglResolveGLSymbols()) {
+//		boError() << k_funcinfo << "GL/GLU/GLX symbols could not be resolved" << endl;
+		qDebug("ERROR: GL/GLU/GLX symbols could not be resolved");
+	}
  }
 
  BoGlobal::initStatic();
