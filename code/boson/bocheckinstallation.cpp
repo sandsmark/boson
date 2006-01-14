@@ -32,11 +32,13 @@ QString BoCheckInstallation::checkInstallation()
 {
  boDebug() << k_funcinfo << endl;
 
- // TODO just use KStandarddirs::exist() ?
- QPixmap p1(locate("data", "boson/pics/boson-startup-bg.png"));
- QPixmap p2(locate("data", "boson/pics/boson-startup-logo.png"));
-  if (p1.isNull() || p2.isNull()) {
-	return i18n("You seem not to have Boson data files installed!\n Please install data package of Boson and restart Boson.");
+ QStringList requiredFiles;
+ requiredFiles.append(locate("data", "boson/pics/boson-startup-bg.png"));
+ requiredFiles.append(locate("data", "boson/pics/boson-startup-logo.png"));
+ for (QStringList::iterator it = requiredFiles.begin(); it != requiredFiles.end(); ++it) {
+	if (!KGlobal::dirs()->exists(*it)) {
+		return i18n("You seem not to have Boson data files installed!\n Please install data package of Boson and restart Boson.");
+	}
  }
 
 #warning TODO: check without preloading data
