@@ -25,6 +25,7 @@
 
 class QImage;
 class QPixmap;
+class QStringList;
 
 class BosonMap;
 
@@ -89,6 +90,14 @@ public:
 	 * BosonData.
 	 **/
 	static bool createGroundThemeList();
+
+	/**
+	 * @return A list of index.ground files available on the system. This is
+	 * used to load the ground themes in @ref createGroundThemeList.
+	 * Usually you don't need this method but rather @ref
+	 * BosonData::groundTheme.
+	 **/
+	static QStringList groundThemeFiles();
 
 	/**
 	 * @return The number of groundTypes available in this
