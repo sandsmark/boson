@@ -244,7 +244,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
 			break;
 		}
-		boDebug() << "MoveMine" << endl;
+//		boDebug() << "MoveMine" << endl;
 		Unit* u = findUnit(message.mHarvesterId, player);
 		if (!u) {
 			boError() << k_lineinfo << "cannot find harvester unit " << message.mHarvesterId << " for player " << player << endl;
