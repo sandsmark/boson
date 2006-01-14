@@ -290,7 +290,7 @@ int main(int argc, char **argv)
 #endif
 
  BoEventLoop eventLoop(0, "main event loop");
- BoApplication app(argv0);
+ BoApplication app(argv0, false, false);
  KGlobal::locale()->insertCatalogue("libkdegames");
 
  // register ourselves as a dcop client
