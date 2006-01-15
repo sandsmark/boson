@@ -22,6 +22,7 @@
 #include <qobject.h>
 
 class KCmdLineArgs;
+class KPlayer;
 
 class MainNoGUIPrivate;
 class MainNoGUI : public QObject
@@ -36,10 +37,12 @@ public:
 
 protected:
 	QByteArray loadPlayFieldFromDisk(KCmdLineArgs* args);
-	bool addPlayersToGame(KCmdLineArgs* args);
+	bool addComputerPlayersToGame(KCmdLineArgs* args, unsigned int needPlayers = 0);
 
 protected slots:
 	void slotGameStarted();
+	void slotPlayerJoinedGame(KPlayer*);
+	void slotCheckStart();
 
 private:
 	MainNoGUIPrivate* d;
