@@ -206,7 +206,6 @@ PythonScript::~PythonScript()
 
   Py_EndInterpreter(mInterpreter);
 
-  CHECK_PYTHON_ERROR;
   freePythonLock();
 
   mScriptInstances--;
