@@ -21,6 +21,7 @@
 #include "mainnogui.moc"
 
 #include "../bomemory/bodummymemory.h"
+#include "defines.h"
 #include "bocheckinstallation.h"
 #include "bosonconfig.h"
 #include "boglobal.h"
@@ -47,6 +48,8 @@
 #include <klocale.h>
 #include <kmessagebox.h>
 
+#include <qtimer.h>
+
 static const char *description =
     I18N_NOOP("Boson without GUI");
 
@@ -57,16 +60,69 @@ static KCmdLineOptions options[] =
     { "load", I18N_NOOP("Skip Welcome Widget and display the Load Game screen"), 0 },
     { "load-from-log <file>", I18N_NOOP("Load from emergency log, for debugging"), 0 },
     { "playfield <identifier>", I18N_NOOP("Playfield identifier for newgame/start editor widget"), 0 },
-    { "players <count>", I18N_NOOP("Add <count> players to the game. Default is 1."), "1" },
-    { "playerspecies <species>", I18N_NOOP("Comma separated list of species identifiers - one species per player."), 0 },
+    { "computerplayers <count>", I18N_NOOP("Add <count> computer players to the game. Default is 1."), "1" },
+    { "computerspecies <species>", I18N_NOOP("Comma separated list of species identifiers - one species per computer player."), 0 },
+    { "networkplayers <count>", I18N_NOOP("Wait for <count> players to enter the game from network. Default is 0."), "0" },
+    { "port <number>", I18N_NOOP("Port to listen on for network players"), QString("%1").arg(BOSON_PORT) },
     { "start", I18N_NOOP("Start the game"), 0},
     { "aidelay <delay>", I18N_NOOP("Set AI delay (in seconds). The less it is, the faster AI will send it's units"), 0 },
     { "noai", I18N_NOOP("Disable AI"), 0 },
+    { "connectto <host:port>" I18N_NOOP("Connect to a server"), 0 },
     { 0, 0, 0 }
 };
 
 
 static void postBosonConfigInit();
+
+class StartGame
+{
+public:
+	StartGame()
+	{
+		mRequiredPlayers = 0;
+		mPort = BOSON_PORT;
+		mHost = "localhost";
+		mClient = false;
+	}
+
+	bool start()
+	{
+		if (!mClient && mPlayField.size() == 0) {
+			return false;
+		}
+		if (!boGame) {
+			return false;
+		}
+		if (!mClient) {
+			boGame->sendMessage(mPlayField, BosonMessageIds::IdNewGame);
+		} else {
+			boDebug() << k_funcinfo << "connecting to host " << mHost << " on port " << mPort << endl;
+			boGame->connectToServer(mHost, mPort);
+		}
+		return true;
+	}
+
+	bool checkStart() const
+	{
+		if (!boGame) {
+			return false;
+		}
+		if (boGame->playerCount() >= mRequiredPlayers) {
+			return true;
+		} else {
+			boDebug() << k_funcinfo << "not enough players yet. have: " << boGame->playerCount() << " need: " << mRequiredPlayers << endl;
+			return false;
+		}
+		return false;
+	}
+
+public:
+	unsigned int mRequiredPlayers;
+	QByteArray mPlayField;
+	QString mHost;
+	int mPort;
+	bool mClient;
+};
 
 class MainNoGUIPrivate
 {
@@ -75,9 +131,13 @@ public:
 	{
 		mGameEngine = 0;
 		mStarting = 0;
+
+		mStartGame = 0;
 	}
 	BosonGameEngine* mGameEngine;
 	BosonStarting* mStarting;
+
+	StartGame* mStartGame;
 };
 
 MainNoGUI::MainNoGUI()
@@ -117,6 +177,21 @@ bool MainNoGUI::init()
 
 bool MainNoGUI::startGame(KCmdLineArgs* args)
 {
+ delete d->mStarting;
+ d->mStarting = new BosonStarting(0);
+ QObject::connect(boGame, SIGNAL(signalStartingCompletedReceived(const QByteArray&, Q_UINT32)),
+		d->mStarting, SLOT(slotStartingCompletedReceived(const QByteArray&, Q_UINT32)));
+ QObject::connect(boGame, SIGNAL(signalSetNewGameData(const QByteArray&, bool*)),
+		d->mStarting, SLOT(slotSetNewGameData(const QByteArray&, bool*)));
+ QObject::connect(boGame, SIGNAL(signalStartNewGame()),
+		d->mStarting, SLOT(slotStartNewGameWithTimer()));
+ connect(boGame, SIGNAL(signalPlayerJoinedGame(KPlayer*)),
+		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
+ BosonGameEngineStarting* game = new BosonGameEngineStarting(d->mStarting, d->mStarting);
+ d->mStarting->addTaskCreator(game);
+
+
+
  bool loadGame = false;
  if (args->isSet("load")) {
 	boError() << k_funcinfo << "loading games is not yet supported here" << endl;
@@ -124,18 +199,62 @@ bool MainNoGUI::startGame(KCmdLineArgs* args)
 	loadGame = true;
  }
 
- if (!loadGame) {
-	boDebug() << k_funcinfo << "starting new game" << endl;
+ delete d->mStartGame;
+ d->mStartGame = new StartGame();
 
-	if (!addPlayersToGame(args)) {
+ if (args->isSet("connectto")) {
+	QString option = args->getOption("connectto");
+	QString host;
+	int port = BOSON_PORT;
+	if (option.find(':') >= 0) {
+		bool ok;
+		host = option.left(option.find(':'));
+		port = option.right(option.length() - (option.find(':') + 1)).toInt(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "invalid port. use host:port with port being a number" << endl;
+			return false;
+		}
+	} else {
+		host = option;
+	}
+
+	if (!addComputerPlayersToGame(args, 1)) {
 		boError() << k_funcinfo << "adding player to game failed" << endl;
 		return false;
 	}
 
-	BosonGameEngineStarting* game = new BosonGameEngineStarting(d->mStarting, d->mStarting);
-	d->mStarting->addTaskCreator(game);
+	d->mStartGame->mHost = host;
+	d->mStartGame->mPort = port;
+	d->mStartGame->mClient = true;
+	return true;
+ }
 
-	boGame->addNeutralPlayer();
+
+ if (args->isSet("networkplayers")) {
+	QString n = args->getOption("networkplayers");
+	bool ok;
+	int players = n.toInt(&ok);
+	if (!ok || players < 0) {
+		boError() << k_funcinfo << "\"networkplayers\" argument is not a valid number" << endl;
+		return false;
+	}
+
+	d->mStartGame->mRequiredPlayers += players;
+	if (players > 0) {
+		int port = BOSON_PORT;
+		if (args->isSet("port")) {
+			bool ok;
+			port = args->getOption("port").toInt(&ok);
+			if (!ok) {
+				boError() << k_funcinfo << "invalid port parameter" << endl;
+				return false;
+			}
+		}
+		if (!boGame->offerConnections(port)) {
+			boError() << k_funcinfo << "unable to offer connections on port " << port << endl;
+			return false;
+		}
+	}
  }
 
 
@@ -144,45 +263,56 @@ bool MainNoGUI::startGame(KCmdLineArgs* args)
 	boError() << k_funcinfo << "unable to load playfield from disk" << endl;
 	return 1;
  }
-
- QObject::connect(boGame, SIGNAL(signalStartingCompletedReceived(const QByteArray&, Q_UINT32)),
-		d->mStarting, SLOT(slotStartingCompletedReceived(const QByteArray&, Q_UINT32)));
- QObject::connect(boGame, SIGNAL(signalSetNewGameData(const QByteArray&, bool*)),
-		d->mStarting, SLOT(slotSetNewGameData(const QByteArray&, bool*)));
- QObject::connect(boGame, SIGNAL(signalStartNewGame()),
-		d->mStarting, SLOT(slotStartNewGameWithTimer()));
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
  stream << (Q_INT8)1; // game mode (not editor)
  stream << qCompress(gameData);
- boGame->sendMessage(buffer, BosonMessageIds::IdNewGame);
+ d->mStartGame->mPlayField = buffer;
 
+
+ if (!loadGame) {
+	boDebug() << k_funcinfo << "starting new game" << endl;
+
+	if (!addComputerPlayersToGame(args)) {
+		boError() << k_funcinfo << "adding player to game failed" << endl;
+		return false;
+	}
+
+
+	d->mStartGame->mRequiredPlayers += 1;
+	boGame->addNeutralPlayer();
+ }
+
+ if (d->mStartGame->mRequiredPlayers > BOSON_MAX_PLAYERS + 1) { // +1 because of neutral player
+	boError() << k_funcinfo << "too many players. only " << BOSON_MAX_PLAYERS << " allowed" << endl;
+	return false;
+ }
 
  return true;
 }
 
-bool MainNoGUI::addPlayersToGame(KCmdLineArgs* args)
+bool MainNoGUI::addComputerPlayersToGame(KCmdLineArgs* args, unsigned int needPlayers)
 {
  int players = 1;
  QStringList species;
- if (args->isSet("players")) {
-	QString n = args->getOption("players");
+ if (args->isSet("computerplayers")) {
+	QString n = args->getOption("computerplayers");
 	bool ok;
 	players = n.toInt(&ok);
-	if (!ok || players <= 0) {
-		boError() << k_funcinfo << "\"players\" argument is not a valid number" << endl;
+	if (!ok || players < 0) {
+		boError() << k_funcinfo << "\"computerplayers\" argument is not a valid number" << endl;
 		return false;
 	}
  }
  if (players > BOSON_MAX_PLAYERS) {
-	boWarning() << k_funcinfo << "requested " << players << " players, but can have at most " << BOSON_MAX_PLAYERS << endl;
+	boWarning() << k_funcinfo << "requested " << players << " computer players, but can have at most " << BOSON_MAX_PLAYERS << endl;
 	players = BOSON_MAX_PLAYERS;
  }
- if (args->isSet("playerspecies")) {
-	QString l = args->getOption("playerspecies");
+ if (args->isSet("computerspecies")) {
+	QString l = args->getOption("computerspecies");
 	species = QStringList::split(",", l);
 	if ((int)species.count() != players) {
-		boError() << k_funcinfo << "must have exactly " << players << " species for argument \"playerspecies\" (one species per player). have " << species.count() << endl;
+		boError() << k_funcinfo << "must have exactly " << players << " species for argument \"computerspecies\" (one species per player). have " << species.count() << endl;
 		return false;
 	}
 	for (QStringList::iterator it = species.begin(); it != species.end(); ++it) {
@@ -197,6 +327,14 @@ bool MainNoGUI::addPlayersToGame(KCmdLineArgs* args)
 	}
  }
 
+ if (needPlayers > species.count()) {
+	boError() << k_funcinfo << "about to add " << species.count() << " players, but need " << needPlayers << " players" << endl;
+	return false;
+ }
+
+ if (d->mStartGame) {
+	d->mStartGame->mRequiredPlayers += species.count();
+ }
  for (unsigned int i = 0; i < species.count(); i++) {
 	Player* p = new Player();
 	p->loadTheme(SpeciesTheme::speciesDirectory(species[i]), QColor(255,( 255 / BOSON_MAX_PLAYERS) * i, 0));
@@ -251,6 +389,26 @@ void MainNoGUI::slotGameStarted()
 	}
  }
  boDebug() << k_funcinfo << "done" << endl;
+}
+
+void MainNoGUI::slotPlayerJoinedGame(KPlayer*)
+{
+ QTimer::singleShot(0, this, SLOT(slotCheckStart()));
+}
+
+void MainNoGUI::slotCheckStart()
+{
+ if (d->mStartGame) {
+	if (d->mStartGame->checkStart()) {
+		if (!d->mStartGame->start()) {
+			boError() << k_funcinfo << "start failed" << endl;
+			return;
+		} else {
+			delete d->mStartGame;
+			d->mStartGame = 0;
+		}
+	}
+ }
 }
 
 
