@@ -154,11 +154,14 @@ BosonItemModelRenderer::BosonItemModelRenderer(BosonItem* item)
  mModel = 0;
  mCurrentAnimation = 0;
  mCurrentFrame = 0.0f;
+ mFramePointers = 0;
+ mMaxFramesInModel = 0;
 }
 
 BosonItemModelRenderer::~BosonItemModelRenderer()
 {
  mItemMatrices.clear();
+ mFramePointers.clear();
 }
 
 bool BosonItemModelRenderer::setModel(BosonModel* model)
@@ -171,21 +174,47 @@ bool BosonItemModelRenderer::setModel(BosonModel* model)
 
  setBoundingSphereRadius(model->boundingSphereRadius());
 
- BoLOD* lod = mModel->lod(0);
- if (!lod) {
-	BO_NULL_ERROR(lod);
-	return false;
- }
- mItemMatrices.resize(lod->frameCount());
- for (unsigned int i = 0; i < mItemMatrices.count(); i++) {
-	BoFrame* frame = lod->frame(i);
-	if (!frame) {
-		BO_NULL_ERROR(frame);
+ mMaxFramesInModel = 0;
+ for (unsigned int lod = 0; lod < mModel->lodCount(); lod++) {
+	BoLOD* l = mModel->lod(lod);
+	if (!l) {
+		BO_NULL_ERROR(l);
 		return false;
 	}
-	mItemMatrices[i].resize(frame->nodeCount());
-	for (unsigned int j = 0; j < mItemMatrices[i].count(); j++) {
-		(mItemMatrices[i])[j] = 0;
+	if (l->frameCount() > mMaxFramesInModel) {
+		mMaxFramesInModel = l->frameCount();
+	}
+ }
+ mItemMatrices.resize(mMaxFramesInModel * mModel->lodCount());
+ mFramePointers.resize(mMaxFramesInModel * mModel->lodCount());
+
+ for (unsigned int lod = 0; lod < mModel->lodCount(); lod++) {
+	BoLOD* l = mModel->lod(lod);
+	if (!l) {
+		BO_NULL_ERROR(l);
+		return false;
+	}
+	for (unsigned int frame = 0; frame < l->frameCount(); frame++) {
+		mFramePointers[lod * mMaxFramesInModel + frame] = l->frame(frame);
+	}
+ }
+
+ for (unsigned int lod = 0; lod < mModel->lodCount(); lod++) {
+	BoLOD* l = mModel->lod(lod);
+	if (!l) {
+		BO_NULL_ERROR(l);
+		return false;
+	}
+	for (unsigned int frame = 0; frame < l->frameCount(); frame++) {
+		BoFrame* f = l->frame(frame);
+		if (!f) {
+			BO_NULL_ERROR(f);
+			return false;
+		}
+		mItemMatrices[mMaxFramesInModel * lod + frame].resize(f->nodeCount());
+		for (unsigned int i = 0; i < f->nodeCount(); i++) {
+			(mItemMatrices[mMaxFramesInModel * lod + frame])[i] = 0;
+		}
 	}
  }
 
@@ -201,20 +230,27 @@ bool BosonItemModelRenderer::setModel(BosonModel* model)
 			continue;
 		}
 		const BoMatrix* matrix = &t->meshMatrix();
-		for (unsigned int i = 0; i < mItemMatrices.count(); i++) {
-			BoFrame* frame = lod->frame(i);
-			if (!frame) {
-				BO_NULL_ERROR(frame);
+		for (unsigned int lod = 0; lod < mModel->lodCount(); lod++) {
+			BoLOD* l = mModel->lod(lod);
+			if (!l) {
+				BO_NULL_ERROR(l);
 				return false;
 			}
-			for (unsigned int j = 0; j < mItemMatrices[i].count(); j++) {
-				BoMesh* mesh = frame->mesh(j);
-				if (!mesh) {
-					BO_NULL_ERROR(mesh);
+			for (unsigned int frame = 0; frame < l->frameCount(); frame++) {
+				BoFrame* f = l->frame(frame);
+				if (!f) {
+					BO_NULL_ERROR(f);
 					return false;
 				}
-				if (t->isMeshPartOfTurret(mesh->name())) {
-					(mItemMatrices[i])[j] = matrix;
+				for (unsigned int node = 0; node < f->nodeCount(); node++) {
+					BoMesh* mesh = f->mesh(node);
+					if (!mesh) {
+						BO_NULL_ERROR(mesh);
+						return false;
+					}
+					if (t->isMeshPartOfTurret(mesh->name())) {
+						(mItemMatrices[mMaxFramesInModel * lod + frame])[node] = matrix;
+					}
 				}
 			}
 		}
@@ -286,13 +322,20 @@ void BosonItemModelRenderer::renderItem(unsigned int lod, bool transparentmeshes
  BO_CHECK_NULL_RET(mModel);
  BoLOD* l = mModel->lod(lod);
  BO_CHECK_NULL_RET(l);
+
+ unsigned int frameIndex = mMaxFramesInModel * lod + (unsigned int)mCurrentFrame;
  BoFrame* frame = l->frame((unsigned int)mCurrentFrame);
  BO_CHECK_NULL_RET(frame);
- if ((unsigned int)mCurrentFrame >= mItemMatrices.count()) {
-	boError() << k_funcinfo << "frame " << (unsigned int)mCurrentFrame << " is out of range for item matrices" << endl;
+
+ if (frameIndex >= mItemMatrices.count()) {
+	boError() << k_funcinfo << "frame index " << frameIndex << " for frame number " << (unsigned int)mCurrentFrame << " is out of range for item matrices" << endl;
 	return;
  }
- frame->renderFrame(mItemMatrices[(unsigned int)mCurrentFrame], teamColor(), transparentmeshes, flags);
+ if (frame != mFramePointers[frameIndex]) {
+	boError() << k_funcinfo << "frame at index " << frameIndex << " has changed since setModel() was called! was: " << mFramePointers[frameIndex] << " is: " << frame << endl;
+	return;
+ }
+ frame->renderFrame(mItemMatrices[frameIndex], teamColor(), transparentmeshes, flags);
 }
 
 unsigned int BosonItemModelRenderer::lodCount() const
