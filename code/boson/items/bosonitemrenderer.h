@@ -167,8 +167,11 @@ private:
 	BosonAnimation* mCurrentAnimation;
 	float mCurrentFrame;
 
-	// one matrix per mesh ("node") per frame
+	// one matrix per mesh ("node") per frame in each lod
 	QValueVector< QValueVector<const BoMatrix*> > mItemMatrices;
+
+	unsigned int mMaxFramesInModel;
+	QValueVector<const BoFrame*> mFramePointers;
 };
 
 #endif
