@@ -459,11 +459,20 @@ class BoTextureManager
       return mTextures.count();
     }
 
+    /**
+     * @return A list of all currently registered textures.
+     **/
+    const QPtrList<const BoTexture>& allTextures() const
+    {
+      return mConstTextures;
+    }
+
 
   private:
     static BoTextureManager* mManager;
 
     QPtrList<BoTexture> mTextures;
+    QPtrList<const BoTexture> mConstTextures;
     BoTexture** mActiveTexture;
     int* mActiveTextureType;
     int mActiveTextureUnit;

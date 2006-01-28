@@ -827,7 +827,12 @@ BoTextureManager::BoTextureManager()
 
 BoTextureManager::~BoTextureManager()
 {
-  boDebug() << k_funcinfo << "Deleting remaining " << mTextures.count() << " textures" << endl;
+  mConstTextures.clear();
+
+  if(mTextures.count() > 0)
+  {
+    boDebug() << k_funcinfo << "Deleting remaining " << mTextures.count() << " textures" << endl;
+  }
   mTextures.setAutoDelete(true);
   mTextures.clear();
 
@@ -1045,6 +1050,7 @@ void BoTextureManager::invalidateCache()
 void BoTextureManager::registerTexture(BoTexture* tex)
 {
   mTextures.append(tex);
+  mConstTextures.append(tex);
 }
 
 void BoTextureManager::unregisterTexture(BoTexture* tex)
@@ -1055,6 +1061,7 @@ void BoTextureManager::unregisterTexture(BoTexture* tex)
   }
 
   mTextures.remove(tex);
+  mConstTextures.remove(tex);
 
   if(mActiveTexture[mActiveTextureUnit] == tex)
   {
