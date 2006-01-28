@@ -38,6 +38,7 @@ class RepairPlugin;
 class BosonWeapon;
 class BosonMoveData;
 class BosonPathInfo;
+class UnitMover;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
 template<class T> class BoRect;
@@ -597,44 +598,22 @@ public:
 
 	virtual bool init();
 
+	static void initStatic();
+
 	/**
 	 * Turn to direction. This sets a new frame according to the new
 	 * direction.
 	 **/
 	virtual void turnTo(int degrees);
 
-	/**
-	 * Call turnTo according to the current speed (you want to use this!)
-	 **/
-	void turnTo();
-
-
 	virtual void advanceFollow(unsigned int advanceCallsCount);
 
 	virtual void advanceIdle(unsigned int advanceCallsCount);
-
-
-	/**
-	 * Move this unit to the repairYard and repair it there.
-	 * TODO: move to plugin
-	 **/
-	void repairAt(Facility* repairYard);
 
 	virtual bool saveAsXML(QDomElement& root);
 	virtual bool loadFromXML(const QDomElement& root);
 
 	virtual void stopMoving();
-
-	bool attackEnemyUnitsInRangeWhileMoving();
-
-	/**
-	 * Move towards p, going at most maxdist (in canvas coords).
-	 * How much unit should move, will be added to xspeed and yspeed.
-	 * (x; y) marks unit's current position
-	 *
-	 * @return How much is moved (will be <= maxdist)
-	 **/
-	bofixed moveTowardsPoint(const BoVector2Fixed& p, bofixed x, bofixed y, bofixed maxdist, bofixed &xspeed, bofixed &yspeed);
 
 	/**
 	 * @return How fast this mobile unit accelerates.
@@ -649,17 +628,10 @@ public:
 	virtual void addUpgrade(const UpgradeProperties* upgrade);
 	virtual void removeUpgrade(const UpgradeProperties* upgrade);
 
-	static void initCellIntersectionTable();
-
 	virtual void flyInCircle();
 
 protected:
 	virtual void advanceMoveInternal(unsigned int advanceCallsCount); // move one step futher to path
-
-	// TODO: rename?
-	void advanceMoveLeader(unsigned int advanceCallsCount);
-	void advanceMoveFollowing(unsigned int advanceCallsCount);
-	void advanceMoveFlying(unsigned int advanceCallsCount);
 
 	/**
 	 * Note: this is not actually an advance*() method, like @ref
@@ -670,35 +642,17 @@ protected:
 	 **/
 	virtual void advanceMoveCheck();
 
-	/**
-	 * Finds new path to destination.
-	 * Destination must have been set before in @ref pathInfo
-	 *
-	 * This is in Unit instead of @ref MobileUnit so that we can apply a
-	 * path to newly constructed units of factories.
-	 **/
-	virtual bool newPath();
-
-	int selectNextPathPoint(int xpos, int ypos);
-	void avoidance();
-	bool canGoToCurrentPathPoint(int xpos, int ypos);
-	void currentPathPointChanged(int unitx, int unity);
-
 private:
 	void changeUpgrades(const UpgradeProperties* upgrade, bool add);
 
 private:
-	// a d pointer is probably not very good here - far too much memory consumption
-	// same apllies to Unit and UnitBase. But it speeds up compiling as we don't
-	// have to change the headers every time...
-	class MobileUnitPrivate;
-	MobileUnitPrivate* d;
+	friend class UnitMover;
+	UnitMover* mUnitMover;
 
 	BoUpgradeableProperty<bofixed> mMaxSpeed;
 	BoUpgradeableProperty<bofixed> mMaxAccelerationSpeed;
 	BoUpgradeableProperty<bofixed> mMaxDecelerationSpeed;
 
-	static QValueVector<BoVector2Fixed> mCellIntersectionTable[11][11];
 };
 
 // if you add class members - ONLY KGameProperties!! otherwise Player::load and
