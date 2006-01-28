@@ -3233,10 +3233,10 @@ bool MobileUnit::loadFromXML(const QDomElement& root)
  if (root.hasAttribute("Speed")) {
 	speed = root.attribute("Speed").toFloat(&ok);
 	if (!ok) {
-		boWarning() << k_funcinfo << "Invalid value for Speed attribute" << endl;
-	} else {
-		setSpeed(speed);
+		boError() << k_funcinfo << "Invalid value for Speed attribute" << endl;
+		return false;
 	}
+	setSpeed(speed);
  }
 
  return mUnitMover->loadFromXML(root);
