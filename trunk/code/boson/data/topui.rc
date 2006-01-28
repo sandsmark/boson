@@ -16,6 +16,7 @@
     <Action name="debug_bodebuglog" />
     <Action name="debug_clear_profiling_data" />
     <Action name="debug_profiling" />
+    <Action name="debug_textures" />
     <Action name="debug_show_opengl_states" />
     <Menu name="weird"><text>&amp;Weird actions</text>
       <Action name="debug_sleep_1s" />

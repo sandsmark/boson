@@ -187,6 +187,8 @@ boson_SOURCES = \
 		boconditionwidget.cpp \
 		bowaterrenderer.cpp \
 		selectbox.cpp \
+		bosondebugtextures.cpp \
+		bosondebugtexturesbase.ui \
 		main.cpp
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
