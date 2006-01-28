@@ -354,7 +354,7 @@ bool BosonStartingStartScenario::startTask()
 	return false;
  }
 
- MobileUnit::initCellIntersectionTable();
+ MobileUnit::initStatic();
 
  BosonSaveLoad load(boGame);
  if (!load.loadKGameFromXML(*mFiles)) {
