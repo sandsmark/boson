@@ -30,6 +30,7 @@
 #include "boshader.h"
 #include "bogl.h"
 #include "bosonviewdata.h"
+#include "bosonprofiling.h"
 
 #include <ksimpleconfig.h>
 
@@ -161,6 +162,7 @@ const QString& BosonGroundThemeData::identifier() const
 
 bool BosonGroundThemeData::loadTextures(const QString& dir, unsigned int i)
 {
+ BosonProfiler prof("BosonGroundThemeData::loadTextures()");
  QDir d(dir);
  // Find all name*.png and name*.jpg files
  BosonGroundTypeData* groundData = groundTypeData(i);
@@ -213,6 +215,7 @@ void BosonGroundThemeData::loadShaders(const QString& dirName, BosonGroundTypeDa
  if (ground->shader) {
 	return;
  }
+ BosonProfiler prof("BosonGroundThemeData::loadShaders()");
 
  // Load bumpmap textures
  QDir dir(dirName);
