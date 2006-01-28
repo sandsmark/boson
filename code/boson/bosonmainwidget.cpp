@@ -59,6 +59,7 @@
 #include "bosongameengine.h"
 #include "bosoncomputerio.h"
 #include "speciestheme.h"
+#include "bosondebugtextures.h"
 
 #include <klocale.h>
 #include <kmessagebox.h>
@@ -290,6 +291,8 @@ void BosonMainWidget::initUfoGUI()
  d->mMenuInput = new BosonMainWidgetMenuInput(ufoManager()->actionCollection(), this);
  connect(d->mMenuInput, SIGNAL(signalDebugUfoWidgets()),
 		this, SLOT(slotDebugUfoWidgets()));
+ connect(d->mMenuInput, SIGNAL(signalDebugTextures()),
+		this, SLOT(slotDebugTextures()));
  connect(d->mMenuInput, SIGNAL(signalPreferences()),
 		this, SLOT(slotPreferences()));
 
@@ -1213,6 +1216,13 @@ void BosonMainWidget::slotDebugUfoWidgets()
 
  debug->setBoUfoManager(ufoManager());
 
+ dialog->show();
+}
+
+void BosonMainWidget::slotDebugTextures()
+{
+ BosonDebugTextures* dialog = new BosonDebugTextures(this);
+ dialog->slotUpdate();
  dialog->show();
 }
 

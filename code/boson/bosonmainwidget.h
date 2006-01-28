@@ -195,6 +195,7 @@ protected slots:
 	void slotPreferences();
 	void slotPreferencesApply();
 	void slotDebugUfoWidgets();
+	void slotDebugTextures();
 
 	void slotStartupPreferredSizeChanged();
 

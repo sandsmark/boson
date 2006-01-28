@@ -312,6 +312,8 @@ boson.source += """
 	bowaterrenderer.cpp
 	selectbox.cpp
 	main.cpp
+	bosondebugtextures.cpp
+	bosondebugtexturesbase.ui
 """
 boson.source += startupwidgets_sources
 boson.source += commandframe_sources
