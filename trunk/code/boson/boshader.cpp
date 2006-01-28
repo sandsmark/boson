@@ -248,12 +248,12 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
     boglGetShaderInfoLog(vertexshader, 8192, &logsize, log);
     if(!compiled)
     {
-      boError(130) << k_funcinfo << "Couldn't compile vertex shader!" << endl << log;
+      boError(130) << k_funcinfo << "Couldn't compile vertex shader!" << endl << log << endl;
       return false;
     }
     else if(logsize > 0)
     {
-      boDebug(130) << "Vertex shader compilation log:" << endl << log;
+      boDebug(130) << "Vertex shader compilation log:" << endl << log << endl;
     }
     // Attach the shader to the program
     boglAttachShader(mProgram, vertexshader);
@@ -278,12 +278,12 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
     boglGetShaderInfoLog(fragmentshader, 8192, &logsize, log);
     if(!compiled)
     {
-      boError(130) << k_funcinfo << "Couldn't compile fragment shader!" << endl << log;
+      boError(130) << k_funcinfo << "Couldn't compile fragment shader!" << endl << log << endl;
       return false;
     }
     else if(logsize > 0)
     {
-      boDebug(130) << "Fragment shader compilation log:" << endl << log;
+      boDebug(130) << "Fragment shader compilation log:" << endl << log << endl;
     }
     // Attach the shader to the program
     boglAttachShader(mProgram, fragmentshader);
@@ -300,7 +300,7 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
 
   if(!linked)
   {
-    boError(130) << k_funcinfo << "Couldn't link the program!" << endl << log;
+    boError(130) << k_funcinfo << "Couldn't link the program!" << endl << log << endl;
     return false;
   }
   else if(logsize > 0)
