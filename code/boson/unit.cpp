@@ -3143,7 +3143,7 @@ void MobileUnit::changeUpgrades(const UpgradeProperties* upgrade, bool add)
  // health
  bofixed origMaxSpeed = mMaxSpeed.value(upgradesCollection());
  bofixed origMaxAccelerationSpeed = maxAccelerationSpeed();
- bofixed origMaxDecelerationSpeed = maxAccelerationSpeed();
+ bofixed origMaxDecelerationSpeed = maxDecelerationSpeed();
 
  if (add) {
 	Unit::addUpgrade(upgrade);
