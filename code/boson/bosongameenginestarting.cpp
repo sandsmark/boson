@@ -354,8 +354,6 @@ bool BosonStartingStartScenario::startTask()
 	return false;
  }
 
- MobileUnit::initStatic();
-
  BosonSaveLoad load(boGame);
  if (!load.loadKGameFromXML(*mFiles)) {
 	boError(270) << k_funcinfo << "unable to load KGame from XML" << endl;

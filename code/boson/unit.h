@@ -256,7 +256,7 @@ public:
 	 * Follow another unit.
 	 * Note that this method is somewhat similar to @ref advanceAttack
 	 **/
-	virtual void advanceFollow(unsigned int) { }
+	virtual void advanceFollow(unsigned int);
 
 	/**
 	 * This is called when the unit is supposed to do nothing.
@@ -495,7 +495,7 @@ public:
 	virtual void addUpgrade(const UpgradeProperties* upgrade);
 	virtual void removeUpgrade(const UpgradeProperties* upgrade);
 
-	virtual void flyInCircle() {}
+	virtual void flyInCircle();
 
 	/**
 	 * Called when the unit wants to move to another position. It may be
@@ -515,16 +515,21 @@ protected:
 	QValueList<Unit*> unitCollisions(bool exact = false);
 
 	/**
-	 * Move the unit. By default this does nothing. Reimplemented in @ref
-	 * MobileUnit
+	 * See @ref UnitMover::advanceMoveInternal
 	 **/
-	virtual void advanceMoveInternal(unsigned int) { }
+	virtual void advanceMoveInternal(unsigned int);
 
 	/**
-	 * Also reimplemented in @ref MobileUnit. Used to check whether the path
-	 * calculated by @ref advanceMove was actually valid.
+	 * See @ref UnitMover::advanceMoveCheck
 	 **/
-	virtual void advanceMoveCheck() { }
+	virtual void advanceMoveCheck();
+
+	/**
+	 * Helper method to @ref advanceIdle.
+	 *
+	 * This does basic tasks common to all units
+	 **/
+	void advanceIdleBasic(unsigned int advanceCallsCount);
 
 
 	/**
@@ -570,6 +575,8 @@ private:
 	typedef void (Unit::*MemberFunction)(unsigned int advanceCallsCount);
 	void setAdvanceFunction(MemberFunction, bool advanceFlag);
 
+	friend class UnitMover;
+
 private:
 	UnitPrivate* d;
 	UnitPlugin* mCurrentPlugin;
@@ -590,81 +597,9 @@ private:
 };
 
 
-// if you add class members - ONLY KGameProperties!! otherwise Player::load and
-// Player::save() won't work correctly! - if you add non KGameProperties adjust
-// UnitBase::save() and unit::load()
-/**
- * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
- **/
-class MobileUnit : public Unit
-{
-public:
-	MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
-	virtual ~MobileUnit();
-
-	virtual bool init();
-
-	static void initStatic();
-
-	/**
-	 * Turn to direction. This sets a new frame according to the new
-	 * direction.
-	 **/
-	virtual void turnTo(int degrees);
-
-	virtual void advanceFollow(unsigned int advanceCallsCount);
-
-	virtual void advanceIdle(unsigned int advanceCallsCount);
-
-	virtual bool saveAsXML(QDomElement& root);
-	virtual bool loadFromXML(const QDomElement& root);
-
-	virtual void stopMoving();
-
-	/**
-	 * @return How fast this mobile unit accelerates.
-	 **/
-	bofixed maxAccelerationSpeed() const;
-
-	/**
-	 * @return How fast this mobile unit decelerates.
-	 **/
-	bofixed maxDecelerationSpeed() const;
-
-	virtual void addUpgrade(const UpgradeProperties* upgrade);
-	virtual void removeUpgrade(const UpgradeProperties* upgrade);
-
-	virtual void flyInCircle();
-
-protected:
-	virtual void advanceMoveInternal(unsigned int advanceCallsCount); // move one step futher to path
-
-	/**
-	 * Note: this is not actually an advance*() method, like @ref
-	 * advanceWork and the like. advanceMoveCheck() must get called
-	 * (manually) after any advance*() method that moves a unit.
-	 *
-	 * This is most notably @ref advanceMove
-	 **/
-	virtual void advanceMoveCheck();
-
-private:
-	void changeUpgrades(const UpgradeProperties* upgrade, bool add);
-
-private:
-	friend class UnitMover;
-	UnitMover* mUnitMover;
-
-	BoUpgradeableProperty<bofixed> mMaxSpeed;
-	BoUpgradeableProperty<bofixed> mMaxAccelerationSpeed;
-	BoUpgradeableProperty<bofixed> mMaxDecelerationSpeed;
-
-};
-
-
 /**
  * Construction of a facility
- * @author Andreas BosonItem <b_mann@gmx.de>
+ * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class UnitConstruction
 {

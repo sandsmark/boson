@@ -36,7 +36,6 @@ class KGameIO;
 class BoGLMatrices;
 class BoTexture;
 class BosonItem;
-class Facility;
 class BosonMiniMapQuadtreeNode;
 
 class QPixmap;

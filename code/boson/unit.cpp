@@ -67,6 +67,147 @@
 
 
 
+/**
+ * @short Class responsible for moving units.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class UnitMover
+{
+public:
+	UnitMover(Unit* u);
+	~UnitMover();
+
+	static void initCellIntersectionTable();
+
+	bool init();
+
+	bool saveAsXML(QDomElement& root) const;
+	bool loadFromXML(const QDomElement& root);
+
+	void addUpgrade(const UpgradeProperties* upgrade);
+	void removeUpgrade(const UpgradeProperties* upgrade);
+
+	void advanceIdle(unsigned int advanceCallsCount);
+	void advanceFollow(unsigned int);
+	void advanceMoveInternal(unsigned int); // move one step futher to path
+
+	/**
+	 * Note: this is not actually an advance*() method, like @ref
+	 * advanceWork and the like. advanceMoveCheck() must get called
+	 * (manually) after any advance*() method that moves a unit.
+	 *
+	 * This is most notably @ref advanceMove
+	**/
+	void advanceMoveCheck();
+
+	bool attackEnemyUnitsInRangeWhileMoving();
+
+	/**
+	 * Move towards p, going at most maxdist (in canvas coords).
+	 * How much unit should move, will be added to xspeed and yspeed.
+	 * (x; y) marks unit's current position
+	 *
+	 * @return How much is moved (will be <= maxdist)
+	 **/
+	bofixed moveTowardsPoint(const BoVector2Fixed& p, bofixed x, bofixed y, bofixed maxdist, bofixed &xspeed, bofixed &yspeed);
+
+	/**
+	 * @return Maximum speed of this mobile unit. WARNING: there is also a
+	 * @ref BosonItem::maxSpeed. Both values should be synchronized.
+	 **/
+	bofixed maxSpeed() const;
+
+	/**
+	 * @return How fast this mobile unit accelerates.
+	 **/
+	bofixed maxAccelerationSpeed() const;
+
+	/**
+	 * @return How fast this mobile unit decelerates.
+	 **/
+	bofixed maxDecelerationSpeed() const;
+
+	void flyInCircle();
+
+	Unit* unit() const
+	{
+		return mUnit;
+	}
+	const BosonCanvas* canvas() const
+	{
+		return unit()->canvas();
+	}
+	unsigned long int id() const
+	{
+		return unit()->id();
+	}
+	UnitBase::WorkType work() const
+	{
+		return unit()->work();
+	}
+	UnitBase::WorkType advanceWork() const
+	{
+		return unit()->advanceWork();
+	}
+	const UnitProperties* unitProperties() const
+	{
+		return unit()->unitProperties();
+	}
+	BosonPathInfo* pathInfo() const
+	{
+		return unit()->pathInfo();
+	}
+
+	/**
+	 * Call turnTo according to the current speed (you want to use this!)
+	 **/
+	void turnTo();
+
+	void advanceMoveLeader(unsigned int advanceCallsCount);
+	void advanceMoveFollowing(unsigned int advanceCallsCount);
+	void advanceMoveFlying(unsigned int advanceCallsCount);
+
+
+	/**
+	 * Finds new path to destination.
+	 * Destination must have been set before in @ref pathInfo
+	 **/
+	bool newPath();
+
+	int selectNextPathPoint(int xpos, int ypos);
+	void avoidance();
+	bool canGoToCurrentPathPoint(int xpos, int ypos);
+	void currentPathPointChanged(int unitx, int unity);
+
+public:
+	static QValueVector<BoVector2Fixed> mCellIntersectionTable[11][11];
+
+private:
+	void changeUpgrades(const UpgradeProperties* upgrade);
+
+private:
+	Unit* mUnit;
+
+	BoUpgradeableProperty<bofixed> mMaxSpeed;
+	BoUpgradeableProperty<bofixed> mMaxAccelerationSpeed;
+	BoUpgradeableProperty<bofixed> mMaxDecelerationSpeed;
+
+	// Should these be made KGameProperty?
+	int mLastCellX;
+	int mLastCellY;
+
+	int mNextCellX;
+	int mNextCellY;
+	QValueVector<BoVector2Fixed>* mNextWaypointIntersections;
+	int mNextWaypointIntersectionsXOffset;
+	int mNextWaypointIntersectionsYOffset;
+
+	bofixed mRoll;
+};
+
+QValueVector<BoVector2Fixed> UnitMover::mCellIntersectionTable[11][11];
+
+
 bool Unit::mInitialized = false;
 
 class UnitPrivate
@@ -79,6 +220,8 @@ public:
 		mWeapons = 0;
 
 		mMoveData = 0;
+
+		mUnitMover = 0;
 	}
 	KGamePropertyList<BoVector2Fixed> mWaypoints;
 	KGamePropertyList<BoVector2Fixed> mPathPoints;
@@ -101,6 +244,8 @@ public:
 	unsigned long int mMaxWeaponRange;
 	unsigned long int mMaxLandWeaponRange;
 	unsigned long int mMaxAirWeaponRange;
+
+	UnitMover* mUnitMover;
 };
 
 Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
@@ -131,11 +276,14 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  mUnitConstruction = 0;
  if (prop->isFacility()) {
 	mUnitConstruction = new UnitConstruction(this);
+ } else {
+	d->mUnitMover = new UnitMover(this);
  }
 }
 
 Unit::~Unit()
 {
+ delete d->mUnitMover;
  delete mUnitConstruction;
  d->mWaypoints.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
  d->mWaypoints.clear();
@@ -218,8 +366,6 @@ void Unit::initStatic()
  addPropertyId(IdPathPoints, QString::fromLatin1("PathPoints"));
  addPropertyId(IdWantedRotation, QString::fromLatin1("WantedRotation"));
 
- // MobileUnit
-
  // Facility
  addPropertyId(IdConstructionStep, QString::fromLatin1("ConstructionStep"));
 
@@ -238,6 +384,8 @@ void Unit::initStatic()
  addPropertyId(IdBombingLastDistFromDropPoint, QString::fromLatin1("IdBombingLastDistFromDropPoint"));
  addPropertyId(IdMineralsPaid, QString::fromLatin1("IdMineralsPaid"));
  addPropertyId(IdOilPaid, QString::fromLatin1("IdOilPaid"));
+
+ UnitMover::initCellIntersectionTable();
 
  mInitialized = true;
 }
@@ -572,9 +720,14 @@ void Unit::advanceNone(unsigned int)
 
 void Unit::advanceIdle(unsigned int advanceCallsCount)
 {
-// this is called when the unit has nothing specific to do. Usually we just want
-// to fire at every enemy in range.
+ advanceIdleBasic(advanceCallsCount);
+ if (d->mUnitMover) {
+	d->mUnitMover->advanceIdle(advanceCallsCount);
+ }
+}
 
+void Unit::advanceIdleBasic(unsigned int advanceCallsCount)
+{
  if (!target()) {
 	if (advanceCallsCount % 40 != 10) {
 		return;
@@ -834,6 +987,27 @@ void Unit::advanceAttack(unsigned int advanceCallsCount)
  boDebug(300) << "    " << k_funcinfo << "done shooting" << endl;
  // TODO: fly on straight, pass the target, fly a bit more, then turn and fly back toward the target
  flyInCircle();
+}
+
+void Unit::advanceFollow(unsigned int advanceCallsCount)
+{
+ if (d->mUnitMover) {
+	d->mUnitMover->advanceFollow(advanceCallsCount);
+ }
+}
+
+void Unit::advanceMoveCheck()
+{
+ if (d->mUnitMover) {
+	d->mUnitMover->advanceMoveCheck();
+ }
+}
+
+void Unit::advanceMoveInternal(unsigned int advanceCallsCount) // this actually needs to be called for every advanceCallsCount.
+{
+ if (d->mUnitMover) {
+	d->mUnitMover->advanceMoveInternal(advanceCallsCount);
+ }
 }
 
 void Unit::advanceDestroyed(unsigned int advanceCallsCount)
@@ -1155,6 +1329,10 @@ void Unit::stopMoving()
  if (!isFlying()) {
 	setMovingStatus(Standing);
 	setVelocity(0.0, 0.0, 0.0);
+
+	if (pathInfo()->slowDownAtDest) {
+		setSpeed(0);
+	}
  }
 }
 
@@ -1245,6 +1423,11 @@ bool Unit::saveAsXML(QDomElement& root)
 	}
  }
 
+ if (d->mUnitMover) {
+	if (!d->mUnitMover->saveAsXML(root)) {
+		return false;
+	}
+ }
  return true;
 }
 
@@ -1418,6 +1601,12 @@ bool Unit::loadFromXML(const QDomElement& root)
 
  if (mUnitConstruction) {
 	if (!mUnitConstruction->loadFromXML(root)) {
+		return false;
+	}
+ }
+
+ if (d->mUnitMover) {
+	if (!d->mUnitMover->loadFromXML(root)) {
 		return false;
 	}
  }
@@ -1616,10 +1805,44 @@ bool Unit::isNextTo(Unit* target) const
  return false;
 }
 
-void Unit::turnTo(int deg)
+void Unit::turnTo(int dir)
 {
+ if (isDestroyed()) {
+	boError() << k_funcinfo << "unit is already destroyed!" << endl;
+	return;
+ }
+
+ if ((int)rotation() != dir) {
+	// Find out how much we have to turn
+	bofixed delta = rotation() - dir;
+	if (delta < 0) {
+		delta = QABS(delta);
+	}
+	if (delta > 180) {
+		delta = 360 - delta;
+	}
+
+	if (delta < unitProperties()->rotationSpeed()) {
+		// Turn immediately (and hope this method won't be called more than once per
+		//  advance call)
+		setRotation(dir);
+		return;
+	}
+	boDebug() << k_funcinfo << id() << ": will slowly rotate from " << rotation() << " to " << dir << endl;
+	// If we're moving, we want to take one more step with current velocity, but
+	//  setAdvanceWork() resets it to 0, so we have this workaround here
+	bofixed _xVelocity = 0, _yVelocity = 0;
+	if (advanceWork() == WorkMove) {
+		_xVelocity = xVelocity();
+		_yVelocity = yVelocity();
+	}
+	d->mWantedRotation = dir;
+	setAdvanceWork(WorkTurn);
+	setVelocity(_xVelocity, _yVelocity, 0);
+ }
+
 // boDebug() << k_funcinfo << id() << ": turning to " << deg << endl;
- d->mWantedRotation = deg;
+ d->mWantedRotation = dir;
 }
 
 void Unit::loadWeapons()
@@ -1794,12 +2017,18 @@ void Unit::addUpgrade(const UpgradeProperties* upgrade)
 {
  UnitBase::addUpgrade(upgrade);
  recalculateMaxWeaponRange();
+ if (d->mUnitMover) {
+	d->mUnitMover->addUpgrade(upgrade);
+ }
 }
 
 void Unit::removeUpgrade(const UpgradeProperties* upgrade)
 {
  UnitBase::removeUpgrade(upgrade);
  recalculateMaxWeaponRange();
+ if (d->mUnitMover) {
+	d->mUnitMover->removeUpgrade(upgrade);
+ }
 }
 
 unsigned long int Unit::maxWeaponRange() const
@@ -1915,120 +2144,21 @@ int Unit::getAnimationMode() const
  return BosonItem::getAnimationMode();
 }
 
-
-
-/////////////////////////////////////////////////
-// MobileUnit
-/////////////////////////////////////////////////
-
-
-class UnitMover
+void Unit::flyInCircle()
 {
-public:
-	UnitMover(MobileUnit* u);
-	~UnitMover();
-
-	static void initCellIntersectionTable();
-
-	bool saveAsXML(QDomElement& root) const;
-	bool loadFromXML(const QDomElement& root);
-
-	void advanceIdle(unsigned int advanceCallsCount);
-	void advanceFollow(unsigned int);
-	void advanceMoveInternal(unsigned int);
-	void advanceMoveCheck();
-
-	bool attackEnemyUnitsInRangeWhileMoving();
-
-	/**
-	 * Move towards p, going at most maxdist (in canvas coords).
-	 * How much unit should move, will be added to xspeed and yspeed.
-	 * (x; y) marks unit's current position
-	 *
-	 * @return How much is moved (will be <= maxdist)
-	 **/
-	bofixed moveTowardsPoint(const BoVector2Fixed& p, bofixed x, bofixed y, bofixed maxdist, bofixed &xspeed, bofixed &yspeed);
-
-	void flyInCircle();
-
-	MobileUnit* unit() const
-	{
-		return mUnit;
-	}
-	const BosonCanvas* canvas() const
-	{
-		return unit()->canvas();
-	}
-	unsigned long int id() const
-	{
-		return unit()->id();
-	}
-	UnitBase::WorkType work() const
-	{
-		return unit()->work();
-	}
-	UnitBase::WorkType advanceWork() const
-	{
-		return unit()->advanceWork();
-	}
-	const UnitProperties* unitProperties() const
-	{
-		return unit()->unitProperties();
-	}
-	BosonPathInfo* pathInfo() const
-	{
-		return unit()->pathInfo();
-	}
-
-	/**
-	 * Call turnTo according to the current speed (you want to use this!)
-	 **/
-	void turnTo();
-
-protected:
-	void advanceMoveLeader(unsigned int advanceCallsCount);
-	void advanceMoveFollowing(unsigned int advanceCallsCount);
-	void advanceMoveFlying(unsigned int advanceCallsCount);
+ if (d->mUnitMover) {
+	d->mUnitMover->flyInCircle();
+ }
+}
 
 
-	/**
-	 * Finds new path to destination.
-	 * Destination must have been set before in @ref pathInfo
-	 *
-	 * This is in Unit instead of @ref MobileUnit so that we can apply a
-	 * path to newly constructed units of factories.
-	 **/
-	bool newPath();
-
-	int selectNextPathPoint(int xpos, int ypos);
-	void avoidance();
-	bool canGoToCurrentPathPoint(int xpos, int ypos);
-	void currentPathPointChanged(int unitx, int unity);
-
-public:
-	static QValueVector<BoVector2Fixed> mCellIntersectionTable[11][11];
-
-private:
-	MobileUnit* mUnit;
-
-	// Should these be made KGameProperty?
-	int mLastCellX;
-	int mLastCellY;
-
-	int mNextCellX;
-	int mNextCellY;
-	QValueVector<BoVector2Fixed>* mNextWaypointIntersections;
-	int mNextWaypointIntersectionsXOffset;
-	int mNextWaypointIntersectionsYOffset;
-
-	bofixed mRoll;
-
-};
-
-QValueVector<BoVector2Fixed> UnitMover::mCellIntersectionTable[11][11];
 
 
-UnitMover::UnitMover(MobileUnit* u)
+
+UnitMover::UnitMover(Unit* u)
+	: mMaxSpeed(u->unitProperties(), "Speed", "MaxValue"),
+	mMaxAccelerationSpeed(u->unitProperties(), "AccelerationSpeed", "MaxValue"),
+	mMaxDecelerationSpeed(u->unitProperties(), "DecelerationSpeed", "MaxValue")
 {
  mUnit = u;
  mNextWaypointIntersections = 0;
@@ -2040,10 +2170,40 @@ UnitMover::UnitMover(MobileUnit* u)
  mNextWaypointIntersectionsYOffset = 0;
 
  mRoll = 0;
+
+ unit()->setMaxSpeed(maxSpeed());
+ unit()->setAccelerationSpeed(maxAccelerationSpeed());
+ unit()->setDecelerationSpeed(maxDecelerationSpeed());
 }
 
 UnitMover::~UnitMover()
 {
+}
+
+bool UnitMover::init()
+{
+ if (unit()->isFlying()) {
+	unit()->setSpeed(maxSpeed() * 0.75);
+	unit()->move(unit()->x(), unit()->y(), unit()->unitProperties()->preferredAltitude());
+ }
+
+ unit()->setWork(UnitBase::WorkIdle);
+ return true;
+}
+
+bofixed UnitMover::maxSpeed() const
+{
+ return mMaxSpeed.value(unit()->upgradesCollection());
+}
+
+bofixed UnitMover::maxAccelerationSpeed() const
+{
+ return mMaxAccelerationSpeed.value(unit()->upgradesCollection());
+}
+
+bofixed UnitMover::maxDecelerationSpeed() const
+{
+ return mMaxDecelerationSpeed.value(unit()->upgradesCollection());
 }
 
 bool UnitMover::saveAsXML(QDomElement& root) const
@@ -2051,14 +2211,15 @@ bool UnitMover::saveAsXML(QDomElement& root) const
  if (unitProperties()->isAircraft()) {
 	root.setAttribute("Roll", mRoll);
  }
+ root.setAttribute("Speed", unit()->speed());
  return true;
 }
 
 bool UnitMover::loadFromXML(const QDomElement& root)
 {
+ bool ok = false;
  if (unitProperties()->isAircraft()) {
 	if (root.hasAttribute("Roll")) {
-		bool ok;
 		mRoll = root.attribute("Roll").toFloat(&ok);
 		if (!ok) {
 			boWarning() << k_funcinfo << "Invalid value for Roll attribute" << endl;
@@ -2066,6 +2227,16 @@ bool UnitMover::loadFromXML(const QDomElement& root)
 			unit()->setYRotation(mRoll);
 		}
 	}
+ }
+
+ bofixed speed = 0.0f;
+ if (root.hasAttribute("Speed")) {
+	speed = root.attribute("Speed").toFloat(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "Invalid value for Speed attribute" << endl;
+		return false;
+	}
+	unit()->setSpeed(speed);
  }
 
 #warning TODO: mNextWaypointIntersections
@@ -3127,197 +3298,33 @@ bool UnitMover::newPath()
  return true;
 }
 
-
-MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
-	: Unit(prop, owner, canvas),
-	mMaxSpeed(prop, "Speed", "MaxValue"),
-	mMaxAccelerationSpeed(prop, "AccelerationSpeed", "MaxValue"),
-	mMaxDecelerationSpeed(prop, "DecelerationSpeed", "MaxValue")
+void UnitMover::addUpgrade(const UpgradeProperties* upgrade)
 {
- mUnitMover = new UnitMover(this);
-
- setMaxSpeed(mMaxSpeed.value(upgradesCollection())); // AB: WARNING: maxSpeed() must NOT be used here (we _set_ it here)
- setAccelerationSpeed(maxAccelerationSpeed());
- setDecelerationSpeed(maxDecelerationSpeed());
+ changeUpgrades(upgrade);
 }
 
-MobileUnit::~MobileUnit()
+void UnitMover::removeUpgrade(const UpgradeProperties* upgrade)
 {
- delete mUnitMover;
+ changeUpgrades(upgrade);
 }
 
-bool MobileUnit::init()
-{
-  bool ret = Unit::init();
-  if (!ret) {
-	return ret;
-  }
-
- if (isFlying()) {
-	setSpeed(maxSpeed() * 0.75);
-	move(x(), y(), unitProperties()->preferredAltitude());
- }
-
- setWork(WorkIdle);
- return true;
-}
-
-void MobileUnit::initStatic()
-{
- UnitMover::initCellIntersectionTable();
-}
-
-bofixed MobileUnit::maxAccelerationSpeed() const
-{
- return mMaxAccelerationSpeed.value(upgradesCollection());
-}
-
-bofixed MobileUnit::maxDecelerationSpeed() const
-{
- return mMaxDecelerationSpeed.value(upgradesCollection());
-}
-
-void MobileUnit::addUpgrade(const UpgradeProperties* upgrade)
-{
- changeUpgrades(upgrade, true);
-}
-
-void MobileUnit::removeUpgrade(const UpgradeProperties* upgrade)
-{
- changeUpgrades(upgrade, false);
-}
-
-void MobileUnit::changeUpgrades(const UpgradeProperties* upgrade, bool add)
+void UnitMover::changeUpgrades(const UpgradeProperties* upgrade)
 {
  // AB: these are special cases: they are stored and handled in BosonItem and
  // therefore we can not use some kind of "speedFactor" as we do with e.g.
  // health
- bofixed origMaxSpeed = mMaxSpeed.value(upgradesCollection());
- bofixed origMaxAccelerationSpeed = maxAccelerationSpeed();
- bofixed origMaxDecelerationSpeed = maxDecelerationSpeed();
 
- if (add) {
-	Unit::addUpgrade(upgrade);
- } else {
-	Unit::removeUpgrade(upgrade);
+ if (unit()->maxSpeed() != maxSpeed()) {
+	unit()->setMaxSpeed(maxSpeed());
  }
 
- if (origMaxSpeed != mMaxSpeed.value(upgradesCollection())) {
-	setMaxSpeed(mMaxSpeed.value(upgradesCollection()));
- }
  // AB: accelerationSpeed/decelerationSpeed always use maximum values
- if (origMaxAccelerationSpeed != maxAccelerationSpeed()) {
-	setAccelerationSpeed(maxAccelerationSpeed());
+ if (unit()->accelerationSpeed() != maxAccelerationSpeed()) {
+	unit()->setAccelerationSpeed(maxAccelerationSpeed());
  }
- if (origMaxDecelerationSpeed != maxDecelerationSpeed()) {
-	setDecelerationSpeed(maxDecelerationSpeed());
+ if (unit()->decelerationSpeed() != maxDecelerationSpeed()) {
+	unit()->setDecelerationSpeed(maxDecelerationSpeed());
  }
-}
-
-void MobileUnit::advanceIdle(unsigned int advanceCallsCount)
-{
- Unit::advanceIdle(advanceCallsCount);
-
- mUnitMover->advanceIdle(advanceCallsCount);
-}
-
-void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this actually needs to be called for every advanceCallsCount.
-{
- mUnitMover->advanceMoveInternal(advanceCallsCount);
-}
-
-void MobileUnit::advanceMoveCheck()
-{
- mUnitMover->advanceMoveCheck();
-}
-
-void MobileUnit::advanceFollow(unsigned int advanceCallsCount)
-{
- mUnitMover->advanceFollow(advanceCallsCount);
-}
-
-void MobileUnit::turnTo(int dir)
-{
- if (isDestroyed()) {
-	boError() << k_funcinfo << "unit is already destroyed!" << endl;
-	return;
- }
- if ((int)rotation() != dir) {
-	// Find out how much we have to turn
-	bofixed delta = rotation() - dir;
-	if (delta < 0) {
-		delta = QABS(delta);
-	}
-	if (delta > 180) {
-		delta = 360 - delta;
-	}
-
-	if (delta < unitProperties()->rotationSpeed()) {
-		// Turn immediately (and hope this method won't be called more than once per
-		//  advance call)
-		setRotation(dir);
-		return;
-	}
-	boDebug() << k_funcinfo << id() << ": will slowly rotate from " << rotation() << " to " << dir << endl;
-	// If we're moving, we want to take one more step with current velocity, but
-	//  setAdvanceWork() resets it to 0, so we have this workaround here
-	bofixed _xVelocity = 0, _yVelocity = 0;
-	if (advanceWork() == WorkMove) {
-		_xVelocity = xVelocity();
-		_yVelocity = yVelocity();
-	}
-	Unit::turnTo(dir);
-	setAdvanceWork(WorkTurn);
-	setVelocity(_xVelocity, _yVelocity, 0);
- }
-}
-
-bool MobileUnit::loadFromXML(const QDomElement& root)
-{
- if (!Unit::loadFromXML(root)) {
-	boError() << k_funcinfo << "Unit not loaded properly" << endl;
-	return false;
- }
-
- bool ok = false;
- bofixed speed = 0.0f;
- if (root.hasAttribute("Speed")) {
-	speed = root.attribute("Speed").toFloat(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "Invalid value for Speed attribute" << endl;
-		return false;
-	}
-	setSpeed(speed);
- }
-
- return mUnitMover->loadFromXML(root);
-}
-
-bool MobileUnit::saveAsXML(QDomElement& root)
-{
- if (!Unit::saveAsXML(root)) {
-	boError() << k_funcinfo << "Unit not saved properly" << endl;
-	return false;
- }
-
- root.setAttribute("Speed", speed());
-
- return mUnitMover->saveAsXML(root);
-}
-
-void MobileUnit::stopMoving()
-{
- Unit::stopMoving();
- if (!isFlying()) {
-	if (pathInfo()->slowDownAtDest) {
-		setSpeed(0);
-	}
- }
-}
-
-void MobileUnit::flyInCircle()
-{
- mUnitMover->flyInCircle();
 }
 
 
