@@ -663,7 +663,8 @@ bool Player::hasMiniMap() const
 			return true;
 		} else {
 			Facility* f = (Facility*)it.current();
-			if (f->isConstructionComplete()) {
+			UnitConstruction* c = f->construction();
+			if (c->isConstructionComplete()) {
 				return true;
 			}
 		}
@@ -734,7 +735,8 @@ void Player::calculatePower(unsigned long int* _powerGenerated, unsigned long in
 	if (!includeUnconstructedFacilities) {
 		if (it.current()->isFacility()) {
 			Facility* f = (Facility*)it.current();
-			if (!f->isConstructionComplete()) {
+			UnitConstruction* c = f->construction();
+			if (!c->isConstructionComplete()) {
 				continue;
 			}
 		}
@@ -892,7 +894,12 @@ bool Player::hasUnitWithType(unsigned long int type) const
  QPtrListIterator<Unit> it(d->mUnits);
  while (it.current()) {
 	if (it.current()->type() == type) {
-		if (it.current()->isMobile() || ((Facility*)it.current())->isConstructionComplete()) {
+		if (it.current()->isMobile()) {
+			return true;
+		}
+		Facility* f = (Facility*)it.current();
+		UnitConstruction* c = f->construction();
+		if (c->isConstructionComplete()) {
 			return true;
 		}
 	}

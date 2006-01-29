@@ -656,8 +656,73 @@ private:
 
 };
 
-// if you add class members - ONLY KGameProperties!! otherwise Player::load and
-// Player::save() won't work correctly!
+
+/**
+ * Construction of a facility
+ * @author Andreas BosonItem <b_mann@gmx.de>
+ **/
+class UnitConstruction
+{
+public:
+	UnitConstruction(Facility* f);
+	~UnitConstruction();
+
+	/**
+	 * Advance the construction animation. This is usually called when
+	 * placing the unit until the construction is completed. See @ref
+	 * isConstructionComplete.
+	 *
+	 * Do NOT call this manually, but let the internal unit advance
+	 * mechanism do that!
+	 **/
+	void advanceConstruction(unsigned int advanceCallsCount);
+
+	/**
+	 * Used by to initialize the scenario. A scenario file can specify that
+	 * a facility is already completed - to do so we can
+	 * setContructionStep(constructionSteps() - 1).
+	 *
+	 * This should <em>not</em> be called once the game is started
+	 **/
+	void setConstructionStep(unsigned int step);
+
+	/**
+	 * Please note that the construction state of a unit specifies if a unit
+	 * <em>has been built</em> completely - it has nothing to do with the
+	 * productions of a facility!
+	 * @return If this unit has been built (constructed) completely
+	 **/
+	bool isConstructionComplete() const;
+
+	/**
+	 * The construction steps are the number of frames until the complete
+	 * pixmap of the facility is shown.
+	 * @return The number of available construction steps for a facility.
+	 **/
+	unsigned int constructionSteps() const;
+
+	unsigned int currentConstructionStep() const;
+
+	/**
+	 * @return A percentage that describes how far the construction progress
+	 * of this facility is.
+	 **/
+	double constructionProgress() const;
+
+	bool loadFromXML(const QDomElement& root);
+	bool saveAsXML(QDomElement&);
+
+	Facility* unit() const
+	{
+		return mFacility;
+	}
+
+private:
+	Facility* mFacility;
+	KGameProperty<unsigned int> mConstructionStep;
+};
+
+
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -669,37 +734,10 @@ public:
 
 	virtual bool init();
 
-	/**
-	 * The construction steps are the number of frames until the complete
-	 * pixmap of the facility is shown.
-	 * @return The number of available construction steps for a facility.
-	 **/
-	unsigned int constructionSteps() const;
-
-	/**
-	 * Please note that the construction state of a unit specifies if a unit
-	 * <em>has been built</em> completely - it has nothing to do with the
-	 * productions of a facility!
-	 * @return If this unit has been built (constructed) completely
-	 **/
-	bool isConstructionComplete() const;
-
-	/**
-	 * @return A percentage that describes how far the construction progress
-	 * of this facility is.
-	 **/
-	double constructionProgress() const;
-
-	/**
-	 * Used by to initialize the scenario. A scenario file can specify that
-	 * a facility is already completed - to do so we can
-	 * setContructionStep(constructionSteps() - 1).
-	 *
-	 * This should <em>not</em> be called once the game is started
-	 **/
-	void setConstructionStep(unsigned int step);
-
-	unsigned int currentConstructionStep() const;
+	UnitConstruction* construction() const
+	{
+		return mUnitConstruction;
+	}
 
 	/**
 	 * Reimplemented. Does nothing if @ref isConstructionComplete is false -
@@ -713,11 +751,6 @@ public:
 	 **/
 	virtual void moveTo(bofixed x, bofixed y, int range = 0);
 
-	/**
-	 * Advance the construction animation. This is usually called when
-	 * placing the unit until the construction is completed. See @ref
-	 * isConstructionComplete
-	 **/
 	virtual void advanceConstruction(unsigned int advanceCallsCount);
 
 	/**

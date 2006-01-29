@@ -909,8 +909,11 @@ Unit* BosonPlayerInputHandler::editorPlaceUnit(Q_UINT32 owner, Q_UINT32 unitType
  u->setRotation(rotation);
  u->updateRotation();
  if (u->isFacility()) {
+	Facility* f = (Facility*)f;
+	UnitConstruction* c = f->construction();
+
 	// Facilities will be fully constructed by default
-	((Facility*)u)->setConstructionStep(((Facility*)u)->constructionSteps());
+	c->setConstructionStep(c->constructionSteps());
  }
  // Resource mines will have 20000 minerals / 10000 oil by default
  if (u->plugin(UnitPlugin::ResourceMine)) {

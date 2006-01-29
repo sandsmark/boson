@@ -3274,37 +3274,6 @@ void MobileUnit::flyInCircle()
 // Facility
 /////////////////////////////////////////////////
 
-/**
- * Construction of a facility
- * @author Andreas BosonItem <b_mann@gmx.de>
- **/
-class UnitConstruction
-{
-public:
-	UnitConstruction(Facility* f);
-	~UnitConstruction();
-
-	void advanceConstruction(unsigned int advanceCallsCount);
-	unsigned int constructionSteps() const;
-	bool isConstructionComplete() const;
-	double constructionProgress() const;
-	void setConstructionStep(unsigned int step);
-	unsigned int currentConstructionStep() const;
-
-	bool loadFromXML(const QDomElement& root);
-	bool saveAsXML(QDomElement&);
-
-	Facility* unit() const
-	{
-		return mFacility;
-	}
-
-
-private:
-	Facility* mFacility;
-	KGameProperty<unsigned int> mConstructionStep;
-};
-
 UnitConstruction::UnitConstruction(Facility* f)
 {
  mFacility = f;
@@ -3327,7 +3296,7 @@ void UnitConstruction::advanceConstruction(unsigned int advanceCallsCount)
 	boError() << k_funcinfo << "unit is already destroyed" << endl;
 	return;
  }
- unit()->setConstructionStep(unit()->currentConstructionStep() + 1);
+ setConstructionStep(currentConstructionStep() + 1);
 }
 
 bool UnitConstruction::isConstructionComplete() const
@@ -3335,7 +3304,7 @@ bool UnitConstruction::isConstructionComplete() const
  if (unit()->work() == UnitBase::WorkConstructed) {
 	return false;
  }
- if (unit()->currentConstructionStep() < constructionSteps()) {
+ if (currentConstructionStep() < constructionSteps()) {
 	return false;
  }
  return true;
@@ -3344,7 +3313,7 @@ bool UnitConstruction::isConstructionComplete() const
 double UnitConstruction::constructionProgress() const
 {
  unsigned int constructionTime = constructionSteps();
- double percentage = (double)(unit()->currentConstructionStep() * 100) / (double)constructionTime;
+ double percentage = (double)(currentConstructionStep() * 100) / (double)constructionTime;
  return percentage;
 }
 
@@ -3410,11 +3379,6 @@ bool Facility::init()
  return true;
 }
 
-unsigned int Facility::constructionSteps() const
-{
- return mUnitConstruction->constructionSteps();
-}
-
 void Facility::advanceConstruction(unsigned int advanceCallsCount)
 {
  mUnitConstruction->advanceConstruction(advanceCallsCount);
@@ -3422,25 +3386,15 @@ void Facility::advanceConstruction(unsigned int advanceCallsCount)
 
 UnitPlugin* Facility::plugin(int pluginType) const
 {
- if (!isConstructionComplete()) {
+ if (!mUnitConstruction->isConstructionComplete()) {
 	return 0;
  }
  return Unit::plugin(pluginType);
 }
 
-bool Facility::isConstructionComplete() const
-{
- return mUnitConstruction->isConstructionComplete();
-}
-
-double Facility::constructionProgress() const
-{
- return mUnitConstruction->constructionProgress();
-}
-
 void Facility::setTarget(Unit* u)
 {
- if (u && !isConstructionComplete()) {
+ if (u && !mUnitConstruction->isConstructionComplete()) {
 	boWarning() << k_funcinfo << "not yet constructed completely" << endl;
 	return;
  }
@@ -3449,21 +3403,11 @@ void Facility::setTarget(Unit* u)
 
 void Facility::moveTo(bofixed x, bofixed y, int range)
 {
- if (!isConstructionComplete()) {
+ if (!mUnitConstruction->isConstructionComplete()) {
 	boWarning() << k_funcinfo << "not yet constructed completely" << endl;
 	return;
  }
  Unit::moveTo(x, y, range);
-}
-
-void Facility::setConstructionStep(unsigned int step)
-{
- mUnitConstruction->setConstructionStep(step);
-}
-
-unsigned int Facility::currentConstructionStep() const
-{
- return mUnitConstruction->currentConstructionStep();
 }
 
 bool Facility::loadFromXML(const QDomElement& root)
@@ -3486,7 +3430,7 @@ int Facility::getAnimationMode() const
  if (isDestroyed()) {
 	return Unit::getAnimationMode();
  }
- if (currentConstructionStep() < constructionSteps()) {
+ if (!mUnitConstruction->isConstructionComplete()) {
 	return UnitAnimationConstruction;
  }
  return Unit::getAnimationMode();
