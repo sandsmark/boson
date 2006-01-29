@@ -66,8 +66,9 @@ QString BoToolTipCreatorExtended::createToolTip(const BosonItem* item) const
  tip = i18n("%1\nHealth: %2").arg(u->name()).arg(u->health());
  if (u->isFacility()) {
 	Facility* fac = (Facility*)u;
-	if (!fac->isConstructionComplete()) {
-		tip += i18n("\n%1% constructed").arg((int)fac->constructionProgress());
+	UnitConstruction* c = fac->construction();
+	if (!c->isConstructionComplete()) {
+		tip += i18n("\n%1% constructed").arg((int)c->constructionProgress());
 	} else {
 		ProductionPlugin* production = (ProductionPlugin*)u->plugin(UnitPlugin::Production);
 		if (production && production->hasProduction()) {
@@ -171,8 +172,9 @@ QString BoToolTipCreatorDebug::createToolTip(const BosonItem* item) const
 
  if (u->isFacility()) {
 	Facility* fac = (Facility*)u;
-	if (!fac->isConstructionComplete()) {
-		tip += i18n("\n%1% constructed").arg((int)fac->constructionProgress());
+	UnitConstruction* c = fac->construction();
+	if (!c->isConstructionComplete()) {
+		tip += i18n("\n%1% constructed").arg((int)c->constructionProgress());
 	} else {
 		ProductionPlugin* production = (ProductionPlugin*)u->plugin(UnitPlugin::Production);
 		if (production && production->hasProduction()) {

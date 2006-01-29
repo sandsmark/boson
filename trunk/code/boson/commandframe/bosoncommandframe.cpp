@@ -136,7 +136,8 @@ protected:
 	{
 		if (unit->isFacility()) {
 			Facility* fac = (Facility*)unit;
-			if (!fac->isConstructionComplete()) {
+			UnitConstruction* c = fac->construction();
+			if (!c->isConstructionComplete()) {
 				return false;
 			}
 		}
@@ -215,10 +216,11 @@ protected:
 			return false;
 		}
 		Facility* fac = (Facility*)unit;
-		if (fac->isConstructionComplete()) {
+		UnitConstruction* c = fac->construction();
+		if (c->isConstructionComplete()) {
 			return false;
 		}
-		setValue(fac->constructionProgress());
+		setValue(c->constructionProgress());
 		return true;
 	}
 
@@ -250,7 +252,8 @@ protected:
 	{
 		if (unit->isFacility()) {
 			Facility* fac = (Facility*)unit;
-			if (!fac->isConstructionComplete()) {
+			UnitConstruction* c = fac->construction();
+			if (!c->isConstructionComplete()) {
 				return false;
 			}
 		}
@@ -961,9 +964,13 @@ void BosonCommandFrame::showUnitActions(Unit* unit)
 	d->mUnitActions->hide();
 	return;
  }
- if (unit->isFacility() && !((Facility*)unit)->isConstructionComplete()) {
-	d->mUnitActions->hide();
-	return;
+ if (unit->isFacility()) {
+	Facility* f = (Facility*)unit;
+	UnitConstruction* c = f->construction();
+	if (!c->isConstructionComplete()) {
+		d->mUnitActions->hide();
+		return;
+	}
  }
  if (!localPlayerIO() || !localPlayerIO()->ownsUnit(unit)) {
 	d->mUnitActions->hide();

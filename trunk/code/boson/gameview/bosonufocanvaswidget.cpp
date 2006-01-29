@@ -260,7 +260,8 @@ void BosonUfoCanvasWidget::initItemEffects()
 		Unit* u = (Unit*)*it;
 		if (u->isFacility()) {
 			Facility* f = (Facility*)u;
-			if (f->isConstructionComplete()) {
+			UnitConstruction* c = f->construction();
+			if (c->isConstructionComplete()) {
 				addFacilityConstructedEffects(u);
 			}
 		}
