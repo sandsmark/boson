@@ -3274,25 +3274,129 @@ void MobileUnit::flyInCircle()
 // Facility
 /////////////////////////////////////////////////
 
-class Facility::FacilityPrivate
+/**
+ * Construction of a facility
+ * @author Andreas BosonItem <b_mann@gmx.de>
+ **/
+class UnitConstruction
 {
 public:
+	UnitConstruction(Facility* f);
+	~UnitConstruction();
+
+	void advanceConstruction(unsigned int advanceCallsCount);
+	unsigned int constructionSteps() const;
+	bool isConstructionComplete() const;
+	double constructionProgress() const;
+	void setConstructionStep(unsigned int step);
+	unsigned int currentConstructionStep() const;
+
+	bool loadFromXML(const QDomElement& root);
+	bool saveAsXML(QDomElement&);
+
+	Facility* unit() const
+	{
+		return mFacility;
+	}
+
+
+private:
+	Facility* mFacility;
 	KGameProperty<unsigned int> mConstructionStep;
 };
 
+UnitConstruction::UnitConstruction(Facility* f)
+{
+ mFacility = f;
+
+ unit()->registerData(&mConstructionStep, Unit::IdConstructionStep);
+ mConstructionStep.setLocal(0);
+}
+
+UnitConstruction::~UnitConstruction()
+{
+}
+
+void UnitConstruction::advanceConstruction(unsigned int advanceCallsCount)
+{
+ if (advanceCallsCount % 20 != 0) {
+	return;
+ }
+ BosonProfiler profiler("advanceConstruction");
+ if (unit()->isDestroyed()) {
+	boError() << k_funcinfo << "unit is already destroyed" << endl;
+	return;
+ }
+ unit()->setConstructionStep(unit()->currentConstructionStep() + 1);
+}
+
+bool UnitConstruction::isConstructionComplete() const
+{
+ if (unit()->work() == UnitBase::WorkConstructed) {
+	return false;
+ }
+ if (unit()->currentConstructionStep() < constructionSteps()) {
+	return false;
+ }
+ return true;
+}
+
+double UnitConstruction::constructionProgress() const
+{
+ unsigned int constructionTime = constructionSteps();
+ double percentage = (double)(unit()->currentConstructionStep() * 100) / (double)constructionTime;
+ return percentage;
+}
+
+unsigned int UnitConstruction::constructionSteps() const
+{
+ return unit()->unitProperties()->constructionSteps();
+}
+
+void UnitConstruction::setConstructionStep(unsigned int step)
+{
+ if (step > constructionSteps()) {
+	step = constructionSteps();
+ }
+
+ mConstructionStep = step;
+ if (step == constructionSteps()) {
+	unit()->setWork(UnitBase::WorkIdle);
+	unit()->owner()->facilityCompleted(unit());
+	unit()->updateAnimationMode();
+ }
+}
+
+unsigned int UnitConstruction::currentConstructionStep() const
+{
+ return mConstructionStep;
+}
+
+bool UnitConstruction::loadFromXML(const QDomElement& root)
+{
+ if (mConstructionStep > constructionSteps()) {
+	mConstructionStep = constructionSteps();
+ }
+
+ unit()->updateAnimationMode();
+
+ return true;
+}
+
+bool UnitConstruction::saveAsXML(QDomElement&)
+{
+ return true;
+}
+
+
 Facility::Facility(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) : Unit(prop, owner, canvas)
 {
- d = new FacilityPrivate;
-
- registerData(&d->mConstructionStep, IdConstructionStep);
-
- d->mConstructionStep.setLocal(0);
+ mUnitConstruction = new UnitConstruction(this);
 }
 
 Facility::~Facility()
 {
- // TODO: write a plugin framework and manage plugins in a list.
- delete d;
+ delete mUnitConstruction;
 }
 
 bool Facility::init()
@@ -3308,20 +3412,12 @@ bool Facility::init()
 
 unsigned int Facility::constructionSteps() const
 {
- return unitProperties()->constructionSteps();
+ return mUnitConstruction->constructionSteps();
 }
 
 void Facility::advanceConstruction(unsigned int advanceCallsCount)
 {
- if (advanceCallsCount % 20 != 0) {
-	return;
- }
- BosonProfiler profiler("advanceConstruction");
- if (isDestroyed()) {
-	boError() << k_funcinfo << "unit is already destroyed" << endl;
-	return;
- }
- setConstructionStep(currentConstructionStep() + 1);
+ mUnitConstruction->advanceConstruction(advanceCallsCount);
 }
 
 UnitPlugin* Facility::plugin(int pluginType) const
@@ -3334,20 +3430,12 @@ UnitPlugin* Facility::plugin(int pluginType) const
 
 bool Facility::isConstructionComplete() const
 {
- if (work() == WorkConstructed) {
-	return false;
- }
- if (currentConstructionStep() < constructionSteps()) {
-	return false;
- }
- return true;
+ return mUnitConstruction->isConstructionComplete();
 }
 
 double Facility::constructionProgress() const
 {
- unsigned int constructionTime = constructionSteps();
- double percentage = (double)(currentConstructionStep() * 100) / (double)constructionTime;
- return percentage;
+ return mUnitConstruction->constructionProgress();
 }
 
 void Facility::setTarget(Unit* u)
@@ -3370,21 +3458,12 @@ void Facility::moveTo(bofixed x, bofixed y, int range)
 
 void Facility::setConstructionStep(unsigned int step)
 {
- if (step > constructionSteps()) {
-	step = constructionSteps();
- }
-
- d->mConstructionStep = step;
- if (step == constructionSteps()) {
-	setWork(WorkIdle);
-	owner()->facilityCompleted(this);
-	updateAnimationMode();
- }
+ mUnitConstruction->setConstructionStep(step);
 }
 
 unsigned int Facility::currentConstructionStep() const
 {
- return d->mConstructionStep;
+ return mUnitConstruction->currentConstructionStep();
 }
 
 bool Facility::loadFromXML(const QDomElement& root)
@@ -3394,22 +3473,12 @@ bool Facility::loadFromXML(const QDomElement& root)
 	return false;
  }
 
- if (d->mConstructionStep > constructionSteps()) {
-	d->mConstructionStep = constructionSteps();
- }
-
- updateAnimationMode();
-
- return true;
+ return mUnitConstruction->loadFromXML(root);
 }
 
 bool Facility::saveAsXML(QDomElement& root)
 {
- if (!Unit::saveAsXML(root)) {
-	boError() << k_funcinfo << "Unit not loaded properly" << endl;
-	return false;
- }
- return true;
+ return Unit::saveAsXML(root);
 }
 
 int Facility::getAnimationMode() const
@@ -3417,7 +3486,7 @@ int Facility::getAnimationMode() const
  if (isDestroyed()) {
 	return Unit::getAnimationMode();
  }
- if (d->mConstructionStep < constructionSteps()) {
+ if (currentConstructionStep() < constructionSteps()) {
 	return UnitAnimationConstruction;
  }
  return Unit::getAnimationMode();

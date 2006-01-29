@@ -39,6 +39,7 @@ class BosonWeapon;
 class BosonMoveData;
 class BosonPathInfo;
 class UnitMover;
+class UnitConstruction;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
 template<class T> class BoRect;
@@ -734,6 +735,8 @@ protected:
 private:
 	class FacilityPrivate;
 	FacilityPrivate* d;
+
+	UnitConstruction* mUnitConstruction;
 };
 
 #endif
