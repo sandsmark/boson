@@ -183,7 +183,7 @@ void ProductionPlugin::productionPlaced(Unit* produced)
 {
  BO_CHECK_NULL_RET(produced);
  if (produced->isFacility()) {
-	player()->statistics()->addProducedFacility((Facility*)produced, this);
+	player()->statistics()->addProducedFacility(produced, this);
  } else {
 	player()->statistics()->addProducedMobileUnit((MobileUnit*)produced, this);
  }

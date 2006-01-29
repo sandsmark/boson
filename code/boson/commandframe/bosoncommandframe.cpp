@@ -135,8 +135,7 @@ protected:
 	virtual bool display(Unit* unit)
 	{
 		if (unit->isFacility()) {
-			Facility* fac = (Facility*)unit;
-			UnitConstruction* c = fac->construction();
+			UnitConstruction* c = unit->construction();
 			if (!c->isConstructionComplete()) {
 				return false;
 			}
@@ -215,8 +214,7 @@ protected:
 		if (!unit->isFacility()) {
 			return false;
 		}
-		Facility* fac = (Facility*)unit;
-		UnitConstruction* c = fac->construction();
+		UnitConstruction* c = unit->construction();
 		if (c->isConstructionComplete()) {
 			return false;
 		}
@@ -251,8 +249,7 @@ protected:
 	virtual bool display(Unit* unit)
 	{
 		if (unit->isFacility()) {
-			Facility* fac = (Facility*)unit;
-			UnitConstruction* c = fac->construction();
+			UnitConstruction* c = unit->construction();
 			if (!c->isConstructionComplete()) {
 				return false;
 			}
@@ -965,8 +962,7 @@ void BosonCommandFrame::showUnitActions(Unit* unit)
 	return;
  }
  if (unit->isFacility()) {
-	Facility* f = (Facility*)unit;
-	UnitConstruction* c = f->construction();
+	UnitConstruction* c = unit->construction();
 	if (!c->isConstructionComplete()) {
 		d->mUnitActions->hide();
 		return;

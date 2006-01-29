@@ -259,8 +259,7 @@ void BosonUfoCanvasWidget::initItemEffects()
 	if (RTTI::isUnit((*it)->rtti())) {
 		Unit* u = (Unit*)*it;
 		if (u->isFacility()) {
-			Facility* f = (Facility*)u;
-			UnitConstruction* c = f->construction();
+			UnitConstruction* c = u->construction();
 			if (c->isConstructionComplete()) {
 				addFacilityConstructedEffects(u);
 			}
