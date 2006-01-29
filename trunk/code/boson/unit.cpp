@@ -127,10 +127,16 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  registerData(&d->mPathPoints, IdPathPoints);
  registerData(&d->mWantedRotation, IdWantedRotation);
  d->mWantedRotation.setLocal(0);
+
+ mUnitConstruction = 0;
+ if (prop->isFacility()) {
+	mUnitConstruction = new UnitConstruction(this);
+ }
 }
 
 Unit::~Unit()
 {
+ delete mUnitConstruction;
  d->mWaypoints.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
  d->mWaypoints.clear();
  unselect();
@@ -194,6 +200,11 @@ bool Unit::init()
  loadWeapons();
 
  speciesTheme()->loadNewUnit(this);
+
+ if (unitProperties()->isFacility()) {
+	setWork(WorkConstructed);
+	updateAnimationMode();
+ }
 
  return true;
 }
@@ -272,6 +283,10 @@ Unit* Unit::target() const
 
 void Unit::setTarget(Unit* target)
 {
+ if (target && mUnitConstruction && !mUnitConstruction->isConstructionComplete()) {
+	boWarning() << k_funcinfo << "not yet constructed completely" << endl;
+	return;
+ }
  d->mTarget = target;
  if (!d->mTarget) {
 	return;
@@ -329,6 +344,9 @@ void Unit::setPluginWork(int pluginType)
 
 UnitPlugin* Unit::plugin(int pluginType) const
 {
+ if (mUnitConstruction && !mUnitConstruction->isConstructionComplete()) {
+	return 0;
+ }
  QPtrListIterator<UnitPlugin> it(d->mPlugins);
  for (; it.current(); ++it) {
 	if (it.current()->pluginType() == pluginType) {
@@ -574,6 +592,13 @@ void Unit::advanceIdle(unsigned int advanceCallsCount)
  }
 
  attackEnemyUnitsInRange();
+}
+
+void Unit::advanceConstruction(unsigned int advanceCallsCount)
+{
+ if (mUnitConstruction) {
+	mUnitConstruction->advanceConstruction(advanceCallsCount);
+ }
 }
 
 bool Unit::attackEnemyUnitsInRange()
@@ -938,6 +963,10 @@ void Unit::resetPathInfo()
 void Unit::moveTo(const BoVector2Fixed& pos, bool attack)
 {
  PROFILE_METHOD
+ if (mUnitConstruction && !mUnitConstruction->isConstructionComplete()) {
+	boWarning() << k_funcinfo << "not yet constructed completely" << endl;
+	return;
+ }
  d->mTarget = 0;
 
  // We want land unit's center point to be in the middle of the cell after
@@ -964,6 +993,10 @@ void Unit::moveTo(const BoVector2Fixed& pos, bool attack)
 
 bool Unit::moveTo(BosonItem* target, int range)
 {
+ if (mUnitConstruction && !mUnitConstruction->isConstructionComplete()) {
+	boWarning() << k_funcinfo << "not yet constructed completely" << endl;
+	return false;
+ }
  // TODO: try to merge this with the moveTo() method below
  if (maxSpeed() == 0) {
 	// If unit's max speed is 0, it cannot move
@@ -1009,6 +1042,10 @@ bool Unit::moveTo(BosonItem* target, int range)
 
 bool Unit::moveTo(bofixed x, bofixed y, int range)
 {
+ if (mUnitConstruction && !mUnitConstruction->isConstructionComplete()) {
+	boWarning() << k_funcinfo << "not yet constructed completely" << endl;
+	return false;
+ }
  if (maxSpeed() == 0) {
 	// If unit's max speed is 0, it cannot move
 	return false;
@@ -1202,6 +1239,11 @@ bool Unit::saveAsXML(QDomElement& root)
  pathinfoxml.setAttribute("waiting", pathInfo()->waiting);
  pathinfoxml.setAttribute("pathrecalced", pathInfo()->pathrecalced);
 
+ if (mUnitConstruction) {
+	if (!mUnitConstruction->saveAsXML(root)) {
+		return false;
+	}
+ }
 
  return true;
 }
@@ -1373,6 +1415,12 @@ bool Unit::loadFromXML(const QDomElement& root)
 
 
  recalculateMaxWeaponRange();
+
+ if (mUnitConstruction) {
+	if (!mUnitConstruction->loadFromXML(root)) {
+		return false;
+	}
+ }
 
  updateAnimationMode();
 
@@ -1860,6 +1908,9 @@ int Unit::getAnimationMode() const
 {
  if (isDestroyed()) {
 	return UnitAnimationWreckage;
+ }
+ if (mUnitConstruction && !mUnitConstruction->isConstructionComplete()) {
+	return UnitAnimationConstruction;
  }
  return BosonItem::getAnimationMode();
 }
@@ -3274,7 +3325,7 @@ void MobileUnit::flyInCircle()
 // Facility
 /////////////////////////////////////////////////
 
-UnitConstruction::UnitConstruction(Facility* f)
+UnitConstruction::UnitConstruction(Unit* f)
 {
  mFacility = f;
 
@@ -3357,82 +3408,4 @@ bool UnitConstruction::saveAsXML(QDomElement&)
  return true;
 }
 
-
-Facility::Facility(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) : Unit(prop, owner, canvas)
-{
- mUnitConstruction = new UnitConstruction(this);
-}
-
-Facility::~Facility()
-{
- delete mUnitConstruction;
-}
-
-bool Facility::init()
-{
- bool ret = Unit::init();
- if (!ret) {
-	return ret;
- }
- setWork(WorkConstructed);
- updateAnimationMode();
- return true;
-}
-
-void Facility::advanceConstruction(unsigned int advanceCallsCount)
-{
- mUnitConstruction->advanceConstruction(advanceCallsCount);
-}
-
-UnitPlugin* Facility::plugin(int pluginType) const
-{
- if (!mUnitConstruction->isConstructionComplete()) {
-	return 0;
- }
- return Unit::plugin(pluginType);
-}
-
-void Facility::setTarget(Unit* u)
-{
- if (u && !mUnitConstruction->isConstructionComplete()) {
-	boWarning() << k_funcinfo << "not yet constructed completely" << endl;
-	return;
- }
- Unit::setTarget(u);
-}
-
-void Facility::moveTo(bofixed x, bofixed y, int range)
-{
- if (!mUnitConstruction->isConstructionComplete()) {
-	boWarning() << k_funcinfo << "not yet constructed completely" << endl;
-	return;
- }
- Unit::moveTo(x, y, range);
-}
-
-bool Facility::loadFromXML(const QDomElement& root)
-{
- if (!Unit::loadFromXML(root)) {
-	boError() << k_funcinfo << "Unit not loaded properly" << endl;
-	return false;
- }
-
- return mUnitConstruction->loadFromXML(root);
-}
-
-bool Facility::saveAsXML(QDomElement& root)
-{
- return Unit::saveAsXML(root);
-}
-
-int Facility::getAnimationMode() const
-{
- if (isDestroyed()) {
-	return Unit::getAnimationMode();
- }
- if (!mUnitConstruction->isConstructionComplete()) {
-	return UnitAnimationConstruction;
- }
- return Unit::getAnimationMode();
-}
 

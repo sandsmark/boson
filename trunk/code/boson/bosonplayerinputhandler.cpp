@@ -909,8 +909,7 @@ Unit* BosonPlayerInputHandler::editorPlaceUnit(Q_UINT32 owner, Q_UINT32 unitType
  u->setRotation(rotation);
  u->updateRotation();
  if (u->isFacility()) {
-	Facility* f = (Facility*)f;
-	UnitConstruction* c = f->construction();
+	UnitConstruction* c = u->construction();
 
 	// Facilities will be fully constructed by default
 	c->setConstructionStep(c->constructionSteps());

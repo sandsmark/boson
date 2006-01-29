@@ -33,7 +33,6 @@ class QDomElement;
 class QTextStream;
 
 class Unit;
-class Facility;
 class SpeciesTheme;
 class UnitProperties;
 class BosonMap;
@@ -221,7 +220,7 @@ public:
 	 * When this facility has some special functions they should be
 	 * activated now (e.g. the mini map for the radar station)
 	 **/
-	void facilityCompleted(Facility* fac);
+	void facilityCompleted(Unit* fac);
 
 	/**
 	 * @return TRUE if the player can display a minimap (i.e. he has a radar

@@ -662,8 +662,7 @@ bool Player::hasMiniMap() const
 		if (!it.current()->isFacility()) {
 			return true;
 		} else {
-			Facility* f = (Facility*)it.current();
-			UnitConstruction* c = f->construction();
+			UnitConstruction* c = it.current()->construction();
 			if (c->isConstructionComplete()) {
 				return true;
 			}
@@ -734,8 +733,7 @@ void Player::calculatePower(unsigned long int* _powerGenerated, unsigned long in
 	powerConsumed += it.current()->powerConsumedByUnit();
 	if (!includeUnconstructedFacilities) {
 		if (it.current()->isFacility()) {
-			Facility* f = (Facility*)it.current();
-			UnitConstruction* c = f->construction();
+			UnitConstruction* c = it.current()->construction();
 			if (!c->isConstructionComplete()) {
 				continue;
 			}
@@ -751,7 +749,7 @@ void Player::calculatePower(unsigned long int* _powerGenerated, unsigned long in
  }
 }
 
-void Player::facilityCompleted(Facility* fac)
+void Player::facilityCompleted(Unit* fac)
 {
  if (!fac) {
 	boError() << k_funcinfo << "NULL facility" << endl;
@@ -897,8 +895,7 @@ bool Player::hasUnitWithType(unsigned long int type) const
 		if (it.current()->isMobile()) {
 			return true;
 		}
-		Facility* f = (Facility*)it.current();
-		UnitConstruction* c = f->construction();
+		UnitConstruction* c = it.current()->construction();
 		if (c->isConstructionComplete()) {
 			return true;
 		}

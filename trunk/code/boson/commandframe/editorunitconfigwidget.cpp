@@ -145,10 +145,10 @@ bool EditorUnitConfigWidget::display(Unit* unit)
  d->mId->setText(QString::number(unit->id()));
 
  const UnitProperties* prop = unit->unitProperties();
- Facility* fac = 0;
+ Unit* facility = 0;
  MobileUnit* mob = 0;
  if (unit->isFacility()) {
-	fac = (Facility*)unit;
+	facility = unit;
  } else {
 	mob = (MobileUnit*)unit;
  }
@@ -170,14 +170,14 @@ bool EditorUnitConfigWidget::display(Unit* unit)
  d->mHealth->setRange(QMIN(10, unit->maxHealth()), unit->maxHealth());
 
  d->mHealth->setValue(unit->health());
- if (!fac || (fac && fac->construction()->constructionSteps() == 0)) {
+ if (!facility || (facility && facility->construction()->constructionSteps() == 0)) {
 	d->mConstructionStep->hide();
 	d->mConstructionStep->setRange(0, 0);
 	d->mConstructionStep->setValue(0);
  } else {
 	d->mConstructionStep->show();
-	d->mConstructionStep->setRange(0, fac->construction()->constructionSteps());
-	d->mConstructionStep->setValue(fac->construction()->currentConstructionStep());
+	d->mConstructionStep->setRange(0, facility->construction()->constructionSteps());
+	d->mConstructionStep->setValue(facility->construction()->currentConstructionStep());
  }
 
  d->mShields->setRange(0, unit->maxShields());
@@ -265,14 +265,13 @@ void EditorUnitConfigWidget::updateUnit(Unit* unit)
  unit->setHealth((unsigned long int)d->mHealth->value());
  unit->setShields((unsigned long int)d->mShields->value());
  if (unit->isFacility()) {
-	Facility* fac = (Facility*)unit;
-	if (fac->construction()->constructionSteps() != 0) {
-		fac->construction()->setConstructionStep((unsigned int)d->mConstructionStep->value());
+	if (unit->construction()->constructionSteps() != 0) {
+		unit->construction()->setConstructionStep((unsigned int)d->mConstructionStep->value());
 		// If the facility isn't fully constructed yet, we need to set it's work
 		//  back to WorkConstructed, so that it's construction will be completed in
 		//  the game
-		if (fac->construction()->isConstructionComplete()) {
-			fac->setWork(UnitBase::WorkConstructed);
+		if (unit->construction()->isConstructionComplete()) {
+			unit->setWork(UnitBase::WorkConstructed);
 		}
 	}
  }

@@ -26,7 +26,6 @@
 #include "../boaction.h"
 
 class Unit;
-class Facility;
 class Player;
 class BosonGroundTheme;
 class BosonOrderButton;

@@ -31,7 +31,6 @@ class BosonCanvas;
 class BoItemList;
 class UnitProperties;
 class Cell;
-class Facility;
 class ProductionPlugin;
 class UnitPlugin;
 class RepairPlugin;
@@ -132,6 +131,11 @@ public:
 
 	virtual void setWork(WorkType w);
 	void setPluginWork(int pluginType);
+
+	UnitConstruction* construction() const
+	{
+		return mUnitConstruction;
+	}
 
 	/**
 	 * Called when @p unit is destroyed. If the unit is a target of this
@@ -273,7 +277,7 @@ public:
 	 * Move the construction animation one step forward. Does nothing by
 	 * default - reimplemented in @ref Facility
 	 **/
-	virtual void advanceConstruction(unsigned int) { }
+	virtual void advanceConstruction(unsigned int);
 
 	/**
 	 * Called when the unit has been destroyed. Maybe compute a destruction
@@ -569,6 +573,7 @@ private:
 private:
 	UnitPrivate* d;
 	UnitPlugin* mCurrentPlugin;
+	UnitConstruction* mUnitConstruction;
 
 	static bool mInitialized; // whether initStatic() was called or not
 
@@ -664,7 +669,7 @@ private:
 class UnitConstruction
 {
 public:
-	UnitConstruction(Facility* f);
+	UnitConstruction(Unit* f);
 	~UnitConstruction();
 
 	/**
@@ -712,64 +717,15 @@ public:
 	bool loadFromXML(const QDomElement& root);
 	bool saveAsXML(QDomElement&);
 
-	Facility* unit() const
+	Unit* unit() const
 	{
 		return mFacility;
 	}
 
 private:
-	Facility* mFacility;
+	Unit* mFacility;
 	KGameProperty<unsigned int> mConstructionStep;
 };
 
-
-/**
- * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
- **/
-class Facility : public Unit
-{
-public:
-	Facility(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
-	virtual ~Facility();
-
-	virtual bool init();
-
-	UnitConstruction* construction() const
-	{
-		return mUnitConstruction;
-	}
-
-	/**
-	 * Reimplemented. Does nothing if @ref isConstructionComplete is false -
-	 * otherwise the same as @ref Unit::setTarget
-	 **/
-	virtual void setTarget(Unit*);
-
-	/**
-	 * Does nothing if @ref isConstructionComplete is false - otherwise the
-	 * same as @ref Unit::moveTo
-	 **/
-	virtual void moveTo(bofixed x, bofixed y, int range = 0);
-
-	virtual void advanceConstruction(unsigned int advanceCallsCount);
-
-	/**
-	 * @return NULL if the facility has not yet been fully constructed,
-	 * otherwise @ref Unit::plugin
-	 **/
-	virtual UnitPlugin* plugin(int pluginType) const;
-
-	virtual bool saveAsXML(QDomElement& root);
-	virtual bool loadFromXML(const QDomElement& root);
-
-protected:
-	virtual int getAnimationMode() const;
-
-private:
-	class FacilityPrivate;
-	FacilityPrivate* d;
-
-	UnitConstruction* mUnitConstruction;
-};
 
 #endif
