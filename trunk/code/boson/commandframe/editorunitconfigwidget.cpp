@@ -146,11 +146,8 @@ bool EditorUnitConfigWidget::display(Unit* unit)
 
  const UnitProperties* prop = unit->unitProperties();
  Unit* facility = 0;
- MobileUnit* mob = 0;
  if (unit->isFacility()) {
 	facility = unit;
- } else {
-	mob = (MobileUnit*)unit;
  }
 
  // AB: there cases when we _cannot_ set the correct health, due to internal

@@ -185,7 +185,7 @@ void ProductionPlugin::productionPlaced(Unit* produced)
  if (produced->isFacility()) {
 	player()->statistics()->addProducedFacility(produced, this);
  } else {
-	player()->statistics()->addProducedMobileUnit((MobileUnit*)produced, this);
+	player()->statistics()->addProducedMobileUnit(produced, this);
  }
 
  BoEvent* productionPlaced = new BoEvent("ProducedUnitWithTypePlaced", QString::number(produced->type()), QString::number(unit()->id()));
