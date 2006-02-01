@@ -306,7 +306,7 @@ boson.source += """
 	bosoneffect.cpp
 	bosoneffectproperties.cpp
 	bosoneffectparticle.cpp
-	bosoneffectpropertiesparticle.cpp 
+	bosoneffectpropertiesparticle.cpp
 	botexmapimportdialog.cpp
 	boconditionwidget.cpp
 	bowaterrenderer.cpp
@@ -409,6 +409,25 @@ borender.source += """
 	boeditturretpropertiesdialog.cpp
 """
 borender.execute()
+
+bomodelpixmaps = env.kobject('program')
+bomodelpixmaps.target = 'bomodelpixmaps'
+bomodelpixmaps.includes = '../bodebug ../bogl ../boson/boufo'
+bomodelpixmaps.includes += libboson_includes
+bomodelpixmaps.libs = libboson_libs + """
+	3ds
+"""
+bomodelpixmaps.libs += boufo_lib
+bomodelpixmaps.libs += " Xmu"
+bomodelpixmaps.libpaths += libcommon_libpaths
+bomodelpixmaps.source = libboson_source
+bomodelpixmaps.source += """
+	bomodelpixmaps.cpp
+	bomodelpixmapsgui.ui
+	borenderrendermodel.cpp
+	bopixmaprenderer.cpp
+"""
+bomodelpixmaps.execute()
 
 boinfo = env.boobject('program')
 boinfo.target = 'boinfo'
