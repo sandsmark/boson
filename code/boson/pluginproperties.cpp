@@ -160,8 +160,7 @@ void HarvesterProperties::loadPlugin(KSimpleConfig* config)
  mCanMineMinerals = config->readBoolEntry("CanMineMinerals", false);
  mCanMineOil = config->readBoolEntry("CanMineOil", false);
  if (mCanMineMinerals && mCanMineOil) {
-	boWarning() << k_funcinfo << "units can't mine minerals *and* oil" << endl;
-	mCanMineOil = false;
+	boWarning() << k_funcinfo << "units should't mine minerals *and* oil" << endl;
  }
  mMaxResources = config->readUnsignedNumEntry("MaxResources", 100);
  // Convert speeds from amount/second to amount/adv.call
@@ -212,8 +211,7 @@ void RefineryProperties::loadPlugin(KSimpleConfig* config)
  mCanRefineMinerals = config->readBoolEntry("CanRefineMinerals", false);
  mCanRefineOil = config->readBoolEntry("CanRefineOil", false);
  if (mCanRefineMinerals && mCanRefineOil) {
-	boWarning() << k_funcinfo << "unit can't refine minerals *and* oil" << endl;
-	mCanRefineOil = false;
+	boWarning() << k_funcinfo << "unit shouldn't refine minerals *and* oil" << endl;
  }
 }
 
