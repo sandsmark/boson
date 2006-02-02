@@ -2678,7 +2678,9 @@ void UnitMover::advanceMoveLeader(unsigned int advanceCallsCount)
 			//  only partial.
 			if (!newPath()) {
 				// Probably no path could be found (and stopMoving() was called)
-				break;
+				// FIME: actually we should move one more step with current velocity
+				//  and then stop
+				return;
 			}
 		} else {
 			// TODO: rotate a bit randomly
@@ -2927,6 +2929,12 @@ void UnitMover::advanceMoveCheck()
 
  // Check if we need to wait
  // Find the next cell we'll be on
+ if (mNextWaypointIntersections->count() == 0) {
+	boWarning() << k_funcinfo << unit()->id() << ": mNextWaypointIntersections is empty" << endl;
+	unit()->stopMoving();
+	return;
+ }
+
  int currentx = (int)(unit()->center().x() + unit()->xVelocity());
  int currenty = (int)(unit()->center().y() + unit()->yVelocity());
  mNextCellX = -1;
