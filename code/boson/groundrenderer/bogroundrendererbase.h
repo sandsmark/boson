@@ -20,7 +20,7 @@
 #define BOGROUNDRENDERERBASE_H
 
 #include "../bogroundrenderer.h"
-#include "../boquadtreenode.h"
+#include "../bogroundquadtreenode.h"
 
 #include <qptrdict.h>
 
@@ -42,12 +42,12 @@ class BoColorMap;
 class BoColorMapRenderer;
 class BosonGroundThemeData;
 
-class BoGroundRendererQuadTreeNode : public BoQuadTreeNode
+class BoGroundRendererQuadTreeNode : public BoGroundQuadTreeNode
 {
 public:
 	BoGroundRendererQuadTreeNode(int l, int t, int r, int b, int depth)
 		:
-		BoQuadTreeNode(l, t, r, b, depth),
+		BoGroundQuadTreeNode(l, t, r, b, depth),
 		mRoughnessMultiplier(100.0f)
 	{
 		mRoughness = 0.0f;
@@ -58,7 +58,8 @@ public:
 
 	virtual BoQuadTreeNode* createNode(int l, int t, int r, int b, int depth) const;
 
-	void calculateRoughness(const BosonMap* map, bool recursive = true);
+	virtual void cellTextureChanged(const BosonMap* map, int x1, int y1, int x2, int y2);
+	virtual void cellHeightChanged(const BosonMap* map, int x1, int y1, int x2, int y2);
 
 	/**
 	 * The "roughness" is a that indicates how many height differences and
@@ -83,6 +84,8 @@ protected:
 
 		mRougnessPlusTextureRougnessTotalMulMultiplier = (mRoughness + mTextureRoughnessTotal) * mRoughnessMultiplier;
 	}
+
+	void calculateRoughness(const BosonMap* map);
 
 private:
 	const float mRoughnessMultiplier;
