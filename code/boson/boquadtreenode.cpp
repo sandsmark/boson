@@ -21,6 +21,7 @@
 
 #include "../../bomemory/bodummymemory.h"
 #include <bodebug.h>
+#include "boquadtreecollection.h"
 
 BoQuadTreeNode::BoQuadTreeNode(int l, int t, int r, int b, int depth)
 	: mLeft(l),
@@ -47,6 +48,12 @@ BoQuadTreeNode::~BoQuadTreeNode()
  delete mTopRight;
  delete mBottomLeft;
  delete mBottomRight;
+
+ if (depth() == 0) {
+	if (BoQuadTreeCollectionManager::manager()) {
+		BoQuadTreeCollectionManager::manager()->unregisterTree(this);
+	}
+ }
 }
 
 BoQuadTreeNode* BoQuadTreeNode::createNode(int l, int t, int r, int b, int depth) const

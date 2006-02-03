@@ -1,8 +1,8 @@
 /*
     This file is part of the Boson game
     Copyright (C) 1999-2000 Thomas Capricelli (capricel@email.enst.fr)
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ class BosonGroundTheme;
 class BoTexture;
 class BosonGroundType;
 class BosonMap;
+class BoGroundQuadTreeNode;
 class BoLake;
 template<class T> class QDict;
 template<class T> class QValueList;
@@ -510,18 +511,6 @@ public:
 		mTexMap->initialize(texture, alpha);
 	}
 
-	/**
-	 * Recalculates whole normal map.
-	 * Use this whenever heightmap changes.
-	 * It automatically creates new normalmap.
-	 **/
-	void recalculateNormalMap();
-
-	/**
-	 * Recalculates all normals within given rect
-	 * Normal map must already exist and rect must be valid
-	 **/
-	void recalculateNormalsInRect(int x1, int y1, int x2, int y2);
 	bool generateCellsFromTexMap();
 
 	/**
@@ -756,6 +745,9 @@ public:
 	void setModified(bool m) { mModified = m; }
 	bool modified() const { return mModified; }
 
+	void registerQuadTree(BoGroundQuadTreeNode* tree);
+	void unregisterQuadTree(BoGroundQuadTreeNode* tree);
+
 public:
 	/**
 	 * @return TRUE if the current map geo is valid.
@@ -790,16 +782,6 @@ public slots:
 	void slotChangeTexMap(int x, int y, unsigned int textureCount, unsigned int* textures, unsigned char* alpha);
 
 signals:
-	/**
-	 * The @ref cell at @p x, @p y has been changed. This refers to the
-	 * texture values / amounts of land and water only, <em>not</em> to the
-	 * units on the cell.
-	 *
-	 * The signal is emitted in editor mode only, once the cell has been
-	 * changed completely.
-	 **/
-	void signalCellChanged(int x, int y);
-
 	void signalColorMapsChanged();
 
 protected:
@@ -831,6 +813,13 @@ protected:
 	 * be a lot of data! (probably more a few MB for 500x500 maps!)
 	 **/
 	bool saveCompleteMap(QDataStream& stream) const;
+
+	/**
+	 * Recalculates all normals within given rect
+	 * Normal map must already exist and rect must be valid
+	 **/
+	void recalculateNormalsInRect(int x1, int y1, int x2, int y2);
+	void heightsInRectChanged(int minX, int minY, int maxX, int maxY);
 
 private:
 	void init();

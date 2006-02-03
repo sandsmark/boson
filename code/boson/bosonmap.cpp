@@ -1,8 +1,8 @@
 /*
     This file is part of the Boson game
     Copyright (C) 1999-2000 Thomas Capricelli (capricel@email.enst.fr)
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 #include "bodebug.h"
 #include "bosondata.h"
 #include "bowater.h"
-#include "botexture.h"
+#include "bogroundquadtreenode.h"
 
 #include <qdict.h>
 #include <qdatastream.h>
@@ -353,10 +353,12 @@ public:
 	BosonMapPrivate()
 	{
 		mWaterManager = 0;
+		mQuadTreeCollection = 0;
 	}
 
 	QDict<BoColorMap> mColorMaps;
 	BoWaterManager* mWaterManager;
+	BoGroundQuadTreeCollection* mQuadTreeCollection;
 };
 
 BosonMap::BosonMap(QObject* parent) : QObject(parent)
@@ -373,6 +375,7 @@ BosonMap::~BosonMap()
  delete mHeightMap;
  delete mTexMap;
  delete d->mWaterManager;
+ delete d->mQuadTreeCollection;
  delete d;
 }
 
@@ -388,6 +391,7 @@ void BosonMap::init()
  mMapWidth = 0;
  mMapHeight = 0;
  d->mWaterManager = new BoWaterManager();
+ d->mQuadTreeCollection = new BoGroundQuadTreeCollection(this);
  setModified(false);
 }
 
@@ -739,7 +743,9 @@ bool BosonMap::loadHeightMap(QDataStream& stream)
  boDebug() << k_funcinfo << "loading height map from network stream" << endl;
  bool ret = mHeightMap->load(stream);
  if (ret) {
-	recalculateNormalMap();
+	delete mNormalMap;
+	mNormalMap = new BoNormalMap(width() + 1, height() + 1);
+	heightsInRectChanged(0, 0, width(), height());
  }
  return ret;
 }
@@ -1035,7 +1041,7 @@ void BosonMap::setHeightsAtCorners(const QValueList< QPair<QPoint, float> >& hei
  maxX = QMIN((int)width(), maxX + 1);
  minY = QMAX(0, minY - 1);
  maxY = QMIN((int)height(), maxY + 1);
- recalculateNormalsInRect(minX, minY, maxX, maxY);
+ heightsInRectChanged(minX, minY, maxX, maxY);
 }
 
 void BosonMap::setHeightAtCorner(int x, int y, float h)
@@ -1172,101 +1178,7 @@ void BosonMap::slotChangeTexMap(int x, int y, unsigned int texCount, unsigned in
 	setTexMapAlpha(texture, x, y, alpha[i]);
  }
 
- // now we update up to 4 cells.
- int cellsX[10]; // we use 10, so that we don't crash for bugs
- int cellsY[10];
- unsigned int count = 0;
- if (x == 0) { // left border
-	if (y == 0) { // top border
-		cellsX[count] = x;
-		cellsY[count] = y;
-		count++;
-	} else if ((uint)y == height()) { // bottom border
-		cellsX[count] = x;
-		cellsY[count] = y - 1;
-		count++;
-	} else { // somewhere between top and bottom
-		cellsX[count] = x;
-		cellsY[count] = y;
-		count++;
-		cellsX[count] = x;
-		cellsY[count] = y - 1;
-		count++;
-	}
- } else if ((uint)x == width()) { // right border
-	if (y == 0) { // top border
-		cellsX[count] = x - 1;
-		cellsY[count] = y;
-		count++;
-	} else if ((uint)y == height()) { // bottom border
-		cellsX[count] = x - 1;
-		cellsY[count] = y - 1;
-		count++;
-	} else { // somewhere between top and bottom
-		cellsX[count] = x - 1;
-		cellsY[count] = y;
-		count++;
-		cellsX[count] = x - 1;
-		cellsY[count] = y - 1;
-		count++;
-	}
- } else if (y == 0) {
-	// top border (can't be left or right border)
-	cellsX[count] = x;
-	cellsY[count] = y;
-	count++;
-	cellsX[count] = x - 1;
-	cellsY[count] = y;
-	count++;
- } else if ((uint)y == height()) {
-	// bottom border (can't be left or right border)
-	cellsX[count] = x;
-	cellsY[count] = y - 1;
-	count++;
-	cellsX[count] = x - 1;
-	cellsY[count] = y - 1;
-	count++;
- } else {
-	// no border at all. 4 cells are adjacent.
-	cellsX[count] = x;
-	cellsY[count] = y;
-	count++;
-	cellsX[count] = x;
-	cellsY[count] = y - 1;
-	count++;
-	cellsX[count] = x - 1;
-	cellsY[count] = y;
-	count++;
-	cellsX[count] = x - 1;
-	cellsY[count] = y - 1;
-	count++;
- }
- if (count > 4) {
-	boError() << k_funcinfo << "a cell cannot have more than 4 corners! count=" << count << endl;
-	count = 4;
- }
- for (unsigned int i = 0; i < count; i++) {
-	// update minimap
-	// we may want to group these cells into a single array to save some
-	// speed once the editor is able to modify several cells at once.
-	// currently it isn't necessary.
-	emit signalCellChanged(cellsX[i], cellsY[i]);
- }
-}
-
-void BosonMap::recalculateNormalMap()
-{
- boDebug() << k_funcinfo << endl;
- if (mNormalMap) {
-	// Old normal map should already be deleted
-	boWarning() << k_funcinfo << "Old normal map not deleted!" << endl;
-	delete mNormalMap;
-	mNormalMap = 0;
- }
-
- mNormalMap = new BoNormalMap(width() + 1, height() + 1);
-
- recalculateNormalsInRect(0, 0, width(), height());
+ d->mQuadTreeCollection->cellTextureChanged(this, x, y, x, y);
 }
 
 void BosonMap::recalculateNormalsInRect(int x1, int y1, int x2, int y2)
@@ -1349,6 +1261,12 @@ void BosonMap::recalculateNormalsInRect(int x1, int y1, int x2, int y2)
  boDebug() << k_funcinfo << "done" << endl;
 }
 
+void BosonMap::heightsInRectChanged(int minX, int minY, int maxX, int maxY)
+{
+ recalculateNormalsInRect(minX, minY, maxX, maxY);
+ d->mQuadTreeCollection->cellHeightChanged(this, minX, minY, maxX, maxY);
+}
+
 
 int BosonMap::mapFileFormatVersion()
 {
@@ -1379,5 +1297,15 @@ void BosonMap::removeColorMap(const QString& name)
  }
  delete map;
  emit signalColorMapsChanged();
+}
+
+void BosonMap::registerQuadTree(BoGroundQuadTreeNode* tree)
+{
+ d->mQuadTreeCollection->registerTree(tree);
+}
+
+void BosonMap::unregisterQuadTree(BoGroundQuadTreeNode* tree)
+{
+ d->mQuadTreeCollection->unregisterTree(tree);
 }
 

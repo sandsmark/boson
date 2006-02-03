@@ -123,6 +123,8 @@ libgameengine.source = """
 	bosonstarting.cpp
 	bosongameenginestarting.cpp
 	boquadtreenode.cpp
+	boquadtreecollection.cpp
+	bogroundquadtreenode.cpp
 	items/bosonitem.cpp
 	items/bosonshot.cpp
 	items/bosonitempropertyhandler.cpp
