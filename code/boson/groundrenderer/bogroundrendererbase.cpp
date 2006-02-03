@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2003-2006 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ static int g_cellsVisibleCalls = 0;
 // Whether to use glTexSubImage2D() to update texture. It seems to be buggy.
 #define USE_TEXSUBIMAGE
 
-BoGroundQuadTreeNode* BoGroundQuadTreeNode::createTree(unsigned int w, unsigned int h)
+BoGroundRendererQuadTreeNode* BoGroundRendererQuadTreeNode::createTree(unsigned int w, unsigned int h)
 {
  if (w < 1) {
 	boError() << k_funcinfo << "invalid width: " << w << endl;
@@ -59,36 +59,28 @@ BoGroundQuadTreeNode* BoGroundQuadTreeNode::createTree(unsigned int w, unsigned 
 	boError() << k_funcinfo << "invalid height: " << h << endl;
 	h = 1;
  }
- BoGroundQuadTreeNode* root = new BoGroundQuadTreeNode(0, 0, w - 1, h - 1, 0);
+ BoGroundRendererQuadTreeNode* root = new BoGroundRendererQuadTreeNode(0, 0, w - 1, h - 1, 0);
  root->createChilds(w, h);
  return root;
 }
 
-BoQuadTreeNode* BoGroundQuadTreeNode::createNode(int l, int t, int r, int b, int depth) const
+BoQuadTreeNode* BoGroundRendererQuadTreeNode::createNode(int l, int t, int r, int b, int depth) const
 {
- return new BoGroundQuadTreeNode(l, t, r, b, depth);
+ return new BoGroundRendererQuadTreeNode(l, t, r, b, depth);
 }
 
 // TODO: also take neighboring cells into account!
-void BoGroundQuadTreeNode::calculateRoughness(const BosonMap* map, bool recursive)
+void BoGroundRendererQuadTreeNode::calculateRoughness(const BosonMap* map, bool recursive)
 {
- int children = 0;
+ int childCount = 0;
  if (recursive) {
-	if (topLeftNode()) {
-		children++;
-		((BoGroundQuadTreeNode*)topLeftNode())->calculateRoughness(map);
-	}
-	if (topRightNode()) {
-		children++;
-		((BoGroundQuadTreeNode*)topRightNode())->calculateRoughness(map);
-	}
-	if (bottomLeftNode()) {
-		children++;
-		((BoGroundQuadTreeNode*)bottomLeftNode())->calculateRoughness(map);
-	}
-	if (bottomRightNode()) {
-		children++;
-		((BoGroundQuadTreeNode*)bottomRightNode())->calculateRoughness(map);
+	BoQuadTreeNode* children[4];
+	getChildren(children);
+	for (int i = 0; i < 4; i++) {
+		if (children[i]) {
+			childCount++;
+			((BoGroundRendererQuadTreeNode*)children[i])->calculateRoughness(map);
+		}
 	}
  }
 
@@ -100,7 +92,7 @@ void BoGroundQuadTreeNode::calculateRoughness(const BosonMap* map, bool recursiv
  // b) precise (e.g. no or only little rounding errors)
  // therefore for now we go the slow way and calculate this for every node
 #if 0
- if (children > 0) {
+ if (childCount > 0) {
 	// ...
 	return;
  }
@@ -262,7 +254,7 @@ public:
 	virtual void cellTextureChanged(int x1, int y1, int x2, int y2);
 	virtual void cellHeightChanged(int x1, int y1, int x2, int y2);
 
-	const BoGroundQuadTreeNode* findVisibleNodeAt(int x, int y);
+	const BoGroundRendererQuadTreeNode* findVisibleNodeAt(int x, int y);
 
 	virtual void updateMapCache(const BosonMap* map);
 
@@ -270,7 +262,7 @@ protected:
 	/**
 	 * Uses @ref addVisibleNodes to add all visible cells to @p cells.
 	 **/
-	void addVisibleCells(int* cells, const BoGroundQuadTreeNode* node);
+	void addVisibleCells(int* cells, const BoGroundRendererQuadTreeNode* node);
 
 	/**
 	 * This is the main method of this class. It checks (recursively)
@@ -282,7 +274,7 @@ protected:
 	 * that all cells in @p node are visible and adds the nodes according to
 	 * the LOD settings only.
 	 **/
-	void addVisibleNodes(QPtrList<const BoGroundQuadTreeNode>* nodes, const BoGroundQuadTreeNode* node, bool allVisible = false);
+	void addVisibleNodes(QPtrList<const BoGroundRendererQuadTreeNode>* nodes, const BoGroundRendererQuadTreeNode* node, bool allVisible = false);
 
 	/**
 	 * @return Whether the cells in the rect of the node are visible.
@@ -291,12 +283,12 @@ protected:
 	 * cell is visible (i.e. this returns FALSE) @p partially is set to
 	 * FALSE.
 	 **/
-	bool cellsVisible(const BoGroundQuadTreeNode* node, bool* partially);
+	bool cellsVisible(const BoGroundRendererQuadTreeNode* node, bool* partially);
 
 	/**
 	 * Add all cells in the rect of the node to @p cells
 	 **/
-	void addCells(int* cells, const BoGroundQuadTreeNode* node);
+	void addCells(int* cells, const BoGroundRendererQuadTreeNode* node);
 
 	void recreateTree(const BosonMap* map);
 
@@ -309,12 +301,12 @@ private:
 	const BosonMap* mMap;
 	unsigned int mCount;
 
-	BoGroundQuadTreeNode* mRoot;
+	BoGroundRendererQuadTreeNode* mRoot;
 
 	float mMinDistance;
 	float mMaxDistance;
 
-	QMemArray< QPtrList<const BoGroundQuadTreeNode>* > mLeafs;
+	QMemArray< QPtrList<const BoGroundRendererQuadTreeNode>* > mLeafs;
 };
 
 void CellListBuilder::copyHeightMap(float* vertexArray, float* heightMap, const BosonMap* map)
@@ -351,13 +343,13 @@ void CellListBuilderTree::copyCustomHeightMap(float* vertexArray, float* heightM
 	return;
  }
  for (int i = (int)mLeafs.size() - 1; i >= 0; i--) {
-	QPtrList<const BoGroundQuadTreeNode>* list = mLeafs[i];
+	QPtrList<const BoGroundRendererQuadTreeNode>* list = mLeafs[i];
 	if (!list || list->isEmpty()) {
 		continue;
 	}
-	QPtrListIterator<const BoGroundQuadTreeNode> it(*list);
+	QPtrListIterator<const BoGroundRendererQuadTreeNode> it(*list);
 	while (it.current()) {
-		const BoGroundQuadTreeNode* node = it.current();
+		const BoGroundRendererQuadTreeNode* node = it.current();
 		++it;
 		const int l = node->left();
 		const int r = node->right();
@@ -411,6 +403,7 @@ void CellListBuilderTree::updateMapCache(const BosonMap* map)
 	boDebug() << k_funcinfo << "recreating map tree" << endl;
 	BosonProfiler prof("mapTreeGeneration");
 	recreateTree(map);
+	boDebug() << k_funcinfo << "recreating map tree done" << endl;
  }
  mMap = map;
 }
@@ -437,7 +430,7 @@ int* CellListBuilderTree::generateCellList(const BosonMap* map, int* origRenderC
  mCount = 0;
 
  for (int i = 0; i < (int)mLeafs.size(); i++) {
-	QPtrList<const BoGroundQuadTreeNode>* list = mLeafs[i];
+	QPtrList<const BoGroundRendererQuadTreeNode>* list = mLeafs[i];
 if (list) {
 		list->clear();
 	}
@@ -459,7 +452,7 @@ if (list) {
  return renderCells;
 }
 
-const BoGroundQuadTreeNode* CellListBuilderTree::findVisibleNodeAt(int x, int y)
+const BoGroundRendererQuadTreeNode* CellListBuilderTree::findVisibleNodeAt(int x, int y)
 {
  if (!mMap) {
 	return 0;
@@ -473,9 +466,9 @@ const BoGroundQuadTreeNode* CellListBuilderTree::findVisibleNodeAt(int x, int y)
  int y1 = y;
  int y2 = y;
 
- QPtrList<const BoGroundQuadTreeNode> nodes;
+ QPtrList<const BoGroundRendererQuadTreeNode> nodes;
  addVisibleNodes(&nodes, mRoot);
- for (QPtrListIterator<const BoGroundQuadTreeNode> it(nodes); it.current(); ++it) {
+ for (QPtrListIterator<const BoGroundRendererQuadTreeNode> it(nodes); it.current(); ++it) {
 	if (it.current()->intersects(x1, y1, x2, y2)) {
 		return it.current();
 	}
@@ -483,7 +476,7 @@ const BoGroundQuadTreeNode* CellListBuilderTree::findVisibleNodeAt(int x, int y)
  return 0;
 }
 
-void CellListBuilderTree::addCells(int* cells, const BoGroundQuadTreeNode* node)
+void CellListBuilderTree::addCells(int* cells, const BoGroundRendererQuadTreeNode* node)
 {
  if (!node) {
 	return;
@@ -498,7 +491,7 @@ void CellListBuilderTree::addCells(int* cells, const BoGroundQuadTreeNode* node)
 	int s = mLeafs.size();
 	mLeafs.resize(node->depth() + 1);
 	for (int i = s; i < (int)mLeafs.size(); i++) {
-		mLeafs[i] = new QPtrList<const BoGroundQuadTreeNode>();
+		mLeafs[i] = new QPtrList<const BoGroundRendererQuadTreeNode>();
 	}
  }
  mLeafs[node->depth()]->append(node);
@@ -516,7 +509,7 @@ void CellListBuilderTree::addCells(int* cells, const BoGroundQuadTreeNode* node)
  }
 }
 
-bool CellListBuilderTree::cellsVisible(const BoGroundQuadTreeNode* node, bool* partially)
+bool CellListBuilderTree::cellsVisible(const BoGroundRendererQuadTreeNode* node, bool* partially)
 {
  g_cellsVisibleCalls++;
  if (!node) {
@@ -574,18 +567,18 @@ bool CellListBuilderTree::cellsVisible(const BoGroundQuadTreeNode* node, bool* p
  return true;
 }
 
-void CellListBuilderTree::addVisibleCells(int* cells, const BoGroundQuadTreeNode* root)
+void CellListBuilderTree::addVisibleCells(int* cells, const BoGroundRendererQuadTreeNode* root)
 {
  BO_CHECK_NULL_RET(cells);
  BO_CHECK_NULL_RET(root);
- QPtrList<const BoGroundQuadTreeNode> nodes;
+ QPtrList<const BoGroundRendererQuadTreeNode> nodes;
  addVisibleNodes(&nodes, root);
- for (QPtrListIterator<const BoGroundQuadTreeNode> it(nodes); it.current(); ++it) {
+ for (QPtrListIterator<const BoGroundRendererQuadTreeNode> it(nodes); it.current(); ++it) {
 	addCells(cells, it.current());
  }
 }
 
-void CellListBuilderTree::addVisibleNodes(QPtrList<const BoGroundQuadTreeNode>* ret, const BoGroundQuadTreeNode* node, bool allVisible)
+void CellListBuilderTree::addVisibleNodes(QPtrList<const BoGroundRendererQuadTreeNode>* ret, const BoGroundRendererQuadTreeNode* node, bool allVisible)
 {
  BO_CHECK_NULL_RET(ret);
  if (!node) {
@@ -607,10 +600,11 @@ void CellListBuilderTree::addVisibleNodes(QPtrList<const BoGroundQuadTreeNode>* 
 	if ((mLODObject && mLODObject->doLOD(mMap, node))) {
 		ret->append(node);
 	} else {
-		addVisibleNodes(ret, (BoGroundQuadTreeNode*)node->topLeftNode(), allVisible);
-		addVisibleNodes(ret, (BoGroundQuadTreeNode*)node->topRightNode(), allVisible);
-		addVisibleNodes(ret, (BoGroundQuadTreeNode*)node->bottomLeftNode(), allVisible);
-		addVisibleNodes(ret, (BoGroundQuadTreeNode*)node->bottomRightNode(), allVisible);
+		BoQuadTreeNode* children[4];
+		node->getChildren(children);
+		for (int i = 0; i < 4; i ++) {
+			addVisibleNodes(ret, (BoGroundRendererQuadTreeNode*)children[i], allVisible);
+		}
 	}
  }
 }
@@ -622,7 +616,7 @@ void CellListBuilderTree::recreateTree(const BosonMap* map)
  BosonProfiler prof("recreateTree");
 
  delete mRoot;
- mRoot = BoGroundQuadTreeNode::createTree(map->width(), map->height());
+ mRoot = BoGroundRendererQuadTreeNode::createTree(map->width(), map->height());
 
  BosonProfiler prof2("calculate roughness");
  mRoot->calculateRoughness(map);
@@ -648,32 +642,27 @@ void CellListBuilderTree::recalculateRoughnessInRect(int x1, int y1, int x2, int
 {
  BO_CHECK_NULL_RET(mMap);
  BO_CHECK_NULL_RET(mRoot);
- QPtrList<BoGroundQuadTreeNode> stack;
+ QPtrList<BoGroundRendererQuadTreeNode> stack;
  stack.append(mRoot);
  while (!stack.isEmpty()) {
-	BoGroundQuadTreeNode* node = stack.take(0);
+	BoGroundRendererQuadTreeNode* node = stack.take(0);
 	if (!node->intersects(x1, y1, x2, y2)) {
 		continue;
 	}
 	node->calculateRoughness(mMap, false);
 
-	if (node->topLeftNode()) {
-		stack.append((BoGroundQuadTreeNode*)node->topLeftNode());
-	}
-	if (node->topRightNode()) {
-		stack.append((BoGroundQuadTreeNode*)node->topRightNode());
-	}
-	if (node->bottomLeftNode()) {
-		stack.append((BoGroundQuadTreeNode*)node->bottomLeftNode());
-	}
-	if (node->bottomRightNode()) {
-		stack.append((BoGroundQuadTreeNode*)node->bottomRightNode());
+	BoQuadTreeNode* children[4];
+	node->getChildren(children);
+	for (int i = 0; i < 4; i++) {
+		if (children[i]) {
+			stack.append((BoGroundRendererQuadTreeNode*)children[i]);
+		}
 	}
  }
 }
 
 // TODO: atm these settings are too aggressive for editor!
-bool BoGroundRendererCellListLOD::doLOD(const BosonMap* map, const BoGroundQuadTreeNode* node) const
+bool BoGroundRendererCellListLOD::doLOD(const BosonMap* map, const BoGroundRendererQuadTreeNode* node) const
 {
  if (!node) {
 	return false;
@@ -745,7 +734,7 @@ bool BoGroundRendererCellListLOD::doLOD(const BosonMap* map, const BoGroundQuadT
  return false;
 }
 
-float BoGroundRendererCellListLOD::distanceFromPlane(const BoPlane& plane, const BoGroundQuadTreeNode* node, const BosonMap* map) const
+float BoGroundRendererCellListLOD::distanceFromPlane(const BoPlane& plane, const BoGroundRendererQuadTreeNode* node, const BosonMap* map) const
 {
  const int l = node->left();
  const int t = node->top();
@@ -1167,7 +1156,7 @@ QString BoGroundRendererBase::debugStringForPoint(const BoVector3Fixed& pos) con
 	return s;
  }
 
- const BoGroundQuadTreeNode* node = ((CellListBuilderTree*)mCellListBuilder)->findVisibleNodeAt((int)pos.x(), (int)-pos.y());
+ const BoGroundRendererQuadTreeNode* node = ((CellListBuilderTree*)mCellListBuilder)->findVisibleNodeAt((int)pos.x(), (int)-pos.y());
 
  if (!node) {
 	s += QString("no node in tree for this position\n");
@@ -1350,7 +1339,7 @@ bool BoGroundRendererBase::isCellInRectVisible(int x1, int y1, int x2, int y2) c
  CellListBuilderTree* tree = (CellListBuilderTree*)mCellListBuilder;
  for (int x = x1; x <= x2; x++) {
 	for (int y = y1; y <= y2; y++) {
-		const BoGroundQuadTreeNode* node = tree->findVisibleNodeAt(x, y);
+		const BoGroundRendererQuadTreeNode* node = tree->findVisibleNodeAt(x, y);
 		if (node) {
 			return true;
 		}
