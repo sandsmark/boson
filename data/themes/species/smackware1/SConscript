@@ -1,0 +1,15 @@
+Import('env')
+
+env.subdirs(['objects', 'pixmaps', 'units', 'sounds'])
+
+data = """
+	index.species
+	index.technologies
+	actions.boson
+"""
+
+destinationdir = env['KDEDATA'] + '/boson/themes/species/smackware1'
+
+env.Install(destinationdir, env.make_list(data))
+env.Alias('install', destinationdir)
+
