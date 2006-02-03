@@ -137,7 +137,19 @@ texture_DATA = \
 	basgunt1.png \
 	basgunt2.png \
 	3ds_ceme.png \
-	3ds_meta.png
+	3ds_meta.png \
+	frog.jpg \
+	bulldog.jpg \
+	wolf.jpg \
+	fact.jpg \
+	owl.jpg \
+	gecko.jpg \
+	hq.jpg \
+	shark.jpg \
+	gen.jpg \
+	ref.jpg \
+	turtle.jpg \
+	leo.jpg
 
 # no further editing need here
 
