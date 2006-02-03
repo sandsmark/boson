@@ -165,6 +165,14 @@ public:
 		}
 	}
 
+	void getChildren(BoQuadTreeNode** nodes) const
+	{
+		nodes[0] = topLeftNode();
+		nodes[1] = topRightNode();
+		nodes[2] = bottomLeftNode();
+		nodes[3] = bottomRightNode();
+	}
+
 protected:
 	virtual BoQuadTreeNode* createNode(int l, int t, int r, int b, int depth) const;
 
