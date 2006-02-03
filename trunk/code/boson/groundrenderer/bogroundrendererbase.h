@@ -37,16 +37,15 @@ typedef BoVector3<float> BoVector3Float;
 
 class QRect;
 class CellListBuilder;
-class BoGroundQuadTreeNode;
 class BoGroundRendererCellListLOD;
 class BoColorMap;
 class BoColorMapRenderer;
 class BosonGroundThemeData;
 
-class BoGroundQuadTreeNode : public BoQuadTreeNode
+class BoGroundRendererQuadTreeNode : public BoQuadTreeNode
 {
 public:
-	BoGroundQuadTreeNode(int l, int t, int r, int b, int depth)
+	BoGroundRendererQuadTreeNode(int l, int t, int r, int b, int depth)
 		:
 		BoQuadTreeNode(l, t, r, b, depth),
 		mRoughnessMultiplier(100.0f)
@@ -55,7 +54,7 @@ public:
 		mTextureRoughnessTotal = 0.0f;
 		mRougnessPlusTextureRougnessTotalMulMultiplier = 0.0f;
 	}
-	static BoGroundQuadTreeNode* createTree(unsigned int width, unsigned int height);
+	static BoGroundRendererQuadTreeNode* createTree(unsigned int width, unsigned int height);
 
 	virtual BoQuadTreeNode* createNode(int l, int t, int r, int b, int depth) const;
 
@@ -267,7 +266,7 @@ public:
 		return mViewFrustum;
 	}
 
-	float distanceFromPlane(const BoPlane& plane, const BoGroundQuadTreeNode* node, const BosonMap* map) const;
+	float distanceFromPlane(const BoPlane& plane, const BoGroundRendererQuadTreeNode* node, const BosonMap* map) const;
 
 	/**
 	 * @return TRUE if the @p node is supposed to be displayed as a single
@@ -275,7 +274,7 @@ public:
 	 * only, or if the distance from the player is high enough for this
 	 * level of detail.
 	 **/
-	virtual bool doLOD(const BosonMap* map, const BoGroundQuadTreeNode* node) const;
+	virtual bool doLOD(const BosonMap* map, const BoGroundRendererQuadTreeNode* node) const;
 
 protected:
 	const BoFrustum* mViewFrustum;
