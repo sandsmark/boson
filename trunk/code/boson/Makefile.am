@@ -76,7 +76,9 @@ libbosongameengine_la_SOURCES = \
 		bosonsaveload.cpp \
 		bosongroundtheme.cpp \
 		bosongameengine.cpp \
-		boquadtreenode.cpp
+		boquadtreenode.cpp \
+		boquadtreecollection.cpp \
+		bogroundquadtreenode.cpp
 
 libbosoncommon_la_SOURCES = \
 		boapplication.cpp \
