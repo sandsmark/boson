@@ -1346,7 +1346,7 @@ bool BosonCanvas::loadItemsFromXML(const QDomElement& root)
 		BosonItem* i = createItemFromXML(item, owner);
 		if (!i) {
 			boError(260) << k_funcinfo << "failed creating item " << j << endl;
-			return false;
+			continue;
 		}
 		allItemElements.append(item);
 		allItems.append(i);
