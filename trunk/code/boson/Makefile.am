@@ -78,7 +78,8 @@ libbosongameengine_la_SOURCES = \
 		bosongameengine.cpp \
 		boquadtreenode.cpp \
 		boquadtreecollection.cpp \
-		bogroundquadtreenode.cpp
+		bogroundquadtreenode.cpp \
+		bocanvasquadtreenode.cpp
 
 libbosoncommon_la_SOURCES = \
 		boapplication.cpp \

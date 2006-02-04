@@ -43,6 +43,7 @@
 #include "bosonpropertyxml.h"
 #include "bosonpath.h"
 #include "bowater.h"
+#include "bocanvasquadtreenode.h"
 
 #include <klocale.h>
 #include <kgame/kgamepropertyhandler.h>
@@ -79,6 +80,7 @@ public:
 	BosonCanvasPrivate()
 		: mAllItems(BoItemList(0, false))
 	{
+		mQuadTreeCollection = 0;
 		mStatistics = 0;
 		mMap = 0;
 
@@ -88,6 +90,7 @@ public:
 
 		mEventListener = 0;
 	}
+	BoCanvasQuadTreeCollection* mQuadTreeCollection;
 	BosonCanvasStatistics* mStatistics;
 
 	QPtrList<Unit> mDestroyedUnits;
@@ -521,6 +524,7 @@ void BosonCanvas::init()
  d->mDestroyedUnits.setAutoDelete(false);
  mAdvanceFunctionLocked = false;
  mCollisions = new BosonCollisions();
+ d->mQuadTreeCollection = new BoCanvasQuadTreeCollection(this);
  d->mStatistics = new BosonCanvasStatistics(this);
  d->mProperties = new KGamePropertyHandler(this);
  d->mNextItemId.registerData(IdNextItemId, d->mProperties,
@@ -547,6 +551,7 @@ BosonCanvas::~BosonCanvas()
  delete d->mStatistics;
  delete mCollisions;
  clearMoveDatas();
+ delete d->mQuadTreeCollection;
  delete d;
  boDebug()<< k_funcinfo <<"done"<< endl;
 }
@@ -1109,6 +1114,20 @@ void BosonCanvas::removeFromCells(BosonItem* item)
 	}
 	c->removeItem(item);
  }
+
+ if (cells->count() > 0) {
+	int x1 = cells->at(0)->x();
+	int y1 = cells->at(0)->y();
+	int x2 = x1;
+	int y2 = y1;
+	for (unsigned int i = 1; i < cells->count(); i++) {
+		x1 = QMIN(x1, cells->at(i)->x());
+		y1 = QMIN(y1, cells->at(i)->y());
+		x2 = QMAX(x2, cells->at(i)->x());
+		y2 = QMAX(y2, cells->at(i)->y());
+	}
+	d->mQuadTreeCollection->cellUnitsChanged(this, x1, y1, x2, y2);
+ }
 }
 
 void BosonCanvas::addToCells(BosonItem* item)
@@ -1121,6 +1140,20 @@ void BosonCanvas::addToCells(BosonItem* item)
 		continue;
 	}
 	c->addItem(item);
+ }
+
+ if (cells->count() > 0) {
+	int x1 = cells->at(0)->x();
+	int y1 = cells->at(0)->y();
+	int x2 = x1;
+	int y2 = y1;
+	for (unsigned int i = 1; i < cells->count(); i++) {
+		x1 = QMIN(x1, cells->at(i)->x());
+		y1 = QMIN(y1, cells->at(i)->y());
+		x2 = QMAX(x2, cells->at(i)->x());
+		y2 = QMAX(y2, cells->at(i)->y());
+	}
+	d->mQuadTreeCollection->cellUnitsChanged(this, x1, y1, x2, y2);
  }
 }
 
@@ -1975,5 +2008,15 @@ BosonMoveData* BosonCanvas::moveData(const UnitProperties* prop) const
 {
  BO_CHECK_NULL_RET0(prop);
  return d->mUnitProperties2MoveData[prop->typeId()];
+}
+
+void BosonCanvas::registerQuadTree(BoCanvasQuadTreeNode* tree)
+{
+ d->mQuadTreeCollection->registerTree(tree);
+}
+
+void BosonCanvas::unregisterQuadTree(BoCanvasQuadTreeNode* tree)
+{
+ d->mQuadTreeCollection->unregisterTree(tree);
 }
 

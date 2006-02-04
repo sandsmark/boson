@@ -125,6 +125,7 @@ libgameengine.source = """
 	boquadtreenode.cpp
 	boquadtreecollection.cpp
 	bogroundquadtreenode.cpp
+	bocanvasquadtreenode.cpp
 	items/bosonitem.cpp
 	items/bosonshot.cpp
 	items/bosonitempropertyhandler.cpp
