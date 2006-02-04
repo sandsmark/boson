@@ -150,7 +150,8 @@ texture_DATA = \
 	ref.jpg \
 	turtle.jpg \
 	leo.jpg \
-	sam.jpg
+	sam.jpg \
+	bunk.jpg
 
 # no further editing need here
 
