@@ -151,6 +151,7 @@ textures = """
 	ref.jpg
 	turtle.jpg
 	leo.jpg
+	sam.jpg
 """
 
 texturesdir = env['KDEDATA'] + '/boson/themes/textures'
