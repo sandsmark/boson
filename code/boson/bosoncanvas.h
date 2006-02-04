@@ -41,6 +41,7 @@ class BosonPath;
 class BosonMoveData;
 class BosonShotFragment;
 class BoEventListener;
+class BoCanvasQuadTreeNode;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
 typedef BoVector2<bofixed> BoVector2Fixed;
@@ -155,6 +156,9 @@ public:
 
 	void initPathFinder();
 	BosonPath* pathFinder() const;
+
+	void registerQuadTree(BoCanvasQuadTreeNode* tree);
+	void unregisterQuadTree(BoCanvasQuadTreeNode* tree);
 
 	inline BosonCollisions* collisions() const { return mCollisions; }
 
