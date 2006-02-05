@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2005 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2005-2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -138,13 +138,15 @@ class BoShader
 
     bool load(const QString& vertexsrc, const QString& fragmentsrc);
     bool load(const QString& name);
-    QString preprocessSource(const QString& source, FilterType filter);
+    QString preprocessSource(const QString& source, FilterType filter, int sourceid = 0);
+    void printUsedSources();
 
 
   private:
     unsigned int mProgram;
     bool mValid;
     QString mName;
+    QStringList mSources;
 
     QDict<int>* mUniformLocations;
 
