@@ -1,8 +1,8 @@
 /*
     This file is part of the Boson game
     Copyright (C) 1999-2000 Thomas Capricelli (capricel@email.enst.fr)
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -455,13 +455,6 @@ protected:
 	 **/
 	int currentWidgetPosDiffY() const { return mCurrentWidgetPosDiffY; }
 
-	/**
-	 * @return The distance the mouse was moved by in the last @ref
-	 * mouseMoved call. Null vector if no such call was made since the last
-	 * @ref pressButton call.
-	 **/
-	const BoVector3Fixed& currentCanvasVectorDiff() const { return mCurrentCanvasVectorDiff; }
-
 private:
 	bool mButtonIsReleased;
 	bool mIsMove;
@@ -475,7 +468,6 @@ private:
 
 	int mCurrentWidgetPosDiffX;
 	int mCurrentWidgetPosDiffY;
-	BoVector3Fixed mCurrentCanvasVectorDiff;
 };
 
 
