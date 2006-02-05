@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2005 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2005-2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -196,12 +196,17 @@ bool BoShader::load(const QString& name)
     return false;
   }
 
+  mSources.clear();
+  mSources.append(filename);
+
   QString contents(f.readAll());
 
-  QString vertexsrc = preprocessSource(contents, VertexOnly);
-  QString fragmentsrc = preprocessSource(contents, FragmentOnly);
+  QString vertexsrc = preprocessSource(contents, VertexOnly, 0);
+  QString fragmentsrc = preprocessSource(contents, FragmentOnly, 0);
 
 
+  //boDebug() << k_funcinfo << "Processed vertex shader source : \n'" << vertexsrc << "'" << endl;
+  //boDebug() << k_funcinfo << "Processed fragment shader source : \n'" << fragmentsrc << "'" << endl;
   if(!load(vertexsrc, fragmentsrc))
   {
     boError() << k_funcinfo << "Couldn't load shader '" << name << "' from '" << filename << "'" << endl;
@@ -229,8 +234,9 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
   GLuint vertexshader;
   GLuint fragmentshader;
 
-  char log[8192];
   GLsizei logsize;
+  GLsizei logarraysize;
+  char* log;
 
   // Load vertex shader, if it was given
   if(!vertexsrc.isEmpty())
@@ -245,20 +251,27 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
     // Make sure it compiled correctly
     int compiled;
     boglGetShaderiv(vertexshader, GL_COMPILE_STATUS, &compiled);
-    boglGetShaderInfoLog(vertexshader, 8192, &logsize, log);
+    // Get info log
+    boglGetShaderiv(vertexshader, GL_INFO_LOG_LENGTH, &logarraysize);
+    log = new char[logarraysize];
+    boglGetShaderInfoLog(vertexshader, logarraysize, &logsize, log);
     if(!compiled)
     {
       boError(130) << k_funcinfo << "Couldn't compile vertex shader!" << endl << log << endl;
+      printUsedSources();
+      delete log;
       return false;
     }
     else if(logsize > 0)
     {
       boDebug(130) << "Vertex shader compilation log:" << endl << log << endl;
+      printUsedSources();
     }
     // Attach the shader to the program
     boglAttachShader(mProgram, vertexshader);
     // Delete shader
     boglDeleteShader(vertexshader);
+    delete log;
   }
 
   // Load fragment shader, if it was given
@@ -275,20 +288,27 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
     // Make sure it compiled correctly
     int compiled;
     boglGetShaderiv(fragmentshader, GL_COMPILE_STATUS, &compiled);
-    boglGetShaderInfoLog(fragmentshader, 8192, &logsize, log);
+    // Get info log
+    boglGetShaderiv(fragmentshader, GL_INFO_LOG_LENGTH, &logarraysize);
+    log = new char[logarraysize];
+    boglGetShaderInfoLog(fragmentshader, logarraysize, &logsize, log);
     if(!compiled)
     {
       boError(130) << k_funcinfo << "Couldn't compile fragment shader!" << endl << log << endl;
+      printUsedSources();
+      delete log;
       return false;
     }
     else if(logsize > 0)
     {
       boDebug(130) << "Fragment shader compilation log:" << endl << log << endl;
+      printUsedSources();
     }
     // Attach the shader to the program
     boglAttachShader(mProgram, fragmentshader);
     // Delete shader
     boglDeleteShader(fragmentshader);
+    delete log;
   }
 
   // Link the program
@@ -296,17 +316,24 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
   // Make sure it linked correctly
   int linked;
   boglGetProgramiv(mProgram, GL_LINK_STATUS, &linked);
-  boglGetProgramInfoLog(mProgram, 8192, &logsize, log);
+  // Get info log
+  boglGetProgramiv(mProgram, GL_INFO_LOG_LENGTH, &logarraysize);
+  log = new char[logarraysize];
+  boglGetProgramInfoLog(mProgram, logarraysize, &logsize, log);
 
   if(!linked)
   {
     boError(130) << k_funcinfo << "Couldn't link the program!" << endl << log << endl;
+    printUsedSources();
+    delete log;
     return false;
   }
   else if(logsize > 0)
   {
     boDebug(130) << "Shader linking log:" << endl << log << endl;
+    printUsedSources();
   }
+  delete log;
 
   // Create uniform locations dict
   mUniformLocations = new QDict<int>(17);
@@ -325,7 +352,7 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
   return true;
 }
 
-QString BoShader::preprocessSource(const QString& source, FilterType filter)
+QString BoShader::preprocessSource(const QString& source, FilterType filter, int sourceid)
 {
   // Whether to ignore what is being read (until next <...> marker)
   bool ignore = false;
@@ -333,8 +360,10 @@ QString BoShader::preprocessSource(const QString& source, FilterType filter)
   // Read through the string, line by line
   QStringList lines = QStringList::split(QChar('\n'), source, true);
   QString result;
+  result += QString("#line 0 %1\n").arg(sourceid);
 
-  for(QStringList::Iterator it = lines.begin(); it != lines.end(); ++it)
+  int linenum = 1;
+  for(QStringList::Iterator it = lines.begin(); it != lines.end(); ++it, linenum++, result += '\n')
   {
     QString line = *it;
     // Check for source markers
@@ -377,18 +406,36 @@ QString BoShader::preprocessSource(const QString& source, FilterType filter)
         continue;
       }
       // Include the file
-      result += preprocessSource(QString(f.readAll()), filter);
+      int newsourceid = mSources.findIndex(filename);
+      if(newsourceid == -1)
+      {
+        newsourceid = mSources.count();
+        mSources.append(filename);
+      }
+      result += preprocessSource(QString(f.readAll()), filter, newsourceid);
+      result += QString("#line %1 %2").arg(linenum).arg(sourceid);
     }
     else
     {
       result += line;
     }
-    result += '\n';
   }
 
-  //boDebug() << k_funcinfo << "Loaded vertex shader source : \n'" << vertexsrc << "'" << endl;
-  //boDebug() << k_funcinfo << "Loaded fragment shader source : \n'" << fragmentsrc << "'" << endl;
   return result;
+}
+
+void BoShader::printUsedSources()
+{
+  if(mSources.count() == 0)
+  {
+    return;
+  }
+
+  boError(130) << k_funcinfo << "Used sources:" << endl;
+  for(unsigned int i = 0; i < mSources.count(); i++)
+  {
+    boError(130) << i << " : " << mSources[i] << endl;
+  }
 }
 
 void BoShader::reload()
