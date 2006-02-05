@@ -140,9 +140,9 @@ float BosonItemRenderer::itemInFrustum(const BoFrustum& frustum) const
 	return false;
  }
  // FIXME: can't we use BoVector3 and it's conversion methods here?
- bofixed x = (mItem->x() + mItem->width() / 2);
- bofixed y = -((mItem->y() + mItem->height() / 2));
- bofixed z = mItem->z(); // this is already in the correct format!
+ bofixed x = (mItem->centerX());
+ bofixed y = -(mItem->centerY());
+ bofixed z = mItem->z();
  BoVector3Fixed pos(x, y, z);
  return (float)frustum.sphereInFrustum(pos, boundingSphereRadius());
 }
