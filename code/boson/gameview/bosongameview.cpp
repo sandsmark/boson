@@ -1,8 +1,8 @@
 /*
     This file is part of the Boson game
     Copyright (C) 1999-2000 Thomas Capricelli (capricel@email.enst.fr)
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -158,7 +158,6 @@ void BoMouseButtonState::pressButton(const QPoint& pos, const BoVector3Fixed& ca
 
  mCurrentWidgetPosDiffX = 0;
  mCurrentWidgetPosDiffY = 0;
- mCurrentCanvasVectorDiff = BoVector3Fixed(0, 0, 0);
 }
 
 void BoMouseButtonState::releaseButton(const BoMouseEvent& modifiers)
@@ -188,7 +187,6 @@ void BoMouseButtonState::mouseMoved(const BoMouseEvent& e)
  // diff = currentPos - oldPos
  mCurrentWidgetPosDiffX = e.gameViewWidgetPos().x() - currentWidgetPos().x();
  mCurrentWidgetPosDiffY = e.gameViewWidgetPos().y() - currentWidgetPos().y();
- mCurrentCanvasVectorDiff = e.canvasVector() - currentCanvasVector();
 
  // update currentPos
  mCurrentWidgetPos = e.gameViewWidgetPos();
