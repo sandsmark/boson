@@ -36,8 +36,8 @@ class Player;
 class SpeciesTheme;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
-template<class T> class BoRect;
-typedef BoRect<bofixed> BoRectFixed;
+template<class T> class BoRect2;
+typedef BoRect2<bofixed> BoRect2Fixed;
 typedef BoVector2<bofixed> BoVector2Fixed;
 typedef BoVector3<bofixed> BoVector3Fixed;
 class BoFrustum;
@@ -273,8 +273,8 @@ public:
 	inline bofixed centerZ() const { return z() + depth() / 2; };
 	BoVector2Fixed center() const;
 
-	BoRectFixed boundingRect() const;
-	BoRectFixed boundingRectAdvanced() const;
+	BoRect2Fixed boundingRect() const;
+	BoRect2Fixed boundingRectAdvanced() const;
 
 	/**
 	 * Move the item to @p nx, @p ny, @p nz. Note that it is moved without
@@ -389,7 +389,7 @@ public:
 	 * calculate which cells the unit would occupy if it was at a certain
 	 * position.
 	 **/
-	static void makeCells(Cell* allCells, QPtrVector<Cell>* cells, const BoRect<bofixed>& rect, int mapWidth, int mapHeight);
+	static void makeCells(Cell* allCells, QPtrVector<Cell>* cells, const BoRect2<bofixed>& rect, int mapWidth, int mapHeight);
 
 	/**
 	 * @return Whether this unit collides with given unit.

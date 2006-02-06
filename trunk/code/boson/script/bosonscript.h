@@ -33,13 +33,13 @@ class Unit;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
 template<class T> class BoVector4;
-template<class T> class BoRect;
+template<class T> class BoRect2;
 typedef BoVector2<bofixed> BoVector2Fixed;
 typedef BoVector3<bofixed> BoVector3Fixed;
 typedef BoVector3<float> BoVector3Float;
 typedef BoVector4<bofixed> BoVector4Fixed;
 typedef BoVector4<float> BoVector4Float;
-typedef BoRect<bofixed> BoRectFixed;
+typedef BoRect2<bofixed> BoRect2Fixed;
 
 class QString;
 class QDataStream;
