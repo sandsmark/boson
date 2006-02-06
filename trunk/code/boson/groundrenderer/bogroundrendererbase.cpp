@@ -46,8 +46,6 @@
 
 static int g_cellsVisibleCalls = 0;
 
-// Whether to use glTexSubImage2D() to update texture. It seems to be buggy.
-#define USE_TEXSUBIMAGE
 
 BoGroundRendererQuadTreeNode* BoGroundRendererQuadTreeNode::createTree(unsigned int w, unsigned int h)
 {
@@ -821,7 +819,6 @@ void FogTexture::updateFogTexture()
 	return;
  }
 
-#ifdef USE_TEXSUBIMAGE
  mFogTexture->bind();
  // Because of (possible) texture compression, we can't update a single pixel
  //  of the texture. Instead, we have to update the whole 4x4 block that the
@@ -852,13 +849,6 @@ void FogTexture::updateFogTexture()
  }
  // Update texture
  glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE, blockdata);
-
-#else
- delete mFogTexture;
- // Create new fog texture
- mFogTexture = new BoTexture(mFogTextureData, mFogTextureDataW, mFogTextureDataH,
-		BoTexture::FilterLinear | BoTexture::FormatRGBA);
-#endif
 
  mFogTextureDirty = false;
 
