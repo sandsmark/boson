@@ -779,7 +779,7 @@ QValueList<int> BosonScript::unitsInRect(int x1, int y1, int x2, int y2) const
     return list;
   }
   BosonCollisions* c = canvas()->collisions();
-  BoItemList* l = c->collisionsAtCells(BoRectFixed(BoVector2Fixed(x1, y1), BoVector2Fixed(x2, y2)));
+  BoItemList* l = c->collisionsAtCells(BoRect2Fixed(BoVector2Fixed(x1, y1), BoVector2Fixed(x2, y2)));
   for(BoItemList::Iterator it = l->begin(); it != l->end(); ++it)
   {
     if(RTTI::isUnit((*it)->rtti()))

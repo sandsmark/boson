@@ -177,7 +177,7 @@ QPtrVector<Cell>* BosonItem::cellsConst() const
  return mCells;
 }
 
-void BosonItem::makeCells(Cell* allCells, QPtrVector<Cell>* cells, const BoRectFixed& rect, int mapWidth, int mapHeight)
+void BosonItem::makeCells(Cell* allCells, QPtrVector<Cell>* cells, const BoRect2Fixed& rect, int mapWidth, int mapHeight)
 {
  BO_CHECK_NULL_RET(allCells);
  int left = QMAX((int)rect.left(), 0);
@@ -289,16 +289,16 @@ BoVector2Fixed BosonItem::center() const
   return BoVector2Fixed(centerX(), centerY());
 }
 
-BoRectFixed BosonItem::boundingRect() const
+BoRect2Fixed BosonItem::boundingRect() const
 {
- return BoRectFixed(leftEdge(), topEdge(), leftEdge() + width(), topEdge() + height());
+ return BoRect2Fixed(leftEdge(), topEdge(), leftEdge() + width(), topEdge() + height());
 }
 
-BoRectFixed BosonItem::boundingRectAdvanced() const
+BoRect2Fixed BosonItem::boundingRectAdvanced() const
 {
  bofixed left = leftEdge() + xVelocity();
  bofixed top = topEdge() + yVelocity();
- return BoRectFixed(left, top, left + width(), top + height());
+ return BoRect2Fixed(left, top, left + width(), top + height());
 }
 
 void BosonItem::addToCells()
