@@ -21,6 +21,7 @@
 
 #include "boquadtreenode.h"
 #include "boquadtreecollection.h"
+#include "../math/borect.h"
 
 class BosonMap;
 
@@ -56,6 +57,12 @@ public:
 	float groundMaxZ() const
 	{
 		return mGroundMaxZ;
+	}
+
+	BoRect3Float groundBoundingBox() const
+	{
+		return BoRect3Float((float)left(), (float)top(), groundMinZ(),
+				(float)right(), (float)bottom(), groundMaxZ());
 	}
 
 protected:
