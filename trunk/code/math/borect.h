@@ -39,6 +39,10 @@ typedef BoRect3<float> BoRect3Float;
 template<class T> class BoRect2
 {
   public:
+    BoRect2()
+    {
+      set(0, 0, 1, 1);
+    }
     BoRect2(const BoVector2<T>& topLeft, const BoVector2<T>& bottomRight)
     {
       set(topLeft, bottomRight);
@@ -46,6 +50,15 @@ template<class T> class BoRect2
     BoRect2(const T left, const T top, const T right, const T bottom)
     {
       set(left, top, right, bottom);
+    }
+    BoRect2(const BoRect2<T>& r)
+    {
+      *this = r;
+    }
+    BoRect2<T>& operator=(const BoRect2<T>& r)
+    {
+      set(r.topLeft(), r.bottomRight());
+      return *this;
     }
 
     inline void set(const BoVector2<T>& topLeft, const BoVector2<T>& bottomRight)
@@ -98,6 +111,10 @@ template<class T> class BoRect2
 template<class T> class BoRect3
 {
   public:
+    BoRect3()
+    {
+      set(0, 0, 0, 1, 1, 1);
+    }
     BoRect3(const BoVector3<T>& topLeftBack, const BoVector3<T>& bottomRightFront)
     {
       set(topLeftBack, bottomRightFront);
@@ -105,6 +122,15 @@ template<class T> class BoRect3
     BoRect3(const T left, const T top, const T back, const T right, const T bottom, const T front)
     {
       set(BoVector3<T>(left, top, back), BoVector3<T>(right, bottom, front));
+    }
+    BoRect3(const BoRect3<T>& r)
+    {
+      *this = r;
+    }
+    BoRect3<T>& operator=(const BoRect3<T>& r)
+    {
+      set(topLeftBack(), bottomRightFront());
+      return *this;
     }
 
     inline void set(const BoVector3<T>& topLeftBack, const BoVector3<T>& bottomRightFront)
