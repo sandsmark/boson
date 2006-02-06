@@ -1,6 +1,7 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2005 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2002-2006 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2002-2006 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,23 +24,26 @@
 #include "math/bomath.h"
 #include "math/bovector.h"
 
-template<class T> class BoRect;
-typedef BoRect<bofixed> BoRectFixed;
-typedef BoRect<float> BoRectFloat;
+template<class T> class BoRect2;
+template<class T> class BoRect3;
+typedef BoRect2<bofixed> BoRect2Fixed;
+typedef BoRect2<float> BoRect2Float;
+typedef BoRect3<bofixed> BoRect3Fixed;
+typedef BoRect3<float> BoRect3Float;
 
 /**
  * @short Rectangle class
  *
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
-template<class T> class BoRect
+template<class T> class BoRect2
 {
   public:
-    BoRect(const BoVector2<T>& topLeft, const BoVector2<T>& bottomRight)
+    BoRect2(const BoVector2<T>& topLeft, const BoVector2<T>& bottomRight)
     {
       set(topLeft, bottomRight);
     }
-    BoRect(const T left, const T top, const T right, const T bottom)
+    BoRect2(const T left, const T top, const T right, const T bottom)
     {
       set(left, top, right, bottom);
     }
@@ -48,11 +52,22 @@ template<class T> class BoRect
     {
       mTopLeft = topLeft;
       mBottomRight = bottomRight;
+      if (left() > right())
+      {
+        float tmp = mTopLeft.x();
+        mTopLeft.setX(mBottomRight.x());
+        mBottomRight.setX(tmp);
+      }
+      if (top() > bottom())
+      {
+        float tmp = mTopLeft.y();
+        mTopLeft.setY(mBottomRight.y());
+        mBottomRight.setY(tmp);
+      }
     }
     inline void set(const T left, const T top, const T right, const T bottom)
     {
-      mTopLeft = BoVector2<T>(left, top);
-      mBottomRight = BoVector2<T>(right, bottom);
+      set(BoVector2<T>(left, top), BoVector2<T>(right, bottom));
     }
 
     inline T left() const  { return mTopLeft.x(); }
@@ -69,7 +84,7 @@ template<class T> class BoRect
     inline T width() const  { return mBottomRight.x() - mTopLeft.x(); }
     inline T height() const  { return mBottomRight.y() - mTopLeft.y(); }
 
-    inline BoVector2<T>center() const
+    inline BoVector2<T> center() const
     {
       return BoVector2<T>((left() + right()) / 2, (top() + bottom()) / 2);
     }
@@ -78,6 +93,78 @@ template<class T> class BoRect
   private:
     BoVector2<T> mTopLeft;
     BoVector2<T> mBottomRight;
+};
+
+template<class T> class BoRect3
+{
+  public:
+    BoRect3(const BoVector3<T>& topLeftBack, const BoVector3<T>& bottomRightFront)
+    {
+      set(topLeftBack, bottomRightFront);
+    }
+    BoRect3(const T left, const T top, const T back, const T right, const T bottom, const T front)
+    {
+      set(BoVector3<T>(left, top, back), BoVector3<T>(right, bottom, front));
+    }
+
+    inline void set(const BoVector3<T>& topLeftBack, const BoVector3<T>& bottomRightFront)
+    {
+      mTopLeftBack = topLeftBack;
+      mBottomRightFront = bottomRightFront;
+      if (left() > right())
+      {
+        float tmp = mTopLeftBack.x();
+        mTopLeftBack.setX(mBottomRightFront.x());
+        mBottomRightFront.setX(tmp);
+      }
+      if (top() > bottom())
+      {
+        float tmp = mTopLeftBack.y();
+        mTopLeftBack.setY(mBottomRightFront.y());
+        mBottomRightFront.setY(tmp);
+      }
+      if (back() > front())
+      {
+        float tmp = mTopLeftBack.z();
+        mTopLeftBack.setZ(mBottomRightFront.z());
+        mBottomRightFront.setZ(tmp);
+      }
+    }
+    inline void set(const T left, const T top, const T front, const T right, const T bottom, const T back)
+    {
+      mTopLeftBack = BoVector3<T>(left, top, back);
+      mBottomRightFront = BoVector3<T>(right, bottom, front);
+    }
+
+    inline T left() const  { return mTopLeftBack.x(); }
+    inline T top() const  { return mTopLeftBack.y(); }
+    inline T back() const { return mTopLeftBack.z(); }
+    inline T right() const  { return mBottomRightFront.x(); }
+    inline T bottom() const  { return mBottomRightFront.y(); }
+    inline T front() const { return mBottomRightFront.z(); }
+
+    inline const BoVector3<T>& topLeftBack() const { return mTopLeftBack; }
+    inline const BoVector3<T>& bottomRightFront() const { return mBottomRightFront; }
+
+    inline T x() const  { return mTopLeftBack.x(); }
+    inline T y() const  { return mTopLeftBack.y(); }
+    inline T z() const  { return mTopLeftBack.z(); }
+
+    inline T width() const  { return right() - left(); }
+    inline T height() const  { return bottom() - top(); }
+    inline T depth() const  { return front() - back(); }
+
+    inline BoVector3<T> center() const
+    {
+      return BoVector3<T>((left() + right()) / 2,
+          (top() + bottom()) / 2,
+          (back() + front()) / 2);
+    }
+
+
+  private:
+    BoVector3<T> mTopLeftBack;
+    BoVector3<T> mBottomRightFront;
 };
 
 #endif

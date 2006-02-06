@@ -621,7 +621,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag)
  boProfiling->popStorage();
 }
 
-bool BosonCanvas::canGo(const UnitProperties* prop, const BoRectFixed& rect, bool _default) const
+bool BosonCanvas::canGo(const UnitProperties* prop, const BoRect2Fixed& rect, bool _default) const
 {
 // boDebug() << k_funcinfo << endl;
  if (rect.left() < 0 || rect.top() < 0 ||
@@ -1176,7 +1176,7 @@ bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const BoVector2Fixe
  if (!onCanvas(pos)) {
 	return false;
  }
- BoRectFixed r(pos, BoVector2Fixed(pos.x() + width, pos.y() + height));
+ BoRect2Fixed r(pos, BoVector2Fixed(pos.x() + width, pos.y() + height));
  if (!canGo(prop, r)) {
 	return false;
  }

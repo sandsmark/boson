@@ -111,7 +111,7 @@ Unit* BosonCollisions::findUnitAt(const BoVector3Fixed& pos) const
 QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const BoVector2Fixed& pos, bofixed radius) const
 {
  PROFILE_METHOD
- BoItemList* l = collisions(BoRectFixed(QMAX(pos.x() - radius, bofixed(0)), QMAX(pos.y() - radius, bofixed(0)),
+ BoItemList* l = collisions(BoRect2Fixed(QMAX(pos.x() - radius, bofixed(0)), QMAX(pos.y() - radius, bofixed(0)),
 		pos.x() + radius, pos.y() + radius));
 
  QValueList<Unit*> list;
@@ -141,7 +141,7 @@ QValueList<Unit*> BosonCollisions::unitCollisionsInSphere(const BoVector3Fixed& 
  PROFILE_METHOD
  // FIXME: code duplicated from unitCollisionsInRange
  boDebug(310) << k_funcinfo << endl;
- BoItemList* l = collisions(BoRectFixed(QMAX(pos.x() - radius, bofixed(0)), QMAX(pos.y() - radius, bofixed(0)),
+ BoItemList* l = collisions(BoRect2Fixed(QMAX(pos.x() - radius, bofixed(0)), QMAX(pos.y() - radius, bofixed(0)),
 		pos.x() + radius, pos.y() + radius));
 
  QValueList<Unit*> list;
@@ -186,7 +186,7 @@ bool BosonCollisions::cellOccupied(int x, int y, Unit* unit, bool excludeMoving)
  return cell(x, y)->isOccupied(unit, includeMoving);
 }
 
-bool BosonCollisions::cellsOccupied(const BoRectFixed& rect) const
+bool BosonCollisions::cellsOccupied(const BoRect2Fixed& rect) const
 {
  int right = (int)ceil(rect.right());
  int bottom = (int)ceil(rect.bottom());
@@ -236,12 +236,12 @@ BoItemList* BosonCollisions::collisionsAtCells(const QPtrVector<Cell>* cells, co
  return collisions;
 }
 
-BoItemList* BosonCollisions::collisions(const BoRectFixed& rect, const BosonItem* item, bool exact) const
+BoItemList* BosonCollisions::collisions(const BoRect2Fixed& rect, const BosonItem* item, bool exact) const
 {
  return collisionsAtCells(rect, item, exact);
 }
 
-BoItemList* BosonCollisions::collisionsAtCells(const BoRectFixed& rect, const BosonItem* item, bool exact) const
+BoItemList* BosonCollisions::collisionsAtCells(const BoRect2Fixed& rect, const BosonItem* item, bool exact) const
 {
  PROFILE_METHOD
  if (!map()) {

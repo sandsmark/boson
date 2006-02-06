@@ -1648,7 +1648,7 @@ BoItemList* Unit::unitsInRange(unsigned long int range) const
 
  // AB: note that we don't need to do error checking like left < 0, since
  // collisions() does this anyway.
- BoRectFixed rect(leftEdge() - range, topEdge() - range, rightEdge() + range, bottomEdge() + range);
+ BoRect2Fixed rect(leftEdge() - range, topEdge() - range, rightEdge() + range, bottomEdge() + range);
 
  // TODO: we should do this using PlayerIO. It should return items that are
  // actually visible to us only!
@@ -3041,7 +3041,7 @@ void UnitMover::avoidance()
  BoVector2Fixed toRight(toRight3.x(), -toRight3.y());
  bofixed avoidstrength = 0;
  // Find all units which are near us
- BoRectFixed rect(unit()->centerX() - unit()->width() - unit()->speed() * 20 - 3, unit()->centerY() - unit()->width() - unit()->speed() * 20 - 3,
+ BoRect2Fixed rect(unit()->centerX() - unit()->width() - unit()->speed() * 20 - 3, unit()->centerY() - unit()->width() - unit()->speed() * 20 - 3,
 		unit()->centerX() + unit()->width() + unit()->speed() * 20 + 3, unit()->centerY() + unit()->width() + unit()->speed() * 20 + 3);
  BoItemList* items = canvas()->collisions()->collisionsAtCells(rect, unit(), false);
  // Go through the units

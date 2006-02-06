@@ -899,7 +899,7 @@ Unit* BosonPlayerInputHandler::editorPlaceUnit(Q_UINT32 owner, Q_UINT32 unitType
  /*const UnitProperties* prop = p->speciesTheme()->unitProperties(unitType);
  bofixed width = prop->unitWidth();
  bofixed height = prop->unitHeight();
- BoRectFixed r(pos, pos + BoVector2Fixed(width, height));
+ BoRect2Fixed r(pos, pos + BoVector2Fixed(width, height));
  if (!canvas()->canGo(prop, r)) {
 	boWarning() << k_funcinfo << "Unit with type " << unitType << " can't go to (" << pos.x() << "; " << pos.y() << ")" << endl;
 	return 0;

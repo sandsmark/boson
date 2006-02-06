@@ -27,10 +27,10 @@ class BosonItem;
 class bofixed;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
-template<class T> class BoRect;
+template<class T> class BoRect2;
 typedef BoVector2<bofixed> BoVector2Fixed;
 typedef BoVector3<bofixed> BoVector3Fixed;
-typedef BoRect<bofixed> BoRectFixed;
+typedef BoRect2<bofixed> BoRect2Fixed;
 
 template<class T> class QPtrList;
 template<class T> class QValueList;
@@ -93,8 +93,8 @@ public:
 	inline BosonMap* map() const { return mMap; }
 
 	BoItemList* collisionsAtCells(const QPtrVector<Cell>* cells, const BosonItem* item, bool exact) const;
-	BoItemList* collisions(const BoRectFixed& rect, const BosonItem* item = 0, bool exact = true) const; // note: exact == true has n effec for item != 0 ONLY!
-	BoItemList* collisionsAtCells(const BoRectFixed& rect, const BosonItem* item = 0, bool exact = true) const; // note: exact == true has n effec for item != 0 ONLY!
+	BoItemList* collisions(const BoRect2Fixed& rect, const BosonItem* item = 0, bool exact = true) const; // note: exact == true has n effec for item != 0 ONLY!
+	BoItemList* collisionsAtCells(const BoRect2Fixed& rect, const BosonItem* item = 0, bool exact = true) const; // note: exact == true has n effec for item != 0 ONLY!
 
 	/**
 	 * @param x x-Position in <em>cell</em>-coordinates.
@@ -144,7 +144,7 @@ public:
 	 * @param rect Check all cells on this rect
 	 * @return TRUE if any cell in rect is occupied, otherwise FALSE.
 	 **/
-	bool cellsOccupied(const BoRectFixed& rect) const;
+	bool cellsOccupied(const BoRect2Fixed& rect) const;
 
 	QValueList<Unit*> collisionsInBox(const BoVector3Fixed& v1, const BoVector3Fixed& v2, BosonItem* exclude) const;
 

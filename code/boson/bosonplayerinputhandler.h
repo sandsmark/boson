@@ -31,9 +31,9 @@ class BosonMessageEditorMove;
 class BosonMessageEditorMoveDeleteItems;
 class bofixed;
 template<class T> class BoVector2;
-template<class T> class BoRect;
+template<class T> class BoRect2;
 typedef BoVector2<bofixed> BoVector2Fixed;
-typedef BoRect<bofixed> BoRectFixed;
+typedef BoRect2<bofixed> BoRect2Fixed;
 
 template<class T> class QPtrStack;
 template<class T> class QValueList;

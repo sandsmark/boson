@@ -41,9 +41,7 @@ class BoEventManager;
 class BoAdvanceMessageTimes;
 class bofixed;
 template<class T> class BoVector2;
-template<class T> class BoRect;
 typedef BoVector2<bofixed> BoVector2Fixed;
-typedef BoRect<bofixed> BoRectFixed;
 class BosonMessageEditorMove;
 class BosonNetworkTraffic;
 
