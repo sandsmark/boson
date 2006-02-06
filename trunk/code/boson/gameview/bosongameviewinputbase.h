@@ -39,10 +39,10 @@ class BosonCursor;
 class bofixed;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
-template<class T> class BoRect;
+template<class T> class BoRect2;
 typedef BoVector2<bofixed> BoVector2Fixed;
 typedef BoVector3<bofixed> BoVector3Fixed;
-typedef BoRect<bofixed> BoRectFixed;
+typedef BoRect2<bofixed> BoRect2Fixed;
 
 template<class T> class QPtrList;
 

@@ -319,7 +319,7 @@ void KGameUnitDebug::update(QListViewItem* item, Unit* unit)
  item->setText(d->mWidth, QString::number(unit->width()));
  item->setText(d->mHeight, QString::number(unit->height()));
 
- BoRectFixed r = unit->boundingRect();
+ BoRect2Fixed r = unit->boundingRect();
  item->setText(d->mBoundingRect, QString("%1,%2,%3,%4").
 		arg(r.x()).
 		arg(r.y()).

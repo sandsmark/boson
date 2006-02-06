@@ -175,7 +175,7 @@ public:
 	 * the ground <em>not</em> for collisions with other units. See @ref Unit for
 	 * this.
 	 **/
-	bool canGo(const UnitProperties* prop, const BoRectFixed& rect, bool _default = false) const;
+	bool canGo(const UnitProperties* prop, const BoRect2Fixed& rect, bool _default = false) const;
 	bool canGo(const UnitProperties* prop, int x, int y, bool _default = false) const;
 
 	void setMap(BosonMap* map);

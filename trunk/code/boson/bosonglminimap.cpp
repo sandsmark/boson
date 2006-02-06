@@ -98,7 +98,7 @@ public:
 	void removeUnit(Unit* u);
 	void unitMoved(Unit* u, bofixed oldX, bofixed oldY);
 
-	BoItemList* approximateUnitsInRect(const BoRectFixed& rect) const;
+	BoItemList* approximateUnitsInRect(const BoRect2Fixed& rect) const;
 	void approximateUnitsInRect(const IntRect& rect, BoItemList* result) const;
 
 protected:
@@ -120,11 +120,11 @@ protected:
 
 
 	// TODO: move to parent class
-	inline bool contains(const BoRectFixed& r) const
+	inline bool contains(const BoRect2Fixed& r) const
 	{
 		return BoQuadTreeNode::contains((int)r.left(), (int)r.top(), (int)r.right(), (int)r.bottom());
 	}
-	inline bool intersects(const BoRectFixed& r) const
+	inline bool intersects(const BoRect2Fixed& r) const
 	{
 		return BoQuadTreeNode::intersects((int)r.left(), (int)r.top(), (int)r.right(), (int)r.bottom());
 	}
@@ -167,7 +167,7 @@ BoQuadTreeNode* BosonMiniMapQuadtreeNode::createNode(int l, int t, int r, int b,
  return new BosonMiniMapQuadtreeNode(l, t, r, b, depth);
 }
 
-BoItemList* BosonMiniMapQuadtreeNode::approximateUnitsInRect(const BoRectFixed& rect) const
+BoItemList* BosonMiniMapQuadtreeNode::approximateUnitsInRect(const BoRect2Fixed& rect) const
 {
  BoItemList* items = new BoItemList;
  // TODO: round right and bottom upwards!
@@ -1292,7 +1292,7 @@ void BosonGLMiniMapRenderer::updateRadarTexture(QPtrList<Unit>* radarlist, Boson
 	miny = QMIN(miny, (float)it.current()->y() - maxrange);
 	maxy = QMAX(maxy, (float)it.current()->y() + maxrange);
  }
- BoRectFixed area((int)QMAX(0.0f, minx),  (int)QMAX(0.0f, miny),
+ BoRect2Fixed area((int)QMAX(0.0f, minx),  (int)QMAX(0.0f, miny),
 		(int)QMIN(mMapWidth, maxx + 1),  (int)QMIN(mMapHeight, maxy + 1));
 
  // Get a list of all items in the affected area
