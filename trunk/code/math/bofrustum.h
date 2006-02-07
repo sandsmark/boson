@@ -24,6 +24,7 @@
 #include "math/bovector.h"
 #include "math/boplane.h"
 #include "math/bomatrix.h"
+#include "math/borect.h"
 
 #include <math.h>
 
@@ -32,13 +33,6 @@ class BoFrustum
 public:
 	BoFrustum()
 	{
-	}
-
-	void loadViewFrustum(const BoMatrix& modelview, const BoMatrix& projection)
-	{
-		BoMatrix m(projection);
-		m.multiply(&modelview);
-		loadViewFrustum(m);
 	}
 
 	/**
@@ -59,6 +53,26 @@ public:
 	 **/
 	void loadViewFrustum(const BoMatrix& projectionModelview);
 
+	/**
+	 * @overload
+	 * Convenience method. This lets you specify both, the modelview and the
+	 * projection matrix and multiplies on its own.
+	 **/
+	void loadViewFrustum(const BoMatrix& modelview, const BoMatrix& projection)
+	{
+		BoMatrix m(projection);
+		m.multiply(&modelview);
+		loadViewFrustum(m);
+	}
+
+	/**
+	 * Create a viewfrustum for picking, i.e. a viewfrustum where the @p
+	 * pickRect (in window coordinates) fill the viewport.
+	 *
+	 * See also @ref loadViewFrustum
+	 **/
+	void loadPickViewFrustum(const BoRect2Float& pickRect, const int* viewport, const BoMatrix& modelview, const BoMatrix& projection);
+
 	const BoPlane& right() const { return mPlanes[0]; }
 	const BoPlane& left() const { return mPlanes[1]; }
 	const BoPlane& bottom() const { return mPlanes[2]; }
@@ -71,6 +85,10 @@ public:
 	bofixed sphereInFrustum(const BoVector3Fixed&, bofixed radius) const;
 
 	bool boxInFrustum(const BoVector3Float& min, const BoVector3Float& max) const;
+	bool boxInFrustum(const BoRect3Float& rect) const
+	{
+		return boxInFrustum(rect.topLeftBack(), rect.bottomRightFront());
+	}
 
 	/**
 	 * This is similar to @ref sphereInFrustum, but will test whether the sphere

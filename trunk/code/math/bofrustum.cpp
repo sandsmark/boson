@@ -43,6 +43,35 @@ void BoFrustum::loadViewFrustum(const BoMatrix& m)
  mPlanes[5].loadPlane(BoVector3Float(m[3] + m[2], m[7] + m[6], m[11] + m[10]), m[15] + m[14]);
 }
 
+void BoFrustum::loadPickViewFrustum(const BoRect2Float& pickRect, const int* viewport, const BoMatrix& modelview, const BoMatrix& _projection)
+{
+ const BoVector2Float pickCenter = pickRect.center();
+ const float viewX = (float)viewport[0];
+ const float viewY = (float)viewport[1];
+ const float viewW = (float)viewport[2];
+ const float viewH = (float)viewport[3];
+ const float pickW = pickRect.width();
+ const float pickH = pickRect.height();
+ const float pickCenterX = pickCenter.x();
+ const float pickCenterY = viewH - pickCenter.y();
+
+ BoMatrix pick;
+ const float scaleX = viewW / pickW;
+ const float scaleY = viewH / pickH;
+ pick.scale(scaleX, scaleY, 1.0f);
+
+ float translateX;
+ float translateY;
+ translateX = 1.0f - 2.0f * (pickCenterX - viewX) / viewW;
+ translateY = 1.0f - 2.0f * (pickCenterY - viewY) / viewH;
+
+ pick.translate(translateX, translateY, 0.0f);
+
+ BoMatrix projection(pick);
+ projection.multiply(&_projection);
+ loadViewFrustum(modelview, projection);
+}
+
 float BoFrustum::sphereInFrustum(const BoVector3Float& pos, float radius) const
 {
  // FIXME: performance: we might unroll the loop and then make this function
