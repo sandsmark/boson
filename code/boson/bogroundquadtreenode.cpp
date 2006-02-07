@@ -59,6 +59,7 @@ void BoGroundQuadTreeNode::cellTextureChanged(const BosonMap* map, int x1, int y
 	return;
  }
  BoQuadTreeNode* children[4];
+ getChildren(children);
  for (int i = 0; i < 4; i++) {
 	if (children[i]) {
 		((BoGroundQuadTreeNode*)children[i])->cellTextureChanged(map, x1, y1, x2, y2);
@@ -73,6 +74,7 @@ void BoGroundQuadTreeNode::cellHeightChanged(const BosonMap* map, int x1, int y1
 	return;
  }
  BoQuadTreeNode* children[4];
+ getChildren(children);
  for (int i = 0; i < 4; i++) {
 	if (children[i]) {
 		((BoGroundQuadTreeNode*)children[i])->cellHeightChanged(map, x1, y1, x2, y2);
