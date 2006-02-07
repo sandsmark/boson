@@ -35,8 +35,8 @@ public:
 
 	static BoCanvasQuadTreeNode* createTree(unsigned int width, unsigned int height);
 
-	virtual void cellHeightChanged(const BosonMap* map, int x1, int x2, int x2, int y2);
-	virtual void cellUnitsChanged(const BosonCanvas* map, int x1, int x2, int x2, int y2);
+	virtual void cellHeightChanged(const BosonMap* map, int x1, int y1, int x2, int y2);
+	virtual void cellUnitsChanged(const BosonCanvas* map, int x1, int y1, int x2, int y2);
 
 	float minZ() const
 	{

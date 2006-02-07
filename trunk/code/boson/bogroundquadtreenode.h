@@ -47,8 +47,8 @@ public:
 	 **/
 	static BoGroundQuadTreeNode* createTree(unsigned int width, unsigned int height);
 
-	virtual void cellTextureChanged(const BosonMap* map, int x1, int x2, int x2, int y2);
-	virtual void cellHeightChanged(const BosonMap* map, int x1, int x2, int x2, int y2);
+	virtual void cellTextureChanged(const BosonMap* map, int x1, int y1, int x2, int y2);
+	virtual void cellHeightChanged(const BosonMap* map, int x1, int y1, int x2, int y2);
 
 	float groundMinZ() const
 	{
@@ -61,8 +61,8 @@ public:
 
 	BoRect3Float groundBoundingBox() const
 	{
-		return BoRect3Float((float)left(), (float)top(), groundMinZ(),
-				(float)right(), (float)bottom(), groundMaxZ());
+		return BoRect3Float((float)left(), (float)-top(), groundMinZ(),
+				(float)(right() + 1), (float)-(bottom() + 1), groundMaxZ());
 	}
 
 protected:
