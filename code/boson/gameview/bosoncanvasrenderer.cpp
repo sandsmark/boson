@@ -2309,7 +2309,7 @@ void BosonCanvasRenderer::slotAddFeedbackMoveTo(const QPtrList<Unit>& units, con
  Q_UNUSED(withAttack);
  BO_CHECK_NULL_RET(d->mCanvas);
 
- float z = d->mCanvas->heightAtPoint(cell.x(), cell.y()) + 0.3f;
+ float z = d->mCanvas->heightAtPoint(cell.x(), cell.y());
  BoVector3Float pos(cell.x(), -cell.y(), z);
  BoVisualFeedbackGroundDot* f = new BoVisualFeedbackGroundDot(pos, 500, Qt::green);
  d->mVisualFeedbacks->addFeedback(f);
