@@ -86,6 +86,21 @@ public:
 
 	virtual void paintWidget();
 
+	QValueList<BosonItem*> itemsAtWidgetRect(const QRect& widgetRect) const;
+
+	/**
+	 * Like @ref itemsAtWidgetRect but returns @ref Unit objects only.
+	 **/
+	QValueList<Unit*> unitsAtWidgetRect(const QRect& widgetRect) const;
+
+	/**
+	 * Like @ref unitsAtWidgetRect with a rect of width=height=1, but this
+	 * method selects a single unit from the list.
+	 *
+	 * This can be used to find a single unit that is under the mouse or so.
+	 **/
+	Unit* unitAtWidgetPos(const QPoint& widgetPos) const;
+
 	/**
 	 * @return BosonCanvasRenderer::emulatePickItems
 	 **/
