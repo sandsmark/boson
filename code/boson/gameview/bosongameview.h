@@ -46,6 +46,7 @@ class KGameIO;
 class QDomElement;
 class Boson;
 class BosonLocalPlayerInput;
+class BosonUfoCanvasWidget;
 
 
 
@@ -112,7 +113,7 @@ public:
 	/**
 	 * @return A list of items that are currently in the selection rect
 	 **/
-	BoItemList* items(const PlayerIO* localPlayerIO, const BosonCanvas* canvas) const;
+	BoItemList* items(const BosonUfoCanvasWidget* canvasWidget) const;
 
 signals:
 	void signalVisible(bool);
@@ -628,8 +629,7 @@ protected:
 	 * @p pos with z=0.0. This is useful for e.g. @ref mapDistance, where
 	 * different z values could deliver wrong values.
 	 **/
-	bool mapCoordinates(const QPoint& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth = true) const;
-	bool mapCoordinatesToCell(const QPoint& pos, QPoint* cell);
+	bool mapCoordinatesToGround(const QPoint& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth = true) const;
 	bool mapDistance(int windowDistanceX, int windowDistanceY, GLfloat* dx, GLfloat* dy) const;
 
 	/**
@@ -651,15 +651,6 @@ protected:
 	 * but @ref selectionEnd is now x,y,z
 	 **/
 	void moveSelectionRect(const QPoint& widgetPos);
-
-	/**
-	 * Remove a currently drawn selection rect and select all units inside
-	 * this rect.
-	 * @param replace If TRUE the current selection is replaced, otherwise
-	 * the selected units are added to the selection.
-	 * Usually when the player holds the shift key down while selecting.
-	 **/
-	void removeSelectionRect(bool replace);
 
 	/**
 	 * Here the defined action for a wheel event should happen. See

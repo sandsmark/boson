@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -625,7 +625,14 @@ void BosonCanvasRenderer::slotWidgetResized()
 
 void BosonCanvasRenderer::setCanvas(const BosonCanvas* canvas)
 {
+ if (d->mCanvas) {
+	disconnect(d->mCanvas, 0, this, 0);
+ }
  d->mCanvas = canvas;
+ if (d->mCanvas) {
+	connect(d->mCanvas, SIGNAL(signalRemovedItem(BosonItem*)),
+			this, SLOT(slotItemRemoved(BosonItem*)));
+ }
 }
 
 void BosonCanvasRenderer::setGameGLMatrices(const BoGLMatrices* m)
@@ -2325,5 +2332,53 @@ static void updateEffects(BoVisibleEffects& v)
 	it.current()->doDelayedUpdates();
 	++it;
  }
+}
+
+
+void BosonCanvasRenderer::slotItemRemoved(BosonItem* item)
+{
+ for (QValueVector<BoRenderItem>::iterator it = d->mRenderItemList.begin(); it != d->mRenderItemList.end(); ++it) {
+	if ((*it).item == item) {
+		d->mRenderItemList.erase(it);
+		return;
+	}
+ }
+}
+
+// AB: large parts are from Mesa-5.1/src/glu/mesa/glu.c: gluPickMatrix().
+QValueList<BosonItem*> BosonCanvasRenderer::emulatePickItems(const QRect& pickRect) const
+{
+ PROFILE_METHOD
+ BoRect2Float _pickRect((float)pickRect.left(), (float)pickRect.top(), (float)pickRect.right(), (float)pickRect.bottom());
+ BoFrustum viewFrustum;
+ viewFrustum.loadPickViewFrustum(_pickRect, d->mGameMatrices->viewport(), d->mGameMatrices->modelviewMatrix(), d->mGameMatrices->projectionMatrix());
+
+
+ QValueList<BosonItem*> items;
+ for (QValueVector<BoRenderItem>::const_iterator it = d->mRenderItemList.begin(); it != d->mRenderItemList.end(); ++it) {
+	BosonItem* item = (*it).item;
+	BosonItemRenderer* itemRenderer = (*it).itemRenderer;
+	if (!itemRenderer) {
+		continue;
+	}
+
+	// AB: note: we don't have to check for localPlayerIO()->canSee(item),
+	//     as all items in d->mRenderItemList are visible to the local
+	//     player anyway
+
+	// TODO
+	// a) implement the boundingSphereRadius properly
+	// b) rather use a box based frustum check (not sphere).
+	//    -> we need the preciseness here
+	float dist = itemRenderer->itemInFrustum(viewFrustum);
+
+
+	if (dist == 0.0f) {
+		continue;
+	}
+	items.append(item);
+ }
+
+ return items;
 }
 

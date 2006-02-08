@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -85,6 +85,21 @@ public:
 	void setCanvas(const BosonCanvas* canvas);
 
 	virtual void paintWidget();
+
+	/**
+	 * @return BosonCanvasRenderer::emulatePickItems
+	 **/
+	QValueList<BosonItem*> emulatePickItems(const QRect& pickRect) const;
+
+	/**
+	 * This method emulates the behaviour of OpenGL "picking", i.e.
+	 * GL_SELECT mode, however it does not actually use OpenGL.
+	 *
+	 * @return The (world) coordinates of the ground at the widget
+	 * coordinates @p pickWidgetPos. (-1,-1,-1) if no ground is at that
+	 * position.
+	 **/
+	BoVector3Float emulatePickGroundPos(const QPoint& pickWidgetPos) const;
 
 	void quitGame();
 
