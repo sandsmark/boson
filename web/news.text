@@ -1,4 +1,15 @@
 [article]
+id=060208
+date=February 8th 2006 15:33
+title=New species
+text=Thanks to Lital Natan, we now have a new species. Few early screenshots
+    have been added to the <a href="screenshots.php">screenshots page</a>.<br>
+    Also, many changes to the code have been made, highlights include support for shadows,
+    new radar system, turrets turning towards their targets, facilities consume power,
+    and visual feedback for your orders.
+    <br><br>
+
+[article]
 id=050902
 date=September 2nd 2005 22:15
 title=0.11 finally released!
