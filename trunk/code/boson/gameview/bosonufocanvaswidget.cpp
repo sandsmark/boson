@@ -776,6 +776,35 @@ void BosonUfoCanvasWidget::slotRemoveItemContainerData(BosonItemContainer* c)
  delete itemRenderer;
 }
 
+QValueList<BosonItem*> BosonUfoCanvasWidget::itemsAtWidgetRect(const QRect& widgetRect) const
+{
+ return emulatePickItems(widgetRect);
+}
+
+QValueList<Unit*> BosonUfoCanvasWidget::unitsAtWidgetRect(const QRect& widgetRect) const
+{
+ QValueList<Unit*> units;
+ QValueList<BosonItem*> items = itemsAtWidgetRect(widgetRect);
+ for (QValueList<BosonItem*>::iterator it = items.begin(); it != items.end(); ++it) {
+	if (RTTI::isUnit((*it)->rtti())) {
+		units.append((Unit*)*it);
+	}
+ }
+ return units;
+}
+
+Unit* BosonUfoCanvasWidget::unitAtWidgetPos(const QPoint& widgetPos) const
+{
+ QValueList<Unit*> units = unitsAtWidgetRect(QRect(widgetPos, QSize(1, 1)));
+ if (units.count() == 0) {
+	return 0;
+ }
+
+ // TODO: select the unit that is closest to the player
+
+ return units[0];
+}
+
 QValueList<BosonItem*> BosonUfoCanvasWidget::emulatePickItems(const QRect& pickRect) const
 {
  return d->mCanvasRenderer->emulatePickItems(pickRect);
