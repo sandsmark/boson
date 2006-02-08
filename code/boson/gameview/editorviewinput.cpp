@@ -199,21 +199,24 @@ void EditorViewInput::actionClicked(const BoMouseEvent& event)
 {
  boDebug() << k_funcinfo << endl;
  BO_CHECK_NULL_RET(canvas());
- if (!canvas()->onCanvas(event.canvasVector())) {
+ bool isValidGround = canvas()->onCanvas(event.groundCanvasVector());
+
+ if (!isValidGround) {
 	return;
  }
+
  if (actionLocked()) {
 	if (actionType() == ActionPlacementPreview) {
-		actionPlace(event.canvasVector(), event.controlButton(), event.shiftButton());
+		actionPlace(event.groundCanvasVector(), event.controlButton(), event.shiftButton());
 		return;
 	} else if (actionType() == ActionChangeHeight) {
 		bool up = !event.controlButton();
-		actionChangeHeight(event.canvasVector(), up);
+		actionChangeHeight(event.groundCanvasVector(), up);
 	}
  }
 }
 
-bool EditorViewInput::actionPlace(const BoVector3Fixed& canvasVector, bool exact, bool force)
+bool EditorViewInput::actionPlace(const BoVector3Fixed& groundCanvasVector, bool exact, bool force)
 {
  boDebug() << k_funcinfo << endl;
  if (!canvas()) {
@@ -228,9 +231,12 @@ bool EditorViewInput::actionPlace(const BoVector3Fixed& canvasVector, bool exact
 	BO_NULL_ERROR(localPlayerInput());
 	return false;
  }
+ if (!canvas()->onCanvas(groundCanvasVector)) {
+	return false;
+ }
  bool ret = false;
- bofixed x = canvasVector.x();
- bofixed y = canvasVector.y();
+ bofixed x = groundCanvasVector.x();
+ bofixed y = groundCanvasVector.y();
  if(!exact || d->mPlacement.isGround())
  {
 	x = rintf(x);
@@ -371,7 +377,7 @@ bool EditorViewInput::actionPlace(const BoVector3Fixed& canvasVector, bool exact
  return ret;
 }
 
-bool EditorViewInput::actionChangeHeight(const BoVector3Fixed& canvasVector, bool up)
+bool EditorViewInput::actionChangeHeight(const BoVector3Fixed& groundCanvasVector, bool up)
 {
  boDebug() << k_funcinfo << endl;
  if (!localPlayerInput()) {
@@ -382,17 +388,17 @@ bool EditorViewInput::actionChangeHeight(const BoVector3Fixed& canvasVector, boo
 	BO_NULL_ERROR(canvas());
 	return false;
  }
- if (!canvas()->onCanvas(canvasVector)) {
+ if (!canvas()->onCanvas(groundCanvasVector)) {
 	return false;
  }
- int cellX = (int)(canvasVector.x());
- int cellY = (int)(canvasVector.y());
+ int cellX = (int)(groundCanvasVector.x());
+ int cellY = (int)(groundCanvasVector.y());
  if (!canvas()->cell(cellX, cellY)) {
 	return false;
  }
  // we need the corner that was clicked, not the cell!
- int cornerX = lrint(canvasVector.x());
- int cornerY = lrint(canvasVector.y());
+ int cornerX = lrint(groundCanvasVector.x());
+ int cornerY = lrint(groundCanvasVector.y());
 
  float height = canvas()->heightAtCorner(cornerX, cornerY);
  if (up) {
@@ -548,7 +554,7 @@ void EditorViewInput::slotMoveSelection(int cellX, int cellY)
 	return;
  }
  BoMouseEvent event;
- event.setCanvasVector(BoVector3Fixed((float)(cellX + 1.0f / 2),
+ event.setGroundCanvasVector(BoVector3Fixed((float)(cellX + 1.0f / 2),
 		(float)(cellY + 1.0f / 2),
 		0.0f));
  actionClicked(event);

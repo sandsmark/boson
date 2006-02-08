@@ -141,6 +141,7 @@ public:
 		mControlButton = false;
 		mShiftButton = false;
 		mAltButton = false;
+		mUnitAtEventPos = 0;
 	}
 
 	~BoMouseEvent()
@@ -155,29 +156,37 @@ public:
 	{
 		return mWidgetPos;
 	}
-	void setCanvasVector(const BoVector3Fixed& pos)
+	void setGroundCanvasVector(const BoVector3Fixed& pos)
 	{
-		mCanvasVector = pos;
-		mCanvasPos = QPoint((int)pos.x(), (int)pos.y());
+		mGroundCanvasVector = pos;
+		mGroundCanvasPos = QPoint((int)pos.x(), (int)pos.y());
+	}
+	void setUnitAtEventPos(Unit* unit)
+	{
+		mUnitAtEventPos = unit;
 	}
 
-	const QPoint& canvasPos() const
+	const QPoint& groundCanvasPos() const
 	{
-		return mCanvasPos;
+		return mGroundCanvasPos;
 	}
-	const BoVector3Fixed& canvasVector() const
+	const BoVector3Fixed& groundCanvasVector() const
 	{
-		return mCanvasVector;
+		return mGroundCanvasVector;
+	}
+	Unit* unitAtEventPos() const
+	{
+		return mUnitAtEventPos;
 	}
 
-	void setWorldPos(GLfloat x, GLfloat y, GLfloat z)
+	void setGroundWorldPos(GLfloat x, GLfloat y, GLfloat z)
 	{
 		mX = x;
 		mY = y;
 		mZ = z;
 	}
 
-	void worldPos(GLfloat* x, GLfloat* y, GLfloat* z) const
+	void groundWorldPos(GLfloat* x, GLfloat* y, GLfloat* z) const
 	{
 		*x = mX;
 		*y = mY;
@@ -217,8 +226,8 @@ public:
 
 private:
 	QPoint mWidgetPos;
-	QPoint mCanvasPos;
-	BoVector3Fixed mCanvasVector;
+	QPoint mGroundCanvasPos;
+	BoVector3Fixed mGroundCanvasVector;
 	GLfloat mX;
 	GLfloat mY;
 	GLfloat mZ;
@@ -226,6 +235,8 @@ private:
 	bool mControlButton;
 	bool mShiftButton;
 	bool mAltButton;
+
+	Unit* mUnitAtEventPos;
 };
 
 
@@ -362,7 +373,7 @@ public:
 	 *
 	 * This enters this state.
 	 **/
-	void pressButton(const QPoint& widgetPos, const BoVector3Fixed& canvasVector);
+	void pressButton(const QPoint& widgetPos);
 
 	/**
 	 * Should be called when the mouse button that is responsible for this
@@ -422,10 +433,6 @@ protected:
 	 * @return The position where @ref pressButton was called
 	 **/
 	const QPoint& startedAtWidgetPos() const { return mStartWidgetPos; }
-	/**
-	 * @return The position where @ref pressButton was called
-	 **/
-	const BoVector3Fixed& startedAtCanvasVector() const { return mStartCanvasVector; }
 
 	/**
 	 * @return The position where @ref mouseMoved or @ref pressButton
@@ -434,13 +441,6 @@ protected:
 	 * startedAtWidgetPos.
 	 **/
 	const QPoint& currentWidgetPos() const { return mCurrentWidgetPos; }
-	/**
-	 * @return The position where @ref mouseMoved or @ref pressButton
-	 * whichever happened most recently, was called the last time. If no
-	 * call to @ref mouseMoved was made, this equals @ref
-	 * startedAtCanvasVector.
-	 **/
-	const BoVector3Fixed& currentCanvasVector() const { return mCurrentCanvasVector; }
 
 	/**
 	 * @return The amount of pixels in x direction that were moved by the
@@ -462,10 +462,8 @@ private:
 	bool mIsCameraAction;
 
 	QPoint mStartWidgetPos;
-	BoVector3Fixed mStartCanvasVector;
 
 	QPoint mCurrentWidgetPos;
-	BoVector3Fixed mCurrentCanvasVector;
 
 	int mCurrentWidgetPosDiffX;
 	int mCurrentWidgetPosDiffY;

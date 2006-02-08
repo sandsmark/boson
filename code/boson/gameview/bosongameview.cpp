@@ -146,15 +146,13 @@ BoMouseButtonState::~BoMouseButtonState()
 {
 }
 
-void BoMouseButtonState::pressButton(const QPoint& pos, const BoVector3Fixed& canvasVector)
+void BoMouseButtonState::pressButton(const QPoint& pos)
 {
  mButtonIsReleased = false;
 
  mStartWidgetPos = pos;
- mStartCanvasVector = canvasVector;
 
  mCurrentWidgetPos = mStartWidgetPos;
- mCurrentCanvasVector = mStartCanvasVector;
 
  mCurrentWidgetPosDiffX = 0;
  mCurrentWidgetPosDiffY = 0;
@@ -190,7 +188,6 @@ void BoMouseButtonState::mouseMoved(const BoMouseEvent& e)
 
  // update currentPos
  mCurrentWidgetPos = e.gameViewWidgetPos();
- mCurrentCanvasVector = e.canvasVector();
 
  mIsMove = true;
  mIsCameraAction = cameraModifier(e);
@@ -296,6 +293,7 @@ void BoLeftMouseButtonState::action(const BoMouseEvent& e)
  BO_CHECK_NULL_RET(displayInput());
  BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(boViewData);
+ BO_CHECK_NULL_RET(mUfoCanvasWidget);
 
  if (displayInput()->actionLocked()) {
 	// basically the same as a normal RMB
@@ -303,13 +301,7 @@ void BoLeftMouseButtonState::action(const BoMouseEvent& e)
 	return;
  }
 
- BoVector3Fixed canvasVector = startedAtCanvasVector();
- Unit* unit = 0;
- if (!canvas()->onCanvas(canvasVector)) {
-	return;
- }
-
- unit = localPlayerIO()->findUnitAt(canvasVector);
+ Unit* unit = mUfoCanvasWidget->unitAtWidgetPos(startedAtWidgetPos());
  bool playSelectSound = false;
 
  if (e.controlButton()) {
@@ -460,7 +452,7 @@ void BoMiddleMouseButtonState::action(const BoMouseEvent& e)
  // we ignore all modifiers here, currently.
  if (boConfig->boolValue("MMBMove")) {
 	float posX, posY, posZ;
-	e.worldPos(&posX, &posY, &posZ);
+	e.groundWorldPos(&posX, &posY, &posZ);
 	int cellX, cellY;
 	cellX = (int)(posX);
 	cellY = (int)(-posY);
@@ -535,7 +527,7 @@ BoItemList* SelectionRect::items(const BosonUfoCanvasWidget* ufoCanvasWidget) co
  QRect widgetRect_;
  widgetRect(&widgetRect_);
 
- QValueList<BosonItem*> items = ufoCanvasWidget->emulatePickItems(widgetRect_);
+ QValueList<BosonItem*> items = ufoCanvasWidget->itemsAtWidgetRect(widgetRect_);
 
  BoItemList* list = new BoItemList();
  for (QValueList<BosonItem*>::iterator it = items.begin(); it != items.end(); ++it) {
@@ -2086,8 +2078,8 @@ void BosonGameView::slotMouseEvent(QMouseEvent* e)
  BoVector3Fixed canvasVector(posX, -posY, posZ);
 
  BoMouseEvent event;
- event.setCanvasVector(canvasVector);
- event.setWorldPos(posX, posY, posZ);
+ event.setGroundCanvasVector(canvasVector);
+ event.setGroundWorldPos(posX, posY, posZ);
  if (e->type() != QEvent::Wheel) {
 	event.setGameViewWidgetPos(e->pos());
 	event.setControlButton(e->state() & ControlButton);
@@ -2100,6 +2092,7 @@ void BosonGameView::slotMouseEvent(QMouseEvent* e)
 	event.setShiftButton(w->state() & ShiftButton);
 	event.setAltButton(w->state() & AltButton);
  }
+ event.setUnitAtEventPos(d->mUfoCanvasWidget->unitAtWidgetPos(event.gameViewWidgetPos()));
 
  // our actions are done on Button*Release*, not Press. That conflicts with
  // DblClick, so we store whether the last Press event was an actual press event
@@ -2137,13 +2130,13 @@ void BosonGameView::slotMouseEvent(QMouseEvent* e)
 
 		switch (e->button()) {
 			case LeftButton:
-				d->mLeftButtonState->pressButton(event.gameViewWidgetPos(), event.canvasVector());
+				d->mLeftButtonState->pressButton(event.gameViewWidgetPos());
 				break;
 			case MidButton:
-				d->mMiddleButtonState->pressButton(event.gameViewWidgetPos(), event.canvasVector());
+				d->mMiddleButtonState->pressButton(event.gameViewWidgetPos());
 				break;
 			case RightButton:
-				d->mRightButtonState->pressButton(event.gameViewWidgetPos(), event.canvasVector());
+				d->mRightButtonState->pressButton(event.gameViewWidgetPos());
 				break;
 			default:
 				break;
@@ -2221,7 +2214,7 @@ void BosonGameView::mouseEventWheel(float delta, Orientation orientation, const 
 			if (delta < 0) { //we scroll only when zooming in, not when zooming out
 				int curX, curY;
 				float posX, posY, posZ;
-				boEvent.worldPos(&posX, &posY, &posZ);
+				boEvent.groundWorldPos(&posX, &posY, &posZ);
 				int cellX, cellY;
 				cellX = (int)(posX);
 				cellY = (int)(-posY);
@@ -2328,7 +2321,7 @@ void BosonGameView::mouseEventReleaseDouble(ButtonState button, const BoMouseEve
 		// currently!
 		bool replace = !event.controlButton();
 		bool onScreenOnly = !event.shiftButton();
-		Unit* unit = localPlayerIO()->findUnitAt(event.canvasVector());
+		Unit* unit = event.unitAtEventPos();
 		if (unit) {
 			if (onScreenOnly) {
 				boDebug() << k_funcinfo << "TODO: select only those that are currently on the screen!" << endl;

@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2005 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2002-2005 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2002-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -67,56 +67,61 @@ void BosonGameViewInput::actionClicked(const BoMouseEvent& event)
  if (selection()->isEmpty()) {
 	return;
  }
- if (!canvas()->onCanvas(event.canvasVector())) {
-	boError() << k_funcinfo << event.canvasVector().x() << "," << event.canvasVector().y() << " is not on the canvas!" << endl;
-	return;
- }
+
+ bool isValidGround = canvas()->onCanvas(event.groundCanvasVector());
 
  if (actionLocked()) {
 	bool unlock = false;
 	switch (actionType()) {
 		case ActionMove:
 		{
-			unlock = actionMoveWithoutAttack(event.canvasVector());
+			if (isValidGround) {
+				unlock = actionMoveWithoutAttack(event.groundCanvasVector());
+			}
 			break;
 		}
 		case ActionAttack:
 		{
-			Unit* unit = canvas()->findUnitAt(event.canvasVector());
+			Unit* unit = event.unitAtEventPos();
 			if (unit) {
-				unlock = actionAttack(event.canvasVector());
+				unlock = actionAttack(unit);
 			} else {
-				unlock = actionMoveWithAttack(event.canvasVector());
+				if (isValidGround) {
+					unlock = actionMoveWithAttack(event.groundCanvasVector());
+				}
 			}
 			break;
 		}
 		case ActionDropBomb:
 		{
-			unlock = actionDropBomb(event.canvasVector());
+			if (isValidGround) {
+				unlock = actionDropBomb(event.groundCanvasVector());
+			}
 			break;
 		}
 		case ActionFollow:
 		{
-			Unit* unit = canvas()->findUnitAt(event.canvasVector());
+			Unit* unit = event.unitAtEventPos();
 			if (unit) {
-				unlock = actionFollow(event.canvasVector());
+				unlock = actionFollow(unit);
 			}
 			break;
 		}
 		case ActionHarvest:
 		{
-			// TODO check if player clicked on oil/minerals
-			unlock = actionHarvest(event.canvasVector());
+			unlock = actionHarvest(event.unitAtEventPos());
 			break;
 		}
 		case ActionRepair:
 		{
-			unlock = actionRepair(event.canvasVector());
+			unlock = actionRepair(event.unitAtEventPos());
 			break;
 		}
 		case ActionPlacementPreview:
 		{
-			unlock = actionBuild(event.canvasVector());
+			if (isValidGround) {
+				unlock = actionBuild(event.groundCanvasVector());
+			}
 			break;
 		}
 		default:
@@ -130,8 +135,11 @@ void BosonGameViewInput::actionClicked(const BoMouseEvent& event)
 	return;
  }
 
- Unit* unit = 0;
- unit = localPlayerIO()->findUnitAt(event.canvasVector()); // also checks for canSee()
+ Unit* unit = event.unitAtEventPos();
+ if (!unit && !isValidGround) {
+	return;
+ }
+
  if (!unit) {
 	//FIXME: first check if a the unit can produce! even mobile units can
 	//have the production plugin!!
@@ -149,11 +157,11 @@ void BosonGameViewInput::actionClicked(const BoMouseEvent& event)
 		}
 
 		if (boConfig->boolValue("RMBMovesWithAttack")) {
-			if (!actionMoveWithAttack(event.canvasVector())) {
+			if (!actionMoveWithAttack(event.groundCanvasVector())) {
 				return;
 			}
 		} else {
-			if (!actionMoveWithoutAttack(event.canvasVector())) {
+			if (!actionMoveWithoutAttack(event.groundCanvasVector())) {
 				return;
 			}
 		}
@@ -168,7 +176,7 @@ void BosonGameViewInput::actionClicked(const BoMouseEvent& event)
 	if ((localPlayerIO()->isEnemy(unit) || event.forceAttack()) &&
 			selection()->canShootAt(unit)) {
 		// attack the unit
-		if (!actionAttack(event.canvasVector())) {
+		if (!actionAttack(unit)) {
 			return;
 		}
 
@@ -183,7 +191,7 @@ void BosonGameViewInput::actionClicked(const BoMouseEvent& event)
 			// (not yet implemented) //FIXME
 			// note that currently the unit can go to every friendly
 			// player, even non-local players
-			if (!actionRepair(event.canvasVector())) {
+			if (!actionRepair(unit)) {
 				return;
 			}
 		} else if (unit->properties(PluginProperties::Refinery)) {
@@ -191,13 +199,12 @@ void BosonGameViewInput::actionClicked(const BoMouseEvent& event)
 			if((prop->canRefineMinerals() && selection()->hasMineralHarvester()) ||
 					(prop->canRefineOil() && selection()->hasOilHarvester())) {
 				// go to the refinery
-				if (!actionRefine(event.canvasVector())) {
+				if (!actionRefine(unit)) {
 					return;
 				}
 			}
 		} else if (selection()->hasMobileUnit() && unit->isMobile()) {
-			// Follow
-			if (!actionFollow(event.canvasVector())) {
+			if (!actionFollow(unit)) {
 				return;
 			}
 		} else {
@@ -211,7 +218,7 @@ void BosonGameViewInput::actionClicked(const BoMouseEvent& event)
 		// note: this is NOT a friendly unit, so we won' repair it or
 		// so. but we won't shoot at it either (by default).
 
-		if (actionHarvest(event.canvasVector())) {
+		if (actionHarvest(unit)) {
 			return;
 		}
 	}
@@ -220,7 +227,7 @@ void BosonGameViewInput::actionClicked(const BoMouseEvent& event)
 }
 
 
-bool BosonGameViewInput::actionHarvest(const BoVector3Fixed& canvasVector)
+bool BosonGameViewInput::actionHarvest(Unit* resourceUnit)
 {
  if (!canvas()) {
 	BO_NULL_ERROR(canvas());
@@ -234,7 +241,6 @@ bool BosonGameViewInput::actionHarvest(const BoVector3Fixed& canvasVector)
 	BO_NULL_ERROR(localPlayerInput());
 	return false;
  }
- Unit* resourceUnit = canvas()->findUnitAt(canvasVector);
  if (!resourceUnit) {
 	return false;
  }
@@ -256,9 +262,7 @@ bool BosonGameViewInput::actionHarvest(const BoVector3Fixed& canvasVector)
 	if (!h) {
 		continue;
 	}
-	boDebug() << k_funcinfo << u->id() << " is a harvester" << endl;
 	if (resource->isUsableTo(h)) {
-		boDebug() << k_funcinfo << u->id() << " will harvest at " << resource->unit()->id() << "," << canvasVector.y() << " which is " << h->unit()->id() << endl;
 		localPlayerInput()->harvest(h, resource);
 		taken = true;
 	} else {
@@ -268,7 +272,7 @@ bool BosonGameViewInput::actionHarvest(const BoVector3Fixed& canvasVector)
  return taken;
 }
 
-bool BosonGameViewInput::actionMoveWithoutAttack(const BoVector3Fixed& canvasVector)
+bool BosonGameViewInput::actionMoveWithoutAttack(const BoVector3Fixed& groundCanvasVector)
 {
  if (!selection()) {
 	BO_NULL_ERROR(selection());
@@ -284,7 +288,7 @@ bool BosonGameViewInput::actionMoveWithoutAttack(const BoVector3Fixed& canvasVec
  }
  // AB: note that only x and y are relevant from canvasVector !
  // z is ignored
- localPlayerInput()->moveWithoutAttack(selection()->allUnits(), canvasVector.x(), canvasVector.y());
+ localPlayerInput()->moveWithoutAttack(selection()->allUnits(), groundCanvasVector.x(), groundCanvasVector.y());
  if (localPlayerIO()->ownsUnit(selection()->leader())) {
 	Unit* leader = selection()->leader();
 	if (leader->speciesTheme()) {
@@ -294,7 +298,7 @@ bool BosonGameViewInput::actionMoveWithoutAttack(const BoVector3Fixed& canvasVec
  return true;
 }
 
-bool BosonGameViewInput::actionMoveWithAttack(const BoVector3Fixed& canvasVector)
+bool BosonGameViewInput::actionMoveWithAttack(const BoVector3Fixed& groundCanvasVector)
 {
  if (!localPlayerIO()) {
 	BO_NULL_ERROR(localPlayerIO());
@@ -310,7 +314,7 @@ bool BosonGameViewInput::actionMoveWithAttack(const BoVector3Fixed& canvasVector
  }
  // AB: note that only x and y are relevant from canvasVector !
  // z is ignored
- localPlayerInput()->moveWithAttack(selection()->allUnits(), canvasVector.x(), canvasVector.y());
+ localPlayerInput()->moveWithAttack(selection()->allUnits(), groundCanvasVector.x(), groundCanvasVector.y());
  if (localPlayerIO()->ownsUnit(selection()->leader())) {
 	Unit* leader = selection()->leader();
 	if (leader->speciesTheme()) {
@@ -320,7 +324,7 @@ bool BosonGameViewInput::actionMoveWithAttack(const BoVector3Fixed& canvasVector
  return true;
 }
 
-bool BosonGameViewInput::actionBuild(const BoVector3Fixed& canvasVector)
+bool BosonGameViewInput::actionBuild(const BoVector3Fixed& groundCanvasVector)
 {
  if (!localPlayerIO()) {
 	BO_NULL_ERROR(localPlayerIO());
@@ -343,8 +347,8 @@ bool BosonGameViewInput::actionBuild(const BoVector3Fixed& canvasVector)
 	return false;
  }
 
- bofixed x = rintf(canvasVector.x());
- bofixed y = rintf(canvasVector.y());
+ bofixed x = rintf(groundCanvasVector.x());
+ bofixed y = rintf(groundCanvasVector.y());
 
  // FIXME: lot of this code should probably be moved to BosonLocalPlayerInput
  ProductionPlugin* production = (ProductionPlugin*)(factory->plugin(UnitPlugin::Production));
@@ -368,7 +372,7 @@ bool BosonGameViewInput::actionBuild(const BoVector3Fixed& canvasVector)
  return true;
 }
 
-bool BosonGameViewInput::actionAttack(const BoVector3Fixed& canvasVector)
+bool BosonGameViewInput::actionAttack(Unit* unit)
 {
  if (!localPlayerIO()) {
 	BO_NULL_ERROR(localPlayerIO());
@@ -386,7 +390,9 @@ bool BosonGameViewInput::actionAttack(const BoVector3Fixed& canvasVector)
 	BO_NULL_ERROR(canvas());
 	return false;
  }
- Unit* unit = canvas()->findUnitAt(canvasVector);
+ if (!unit) {
+	return false;
+ }
  localPlayerInput()->attack(selection()->allUnits(), unit);
  Unit* u = selection()->leader();
  if (localPlayerIO()->ownsUnit(u)) {
@@ -397,7 +403,7 @@ bool BosonGameViewInput::actionAttack(const BoVector3Fixed& canvasVector)
  return true;
 }
 
-bool BosonGameViewInput::actionDropBomb(const BoVector3Fixed& canvasVector)
+bool BosonGameViewInput::actionDropBomb(const BoVector3Fixed& groundCanvasVector)
 {
  if (!localPlayerIO()) {
 	BO_NULL_ERROR(localPlayerIO());
@@ -413,7 +419,7 @@ bool BosonGameViewInput::actionDropBomb(const BoVector3Fixed& canvasVector)
  }
  // AB: note that only x and y are relevant from canvasVector !
  // z is ignored
- localPlayerInput()->dropBomb(selection()->leader(), weaponId, canvasVector.x(), canvasVector.y());
+ localPlayerInput()->dropBomb(selection()->leader(), weaponId, groundCanvasVector.x(), groundCanvasVector.y());
  weaponId = -1;
  if (localPlayerIO()->ownsUnit(selection()->leader())) {
 	Unit* leader = selection()->leader();
@@ -424,7 +430,7 @@ bool BosonGameViewInput::actionDropBomb(const BoVector3Fixed& canvasVector)
  return true;
 }
 
-bool BosonGameViewInput::actionRepair(const BoVector3Fixed& canvasVector)
+bool BosonGameViewInput::actionRepair(Unit* unit)
 {
  if (!selection()) {
 	BO_NULL_ERROR(selection());
@@ -438,7 +444,6 @@ bool BosonGameViewInput::actionRepair(const BoVector3Fixed& canvasVector)
 	BO_NULL_ERROR(localPlayerInput());
 	return false;
  }
- Unit* unit = canvas()->findUnitAt(canvasVector);
  QPtrList<Unit> allUnits = selection()->allUnits();
  QPtrList<Unit> list;
  QPtrListIterator<Unit> it(allUnits);
@@ -453,7 +458,7 @@ bool BosonGameViewInput::actionRepair(const BoVector3Fixed& canvasVector)
  return true;
 }
 
-bool BosonGameViewInput::actionRefine(const BoVector3Fixed& canvasVector)
+bool BosonGameViewInput::actionRefine(Unit* unit)
 {
  if (!selection()) {
 	BO_NULL_ERROR(selection());
@@ -467,7 +472,9 @@ bool BosonGameViewInput::actionRefine(const BoVector3Fixed& canvasVector)
 	BO_NULL_ERROR(localPlayerInput());
 	return false;
  }
- Unit* unit = canvas()->findUnitAt(canvasVector);
+ if (!unit) {
+	return false;
+ }
  const RefineryProperties* prop = (RefineryProperties*)unit->properties(PluginProperties::Refinery);
  if (!prop) {
 	boError() << k_funcinfo << unit->id() << "cannot refine" << endl;
@@ -493,7 +500,7 @@ bool BosonGameViewInput::actionRefine(const BoVector3Fixed& canvasVector)
  return true;
 }
 
-bool BosonGameViewInput::actionFollow(const BoVector3Fixed& canvasVector)
+bool BosonGameViewInput::actionFollow(Unit* unit)
 {
  if (!localPlayerIO()) {
 	BO_NULL_ERROR(localPlayerIO());
@@ -511,7 +518,9 @@ bool BosonGameViewInput::actionFollow(const BoVector3Fixed& canvasVector)
 	BO_NULL_ERROR(localPlayerInput());
 	return false;
  }
- Unit* unit = canvas()->findUnitAt(canvasVector);
+ if (!unit) {
+	return false;
+ }
  localPlayerInput()->follow(selection()->allUnits(), unit);
  Unit* u = selection()->leader();
  if (localPlayerIO()->ownsUnit(u)) {
@@ -698,7 +707,7 @@ void BosonGameViewInput::slotMoveSelection(int cellX, int cellY)
 	return;
  }
  BoMouseEvent event;
- event.setCanvasVector(BoVector3Fixed((float)(cellX + 1.0f / 2),
+ event.setGroundCanvasVector(BoVector3Fixed((float)(cellX + 1.0f / 2),
 		(float)(cellY + 1.0f / 2),
 		0.0f));
  actionClicked(event);
