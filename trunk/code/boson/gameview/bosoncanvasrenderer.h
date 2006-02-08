@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -92,7 +92,34 @@ public:
 
 	void reset();
 	void initGL();
+
+	/**
+	 * Render the currently visible items, effects, ground, ... i.e. the
+	 * currently visible part of the canvas.
+	 *
+	 * The method assumes that the projection has been set already. Same
+	 * about the camera settings.
+	 *
+	 * @param allItems A list of all BosonItemContainer objects existing in
+	 * the game.
+	 * @param effects A list of all BosonEffect objects existing in the
+	 * game.
+	 **/
 	void paintGL(const QPtrList<BosonItemContainer>& allItems, const QPtrList<BosonEffect>& effects);
+
+	/**
+	 * Uses the list of currently visible items to emulate OpenGL "picking"
+	 * (i.e. GL_SELECT mode). The items in the specified @p pickRect on the
+	 * screen (i.e. @p pickRect is in widget coordinates) are returned.
+	 *
+	 * @return A list containing all items that were found to be visible in
+	 * the specified rect. This method may return (due to the use of
+	 * bounding volumes) items that are "nearly" visible, but not actually.
+	 * This is intended: it makes sure that the user does not have to click
+	 * _exactly_ on a pixel of the item, buit can click "close to it", too.
+	 **/
+	QValueList<BosonItem*> emulatePickItems(const QRect& pickRect) const;
+
 	unsigned int renderedItems() const;
 	unsigned int renderedCells() const;
 	unsigned int renderedParticles() const;
@@ -104,6 +131,9 @@ public:
 	BoGameCamera* camera() const;
 	PlayerIO* localPlayerIO() const;
 	const BoFrustum& viewFrustum() const;
+
+public slots:
+	void slotItemRemoved(BosonItem* item);
 
 protected slots:
 	void slotAddFeedbackAttack(const QPtrList<Unit>& attacker, const Unit* unit);

@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,7 +45,10 @@
 #include "../bocamera.h"
 #include "../boitemlist.h"
 #include "../bosonviewdata.h"
+#include "../bogroundquadtreenode.h"
 #include "bodebug.h"
+
+#include "../botexture.h"
 
 #include <klocale.h>
 
@@ -138,6 +141,8 @@ public:
 		mCanvas = 0;
 
 		mEffectManager = 0;
+
+		mGroundQuadTree = 0;
 	}
 	const BoGLMatrices* mGameGLMatrices;
 	BosonCanvasRenderer* mCanvasRenderer;
@@ -148,6 +153,8 @@ public:
 	QPtrList<BosonEffect> mEffects;
 
 	BosonEffectManager* mEffectManager;
+
+	BoGroundQuadTreeNode* mGroundQuadTree;
 };
 
 BosonUfoCanvasWidget::BosonUfoCanvasWidget()
@@ -169,6 +176,7 @@ BosonUfoCanvasWidget::~BosonUfoCanvasWidget()
 {
  boDebug() << k_funcinfo << endl;
  quitGame();
+ delete d->mGroundQuadTree;
  delete d->mCanvasRenderer;
  delete d->mEffectManager;
  BosonEffectPropertiesManager::deleteStatic();
@@ -234,6 +242,8 @@ void BosonUfoCanvasWidget::setCanvas(const BosonCanvas* canvas)
  if (d->mCanvas) {
 	disconnect(d->mCanvas, 0, this, 0);
  }
+ delete d->mGroundQuadTree;
+ d->mGroundQuadTree = 0;
  d->mCanvas = canvas;
  d->mCanvasRenderer->setCanvas(d->mCanvas);
  if (d->mCanvas) {
@@ -245,6 +255,20 @@ void BosonUfoCanvasWidget::setCanvas(const BosonCanvas* canvas)
 		this, SLOT(slotUnitDestroyed(Unit*)));
 	connect(d->mCanvas, SIGNAL(signalFragmentCreated(BosonShotFragment*)),
 		this, SLOT(slotFragmentCreated(BosonShotFragment*)));
+	d->mGroundQuadTree = BoGroundQuadTreeNode::createTree(d->mCanvas->mapWidth(), d->mCanvas->mapHeight());
+
+	const BosonMap* map = d->mCanvas->map();
+
+	// AB: atm we need a non-const map pointer for registering :-(
+	//     -> however we don't really modify the map, so it is safe to use
+	//        nonConstMap here.
+	BosonMap* nonConstMap = d->mCanvas->map();
+	nonConstMap->registerQuadTree(d->mGroundQuadTree);
+
+	BosonProfiler treeProf("Initialize tree");
+	d->mGroundQuadTree->cellTextureChanged(map, 0, 0, map->width() - 1, map->height() - 1);
+	d->mGroundQuadTree->cellHeightChanged(map, 0, 0, map->width() - 1, map->height() - 1);
+	treeProf.pop();
  }
 }
 
@@ -275,6 +299,8 @@ void BosonUfoCanvasWidget::setParticlesDirty(bool dirty)
 
 void BosonUfoCanvasWidget::quitGame()
 {
+ delete d->mGroundQuadTree;
+ d->mGroundQuadTree = 0;
  d->mCanvasRenderer->reset();
 
  while (!d->mEffects.isEmpty()) {
@@ -748,6 +774,279 @@ void BosonUfoCanvasWidget::slotRemoveItemContainerData(BosonItemContainer* c)
  c->setItemRenderer(0);
  delete effects;
  delete itemRenderer;
+}
+
+QValueList<BosonItem*> BosonUfoCanvasWidget::emulatePickItems(const QRect& pickRect) const
+{
+ return d->mCanvasRenderer->emulatePickItems(pickRect);
+}
+
+/**
+ * @shortHelper clas for @ref emulatePickGroundPos
+ *
+ * @ref emulatePickGroundPos needs a higher precision than our cell-based
+ * quadtree provides, so we divide leafs even further, using this class.
+ *
+ * We cannot use @ref BoRect3Float, as there we can have min/max values for z
+ * only, but we need the correct z value for every corner.
+ **/
+class EmulatePickRect {
+public:
+	EmulatePickRect()
+	{
+	}
+	EmulatePickRect(const EmulatePickRect& n)
+	{
+		*this = n;
+	}
+	EmulatePickRect(const BoVector3Float& tl, const BoVector3Float& tr, const BoVector3Float& bl, const BoVector3Float& br)
+	{
+		topLeft = tl;
+		topRight = tr;
+		bottomLeft = bl;
+		bottomRight = br;
+	}
+	EmulatePickRect& operator=(const EmulatePickRect& n)
+	{
+		topLeft = n.topLeft;
+		topRight = n.topRight;
+		bottomLeft = n.bottomLeft;
+		bottomRight = n.bottomRight;
+		return *this;
+	}
+
+	BoVector3Float center() const
+	{
+		// AB: we assume that topLeft.x() == bottomLeft().x() (same
+		// about Right/Top/Bottom)
+		const float x = (topLeft.x() + topRight.x()) / 2.0f;
+		const float y = (topLeft.y() + bottomLeft.y()) / 2.0f;
+		const float z = (topLeft.z() + topRight.z() + bottomLeft.z() + bottomRight.z()) / 4.0f;
+		return BoVector3Float(x, y, z);
+	}
+	float radius() const
+	{
+		BoVector3Float c = center();
+		float z1 = (c - topRight).length();
+		float z2 = (c - topLeft).length();
+		float z3 = (c - bottomRight).length();
+		float z4 = (c - bottomLeft).length();
+		float r = QMAX(z1, z2);
+		r = QMAX(r, z3);
+		r = QMAX(r, z4);
+		return r;
+	}
+
+	BoRect3Float boundingBox() const
+	{
+		float minZ = topLeft.z();
+		float maxZ = minZ;
+		minZ = QMIN(minZ, topRight.z());
+		maxZ = QMAX(maxZ, topRight.z());
+		minZ = QMIN(minZ, bottomRight.z());
+		maxZ = QMAX(maxZ, bottomRight.z());
+		minZ = QMIN(minZ, bottomLeft.z());
+		maxZ = QMAX(maxZ, bottomLeft.z());
+		return BoRect3Float(topLeft.x(), topLeft.y(), minZ, bottomRight.x(), bottomRight.y(), maxZ);
+	}
+	BoVector3Float topLeft;
+	BoVector3Float topRight;
+	BoVector3Float bottomLeft;
+	BoVector3Float bottomRight;
+};
+
+/*
+ * AB: the code sucks. It is pretty complex and should be simplified.
+ *
+ * However it works and as long as it does, I don't intend to do so.
+ */
+BoVector3Float BosonUfoCanvasWidget::emulatePickGroundPos(const QPoint& pickPos) const
+{
+ PROFILE_METHOD
+ if (!d->mCanvas) {
+	BO_NULL_ERROR(d->mCanvas);
+	return BoVector3Float(-1.0f, -1.0f, -1.0f);
+ }
+ const BosonMap* map = d->mCanvas->map();
+ if (!map) {
+	BO_NULL_ERROR(map);
+	return BoVector3Float(-1.0f, -1.0f, -1.0f);
+ }
+ const float pickSize = 0.1f;
+ BoRect2Float pickRect((float)pickPos.x() - pickSize, (float)pickPos.y() - pickSize, (float)pickPos.x() + pickSize, (float)pickPos.y() + pickSize);
+ BoFrustum viewFrustum;
+ viewFrustum.loadPickViewFrustum(pickRect, d->mGameGLMatrices->viewport(), d->mGameGLMatrices->modelviewMatrix(), d->mGameGLMatrices->projectionMatrix());
+ BoVector3Float pos;
+
+ QValueVector<BoGroundQuadTreeNode*> retNodes;
+ QValueVector<BoGroundQuadTreeNode*> nodes;
+ nodes.append(d->mGroundQuadTree);
+ int visibleDepth = 0;
+ while (!nodes.isEmpty()) {
+	QValueVector<BoGroundQuadTreeNode*> nextNodes;
+	nextNodes.reserve(nodes.count() * 4);
+
+	QValueVector<BoGroundQuadTreeNode*> nextRetNodes;
+	nextRetNodes.reserve(nodes.count());
+
+	QValueVector<BoGroundQuadTreeNode*>::iterator it;
+	for (it = nodes.begin(); it != nodes.end(); ++it) {
+		BoRect3Float r = (*it)->groundBoundingBox();
+
+#define USE_BOX_NOT_SPHERE 1
+#if USE_BOX_NOT_SPHERE
+		if (!viewFrustum.boxInFrustum(r)) {
+			continue;
+		}
+#else
+		BoVector3Float center;
+		center.setX((r.left() + r.right()) / 2.0f);
+		center.setY((r.top() + r.bottom()) / 2.0f);
+		center.setZ((r.front() + r.back()) / 2.0f);
+		BoVector3Float v = center + BoVector3Float(r.width() / 2.0f, r.height() / 2.0f, r.depth() / 2.0f);
+		float radius = (center - v).length();
+		if (!viewFrustum.sphereInFrustum(center, radius)) {
+			continue;
+		}
+#endif
+#undef USE_BOX_NOT_SPHERE
+
+		nextRetNodes.append(*it);
+
+		BoQuadTreeNode* children[4];
+		(*it)->getChildren(children);
+		for (int j = 0; j < 4; j++) {
+			if (children[j]) {
+				nextNodes.append((BoGroundQuadTreeNode*)children[j]);
+			}
+		}
+	}
+	if (nextRetNodes.count() > 0) {
+		retNodes = nextRetNodes;
+	}
+	nodes = nextNodes;
+	visibleDepth++;
+ }
+
+ if (retNodes.count() == 0) {
+	// nothing visible (or a major bug somewhere)
+	return BoVector3Float(-1.0f, -1.0f, -1.0f);
+ }
+
+
+ // if everything worked correct "retNodes" contains only leaf nodes now.
+ // "cell" coordinates are not precise enough for us, so we go a few levels
+ // deeper
+
+ // fallback only
+ pos = BoVector3Float(retNodes[0]->left(), -retNodes[0]->top(), map->cellAverageHeight(retNodes[0]->left(), retNodes[0]->top()));
+
+ QValueVector<EmulatePickRect> rects;
+ for (unsigned int i = 0; i < retNodes.count(); i++) {
+	const int x1 = retNodes[i]->left();
+	const int x2 = retNodes[i]->right() + 1;
+	const int y1 = retNodes[i]->top();
+	const int y2 = retNodes[i]->bottom() + 1;
+	rects.append(EmulatePickRect(
+			BoVector3Float((float)x1, (float)-y1, map->heightAtCorner(x1, y1)),
+			BoVector3Float((float)x2, (float)-y1, map->heightAtCorner(x2, y1)),
+			BoVector3Float((float)x1, (float)-y2, map->heightAtCorner(x1, y2)),
+			BoVector3Float((float)x2, (float)-y2, map->heightAtCorner(x2, y2))
+			));
+ }
+
+ // precision = 1: 1-cell precision
+ // precision = 2: 1/2-cell precision
+ // precision = 3: 1/4-cell precision
+ // precision = 4: 1/8-cell precision
+ // ...
+ const int precision = 4;
+ for (int precisionRun = 0; precisionRun < precision; precisionRun++) {
+	QValueVector<EmulatePickRect> nextRects;
+	nextRects.reserve(rects.count() * 4);
+	const EmulatePickRect* firstVisible = 0;
+	for (unsigned int i = 0; i < rects.count(); i++) {
+		const EmulatePickRect& r = rects[i];
+		BoVector3Float center = r.center();
+#define USE_BOX_NOT_SPHERE 1
+#if USE_BOX_NOT_SPHERE
+		if (!viewFrustum.boxInFrustum(r.boundingBox())) {
+			continue;
+		}
+#else
+		if (!viewFrustum.sphereInFrustum(center, r.radius())) {
+			continue;
+		}
+#endif
+#undef USE_BOX_NOT_SPHERE
+		if (!firstVisible) {
+			firstVisible = &r;
+		}
+
+		BoVector3Float topCenter(center.x(), r.topLeft.y(), (r.topLeft.z() + r.topRight.z()) / 2.0f);
+		BoVector3Float leftCenter(r.topLeft.x(), center.y(), (r.topLeft.z() + r.bottomLeft.z()) / 2.0f);
+		BoVector3Float bottomCenter(center.x(), r.bottomLeft.y(), (r.bottomLeft.z() + r.bottomRight.z()) / 2.0f);
+		BoVector3Float rightCenter(r.topRight.x(), center.y(), (r.topRight.z() + r.bottomRight.z()) / 2.0f);
+
+		// top-left
+		nextRects.append(EmulatePickRect(
+				r.topLeft,
+				topCenter,
+				leftCenter,
+				center
+				));
+
+		// top-right
+		nextRects.append(EmulatePickRect(
+				topCenter,
+				r.topRight,
+				center,
+				rightCenter
+				));
+
+		// bottom-left
+		nextRects.append(EmulatePickRect(
+				leftCenter,
+				center,
+				r.bottomLeft,
+				bottomCenter
+				));
+
+		// bottom-right
+		nextRects.append(EmulatePickRect(
+				center,
+				rightCenter,
+				bottomCenter,
+				r.bottomRight
+				));
+	}
+
+	if (firstVisible) {
+		pos = firstVisible->center();
+	}
+
+	rects = nextRects;
+ }
+
+ if (rects.count() == 0) {
+	return pos;
+ }
+
+
+ float x = 0.0f;
+ float y = 0.0f;
+ float z = 0.0f;
+ for (unsigned int i = 0; i < rects.count(); i++) {
+	BoVector3Float center = rects[i].center();
+	x += center.x();
+	y += center.y();
+	z += center.z();
+ }
+ x /= (float)rects.count();
+ y /= (float)rects.count();
+ z /= (float)rects.count();
+
+ return BoVector3Float(x, y, z);
 }
 
 void BosonUfoCanvasWidget::paintWidget()

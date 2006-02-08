@@ -240,11 +240,16 @@ public:
 	BoLeftMouseButtonState(BosonGameView* v, const BoGLMatrices* m) : BoGameViewMouseState(v, m)
 	{
 		mSelectionRect = 0;
+		mUfoCanvasWidget = 0;
 	}
 
 	void setSelectionRect(SelectionRect* r)
 	{
 		mSelectionRect = r;
+	}
+	void setUfoCanvasWidget(const BosonUfoCanvasWidget* w)
+	{
+		mUfoCanvasWidget = w;
 	}
 
 protected:
@@ -255,6 +260,7 @@ protected:
 
 private:
 	SelectionRect* mSelectionRect;
+	const BosonUfoCanvasWidget* mUfoCanvasWidget;
 };
 
 class BoRightMouseButtonState : public BoGameViewMouseState
@@ -340,8 +346,10 @@ void BoLeftMouseButtonState::actionAfterMove(const BoMouseEvent& e)
  BO_CHECK_NULL_RET(displayInput());
  BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(boViewData);
+ BO_CHECK_NULL_RET(mSelectionRect);
+ BO_CHECK_NULL_RET(mUfoCanvasWidget);
 
- BoItemList* items = mSelectionRect->items(localPlayerIO(), canvas());
+ BoItemList* items = mSelectionRect->items(mUfoCanvasWidget);
  bool playSelectionSoundForLeader = false;
  if (e.controlButton()) {
 	if (selection()->count() > 0) {
@@ -372,6 +380,7 @@ void BoLeftMouseButtonState::cameraAction(const BoMouseEvent& e)
 
 void BoLeftMouseButtonState::moveAction(const BoMouseEvent& e)
 {
+ BO_CHECK_NULL_RET(mSelectionRect);
  if (!displayInput()->actionLocked()) {
 	// TODO: use canvas coordinates for the selection rect.
 	//       atm the widget size is the largest possible area for the
@@ -476,52 +485,6 @@ void BoMiddleMouseButtonState::moveAction(const BoMouseEvent& e)
 }
 
 
-
-/**
- * Calculate the maximum and minimum world coordinates from the
- * specified rectangles.
- *
- * The rect @p rect is in window coordinates (e.g. the selection rect).
- **/
-static void calculateWorldRect(const BoGLMatrices& matrices, const QRect& rect, float* minX, float* minY, float* maxX, float* maxY)
-{
- BO_CHECK_NULL_RET(boGame);
- BO_CHECK_NULL_RET(boGame->canvas());
- const BosonMap* map = boGame->canvas()->map();
- BO_CHECK_NULL_RET(map);
- GLfloat posX, posY;
- GLfloat posZ;
- Bo3dTools::mapCoordinates(matrices, rect.topLeft(), &posX, &posY, &posZ);
- *maxX = *minX = posX;
- *maxY = *minY = -posY;
- Bo3dTools::mapCoordinates(matrices, rect.topRight(), &posX, &posY, &posZ);
- *maxX = QMAX(*maxX, posX);
- *maxY = QMAX(*maxY, -posY);
- *minX = QMIN(*minX, posX);
- *minY = QMIN(*minY, -posY);
- Bo3dTools::mapCoordinates(matrices, rect.bottomLeft(), &posX, &posY, &posZ);
- *maxX = QMAX(*maxX, posX);
- *maxY = QMAX(*maxY, -posY);
- *minX = QMIN(*minX, posX);
- *minY = QMIN(*minY, -posY);
- Bo3dTools::mapCoordinates(matrices, rect.bottomRight(), &posX, &posY, &posZ);
- *maxX = QMAX(*maxX, posX);
- *maxY = QMAX(*maxY, -posY);
- *minX = QMIN(*minX, posX);
- *minY = QMIN(*minY, -posY);
-
- *maxX = QMAX(0, *maxX);
- *maxY = QMAX(0, *maxY);
- *minX = QMAX(0, *minX);
- *minY = QMAX(0, *minY);
- *maxX = QMIN((map->width() - 1), *maxX);
- *minX = QMIN((map->width() - 1), *minX);
- *maxY = QMIN((map->height() - 1), *maxY);
- *minY = QMIN((map->height() - 1), *minY);
- *minY *= -1;
- *maxY *= -1;
-}
-
 SelectionRect::SelectionRect() : QObject(0)
 {
  mVisible = false;
@@ -563,106 +526,23 @@ void SelectionRect::quitGame()
 }
 
 
-BoItemList* SelectionRect::items(const PlayerIO* localPlayerIO, const BosonCanvas* canvas) const
+BoItemList* SelectionRect::items(const BosonUfoCanvasWidget* ufoCanvasWidget) const
 {
- if (!canvas) {
-	BO_NULL_ERROR(canvas);
+ if (!ufoCanvasWidget) {
+	BO_NULL_ERROR(ufoCanvasWidget);
 	return new BoItemList();
  }
- if (!localPlayerIO) {
-	BO_NULL_ERROR(localPlayerIO);
-	return new BoItemList();
- }
- const BosonMap* map = canvas->map();
- if (!map) {
-	BO_NULL_ERROR(map);
-	return new BoItemList();
- }
-
  QRect widgetRect_;
  widgetRect(&widgetRect_);
 
- GLfloat maxX, maxY;
- GLfloat minX, minY;
- calculateWorldRect(*mMatrices, widgetRect_, &minX, &minY, &maxX, &maxY);
- maxY /= -1.0f;
- minY /= -1.0f;
+ QValueList<BosonItem*> items = ufoCanvasWidget->emulatePickItems(widgetRect_);
 
- // now the really ugly part starts. we really should improve this.
- // the rect (pos1, pos2) is the smallest possible 2d rect that contains all
- // cells (with 2d rect i mean: parallel to x and y world-axis).
- // but we we need an actual world rect, as the view is most probably rotated
- // and so a lot of cells that are in the parallel rect are not in the actual
- // rect.
- // to achieve this we loop through all cells in the parallel rect and check
- // whether they are in the actual rect.
- // someone with some maths knowledge and/or some time can surely speed this up
- // by using some proper formulas!
-
- QRect cellRect = QRect(QPoint((int)minX, (int)minY), QPoint((int)maxX, (int)maxY)).normalize();
- QPoint win;
- QValueList<const Cell*> cells;
- for (int x = cellRect.left(); x <= cellRect.right(); x++) {
-	for (int y = cellRect.top(); y <= cellRect.bottom(); y++) {
-		const Cell* c = canvas->cell(x, y);
-		if (!c) {
-			boDebug() << k_funcinfo << "NULL cell at " << x << "," << y << endl;
-			continue;
-		}
-		// AB: we use z==0.0, that is not really nice here. anyway,
-		// let's wait until it causes trouble.
-		// (read: I don't know which kind of trouble it will cause)
-		GLfloat glx, gly, glz;
-
-		// top left corner of cell
-		glx = x;
-		gly = -y;
-		glz = map->heightAtCorner(x, y);
-		Bo3dTools::boProject(*mMatrices, glx, gly, glz, &win);
-		if (widgetRect_.contains(win)) {
-			cells.append(c);
-			continue;
-		}
-		// top right corner of cell
-		glx = (x + 1);
-		gly = -y;
-		glz = map->heightAtCorner(x + 1, y);
-		Bo3dTools::boProject(*mMatrices, glx, gly, glz, &win);
-		if (widgetRect_.contains(win)) {
-			cells.append(c);
-			continue;
-		}
-		// bottom left corner of cell
-		glx = x;
-		gly = -(y + 1);
-		glz = map->heightAtCorner(x, y + 1);
-		Bo3dTools::boProject(*mMatrices, glx, gly, glz, &win);
-		if (widgetRect_.contains(win)) {
-			cells.append(c);
-			continue;
-		}
-		// bottom right corner of cell
-		glx = (x + 1);
-		gly = -(y + 1);
-		glz = map->heightAtCorner(x + 1, y + 1);
-		Bo3dTools::boProject(*mMatrices, glx, gly, glz, &win);
-		if (widgetRect_.contains(win)) {
-			cells.append(c);
-			continue;
-		}
-	}
+ BoItemList* list = new BoItemList();
+ for (QValueList<BosonItem*>::iterator it = items.begin(); it != items.end(); ++it) {
+	list->append(*it);
  }
 
- // another ugly part of this function...
- QPtrVector<const Cell> cellVector(cells.count());
- QValueList<const Cell*>::Iterator it;
- int i = 0;
- for (it = cells.begin(); it != cells.end(); ++it) {
-	cellVector.insert(i, *it);
-	i++;
- }
-
- return localPlayerIO->unitsAtCells(&cellVector);
+ return list;
 }
 
 
@@ -1087,8 +967,6 @@ void BosonGameView::slotWidgetResized()
  d->mAspect = (float)w / (float)h;
  gluPerspective(fovY, d->mAspect, BO_GL_NEAR_PLANE, BO_GL_FAR_PLANE);
 
- // cache the composed projection matrix. we'll need it very often in
- // mapCoordinates()
  d->mProjectionMatrix = createMatrixFromOpenGL(GL_PROJECTION_MATRIX);
  d->mViewFrustum.loadViewFrustum(d->mModelviewMatrix, d->mProjectionMatrix);
 
@@ -1145,7 +1023,7 @@ const QPoint& BosonGameView::cursorWidgetPos() const
 void BosonGameView::updateCursorCanvasVector(const QPoint& cursorGameViewPos)
 {
  GLfloat x = 0.0, y = 0.0, z = 0.0;
- mapCoordinates(cursorGameViewPos, &x, &y, &z);
+ mapCoordinatesToGround(cursorGameViewPos, &x, &y, &z);
  BoVector3Fixed canvas(x, -y, z); // AB: are these already real z coordinates?
  QPoint rootPanePos = mapToRoot(cursorGameViewPos);
 
@@ -1189,12 +1067,7 @@ void BosonGameView::cameraChanged()
 	boError() << k_funcinfo << "after BoGameCamera::applyCameraToScene()" << endl;
  }
 
- // the applyCameraToScene() above is the most important call for the modelview matrix.
- // everything else will be discarded by glPushMatrix/glPopMatrix anyway (in
- // paintGL()). So we cache the matrix here, for mapCoordinates() and some other
- // stuff
  d->mModelviewMatrix = createMatrixFromOpenGL(GL_MODELVIEW_MATRIX);
-
  d->mViewFrustum.loadViewFrustum(d->mModelviewMatrix, d->mProjectionMatrix);
  BoGroundRenderer* renderer = BoGroundRendererManager::manager()->currentRenderer();
  if (renderer) {
@@ -1245,36 +1118,21 @@ void BosonGameView::slotReCenterDisplay(const QPoint& pos)
  camera()->setLookAt(BoVector3Float(((float)pos.x()), -((float)pos.y()), 0));
 }
 
-bool BosonGameView::mapCoordinates(const QPoint& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth) const
+bool BosonGameView::mapCoordinatesToGround(const QPoint& widgetPos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth) const
 {
- return Bo3dTools::mapCoordinates(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewport,
-		pos, posX, posY, posZ, useRealDepth);
+ BoVector3Float p = d->mUfoCanvasWidget->emulatePickGroundPos(widgetPos);
+ *posX = p.x();
+ *posY = p.y();
+ *posZ = p.z();
+ return true;
 }
 
+#warning TODO: port to new pick architecture
 bool BosonGameView::mapDistance(int windx, int windy, GLfloat* dx, GLfloat* dy) const
 {
+ // FIXME: use mapCoordinatesToGround() or so
  return Bo3dTools::mapDistance(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewport,
 		windx, windy, dx, dy);
-}
-
-bool BosonGameView::mapCoordinatesToCell(const QPoint& pos, QPoint* cell)
-{
- GLfloat x, y, z;
- if (!canvas()) {
-	BO_NULL_ERROR(canvas());
-	return false;
- }
- if (!mapCoordinates(pos, &x, &y, &z)) {
-	return false;
- }
- y *= -1;
- int cellX = (int)(x);
- int cellY = (int)(y);
- cellX = QMAX(0, QMIN((int)canvas()->mapWidth(), cellX));
- cellY = QMAX(0, QMIN((int)canvas()->mapHeight(), cellY));
- cell->setX(cellX);
- cell->setY(cellY);
- return true;
 }
 
 void BosonGameView::scrollBy(int dx, int dy)
@@ -1373,6 +1231,7 @@ void BosonGameView::initUfoGUI()
  d->mUfoCanvasWidget->setGameGLMatrices(d->mGameGLMatrices);
  d->mUfoCanvasWidget->setCamera(&d->mCamera);
  d->mUfoCanvasWidget->setCanvas(canvas());
+ d->mLeftButtonState->setUfoCanvasWidget(d->mUfoCanvasWidget);
 
  d->mUfoPlacementPreviewWidget = new BosonUfoPlacementPreviewWidget();
  d->mUfoPlacementPreviewWidget->setGameGLMatrices(d->mGameGLMatrices);
@@ -2140,43 +1999,6 @@ void BosonGameView::moveSelectionRect(const QPoint& widgetPos)
  }
 }
 
-void BosonGameView::removeSelectionRect(bool replace)
-{
- BO_CHECK_NULL_RET(displayInput());
- BO_CHECK_NULL_RET(localPlayerIO());
- BO_CHECK_NULL_RET(boViewData);
-
- if (d->mSelectionRect->isVisible()) {
- } else {
-	// a simple click on the map
-	GLfloat x,y,z;
-	if (!mapCoordinates(d->mSelectionRect->startPos(), &x, &y, &z)) {
-		boError() << k_funcinfo << "Cannot map coordinates" << endl;
-		return;
-	}
-	BoVector3Fixed canvasVector(x, -y, z);
-	Unit* unit = 0;
-	if (!canvas()->onCanvas(canvasVector)) {
-		return;
-	}
-
-	unit = localPlayerIO()->findUnitAt(canvasVector);
-	if (unit) {
-		boDebug() << k_funcinfo << "select unit at " << canvasVector.x() << "," << canvasVector.y() << " (canvas)" << endl;
-		displayInput()->selectSingle(unit, replace);
-		// cannot be placed into selection() cause we don't have localPlayer
-		// there
-		if (localPlayerIO()->ownsUnit(unit)) {
-			boViewData->speciesData(unit->speciesTheme())->playSound(unit, SoundOrderSelect);
-		}
-	} else {
-		if (replace) {
-			selection()->clear();
-		}
-	}
- }
-}
-
 void BosonGameView::setDisplayInput(BosonGameViewInputBase* input)
 {
  if (d->mInput) {
@@ -2257,7 +2079,7 @@ void BosonGameView::slotMouseEvent(QMouseEvent* e)
  GLfloat posX = 0.0;
  GLfloat posY = 0.0;
  GLfloat posZ = 0.0;
- if (!mapCoordinates(e->pos(), &posX, &posY, &posZ)) {
+ if (!mapCoordinatesToGround(e->pos(), &posX, &posY, &posZ)) {
 	boError() << k_funcinfo << "Cannot map coordinates" << endl;
 	return;
  }
