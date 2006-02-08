@@ -317,6 +317,10 @@ void BosonLocalPlayerInput::moveWithAttack(const QPtrList<Unit>& units, bofixed 
 void BosonLocalPlayerInput::build(ProductionType type, Unit* factory, bofixed x, bofixed y)
 {
   boDebug() << k_funcinfo << endl;
+  if (!factory)
+  {
+    return;
+  }
 
   BosonMessageMoveBuild message(type, factory->owner()->bosonId(), factory->id(), BoVector2Fixed(x, y));
 
@@ -335,6 +339,10 @@ void BosonLocalPlayerInput::build(ProductionType type, Unit* factory, bofixed x,
 void BosonLocalPlayerInput::attack(const QPtrList<Unit>& units, Unit* target)
 {
   boDebug() << k_funcinfo << endl;
+  if (!target)
+  {
+    return;
+  }
 
   QValueList<Q_ULONG> attackUnits;
   QPtrListIterator<Unit> it(units);
@@ -361,6 +369,10 @@ void BosonLocalPlayerInput::attack(const QPtrList<Unit>& units, Unit* target)
 void BosonLocalPlayerInput::dropBomb(Unit* u, int weapon, bofixed x, bofixed y)
 {
   boDebug() << k_funcinfo << endl;
+  if (!u)
+  {
+    return;
+  }
 
   QValueList<Q_ULONG> units;
   QValueList<Q_ULONG> weapons;
@@ -382,11 +394,16 @@ void BosonLocalPlayerInput::dropBomb(Unit* u, int weapon, bofixed x, bofixed y)
 
 void BosonLocalPlayerInput::repair(const QPtrList<Unit>& units, Unit* repairyard)
 {
+  if (!repairyard)
+  {
+    return;
+  }
   // TODO
 }
 
 void BosonLocalPlayerInput::refine(const QPtrList<Unit>& units, Unit* refinery)
 {
+  BO_CHECK_NULL_RET(refinery);
   boDebug() << k_funcinfo << endl;
 
   QValueList<Q_ULONG> refineUnits;
@@ -414,6 +431,10 @@ void BosonLocalPlayerInput::refine(const QPtrList<Unit>& units, Unit* refinery)
 void BosonLocalPlayerInput::follow(const QPtrList<Unit>& units, Unit* target)
 {
   boDebug() << k_funcinfo << endl;
+  if (!target)
+  {
+    return;
+  }
 
   QValueList<Q_ULONG> followUnits;
   QPtrListIterator<Unit> it(units);
@@ -439,6 +460,7 @@ void BosonLocalPlayerInput::follow(const QPtrList<Unit>& units, Unit* target)
 
 void BosonLocalPlayerInput::placeUnit(Player* owner, unsigned long int unitType, bofixed x, bofixed y)
 {
+  BO_CHECK_NULL_RET(owner);
   boDebug() << k_funcinfo << endl;
 
   bofixed rotation = 0;
