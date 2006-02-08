@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2005 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2002-2005 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2002-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -46,13 +46,13 @@ protected:
 	//AB: use BoMouseEvent as 1st parameter
 	bool actionMoveWithAttack(const BoVector3Fixed& pos);
 	bool actionMoveWithoutAttack(const BoVector3Fixed& pos);
-	bool actionAttack(const BoVector3Fixed& pos);
+	bool actionAttack(Unit* target);
 	bool actionDropBomb(const BoVector3Fixed& pos);
 	bool actionBuild(const BoVector3Fixed& pos);
-	bool actionFollow(const BoVector3Fixed& pos);
-	bool actionRepair(const BoVector3Fixed& pos);
-	bool actionRefine(const BoVector3Fixed& pos);
-	bool actionHarvest(const BoVector3Fixed& pos);
+	bool actionFollow(Unit* unit);
+	bool actionRepair(Unit* repairYard);
+	bool actionRefine(Unit* refinery);
+	bool actionHarvest(Unit* resourceMine);
 
 	CanSelectUnit canSelect(Unit* unit) const;
 
