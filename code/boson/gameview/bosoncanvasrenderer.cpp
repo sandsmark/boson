@@ -2349,7 +2349,7 @@ void BosonCanvasRenderer::slotItemRemoved(BosonItem* item)
 QValueList<BosonItem*> BosonCanvasRenderer::emulatePickItems(const QRect& pickRect) const
 {
  PROFILE_METHOD
- BoRect2Float _pickRect((float)pickRect.left(), (float)pickRect.top(), (float)pickRect.right(), (float)pickRect.bottom());
+ BoRect2Float _pickRect((float)pickRect.x(), (float)pickRect.y(), (float)(pickRect.x() + pickRect.width()), (float)(pickRect.y() + pickRect.height()));
  BoFrustum viewFrustum;
  viewFrustum.loadPickViewFrustum(_pickRect, d->mGameMatrices->viewport(), d->mGameMatrices->modelviewMatrix(), d->mGameMatrices->projectionMatrix());
 
