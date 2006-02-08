@@ -70,6 +70,9 @@ public:
 	 * pickRect (in window coordinates) fill the viewport.
 	 *
 	 * See also @ref loadViewFrustum
+	 *
+	 * @param pickRect The rectangle inside the viewport that is to be
+	 * picked. This is in Qt/X11 widget coordinates, i.e. y=0 is top!
 	 **/
 	void loadPickViewFrustum(const BoRect2Float& pickRect, const int* viewport, const BoMatrix& modelview, const BoMatrix& projection);
 
