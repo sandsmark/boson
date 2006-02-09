@@ -966,6 +966,21 @@ bool BoUfoWidget::takesKeyboardFocus() const
  return ufoWidget()->isFocusable();
 }
 
+void BoUfoWidget::setFocus()
+{
+ ufoWidget()->requestFocus();
+}
+
+void BoUfoWidget::clearFocus()
+{
+ ufoWidget()->releaseFocus();
+}
+
+bool BoUfoWidget::hasFocus() const
+{
+ return ufoWidget()->isFocused();
+}
+
 void BoUfoWidget::loadPropertiesFromXML(const QDomElement& root)
 {
  if (root.isNull()) {

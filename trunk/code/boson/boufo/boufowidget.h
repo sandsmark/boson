@@ -234,6 +234,10 @@ public:
 
 	void setTakesKeyboardFocus(bool);
 	bool takesKeyboardFocus() const;
+	bool hasFocus() const;
+
+	void setFocus();
+	void clearFocus();
 
 	/**
 	 * Add @p w as child to this widget. This is also adds @p w to the
