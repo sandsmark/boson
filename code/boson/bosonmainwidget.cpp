@@ -1055,6 +1055,8 @@ void BosonMainWidget::slotGameStarted()
  // hombase.
  d->mGameView->slotCenterHomeBase();
 
+ d->mGameView->setFocus();
+
  if (boGame->gameMode()) {
 	if (boGame->isAdmin()) {
 		if (boGame->gameSpeed() == 0) {
