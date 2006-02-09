@@ -401,6 +401,10 @@ class genobj:
 
 		self.executed=1
 
+		# AB: actually return it, as we need to add dependencies later
+		#     (boson.py)
+		return ret
+
 ## install files given named resources, for example KDEBIN to install stuff with kde binaries
 def getInstDirForResType(lenv,restype):
 	if len(restype) == 0 or not lenv.has_key(restype):

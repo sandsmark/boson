@@ -855,7 +855,7 @@ def generate(env):
 			self.p_localsource=KDEfiles(env, self.joinpath(self.target), self.joinpath(self.source))
 			# ITA
 			#print self.p_localsource
-			generic.genobj.execute(self)
+			return generic.genobj.execute(self)
 
 		def xml(self):
 			dirprefix = reldir('.')
