@@ -10,7 +10,10 @@ def generate(env):
 		return
 
 	if not env['BOSON_DO_STATIC']:
-		env['LIB_KDECORE_DEPENDENCIES_OBJECTS'] = []
+		# AB: linking dynamically, most dependencies are resolved
+		#     automatically. only Xmu may be required (boson depends
+		#     on it)
+		env['LIB_KDECORE_DEPENDENCIES_OBJECTS'] = env.createDummyLibs('qt-mt Xmu')
 		return
 
 	# TODO: figure out how to calculate the dependencies (e.g. by somehow reading the .la files)
