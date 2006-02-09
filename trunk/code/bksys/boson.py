@@ -41,6 +41,7 @@ def generate(env):
 			self.filename = None
 			self.libname = None
 			self.linker_flag = ''
+			self.dependsfile = None
 
 	class BoSharedLib(BoLib):
 		def __init__(self, lib, local = True):
@@ -74,10 +75,12 @@ def generate(env):
 				self.libname = link
 				self.dirname = f.dir.path
 				self.filename = f.name
+				self.dependsfile = lib
 			else:
 				self.libname = lib
 				self.dirname = None
 				self.filename = None
+				self.dependsfile = None
 
 	class BoStaticLib(BoLib):
 		def __init__(self, lib, local = True):
@@ -97,9 +100,11 @@ def generate(env):
 				f = SCons.Node.FS.default_fs.File(file)
 				self.dirname = f.dir.path
 				self.filename = f.name
+				self.dependsfile = lib
 			else:
 				print "WARNING: global static libs not yet handled propertly"
 				self.libname = lib
+				self.dependsfile = None
 
 
 	import kde3
@@ -148,8 +153,15 @@ def generate(env):
 			if len(self._libflags)>0:
 				self.env.Prepend(_LIBFLAGS = self.orenv.make_list(self._libflags))
 
+			target = env.kobject.execute(self)
+			if not target:
+				return
 
-			env.kobject.execute(self)
+			for lib in self.bo_libs:
+				if lib.dependsfile:
+					self.env.Depends(target, lib.dependsfile)
+
+			return target
 
 		def boAddLibObjects(self, libs):
 			for lib in libs:
