@@ -72,6 +72,7 @@ bool g_tex_convertToLowerCase = false;
 bool g_tex_optimize = false;
 bool g_model_center = false;
 bool g_tex_dontLoad = false;
+bool g_meshes_merge = true;
 
 
 double starttime;
@@ -219,6 +220,7 @@ bool processCommandLine(int argc, char** argv)
       usage += "  -texnametolower    Convert all texture names to lowercase\n";
       usage += "  -center            Centers the model\n";
       usage += "  -dontloadtex       Will not try to load the used textures\n";
+      usage += "  -dontmergemeshes   Will not try to merge model's meshes\n";
       //usage += "  \n";
       cout << usage;
       return false;
@@ -341,6 +343,10 @@ bool processCommandLine(int argc, char** argv)
     {
       g_tex_dontLoad = true;
     }
+    else if(larg == "-dontmergemeshes")
+    {
+      g_meshes_merge = false;
+    }
     else
     {
       if(arg[0] == '-')
@@ -447,6 +453,7 @@ bool loadConfigFile(Model* m)
   //  group.
   cfg.setGroup("Model");
   g_modelSize = (float)cfg.readDoubleNumEntry("Size", g_modelSize);
+  g_meshes_merge = cfg.readBoolEntry("MergeMeshes", g_meshes_merge);
 
   return true;
 }
@@ -657,7 +664,10 @@ bool doModelProcessing(Model* m)
   }
 
   processorList.append(new MaterialOptimizer());
-  processorList.append(new MeshOptimizer());
+  if(g_meshes_merge)
+  {
+    processorList.append(new MeshOptimizer());
+  }
   processorList.append(new VertexOptimizer());
 
 
