@@ -522,7 +522,7 @@ class BosonWeaponTurret
      * direction is actually a direction, i.e. the turret is at position
      * (0,0,0).
      **/
-    void pointTo(const BoVector3Fixed& direction);
+    void pointTo(const BoVector3Fixed& direction, const Unit* unit);
 
   private:
     const BosonWeaponTurretProperties* mProperties;

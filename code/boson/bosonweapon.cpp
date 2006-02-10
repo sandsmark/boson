@@ -636,7 +636,7 @@ void BosonWeapon::shoot(Unit* u)
   {
     if(turret())
     {
-      turret()->pointTo(BoVector3Fixed(u->centerX(), u->centerY(), u->z()) - mypos);
+      turret()->pointTo(BoVector3Fixed(u->centerX(), u->centerY(), u->z()) - mypos, unit());
     }
     BosonShot* shot = mProp->newShot(unit(), this, mypos, u);
     canvas()->shotFired(shot, this);
@@ -692,7 +692,7 @@ void BosonWeapon::shoot(const BoVector3Fixed& pos, const BoVector3Fixed& target)
   }
   if(turret())
   {
-    turret()->pointTo(target - pos);
+    turret()->pointTo(target - pos, unit());
   }
   BosonShot* shot = mProp->newShot(unit(), this, pos, target);
   canvas()->shotFired(shot, this);
@@ -851,10 +851,24 @@ bool BosonWeaponTurret::loadFromXML(const QDomElement& root)
   return true;
 }
 
-void BosonWeaponTurret::pointTo(const BoVector3Fixed& direction)
+void BosonWeaponTurret::pointTo(const BoVector3Fixed& direction, const Unit* unit)
 {
+  BoVector3Float dir = direction.toFloat();
+
+  if(unit->rotation() != 0)
+  {
+    BoMatrix rot;
+    rot.rotate(unit->rotation(), 0, 0, 1);
+    rot.rotate(unit->xRotation(), 1, 0, 0);
+    rot.rotate(unit->yRotation(), 0, 1, 0);
+    BoMatrix invRot;
+    rot.invert(&invRot);
+    BoVector3Float direction_ = dir;
+    invRot.transform(&dir, &direction_);
+  }
+
   // AB: atm we support rotations around the z axis only
-  BoVector3Float dir(direction[0], direction[1], 0.0f);
+  dir.setZ(0.0f);
   BoVector3Float up(0, 0, 1);
   BoMatrix m;
   m.setLookAtRotation(BoVector3Float(0, 0, 0), dir, up);
