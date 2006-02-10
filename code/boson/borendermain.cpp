@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2006 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -453,6 +453,12 @@ void BoRenderGLWidget::initUfoGUI()
 		d->mModelDisplay, SLOT(slotEnableMaterials(bool)));
  connect(d->mGUI->mDebugTurret, SIGNAL(signalToggled(bool)),
 		this, SLOT(slotShowTurretToggled(bool)));
+ connect(d->mGUI->mDebugTurretMode, SIGNAL(signalButtonActivated(BoUfoRadioButton*)),
+		this, SLOT(slotChangeTurretMode(BoUfoRadioButton*)));
+ connect(d->mGUI->mTurretRotation, SIGNAL(signalValueChanged(float)),
+		d->mModelDisplay, SLOT(slotSetTurretRotationAngle(float)));
+ connect(d->mModelDisplay, SIGNAL(signalTurretRotation(float)),
+		d->mGUI->mTurretRotation, SLOT(setValue(float)));
  connect(d->mGUI->mEditTurretProperties, SIGNAL(signalClicked()),
 		this, SLOT(slotEditTurretProperties()));
 
@@ -633,9 +639,22 @@ void BoRenderGLWidget::slotShowTurretToggled(bool show)
  if (show) {
 	d->mGUI->mEditTurretProperties->setEnabled(true);
 	d->mModelDisplay->setTurretMeshesEnabled(true);
+	d->mGUI->mDebugTurretDetailsWidget->setVisible(true);
  } else {
 	d->mGUI->mEditTurretProperties->setEnabled(false);
 	d->mModelDisplay->setTurretMeshesEnabled(false);
+	d->mGUI->mDebugTurretDetailsWidget->setVisible(false);
+ }
+}
+
+void BoRenderGLWidget::slotChangeTurretMode(BoUfoRadioButton* button)
+{
+ if (button == d->mGUI->mDebugTurretRotating) {
+	d->mModelDisplay->setTurretTimerRotation(true);
+ } else if (button == d->mGUI->mDebugTurretKeepPosition) {
+	d->mModelDisplay->setTurretTimerRotation(false);
+ } else {
+	boWarning() << k_funcinfo << "unknown mode selected" << endl;
  }
 }
 
@@ -1124,6 +1143,8 @@ void ModelDisplay::initializeGL()
 		this, SIGNAL(signalCameraChanged()));
  connect(d->mRenderModel, SIGNAL(signalResetModel()),
 		this, SLOT(slotResetModel()));
+ connect(d->mRenderModel, SIGNAL(signalTurretRotation(float)),
+		this, SIGNAL(signalTurretRotation(float)));
 }
 
 const BosonModel* ModelDisplay::model() const
@@ -1159,6 +1180,16 @@ void ModelDisplay::setTurretMeshesEnabled(bool e)
 void ModelDisplay::setTurretInitialZRotation(float r)
 {
  d->mRenderModel->setTurretInitialZRotation(r);
+}
+
+void ModelDisplay::setTurretTimerRotation(bool timer)
+{
+ d->mRenderModel->setTurretTimerRotation(timer);
+}
+
+void ModelDisplay::slotSetTurretRotationAngle(float rot)
+{
+ d->mRenderModel->slotSetTurretRotationAngle(rot);
 }
 
 void ModelDisplay::setFont(const BoFontInfo& font)

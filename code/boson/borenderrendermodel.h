@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2006 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -64,6 +64,8 @@ public:
 	{
 		mTurretInitialZRotation = r;
 	}
+	void setTurretTimerRotation(bool timer);
+
 	void setSelectedMesh(int m);
 	int selectedMesh() const
 	{
@@ -98,8 +100,12 @@ signals:
 	void signalLODChanged(float);
 	void signalCameraChanged();
 
+	void signalTurretRotation(float rotation);
+
 
 public slots:
+	void slotSetTurretRotationAngle(float rot);
+
 	void slotFrameChanged(float f)
 	{
 		slotFrameChanged((int)f);
@@ -143,6 +149,9 @@ protected:
 	 **/
 	void hideMesh(unsigned int mesh, bool hide = true);
 
+protected slots:
+	void slotTurretTimeout();
+
 private:
 	BoRenderRenderModelPrivate* d;
 
@@ -154,6 +163,7 @@ private:
 	bool mTurretMeshesEnabled;
 	float mTurretInitialZRotation;
 	float mTurretRotation;
+	bool mTurretTimerRotation;
 	BoMatrix mTurretMatrix;
 
 	bool mPlacementPreview;
