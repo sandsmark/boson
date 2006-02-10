@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2006 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@
 #include <bogl.h>
 
 #include <qvaluevector.h>
+#include <qtimer.h>
 
 #include <math.h>
 #include <stdlib.h>
@@ -84,8 +85,14 @@ BoRenderRenderModel::BoRenderRenderModel(QObject* parent)
  mTurretMeshesEnabled = false;
  mTurretInitialZRotation = 0.0f;
  mTurretRotation = 0.0f;
+ mTurretTimerRotation = true;
  mCamera = new BoCamera;
  mLight = 0;
+
+ QTimer* turretTimer = new QTimer();
+ connect(turretTimer, SIGNAL(timeout()),
+		this, SLOT(slotTurretTimeout()));
+ turretTimer->start(50);
 
  mPlacementPreview = false;
  mDisallowPlacement = false;
@@ -244,10 +251,6 @@ void BoRenderRenderModel::renderModel(int mode)
 			glDisable(GL_ALPHA_TEST);
 		mModel->prepareRendering();
 
-		mTurretRotation += 5.0f;
-		if (mTurretRotation > 230.0f) {
-			mTurretRotation = 0.0f;
-		}
 		mTurretMatrix = BoMatrix();
 		mTurretMatrix.rotate(mTurretInitialZRotation, 0.0f, 0.0f, -1.0f);
 		mTurretMatrix.rotate(90.0f, 1.0f, 0.0f, 0.0f);
@@ -634,4 +637,25 @@ void BoRenderRenderModel::slotUnHideAllMeshes()
 #endif
 }
 
+void BoRenderRenderModel::slotTurretTimeout()
+{
+ if (!mTurretTimerRotation) {
+	return;
+ }
+ slotSetTurretRotationAngle(mTurretRotation + 5.0f);
+ if (mTurretRotation > 360.0f) {
+	slotSetTurretRotationAngle(0.0f);
+ }
+}
+
+void BoRenderRenderModel::slotSetTurretRotationAngle(float rot)
+{
+ mTurretRotation = rot;
+ emit signalTurretRotation(mTurretRotation);
+}
+
+void BoRenderRenderModel::setTurretTimerRotation(bool timer)
+{
+ mTurretTimerRotation = timer;
+}
 

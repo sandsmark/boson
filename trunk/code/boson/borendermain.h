@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2006 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -57,6 +57,7 @@ class BosonViewData;
 class BoEditTurretPropertiesDialog;
 template<class T> class BoVector3;
 typedef BoVector3<float> BoVector3Float;
+class BoUfoRadioButton;
 
 class ModelDisplayPrivate;
 /**
@@ -82,6 +83,7 @@ public:
 	const QStringList& turretMeshes() const;
 	void setTurretMeshesEnabled(bool e);
 	void setTurretInitialZRotation(float r);
+	void setTurretTimerRotation(bool timer);
 
 	void updateCamera(const BoVector3Float& cameraPos, const BoQuaternion& q);
 	void updateCamera(const BoVector3Float& cameraPos, const BoMatrix& rotationMatrix);
@@ -108,6 +110,7 @@ signals:
 	void signalMaxLODChanged(float);
 
 	void signalMeshSelected(int);
+	void signalTurretRotation(float rotation);
 
 
 	void signalChangeBackgroundColor();
@@ -158,6 +161,7 @@ public slots:
 	void slotSetVertexPointSize(int);
 
 	void slotDebugMemory();
+	void slotSetTurretRotationAngle(float rot);
 
 protected slots:
 	void slotMousePressEvent(QMouseEvent*);
@@ -260,6 +264,7 @@ protected slots:
 	void slotEditTurretProperties();
 
 	void slotApplyTurretProperties(BoEditTurretPropertiesDialog*);
+	void slotChangeTurretMode(BoUfoRadioButton* button);
 
 
 
