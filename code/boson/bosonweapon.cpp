@@ -634,6 +634,10 @@ void BosonWeapon::shoot(Unit* u)
   BoVector3Fixed mypos(unit()->centerX(), unit()->centerY(), unit()->z());
   if(mProp->shotType() == BosonShot::Missile)
   {
+    if(turret())
+    {
+      turret()->pointTo(BoVector3Fixed(u->centerX(), u->centerY(), u->z()) - mypos);
+    }
     BosonShot* shot = mProp->newShot(unit(), this, mypos, u);
     canvas()->shotFired(shot, this);
     mReloadCounter = reloadingTime();
