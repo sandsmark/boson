@@ -38,6 +38,9 @@ UnitHeight=1
 UnitWidth=1
 Weapons=1
 
+[Model]
+MergeMeshes=false
+
 [Sounds]
 OrderAttack=order_attack
 OrderMove=order_move
@@ -68,4 +71,5 @@ Speed=15
 TakeTargetVeloIntoAccount=true
 Type=Rocket
 Model=bullet
-TurretMeshes=Gun,Turret,MachinegunBarrel,Machinegun,MachineGunHolder,MachineGunRing,TurretTower,AntennaHolder,Antenna,TurretLaserSight,TurretExtension
+TurretMeshes=TurretBar1,TurretBar2,TurretBase,TurretHd1,TurretHd2
+TurretInitialZRotation=180
