@@ -793,7 +793,7 @@ bool Unit::attackEnemyUnitsInRange()
 	targetfound = true;
 
 	// If unit is mobile, rotate to face the target if it isn't facing it yet
-	if (isMobile() && !isFlying()) {
+	if (!w->turret() && isMobile() && !isFlying()) {
 		bofixed rot = Bo3dTools::rotationToPoint(target()->x() - x(), target()->y() - y());
 		if (rot < rotation() - 5 || rot > rotation() + 5) {
 			// Rotate to face target
