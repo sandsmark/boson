@@ -19,6 +19,7 @@
 */
 
 #include "bosoncanvas.h"
+#include "bosoncanvas.moc"
 
 #include "../bomemory/bodummymemory.h"
 #include "player.h"
@@ -54,8 +55,6 @@
 #include <qintdict.h>
 
 #include <math.h>
-
-#include "bosoncanvas.moc"
 
 ItemType ItemType::typeForUnit(unsigned long int unitType)
 {
