@@ -604,8 +604,8 @@ void CellListBuilderTree::recreateTree(const BosonMap* map)
  nonConstMap->registerQuadTree(mRoot);
 
  BosonProfiler prof2("initialize tree");
- mRoot->cellHeightChanged(map, 0, map->width() - 1, 0, map->height() - 1);
- mRoot->cellTextureChanged(map, 0, map->width() - 1, 0, map->height() - 1);
+ mRoot->cellHeightChanged(map, 0, 0, map->width() - 1, map->height() - 1);
+ mRoot->cellTextureChanged(map, 0, 0, map->width() - 1, map->height() - 1);
 }
 
 // TODO: atm these settings are too aggressive for editor!
