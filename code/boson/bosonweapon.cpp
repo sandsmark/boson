@@ -855,16 +855,20 @@ void BosonWeaponTurret::pointTo(const BoVector3Fixed& direction, const Unit* uni
 {
   BoVector3Float dir = direction.toFloat();
 
+  mMeshMatrix = mProperties->initialMeshMatrix();
+
   if(unit->rotation() != 0)
   {
     BoMatrix rot;
-    rot.rotate(unit->rotation(), 0, 0, 1);
-    rot.rotate(unit->xRotation(), 1, 0, 0);
-    rot.rotate(unit->yRotation(), 0, 1, 0);
-    BoMatrix invRot;
-    rot.invert(&invRot);
-    BoVector3Float direction_ = dir;
-    invRot.transform(&dir, &direction_);
+
+    // note: we rotate by unit->rotation(), not by -unit->rotation()
+    // -> this is the inverse of what the unit does
+    rot.rotate(unit->rotation(), 0.0f, 0.0f, 1.0f);
+
+    // we left-m
+    // we left-multiply with the inverse to undo the z rotation of the unit
+    rot.multiply(&mMeshMatrix);
+    mMeshMatrix = rot;
   }
 
   // AB: atm we support rotations around the z axis only
@@ -873,7 +877,6 @@ void BosonWeaponTurret::pointTo(const BoVector3Fixed& direction, const Unit* uni
   BoMatrix m;
   m.setLookAtRotation(BoVector3Float(0, 0, 0), dir, up);
 
-  mMeshMatrix = mProperties->initialMeshMatrix();
   mMeshMatrix.multiply(&m);
 }
 
