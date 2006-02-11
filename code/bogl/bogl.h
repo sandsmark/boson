@@ -29,7 +29,9 @@ class QStringList;
 // Defines
 #define GL_GLEXT_LEGACY
 
+#ifndef QT_CLEAN_NAMESPACE
 #define QT_CLEAN_NAMESPACE
+#endif
 
 #ifdef __gl_h_
 #error You should include "bogl.h" before <GL/gl.h>

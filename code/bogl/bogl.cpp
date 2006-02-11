@@ -20,7 +20,9 @@
 #define GL_GLEXT_LEGACY
 #define GLX_GLXEXT_PROTOTYPES
 
+#ifndef QT_CLEAN_NAMESPACE
 #define QT_CLEAN_NAMESPACE
+#endif
 
 #include "bogl.h"
 #include "boglx.h"

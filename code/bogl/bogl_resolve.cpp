@@ -17,7 +17,9 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#ifndef QT_CLEAN_NAMESPACE
 #define QT_CLEAN_NAMESPACE
+#endif
 
 #include <qdir.h> // must be first, due to a header conflict otherwise
 
