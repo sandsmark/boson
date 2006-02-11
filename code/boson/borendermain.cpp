@@ -457,6 +457,12 @@ void BoRenderGLWidget::initUfoGUI()
 		this, SLOT(slotChangeTurretMode(BoUfoRadioButton*)));
  connect(d->mGUI->mTurretRotation, SIGNAL(signalValueChanged(float)),
 		d->mModelDisplay, SLOT(slotSetTurretRotationAngle(float)));
+ connect(d->mGUI->mModelRotationZ, SIGNAL(signalValueChanged(float)),
+		d->mModelDisplay, SLOT(slotSetModelRotationZ(float)));
+ connect(d->mGUI->mModelRotationX, SIGNAL(signalValueChanged(float)),
+		d->mModelDisplay, SLOT(slotSetModelRotationX(float)));
+ connect(d->mGUI->mModelRotationY, SIGNAL(signalValueChanged(float)),
+		d->mModelDisplay, SLOT(slotSetModelRotationY(float)));
  connect(d->mModelDisplay, SIGNAL(signalTurretRotation(float)),
 		d->mGUI->mTurretRotation, SLOT(setValue(float)));
  connect(d->mGUI->mEditTurretProperties, SIGNAL(signalClicked()),
@@ -1190,6 +1196,21 @@ void ModelDisplay::setTurretTimerRotation(bool timer)
 void ModelDisplay::slotSetTurretRotationAngle(float rot)
 {
  d->mRenderModel->slotSetTurretRotationAngle(rot);
+}
+
+void ModelDisplay::slotSetModelRotationZ(float rot)
+{
+ d->mRenderModel->slotSetModelRotationZ(rot);
+}
+
+void ModelDisplay::slotSetModelRotationX(float rot)
+{
+ d->mRenderModel->slotSetModelRotationX(rot);
+}
+
+void ModelDisplay::slotSetModelRotationY(float rot)
+{
+ d->mRenderModel->slotSetModelRotationY(rot);
 }
 
 void ModelDisplay::setFont(const BoFontInfo& font)

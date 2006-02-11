@@ -105,6 +105,9 @@ signals:
 
 public slots:
 	void slotSetTurretRotationAngle(float rot);
+	void slotSetModelRotationZ(float rot);
+	void slotSetModelRotationX(float rot);
+	void slotSetModelRotationY(float rot);
 
 	void slotFrameChanged(float f)
 	{
@@ -165,6 +168,10 @@ private:
 	float mTurretRotation;
 	bool mTurretTimerRotation;
 	BoMatrix mTurretMatrix;
+
+	float mModelRotationZ;
+	float mModelRotationX;
+	float mModelRotationY;
 
 	bool mPlacementPreview;
 	bool mDisallowPlacement;
