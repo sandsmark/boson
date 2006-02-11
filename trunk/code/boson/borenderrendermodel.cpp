@@ -257,6 +257,13 @@ void BoRenderRenderModel::renderModel(int mode)
 
 		BoVector3Float v(0.0f, 1.0f, 0.0f);
 		{
+			{
+				BoMatrix rot;
+				rot.rotate(mModelRotationZ, 0.0f, 0.0f, 1.0f);
+				rot.multiply(&mTurretMatrix);
+				mTurretMatrix = rot;
+			}
+
 			BoMatrix rot;
 			rot.rotate(mTurretRotation, 0.0, 0.0, 1.0);
 			BoVector3Float v2 = v;
@@ -275,7 +282,17 @@ void BoRenderRenderModel::renderModel(int mode)
 			}
 			itemMatrices[i] = &mTurretMatrix;
 		}
+
+
+		glPushMatrix();
+
+		// AB: these rotations emulate the unit rotation in the game
+		glRotatef(-mModelRotationZ, 0.0f, 0.0f, 1.0f);
+		glRotatef(mModelRotationX, 1.0f, 0.0f, 0.0f);
+		glRotatef(mModelRotationY, 0.0f, 1.0f, 0.0f);
+
 		f->renderFrame(itemMatrices, 0, false, Default, mode);
+
 		startTransparentFrameRendering();
 		if (mode == GL_SELECT) {
 			glDisable(GL_BLEND);
@@ -283,6 +300,9 @@ void BoRenderRenderModel::renderModel(int mode)
 		}
 		f->renderFrame(itemMatrices, 0, true, Default, mode);
 		stopTransparentFrameRendering();
+
+		glPopMatrix();
+
 		BosonModel::stopModelRendering();
 		if (mPlacementPreview) {
 			// AB: do not reset the actual color - if it will get
@@ -652,6 +672,21 @@ void BoRenderRenderModel::slotSetTurretRotationAngle(float rot)
 {
  mTurretRotation = rot;
  emit signalTurretRotation(mTurretRotation);
+}
+
+void BoRenderRenderModel::slotSetModelRotationZ(float rot)
+{
+ mModelRotationZ = rot;
+}
+
+void BoRenderRenderModel::slotSetModelRotationX(float rot)
+{
+ mModelRotationX = rot;
+}
+
+void BoRenderRenderModel::slotSetModelRotationY(float rot)
+{
+ mModelRotationY = rot;
 }
 
 void BoRenderRenderModel::setTurretTimerRotation(bool timer)

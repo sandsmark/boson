@@ -162,6 +162,9 @@ public slots:
 
 	void slotDebugMemory();
 	void slotSetTurretRotationAngle(float rot);
+	void slotSetModelRotationZ(float rot);
+	void slotSetModelRotationX(float rot);
+	void slotSetModelRotationY(float rot);
 
 protected slots:
 	void slotMousePressEvent(QMouseEvent*);

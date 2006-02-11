@@ -733,13 +733,91 @@
         <borderType/>
         <stretch/>
         <takesKeyboardFocus/>
-        <label/>
+        <label>Turret rotation</label>
         <minimumValue>0</minimumValue>
         <maximumValue>360</maximumValue>
         <stepSize/>
         <value>0</value>
        </Properties>
       </Widget>
+     </Widget>
+     <Widget>
+      <ClassName>BoUfoNumInput</ClassName>
+      <Properties>
+       <name>mModelRotationZ</name>
+       <constraints/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <opaque/>
+       <layout/>
+       <minimumWidth/>
+       <minimumHeight/>
+       <preferredWidth/>
+       <preferredHeight/>
+       <backgroundImageFile/>
+       <verticalAlignment/>
+       <horizontalAlignment/>
+       <borderType/>
+       <stretch/>
+       <takesKeyboardFocus/>
+       <label>Z rotation</label>
+       <minimumValue>0</minimumValue>
+       <maximumValue>360</maximumValue>
+       <stepSize/>
+       <value>0</value>
+      </Properties>
+     </Widget>
+     <Widget>
+      <ClassName>BoUfoNumInput</ClassName>
+      <Properties>
+       <name>mModelRotationX</name>
+       <constraints/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <opaque/>
+       <layout/>
+       <minimumWidth/>
+       <minimumHeight/>
+       <preferredWidth/>
+       <preferredHeight/>
+       <backgroundImageFile/>
+       <verticalAlignment/>
+       <horizontalAlignment/>
+       <borderType/>
+       <stretch/>
+       <takesKeyboardFocus/>
+       <label>X rotation</label>
+       <minimumValue>0</minimumValue>
+       <maximumValue>360</maximumValue>
+       <stepSize/>
+       <value>0</value>
+      </Properties>
+     </Widget>
+     <Widget>
+      <ClassName>BoUfoNumInput</ClassName>
+      <Properties>
+       <name>mModelRotationY</name>
+       <constraints/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <opaque/>
+       <layout/>
+       <minimumWidth/>
+       <minimumHeight/>
+       <preferredWidth/>
+       <preferredHeight/>
+       <backgroundImageFile/>
+       <verticalAlignment/>
+       <horizontalAlignment/>
+       <borderType/>
+       <stretch/>
+       <takesKeyboardFocus/>
+       <label>Y rotation</label>
+       <minimumValue>0</minimumValue>
+       <maximumValue>360</maximumValue>
+       <stepSize/>
+       <value>0</value>
+      </Properties>
      </Widget>
      <Widget>
       <ClassName>BoUfoWidget</ClassName>
