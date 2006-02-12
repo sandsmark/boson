@@ -23,9 +23,7 @@
 
 #include <config.h>
 
-#if HAVE_KGAME_VERSION_H
 #include <kgame/kgameversion.h>
-#endif
 
 #include "global.h"
 
