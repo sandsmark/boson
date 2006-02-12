@@ -21,7 +21,7 @@
 
 #include <qobject.h>
 
-#include "../global.h"
+#include "global.h"
 
 class Cell;
 class PlayerIO;
