@@ -1078,18 +1078,6 @@ void BosonGameView::cameraChanged()
  boWaterRenderer->setCameraPos(camera()->cameraPos());
  BoShader::setCameraPos(camera()->cameraPos());
 
-#if 0
- QPoint cellTL; // topleft cell
- QPoint cellTR; // topright cell
- QPoint cellBL; // bottomleft cell
- QPoint cellBR; // bottomright cell
- mapCoordinatesToCell(QPoint(0, 0), &cellTL);
- mapCoordinatesToCell(QPoint(0, d->mViewport[3]), &cellBL);
- mapCoordinatesToCell(QPoint(d->mViewport[2], 0), &cellTR);
- mapCoordinatesToCell(QPoint(d->mViewport[2], d->mViewport[3]), &cellBR);
- emit signalChangeViewport(this, cellTL, cellTR, cellBL, cellBR);
-#endif
-
  updateCursorCanvasVector(cursorWidgetPos());
 }
 
@@ -1113,16 +1101,18 @@ void BosonGameView::slotReCenterDisplay(const QPoint& pos)
 bool BosonGameView::mapCoordinatesToGround(const QPoint& widgetPos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth) const
 {
  BoVector3Float p = d->mUfoCanvasWidget->emulatePickGroundPos(widgetPos);
- *posX = p.x();
- *posY = p.y();
- *posZ = p.z();
+ if (p.x() >= 0.0f && p.y() >= 0.0f) {
+	*posX = p.x();
+	*posY = p.y();
+	*posZ = p.z();
+ } else {
+	return false;
+ }
  return true;
 }
 
-#warning TODO: port to new pick architecture
 bool BosonGameView::mapDistance(int windx, int windy, GLfloat* dx, GLfloat* dy) const
 {
- // FIXME: use mapCoordinatesToGround() or so
  return Bo3dTools::mapDistance(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewport,
 		windx, windy, dx, dy);
 }
