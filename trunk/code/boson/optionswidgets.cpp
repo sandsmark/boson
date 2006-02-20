@@ -436,20 +436,6 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mAlignSelectBoxes = new QCheckBox(this);
  mAlignSelectBoxes->setText(i18n("Align unit selection boxes to camera"));
 
- QVBox* atiWorkaround = new QVBox(this);
- mEnableATIDepthWorkaround = new QCheckBox(atiWorkaround);
- mEnableATIDepthWorkaround->setText(i18n("Enable ATI depth workaround"));
- connect(mEnableATIDepthWorkaround, SIGNAL(toggled(bool)), this, SLOT(slotEnableATIDepthWorkaround(bool)));
- QToolTip::add(mEnableATIDepthWorkaround, i18n("Use this if you own a ATI card and you have <em>extreme</em> problems at selecting units"));
- QHBox* atiValue = new QHBox(atiWorkaround);
- (void)new QLabel(i18n("Value: "), atiValue);
- mATIDepthWorkaroundValue = new QLineEdit(atiValue);
- QPushButton* atiDefaultValue = new QPushButton(i18n("Default"), atiValue);
- connect(atiDefaultValue, SIGNAL(clicked()), this, SLOT(slotATIDepthWorkaroundDefaultValue()));
- slotATIDepthWorkaroundDefaultValue();
- mEnableATIDepthWorkaround->setChecked(false);
- slotEnableATIDepthWorkaround(false);
-
 #if BOSONFONT
  QHBox* fontBox = new QHBox(this);
  (void)new QLabel(i18n("Font: "), fontBox);
@@ -805,18 +791,6 @@ void OpenGLOptions::apply()
 #endif
 
 
- boConfig->setBoolValue("EnableATIDepthWorkaround", mEnableATIDepthWorkaround->isChecked());
- if (mEnableATIDepthWorkaround->isChecked()) {
-	bool ok = false;
-	double d = mATIDepthWorkaroundValue->text().toDouble(&ok);
-	if (!ok) {
-		d = 0.00390625;
-	}
-	boConfig->setDoubleValue("ATIDepthWorkaroundValue", d);
-	Bo3dTools::enableReadDepthBufferWorkaround((float)d);
- } else {
-	Bo3dTools::disableReadDepthBufferWorkaround();
- }
  boConfig->setBoolValue("SmoothShading", mSmoothShading->isChecked());
 
  if (mResolution->isEnabled() && mResolution->currentItem() > 0) {
@@ -878,8 +852,6 @@ void OpenGLOptions::load()
  mUseMaterials->setChecked(boConfig->boolValue("UseMaterials"));
  setUseLOD(boConfig->boolValue("UseLOD"));
  setDefaultLOD(boConfig->uintValue("DefaultLOD", 0));
- mEnableATIDepthWorkaround->setChecked(boConfig->boolValue("EnableATIDepthWorkaround"));
- mATIDepthWorkaroundValue->setText(QString::number(boConfig->doubleValue("ATIDepthWorkaroundValue")));
 #if BOSONFONT
  if (!mFontInfo->fromString(boConfig->stringValue("GLFont", QString::null))) {
 	boError() << k_funcinfo << "Could not load font " << boConfig->stringValue("GLFont", QString::null) << endl;
@@ -1021,16 +993,6 @@ void OpenGLOptions::setDefaultLOD(unsigned int l)
 		mDefaultLOD->setCurrentItem(1);
 		break;
  }
-}
-
-void OpenGLOptions::slotEnableATIDepthWorkaround(bool e)
-{
- mATIDepthWorkaroundValue->setEnabled(e);
-}
-
-void OpenGLOptions::slotATIDepthWorkaroundDefaultValue()
-{
- mATIDepthWorkaroundValue->setText(QString::number(0.00390625));
 }
 
 void OpenGLOptions::setCurrentMeshRenderer(const QString& renderer)

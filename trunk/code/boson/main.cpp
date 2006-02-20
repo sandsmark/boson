@@ -62,7 +62,7 @@ static KCmdLineOptions options[] =
     { "aidelay <delay>", I18N_NOOP("Set AI delay (in seconds). The less it is, the faster AI will send it's units"), 0 },
     { "noai", I18N_NOOP("Disable AI"), 0 },
     { "indirect", I18N_NOOP("Use Indirect rendering (sloooow!! - debugging only)"), 0 },
-    { "ati-depth-workaround", I18N_NOOP("Enable the ATI (proprietary) driver workaround for reading the depth buffer. Will use depth of 0.00390625"), 0 },
+    { "ati-depth-workaround", I18N_NOOP("Enable the ATI (proprietary) driver workaround for reading the depth buffer. Will use depth of 0.00390625. This workaround is deprecated and not required anymore!"), 0 },
     { "ati-depth-workaround-depth <depth>", I18N_NOOP("Use with --ati-depth-workaround. Supply a depth value for your system (default=0.00390625)"), 0 },
     { "default-lodcount <count>", I18N_NOOP("Use <count> for default level of detail count"), 0 },
     { "nomodels", I18N_NOOP("Disable model loading for faster startup (you won't see the units)"), 0 },
