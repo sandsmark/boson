@@ -218,8 +218,6 @@ protected:
 
 protected slots:
 	void slotRenderingSpeedChanged(int);
-	void slotEnableATIDepthWorkaround(bool);
-	void slotATIDepthWorkaroundDefaultValue();
 	void slotShowDetails(bool);
 	void slotChangeFont();
 
@@ -230,9 +228,7 @@ signals:
 private:
 	QComboBox* mRenderingSpeed;
 	QCheckBox* mAlignSelectBoxes;
-	QCheckBox* mEnableATIDepthWorkaround;
 	QComboBox* mResolution;
-	QLineEdit* mATIDepthWorkaroundValue;
 	QVBox* mAdvanced;
 
 	KIntNumInput* mUpdateInterval;
