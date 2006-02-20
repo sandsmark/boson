@@ -632,8 +632,8 @@ protected:
 
 	/**
 	 * Set a viewport. Basically the same as glViewport, but you should use
-	 * this instead the standard OpenGL function. The viewport values are
-	 * cached in boson, so that we can easily use it in @ref mapCoordinates.
+	 * this instead the standard OpenGL function, so that we can easily keep
+	 * track of the viewport.
 	 *
 	 * Note that the current matrix is not changed before glViewport is
 	 * calles, so you need to ensure that it is called at the correct
