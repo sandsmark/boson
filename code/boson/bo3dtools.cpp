@@ -541,7 +541,7 @@ bool Bo3dTools::boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& pro
                      BoVector2Float((float)pos.x(), (float)pos.y()), ret, z);
 }
 
-bool Bo3dTools::boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const BoVector2Float& pos, BoVector3Float* ret, float z)
+bool Bo3dTools::boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const BoVector2Float& pos, BoVector3Float* ret, float depth)
 {
   PROFILE_METHOD
   // AB: most code is from mesa's gluUnProject().
@@ -561,21 +561,7 @@ bool Bo3dTools::boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& pro
   // AB: we could calculate the inverse whenever camera changes!
   // --> less inverses to be calculated.
 
-  GLfloat depth = 0.0f;
   GLint realy = viewport[3] - (GLint)pos.y() - 1;
-  if (z == -1.0f)
-  {
-    glReadPixels(((GLint)pos.x()), realy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-    if (workaround_depth_value_enabled)
-    {
-      depth /= workaround_depth_value_1_0;
-    }
-  }
-  else
-  {
-    depth = z;
-  }
-
 
   BoVector4Float v;
   BoVector4Float result;
@@ -601,15 +587,26 @@ bool Bo3dTools::boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& pro
   return true;
 }
 
-bool Bo3dTools::mapCoordinates(const BoGLMatrices& m, const BoVector2Float& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth)
+bool Bo3dTools::boUnProjectUseDepthBuffer(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const BoVector2Float& pos, BoVector3Float* ret)
 {
-  return mapCoordinates(m.modelviewMatrix(), m.projectionMatrix(), m.viewport(),
-      pos, posX, posY, posZ, useRealDepth);
+  const GLint realy = viewport[3] - (GLint)pos.y() - 1;
+  float depth;
+  glReadPixels(((GLint)pos.x()), realy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+  if (workaround_depth_value_enabled)
+  {
+    depth /= workaround_depth_value_1_0;
+  }
+  return boUnProject(modelviewMatrix, projectionMatrix, viewport, pos, ret, depth);
 }
 
-bool Bo3dTools::mapCoordinates(const BoGLMatrices& m, const QPoint& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth)
+bool Bo3dTools::mapCoordinates(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const BoVector2Float& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ)
 {
-  return mapCoordinates(m, BoVector2Float((float)pos.x(), (float)pos.y()), posX, posY, posZ, useRealDepth);
+ return mapCoordinates(modelviewMatrix, projectionMatrix, viewport, pos, posX, posY, posZ, false);
+}
+
+bool Bo3dTools::mapCoordinatesUseDepthBuffer(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const BoVector2Float& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ)
+{
+ return mapCoordinates(modelviewMatrix, projectionMatrix, viewport, pos, posX, posY, posZ, true);
 }
 
 bool Bo3dTools::mapCoordinates(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const BoVector2Float& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth)
@@ -640,20 +637,11 @@ bool Bo3dTools::mapCoordinates(const BoMatrix& modelviewMatrix, const BoMatrix& 
 
   GLdouble zAtPoint = 0.0f;
 
-  // we need to find out which z position is at the point pos. this is important
-  // for mapping 2d values (screen coordinates) to 3d (world coordinates)
-  GLfloat depth = 0.0;
-  glReadPixels(((GLint)pos.x()), realy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-  if (workaround_depth_value_enabled)
-  {
-    depth /= workaround_depth_value_1_0;
-  }
-
   // AB: 0.0f is reached when we have a point that is outside the actual window!
-  if(useRealDepth && depth != 1.0f && depth != 0.0f) {
-    // retrieve z
+  if (useRealDepth)
+  {
     BoVector3Float v;
-    if(!boUnProject(modelviewMatrix, projectionMatrix, viewport, pos, &v))
+    if(!boUnProjectUseDepthBuffer(modelviewMatrix, projectionMatrix, viewport, pos, &v))
     {
       return false;
     }
@@ -678,11 +666,6 @@ bool Bo3dTools::mapCoordinates(const BoMatrix& modelviewMatrix, const BoMatrix& 
   return true;
 }
 
-bool Bo3dTools::mapCoordinates(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth)
-{
-  return mapCoordinates(modelviewMatrix, projectionMatrix, viewport, BoVector2Float((float)pos.x(), (float)pos.y()), posX, posY, posZ, useRealDepth);
-}
-
 bool Bo3dTools::mapDistance(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, int windx, int windy, GLfloat* dx, GLfloat* dy)
 {
   PROFILE_METHOD
@@ -701,14 +684,14 @@ bool Bo3dTools::mapDistance(const BoMatrix& modelviewMatrix, const BoMatrix& pro
   }
   if(!mapCoordinates(modelviewMatrix, projectionMatrix, viewport,
               BoVector2Float(viewport[2] / 2 - windx / 2, viewport[3] / 2 - windy / 2),
-              &moveX1, &moveY1, &moveZ, false))
+              &moveX1, &moveY1, &moveZ))
   {
     printf("ERROR: mapDistance(): Cannot map coordinates\n");
     return false;
   }
   if(!mapCoordinates(modelviewMatrix, projectionMatrix, viewport,
               BoVector2Float(viewport[2] / 2 + windx / 2, viewport[3] / 2 + windy / 2),
-              &moveX2, &moveY2, &moveZ, false))
+              &moveX2, &moveY2, &moveZ))
   {
     printf("ERROR: mapDistance(): Cannot map coordinates\n");
     return false;

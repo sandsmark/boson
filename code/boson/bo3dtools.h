@@ -176,41 +176,44 @@ class Bo3dTools : public Bo3dToolsBase
     static bool boProject(const BoGLMatrices& matrices, float x, float y, float z, BoVector2Float* pos);
     static bool boProject(const BoGLMatrices& matrices, float x, float y, float z, QPoint* pos);
 
-    static bool boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const BoVector2Float& pos, BoVector3Float* v, float z = -1.0);
-    static bool boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, BoVector3Float* v, float z = -1.0);
-    static bool boUnProject(const BoGLMatrices& matrices, const BoVector2Float& pos, BoVector3Float* v, float z = -1.0);
-    static bool boUnProject(const BoGLMatrices& matrices, const QPoint& pos, BoVector3Float* v, float z = -1.0);
+    static bool boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const BoVector2Float& pos, BoVector3Float* v, float z);
+    static bool boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, BoVector3Float* v, float z);
+    static bool boUnProject(const BoGLMatrices& matrices, const BoVector2Float& pos, BoVector3Float* v, float z);
+    static bool boUnProject(const BoGLMatrices& matrices, const QPoint& pos, BoVector3Float* v, float z);
 
     /**
-     * This is a frontend to @ref boUnProject. It calculates the world-(aka
-     * OpenGL-) coordinates (@p posX, @p posY, @p posZ) of given window
-     * coordinates @p pos.
+     * Like @ref boUnProject, but calculates the z value according to the value
+     * of the depth buffer at @p pos.
+     **/
+    static bool boUnProjectUseDepthBuffer(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const BoVector2Float& pos, BoVector3Float* ret);
+
+    /**
+     * Map the window-coordinates @p pos to world-coordinates @p posX, @p posY,
+     * @p posZ.
      *
-     * This function takes the correct z value at @p pos into account (usually
-     * the z/depth at the mouse cursor).
-     * @param useRealDepth If TRUE this function will calculate the real
-     * coordinates at @p pos, if FALSE it will calculate the coordinate at
-     * @p pos with z=0.0. This is useful for e.g. @ref mapDistance, where
-     * different z values could deliver wrong values.
+     * This method assumes z=0.0f, so @p posZ will always be 0.0f.
+     *
+     * See also @ref mapCoordinatesUseDepthBuffer for z != 0.0f.
      **/
-    static bool mapCoordinates(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const BoVector2Float& pos, float* posX, float* posY, float* posZ, bool useRealDepth = true);
+    static bool mapCoordinates(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const BoVector2Float& pos, float* posX, float* posY, float* posZ);
 
     /**
-     * @overload
-     * This version provides @p pos as a @ref QPoint
+     * Like @ref mapCoordinates but takes the real z value at @p pos into
+     * account by reading from the depth buffer.
+     *
+     * <em>Using this method is not recommended!</em> Reading from the depth
+     * buffer is both, slow and unrealiable. It takes usually about 2ms per call
+     * (which is too slow for using e.g. in mouse move events) and some OpenGL
+     * drivers provide buggy implementations, delivering wrong values.
+     *
+     * An alternative solution might be found (as of 2006/02/20) in
+     * bosongameview.cpp, mapCoordinatesToGround() - use OpenGL picking (or
+     * "emulate" picking). Simply draw rectangles onto the screen and use the
+     * center of the rectangles that caused "hits" in the picking area (by
+     * making the rects smaller after every iteration, you can get a pretty high
+     * precision).
      **/
-    static bool mapCoordinates(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, float* posX, float* posY, float* posZ, bool useRealDepth = true);
-
-    /**
-     * @overload
-     **/
-    static bool mapCoordinates(const BoGLMatrices& matrices, const BoVector2Float& pos, float* posX, float* posY, float* posZ, bool useRealDepth = true);
-
-    /**
-     * @overload
-     * This version provides @p pos as @ref QPoint
-     **/
-    static bool mapCoordinates(const BoGLMatrices& matrices, const QPoint& pos, float* posX, float* posY, float* posZ, bool useRealDepth = true);
+    static bool mapCoordinatesUseDepthBuffer(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const BoVector2Float& pos, float* posX, float* posY, float* posZ);
 
     /**
      * Map distances from window to world coordinates.
@@ -256,6 +259,31 @@ class Bo3dTools : public Bo3dToolsBase
      *  is returned
      **/
     static GLenum string2GLBlendFunc(const QString& str);
+
+protected:
+    /**
+     * This is a frontend to @ref boUnProject. It calculates the world-(aka
+     * OpenGL-) coordinates (@p posX, @p posY, @p posZ) of given window
+     * coordinates @p pos.
+     *
+     * If @p useRealDepth is TRUE, this method takes the real z value at @p pos
+     * into account, otherwise it just assumes an arbitrary (but fixed) value.
+     * Using an arbitrary value is sufficient when only the world-distance
+     * between two window positions is required (see @ref mapDistance which uses
+     * this method). If the exact coordinates are required, useRealDepth=TRUE
+     * should be used - but note that this is usually slow (about 2 ms per
+     * call), so it should not be used e.g. in mousemove events.
+     *
+     * Because of this useRealDepth issue, this method is protected and should
+     * not be used directly. Use the overloaded @ref mapCoordinates or the @ref
+     * mapCoordinatesUseDepthBuffer instead.
+     *
+     * @param useRealDepth If TRUE this function will calculate the real
+     * coordinates at @p pos, if FALSE it will calculate the coordinate at
+     * @p pos with z=0.0. This is useful for e.g. @ref mapDistance, where
+     * different z values could deliver wrong values.
+     **/
+    static bool mapCoordinates(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const BoVector2Float& pos, float* posX, float* posY, float* posZ, bool useRealDepth);
 };
 
 
