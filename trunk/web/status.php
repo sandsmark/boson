@@ -47,7 +47,7 @@ draw_bigbox_text("Most recent version, 0.11, was released on 2nd September 2005.
 
 draw_bigbox_subheader("<a name=\"features\"></a>Feature list");
 
-draw_bigbox_text("What has been changed since 0.11:
+draw_bigbox_text("What has been changed since 0.11 (incomplete list):
 <ul>
   <li>Major PlayerId redesign</li>
   <li>Several bugfixes</li>
@@ -58,7 +58,11 @@ draw_bigbox_text("What has been changed since 0.11:
   <li>Powerplants now actually plant power</li>
   <li>Shadow support</li>
   <li>Turrets turn towards their target</li>
-  <li>Weapons use ammunition</li>
+  <li>Weapons can use ammunition</li>
+  <li>New radar system</li>
+  <li>New method to find the 3d-position of the mouse position. This fixes
+  problems with some broken OpenGL drivers and also fixes a performance issue</li>
+  <li>A complete new species with its own models</li>
 </ul>");
 
 draw_bigbox_end();
