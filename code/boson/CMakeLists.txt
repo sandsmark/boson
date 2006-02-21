@@ -201,7 +201,7 @@ set(libboson_SRCS
 	boaction.cpp
 	bosongroundthemedata.cpp
 	borendertarget.cpp
-	bosonwidgets/bonuminput.cpp
+	bonuminput.cpp
 	sound/bosonaudiointerface.cpp
 )
 kde3_automoc(${libboson_SRCS})
