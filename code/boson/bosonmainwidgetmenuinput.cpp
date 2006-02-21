@@ -133,7 +133,7 @@ void BosonMainWidgetMenuInput::initUfoActions()
  (void)new BoUfoAction(i18n("Crash boson"), KShortcut(), this,
 		SLOT(slotCrashBoson()), actionCollection(),
 		"debug_crash_boson");
- (void)new BoUfoAction(i18n("Show OpenGL states"), KShortcut(), this,
+ (void)new BoUfoAction(i18n("OpenGL states..."), KShortcut(), this,
 		SLOT(slotShowGLStates()), actionCollection(),
 		"debug_show_opengl_states");
  (void)new BoUfoAction(i18n("Debug &ufo widgets..."), KShortcut(),
