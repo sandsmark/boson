@@ -1,4 +1,4 @@
-SUBDIRS = ufoext bouic . designer test
+SUBDIRS = bosonfont ufoext bouic . designer test
 
 INCLUDES = $(UFO_INCLUDES) -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl $(all_includes) -I$(top_srcdir)/boson
 

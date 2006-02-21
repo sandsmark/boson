@@ -3,7 +3,6 @@
 SUBDIRS = \
 		data \
 		imageio \
-		bosonfont \
 		boufo \
 		bosonwidgets \
 		items \
