@@ -674,3 +674,30 @@ bool SpeciesData::loadUnitSounds(const UnitProperties* prop)
  return true;
 }
 
+QPtrList<BosonModel> SpeciesData::allLoadedModels() const
+{
+ QPtrList<BosonModel> models;
+ for (QIntDictIterator<BosonModel> it(d->mUnitModels); it.current(); ++it) {
+	models.append(it.current());
+ }
+ for (QDictIterator<BosonModel> it(d->mObjectModels); it.current(); ++it) {
+	models.append(it.current());
+ }
+ return models;
+}
+
+QPtrList<BosonModel> SpeciesData::allLoadedModelsInAllSpecies()
+{
+ QPtrList<BosonModel> models;
+ if (!mSpeciesData) {
+	return models;
+ }
+ for (QDictIterator<SpeciesData> it(*mSpeciesData); it.current(); ++it) {
+	QPtrList<BosonModel> list = it.current()->allLoadedModels();
+	for (QPtrListIterator<BosonModel> it2(list); it2.current(); ++it2) {
+		models.append(it2.current());
+	}
+ }
+ return models;
+}
+

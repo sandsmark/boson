@@ -176,6 +176,9 @@ public:
 	bool loadGeneralSounds();
 	bool loadUnitSounds(const UnitProperties* prop);
 
+	QPtrList<BosonModel> allLoadedModels() const;
+	static QPtrList<BosonModel> allLoadedModelsInAllSpecies();
+
 protected:
 
 	/**
