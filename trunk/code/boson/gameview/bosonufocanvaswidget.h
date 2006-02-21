@@ -110,11 +110,14 @@ public:
 	 * This method emulates the behaviour of OpenGL "picking", i.e.
 	 * GL_SELECT mode, however it does not actually use OpenGL.
 	 *
-	 * @return The (world) coordinates of the ground at the widget
-	 * coordinates @p pickWidgetPos. (-1,-1,-1) if no ground is at that
-	 * position.
+	 * @param worldPos The result, i.e. the world coordinates of the ground
+	 * at the widgetcoordinates @p pickWidgetPos is placed here if this
+	 * method is successful. Will remain unmodified otherwise.
+	 *
+	 * @return TRUE on success (the result is in @p worldPos), otherwise
+	 * FALSE.
 	 **/
-	BoVector3Float emulatePickGroundPos(const QPoint& pickWidgetPos) const;
+	bool emulatePickGroundPos(const QPoint& pickWidgetPos, BoVector3Float* worldPos) const;
 
 	void quitGame();
 
