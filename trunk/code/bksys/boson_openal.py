@@ -12,9 +12,9 @@ def generate(env):
 	import os
 
 	# local libs
-	lib_bosound = ['bosound/libbosonsound.a', 'bosound/libbosonsoundcommon.a']
+	lib_bosound = ['boson/sound/bosound/libbosonsound.a', 'boson/sound/bosound/libbosonsoundcommon.a']
 	if env['LIB_OPENAL']:
-		lib_bosound.append('bosound/openal/libbosonsoundopenal.a')
+		lib_bosound.append('boson/sound/bosound/openal/libbosonsoundopenal.a')
 
 	tmp = lib_bosound
 	lib_bosound = []

@@ -7,6 +7,7 @@ add_subdirectory( boufo )
 add_subdirectory( gameview/plugin )
 add_subdirectory( meshrenderer )
 add_subdirectory( groundrenderer )
+add_subdirectory( bosound )
 
 include(BosonMacros)
 
@@ -19,7 +20,7 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/kgame
 	${CMAKE_SOURCE_DIR}/bodebug
 	${CMAKE_SOURCE_DIR}/bogl
-	${CMAKE_SOURCE_DIR}/bosound
+	${CMAKE_CURRENT_SOURCE_DIR}/sound/bosound
 	${CMAKE_CURRENT_SOURCE_DIR}/boufo
 	${QT_INCLUDE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}

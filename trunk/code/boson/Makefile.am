@@ -12,6 +12,7 @@ SUBDIRS = \
 		script \
 		meshrenderer \
 		groundrenderer \
+		bosound \
 		gameview
 
 noinst_LTLIBRARIES = \
