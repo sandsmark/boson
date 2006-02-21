@@ -221,11 +221,10 @@ libboson_source = """
 	boaction.cpp
 	bosongroundthemedata.cpp
 	borendertarget.cpp
-	bosonwidgets/bonuminput.cpp
+	bonuminput.cpp
 	sound/bosonaudiointerface.cpp
 """
 libboson_includes = '../bodebug ../bogl ../boson/boufo ../bosound'
-libboson_includes += ' bosonwidgets ' # for .moc files
 
 libboson_libs = lib_meshrendererplugin
 libboson_libs += ' ./info/libbosoninfo.a '

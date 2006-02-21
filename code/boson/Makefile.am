@@ -4,7 +4,6 @@ SUBDIRS = \
 		data \
 		imageio \
 		boufo \
-		bosonwidgets \
 		items \
 		commandframe \
 		startupwidgets \
@@ -124,7 +123,8 @@ libboson_la_SOURCES = \
 		speciesdata.cpp \
 		boaction.cpp \
 		bosongroundthemedata.cpp \
-		borendertarget.cpp
+		borendertarget.cpp \
+		bonuminput.cpp
 
 libbosongameengine_la_LIBADD = \
 		$(top_builddir)/boson/items/libbosonitems.la
@@ -135,7 +135,6 @@ libboson_la_LIBADD = \
 		$(top_builddir)/math/libbomath.la \
 		$(top_builddir)/boson/sound/libbosonsoundinterface.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
-		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		$(top_builddir)/boson/script/libbosonscript.la \
 		$(LIB_MESHRENDERER) \
 		$(LIB_GROUNDRENDERER) \
