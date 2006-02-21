@@ -1,8 +1,0 @@
-Makefile
-Makefile.in
-.deps
-.libs
-*.moc
-*.lo
-libbogl.la
-libbogl_la_meta_unload.*
