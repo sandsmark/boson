@@ -642,12 +642,6 @@ void BosonModel::allocatePointArray(unsigned int size)
  }
  d->mPoints = new float[size * BoMesh::pointSize()];
  d->mPointArraySize = size;
-
- static int usedpoints = 0;
-
- usedpoints += size;
- boDebug(100) << k_funcinfo << usedpoints << " points are used now, taking " <<
-		(usedpoints * BoMesh::pointSize() * sizeof(float)) / 1024 << "kb" << endl;
 }
 
 unsigned char* BosonModel::indexArray() const
@@ -671,22 +665,17 @@ void BosonModel::allocateIndexArray(unsigned int size, unsigned int type)
 	boWarning(100) << k_funcinfo << "Index array already allocated!" << endl;
 	delete[] d->mIndices;
  }
- static int usedbytes = 0;
 
  d->mIndexArraySize = size;
  d->mIndexArrayType = type;
  if(type == GL_UNSIGNED_SHORT)
  {
 	d->mIndices = (unsigned char*)new Q_UINT16[size];
-	usedbytes += size * 2;
  }
  else
  {
 	d->mIndices = (unsigned char*)new Q_UINT32[size];
-	usedbytes += size * 4;
  }
-
- boDebug(100) << k_funcinfo << "Indices are used now taking " << usedbytes / 1024 << "kb" << endl;
 }
 
 void BosonModel::prepareRendering()
