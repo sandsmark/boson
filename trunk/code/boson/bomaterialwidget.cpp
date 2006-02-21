@@ -21,7 +21,7 @@
 #include "bomaterialwidget.moc"
 
 #include "../bomemory/bodummymemory.h"
-#include "bosonwidgets/bonuminput.h"
+#include "bonuminput.h"
 #include "bomaterial.h"
 #include "bovectorinput.h"
 

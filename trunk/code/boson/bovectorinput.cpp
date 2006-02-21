@@ -22,7 +22,7 @@
 #include "bovectorinput.moc"
 
 #include "../bomemory/bodummymemory.h"
-#include "bosonwidgets/bonuminput.h"
+#include "bonuminput.h"
 #include "bo3dtools.h"
 
 #include <qwidget.h>

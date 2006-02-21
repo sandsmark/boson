@@ -24,7 +24,7 @@
 #include "bocamera.h"
 #include "bodebug.h"
 #include "bo3dtools.h"
-#include "bosonwidgets/bonuminput.h"
+#include "bonuminput.h"
 #include "bomatrixwidget.h"
 #include "boorbiterwidget.h"
 #include "bosonufoglwidget.h"
