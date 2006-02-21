@@ -23,9 +23,9 @@ set(ufoext_SRCS
 )
 
 set(bosonfont_SRCS
-	../bosonfont/fnt.cpp
-	../bosonfont/fntTXF.cpp
-	../bosonfont/bosonglfont.cpp
+	bosonfont/fnt.cpp
+	bosonfont/fntTXF.cpp
+	bosonfont/bosonglfont.cpp
 )
 
 set(boufo_SRCS

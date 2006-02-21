@@ -14,9 +14,9 @@ ufoext_sources = """
 """
 
 bosonfont_sources = """
-	../bosonfont/fnt.cpp
-	../bosonfont/fntTXF.cpp
-	../bosonfont/bosonglfont.cpp
+	bosonfont/fnt.cpp
+	bosonfont/fntTXF.cpp
+	bosonfont/bosonglfont.cpp
 """
 
 libboufo = env.kobject('staticlib')

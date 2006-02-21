@@ -25,7 +25,7 @@
 #include "ufo/util/ufilearchive.hpp"
 
 #include "boufofontrenderer.h"
-#include "../../bosonfont/bosonglfont.h"
+#include "../bosonfont/bosonglfont.h"
 
 #include <bodebug.h>
 
