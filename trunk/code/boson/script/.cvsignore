@@ -1,9 +1,0 @@
-Makefile
-Makefile.in
-.deps
-.libs
-*.moc
-*.lo
-libbosonscript.la
-libbosonscript_la_meta_unload.*
-*.pyc

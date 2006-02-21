@@ -1,8 +1,0 @@
-Makefile
-Makefile.in
-.deps
-.libs
-*.moc
-*.lo
-libbosongameview.la
-libbosongameview_la_meta_unload.*

@@ -1,8 +1,0 @@
-Makefile
-Makefile.in
-.deps
-.libs
-*.moc
-*.lo
-libboimageio.la
-libboimageio_la_meta_unload.*
