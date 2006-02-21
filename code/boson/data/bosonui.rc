@@ -9,7 +9,7 @@
     <Action name="game_quickload" append="new_merge" />
   </Menu>
   <Menu name="debug" group="debugmenu"><text>&amp;Debug</text>
-    <Action name="debug_sync_network" />
+    <Action name="debug_sync_network" append="debug_action" />
   </Menu>
 </MenuBar>
 <ToolBar name="mainToolBar"><text>Main Toolbar</text>
