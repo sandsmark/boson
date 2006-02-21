@@ -140,6 +140,8 @@ void BosonMainWidgetMenuInput::initUfoActions()
 		this, SIGNAL(signalDebugUfoWidgets()), actionCollection(), "debug_ufo_widgets");
  (void)new BoUfoAction(i18n("Debug &Textures..."), KShortcut(),
 		this, SIGNAL(signalDebugTextures()), actionCollection(), "debug_textures");
+ (void)new BoUfoAction(i18n("Debug &Models..."), KShortcut(),
+		this, SIGNAL(signalDebugModels()), actionCollection(), "debug_models");
 // (void)new BoUfoAction(i18n("Grab &Profiling data"), KShortcut(Qt::CTRL + Qt::Key_P),
 //		this, SLOT(slotGrabProfiling()), actionCollection(), "game_grab_profiling");
  (void)new BoUfoAction(i18n("&Grab Screenshot"), KShortcut(Qt::CTRL + Qt::Key_G),

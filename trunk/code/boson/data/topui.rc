@@ -18,6 +18,7 @@
     <Action name="debug_show_opengl_states" />
     <Action name="debug_ufo_widgets" />
     <Action name="debug_textures" />
+    <Action name="debug_models" />
     <MergeLocal name="debug_dialog" />
     <Separator />
     <MergeLocal name="debug_checkbox" />

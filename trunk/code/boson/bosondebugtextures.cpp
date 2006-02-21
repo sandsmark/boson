@@ -22,10 +22,13 @@
 
 #include "botexture.h"
 #include "bodebug.h"
+#include "qlistviewitemnumber.h"
 
 #include <klocale.h>
 
 #include <qlistview.h>
+#include <qlabel.h>
+
 
 class BosonDebugTexturesPrivate
 {
@@ -54,14 +57,29 @@ void BosonDebugTextures::slotUpdate()
 	BO_NULL_ERROR(boTextureManager);
 	return;
  }
+ long int memorySum = 0;
  QPtrList<const BoTexture> textures = boTextureManager->allTextures();
  for (QPtrListIterator<const BoTexture> it(textures); it.current(); ++it) {
 	QString file = it.current()->filePath();
 	int approximateMemory = it.current()->memoryUsed();
+	memorySum += approximateMemory;
 
 	QString memory = i18n("%1 KB").arg(((float)approximateMemory) / 1024.0f);
 
-	new QListViewItem(mTextureList, file, memory);
+	QListViewItemNumberPrefix* item = new QListViewItemNumberPrefix(mTextureList);
+	item->setText(0, file);
+	item->setText(1, memory);
  }
+ mTextureCount->setText(i18n("%1").arg(textures.count()));
+
+ QString sum;
+ if (memorySum < 1024) {
+	sum = i18n("%1 B").arg(memorySum);
+ } else if (memorySum < 1024 * 1024) {
+	sum = i18n("%1 KB").arg(((float)memorySum) / 1024.0f);
+ } else {
+	sum = i18n("%1 MB").arg(((float)memorySum) / (1024.0f * 1024.0f));
+ }
+ mTextureMemorySum->setText(sum);
 }
 

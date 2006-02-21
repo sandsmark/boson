@@ -30,6 +30,7 @@ libcommon.source = """
 	bo3dtools.cpp
 	bosonprofiling.cpp
 	bopluginmanager.cpp
+	qlistviewitemnumber.cpp
 """
 libcommon.execute()
 
@@ -317,6 +318,8 @@ boson.source += """
 	main.cpp
 	bosondebugtextures.cpp
 	bosondebugtexturesbase.ui
+	bosondebugmodels.cpp
+	bosondebugmodelsbase.ui
 """
 boson.source += startupwidgets_sources
 boson.source += commandframe_sources
@@ -401,7 +404,7 @@ borender.libs += " Xmu"
 borender.libpaths += libcommon_libpaths
 borender.source = libboson_source
 borender.source += """
-	kgamemodeldebug.cpp
+	kgame3dsmodeldebug.cpp
 	bomaterialwidget.cpp
 	bovectorinput.cpp
 	kgamespeciesdebug.cpp
@@ -457,7 +460,7 @@ bo3dsdebug.libs += boufo_lib
 bo3dsdebug.libs += ' 3ds'
 bo3dsdebug.libs += ' kio'
 bo3dsdebug.source = """
-	kgamemodeldebug.cpp
+	kgame3dsmodeldebug.cpp
 	bomatrixwidget.cpp
 
 	bo3dsdebugmain.cpp

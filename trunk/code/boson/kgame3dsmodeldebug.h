@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef KGAMEMODELDEBUG_H
-#define KGAMEMODELDEBUG_H
+#ifndef KGAME3DSMODELDEBUG_H
+#define KGAME3DSMODELDEBUG_H
 
 #include <qwidget.h>
 
@@ -95,12 +95,12 @@ private:
  * @short Widget that displays most data of a model (like faces and materials)
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class KGameModelDebug : public QWidget
+class KGame3DSModelDebug : public QWidget
 {
 	Q_OBJECT
 public:
-	KGameModelDebug(QWidget* parent);
-	~KGameModelDebug();
+	KGame3DSModelDebug(QWidget* parent);
+	~KGame3DSModelDebug();
 
 	/**
 	 * Note that we'll reparse the .3ds file! Most data are discarded in
@@ -162,8 +162,8 @@ private:
 	void addTextureMap(const QString& text, _Lib3dsTextureMap* map);
 
 private:
-	class KGameModelDebugPrivate;
-	KGameModelDebugPrivate* d;
+	class KGame3DSModelDebugPrivate;
+	KGame3DSModelDebugPrivate* d;
 };
 
 

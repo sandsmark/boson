@@ -42,6 +42,7 @@ public:
 signals:
 	void signalDebugUfoWidgets();
 	void signalDebugTextures();
+	void signalDebugModels();
 	void signalPreferences();
 
 protected slots:

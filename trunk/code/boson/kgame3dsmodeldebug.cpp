@@ -17,8 +17,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "kgamemodeldebug.h"
-#include "kgamemodeldebug.moc"
+#include "kgame3dsmodeldebug.h"
+#include "kgame3dsmodeldebug.moc"
 
 #include "../bomemory/bodummymemory.h"
 #include "bo3dtools.h"
@@ -998,9 +998,9 @@ public:
 	void setMaterial(Lib3dsMaterial *m)
 	{
 		if (m) {
-			mAmbient->setText(KGameModelDebug::rgbaText(m->ambient));
-			mDiffuse->setText(KGameModelDebug::rgbaText(m->diffuse));
-			mSpecular->setText(KGameModelDebug::rgbaText(m->specular));
+			mAmbient->setText(KGame3DSModelDebug::rgbaText(m->ambient));
+			mDiffuse->setText(KGame3DSModelDebug::rgbaText(m->diffuse));
+			mSpecular->setText(KGame3DSModelDebug::rgbaText(m->specular));
 			mShininess->setText(QString::number(m->shininess));
 			mShinStrength->setText(QString::number(m->shin_strength));
 			mUseBlur->setChecked(m->use_blur);
@@ -1424,10 +1424,10 @@ bool BoListView::eventFilter(QObject* o, QEvent* e)
  return KListView::eventFilter(o, e);
 }
 
-class KGameModelDebug::KGameModelDebugPrivate
+class KGame3DSModelDebug::KGame3DSModelDebugPrivate
 {
 public:
-	KGameModelDebugPrivate()
+	KGame3DSModelDebugPrivate()
 	{
 		mTopLayout = 0;
 		mModelBox = 0;
@@ -1511,13 +1511,13 @@ public:
 	Lib3dsFile* m3ds;
 };
 
-KGameModelDebug::KGameModelDebug(QWidget* parent) : QWidget(parent, "KGameModelDebug")
+KGame3DSModelDebug::KGame3DSModelDebug(QWidget* parent) : QWidget(parent, "KGame3DSModelDebug")
 {
- d = new KGameModelDebugPrivate;
+ d = new KGame3DSModelDebugPrivate;
  init();
 }
 
-KGameModelDebug::~KGameModelDebug()
+KGame3DSModelDebug::~KGame3DSModelDebug()
 {
  if (d->m3ds) {
 	lib3ds_file_free(d->m3ds);
@@ -1525,7 +1525,7 @@ KGameModelDebug::~KGameModelDebug()
  delete d;
 }
 
-void KGameModelDebug::init()
+void KGame3DSModelDebug::init()
 {
  d->mCurrentItem = -1;
  d->mTopLayout = new QVBoxLayout(this);
@@ -1547,7 +1547,7 @@ void KGameModelDebug::init()
  slotUpdate();
 }
 
-void KGameModelDebug::initMaterialPage()
+void KGame3DSModelDebug::initMaterialPage()
 {
  d->mMaterialPage = new QWidget(d->mTabWidget);
  QHBoxLayout* l = new QHBoxLayout(d->mMaterialPage, 10, 10);
@@ -1580,7 +1580,7 @@ void KGameModelDebug::initMaterialPage()
  d->mTabWidget->addTab(d->mMaterialPage, i18n("M&aterials"));
 }
 
-void KGameModelDebug::initMeshPage()
+void KGame3DSModelDebug::initMeshPage()
 {
  // AB: a "mesh" from a lib3ds point of view is the object itself. it does not
  // contain any information on it's position - it is always at (0,0,0).
@@ -1658,7 +1658,7 @@ void KGameModelDebug::initMeshPage()
  d->mTabWidget->addTab(d->mMeshPage, i18n("&Meshes"));
 }
 
-void KGameModelDebug::initNodePage()
+void KGame3DSModelDebug::initNodePage()
 {
  // a node is an "instance" of a mesh from a lib3ds point of view. the mesh is
  // the "class" and the node is the "object".
@@ -1716,14 +1716,14 @@ void KGameModelDebug::initNodePage()
  d->mTabWidget->addTab(d->mNodePage, i18n("&Nodes"));
 }
 
-void KGameModelDebug::setMatrixPrecision(int prec)
+void KGame3DSModelDebug::setMatrixPrecision(int prec)
 {
  d->mMeshMatrix->setPrecision(prec);
  d->mInvMeshMatrix->setPrecision(prec);
  d->mNodeMatrix->setPrecision(prec);
 }
 
-void KGameModelDebug::addFile(const QString& file, const QString& _name)
+void KGame3DSModelDebug::addFile(const QString& file, const QString& _name)
 {
  unsigned int i = d->mModelBox->count();
  QString name = _name.isEmpty() ? QString::number(i) : _name;
@@ -1731,7 +1731,7 @@ void KGameModelDebug::addFile(const QString& file, const QString& _name)
  d->mModelBox->insertItem(name);
 }
 
-void KGameModelDebug::addFiles(const QString& _dir)
+void KGame3DSModelDebug::addFiles(const QString& _dir)
 {
  QStringList allDirs;
  QStringList allFiles;
@@ -1769,7 +1769,7 @@ void KGameModelDebug::addFiles(const QString& _dir)
  }
 }
 
-void KGameModelDebug::slotModelChanged(int index)
+void KGame3DSModelDebug::slotModelChanged(int index)
 {
  if (index < 0) {
 	boWarning() << k_funcinfo << "index==" << index << endl;
@@ -1786,7 +1786,7 @@ void KGameModelDebug::slotModelChanged(int index)
  slotUpdate();
 }
 
-void KGameModelDebug::slotUpdate()
+void KGame3DSModelDebug::slotUpdate()
 {
  if (d->m3ds) {
 	lib3ds_file_free(d->m3ds);
@@ -1800,7 +1800,7 @@ void KGameModelDebug::slotUpdate()
  updateNodePage();
 }
 
-void KGameModelDebug::updateMaterialPage()
+void KGame3DSModelDebug::updateMaterialPage()
 {
  d->mMaterialBox->clear();
  d->mMaterialData->setMaterial(0);
@@ -1817,7 +1817,7 @@ void KGameModelDebug::updateMaterialPage()
  }
 }
 
-void KGameModelDebug::updateMeshPage()
+void KGame3DSModelDebug::updateMeshPage()
 {
  d->mMeshView->clear();
  d->mFaceList->clear();
@@ -1841,7 +1841,7 @@ void KGameModelDebug::updateMeshPage()
  d->mMeshVertexCountLabel->setText(QString::number(faces * 3));
 }
 
-void KGameModelDebug::updateNodePage()
+void KGame3DSModelDebug::updateNodePage()
 {
  d->mNodeView->clear();
  d->mListItem2Node.clear();
@@ -1885,7 +1885,7 @@ void KGameModelDebug::updateNodePage()
  d->mNodeVertexCountLabel->setText(QString::number(faces * 3));
 }
 
-void KGameModelDebug::slotConstructMeshList()
+void KGame3DSModelDebug::slotConstructMeshList()
 {
  boDebug() << k_funcinfo << endl;
  d->mMeshView->clear();
@@ -1930,7 +1930,7 @@ void KGameModelDebug::slotConstructMeshList()
  }
 }
 
-void KGameModelDebug::slotConstructNodeList()
+void KGame3DSModelDebug::slotConstructNodeList()
 {
  boDebug() << k_funcinfo << endl;
  d->mNodeView->clear();
@@ -1945,7 +1945,7 @@ void KGameModelDebug::slotConstructNodeList()
 
 }
 
-void KGameModelDebug::addNodeToList(QListViewItem* parent, Lib3dsNode* node)
+void KGame3DSModelDebug::addNodeToList(QListViewItem* parent, Lib3dsNode* node)
 {
  BO_CHECK_NULL_RET(node);
  if (node->type != LIB3DS_OBJECT_NODE) {
@@ -1972,17 +1972,17 @@ void KGameModelDebug::addNodeToList(QListViewItem* parent, Lib3dsNode* node)
  }
 }
 
-void KGameModelDebug::slotUseLib3dsCoordinates(bool)
+void KGame3DSModelDebug::slotUseLib3dsCoordinates(bool)
 {
  slotDisplayMesh(d->mMeshView->currentItem());
 }
 
-void KGameModelDebug::slotShowPointIndices(bool)
+void KGame3DSModelDebug::slotShowPointIndices(bool)
 {
  slotDisplayMesh(d->mMeshView->currentItem());
 }
 
-void KGameModelDebug::slotDisplayMesh(QListViewItem* item)
+void KGame3DSModelDebug::slotDisplayMesh(QListViewItem* item)
 {
  d->mFaceList->clear();
  d->mPointList->clear();
@@ -2040,7 +2040,7 @@ void KGameModelDebug::slotDisplayMesh(QListViewItem* item)
  // TODO: mesh->map_data
 }
 
-void KGameModelDebug::slotDisplayMaterial(QListBoxItem* item)
+void KGame3DSModelDebug::slotDisplayMaterial(QListBoxItem* item)
 {
  d->mTextureView->clear();
  Lib3dsMaterial* mat = d->mListItem2Material[item];
@@ -2073,7 +2073,7 @@ void KGameModelDebug::slotDisplayMaterial(QListBoxItem* item)
  addTextureMap(i18n("Reflection Mask"), &mat->reflection_mask);
 }
 
-void KGameModelDebug::slotDisplayNode(QListViewItem* item)
+void KGame3DSModelDebug::slotDisplayNode(QListViewItem* item)
 {
  if (!item) {
 	boDebug() << k_funcinfo << "NULL item" << endl;
@@ -2092,7 +2092,7 @@ void KGameModelDebug::slotDisplayNode(QListViewItem* item)
  d->mNodeObjectData->setNodeObjectData(&node->data.object);
 }
 
-void KGameModelDebug::slotFrameChanged(int frame)
+void KGame3DSModelDebug::slotFrameChanged(int frame)
 {
  if (!d->m3ds) {
 	return;
@@ -2108,17 +2108,17 @@ void KGameModelDebug::slotFrameChanged(int frame)
  slotDisplayNode(d->mNodeView->currentItem());
 }
 
-QString KGameModelDebug::rgbaText(Lib3dsRgba r)
+QString KGame3DSModelDebug::rgbaText(Lib3dsRgba r)
 {
  return i18n("%1,%2,%3,%4").arg(r[0]).arg(r[1]).arg(r[2]).arg(r[3]);
 }
 
-QString KGameModelDebug::rgbText(Lib3dsRgb r)
+QString KGame3DSModelDebug::rgbText(Lib3dsRgb r)
 {
  return i18n("%1,%2,%3").arg(r[0]).arg(r[1]).arg(r[2]);
 }
 
-void KGameModelDebug::addTextureMap(const QString& name, _Lib3dsTextureMap* t)
+void KGame3DSModelDebug::addTextureMap(const QString& name, _Lib3dsTextureMap* t)
 {
  QListViewItem* item = new QListViewItem(d->mTextureView);
  item->setText(0, name);
@@ -2137,7 +2137,7 @@ void KGameModelDebug::addTextureMap(const QString& name, _Lib3dsTextureMap* t)
  item->setText(12, rgbText(t->tint_b));
 }
 
-void KGameModelDebug::slotConnectToFace(QListViewItem* item)
+void KGame3DSModelDebug::slotConnectToFace(QListViewItem* item)
 {
 #if ALLOW_FACE_CONNECTIONS
  Lib3dsFace* face = d->mListItem2Face[item];
@@ -2171,7 +2171,7 @@ void KGameModelDebug::slotConnectToFace(QListViewItem* item)
 #endif
 }
 
-void KGameModelDebug::slotHideConnectableWidgets(bool h)
+void KGame3DSModelDebug::slotHideConnectableWidgets(bool h)
 {
  if (h) {
 	d->mConnectableWidget->hide();

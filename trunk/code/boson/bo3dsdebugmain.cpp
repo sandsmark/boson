@@ -19,7 +19,7 @@
 
 
 #include "../bomemory/bodummymemory.h"
-#include "kgamemodeldebug.h"
+#include "kgame3dsmodeldebug.h"
 #include "boapplication.h"
 #include "bodebug.h"
 #include "boversion.h"
@@ -72,7 +72,7 @@ int main(int argc, char ** argv)
 
  QWidget* w = dialog->plainPage();
  QVBoxLayout* layout = new QVBoxLayout(w);
- KGameModelDebug* models = new KGameModelDebug(w);
+ KGame3DSModelDebug* models = new KGame3DSModelDebug(w);
  layout->addWidget(models);
 
  QStringList list = KGlobal::dirs()->resourceDirs("data");

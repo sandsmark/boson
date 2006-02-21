@@ -31,7 +31,7 @@
 #include "bomaterial.h"
 #include "bosonprofiling.h"
 #include "unitproperties.h"
-#include "kgamemodeldebug.h"
+#include "kgame3dsmodeldebug.h"
 #include "kgamespeciesdebug.h"
 #include "bodebug.h"
 #include "boversion.h"
@@ -730,7 +730,7 @@ void BoRenderGLWidget::slotDebugModels()
  connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
  QWidget* w = dialog->plainPage();
  QVBoxLayout* l = new QVBoxLayout(w);
- KGameModelDebug* models = new KGameModelDebug(w);
+ KGame3DSModelDebug* models = new KGame3DSModelDebug(w);
  l->addWidget(models);
 
  QPtrListIterator<SpeciesTheme> it(d->mSpecies);

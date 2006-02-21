@@ -24,6 +24,7 @@
 #include "bodebug.h"
 #include "bofiledialog.h"
 #include "rtti.h"
+#include "qlistviewitemnumber.h"
 
 #include <klocale.h>
 #include <klistview.h>
@@ -104,13 +105,13 @@ void ProfilingItem::insertChild(BosonProfilingItem* item)
  p->addItem(item);
 }
 
-class QListViewItemNumber : public QListViewItem
+class QListViewItemNumberTime : public QListViewItemNumber
 {
 public:
-	QListViewItemNumber(QListView* p) : QListViewItem(p)
+	QListViewItemNumberTime(QListView* p) : QListViewItemNumber(p)
 	{
 	}
-	QListViewItemNumber(QListViewItem* p) : QListViewItem(p)
+	QListViewItemNumberTime(QListViewItem* p) : QListViewItemNumber(p)
 	{
 	}
 
@@ -131,32 +132,6 @@ public:
 		setText(firstColumn, QString::number(time));
 		setText(firstColumn + 1, QString::number((double)time / 1000));
 		setText(firstColumn + 2, QString::number((double)time / 1000000));
-	}
-
-	virtual int compare(QListViewItem* i, int col, bool ascending) const
-	{
-		bool ok = true;
-		bool ok2 = true;
-		double n = key(col, ascending).toDouble(&ok);
-		double n2 = i->key(col, ascending).toDouble(&ok2);
-		// numbers first - then letters
-		if (ok && ok2) {
-			if (n == n2) {
-				return 0;
-			} else if (n > n2) {
-				return 1;
-			} else {
-				return -1;
-			}
-		} else if (ok) {
-			// this is a number, i is not. this comes first.
-			return -1;
-		} else if (ok2) {
-			// this is not a number, i is. i comes first.
-			return 1;
-		} else {
-			return QListViewItem::compare(i, col, ascending);
-		}
 	}
 };
 
@@ -359,12 +334,12 @@ void BosonProfilingDialog::resetRawTreePage()
 
  QPtrListIterator<BosonProfilingItem> it(d->mItems);
  while (it.current()) {
-	initRawTreeProfilingItem(new QListViewItemNumber(d->mRawTree), it.current(), -1);
+	initRawTreeProfilingItem(new QListViewItemNumberTime(d->mRawTree), it.current(), -1);
 	++it;
  }
 }
 
-void BosonProfilingDialog::initProfilingItem(QListViewItemNumber* item, ProfilingItem* profilingItem, long int totalTime)
+void BosonProfilingDialog::initProfilingItem(QListViewItemNumberTime* item, ProfilingItem* profilingItem, long int totalTime)
 {
  BO_CHECK_NULL_RET(profilingItem);
  if (item) {
@@ -389,11 +364,11 @@ void BosonProfilingDialog::initProfilingItem(QListViewItemNumber* item, Profilin
 
  QPtrListIterator<ProfilingItem> it(profilingItem->children());
  while (it.current()) {
-	QListViewItemNumber* child;
+	QListViewItemNumberTime* child;
 	if (item) {
-		child = new QListViewItemNumber(item);
+		child = new QListViewItemNumberTime(item);
 	} else {
-		child = new QListViewItemNumber(d->mEvents);
+		child = new QListViewItemNumberTime(d->mEvents);
 	}
 	initProfilingItem(child, it.current(), totalTime);
 
@@ -401,7 +376,7 @@ void BosonProfilingDialog::initProfilingItem(QListViewItemNumber* item, Profilin
  }
 }
 
-void BosonProfilingDialog::initRawTreeProfilingItem(QListViewItemNumber* item, BosonProfilingItem* profilingItem, long int totalTime)
+void BosonProfilingDialog::initRawTreeProfilingItem(QListViewItemNumberTime* item, BosonProfilingItem* profilingItem, long int totalTime)
 {
  BO_CHECK_NULL_RET(item);
  BO_CHECK_NULL_RET(profilingItem);
@@ -417,8 +392,8 @@ void BosonProfilingDialog::initRawTreeProfilingItem(QListViewItemNumber* item, B
 
  QPtrListIterator<BosonProfilingItem> it(*profilingItem->children());
  while (it.current()) {
-	QListViewItemNumber* child;
-	child = new QListViewItemNumber(item);
+	QListViewItemNumberTime* child;
+	child = new QListViewItemNumberTime(item);
 	initRawTreeProfilingItem(child, it.current(), totalTime);
 
 	++it;

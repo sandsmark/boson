@@ -40,6 +40,7 @@ set(common_SRCS
 	bo3dtools.cpp
 	bosonprofiling.cpp
 	bopluginmanager.cpp
+	qlistviewitemnumber.cpp
 )
 kde3_automoc(${common_SRCS})
 set(common_LIBS
@@ -254,6 +255,7 @@ set(boson_SRCS
 	selectbox.cpp
 	main.cpp
 	bosondebugtextures.cpp
+	bosondebugmodels.cpp
 
 	${startupwidgets_SRCS}
 	${commandframe_SRCS}
@@ -261,6 +263,7 @@ set(boson_SRCS
 )
 set(boson_UI
 	bosondebugtexturesbase.ui
+	bosondebugmodelsbase.ui
 )
 kde3_add_ui_files( boson_SRCS ${boson_UI} )
 kde3_add_ui_files( foobar ${boson_UI} )
@@ -305,7 +308,7 @@ target_link_libraries(boson-no-gui
 
 ################ borender #################
 set(borender_SRCS
-	kgamemodeldebug.cpp
+	kgame3dsmodeldebug.cpp
 	bomaterialwidget.cpp
 	bovectorinput.cpp
 	kgamespeciesdebug.cpp
@@ -405,7 +408,7 @@ target_link_libraries(boinfo
 
 ################ bo3dsdebug #################
 set(bo3dsdebug_SRCS
-	kgamemodeldebug.cpp
+	kgame3dsmodeldebug.cpp
 	bomatrixwidget.cpp
 
 	bo3dsdebugmain.cpp
