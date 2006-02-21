@@ -30,6 +30,7 @@
 #include "bodebug.h"
 #include "bo3dtools.h"
 #include "bosonpropertyxml.h"
+#include "qlistviewitemnumber.h"
 
 #include <klistview.h>
 #include <klistbox.h>
@@ -48,44 +49,6 @@
 #include <qsplitter.h>
 #include <qpopupmenu.h>
 #include <qcursor.h>
-
-
-class QListViewItemNumber : public QListViewItem
-{
-public:
-	QListViewItemNumber(QListView* p) : QListViewItem(p)
-	{
-	}
-	QListViewItemNumber(QListViewItem* p) : QListViewItem(p)
-	{
-	}
-	virtual int compare(QListViewItem* i, int col, bool ascending) const
-	{
-		bool ok = true;
-		bool ok2 = true;
-		double n = key(col, ascending).toDouble(&ok);
-		double n2 = i->key(col, ascending).toDouble(&ok2);
-		// numbers first - then letters
-		if (ok && ok2) {
-			if (n == n2) {
-				return 0;
-			} else if (n > n2) {
-				return 1;
-			} else {
-				return -1;
-			}
-		} else if (ok) {
-			// this is a number, i is not. this comes first.
-			return -1;
-		} else if (ok2) {
-			// this is not a number, i is. i comes first.
-			return 1;
-		} else {
-			return QListViewItem::compare(i, col, ascending);
-		}
-	}
-};
-
 
 
 class KGameUnitDebug::KGameUnitDebugPrivate

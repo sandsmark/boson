@@ -26,7 +26,7 @@
 class BosonProfilingItem;
 class ProfilingItem;
 class QListViewItem;
-class QListViewItemNumber;
+class QListViewItemNumberTime;
 
 class BosonProfilingDialogPrivate;
 /**
@@ -51,8 +51,8 @@ protected:
 	void resetRawTreePage();
 	void resetFilesPage();
 
-	void initProfilingItem(QListViewItemNumber*, ProfilingItem*, long int totalTime);
-	void initRawTreeProfilingItem(QListViewItemNumber*, BosonProfilingItem*, long int totalTime);
+	void initProfilingItem(QListViewItemNumberTime*, ProfilingItem*, long int totalTime);
+	void initRawTreeProfilingItem(QListViewItemNumberTime*, BosonProfilingItem*, long int totalTime);
 
 protected slots:
 	void slotUpdateFromGlobalProfiling();

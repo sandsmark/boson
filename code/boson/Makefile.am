@@ -90,7 +90,8 @@ libbosoncommon_la_SOURCES = \
 		bomath.cpp \
 		bo3dtools.cpp \
 		bosonprofiling.cpp \
-		bopluginmanager.cpp
+		bopluginmanager.cpp \
+		qlistviewitemnumber.cpp
 
 libboson_la_SOURCES = \
 		bosonviewdata.cpp \
@@ -192,6 +193,8 @@ boson_SOURCES = \
 		selectbox.cpp \
 		bosondebugtextures.cpp \
 		bosondebugtexturesbase.ui \
+		bosondebugmodels.cpp \
+		bosondebugmodelsbase.ui \
 		main.cpp
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
@@ -242,7 +245,7 @@ bocursor_SOURCES = \
 		bocursormain.cpp bosoncursoreditor.cpp
 
 libborender_la_SOURCES = \
-		kgamemodeldebug.cpp
+		kgame3dsmodeldebug.cpp
 borender_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker --export-dynamic
 borender_LDADD = \
 		$(top_builddir)/math/libbomath.la \
@@ -307,7 +310,7 @@ libbo3dsdebug_la_SOURCES = \
 		bomath.cpp \
 		bo3dtools.cpp \
 		bosonprofiling.cpp \
-		kgamemodeldebug.cpp \
+		kgame3dsmodeldebug.cpp \
 		bomatrixwidget.cpp
 bo3dsdebug_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bo3dsdebug_LDADD = \

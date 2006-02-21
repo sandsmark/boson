@@ -60,6 +60,7 @@
 #include "bosoncomputerio.h"
 #include "speciestheme.h"
 #include "bosondebugtextures.h"
+#include "bosondebugmodels.h"
 
 #include <klocale.h>
 #include <kmessagebox.h>
@@ -293,6 +294,8 @@ void BosonMainWidget::initUfoGUI()
 		this, SLOT(slotDebugUfoWidgets()));
  connect(d->mMenuInput, SIGNAL(signalDebugTextures()),
 		this, SLOT(slotDebugTextures()));
+ connect(d->mMenuInput, SIGNAL(signalDebugModels()),
+		this, SLOT(slotDebugModels()));
  connect(d->mMenuInput, SIGNAL(signalPreferences()),
 		this, SLOT(slotPreferences()));
 
@@ -1224,6 +1227,13 @@ void BosonMainWidget::slotDebugUfoWidgets()
 void BosonMainWidget::slotDebugTextures()
 {
  BosonDebugTextures* dialog = new BosonDebugTextures(this);
+ dialog->slotUpdate();
+ dialog->show();
+}
+
+void BosonMainWidget::slotDebugModels()
+{
+ BosonDebugModels* dialog = new BosonDebugModels(this);
  dialog->slotUpdate();
  dialog->show();
 }

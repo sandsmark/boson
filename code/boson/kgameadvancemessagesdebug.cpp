@@ -24,6 +24,7 @@
 #include "bodebug.h"
 #include "bosoncanvas.h"
 #include "boson.h"
+#include "qlistviewitemnumber.h"
 
 #include <klocale.h>
 
@@ -44,62 +45,6 @@ static unsigned long int compareTimes(const struct timeval* newest, const struct
  return (((newest->tv_sec - last->tv_sec) * 1000000) + (newest->tv_usec - last->tv_usec)) / 1000;
 }
 
-
-class QListViewItemNumber : public QListViewItem
-{
-public:
-	QListViewItemNumber(QListView* p) : QListViewItem(p)
-	{
-	}
-	QListViewItemNumber(QListViewItem* p) : QListViewItem(p)
-	{
-	}
-
-#if 0
-	void setTime(int firstColumn, struct timeval* t)
-	{
-		setTime(firstColumn, t->tv_sec * 1000000 + t->tv_usec);
-	}
-
-	/**
-	 * Note: this will take 3 columns! Time, Time (ms), Time (s) !
-	 * @param firstColumn The first time-column. We need 3 columns here!
-	 * @param time How much time this action took
-	 **/
-	void setTime(int firstColumn, unsigned long int time)
-	{
-		setText(firstColumn, QString::number(time));
-		setText(firstColumn + 1, QString::number((double)time / 1000));
-		setText(firstColumn + 2, QString::number((double)time / 1000000));
-	}
-#endif
-
-	virtual int compare(QListViewItem* i, int col, bool ascending) const
-	{
-		bool ok = true;
-		bool ok2 = true;
-		double n = key(col, ascending).toDouble(&ok);
-		double n2 = i->key(col, ascending).toDouble(&ok2);
-		// numbers first - then letters
-		if (ok && ok2) {
-			if (n == n2) {
-				return 0;
-			} else if (n > n2) {
-				return 1;
-			} else {
-				return -1;
-			}
-		} else if (ok) {
-			// this is a number, i is not. this comes first.
-			return -1;
-		} else if (ok2) {
-			// this is not a number, i is. i comes first.
-			return 1;
-		} else {
-			return QListViewItem::compare(i, col, ascending);
-		}
-	}
-};
 
 class KGameAdvanceMessagesDebugPrivate
 {
