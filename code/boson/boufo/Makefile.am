@@ -42,6 +42,6 @@ libboufo_la_SOURCES = \
 
 libboufo_la_LIBADD = \
 		$(top_builddir)/boson/boufo/ufoext/libufoext.la \
-		$(top_builddir)/boson/bosonfont/libbosonfont.la \
+		$(top_builddir)/boson/boufo/bosonfont/libbosonfont.la \
 		$(LIB_UFO)
 
