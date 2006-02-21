@@ -25,7 +25,7 @@ class BoAudioCommand;
 
 #include <qstring.h>
 
-#include "../bosound/bosonabstractaudiointerface.h"
+#include "bosound/bosonabstractaudiointerface.h"
 
 template<class T1, class T2> class QMap;
 class QStringList;
