@@ -1100,15 +1100,14 @@ void BosonGameView::slotReCenterDisplay(const QPoint& pos)
 
 bool BosonGameView::mapCoordinatesToGround(const QPoint& widgetPos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth) const
 {
- BoVector3Float p = d->mUfoCanvasWidget->emulatePickGroundPos(widgetPos);
- if (p.x() >= 0.0f && p.y() >= 0.0f) {
+ BoVector3Float p;
+ bool ret = d->mUfoCanvasWidget->emulatePickGroundPos(widgetPos, &p);
+ if (ret) {
 	*posX = p.x();
 	*posY = p.y();
 	*posZ = p.z();
- } else {
-	return false;
  }
- return true;
+ return ret;
 }
 
 bool BosonGameView::mapDistance(int windx, int windy, GLfloat* dx, GLfloat* dy) const
@@ -2062,7 +2061,7 @@ void BosonGameView::slotMouseEvent(QMouseEvent* e)
  GLfloat posY = 0.0;
  GLfloat posZ = 0.0;
  if (!mapCoordinatesToGround(e->pos(), &posX, &posY, &posZ)) {
-	boError() << k_funcinfo << "Cannot map coordinates" << endl;
+//	boError() << k_funcinfo << "Cannot map coordinates" << endl;
 	return;
  }
  BoVector3Fixed canvasVector(posX, -posY, posZ);

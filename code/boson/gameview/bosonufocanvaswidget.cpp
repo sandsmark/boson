@@ -889,17 +889,21 @@ public:
  *
  * However it works and as long as it does, I don't intend to do so.
  */
-BoVector3Float BosonUfoCanvasWidget::emulatePickGroundPos(const QPoint& pickPos) const
+bool BosonUfoCanvasWidget::emulatePickGroundPos(const QPoint& pickPos, BoVector3Float* worldPos) const
 {
  PROFILE_METHOD
+ if (!worldPos) {
+	BO_NULL_ERROR(worldPos);
+	return false;
+ }
  if (!d->mCanvas) {
 	BO_NULL_ERROR(d->mCanvas);
-	return BoVector3Float(-1.0f, -1.0f, -1.0f);
+	return false;
  }
  const BosonMap* map = d->mCanvas->map();
  if (!map) {
 	BO_NULL_ERROR(map);
-	return BoVector3Float(-1.0f, -1.0f, -1.0f);
+	return false;
  }
  const float pickSize = 0.1f;
  BoRect2Float pickRect((float)pickPos.x() - pickSize, (float)pickPos.y() - pickSize, (float)pickPos.x() + pickSize, (float)pickPos.y() + pickSize);
@@ -959,7 +963,7 @@ BoVector3Float BosonUfoCanvasWidget::emulatePickGroundPos(const QPoint& pickPos)
 
  if (retNodes.count() == 0) {
 	// nothing visible (or a major bug somewhere)
-	return BoVector3Float(-1.0f, -1.0f, -1.0f);
+	return false;
  }
 
 
@@ -1058,7 +1062,8 @@ BoVector3Float BosonUfoCanvasWidget::emulatePickGroundPos(const QPoint& pickPos)
  }
 
  if (rects.count() == 0) {
-	return pos;
+	*worldPos = pos;
+	return true;
  }
 
 
@@ -1075,7 +1080,8 @@ BoVector3Float BosonUfoCanvasWidget::emulatePickGroundPos(const QPoint& pickPos)
  y /= (float)rects.count();
  z /= (float)rects.count();
 
- return BoVector3Float(x, y, z);
+ *worldPos = BoVector3Float(x, y, z);
+ return true;
 }
 
 void BosonUfoCanvasWidget::paintWidget()
