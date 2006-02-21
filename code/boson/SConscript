@@ -16,7 +16,7 @@ else:
 #env.PrependUnique(CPPPATH = ['../kgame'])
 #env.PrependUnique(CPPPATH = ['../ufo'])
 
-env.subdirs(['data', 'script', 'info', 'gameview/plugin', 'boufo', 'meshrenderer', 'groundrenderer'])
+env.subdirs(['data', 'script', 'info', 'gameview/plugin', 'boufo', 'meshrenderer', 'groundrenderer', 'sound/bosound'])
 
 libcommon = env.kobject('staticlib')
 libcommon.target = 'libcommon'
@@ -224,7 +224,7 @@ libboson_source = """
 	bonuminput.cpp
 	sound/bosonaudiointerface.cpp
 """
-libboson_includes = '../bodebug ../bogl ../boson/boufo ../bosound'
+libboson_includes = '../bodebug ../bogl ../boson/boufo sound/bosound'
 
 libboson_libs = lib_meshrendererplugin
 libboson_libs += ' ./info/libbosoninfo.a '

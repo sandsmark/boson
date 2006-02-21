@@ -138,7 +138,6 @@ subdirs += """
 	bodebug
 	bogl
 	kgame
-	bosound
 	ufo
 	boson
 	server
