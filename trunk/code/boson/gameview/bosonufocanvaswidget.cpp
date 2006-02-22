@@ -26,7 +26,7 @@
 #include "bosoncanvasrenderer.h"
 #include "../gameengine/bosoncanvas.h"
 #include "../gameengine/bosonmap.h"
-#include "../bosonmodel.h"
+#include "../modelrendering/bosonmodel.h"
 #include "../gameengine/speciestheme.h"
 #include "../speciesdata.h"
 #include "../gameengine/bosongroundtheme.h"

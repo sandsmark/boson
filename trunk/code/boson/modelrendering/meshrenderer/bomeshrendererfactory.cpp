@@ -20,12 +20,12 @@
 #include "bomeshrendererfactory.h"
 #include "bomeshrendererfactory.moc"
 
-#include "../../bomemory/bodummymemory.h"
+#include "../../../bomemory/bodummymemory.h"
 #include "bomeshrendererimmediate.h"
 #include "bomeshrenderersemiimmediate.h"
 #include "bomeshrenderervertexarray.h"
 #include "bomeshrenderervbo.h"
-#include "../boversion.h"
+#include "../../boversion.h"
 
 #include <bodebug.h>
 

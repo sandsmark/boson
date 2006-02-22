@@ -53,7 +53,7 @@
 #include "../boautocamera.h"
 #include "../bogroundrenderer.h"
 #include "../bogroundrenderermanager.h"
-#include "../bomeshrenderermanager.h"
+#include "../modelrendering/bomeshrenderermanager.h"
 #include "../bolight.h"
 #include "../bosonglminimap.h"
 #include "../info/boinfo.h"

@@ -31,7 +31,7 @@
 #include "../gameengine/bosoncanvasstatistics.h"
 #include "../bogroundrenderer.h"
 #include "../bogroundrenderermanager.h"
-#include "../bomeshrenderermanager.h"
+#include "../modelrendering/bomeshrenderermanager.h"
 #include "../botexture.h"
 #include "../bocamera.h"
 #include "../bosonufochat.h"

@@ -22,12 +22,11 @@
 #include "bomeshrenderervbo.h"
 #include "bomeshrenderervbo.moc"
 
-#include "../../bomemory/bodummymemory.h"
-#include "../bomeshrenderer.h"
+#include "../../../bomemory/bodummymemory.h"
 #include "../bosonmodel.h"
 #include "../bomesh.h"
-#include "../bomaterial.h"
-#include "../info/boinfo.h"
+#include "../../bomaterial.h"
+#include "../../info/boinfo.h"
 
 #include <bodebug.h>
 

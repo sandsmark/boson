@@ -16,46 +16,52 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include "bomeshrenderersemiimmediate.h"
-#include "bomeshrenderersemiimmediate.moc"
+#include "bomeshrenderervertexarray.h"
+#include "bomeshrenderervertexarray.moc"
 
-#include "../../bomemory/bodummymemory.h"
+#include "../../../bomemory/bodummymemory.h"
 #include "../bomeshrenderer.h"
 #include "../bosonmodel.h"
 #include "../bomesh.h"
-#include "../bomaterial.h"
+#include "../../bomaterial.h"
 
 #include <bodebug.h>
 
-BoMeshRendererSemiImmediate::BoMeshRendererSemiImmediate() : BoMeshRenderer()
+
+
+BoMeshRendererVertexArray::BoMeshRendererVertexArray() : BoMeshRenderer()
+{
+ mPreviousModel = 0;
+}
+
+BoMeshRendererVertexArray::~BoMeshRendererVertexArray()
 {
 }
 
-BoMeshRendererSemiImmediate::~BoMeshRendererSemiImmediate()
-{
-}
-
-void BoMeshRendererSemiImmediate::setModel(BosonModel* model)
+void BoMeshRendererVertexArray::setModel(BosonModel* model)
 {
  BoMeshRenderer::setModel(model);
  if (!model) {
 	return;
  }
+ if (mPreviousModel == model) {
+	return;
+ }
 
- int stride = BoMesh::pointSize() * sizeof(float);
- float* points = model->pointArray();
- glVertexPointer(3, GL_FLOAT, stride, points + BoMesh::vertexPos());
- glNormalPointer(GL_FLOAT, stride, points + BoMesh::normalPos());
- glTexCoordPointer(2, GL_FLOAT, stride, points + BoMesh::texelPos());
+ const int stride = (3 + 3 + 2) * sizeof(float);
+ glVertexPointer(3, GL_FLOAT, stride, model->pointArray());
+ glNormalPointer(GL_FLOAT, stride, model->pointArray() + 3);
+ glTexCoordPointer(2, GL_FLOAT, stride, model->pointArray() + 3 + 3);
+
+ mPreviousModel = model;
 }
 
-void BoMeshRendererSemiImmediate::initFrame()
+void BoMeshRendererVertexArray::initFrame()
 {
  glPushAttrib(GL_POLYGON_BIT | GL_COLOR_BUFFER_BIT);
 
  glEnable(GL_CULL_FACE);
  glCullFace(GL_BACK);
-
  glEnableClientState(GL_VERTEX_ARRAY);
  glEnableClientState(GL_NORMAL_ARRAY);
  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -65,9 +71,11 @@ void BoMeshRendererSemiImmediate::initFrame()
  // fragment must either be visible or invisible)
  glEnable(GL_ALPHA_TEST);
  glAlphaFunc(GL_GREATER, 0.0f);
+
+ mPreviousModel = 0;
 }
 
-void BoMeshRendererSemiImmediate::deinitFrame()
+void BoMeshRendererVertexArray::deinitFrame()
 {
  glPopAttrib();
 
@@ -76,10 +84,10 @@ void BoMeshRendererSemiImmediate::deinitFrame()
  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
-unsigned int BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh* mesh, RenderFlags flags)
+
+unsigned int BoMeshRendererVertexArray::render(const QColor* teamColor, BoMesh* mesh, RenderFlags flags)
 {
  if (mesh->pointCount() == 0) {
-	// nothing to do.
 	return 0;
  }
 
@@ -96,6 +104,7 @@ unsigned int BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh
  // so optimization should happen here - if possible at all...
 
  if (!(flags & DepthOnly)) {
+	// TODO: support material _and_ teamcolor
 	BoMaterial::activate(mesh->material());
 	if (!mesh->material()) {
 		if (mesh->isTeamColor()) {
@@ -108,6 +117,7 @@ unsigned int BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh
 	} else {
 		BoMaterial* mat = mesh->material();
 		if (mat->textureName().isEmpty()) {
+			// FIXME: what's that for???
 			glPushAttrib(GL_CURRENT_BIT);
 			glColor3fv(mesh->material()->diffuse().data());
 			resetColor = true;
@@ -118,30 +128,17 @@ unsigned int BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh
 		}
 	}
  }
-
  unsigned int renderedPoints = 0;
- glBegin(mesh->renderMode());
 
  if (mesh->useIndices()) {
-	for (unsigned int i = 0; i < mesh->indexCount(); i++) {
-		unsigned int index;
-		if (model()->indexArrayType() == GL_UNSIGNED_SHORT) {
-			index = ((Q_UINT16*)mesh->indices())[i];
-		} else {
-			index = ((Q_UINT32*)mesh->indices())[i];
-		}
-		glArrayElement(index);
-		renderedPoints++;
-	}
+	unsigned int minindex = mesh->pointOffset();
+	unsigned int maxindex = mesh->pointOffset() + mesh->pointCount() - 1;
+	glDrawRangeElements(mesh->renderMode(), minindex, maxindex, mesh->indexCount(), model()->indexArrayType(), mesh->indices());
+	renderedPoints = mesh->indexCount();
  } else {
-	for(unsigned int i = 0; i < mesh->pointCount(); i++) {
-		glArrayElement(mesh->pointOffset() + i);
-		renderedPoints++;
-	}
+	glDrawArrays(mesh->renderMode(), mesh->pointOffset(), mesh->pointCount());
+	renderedPoints = mesh->pointCount();
  }
-
- glEnd();
-
 
  if (resetColor) {
 	// we need to reset the color (mainly for the placement preview)
@@ -155,5 +152,4 @@ unsigned int BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh
 
  return renderedPoints;
 }
-
 
