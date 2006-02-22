@@ -20,11 +20,11 @@
 #ifndef BOSONORDERBUTTON_H
 #define BOSONORDERBUTTON_H
 
-#include "../boufo/boufowidget.h"
-#include "../boufo/boufopushbutton.h"
-#include "../boufo/boufoimage.h"
-#include "../global.h"
-#include "../boaction.h"
+#include "../../boufo/boufowidget.h"
+#include "../../boufo/boufopushbutton.h"
+#include "../../boufo/boufoimage.h"
+#include "../../global.h"
+#include "../../boaction.h"
 
 
 class Unit;

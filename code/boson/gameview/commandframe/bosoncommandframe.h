@@ -19,7 +19,7 @@
 #ifndef BOSONCOMMANDFRAME_H
 #define BOSONCOMMANDFRAME_H
 
-#include "../boufo/boufowidget.h"
+#include "../../boufo/boufowidget.h"
 
 class Player;
 class PlayerIO;

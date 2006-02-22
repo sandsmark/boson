@@ -23,7 +23,7 @@
 #include "server.h"
 #include "bodebug.h"
 #include "player.h"
-#include "boson/bosonmessageids.h"
+#include "../boson/gameengine/bosonmessageids.h"
 
 #include <qcstring.h>
 #include <qmap.h>

@@ -22,9 +22,9 @@
 
 #include "../../../bomemory/bodummymemory.h"
 #include "../../no_player.h"
-#include "../../bosoncanvas.h"
-#include "../../bosonmap.h"
-#include "../../playerio.h"
+#include "../../gameengine/bosoncanvas.h"
+#include "../../gameengine/bosonmap.h"
+#include "../../gameengine/playerio.h"
 #include "../bosonlocalplayerinput.h"
 #include <bodebug.h>
 

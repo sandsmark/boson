@@ -22,10 +22,10 @@
 
 #include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
-#include "../player.h"
+#include "../gameengine/player.h"
 #include "bosonlocalplayerinput.h"
 #include "bosonmenuinput.h"
-#include "../bosoncomputerio.h"
+#include "../gameengine/bosoncomputerio.h"
 
 #include <qlayout.h>
 #include <qlistbox.h>

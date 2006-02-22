@@ -23,7 +23,6 @@
 #include "bosonprofiling.h"
 #include "bodebug.h"
 #include "bofiledialog.h"
-#include "rtti.h"
 #include "qlistviewitemnumber.h"
 
 #include <klocale.h>

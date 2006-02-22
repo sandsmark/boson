@@ -20,10 +20,10 @@
 #ifndef BOSONORDERWIDGET_H
 #define BOSONORDERWIDGET_H
 
-#include "../boufo/boufowidget.h"
+#include "../../boufo/boufowidget.h"
 
-#include "../global.h"
-#include "../boaction.h"
+#include "../../global.h"
+#include "../../boaction.h"
 
 class Unit;
 class Player;

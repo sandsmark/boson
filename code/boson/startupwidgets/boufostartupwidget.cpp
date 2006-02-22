@@ -30,7 +30,7 @@
 #include "welcomewidget.h"
 #include "bosonstartupnetwork.h"
 #include "bodebug.h"
-#include "../boson.h"
+#include "../gameengine/boson.h"
 #include "../defines.h"
 
 #include <kmainwindow.h> // AB: urghs

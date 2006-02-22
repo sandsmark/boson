@@ -21,10 +21,10 @@
 #include "bosongamevieweventlistener.moc"
 
 #include "../bosonprofiling.h"
-#include "../boevent.h"
-#include "../rtti.h"
-#include "../bosoncanvas.h"
-#include "../items/bosonitem.h"
+#include "../gameengine/boevent.h"
+#include "../gameengine/rtti.h"
+#include "../gameengine/bosoncanvas.h"
+#include "../gameengine/bosonitem.h"
 #include "bodebug.h"
 
 BosonGameViewEventListener::BosonGameViewEventListener(BoEventManager* manager, QObject* parent)

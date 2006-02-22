@@ -52,61 +52,61 @@ set(common_LIBS
 )
 
 set(gameengine_SRCS
-	boeventloop.cpp
-	boupgradeableproperty.cpp
-	unitbase.cpp
-	unit.cpp
-	unitproperties.cpp
-	pluginproperties.cpp
-	unitplugins.cpp
-	upgradeproperties.cpp
-	bosonweapon.cpp
-	boitemlist.cpp
-	boitemlisthandler.cpp
-	bosonplayfield.cpp
-	bosonmap.cpp
-	cell.cpp
-	bofile.cpp
-	bpfdescription.cpp
-	bosonfileconverter.cpp
-	bosoncampaign.cpp
-	bosonmessage.cpp
-	boson.cpp
-	bomessage.cpp
-	bosoncanvas.cpp
-	bosoncanvasstatistics.cpp
-	bosoncollisions.cpp
-	bosonnetworksynchronizer.cpp
-	bosonnetworktraffic.cpp
-	speciestheme.cpp
-	player.cpp
-	playerio.cpp
-	bosoncomputerio.cpp
-	bosonpath.cpp
-	bosongamestatistics.cpp
-	bosonstatistics.cpp
-	bogameproperty.cpp
-	bosonpropertyxml.cpp
-	bosonplayerinputhandler.cpp
-	bobincoder.cpp
-	boevent.cpp
-	boeventmatching.cpp
-	boeventlistener.cpp
-	boeventmanager.cpp
-	bocondition.cpp
-	bowater.cpp
-	bosonsaveload.cpp
-	bosongroundtheme.cpp
-	bosongameengine.cpp
-	bosonstarting.cpp
-	bosongameenginestarting.cpp
-	boquadtreenode.cpp
-	boquadtreecollection.cpp
-	bogroundquadtreenode.cpp
-	bocanvasquadtreenode.cpp
-	items/bosonitem.cpp
-	items/bosonshot.cpp
-	items/bosonitempropertyhandler.cpp
+	gameengine/boeventloop.cpp
+	gameengine/boupgradeableproperty.cpp
+	gameengine/unitbase.cpp
+	gameengine/unit.cpp
+	gameengine/unitproperties.cpp
+	gameengine/pluginproperties.cpp
+	gameengine/unitplugins.cpp
+	gameengine/upgradeproperties.cpp
+	gameengine/bosonweapon.cpp
+	gameengine/boitemlist.cpp
+	gameengine/boitemlisthandler.cpp
+	gameengine/bosonplayfield.cpp
+	gameengine/bosonmap.cpp
+	gameengine/cell.cpp
+	gameengine/bofile.cpp
+	gameengine/bpfdescription.cpp
+	gameengine/bosonfileconverter.cpp
+	gameengine/bosoncampaign.cpp
+	gameengine/bosonmessage.cpp
+	gameengine/boson.cpp
+	gameengine/bomessage.cpp
+	gameengine/bosoncanvas.cpp
+	gameengine/bosoncanvasstatistics.cpp
+	gameengine/bosoncollisions.cpp
+	gameengine/bosonnetworksynchronizer.cpp
+	gameengine/bosonnetworktraffic.cpp
+	gameengine/speciestheme.cpp
+	gameengine/player.cpp
+	gameengine/playerio.cpp
+	gameengine/bosoncomputerio.cpp
+	gameengine/bosonpath.cpp
+	gameengine/bosongamestatistics.cpp
+	gameengine/bosonstatistics.cpp
+	gameengine/bogameproperty.cpp
+	gameengine/bosonpropertyxml.cpp
+	gameengine/bosonplayerinputhandler.cpp
+	gameengine/bobincoder.cpp
+	gameengine/boevent.cpp
+	gameengine/boeventmatching.cpp
+	gameengine/boeventlistener.cpp
+	gameengine/boeventmanager.cpp
+	gameengine/bocondition.cpp
+	gameengine/bowater.cpp
+	gameengine/bosonsaveload.cpp
+	gameengine/bosongroundtheme.cpp
+	gameengine/bosongameengine.cpp
+	gameengine/bosonstarting.cpp
+	gameengine/bosongameenginestarting.cpp
+	gameengine/boquadtreenode.cpp
+	gameengine/boquadtreecollection.cpp
+	gameengine/bogroundquadtreenode.cpp
+	gameengine/bocanvasquadtreenode.cpp
+	gameengine/bosonitem.cpp
+	gameengine/bosonshot.cpp
+	gameengine/bosonitempropertyhandler.cpp
 )
 kde3_automoc(${gameengine_SRCS})
 
@@ -147,7 +147,7 @@ set(commandframe_SRCS
 kde3_automoc(${commandframe_SRCS})
 
 set(gameview_SRCS
-	items/bosonitemrenderer.cpp
+	gameview/bosonitemrenderer.cpp
 	gameview/bosonufogamegui.cpp
 	gameview/bosonufocanvaswidget.cpp
 	gameview/bosonufogamewidgets.cpp

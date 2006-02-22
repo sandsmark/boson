@@ -22,7 +22,7 @@
 #include "boufonetworkoptionswidget.moc"
 
 #include "../../bomemory/bodummymemory.h"
-#include "../boson.h"
+#include "../gameengine/boson.h"
 #include "../defines.h"
 #include "bodebug.h"
 

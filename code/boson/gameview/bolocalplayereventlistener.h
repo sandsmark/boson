@@ -19,7 +19,7 @@
 #ifndef BOLOCALPLAYEREVENTLISTENER_H
 #define BOLOCALPLAYEREVENTLISTENER_H
 
-#include "../boeventlistener.h"
+#include "../gameengine/boeventlistener.h"
 
 class Boson;
 class KGamePropertyHandler;

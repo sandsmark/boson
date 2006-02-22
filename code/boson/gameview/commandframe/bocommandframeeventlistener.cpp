@@ -20,9 +20,9 @@
 #include "bocommandframeeventlistener.h"
 #include "bocommandframeeventlistener.moc"
 
-#include "../../bomemory/bodummymemory.h"
-#include "../playerio.h"
-#include "../boevent.h"
+#include "../../../bomemory/bodummymemory.h"
+#include "../../gameengine/playerio.h"
+#include "../../gameengine/boevent.h"
 #include <bodebug.h>
 
 class BoCommandFrameEventListenerPrivate

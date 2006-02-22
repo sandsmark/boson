@@ -20,7 +20,7 @@
 #define BOGROUNDRENDERERBASE_H
 
 #include "../bogroundrenderer.h"
-#include "../bogroundquadtreenode.h"
+#include "../gameengine/bogroundquadtreenode.h"
 
 #include <qptrdict.h>
 

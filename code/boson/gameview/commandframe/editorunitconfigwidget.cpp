@@ -20,13 +20,13 @@
 #include "editorunitconfigwidget.h"
 #include "editorunitconfigwidget.moc"
 
-#include "../../bomemory/bodummymemory.h"
-#include "../unit.h"
-#include "../unitplugins.h"
-#include "../unitproperties.h"
-#include "../defines.h"
-#include "../boufo/boufolabel.h"
-#include "../boufo/boufonuminput.h"
+#include "../../../bomemory/bodummymemory.h"
+#include "../../gameengine/unit.h"
+#include "../../gameengine/unitplugins.h"
+#include "../../gameengine/unitproperties.h"
+#include "../../defines.h"
+#include "../../boufo/boufolabel.h"
+#include "../../boufo/boufonuminput.h"
 #include "bodebug.h"
 
 #include <klocale.h>

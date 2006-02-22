@@ -22,13 +22,13 @@
 
 #include "../../bomemory/bodummymemory.h"
 #include "bogroundrendererbase.h"
-#include "../bosonmap.h"
+#include "../gameengine/bosonmap.h"
 #include "../defines.h"
-#include "../cell.h"
-#include "../bosongroundtheme.h"
+#include "../gameengine/cell.h"
+#include "../gameengine/bosongroundtheme.h"
 #include "../bosongroundthemedata.h"
 #include "../bomaterial.h"
-#include "../boson.h"
+#include "../gameengine/boson.h"
 #include "../botexture.h"
 #include <bogl.h>
 #include <bodebug.h>

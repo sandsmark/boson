@@ -22,8 +22,8 @@
 
 #include "bodebug.h"
 #include "../../bosonconfig.h"
-#include "../../boson.h"
-#include "../../bosonnetworktraffic.h"
+#include "../../gameengine/boson.h"
+#include "../../gameengine/bosonnetworktraffic.h"
 
 #include <qsignalmapper.h>
 

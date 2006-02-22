@@ -19,7 +19,7 @@
 
 #include "server.h"
 
-#include "boson/bosonmessageids.h"
+#include "../boson/gameengine/bosonmessageids.h"
 #include "webinterface.h"
 #include "game.h"
 #include "bodebug.h"

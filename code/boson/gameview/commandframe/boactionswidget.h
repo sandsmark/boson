@@ -20,9 +20,9 @@
 #ifndef BOACTIONSWIDGET_H
 #define BOACTIONSWIDGET_H
 
-#include "../boufo/boufowidget.h"
+#include "../../boufo/boufowidget.h"
 
-#include "../boaction.h"
+#include "../../boaction.h"
 
 class Unit;
 class BosonOrderButton;

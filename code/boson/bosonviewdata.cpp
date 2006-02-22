@@ -24,11 +24,13 @@
 #include "bosonconfig.h"
 #include "speciestheme.h"
 #include "speciesdata.h"
-#include "items/bosonitem.h"
-#include "items/bosonitemrenderer.h"
+#include "bosonitem.h"
 #include "bosoneffect.h"
 #include "bosongroundtheme.h"
 #include "bosongroundthemedata.h"
+
+#warning FIXME: either move this file to gameview or dont include that file
+#include "gameview/bosonitemrenderer.h"
 
 #include <qptrlist.h>
 #include <qptrdict.h>
