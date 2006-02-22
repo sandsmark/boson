@@ -20,10 +20,10 @@
 
 #include "bomesh.h"
 
-#include "../bomemory/bodummymemory.h"
+#include "../../bomemory/bodummymemory.h"
 #include "bodebug.h"
-#include "bo3dtools.h"
-#include "bomaterial.h"
+#include "../bo3dtools.h"
+#include "../bomaterial.h"
 #include "bomeshrenderermanager.h"
 #include "bomeshrenderer.h"
 #include "bosonmodel.h"

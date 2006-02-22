@@ -16,80 +16,65 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include "bomeshrenderervertexarray.h"
-#include "bomeshrenderervertexarray.moc"
+#include "bomeshrendererimmediate.h"
+#include "bomeshrendererimmediate.moc"
 
-#include "../../bomemory/bodummymemory.h"
-#include "../bomeshrenderer.h"
+#include "../../../bomemory/bodummymemory.h"
 #include "../bosonmodel.h"
 #include "../bomesh.h"
-#include "../bomaterial.h"
+#include "../../bomaterial.h"
 
 #include <bodebug.h>
 
-
-
-BoMeshRendererVertexArray::BoMeshRendererVertexArray() : BoMeshRenderer()
-{
- mPreviousModel = 0;
-}
-
-BoMeshRendererVertexArray::~BoMeshRendererVertexArray()
+BoMeshRendererImmediate::BoMeshRendererImmediate() : BoMeshRenderer()
 {
 }
 
-void BoMeshRendererVertexArray::setModel(BosonModel* model)
+BoMeshRendererImmediate::~BoMeshRendererImmediate()
+{
+}
+
+void BoMeshRendererImmediate::setModel(BosonModel* model)
 {
  BoMeshRenderer::setModel(model);
  if (!model) {
 	return;
  }
- if (mPreviousModel == model) {
-	return;
- }
-
- const int stride = (3 + 3 + 2) * sizeof(float);
- glVertexPointer(3, GL_FLOAT, stride, model->pointArray());
- glNormalPointer(GL_FLOAT, stride, model->pointArray() + 3);
- glTexCoordPointer(2, GL_FLOAT, stride, model->pointArray() + 3 + 3);
-
- mPreviousModel = model;
 }
 
-void BoMeshRendererVertexArray::initFrame()
+void BoMeshRendererImmediate::initFrame()
 {
  glPushAttrib(GL_POLYGON_BIT | GL_COLOR_BUFFER_BIT);
 
  glEnable(GL_CULL_FACE);
  glCullFace(GL_BACK);
- glEnableClientState(GL_VERTEX_ARRAY);
- glEnableClientState(GL_NORMAL_ARRAY);
- glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
  // AB: we enable the alpha test and discard any texture fragments which are
  // greater 0.0 - this allows transparent textures (_not_ translucent - a
  // fragment must either be visible or invisible)
  glEnable(GL_ALPHA_TEST);
  glAlphaFunc(GL_GREATER, 0.0f);
-
- mPreviousModel = 0;
 }
 
-void BoMeshRendererVertexArray::deinitFrame()
+void BoMeshRendererImmediate::deinitFrame()
 {
  glPopAttrib();
-
- glDisableClientState(GL_VERTEX_ARRAY);
- glDisableClientState(GL_NORMAL_ARRAY);
- glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
-
-unsigned int BoMeshRendererVertexArray::render(const QColor* teamColor, BoMesh* mesh, RenderFlags flags)
+unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* mesh, RenderFlags flags)
 {
- if (mesh->pointCount() == 0) {
+ if (!model()) {
+	BO_NULL_ERROR(model());
 	return 0;
  }
+
+ if (mesh->pointCount() == 0) {
+	// nothing to do.
+	return 0;
+ }
+
+ int pointsize = BoMesh::pointSize();
+ float* pointArray = model()->pointArray() + pointsize * mesh->pointOffset();
 
  bool resetColor = false; // needs to be true after we changed the current color
  bool resetCullFace = false;
@@ -104,7 +89,6 @@ unsigned int BoMeshRendererVertexArray::render(const QColor* teamColor, BoMesh* 
  // so optimization should happen here - if possible at all...
 
  if (!(flags & DepthOnly)) {
-	// TODO: support material _and_ teamcolor
 	BoMaterial::activate(mesh->material());
 	if (!mesh->material()) {
 		if (mesh->isTeamColor()) {
@@ -117,9 +101,8 @@ unsigned int BoMeshRendererVertexArray::render(const QColor* teamColor, BoMesh* 
 	} else {
 		BoMaterial* mat = mesh->material();
 		if (mat->textureName().isEmpty()) {
-			// FIXME: what's that for???
 			glPushAttrib(GL_CURRENT_BIT);
-			glColor3fv(mesh->material()->diffuse().data());
+			glColor3fv(mat->diffuse().data());
 			resetColor = true;
 		}
 		if (mat->twoSided()) {
@@ -128,17 +111,37 @@ unsigned int BoMeshRendererVertexArray::render(const QColor* teamColor, BoMesh* 
 		}
 	}
  }
+
  unsigned int renderedPoints = 0;
 
+ glBegin(mesh->renderMode());
+
  if (mesh->useIndices()) {
-	unsigned int minindex = mesh->pointOffset();
-	unsigned int maxindex = mesh->pointOffset() + mesh->pointCount() - 1;
-	glDrawRangeElements(mesh->renderMode(), minindex, maxindex, mesh->indexCount(), model()->indexArrayType(), mesh->indices());
-	renderedPoints = mesh->indexCount();
+	for (unsigned int i = 0; i < mesh->indexCount(); i++) {
+		unsigned int index;
+		if (model()->indexArrayType() == GL_UNSIGNED_SHORT) {
+			index = ((Q_UINT16*)mesh->indices())[i];
+		} else {
+			index = ((Q_UINT32*)mesh->indices())[i];
+		}
+		const float* p = model()->pointArray() + (index * BoMesh::pointSize());
+		glNormal3fv(p + BoMesh::normalPos());
+		glTexCoord2fv(p + BoMesh::texelPos());
+		glVertex3fv(p + BoMesh::vertexPos());
+		renderedPoints++;
+	}
  } else {
-	glDrawArrays(mesh->renderMode(), mesh->pointOffset(), mesh->pointCount());
-	renderedPoints = mesh->pointCount();
+	for (unsigned int i = 0; i < mesh->pointCount(); i++) {
+		const float* p = pointArray + (i * pointsize);
+		glNormal3fv(p + BoMesh::normalPos());
+		glTexCoord2fv(p + BoMesh::texelPos());
+		glVertex3fv(p + BoMesh::vertexPos());
+		renderedPoints++;
+	}
  }
+
+ glEnd();
+
 
  if (resetColor) {
 	// we need to reset the color (mainly for the placement preview)
@@ -146,8 +149,8 @@ unsigned int BoMeshRendererVertexArray::render(const QColor* teamColor, BoMesh* 
 	resetColor = false;
  }
  if (resetCullFace) {
-	glEnable(GL_CULL_FACE);
-	resetCullFace = false;
+	 glEnable(GL_CULL_FACE);
+	 resetCullFace = false;
  }
 
  return renderedPoints;

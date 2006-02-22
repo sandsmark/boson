@@ -21,8 +21,8 @@
 #ifndef BOMESH_H
 #define BOMESH_H
 
-#include "bo3dtools.h"
-#include "global.h"
+#include "../bo3dtools.h"
+#include "../global.h"
 #include <bogl.h>
 
 #include <qstring.h>

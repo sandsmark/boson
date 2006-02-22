@@ -38,7 +38,7 @@
 #include "../gameengine/bosonmap.h"
 #include "../gameengine/bosongroundtheme.h"
 #include "../bogroundrenderermanager.h"
-#include "../bomeshrenderermanager.h"
+#include "../modelrendering/bomeshrenderermanager.h"
 #include "../gameengine/playerio.h"
 #include "../gameengine/player.h"
 #include "../botexmapimportdialog.h"

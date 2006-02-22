@@ -19,7 +19,7 @@
 #ifndef BOMESHRENDERER_H
 #define BOMESHRENDERER_H
 
-#include "global.h"
+#include "../global.h"
 
 #include <qobject.h>
 

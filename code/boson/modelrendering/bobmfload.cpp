@@ -19,12 +19,12 @@
 
 #include "bobmfload.h"
 
-#include "../bomemory/bodummymemory.h"
-#include "bo3dtools.h"
+#include "../../bomemory/bodummymemory.h"
+#include "../bo3dtools.h"
 #include "bomesh.h"
-#include "bomaterial.h"
+#include "../bomaterial.h"
 #include "bosonmodel.h"
-#include "../bobmfconverter/bmf.h"
+#include "../../bobmfconverter/bmf.h"
 #include "bodebug.h"
 
 #include <qfile.h>

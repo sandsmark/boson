@@ -16,39 +16,48 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include "bomeshrendererimmediate.h"
-#include "bomeshrendererimmediate.moc"
+#include "bomeshrenderersemiimmediate.h"
+#include "bomeshrenderersemiimmediate.moc"
 
-#include "../../bomemory/bodummymemory.h"
-#include "../bomeshrenderer.h"
+#include "../../../bomemory/bodummymemory.h"
 #include "../bosonmodel.h"
 #include "../bomesh.h"
-#include "../bomaterial.h"
+#include "../../bomaterial.h"
 
 #include <bodebug.h>
 
-BoMeshRendererImmediate::BoMeshRendererImmediate() : BoMeshRenderer()
+BoMeshRendererSemiImmediate::BoMeshRendererSemiImmediate() : BoMeshRenderer()
 {
 }
 
-BoMeshRendererImmediate::~BoMeshRendererImmediate()
+BoMeshRendererSemiImmediate::~BoMeshRendererSemiImmediate()
 {
 }
 
-void BoMeshRendererImmediate::setModel(BosonModel* model)
+void BoMeshRendererSemiImmediate::setModel(BosonModel* model)
 {
  BoMeshRenderer::setModel(model);
  if (!model) {
 	return;
  }
+
+ int stride = BoMesh::pointSize() * sizeof(float);
+ float* points = model->pointArray();
+ glVertexPointer(3, GL_FLOAT, stride, points + BoMesh::vertexPos());
+ glNormalPointer(GL_FLOAT, stride, points + BoMesh::normalPos());
+ glTexCoordPointer(2, GL_FLOAT, stride, points + BoMesh::texelPos());
 }
 
-void BoMeshRendererImmediate::initFrame()
+void BoMeshRendererSemiImmediate::initFrame()
 {
  glPushAttrib(GL_POLYGON_BIT | GL_COLOR_BUFFER_BIT);
 
  glEnable(GL_CULL_FACE);
  glCullFace(GL_BACK);
+
+ glEnableClientState(GL_VERTEX_ARRAY);
+ glEnableClientState(GL_NORMAL_ARRAY);
+ glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
  // AB: we enable the alpha test and discard any texture fragments which are
  // greater 0.0 - this allows transparent textures (_not_ translucent - a
@@ -57,25 +66,21 @@ void BoMeshRendererImmediate::initFrame()
  glAlphaFunc(GL_GREATER, 0.0f);
 }
 
-void BoMeshRendererImmediate::deinitFrame()
+void BoMeshRendererSemiImmediate::deinitFrame()
 {
  glPopAttrib();
+
+ glDisableClientState(GL_VERTEX_ARRAY);
+ glDisableClientState(GL_NORMAL_ARRAY);
+ glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
-unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* mesh, RenderFlags flags)
+unsigned int BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh* mesh, RenderFlags flags)
 {
- if (!model()) {
-	BO_NULL_ERROR(model());
-	return 0;
- }
-
  if (mesh->pointCount() == 0) {
 	// nothing to do.
 	return 0;
  }
-
- int pointsize = BoMesh::pointSize();
- float* pointArray = model()->pointArray() + pointsize * mesh->pointOffset();
 
  bool resetColor = false; // needs to be true after we changed the current color
  bool resetCullFace = false;
@@ -103,7 +108,7 @@ unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* me
 		BoMaterial* mat = mesh->material();
 		if (mat->textureName().isEmpty()) {
 			glPushAttrib(GL_CURRENT_BIT);
-			glColor3fv(mat->diffuse().data());
+			glColor3fv(mesh->material()->diffuse().data());
 			resetColor = true;
 		}
 		if (mat->twoSided()) {
@@ -114,7 +119,6 @@ unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* me
  }
 
  unsigned int renderedPoints = 0;
-
  glBegin(mesh->renderMode());
 
  if (mesh->useIndices()) {
@@ -125,18 +129,12 @@ unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* me
 		} else {
 			index = ((Q_UINT32*)mesh->indices())[i];
 		}
-		const float* p = model()->pointArray() + (index * BoMesh::pointSize());
-		glNormal3fv(p + BoMesh::normalPos());
-		glTexCoord2fv(p + BoMesh::texelPos());
-		glVertex3fv(p + BoMesh::vertexPos());
+		glArrayElement(index);
 		renderedPoints++;
 	}
  } else {
-	for (unsigned int i = 0; i < mesh->pointCount(); i++) {
-		const float* p = pointArray + (i * pointsize);
-		glNormal3fv(p + BoMesh::normalPos());
-		glTexCoord2fv(p + BoMesh::texelPos());
-		glVertex3fv(p + BoMesh::vertexPos());
+	for(unsigned int i = 0; i < mesh->pointCount(); i++) {
+		glArrayElement(mesh->pointOffset() + i);
 		renderedPoints++;
 	}
  }
@@ -150,10 +148,11 @@ unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* me
 	resetColor = false;
  }
  if (resetCullFace) {
-	 glEnable(GL_CULL_FACE);
-	 resetCullFace = false;
+	glEnable(GL_CULL_FACE);
+	resetCullFace = false;
  }
 
  return renderedPoints;
 }
+
 

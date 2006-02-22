@@ -24,10 +24,10 @@
 #include "bosonconfig.h"
 #include "bodebug.h"
 #include "bocamera.h"
-#include "bosonmodel.h"
-#include "bomesh.h"
+#include "modelrendering/bosonmodel.h"
+#include "modelrendering/bomesh.h"
 #include "bolight.h"
-#include "bomeshrenderermanager.h"
+#include "modelrendering/bomeshrenderermanager.h"
 #include "bomaterial.h"
 #include <bogl.h>
 

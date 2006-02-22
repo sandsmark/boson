@@ -20,7 +20,7 @@
 #ifndef BOSONMODEL_H
 #define BOSONMODEL_H
 
-#include "global.h"
+#include "../global.h"
 
 #include <bogl.h>
 

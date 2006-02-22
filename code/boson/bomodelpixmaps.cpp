@@ -22,7 +22,7 @@
 
 #include "../bomemory/bodummymemory.h"
 #include "bosonconfig.h"
-#include "bosonmodel.h"
+#include "modelrendering/bosonmodel.h"
 #include "borenderrendermodel.h"
 #include "bosonprofiling.h"
 #include "bodebug.h"
@@ -33,7 +33,7 @@
 #include "bopixmaprenderer.h"
 #include "info/boinfo.h"
 #include "bosonviewdata.h"
-#include "bomeshrenderermanager.h"
+#include "modelrendering/bomeshrenderermanager.h"
 #include "bomaterial.h"
 #include "bosonmodeltextures.h"
 #include "bolight.h"

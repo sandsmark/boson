@@ -24,8 +24,8 @@
 #include "speciestheme.h"
 #include "speciesdata.h"
 #include "bodebug.h"
-#include "bosonmodel.h"
-#include "bomesh.h"
+#include "modelrendering/bosonmodel.h"
+#include "modelrendering/bomesh.h"
 #include "bosonviewdata.h"
 
 #include <klocale.h>

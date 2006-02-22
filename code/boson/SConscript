@@ -6,7 +6,7 @@ lib_gameviewplugin = ''
 if env['BOSON_USE_PLUGINS']:
 	env.KDEaddflags_link('-Xlinker --export-dynamic')
 else:
-	lib_meshrendererplugin = ' meshrenderer/libbomeshrendererplugin_static.a '
+	lib_meshrendererplugin = ' modelrendering/meshrenderer/libbomeshrendererplugin_static.a '
 	lib_groundrendererplugin = ' groundrenderer/libbogroundrendererplugin_static.a '
 	lib_gameviewplugin = ' gameview/plugin/libbosongameviewplugin_static.a '
 
@@ -16,7 +16,7 @@ else:
 #env.PrependUnique(CPPPATH = ['../kgame'])
 #env.PrependUnique(CPPPATH = ['../ufo'])
 
-env.subdirs(['data', 'gameengine/script', 'info', 'gameview/plugin', 'boufo', 'meshrenderer', 'groundrenderer', 'sound/bosound'])
+env.subdirs(['data', 'gameengine/script', 'info', 'gameview/plugin', 'boufo', 'modelrendering/meshrenderer', 'groundrenderer', 'sound/bosound'])
 
 libcommon = env.kobject('staticlib')
 libcommon.target = 'libcommon'
@@ -186,6 +186,15 @@ boufo_lib = """
 	../ufo/src/libufo.a
 """
 
+modelrendering_source = """
+	modelrendering/bosonmodel.cpp
+	modelrendering/bosonmodeltextures.cpp
+	modelrendering/bomesh.cpp
+	modelrendering/bomeshrenderer.cpp
+	modelrendering/bomeshrenderermanager.cpp
+	modelrendering/bobmfload.cpp
+"""
+
 
 libboson_source = """
 	bosonviewdata.cpp
@@ -206,15 +215,9 @@ libboson_source = """
 	bocamera.cpp
 	boautocamera.cpp
 	bosoncursor.cpp
-	bosonmodel.cpp
-	bosonmodeltextures.cpp
-	bomesh.cpp
-	bomeshrenderer.cpp
-	bomeshrenderermanager.cpp
 	bomaterial.cpp
 	bolight.cpp
 	botexture.cpp
-	bobmfload.cpp
 	boshader.cpp
 	speciesdata.cpp
 	boaction.cpp
@@ -223,7 +226,8 @@ libboson_source = """
 	bonuminput.cpp
 	sound/bosonaudiointerface.cpp
 """
-libboson_includes = '../bodebug ../bogl ../boson/boufo sound/bosound'
+libboson_source += modelrendering_source
+libboson_includes = '../bodebug ../bogl ../boson/boufo sound/bosound modelrendering '
 
 libboson_libs = lib_meshrendererplugin
 libboson_libs += ' ./info/libbosoninfo.a '

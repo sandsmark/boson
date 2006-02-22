@@ -20,16 +20,16 @@
 
 #include "bosonmodel.h"
 
-#include "defines.h"
-#include "../bomemory/bodummymemory.h"
+#include "../../bomemory/bodummymemory.h"
+#include "../defines.h"
 #include "bosonmodeltextures.h"
-#include "bosonprofiling.h"
-#include "bo3dtools.h"
-#include "bosonglwidget.h" // BoContext
+#include "../bosonprofiling.h"
+#include "../bo3dtools.h"
+#include "../bosonglwidget.h" // BoContext
 #include "bodebug.h"
 #include "bomesh.h"
-#include "bomaterial.h"
-#include "bosonconfig.h"
+#include "../bomaterial.h"
+#include "../bosonconfig.h"
 #include "bomeshrenderer.h"
 #include "bomeshrenderermanager.h"
 #include "bobmfload.h"

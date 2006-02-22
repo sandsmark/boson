@@ -19,8 +19,8 @@
 #include "bosonitemrenderer.h"
 
 #include "../../bomemory/bodummymemory.h"
-#include "../bosonmodel.h"
-#include "../bomesh.h"
+#include "../modelrendering/bosonmodel.h"
+#include "../modelrendering/bomesh.h"
 #include "../bo3dtools.h"
 #include "../bosonconfig.h"
 #include "../gameengine/boson.h"

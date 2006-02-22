@@ -9,7 +9,7 @@ SUBDIRS = \
 		sound \
 		info \
 		script \
-		meshrenderer \
+		modelrendering \
 		groundrenderer \
 		bosound \
 		gameview
@@ -58,15 +58,9 @@ libboson_la_SOURCES = \
 		bocamera.cpp \
 		boautocamera.cpp \
 		bosoncursor.cpp \
-		bosonmodel.cpp \
-		bosonmodeltextures.cpp \
-		bomesh.cpp \
-		bomeshrenderer.cpp \
-		bomeshrenderermanager.cpp \
 		bomaterial.cpp \
 		bolight.cpp \
 		botexture.cpp \
-		bobmfload.cpp \
 		boshader.cpp \
 		speciesdata.cpp \
 		boaction.cpp \

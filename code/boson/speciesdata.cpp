@@ -23,7 +23,7 @@
 #include "unitproperties.h"
 #include "unitbase.h"
 #include "bosonweapon.h"
-#include "bosonmodel.h"
+#include "modelrendering/bosonmodel.h"
 #include "bodebug.h"
 #include "boaction.h"
 #include "bosonconfig.h"

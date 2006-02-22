@@ -18,11 +18,11 @@
 */
 #include "bomeshrenderermanager.h"
 
-#include "../bomemory/bodummymemory.h"
+#include "../../bomemory/bodummymemory.h"
 #include "bomeshrenderer.h"
 #include "bosonmodel.h"
-#include "bosonconfig.h"
-#include "boversion.h"
+#include "../bosonconfig.h"
+#include "../boversion.h"
 
 #include <bodebug.h>
 

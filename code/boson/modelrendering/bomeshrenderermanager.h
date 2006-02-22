@@ -19,7 +19,7 @@
 #ifndef BOMESHRENDERERMANAGER_H
 #define BOMESHRENDERERMANAGER_H
 
-#include "bopluginmanager.h"
+#include "../bopluginmanager.h"
 
 class BosonModel;
 class BoMesh;

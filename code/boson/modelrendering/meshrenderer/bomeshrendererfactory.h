@@ -21,7 +21,7 @@
 
 #include <klibloader.h>
 #include "../bomeshrenderer.h"
-#include "../bopluginmanager.h"
+#include "../../bopluginmanager.h"
 
 class BoMeshRendererFactory : public KLibFactory
 {

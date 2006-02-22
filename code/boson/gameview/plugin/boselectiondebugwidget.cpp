@@ -33,7 +33,7 @@
 #include "../../gameview/bosonitemrenderer.h"
 #include "../bosonufocanvaswidget.h"
 #include "../../bosonviewdata.h"
-#include "../../bosonmodel.h"
+#include "../../modelrendering/bosonmodel.h"
 #include <bodebug.h>
 
 #include <kgamepropertyhandler.h>

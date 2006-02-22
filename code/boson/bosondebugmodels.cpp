@@ -22,8 +22,8 @@
 
 #include "bodebug.h"
 #include "qlistviewitemnumber.h"
-#include "bosonmodel.h"
-#include "bomesh.h"
+#include "modelrendering/bosonmodel.h"
+#include "modelrendering/bomesh.h"
 #include "speciesdata.h"
 
 #include <klocale.h>
