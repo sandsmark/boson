@@ -5,7 +5,6 @@ SUBDIRS = \
 		imageio \
 		boufo \
 		items \
-		commandframe \
 		startupwidgets \
 		sound \
 		info \
@@ -151,7 +150,7 @@ boson_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker --export-dynamic
 boson_LDADD = \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		$(top_builddir)/boson/gameview/libbosongameview.la \
-		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
+		$(top_builddir)/boson/gameview/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/libboson.la \
 		$(top_builddir)/boson/libbosongameengine.la \
 		$(top_builddir)/boson/libbosoncommon.la \

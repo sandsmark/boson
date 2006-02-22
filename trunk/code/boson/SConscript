@@ -154,13 +154,13 @@ startupwidgets_sources = """
 #"""
 
 commandframe_sources = """
-	commandframe/bosoncommandframe.cpp
-	commandframe/bosonorderwidget.cpp
-	commandframe/bosonorderbutton.cpp
-	commandframe/boactionswidget.cpp
-	commandframe/bosonunitview.cpp
-	commandframe/editorunitconfigwidget.cpp
-	commandframe/bocommandframeeventlistener.cpp
+	gameview/commandframe/bosoncommandframe.cpp
+	gameview/commandframe/bosonorderwidget.cpp
+	gameview/commandframe/bosonorderbutton.cpp
+	gameview/commandframe/boactionswidget.cpp
+	gameview/commandframe/bosonunitview.cpp
+	gameview/commandframe/editorunitconfigwidget.cpp
+	gameview/commandframe/bocommandframeeventlistener.cpp
 """
 
 gameview_sources = """
@@ -271,7 +271,7 @@ if env['BOSON_DO_STATIC']:
 boson = env.boobject('program')
 boson.target = 'boson'
 boson.includes = '../bodebug ../bogl ../boson/boufo'
-boson.includes += ' commandframe/ gameview/ startupwidgets/ ' # for .moc files
+boson.includes += ' gameview/commandframe/ gameview/ startupwidgets/ ' # for .moc files
 boson.includes += libboson_includes
 boson.libs = ''
 boson.boAddLibs(lib_groundrendererplugin)
