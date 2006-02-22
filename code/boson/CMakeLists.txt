@@ -136,13 +136,13 @@ boson_add_boui_files(startupwidgets_SRCS ${startupwidgets_BOUI})
 kde3_automoc(${startupwidgets_SRCS})
 
 set(commandframe_SRCS
-	commandframe/bosoncommandframe.cpp
-	commandframe/bosonorderwidget.cpp
-	commandframe/bosonorderbutton.cpp
-	commandframe/boactionswidget.cpp
-	commandframe/bosonunitview.cpp
-	commandframe/editorunitconfigwidget.cpp
-	commandframe/bocommandframeeventlistener.cpp
+	gameview/commandframe/bosoncommandframe.cpp
+	gameview/commandframe/bosonorderwidget.cpp
+	gameview/commandframe/bosonorderbutton.cpp
+	gameview/commandframe/boactionswidget.cpp
+	gameview/commandframe/bosonunitview.cpp
+	gameview/commandframe/editorunitconfigwidget.cpp
+	gameview/commandframe/bocommandframeeventlistener.cpp
 )
 kde3_automoc(${commandframe_SRCS})
 

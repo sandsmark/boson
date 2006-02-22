@@ -1,4 +1,4 @@
-SUBDIRS = plugin
+SUBDIRS = commandframe plugin
 
 INCLUDES = -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl -I$(top_srcdir)/boson/boufo $(all_includes)
 
