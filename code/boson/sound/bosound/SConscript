@@ -1,0 +1,26 @@
+Import('env')
+
+if env['LIB_OPENAL']:
+	env.subdirs('openal')
+else:
+	print "Not building OpenAL support. Sound will be disabled."
+
+
+libcommon = env.kobject('staticlib')
+libcommon.target = 'libbosonsoundcommon'
+libcommon.source = 'boaudiocommand.cpp'
+libcommon.env = env
+libcommon.execute()
+
+bosonsound = env.kobject('staticlib')
+bosonsound.target = 'libbosonsound'
+bosonsound.includes = '../bodebug'
+bosonsound.source = """
+	boaudiothread.cpp
+	bosonaudio.cpp
+"""
+
+bosonsound.env = env
+bosonsound.execute()
+
+
