@@ -21,7 +21,7 @@
 
 #include "../defines.h"
 #include "../../bomemory/bodummymemory.h"
-#include "../bosonmap.h"
+#include "../gameengine/bosonmap.h"
 #include "../botexture.h"
 #include "bodebug.h"
 

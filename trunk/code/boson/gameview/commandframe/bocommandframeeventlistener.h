@@ -19,7 +19,7 @@
 #ifndef BOCOMMANDFRAMEEVENTLISTENER_H
 #define BOCOMMANDFRAMEEVENTLISTENER_H
 
-#include "../boeventlistener.h"
+#include "../../gameengine/boeventlistener.h"
 
 class Player;
 class PlayerIO;

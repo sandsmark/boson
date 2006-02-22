@@ -4,7 +4,7 @@ SUBDIRS = \
 		data \
 		imageio \
 		boufo \
-		items \
+		gameengine \
 		startupwidgets \
 		sound \
 		info \
@@ -16,7 +16,6 @@ SUBDIRS = \
 
 noinst_LTLIBRARIES = \
 		libbosoncommon.la \
-		libbosongameengine.la \
 		libboson.la \
 		libbocursor.la \
 		libborender.la \
@@ -27,57 +26,6 @@ bin_PROGRAMS = boson borender bounit bocursor boinfo bo3dsdebug boconditionedito
 
 INCLUDES = -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl -I$(top_srcdir)/boson/boufo $(all_includes)
 
-
-libbosongameengine_la_SOURCES = \
-		boupgradeableproperty.cpp \
-		unitbase.cpp \
-		unit.cpp \
-		unitproperties.cpp \
-		pluginproperties.cpp \
-		unitplugins.cpp \
-		upgradeproperties.cpp \
-		bosonweapon.cpp \
-		boitemlist.cpp \
-		boitemlisthandler.cpp \
-		bosonplayfield.cpp \
-		bosonmap.cpp \
-		cell.cpp \
-		bofile.cpp \
-		bpfdescription.cpp \
-		bosonfileconverter.cpp \
-		bosoncampaign.cpp \
-		bosonmessage.cpp \
-		boson.cpp \
-		bomessage.cpp \
-		bosoncanvas.cpp \
-		bosoncanvasstatistics.cpp \
-		bosoncollisions.cpp \
-		bosonnetworksynchronizer.cpp \
-		bosonnetworktraffic.cpp \
-		speciestheme.cpp \
-		player.cpp \
-		playerio.cpp \
-		bosoncomputerio.cpp \
-		bosonpath.cpp \
-		bosongamestatistics.cpp \
-		bosonstatistics.cpp \
-		bogameproperty.cpp \
-		bosonpropertyxml.cpp \
-		bosonplayerinputhandler.cpp \
-		bobincoder.cpp \
-		boevent.cpp \
-		boeventmatching.cpp \
-		boeventlistener.cpp \
-		boeventmanager.cpp \
-		bocondition.cpp \
-		bowater.cpp \
-		bosonsaveload.cpp \
-		bosongroundtheme.cpp \
-		bosongameengine.cpp \
-		boquadtreenode.cpp \
-		boquadtreecollection.cpp \
-		bogroundquadtreenode.cpp \
-		bocanvasquadtreenode.cpp
 
 libbosoncommon_la_SOURCES = \
 		boapplication.cpp \
@@ -126,9 +74,6 @@ libboson_la_SOURCES = \
 		borendertarget.cpp \
 		bonuminput.cpp
 
-libbosongameengine_la_LIBADD = \
-		$(top_builddir)/boson/items/libbosonitems.la
-
 libboson_la_LIBADD = \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/bogl/libbogl.la \
@@ -152,7 +97,7 @@ boson_LDADD = \
 		$(top_builddir)/boson/gameview/libbosongameview.la \
 		$(top_builddir)/boson/gameview/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/libboson.la \
-		$(top_builddir)/boson/libbosongameengine.la \
+		$(top_builddir)/boson/gameengine/libbosongameengine.la \
 		$(top_builddir)/boson/libbosoncommon.la \
 		$(top_builddir)/boson/imageio/libboimageio.la \
 		$(top_builddir)/boson/boufo/libboufo.la \
@@ -197,7 +142,7 @@ boson_SOURCES = \
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bounit_LDADD = \
-		$(top_builddir)/boson/libbosongameengine.la \
+		$(top_builddir)/boson/gameengine/libbosongameengine.la \
 		$(top_builddir)/boson/libbosoncommon.la \
 		$(top_builddir)/boson/imageio/libboimageio.la \
 		$(top_builddir)/bogl/libbogl.la \
@@ -247,7 +192,7 @@ libborender_la_SOURCES = \
 borender_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker --export-dynamic
 borender_LDADD = \
 		$(top_builddir)/math/libbomath.la \
-		$(top_builddir)/boson/libbosongameengine.la \
+		$(top_builddir)/boson/gameengine/libbosongameengine.la \
 		$(top_builddir)/boson/libboson.la \
 		$(top_builddir)/boson/libbosoncommon.la \
 		$(top_builddir)/boson/imageio/libboimageio.la \
@@ -269,7 +214,7 @@ bomodelpixmaps_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker --export-dynamic
 bomodelpixmaps_LDADD = \
 		$(top_builddir)/math/libbomath.la \
 		$(top_builddir)/boson/libboson.la \
-		$(top_builddir)/boson/libbosongameengine.la \
+		$(top_builddir)/boson/gameengine/libbosongameengine.la \
 		$(top_builddir)/boson/libbosoncommon.la \
 		$(top_builddir)/boson/imageio/libboimageio.la \
 		$(top_builddir)/boson/boufo/libboufo.la \
@@ -327,7 +272,7 @@ bo3dsdebug_SOURCES = \
 
 boconditioneditor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boconditioneditor_LDADD = \
-		$(top_builddir)/boson/libbosongameengine.la \
+		$(top_builddir)/boson/gameengine/libbosongameengine.la \
 		$(top_builddir)/boson/libbosoncommon.la \
 		$(top_builddir)/boson/imageio/libboimageio.la \
 		$(top_builddir)/bodebug/libbodebug.la \

@@ -23,7 +23,7 @@
 #include "botooltipcreator.h"
 #include "bodebug.h"
 #include "bosoncanvas.h"
-#include "items/bosonitem.h"
+#include "bosonitem.h"
 #include "bosonconfig.h"
 #include "boufo/boufo.h"
 #include "playerio.h"

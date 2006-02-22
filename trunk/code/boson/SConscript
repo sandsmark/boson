@@ -16,7 +16,7 @@ else:
 #env.PrependUnique(CPPPATH = ['../kgame'])
 #env.PrependUnique(CPPPATH = ['../ufo'])
 
-env.subdirs(['data', 'script', 'info', 'gameview/plugin', 'boufo', 'meshrenderer', 'groundrenderer', 'sound/bosound'])
+env.subdirs(['data', 'gameengine/script', 'info', 'gameview/plugin', 'boufo', 'meshrenderer', 'groundrenderer', 'sound/bosound'])
 
 libcommon = env.kobject('staticlib')
 libcommon.target = 'libcommon'
@@ -47,13 +47,13 @@ libcommon_libs_objects += env.createDummyLibs('../bodebug/libbodebug.a ../bogl/l
 
 
 libgameengine_libs = """
-	./script/libbosonscript.a
+	./gameengine/script/libbosonscript.a
 """ + env['LIB_PYTHON'] + """
 	../kgame/libkgame.a
 """
 
 libgameengine_libs_objects = []
-libgameengine_libs_objects += env.createDummyLibs('./script/libbosonscript.a')
+libgameengine_libs_objects += env.createDummyLibs('./gameengine/script/libbosonscript.a')
 libgameengine_libs_objects += env.createDummyLibs(env['LIB_PYTHON'], env['BOSON_DO_STATIC'])
 libgameengine_libs_objects += env.createDummyLibs('../kgame/libkgame.a')
 
@@ -72,64 +72,63 @@ libimageio.execute()
 
 libgameengine = env.kobject('staticlib')
 libgameengine.target = 'libgameengine'
-libgameengine.includes = '../bodebug ../bogl ../boson/boufo'
-libgameengine.includes += ' items/' # for .moc files
+libgameengine.includes = '../bodebug ../bogl ../boson/boufo gameengine '
 libgameengine.source = """
-	boeventloop.cpp
-	boupgradeableproperty.cpp
-	unitbase.cpp
-	unit.cpp
-	unitproperties.cpp
-	pluginproperties.cpp
-	unitplugins.cpp
-	upgradeproperties.cpp
-	bosonweapon.cpp
-	boitemlist.cpp
-	boitemlisthandler.cpp
-	bosonplayfield.cpp
-	bosonmap.cpp
-	cell.cpp
-	bofile.cpp
-	bpfdescription.cpp
-	bosonfileconverter.cpp
-	bosoncampaign.cpp
-	bosonmessage.cpp
-	boson.cpp
-	bomessage.cpp
-	bosoncanvas.cpp
-	bosoncanvasstatistics.cpp
-	bosoncollisions.cpp
-	bosonnetworksynchronizer.cpp
-	bosonnetworktraffic.cpp
-	speciestheme.cpp
-	player.cpp
-	playerio.cpp
-	bosoncomputerio.cpp
-	bosonpath.cpp
-	bosongamestatistics.cpp
-	bosonstatistics.cpp
-	bogameproperty.cpp
-	bosonpropertyxml.cpp
-	bosonplayerinputhandler.cpp
-	bobincoder.cpp
-	boevent.cpp
-	boeventmatching.cpp
-	boeventlistener.cpp
-	boeventmanager.cpp
-	bocondition.cpp
-	bowater.cpp
-	bosonsaveload.cpp
-	bosongroundtheme.cpp
-	bosongameengine.cpp
-	bosonstarting.cpp
-	bosongameenginestarting.cpp
-	boquadtreenode.cpp
-	boquadtreecollection.cpp
-	bogroundquadtreenode.cpp
-	bocanvasquadtreenode.cpp
-	items/bosonitem.cpp
-	items/bosonshot.cpp
-	items/bosonitempropertyhandler.cpp
+	gameengine/boeventloop.cpp
+	gameengine/boupgradeableproperty.cpp
+	gameengine/unitbase.cpp
+	gameengine/unit.cpp
+	gameengine/unitproperties.cpp
+	gameengine/pluginproperties.cpp
+	gameengine/unitplugins.cpp
+	gameengine/upgradeproperties.cpp
+	gameengine/bosonweapon.cpp
+	gameengine/boitemlist.cpp
+	gameengine/boitemlisthandler.cpp
+	gameengine/bosonplayfield.cpp
+	gameengine/bosonmap.cpp
+	gameengine/cell.cpp
+	gameengine/bofile.cpp
+	gameengine/bpfdescription.cpp
+	gameengine/bosonfileconverter.cpp
+	gameengine/bosoncampaign.cpp
+	gameengine/bosonmessage.cpp
+	gameengine/boson.cpp
+	gameengine/bomessage.cpp
+	gameengine/bosoncanvas.cpp
+	gameengine/bosoncanvasstatistics.cpp
+	gameengine/bosoncollisions.cpp
+	gameengine/bosonnetworksynchronizer.cpp
+	gameengine/bosonnetworktraffic.cpp
+	gameengine/speciestheme.cpp
+	gameengine/player.cpp
+	gameengine/playerio.cpp
+	gameengine/bosoncomputerio.cpp
+	gameengine/bosonpath.cpp
+	gameengine/bosongamestatistics.cpp
+	gameengine/bosonstatistics.cpp
+	gameengine/bogameproperty.cpp
+	gameengine/bosonpropertyxml.cpp
+	gameengine/bosonplayerinputhandler.cpp
+	gameengine/bobincoder.cpp
+	gameengine/boevent.cpp
+	gameengine/boeventmatching.cpp
+	gameengine/boeventlistener.cpp
+	gameengine/boeventmanager.cpp
+	gameengine/bocondition.cpp
+	gameengine/bowater.cpp
+	gameengine/bosonsaveload.cpp
+	gameengine/bosongroundtheme.cpp
+	gameengine/bosongameengine.cpp
+	gameengine/bosonstarting.cpp
+	gameengine/bosongameenginestarting.cpp
+	gameengine/boquadtreenode.cpp
+	gameengine/boquadtreecollection.cpp
+	gameengine/bogroundquadtreenode.cpp
+	gameengine/bocanvasquadtreenode.cpp
+	gameengine/bosonitem.cpp
+	gameengine/bosonshot.cpp
+	gameengine/bosonitempropertyhandler.cpp
 """
 libgameengine.execute()
 
@@ -164,7 +163,7 @@ commandframe_sources = """
 """
 
 gameview_sources = """
-	items/bosonitemrenderer.cpp
+	gameview/bosonitemrenderer.cpp
 	gameview/bosonufogameguihelper.boui
 	gameview/bosonufogamegui.cpp
 	gameview/bosonufocanvaswidget.cpp
@@ -270,7 +269,7 @@ if env['BOSON_DO_STATIC']:
 
 boson = env.boobject('program')
 boson.target = 'boson'
-boson.includes = '../bodebug ../bogl ../boson/boufo'
+boson.includes = '../bodebug ../bogl ../boson/boufo gameengine '
 boson.includes += ' gameview/commandframe/ gameview/ startupwidgets/ ' # for .moc files
 boson.includes += libboson_includes
 boson.libs = ''
@@ -332,7 +331,7 @@ boson.execute()
 
 bosonNoGUI = env.kobject('program')
 bosonNoGUI.target = 'boson-no-gui'
-bosonNoGUI.includes = '../bodebug'
+bosonNoGUI.includes = '../bodebug gameengine '
 bosonNoGUI.includes += libboson_includes
 bosonNoGUI.libs = ' libgameengine.a'
 bosonNoGUI.libs += boufo_lib
@@ -342,7 +341,6 @@ bosonNoGUI.libs += libcommon_libs
 bosonNoGUI.libs += ' kio kdecore qt-mt'
 bosonNoGUI.libpaths += libcommon_libpaths
 bosonNoGUI.source += """
-	bosoncomputerio.cpp
 	bocheckinstallation.cpp
 	mainnogui.cpp
 """
@@ -355,7 +353,7 @@ bosonNoGUI.execute()
 
 bounit = env.kobject('program')
 bounit.target = 'bounit'
-bounit.includes = '../bodebug ../bogl ../boson/boufo'
+bounit.includes = '../bodebug ../bogl ../boson/boufo gameengine '
 bounit.libpaths += libcommon_libpaths
 bounit.libs = """
 	libgameengine.a
@@ -393,7 +391,7 @@ bocursor.execute()
 
 borender = env.kobject('program')
 borender.target = 'borender'
-borender.includes = '../bodebug ../bogl ../boson/boufo'
+borender.includes = '../bodebug ../bogl ../boson/boufo gameengine '
 borender.includes += libboson_includes
 borender.libs = libboson_libs + """
 	3ds
@@ -417,7 +415,7 @@ borender.execute()
 
 bomodelpixmaps = env.kobject('program')
 bomodelpixmaps.target = 'bomodelpixmaps'
-bomodelpixmaps.includes = '../bodebug ../bogl ../boson/boufo'
+bomodelpixmaps.includes = '../bodebug ../bogl ../boson/boufo gameengine '
 bomodelpixmaps.includes += libboson_includes
 bomodelpixmaps.libs = libboson_libs + """
 	3ds
@@ -468,7 +466,7 @@ bo3dsdebug.execute()
 
 boconditioneditor = env.kobject('program')
 boconditioneditor.target = 'boconditioneditor'
-boconditioneditor.includes = '../bodebug ../bogl ../boson/boufo'
+boconditioneditor.includes = '../bodebug ../bogl ../boson/boufo gameengine '
 boconditioneditor.libpaths += libcommon_libpaths
 boconditioneditor.libs = './libgameengine.a ' + libgameengine_libs
 boconditioneditor.libs += './libcommon.a ' + libcommon_libs

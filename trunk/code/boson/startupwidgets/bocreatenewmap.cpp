@@ -20,15 +20,15 @@
 
 #include "bocreatenewmap.h"
 
-#include "../bosonmap.h"
-#include "../bosonplayfield.h"
+#include "../gameengine/bosonmap.h"
+#include "../gameengine/bosonplayfield.h"
 #include "../bosondata.h"
-#include "../bpfdescription.h"
-#include "../bosongroundtheme.h"
-#include "../bosonsaveload.h"
+#include "../gameengine/bpfdescription.h"
+#include "../gameengine/bosongroundtheme.h"
+#include "../gameengine/bosonsaveload.h"
 #include "../defines.h"
-#include "../boson.h"
-#include "../boeventmanager.h"
+#include "../gameengine/boson.h"
+#include "../gameengine/boeventmanager.h"
 #include "bodebug.h"
 
 #include <kmessagebox.h>

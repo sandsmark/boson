@@ -19,7 +19,7 @@
 #ifndef BOSONGAMEVIEWEVENTLISTENER_H
 #define BOSONGAMEVIEWEVENTLISTENER_H
 
-#include "../boeventlistener.h"
+#include "../gameengine/boeventlistener.h"
 
 class BosonCanvas;
 class BosonItem;

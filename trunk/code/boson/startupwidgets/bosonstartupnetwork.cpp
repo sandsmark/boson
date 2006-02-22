@@ -21,10 +21,10 @@
 #include "bosonstartupnetwork.moc"
 
 #include "../../bomemory/bodummymemory.h"
-#include "../boson.h"
-#include "../bosonplayfield.h"
-#include "../player.h"
-#include "../bosonmessageids.h"
+#include "../gameengine/boson.h"
+#include "../gameengine/bosonplayfield.h"
+#include "../gameengine/player.h"
+#include "../gameengine/bosonmessageids.h"
 #include "../bosondata.h"
 #include "../defines.h"
 #include "../gameview/bosonlocalplayerinput.h" // ugly. we should not include stuff from the gameview in here.

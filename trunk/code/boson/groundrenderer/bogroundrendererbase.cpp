@@ -21,16 +21,16 @@
 #include "bogroundrendererbase.moc"
 
 #include "../../bomemory/bodummymemory.h"
-#include "../bosonmap.h"
+#include "../gameengine/bosonmap.h"
 #include "../bosonprofiling.h"
 #include "../defines.h"
-#include "../cell.h"
+#include "../gameengine/cell.h"
 #include "../bo3dtools.h"
 #include "../bosonconfig.h" // WARNING: groundrenderer needs to be re-installed if bosonconfig.h changes!
 #include "../botexture.h"
-#include "../playerio.h"
+#include "../gameengine/playerio.h"
 #include "../bosonviewdata.h"
-#include "../bosongroundtheme.h"
+#include "../gameengine/bosongroundtheme.h"
 #include "bocolormaprenderer.h"
 #include <bogl.h>
 #include <bodebug.h>
@@ -38,7 +38,7 @@
 // not nice in this file. we need it for boGame->status() == KGame::Init
 // maybe we should require KGame not to be in init state before constructin the
 // class
-#include "../boson.h"
+#include "../gameengine/boson.h"
 
 #include <math.h>
 

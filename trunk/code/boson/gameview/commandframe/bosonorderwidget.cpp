@@ -21,15 +21,15 @@
 #include "bosonorderwidget.h"
 #include "bosonorderwidget.moc"
 
-#include "../../bomemory/bodummymemory.h"
+#include "../../../bomemory/bodummymemory.h"
 #include "bosonorderbutton.h"
 #include "bosoncommandframe.h"
-#include "../unit.h"
-#include "../unitplugins.h"
-#include "../unitproperties.h"
-#include "../bosongroundtheme.h"
-#include "../playerio.h"
-#include "../boaction.h"
+#include "../../gameengine/unit.h"
+#include "../../gameengine/unitplugins.h"
+#include "../../gameengine/unitproperties.h"
+#include "../../gameengine/bosongroundtheme.h"
+#include "../../gameengine/playerio.h"
+#include "../../boaction.h"
 #include "bodebug.h"
 
 #include <klocale.h>

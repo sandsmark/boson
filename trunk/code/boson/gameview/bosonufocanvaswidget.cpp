@@ -24,28 +24,28 @@
 #include "../bomemory/bodummymemory.h"
 #include "../no_player.h"
 #include "bosoncanvasrenderer.h"
-#include "../bosoncanvas.h"
-#include "../bosonmap.h"
+#include "../gameengine/bosoncanvas.h"
+#include "../gameengine/bosonmap.h"
 #include "../bosonmodel.h"
-#include "../speciestheme.h"
+#include "../gameengine/speciestheme.h"
 #include "../speciesdata.h"
-#include "../bosongroundtheme.h"
-#include "../playerio.h"
-#include "../unitproperties.h"
+#include "../gameengine/bosongroundtheme.h"
+#include "../gameengine/playerio.h"
+#include "../gameengine/unitproperties.h"
 #include "../bosonconfig.h"
 #include "../bosonprofiling.h"
-#include "../items/bosonshot.h"
-#include "../items/bosonitemrenderer.h"
-#include "../bosonweapon.h"
-#include "../unit.h"
+#include "../gameengine/bosonshot.h"
+#include "bosonitemrenderer.h"
+#include "../gameengine/bosonweapon.h"
+#include "../gameengine/unit.h"
 #include "../bosoneffectmanager.h"
 #include "../bosoneffectproperties.h"
 #include "../bosoneffect.h"
 #include "../bowaterrenderer.h"
 #include "../bocamera.h"
-#include "../boitemlist.h"
+#include "../gameengine/boitemlist.h"
 #include "../bosonviewdata.h"
-#include "../bogroundquadtreenode.h"
+#include "../gameengine/bogroundquadtreenode.h"
 #include "bodebug.h"
 
 #include "../botexture.h"
@@ -1121,7 +1121,7 @@ void BosonUfoCanvasWidget::paintWidget()
 }
 
 
-#include "../items/bosonshot.h" // for an explosion hack below
+#include "../gameengine/bosonshot.h" // for an explosion hack below
 BosonItemRenderer* BosonUfoCanvasWidget::createItemRendererFor(const BosonItemContainer* c)
 {
  BO_CHECK_NULL_RET0(c);

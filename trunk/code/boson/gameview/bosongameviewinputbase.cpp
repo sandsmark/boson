@@ -25,15 +25,15 @@
 #include "../no_player.h"
 #include "../bosonconfig.h"
 #include "../boselection.h"
-#include "../bosoncanvas.h"
-#include "../boitemlist.h"
+#include "../gameengine/bosoncanvas.h"
+#include "../gameengine/boitemlist.h"
 #include "bodebug.h"
-#include "../rtti.h"
-#include "../playerio.h"
-#include "../unit.h"
+#include "../gameengine/rtti.h"
+#include "../gameengine/playerio.h"
+#include "../gameengine/unit.h"
 #include "../bosoncursor.h"
 #include "bosonlocalplayerinput.h"
-#include "../items/bosonitem.h"
+#include "../gameengine/bosonitem.h"
 
 BosonGameViewInputBase::BosonGameViewInputBase()
 	: QObject()
