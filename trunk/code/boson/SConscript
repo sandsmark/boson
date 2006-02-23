@@ -178,6 +178,11 @@ gameview_sources = """
 	gameview/bolocalplayereventlistener.cpp
 	gameview/bosonmenuinput.cpp
 	gameview/boeditplayerinputswidget.cpp
+	gameview/bosoneffectmanager.cpp
+	gameview/bosoneffect.cpp
+	gameview/bosoneffectproperties.cpp
+	gameview/bosoneffectparticle.cpp
+	gameview/bosoneffectpropertiesparticle.cpp
 """
 
 
@@ -308,11 +313,6 @@ boson.source += """
 	bosonguistarting.cpp
 	bosongameviewpluginbase.cpp
 	bosongameviewpluginmanager.cpp
-	bosoneffectmanager.cpp
-	bosoneffect.cpp
-	bosoneffectproperties.cpp
-	bosoneffectparticle.cpp
-	bosoneffectpropertiesparticle.cpp
 	botexmapimportdialog.cpp
 	boconditionwidget.cpp
 	bowaterrenderer.cpp
