@@ -135,6 +135,23 @@ void BosonItemRenderer::renderItem(unsigned int lod, bool transparentmeshes, Ren
 
 float BosonItemRenderer::itemInFrustum(const BoFrustum& frustum) const
 {
+ return itemSphereInFrustum(frustum);
+}
+
+bool BosonItemRenderer::itemInFrustumSlow(const BoFrustum& frustum) const
+{
+ float distance = itemSphereInFrustum(frustum);
+ if (distance == 0.0f) {
+	return false;
+ }
+ if (!itemBoxInFrustum(frustum)) {
+	return false;
+ }
+ return true;
+}
+
+float BosonItemRenderer::itemSphereInFrustum(const BoFrustum& frustum) const
+{
  if (!mItem) {
 	BO_NULL_ERROR(mItem);
 	return false;
@@ -142,9 +159,20 @@ float BosonItemRenderer::itemInFrustum(const BoFrustum& frustum) const
  // FIXME: can't we use BoVector3 and it's conversion methods here?
  bofixed x = (mItem->centerX());
  bofixed y = -(mItem->centerY());
- bofixed z = mItem->z();
+ bofixed z = mItem->z() + mItem->depth() / 2;
  BoVector3Fixed pos(x, y, z);
  return (float)frustum.sphereInFrustum(pos, boundingSphereRadius());
+}
+
+bool BosonItemRenderer::itemBoxInFrustum(const BoFrustum& frustum) const
+{
+ bofixed x = (mItem->centerX());
+ bofixed y = -(mItem->centerY());
+ bofixed z = mItem->z();
+ BoVector3Float min(mItem->leftEdge(), -mItem->topEdge(), mItem->z());
+ BoVector3Float max(mItem->rightEdge(), -mItem->bottomEdge(), mItem->z() + mItem->depth());
+
+ return frustum.boxInFrustum(min, max);
 }
 
 

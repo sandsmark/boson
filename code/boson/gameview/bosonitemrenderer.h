@@ -83,6 +83,15 @@ public:
 	 **/
 	float itemInFrustum(const BoFrustum& frustum) const;
 
+	/**
+	 * Like @ref itemInFrustum but slower and more precise. This method
+	 * currently does both, a bounding sphere and a bounding box test.
+	 *
+	 * As a result of the additional tests, this method returns only whether
+	 * the item is in the frustum, not the distance from the NEAR plane.
+	 **/
+	bool itemInFrustumSlow(const BoFrustum& frustum) const;
+
 	virtual unsigned int preferredLod(float distanceFromCamera) const
 	{
 		Q_UNUSED(distanceFromCamera);
@@ -108,6 +117,9 @@ protected:
 	const QColor* teamColor() const;
 
 	void setBoundingSphereRadius(float r) { mBoundingSphereRadius = r; }
+
+	float itemSphereInFrustum(const BoFrustum& frustum) const;
+	bool itemBoxInFrustum(const BoFrustum& frustum) const;
 
 private:
 	BosonItem* mItem;
