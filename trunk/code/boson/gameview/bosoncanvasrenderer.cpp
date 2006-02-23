@@ -2366,14 +2366,7 @@ QValueList<BosonItem*> BosonCanvasRenderer::emulatePickItems(const QRect& pickRe
 	//     as all items in d->mRenderItemList are visible to the local
 	//     player anyway
 
-	// TODO
-	// a) implement the boundingSphereRadius properly
-	// b) rather use a box based frustum check (not sphere).
-	//    -> we need the preciseness here
-	float dist = itemRenderer->itemInFrustum(viewFrustum);
-
-
-	if (dist == 0.0f) {
+	if (!itemRenderer->itemInFrustumSlow(viewFrustum)) {
 		continue;
 	}
 	items.append(item);
