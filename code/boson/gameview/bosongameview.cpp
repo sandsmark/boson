@@ -81,7 +81,7 @@
 #include "../bosongameviewpluginbase.h"
 #include "../bosonviewdata.h"
 #include "bosongamevieweventlistener.h"
-#include "../bosoneffectpropertiesparticle.h"
+#include "bosoneffectpropertiesparticle.h"
 
 #include <kgame/kgameio.h>
 #include <kgame/kplayer.h>

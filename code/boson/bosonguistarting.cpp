@@ -36,7 +36,6 @@
 #include "bosoncanvas.h"
 #include "bodebug.h"
 #include "bosonsaveload.h"
-#include "bosoneffectproperties.h"
 #include "bowaterrenderer.h"
 #include "unit.h"
 #include "boitemlist.h"
@@ -44,6 +43,7 @@
 #include "bosoncomputerio.h"
 #include "gameview/bosonlocalplayerinput.h"
 #include "gameview/bosongameview.h"
+#include "gameview/bosoneffectproperties.h"
 
 #include <klocale.h>
 
