@@ -28,7 +28,6 @@
 #include "../gameengine/cell.h"
 #include "../gameengine/bosongroundtheme.h"
 #include "../bosongroundthemedata.h"
-#include "../bomaterial.h"
 #include "../gameengine/boson.h"
 #include "../botexture.h"
 #include "../bosonconfig.h"
