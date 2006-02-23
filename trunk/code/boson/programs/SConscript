@@ -277,7 +277,7 @@ if env['BOSON_DO_STATIC']:
 
 
 boson = env.boobject('program')
-boson.target = 'programs/boson'
+boson.target = 'boson'
 boson.includes = '../bodebug ../bogl ../boson/boufo gameengine '
 boson.includes += ' gameview/commandframe/ gameview/ startupwidgets/ ' # for .moc files
 boson.includes += libboson_includes
@@ -317,11 +317,11 @@ boson.source += """
 	boconditionwidget.cpp
 	bowaterrenderer.cpp
 	selectbox.cpp
+	main.cpp
 	bosondebugtextures.cpp
 	bosondebugtexturesbase.ui
 	bosondebugmodels.cpp
 	bosondebugmodelsbase.ui
-	programs/main.cpp
 """
 boson.source += startupwidgets_sources
 boson.source += commandframe_sources
@@ -334,8 +334,8 @@ boson.execute()
 
 
 bosonNoGUI = env.kobject('program')
-bosonNoGUI.target = 'programs/boson-no-gui'
-bosonNoGUI.includes = '../bodebug gameengine programs '
+bosonNoGUI.target = 'boson-no-gui'
+bosonNoGUI.includes = '../bodebug gameengine '
 bosonNoGUI.includes += libboson_includes
 bosonNoGUI.libs = ' libgameengine.a'
 bosonNoGUI.libs += boufo_lib
@@ -346,7 +346,7 @@ bosonNoGUI.libs += ' kio kdecore qt-mt'
 bosonNoGUI.libpaths += libcommon_libpaths
 bosonNoGUI.source += """
 	bocheckinstallation.cpp
-	programs/mainnogui.cpp
+	mainnogui.cpp
 """
 
 
@@ -357,7 +357,7 @@ bosonNoGUI.execute()
 
 bounit = env.kobject('program')
 bounit.target = 'bounit'
-bounit.includes = '../bodebug ../bogl ../boson/boufo gameengine programs '
+bounit.includes = '../bodebug ../bogl ../boson/boufo gameengine '
 bounit.libpaths += libcommon_libpaths
 bounit.libs = """
 	libgameengine.a
@@ -367,18 +367,18 @@ bounit.libs = """
 bounit.libs += ' kio kdeui kdecore qt-mt Xmu'
 bounit.libs += ' ' + env['LIB_XRANDR']
 bounit.source = """
-	programs/bounitmain.cpp
-	programs/bosonsearchpathswidgetbase.ui
-	programs/bosonsearchpathswidget.cpp
-	programs/bouniteditorbase.ui
-	programs/bouniteditor.cpp
+	bounitmain.cpp
+	bosonsearchpathswidgetbase.ui
+	bosonsearchpathswidget.cpp
+	bouniteditorbase.ui
+	bouniteditor.cpp
 """
 bounit.execute()
 
 
 bocursor = env.kobject('program')
 bocursor.target = 'bocursor'
-bocursor.includes = '../bodebug ../bogl ../boson/boufo programs '
+bocursor.includes = '../bodebug ../bogl ../boson/boufo'
 bocursor.libpaths += libcommon_libpaths
 bocursor.libs = './info/libbosoninfo.a'
 bocursor.libs += ' ./libcommon.a' + libcommon_libs
@@ -388,14 +388,14 @@ bocursor.source = """
 	botexture.cpp
 	bosonglwidget.cpp
 
-	programs/bocursormain.cpp
-	programs/bosoncursoreditor.cpp
+	bocursormain.cpp
+	bosoncursoreditor.cpp
 """
 bocursor.execute()
 
 borender = env.kobject('program')
 borender.target = 'borender'
-borender.includes = '../bodebug ../bogl ../boson/boufo gameengine programs '
+borender.includes = '../bodebug ../bogl ../boson/boufo gameengine '
 borender.includes += libboson_includes
 borender.libs = libboson_libs + """
 	3ds
@@ -409,17 +409,17 @@ borender.source += """
 	bomaterialwidget.cpp
 	bovectorinput.cpp
 	kgamespeciesdebug.cpp
-	programs/borendermain.cpp
-	programs/borendergui.boui
-	programs/borenderrendermodel.cpp
+	borendermain.cpp
+	borendergui.boui
+	borenderrendermodel.cpp
 	bopixmaprenderer.cpp
-	programs/boeditturretpropertiesdialog.cpp
+	boeditturretpropertiesdialog.cpp
 """
 borender.execute()
 
 bomodelpixmaps = env.kobject('program')
 bomodelpixmaps.target = 'bomodelpixmaps'
-bomodelpixmaps.includes = '../bodebug ../bogl ../boson/boufo gameengine programs '
+bomodelpixmaps.includes = '../bodebug ../bogl ../boson/boufo gameengine '
 bomodelpixmaps.includes += libboson_includes
 bomodelpixmaps.libs = libboson_libs + """
 	3ds
@@ -429,9 +429,9 @@ bomodelpixmaps.libs += " Xmu"
 bomodelpixmaps.libpaths += libcommon_libpaths
 bomodelpixmaps.source = libboson_source
 bomodelpixmaps.source += """
-	programs/bomodelpixmaps.cpp
-	programs/bomodelpixmapsgui.ui
-	programs/borenderrendermodel.cpp
+	bomodelpixmaps.cpp
+	bomodelpixmapsgui.ui
+	borenderrendermodel.cpp
 	bopixmaprenderer.cpp
 """
 bomodelpixmaps.execute()
@@ -442,7 +442,7 @@ boinfo.includes = '../bodebug ../bogl ../boson/boufo'
 boinfo.libpaths += libcommon_libpaths
 boinfo.source = """
 	bosonglwidget.cpp
-	programs/boinfomain.cpp
+	boinfomain.cpp
 """
 boinfo.libs = ''
 boinfo.boAddLibs('./info/libbosoninfo.a')
@@ -464,13 +464,13 @@ bo3dsdebug.source = """
 	kgame3dsmodeldebug.cpp
 	bomatrixwidget.cpp
 
-	programs/bo3dsdebugmain.cpp
+	bo3dsdebugmain.cpp
 """
 bo3dsdebug.execute()
 
 boconditioneditor = env.kobject('program')
 boconditioneditor.target = 'boconditioneditor'
-boconditioneditor.includes = '../bodebug ../bogl ../boson/boufo gameengine programs '
+boconditioneditor.includes = '../bodebug ../bogl ../boson/boufo gameengine '
 boconditioneditor.libpaths += libcommon_libpaths
 boconditioneditor.libs = './libgameengine.a ' + libgameengine_libs
 boconditioneditor.libs += './libcommon.a ' + libcommon_libs
@@ -478,7 +478,7 @@ boconditioneditor.libs += ' ' + env['LIB_XRANDR']
 boconditioneditor.libs += ' kio kdeui qt-mt Xmu'
 boconditioneditor.source = """
 	boconditionwidget.cpp
-	programs/boconditioneditormain.cpp
+	boconditioneditormain.cpp
 """
 boconditioneditor.execute()
 
@@ -493,7 +493,7 @@ boprofiling.libs += ' kio kdeui qt-mt Xmu'
 boprofiling.libs += ' ' + env['LIB_XRANDR']
 boprofiling.source = """
 	bosonprofilingdialog.cpp
-	programs/boprofilingmain.cpp
+	boprofilingmain.cpp
 """
 boprofiling.execute()
 

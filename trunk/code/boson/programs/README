@@ -1,0 +1,8 @@
+This directory contains
+1. main.cpp for the main boson binary
+2. all files that are required for applications other than the main boson binary
+   such as the unit editor (bounit) or debugging applications.
+
+Whenever a file is used by the actual game, it should not be in this directory
+(with the exception of main.cpp)
+
