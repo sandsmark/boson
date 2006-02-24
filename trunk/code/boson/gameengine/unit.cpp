@@ -1137,7 +1137,7 @@ void Unit::moveTo(const BoVector2Fixed& pos, bool attack)
 {
  PROFILE_METHOD
  if (mUnitConstruction && !mUnitConstruction->isConstructionComplete()) {
-	boWarning() << k_funcinfo << "not yet constructed completely" << endl;
+	boWarning(380) << k_funcinfo << "not yet constructed completely" << endl;
 	return;
  }
  d->mTarget = 0;
@@ -1153,12 +1153,12 @@ void Unit::moveTo(const BoVector2Fixed& pos, bool attack)
  bofixed y = (int)pos.y() + add;
 
  if (moveTo(x, y, -1)) {
-	boDebug() << k_funcinfo << "unit " << id() << ": Will move to (" << x << "; " << y << ")" << endl;
+	boDebug(380) << k_funcinfo << "unit " << id() << ": Will move to (" << x << "; " << y << ")" << endl;
 	pathInfo()->moveAttacking = attack;
 	pathInfo()->slowDownAtDest = true;
 	setWork(WorkMove);
  } else {
-	boDebug() << k_funcinfo << "unit " << id() << ": CANNOT move to (" << x << "; " << y << ")" << endl;
+	boDebug(380) << k_funcinfo << "unit " << id() << ": CANNOT move to (" << x << "; " << y << ")" << endl;
 	setWork(WorkIdle);
 	stopMoving();
  }
@@ -1167,7 +1167,7 @@ void Unit::moveTo(const BoVector2Fixed& pos, bool attack)
 bool Unit::moveTo(BosonItem* target, int range)
 {
  if (mUnitConstruction && !mUnitConstruction->isConstructionComplete()) {
-	boWarning() << k_funcinfo << "not yet constructed completely" << endl;
+	boWarning(380) << k_funcinfo << "not yet constructed completely" << endl;
 	return false;
  }
  // TODO: try to merge this with the moveTo() method below
@@ -1177,7 +1177,7 @@ bool Unit::moveTo(BosonItem* target, int range)
  }
 
  if (!target) {
-	boError() << k_funcinfo << "NULL target" << endl;
+	boError(380) << k_funcinfo << "NULL target" << endl;
 	return false;
  }
 
@@ -1195,7 +1195,7 @@ bool Unit::moveTo(BosonItem* target, int range)
  resetPathInfo();
  pathInfo()->target = target;
  pathInfo()->range = range;
- boDebug() << k_funcinfo << "unit " << id() << ": target: (" << target->id() << "); range: " << range << endl;
+ boDebug(380) << k_funcinfo << "unit " << id() << ": target: (" << target->id() << "); range: " << range << endl;
 
  // Remove old way/pathpoints
  clearWaypoints();
@@ -1216,7 +1216,7 @@ bool Unit::moveTo(BosonItem* target, int range)
 bool Unit::moveTo(bofixed x, bofixed y, int range)
 {
  if (mUnitConstruction && !mUnitConstruction->isConstructionComplete()) {
-	boWarning() << k_funcinfo << "not yet constructed completely" << endl;
+	boWarning(380) << k_funcinfo << "not yet constructed completely" << endl;
 	return false;
  }
  if (maxSpeed() == 0) {
@@ -1238,7 +1238,7 @@ bool Unit::moveTo(bofixed x, bofixed y, int range)
  int cellY = (int)y;
  Cell* cell = canvas()->cell(cellX, cellY);
  if (!cell) {
-	boError() << k_funcinfo << "unit " << id() << ": Cell (" << cellX << "; " << cellY << ") at (" <<
+	boError(380) << k_funcinfo << "unit " << id() << ": Cell (" << cellX << "; " << cellY << ") at (" <<
 			x << "; " << y << ") is not valid!" << endl;
 	return false;
  }
@@ -1248,7 +1248,7 @@ bool Unit::moveTo(bofixed x, bofixed y, int range)
  pathInfo()->dest.setX(x);
  pathInfo()->dest.setY(y);
  pathInfo()->range = range;
- boDebug() << k_funcinfo << "unit " << id() << ": dest: (" << x << "; " << y << "); range: " << range << endl;
+ boDebug(380) << k_funcinfo << "unit " << id() << ": dest: (" << x << "; " << y << "); range: " << range << endl;
 
  // Remove old way/pathpoints
  // TODO: maybe call stopMoving() instead and remove setMovingStatus(Standing)
@@ -1807,7 +1807,7 @@ bool Unit::isNextTo(Unit* target) const
 void Unit::turnTo(int dir)
 {
  if (isDestroyed()) {
-	boError() << k_funcinfo << "unit is already destroyed!" << endl;
+	boError(380) << k_funcinfo << "unit is already destroyed!" << endl;
 	return;
  }
 
@@ -1827,7 +1827,7 @@ void Unit::turnTo(int dir)
 		setRotation(dir);
 		return;
 	}
-	boDebug() << k_funcinfo << id() << ": will slowly rotate from " << rotation() << " to " << dir << endl;
+	boDebug(380) << k_funcinfo << id() << ": will slowly rotate from " << rotation() << " to " << dir << endl;
 	// If we're moving, we want to take one more step with current velocity, but
 	//  setAdvanceWork() resets it to 0, so we have this workaround here
 	bofixed _xVelocity = 0, _yVelocity = 0;
@@ -1840,7 +1840,7 @@ void Unit::turnTo(int dir)
 	setVelocity(_xVelocity, _yVelocity, 0);
  }
 
-// boDebug() << k_funcinfo << id() << ": turning to " << deg << endl;
+// boDebug(380) << k_funcinfo << id() << ": turning to " << deg << endl;
  d->mWantedRotation = dir;
 }
 
