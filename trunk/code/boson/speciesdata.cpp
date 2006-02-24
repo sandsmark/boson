@@ -491,6 +491,7 @@ BosonModel* SpeciesData::objectModel(const QString& name) const
 
 bool SpeciesData::loadObjects(const QColor& teamColor)
 {
+ BosonProfiler prof("LoadObjects");
  QString fileName = themePath() + QString::fromLatin1("objects/objects.boson");
  if (!KStandardDirs::exists(fileName)) {
 	boDebug(270) << k_funcinfo << "no objects.boson file found at " << fileName << endl;
