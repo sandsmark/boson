@@ -212,6 +212,7 @@ libboson_source = """
 	bocamerawidget.cpp
 	boorbiterwidget.cpp
 	bosonufochat.cpp
+	bosonprofilingdialoggui.ui
 	bosonprofilingdialog.cpp
 	bpfdescriptiondialog.cpp
 	boglstatewidget.cpp
@@ -492,6 +493,7 @@ boprofiling.libs += ' kio kdeui qt-mt Xmu'
 # TODO: only if present
 boprofiling.libs += ' ' + env['LIB_XRANDR']
 boprofiling.source = """
+	bosonprofilingdialoggui.ui
 	bosonprofilingdialog.cpp
 	programs/boprofilingmain.cpp
 """
