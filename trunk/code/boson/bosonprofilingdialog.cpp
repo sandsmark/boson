@@ -267,16 +267,16 @@ void BosonProfilingDialog::slotSaveToFile()
  if (file.isEmpty()) {
 	return;
  }
- QFile f(file);
- if (!f.open(IO_WriteOnly)) {
-	KMessageBox::sorry(this, i18n("File %1 could not be opened").arg(file));
-	return;
- }
  if (QFile::exists(file)) {
 	int ret = KMessageBox::questionYesNo(this, i18n("File %1 already exists. Overwrite?").arg(file));
 	if (ret != KMessageBox::Yes) {
 		return;
 	}
+ }
+ QFile f(file);
+ if (!f.open(IO_WriteOnly)) {
+	KMessageBox::sorry(this, i18n("File %1 could not be opened").arg(file));
+	return;
  }
  QDataStream stream(&f);
  if (!d->mProfiling.save(stream)) {
