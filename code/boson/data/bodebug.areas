@@ -24,6 +24,7 @@
 350    BosonShot
 360    Event
 370    NetworkSync
+380    Movement
 
 # Use 400-429 for Unit::advance*()
 401    AdvanceMove

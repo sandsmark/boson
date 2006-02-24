@@ -114,26 +114,26 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 	{
 		BosonMessageMoveMove message;
 		if (!message.load(stream)) {
-			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			boError(380) << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
 			break;
 		}
 		bool attack = message.mIsAttack;
-		boDebug() << "MOVING: " << k_funcinfo << "attack: " << attack << endl;
+		boDebug(380) << "MOVING: " << k_funcinfo << "attack: " << attack << endl;
 		QPtrList<Unit> unitsToMove;
 		for (QValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
 			Q_ULONG unitId = *it;
 //			boDebug() << "pos: " << mPos.x() << " " << mPos.y() << endl;
 			Unit* unit = findUnit(unitId, player);
 			if (!unit) {
-				boDebug() << "unit " << unitId << " not found for this player" << endl;
+				boDebug(380) << "unit " << unitId << " not found for this player" << endl;
 				continue;
 			}
 			if (unit->owner() != player) {
-				boDebug() << "unit " << unitId << "only owner can move units!" << endl;
+				boDebug(380) << "unit " << unitId << "only owner can move units!" << endl;
 				continue;
 			}
 			if (unit->isDestroyed()) {
-				boDebug() << "cannot move destroyed units" << endl;
+				boDebug(380) << "cannot move destroyed units" << endl;
 				continue;
 			}
 //			boDebug() << "move " << unitId << endl;
@@ -142,7 +142,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			}
 		}
 		if (unitsToMove.count() == 0) {
-			boWarning() << k_lineinfo << "no unit to move" << endl;
+			boWarning(380) << k_lineinfo << "no unit to move" << endl;
 			break;
 		}
 		if (unitsToMove.count() == 1) {
