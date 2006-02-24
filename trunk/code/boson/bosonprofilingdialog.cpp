@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2006 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "bodebug.h"
 #include "bofiledialog.h"
 #include "qlistviewitemnumber.h"
+#include "bosonprofilingdialoggui.h"
 
 #include <klocale.h>
 #include <klistview.h>
@@ -139,14 +140,10 @@ class BosonProfilingDialogPrivate
 public:
 	BosonProfilingDialogPrivate()
 	{
-		mEvents = 0;
-		mRawTree = 0;
-
 		mTopItem = 0;
 	}
 
-	KListView* mEvents;
-	KListView* mRawTree;
+	BosonProfilingDialogGUI* mGUI;
 
 	BosonProfiling mProfiling;
 	QPtrList<BosonProfilingItem> mItems;
@@ -155,74 +152,40 @@ public:
 };
 
 BosonProfilingDialog::BosonProfilingDialog(QWidget* parent, bool modal)
-		: KDialogBase(Tabbed, i18n("Boson Profiling"), Ok,
+		: KDialogBase(Plain, i18n("Boson Profiling"), Ok,
 		Ok, parent, "bosonprofilingdialog", modal, true)
 {
  d = new BosonProfilingDialogPrivate;
 
- initEventsPage();
- initRawTreePage();
- initFilesPage();
+ d->mGUI = new BosonProfilingDialogGUI(plainPage());
+
+ QVBoxLayout* layout = new QVBoxLayout(plainPage());
+ layout->addWidget(d->mGUI);
+
+ d->mGUI->mEvents->setColumnWidthMode(0, QListView::Manual);
+ d->mGUI->mEvents->setColumnWidth(0, 400);
+ d->mGUI->mRawTree->setColumnWidthMode(0, QListView::Manual);
+ d->mGUI->mRawTree->setColumnWidth(0, 400);
+
+ connect(d->mGUI->mLoadFromFile, SIGNAL(clicked()),
+		this, SLOT(slotLoadFromFile()));
+ connect(d->mGUI->mSaveToFile, SIGNAL(clicked()),
+		this, SLOT(slotSaveToFile()));
+ connect(d->mGUI->mUpdateProfilingData, SIGNAL(clicked()),
+		this, SLOT(slotUpdateFromGlobalProfiling()));
 
  slotUpdateFromGlobalProfiling();
 }
 
 BosonProfilingDialog::~BosonProfilingDialog()
 {
- d->mEvents->clear();
- d->mRawTree->clear();
+ d->mGUI->mEvents->clear();
+ d->mGUI->mRawTree->clear();
 
  d->mItems.setAutoDelete(true);
  d->mItems.clear();
  delete d->mTopItem;
  delete d;
-}
-
-void BosonProfilingDialog::initEventsPage()
-{
- QVBox* vbox = addVBoxPage(i18n("&Tree"));
- d->mEvents = new KListView(vbox);
- d->mEvents->setAllColumnsShowFocus(true);
- d->mEvents->setRootIsDecorated(true);
- d->mEvents->addColumn(i18n("Event"), 400);
- d->mEvents->addColumn(i18n("%"));
- d->mEvents->addColumn(i18n("Sum (us)"));
- d->mEvents->addColumn(i18n("Sum (ms)"));
- d->mEvents->addColumn(i18n("Sum (s)"));
- d->mEvents->addColumn(i18n("Average (us)"));
- d->mEvents->addColumn(i18n("Average (ms)"));
- d->mEvents->addColumn(i18n("Average (s)"));
- d->mEvents->addColumn(i18n("Calls"));
-}
-
-void BosonProfilingDialog::initRawTreePage()
-{
- QVBox* vbox = addVBoxPage(i18n("&Raw Tree"));
- d->mRawTree = new KListView(vbox);
- d->mRawTree->setAllColumnsShowFocus(true);
- d->mRawTree->setRootIsDecorated(true);
- d->mRawTree->addColumn(i18n("Event"), 400);
- d->mRawTree->addColumn(i18n("%"));
- d->mRawTree->addColumn(i18n("Time (us)"));
- d->mRawTree->addColumn(i18n("Time (ms)"));
- d->mRawTree->addColumn(i18n("Time (s)"));
-}
-
-void BosonProfilingDialog::initFilesPage()
-{
- QVBox* vbox = addVBoxPage(i18n("&Files"));
- QHBox* hbox = new QHBox(vbox);
- QPushButton* open = new QPushButton(hbox);
- open->setText(i18n("&Load From File"));
- connect(open, SIGNAL(clicked()), this, SLOT(slotLoadFromFile()));
-
- QPushButton* save = new QPushButton(hbox);
- save->setText(i18n("&Save To File"));
- connect(save, SIGNAL(clicked()), this, SLOT(slotSaveToFile()));
-
- QPushButton* reset = new QPushButton(vbox);
- reset->setText(i18n("Update profiling data (inaccurate because the profiling dialog is on top of the GL screen!"));
- connect(reset, SIGNAL(clicked()), this, SLOT(slotUpdateFromGlobalProfiling()));
 }
 
 void BosonProfilingDialog::reset()
@@ -322,18 +285,18 @@ void BosonProfilingDialog::resetFilesPage()
 
 void BosonProfilingDialog::resetEventsPage()
 {
- d->mEvents->clear();
+ d->mGUI->mEvents->clear();
 
  initProfilingItem(0, d->mTopItem, -1);
 }
 
 void BosonProfilingDialog::resetRawTreePage()
 {
- d->mRawTree->clear();
+ d->mGUI->mRawTree->clear();
 
  QPtrListIterator<BosonProfilingItem> it(d->mItems);
  while (it.current()) {
-	initRawTreeProfilingItem(new QListViewItemNumberTime(d->mRawTree), it.current(), -1);
+	initRawTreeProfilingItem(new QListViewItemNumberTime(d->mGUI->mRawTree), it.current(), -1);
 	++it;
  }
 }
@@ -367,7 +330,7 @@ void BosonProfilingDialog::initProfilingItem(QListViewItemNumberTime* item, Prof
 	if (item) {
 		child = new QListViewItemNumberTime(item);
 	} else {
-		child = new QListViewItemNumberTime(d->mEvents);
+		child = new QListViewItemNumberTime(d->mGUI->mEvents);
 	}
 	initProfilingItem(child, it.current(), totalTime);
 
