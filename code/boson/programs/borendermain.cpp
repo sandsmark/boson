@@ -166,7 +166,8 @@ void BoRenderGLWidget::initWidget()
  for (unsigned int i = 0; i < list.count(); i++) {
 	QString dir = list[i];
 	dir = dir.left(dir.length() - QString("index.species").length());
-	SpeciesTheme* s = new SpeciesTheme(dir, QColor());
+	SpeciesTheme* s = new SpeciesTheme();
+	s->loadTheme(dir, QColor());
 	d->mSpecies.append(s);
 	s->readUnitConfigs(false);
  }

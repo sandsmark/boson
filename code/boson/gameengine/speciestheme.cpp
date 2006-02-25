@@ -107,15 +107,11 @@ QRgb default_color[BOSON_MAX_PLAYERS + 1] = { // AB: + 1 because of neutral play
 	qRgb(127,0,255),
 };
 
-SpeciesTheme::SpeciesTheme(const QString& speciesDir, const QColor& teamColor)
+SpeciesTheme::SpeciesTheme()
 {
  d = new SpeciesThemePrivate;
  d->mUnitProperties.setAutoDelete(true);
  d->mUpgrades.setAutoDelete(true);
-
- if (!loadTheme(speciesDir, teamColor)) {
-	boError() << "Theme " << speciesDir << " not properly loaded" << endl;
- }
 }
 
 SpeciesTheme::~SpeciesTheme()
