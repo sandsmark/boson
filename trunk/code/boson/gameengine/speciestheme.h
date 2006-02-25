@@ -57,12 +57,9 @@ class SpeciesTheme
 {
 public:
 	/**
-	 * Construct and load a theme. See @ref loadTheme.
-	 *
-	 * Constructing is quite fast, as @ref loadTheme does no preloading of
-	 * unit pixmaps.
+	 * Construct a theme. See @ref loadTheme.
 	 **/
-	SpeciesTheme(const QString& species, const QColor& color);
+	SpeciesTheme();
 
 	~SpeciesTheme();
 

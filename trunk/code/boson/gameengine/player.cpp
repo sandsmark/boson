@@ -248,8 +248,14 @@ void Player::loadTheme(const QString& species, const QColor& teamColor)
 		return;
 	}
  }
+ SpeciesTheme* newTheme = new SpeciesTheme();
+ if (!newTheme->loadTheme(species, teamColor)) {
+	boError() << k_funcinfo << "cannot load theme " << species << endl;
+	delete newTheme;
+	return;
+ }
  delete mSpecies;
- mSpecies = new SpeciesTheme(species, teamColor);
+ mSpecies = newTheme;
 }
 
 void Player::addUnit(Unit* unit, int dataHandlerId)
