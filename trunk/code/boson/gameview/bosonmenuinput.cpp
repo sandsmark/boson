@@ -163,6 +163,9 @@ BoUfoActionCollection* BosonMenuInputData::actionCollection() const
 void BosonMenuInputData::initUfoActions(bool gameMode)
 {
  BO_CHECK_NULL_RET(actionCollection());
+ BO_CHECK_NULL_RET(boGame);
+ BO_CHECK_NULL_RET(boGame->playField());
+ BO_CHECK_NULL_RET(boGame->playField()->map());
 
  // TODO: help menu
 
@@ -619,6 +622,8 @@ void BosonMenuInputData::slotDebugPlayer(int id)
 
 void BosonMenuInputData::slotUpdateColorMapsMenu()
 {
+ BO_CHECK_NULL_RET(boGame);
+ BO_CHECK_NULL_RET(boGame->playField());
  // Clear current entries
  d->mActionDebugColormap->clear();
 
@@ -628,6 +633,8 @@ void BosonMenuInputData::slotUpdateColorMapsMenu()
 
  // Then add colormap entries
  BosonMap* map = boGame->playField()->map();
+ BO_CHECK_NULL_RET(map);
+ BO_CHECK_NULL_RET(map->colorMaps());
  QDictIterator<BoColorMap> it(*map->colorMaps());
  while (it.current()) {
 	d->mActionDebugColormap->insertItem(it.currentKey(), i++);
