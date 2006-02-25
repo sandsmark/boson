@@ -162,14 +162,6 @@ protected slots:
 	 **/
 	void slotCancelLoadSave();
 
-	/**
-	 * Called by the @ref KLoadSaveGameWidget . This will do the actual game loading
-	 * from the file into a stream and then will start the usual data
-	 * loading procedure.
-	 **/
-	void slotLoadGame(const QString& fileName);
-	void slotSaveGame(const QString& fileName, const QString& description, bool forceOverwrite = false);
-
 	void slotQuickloadGame();
 	void slotQuicksaveGame();
 

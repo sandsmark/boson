@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2006 Andreas Beckermann (b_mann@gmx.de)
     Copyright (C) 2002-2005 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
@@ -56,6 +56,13 @@ public:
 
 	BosonStartupNetwork* networkInterface() const;
 
+	/**
+	 * Directly load a game - this is a shortcut for @ref slotLoadGame and
+	 * then entering the filename + loading the game there.
+	 **/
+	void loadGame(const QString& fileName);
+	void saveGame(const QString& fileName, const QString& description, bool forceOverwrite);
+
 public slots:
 	void slotLoadingMaxDuration(unsigned int maxDuration);
 	void slotLoadingTaskCompleted(unsigned int duration);
@@ -88,6 +95,7 @@ public slots:
 	 * select the playfield.
 	 **/
 	void slotNewSinglePlayerGame(KCmdLineArgs* args = 0);
+
 	/**
 	 * Mainly used internally. This will display the network widget and then new
 	 * game widget (see @ref BosonNewGameWidget) for a multi-player game.
@@ -113,9 +121,6 @@ signals:
 	 **/
 	void signalQuit();
 
-	void signalLoadGame(const QString& fileName);
-	void signalSaveGame(const QString& fileName, const QString& description);
-
 	/**
 	 * The load/save widget has been canceled. We should return to the
 	 * welcome widget or to the game (depends on whether a game is currently
@@ -137,6 +142,15 @@ signals:
 	 * changed!!)
 	 **/
 	void signalResetGame();
+
+	/**
+	 * AB: this is an ugly signal. @ref signalResetGame or so should be used
+	 * directly probably.
+	 *
+	 * This signal is meant to call @ref BosonMainWidget::slotGameOver to
+	 * reset the game.
+	 **/
+	void signalGameOver();
 
 	void signalPreferredSizeChanged();
 

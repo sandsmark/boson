@@ -314,12 +314,10 @@ void BosonMainWidget::initUfoGUI()
 		this, SLOT(slotAddLocalPlayer()));
  connect(d->mStartup, SIGNAL(signalResetGame()),
 		this, SLOT(slotResetGame()));
+ connect(d->mStartup, SIGNAL(signalGameOver()),
+		this, SLOT(slotGameOver()));
  connect(d->mStartup, SIGNAL(signalQuit()), this, SLOT(close()));
  connect(d->mStartup, SIGNAL(signalPreferences()), this, SLOT(slotPreferences()));
- connect(d->mStartup, SIGNAL(signalLoadGame(const QString&)),
-		this, SLOT(slotLoadGame(const QString&)));
- connect(d->mStartup, SIGNAL(signalSaveGame(const QString&, const QString&)),
-		this, SLOT(slotSaveGame(const QString&, const QString&)));
  connect(d->mStartup, SIGNAL(signalCancelLoadSave()),
 		this, SLOT(slotCancelLoadSave()));
  connect(d->mStartup, SIGNAL(signalPreferredSizeChanged()),
@@ -838,71 +836,6 @@ void BosonMainWidget::slotCancelLoadSave()
  }
 }
 
-void BosonMainWidget::slotSaveGame(const QString& fileName, const QString& description, bool forceOverwrite)
-{
- boDebug() << k_funcinfo << endl;
- QString file = fileName;
- if (file.isNull()) {
-	return;
- }
- if (file[0] != '/') {
-	boError() << k_funcinfo << "filename must be absolute" << endl;
-	return;
- }
- if (file.findRev('.') == -1) {
-	file += ".bsg";
- }
- if (!forceOverwrite && KStandardDirs::exists(file)) {
-	int r = KMessageBox::questionYesNo(this, i18n("File %1 already exists. Overwrite?").arg(file));
-	if (r != KMessageBox::Yes) {
-		return;
-	}
- }
-
- boDebug() << k_funcinfo << file << endl;
- bool ok = boGame->saveToFile(file);
-
- if (ok) {
-	slotCancelLoadSave();
- } else {
-	KMessageBox::sorry(this, i18n("Error while saving!"));
- }
-}
-
-void BosonMainWidget::slotLoadGame(const QString& fileName)
-{
- boDebug() << k_funcinfo << endl;
- BO_CHECK_NULL_RET(boGame);
- if (fileName.isEmpty()) {
-	return;
- }
- if (boGame) {
-	boDebug() << k_funcinfo << "non-NULL game - calling slotGameOver() first" << endl;
-	slotGameOver();
- }
- if (!d->mStarting) {
-	boError() << k_funcinfo << "NULL starting object!!" << endl;
-	return;
- }
-
- // load the file into memory
- QByteArray data = prepareLoadGame(fileName);
- if (data.size() == 0) {
-	boError() << k_funcinfo << "failed loading from file" << endl;
-	return;
- }
-
- QByteArray compresseddata = qCompress(data);
-
- QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
- stream << (Q_INT8)1; // game mode
- stream << compresseddata;
-
- // actually start the game
- boGame->sendMessage(buffer, BosonMessageIds::IdNewGame);
-}
-
 void BosonMainWidget::slotQuicksaveGame()
 {
  BO_CHECK_NULL_RET(d->mLocalPlayer);
@@ -912,7 +845,7 @@ void BosonMainWidget::slotQuicksaveGame()
 	boError() << k_funcinfo << "cannot find default quicksave directory" << endl;
 	return;
  }
- slotSaveGame(dir + "quicksave.bsg", i18n("Quicksave"), true);
+ d->mStartup->saveGame(dir + "quicksave.bsg", i18n("Quicksave"), true);
 
  BO_CHECK_NULL_RET(d->mLocalPlayer);
  BO_CHECK_NULL_RET(boGame);
@@ -927,7 +860,7 @@ void BosonMainWidget::slotQuickloadGame()
 	boError() << k_funcinfo << "cannot find default quicksave directory" << endl;
 	return;
  }
- slotLoadGame(dir + "quicksave.bsg");
+ d->mStartup->loadGame(dir + "quicksave.bsg");
 
  // AB: note that loading works asynchonously. after returning here, we haven't
  // started loading yet.

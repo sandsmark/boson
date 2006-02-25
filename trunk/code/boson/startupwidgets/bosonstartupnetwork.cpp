@@ -183,6 +183,33 @@ bool BosonStartupNetwork::sendNewGame(BosonPlayField* field, bool editor, const 
  return true;
 }
 
+bool BosonStartupNetwork::sendLoadGame(const QByteArray& data)
+{
+ if (data.size() == 0) {
+	boError() << k_funcinfo << "failed loading game (empty data)" << endl;
+	return false;
+ }
+ if (!mGame) {
+	BO_NULL_ERROR(mGame);
+	return false;
+ }
+ if (!mGame->isAdmin()) {
+	boError() << k_funcinfo << "only ADMIN is allowed to send this message" << endl;
+	return false;
+ }
+
+ QByteArray compresseddata = qCompress(data);
+
+ QByteArray buffer;
+ QDataStream stream(buffer, IO_WriteOnly);
+
+ stream << (Q_INT8)1; // game mode
+ stream << compresseddata;
+
+ mGame->sendMessage(buffer, BosonMessageIds::IdNewGame);
+ return true;
+}
+
 void BosonStartupNetwork::sendChangeTeamColor(Player* p, const QColor& color)
 {
  BO_CHECK_NULL_RET(mGame);
