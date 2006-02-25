@@ -570,7 +570,7 @@ protected:
 		// - possibleDestRegions
 		BosonPathInfo* i = u->pathInfo();
 		if (u != i->unit && i->unit) {
-			boError() << k_funcinfo "u != unit in for pathinfo" << endl;
+			boError(370) << k_funcinfo "u != unit in for pathinfo" << endl;
 		}
 		stream << (Q_UINT32)i->hlstep;
 		stream << i->start;
@@ -932,10 +932,10 @@ bool BosonNetworkSynchronizer::receiveNetworkSync(QDataStream& stream)
 	// the game is most probably really unusable now, because this can
 	// happen only if something could not be loaded - but we have already
 	// started loading (and therefore deleted old data).
-	boError() << k_funcinfo << "loading from sync message failed. game unusable now" << endl;
+	boError(370) << k_funcinfo << "loading from sync message failed. game unusable now" << endl;
 	return false;
  }
- boDebug() << k_funcinfo << "sync message successfully loaded" <<endl;
+ boDebug(370) << k_funcinfo << "sync message successfully loaded" <<endl;
 
  forceCompleteSyncCheckAndUnlockGame(mGame->canvasNonConst());
 
@@ -946,7 +946,7 @@ bool BosonNetworkSynchronizer::receiveNetworkSyncUnlockGame(QDataStream& stream)
 {
  Q_UNUSED(stream);
  if (!d->mSyncer.gameLocked()) {
-	boError() << k_funcinfo << "cannot unlock game - game not locked" << endl;
+	boError(370) << k_funcinfo << "cannot unlock game - game not locked" << endl;
 	return false;
  }
  d->mSyncer.setGameLocked(false);
@@ -956,7 +956,7 @@ bool BosonNetworkSynchronizer::receiveNetworkSyncUnlockGame(QDataStream& stream)
 void BosonNetworkSynchronizer::syncCheckingCompleted(const QValueList<Q_UINT32>& outOfSyncClients)
 {
  if (!outOfSyncClients.isEmpty()) {
-	boDebug() << k_funcinfo << outOfSyncClients.count() << " clients out of sync" << endl;
+	boDebug(370) << k_funcinfo << outOfSyncClients.count() << " clients out of sync" << endl;
  }
  if (d->mSyncer.gameLocked()) {
 	if (outOfSyncClients.isEmpty()) {
@@ -979,13 +979,13 @@ void BosonNetworkSynchronizer::syncCheckingCompleted(const QValueList<Q_UINT32>&
 void BosonNetworkSynchronizer::syncNetwork()
 {
  BO_CHECK_NULL_RET(mGame);
- boDebug() << k_funcinfo << endl;
+ boDebug(370) << k_funcinfo << endl;
  if (!mGame->isAdmin()) {
-	boWarning() << k_funcinfo << "may be called by ADMIN only" << endl;
+	boWarning(370) << k_funcinfo << "may be called by ADMIN only" << endl;
 	return;
  }
  if (d->mSyncer.gameLocked()) {
-	boError() << k_funcinfo << "game is already locked" << endl;
+	boError(370) << k_funcinfo << "game is already locked" << endl;
 	return;
  }
 
@@ -1028,7 +1028,7 @@ void BosonNetworkSynchronizer::forceCompleteSyncCheckAndUnlockGame(BosonCanvas* 
 
  BO_CHECK_NULL_RET(canvas);
  if (!d->mSyncer.gameLocked()) {
-	boError() << k_funcinfo << "game not locked. aborting." << endl;
+	boError(370) << k_funcinfo << "game not locked. aborting." << endl;
 	return;
  }
 
@@ -1039,7 +1039,7 @@ void BosonNetworkSynchronizer::forceCompleteSyncCheckAndUnlockGame(BosonCanvas* 
 	// log is removed from the queue. so the queue must be empty at this
 	// point, or there must be a bug.
 
-	boWarning() << k_funcinfo << "log queue is not empty. clearing it now." << endl;
+	boWarning(370) << k_funcinfo << "log queue is not empty. clearing it now." << endl;
 	d->mSyncChecker.clearLogs();
  }
 
@@ -1318,7 +1318,7 @@ bool BosonNetworkSyncer::receiveNetworkRequestSync(QDataStream&)
  }
  QByteArray syncBuffer = createSyncMessage();
  if (syncBuffer.size() == 0) {
-	boError() << k_funcinfo << "could not create sync message." << endl;
+	boError(370) << k_funcinfo << "could not create sync message." << endl;
 	setGameLocked(false);
 	return false;
  }
@@ -1337,7 +1337,7 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
 
  QDomDocument doc;
  if (!doc.setContent(xml)) {
-	boError() << k_funcinfo << "unable to load XML from stream" << endl;
+	boError(370) << k_funcinfo << "unable to load XML from stream" << endl;
 	return false;
  }
  QDomElement root = doc.documentElement();
@@ -1345,7 +1345,7 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
  {
 	QDomElement players = root.namedItem("Players").toElement();
 	if (players.isNull()) {
-		boError() << k_funcinfo << "no Players tag found" << endl;
+		boError(370) << k_funcinfo << "no Players tag found" << endl;
 		return false;
 	}
 	for (KPlayer* kplayer = mGame->playerList()->first(); kplayer; kplayer = mGame->playerList()->next()) {
@@ -1365,7 +1365,7 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
 				ok = false;
 			}
 			if (!ok) {
-				boError() << k_funcinfo << "Invalid PlayerId attribute" << endl;
+				boError(370) << k_funcinfo << "Invalid PlayerId attribute" << endl;
 				return false;
 			}
 			if (id == player->bosonId()) {
@@ -1373,7 +1373,7 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
 			}
 		}
 		if (playerElement.isNull()) {
-			boError() << k_funcinfo << "No Player tag found for player " << player->bosonId() << endl;
+			boError(370) << k_funcinfo << "No Player tag found for player " << player->bosonId() << endl;
 			return false;
 		}
 	
@@ -1382,7 +1382,7 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
 		player->quitGame();
 		player->initMap(map);
 		if (!player->loadFromXML(playerElement)) {
-			boError() << k_funcinfo << "could not load player " << player->bosonId() << endl;
+			boError(370) << k_funcinfo << "could not load player " << player->bosonId() << endl;
 			return false;
 		}
 	}
@@ -1390,7 +1390,7 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
 
  QDomElement canvasElement = root.namedItem("Canvas").toElement();
  if (canvasElement.isNull()) {
-	boError() << k_funcinfo << "no Canvas tag found" << endl;
+	boError(370) << k_funcinfo << "no Canvas tag found" << endl;
 	return false;
  }
 
@@ -1425,7 +1425,7 @@ QByteArray BosonNetworkSyncer::createSyncMessage()
 		QDomElement player = doc.createElement("Player");
 		Player* p2 = (Player*)p;
 		if (!p2->saveAsXML(player)) {
-			boError() << k_funcinfo << "unable to save player " << ((Player*)p)->bosonId() << endl;
+			boError(370) << k_funcinfo << "unable to save player " << ((Player*)p)->bosonId() << endl;
 			return b;
 		}
 		players.appendChild(player);
@@ -1441,7 +1441,7 @@ QByteArray BosonNetworkSyncer::createSyncMessage()
 
  // TODO: save Boson (especially random number - we probably need a design
  // change for the random number class here)
- boWarning() << k_funcinfo << "TODO: save the Boson object to the xml document" << endl;
+ boWarning(370) << k_funcinfo << "TODO: save the Boson object to the xml document" << endl;
 
 
  QDataStream stream(b, IO_WriteOnly);
