@@ -275,6 +275,7 @@ void BoUfoStartEditorWidget::slotNetStart()
 	boGame->bosonAddPlayer(p);
  }
 
+ networkInterface()->addNeutralPlayer(true);
  networkInterface()->sendNewGame(field, true, &newMap);
 }
 

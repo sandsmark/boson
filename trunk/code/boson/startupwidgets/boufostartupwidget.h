@@ -40,6 +40,7 @@ public:
 		IdStartEditor = 3,
 		IdLoading = 4,
 		IdNetwork = 5,
+		IdLoadFromLog = 6,
 		IdLast // MUST be the last entry!
 	};
 
@@ -95,6 +96,7 @@ public slots:
 	 * select the playfield.
 	 **/
 	void slotNewSinglePlayerGame(KCmdLineArgs* args = 0);
+	void slotLoadFromLog(const QString& fileName);
 
 	/**
 	 * Mainly used internally. This will display the network widget and then new

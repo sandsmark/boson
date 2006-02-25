@@ -270,6 +270,14 @@ public:
 	void writeGameLog(QTextStream& log);
 	bool saveGameLogs(const QString& prefix);
 
+	/**
+	 * Call @ref KGame::syncRandom
+	 *
+	 * You should normally not need this, as @ref KGame ensures that the
+	 * random seeds are in sync.
+	 **/
+	void sendMessageSyncRandom();
+
 	void syncNetwork();
 	void clearDelayedMessages();
 	void forcePauseGame();
@@ -280,6 +288,16 @@ public:
 
 	bool loadCanvasConditions(const QDomElement& root);
 	bool saveCanvasConditions(QDomElement& root) const;
+
+	bool loadFromLog(QPtrList<BoMessage>* messages);
+
+	/**
+	 * Called when all messages from a "loadfromlog" run have been
+	 * delivered. Network messages after this point will be accepted again.
+	 *
+	 * Calling this when not in "loadfromlog" mode is a noop.
+	 **/
+	void setLoadFromLogComplete();
 
 	const BosonNetworkTraffic* networkTraffic() const;
 

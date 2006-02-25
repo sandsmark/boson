@@ -327,6 +327,11 @@ void BosonStarting::slotStartingCompletedReceived(const QByteArray& buffer, Q_UI
 
 void BosonStarting::sendStartingCompleted(bool success)
 {
+ // AB: note: in normal games this is not required. however sending this message
+ // means that we have this message in the log, which in turn makes the
+ // "loadfromlog" mode much easier.
+ boGame->sendMessageSyncRandom();
+
  QByteArray b;
  QDataStream stream(b, IO_WriteOnly);
  stream << (Q_INT8)success;

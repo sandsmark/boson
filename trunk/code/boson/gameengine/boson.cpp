@@ -306,6 +306,7 @@ public:
 	BosonGameStatistics* mGameStatistics;
 
 	bool mGameIsOver;
+	bool mLoadFromLogMode;
 };
 
 Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
@@ -338,6 +339,7 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 
  mGameMode = true;
  d->mGameIsOver = false;
+ d->mLoadFromLogMode = false;
 
  connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, Q_UINT32)),
 		this, SLOT(slotNetworkData(int, const QByteArray&, Q_UINT32, Q_UINT32)));
@@ -368,7 +370,7 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
  //     the log will be saved properly, but since the starting procedure has
  //     been changed completely, we most likely won't be able to load it anyway.
 #warning FIXME: emergencySaveFunction log loading
-#if 0
+#if 1
  if (KCrash::emergencySaveFunction() != NULL) {
 	boError() << k_funcinfo << "oops - already an emergencySaveFunction set! overwriting!" << endl;
  }
@@ -485,6 +487,11 @@ PlayerIO* Boson::playerIOAt(unsigned int index) const
  return 0;
 }
 
+void Boson::sendMessageSyncRandom()
+{
+ syncRandom();
+}
+
 void Boson::quitGame()
 {
  boDebug() << k_funcinfo << endl;
@@ -537,6 +544,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
  switch (msgid) {
 	case BosonMessageIds::AdvanceN:
 	{
+		BO_CHECK_NULL_RET(canvas());
 		d->mNetworkSynchronizer->receiveAdvanceMessage(d->mCanvas);
 		d->mGameStatistics->receiveAdvanceMessage(d->mCanvas);
 		d->mAdvance->receiveAdvanceMessage(gameSpeed());
@@ -574,6 +582,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			// TODO: message box ; back to newgame widget?
 			return;
 		}
+		boGame->lock();
 		QTimer::singleShot(0, this, SIGNAL(signalStartNewGame()));
 		break;
 	}
@@ -589,7 +598,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	case BosonMessageIds::IdGameIsStarted:
 	{
 		QString loadFromLog;
-		stream >> loadFromLog;
+		stream >> loadFromLog; // AB: obsolete!!
 		if (sender != messageClient()->adminId()) {
 			boError() << k_funcinfo << "only ADMIN is allowed to send IdGameIsStarted message! sender="
 					<< sender << " ADMIN="
@@ -600,17 +609,9 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 
 		emit signalGameStarted();
 
-		if (loadFromLog.isEmpty()) {
+		if (!d->mLoadFromLogMode) {
 			if (isAdmin()) {
 				connect(d->mGameTimer, SIGNAL(timeout()), this, SLOT(slotSendAdvance()));
-			}
-		} else {
-			boWarning() << k_funcinfo << "starting to re-play from log..." << endl;
-
-			if (!loadFromLogFile(loadFromLog)) {
-				slotAddChatSystemMessage(i18n("You requested to load from a log file, but the game could not be started using the specified file.\nThe current game is now unusable."));
-//				KMessageBox::sorry(0, i18n("You requested to load from a log file, but the game could not be started using the specified file.\nThe current game is now unusable."));
-			} else {
 			}
 		}
 		clearUndoStacks();
@@ -668,6 +669,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	}
 	case BosonMessageIds::IdKillPlayer:
 	{
+		BO_CHECK_NULL_RET(canvas());
 		Player* p = 0;
 		Q_UINT32 id = 0;
 		stream >> id;
@@ -680,6 +682,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	}
 	case BosonMessageIds::IdModifyMinerals:
 	{
+		BO_CHECK_NULL_RET(canvas());
 		Player* p = 0;
 		Q_INT32 change = 0;
 		Q_UINT32 id = 0;
@@ -694,6 +697,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	}
 	case BosonMessageIds::IdModifyOil:
 	{
+		BO_CHECK_NULL_RET(canvas());
 		Player* p = 0;
 		Q_INT32 change = 0;
 		Q_UINT32 id = 0;
@@ -724,6 +728,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	}
 	case BosonMessageIds::IdNetworkSyncCheck:
 	{
+		BO_CHECK_NULL_RET(canvas());
 		if (!d->mNetworkSynchronizer->receiveNetworkSyncCheck(stream)) {
 			// the network is not in sync anymore.
 			// note that we don't have to do anything here, it is
@@ -733,6 +738,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	}
 	case BosonMessageIds::IdNetworkSyncCheckACK:
 	{
+		BO_CHECK_NULL_RET(canvas());
 		if (!isAdmin()) {
 			break;
 		}
@@ -745,6 +751,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	}
 	case BosonMessageIds::IdNetworkRequestSync:
 	{
+		BO_CHECK_NULL_RET(canvas());
 		if (!d->mNetworkSynchronizer->receiveNetworkRequestSync(stream)) {
 			slotAddChatSystemMessage(i18n("Could not synchronize clients. Cannot fix out-of-sync client. Sorry"));
 			boError() << k_funcinfo << "unable to synchronize clients. cannot fix out-of-sync." << endl;
@@ -754,6 +761,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	}
 	case BosonMessageIds::IdNetworkSync:
 	{
+		BO_CHECK_NULL_RET(canvas());
 		if (!d->mNetworkSynchronizer->receiveNetworkSync(stream)) {
 			slotAddChatSystemMessage(i18n("Could not load from sync stream. Game unusable now (loading error)"));
 
@@ -1045,8 +1053,17 @@ void Boson::slotReceiveAdvance()
  d->mAdvance->receiveAdvanceCall();
 }
 
+void Boson::setLoadFromLogComplete()
+{
+ d->mLoadFromLogMode = false;
+}
+
 void Boson::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 r, Q_UINT32 s, Q_UINT32 clientId)
 {
+ if (d->mLoadFromLogMode) {
+	// ignoring any network messages while loading from log.
+	return;
+ }
  if (!d->mNetworkSynchronizer->acceptNetworkTransmission(msgid)) {
 	// the game is locked. only certain messages are allowed currently.
 	boDebug() << k_funcinfo << "game is locked for syncing. ignoring message with id=" << msgid << endl;
@@ -1591,6 +1608,10 @@ static void emergencySave(int signal)
 // (this is called after IdGameIsStarted is received)
 bool Boson::loadFromLogFile(const QString& file)
 {
+ if (d->mLoadFromLogMode) {
+	boError() << k_funcinfo << "already loading from log" << endl;
+	return false;
+ }
  if (file.isEmpty()) {
 	boError() << k_funcinfo << "empty log filename" << endl;
 	return false;
@@ -1625,11 +1646,24 @@ bool Boson::loadFromLogFile(const QString& file)
  }
  messages.removeFirst();
 
- while (!messages.isEmpty()) {
-	BoMessage* m = messages.take(0);
+ return loadFromLog(&messages);
+}
+
+bool Boson::loadFromLog(QPtrList<BoMessage>* messages)
+{
+ if (!messages) {
+	return false;
+ }
+ boDebug() << k_funcinfo << "delaying " << messages->count() << " messages." << endl;
+ while (!messages->isEmpty()) {
+	BoMessage* m = messages->take(0);
 	d->mMessageDelayer->delay(m);
  }
+ boDebug() << k_funcinfo << "messages delayed." << endl;
 
+ d->mLoadFromLogMode = true;
+
+ boDebug() << k_funcinfo << "unlocking messagedelayer - processing messages now." << endl;
  d->mMessageDelayer->unlock();
  return true;
 }

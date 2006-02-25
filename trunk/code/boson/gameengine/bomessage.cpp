@@ -176,6 +176,9 @@ void BoMessageDelayer::unlock()
  while (!mDelayedMessages->isEmpty() && !mIsLocked) {
 	processDelayed();
  }
+ if (mDelayedMessages->isEmpty()) {
+	mBoson->setLoadFromLogComplete();
+ }
 }
 
 unsigned int BoMessageDelayer::delayedMessageCount() const
