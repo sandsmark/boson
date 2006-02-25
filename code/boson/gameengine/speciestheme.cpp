@@ -139,6 +139,12 @@ QColor SpeciesTheme::defaultColor()
 
 bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
 {
+ QDir dir(speciesDir);
+ if (!dir.exists()) {
+	boError() << k_funcinfo << "directory " << speciesDir << " does not exist. cannot load theme from there." << endl;
+	return false;
+ }
+
  if (teamColor == QColor(0,0,0)) { // no color specified
 	setTeamColor(defaultColor());
  } else {
