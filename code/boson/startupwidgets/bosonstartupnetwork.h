@@ -44,6 +44,7 @@ public:
 	 * mode. @p field must be NULL then.
 	 **/
 	bool sendNewGame(BosonPlayField* field, bool editor, const QByteArray* newPlayField = 0);
+	bool sendLoadGame(const QByteArray& data);
 	void sendChangeTeamColor(Player* p, const QColor& color);
 	void sendChangeSpecies(Player* p, const QString& species, const QColor& color);
 	void sendChangePlayerName(Player* p, const QString& name);

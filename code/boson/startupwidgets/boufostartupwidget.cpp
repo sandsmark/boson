@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2006 Andreas Beckermann (b_mann@gmx.de)
     Copyright (C) 2002-2005 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
@@ -27,6 +27,7 @@
 #include "boufonetworkoptionswidget.h"
 #include "boufostarteditorwidget.h"
 #include "boufoloadsavegamewidget.h"
+#include "bosonloadsavegamehandler.h"
 #include "welcomewidget.h"
 #include "bosonstartupnetwork.h"
 #include "bodebug.h"
@@ -55,6 +56,8 @@ public:
 		mNetworkInterface = 0;
 
 		mLocalPlayer = 0;
+
+		mLoadSaveGameHandler = 0;
 	}
 
 	BoUfoWidgetStack* mWidgetStack;
@@ -64,6 +67,7 @@ public:
 	QGuardedPtr<Player> mLocalPlayer;
 
 	bool mSinglePlayer;
+	BosonLoadSaveGameHandler* mLoadSaveGameHandler;
 };
 
 BoUfoStartupWidget::BoUfoStartupWidget() : BoUfoWidget()
@@ -98,6 +102,12 @@ void BoUfoStartupWidget::init()
  d->mNetworkInterface = new BosonStartupNetwork(this);
  d->mNetworkInterface->setGame(boGame);
 
+ d->mLoadSaveGameHandler = new BosonLoadSaveGameHandler(d->mNetworkInterface, this);
+ connect(d->mLoadSaveGameHandler, SIGNAL(signalGameOver()),
+		this, SIGNAL(signalGameOver()));
+ connect(d->mLoadSaveGameHandler, SIGNAL(signalCancelLoadSave()),
+		this, SIGNAL(signalCancelLoadSave()));
+
  installEventFilter(this); // for the popup menu
 
  d->mSinglePlayer = false;
@@ -105,6 +115,7 @@ void BoUfoStartupWidget::init()
 
 BoUfoStartupWidget::~BoUfoStartupWidget()
 {
+ delete d->mLoadSaveGameHandler;
  delete d;
 }
 
@@ -117,6 +128,11 @@ void BoUfoStartupWidget::setLocalPlayer(Player* p)
  }
 }
 
+void BoUfoStartupWidget::loadGame(const QString& fileName)
+{
+ d->mLoadSaveGameHandler->slotLoadGame(fileName);
+}
+
 void BoUfoStartupWidget::slotLoadGame()
 {
  showWidget(IdLoadSaveGame);
@@ -127,6 +143,11 @@ void BoUfoStartupWidget::slotLoadGame()
  }
  loadSave->setSaveMode(false);
  loadSave->updateGames();
+}
+
+void BoUfoStartupWidget::saveGame(const QString& fileName, const QString& description, bool forceOverwrite)
+{
+ d->mLoadSaveGameHandler->slotSaveGame(fileName, description, forceOverwrite);
 }
 
 void BoUfoStartupWidget::slotSaveGame()
@@ -285,9 +306,9 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 		BoUfoLabel::setDefaultForegroundColor(defaultColor);
 		loadSaveWidget->setSuffix(QString::fromLatin1("bsg"));
 		connect(loadSaveWidget, SIGNAL(signalLoadGame(const QString&)),
-				this, SIGNAL(signalLoadGame(const QString&)));
+				d->mLoadSaveGameHandler, SLOT(slotLoadGame(const QString&)));
 		connect(loadSaveWidget, SIGNAL(signalSaveGame(const QString&, const QString&)),
-				this, SIGNAL(signalSaveGame(const QString&, const QString&)));
+				d->mLoadSaveGameHandler, SLOT(slotSaveGame(const QString&, const QString&)));
 		connect(loadSaveWidget, SIGNAL(signalCancel()),
 				this, SIGNAL(signalCancelLoadSave()));
 		w = loadSaveWidget;

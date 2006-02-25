@@ -147,10 +147,8 @@ startupwidgets_sources = """
 	startupwidgets/boufostarteditorwidget.cpp
 	startupwidgets/boufoloadsavegamewidget.cpp
 	startupwidgets/bocreatenewmap.cpp
+	startupwidgets/bosonloadsavegamehandler.cpp
 """
-#startupwidgets_sources = """
-#	startupwidgets/welcomewidget.boui
-#"""
 
 commandframe_sources = """
 	gameview/commandframe/bosoncommandframe.cpp
