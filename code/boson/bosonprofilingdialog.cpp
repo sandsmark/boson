@@ -41,6 +41,119 @@
 #include <qmemarray.h>
 #include <qdict.h>
 
+
+/**
+ * Stores all occurances of a certain event, no matter where in the tree it
+ * occurs
+ **/
+class ProfilingEventSum
+{
+public:
+	ProfilingEventSum(const QString& name)
+	{
+		mName = name;
+		mTotalCalls = 0;
+		mTime = 0;
+	}
+	~ProfilingEventSum()
+	{
+	}
+
+	void addCall(const BosonProfilingItem* item, const BosonProfilingItem* caller)
+	{
+		BO_CHECK_NULL_RET(item);
+		mTime += item->elapsedTime();
+		mTotalCalls++;
+
+		QString callerName;
+		if (caller) {
+			callerName = caller->name();
+		}
+		if (!mCallsBy.contains(callerName)) {
+			mCallsBy.insert(callerName, 0);
+		}
+		mCallsBy[callerName] = mCallsBy[callerName] + 1;
+	}
+
+	const QString& name() const
+	{
+		return mName;
+	}
+	long int timeUs() const
+	{
+		return mTime;
+	}
+	unsigned int totalCalls() const
+	{
+		return mTotalCalls;
+	}
+	const QMap<QString, int>& callers() const
+	{
+		return mCallsBy;
+	}
+
+private:
+	QString mName;
+	long int mTime;
+	unsigned int mTotalCalls;
+	QMap<QString, int> mCallsBy;
+};
+
+class ProfilingEventSumCollection
+{
+public:
+	ProfilingEventSumCollection()
+	{
+	}
+	~ProfilingEventSumCollection()
+	{
+		QMap<QString, ProfilingEventSum*>::iterator it;
+		for (it = mName2Sum.begin(); it != mName2Sum.end(); ++it) {
+			delete it.data();
+		}
+		mName2Sum.clear();
+	}
+
+	void add(const BosonProfilingItem* item, const BosonProfilingItem* calledBy)
+	{
+		BO_CHECK_NULL_RET(item);
+		QString name = item->name();
+		ProfilingEventSum* sum = 0;
+		if (!mName2Sum.contains(name)) {
+			sum = new ProfilingEventSum(name);
+			mName2Sum.insert(name, sum);
+		} else {
+			sum = mName2Sum[name];
+		}
+		sum->addCall(item, calledBy);
+
+		if (!item->children()) {
+			return;
+		}
+		for (QPtrListIterator<BosonProfilingItem> it(*item->children()); it.current(); ++it) {
+			add(it.current(), item);
+		}
+	}
+
+	const ProfilingEventSum* sumForEvent(const QString& name) const
+	{
+		if (!mName2Sum.contains(name)) {
+			return 0;
+		}
+		return mName2Sum[name];
+	}
+
+	QValueList<QString> allEventNames() const
+	{
+		return mName2Sum.keys();
+	}
+
+private:
+	QMap<QString, ProfilingEventSum*> mName2Sum;
+};
+
+
+
 class ProfilingItem
 {
 public:
@@ -141,6 +254,7 @@ public:
 	BosonProfilingDialogPrivate()
 	{
 		mTopItem = 0;
+		mEventSumCollection = 0;
 	}
 
 	BosonProfilingDialogGUI* mGUI;
@@ -149,6 +263,7 @@ public:
 	QPtrList<BosonProfilingItem> mItems;
 
 	ProfilingItem* mTopItem;
+	ProfilingEventSumCollection* mEventSumCollection;
 };
 
 BosonProfilingDialog::BosonProfilingDialog(QWidget* parent, bool modal)
@@ -164,9 +279,13 @@ BosonProfilingDialog::BosonProfilingDialog(QWidget* parent, bool modal)
 
  d->mGUI->mEvents->setColumnWidthMode(0, QListView::Manual);
  d->mGUI->mEvents->setColumnWidth(0, 400);
+ d->mGUI->mEventLeafs->setColumnWidthMode(0, QListView::Manual);
+ d->mGUI->mEventLeafs->setColumnWidth(0, 400);
  d->mGUI->mRawTree->setColumnWidthMode(0, QListView::Manual);
  d->mGUI->mRawTree->setColumnWidth(0, 400);
 
+ connect(d->mGUI->mEvents, SIGNAL(currentChanged(QListViewItem*)),
+		this, SLOT(slotShowSumForEvent(QListViewItem*)));
  connect(d->mGUI->mLoadFromFile, SIGNAL(clicked()),
 		this, SLOT(slotLoadFromFile()));
  connect(d->mGUI->mSaveToFile, SIGNAL(clicked()),
@@ -180,17 +299,20 @@ BosonProfilingDialog::BosonProfilingDialog(QWidget* parent, bool modal)
 BosonProfilingDialog::~BosonProfilingDialog()
 {
  d->mGUI->mEvents->clear();
+ d->mGUI->mEventLeafs->clear();
  d->mGUI->mRawTree->clear();
 
  d->mItems.setAutoDelete(true);
  d->mItems.clear();
  delete d->mTopItem;
+ delete d->mEventSumCollection;
  delete d;
 }
 
 void BosonProfilingDialog::reset()
 {
  resetEventsPage();
+ resetEventLeafsPage();
  resetRawTreePage();
  resetFilesPage();
 }
@@ -215,10 +337,13 @@ void BosonProfilingDialog::slotUpdate()
  delete d->mTopItem;
 
  d->mTopItem = new ProfilingItem(QString::null);
- QPtrListIterator<BosonProfilingItem> it(d->mItems);
- while (it.current()) {
+ for (QPtrListIterator<BosonProfilingItem> it(d->mItems); it.current(); ++it) {
 	d->mTopItem->insertChild(it.current());
-	++it;
+ }
+ delete d->mEventSumCollection;
+ d->mEventSumCollection = new ProfilingEventSumCollection();
+ for (QPtrListIterator<BosonProfilingItem> it(d->mItems); it.current(); ++it) {
+	d->mEventSumCollection->add(it.current(), 0);
  }
 
  reset();
@@ -290,6 +415,35 @@ void BosonProfilingDialog::resetEventsPage()
  initProfilingItem(0, d->mTopItem, -1);
 }
 
+void BosonProfilingDialog::resetEventLeafsPage()
+{
+ d->mGUI->mEventLeafs->clear();
+
+ QValueList<QString> events = d->mEventSumCollection->allEventNames();
+ for (QValueList<QString>::iterator it = events.begin(); it != events.end(); ++it) {
+	const ProfilingEventSum* sum = d->mEventSumCollection->sumForEvent(*it);
+	if (!sum) {
+		continue;
+	}
+
+	QListViewItemNumberTime* item = new QListViewItemNumberTime(d->mGUI->mEventLeafs);
+	item->setText(0, *it);
+
+	unsigned int calls = sum->totalCalls();
+	unsigned long int sumUs = sum->timeUs();
+	unsigned long int averageUs = 0;
+	if (calls > 0) {
+		averageUs = sumUs / calls;
+	}
+	item->setText(1, QString::number(sumUs));
+	item->setTime3(1, sumUs);
+	item->setTime3(4, averageUs);
+	item->setText(7, QString::number(calls));
+ }
+
+// initProfilingItem(0, d->mTopItem, -1);
+}
+
 void BosonProfilingDialog::resetRawTreePage()
 {
  d->mGUI->mRawTree->clear();
@@ -359,6 +513,54 @@ void BosonProfilingDialog::initRawTreeProfilingItem(QListViewItemNumberTime* ite
 	initRawTreeProfilingItem(child, it.current(), totalTime);
 
 	++it;
+ }
+}
+
+void BosonProfilingDialog::slotShowSumForEvent(QListViewItem* item)
+{
+ QString eventName;
+ int calls = 0;
+ long int sumUs = 0;
+ double averageUs = 0;
+ QMap<QString, int> callers;
+ d->mGUI->mSelectedEventCalledBy->clear();
+ if (item) {
+	eventName = item->text(0);
+	const ProfilingEventSum* sum = d->mEventSumCollection->sumForEvent(eventName);
+	if (!sum) {
+		eventName = i18n("(Could not find event. Internal error.)");
+	} else {
+		calls = sum->totalCalls();
+		sumUs = sum->timeUs();
+		callers = sum->callers();
+	}
+ }
+ if (eventName.isNull()) {
+	eventName = i18n("(no event selected)");
+ }
+ if (calls > 0) {
+	averageUs = ((double)sumUs) / calls;
+ }
+ d->mGUI->mSelectedEventName->setText(eventName);
+ d->mGUI->mSelectedEventCalls->setText(QString::number(calls));
+ d->mGUI->mSelectedEventSum->setText(i18n("%1/%2/%3")
+		.arg(QString::number(sumUs))
+		.arg(QString::number(((double)sumUs) / 1000.0))
+		.arg(QString::number(((double)sumUs) / 1000000.0)));
+ d->mGUI->mSelectedEventAverage->setText(i18n("%1/%2/%3")
+		.arg(QString::number(averageUs))
+		.arg(QString::number(averageUs / 1000.0))
+		.arg(QString::number(averageUs / 1000000.0)));
+
+ d->mGUI->mSelectedEventCalledBy->clear();
+ for (QMap<QString, int>::iterator it = callers.begin(); it != callers.end(); ++it) {
+	QListViewItem* item = new QListViewItemNumber(d->mGUI->mSelectedEventCalledBy);
+	QString callerName = it.key();
+	if (callerName.isNull()) {
+		callerName = i18n("(toplevel event)");
+	}
+	item->setText(0, callerName);
+	item->setText(1, QString::number(it.data()));
  }
 }
 
