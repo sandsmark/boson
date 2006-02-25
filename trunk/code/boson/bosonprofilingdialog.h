@@ -44,6 +44,7 @@ public:
 protected:
 	void reset();
 	void resetEventsPage();
+	void resetEventLeafsPage();
 	void resetRawTreePage();
 	void resetFilesPage();
 
@@ -55,6 +56,7 @@ protected slots:
 	void slotUpdate();
 	void slotSaveToFile();
 	void slotLoadFromFile();
+	void slotShowSumForEvent(QListViewItem*);
 
 private:
 	BosonProfilingDialogPrivate* d;
