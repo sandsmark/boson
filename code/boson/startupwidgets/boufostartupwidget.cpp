@@ -24,6 +24,7 @@
 #include "../../bomemory/bodummymemory.h"
 #include "boufoloadingwidget.h"
 #include "boufonewgamewidget.h"
+#include "boufoloadfromlogwidget.h"
 #include "boufonetworkoptionswidget.h"
 #include "boufostarteditorwidget.h"
 #include "boufoloadsavegamewidget.h"
@@ -35,6 +36,7 @@
 #include "../defines.h"
 
 #include <kmainwindow.h> // AB: urghs
+#include <kmessagebox.h>
 #include <kstandarddirs.h>
 #include <klocale.h>
 #include <kcmdlineargs.h>
@@ -161,6 +163,23 @@ void BoUfoStartupWidget::slotSaveGame()
  }
  loadSave->setSaveMode(true);
  loadSave->updateGames();
+}
+
+void BoUfoStartupWidget::slotLoadFromLog(const QString& fileName)
+{
+ d->mSinglePlayer = true;
+
+ showWidget(IdLoadFromLog);
+
+ BoUfoLoadFromLogWidget* w = (BoUfoLoadFromLogWidget*)d->mWidgetStack->stackWidget(IdLoadFromLog);
+ if (!w) {
+	BO_NULL_ERROR(w);
+	return;
+ }
+ if (!w->loadFromLog(fileName)) {
+	KMessageBox::sorry(0, i18n("Could not load from log file %1").arg(fileName));
+	return;
+ }
 }
 
 void BoUfoStartupWidget::slotNewSinglePlayerGame(KCmdLineArgs* args)
@@ -332,6 +351,18 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 		w = startGame;
 		break;
 	}
+	case IdLoadFromLog:
+	{
+		QColor defaultColor = BoUfoLabel::defaultForegroundColor();
+		BoUfoLabel::setDefaultForegroundColor(Qt::white);
+		BoUfoLoadFromLogWidget* load = new BoUfoLoadFromLogWidget(networkInterface());
+		BoUfoLabel::setDefaultForegroundColor(defaultColor);
+		connect(load, SIGNAL(signalCancelled()),
+				this, SLOT(slotShowWelcomeWidget()));
+
+		w = load;
+		break;
+	}
 	case IdNetwork:
 	{
 		// AB: the network widget requires the newgame widget to be
@@ -390,6 +421,8 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 
 	// should be done _after_ adding the local player
 	((BoUfoNewGameWidget*)w)->initInitialPlayField();
+ } else if (widgetId == IdLoadFromLog) {
+	emit signalAddLocalPlayer();
  }
 }
 

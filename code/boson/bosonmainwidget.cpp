@@ -871,10 +871,12 @@ void BosonMainWidget::slotStartNewGame()
  BO_CHECK_NULL_RET(boGame);
  if (!d->mStarting) {
 	boError() << k_funcinfo << "NULL starting object!!" << endl;
+	boGame->unlock();
 	return;
  }
  if (!d->mStartup) {
 	boError() << k_funcinfo << "NULL startup widget" << endl;
+	boGame->unlock();
 	return;
  }
  boDebug(270) << k_funcinfo << endl;
@@ -1057,7 +1059,11 @@ void BosonMainWidget::slotLoadFromLog(const QString& logFile)
  }
  BO_CHECK_NULL_RET(boGame);
  boDebug() << k_funcinfo << "trying to load from log file " << logFile << endl;
- d->mStartup->slotNewSinglePlayerGame(0);
+ d->mStartup->slotLoadFromLog(logFile);
+
+ // AB: this is mostly a dummy call: we just need a non-null string to tell
+ // Boson not to start the game timer.
+ // -> the messages are actually loaded already at this point
  BO_CHECK_NULL_RET(d->mStarting);
  d->mStarting->setLoadFromLogFile(logFile);
 }

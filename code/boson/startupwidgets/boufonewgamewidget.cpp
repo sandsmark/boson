@@ -558,8 +558,16 @@ void BoUfoNewGameWidget::slotNetStart()
         return;
     }
 
-    // Send start message over net
-    if (!networkInterface()->sendNewGame(field, false)) {
+    bool ret = true;
+    if (ret) {
+      if (boGame->isAdmin()) {
+        ret = networkInterface()->addNeutralPlayer(false);
+      }
+    }
+    if (ret) {
+      ret = networkInterface()->sendNewGame(field, false);
+    }
+    if (!ret) {
         KMessageBox::sorry(0, i18n("The selected map could not be saved to a network stream. This might be due to a broken map file, or due to a boson bug.\nAnyway - the game cannot be started."));
         return;
     } else {

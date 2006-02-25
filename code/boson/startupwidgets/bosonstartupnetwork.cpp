@@ -147,25 +147,23 @@ bool BosonStartupNetwork::sendNewGame(BosonPlayField* field, bool editor, const 
 		return false;
 	}
  }
- // AB: note that _only_ admin does this!
- if (mGame->maxPlayers() >= 0) {
-	// we increase the limit for the neutral player only!
-	mGame->setMaxPlayers(mGame->maxPlayers() + 1);
- }
- Player* neutralPlayer = mGame->addNeutralPlayer();
- if (!neutralPlayer) {
-	boError() << k_funcinfo << "unable to add neutral player. cannot send newgame message." << endl;
+
+ return sendNewGame(data, editor);
+}
+
+bool BosonStartupNetwork::sendNewGame(const QByteArray& data, bool editor)
+{
+ if (!mGame) {
+	BO_NULL_ERROR(mGame);
 	return false;
  }
- if (editor) {
-	BosonLocalPlayerInput* io = new BosonLocalPlayerInput(false);
-	neutralPlayer->addGameIO(io);
-	if (!io->initializeIO()) {
-		neutralPlayer->removeGameIO(io, true);
-
-		boError() << k_funcinfo << "could not initialize IO for neutral player" << endl;
-		return false;
-	}
+ if (!mGame->isAdmin()) {
+	boError() << k_funcinfo << "only ADMIN is allowed to send this message" << endl;
+	return false;
+ }
+ if (data.size() == 0) {
+	boError() << k_funcinfo << "empty data. cannot start." << endl;
+	return false;
  }
 
  QByteArray compresseddata = qCompress(data);
@@ -178,35 +176,45 @@ bool BosonStartupNetwork::sendNewGame(BosonPlayField* field, bool editor, const 
 	stream << (Q_INT8)1;
  }
  stream << compresseddata;
- boDebug() << k_funcinfo << "neutral player will get added from network soon. sending newgame message." << endl;
  mGame->sendMessage(buffer, BosonMessageIds::IdNewGame);
  return true;
 }
 
 bool BosonStartupNetwork::sendLoadGame(const QByteArray& data)
 {
- if (data.size() == 0) {
-	boError() << k_funcinfo << "failed loading game (empty data)" << endl;
-	return false;
- }
+ return sendNewGame(data, false);
+}
+
+bool BosonStartupNetwork::addNeutralPlayer(bool editor)
+{
  if (!mGame) {
 	BO_NULL_ERROR(mGame);
 	return false;
  }
  if (!mGame->isAdmin()) {
-	boError() << k_funcinfo << "only ADMIN is allowed to send this message" << endl;
+	boError() << k_funcinfo << "only ADMIN is allowed to call this" << endl;
+	return false;
+ }
+ if (mGame->maxPlayers() >= 0) {
+	// we increase the limit for the neutral player only!
+	mGame->setMaxPlayers(mGame->maxPlayers() + 1);
+ }
+ Player* neutralPlayer = mGame->addNeutralPlayer();
+ if (!neutralPlayer) {
+	boError() << k_funcinfo << "unable to add neutral player. cannot send newgame message." << endl;
 	return false;
  }
 
- QByteArray compresseddata = qCompress(data);
+ if (editor) {
+	BosonLocalPlayerInput* io = new BosonLocalPlayerInput(false);
+	neutralPlayer->addGameIO(io);
+	if (!io->initializeIO()) {
+		neutralPlayer->removeGameIO(io, true);
 
- QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
-
- stream << (Q_INT8)1; // game mode
- stream << compresseddata;
-
- mGame->sendMessage(buffer, BosonMessageIds::IdNewGame);
+		boError() << k_funcinfo << "could not initialize IO for neutral player" << endl;
+		return false;
+	}
+ }
  return true;
 }
 

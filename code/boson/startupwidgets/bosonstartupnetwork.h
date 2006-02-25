@@ -39,6 +39,12 @@ public:
 	void setGame(Boson* game);
 
 	/**
+	 * Add the neutral player that is required before calling @ref
+	 * sendNewGame
+	 **/
+	bool addNeutralPlayer(bool editor);
+
+	/**
 	 * @param newPlayField Used for creating new playfields only. This
 	 * should contain all the data necessary for starting a game in editor
 	 * mode. @p field must be NULL then.
@@ -72,6 +78,9 @@ protected slots:
 	void slotPlayFieldChanged(const QString& id);
 
 	void slotUnsetKGame();
+
+protected:
+	bool sendNewGame(const QByteArray& data, bool editor);
 
 signals:
 	void signalPlayerNameChanged(Player* player);
