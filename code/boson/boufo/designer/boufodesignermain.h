@@ -39,6 +39,7 @@ class QLineEdit;
 class QWidgetStack;
 class QVBoxLayout;
 class BoUfoWidget;
+class OptionsDialog;
 
 
 /**
@@ -222,6 +223,8 @@ protected:
 protected slots:
 	void slotUpdateGUI();
 	void slotDebugUfo();
+	void slotConfigure();
+	void slotApplyOptions();
 
 private slots:
 	void slotWidgetClassSelected(const QString&);
@@ -237,6 +240,7 @@ private:
 	BoWidgetList* mWidgets;
 	BoWidgetTree* mWidgetTree;
 	BoPropertiesWidget* mProperties;
+	OptionsDialog* mOptionsDialog;
 
 	QDomDocument mDocument;
 	QString mPlaceWidgetClass;

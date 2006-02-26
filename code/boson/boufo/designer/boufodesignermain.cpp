@@ -27,6 +27,7 @@
 
 #include "boufodebugwidget.h"
 #include "bosignalsslotseditor.h"
+#include "optionsdialog.h"
 
 #include <bodebug.h>
 
@@ -49,6 +50,7 @@
 #include <qcombobox.h>
 #include <qvgroupbox.h>
 #include <qwidgetstack.h>
+#include <qsettings.h>
 
 #include <math.h>
 #include <stdlib.h>
@@ -1123,6 +1125,7 @@ BoUfoDesignerMain::BoUfoDesignerMain()
  mIface = new BoDebugDCOPIface();
  QWidget* topWidget = new QWidget(this);
  setCentralWidget(topWidget);
+ mOptionsDialog = 0;
 
  QHBoxLayout* layout = new QHBoxLayout(topWidget);
 
@@ -1163,6 +1166,8 @@ BoUfoDesignerMain::BoUfoDesignerMain()
 		this, SLOT(slotPropertiesChanged(const QDomElement&)));
 
  initActions();
+
+ slotApplyOptions();
 }
 
 BoUfoDesignerMain::~BoUfoDesignerMain()
@@ -1526,6 +1531,9 @@ void BoUfoDesignerMain::initActions()
  QAction* debugUfo = new QAction(tr("Debug Ufo..."), 0, this, "debug_ufo");
  connect(debugUfo, SIGNAL(activated()), this, SLOT(slotDebugUfo()));
 
+ QAction* configure = new QAction(tr("&Configure..."), 0, this, "configure");
+ connect(configure, SIGNAL(activated()), this, SLOT(slotConfigure()));
+
  QPopupMenu* file = new QPopupMenu(this);
  menuBar()->insertItem("&File", file);
  fileNew->addTo(file);
@@ -1537,6 +1545,9 @@ void BoUfoDesignerMain::initActions()
  QPopupMenu* debug = new QPopupMenu(this);
  menuBar()->insertItem("&Debug", debug);
  debugUfo->addTo(debug);
+ QPopupMenu* settingsMenu = new QPopupMenu(this);
+ menuBar()->insertItem("&Settings", settingsMenu);
+ configure->addTo(settingsMenu);
 }
 
 void BoUfoDesignerMain::closeEvent(QCloseEvent* e)
@@ -1561,5 +1572,27 @@ void BoUfoDesignerMain::slotDebugUfo()
  debug->setBoUfoManager(mPreview->ufoManager());
  l->addWidget(debug);
  dialog->show();
+}
+
+void BoUfoDesignerMain::slotConfigure()
+{
+ if (mOptionsDialog) {
+	mOptionsDialog->show();
+	return;
+ }
+ mOptionsDialog = new OptionsDialog(this);
+ connect(mOptionsDialog, SIGNAL(signalApplyOptions()),
+		this, SLOT(slotApplyOptions()));
+ mOptionsDialog->show();
+}
+
+void BoUfoDesignerMain::slotApplyOptions()
+{
+ BO_CHECK_NULL_RET(mPreview);
+ mPreview->updateGL(); // enfore call to initializeGL()
+ BO_CHECK_NULL_RET(mPreview->ufoManager());
+ QSettings settings;
+ settings.setPath("boson.eu.org", "boufodesigner");
+ mPreview->ufoManager()->setDataDir(settings.readEntry("/ufo/data_dir"));
 }
 
