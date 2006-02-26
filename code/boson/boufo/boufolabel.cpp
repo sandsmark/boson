@@ -34,6 +34,7 @@
 #include "boufodrawable.h"
 #include "boufomanager.h"
 #include "boufofontinfo.h"
+#include "boufomanager.h"
 #include "ufoext/ubolabel.h"
 #include "ufoext/ubodrawableicon.h"
 #include <bodebug.h>
@@ -149,6 +150,11 @@ void BoUfoLabel::setIconFile(const QString& file_)
 		if (file.isEmpty()) {
 			boDebug() << k_funcinfo << "file " << file_ << " not found" << endl;
 			file = file_;
+		}
+	} else if (BoUfoManager::currentUfoManager()) {
+		QString dataDir = BoUfoManager::currentUfoManager()->dataDir();
+		if (!dataDir.isEmpty()) {
+			file = dataDir + "/" + file_;
 		}
 	}
 	if (!img.load(file)) {
