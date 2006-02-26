@@ -80,7 +80,7 @@ OptionsDialog::OptionsDialog(QWidget* parent)
 
  QSettings settings;
  settings.setPath("boson.eu.org", "boufodesigner");
- d->mDataDir->setText(settings.readEntry("/ufo/data_dir"));
+ d->mDataDir->setText(settings.readEntry("/boson/data_dir"));
 }
 
 OptionsDialog::~OptionsDialog()
@@ -98,7 +98,7 @@ void OptionsDialog::slotApply()
 {
  QSettings settings;
  settings.setPath("boson.eu.org", "boufodesigner");
- settings.writeEntry("/ufo/data_dir", d->mDataDir->text());
+ settings.writeEntry("/boson/data_dir", d->mDataDir->text());
 
  emit signalApplyOptions();
 }

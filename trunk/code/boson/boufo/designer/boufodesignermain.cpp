@@ -1593,6 +1593,6 @@ void BoUfoDesignerMain::slotApplyOptions()
  BO_CHECK_NULL_RET(mPreview->ufoManager());
  QSettings settings;
  settings.setPath("boson.eu.org", "boufodesigner");
- mPreview->ufoManager()->setDataDir(settings.readEntry("/ufo/data_dir"));
+ mPreview->ufoManager()->setDataDir(settings.readEntry("/boson/data_dir"));
 }
 
