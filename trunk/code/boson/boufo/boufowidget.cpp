@@ -46,6 +46,7 @@
 #include "boufomanager.h"
 #include "boufofontinfo.h"
 #include "boufoprofiling.h"
+#include "boufomanager.h"
 
 #include <kglobal.h>
 #include <kstandarddirs.h>
@@ -1039,6 +1040,11 @@ void BoUfoWidget::setBackgroundImageFile(const QString& file_)
 		if (file.isEmpty()) {
 			boDebug() << k_funcinfo << "file " << file_ << " not found" << endl;
 			file = file_;
+		}
+	} else if (BoUfoManager::currentUfoManager()) {
+		QString dataDir = BoUfoManager::currentUfoManager()->dataDir();
+		if (!dataDir.isEmpty()) {
+			file = dataDir + "/" + file_;
 		}
 	}
 	if (!img.load(file)) {
