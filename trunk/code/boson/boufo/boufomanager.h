@@ -120,6 +120,16 @@ public:
 	~BoUfoManager();
 
 	/**
+	 * Set the directory where libufo should search for it's files (images,
+	 * fonts, ...)
+	 *
+	 * In Boson this is set automatically on construction to
+	 * $KDEDIR/share/apps/boson
+	 **/
+	void setDataDir(const QString& dir);
+	QString dataDir() const;
+
+	/**
 	 * @return The BoUfoManager object that maintains the currently active
 	 * context, see @ref ufo::UToolkit::getCurrentContext or NULL if no
 	 * context is current, or if no BoUfoManager manages that context. Note

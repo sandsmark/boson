@@ -49,6 +49,7 @@
 
 #include <qobject.h>
 #include <qdom.h>
+#include <qdir.h>
 
 #include <bodebug.h>
 
@@ -308,11 +309,9 @@ BoUfoManager::BoUfoManager(int w, int h, bool opaque)
 //		tk->putProperty("data_dir", "/usr/local/share/ufo");
 //		tk->putProperty("font_dir", "/usr/local/share/ufo/font");
 	} else {
-		data_dir += "boson/ufo";
-		tk->putProperty("data_dir", data_dir.latin1());
+		data_dir += "boson";
 
-		QString font_dir = data_dir + "/font";
-		tk->putProperty("font_dir", font_dir.latin1());
+		setDataDir(data_dir);
 	}
 
 #if 1
@@ -436,6 +435,27 @@ BoUfoManager::~BoUfoManager()
  // does libufo take care of that?
 
  boDebug() << k_funcinfo << "done" << endl;
+}
+
+void BoUfoManager::setDataDir(const QString& data_dir)
+{
+ if (data_dir.isEmpty()) {
+	boWarning() << k_funcinfo << "no data_dir given" << endl;
+	return;
+ }
+ QDir dir(data_dir);
+ if (!dir.exists()) {
+	boWarning() << k_funcinfo << "given data_dir " << data_dir << " does not exist" << endl;
+	return;
+ }
+ QString font_dir = data_dir + "/font";
+ setUfoToolkitProperty("data_dir", data_dir);
+ setUfoToolkitProperty("font_dir", font_dir);
+}
+
+QString BoUfoManager::dataDir() const
+{
+ return ufoToolkitProperty("data_dir");
 }
 
 BoUfoManager* BoUfoManager::currentUfoManager()
