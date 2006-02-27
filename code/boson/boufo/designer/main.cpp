@@ -24,6 +24,7 @@
 #include <bodebug.h>
 
 #include <qapplication.h>
+#include <qsettings.h>
 
 #include <stdlib.h>
 #include <iostream>
@@ -57,6 +58,12 @@ int main(int argc, char **argv)
 		}
 		file = app.argv()[i + 1];
 	}
+ }
+
+ if (file.isEmpty()) {
+	QSettings settings;
+	settings.setPath("boson.eu.org", "boufodesigner");
+	file = settings.readEntry("/boufodesigner/MostRecentFile");
  }
 
  if (file.isEmpty()) {
