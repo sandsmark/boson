@@ -26,7 +26,6 @@
 #include "boactionswidget.h"
 #include "editorunitconfigwidget.h"
 #include "bocommandframeeventlistener.h"
-#include "../../boselection.h"
 #include "../../gameengine/unit.h"
 #include "../../gameengine/unitplugins.h"
 #include "../../gameengine/unitproperties.h"
@@ -35,13 +34,14 @@
 #include "../../gameengine/player.h"
 #include "../../gameengine/playerio.h"
 #include "../../gameengine/speciestheme.h"
-#include "../../speciesdata.h"
 #include "../../gameengine/boson.h"
-#include "bodebug.h"
 #include "../../boufo/boufolabel.h"
 #include "../../boufo/boufoprogress.h"
 #include "../../boufo/boufocustomwidget.h"
+#include "../../speciesdata.h"
 #include "../../bosonviewdata.h"
+#include "../boselection.h"
+#include "bodebug.h"
 
 #include <klocale.h>
 
