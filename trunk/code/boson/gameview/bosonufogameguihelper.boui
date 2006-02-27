@@ -1058,6 +1058,27 @@
      <takesKeyboardFocus/>
     </Properties>
     <Widget>
+     <ClassName>BoUfoWidget</ClassName>
+     <Properties>
+      <name>mWidget53</name>
+      <constraints/>
+      <gridLayoutColumns/>
+      <gridLayoutRows/>
+      <opaque/>
+      <layout/>
+      <minimumWidth/>
+      <minimumHeight/>
+      <preferredWidth/>
+      <preferredHeight/>
+      <backgroundImageFile/>
+      <verticalAlignment/>
+      <horizontalAlignment/>
+      <borderType/>
+      <stretch>1</stretch>
+      <takesKeyboardFocus/>
+     </Properties>
+    </Widget>
+    <Widget>
      <ClassName>BoUfoLabel</ClassName>
      <Properties>
       <name>mGamePaused</name>
@@ -1077,6 +1098,27 @@
       <gridLayoutColumns/>
       <gridLayoutRows/>
       <borderType/>
+      <takesKeyboardFocus/>
+     </Properties>
+    </Widget>
+    <Widget>
+     <ClassName>BoUfoWidget</ClassName>
+     <Properties>
+      <name>mWidget54</name>
+      <constraints/>
+      <gridLayoutColumns/>
+      <gridLayoutRows/>
+      <opaque/>
+      <layout/>
+      <minimumWidth/>
+      <minimumHeight/>
+      <preferredWidth/>
+      <preferredHeight/>
+      <backgroundImageFile/>
+      <verticalAlignment/>
+      <horizontalAlignment/>
+      <borderType/>
+      <stretch>1</stretch>
       <takesKeyboardFocus/>
      </Properties>
     </Widget>
