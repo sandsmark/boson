@@ -225,6 +225,11 @@ BoUfoDesignerMain::BoUfoDesignerMain()
 BoUfoDesignerMain::~BoUfoDesignerMain()
 {
  boDebug() << k_funcinfo << endl;
+
+ QSettings settings;
+ settings.setPath("boson.eu.org", "boufodesigner");
+ settings.writeEntry("/boufodesigner/MostRecentFile", d->mCurrentFile);
+
  delete mIface;
  delete d;
 }
@@ -674,6 +679,6 @@ void BoUfoDesignerMain::slotApplyOptions()
  BO_CHECK_NULL_RET(mPreview->ufoManager());
  QSettings settings;
  settings.setPath("boson.eu.org", "boufodesigner");
- mPreview->ufoManager()->setDataDir(settings.readEntry("/boson/data_dir"));
+ mPreview->ufoManager()->setDataDir(settings.readEntry("/boufodesigner/data_dir"));
 }
 
