@@ -41,6 +41,7 @@ class BoWidgetList;
 class BoWidgetTree;
 class BoPropertiesWidget;
 
+class BoUfoDesignerMainPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -54,10 +55,11 @@ public:
 public slots:
 	bool slotCreateNew();
 	bool slotLoadFromFile(const QString& fileName);
-	bool slotLoadFromXML(const QByteArray& xml);
+	bool slotLoadFromXML(const QByteArray& xml, bool resetFileName = true);
 	bool slotSaveAsFile(const QString& fileName);
 
 	void slotLoad();
+	void slotSave();
 	void slotSaveAs();
 	void slotEditSignalsSlots();
 
@@ -84,6 +86,7 @@ private slots:
 	void slotTreeHierarchyChanged();
 
 private:
+	BoUfoDesignerMainPrivate* d;
 	FormPreview* mPreview;
 	BoDebugDCOPIface* mIface;
 	BoWidgetList* mWidgets;

@@ -158,9 +158,22 @@ static bool isContainerWidget(const QString& className)
  return false;
 }
 
+class BoUfoDesignerMainPrivate
+{
+public:
+	BoUfoDesignerMainPrivate()
+	{
+		mSaveAction = 0;
+	}
+	QAction* mSaveAction;
+	QString mCurrentFile;
+};
+
+
 BoUfoDesignerMain::BoUfoDesignerMain()
 	: QMainWindow(0, "mainwindow", WType_TopLevel | WDestructiveClose)
 {
+ d = new BoUfoDesignerMainPrivate();
  mIface = new BoDebugDCOPIface();
  QWidget* topWidget = new QWidget(this);
  setCentralWidget(topWidget);
@@ -213,6 +226,7 @@ BoUfoDesignerMain::~BoUfoDesignerMain()
 {
  boDebug() << k_funcinfo << endl;
  delete mIface;
+ delete d;
 }
 
 bool BoUfoDesignerMain::slotCreateNew()
@@ -224,6 +238,8 @@ bool BoUfoDesignerMain::slotCreateNew()
  root.appendChild(widgets);
  initProperties(widgets, "BoUfoWidget"); // root widget
  setElementText(widgets.namedItem("Properties").namedItem("name"), "BoClassName"); // the name of the root widget is the name of the generated class
+
+ d->mCurrentFile = QString::null;
 
  return slotLoadFromXML(doc.toCString());
 }
@@ -241,7 +257,11 @@ bool BoUfoDesignerMain::slotLoadFromFile(const QString& fileName)
 	boError() << k_funcinfo << "nothing read from file" << endl;
 	return false;
  }
- return slotLoadFromXML(b);
+
+ d->mCurrentFile = fileName;
+ d->mSaveAction->setEnabled(true);
+
+ return slotLoadFromXML(b, false);
 }
 
 bool BoUfoDesignerMain::slotSaveAsFile(const QString& fileName)
@@ -255,11 +275,19 @@ bool BoUfoDesignerMain::slotSaveAsFile(const QString& fileName)
  t << mDocument;
 // file.writeBlock(mDocument.toCString());
  file.close();
+
+ d->mCurrentFile = fileName;
+ d->mSaveAction->setEnabled(true);
+
  return true;
 }
 
-bool BoUfoDesignerMain::slotLoadFromXML(const QByteArray& xml)
+bool BoUfoDesignerMain::slotLoadFromXML(const QByteArray& xml, bool resetFileName)
 {
+ if (resetFileName) {
+	d->mCurrentFile = QString::null;
+	d->mSaveAction->setEnabled(false);
+ }
  if (xml.size() == 0) {
 	boError() << k_funcinfo << "empty xml" << endl;
 	return false;
@@ -524,6 +552,17 @@ void BoUfoDesignerMain::slotLoad()
  }
 }
 
+void BoUfoDesignerMain::slotSave()
+{
+ if (d->mCurrentFile.isEmpty()) {
+	slotSaveAs();
+	return;
+ }
+ if (!slotSaveAsFile(d->mCurrentFile)) {
+	QMessageBox::critical(this, tr("Could not save"), tr("Unable to save to file %1").arg(d->mCurrentFile));
+ }
+}
+
 void BoUfoDesignerMain::slotSaveAs()
 {
  QString fileName = QFileDialog::getSaveFileName(QString::null, tr("boui files (*.boui)"), this, "save dialog");
@@ -560,8 +599,10 @@ void BoUfoDesignerMain::initActions()
  QAction* fileNew = new QAction(tr("New"), CTRL + Key_N, this, "new");
  QAction* fileOpen = new QAction(tr("Open..."), CTRL + Key_O, this, "open");
  QAction* fileSaveAs = new QAction(tr("Save as..."), 0, this, "saveas");
+ d->mSaveAction = new QAction(tr("Save"), 0, this, "save");
  connect(fileNew, SIGNAL(activated()), this, SLOT(slotCreateNew()));
  connect(fileOpen, SIGNAL(activated()), this, SLOT(slotLoad()));
+ connect(d->mSaveAction, SIGNAL(activated()), this, SLOT(slotSave()));
  connect(fileSaveAs, SIGNAL(activated()), this, SLOT(slotSaveAs()));
 
  QAction* editSignalsSlots = new QAction(tr("Edit &Signals and Slots..."), 0, this, "editsignalsslots");
@@ -577,6 +618,7 @@ void BoUfoDesignerMain::initActions()
  menuBar()->insertItem("&File", file);
  fileNew->addTo(file);
  fileOpen->addTo(file);
+ d->mSaveAction->addTo(file);
  fileSaveAs->addTo(file);
  QPopupMenu* edit = new QPopupMenu(this);
  menuBar()->insertItem("&Edit", edit);
