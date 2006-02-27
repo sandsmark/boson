@@ -6,6 +6,10 @@ designer.includes = '../../../bodebug ../../../bogl ../../../ufo/include ../'
 
 designer.source = """
 	boufodesignermain.cpp
+	formpreview.cpp
+	bowidgetlist.cpp
+	bowidgettree.cpp
+	bopropertieswidget.cpp
 	bosignalsslotseditor.cpp
 	optionsdialog.cpp
 	main.cpp

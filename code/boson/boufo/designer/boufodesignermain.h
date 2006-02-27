@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2004-2006 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,12 +21,8 @@
 
 #include "bodebugdcopiface.h"
 
-#include <qgl.h> // AB: _Q_GLWidget
 #include <qmainwindow.h>
-#include <qdialog.h>
 #include <qdom.h>
-#include <qmap.h>
-#include <qptrlist.h>
 
 class QListBox;
 class QListBoxItem;
@@ -40,157 +36,10 @@ class QWidgetStack;
 class QVBoxLayout;
 class BoUfoWidget;
 class OptionsDialog;
-
-
-/**
- * @author Andreas Beckermann <b_mann@gmx.de>
- **/
-class FormPreview : public QGLWidget
-{
-	Q_OBJECT
-public:
-	FormPreview(const QGLFormat& format, QWidget*);
-	~FormPreview();
-
-	void setPlacementMode(bool m);
-
-	void updateGUI(const QDomElement& root);
-
-	BoUfoWidget* getWidgetAt(int x, int y);
-	BoUfoWidget* getContainerWidgetAt(int x, int y);
-
-	void setSelectedWidget(const QDomElement& widget);
-
-	BoUfoManager* ufoManager() const
-	{
-		return mUfoManager;
-	}
-
-signals:
-	void signalPlaceWidget(const QDomElement& parent);
-	void signalSelectWidget(const QDomElement& widget);
-
-protected:
-	virtual void initializeGL();
-	virtual void paintGL();
-	virtual void resizeGL(int, int);
-
-	virtual bool eventFilter(QObject* o, QEvent* e);
-	virtual void mouseMoveEvent(QMouseEvent*);
-	virtual void mousePressEvent(QMouseEvent*);
-	virtual void mouseReleaseEvent(QMouseEvent*);
-	virtual void wheelEvent(QWheelEvent*);
-	virtual void keyPressEvent(QKeyEvent* e);
-	virtual void keyReleaseEvent(QKeyEvent* e);
-
-	void updateGUI(const QDomElement& root, BoUfoWidget* parent);
-	void selectWidgetUnderCursor();
-	void selectWidget(BoUfoWidget* widget);
-
-private:
-	void addWidget(BoUfoWidget*, const QDomElement&);
-
-private:
-	BoUfoManager* mUfoManager;
-	BoUfoWidget* mContentWidget;
-	bool mPlacementMode;
-	QMap<void*, QDomElement> mUfoWidget2Element;
-	QMap<void*, BoUfoWidget*> mUfoWidget2Widget;
-
-	QString mNameOfSelectedWidget;
-};
-
-
-// displays a list of widgets that can be placed
-class BoWidgetList : public QWidget
-{
-	Q_OBJECT
-public:
-	BoWidgetList(QWidget* parent, const char* name = 0);
-	~BoWidgetList();
-
-	QString widget() const;
-	void clearSelection();
-
-signals:
-	void signalWidgetSelected(const QString&);
-
-private slots:
-	void slotWidgetHighlighted(QListBoxItem*);
-	void slotWidgetSelectionChanged();
-
-private:
-	QListBox* mListBox;
-};
-
-
-// displays the current form, as it is in the internal xml file
-class BoWidgetTree : public QWidget
-{
-	Q_OBJECT
-public:
-	BoWidgetTree(QWidget* parent, const char* name = 0);
-	~BoWidgetTree();
-
-	void updateGUI(const QDomElement& root);
-
-	void selectWidget(const QDomElement& widget);
-
-protected:
-	bool isContainer(QListViewItem* item) const;
-	bool isContainer(const QDomElement&) const;
-
-signals:
-	void signalWidgetSelected(const QDomElement& widget);
-	void signalRemoveWidget(const QDomElement& widget);
-	void signalInsertWidget(const QDomElement& parent);
-	void signalHierarchyChanged();
-
-protected:
-	void updateGUI(const QDomElement& root, QListViewItem* item);
-	void moveElement(QListViewItem* widget, QListViewItem* parent, QListViewItem* before);
-
-protected slots:
-	void slotSelectionChanged(QListViewItem*);
-	void slotInsert();
-	void slotRemove();
-	void slotMoveUp();
-	void slotMoveDown();
-
-private:
-	QListView* mListView;
-	QPushButton* mInsertWidget;
-	QPushButton* mRemoveWidget;
-	QPushButton* mMoveUp;
-	QPushButton* mMoveDown;
-
-	QMap<QListViewItem*, QDomElement> mItem2Element;
-};
-
-class BoPropertiesWidget : public QWidget
-{
-	Q_OBJECT
-public:
-	BoPropertiesWidget(QWidget* parent, const char* name = 0);
-	~BoPropertiesWidget();
-
-	void displayProperties(const QDomElement& root);
-
-signals:
-	void signalChanged(const QDomElement&);
-
-protected:
-	void setClassLabel(const QString& text);
-	void createProperties(const QDomElement& root);
-
-protected slots:
-	void slotItemRenamed(QListViewItem* item, int col);
-
-private:
-	QLabel* mClassLabel;
-	QListView* mListView;
-	QDomElement mWidgetElement;
-};
+class FormPreview;
+class BoWidgetList;
+class BoWidgetTree;
+class BoPropertiesWidget;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
