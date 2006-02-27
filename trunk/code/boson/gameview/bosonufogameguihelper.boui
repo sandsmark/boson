@@ -1091,7 +1091,7 @@
       <preferredHeight/>
       <backgroundImageFile/>
       <verticalAlignment/>
-      <horizontalAlignment/>
+      <horizontalAlignment>AlignHCenter</horizontalAlignment>
       <stretch/>
       <text>The game is paused</text>
       <iconFile/>
