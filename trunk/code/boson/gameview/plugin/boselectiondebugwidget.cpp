@@ -25,15 +25,15 @@
 #include "../../gameengine/bosonmap.h"
 #include "../../gameengine/playerio.h"
 #include "../../gameengine/player.h"
-#include "../../boselection.h"
 #include "../../gameengine/unit.h"
 #include "../../gameengine/unitproperties.h"
 #include "../../gameengine/bosonpropertyxml.h"
 #include "../../boufo/boufotabwidget.h"
 #include "../../gameview/bosonitemrenderer.h"
-#include "../bosonufocanvaswidget.h"
 #include "../../bosonviewdata.h"
 #include "../../modelrendering/bosonmodel.h"
+#include "../bosonufocanvaswidget.h"
+#include "../boselection.h"
 #include <bodebug.h>
 
 #include <kgamepropertyhandler.h>

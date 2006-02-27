@@ -28,7 +28,6 @@
 
 class BosonCanvas;
 class BosonCursor;
-class BoSelection;
 class Player;
 class PlayerIO;
 class Unit;

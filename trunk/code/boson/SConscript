@@ -183,6 +183,7 @@ gameview_sources = """
 	gameview/bosoneffectproperties.cpp
 	gameview/bosoneffectparticle.cpp
 	gameview/bosoneffectpropertiesparticle.cpp
+	gameview/boselection.cpp
 """
 
 
@@ -203,7 +204,6 @@ modelrendering_source = """
 
 libboson_source = """
 	bosonviewdata.cpp
-	boselection.cpp
 	botooltipcreator.cpp
 	bosonglwidget.cpp
 	bosonufoglwidget.cpp
@@ -357,7 +357,7 @@ bosonNoGUI.execute()
 
 
 bounit = env.kobject('program')
-bounit.target = 'bounit'
+bounit.target = 'programs/bounit'
 bounit.includes = '../bodebug ../bogl ../boson/boufo gameengine programs '
 bounit.libpaths += libcommon_libpaths
 bounit.libs = """
@@ -378,7 +378,7 @@ bounit.execute()
 
 
 bocursor = env.kobject('program')
-bocursor.target = 'bocursor'
+bocursor.target = 'programs/bocursor'
 bocursor.includes = '../bodebug ../bogl ../boson/boufo programs '
 bocursor.libpaths += libcommon_libpaths
 bocursor.libs = './info/libbosoninfo.a'
@@ -395,7 +395,7 @@ bocursor.source = """
 bocursor.execute()
 
 borender = env.kobject('program')
-borender.target = 'borender'
+borender.target = 'programs/borender'
 borender.includes = '../bodebug ../bogl ../boson/boufo gameengine programs '
 borender.includes += libboson_includes
 borender.libs = libboson_libs + """
@@ -419,7 +419,7 @@ borender.source += """
 borender.execute()
 
 bomodelpixmaps = env.kobject('program')
-bomodelpixmaps.target = 'bomodelpixmaps'
+bomodelpixmaps.target = 'programs/bomodelpixmaps'
 bomodelpixmaps.includes = '../bodebug ../bogl ../boson/boufo gameengine programs '
 bomodelpixmaps.includes += libboson_includes
 bomodelpixmaps.libs = libboson_libs + """
@@ -438,7 +438,7 @@ bomodelpixmaps.source += """
 bomodelpixmaps.execute()
 
 boinfo = env.boobject('program')
-boinfo.target = 'boinfo'
+boinfo.target = 'programs/boinfo'
 boinfo.includes = '../bodebug ../bogl ../boson/boufo'
 boinfo.libpaths += libcommon_libpaths
 boinfo.source = """
@@ -454,7 +454,7 @@ boinfo.boAddLibObjects(env['LIB_KDECORE_DEPENDENCIES_OBJECTS'])
 boinfo.execute()
 
 bo3dsdebug = env.kobject('program')
-bo3dsdebug.target = 'bo3dsdebug'
+bo3dsdebug.target = 'programs/bo3dsdebug'
 bo3dsdebug.includes = '../bodebug ../bogl ../boson/boufo'
 bo3dsdebug.libpaths += libcommon_libpaths
 bo3dsdebug.libs = 'libcommon.a ' + libcommon_libs
@@ -470,7 +470,7 @@ bo3dsdebug.source = """
 bo3dsdebug.execute()
 
 boconditioneditor = env.kobject('program')
-boconditioneditor.target = 'boconditioneditor'
+boconditioneditor.target = 'programs/boconditioneditor'
 boconditioneditor.includes = '../bodebug ../bogl ../boson/boufo gameengine programs '
 boconditioneditor.libpaths += libcommon_libpaths
 boconditioneditor.libs = './libgameengine.a ' + libgameengine_libs
@@ -485,7 +485,7 @@ boconditioneditor.execute()
 
 
 boprofiling = env.kobject('program')
-boprofiling.target = 'boprofiling'
+boprofiling.target = 'programs/boprofiling'
 boprofiling.includes = '../bodebug ../bogl ../boson/boufo'
 boprofiling.libpaths += libcommon_libpaths
 boprofiling.libs = 'libcommon.a ' + libcommon_libs

@@ -23,21 +23,21 @@
 
 #include "../../../bomemory/bodummymemory.h"
 #include "../../gameengine/bosongroundtheme.h"
-#include "../../bosongroundthemedata.h"
 #include "../../gameengine/unit.h"
 #include "../../gameengine/player.h"
 #include "../../gameengine/speciestheme.h"
-#include "../../speciesdata.h"
 #include "../../gameengine/unitproperties.h"
-#include "../../defines.h"
 #include "../../gameengine/upgradeproperties.h"
-#include "bodebug.h"
 #include "../../boufo/boufoimage.h"
 #include "../../boufo/boufoprogress.h"
 #include "../../boufo/boufodrawable.h"
 #include "../../boufo/boufostandalonefont.h"
 #include "../../boufo/boufomanager.h"
+#include "../../defines.h"
+#include "../../speciesdata.h"
 #include "../../bosonviewdata.h"
+#include "../../bosongroundthemedata.h"
+#include "bodebug.h"
 
 #include <kpixmap.h>
 #include <kpixmapeffect.h>
