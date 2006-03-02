@@ -170,6 +170,46 @@ public:
 	BosonStartingStartScenarioGUI(const QString& text)
 		: BosonStartingTask(text)
 	{
+		mCanvas = 0;
+	}
+
+	virtual unsigned int taskDuration() const;
+
+public slots:
+	void slotSetCanvas(BosonCanvas* canvas)
+	{
+		mCanvas = canvas;
+	}
+
+protected:
+	virtual bool startTask();
+
+private:
+	BosonCanvas* mCanvas;
+};
+
+class BosonStartingCheckIOs : public BosonStartingTask
+{
+	Q_OBJECT
+public:
+	BosonStartingCheckIOs(const QString& text)
+		: BosonStartingTask(text)
+	{
+	}
+
+	virtual unsigned int taskDuration() const;
+
+protected:
+	virtual bool startTask();
+};
+
+class BosonStartingStartGameView : public BosonStartingTask
+{
+	Q_OBJECT
+public:
+	BosonStartingStartGameView(const QString& text)
+		: BosonStartingTask(text)
+	{
 		mGameView = 0;
 		mFiles = 0;
 
@@ -199,21 +239,6 @@ private:
 	QMap<QString, QByteArray>* mFiles;
 
 	BosonCanvas* mCanvas;
-};
-
-class BosonStartingCheckIOs : public BosonStartingTask
-{
-	Q_OBJECT
-public:
-	BosonStartingCheckIOs(const QString& text)
-		: BosonStartingTask(text)
-	{
-	}
-
-	virtual unsigned int taskDuration() const;
-
-protected:
-	virtual bool startTask();
 };
 
 #endif
