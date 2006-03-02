@@ -124,10 +124,15 @@ bool BosonGUIStarting::createTasks(QPtrList<BosonStartingTask>* tasks)
  BosonStartingStartScenarioGUI* scenarioGUI = new BosonStartingStartScenarioGUI(i18n("Start Scenario (GUI)"));
  connect(mStarting, SIGNAL(signalCanvas(BosonCanvas*)),
 		scenarioGUI, SLOT(slotSetCanvas(BosonCanvas*)));
- scenarioGUI->setGameView(mGameView);
- scenarioGUI->setFiles(mFiles);
  tasks->append(scenarioGUI);
 
+
+ BosonStartingStartGameView* gameView = new BosonStartingStartGameView(i18n("Start gameview"));
+ connect(mStarting, SIGNAL(signalCanvas(BosonCanvas*)),
+		gameView, SLOT(slotSetCanvas(BosonCanvas*)));
+ gameView->setGameView(mGameView);
+ gameView->setFiles(mFiles);
+ tasks->append(gameView);
 
 
 
@@ -344,11 +349,6 @@ unsigned int BosonStartingLoadWater::taskDuration() const
  return 100;
 }
 
-void BosonStartingStartScenarioGUI::setGameView(BosonGameView* gameView)
-{
- mGameView = gameView;
-}
-
 bool BosonStartingStartScenarioGUI::startTask()
 {
  PROFILE_METHOD
@@ -356,12 +356,6 @@ bool BosonStartingStartScenarioGUI::startTask()
 	BO_NULL_ERROR(boGame);
 	return false;
  }
- if (!mGameView) {
-	BO_NULL_ERROR(mGameView);
-	return false;
- }
-
- mGameView->setCanvas(mCanvas);
 
  disconnect(mCanvas, 0, boViewData, 0);
  if (boViewData->allItemContainers().count() > 0) {
@@ -385,19 +379,6 @@ bool BosonStartingStartScenarioGUI::startTask()
 		boViewData, SLOT(slotRemoveItemContainerFor(BosonItem*)));
  for (BoItemList::iterator it = mCanvas->allItems()->begin(); it != mCanvas->allItems()->end(); ++it) {
 	boViewData->slotAddItemContainerFor(*it);
- }
-
- if (!mGameView->initializeItems()) {
-	boError() << k_funcinfo << "initializing items failed" << endl;
-	return false;
- }
-
- BosonSaveLoad load(boGame);
-
- // TODO: rename to "loadGameViewFromXML()"
- if (!load.loadExternalFromXML(*mFiles)) {
-	boError(270) << k_funcinfo << "unable to load external data from XML" << endl;
-	return false;
  }
 
  return true;
@@ -467,6 +448,45 @@ unsigned int BosonStartingCheckIOs::taskDuration() const
  return 5;
 }
 
+
+void BosonStartingStartGameView::setGameView(BosonGameView* gameView)
+{
+ mGameView = gameView;
+}
+
+bool BosonStartingStartGameView::startTask()
+{
+ PROFILE_METHOD
+ if (!boGame) {
+	BO_NULL_ERROR(boGame);
+	return false;
+ }
+ if (!mGameView) {
+	BO_NULL_ERROR(mGameView);
+	return false;
+ }
+
+ mGameView->setCanvas(mCanvas);
+ if (!mGameView->initializeItems()) {
+	boError() << k_funcinfo << "initializing items failed" << endl;
+	return false;
+ }
+
+ BosonSaveLoad load(boGame);
+
+ // TODO: rename to "loadGameViewFromXML()"
+ if (!load.loadExternalFromXML(*mFiles)) {
+	boError(270) << k_funcinfo << "unable to load external data from XML" << endl;
+	return false;
+ }
+
+ return true;
+}
+
+unsigned int BosonStartingStartGameView::taskDuration() const
+{
+ return 100;
+}
 
 
 
