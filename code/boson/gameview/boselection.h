@@ -60,7 +60,7 @@ public:
 	 * @param replace If TRUE (default) then the current selection is
 	 * replaced. If FALSE, the new units are added to the selection instead.
 	 **/
-	void selectUnits(QPtrList<Unit> list, bool replace = true);
+	void selectUnits(const QPtrList<Unit>& list, bool replace = true);
 
 	/**
 	 * Select a single unit.
