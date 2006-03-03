@@ -361,6 +361,7 @@ void BosonOrderWidget::slotMouseMoved(QMouseEvent* e)
 
 void BosonOrderWidget::slotCheckCursor()
 {
+ BO_CHECK_NULL_RET(d->mCommandFrame->cursorRootPos());
  QRect r(rootLocation(), QSize(width(), height()));
  if (r.contains(*d->mCommandFrame->cursorRootPos())) {
 	// TODO: check for children?
