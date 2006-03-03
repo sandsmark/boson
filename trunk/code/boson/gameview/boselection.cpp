@@ -99,13 +99,13 @@ void BoSelection::selectUnit(Unit* unit, bool replace)
  emit signalSelectionChanged(this);
 }
 
-void BoSelection::selectUnits(QPtrList<Unit> list, bool replace)
+void BoSelection::selectUnits(const QPtrList<Unit>& list, bool replace)
 {
  if (!list.count()) {
 	return;
  }
  if (list.count() == 1) {
-	selectUnit(list.first(), replace);
+	selectUnit(list.getFirst(), replace);
 	return;
  }
  if (replace) {
