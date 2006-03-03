@@ -245,6 +245,7 @@ libboson_libs += libcommon_libs
 libboson_libs += ' kio'
 libboson_libs += ' 3ds'
 libboson_libs += ' ' + env['LIB_XRANDR']
+libboson_libs += ' '
 
 libboson_libs_objects = []
 libboson_libs_objects += env.createDummyLibs([lib_meshrendererplugin, './info/libbosoninfo.a', './libgameengine.a', './libcommon.a'])
@@ -279,7 +280,7 @@ if env['BOSON_DO_STATIC']:
 
 boson = env.boobject('program')
 boson.target = 'programs/boson'
-boson.includes = '../bodebug ../bogl ../boson/boufo gameengine '
+boson.includes = '../bodebug ../bogl boufo gameengine '
 boson.includes += ' gameview/commandframe/ gameview/ startupwidgets/ ' # for .moc files
 boson.includes += libboson_includes
 boson.libs = ''
@@ -312,6 +313,7 @@ boson.source += """
 	gameoverdialog.cpp
 	bocheckinstallation.cpp
 	bosonguistarting.cpp
+	bosongameviewstarting.cpp
 	bosongameviewpluginbase.cpp
 	bosongameviewpluginmanager.cpp
 	botexmapimportdialog.cpp
@@ -348,6 +350,7 @@ bosonNoGUI.libpaths += libcommon_libpaths
 bosonNoGUI.source += """
 	bocheckinstallation.cpp
 	programs/mainnogui.cpp
+	programs/mainnoguimain.cpp
 """
 
 
@@ -499,5 +502,22 @@ boprofiling.source = """
 """
 boprofiling.execute()
 
+
+bocommandframetester = env.kobject('program')
+bocommandframetester.target = 'programs/bocommandframetester'
+bocommandframetester.includes = boson.includes
+bocommandframetester.includes += ' programs'
+bocommandframetester.libpaths = boson.libpaths
+bocommandframetester.libs = libboson_libs
+bocommandframetester.libs += boufo_lib
+bocommandframetester.libs += " Xmu"
+source_list = boson.source.split()
+source_list.remove('programs/main.cpp')
+bocommandframetester.source = ' '.join(source_list)
+bocommandframetester.source += """
+	programs/mainnogui.cpp
+	programs/bocommandframetestermain.cpp
+"""
+bocommandframetester.execute()
 
 

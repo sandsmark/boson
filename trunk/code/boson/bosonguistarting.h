@@ -26,7 +26,6 @@ class BosonPlayField;
 class Player;
 class Boson;
 class BosonCanvas;
-class BosonGameView;
 class QDomElement;
 template<class T> class QPtrList;
 template<class T1, class T2> class QMap;
@@ -41,8 +40,6 @@ public:
 	BosonGUIStarting(BosonStarting* starting, QObject* parent);
 	~BosonGUIStarting();
 
-	void setGameView(BosonGameView* gameView);
-
 	virtual void setFiles(QMap<QString, QByteArray>* files);
 	virtual QString creatorName() const;
 
@@ -50,7 +47,6 @@ public:
 
 private:
 	BosonStarting* mStarting;
-	BosonGameView* mGameView;
 	QMap<QString, QByteArray>* mFiles;
 };
 
@@ -201,44 +197,6 @@ public:
 
 protected:
 	virtual bool startTask();
-};
-
-class BosonStartingStartGameView : public BosonStartingTask
-{
-	Q_OBJECT
-public:
-	BosonStartingStartGameView(const QString& text)
-		: BosonStartingTask(text)
-	{
-		mGameView = 0;
-		mFiles = 0;
-
-		mCanvas = 0;
-	}
-
-	virtual unsigned int taskDuration() const;
-
-	void setGameView(BosonGameView* gameView);
-
-	void setFiles(QMap<QString, QByteArray>* files)
-	{
-		mFiles = files;
-	}
-
-public slots:
-	void slotSetCanvas(BosonCanvas* canvas)
-	{
-		mCanvas = canvas;
-	}
-
-protected:
-	virtual bool startTask();
-
-private:
-	BosonGameView* mGameView;
-	QMap<QString, QByteArray>* mFiles;
-
-	BosonCanvas* mCanvas;
 };
 
 #endif
