@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2006 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,28 +22,28 @@
 
 #include "../bomemory/bodummymemory.h"
 #include "defines.h"
-#include "boson.h"
-#include "player.h"
-#include "bosonplayfield.h"
-#include "bosonmap.h"
-#include "bosongroundtheme.h"
 #include "bosongroundthemedata.h"
-#include "bosonmessageids.h"
-#include "speciestheme.h"
 #include "speciesdata.h"
 #include "bosonprofiling.h"
 #include "bosondata.h"
-#include "bosoncanvas.h"
 #include "bodebug.h"
-#include "bosonsaveload.h"
 #include "bowaterrenderer.h"
-#include "unit.h"
-#include "boitemlist.h"
 #include "bosonviewdata.h"
-#include "bosoncomputerio.h"
+#include "gameengine/bosoncanvas.h"
+#include "gameengine/boson.h"
+#include "gameengine/player.h"
+#include "gameengine/bosonplayfield.h"
+#include "gameengine/bosonmap.h"
+#include "gameengine/bosongroundtheme.h"
+#include "gameengine/bosonmessageids.h"
+#include "gameengine/speciestheme.h"
+#include "gameengine/unit.h"
+#include "gameengine/boitemlist.h"
+#include "gameengine/bosoncomputerio.h"
 #include "gameview/bosonlocalplayerinput.h"
-#include "gameview/bosongameview.h"
 #include "gameview/bosoneffectproperties.h"
+#include "modelrendering/bomeshrenderermanager.h"
+#include "botexture.h"
 
 #include <klocale.h>
 
@@ -53,7 +53,6 @@ BosonGUIStarting::BosonGUIStarting(BosonStarting* starting, QObject* parent)
 	: BosonStartingTaskCreator(parent)
 {
  mStarting = starting;
- mGameView = 0;
  mFiles = 0;
 }
 
@@ -64,11 +63,6 @@ BosonGUIStarting::~BosonGUIStarting()
 QString BosonGUIStarting::creatorName() const
 {
  return i18n("GUI");
-}
-
-void BosonGUIStarting::setGameView(BosonGameView* gameView)
-{
- mGameView = gameView;
 }
 
 void BosonGUIStarting::setFiles(QMap<QString, QByteArray>* files)
@@ -84,10 +78,6 @@ bool BosonGUIStarting::createTasks(QPtrList<BosonStartingTask>* tasks)
  }
  if (!mFiles) {
 	BO_NULL_ERROR(mFiles);
-	return false;
- }
- if (!mGameView) {
-	BO_NULL_ERROR(mGameView);
 	return false;
  }
 
@@ -127,15 +117,6 @@ bool BosonGUIStarting::createTasks(QPtrList<BosonStartingTask>* tasks)
  tasks->append(scenarioGUI);
 
 
- BosonStartingStartGameView* gameView = new BosonStartingStartGameView(i18n("Start gameview"));
- connect(mStarting, SIGNAL(signalCanvas(BosonCanvas*)),
-		gameView, SLOT(slotSetCanvas(BosonCanvas*)));
- gameView->setGameView(mGameView);
- gameView->setFiles(mFiles);
- tasks->append(gameView);
-
-
-
 
  BosonStartingCheckIOs* ios = new BosonStartingCheckIOs(i18n("Check IOs"));
  tasks->append(ios);
@@ -163,7 +144,13 @@ bool BosonStartingLoadTiles::startTask()
 	boError(270) << k_funcinfo << "NULL groundtheme" << endl;
 	return false;
  }
+ if (!boViewData) {
+	boError(270) << k_funcinfo << "NULL boViewData" << endl;
+	return false;
+ }
  boProfiling->push("LoadTiles");
+
+ BoTextureManager::initStatic(); // noop if already done
 
  checkEvents();
 
@@ -188,6 +175,7 @@ unsigned int BosonStartingLoadTiles::taskDuration() const
 
 bool BosonStartingLoadEffects::startTask()
 {
+ BosonEffectPropertiesManager::initStatic();
  boEffectPropertiesManager->loadEffectProperties();
  return true;
 }
@@ -213,7 +201,13 @@ bool BosonStartingLoadPlayerGUIData::startTask()
 	BO_NULL_ERROR(player()->speciesTheme());
 	return false;
  }
+ if (!boViewData) {
+	boError(270) << k_funcinfo << "NULL boViewData" << endl;
+	return false;
+ }
  BosonProfiler profiler("LoadPlayerGUIData");
+
+ BoMeshRendererManager::initStatic();
 
  boDebug(270) << k_funcinfo << player()->bosonId() << endl;
  // Order of calls below is very important!!! Don't change this unless you're sure you know what you're doing!!!
@@ -289,6 +283,10 @@ unsigned int BosonStartingLoadPlayerGUIData::loadUnitDuration() const
 
 bool BosonStartingLoadPlayerGUIData::loadUnitDatas()
 {
+ if (!boViewData) {
+	boError(270) << k_funcinfo << "NULL boViewData" << endl;
+	return false;
+ }
  startSubTask(i18n("Units..."));
 
  // AB: this is to ensure that we really are where we expect to be
@@ -339,6 +337,7 @@ bool BosonStartingLoadWater::startTask()
 	BO_NULL_ERROR(playField()->lakes());
 	return false;
  }
+ BoWaterRenderer::initStatic();
  boWaterRenderer->setMap(playField()->map());
  boWaterRenderer->loadNecessaryTextures();
  return true;
@@ -354,6 +353,10 @@ bool BosonStartingStartScenarioGUI::startTask()
  PROFILE_METHOD
  if (!boGame) {
 	BO_NULL_ERROR(boGame);
+	return false;
+ }
+ if (!boViewData) {
+	boError(270) << k_funcinfo << "NULL boViewData" << endl;
 	return false;
  }
 
@@ -447,46 +450,5 @@ unsigned int BosonStartingCheckIOs::taskDuration() const
 {
  return 5;
 }
-
-
-void BosonStartingStartGameView::setGameView(BosonGameView* gameView)
-{
- mGameView = gameView;
-}
-
-bool BosonStartingStartGameView::startTask()
-{
- PROFILE_METHOD
- if (!boGame) {
-	BO_NULL_ERROR(boGame);
-	return false;
- }
- if (!mGameView) {
-	BO_NULL_ERROR(mGameView);
-	return false;
- }
-
- mGameView->setCanvas(mCanvas);
- if (!mGameView->initializeItems()) {
-	boError() << k_funcinfo << "initializing items failed" << endl;
-	return false;
- }
-
- BosonSaveLoad load(boGame);
-
- // TODO: rename to "loadGameViewFromXML()"
- if (!load.loadExternalFromXML(*mFiles)) {
-	boError(270) << k_funcinfo << "unable to load external data from XML" << endl;
-	return false;
- }
-
- return true;
-}
-
-unsigned int BosonStartingStartGameView::taskDuration() const
-{
- return 100;
-}
-
 
 

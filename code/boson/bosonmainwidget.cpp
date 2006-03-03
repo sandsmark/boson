@@ -38,6 +38,7 @@
 #include "bosonstarting.h"
 #include "bosongameenginestarting.h"
 #include "bosonguistarting.h"
+#include "bosongameviewstarting.h"
 #include "gameview/bosongameview.h"
 #include "gameview/bosonlocalplayerinput.h"
 #include "startupwidgets/boufostartupwidget.h"
@@ -798,8 +799,10 @@ void BosonMainWidget::reinitGame()
  BosonGameEngineStarting* gameStarting = new BosonGameEngineStarting(d->mStarting, d->mStarting);
  d->mStarting->addTaskCreator(gameStarting);
  BosonGUIStarting* guiStarting = new BosonGUIStarting(d->mStarting, d->mStarting);
- guiStarting->setGameView(d->mGameView);
  d->mStarting->addTaskCreator(guiStarting);
+ BosonGameViewStarting* gameViewStarting = new BosonGameViewStarting(d->mStarting, d->mStarting);
+ gameViewStarting->setGameView(d->mGameView);
+ d->mStarting->addTaskCreator(gameViewStarting);
 
  initBoson();
 }
