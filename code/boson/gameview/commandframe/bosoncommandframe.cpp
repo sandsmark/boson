@@ -849,10 +849,8 @@ void BosonCommandFrame::setProduction(Unit* unit)
  QValueList<int> grayOutActions;
 
  QValueList<unsigned long int> grayedOutUnits;
- QValueList<unsigned long int> unitsList = production->possibleUnitProductions(&grayedOutUnits);
- QValueList<unsigned long int> allUnits = unitsList;
- allUnits += grayedOutUnits;
- for (QValueList<unsigned long int>::iterator it = allUnits.begin(); it != allUnits.end(); ++it) {
+ QValueList<unsigned long int> unitsList = production->allUnitProductions(0, &grayedOutUnits);
+ for (QValueList<unsigned long int>::iterator it = unitsList.begin(); it != unitsList.end(); ++it) {
 	BoSpecificAction a(d->mProduceActions->produceActionFor(speciesTheme->unitProperties(*it)));
 	a.setType(ActionProduceUnit);
 	a.setProductionId(*it);
@@ -864,10 +862,8 @@ void BosonCommandFrame::setProduction(Unit* unit)
  }
 
  QValueList<unsigned long int> grayedOutTechs;
- QValueList<unsigned long int> techList = production->possibleTechnologyProductions(&grayedOutTechs);
- QValueList<unsigned long int> allTechs = techList;
- allTechs += grayedOutTechs;
- for (QValueList<unsigned long int>::iterator it = allTechs.begin(); it != allTechs.end(); it++) {
+ QValueList<unsigned long int> techList = production->allTechnologyProductions(0, &grayedOutTechs);
+ for (QValueList<unsigned long int>::iterator it = techList.begin(); it != techList.end(); it++) {
 	BoSpecificAction a(d->mProduceActions->produceActionFor(speciesTheme->technology(*it), production->speciesTheme()));
 	a.setType(ActionProduceTech);
 	a.setProductionId(*it);
