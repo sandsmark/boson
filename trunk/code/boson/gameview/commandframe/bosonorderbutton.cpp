@@ -241,6 +241,9 @@ void BoOrderButtonButton::slotMouseReleaseEvent(QMouseEvent* e)
  if (e->button() == Qt::RightButton) {
 	emit signalRightClicked();
 	e->accept();
+ } else if (e->button() == Qt::LeftButton) {
+	emit signalLeftClicked();
+	e->accept();
  }
 }
 
@@ -273,7 +276,7 @@ BosonOrderButton::BosonOrderButton() : BoUfoWidget()
  mPixmapButton->setOpaque(false);
  display->addWidget(mPixmapButton);
  mPixmapButton->setMouseEventsEnabled(true, true);
- connect(mPixmapButton, SIGNAL(signalClicked()), this, SLOT(slotClicked()));
+ connect(mPixmapButton, SIGNAL(signalLeftClicked()), this, SLOT(slotLeftClicked()));
  connect(mPixmapButton, SIGNAL(signalRightClicked()), this, SLOT(slotRightClicked()));
  connect(mPixmapButton, SIGNAL(signalMouseEntered(ufo::UMouseEvent*)), this, SIGNAL(signalMouseEntered()));
  connect(mPixmapButton, SIGNAL(signalMouseExited(ufo::UMouseEvent*)), this, SIGNAL(signalMouseLeft()));
@@ -414,7 +417,7 @@ void BosonOrderButton::setImage(const BoUfoImage& image, float progressPercentag
  mPixmapButton->show();
 }
 
-void BosonOrderButton::slotClicked()
+void BosonOrderButton::slotLeftClicked()
 {
  switch (type()) {
 	case ShowNothing:
