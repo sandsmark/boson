@@ -156,6 +156,7 @@ void BosonLocalPlayerInput::produceAction(const BoSpecificAction& action)
   if (!message)
   {
     BO_NULL_ERROR(message);
+    return;
   }
 
   QByteArray b;
