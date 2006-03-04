@@ -239,7 +239,7 @@ void BoOrderButtonButton::setProgressPercentage(float percentage)
 void BoOrderButtonButton::slotMouseReleaseEvent(QMouseEvent* e)
 {
  if (e->button() == Qt::RightButton) {
-	emit rightClicked();
+	emit signalRightClicked();
 	e->accept();
  }
 }
@@ -274,7 +274,7 @@ BosonOrderButton::BosonOrderButton() : BoUfoWidget()
  display->addWidget(mPixmapButton);
  mPixmapButton->setMouseEventsEnabled(true, true);
  connect(mPixmapButton, SIGNAL(signalClicked()), this, SLOT(slotClicked()));
- connect(mPixmapButton, SIGNAL(rightClicked()), this, SLOT(slotRightClicked()));
+ connect(mPixmapButton, SIGNAL(signalRightClicked()), this, SLOT(slotRightClicked()));
  connect(mPixmapButton, SIGNAL(signalMouseEntered(ufo::UMouseEvent*)), this, SIGNAL(signalMouseEntered()));
  connect(mPixmapButton, SIGNAL(signalMouseExited(ufo::UMouseEvent*)), this, SIGNAL(signalMouseLeft()));
 // mPixmapButton->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
