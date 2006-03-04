@@ -246,14 +246,39 @@ public:
 	bool contains(ProductionType type, unsigned long int id); // { return productionList().contains(typeId);}
 
 	/**
-	 * @return A list with all unittypes that this plugin can currently
-	 * produce
-	 * @param impossible UnitProductions This list returns (if non-NULL) all
+	 * @return A list with all unittypes that this plugin could prodcue if
+	 * all production requirements were fullfilled.
+	 *
+	 * @param producible If non-NULL, this returns alls unittypes that this
+	 * plugin can currently produce.
+	 * @param impossible This list returns (if non-NULL) all
 	 * unittypes that cannot be produced currently, but could be, if the
 	 * necessary requirements were met.
 	 **/
-	QValueList<unsigned long int> possibleUnitProductions(QValueList<unsigned long int>* impossibleUnitProductions = 0) const;
-	QValueList<unsigned long int> possibleTechnologyProductions(QValueList<unsigned long int>* impossibleTechnologyProductions = 0) const;
+	QValueList<unsigned long int> allUnitProductions(QValueList<unsigned long int>* producible, QValueList<unsigned long int>* notYetProducible) const;
+
+	/**
+	 * This behaves like @ref allUnitProductions with one exception:
+	 *
+	 * All technologies that already have been researched and thus cannot be
+	 * researched anymore, are not returned.
+	 **/
+	QValueList<unsigned long int> allTechnologyProductions(QValueList<unsigned long int>* producible, QValueList<unsigned long int>* notYetProducible) const;
+
+	/**
+	 * @return TRUE if this plugin can produce the unit @p type. This is the
+	 * case if this plugin is a producer of @p type and all requirements are
+	 * fullfilled.
+	 **/
+	bool canCurrentlyProduceUnit(unsigned long int type) const;
+
+	/**
+	 * @return TRUE if this plugin can produce (i.e. research) technology @p
+	 * type. This is the case if this plugin is a producer of @p type and
+	 * all requirements are fullfilled and if @p type has not yet been
+	 * researched.
+	 **/
+	bool canCurrentlyProduceTechnology(unsigned long int type) const;
 
 	/**
 	 * @return The percentage of the production progress. 0 means the

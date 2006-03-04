@@ -219,7 +219,7 @@ void ProductionPlugin::addProduction(ProductionType type, unsigned long int id)
 		boError() << k_lineinfo << "NULL unit properties (EVIL BUG)" << endl;
 		return;
 	}
-	if (!possibleUnitProductions().contains(id)) {
+	if (!canCurrentlyProduceUnit(id)) {
 		boError() << k_funcinfo << " cannot produce unit witht type " << id << endl;
 		game()->slotAddChatSystemMessage(i18n("Cannot produce unit %1").arg(prop->name()), player());
 		return;
@@ -230,7 +230,7 @@ void ProductionPlugin::addProduction(ProductionType type, unsigned long int id)
 		boError() << k_lineinfo << "NULL technology properties (EVIL BUG)" << endl;
 		return;
 	}
-	if (!possibleTechnologyProductions().contains(id)) {
+	if (!canCurrentlyProduceTechnology(id)) {
 		boError() << k_funcinfo << " cannot produce technology with id " << id << endl;
 		game()->slotAddChatSystemMessage(i18n("Cannot produce technology %1").arg(prop->upgradeName()), player());
 		return;
@@ -540,21 +540,19 @@ void ProductionPlugin::advance(unsigned int)
 
 void ProductionPlugin::unitDestroyed(Unit* destroyedUnit)
 {
- QValueList<unsigned long int> units = possibleUnitProductions();
- QValueList<unsigned long int> techs = possibleTechnologyProductions();
  QValueList< QPair<ProductionType, unsigned long int> > abort;
  QValueList<unsigned long int> abortTechs;
  for (unsigned int i = 0; i < mProductions.count(); i++) {
 	unsigned long int id = mProductions[i].second;
 	if (mProductions[i].first == ProduceUnit) {
-		if (!units.contains(id)) {
+		if (!canCurrentlyProduceUnit(id)) {
 			QPair<ProductionType, unsigned long int> pair;
 			pair.first = ProduceUnit;
 			pair.second = id;
 			abort.append(pair);
 		}
 	} else if (mProductions[i].first == ProduceTech) {
-		if (!techs.contains(id)) {
+		if (!canCurrentlyProduceTechnology(id)) {
 			QPair<ProductionType, unsigned long int> pair;
 			pair.first = ProduceTech;
 			pair.second = id;
@@ -644,7 +642,7 @@ bool ProductionPlugin::contains(ProductionType type, unsigned long int id)
  return productionList().contains(pair);
 }
 
-QValueList<unsigned long int> ProductionPlugin::possibleUnitProductions(QValueList<unsigned long int>* impossibleUnits) const
+QValueList<unsigned long int> ProductionPlugin::allUnitProductions(QValueList<unsigned long int>* producible, QValueList<unsigned long int>* notYetProducible) const
 {
  QValueList<unsigned long int> ret;
  ProductionProperties* pp = (ProductionProperties*)properties(PluginProperties::Production);
@@ -658,29 +656,31 @@ QValueList<unsigned long int> ProductionPlugin::possibleUnitProductions(QValueLi
 	return ret;
  }
 
- QValueList<unsigned long int> unitsList = speciesTheme()->productions(pp->producerList());
+ QValueList<unsigned long int> allProductions = speciesTheme()->productions(pp->producerList());
 
- if (impossibleUnits) {
-	impossibleUnits->clear();
+ if (producible) {
+	producible->clear();
+ }
+ if (notYetProducible) {
+	notYetProducible->clear();
  }
 
- // Filter out things that player can't actually build (requirements aren't met yet)
- QValueList<unsigned long int>::Iterator it;
- it = unitsList.begin();
- for (; it != unitsList.end(); ++it) {
+ for (QValueList<unsigned long int>::Iterator it = allProductions.begin(); it != allProductions.end(); ++it) {
 	if (player()->canBuild(*it)) {
-		ret.append(*it);
+		if (producible) {
+			producible->append(*it);
+		}
 	} else {
-		if (impossibleUnits) {
-			impossibleUnits->append(*it);
+		if (notYetProducible) {
+			notYetProducible->append(*it);
 		}
 	}
  }
 
- return ret;
+ return allProductions;
 }
 
-QValueList<unsigned long int> ProductionPlugin::possibleTechnologyProductions(QValueList<unsigned long int>* impossibleTechnologies) const
+QValueList<unsigned long int> ProductionPlugin::allTechnologyProductions(QValueList<unsigned long int>* producible, QValueList<unsigned long int>* notYetProducible) const
 {
  QValueList<unsigned long int> ret;
  ProductionProperties* pp = (ProductionProperties*)properties(PluginProperties::Production);
@@ -694,27 +694,54 @@ QValueList<unsigned long int> ProductionPlugin::possibleTechnologyProductions(QV
 	return ret;
  }
 
- QValueList<unsigned long int> techList = speciesTheme()->technologies(pp->producerList());
+ QValueList<unsigned long int> allTechs = speciesTheme()->technologies(pp->producerList());
+ QValueList<unsigned long int> allUnresearchedTechs = speciesTheme()->technologies(pp->producerList());
 
- if (impossibleTechnologies) {
-	impossibleTechnologies->clear();
+ if (producible) {
+	producible->clear();
+ }
+ if (notYetProducible) {
+	notYetProducible->clear();
  }
 
- // Filter out things that player can't actually build (requirements aren't met yet)
- QValueList<unsigned long int>::Iterator it;
- for (it = techList.begin(); it != techList.end(); it++) {
-	if ((!player()->hasTechnology(*it))) {
-		if ((player()->canResearchTech(*it))) {
-			ret.append(*it);
-		} else {
-			if (impossibleTechnologies) {
-				impossibleTechnologies->append(*it);
-			}
+ for (QValueList<unsigned long int>::Iterator it = allTechs.begin(); it != allTechs.end(); it++) {
+	if (!player()->hasTechnology(*it)) {
+		allUnresearchedTechs.append(*it);
+	}
+ }
+ for (QValueList<unsigned long int>::Iterator it = allUnresearchedTechs.begin(); it != allUnresearchedTechs.end(); it++) {
+	if (player()->canResearchTech(*it)) {
+		if (producible) {
+			producible->append(*it);
+		}
+	} else {
+		if (notYetProducible) {
+			notYetProducible->append(*it);
 		}
 	}
  }
 
- return ret;
+ return allUnresearchedTechs;
+}
+
+bool ProductionPlugin::canCurrentlyProduceUnit(unsigned long int type) const
+{
+ QValueList<unsigned long int> producible;
+ allUnitProductions(&producible, 0);
+ if (producible.contains(type)) {
+	return true;
+ }
+ return false;
+}
+
+bool ProductionPlugin::canCurrentlyProduceTechnology(unsigned long int type) const
+{
+ QValueList<unsigned long int> producible;
+ allTechnologyProductions(&producible, 0);
+ if (producible.contains(type)) {
+	return true;
+ }
+ return false;
 }
 
 
