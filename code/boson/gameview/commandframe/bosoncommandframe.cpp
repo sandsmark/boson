@@ -978,7 +978,6 @@ void BosonCommandFrame::showUnitActions(Unit* unit)
 
 void BosonCommandFrame::slotUpdate()
 {
- boDebug(220) << k_funcinfo << endl;
  if (!selectedUnit()) {
 	d->mUpdateTimer.stop();
 	return;
