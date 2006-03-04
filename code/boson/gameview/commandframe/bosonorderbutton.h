@@ -161,7 +161,7 @@ protected:
 	void setImage(const BoUfoImage& image, float progressPercentage = 100.0f);
 
 protected slots:
-	void slotClicked();
+	void slotLeftClicked();
 	void slotRightClicked();
 
 private:
@@ -195,6 +195,7 @@ public:
 	void setGrayOut(bool g);
 
 signals:
+	void signalLeftClicked();
 	void signalRightClicked();
 
 protected slots:
