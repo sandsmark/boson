@@ -315,5 +315,6 @@ static void postBosonConfigInit()
 	return;
  }
  conf->setBoolValue("ForceDisableSound", true);
+ conf->setBoolValue("ForceDisableModelLoading", true);
 }
 
