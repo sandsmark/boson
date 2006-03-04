@@ -195,7 +195,7 @@ public:
 	void setGrayOut(bool g);
 
 signals:
-	void rightClicked();
+	void signalRightClicked();
 
 protected slots:
 	void slotMouseReleaseEvent(QMouseEvent*);
