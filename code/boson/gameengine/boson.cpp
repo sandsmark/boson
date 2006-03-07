@@ -324,6 +324,7 @@ protected:
 	bool saveUnitLog();
 	bool saveNetworkLog();
 	bool saveBoDebugLog();
+	bool saveBacktrace();
 
 private:
 	QString mPrefix;
@@ -364,6 +365,10 @@ bool BoGameLogSaver::save()
  }
  if (!saveBoDebugLog()) {
 	boError() << k_funcinfo << "failed saving bodebug log" << endl;
+	ret = false;
+ }
+ if (!saveBacktrace()) {
+	boError() << k_funcinfo << "failed saving backtrace" << endl;
 	ret = false;
  }
 
@@ -478,6 +483,23 @@ bool BoGameLogSaver::saveBoDebugLog()
  }
 
  log.close();
+ return true;
+}
+
+bool BoGameLogSaver::saveBacktrace()
+{
+ QFile log(mPrefix + ".backtrace");
+ if (!log.open(IO_WriteOnly)) {
+	boError() << k_funcinfo << "Can't open output file '" << log.name() << "' for writing!" << endl;
+	return false;
+ }
+ QTextStream stream(&log);
+ QString bt = boBacktrace();
+ if (bt.isEmpty()) {
+	stream << "No backtrace could be generated on this system. Use gdb to create a backtrace instead\n";
+ } else {
+	stream << bt;
+ }
  return true;
 }
 
