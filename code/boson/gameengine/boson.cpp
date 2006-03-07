@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 1999-2000 Thomas Capricelli (capricel@email.enst.fr)
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
     Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
@@ -36,6 +36,7 @@
 #include "../global.h"
 #include "../bosonprofiling.h"
 #include "bodebug.h"
+#include "bodebuglog.h"
 #include "bosonsaveload.h"
 #include "../bosonconfig.h"
 #include "boevent.h"
@@ -308,6 +309,180 @@ public:
 	bool mGameIsOver;
 	bool mLoadFromLogMode;
 };
+
+
+class BoGameLogSaver
+{
+public:
+	BoGameLogSaver(Boson* boson, const QString& prefix);
+
+	bool save();
+
+protected:
+	bool saveMessageLog();
+	bool saveGameLog();
+	bool saveUnitLog();
+	bool saveNetworkLog();
+	bool saveBoDebugLog();
+
+private:
+	QString mPrefix;
+	Boson::BosonPrivate* d;
+	Boson* mBoson;
+};
+
+BoGameLogSaver::BoGameLogSaver(Boson* boson, const QString& prefix)
+{
+ d = boson->d;
+ mBoson = boson;
+ mPrefix = prefix;
+}
+
+bool BoGameLogSaver::save()
+{
+ bool ret = true;
+ // AB: note: usually we do not return if saving fails
+ //           -> we should save as many logs as possible
+
+ if (!saveMessageLog()) {
+	boError() << k_funcinfo << "failed saving message log" << endl;
+	ret = false;
+ }
+ if (!saveGameLog()) {
+	boError() << k_funcinfo << "failed saving game log" << endl;
+	ret = false;
+ }
+#ifdef COLLECT_UNIT_LOGS
+ if (!saveUnitLog()) {
+	boError() << k_funcinfo << "failed saving unit log" << endl;
+	ret = false;
+ }
+#endif
+ if (!saveNetworkLog()) {
+	boError() << k_funcinfo << "failed saving network log" << endl;
+	ret = false;
+ }
+ if (!saveBoDebugLog()) {
+	boError() << k_funcinfo << "failed saving bodebug log" << endl;
+	ret = false;
+ }
+
+
+ return ret;
+}
+
+bool BoGameLogSaver::saveMessageLog()
+{
+ // this one can be used to reproduce a game.
+ // therefore we start with this one, if everything else fails we still have it.
+ QFile messageLog(mPrefix + ".messagelog");
+ if (!messageLog.open(IO_WriteOnly)) {
+	boError() << k_funcinfo << "Can't open output file '" << mPrefix << ".messagelog' for writing!" << endl;
+	return false;
+ }
+ if (!d->mMessageLogger.saveMessageLog(&messageLog)) {
+	boError() << k_funcinfo << "unable to write message log" << endl;
+	return false;
+ }
+ messageLog.close();
+ boDebug() << k_funcinfo << "message log saved to " << messageLog.name() << endl;
+ return true;
+}
+
+bool BoGameLogSaver::saveGameLog()
+{
+ QFile gameLog(mPrefix + ".gamelog");
+ if (!gameLog.open(IO_WriteOnly)) {
+	boError() << k_funcinfo << "Can't open output file '" << gameLog.name() << "' for writing gamelog!" << endl;
+	return false;
+ }
+ QValueList<QByteArray>::iterator it;
+ for (it = d->mGameLogs.begin(); it != d->mGameLogs.end(); it++) {
+	gameLog.writeBlock(qUncompress(*it));
+ }
+ gameLog.close();
+ return true;
+}
+
+bool BoGameLogSaver::saveUnitLog()
+{
+ QFile unitLog(mPrefix + ".unitlog");
+ if (!unitLog.open(IO_WriteOnly)) {
+	boError() << k_funcinfo << "Can't open output file '" << unitLog.name() << "' for writing unitlog!" << endl;
+	return false;
+ }
+ QValueList<QByteArray>::iterator uit;
+ for (uit = d->mUnitLogs.begin(); uit != d->mUnitLogs.end(); uit++) {
+	unitLog.writeBlock(qUncompress(*uit));
+ }
+ unitLog.close();
+ return true;
+}
+
+bool BoGameLogSaver::saveNetworkLog()
+{
+ QFile netLog(mPrefix + ".netlog");
+ if (!netLog.open(IO_WriteOnly)) {
+	boError() << k_funcinfo << "Can't open output file '" << netLog.name() << "' for writing!" << endl;
+	return false;
+ }
+ if (!d->mMessageLogger.saveHumanReadableMessageLog(&netLog)) {
+	boError() << k_funcinfo << "unable to write (human readable) message log" << endl;
+	return false;
+ }
+ netLog.close();
+ return true;
+}
+
+bool BoGameLogSaver::saveBoDebugLog()
+{
+ BoDebugLog* debugLog = BoDebugLog::debugLog();
+ if (!debugLog) {
+	BO_NULL_ERROR(debugLog);
+	return false;
+ }
+ const QPtrList<BoDebugMessage>* messages = debugLog->messageLogLevel(-1);
+ if (!messages) {
+	BO_NULL_ERROR(messages);
+	return false;
+ }
+ QFile log(mPrefix + ".bodebuglog");
+ if (!log.open(IO_WriteOnly)) {
+	boError() << k_funcinfo << "Can't open output file '" << log.name() << "' for writing!" << endl;
+	return false;
+ }
+ QTextStream stream(&log);
+ for (QPtrListIterator<BoDebugMessage> it(*messages); it.current(); ++it) {
+	QString level;
+	switch (it.current()->level()) {
+		case BoDebug::KDEBUG_INFO:
+			level = "INFO";
+			break;
+		case BoDebug::KDEBUG_WARN:
+			level = "WARNING";
+			break;
+		case BoDebug::KDEBUG_ERROR:
+			level = "ERROR";
+			break;
+		case BoDebug::KDEBUG_FATAL:
+			level = "FATAL";
+			break;
+		default:
+			level = "UNKNOWN";
+			break;
+	}
+	stream << level << " (" << it.current()->area() << ", " << it.current()->areaName() << "): " << it.current()->message();
+	if (!it.current()->backtrace().isEmpty()) {
+		stream << it.current()->backtrace();
+	}
+ }
+
+ log.close();
+ return true;
+}
+
+
+
 
 Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 {
@@ -1478,60 +1653,10 @@ bool Boson::saveGameLogs(const QString& prefix)
  // (actually the profiling and boDebug stuff shouldnt be here, either)
  BosonProfiler p("saveGameLogs");
 
- // this one can be used to reproduce a game.
- // therefore we start with this one, if everything else fails we still have it.
- QFile messageLog(prefix + ".messagelog");
- if (!messageLog.open(IO_WriteOnly)) {
-	boError() << k_funcinfo << "Can't open output file '" << prefix << ".messagelog' for writing!" << endl;
-	return false;
- }
- if (!d->mMessageLogger.saveMessageLog(&messageLog)) {
-	boError() << k_funcinfo << "unable to write message log" << endl;
-	return false;
- }
- messageLog.close();
- boDebug() << k_funcinfo << "message log saved to " << messageLog.name() << endl;
-
- // Write gamelog
- QFile gameLog(prefix + ".gamelog");
- if (!gameLog.open(IO_WriteOnly)) {
-	boError() << k_funcinfo << "Can't open output file '" << gameLog.name() << "' for writing gamelog!" << endl;
-	return false;
- }
- QValueList<QByteArray>::iterator it;
- for (it = d->mGameLogs.begin(); it != d->mGameLogs.end(); it++) {
-	gameLog.writeBlock(qUncompress(*it));
- }
- gameLog.close();
-
-#ifdef COLLECT_UNIT_LOGS
- // Write unitlog
- QFile unitLog(prefix + ".unitlog");
- if (!unitLog.open(IO_WriteOnly)) {
-	boError() << k_funcinfo << "Can't open output file '" << unitLog.name() << "' for writing unitlog!" << endl;
-	return false;
- }
- QValueList<QByteArray>::iterator uit;
- for (uit = d->mUnitLogs.begin(); uit != d->mUnitLogs.end(); uit++) {
-	unitLog.writeBlock(qUncompress(*uit));
- }
- unitLog.close();
-#endif
-
- // Write network message log
- QFile netLog(prefix + ".netlog");
- if (!netLog.open(IO_WriteOnly)) {
-	boError() << k_funcinfo << "Can't open output file '" << netLog.name() << "' for writing!" << endl;
-	return false;
- }
- if (!d->mMessageLogger.saveHumanReadableMessageLog(&netLog)) {
-	boError() << k_funcinfo << "unable to write (human readable) message log" << endl;
-	return false;
- }
- netLog.close();
-
+ BoGameLogSaver logs(this, prefix);
+ bool ret = logs.save();
  boDebug() << k_funcinfo << "Done, elapsed: " << p.elapsedSinceStart() << endl;
- return true;
+ return ret;
 }
 
 unsigned int Boson::advanceCallsCount() const
