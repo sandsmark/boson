@@ -40,20 +40,20 @@ InstallDirsKDE3 = {
 }
 
 InstallDirsKDE4 = {
-   "kde_apps"     => "${KDE4_APPS_DIR}",
-   "kde_conf"     => "${KDE4_CONFIG_DIR}",
-   "kde_data"     => "${KDE4_DATA_DIR}",
-   "kde_html"     => "${KDE4_HTML_DIR}",
+   "kde_apps"     => "${APPLNK_INSTALL_DIR}",
+   "kde_conf"     => "${CONFIG_INSTALL_DIR}",
+   "kde_data"     => "${DATA_INSTALL_DIR}",
+   "kde_html"     => "${HTML_INSTALL_DIR}",
    "kde_icon"     => "${KDE4_ICON_DIR}",
-   "kde_kcfg"     => "${KDE4_KCFG_DIR}",
-   "kde_libs_html"=> "${KDE4_LIBS_HTML_DIR}",
-   "kde_locale"   => "${KDE4_LOCALE_DIR}",
-   "kde_mime"     => "${KDE4_MIME_DIR}",
-   "kde_services" => "${KDE4_SERVICES_DIR}",
-   "kde_servicetypes" => "${KDE4_SERVICETYPES_DIR}",
-   "kde_sound"    => "${KDE4_SOUND_DIR}",
-   "kde_templates"=> "${KDE4_TEMPLATES_DIR}",
-   "kde_wallpaper"=> "${KDE4_WALLPAPER_DIR}",
+   "kde_kcfg"     => "${KCFG_INSTALL_DIR}",
+   "kde_libs_html"=> "${LIBS_HTML_INSTALL_DIR}",
+   "kde_locale"   => "${LOCALE_INSTALL_DIR}",
+   "kde_mime"     => "${MIME_INSTALL_DIR}",
+   "kde_services" => "${SERVICES_INSTALL_DIR}",
+   "kde_servicetypes" => "${SERVICETYPES_INSTALL_DIR}",
+   "kde_sound"    => "${SOUND_INSTALL_DIR}",
+   "kde_templates"=> "${TEMPLATES_INSTALL_DIR}",
+   "kde_wallpaper"=> "${WALLPAPER_INSTALL_DIR}",
    "xdg_apps"     => "${XDG_APPS_DIR}",
    "xdg_directory"=> "${XDG_DIRECTORY_DIR}",
    "data"         => "/share",
@@ -134,6 +134,16 @@ class BuildTarget
          when "$(LIB_KIO)" then "kio"
          when "$(LIB_KDEPRINT)" then "kdeprint"
          when "$(LIB_KPARTS)" then "kparts"
+		 when "$(LIB_KSPELL2)" then "kspell2"
+		 when "$(LIB_KDE3SUPPORT)" then "kde3support"
+		 when "$(LIB_KJS)" then "kjs"
+		 when "$(LIB_KHTML)" then "khtml"
+		 when "$(LIB_KNEWSTUFF)" then "knewstuff"
+		 when "$(LIB_KDEPIM)" then "kdepim"
+		 when "$(LIB_KDNSSD)" then "kdnssd"
+		 when "$(LIB_KIMPROXY)" then "kimproxy"
+		 when "$(LIB_KUTILS)" then "kutils"
+		 when "$(LIB_KSYCOCA)" then "kio"
          else
             if currentLib =~ /^-l(\S+)$/
                $1
@@ -600,7 +610,7 @@ class CMakeFile
 
             file.printf("INSTALL_TARGETS(/lib/kde3 %s )\n\n", buildTarget.name)
          elsif buildTarget.type==KDEInit
-            file.printf("KDE3_ADD_KLM( %s ${%s})\n\n", buildTarget.name, srcsName)
+            file.printf("KDE3_ADD_KDEINIT_EXECUTABLE( %s ${%s})\n\n", buildTarget.name, srcsName)
 
             file.printf("TARGET_LINK_LIBRARIES(kdeinit_%s ", buildTarget.name)
             buildTarget.libs.each { |currentLib| file.printf(" %s", currentLib) }
@@ -661,8 +671,6 @@ class CMakeFile
          file.printf("KDE3_INSTALL_ICONS( %s )\n\n",@iconDir )
       end
 
-      file.printf("KDE3_PLACEHOLDER()\n\n")
-
       file.printf("\n\n#original Makefile.am contents follow:\n\n")
       @lines.each{ |line| file.printf("#%s", line)}
    end
@@ -678,7 +686,7 @@ class CMakeFile
           file.printf("add_definitions(${QT_DEFINITIONS} ${KDE4_DEFINITIONS})\n\n")
           file.printf("link_directories(${KDE4_LIB_DIR})\n\n")
           file.printf("include(ConvenienceLibs.cmake)\n\n")
-          file.printf("include(ManualStuff.cmake)\n\n")
+		  file.printf("include(ManualStuff.cmake)\n\n")
           file.printf("include(ConfigureChecks.cmake)\n\n")
       end
 
@@ -771,10 +779,12 @@ class CMakeFile
          end
 
          if not buildTarget.sources.empty?
-            file.printf("set(%s\n", srcsName)
+            file.printf("set(%s ", srcsName)
             needToCreateDummyFile=false
             buildTarget.sources.each do |currentFile|
-               file.printf("%s\n", currentFile)
+               # if there are more than 3 files, print each of them on its own line
+               file.printf("\n   ") if buildTarget.sources.size>3
+               file.printf("%s ", currentFile)
                if currentFile=="dummy.cpp"
 
                   needToCreateDummyFile=true if not FileTest.exists?(@path+"/dummy.cpp")
@@ -790,49 +800,63 @@ class CMakeFile
          end
 
          if not buildTarget.uis.empty?
-            file.printf("set( %s\n", uisName)
-            buildTarget.uis.each{ |currentFile| file.printf("%s\n", currentFile)}
+            file.printf("kde4_add_ui_files(%s ", srcsName )
+            buildTarget.uis.each do |currentFile| 
+               # if there are more than 3 files, print each of them on its own line
+               file.printf("\n   ") if buildTarget.uis.size>3
+               file.printf("%s ", currentFile)
+            end
             file.printf(")\n\n")
-            file.printf("kde4_add_ui_files(%s ${%s} )\n\n", srcsName, uisName)
          end
 
          if not buildTarget.ui3s.empty?
-            file.printf("set( %s\n", ui3sName)
-            buildTarget.ui3s.each{ |currentFile| file.printf("%s\n", currentFile)}
+            file.printf("kde4_add_ui3_files(%s ", srcsName)
+            buildTarget.ui3s.each do |currentFile| 
+               # if there are more than 3 files, print each of them on its own line
+               file.printf("\n   ") if buildTarget.ui3s.size>3
+               file.printf("%s ", currentFile)
+            end
             file.printf(")\n\n")
-            file.printf("kde4_add_ui3_files(%s ${%s} )\n\n", srcsName, ui3sName)
          end
 
          if not buildTarget.qrcs.empty?
-            file.printf("set( %s\n", qrcsName)
-            buildTarget.qrcs.each{ |currentFile| file.printf("%s\n", currentFile)}
+            file.printf("qt4_add_resources(%s ", srcsName)
+            buildTarget.qrcs.each do |currentFile| 
+               # if there are more than 3 files, print each of them on its own line
+               file.printf("\n   ") if buildTarget.qrcs.size>3
+               file.printf("%s ", currentFile)
+            end
             file.printf(")\n\n")
-            file.printf("qt4_add_resources(%s ${%s} )\n\n", srcsName, qrcsName)
          end
 
-
          if not buildTarget.skels.empty?
-            file.printf("set( %s\n", skelsName)
-            buildTarget.skels.each{ |currentFile| file.printf("%s\n", currentFile)}
+            file.printf("kde4_add_dcop_skels(%s ", srcsName)
+            buildTarget.skels.each do |currentFile| 
+               # if there are more than 3 files, print each of them on its own line
+               file.printf("\n   ") if buildTarget.skels.size>3
+               file.printf("%s ", currentFile)
+            end
             file.printf(")\n\n")
-
-            file.printf("kde4_add_dcop_skels(%s ${%s})\n\n", srcsName, skelsName)
          end
 
          if not buildTarget.stubs.empty?
-            file.printf("set( %s\n", stubsName)
-            buildTarget.stubs.each{ |currentFile| file.printf("%s\n", currentFile)}
+            file.printf("kde4_add_dcop_stubs(%s ", srcsName)
+            buildTarget.stubs.each do |currentFile| 
+               # if there are more than 3 files, print each of them on its own line
+               file.printf("\n   ") if buildTarget.stubs.size>3
+               file.printf("%s ", currentFile)
+            end
             file.printf(")\n\n")
-
-            file.printf("kde4_add_dcop_stubs(%s ${%s})\n\n", srcsName, stubsName)
          end
 
          if not buildTarget.kcfgs.empty?
-            file.printf("set( %s\n", kcfgsName)
-            buildTarget.kcfgs.each{ |currentFile| file.printf("%s\n", currentFile)}
+            file.printf("kde4_add_kcfg_files(%s ", srcsName)
+            buildTarget.kcfgs.each do |currentFile| 
+               # if there are more than 3 files, print each of them on its own line
+               file.printf("\n   ") if buildTarget.kcfgs.size>3
+               file.printf("%s ", currentFile)
+            end
             file.printf(")\n\n")
-
-            file.printf("kde4_add_kcfg_files(%s ${%s})\n\n", srcsName, kcfgsName)
          end
 
          if buildTarget.type==SharedLib
@@ -842,7 +866,7 @@ class CMakeFile
             file.printf(" )\n\n")
 
             file.printf("set_target_properties(%s PROPERTIES VERSION %d.%d.%d SOVERSION %d )\n", buildTarget.name, buildTarget.versionNumberMajor, buildTarget.versionNumberMinor, buildTarget.versionNumberPatch, buildTarget.versionNumberMajor)
-            file.printf("install_targets(${KDE4_LIB_INSTALL_DIR} %s )\n\n", buildTarget.name)
+            file.printf("install_targets(${LIB_INSTALL_DIR} %s )\n\n", buildTarget.name)
 
          elsif buildTarget.type==StaticLib
             file.printf("kde4_add_library(%s STATIC ${%s})\n\n", buildTarget.name, srcsName)
@@ -850,24 +874,24 @@ class CMakeFile
          elsif buildTarget.type==Part
             if buildTarget.stdPrefix
                file.printf("kde4_add_plugin(%s WITH_PREFIX ${%s})\n\n", buildTarget.name, srcsName)
-			   file.printf("kde4_create_libtool_file( %s  /kde4/ )\n\n", buildTarget.name)
+               file.printf("kde4_install_libtool_file( ${PLUGIN_INSTALL_DIR} %s )\n\n", buildTarget.name)
             else
                file.printf("kde4_add_plugin(%s ${%s})\n\n", buildTarget.name, srcsName)
-			   file.printf("kde4_create_libtool_file( %s  /kde4/ )\n\n", buildTarget.name)
+               file.printf("kde4_install_libtool_file( ${PLUGIN_INSTALL_DIR} %s )\n\n", buildTarget.name)
             end
             file.printf("target_link_libraries(%s ", buildTarget.name)
             buildTarget.libs.each { |currentLib| file.printf(" %s", currentLib) }
             file.printf(" )\n\n")
 
-            file.printf("install_targets(${KDE4_LIB_INSTALL_DIR}/kde4 %s )\n\n", buildTarget.name)
+            file.printf("install_targets(${LIB_INSTALL_DIR}/kde4 %s )\n\n", buildTarget.name)
          elsif buildTarget.type==KDEInit
-            file.printf("kde4_add_klm( %s ${%s})\n\n", buildTarget.name, srcsName)
+            file.printf("kde4_add_kdeinit_executable( %s ${%s})\n\n", buildTarget.name, srcsName)
 
             file.printf("target_link_libraries(kdeinit_%s ", buildTarget.name)
             buildTarget.libs.each { |currentLib| file.printf(" %s", currentLib) }
             file.printf(" )\n\n")
 
-            file.printf("install_targets(${KDE4_LIB_INSTALL_DIR} kdeinit_%s )\n\n", buildTarget.name)
+            file.printf("install_targets(${LIB_INSTALL_DIR} kdeinit_%s )\n\n", buildTarget.name)
 
             file.printf("target_link_libraries( %s kdeinit_%s )\n", buildTarget.name, buildTarget.name)
 
@@ -904,7 +928,8 @@ class CMakeFile
       file.printf("\n")
 
       if @installIcons
-         file.printf("kde4_install_icons( %s )\n\n",@iconDir )
+         #add a default theme (not perfect for convert but enough to avoid pb
+		 file.printf("kde4_install_icons( ${ICON_INSTALL_DIR}  %s )\n\n",@iconDir )
       end
 
       if @createDoxygenDocs

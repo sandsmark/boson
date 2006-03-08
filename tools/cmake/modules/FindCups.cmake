@@ -1,9 +1,9 @@
-# - Try to find Cups
+# - Try to find the Cups printing system
 # Once done this will define
 #
 #  CUPS_FOUND - system has Cups
 #  CUPS_INCLUDE_DIR - the Cups include directory
-#  CUPS_LIBRARY - Link these to use OpenGL and GLU
+#  CUPS_LIBRARIES - Libraries needed to use Cups
 #  CUPS_DEFINITIONS - Compiler switches required for using Cups
 #
 
@@ -13,23 +13,24 @@ FIND_PATH(CUPS_INCLUDE_DIR cups/cups.h
   /usr/local/include
 )
 
-FIND_LIBRARY(CUPS_LIBRARY NAMES cups
+FIND_LIBRARY(CUPS_LIBRARIES NAMES cups
   PATHS
   /usr/lib
   /usr/local/lib
 )
 
-IF(CUPS_INCLUDE_DIR AND CUPS_LIBRARY)
-   SET(CUPS_FOUND TRUE)
-ENDIF(CUPS_INCLUDE_DIR AND CUPS_LIBRARY)
+if(CUPS_INCLUDE_DIR AND CUPS_LIBRARIES)
+   set(CUPS_FOUND TRUE)
+endif(CUPS_INCLUDE_DIR AND CUPS_LIBRARIES)
 
-IF(CUPS_FOUND)
-  IF(NOT Cups_FIND_QUIETLY)
-    MESSAGE(STATUS "Found Cups: ${CUPS_LIBRARY}")
-  ENDIF(NOT Cups_FIND_QUIETLY)
-ELSE(CUPS_FOUND)
-  IF(Cups_FIND_REQUIRED)
-    MESSAGE(FATAL_ERROR "Could not find Cups")
-  ENDIF(Cups_FIND_REQUIRED)
-ENDIF(CUPS_FOUND)
+if(CUPS_FOUND)
+  if(NOT Cups_FIND_QUIETLY)
+    message(STATUS "Found Cups: ${CUPS_LIBRARIES}")
+  endif(NOT Cups_FIND_QUIETLY)
+else(CUPS_FOUND)
+  if(Cups_FIND_REQUIRED)
+    message(FATAL_ERROR "Could NOT find Cups")
+  endif(Cups_FIND_REQUIRED)
+endif(CUPS_FOUND)
 
+MARK_AS_ADVANCED(CUPS_INCLUDE_DIR CUPS_LIBRARIES)

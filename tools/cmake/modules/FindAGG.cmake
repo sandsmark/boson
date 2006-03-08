@@ -1,9 +1,9 @@
-# - Try to find AGG
+# - Try to find the AGG graphics library
 # Once done this will define
 #
 #  AGG_FOUND - system has AGG
 #  AGG_INCLUDE_DIR - the AGG include directory
-#  AGG_LIBRARY - Link these to use OpenGL and GLU
+#  AGG_LIBRARIES - Link these to use AGG
 #  AGG_DEFINITIONS - Compiler switches required for using AGG
 #
 
@@ -14,7 +14,7 @@ INCLUDE(UsePkgConfig)
 
 PKGCONFIG(libagg _AGGIncDir _AGGLinkDir _AGGLinkFlags _AGGCflags)
 
-SET(AGG_DEFINITIONS ${_AGGCflags})
+set(AGG_DEFINITIONS ${_AGGCflags})
 
 FIND_PATH(AGG_INCLUDE_DIR agg2/agg_pixfmt_gray.h
   ${_AGGIncDir}
@@ -22,24 +22,25 @@ FIND_PATH(AGG_INCLUDE_DIR agg2/agg_pixfmt_gray.h
   /usr/local/include
 )
 
-FIND_LIBRARY(AGG_LIBRARY NAMES agg
+FIND_LIBRARY(AGG_LIBRARIES NAMES agg
   PATHS
   ${_AGGLinkDir}
   /usr/lib
   /usr/local/lib
 )
 
-IF(AGG_INCLUDE_DIR AND AGG_LIBRARY)
-   SET(AGG_FOUND TRUE)
-ENDIF(AGG_INCLUDE_DIR AND AGG_LIBRARY)
+if(AGG_INCLUDE_DIR AND AGG_LIBRARIES)
+   set(AGG_FOUND TRUE)
+endif(AGG_INCLUDE_DIR AND AGG_LIBRARIES)
 
-IF(AGG_FOUND)
-  IF(NOT AGG_FIND_QUIETLY)
-    MESSAGE(STATUS "Found AGG: ${AGG_LIBRARY}")
-  ENDIF(NOT AGG_FIND_QUIETLY)
-ELSE(AGG_FOUND)
-  IF(AGG_FIND_REQUIRED)
-    MESSAGE(FATAL_ERROR "Could not find AGG")
-  ENDIF(AGG_FIND_REQUIRED)
-ENDIF(AGG_FOUND)
+if(AGG_FOUND)
+  if(NOT AGG_FIND_QUIETLY)
+    message(STATUS "Found AGG: ${AGG_LIBRARIES}")
+  endif(NOT AGG_FIND_QUIETLY)
+else(AGG_FOUND)
+  if(AGG_FIND_REQUIRED)
+    message(FATAL_ERROR "Could NOT find AGG")
+  endif(AGG_FIND_REQUIRED)
+endif(AGG_FOUND)
 
+MARK_AS_ADVANCED(AGG_INCLUDE_DIR AGG_LIBRARIES)
