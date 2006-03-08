@@ -22,10 +22,10 @@
 
 #include "bodebug.h"
 #include "bosonconfig.h"
-#include "speciestheme.h"
+#include "gameengine/speciestheme.h"
 #include "speciesdata.h"
-#include "bosonitem.h"
-#include "bosongroundtheme.h"
+#include "gameengine/bosonitem.h"
+#include "gameengine/bosongroundtheme.h"
 #include "bosongroundthemedata.h"
 
 #include <qptrlist.h>

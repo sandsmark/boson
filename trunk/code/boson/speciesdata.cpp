@@ -20,9 +20,9 @@
 #include "speciesdata.h"
 
 #include "../bomemory/bodummymemory.h"
-#include "unitproperties.h"
-#include "unitbase.h"
-#include "bosonweapon.h"
+#include "gameengine/unitproperties.h"
+#include "gameengine/unitbase.h"
+#include "gameengine/bosonweapon.h"
 #include "modelrendering/bosonmodel.h"
 #include "bodebug.h"
 #include "boaction.h"

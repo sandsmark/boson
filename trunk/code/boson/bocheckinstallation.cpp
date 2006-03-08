@@ -20,7 +20,7 @@
 
 #include "defines.h"
 #include "../bomemory/bodummymemory.h"
-#include "bosonplayfield.h"
+#include "gameengine/bosonplayfield.h"
 #include "bosongroundtheme.h"
 #include "bodebug.h"
 

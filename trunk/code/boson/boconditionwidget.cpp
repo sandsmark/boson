@@ -22,10 +22,10 @@
 
 #include "../bomemory/bodummymemory.h"
 #include "bo3dtools.h"
-#include "boeventmatching.h"
-#include "boevent.h"
+#include "gameengine/boeventmatching.h"
+#include "gameengine/boevent.h"
 #include "bodebug.h"
-#include "bocondition.h"
+#include "gameengine/bocondition.h"
 
 #include <qlayout.h>
 #include <qlabel.h>

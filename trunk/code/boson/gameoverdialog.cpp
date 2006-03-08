@@ -21,9 +21,9 @@
 #include "gameoverdialog.moc"
 
 #include "../bomemory/bodummymemory.h"
-#include "boson.h"
-#include "player.h"
-#include "bosonstatistics.h"
+#include "gameengine/boson.h"
+#include "gameengine/player.h"
+#include "gameengine/bosonstatistics.h"
 
 #include <klocale.h>
 

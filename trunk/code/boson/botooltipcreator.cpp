@@ -21,13 +21,13 @@
 
 #include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
-#include "rtti.h"
-#include "unit.h"
-#include "unitplugins.h"
-#include "speciestheme.h"
-#include "unitproperties.h"
-#include "upgradeproperties.h"
-#include "cell.h"
+#include "gameengine/rtti.h"
+#include "gameengine/unit.h"
+#include "gameengine/unitplugins.h"
+#include "gameengine/speciestheme.h"
+#include "gameengine/unitproperties.h"
+#include "gameengine/upgradeproperties.h"
+#include "gameengine/cell.h"
 #include "bo3dtools.h"
 
 #include <qstring.h>

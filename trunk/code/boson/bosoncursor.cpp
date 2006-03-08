@@ -20,7 +20,6 @@
 #include "bosoncursor.h"
 
 #include "../bomemory/bodummymemory.h"
-#include "rtti.h"
 #include "botexture.h"
 #include "bodebug.h"
 

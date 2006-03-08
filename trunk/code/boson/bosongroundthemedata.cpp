@@ -19,8 +19,8 @@
 #include "bosongroundthemedata.h"
 
 #include "../bomemory/bodummymemory.h"
-#include "bosongroundtheme.h"
-#include "bosonmap.h"
+#include "gameengine/bosongroundtheme.h"
+#include "gameengine/bosonmap.h"
 #include "bodebug.h"
 #include "defines.h"
 #include "bosondata.h"

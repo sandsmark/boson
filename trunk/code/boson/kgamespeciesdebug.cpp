@@ -21,7 +21,7 @@
 #include "kgamespeciesdebug.moc"
 
 #include "../bomemory/bodummymemory.h"
-#include "speciestheme.h"
+#include "gameengine/speciestheme.h"
 #include "speciesdata.h"
 #include "bodebug.h"
 #include "modelrendering/bosonmodel.h"
