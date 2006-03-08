@@ -98,6 +98,7 @@
 #include <qdir.h>
 #include <qdom.h>
 #include <qvaluevector.h>
+#include <qapplication.h>
 
 
 #warning d->mMouseMoveDiff.start() mostly removed. probably fix displayInput()->actionLoced() actions !
@@ -149,7 +150,7 @@ public:
 	}
 	void mousePressEvent(QMouseEvent* e)
 	{
-		if (mTimeSinceLastPress.elapsed() > 200) {
+		if (mTimeSinceLastPress.elapsed() > QApplication::doubleClickInterval()) {
 			reset();
 		}
 		mTimeSinceLastPress.restart();
@@ -215,7 +216,7 @@ void BoMouseButtonState::pressButton(const QPoint& pos)
  mCurrentWidgetPosDiffY = 0;
 }
 
-void BoMouseButtonState::releaseButton(const BoMouseEvent& modifiers)
+void BoMouseButtonState::releaseButton(const BoMouseEvent& modifiers, bool doubleRelease)
 {
  if (mButtonIsReleased) {
 	return;
@@ -227,7 +228,11 @@ void BoMouseButtonState::releaseButton(const BoMouseEvent& modifiers)
 		actionAfterMove(modifiers);
 	}
  } else {
-	action(modifiers);
+	if (doubleRelease) {
+		actionDouble(modifiers);
+	} else {
+		action(modifiers);
+	}
  }
  mIsMove = false;
  mIsCameraAction = false;
@@ -253,6 +258,11 @@ void BoMouseButtonState::mouseMoved(const BoMouseEvent& e)
  } else {
 	moveAction(e);
  }
+}
+
+void BoMouseButtonState::actionDouble(const BoMouseEvent& modifiers)
+{
+ action(modifiers);
 }
 
 
@@ -308,6 +318,7 @@ public:
 
 protected:
 	virtual void action(const BoMouseEvent&);
+	virtual void actionDouble(const BoMouseEvent&);
 	virtual void actionAfterMove(const BoMouseEvent&);
 	virtual void cameraAction(const BoMouseEvent&);
 	virtual void moveAction(const BoMouseEvent&);
@@ -326,6 +337,7 @@ public:
 
 protected:
 	virtual void action(const BoMouseEvent&);
+	virtual void actionDouble(const BoMouseEvent&);
 	virtual void actionAfterMove(const BoMouseEvent&);
 	virtual void cameraAction(const BoMouseEvent&);
 	virtual void moveAction(const BoMouseEvent&);
@@ -340,6 +352,7 @@ public:
 
 protected:
 	virtual void action(const BoMouseEvent&);
+	virtual void actionDouble(const BoMouseEvent&);
 	virtual void actionAfterMove(const BoMouseEvent&);
 	virtual void cameraAction(const BoMouseEvent&);
 	virtual void moveAction(const BoMouseEvent&);
@@ -387,6 +400,24 @@ void BoLeftMouseButtonState::action(const BoMouseEvent& e)
 
  if (unit && playSelectSound) {
 	boViewData->speciesData(unit->speciesTheme())->playSound(unit, SoundOrderSelect);
+ }
+}
+
+void BoLeftMouseButtonState::actionDouble(const BoMouseEvent& e)
+{
+ BO_CHECK_NULL_RET(displayInput());
+
+ // we ignore UnitAction is locked here currently!
+ bool replace = !e.controlButton();
+ bool onScreenOnly = !e.shiftButton();
+ Unit* unit = e.unitAtEventPos();
+ if (unit) {
+	if (onScreenOnly) {
+		boDebug() << k_funcinfo << "TODO: select only those that are currently on the screen!" << endl;
+	}
+	if (!displayInput()->selectAll(unit->unitProperties(), replace)) {
+		displayInput()->selectSingle(unit, replace);
+	}
  }
 }
 
@@ -462,6 +493,11 @@ void BoRightMouseButtonState::action(const BoMouseEvent& e)
  }
 }
 
+void BoRightMouseButtonState::actionDouble(const BoMouseEvent& e)
+{
+ action(e);
+}
+
 void BoRightMouseButtonState::actionAfterMove(const BoMouseEvent& e)
 {
  Q_UNUSED(e);
@@ -516,6 +552,11 @@ void BoMiddleMouseButtonState::action(const BoMouseEvent& e)
 	gameView()->slotReCenterDisplay(QPoint(cellX, cellY));
 	displayInput()->updateCursor();
  }
+}
+
+void BoMiddleMouseButtonState::actionDouble(const BoMouseEvent& e)
+{
+ action(e);
 }
 
 void BoMiddleMouseButtonState::actionAfterMove(const BoMouseEvent& e)
@@ -2359,32 +2400,24 @@ void BosonGameView::mouseEventReleaseDouble(ButtonState button, const BoMouseEve
  switch (button) {
 	case LeftButton:
 	{
-		// we ignore UnitAction is locked here
-		// currently!
-		bool replace = !event.controlButton();
-		bool onScreenOnly = !event.shiftButton();
-		Unit* unit = event.unitAtEventPos();
-		if (unit) {
-			if (onScreenOnly) {
-				boDebug() << k_funcinfo << "TODO: select only those that are currently on the screen!" << endl;
-			}
-			if (!displayInput()->selectAll(unit->unitProperties(), replace)) {
-				displayInput()->selectSingle(unit, replace);
-			}
-		}
+		d->mLeftButtonState->releaseButton(event, true);
 		break;
 	}
 	case MidButton:
+	{
+		d->mMiddleButtonState->releaseButton(event, true);
+		break;
+	}
 	case RightButton:
 	{
-		// we ignore all other (RMB, MMB) for now. we
-		// might use this one day.
+		d->mRightButtonState->releaseButton(event, true);
 		break;
 	}
 	default:
 		boError() << k_funcinfo << "invalid mouse button " << button << endl;
 		break;
  }
+ displayInput()->updateCursor();
 }
 
 void BosonGameView::paint()
