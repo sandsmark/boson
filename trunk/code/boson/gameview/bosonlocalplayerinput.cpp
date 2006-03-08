@@ -27,7 +27,7 @@
 #include "../gameengine/unitproperties.h"
 #include "../gameengine/player.h"
 #include "../gameengine/playerio.h"
-#include "../boselection.h"
+#include "boselection.h"
 #include "../gameengine/bosonmessage.h"
 #include "../gameengine/bosonmessageids.h"
 #include "bodebug.h"
