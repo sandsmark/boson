@@ -20,7 +20,7 @@
 #include "boaction.h"
 
 #include "../bomemory/bodummymemory.h"
-#include "unit.h"
+#include "gameengine/unit.h"
 #include "speciesdata.h"
 #include "bodebug.h"
 

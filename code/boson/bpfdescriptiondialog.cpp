@@ -21,7 +21,7 @@
 #include "bpfdescriptiondialog.moc"
 
 #include "../bomemory/bodummymemory.h"
-#include "bpfdescription.h"
+#include "gameengine/bpfdescription.h"
 #include "bodebug.h"
 
 #include <klocale.h>

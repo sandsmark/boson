@@ -27,7 +27,7 @@
 #include "bodebug.h"
 #include "bosonglwidget.h" // BoContext
 #include "bolight.h"
-#include "bosoncanvas.h"
+#include "gameengine/bosoncanvas.h"
 
 #include <qdom.h>
 
