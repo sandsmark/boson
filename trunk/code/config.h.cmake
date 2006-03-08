@@ -1,5 +1,5 @@
 #include <ufo/config-ufo.h>
-#include <bosound/config-bosound.h>
+#include <boson/sound/bosound/config-bosound.h>
 #include <boson/info/config-info.h>
 #include <bobmfconverter/libgfx/config-libgfx.h>
 
