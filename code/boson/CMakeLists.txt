@@ -1,13 +1,13 @@
 project(boson)
 
 add_subdirectory( data )
-add_subdirectory( script )
+add_subdirectory( gameengine/script )
 add_subdirectory( info )
-add_subdirectory( boufo )
 add_subdirectory( gameview/plugin )
-add_subdirectory( meshrenderer )
+add_subdirectory( boufo )
+add_subdirectory( modelrendering/meshrenderer )
 add_subdirectory( groundrenderer )
-add_subdirectory( bosound )
+add_subdirectory( sound/bosound )
 
 include(BosonMacros)
 
@@ -22,6 +22,7 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/bogl
 	${CMAKE_CURRENT_SOURCE_DIR}/sound/bosound
 	${CMAKE_CURRENT_SOURCE_DIR}/boufo
+	${CMAKE_CURRENT_SOURCE_DIR}/gameengine
 	${QT_INCLUDE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 )
@@ -125,12 +126,15 @@ set(startupwidgets_SRCS
 	startupwidgets/boufostarteditorwidget.cpp
 	startupwidgets/boufoloadsavegamewidget.cpp
 	startupwidgets/bocreatenewmap.cpp
+	startupwidgets/bosonloadsavegamehandler.cpp
+	startupwidgets/boufoloadfromlogwidget.cpp
 )
 set(startupwidgets_BOUI
 	startupwidgets/welcomewidget.boui
 	startupwidgets/newgamewidget.boui
 	startupwidgets/boufonetworkoptionswidgetbase.boui
 	startupwidgets/boufostarteditorwidgetbase.boui
+	startupwidgets/boufoloadfromlogwidgetbase.boui
 )
 boson_add_boui_files(startupwidgets_SRCS ${startupwidgets_BOUI})
 kde3_automoc(${startupwidgets_SRCS})
@@ -161,6 +165,12 @@ set(gameview_SRCS
 	gameview/bolocalplayereventlistener.cpp
 	gameview/bosonmenuinput.cpp
 	gameview/boeditplayerinputswidget.cpp
+	gameview/bosoneffectmanager.cpp
+	gameview/bosoneffect.cpp
+	gameview/bosoneffectproperties.cpp
+	gameview/bosoneffectparticle.cpp
+	gameview/bosoneffectpropertiesparticle.cpp
+	gameview/boselection.cpp
 )
 set(gameview_BOUI
 	gameview/bosonufogameguihelper.boui
@@ -169,9 +179,18 @@ boson_add_boui_files(gameview_SRCS ${gameview_BOUI})
 kde3_automoc(${gameview_SRCS})
 
 
+set(modelrendering_SRCS
+	modelrendering/bosonmodel.cpp
+	modelrendering/bosonmodeltextures.cpp
+	modelrendering/bomesh.cpp
+	modelrendering/bomeshrenderer.cpp
+	modelrendering/bomeshrenderermanager.cpp
+	modelrendering/bobmfload.cpp
+)
+kde3_automoc(${modelrendering_SRCS})
+
 set(libboson_SRCS
 	bosonviewdata.cpp
-	boselection.cpp
 	botooltipcreator.cpp
 	bosonglwidget.cpp
 	bosonufoglwidget.cpp
@@ -188,15 +207,9 @@ set(libboson_SRCS
 	bocamera.cpp
 	boautocamera.cpp
 	bosoncursor.cpp
-	bosonmodel.cpp
-	bosonmodeltextures.cpp
-	bomesh.cpp
-	bomeshrenderer.cpp
-	bomeshrenderermanager.cpp
 	bomaterial.cpp
 	bolight.cpp
 	botexture.cpp
-	bobmfload.cpp
 	boshader.cpp
 	speciesdata.cpp
 	boaction.cpp
@@ -205,6 +218,10 @@ set(libboson_SRCS
 	bonuminput.cpp
 	sound/bosonaudiointerface.cpp
 )
+set(libboson_UI
+	bosonprofilingdialoggui.ui
+)
+kde3_add_ui_files( libboson_SRCS ${libboson_UI} )
 kde3_automoc(${libboson_SRCS})
 
 
@@ -213,6 +230,7 @@ set(libboson_LIBS
 	bosoninfo
 	bosonsound
 	bosonsoundcommon
+	modelrendering
 	gameengine
 	common
 #	${common_LIBS}
@@ -243,20 +261,16 @@ set(boson_SRCS
 	gameoverdialog.cpp
 	bocheckinstallation.cpp
 	bosonguistarting.cpp
+	bosongameviewstarting.cpp
 	bosongameviewpluginbase.cpp
 	bosongameviewpluginmanager.cpp
-	bosoneffectmanager.cpp
-	bosoneffect.cpp
-	bosoneffectproperties.cpp
-	bosoneffectparticle.cpp
-	bosoneffectpropertiesparticle.cpp
 	botexmapimportdialog.cpp
 	boconditionwidget.cpp
 	bowaterrenderer.cpp
 	selectbox.cpp
-	main.cpp
 	bosondebugtextures.cpp
 	bosondebugmodels.cpp
+	programs/main.cpp
 
 	${startupwidgets_SRCS}
 	${commandframe_SRCS}
@@ -282,6 +296,9 @@ target_link_libraries(bosonlib ${libboson_LIBS})
 add_library(gameengine STATIC ${gameengine_SRCS})
 target_link_libraries(gameengine ${gameengine_LIBS})
 
+add_library(modelrendering STATIC ${modelrendering_SRCS})
+#target_link_libraries(modelrendering ${modelrendering_SRCS})
+
 
 ################ boson #################
 kde3_add_executable(boson ${boson_SRCS})
@@ -293,9 +310,9 @@ target_link_libraries(boson
 
 ################ boson-no-bui #################
 set(bosonNoGUI_SRCS
-	bosoncomputerio.cpp
 	bocheckinstallation.cpp
-	mainnogui.cpp
+	programs/mainnogui.cpp
+	programs/mainnoguimain.cpp
 )
 kde3_automoc(${bosonNoGUI_SRCS})
 kde3_add_executable(boson-no-gui ${bosonNoGUI_SRCS})
@@ -307,38 +324,16 @@ target_link_libraries(boson-no-gui
 	${QT_AND_KDECORE_LIBS}
 )
 
-################ borender #################
-set(borender_SRCS
-	kgame3dsmodeldebug.cpp
-	bomaterialwidget.cpp
-	bovectorinput.cpp
-	kgamespeciesdebug.cpp
-	borendermain.cpp
-	borenderrendermodel.cpp
-	bopixmaprenderer.cpp
-	boeditturretpropertiesdialog.cpp
-)
-boson_add_boui_files(borender_SRCS
-	borendergui.boui
-)
-kde3_automoc(${borender_SRCS})
-kde3_add_executable(borender ${borender_SRCS})
-target_link_libraries(borender
-	bosonlib
-	boufo
-	3ds
-	${X11_XMU_LIB}
-)
 
 ################ bounit #################
 set(bounit_SRCS
-	bounitmain.cpp
-	bosonsearchpathswidget.cpp
-	bouniteditor.cpp
+	programs/bounitmain.cpp
+	programs/bosonsearchpathswidget.cpp
+	programs/bouniteditor.cpp
 )
 set(bounit_UI
-	bosonsearchpathswidgetbase.ui
-	bouniteditorbase.ui
+	programs/bosonsearchpathswidgetbase.ui
+	programs/bouniteditorbase.ui
 )
 kde3_add_ui_files(bounit_SRCS ${bounit_UI})
 kde3_automoc(${bounit_SRCS})
@@ -353,14 +348,39 @@ target_link_libraries(bounit
 	${X11_XMU_LIB}
 )
 
+
+
+################ borender #################
+set(borender_SRCS
+	kgame3dsmodeldebug.cpp
+	bomaterialwidget.cpp
+	bovectorinput.cpp
+	kgamespeciesdebug.cpp
+	programs/borendermain.cpp
+	programs/borenderrendermodel.cpp
+	bopixmaprenderer.cpp
+	programs/boeditturretpropertiesdialog.cpp
+)
+boson_add_boui_files(borender_SRCS
+	programs/borendergui.boui
+)
+kde3_automoc(${borender_SRCS})
+kde3_add_executable(borender ${borender_SRCS})
+target_link_libraries(borender
+	bosonlib
+	boufo
+	3ds
+	${X11_XMU_LIB}
+)
+
 ################ bocursor #################
 set(bocursor_SRCS
 	bosoncursor.cpp
 	botexture.cpp
 	bosonglwidget.cpp
 
-	bocursormain.cpp
-	bosoncursoreditor.cpp
+	programs/bocursormain.cpp
+	programs/bosoncursoreditor.cpp
 )
 kde3_automoc(${bocursor_SRCS})
 kde3_add_executable(bocursor ${bocursor_SRCS})
@@ -375,12 +395,12 @@ target_link_libraries(bocursor
 
 ################ bomodelpixmaps #################
 set(bomodelpixmaps_SRCS
-	bomodelpixmaps.cpp
-	borenderrendermodel.cpp
+	programs/bomodelpixmaps.cpp
+	programs/borenderrendermodel.cpp
 	bopixmaprenderer.cpp
 )
 kde3_add_ui_files(bomodelpixmaps_SRCS
-	bomodelpixmapsgui.ui
+	programs/bomodelpixmapsgui.ui
 )
 kde3_automoc(${bomodelpixmaps_SRCS})
 kde3_add_executable(bomodelpixmaps ${bomodelpixmaps_SRCS})
@@ -394,7 +414,7 @@ target_link_libraries(bomodelpixmaps
 ################ boinfo #################
 set(boinfo_SRCS
 	bosonglwidget.cpp
-	boinfomain.cpp
+	programs/boinfomain.cpp
 )
 kde3_automoc(${boinfo_SRCS})
 kde3_add_executable(boinfo ${boinfo_SRCS})
@@ -412,7 +432,7 @@ set(bo3dsdebug_SRCS
 	kgame3dsmodeldebug.cpp
 	bomatrixwidget.cpp
 
-	bo3dsdebugmain.cpp
+	programs/bo3dsdebugmain.cpp
 )
 kde3_automoc(${bo3dsdebug_SRCS})
 kde3_add_executable(bo3dsdebug ${bo3dsdebug_SRCS})
@@ -428,7 +448,7 @@ target_link_libraries(bo3dsdebug
 ################ boconditioneditor #################
 set(boconditioneditor_SRCS
 	boconditionwidget.cpp
-	boconditioneditormain.cpp
+	programs/boconditioneditormain.cpp
 )
 kde3_automoc(${boconditioneditor_SRCS})
 kde3_add_executable(boconditioneditor ${boconditioneditor_SRCS})
@@ -444,7 +464,10 @@ target_link_libraries(boconditioneditor
 ################ boprofiling #################
 set(boprofiling_SRCS
 	bosonprofilingdialog.cpp
-	boprofilingmain.cpp
+	programs/boprofilingmain.cpp
+)
+kde3_add_ui_files(boprofiling_SRCS
+	bosonprofilingdialoggui.ui
 )
 kde3_automoc(${boprofiling_SRCS})
 kde3_add_executable(boprofiling ${boprofiling_SRCS})
