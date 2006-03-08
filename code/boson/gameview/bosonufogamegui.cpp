@@ -38,7 +38,7 @@
 #include "../bosonufominimap.h"
 #include "commandframe/bosoncommandframe.h"
 #include "../gameengine/bosonmessageids.h"
-#include "../boselection.h"
+#include "boselection.h"
 #include "../gameengine/playerio.h"
 #include "bosonlocalplayerinput.h"
 #include "../gameengine/unit.h"

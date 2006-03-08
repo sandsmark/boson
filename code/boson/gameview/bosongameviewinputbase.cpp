@@ -24,7 +24,7 @@
 #include "../bomemory/bodummymemory.h"
 #include "../no_player.h"
 #include "../bosonconfig.h"
-#include "../boselection.h"
+#include "boselection.h"
 #include "../gameengine/bosoncanvas.h"
 #include "../gameengine/boitemlist.h"
 #include "bodebug.h"

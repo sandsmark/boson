@@ -34,7 +34,7 @@
 #include "../gameengine/speciestheme.h"
 #include "../speciesdata.h"
 #include "../bosonconfig.h"
-#include "../boselection.h"
+#include "boselection.h"
 #include "../selectbox.h"
 #include "../bosonprofiling.h"
 #include "bosoneffect.h"

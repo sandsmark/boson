@@ -19,12 +19,12 @@
 
 #include "bosoneffectmanager.h"
 
-#include "../bomemory/bodummymemory.h"
+#include "../../bomemory/bodummymemory.h"
 #include "bodebug.h"
 #include "bosoneffect.h"
 #include "bosoneffectproperties.h"
-#include "unitproperties.h"
-#include "bosonweapon.h"
+#include "../gameengine/unitproperties.h"
+#include "../gameengine/bosonweapon.h"
 
 #include <qptrlist.h>
 

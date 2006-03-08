@@ -20,12 +20,12 @@
 #include "boselection.h"
 #include "boselection.moc"
 
-#include "../bomemory/bodummymemory.h"
-#include "unit.h"
-#include "unitproperties.h"
-#include "pluginproperties.h"
+#include "../../bomemory/bodummymemory.h"
+#include "../gameengine/unit.h"
+#include "../gameengine/unitproperties.h"
+#include "../gameengine/pluginproperties.h"
 #include "bodebug.h"
-#include "boson.h"
+#include "../gameengine/boson.h"
 
 #include <qdom.h>
 #include <qintdict.h>

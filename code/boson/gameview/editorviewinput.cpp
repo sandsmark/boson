@@ -23,7 +23,7 @@
 
 #include "../bomemory/bodummymemory.h"
 #include "bosongameview.h"
-#include "../boselection.h"
+#include "boselection.h"
 #include "../gameengine/bosoncanvas.h"
 #include "../bosonconfig.h"
 #include "../gameengine/bosonmessage.h"
