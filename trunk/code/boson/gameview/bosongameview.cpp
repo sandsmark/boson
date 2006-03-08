@@ -132,6 +132,63 @@ static bool cameraModifier(const BoMouseEvent& event)
 }
 
 
+class BoMouseDoubleClickRecognizer
+{
+public:
+	BoMouseDoubleClickRecognizer()
+	{
+		mButton = Qt::NoButton;
+		mCount = 0;
+	}
+
+	void mouseMoveEvent(QMouseEvent*)
+	{
+		// when the mouse was pressed twice but the second press is
+		// hold down and moved then it isn't a double click anymore.
+		reset();
+	}
+	void mousePressEvent(QMouseEvent* e)
+	{
+		if (mTimeSinceLastPress.elapsed() > 200) {
+			reset();
+		}
+		mTimeSinceLastPress.restart();
+		if (mCount == 0) {
+			mButton = e->button();
+			mCount++;
+		} else {
+			if (mButton == e->button()) {
+				mCount++;
+			} else {
+				reset();
+			}
+		}
+	}
+
+	/**
+	 * @return TRUE when this is a double click release event.
+	 **/
+	bool mouseReleaseEvent(QMouseEvent*)
+	{
+		if (mCount >= 2) {
+			return true;
+		}
+		return false;
+	}
+
+protected:
+	void reset()
+	{
+		mButton = Qt::NoButton;
+		mCount = 0;
+	}
+
+private:
+	Qt::ButtonState mButton;
+	int mCount;
+	QTime mTimeSinceLastPress;
+};
+
 BoMouseButtonState::BoMouseButtonState()
 {
  mButtonIsReleased = true;
@@ -724,6 +781,7 @@ public:
 
 	BosonGameViewEventListener* mEventListener;
 
+	BoMouseDoubleClickRecognizer mDoubleClickRecognizer;
 	BoLeftMouseButtonState* mLeftButtonState;
 	BoMiddleMouseButtonState* mMiddleButtonState;
 	BoRightMouseButtonState* mRightButtonState;
@@ -2083,12 +2141,6 @@ void BosonGameView::slotMouseEvent(QMouseEvent* e)
  }
  event.setUnitAtEventPos(d->mUfoCanvasWidget->unitAtWidgetPos(event.gameViewWidgetPos()));
 
- // our actions are done on Button*Release*, not Press. That conflicts with
- // DblClick, so we store whether the last Press event was an actual press event
- // or a double click.
- static ButtonState isDoubleClick = NoButton;
-
-
  switch (e->type()) {
 	case QEvent::Wheel:
 	{
@@ -2100,23 +2152,23 @@ void BosonGameView::slotMouseEvent(QMouseEvent* e)
 	}
 	case QEvent::MouseMove:
 	{
-		isDoubleClick = NoButton; // when the mouse was pressed twice but the second press is hold down and moved then it isn't a double click anymore.
+		d->mDoubleClickRecognizer.mouseMoveEvent(e);
 		mouseEventMove(e->state(), event);
 		e->accept();
 		break;
 	}
 	case QEvent::MouseButtonDblClick:
 	{
-		isDoubleClick = e->button();
-		// actual actions will happen on ButtonRelease!
+		// AB: won't happen, since BoUfo won't emit this kind of
+		// events!
 		e->accept();
 		break;
 	}
 	case QEvent::MouseButtonPress:
 	{
 		// no action should happen here!
-		isDoubleClick = NoButton;
 
+		d->mDoubleClickRecognizer.mousePressEvent(e);
 		switch (e->button()) {
 			case LeftButton:
 				d->mLeftButtonState->pressButton(event.gameViewWidgetPos());
@@ -2135,7 +2187,8 @@ void BosonGameView::slotMouseEvent(QMouseEvent* e)
 	}
 	case QEvent::MouseButtonRelease:
 	{
-		if (e->button() == isDoubleClick) {
+		bool isDoubleClick = d->mDoubleClickRecognizer.mouseReleaseEvent(e);
+		if (isDoubleClick) {
 			mouseEventReleaseDouble(e->button(), event);
 		} else {
 			mouseEventRelease(e->button(), event);
