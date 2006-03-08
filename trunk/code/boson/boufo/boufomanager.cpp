@@ -624,12 +624,14 @@ bool BoUfoManager::sendEvent(QEvent* e)
 		return sendWheelEvent((QWheelEvent*)e);
 	case QEvent::MouseMove:
 		return sendMouseMoveEvent((QMouseEvent*)e);
+	case QEvent::MouseButtonDblClick:
+		// AB: Qt divides press events into simple press events and
+		// dblclick events, libufo does not
+		// -> so we treat both events equally
 	case QEvent::MouseButtonPress:
 		return sendMousePressEvent((QMouseEvent*)e);
 	case QEvent::MouseButtonRelease:
 		return sendMouseReleaseEvent((QMouseEvent*)e);
-	case QEvent::MouseButtonDblClick:
-		return false;
 	case QEvent::KeyPress:
 		return sendKeyPressEvent((QKeyEvent*)e);
 	case QEvent::KeyRelease:
