@@ -1305,13 +1305,18 @@ void BoUfoWidget::uslotMouseReleased(ufo::UMouseEvent* e)
 
 void BoUfoWidget::uslotMouseClicked(ufo::UMouseEvent* e)
 {
-#if 0
  int button = convertUfoMouseButtonToQt(e->getButton());
  int state = convertUfoModifierStateToQt(e->getModifiers());
  state |= button;
- QMouseEvent me(QEvent::MouseButtonXYZ, QPoint(e->getX(), e->getY()), button, state);
-#endif
- emit signalMouseClicked(e);
+ BoUfoMouseEventClick me((QEvent::Type)BoUfoMouseEventClick::EventClick,
+		QPoint(e->getX(), e->getY()),
+		button,
+		state,
+		e->getClickCount());
+ emit signalMouseClicked(&me);
+ if (me.isAccepted()) {
+	e->consume();
+ }
 }
 
 // TODO: uslotMouseClicked, QEvent::MouseButtonDblClick

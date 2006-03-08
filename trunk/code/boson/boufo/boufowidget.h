@@ -22,6 +22,7 @@
 #define BOUFOWIDGET_H
 
 #include <qobject.h>
+#include <qevent.h>
 
 class QMouseEvent;
 class QWheelEvent;
@@ -89,6 +90,49 @@ class BoUfoManager;
  **/
 #define CONNECT_UFO_TO_QT(className, widget, signal) \
 		widget->sig##signal().connect(slot(*this, &className::uslot##signal));
+
+
+/**
+ * @short Event class for mouse clicks
+ *
+ * libufo uses both, mouse push/release and click events. A click event is just
+ * like a release event, however it has an additional "click count" parameter
+ * that allows to distinguish normal clicks and double/triple/whatever clicks.
+ *
+ * This class represents this kind of click events.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoUfoMouseEventClick : public QMouseEvent
+{
+public:
+	enum EventType {
+		EventClick = QEvent::User + 0
+	};
+public:
+	BoUfoMouseEventClick(Type type, const QPoint& pos, int button, int state, int clickCount = 1)
+		: QMouseEvent(type, pos, button, state),
+		mClickCount(clickCount)
+	{
+	}
+	BoUfoMouseEventClick(const QPoint& pos, int button, int state, int clickCount = 1)
+		: QMouseEvent((QEvent::Type)EventClick, pos, button, state),
+		mClickCount(clickCount)
+	{
+	}
+
+	/**
+	 * @return The number of clicks the mouse was clicked within a short
+	 * period of time. 1 for normal clicks, 2 for double clicks, ...
+	 **/
+	int clickCount() const
+	{
+		return mClickCount;
+	}
+
+private:
+	int mClickCount;
+};
 
 
 /**
@@ -457,7 +501,18 @@ signals: // TODO: remove ufo::* parameters. use Qt or custom parameters only
 	void signalMouseDragged(QMouseEvent* e);
 	void signalMousePressed(QMouseEvent* e);
 	void signalMouseReleased(QMouseEvent* e);
-	void signalMouseClicked(ufo::UMouseEvent* e);
+
+	/**
+	 * Emitted on "clicks", i.e. when the mouse is released with barely (or
+	 * not at all) being moved away from the point where it was pushed down.
+	 *
+	 * The provided parameter is actually a @ref BoUfoMouseEventClick with a
+	 * type of @ref BoUfoMouseEventClick::EventClick. In addition to a
+	 * normal @ref QMouseEvent you can use it to retrieve the @ref
+	 * BoUfoMouseEventClick::clickCount which allows to distinguish between
+	 * simple clicks and e.g. double clicks.
+	 **/
+	void signalMouseClicked(QMouseEvent* e);
 	void signalMouseWheel(QWheelEvent* e);
 	void signalKeyPressed(ufo::UKeyEvent* e);
 	void signalKeyReleased(ufo::UKeyEvent* e);
