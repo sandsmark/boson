@@ -21,7 +21,7 @@ SET(BOUIC_EXECUTABLE ${CMAKE_BINARY_DIR}/boson/boufo/bouic/bouic)
 # usage: BOSON_ADD_BOUI_FILES(foo_SRCS ${boui_files})
 MACRO ( BOSON_ADD_BOUI_FILES _sources )
    FOREACH (_current_FILE ${ARGN})
-     KDE3_GET_ABS_PATH(_tmp_FILE ${_current_FILE})
+     GET_FILENAME_COMPONENT(_tmp_FILE ${_current_FILE} ABSOLUTE)
 
      GET_FILENAME_COMPONENT(_basename ${_tmp_FILE} NAME_WE)
 

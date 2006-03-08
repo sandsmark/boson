@@ -1,27 +1,37 @@
+# - Try to find the Jasper JPEG2000 library
+# Once done this will define
+#
+#  JASPER_FOUND - system has Jasper
+#  JASPER_INCLUDE_DIR - the Jasper include directory
+#  JASPER_LIBRARIES - The libraries needed to use Jasper
 
 FIND_PATH(JASPER_INCLUDE_DIR jasper/jasper.h
-/usr/include
-/usr/local/include
+   /usr/include
+   /usr/local/include
 )
 
-FIND_LIBRARY(JASPER_LIBRARY NAMES jasper
-PATHS
-/usr/lib
-/usr/local/lib
+FIND_LIBRARY(JASPER_LIBRARY NAMES jasper libjasper
+   PATHS
+   /usr/lib
+   /usr/local/lib
 )
 
+FIND_PACKAGE(JPEG)
 
-IF(JASPER_INCLUDE_DIR AND JASPER_LIBRARY)
-   SET(JASPER_FOUND TRUE)
-ENDIF(JASPER_INCLUDE_DIR AND JASPER_LIBRARY)
+if(JASPER_INCLUDE_DIR AND JASPER_LIBRARIES AND JPEG_LIBRARIES)
+   set(JASPER_FOUND TRUE)
+   set(JASPER_LIBRARIES ${JASPER_LIBRARY} ${JPEG_LIBRARIES} )
+endif(JASPER_INCLUDE_DIR AND JASPER_LIBRARIES AND JPEG_LIBRARIES)
 
 
-IF(JASPER_FOUND)
-   IF(NOT Jasper_FIND_QUIETLY)
-      MESSAGE(STATUS "Found jasper: ${JASPER_LIBRARY}")
-   ENDIF(NOT Jasper_FIND_QUIETLY)
-ELSE(JASPER_FOUND)
-   IF(Jasper_FIND_REQUIRED)
-      MESSAGE(FATAL_ERROR "Could not find jasper library")
-   ENDIF(Jasper_FIND_REQUIRED)
-ENDIF(JASPER_FOUND)
+if(JASPER_FOUND)
+   if(NOT Jasper_FIND_QUIETLY)
+      message(STATUS "Found jasper: ${JASPER_LIBRARIES}")
+   endif(NOT Jasper_FIND_QUIETLY)
+else(JASPER_FOUND)
+   if(Jasper_FIND_REQUIRED)
+      message(FATAL_ERROR "Could NOT find jasper library")
+   endif(Jasper_FIND_REQUIRED)
+endif(JASPER_FOUND)
+
+MARK_AS_ADVANCED(JASPER_INCLUDE_DIR JASPER_LIBRARIES)

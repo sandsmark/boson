@@ -5,6 +5,12 @@
 #  HEADER - the header(s) where the prototype should be declared
 #  VARIABLE - variable to store the result
 #
+# The following variables may be set before calling this macro to
+# modify the way the check is run:
+#
+#  CMAKE_REQUIRED_FLAGS = string of compile command line flags
+#  CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
+#  CMAKE_REQUIRED_INCLUDES = list of include directories
 
 INCLUDE(CheckCXXSourceCompiles)
 

@@ -3,33 +3,37 @@
 #
 #  GIF_FOUND - system has GIF
 #  GIF_INCLUDE_DIR - the GIF include directory
-#  GIF_LIBRARY - Link these to use OpenGL and GLU
+#  GIF_LIBRARIES - Libraries needed to use GIF
 #  GIF_DEFINITIONS - Compiler switches required for using GIF
 #
+FIND_PACKAGE(GNUWIN32)
 
 
 FIND_PATH(GIF_INCLUDE_DIR gif_lib.h
   /usr/include
   /usr/local/include
+ ${GNUWIN32_DIR}/include
 )
 
-FIND_LIBRARY(GIF_LIBRARY NAMES gif libgif ungif libungif
+FIND_LIBRARY(GIF_LIBRARIES NAMES gif libgif ungif libungif giflib
   PATHS
   /usr/lib
   /usr/local/lib
+ ${GNUWIN32_DIR}/lib
 )
 
-IF(GIF_INCLUDE_DIR AND GIF_LIBRARY)
-   SET(GIF_FOUND TRUE)
-ENDIF(GIF_INCLUDE_DIR AND GIF_LIBRARY)
+if(GIF_INCLUDE_DIR AND GIF_LIBRARIES)
+   set(GIF_FOUND TRUE)
+endif(GIF_INCLUDE_DIR AND GIF_LIBRARIES)
 
-IF(GIF_FOUND)
-  IF(NOT GIF_FIND_QUIETLY)
-    MESSAGE(STATUS "Found GIF: ${GIF_LIBRARY}")
-  ENDIF(NOT GIF_FIND_QUIETLY)
-ELSE(GIF_FOUND)
-  IF(GIF_FIND_REQUIRED)
-    MESSAGE(FATAL_ERROR "Could not find GIF")
-  ENDIF(GIF_FIND_REQUIRED)
-ENDIF(GIF_FOUND)
+if(GIF_FOUND)
+  if(NOT GIF_FIND_QUIETLY)
+    message(STATUS "Found GIF: ${GIF_LIBRARIES}")
+  endif(NOT GIF_FIND_QUIETLY)
+else(GIF_FOUND)
+  if(GIF_FIND_REQUIRED)
+    message(FATAL_ERROR "Could NOT find GIF")
+  endif(GIF_FIND_REQUIRED)
+endif(GIF_FOUND)
 
+MARK_AS_ADVANCED(GIF_INCLUDE_DIR GIF_LIBRARIES)

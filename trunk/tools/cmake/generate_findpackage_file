@@ -24,7 +24,7 @@ print("Look for library (e.g. \"jpeg\" or \"xml2\"): ")
 lib=gets.chomp
 
 cmakeIncDirName=package.upcase+"_INCLUDE_DIR"
-cmakeLibName=package.upcase+"_LIBRARY"
+cmakeLibName=package.upcase+"_LIBRARIES"
 cmakeDefsName=package.upcase+"_DEFINITIONS"
 cmakeFoundName=package.upcase+"_FOUND"
 cmakeQuietName=package+"_FIND_QUIETLY"
@@ -81,5 +81,10 @@ file.printf("  IF(#{cmakeRequiredName})\n")
 file.printf("    MESSAGE(FATAL_ERROR \"Could not find #{package}\")\n")
 file.printf("  ENDIF(#{cmakeRequiredName})\n")
 file.printf("ENDIF(#{cmakeFoundName})\n\n")
+
+
+file.printf("# show the #{cmakeIncDirName} and #{cmakeLibName} variables only in the advanced view\n")
+file.printf("MARK_AS_ADVANCED(#{cmakeIncDirName} #{cmakeLibName} )\n\n")
+
 
 printf("Done, generated Find#{package}.cmake\n")

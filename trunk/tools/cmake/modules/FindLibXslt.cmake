@@ -3,7 +3,7 @@
 #
 #  LIBXSLT_FOUND - system has LibXslt
 #  LIBXSLT_INCLUDE_DIR - the LibXslt include directory
-#  LIBXSLT_LIBRARY - Link these to use OpenGL and GLU
+#  LIBXSLT_LIBRARIES - Link these to LibXslt
 #  LIBXSLT_DEFINITIONS - Compiler switches required for using LibXslt
 #
 
@@ -14,32 +14,38 @@ INCLUDE(UsePkgConfig)
 
 PKGCONFIG(libxslt _LibXsltIncDir _LibXsltLinkDir _LibXsltLinkFlags _LibXsltCflags)
 
-SET(LIBXSLT_DEFINITIONS ${_LibXsltCflags})
+set(LIBXSLT_DEFINITIONS ${_LibXsltCflags})
+
+FIND_PACKAGE(GNUWIN32)
 
 FIND_PATH(LIBXSLT_INCLUDE_DIR libxslt/xslt.h
   ${_LibXsltIncDir}
   /usr/include
   /usr/local/include
+  ${GNUWIN32_DIR}/include
 )
 
-FIND_LIBRARY(LIBXSLT_LIBRARY NAMES xslt libxslt
+FIND_LIBRARY(LIBXSLT_LIBRARIES NAMES xslt libxslt
   PATHS
   ${_LibXsltLinkDir}
   /usr/lib
   /usr/local/lib
+  ${GNUWIN32_DIR}/lib
 )
 
-IF(LIBXSLT_INCLUDE_DIR AND LIBXSLT_LIBRARY)
-   SET(LIBXSLT_FOUND TRUE)
-ENDIF(LIBXSLT_INCLUDE_DIR AND LIBXSLT_LIBRARY)
+if(LIBXSLT_INCLUDE_DIR AND LIBXSLT_LIBRARIES)
+   set(LIBXSLT_FOUND TRUE)
+endif(LIBXSLT_INCLUDE_DIR AND LIBXSLT_LIBRARIES)
 
-IF(LIBXSLT_FOUND)
-  IF(NOT LibXslt_FIND_QUIETLY)
-    MESSAGE(STATUS "Found LibXslt: ${LIBXSLT_LIBRARY}")
-  ENDIF(NOT LibXslt_FIND_QUIETLY)
-ELSE(LIBXSLT_FOUND)
-  IF(LibXslt_FIND_REQUIRED)
-    MESSAGE(FATAL_ERROR "Could not find LibXslt")
-  ENDIF(LibXslt_FIND_REQUIRED)
-ENDIF(LIBXSLT_FOUND)
+if(LIBXSLT_FOUND)
+  if(NOT LibXslt_FIND_QUIETLY)
+    message(STATUS "Found LibXslt: ${LIBXSLT_LIBRARIES}")
+  endif(NOT LibXslt_FIND_QUIETLY)
+else(LIBXSLT_FOUND)
+  if(LibXslt_FIND_REQUIRED)
+    message(FATAL_ERROR "Could NOT find LibXslt")
+  endif(LibXslt_FIND_REQUIRED)
+endif(LIBXSLT_FOUND)
+
+MARK_AS_ADVANCED(LIBXSLT_INCLUDE_DIR LIBXSLT_LIBRARIES)
 
