@@ -381,7 +381,7 @@ public:
 	 *
 	 * This leaves this state.
 	 **/
-	void releaseButton(const BoMouseEvent& modifiers);
+	void releaseButton(const BoMouseEvent& modifiers, bool doubleRelease = false);
 
 	/**
 	 * Should be called when the mouse is moved
@@ -399,6 +399,14 @@ protected:
 	 * RMB release the selection may be ordered to move or attack.
 	 **/
 	virtual void action(const BoMouseEvent& modifiers) = 0;
+
+	/**
+	 * Like @ref action, but responds to double clicks (i.e. double
+	 * button releases).
+	 *
+	 * By default this calls @ref action
+	 **/
+	virtual void actionDouble(const BoMouseEvent& modifiers);
 
 	/**
 	 * Called when the button is released and the mouse was moved after the
