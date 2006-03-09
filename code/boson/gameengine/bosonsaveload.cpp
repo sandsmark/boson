@@ -490,6 +490,9 @@ bool BosonSaveLoad::loadPlayersFromXML(const QMap<QString, QByteArray>& files)
  }
  for (unsigned int i = 0; i < d->mBoson->playerCount(); i++) {
 	Player* p = (Player*)d->mBoson->playerList()->at(i);
+	if (p->bosonId() <= 127 || p->bosonId() >= 512) {
+		continue;
+	}
 	QDomElement player;
 	for (unsigned int j = 0; j < list.count() && player.isNull(); j++) {
 		QDomElement e = list.item(j).toElement();
