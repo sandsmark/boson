@@ -193,18 +193,6 @@ protected slots:
 
 
 private:
-	/**
-	 * Prepare for loading a game. This loads the playfield from @ref
-	 * fileName and adds the players necessary for loading the game.
-	 * @return An empty @ref QByteArray if an error occurred or the data
-	 * necessary for @ref BosonStarting (such as the playField) if it
-	 * succeeded.
-	 **/
-	QByteArray prepareLoadGame(const QString& loadingFileName);
-
-	bool addLoadGamePlayers(const QString& playersXML);
-
-private:
 	void init();
 	void initUfoGUI();
 
