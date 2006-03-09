@@ -210,12 +210,12 @@ void BoUfoStartEditorWidget::slotNetStart()
  // start the old one.
  // We should use the actual playfield from the network here!!
 
- if (boGame->playerCount() > 0) {
-	boError() << k_funcinfo << "playerCount must be 0! trying to clear" << endl;
+ if (boGame->allPlayerCount() > 0) {
+	boError() << k_funcinfo << "allPlayerCount must be 0! trying to clear" << endl;
 	boGame->quitGame();
  }
- if (boGame->playerCount() > 0) {
-	boError() << k_funcinfo << "playerCount must be 0! clearning did not succeed" << endl;
+ if (boGame->allPlayerCount() > 0) {
+	boError() << k_funcinfo << "allPlayerCount must be 0! clearning did not succeed" << endl;
 	return;
  }
 

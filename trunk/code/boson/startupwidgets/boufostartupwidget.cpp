@@ -189,7 +189,7 @@ void BoUfoStartupWidget::slotNewSinglePlayerGame(KCmdLineArgs* args)
  newGame(args);
  BoUfoNewGameWidget* w = (BoUfoNewGameWidget*)d->mWidgetStack->stackWidget(IdNewGame);
  if (w) {
-	if (boGame->isAdmin() && boGame->playerCount() <= 1) {
+	if (boGame->isAdmin() && boGame->gamePlayerCount() <= 1) {
 		if (!args || !args->isSet("start") && !args->isSet("computer")) {
 			w->addAIPlayer();
 		}

@@ -180,7 +180,7 @@ bool BosonScript::isEnemy(int p) const
   return areEnemies(playerId(), p);
 }
 
-QValueList<int> BosonScript::allPlayers() const
+QValueList<int> BosonScript::allGamePlayers() const
 {
   QValueList<int> players;
 
@@ -190,14 +190,10 @@ QValueList<int> BosonScript::allPlayers() const
     return players;
   }
 
-  QPtrListIterator<KPlayer> it(*(game()->playerList()));
+  QPtrListIterator<Player> it(*game()->gamePlayerList());
   for (; it.current(); ++it)
   {
-    Player* p = (Player*)it.current();
-    if(p->bosonId() < 128 || p->bosonId() >= 512)
-    {
-      continue;
-    }
+    Player* p = it.current();
     players.append(p->bosonId());
   }
 
@@ -1646,10 +1642,10 @@ void BosonScript::unfogAllPlayers()
     boError() << k_funcinfo << "NULL map" << endl;
     return;
   }
-  QPtrList<KPlayer> list = *game()->playerList();
+  QPtrList<Player> list = *game()->allPlayerList();
   for(unsigned int i = 0; i < list.count(); i++)
   {
-    Player* p = (Player*)list.at(i);
+    Player* p = list.at(i);
     for(unsigned int x = 0; x < map->width(); x++)
     {
       for(unsigned int y = 0; y < map->height(); y++)

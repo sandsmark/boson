@@ -295,8 +295,8 @@ void KGameUnitDebug::slotUnitPropertyChanged(KGamePropertyBase* prop)
 // again, our evil hack. See Player::slotUnitPropertyChanged()
  Unit* unit = 0;
  QPtrList<Unit> units;
- QPtrList<KPlayer>list = *d->mBoson->playerList();
- for (unsigned int i = 0; i < d->mBoson->playerCount() && !unit; i++) {
+ QPtrList<Player> list = *d->mBoson->gamePlayerList();
+ for (unsigned int i = 0; i < d->mBoson->gamePlayerCount() && !unit; i++) {
 	QPtrList<Unit> playerUnits = *((Player*)list.at(i))->allUnits();
 	for (unit = playerUnits.first(); unit; unit = playerUnits.next()) {
 		if (unit->dataHandler() == (KGamePropertyHandler*)sender()) {

@@ -140,6 +140,22 @@ int Player::bosonId() const
  return userId();
 }
 
+bool Player::isGamePlayer() const
+{
+ if (bosonId() >= 128 && bosonId() <= 511) {
+	return true;
+ }
+ return false;
+}
+
+bool Player::isActiveGamePlayer() const
+{
+ if (bosonId() >= 128 && bosonId() <= 255) {
+	return true;
+ }
+ return false;
+}
+
 bool Player::isNeutralPlayer() const
 {
  return d->mIsNeutralPlayer;
@@ -772,9 +788,8 @@ void Player::facilityCompleted(Unit* fac)
 
 void Player::setOutOfGame()
 {
- if ((Player*)boGame->playerList()->getLast() == this) {
-	// the last player is per definition the neutral player (which is never
-	// out of the game).
+ if (!isActiveGamePlayer()) {
+	// non-active players (e.g. neutral players) are never out of the game
 	mOutOfGame = false;
 	return;
  }
@@ -958,8 +973,8 @@ bool Player::advanceFlag() const
 bool Player::saveAsXML(QDomElement& root)
 {
  PROFILE_METHOD
- if (!game() || !game()->playerList()) {
-	boError() << k_funcinfo << "NULL game/playerlist" << endl;
+ if (!game()) {
+	boError() << k_funcinfo << "NULL game" << endl;
 	return false;
  }
  if (!speciesTheme()) {
@@ -1023,8 +1038,8 @@ bool Player::loadFromXML(const QDomElement& root)
  // this does NOT load the units!
 
  bool ok = false;
- if (!game() || !game()->playerList()) {
-	boError() << k_funcinfo << "NULL game/playerlist" << endl;
+ if (!game()) {
+	boError() << k_funcinfo << "NULL game" << endl;
 	return false;
  }
  if (root.hasAttribute("IsNeutral")) {

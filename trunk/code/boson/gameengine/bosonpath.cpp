@@ -1812,10 +1812,10 @@ void BosonPath::initMoveDatas(BosonCanvas* canvas)
   canvas->clearMoveDatas();
 
   // Go through all units and create all possible movedatas
-  QPtrListIterator<KPlayer> playerit(*boGame->playerList());
+  QPtrListIterator<Player> playerit(*boGame->gamePlayerList());
   while(playerit.current())
   {
-    Player* p = (Player*)playerit.current();
+    Player* p = playerit.current();
     SpeciesTheme* theme = p->speciesTheme();
 
     QValueList<unsigned long int> unitpropids = theme->allMobiles();

@@ -56,7 +56,7 @@ PyMethodDef PythonScript::mCallbacks[] = {
   // Players
   { (char*)"areEnemies", py_areEnemies, METH_VARARGS, 0 },
   { (char*)"isEnemy", py_isEnemy, METH_VARARGS, 0 },
-  { (char*)"allPlayers", py_allPlayers, METH_VARARGS, 0 },
+  { (char*)"allPlayers", py_allGamePlayers, METH_VARARGS, 0 },
   { (char*)"isNeutral", py_isNeutral, METH_VARARGS, 0 },
   { (char*)"powerGenerated", py_powerGenerated, METH_VARARGS, 0 },
   { (char*)"powerConsumed", py_powerConsumed, METH_VARARGS, 0 },
@@ -903,10 +903,10 @@ PyObject* PythonScript::py_isEnemy(PyObject*, PyObject* args)
   return Py_BuildValue((char*)"i", enemy ? 1 : 0);
 }
 
-PyObject* PythonScript::py_allPlayers(PyObject*, PyObject*)
+PyObject* PythonScript::py_allGamePlayers(PyObject*, PyObject*)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  QValueList<int> players = currentScript()->allPlayers();
+  QValueList<int> players = currentScript()->allGamePlayers();
 
   return QValueListToPyList(&players);
 }

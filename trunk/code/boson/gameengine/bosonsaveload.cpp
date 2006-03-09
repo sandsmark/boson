@@ -384,15 +384,15 @@ QCString BosonSaveLoad::savePlayersAsXML()
 	return QCString();
  }
 
- KGame::KGamePlayerList* list = d->mBoson->playerList();
- boDebug() << k_funcinfo << "saving " << list->count() << " players" << endl;
- for (KPlayer* p = list->first(); p; p = list->next()) {
+ QPtrList<Player> list = *d->mBoson->gamePlayerList();
+ boDebug() << k_funcinfo << "saving " << list.count() << " players" << endl;
+ for (Player* p = list.first(); p; p = list.next()) {
 	// KGame also stored ID, RTTI and KPlayer::calcIOValue() here.
 	// I believe we won't need them. ID might be useful for network games,
 	// but we load from a file here.
 	QDomElement element = doc.createElement(QString::fromLatin1("Player"));
-	if (!((Player*)p)->saveAsXML(element)) {
-		boError() << k_funcinfo << "Unable to save player " << ((Player*)p)->bosonId() << endl;
+	if (!p->saveAsXML(element)) {
+		boError() << k_funcinfo << "Unable to save player " << p->bosonId() << endl;
 		return QCString();
 	}
 	root.appendChild(element);
@@ -488,11 +488,8 @@ bool BosonSaveLoad::loadPlayersFromXML(const QMap<QString, QByteArray>& files)
 	boError(270) << k_funcinfo << "no Player tags in file" << endl;
 	return false;
  }
- for (unsigned int i = 0; i < d->mBoson->playerCount(); i++) {
-	Player* p = (Player*)d->mBoson->playerList()->at(i);
-	if (p->bosonId() <= 127 || p->bosonId() >= 512) {
-		continue;
-	}
+ for (unsigned int i = 0; i < d->mBoson->gamePlayerCount(); i++) {
+	Player* p = (Player*)d->mBoson->gamePlayerList()->at(i);
 	QDomElement player;
 	for (unsigned int j = 0; j < list.count() && player.isNull(); j++) {
 		QDomElement e = list.item(j).toElement();

@@ -516,28 +516,28 @@ void BoUfoNewGameWidget::slotNetStart()
     return;
  }
  // Check for valid players count
- if (boGame->playerCount() > mMaxPlayers) {
+ if (boGame->gamePlayerCount() > mMaxPlayers) {
     KMessageBox::sorry(0, i18n("There are too many players in game.\n"
             "Current map supports only %1 players, currently, there are %2 players in the game.\n"
-            "Please remove some players.").arg(mMaxPlayers).arg(boGame->playerCount()),
+            "Please remove some players.").arg(mMaxPlayers).arg(boGame->gamePlayerCount()),
             i18n("Too many players"));
- } else if (boGame->playerCount() < mMinPlayers) {
+ } else if (boGame->gamePlayerCount() < mMinPlayers) {
     KMessageBox::sorry(0, i18n("There are too few players in game.\n"
             "Current map requires at least %1 players, currently, there are only %2 players in the game.\n"
-            "Please add some players.").arg(mMinPlayers).arg(boGame->playerCount()),
+            "Please add some players.").arg(mMinPlayers).arg(boGame->gamePlayerCount()),
             i18n("Too few players"));
  } else {
     // All good
     //slotPlayerNameChanged();
     // Check if each player has unique team color
-    for (unsigned int i = 0; i < boGame->playerCount() - 1; i++) {
-        Player* p = (Player*)boGame->playerList()->at(i);
+    for (unsigned int i = 0; i < boGame->gamePlayerCount() - 1; i++) {
+        Player* p = boGame->gamePlayerList()->at(i);
         if (!p) {
             BO_NULL_ERROR(p);
             continue;
         }
-        for (unsigned int j = i + 1; j < boGame->playerCount(); j++) {
-            Player* p2 = (Player*)boGame->playerList()->at(j);
+        for (unsigned int j = i + 1; j < boGame->gamePlayerCount(); j++) {
+            Player* p2 = boGame->gamePlayerList()->at(j);
             if (!p2) {
                 BO_NULL_ERROR(p2);
                 continue;
@@ -628,8 +628,8 @@ void BoUfoNewGameWidget::slotNetPlayerJoinedGame(KPlayer* p)
             boGame->slotAddChatSystemMessage("Boson", i18n("%1 added AI player %2 to the game").arg(mainPlayer->name()).arg(p->name()));
         }
     }
-    for (int i = 0; i < (int)boGame->playerCount() - 1; i++) {
-        Player* p2 = (Player*)boGame->playerList()->at(i);
+    for (int i = 0; i < (int)boGame->gamePlayerCount() - 1; i++) {
+        Player* p2 = boGame->gamePlayerList()->at(i);
         if (p2 == (Player*)p) {
             continue;
         }
@@ -649,7 +649,7 @@ void BoUfoNewGameWidget::slotNetPlayerJoinedGame(KPlayer* p)
 
 void BoUfoNewGameWidget::slotNetPlayerLeftGame(KPlayer* p)
 {
- boDebug() << k_funcinfo << "there are " << boGame->playerList()->count() << " players in game now" << endl;
+ boDebug() << k_funcinfo << "there are " << boGame->allPlayerList()->count() << " players in game now with " << boGame->gamePlayerList()->count() << " game players" << endl;
 
  if (((Player*)p)->isNeutralPlayer()) {
     // Neutral player shouldn't be removed because it's not added until the game
@@ -1109,9 +1109,9 @@ void BoUfoNewGameWidget::possibleSidesChanged()
    watchId = 1;
    do {
      isTaken = false;
-     QPtrListIterator<KPlayer> it(*boGame->playerList());
+     QPtrListIterator<Player> it(*boGame->allPlayerList());
      for (; it.current(); ++it) {
-       Player* p = (Player*)it.current();
+       Player* p = it.current();
        if (p->bosonId() == watchId && p != mSelectedPlayer) {
          isTaken = true;
        }

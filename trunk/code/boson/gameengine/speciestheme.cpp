@@ -533,6 +533,7 @@ bool SpeciesTheme::saveGameDataAsXML(QDomElement& root) const
 
 bool SpeciesTheme::loadGameDataFromXML(const QDomElement& root)
 {
+ boDebug() << k_funcinfo << identifier() << endl;
  QDomElement unitTypes = root.namedItem("UnitTypes").toElement();
  if (unitTypes.isNull()) {
 	boError() << k_funcinfo << "NULL UnitTypes tag" << endl;

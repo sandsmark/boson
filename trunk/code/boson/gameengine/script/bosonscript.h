@@ -179,7 +179,7 @@ class BosonScript
     /**
      * @return List containing ids of all players in the game
      **/
-    QValueList<int> allPlayers() const;
+    QValueList<int> allGamePlayers() const;
     /**
      * @return Whether player with given id is neutral player
      **/
