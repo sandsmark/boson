@@ -78,6 +78,18 @@ bool BosonPlayerInputHandler::playerInput(QDataStream& stream, Player* player)
 	boWarning() << k_funcinfo << "Player must not send input anymore!!" << endl;
 	return true;
  }
+ if (player->bosonId() <= 127) {
+	boWarning() << k_funcinfo << "watching players are not allowed to send any input" << endl;
+	return true;
+ }
+ if (player->bosonId() >= 512) {
+	// AB: players with ID >= 512 are reserved for future use, so they
+	// should not exist at all here. but they certainly shouldn't send any
+	// input.
+	boWarning() << k_funcinfo << "players with ID >= 512 are not allowed to send any input" << endl;
+	return true;
+ }
+
  if (!mGame->gameMode()) {
 	// editor mode sends an additional entry safety id, just in case we
 	// might have constructed a wrong display or so
