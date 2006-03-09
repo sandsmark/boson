@@ -280,8 +280,8 @@ public:
 	{
 		QByteArray playersBuffer;
 		QDataStream playersStream(playersBuffer, IO_WriteOnly);
-		QPtrListIterator<KPlayer> playerIt(*mGame->playerList());
-		playersStream << (Q_UINT32)mGame->playerList()->count();
+		QPtrListIterator<Player> playerIt(*mGame->allPlayerList());
+		playersStream << (Q_UINT32)mGame->allPlayerList()->count();
 		while (playerIt.current()) {
 			Player* p = (Player*)playerIt.current();
 			playersStream << (Q_UINT32)p->foggedCells();
@@ -1348,7 +1348,8 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
 		boError(370) << k_funcinfo << "no Players tag found" << endl;
 		return false;
 	}
-	for (KPlayer* kplayer = mGame->playerList()->first(); kplayer; kplayer = mGame->playerList()->next()) {
+	QPtrList<Player> allPlayerList = *mGame->allPlayerList();
+	for (KPlayer* kplayer = allPlayerList.first(); kplayer; kplayer = allPlayerList.next()) {
 		Player* player = (Player*)kplayer;
 		QDomElement playerElement;
 		for (QDomNode n = players.firstChild(); !n.isNull() && playerElement.isNull(); n = n.nextSibling()) {
@@ -1420,12 +1421,11 @@ QByteArray BosonNetworkSyncer::createSyncMessage()
  doc.appendChild(root);
  {
 	QDomElement players = doc.createElement("Players");
-	KGame::KGamePlayerList* list = mGame->playerList();
-	for (KPlayer* p = list->first(); p; p = list->next()) {
+	QPtrList<Player> list = *mGame->allPlayerList();
+	for (Player* p = list.first(); p; p = list.next()) {
 		QDomElement player = doc.createElement("Player");
-		Player* p2 = (Player*)p;
-		if (!p2->saveAsXML(player)) {
-			boError(370) << k_funcinfo << "unable to save player " << ((Player*)p)->bosonId() << endl;
+		if (!p->saveAsXML(player)) {
+			boError(370) << k_funcinfo << "unable to save player " << p->bosonId() << endl;
 			return b;
 		}
 		players.appendChild(player);

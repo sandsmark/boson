@@ -111,7 +111,35 @@ public:
 	BosonPlayField* playField() const;
 
 	PlayerIO* findPlayerIO(Q_UINT32 id) const;
-	PlayerIO* playerIOAt(unsigned int playerIndex) const;
+	PlayerIO* playerIOAtAllIndex(unsigned int playerIndex) const;
+	PlayerIO* playerIOAtGameIndex(unsigned int playerIndex) const;
+	PlayerIO* playerIOAtActiveGameIndex(unsigned int playerIndex) const;
+
+	unsigned int allPlayerCount() const;
+	unsigned int gamePlayerCount() const;
+	unsigned int activeGamePlayerCount() const;
+
+	/**
+	 * @return The same as @ref KGame::playerList
+	 **/
+	QPtrList<Player>* allPlayerList() const;
+
+	/**
+	 * "game players" are players with ID >= 127 and <= 511. These are
+	 * players who actually may own and move units in the game.
+	 *
+	 * This includes both, human controllable and neutral players.
+	 **/
+	QPtrList<Player>* gamePlayerList() const;
+
+	/**
+	 * "active game players" are players with ID >= 128 and <= 255. These
+	 * players are relevant for winning conditions and therefore take an
+	 * actual part in the game.
+	 *
+	 * They are in particular @em not neutral players.
+	 **/
+	QPtrList<Player>* activeGamePlayerList() const;
 
 	/**
 	 * Initialize a @ref BosonSaveLoad object with the relevant data.
@@ -517,6 +545,7 @@ protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);
 
 	virtual void systemAddPlayer(KPlayer* p);
+	virtual void systemRemovePlayer(KPlayer* p, bool deleteIt);
 
 	/**
 	 * Create a game log (see @ref writeGameLog) and store it for later use (see
@@ -528,6 +557,18 @@ protected:
 	bool loadFromLogFile(const QString& file);
 
 	void clearUndoStacks();
+
+	bool changeUserIdOfPlayer(Player* p, unsigned int newId);
+
+	/**
+	 * Redo the @ref allPlayerList, @ref gamePlayerList, @ref
+	 * activeGamePlayerList lists.
+	 *
+	 * This must be called whenever these lists might change, i.e. whenever
+	 * a player enters/leaves the game or whenever an Id of a player
+	 * changes.
+	 **/
+	void recalculatePlayerLists();
 
 protected slots:
 	/**
@@ -568,6 +609,16 @@ protected slots:
 private:
 	friend class BoAdvance;
 	friend class BoGameLogSaver;
+
+	/**
+	 * Use @ref allPlayerList instead
+	 **/
+	KGame::playerList;
+
+	/**
+	 * Use @ref allPlayerCount instead
+	 **/
+	KGame::playerCount;
 
 private:
 	class BosonPrivate;

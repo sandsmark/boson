@@ -222,7 +222,7 @@ bool BoCommandFrameTesterMain::start()
 void BoCommandFrameTesterMain::slotAdvance(unsigned int advanceCallsCount, bool)
 {
  BO_CHECK_NULL_RET(boGame);
- PlayerIO* playerIO = boGame->playerIOAt(0);
+ PlayerIO* playerIO = boGame->playerIOAtGameIndex(0);
  BO_CHECK_NULL_RET(playerIO);
  BosonLocalPlayerInput* playerInput = (BosonLocalPlayerInput*)playerIO->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
 

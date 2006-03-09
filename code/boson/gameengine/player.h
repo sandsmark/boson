@@ -69,6 +69,25 @@ public:
 	int bosonId() const;
 
 	/**
+	 * A "game player" is a player that may own units and move units.
+	 *
+	 * This can be both, a human controllable unit and also neutral players.
+	 *
+	 * See also http://boson.freehackers.org/wiki/Main/PlayerIds
+	 **/
+	bool isGamePlayer() const;
+
+	/**
+	 * A "active game player" is a player that is relevant for winning
+	 * conditions. A neutral player is never a "active" game player.
+	 *
+	 * A "active game player" is always a @ref isGamePlayer
+	 *
+	 * See also http://boson.freehackers.org/wiki/Main/PlayerIds
+	 **/
+	bool isActiveGamePlayer() const;
+
+	/**
 	 * @return TRUE if this is the neutral player. Note that the neutral
 	 * player is always at (Boson::playerList()->count() - 1), i.e. it is
 	 * always the last player in the list of players. You should prefer the

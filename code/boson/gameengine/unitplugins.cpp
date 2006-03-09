@@ -1102,14 +1102,13 @@ void HarvesterPlugin::advanceRefine()
 ResourceMinePlugin* HarvesterPlugin::findClosestResourceMine() const
 {
  BO_CHECK_NULL_RET0(game());
- BO_CHECK_NULL_RET0(game()->playerList());
  BO_CHECK_NULL_RET0(player());
  BO_CHECK_NULL_RET0(player()->playerIO());
 
- // FIXME: we should use player()->playerIO()->getUnitsOf(playerCount() - 1)
+ // FIXME: we should use player()->playerIO()->getUnitsOfPlayer(128)
  // instead
  // --> that should give us all units that are visible to us only
- Player* neutral = (Player*)game()->playerList()->getLast();
+ Player* neutral = (Player*)game()->findPlayerByUserId(256);
 
  BO_CHECK_NULL_RET0(neutral);
  QPtrListIterator<Unit> it(*(neutral->allUnits()));

@@ -84,7 +84,7 @@ bool BosonGameEngineStarting::createTasks(QPtrList<BosonStartingTask>* tasks)
 		<< "Current status: " << boGame->gameStatus() << endl;
 	return false;
  }
- if (boGame->playerCount() < 2) {
+ if (boGame->gamePlayerCount() < 2) {
 	boError(270) << k_funcinfo << "not enough players in game. there must be at least a real player and a (internal) neutral player" << endl;
 	return false;
  }
@@ -93,8 +93,8 @@ bool BosonGameEngineStarting::createTasks(QPtrList<BosonStartingTask>* tasks)
  {
 	QValueList<int> players;
 	QValueList<int> watchPlayers;
-	for (unsigned i = 0; i < boGame->playerCount(); i++) {
-		Player* p = (Player*)boGame->playerList()->at(i);
+	for (unsigned i = 0; i < boGame->allPlayerCount(); i++) {
+		Player* p = (Player*)boGame->allPlayerList()->at(i);
 		int id = p->bosonId();
 		if (id <= 0) {
 			// IDs <= 0 are invalid.
@@ -157,18 +157,19 @@ bool BosonGameEngineStarting::createTasks(QPtrList<BosonStartingTask>* tasks)
  tasks->append(script);
 
 
- for (QPtrListIterator<KPlayer> it(*(boGame->playerList())); it.current(); ++it) {
+ int index = 0;
+ for (QPtrListIterator<Player> it(*boGame->gamePlayerList()); it.current(); ++it) {
 	Player* p = (Player*)it.current();
 	QString text;
-	unsigned int index = boGame->playerList()->find(it.current());
-	if (index < boGame->playerCount() - 1) {
-		text = i18n("Load player game data of player %1 (of %2)").arg(index + 1).arg(boGame->playerCount() - 1);
+	if (p->isActiveGamePlayer()) {
+		text = i18n("Load player game data of player %1 (of %2)").arg(index + 1).arg(boGame->activeGamePlayerCount());
 	} else {
 		text = i18n("Load player game data of neutral player");
 	}
 	BosonStartingLoadPlayerGameData* playerData = new BosonStartingLoadPlayerGameData(text);
 	playerData->setPlayer(p);
 	tasks->append(playerData);
+	index++;
  }
 
 
@@ -269,9 +270,9 @@ bool BosonStartingInitPlayerMap::startTask()
 	BO_NULL_ERROR(boGame);
 	return false;
  }
- for (unsigned int i = 0; i < boGame->playerCount(); i++) {
+ for (unsigned int i = 0; i < boGame->allPlayerCount(); i++) {
 	boDebug(270) << "init map for player " << i << endl;
-	Player* p = (Player*)boGame->playerList()->at(i);
+	Player* p = boGame->allPlayerList()->at(i);
 	if (p) {
 		p->initMap(playField()->map(), boGame->gameMode());
 	}
@@ -370,7 +371,7 @@ bool BosonStartingStartScenario::startTask()
 	boError(270) << k_funcinfo << "unable to load players from XML" << endl;
 	return false;
  }
- boDebug(270) << k_funcinfo << boGame->playerCount() << " players loaded" << endl;
+ boDebug(270) << k_funcinfo << boGame->gamePlayerCount() << " players loaded" << endl;
 
  if (!load.loadCanvasFromXML(*mFiles)) {
 	boError(270) << k_funcinfo << "unable to load canvas from XML" << endl;

@@ -159,7 +159,7 @@ bool BosonLoadSaveGameHandler::addLoadGamePlayers(const QString& playersXML)
 	return false;
  }
  QDomElement playersRoot = playersDoc.documentElement();
- if (boGame->playerCount() != 0) {
+ if (boGame->allPlayerCount() != 0) {
 	boError(260) << k_funcinfo << "no player are allowed at this point" << endl;
 	return false;
  }

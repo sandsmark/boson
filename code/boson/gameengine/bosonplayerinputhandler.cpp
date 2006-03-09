@@ -888,17 +888,7 @@ Unit* BosonPlayerInputHandler::editorPlaceUnit(Q_UINT32 owner, Q_UINT32 unitType
 {
  BO_CHECK_NULL_RET0(canvas());
 
- Player* p = 0;
-#warning FIXME?
-#if 0
- if (owner >= 1024) { // a KPlayer ID
-	p = findPlayer(owner);
- } else {
-	p = (Player*)mGame->playerList()->at(owner);
- }
-#else
- p = findPlayerByUserId(owner);
-#endif
+ Player* p = findPlayerByUserId(owner);
  if (!p) {
 	boError() << k_lineinfo << "Cannot find player " << owner << endl;
 	return 0;

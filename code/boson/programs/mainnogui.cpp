@@ -79,10 +79,10 @@ public:
 		if (!boGame) {
 			return false;
 		}
-		if (boGame->playerCount() >= mRequiredPlayers) {
+		if (boGame->allPlayerCount() >= mRequiredPlayers) {
 			return true;
 		} else {
-			boDebug() << k_funcinfo << "not enough players yet. have: " << boGame->playerCount() << " need: " << mRequiredPlayers << endl;
+			boDebug() << k_funcinfo << "not enough players yet. have: " << boGame->allPlayerCount() << " need: " << mRequiredPlayers << endl;
 			return false;
 		}
 		return false;

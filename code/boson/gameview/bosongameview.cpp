@@ -2515,14 +2515,13 @@ void BosonGameView::slotGameOver()
  BO_CHECK_NULL_RET(boGame);
  boDebug() << k_funcinfo << endl;
 
- // AB: keep in mind that boGame->playerCount()-1 == neutral player
  QString winner;
  QString loser;
  QString rest;
  bool localWon = false;
  bool localLost = false;
- for (unsigned int i = 0; i < boGame->playerCount() - 1; i++) {
-	PlayerIO* io = boGame->playerIOAt(i);
+ for (unsigned int i = 0; i < boGame->gamePlayerCount(); i++) {
+	PlayerIO* io = boGame->playerIOAtGameIndex(i);
 	if (io->hasLost()) {
 		if (io == localPlayerIO()) {
 			localLost = true;

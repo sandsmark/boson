@@ -164,12 +164,8 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
  boProfiling->push(prof_funcinfo + " - Whole method");
 
  QMap<Player*, bool> player2HasMiniMap;
- for (QPtrListIterator<KPlayer> it(*boGame->playerList()); it.current(); ++it) {
-	Player* p = (Player*)it.current();
-	if (p->bosonId() < 128 || p->bosonId() >= 512) {
-		// not a game player
-		continue;
-	}
+ for (QPtrListIterator<Player> it(*boGame->gamePlayerList()); it.current(); ++it) {
+	Player* p = it.current();
 	player2HasMiniMap.insert(p, p->hasMiniMap());
  }
 
@@ -215,11 +211,8 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
  // if this value is reached, "free" refill stops. only using ammunition center
  // (i.e. by producing new ammo), new ammo can be gained.
  const unsigned long int maxAmmo = 1000;
- for (QPtrListIterator<KPlayer> it(*boGame->playerList()); it.current(); ++it) {
-	Player* p = (Player*)it.current();
-	if (p->bosonId() < 128 || p->bosonId() >= 256) {
-		continue;
-	}
+ for (QPtrListIterator<Player> it(*boGame->activeGamePlayerList()); it.current(); ++it) {
+	Player* p = it.current();
 	QString type = "Generic";
 	if (p->ammunition(type) < maxAmmo) {
 		p->setAmmunition(type, p->ammunition(type) + amount);
@@ -263,12 +256,8 @@ void BoCanvasAdvance::chargeUnits(unsigned int advanceCallsCount, bool advanceFl
 {
  Q_UNUSED(advanceCallsCount);
  Q_UNUSED(advanceFlag);
- for (QPtrListIterator<KPlayer> it(*boGame->playerList()); it.current(); ++it) {
-	Player* p = (Player*)it.current();
-	if (p->bosonId() < 128 || p->bosonId() >= 512) {
-		// not a game player
-		continue;
-	}
+ for (QPtrListIterator<Player> it(*boGame->gamePlayerList()); it.current(); ++it) {
+	Player* p = it.current();
 	p->updatePowerChargeForCurrentAdvanceCall();
  }
 }
@@ -277,12 +266,8 @@ void BoCanvasAdvance::unchargeUnits(unsigned int advanceCallsCount, bool advance
 {
  Q_UNUSED(advanceCallsCount);
  Q_UNUSED(advanceFlag);
- for (QPtrListIterator<KPlayer> it(*boGame->playerList()); it.current(); ++it) {
-	Player* p = (Player*)it.current();
-	if (p->bosonId() < 128 || p->bosonId() >= 512) {
-		// not a game player
-		continue;
-	}
+ for (QPtrListIterator<Player> it(*boGame->gamePlayerList()); it.current(); ++it) {
+	Player* p = it.current();
 	p->unchargeUnitsForAdvance();
  }
 }
@@ -918,7 +903,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	boGame->queueEvent(unitDestroyed);
 
 	// the following events are not emitted for the neutral player
-	if (owner != boGame->playerList()->at(boGame->playerCount() - 1)) {
+	if (owner->isActiveGamePlayer()) {
 		if (owner->mobilesCount() == 0) {
 			BoEvent* event = new BoEvent("AllMobileUnitsDestroyed");
 			event->setPlayerId(unit->owner()->bosonId());
@@ -1628,7 +1613,8 @@ bool BosonCanvas::saveItemsAsXML(QDomElement& root) const
 {
  QDomDocument doc = root.ownerDocument();
  QMap<unsigned int, QDomElement> owner2Items;
- for (KPlayer* p = boGame->playerList()->first(); p; p = boGame->playerList()->next()) {
+ QPtrList<Player> gamePlayerList = *boGame->gamePlayerList();
+ for (KPlayer* p = gamePlayerList.first(); p; p = gamePlayerList.next()) {
 	QDomElement items = doc.createElement(QString::fromLatin1("Items"));
 
 	// note: we need to store the index in the list here, not the p->kgameId() !
