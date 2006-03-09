@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 2002-2005 Rivo Laks (rivolaks@hot.ee)
-    Copyright (C) 2002-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2006 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -272,6 +272,8 @@ public:
     QMap<int, QString> mSpeciesIndex2Identifier;
     QMap<int, QString> mSpeciesIndex2Comment;
 
+    QMap<int, int> mSideIndex2Side; // index in combobox -> Player::bosonId() of the side
+
     QGuardedPtr<Player> mLocalPlayer;
 
     BoUfoColorChooser* mPlayerColor;
@@ -316,6 +318,8 @@ BoUfoNewGameWidget::BoUfoNewGameWidget(BosonStartupNetwork* interface)
         this, SLOT(slotNetPlayerLeftGame(KPlayer*)));
  connect(networkInterface(), SIGNAL(signalSpeciesChanged(Player*)),
         this, SLOT(slotNetSpeciesChanged(Player*)));
+ connect(networkInterface(), SIGNAL(signalSideChanged(Player*)),
+        this, SLOT(slotNetSideChanged(Player*)));
  connect(networkInterface(), SIGNAL(signalTeamColorChanged(Player*)),
         this, SLOT(slotNetColorChanged(Player*)));
  connect(networkInterface(), SIGNAL(signalPlayFieldChanged(BosonPlayField*)),
@@ -640,6 +644,7 @@ void BoUfoNewGameWidget::slotNetPlayerJoinedGame(KPlayer* p)
 
  updateColors();
  playerCountChanged();
+ possibleSidesChanged();
 }
 
 void BoUfoNewGameWidget::slotNetPlayerLeftGame(KPlayer* p)
@@ -689,6 +694,12 @@ void BoUfoNewGameWidget::slotNetSpeciesChanged(Player* p)
         }
     }
  }
+}
+
+void BoUfoNewGameWidget::slotNetSideChanged(Player* p)
+{
+ boDebug() << k_funcinfo << endl;
+ possibleSidesChanged();
 }
 
 void BoUfoNewGameWidget::slotNetColorChanged(Player* p)
@@ -744,6 +755,7 @@ void BoUfoNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
     mMapDescription->setText(description->comment());
  }
  playerCountChanged();
+ possibleSidesChanged();
 }
 
 void BoUfoNewGameWidget::slotNetPlayerNameChanged(Player* p)
@@ -898,6 +910,27 @@ void BoUfoNewGameWidget::slotPlayerSpeciesChanged(int index)
  networkInterface()->sendChangeSpecies(p, d->mSpeciesIndex2Identifier[index], p->speciesTheme()->teamColor());
 }
 
+void BoUfoNewGameWidget::slotPlayerSideChanged(int index)
+{
+ boDebug() << k_funcinfo << endl;
+ BO_CHECK_NULL_RET(localPlayer());
+
+ Player* p = mSelectedPlayer;
+ if (!p) {
+    p = localPlayer();
+ }
+ if (!boGame->isAdmin() && mSelectedPlayer->isVirtual()) {
+    boError() << k_funcinfo << "Can't set side for player " << p->bosonId() << endl;
+    return;
+ }
+
+ if (index >= (int)d->mSideIndex2Side.count()) {
+    boError() << k_funcinfo << "invalid index " << index << endl;
+    return;
+ }
+ networkInterface()->sendChangeSide(p, d->mSideIndex2Side[index]);
+}
+
 void BoUfoNewGameWidget::slotAddComputerPlayer()
 {
  BO_CHECK_NULL_RET(boGame);
@@ -981,6 +1014,7 @@ void BoUfoNewGameWidget::slotPlayerSelected(int index)
         break;
     }
  }
+ possibleSidesChanged();
 
  // Enable/disable some stuff
  bool canChange = false;
@@ -990,6 +1024,7 @@ void BoUfoNewGameWidget::slotPlayerSelected(int index)
  mPlayerName->setEditable(canChange);
  d->mPlayerColor->setEnabled(canChange);
  mPlayerSpecies->setEnabled(canChange);
+ mPlayerDesiredSide->setEnabled(canChange);
  mRemovePlayer->setEnabled(canChange && (mSelectedPlayer != localPlayer()));
 }
 
@@ -1037,6 +1072,82 @@ void BoUfoNewGameWidget::playerCountChanged()
     mAddAIPlayer->setEnabled(boGame->isAdmin());
  }
  // Maybe also disable/enable start button if player count is invalid?
+}
+
+void BoUfoNewGameWidget::possibleSidesChanged()
+{
+ boDebug() << k_funcinfo << endl;
+ BO_CHECK_NULL_RET(boGame);
+ mPlayerDesiredSide->clear();
+ d->mSideIndex2Side.clear();
+
+ if (!mSelectedPlayer) {
+   boDebug() << k_funcinfo << "no player selected" << endl;
+   return;
+ }
+
+ QStringList sides;
+
+#warning TODO: read available sides from map
+ // TODO: insert possible sides of the map
+ unsigned int maxPlayers = BOSON_MAX_PLAYERS;
+ maxPlayers = QMIN(maxPlayers, mMaxPlayers);
+ maxPlayers = QMAX(maxPlayers, mMinPlayers);
+ for (unsigned int i = 0; i < maxPlayers; i++) {
+   int id = 128 + i;
+   Player* p = (Player*)boGame->findPlayerByUserId(id);
+   if (p && p != mSelectedPlayer) {
+     continue;
+   }
+   sides.append(i18n("Player %1 (Id=%2)").arg(i + 1).arg(id));
+   d->mSideIndex2Side.insert(sides.count() - 1, id);
+ }
+
+ int watchId = 1; // ID of a player who watches the game only (but won't be able to play)
+ {
+   bool isTaken = false;
+   watchId = 1;
+   do {
+     isTaken = false;
+     QPtrListIterator<KPlayer> it(*boGame->playerList());
+     for (; it.current(); ++it) {
+       Player* p = (Player*)it.current();
+       if (p->bosonId() == watchId && p != mSelectedPlayer) {
+         isTaken = true;
+       }
+     }
+     if (isTaken) {
+       watchId++;
+     }
+   } while (isTaken && watchId <= 127);
+ }
+
+ // AB: by definition a "watch" player must have an Id >= 1 and <= 127.
+ //     See http://boson.freehackers.org/wiki/Main/PlayerIds
+ if (watchId >= 1 && watchId <= 127) {
+   sides.append(i18n("Watch game only (Id = %1)").arg(watchId));
+   d->mSideIndex2Side.insert(sides.count() - 1, watchId);
+ }
+
+ mPlayerDesiredSide->setItems(sides);
+
+ if (d->mSideIndex2Side.count() != mPlayerDesiredSide->count()) {
+   boError() << k_funcinfo << "invalid side count" << endl;
+   d->mSideIndex2Side.clear();
+   mPlayerDesiredSide->clear();
+   return;
+ }
+
+ BO_CHECK_NULL_RET(mSelectedPlayer);
+ int selectedPlayerSide = mSelectedPlayer->bosonId();
+ for (QMap<int, int>::iterator it = d->mSideIndex2Side.begin(); it != d->mSideIndex2Side.end(); it++) {
+   if (it.data() == selectedPlayerSide) {
+     mPlayerDesiredSide->blockSignals(true);
+     mPlayerDesiredSide->setCurrentItem(it.key());
+     mPlayerDesiredSide->blockSignals(false);
+     break;
+   }
+ }
 }
 
 void BoUfoNewGameWidget::slotSetAdmin(bool admin)
@@ -1124,6 +1235,7 @@ void BoUfoNewGameWidget::removePlayer(KPlayer* p)
 
         // Update player info
         playerCountChanged();
+        possibleSidesChanged();
         slotPlayerSelected(mConnectedPlayersList->selectedItem());
         return;
     }

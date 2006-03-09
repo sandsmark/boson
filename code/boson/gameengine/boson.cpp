@@ -831,6 +831,37 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		emit signalSpeciesChanged(p);
 		break;
 	}
+	case BosonMessageIds::ChangeSide:
+	{
+		Q_UINT32 id;
+		Q_UINT32 newId;
+		stream >> id;
+		stream >> newId;
+		Player* p = (Player*)findPlayerByUserId(id);
+		if (!p) {
+			boError() << k_lineinfo << "Cannot find player " << id << endl;
+			return;
+		}
+		if (findPlayerByUserId(newId) && (Player*)findPlayerByUserId(newId) != p) {
+			boError() << k_lineinfo << "user id " << newId << " already taken by a player. won't change to that Id." << endl;
+			return;
+		}
+		if (newId <= 0) {
+			boError() << k_lineinfo << "Id 0 is not allowed to be taken by a player" << endl;
+			return;
+		}
+		if (newId > 255) {
+			boError() << k_lineinfo << "Ids > 255 are not allowed to be taken by a real player. Use Ids between 1 and 127 to \"watch\" a game" << endl;
+			return;
+		}
+		if (gameStatus() != KGame::Init) {
+			boError() << k_lineinfo << "not in Init state" << endl;
+			return;
+		}
+		p->setUserId(newId);
+		emit signalSideChanged(p);
+		break;
+	}
 	case BosonMessageIds::ChangeTeamColor:
 	{
 		Q_UINT32 id;

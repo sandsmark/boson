@@ -764,6 +764,71 @@
       </Widget>
      </Widget>
      <Widget>
+      <ClassName>BoUfoHBox</ClassName>
+      <Properties>
+       <name>mWidget49</name>
+       <constraints/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <opaque/>
+       <layout>UHBoxLayout</layout>
+       <minimumWidth/>
+       <minimumHeight/>
+       <preferredWidth/>
+       <preferredHeight/>
+       <backgroundImageFile/>
+       <verticalAlignment/>
+       <horizontalAlignment/>
+       <borderType/>
+       <stretch/>
+       <takesKeyboardFocus/>
+      </Properties>
+      <Widget>
+       <ClassName>BoUfoLabel</ClassName>
+       <Properties>
+        <name>mWidget50</name>
+        <constraints/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <opaque/>
+        <layout/>
+        <minimumWidth/>
+        <minimumHeight/>
+        <preferredWidth/>
+        <preferredHeight/>
+        <backgroundImageFile/>
+        <verticalAlignment/>
+        <horizontalAlignment/>
+        <borderType/>
+        <stretch/>
+        <takesKeyboardFocus/>
+        <text>Side (Player Id):</text>
+        <iconFile/>
+       </Properties>
+      </Widget>
+      <Widget>
+       <ClassName>BoUfoComboBox</ClassName>
+       <Properties>
+        <name>mPlayerDesiredSide</name>
+        <constraints/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <opaque/>
+        <layout/>
+        <minimumWidth/>
+        <minimumHeight/>
+        <preferredWidth/>
+        <preferredHeight/>
+        <backgroundImageFile/>
+        <verticalAlignment/>
+        <horizontalAlignment/>
+        <borderType/>
+        <stretch/>
+        <takesKeyboardFocus/>
+       </Properties>
+      </Widget>
+     </Widget>
+     <Widget>
       <ClassName>BoUfoPushButton</ClassName>
       <Properties>
        <opaque/>
@@ -1031,9 +1096,9 @@
   </Widget>
  </Widgets>
  <Methods>
-  <Method return="void" visibility="protected" type="slot" name="slotCampaignSelected(int, int)" >
+  <Method return="void" visibility="protected" type="slot" name="slotPlayerSideChanged(int)" >
    <Connections>
-    <Connection sender="mSelectCampaign" signal="signalSelectionChanged(int, int)" type="receiver" />
+    <Connection sender="mPlayerDesiredSide" signal="signalActivated(int)" type="receiver" />
    </Connections>
   </Method>
   <Method return="void" visibility="protected" type="slot" name="slotAddComputerPlayer()" >
@@ -1041,14 +1106,14 @@
     <Connection sender="mAddAIPlayer" signal="signalClicked()" type="receiver" />
    </Connections>
   </Method>
+  <Method return="void" visibility="protected" type="slot" name="slotCampaignSelected(int, int)" >
+   <Connections>
+    <Connection sender="mSelectCampaign" signal="signalSelectionChanged(int, int)" type="receiver" />
+   </Connections>
+  </Method>
   <Method return="void" visibility="public" type="slot" name="slotCancel()" >
    <Connections>
     <Connection sender="mCancel" signal="signalClicked()" type="receiver" />
-   </Connections>
-  </Method>
-  <Method return="void" visibility="protected" type="slot" name="slotPlayFieldSelected(int, int)" >
-   <Connections>
-    <Connection sender="mSelectMap" signal="signalSelectionChanged(int, int)" type="receiver" />
    </Connections>
   </Method>
   <Method return="void" visibility="protected" type="slot" name="slotPlayerNameChanged()" >
@@ -1064,6 +1129,11 @@
   <Method return="void" visibility="protected" type="slot" name="slotPlayerSpeciesChanged(int)" >
    <Connections>
     <Connection sender="mPlayerSpecies" signal="signalActivated(int)" type="receiver" />
+   </Connections>
+  </Method>
+  <Method return="void" visibility="protected" type="slot" name="slotPlayFieldSelected(int, int)" >
+   <Connections>
+    <Connection sender="mSelectMap" signal="signalSelectionChanged(int, int)" type="receiver" />
    </Connections>
   </Method>
   <Method return="void" visibility="protected" type="slot" name="slotRemovePlayer()" >
