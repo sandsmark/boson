@@ -53,6 +53,7 @@ public:
 	bool sendLoadGame(const QByteArray& data);
 	void sendChangeTeamColor(Player* p, const QColor& color);
 	void sendChangeSpecies(Player* p, const QString& species, const QColor& color);
+	void sendChangeSide(Player* p, unsigned int sideId);
 	void sendChangePlayerName(Player* p, const QString& name);
 	void sendChangePlayField(const QString& playFieldIdentifier);
 
@@ -87,6 +88,7 @@ signals:
 	void signalPlayerJoinedGame(KPlayer* player);
 	void signalPlayerLeftGame(KPlayer* player);
 	void signalSpeciesChanged(Player* player);
+	void signalSideChanged(Player* player);
 	void signalTeamColorChanged(Player* player);
 	void signalPlayFieldChanged(const QString& identifier); // obsolete
 	void signalPlayFieldChanged(BosonPlayField*);

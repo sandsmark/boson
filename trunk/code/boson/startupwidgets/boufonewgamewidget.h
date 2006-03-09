@@ -86,6 +86,7 @@ protected slots: // implementations for the .ui slots
 	virtual void slotPlayFieldSelected(int, int);
 	virtual void slotCampaignSelected(int, int);
 	virtual void slotPlayerSpeciesChanged(int);
+	virtual void slotPlayerSideChanged(int);
 	virtual void slotAddComputerPlayer();
 	virtual void slotRemovePlayer();
 	virtual void slotPlayerSelected(int, int);
@@ -111,6 +112,8 @@ private slots:
 	 * This does nothing at the moment
 	 **/
 	void slotNetSpeciesChanged(Player*);
+
+	void slotNetSideChanged(Player*);
 
 	/**
 	 * Called when some player changes his color
@@ -170,6 +173,7 @@ private:
 
 	void playersChanged();
 	void playerCountChanged();
+	void possibleSidesChanged();
 	void removePlayer(KPlayer* p);
 
 private:

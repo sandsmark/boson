@@ -63,6 +63,8 @@ void BosonStartupNetwork::setGame(Boson* game)
 		this, SLOT(slotPlayerLeftGame(KPlayer*)));
  connect(mGame, SIGNAL(signalSpeciesChanged(Player*)),
 		this, SIGNAL(signalSpeciesChanged(Player*)));
+ connect(mGame, SIGNAL(signalSideChanged(Player*)),
+		this, SIGNAL(signalSideChanged(Player*)));
  connect(mGame, SIGNAL(signalTeamColorChanged(Player*)),
 		this, SIGNAL(signalTeamColorChanged(Player*)));
  connect(mGame, SIGNAL(signalPlayFieldChanged(const QString&)),
@@ -239,6 +241,17 @@ void BosonStartupNetwork::sendChangeSpecies(Player* p, const QString& species, c
  stream << species;
  stream << (Q_UINT32)color.rgb();
  mGame->sendMessage(b, BosonMessageIds::ChangeSpecies);
+}
+
+void BosonStartupNetwork::sendChangeSide(Player* p, unsigned int sideId)
+{
+ BO_CHECK_NULL_RET(mGame);
+ BO_CHECK_NULL_RET(p);
+ QByteArray b;
+ QDataStream stream(b, IO_WriteOnly);
+ stream << (Q_UINT32)p->bosonId();
+ stream << (Q_UINT32)sideId;
+ mGame->sendMessage(b, BosonMessageIds::ChangeSide);
 }
 
 void BosonStartupNetwork::sendChangePlayerName(Player* p, const QString& name)

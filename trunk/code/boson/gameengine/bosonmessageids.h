@@ -37,6 +37,7 @@ public:
 		ChangeTeamColor = 4,
 		IdNewGame = 5,
 		IdStartGameClicked = 7,
+		ChangeSide = 8,
 
 	// once a newgame is started:
 //		IdInitFogOfWar = 10,

@@ -452,6 +452,15 @@ signals:
 	void signalSpeciesChanged(Player* player);
 
 	/**
+	 * This is only interesting for the new game dialog.
+	 * Emitted when the "side" of the player changes, i.e. the @ref
+	 * Player::bosonId.
+	 *
+	 * This is allowed to happen only before the game starts.
+	 **/
+	void signalSideChanged(Player* player);
+
+	/**
 	 * This is only interesting for the new game dialog. Emitted when
 	 * another species has been chosen.
 	 **/
