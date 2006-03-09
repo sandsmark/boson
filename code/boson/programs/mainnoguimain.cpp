@@ -44,13 +44,11 @@ static const char *version = BOSON_VERSION_STRING;
 static KCmdLineOptions options[] =
 {
     { "load", I18N_NOOP("Skip Welcome Widget and display the Load Game screen"), 0 },
-    { "load-from-log <file>", I18N_NOOP("Load from emergency log, for debugging"), 0 },
     { "playfield <identifier>", I18N_NOOP("Playfield identifier for newgame/start editor widget"), 0 },
     { "computerplayers <count>", I18N_NOOP("Add <count> computer players to the game. Default is 1."), "1" },
     { "computerspecies <species>", I18N_NOOP("Comma separated list of species identifiers - one species per computer player."), 0 },
     { "networkplayers <count>", I18N_NOOP("Wait for <count> players to enter the game from network. Default is 0."), "0" },
     { "port <number>", I18N_NOOP("Port to listen on for network players"), QString("%1").arg(BOSON_PORT) },
-    { "start", I18N_NOOP("Start the game"), 0},
     { "aidelay <delay>", I18N_NOOP("Set AI delay (in seconds). The less it is, the faster AI will send it's units"), 0 },
     { "noai", I18N_NOOP("Disable AI"), 0 },
     { "connectto <host:port>" I18N_NOOP("Connect to a server"), 0 },
