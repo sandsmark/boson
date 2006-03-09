@@ -96,12 +96,18 @@ bool BosonGameEngineStarting::createTasks(QPtrList<BosonStartingTask>* tasks)
 	for (unsigned i = 0; i < boGame->playerCount(); i++) {
 		Player* p = (Player*)boGame->playerList()->at(i);
 		int id = p->bosonId();
-		if (id < 128) {
-			// IDs < 128 are invalid.
+		if (id <= 0) {
+			// IDs <= 0 are invalid.
 			boError() << k_funcinfo << "Invalid player ID " << id << " for player with KGame ID " << p->kgameId() << endl;
 			return false;
 		}
 		if (id >= 512) {
+			// IDs >= 512 are reserved for future use. they must not
+			// be used currently.
+			boError() << k_funcinfo << "Invalid player ID " << id << " for player with KGame ID " << p->kgameId() << endl;
+			return false;
+		}
+		if (id < 127) {
 			boDebug() << k_funcinfo << "player with KGame ID " << p->kgameId() << " is just watching the game. no active player" << endl;
 			if (watchPlayers.contains(id)) {
 				// AB: note that duplicated IDs are (currently)
@@ -109,7 +115,8 @@ bool BosonGameEngineStarting::createTasks(QPtrList<BosonStartingTask>* tasks)
 				boWarning() << k_funcinfo << "already have a player with ID " << id << endl;
 			}
 			watchPlayers.append(id);
-		} else {
+		}
+		if (id >= 128 && id <= 511) {
 			// player ID 128..511 are game players (256-511 are
 			// non-playable players)
 			if (players.contains(id)) {
