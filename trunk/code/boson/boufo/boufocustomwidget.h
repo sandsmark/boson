@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2004-2006 Andreas Beckermann (b_mann@gmx.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -40,6 +40,9 @@ public:
 	virtual void paint();
 	virtual void paintWidget();
 	virtual void paintBorder();
+
+	virtual QSize preferredSize(const QSize& maxSize) const;
+
 };
 
 #endif
