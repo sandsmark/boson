@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2004-2006 Andreas Beckermann (b_mann@gmx.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -21,9 +21,11 @@
 #ifndef BOUFOPROGRESS_H
 #define BOUFOPROGRESS_H
 
-#include "boufowidget.h"
+#include "boufocustomwidget.h"
 
-class BoUfoProgress : public BoUfoWidget
+#include <qcolor.h>
+
+class BoUfoProgress : public BoUfoCustomWidget
 {
 	Q_OBJECT
 	Q_PROPERTY(double minimumValue READ minimumValue WRITE setMinimumValue);
@@ -37,11 +39,7 @@ public:
 	BoUfoProgress(Qt::Orientation = Horizontal);
 
 	void setOrientation(Qt::Orientation o);
-
-	ufo::UBoProgress* progress() const
-	{
-		return mProgress;
-	}
+	Qt::Orientation orientation() const;
 
 	double value() const;
 	void setValue(double v);
@@ -56,20 +54,37 @@ public:
 	bool hasFrame() const;
 
 	void setFrameColor(const QColor& color);
-	QColor frameColor() const;
+	const QColor& frameColor() const;
 	void setStartColor(const QColor& color);
-	QColor startColor() const;
+	const QColor& startColor() const;
 	void setEndColor(const QColor& color);
-	QColor endColor() const;
+	const QColor& endColor() const;
 	void setColor(const QColor& color);
 
 	virtual void setOpaque(bool o);
+
+
+	virtual QSize preferredSize(const QSize& maxSize) const;
+	virtual void paintWidget();
+
+protected:
+	void paintGradient(const QColor& from, const QColor& to);
+	void paintFrame(const QColor& color);
 
 private:
 	void init(Qt::Orientation);
 
 private:
 	ufo::UBoProgress* mProgress;
+
+	QColor mStartColor;
+	QColor mEndColor;
+	QColor mFrameColor;
+	bool mHasFrame;
+	double mMinimumValue;
+	double mMaximumValue;
+	double mValue;
+	Qt::Orientation mOrientation;
 };
 
 #endif

@@ -16,7 +16,6 @@ set(ufoext_SRCS
 	ufoext/ubosonstyle.cpp
 	ufoext/ubolabel.cpp
 	ufoext/ubolabelui.cpp
-	ufoext/uboprogress.cpp
 	ufoext/ubogridlayout.cpp
 	ufoext/ubodrawableicon.cpp
 	ufoext/uboboxlayout.cpp

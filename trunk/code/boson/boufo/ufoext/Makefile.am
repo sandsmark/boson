@@ -12,7 +12,6 @@ libufoext_la_SOURCES = \
 	ubosonstyle.cpp \
 	ubolabel.cpp \
 	ubolabelui.cpp \
-	uboprogress.cpp \
 	ubogridlayout.cpp \
 	ubodrawableicon.cpp
 

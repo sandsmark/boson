@@ -7,7 +7,6 @@ ufoext_sources = """
 	ufoext/ubosonstyle.cpp
 	ufoext/ubolabel.cpp
 	ufoext/ubolabelui.cpp
-	ufoext/uboprogress.cpp
 	ufoext/ubogridlayout.cpp
 	ufoext/ubodrawableicon.cpp
 	ufoext/uboboxlayout.cpp

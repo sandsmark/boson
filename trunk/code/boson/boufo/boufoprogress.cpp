@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2004-2006 Andreas Beckermann (b_mann@gmx.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -19,74 +19,81 @@
 
 #include <bogl.h>
 
-// AB: first include the ufo headers, otherwise we conflict with Qt
-#include <ufo/ufo.hpp>
-#include "ufoext/uboprogress.h"
-
-// AB: make sure that we are compatible to system that have QT_NO_STL defined
-#ifndef QT_NO_STL
-#define QT_NO_STL
-#endif
-
 #include "boufoprogress.h"
 #include "boufoprogress.moc"
 
 #include <bodebug.h>
 
-BoUfoProgress::BoUfoProgress(Qt::Orientation o) : BoUfoWidget()
+// AB: these are the default values. pretty random values though
+// -> a user can and probably will use widget->setPreferredSize() anyway
+#define PREFERRED_WIDTH 20
+#define PREFERRED_HEIGHT 10
+
+
+BoUfoProgress::BoUfoProgress(Qt::Orientation o)
+	: BoUfoCustomWidget()
 {
  init(o);
 }
 
 void BoUfoProgress::init(Qt::Orientation o)
 {
- setLayoutClass(UHBoxLayout);
-
- mProgress = new ufo::UBoProgress();
-// mProgress->updateUI();
- setOrientation(o);
- ufoWidget()->add(mProgress);
+ mStartColor = QColor(255, 0, 0);
+ mEndColor = QColor(0, 255, 0);
+ mFrameColor = QColor(64, 64, 64);
+ mHasFrame = true;
+ mValue = 50.0;
+ mMinimumValue = 0.0;
+ mMaximumValue = 100.0;
+ mOrientation = o;
 }
 
 void BoUfoProgress::setOpaque(bool o)
 {
  BoUfoWidget::setOpaque(o);
- mProgress->setOpaque(o);
 }
 
 void BoUfoProgress::setOrientation(Orientation o)
 {
- if (o == Horizontal) {
-	mProgress->setOrientation(ufo::Horizontal);
- } else {
-	mProgress->setOrientation(ufo::Vertical);
- }
+ mOrientation = o;
+ invalidate();
+}
+
+Qt::Orientation BoUfoProgress::orientation() const
+{
+ return mOrientation;
 }
 
 double BoUfoProgress::value() const
 {
- return mProgress->getValue();
+ return mValue;
 }
 
 double BoUfoProgress::minimumValue() const
 {
- return mProgress->getMinimumValue();
+ return mMinimumValue;
 }
 
 double BoUfoProgress::maximumValue() const
 {
- return mProgress->getMaximumValue();
+ return mMaximumValue;
 }
 
 void BoUfoProgress::setValue(double v)
 {
- mProgress->setValue(v);
+ v = QMAX(v, minimumValue());
+ v = QMIN(v, maximumValue());
+ mValue = v;
 }
 
 void BoUfoProgress::setRange(double min, double max)
 {
- mProgress->setMinimumValue(min);
- mProgress->setMaximumValue(max);
+ max = QMAX(max, min);
+ mMinimumValue = min;
+ mMaximumValue = max;
+
+ mValue = QMAX(mValue, minimumValue());
+ mValue = QMIN(mValue, maximumValue());
 }
 
 void BoUfoProgress::setMinimumValue(double min)
@@ -103,50 +110,119 @@ void BoUfoProgress::setMaximumValue(double max)
 
 void BoUfoProgress::setHasFrame(bool has)
 {
- mProgress->setHasFrame(has);
+ mHasFrame = has;
 }
 
 bool BoUfoProgress::hasFrame() const
 {
- return mProgress->getHasFrame();
+ return mHasFrame;
 }
 
 void BoUfoProgress::setFrameColor(const QColor& c)
 {
- mProgress->setFrameColor(ufo::UColor(c.red(), c.green(), c.blue()));
+ mFrameColor = c;
 }
 
-QColor BoUfoProgress::frameColor() const
+const QColor& BoUfoProgress::frameColor() const
 {
- ufo::UColor c = mProgress->frameColor();
- return QColor((int)(c.getRed() * 255), (int)(c.getGreen() * 255), (int)(c.getBlue() * 255));
+ return mFrameColor;
 }
 
 void BoUfoProgress::setStartColor(const QColor& c)
 {
- mProgress->setStartColor(ufo::UColor(c.red(), c.green(), c.blue()));
+ mStartColor = c;
 }
 
-QColor BoUfoProgress::startColor() const
+const QColor& BoUfoProgress::startColor() const
 {
- ufo::UColor c = mProgress->startColor();
- return QColor((int)(c.getRed() * 255), (int)(c.getGreen() * 255), (int)(c.getBlue() * 255));
+ return mStartColor;
 }
 
 void BoUfoProgress::setEndColor(const QColor& c)
 {
- mProgress->setEndColor(ufo::UColor(c.red(), c.green(), c.blue()));
+ mEndColor = c;
 }
 
-QColor BoUfoProgress::endColor() const
+const QColor& BoUfoProgress::endColor() const
 {
- ufo::UColor c = mProgress->endColor();
- return QColor((int)(c.getRed() * 255), (int)(c.getGreen() * 255), (int)(c.getBlue() * 255));
+ return mEndColor;
 }
 
 void BoUfoProgress::setColor(const QColor& c)
 {
- mProgress->setColor(ufo::UColor(c.red(), c.green(), c.blue()));
+ setStartColor(c);
+ setEndColor(c);
+}
+
+QSize BoUfoProgress::preferredSize(const QSize& maxSize) const
+{
+ QSize size;
+ if (orientation() == Qt::Horizontal) {
+	size = QSize(PREFERRED_WIDTH, PREFERRED_HEIGHT);
+ } else {
+	size = QSize(PREFERRED_HEIGHT, PREFERRED_HEIGHT);
+ }
+ return size.boundedTo(maxSize);
+}
+
+void BoUfoProgress::paintWidget()
+{
+ // TODO: support an icon
+ paintGradient(startColor(), endColor());
+ if (hasFrame()) {
+	paintFrame(frameColor());
+ }
+}
+
+void BoUfoProgress::paintGradient(const QColor& from, const QColor& to)
+{
+ double l = maximumValue() - minimumValue();
+ double factor;
+ if (l != 0.0) {
+	factor = (value() - minimumValue()) / l;
+ } else {
+	factor = 0.0;
+ }
+
+ glColor3ub(from.red(), from.green(), from.blue());
+ glPushAttrib(GL_LIGHTING_BIT);
+ glShadeModel(GL_SMOOTH);
+
+ int realToR = (to.red()   * factor + from.red()   * (1.0 - factor));
+ int realToG = (to.green() * factor + from.green() * (1.0 - factor));
+ int realToB = (to.blue()  * factor + from.blue()  * (1.0 - factor));
+ int realToA = 255;
+
+ if (orientation() == Qt::Horizontal) {
+	glBegin(GL_QUADS);
+		glVertex2i(0, 0);
+		glVertex2i(0, height());
+		glColor4ub(realToR, realToG, realToB, realToA);
+		glVertex2i((int)(width() * factor), height());
+		glVertex2i((int)(width() * factor), 0);
+	glEnd();
+ } else {
+	glBegin(GL_QUADS);
+		glVertex2i(0, height());
+		glVertex2i(width(), height());
+		glColor4ub(realToR, realToG, realToB, realToA);
+		glVertex2i(width(), height() - (int)(height() * factor));
+		glVertex2i(0, height() - (int)(height() * factor));
+	glEnd();
+ }
+ glPopAttrib();
+}
+
+void BoUfoProgress::paintFrame(const QColor& color)
+{
+ glColor3ub(color.red(), color.green(), color.blue());
+
+ glBegin(GL_LINE_LOOP);
+	glVertex2i(0, 0);
+	glVertex2i(0, height());
+	glVertex2i(width(), height());
+	glVertex2i(width(), 0);
+ glEnd();
 }
 
 
