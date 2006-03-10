@@ -487,6 +487,14 @@ public:
 	 **/
 	virtual void paintBorder() {}
 
+	/**
+	 * Used by @ref BoUfoCustomWidget only
+	 **/
+	virtual QSize preferredSize(const QSize& maxSize = QSize(QCOORD_MAX, QCOORD_MAX)) const
+	{
+		return QSize(0, 0);
+	}
+
 
 public slots:
 	void setVisible(bool);

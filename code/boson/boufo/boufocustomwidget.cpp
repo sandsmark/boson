@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2004-2006 Andreas Beckermann (b_mann@gmx.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -57,17 +57,21 @@ public:
 		Q_UNUSED(g);
 		mWidget->paintBorder();
 	}
-#if 0
-	virtual ufo::UDimension getPreferredSize()
+
+#if 0 // AB: we probably don't need to overwrite the "normal" (without parameters) getPreferredSize()
+	virtual ufo::UDimension getPreferredSize() const
 	{
 		QSize s = mWidget->preferredSize();
-		return ufo::UDimension(s.width(), s.height());
+		return sizeToDimension(s);
 	}
-	virtual ufo::UDimension getPreferredSize(const ufo::UDimension& maxSize)
+#endif
+	virtual ufo::UDimension getPreferredSize(const ufo::UDimension& maxSize) const
 	{
-		QSize s = mRenderer->preferredSize(QSize(maxSize.w, maxSize.h));
-		return ufo::UDimension(s.width(), s.height());
+		QSize maxSize_ = dimensionToSize(maxSize);
+		QSize s = mWidget->preferredSize(maxSize_);
+		return sizeToDimension(s);
 	}
+#if 0
 	virtual ufo::UDimension getMinimumSize()
 	{
 		QSize s = mRenderer->minimumSize();
@@ -93,21 +97,55 @@ public:
 	{
 		ufo::UWidget::paintBorder(g);
 	}
-	ufo::UDimension getUfoPreferredSize()
+
+	// AB: here we use Qt parameters/returns QSize instead of libufos
+	//     ufo::UDimension
+	//     -> so this method cares about conversion, the caller does not
+	//     need to
+#if 0
+	QSize getUfoPreferredSize() const
 	{
-		return ufo::UWidget::getPreferredSize();
+		ufo::UDimension dim = ufo::UWidget::getPreferredSize();
+		return dimensionToSize(dim);
 	}
-	ufo::UDimension getUfoPreferredSize(const ufo::UDimension& maxSize)
+#endif
+
+	QSize getUfoPreferredSize(const QSize& maxSize)
 	{
-		return ufo::UWidget::getPreferredSize(maxSize);
+		ufo::UDimension maxSize_ = sizeToDimension(maxSize);
+		ufo::UDimension dim = ufo::UWidget::getPreferredSize(maxSize_);
+		return dimensionToSize(dim);
 	}
-	ufo::UDimension getUfoMinimumSize()
-	{
-		return ufo::UWidget::getMinimumSize();
-	}
+
+#if 0
 	ufo::UDimension getUfoMaximumSize()
 	{
 		return ufo::UWidget::getMaximumSize();
+	}
+#endif
+
+protected:
+	QSize dimensionToSize(const ufo::UDimension& dim) const
+	{
+		QSize s(dim.w, dim.h);
+		if (dim.w == ufo::UDimension::maxDimension.w) {
+			s.setWidth(QCOORD_MAX);
+		}
+		if (dim.h == ufo::UDimension::maxDimension.h) {
+			s.setHeight(QCOORD_MAX);
+		}
+		return s;
+	}
+	ufo::UDimension sizeToDimension(const QSize& s) const
+	{
+		ufo::UDimension dim(s.width(), s.height());
+		if (s.width() == QCOORD_MAX) {
+			dim.w = ufo::UDimension::maxDimension.w;
+		}
+		if (s.height() == QCOORD_MAX) {
+			dim.h = ufo::UDimension::maxDimension.h;
+		}
+		return dim;
 	}
 
 private:
@@ -160,6 +198,18 @@ void BoUfoCustomWidget::paintBorder()
  ufo::UGraphics* g = c->getGraphics();
  BO_CHECK_NULL_RET(g);
  ((UCustomWidgetRenderer*)ufoWidget())->ufoPaintBorder(g);
+}
+
+#if 0
+QSize BoUfoCustomWidget::preferredSize() const
+{
+ return ((UCustomWidgetRenderer*)ufoWidget())->getUfoPreferredSize();
+}
+#endif
+
+QSize BoUfoCustomWidget::preferredSize(const QSize& maxSize) const
+{
+ return ((UCustomWidgetRenderer*)ufoWidget())->getUfoPreferredSize(maxSize);
 }
 
 
