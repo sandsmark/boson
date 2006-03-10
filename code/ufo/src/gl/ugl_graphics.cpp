@@ -497,10 +497,13 @@ UGL_Graphics::drawVertexArray(VertexType type, UVertexArray * buffer) {
 		ugl_driver->glInterleavedArrays(GL_V3F, 0, buffer->getArray());
 		ugl_driver->glDrawArrays(glType, 0, buffer->getCount());
 	} else if (buffer->getType() == UVertexArray::C3F_V3F) {
+		// we use color arrays ...
+		ugl_driver->glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
 		ugl_driver->glShadeModel(GL_SMOOTH);
 		ugl_driver->glInterleavedArrays(GL_C3F_V3F, 0, buffer->getArray());
 		ugl_driver->glDrawArrays(glType, 0, buffer->getCount());
 		ugl_driver->glShadeModel(GL_FLAT);
+		ugl_driver->glPopClientAttrib();
 	}
 			ugl_driver->glTranslatef(-ufo_line_add, -ufo_line_add, 0);
 	switch (type) {

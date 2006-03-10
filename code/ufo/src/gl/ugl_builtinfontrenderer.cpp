@@ -219,7 +219,7 @@ UGL_BuiltinFontMetrics::getStringWidth(const char * text, unsigned int nChar) co
 
 int
 UGL_BuiltinFontMetrics::getCharWidth(const wchar_t chA) const {
-	return (m_renderer->m_fontStruct.m_characters[chA])[0];
+	return (m_renderer->m_fontStruct.m_characters[uint8_t(chA)])[0];
 }
 
 unsigned int
@@ -229,7 +229,7 @@ UGL_BuiltinFontMetrics::viewToModel(const char * text, unsigned int nChar,
 	unsigned int index = 0;
 
 	for (;index < nChar; ++index) {
-		advance += (m_renderer->m_fontStruct.m_characters[text[index]])[0];
+		advance += (m_renderer->m_fontStruct.m_characters[uint8_t(text[index])])[0];
 		if (advance > w) {
 			index--;
 			break;
