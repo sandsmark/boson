@@ -1,0 +1,68 @@
+Import('env')
+
+boufotest = env.kobject('program')
+boufotest.target = 'boufotest'
+boufotest.includes = '../../../bodebug ../../../bogl ../../../ufo/include ../'
+boufotest.source = """
+	boufotestmain.cpp
+	boufofontselectionwidgetbase.boui
+	boufofontselectionwidget.cpp
+"""
+boufotest.libs = """
+	../../../bodebug/libbodebug.a
+	../../../bogl/libbogl.a
+	../libboufo.a
+	../../../ufo/src/libufo.a
+	kdecore
+"""
+boufotest.execute()
+
+
+boufobuttontest = env.kobject('program')
+boufobuttontest.target = 'boufobuttontest'
+boufobuttontest.includes = '../../../bodebug ../../../bogl ../../../ufo/include ../'
+boufobuttontest.source = """
+	boufobuttontest.cpp
+"""
+boufobuttontest.libs = """
+	../../../bodebug/libbodebug.a
+	../../../bogl/libbogl.a
+	../libboufo.a
+	../../../ufo/src/libufo.a
+	kdecore
+"""
+boufobuttontest.execute()
+
+
+boufolistboxtest= env.kobject('program')
+boufolistboxtest.target = 'boufolistboxtest'
+boufolistboxtest.includes = '../../../bodebug ../../../bogl ../../../ufo/include ../'
+boufolistboxtest.source = """
+	boufolistboxtest.cpp
+"""
+boufolistboxtest.libs = """
+	../../../bodebug/libbodebug.a
+	../../../bogl/libbogl.a
+	../libboufo.a
+	../../../ufo/src/libufo.a
+	kdecore
+"""
+boufolistboxtest.execute()
+
+
+
+boufowidgets= env.kobject('program')
+boufowidgets.target = 'boufowidgets'
+boufowidgets.includes = '../../../bodebug ../../../bogl ../../../ufo/include ../'
+boufowidgets.source = """
+	boufowidgets.cpp
+"""
+boufowidgets.libs = """
+	../../../bodebug/libbodebug.a
+	../../../bogl/libbogl.a
+	../libboufo.a
+	../../../ufo/src/libufo.a
+	kdecore
+"""
+boufowidgets.execute()
+
