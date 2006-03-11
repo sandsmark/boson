@@ -414,7 +414,7 @@ double BoUfoExtendedProgress::gradientMaximumValue() const
 
 void BoUfoExtendedProgress::paintExtensions(const QColor& start, const QColor& end)
 {
- float startFactor;
+ double startFactor;
  if (value() >= gradientMinimumValue()) {
 	startFactor = 1.0f;
  } else {
@@ -428,7 +428,7 @@ void BoUfoExtendedProgress::paintExtensions(const QColor& start, const QColor& e
 	}
  }
 
- float endFactor;
+ double endFactor;
  if (value() <= gradientMaximumValue()) {
 	endFactor = 0.0f;
  } else {
@@ -520,18 +520,22 @@ void BoUfoExtendedProgress::paintExtensionDecorations(const QColor& start, const
 	x = rect.left();
 	y1 = rect.top() - (int)((rect.height() * mDecorationSizeFactor) / 2.0);
 	y2 = rect.bottom() + (int)((rect.height() * mDecorationSizeFactor) / 2.0);
-	glColor3ub(start.red(), start.green(), start.blue());
-	glBegin(GL_LINES);
-		glVertex2i(x, y1);
-		glVertex2i(x, y2);
-	glEnd();
+	if (startExtensionValueRange() > 0.0) {
+		glColor3ub(start.red(), start.green(), start.blue());
+		glBegin(GL_LINES);
+			glVertex2i(x, y1);
+			glVertex2i(x, y2);
+		glEnd();
+	}
 
 	x = rect.right();
-	glColor3ub(end.red(), end.green(), end.blue());
-	glBegin(GL_LINES);
-		glVertex2i(x, y1);
-		glVertex2i(x, y2);
-	glEnd();
+	if (endExtensionValueRange() > 0.0) {
+		glColor3ub(end.red(), end.green(), end.blue());
+		glBegin(GL_LINES);
+			glVertex2i(x, y1);
+			glVertex2i(x, y2);
+		glEnd();
+	}
  } else {
 	int x1, x2;
 	int y;
@@ -539,18 +543,22 @@ void BoUfoExtendedProgress::paintExtensionDecorations(const QColor& start, const
 	x2 = rect.right() + (int)((rect.width() * mDecorationSizeFactor) / 2.0);
 	y = rect.bottom();
 
-	glColor3ub(start.red(), start.green(), start.blue());
-	glBegin(GL_LINES);
-		glVertex2i(x1, y);
-		glVertex2i(x2, y);
-	glEnd();
+	if (startExtensionValueRange() > 0.0 || 1) {
+		glColor3ub(start.red(), start.green(), start.blue());
+		glBegin(GL_LINES);
+			glVertex2i(x1, y);
+			glVertex2i(x2, y);
+		glEnd();
+	}
 
 	y = rect.top();
-	glColor3ub(end.red(), end.green(), end.blue());
-	glBegin(GL_LINES);
-		glVertex2i(x1, y);
-		glVertex2i(x2, y);
-	glEnd();
+	if (endExtensionValueRange() > 0.0 || 1) {
+		glColor3ub(end.red(), end.green(), end.blue());
+		glBegin(GL_LINES);
+			glVertex2i(x1, y);
+			glVertex2i(x2, y);
+		glEnd();
+	}
  }
 }
 
@@ -559,11 +567,13 @@ QRect BoUfoExtendedProgress::removeExtensionsFromRect(const QRect& barRect_) con
  double barFactor = 1.0 - (startExtensionSizeFactor() + endExtensionSizeFactor());
  QRect barRect(barRect_);
  if (orientation() == Qt::Horizontal) {
+	int w = barRect.width();
 	barRect.setX(barRect.x() + (int)(barRect.width() * startExtensionSizeFactor()));
-	barRect.setWidth((int)(barRect.width() * barFactor));
+	barRect.setWidth((int)(w * barFactor));
  } else {
+	int h = barRect.height();
 	barRect.setY(barRect.y() + (int)(barRect.height() * endExtensionSizeFactor()));
-	barRect.setHeight((int)(barRect.height() * barFactor));
+	barRect.setHeight((int)(h * barFactor));
  }
  return barRect;
 }
