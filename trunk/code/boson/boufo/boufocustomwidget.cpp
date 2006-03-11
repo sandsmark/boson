@@ -67,6 +67,11 @@ public:
 #endif
 	virtual ufo::UDimension getPreferredSize(const ufo::UDimension& maxSize) const
 	{
+		// check for an explicitly set size.
+		if (getStyleHints()->preferredSize.isValid()) {
+			return getStyleHints()->preferredSize;
+		}
+
 		QSize maxSize_ = dimensionToSize(maxSize);
 		QSize s = mWidget->preferredSize(maxSize_);
 		return sizeToDimension(s);
