@@ -28,6 +28,7 @@
 class BoUfoProgress : public BoUfoCustomWidget
 {
 	Q_OBJECT
+	Q_PROPERTY(Orientation orientation READ orientation WRITE setOrientation);
 	Q_PROPERTY(double minimumValue READ minimumValue WRITE setMinimumValue);
 	Q_PROPERTY(double maximumValue READ maximumValue WRITE setMaximumValue);
 	Q_PROPERTY(double value READ value WRITE setValue);
@@ -40,8 +41,8 @@ public:
 	// collection of libufo and Qt may confuse each other.
 	BoUfoProgress(Qt::Orientation = Horizontal);
 
-	void setOrientation(Qt::Orientation o);
-	Qt::Orientation orientation() const;
+	void setOrientation(Orientation o);
+	Orientation orientation() const;
 
 	double value() const;
 	void setValue(double v);
