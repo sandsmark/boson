@@ -235,6 +235,7 @@ public:
 		mGenericAmmoLabel = 0;
 		mPowerGeneratedLabel = 0;
 		mPowerConsumedLabel = 0;
+		mPower = 0;
 		mFPSLabel = 0;
 		mGroundRendererDebug = 0;
 		mMapCoordinates = 0;
@@ -279,6 +280,7 @@ public:
 	BoUfoLabel* mGenericAmmoLabel;
 	BoUfoLabel* mPowerGeneratedLabel;
 	BoUfoLabel* mPowerConsumedLabel;
+	BoUfoExtendedProgress* mPower;
 	BoUfoLabel* mFPSLabel;
 	BoUfoLabel* mGroundRendererDebug;
 	BoUfoVBox* mMapCoordinates;
@@ -377,6 +379,7 @@ void BosonUfoGameGUI::initUfoWidgets()
  d->mGenericAmmoLabel = widget->mGenericAmmoLabel;
  d->mPowerGeneratedLabel = widget->mPowerGeneratedLabel;
  d->mPowerConsumedLabel = widget->mPowerConsumedLabel;
+ d->mPower = widget->mPower;
  d->mFPSLabel = widget->mFPSLabel;
  d->mGroundRendererDebug = widget->mGroundRendererDebug;
  d->mMapCoordinates = widget->mMapCoordinates;
@@ -521,6 +524,9 @@ void BosonUfoGameGUI::updateUfoLabels()
  localPlayerIO()->calculatePower(&powerGenerated, &powerConsumed);
  d->mPowerGeneratedLabel->setText(QString::number(powerGenerated));
  d->mPowerConsumedLabel->setText(QString::number(powerConsumed));
+ d->mPower->setRange(0, powerConsumed * 1.5);
+ d->mPower->setEndExtensionValueRange(powerConsumed * 0.5);
+ d->mPower->setValue(powerGenerated);
 
  double fps;
  double skippedFPS;
