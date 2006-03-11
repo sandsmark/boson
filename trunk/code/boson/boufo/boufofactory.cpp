@@ -51,6 +51,7 @@ BoUfoWidget* BoUfoFactory::createWidget(const QString& className)
  CLASSNAME(BoUfoButtonGroupWidget)
  CLASSNAME(BoUfoSlider)
  CLASSNAME(BoUfoProgress)
+ CLASSNAME(BoUfoExtendedProgress)
  CLASSNAME(BoUfoNumInput)
  CLASSNAME(BoUfoLabel)
  CLASSNAME(BoUfoLineEdit)
@@ -78,6 +79,7 @@ QStringList BoUfoFactory::widgets()
  list.append("BoUfoButtonGroupWidget");
  list.append("BoUfoSlider");
  list.append("BoUfoProgress");
+ list.append("BoUfoExtendedProgress");
  list.append("BoUfoNumInput");
  list.append("BoUfoLabel");
  list.append("BoUfoLineEdit");
