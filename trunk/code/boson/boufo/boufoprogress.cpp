@@ -543,7 +543,7 @@ void BoUfoExtendedProgress::paintExtensionDecorations(const QColor& start, const
 	x2 = rect.right() + (int)((rect.width() * mDecorationSizeFactor) / 2.0);
 	y = rect.bottom();
 
-	if (startExtensionValueRange() > 0.0 || 1) {
+	if (startExtensionValueRange() > 0.0) {
 		glColor3ub(start.red(), start.green(), start.blue());
 		glBegin(GL_LINES);
 			glVertex2i(x1, y);
@@ -552,7 +552,7 @@ void BoUfoExtendedProgress::paintExtensionDecorations(const QColor& start, const
 	}
 
 	y = rect.top();
-	if (endExtensionValueRange() > 0.0 || 1) {
+	if (endExtensionValueRange() > 0.0) {
 		glColor3ub(end.red(), end.green(), end.blue());
 		glBegin(GL_LINES);
 			glVertex2i(x1, y);
