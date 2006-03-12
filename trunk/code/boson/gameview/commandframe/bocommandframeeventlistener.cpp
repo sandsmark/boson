@@ -78,6 +78,7 @@ void BoCommandFrameEventListener::processEvent(const BoEvent* event)
 	// might be a production completed
 	emit signalUpdateProduction(event->data2().toULong());
  } else if (event->name() == "TechnologyWithTypeResearched") {
+	emit signalUpdateSelection();
 	emit signalUpdateProductionOptions();
 
 	// might be a production completed

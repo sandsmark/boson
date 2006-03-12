@@ -90,6 +90,7 @@ public slots:
 	void slotUpdateProduction(unsigned long int id);
 	void slotUpdateProduction(Unit*);
 	void slotUpdateProductionOptions();
+	void slotUpdateSelection();
 	void slotSelectionChanged(BoSelection*);
 	void slotProduce(const BoSpecificAction&);
 	void slotConstructionCompleted(unsigned long int facilityId);

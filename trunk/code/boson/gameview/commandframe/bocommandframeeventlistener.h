@@ -56,6 +56,7 @@ public:
 	virtual bool canSee(const BoEvent* event) const;
 
 signals:
+	void signalUpdateSelection();
 	void signalUpdateProductionOptions();
 	void signalUpdateProduction(unsigned long int unitId);
 
