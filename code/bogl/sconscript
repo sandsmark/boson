@@ -1,0 +1,11 @@
+#! /usr/bin/env python
+
+obj = kdeobj('staticlib')
+obj.source = """
+	bogl.cpp
+	bogl_resolve.cpp
+"""
+obj.target = 'bogl'
+obj.includes = '. ../bodebug'
+obj.uselib = 'QT'
+

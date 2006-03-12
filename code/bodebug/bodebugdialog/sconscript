@@ -1,0 +1,18 @@
+#! /usr/bin/env python
+
+obj = kdeobj('program')
+obj.source = """
+	boabstractdebugdialog.cpp
+	bodebugdialog.cpp
+	bolistdebugdialog.cpp
+	main.cpp
+"""
+obj.target = 'bodebugdialog'
+obj.includes = '. ..'
+
+print "FIXME: bodebug: use KDEUI, not KIO"
+# AB: waf doesnt know KDEUI
+#obj.uselib = 'QT KDECORE KDEUI'
+obj.uselib = 'QT KDECORE KIO'
+#	../libbodebug.a
+
