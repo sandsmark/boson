@@ -104,8 +104,8 @@ class Configure:
 		dest.close()
 		# TODO: currently only for g++ 
 		# implement platform independent compile function probably by refactoring 
-		# Task/Action class 
-		if Runner.exec_command(self.env['CPP'] + ' test.c -o test ' + options + ' 2>test.log') == 0:
+		# Task/Action class
+		if Runner.exec_command('%s test.c -o test %s 2>test.log '% (self.env['CXX'], str(options)) ) == 0:
 			return 1
 		else:
 			return 0
@@ -146,7 +146,7 @@ class Configure:
 		dest.write('/* configuration created by waf */\n')
 		for key in self.defines: 
 			if self.defines[key]:
-				dest.write('#define '+key+' 1\n')
+				dest.write('#define %s %s\n' % (key, self.defines[key]))
 				#if addcontent:
 				#	dest.write(addcontent);
 			else:

@@ -223,20 +223,28 @@ class cppobj(Object.genobj):
 		cpppath_st = self.env.getValue('CPPPATH_ST')
 		lib_st = self.env.getValue('LIB_ST')
 		libpath_st = self.env.getValue('LIBPATH_ST')
-		
-		# this is usually a good idea
-		self.env.appendValue('_CXXINCFLAGS', cpppath_st % '.')
+
+		# local flags come first
+		# set the user-defined includes paths
+		if not self._incpaths_lst: self.apply_incpaths()
+		for i in self._bld_incpaths_lst:
+			self.env.appendValue('_CXXINCFLAGS', cpppath_st % i.bldpath())
 
 		# set the library include paths
 		for i in self.env.getValue('CPPPATH'):
 			self.env.appendValue('_CXXINCFLAGS', cpppath_st % i)
 			#print self.env['_CXXINCFLAGS']
 			#print " appending include ",i
-
-		# set the user-defined includes paths
-		if not self._incpaths_lst: self.apply_incpaths()
-		for i in self._bld_incpaths_lst:
-			self.env.appendValue('_CXXINCFLAGS', cpppath_st % i.bldpath())
+	
+		# this is usually a good idea
+		self.env.appendValue('_CXXINCFLAGS', cpppath_st % '.')
+		try:
+			tmpnode = Params.g_curdirnode
+			tmpnode_mirror = Params.g_build.m_tree.self.m_src_to_bld[tmpnode]
+			self.env.appendValue('_CXXINCFLAGS', cpppath_st % tmpnode.bldpath())
+			self.env.appendValue('_CXXINCFLAGS', cpppath_st % tmpnode_mirror.bldpath())
+		except:
+			pass
 
 		for i in self.env.getValue('LIB'):
 			self.env.appendValue('LINKFLAGS', lib_st % i)
