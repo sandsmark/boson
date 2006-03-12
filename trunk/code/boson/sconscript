@@ -1,0 +1,35 @@
+#! /usr/bin/env python
+
+#obj = kdeobj('staticlib')
+#obj.source = """
+#"""
+#obj.uselib = 'QT'
+#obj.target = ''
+##obj.includes = ''
+
+libimageio = kdeobj('staticlib')
+libimageio.target = 'imageio'
+#libimageio.includes = '../bodebug ../bogl'
+libimageio.uselib = 'QT KDECORE'
+libimageio.source = """
+	imageio/boimageio.cpp
+	imageio/tga.cpp
+	imageio/pcx.cpp
+"""
+
+
+libcommon = kdeobj('staticlib')
+libcommon.target = 'common'
+libcommon.uselib = 'QT KDECORE'
+libcommon.includes = '../bodebug ../bogl .. .'
+libcommon.source = """
+	boapplication.cpp
+	boglobal.cpp
+	bosonconfig.cpp
+	bosondata.cpp
+	bomath.cpp
+	bo3dtools.cpp
+	bosonprofiling.cpp
+	bopluginmanager.cpp
+"""
+
