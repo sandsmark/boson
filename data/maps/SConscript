@@ -53,8 +53,7 @@ for i in env.make_list(maps):
 	subdir = os.path.dirname(i)
 	file = os.path.basename(i)
 	dest = mapsdir + '/' + i
-	env.Install(dest, sourceDir + '/' + i)
-	env.Alias('install', mapsdir + '/' + subdir)
+	env.Install(mapsdir + '/' + subdir, sourceDir + '/' + i)
 
 env.Alias('install', mapsdir)
 
