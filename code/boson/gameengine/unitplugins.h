@@ -265,6 +265,13 @@ public:
 	 **/
 	QValueList<unsigned long int> allTechnologyProductions(QValueList<unsigned long int>* producible, QValueList<unsigned long int>* notYetProducible) const;
 
+
+
+	/**
+	 * See @ref canCurrentlyProduceUnit and @ref canCurrentlyProduceTechnology
+	 **/
+	bool canCurrentlyProduce(ProductionType p, unsigned long int type) const;
+
 	/**
 	 * @return TRUE if this plugin can produce the unit @p type. This is the
 	 * case if this plugin is a producer of @p type and all requirements are
@@ -298,13 +305,30 @@ protected:
 	/**
 	 * Remove first occurance of type ID id in the production list. Does not
 	 * remove anything if id is not in the list.
+	 *
+	 * This will re-fund any minerals/oil paid for this production so far.
 	 **/
 	bool removeProduction(ProductionType type, unsigned long int id);
 
 	/**
+	 * @overload
 	 * Remove the first item from the production list.
 	 **/
-	bool removeProduction(); // removes first item
+	bool removeProduction();
+
+	/**
+	 * Like @ref removeProduction but won't re-fund the minerals/oil used
+	 * for this production.
+	 **/
+	void removeCompletedProduction();
+
+private:
+	/**
+	 * Helper method for @ref advance. This is called when the production is
+	 * completed and will e.g. place the production (or whatever is
+	 * applicable)
+	 **/
+	void productionCompleted();
 
 private:
 	QValueList<QPair<ProductionType, unsigned long int> > mProductions;

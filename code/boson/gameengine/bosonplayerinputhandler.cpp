@@ -441,9 +441,13 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 				break;
 			}
 		}
-		if (!production->canCurrentlyProduceUnit((unsigned long int)message.mType)) {
-			boError() << k_lineinfo << "Unit " << message.mFactoryId << " can't produce units of type " <<
-					(unsigned long int)message.mType << endl;
+		if (!production->canCurrentlyProduce((ProductionType)message.mProduceType, (unsigned long int)message.mType)) {
+			boError() << k_lineinfo << "Unit "
+					<< message.mFactoryId
+					<< " can't produce type " <<
+					(unsigned long int)message.mType
+					<< " of producetype "
+					<< message.mProduceType << endl;
 			break;
 		}
 		production->addProduction((ProductionType)message.mProduceType, (unsigned long int)message.mType);

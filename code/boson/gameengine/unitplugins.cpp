@@ -197,7 +197,7 @@ void ProductionPlugin::productionPlaced(Unit* produced)
  // the current production is done.
  mMineralsPaid = 0;
  mOilPaid = 0;
- removeProduction();
+ removeCompletedProduction();
 }
 
 void ProductionPlugin::addProduction(ProductionType type, unsigned long int id)
@@ -362,6 +362,13 @@ void ProductionPlugin::abortProduction(ProductionType type, unsigned long int id
  }
 }
 
+void ProductionPlugin::removeCompletedProduction()
+{
+ mMineralsPaid = 0;
+ mOilPaid = 0;
+ removeProduction();
+}
+
 bool ProductionPlugin::removeProduction()
 {
  if (!hasProduction()) {
@@ -432,83 +439,8 @@ void ProductionPlugin::advance(unsigned int)
  }
  if (mProductionState <= productionTime) {
 	if (mProductionState == productionTime) {
-		boDebug() << "Production with type " << currentProductionType() << " and id " << id << " completed :-)" << endl;
-		mProductionState = mProductionState + 1;
-
-		if (currentProductionType() != ProduceUnit) {
-			// It's technology
-			// these can be handled immediately.
-			removeProduction();
-			player()->technologyResearched(this, id);
-			return;
-		}
-
-		// A unit must be placed on the map, before removeProduction()
-		// may be called.
-
-		// Auto-place unit
-		// Unit positioning scheme: all tiles starting with tile that is below
-		// facility's lower-left tile, are tested counter-clockwise. Unit is placed
-		// to first free tile.
-		// No auto-placing for facilities
-		const UnitProperties* prop = speciesTheme()->unitProperties(id);
-		if (!prop) {
-			boError() << k_lineinfo << "Unknown id " << id << endl;
-			return;
-		}
-
-		BoEvent* unitProduced = new BoEvent("UnitWithTypeProduced", QString::number(id),
-				QString::number(unit()->id()));
-		unitProduced->setPlayerId(player()->bosonId());
-		game()->queueEvent(unitProduced);
-
-		if (prop->isFacility()) {
-			return;
-		}
-
-		boDebug() << k_funcinfo << "auto-placing unit "<< prop->typeId() << endl;
-
-		int tilex, tiley; // Position of lower-left corner of facility in tiles
-		int theight, twidth; // height and width of facility in tiles
-		int currentx, currenty; // Position of tile currently tested
-
-#warning converting to ints! -> we should use float here
-		theight = unit()->height();
-		twidth = unit()-> width();
-		tilex = (int)(unit()->x());
-		tiley = (int)(unit()->y() + theight);
-		int tries; // Tiles to try for free space
-		int ctry; // Current try
-		currentx = tilex - 1;
-		currenty = tiley - 1;
-		for (int i = 1; i <= BUILD_RANGE; i++) {
-			tries = 2 * i * twidth + 2 * i * theight + 4;
-			currenty++;
-			for (ctry = 1; ctry <= tries; ctry++) {
-				if (ctry <= twidth + i) {
-					currentx++;
-				} else if (ctry <= twidth + i + theight + 2 * i - 1) {
-					currenty--;
-				} else if (ctry <= twidth + i + 2 * (theight + 2 * i - 1)) {
-					currentx--;
-				} else if (ctry <= twidth + i + 3 * (theight + 2 * i - 1)) {
-					currenty++;
-				} else {
-					currentx++;
-				}
-
-				if (canvas()->canPlaceUnitAt(speciesTheme()->unitProperties(id), BoVector2Fixed(currentx, currenty), this)) {
-					// Free cell - place unit at it
-					mProductionState = mProductionState + 1;
-					((Boson*)player()->game())->buildProducedUnit(this, id, BoVector2Fixed(currentx, currenty));
-					return;
-				}
-			}
-		}
-		boDebug() << k_funcinfo << "Cannot find free cell around facility :-(" << endl;
-		game()->slotAddChatSystemMessage(
-				i18n("%1 could not be placed on the map - no free cell found. Place it manuall!").arg(prop->name()),
-				player());
+		productionCompleted();
+		return;
 	} else {
 		// Make sure the player has enough resources
 		unsigned long int mineralCost = 0, oilCost = 0;
@@ -536,6 +468,96 @@ void ProductionPlugin::advance(unsigned int)
 		}
 	}
  }
+}
+
+void ProductionPlugin::productionCompleted()
+{
+ unsigned long int id = currentProductionId();
+ if (id <= 0) {
+	boError() << k_funcinfo << "invalid id " << id << endl;
+	return;
+ }
+ boDebug() << "Production with type " << currentProductionType() << " and id " << id << " completed :-)" << endl;
+ mProductionState = mProductionState + 1;
+
+ if (currentProductionType() == ProduceTech) {
+	// these can be handled immediately.
+	removeCompletedProduction();
+	player()->technologyResearched(this, id);
+	return;
+ } else if (currentProductionType() != ProduceUnit) {
+	boError() << k_funcinfo << "productiontype is neither technology nor unit .. cannot handle this" << endl;
+	removeProduction(); // will re-fund minerals/oil
+	return;
+ }
+
+ // A unit must be placed on the map, before removeProduction()
+ // may be called.
+
+ // Auto-place unit
+ // Unit positioning scheme: all tiles starting with tile that is below
+ // facility's lower-left tile, are tested counter-clockwise. Unit is placed
+ // to first free tile.
+ // No auto-placing for facilities
+ const UnitProperties* prop = speciesTheme()->unitProperties(id);
+ if (!prop) {
+	boError() << k_lineinfo << "Unknown id " << id << endl;
+	return;
+ }
+
+ BoEvent* unitProduced = new BoEvent("UnitWithTypeProduced", QString::number(id),
+		QString::number(unit()->id()));
+ unitProduced->setPlayerId(player()->bosonId());
+ game()->queueEvent(unitProduced);
+
+ if (prop->isFacility()) {
+	return;
+ }
+
+ boDebug() << k_funcinfo << "auto-placing unit "<< prop->typeId() << endl;
+
+ int tilex, tiley; // Position of lower-left corner of facility in tiles
+ int theight, twidth; // height and width of facility in tiles
+ int currentx, currenty; // Position of tile currently tested
+
+#warning converting to ints! -> we should use float here
+ theight = unit()->height();
+ twidth = unit()-> width();
+ tilex = (int)(unit()->x());
+ tiley = (int)(unit()->y() + theight);
+ int tries; // Tiles to try for free space
+ int ctry; // Current try
+ currentx = tilex - 1;
+ currenty = tiley - 1;
+ for (int i = 1; i <= BUILD_RANGE; i++) {
+	tries = 2 * i * twidth + 2 * i * theight + 4;
+	currenty++;
+	for (ctry = 1; ctry <= tries; ctry++) {
+		if (ctry <= twidth + i) {
+			currentx++;
+		} else if (ctry <= twidth + i + theight + 2 * i - 1) {
+			currenty--;
+		} else if (ctry <= twidth + i + 2 * (theight + 2 * i - 1)) {
+			currentx--;
+		} else if (ctry <= twidth + i + 3 * (theight + 2 * i - 1)) {
+			currenty++;
+		} else {
+			currentx++;
+		}
+
+		if (canvas()->canPlaceUnitAt(speciesTheme()->unitProperties(id), BoVector2Fixed(currentx, currenty), this)) {
+			// Free cell - place unit at it
+			mProductionState = mProductionState + 1;
+			((Boson*)player()->game())->buildProducedUnit(this, id, BoVector2Fixed(currentx, currenty));
+			return;
+		}
+	}
+ }
+ boDebug() << k_funcinfo << "Cannot find free cell around facility :-(" << endl;
+ game()->slotAddChatSystemMessage(
+		i18n("%1 could not be placed on the map - no free cell found. Place it manuall!").arg(prop->name()),
+		player());
+
 }
 
 void ProductionPlugin::unitDestroyed(Unit* destroyedUnit)
@@ -695,7 +717,6 @@ QValueList<unsigned long int> ProductionPlugin::allTechnologyProductions(QValueL
  }
 
  QValueList<unsigned long int> allTechs = speciesTheme()->technologies(pp->producerList());
- QValueList<unsigned long int> allUnresearchedTechs = speciesTheme()->technologies(pp->producerList());
 
  if (producible) {
 	producible->clear();
@@ -704,6 +725,7 @@ QValueList<unsigned long int> ProductionPlugin::allTechnologyProductions(QValueL
 	notYetProducible->clear();
  }
 
+ QValueList<unsigned long int> allUnresearchedTechs;
  for (QValueList<unsigned long int>::Iterator it = allTechs.begin(); it != allTechs.end(); it++) {
 	if (!player()->hasTechnology(*it)) {
 		allUnresearchedTechs.append(*it);
@@ -722,6 +744,22 @@ QValueList<unsigned long int> ProductionPlugin::allTechnologyProductions(QValueL
  }
 
  return allUnresearchedTechs;
+}
+
+bool ProductionPlugin::canCurrentlyProduce(ProductionType p, unsigned long int type) const
+{
+ switch (p) {
+	case ProduceUnit:
+		return canCurrentlyProduceUnit(type);
+	case ProduceTech:
+		return canCurrentlyProduceTechnology(type);
+	default:
+		boWarning() << k_funcinfo << "unknown ProductionType " << (int)p << endl;
+		// fall-through intended
+	case ProduceNothing:
+		return false;
+ }
+ return false;
 }
 
 bool ProductionPlugin::canCurrentlyProduceUnit(unsigned long int type) const
