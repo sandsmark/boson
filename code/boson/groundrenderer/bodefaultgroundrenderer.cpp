@@ -353,6 +353,7 @@ void BoDefaultGroundRenderer::updateMapCache(const BosonMap* map)
  for (unsigned int i = 0; i < map->groundTheme()->groundTypeCount(); i++) {
 	mTextureIndices[i] = new QMemArray<unsigned int>();
  }
+ mIndicesDirty = true;
 #if USE_VBOS
  boglGenBuffers(1, &mVBOVertex);
  boglGenBuffers(1, &mVBONormal);
