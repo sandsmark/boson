@@ -759,8 +759,7 @@ void FogTexture::stop(const BosonMap*)
 
 void FogTexture::initFogTexture(const BosonMap* map)
 {
- if (mLastMapWidth != map->width() || mLastMapHeight != map->height()) {
-	// Map size has changed. Delete fog texture (new one will be created)
+ if (mLastMap != map) {
 	delete[] mFogTextureData;
 	delete mFogTexture;
 	mFogTextureData = 0;
@@ -771,6 +770,7 @@ void FogTexture::initFogTexture(const BosonMap* map)
 	// +2 because we want 1-pixel border
 	mLastMapWidth = map->width();
 	mLastMapHeight = map->height();
+	mLastMap = map;
 	int w = BoTexture::nextPower2(mLastMapWidth + 2);
 	int h = BoTexture::nextPower2(mLastMapHeight + 2);
 	boDebug() << "FOGTEX: " << k_funcinfo << "w: " << w << "; h: " << h  << endl;
@@ -953,6 +953,7 @@ void BoGroundRendererBase::updateMapCache(const BosonMap* map)
  if (mCurrentMap == map) {
 	return;
  }
+ boDebug() << k_funcinfo << endl;
  mCurrentGroundThemeData = 0;
  mCurrentMap = map;
  BO_CHECK_NULL_RET(mCurrentMap);
@@ -1185,7 +1186,7 @@ void BoGroundRendererBase::cellTextureChanged(int x1, int y1, int x2, int y2)
 
  mUsedTexturesDirty = true;
 
- // re-generate the visible cells list (with new LOD settings
+ // re-generate the visible cells list (with new LOD settings)
  setRenderCellsCount(0);
 }
 

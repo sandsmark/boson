@@ -108,6 +108,7 @@ public:
 		mFogTextureDataH = 0;
 		mLastMapWidth = 0;
 		mLastMapHeight = 0;
+		mLastMap = 0;
 		mFogTextureDirty = false;
 		mFogTextureDirtyAreaX1 = 0;
 		mFogTextureDirtyAreaX2 = 0;
@@ -142,6 +143,7 @@ private:
 	unsigned char* mFogTextureData;
 	int mFogTextureDataW;
 	int mFogTextureDataH;
+	const BosonMap* mLastMap;
 	unsigned int mLastMapWidth;
 	unsigned int mLastMapHeight;
 	bool mFogTextureDirty;
