@@ -12,10 +12,11 @@ def findMaps(dir, depth = 0):
 
 	ret = []
 	for i in list:
-		if not os.path.isfile(i):
+		path = dir + '/' + i
+		if not os.path.isfile(path):
 			continue
-		if i.endswith('.bpf'):
-			ret.append(dir + '/' + i)
+		if path.endswith('.bpf'):
+			ret.append(path)
 
 	for i in list:
 		if os.path.isdir(dir + '/' + i):
@@ -36,9 +37,9 @@ dir = '.' # FIXME: this points to build/maps/. we want just maps/.
 
 # HACK!
 print "mapsdir: FIXME! (HACK!)"
-dir = '../../maps'
+sourceDir = '../../maps'
 
-maps = findMaps(dir)
+maps = findMaps(sourceDir)
 
 
 mapsdir = env['KDEDATA'] + '/boson/maps/'
@@ -50,7 +51,10 @@ print "TODO: delete the old mapsdir"
 
 for i in env.make_list(maps):
 	subdir = os.path.dirname(i)
-	env.Install(mapsdir + '/' + subdir, i)
+	file = os.path.basename(i)
+	dest = mapsdir + '/' + i
+	env.Install(dest, sourceDir + '/' + i)
+	env.Alias('install', mapsdir + '/' + subdir)
 
 env.Alias('install', mapsdir)
 
