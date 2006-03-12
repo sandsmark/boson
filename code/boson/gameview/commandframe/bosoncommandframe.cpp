@@ -634,6 +634,8 @@ void BosonCommandFrame::setLocalPlayerIO(PlayerIO* io)
 	// there is nothing to be loaded.
 	BoEventManager* manager = game->eventManager();
 	d->mEventListener = new BoCommandFrameEventListener(io, manager, this);
+	connect(d->mEventListener, SIGNAL(signalUpdateSelection()),
+			this, SLOT(slotUpdateSelection()));
 	connect(d->mEventListener, SIGNAL(signalUpdateProductionOptions()),
 			this, SLOT(slotUpdateProductionOptions()));
 	connect(d->mEventListener, SIGNAL(signalUpdateProduction(unsigned long int)),
@@ -653,6 +655,11 @@ PlayerIO* BosonCommandFrame::localPlayerIO() const
 BoSelection* BosonCommandFrame::selection() const
 {
  return d->mSelection;
+}
+
+void BosonCommandFrame::slotUpdateSelection()
+{
+ slotSelectionChanged(selection());
 }
 
 void BosonCommandFrame::slotSelectionChanged(BoSelection* selection)
