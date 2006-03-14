@@ -3,7 +3,7 @@
 # Thomas Nagy, 2006 (ita)
 
 conf = Configure.Configure()
-conf.checkTool(['g++', 'KDE3'])
+conf.checkTool(['g++', 'KDE3', 'BoUIC'])
 
 # hand-written defines - comment
 conf.addDefine('HAVE_SSTREAM', 1)
@@ -12,9 +12,18 @@ conf.addDefine('HAVE_STDINT_H', 1)
 conf.addDefine('HAVE_EXECINFO_H', 1)
 conf.addDefine('HAVE_PWD_H', 1)
 conf.addDefine('HAVE_DLFCN_H', 1)
+conf.addDefine('HAVE_SYS_TIME_H', 1)
+conf.addDefine('HAVE_SYS_STAT_H', 1)
+conf.addDefine('HAVE_LIMITS_H', 1)
+conf.addDefine('HAVE_GETRUSAGE_H', 1)
+conf.addDefine('HAVE_TIMES', 1)
 
 # TODO
 conf.addDefine('BOSON_PREFIX', '""')
+#conf.addDefine('BOSON_USE_BOMEMORY', '1')
+#conf.addDefine('BOSON_USE_OPENAL', '1')
+#conf.addDefine('USE_BO_PLUGINS', '1')
+#conf.addDefine('BOSON_LINK_STATIC', '1')
 
 conf.checkHeader('sstream','HAVE_SSTREAM')
 conf.checkHeader('strstream','HAVE_STRSTREAM')
@@ -22,6 +31,13 @@ conf.checkHeader('stdint.h','HAVE_STDINT_H')
 conf.checkHeader('execinfo.h','HAVE_EXECINFO_H')
 conf.checkHeader('pwd.h','HAVE_PWD_H')
 conf.checkHeader('dlfcn.h','HAVE_DLFCN_H')
+
+
+# AB: the next line is _REQUIRED_ for boson!
+#     -> we must make sure g++ picks our copy, not the one from libkdegames. for
+#        this we need both, -I. (for #include <kgame/foobar.h>) and -Ikgame (for
+#        #include <foobar.h>)
+conf.env['_CXXINCFLAGS'] = ['-I../kgame']
 
 conf.store('main.cache.py')
 
