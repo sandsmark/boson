@@ -159,33 +159,25 @@ Available versions are:<br>
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=17261\">Boson 0.5</a>
 (released on 30th October 2000).<br><br>");
 
-draw_bigbox_subheader("<a name=\"cvs\"></a>CVS - Bleeding edge development version");
-draw_bigbox_text("You can get both code and data from CVS using the procedure below.<br>
-First, login to the CVS-server by issuing
-<pre>$ cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/boson login</pre>
-When asked for a password, just press enter. Now, download the code and data by typing
+draw_bigbox_subheader("<a name=\"cvs\"></a><a name=\"svn\"></a>SVN - Bleeding edge development version");
+draw_bigbox_text("You can get both code and data from SVN using the following commands:
 <pre>
-$ cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/boson co -P code
-$ cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/boson co -P data
-$ cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/boson co -P tools
+$ svn co https://svn.sourceforge.net/svnroot/boson/trunk/code code
+$ svn co https://svn.sourceforge.net/svnroot/boson/trunk/data data
 </pre>
-Now you need to link the admin dir from the tools directory:
+We recommend using SCons for compilation and installation. In both code/ and
+data/ directory, use these commands:
 <pre>
-$ cd code && ln -s ../tools/admin admin
-$ cd data && ln -s ../tools/admin admin
+$ tar xjvf bksys/scons-mini.tar.bz2
+$ ./scons configure
+$ ./scons
+# ./scons install
 </pre>
-Since these files are from CVS, you need to create the makefiles in both the
-code and data directory first by doing
-<pre>$ make -f Makefile.cvs</pre> Finally, you can configure, compile and
-install boson:
-<pre>$ ./configure
-$ make
-# make install</pre>
 When configuring fails, check whether you have all the
 <a href=\"info.php\">software dependencies</a> installed.
 <br>To stay up to date, you can update both code and data directories later on
 by executing
-<pre>$ cvs -z3 up -Pd</pre><br>");
+<pre>$ svn up</pre><br>");
 
 draw_bigbox_end();
 
