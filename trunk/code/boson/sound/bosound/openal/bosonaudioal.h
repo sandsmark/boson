@@ -21,7 +21,7 @@
 
 #include "../bosonaudio.h"
 
-#include <AL/altypes.h>
+#include <AL/al.h>
 
 class QString;
 class BosonMusic;

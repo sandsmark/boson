@@ -24,7 +24,7 @@
 #include <qptrlist.h>
 #include <qmap.h>
 
-#include <AL/altypes.h>
+#include <AL/al.h>
 
 class BoPlayObject;
 class BosonAudioAL;
