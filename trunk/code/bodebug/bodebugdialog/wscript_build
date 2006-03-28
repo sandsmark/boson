@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 
-obj = kdeobj('program')
+from Object import createObj
+
+obj = createObj('kde', 'program')
 obj.source = """
 	boabstractdebugdialog.cpp
 	bodebugdialog.cpp

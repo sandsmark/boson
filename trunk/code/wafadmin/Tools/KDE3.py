@@ -4,13 +4,7 @@
 
 import os, shutil, sys
 import Action, Common, Object, Task, Params, Runner, Utils, Scan
-
-def trace(msg):
-	Params.trace(msg, 'KDE3')
-def debug(msg):
-	Params.debug(msg, 'KDE3')
-def error(msg):
-	Params.error(msg, 'KDE3')
+from Params import debug, error, trace, fatal
 
 # kde moc file processing
 moc_vardeps = ['MOC', 'MOC_FLAGS', 'MOC_ST']
@@ -246,41 +240,6 @@ class kdeobj(Common.cppobj):
 		task.m_outputs = self.file_in(base+'.moc')
 		return task
 
-	#def create_kidl_task(self, base):
-	#	task = self.create_task('kidl', self.env, 2)
-	#	task.m_inputs  = self.file_in(base+'.h')
-	#	task.m_outputs = self.file_in(base+'.kidl')
-	#	return task
-
-	#def create_skel_or_stub_task(self, base, ext):
-	#	if not base in skel_or_stub:
-	#		self.m_skel_or_stub[base] = self.create_kidl_task(base)
-
-	#	type = ext[1:] # .stub -> stub
-
-	#	task = self.create_task(type, self.env, 3)
-	#	task.m_inputs  = self.m_skel_or_stub[base].m_outputs
-	#	task.m_outputs = self.file_in( ''.join([base,'_',type,'.cpp'])
-
-	#	cpptask = self.create_cpp_task()
-	#	cpptask.m_inputs  = task.m_outputs
-	#	cpptask.m_outputs = self.file_in( ''.join(base,'_',type,'.o'])
-	#	return cpptask
-
-	#def create_rcc_task(self, base):
-	#	# run rcctask with one of the highest priority
-	#	rcctask = self.create_task('rcc', self.env, 2)
-	#	rcctask.m_inputs  = self.file_in(base+'.qrc')
-	#	rcctask.m_outputs = self.file_in(base+'_rc.cpp')
-
-	#	cpptask = self.create_cpp_task()
-	#	cpptask.m_inputs  = self.file_in(base+'_rc.cpp')
-	#	cpptask.m_outputs = self.file_in(base+'.o')
-
-	#	# not mandatory
-	#	cpptask.m_run_after = [rcctask]
-	#	return cpptask
-
 	def create_cpp_task(self):
 		return self.create_task('cpp', self.env)
 
@@ -436,6 +395,8 @@ class kdeobj(Common.cppobj):
 			self.install_results( 'KDE_MODULE', '', self.m_linktask )
 			self.install_results( 'KDE_MODULE', '', self.m_latask )
 
+def setup(env):
+	Object.register('kde3', kdeobj)
 
 def detect_kde(conf):
 	env = conf.env
@@ -481,7 +442,7 @@ def detect_kde(conf):
 		else: p('RED','kde-config was NOT found in your PATH')
 		print "Make sure kde is installed properly"
 		print "(missing package kdebase-devel?)"
-		env.Exit(1)
+		sys.exit(1)
 	if kdedir: env['KDEDIR']=kdedir
 	else: env['KDEDIR'] = os.popen(kde_config+' -prefix').read().strip()
 
@@ -511,7 +472,7 @@ def detect_kde(conf):
 		else:
 			p('RED','Qt was not found')
 			p('RED','Please set QTDIR first (/usr/lib/qt3?) or try scons -h for more options')
-			env.Exit(1)
+			sys.exit(1)
 	env['QTDIR'] = qtdir.strip()
 	env['LIB_QT'] = 'qt-mt'
 
@@ -530,7 +491,7 @@ def detect_kde(conf):
 				p('YELLOW',"uic was found as "+uic)
 			else:
 				p('RED',"uic was not found - set QTDIR put it in your PATH ?")
-				env.Exit(1)
+				sys.exit(1)
 	env['UIC'] = uic
 
 	print "Checking for moc                  : ",
@@ -546,7 +507,7 @@ def detect_kde(conf):
 			p('YELLOW',"moc was found as "+moc)
 		else:
 			p('RED',"moc was not found - set QTDIR or put it in your PATH ?")
-			env.Exit(1)
+			sys.exit(1)
 	env['MOC'] = moc
 
 	## check for the qt and kde includes
@@ -565,7 +526,7 @@ def detect_kde(conf):
 			qtincludes = "/usr/include/qt3"
 		else:
 			p('RED',"the qt headers were not found")
-			env.Exit(1)
+			sys.exit(1)
 
 	print "Checking for the kde includes     : ",
 	kdeprefix = os.popen(kde_config+" --prefix").read().strip()
@@ -580,7 +541,7 @@ def detect_kde(conf):
 			kdeincludes = kdeprefix + "/include/kde/"
 		else:
 			p('RED',"The kde includes were NOT found")
-			env.Exit(1)
+			sys.exit(1)
 
 	# kde-config options
 	kdec_opts = {'KDE_BIN'    : 'exe',     'KDE_APPS'      : 'apps',
@@ -666,6 +627,11 @@ def detect_kde(conf):
 	except: pass
 	try: env['module_LINKFLAGS']=env['shlib_LINKFLAGS']
 	except: pass
+
+def setup(env):
+        Object.register('kde_translations', kde_translations)
+        Object.register('kde_documentation', kde_documentation)
+        Object.register('kde', kdeobj)
 
 def detect(conf):
 	conf.env['KDE_IS_FOUND'] = 0

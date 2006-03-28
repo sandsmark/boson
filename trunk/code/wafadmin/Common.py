@@ -6,21 +6,16 @@
 
 import os, types, shutil
 import Action, Object, Params, Runner, Scan
-
-def trace(msg):
-	Params.trace(msg, 'Common')
-def debug(msg):
-	Params.debug(msg, 'Common')
-def error(msg):
-	Params.error(msg, 'Common')
-def fatal(msg):
-	Params.fatal(msg, 'Common')
+from Params import debug, error, trace, fatal
 
 g_cppvalues = [
 'FRAMEWORK', 'FRAMEWORKPATH',
 'STATICLIB', 'LIB', 'LIBPATH', 'LINKFLAGS', 'RPATH',
 'INCLUDE',
 'CXXFLAGS', 'CCFLAGS', 'CPPPATH', 'CPPLAGS']
+
+class InstallError:
+	pass
 
 def check_dir(dir):
 	#print "check dir ", dir
@@ -47,7 +42,8 @@ def install_files(var, subdir, files, env=None):
 	for filename in lst:
 		file = os.path.join(node.abspath(), filename)
 		print "* installing %s in %s" % (file, destpath)
-		shutil.copy2( file, destpath )
+		try: shutil.copy2( file, destpath )
+		except: raise InstallError
 
 def install_as(var, destfile, srcfile, env=None):
 	if not Params.g_commands['install']: return
@@ -64,7 +60,8 @@ def install_as(var, destfile, srcfile, env=None):
 
 	src = os.path.join(node.abspath(), srcfile.lstrip(os.sep))
 	print "* installing %s as %s" % (src, tgt)
-	shutil.copy2( src, tgt )
+	try: shutil.copy2( src, tgt )
+	except: raise InstallError
 
 # fake libtool files
 fakelibtool_vardeps = ['CXX', 'PREFIX']
@@ -151,7 +148,10 @@ class cppobj(Object.genobj):
 		for filename in lst:
 
 			node = self.m_current_path.find_node( filename.split(os.sep) )
-			if not node: error("source not found "+filename)
+			if not node:
+				error("source not found "+filename)
+				print self.m_current_path
+				sys.exit(1)
 
 			base, ext = os.path.splitext(filename)
 
@@ -190,6 +190,11 @@ class cppobj(Object.genobj):
 	def apply_incpaths(self):
 		inc_lst = self.includes.split()
 		lst = self._incpaths_lst
+
+		# add the build directory
+		self._incpaths_lst.append( Params.g_build.m_tree.m_bldnode )
+
+		# now process the include paths
 		tree = Params.g_build.m_tree
 		for dir in inc_lst:
 			node = self.m_current_path.find_node( dir.split(os.sep) )
@@ -264,6 +269,10 @@ class cppobj(Object.genobj):
 				except: pass
 				if val:
 					self.env.appendValue(v, val)
+
+# register our object
+Object.register('cpp', cppobj)
+
 
 ## TODO rework the part below seriously
 class ccobj(Object.genobj):

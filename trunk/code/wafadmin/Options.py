@@ -2,19 +2,14 @@
 # encoding: utf-8
 # Scott Newton, 2005 (scottn)
 
-import sys
-import string
+import os, sys, string
 from types import *
 from optparse import OptionParser
-import Params
+import Params, Utils
+from Params import debug, trace, fatal, error
 
-g_custom_options=[]
-
-def do_exec(parser, pargs):
-	exec 'parser.'+pargs
-
-def parse_args():
-	Params.trace("parse_args is called")
+def create_parser():
+	Params.trace("create_parser is called")
 
 	def to_list(sth):
 		if type(sth) is ListType: return sth
@@ -59,22 +54,14 @@ def parse_args():
 	#	dest = 'target')
 
 	p('-v', '--verbose', 
-		action = 'store_true',
-		default = False,
+		action = 'count',
+		default = 0,
 		help = 'Show verbose output [Default: False]',
 		dest = 'verbose')
+	return parser
 
-	p('-w', '--wafcoder',
-		action = 'store_true',
-		default = False,
-		help = 'Show ultra verbose output [Default: False]',
-		dest = 'wafcoder')
+def parse_args_impl(parser):
 
-	global g_custom_options
-	for s in g_custom_options:
-		do_exec(parser, s)
-
-	# Now parse the arguments
 	(Params.g_options, args) = parser.parse_args()
 	#print Params.g_options, " ", args
 
@@ -101,7 +88,6 @@ def parse_args():
 	lst=['dist','configure','clean','distclean','make','install','doc']
 	for var in lst:    Params.g_commands[var]    = 0
 	if len(args) == 0: Params.g_commands['make'] = 1
-	
 
 	# Parse the command arguments
 	for arg in args:
@@ -115,6 +101,36 @@ def parse_args():
 
 	Params.g_maxjobs = Params.g_options.jobs
 	Params.g_verbose = Params.g_options.verbose
-	if Params.g_options.wafcoder: Params.set_trace(1,1,1)
+	if Params.g_verbose>1: Params.set_trace(1,1,1)
+	#if Params.g_options.wafcoder: Params.set_trace(1,1,1)
 
+# TODO bad name for a useful class
+# loads wscript modules in folders for adding options
+class Handler:
+	def __init__(self):
+		self.parser    = create_parser()
+		self.cwd = os.getcwd()
+	def add_option(self, *kw, **kwargs):
+		self.parser.add_option(*kw, **kwargs)
+	def sub_options(self, dir):
+		current = self.cwd
+
+		self.cwd = os.path.join(self.cwd, dir)
+		cur = os.path.join(self.cwd, 'wscript')
+
+		try:
+			mod = Utils.load_module(cur)
+		except:
+			msg = "no module was found for wscript (sub_options)\n[%s]:\n * make sure such a function is defined \n * run configure from the root of the project"
+			fatal(msg % self.cwd)
+		try:
+			mod.set_options(self)
+		except AttributeError:
+			msg = "no set_options function was found in wscript\n[%s]:\n * make sure such a function is defined \n * run configure from the root of the project"
+			fatal(msg % self.cwd)
+
+		self.cwd = current
+
+	def parse_args(self):
+		parse_args_impl(self.parser)
 

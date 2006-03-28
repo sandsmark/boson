@@ -2,7 +2,7 @@
 # encoding: utf-8
 # Thomas Nagy, 2005 (ita)
 
-import os, md5, types, sys, string, stat
+import os, md5, types, sys, string, stat, imp
 import Params
 
 g_trace=1
@@ -81,7 +81,7 @@ def reset():
 
 	Params.g_scanned_folders=[]
 
-def add_option(key=None, action=None, default=None, help=None, dest=None, type=None):
+def options(**kwargs):
 	pass
 
 # === part below is borrowed from scons === #
@@ -194,4 +194,47 @@ else:
 					except ValueError: return os.path.normpath(f)
 					continue
 		return None
+
+## index modules by absolute path
+g_loaded_modules={}
+## the main module is special
+g_module=None
+
+# this function requires an absolute path
+def load_module(file_path, name='wscript'):
+	try: return g_loaded_modules[file_path]
+	except: pass
+
+	module = imp.new_module(name)
+
+	file = open(file_path, 'r')
+	code = file.read()
+
+	exec code in module.__dict__
+	if file: file.close()
+
+	g_loaded_modules[file_path] = module
+
+	return module
+
+def set_main_module(file_path):
+	# Load custom options, if defined
+	global g_module
+	g_module = load_module(file_path, 'wscript_main')
+	
+	# remark: to register the module globally, use the following:
+	# sys.modules['wscript_main'] = g_module
+
+def fetch_options(file_path):
+	import Options
+	# Load custom options, if defined
+	file = open(file_path, 'r')
+	name = 'wscript'
+	desc = ('', 'U', 1)
+
+	module = imp.load_module(file_path, file, name, desc)
+	try:
+		Options.g_custom_options.append(module.set_options)
+	finally:
+		if file: file.close()
 

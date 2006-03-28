@@ -8,19 +8,9 @@ import sys
 import cPickle
 from Deptree import Deptree
 
-import Environment
-import Params
-import Runner
-import Object
+import Environment, Params, Runner, Object, Utils
 
-def trace(msg):
-	Params.trace(msg, 'Build')
-def debug(msg):
-	Params.debug(msg, 'Build')
-def error(msg):
-	Params.error(msg, 'Build')
-def fatal(msg):
-	Params.fatal(msg, 'Build')
+from Params import debug, error, trace, fatal
 
 class Build:
 	def __init__(self):
@@ -28,15 +18,17 @@ class Build:
 		self.m_tree     = None # dependency tree
 		self.m_dirs     = []   # folders in the dependency tree to scan
 		self.m_rootdir  = ''   # root of the build, in case if the build is moved ?
-		self.m_prune    = []
 
 		Params.g_build=self
 
-	def load(self):
+		self.m_bdir = ''
+
+	def load(self, blddir):
+		self.m_bdir = blddir
 		self.m_rootdir = os.path.abspath('.')
 		if sys.platform=='win32': self.m_rootdir=self.m_rootdir[2:]
 		try:
-			file = open(Params.g_dbfile, 'rb')
+			file = open( os.path.join(blddir, Params.g_dbfile), 'rb')
 			self.m_tree = cPickle.load(file)
 			file.close()
 		except:
@@ -45,11 +37,16 @@ class Build:
 		self.m_tree.m_root.tag(0)
 
 	def store(self):
-		file = open(Params.g_dbfile, 'wb')
+		file = open(os.path.join(self.m_bdir, Params.g_dbfile), 'wb')
 		cPickle.dump(self.m_tree, file, -1)
 		file.close()
 
 	def set_dirs(self, srcdir, blddir, scan='auto'):
+		if len(srcdir) >= len(blddir)-1:
+			fatal("build dir must be different from srcdir")
+
+		self.load(blddir)
+
 		self.set_bdir(blddir)
 		self.set_srcdir(srcdir, scan)
 
@@ -68,7 +65,8 @@ class Build:
 			error('passing a null filename to set_default_env')
 			return
 		if not env.load(filename):
-			fatal("no cache file found or corrupted. You should run 'waf configure'")
+			print "the cache file was not found"
+			#fatal("no cache file found or corrupted. You should run 'waf configure'")
 		
 		env.setup(env['tools'])
 		Params.g_default_env = env.copy()
@@ -85,7 +83,10 @@ class Build:
 		Params.g_curdirnode = node
 		# stupid behaviour (will scan every project in the folder) but scandirs-free
 		# we will see later for more intelligent behaviours (scan only folders that contain sources..)
-		Params.g_excludes=Params.g_excludes+self.m_prune
+		try:
+			Params.g_excludes=Params.g_excludes+Utils.g_module.prunedirs
+		except:
+			pass
 		if scan == 'auto':
 			trace("autoscan in use")
 			# avoid recursion
@@ -133,13 +134,24 @@ class Build:
 		if Params.g_maxjobs <=1: executor = Runner.Serial(generator)
 		else:                    executor = Runner.Parallel(generator, Params.g_maxjobs)
 		trace("executor starting")
-		executor.start()
+		try:
+			ret = executor.start()
+		except KeyboardInterrupt:
+			os.chdir( self.m_tree.m_srcnode.abspath() )
+			self.store()
+			raise
+		#finally:
+		#	os.chdir( self.m_tree.m_srcnode.abspath() )
 
 		os.chdir( self.m_tree.m_srcnode.abspath() )
+		return ret
 
 	def install(self):
 		trace("install called")
 		for obj in Object.g_allobjs:
 			obj.install()
 		
+	def add_subdir(self, dir):
+		import Scripting
+		Scripting.add_subdir(dir)
 
