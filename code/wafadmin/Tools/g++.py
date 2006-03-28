@@ -24,6 +24,10 @@ def setup(env):
 # the values are cached for further build processes
 def detect(conf):
 
+	cpp = conf.checkProgram('cpp')
+	if not cpp:
+		return 0;
+
 	comp = conf.checkProgram('g++')
 	if not comp:
 		return 0;
@@ -33,6 +37,16 @@ def detect(conf):
 		Utils.error('g++ needs ar - not found')
 		return 0
 
+	# preprocessor
+	conf.env['CPP']             = cpp
+
+	# c++ compiler
+	conf.env['CXX']             = comp
+	conf.env['_CPPDEFFLAGS']    = ''
+	conf.env['_CXXINCFLAGS']    = ''
+	conf.env['CXX_ST']          = '%s -c -o %s'
+	conf.env['CPPPATH_ST']      = '-I%s' # template for adding include pathes
+
 	# compiler debug levels
 	conf.env['CXXFLAGS'] = []
 	conf.env['CXXFLAGS_OPTIMIZED'] = ['-O2']
@@ -40,6 +54,15 @@ def detect(conf):
 	conf.env['CXXFLAGS_DEBUG'] = ['-g', '-DDEBUG']
 	conf.env['CXXFLAGS_ULTRADEBUG'] = ['-g3', '-O0', '-DDEBUG']
 		
+	# linker	
+	conf.env['LINK']            = comp
+	conf.env['LIB']             = []
+	conf.env['LINK_ST']         = '%s -o %s'
+	conf.env['LIB_ST']          = '-l%s'	# template for adding libs
+	conf.env['LIBPATH_ST']      = '-L%s' # template for adding libpathes
+	conf.env['_LIBDIRFLAGS']    = ''
+	conf.env['_LIBFLAGS']       = ''
+
 	# linker debug levels
 	conf.env['LINKFLAGS'] = []
 	conf.env['LINKFLAGS_OPTIMIZED'] = ['-s']
@@ -52,22 +75,6 @@ def detect(conf):
 	if sys.platform == "win32": 
 		if not conf.env['PREFIX']: conf.env['PREFIX']='c:\\'
 
-		# c++ compiler
-		conf.env['CXX']             = comp
-		conf.env['_CPPDEFFLAGS']    = ''
-		conf.env['_CXXINCFLAGS']    = ''
-		conf.env['CXX_ST']          = '%s -c -o %s'
-		conf.env['CPPPATH_ST']      = '-I%s' # template for adding include pathes
-
-		# linker	
-		conf.env['LINK']            = comp
-		conf.env['LIB']             = []
-		conf.env['LINK_ST']         = '%s -o %s'
-		conf.env['LIB_ST']          = '-l%s'	# template for adding libs
-		conf.env['LIBPATH_ST']      = '-L%s' # template for adding libpathes
-		conf.env['_LIBDIRFLAGS']    = ''
-		conf.env['_LIBFLAGS']       = ''
-	
 		# shared library 
 		conf.env['shlib_CXXFLAGS']  = ['']
 		conf.env['shlib_LINKFLAGS'] = ['-shared']
@@ -89,22 +96,6 @@ def detect(conf):
 	else:
 		if not conf.env['PREFIX']: conf.env['PREFIX'] = '/usr'
 
-		# c++ compiler
-		conf.env['CXX']             = 'g++'
-		conf.env['_CPPDEFFLAGS']    = ''
-		conf.env['_CXXINCFLAGS']    = ''
-		conf.env['CXX_ST']          = '%s -c -o %s'
-		conf.env['CPPPATH_ST']      = '-I%s' # template for adding include pathes
-	
-		# linker
-		conf.env['LINK']            = 'g++'
-		conf.env['LIB']             = []
-		conf.env['LINK_ST']         = '%s -o %s'
-		conf.env['LIB_ST']          = '-l%s'	# template for adding libs
-		conf.env['LIBPATH_ST']      = '-L%s' # template for adding libpathes
-		conf.env['_LIBDIRFLAGS']    = ''
-		conf.env['_LIBFLAGS']       = ''
-	
 		# shared library 
 		conf.env['shlib_CXXFLAGS']  = ['-fPIC', '-DPIC']
 		conf.env['shlib_LINKFLAGS'] = ['-shared']

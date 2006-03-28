@@ -2,15 +2,9 @@
 # encoding: utf-8
 # Thomas Nagy, 2005 (ita)
 
-import os, os.path, types, sys, cPickle
-import Build, Params
-
-def trace(msg):
-	Params.trace(msg, 'Scripting')
-def debug(msg):
-	Params.debug(msg, 'Scripting')
-def error(msg):
-	Params.error(msg, 'Scripting')
+import os, os.path, types, sys, imp, cPickle
+import Build, Params, Utils, Options, Configure, Environment
+from Params import debug, error, trace, fatal
 
 # each script calls add_subdir
 def add_subdir(dir):
@@ -39,25 +33,66 @@ def add_subdir(dir):
 
 	Params.g_subdirs.append(  [Params.g_curdirnode, restore]    )
 
+def private_setup_build(load=1):
+	bld = Build.Build()
+	try:
+		Utils.g_module.setup_build(bld)
+	except AttributeError:
+		try:
+			cachedir = Utils.g_module.cachedir
+			bld.set_dirs(Utils.g_module.srcdir, Utils.g_module.blddir)
+			#bld.set_default_env(os.path.join(Utils.g_module.cachedir, 'main.cache.py')) # TODO
+			if not load: return bld
+			lst = os.listdir(Utils.g_module.cachedir)
+			for file in lst:
+				env = Environment.Environment()
+				ret = env.load(os.path.join(cachedir, file))
+				name = file.split('.')[0]
+
+				if not ret:
+					print "could not load env ", name
+					continue
+				Params.g_envs[name] = env
+				try: env.setup(env['tools'])
+				except: pass
+
+			Params.g_default_env = Params.g_envs['default']
+
+		except AttributeError:
+			msg = "The attributes srcdir or builddir are missing from wscript\n[%s]\n * make sure such a function is defined\n * run configure from the root of the project"
+			fatal(msg % os.path.abspath('.'))
+		except OSError:
+			pass
+		except KeyError:
+			pass
+	return bld
+
 def Main():
+	from Object import createObj
+	from Configure import sub_config, create_config
+	from Common import install_files, install_as
 	# configure the project
 	if Params.g_commands['configure']:
-		from Utils import add_option
-		import Environment, Configure, Tools
-		from Environment import create_env
-		from Configure import sub_config, create_config
-		file = open('sconfigure', 'r')
-		exec file
+		bld = private_setup_build(0)
+		conf = Configure.Configure()
+		conf.sub_config('')
+		conf.store()
+
+		# this will write a configure lock so that subsequent run will
+		# consider the current path as the root directory
+		# to remove: use 'waf distclean'
+		file = open('.lock-wscript', 'w')
+		file.write(Utils.g_module.blddir)
+		file.close()
+
 		sys.exit(0)
 
 	# compile the project and/or install the files
-	bld = Build.Build()
-	bld.load()
+	bld = private_setup_build()
 	#bld.m_tree.dump()
 
 	Params.g_inroot=1
-	file=open('sconstruct', 'r')
-	exec file
+	Utils.g_module.build(bld)
 	Params.g_inroot=0
 
 	while len(Params.g_subdirs)>0:
@@ -73,25 +108,43 @@ def Main():
 		# take the new node position
 		Params.g_curdirnode=new
 
-		# idea : add an exception right here
-		# but does this slow down the process ? to investigate (TODO ita)
-		file=open('%s/sconscript'%new.abspath(), 'r')
-		exec file
+		# try to open 'wscript_build' for execution
+		# if unavailable, open the module wscript and call the build function from it
+		try:
+			file_path = os.path.join(new.abspath(), 'wscript_build')
+			file = open(file_path, 'r')
+			code = file.read()
+			file.close()
+			exec code
+		except IOError:
+			file_path = os.path.join(new.abspath(), 'wscript')
+			module = Utils.load_module(file_path)
+			module.build(bld)
 
 		# restore the old node position
 		Params.g_curdirnode=old
 
 	#bld.m_tree.dump()
 
-	# for now
-	bld.compile()
+	# compile
+	if Params.g_commands['make'] or Params.g_commands['install']:
+	#if ('make' in Params.g_commands and Params.g_commands['make']) or Params.g_commands['install']:
+		try:
+			bld.compile()
+		except:
+			raise
 
+	# install
 	try:
 		if Params.g_commands['install']:
 			bld.install()
 	finally:
 		bld.cleanup()
 		bld.store()
+
+	# shutdown
+	try:    Utils.g_module.shutdown()
+	except: pass
 
 # dist target - should be portable
 def Dist(appname, version):
@@ -148,21 +201,42 @@ def Dist(appname, version):
 
 # distclean target - should be portable too
 def DistClean():
-	import os, shutil
-	try: os.remove('.dblite')
+	import os, shutil, types
+	import Build
+
+	#print "Executing distclean in ", os.path.abspath('.')
+
+	# remove the distclean folders (may not exist)
+	try:
+		li=Utils.g_module.distclean
+		if not type(li) is types.ListType:
+			li = li.split()
+		for dir in li:
+			if not dir: continue
+			try: shutil.rmtree(os.path.abspath(dir))
+			except: pass
+	except:
+		pass
+
+	# remove the builddir declared
+	try: shutil.rmtree(os.path.abspath(Utils.g_module.blddir))
 	except: pass
 
-	try: shutil.rmtree('_build_')
-	except: pass
-
-	try: shutil.rmtree('cache')
-	except: pass
-
+	# remove the temporary files
 	for (root, dirs, filenames) in os.walk('.'):
 		to_remove = False
 		for f in list(filenames):
-			if f.endswith('~'): to_remove = True
+			if f=='.lock-wscript':
+				# removes a lock, and the builddir indicated
+				to_remove = True
+				file = open(os.path.join(root, f), 'r')
+				dirname = file.read().strip()
+				file.close()
+				try: shutil.rmtree(os.path.join(root, dirname))
+				except: pass
+			elif f.endswith('~'): to_remove = True
 			elif f.endswith('.pyc'): to_remove = True
+			elif f.startswith('.dblite'): to_remove = True
 			
 			if to_remove:
 				#print "removing ",os.path.join(root, f)

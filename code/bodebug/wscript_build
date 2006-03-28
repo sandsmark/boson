@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 
-obj = kdeobj('staticlib')
+from Object import createObj
+
+obj = createObj('kde', 'staticlib')
 obj.source = """
 	bodebug.cpp
 	bodebugdcopiface.cpp

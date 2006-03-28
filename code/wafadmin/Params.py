@@ -2,7 +2,7 @@
 # encoding: utf-8
 # Thomas Nagy, 2005 (ita)
 
-import os, sys, types
+import os, sys, types, inspect
 import Utils
 
 g_version='0.7.4' # ph34r
@@ -23,7 +23,11 @@ g_scanners={}
 g_fake = 0
 
 ## == ENVIRONMENT == ##
+# the default environment, will be obsolete soon
 g_default_env=None
+
+# map a name to an environment, the 'default' must be defined
+g_envs={}
 
 ## == DEPTREE == ##
 g_excludes = ['.svn', 'CVS', 'wafadmin', 'cache', '{arch}', '.arch-ids']
@@ -172,20 +176,30 @@ def niceprint(msg, type='', module=''):
 		return
 	print 'TRACE: == %s == %s'% (module, msg)
 
-def trace(msg, module=''):
+def trace(msg):
+	module = inspect.stack()[1][0].f_globals['__name__']
+
 	if not Utils.g_trace: return
 	if module in g_trace_exclude: return
 	niceprint(msg, 'TRACE', module)
-def debug(msg, module=''):
+def debug(msg):
+	module = inspect.stack()[1][0].f_globals['__name__']
+
 	if not Utils.g_debug: return
 	if module in g_trace_exclude: return
 	niceprint(msg, 'DEBUG', module)
-def error(msg, module=''):
+def error(msg):
+	module = inspect.stack()[1][0].f_globals['__name__']
+
 	if not Utils.g_error: return
 	if module in g_trace_exclude: return
 	niceprint(msg, 'ERROR', module)
-def fatal(msg, module=''):
-	niceprint(msg, 'ERROR', module)
+def fatal(msg):
+	module = inspect.stack()[1][0].f_globals['__name__']
+
+	# this one is fatal
+	#niceprint(msg, 'ERROR', module)
+	pprint('RED', msg+" "+module)
 	sys.exit(1)
 
 def h_file(fname):
@@ -215,4 +229,5 @@ def xor_sig(o1, o2):
 		except:
 			print o1, o2
 			raise
+
 

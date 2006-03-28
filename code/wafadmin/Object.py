@@ -19,13 +19,7 @@
 
 import os, shutil, types
 import Action, Params, Environment, Runner, Task
-
-def trace(msg):
-	Params.trace(msg, 'Object')
-def debug(msg):
-	Params.debug(msg, 'Object')
-def error(msg):
-	Params.error(msg, 'Object')
+from Params import debug, error, trace, fatal
 
 g_register={}
 g_allobjs=[]
@@ -237,4 +231,20 @@ def reset():
 	global g_register
 	g_register={}
 	g_allobjs=[]
+
+# The main functor 
+# build objects without having to add tons of import statements
+
+g_allclasses = {}
+def createObj(objname, *k, **kw):
+	try:
+		return g_allclasses[objname](*k, **kw)
+	except:
+		print "error in createObj", objname
+		raise
+
+def register(name, classval):
+	global g_allclasses
+	if name in g_allclasses: print "there is a problem in Object:register: class exists ", name
+	g_allclasses[name] = classval
 
