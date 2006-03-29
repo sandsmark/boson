@@ -3,6 +3,7 @@ project(boson)
 include(BosonMacros)
 
 CHECK_INCLUDE_FILE( sys/time.h HAVE_SYS_TIME_H )
+CHECK_INCLUDE_FILE( limits.h HAVE_LIMITS_H )
 
 
 add_subdirectory( data )
@@ -311,4 +312,6 @@ target_link_libraries(bosongamelib
 	${X11_XMU_LIB}
 )
 
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config-boson.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-boson.h )
 
