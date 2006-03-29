@@ -23,3 +23,7 @@ target_link_libraries(boserver
 	${QT_AND_KDECORE_LIBS}
 )
 
+install_targets(/bin
+	boserver
+)
+
