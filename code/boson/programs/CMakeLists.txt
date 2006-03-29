@@ -205,3 +205,17 @@ target_link_libraries(bocommandframetester
 	bosongamelib
 )
 
+install_targets(/bin
+	boson
+	boson-no-gui
+	bounit
+	borender
+	bocursor
+	bomodelpixmaps
+	boinfo
+	bo3dsdebug
+	boconditioneditor
+	boprofiling
+	bocommandframetester
+)
+
