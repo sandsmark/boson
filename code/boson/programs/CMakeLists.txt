@@ -18,6 +18,7 @@ kde3_add_executable(boson
 )
 target_link_libraries(boson
 	bosongamelib
+	${LIB_BOMEMORY}
 )
 
 
@@ -35,6 +36,7 @@ target_link_libraries(boson-no-gui
 	common
 	kio
 	${QT_AND_KDECORE_LIBS}
+	${LIB_BOMEMORY}
 )
 
 
@@ -58,6 +60,7 @@ target_link_libraries(bounit
 	kdeui
 	${QT_AND_KDECORE_LIBS}
 	${X11_XMU_LIB}
+	${LIB_BOMEMORY}
 )
 
 
@@ -83,6 +86,7 @@ target_link_libraries(borender
 	boufo
 	3ds
 	${X11_XMU_LIB}
+	${LIB_BOMEMORY}
 )
 
 ################ bocursor #################
@@ -103,6 +107,7 @@ target_link_libraries(bocursor
 	kdeui
 	${QT_AND_KDECORE_LIBS}
 	${X11_XMU_LIB}
+	${LIB_BOMEMORY}
 )
 
 ################ bomodelpixmaps #################
@@ -121,6 +126,7 @@ target_link_libraries(bomodelpixmaps
 	boufo
 	3ds
 	${X11_XMU_LIB}
+	${LIB_BOMEMORY}
 )
 
 ################ boinfo #################
@@ -137,6 +143,7 @@ target_link_libraries(boinfo
 	kdeui
 	${QT_AND_KDECORE_LIBS}
 	${X11_XMU_LIB}
+	${LIB_BOMEMORY}
 )
 
 ################ bo3dsdebug #################
@@ -155,6 +162,7 @@ target_link_libraries(bo3dsdebug
 	kdeui
 	${QT_AND_KDECORE_LIBS}
 	3ds
+	${LIB_BOMEMORY}
 )
 
 ################ boconditioneditor #################
@@ -171,6 +179,7 @@ target_link_libraries(boconditioneditor
 	kio
 	kdeui
 	${QT_AND_KDECORE_LIBS}
+	${LIB_BOMEMORY}
 )
 
 ################ boprofiling #################
@@ -189,6 +198,7 @@ target_link_libraries(boprofiling
 	kdeui
 	${QT_AND_KDECORE_LIBS}
 	${X11_XMU_LIB}
+	${LIB_BOMEMORY}
 )
 
 
@@ -203,6 +213,7 @@ kde3_add_executable(bocommandframetester
 )
 target_link_libraries(bocommandframetester
 	bosongamelib
+	${LIB_BOMEMORY}
 )
 
 install_targets(/bin

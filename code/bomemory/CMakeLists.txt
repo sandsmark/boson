@@ -16,6 +16,9 @@ set(bomemory_SRCS
 
 if(BOSON_USE_BOMEMORY)
   add_library(bomemory STATIC ${bomemory_SRCS})
+  set(LIB_BOMEMORY bomemory)
+else(BOSON_USE_BOMEMORY)
+  set(LIB_BOMEMORY "")
 endif(BOSON_USE_BOMEMORY)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config-bomemory.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-bomemory.h )
