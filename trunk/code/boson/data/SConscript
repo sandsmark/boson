@@ -13,9 +13,9 @@ print "TODO: install bodebug* files"
 #env.KDEinstall('KDECONFIG', '', 'bodebug.areas')
 
 # .desktop files
-env.KDEinstall('KDEMENU', 'Games/TacticStrategy/boson', 'boson.desktop')
-env.KDEinstall('KDEMENU', 'Games/TacticStrategy/boson', 'bounit.desktop')
-env.KDEinstall('KDEMENU', 'Games/TacticStrategy/boson', 'boinfo.desktop')
+env.KDEinstall('KDEMENU', 'Games/TacticStrategy/boson', 'boson-boson.desktop')
+env.KDEinstall('KDEMENU', 'Games/TacticStrategy/boson', 'boson-bounit.desktop')
+env.KDEinstall('KDEMENU', 'Games/TacticStrategy/boson', 'boson-boinfo.desktop')
 
 # icons
 #env.KDEicon('boson')
