@@ -1,5 +1,14 @@
 project(boson)
 
+CMAKE_MINIMUM_REQUIRED(VERSION 2.3.5)
+
+# Disallow in-source build
+STRING(COMPARE EQUAL "${boson_SOURCE_DIR}" "${boson_BINARY_DIR}" insource)
+if(insource)
+  MESSAGE(FATAL_ERROR "boson requires an out of source build. Please create a separate build directory and run 'cmake path_to_boson [options]' there.")
+endif(insource)
+
+
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
 #set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules" "${CMAKE_SOURCE_DIR}/cmake/modules/boson")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/boson")
@@ -8,9 +17,37 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/boson")
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 
-# TODO: make configurable
-set(BOSON_LINK_STATIC 0)
-set(USE_BO_PLUGINS 1)
+
+option(BOSON_LINK_STATIC
+  "link statically to most libraries, like KDE and Qt"
+  OFF
+)
+option(BOSON_USE_DEBUG_PLUGINS
+  "use debugging plugins that allow to use new code without restarting boson.  only useful to developers."
+  ON
+)
+option(BOSON_USE_BOMEMORY
+  "debug memory usage. this is a very experimental debugging option!"
+  OFF
+)
+
+if(BOSON_LINK_STATIC)
+  set(BOSON_USE_DEBUG_PLUGINS OFF)
+endif(BOSON_LINK_STATIC)
+
+
+# AB: use "0" and "1" in defines, not "OFF" and "ON"
+if(BOSON_LINK_STATIC)
+  set(BOSON_LINK_STATIC 1)
+else(BOSON_LINK_STATIC)
+  set(BOSON_LINK_STATIC 0)
+endif(BOSON_LINK_STATIC)
+if(BOSON_USE_DEBUG_PLUGINS)
+  set(BOSON_USE_DEBUG_PLUGINS 1)
+else(BOSON_USE_DEBUG_PLUGINS)
+  set(BOSON_USE_DEBUG_PLUGINS 0)
+endif(BOSON_USE_DEBUG_PLUGINS)
+
 
 # search packages used by KDE
 find_package(Qt3 REQUIRED)
@@ -53,8 +90,7 @@ if (UNIX)
    include_directories(/usr/local/include)
 endif (UNIX)
 
-# TODO: compile bomemory conditionally
-#add_subdirectory( bomemory )
+add_subdirectory( bomemory )
 add_subdirectory( math )
 add_subdirectory( bobmfconverter )
 add_subdirectory( bodebug )
