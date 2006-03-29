@@ -1,11 +1,8 @@
 project(boson)
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules" "${CMAKE_SOURCE_DIR}/cmake/modules/boson")
-
-## support for Dart: http://public.kitware.com/dashboard.php?name=kde
-#enable_testing()
-#include(CTest)
+#set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules" "${CMAKE_SOURCE_DIR}/cmake/modules/boson")
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/boson")
 
 # generate non-quiet makefiles
 set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -24,10 +21,6 @@ find_package(Perl REQUIRED)
 # note: we may have more deeper in the directory structure (e.g. python in
 #       boson/script)
 find_package(OpenGL REQUIRED)
-
-
-include (MacroAdditionalCleanFiles)
-include (MacroAddFileDependencies)
 
 
 add_definitions(${QT_DEFINITIONS} ${KDE3_DEFINITIONS} -DHAVE_CONFIG_H=1)
