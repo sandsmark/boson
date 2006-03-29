@@ -19,6 +19,7 @@ add_subdirectory( programs )
 # TODO: USE_BO_PLUGINS
 # TODO: BOSON_LINK_STATIC
 
+
 include_directories(
 	${CMAKE_SOURCE_DIR}/kgame
 	${CMAKE_SOURCE_DIR}/bodebug
@@ -203,6 +204,7 @@ add_library(modelrendering STATIC ${modelrendering_SRCS})
 #        (weird enough: boson does link successfully)
 target_link_libraries(modelrendering
 	bosonmainlib
+	${LIB_MESHRENDERER_PLUGIN}
 )
 
 
@@ -251,6 +253,8 @@ target_link_libraries(bosonmainlib
 	bosoninfo
 	bosonsound
 	bosonsoundcommon
+	${LIB_GROUNDRENDERER_PLUGIN}
+	${LIB_GAMEVIEW_PLUGIN}
 	modelrendering
 	gameengine
 	common

@@ -18,6 +18,22 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 
 
+# AB: TODO: include in official cmake files?
+set(KDE3_XDG_APPS_DIR /share/applications)
+set(KDE3_DATA_INSTALL_DIR /share/apps)
+set(KDE3_LIB_INSTALL_DIR /lib)
+set(KDE3_PLUGIN_INSTALL_DIR ${KDE3_LIB_INSTALL_DIR}/kde3)
+
+# AB: we need this for bodebug. TODO: we should probably use
+#                                     KDE_DATA_INSTALL_DIR/boson/bodebug
+#                                     instead
+set(KDE3_CONFIG_INSTALL_DIR /share/config)
+# AB: TODO: include in official cmake files? (end)
+
+set(BOSON_PLUGIN_INSTALL_DIR ${KDE3_PLUGIN_INSTALL_DIR}/plugins/boson)
+
+
+
 option(BOSON_LINK_STATIC
   "link statically to most libraries, like KDE and Qt"
   OFF
