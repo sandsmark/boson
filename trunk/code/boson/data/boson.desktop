@@ -1,18 +1,17 @@
 [Desktop Entry]
-Comment=Real-time strategy game
-Comment[de]=Echtzeit Strategiespiel
-Comment[fr]=Jeu de strategie en temps reel
+Encoding=UTF-8
 Name=Boson
 Name[de]=Boson
 Name[fr]=Boson
 Name[it]=Boson
+GenericName=Real-time strategy game
+GenericName[de]=Echtzeit Strategiespiel
+GenericName[fr]=Jeu de strategie en temps reel
 Exec=boson
-MapNotify=true
-TerminalOptions=
 Icon=boson
-Path=
-DocPath=boson/index.html
+X-DocPath=boson/index.html
+Terminal=false
 Type=Application
-Terminal=0
-InitialPreference=8
+Path=
+Categories=Qt;KDE;Game;StrategyGame;
 
