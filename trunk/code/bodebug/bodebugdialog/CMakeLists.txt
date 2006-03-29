@@ -22,3 +22,5 @@ target_link_libraries(bodebugdialog
 	${QT_AND_KDECORE_LIBS}
 )
 
+
+install_targets(/bin bodebugdialog)
