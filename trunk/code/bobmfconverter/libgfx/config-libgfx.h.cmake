@@ -7,4 +7,5 @@
 #cmakedefine HAVE_RANDOM 1
 #cmakedefine HAVE_GETOPT 1
 #cmakedefine HAVE_GETOPT_LONG 1
+#cmakedefine HAVE_TIMES 1
 
