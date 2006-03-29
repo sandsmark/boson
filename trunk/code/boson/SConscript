@@ -391,23 +391,6 @@ bounit.source = """
 bounit.execute()
 
 
-bocursor = env.kobject('program')
-bocursor.target = 'programs/bocursor'
-bocursor.includes = '../bodebug ../bogl ../boson/boufo programs '
-bocursor.libpaths += libcommon_libpaths
-bocursor.libs = './info/libbosoninfo.a'
-bocursor.libs += ' ./libcommon.a' + libcommon_libs
-bocursor.libs += 'kio kdeui qt-mt Xmu'
-bocursor.source = """
-	bosoncursor.cpp
-	botexture.cpp
-	bosonglwidget.cpp
-
-	programs/bocursormain.cpp
-	programs/bosoncursoreditor.cpp
-"""
-bocursor.execute()
-
 borender = env.kobject('program')
 borender.target = 'programs/borender'
 borender.includes = '../bodebug ../bogl ../boson/boufo gameengine programs '
@@ -431,6 +414,25 @@ borender.source += """
 	programs/boeditturretpropertiesdialog.cpp
 """
 borender.execute()
+
+
+bocursor = env.kobject('program')
+bocursor.target = 'programs/bocursor'
+bocursor.includes = '../bodebug ../bogl ../boson/boufo programs '
+bocursor.libpaths += libcommon_libpaths
+bocursor.libs = './info/libbosoninfo.a'
+bocursor.libs += ' ./libcommon.a' + libcommon_libs
+bocursor.libs += 'kio kdeui qt-mt Xmu'
+bocursor.source = """
+	bosoncursor.cpp
+	botexture.cpp
+	bosonglwidget.cpp
+
+	programs/bocursormain.cpp
+	programs/bosoncursoreditor.cpp
+"""
+bocursor.execute()
+
 
 bomodelpixmaps = env.kobject('program')
 bomodelpixmaps.target = 'programs/bomodelpixmaps'
