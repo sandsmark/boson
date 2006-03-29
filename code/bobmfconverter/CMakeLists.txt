@@ -102,3 +102,7 @@ target_link_libraries(bobmfconverter
 	3ds
 )
 
+install_targets(/bin
+	bobmfconverter
+)
+
