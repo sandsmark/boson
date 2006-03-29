@@ -16,7 +16,30 @@ else:
 #env.PrependUnique(CPPPATH = ['../kgame'])
 #env.PrependUnique(CPPPATH = ['../ufo'])
 
-env.subdirs(['data', 'gameengine/script', 'info', 'gameview/plugin', 'boufo', 'modelrendering/meshrenderer', 'groundrenderer', 'sound/bosound'])
+
+env.subdirs([
+	'data',
+	'gameengine/script',
+	'info',
+	'gameview/plugin',
+	'boufo',
+	'modelrendering/meshrenderer',
+	'groundrenderer',
+	'sound/bosound'
+])
+
+
+libimageio = env.kobject('staticlib')
+libimageio.target = 'libimageio'
+#libimageio.includes = '../bodebug ../bogl'
+libimageio.source = """
+	imageio/boimageio.cpp
+	imageio/tga.cpp
+	imageio/pcx.cpp
+"""
+libimageio.execute()
+
+
 
 libcommon = env.kobject('staticlib')
 libcommon.target = 'libcommon'
@@ -56,18 +79,6 @@ libgameengine_libs_objects = []
 libgameengine_libs_objects += env.createDummyLibs('./gameengine/script/libbosonscript.a')
 libgameengine_libs_objects += env.createDummyLibs(env['LIB_PYTHON'], env['BOSON_DO_STATIC'])
 libgameengine_libs_objects += env.createDummyLibs('../kgame/libkgame.a')
-
-
-
-libimageio = env.kobject('staticlib')
-libimageio.target = 'libimageio'
-#libimageio.includes = '../bodebug ../bogl'
-libimageio.source = """
-	imageio/boimageio.cpp
-	imageio/tga.cpp
-	imageio/pcx.cpp
-"""
-libimageio.execute()
 
 
 libgameengine = env.kobject('staticlib')
