@@ -13,8 +13,21 @@ include_directories(
 
 
 ################ boson #################
-kde3_add_executable(boson
+
+# AB: WARNING: this SUCKS!
+#              bosongameviewpluginbase.cpp is already included in bosongamelib,
+#              but the symbols are discarded if we just link to that lib.
+#              however the gameview plugin requires these libs, so we compile
+#              and link to that file again here :-(
+#              TODO: how can we convince g++ not to discard symbols from static
+#              libs?
+set(boson_SRCS
 	main.cpp
+	../bosongameviewpluginbase.cpp
+)
+kde3_automoc(${boson_SRCS})
+kde3_add_executable(boson
+	${boson_SRCS}
 )
 target_link_libraries(boson
 	bosongamelib
