@@ -75,6 +75,11 @@ find_package(Perl REQUIRED)
 #       boson/script)
 find_package(OpenGL REQUIRED)
 
+find_package(Lib3ds REQUIRED)
+
+# AB: apparently the "REQUIRED" parameter only works if the Find<name>.cmake
+#     package supports it.
+#     many don't. (the KDE3 package does)
 
 add_definitions(${QT_DEFINITIONS} ${KDE3_DEFINITIONS} -DHAVE_CONFIG_H=1)
 link_directories(${KDE3_LIB_DIR})
