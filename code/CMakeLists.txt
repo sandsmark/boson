@@ -25,7 +25,7 @@ set(KDE3_LIB_INSTALL_DIR /lib)
 set(KDE3_PLUGIN_INSTALL_DIR ${KDE3_LIB_INSTALL_DIR}/kde3)
 
 # AB: we need this for bodebug. TODO: we should probably use
-#                                     KDE_DATA_INSTALL_DIR/boson/bodebug
+#                                     KDE3_DATA_INSTALL_DIR/boson/bodebug
 #                                     instead
 set(KDE3_CONFIG_INSTALL_DIR /share/config)
 # AB: TODO: include in official cmake files? (end)
