@@ -1,12 +1,11 @@
-set(maps_install_dir ${KDE3_DATA_INSTALL_DIR}/boson/maps)
+set(BOSON_MAPS_INSTALL_DIR ${KDE3_DATA_INSTALL_DIR}/boson/maps)
 
-install_files(${maps_install_dir} .*\\.bpf)
+# the <path_to_data>/maps directory. this will be used in CMakeLists.txt files
+# of the subdirectories
+set(BOSON_MAPS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
-# AB: install_files(<dir> <regexp>) cannot handle subdirs.
-#     install_files(<dir> FILES file1 file2 ...) can handle subdirs, but then we
-#     would have to list every single file.
-#     any solutions?
+install_files(${BOSON_MAPS_INSTALL_DIR} .*\\.bpf)
 
-# TODO: subdirectories
-message(STATUS "TODO: install maps/<foo>/*.bpf")
+add_subdirectory(testing)
+add_subdirectory(1-Better_times_on_canesia)
 
