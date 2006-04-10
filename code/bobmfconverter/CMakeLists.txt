@@ -7,6 +7,7 @@ include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/mixkit
 	${CMAKE_CURRENT_SOURCE_DIR}/libgfx
 	${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
+	${LIB3DS_INCLUDE_DIR}
 )
 
 set(libgfx_SRCS
@@ -99,7 +100,7 @@ kde3_automoc(${bobmfconverter_SRCS})
 kde3_add_executable(bobmfconverter ${bobmfconverter_SRCS})
 target_link_libraries(bobmfconverter
 	${QT_AND_KDECORE_LIBS}
-	3ds
+	${LIB3DS_LIBRARY}
 )
 
 install_targets(/bin
