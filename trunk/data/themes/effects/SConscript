@@ -1,9 +1,0 @@
-Import('env')
-env.subdirs('particles')
-
-data = 'effects.boson'
-
-effectsdir = env['KDEDATA'] + '/boson/themes/effects'
-
-env.Install(effectsdir, env.make_list(data))
-env.Alias('install', effectsdir)
