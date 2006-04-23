@@ -1,6 +1,7 @@
 project(boufo)
 
 add_subdirectory(bouic)
+add_subdirectory(designer)
 add_subdirectory(test)
 
 include_directories(
