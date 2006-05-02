@@ -39,9 +39,6 @@
 #include "../../bosongroundthemedata.h"
 #include "bodebug.h"
 
-#include <kpixmap.h>
-#include <kpixmapeffect.h>
-#include <kimageeffect.h>
 #include <klocale.h>
 
 #include <qpixmap.h>
