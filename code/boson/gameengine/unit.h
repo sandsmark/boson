@@ -38,6 +38,8 @@ class BosonWeapon;
 class BosonMoveData;
 class BosonPathInfo;
 class UnitMover;
+class UnitMoverFlying;
+class UnitMoverLand;
 class UnitConstruction;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
@@ -236,15 +238,9 @@ public:
 
 
 	/**
-	 * Convenience method for moving the unit - @ref advanceMoveCheck must
-	 * be called after @ref advanceMoveInternal, so you should never call @ref
-	 * advanceMoveInternal directly, but rather use this.
+	 * Moves the unit.
 	 **/
-	void advanceMove(unsigned int advanceCallsCount)
-	{
-		advanceMoveInternal(advanceCallsCount);
-		advanceMoveCheck();
-	}
+	virtual void advanceMove(unsigned int advanceCallsCount);
 
 
 	/**
@@ -495,7 +491,11 @@ public:
 	virtual void addUpgrade(const UpgradeProperties* upgrade);
 	virtual void removeUpgrade(const UpgradeProperties* upgrade);
 
-	virtual void flyInCircle();
+	/**
+	 * You can call this when unit is idle and could move
+	 * It makes flying units fly around in circles
+	 **/
+	void moveIdle();
 
 	/**
 	 * Called when the unit wants to move to another position. It may be
@@ -513,16 +513,6 @@ protected:
 	 * destryed units, ...
 	 **/
 	QValueList<Unit*> unitCollisions(bool exact = false);
-
-	/**
-	 * See @ref UnitMover::advanceMoveInternal
-	 **/
-	virtual void advanceMoveInternal(unsigned int);
-
-	/**
-	 * See @ref UnitMover::advanceMoveCheck
-	 **/
-	virtual void advanceMoveCheck();
 
 	/**
 	 * Helper method to @ref advanceIdle.
@@ -576,6 +566,8 @@ private:
 	void setAdvanceFunction(MemberFunction, bool advanceFlag);
 
 	friend class UnitMover;
+	friend class UnitMoverFlying;
+	friend class UnitMoverLand;
 
 private:
 	UnitPrivate* d;
