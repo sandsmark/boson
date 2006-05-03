@@ -13,10 +13,6 @@ endif(insource)
 #set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules" "${CMAKE_SOURCE_DIR}/cmake/modules/boson")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/boson")
 
-# generate non-quiet makefiles
-set(CMAKE_VERBOSE_MAKEFILE ON)
-
-
 
 # AB: TODO: include in official cmake files?
 set(KDE3_XDG_APPS_DIR /share/applications)
