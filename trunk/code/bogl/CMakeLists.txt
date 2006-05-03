@@ -9,6 +9,7 @@ include_directories(
 set(bogl_SRCS
 	bogl.cpp
 	bogl_resolve.cpp
+	bogl_resolve_symbols.cpp
 )
 
 add_library(bogl STATIC ${bogl_SRCS})

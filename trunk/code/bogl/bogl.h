@@ -73,6 +73,12 @@ QString boglGetGLUVersionString();
 QStringList boglGetGLUExtensions();
 
 
+// internal
+class QLibrary;
+bool boglResolveLibGLSymbols(QLibrary& gl);
+bool boglResolveLibGLUSymbols(QLibrary& glu);
+
+
 
 // Typedefs
 // This type was added for vbo extension.
