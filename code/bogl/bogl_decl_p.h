@@ -24,6 +24,8 @@
 #error Never include this file directly! Include bogl.h instead!
 #endif
 
+#include "bogl_do_dlopen.h"
+
 
 // This file contains declarations from GL/gl.h and GL/glx.h ONLY!
 // Do NOT add any other functions here!
@@ -1204,6 +1206,7 @@ extern _gluUnProject4 bo_gluUnProject4;
 
 
 // GL defines
+#if BOGL_DO_DLOPEN
 #define glClearIndex bo_glClearIndex
 #define glClearColor bo_glClearColor
 #define glClear bo_glClear
@@ -1778,6 +1781,6 @@ extern _gluUnProject4 bo_gluUnProject4;
 #define gluScaleImage bo_gluScaleImage
 #define gluSphere bo_gluSphere
 #define gluTessBeginContour bo_gluTessBeginContour
-
+#endif // BOGL_DO_DLOPEN
 
 #endif // BOGLDECL_P_H
