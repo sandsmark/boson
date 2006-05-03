@@ -20,7 +20,7 @@
 #ifndef BOGL_1_5_DECL_P_H
 #define BOGL_1_5_DECL_P_H
 
-#include "bogl_1_3_decl_p.h"
+#include "bogl_1_4_decl_p.h"
 
 /*
  additions in OpenGL 1.5:
