@@ -21,9 +21,10 @@
 #define BOGLXDECL_P_H
 
 #ifndef BOGL_H
-#error Never include this file directly! Include bogl.h instead!
+#error Never include this file directly! Include boglx.h instead!
 #endif
 
+#include "bogl_do_dlopen.h"
 
 
 // This file contains declarations of GL/glx.h ONLY!
@@ -167,8 +168,8 @@ extern _glXSelectEventSGIX bo_glXSelectEventSGIX;
 extern _glXGetSelectedEventSGIX bo_glXGetSelectedEventSGIX;
 }; // extern "C"
 
-
 // GLX defines
+#if BOGL_DO_DLOPEN
 #define glXChooseVisual bo_glXChooseVisual
 #define glXCopyContext bo_glXCopyContext
 #define glXCreateContext bo_glXCreateContext
@@ -230,6 +231,7 @@ extern _glXGetSelectedEventSGIX bo_glXGetSelectedEventSGIX;
 #define glXQueryGLXPbufferSGIX bo_glXQueryGLXPbufferSGIX
 #define glXSelectEventSGIX bo_glXSelectEventSGIX
 #define glXGetSelectedEventSGIX bo_glXGetSelectedEventSGIX
+#endif // BOGL_DO_DLOPEN
 
 
 #endif // BOGLXDECL_P_H

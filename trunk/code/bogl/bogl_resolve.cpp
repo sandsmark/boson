@@ -697,10 +697,9 @@ extern "C" {
 
 bool boglResolveGLSymbols()
 {
- static bool symbolsResolved = false;
- if (symbolsResolved) {
-	return true;
- }
+#if !BOGL_DO_DLOPEN
+ return true;
+#endif
 
  bool ret = true;
 
@@ -737,6 +736,9 @@ bool boglResolveGLSymbols()
 
 static bool boglResolveOpenGLSymbols(QLibrary& gl)
 {
+#if !BOGL_DO_DLOPEN
+ return true;
+#endif
  if (!gl.isLoaded() && !gl.load()) {
 	boError() << k_funcinfo << "unable to load the GL library" << endl;
 	return false;
@@ -1752,6 +1754,9 @@ static bool boglResolveGLUSymbols(QLibrary& glu)
 
 static bool boglResolveGLXSymbols(QLibrary& gl)
 {
+#if !BOGL_DO_DLOPEN
+ return true;
+#endif
  if (!gl.isLoaded() && !gl.load()) {
 	boError() << k_funcinfo << "unable to load the GL library" << endl;
 	return false;
