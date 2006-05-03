@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2005 Andreas Beckermann <b_mann@gmx.de>
+    Copyright (C) 2005-2006 Andreas Beckermann <b_mann@gmx.de>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,24 +17,23 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef BOGLDECL_P_H
-#define BOGLDECL_P_H
+#ifndef EXT_POLYGON_OFFSET_DECL_P_H
+#define EXT_POLYGON_OFFSET_DECL_P_H
 
-#ifndef BOGL_H
-#error Never include this file directly! Include bogl.h instead!
+// note: compliant OpenGL implementations don't have to implement an extension!
+
+extern "C" {
+	// GL typedefs
+	typedef void (*_glPolygonOffsetEXT)(GLfloat factor, GLfloat bias);
+
+	// GL function pointers
+	extern _glPolygonOffsetEXT bo_glPolygonOffsetEXT;
+}; // extern "C"
+
+
+#if BOGL_DO_DLOPEN
+#define glPolygonOffsetEXT bo_glPolygonOffsetEXT
+#endif // BOGL_DO_DLOPEN
+
 #endif
 
-// OpenGL
-#include "gl/bogl_1_5_decl_p.h"
-
-// GLU
-#include "gl/boglu_decl_p.h"
-
-// OpenGL extensions
-#include "gl/extensions/arb_multitexture_decl_p.h"
-#include "gl/extensions/ext_blend_color_decl_p.h"
-#include "gl/extensions/ext_point_parameters_decl_p.h"
-#include "gl/extensions/ext_polygon_offset_decl_p.h"
-#include "gl/extensions/ext_texture3d_decl_p.h"
-
-#endif // BOGLDECL_P_H

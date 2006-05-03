@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2005 Andreas Beckermann <b_mann@gmx.de>
+    Copyright (C) 2005-2006 Andreas Beckermann <b_mann@gmx.de>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,24 +17,43 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef BOGLDECL_P_H
-#define BOGLDECL_P_H
+#ifndef BOGL_1_5_DECL_P_H
+#define BOGL_1_5_DECL_P_H
 
-#ifndef BOGL_H
-#error Never include this file directly! Include bogl.h instead!
+#include "bogl_1_3_decl_p.h"
+
+/*
+ additions in OpenGL 1.5:
+ previously extensions and now directly included:
+ * ARB_vertex_buffer_object
+ * ARB_occlusion_query
+ * EXT_shadow_funcs
+*/
+
+/*
+ new functions:
+ * ARB_vertex_buffer_object
+   (TODO)
+ * ARB_occlusion_query
+   (TODO)
+ * EXT_shadow_funcs
+   (TODO)
+*/
+
+
+extern "C" {
+	// GL typedefs
+	// (TODO)
+
+	// GL function pointers
+	// (TODO)
+}; // extern "C"
+
+
+// GL defines
+#if BOGL_DO_DLOPEN
+// (TODO)
+#endif // BOGL_DO_DLOPEN
+
 #endif
 
-// OpenGL
-#include "gl/bogl_1_5_decl_p.h"
-
-// GLU
-#include "gl/boglu_decl_p.h"
-
-// OpenGL extensions
-#include "gl/extensions/arb_multitexture_decl_p.h"
-#include "gl/extensions/ext_blend_color_decl_p.h"
-#include "gl/extensions/ext_point_parameters_decl_p.h"
-#include "gl/extensions/ext_polygon_offset_decl_p.h"
-#include "gl/extensions/ext_texture3d_decl_p.h"
-
-#endif // BOGLDECL_P_H
