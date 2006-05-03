@@ -436,6 +436,7 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 	// If there aren't any enemies, find new path
 	if (!newPath()) {
 		// No path was found
+		unit()->stopMoving();
 		return;
 	}
  }
@@ -446,7 +447,8 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 		// New pathfinding query has to made, because last returned path was
 		//  only partial.
 		if (!newPath()) {
-			// Probably no path could be found (and stopMoving() was called)
+			// Probably no path could be found or we're already at destination point
+			unit()->stopMoving();
 			return;
 		}
 	} else {
@@ -531,10 +533,10 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 			// New pathfinding query has to made, because last returned path was
 			//  only partial.
 			if (!newPath()) {
-				// Probably no path could be found (and stopMoving() was called)
-				// FIME: actually we should move one more step with current velocity
-				//  and then stop
-				return;
+				// Probably no path could be found
+				// Unit will stop moving during the next advance call (because we want
+				//  to move as much as we already have in this loop)
+				break;
 			}
 		} else {
 			// TODO: rotate a bit randomly
@@ -574,14 +576,9 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 	if (!canGoToCurrentPathPoint(x + xspeed, y + yspeed)) {
 		// Gotta find another path
 		if (!newPath()) {
-			// Probably no path could be found (and stopMoving() was called)
-			// FIXME!!!!! This is the source of the units-continuing-moving-after-they-stop
-			// bug: newPath() calls stopMoving() when it cannot find a new path, however here
-			// we just break (isntead of returning) and 30 lines later we set the velocity back
-			// to something without setting work back to move
-			// However we can't just return either because that would mean not moving at all
-			// (we should move as much as we already have and _then_ stop moving - maybe during
-			// the next adv call)
+			// Probably no path could be found
+			// Unit will stop moving during the next advance call (because we want
+			//  to move as much as we already have in this loop)
 			break;
 		}
 		currentPathPointChanged((int)(x + xspeed), (int)(y + yspeed));
@@ -601,7 +598,6 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 		currentPathPointChanged((int)(x + xspeed), (int)(y + yspeed));
 		// Check for enemies
 		if (attackEnemyUnitsInRangeWhileMoving()) {
-      boDebug(401) << k_lineinfo << id() << endl;
 			break;
 		}
 	}
@@ -609,7 +605,6 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 
  // If the unit didn't move, we can just return now (this is valid)
  if ((xspeed == 0) && (yspeed == 0)) {
-   boDebug(401) << k_lineinfo << id() << endl;
 	return;
  }
 
@@ -973,18 +968,23 @@ bool UnitMoverLand::newPath()
  // Update our start position
  pathInfo()->start.set(unit()->centerX(), unit()->centerY());
 
+ // Clear previous pathpoints
+ unit()->clearPathPoints();
+
  // Don't try to find the path if we're already at the destination point
+ if(QMAX(QABS(pathInfo()->dest.x() - pathInfo()->start.x()), QABS(pathInfo()->dest.x() - pathInfo()->start.x()))
+		< 1.0f) {
+	return false;
+ }
 
  // Find path
  canvas()->pathFinder()->findPath(pathInfo());
 
  if (pathInfo()->result == BosonPath::NoPath || pathInfo()->llpath.count() == 0) {
 	// Stop moving
-	unit()->stopMoving();
 	return false;
  }
  // Copy low-level path to pathpoints' list
- unit()->clearPathPoints();
  for (int unsigned i = 0; i < pathInfo()->llpath.count(); i++) {
 	unit()->addPathPoint(pathInfo()->llpath[i]);
  }
