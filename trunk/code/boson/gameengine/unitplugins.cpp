@@ -1412,7 +1412,7 @@ void BombingPlugin::advance(unsigned int advanceCalls)
 	// We're at drop point. Drop the bomb
 	if (!mWeapon->reloaded()) {
 		//boError() << k_funcinfo << "Weapon not reloaded!" << endl;
-		unit()->flyInCircle();
+		unit()->moveIdle();
 		return;
 	}
 

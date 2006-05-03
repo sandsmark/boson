@@ -66,6 +66,7 @@ set(gameengine_SRCS
 	gameengine/boupgradeableproperty.cpp
 	gameengine/unitbase.cpp
 	gameengine/unit.cpp
+	gameengine/unitmover.cpp
 	gameengine/unitproperties.cpp
 	gameengine/pluginproperties.cpp
 	gameengine/unitplugins.cpp
