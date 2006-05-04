@@ -36,8 +36,6 @@
 bool bogl_inited = false;
 
 // Function pointers for extensions
-// Textures
-_boglActiveTexture boglActiveTexture = 0;
 // FBO
 _boglBindRenderbuffer boglBindRenderbuffer = 0;
 _boglDeleteRenderbuffers boglDeleteRenderbuffers = 0;
@@ -82,15 +80,6 @@ void boglInit()
     boglGenerateMipmap = (_boglGenerateMipmap)glXGetProcAddressARB((const GLubyte*)"glGenerateMipmapEXT");
   }
 
-  // Textures
-  if(openglversion >= MAKE_VERSION_BOGL(1,3,0))
-  {
-    boglActiveTexture = (_boglActiveTexture)glXGetProcAddressARB((const GLubyte*)"glActiveTexture");
-  }
-  else if(extensions.contains("GL_ARB_multitexture"))
-  {
-    boglActiveTexture = (_boglActiveTexture)glXGetProcAddressARB((const GLubyte*)"glActiveTextureARB");
-  }
 #else //GLX_ARB_get_proc_address
 
   // AB: if this is a linux system, it MUST support GLX_ARB_get_proc_address, as

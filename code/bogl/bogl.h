@@ -90,9 +90,6 @@ typedef char GLcharARB;		/* native character */
 #endif
 
 // Function prototypes
-typedef void (*_boglActiveTexture)(GLenum);
-
-
 typedef void (*_boglBindRenderbuffer) (GLenum, GLuint);
 typedef void (*_boglDeleteRenderbuffers) (GLsizei, const GLuint *);
 typedef void (*_boglGenRenderbuffers) (GLsizei, GLuint *);
@@ -108,8 +105,6 @@ typedef void (*_boglGenerateMipmap) (GLenum);
 
 
 // Function pointers for extensions
-// Textures
-extern _boglActiveTexture boglActiveTexture;
 // FBO
 extern _boglBindRenderbuffer boglBindRenderbuffer;
 extern _boglDeleteRenderbuffers boglDeleteRenderbuffers;
