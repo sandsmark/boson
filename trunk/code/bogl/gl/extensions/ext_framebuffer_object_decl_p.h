@@ -121,6 +121,27 @@ extern "C" {
 #define GL_INVALID_FRAMEBUFFER_OPERATION_EXT   0x0506
 
 
+#if BOGL_DO_DLOPEN
+#define glIsRenderBufferEXT bo_glIsRenderBufferEXT
+#define glBindRenderbufferEXT bo_glBindRenderbufferEXT
+#define glDeleteRenderbuffersEXT bo_glDeleteRenderbuffersEXT
+#define glGenRenderbuffersEXT bo_glGenRenderbuffersEXT
+#define glRenderbufferStorageEXT bo_glRenderbufferStorageEXT
+#define glGetRenderbufferParameterivEXT bo_glGetRenderbufferParameterivEXT
+#define glIsFrameBufferEXT bo_glIsFrameBufferEXT
+#define glBindFramebufferEXT bo_glBindFramebufferEXT
+#define glDeleteFramebuffersEXT bo_glDeleteFramebuffersEXT
+#define glGenFramebuffersEXT bo_glGenFramebuffersEXT
+#define glCheckFramebufferStatusEXT bo_glCheckFramebufferStatusEXT
+#define glFramebufferTexture1DEXT bo_glFramebufferTexture1DEXT
+#define glFramebufferTexture2DEXT bo_glFramebufferTexture2DEXT
+#define glFramebufferTexture3DEXT bo_glFramebufferTexture3DEXT
+#define glFramebufferRenderbufferEXT bo_glFramebufferRenderbufferEXT
+#define glFramebufferAttachmentParameterivEXT bo_glFramebufferAttachmentParameterivEXT
+#define glGenerateMipmapEXT bo_glGenerateMipmapEXT
+
+#endif // BOGL_DO_DLOPEN
+
 
 #endif
 
