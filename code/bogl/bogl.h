@@ -90,12 +90,6 @@ typedef char GLcharARB;		/* native character */
 #endif
 
 // Function prototypes
-typedef void (*_boglDeleteBuffers)(GLsizei, const GLuint*);
-typedef void (*_boglGenBuffers)(GLsizei, GLuint*);
-typedef void (*_boglBindBuffer)(GLenum, GLuint);
-typedef void (*_boglBufferData)(GLenum, GLsizeiptrARB, const GLvoid*, GLenum);
-typedef GLvoid* (* _boglMapBuffer) (GLenum target, GLenum access);
-typedef GLboolean (* _boglUnmapBuffer) (GLenum target);
 typedef void (*_boglActiveTexture)(GLenum);
 
 typedef void (*_boglAttachShader) (GLuint, GLuint);
@@ -133,13 +127,6 @@ typedef void (*_boglGenerateMipmap) (GLenum);
 
 
 // Function pointers for extensions
-// VBO
-extern _boglDeleteBuffers boglDeleteBuffers;
-extern _boglGenBuffers boglGenBuffers;
-extern _boglBindBuffer boglBindBuffer;
-extern _boglBufferData boglBufferData;
-extern _boglMapBuffer boglMapBuffer;
-extern _boglUnmapBuffer boglUnmapBuffer;
 // Textures
 extern _boglActiveTexture boglActiveTexture;
 // Shaders
@@ -176,12 +163,6 @@ extern _boglFramebufferRenderbuffer boglFramebufferRenderbuffer;
 extern _boglGenerateMipmap boglGenerateMipmap;
 
 
-
-#define GL_ARRAY_BUFFER                   0x8892
-#define GL_ELEMENT_ARRAY_BUFFER           0x8893
-#define GL_WRITE_ONLY                     0x88B9
-#define GL_STATIC_DRAW                    0x88E4
-#define GL_DYNAMIC_DRAW                   0x88E8
 
 #define GL_TEXTURE0                       0x84C0
 #define GL_TEXTURE1                       0x84C1
@@ -287,7 +268,6 @@ extern _boglGenerateMipmap boglGenerateMipmap;
  * @li GL_multitexture_ARB (GL 1.3) - first 4 texture units
  * @li GL_texture_env_combine_ARB (GL 1.3) - full support
  * @li GL_texture_env_dot3_ARB (GL 1.3) - full support
- * @li GL_vertex_buffer_object_ARB (GL 1.5) - necessary VBO functionality
  * @li GL_shader_object_ARB and other shader extensions (GL 2.0) - necessary stuff
  * ...
  **/
