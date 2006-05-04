@@ -49,6 +49,16 @@
 	bo_##a = (_##a)glXGetProcAddressARB( (const GLubyte*) #a ); \
 	if (bo_##a == 0) { boError() << k_funcinfo << "unable to resolve symbols " << #a << endl; return false; }
 
+// assign a function pointer from an extension (e.g. glActiveTextureARB) to a
+// function pointer from an official GL version (e.g. glActiveTexture), if that
+// pointer is not 0.
+//
+// this should be used so that we can use the "official" function names always
+// and don't need to use the extension function if the GL version is not
+// available.
+#define ASSIGN_FROM_EXT(func, func_ext) \
+	if (bo_##func == 0) { bo_##func = bo_##func_ext; }
+
 
 
 static bool boglResolveGLXSymbols(QLibrary& gl);
@@ -1344,7 +1354,7 @@ extern "C" {
 	_glActiveTextureARB bo_glActiveTextureARB;
 }; // extern "C"
 
-bool boglResolveARB_multitexture_Symbols(QLibrary&gl)
+bool boglResolveARB_multitexture_Symbols(QLibrary& gl)
 {
  RESOLVE(glMultiTexCoord1dARB);
  RESOLVE(glMultiTexCoord1dvARB);
@@ -1380,6 +1390,42 @@ bool boglResolveARB_multitexture_Symbols(QLibrary&gl)
  RESOLVE(glMultiTexCoord4svARB);
  RESOLVE(glClientActiveTextureARB);
  RESOLVE(glActiveTextureARB);
+
+ ASSIGN_FROM_EXT(glMultiTexCoord1d, glMultiTexCoord1dARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord1dv, glMultiTexCoord1dvARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord1f, glMultiTexCoord1fARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord1fv, glMultiTexCoord1fvARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord1i, glMultiTexCoord1iARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord1iv, glMultiTexCoord1ivARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord1s, glMultiTexCoord1sARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord1sv, glMultiTexCoord1svARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord2d, glMultiTexCoord2dARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord2dv, glMultiTexCoord2dvARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord2f, glMultiTexCoord2fARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord2fv, glMultiTexCoord2fvARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord2i, glMultiTexCoord2iARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord2iv, glMultiTexCoord2ivARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord2s, glMultiTexCoord2sARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord2sv, glMultiTexCoord2svARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord3d, glMultiTexCoord3dARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord3dv, glMultiTexCoord3dvARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord3f, glMultiTexCoord3fARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord3fv, glMultiTexCoord3fvARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord3i, glMultiTexCoord3iARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord3iv, glMultiTexCoord3ivARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord3s, glMultiTexCoord3sARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord3sv, glMultiTexCoord3svARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord4d, glMultiTexCoord4dARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord4dv, glMultiTexCoord4dvARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord4f, glMultiTexCoord4fARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord4fv, glMultiTexCoord4fvARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord4i, glMultiTexCoord4iARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord4iv, glMultiTexCoord4ivARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord4s, glMultiTexCoord4sARB);
+ ASSIGN_FROM_EXT(glMultiTexCoord4sv, glMultiTexCoord4svARB);
+ ASSIGN_FROM_EXT(glClientActiveTexture, glClientActiveTextureARB);
+ ASSIGN_FROM_EXT(glActiveTexture, glActiveTextureARB);
+
  return true;
 }
 
