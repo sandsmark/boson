@@ -27,6 +27,7 @@
 #include "bodebug.h"
 
 #include <qlibrary.h>
+#include <qstringlist.h>
 
 #include <stdlib.h>
 
@@ -38,6 +39,16 @@
 #define RESOLVE_CHECK(a) \
 	bo_##a = (_##a)gl.resolve( #a ); \
 	if (bo_##a == 0) { boError() << k_funcinfo << "unable to resolve symbols " << #a << endl; return false; }
+
+// like RESOLVE(), but uses glXGetProcAddressARB()
+#define RESOLVE_GL_SYMBOL(a) \
+	bo_##a = (_##a)glXGetProcAddressARB( (const GLubyte*) #a );
+
+// like RESOLVE_CHECK(), but uses glXGetProcAddressARB()
+#define RESOLVE_GL_SYMBOL_CHECK(a) \
+	bo_##a = (_##a)glXGetProcAddressARB( (const GLubyte*) #a ); \
+	if (bo_##a == 0) { boError() << k_funcinfo << "unable to resolve symbols " << #a << endl; return false; }
+
 
 
 static bool boglResolveGLXSymbols(QLibrary& gl);
@@ -83,16 +94,21 @@ bool boglResolveLibGLSymbols(QLibrary& gl)
 	return false;
  }
 
- // TODO: check if extensions are present
- boglResolveARB_multitexture_Symbols(gl);
- boglResolveEXT_point_parameters_Symbols(gl);
- boglResolveEXT_polygon_offset_Symbols(gl);
- boglResolveEXT_texture3d_Symbols(gl);
+ QStringList extensions = boglGetOpenGLExtensions();
 
- // TODO:
- // if (!extensions.contains("GL_ARB_imaging"))
- {
-	// ARB_imaging already contains this.
+ if (extensions.contains("GL_ARB_multitexture")) {
+	boglResolveARB_multitexture_Symbols(gl);
+ }
+ if (extensions.contains("GL_EXT_point_parameters")) {
+	boglResolveEXT_point_parameters_Symbols(gl);
+ }
+ if (extensions.contains("GL_EXT_polygon_offset")) {
+	boglResolveEXT_polygon_offset_Symbols(gl);
+ }
+ if (extensions.contains("GL_EXT_texture3d")) {
+	boglResolveEXT_texture3d_Symbols(gl);
+ }
+ if (extensions.contains("GL_EXT_blend_color")) {
 	boglResolveEXT_blend_color_Symbols(gl);
  }
 
@@ -1417,5 +1433,6 @@ bool boglResolveEXT_texture3d_Symbols(QLibrary&gl)
  RESOLVE(glCopyTexSubImage3DEXT);
  return true;
 }
+
 
 
