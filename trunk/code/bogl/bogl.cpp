@@ -36,13 +36,6 @@
 bool bogl_inited = false;
 
 // Function pointers for extensions
-// VBO
-_boglDeleteBuffers boglDeleteBuffers = 0;
-_boglGenBuffers boglGenBuffers = 0;
-_boglBindBuffer boglBindBuffer = 0;
-_boglBufferData boglBufferData = 0;
-_boglMapBuffer boglMapBuffer = 0;
-_boglUnmapBuffer boglUnmapBuffer = 0;
 // Textures
 _boglActiveTexture boglActiveTexture = 0;
 // Shaders
@@ -92,18 +85,6 @@ void boglInit()
   boDebug() << k_funcinfo << "Checking for OpenGL extensions..." << endl;
   QStringList extensions = boglGetOpenGLExtensions();
   unsigned int openglversion = boglGetOpenGLVersion();
-
-  // VBO
-  if(extensions.contains("GL_ARB_vertex_buffer_object"))
-  {
-    boglDeleteBuffers = (_boglDeleteBuffers)glXGetProcAddressARB((const GLubyte*)"glDeleteBuffersARB");
-    boglGenBuffers = (_boglGenBuffers)glXGetProcAddressARB((const GLubyte*)"glGenBuffersARB");
-    boglBindBuffer = (_boglBindBuffer)glXGetProcAddressARB((const GLubyte*)"glBindBufferARB");
-    boglBufferData = (_boglBufferData)glXGetProcAddressARB((const GLubyte*)"glBufferDataARB");
-    boglMapBuffer = (_boglMapBuffer)glXGetProcAddressARB((const GLubyte*)"glMapBufferARB");
-    boglUnmapBuffer = (_boglUnmapBuffer)glXGetProcAddressARB((const GLubyte*)"glUnmapBufferARB");
-  }
-  // TODO: check for OpenGL 1.5
 
   // Shaders
   if(extensions.contains("GL_ARB_shader_objects"))
