@@ -40,6 +40,7 @@ extern "C" {
 	typedef GLhandleARB (*_glCreateProgramObjectARB) (GLvoid);
 	typedef GLvoid (*_glAttachObjectARB) (GLhandleARB, GLhandleARB);
 	typedef GLvoid (*_glLinkProgramARB) (GLhandleARB);
+	typedef GLvoid (*_glUseProgramObjectARB) (GLhandleARB);
 	typedef GLvoid (*_glValidateProgramARB) (GLhandleARB);
 	typedef GLvoid (*_glUniform1fARB) (GLint, GLfloat);
 	typedef GLvoid (*_glUniform2fARB) (GLint, GLfloat, GLfloat);
@@ -82,6 +83,7 @@ extern "C" {
 	extern _glCreateProgramObjectARB bo_glCreateProgramObjectARB;
 	extern _glAttachObjectARB bo_glAttachObjectARB;
 	extern _glLinkProgramARB bo_glLinkProgramARB;
+	extern _glUseProgramObjectARB bo_glUseProgramObjectARB;
 	extern _glValidateProgramARB bo_glValidateProgramARB;
 	extern _glUniform1fARB bo_glUniform1fARB;
 	extern _glUniform2fARB bo_glUniform2fARB;
@@ -163,6 +165,7 @@ extern "C" {
 #define glCreateProgramObjectARB bo_glCreateProgramObjectARB
 #define glAttachObjectARB bo_glAttachObjectARB
 #define glLinkProgramARB bo_glLinkProgramARB
+#define glUseProgramObjectARB bo_glUseProgramObjectARB
 #define glValidateProgramARB bo_glValidateProgramARB
 #define glUniform1fARB bo_glUniform1fARB
 #define glUniform2fARB bo_glUniform2fARB
