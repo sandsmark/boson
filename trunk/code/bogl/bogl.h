@@ -80,45 +80,6 @@ bool boglResolveLibGLUSymbols(QLibrary& glu);
 
 
 
-// Typedefs
-// This type was added for vbo extension.
-// TODO: why do we use "ARB" here?
-typedef int GLsizeiptrARB;
-#ifndef GL_ARB_shader_objects
-/* GL types for handling shader object handles and characters */
-typedef char GLcharARB;		/* native character */
-#endif
-
-// Function prototypes
-typedef void (*_boglBindRenderbuffer) (GLenum, GLuint);
-typedef void (*_boglDeleteRenderbuffers) (GLsizei, const GLuint *);
-typedef void (*_boglGenRenderbuffers) (GLsizei, GLuint *);
-typedef void (*_boglRenderbufferStorage) (GLenum, GLenum, GLsizei, GLsizei);
-typedef void (*_boglBindFramebuffer) (GLenum, GLuint);
-typedef void (*_boglDeleteFramebuffers) (GLsizei, const GLuint *);
-typedef void (*_boglGenFramebuffers) (GLsizei, GLuint *);
-typedef GLenum (*_boglCheckFramebufferStatus) (GLenum);
-typedef void (*_boglFramebufferTexture2D) (GLenum, GLenum, GLenum, GLuint, GLint);
-typedef void (*_boglFramebufferRenderbuffer) (GLenum, GLenum, GLenum, GLuint);
-typedef void (*_boglGenerateMipmap) (GLenum);
-
-
-
-// Function pointers for extensions
-// FBO
-extern _boglBindRenderbuffer boglBindRenderbuffer;
-extern _boglDeleteRenderbuffers boglDeleteRenderbuffers;
-extern _boglGenRenderbuffers boglGenRenderbuffers;
-extern _boglRenderbufferStorage boglRenderbufferStorage;
-extern _boglBindFramebuffer boglBindFramebuffer;
-extern _boglDeleteFramebuffers boglDeleteFramebuffers;
-extern _boglGenFramebuffers boglGenFramebuffers;
-extern _boglCheckFramebufferStatus boglCheckFramebufferStatus;
-extern _boglFramebufferTexture2D boglFramebufferTexture2D;
-extern _boglFramebufferRenderbuffer boglFramebufferRenderbuffer;
-extern _boglGenerateMipmap boglGenerateMipmap;
-
-
 
 #define GL_TEXTURE0                       0x84C0
 #define GL_TEXTURE1                       0x84C1
@@ -183,49 +144,11 @@ extern _boglGenerateMipmap boglGenerateMipmap;
 #define GL_VERTEX_SHADER                  0x8B31
 #define GL_FRAGMENT_SHADER                0x8B30
 
-#ifndef GL_EXT_framebuffer_object
-#define GL_FRAMEBUFFER_COMPLETE           0x8CD5
-#define GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT 0x8CD6
-#define GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT 0x8CD7
-#define GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT 0x8CD8
-#define GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS 0x8CD9
-#define GL_FRAMEBUFFER_INCOMPLETE_FORMATS 0x8CDA
-#define GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER 0x8CDB
-#define GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER 0x8CDC
-#define GL_FRAMEBUFFER_UNSUPPORTED        0x8CDD
-#define GL_MAX_COLOR_ATTACHMENTS          0x8CDF
-#define GL_COLOR_ATTACHMENT0              0x8CE0
-#define GL_COLOR_ATTACHMENT1              0x8CE1
-#define GL_COLOR_ATTACHMENT2              0x8CE2
-#define GL_COLOR_ATTACHMENT3              0x8CE3
-#define GL_DEPTH_ATTACHMENT               0x8D00
-#define GL_STENCIL_ATTACHMENT             0x8D20
-#define GL_FRAMEBUFFER                    0x8D40
-#define GL_RENDERBUFFER                   0x8D41
-#endif
-
 #define GL_DEPTH_COMPONENT24              0x81A6
 #define GL_DEPTH_TEXTURE_MODE             0x884B
 #define GL_TEXTURE_COMPARE_MODE           0x884C
 #define GL_TEXTURE_COMPARE_FUNC           0x884D
 #define GL_COMPARE_R_TO_TEXTURE           0x884E
 
-
-// AB: defines for extensions:
-//     (note: the above defines are partially for extensions too, one day we
-//      should sort this properly)
-// GL_ARB_multitexture (part of OpenGL 1.2.1)
-#define GL_MAX_TEXTURE_UNITS_ARB          0x84E2
-
-
-
-/**
- * This header includes more or less complete support for following extensions:
- * @li GL_multitexture_ARB (GL 1.3) - first 4 texture units
- * @li GL_texture_env_combine_ARB (GL 1.3) - full support
- * @li GL_texture_env_dot3_ARB (GL 1.3) - full support
- * @li GL_shader_object_ARB and other shader extensions (GL 2.0) - necessary stuff
- * ...
- **/
 
 #endif

@@ -57,7 +57,7 @@ BoRenderTarget::BoRenderTarget(int width, int height, int flags, BoTexture* colo
   const BoInfoGLCache* glInfo = BoInfo::boInfo()->gl();
   QStringList extensions = glInfo->openGLExtensions();
   // Use FBO if it's supported
-  if(extensions.contains("GL_EXT_framebuffer_object") && boglFramebufferTexture2D)
+  if(extensions.contains("GL_EXT_framebuffer_object") && glFramebufferTexture2DEXT)
   {
     mType = FBO;
   }
@@ -109,13 +109,13 @@ BoRenderTarget::~BoRenderTarget()
     // TODO: what if this changes during this object's lifetime?
     if(!mDepthTexture && (mFlags & Depth))
     {
-      boglDeleteRenderbuffers(1, &mFBOData->depthbuffer);
+      glDeleteRenderbuffersEXT(1, &mFBOData->depthbuffer);
     }
     if(!mTexture && (mFlags & RGB || mFlags & RGBA))
     {
-      boglDeleteRenderbuffers(1, &mFBOData->colorbuffer);
+      glDeleteRenderbuffersEXT(1, &mFBOData->colorbuffer);
     }
-    boglDeleteFramebuffers(1, &mFBOData->framebuffer);
+    glDeleteFramebuffersEXT(1, &mFBOData->framebuffer);
     delete mFBOData;
   }
 }
@@ -130,7 +130,7 @@ bool BoRenderTarget::enable()
 
   if(mType == FBO)
   {
-    boglBindFramebuffer(GL_FRAMEBUFFER, mFBOData->framebuffer);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFBOData->framebuffer);
   }
   else
   {
@@ -158,7 +158,7 @@ bool BoRenderTarget::disable()
 
   if(mType == FBO)
   {
-    boglBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
   }
   else
   {
@@ -331,56 +331,56 @@ bool BoRenderTarget::createContext(int* attrib, int& i, int* pattrib, int& pi)
 void BoRenderTarget::initFBO()
 {
   mFBOData = new FBOData;
-  boglGenFramebuffers(1, &mFBOData->framebuffer);
-  boglBindFramebuffer(GL_FRAMEBUFFER, mFBOData->framebuffer);
+  glGenFramebuffersEXT(1, &mFBOData->framebuffer);
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFBOData->framebuffer);
 
   if(mFlags & RGB || mFlags & RGBA)
   {
     if(mTexture)
     {
-      boglFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTexture->id(), 0);
+      glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, mTexture->id(), 0);
     }
     else
     {
-      boglGenRenderbuffers(1, &mFBOData->colorbuffer);
-      boglBindRenderbuffer(GL_RENDERBUFFER, mFBOData->colorbuffer);
-      boglRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, mWidth, mHeight);
-      boglFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, mFBOData->colorbuffer);
-      boglBindRenderbuffer(GL_RENDERBUFFER, 0);
+      glGenRenderbuffersEXT(1, &mFBOData->colorbuffer);
+      glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, mFBOData->colorbuffer);
+      glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_RGBA8, mWidth, mHeight);
+      glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, mFBOData->colorbuffer);
+      glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
     }
   }
   else
   {
-    boglFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 0, 0, 0);
+    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, 0, 0, 0);
   }
 
   if(mFlags & Depth)
   {
     if(mDepthTexture)
     {
-      boglFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mDepthTexture->id(), 0);
+      glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, mDepthTexture->id(), 0);
     }
     else
     {
-      boglGenRenderbuffers(1, &mFBOData->depthbuffer);
-      boglBindRenderbuffer(GL_RENDERBUFFER, mFBOData->depthbuffer);
-      boglRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mWidth, mHeight);
-      boglFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mFBOData->depthbuffer);
-      boglBindRenderbuffer(GL_RENDERBUFFER, 0);
+      glGenRenderbuffersEXT(1, &mFBOData->depthbuffer);
+      glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, mFBOData->depthbuffer);
+      glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, mWidth, mHeight);
+      glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, mFBOData->depthbuffer);
+      glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
     }
   }
   else
   {
-    boglFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, 0);
   }
 
-  GLenum status = boglCheckFramebufferStatus(GL_FRAMEBUFFER);
-  if(status != GL_FRAMEBUFFER_COMPLETE)
+  GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+  if(status != GL_FRAMEBUFFER_COMPLETE_EXT)
   {
     boError() << k_funcinfo << "Invalid fb status: " << status << endl;
   }
 
-  boglBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
   mValid = true;
 }
