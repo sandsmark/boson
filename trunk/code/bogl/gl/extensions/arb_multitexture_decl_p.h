@@ -109,6 +109,21 @@ extern "C" {
 }; // extern "C"
 
 
+#define GL_TEXTURE0_ARB                       0x84C0
+#define GL_TEXTURE1_ARB                       0x84C1
+#define GL_TEXTURE2_ARB                       0x84C2
+#define GL_TEXTURE3_ARB                       0x84C3
+#define GL_TEXTURE4_ARB                       0x84C4
+#define GL_TEXTURE5_ARB                       0x84C5
+#define GL_TEXTURE6_ARB                       0x84C6
+#define GL_TEXTURE7_ARB                       0x84C7
+#define GL_TEXTURE8_ARB                       0x84C8
+#define GL_TEXTURE9_ARB                       0x84C9
+#define GL_CLIENT_ACTIVE_TEXTURE_ARB          0x84E1
+#define GL_ACTIVE_TEXTURE_ARB                 0x84E0
+#define GL_MAX_TEXTURE_UNITS_ARB              0x84E2
+
+
 
 // GL defines
 #if BOGL_DO_DLOPEN
