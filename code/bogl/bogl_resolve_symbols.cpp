@@ -69,13 +69,14 @@ static bool boglResolveOpenGL_1_3_Symbols(QLibrary& gl);
 static bool boglResolveOpenGL_1_4_Symbols(QLibrary& gl);
 static bool boglResolveOpenGL_1_5_Symbols(QLibrary& gl);
 static bool boglResolveGLUSymbols(QLibrary& gl);
-static bool boglResolveARB_multitexture_Symbols(QLibrary&gl);
-static bool boglResolveEXT_blend_color_Symbols(QLibrary&gl);
-static bool boglResolveEXT_point_parameters_Symbols(QLibrary&gl);
-static bool boglResolveEXT_polygon_offset_Symbols(QLibrary&gl);
-static bool boglResolveEXT_texture3d_Symbols(QLibrary&gl);
-static bool boglResolveARB_vertex_buffer_object_Symbols(QLibrary&gl);
-static bool boglResolveARB_shader_objects_Symbols(QLibrary&gl);
+static bool boglResolveARB_multitexture_Symbols(QLibrary& gl);
+static bool boglResolveEXT_blend_color_Symbols(QLibrary& gl);
+static bool boglResolveEXT_point_parameters_Symbols(QLibrary& gl);
+static bool boglResolveEXT_polygon_offset_Symbols(QLibrary& gl);
+static bool boglResolveEXT_texture3d_Symbols(QLibrary& gl);
+static bool boglResolveARB_vertex_buffer_object_Symbols(QLibrary& gl);
+static bool boglResolveARB_shader_objects_Symbols(QLibrary& gl);
+static bool boglResolveEXT_framebuffer_object_Symbols(QLibrary& gl);
 
 bool boglResolveLibGLSymbols(QLibrary& gl)
 {
@@ -128,6 +129,9 @@ bool boglResolveLibGLSymbols(QLibrary& gl)
  }
  if (extensions.contains("GL_ARB_shader_objects")) {
 	boglResolveARB_shader_objects_Symbols(gl);
+ }
+ if (extensions.contains("GL_EXT_framebuffer_object")) {
+	boglResolveEXT_framebuffer_object_Symbols(gl);
  }
 
  return true;
@@ -1435,7 +1439,7 @@ extern "C" {
 	_glBlendColorEXT bo_glBlendColorEXT;
 }; // extern "C"
 
-bool boglResolveEXT_blend_color_Symbols(QLibrary&gl)
+bool boglResolveEXT_blend_color_Symbols(QLibrary& gl)
 {
  RESOLVE(glBlendColorEXT);
 
@@ -1452,7 +1456,7 @@ extern "C" {
 	_glPointParameterfvEXT bo_glPointParameterfvEXT;
 }; // extern "C"
 
-bool boglResolveEXT_point_parameters_Symbols(QLibrary&gl)
+bool boglResolveEXT_point_parameters_Symbols(QLibrary& gl)
 {
  RESOLVE(glPointParameterfEXT);
  RESOLVE(glPointParameterfvEXT);
@@ -1465,7 +1469,7 @@ extern "C" {
 	_glPolygonOffsetEXT bo_glPolygonOffsetEXT;
 }; // extern "C"
 
-bool boglResolveEXT_polygon_offset_Symbols(QLibrary&gl)
+bool boglResolveEXT_polygon_offset_Symbols(QLibrary& gl)
 {
  RESOLVE(glPolygonOffsetEXT);
  return true;
@@ -1479,7 +1483,7 @@ extern "C" {
 	_glCopyTexSubImage3DEXT bo_glCopyTexSubImage3DEXT;
 }; // extern "C"
 
-bool boglResolveEXT_texture3d_Symbols(QLibrary&gl)
+bool boglResolveEXT_texture3d_Symbols(QLibrary& gl)
 {
  RESOLVE(glTexImage3DEXT);
  RESOLVE(glTexSubImage3DEXT);
@@ -1641,4 +1645,33 @@ bool boglResolveARB_shader_objects_Symbols(QLibrary& gl)
  return true;
 }
 
+
+// GL_EXT_framebuffer_object
+extern "C" {
+}; // "C"
+
+bool boglResolveEXT_framebuffer_object_Symbols(QLibrary& gl)
+{
+ Q_UNUSED(gl);
+
+ RESOLVE_GL_SYMBOL_CHECK(glIsRenderBufferEXT);
+ RESOLVE_GL_SYMBOL_CHECK(glBindRenderbufferEXT);
+ RESOLVE_GL_SYMBOL_CHECK(glDeleteRenderbuffersEXT);
+ RESOLVE_GL_SYMBOL_CHECK(glGenRenderbuffersEXT);
+ RESOLVE_GL_SYMBOL_CHECK(glRenderbufferStorageEXT);
+ RESOLVE_GL_SYMBOL_CHECK(glGetRenderbufferParameterivEXT);
+ RESOLVE_GL_SYMBOL_CHECK(glIsFrameBufferEXT);
+ RESOLVE_GL_SYMBOL_CHECK(glBindFramebufferEXT);
+ RESOLVE_GL_SYMBOL_CHECK(glDeleteFramebuffersEXT);
+ RESOLVE_GL_SYMBOL_CHECK(glGenFramebuffersEXT);
+ RESOLVE_GL_SYMBOL_CHECK(glCheckFramebufferStatusEXT);
+ RESOLVE_GL_SYMBOL_CHECK(glFramebufferTexture1DEXT);
+ RESOLVE_GL_SYMBOL_CHECK(glFramebufferTexture2DEXT);
+ RESOLVE_GL_SYMBOL_CHECK(glFramebufferTexture3DEXT);
+ RESOLVE_GL_SYMBOL_CHECK(glFramebufferRenderbufferEXT);
+ RESOLVE_GL_SYMBOL_CHECK(glFramebufferAttachmentParameterivEXT);
+ RESOLVE_GL_SYMBOL_CHECK(glGenerateMipmapEXT);
+
+ return true;
+}
 
