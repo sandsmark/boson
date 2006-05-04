@@ -1522,10 +1522,18 @@ bool boglResolveARB_vertex_buffer_object_Symbols(QLibrary& gl)
  //      use the ARB functions for the non-ARB function pointers if OpenGL 1.5
  //      is not supported by this system
  //      --> we can use the non-ARB versions in code then
- if (bo_glDeleteBuffers != 0) {
-	bo_glDeleteBuffers = bo_glDeleteBuffersARB;
-	// ... TODO
- }
+
+ ASSIGN_FROM_EXT(glBindBuffer, glBindBufferARB);
+ ASSIGN_FROM_EXT(glDeleteBuffers, glDeleteBuffersARB);
+ ASSIGN_FROM_EXT(glGenBuffers, glGenBuffersARB);
+ ASSIGN_FROM_EXT(glIsBuffer, glIsBufferARB);
+ ASSIGN_FROM_EXT(glBufferData, glBufferDataARB);
+ ASSIGN_FROM_EXT(glBufferSubData, glBufferSubDataARB);
+ ASSIGN_FROM_EXT(glMapBuffer, glMapBufferARB);
+ ASSIGN_FROM_EXT(glUnmapBuffer, glUnmapBufferARB);
+ ASSIGN_FROM_EXT(glGetBufferParameteriv, glGetBufferParameterivARB);
+ ASSIGN_FROM_EXT(glGetBufferPointerv, glGetBufferPointervARB);
+
 #endif
 
  return true;
@@ -1543,6 +1551,7 @@ extern "C" {
 	_glCreateProgramObjectARB bo_glCreateProgramObjectARB;
 	_glAttachObjectARB bo_glAttachObjectARB;
 	_glLinkProgramARB bo_glLinkProgramARB;
+	_glUseProgramObjectARB bo_glUseProgramObjectARB;
 	_glValidateProgramARB bo_glValidateProgramARB;
 	_glUniform1fARB bo_glUniform1fARB;
 	_glUniform2fARB bo_glUniform2fARB;
@@ -1587,6 +1596,7 @@ bool boglResolveARB_shader_objects_Symbols(QLibrary& gl)
  RESOLVE_GL_SYMBOL_CHECK(glCreateProgramObjectARB);
  RESOLVE_GL_SYMBOL_CHECK(glAttachObjectARB);
  RESOLVE_GL_SYMBOL_CHECK(glLinkProgramARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUseProgramObjectARB);
  RESOLVE_GL_SYMBOL_CHECK(glValidateProgramARB);
  RESOLVE_GL_SYMBOL_CHECK(glUniform1fARB);
  RESOLVE_GL_SYMBOL_CHECK(glUniform2fARB);
