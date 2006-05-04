@@ -124,6 +124,10 @@ extern "C" {
 	typedef void (*_glTexSubImage3D)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const GLvoid *pixels);
 	typedef void (*_glCopyTexSubImage3D)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height);
 	typedef void (*_glDrawRangeElements)(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid *indices);
+
+	// these are only available if the extensions include ARB_imaging.
+	// (this is not an actual extension though, i.e. is not listed in the
+	// extensions registry)
 	typedef void (*_glColorTable)(GLenum target, GLenum internalformat, GLsizei width, GLenum format, GLenum type, const GLvoid *table);
 	typedef void (*_glCopyColorTable)(GLenum target, GLenum internalformat, GLint x, GLint y, GLsizei width);
 	typedef void (*_glColorTableParameteriv)(GLenum target, GLenum pname, const GLint *params);
@@ -166,6 +170,10 @@ extern "C" {
 	extern _glTexSubImage3D bo_glTexSubImage3D;
 	extern _glCopyTexSubImage3D bo_glCopyTexSubImage3D;
 	extern _glDrawRangeElements bo_glDrawRangeElements;
+
+	// these are only available if the extensions include ARB_imaging.
+	// (this is not an actual extension though, i.e. is not listed in the
+	// extensions registry)
 	extern _glColorTable bo_glColorTable;
 	extern _glCopyColorTable bo_glCopyColorTable;
 	extern _glColorTableParameteriv bo_glColorTableParameteriv;
