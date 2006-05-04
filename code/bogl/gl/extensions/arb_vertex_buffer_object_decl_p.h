@@ -95,16 +95,16 @@ extern "C" {
 
 
 #if BOGL_DO_DLOPEN
-#define glBindBufferARB bo_glBindBufferARB;
-#define glDeleteBuffersARB bo_glDeleteBuffersARB;
-#define glGenBuffersARB bo_glGenBuffersARB;
-#define glIsBufferARB bo_glIsBufferARB;
-#define glBufferDataARB bo_glBufferDataARB;
-#define glBufferSubDataARB bo_glBufferSubDataARB;
-#define glMapBufferARB bo_glMapBufferARB;
-#define glUnmapBufferARB bo_glUnmapBufferARB;
-#define glGetBufferParameterivARB bo_glGetBufferParameterivARB;
-#define glGetBufferPointervARB bo_glGetBufferPointervARB;
+#define glBindBufferARB bo_glBindBufferARB
+#define glDeleteBuffersARB bo_glDeleteBuffersARB
+#define glGenBuffersARB bo_glGenBuffersARB
+#define glIsBufferARB bo_glIsBufferARB
+#define glBufferDataARB bo_glBufferDataARB
+#define glBufferSubDataARB bo_glBufferSubDataARB
+#define glMapBufferARB bo_glMapBufferARB
+#define glUnmapBufferARB bo_glUnmapBufferARB
+#define glGetBufferParameterivARB bo_glGetBufferParameterivARB
+#define glGetBufferPointervARB bo_glGetBufferPointervARB
 #endif // BOGL_DO_DLOPEN
 
 
