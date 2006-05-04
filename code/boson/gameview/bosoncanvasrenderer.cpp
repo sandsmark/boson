@@ -613,6 +613,12 @@ void BosonCanvasRenderer::initGL()
 	// Load unit shader
 	d->mUnitShader = new BoShader("unit");
  }
+
+ if (!extensions.contains("GL_EXT_framebuffer_object")) {
+	boError() << k_funcinfo << "boson requires GL_EXT_framebuffer_object" << endl;
+	// TODO: return false or so?
+	// -> glGenerateMipmapEXT() will be 0
+ }
 }
 
 void BosonCanvasRenderer::slotWidgetResized()
@@ -2143,7 +2149,7 @@ void BosonCanvasRenderer::renderFadeEffects(BoVisibleEffects& visible)
  boTextureManager->activateTextureUnit(0);
  d->mMainSceneRenderTarget->texture->bind();
  // Generate mipmaps for the scene texture
- boglGenerateMipmap(GL_TEXTURE_2D);
+ glGenerateMipmapEXT(GL_TEXTURE_2D);
  glLoadIdentity();
  glScalef(sceneTexScaleX, sceneTexScaleY, 1.0);
   // Bind scene depth tex to texunit 1 and change tex matrix
@@ -2204,7 +2210,7 @@ void BosonCanvasRenderer::renderFadeEffects(BoVisibleEffects& visible)
 		glScalef(inputTarget->texture->width() / (float)(widgetwidth / lastDownscale),
 				inputTarget->texture->height() / (float)(widgetheight / lastDownscale), 1.0);
 		// Generate mipmaps for input texture, if necessary
-		boglGenerateMipmap(GL_TEXTURE_2D);
+		glGenerateMipmapEXT(GL_TEXTURE_2D);
 
 
 		// Bind shader
