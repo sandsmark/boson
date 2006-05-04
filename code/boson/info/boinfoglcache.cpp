@@ -146,8 +146,8 @@ void BoInfoGLCache::update()
  d->mMaxTextureSize = getIntFromList(glValues, "GL_MAX_TEXTURE_SIZE", 1);
  d->mMaxTextureUnits = getIntFromList(glValues, "GL_MAX_TEXTURE_UNITS", 1);
  if (d->mMaxTextureUnits > 1) {
-	if (!boglActiveTexture) {
-		boError() << k_funcinfo << "multitexturing supported, but not glActiveTexture function found!" << endl;
+	if (!glActiveTexture) {
+		boError() << k_funcinfo << "multitexturing supported, but no glActiveTexture function found!" << endl;
 		// disable multitexturing
 		d->mMaxTextureUnits = 1;
 	}
