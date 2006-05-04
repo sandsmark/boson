@@ -35,20 +35,6 @@
 // bogl variables
 bool bogl_inited = false;
 
-// Function pointers for extensions
-// FBO
-_boglBindRenderbuffer boglBindRenderbuffer = 0;
-_boglDeleteRenderbuffers boglDeleteRenderbuffers = 0;
-_boglGenRenderbuffers boglGenRenderbuffers = 0;
-_boglRenderbufferStorage boglRenderbufferStorage = 0;
-_boglBindFramebuffer boglBindFramebuffer = 0;
-_boglDeleteFramebuffers boglDeleteFramebuffers = 0;
-_boglGenFramebuffers boglGenFramebuffers = 0;
-_boglCheckFramebufferStatus boglCheckFramebufferStatus = 0;
-_boglFramebufferTexture2D boglFramebufferTexture2D = 0;
-_boglFramebufferRenderbuffer boglFramebufferRenderbuffer = 0;
-_boglGenerateMipmap boglGenerateMipmap = 0;
-
 
 void boglInit()
 {
@@ -58,29 +44,7 @@ void boglInit()
     return;
   }
 
-#ifdef GLX_ARB_get_proc_address
-  // Get pointers to supported opengl functions
-  boDebug() << k_funcinfo << "Checking for OpenGL extensions..." << endl;
-  QStringList extensions = boglGetOpenGLExtensions();
-  unsigned int openglversion = boglGetOpenGLVersion();
-
-  // FBO
-  if(extensions.contains("GL_EXT_framebuffer_object"))
-  {
-    boglBindRenderbuffer = (_boglBindRenderbuffer)glXGetProcAddressARB((const GLubyte*)"glBindRenderbufferEXT");
-    boglDeleteRenderbuffers = (_boglDeleteRenderbuffers)glXGetProcAddressARB((const GLubyte*)"glDeleteRenderbuffersEXT");
-    boglGenRenderbuffers = (_boglGenRenderbuffers)glXGetProcAddressARB((const GLubyte*)"glGenRenderbuffersEXT");
-    boglRenderbufferStorage = (_boglRenderbufferStorage)glXGetProcAddressARB((const GLubyte*)"glRenderbufferStorageEXT");
-    boglBindFramebuffer = (_boglBindFramebuffer)glXGetProcAddressARB((const GLubyte*)"glBindFramebufferEXT");
-    boglDeleteFramebuffers = (_boglDeleteFramebuffers)glXGetProcAddressARB((const GLubyte*)"glDeleteFramebuffersEXT");
-    boglGenFramebuffers = (_boglGenFramebuffers)glXGetProcAddressARB((const GLubyte*)"glGenFramebuffersEXT");
-    boglCheckFramebufferStatus = (_boglCheckFramebufferStatus)glXGetProcAddressARB((const GLubyte*)"glCheckFramebufferStatusEXT");
-    boglFramebufferTexture2D = (_boglFramebufferTexture2D)glXGetProcAddressARB((const GLubyte*)"glFramebufferTexture2DEXT");
-    boglFramebufferRenderbuffer = (_boglFramebufferRenderbuffer)glXGetProcAddressARB((const GLubyte*)"glFramebufferRenderbufferEXT");
-    boglGenerateMipmap = (_boglGenerateMipmap)glXGetProcAddressARB((const GLubyte*)"glGenerateMipmapEXT");
-  }
-
-#else //GLX_ARB_get_proc_address
+#ifndef GLX_ARB_get_proc_address
 
   // AB: if this is a linux system, it MUST support GLX_ARB_get_proc_address, as
   //     it is part of the linux OpenGL ARB.
