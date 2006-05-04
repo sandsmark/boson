@@ -65,6 +65,7 @@ static bool boglResolveEXT_point_parameters_Symbols(QLibrary&gl);
 static bool boglResolveEXT_polygon_offset_Symbols(QLibrary&gl);
 static bool boglResolveEXT_texture3d_Symbols(QLibrary&gl);
 static bool boglResolveARB_vertex_buffer_object_Symbols(QLibrary&gl);
+static bool boglResolveARB_shader_objects_Symbols(QLibrary&gl);
 
 bool boglResolveLibGLSymbols(QLibrary& gl)
 {
@@ -114,6 +115,9 @@ bool boglResolveLibGLSymbols(QLibrary& gl)
  }
  if (extensions.contains("GL_ARB_vertex_buffer_object")) {
 	boglResolveARB_vertex_buffer_object_Symbols(gl);
+ }
+ if (extensions.contains("GL_ARB_shader_objects")) {
+	boglResolveARB_shader_objects_Symbols(gl);
  }
 
  return true;
@@ -1129,9 +1133,8 @@ bool boglResolveOpenGL_1_2_Symbols(QLibrary& gl)
  RESOLVE_CHECK(glCopyTexSubImage3D);
  RESOLVE_CHECK(glDrawRangeElements);
 
- // TODO:
- // if (extensions.contains("GL_ARB_imaging")
- {
+ QStringList extensions = boglGetOpenGLExtensions();
+ if (extensions.contains("GL_ARB_imaging")) {
 	RESOLVE_CHECK(glColorTable);
 	RESOLVE_CHECK(glCopyColorTable);
 	RESOLVE_CHECK(glColorTableParameteriv);
@@ -1439,7 +1442,7 @@ bool boglResolveEXT_texture3d_Symbols(QLibrary&gl)
 }
 
 
-// ARB_vertex_buffer_object
+// GL_ARB_vertex_buffer_object
 extern "C" {
 	_glBindBufferARB bo_glBindBufferARB;
 	_glDeleteBuffersARB bo_glDeleteBuffersARB;
@@ -1470,7 +1473,108 @@ bool boglResolveARB_vertex_buffer_object_Symbols(QLibrary& gl)
 
 #if 0
  // TODO (once OpenGL 1.5 support is available in our headers):
- //      use the ARB functions for the non-ARB function pointers
+ //      use the ARB functions for the non-ARB function pointers if OpenGL 1.5
+ //      is not supported by this system
+ //      --> we can use the non-ARB versions in code then
+ if (bo_glDeleteBuffers != 0) {
+	bo_glDeleteBuffers = bo_glDeleteBuffersARB;
+	// ... TODO
+ }
+#endif
+
+ return true;
+}
+
+
+// GL_ARB_shader_objects
+extern "C" {
+	_glDeleteObjectARB bo_glDeleteObjectARB;
+	_glGetHandleARB bo_glGetHandleARB;
+	_glDetachObjectARB bo_glDetachObjectARB;
+	_glCreateShaderObjectARB bo_glCreateShaderObjectARB;
+	_glShaderSourceARB bo_glShaderSourceARB;
+	_glCompileShaderARB bo_glCompileShaderARB;
+	_glCreateProgramObjectARB bo_glCreateProgramObjectARB;
+	_glAttachObjectARB bo_glAttachObjectARB;
+	_glLinkProgramARB bo_glLinkProgramARB;
+	_glValidateProgramARB bo_glValidateProgramARB;
+	_glUniform1fARB bo_glUniform1fARB;
+	_glUniform2fARB bo_glUniform2fARB;
+	_glUniform3fARB bo_glUniform3fARB;
+	_glUniform4fARB bo_glUniform4fARB;
+	_glUniform1iARB bo_glUniform1iARB;
+	_glUniform2iARB bo_glUniform2iARB;
+	_glUniform3iARB bo_glUniform3iARB;
+	_glUniform4iARB bo_glUniform4iARB;
+	_glUniform1fvARB bo_glUniform1fvARB;
+	_glUniform2fvARB bo_glUniform2fvARB;
+	_glUniform3fvARB bo_glUniform3fvARB;
+	_glUniform4fvARB bo_glUniform4fvARB;
+	_glUniform1ivARB bo_glUniform1ivARB;
+	_glUniform2ivARB bo_glUniform2ivARB;
+	_glUniform3ivARB bo_glUniform3ivARB;
+	_glUniform4ivARB bo_glUniform4ivARB;
+	_glUniformMatrix2fvARB bo_glUniformMatrix2fvARB;
+	_glUniformMatrix3fvARB bo_glUniformMatrix3fvARB;
+	_glUniformMatrix4fvARB bo_glUniformMatrix4fvARB;
+	_glGetObjectParameterfvARB bo_glGetObjectParameterfvARB;
+	_glGetObjectParameterivARB bo_glGetObjectParameterivARB;
+	_glGetInfoLogARB bo_glGetInfoLogARB;
+	_glGetAttachedObjectsARB bo_glGetAttachedObjectsARB;
+	_glGetUniformLocationARB bo_glGetUniformLocationARB;
+	_glGetActiveUniformARB bo_glGetActiveUniformARB;
+	_glGetActiveUniformfvARB bo_glGetActiveUniformfvARB;
+	_glGetActiveUniformivARB bo_glGetActiveUniformivARB;
+	_glGetShaderSourceARB bo_glGetShaderSourceARB;
+}; // "C"
+
+bool boglResolveARB_shader_objects_Symbols(QLibrary& gl)
+{
+ Q_UNUSED(gl);
+
+ RESOLVE_GL_SYMBOL_CHECK(glDeleteObjectARB);
+ RESOLVE_GL_SYMBOL_CHECK(glGetHandleARB);
+ RESOLVE_GL_SYMBOL_CHECK(glDetachObjectARB);
+ RESOLVE_GL_SYMBOL_CHECK(glCreateShaderObjectARB);
+ RESOLVE_GL_SYMBOL_CHECK(glShaderSourceARB);
+ RESOLVE_GL_SYMBOL_CHECK(glCompileShaderARB);
+ RESOLVE_GL_SYMBOL_CHECK(glCreateProgramObjectARB);
+ RESOLVE_GL_SYMBOL_CHECK(glAttachObjectARB);
+ RESOLVE_GL_SYMBOL_CHECK(glLinkProgramARB);
+ RESOLVE_GL_SYMBOL_CHECK(glValidateProgramARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUniform1fARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUniform2fARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUniform3fARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUniform4fARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUniform1iARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUniform2iARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUniform3iARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUniform4iARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUniform1fvARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUniform2fvARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUniform3fvARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUniform4fvARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUniform1ivARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUniform2ivARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUniform3ivARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUniform4ivARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUniformMatrix2fvARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUniformMatrix3fvARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUniformMatrix4fvARB);
+ RESOLVE_GL_SYMBOL_CHECK(glGetObjectParameterfvARB);
+ RESOLVE_GL_SYMBOL_CHECK(glGetObjectParameterivARB);
+ RESOLVE_GL_SYMBOL_CHECK(glGetInfoLogARB);
+ RESOLVE_GL_SYMBOL_CHECK(glGetAttachedObjectsARB);
+ RESOLVE_GL_SYMBOL_CHECK(glGetUniformLocationARB);
+ RESOLVE_GL_SYMBOL_CHECK(glGetActiveUniformARB);
+ RESOLVE_GL_SYMBOL_CHECK(glGetActiveUniformfvARB);
+ RESOLVE_GL_SYMBOL_CHECK(glGetActiveUniformivARB);
+ RESOLVE_GL_SYMBOL_CHECK(glGetShaderSourceARB);
+
+#if 0
+ // TODO (once OpenGL 2.0 support is available in our headers):
+ //      use the ARB functions for the non-ARB function pointers if OpenGL 2.0
+ //      is not supported by this system
  //      --> we can use the non-ARB versions in code then
  if (bo_glDeleteBuffers != 0) {
 	bo_glDeleteBuffers = bo_glDeleteBuffersARB;
