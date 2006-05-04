@@ -33,6 +33,29 @@
 #include <kglobal.h>
 #include <kstandarddirs.h>
 
+// AB: OpenGL 2.0 headers have not yet been written yet, so we have to use these
+//     defines for now
+#define glDeleteProgram glDeleteObjectARB
+#define glCreateProgram glCreateProgramObjectARB
+#define glCreateShader glCreateShaderObjectARB
+#define glShaderSource glShaderSourceARB
+#define glCompileShader glCompileShaderARB
+#define glGetShaderiv glGetObjectParameterivARB
+#define glGetShaderInfoLog glGetInfoLogARB
+#define glAttachObject glAttachObjectARB // ??
+#define glDeleteShader glDeleteObjectARB
+#define glAttachShader glAttachObjectARB
+#define glLinkProgram glLinkProgramARB
+#define glGetProgramiv glGetObjectParameterivARB
+#define glGetProgramInfoLog glGetInfoLogARB
+#define glGetUniformLocation glGetUniformLocationARB
+#define glUniform1f glUniform1fARB
+#define glUniform1i glUniform1iARB
+#define glUniform2fv glUniform2fvARB
+#define glUniform3fv glUniform3fvARB
+#define glUniform4fv glUniform4fvARB
+#define glUseProgram glUseProgramObjectARB
+
 
 
 BoShaderManager* BoShaderManager::mShaderManager = 0;
@@ -182,7 +205,7 @@ BoShader::~BoShader()
     {
       unbind();
     }
-    boglDeleteProgram(mProgram);
+    glDeleteProgram(mProgram);
   }
 }
 
@@ -222,14 +245,14 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
     boError(130) << k_funcinfo << "No shader sources given!" << endl;
     return false;
   }
-  if(!boglCreateProgram)
+  if(!glCreateProgram)
   {
     boError(130) << k_funcinfo << "Shaders aren't supported!" << endl;
     return false;
   }
 
   // Create program object
-  mProgram = boglCreateProgram();
+  mProgram = glCreateProgram();
 
   GLuint vertexshader;
   GLuint fragmentshader;
@@ -242,19 +265,19 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
   if(!vertexsrc.isEmpty())
   {
     // Create shader object
-    vertexshader = boglCreateShader(GL_VERTEX_SHADER);
+    vertexshader = glCreateShader(GL_VERTEX_SHADER);
     // Load it
     const char* src = vertexsrc.latin1();
-    boglShaderSource(vertexshader, 1, &src, NULL);
+    glShaderSource(vertexshader, 1, &src, NULL);
     // Compile the shader
-    boglCompileShader(vertexshader);
+    glCompileShader(vertexshader);
     // Make sure it compiled correctly
     int compiled;
-    boglGetShaderiv(vertexshader, GL_COMPILE_STATUS, &compiled);
+    glGetShaderiv(vertexshader, GL_COMPILE_STATUS, &compiled);
     // Get info log
-    boglGetShaderiv(vertexshader, GL_INFO_LOG_LENGTH, &logarraysize);
+    glGetShaderiv(vertexshader, GL_INFO_LOG_LENGTH, &logarraysize);
     log = new char[logarraysize];
-    boglGetShaderInfoLog(vertexshader, logarraysize, &logsize, log);
+    glGetShaderInfoLog(vertexshader, logarraysize, &logsize, log);
     if(!compiled)
     {
       boError(130) << k_funcinfo << "Couldn't compile vertex shader!" << endl << log << endl;
@@ -268,9 +291,9 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
       printUsedSources();
     }
     // Attach the shader to the program
-    boglAttachShader(mProgram, vertexshader);
+    glAttachObject(mProgram, vertexshader);
     // Delete shader
-    boglDeleteShader(vertexshader);
+    glDeleteShader(vertexshader);
     delete log;
   }
 
@@ -278,20 +301,20 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
   if(!fragmentsrc.isEmpty())
   {
     // Create shader object
-    fragmentshader = boglCreateShader(GL_FRAGMENT_SHADER);
+    fragmentshader = glCreateShader(GL_FRAGMENT_SHADER);
     // Load it
     const char* src = fragmentsrc.latin1();
-    boglShaderSource(fragmentshader, 1, &src, NULL);
-    //boglShaderSource(fragmentshader, 1, &fragmentsrc.latin1(), NULL);
+    glShaderSource(fragmentshader, 1, &src, NULL);
+    //glShaderSource(fragmentshader, 1, &fragmentsrc.latin1(), NULL);
     // Compile the shader
-    boglCompileShader(fragmentshader);
+    glCompileShader(fragmentshader);
     // Make sure it compiled correctly
     int compiled;
-    boglGetShaderiv(fragmentshader, GL_COMPILE_STATUS, &compiled);
+    glGetShaderiv(fragmentshader, GL_COMPILE_STATUS, &compiled);
     // Get info log
-    boglGetShaderiv(fragmentshader, GL_INFO_LOG_LENGTH, &logarraysize);
+    glGetShaderiv(fragmentshader, GL_INFO_LOG_LENGTH, &logarraysize);
     log = new char[logarraysize];
-    boglGetShaderInfoLog(fragmentshader, logarraysize, &logsize, log);
+    glGetShaderInfoLog(fragmentshader, logarraysize, &logsize, log);
     if(!compiled)
     {
       boError(130) << k_funcinfo << "Couldn't compile fragment shader!" << endl << log << endl;
@@ -305,21 +328,21 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
       printUsedSources();
     }
     // Attach the shader to the program
-    boglAttachShader(mProgram, fragmentshader);
+    glAttachShader(mProgram, fragmentshader);
     // Delete shader
-    boglDeleteShader(fragmentshader);
+    glDeleteShader(fragmentshader);
     delete log;
   }
 
   // Link the program
-  boglLinkProgram(mProgram);
+  glLinkProgram(mProgram);
   // Make sure it linked correctly
   int linked;
-  boglGetProgramiv(mProgram, GL_LINK_STATUS, &linked);
+  glGetProgramiv(mProgram, GL_LINK_STATUS, &linked);
   // Get info log
-  boglGetProgramiv(mProgram, GL_INFO_LOG_LENGTH, &logarraysize);
+  glGetProgramiv(mProgram, GL_INFO_LOG_LENGTH, &logarraysize);
   log = new char[logarraysize];
-  boglGetProgramInfoLog(mProgram, logarraysize, &logsize, log);
+  glGetProgramInfoLog(mProgram, logarraysize, &logsize, log);
 
   if(!linked)
   {
@@ -458,7 +481,7 @@ void BoShader::reload()
     {
       unbind();
     }
-    boglDeleteProgram(mProgram);
+    glDeleteProgram(mProgram);
   }
 
   // Reload
@@ -475,7 +498,7 @@ int BoShader::uniformLocation(const QString& name)
   if(!location)
   {
     location = new int;
-    *location = boglGetUniformLocation(mProgram, name.latin1());
+    *location = glGetUniformLocation(mProgram, name.latin1());
     mUniformLocations->insert(name, location);
   }
   return *location;
@@ -486,7 +509,7 @@ bool BoShader::setUniform(const QString& name, float value)
   int location = uniformLocation(name);
   if(location >= 0)
   {
-    boglUniform1f(location, value);
+    glUniform1f(location, value);
   }
   return (location >= 0);
 }
@@ -496,7 +519,7 @@ bool BoShader::setUniform(const QString& name, int value)
   int location = uniformLocation(name);
   if(location >= 0)
   {
-    boglUniform1i(location, value);
+    glUniform1i(location, value);
   }
   return (location >= 0);
 }
@@ -506,7 +529,7 @@ bool BoShader::setUniform(const QString& name, bool value)
   int location = uniformLocation(name);
   if(location >= 0)
   {
-    boglUniform1i(location, value ? 1 : 0);
+    glUniform1i(location, value ? 1 : 0);
   }
   return (location >= 0);
 }
@@ -516,7 +539,7 @@ bool BoShader::setUniform(const QString& name, const BoVector2Float& value)
   int location = uniformLocation(name);
   if(location >= 0)
   {
-    boglUniform2fv(location, 1, value.data());
+    glUniform2fv(location, 1, value.data());
   }
   return (location >= 0);
 }
@@ -526,7 +549,7 @@ bool BoShader::setUniform(const QString& name, const BoVector3Float& value)
   int location = uniformLocation(name);
   if(location >= 0)
   {
-    boglUniform3fv(location, 1, value.data());
+    glUniform3fv(location, 1, value.data());
   }
   return (location >= 0);
 }
@@ -536,7 +559,7 @@ bool BoShader::setUniform(const QString& name, const BoVector4Float& value)
   int location = uniformLocation(name);
   if(location >= 0)
   {
-    boglUniform4fv(location, 1, value.data());
+    glUniform4fv(location, 1, value.data());
   }
   return (location >= 0);
 }
@@ -545,7 +568,7 @@ void BoShader::bind()
 {
   if(mCurrentShader != this)
   {
-    boglUseProgram(mProgram);
+    glUseProgram(mProgram);
     mCurrentShader = this;
     setUniform("cameraPos", mCameraPos);
     setUniform("lightPos", mSun->position3());
@@ -559,7 +582,7 @@ void BoShader::unbind()
 {
   if(mCurrentShader)
   {
-    boglUseProgram(0);
+    glUseProgram(0);
     mCurrentShader = 0;
   }
 }
