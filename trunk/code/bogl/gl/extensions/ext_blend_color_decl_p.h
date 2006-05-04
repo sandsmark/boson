@@ -31,6 +31,13 @@ extern "C" {
 }; // extern "C"
 
 
+#define GL_CONSTANT_COLOR_EXT                 0x8001
+#define GL_ONE_MINUS_CONSTANT_COLOR_EXT       0x8002
+#define GL_CONSTANT_ALPHA_EXT                 0x8003
+#define GL_ONE_MINUS_CONSTANT_ALPHA_EXT       0x8004
+#define GL_BLEND_COLOR_EXT                    0x8005
+
+
 #if BOGL_DO_DLOPEN
 #define glBlendColorEXT bo_glBlendColorEXT
 #endif // BOGL_DO_DLOPEN
