@@ -1011,7 +1011,7 @@ void BoTextureManager::activateTextureUnit(int textureUnit)
   }
   if(mActiveTextureUnit != textureUnit)
   {
-    boglActiveTexture(GL_TEXTURE0 + textureUnit);
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
     mActiveTextureUnit = textureUnit;
   }
 }
@@ -1023,7 +1023,7 @@ void BoTextureManager::invalidateCache()
     // Disable all texturing
     if(mTextureUnits > 1)
     {
-      boglActiveTexture(GL_TEXTURE0 + i);
+      glActiveTexture(GL_TEXTURE0 + i);
     }
     glDisable(GL_TEXTURE_1D);
     glDisable(GL_TEXTURE_2D);
@@ -1042,7 +1042,7 @@ void BoTextureManager::invalidateCache()
   }
   if(mTextureUnits > 1)
   {
-    boglActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE0);
   }
   mActiveTextureUnit = 0;
 }
