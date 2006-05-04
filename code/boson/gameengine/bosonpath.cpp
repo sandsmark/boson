@@ -394,8 +394,8 @@ void BosonPath::advance()
 
 void BosonPath::findPath(BosonPathInfo* info)
 {
+  //boDebug(500) << k_funcinfo << endl;
   PROFILE_METHOD;
-  boDebug(500) << k_funcinfo << endl;
 
   if(info->flying)
   {
@@ -453,6 +453,12 @@ void BosonPath::findPath(BosonPathInfo* info)
 
   // Reset statuses in the search area
   resetDirtyCellStatuses();
+
+  long int elapsed = methodProfiler.popElapsed();
+  boDebug(500) << k_funcinfo << (info->flying ? "flying " : "") <<
+      "unit " << (info->unit ? info->unit->id() : -1) << "; took " << elapsed/1000.0f << " ms;   result: " <<
+      (info->result == GoalReached ? "GoalReached" : (info->result == OutOfRange ? "OutOfRange" :
+      (info->result == NoPath ? "NoPath" : "None"))) << ", path length: " << info->llpath.count() << endl;
 }
 
 
@@ -501,11 +507,19 @@ int BosonPath::findClosestFreeGoalCell(BosonPathInfo* info)
       {
         return range;
       }
+      if(!(nodeStatus(info, x, goaly + range) & STATUS_CANTGO))
+      {
+        return range;
+      }
     }
     // Then right and left sides. Note that corners are already checked
     for(int y = goaly - range + 1; y < goaly + range; y++)
     {
       if(!(nodeStatus(info, goalx - range, y) & STATUS_CANTGO))
+      {
+        return range;
+      }
+      if(!(nodeStatus(info, goalx + range, y) & STATUS_CANTGO))
       {
         return range;
       }
@@ -1044,7 +1058,7 @@ unsigned int BosonPath::nodeStatus(BosonPathInfo* info, int x, int y)
       {
         calculateCellStatus(info, x2, y2);
       }
-      status &= mCellStatus[y2 * mMap->width() + x2].flags;
+      status |= mCellStatus[y2 * mMap->width() + x2].flags;
     }
   }
 
