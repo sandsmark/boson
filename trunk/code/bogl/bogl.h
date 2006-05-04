@@ -92,25 +92,6 @@ typedef char GLcharARB;		/* native character */
 // Function prototypes
 typedef void (*_boglActiveTexture)(GLenum);
 
-typedef void (*_boglAttachShader) (GLuint, GLuint);
-typedef void (*_boglCompileShader) (GLuint);
-typedef GLuint (*_boglCreateProgram) (void);
-typedef GLuint (*_boglCreateShader) (GLenum);
-typedef void (*_boglDeleteProgram) (GLuint);
-typedef void (*_boglDeleteShader) (GLuint);
-typedef void (*_boglGetProgramInfoLog) (GLuint, GLsizei, GLsizei *, GLcharARB *);
-typedef void (*_boglGetProgramiv) (GLuint, GLenum, GLint *);
-typedef void (*_boglGetShaderInfoLog) (GLuint, GLsizei, GLsizei *, GLcharARB *);
-typedef void (*_boglGetShaderiv) (GLuint, GLenum, GLint *);
-typedef GLint (*_boglGetUniformLocation) (GLuint, const GLcharARB *);
-typedef void (*_boglLinkProgram) (GLuint);
-typedef void (*_boglShaderSource) (GLuint, GLsizei, const GLcharARB* *, const GLint *);
-typedef void (*_boglUniform1f) (GLint, GLfloat);
-typedef void (*_boglUniform1i) (GLint, GLint);
-typedef void (*_boglUniform2fv) (GLint, GLsizei, const GLfloat *);
-typedef void (*_boglUniform3fv) (GLint, GLsizei, const GLfloat *);
-typedef void (*_boglUniform4fv) (GLint, GLsizei, const GLfloat *);
-typedef void (*_boglUseProgram) (GLuint);
 
 typedef void (*_boglBindRenderbuffer) (GLenum, GLuint);
 typedef void (*_boglDeleteRenderbuffers) (GLsizei, const GLuint *);
@@ -129,26 +110,6 @@ typedef void (*_boglGenerateMipmap) (GLenum);
 // Function pointers for extensions
 // Textures
 extern _boglActiveTexture boglActiveTexture;
-// Shaders
-extern _boglAttachShader boglAttachShader;
-extern _boglCompileShader boglCompileShader;
-extern _boglCreateProgram boglCreateProgram;
-extern _boglCreateShader boglCreateShader;
-extern _boglDeleteProgram boglDeleteProgram;
-extern _boglDeleteShader boglDeleteShader;
-extern _boglGetProgramInfoLog boglGetProgramInfoLog;
-extern _boglGetProgramiv boglGetProgramiv;
-extern _boglGetShaderInfoLog boglGetShaderInfoLog;
-extern _boglGetShaderiv boglGetShaderiv;
-extern _boglGetUniformLocation boglGetUniformLocation;
-extern _boglLinkProgram boglLinkProgram;
-extern _boglShaderSource boglShaderSource;
-extern _boglUniform1f boglUniform1f;
-extern _boglUniform1i boglUniform1i;
-extern _boglUniform2fv boglUniform2fv;
-extern _boglUniform3fv boglUniform3fv;
-extern _boglUniform4fv boglUniform4fv;
-extern _boglUseProgram boglUseProgram;
 // FBO
 extern _boglBindRenderbuffer boglBindRenderbuffer;
 extern _boglDeleteRenderbuffers boglDeleteRenderbuffers;
