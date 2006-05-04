@@ -45,12 +45,16 @@ extern "C" {
 
 
 	// GL function pointers
+	extern _glBindBufferARB bo_glBindBufferARB;
 	extern _glDeleteBuffersARB bo_glDeleteBuffersARB;
 	extern _glGenBuffersARB bo_glGenBuffersARB;
-	extern _glBindBufferARB bo_glBindBufferARB;
+	extern _glIsBufferARB bo_glIsBufferARB;
 	extern _glBufferDataARB bo_glBufferDataARB;
+	extern _glBufferSubDataARB bo_glBufferSubDataARB;
 	extern _glMapBufferARB bo_glMapBufferARB;
 	extern _glUnmapBufferARB bo_glUnmapBufferARB;
+	extern _glGetBufferParameterivARB bo_glGetBufferParameterivARB;
+	extern _glGetBufferPointervARB bo_glGetBufferPointervARB;
 }; // extern "C"
 
 
@@ -58,7 +62,6 @@ extern "C" {
 #define GL_ELEMENT_ARRAY_BUFFER_ARB                     0x8893
 #define GL_ARRAY_BUFFER_BINDING_ARB                     0x8894
 #define GL_ELEMENT_ARRAY_BUFFER_BINDING_ARB             0x8895
-#define GL_VERTEX_ARRAY_BUFFER_BINDING_ARB              0x8895
 #define GL_VERTEX_ARRAY_BUFFER_BINDING_ARB              0x8896
 #define GL_NORMAL_ARRAY_BUFFER_BINDING_ARB              0x8897
 #define GL_COLOR_ARRAY_BUFFER_BINDING_ARB               0x8898
@@ -92,6 +95,16 @@ extern "C" {
 
 
 #if BOGL_DO_DLOPEN
+#define glBindBufferARB bo_glBindBufferARB;
+#define glDeleteBuffersARB bo_glDeleteBuffersARB;
+#define glGenBuffersARB bo_glGenBuffersARB;
+#define glIsBufferARB bo_glIsBufferARB;
+#define glBufferDataARB bo_glBufferDataARB;
+#define glBufferSubDataARB bo_glBufferSubDataARB;
+#define glMapBufferARB bo_glMapBufferARB;
+#define glUnmapBufferARB bo_glUnmapBufferARB;
+#define glGetBufferParameterivARB bo_glGetBufferParameterivARB;
+#define glGetBufferPointervARB bo_glGetBufferPointervARB;
 #endif // BOGL_DO_DLOPEN
 
 
