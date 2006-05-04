@@ -64,6 +64,7 @@ static bool boglResolveEXT_blend_color_Symbols(QLibrary&gl);
 static bool boglResolveEXT_point_parameters_Symbols(QLibrary&gl);
 static bool boglResolveEXT_polygon_offset_Symbols(QLibrary&gl);
 static bool boglResolveEXT_texture3d_Symbols(QLibrary&gl);
+static bool boglResolveARB_vertex_buffer_object_Symbols(QLibrary&gl);
 
 bool boglResolveLibGLSymbols(QLibrary& gl)
 {
@@ -110,6 +111,9 @@ bool boglResolveLibGLSymbols(QLibrary& gl)
  }
  if (extensions.contains("GL_EXT_blend_color")) {
 	boglResolveEXT_blend_color_Symbols(gl);
+ }
+ if (extensions.contains("GL_ARB_vertex_buffer_object")) {
+	boglResolveARB_vertex_buffer_object_Symbols(gl);
  }
 
  return true;
@@ -1434,5 +1438,47 @@ bool boglResolveEXT_texture3d_Symbols(QLibrary&gl)
  return true;
 }
 
+
+// ARB_vertex_buffer_object
+extern "C" {
+	_glBindBufferARB bo_glBindBufferARB;
+	_glDeleteBuffersARB bo_glDeleteBuffersARB;
+	_glGenBuffersARB bo_glGenBuffersARB;
+	_glIsBufferARB bo_glIsBufferARB;
+	_glBufferDataARB bo_glBufferDataARB;
+	_glBufferSubDataARB bo_glBufferSubDataARB;
+	_glMapBufferARB bo_glMapBufferARB;
+	_glUnmapBufferARB bo_glUnmapBufferARB;
+	_glGetBufferParameterivARB bo_glGetBufferParameterivARB;
+	_glGetBufferPointervARB bo_glGetBufferPointervARB;
+}; // extern "C"
+
+bool boglResolveARB_vertex_buffer_object_Symbols(QLibrary& gl)
+{
+ Q_UNUSED(gl);
+
+ RESOLVE_GL_SYMBOL_CHECK(glBindBufferARB);
+ RESOLVE_GL_SYMBOL_CHECK(glDeleteBuffersARB);
+ RESOLVE_GL_SYMBOL_CHECK(glGenBuffersARB);
+ RESOLVE_GL_SYMBOL_CHECK(glIsBufferARB);
+ RESOLVE_GL_SYMBOL_CHECK(glBufferDataARB);
+ RESOLVE_GL_SYMBOL_CHECK(glBufferSubDataARB);
+ RESOLVE_GL_SYMBOL_CHECK(glMapBufferARB);
+ RESOLVE_GL_SYMBOL_CHECK(glUnmapBufferARB);
+ RESOLVE_GL_SYMBOL_CHECK(glGetBufferParameterivARB);
+ RESOLVE_GL_SYMBOL_CHECK(glGetBufferPointervARB);
+
+#if 0
+ // TODO (once OpenGL 1.5 support is available in our headers):
+ //      use the ARB functions for the non-ARB function pointers
+ //      --> we can use the non-ARB versions in code then
+ if (bo_glDeleteBuffers != 0) {
+	bo_glDeleteBuffers = bo_glDeleteBuffersARB;
+	// ... TODO
+ }
+#endif
+
+ return true;
+}
 
 
