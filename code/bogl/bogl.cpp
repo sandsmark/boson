@@ -36,8 +36,6 @@
 bool bogl_inited = false;
 
 // Function pointers for extensions
-// Blendcolor
-_boglBlendColor boglBlendColor = 0;
 // VBO
 _boglDeleteBuffers boglDeleteBuffers = 0;
 _boglGenBuffers boglGenBuffers = 0;
@@ -94,16 +92,6 @@ void boglInit()
   boDebug() << k_funcinfo << "Checking for OpenGL extensions..." << endl;
   QStringList extensions = boglGetOpenGLExtensions();
   unsigned int openglversion = boglGetOpenGLVersion();
-
-  // Blendcolor
-  if(extensions.contains("GL_ARB_imaging"))
-  {
-    boglBlendColor = (_boglBlendColor)glXGetProcAddressARB((const GLubyte*)"glBlendColor");
-  }
-  else if(extensions.contains("GL_EXT_blend_color"))
-  {
-    boglBlendColor = (_boglBlendColor)glXGetProcAddressARB((const GLubyte*)"glBlendColorEXT");
-  }
 
   // VBO
   if(extensions.contains("GL_ARB_vertex_buffer_object"))
@@ -168,9 +156,11 @@ void boglInit()
     boglActiveTexture = (_boglActiveTexture)glXGetProcAddressARB((const GLubyte*)"glActiveTextureARB");
   }
 #else //GLX_ARB_get_proc_address
-  // TODO: maybe make this an error?
-#warning cannot find GLX_ARB_get_proc_address - cant use extensions
-  boError() << k_funcinfo << "GLX_ARB_get_proc_address not available. please report this with information about your system!" << endl;
+
+  // AB: if this is a linux system, it MUST support GLX_ARB_get_proc_address, as
+  //     it is part of the linux OpenGL ARB.
+#error cannot find GLX_ARB_get_proc_address. OpenGL installation broken?
+
 #endif //GLX_ARB_get_proc_address
 
   // Done

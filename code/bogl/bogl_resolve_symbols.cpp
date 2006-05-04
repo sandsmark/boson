@@ -59,6 +59,8 @@ bool boglResolveLibGLSymbols(QLibrary& gl)
  if (!boglResolveGLXSymbols(gl)) {
 	return false;
  }
+
+ // TODO: check for OpenGL version
  if (!boglResolveOpenGL_1_1_Symbols(gl)) {
 	return false;
  }
@@ -80,11 +82,19 @@ bool boglResolveLibGLSymbols(QLibrary& gl)
  if (!boglResolveOpenGL_1_5_Symbols(gl)) {
 	return false;
  }
+
+ // TODO: check if extensions are present
  boglResolveARB_multitexture_Symbols(gl);
- boglResolveEXT_blend_color_Symbols(gl);
  boglResolveEXT_point_parameters_Symbols(gl);
  boglResolveEXT_polygon_offset_Symbols(gl);
  boglResolveEXT_texture3d_Symbols(gl);
+
+ // TODO:
+ // if (!extensions.contains("GL_ARB_imaging"))
+ {
+	// ARB_imaging already contains this.
+	boglResolveEXT_blend_color_Symbols(gl);
+ }
 
  return true;
 }
@@ -1098,40 +1108,45 @@ bool boglResolveOpenGL_1_2_Symbols(QLibrary& gl)
  RESOLVE_CHECK(glTexSubImage3D);
  RESOLVE_CHECK(glCopyTexSubImage3D);
  RESOLVE_CHECK(glDrawRangeElements);
- RESOLVE_CHECK(glColorTable);
- RESOLVE_CHECK(glCopyColorTable);
- RESOLVE_CHECK(glColorTableParameteriv);
- RESOLVE_CHECK(glColorTableParameterfv);
- RESOLVE_CHECK(glGetColorTable);
- RESOLVE_CHECK(glGetColorTableParameterfv);
- RESOLVE_CHECK(glGetColorTableParameteriv);
- RESOLVE_CHECK(glColorSubTable);
- RESOLVE_CHECK(glCopyColorSubTable);
- RESOLVE_CHECK(glConvolutionFilter1D);
- RESOLVE_CHECK(glConvolutionFilter2D);
- RESOLVE_CHECK(glCopyConvolutionFilter1D);
- RESOLVE_CHECK(glCopyConvolutionFilter2D);
- RESOLVE_CHECK(glGetConvolutionFilter);
- RESOLVE_CHECK(glSeparableFilter2D);
- RESOLVE_CHECK(glGetSeparableFilter);
- RESOLVE_CHECK(glConvolutionParameterf);
- RESOLVE_CHECK(glConvolutionParameterfv);
- RESOLVE_CHECK(glConvolutionParameteri);
- RESOLVE_CHECK(glConvolutionParameteriv);
- RESOLVE_CHECK(glGetConvolutionParameterfv);
- RESOLVE_CHECK(glGetConvolutionParameteriv);
- RESOLVE_CHECK(glHistogram);
- RESOLVE_CHECK(glResetHistogram);
- RESOLVE_CHECK(glGetHistogram);
- RESOLVE_CHECK(glGetHistogramParameterfv);
- RESOLVE_CHECK(glGetHistogramParameteriv);
- RESOLVE_CHECK(glMinmax);
- RESOLVE_CHECK(glResetMinmax);
- RESOLVE_CHECK(glGetMinmax);
- RESOLVE_CHECK(glGetMinmaxParameterfv);
- RESOLVE_CHECK(glGetMinmaxParameteriv);
- RESOLVE_CHECK(glBlendColor);
- RESOLVE_CHECK(glBlendEquation);
+
+ // TODO:
+ // if (extensions.contains("GL_ARB_imaging")
+ {
+	RESOLVE_CHECK(glColorTable);
+	RESOLVE_CHECK(glCopyColorTable);
+	RESOLVE_CHECK(glColorTableParameteriv);
+	RESOLVE_CHECK(glColorTableParameterfv);
+	RESOLVE_CHECK(glGetColorTable);
+	RESOLVE_CHECK(glGetColorTableParameterfv);
+	RESOLVE_CHECK(glGetColorTableParameteriv);
+	RESOLVE_CHECK(glColorSubTable);
+	RESOLVE_CHECK(glCopyColorSubTable);
+	RESOLVE_CHECK(glConvolutionFilter1D);
+	RESOLVE_CHECK(glConvolutionFilter2D);
+	RESOLVE_CHECK(glCopyConvolutionFilter1D);
+	RESOLVE_CHECK(glCopyConvolutionFilter2D);
+	RESOLVE_CHECK(glGetConvolutionFilter);
+	RESOLVE_CHECK(glSeparableFilter2D);
+	RESOLVE_CHECK(glGetSeparableFilter);
+	RESOLVE_CHECK(glConvolutionParameterf);
+	RESOLVE_CHECK(glConvolutionParameterfv);
+	RESOLVE_CHECK(glConvolutionParameteri);
+	RESOLVE_CHECK(glConvolutionParameteriv);
+	RESOLVE_CHECK(glGetConvolutionParameterfv);
+	RESOLVE_CHECK(glGetConvolutionParameteriv);
+	RESOLVE_CHECK(glHistogram);
+	RESOLVE_CHECK(glResetHistogram);
+	RESOLVE_CHECK(glGetHistogram);
+	RESOLVE_CHECK(glGetHistogramParameterfv);
+	RESOLVE_CHECK(glGetHistogramParameteriv);
+	RESOLVE_CHECK(glMinmax);
+	RESOLVE_CHECK(glResetMinmax);
+	RESOLVE_CHECK(glGetMinmax);
+	RESOLVE_CHECK(glGetMinmaxParameterfv);
+	RESOLVE_CHECK(glGetMinmaxParameteriv);
+	RESOLVE_CHECK(glBlendColor);
+	RESOLVE_CHECK(glBlendEquation);
+ }
  return true;
 }
 
@@ -1354,6 +1369,10 @@ extern "C" {
 bool boglResolveEXT_blend_color_Symbols(QLibrary&gl)
 {
  RESOLVE(glBlendColorEXT);
+
+ if (bo_glBlendColor == 0) {
+	bo_glBlendColor = bo_glBlendColorEXT;
+ }
  return true;
 }
 
