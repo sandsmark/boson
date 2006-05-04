@@ -1648,6 +1648,23 @@ bool boglResolveARB_shader_objects_Symbols(QLibrary& gl)
 
 // GL_EXT_framebuffer_object
 extern "C" {
+	_glIsRenderBufferEXT bo_glIsRenderBufferEXT;
+	_glBindRenderbufferEXT bo_glBindRenderbufferEXT;
+	_glDeleteRenderbuffersEXT bo_glDeleteRenderbuffersEXT;
+	_glGenRenderbuffersEXT bo_glGenRenderbuffersEXT;
+	_glRenderbufferStorageEXT bo_glRenderbufferStorageEXT;
+	_glGetRenderbufferParameterivEXT bo_glGetRenderbufferParameterivEXT;
+	_glIsFrameBufferEXT bo_glIsFrameBufferEXT;
+	_glBindFramebufferEXT bo_glBindFramebufferEXT;
+	_glDeleteFramebuffersEXT bo_glDeleteFramebuffersEXT;
+	_glGenFramebuffersEXT bo_glGenFramebuffersEXT;
+	_glCheckFramebufferStatusEXT bo_glCheckFramebufferStatusEXT;
+	_glFramebufferTexture1DEXT bo_glFramebufferTexture1DEXT;
+	_glFramebufferTexture2DEXT bo_glFramebufferTexture2DEXT;
+	_glFramebufferTexture3DEXT bo_glFramebufferTexture3DEXT;
+	_glFramebufferRenderbufferEXT bo_glFramebufferRenderbufferEXT;
+	_glFramebufferAttachmentParameterivEXT bo_glFramebufferAttachmentParameterivEXT;
+	_glGenerateMipmapEXT bo_glGenerateMipmapEXT;
 }; // "C"
 
 bool boglResolveEXT_framebuffer_object_Symbols(QLibrary& gl)
