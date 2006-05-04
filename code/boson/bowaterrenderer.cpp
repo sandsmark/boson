@@ -820,7 +820,7 @@ void BoWaterRenderer::renderChunk(BoLakeGL* lake, BoLakeGL::WaterChunk* chunk, f
       glEnable(GL_BLEND);
       if(mSupports_blendcolor)
       {
-        boglBlendColor(diffusecolor.x(), diffusecolor.y(), diffusecolor.z(), diffusecolor.w());
+        glBlendColor(diffusecolor.x(), diffusecolor.y(), diffusecolor.z(), diffusecolor.w());
         glBlendFunc(GL_CONSTANT_COLOR, GL_ZERO);
       }
     }
