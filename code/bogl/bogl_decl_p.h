@@ -33,7 +33,6 @@
 // OpenGL extensions
 #include "gl/extensions/arb_multitexture_decl_p.h"
 #include "gl/extensions/ext_blend_color_decl_p.h"
-#include "gl/extensions/ext_point_parameters_decl_p.h"
 #include "gl/extensions/ext_polygon_offset_decl_p.h"
 #include "gl/extensions/ext_texture3d_decl_p.h"
 #include "gl/extensions/arb_vertex_buffer_object_decl_p.h"

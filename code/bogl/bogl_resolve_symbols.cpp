@@ -71,7 +71,6 @@ static bool boglResolveOpenGL_1_5_Symbols(QLibrary& gl);
 static bool boglResolveGLUSymbols(QLibrary& gl);
 static bool boglResolveARB_multitexture_Symbols();
 static bool boglResolveEXT_blend_color_Symbols();
-static bool boglResolveEXT_point_parameters_Symbols();
 static bool boglResolveEXT_polygon_offset_Symbols();
 static bool boglResolveEXT_texture3d_Symbols();
 static bool boglResolveARB_vertex_buffer_object_Symbols();
@@ -120,9 +119,6 @@ void boglResolveGLExtensionSymbols()
 
  if (extensions.contains("GL_ARB_multitexture")) {
 	boglResolveARB_multitexture_Symbols();
- }
- if (extensions.contains("GL_EXT_point_parameters")) {
-	boglResolveEXT_point_parameters_Symbols();
  }
  if (extensions.contains("GL_EXT_polygon_offset")) {
 	boglResolveEXT_polygon_offset_Symbols();
@@ -1514,19 +1510,6 @@ bool boglResolveEXT_blend_color_Symbols()
  return true;
 }
 
-
-// EXT_point_parameters
-extern "C" {
-	_glPointParameterfEXT bo_glPointParameterfEXT;
-	_glPointParameterfvEXT bo_glPointParameterfvEXT;
-}; // extern "C"
-
-bool boglResolveEXT_point_parameters_Symbols()
-{
- RESOLVE_GL_SYMBOL_CHECK(glPointParameterfEXT);
- RESOLVE_GL_SYMBOL_CHECK(glPointParameterfvEXT);
- return true;
-}
 
 
 // EXT_polygon_offset
