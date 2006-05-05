@@ -445,6 +445,7 @@ void BosonPath::findPath(BosonPathInfo* info)
       // Use the high-level pathfinder
       if(getHighLevelPath(info) != NoPath)
       {
+        boDebug(500) << "Found hlpath of " << info->hlpath.count() << " steps" << endl;
         getPartialLowLevelPath(info);
       }
     }
@@ -1968,11 +1969,18 @@ void BosonPath::initBlocks()
   {
     mBlocks[i].centerx = new int[mMoveDatas.count()];
     mBlocks[i].centery = new int[mMoveDatas.count()];
-    // Find block centers
-    for(unsigned int j = 0; j < mMoveDatas.count(); j++)
+  }
+  // We need to first loop by movedata here, because cell statuses are cached
+  //  per movedata, so we need to reset them before starting to process another
+  //  movedata
+  // Find block centers
+  for(unsigned int i = 0; i < mMoveDatas.count(); i++)
+  {
+    for(int j = 0; j < blockcount; j++)
     {
-      findBlockCenter(i, mMoveDatas[j]);
+      findBlockCenter(j, mMoveDatas[i]);
     }
+    resetDirtyCellStatuses();
   }
 
   // Find the connections between the blocks
@@ -1995,8 +2003,6 @@ void BosonPath::initBlocks()
   {
     createBlockColormap(mMoveDatas[i]);
   }*/
-
-  resetDirtyCellStatuses();
 }
 
 void BosonPath::findBlockCenter(int blockpos, BosonMoveData* movedata)
@@ -2447,8 +2453,8 @@ void BosonPath::updateChangedBlocks()
     return;
   }
 
-  boDebug(500) << k_funcinfo << "Updating " << mChangedBlocks.count() << " blocks and " <<
-      mDirtyConnections.count() << " connections" << endl;
+  int blocksToUpdate = mChangedBlocks.count();
+  int connectionsToUpdate = mDirtyConnections.count();
 
   {
   PROFILE_METHOD;
@@ -2466,6 +2472,7 @@ void BosonPath::updateChangedBlocks()
     for(unsigned int i = 0; i < mMoveDatas.count(); i++)
     {
       findBlockCenter(pos, mMoveDatas[i]);
+      resetDirtyCellStatuses();
     }
     mBlocks[pos].flags &= ~STATUS_CHANGED;
   }
@@ -2485,6 +2492,9 @@ void BosonPath::updateChangedBlocks()
     }
     mBlockConnectionsDirty[blockpos*4 + dir] = false;
   }
+  long int elapsed = methodProfiler.popElapsed();
+  boDebug(500) << k_funcinfo << "Updated " << blocksToUpdate << " blocks and " <<
+      connectionsToUpdate << " connections in " << elapsed/1000.0f << " ms" << endl;
   }
 
   /*for(unsigned int i = 0; i < mMoveDatas.count(); i++)
