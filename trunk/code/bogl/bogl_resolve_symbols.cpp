@@ -1306,12 +1306,69 @@ bool boglResolveOpenGL_1_3_Symbols(QLibrary& gl)
 
 // OpenGL 1.4
 extern "C" {
+	_glFogCoordPointer bo_glFogCoordPointer;
+	_glFogCoordf bo_glFogCoordf;
+	_glFogCoordd bo_glFogCoordd;
+	_glFogCoordfv bo_glFogCoordfv;
+	_glFogCoorddv bo_glFogCoorddv;
+	_glMultiDrawArrays bo_glMultiDrawArrays;
+	_glMultiDrawElements bo_glMultiDrawElements;
+	_glPointParameterf bo_glPointParameterf;
+	_glPointParameterfv bo_glPointParameterfv;
+	_glPointParameteri bo_glPointParameteri;
+	_glPointParameteriv bo_glPointParameteriv;
+	_glSecondaryColor3b bo_glSecondaryColor3b;
+	_glSecondaryColor3s bo_glSecondaryColor3s;
+	_glSecondaryColor3i bo_glSecondaryColor3i;
+	_glSecondaryColor3f bo_glSecondaryColor3f;
+	_glSecondaryColor3d bo_glSecondaryColor3d;
+	_glSecondaryColor3bv bo_glSecondaryColor3bv;
+	_glSecondaryColor3sv bo_glSecondaryColor3sv;
+	_glSecondaryColor3iv bo_glSecondaryColor3iv;
+	_glSecondaryColor3fv bo_glSecondaryColor3fv;
+	_glSecondaryColor3dv bo_glSecondaryColor3dv;
+	_glSecondaryColor3ub bo_glSecondaryColor3ub;
+	_glSecondaryColor3us bo_glSecondaryColor3us;
+	_glSecondaryColor3ui bo_glSecondaryColor3ui;
+	_glSecondaryColor3ubv bo_glSecondaryColor3ubv;
+	_glSecondaryColor3usv bo_glSecondaryColor3usv;
+	_glSecondaryColor3uiv bo_glSecondaryColor3uiv;
+	_glSecondaryColorPointer bo_glSecondaryColorPointer;
+	_glBlendFuncSeparate bo_glBlendFuncSeparate;
 }; // extern "C"
 
 bool boglResolveOpenGL_1_4_Symbols(QLibrary& gl)
 {
- // TODO
- Q_UNUSED(gl);
+ RESOLVE(glFogCoordPointer);
+ RESOLVE(glFogCoordf);
+ RESOLVE(glFogCoordd);
+ RESOLVE(glFogCoordfv);
+ RESOLVE(glFogCoorddv);
+ RESOLVE(glMultiDrawArrays);
+ RESOLVE(glMultiDrawElements);
+ RESOLVE(glPointParameterf);
+ RESOLVE(glPointParameterfv);
+ RESOLVE(glPointParameteri);
+ RESOLVE(glPointParameteriv);
+ RESOLVE(glSecondaryColor3b);
+ RESOLVE(glSecondaryColor3s);
+ RESOLVE(glSecondaryColor3i);
+ RESOLVE(glSecondaryColor3f);
+ RESOLVE(glSecondaryColor3d);
+ RESOLVE(glSecondaryColor3bv);
+ RESOLVE(glSecondaryColor3sv);
+ RESOLVE(glSecondaryColor3iv);
+ RESOLVE(glSecondaryColor3fv);
+ RESOLVE(glSecondaryColor3dv);
+ RESOLVE(glSecondaryColor3ub);
+ RESOLVE(glSecondaryColor3us);
+ RESOLVE(glSecondaryColor3ui);
+ RESOLVE(glSecondaryColor3ubv);
+ RESOLVE(glSecondaryColor3usv);
+ RESOLVE(glSecondaryColor3uiv);
+ RESOLVE(glSecondaryColorPointer);
+ RESOLVE(glBlendFuncSeparate);
+
  return true;
 }
 

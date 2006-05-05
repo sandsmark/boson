@@ -35,48 +35,238 @@
  * EXT_secondary_color
  * EXT_blend_func_separate
  * EXT_stencil_wrap
- * ARB_texture_crossbar
+ * ARB_texture_env_crossbar
 */
 
 /*
  new functions:
  * SGIS_generate_mipmap
-   (TODO)
+   none
  * NV_blend_square
-   (TODO)
+   none
  * ARB_depth_texture
-   (TODO)
+   none
  * ARB_shadow
-   (TODO)
+   none
  * EXT_fog_coord
-   (TODO)
+   glFogCoord[fd]()
+   glFogCoord[fd]v()
+   glFogCoordPointer()
  * EXT_multi_draw_arrays
-   (TODO)
+   glMultiDrawArrays()
+   glMultiDrawElements()
  * ARB_point_parameters
-   (TODO)
+   glPointParameterf()
+   glPointParameterfv()
+   glPointParameteri()    // AB: not in the extension, but in the 1.4 spec
+   glPointParameteriv()   // AB: not in the extension, but in the 1.4 spec
  * EXT_secondary_color
-   (TODO)
+   glSecondaryColor3[bsifd ubusui]()
+   glSecondaryColor3[bsifd ubusui]v()
+   glSecondaryColorPointer()
  * EXT_blend_func_separate
-   (TODO)
+   glBlendFuncSeparate()
  * EXT_stencil_wrap
-   (TODO)
- * ARB_texture_crossbar
-   (TODO)
+   none
+ * ARB_texture_env_crossbar
+   none
+
+ new defines:
+ * SGIS_generate_mipmap
+   GL_GENERATE_MIPMAP
+   GL_GENERATE_MIPMAP_HINT
+ * NV_blend_square
+   none
+ * ARB_depth_texture
+   GL_DEPTH_COMPONENT
+   GL_DEPTH_COMPONENT16
+   GL_DEPTH_COMPONENT24
+   GL_DEPTH_COMPONENT32
+   GL_TEXTURE_DEPTH_SIZE
+   GL_DEPTH_TEXTURE_MODE
+ * ARB_shadow
+   GL_TEXTURE_COMPARE_MODE
+   GL_TEXTURE_COMPARE_FUNC
+   GL_COMPARE_R_TO_TEXTURE
+ * EXT_fog_coord
+   FOG_COORDINATE_SOURCE
+   FOG_COORDINATE
+   FRAGMENT_DEPTH
+   CURRENT_FOG_COORDINATE
+   FOG_COORDINATE_ARRAY_TYPE
+   FOG_COORDINATE_ARRAY_STRIDE
+   FOG_COORDINATE_ARRAY_POINTER
+   GL_FOG_COORDINATE_ARRAY
+ * EXT_multi_draw_arrays
+   none
+ * ARB_point_parameters
+   POINT_SIZE_MIN
+   POINT_SIZE_MAX
+   POINT_FADE_THRESHOLD_SIZE
+   POINT_DISTANCE_ATTENUATION
+ * EXT_secondary_color
+   GL_COLOR_SUM
+   GL_CURRENT_SECONDARY_COLOR
+   GL_SECONDARY_COLOR_ARRAY_SIZE
+   GL_SECONDARY_COLOR_ARRAY_TYPE
+   GL_SECONDARY_COLOR_ARRAY_STRIDE
+   GL_SECONDARY_COLOR_ARRAY_POINTER
+   GL_SECONDARY_COLOR_ARRAY
+ * EXT_blend_func_separate
+   GL_BLEND_DST_RGB
+   GL_BLEND_SRC_RGB
+   GL_BLEND_DST_ALPHA
+   GL_BLEND_SRC_ALPHA
+ * EXT_stencil_wrap
+   GL_INCR_WRAP
+   GL_DECR_WRAP
+ * ARB_texture_env_crossbar
+   none (GL_TEXTUREi was already in 1.3)
 */
 
 
 extern "C" {
 	// GL typedefs
-	// (TODO)
+	typedef void (*_glFogCoordf)(GLfloat);
+	typedef void (*_glFogCoordd)(GLdouble);
+	typedef void (*_glFogCoordfv)(const GLfloat*);
+	typedef void (*_glFogCoorddv)(const GLdouble*);
+	typedef void (*_glFogCoordPointer)(GLenum, GLsizei, const GLvoid*);
+	typedef void (*_glMultiDrawArrays)(GLenum, GLint*, GLsizei*, GLsizei);
+	typedef void (*_glMultiDrawElements)(GLenum, GLsizei*, GLenum, const GLvoid**, GLsizei);
+	typedef void (*_glPointParameterf)(GLenum, GLfloat);
+	typedef void (*_glPointParameterfv)(GLenum, const GLfloat*);
+	typedef void (*_glPointParameteri)(GLenum, GLint);
+	typedef void (*_glPointParameteriv)(GLenum, const GLint*);
+	typedef void (*_glSecondaryColor3b)(GLbyte, GLbyte, GLbyte);
+	typedef void (*_glSecondaryColor3s)(GLshort, GLshort, GLshort);
+	typedef void (*_glSecondaryColor3i)(GLint, GLint, GLint);
+	typedef void (*_glSecondaryColor3f)(GLfloat, GLfloat, GLfloat);
+	typedef void (*_glSecondaryColor3d)(GLdouble, GLdouble, GLdouble);
+	typedef void (*_glSecondaryColor3bv)(const GLbyte*);
+	typedef void (*_glSecondaryColor3sv)(const GLshort*);
+	typedef void (*_glSecondaryColor3iv)(const GLint*);
+	typedef void (*_glSecondaryColor3fv)(const GLfloat*);
+	typedef void (*_glSecondaryColor3dv)(const GLdouble*);
+	typedef void (*_glSecondaryColor3ub)(GLubyte, GLubyte, GLubyte);
+	typedef void (*_glSecondaryColor3us)(GLushort, GLushort, GLushort);
+	typedef void (*_glSecondaryColor3ui)(GLuint, GLuint, GLuint);
+	typedef void (*_glSecondaryColor3ubv)(const GLubyte*);
+	typedef void (*_glSecondaryColor3usv)(const GLushort*);
+	typedef void (*_glSecondaryColor3uiv)(const GLuint*);
+	typedef void (*_glSecondaryColorPointer)(GLint, GLenum, GLsizei, const GLvoid*);
+	typedef void (*_glBlendFuncSeparate)(GLenum, GLenum, GLenum,GLenum);
+
 
 	// GL function pointers
-	// (TODO)
+	extern _glFogCoordPointer bo_glFogCoordPointer;
+	extern _glFogCoordf bo_glFogCoordf;
+	extern _glFogCoordd bo_glFogCoordd;
+	extern _glFogCoordfv bo_glFogCoordfv;
+	extern _glFogCoorddv bo_glFogCoorddv;
+	extern _glMultiDrawArrays bo_glMultiDrawArrays;
+	extern _glMultiDrawElements bo_glMultiDrawElements;
+	extern _glPointParameterf bo_glPointParameterf;
+	extern _glPointParameterfv bo_glPointParameterfv;
+	extern _glPointParameteri bo_glPointParameteri;
+	extern _glPointParameteriv bo_glPointParameteriv;
+	extern _glSecondaryColor3b bo_glSecondaryColor3b;
+	extern _glSecondaryColor3s bo_glSecondaryColor3s;
+	extern _glSecondaryColor3i bo_glSecondaryColor3i;
+	extern _glSecondaryColor3f bo_glSecondaryColor3f;
+	extern _glSecondaryColor3d bo_glSecondaryColor3d;
+	extern _glSecondaryColor3bv bo_glSecondaryColor3bv;
+	extern _glSecondaryColor3sv bo_glSecondaryColor3sv;
+	extern _glSecondaryColor3iv bo_glSecondaryColor3iv;
+	extern _glSecondaryColor3fv bo_glSecondaryColor3fv;
+	extern _glSecondaryColor3dv bo_glSecondaryColor3dv;
+	extern _glSecondaryColor3ub bo_glSecondaryColor3ub;
+	extern _glSecondaryColor3us bo_glSecondaryColor3us;
+	extern _glSecondaryColor3ui bo_glSecondaryColor3ui;
+	extern _glSecondaryColor3ubv bo_glSecondaryColor3ubv;
+	extern _glSecondaryColor3usv bo_glSecondaryColor3usv;
+	extern _glSecondaryColor3uiv bo_glSecondaryColor3uiv;
+	extern _glSecondaryColorPointer bo_glSecondaryColorPointer;
+	extern _glBlendFuncSeparate bo_glBlendFuncSeparate;
 }; // extern "C"
 
 
+// SGIS_generate_mipmap
+#define GL_GENERATE_MIPMAP              0x8191
+#define GL_GENERATE_MIPMAP_HINT         0x8192
+// ARB_depth_texture
+#define GL_DEPTH_COMPONENT              0x1902
+#define GL_DEPTH_COMPONENT16            0x81A5
+#define GL_DEPTH_COMPONENT24            0x81A6
+#define GL_DEPTH_COMPONENT32            0x81A7
+#define GL_TEXTURE_DEPTH_SIZE           0x884A
+#define GL_DEPTH_TEXTURE_MODE           0x884B
+// ARB_shadow
+#define GL_TEXTURE_COMPARE_MODE         0x884C
+#define GL_TEXTURE_COMPARE_FUNC         0x884D
+#define GL_COMPARE_R_TO_TEXTURE         0x884E
+// EXT_fog_coord
+#define GL_FOG_COORDINATE_SOURCE        0x8450
+#define GL_FOG_COORDINATE               0x8451
+#define GL_FRAGMENT_DEPTH               0x8452
+#define GL_CURRENT_FOG_COORDINATE       0x8453
+#define GL_FOG_COORDINATE_ARRAY_TYPE    0x8454
+#define GL_FOG_COORDINATE_ARRAY_STRIDE  0x8455
+#define GL_FOG_COORDINATE_ARRAY_POINTER 0x8456
+#define GL_FOG_COORDINATE_ARRAY         0x8457
+// ARB_point_parameters
+#define GL_POINT_SIZE_MIN               0x8126
+#define GL_POINT_SIZE_MAX               0x8127
+#define GL_POINT_FADE_THRESHOLD_SIZE    0x8128
+#define GL_POINT_DISTANCE_ATTENUATION   0x8129
+// EXT_secondary_color
+#define GL_COLOR_SUM                    0x8458
+#define GL_CURRENT_SECONDARY_COLOR      0x8459
+#define GL_SECONDARY_COLOR_ARRAY_SIZE   0x845A
+#define GL_SECONDARY_COLOR_ARRAY_TYPE   0x845B
+#define GL_SECONDARY_COLOR_ARRAY_STRIDE 0x845C
+#define GL_SECONDARY_COLOR_ARRAY_POINTER 0x845D
+#define GL_SECONDARY_COLOR_ARRAY        0x845E
+// EXT_blend_func_separate
+#define GL_BLEND_DST_RGB                0x80C8
+#define GL_BLEND_SRC_RGB                0x80C9
+#define GL_BLEND_DST_ALPHA              0x80CA
+#define GL_BLEND_SRC_ALPHA              0x80CB
+// EXT_stencil_wrap
+#define GL_INCR_WRAP                    0x8507
+#define GL_DECR_WRAP                    0x8508
+
 // GL defines
 #if BOGL_DO_DLOPEN
-// (TODO)
+#define glFogCoordPointer bo_glFogCoordPointer
+#define glFogCoordf bo_glFogCoordf
+#define glFogCoordd bo_glFogCoordd
+#define glFogCoordfv bo_glFogCoordf
+#define glFogCoorddv bo_glFogCoorddv
+#define glMultiDrawArrays bo_glMultiDrawArrays
+#define glMultiDrawElements bo_glMultiDrawElements
+#define glPointParameterf bo_glPointParameterf
+#define glPointParameterfv bo_glPointParameterfv
+#define glPointParameteri bo_glPointParameteri
+#define glPointParameteriv bo_glPointParameteriv
+#define glSecondaryColor3b bo_glSecondaryColor3b
+#define glSecondaryColor3s bo_glSecondaryColor3s
+#define glSecondaryColor3i bo_glSecondaryColor3i
+#define glSecondaryColor3f bo_glSecondaryColor3f
+#define glSecondaryColor3d bo_glSecondaryColor3d
+#define glSecondaryColor3bv bo_glSecondaryColor3bv
+#define glSecondaryColor3sv bo_glSecondaryColor3sv
+#define glSecondaryColor3iv bo_glSecondaryColor3iv
+#define glSecondaryColor3fv bo_glSecondaryColor3fv
+#define glSecondaryColor3dv bo_glSecondaryColor3dv
+#define glSecondaryColor3ub bo_glSecondaryColor3ub
+#define glSecondaryColor3us bo_glSecondaryColor3us
+#define glSecondaryColor3ui bo_glSecondaryColor3ui
+#define glSecondaryColor3ubv bo_glSecondaryColor3ubv
+#define glSecondaryColor3usv bo_glSecondaryColor3usv
+#define glSecondaryColor3uiv bo_glSecondaryColor3uiv
+#define glSecondaryColorPointer bo_glSecondaryColorPointer
+#define glBlendFuncSeparate bo_glBlendFuncSeparate
 #endif // BOGL_DO_DLOPEN
 
 #endif
