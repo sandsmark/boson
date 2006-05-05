@@ -33,30 +33,6 @@
 #include <kglobal.h>
 #include <kstandarddirs.h>
 
-// AB: OpenGL 2.0 headers have not yet been written yet, so we have to use these
-//     defines for now
-#define glDeleteProgram glDeleteObjectARB
-#define glCreateProgram glCreateProgramObjectARB
-#define glCreateShader glCreateShaderObjectARB
-#define glShaderSource glShaderSourceARB
-#define glCompileShader glCompileShaderARB
-#define glGetShaderiv glGetObjectParameterivARB
-#define glGetShaderInfoLog glGetInfoLogARB
-#define glAttachObject glAttachObjectARB // ??
-#define glDeleteShader glDeleteObjectARB
-#define glAttachShader glAttachObjectARB
-#define glLinkProgram glLinkProgramARB
-#define glGetProgramiv glGetObjectParameterivARB
-#define glGetProgramInfoLog glGetInfoLogARB
-#define glGetUniformLocation glGetUniformLocationARB
-#define glUniform1f glUniform1fARB
-#define glUniform1i glUniform1iARB
-#define glUniform2fv glUniform2fvARB
-#define glUniform3fv glUniform3fvARB
-#define glUniform4fv glUniform4fvARB
-#define glUseProgram glUseProgramObjectARB
-
-
 
 BoShaderManager* BoShaderManager::mShaderManager = 0;
 
@@ -291,7 +267,7 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
       printUsedSources();
     }
     // Attach the shader to the program
-    glAttachObject(mProgram, vertexshader);
+    glAttachShader(mProgram, vertexshader);
     // Delete shader
     glDeleteShader(vertexshader);
     delete log;
