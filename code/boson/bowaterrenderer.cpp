@@ -839,7 +839,7 @@ void BoWaterRenderer::renderChunk(BoLakeGL* lake, BoLakeGL::WaterChunk* chunk, f
   glEnableClientState(GL_VERTEX_ARRAY);
   if(mEnableVBO)
   {
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, chunk->vbo_vertex);
+    glBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_vertex);
     glVertexPointer(3, GL_FLOAT, 0, 0);
   }
   else
@@ -854,7 +854,7 @@ void BoWaterRenderer::renderChunk(BoLakeGL* lake, BoLakeGL::WaterChunk* chunk, f
     glEnableClientState(GL_COLOR_ARRAY);
     if(mEnableVBO)
     {
-      glBindBufferARB(GL_ARRAY_BUFFER_ARB, chunk->vbo_color);
+      glBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_color);
       glColorPointer(4, GL_FLOAT, 0, 0);
     }
     else
@@ -873,7 +873,7 @@ void BoWaterRenderer::renderChunk(BoLakeGL* lake, BoLakeGL::WaterChunk* chunk, f
   // Do the drawing
   if(mEnableVBO)
   {
-    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, chunk->vbo_index);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk->vbo_index);
     glDrawElements(GL_QUADS, chunk->indices_count, GL_UNSIGNED_INT, 0);
   }
   else
@@ -977,7 +977,7 @@ void BoWaterRenderer::renderChunk(BoLakeGL* lake, BoLakeGL::WaterChunk* chunk, f
       glEnableClientState(GL_COLOR_ARRAY);
       if(mEnableVBO)
       {
-        glBindBufferARB(GL_ARRAY_BUFFER_ARB, chunk->vbo_color);
+        glBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_color);
         glColorPointer(4, GL_FLOAT, 0, 0);
       }
       else
@@ -989,7 +989,7 @@ void BoWaterRenderer::renderChunk(BoLakeGL* lake, BoLakeGL::WaterChunk* chunk, f
     glEnableClientState(GL_VERTEX_ARRAY);
     if(mEnableVBO)
     {
-      glBindBufferARB(GL_ARRAY_BUFFER_ARB, chunk->vbo_vertex);
+      glBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_vertex);
       glVertexPointer(3, GL_FLOAT, 0, 0);
     }
     else
@@ -1003,7 +1003,7 @@ void BoWaterRenderer::renderChunk(BoLakeGL* lake, BoLakeGL::WaterChunk* chunk, f
     // Do the drawing
     if(mEnableVBO)
     {
-      glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, chunk->vbo_index);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk->vbo_index);
       glDrawElements(GL_QUADS, chunk->indices_count, GL_UNSIGNED_INT, 0);
     }
     else
@@ -1092,27 +1092,27 @@ void BoWaterRenderer::initDataBuffersForStorage(RenderInfo* info)
     // Generate VBOs if it's not yet done
     if(!info->chunk->vbo_vertex)
     {
-      glGenBuffersARB(1, &info->chunk->vbo_vertex);
-      glGenBuffersARB(1, &info->chunk->vbo_color);
-      glGenBuffersARB(1, &info->chunk->vbo_index);
+      glGenBuffers(1, &info->chunk->vbo_vertex);
+      glGenBuffers(1, &info->chunk->vbo_color);
+      glGenBuffers(1, &info->chunk->vbo_index);
     }
-#define WATER_VBO_MODE GL_DYNAMIC_DRAW_ARB
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_vertex);
-    glBufferDataARB(GL_ARRAY_BUFFER_ARB, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
-    info->vertices_p = (BoVector3Float*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+#define WATER_VBO_MODE GL_DYNAMIC_DRAW
+    glBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_vertex);
+    glBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
+    info->vertices_p = (BoVector3Float*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
     if(!mEnableShader)
     {
       if(mEnableTranslucency)
       {
-        glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_color);
-        glBufferDataARB(GL_ARRAY_BUFFER_ARB, corners * sizeof(BoVector4Float), 0, WATER_VBO_MODE);
-        info->colors_p = (BoVector4Float*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+        glBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_color);
+        glBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector4Float), 0, WATER_VBO_MODE);
+        info->colors_p = (BoVector4Float*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
       }
     }
     // Buffer for indices
-    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, info->chunk->vbo_index);
-    glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, corners * 4 * sizeof(unsigned int), 0, WATER_VBO_MODE);
-    info->indices_p = (unsigned int*)glMapBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, info->chunk->vbo_index);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, corners * 4 * sizeof(unsigned int), 0, WATER_VBO_MODE);
+    info->indices_p = (unsigned int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
   }
   else
   {
@@ -1158,8 +1158,8 @@ void BoWaterRenderer::uninitDataBuffersForStorage(RenderInfo* info)
   if(mEnableVBO)
   {
     // Unmap vbos
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_vertex);
-    if(!glUnmapBufferARB(GL_ARRAY_BUFFER_ARB))
+    glBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_vertex);
+    if(!glUnmapBuffer(GL_ARRAY_BUFFER))
     {
       boError() << k_funcinfo << "can't unmap vertices' vbo!" << endl;
     }
@@ -1167,20 +1167,20 @@ void BoWaterRenderer::uninitDataBuffersForStorage(RenderInfo* info)
     {
       if(mEnableTranslucency)
       {
-        glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_color);
-        if(!glUnmapBufferARB(GL_ARRAY_BUFFER_ARB))
+        glBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_color);
+        if(!glUnmapBuffer(GL_ARRAY_BUFFER))
         {
           boError() << k_funcinfo << "can't unmap colors' vbo!" << endl;
         }
       }
     }
-    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, info->chunk->vbo_index);
-    if(!glUnmapBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB))
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, info->chunk->vbo_index);
+    if(!glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER))
     {
       boError() << k_funcinfo << "can't unmap indices' vbo!" << endl;
     }
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);  // Disable VBO
-    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);  // Disable index VBO
+    glBindBuffer(GL_ARRAY_BUFFER, 0);  // Disable VBO
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);  // Disable index VBO
   }
 }
 
