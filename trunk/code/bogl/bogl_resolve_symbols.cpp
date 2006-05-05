@@ -68,6 +68,7 @@ static bool boglResolveOpenGL_1_2_1_Symbols(QLibrary& gl);
 static bool boglResolveOpenGL_1_3_Symbols(QLibrary& gl);
 static bool boglResolveOpenGL_1_4_Symbols(QLibrary& gl);
 static bool boglResolveOpenGL_1_5_Symbols(QLibrary& gl);
+static bool boglResolveOpenGL_2_0_Symbols(QLibrary& gl);
 static bool boglResolveGLUSymbols(QLibrary& gl);
 static bool boglResolveARB_multitexture_Symbols();
 static bool boglResolveEXT_blend_color_Symbols();
@@ -103,6 +104,9 @@ bool boglResolveLibGLSymbols(QLibrary& gl)
 	return false;
  }
  if (!boglResolveOpenGL_1_5_Symbols(gl)) {
+	return false;
+ }
+ if (!boglResolveOpenGL_2_0_Symbols(gl)) {
 	return false;
  }
  return true;
@@ -1449,6 +1453,205 @@ bool boglResolveOpenGL_1_5_Symbols(QLibrary& gl)
 }
 
 
+// OpenGL 2.0
+extern "C" {
+	_glDrawBuffers bo_glDrawBuffers;
+	_glStencilOpSeparate bo_glStencilOpSeparate;
+	_glStencilFuncSeparate bo_glStencilFuncSeparate;
+	_glIsShader bo_glIsShader;
+	_glIsProgram bo_glIsProgram;
+	_glGetAttachedShaders bo_glGetAttachedShaders;
+	_glCreateShader bo_glCreateShader;
+	_glShaderSource bo_glShaderSource;
+	_glCompileShader bo_glCompileShader;
+	_glDeleteShader bo_glDeleteShader;
+	_glCreateProgram bo_glCreateProgram;
+	_glAttachShader bo_glAttachShader;
+	_glDetachShader bo_glDetachShader;
+	_glLinkProgram bo_glLinkProgram;
+	_glUseProgram bo_glUseProgram;
+	_glDeleteProgram bo_glDeleteProgram;
+	_glGetShaderInfoLog bo_glGetShaderInfoLog;
+	_glGetProgramInfoLog bo_glGetProgramInfoLog;
+	_glGetShaderSource bo_glGetShaderSource;
+	_glGetUniformfv bo_glGetUniformfv;
+	_glGetUniformiv bo_glGetUniformiv;
+	_glGetProgramiv bo_glGetProgramiv;
+	_glGetShaderiv bo_glGetShaderiv;
+	_glUniform1f bo_glUniform1f;
+	_glUniform2f bo_glUniform2f;
+	_glUniform3f bo_glUniform3f;
+	_glUniform4f bo_glUniform4f;
+	_glUniform1i bo_glUniform1i;
+	_glUniform2i bo_glUniform2i;
+	_glUniform3i bo_glUniform3i;
+	_glUniform4i bo_glUniform4i;
+	_glUniform1fv bo_glUniform1fv;
+	_glUniform2fv bo_glUniform2fv;
+	_glUniform3fv bo_glUniform3fv;
+	_glUniform4fv bo_glUniform4fv;
+	_glUniform1iv bo_glUniform1iv;
+	_glUniform2iv bo_glUniform2iv;
+	_glUniform3iv bo_glUniform3iv;
+	_glUniform4iv bo_glUniform4iv;
+	_glUniformMatrix2fv bo_glUniformMatrix2fv;
+	_glUniformMatrix3fv bo_glUniformMatrix3fv;
+	_glUniformMatrix4fv bo_glUniformMatrix4fv;
+	_glValidateProgram bo_glValidateProgram;
+	_glGetUniformLocation bo_glGetUniformLocation;
+	_glGetActiveUniform bo_glGetActiveUniform;
+	_glVertexAttrib1s bo_glVertexAttrib1s;
+	_glVertexAttrib1f bo_glVertexAttrib1f;
+	_glVertexAttrib1d bo_glVertexAttrib1d;
+	_glVertexAttrib2s bo_glVertexAttrib2s;
+	_glVertexAttrib2f bo_glVertexAttrib2f;
+	_glVertexAttrib2d bo_glVertexAttrib2d;
+	_glVertexAttrib3s bo_glVertexAttrib3s;
+	_glVertexAttrib3f bo_glVertexAttrib3f;
+	_glVertexAttrib3d bo_glVertexAttrib3d;
+	_glVertexAttrib4s bo_glVertexAttrib4s;
+	_glVertexAttrib4f bo_glVertexAttrib4f;
+	_glVertexAttrib4d bo_glVertexAttrib4d;
+	_glVertexAttrib1sv bo_glVertexAttrib1sv;
+	_glVertexAttrib1fv bo_glVertexAttrib1fv;
+	_glVertexAttrib1dv bo_glVertexAttrib1dv;
+	_glVertexAttrib2sv bo_glVertexAttrib2sv;
+	_glVertexAttrib2fv bo_glVertexAttrib2fv;
+	_glVertexAttrib2dv bo_glVertexAttrib2dv;
+	_glVertexAttrib3sv bo_glVertexAttrib3sv;
+	_glVertexAttrib3fv bo_glVertexAttrib3fv;
+	_glVertexAttrib3dv bo_glVertexAttrib3dv;
+	_glVertexAttrib4sv bo_glVertexAttrib4sv;
+	_glVertexAttrib4fv bo_glVertexAttrib4fv;
+	_glVertexAttrib4dv bo_glVertexAttrib4dv;
+	_glVertexAttrib4bv bo_glVertexAttrib4bv;
+	_glVertexAttrib4iv bo_glVertexAttrib4iv;
+	_glVertexAttrib4ubv bo_glVertexAttrib4ubv;
+	_glVertexAttrib4usv bo_glVertexAttrib4usv;
+	_glVertexAttrib4uiv bo_glVertexAttrib4uiv;
+	_glVertexAttrib4Nub bo_glVertexAttrib4Nub;
+	_glVertexAttrib4Nbv bo_glVertexAttrib4Nbv;
+	_glVertexAttrib4Nsv bo_glVertexAttrib4Nsv;
+	_glVertexAttrib4Niv bo_glVertexAttrib4Niv;
+	_glVertexAttrib4Nubv bo_glVertexAttrib4Nubv;
+	_glVertexAttrib4Nusv bo_glVertexAttrib4Nusv;
+	_glVertexAttrib4Nuiv bo_glVertexAttrib4Nuiv;
+	_glVertexAttribPointer bo_glVertexAttribPointer;
+	_glEnableVertexAttribArray bo_glEnableVertexAttribArray;
+	_glDisableVertexAttribArray bo_glDisableVertexAttribArray;
+	_glBindAttribLocation bo_glBindAttribLocation;
+	_glGetActiveAttrib bo_glGetActiveAttrib;
+	_glGetAttribLocation bo_glGetAttribLocation;
+	_glGetVertexAttribdv bo_glGetVertexAttribdv;
+	_glGetVertexAttribfv bo_glGetVertexAttribfv;
+	_glGetVertexAttribiv bo_glGetVertexAttribiv;
+	_glGetVertexAttribPointerv bo_glGetVertexAttribPointerv;
+	_glBlendEquationSeparate bo_glBlendEquationSeparate;
+}; // extern "C"
+
+bool boglResolveOpenGL_2_0_Symbols(QLibrary& gl)
+{
+ RESOLVE(glDrawBuffers);
+ RESOLVE(glStencilOpSeparate);
+ RESOLVE(glStencilFuncSeparate);
+ RESOLVE(glIsShader);
+ RESOLVE(glIsProgram);
+ RESOLVE(glGetAttachedShaders);
+ RESOLVE(glCreateShader);
+ RESOLVE(glShaderSource);
+ RESOLVE(glCompileShader);
+ RESOLVE(glDeleteShader);
+ RESOLVE(glCreateProgram);
+ RESOLVE(glAttachShader);
+ RESOLVE(glDetachShader);
+ RESOLVE(glLinkProgram);
+ RESOLVE(glUseProgram);
+ RESOLVE(glDeleteProgram);
+ RESOLVE(glGetShaderInfoLog);
+ RESOLVE(glGetProgramInfoLog);
+ RESOLVE(glGetShaderSource);
+ RESOLVE(glGetUniformfv);
+ RESOLVE(glGetUniformiv);
+ RESOLVE(glGetProgramiv);
+ RESOLVE(glGetShaderiv);
+ RESOLVE(glUniform1f);
+ RESOLVE(glUniform2f);
+ RESOLVE(glUniform3f);
+ RESOLVE(glUniform4f);
+ RESOLVE(glUniform1i);
+ RESOLVE(glUniform2i);
+ RESOLVE(glUniform3i);
+ RESOLVE(glUniform4i);
+ RESOLVE(glUniform1fv);
+ RESOLVE(glUniform2fv);
+ RESOLVE(glUniform3fv);
+ RESOLVE(glUniform4fv);
+ RESOLVE(glUniform1iv);
+ RESOLVE(glUniform2iv);
+ RESOLVE(glUniform3iv);
+ RESOLVE(glUniform4iv);
+ RESOLVE(glUniformMatrix2fv);
+ RESOLVE(glUniformMatrix3fv);
+ RESOLVE(glUniformMatrix4fv);
+ RESOLVE(glValidateProgram);
+ RESOLVE(glGetUniformLocation);
+ RESOLVE(glGetActiveUniform);
+ RESOLVE(glVertexAttrib1s);
+ RESOLVE(glVertexAttrib1f);
+ RESOLVE(glVertexAttrib1d);
+ RESOLVE(glVertexAttrib2s);
+ RESOLVE(glVertexAttrib2f);
+ RESOLVE(glVertexAttrib2d);
+ RESOLVE(glVertexAttrib3s);
+ RESOLVE(glVertexAttrib3f);
+ RESOLVE(glVertexAttrib3d);
+ RESOLVE(glVertexAttrib4s);
+ RESOLVE(glVertexAttrib4f);
+ RESOLVE(glVertexAttrib4d);
+ RESOLVE(glVertexAttrib1sv);
+ RESOLVE(glVertexAttrib1fv);
+ RESOLVE(glVertexAttrib1dv);
+ RESOLVE(glVertexAttrib2sv);
+ RESOLVE(glVertexAttrib2fv);
+ RESOLVE(glVertexAttrib2dv);
+ RESOLVE(glVertexAttrib3sv);
+ RESOLVE(glVertexAttrib3fv);
+ RESOLVE(glVertexAttrib3dv);
+ RESOLVE(glVertexAttrib4sv);
+ RESOLVE(glVertexAttrib4fv);
+ RESOLVE(glVertexAttrib4dv);
+ RESOLVE(glVertexAttrib4bv);
+ RESOLVE(glVertexAttrib4iv);
+ RESOLVE(glVertexAttrib4ubv);
+ RESOLVE(glVertexAttrib4usv);
+ RESOLVE(glVertexAttrib4uiv);
+ RESOLVE(glVertexAttrib4Nub);
+ RESOLVE(glVertexAttrib4Nbv);
+ RESOLVE(glVertexAttrib4Nsv);
+ RESOLVE(glVertexAttrib4Niv);
+ RESOLVE(glVertexAttrib4Nubv);
+ RESOLVE(glVertexAttrib4Nusv);
+ RESOLVE(glVertexAttrib4Nuiv);
+ RESOLVE(glVertexAttribPointer);
+ RESOLVE(glEnableVertexAttribArray);
+ RESOLVE(glDisableVertexAttribArray);
+ RESOLVE(glBindAttribLocation);
+ RESOLVE(glGetActiveAttrib);
+ RESOLVE(glGetAttribLocation);
+ RESOLVE(glGetVertexAttribdv);
+ RESOLVE(glGetVertexAttribfv);
+ RESOLVE(glGetVertexAttribiv);
+ RESOLVE(glGetVertexAttribPointerv);
+ RESOLVE(glBlendEquationSeparate);
+
+ return true;
+}
+
+
+
+
+
+
 // ARB_multitexture
 extern "C" {
 	_glMultiTexCoord1dARB bo_glMultiTexCoord1dARB;
@@ -1735,16 +1938,61 @@ bool boglResolveARB_shader_objects_Symbols()
  RESOLVE_GL_SYMBOL_CHECK(glGetUniformivARB);
  RESOLVE_GL_SYMBOL_CHECK(glGetShaderSourceARB);
 
-#if 0
- // TODO (once OpenGL 2.0 support is available in our headers):
- //      use the ARB functions for the non-ARB function pointers if OpenGL 2.0
- //      is not supported by this system
- //      --> we can use the non-ARB versions in code then
- if (bo_glDeleteBuffers != 0) {
-	bo_glDeleteBuffers = bo_glDeleteBuffersARB;
-	// ... TODO
+ ASSIGN_FROM_EXT(glDeleteProgram, glDeleteObjectARB);
+ ASSIGN_FROM_EXT(glDeleteShader, glDeleteObjectARB);
+// ASSIGN_FROM_EXT(glGetHandleARB, glGetHandleARB);
+ ASSIGN_FROM_EXT(glDetachShader, glDetachObjectARB);
+ ASSIGN_FROM_EXT(glCreateShader, glCreateShaderObjectARB);
+ ASSIGN_FROM_EXT(glShaderSource, glShaderSourceARB);
+ ASSIGN_FROM_EXT(glCompileShader, glCompileShaderARB);
+ ASSIGN_FROM_EXT(glCreateProgram, glCreateProgramObjectARB);
+ ASSIGN_FROM_EXT(glAttachShader, glAttachObjectARB);
+ ASSIGN_FROM_EXT(glLinkProgram, glLinkProgramARB);
+ ASSIGN_FROM_EXT(glUseProgram, glUseProgramObjectARB);
+ ASSIGN_FROM_EXT(glValidateProgram, glValidateProgramARB);
+ ASSIGN_FROM_EXT(glUniform1f, glUniform1fARB);
+ ASSIGN_FROM_EXT(glUniform2f, glUniform2fARB);
+ ASSIGN_FROM_EXT(glUniform3f, glUniform3fARB);
+ ASSIGN_FROM_EXT(glUniform4f, glUniform4fARB);
+ ASSIGN_FROM_EXT(glUniform1i, glUniform1iARB);
+ ASSIGN_FROM_EXT(glUniform2i, glUniform2iARB);
+ ASSIGN_FROM_EXT(glUniform3i, glUniform3iARB);
+ ASSIGN_FROM_EXT(glUniform4i, glUniform4iARB);
+ ASSIGN_FROM_EXT(glUniform1fv, glUniform1fvARB);
+ ASSIGN_FROM_EXT(glUniform2fv, glUniform2fvARB);
+ ASSIGN_FROM_EXT(glUniform3fv, glUniform3fvARB);
+ ASSIGN_FROM_EXT(glUniform4fv, glUniform4fvARB);
+ ASSIGN_FROM_EXT(glUniform1iv, glUniform1ivARB);
+ ASSIGN_FROM_EXT(glUniform2iv, glUniform2ivARB);
+ ASSIGN_FROM_EXT(glUniform3iv, glUniform3ivARB);
+ ASSIGN_FROM_EXT(glUniform4iv, glUniform4ivARB);
+ ASSIGN_FROM_EXT(glUniformMatrix2fv, glUniformMatrix2fvARB);
+ ASSIGN_FROM_EXT(glUniformMatrix3fvARB, glUniformMatrix3fvARB);
+ ASSIGN_FROM_EXT(glUniformMatrix4fvARB, glUniformMatrix4fvARB);
+// ASSIGN_FROM_EXT(glGetObjectParameterfvARB, glGetObjectParameterfvARB);
+ ASSIGN_FROM_EXT(glGetProgramiv, glGetObjectParameterivARB);
+ ASSIGN_FROM_EXT(glGetShaderiv, glGetObjectParameterivARB);
+ ASSIGN_FROM_EXT(glGetShaderInfoLog, glGetInfoLogARB);
+ ASSIGN_FROM_EXT(glGetProgramInfoLog, glGetInfoLogARB);
+ ASSIGN_FROM_EXT(glGetAttachedShaders, glGetAttachedObjectsARB);
+ ASSIGN_FROM_EXT(glGetUniformLocation, glGetUniformLocationARB);
+ ASSIGN_FROM_EXT(glGetActiveUniform, glGetActiveUniformARB);
+ ASSIGN_FROM_EXT(glGetUniformfv, glGetUniformfvARB);
+ ASSIGN_FROM_EXT(glGetUniformiv, glGetUniformivARB);
+ ASSIGN_FROM_EXT(glGetShaderSource, glGetShaderSourceARB);
+
+ // AB: note: there appers to be no equivalent to glIsShader() in the ARB
+ //           extension
+ // AB: note: there appers to be no equivalent to glIsProgram() in the ARB
+ //           extension
+
+ if (bo_glIsShader == 0) {
+	boWarning() << k_funcinfo << "have no glIsShader() function in the ARB extension. dont use that function" << endl;
  }
-#endif
+ if (bo_glIsProgram == 0) {
+	boWarning() << k_funcinfo << "have no glIsProgram() function in the ARB extension. dont use that function" << endl;
+ }
+
 
  return true;
 }
