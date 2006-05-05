@@ -611,6 +611,7 @@ void BosonGLWidget::initGL()
  }
  boDebug() << k_funcinfo << endl;
  makeCurrent();
+ boglResolveGLExtensionSymbols();
  initializeGL();
  boDebug() << k_funcinfo << "done" << endl;
  context()->setIsInitialized(true);

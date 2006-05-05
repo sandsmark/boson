@@ -67,8 +67,8 @@ extern "C" {
 	typedef GLvoid (*_glGetAttachedObjectsARB) (GLhandleARB, GLsizei, GLsizei*, GLhandleARB*);
 	typedef GLint (*_glGetUniformLocationARB) (GLhandleARB, const GLcharARB*);
 	typedef GLvoid (*_glGetActiveUniformARB) (GLhandleARB, GLuint, GLsizei, GLsizei*, GLint*, GLenum*, const GLcharARB*);
-	typedef GLvoid (*_glGetActiveUniformfvARB) (GLhandleARB, GLint, GLfloat*);
-	typedef GLvoid (*_glGetActiveUniformivARB) (GLhandleARB, GLint, GLint*);
+	typedef GLvoid (*_glGetUniformfvARB) (GLhandleARB, GLint, GLfloat*);
+	typedef GLvoid (*_glGetUniformivARB) (GLhandleARB, GLint, GLint*);
 	typedef GLvoid (*_glGetShaderSourceARB) (GLhandleARB, GLsizei, GLsizei*, GLcharARB*);
 
 
@@ -110,8 +110,8 @@ extern "C" {
 	extern _glGetAttachedObjectsARB bo_glGetAttachedObjectsARB;
 	extern _glGetUniformLocationARB bo_glGetUniformLocationARB;
 	extern _glGetActiveUniformARB bo_glGetActiveUniformARB;
-	extern _glGetActiveUniformfvARB bo_glGetActiveUniformfvARB;
-	extern _glGetActiveUniformivARB bo_glGetActiveUniformivARB;
+	extern _glGetUniformfvARB bo_glGetUniformfvARB;
+	extern _glGetUniformivARB bo_glGetUniformivARB;
 	extern _glGetShaderSourceARB bo_glGetShaderSourceARB;
 
 }; // extern "C"
@@ -192,8 +192,8 @@ extern "C" {
 #define glGetAttachedObjectsARB bo_glGetAttachedObjectsARB
 #define glGetUniformLocationARB bo_glGetUniformLocationARB
 #define glGetActiveUniformARB bo_glGetActiveUniformARB
-#define glGetActiveUniformfvARB bo_glGetActiveUniformfvARB
-#define glGetActiveUniformivARB bo_glGetActiveUniformivARB
+#define glUniformfvARB bo_glGetUniformfvARB
+#define glUniformivARB bo_glGetUniformivARB
 #define glGetShaderSourceARB bo_glGetShaderSourceARB
 #endif // BOGL_DO_DLOPEN
 
