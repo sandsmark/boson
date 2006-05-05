@@ -1331,6 +1331,22 @@ extern "C" {
 	_glSecondaryColor3uiv bo_glSecondaryColor3uiv;
 	_glSecondaryColorPointer bo_glSecondaryColorPointer;
 	_glBlendFuncSeparate bo_glBlendFuncSeparate;
+	_glWindowPos2d bo_glWindowPos2d;
+	_glWindowPos2f bo_glWindowPos2f;
+	_glWindowPos2i bo_glWindowPos2i;
+	_glWindowPos2s bo_glWindowPos2s;
+	_glWindowPos2dv bo_glWindowPos2dv;
+	_glWindowPos2fv bo_glWindowPos2fv;
+	_glWindowPos2iv bo_glWindowPos2iv;
+	_glWindowPos2sv bo_glWindowPos2sv;
+	_glWindowPos3d bo_glWindowPos3d;
+	_glWindowPos3f bo_glWindowPos3f;
+	_glWindowPos3i bo_glWindowPos3i;
+	_glWindowPos3s bo_glWindowPos3s;
+	_glWindowPos3dv bo_glWindowPos3dv;
+	_glWindowPos3fv bo_glWindowPos3fv;
+	_glWindowPos3iv bo_glWindowPos3iv;
+	_glWindowPos3sv bo_glWindowPos3sv;
 }; // extern "C"
 
 bool boglResolveOpenGL_1_4_Symbols(QLibrary& gl)
@@ -1364,6 +1380,23 @@ bool boglResolveOpenGL_1_4_Symbols(QLibrary& gl)
  RESOLVE(glSecondaryColor3uiv);
  RESOLVE(glSecondaryColorPointer);
  RESOLVE(glBlendFuncSeparate);
+ RESOLVE(glWindowPos2d);
+ RESOLVE(glWindowPos2f);
+ RESOLVE(glWindowPos2i);
+ RESOLVE(glWindowPos2s);
+ RESOLVE(glWindowPos2dv);
+ RESOLVE(glWindowPos2fv);
+ RESOLVE(glWindowPos2iv);
+ RESOLVE(glWindowPos2sv);
+ RESOLVE(glWindowPos3d);
+ RESOLVE(glWindowPos3f);
+ RESOLVE(glWindowPos3i);
+ RESOLVE(glWindowPos3s);
+ RESOLVE(glWindowPos3dv);
+ RESOLVE(glWindowPos3fv);
+ RESOLVE(glWindowPos3iv);
+ RESOLVE(glWindowPos3sv);
+
 
  return true;
 }
