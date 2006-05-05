@@ -49,7 +49,7 @@ extern "C" {
 	typedef GLvoid (*_glUniform1iARB) (GLint, GLint);
 	typedef GLvoid (*_glUniform2iARB) (GLint, GLint, GLint);
 	typedef GLvoid (*_glUniform3iARB) (GLint, GLint, GLint, GLint);
-	typedef GLvoid (*_glUniform4iARB) (GLint, GLint, GLint, GLint, GLfloat);
+	typedef GLvoid (*_glUniform4iARB) (GLint, GLint, GLint, GLint, GLint);
 	typedef GLvoid (*_glUniform1fvARB) (GLint, GLsizei, const GLfloat*);
 	typedef GLvoid (*_glUniform2fvARB) (GLint, GLsizei, const GLfloat*);
 	typedef GLvoid (*_glUniform3fvARB) (GLint, GLsizei, const GLfloat*);
