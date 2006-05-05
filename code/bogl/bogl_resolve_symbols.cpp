@@ -1404,12 +1404,47 @@ bool boglResolveOpenGL_1_4_Symbols(QLibrary& gl)
 
 // OpenGL 1.5
 extern "C" {
+	_glBindBuffer bo_glBindBuffer;
+	_glDeleteBuffers bo_glDeleteBuffers;
+	_glGenBuffers bo_glGenBuffers;
+	_glIsBuffer bo_glIsBuffer;
+	_glBufferData bo_glBufferData;
+	_glBufferSubData bo_glBufferSubData;
+	_glMapBuffer bo_glMapBuffer;
+	_glUnmapBuffer bo_glUnmapBuffer;
+	_glGetBufferParameteriv bo_glGetBufferParameteriv;
+	_glGetBufferPointerv bo_glGetBufferPointerv;
+	_glGenQueries bo_glGenQueries;
+	_glDeleteQueries bo_glDeleteQueries;
+	_glIsQuery bo_glIsQuery;
+	_glBeginQuery bo_glBeginQuery;
+	_glEndQuery bo_glEndQuery;
+	_glGetQueryiv bo_glGetQueryiv;
+	_glGetQueryObjectiv bo_glGetQueryObjectiv;
+	_glGetQueryObjectuiv bo_glGetQueryObjectuiv;
 }; // extern "C"
 
 bool boglResolveOpenGL_1_5_Symbols(QLibrary& gl)
 {
- // TODO
- Q_UNUSED(gl);
+ RESOLVE(glBindBuffer);
+ RESOLVE(glDeleteBuffers);
+ RESOLVE(glGenBuffers);
+ RESOLVE(glIsBuffer);
+ RESOLVE(glBufferData);
+ RESOLVE(glBufferSubData);
+ RESOLVE(glMapBuffer);
+ RESOLVE(glUnmapBuffer);
+ RESOLVE(glGetBufferParameteriv);
+ RESOLVE(glGetBufferPointerv);
+ RESOLVE(glGenQueries);
+ RESOLVE(glDeleteQueries);
+ RESOLVE(glIsQuery);
+ RESOLVE(glBeginQuery);
+ RESOLVE(glEndQuery);
+ RESOLVE(glGetQueryiv);
+ RESOLVE(glGetQueryObjectiv);
+ RESOLVE(glGetQueryObjectuiv);
+
  return true;
 }
 
@@ -1600,12 +1635,6 @@ bool boglResolveARB_vertex_buffer_object_Symbols()
  RESOLVE_GL_SYMBOL_CHECK(glGetBufferParameterivARB);
  RESOLVE_GL_SYMBOL_CHECK(glGetBufferPointervARB);
 
-#if 0
- // TODO (once OpenGL 1.5 support is available in our headers):
- //      use the ARB functions for the non-ARB function pointers if OpenGL 1.5
- //      is not supported by this system
- //      --> we can use the non-ARB versions in code then
-
  ASSIGN_FROM_EXT(glBindBuffer, glBindBufferARB);
  ASSIGN_FROM_EXT(glDeleteBuffers, glDeleteBuffersARB);
  ASSIGN_FROM_EXT(glGenBuffers, glGenBuffersARB);
@@ -1616,8 +1645,6 @@ bool boglResolveARB_vertex_buffer_object_Symbols()
  ASSIGN_FROM_EXT(glUnmapBuffer, glUnmapBufferARB);
  ASSIGN_FROM_EXT(glGetBufferParameteriv, glGetBufferParameterivARB);
  ASSIGN_FROM_EXT(glGetBufferPointerv, glGetBufferPointervARB);
-
-#endif
 
  return true;
 }
