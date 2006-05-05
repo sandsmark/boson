@@ -36,6 +36,9 @@
  * EXT_blend_func_separate
  * EXT_stencil_wrap
  * ARB_texture_env_crossbar
+ * EXT_texture_lod_bias
+ * ARB_texture_mirrored_repeat
+ * ARB_window_pos
 */
 
 /*
@@ -70,6 +73,16 @@
    none
  * ARB_texture_env_crossbar
    none
+ * EXT_texture_lod_bias
+   none
+ * ARB_texture_mirrored_repeat
+   none
+ * ARB_window_pos
+   glWindowPos2[dfis]()
+   glWindowPos2[dfis]v()
+   glWindowPos3[dfis]()
+   glWindowPos3[dfis]v()
+
 
  new defines:
  * SGIS_generate_mipmap
@@ -122,6 +135,14 @@
    GL_DECR_WRAP
  * ARB_texture_env_crossbar
    none (GL_TEXTUREi was already in 1.3)
+ * EXT_texture_lod_bias
+   GL_TEXTURE_FILTER_CONTROL
+   GL_TEXTURE_LOD_BIAS
+   GL_MAX_TEXTURE_LOD_BIAS
+ * ARB_texture_mirrored_repeat
+   GL_MIRRORED_REPEAT
+ * ARB_window_pos
+   none
 */
 
 
@@ -156,6 +177,22 @@ extern "C" {
 	typedef void (*_glSecondaryColor3uiv)(const GLuint*);
 	typedef void (*_glSecondaryColorPointer)(GLint, GLenum, GLsizei, const GLvoid*);
 	typedef void (*_glBlendFuncSeparate)(GLenum, GLenum, GLenum,GLenum);
+	typedef void (*_glWindowPos2d)(GLdouble, GLdouble);
+	typedef void (*_glWindowPos2f)(GLfloat, GLfloat);
+	typedef void (*_glWindowPos2i)(GLint, GLint);
+	typedef void (*_glWindowPos2s)(GLshort, GLshort);
+	typedef void (*_glWindowPos2dv)(const GLdouble*);
+	typedef void (*_glWindowPos2fv)(const GLfloat*);
+	typedef void (*_glWindowPos2iv)(const GLint*);
+	typedef void (*_glWindowPos2sv)(const GLshort*);
+	typedef void (*_glWindowPos3d)(GLdouble, GLdouble, GLdouble);
+	typedef void (*_glWindowPos3f)(GLfloat, GLfloat, GLfloat);
+	typedef void (*_glWindowPos3i)(GLint, GLint, GLint);
+	typedef void (*_glWindowPos3s)(GLshort, GLshort, GLshort);
+	typedef void (*_glWindowPos3dv)(const GLdouble*);
+	typedef void (*_glWindowPos3fv)(const GLfloat*);
+	typedef void (*_glWindowPos3iv)(const GLint*);
+	typedef void (*_glWindowPos3sv)(const GLshort*);
 
 
 	// GL function pointers
@@ -188,6 +225,22 @@ extern "C" {
 	extern _glSecondaryColor3uiv bo_glSecondaryColor3uiv;
 	extern _glSecondaryColorPointer bo_glSecondaryColorPointer;
 	extern _glBlendFuncSeparate bo_glBlendFuncSeparate;
+	extern _glWindowPos2d bo_glWindowPos2d;
+	extern _glWindowPos2f bo_glWindowPos2f;
+	extern _glWindowPos2i bo_glWindowPos2i;
+	extern _glWindowPos2s bo_glWindowPos2s;
+	extern _glWindowPos2dv bo_glWindowPos2dv;
+	extern _glWindowPos2fv bo_glWindowPos2fv;
+	extern _glWindowPos2iv bo_glWindowPos2iv;
+	extern _glWindowPos2sv bo_glWindowPos2sv;
+	extern _glWindowPos3d bo_glWindowPos3d;
+	extern _glWindowPos3f bo_glWindowPos3f;
+	extern _glWindowPos3i bo_glWindowPos3i;
+	extern _glWindowPos3s bo_glWindowPos3s;
+	extern _glWindowPos3dv bo_glWindowPos3dv;
+	extern _glWindowPos3fv bo_glWindowPos3fv;
+	extern _glWindowPos3iv bo_glWindowPos3iv;
+	extern _glWindowPos3sv bo_glWindowPos3sv;
 }; // extern "C"
 
 
@@ -235,8 +288,15 @@ extern "C" {
 // EXT_stencil_wrap
 #define GL_INCR_WRAP                    0x8507
 #define GL_DECR_WRAP                    0x8508
+// EXT_texture_lod_bias
+#define GL_TEXTURE_FILTER_CONTROL       0x8500
+#define GL_TEXTURE_LOD_BIAS             0x8501
+#define GL_MAX_TEXTURE_LOD_BIAS         0x84FD
+// ARB_texture_mirrored_repeat
+#define GL_MIRRORED_REPEAT_ARB          0x8370
 
-// GL defines
+
+
 #if BOGL_DO_DLOPEN
 #define glFogCoordPointer bo_glFogCoordPointer
 #define glFogCoordf bo_glFogCoordf
@@ -267,6 +327,22 @@ extern "C" {
 #define glSecondaryColor3uiv bo_glSecondaryColor3uiv
 #define glSecondaryColorPointer bo_glSecondaryColorPointer
 #define glBlendFuncSeparate bo_glBlendFuncSeparate
+#define glWindowPos2d bo_glWindowPos2d
+#define glWindowPos2f bo_glWindowPos2f
+#define glWindowPos2i bo_glWindowPos2i
+#define glWindowPos2s bo_glWindowPos2s
+#define glWindowPos2dv bo_glWindowPos2dv
+#define glWindowPos2fv bo_glWindowPos2fv
+#define glWindowPos2iv bo_glWindowPos2iv
+#define glWindowPos2sv bo_glWindowPos2sv
+#define glWindowPos3d bo_glWindowPos3d
+#define glWindowPos3f bo_glWindowPos3f
+#define glWindowPos3i bo_glWindowPos3i
+#define glWindowPos3s bo_glWindowPos3s
+#define glWindowPos3dv bo_glWindowPos3dv
+#define glWindowPos3fv bo_glWindowPos3fv
+#define glWindowPos3iv bo_glWindowPos3iv
+#define glWindowPos3sv bo_glWindowPos3sv
 #endif // BOGL_DO_DLOPEN
 
 #endif
