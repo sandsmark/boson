@@ -25,13 +25,13 @@
 
 extern "C" {
 	// GL typedefs
-	typedef GLboolean (*_glIsRenderBufferEXT) (GLuint);
+	typedef GLboolean (*_glIsRenderbufferEXT) (GLuint);
 	typedef GLvoid (*_glBindRenderbufferEXT) (GLenum, GLuint);
 	typedef GLvoid (*_glDeleteRenderbuffersEXT) (GLsizei, const GLuint *);
 	typedef GLvoid (*_glGenRenderbuffersEXT) (GLsizei, GLuint *);
 	typedef GLvoid (*_glRenderbufferStorageEXT) (GLenum, GLenum, GLsizei, GLsizei);
 	typedef GLvoid (*_glGetRenderbufferParameterivEXT) (GLenum, GLenum, GLsizei, GLint*);
-	typedef GLboolean (*_glIsFrameBufferEXT) (GLuint);
+	typedef GLboolean (*_glIsFramebufferEXT) (GLuint);
 	typedef GLvoid (*_glBindFramebufferEXT) (GLenum, GLuint);
 	typedef GLvoid (*_glDeleteFramebuffersEXT) (GLsizei, const GLuint *);
 	typedef GLvoid (*_glGenFramebuffersEXT) (GLsizei, GLuint *);
@@ -40,20 +40,20 @@ extern "C" {
 	typedef GLvoid (*_glFramebufferTexture2DEXT) (GLenum, GLenum, GLenum, GLuint, GLint);
 	typedef GLvoid (*_glFramebufferTexture3DEXT) (GLenum, GLenum, GLenum, GLuint, GLint);
 	typedef GLvoid (*_glFramebufferRenderbufferEXT) (GLenum, GLenum, GLenum, GLuint);
-	typedef GLvoid (*_glFramebufferAttachmentParameterivEXT) (GLenum, GLenum, GLenum, GLint*);
+	typedef GLvoid (*_glGetFramebufferAttachmentParameterivEXT) (GLenum, GLenum, GLenum, GLint*);
 	typedef GLvoid (*_glGenerateMipmapEXT) (GLenum);
 
 
 
 
 	// GL function pointers
-	extern _glIsRenderBufferEXT bo_glIsRenderBufferEXT;
+	extern _glIsRenderbufferEXT bo_glIsRenderbufferEXT;
 	extern _glBindRenderbufferEXT bo_glBindRenderbufferEXT;
 	extern _glDeleteRenderbuffersEXT bo_glDeleteRenderbuffersEXT;
 	extern _glGenRenderbuffersEXT bo_glGenRenderbuffersEXT;
 	extern _glRenderbufferStorageEXT bo_glRenderbufferStorageEXT;
 	extern _glGetRenderbufferParameterivEXT bo_glGetRenderbufferParameterivEXT;
-	extern _glIsFrameBufferEXT bo_glIsFrameBufferEXT;
+	extern _glIsFramebufferEXT bo_glIsFramebufferEXT;
 	extern _glBindFramebufferEXT bo_glBindFramebufferEXT;
 	extern _glDeleteFramebuffersEXT bo_glDeleteFramebuffersEXT;
 	extern _glGenFramebuffersEXT bo_glGenFramebuffersEXT;
@@ -62,7 +62,7 @@ extern "C" {
 	extern _glFramebufferTexture2DEXT bo_glFramebufferTexture2DEXT;
 	extern _glFramebufferTexture3DEXT bo_glFramebufferTexture3DEXT;
 	extern _glFramebufferRenderbufferEXT bo_glFramebufferRenderbufferEXT;
-	extern _glFramebufferAttachmentParameterivEXT bo_glFramebufferAttachmentParameterivEXT;
+	extern _glGetFramebufferAttachmentParameterivEXT bo_glGetFramebufferAttachmentParameterivEXT;
 	extern _glGenerateMipmapEXT bo_glGenerateMipmapEXT;
 }; // extern "C"
 
@@ -122,13 +122,13 @@ extern "C" {
 
 
 #if BOGL_DO_DLOPEN
-#define glIsRenderBufferEXT bo_glIsRenderBufferEXT
+#define glIsRenderbufferEXT bo_glIsRenderbufferEXT
 #define glBindRenderbufferEXT bo_glBindRenderbufferEXT
 #define glDeleteRenderbuffersEXT bo_glDeleteRenderbuffersEXT
 #define glGenRenderbuffersEXT bo_glGenRenderbuffersEXT
 #define glRenderbufferStorageEXT bo_glRenderbufferStorageEXT
 #define glGetRenderbufferParameterivEXT bo_glGetRenderbufferParameterivEXT
-#define glIsFrameBufferEXT bo_glIsFrameBufferEXT
+#define glIsFramebufferEXT bo_glIsFramebufferEXT
 #define glBindFramebufferEXT bo_glBindFramebufferEXT
 #define glDeleteFramebuffersEXT bo_glDeleteFramebuffersEXT
 #define glGenFramebuffersEXT bo_glGenFramebuffersEXT
@@ -137,7 +137,7 @@ extern "C" {
 #define glFramebufferTexture2DEXT bo_glFramebufferTexture2DEXT
 #define glFramebufferTexture3DEXT bo_glFramebufferTexture3DEXT
 #define glFramebufferRenderbufferEXT bo_glFramebufferRenderbufferEXT
-#define glFramebufferAttachmentParameterivEXT bo_glFramebufferAttachmentParameterivEXT
+#define glGetFramebufferAttachmentParameterivEXT bo_glGetFramebufferAttachmentParameterivEXT
 #define glGenerateMipmapEXT bo_glGenerateMipmapEXT
 
 #endif // BOGL_DO_DLOPEN

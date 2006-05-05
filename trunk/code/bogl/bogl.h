@@ -64,6 +64,15 @@ extern bool bogl_inited;
 // bogl functions
 void boglInit();
 bool boglResolveGLSymbols();
+
+/**
+ * Must be called @em after the context has been created/made current. Put it
+ * into the initializeGL() calll.
+ *
+ * It is necessary to create the context first, because apparently
+ * glGetString(GL_EXTENSIONS) depends on it, which is required.
+ **/
+void boglResolveGLExtensionSymbols();
 unsigned int boglGetOpenGLVersion();
 QString boglGetOpenGLVersionString();
 QString boglGetOpenGLVendorString();
