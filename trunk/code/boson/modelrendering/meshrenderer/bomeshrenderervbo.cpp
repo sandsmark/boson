@@ -42,10 +42,10 @@ public:
 	~BoMeshRendererModelDataVBO()
 	{
 		if (mVBO) {
-			if (!glDeleteBuffersARB) {
-				BO_NULL_ERROR(glDeleteBuffersARB);
+			if (!glDeleteBuffers) {
+				BO_NULL_ERROR(glDeleteBuffers);
 			} else {
-				glDeleteBuffersARB(1, &mVBO);
+				glDeleteBuffers(1, &mVBO);
 			}
 		}
 	}
@@ -81,15 +81,15 @@ void BoMeshRendererVBO::initModelData(BosonModel* model)
  BO_CHECK_NULL_RET(data);
 
  if (hasVBOExtension()) {
-	glGenBuffersARB(1, &data->mVBO);
+	glGenBuffers(1, &data->mVBO);
 	if (data->mVBO == 0) {
 		boError() << k_funcinfo << "no VBO??" << endl;
 	} else {
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB, data->mVBO);
-		glBufferDataARB(GL_ARRAY_BUFFER_ARB,
+		glBindBuffer(GL_ARRAY_BUFFER, data->mVBO);
+		glBufferData(GL_ARRAY_BUFFER,
 				model->pointArraySize() * BoMesh::pointSize() * sizeof(float),
 				model->pointArray(),
-				GL_STATIC_DRAW_ARB);
+				GL_STATIC_DRAW);
 	}
  }
 }
@@ -126,7 +126,7 @@ void BoMeshRendererVBO::setModel(BosonModel* model)
 	void* texelPtr = 0;
 
 	void* startPtr = 0;
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB, data->mVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, data->mVBO);
 	// AB: endianness problem?
 #define OFFSET(i) ((i) * sizeof(float))
 	const int stride = 8 * sizeof(float);
@@ -139,7 +139,7 @@ void BoMeshRendererVBO::setModel(BosonModel* model)
 	glTexCoordPointer(2, GL_FLOAT, stride, texelPtr);
 
 	// Disable VBO
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	return;
  }
@@ -166,16 +166,16 @@ bool BoMeshRendererVBO::hasVBOExtension() const
 	}
  }
  // AB: testing one of these function should be sufficient
- if (!glDeleteBuffersARB) {
+ if (!glDeleteBuffers) {
 	return false;
  }
- if (!glGenBuffersARB) {
+ if (!glGenBuffers) {
 	return false;
  }
- if (!glBindBufferARB) {
+ if (!glBindBuffer) {
 	return false;
  }
- if (!glBufferDataARB) {
+ if (!glBufferData) {
 	return false;
  }
  return true;

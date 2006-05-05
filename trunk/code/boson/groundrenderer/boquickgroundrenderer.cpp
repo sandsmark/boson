@@ -67,11 +67,11 @@ BoQuickGroundRenderer::BoQuickGroundRenderer()
 BoQuickGroundRenderer::~BoQuickGroundRenderer()
 {
   // Delete VBOs
-  if (glDeleteBuffersARB)
+  if (glDeleteBuffers)
   {
-    glDeleteBuffersARB(1, &mVBOVertex);
-    glDeleteBuffersARB(1, &mVBONormal);
-    glDeleteBuffersARB(1, &mVBOTexture);
+    glDeleteBuffers(1, &mVBOVertex);
+    glDeleteBuffers(1, &mVBONormal);
+    glDeleteBuffers(1, &mVBOTexture);
   }
 
   // Delete fog texture
@@ -99,7 +99,7 @@ bool BoQuickGroundRenderer::usable() const
   {
     return false;
   }
-  if(!glBindBufferARB || !glBufferDataARB)
+  if(!glBindBuffer || !glBufferData)
   {
     return false;
   }
@@ -243,18 +243,18 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
 
   // Bind VBOs
   glEnableClientState(GL_VERTEX_ARRAY);
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, mVBOVertex);
+  glBindBuffer(GL_ARRAY_BUFFER, mVBOVertex);
   glVertexPointer(3, GL_FLOAT, 0, 0);
 
   // We don't need normals and texture weights (stored in color) for depth pass
   if(!depthonly)
   {
     glEnableClientState(GL_NORMAL_ARRAY);
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, mVBONormal);
+    glBindBuffer(GL_ARRAY_BUFFER, mVBONormal);
     glNormalPointer(GL_FLOAT, 0, 0);
 
     glEnableClientState(GL_COLOR_ARRAY);
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, mVBOTexture);
+    glBindBuffer(GL_ARRAY_BUFFER, mVBOTexture);
   }
 
 //  glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_TEXTURE_BIT);
@@ -426,7 +426,7 @@ void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMa
   }
 
   // Disable VBO
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   glPopAttrib();
   glPopClientAttrib();
@@ -715,23 +715,23 @@ void BoQuickGroundRenderer::initMap(const BosonMap* map)
 
   // Create, bind and map VBOs
   // Vertex VBO
-  glGenBuffersARB(1, &mVBOVertex);
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, mVBOVertex);
-  glBufferDataARB(GL_ARRAY_BUFFER_ARB, mMapCW * mMapCH * sizeof(BoVector3Float), 0, GL_STATIC_DRAW_ARB);
-  BoVector3Float* vertices = (BoVector3Float*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+  glGenBuffers(1, &mVBOVertex);
+  glBindBuffer(GL_ARRAY_BUFFER, mVBOVertex);
+  glBufferData(GL_ARRAY_BUFFER, mMapCW * mMapCH * sizeof(BoVector3Float), 0, GL_STATIC_DRAW);
+  BoVector3Float* vertices = (BoVector3Float*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
   // Normal VBO
-  glGenBuffersARB(1, &mVBONormal);
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, mVBONormal);
-  glBufferDataARB(GL_ARRAY_BUFFER_ARB, mMapCW * mMapCH * sizeof(BoVector3Float), 0, GL_STATIC_DRAW_ARB);
-  BoVector3Float* normals = (BoVector3Float*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+  glGenBuffers(1, &mVBONormal);
+  glBindBuffer(GL_ARRAY_BUFFER, mVBONormal);
+  glBufferData(GL_ARRAY_BUFFER, mMapCW * mMapCH * sizeof(BoVector3Float), 0, GL_STATIC_DRAW);
+  BoVector3Float* normals = (BoVector3Float*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
   // Texture weights' VBO
   mTextureCount = map->groundTheme()->groundTypeCount();
   // Size of a single texture weights' layer (for a single texture) in bytes
   mVBOTextureLayerSize = mMapCW * mMapCH * 4;
-  glGenBuffersARB(1, &mVBOTexture);
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, mVBOTexture);
-  glBufferDataARB(GL_ARRAY_BUFFER_ARB, mTextureCount * mVBOTextureLayerSize * sizeof(unsigned char), 0, GL_STATIC_DRAW_ARB);
-  unsigned char* weights = (unsigned char*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+  glGenBuffers(1, &mVBOTexture);
+  glBindBuffer(GL_ARRAY_BUFFER, mVBOTexture);
+  glBufferData(GL_ARRAY_BUFFER, mTextureCount * mVBOTextureLayerSize * sizeof(unsigned char), 0, GL_STATIC_DRAW);
+  unsigned char* weights = (unsigned char*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
   // Get pointers to height and normal maps
   const float* heightmap = map->heightMap();
@@ -759,18 +759,18 @@ void BoQuickGroundRenderer::initMap(const BosonMap* map)
   }
 
   // Unmap VBOs
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, mVBOVertex);
-  if(!glUnmapBufferARB(GL_ARRAY_BUFFER_ARB))
+  glBindBuffer(GL_ARRAY_BUFFER, mVBOVertex);
+  if(!glUnmapBuffer(GL_ARRAY_BUFFER))
   {
     boError() << k_funcinfo << "can't unmap vertices' vbo!" << endl;
   }
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, mVBONormal);
-  if(!glUnmapBufferARB(GL_ARRAY_BUFFER_ARB))
+  glBindBuffer(GL_ARRAY_BUFFER, mVBONormal);
+  if(!glUnmapBuffer(GL_ARRAY_BUFFER))
   {
     boError() << k_funcinfo << "can't unmap vertices' vbo!" << endl;
   }
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, mVBOTexture);
-  if(!glUnmapBufferARB(GL_ARRAY_BUFFER_ARB))
+  glBindBuffer(GL_ARRAY_BUFFER, mVBOTexture);
+  if(!glUnmapBuffer(GL_ARRAY_BUFFER))
   {
     boError() << k_funcinfo << "can't unmap texture weights' vbo!" << endl;
   }
@@ -867,7 +867,7 @@ void BoQuickGroundRenderer::initMap(const BosonMap* map)
     }
   }
 
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);  // Disable VBO
+  glBindBuffer(GL_ARRAY_BUFFER, 0);  // Disable VBO
 }
 
 BoQuickGroundRenderer::TerrainChunk* BoQuickGroundRenderer::chunkAt(int x, int y) const
@@ -950,10 +950,10 @@ void BoQuickGroundRenderer::cellHeightChanged(int x1, int y1, int x2, int y2)
   const float* heightmap = mMap->heightMap();
   const float* normalmap = mMap->normalMap();
 
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, mVBOVertex);
-  BoVector3Float* vertices = (BoVector3Float*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, mVBONormal);
-  BoVector3Float* normals = (BoVector3Float*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+  glBindBuffer(GL_ARRAY_BUFFER, mVBOVertex);
+  BoVector3Float* vertices = (BoVector3Float*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+  glBindBuffer(GL_ARRAY_BUFFER, mVBONormal);
+  BoVector3Float* normals = (BoVector3Float*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
   for(int y = y1; y <= y2; y++)
   {
@@ -967,13 +967,13 @@ void BoQuickGroundRenderer::cellHeightChanged(int x1, int y1, int x2, int y2)
   }
 
   // Unmap VBOs
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, mVBOVertex);
-  if(!glUnmapBufferARB(GL_ARRAY_BUFFER_ARB))
+  glBindBuffer(GL_ARRAY_BUFFER, mVBOVertex);
+  if(!glUnmapBuffer(GL_ARRAY_BUFFER))
   {
     boError() << k_funcinfo << "can't unmap vertices' vbo!" << endl;
   }
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, mVBONormal);
-  if(!glUnmapBufferARB(GL_ARRAY_BUFFER_ARB))
+  glBindBuffer(GL_ARRAY_BUFFER, mVBONormal);
+  if(!glUnmapBuffer(GL_ARRAY_BUFFER))
   {
     boError() << k_funcinfo << "can't unmap vertices' vbo!" << endl;
   }
@@ -983,8 +983,8 @@ void BoQuickGroundRenderer::cellTextureChanged(int x1, int y1, int x2, int y2)
 {
   const unsigned char* texmap = mMap->texMap();  // Contains weights for _all_ textures
 
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, mVBOTexture);
-  unsigned char* weights = (unsigned char*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+  glBindBuffer(GL_ARRAY_BUFFER, mVBOTexture);
+  unsigned char* weights = (unsigned char*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
   for(int y = y1; y <= y2; y++)
   {
@@ -1004,8 +1004,8 @@ void BoQuickGroundRenderer::cellTextureChanged(int x1, int y1, int x2, int y2)
   }
 
   // Unmap VBOs
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, mVBOTexture);
-  if(!glUnmapBufferARB(GL_ARRAY_BUFFER_ARB))
+  glBindBuffer(GL_ARRAY_BUFFER, mVBOTexture);
+  if(!glUnmapBuffer(GL_ARRAY_BUFFER))
   {
     boError() << k_funcinfo << "can't unmap texture weights' vbo!" << endl;
   }
