@@ -25,7 +25,7 @@
 #endif
 
 // OpenGL
-#include "gl/bogl_1_5_decl_p.h"
+#include "gl/bogl_2_0_decl_p.h"
 
 // GLU
 #include "gl/boglu_decl_p.h"
