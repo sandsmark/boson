@@ -173,6 +173,7 @@ BoShader::~BoShader()
   {
     mUniformLocations->clear();
     delete mUniformLocations;
+    mUniformLocations = 0;
   }
 
   if(mProgram)
@@ -334,7 +335,7 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
   }
   delete log;
 
-  // Create uniform locations dict
+  delete mUniformLocations;
   mUniformLocations = new QDict<int>(17);
   mUniformLocations->setAutoDelete(true);
 
@@ -450,6 +451,7 @@ void BoShader::reload()
   {
     mUniformLocations->clear();
     delete mUniformLocations;
+    mUniformLocations = 0;
   }
   if(mProgram)
   {
