@@ -457,7 +457,7 @@ void BosonPath::findPath(BosonPathInfo* info)
 
   long int elapsed = methodProfiler.popElapsed();
   boDebug(500) << k_funcinfo << (info->flying ? "flying " : "") <<
-      "unit " << (info->unit ? info->unit->id() : -1) << "; took " << elapsed/1000.0f << " ms;   result: " <<
+      "unit " << (info->unit ? (int)info->unit->id() : -1) << "; took " << elapsed/1000.0f << " ms;   result: " <<
       (info->result == GoalReached ? "GoalReached" : (info->result == OutOfRange ? "OutOfRange" :
       (info->result == NoPath ? "NoPath" : "None"))) << ", path length: " << info->llpath.count() << endl;
 }
@@ -549,8 +549,8 @@ void BosonPath::getPartialLowLevelPath(BosonPathInfo* info)
   {
     lasthlstep = QMIN(3, (int)info->hlpath.count() - 1);
     info->dest = info->hlpath[lasthlstep];
-    // We want to get _exactly_ to hlpath's point
-    info->range = 0;
+    // Getting near the hlpath's point should be enough
+    info->range = 4;
   }
 
   // Find the path
