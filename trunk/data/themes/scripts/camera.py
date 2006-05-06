@@ -28,14 +28,14 @@ class Camera:
   def setUp(self, x, y, z):
     BoScript.setCameraUp(x, y, z)
 
-  def setZ(self, z):
-    BoScript.setCameraZ(z)
+  def setDistance(self, dist):
+    BoScript.setCameraDistance(dist)
 
   def setRotation(self, r):
     BoScript.setCameraRotation(r)
 
-  def setRadius(self, r):
-    BoScript.setCameraRadius(r)
+  def setXRotation(self, r):
+    BoScript.setCameraXRotation(r)
 
 
   def addPos(self, x, y, z,  time):
