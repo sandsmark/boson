@@ -928,9 +928,14 @@ bool UnitMoverLand::canGoToCurrentPathPoint(int xpos, int ypos)
 			} else if (u->isFlying()) {
 				continue;
 			}
-			if (u->movingStatus() != UnitBase::Moving) {
-				return false;
+			if (u->movingStatus() == UnitBase::Moving) {
+				// Hopefully it will move away
+				continue;
+			} else if(u->maxHealth() <= pathInfo()->movedata->crushDamage && u->owner() != unit()->owner()) {
+				// We can just crush it
+				continue;
 			}
+			return false;
 		}
 	}
  }
