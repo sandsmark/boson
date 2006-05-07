@@ -3,10 +3,10 @@
 uniform bool fogEnabled;
 
 varying vec3 normal;
-varying vec3 vertex;
 varying vec3 tolight;
 varying vec3 tocamera;
 varying vec3 color;
+varying float fogStrength;
 
 vec3 eucleidian(vec4 h) { return vec3(h.xyz / h.w); }
 
@@ -20,11 +20,11 @@ void main()
   //  because models use matrix transformations.
   normal = gl_NormalMatrix * gl_Normal;
   vec4 eyevertex = gl_ModelViewMatrix * gl_Vertex;
-  vertex = eucleidian(eyevertex);
   // FIXME: this assumes we're using directional light
   tolight = normalize(vec3(gl_LightSource[0].position));
 #ifdef USE_SPECULAR
   // Camera is at (0; 0; 0) in eye space, so this is the direction to it.
+  vec3 vertex = eucleidian(eyevertex);
   tocamera = normalize(vec3(-vertex));
 #endif
 
@@ -36,7 +36,7 @@ void main()
   gl_TexCoord[1] = gl_TextureMatrix[3] * gl_TexCoord[1];
 
   if(fogEnabled)
-    gl_FogFragCoord = gl_Position.z;
+    fogStrength = clamp((eyevertex.z - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
 
   gl_Position = ftransform();
 }
@@ -51,10 +51,10 @@ uniform sampler2DShadow texture_3;
 uniform bool fogEnabled;
 
 varying vec3 normal;
-varying vec3 vertex;
 varying vec3 tolight;
 varying vec3 tocamera;
 varying vec3 color;
+varying float fogStrength;
 
 float specularStrength(vec3 lightdir, vec3 cameradir, vec3 normal)
 {
@@ -124,10 +124,9 @@ void main()
       shadow * specular * vec3(0.8, 0.8, 0.8) * gl_LightSource[0].specular.rgb;
 #endif
 
-  float fog = 1.0;
   if(fogEnabled)
-    fog = clamp((gl_Fog.end - gl_FogFragCoord) * gl_Fog.scale, 0.0, 1.0);
+    litcolor = mix(litcolor, gl_Fog.color.rgb, fogStrength);
 
-  gl_FragColor = vec4(mix(gl_Fog.color.rgb, litcolor, fog), texcolor.a);
+  gl_FragColor = vec4(litcolor, texcolor.a);
 }
 
