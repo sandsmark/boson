@@ -34,6 +34,7 @@ public:
 	BoColorDrawable()
 	{
 		mTaken = false;
+		mHighlight = false;
 	}
 
 	void setColor(const QColor c)
@@ -43,6 +44,10 @@ public:
 	void setTaken(bool t)
 	{
 		mTaken = t;
+	}
+	void setHighlight(bool h)
+	{
+		mHighlight = h;
 	}
 
 	virtual int drawableWidth() const
@@ -56,7 +61,7 @@ public:
 
 	virtual void render(int x, int y, int w, int h)
 	{
-		glPushAttrib(GL_ENABLE_BIT);
+		glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_HINT_BIT);
 
 		glDisable(GL_TEXTURE_2D);
 
@@ -69,13 +74,25 @@ public:
 		glEnd();
 
 		glColor3ub(0, 0, 0);
+		glLineWidth(2.0f);
+		glEnable(GL_LINE_SMOOTH);
+		glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+		const int margin = 3;
 		if (mTaken) {
 			glBegin(GL_LINES);
-				glVertex2i(x, y);
-				glVertex2i(x + h, y + h);
+				glVertex2i(x + margin, y + margin);
+				glVertex2i(x + w - margin, y + h - margin);
 
-				glVertex2i(x + w, y);
-				glVertex2i(x, y + h);
+				glVertex2i(x + w - margin, y + margin);
+				glVertex2i(x + margin, y + h - margin);
+			glEnd();
+		}
+		if(mHighlight) {
+			glBegin(GL_LINE_LOOP);
+				glVertex2i(x + margin, y + margin);
+				glVertex2i(x + w - margin, y + margin);
+				glVertex2i(x + w - margin, y + h - margin);
+				glVertex2i(x + margin, y + h - margin);
 			glEnd();
 		}
 
@@ -86,6 +103,7 @@ public:
 private:
 	QColor mColor;
 	bool mTaken;
+	bool mHighlight;
 };
 
 class BoUfoColorChooserPrivate
@@ -306,6 +324,8 @@ void BoUfoColorChooser::highlightColor(int i)
 
  BoUfoWidget* b = d->mButtons.at(i);
  b->setBorderType(BoUfoWidget::LoweredBevelBorder);
+ BoColorDrawable* drawable = d->mButtonDrawable.at(i);
+ drawable->setHighlight(true);
 }
 
 void BoUfoColorChooser::highlightColor(const QColor& c)
@@ -331,6 +351,8 @@ void BoUfoColorChooser::unhighlightColor(int i)
 
  BoUfoWidget* b = d->mButtons.at(i);
  b->setBorderType(BoUfoWidget::NoBorder);
+ BoColorDrawable* drawable = d->mButtonDrawable.at(i);
+ drawable->setHighlight(false);
 }
 
 void BoUfoColorChooser::unhighlightColor(const QColor& c)
