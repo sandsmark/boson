@@ -35,10 +35,10 @@ void main()
   gl_TexCoord[1].q = dot(eyevertex, gl_EyePlaneQ[3]);
   gl_TexCoord[1] = gl_TextureMatrix[3] * gl_TexCoord[1];
 
-  if(fogEnabled)
-    fogStrength = clamp((eyevertex.z - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
-
   gl_Position = ftransform();
+
+  if(fogEnabled)
+    fogStrength = clamp((gl_Position.z - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
 }
 
 <fragment>
