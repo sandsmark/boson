@@ -5,6 +5,7 @@ uniform bool fogEnabled;
 
 varying vec3 vertex;
 varying vec3 lightDir;
+varying float fogStrength;
 
 void main()
 {
@@ -18,7 +19,7 @@ void main()
   gl_Position = ftransform();
 
   if(fogEnabled)
-    gl_FogFragCoord = gl_Position.z;
+    fogStrength = clamp((gl_Position.z - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
 }
 
 
@@ -35,6 +36,7 @@ uniform bool fogEnabled;
 uniform vec3 cameraPos;
 varying vec3 vertex;
 varying vec3 lightDir;
+varying float fogStrength;
 
 // Index of refraction of water
 #define IOR 1.333
@@ -69,14 +71,14 @@ void main()
   float d = IOR * dot(viewv, normal);
   float refrFactor = clamp(d*d + 1.0 - IOR*IOR, 0.0, 1.0);
 
-  float fog = 1.0;
-  if(fogEnabled)
-    fog = clamp((gl_Fog.end - gl_FogFragCoord) * gl_Fog.scale, 0.0, 1.0);
 
   // Final result
   // This will be mix between reflection (from envmap) and basecolor
   // Specular color will be added to the result
   vec3 visiblecolor = mix(envcolor, litcolor, refrFactor);
-  gl_FragColor = vec4(mix(gl_Fog.color.rgb, visiblecolor, fog), 1.0 - refrFactor * 0.75) + speccolor;
+  if(fogEnabled)
+    visiblecolor = mix(visiblecolor, gl_Fog.color.rgb, fogStrength);
+
+  gl_FragColor = vec4(visiblecolor, 1.0 - refrFactor * 0.75) + speccolor;
 }
 
