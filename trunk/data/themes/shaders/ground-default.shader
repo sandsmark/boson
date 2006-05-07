@@ -85,7 +85,7 @@ void main()
   vec3 normal = texture2D(texture_2, texcoord).rgb * 2.0 - 1.0;
 
   // Diffuse light received by surface (N.L)
-  vec3 diffuse = dot(normal, tLightDir) * gl_LightSource[0].diffuse.rgb;
+  vec3 diffuse = max(dot(normal, tLightDir), 0.0) * gl_LightSource[0].diffuse.rgb;
 
   // Amount of specular light
   //float specular = clamp(pow(dot(halfv, normal), 32), 0.0, 1.0);
