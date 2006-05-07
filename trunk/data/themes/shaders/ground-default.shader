@@ -8,6 +8,7 @@ uniform bool fogEnabled;
 varying float alpha;
 varying vec3 tLightDir;
 varying vec3 tCameraDir;
+varying float fogStrength;
 
 void main()
 {
@@ -33,7 +34,7 @@ void main()
   gl_Position = ftransform();
 
   if(fogEnabled)
-    gl_FogFragCoord = gl_Position.z;
+    fogStrength = clamp((gl_Position.z - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
 }
 
 
@@ -55,6 +56,7 @@ uniform bool fogEnabled;
 varying float alpha;
 varying vec3 tLightDir;
 varying vec3 tCameraDir;
+varying float fogStrength;
 
 void main()
 {
@@ -124,10 +126,9 @@ void main()
 
   vec3 litcolor = basetexcolor * (diffuse * shadow + gl_LightSource[0].ambient.rgb);
 
-  float fog = 1.0;
   if(fogEnabled)
-    fog = clamp((gl_Fog.end - gl_FogFragCoord) * gl_Fog.scale, 0.0, 1.0);
+    litcolor = mix(litcolor, gl_Fog.color.rgb, fogStrength);
 
-  gl_FragColor = vec4(mix(gl_Fog.color.rgb, litcolor * visibility, fog), alpha) /*+ speccolor*/;
+  gl_FragColor = vec4(litcolor * visibility, alpha) /*+ speccolor*/;
 }
 
