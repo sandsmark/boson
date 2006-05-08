@@ -13,6 +13,7 @@ endif(insource)
 #set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules" "${CMAKE_SOURCE_DIR}/cmake/modules/boson")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/boson")
 
+include(BosonMisc)
 
 # AB: TODO: include in official cmake files?
 set(KDE3_XDG_APPS_DIR /share/applications)
@@ -62,9 +63,14 @@ endif(BOSON_USE_DEBUG_PLUGINS)
 
 
 # search packages used by KDE
+# AB: FindKDE3.cmake adds compiler flags, but we don't want this.
+set(orig_c_flags ${CMAKE_C_FLAGS})
+set(orig_cxx_flags ${CMAKE_CXX_FLAGS})
 find_package(Qt3 REQUIRED)
 find_package(KDE3 REQUIRED)
 find_package(Perl REQUIRED)
+set(CMAKE_C_FLAGS ${orig_c_flags})
+set(CMAKE_CXX_FLAGS ${orig_cxx_flags})
 
 # packages required by boson
 # note: we may have more deeper in the directory structure (e.g. python in
