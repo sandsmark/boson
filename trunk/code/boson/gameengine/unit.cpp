@@ -1757,17 +1757,17 @@ bool Unit::slowDownAtDestination() const
 
 bofixed Unit::distanceSquared(const Unit* u) const
 {
- bofixed dx = centerX() - u->centerX();
- bofixed dy = centerY() - u->centerY();
- bofixed dz = centerZ() - u->centerZ();
+ bofixed dx = QMAX(bofixed(0), QABS(centerX() - u->centerX()) - width()/2 - u->width()/2);
+ bofixed dy = QMAX(bofixed(0), QABS(centerY() - u->centerY()) - height()/2 - u->height()/2);
+ bofixed dz = QMAX(bofixed(0), QABS(centerZ() - u->centerZ()) - depth()/2 - u->depth()/2);
  return dx*dx + dy*dy + dz*dz;
 }
 
 bofixed Unit::distanceSquared(const BoVector3Fixed& pos) const
 {
- bofixed dx = pos.x() - centerX();
- bofixed dy = pos.y() - centerY();
- bofixed dz = pos.z() - centerZ();
+ bofixed dx = QMAX(bofixed(0), QABS(pos.x() - centerX()) - width()/2);
+ bofixed dy = QMAX(bofixed(0), QABS(pos.y() - centerY()) - height()/2);
+ bofixed dz = QMAX(bofixed(0), QABS(pos.z() - centerZ()) - depth()/2);
  return dx*dx + dy*dy + dz*dz;
 }
 
