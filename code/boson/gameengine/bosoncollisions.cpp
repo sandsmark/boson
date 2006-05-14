@@ -158,7 +158,7 @@ QValueList<Unit*> BosonCollisions::unitCollisionsInSphere(const BoVector3Fixed& 
 	}
 //	boDebug(310) << "unit at x=" << u->x() << ",y=" << u->y() << ",pos=" << pos.x() << "," << pos.y() << endl;
 
-	if (u->distance(pos) <= radius * radius) {
+	if (u->distanceSquared(pos) <= radius * radius) {
 		list.append(u);
 	}
  }

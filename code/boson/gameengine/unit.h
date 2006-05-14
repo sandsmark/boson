@@ -467,11 +467,11 @@ public:
 	/**
 	 * @return Square of distance between center points of this unit and u
 	 **/
-	bofixed distance(const Unit* u) const;
+	bofixed distanceSquared(const Unit* u) const;
 	/**
 	 * @return Square of distance between center point of this unit and pos
 	 **/
-	bofixed distance(const BoVector3Fixed& pos) const;
+	bofixed distanceSquared(const BoVector3Fixed& pos) const;
 
 	/**
 	 * @return Weapon with given id for this unit. 0 if it doesn't exist.

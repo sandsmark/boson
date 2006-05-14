@@ -737,7 +737,7 @@ void BosonCanvas::explosion(const BoVector3Fixed& pos, long int damage, bofixed 
 	Unit* u = l[i];
 	// We substract unit's size from actual distance
 	bofixed unitsize = QMIN(u->width(), u->height()) / 2.0f;
-	dist = QMAX(bofixed(sqrt(u->distance(pos)) - unitsize), bofixed(0));
+	dist = QMAX(bofixed(sqrt(u->distanceSquared(pos)) - unitsize), bofixed(0));
 	if (dist <= fullrange || range == fullrange) {
 		d = damage;
 	} else {
