@@ -735,9 +735,9 @@ void BosonCanvas::explosion(const BoVector3Fixed& pos, long int damage, bofixed 
  QValueList<Unit*> l = collisions()->unitCollisionsInSphere(pos, range);
  for (unsigned int i = 0; i < l.count(); i++) {
 	Unit* u = l[i];
-	// We substract unit's size from actual distance
-	bofixed unitsize = QMIN(u->width(), u->height()) / 2.0f;
-	dist = QMAX(bofixed(sqrt(u->distanceSquared(pos)) - unitsize), bofixed(0));
+	// Calculate actual distance of unit from explosion's center (this takes
+	//  unit's size into account)
+	dist = sqrt(u->distanceSquared(pos));
 	if (dist <= fullrange || range == fullrange) {
 		d = damage;
 	} else {
