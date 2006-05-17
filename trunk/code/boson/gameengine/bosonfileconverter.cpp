@@ -1491,12 +1491,7 @@ bool BosonFileConverter::convertPlayField_From_0_11_81_To_0_12(QMap<QString, QBy
  QDomElement kgameRoot = kgameDoc.documentElement();
  QDomElement canvasRoot = canvasDoc.documentElement();
 
-#if BOSON_VERSION_MINOR < 0x12
- kgameRoot.setAttribute("Version", BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x03, 0x02));
-#else
-#error TODO: the above version to be BOSON_SAVEGAME_FORMAT_VERSION_0_12
  kgameRoot.setAttribute("Version", BOSON_SAVEGAME_FORMAT_VERSION_0_12);
-#endif
 
  // retrieve all UnitPlugins, including all weapons
  QDomNodeList unitPlugins = canvasRoot.elementsByTagName("UnitPlugin");
@@ -1530,6 +1525,33 @@ bool BosonFileConverter::convertPlayField_From_0_11_81_To_0_12(QMap<QString, QBy
  files.insert("canvas.xml", canvasDoc.toString().utf8());
  return true;
 }
+
+// AB: this should be used as template for the first conversion from 0.12 to
+// something newer
+#if 0
+bool BosonFileConverter::convertPlayField_From_0_12_To_0_12_1(QMap<QString, QByteArray>& files)
+{
+ QDomDocument kgameDoc(QString::fromLatin1("Boson"));
+ if (!loadXMLDoc(&kgameDoc, files["kgame.xml"])) {
+	boError() << k_funcinfo << "could not load kgame.xml" << endl;
+	return false;
+ }
+
+ QDomElement kgameRoot = kgameDoc.documentElement();
+
+
+#if BOSON_VERSION_MINOR < 0x13
+ kgameRoot.setAttribute("Version", BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x03, 0x03));
+#else
+#error TODO: the above version should be BOSON_SAVEGAME_FORMAT_VERSION_0_13
+ kgameRoot.setAttribute("Version", BOSON_SAVEGAME_FORMAT_VERSION_0_13);
+#endif
+
+ files.insert("kgame.xml", kgameDoc.toString().utf8());
+
+ return true;
+}
+#endif
 
 void BosonFileConverter::removePropertyIds_0_9_1(const QDomNodeList& itemsList, const QStringList& ids)
 {
