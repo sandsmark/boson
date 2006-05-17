@@ -50,7 +50,17 @@ public:
 	virtual void paintWidget(ufo::UGraphics* g)
 	{
 		Q_UNUSED(g);
+
+		// AB: libufo uses pixel exact rendering in the way proposed in
+		// the redbook - the appendix "programming tips".
+		//
+		// however by some reason it does NOT do the translation, but
+		// rather adds the same translation in every GL call that is
+		// done using a UGraphics object. I consider that nonsense, but
+		// that's the way it is - so we have to fix it here.
+		glTranslatef(0.375f, 0.375f, 0.0);
 		mWidget->paintWidget();
+		glTranslatef(-0.375f, -0.375f, 0.0);
 	}
 	virtual void paintBorder(ufo::UGraphics* g)
 	{
