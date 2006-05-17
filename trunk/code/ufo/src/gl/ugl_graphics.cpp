@@ -143,7 +143,7 @@ UGL_Graphics::mapToDevice(const URectangle & rect) {
 	ugl_driver->glGetIntegerv(GL_VIEWPORT, vport);
 
 	// y-flip
-	return URectangle(vport[0] + rect.x, vport[1] + vport[3] - rect.y - rect.h + 1, rect.w, rect.h);
+	return URectangle(vport[0] + rect.x, vport[1] + vport[3] - rect.y - rect.h, rect.w, rect.h);
 }
 
 URectangle
@@ -154,7 +154,7 @@ UGL_Graphics::mapFromDevice(const URectangle & rect) {
 	// FIXME
 	// this is simply wrong
 	// y-flip
-	return URectangle(rect.x - vport[0], - vport[1] - vport[3] + rect.y + rect.h - 1, rect.w, rect.h);
+	return URectangle(rect.x - vport[0], - vport[1] - vport[3] + rect.y + rect.h, rect.w, rect.h);
 }
 
 

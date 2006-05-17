@@ -33,7 +33,6 @@ Patches applied currently:
   method.
   The methods used are virtual and do nothing by default - it is up to the
   user to implement real profiling.
-- Patch to ugl_graphics.cpp to fix ufo::UGL_Graphics::mapToDevice()
 
 
 
