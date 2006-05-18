@@ -42,28 +42,10 @@ main_area_begin();
 
 // Contacts
 draw_bigbox_begin("Status");
-draw_bigbox_text("Most recent version, 0.11, was released on 2nd September 2005.
-  <br><br>");
-
-draw_bigbox_subheader("<a name=\"features\"></a>Feature list");
-
-draw_bigbox_text("What has been changed since 0.11 (incomplete list):
-<ul>
-  <li>Major PlayerId redesign</li>
-  <li>Several bugfixes</li>
-  <li>Visual feedbacks when giving orders to units</li>
-  <li>Provide ALT+number to center on a selection</li>
-  <li>Show all production options in the commandframe, even those with unmet
-  requirements (grayed out then)</li>
-  <li>Powerplants now actually plant power</li>
-  <li>Shadow support</li>
-  <li>Turrets turn towards their target</li>
-  <li>Weapons can use ammunition</li>
-  <li>New radar system</li>
-  <li>New method to find the 3d-position of the mouse position. This fixes
-  problems with some broken OpenGL drivers and also fixes a performance issue</li>
-  <li>A complete new species with its own models</li>
-</ul>");
+draw_bigbox_text("
+You can find the current status, that is changes in recent SVN as well as
+changelogs from previous versions, in our <a
+href=\"http://boson.eu.org/wiki/Main/Releases\">wiki</a>");
 
 draw_bigbox_end();
 main_area_end();
