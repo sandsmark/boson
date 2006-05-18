@@ -29,3 +29,9 @@ if (NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE Debug)
 endif (NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 
+
+# we use these in many files
+include(CheckIncludeFiles)
+include(CheckIncludeFile)
+include(CheckIncludeFileCXX)
+
