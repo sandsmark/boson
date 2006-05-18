@@ -72,6 +72,11 @@ find_package(Perl REQUIRED)
 set(CMAKE_C_FLAGS ${orig_c_flags})
 set(CMAKE_CXX_FLAGS ${orig_cxx_flags})
 
+# cmake <= 2.4.2 sometimes catch moc/uic from qt4. make sure that has not
+# happened to us.
+include(CheckQt3Executables)
+check_qt3_executables()
+
 # packages required by boson
 # note: we may have more deeper in the directory structure (e.g. python in
 #       boson/script)
