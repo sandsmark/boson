@@ -85,7 +85,6 @@ draw_link("Wiki", "http://boson.freehackers.org/pmwiki/pmwiki.php");
 draw_extended_link("FAQ", "http://boson.halux2001.de/handbook/en/faq.html", "target=\"_blank\"");
 echo "<br>";
 draw_link("Announcements", "announcements.php");
-draw_link("Stories", "stories.php");
 echo "<br>";
 draw_link("Status", "status.php");
 draw_link("Contact us", "contact.php");
@@ -174,15 +173,5 @@ draw_link("Boson 0.10", "announces/boson-0.10.php");
 draw_link("Boson 0.11", "announces/boson-0.11.php");
 sidebar_box_end();
 }
-
-function sidebar_stories_box()
-{
-sidebar_box_begin("Boson stories");
-draw_link("Story #1&nbsp;&nbsp;(Oct. 17, 2002)", "stories/story-20021017.php");
-draw_link("Story #2&nbsp;&nbsp;(Nov. 08, 2002)", "stories/story-20021108.php");
-draw_link("Story #3&nbsp;&nbsp;(March 31, 2003)", "stories/story-20030331.php");
-sidebar_box_end();
-}
-
 
 ?>
