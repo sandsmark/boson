@@ -1,0 +1,5 @@
+#include "facilities.wml" type="Units" name="Ferry" \
+        description="With the ferry you can transport land units over the sea.<br>One of the most important \
+        things a captain has to do before he can use his Ferry is to implement landing, loading and such things." \
+        name2="ferry" type2="mob" \
+        before_url="ship.html" before_text="Ship" after_url="tornado.html" after_text="Tornado" up_url="index.html"

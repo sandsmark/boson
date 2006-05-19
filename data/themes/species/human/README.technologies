@@ -1,0 +1,74 @@
+With technologies you get the ability to change unit and facility properties during the game.
+This file explains the syntax of an entry in the index.technologies file.
+
+
+The entries marked with * are mandatory.
+-------------------------------------------------------------------------------
+[UPGRADE_NAME]
+* Id=Number
+        ID of the entry.
+        No default!
+Name=Text
+        Upgrade name. It can be different from UPGRADE_NAME
+        Default is "Unknown".
+MineralCost=Number
+        Mineral cost for development.
+        Default is 0.
+OilCost=Number
+        Oil cost for development.
+        Default is 0.
+Producer=Number
+        Specifies which kind of factory is able to produce this
+        technology. Possible values are: 0=war factory (heavy land
+        units, all types of vehicles), 1=shipyard (all ships),
+        2=airport (all aircrafts), 3=barracks (soldiers,
+        human units), 10=command bunker (all facilities).
+        Default is 0.
+ProductionTime=Number
+        The number of advance calls needed to produce this technology.
+        Must be >= 0.
+        Default is 100.
+Pixmap=Filename
+        Filename for an icon. The file has to be in
+        themes/species/human/pixmaps.
+        Default is none.png.
+ApplyToTypes=Numbers
+        List seperated by commas with unit/facility ids. This units will be upgraded.
+        No default.
+RequireUnits=Numbers
+        List seperated by commas with unit/facility ids which are required
+        to get this technologie.
+        No default.
+ApplyToFacilities=bool
+        Upgrade all facilities ?
+        Default is false.
+ApplyToMobiles=bool
+        Upgrade all mobile units ?
+        Default is false
+
+
+You can upgrade the following properties of a unit/facility:
+(For more information see units/README)
+
+Health
+Armor
+Shields
+UnitMineralCost
+UnitOilCost
+SightRange
+UnitProductionTime
+Speed
+AccelerationSpeed
+DecelerationSpeed
+
+The values for them are:
+
+Absolute value
+        Replaces old value.
+        Example: 10 or 50
+Relative value
+        Is added to old value.
+        Example: +4 or -1
+Percent value
+        Changes the new value to x percents of the old value.
+        Example: 50% or 200%

@@ -1,0 +1,18 @@
+[Boson Facility]
+ConstructionSteps=0
+
+[Boson Unit]
+Name=Crate - wooden1
+Health=35
+Id=39
+IsFacility=true
+MineralCost=30
+OilCost=10
+#Producer=10
+#ProductionTime=20
+SupportMiniMap=false
+TerrainType=1
+UnitDepth=0.3
+UnitHeight=0.3
+UnitWidth=0.3
+

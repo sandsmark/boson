@@ -1,0 +1,8 @@
+#include "indexes.wml" title="Introduction" description="This section covers everything you need to know about Boson to get it successfully running."
+          
+<dt>1 <a href="about.html">About Boson</a></dt>
+<dt>2 <a href="started.html">Getting started</a></dt>
+<dt>3 <a href="installation.html">Installation</a></dt>
+
+#include "indexes_footer.wml" before_url="index.html" before_text="Index" after_url="about.html" after_text="About Boson" up_url="index.html"
+

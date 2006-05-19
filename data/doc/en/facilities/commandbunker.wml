@@ -1,0 +1,5 @@
+#include "facilities.wml" type="Facilities" name="Command Bunker" \
+        description="This is your command center where your operations will take place. Defend it with your life, \
+        as the root of the dependency tree it allows you to construct all basic buildings." \
+        name2="commandbunker" type2="fix" \
+        before_url="map.html" before_text="Facilities dependency tree" after_url="mineralrefinery.html" after_text="Mineral Refinery" up_url="index.html"

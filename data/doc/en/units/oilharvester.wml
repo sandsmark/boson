@@ -1,0 +1,4 @@
+#include "facilities.wml" type="Units" name="Oil Harvester" \
+        description="The Oil Harvester transports oil from the Oil Towers to a <a href='../facilities/oilrefinery.html'>Oil Refinery</a>" \
+        name2="oilharvester" type2="mob" \
+        before_url="mineralharvester.html" before_text="Mineral Harvester" after_url="grizzly.html" after_text="Grizzly" up_url="index.html"

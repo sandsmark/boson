@@ -1,0 +1,13 @@
+#include "top.wml"
+    <h1>
+      Building units
+    </h1>
+    <p>&nbsp;</p>
+    <p>
+      You can instruct different buildings to construct units.<br>
+      At the moment only the <a href="../facilities/weaponsfactory.html">Weapons Factory</a> and the <a href="../facilities/helipad.html">Helipad</a>
+      support that.
+    </p>
+
+#include "nav.wml" before_url="buildfac.html" before_text="Build facilities" after_url="moving.html" after_text="Selecting and moving units" up_url="index.html"
+#include "footer.wml"

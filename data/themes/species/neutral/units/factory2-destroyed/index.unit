@@ -1,0 +1,19 @@
+[Boson Facility]
+ConstructionSteps=0
+
+[Boson Unit]
+Name=Factory2-Destroyed
+Health=300
+Armor=4
+Id=62
+IsFacility=true
+MineralCost=160
+OilCost=20
+#Producer=10
+#ProductionTime=20
+SupportMiniMap=false
+TerrainType=1
+UnitDepth=1.8
+UnitHeight=5
+UnitWidth=5
+

@@ -1,0 +1,171 @@
+WARNING: this file is obsolete!
+
+1. A boson playfield file
+1.1 The .boson files
+1.2 The .bpf file
+2.1 BosonMap
+2.2 BosonScenario
+2.2.1 ScenarioSettings
+2.2.2 Player
+2.2.2.1 Unit
+
+1. A boson playfield file
+The boson playfield file is either a gzip compressed XML or uncompressed XML file.
+
+A playfield file contains information about the map (i.e. where is which 
+cell/tile - it specifies which ground type is where) AND about the scenario 
+(how many players can play on this map, where are their units, which units, ...)
+
+Both of this - map and scenario - are call a "playfield". I don't really
+distinguish between those different names, though. All over boson you'll find
+the names "map", "scenario" and maybe even "playfield" which all mean the same
+file.
+But the "map class" or "map tag" as well as the scenario class/tag are certain
+classes!
+
+The playfield filename can be any (you'll probably use the english map name) with a
+suffix of ".bpf" .
+
+1.1 The .boson files
+----------------------
+Additionally there is a file with the same name but a suffix of .boson.
+So the basic map would have the files
+basic.bpf
+basic.boson
+
+The .boson file contains further information about the playfield. This is 
+mainly the localized name and a short description. It also contains the 
+"identifier", a short, unique (!!) name for the map that is referred to by the 
+scenario files.
+The structure of the .boson file:
+
+[Boson PlayField]
+Name=Basic
+Name[de]=German name of Basic
+Comment=Basic is... Basic!
+Comment[de]=German translation of the comment
+Identifier=Basic
+
+The .boson file consists of a single group "[Boson PlayField]". It supports the
+following entries:
+Name=Text       - The name of the map. Translated versions can be created with
+                  [de] after Name, where de is the language. See KDE/KConfig for
+                  information about possible language letters. 
+                  Note that you don't have to provide a translated version. If you
+                  don't do, the english name is used (which makes often more
+                  sense).
+Comment=Text    - A short text about your map. Can also be translated.
+Identifier=Text - A unique text for this map. Do *not* translate!
+
+
+1.2 The .bpf file
+-----------------
+This is the main file. It contains two xml tags: <BosonMap> and <BosonScenario>.
+Their content is described in the following parts.
+
+2.1 BosonMap
+------------
+The first gets read by the class BosonMap and defines the map.
+Currently (!) BosonMap supports only the arguments "Width" and "Height" and the
+tag <Cell>. Cell takes the arguments "x" and "y" which define the position of
+the cell on the map (0,0 is upper left, Width-1,Height-1 is bottom right), the
+argument "GroundType" which specifies *what* is at this position (see
+Cell::GroundType for possible values) and finally the argument "Version" which
+can be 0..3 (a different version of a cell is basically exactly the same type of
+cell but looks slightly different. this way the map won't look too tiled).
+You will usually use the map editor to generate a map - if you need further
+information about the file format please refer to the code.
+
+2.2 BosonScenario
+-----------------
+The second tag, <BosonScenario> is the more interesting one. It defines the
+position of all units (fix and mobile) which are initially on the map. 
+
+2.2.1 ScenarioSettings
+----------------------
+The first tag here, <ScenarioSettings>, takes the following arguments (please
+refer to the code - bosonscenario.[h|cpp] for current information):
+MaxPlayers=Number    - The maximal number of players that this map supports.
+                       Note that you need to provide exactly this number of 
+                       Player tags later, so that it's actually possible to
+                       play the map with this number of players.
+                       This entry is mandatory!
+MinPlayeres=Number   - The minimal number of players this map can be played
+                       with. The players won't be able to start a game with less
+                       players.
+                       The default is 1 (although the game doesn't make any
+                       sense without an enemy).
+
+2.2.2 Player
+------------
+The second important tag of <BosonScenario> is <Player>. Currently there is 
+only a single argument for it:
+PlayerNumber=Number  - A number 0..(MaxPlayers-1). You must provide ALL numbers
+                       in this range, you need a separate <Player> tag for every
+                       PlayerNumber.
+                       This entry is mandatory.
+
+The player tag can also contain several tags. First of all you should describe
+the resources of the player:
+Minerals      - This tag takes a number of quite much any positive value
+                (actually its maximum is about 4 billions).
+                The default is 0.
+Minerals      - This tag takes a number of quite much any positive value
+                (actually its maximum is about 4 billions).
+                The default is 0.
+
+For example a player with 1000 minerals and 0 oil might look like this:
+
+<Player PlayerNumber="0">
+ <Minerals>1000</Minerals>
+</Player>
+
+Note that you can simply leave out the <Oil> tag is it's 0 anyway.
+But a player without units doesn't make much sense does it? So read on...
+
+2.2.2.1 Unit
+------------
+WARNING: a lot of things are outdated here!
+The most important tag of Player. All possibl entries you can use are arguments
+- this might be baaad xml structure... Perhaps I'll change it later but
+  currently that's the way it is.
+Entries marked with a * are mandatory!
+
+* x=Number          - The tile/cell x-position of the initial position of the
+                      unit
+* y=Number          - The tile/cell y-position of the initial position of the
+                      unit
+* UnitType=Number   - The type ID of this unit. See
+                      themes/species/human/units/*/index.unit for possible
+                      IDs.
+Health=Number       - The health/power of the unit.
+                      Default depends on the index.unit file of the unit.
+Armor=Number        - Armor of the unit (not yet used)
+                      Default depends on the index.unit file of the unit.
+Shields=Number      - Shields of the unit (not yet used)
+                      Default depends on the index.unit file of the unit.
+Work=Number         - What this unit is doing at the moment. See
+                      UnitBase::WorkType for possible values.
+                      Default is UnitBase::WorkNone (0)
+ReloadState=Number  - Not yet supported
+WeaponDamage=Number - How much damage this unit does to other units.
+                      Default depends on the index.unit file of the unit.
+WeaponRange=Number  - The weapon Range of this unit.
+                      Default depends on the index.unit file of the unit.
+SightRange=Number   - How far this unit can see.
+                      Default depends on the index.unit file of the unit.
+
+There are also a few entries that apply to mobile units only:
+Speed=Number        - The speed of the unit
+                      Default depends on the index.unit file of the unit.
+
+There are also a few entries that apply to facilities only:
+ConstructionCompleted=Anything - If this argument is given the unit will be
+                                 completed on the map. Otherwise it first needs
+                                 to be constructed as if it was just placed
+                                 there.
+ConstructionStep=Number  - A value 0..UnitProperties::constructionSteps(). (see
+                           entry ConstructionSteps in the index.unit file of the unit)
+                           This specifies the initial frame number of the
+                           construction animation.
+                           Default is 0

@@ -1,0 +1,14 @@
+#include "top.wml"
+
+    <h1>
+      About Boson
+    </h1>
+    <p>&nbsp;</p>
+    <p>
+        Boson is an OpenGL real-time strategy game, with the feeling of
+        Command&amp;Conquer&trade or StarCraft&trade and OpenGL support.
+        It is designed to run on Unix (Linux) computers, and is built on top of the libkdegames, kde and Qt libraries.<br>
+    </p>
+
+#include "nav.wml" before_url="intr.html" before_text="Introduction" after_url="started.html" after_text="Getting started" up_url="index.html"
+#include "footer.wml"
