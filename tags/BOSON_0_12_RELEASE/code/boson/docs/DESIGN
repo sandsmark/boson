@@ -1,0 +1,113 @@
+(Andreas Beckermann, 01/11/15)
+Note: I have spent the last few weeks rewriting boson and porting it to KGame.
+It is not yet fully completed (although most is working) so it might be that
+several parts will change.
+
+1. Boson (game) / map editor specific parts (100% obsolete and removed)
+2. KGame
+2.1 Network Traffic with KGame
+3. Widgets (98% obsolete and removed)
+
+
+1. Boson (game) / map editor specific parts
+(removed)
+
+2. KGame
+Boson is completely KGame based. This means that there is on class (Boson)
+which is derived from KGame. All playerinputs (like "move unit z to x,y) is sent
+through the network. The actual move is executed when the client(s) receive the
+input from the network. It is received in Boson::playerInput() where the units
+are moved (or whatever this playerinput was for).
+
+The class UnitBase is the base class for all units. Unit is derived from
+UnitBase and extends it by all visual parts (04/01/10: actually most visual
+parts are now implemented by BosonItem) and most of the logic stuff. 
+UnitBase contains mostly the properties that are used by Unit, as well as all 
+set/get functions.
+The most important method of Unit is owner() which returns a pointer to the
+player. Other important methods are speciesTheme() which is just a
+owner()->speciesTheme() and unitProperties() which returns the UnitProprties of
+the unit - see below for information on these classes.
+A unit has a type (Unit::type()) and an id (Unit::id()). The latter is important
+to identify a unit on the canvas (for example). The type describes ... the type
+of the unit. You need it to know that a ship is not an aircraft ;-) The type is
+sipmly a unitProperties()->typeId() so you can usually use unitProperties()
+directly.
+(04/01/10: not only units, but even all items, i.e. BosonItem objects, have an
+id now!)
+
+The class Player represents (surprise) a player. A player knows about its units,
+but it does not own them (i.e. doesnt delete them).
+Most stuff is done by KGame (like playerinput) and is not subject of this 
+document. A player must contain a SpeciesTheme, which is used to load the units.
+The Player class also contains data about what it has, e.g. whether it has a
+unit providing a minimap, and whether certain technologies have been researched
+already.
+Note that commands/inputs ("move unit a to x,y,z") should NOT be handled in
+Player, but rather in a Input class, probably a class derived of KGameIO.
+
+The class SpeciesTheme is one of the most important classes around but you
+probably don't have to care much about it. I assume that the original intention
+was that a player can change the theme on run time so that all units change
+their outlook (this is just a guess - "theme" sounds much like this).
+But now we use them just for different species - a player of species "human" has
+different units than a player of species "klingon" or whatever. All
+units/sounds/images/whatever which are specific to a special theme are stored in
+a separate directory. See the documentation of the data directory for more on
+this.
+SpeciesTheme loads all units from this dir and stores it under
+SpeciesTheme::unitProperties(). You need the type ids to access the units. The
+possible ids should be listed in the map file (aka the playfield) - unless a map
+allows just any units (this will be the usual case).
+
+UnitProperties contains information about a special unit type. So e.g. an
+aircraft has currently an initial health of 100, so UnitProperties::health()
+would return 100 for this. These are just the initial values - they usually
+differ in the actual units, but the value will stay the same in UnitProperties.
+UnitProperties also describes whether a unit can do certain things, e.g.
+UnitProperties::canGoOnWater() or UnitProperties::canProduce().
+You will find mostly all proprties of UnitBase in UnitProperties, too, except a
+for a few properties that defaults don't change (e.g. work() - the default is
+*always* WorkIdle, even if the unit changes the value immediately on startup).
+
+Boson uses KGameProperty<type> all over the code. Note that we use PolicyLocal
+nearly everywhere, so the main intention of KGameProperty (sending a property 
+to the network whenever it changes on a client) is useless. We do so to save
+network traffic (see below).
+But using KGameProperty has another *very* big advantage: you have already
+written most parts of the load/save code. KGamePropertyHandler (which contains
+the KGameProperties) can load and save them into a stream and/or file and
+therefore we just have to ensure that the non-KGameProperty variables are
+restored and we can already load/save games. So try to use KGameProperty
+whenever possible/useful!
+
+2.1 Network Traffic with KGame
+A game like boson has a big problem: network traffic. There are usually about
+100 units (in our *current*, initial map!!) on the screen. So imagine how much
+traffic you get if they all move or their health changes or whatever!
+That's why I used a very new network concept, introduced by KGame (Martin: if
+you read this, great work!). As memory and cpu power nowadays is much bigger
+than netork bandwith, all clients store *all* variables/values. So instead of
+having a single server that stores the units of all players, all players store
+all units. Most of the network messages sent our are so called "playerinputs".
+This means a player clicks on the screen and this click is sent through the
+network. To prevent a network to get slower just cause a player keeps clicking
+on the ground the click is checked first. So if the click is e.g. on the ground
+(no unit) and there is already a unit selected the playerinput with the id
+BosonMessageIds::MoveMove is sent out. This means something like "move unit with id
+z to coordinates x,y". This playerinput is received by *all* clients, including
+the one that sent it out. Now all clients just move the unit. 
+This has a lot of advantages, but also some disadvantages:
+- no dedicated server. I don't know whether a dedicated server (which checks 
+  the move for validity) is possible at all. Hey - this concept is very new!
+- all clients *must* be of exactly the same version. If a unit is moved in a
+  different way on one of the client this client will be broken. This client now
+  has the units on different locations to all other clients and therefor not
+  usable. This is not a big problem, as boson is open source and there is no
+  point against upgrading. But games with development version are difficult...
+
+
+3. Widgets
+(removed)
+
+

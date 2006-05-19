@@ -1,0 +1,134 @@
+<!DOCTYPE UI><UI version="3.2" stdsetdef="1">
+<class>BosonSearchPathsWidgetBase</class>
+<comment>Little widget to select paths
+Written for Boson Unit Editor, but may also be useful in other places</comment>
+<author>Rivo Laks &lt;rivolaks@hot.ee&gt;</author>
+<widget class="QWidget">
+    <property name="name">
+        <cstring>BosonSearchPathsWidgetBase</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>365</width>
+            <height>276</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Edit search paths</string>
+    </property>
+    <grid>
+        <property name="name">
+            <cstring>unnamed</cstring>
+        </property>
+        <property name="margin">
+            <number>11</number>
+        </property>
+        <property name="spacing">
+            <number>6</number>
+        </property>
+        <widget class="QListBox" row="1" column="0" rowspan="4" colspan="1">
+            <property name="name">
+                <cstring>mCurrentPaths</cstring>
+            </property>
+        </widget>
+        <widget class="QPushButton" row="4" column="1">
+            <property name="name">
+                <cstring>mOkButton</cstring>
+            </property>
+            <property name="text">
+                <string>&amp;Ok</string>
+            </property>
+        </widget>
+        <spacer row="3" column="1">
+            <property name="name">
+                <cstring>mSpacer</cstring>
+            </property>
+            <property name="orientation">
+                <enum>Vertical</enum>
+            </property>
+            <property name="sizeType">
+                <enum>Expanding</enum>
+            </property>
+            <property name="sizeHint">
+                <size>
+                    <width>20</width>
+                    <height>20</height>
+                </size>
+            </property>
+        </spacer>
+        <widget class="QPushButton" row="2" column="1">
+            <property name="name">
+                <cstring>mRemoveButton</cstring>
+            </property>
+            <property name="text">
+                <string>&amp;Remove</string>
+            </property>
+        </widget>
+        <widget class="QPushButton" row="1" column="1">
+            <property name="name">
+                <cstring>mAddButton</cstring>
+            </property>
+            <property name="text">
+                <string>&amp;Add</string>
+            </property>
+        </widget>
+        <widget class="QLineEdit" row="0" column="0">
+            <property name="name">
+                <cstring>mNewPath</cstring>
+            </property>
+        </widget>
+        <widget class="QPushButton" row="0" column="1">
+            <property name="name">
+                <cstring>mBrowseButton</cstring>
+            </property>
+            <property name="text">
+                <string>&amp;Browse...</string>
+            </property>
+        </widget>
+    </grid>
+</widget>
+<connections>
+    <connection>
+        <sender>mBrowseButton</sender>
+        <signal>clicked()</signal>
+        <receiver>BosonSearchPathsWidgetBase</receiver>
+        <slot>slotBrowse()</slot>
+    </connection>
+    <connection>
+        <sender>mAddButton</sender>
+        <signal>clicked()</signal>
+        <receiver>BosonSearchPathsWidgetBase</receiver>
+        <slot>slotAddPath()</slot>
+    </connection>
+    <connection>
+        <sender>mRemoveButton</sender>
+        <signal>clicked()</signal>
+        <receiver>BosonSearchPathsWidgetBase</receiver>
+        <slot>slotRemovePath()</slot>
+    </connection>
+    <connection>
+        <sender>mCurrentPaths</sender>
+        <signal>highlighted(int)</signal>
+        <receiver>BosonSearchPathsWidgetBase</receiver>
+        <slot>slotPathSelected(int)</slot>
+    </connection>
+    <connection>
+        <sender>mNewPath</sender>
+        <signal>textChanged(const QString&amp;)</signal>
+        <receiver>BosonSearchPathsWidgetBase</receiver>
+        <slot>slotCurrentPathChanged(const QString&amp;)</slot>
+    </connection>
+</connections>
+<slots>
+    <slot>slotAppendPath( QString path )</slot>
+    <slot specifier="pure virtual">slotSetPaths( QStringList paths )</slot>
+    <slot specifier="pure virtual">slotRemovePath()</slot>
+    <slot specifier="pure virtual">slotAddPath()</slot>
+    <slot specifier="pure virtual">slotBrowse()</slot>
+    <slot access="protected" specifier="pure virtual">slotPathSelected( int index )</slot>
+    <slot access="protected" specifier="pure virtual">slotCurrentPathChanged( const QString &amp; path )</slot>
+</slots>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

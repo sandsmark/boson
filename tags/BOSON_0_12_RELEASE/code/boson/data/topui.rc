@@ -1,0 +1,51 @@
+<!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
+<kpartgui name="boson" version="5">
+<MenuBar>
+  <DefineGroup name="filemenu" />
+  <DefineGroup name="editormenu" />
+  <DefineGroup name="gamemenu" />
+  <DefineGroup name="settingsmenu" />
+  <DefineGroup name="windowmenu" />
+  <DefineGroup name="viewmenu" />
+  <Menu name="game" group="gamemenu"><text>&amp;Game</text>
+    <Action name="game_grab_screenshot" />
+    <Action name="game_grab_profiling" />
+  </Menu>
+  <Menu name="debug" group="debugmenu"><text>&amp;Debug</text>
+    <Action name="debug_kgame" />
+    <Action name="debug_bodebuglog" />
+    <Action name="debug_profiling" />
+    <Action name="debug_show_opengl_states" />
+    <Action name="debug_ufo_widgets" />
+    <Action name="debug_textures" />
+    <Action name="debug_models" />
+    <MergeLocal name="debug_dialog" />
+    <Separator />
+    <MergeLocal name="debug_checkbox" />
+    <Separator />
+    <Action name="debug_clear_profiling_data" />
+    <Menu name="weird"><text>&amp;Weird actions</text>
+      <Action name="debug_sleep_1s" />
+      <Action name="debug_crash_boson" />
+    </Menu>
+    <MergeLocal name="debug_action" />
+    <Separator />
+    <MergeLocal />
+  </Menu>
+  <Menu name="settings" group="settingsmenu"><text>&amp;Settings</text>
+    <Action name="options_sound" append="show_merge" />
+    <Action name="options_music" append="show_merge" />
+    <Menu name="profiling"><text>&amp;Profiling</text>
+      <Action name="options_profiling_max_event_entries" />
+      <Action name="options_profiling_max_advance_entries" />
+      <Action name="options_profiling_max_rendering_entries" />
+    </Menu>
+  </Menu>
+  <Menu name="window" append="settings_merge" group="windowmenu"><text>&amp;Window</text>
+    <Action name="window_fullscreen" />
+  </Menu>
+</MenuBar>
+<Menu name="welcomepopup">
+    <Action name="options_show_menubar" />
+</Menu>
+</kpartgui>

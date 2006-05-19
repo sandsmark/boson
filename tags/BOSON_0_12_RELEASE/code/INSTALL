@@ -1,0 +1,52 @@
+
+This is about how to install the *SVN* version of boson!
+
+See http://boson.eu.org/install.php for instructions on installing released
+version.
+
+Note: this file might be outdates. http://boson.eu.org provides the most current instructions!
+
+
+Well.. basically, you need
+
+    code/
+    data/
+
+from boson SVN.
+see
+
+    http://sourceforge.net/projects/boson
+
+for more info about how to get the SVN modules.
+
+Making the game :
+=================
+
+You should _not_ be root to make the game.
+
+WARNING: the following is subject to change. We are currently investigating
+build system alternatives. The install instructions _will_ change in the future!
+
+Currently you need to do:
+  tar xjvf bksys/scons-mini.tar.bz2
+  ./scons configure prefix=/opt/kde3 debug=yes
+to set up the build system for an installation to /opt/kde3. Then do a
+  ./scons
+to compile boson.
+
+
+Installing the game :
+=====================
+You have to be _root_ to install it.
+type : "./scons install"
+
+
+Installing data :
+=================
+
+Data are in the SVN module "data/"
+
+Repeat exactly the same steps as above, but in the "data" directory instead of
+the "code" directory.
+
+

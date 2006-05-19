@@ -1,0 +1,15 @@
+This is a small test application for lib3ds.
+It was written to make sure that lib3ds works correctly on a given platform.
+
+lib3ds has been developed and tested on 32bit x86 machines, so that platform
+will work anyway.
+Interesting platforms would especially be different 64 bit platforms, big
+endian machines (x86 in both, 32 and 64 bit variants are little endian) and
+a combination of both.
+
+Instructions:
+1. edit SConscript to actually compile the program (atm: set do_testing to 1)
+2. cd into the directory (build/bobmfconverter/loaders/lib3ds_test)
+3. copy the .3ds from bobmfconverter/loaders/lib3ds_test
+4. ./lib3ds_test
+-> if it succeeds, lib3ds should be working on this platform

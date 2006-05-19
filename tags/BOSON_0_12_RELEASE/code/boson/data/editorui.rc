@@ -1,0 +1,37 @@
+<!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
+<kpartgui name="bosoneditor" version="4">
+<MenuBar>
+  <Menu name="file" group="filemenu"><text>&amp;File</text>
+    <Action name="file_save_playfield_as" append="save_merge"/>
+    <Action name="game_reset_view_properties"/>
+    <Action name="game_grab_screenshot"/>
+    <Action name="game_grab_profiling"/>
+  </Menu>
+  <Menu name="editor" group="editormenu"><text>&amp;Editor</text>
+    <Action name="editor_player"/>
+    <Action name="editor_place" />
+    <Action name="editor_height" />
+    <Action name="editor_import_heightmap" />
+    <Action name="editor_export_heightmap" />
+    <Action name="editor_import_texmap" />
+    <Action name="editor_export_texmap" />
+    <Action name="editor_create_unit"  />
+    <Action name="editor_create_tiles" />
+    <Action name="editor_create_debug_tiles" />
+    <Action name="editor_map_description" />
+    <Action name="editor_player_minerals" />
+    <Action name="editor_player_oil" />
+    <Action name="editor_edit_conditions" />
+    <Action name="editor_show_random_map_generation" />
+  </Menu>
+</MenuBar>
+<ToolBar name="mainToolBar"><text>Main Toolbar</text>
+  <Action name="editor_player" />
+  <Separator />
+  <Action name="editor_place" />
+  <Separator />
+  <Action name="editor_height" />
+  <Separator />
+  <Action name="window_fullscreen" />
+</ToolBar>
+</kpartgui>

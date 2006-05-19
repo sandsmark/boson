@@ -1,0 +1,17 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Boson
+Name[de]=Boson
+Name[fr]=Boson
+Name[it]=Boson
+GenericName=Real-time strategy game
+GenericName[de]=Echtzeit Strategiespiel
+GenericName[fr]=Jeu de strategie en temps reel
+Exec=boson
+Icon=boson
+X-DocPath=boson/index.html
+Terminal=false
+Type=Application
+Path=
+Categories=Qt;KDE;Game;StrategyGame;
+

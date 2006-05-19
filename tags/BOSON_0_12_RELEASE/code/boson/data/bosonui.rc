@@ -1,0 +1,18 @@
+<!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
+<kpartgui name="bosongame" version="2">
+<MenuBar>
+  <Menu name="game" group="gamemenu"><text>&amp;Game</text>
+    <Action name="game_center_base" />
+    <Action name="game_reset_view_properties" />
+    <Action name="game_grab_movie" />
+    <Action name="game_quicksave" append="save_merge" />
+    <Action name="game_quickload" append="new_merge" />
+  </Menu>
+  <Menu name="debug" group="debugmenu"><text>&amp;Debug</text>
+    <Action name="debug_sync_network" append="debug_action" />
+  </Menu>
+</MenuBar>
+<ToolBar name="mainToolBar"><text>Main Toolbar</text>
+  <Action name="debug_sync_network" />
+</ToolBar>
+</kpartgui>
