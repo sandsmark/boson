@@ -1,26 +1,22 @@
 Remember to update/check before releasing:
 ------------------------------------------
+- bosonfileconverter.cpp/bosonplayfield.cpp: #define the savegame format
+  (BOSON_SAVEGAME_FORMAT_VERSIO_...)
+  -> make sure that define is used in the file converter for the released
+     version
 - change version number:
-  - code/configure.in.in
-  - data/configure.in.in
-  - main.cpp,bounitmain.cpp,bocursormain.cpp,boprofilingmain.cpp,borendermain.cpp,bouniteditor.ui
-  - *.cpp *.h --> grep 
-  - code/ChangeLog: echo "version foobar has been released on ..."
   - boversion.h: BOSON_VERSION_STRING and BOSON_VERSION_[MINOR|MICRO]
+  - bouniteditor.ui
+  - *.cpp *.h --> grep
+  - code/ChangeLog: echo "version foobar has been released on ..."
 - code/boson/data/boson.lsm: Version, Entered-Date, Primary-site, Alternate-site, maybe. Keywords and Platform
 - website: news, download.html
 - <package>/REAMDE -> installation instructions for packages differ from the
-  instructions for cvs
-- ensure that *no* .o files are in the release package
-- test on gcc3.2 AND gcc2.95 --> we do not support gcc3.0.x (KDE doesn't either)
-- ensure that *if* there are CVS dirs they *only* include anonymous access - if
-  not then the package shouldn't have .cvsignore files either
+  instructions for svn
 - remember that the lsm file (for ftp servers) and the ChangeLog both include
   the release-date!
-- release ONLY from a cvs RELEASE tag! i.e. cvs up -r BOSON_0_6_1_RELEASE for
-  0.6.1 release. You can tag the release using cvs -q tag BOSON_0_6_1_RELEASE
-  (remember that you need to do a cvs up -r BOSON_0_6_1_RELEASE after doing so)
-  --> you can move the tag with the same command (but adding -F after "tag"), following a specific file.
+- release ONLY from a cvs RELEASE tag!
+  -> svn co https://svn.sourceforge.net/svnroot/boson/tags/BOSON_0_12_RELEASE/code
 
 
 Special notes about the -music package:
@@ -34,19 +30,18 @@ Special notes about the -music package:
 Release Instructions:
 ---------------------
  mkdir release ; cd release
- cvs co -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson -r BOSON_x_y_RELEASE code
- cvs co -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson -r BOSON_x_y_RELEASE data
-# where x and y are the version number (e.g. BOSON_0_7_RELEASE)
- UPDATE: do _NOT_ release from anonymous CVS!
- --> it is usually lagging behind actual developer CVS and might contains
-     obsoleted files
+ mkdir svn ; cd svn
+ svn co https://svn.sourceforge.net/svnroot/boson/tags/BOSON_0_12_RELEASE
+ cd ..
+ svn export svn/BOSON_0_12_RELEASE BOSON_0_12_RELEASE
 
+ cd BOSON_0_12_RELEASE
  mkdir music ; cd music
  wget http://boson.sf.net/music/foobar.tar.bz2   
 # where foobar are the music files
  cd ..
 
-Now you should have code and data (cleanly!) from anonymous cvs and a dir music
+Now you should have code and data (cleanly!) from svn and a dir music
 with .tar.bz2 files containing music.
 You should now edit release/dist from the "tools" module in cvs and start it in
 the current (release) directory.
