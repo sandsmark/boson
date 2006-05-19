@@ -1,0 +1,20 @@
+[Boson Facility]
+ConstructionSteps=0
+
+[Boson Unit]
+Name=Tree4 (big)
+Health=40
+Id=16
+DestroyedEffects=22002
+RemoveWreckageImmediately=true
+IsFacility=true
+MineralCost=100
+OilCost=0
+#Producer=10
+#ProductionTime=20
+SupportMiniMap=false
+TerrainType=1
+UnitDepth=2
+UnitHeight=1.4
+UnitWidth=1.4
+

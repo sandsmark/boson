@@ -1,0 +1,19 @@
+Every action has an own directory (e.g. "move/" or "attack/"). All must be
+provided.
+
+Every dir has a index.cursor file, that describes the cursor. Contents:
+
+[Boson Cursor]
+CursorPrefix=text    -  The prefix of the filename. Default: "cursor-". Then
+                        *must* follow a 4-digit number (0000, 0001, 0002, ...)
+                        and then .png! Only .png are supported.
+FrameCount=number    -  The number of files you provide. This must be at least
+                        1! Note that file naming starts with zero!
+                        Default is 1.
+HotspotX=number      -  The horizontal hotspot of the cursor. Example:
+                        HotspotX=20
+                        This means that the file cursor-0000.png has the
+                        horizontal hotspot at 20, i.e. at x=20 will be the
+                        center of the cursor
+HotspotY=number      -  See above.
+

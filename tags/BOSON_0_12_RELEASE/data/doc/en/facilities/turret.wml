@@ -1,0 +1,5 @@
+#include "facilities.wml" type="Facilities" name="Turret" \
+        description="A revolving tower constructed of thick iron plates and armed \
+        with cannons.<br> Turrets are used against vessels of war and land units." \
+        name2="turret" type2="fix" \
+        before_url="helipad.html" before_text="Helipad" after_url="airturret.html" after_text="Air Turret" up_url="index.html"

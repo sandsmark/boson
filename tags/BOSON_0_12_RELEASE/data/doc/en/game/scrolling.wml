@@ -1,0 +1,63 @@
+#include "top.wml"
+    <h1>
+      Scrolling
+    </h1>
+    <p>&nbsp;</p>
+    <p>
+      In Boson you have several different ways of scrolling. Pick the one you
+      like most :-)
+    </p>
+    <h4>1. MiniMap</h4>
+    <p>
+      Left click on the minimap centers the display on the point you clicked in
+      the mini map.
+    </p>
+
+    <h4>2. MMB Scrolling</h4>
+    <p>
+      You can click using the middle mouse button somewhere on the big display
+      (i.e.
+      the map where you can select the units) to center the display on that
+      point.
+      Note that you need 3 mouse buttons for this ;-)
+      Usually you can press both mouse buttons at once to emulate a middle mouse
+      button click - this should work as well then.
+    </p>
+
+    <h4>3. RMB Scrolling</h4>
+    <p>
+      Click somewhere in the big display
+      and hold the mouse button. Now move the mouse with the righ mouse button
+      still pressed and the display follows your mouse movements. Release to stop
+      scrolling.
+    </p>
+
+    <h4>4. Cursor Keys</h4>
+    <p>
+      You can also use the cursor keys to scroll the display. There is not much
+      to say about this - except that you can configure the step-size of a cursor key.
+      Go to Settings->Configure Boson and change the number for "Arrow Key Steps".
+      Simply enter your desired pixel value.
+    </p>
+
+    <h4>5. Mouse wheel scrolling</h4>
+    <p>
+      You need to configure Boson for mouse scrolling. Go to the "Settings" menu and select
+      "Configure Boson". Change "Mouse wheel action" under the "Scrolling" tab to "Move camera".<br>
+      Now you can scroll with your mouse wheel, hold down the Alt key for horizontal scrolling.
+    </p>
+
+    <h4>6. Cursor at the Edge of the window</h4>
+    <p>
+      <i>(Currently at an experimental state!)</i><br>
+      You can also scroll by moving the cursor at the edge of the window. Move
+      the cursor at the edge of the main window and wait a moment. That's it.<br>
+      Please note that you may have some problems with this if you are not
+      playing in fullscreen mode. We recommend to play in fullscreen mode!<br>
+      The sensity is configureable under the "scolling" tab in the settings dialog.
+    </p>
+
+
+#include "nav.wml" before_url="apps.html" before_text="Programs and tools" after_url="cursor.html" after_text="The cursors" up_url="index.html"
+#include "footer.wml"
+

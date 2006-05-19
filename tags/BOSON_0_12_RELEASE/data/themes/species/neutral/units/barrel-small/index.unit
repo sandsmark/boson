@@ -1,0 +1,21 @@
+[Boson Facility]
+ConstructionSteps=0
+
+[Boson Unit]
+Name=Barrel (small)
+Health=20
+Id=25
+IsFacility=true
+MineralCost=30
+OilCost=50
+ExplodingDamage=200
+ExplodingDamageRange=2
+DestroyedEffects=1001
+#Producer=10
+#ProductionTime=20
+SupportMiniMap=false
+TerrainType=1
+UnitDepth=0.3
+UnitHeight=0.2
+UnitWidth=0.2
+

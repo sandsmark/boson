@@ -1,0 +1,19 @@
+[Boson Facility]
+ConstructionSteps=0
+
+[Boson Unit]
+Name=Containers1
+Health=60
+Armor=8
+Id=59
+IsFacility=true
+MineralCost=160
+OilCost=20
+#Producer=10
+#ProductionTime=20
+SupportMiniMap=false
+TerrainType=1
+UnitDepth=0.4
+UnitHeight=0.75
+UnitWidth=0.75
+

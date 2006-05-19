@@ -1,0 +1,21 @@
+#include "top.wml"
+    <h1>
+      $(type) - $(name)
+    </h1>
+    <table border="0">
+        <tr>
+                <td><img src="$(name2).jpg" border="0">&nbsp;</td>
+                <td valign="top"><br>
+                $(description)
+        </tr>
+    </table>
+
+<:
+use get_values;
+
+# ( facility type, facility name)
+get_values->getval("$(type2)", "$(name2)");
+:>
+
+#include "nav.wml" before_url="$(before_url)" before_text="$(before_text)" after_url="$(after_url)" after_text="$(after_text)" up_url="$(up_url)"
+#include "footer.wml"

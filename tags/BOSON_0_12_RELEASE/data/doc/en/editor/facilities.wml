@@ -1,0 +1,22 @@
+#include "top.wml"
+
+    <h1>
+      Building Facilities and Units
+    </h1>
+    <p>&nbsp;</p>
+    <p>
+    <h4>General</h4>
+    <p>
+    Select the <i>Facilities</i> or <i>Mobiles</i> selection from the second dropdown menu.<br>
+    You can build them like in a normal boson game, but you are able to drop them between two cells
+    if you hold down the Ctrl key.<br><br>
+
+    You can only place facilities and mobiles for one player at one time. don't forget to change the
+    player while building units and buildings, it is not editable at a later time.<br>
+    If you change the tiles on map or remove things, of course the player doesn't matter.<br><br>
+    </p><p>&nbsp;</p>
+
+
+    </p>
+#include "nav.wml" before_url="overview.html" before_text="Overview" after_url="../faq.html" after_text="FAQ" up_url="index.html"
+#include "footer.wml"

@@ -1,0 +1,43 @@
+[Boson Facility]
+CanRefineMinerals=false
+CanRefineOil=false
+ConstructionSteps=17
+
+[Boson Unit]
+Armor=0
+ConstructedEffects=
+Description=You can build air units here.
+DestroyedEffects=1010,3010,6010,7010
+ExplodingDamage=0
+ExplodingDamageRange=0
+Health=400
+HitPoint=0,0,0.07
+Id=1
+IsFacility=true
+MineralCost=500
+Name=Helipad
+OilCost=300
+Producer=10
+ProductionTime=30
+Requirements=5,3,14
+Shields=0
+SightRange=9
+SupportMiniMap=false
+TerrainType=1
+UnitDepth=0.06
+UnitHeight=2.5
+UnitWidth=2.5
+Weapons=0
+PowerConsumed=100
+
+[ProductionPlugin]
+ProducerList=2
+
+[Sounds]
+OrderAttack=order_attack
+OrderMove=order_move
+OrderSelect=order_select
+ReportDestroyed=report_destroyed
+ReportProduced=report_produced
+ReportUnderAttack=report_underattack
+Shoot=shoot

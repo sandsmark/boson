@@ -1,0 +1,22 @@
+#include "top.wml"
+    <h1>
+      Unit equipment
+    </h1>
+    <p>&nbsp;</p>
+    <h4>Weapons</h4>
+    <p>
+          ...
+    </p>
+    
+    <h4>Armor</h4>
+    <p>
+          ...
+    </p>
+
+    <h4>Shield</h4>
+    <p>
+          ...
+    </p>
+
+#include "nav.wml" before_url="moving.html" before_text="Selecting and moving units" after_url="attacking.html" after_text="Attacking" up_url="index.html"
+#include "footer.wml"

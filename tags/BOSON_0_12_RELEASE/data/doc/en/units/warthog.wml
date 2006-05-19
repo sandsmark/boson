@@ -1,0 +1,4 @@
+#include "facilities.wml" type="Units" name="Warthog" \
+        description="Warthogs are armed with heavy anti-tank missiles. They can harm a lot of damage, but are also very vulnerable." \
+        name2="warthog" type2="mob" \
+        before_url="transall.html" before_text="Transall" after_url="puma.html" after_text="Puma" up_url="index.html"

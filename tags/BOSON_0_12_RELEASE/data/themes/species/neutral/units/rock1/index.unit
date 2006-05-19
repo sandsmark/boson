@@ -1,0 +1,18 @@
+[Boson Facility]
+ConstructionSteps=0
+
+[Boson Unit]
+Name=Rock1
+Health=100
+Id=4
+IsFacility=true
+MineralCost=100
+OilCost=0
+#Producer=10
+#ProductionTime=20
+SupportMiniMap=false
+TerrainType=1
+UnitDepth=1
+UnitHeight=1
+UnitWidth=1
+

@@ -1,0 +1,7 @@
+#include "facilities.wml" type="Facilities" name="Helipad" \
+        description="The Helipad is a powerful building, which allows the jets and helicopters of your air force to \
+        start and land on even very limited areas.<br><br>\
+        This is possible through a technology called VOP (Vertical Operation Procedure) where a big air duct gets created \
+        through many slots on the surface. This allows your aircrafts to start and land vertically." \
+        name2="helipad" type2="fix" \
+        before_url="repairpad.html" before_text="Repair Pad" after_url="turret.html" after_text="Turret" up_url="index.html"

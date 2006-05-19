@@ -1,0 +1,6 @@
+#include "facilities.wml" type="Facilities" name="Sam-Site" \
+        description="A Sam-Site is a missile silo armed with short-range missiles.<br> \
+        Upon detection of an enemy aircraft, the reinforced concrete silo opens and an automated SAM \
+        (Surface-to-Air Missile) launcher comes up." \
+        name2="samsite" type2="fix" \
+        before_url="airturret.html" before_text="Air Turret" after_url="../units/index.html" after_text="Units" up_url="index.html"
