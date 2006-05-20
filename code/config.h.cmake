@@ -11,6 +11,6 @@
 #define BOSON_USE_DEBUG_PLUGINS ${BOSON_USE_DEBUG_PLUGINS}
 #define BOSON_PREFIX "${CMAKE_INSTALL_PREFIX}"
 
-// AB: this define is obsolete. use BOSON_USE_DEBUG_PLUGINS instead
+/* AB: this define is obsolete. use BOSON_USE_DEBUG_PLUGINS instead */
 #define USE_BO_PLUGINS ${BOSON_USE_DEBUG_PLUGINS}
 
