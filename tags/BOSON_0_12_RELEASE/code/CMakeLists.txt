@@ -82,7 +82,10 @@ check_qt3_executables()
 #       boson/script)
 find_package(OpenGL REQUIRED)
 
-find_package(Lib3ds REQUIRED)
+#find_package(Lib3ds REQUIRED)
+set(LIB3DS_INCLUDE_DIR "${boson_SOURCE_DIR}/lib3ds")
+set(LIB3DS_LIBRARY_DIR "${boson_BINARY_DIR}/lib3ds")
+set(LIB3DS_LIBRARY "lib3ds")
 
 # AB: apparently the "REQUIRED" parameter only works if the Find<name>.cmake
 #     package supports it.
@@ -90,10 +93,6 @@ find_package(Lib3ds REQUIRED)
 
 add_definitions(${QT_DEFINITIONS} ${KDE3_DEFINITIONS} -DHAVE_CONFIG_H=1)
 link_directories(${KDE3_LIB_DIR})
-
-# AB: don't want this (KDE3_DEFINITIONS defines it)
-add_definitions(-Wno-non-virtual-dtor)
-remove_definitions(-Wnon-virtual-dtor)
 
 
 include_directories(
@@ -118,6 +117,7 @@ if (UNIX)
    include_directories(/usr/local/include)
 endif (UNIX)
 
+add_subdirectory( lib3ds )
 add_subdirectory( bomemory )
 add_subdirectory( math )
 add_subdirectory( bobmfconverter )
