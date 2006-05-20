@@ -24,21 +24,22 @@ Making the game :
 
 You should _not_ be root to make the game.
 
-WARNING: the following is subject to change. We are currently investigating
-build system alternatives. The install instructions _will_ change in the future!
-
 Currently you need to do:
-  tar xjvf bksys/scons-mini.tar.bz2
-  ./scons configure prefix=/opt/kde3 debug=yes
-to set up the build system for an installation to /opt/kde3. Then do a
-  ./scons
+  export QTDIR=/path/to/qt
+  export KDEDIR=`kde-config --prefix`
+  mkdir build
+  cd build
+  cmake -DCMAKE_INSTALL_PREFIX=/where/to/install/to ..
+  make
 to compile boson.
+
+QTDIR is e.g. /usr/share/qt3 on debian systems.
 
 
 Installing the game :
 =====================
 You have to be _root_ to install it.
-type : "./scons install"
+type : "make install"
 
 
 Installing data :
