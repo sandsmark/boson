@@ -44,6 +44,7 @@ function delete_all_boson_related_stuff()
  delete_dir "$KDEDIR/share/apps/boson"
  delete_dir "$KDEDIR/share/apps/borender"
  delete_dir "$KDEDIR/share/applnk/Games/TacticStrategy/boson"
+ delete_dir "$KDEDIR/lib/kde3/plugins/boson"
 
  # now from $KDEHOME
  if [ "x$KDEHOME" = "x" ]; then
