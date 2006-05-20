@@ -55,7 +55,6 @@ endif (UNIX)
 add_subdirectory( doc )
 add_subdirectory( fonts )
 add_subdirectory( maps )
-add_subdirectory( music )
 add_subdirectory( pics )
 add_subdirectory( themes )
 
