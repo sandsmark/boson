@@ -122,10 +122,10 @@ echo "add_subdirectory(music)" >> "$DEST_ALL/CMakeLists.txt"
 # create the packages
 ######################
 echo "Creating tar archives"
-tar -C "$DEST_BASE" -cjf "$DEST_ALL_DIRNAME.tar.bz2" "$DEST_ALL_DIRNAME" > /dev/null || exit 1
-tar -C "$DEST_BASE" -cjf "$DEST_CODE_DIRNAME.tar.bz2" "$DEST_CODE_DIRNAME" > /dev/null || exit 1
-tar -C "$DEST_BASE" -cjf "$DEST_DATA_DIRNAME.tar.bz2" "$DEST_DATA_DIRNAME" > /dev/null || exit 1
-tar -C "$DEST_BASE" -cjf "$DEST_MUSIC_DIRNAME.tar.bz2" "$DEST_MUSIC_DIRNAME" > /dev/null || exit 1
+tar -C "$DEST_BASE" -cjf "$DEST_BASE/$DEST_ALL_DIRNAME.tar.bz2" "$DEST_ALL_DIRNAME" > /dev/null || exit 1
+tar -C "$DEST_BASE" -cjf "$DEST_BASE/$DEST_CODE_DIRNAME.tar.bz2" "$DEST_CODE_DIRNAME" > /dev/null || exit 1
+tar -C "$DEST_BASE" -cjf "$DEST_BASE/$DEST_DATA_DIRNAME.tar.bz2" "$DEST_DATA_DIRNAME" > /dev/null || exit 1
+tar -C "$DEST_BASE" -cjf "$DEST_BASE/$DEST_MUSIC_DIRNAME.tar.bz2" "$DEST_MUSIC_DIRNAME" > /dev/null || exit 1
 
 
 echo "Packaging should be completed now (unless you see any errors above, that could not get catched!"
