@@ -97,7 +97,7 @@ kde3_add_executable(borender ${borender_SRCS})
 target_link_libraries(borender
 	bosonmainlib
 	boufo
-	3ds
+	${LIB3DS_LIBRARY}
 	${X11_XMU_LIB}
 	${LIB_BOMEMORY}
 )
@@ -137,7 +137,7 @@ kde3_add_executable(bomodelpixmaps ${bomodelpixmaps_SRCS})
 target_link_libraries(bomodelpixmaps
 	bosonmainlib
 	boufo
-	3ds
+	${LIB3DS_LIBRARY}
 	${X11_XMU_LIB}
 	${LIB_BOMEMORY}
 )
@@ -174,7 +174,7 @@ target_link_libraries(bo3dsdebug
 	kio
 	kdeui
 	${QT_AND_KDECORE_LIBS}
-	3ds
+	${LIB3DS_LIBRARY}
 	${LIB_BOMEMORY}
 )
 
