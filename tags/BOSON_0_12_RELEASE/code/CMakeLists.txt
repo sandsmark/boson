@@ -13,6 +13,12 @@ endif(insource)
 #set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules" "${CMAKE_SOURCE_DIR}/cmake/modules/boson")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/boson")
 
+# AB: this is for the boson-all release package. code is a subdirectory of it
+#     the rest of this file (and CMakeLists.txt in subdirs) assume that
+#     CMAKE_SOURCE_DIR==boson_SOURCE_DIR.
+set(CMAKE_SOURCE_DIR ${boson_SOURCE_DIR})
+message(STATUS ${CMAKE_SOURCE_DIR})
+
 include(BosonMisc)
 
 # AB: TODO: include in official cmake files?
