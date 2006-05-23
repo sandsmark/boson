@@ -17,7 +17,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/boson")
 #     the rest of this file (and CMakeLists.txt in subdirs) assume that
 #     CMAKE_SOURCE_DIR==boson_SOURCE_DIR.
 set(CMAKE_SOURCE_DIR ${boson_SOURCE_DIR})
-message(STATUS ${CMAKE_SOURCE_DIR})
+set(CMAKE_BINARY_DIR ${boson_BINARY_DIR})
 
 include(BosonMisc)
 
