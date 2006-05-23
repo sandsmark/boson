@@ -96,7 +96,7 @@ void BoUfoStartupWidget::init()
  logo->setHorizontalAlignment(BoUfoWidget::AlignHCenter);
  logo->setIcon(logoImage);
 
- addSpacing(5);
+ addSpacing(25);
  addWidget(logo);
  addWidget(d->mWidgetStack);
  d->mWidgetStack->setStretch(1);
