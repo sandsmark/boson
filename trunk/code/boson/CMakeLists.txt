@@ -1,5 +1,3 @@
-project(boson)
-
 include(BosonMacros)
 
 CHECK_INCLUDE_FILE( sys/time.h HAVE_SYS_TIME_H )
@@ -260,7 +258,7 @@ target_link_libraries(bosonmainlib
 	gameengine
 	common
 	kio
-	3ds
+	${LIB3DS_LIBRARY}
 
 	${X11_XRANDR_LIB}
 )
