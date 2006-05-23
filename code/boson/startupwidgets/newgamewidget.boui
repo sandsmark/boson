@@ -359,7 +359,7 @@
            <Properties>
             <selection/>
             <preferredHeight>250</preferredHeight>
-            <minimumHeight/>
+            <minimumHeight>250</minimumHeight>
             <opaque/>
             <constraints/>
             <verticalAlignment/>
@@ -367,7 +367,7 @@
             <horizontalAlignment/>
             <layout/>
             <name>mSelectMap</name>
-            <minimumWidth/>
+            <minimumWidth>200</minimumWidth>
             <backgroundImageFile/>
             <stretch>1</stretch>
             <gridLayoutColumns/>
@@ -600,8 +600,8 @@
          <Widget>
           <ClassName>BoUfoTextEdit</ClassName>
           <Properties>
-           <preferredHeight>100</preferredHeight>
-           <minimumHeight/>
+           <preferredHeight>250</preferredHeight>
+           <minimumHeight>250</minimumHeight>
            <opaque/>
            <constraints/>
            <verticalAlignment/>
@@ -610,7 +610,7 @@
            <layout/>
            <name>mMapDescription</name>
            <text/>
-           <minimumWidth/>
+           <minimumWidth>150</minimumWidth>
            <backgroundImageFile/>
            <stretch>1</stretch>
            <editable>false</editable>
@@ -1294,7 +1294,7 @@
           <constraints/>
           <verticalAlignment/>
           <preferredWidth/>
-          <horizontalAlignment/>
+          <horizontalAlignment>AlignHCenter</horizontalAlignment>
           <layout/>
           <name>mAddAIPlayer</name>
           <iconFile/>
@@ -1338,7 +1338,7 @@
           <constraints/>
           <verticalAlignment/>
           <preferredWidth/>
-          <horizontalAlignment/>
+          <horizontalAlignment>AlignHCenter</horizontalAlignment>
           <layout/>
           <name>mRemovePlayer</name>
           <iconFile/>
@@ -1485,8 +1485,8 @@
     <Widget>
      <ClassName>BoUfoPushButton</ClassName>
      <Properties>
-      <preferredHeight></preferredHeight>
-      <minimumHeight></minimumHeight>
+      <preferredHeight/>
+      <minimumHeight/>
       <opaque/>
       <constraints/>
       <verticalAlignment/>
@@ -1529,8 +1529,8 @@
     <Widget>
      <ClassName>BoUfoPushButton</ClassName>
      <Properties>
-      <preferredHeight></preferredHeight>
-      <minimumHeight></minimumHeight>
+      <preferredHeight/>
+      <minimumHeight/>
       <opaque/>
       <constraints/>
       <verticalAlignment/>
@@ -1588,7 +1588,7 @@
      <verticalAlignment/>
      <horizontalAlignment/>
      <borderType/>
-     <stretch></stretch>
+     <stretch/>
      <takesKeyboardFocus/>
     </Properties>
    </Widget>
