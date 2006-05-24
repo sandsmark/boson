@@ -492,6 +492,7 @@ public:
 	 **/
 	virtual QSize preferredSize(const QSize& maxSize = QSize(QCOORD_MAX, QCOORD_MAX)) const
 	{
+		Q_UNUSED(maxSize);
 		return QSize(0, 0);
 	}
 
