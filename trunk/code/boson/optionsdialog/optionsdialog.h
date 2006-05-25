@@ -21,12 +21,7 @@
 
 #include <kdialogbase.h>
 
-#include "global.h"
-
-class BosonConfig;
 class OptionsWidget;
-class Player;
-class Boson;
 class BoFontInfo;
 
 class OptionsDialogPrivate;

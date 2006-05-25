@@ -56,7 +56,7 @@
 #include "boufo/boufodebugwidget.h"
 #include "boufo/boufofactory.h"
 #include "bodebug.h"
-#include "optionsdialog.h"
+#include "optionsdialog/optionsdialog.h"
 #include "gameengine/bosongameengine.h"
 #include "gameengine/bosoncomputerio.h"
 #include "gameengine/speciestheme.h"
