@@ -31,6 +31,8 @@
 #include <qimage.h>
 #include <qgl.h>
 
+#include <math.h>
+
 #define BTF_FILE_ID "BTF "
 #define BTF_FILE_ID_LEN 4
 
@@ -167,9 +169,21 @@ bool BoBTFLoad::loadInfo(QDataStream& stream)
  stream >> w;
  stream >> h;
 
+ const unsigned int maxSize = 65536;
+ if (w > maxSize || h > maxSize) {
+	boError() << k_funcinfo << "invalid size: width=" << w << " height=" << h << endl;
+	return false;
+ }
+
  // number of mipmap levels
  // this is kinda redundant, as we can retrieve it from w and h
  stream >> levels;
+
+ unsigned int maxLevels = log2(QMAX(w, h)) + 2; // +2 to catch rounding errors
+ if (levels > maxLevels) {
+	boError() << k_funcinfo << "broken file: tried to allocate " << levels << " mipmap levels for a original size of width=" << w << " height=" << h << endl;
+	return false;
+ }
 
  mLevels = levels;
 
