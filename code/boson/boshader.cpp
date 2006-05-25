@@ -24,6 +24,7 @@
 #include "bodebug.h"
 #include "bolight.h"
 #include "bosonconfig.h"
+#include "bosonprofiling.h"
 
 #include <qstring.h>
 #include <qdict.h>
@@ -188,6 +189,7 @@ BoShader::~BoShader()
 
 bool BoShader::load(const QString& name)
 {
+  BosonProfiler profiler("BoShader::load(name)");
   QString filename = boShaderManager->getFullFilename(name);
   QFile f(filename);
   if(!f.open(IO_ReadOnly))
@@ -201,8 +203,10 @@ bool BoShader::load(const QString& name)
 
   QString contents(f.readAll());
 
+  BosonProfiler prepProfiler("Preprocessing of sources");
   QString vertexsrc = preprocessSource(contents, VertexOnly, 0);
   QString fragmentsrc = preprocessSource(contents, FragmentOnly, 0);
+  prepProfiler.pop();
 
 
   //boDebug() << k_funcinfo << "Processed vertex shader source : \n'" << vertexsrc << "'" << endl;
@@ -217,6 +221,7 @@ bool BoShader::load(const QString& name)
 
 bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
 {
+  BosonProfiler loadProfiler("BoShader::load(vertexsrc, fragmentsrc)");
   if(fragmentsrc.isEmpty() && vertexsrc.isEmpty())
   {
     boError(130) << k_funcinfo << "No shader sources given!" << endl;
@@ -241,6 +246,7 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
   // Load vertex shader, if it was given
   if(!vertexsrc.isEmpty())
   {
+    BosonProfiler compileProfiler("vertex shader compilation&attaching");
     // Create shader object
     vertexshader = glCreateShader(GL_VERTEX_SHADER);
     // Load it
@@ -277,6 +283,7 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
   // Load fragment shader, if it was given
   if(!fragmentsrc.isEmpty())
   {
+    BosonProfiler compileProfiler("fragment shader compilation&attaching");
     // Create shader object
     fragmentshader = glCreateShader(GL_FRAGMENT_SHADER);
     // Load it
@@ -312,7 +319,9 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
   }
 
   // Link the program
+  BosonProfiler linkProfiler("shader linking");
   glLinkProgram(mProgram);
+  linkProfiler.pop();
   // Make sure it linked correctly
   int linked;
   glGetProgramiv(mProgram, GL_LINK_STATUS, &linked);
