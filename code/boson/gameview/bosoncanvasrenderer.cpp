@@ -113,7 +113,6 @@ static BosonModel* renderSingleItem(
 	currentModel->prepareRendering();
  }
  itemRenderer->renderItem(lod, transparentMeshes, flags);
- glColor3ub(255, 255, 255);
  glPopMatrix();
  if (_lod) {
 	*_lod = lod;
@@ -1348,6 +1347,7 @@ void BosonCanvasRenderer::renderBoundingBox(const BosonItem* item)
 void BosonCanvasRenderer::renderBoundingBox(const BoVector3Float& c1, const BoVector3Float& c2)
 {
  boTextureManager->disableTexturing();
+ glColor3ub(127, 127, 127);
  glLineWidth(1.0);
  glBegin(GL_LINES);
 	glVertex3f(c1.x(), c1.y(), c1.z());  glVertex3f(c2.x(), c1.y(), c1.z());
@@ -1637,6 +1637,7 @@ void BosonCanvasRenderer::renderItems(RenderFlags flags)
 	}
 	glPopAttrib();
  }
+ glColor3ub(255, 255, 255);
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error before rendering selections" << endl;
