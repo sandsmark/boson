@@ -1,6 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 2002-2005 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2006 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,50 +26,12 @@
 #include <klocale.h>
 
 BoUfoLoadingWidget::BoUfoLoadingWidget()
-    : BoUfoWidget()
+    : BoUfoLoadingWidgetBase()
 {
-  setLayoutClass(BoUfoWidget::UVBoxLayout);
-
-  BoUfoLabel* header = new BoUfoLabel();
-  addWidget(header);
-  // TODO
-#if 0
-  QFont header_font(header->font());
-  header_font.setFamily("verdana");
-  header_font.setPointSize(30);
-  header_font.setBold(TRUE);
-  header->setPaletteForegroundColor( QColor( 255, 255, 255 ));
-  header->setFont(header_font);
-#endif
-#if 0
-  header->setAlignment( int( QLabel::AlignCenter ) );
-#endif
-  header->setText( i18n( "Initializing mission data..." ) );
-
-  addSpacing(20);
-
-  BoUfoLabel* pleaseWaitLabel = new BoUfoLabel();
-  addWidget(pleaseWaitLabel);
-  // TODO
-#if 0
-  pleaseWaitLabel->setPaletteForegroundColor(QColor(255, 255, 255));
-#endif
-  pleaseWaitLabel->setText(i18n("Please wait while Boson's data is being loaded. This may take some time..."));
-  addSpacing(20);
-
-  mLoadingTaskLabel = new BoUfoLabel();
-  addWidget(mLoadingTaskLabel);
-
-  mLoadingSubTaskLabel = new BoUfoLabel();
-  addWidget(mLoadingSubTaskLabel);
-
-  mProgress = new BoUfoProgress();
-  addWidget(mProgress);
-  mProgress->setValue(0.0);
-
+  // AB: support for QColor in boufodesigner sucks. better do it in code.
   mProgress->setStartColor(QColor(0, 0, 0));
   mProgress->setEndColor(QColor(222, 222, 222));
-  addSpacing(20);
+
   mLastGLUpdate.start();
 }
 
