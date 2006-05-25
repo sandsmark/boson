@@ -281,6 +281,7 @@ set(bosongamelib_SRCS
 	bosonufominimap.cpp
 	optionsdialog/optionsdialog.cpp
 	optionsdialog/optionswidgets.cpp
+	optionsdialog/opengloptions.cpp
 	optionsdialog/configoptionwidgets.cpp
 	bogroundrenderer.cpp
 	bogroundrenderermanager.cpp
