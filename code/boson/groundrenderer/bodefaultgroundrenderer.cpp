@@ -444,6 +444,10 @@ void BoDefaultGroundRenderer::calculateIndices(int* renderCells, unsigned int ce
 	boError() << k_funcinfo << endl;
 	return;
  }
+ if (cellsCount > map->width() * map->height()) {
+	boError() << k_funcinfo << "cellsCount > total cellscount of map" << endl;
+	return;
+ }
  delete[] mIndicesArray;
  mIndicesArray = 0;
 
