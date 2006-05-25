@@ -21,6 +21,7 @@
 
 #include "../../bomemory/bodummymemory.h"
 #include "optionswidgets.h"
+#include "opengloptions.h"
 #include "bodebug.h"
 
 #include <klocale.h>
