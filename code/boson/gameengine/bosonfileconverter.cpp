@@ -313,6 +313,10 @@ bool BosonFileConverter::convertScenario_From_0_8_To_0_9(const QByteArray& scena
 		}
 	}
 	QDomNodeList units = e.elementsByTagName(QString::fromLatin1("Unit"));
+	if (units.count() > 65536) {
+		boError() << k_funcinfo << "too many units in file: " << units.count() << endl;
+		return false;
+	}
 	p->units = new UnitNode[units.count()];
 	p->unitCount = units.count();
 	for (unsigned int j = 0; j < units.count(); j++) {
@@ -1714,6 +1718,11 @@ bool MapToTexMap_From_0_8_To_0_9::convert(int* groundTypes, QByteArray* newMap, 
  writeMapStream << (Q_UINT32)mMapHeight;
  writeMapStream << QString::fromLatin1("earth");
  writeTexMapStream << (Q_UINT32)BO_COMPAT_0_8_TEXTURE_COUNT;
+
+ if (mMapHeight > 500 || mMapWidth > 500) {
+	boError() << k_funcinfo << "invalid map dimensions" << endl;
+	return false;
+ }
 
 
  unsigned char* tex = new unsigned char[(mMapWidth + 1) * (mMapHeight + 1) * BO_COMPAT_0_8_TEXTURE_COUNT];
