@@ -853,7 +853,13 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	d->mDestroyedUnits.append(unit);
 
 	// This stops everything
+	// (except moving of flying units)
 	unit->stopAttacking();
+
+	// TODO: flying units: fall down the air
+	// -> we MUST stop the unit, otherwise it'd go off the map very fast.
+	unit->setVelocity(0.0, 0.0, 0.0);
+	unit->setSpeed(0);
 
 	// the unit is added to a list - now displayed as a wreckage only.
 	removeUnit(unit);
