@@ -879,6 +879,7 @@ BosonGameView::~BosonGameView()
 
 void BosonGameView::init()
 {
+ PROFILE_METHOD
  d = new BosonGameViewPrivate;
  mCanvas = 0;
  d->mGameMode = true;
@@ -896,11 +897,13 @@ void BosonGameView::init()
 	d->mViewport[i] = 0;
  }
 
+ boProfiling->push("initStatic");
  BoLightManager::initStatic();
  BoWaterRenderer::initStatic();
  BoGroundRendererManager::initStatic();
  BoMeshRendererManager::initStatic();
  BosonGameViewPluginManager::initStatic();
+ boProfiling->pop();
  BoMeshRendererManager::manager()->makeRendererCurrent(QString::null);
  BoGroundRendererManager::manager()->makeRendererCurrent(QString::null);
  BosonGameViewPluginManager::manager()->makePluginCurrent(QString::null);
@@ -1293,6 +1296,7 @@ void BosonGameView::slotResetViewProperties()
 
 void BosonGameView::initUfoGUI()
 {
+ PROFILE_METHOD
  glPushAttrib(GL_ALL_ATTRIB_BITS);
 
  // AB: note that BoUfo widgets differ from usual Qt widgets API-wise.
