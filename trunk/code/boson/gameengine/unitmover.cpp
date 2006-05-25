@@ -1089,8 +1089,13 @@ void UnitMoverFlying::flyInCircle()
  // Don't go off the map
  if (unit()->x() < 0.5 || unit()->y() < 0.5 ||
 		unit()->x() > bofixed(canvas()->mapWidth()) - unit()->width() - 0.5 || unit()->y() > bofixed(canvas()->mapHeight()) - unit()->height() - 0.5) {
-	unit()->move(QMIN(QMAX(unit()->x(), bofixed(1)), bofixed(canvas()->mapWidth()) - unit()->width() - 1),
-			QMIN(QMAX(unit()->y(), bofixed(1)), bofixed(canvas()->mapHeight()) - unit()->height() - 1), unit()->z());
+	bofixed x = unit()->x();
+	bofixed y = unit()->y();
+	x = QMAX(x, bofixed(1));
+	y = QMAX(y, bofixed(1));
+	x = QMIN(x, bofixed(canvas()->mapWidth()) - unit()->width() - 1);
+	y = QMIN(y, bofixed(canvas()->mapHeight()) - unit()->height() - 1);
+	unit()->move(x, y, unit()->z());
  }
 
  bofixed groundz = canvas()->heightAtPoint(unit()->centerX() + velo.x(), unit()->centerY() + velo.y());
