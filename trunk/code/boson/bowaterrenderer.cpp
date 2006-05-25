@@ -1085,6 +1085,12 @@ void BoWaterRenderer::calculatePerCornerStuff(RenderInfo* info)
 
 void BoWaterRenderer::initDataBuffersForStorage(RenderInfo* info)
 {
+  if(info->chunkcornerh < 0 || info->chunkcornerw < 0)
+  {
+    boError() << k_funcinfo << "invalid chunk sizes" << endl;
+    return;
+  }
+
   // Corner arrays/vbos first
   if(mEnableVBO)
   {
