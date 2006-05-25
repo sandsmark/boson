@@ -267,11 +267,15 @@ void BosonMainWidget::initializeGL()
 
 	// update system information (initializeGL() must have been called before
 	// this makes sense)
+	boProfiling->push("Update BoInfo");
 	BoInfo::boInfo()->update(this);
+	boProfiling->pop();
  }
 
+ boProfiling->push("init texture manager");
  BoTextureManager::initStatic();
  boTextureManager->initOpenGL();
+ boProfiling->pop();
 
  connect(kapp->eventLoop(), SIGNAL(signalUpdateGL()), this, SLOT(slotUpdateGL()));
 
@@ -283,10 +287,13 @@ void BosonMainWidget::initializeGL()
 
 void BosonMainWidget::initUfoGUI()
 {
+ PROFILE_METHOD
  boDebug() << k_funcinfo << endl;
  glPushAttrib(GL_ALL_ATTRIB_BITS);
 
+ boProfiling->push("initUfo()");
  initUfo();
+ boProfiling->pop();
 
  BoUfoActionCollection::initActionCollection(ufoManager());
  ufoManager()->actionCollection()->setAccelWidget(this);
@@ -344,9 +351,12 @@ void BosonMainWidget::initUfoGUI()
 		this, SLOT(slotSetWidgetCursor(BosonCursor*)));
  d->mGameView->setGameFPSCounter(new BosonGameFPSCounter(d->mFPSCounter));
  d->mGameView->hide();
-
+ boProfiling->push("adding startup widget to widget stack");
  d->mWidgetStack->addWidget(d->mStartup);
+ boProfiling->pop();
+ boProfiling->push("adding gameview to widget stack");
  d->mWidgetStack->addWidget(d->mGameView);
+ boProfiling->pop();
  d->mWidgetStack->insertStackWidget(d->mStartup);
  d->mWidgetStack->insertStackWidget(d->mGameView);
 
@@ -355,7 +365,9 @@ void BosonMainWidget::initUfoGUI()
  d->mGameView->setMouseEventsEnabled(true, true);
 
  boDebug() << k_funcinfo << "creating BoUfoAction GUI" << endl;
+ boProfiling->push("createGUI()");
  ufoManager()->actionCollection()->createGUI();
+ boProfiling->pop();
  boDebug() << k_funcinfo << "creating BoUfoAction GUI done" << endl;
 
  glPopAttrib();
