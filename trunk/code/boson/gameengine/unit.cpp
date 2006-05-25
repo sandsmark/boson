@@ -1492,7 +1492,9 @@ BoItemList* Unit::unitsInRange(unsigned long int range) const
 
  // TODO: we should do this using PlayerIO. It should return items that are
  // actually visible to us only!
+ boProfiling->push("collisionsAtCells()");
  BoItemList* items = collisions()->collisionsAtCells(rect, (BosonItem*)this, false);
+ boProfiling->pop();
  items->remove((BosonItem*)this);
 
  BoItemList* units = new BoItemList();
@@ -1522,16 +1524,20 @@ BoItemList* Unit::unitsInRange(unsigned long int range) const
 BoItemList* Unit::enemyUnitsInRange(unsigned long int range) const
 {
  PROFILE_METHOD
+ boProfiling->push("unitsInRange()");
  BoItemList* units = unitsInRange(range);
+ boProfiling->pop();
  BoItemList* enemy = new BoItemList();
  Unit* u;
  BoItemList::Iterator it = units->begin();
+ boProfiling->push("find enemies");
  for (; it != units->end(); ++it) {
 	u = (Unit*)*it;
 	if (ownerIO()->isEnemy(u)) {
 		enemy->append(u);
 	}
  }
+ boProfiling->pop();
  return enemy;
 }
 
