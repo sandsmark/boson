@@ -51,6 +51,7 @@
 #include <qtooltip.h>
 #include <qpushbutton.h>
 #include <qlineedit.h>
+#include <qtabwidget.h>
 
 
 OpenGLOptions::OpenGLOptions(QWidget* parent)
@@ -199,11 +200,14 @@ void OpenGLOptions::slotShowDetails(bool show)
 AdvancedGLOptions::AdvancedGLOptions(OpenGLOptions* parent)
 	: QVBox(parent)
 {
+ mOpenGLOptions = parent;
+ QTabWidget* tabWidget = new QTabWidget(this);
+
  QHBox* hbox;
 
- mOpenGLOptions = parent;
-
- hbox = new QHBox(this);
+ QVBox* texturePage = new QVBox(tabWidget);
+ tabWidget->addTab(texturePage, i18n("Textures"));
+ hbox = new QHBox(texturePage);
  (void)new QLabel(i18n("Texture Filter"), hbox);
  mTextureFilter = new QComboBox(hbox);
  //mTextureFilter->insertItem(i18n("Use GL_NEAREST (fastest)"));
@@ -227,39 +231,64 @@ AdvancedGLOptions::AdvancedGLOptions(OpenGLOptions* parent)
 
  QToolTip::add(mTextureFilter, i18n("Selects texture filtering method\nGL_LINEAR_MIPMAP_LINEAR looks very good.\nAnisotropic modes look even better but are slower."));
 
- mUseCompressedTextures = new ConfigOptionWidgetBool("TextureCompression", this);
+ mUseCompressedTextures = new ConfigOptionWidgetBool("TextureCompression", texturePage);
  mUseCompressedTextures->setLabel(i18n("Use compressed textures"));
  QToolTip::add(mUseCompressedTextures, i18n("Compressing textures reduces amount of memory used\nat the expense of very slight quality loss."));
  addConfigOptionWidget(mUseCompressedTextures);
 
- mUseColoredMipmaps = new ConfigOptionWidgetBool("TextureColorMipmaps", this);
+ mUseColoredMipmaps = new ConfigOptionWidgetBool("TextureColorMipmaps", texturePage);
  mUseColoredMipmaps->setLabel(i18n("Use colored mipmaps"));
  QToolTip::add(mUseColoredMipmaps, i18n("Colors different mipmap levels so you can make difference between them.\nDo not enable this unless you know what you're doing."));
  addConfigOptionWidget(mUseColoredMipmaps);
 
- mUseLight = new ConfigOptionWidgetBool("UseLight", this);
+
+
+ QVBox* miscPage = new QVBox(tabWidget);
+ tabWidget->addTab(miscPage, i18n("Misc"));
+ mUseLight = new ConfigOptionWidgetBool("UseLight", miscPage);
  mUseLight->setLabel(i18n("Enable light"));
  addConfigOptionWidget(mUseLight);
 
- mUseMaterials = new ConfigOptionWidgetBool("UseMaterials", this);
+ mUseMaterials = new ConfigOptionWidgetBool("UseMaterials", miscPage);
  mUseMaterials->setLabel(i18n("Use materials"));
  QToolTip::add(mUseMaterials, i18n("Materials influence the way in which models (like units) are lighted. You can disable them to gain some performance."));
  addConfigOptionWidget(mUseMaterials);
 
- hbox = new QHBox(this);
+ hbox = new QHBox(miscPage);
  (void)new QLabel(i18n("Ground render:"), hbox);
  mGroundRenderer = new QComboBox(hbox);
 
- mUseGroundShaders = new ConfigOptionWidgetBool("UseGroundShaders", this);
+ mUseLOD = new ConfigOptionWidgetBool("UseLOD", miscPage);
+ mUseLOD->setLabel(i18n("Use level of detail"));
+ addConfigOptionWidget(mUseLOD);
+
+ hbox = new QHBox(miscPage);
+ (void)new QLabel(i18n("Default level of detail:"), hbox);
+ mDefaultLOD = new QComboBox(hbox);
+ mDefaultLOD->insertItem(i18n("All details (default)"));
+ mDefaultLOD->insertItem(i18n("Lowest details"));
+ mDefaultLOD->setCurrentItem(0);
+ connect(mUseLOD, SIGNAL(signalValueChanged(bool)), hbox, SLOT(setEnabled(bool)));
+ mSmoothShading = new ConfigOptionWidgetBool("SmoothShading", miscPage);
+ mSmoothShading->setLabel(i18n("Smooth shade model"));
+ addConfigOptionWidget(mSmoothShading);
+
+ hbox = new QHBox(miscPage);
+ (void)new QLabel(i18n("Mesh renderer:"), hbox);
+ mMeshRenderer = new QComboBox(hbox);
+
+ QVBox* shadersPage = new QVBox(tabWidget);
+ tabWidget->addTab(shadersPage, i18n("Shaders"));
+ mUseGroundShaders = new ConfigOptionWidgetBool("UseGroundShaders", shadersPage);
  mUseGroundShaders->setLabel(i18n("Use ground shaders (and shadows)"));
  mUseGroundShaders->setEnabled(BosonGroundThemeData::shadersSupported());
  addConfigOptionWidget(mUseGroundShaders);
- mUseUnitShaders = new ConfigOptionWidgetBool("UseUnitShaders", this);
+ mUseUnitShaders = new ConfigOptionWidgetBool("UseUnitShaders", shadersPage);
  mUseUnitShaders->setLabel(i18n("Use unit shaders (and shadows)"));
  mUseUnitShaders->setEnabled(BosonGroundThemeData::shadersSupported());
  addConfigOptionWidget(mUseUnitShaders);
 
- hbox = new QHBox(this);
+ hbox = new QHBox(shadersPage);
  (void)new QLabel(i18n("Shader quality:"), hbox);
  mShaderQuality = new QComboBox(hbox);
  mShaderQuality->setEnabled(BosonGroundThemeData::shadersSupported());
@@ -268,33 +297,13 @@ AdvancedGLOptions::AdvancedGLOptions(OpenGLOptions* parent)
  mShaderQuality->insertItem(i18n("Medium"));
  mShaderQuality->insertItem(i18n("Low"));
  mShaderQuality->setCurrentItem(2);
- hbox = new QHBox(this);
+ hbox = new QHBox(shadersPage);
  (void)new QLabel(i18n("Shadow quality:"), hbox);
  mShadowQuality = new QComboBox(hbox);
  mShadowQuality->insertItem(i18n("High"));
  mShadowQuality->insertItem(i18n("Medium"));
  mShadowQuality->insertItem(i18n("Low"));
  mShadowQuality->setCurrentItem(0);
-
- mUseLOD = new ConfigOptionWidgetBool("UseLOD", this);
- mUseLOD->setLabel(i18n("Use level of detail"));
- addConfigOptionWidget(mUseLOD);
-
- hbox = new QHBox(this);
- (void)new QLabel(i18n("Default level of detail:"), hbox);
- mDefaultLOD = new QComboBox(hbox);
- mDefaultLOD->insertItem(i18n("All details (default)"));
- mDefaultLOD->insertItem(i18n("Lowest details"));
- mDefaultLOD->setCurrentItem(0);
- connect(mUseLOD, SIGNAL(signalValueChanged(bool)), hbox, SLOT(setEnabled(bool)));
- mSmoothShading = new ConfigOptionWidgetBool("SmoothShading", this);
- mSmoothShading->setLabel(i18n("Smooth shade model"));
- addConfigOptionWidget(mSmoothShading);
-
- hbox = new QHBox(this);
- (void)new QLabel(i18n("Mesh renderer:"), hbox);
- mMeshRenderer = new QComboBox(hbox);
-
 }
 
 AdvancedGLOptions::~AdvancedGLOptions()
