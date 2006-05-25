@@ -279,8 +279,9 @@ set(bosongamelib_SRCS
 	bogltooltip.cpp
 	bosonglminimap.cpp
 	bosonufominimap.cpp
-	optionsdialog.cpp
-	optionswidgets.cpp
+	optionsdialog/optionsdialog.cpp
+	optionsdialog/optionswidgets.cpp
+	optionsdialog/configoptionwidgets.cpp
 	bogroundrenderer.cpp
 	bogroundrenderermanager.cpp
 	kgameunitdebug.cpp

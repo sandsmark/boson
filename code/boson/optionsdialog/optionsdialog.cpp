@@ -19,7 +19,7 @@
 #include "optionsdialog.h"
 #include "optionsdialog.moc"
 
-#include "../bomemory/bodummymemory.h"
+#include "../../bomemory/bodummymemory.h"
 #include "optionswidgets.h"
 #include "bodebug.h"
 

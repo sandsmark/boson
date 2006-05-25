@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
     Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
@@ -21,6 +21,7 @@
 #include "optionswidgets.moc"
 
 #include "../bomemory/bodummymemory.h"
+#include "configoptionwidgets.h"
 #include "bosonconfig.h"
 #include "bosoncursor.h"
 #include "modelrendering/bosonmodeltextures.h"
@@ -53,22 +54,39 @@
 #include <qlineedit.h>
 
 
-// we use libufo fonts now.
-// TODO: make them configurable
-// TODO: port bosonfont to libufo
-#define BOSONFONT 0
-#if BOSONFONT
-#include "bosonfont/bosonglfont.h"
-#include "bosonfont/bosonglfontchooser.h"
-#endif
-
 OptionsWidget::OptionsWidget()
 {
 }
 
 OptionsWidget::~OptionsWidget()
 {
- boDebug(210) << k_funcinfo << endl;
+ mConfigOptionWidgets.clear();
+}
+
+void OptionsWidget::addConfigOptionWidget(ConfigOptionWidget* w)
+{
+ mConfigOptionWidgets.append(w);
+}
+
+void OptionsWidget::load()
+{
+ for (QValueList<ConfigOptionWidget*>::iterator it = mConfigOptionWidgets.begin(); it != mConfigOptionWidgets.end(); ++it) {
+	(*it)->load();
+ }
+}
+
+void OptionsWidget::apply()
+{
+ for (QValueList<ConfigOptionWidget*>::iterator it = mConfigOptionWidgets.begin(); it != mConfigOptionWidgets.end(); ++it) {
+	(*it)->apply();
+ }
+}
+
+void OptionsWidget::setDefaults()
+{
+ for (QValueList<ConfigOptionWidget*>::iterator it = mConfigOptionWidgets.begin(); it != mConfigOptionWidgets.end(); ++it) {
+	(*it)->loadDefault();
+ }
 }
 
 
@@ -78,62 +96,23 @@ OptionsWidget::~OptionsWidget()
 
 GeneralOptions::GeneralOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 {
- mGameSpeed = new KIntNumInput(DEFAULT_GAME_SPEED, this);
+ mGameSpeed = new ConfigOptionWidgetInt("GameSpeed", this);
+ mGameSpeed->setLabel(i18n("Game Speed"));
  mGameSpeed->setRange(MIN_GAME_SPEED, MAX_GAME_SPEED);
- mGameSpeed->setLabel(i18n("Game speed"));
+ addConfigOptionWidget(mGameSpeed);
 
- mMiniMapScale = new KDoubleNumInput(boConfig->doubleDefaultValue("MiniMapScale"), this);
- mMiniMapScale->setRange(1.0, 5.0, 1);
+ mMiniMapScale = new ConfigOptionWidgetDouble("MiniMapScale", this);
  mMiniMapScale->setLabel(i18n("Mini Map scale factor"));
+ mMiniMapScale->setRange(1.0, 5.0, 1);
+ addConfigOptionWidget(mMiniMapScale);
 
-
- mRMBMovesWithAttack = new QCheckBox("Units attack enemies in sight while moving", this);
- mRMBMovesWithAttack->setChecked(boConfig->boolValue("RMBMovesWithAttack"));
+ mRMBMovesWithAttack = new ConfigOptionWidgetBool("RMBMovesWithAttack", this);
+ mRMBMovesWithAttack->setLabel(i18n("Units attack enemies in sight while moving"));
+ addConfigOptionWidget(mRMBMovesWithAttack);
 }
 
 GeneralOptions::~GeneralOptions()
 {
- boDebug(210) << k_funcinfo << endl;
-}
-
-void GeneralOptions::apply()
-{
- boDebug(210) << k_funcinfo << endl;
- boConfig->setIntValue("GameSpeed", mGameSpeed->value());
- boConfig->setDoubleValue("MiniMapScale", mMiniMapScale->value());
- QString file;
-
- boConfig->setBoolValue("RMBMovesWithAttack", mRMBMovesWithAttack->isChecked());
- boDebug(210) << k_funcinfo << "done" << endl;
-}
-
-void GeneralOptions::load()
-{
- setGameSpeed(boConfig->intValue("GameSpeed"));
- setMiniMapScale(boConfig->doubleValue("MiniMapScale"));
- setRMBMovesWithAttack(boConfig->boolValue("RMBMovesWithAttack"));
-}
-
-void GeneralOptions::setDefaults()
-{
- setGameSpeed(boConfig->intDefaultValue("GameSpeed"));
- setMiniMapScale(boConfig->doubleDefaultValue("MiniMapScale"));
- setRMBMovesWithAttack(boConfig->boolDefaultValue("RMBMovesWithAttack"));
-}
-
-void GeneralOptions::setGameSpeed(int ms)
-{
- mGameSpeed->setValue(ms);
-}
-
-void GeneralOptions::setMiniMapScale(double scale)
-{
- mMiniMapScale->setValue(scale);
-}
-
-void GeneralOptions::setRMBMovesWithAttack(bool attack)
-{
- mRMBMovesWithAttack->setChecked(attack);
 }
 
 
@@ -224,31 +203,34 @@ void CursorOptions::setCursor(CursorMode mode)
 
 ScrollingOptions::ScrollingOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 {
- QHBox* hbox = new QHBox(this);
- (void)new QLabel(i18n("Enable right mouse button scrolling"), hbox);
- mRMBScrolling = new QCheckBox(hbox);
+ mRMBScrolling = new ConfigOptionWidgetBool("RMBMove", this);
+ mRMBScrolling->setLabel(i18n("Enable right mouse button scrolling"));
+ addConfigOptionWidget(mRMBScrolling);
 
- hbox = new QHBox(this);
- (void)new QLabel(i18n("Enable middle mouse button scrolling"), hbox);
- mMMBScrolling = new QCheckBox(hbox);
+ mMMBScrolling = new ConfigOptionWidgetBool("MMBMove", this);
+ mMMBScrolling->setLabel(i18n("Enable middle mouse button scrolling"));
+ addConfigOptionWidget(mMMBScrolling);
 
- hbox = new QHBox(this);
- (void)new QLabel(i18n("Enable Zoom'nScroll"), hbox);
- mWheelMoveZoom = new QCheckBox(hbox);
+ mWheelMoveZoom = new ConfigOptionWidgetBool("WheelMoveZoom", this);
+ mWheelMoveZoom->setLabel(i18n("Enable Zoom'nScroll"));
+ addConfigOptionWidget(mWheelMoveZoom);
 
- hbox = new QHBox(this);
- (void)new QLabel(i18n("Sensity of cursor at edge of the window scrolling (0 for disabled)"), hbox);
- mCursorEdgeSensity = new KIntNumInput(hbox);
+ mCursorEdgeSensity = new ConfigOptionWidgetUInt("CursorEdgeSensity", this);
+ mCursorEdgeSensity->setLabel(i18n("Sensity of cursor at edge of the window scrolling (0 for disabled)"));
  mCursorEdgeSensity->setRange(0, 50);
+ addConfigOptionWidget(mCursorEdgeSensity);
 
- mArrowSpeed = new KIntNumInput(boConfig->uintDefaultValue("ArrowKeyStep"), this);
- mArrowSpeed->setRange(1, 200);
+ mArrowSpeed = new ConfigOptionWidgetUInt("ArrowKeyStep", this);
  mArrowSpeed->setLabel(i18n("Arrow key steps"));
+ mArrowSpeed->setRange(1, 200);
+ addConfigOptionWidget(mArrowSpeed);
 
  QMap<int, QString> items;
  items.insert((int)CameraMove, i18n("Move camera"));
  items.insert((int)CameraZoom, i18n("Zoom camera"));
  items.insert((int)CameraRotate, i18n("Rotate camera"));
+
+ QHBox* hbox;
  hbox = new QHBox(this);
  (void)new QLabel(i18n("Mouse wheel action"), hbox);
  mMouseWheelAction = new QComboBox(hbox);
@@ -275,17 +257,8 @@ ScrollingOptions::~ScrollingOptions()
 void ScrollingOptions::apply()
 {
  boDebug(210) << k_funcinfo << endl;
- boConfig->setBoolValue("RMBMove", mRMBScrolling->isChecked());
- boConfig->setBoolValue("MMBMove", mMMBScrolling->isChecked());
- boConfig->setBoolValue("WheelMoveZoom", mWheelMoveZoom->isChecked());
- if (mCursorEdgeSensity->value() < 0) {
-	mCursorEdgeSensity->setValue(0);
- }
- boConfig->setUIntValue("CursorEdgeSensity", mCursorEdgeSensity->value());
- if (mArrowSpeed->value() < 0) {
-	mArrowSpeed->setValue(0);
- }
- boConfig->setUIntValue("ArrowKeyStep", mArrowSpeed->value());
+ OptionsWidget::apply();
+
  boConfig->setIntValue("MouseWheelAction", (CameraAction)(mMouseWheelAction->currentItem()));
  boConfig->setIntValue("MouseWheelShiftAction", (CameraAction)(mMouseWheelShiftAction->currentItem()));
  boDebug(210) << k_funcinfo << "done" << endl;
@@ -293,49 +266,16 @@ void ScrollingOptions::apply()
 
 void ScrollingOptions::setDefaults()
 {
- setArrowScrollSpeed(boConfig->uintDefaultValue("ArrowKeyStep"));
- setCursorEdgeSensity(boConfig->uintDefaultValue("CursorEdgeSensity"));
- setRMBScrolling(boConfig->boolDefaultValue("RMBMove"));
- setMMBScrolling(boConfig->boolDefaultValue("MMBMove"));
- setWheelMoveZoom(boConfig->boolDefaultValue("WheelMoveZoom"));
+ OptionsWidget::setDefaults();
  mMouseWheelAction->setCurrentItem(boConfig->intDefaultValue("MouseWheelAction"));
  mMouseWheelShiftAction->setCurrentItem(boConfig->intDefaultValue("MouseWheelShiftAction"));
 }
 
 void ScrollingOptions::load()
 {
- setArrowScrollSpeed(boConfig->uintValue("ArrowKeyStep"));
- setCursorEdgeSensity(boConfig->uintValue("CursorEdgeSensity"));
- setRMBScrolling(boConfig->boolValue("RMBMove"));
- setMMBScrolling(boConfig->boolValue("MMBMove"));
- setWheelMoveZoom(boConfig->boolValue("WheelMoveZoom"));
+ OptionsWidget::load();
  setMouseWheelAction((CameraAction)boConfig->intValue("MouseWheelAction"));
  setMouseWheelShiftAction((CameraAction)boConfig->intValue("MouseWheelShiftAction"));
-}
-
-void ScrollingOptions::setCursorEdgeSensity(int s)
-{
- mCursorEdgeSensity->setValue(s);
-}
-
-void ScrollingOptions::setArrowScrollSpeed(int s)
-{
- mArrowSpeed->setValue(s);
-}
-
-void ScrollingOptions::setRMBScrolling(bool on)
-{
- mRMBScrolling->setChecked(on);
-}
-
-void ScrollingOptions::setMMBScrolling(bool on)
-{
- mMMBScrolling->setChecked(on);
-}
-
-void ScrollingOptions::setWheelMoveZoom(bool on)
-{
- mWheelMoveZoom->setChecked(on);
 }
 
 void ScrollingOptions::setMouseWheelAction(CameraAction action)
@@ -433,17 +373,9 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mRenderingSpeed->insertItem(i18n("Lowest quality (e.g. for software rendering)"));
  connect(mRenderingSpeed, SIGNAL(activated(int)), this, SLOT(slotRenderingSpeedChanged(int)));
 
- mAlignSelectBoxes = new QCheckBox(this);
- mAlignSelectBoxes->setText(i18n("Align unit selection boxes to camera"));
-
-#if BOSONFONT
- QHBox* fontBox = new QHBox(this);
- (void)new QLabel(i18n("Font: "), fontBox);
- mFont = new QPushButton(fontBox);
- mFontChanged = false;
- mFontInfo = new BoFontInfo();
- connect(mFont, SIGNAL(clicked()), this, SLOT(slotChangeFont()));
-#endif
+ mAlignSelectBoxes = new ConfigOptionWidgetBool("AlignSelectionBoxes", this);
+ mAlignSelectBoxes->setLabel(i18n("Align unit selection boxes to camera"));
+ addConfigOptionWidget(mAlignSelectBoxes);
 
  QHBox* resolutionBox = new QHBox(this);
  (void)new QLabel(i18n("Resolution:"), resolutionBox);
@@ -465,10 +397,11 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  showDetails->setOn(false);
  slotShowDetails(false);
 
- mUpdateInterval = new KIntNumInput(boConfig->uintDefaultValue("GLUpdateInterval"), mAdvanced);
- mUpdateInterval->setRange(1, 100);
+ mUpdateInterval = new ConfigOptionWidgetUInt("GLUpdateInterval", this);
  mUpdateInterval->setLabel(i18n("Update interval (low values hurt performance)"));
+ mUpdateInterval->setRange(1, 100);
  QToolTip::add(mUpdateInterval, i18n("The update interval specifies after how many milli seconds the scene gets re-rendered and therefore directly influence the frames per seconds. But low values prevent boson from doing other important tasks and therefore you might end up in a game that takes several seconds until your units react to your commands! 20ms are usually a good value."));
+ addConfigOptionWidget(mUpdateInterval);
 
  hbox = new QHBox(mAdvanced);
  (void)new QLabel(i18n("Texture Filter"), hbox);
@@ -494,27 +427,38 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 
  QToolTip::add(mTextureFilter, i18n("Selects texture filtering method\nGL_LINEAR_MIPMAP_LINEAR looks very good.\nAnisotropic modes look even better but are slower."));
 
- mUseCompressedTextures = new QCheckBox(mAdvanced);
- mUseCompressedTextures->setText(i18n("Use compressed textures"));
+ mUseCompressedTextures = new ConfigOptionWidgetBool("TextureCompression", mAdvanced);
+ mUseCompressedTextures->setLabel(i18n("Use compressed textures"));
  QToolTip::add(mUseCompressedTextures, i18n("Compressing textures reduces amount of memory used\nat the expense of very slight quality loss."));
+ addConfigOptionWidget(mUseCompressedTextures);
 
- mUseColoredMipmaps = new QCheckBox(mAdvanced);
- mUseColoredMipmaps->setText(i18n("Use colored mipmaps"));
+ mUseColoredMipmaps = new ConfigOptionWidgetBool("TextureColorMipmaps", mAdvanced);
+ mUseColoredMipmaps->setLabel(i18n("Use colored mipmaps"));
  QToolTip::add(mUseColoredMipmaps, i18n("Colors different mipmap levels so you can make difference between them.\nDo not enable this unless you know what you're doing."));
+ addConfigOptionWidget(mUseColoredMipmaps);
 
- mUseLight = new QCheckBox(mAdvanced);
- mUseLight->setText(i18n("Enable light"));
+ mUseLight = new ConfigOptionWidgetBool("UseLight", mAdvanced);
+ mUseLight->setLabel(i18n("Enable light"));
+ addConfigOptionWidget(mUseLight);
 
- mUseMaterials = new QCheckBox(mAdvanced);
- mUseMaterials->setText(i18n("Use materials"));
+ mUseMaterials = new ConfigOptionWidgetBool("UseMaterials", mAdvanced);
+ mUseMaterials->setLabel(i18n("Use materials"));
  QToolTip::add(mUseMaterials, i18n("Materials influence the way in which models (like units) are lighted. You can disable them to gain some performance."));
+ addConfigOptionWidget(mUseMaterials);
 
  hbox = new QHBox(mAdvanced);
  (void)new QLabel(i18n("Ground render:"), hbox);
  mGroundRenderer = new QComboBox(hbox);
 
- mUseShaders = new QCheckBox(i18n("Use shaders (and shadows)"), mAdvanced);
- mUseShaders->setEnabled(BosonGroundThemeData::shadersSupported());
+ mUseGroundShaders = new ConfigOptionWidgetBool("UseGroundShaders", mAdvanced);
+ mUseGroundShaders->setLabel(i18n("Use ground shaders (and shadows)"));
+ mUseGroundShaders->setEnabled(BosonGroundThemeData::shadersSupported());
+ addConfigOptionWidget(mUseGroundShaders);
+ mUseUnitShaders = new ConfigOptionWidgetBool("UseUnitShaders", mAdvanced);
+ mUseUnitShaders->setLabel(i18n("Use unit shaders (and shadows)"));
+ mUseUnitShaders->setEnabled(BosonGroundThemeData::shadersSupported());
+ addConfigOptionWidget(mUseUnitShaders);
+
  hbox = new QHBox(mAdvanced);
  (void)new QLabel(i18n("Shader quality:"), hbox);
  mShaderQuality = new QComboBox(hbox);
@@ -532,16 +476,21 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mShadowQuality->insertItem(i18n("Low"));
  mShadowQuality->setCurrentItem(0);
 
- mUseLOD = new QCheckBox(i18n("Use level of detail"), mAdvanced);
+ mUseLOD = new ConfigOptionWidgetBool("UseLOD", mAdvanced);
+ mUseLOD->setLabel(i18n("Use level of detail"));
+ addConfigOptionWidget(mUseLOD);
+
  hbox = new QHBox(mAdvanced);
  (void)new QLabel(i18n("Default level of detail:"), hbox);
  mDefaultLOD = new QComboBox(hbox);
  mDefaultLOD->insertItem(i18n("All details (default)"));
  mDefaultLOD->insertItem(i18n("Lowest details"));
  mDefaultLOD->setCurrentItem(0);
- connect(mUseLOD, SIGNAL(toggled(bool)), hbox, SLOT(setEnabled(bool)));
- mSmoothShading = new QCheckBox(i18n("Smooth shade model"), mAdvanced);
- mSmoothShading->setChecked(true);
+ connect(mUseLOD, SIGNAL(signalValueChanged(bool)), hbox, SLOT(setEnabled(bool)));
+ mSmoothShading = new ConfigOptionWidgetBool("SmoothShading", mAdvanced);
+ mSmoothShading->setLabel(i18n("Smooth shade model"));
+ addConfigOptionWidget(mSmoothShading);
+
  hbox = new QHBox(mAdvanced);
  (void)new QLabel(i18n("Mesh renderer:"), hbox);
  mMeshRenderer = new QComboBox(hbox);
@@ -598,53 +547,56 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 	default:
 		boWarning(210) << k_funcinfo << "invalid value: " << speed << endl;
 	case Defaults:
-		setUpdateInterval(boConfig->uintDefaultValue("GLUpdateInterval"));
+		mUpdateInterval->loadDefault();
 		setTextureFilter(boConfig->intDefaultValue("TextureFilter"));
-		mUseCompressedTextures->setChecked(boConfig->boolDefaultValue("TextureCompression"));
+		mUseCompressedTextures->loadDefault();
 		mUseColoredMipmaps->setChecked(false);
-		 setAlignSelectionBoxes(boConfig->boolDefaultValue("AlignSelectionBoxes"));
-		mUseLight->setChecked(boConfig->boolDefaultValue("UseLight"));
-		mUseMaterials->setChecked(boConfig->boolDefaultValue("UseMaterials"));
+		mAlignSelectBoxes->setValue(boConfig->boolDefaultValue("AlignSelectionBoxes"));
+		mUseLight->loadDefault();
+		mUseMaterials->loadDefault();
 		setCurrentGroundRenderer(boConfig->stringDefaultValue("GroundRendererClass"));
-		mUseShaders->setChecked(false);
+		mUseGroundShaders->setChecked(false);
+		mUseUnitShaders->setChecked(false);
 		mShaderQuality->setCurrentItem(shaderSuffixesToIndex("-med"));
 		mShadowQuality->setCurrentItem(shadowMapResolutionToIndex(2048));
 		setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
-		setUseLOD(boConfig->boolDefaultValue("UseLOD"));
+		mUseLOD->loadDefault();
 		setDefaultLOD(0);
 		mSmoothShading->setChecked(true);
 		mResolution->setCurrentItem(0);
 		break;
 	case BestQuality:
 		// we mostly use defaults here.
-		setUpdateInterval(boConfig->uintDefaultValue("GLUpdateInterval"));
+		mUpdateInterval->loadDefault();
 		setTextureFilter(boConfig->intDefaultValue("TextureFilter"));
-		mUseCompressedTextures->setChecked(boConfig->boolDefaultValue("TextureCompression"));
+		mUseCompressedTextures->loadDefault();
 		mUseColoredMipmaps->setChecked(false);
-		mUseLight->setChecked(boConfig->boolDefaultValue("UseLight"));
-		mUseMaterials->setChecked(boConfig->boolDefaultValue("UseMaterials"));
+		mUseLight->loadDefault();
+		mUseMaterials->loadDefault();
 		setCurrentGroundRenderer(boConfig->stringDefaultValue("GroundRendererClass"));
-		mUseShaders->setChecked(true);
+		mUseGroundShaders->setChecked(true);
+		mUseUnitShaders->setChecked(true);
 		mShaderQuality->setCurrentItem(0); // upmost item is the best-quality one
 		mShadowQuality->setCurrentItem(0); // upmost item is the best-quality one
 		setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
-		setUseLOD(true);
+		mUseLOD->setValue(true);
 		setDefaultLOD(0);
 		mSmoothShading->setChecked(true);
 		break;
 	case Fastest:
-		setUpdateInterval(boConfig->uintDefaultValue("GLUpdateInterval"));
+		mUpdateInterval->loadDefault();
 		setTextureFilter(GL_LINEAR);  // Use bilinear maybe?
-		mUseCompressedTextures->setChecked(true);
+		mUseCompressedTextures->setValue(true);
 		mUseColoredMipmaps->setChecked(false);
 		mUseLight->setChecked(false);
 		mUseMaterials->setChecked(false);
 		setCurrentGroundRenderer("BoFastGroundRenderer");
-		mUseShaders->setChecked(false);
+		mUseGroundShaders->setChecked(false);
+		mUseUnitShaders->setChecked(false);
 		mShaderQuality->setCurrentItem(shaderSuffixesToIndex("-low"));
 		mShadowQuality->setCurrentItem(shadowMapResolutionToIndex(512));
 		setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
-		setUseLOD(true);
+		mUseLOD->setValue(true);
 		setDefaultLOD(5000);
 		mSmoothShading->setChecked(false);
 		break;
@@ -660,19 +612,6 @@ void OpenGLOptions::slotShowDetails(bool show)
  } else {
 	mAdvanced->hide();
  }
-}
-
-void OpenGLOptions::slotChangeFont()
-{
-#if BOSONFONT
- BoFontInfo f = *mFontInfo;
- int result = BosonGLFontChooser::getFont(f, this);
- if (result == QDialog::Accepted) {
-	*mFontInfo = f;
-	mFontChanged = true;
-	mFont->setText(mFontInfo->guiName());
- }
-#endif
 }
 
 QString OpenGLOptions::shaderSuffixes()
@@ -735,12 +674,12 @@ int OpenGLOptions::indexToShadowMapResolution(int index)
 void OpenGLOptions::apply()
 {
  boDebug(210) << k_funcinfo << endl;
+ OptionsWidget::apply();
  boConfig->setIntValue("RenderingSpeed", renderingSpeed());
 
  QString changesThatNeedRestart;
  bool resetTexParameter = false;
  bool reloadTextures = false;
- boConfig->setUIntValue("GLUpdateInterval", (unsigned int)mUpdateInterval->value());
  if (boConfig->intValue("TextureFilter") != textureFilter()) {
 	boConfig->setIntValue("TextureFilter", textureFilter());
 	resetTexParameter = true;
@@ -776,22 +715,7 @@ void OpenGLOptions::apply()
 	boTextureManager->reloadTextures();
  }
 
- boConfig->setBoolValue("AlignSelectionBoxes", mAlignSelectBoxes->isChecked());
- boConfig->setBoolValue("UseLight", mUseLight->isChecked());
- boConfig->setBoolValue("UseMaterials", mUseMaterials->isChecked());
- boConfig->setBoolValue("UseLOD", useLOD());
  boConfig->setUIntValue("DefaultLOD", defaultLOD());
-
-#if BOSONFONT
- if (mFontChanged) {
-	boConfig->setStringValue("GLFont", mFontInfo->toString());
-	mFontChanged = false;
-	emit signalFontChanged(*mFontInfo);
- }
-#endif
-
-
- boConfig->setBoolValue("SmoothShading", mSmoothShading->isChecked());
 
  if (mResolution->isEnabled() && mResolution->currentItem() > 0) {
 	// first entry is "do not change", then a list, as provided by
@@ -817,9 +741,7 @@ void OpenGLOptions::apply()
 		kapp->exit(1);
 	}
  }
- boConfig->setBoolValue("UseGroundShaders", mUseShaders->isChecked());
- boConfig->setBoolValue("UseUnitShaders", mUseShaders->isChecked());
- BosonGroundThemeData::setUseGroundShaders(mUseShaders->isChecked());
+ BosonGroundThemeData::setUseGroundShaders(mUseGroundShaders->isChecked());
 
  if (shaderSuffixes() != boConfig->stringValue("ShaderSuffixes")) {
 	boConfig->setStringValue("ShaderSuffixes", shaderSuffixes());
@@ -835,45 +757,24 @@ void OpenGLOptions::apply()
 
 void OpenGLOptions::setDefaults()
 {
+ OptionsWidget::setDefaults();
  mRenderingSpeed->setCurrentItem(0);
  slotRenderingSpeedChanged(0);
 }
 
 void OpenGLOptions::load()
 {
+ OptionsWidget::load();
  setRenderingSpeed(boConfig->intValue("RenderingSpeed", Defaults));
- setUpdateInterval(boConfig->uintValue("GLUpdateInterval"));
  setTextureFilter(boConfig->intValue("TextureFilter"));
  setTextureAnisotropy(boConfig->intValue("TextureAnisotropy"));
- mUseCompressedTextures->setChecked(boConfig->boolValue("TextureCompression"));
- mUseColoredMipmaps->setChecked(boConfig->boolValue("TextureColorMipmaps"));
- setAlignSelectionBoxes(boConfig->boolValue("AlignSelectionBoxes"));
- mUseLight->setChecked(boConfig->boolValue("UseLight"));
- mUseMaterials->setChecked(boConfig->boolValue("UseMaterials"));
- setUseLOD(boConfig->boolValue("UseLOD"));
  setDefaultLOD(boConfig->uintValue("DefaultLOD", 0));
-#if BOSONFONT
- if (!mFontInfo->fromString(boConfig->stringValue("GLFont", QString::null))) {
-	boError() << k_funcinfo << "Could not load font " << boConfig->stringValue("GLFont", QString::null) << endl;
-	*mFontInfo = BoFontInfo();
- }
- mFont->setText(mFontInfo->guiName());
- mFontChanged = false;
-#endif
- mSmoothShading->setChecked(boConfig->boolValue("SmoothShading", true));
  mResolution->setCurrentItem(0);
 
  setCurrentMeshRenderer(BoMeshRendererManager::manager()->currentRendererName());
  setCurrentGroundRenderer(BoGroundRendererManager::manager()->currentRendererName());
- mUseShaders->setChecked(boConfig->boolValue("UseGroundShaders") && boConfig->boolValue("UseUnitShaders"));
  mShaderQuality->setCurrentItem(shaderSuffixesToIndex(boConfig->stringValue("ShaderSuffixes")));
  mShadowQuality->setCurrentItem(shadowMapResolutionToIndex(boConfig->intValue("ShadowMapResolution")));
-}
-
-void OpenGLOptions::setUpdateInterval(int ms)
-{
- boDebug(210) << k_funcinfo << ms << endl;
- mUpdateInterval->setValue(ms);
 }
 
 int OpenGLOptions::textureFilter() const
@@ -954,21 +855,6 @@ void OpenGLOptions::setTextureAnisotropy(int a)
  }
 }
 
-void OpenGLOptions::setAlignSelectionBoxes(bool align)
-{
- mAlignSelectBoxes->setChecked(align);
-}
-
-bool OpenGLOptions::useLOD() const
-{
- return mUseLOD->isChecked();
-}
-
-void OpenGLOptions::setUseLOD(bool use)
-{
- mUseLOD->setChecked(use);
-}
-
 unsigned int OpenGLOptions::defaultLOD() const
 {
  switch (mDefaultLOD->currentItem()) {
@@ -1028,17 +914,30 @@ void OpenGLOptions::setCurrentGroundRenderer(const QString& renderer)
 
 WaterOptions::WaterOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 {
-// QHBox* hbox = new QHBox(this);
- mShaders = new QCheckBox(i18n("Enable shaders"), this);
+ mShaders = new ConfigOptionWidgetBool("WaterShaders", this);
+ mShaders->setLabel(i18n("Enable shaders"));
  mShaders->setEnabled(boWaterRenderer->supportsShaders());
- mReflections = new QCheckBox(i18n("Enable reflections"), this);
+ addConfigOptionWidget(mShaders);
+
+ mReflections = new ConfigOptionWidgetBool("WaterReflections", this);
+ mReflections->setLabel(i18n("Enable reflections"));
  mReflections->setEnabled(boWaterRenderer->supportsReflections());
- mTranslucency = new QCheckBox(i18n("Enable translucent water"), this);
+ addConfigOptionWidget(mReflections);
+
+ mTranslucency = new ConfigOptionWidgetBool("WaterTranslucency", this);
+ mTranslucency->setLabel(i18n("Enable translucent water"));
  mTranslucency->setEnabled(boWaterRenderer->supportsTranslucency());
- mBumpmapping = new QCheckBox(i18n("Enable bumpmapped water"), this);
+ addConfigOptionWidget(mTranslucency);
+
+ mBumpmapping = new ConfigOptionWidgetBool("WaterBumpmapping", this);
+ mBumpmapping->setLabel(i18n("Enable bumpmapped water"));
  mBumpmapping->setEnabled(boWaterRenderer->supportsBumpmapping());
- mAnimatedBumpmaps = new QCheckBox(i18n("Enable animated bumpmaps"), this);
+ addConfigOptionWidget(mBumpmapping);
+
+ mAnimatedBumpmaps = new ConfigOptionWidgetBool("WaterAnimatedBumpmaps", this);
+ mAnimatedBumpmaps->setLabel(i18n("Enable animated bumpmaps"));
  mAnimatedBumpmaps->setEnabled(boWaterRenderer->supportsBumpmapping());
+ addConfigOptionWidget(mAnimatedBumpmaps);
 
  connect(mShaders, SIGNAL(toggled(bool)), this, SLOT(slotEnableShaders(bool)));
 }
@@ -1051,32 +950,20 @@ WaterOptions::~WaterOptions()
 void WaterOptions::apply()
 {
  boDebug(210) << k_funcinfo << endl;
- boConfig->setBoolValue("WaterShaders", mShaders->isChecked());
- boConfig->setBoolValue("WaterReflections", mReflections->isChecked());
- boConfig->setBoolValue("WaterTranslucency", mTranslucency->isChecked());
- boConfig->setBoolValue("WaterBumpmapping", mBumpmapping->isChecked());
- boConfig->setBoolValue("WaterAnimatedBumpmaps", mAnimatedBumpmaps->isChecked());
+ OptionsWidget::apply();
  boWaterRenderer->reloadConfiguration();
  boDebug(210) << k_funcinfo << "done" << endl;
 }
 
 void WaterOptions::setDefaults()
 {
- mShaders->setChecked(boConfig->boolDefaultValue("WaterShaders"));
- mReflections->setChecked(boConfig->boolDefaultValue("WaterReflections"));
- mTranslucency->setChecked(boConfig->boolDefaultValue("WaterTranslucency"));
- mBumpmapping->setChecked(boConfig->boolDefaultValue("WaterBumpmapping"));
- mAnimatedBumpmaps->setChecked(boConfig->boolDefaultValue("WaterAnimatedBumpmaps"));
+ OptionsWidget::setDefaults();
  slotEnableShaders(mShaders->isChecked());
 }
 
 void WaterOptions::load()
 {
- mShaders->setChecked(boConfig->boolValue("WaterShaders"));
- mReflections->setChecked(boConfig->boolValue("WaterReflections"));
- mTranslucency->setChecked(boConfig->boolValue("WaterTranslucency"));
- mBumpmapping->setChecked(boConfig->boolValue("WaterBumpmapping"));
- mAnimatedBumpmaps->setChecked(boConfig->boolValue("WaterAnimatedBumpmaps"));
+ OptionsWidget::load();
  slotEnableShaders(mShaders->isChecked());
 }
 
@@ -1093,50 +980,20 @@ void WaterOptions::slotEnableShaders(bool)
 
 ChatOptions::ChatOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 {
-// QHBox* hbox = new QHBox(this);
- mScreenRemoveTime = new KIntNumInput(boConfig->uintDefaultValue("ChatScreenRemoveTime"), this);
- mScreenRemoveTime->setRange(0, 400);
+ mScreenRemoveTime = new ConfigOptionWidgetUInt("ChatScreenRemoveTime", this);
  mScreenRemoveTime->setLabel(i18n("Remove from screen after seconds (0 to remove never)"));
+ mScreenRemoveTime->setRange(0, 400);
+ addConfigOptionWidget(mScreenRemoveTime);
 
-// hbox = new QHBox(this);
- mScreenMaxItems = new KIntNumInput(boConfig->intDefaultValue("ChatScreenMaxItems"), this);
- mScreenMaxItems->setRange(-1, 40);
+ mScreenMaxItems = new ConfigOptionWidgetInt("ChatScreenMaxItems", this);
  mScreenMaxItems->setLabel(i18n("Maximal items on the screen (-1 is unlimited)"));
+ mScreenMaxItems->setRange(-1, 40);
+ addConfigOptionWidget(mScreenMaxItems);
 }
 
 ChatOptions::~ChatOptions()
 {
  boDebug(210) << k_funcinfo << endl;
-}
-
-void ChatOptions::apply()
-{
- boDebug(210) << k_funcinfo << endl;
- boConfig->setUIntValue("ChatScreenRemoveTime", mScreenRemoveTime->value());
- boConfig->setIntValue("ChatScreenMaxItems", mScreenMaxItems->value());
- boDebug(210) << k_funcinfo << "done" << endl;
-}
-
-void ChatOptions::setDefaults()
-{
- setScreenRemoveTime(boConfig->uintDefaultValue("ChatScreenRemoveTime"));
- setScreenMaxItems(boConfig->intDefaultValue("ChatScreenMaxItems"));
-}
-
-void ChatOptions::load()
-{
- setScreenRemoveTime(boConfig->uintValue("ChatScreenRemoveTime"));
- setScreenMaxItems(boConfig->intValue("ChatScreenMaxItems"));
-}
-
-void ChatOptions::setScreenRemoveTime(unsigned int s)
-{
- mScreenRemoveTime->setValue(s);
-}
-
-void ChatOptions::setScreenMaxItems(int m)
-{
- mScreenMaxItems->setValue(m);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1148,9 +1005,10 @@ ToolTipOptions::ToolTipOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  // you could reduce the update period to very low values to monitor changes
  // that change very often (you may want to use that in combination with pause),
  // such as waypoints (?), health, reload state, ...
- mUpdatePeriod = new KIntNumInput(boConfig->intDefaultValue("ToolTipUpdatePeriod"), this);
- mUpdatePeriod->setRange(1, 500);
+ mUpdatePeriod = new ConfigOptionWidgetInt("ToolTipUpdatePeriod", this);
  mUpdatePeriod->setLabel(i18n("Update period. Low values lead to more current data. Debugging option - leave this at the default.)"));
+ mUpdatePeriod->setRange(1, 500);
+ addConfigOptionWidget(mUpdatePeriod);
 
  // TODO: the tooltip delay!
 
@@ -1171,6 +1029,7 @@ ToolTipOptions::~ToolTipOptions()
 
 void ToolTipOptions::apply()
 {
+ OptionsWidget::apply();
  BoToolTipCreatorFactory factory;
  QValueList<int> tips = factory.availableTipCreators();
  int index = mToolTipCreator->currentItem();
@@ -1179,12 +1038,11 @@ void ToolTipOptions::apply()
  } else {
 	boWarning() << k_funcinfo << "invalid tooltip creator index=" << index << endl;
  }
- boConfig->setIntValue("ToolTipUpdatePeriod", mUpdatePeriod->value());
 }
 
 void ToolTipOptions::setDefaults()
 {
- mUpdatePeriod->setValue(boConfig->intDefaultValue("ToolTipUpdatePeriod"));
+ OptionsWidget::setDefaults();
  BoToolTipCreatorFactory factory;
  QValueList<int> tips = factory.availableTipCreators();
  int index = -1;
@@ -1198,7 +1056,7 @@ void ToolTipOptions::setDefaults()
 
 void ToolTipOptions::load()
 {
- mUpdatePeriod->setValue(boConfig->intValue("ToolTipUpdatePeriod"));
+ OptionsWidget::load();
  BoToolTipCreatorFactory factory;
  QValueList<int> tips = factory.availableTipCreators();
  int index = -1;

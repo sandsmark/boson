@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
     Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
@@ -23,6 +23,7 @@
 #include <qvbox.h>
 #include <qstringlist.h>
 #include <qmap.h>
+#include <qvaluelist.h>
 
 #include "global.h"
 
@@ -35,7 +36,11 @@ class KDoubleNumInput;
 class QComboBox;
 class QCheckBox;
 class QPushButton;
-class QLineEdit;
+class ConfigOptionWidget;
+class ConfigOptionWidgetInt;
+class ConfigOptionWidgetUInt;
+class ConfigOptionWidgetDouble;
+class ConfigOptionWidgetBool;
 
 /**
  * @short Base widget for pages of the @ref OptionsDialog
@@ -47,9 +52,14 @@ public:
 	OptionsWidget();
 	virtual ~OptionsWidget();
 
-	virtual void load() = 0; // load from current game values
-	virtual void apply() = 0;
-	virtual void setDefaults() = 0; // reset to hardcoded defaults
+	void addConfigOptionWidget(ConfigOptionWidget* w);
+
+	virtual void load(); // load from current game values
+	virtual void apply();
+	virtual void setDefaults(); // reset to hardcoded defaults
+
+private:
+	QValueList<ConfigOptionWidget*> mConfigOptionWidgets;
 };
 
 class GeneralOptions : public QVBox, public OptionsWidget
@@ -59,27 +69,10 @@ public:
 	GeneralOptions(QWidget* parent);
 	~GeneralOptions();
 
-	virtual void apply();
-	virtual void setDefaults();
-	virtual void load();
-
-	/**
-	 * Set the shown value for the game speed. Note that this value is the
-	 * time between 2 advance calls in ms while the dialog
-	 * does not show anything in ms. The dialog values are just the
-	 * opposite: higher values mean higher speed.
-	 **/
-	void setGameSpeed(int ms);
-	void setMiniMapScale(double s);
-	void setRMBMovesWithAttack(bool attack);
-
-signals:
-	void signalMiniMapScaleChanged(double);
-
 private:
-	KIntNumInput* mGameSpeed;
-	KDoubleNumInput* mMiniMapScale;
-	QCheckBox* mRMBMovesWithAttack;
+	ConfigOptionWidgetInt* mGameSpeed;
+	ConfigOptionWidgetDouble* mMiniMapScale;
+	ConfigOptionWidgetBool* mRMBMovesWithAttack;
 };
 
 class CursorOptions : public QVBox, public OptionsWidget
@@ -115,20 +108,15 @@ public:
 	virtual void setDefaults();
 	virtual void load();
 
-	void setArrowScrollSpeed(int);
-	void setCursorEdgeSensity(int);
-	void setRMBScrolling(bool);
-	void setMMBScrolling(bool);
-	void setWheelMoveZoom(bool);
 	void setMouseWheelAction(CameraAction action);
 	void setMouseWheelShiftAction(CameraAction action);
 
 private:
-	KIntNumInput* mArrowSpeed;
-	QCheckBox* mRMBScrolling;
-	QCheckBox* mMMBScrolling;
-	QCheckBox* mWheelMoveZoom;
-	KIntNumInput* mCursorEdgeSensity;
+	ConfigOptionWidgetBool* mRMBScrolling;
+	ConfigOptionWidgetBool* mMMBScrolling;
+	ConfigOptionWidgetBool* mWheelMoveZoom;
+	ConfigOptionWidgetUInt* mArrowSpeed;
+	ConfigOptionWidgetUInt* mCursorEdgeSensity;
 	QComboBox* mMouseWheelAction;
 	QComboBox* mMouseWheelShiftAction;
 };
@@ -148,7 +136,7 @@ public:
 
 private:
 	QMap<QCheckBox*, UnitSoundEvent> mCheckBox2UnitSoundEvent;
-  QCheckBox* weaponsounds;
+	QCheckBox* weaponsounds;
 };
 
 
@@ -170,17 +158,12 @@ public:
 	virtual void setDefaults();
 	virtual void load();
 
-	void setUpdateInterval(int ms);
-
 protected:
 	int textureFilter() const;
 	void setTextureFilter(int f);
 
 	int textureAnisotropy() const;
 	void setTextureAnisotropy(int f);
-
-	void setUseLOD(bool l);
-	bool useLOD() const;
 
 	void setDefaultLOD(unsigned int l);
 	unsigned int defaultLOD() const;
@@ -219,7 +202,6 @@ protected:
 protected slots:
 	void slotRenderingSpeedChanged(int);
 	void slotShowDetails(bool);
-	void slotChangeFont();
 
 signals:
 	void signalFontChanged(const BoFontInfo& font);
@@ -227,26 +209,24 @@ signals:
 
 private:
 	QComboBox* mRenderingSpeed;
-	QCheckBox* mAlignSelectBoxes;
+	ConfigOptionWidgetBool* mAlignSelectBoxes;
 	QComboBox* mResolution;
 	QVBox* mAdvanced;
 
-	KIntNumInput* mUpdateInterval;
+	ConfigOptionWidgetUInt* mUpdateInterval;
 	QComboBox* mTextureFilter;
-	QCheckBox* mUseCompressedTextures;
-	QCheckBox* mUseColoredMipmaps;
-	QCheckBox* mUseLight;
-	QCheckBox* mUseMaterials;
+	ConfigOptionWidgetBool* mUseCompressedTextures;
+	ConfigOptionWidgetBool* mUseColoredMipmaps;
+	ConfigOptionWidgetBool* mUseLight;
+	ConfigOptionWidgetBool* mUseMaterials;
 	QComboBox* mGroundRenderer;
-	QCheckBox* mUseShaders;
+	ConfigOptionWidgetBool* mUseGroundShaders;
+	ConfigOptionWidgetBool* mUseUnitShaders;
 	QComboBox* mShaderQuality;
 	QComboBox* mShadowQuality;
-	QCheckBox* mUseLOD;
+	ConfigOptionWidgetBool* mUseLOD;
 	QComboBox* mDefaultLOD;
-	QPushButton* mFont;
-	BoFontInfo* mFontInfo;
-	bool mFontChanged;
-	QCheckBox* mSmoothShading;
+	ConfigOptionWidgetBool* mSmoothShading;
 	QComboBox* mMeshRenderer;
 };
 
@@ -265,11 +245,11 @@ protected slots:
 	void slotEnableShaders(bool);
 
 private:
-	QCheckBox* mShaders;
-	QCheckBox* mReflections;
-	QCheckBox* mTranslucency;
-	QCheckBox* mBumpmapping;
-	QCheckBox* mAnimatedBumpmaps;
+	ConfigOptionWidgetBool* mShaders;
+	ConfigOptionWidgetBool* mReflections;
+	ConfigOptionWidgetBool* mTranslucency;
+	ConfigOptionWidgetBool* mBumpmapping;
+	ConfigOptionWidgetBool* mAnimatedBumpmaps;
 };
 
 class ChatOptions : public QVBox, public OptionsWidget
@@ -279,16 +259,9 @@ public:
 	ChatOptions(QWidget* parent);
 	~ChatOptions();
 
-	virtual void apply();
-	virtual void setDefaults();
-	virtual void load();
-
-	void setScreenRemoveTime(unsigned int s);
-	void setScreenMaxItems(int s);
-
 private:
-	KIntNumInput* mScreenRemoveTime;
-	KIntNumInput* mScreenMaxItems;
+	ConfigOptionWidgetUInt* mScreenRemoveTime;
+	ConfigOptionWidgetInt* mScreenMaxItems;
 };
 
 class ToolTipOptions : public QVBox, public OptionsWidget
@@ -303,7 +276,7 @@ public:
 	virtual void load();
 
 private:
-	KIntNumInput* mUpdatePeriod;
+	ConfigOptionWidgetInt* mUpdatePeriod;
 	QComboBox* mToolTipCreator;
 };
 
