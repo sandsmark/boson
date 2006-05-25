@@ -3,7 +3,7 @@
  <Widgets>
   <ClassName>BoUfoWidget</ClassName>
   <Properties>
-   <name>BoClassName</name>
+   <name>BoUfoLoadingWidgetBase</name>
    <constraints/>
    <gridLayoutColumns/>
    <gridLayoutRows/>
