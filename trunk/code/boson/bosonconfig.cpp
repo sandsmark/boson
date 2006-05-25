@@ -293,7 +293,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntryInt("ChatScreenMaxItems", 5);
  addDynamicEntryIntList("DeactivateUnitSounds", QValueList<int>());
  addDynamicEntryBool("AlignSelectionBoxes", true);
- addDynamicEntryBool("RMBMovesWithAttack", false);
+ addDynamicEntryBool("RMBMovesWithAttack", true);
  addDynamicEntryInt("MouseWheelAction", CameraZoom);
  addDynamicEntryInt("MouseWheelShiftAction", CameraRotate);
  addDynamicEntryBool("DeactivateWeaponSounds", false);
