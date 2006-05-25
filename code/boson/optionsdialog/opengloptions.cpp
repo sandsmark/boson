@@ -41,7 +41,6 @@
 #include <kapplication.h>
 #include <klocale.h>
 #include <knuminput.h>
-#include <ksimpleconfig.h>
 #include <kstandarddirs.h>
 #include <kmessagebox.h>
 
@@ -137,11 +136,12 @@ void OpenGLOptions::setDefaults()
 
 void OpenGLOptions::load()
 {
- OptionsWidget::load();
  mAdvanced->setRenderingSpeed(boConfig->intValue("RenderingSpeed", Defaults));
  mResolution->setCurrentItem(0);
 
  mAdvanced->load();
+
+ OptionsWidget::load();
 }
 
 void OpenGLOptions::slotRenderingSpeedChanged(int index)
