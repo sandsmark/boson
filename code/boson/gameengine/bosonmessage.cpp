@@ -321,6 +321,10 @@ bool BosonMessageEditorMoveChangeTexMap::load(QDataStream& stream)
  }
  Q_UINT32 count;
  stream >> count;
+ if (count > 65536) {
+	boError() << k_funcinfo << "broken message. tried to allocate size for " << count << " corners" << endl;
+	return false;
+ }
  mCellCornersX.resize(count);
  mCellCornersY.resize(count);
  mCellCornersTextureCount.resize(count);
@@ -410,6 +414,10 @@ bool BosonMessageEditorMoveChangeHeight::load(QDataStream& stream)
  }
  Q_UINT32 count;
  stream >> count;
+ if (count > 65536) {
+	boError() << k_funcinfo << "broken message. tried to allocate size for " << count << " corners" << endl;
+	return false;
+ }
  mCellCornersX.resize(count);
  mCellCornersY.resize(count);
  mCellCornersHeight.resize(count);
