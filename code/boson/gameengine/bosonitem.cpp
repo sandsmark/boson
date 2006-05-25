@@ -166,7 +166,8 @@ BosonItem::~BosonItem()
 QPtrVector<Cell>* BosonItem::cells()
 {
  if (mCellsDirty) {
-	makeCells(canvas()->cells(), mCells, boundingRect(), canvas()->mapWidth(), canvas()->mapHeight());
+	BoRect2Fixed rect = boundingRect();
+	makeCells(canvas()->cells(), mCells, rect, canvas()->mapWidth(), canvas()->mapHeight());
 	mCellsDirty = false;
  }
  return mCells;
@@ -180,10 +181,18 @@ QPtrVector<Cell>* BosonItem::cellsConst() const
 void BosonItem::makeCells(Cell* allCells, QPtrVector<Cell>* cells, const BoRect2Fixed& rect, int mapWidth, int mapHeight)
 {
  BO_CHECK_NULL_RET(allCells);
- int left = QMAX((int)rect.left(), 0);
- int top = QMAX((int)rect.top(), 0);
- int right = QMIN((int)ceil(rect.right()), mapWidth);
- int bottom = QMIN((int)ceil(rect.bottom()), mapHeight);
+ int left = (int)rect.left();
+ int top = (int)rect.top();
+ int right = (int)ceil(rect.right());
+ int bottom = (int)ceil(rect.bottom());
+ left = QMAX(left, 0);
+ top = QMAX(top, 0);
+ right = QMAX(right, 0);
+ bottom = QMAX(bottom, 0);
+ left = QMIN(left, mapWidth);
+ top = QMIN(top, mapHeight);
+ right = QMIN(right, mapWidth);
+ bottom = QMIN(bottom, mapHeight);
 
  // AB: WARNING: we do direct array/pointer calculations here, so
  // right/bottom/left/top MUST be valid for the allCells array!
@@ -191,6 +200,10 @@ void BosonItem::makeCells(Cell* allCells, QPtrVector<Cell>* cells, const BoRect2
 
 
  int size = (right - left) * (bottom - top);
+ if (size < 0 || size >= mapWidth * mapHeight) {
+	boError() << k_funcinfo << "invalid size: " << size << " left=" << left << " right=" << right << " top=" << top << " bottom=" << bottom << endl;
+	return;
+ }
  cells->resize(size);
  if (size == 0) {
 	return;
