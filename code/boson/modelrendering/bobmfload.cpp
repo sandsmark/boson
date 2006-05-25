@@ -285,6 +285,11 @@ bool BoBMFLoad::loadTextures(QDataStream& stream)
   char* name;
   Q_UINT8 hastransparency;
   stream >> count;
+  if(count > 500)
+  {
+     boError(100) << k_funcinfo << "too many textures: " << count << endl;
+     return false;
+  }
   mTextureNames.clear();
   mTextureNames.reserve(count);
   mTextureTransparent = new bool[count];

@@ -96,6 +96,10 @@ public:
 	void placeGround(unsigned int texCount, unsigned char* alpha)
 	{
 		reset();
+		if (texCount > 500) {
+			boError() << k_funcinfo << "invalid texCount: " << texCount << endl;
+			return;
+		}
 		mType = PlaceGround;
 		mTextureCount = texCount;
 		mTextureAlpha = new unsigned char[texCount];

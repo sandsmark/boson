@@ -85,7 +85,7 @@ class BoMessageLogger;
 
 BoAdvanceMessageTimes::BoAdvanceMessageTimes(int gameSpeed)
 {
- if (gameSpeed <= 0) {
+ if (gameSpeed <= 0 || gameSpeed >= 5000) {
 	boError(300) << k_funcinfo << "invalid advance message - gameSpeed " << gameSpeed << endl;
 	gameSpeed = 1;
  }

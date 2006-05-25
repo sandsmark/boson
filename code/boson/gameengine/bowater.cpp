@@ -184,6 +184,11 @@ void BoLake::findWater(BoWaterManager* manager, int x, int y, const QRect& searc
 
   // Mark all corners that we have
   int size = (maxx - minx + 1) * (maxy - miny + 1);
+  if (size < 0 || size > 4194304)
+  {
+    boError() << k_funcinfo << "invalid size: " << size << endl;
+    return;
+  }
   corners = new bool[size];
   // TODO: can we use memset() here?
   for(int i = 0; i < size; i++)
@@ -248,6 +253,11 @@ bool BoWaterManager::loadFromXML(const QDomElement& root)
   if(!mData)
   {
     BO_NULL_ERROR(mData);
+    return false;
+  }
+  if(mData->width < 0 || mData->height < 0 || mData->width * mData->height > 4194304)
+  {
+    boError() << k_funcinfo << "invalid data dimensions" << endl;
     return false;
   }
   // Init some data structures
