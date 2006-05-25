@@ -215,6 +215,12 @@ void BoGroundRenderer::getCell(int* renderCells, unsigned int cellCount, int *x,
 
 int* BoGroundRenderer::makeCellArray(unsigned int count)
 {
+ const unsigned int maxCount = 4194304; // (2^11)^2
+ if (count > maxCount) {
+	// AB: we will never have that many cells, so if we exceed this value,
+	// we must have a nasty bug around.
+	count = maxCount;
+ }
  return new int[count * 4];
 }
 
