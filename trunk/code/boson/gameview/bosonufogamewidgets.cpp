@@ -115,6 +115,10 @@ public:
 	}
 	void setData(unsigned int texCount, unsigned char* alpha)
 	{
+		if (texCount > 500) {
+			boError() << k_funcinfo << "invalid texCount: " << texCount << endl;
+			return;
+		}
 		mGroundTextureCount = texCount;
 		delete[] mGroundTextureAlpha;
 		mGroundTextureAlpha = new unsigned char[texCount];

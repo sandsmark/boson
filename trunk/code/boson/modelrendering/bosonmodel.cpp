@@ -157,6 +157,10 @@ void BoFrame::allocNodes(int nodes)
 	boError(100) << k_funcinfo << "meshes already allocated??" << endl;
 	delete[] mMeshes;
  }
+ if (nodes > (0x1 << 18)) {
+	boError() << k_funcinfo << "too many nodes: " << nodes << endl;
+	nodes = (0x1<<18);
+ }
  mMeshes = new BoMesh*[nodes];
  mMatrices = new BoMatrix*[nodes];
  mNodeCount = nodes; // unused?
@@ -640,6 +644,11 @@ void BosonModel::allocatePointArray(unsigned int size)
 	boWarning(100) << k_funcinfo << "Point array already allocated!" << endl;
 	delete[] d->mPoints;
  }
+ const unsigned int maxSize = 0x1 << 22;
+ if (size > maxSize) {
+	boError() << k_funcinfo << "too many points: " << size << endl;
+	size = maxSize;
+ }
  d->mPoints = new float[size * BoMesh::pointSize()];
  d->mPointArraySize = size;
 }
@@ -698,6 +707,10 @@ void BosonModel::allocateLODs(unsigned int count)
 	boWarning(100) << k_funcinfo << "LODs already allocated!" << endl;
 	delete[] d->mLODs;
 	delete[] d->mLODDistances;
+ }
+ if (count > 500) {
+	boError() << k_funcinfo << "too many lods: " << count << endl;
+	count = 500;
  }
 
  d->mLODs = new BoLOD[count];

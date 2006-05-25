@@ -70,6 +70,10 @@ void BoGroundRenderer::setRenderCells(int* renderCells, int renderCellsSize)
  delete[] mRenderCells;
  mRenderCells = renderCells;
  mRenderCellsSize = renderCellsSize;
+ if (mRenderCellsSize > 4194304) {
+	boError() << k_funcinfo << "invalid mRenderCellsSize: " << mRenderCellsSize << endl;
+	mRenderCellsSize = 4194304;
+ }
  if (mRenderCellsSize < 0) {
 	mRenderCellsCount = 0;
  } else if (mRenderCellsCount > (unsigned int)mRenderCellsSize) {
