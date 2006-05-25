@@ -1,6 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 2002-2005 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2006 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,13 +20,13 @@
 #ifndef BOUFOLOADINGWIDGET_H
 #define BOUFOLOADINGWIDGET_H
 
-#include <boufo/boufo.h>
+#include "boufoloadingwidgetbase.h"
 
 #include <qdatetime.h>
 
 class QString;
 
-class BoUfoLoadingWidget : public BoUfoWidget
+class BoUfoLoadingWidget : public BoUfoLoadingWidgetBase
 {
     Q_OBJECT
   public:
@@ -46,9 +47,6 @@ class BoUfoLoadingWidget : public BoUfoWidget
     void updateGLWidget(bool force = false);
 
   private:
-    BoUfoLabel* mLoadingTaskLabel;
-    BoUfoLabel* mLoadingSubTaskLabel;
-    BoUfoProgress* mProgress;
     QTime mLastGLUpdate;
 };
 

@@ -25,7 +25,7 @@ include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/sound/bosound
 	${CMAKE_CURRENT_SOURCE_DIR}/boufo
 	${CMAKE_CURRENT_SOURCE_DIR}/gameengine
-	${QT_INCLUDE_DIR}
+	${KDE3_INCLUDE_DIRS}
 	${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -144,6 +144,7 @@ boson_add_boui_files(startupwidgets_SRCS
 	startupwidgets/boufonetworkoptionswidgetbase.boui
 	startupwidgets/boufostarteditorwidgetbase.boui
 	startupwidgets/boufoloadfromlogwidgetbase.boui
+	startupwidgets/boufoloadingwidgetbase.boui
 )
 kde3_automoc(${startupwidgets_SRCS})
 
