@@ -77,9 +77,7 @@ void main()
   // Diffuse light strength
   float NdotL = max(0.0, dot(mynormal, lightdir));
 
-#ifndef USE_SPECULAR
-  float specular = 0.0;
-#else
+#ifdef USE_SPECULAR
   float specular = specularStrength(lightdir, tocamera, mynormal);
 #endif
   // Get diffuse texture color at this point
@@ -115,13 +113,17 @@ void main()
 
   // Calculate final color of the surface
 #ifdef USE_MATERIALS
-  vec3 litcolor = (gl_FrontMaterial.ambient.rgb * gl_LightSource[0].ambient.rgb * color +
-      shadow * NdotL * gl_FrontMaterial.diffuse.rgb * gl_LightSource[0].diffuse.rgb) * texcolor.rgb * color +
-      shadow * specular * gl_FrontMaterial.specular.rgb * gl_LightSource[0].specular.rgb;
+  vec3 litcolor = (gl_FrontMaterial.ambient.rgb * gl_LightSource[0].ambient.rgb +
+      shadow * NdotL * gl_FrontMaterial.diffuse.rgb * gl_LightSource[0].diffuse.rgb) * texcolor.rgb * color;
+#ifdef USE_SPECULAR
+  litcolor += shadow * specular * gl_FrontMaterial.specular.rgb * gl_LightSource[0].specular.rgb;
+#endif
 #else
-  vec3 litcolor = (vec3(0.8, 0.8, 0.8) * gl_LightSource[0].ambient.rgb * color +
-      shadow * NdotL * vec3(0.8, 0.8, 0.8) * gl_LightSource[0].diffuse.rgb) * texcolor.rgb * color +
-      shadow * specular * vec3(0.8, 0.8, 0.8) * gl_LightSource[0].specular.rgb;
+  vec3 litcolor = (gl_LightSource[0].ambient.rgb +
+      shadow * NdotL * gl_LightSource[0].diffuse.rgb) * texcolor.rgb * color;
+#ifdef USE_SPECULAR
+  litcolor += shadow * specular * gl_LightSource[0].specular.rgb;
+#endif
 #endif
 
   if(fogEnabled)
