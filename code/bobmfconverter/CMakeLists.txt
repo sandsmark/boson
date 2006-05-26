@@ -78,6 +78,7 @@ set(bobmfconverter_SRCS
 	saver.cpp
 	texture.cpp
 
+	processors/defaultmaterials.cpp
 	processors/frameoptimizer.cpp
 	processors/lodcreator.cpp
 	processors/materialoptimizer.cpp

@@ -96,25 +96,14 @@ unsigned int BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh
 
  if (!(flags & DepthOnly)) {
 	BoMaterial::activate(mesh->material());
-	if (!mesh->material()) {
-		if (mesh->isTeamColor()) {
-			if (teamColor) {
-				glPushAttrib(GL_CURRENT_BIT);
-				glColor3ub(teamColor->red(), teamColor->green(), teamColor->blue());
-				resetColor = true;
-			}
-		}
-	} else {
-		BoMaterial* mat = mesh->material();
-		if (mat->textureName().isEmpty()) {
-			glPushAttrib(GL_CURRENT_BIT);
-			glColor3fv(mesh->material()->diffuse().data());
-			resetColor = true;
-		}
-		if (mat->twoSided()) {
-			glDisable(GL_CULL_FACE);
-			resetCullFace = true;
-		}
+	if (mesh->isTeamColor() && teamColor) {
+		glPushAttrib(GL_CURRENT_BIT);
+		glColor3ub(teamColor->red(), teamColor->green(), teamColor->blue());
+		resetColor = true;
+	}
+	if (mesh->material()->twoSided()) {
+		glDisable(GL_CULL_FACE);
+		resetCullFace = true;
 	}
  }
 
@@ -145,11 +134,9 @@ unsigned int BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh
  if (resetColor) {
 	// we need to reset the color (mainly for the placement preview)
 	glPopAttrib();
-	resetColor = false;
  }
  if (resetCullFace) {
 	glEnable(GL_CULL_FACE);
-	resetCullFace = false;
  }
 
  return renderedPoints;

@@ -31,6 +31,7 @@
 #include "processors/meshoptimizer.h"
 #include "processors/textureoptimizer.h"
 #include "processors/materialoptimizer.h"
+#include "processors/defaultmaterials.h"
 
 #include <qstring.h>
 #include <qfileinfo.h>
@@ -639,6 +640,7 @@ bool doModelProcessing(Model* m)
   QPtrList<Processor> processorList;
   processorList.setAutoDelete(true);
 
+  processorList.append(new DefaultMaterials);
   processorList.append(new UnusedDataRemover);
   if(!g_frames_keepAll || g_frames_removeAll)
   {

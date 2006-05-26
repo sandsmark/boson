@@ -38,7 +38,7 @@
 // Version of the BMF format
 #define BMF_VERSION_MAJOR              0
 #define BMF_VERSION_MINOR              1
-#define BMF_VERSION_RELEASE            0
+#define BMF_VERSION_RELEASE            1
 
 #define BMF_MAKE_VERSION_CODE(a, b, c)  ( ((a) << 16) | ((b) << 8) | (c) )
 #define BMF_VERSION_CODE \

@@ -37,7 +37,7 @@
 #include <kprocess.h>
 
 
-#define MIN_SUPPORTED_VERSION BMF_MAKE_VERSION_CODE(0, 1, 0)
+#define MIN_SUPPORTED_VERSION BMF_MAKE_VERSION_CODE(0, 1, 1)
 
 
 BoBMFLoad::BoBMFLoad(const QString& file, BosonModel* model)
@@ -352,11 +352,8 @@ bool BoBMFLoad::loadMaterials(QDataStream& stream)
     // Texture
     Q_INT32 textureid;
     stream >> textureid;
-    if(textureid >= 0)
-    {
-      mat->setTextureName(mTextureNames[textureid]);
-      mat->setIsTransparent(mTextureTransparent[textureid]);
-    }
+    mat->setTextureName(mTextureNames[textureid]);
+    mat->setIsTransparent(mTextureTransparent[textureid]);
   }
 
   return true;
@@ -501,13 +498,10 @@ bool BoBMFLoad::loadMeshes(QDataStream& stream, int lod)
     }
     Q_INT32 materialid;
     stream >> materialid;
-    if(materialid >= 0)
+    mesh->setMaterial(mModel->material(materialid));
+    if(mesh->material()->isTransparent())
     {
-      mesh->setMaterial(mModel->material(materialid));
-      if(mesh->material()->isTransparent())
-      {
-        hastransparentmeshes = true;
-      }
+      hastransparentmeshes = true;
     }
     Q_UINT8 isteamcolor;
     stream >> isteamcolor;

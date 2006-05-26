@@ -71,14 +71,13 @@ public:
 	void setIsTeamColor(bool teamColor) { mIsTeamColor = teamColor; }
 
 	/**
-	 * @return TRUE if this is a teamcolor object (which also is not textured)
+	 * @return TRUE if this is a teamcolor object
 	 * and FALSE if it is not a teamcolor object.
 	 **/
 	bool isTeamColor() const { return mIsTeamColor; }
 
 	/**
-	 * @return material()->textureObject() if @ref material is non-null,
-	 * otherwise 0.
+	 * @return material()->textureObject()
 	 **/
 	BoTexture* textureObject() const;
 
