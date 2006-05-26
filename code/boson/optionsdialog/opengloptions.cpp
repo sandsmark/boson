@@ -135,6 +135,13 @@ void OpenGLOptions::setDefaults()
  mAdvanced->setDefaults();
 }
 
+void OpenGLOptions::loadFromConfigScript(const BosonConfigScript* script)
+{
+ BO_CHECK_NULL_RET(script);
+ OptionsWidget::loadFromConfigScript(script);
+ mAdvanced->loadFromConfigScript(script);
+}
+
 void OpenGLOptions::load()
 {
  mAdvanced->setRenderingSpeed(boConfig->intValue("RenderingSpeed", Defaults));
@@ -317,60 +324,28 @@ void AdvancedGLOptions::addConfigOptionWidget(ConfigOptionWidget* w)
 
 void AdvancedGLOptions::setRenderingSpeed(int speed)
 {
+ const BosonConfigScript* script = 0;
  switch ((OpenGLOptions::RenderingSpeed)speed) {
 	default:
 		boWarning(210) << k_funcinfo << "invalid value: " << speed << endl;
+		break;
 	case OpenGLOptions::Defaults:
-		setTextureFilter(boConfig->intDefaultValue("TextureFilter"));
-		mUseCompressedTextures->loadDefault();
-		mUseColoredMipmaps->setChecked(false);
-		mUseLight->loadDefault();
-		mUseMaterials->loadDefault();
-		setCurrentGroundRenderer(boConfig->stringDefaultValue("GroundRendererClass"));
-		mUseGroundShaders->setChecked(false);
-		mUseUnitShaders->setChecked(false);
-		mShaderQuality->setCurrentItem(shaderSuffixesToIndex("-med"));
-		mShadowQuality->setCurrentItem(shadowMapResolutionToIndex(2048));
-		setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
-		mUseLOD->loadDefault();
-		setDefaultLOD(0);
-		mSmoothShading->setChecked(true);
+		script = boConfig->configScript("DefaultRendering");
 		break;
 	case OpenGLOptions::BestQuality:
-		// we mostly use defaults here.
-		setTextureFilter(boConfig->intDefaultValue("TextureFilter"));
-		mUseCompressedTextures->loadDefault();
-		mUseColoredMipmaps->setChecked(false);
-		mUseLight->loadDefault();
-		mUseMaterials->loadDefault();
-		setCurrentGroundRenderer(boConfig->stringDefaultValue("GroundRendererClass"));
-		mUseGroundShaders->setChecked(true);
-		mUseUnitShaders->setChecked(true);
-		mShaderQuality->setCurrentItem(0); // upmost item is the best-quality one
-		mShadowQuality->setCurrentItem(0); // upmost item is the best-quality one
-		setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
-		mUseLOD->setValue(true);
-		setDefaultLOD(0);
-		mSmoothShading->setChecked(true);
+		script = boConfig->configScript("BestQualityRendering");
 		break;
 	case OpenGLOptions::Fastest:
-		setTextureFilter(GL_LINEAR);  // Use bilinear maybe?
-		mUseCompressedTextures->setValue(true);
-		mUseColoredMipmaps->setChecked(false);
-		mUseLight->setChecked(false);
-		mUseMaterials->setChecked(false);
-		setCurrentGroundRenderer("BoFastGroundRenderer");
-		mUseGroundShaders->setChecked(false);
-		mUseUnitShaders->setChecked(false);
-		mShaderQuality->setCurrentItem(shaderSuffixesToIndex("-low"));
-		mShadowQuality->setCurrentItem(shadowMapResolutionToIndex(512));
-		setCurrentMeshRenderer(boConfig->stringDefaultValue("MeshRenderer"));
-		mUseLOD->setValue(true);
-		setDefaultLOD(5000);
-		mSmoothShading->setChecked(false);
+		script = boConfig->configScript("FastRendering");
 		break;
-
  }
+ if (!script) {
+	boWarning(210) << k_funcinfo << "no script found for speed " << speed << endl;
+	return;
+ }
+
+ mOpenGLOptions->loadFromConfigScript(script);
+
 }
 
 int AdvancedGLOptions::textureFilter() const
@@ -611,6 +586,33 @@ void AdvancedGLOptions::setDefaults()
 {
 }
 
+void AdvancedGLOptions::loadFromConfigScript(const BosonConfigScript* script)
+{
+
+ // these are not handled by ConfigOptionWidgets:
+ const BoConfigIntEntry* textureFilter = script->intValue("TextureFilter");
+ if (textureFilter) {
+	setTextureFilter(textureFilter->value());
+ }
+ const BoConfigStringEntry* groundRenderer = script->stringValue("GroundRendererClass");
+ if (groundRenderer) {
+	setCurrentGroundRenderer(groundRenderer->value());
+ }
+
+ const BoConfigStringEntry* shaderSuffixes = script->stringValue("ShaderSuffixes");
+ if (shaderSuffixes) {
+	mShaderQuality->setCurrentItem(shaderSuffixesToIndex(shaderSuffixes->value()));
+ }
+ const BoConfigIntEntry* shadowMapResolution = script->intValue("ShadowMapResolution");
+ if (shadowMapResolution) {
+	mShadowQuality->setCurrentItem(shadowMapResolutionToIndex(shadowMapResolution->value()));
+ }
+ const BoConfigStringEntry* meshRenderer = script->stringValue("MeshRenderer");
+ if (meshRenderer) {
+	setCurrentMeshRenderer(meshRenderer->value());
+ }
+}
+
 void AdvancedGLOptions::load()
 {
  setTextureFilter(boConfig->intValue("TextureFilter"));
@@ -686,6 +688,11 @@ WaterOptions::WaterOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 WaterOptions::~WaterOptions()
 {
  boDebug(210) << k_funcinfo << endl;
+}
+
+void WaterOptions::loadFromConfigScript(const BosonConfigScript* script)
+{
+ OptionsWidget::loadFromConfigScript(script);
 }
 
 void WaterOptions::apply()

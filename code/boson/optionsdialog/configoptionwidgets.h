@@ -26,6 +26,7 @@ class QWidget;
 class KIntNumInput;
 class KDoubleNumInput;
 class QCheckBox;
+class BosonConfigScript;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -40,6 +41,7 @@ public:
 	virtual void setLabel(const QString& label) = 0;
 	virtual QString label() const = 0;
 
+	virtual void loadFromConfigScript(const BosonConfigScript* script) = 0;
 	virtual void load() = 0;
 	virtual void apply() = 0;
 	virtual void loadDefault() = 0;
@@ -72,6 +74,7 @@ public:
 	int minValue() const;
 	int maxValue() const;
 
+	virtual void loadFromConfigScript(const BosonConfigScript* script);
 	virtual void load();
 	virtual void apply();
 	virtual void loadDefault();
@@ -96,6 +99,7 @@ public:
 	int minValue() const;
 	int maxValue() const;
 
+	virtual void loadFromConfigScript(const BosonConfigScript* script);
 	virtual void load();
 	virtual void apply();
 	virtual void loadDefault();
@@ -120,6 +124,7 @@ public:
 	double minValue() const;
 	double maxValue() const;
 
+	virtual void loadFromConfigScript(const BosonConfigScript* script);
 	virtual void load();
 	virtual void apply();
 	virtual void loadDefault();
@@ -149,6 +154,7 @@ public:
 		return value();
 	}
 
+	virtual void loadFromConfigScript(const BosonConfigScript* script);
 	virtual void load();
 	virtual void apply();
 	virtual void loadDefault();

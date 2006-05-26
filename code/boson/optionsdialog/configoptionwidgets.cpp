@@ -92,6 +92,20 @@ int ConfigOptionWidgetInt::maxValue() const
  return mNumInput->maxValue();
 }
 
+void ConfigOptionWidgetInt::loadFromConfigScript(const BosonConfigScript* script)
+{
+ const BoConfigEntry* value = script->valueForKey(configKey());
+ if (!value) {
+	return;
+ }
+ if (value->type() != BoConfigEntry::Int) {
+	boError() << k_funcinfo << "key " << configKey() << " is there, but has unexpected type " << value->type() << endl;
+	return;
+ }
+ const BoConfigIntEntry* v = (const BoConfigIntEntry*)value;
+ setValue(v->value());
+}
+
 void ConfigOptionWidgetInt::load()
 {
  setValue(boConfig->intValue(configKey()));
@@ -161,6 +175,20 @@ int ConfigOptionWidgetUInt::maxValue() const
  return mNumInput->maxValue();
 }
 
+void ConfigOptionWidgetUInt::loadFromConfigScript(const BosonConfigScript* script)
+{
+ const BoConfigEntry* value = script->valueForKey(configKey());
+ if (!value) {
+	return;
+ }
+ if (value->type() != BoConfigEntry::UInt) {
+	boError() << k_funcinfo << "key " << configKey() << " is there, but has unexpected type " << value->type() << endl;
+	return;
+ }
+ const BoConfigUIntEntry* v = (const BoConfigUIntEntry*)value;
+ setValue(v->value());
+}
+
 void ConfigOptionWidgetUInt::load()
 {
  setValue(boConfig->uintValue(configKey()));
@@ -227,6 +255,20 @@ double ConfigOptionWidgetDouble::maxValue() const
  return mNumInput->maxValue();
 }
 
+void ConfigOptionWidgetDouble::loadFromConfigScript(const BosonConfigScript* script)
+{
+ const BoConfigEntry* value = script->valueForKey(configKey());
+ if (!value) {
+	return;
+ }
+ if (value->type() != BoConfigEntry::Double) {
+	boError() << k_funcinfo << "key " << configKey() << " is there, but has unexpected type " << value->type() << endl;
+	return;
+ }
+ const BoConfigDoubleEntry* v = (const BoConfigDoubleEntry*)value;
+ setValue(v->value());
+}
+
 void ConfigOptionWidgetDouble::load()
 {
  setValue(boConfig->doubleValue(configKey()));
@@ -279,6 +321,20 @@ void ConfigOptionWidgetBool::setValue(bool c)
 bool ConfigOptionWidgetBool::value() const
 {
  return mCheckBox->isChecked();
+}
+
+void ConfigOptionWidgetBool::loadFromConfigScript(const BosonConfigScript* script)
+{
+ const BoConfigEntry* value = script->valueForKey(configKey());
+ if (!value) {
+	return;
+ }
+ if (value->type() != BoConfigEntry::Bool) {
+	boError() << k_funcinfo << "key " << configKey() << " is there, but has unexpected type " << value->type() << endl;
+	return;
+ }
+ const BoConfigBoolEntry* v = (const BoConfigBoolEntry*)value;
+ setValue(v->value());
 }
 
 void ConfigOptionWidgetBool::load()

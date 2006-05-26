@@ -68,6 +68,14 @@ void OptionsWidget::addConfigOptionWidget(ConfigOptionWidget* w)
  mConfigOptionWidgets.append(w);
 }
 
+void OptionsWidget::loadFromConfigScript(const BosonConfigScript* script)
+{
+ BO_CHECK_NULL_RET(script);
+ for (QValueList<ConfigOptionWidget*>::iterator it = mConfigOptionWidgets.begin(); it != mConfigOptionWidgets.end(); ++it) {
+	(*it)->loadFromConfigScript(script);
+ }
+}
+
 void OptionsWidget::load()
 {
  for (QValueList<ConfigOptionWidget*>::iterator it = mConfigOptionWidgets.begin(); it != mConfigOptionWidgets.end(); ++it) {

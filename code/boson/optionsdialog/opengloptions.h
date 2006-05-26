@@ -42,6 +42,7 @@ public:
 	OpenGLOptions(QWidget* parent);
 	~OpenGLOptions();
 
+	virtual void loadFromConfigScript(const BosonConfigScript* script);
 	virtual void apply();
 	virtual void setDefaults();
 	virtual void load();
@@ -91,6 +92,7 @@ public:
 	 **/
 	void setRenderingSpeed(int speed);
 
+	virtual void loadFromConfigScript(const BosonConfigScript* script);
 	virtual void apply();
 	virtual void setDefaults();
 	virtual void load();
@@ -145,6 +147,7 @@ public:
 	WaterOptions(QWidget* parent);
 	~WaterOptions();
 
+	virtual void loadFromConfigScript(const BosonConfigScript* script);
 	virtual void apply();
 	virtual void setDefaults();
 	virtual void load();
