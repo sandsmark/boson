@@ -42,6 +42,7 @@ set(common_SRCS
 	boapplication.cpp
 	boglobal.cpp
 	bosonconfig.cpp
+	bosonconfigentries.cpp
 	bosondata.cpp
 	bomath.cpp
 	bo3dtools.cpp
