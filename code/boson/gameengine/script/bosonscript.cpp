@@ -330,6 +330,19 @@ bool BosonScript::isCellFogged(int playerId, int x, int y) const
   return p->isFogged(x, y);
 }
 
+bool BosonScript::isCellExplored(int playerId, int x, int y) const
+{
+  PlayerIO* p = findPlayerIOByUserId(playerId);
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerId << endl;
+    return 0;
+  }
+
+  return p->isExplored(x, y);
+}
+
 
 /*****  Resource methods  *****/
 unsigned long int BosonScript::minerals(int playerId) const
@@ -1584,6 +1597,66 @@ BoVector3Float BosonScript::wind()
   return interface()->wind();
 }
 
+void BosonScript::explorePlayer(int playerid)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return;
+  }
+  if(!game()->playField())
+  {
+    boError() << k_funcinfo << "NULL playField" << endl;
+    return;
+  }
+  BosonMap* map = game()->playField()->map();
+  if(!map)
+  {
+    boError() << k_funcinfo << "NULL map" << endl;
+    return;
+  }
+
+  Player* p = findPlayerByUserId(playerid);
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerid << endl;
+    return;
+  }
+
+  // AB: this breaks network, unless it is executed on all clients. scripts
+  // cannot ensure that.
+  // this method should be removed.
+  boWarning() << k_funcinfo << "exploring - may break network" << endl;
+  internalExplorePlayer(map, p);
+}
+
+void BosonScript::exploreAllPlayers()
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return;
+  }
+  if(!game()->playField())
+  {
+    boError() << k_funcinfo << "NULL playField" << endl;
+    return;
+  }
+  BosonMap* map = game()->playField()->map();
+  if(!map)
+  {
+    boError() << k_funcinfo << "NULL map" << endl;
+    return;
+  }
+  QPtrList<Player> list = *game()->allPlayerList();
+  for(unsigned int i = 0; i < list.count(); i++)
+  {
+    Player* p = list.at(i);
+    internalExplorePlayer(map, p);
+  }
+}
+
 void BosonScript::unfogPlayer(int playerid)
 {
   if(!game())
@@ -1615,13 +1688,7 @@ void BosonScript::unfogPlayer(int playerid)
   // cannot ensure that.
   // this method should be removed.
   boWarning() << k_funcinfo << "unfogging - may break network" << endl;
-  for(unsigned int x = 0; x < map->width(); x++)
-  {
-    for(unsigned int y = 0; y < map->height(); y++)
-    {
-      p->unfog(x, y);
-    }
-  }
+  internalUnfogPlayer(map, p);
 }
 
 void BosonScript::unfogAllPlayers()
@@ -1646,13 +1713,67 @@ void BosonScript::unfogAllPlayers()
   for(unsigned int i = 0; i < list.count(); i++)
   {
     Player* p = list.at(i);
-    for(unsigned int x = 0; x < map->width(); x++)
-    {
-      for(unsigned int y = 0; y < map->height(); y++)
-      {
-        p->unfog(x, y);
-      }
-    }
+    internalUnfogPlayer(map, p);
+  }
+}
+
+void BosonScript::fogPlayer(int playerid)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return;
+  }
+  if(!game()->playField())
+  {
+    boError() << k_funcinfo << "NULL playField" << endl;
+    return;
+  }
+  BosonMap* map = game()->playField()->map();
+  if(!map)
+  {
+    boError() << k_funcinfo << "NULL map" << endl;
+    return;
+  }
+
+  Player* p = findPlayerByUserId(playerid);
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerid << endl;
+    return;
+  }
+
+  // AB: this breaks network, unless it is executed on all clients. scripts
+  // cannot ensure that.
+  // this method should be removed.
+  boWarning() << k_funcinfo << "fogging - may break network" << endl;
+  internalFogPlayer(map, p);
+}
+
+void BosonScript::fogAllPlayers()
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return;
+  }
+  if(!game()->playField())
+  {
+    boError() << k_funcinfo << "NULL playField" << endl;
+    return;
+  }
+  BosonMap* map = game()->playField()->map();
+  if(!map)
+  {
+    boError() << k_funcinfo << "NULL map" << endl;
+    return;
+  }
+  QPtrList<Player> list = *game()->allPlayerList();
+  for(unsigned int i = 0; i < list.count(); i++)
+  {
+    Player* p = list.at(i);
+    internalFogPlayer(map, p);
   }
 }
 
@@ -1744,6 +1865,39 @@ Unit* BosonScript::findUnit(unsigned long int id) const
     }
   }
   return u;
+}
+
+void BosonScript::internalExplorePlayer(BosonMap* map, Player* p)
+{
+  for(unsigned int x = 0; x < map->width(); x++)
+  {
+    for(unsigned int y = 0; y < map->height(); y++)
+    {
+      p->explore(x, y);
+    }
+  }
+}
+
+void BosonScript::internalUnfogPlayer(BosonMap* map, Player* p)
+{
+  for(unsigned int x = 0; x < map->width(); x++)
+  {
+    for(unsigned int y = 0; y < map->height(); y++)
+    {
+      p->addFogRef(x, y);
+    }
+  }
+}
+
+void BosonScript::internalFogPlayer(BosonMap* map, Player* p)
+{
+  for(unsigned int x = 0; x < map->width(); x++)
+  {
+    for(unsigned int y = 0; y < map->height(); y++)
+    {
+      p->removeFogRef(x, y);
+    }
+  }
 }
 
 /*

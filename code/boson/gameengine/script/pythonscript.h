@@ -187,8 +187,12 @@ class PythonScript : public BosonScript
     static PyObject* py_advanceEffects(PyObject* self, PyObject* args);
     static PyObject* py_wind(PyObject* self, PyObject* args);
     static PyObject* py_setWind(PyObject* self, PyObject* args);
+    static PyObject* py_explorePlayer(PyObject* self, PyObject* args);
+    static PyObject* py_exploreAllPlayers(PyObject* self, PyObject* args);
     static PyObject* py_unfogPlayer(PyObject* self, PyObject* args);
     static PyObject* py_unfogAllPlayers(PyObject* self, PyObject* args);
+    static PyObject* py_fogPlayer(PyObject* self, PyObject* args);
+    static PyObject* py_fogAllPlayers(PyObject* self, PyObject* args);
     static PyObject* py_setAcceptUserInput(PyObject* self, PyObject* args);
     static PyObject* py_addChatMessage(PyObject* self, PyObject* args);
     static PyObject* py_mapWidth(PyObject* self, PyObject* args);

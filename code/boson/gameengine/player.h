@@ -155,8 +155,20 @@ public:
 	 **/
 	const UnitProperties* unitProperties(unsigned long int unitType) const;
 
-	void fog(int x, int y);
-	void unfog(int x, int y);
+	void explore(int x, int y);
+	void unexplore(int x, int y);
+
+	void addFogRef(int x, int y);
+	void removeFogRef(int x, int y);
+
+	/**
+	 * @return Whether the coordinates @p cellX, @p cellY are explored for
+	 * this player.
+	 * Explored means that player has seen this cell, so he can see the terrain,
+	 * but this doesn't mean he can see enemy units (@ref isFogged determines
+	 * that)
+	 **/
+	bool isExplored(int cellX, int cellY) const;
 
 	/**
 	 * @param x Position of the cell in <em>Cell</em>-coordinates
@@ -169,7 +181,8 @@ public:
 	/**
 	 * @return How many cells are currently fogged for this player
 	 **/
-	unsigned int foggedCells() const;
+	unsigned int unfoggedCells() const;
+  unsigned int exploredCells() const;
 
 	unsigned long int minerals() const;
 	unsigned long int oil() const;
@@ -227,12 +240,14 @@ public:
 	 *
 	 * Note that this function depends on calling @ref quitGame correctly,
 	 * i.e. whenever the map changes.
-	 * @param fogged Whether the map is fogged initially or not. You can
+	 * @param unexplored Whether the map is initially unexplored or not. You can
 	 * specify false here for the editor. Note that the fog is <em>not</em>
 	 * changed if it was initialized before (i.e. size != 0)! This is
 	 * usually the case for loading games.
+	 * @param fogged Whether the map is initially fogged. You can specify false
+	 * for the editor.
 	 **/
-	void initMap(BosonMap* map, bool fogged = true);
+	void initMap(BosonMap* map, bool unexplored = true, bool fogged = true);
 
 	/**
 	 * Called by @ref Facility when the construction has been completed.
@@ -421,6 +436,8 @@ signals:
 
 	void signalFog(int x, int y);
 	void signalUnfog(int x, int y);
+	void signalExplored(int x, int y);
+	void signalUnexplored(int x, int y);
 
 public slots:
 	/**

@@ -211,6 +211,11 @@ BosonStatistics* PlayerIO::statistics() const
  return player()->statistics();
 }
 
+bool PlayerIO::isExplored(int x, int y) const
+{
+ return player()->isExplored(x, y);
+}
+
 bool PlayerIO::isFogged(int x, int y) const
 {
  return player()->isFogged(x, y);

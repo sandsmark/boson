@@ -160,8 +160,12 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"advanceEffects", py_advanceEffects, METH_VARARGS, 0 },
   { (char*)"wind", py_wind, METH_VARARGS, 0 },
   { (char*)"setWind", py_setWind, METH_VARARGS, 0 },
+  { (char*)"explorePlayer", py_explorePlayer, METH_VARARGS, 0 },
+  { (char*)"exploreAllPlayers", py_exploreAllPlayers, METH_VARARGS, 0 },
   { (char*)"unfogPlayer", py_unfogPlayer, METH_VARARGS, 0 },
   { (char*)"unfogAllPlayers", py_unfogAllPlayers, METH_VARARGS, 0 },
+  { (char*)"fogPlayer", py_fogPlayer, METH_VARARGS, 0 },
+  { (char*)"fogAllPlayers", py_fogAllPlayers, METH_VARARGS, 0 },
   { (char*)"setAcceptUserInput", py_setAcceptUserInput, METH_VARARGS, 0 },
   { (char*)"addChatMessage", py_addChatMessage, METH_VARARGS, 0 },
   { (char*)"mapWidth", py_mapWidth, METH_VARARGS, 0 },
@@ -2203,6 +2207,27 @@ PyObject* PythonScript::py_setWind(PyObject*, PyObject* args)
   return Py_None;
 }
 
+PyObject* PythonScript::py_explorePlayer(PyObject*, PyObject* args)
+{
+  BO_CHECK_NULL_RET0(currentScript());
+  int playerid;
+  if(!PyArg_ParseTuple(args, (char*)"i", &playerid))
+  {
+    return 0;
+  }
+  currentScript()->explorePlayer(playerid);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_exploreAllPlayers(PyObject*, PyObject*)
+{
+  BO_CHECK_NULL_RET0(currentScript());
+  currentScript()->exploreAllPlayers();
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
 PyObject* PythonScript::py_unfogPlayer(PyObject*, PyObject* args)
 {
   BO_CHECK_NULL_RET0(currentScript());
@@ -2220,6 +2245,27 @@ PyObject* PythonScript::py_unfogAllPlayers(PyObject*, PyObject*)
 {
   BO_CHECK_NULL_RET0(currentScript());
   currentScript()->unfogAllPlayers();
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_fogPlayer(PyObject*, PyObject* args)
+{
+  BO_CHECK_NULL_RET0(currentScript());
+  int playerid;
+  if(!PyArg_ParseTuple(args, (char*)"i", &playerid))
+  {
+    return 0;
+  }
+  currentScript()->fogPlayer(playerid);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_fogAllPlayers(PyObject*, PyObject*)
+{
+  BO_CHECK_NULL_RET0(currentScript());
+  currentScript()->fogAllPlayers();
   Py_INCREF(Py_None);
   return Py_None;
 }

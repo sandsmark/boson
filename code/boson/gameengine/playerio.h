@@ -150,6 +150,15 @@ public:
 	QPtrList<Unit> allMyLivingUnits() const;
 
 	/**
+	 * @return Whether the coordinates @p cellX, @p cellY are explored for
+	 * this player.
+	 * Explored means that player has seen this cell, so he can see the terrain,
+	 * but this doesn't mean he can see enemy units (@ref isFogged determines
+	 * that)
+	 **/
+	bool isExplored(int cellX, int cellY) const;
+
+	/**
 	 * @return Whether the coordinates @p cellX, @p cellY are fogged for
 	 * this player.
 	 **/

@@ -58,7 +58,9 @@ signals:
 	void signalDebugModifyMinerals(Q_UINT32 playerId, int amount);
 	void signalDebugModifyOil(Q_UINT32 playerId, int amount);
 	void signalToggleCheating(bool);
+	void signalExploreAll();
 	void signalUnfogAll();
+	void signalFogAll();
 	void signalDumpGameLog();
 	void signalEditConditions();
 	void signalReloadMeshRenderer();
@@ -196,7 +198,9 @@ protected slots:
 	void slotDebugModifyMinerals(Q_UINT32 playerId, int amount);
 	void slotDebugModifyOil(Q_UINT32 playerId, int amount);
 	void slotToggleCheating(bool);
+	void slotExploreAll(Player* pl = 0);
 	void slotUnfogAll(Player* pl = 0);
+	void slotFogAll(Player* pl = 0);
 	void slotDumpGameLog();
 	void slotEditConditions();
 	void slotReloadMeshRenderer();

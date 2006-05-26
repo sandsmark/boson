@@ -156,7 +156,7 @@ class BoWaterRenderer
 
     void update(float elapsed);
     void modelviewMatrixChanged(const BoMatrix& modelview);
-    void cellFogChanged(int x1, int x2, int y1, int y2);
+    void cellExploredChanged(int x1, int x2, int y1, int y2);
 
     void render();
 

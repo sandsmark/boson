@@ -30,7 +30,9 @@
     <Action name="debug_cpu_usage" append="debug_checkbox" />
     <Action name="debug_groundrenderer_debug" append="debug_checkbox" />
     <Action name="debug_players" append="debug_action" />
+    <Action name="debug_explore" append="debug_action" />
     <Action name="debug_unfog" append="debug_action" />
+    <Action name="debug_fog" append="debug_action" />
     <Action name="debug_gamelog" append="debug_action" />
     <Menu name="debug_lazy" append="debug_action"><text>&amp;Lazyness</text>
       <Action name="debug_lazy_reload_model_textures" />

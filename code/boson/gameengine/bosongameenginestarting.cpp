@@ -274,7 +274,7 @@ bool BosonStartingInitPlayerMap::startTask()
 	boDebug(270) << "init map for player " << i << endl;
 	Player* p = boGame->allPlayerList()->at(i);
 	if (p) {
-		p->initMap(playField()->map(), boGame->gameMode());
+		p->initMap(playField()->map(), boGame->gameMode(), boGame->gameMode());
 	}
  }
  return true;

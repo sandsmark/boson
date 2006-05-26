@@ -619,6 +619,7 @@ void BosonGameViewInput::updateCursor()
 
  if (!selection()->isEmpty() && localPlayerIO()->ownsUnit(selection()->leader())) {
 	Unit* leader = selection()->leader();
+	// TODO: take facilities into account if the cell has been explored
 	if (localPlayerIO()->isFogged(cursorCanvasVector())) {
 		if (leader->isMobile()) {
 			setCursorType(CursorMove);

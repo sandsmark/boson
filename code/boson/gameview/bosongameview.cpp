@@ -1517,10 +1517,15 @@ void BosonGameView::setLocalPlayerIO(PlayerIO* io)
 	}
 	if (localPlayerIO()) {
 		PlayerIO* io = localPlayerIO();
-		io->connect(SIGNAL(signalFog(int, int)),
-				d->mGLMiniMap, SLOT(slotFog(int, int)));
-		io->connect(SIGNAL(signalUnfog(int, int)),
-				d->mGLMiniMap, SLOT(slotUnfog(int, int)));
+		io->connect(SIGNAL(signalExplored(int, int)),
+				d->mGLMiniMap, SLOT(slotExplored(int, int)));
+		io->connect(SIGNAL(signalUnexplored(int, int)),
+				d->mGLMiniMap, SLOT(slotUnexplored(int, int)));
+
+		io->connect(SIGNAL(signalExplored(int, int)),
+				this, SLOT(slotExplored(int, int)));
+		io->connect(SIGNAL(signalUnexplored(int, int)),
+				this, SLOT(slotUnexplored(int, int)));
 		io->connect(SIGNAL(signalFog(int, int)),
 				this, SLOT(slotFog(int, int)));
 		io->connect(SIGNAL(signalUnfog(int, int)),
@@ -1611,22 +1616,38 @@ void BosonGameView::slotUnitChanged(Unit* unit)
  }
 }
 
-void BosonGameView::slotFog(int x, int y)
+void BosonGameView::slotExplored(int x, int y)
 {
  BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
  if (r) {
-	r->cellFogChanged(x, y, x, y);
+	 r->cellExploredChanged(x, y, x, y);
  }
- boWaterRenderer->cellFogChanged(x, y, x, y);
+ boWaterRenderer->cellExploredChanged(x, y, x, y);
+}
+
+void BosonGameView::slotUnexplored(int x, int y)
+{
+ BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
+ if (r) {
+	r->cellExploredChanged(x, y, x, y);
+ }
+ boWaterRenderer->cellExploredChanged(x, y, x, y);
+}
+
+void BosonGameView::slotFog(int x, int y)
+{
+	BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
+	if (r) {
+		r->cellFogChanged(x, y, x, y);
+	}
 }
 
 void BosonGameView::slotUnfog(int x, int y)
 {
- BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
- if (r) {
-	r->cellFogChanged(x, y, x, y);
- }
- boWaterRenderer->cellFogChanged(x, y, x, y);
+	BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
+	if (r) {
+		r->cellFogChanged(x, y, x, y);
+	}
 }
 
 void BosonGameView::slotChangeTexMap(int x, int y)

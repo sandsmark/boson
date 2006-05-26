@@ -284,8 +284,12 @@ void BosonMenuInputData::initUfoActions(bool gameMode)
 		KShortcut(), 0, 0, actionCollection(), "debug_groundrenderer_debug");
  (void)new BoUfoConfigToggleAction(i18n("Debug CPU Usage"),
 		KShortcut(), 0, 0, actionCollection(), "debug_cpu_usage");
+ (void)new BoUfoAction(i18n("&Explore"), KShortcut(), this,
+		SIGNAL(signalExploreAll()), actionCollection(), "debug_explore");
  (void)new BoUfoAction(i18n("&Unfog"), KShortcut(), this,
 		SIGNAL(signalUnfogAll()), actionCollection(), "debug_unfog");
+ (void)new BoUfoAction(i18n("&Fog"), KShortcut(), this,
+		SIGNAL(signalFogAll()), actionCollection(), "debug_fog");
  (void)new BoUfoAction(i18n("Dump game &log"), KShortcut(), this,
 		SIGNAL(signalDumpGameLog()), actionCollection(), "debug_gamelog");
  (void)new BoUfoAction(i18n("Edit global conditions..."), KShortcut(), this,
@@ -788,8 +792,12 @@ void BosonMenuInput::initIO(KPlayer* player)
 		this, SLOT(slotDebugModifyOil(Q_UINT32, int)));
  connect(mData, SIGNAL(signalToggleCheating(bool)),
 		this, SLOT(slotToggleCheating(bool)));
+ connect(mData, SIGNAL(signalExploreAll()),
+		this, SLOT(slotExploreAll()));
  connect(mData, SIGNAL(signalUnfogAll()),
 		this, SLOT(slotUnfogAll()));
+ connect(mData, SIGNAL(signalFogAll()),
+		this, SLOT(slotFogAll()));
  connect(mData, SIGNAL(signalDumpGameLog()),
 		this, SLOT(slotDumpGameLog()));
  connect(mData, SIGNAL(signalEditConditions()),
@@ -997,8 +1005,42 @@ void BosonMenuInput::slotToggleCheating(bool on)
  if (!actionCollection()) {
 	return;
  }
+ actionCollection()->setActionEnabled("debug_explore", on);
  actionCollection()->setActionEnabled("debug_unfog", on);
+ actionCollection()->setActionEnabled("debug_fog", on);
  actionCollection()->setActionEnabled("debug_players", on);
+}
+
+void BosonMenuInput::slotExploreAll(Player* pl)
+{
+ if (!boGame) {
+	boError() << k_funcinfo << "NULL game" << endl;
+	return;
+ }
+ if (!boGame->playField()) {
+	boError() << k_funcinfo << "NULL playField" << endl;
+	return;
+ }
+ BosonMap* map = boGame->playField()->map();
+ if (!map) {
+	boError() << k_funcinfo << "NULL map" << endl;
+	return;
+ }
+ QPtrList<Player> list;
+ if (!pl) {
+	list = *boGame->allPlayerList();
+ } else {
+	list.append(pl);
+ }
+ for (unsigned int i = 0; i < list.count(); i++) {
+	Player* p = list.at(i);
+	for (unsigned int x = 0; x < map->width(); x++) {
+		for (unsigned int y = 0; y < map->height(); y++) {
+			p->explore(x, y);
+		}
+	}
+	boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Explored player %1 - %2").arg(p->bosonId()).arg(p->name()));
+ }
 }
 
 void BosonMenuInput::slotUnfogAll(Player* pl)
@@ -1026,10 +1068,42 @@ void BosonMenuInput::slotUnfogAll(Player* pl)
 	Player* p = list.at(i);
 	for (unsigned int x = 0; x < map->width(); x++) {
 		for (unsigned int y = 0; y < map->height(); y++) {
-			p->unfog(x, y);
+			p->addFogRef(x, y);
 		}
 	}
 	boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Unfogged player %1 - %2").arg(p->bosonId()).arg(p->name()));
+ }
+}
+
+void BosonMenuInput::slotFogAll(Player* pl)
+{
+ if (!boGame) {
+	boError() << k_funcinfo << "NULL game" << endl;
+	return;
+ }
+ if (!boGame->playField()) {
+	boError() << k_funcinfo << "NULL playField" << endl;
+	return;
+ }
+ BosonMap* map = boGame->playField()->map();
+ if (!map) {
+	boError() << k_funcinfo << "NULL map" << endl;
+	return;
+ }
+ QPtrList<Player> list;
+ if (!pl) {
+	list = *boGame->allPlayerList();
+ } else {
+	list.append(pl);
+ }
+ for (unsigned int i = 0; i < list.count(); i++) {
+	Player* p = list.at(i);
+	for (unsigned int x = 0; x < map->width(); x++) {
+		for (unsigned int y = 0; y < map->height(); y++) {
+			p->removeFogRef(x, y);
+		}
+	}
+	boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Fogged player %1 - %2").arg(p->bosonId()).arg(p->name()));
  }
 }
 

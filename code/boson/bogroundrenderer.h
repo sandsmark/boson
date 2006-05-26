@@ -210,6 +210,13 @@ public:
 	virtual void cellFogChanged(int x1, int y1, int x2, int y2);
 
 	/**
+	 * Called when explored status of a cell or cells changes.
+	 * x1, y1, x2, y2 define rectangle which includes all the changed cells.
+	 * E.g. if x1 = x2 = 3 and y1 = y2 = 4, then only cell at (3; 4) changed.
+	 **/
+	virtual void cellExploredChanged(int x1, int y1, int x2, int y2);
+
+	/**
 	 * Called when height of a corner or corners changes.
 	 * x1, y1, x2, y2 define rectangle which includes all the changed corners.
 	 * E.g. if x1 = x2 = 3 and y1 = y2 = 4, then only corner at (3; 4) changed.

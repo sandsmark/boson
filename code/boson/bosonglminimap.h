@@ -111,8 +111,8 @@ public slots:
 	void slotItemAdded(BosonItem* item);
 	void slotFacilityConstructed(Unit* u);
 
-	void slotUnfog(int x, int y);
-	void slotFog(int x, int y);
+	void slotExplored(int x, int y);
+	void slotUnexplored(int x, int y);
 
 	/**
 	 * Show or hide the minimap, depending on @p show. This slot is called
@@ -253,11 +253,11 @@ public:
 
 	void setTerrainPoint(int x, int y, const QColor& color);
 	void setWaterPoint(int x, int y, bool isWater);
-	void setFoggedPoint(int x, int y, bool isFogged);
+	void setExploredPoint(int x, int y, bool isExplored);
 
 	/**
 	 * Disable updates before calling @ref setPoint (e.g. using @ref
-	 * setFoggedPoint) many times. After you've called them, enable
+	 * setExploredPoint) many times. After you've called them, enable
 	 * updates again. Before enabling updates again, previous updates are
 	 * incorporated into the minimap then.
 	 **/
@@ -311,7 +311,7 @@ private:
 	unsigned int mPosX;
 	unsigned int mPosY;
 
-	bool mUseFog; // useful for the editor to disable the fog of war
+	bool mUseExplored; // useful for the editor to disable the fog of war
 	BosonCanvas* mCanvas;
 	PlayerIO* mLocalPlayerIO;
 };

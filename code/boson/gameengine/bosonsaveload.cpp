@@ -621,6 +621,7 @@ bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
 	p.removeAttribute("UnitPropId");
 	p.removeChild(p.namedItem("Statistics"));
 	p.removeChild(p.namedItem("Fogged"));
+	p.removeChild(p.namedItem("Explored"));
 
 	QDomElement speciesThemeTag = p.namedItem("SpeciesTheme").toElement();
 	speciesThemeTag.removeAttribute("Identifier");
