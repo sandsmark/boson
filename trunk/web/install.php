@@ -92,12 +92,6 @@ $ su
 # make install</pre><p class=\"bigboxtext\">
   After you've done it, Boson should be installed! Happy playing!<br><br>");
 
-draw_bigbox_subheader("Installing on FreeBSD");
-
-draw_bigbox_text("Raphael Langerhorst has written
-    <a href=\"http://boson.eu.org/wiki/Main/InstallingOnFreeBSD\">some
-    instructions</a> about installing Boson (both 0.10 and CVS) on FreeBSD.<br><br>");
-
 draw_bigbox_end();
 
 main_area_end();
