@@ -305,7 +305,7 @@ add_screenshot("New species",
 add_screenshot("Some units from new species",
     "8. February 2006 (CVS)", "0602-1-thumb.jpg", "0602-1.jpg");
 
-add_screenshot("Attack has begun",
+add_screenshot("Attack in between hills",
     "<b>NEW:</b> 27. May 2006 (0.12)", "0.12-1-thumb.jpg", "0.12-1.jpg");
 add_screenshot("Defending the base",
     "<b>NEW:</b> 27. May 2006 (0.12)", "0.12-2-thumb.jpg", "0.12-2.jpg");
