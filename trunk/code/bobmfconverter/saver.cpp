@@ -180,7 +180,7 @@ bool Saver::saveMaterial(QDataStream& stream, Material* mat)
 
   stream << mat->shininess();
 
-  stream << (Q_INT32)(mat->texture() ? mat->texture()->id() : -1);
+  stream << (Q_INT32)mat->texture()->id();
 
   return true;
 }
@@ -234,7 +234,7 @@ bool Saver::saveMesh(QDataStream& stream, Mesh* mesh)
 
   // Misc info
   stream << (Q_UINT32)BMF_MAGIC_MESH_MISC;
-  stream << (Q_INT32)((mesh->material() && !mesh->isTeamColor()) ? mesh->material()->id() : -1);
+  stream << (Q_INT32)mesh->material()->id();
   stream << (Q_UINT8)(mesh->isTeamColor() ? 255 : 0);
 
   return true;
