@@ -301,9 +301,22 @@ add_screenshot("Some units fighting, also showing ground detail using shaders",
     "3. September 2005 (0.11)", "0.11-1-thumb.jpg", "0.11-1.jpg");
 
 add_screenshot("New species",
-    "<b>NEW:</b> 8. February 2006 (CVS)", "0602-2-thumb.jpg", "0602-2.jpg");
+    "8. February 2006 (CVS)", "0602-2-thumb.jpg", "0602-2.jpg");
 add_screenshot("Some units from new species",
-    "<b>NEW:</b> 8. February 2006 (CVS)", "0602-1-thumb.jpg", "0602-1.jpg");
+    "8. February 2006 (CVS)", "0602-1-thumb.jpg", "0602-1.jpg");
+
+add_screenshot("Attack has begun",
+    "<b>NEW:</b> 27. May 2006 (0.12)", "0.12-1-thumb.jpg", "0.12-1.jpg");
+add_screenshot("Defending the base",
+    "<b>NEW:</b> 27. May 2006 (0.12)", "0.12-2-thumb.jpg", "0.12-2.jpg");
+add_screenshot("Specular highlights on units with high-quality shaders",
+    "<b>NEW:</b> 27. May 2006 (0.12)", "0.12-3-thumb.jpg", "0.12-3.jpg");
+add_screenshot("Attacking enemy's air units",
+    "<b>NEW:</b> 27. May 2006 (0.12)", "0.12-4-thumb.jpg", "0.12-4.jpg");
+add_screenshot("Battle for the oilfields... sounds familiar?",
+    "<b>NEW:</b> 27. May 2006 (0.12)", "0.12-5-thumb.jpg", "0.12-5.jpg");
+add_screenshot("Night is coming and the shadows are getting long",
+    "<b>NEW:</b> 27. May 2006 (0.12)", "0.12-6-thumb.jpg", "0.12-6.jpg");
 
 $ss_count = count($screens);
 
