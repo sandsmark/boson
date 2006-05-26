@@ -1,4 +1,17 @@
 [article]
+id=060527
+date=May 27th 2006 00:00
+title=0.12 is out!
+text=We are happy to announce that Boson 0.12 is
+    <a href="announces/boson-0.12.php">now available</a>.<br>
+    Highlights of this release include support for shadows, completely new
+    radar system and addition of power and ammunition resources. Longer list of
+    changes can be found <a href="announces/changelog-0.12.php">here</a>.<br>
+    Some <a href="screenshots.php">new screenshots</a> are also available.<br>
+    You can grab 0.12 from the <a href="download.php">downloads page</a>.
+    <br><br>
+
+[article]
 id=060208
 date=February 8th 2006 15:33
 title=New species

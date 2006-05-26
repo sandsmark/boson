@@ -52,29 +52,41 @@ draw_bigbox_text("Note that these instructions only apply if you're using a sour
 
 draw_bigbox_subheader("If you downloaded the big package");
 
-draw_bigbox_text("</p><pre>$ tar xjvf boson-all-0.10.tar.bz2
-$ cd boson
-$ ./configure
+draw_bigbox_text("</p><pre>$ tar xjvf boson-all-0.12.tar.bz2
+$ cd boson-all-0.12
+$ mkdir build
+$ cd build
+$ cmake ..
 $ make
 $ su
-# make install</pre><br><p class=\"bigboxtext\">");
+# make install</pre><br>
+Note that if you want to install at a custom prefix, use
+'cmake -DCMAKE_INSTALL_PREFIX=/install/boson/to ..' instead of 'cmake ..'.<br>
+<p class=\"bigboxtext\">");
 
 draw_bigbox_subheader("If you downloaded code, data and music separately do all of the following");
 
-draw_bigbox_text("</p><pre>$ tar xjvf boson-code-0.10.tar.bz2
-$ cd code$ ./configure
+draw_bigbox_text("</p><pre>$ tar xjvf boson-code-0.12.tar.bz2
+$ cd code
+$ mkdir build
+$ cd build
+$ cmake ..
 $ make
 $ su
 # make install</pre>
-  <pre>$ tar xjvf boson-data-0.10.tar.bz2
+  <pre>$ tar xjvf boson-data-0.12.tar.bz2
 $ cd data
-$ ./configure
+$ mkdir build
+$ cd build
+$ cmake ..
 $ make
 $ su
 # make install</pre>
-  <pre>$ tar xjvf boson-music-0.10.tar.bz2
+  <pre>$ tar xjvf boson-music-0.12.tar.bz2
 $ cd music
-$ ./configure
+$ mkdir build
+$ cd build
+$ cmake ..
 $ make
 $ su
 # make install</pre><p class=\"bigboxtext\">

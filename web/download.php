@@ -57,7 +57,7 @@ echo "
       currently latest version available.</b><br><br>
     </td></tr>";
 
-draw_bigbox_subheader("Installer");
+/*draw_bigbox_subheader("Installer");
 draw_bigbox_text("This is the recommended way of getting Boson.<br>
 It includes mostly static binary of Boson which means you won't have to
 install anything else.<br>
@@ -65,35 +65,36 @@ You ca download it from
 <a href=\"download.php?dl=boson-0.11-x86.run\">here</a>
 (79 164 KB) or via SF.net's web interface from
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=353607\">here</a>.<br><br>");
+*/
 
 draw_bigbox_subheader("All-in-one package");
 draw_bigbox_text("This is a big package that contains source code, data files
 and music. You do not need to download any package below if you download this
 one. You can get it from
-<a href=\"download.php?dl=boson-all-0.11.tar.bz2\">here</a>
-(33 703 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=353607\">here</a>.<br><br>");
+<a href=\"download.php?dl=boson-all-0.12.tar.bz2\">here</a>
+(35 960 KB) or via SF.net's web interface from
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=419522\">here</a>.<br><br>");
 
 draw_bigbox_subheader("Source code");
 draw_bigbox_text("You can download a tarball (.tar.bz2) with the code from
-<a href=\"download.php?dl=boson-code-0.11.tar.bz2\">here</a>
-(2099 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=353607\">here</a>.
+<a href=\"download.php?dl=boson-code-0.12.tar.bz2\">here</a>
+(1769 KB) or via SF.net's web interface from
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=419522\">here</a>.
 Note that you also need to download the data package to play Boson.<br><br>");
 
 draw_bigbox_subheader("Data package");
 draw_bigbox_text("This tarball contains the data files needed for playing Boson.
 You can download it from
-<a href=\"download.php?dl=boson-data-0.11.tar.bz2\">here</a>
-(15 702 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=353607\">here</a>.<br><br>");
+<a href=\"download.php?dl=boson-data-0.12.tar.bz2\">here</a>
+(17 893 KB) or via SF.net's web interface from
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=419522\">here</a>.<br><br>");
 
 draw_bigbox_subheader("Music");
 draw_bigbox_text("You don't need the music package to play Boson, but it's
 recommended. :-) You can download the tarball from
-<a href=\"download.php?dl=boson-music-0.11.tar.bz2\">here</a>
-(16 576 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=353607\">here</a>.<br><br>");
+<a href=\"download.php?dl=boson-music-0.12.tar.bz2\">here</a>
+(16 308 KB) or via SF.net's web interface from
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=419522\">here</a>.<br><br>");
 
 /*draw_bigbox_subheader("Gentoo");
 draw_bigbox_text("Boson-0.9.1 is in the official portage tree, unmasked.<br>
@@ -142,6 +143,8 @@ draw_bigbox_subheader("Older versions");
 draw_bigbox_text("Currently, you can download old releases only via
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087\">SF.net's web interface</a>.<br>
 Available versions are:<br>
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=353607\">Boson 0.11</a>
+(released on 3rd September 2005),<br>
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=235412\">Boson 0.10</a>
 (released on 2nd May 2004),<br>
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=197716\">Boson 0.9.1</a>
@@ -165,13 +168,15 @@ draw_bigbox_text("You can get both code and data from SVN using the following co
 $ svn co https://svn.sourceforge.net/svnroot/boson/trunk/code code
 $ svn co https://svn.sourceforge.net/svnroot/boson/trunk/data data
 </pre>
-We recommend using SCons for compilation and installation. In both code/ and
+You need <a href=\"http://www.cmake.org\">CMake</a> for compilation. In both code/ and
 data/ directory, use these commands:
 <pre>
-$ tar xjvf bksys/scons-mini.tar.bz2
-$ ./scons configure
-$ ./scons
-# ./scons install
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make
+$ su
+# make install
 </pre>
 When configuring fails, check whether you have all the
 <a href=\"info.php\">software dependencies</a> installed.
