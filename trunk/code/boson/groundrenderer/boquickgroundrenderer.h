@@ -73,6 +73,7 @@ class BoQuickGroundRenderer : public BoGroundRenderer
     virtual void generateCellList(const BosonMap* map);
 
     virtual void cellFogChanged(int x1, int y1, int x2, int y2);
+    virtual void cellExploredChanged(int x1, int y1, int x2, int y2);
     virtual void cellHeightChanged(int x1, int y1, int x2, int y2);
     virtual void cellTextureChanged(int x1, int y1, int x2, int y2);
 
@@ -111,8 +112,8 @@ class BoQuickGroundRenderer : public BoGroundRenderer
         // Neighbors are in order: left, top, right, bottom
         TerrainChunk* neighbors[4];
 
-        // Whether all the cells in this chunk are fogged
-        bool fogged;
+        // Whether all the cells in this chunk are unexplored
+        bool unexplored;
         // Whether a certain texture is used by this chunk
         bool* hastexture;
 

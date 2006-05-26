@@ -30,6 +30,7 @@ class BosonCanvas;
 class Boson;
 class BoEvent;
 class Unit;
+class BosonMap;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
 template<class T> class BoVector4;
@@ -203,6 +204,7 @@ class BosonScript
      **/
     unsigned long int powerGeneratedAfterConstructions(int playerId) const;
     bool isCellFogged(int playerId, int x, int y) const;
+    bool isCellExplored(int playerId, int x, int y) const;
 
 
     // Resources
@@ -480,6 +482,10 @@ class BosonScript
     BoVector3Float wind();
     void unfogPlayer(int playerid);
     void unfogAllPlayers();
+    void fogPlayer(int playerid);
+    void fogAllPlayers();
+    void explorePlayer(int playerid);
+    void exploreAllPlayers();
     void setAcceptUserInput(bool accept);
     void addChatMessage(const QString& from, const QString& message);
     int mapWidth() const;
@@ -510,6 +516,10 @@ class BosonScript
     Player* scriptPlayer() const;
     PlayerIO* scriptPlayerIO() const;
     Unit* findUnit(unsigned long int id) const;
+
+    void internalExplorePlayer(BosonMap* map, Player* p);
+    void internalUnfogPlayer(BosonMap* map, Player* p);
+    void internalFogPlayer(BosonMap* map, Player* p);
 
   private:
     static BosonScript* mCurrentScript;

@@ -123,8 +123,8 @@ void BoQuickGroundRenderer::generateCellList(const BosonMap* map)
     TerrainChunk* c = &mChunks[i];
     c->render = false;
 
-    // Don't consider completely fogged chunks
-    if(c->fogged)
+    // Don't consider completely unexplored chunks
+    if(c->unexplored)
     {
       continue;
     }
@@ -799,8 +799,8 @@ void BoQuickGroundRenderer::initMap(const BosonMap* map)
       chunk->maxX = chunkx + chunkw;
       chunk->maxY = chunky + chunkh;
 
-      // Init fogged and hastexture flags
-      chunk->fogged = true;
+      // Init unexplored and hastexture flags
+      chunk->unexplored = true;
       chunk->hastexture = new bool[mTextureCount];
       for(unsigned int t = 0; t < mTextureCount; t++)
       {
@@ -814,18 +814,18 @@ void BoQuickGroundRenderer::initMap(const BosonMap* map)
       chunk->neighbors[3] = ((chunky + mChunkSize) < mMapH) ? chunkAt(chunkx, chunky + mChunkSize) : 0;
 
       // Pass 1
-      // Inits fogged flag
+      // Inits unexplored flag
       for(unsigned int y = chunk->minY; y < chunk->maxY; y++)
       {
         for(unsigned int x = chunk->minX; x < chunk->maxX; x++)
         {
-          if(!localPlayerIO()->isFogged(x, y))
+          if(localPlayerIO()->isExplored(x, y))
           {
-            chunk->fogged = false;
+            chunk->unexplored = false;
             break;
           }
         }
-        if(!chunk->fogged)
+        if(!chunk->unexplored)
         {
           break;
         }
@@ -918,16 +918,22 @@ unsigned int BoQuickGroundRenderer::chooseLOD(BoQuickGroundRenderer::TerrainChun
 
 void BoQuickGroundRenderer::cellFogChanged(int x1, int y1, int x2, int y2)
 {
+  mFogTexture->setLocalPlayerIO(localPlayerIO());
+  mFogTexture->cellChanged(x1, y1, x2, y2);
+}
+
+void BoQuickGroundRenderer::cellExploredChanged(int x1, int y1, int x2, int y2)
+{
   // TODO: don't go over every single cell!
   for(int y = y1; y <= y2; y++)
   {
     for(int x = x1; x <= x2; x++)
     {
-      if(!localPlayerIO()->isFogged(x, y))
+      if(localPlayerIO()->isExplored(x, y))
       {
-        if(chunkAt(x, y)->fogged)
+        if(chunkAt(x, y)->unexplored)
         {
-          chunkAt(x, y)->fogged = false;
+          chunkAt(x, y)->unexplored = false;
           // When a chunk becomes visible, the list of visible chunks has to be
           //  rebuilt
           mCellListDirty = true;

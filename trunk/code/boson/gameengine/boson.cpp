@@ -1127,7 +1127,7 @@ KPlayer* Boson::createPlayer(int , int , bool ) // AB: we don't use these params
  p->setGame(this);
  if (d->mPlayField && d->mPlayField->map()) {
 	// AB: this will never be reached. unused. can probably be removed.
-	p->initMap(d->mPlayField->map(), boGame->gameMode());
+	p->initMap(d->mPlayField->map(), boGame->gameMode(), boGame->gameMode());
  }
  return p;
 }

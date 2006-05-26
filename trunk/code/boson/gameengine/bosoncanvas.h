@@ -322,7 +322,9 @@ public:
 	 **/
 	void removeUnit(Unit* unit);
 
-	void updateSight(Unit*, bofixed oldX, bofixed oldY);
+	void updateSight(Unit* unit, bofixed oldX, bofixed oldY);
+	void addSight(Unit* unit);
+	void removeSight(Unit* unit);
 
 	Cell* cellAt(Unit* unit) const;
 

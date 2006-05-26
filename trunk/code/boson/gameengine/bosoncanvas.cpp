@@ -667,13 +667,11 @@ void BosonCanvas::unitMoved(Unit* unit, bofixed oldX, bofixed oldY)
  emit signalUnitMoved(unit, oldX, oldY);
 }
 
-void BosonCanvas::updateSight(Unit* unit, bofixed, bofixed)
+void BosonCanvas::updateSight(Unit* unit, bofixed oldX, bofixed oldY)
 {
-// TODO: use the bofixed parameters - check whether the player can still see
-// these coordinates and if not out fog on them again. Remember to check for -1
-// (new unit placed)!
-
+ PROFILE_METHOD;
  unsigned int sight = (int)unit->sightRange();
+ int sight2 = sight * sight;
  unsigned int x = (unsigned int)unit->centerX();
  unsigned int y = (unsigned int)unit->centerY();
 
@@ -684,26 +682,105 @@ void BosonCanvas::updateSight(Unit* unit, bofixed, bofixed)
  int bottom = ((y + sight > d->mMap->height()) ?  d->mMap->height() :
 		y + sight) - y;
 
- int sight2 = sight * sight;
-// boDebug() << k_funcinfo << endl;
-// boDebug() << "left=" << left << ",right=" << right << endl;
-// boDebug() << "top=" << top << ",bottom=" << bottom << endl;
 
+ if (oldX != -1 && oldY != -1) {
+	unsigned int oldCenterX = (unsigned int)(unit->centerX() + (oldX - unit->x()));
+	unsigned int oldCenterY = (unsigned int)(unit->centerY() + (oldY - unit->y()));
+	int deltaX = x - oldCenterX;
+	int deltaY = y - oldCenterY;
+	if (!deltaX && !deltaY) {
+		return;
+	}
+
+	int oldleft = ((oldCenterX < sight) ? 0 : (oldCenterX - sight)) - x;
+	int oldtop = ((oldCenterY < sight) ? 0 : (oldCenterY - sight)) - y;
+	int oldright = ((oldCenterX + sight > d->mMap->width()) ? d->mMap->width() : (oldCenterX + sight)) - x;
+	int oldbottom = ((oldCenterY + sight > d->mMap->height()) ? d->mMap->height() : (oldCenterY + sight)) - y;
+
+	if (QMAX(deltaX, deltaY) <= 3) {
+		// Speed up the common case by looking through every cell just once
+		left = QMIN(left, oldleft);
+		top = QMIN(top, oldtop);
+		right = QMAX(right, oldright);
+		bottom = QMAX(bottom, oldbottom);
+		for (int i = left; i < right; i++) {
+			for (int j = top; j < bottom; j++) {
+				int olddist = (i+deltaX)*(i+deltaX) + (j+deltaY)*(j+deltaY);
+				int newdist = i*i + j*j;
+				if ((newdist >= sight2) && (olddist < sight2)) {
+					// This cell is now out of sight but was previously in sight
+					unit->owner()->removeFogRef(x + i, y + j);
+				} else if ((newdist < sight2) && (olddist >= sight2)) {
+					unit->owner()->addFogRef(x + i, y + j);
+				}
+			}
+		}
+	} else {
+		// First remove cells which were visible but aren't anymore...
+		for (int i = oldleft; i < oldright; i++) {
+			for (int j = oldtop; j < oldbottom; j++) {
+				if ((i*i + j*j >= sight2) && ((i+deltaX)*(i+deltaX) + (j+deltaY)*(j+deltaY) < sight2)) {
+					// This cell is now out of sight but was previously in sight
+					unit->owner()->removeFogRef(x + i, y + j);
+				}
+			}
+		}
+
+		// ... then add those which just became visible
+		for (int i = left; i < right; i++) {
+			for (int j = top; j < bottom; j++) {
+				if ((i*i + j*j < sight2) && ((i+deltaX)*(i+deltaX) + (j+deltaY)*(j+deltaY) >= sight2)) {
+					unit->owner()->addFogRef(x + i, y + j);
+				}
+			}
+		}
+	}
+ } else {
+	// This is the first time we update sight for this unit. Just unfog
+	//  everything the unit can see
+	addSight(unit);
+ }
+}
+
+void BosonCanvas::addSight(Unit* unit)
+{
+ unsigned int sight = (int)unit->sightRange();
+ int sight2 = sight * sight;
+ unsigned int x = (unsigned int)unit->centerX();
+ unsigned int y = (unsigned int)unit->centerY();
+
+ int left = ((x > sight) ? (x - sight) : 0) - x;
+ int top = ((y > sight) ? (y - sight) : 0) - y;
+ int right = ((x + sight > d->mMap->width()) ?  d->mMap->width() :
+		x + sight) - x;
+ int bottom = ((y + sight > d->mMap->height()) ?  d->mMap->height() :
+		y + sight) - y;
  for (int i = left; i < right; i++) {
 	for (int j = top; j < bottom; j++) {
 		if (i*i + j*j < sight2) {
-			int cellX = x + i;
-			int cellY = y + j;
-			if (unit->owner()->isFogged(cellX, cellY)) {
-				unit->owner()->unfog(cellX, cellY);
-			}
-		} else {
-			//TODO
-			// cell(i, j) is not in sight anymore. Check if any
-			// other unit can see it!
-			// if (we_cannot_see_this) {
-			//	unit->owner()->fog(x + i, y + j);
-			// }
+			unit->owner()->addFogRef(x + i, y + j);
+		}
+	}
+ }
+}
+
+void BosonCanvas::removeSight(Unit* unit)
+{
+ unsigned int sight = (int)unit->sightRange();
+ int sight2 = sight * sight;
+ unsigned int x = (unsigned int)unit->centerX();
+ unsigned int y = (unsigned int)unit->centerY();
+
+ int left = ((x > sight) ? (x - sight) : 0) - x;
+ int top = ((y > sight) ? (y - sight) : 0) - y;
+ int right = ((x + sight > d->mMap->width()) ?  d->mMap->width() :
+		x + sight) - x;
+ int bottom = ((y + sight > d->mMap->height()) ?  d->mMap->height() :
+		y + sight) - y;
+ for (int i = left; i < right; i++) {
+	for (int j = top; j < bottom; j++) {
+		if (i*i + j*j < sight2) {
+			unit->owner()->removeFogRef(x + i, y + j);
 		}
 	}
  }
@@ -895,6 +972,9 @@ void BosonCanvas::destroyUnit(Unit* unit)
 			emit signalFragmentCreated(f);
 		}
 	}
+
+	// Decrease fogref of all cells that the unit can see
+	removeSight(unit);
 
 	emit signalUnitDestroyed(unit);
 

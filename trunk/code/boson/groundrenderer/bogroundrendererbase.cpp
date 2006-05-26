@@ -788,9 +788,13 @@ void FogTexture::initFogTexture(const BosonMap* map)
 	for (unsigned int y = 1; y <= mLastMapHeight; y++) {
 		for (unsigned int x = 1; x <= mLastMapWidth; x++) {
 			unsigned char value = 0;
-			if (!localPlayerIO()->isFogged(x - 1, y - 1)) {
-				if (!mSmoothEdges || (x > 1 && y > 1 && x < mLastMapWidth && y < mLastMapHeight)) {
-					value = 255;
+			if (!mSmoothEdges || (x > 1 && y > 1 && x < mLastMapWidth && y < mLastMapHeight)) {
+				if (localPlayerIO()->isExplored(x - 1, y - 1)) {
+					if (localPlayerIO()->isFogged(x - 1, y - 1)) {
+						value = 205;
+					} else {
+						value = 255;
+					}
 				}
 			}
 			mFogTextureData[(y * w + x) * 4 + 0] = value;
@@ -879,7 +883,11 @@ void FogTexture::cellChanged(int x1, int y1, int x2, int y2)
  for (int y = y1; y <= y2; y++) {
 	for (int x = x1; x <= x2; x++) {
 		unsigned char value = 0;
-		if (!localPlayerIO()->isFogged(x, y)) {
+		if (!localPlayerIO()->isExplored(x, y)) {
+			value = 0;
+		} else if(localPlayerIO()->isFogged(x, y)) {
+			value = 205;
+		} else {
 			value = 255;
 		}
 
@@ -1053,6 +1061,12 @@ void BoGroundRendererBase::generateCellList(const BosonMap* map)
 }
 
 void BoGroundRendererBase::cellFogChanged(int x1, int y1, int x2, int y2)
+{
+ mFogTexture->setLocalPlayerIO(localPlayerIO());
+ mFogTexture->cellChanged(x1, y1, x2, y2);
+}
+
+void BoGroundRendererBase::cellExploredChanged(int x1, int y1, int x2, int y2)
 {
  mFogTexture->setLocalPlayerIO(localPlayerIO());
  mFogTexture->cellChanged(x1, y1, x2, y2);

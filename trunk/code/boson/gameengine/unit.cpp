@@ -313,12 +313,15 @@ void Unit::setHealth(unsigned long int h)
 
 void Unit::setSightRange(unsigned long int r)
 {
+ if(canvas()) {
+	canvas()->removeSight(this);
+ }
  UnitBase::setSightRange(r);
  if (isDestroyed()) {
 	return;
  }
  if (canvas()) {
-	canvas()->updateSight(this, x(), y());
+	canvas()->addSight(this);
  }
 }
 

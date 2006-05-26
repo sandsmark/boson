@@ -232,6 +232,10 @@ void BoGroundRenderer::cellFogChanged(int, int, int, int)
 {
 }
 
+void BoGroundRenderer::cellExploredChanged(int, int, int, int)
+{
+}
+
 void BoGroundRenderer::cellHeightChanged(int, int, int, int)
 {
 }

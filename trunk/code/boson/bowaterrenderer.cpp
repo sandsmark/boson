@@ -468,7 +468,7 @@ float BoWaterRenderer::waterAlphaAt(BoLakeGL* lake, float x, float y)
   return QMIN(1.0, ((lake->lake->level - mMap->heightAtCorner((int)x, (int)y)) * lake->alphaMultiplier + lake->alphaBase)/* * mWaterDiffuseColor*/);
 }
 
-void BoWaterRenderer::cellFogChanged(int x1, int x2, int y1, int y2)
+void BoWaterRenderer::cellExploredChanged(int x1, int x2, int y1, int y2)
 {
   setDirty(true);
 }
@@ -1208,7 +1208,7 @@ void BoWaterRenderer::calculateIndices(RenderInfo* info)
       }
       int posx = (int)x;
       int posy = (int)y;
-      if(mLocalPlayerIO->isFogged(posx, posy))
+      if(!mLocalPlayerIO->isExplored(posx, posy))
       {
         continue;
       }

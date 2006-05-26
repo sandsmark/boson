@@ -55,7 +55,7 @@
 #include <qptrlist.h>
 #include <qgl.h>
 
-#define COLOR_UNKNOWN Qt::black // fog of war
+#define COLOR_UNKNOWN Qt::black // unexplored terrain
 #define ZOOM_STEP 0.5
 
 static void cut_line_segment_at_plane(const BoPlane& plane, BoVector3Float& linePoint1, BoVector3Float& linePoint2);
@@ -535,16 +535,16 @@ void BosonGLMiniMap::initFogOfWar(PlayerIO* p)
 	// war gets disabled.
 	for (unsigned int i = 0; i < canvas()->mapWidth(); i++) {
 		for (unsigned int j = 0; j < canvas()->mapHeight(); j++) {
-			slotUnfog(i, j);
+			slotExplored(i, j);
 		}
 	}
  } else {
 	for (unsigned int i = 0; i < canvas()->mapWidth(); i++) {
 		for (unsigned int j = 0; j < canvas()->mapHeight(); j++) {
 			if (p && !p->canSee(i, j)) {
-				slotFog(i, j);
+				slotUnexplored(i, j);
 			} else {
-				slotUnfog(i, j);
+				slotExplored(i, j);
 			}
 		}
 	}
@@ -813,7 +813,7 @@ unsigned int BosonGLMiniMap::miniMapHeight() const
  return mRenderer->miniMapHeight();
 }
 
-void BosonGLMiniMap::slotUnfog(int x, int y)
+void BosonGLMiniMap::slotExplored(int x, int y)
 {
  if (!hasMap()) {
 	return;
@@ -823,10 +823,10 @@ void BosonGLMiniMap::slotUnfog(int x, int y)
  }
  BO_CHECK_NULL_RET(canvas()->cell(x, y));
  BO_CHECK_NULL_RET(mRenderer);
- mRenderer->setFoggedPoint(x, y, false);
+ mRenderer->setExploredPoint(x, y, true);
 }
 
-void BosonGLMiniMap::slotFog(int x, int y)
+void BosonGLMiniMap::slotUnexplored(int x, int y)
 {
  if (!hasMap()) {
 	return;
@@ -836,7 +836,7 @@ void BosonGLMiniMap::slotFog(int x, int y)
  }
  BO_CHECK_NULL_RET(canvas()->cell(x, y));
  BO_CHECK_NULL_RET(mRenderer);
- mRenderer->setFoggedPoint(x, y, true);
+ mRenderer->setExploredPoint(x, y, false);
 }
 
 bool BosonGLMiniMap::mouseEvent(KGameIO*, QDataStream&, QMouseEvent* e, bool* send)
@@ -937,11 +937,11 @@ public:
 		mGameGLMatrices = 0;
 		mTerrainTexture = 0;
 		mWaterTexture = 0;
-		mFogTexture = 0;
+		mExploredTexture = 0;
 		mGLTerrainTexture = 0;
 		mGLWaterTexture = 0;
 		mGLUnitsTexture = 0;
-		mGLFogTexture = 0;
+		mGLExploredTexture = 0;
 		mUnitTarget = 0;
 
 		mLogoTexture = 0;
@@ -953,13 +953,13 @@ public:
 
 	GLubyte* mTerrainTexture;
 	GLubyte* mWaterTexture;
-	GLubyte* mFogTexture;
+	GLubyte* mExploredTexture;
 	int mMapTextureWidth;
 	int mMapTextureHeight;
 	BoTexture* mGLTerrainTexture;
 	BoTexture* mGLWaterTexture;
 	BoTexture* mGLUnitsTexture;
-	BoTexture* mGLFogTexture;
+	BoTexture* mGLExploredTexture;
 
 	BoRenderTarget* mUnitTarget;
 
@@ -981,7 +981,7 @@ BosonGLMiniMapRenderer::BosonGLMiniMapRenderer(const BoGLMatrices* gameGLMatrice
 
  mMapWidth = 0;
  mMapHeight = 0;
- mUseFog = true;
+ mUseExplored = true;
  mType = Logo;
  mTextureMaxWidth = 1.0f;
  mTextureMaxHeight = 1.0f;
@@ -1015,10 +1015,10 @@ BosonGLMiniMapRenderer::~BosonGLMiniMapRenderer()
  delete d->mGLTerrainTexture;
  delete d->mGLWaterTexture;
  delete d->mGLUnitsTexture;
- delete d->mGLFogTexture;
+ delete d->mGLExploredTexture;
  delete[] d->mTerrainTexture;
  delete[] d->mWaterTexture;
- delete[] d->mFogTexture;
+ delete[] d->mExploredTexture;
  delete d->mLogoTexture;
  delete d->mRadarRangeTexture;
  delete d;
@@ -1036,7 +1036,7 @@ void BosonGLMiniMapRenderer::setUpdatesEnabled(bool e)
 	d->mGLTerrainTexture = new BoTexture(d->mTerrainTexture,
 			d->mMapTextureWidth, d->mMapTextureHeight,
 			BoTexture::FilterLinear | BoTexture::FormatRGBA |
-			BoTexture::DontCompress | BoTexture::DontGenMipmaps);
+			BoTexture::DontCompress | BoTexture::DontGenMipmaps | BoTexture::ClampToEdge);
 	d->mTextureUpdatesEnabled[d->mTerrainTexture] = true;
  }
  if (!wasEnabled || !d->mTextureUpdatesEnabled[d->mWaterTexture]) {
@@ -1044,7 +1044,7 @@ void BosonGLMiniMapRenderer::setUpdatesEnabled(bool e)
 	d->mGLWaterTexture = new BoTexture(d->mWaterTexture,
 			d->mMapTextureWidth, d->mMapTextureHeight,
 			BoTexture::FilterLinear | BoTexture::FormatRGBA |
-			BoTexture::DontCompress | BoTexture::DontGenMipmaps);
+			BoTexture::DontCompress | BoTexture::DontGenMipmaps | BoTexture::ClampToEdge);
 	d->mTextureUpdatesEnabled[d->mWaterTexture] = true;
  }
  if (!wasEnabled) {
@@ -1053,17 +1053,17 @@ void BosonGLMiniMapRenderer::setUpdatesEnabled(bool e)
 	d->mGLUnitsTexture = new BoTexture(0,
 			d->mMapTextureWidth, d->mMapTextureHeight,
 			BoTexture::FilterLinear | BoTexture::FormatRGBA |
-			BoTexture::DontCompress | BoTexture::DontGenMipmaps);
+			BoTexture::DontCompress | BoTexture::DontGenMipmaps | BoTexture::ClampToEdge);
 	d->mUnitTarget = new BoRenderTarget(d->mMapTextureWidth, d->mMapTextureHeight,
 			BoRenderTarget::RGBA, d->mGLUnitsTexture);
  }
- if (!wasEnabled || !d->mTextureUpdatesEnabled[d->mFogTexture]) {
-	delete d->mGLFogTexture;
-	d->mGLFogTexture = new BoTexture(d->mFogTexture,
+ if (!wasEnabled || !d->mTextureUpdatesEnabled[d->mExploredTexture]) {
+	delete d->mGLExploredTexture;
+	d->mGLExploredTexture = new BoTexture(d->mExploredTexture,
 			d->mMapTextureWidth, d->mMapTextureHeight,
 			BoTexture::FilterLinear | BoTexture::FormatRGBA |
-			BoTexture::DontCompress | BoTexture::DontGenMipmaps);
-	d->mTextureUpdatesEnabled[d->mFogTexture] = true;
+			BoTexture::DontCompress | BoTexture::DontGenMipmaps | BoTexture::ClampToEdge);
+	d->mTextureUpdatesEnabled[d->mExploredTexture] = true;
  }
 }
 
@@ -1087,17 +1087,17 @@ void BosonGLMiniMapRenderer::createMap(unsigned int w, unsigned int h, BosonGrou
 
  delete[] d->mTerrainTexture;
  delete[] d->mWaterTexture;
- delete[] d->mFogTexture;
+ delete[] d->mExploredTexture;
  d->mTerrainTexture = new GLubyte[w2 * h2 * 4];
  d->mWaterTexture = new GLubyte[w2 * h2 * 4];
- d->mFogTexture = new GLubyte[w2 * h2 * 4];
+ d->mExploredTexture = new GLubyte[w2 * h2 * 4];
  d->mMapTextureWidth = w2;
  d->mMapTextureHeight = h2;
 
  QValueList<GLubyte*> textures;
  textures.append(d->mTerrainTexture);
  textures.append(d->mWaterTexture);
- textures.append(d->mFogTexture);
+ textures.append(d->mExploredTexture);
  for (QValueList<GLubyte*>::iterator it = textures.begin(); it != textures.end(); ++it) {
 	GLubyte* texture = (*it);
 	for (int y = 0; y < d->mMapTextureHeight; y++) {
@@ -1116,7 +1116,7 @@ void BosonGLMiniMapRenderer::createMap(unsigned int w, unsigned int h, BosonGrou
 	GLubyte* texture = (*it);
 
 	GLubyte alpha = 255;
-	if (texture != d->mTerrainTexture && texture != d->mFogTexture) {
+	if (texture != d->mTerrainTexture && texture != d->mExploredTexture) {
 		alpha = 0;
 	}
 	for (unsigned int x = 0; x < w; x++) {
@@ -1187,10 +1187,10 @@ void BosonGLMiniMapRenderer::renderMiniMap(QPtrList<Unit>* radars, BosonMiniMapQ
 {
  BO_CHECK_NULL_RET(d->mTerrainTexture);
  BO_CHECK_NULL_RET(d->mWaterTexture);
- BO_CHECK_NULL_RET(d->mFogTexture);
+ BO_CHECK_NULL_RET(d->mExploredTexture);
  BO_CHECK_NULL_RET(d->mGLTerrainTexture);
  BO_CHECK_NULL_RET(d->mGLWaterTexture);
- BO_CHECK_NULL_RET(d->mGLFogTexture);
+ BO_CHECK_NULL_RET(d->mGLExploredTexture);
  glPushMatrix();
 
  // AB: this is only for pre-ufo use
@@ -1220,8 +1220,8 @@ void BosonGLMiniMapRenderer::renderMiniMap(QPtrList<Unit>* radars, BosonMiniMapQ
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  d->mGLWaterTexture->bind();
  renderQuad();
- if (mUseFog) {
-	d->mGLFogTexture->bind();
+ if (mUseExplored) {
+	d->mGLExploredTexture->bind();
 	renderQuad();
  }
  // Darken the terrain to make radar blips more visible
@@ -1635,19 +1635,19 @@ void BosonGLMiniMapRenderer::setWaterPoint(int x, int y, bool isWater)
  }
 }
 
-void BosonGLMiniMapRenderer::setFoggedPoint(int x, int y, bool fogged)
+void BosonGLMiniMapRenderer::setExploredPoint(int x, int y, bool explored)
 {
- if (!mUseFog) {
+ if (!mUseExplored) {
 	return;
  }
  if (x < 0 || y < 0 || (unsigned int)x >= mapWidth() || (unsigned int)y >= mapHeight()) {
 	boError() << k_funcinfo << "invalid cell " << x << "," << y << endl;
 	return;
  }
- if (fogged) {
-	setPoint(x, y, COLOR_UNKNOWN, d->mFogTexture, d->mGLFogTexture);
+ if (!explored) {
+	setPoint(x, y, COLOR_UNKNOWN, d->mExploredTexture, d->mGLExploredTexture);
  } else {
-	unsetPoint(x, y, d->mFogTexture, d->mGLFogTexture);
+	unsetPoint(x, y, d->mExploredTexture, d->mGLExploredTexture);
  }
 }
 

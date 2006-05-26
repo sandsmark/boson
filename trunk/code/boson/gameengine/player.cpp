@@ -55,6 +55,7 @@ public:
 	{
 		mUnitPropID = 0;
 		mMap = 0;
+		mFoggedRef = 0;
 
 		mStatistics = 0;
 
@@ -66,8 +67,10 @@ public:
 	BosonMap* mMap; // just a pointer
 	int mUnitPropID; // used for KGamePropertyHandler
 
-	QBitArray mFogged; // TODO: use KGameProperty
-	unsigned int mFoggedCount; // helper variable, doesn't need to be saved
+	QBitArray mExplored; // TODO: use KGameProperty
+	unsigned short int* mFoggedRef;
+	unsigned int mExploredCount; // helper variable, doesn't need to be saved
+	unsigned int mUnfoggedCount; // helper variable, doesn't need to be saved
 	KGameProperty<unsigned long int> mMinerals;
 	KGameProperty<unsigned long int> mOil;
 	KGamePropertyBool mIsNeutralPlayer;
@@ -90,7 +93,8 @@ Player::Player(bool isNeutralPlayer) : KPlayer()
  boDebug() << k_funcinfo << endl;
  mSpecies = 0;
  d = new PlayerPrivate;
- d->mFoggedCount = 0;
+ d->mExploredCount = 0;
+ d->mUnfoggedCount = 0;
  mPowerChargeForCurrentAdvanceCall = 0;
  setAsyncInput(true);
  connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)),
@@ -176,7 +180,8 @@ void Player::quitGame(bool destruct)
  boDebug() << k_funcinfo << endl;
  d->mMobilesCount = 0;
  d->mFacilitiesCount = 0;
- d->mFoggedCount = 0;
+ d->mUnfoggedCount = 0;
+ d->mExploredCount = 0;
  mOutOfGame = false;
  mHasWon = false;
  mHasLost = false;
@@ -193,7 +198,8 @@ void Player::quitGame(bool destruct)
 	d->mStatistics = new BosonStatistics;
 	d->mMinerals.setLocal(0);
 	d->mOil.setLocal(0);
-	d->mFogged.resize(0);
+	d->mExplored.resize(0);
+	delete[] d->mFoggedRef;
 	d->mAmmunition.clear();
 	d->mAmmunition.insert("Generic", 0);
  }
@@ -466,88 +472,135 @@ const UnitProperties* Player::unitProperties(unsigned long int unitType) const
  return speciesTheme()->unitProperties(unitType);
 }
 
-void Player::initMap(BosonMap* map, bool fogged)
+void Player::initMap(BosonMap* map, bool unexplored, bool fogged)
 {
  d->mMap = map;
  if (!d->mMap) {
-	d->mFogged.resize(0);
+	d->mExplored.resize(0);
 	return;
  }
- if (d->mFogged.size() != 0) {
+ if (d->mExplored.size() != 0) {
 	// the fog of war was initialized before. probably we are loading a
 	// game.
 	return;
  }
- d->mFogged.fill(fogged, d->mMap->width() * d->mMap->height());
- if (fogged) {
-	d->mFoggedCount = d->mFogged.size();
- } else {
-	d->mFoggedCount = 0;
+ int cellcount = d->mMap->width() * d->mMap->height();
+ d->mExplored.fill(!unexplored, cellcount);
+ d->mExploredCount = (unexplored ? 0 : cellcount);
+ d->mFoggedRef = new unsigned short int[cellcount];
+ for (int i = 0; i < cellcount; i++) {
+	d->mFoggedRef[i] = (fogged ? 0 : 1);
+ }
+ d->mUnfoggedCount = (fogged ? 0 : cellcount);
+}
+
+void Player::addFogRef(int x, int y)
+{
+ if (!d->mMap || !d->mFoggedRef) {
+	return;
+ }
+
+ unsigned int index = x + d->mMap->width() * y;
+ d->mFoggedRef[index]++;
+ if (d->mFoggedRef[index] == 1) {
+	d->mUnfoggedCount++;
+	explore(x, y);
+	emit signalUnfog(x, y);
  }
 }
 
-void Player::fog(int x, int y)
+void Player::removeFogRef(int x, int y)
 {
- if (!d->mMap) {
+ if (!d->mMap || !d->mFoggedRef) {
 	return;
  }
- unsigned int index = x + d->mMap->width() * y;
- if (index >= d->mFogged.size()) {
-	boError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
-			<< d->mFogged.size() << ")" << endl;
-	return;
- }
- bool isFogged = d->mFogged.at(index);
-//boDebug() << k_funcinfo << x << "," << y << endl;
- d->mFogged.setBit(index);
- if (!isFogged) {
-	if (d->mFoggedCount >= d->mFogged.size()) {
-		boError() << k_funcinfo << "invalid fogged count value " << d->mFoggedCount << endl;
-	} else {
-		d->mFoggedCount++;
-	}
- }
- // emit signal (actual fog on map + minimap)
- // TODO: any way to emit only for the local player?
- emit signalFog(x, y);
-//boDebug() << k_funcinfo << "done " << endl;
-}
 
-void Player::unfog(int x, int y)
-{
- if (!d->mMap) {
-	return;
- }
-//boDebug() << k_funcinfo << x << "," << y << endl;
  unsigned int index = x + d->mMap->width() * y;
- if (index >= d->mFogged.size()) {
-	boError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
-			<< d->mFogged.size() << ")" << endl;
+ if (d->mFoggedRef[index] == 0) {
+	boError() << k_funcinfo << "mFoggedRef is already 0 at (" << x << "; " << y << ")!" << endl;
 	return;
  }
- bool isFogged = d->mFogged.at(index);
- d->mFogged.clearBit(index);
- if (isFogged) {
-	if (d->mFoggedCount == 0) {
-		boError() << k_funcinfo << "invalid fogged count value " << d->mFoggedCount << endl;
-	} else {
-		d->mFoggedCount--;
-	}
+ d->mFoggedRef[index]--;
+ if (d->mFoggedRef[index] == 0) {
+	d->mUnfoggedCount--;
+	emit signalFog(x, y);
  }
- // emit signal (actual fog on map + minimap)
- // TODO: any way to emit only for the local player?
- emit signalUnfog(x, y);
-//boDebug() << k_funcinfo << "done " << endl;
 }
 
 bool Player::isFogged(int x, int y) const
 {
- if (x + d->mMap->width() * y >= d->mFogged.size()) {
+ // TODO: error checking
+ /*if (x + d->mMap->width() * y >= d->mFogged.size()) {
 	boError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
 			<< d->mFogged.size() << ")" << endl;
 	return true;
+ }*/
+ return d->mFoggedRef[x + d->mMap->width() * y] == 0;
+}
+
+void Player::explore(int x, int y)
+{
+ if (!d->mMap) {
+	return;
  }
- return d->mFogged.at(x + d->mMap->width() * y);
+ unsigned int index = x + d->mMap->width() * y;
+ if (index >= d->mExplored.size()) {
+	boError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
+			<< d->mExplored.size() << ")" << endl;
+	return;
+ }
+ bool isExplored = d->mExplored.at(index);
+//boDebug() << k_funcinfo << x << "," << y << endl;
+ if (!isExplored) {
+	d->mExplored.setBit(index);
+	if (d->mExploredCount >= d->mExplored.size()) {
+		boError() << k_funcinfo << "invalid explored count value " << d->mExploredCount << endl;
+	} else {
+		d->mExploredCount++;
+	}
+	// emit signal (actual fog on map + minimap)
+	// TODO: any way to emit only for the local player?
+	emit signalExplored(x, y);
+ }
+//boDebug() << k_funcinfo << "done " << endl;
+}
+
+void Player::unexplore(int x, int y)
+{
+ if (!d->mMap) {
+	return;
+ }
+//boDebug() << k_funcinfo << x << "," << y << endl;
+ unsigned int index = x + d->mMap->width() * y;
+ if (index >= d->mExplored.size()) {
+	boError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
+			<< d->mExplored.size() << ")" << endl;
+	return;
+ }
+ bool isExplored = d->mExplored.at(index);
+ if (isExplored) {
+	d->mExplored.clearBit(index);
+	if (d->mExploredCount == 0) {
+		boError() << k_funcinfo << "invalid fogged count value " << d->mExploredCount << endl;
+	} else {
+		d->mExploredCount--;
+	}
+	// emit signal (actual fog on map + minimap)
+	// TODO: any way to emit only for the local player?
+	emit signalUnexplored(x, y);
+ }
+//boDebug() << k_funcinfo << "done " << endl;
+}
+
+bool Player::isExplored(int x, int y) const
+{
+ unsigned int index = x + d->mMap->width() * y;
+ if (index >= d->mExplored.size()) {
+	boError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
+			<< d->mExplored.size() << ")" << endl;
+	return true;
+ }
+ return d->mExplored.at(index);
 }
 
 unsigned long int Player::minerals() const
@@ -1122,43 +1175,48 @@ bool Player::saveFogOfWar(QDomElement& root) const
  // also note that i don't want to do the bit magic myself, as i want to avoid
  // this trouble with strings/xml and e.g. \0
  QDomDocument doc = root.ownerDocument();
- QDomElement fog = doc.createElement(QString::fromLatin1("Fogged"));
- fog.appendChild(doc.createTextNode(BoBinCoder::toCoded(d->mFogged)));
- root.appendChild(fog);
+ QDomElement explored = doc.createElement(QString::fromLatin1("Explored"));
+ explored.appendChild(doc.createTextNode(BoBinCoder::toCoded(d->mExplored)));
+ root.appendChild(explored);
+#warning TODO!!!
+ //QDomElement fog = doc.createElement(QString::fromLatin1("Fogged"));
+ //fog.appendChild(doc.createTextNode(BoBinCoder::toCoded(d->mFoggedRef)));
+ //root.appendChild(fog);
  return true;
 }
 
 bool Player::loadFogOfWar(const QDomElement& root)
 {
- QDomElement element = root.namedItem(QString::fromLatin1("Fogged")).toElement();
+ QDomElement element = root.namedItem(QString::fromLatin1("Explored")).toElement();
  if (element.isNull()) {
-	boError() << k_funcinfo << "No Fogged tag found" << endl;
-	d->mFogged.fill(true);
-	d->mFoggedCount = d->mFogged.size();
+	boError() << k_funcinfo << "No Explored tag found" << endl;
+	d->mExplored.fill(true);
+	d->mExploredCount = d->mExplored.size();
 	return false;
  }
  QString text = element.text();
  if (text.isEmpty()) {
-	boError() << k_funcinfo << "no content for Fogged tag found" << endl;
-	d->mFogged.fill(true);
-	d->mFoggedCount = d->mFogged.size();
+	boError() << k_funcinfo << "no content for Explored tag found" << endl;
+	d->mExplored.fill(true);
+	d->mExploredCount = d->mExplored.size();
 	return false;
  }
  boDebug() << k_funcinfo << "decoding" << endl;
- d->mFogged = BoBinCoder::toBinary(text);
- d->mFoggedCount = 0;
- for (unsigned int i = 0; i < d->mFogged.size(); i++) {
-	if (d->mFogged.at(i)) {
-		d->mFoggedCount++;
+ d->mExplored = BoBinCoder::toBinary(text);
+ d->mExploredCount = 0;
+ for (unsigned int i = 0; i < d->mExplored.size(); i++) {
+	if (d->mExplored.at(i)) {
+		d->mExploredCount++;
 	}
  }
- boDebug() << k_funcinfo << "decoded: " << d->mFogged.size() << endl;
+ boDebug() << k_funcinfo << "decoded: " << d->mExplored.size() << endl;
  if (d->mMap) {
-	if (d->mMap->width() * d->mMap->height() != d->mFogged.size()) {
-		boError() << k_funcinfo << "fog of war loaded: " << d->mFogged.size() << " map size: " << d->mMap->width() << "x" << d->mMap->height() << endl;
+	if (d->mMap->width() * d->mMap->height() != d->mExplored.size()) {
+		boError() << k_funcinfo << "exploration fog loaded: " << d->mExplored.size() << " map size: " << d->mMap->width() << "x" << d->mMap->height() << endl;
 		return false;
 	}
  }
+#warning TODO!!! Load real fog (mFoggedRef)!!!
  return true;
 }
 
@@ -1233,9 +1291,14 @@ void Player::writeGameLog(QTextStream& log)
  log << endl;
 }
 
-unsigned int Player::foggedCells() const
+unsigned int Player::unfoggedCells() const
 {
- return d->mFoggedCount;
+ return d->mUnfoggedCount;
+}
+
+unsigned int Player::exploredCells() const
+{
+ return d->mExploredCount;
 }
 
 void Player::clearUpgrades()

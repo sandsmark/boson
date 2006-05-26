@@ -2647,13 +2647,13 @@ QValueList<BoVector2Fixed> BosonPath::findLocations(Player* player, int x, int y
       open.append(n2);
       VISITED(n2.x, n2.y) = true;
 
-      // Check if cell is fogged or not
-      if(player->isFogged(n2.x, n2.y))
+      // Check if cell is explored or not
+      if(player->isExplored(n2.x, n2.y))
       {
         continue;
       }
 
-      // If it's not fogged, maybe it's what we're looking for
+      // If it's explored, maybe it's what we're looking for
       if(type == Minerals)
       {
         const BoItemList* items = cell(n2.x, n2.y)->items();

@@ -578,6 +578,8 @@ public slots:
 	 **/
 	void slotUnitChanged(Unit* unit);
 
+	void slotExplored(int x, int y);
+	void slotUnexplored(int x, int y);
 	void slotFog(int x, int y);
 	void slotUnfog(int x, int y);
 
