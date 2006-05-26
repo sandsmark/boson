@@ -26,6 +26,7 @@
 class QColor;
 class KConfig;
 class BosonConfig;
+class BosonConfigScript;
 class bofixed;
 template<class T> class QValueList;
 template<class T> class BoVector2;
@@ -490,10 +491,100 @@ public:
 	static QValueList<float> readFloatNumList(const KConfig* cfg, const QString key);
 	static void writeFloatNumList(QValueList<float> list, KConfig* cfg, const QString key);
 
+	/**
+	 * Adds @p script to the internal list of available config scripts.
+	 *
+	 * This method takes ownership of the given object and will delete it on
+	 * destruction.
+	 **/
+	void addConfigScript(BosonConfigScript* script);
+
+	/**
+	 * @return The config script named @p name or NULL if no such script was
+	 * added.
+	 **/
+	const BosonConfigScript* configScript(const QString& name) const;
+
+protected:
+	void initConfigEntries();
+	void initScripts();
 
 private:
 	class BosonConfigPrivate;
 	BosonConfigPrivate* d;
+};
+
+class BosonConfigScriptPrivate;
+/**
+ * Class that can set multiple config values at once
+ *
+ * A config script is a collection of config entries each with a value assigned.
+ * When the script is executed, the config values are set to the values in the
+ * script. This allows for constructs such as a "SoftwareRendering" or a
+ * "BestQuality" script, that set the OpenGL settings to useful values for such
+ * profiles.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BosonConfigScript
+{
+public:
+	/**
+	 * Construct a script with identifier @p name. The @p name is used
+	 * internally only.
+	 *
+	 * Use @ref addBoolValue, ... to make this script do something.
+	 **/
+	BosonConfigScript(const QString& name);
+	~BosonConfigScript();
+
+	const QString& name() const
+	{
+		return mName;
+	}
+
+	/**
+	 * @return TRUE if a config option @p key has been added to this script.
+	 * Otherwise FALSE.
+	 **/
+	const BoConfigEntry* valueForKey(const QString& key) const;
+
+	/**
+	 * Return @ref valueForKey(key) if the object is a Bool object.
+	 * Otherwise 0.
+	 **/
+	const BoConfigBoolEntry* boolValue(const QString& key) const;
+	const BoConfigIntEntry* intValue(const QString& key) const;
+	const BoConfigUIntEntry* uintValue(const QString& key) const;
+	const BoConfigDoubleEntry* doubleValue(const QString& key) const;
+	const BoConfigStringEntry* stringValue(const QString& key) const;
+	const BoConfigIntListEntry* intListValue(const QString& key) const;
+	const BoConfigColorEntry* colorValue(const QString& key) const;
+
+
+	void addBoolValue(const QString& key, bool value);
+	void addIntValue(const QString& key, int value);
+	void addUIntValue(const QString& key, unsigned int value);
+	void addDoubleValue(const QString& key, double value);
+	void addStringValue(const QString& key, const QString& value);
+	void addIntListValue(const QString& key, const QValueList<int>& value);
+	void addColorValue(const QString& key, const QColor& value);
+
+	/**
+	 * Similar to the @ref addBoolValue and friends methods above, but this
+	 * one retrieves the entry from @p config and uses the default value
+	 * from it.
+	 **/
+	void addDefaultValueOf(const QString& key, BosonConfig* config);
+
+	void execute(BosonConfig* config);
+
+protected:
+	void addValue(BoConfigEntry* entry);
+	void apply(BoConfigEntry* scriptValue, BoConfigEntry* configValue);
+
+private:
+	BosonConfigScriptPrivate* d;
+	QString mName;
 };
 
 #endif

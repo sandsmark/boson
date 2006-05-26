@@ -72,7 +72,9 @@ BoConfigEntry::BoConfigEntry(BosonConfig* parent, const QString& key, bool saveC
 {
  mKey = key;
  mSaveConfig = saveConfig;
- parent->addConfigEntry(this);
+ if (parent) {
+	parent->addConfigEntry(this);
+ }
 }
 
 BoConfigEntry::~BoConfigEntry()
@@ -257,6 +259,323 @@ QColor BoConfigColorEntry::defaultValue() const
 }
 
 
+class BosonConfigScriptPrivate
+{
+public:
+	BosonConfigScriptPrivate()
+	{
+	}
+
+	QPtrList<BoConfigEntry> mEntries;
+};
+
+BosonConfigScript::BosonConfigScript(const QString& name)
+{
+ d = new BosonConfigScriptPrivate;
+ mName = name;
+}
+
+BosonConfigScript::~BosonConfigScript()
+{
+ d->mEntries.setAutoDelete(false);
+ for (QPtrListIterator<BoConfigEntry> it(d->mEntries); it.current(); ++it) {
+	delete it.current();
+	++it;
+ }
+ d->mEntries.clear();
+ delete d;
+}
+
+void BosonConfigScript::execute(BosonConfig* config)
+{
+ BO_CHECK_NULL_RET(config);
+ for (QPtrListIterator<BoConfigEntry> it(d->mEntries); it.current(); ++it) {
+	QString key = it.current()->key();
+	BoConfigEntry* myValue = it.current();
+	BoConfigEntry* value = config->value(key);
+	if (!value) {
+		boError() << k_funcinfo << "no config entry registered for key " << key << endl;
+		continue;
+	}
+	apply(myValue, value);
+	++it;
+ }
+}
+
+const BoConfigEntry* BosonConfigScript::valueForKey(const QString& key) const
+{
+ for (QPtrListIterator<BoConfigEntry> it(d->mEntries); it.current(); ++it) {
+	if (it.current()->key() == key) {
+		return it.current();
+	}
+ }
+ return 0;
+}
+
+const BoConfigBoolEntry* BosonConfigScript::boolValue(const QString& key) const
+{
+ const BoConfigEntry* entry = valueForKey(key);
+ if (!entry) {
+	return 0;
+ }
+ if (entry->type() != BoConfigEntry::Bool) {
+	return 0;
+ }
+ return (const BoConfigBoolEntry*)entry;
+}
+
+const BoConfigIntEntry* BosonConfigScript::intValue(const QString& key) const
+{
+ const BoConfigEntry* entry = valueForKey(key);
+ if (!entry) {
+	return 0;
+ }
+ if (entry->type() != BoConfigEntry::Int) {
+	return 0;
+ }
+ return (const BoConfigIntEntry*)entry;
+}
+
+const BoConfigUIntEntry* BosonConfigScript::uintValue(const QString& key) const
+{
+ const BoConfigEntry* entry = valueForKey(key);
+ if (!entry) {
+	return 0;
+ }
+ if (entry->type() != BoConfigEntry::UInt) {
+	return 0;
+ }
+ return (const BoConfigUIntEntry*)entry;
+}
+
+const BoConfigDoubleEntry* BosonConfigScript::doubleValue(const QString& key) const
+{
+ const BoConfigEntry* entry = valueForKey(key);
+ if (!entry) {
+	return 0;
+ }
+ if (entry->type() != BoConfigEntry::Double) {
+	return 0;
+ }
+ return (const BoConfigDoubleEntry*)entry;
+}
+
+const BoConfigStringEntry* BosonConfigScript::stringValue(const QString& key) const
+{
+ const BoConfigEntry* entry = valueForKey(key);
+ if (!entry) {
+	return 0;
+ }
+ if (entry->type() != BoConfigEntry::String) {
+	return 0;
+ }
+ return (const BoConfigStringEntry*)entry;
+}
+
+const BoConfigIntListEntry* BosonConfigScript::intListValue(const QString& key) const
+{
+ const BoConfigEntry* entry = valueForKey(key);
+ if (!entry) {
+	return 0;
+ }
+ if (entry->type() != BoConfigEntry::IntList) {
+	return 0;
+ }
+ return (const BoConfigIntListEntry*)entry;
+}
+
+const BoConfigColorEntry* BosonConfigScript::colorValue(const QString& key) const
+{
+ const BoConfigEntry* entry = valueForKey(key);
+ if (!entry) {
+	return 0;
+ }
+ if (entry->type() != BoConfigEntry::Color) {
+	return 0;
+ }
+ return (const BoConfigColorEntry*)entry;
+}
+
+void BosonConfigScript::addValue(BoConfigEntry* entry)
+{
+ BO_CHECK_NULL_RET(entry);
+ if (entry->key().isEmpty()) {
+	boError() << k_funcinfo << "cannot add config entry with empty key" << endl;
+	delete entry;
+	return;
+ }
+ if (valueForKey(entry->key())) {
+	boError() << k_funcinfo << "already a value with key " << entry->key() << " added" << endl;
+	delete entry;
+	return;
+ }
+ d->mEntries.append(entry);
+}
+
+void BosonConfigScript::apply(BoConfigEntry* scriptValue, BoConfigEntry* configValue)
+{
+ BO_CHECK_NULL_RET(scriptValue);
+ BO_CHECK_NULL_RET(configValue);
+ if (scriptValue->type() != configValue->type()) {
+	boError() << k_funcinfo << "script type: " << scriptValue->type() << " does not match config type: " << configValue->type() << " for key " << scriptValue->key() << endl;
+	return;
+ }
+
+ switch (scriptValue->type()) {
+	case BoConfigEntry::Bool:
+	{
+		BoConfigBoolEntry* src = (BoConfigBoolEntry*)scriptValue;
+		BoConfigBoolEntry* dest = (BoConfigBoolEntry*)configValue;
+		dest->setValue(src->value());
+		break;
+	}
+	case BoConfigEntry::Int:
+	{
+		BoConfigIntEntry* src = (BoConfigIntEntry*)scriptValue;
+		BoConfigIntEntry* dest = (BoConfigIntEntry*)configValue;
+		dest->setValue(src->value());
+		break;
+	}
+	case BoConfigEntry::UInt:
+	{
+		BoConfigUIntEntry* src = (BoConfigUIntEntry*)scriptValue;
+		BoConfigUIntEntry* dest = (BoConfigUIntEntry*)configValue;
+		dest->setValue(src->value());
+		break;
+	}
+	case BoConfigEntry::Double:
+	{
+		BoConfigDoubleEntry* src = (BoConfigDoubleEntry*)scriptValue;
+		BoConfigDoubleEntry* dest = (BoConfigDoubleEntry*)configValue;
+		dest->setValue(src->value());
+		break;
+	}
+	case BoConfigEntry::String:
+	{
+		BoConfigStringEntry* src = (BoConfigStringEntry*)scriptValue;
+		BoConfigStringEntry* dest = (BoConfigStringEntry*)configValue;
+		dest->setValue(src->value());
+		break;
+	}
+	case BoConfigEntry::IntList:
+	{
+		BoConfigIntListEntry* src = (BoConfigIntListEntry*)scriptValue;
+		BoConfigIntListEntry* dest = (BoConfigIntListEntry*)configValue;
+		dest->setValue(src->value());
+		break;
+	}
+	case BoConfigEntry::Color:
+	{
+		BoConfigColorEntry* src = (BoConfigColorEntry*)scriptValue;
+		BoConfigColorEntry* dest = (BoConfigColorEntry*)configValue;
+		dest->setValue(src->value());
+		break;
+	}
+	default:
+	{
+		boError() << k_funcinfo << "unhandled config entry type " << scriptValue->type() << endl;
+		break;
+	}
+ }
+}
+
+void BosonConfigScript::addDefaultValueOf(const QString& key, BosonConfig* config)
+{
+ BO_CHECK_NULL_RET(config);
+ BoConfigEntry* entry = config->value(key);
+ if (!entry) {
+	boError() << k_funcinfo << "no config entry with key " << key << " found" << endl;
+	return;
+ }
+ switch (entry->type()) {
+	case BoConfigEntry::Bool:
+	{
+		BoConfigBoolEntry* v = (BoConfigBoolEntry*)entry;
+		addBoolValue(key, v->defaultValue());
+		break;
+	}
+	case BoConfigEntry::Int:
+	{
+		BoConfigIntEntry* v = (BoConfigIntEntry*)entry;
+		addIntValue(key, v->defaultValue());
+		break;
+	}
+	case BoConfigEntry::UInt:
+	{
+		BoConfigUIntEntry* v = (BoConfigUIntEntry*)entry;
+		addUIntValue(key, v->defaultValue());
+		break;
+	}
+	case BoConfigEntry::Double:
+	{
+		BoConfigDoubleEntry* v = (BoConfigDoubleEntry*)entry;
+		addDoubleValue(key, v->defaultValue());
+		break;
+	}
+	case BoConfigEntry::String:
+	{
+		BoConfigStringEntry* v = (BoConfigStringEntry*)entry;
+		addStringValue(key, v->defaultValue());
+		break;
+	}
+	case BoConfigEntry::IntList:
+	{
+		BoConfigIntListEntry* v = (BoConfigIntListEntry*)entry;
+		addIntListValue(key, v->defaultValue());
+		break;
+	}
+	case BoConfigEntry::Color:
+	{
+		BoConfigColorEntry* v = (BoConfigColorEntry*)entry;
+		addColorValue(key, v->defaultValue());
+		break;
+	}
+	default:
+	{
+		boError() << k_funcinfo << "unhandled config entry type " << entry->type() << endl;
+		break;
+	}
+ }
+}
+
+void BosonConfigScript::addBoolValue(const QString& key, bool v)
+{
+ addValue(new BoConfigBoolEntry(0, key, v, false));
+}
+
+void BosonConfigScript::addIntValue(const QString& key, int v)
+{
+ addValue(new BoConfigIntEntry(0, key, v, false));
+}
+
+void BosonConfigScript::addUIntValue(const QString& key, unsigned int v)
+{
+ addValue(new BoConfigUIntEntry(0, key, v, false));
+}
+
+void BosonConfigScript::addDoubleValue(const QString& key, double v)
+{
+ addValue(new BoConfigDoubleEntry(0, key, v, false));
+}
+
+void BosonConfigScript::addStringValue(const QString& key, const QString& v)
+{
+ addValue(new BoConfigStringEntry(0, key, v, false));
+}
+
+void BosonConfigScript::addIntListValue(const QString& key, const QValueList<int>& v)
+{
+ addValue(new BoConfigIntListEntry(0, key, v, false));
+}
+
+void BosonConfigScript::addColorValue(const QString& key, const QColor& v)
+{
+ addValue(new BoConfigColorEntry(0, key, v, false));
+}
+
+
+
+
 
 class BosonConfig::BosonConfigPrivate
 {
@@ -268,6 +587,7 @@ public:
 
 	QPtrList<BoConfigEntry> mConfigEntries;
 	QDict<BoConfigEntry> mDynamicEntries; // added dynamically.
+	QPtrList<BosonConfigScript> mConfigScripts;
 };
 
 BosonConfig::BosonConfig(KConfig* conf)
@@ -278,7 +598,16 @@ BosonConfig::BosonConfig(KConfig* conf)
  // there
  d->mDynamicEntries.setAutoDelete(false);
 
+ initConfigEntries();
 
+ // load from config
+ reset(conf);
+
+ initScripts();
+}
+
+void BosonConfig::initConfigEntries()
+{
  addDynamicEntryBool("Sound", false);
  addDynamicEntryBool("Music", true);
  addDynamicEntryBool("MMBMove", true);
@@ -374,9 +703,86 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntryBool("debug_render_items", true, false);
  addDynamicEntryBool("debug_render_water", true, false);
  addDynamicEntryBool("debug_render_particles", true, false);
+}
 
- // load from config
- reset(conf);
+void BosonConfig::initScripts()
+{
+ // note: this method won't modify any config values!
+
+ BosonConfigScript* defaultRendering = new BosonConfigScript("DefaultRendering");
+ addConfigScript(defaultRendering);
+ defaultRendering->addDefaultValueOf("TextureFilter", this);
+ defaultRendering->addDefaultValueOf("TextureCompression", this);
+ defaultRendering->addDefaultValueOf("TextureColorMipmaps", this);
+ defaultRendering->addDefaultValueOf("UseLight", this);
+ defaultRendering->addDefaultValueOf("UseMaterials", this);
+ defaultRendering->addDefaultValueOf("GroundRendererClass", this);
+ defaultRendering->addDefaultValueOf("UseGroundShaders", this);
+ defaultRendering->addDefaultValueOf("UseUnitShaders", this);
+ defaultRendering->addDefaultValueOf("ShaderSuffixes", this);
+ defaultRendering->addDefaultValueOf("ShadowMapResolution", this);
+ defaultRendering->addDefaultValueOf("MeshRenderer", this);
+ defaultRendering->addDefaultValueOf("UseLOD", this);
+ defaultRendering->addDefaultValueOf("DefaultLOD", this);
+ defaultRendering->addDefaultValueOf("SmoothShading", this);
+
+ BosonConfigScript* bestRendering = new BosonConfigScript("BestQualityRendering");
+ addConfigScript(bestRendering);
+ bestRendering->addDefaultValueOf("TextureFilter", this);
+ bestRendering->addDefaultValueOf("TextureCompression", this);
+ bestRendering->addDefaultValueOf("TextureColorMipmaps", this);
+ bestRendering->addDefaultValueOf("UseLight", this);
+ bestRendering->addDefaultValueOf("UseMaterials", this);
+ bestRendering->addDefaultValueOf("GroundRendererClass", this);
+ bestRendering->addBoolValue("UseGroundShaders", true);
+ bestRendering->addBoolValue("UseUnitShaders", true);
+ bestRendering->addStringValue("ShaderSuffixes", "-vhi,-hi,-med,-low");
+ bestRendering->addIntValue("ShadowMapResolution", 2048);
+ bestRendering->addDefaultValueOf("MeshRenderer", this);
+ bestRendering->addDefaultValueOf("UseLOD", this);
+ bestRendering->addDefaultValueOf("DefaultLOD", this);
+ bestRendering->addDefaultValueOf("SmoothShading", this);
+
+
+ BosonConfigScript* fastRendering = new BosonConfigScript("FastRendering");
+ addConfigScript(fastRendering);
+ fastRendering->addIntValue("TextureFilter", GL_LINEAR);
+ fastRendering->addBoolValue("TextureCompression", true);
+ fastRendering->addDefaultValueOf("TextureColorMipmaps", this);
+ fastRendering->addBoolValue("UseLight", false);
+ fastRendering->addBoolValue("UseMaterials", false);
+ fastRendering->addStringValue("GroundRendererClass", "BoFastGroundRenderer");
+ fastRendering->addBoolValue("UseGroundShaders", false);
+ fastRendering->addBoolValue("UseUnitShaders", false);
+ fastRendering->addStringValue("ShaderSuffixes", "-low");
+ fastRendering->addIntValue("ShadowMapResolution", 512);
+ fastRendering->addDefaultValueOf("MeshRenderer", this);
+ fastRendering->addBoolValue("UseLOD", true);
+ fastRendering->addDefaultValueOf("DefaultLOD", this);
+ fastRendering->addDefaultValueOf("SmoothShading", this);
+
+
+
+ BosonConfigScript* softwareRendering = new BosonConfigScript("SoftwareRendering");
+ addConfigScript(softwareRendering);
+ softwareRendering->addBoolValue("UseLight", false);
+ softwareRendering->addBoolValue("UseMaterials", false);
+ softwareRendering->addBoolValue("UseLOD", true);
+ softwareRendering->addBoolValue("UseVBO", true);
+ softwareRendering->addBoolValue("WaterShaders", false);
+ softwareRendering->addBoolValue("WaterReflections", false);
+ softwareRendering->addBoolValue("WaterTranslucency", false);
+ softwareRendering->addBoolValue("WaterBumpmapping", false);
+ softwareRendering->addBoolValue("WaterAnimatedBumpmaps", false);
+ softwareRendering->addIntValue("TextureFilter", GL_NEAREST);
+ softwareRendering->addBoolValue("TextureCompression", false);
+ softwareRendering->addBoolValue("UseGroundShaders", false);
+ softwareRendering->addBoolValue("UseUnitShaders", false);
+ softwareRendering->addBoolValue("SmoothShading", false);
+// softwareRendering->addStringValue("MeshRenderer", "BoMeshRendererVertexArray");
+ softwareRendering->addStringValue("GroundRendererClass", "BoVeryFastGroundRenderer");
+
+
 }
 
 BosonConfig::~BosonConfig()
@@ -1123,4 +1529,32 @@ QValueList<int> BosonConfig::intListDefaultValue(const QString& key, const QValu
  }
  return ((BoConfigIntListEntry*)entry)->defaultValue();
 }
+
+void BosonConfig::addConfigScript(BosonConfigScript* script)
+{
+ BO_CHECK_NULL_RET(script);
+ if (script->name().isEmpty()) {
+	boError() << k_funcinfo << "empty names are not allowed" << endl;
+	delete script;
+	return;
+ }
+ if (configScript(script->name())) {
+	boError() << k_funcinfo << "script named " << script->name() << " already added" << endl;
+	delete script;
+	return;
+ }
+ d->mConfigScripts.append(script);
+}
+
+const BosonConfigScript* BosonConfig::configScript(const QString& name) const
+{
+ for (QPtrListIterator<BosonConfigScript> it(d->mConfigScripts); it.current(); ++it) {
+	if (it.current()->name() == name) {
+		return it.current();
+	}
+ }
+ return 0;
+}
+
+
 

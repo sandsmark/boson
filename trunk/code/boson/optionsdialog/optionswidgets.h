@@ -30,6 +30,7 @@
 class Player;
 class Boson;
 class BosonConfig;
+class BosonConfigScript;
 class BoFontInfo;
 class KIntNumInput;
 class KDoubleNumInput;
@@ -54,6 +55,7 @@ public:
 
 	void addConfigOptionWidget(ConfigOptionWidget* w);
 
+	virtual void loadFromConfigScript(const BosonConfigScript* script);
 	virtual void load(); // load from current game values
 	virtual void apply();
 	virtual void setDefaults(); // reset to hardcoded defaults
