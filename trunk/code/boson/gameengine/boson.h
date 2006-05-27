@@ -570,6 +570,12 @@ protected:
 	 **/
 	void recalculatePlayerLists();
 
+	/**
+	 * Like @ref recalculatePlayerLists, but pretends that @p removedPlayer
+	 * was already removed from the players list.
+	 **/
+	void recalculatePlayerListsWithPlayerRemoved(KPlayer* removedPlayer);
+
 protected slots:
 	/**
 	 * A network message arrived. Most game logic stuff is done here as

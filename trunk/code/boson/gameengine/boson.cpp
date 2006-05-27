@@ -792,14 +792,28 @@ void Boson::systemAddPlayer(KPlayer* p)
  } else {
 	boDebug() << k_funcinfo << "player " << p->kgameId() << " already has a userId: " << p->userId() << endl;
  }
+ bool have = false;
+ if (playerList()->contains(p)) {
+	have = true;
+ }
+ blockSignals(true);
  KGame::systemAddPlayer(p);
+ blockSignals(false);
+
  recalculatePlayerLists();
+ if (!have) {
+	if (playerList()->contains(p)) {
+		emit signalPlayerJoinedGame(p);
+	}
+ }
 }
 
 void Boson::systemRemovePlayer(KPlayer* p, bool deleteIt)
 {
+ // AB: make sure that the player lists do NOT include this player anymore, when
+ //     signalPlayerLeftGame() is emitted
+ recalculatePlayerListsWithPlayerRemoved(p);
  KGame::systemRemovePlayer(p, deleteIt);
- recalculatePlayerLists();
 }
 
 void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UINT32 sender)
@@ -1322,7 +1336,7 @@ QValueList<QColor> Boson::availableTeamColors() const
  QPtrListIterator<Player> it(*gamePlayerList());
  while (it.current()) {
 	if (it.current()->speciesTheme()) {
-		boDebug() << k_funcinfo <<  endl;
+		boDebug() << k_funcinfo << endl;
 		colors.remove(it.current()->speciesTheme()->teamColor());
 	}
 	++it;
@@ -2025,10 +2039,18 @@ bool Boson::changeUserIdOfPlayer(Player* p, unsigned int newId)
 
 void Boson::recalculatePlayerLists()
 {
+ recalculatePlayerListsWithPlayerRemoved(0);
+}
+
+void Boson::recalculatePlayerListsWithPlayerRemoved(KPlayer* removedPlayer)
+{
  d->mAllPlayerList.clear();
  d->mGamePlayerList.clear();
  d->mActiveGamePlayerList.clear();
  for (QPtrListIterator<KPlayer> it(*playerList()); it.current(); ++it) {
+	if (it.current() == removedPlayer) {
+		continue;
+	}
 	Player* p = (Player*)it.current();
 	d->mAllPlayerList.append(p);
 	if (p->isGamePlayer()) {
