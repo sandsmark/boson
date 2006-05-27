@@ -47,6 +47,11 @@ bool boglResolveGLSymbols()
  return true;
 #endif
 
+ static bool isResolved = false;
+ if (isResolved) {
+	return true;
+ }
+
  bool ret = true;
 
  QLibrary* gl = loadLibrary("GL");
@@ -74,6 +79,8 @@ bool boglResolveGLSymbols()
  if (!ret) {
 	return false;
  }
+
+ isResolved = true;
  return true;
 }
 
