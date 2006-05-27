@@ -4,6 +4,7 @@
 #include <bobmfconverter/libgfx/config-libgfx.h>
 #include <bomemory/config-bomemory.h>
 #include <boson/config-boson.h>
+#include <bodebug/config-bodebug.h>
 
 #cmakedefine HAVE_SYS_TIME_H 1
 

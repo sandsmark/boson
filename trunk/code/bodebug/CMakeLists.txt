@@ -1,5 +1,13 @@
 project(libbodebug)
 
+include(CheckFunctionExists)
+check_function_exists(backtrace HAVE_BACKTRACE)
+
+# create config.h
+#include(ConfigureChecks.cmake)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config-bodebug.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-bodebug.h )
+
+
 add_subdirectory(bodebugdialog)
 
 include_directories(
