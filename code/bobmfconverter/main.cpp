@@ -32,6 +32,7 @@
 #include "processors/textureoptimizer.h"
 #include "processors/materialoptimizer.h"
 #include "processors/defaultmaterials.h"
+#include "processors/normalcalculator.h"
 
 #include <qstring.h>
 #include <qfileinfo.h>
@@ -74,6 +75,8 @@ bool g_tex_optimize = false;
 bool g_model_center = false;
 bool g_tex_dontLoad = false;
 bool g_meshes_merge = true;
+bool g_usenormalcalculator = true;
+float g_normalcalculator_threshold = 0.6;
 
 
 double starttime;
@@ -455,6 +458,8 @@ bool loadConfigFile(Model* m)
   cfg.setGroup("Model");
   g_modelSize = (float)cfg.readDoubleNumEntry("Size", g_modelSize);
   g_meshes_merge = cfg.readBoolEntry("MergeMeshes", g_meshes_merge);
+  g_usenormalcalculator = cfg.readBoolEntry("UseNormalCalculator", g_usenormalcalculator);
+  g_normalcalculator_threshold = (float)cfg.readDoubleNumEntry("NormalCalculatorThreshold", g_normalcalculator_threshold);
 
   return true;
 }
@@ -665,6 +670,10 @@ bool doModelProcessing(Model* m)
     processorList.append(textureOptimizer);
   }
 
+  if(g_usenormalcalculator)
+  {
+    processorList.append(new NormalCalculator(g_normalcalculator_threshold));
+  }
   processorList.append(new MaterialOptimizer());
   if(g_meshes_merge)
   {
@@ -681,11 +690,14 @@ bool doModelProcessing(Model* m)
   processorList.clear();
 
 
-  boDebug() << "Calculating model's face normals..." << endl;
-  m->calculateFaceNormals();
+  if(!g_usenormalcalculator)
+  {
+    boDebug() << "Calculating model's face normals..." << endl;
+    m->calculateFaceNormals();
 
-  boDebug() << "Calculating model's vertex normals..." << endl;
-  m->calculateVertexNormals();
+    boDebug() << "Calculating model's vertex normals..." << endl;
+    m->calculateVertexNormals();
+  }
 
   boDebug() << "Creating lods..." << endl;
   m->createLODs(g_numLods);
