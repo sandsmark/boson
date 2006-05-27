@@ -147,6 +147,10 @@ private:
 class BoSyncCheckMessageBase
 {
 public:
+	virtual ~BoSyncCheckMessageBase()
+	{
+	}
+
 	/**
 	 * Called to create the sync message.
 	 **/
