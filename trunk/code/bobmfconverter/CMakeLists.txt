@@ -83,6 +83,7 @@ set(bobmfconverter_SRCS
 	processors/lodcreator.cpp
 	processors/materialoptimizer.cpp
 	processors/meshoptimizer.cpp
+	processors/normalcalculator.cpp
 	processors/textureoptimizer.cpp
 	processors/transformer.cpp
 	processors/unuseddataremover.cpp
