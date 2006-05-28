@@ -243,3 +243,18 @@ install_targets(/bin
 	bocommandframetester
 )
 
+################ boson-no-gui #################
+set(bofileconverter_SRCS
+	bofileconvertermain.cpp
+)
+kde3_automoc(${bosonNoGUI_SRCS})
+kde3_add_executable(bofileconverter ${bofileconverter_SRCS})
+target_link_libraries(bofileconverter
+	gameengine
+	common
+	kio
+	${QT_AND_KDECORE_LIBS}
+	${LIB_BOMEMORY}
+)
+
+
