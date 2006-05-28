@@ -218,7 +218,7 @@ public:
 
 	bool inFrontOfPlane(float x, float y, float z) const
 	{
-		return behindPlane(BoVector3Float(x, y, z));
+		return inFrontOfPlane(BoVector3Float(x, y, z));
 	}
 	bool inFrontOfPlane(const BoVector3Float& pos) const
 	{
