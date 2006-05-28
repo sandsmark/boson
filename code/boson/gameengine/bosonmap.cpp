@@ -828,6 +828,72 @@ QByteArray BosonMap::saveWaterToFile() const
  return doc.toCString();
 }
 
+
+bool BosonMap::calculateMiniMapGround(int x, int y, int* _r, int* _g, int* _b, bool* coveredByWater)
+{
+ if (!groundTheme()) {
+	BO_NULL_ERROR(groundTheme());
+	return false;
+ }
+ if (!texMap()) {
+	BO_NULL_ERROR(texMap());
+	return false;
+ }
+ if (!isValidCell(x, y)) {
+	boError() << k_funcinfo << "invalid cell: (" << x << ", " << y << ")" << endl;
+	return false;
+ }
+
+ // every cell has four corners - we mix them together to get the actual minimap
+ // color.
+ unsigned int cornerX[4] = { x, x + 1, x + 1,     x };
+ unsigned int cornerY[4] = { y,     y, y + 1, y + 1 };
+ int r = 0;
+ int g = 0;
+ int b = 0;
+ for (int j = 0; j < 4; j++) {
+	int alphaSum = 0; // sum of all textures
+	int cornerRed = 0;
+	int cornerGreen = 0;
+	int cornerBlue = 0;
+
+	for (unsigned int i = 0; i < groundTheme()->groundTypeCount(); i++) {
+		int alpha = (int)texMapAlpha(i, cornerX[j], cornerY[j]);
+		alphaSum += alpha;
+
+		QRgb rgb = groundTheme()->groundType(i)->color;
+		int red = qRed(rgb);
+		int green = qGreen(rgb);
+		int blue = qBlue(rgb);
+		cornerRed += red * alpha / 255;
+		cornerGreen += green * alpha / 255;
+		cornerBlue += blue * alpha / 255;
+	}
+	if (alphaSum == 0) {
+		// nothing to do for this corner.
+		continue;
+	}
+	cornerRed = cornerRed * 255 / alphaSum;
+	cornerGreen = cornerGreen * 255 / alphaSum;
+	cornerBlue = cornerBlue * 255 / alphaSum;
+
+	r += cornerRed;
+	g += cornerGreen;
+	b += cornerBlue;
+ }
+
+ r /= 4;
+ g /= 4;
+ b /= 4;
+
+ (*_r) = r;
+ (*_g) = g;
+ (*_b) = b;
+ (*coveredByWater) = cell(x, y)->isWater();
+
+ return true;
+}
+
 bool BosonMap::saveCompleteMap(QDataStream& stream) const
 {
  // AB: we may have a problem here - this stream is meant to be sent through

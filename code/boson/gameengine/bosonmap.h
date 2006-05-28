@@ -742,6 +742,19 @@ public:
 
 	QByteArray saveTexMapImage(unsigned int texture) const;
 
+	/**
+	 * Calculate the color of a cell @p x, @p y, as it is meant to be
+	 * displayed in the minimap. The calculated value is returned in @p _p,
+	 * @p _g, @p _b.
+	 *
+	 * If @p coveredByWater is set to TRUE, then the calculated color should
+	 * not be used, as there is water on the ground.
+	 *
+	 * @return TRUE if the cell is valid and the values could be
+	 * calculated. Otherwise FALSE.
+	 **/
+	bool calculateMiniMapGround(int x, int y, int* _r, int* _g, int* _b, bool* coveredByWater);
+
 	void setModified(bool m) { mModified = m; }
 	bool modified() const { return mModified; }
 

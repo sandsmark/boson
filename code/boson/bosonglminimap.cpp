@@ -576,56 +576,19 @@ void BosonGLMiniMap::calculateGround(int x, int y)
  BO_CHECK_NULL_RET(mRenderer);
  BO_CHECK_NULL_RET(groundTheme());
  BO_CHECK_NULL_RET(canvas());
+ BO_CHECK_NULL_RET(canvas()->map());
  BosonMap* map = canvas()->map();
- BO_CHECK_NULL_RET(map->texMap());
- if (!map->isValidCell(x, y)) {
-	return;
- }
-
- // every cell has four corners - we mix them together to get the actual minimap
- // color.
- unsigned int cornerX[4] = { x, x + 1, x + 1,     x };
- unsigned int cornerY[4] = { y,     y, y + 1, y + 1 };
  int r = 0;
  int g = 0;
  int b = 0;
- for (int j = 0; j < 4; j++) {
-	int alphaSum = 0; // sum of all textures
-	int cornerRed = 0;
-	int cornerGreen = 0;
-	int cornerBlue = 0;
+ bool coveredByWater = false;
 
-	for (unsigned int i = 0; i < groundTheme()->groundTypeCount(); i++) {
-		int alpha = (int)map->texMapAlpha(i, cornerX[j], cornerY[j]);
-		alphaSum += alpha;
-
-		QRgb rgb = groundTheme()->groundType(i)->color;
-		int red = qRed(rgb);
-		int green = qGreen(rgb);
-		int blue = qBlue(rgb);
-		cornerRed += red * alpha / 255;
-		cornerGreen += green * alpha / 255;
-		cornerBlue += blue * alpha / 255;
-	}
-	if (alphaSum == 0) {
-		// nothing to do for this corner.
-		continue;
-	}
-	cornerRed = cornerRed * 255 / alphaSum;
-	cornerGreen = cornerGreen * 255 / alphaSum;
-	cornerBlue = cornerBlue * 255 / alphaSum;
-
-	r += cornerRed;
-	g += cornerGreen;
-	b += cornerBlue;
+ if (!map->calculateMiniMapGround(x, y, &r, &g, &b, &coveredByWater)) {
+	return;
  }
 
- r /= 4;
- g /= 4;
- b /= 4;
-
  mRenderer->setTerrainPoint(x, y, QColor(r, g, b));
- mRenderer->setWaterPoint(x, y, canvas()->cell(x, y)->isWater());
+ mRenderer->setWaterPoint(x, y, coveredByWater);
 }
 
 void BosonGLMiniMap::setImageTheme(const QString& theme)
