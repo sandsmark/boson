@@ -22,8 +22,8 @@
 // AB: in favor of readability we don't use real hex numbers, i.e. we use 0x10 == 10
 #define BOSON_VERSION_MAJOR 0x00
 #define BOSON_VERSION_MINOR 0x12
-#define BOSON_VERSION_MICRO 0x00
-#define BOSON_VERSION_STRING "0.12"
+#define BOSON_VERSION_MICRO 0x01
+#define BOSON_VERSION_STRING "0.12.1pre"
 
 #define BOSON_VERSION ((BOSON_VERSION_MAJOR << 16) | (BOSON_VERSION_MINOR << 8) | BOSON_VERSION_MICRO)
 
