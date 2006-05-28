@@ -773,8 +773,9 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
  //BoGroundRendererManager::manager()->currentRenderer()->generateCellList(d->mCanvas->map());
 
 
- bool useShadows = d->mUnitShader && boConfig->boolValue("UseUnitShaders");
- if (useShadows) {
+ bool useUnitShadows = d->mUnitShader && boConfig->boolValue("UseUnitShaders");
+ bool useGroundShadows = boConfig->boolValue("UseGroundShaders");
+ if (useUnitShadows || useGroundShadows) {
 	// Render the shadowmap
 	renderShadowMap(d->mCanvas);
  }
@@ -802,7 +803,7 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
  // Activate fog effect (if any)
  renderFog(d->mVisibleEffects);
 
- if (useShadows) {
+ if (useGroundShadows) {
 	activateShadowMap();
  }
 
@@ -815,9 +816,15 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
 	boError() << k_funcinfo << "after ground rendering" << endl;
  }
 
+ if(useGroundShadows && !useUnitShadows) {
+	deactivateShadowMap();
+ } else if(useUnitShadows && !useGroundShadows) {
+	activateShadowMap();
+ }
+
 
  if (boConfig->boolValue("debug_render_items")) {
-	if (useShadows) {
+   if (useUnitShadows) {
 		d->mUnitShader->bind();
 		renderItems();
 		d->mUnitShader->unbind();
@@ -826,7 +833,7 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
 	}
  }
 
- if (useShadows) {
+ if (useUnitShadows) {
 	deactivateShadowMap();
  }
 
