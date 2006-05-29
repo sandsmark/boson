@@ -51,7 +51,7 @@ int QListViewItemNumber::compare(QListViewItem* i, int col, bool ascending) cons
 QString QListViewItemNumberPrefix::key(int column, bool ascending) const
 {
  QString k = QListViewItemNumber::key(column, ascending);
- QRegExp r("^[0-9]+(\.[0-9]+)?");
+ QRegExp r("^[0-9]+(\\.[0-9]+)?");
  if (r.search(k) >= 0) {
 	return r.cap(0);
  }
