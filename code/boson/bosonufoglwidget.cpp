@@ -35,11 +35,11 @@ public:
 	BoUfoRealProfiling()
 	{
 	}
-	void BoUfoRealProfiling::push(const QString& name)
+	void push(const QString& name)
 	{
 		boProfiling->push(name);
 	}
-	void BoUfoRealProfiling::pop()
+	void pop()
 	{
 		boProfiling->pop();
 	}
