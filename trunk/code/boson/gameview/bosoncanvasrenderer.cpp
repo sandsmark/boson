@@ -540,6 +540,10 @@ public:
 
 		mMainSceneRenderTarget = 0;
 		mSceneRenderTargetCache = 0;
+
+		mUnitIconLand = 0;
+		mUnitIconAir = 0;
+		mUnitIconFacility = 0;
 	}
 	const BosonCanvas* mCanvas;
 	QValueVector<BoRenderItem> mRenderItemList;
@@ -571,6 +575,11 @@ public:
 
 	BoSceneRenderTarget* mMainSceneRenderTarget;
 	BoSceneRenderTargetCache* mSceneRenderTargetCache;
+
+	QValueList<Unit*> mIconicUnits;
+	BoTexture* mUnitIconLand;
+	BoTexture* mUnitIconAir;
+	BoTexture* mUnitIconFacility;
 };
 
 BosonCanvasRenderer::BosonCanvasRenderer()
@@ -599,6 +608,9 @@ BosonCanvasRenderer::~BosonCanvasRenderer()
  delete d->mShadowTarget;
  delete d->mShadowTexture;
  delete d->mShadowColorTexture;
+ delete d->mUnitIconLand;
+ delete d->mUnitIconAir;
+ delete d->mUnitIconFacility;
  delete d;
 }
 
@@ -618,6 +630,15 @@ void BosonCanvasRenderer::initGL()
 	// TODO: return false or so?
 	// -> glGenerateMipmapEXT() will be 0
  }
+
+ QString path = KGlobal::dirs()->findResourceDir("data", "boson/themes/ui/standard/uniticon-land.png");
+ if (path.isEmpty()) {
+	 boError() << k_funcinfo << "Couldn't find path for unit icons!" << endl;
+ }
+ path += "boson/themes/ui/standard/";
+ d->mUnitIconLand = new BoTexture(path + "uniticon-land.png");
+ d->mUnitIconAir = new BoTexture(path + "uniticon-air.png");
+ d->mUnitIconFacility = new BoTexture(path + "uniticon-facility.png");
 }
 
 void BosonCanvasRenderer::slotWidgetResized()
@@ -857,6 +878,9 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
  glDisable(GL_NORMALIZE);
 
  renderBulletTrailEffects(d->mVisibleEffects);
+
+ renderUnitIcons();
+
  d->mVisualFeedbacks->paintGL();
 
  if (renderToTexture) {
@@ -1579,6 +1603,9 @@ void BosonCanvasRenderer::renderItems(RenderFlags flags)
  QValueVector<BoRenderItem> transparentModels;
  transparentModels.reserve((int)(itemCount * 0.25));
 
+ d->mIconicUnits.clear();
+ const float baseIconifyDist = 80.0;
+
  // Model that is being used currently
  BosonModel* currentModel = 0;
  // Render all items
@@ -1587,6 +1614,12 @@ void BosonCanvasRenderer::renderItems(RenderFlags flags)
 	BosonItemRenderer* itemRenderer = d->mRenderItemList[i].itemRenderer;
 	if (!itemRenderer) {
 		BO_NULL_ERROR(itemRenderer);
+		continue;
+	}
+
+	float iconifyDist = baseIconifyDist * sqrt(item->width());
+	float distSq = (camera()->cameraPos() - BoVector3Float(item->centerX(), -item->centerY(), item->z())).dotProduct();
+	if (distSq >= iconifyDist*iconifyDist && (flags & DepthOnly)) {
 		continue;
 	}
 
@@ -1599,16 +1632,23 @@ void BosonCanvasRenderer::renderItems(RenderFlags flags)
 		glColor3ub(c.red(), c.green(), c.blue());
 	}
 
-	unsigned int lod;
-	currentModel = renderSingleItem(useLOD, camera(), item, itemRenderer, false, currentModel, &lod, flags);
+	if (distSq < iconifyDist*iconifyDist) {
+		unsigned int lod;
+		currentModel = renderSingleItem(useLOD, camera(), item, itemRenderer, false, currentModel, &lod, flags);
 
 
-	if (currentModel && currentModel->hasTransparentMeshes(lod)) {
-		transparentModels.append(d->mRenderItemList[i]);
-	}
+		if (currentModel && currentModel->hasTransparentMeshes(lod)) {
+			transparentModels.append(d->mRenderItemList[i]);
+		}
 
-	if (boConfig->boolValue("debug_boundingboxes") && !(flags & DepthOnly)) {
-		renderBoundingBox(item);
+		if (boConfig->boolValue("debug_boundingboxes") && !(flags & DepthOnly)) {
+			renderBoundingBox(item);
+		}
+	} else if (RTTI::isUnit(item->rtti())) {
+		Unit* u = (Unit*) item;
+		if (!u->isDestroyed()) {
+			d->mIconicUnits.append(u);
+		}
 	}
  }
 
@@ -1757,6 +1797,77 @@ void BosonCanvasRenderer::renderSelections(const BoItemList* selectedItems)
  }
  glPopAttrib();
  boTextureManager->invalidateCache();
+}
+
+void BosonCanvasRenderer::renderUnitIcons()
+{
+ if (d->mIconicUnits.count() == 0) {
+	return;
+ }
+
+ // Taken from renderParticles()
+ const BoMatrix& modelview = d->mGameMatrices->modelviewMatrix();
+ const BoVector3Float x(modelview[0], modelview[4], modelview[8]);
+ const BoVector3Float y(modelview[1], modelview[5], modelview[9]);
+ const BoVector3Float z(modelview[2], modelview[6], modelview[10]);
+
+ const BoVector3Float upperleft (-x + y);
+ const BoVector3Float upperright( x + y);
+ const BoVector3Float lowerright( x - y);
+ const BoVector3Float lowerleft (-x - y);
+
+ const BoVector4Float enemyColor(0.8, 0.0, 0.0, 0.8);
+ const BoVector4Float neutralColor(0.0, 0.4, 0.0, 0.3);
+ const BoVector4Float alliedColor(0.0, 0.0, 1.0, 0.8);
+
+
+ glEnable(GL_BLEND);
+ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+ glEnable(GL_ALPHA_TEST);
+ glAlphaFunc(GL_GEQUAL, 0.1);
+
+ for (QValueList<Unit*>::Iterator it = d->mIconicUnits.begin(); it != d->mIconicUnits.end(); ++it) {
+	Unit* u = *it;
+	BoVector3Float pos(u->centerX(), -u->centerY(), u->centerZ());
+	float distSq = (camera()->cameraPos() - pos).dotProduct();
+	float dist = sqrt(distSq);
+	float sqrtwidth = sqrt(u->width());
+
+	// Select icon size
+	float iconsize = 0.6f * (dist / 70) * sqrtwidth;
+	BoVector3Float shift = z * iconsize;
+
+	// Select color
+	BoVector4Float color;
+	if (localPlayerIO()->isEnemy(u)) {
+		glColor4fv(enemyColor.data());
+	} else if (localPlayerIO()->isNeutral(u)) {
+		glColor4fv(neutralColor.data());
+	} else {
+		glColor4fv(alliedColor.data());
+	}
+
+	// Select texture
+	if (u->unitProperties()->isFacility()) {
+		d->mUnitIconFacility->bind();
+	} else if (u->unitProperties()->isAircraft()) {
+		d->mUnitIconAir->bind();
+	} else {
+		d->mUnitIconLand->bind();
+	}
+
+	// Render icon
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0, 1.0);  glVertex3fv((pos + (upperleft  * iconsize) + shift).data());
+		glTexCoord2f(1.0, 1.0);  glVertex3fv((pos + (upperright * iconsize) + shift).data());
+		glTexCoord2f(1.0, 0.0);  glVertex3fv((pos + (lowerright * iconsize) + shift).data());
+		glTexCoord2f(0.0, 0.0);  glVertex3fv((pos + (lowerleft  * iconsize) + shift).data());
+	glEnd();
+ }
+
+ glColor4ub(255, 255, 255, 255);
+ glDisable(GL_BLEND);
+ glDisable(GL_ALPHA_TEST);
 }
 
 void BosonCanvasRenderer::renderPathLines(const BosonCanvas* canvas, QValueList<QPoint>& path, bool isFlying, float _z)
