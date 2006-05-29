@@ -143,6 +143,7 @@ protected slots:
 protected:
 	void renderGround(const BosonMap*, RenderFlags flags = Default);
 	void renderItems(RenderFlags flags = Default);
+	void renderUnitIcons();
 	void renderSelections(const BoItemList* selectedItems);
 	void renderWater();
 	void renderFog(BoVisibleEffects&);
