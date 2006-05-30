@@ -1,4 +1,5 @@
-find_package(PythonLibs REQUIRED)
+#find_package(PythonLibs REQUIRED)
+find_package(BosonPythonLibs REQUIRED)
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/bodebug
