@@ -370,8 +370,7 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, const BosonWeapon* wea
   {
     case BosonShot::Bullet:
     {
-      ((BosonShotBullet*)s)->setTarget(target);
-      s->explode();
+      // Doesn't need initing
       break;
     }
     case BosonShot::Rocket:
@@ -696,6 +695,14 @@ void BosonWeapon::shoot(const BoVector3Fixed& pos, const BoVector3Fixed& target)
   }
   BosonShot* shot = mProp->newShot(unit(), this, pos, target);
   canvas()->shotFired(shot, this);
+
+  // Bullet needs to be moved to target and exploded immediately
+  if(mProp->shotType() == BosonShot::Bullet)
+  {
+    ((BosonShotBullet*)shot)->setTarget(target);
+    shot->explode();
+  }
+
   mReloadCounter = reloadingTime();
   mAmmunition = 0;
 }
