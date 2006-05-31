@@ -580,7 +580,7 @@ void BosonUfoCanvasWidget::slotShotHit(BosonShot* shot)
 	d->mEffectManager->loadWeaponType(shot->properties());
 	switch (shot->type()) {
 		case BosonShot::Bullet:
-			effects->setEffects(d->mEffectManager->newFlyEffects(shot->properties(), pos, 0), &d->mEffects);
+			effects->updateEffectsPosition();
 			break;
 		case BosonShot::Rocket:
 			break;
@@ -733,7 +733,9 @@ void BosonUfoCanvasWidget::slotAddItemContainerData(BosonItemContainer* c)
 	BosonShot* shot = (BosonShot*)item;
 	switch (shot->type()) {
 		case BosonShot::Bullet:
-			break;
+			// Fall through
+		case BosonShot::Missile:
+			// Fall through
 		case BosonShot::Rocket:
 		{
 			d->mEffectManager->loadWeaponType(shot->properties());
@@ -749,13 +751,6 @@ void BosonUfoCanvasWidget::slotAddItemContainerData(BosonItemContainer* c)
 			break;
 		case BosonShot::Fragment:
 			break;
-		case BosonShot::Missile:
-		{
-			d->mEffectManager->loadWeaponType(shot->properties());
-			BoVector3Fixed pos(shot->x(), shot->y(), shot->z());
-			effects->setEffects(d->mEffectManager->newFlyEffects(shot->properties(), pos, 0.0), &d->mEffects);
-			break;
-		}
 		default:
 			break;
 	}
