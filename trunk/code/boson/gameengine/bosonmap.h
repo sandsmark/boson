@@ -695,6 +695,7 @@ public:
 
 
 	QByteArray saveMapToFile() const;
+	QByteArray saveMapPreviewPNGToFile() const;
 	QByteArray saveWaterToFile() const;
 
 
@@ -753,7 +754,7 @@ public:
 	 * @return TRUE if the cell is valid and the values could be
 	 * calculated. Otherwise FALSE.
 	 **/
-	bool calculateMiniMapGround(int x, int y, int* _r, int* _g, int* _b, bool* coveredByWater);
+	bool calculateMiniMapGround(int x, int y, int* _r, int* _g, int* _b, bool* coveredByWater) const;
 
 	void setModified(bool m) { mModified = m; }
 	bool modified() const { return mModified; }

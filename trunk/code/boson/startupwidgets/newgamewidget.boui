@@ -620,6 +620,27 @@
            <takesKeyboardFocus/>
           </Properties>
          </Widget>
+         <Widget>
+          <ClassName>BoUfoWidget</ClassName>
+          <Properties>
+           <name>mMapPreviewContainer</name>
+           <constraints/>
+           <gridLayoutColumns/>
+           <gridLayoutRows/>
+           <opaque/>
+           <layout/>
+           <minimumWidth/>
+           <minimumHeight/>
+           <preferredWidth/>
+           <preferredHeight/>
+           <backgroundImageFile/>
+           <verticalAlignment/>
+           <horizontalAlignment/>
+           <borderType/>
+           <stretch>1</stretch>
+           <takesKeyboardFocus/>
+          </Properties>
+         </Widget>
         </Widget>
         <Widget>
          <ClassName>BoUfoWidget</ClassName>
