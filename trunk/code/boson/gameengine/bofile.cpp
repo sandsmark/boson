@@ -171,8 +171,11 @@ bool BoFile::hasEntry(const QString& file, const QString& subdir, bool isFile) c
 	dir = topLevel;
  } else {
 	const KArchiveEntry* e = topLevel->entry(subdir);
+	if (!e) {
+		return false;
+	}
 	if (!e->isDirectory()) {
-		boError() << k_funcinfo << subdir << " is not a directory" << endl;
+		boError() << k_funcinfo << subdir << " exists, but is not a directory" << endl;
 		return false;
 	} else {
 		dir = (const KArchiveDirectory*)e;
