@@ -36,6 +36,7 @@
 #include <qdatastream.h>
 #include <qimage.h>
 #include <qdom.h>
+#include <qbuffer.h>
 
 #define BOSONMAP_VERSION 0x01 // current version
 
@@ -828,8 +829,44 @@ QByteArray BosonMap::saveWaterToFile() const
  return doc.toCString();
 }
 
+QByteArray BosonMap::saveMapPreviewPNGToFile() const
+{
+ QByteArray imageData;
+ QBuffer imageBuffer(imageData);
+ imageBuffer.open(IO_WriteOnly);
+ QImage image(width(), height(), 32);
 
-bool BosonMap::calculateMiniMapGround(int x, int y, int* _r, int* _g, int* _b, bool* coveredByWater)
+ for (unsigned int y = 0; y < height(); y++) {
+	unsigned int* line = (unsigned int*)image.scanLine(y);
+	for (unsigned int x = 0; x < width(); x++) {
+		unsigned int* p = line + x;
+		bool isWater;
+		int r, g, b;
+		if (!calculateMiniMapGround(x, y, &r, &g, &b, &isWater)) {
+			boError() << k_funcinfo << "unable to calculate color at " << x << "," << y << endl;
+			return QByteArray();
+		}
+		if (isWater) {
+			// uff - ugly hardcoded color...
+			// see bosonglminimap.cpp for the most up to date
+			// implementation
+			*p = qRgb(0,64,192);
+		} else {
+			*p = qRgb(r,g,b);
+		}
+	}
+ }
+
+
+ if (!image.save(&imageBuffer, "PNG", 75)) {
+	boError() << k_funcinfo << "error saving PNG" << endl;
+	return QByteArray();
+ }
+ return imageData;
+}
+
+
+bool BosonMap::calculateMiniMapGround(int x, int y, int* _r, int* _g, int* _b, bool* coveredByWater) const
 {
  if (!groundTheme()) {
 	BO_NULL_ERROR(groundTheme());
@@ -882,6 +919,17 @@ bool BosonMap::calculateMiniMapGround(int x, int y, int* _r, int* _g, int* _b, b
 	b += cornerBlue;
  }
 
+ // TODO: maybe also take the heightmap/normalmap into account?
+ //       heightmap: something like this is acceptable:
+ //       h = pixelValueAtHeightMapForCell(x,y)
+ //       h += 113; // "113 := 1.0f" -> 113 .. 368
+ //       h /= 255;
+ //       h = sqrtf(h);
+ //       h = sqrtf(h); // optional
+ // another idea: use the normal of the cell to actually calculate the light at
+ // that position
+ // -> for the mappreview we might simply use a random light position or so
+
  r /= 4;
  g /= 4;
  b /= 4;
@@ -896,9 +944,8 @@ bool BosonMap::calculateMiniMapGround(int x, int y, int* _r, int* _g, int* _b, b
 
 bool BosonMap::saveCompleteMap(QDataStream& stream) const
 {
- // AB: we may have a problem here - this stream is meant to be sent through
- // network, but it is very big! (sometimes several MB)
- // we should compress it!
+ // AB: note we don't save the map preview here - it can be reconstructed from
+ //     the map data.
 
  QByteArray buffer;
  buffer = saveMapToFile();

@@ -45,6 +45,7 @@
 
 #include <qguardedptr.h>
 #include <qtimer.h>
+#include <qimage.h>
 
 #warning TODO: implement!
 #define HAVE_CHAT_WIDGET 0
@@ -276,6 +277,7 @@ public:
 
     QGuardedPtr<Player> mLocalPlayer;
 
+    BoUfoLabel* mMapPreview;
     BoUfoColorChooser* mPlayerColor;
 
     int mComputerPlayerNumber;
@@ -304,6 +306,13 @@ BoUfoNewGameWidget::BoUfoNewGameWidget(BosonStartupNetwork* interface)
  mPlayerColorContainer->addWidget(d->mPlayerColor);
  connect(d->mPlayerColor, SIGNAL(signalColorSelected(int)),
         this, SLOT(slotPlayerColorChanged(int)));
+
+ // TODO: use a fixed size
+ d->mMapPreview = new BoUfoLabel();
+ mMapPreviewContainer->setLayoutClass(BoUfoWidget::UHBoxLayout);
+ mMapPreviewContainer->addWidget(d->mMapPreview);
+ d->mMapPreview->setVerticalAlignment(BoUfoWidget::AlignVCenter);
+ d->mMapPreview->setHorizontalAlignment(BoUfoWidget::AlignHCenter);
 
  initPlayFields();
  d->mPlayFieldSelection->setCurrentCampaignWithIndex(0);
@@ -753,6 +762,14 @@ void BoUfoNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
     mMapDescription->setText(i18n("There is no comment for this map available"));
  } else {
     mMapDescription->setText(description->comment());
+ }
+ if (field->mapPreviewPNGData().size() > 0) {
+   d->mMapPreview->setText("");
+   QImage preview(field->mapPreviewPNGData());
+   d->mMapPreview->setIcon(preview);
+ } else {
+   d->mMapPreview->setText(i18n("No preview available"));
+   d->mMapPreview->setIcon(BoUfoImage());
  }
  playerCountChanged();
  possibleSidesChanged();

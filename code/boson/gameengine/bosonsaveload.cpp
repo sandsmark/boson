@@ -213,6 +213,7 @@ bool BosonSaveLoad::saveToFile(const QMap<QString, QByteArray>& files, const QSt
  QByteArray heightMap = files["map/heightmap.png"];
  QByteArray texMap = files["map/texmap"];
  QByteArray descriptionXML = files["C/description.xml"];
+ QByteArray mapPreviewPNG = files["mappreview/map.png"];
  if (kgameXML.size() == 0) {
 	boError() << k_funcinfo << "no kgameXML found" << endl;
 	return false;
@@ -298,6 +299,11 @@ bool BosonSaveLoad::saveToFile(const QMap<QString, QByteArray>& files, const QSt
 	return false;
  }
  writtenFiles.append("C/description.xml");
+ if (!f.writeFile(QString::fromLatin1("map.png"), mapPreviewPNG, QString::fromLatin1("mappreview"))) {
+	boError() << k_funcinfo << "Could not write mappreview to " << file << endl;
+	return false;
+ }
+ writtenFiles.append("mappreview/map.png");
 
  QStringList scripts = QStringList(files.keys()).grep(QRegExp("^scripts"));
  for (QStringList::iterator it = scripts.begin(); it != scripts.end(); ++it) {

@@ -385,6 +385,7 @@ bool BosonPlayField::preLoadPlayField(const QString& file)
 	return false;
  }
  mIdentifier = mFile->identifier();
+ mMapPreviewPNGData = mFile->fileData("map.png", "mappreview");
 
  mFileName = file;
  mPreLoaded = true;
@@ -510,7 +511,7 @@ bool BosonPlayField::loadMapFromFile(const QByteArray& mapXML, const QByteArray&
  return ret;
 }
 
-QString BosonPlayField::saveDescriptionToFile()
+QString BosonPlayField::saveDescriptionToFile() const
 {
  if (!mDescription) {
 	BO_NULL_ERROR(mDescription);
@@ -519,7 +520,7 @@ QString BosonPlayField::saveDescriptionToFile()
  return mDescription->toString();
 }
 
-QByteArray BosonPlayField::saveMapToFile()
+QByteArray BosonPlayField::saveMapToFile() const
 {
  if (!mMap) {
 	boError() << k_funcinfo << "NULL map" << endl;
@@ -528,7 +529,7 @@ QByteArray BosonPlayField::saveMapToFile()
  return mMap->saveMapToFile();
 }
 
-QByteArray BosonPlayField::saveWaterToFile()
+QByteArray BosonPlayField::saveWaterToFile() const
 {
  if (!mMap) {
 	boError() << k_funcinfo << "NULL map" << endl;
@@ -537,7 +538,7 @@ QByteArray BosonPlayField::saveWaterToFile()
  return mMap->saveWaterToFile();
 }
 
-QByteArray BosonPlayField::saveTexMapToFile()
+QByteArray BosonPlayField::saveTexMapToFile() const
 {
  if (!mMap) {
 	boError() << k_funcinfo << "NULL map" << endl;
@@ -551,6 +552,16 @@ QByteArray BosonPlayField::saveTexMapToFile()
  }
  return file;
 }
+
+QByteArray BosonPlayField::saveMapPreviewPNGToFile() const
+{
+ if (!mMap) {
+	boError() << k_funcinfo << "NULL map" << endl;
+	return QByteArray();
+ }
+ return mMap->saveMapPreviewPNGToFile();
+}
+
 
 void BosonPlayField::quit()
 {
@@ -634,6 +645,11 @@ QByteArray BosonPlayField::exportTexMap(unsigned int texture) const
  return mMap->saveTexMapImage(texture);
 }
 
+QByteArray BosonPlayField::mapPreviewPNGData() const
+{
+ return mMapPreviewPNGData;
+}
+
 
 QStringList BosonPlayField::findAvailablePlayFields()
 {
@@ -699,6 +715,7 @@ bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
  QByteArray playersXML = mFile->playersData();
  QByteArray canvasXML = mFile->canvasData();
  QByteArray kgameXML = mFile->kgameData();
+ QByteArray mapPreviewPNG = mFile->fileData("map.png", "mappreview");
  if (!mFile->hasMapDirectory()) {
 	boWarning() << k_funcinfo << "need to convert from an old file" << endl;
 	BosonFileConverter converter;
@@ -773,6 +790,10 @@ bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
  if (externalXML.size() != 0) {
 	// AB: externalXML is optional only. only for loading games.
 	destFiles.insert("external.xml", externalXML);
+ }
+ if (mapPreviewPNG.size() != 0) {
+	// mappreview is optional. it's being displayed in the newgame widget.
+	destFiles.insert("mappreview/map.png", mapPreviewPNG);
  }
 
  if (!convertFilesToCurrentFormat(destFiles)) {
@@ -894,10 +915,18 @@ bool BosonPlayField::savePlayFieldToFiles(QMap<QString, QByteArray>& files)
 	return false;
  }
 
+ QByteArray mapPreviewPNG;
+ mapPreviewPNG = saveMapPreviewPNGToFile();
+ if (mapPreviewPNG.size() == 0) {
+	boError() << k_funcinfo << "saving map preview failed" << endl;
+	return false;
+ }
+
  files.insert("map/map.xml", mapXML);
  files.insert("map/water.xml", waterXML);
  files.insert("map/heightmap.png", heightMap);
  files.insert("map/texmap", texMap);
+ files.insert("mappreview/map.png", mapPreviewPNG);
  files.insert("C/description.xml", descriptionXML);
  boDebug() << k_funcinfo << "succeeded" << endl;
  return true;

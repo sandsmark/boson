@@ -111,6 +111,21 @@ public:
 	bool preLoadPlayField(const QString& file);
 
 	/**
+	 * The map preview is meant to be displayed in the newgame widget as a
+	 * short preview of the map before he actually plays it. The preview is
+	 * usually stored inside the playfield file (.bpf/.bsg) and thus very
+	 * static.
+	 *
+	 * You need to call @ref preLoadPlayField before using this.
+	 *
+	 * @return An PNG map preview. This preview is meant to display the @em
+	 * original map, so if the map was edited, the preview is out of date.
+	 * It is possible that there is no preview available for this map, an
+	 * empty byte array is returned then.
+	 **/
+	QByteArray mapPreviewPNGData() const;
+
+	/**
 	 * Load the playfield from @p files to this object.
 	 **/
 	bool loadPlayField(const QMap<QString, QByteArray>& files);
@@ -218,10 +233,11 @@ protected:
 	bool loadDescriptionFromFile(const QByteArray& xml);
 	bool loadMapFromFile(const QByteArray& xml, const QByteArray& heightMapImage, const QByteArray& texMap, const QByteArray& waterXML);
 
-	QString saveDescriptionToFile();
-	QByteArray saveMapToFile();
-	QByteArray saveWaterToFile();
-	QByteArray saveTexMapToFile();
+	QString saveDescriptionToFile() const;
+	QByteArray saveMapToFile() const;
+	QByteArray saveWaterToFile() const;
+	QByteArray saveTexMapToFile() const;
+	QByteArray saveMapPreviewPNGToFile() const;
 
 	/**
 	 * This takes a set of files, as loaded by @ref loadFromDiskToFiles, and
@@ -253,6 +269,7 @@ private:
 	BosonMap* mMap;
 	BosonPlayFieldInformation* mPlayFieldInformation;
 	BPFDescription* mDescription;
+	QByteArray mMapPreviewPNGData;
 	QString mIdentifier; // AB: this is not yet fully implemented - e.g. it isn't changed when saving or changing the map. should be the filename (see BPFFile::identifier())
 	bool mPreLoaded;
 	BPFFile* mFile;
