@@ -272,7 +272,6 @@ private:
 	QByteArray mMapPreviewPNGData;
 	QString mIdentifier; // AB: this is not yet fully implemented - e.g. it isn't changed when saving or changing the map. should be the filename (see BPFFile::identifier())
 	bool mPreLoaded;
-	BPFFile* mFile;
 	QString mFileName;
 };
 
