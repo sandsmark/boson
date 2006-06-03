@@ -2,16 +2,16 @@
 CanGoOnLand=true
 CanGoOnWater=false
 Speed=1.1
-AccelerationSpeed=0.2
+AccelerationSpeed=0.4
 
 [Boson Unit]
-Armor=2
+Armor=4
 ConstructedEffects=
-Description=Rocket launcher
+Description=Anti-air missile launcher
 DestroyedEffects=1002,3001,6001,7001
 ExplodingDamage=0
 ExplodingDamageRange=0
-Health=180
+Health=160
 HitPoint=0,0,0.4
 Id=10006
 IsFacility=false
@@ -22,7 +22,7 @@ Producer=0
 ProductionTime=10
 Requirements=3
 Shields=0
-SightRange=9
+SightRange=12
 SupportMiniMap=false
 TerrainType=1
 UnitDepth=0.8
@@ -40,14 +40,14 @@ ReportUnderAttack=report_underattack
 Shoot=shoot
 
 [Weapon_0]
-AccelerationSpeed=3
-CanShootAtAirUnits=false
-CanShootAtLandUnits=true
-Damage=200
+AccelerationSpeed=12
+CanShootAtAirUnits=true
+CanShootAtLandUnits=false
+Damage=80
 DamageRange=3
 FlyEffects=5001,5010
 HitEffects=2001
-MaxFlyDistance=24
+MaxFlyDistance=30
 MaxHeight=1
 Model=missile
 Name=Missiles
@@ -58,5 +58,5 @@ ShootEffects=
 SoundFly=
 SoundHit=hit
 SoundShoot=shoot
-Speed=8
-Type=Rocket
+Speed=20
+Type=Missile
