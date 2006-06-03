@@ -256,7 +256,6 @@ bool BosonPlayFieldInformation::loadMapInformation(const QByteArray& xml)
 BosonPlayField::BosonPlayField(QObject* parent) : QObject(parent, "BosonPlayField")
 {
  mMap = 0;
- mFile = 0;
  mPreLoaded = false;
  mPlayFieldInformation = new BosonPlayFieldInformation();
  mDescription = new BPFDescription();
@@ -267,7 +266,6 @@ BosonPlayField::~BosonPlayField()
  boDebug() << k_funcinfo << endl;
  delete mMap;
  delete mDescription;
- delete mFile;
  delete mPlayFieldInformation;
  boDebug() << k_funcinfo << "done" << endl;
 }
@@ -364,19 +362,18 @@ bool BosonPlayField::preLoadPlayField(const QString& file)
  if (isPreLoaded()) {
 	return true;
  }
- delete mFile;
- mFile = new BPFFile(file, true);
- if (!mFile->checkTar()) {
+ BPFFile boFile(file, true);
+ if (!boFile.checkTar()) {
 	boError() << k_funcinfo << "Oops - broken file " << file << endl;
 	return false;
  }
- if (!mPlayFieldInformation->loadInformation(mFile)) {
+ if (!mPlayFieldInformation->loadInformation(&boFile)) {
 	boError() << k_funcinfo << "Could not load playfield information" << endl;
 	return false;
  }
- QMap<QString, QByteArray> descriptions = mFile->descriptionsData();
+ QMap<QString, QByteArray> descriptions = boFile.descriptionsData();
  QByteArray descriptionXML = descriptions["C/description.xml"];
- if (descriptionXML.size() == 0 && !mFile->hasMapDirectory()) {
+ if (descriptionXML.size() == 0 && !boFile.hasMapDirectory()) {
 	boError() << k_funcinfo << "old savegame format not supported." << endl;
 	return false;
  }
@@ -384,14 +381,12 @@ bool BosonPlayField::preLoadPlayField(const QString& file)
 	boError() << k_funcinfo << "Could not load description file" << endl;
 	return false;
  }
- mIdentifier = mFile->identifier();
- mMapPreviewPNGData = mFile->fileData("map.png", "mappreview");
+ mIdentifier = boFile.identifier();
+ mMapPreviewPNGData = boFile.fileData("map.png", "mappreview");
 
  mFileName = file;
  mPreLoaded = true;
 
- delete mFile;
- mFile = 0;
  return true;
 }
 
@@ -705,36 +700,34 @@ bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
 	boError() << k_funcinfo << "playfield not yet preloaded" << endl;
 	return false;
  }
- if (!mFile) {
-	mFile = new BPFFile(mFileName, true);
- }
- QByteArray heightMap = mFile->heightMapData();
- QByteArray texMap = mFile->texMapData();
- QByteArray mapXML = mFile->mapXMLData();
- QByteArray waterXML = mFile->waterXMLData();
- QByteArray playersXML = mFile->playersData();
- QByteArray canvasXML = mFile->canvasData();
- QByteArray kgameXML = mFile->kgameData();
- QByteArray mapPreviewPNG = mFile->fileData("map.png", "mappreview");
- if (!mFile->hasMapDirectory()) {
+ BPFFile boFile(mFileName, true);
+ QByteArray heightMap = boFile.heightMapData();
+ QByteArray texMap = boFile.texMapData();
+ QByteArray mapXML = boFile.mapXMLData();
+ QByteArray waterXML = boFile.waterXMLData();
+ QByteArray playersXML = boFile.playersData();
+ QByteArray canvasXML = boFile.canvasData();
+ QByteArray kgameXML = boFile.kgameData();
+ QByteArray mapPreviewPNG = boFile.fileData("map.png", "mappreview");
+ if (!boFile.hasMapDirectory()) {
 	boWarning() << k_funcinfo << "need to convert from an old file" << endl;
 	BosonFileConverter converter;
 
 	// convert map first
 	if (texMap.size() == 0) {
-		if (!converter.convertMapFile_From_0_8_To_0_9(mFile->mapData(), &mapXML, &texMap)) {
+		if (!converter.convertMapFile_From_0_8_To_0_9(boFile.mapData(), &mapXML, &texMap)) {
 			boError() << k_funcinfo << "failed converting from boson 0.8" << endl;
 			return false;
 		}
 	} else {
-		if (!converter.convertMapFile_From_0_8_128_To_0_9(mFile->mapData(), &mapXML)) {
+		if (!converter.convertMapFile_From_0_8_128_To_0_9(boFile.mapData(), &mapXML)) {
 			boError() << k_funcinfo << "failed converting from boson 0.8.128" << endl;
 			return false;
 		}
 	}
 
 	// convert scenario
-	QByteArray scenario = mFile->scenarioData();
+	QByteArray scenario = boFile.scenarioData();
 	converter.convertScenario_From_0_8_To_0_9(scenario, &playersXML, &canvasXML, &kgameXML);
 	boDebug() << k_funcinfo << "conversion completed" << endl;
  }
@@ -756,7 +749,7 @@ bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
 	return false;
  }
 
- QMap<QString, QByteArray> descriptions = mFile->descriptionsData();
+ QMap<QString, QByteArray> descriptions = boFile.descriptionsData();
  if (!descriptions.contains("C/description.xml")) {
 	boError() << k_funcinfo << "no C/description.xml file found" << endl;
 	return false;
@@ -769,17 +762,17 @@ bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
 	destFiles.insert(it.key(), it.data());
  }
 
- QMap<QString, QByteArray> scripts = mFile->scriptsData();
+ QMap<QString, QByteArray> scripts = boFile.scriptsData();
  for (QMap<QString, QByteArray>::iterator it = scripts.begin(); it != scripts.end(); ++it) {
 	destFiles.insert(it.key(), it.data());
  }
 
- QMap<QString, QByteArray> eventListener = mFile->eventListenerData();
+ QMap<QString, QByteArray> eventListener = boFile.eventListenerData();
  for (QMap<QString, QByteArray>::iterator it = eventListener.begin(); it != eventListener.end(); ++it) {
 	destFiles.insert(it.key(), it.data());
  }
 
- QByteArray externalXML = mFile->externalData();
+ QByteArray externalXML = boFile.externalData();
  destFiles.insert("map/texmap", texMap);
  destFiles.insert("map/heightmap.png", heightMap);
  destFiles.insert("map/map.xml", mapXML);
