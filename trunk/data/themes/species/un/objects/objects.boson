@@ -12,3 +12,8 @@ Height=0.1
 File=bullet.3ds
 Width=0.1
 Height=0.1
+
+[daisycutter]
+File=daisycutter.3ds
+Width=0.5
+Height=0.5

@@ -35,7 +35,7 @@ Weapons=0
 PowerConsumed=300
 
 [ProductionPlugin]
-ProducerList=0
+ProducerList=0,2
 
 [Sounds]
 OrderAttack=order_attack

@@ -1,15 +1,16 @@
 [Boson Mobile Unit]
-AccelerationSpeed=2.0
+AccelerationSpeed=1.0
 CanGoOnLand=true
 CanGoOnWater=true
 DecelerationSpeed=1.7
-RotationSpeed=140
-Speed=5.5
+RotationSpeed=40
+Speed=5.0
+PreferredAltitude=7
 
 [Boson Unit]
-Armor=8
+Armor=10
 ConstructedEffects=21010,21011
-Description=A-10 Thunderbolt\nFast assault plane.\nArmed with light anti-air cannon and very effective LR-102 air-to-surface rockets.
+Description=F-15 Eagle Fighter
 DestroyedEffects=1001,6100
 ExplodingDamage=0
 ExplodingDamageRange=0
@@ -18,13 +19,13 @@ ExplodingFragmentDamage=20
 ExplodingFragmentHitEffects=2001
 ExplodingFragmentFlyEffects=5101,5110
 RemoveWreckageImmediately=true
-Health=140
+Health=180
 HitPoint=0,0,0.4
-Id=10035
+Id=10052
 IsFacility=false
-MineralCost=1100
-Name=Warthog
-OilCost=500
+MineralCost=2200
+Name=Eagle
+OilCost=1200
 Producer=0
 ProductionTime=30
 Requirements=3
@@ -32,10 +33,10 @@ Shields=0
 SightRange=10
 SupportMiniMap=false
 TerrainType=4
-UnitDepth=0.5
-UnitHeight=2
-UnitWidth=2
-Weapons=2
+UnitDepth=1.2
+UnitHeight=5
+UnitWidth=5
+Weapons=1
 
 [Sounds]
 OrderAttack=order_attack
@@ -47,42 +48,21 @@ ReportUnderAttack=report_underattack
 Shoot=shoot
 
 [Weapon_0]
-CanShootAtAirUnits=true
-CanShootAtLandUnits=true
-Damage=25
-DamageRange=0.5
-FlyEffects=9001
-Height=1
-HitEffects=2010
-Name=Cannon
-Offset=0,0,0
-Range=8
-Reload=1.5
-ShootEffects=
-SoundFly=
-SoundHit=hit
-SoundShoot=shoot
-Speed=0
-Type=Bullet
-
-[Weapon_1]
 CanShootAtAirUnits=false
 CanShootAtLandUnits=true
-AccelerationSpeed=7
-Damage=100
-DamageRange=2.0
-FlyEffects=5001,5010
-FullDamageRange=0.5
+AccelerationSpeed=1.2
+Damage=900
+DamageRange=10
+FullDamageRange=2
 Height=0.1
-HitEffects=21200
-Name=Missiles
-Model=missile
+HitEffects=20025,20030,20040,20050,20051,20010
+Name=Bomb
+Model=daisycutter
 Offset=0.10,0.0,0
-Range=10
-Reload=7
+Range=0
+Reload=18
 ShootEffects=
-SoundFly=missile_fly
-SoundHit=hit
-SoundShoot=shoot
-Speed=15
-Type=Missile
+Speed=7
+Type=Bomb
+AutoUse=false
+
