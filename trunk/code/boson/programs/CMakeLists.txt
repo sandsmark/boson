@@ -243,11 +243,11 @@ install_targets(/bin
 	bocommandframetester
 )
 
-################ boson-no-gui #################
+################ bofileconverter #################
 set(bofileconverter_SRCS
 	bofileconvertermain.cpp
 )
-kde3_automoc(${bosonNoGUI_SRCS})
+kde3_automoc(${bofileconverter_SRCS})
 kde3_add_executable(bofileconverter ${bofileconverter_SRCS})
 target_link_libraries(bofileconverter
 	gameengine
@@ -257,4 +257,17 @@ target_link_libraries(bofileconverter
 	${LIB_BOMEMORY}
 )
 
+################ bocreatepreview #################
+set(bocreatepreview_SRCS
+	bocreatepreviewmain.cpp
+)
+kde3_automoc(${bocreatepreview_SRCS})
+kde3_add_executable(bocreatepreview ${bocreatepreview_SRCS})
+target_link_libraries(bocreatepreview
+	gameengine
+	common
+	kio
+	${QT_AND_KDECORE_LIBS}
+	${LIB_BOMEMORY}
+)
 
