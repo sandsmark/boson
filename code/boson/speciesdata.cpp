@@ -413,22 +413,23 @@ bool SpeciesData::loadUnitImage(const QColor& teamColor, const QString &fileName
  w = image.width();
  h = image.height();
 
+ if (image.isNull()) {
+	boDebug(270) << k_funcinfo << fileName << ": NULL image" << endl;
+	return false;
+ }
  if (image.depth() != 32) {
-	boError(270) << k_funcinfo << fileName << "depth != 32" << endl;
+	boError(270) << k_funcinfo << fileName << ": depth != 32" << endl;
+	return false;
  }
  if (w < 32) {
-	boError(270) << k_funcinfo << fileName << "w < 32" << endl;
+	boError(270) << k_funcinfo << fileName << ": w < 32" << endl;
 	return false;
  }
  if (h < 32) {
-	boError(270) << k_funcinfo << fileName << "h < 32" << endl;
+	boError(270) << k_funcinfo << fileName << ": h < 32" << endl;
 	return false;
  }
 
- if (image.isNull()) {
-	boError(270) << k_funcinfo << "NULL image" << endl;
-	return false;
- }
 
  boProfiling->push("teamcolor");
  for ( y = 0; y < h; y++ ) {
