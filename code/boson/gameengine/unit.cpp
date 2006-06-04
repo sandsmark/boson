@@ -826,8 +826,8 @@ void Unit::advanceAttack(unsigned int advanceCallsCount)
 	w = *wit;
 	if (w->properties()->autoUse() && w->reloaded() && w->canShootAt(target()) && inRange(w->range(), target())) {
 		shootAt(w, target());
-		if (target()->isDestroyed()) {
-			boDebug(300) << "    " << k_funcinfo << "target destroyed, returning" << endl;
+		if (!target() || target()->isDestroyed()) {
+			boDebug(300) << "    " << k_funcinfo << "target gone, returning" << endl;
 			stopAttacking();
 			moveIdle();
 			return;
