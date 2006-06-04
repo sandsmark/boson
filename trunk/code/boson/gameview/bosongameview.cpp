@@ -1459,6 +1459,9 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
  slotResetViewProperties();
 
  d->mGLMiniMap->createMap(mCanvas, d->mGameGLMatrices);
+ if (d->mLocalPlayerIO) {
+	slotInitMiniMapFogOfWar();
+ }
 
  if (!boGame->gameMode()) { // AB: is this valid at this point?
 	d->mUfoGameGUI->setGroundTheme(mCanvas->map()->groundTheme());
