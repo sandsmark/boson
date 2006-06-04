@@ -112,7 +112,7 @@ void BoUfoLoadSaveGameWidget::init()
  connect(browse, SIGNAL(signalClicked()), this, SLOT(slotBrowse()));
 
  d->mLoadSaveButton = new BoUfoPushButton();
- connect(d->mLoadSaveButton, SIGNAL(signalClicked()), this, SLOT(slotLoadSave()));
+ connect(d->mLoadSaveButton, SIGNAL(signalClicked()), this, SLOT(slotLoadSaveTimer()));
 
  BoUfoPushButton* cancel = new BoUfoPushButton(i18n("&Cancel"));
  connect(cancel, SIGNAL(signalClicked()), this, SLOT(slotCancel()));
@@ -306,6 +306,11 @@ void BoUfoLoadSaveGameWidget::slotDelete()
 
  w->hide();
  updateGames();
+}
+
+void BoUfoLoadSaveGameWidget::slotLoadSaveTimer()
+{
+ QTimer::singleShot(0, this, SLOT(slotLoadSave()));
 }
 
 void BoUfoLoadSaveGameWidget::slotLoadSave()
