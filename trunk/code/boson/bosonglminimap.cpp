@@ -533,18 +533,18 @@ void BosonGLMiniMap::initFogOfWar(PlayerIO* p)
  if (!p) {
 	// a NULL playerIO means that we should display the complete map. fog of
 	// war gets disabled.
-	for (unsigned int i = 0; i < canvas()->mapWidth(); i++) {
-		for (unsigned int j = 0; j < canvas()->mapHeight(); j++) {
-			slotExplored(i, j);
+	for (unsigned int x = 0; x < canvas()->mapWidth(); x++) {
+		for (unsigned int y = 0; y < canvas()->mapHeight(); y++) {
+			slotExplored(x, y);
 		}
 	}
  } else {
-	for (unsigned int i = 0; i < canvas()->mapWidth(); i++) {
-		for (unsigned int j = 0; j < canvas()->mapHeight(); j++) {
-			if (p && !p->canSee(i, j)) {
-				slotUnexplored(i, j);
+	for (unsigned int x = 0; x < canvas()->mapWidth(); x++) {
+		for (unsigned int y = 0; y < canvas()->mapHeight(); y++) {
+			if (p && !p->canSee(x, y)) {
+				slotUnexplored(x, y);
 			} else {
-				slotExplored(i, j);
+				slotExplored(x, y);
 			}
 		}
 	}
