@@ -1393,6 +1393,8 @@ void BosonGameView::initUfoGUI()
 
 void BosonGameView::setCanvas(BosonCanvas* canvas)
 {
+ boDebug() << k_funcinfo << "current canvas: " << mCanvas << " new canvas: " << canvas << endl;
+
  BosonCanvas* previousCanvas = mCanvas;
  if (mCanvas) {
 	disconnect(previousCanvas, 0, this, 0);
@@ -1442,8 +1444,8 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
 		d->mGLMiniMap, SLOT(slotItemAdded(BosonItem*)));
 	connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
 			d->mGLMiniMap, SLOT(slotAdvance(unsigned int)));
- connect(d->mEventListener, SIGNAL(signalFacilityConstructed(Unit*)),
-		d->mGLMiniMap, SLOT(slotFacilityConstructed(Unit*)));
+	connect(d->mEventListener, SIGNAL(signalFacilityConstructed(Unit*)),
+			d->mGLMiniMap, SLOT(slotFacilityConstructed(Unit*)));
 
 	connect(d->mGLMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
 			this, SLOT(slotReCenterDisplay(const QPoint&)));
@@ -1455,8 +1457,6 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
 
  d->mCamera.setCanvas(mCanvas);
  slotResetViewProperties();
-
- boDebug() << k_funcinfo << endl;
 
  d->mGLMiniMap->createMap(mCanvas, d->mGameGLMatrices);
 
