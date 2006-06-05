@@ -281,17 +281,13 @@ public:
 	 * @return Turning speed of this mobile unit (degrees per advance call). 0 if
 	 * this is a facility. See @ref isFacility
 	 **/
-	int rotationSpeed() const;
+	bofixed rotationSpeed() const;
 
 	/**
 	 * @return Whether this unit can move like a helicopter.
 	 * Work only for aircrafts
 	 **/
 	bool isHelicopter() const;
-	/**
-	 * @return Turn radius for flying units
-	 **/
-	bofixed turnRadius() const;
 	/**
 	 * @return Preferred flying altitude for flying units
 	 **/
@@ -533,8 +529,7 @@ protected:
 	BoUpgradeableProperty<bofixed> mAccelerationSpeed;
 	BoUpgradeableProperty<bofixed> mDecelerationSpeed;
 
-	int mRotationSpeed;
-	bofixed mTurnRadius;
+	bofixed mRotationSpeed;
 	bofixed mPreferredAltitude;
 	bool mCanGoOnLand;
 	bool mCanGoOnWater;

@@ -200,7 +200,12 @@ bool UnitProperties::loadMobileProperties(KSimpleConfig* conf)
  }
  insertBoFixedBaseValue(conf->readDoubleNumEntry("AccelerationSpeed", 1) / 20.0f / 20.0f, "AccelerationSpeed", "MaxValue");
  insertBoFixedBaseValue(conf->readDoubleNumEntry("DecelerationSpeed", 2) / 20.0f / 20.0f, "DecelerationSpeed", "MaxValue");
- mRotationSpeed = (int)(conf->readNumEntry("RotationSpeed", (int)(bofixedBaseValue("Speed") * 20.0f * 90.0f)) / 20.0f);
+ // Different default values for aircrafts
+ if (isAircraft()) {
+	mRotationSpeed = conf->readDoubleNumEntry("RotationSpeed", (bofixedBaseValue("Speed") * 20.0f * 15.0f)) / 20.0f;
+ } else {
+	mRotationSpeed = conf->readDoubleNumEntry("RotationSpeed", (bofixedBaseValue("Speed") * 20.0f * 90.0f)) / 20.0f;
+ }
  mCanGoOnLand = conf->readBoolEntry("CanGoOnLand", (isLand() || isAircraft()));
  mCanGoOnWater = conf->readBoolEntry("CanGoOnWater", (isShip() || isAircraft()));
  mCrushDamage = conf->readUnsignedLongNumEntry("CrushDamage", 0);
@@ -208,7 +213,6 @@ bool UnitProperties::loadMobileProperties(KSimpleConfig* conf)
  mWaterDepth = conf->readDoubleNumEntry("WaterDepth", 0.25);
 
  // Those are relevant only for aircrafts
- mTurnRadius = conf->readDoubleNumEntry("TurnRadius", 5);
  mPreferredAltitude = conf->readDoubleNumEntry("PreferredAltitude", 3);
  return true;
 }
@@ -421,7 +425,7 @@ bofixed UnitProperties::maxDecelerationSpeed() const
  return mDecelerationSpeed.value(upgradesCollection());
 }
 
-int UnitProperties::rotationSpeed() const
+bofixed UnitProperties::rotationSpeed() const
 {
  if (!isMobile()) {
 	return 0;
@@ -432,14 +436,6 @@ int UnitProperties::rotationSpeed() const
 bool UnitProperties::isHelicopter() const
 {
  return (mTerrain & TerrainAirHelicopter);
-}
-
-bofixed UnitProperties::turnRadius() const
-{
- if (!isMobile() || !isAircraft()) {
-	return 0;
- }
- return mTurnRadius;
 }
 
 bofixed UnitProperties::preferredAltitude() const
