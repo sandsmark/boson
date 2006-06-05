@@ -833,8 +833,10 @@ void UnitMoverLand::avoidance()
  BoVector2Fixed toRight(toRight3.x(), -toRight3.y());
  bofixed avoidstrength = 0;
  // Find all units which are near us
- BoRect2Fixed rect(unit()->centerX() - unit()->width() - unit()->speed() * 20 - 3, unit()->centerY() - unit()->width() - unit()->speed() * 20 - 3,
-		unit()->centerX() + unit()->width() + unit()->speed() * 20 + 3, unit()->centerY() + unit()->width() + unit()->speed() * 20 + 3);
+ BoRect2Fixed rect(unit()->x() - unit()->speed() * 40 - 1,
+		unit()->y() - unit()->speed() * 40 - 1,
+		unit()->x() + unit()->width() + unit()->speed() * 40 + 1,
+		unit()->y() + unit()->height() + unit()->speed() * 40 + 1);
  BoItemList* items = canvas()->collisions()->collisionsAtCells(rect, unit(), false);
  // Go through the units
  for (BoItemList::ConstIterator it = items->begin(); it != items->end(); ++it) {
@@ -1078,7 +1080,7 @@ void UnitMoverFlying::flyInCircle()
 
  // Flying units need to keep flying
  // TODO: choose which way to turn
- bofixed newrot = unit()->rotation() + unit()->maxSpeed() * 20;
+ bofixed newrot = unit()->rotation() + unitProperties()->rotationSpeed();
  if (newrot > 360) {
 	newrot -= 360;
  }
@@ -1215,7 +1217,7 @@ void UnitMoverFlying::advanceMoveInternal(unsigned int advanceCallsCount)
 	turncw = !turncw;
  }
 
- const bofixed maxturningspeed = 2;
+ const bofixed maxturningspeed = unitProperties()->rotationSpeed();
  if (rotationdelta <= maxturningspeed) {
 	newrotation = wantedrotation;
  } else {
