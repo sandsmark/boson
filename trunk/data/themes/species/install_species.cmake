@@ -60,8 +60,9 @@ macro(BOSON_INSTALL_SPECIES_OBJECTS objects_source objects_dest)
 		${objects_source}/objects.boson
 	)
 
-	file(GLOB object_models ${objects_source}/*.3ds)
-	foreach(file ${object_models})
+	file(GLOB object_models_3ds ${objects_source}/*.3ds)
+	file(GLOB object_models_ac ${objects_source}/*.ac)
+	foreach(file ${object_models_3ds} ${object_models_ac})
 		install_files(${objects_dest} FILES
 			${file}
 		)
@@ -82,10 +83,10 @@ macro(BOSON_INSTALL_SPECIES_UNITS units_source units_dest)
 		set(unit_path ${units_source}/${unit})
 		install_files(${units_dest}/${unit} FILES
 			${unit_path}/index.unit
-			${unit_path}/unit.3ds
 		)
+		file(GLOB unit_files ${unit_path}/unit.*)
 		file(GLOB png ${unit_path}/*.png)
-		foreach(file ${png})
+		foreach(file ${png} ${unit_files})
 			install_files(${units_dest}/${unit} FILES
 				${file}
 			)
