@@ -32,4 +32,6 @@ target_link_libraries(boufodesigner
 	${QT_AND_KDECORE_LIBS}
 )
 
-
+install_targets(/bin
+	boufodesigner
+)
