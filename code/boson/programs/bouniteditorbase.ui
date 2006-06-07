@@ -1,4 +1,4 @@
-<!DOCTYPE UI><UI version="3.2" stdsetdef="1">
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
 <class>BoUnitEditorBase</class>
 <comment>Editor widget for editing Boson units</comment>
 <author>Rivo Laks &lt;rivolaks@hot.ee&gt;</author>
@@ -11,7 +11,7 @@
             <x>0</x>
             <y>0</y>
             <width>998</width>
-            <height>819</height>
+            <height>827</height>
         </rect>
     </property>
     <property name="caption">
@@ -1467,52 +1467,6 @@ Construction steps are used to get feeling that your unit is constructed step by
                                                 <property name="name">
                                                     <cstring>unnamed</cstring>
                                                 </property>
-                                                <widget class="QLayoutWidget">
-                                                    <property name="name">
-                                                        <cstring>layout30</cstring>
-                                                    </property>
-                                                    <hbox>
-                                                        <property name="name">
-                                                            <cstring>unnamed</cstring>
-                                                        </property>
-                                                        <widget class="QLabel">
-                                                            <property name="name">
-                                                                <cstring>mUnitSpeedLabel_6</cstring>
-                                                            </property>
-                                                            <property name="text">
-                                                                <string>Turn radius:</string>
-                                                            </property>
-                                                        </widget>
-                                                        <spacer>
-                                                            <property name="name">
-                                                                <cstring>mUnitSpeedSpacer_6</cstring>
-                                                            </property>
-                                                            <property name="orientation">
-                                                                <enum>Horizontal</enum>
-                                                            </property>
-                                                            <property name="sizeType">
-                                                                <enum>Fixed</enum>
-                                                            </property>
-                                                            <property name="sizeHint">
-                                                                <size>
-                                                                    <width>20</width>
-                                                                    <height>20</height>
-                                                                </size>
-                                                            </property>
-                                                        </spacer>
-                                                        <widget class="KDoubleNumInput">
-                                                            <property name="name">
-                                                                <cstring>mUnitTurnRadius</cstring>
-                                                            </property>
-                                                            <property name="maxValue">
-                                                                <number>30</number>
-                                                            </property>
-                                                            <property name="toolTip" stdset="0">
-                                                                <string>Speed of your unit</string>
-                                                            </property>
-                                                        </widget>
-                                                    </hbox>
-                                                </widget>
                                                 <widget class="QLayoutWidget">
                                                     <property name="name">
                                                         <cstring>layout31</cstring>
@@ -4589,12 +4543,6 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
-        <sender>mUnitTurnRadius</sender>
-        <signal>valueChanged(double)</signal>
-        <receiver>BoUnitEditorBase</receiver>
-        <slot>slotConfigChanged()</slot>
-    </connection>
-    <connection>
         <sender>mUnitPreferredAltitude</sender>
         <signal>valueChanged(double)</signal>
         <receiver>BoUnitEditorBase</receiver>
@@ -4638,8 +4586,6 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>klineedit.h</includehint>
-    <includehint>knuminput.h</includehint>
-    <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>

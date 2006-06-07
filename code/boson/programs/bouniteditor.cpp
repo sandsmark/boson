@@ -144,13 +144,6 @@ void EditorUnitProperties::setWaterDepth(bofixed w)
  }
 }
 
-void EditorUnitProperties::setTurnRadius(bofixed r)
-{
- if (isMobile()) {
-	mTurnRadius = r;
- }
-}
-
 void EditorUnitProperties::setPreferredAltitude(bofixed a)
 {
  if (isMobile()) {
@@ -220,7 +213,6 @@ void EditorUnitProperties::reset()
  mMaxSlope = 30;
  mCrushDamage = 0;
  mWaterDepth = 0.25;
- mTurnRadius = 5;
  mPreferredAltitude = 3;
 
  // Sounds
@@ -301,7 +293,6 @@ bool EditorUnitProperties::saveMobileProperties(KSimpleConfig* conf)
  conf->writeEntry("CrushDamage", (unsigned long int)mCrushDamage);
  conf->writeEntry("MaxSlope", (double)mMaxSlope);
  conf->writeEntry("WaterDepth", (double)mWaterDepth);
- conf->writeEntry("TurnRadius", (double)mTurnRadius);
  conf->writeEntry("PreferredAltitude", (double)mPreferredAltitude);
  return true;
 }
@@ -1014,7 +1005,6 @@ void BoPropertiesPageHandler::updateUnitProperties()
 	unit->setMaxSlope(bofixed(mEditor->mUnitMaxSlope->value()));
 	unit->setCrushDamage(mEditor->mUnitCrushDamage->value());
 	unit->setWaterDepth(bofixed(mEditor->mUnitWaterDepth->value()));
-	unit->setTurnRadius(bofixed(mEditor->mUnitTurnRadius->value()));
 	unit->setPreferredAltitude(bofixed(mEditor->mUnitPreferredAltitude->value()));
  }
 }
@@ -1046,7 +1036,6 @@ void BoPropertiesPageHandler::updateWidget()
  mEditor->mUnitMaxSlope->setValue(unit->maxSlope());
  mEditor->mUnitCrushDamage->setValue(unit->crushDamage());
  mEditor->mUnitWaterDepth->setValue(unit->waterDepth());
- mEditor->mUnitTurnRadius->setValue(unit->turnRadius());
  mEditor->mUnitPreferredAltitude->setValue(unit->preferredAltitude());
  mEditor->mPowerGenerated->setValue(unit->ulongBaseValue("PowerGenerated"));
  mEditor->mPowerConsumed->setValue(unit->ulongBaseValue("PowerConsumed"));
