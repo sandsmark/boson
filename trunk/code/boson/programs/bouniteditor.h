@@ -65,7 +65,6 @@ public:
 	void setCrushDamage(unsigned int);
 	void setWaterDepth(bofixed);
 	void setIsHelicopter(bool);
-	void setTurnRadius(bofixed);
 	void setPreferredAltitude(bofixed);
 
 	void reset();
