@@ -229,6 +229,11 @@ bool processCommandLine(int argc, char** argv)
       cout << usage;
       return false;
     }
+    else if(larg == "--version" || larg == "-v")
+    {
+      cerr << "BoBMFConverter version 0.13pre" << endl;
+      return false;
+    }
     else if(larg == "-o" || larg == "-output")
     {
       NEXTARG(arg);
