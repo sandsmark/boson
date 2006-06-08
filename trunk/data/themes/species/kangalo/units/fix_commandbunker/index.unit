@@ -4,7 +4,7 @@ CanRefineOil=false
 ConstructionSteps=22
 
 [Boson Unit]
-Armor=10
+Armor=15
 ConstructedEffects=
 Description=This is the base of your operations.\nYou can build all other facilities from here, so guard it well.
 DestroyedEffects=1010,3011,6011,7010,4001
@@ -22,11 +22,9 @@ MineralCost=1000
 Name=Command Bunker
 OilCost=400
 Producer=10
-ProductionTime=60
+ProductionTime=80
 Requirements=
-Shields=0
 SightRange=10
-SupportMiniMap=false
 TerrainType=1
 UnitDepth=1.05
 UnitHeight=4.5

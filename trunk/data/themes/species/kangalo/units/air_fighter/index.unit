@@ -1,16 +1,15 @@
 [Boson Mobile Unit]
-AccelerationSpeed=1.0
+AccelerationSpeed=2.6
 CanGoOnLand=true
 CanGoOnWater=true
 DecelerationSpeed=1.7
-RotationSpeed=25
-Speed=5.0
-PreferredAltitude=7
+RotationSpeed=90
+Speed=6
 
 [Boson Unit]
 Armor=10
 ConstructedEffects=21010,21011
-Description=B-1 Lancer bomber
+Description=MiG-29 Fulcrum fighter
 DestroyedEffects=1001,6100
 ExplodingDamage=0
 ExplodingDamageRange=0
@@ -19,22 +18,22 @@ ExplodingFragmentDamage=20
 ExplodingFragmentHitEffects=2001
 ExplodingFragmentFlyEffects=5101,5110
 RemoveWreckageImmediately=true
-Health=180
+Health=170
 HitPoint=0,0,0.4
-Id=10052
+Id=10051
 IsFacility=false
-MineralCost=2200
-Name=Eagle
-OilCost=1400
+MineralCost=1200
+Name=Fulcrum
+OilCost=600
 Producer=0
-ProductionTime=50
+ProductionTime=30
 Requirements=3
-SightRange=18
+SightRange=16
 TerrainType=4
-UnitDepth=1.2
-UnitHeight=5
-UnitWidth=5
-Weapons=1
+UnitDepth=0.6
+UnitHeight=2.4
+UnitWidth=2.4
+Weapons=2
 
 [Sounds]
 OrderAttack=order_attack
@@ -46,20 +45,34 @@ ReportUnderAttack=report_underattack
 Shoot=shoot
 
 [Weapon_0]
-CanShootAtAirUnits=false
+CanShootAtAirUnits=true
 CanShootAtLandUnits=true
-AccelerationSpeed=1.8
-Damage=900
-DamageRange=10
-FullDamageRange=2
-HitEffects=20025,20030,20040,20050,20051,20010
-Name=Bomb
-Model=daisycutter
-Offset=0.10,0.0,0
-Range=0
-Reload=20
+Damage=22
+DamageRange=0.3
+FlyEffects=9001
+HitEffects=2010
+Name=Cannon
+Offset=0,0,0
+Range=11
+Reload=1.0
 ShootEffects=
-Speed=8
-Type=Bomb
-AutoUse=false
+Type=Bullet
 
+[Weapon_1]
+CanShootAtAirUnits=true
+CanShootAtLandUnits=false
+AccelerationSpeed=20
+Damage=100
+DamageRange=2.0
+FlyEffects=5001,5010
+FullDamageRange=0.5
+HitEffects=21200
+Name=Missiles
+MaxFlyDistance=40
+Model=missile
+Offset=0.10,0.0,0
+Range=16
+Reload=7
+ShootEffects=
+Speed=20
+Type=Missile

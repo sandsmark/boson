@@ -22,11 +22,9 @@ MineralCost=800
 Name=Weapons Factory
 OilCost=550
 Producer=10
-ProductionTime=30
+ProductionTime=40
 Requirements=5,2
-Shields=0
 SightRange=8
-SupportMiniMap=false
 TerrainType=1
 UnitDepth=1.372
 UnitHeight=2.8
@@ -35,7 +33,7 @@ Weapons=0
 PowerConsumed=300
 
 [ProductionPlugin]
-ProducerList=0
+ProducerList=0,2
 
 [Sounds]
 OrderAttack=order_attack
