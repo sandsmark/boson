@@ -104,6 +104,7 @@ int main(int argc, char **argv)
  KApplication::disableAutoDcopRegistration();
 #endif
 
+ boDebug() << k_funcinfo << "Boson " << version << " is starting..." << endl;
  boDebug() << k_funcinfo << "resolving GL, GLX and GLU symbols" << endl;
  if (!boglResolveGLSymbols()) {
 #warning TODO: messagebox
