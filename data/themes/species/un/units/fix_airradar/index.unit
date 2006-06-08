@@ -20,7 +20,6 @@ OilCost=200
 Producer=10
 ProductionTime=30
 Requirements=5,2,3
-Shields=0
 SightRange=15
 SupportMiniMap=true
 TerrainType=1

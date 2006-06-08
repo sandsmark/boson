@@ -4,25 +4,23 @@ CanGoOnWater=false
 Speed=1.6
 
 [Boson Unit]
-Armor=0
+Armor=2
 ConstructedEffects=
 Description=Collects minerals from mineral mines.
 DestroyedEffects=1001,3001,6001,7001
 ExplodingDamage=0
 ExplodingDamageRange=0
-Health=120
+Health=160
 HitPoint=0,0,0.5
 Id=10003
 IsFacility=false
-MineralCost=400
+MineralCost=900
 Name=Mineral Harvester
-OilCost=200
+OilCost=500
 Producer=0
 ProductionTime=30
 Requirements=13,3
-Shields=0
-SightRange=7
-SupportMiniMap=false
+SightRange=8
 TerrainType=1
 UnitDepth=0.375
 UnitHeight=0.75
@@ -32,7 +30,7 @@ Weapons=0
 [HarvesterPlugin]
 CanMineMinerals=true
 CanMineOil=false
-MaxResources=200
+MaxResources=250
 MiningSpeed=60
 UnloadingSpeed=200
 

@@ -1,6 +1,4 @@
 [Boson Facility]
-CanRefineMinerals=false
-CanRefineOil=true
 ConstructionSteps=20
 
 [Boson Unit]
@@ -24,9 +22,7 @@ OilCost=500
 Producer=10
 ProductionTime=40
 Requirements=5,2
-Shields=0
 SightRange=8
-SupportMiniMap=false
 TerrainType=1
 UnitDepth=4.0
 UnitHeight=4.0
