@@ -326,6 +326,7 @@ class BosonShotMissile : public BosonShot
 
   private:
     Unit* mTarget;
+    BoVector3Fixed mTargetPos;
     KGameProperty<bofixed> mPassedDist;
     // This is _normalized_ velocity, i.e. just direction
     BoVector3Fixed mVelo;
