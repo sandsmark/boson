@@ -573,6 +573,7 @@ void BosonShotMissile::init(const BoVector3Fixed& pos, Unit* target)
 {
   boDebug(350) << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
   mTarget = target;
+  mTargetPos.set(mTarget->centerX(), mTarget->centerY(), mTarget->z());
   if(!properties())
   {
     boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
@@ -616,10 +617,10 @@ void BosonShotMissile::init(const BoVector3Fixed& pos, Unit* target)
 // (actually only set the velocity - it is moved by BosonCanvas::slotAdvance())
 void BosonShotMissile::advanceMoveInternal()
 {
-  if(!mTarget || mTarget->isDestroyed())
+  if(mTarget && !mTarget->isDestroyed())
   {
-    explode();
-    return;
+    // Update target pos
+    mTargetPos.set(mTarget->centerX(), mTarget->centerY(), mTarget->z());
   }
 
   setVisible(true);
@@ -634,11 +635,11 @@ void BosonShotMissile::advanceMoveInternal()
     return;
   }
 
-  //boDebug(350) << k_funcinfo << id() << ": target pos: (" << mTarget->centerX() << "; " << mTarget->centerY() << "; " << mTarget->z() << ")" << endl;
+  //boDebug(350) << k_funcinfo << id() << ": target pos: (" << mTargetPos.x() << "; " << mTargetPos.y() << "; " << mTargetPos.z() << ")" << endl;
   //boDebug(350) << k_funcinfo << id() << ": my pos: (" << x() << "; " << y() << "; " << z() << ")" << endl;
   // Calculate velocity
   // Missile always moves towards it's target
-  BoVector3Fixed totarget(mTarget->centerX() - x(), mTarget->centerY() - y(), mTarget->z() - z());
+  BoVector3Fixed totarget(mTargetPos.x() - x(), mTargetPos.y() - y(), mTargetPos.z() - z());
   bofixed totargetlen = totarget.length();
   // We need check this here to avoid division by 0 later
   if(totargetlen <= speed())
@@ -689,6 +690,9 @@ bool BosonShotMissile::saveAsXML(QDomElement& root)
   root.setAttribute("zVelocity", mVelo.z());
   root.setAttribute("Speed", speed());
   root.setAttribute("Target", mTarget->id());
+  root.setAttribute("TargetPosX", mTargetPos.x());
+  root.setAttribute("TargetPosY", mTargetPos.y());
+  root.setAttribute("TargetPosZ", mTargetPos.z());
   return true;
 }
 
@@ -704,6 +708,7 @@ bool BosonShotMissile::loadFromXML(const QDomElement& root)
   bofixed speed;
   bofixed xvelo, yvelo, zvelo;
   unsigned int targetid;
+  bofixed targetposx, targetposy, targetposz;
 
   xvelo = root.attribute("xVelocity").toFloat(&ok);
   if(!ok)
@@ -735,9 +740,28 @@ bool BosonShotMissile::loadFromXML(const QDomElement& root)
     boError(350) << k_funcinfo << "Invalid value for Target tag" << endl;
     return false;
   }
+  targetposx = root.attribute("TargetPosX").toFloat(&ok);
+  if(!ok)
+  {
+    boError(350) << k_funcinfo << "Invalid value for TargetPosX tag" << endl;
+    return false;
+  }
+  targetposy = root.attribute("TargetPosY").toFloat(&ok);
+  if(!ok)
+  {
+    boError(350) << k_funcinfo << "Invalid value for TargetPosY tag" << endl;
+    return false;
+  }
+  targetposz = root.attribute("TargetPosZ").toFloat(&ok);
+  if(!ok)
+  {
+    boError(350) << k_funcinfo << "Invalid value for TargetPosZ tag" << endl;
+    return false;
+  }
 
   mTarget = boGame->findUnit(targetid, 0);
   mVelo.set(xvelo, yvelo, zvelo);
+  mTargetPos.set(targetposx, targetposy, targetposz);
   setRotation(Bo3dTools::rotationToPoint(mVelo.x(), mVelo.y()));
   setXRotation(Bo3dTools::rotationToPoint(mVelo.y(), mVelo.z()) + 90);
   setSpeed(speed);
