@@ -4,7 +4,7 @@ CanRefineOil=false
 ConstructionSteps=18
 
 [Boson Unit]
-Armor=5
+Armor=8
 ConstructedEffects=
 Description=Planes can land here
 DestroyedEffects=1010,3010,6010,7010
@@ -14,19 +14,22 @@ Health=1200
 HitPoint=0,0,0.5
 Id=19
 IsFacility=true
-MineralCost=1500
+MineralCost=2500
 Name=Airport
-OilCost=1200
+OilCost=2000
 Producer=10
 ProductionTime=80
-Requirements=3
-SightRange=15
+Requirements=2,3,5
+SightRange=17
 TerrainType=1
-UnitDepth=2.7
-UnitHeight=12
-UnitWidth=24
+UnitDepth=1.2
+UnitHeight=5
+UnitWidth=10
 Weapons=0
-PowerConsumed=100
+PowerConsumed=300
+
+[ProductionPlugin]
+ProducerList=2
 
 [Sounds]
 OrderAttack=order_attack
