@@ -700,6 +700,7 @@ void BosonWeapon::shoot(const BoVector3Fixed& pos, const BoVector3Fixed& target)
   if(mProp->shotType() == BosonShot::Bullet)
   {
     ((BosonShotBullet*)shot)->setTarget(target);
+    shot->move(target.x(), target.y(), target.z());
     shot->explode();
   }
 
