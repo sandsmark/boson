@@ -1216,7 +1216,7 @@ void BosonGLMiniMapRenderer::updateRadarTexture(QPtrList<Unit>* radarlist, Boson
  d->mAdvanceCallsSinceLastUpdate = 0;
  // Init rendering
  glPushAttrib(GL_ALL_ATTRIB_BITS);
- glViewport(0, 0, d->mMapTextureWidth, d->mMapTextureHeight);
+ glViewport(0, 0, mMapWidth, mMapHeight);
  glDisable(GL_SCISSOR_TEST);
  glClear(GL_COLOR_BUFFER_BIT);
  if (radarlist->isEmpty()) {
@@ -1230,7 +1230,7 @@ void BosonGLMiniMapRenderer::updateRadarTexture(QPtrList<Unit>* radarlist, Boson
  glMatrixMode(GL_PROJECTION);
  glPushMatrix();
  glLoadIdentity();
- gluOrtho2D(0.0f, miniMapWidth(), 0.0f, miniMapHeight());
+ gluOrtho2D(0.0f, mMapWidth, 0.0f, mMapHeight);
  glDisable(GL_DEPTH_TEST);
 
  // Create a vector of radars and their ranges
@@ -1286,8 +1286,10 @@ void BosonGLMiniMapRenderer::updateRadarTexture(QPtrList<Unit>* radarlist, Boson
  glDisable(GL_TEXTURE_2D);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE);
  glEnable(GL_POINT_SMOOTH);
- glPointSize(3.0f);
- float scale = miniMapWidth() / (float)QMAX(d->mMapTextureWidth, d->mMapTextureHeight);
+ // Size of the radar point (blip) in pixels after the minimap has been
+ //  rendered. This is dependant on the minimap size and map size
+ float visiblepointsize = 2.0f;
+ glPointSize(visiblepointsize * QMAX(mMapWidth, mMapHeight) / (float)miniMapWidth());
  BoVector4Float basecolor(-0.05, -0.05, -0.02, 0.8);
  BoVector4Float addcolor(0.03, 0.1, 0.01, 0.0);
 
@@ -1309,7 +1311,7 @@ void BosonGLMiniMapRenderer::updateRadarTexture(QPtrList<Unit>* radarlist, Boson
 		// Visible enemies will be shown as red dots
 		// TODO: render all visible enemies, not just those in radar range
 		glColor4f(0.7, 0.0, 0.0, 1.0);
-		glVertex3f(itempos.x() * scale, itempos.y() * scale, 0.0f);
+		glVertex3f(itempos.x(), itempos.y(), 0.0f);
 		continue;
 	}
 	bool flying = u->isFlying();
@@ -1334,7 +1336,7 @@ void BosonGLMiniMapRenderer::updateRadarTexture(QPtrList<Unit>* radarlist, Boson
 		// Signal was picked up by at least one radar.
 		// Render the dot
 		glColor4fv((basecolor + addcolor * strongestsignal).data());
-		glVertex3f(itempos.x() * scale, itempos.y() * scale, 0.0f);
+		glVertex3f(itempos.x(), itempos.y(), 0.0f);
 	}
  }
  QPtrListIterator<Unit> playerUnitsIt(*mLocalPlayerIO->allMyUnits());
@@ -1344,7 +1346,7 @@ void BosonGLMiniMapRenderer::updateRadarTexture(QPtrList<Unit>* radarlist, Boson
 		continue;
 	}
 	BoVector2Float itempos = playerUnitsIt.current()->center().toFloat();
-	glVertex3f(itempos.x() * scale, itempos.y() * scale, 0.0f);
+	glVertex3f(itempos.x(), itempos.y(), 0.0f);
 	++playerUnitsIt;
  }
  glEnd();
