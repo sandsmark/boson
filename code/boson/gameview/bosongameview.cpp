@@ -55,13 +55,12 @@
 #include "../bogroundrenderermanager.h"
 #include "../modelrendering/bomeshrenderermanager.h"
 #include "../bolight.h"
-#include "../bosonglminimap.h"
+#include "../minimap/bosonufominimap.h"
 #include "../info/boinfo.h"
 #include "../speciesdata.h"
 #include "../bowaterrenderer.h"
 #include "../botexture.h"
 #include "../boufo/boufoaction.h"
-#include "../bosonufominimap.h"
 #include "bosonufogamegui.h"
 #include "bosonlocalplayerinput.h"
 #include "../gameengine/bosonplayfield.h"
@@ -793,7 +792,7 @@ public:
 	BosonGameFPSCounter* mFPSCounter;
 	BoUfoActionCollection* mActionCollection;
 	BoGLToolTip* mToolTips;
-	BosonGLMiniMap* mGLMiniMap;
+	BosonUfoMiniMap* mGLMiniMap;
 	PlayerIO* mLocalPlayerIO;
 	BosonGameViewScriptConnector* mScriptConnector;
 	SelectionRect* mSelectionRect;
@@ -856,7 +855,6 @@ BosonGameView::~BosonGameView()
  delete d->mSelectionGroups;
  delete mSelection;
  delete d->mGameGLMatrices;
- delete d->mGLMiniMap;
  delete d->mToolTips;
  d->mGameViewPlugin = 0;
  BoMeshRendererManager::manager()->unsetCurrentRenderer();
@@ -920,7 +918,6 @@ void BosonGameView::init()
  d->mToolTips = new BoGLToolTip(this);
  connect(this, SIGNAL(signalCursorCanvasVectorChanged(const BoVector3Fixed&)),
 		d->mToolTips, SLOT(slotSetCursorCanvasVector(const BoVector3Fixed&)));
- d->mGLMiniMap = new BosonGLMiniMap(this);
 
  d->mSelectionRect = new SelectionRect();
  d->mSelectionRect->setMatrices(d->mGameGLMatrices);
@@ -1334,7 +1331,7 @@ void BosonGameView::initUfoGUI()
  d->mUfoGameGUI->setSelection(selection());
  d->mUfoGameGUI->setCanvas(canvas());
  d->mUfoGameGUI->setCamera(camera());
- d->mUfoGameGUI->setGLMiniMap(d->mGLMiniMap);
+ d->mGLMiniMap = d->mUfoGameGUI->miniMapWidget();
  connect(this, SIGNAL(signalSelectionChanged(BoSelection*)),
 		d->mUfoGameGUI, SIGNAL(signalSelectionChanged(BoSelection*)));
  ufoGameGUIContainer->addWidget(d->mUfoGameGUI);
@@ -1435,7 +1432,9 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
 		disconnect(d->mGLMiniMap, 0, previousCanvas, 0);
 	}
 	disconnect(d->mGLMiniMap, 0, this, 0);
-	disconnect(d->mGLMiniMap, 0, displayInput(), 0);
+	if (displayInput()) {
+		disconnect(d->mGLMiniMap, 0, displayInput(), 0);
+	}
 	connect(mCanvas, SIGNAL(signalUnitMoved(Unit*, bofixed, bofixed)),
 		d->mGLMiniMap, SLOT(slotUnitMoved(Unit*, bofixed, bofixed)));
 	connect(mCanvas, SIGNAL(signalUnitRemoved(Unit*)),

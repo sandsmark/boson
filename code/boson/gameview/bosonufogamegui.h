@@ -22,7 +22,7 @@
 #include "../boufo/boufo.h"
 #include <bogl.h>
 
-class BosonGLMiniMap;
+class BosonUfoMiniMap;
 class BoSelection;
 class PlayerIO;
 class Player;
@@ -70,7 +70,6 @@ public:
 	void setCamera(BoGameCamera* c);
 	void setGameFPSCounter(BosonGameFPSCounter* counter);
 
-	void setGLMiniMap(BosonGLMiniMap* m);
 	void setGroundTheme(BosonGroundTheme*);
 	void updateUfoLabels();
 	void addChatMessage(const QString& message);
@@ -80,6 +79,8 @@ public:
 
 	void setLocalPlayerIO(PlayerIO*);
 	PlayerIO* localPlayerIO() const;
+
+	BosonUfoMiniMap* miniMapWidget() const;
 
 public slots:
 	void slotShowPlaceFacilities(PlayerIO*);
