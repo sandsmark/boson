@@ -753,6 +753,14 @@ void BosonCommandFrame::slotProduce(const BoSpecificAction& _action)
  boDebug(220) << k_funcinfo << "Emitting signalAction(action)  (for producing; type: " << action.type() << ")" << endl;
  action.setUnit(selectedUnit());
  emit signalAction(action);
+
+ // This has to be done with QTimer since the action will be sent over the net
+ //  and thus won't take effect immediately
+ // TODO: any timeout value, even 0, works for singleplayer games; however for
+ //  multiplayer games, 50 msecs might not be enough. Some clever system should
+ //  be implemented which would update production when the message actually
+ //  arrives
+ QTimer::singleShot(50, this, SLOT(slotUpdateProductionOptions()));
 }
 
 void BosonCommandFrame::slotPlaceUnit(const BoSpecificAction& action)
