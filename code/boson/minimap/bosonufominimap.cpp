@@ -374,6 +374,14 @@ PlayerIO* BosonUfoMiniMap::localPlayerIO() const
 void BosonUfoMiniMap::slotMouseEvent(QMouseEvent* e)
 {
  QPoint pos = e->pos();
+
+ // AB: when using click+move, the coordinates may go off this widget. we don't
+ // want this.
+ pos.setX(QMAX(0, pos.x()));
+ pos.setY(QMAX(0, pos.y()));
+ pos.setX(QMIN(pos.x(), width()));
+ pos.setY(QMIN(pos.y(), height()));
+
  QPoint cell = widgetToCell(pos);
 
  // we accept all mouse events except mousemove events. this means that only
