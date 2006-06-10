@@ -14,19 +14,22 @@ Health=1200
 HitPoint=0,0,0.5
 Id=19
 IsFacility=true
-MineralCost=1000
+MineralCost=2500
 Name=Airport
 OilCost=2000
 Producer=10
 ProductionTime=70
-Requirements=5,2,3,14
+Requirements=2,3,5
 SightRange=15
 TerrainType=1
-UnitDepth=2.7
-UnitHeight=12
-UnitWidth=24
+UnitDepth=1.2
+UnitHeight=5
+UnitWidth=10
 Weapons=0
 PowerConsumed=100
+
+[ProductionPlugin]
+ProducerList=2
 
 [Sounds]
 OrderAttack=order_attack
