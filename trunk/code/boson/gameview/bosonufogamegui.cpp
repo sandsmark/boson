@@ -35,7 +35,7 @@
 #include "../botexture.h"
 #include "../bocamera.h"
 #include "../bosonufochat.h"
-#include "../bosonufominimap.h"
+#include "../minimap/bosonufominimap.h"
 #include "commandframe/bosoncommandframe.h"
 #include "../gameengine/bosonmessageids.h"
 #include "boselection.h"
@@ -398,7 +398,6 @@ void BosonUfoGameGUI::initUfoWidgets()
 
 
  d->mUfoMiniMap = new BosonUfoMiniMap();
-// d->mUfoMiniMap->setMiniMap(d->mGLMiniMap);
  widget->mUfoMiniMapContainer->addWidget(d->mUfoMiniMap);
 
  d->mUfoCommandFrame = new BosonCommandFrame();
@@ -448,9 +447,9 @@ void BosonUfoGameGUI::initUfoWidgets()
  d->mCPUTimes2.update();
 }
 
-void BosonUfoGameGUI::setGLMiniMap(BosonGLMiniMap* m)
+BosonUfoMiniMap* BosonUfoGameGUI::miniMapWidget() const
 {
- d->mUfoMiniMap->setMiniMap(m);
+ return d->mUfoMiniMap;
 }
 
 void BosonUfoGameGUI::setSelection(BoSelection* s)
