@@ -278,8 +278,9 @@ set(bosongamelib_SRCS
 	bosonmainwidgetmenuinput.cpp
 	boufoactionext.cpp
 	bogltooltip.cpp
-	bosonglminimap.cpp
-	bosonufominimap.cpp
+	minimap/bosonglcompleteminimap.cpp
+	minimap/bosonglminimapview.cpp
+	minimap/bosonufominimap.cpp
 	optionsdialog/optionsdialog.cpp
 	optionsdialog/optionswidgets.cpp
 	optionsdialog/opengloptions.cpp
