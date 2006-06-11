@@ -1403,6 +1403,7 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
  }
 
  BosonCanvas* canvas = mGame->canvasNonConst();
+#warning FIXME: this removes all units. notify all GUI objects! -> either using signalRemoveUnit()/Item(), or by calling quitGame() on them, too!
  canvas->quitGame();
  canvas->loadFromXML(canvasElement);
 
