@@ -58,13 +58,6 @@ public:
 	BosonGLMiniMapView(const BoGLMatrices*, QObject* parent);
 	virtual ~BosonGLMiniMapView();
 
-	/**
-	 * @param alignmentFlags See @ref Qt::AlignmentFlags. You can OR
-	 * together either @ref Qt::Alignleft or @ref Qt::AlignRight and @ref
-	 * Qt::AlignTop or @ref Qt::AlignBottom.
-	 **/
-	void setAlignment(int alignmentFlags);
-
 	void setMiniMapScreenSize(unsigned int w, unsigned int h);
 
 	/**

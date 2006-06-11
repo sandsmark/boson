@@ -259,58 +259,6 @@ void BosonGLMiniMapView::renderCamera()
  glColor3ub(255, 255, 255);
 }
 
-void BosonGLMiniMapView::setAlignment(int f)
-{
- BO_CHECK_NULL_RET(d->mGameGLMatrices);
- if (f & Qt::AlignLeft) {
-	d->mPosX = distanceFromEdge();
- } else {
-	d->mPosX = d->mGameGLMatrices->viewport()[2] - miniMapScreenWidth() - distanceFromEdge();
- }
- if (f & Qt::AlignBottom) {
-	d->mPosY = distanceFromEdge();
- } else {
-	d->mPosY = d->mGameGLMatrices->viewport()[3] - miniMapScreenHeight() - distanceFromEdge();
- }
-}
-
-#if 0
-bool BosonGLMiniMapView::windowToCell(const QPoint& pos, QPoint* cell) const
-{
- if (!d->mGameGLMatrices) {
-	BO_NULL_ERROR(d->mGameGLMatrices);
-	return false;
- }
- int realy = d->mGameGLMatrices->viewport()[3] - pos.y();
- if (pos.x() < (int)d->mPosX) {
-	return false;
- }
- if (realy < (int)d->mPosY) {
-	return false;
- }
- if (pos.x() >= (int)(d->mPosX + miniMapScreenWidth())) {
-	return false;
- }
- if (realy >= (int)(d->mPosY + miniMapScreenHeight())) {
-	return false;
- }
-
- BoMatrix invModelviewMatrix;
- d->mModelviewMatrix.invert(&invModelviewMatrix);
- BoVector3Float v(pos.x(), realy, 0.0f);
- BoVector3Float v2;
- invModelviewMatrix.transform(&v2, &v);
- v2.setX(v2.x() * ((float)mapWidth() / (float)miniMapScreenWidth()));
- v2.setY(v2.y() * ((float)mapHeight() / (float)miniMapScreenHeight()));
-
- cell->setX((int)v2.x());
- cell->setY(mapHeight() - (int)(v2.y()));
-
- return true;
-}
-#endif
-
-
 // cuts the line at z=0.0
 static void cutLineZ0(BoVector3Float& p1_, BoVector3Float& p2_)
 {
