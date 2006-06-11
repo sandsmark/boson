@@ -67,8 +67,6 @@ public:
 
 	void render();
 
-	unsigned int miniMapScreenWidth() const;
-	unsigned int miniMapScreenHeight() const;
 	bool showMiniMap() const;
 
 	BosonCanvas* canvas() const;
@@ -119,6 +117,7 @@ signals:
 
 protected slots:
 	void slotMouseEvent(QMouseEvent*);
+	void slotWidgetResized();
 
 protected:
 	/**

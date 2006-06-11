@@ -106,6 +106,9 @@ BosonUfoMiniMap::BosonUfoMiniMap()
 // connect(this, SIGNAL(signalMouseClicked(ufo::UMouseEvent*)),
 //		this, SLOT(slotMouseEvent(ufo::UMouseEvent*)));
 
+ connect(this, SIGNAL(signalWidgetResized()),
+		this, SLOT(slotWidgetResized()));
+
 }
 
 BosonUfoMiniMap::~BosonUfoMiniMap()
@@ -289,6 +292,7 @@ void BosonUfoMiniMap::createMap(BosonCanvas* c, const BoGLMatrices* gameGLMatric
 
  delete d->mMiniMapView;
  d->mMiniMapView = new BosonGLMiniMapView(gameGLMatrices, this);
+ d->mMiniMapView->setMiniMapScreenSize(width(), height());
  d->mMiniMapView->setCanvas(canvas());
  d->mMiniMapView->setLocalPlayerIO(localPlayerIO());
  d->mMiniMapView->createMap(c->mapWidth(), c->mapHeight());
@@ -305,7 +309,6 @@ void BosonUfoMiniMap::render()
  }
 
 // d->mMiniMapView->setZoom(zoom());
- d->mMiniMapView->setAlignment(Qt::Left | Qt::Top);
 
  if (d->mShowMiniMap) {
 	renderMiniMap();
@@ -343,22 +346,6 @@ void BosonUfoMiniMap::renderLogo()
 
  glPopAttrib();
  boTextureManager->invalidateCache();
-}
-
-unsigned int BosonUfoMiniMap::miniMapScreenWidth() const
-{
- if (!d->mMiniMapView) {
-	return 0;
- }
- return d->mMiniMapView->miniMapScreenWidth();
-}
-
-unsigned int BosonUfoMiniMap::miniMapScreenHeight() const
-{
- if (!d->mMiniMapView) {
-	return 0;
- }
- return d->mMiniMapView->miniMapScreenHeight();
 }
 
 BosonCanvas* BosonUfoMiniMap::canvas() const
@@ -442,11 +429,11 @@ QPoint BosonUfoMiniMap::widgetToCell(const QPoint& pos)
  if (!map) {
 	return QPoint();
  }
- if (miniMapScreenWidth() == 0 || miniMapScreenHeight() == 0) {
+ if (width() == 0 || height() == 0) {
 	return QPoint();
  }
- QPoint cell = QPoint((pos.x() * map->width()) / miniMapScreenWidth(),
-		(pos.y() * map->height()) / miniMapScreenHeight());
+ QPoint cell = QPoint((pos.x() * map->width()) / width(),
+		(pos.y() * map->height()) / height());
  return cell;
 }
 
@@ -458,9 +445,9 @@ void BosonUfoMiniMap::paintWidget()
  PROFILE_METHOD
  boTextureManager->invalidateCache();
  glPushMatrix();
- glTranslatef(0.0f, miniMapScreenHeight(), 0.0f);
+ glTranslatef(0.0f, (float)height(), 0.0f);
  glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
- glScalef((float)miniMapScreenWidth(), (float)miniMapScreenHeight(), 0.0f);
+ glScalef((float)width(), (float)height(), 0.0f);
  render();
  glPopMatrix();
  boTextureManager->invalidateCache();
@@ -529,6 +516,13 @@ void BosonUfoMiniMap::initFogOfWar(PlayerIO* p)
 {
  if (d->mMiniMapView) {
 	d->mMiniMapView->initFogOfWar(p);
+ }
+}
+
+void BosonUfoMiniMap::slotWidgetResized()
+{
+ if (d->mMiniMapView) {
+	d->mMiniMapView->setMiniMapScreenSize(width(), height());
  }
 }
 
