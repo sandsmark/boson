@@ -44,14 +44,6 @@ public:
 
 	BoMatrix mModelviewMatrix;
 	const BoGLMatrices* mGameGLMatrices;
-
-	unsigned int mMiniMapScreenWidth;
-	unsigned int mMiniMapScreenHeight;
-
-
-	unsigned int mPosX;
-	unsigned int mPosY;
-
 };
 
 BosonGLMiniMapView::BosonGLMiniMapView(const BoGLMatrices* gameGLMatrices, QObject* parent)
@@ -60,36 +52,11 @@ BosonGLMiniMapView::BosonGLMiniMapView(const BoGLMatrices* gameGLMatrices, QObje
  d = new BosonGLMiniMapViewPrivate;
 
  d->mGameGLMatrices = gameGLMatrices;
-
- d->mMiniMapScreenWidth = 0;
- d->mMiniMapScreenHeight = 0;
-
- d->mPosX = distanceFromEdge();
- d->mPosY = distanceFromEdge();
-
- // default size of the displayed minimap quad
- setMiniMapScreenSize(150, 150);
 }
 
 BosonGLMiniMapView::~BosonGLMiniMapView()
 {
  delete d;
-}
-
-void BosonGLMiniMapView::setMiniMapScreenSize(unsigned int width, unsigned int height)
-{
- d->mMiniMapScreenWidth = width;
- d->mMiniMapScreenHeight = height;
-}
-
-unsigned int BosonGLMiniMapView::miniMapScreenWidth() const
-{
- return d->mMiniMapScreenWidth;
-}
-
-unsigned int BosonGLMiniMapView::miniMapScreenHeight() const
-{
- return d->mMiniMapScreenHeight;
 }
 
 void BosonGLMiniMapView::render()

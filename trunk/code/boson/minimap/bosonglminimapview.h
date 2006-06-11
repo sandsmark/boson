@@ -58,39 +58,10 @@ public:
 	BosonGLMiniMapView(const BoGLMatrices*, QObject* parent);
 	virtual ~BosonGLMiniMapView();
 
-	void setMiniMapScreenSize(unsigned int w, unsigned int h);
-
-	/**
-	 * @return The width of the minimap, i.e. the width of the rectangle
-	 * that is rendered - in pixels. Note: this is just the width of the
-	 * quad that is rendered - the actual minimap size can differ, due to
-	 * internal reasons.
-	 **/
-	unsigned int miniMapScreenWidth() const;
-	unsigned int miniMapScreenHeight() const;
-
-	/**
-	 * Convert a window-coordinate (e.g. a click) to cell-coordinates. This
-	 * can be used e.g. to move units to the point where the user clicked.
-	 *
-	 * This is dependant on the current mini map position (e.g. @ref
-	 * setAlignment) as well as on the current view properties (such as @ref setZoom).
-	 *
-	 * @return TRUE if @p pos was inside the minimap, otherwise FALSE.
-	 **/
-#if 0
-	bool windowToCell(const QPoint& pos, QPoint* cell) const;
-#endif
-
 	void render();
 
 protected:
 	void renderCamera();
-
-	unsigned int distanceFromEdge() const
-	{
-		return 5;
-	}
 
 private:
 	void renderQuad();
