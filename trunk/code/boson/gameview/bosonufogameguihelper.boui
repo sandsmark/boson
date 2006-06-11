@@ -83,10 +83,12 @@
      <Widget>
       <ClassName>BoUfoWidget</ClassName>
       <Properties>
-       <name>mUfoMiniMapContainer</name>
+       <name>mWidget56</name>
        <constraints/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
        <opaque/>
-       <layout>UVBoxLayout</layout>
+       <layout>UHBoxLayout</layout>
        <minimumWidth/>
        <minimumHeight/>
        <preferredWidth/>
@@ -94,12 +96,52 @@
        <backgroundImageFile/>
        <verticalAlignment/>
        <horizontalAlignment/>
-       <stretch/>
-       <gridLayoutColumns/>
-       <gridLayoutRows/>
        <borderType/>
+       <stretch/>
        <takesKeyboardFocus/>
       </Properties>
+      <Widget>
+       <ClassName>BoUfoWidget</ClassName>
+       <Properties>
+        <name>mUfoMiniMapContainer</name>
+        <constraints/>
+        <opaque/>
+        <layout>UVBoxLayout</layout>
+        <minimumWidth/>
+        <minimumHeight/>
+        <preferredWidth/>
+        <preferredHeight/>
+        <backgroundImageFile/>
+        <verticalAlignment/>
+        <horizontalAlignment/>
+        <stretch/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <borderType/>
+        <takesKeyboardFocus/>
+       </Properties>
+      </Widget>
+      <Widget>
+       <ClassName>BoUfoWidget</ClassName>
+       <Properties>
+        <name>mStretch57</name>
+        <constraints/>
+        <gridLayoutColumns/>
+        <gridLayoutRows/>
+        <opaque/>
+        <layout/>
+        <minimumWidth/>
+        <minimumHeight/>
+        <preferredWidth/>
+        <preferredHeight/>
+        <backgroundImageFile/>
+        <verticalAlignment/>
+        <horizontalAlignment/>
+        <borderType/>
+        <stretch>1</stretch>
+        <takesKeyboardFocus/>
+       </Properties>
+      </Widget>
      </Widget>
      <Widget>
       <ClassName>BoUfoWidget</ClassName>
