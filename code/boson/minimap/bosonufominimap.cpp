@@ -292,7 +292,6 @@ void BosonUfoMiniMap::createMap(BosonCanvas* c, const BoGLMatrices* gameGLMatric
 
  delete d->mMiniMapView;
  d->mMiniMapView = new BosonGLMiniMapView(gameGLMatrices, this);
- d->mMiniMapView->setMiniMapScreenSize(width(), height());
  d->mMiniMapView->setCanvas(canvas());
  d->mMiniMapView->setLocalPlayerIO(localPlayerIO());
  d->mMiniMapView->createMap(c->mapWidth(), c->mapHeight());
@@ -522,7 +521,7 @@ void BosonUfoMiniMap::initFogOfWar(PlayerIO* p)
 void BosonUfoMiniMap::slotWidgetResized()
 {
  if (d->mMiniMapView) {
-	d->mMiniMapView->setMiniMapScreenSize(width(), height());
+//	d->mMiniMapView->setMiniMapScreenSize(width(), height());
  }
 }
 
