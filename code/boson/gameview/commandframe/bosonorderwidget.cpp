@@ -114,7 +114,7 @@ void BosonOrderWidget::setOrderButtons(const QValueList<BoSpecificAction>& actio
  setOrderButtons(actions, QValueList<int>());
 }
 
-void BosonOrderWidget::setOrderButtons(const QValueList<BoSpecificAction>& actions, const QValueList<int>& grayActionsOut)
+void BosonOrderWidget::setOrderButtons(const QValueList<BoSpecificAction>& actions, const QValueList<int>& unavailableActions)
 {
  boDebug(220) << k_funcinfo << actions.count() << " actions" << endl;
 
@@ -152,23 +152,23 @@ void BosonOrderWidget::setOrderButtons(const QValueList<BoSpecificAction>& actio
 			} else {
 				d->mOrderButton[i]->setProductionCount(count);
 			}
-			d->mOrderButton[i]->setGrayOut(false);
+			d->mOrderButton[i]->setProductionStatus(BosonOrderButton::CanProduce);
 		} else {
 			d->mOrderButton[i]->setProductionCount(count);
-			d->mOrderButton[i]->setGrayOut(true);
+			d->mOrderButton[i]->setProductionStatus(BosonOrderButton::Producing);
 		}
 	} else { // no production started yet
 		resetButton(d->mOrderButton[i]);
 	}
  }
 
- for (QValueList<int>::const_iterator it = grayActionsOut.begin(); it != grayActionsOut.end(); ++it) {
+ for (QValueList<int>::const_iterator it = unavailableActions.begin(); it != unavailableActions.end(); ++it) {
 	int index = *it;
 	if (index < 0 || (unsigned int)index >= actions.count()) {
-		boError() << k_funcinfo << "invalid grayout index " << index << endl;
+		boError() << k_funcinfo << "invalid unavailableActions index " << index << endl;
 		continue;
 	}
-	d->mOrderButton[index]->setGrayOut(true);
+	d->mOrderButton[index]->setProductionStatus(BosonOrderButton::CannotProduce);
  }
 
  d->mIsProduceAction = true;
@@ -260,7 +260,7 @@ void BosonOrderWidget::setGroundTheme(BosonGroundTheme* theme)
 void BosonOrderWidget::resetButton(BosonOrderButton* button)
 {
  button->setProductionCount(0);
- button->setGrayOut(false);
+ button->setProductionStatus(BosonOrderButton::CanProduce);
 }
 
 bool BosonOrderWidget::isProduceAction() const

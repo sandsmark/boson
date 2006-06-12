@@ -57,7 +57,9 @@ static void drawProgress(float progress, float w, float h)
  if (progress < 0.0f) {
 	progress = 0.0f;
  }
- glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+ glColor4f(0.0f, 0.0f, 0.0f, 0.3f);
+ glEnable(GL_BLEND);
+ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
  float factor_100 = (QMIN(100.0f - progress, 12.5f)) / 12.5f;
  float factor_875 = (QMIN(87.5f  - progress, 12.5f)) / 12.5f;
@@ -102,6 +104,7 @@ static void drawProgress(float progress, float w, float h)
 
 
  glColor3f(255, 255, 255);
+ glDisable(GL_BLEND);
 }
 
 
@@ -110,7 +113,7 @@ class BoOrderButtonDrawable : public BoUfoDrawable
 public:
 	BoOrderButtonDrawable() : BoUfoDrawable()
 	{
-		mGrayOut = false;
+		mProductionStatus = BosonOrderButton::CanProduce;
 		mProductionCount = 0;
 		mProgressPercentage = 0.0f;
 
@@ -130,9 +133,9 @@ public:
 	{
 		mImage = img;
 	}
-	void setGrayOut(bool g)
+	void setProductionStatus(BosonOrderButton::ProductionStatus s)
 	{
-		mGrayOut = g;
+		mProductionStatus = s;
 	}
 	void setProductionCount(int c)
 	{
@@ -145,7 +148,7 @@ public:
 
 private:
 	BoUfoImage mImage;
-	bool mGrayOut;
+	BosonOrderButton::ProductionStatus mProductionStatus;
 	int mProductionCount;
 	float mProgressPercentage;
 
@@ -155,9 +158,13 @@ private:
 void BoOrderButtonDrawable::render(int x, int y, int w, int h)
 {
  mImage.paint(QRect(x, y, w, h));
- if (mGrayOut) {
+ if (mProductionStatus != BosonOrderButton::CanProduce) {
 	glPushAttrib(GL_COLOR_BUFFER_BIT);
-	glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+	if (mProductionStatus == BosonOrderButton::CannotProduce) {
+		glColor4f(0.0f, 0.0f, 0.0f, 0.6f);
+	} else if (mProductionStatus == BosonOrderButton::Producing) {
+		glColor4f(0.0f, 0.0f, 0.0f, 0.3f);
+	}
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBegin(GL_QUADS);
@@ -201,7 +208,7 @@ BoOrderButtonButton::BoOrderButtonButton()
 		this, SLOT(slotMouseReleaseEvent(QMouseEvent*)));
 
  mDrawable = new BoOrderButtonDrawable();
- mDrawable->setGrayOut(false);
+ mDrawable->setProductionStatus(BosonOrderButton::CanProduce);
  mDrawable->setProductionCount(0);
  mDrawable->setProgressPercentage(100.0f);
 
@@ -213,9 +220,9 @@ BoOrderButtonButton::~BoOrderButtonButton()
  delete mDrawable;
 }
 
-void BoOrderButtonButton::setGrayOut(bool g)
+void BoOrderButtonButton::setProductionStatus(BosonOrderButton::ProductionStatus s)
 {
- mDrawable->setGrayOut(g);
+ mDrawable->setProductionStatus(s);
 }
 
 void BoOrderButtonButton::setImage(const BoUfoImage& img)
@@ -261,6 +268,7 @@ BosonOrderButton::BosonOrderButton() : BoUfoWidget()
  mUnit = 0;
  mGroundType = 0;
  mType = ShowNothing;
+ mProductionStatus = CanProduce;
 
  setLayoutClass(UHBoxLayout);
  setOpaque(false);
@@ -316,7 +324,6 @@ void BosonOrderButton::setUnit(Unit* unit)
  mHealth->show();
 
  setProductionCount(0);
- setGrayOut(false);
 }
 
 void BosonOrderButton::setAction(const BoSpecificAction& action)
@@ -376,7 +383,6 @@ void BosonOrderButton::setGround(unsigned int groundType, const BosonGroundTheme
 
  show();
  setProductionCount(0);
- setGrayOut(false);
 }
 
 void BosonOrderButton::displayUnitPixmap(Unit* unit)
@@ -416,7 +422,7 @@ void BosonOrderButton::setImage(const BoUfoImage& image, float progressPercentag
 
 void BosonOrderButton::slotLeftClicked()
 {
- if (mGrayOut) {
+ if (type() == ShowAction && mProductionStatus == CannotProduce) {
 	return;
  }
 
@@ -446,7 +452,7 @@ void BosonOrderButton::slotLeftClicked()
 
 void BosonOrderButton::slotRightClicked()
 {
- if (mGrayOut) {
+ if (type() == ShowAction && mProductionStatus == CannotProduce) {
 	return;
  }
 
@@ -519,10 +525,10 @@ void BosonOrderButton::advanceProduction(double percentage)
  setImage(*image, percentage);
 }
 
-void BosonOrderButton::setGrayOut(bool g)
+void BosonOrderButton::setProductionStatus(ProductionStatus s)
 {
- mGrayOut = g;
- mPixmapButton->setGrayOut(g);
+ mProductionStatus = s;
+ mPixmapButton->setProductionStatus(s);
 }
 
 void BosonOrderButton::setProductionCount(int count)
