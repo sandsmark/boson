@@ -52,6 +52,16 @@ public:
 	 * @li ShowGround - ground type is shown (for placement)
 	 **/
 	enum ShowingType { ShowNothing = 0, ShowUnit, ShowAction, ShowGround };
+	/**
+	 * When the button is showing production action, specifies it's status
+	 * @li CanProduce - production can be produced by player (and might already
+	 *     be started)
+	 * @li CannotProduce - production cannot be produced by player (requirements
+	 *     aren't met)
+	 * @li Producing - something else is already being produced, however this
+	 *     production is also available
+	 **/
+	enum ProductionStatus { CanProduce = 0, CannotProduce, Producing };
 
 
 	BosonOrderButton();
@@ -119,7 +129,7 @@ public:
 	void advanceProduction(double percentage);
 
 
-	void setGrayOut(bool g);
+	void setProductionStatus(ProductionStatus status);
 
 	/**
 	 * Add a small number to the shown pixmap. The number displays how many
@@ -130,6 +140,7 @@ public:
 	void setProductionCount(int count);
 
 	ShowingType type() const { return mType; }
+	ProductionStatus productionStatus() const { return mProductionStatus; }
 
 public slots:
 	void slotUnitChanged(Unit*);
@@ -173,7 +184,7 @@ private:
 	BoSpecificAction mAction;
 
 	ShowingType mType;
-	bool mGrayOut;
+	ProductionStatus mProductionStatus;
 
 	BoOrderButtonButton* mPixmapButton;
 	BoUfoProgress* mHealth;
@@ -193,7 +204,7 @@ public:
 
 	void setProgressPercentage(float percentage);
 	void setProductionCount(int c);
-	void setGrayOut(bool g);
+	void setProductionStatus(BosonOrderButton::ProductionStatus status);
 
 signals:
 	void signalLeftClicked();

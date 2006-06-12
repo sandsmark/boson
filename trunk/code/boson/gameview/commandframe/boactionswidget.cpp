@@ -168,7 +168,7 @@ void BoActionsWidget::showUnitActions(Unit* unit, const QPtrList<Unit>& allUnits
 void BoActionsWidget::resetButton(BosonOrderButton* button)
 {
  button->setProductionCount(0);
- button->setGrayOut(false);
+ button->setProductionStatus(BosonOrderButton::CanProduce);
 }
 
 
