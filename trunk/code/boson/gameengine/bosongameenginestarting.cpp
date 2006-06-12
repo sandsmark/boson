@@ -37,6 +37,7 @@
 #include "script/bosonscript.h"
 #include "unit.h"
 #include "boitemlist.h"
+#include "bosonconfig.h"
 
 #include <klocale.h>
 
@@ -270,11 +271,12 @@ bool BosonStartingInitPlayerMap::startTask()
 	BO_NULL_ERROR(boGame);
 	return false;
  }
+ bool mapExplored = boConfig->boolValue("ExploreMapOnStartup");
  for (unsigned int i = 0; i < boGame->allPlayerCount(); i++) {
 	boDebug(270) << "init map for player " << i << endl;
 	Player* p = boGame->allPlayerList()->at(i);
 	if (p) {
-		p->initMap(playField()->map(), boGame->gameMode(), boGame->gameMode());
+    p->initMap(playField()->map(), boGame->gameMode() && !mapExplored, boGame->gameMode());
 	}
  }
  return true;
