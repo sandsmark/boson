@@ -181,6 +181,9 @@ void BoOrderButtonDrawable::render(int x, int y, int w, int h)
  glTranslatef(-(float)x, -(float)y, 0);
 
  if (mProductionCount > 0) {
+	if (mProductionStatus == BosonOrderButton::CanProduce && mProgressPercentage >= 100.0f) {
+		mFont->drawString(i18n("Ready"), x + 5, y + 8 + 2*mFont->height());
+	}
 	mFont->drawString(QString::number(mProductionCount), x + 5, y + 5 + mFont->height());
  } else if (mProductionCount == -1) {
 	// TODO: if the i18n()'ed text does not fit into the widget change the
