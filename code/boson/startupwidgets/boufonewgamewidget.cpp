@@ -577,6 +577,8 @@ void BoUfoNewGameWidget::slotNetStart()
         ret = networkInterface()->addNeutralPlayer(false);
       }
     }
+    boConfig->addDynamicEntryBool("ExploreMapOnStartup");
+    boConfig->setBoolValue("ExploreMapOnStartup", mStartExplored->checked());
     if (ret) {
       ret = networkInterface()->sendNewGame(field, false);
     }

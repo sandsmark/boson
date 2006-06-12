@@ -299,7 +299,7 @@
             <layout/>
             <minimumWidth/>
             <minimumHeight/>
-            <preferredWidth>200</preferredWidth>
+            <preferredWidth>160</preferredWidth>
             <preferredHeight>80</preferredHeight>
             <backgroundImageFile/>
             <verticalAlignment/>
@@ -358,16 +358,16 @@
            <ClassName>BoUfoListBox</ClassName>
            <Properties>
             <selection/>
-            <preferredHeight>250</preferredHeight>
-            <minimumHeight>250</minimumHeight>
+            <preferredHeight>200</preferredHeight>
+            <minimumHeight>200</minimumHeight>
             <opaque/>
             <constraints/>
             <verticalAlignment/>
-            <preferredWidth>200</preferredWidth>
+            <preferredWidth>160</preferredWidth>
             <horizontalAlignment/>
             <layout/>
             <name>mSelectMap</name>
-            <minimumWidth>200</minimumWidth>
+            <minimumWidth>160</minimumWidth>
             <backgroundImageFile/>
             <stretch>1</stretch>
             <gridLayoutColumns/>
@@ -631,7 +631,7 @@
            <layout/>
            <name>mMapDescription</name>
            <text/>
-           <minimumWidth>150</minimumWidth>
+           <minimumWidth>100</minimumWidth>
            <backgroundImageFile/>
            <stretch>1</stretch>
            <editable>false</editable>
@@ -660,6 +660,29 @@
            <borderType/>
            <stretch>1</stretch>
            <takesKeyboardFocus/>
+          </Properties>
+         </Widget>
+         <Widget>
+          <ClassName>BoUfoCheckBox</ClassName>
+          <Properties>
+           <name>mStartExplored</name>
+           <constraints/>
+           <gridLayoutColumns/>
+           <gridLayoutRows/>
+           <opaque/>
+           <layout/>
+           <minimumWidth/>
+           <minimumHeight/>
+           <preferredWidth/>
+           <preferredHeight/>
+           <backgroundImageFile/>
+           <verticalAlignment/>
+           <horizontalAlignment/>
+           <borderType/>
+           <stretch/>
+           <takesKeyboardFocus/>
+           <text>Start with explored map</text>
+           <checked>1</checked>
           </Properties>
          </Widget>
         </Widget>
@@ -1289,8 +1312,8 @@
          <Properties>
           <selection/>
           <opaque/>
-          <minimumHeight>100</minimumHeight>
-          <preferredHeight>150</preferredHeight>
+          <minimumHeight>60</minimumHeight>
+          <preferredHeight>100</preferredHeight>
           <constraints/>
           <verticalAlignment/>
           <preferredWidth>150</preferredWidth>
@@ -1331,7 +1354,7 @@
          <ClassName>BoUfoPushButton</ClassName>
          <Properties>
           <opaque/>
-          <minimumHeight/>
+          <minimumHeight></minimumHeight>
           <preferredHeight/>
           <constraints/>
           <verticalAlignment/>
@@ -1340,7 +1363,7 @@
           <layout/>
           <name>mAddAIPlayer</name>
           <iconFile/>
-          <minimumWidth/>
+          <minimumWidth></minimumWidth>
           <text>&amp;Add computer player</text>
           <backgroundImageFile/>
           <stretch/>
