@@ -416,6 +416,10 @@ void BosonOrderButton::setImage(const BoUfoImage& image, float progressPercentag
 
 void BosonOrderButton::slotLeftClicked()
 {
+ if (mGrayOut) {
+	return;
+ }
+
  switch (type()) {
 	case ShowNothing:
 		boWarning(220) << "Invalid type \"ShowNothing\"" << endl;
@@ -442,6 +446,10 @@ void BosonOrderButton::slotLeftClicked()
 
 void BosonOrderButton::slotRightClicked()
 {
+ if (mGrayOut) {
+	return;
+ }
+
  if (type() == ShowAction && mAction.isProduceAction()) {
 	BoSpecificAction a = mAction;
 	if (mAction.type() == ActionProduceUnit) {
@@ -513,6 +521,7 @@ void BosonOrderButton::advanceProduction(double percentage)
 
 void BosonOrderButton::setGrayOut(bool g)
 {
+ mGrayOut = g;
  mPixmapButton->setGrayOut(g);
 }
 

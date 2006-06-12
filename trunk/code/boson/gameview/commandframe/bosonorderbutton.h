@@ -173,6 +173,7 @@ private:
 	BoSpecificAction mAction;
 
 	ShowingType mType;
+	bool mGrayOut;
 
 	BoOrderButtonButton* mPixmapButton;
 	BoUfoProgress* mHealth;

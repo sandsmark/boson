@@ -169,7 +169,6 @@ void BosonOrderWidget::setOrderButtons(const QValueList<BoSpecificAction>& actio
 		continue;
 	}
 	d->mOrderButton[index]->setGrayOut(true);
-	d->mOrderButton[index]->setEnabled(false);
  }
 
  d->mIsProduceAction = true;
@@ -217,7 +216,6 @@ void BosonOrderWidget::showUnits(const QPtrList<Unit>& units)
  i = 0;
  QPtrListIterator<Unit> it(units);
  for (; it.current(); ++it, i++) {
-	d->mOrderButton[i]->setEnabled(true);
 	if ((d->mOrderButton[i]->type() == BosonOrderButton::ShowUnit) && (d->mOrderButton[i]->unit() == it.current())) {
 		boDebug(220) << "unit already displayed - update..." << endl;
 		d->mOrderButton[i]->slotUnitChanged(it.current());
@@ -263,7 +261,6 @@ void BosonOrderWidget::resetButton(BosonOrderButton* button)
 {
  button->setProductionCount(0);
  button->setGrayOut(false);
- button->setEnabled(true);
 }
 
 bool BosonOrderWidget::isProduceAction() const
