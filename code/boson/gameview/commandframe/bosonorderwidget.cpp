@@ -294,7 +294,7 @@ void BosonOrderWidget::slotMouseEnteredButton()
 	const BoSpecificAction& action = button->action();
 	if (isProducibleOrPlaceable(action)) {
 		const UnitProperties* prop = action.productionOwner()->unitProperties(action.productionId());
-		emit signalUnitTypeHighlighted(prop);
+		emit signalUnitTypeHighlighted(action.productionOwner(), prop);
 	}
  }
 }
@@ -306,7 +306,7 @@ void BosonOrderWidget::slotMouseLeftButton()
  if (button->type() == BosonOrderButton::ShowAction) {
 	const BoSpecificAction& action = button->action();
 	if (isProducibleOrPlaceable(action)) {
-		emit signalUnitTypeHighlighted(0);
+		emit signalUnitTypeHighlighted(0, 0);
 	}
  }
 }
@@ -332,19 +332,19 @@ void BosonOrderWidget::slotMouseMoved(QMouseEvent* e)
 	if (action.isProduceAction()) {
 		if (action.productionType() == ProduceUnit) {
 			const UnitProperties* prop = action.productionOwner()->unitProperties(action.productionId());
-			emit signalUnitTypeHighlighted(prop);
+			emit signalUnitTypeHighlighted(action.productionOwner(), prop);
 			d->mButtonTimer->start(200);
 			return;
 		} else if (action.productionType() == ProduceTech) {
 			const UpgradeProperties* prop = action.productionOwner()->technologyProperties(action.productionId());
-			emit signalTechnologyHighlighted(prop);
+			emit signalTechnologyHighlighted(action.productionOwner(), prop);
 			d->mButtonTimer->start(200);
 			return;
 		}
 	} else if (action.type() == ActionPlacementPreview) {
 		if (action.productionOwner()) { // unit placement
 			const UnitProperties* prop = action.productionOwner()->unitProperties(action.productionId());
-			emit signalUnitTypeHighlighted(prop);
+			emit signalUnitTypeHighlighted(action.productionOwner(), prop);
 			d->mButtonTimer->start(200);
 			return;
 		} else { // ground placement
@@ -352,7 +352,7 @@ void BosonOrderWidget::slotMouseMoved(QMouseEvent* e)
 		}
 	}
  }
- emit signalUnitTypeHighlighted(0);
+ emit signalUnitTypeHighlighted(0, 0);
  d->mButtonTimer->stop();
 }
 
@@ -372,7 +372,7 @@ void BosonOrderWidget::slotCheckCursor()
  }*/
 
  // None of the order buttons has mouse. Disable unit info
- emit signalUnitTypeHighlighted(0);
+ emit signalUnitTypeHighlighted(0, 0);
  d->mButtonTimer->stop();
 }
 

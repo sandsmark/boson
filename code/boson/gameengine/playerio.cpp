@@ -418,6 +418,12 @@ bool PlayerIO::hasTechnology(unsigned long int id) const
  return player()->hasTechnology(id);
 }
 
+bool PlayerIO::hasUnitWithType(unsigned long int type) const
+{
+ return player()->hasUnitWithType(type);
+}
+
+
 bool PlayerIO::isValidCell(int x, int y) const
 {
  if (!player()->map()) {

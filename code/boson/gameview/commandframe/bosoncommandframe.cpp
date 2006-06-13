@@ -352,8 +352,8 @@ class BosonInfoWidget : public BoUfoCustomWidget
 public:
 	BosonInfoWidget();
 
-	void showUnit(const UnitProperties* prop, bool gameMode = true);
-	void showTechnology(const UpgradeProperties* prop, bool gameMode = true);
+	void showUnit(const PlayerIO* player, const UnitProperties* prop, bool gameMode = true);
+	void showTechnology(const PlayerIO* player, const UpgradeProperties* prop, bool gameMode = true);
 
 	virtual void paintWidget();
 
@@ -378,7 +378,7 @@ BosonInfoWidget::BosonInfoWidget()
  addWidget(mInfo);
 }
 
-void BosonInfoWidget::showUnit(const UnitProperties* prop, bool gameMode)
+void BosonInfoWidget::showUnit(const PlayerIO* player, const UnitProperties* prop, bool gameMode)
 {
  if (!prop) {
 	hide();
@@ -388,10 +388,20 @@ void BosonInfoWidget::showUnit(const UnitProperties* prop, bool gameMode)
  QString info;
  info = i18n("%1\n").arg(prop->name());
  if (gameMode) {
-	// TODO: if the requirements are not met yet: display missing
-	// requirements
 	info += QString("Minerals: %2\nOil: %3\n")
 			.arg(prop->mineralCost()).arg(prop->oilCost());
+	// Check if the unit can be built
+	QString missingRequirements;
+	QValueList<unsigned long int> requirements = prop->requirements();
+	for (QValueList<unsigned long int>::Iterator it = requirements.begin(); it != requirements.end(); ++it) {
+		if (!player->hasUnitWithType(*it)) {
+			missingRequirements.append("  " + player->unitProperties(*it)->name() + "\n");
+		}
+	}
+	if (!missingRequirements.isEmpty()) {
+		info += "\nThis unit has missing requirements:\n";
+		info += missingRequirements;
+	}
  }
  if (!prop->description().isEmpty()) {
 	if (!info.isEmpty()) {
@@ -404,7 +414,7 @@ void BosonInfoWidget::showUnit(const UnitProperties* prop, bool gameMode)
  show();
 }
 
-void BosonInfoWidget::showTechnology(const UpgradeProperties* prop, bool gameMode)
+void BosonInfoWidget::showTechnology(const PlayerIO* player, const UpgradeProperties* prop, bool gameMode)
 {
  if (!prop) {
 	hide();
@@ -588,10 +598,10 @@ void BosonCommandFrame::initSelectionWidget()
 
  connect(d->mSelectionWidget, SIGNAL(signalSelectUnit(Unit*)),
 		this, SIGNAL(signalSelectUnit(Unit*)));
- connect(d->mSelectionWidget, SIGNAL(signalUnitTypeHighlighted(const UnitProperties*)),
-		this, SLOT(slotUnitTypeHighlighted(const UnitProperties*)));
- connect(d->mSelectionWidget, SIGNAL(signalTechnologyHighlighted(const UpgradeProperties*)),
-		this, SLOT(slotTechnologyHighlighted(const UpgradeProperties*)));
+ connect(d->mSelectionWidget, SIGNAL(signalUnitTypeHighlighted(const PlayerIO*, const UnitProperties*)),
+		this, SLOT(slotUnitTypeHighlighted(const PlayerIO*, const UnitProperties*)));
+ connect(d->mSelectionWidget, SIGNAL(signalTechnologyHighlighted(const PlayerIO*, const UpgradeProperties*)),
+		this, SLOT(slotTechnologyHighlighted(const PlayerIO*, const UpgradeProperties*)));
 }
 
 void BosonCommandFrame::initPlacementWidget()
@@ -603,10 +613,10 @@ void BosonCommandFrame::initPlacementWidget()
  d->mPlacementScrollWidget->addWidget(d->mPlacementWidget);
  d->mPlacementWidget->hide();
  d->mPlacementWidget->setGridLayoutColumns(5);
- connect(d->mPlacementWidget, SIGNAL(signalUnitTypeHighlighted(const UnitProperties*)),
-		this, SLOT(slotUnitTypeHighlighted(const UnitProperties*)));
- connect(d->mPlacementWidget, SIGNAL(signalTechnologyHighlighted(const UpgradeProperties*)),
-		this, SLOT(slotTechnologyHighlighted(const UpgradeProperties*)));
+ connect(d->mPlacementWidget, SIGNAL(signalUnitTypeHighlighted(const PlayerIO*, const UnitProperties*)),
+		this, SLOT(slotUnitTypeHighlighted(const PlayerIO*, const UnitProperties*)));
+ connect(d->mPlacementWidget, SIGNAL(signalTechnologyHighlighted(const PlayerIO*, const UpgradeProperties*)),
+		this, SLOT(slotTechnologyHighlighted(const PlayerIO*, const UpgradeProperties*)));
 
 }
 
@@ -1138,14 +1148,14 @@ void BosonCommandFrame::slotUpdateUnitConfig()
  d->mUnitConfigWidget->updateUnit(selectedUnit());
 }
 
-void BosonCommandFrame::slotUnitTypeHighlighted(const UnitProperties* prop)
+void BosonCommandFrame::slotUnitTypeHighlighted(const PlayerIO* player, const UnitProperties* prop)
 {
- d->mInfoWidget->showUnit(prop, d->mGameMode);
+ d->mInfoWidget->showUnit(player, prop, d->mGameMode);
 }
 
-void BosonCommandFrame::slotTechnologyHighlighted(const UpgradeProperties* prop)
+void BosonCommandFrame::slotTechnologyHighlighted(const PlayerIO* player, const UpgradeProperties* prop)
 {
- d->mInfoWidget->showTechnology(prop, d->mGameMode);
+ d->mInfoWidget->showTechnology(player, prop, d->mGameMode);
 }
 
 const QPoint* BosonCommandFrame::cursorRootPos() const

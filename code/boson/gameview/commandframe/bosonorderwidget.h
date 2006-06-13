@@ -162,14 +162,14 @@ signals:
 	 * placable unittype. A receiving slot may want to display information
 	 * about this unittype to the user.
 	 **/
-	void signalUnitTypeHighlighted(const UnitProperties* prop);
+	void signalUnitTypeHighlighted(const PlayerIO* player, const UnitProperties* prop);
 
 	/**
 	 * Emitted when the mouse is over a button containing a producable or
 	 * "placable" technology. A receiving slot may want to display information
 	 * about this technology to the user.
 	 **/
-	void signalTechnologyHighlighted(const UpgradeProperties*);
+	void signalTechnologyHighlighted(const PlayerIO* player, const UpgradeProperties*);
 
 private:
 	BosonOrderWidgetPrivate* d;

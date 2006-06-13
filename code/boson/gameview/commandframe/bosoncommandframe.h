@@ -108,8 +108,8 @@ public slots:
 
 	void slotSetGroundTheme(BosonGroundTheme* theme);
 
-	void slotUnitTypeHighlighted(const UnitProperties* prop);
-	void slotTechnologyHighlighted(const UpgradeProperties* prop);
+	void slotUnitTypeHighlighted(const PlayerIO* player, const UnitProperties* prop);
+	void slotTechnologyHighlighted(const PlayerIO* player, const UpgradeProperties* prop);
 
 protected:
 	/**
