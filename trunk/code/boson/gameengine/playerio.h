@@ -266,6 +266,7 @@ public:
 	bool canBuild(unsigned long int unitType) const;
 	bool canResearchTech(unsigned long int id) const;
 	bool hasTechnology(unsigned long int id) const;
+	bool hasUnitWithType(unsigned long int type) const;
 
 	/**
 	 * @return The item at @p canvasVector, if any.
