@@ -35,6 +35,7 @@ class BoGLMatrices;
 class BoTexture;
 class BosonItem;
 class BosonMiniMapQuadtreeNode;
+class BosonGLMiniMapView;
 
 class QPixmap;
 class QPainter;
@@ -69,10 +70,6 @@ public:
 
 	bool showMiniMap() const;
 
-	BosonCanvas* canvas() const;
-	PlayerIO* localPlayerIO() const;
-	float zoom() const;
-
 	/**
 	 * Set the theme where to find the images (logo, zoom images, ...) in.
 	 * Default is "standard".
@@ -80,8 +77,6 @@ public:
 	void setImageTheme(const QString& theme);
 
 	void initFogOfWar(PlayerIO* p);
-
-	virtual void paintWidget();
 
 public slots:
 	/**
@@ -110,14 +105,9 @@ public slots:
 	void slotExplored(int x, int y);
 	void slotUnexplored(int x, int y);
 
-
 signals:
 	void signalReCenterView(const QPoint& pos);
 	void signalMoveSelection(int cellX, int cellY);
-
-protected slots:
-	void slotMouseEvent(QMouseEvent*);
-	void slotWidgetResized();
 
 protected:
 	/**
@@ -127,17 +117,16 @@ protected:
 	 **/
 	QImage imageFromTheme(const QString& file, const QString& theme) const;
 
-	void renderLogo();
-	void renderMiniMap();
-
-	QPoint widgetToCell(const QPoint& pos);
-
 	void setZoomImages(const QImage& in_, const QImage& out_, const QImage& defaultZoom_);
+
+	BosonGLMiniMapView* miniMapView() const;
+
+	unsigned int mapWidth() const;
+	unsigned int mapHeight() const;
 
 private:
 	BosonUfoMiniMapPrivate* d;
 };
-
 
 #endif
 
