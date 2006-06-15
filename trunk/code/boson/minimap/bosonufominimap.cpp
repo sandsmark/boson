@@ -29,6 +29,8 @@
 #include "../botexture.h"
 #include "bodebug.h"
 #include "bosonglminimapview.h"
+#include "bosonufominimapdisplay.h"
+#include "../boufo/boufopushbutton.h"
 #include <bogl.h>
 
 #include <klocale.h>
@@ -46,104 +48,89 @@ class BosonUfoMiniMapPrivate
 public:
 	BosonUfoMiniMapPrivate()
 	{
-		mLocalPlayerIO = 0;
-		mCanvas = 0;
-
+		mMiniMapDisplay = 0;
 		mLogoTexture = 0;
-		mMiniMapView = 0;
 	}
-	PlayerIO* mLocalPlayerIO;
-	BosonCanvas* mCanvas;
-
 	QString mImageTheme;
 
 	QPointArray mSelectionRect;
 
-	float mZoom;
-
-	bool mShowMiniMap;
 	QImage mLogo;
 	QImage mZoomIn;
 	QImage mZoomOut;
 	QImage mZoomDefault;
 
+	BosonUfoMiniMapDisplay* mMiniMapDisplay;
 	BoTexture* mLogoTexture;
-	BosonGLMiniMapView* mMiniMapView;
-
 };
 
 BosonUfoMiniMap::BosonUfoMiniMap()
 	: BoUfoCustomWidget()
 {
+ setName("ufoglminimap");
+ setLayoutClass(BoUfoWidget::UHBoxLayout);
+
  d = new BosonUfoMiniMapPrivate;
- d->mShowMiniMap = false;
- d->mZoom = 1.0f;
  d->mSelectionRect.resize(8);
 
- setName("ufoglminimap");
+ d->mMiniMapDisplay = new BosonUfoMiniMapDisplay();
+ addWidget(d->mMiniMapDisplay);
+ connect(d->mMiniMapDisplay, SIGNAL(signalReCenterView(const QPoint&)),
+		this, SIGNAL(signalReCenterView(const QPoint&)));
+ connect(d->mMiniMapDisplay, SIGNAL(signalMoveSelection(int, int)),
+		this, SIGNAL(signalMoveSelection(int, int)));
+
+ BoUfoWidget* buttons = new BoUfoWidget();
+ buttons->setLayoutClass(BoUfoWidget::UVBoxLayout);
+ addWidget(buttons);
+
+#if 1
+ BoUfoPushButton* zoomIn = new BoUfoPushButton(i18n("+"));
+ connect(zoomIn, SIGNAL(signalClicked()),
+		this, SLOT(slotZoomIn()));
+ buttons->addWidget(zoomIn);
+ BoUfoPushButton* zoomOut = new BoUfoPushButton(i18n("-"));
+ connect(zoomOut, SIGNAL(signalClicked()),
+		this, SLOT(slotZoomOut()));
+ buttons->addWidget(zoomOut);
+#endif
 
  setOpaque(false);
- setMouseEventsEnabled(true, true);
 
  setImageTheme(QString::fromLatin1("standard"));
  slotShowMiniMap(false);
-
- setPreferredWidth(150);
- setPreferredHeight(150);
- setMinimumWidth(150);
- setMinimumHeight(150);
- setSize(150, 150);
-
-
- connect(this, SIGNAL(signalMouseMoved(QMouseEvent*)),
-		this, SLOT(slotMouseEvent(QMouseEvent*)));
- connect(this, SIGNAL(signalMouseDragged(QMouseEvent*)),
-		this, SLOT(slotMouseEvent(QMouseEvent*)));
- connect(this, SIGNAL(signalMousePressed(QMouseEvent*)),
-		this, SLOT(slotMouseEvent(QMouseEvent*)));
- connect(this, SIGNAL(signalMouseReleased(QMouseEvent*)),
-		this, SLOT(slotMouseEvent(QMouseEvent*)));
-// connect(this, SIGNAL(signalMouseClicked(ufo::UMouseEvent*)),
-//		this, SLOT(slotMouseEvent(ufo::UMouseEvent*)));
-
- connect(this, SIGNAL(signalWidgetResized()),
-		this, SLOT(slotWidgetResized()));
-
 }
 
 BosonUfoMiniMap::~BosonUfoMiniMap()
 {
- boDebug() << k_funcinfo << endl;
- delete d->mMiniMapView;
  delete d->mLogoTexture;
  delete d;
+}
+
+BosonGLMiniMapView* BosonUfoMiniMap::miniMapView() const
+{
+ return d->mMiniMapDisplay->miniMapView();
 }
 
 void BosonUfoMiniMap::quitGame()
 {
  setLocalPlayerIO(0);
- d->mCanvas = 0;
+ d->mMiniMapDisplay->quitGame();
 }
 
 void BosonUfoMiniMap::setLocalPlayerIO(PlayerIO* io)
 {
- d->mLocalPlayerIO = io;
- if (d->mMiniMapView) {
-	d->mMiniMapView->setLocalPlayerIO(io);
- }
- if (!io) {
-	slotShowMiniMap(false);
- }
+ d->mMiniMapDisplay->setLocalPlayerIO(io);
 }
 
 bool BosonUfoMiniMap::showMiniMap() const
 {
- return d->mShowMiniMap;
+ return d->mMiniMapDisplay->showMiniMap();
 }
 
 void BosonUfoMiniMap::slotShowMiniMap(bool s)
 {
- d->mShowMiniMap = s;
+ d->mMiniMapDisplay->setShowMiniMap(s);
 }
 
 void BosonUfoMiniMap::slotMoveRect(const QPoint& topLeft, const QPoint& topRight, const QPoint& bottomLeft, const QPoint& bottomRight)
@@ -161,26 +148,18 @@ void BosonUfoMiniMap::slotMoveRect(const QPoint& topLeft, const QPoint& topRight
  d->mSelectionRect.setPoint(7, topLeft);
 }
 
-float BosonUfoMiniMap::zoom() const
-{
- return 1.0f;
-}
-
 void BosonUfoMiniMap::setImageTheme(const QString& theme)
 {
  d->mImageTheme = theme;
- if (!d->mMiniMapView) {
-	return;
- }
  QImage image = imageFromTheme(QString::fromLatin1("minimap-logo.png"), theme);
  if (image.isNull()) {
 	boError() << k_funcinfo << "Could not load minimap-logo.png from " << theme << endl;
 	if (d->mLogo.isNull()) {
 		// create a dummy pixmap to avoid a crash
 		int w, h;
-		if (canvas()) {
-			w = canvas()->mapWidth();
-			h = canvas()->mapHeight();
+		if (mapWidth() > 0 && mapHeight() > 0) {
+			w = mapWidth();
+			h = mapHeight();
 		} else {
 			w = 100;
 			h = 100;
@@ -198,6 +177,7 @@ void BosonUfoMiniMap::setImageTheme(const QString& theme)
 		d->mLogo.width(), d->mLogo.height(),
 		BoTexture::FilterLinear | BoTexture::FormatRGBA |
 		BoTexture::DontCompress | BoTexture::DontGenMipmaps);
+ d->mMiniMapDisplay->setLogoTexture(d->mLogoTexture);
 
  image = imageFromTheme(QString::fromLatin1("minimap-zoom-in.png"), theme);
  if (image.isNull()) {
@@ -249,18 +229,28 @@ void BosonUfoMiniMap::setZoomImages(const QImage& in_, const QImage& out_, const
 
 void BosonUfoMiniMap::slotZoomIn()
 {
+#if 0
  if (boConfig->doubleValue("MiniMapZoom") + ZOOM_STEP > 3.0) {
 	return;
  }
  boConfig->setDoubleValue("MiniMapZoom", boConfig->doubleValue("MiniMapZoom") + ZOOM_STEP);
+#endif
+ if (miniMapView()) {
+	miniMapView()->zoomIn();
+ }
 }
 
 void BosonUfoMiniMap::slotZoomOut()
 {
+#if 0
  if (boConfig->doubleValue("MiniMapZoom") - ZOOM_STEP <= 0.1) {
 	return;
  }
  boConfig->setDoubleValue("MiniMapZoom", boConfig->doubleValue("MiniMapZoom") - ZOOM_STEP);
+#endif
+ if (miniMapView()) {
+	miniMapView()->zoomOut();
+ }
 }
 
 void BosonUfoMiniMap::slotZoomDefault()
@@ -288,240 +278,91 @@ void BosonUfoMiniMap::createMap(BosonCanvas* c, const BoGLMatrices* gameGLMatric
 {
  BO_CHECK_NULL_RET(c);
  boDebug() << k_funcinfo << endl;
- d->mCanvas = c;
 
- delete d->mMiniMapView;
- d->mMiniMapView = new BosonGLMiniMapView(gameGLMatrices, this);
- d->mMiniMapView->setCanvas(canvas());
- d->mMiniMapView->setLocalPlayerIO(localPlayerIO());
- d->mMiniMapView->createMap(c->mapWidth(), c->mapHeight());
+ d->mMiniMapDisplay->createMap(c, gameGLMatrices);
  if (!d->mImageTheme.isEmpty()) {
 	setImageTheme(d->mImageTheme);
  }
  boDebug() << k_funcinfo << "done" << endl;
 }
 
-void BosonUfoMiniMap::render()
-{
- if (!canvas() || !d->mMiniMapView) {
-	return;
- }
-
-// d->mMiniMapView->setZoom(zoom());
-
- if (d->mShowMiniMap) {
-	renderMiniMap();
- } else {
-	renderLogo();
- }
-}
-
-void BosonUfoMiniMap::renderMiniMap()
-{
- d->mMiniMapView->render();
-}
-
-void BosonUfoMiniMap::renderLogo()
-{
- BO_CHECK_NULL_RET(d->mLogoTexture);
- glPushAttrib(GL_ENABLE_BIT);
- glEnable(GL_TEXTURE_2D);
- glColor3ub(255, 255, 255);
- d->mLogoTexture->bind();
-
- glBegin(GL_QUADS);
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex2f(0.0f, 0.0f);
-
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex2f(1.0f, 0.0f);
-
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex2f(1.0f, 1.0f);
-
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex2f(0.0f, 1.0f);
- glEnd();
-
- glPopAttrib();
- boTextureManager->invalidateCache();
-}
-
-BosonCanvas* BosonUfoMiniMap::canvas() const
-{
- return d->mCanvas;
-}
-
-PlayerIO* BosonUfoMiniMap::localPlayerIO() const
-{
- return d->mLocalPlayerIO;
-}
-
-void BosonUfoMiniMap::slotMouseEvent(QMouseEvent* e)
-{
- QPoint pos = e->pos();
-
- // AB: when using click+move, the coordinates may go off this widget. we don't
- // want this.
- pos.setX(QMAX(0, pos.x()));
- pos.setY(QMAX(0, pos.y()));
- pos.setX(QMIN(pos.x(), width()));
- pos.setY(QMIN(pos.y(), height()));
-
- QPoint cell = widgetToCell(pos);
-
- // we accept all mouse events except mousemove events. this means that only
- // mouse move events are propagated to the parent (necessary for updating
- // cursor position)
- switch (e->type()) {
-	case QMouseEvent::MouseMove:
-		if (!(e->state() & Qt::LeftButton)) {
-			// MouseMove is ignored when LMB is not pressed only
-			e->ignore();
-		} else {
-			e->accept();
-		}
-		break;
-	default:
-		e->accept();
-		break;
- }
-
- if (!showMiniMap()) {
-	return;
- }
-
- int button = e->button();
- switch (e->type()) {
-	case QMouseEvent::MouseMove:
-		button = Qt::NoButton;
-		if (e->state() & Qt::LeftButton) {
-			button = Qt::LeftButton;
-		} else {
-			break;
-		}
-		// fall through intended, for LMB+Move
-	case QMouseEvent::MouseButtonPress:
-	{
-		if (button == Qt::LeftButton) {
-			emit signalReCenterView(cell);
-		} else if (button == Qt::RightButton) {
-			emit signalMoveSelection(cell.x(), cell.y());
-		}
-		break;
-	}
-	case QMouseEvent::MouseButtonRelease:
-		break;
-//	case QMouseEvent::MouseClicked:
-//		break;
-//	case QMouseEvent::MouseDragged:
-//		break;
-	default:
-		break;
- }
-}
-
-QPoint BosonUfoMiniMap::widgetToCell(const QPoint& pos)
-{
- // TODO: the correct cell depends on the modelview matrix of the minimap (zooming, ...). we should use something like d->mGLMiniMap->widgetToCell(), which would take the mModelView of the minimap into account.
- BosonMap* map = canvas()->map();
- if (!map) {
-	return QPoint();
- }
- if (width() == 0 || height() == 0) {
-	return QPoint();
- }
- QPoint cell = QPoint((pos.x() * map->width()) / width(),
-		(pos.y() * map->height()) / height());
- return cell;
-}
-
-void BosonUfoMiniMap::paintWidget()
-{
- if (Bo3dTools::checkError()) {
-	boError() << k_funcinfo << "GL error at the beginning of this method" << endl;
- }
- PROFILE_METHOD
- boTextureManager->invalidateCache();
- glPushMatrix();
- glTranslatef(0.0f, (float)height(), 0.0f);
- glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
- glScalef((float)width(), (float)height(), 0.0f);
- render();
- glPopMatrix();
- boTextureManager->invalidateCache();
- if (Bo3dTools::checkError()) {
-	boError() << k_funcinfo << "GL error at the end of this method" << endl;
- }
-}
-
 void BosonUfoMiniMap::slotAdvance(unsigned int advanceCallsCount)
 {
- if (d->mMiniMapView) {
-	d->mMiniMapView->slotAdvance(advanceCallsCount);
+ if (miniMapView()) {
+	miniMapView()->slotAdvance(advanceCallsCount);
  }
 }
 
 void BosonUfoMiniMap::slotUnitMoved(Unit* unit, bofixed oldX, bofixed oldY)
 {
- if (d->mMiniMapView) {
-	d->mMiniMapView->slotUnitMoved(unit, oldX, oldY);
+ if (miniMapView()) {
+	miniMapView()->slotUnitMoved(unit, oldX, oldY);
  }
 }
 
 void BosonUfoMiniMap::slotUnitRemoved(Unit* unit)
 {
- if (d->mMiniMapView) {
-	d->mMiniMapView->slotUnitRemoved(unit);
+ if (miniMapView()) {
+	miniMapView()->slotUnitRemoved(unit);
  }
 }
 
 void BosonUfoMiniMap::slotItemAdded(BosonItem* item)
 {
- if (d->mMiniMapView) {
-	d->mMiniMapView->slotItemAdded(item);
+ if (miniMapView()) {
+	miniMapView()->slotItemAdded(item);
  }
 }
 
 void BosonUfoMiniMap::slotFacilityConstructed(Unit* fac)
 {
- if (d->mMiniMapView) {
-	d->mMiniMapView->slotFacilityConstructed(fac);
+ if (miniMapView()) {
+	miniMapView()->slotFacilityConstructed(fac);
  }
 }
 
 void BosonUfoMiniMap::slotUpdateTerrainAtCorner(int x, int y)
 {
- if (d->mMiniMapView) {
-	d->mMiniMapView->slotUpdateTerrainAtCorner(x, y);
+ if (miniMapView()) {
+	miniMapView()->slotUpdateTerrainAtCorner(x, y);
  }
 }
 
 void BosonUfoMiniMap::slotExplored(int x, int y)
 {
- if (d->mMiniMapView) {
-	d->mMiniMapView->slotExplored(x, y);
+ if (miniMapView()) {
+	miniMapView()->slotExplored(x, y);
  }
 }
 
 void BosonUfoMiniMap::slotUnexplored(int x, int y)
 {
- if (d->mMiniMapView) {
-	d->mMiniMapView->slotUnexplored(x, y);
+ if (miniMapView()) {
+	miniMapView()->slotUnexplored(x, y);
  }
 }
 
 void BosonUfoMiniMap::initFogOfWar(PlayerIO* p)
 {
- if (d->mMiniMapView) {
-	d->mMiniMapView->initFogOfWar(p);
+ if (miniMapView()) {
+	miniMapView()->initFogOfWar(p);
  }
 }
 
-void BosonUfoMiniMap::slotWidgetResized()
+unsigned int BosonUfoMiniMap::mapWidth() const
 {
- if (d->mMiniMapView) {
-//	d->mMiniMapView->setMiniMapScreenSize(width(), height());
+ if (miniMapView()) {
+	return miniMapView()->mapWidth();
  }
+ return 0;
 }
+
+unsigned int BosonUfoMiniMap::mapHeight() const
+{
+ if (miniMapView()) {
+	return miniMapView()->mapHeight();
+ }
+ return 0;
+}
+
 

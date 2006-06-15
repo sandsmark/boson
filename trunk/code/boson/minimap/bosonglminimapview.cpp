@@ -24,53 +24,87 @@
 #include "../bo3dtools.h"
 #include "bodebug.h"
 #include "../bosonprofiling.h"
+#include "../defines.h"
 #include <bogl.h>
 
 #include <klocale.h>
+
+#include <qvaluelist.h>
+#include <qpair.h>
 
 static void cut_line_segment_at_plane(const BoPlane& plane, BoVector3Float& linePoint1, BoVector3Float& linePoint2);
 static void cutLineZ0(BoVector3Float& p1_, BoVector3Float& p2_);
 static void drawLine(const BoVector3Float& p1_, const BoVector3Float& p2_, int w, int h);
 static void keepLinesInRect(int w, int h, BoVector3Float& p1, BoVector3Float& p2, bool* skip);
 
-
-class BosonGLMiniMapViewPrivate
+class CameraLines
 {
 public:
-	BosonGLMiniMapViewPrivate()
-	{
-		mGameGLMatrices = 0;
-	}
+	CameraLines();
 
-	BoMatrix mModelviewMatrix;
-	const BoGLMatrices* mGameGLMatrices;
+	BoVector3Float BLF; // bottom-left-far
+	BoVector3Float BRF; // bottom-right-far
+	BoVector3Float BRN; // bottom-right-near
+	BoVector3Float BLN; // bottom-left-near
+	BoVector3Float TLF; // top-left-far
+	BoVector3Float TRF; // top-right-far
+	BoVector3Float TRN; // top-right-near
+	BoVector3Float TLN; // top-left-near
+
+	QValueList< QPair<BoVector3Float*, BoVector3Float*> > mAllLines;
+	QValueList<BoVector3Float*> mAllPoints;
+
+	/**
+	 * Estimated (!!) center of the view frustum on the z=0 plane. In cell
+	 * coordinates.
+	 *
+	 * This value is calculated from the camera lines, so if they are
+	 * calculated incorrectly, this value will be, too, most of the time.
+	 **/
+	BoVector3Float mCenterCell;
+
+	/**
+	 * Retrieve the viewfrustum lines from the given @p viewFrustum.
+	 *
+	 * The lines are those that intersect the z=0 plane and are meant to be
+	 * displayed in the minimap.
+	 **/
+	void retrieve(const BoFrustum& viewFrustum);
+
+protected:
+	void calculateCenterCell();
 };
 
-BosonGLMiniMapView::BosonGLMiniMapView(const BoGLMatrices* gameGLMatrices, QObject* parent)
-	: BosonGLCompleteMiniMap(parent)
+CameraLines::CameraLines()
 {
- d = new BosonGLMiniMapViewPrivate;
+ mAllLines.append(QPair<BoVector3Float*, BoVector3Float*>(&BLF, &BRF));
+ mAllLines.append(QPair<BoVector3Float*, BoVector3Float*>(&BRF, &BRN));
+ mAllLines.append(QPair<BoVector3Float*, BoVector3Float*>(&BRN, &BLN));
+ mAllLines.append(QPair<BoVector3Float*, BoVector3Float*>(&BLN, &BLF));
+ mAllLines.append(QPair<BoVector3Float*, BoVector3Float*>(&TLF, &TRF));
+ mAllLines.append(QPair<BoVector3Float*, BoVector3Float*>(&TRF, &TRN));
+ mAllLines.append(QPair<BoVector3Float*, BoVector3Float*>(&TRN, &TLN));
+ mAllLines.append(QPair<BoVector3Float*, BoVector3Float*>(&TLN, &TLF));
+ mAllLines.append(QPair<BoVector3Float*, BoVector3Float*>(&BLF, &TLF));
+ mAllLines.append(QPair<BoVector3Float*, BoVector3Float*>(&BRF, &TRF));
+ mAllLines.append(QPair<BoVector3Float*, BoVector3Float*>(&BRN, &TRN));
+ mAllLines.append(QPair<BoVector3Float*, BoVector3Float*>(&BLN, &TLN));
 
- d->mGameGLMatrices = gameGLMatrices;
+ mAllPoints.append(&BLF);
+ mAllPoints.append(&BRF);
+ mAllPoints.append(&BRN);
+ mAllPoints.append(&BLN);
+ mAllPoints.append(&TLF);
+ mAllPoints.append(&TRF);
+ mAllPoints.append(&TRN);
+ mAllPoints.append(&TLN);
 }
 
-BosonGLMiniMapView::~BosonGLMiniMapView()
-{
- delete d;
-}
-
-void BosonGLMiniMapView::render()
-{
- BosonGLCompleteMiniMap::render();
- renderCamera();
-}
-
-void BosonGLMiniMapView::renderCamera()
+void CameraLines::retrieve(const BoFrustum& viewFrustum)
 {
  // extract points from the viewfrustum
  // we have planes RIGHT, LEFT, BOTTOM, TOP, FAR, NEAR, we are going to name
  // lines and points accordingly (point at LEFT/BOTTOM/NEAR planes is LBN)
- const BoFrustum& viewFrustum = d->mGameGLMatrices->viewFrustum();
  const BoPlane& planeRight  = viewFrustum.right();
  const BoPlane& planeLeft   = viewFrustum.left();
  const BoPlane& planeBottom = viewFrustum.bottom();
@@ -135,14 +169,6 @@ void BosonGLMiniMapView::renderCamera()
  // note that we must not do line-line intersection, as that would be highly
  // inaccurate. we use line-plane intersection instead, which provides more
  // accurate results
- BoVector3Float BLF;
- BoVector3Float BRF;
- BoVector3Float BRN;
- BoVector3Float BLN;
- BoVector3Float TLF;
- BoVector3Float TRF;
- BoVector3Float TRN;
- BoVector3Float TLN;
  planeBottom.intersectLine(LF_point, LF_dir, &BLF);
  planeBottom.intersectLine(RF_point, RF_dir, &BRF);
  planeBottom.intersectLine(RN_point, RN_dir, &BRN);
@@ -170,6 +196,232 @@ void BosonGLMiniMapView::renderCamera()
  cutLineZ0(BRF, TRF);
  cutLineZ0(BRN, TRN);
  cutLineZ0(BLN, TLN);
+
+ calculateCenterCell();
+}
+
+void CameraLines::calculateCenterCell()
+{
+ // fallback
+ mCenterCell = BoVector3Float(0.0f, 0.0f, 0.0f);
+
+ float x = 0.0f;
+ float y = 0.0f;
+ float z = 0.0f;
+ float count = 0.0f;
+ for (QValueList<BoVector3Float*>::iterator it = mAllPoints.begin(); it != mAllPoints.end(); ++it) {
+	if (fabsf((*it)->z()) > 2.0f) {
+		// in theory all points should be at z=0.0f
+		// this one is too far away from that, so we won't use it
+		continue;
+	}
+
+	// protect against large (!) errors.
+	//
+	// note that checks agains x < 0, or x >= mapWidth won't work correctly,
+	// as the camera actually _can_ go off the map partially!
+	if (fabsf((*it)->x()) > MAX_MAP_WIDTH + 500.0f) {
+		continue;
+	}
+	if (fabsf((*it)->y()) > MAX_MAP_HEIGHT+ 500.0f) {
+		continue;
+	}
+
+	x += (*it)->x();
+	y += (*it)->y();
+	count += 1.0f;
+ }
+ if (count > 0.0f) {
+	x /= count;
+	y /= count;
+ }
+ mCenterCell = BoVector3Float(x, -y, z);
+}
+
+
+class BosonGLMiniMapViewPrivate
+{
+public:
+	BosonGLMiniMapViewPrivate()
+	{
+		mGameGLMatrices = 0;
+	}
+
+	const BoGLMatrices* mGameGLMatrices;
+	CameraLines mCameraLines;
+
+	unsigned int mViewWidth;
+	unsigned int mViewHeight;
+
+	int mViewCenterX;
+	int mViewCenterY;
+
+	float mZoomStep;
+};
+
+BosonGLMiniMapView::BosonGLMiniMapView(const BoGLMatrices* gameGLMatrices, QObject* parent)
+	: BosonGLCompleteMiniMap(parent)
+{
+ d = new BosonGLMiniMapViewPrivate;
+ d->mZoomStep = 1.0f;
+
+ d->mGameGLMatrices = gameGLMatrices;
+ d->mViewCenterX = 0;
+ d->mViewCenterY = 0;
+ d->mViewWidth = 1;
+ d->mViewHeight = 1;
+}
+
+BosonGLMiniMapView::~BosonGLMiniMapView()
+{
+ delete d;
+}
+
+void BosonGLMiniMapView::setViewSize(unsigned int w, unsigned int h)
+{
+ d->mViewWidth = w;
+ d->mViewHeight = h;
+
+ // avoid possible divisions by zero
+ d->mViewWidth = QMAX(d->mViewWidth, 1);
+ d->mViewHeight = QMAX(d->mViewHeight, 1);
+
+ centerViewOnCell(d->mViewCenterX, d->mViewCenterY);
+}
+
+
+void BosonGLMiniMapView::centerViewOnCell(int x, int y)
+{
+ x = QMIN(x, (int)mapWidth() - 1);
+ y = QMIN(y, (int)mapHeight() - 1);
+ x = QMAX(x, 0);
+ y = QMAX(y, 0);
+ d->mViewCenterX = x;
+ d->mViewCenterY = y;
+}
+
+int BosonGLMiniMapView::xTranslation() const
+{
+ if (d->mViewWidth * 1.0f / zoomOutFactor() >= mapWidth()) {
+	// we can display the whole map
+	return 0;
+ }
+ int w2 = (int)((d->mViewWidth / 2) * 1.0f / zoomOutFactor());
+ int ret = d->mViewCenterX - w2;
+ ret = QMAX(ret, 0);
+ ret = QMIN(ret, (int)(mapWidth() - d->mViewWidth * 1.0f / zoomOutFactor()));
+
+ return -ret;
+}
+
+int BosonGLMiniMapView::yTranslation() const
+{
+ if (d->mViewHeight * 1.0 / zoomOutFactor() >= mapHeight()) {
+	// we can display the whole map
+	return (int)(d->mViewHeight * 1.0f / zoomOutFactor()- mapHeight());
+ }
+
+ // flip y: 0 is bottom
+ int realCenterY = (int)(mapHeight() - d->mViewCenterY) - 1;
+ realCenterY = QMAX(realCenterY, 0);
+
+ int h2 = (int)((d->mViewHeight / 2) * 1.0f / zoomOutFactor());
+ int ret = realCenterY - h2;
+ ret = QMAX(ret, 0);
+ ret = QMIN(ret, (int)(mapHeight() - d->mViewHeight * 1.0f / zoomOutFactor()));
+
+ return -ret;
+}
+
+int BosonGLMiniMapView::viewCenterX() const
+{
+ return d->mViewCenterX;
+}
+
+int BosonGLMiniMapView::viewCenterY() const
+{
+ return d->mViewCenterY;
+}
+
+void BosonGLMiniMapView::zoomIn()
+{
+ d->mZoomStep /= 2.0f;
+ d->mZoomStep = QMAX(d->mZoomStep, 0.125f);
+
+ centerViewOnCell(d->mViewCenterX, d->mViewCenterY);
+}
+
+void BosonGLMiniMapView::zoomOut()
+{
+ d->mZoomStep *= 2.0f;
+
+ centerViewOnCell(d->mViewCenterX, d->mViewCenterY);
+}
+
+void BosonGLMiniMapView::render()
+{
+ const BoFrustum& viewFrustum = d->mGameGLMatrices->viewFrustum();
+ d->mCameraLines.retrieve(viewFrustum);
+ centerViewOnCell((int)d->mCameraLines.mCenterCell.x(), (int)d->mCameraLines.mCenterCell.y());
+
+ glPushMatrix();
+
+ glScalef(zoomOutFactor(), zoomOutFactor(), 1.0f);
+ glTranslatef((float)xTranslation(), (float)yTranslation(), 0.0f);
+
+ glScalef((float)mapWidth(), (float)mapHeight(), 1.0f);
+ BosonGLCompleteMiniMap::render();
+ renderCamera();
+
+ glPopMatrix();
+}
+
+float BosonGLMiniMapView::zoomOutFactor() const
+{
+ float f = 1.0f;
+ if (d->mZoomStep > 0.001f) {
+	if (d->mZoomStep > 1.0f) {
+		int scaledW = (int)floor(d->mZoomStep * ((float)d->mViewWidth));
+		int scaledH = (int)floor(d->mZoomStep * ((float)d->mViewHeight));
+		int dw = ((int)mapWidth()) - scaledW;
+		int dh = ((int)mapHeight()) - scaledH;
+		if (dw < 0 && dh < 0) {
+			float view = 0.0f;
+			float maxRequired = 0.0f;
+			if (dw >= dh) {
+				view = (float)d->mViewWidth;
+				maxRequired = (float)mapWidth();
+			} else {
+				view = (float)d->mViewHeight;
+				maxRequired = (float)mapHeight();
+			}
+
+			// we search the smallest zoomStep, so that
+			//   view * zoomStep >= maxRequired
+			// is still satisfied.
+			float zoomStep = maxRequired / view;
+			if (zoomStep <= 0.0001f) { // error
+				zoomStep = 1.0f;
+			}
+			d->mZoomStep = zoomStep;
+		}
+	}
+
+	f = 1.0f / d->mZoomStep;
+ }
+ return f;
+}
+
+void BosonGLMiniMapView::renderCamera()
+{
+ BoVector3Float BLF = d->mCameraLines.BLF;
+ BoVector3Float BRF = d->mCameraLines.BRF;
+ BoVector3Float BRN = d->mCameraLines.BRN;
+ BoVector3Float BLN = d->mCameraLines.BLN;
+ BoVector3Float TLF = d->mCameraLines.TLF;
+ BoVector3Float TRF = d->mCameraLines.TRF;
+ BoVector3Float TRN = d->mCameraLines.TRN;
+ BoVector3Float TLN = d->mCameraLines.TLN;
 
  glDisable(GL_TEXTURE_2D);
 
@@ -321,5 +573,37 @@ static void cut_line_segment_at_plane(const BoPlane& plane, BoVector3Float& line
  } else {
 	linePoint2 = intersection;
  }
+}
+
+QPoint BosonGLMiniMapView::widgetToCell(const QPoint& pos) const
+{
+ if (d->mViewWidth <= 0 || d->mViewHeight <= 0) {
+	return QPoint(-1, -1);
+ }
+ if (pos.x() < 0 || pos.y() < 0 || pos.x() >= (int)d->mViewWidth || pos.y() >= (int)d->mViewHeight) {
+	return QPoint(-1, -1);
+ }
+
+ if (fabsf(zoomOutFactor()) <= 0.0001f) {
+	return QPoint(-1, -1);
+ }
+
+ const int xTrans = -xTranslation();
+ const int yTrans = -yTranslation();
+
+ float zoomFactor = 1.0f / zoomOutFactor();
+
+ int xCell = xTrans + (int)(pos.x() * zoomFactor);
+
+ int yPos = d->mViewHeight - pos.y() - 1;
+ int y = yTrans + (int)(yPos * zoomFactor);
+ int yCell = mapHeight() - y - 1;
+
+ if (xCell < 0 || (unsigned int)xCell >= mapWidth() ||
+	yCell < 0 || (unsigned int)yCell >= mapHeight()) {
+	return QPoint(-1, -1);
+ }
+
+ return QPoint(xCell, yCell);
 }
 
