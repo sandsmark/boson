@@ -79,6 +79,8 @@ BosonUfoMiniMapDisplay::BosonUfoMiniMapDisplay()
 		this, SLOT(slotMouseEvent(QMouseEvent*)));
 // connect(this, SIGNAL(signalMouseClicked(ufo::UMouseEvent*)),
 //		this, SLOT(slotMouseEvent(ufo::UMouseEvent*)));
+ connect(this, SIGNAL(signalMouseWheel(QWheelEvent*)),
+		this, SLOT(slotWheelEvent(QWheelEvent*)));
 
  connect(this, SIGNAL(signalWidgetResized()),
 		this, SLOT(slotWidgetResized()));
@@ -218,6 +220,20 @@ void BosonUfoMiniMapDisplay::slotMouseEvent(QMouseEvent* e)
 	default:
 		break;
  }
+}
+
+void BosonUfoMiniMapDisplay::slotWheelEvent(QWheelEvent* e)
+{
+ if (!d->mMiniMapView || !showMiniMap()) {
+	return;
+ }
+
+ if (e->delta() > 0) {
+	miniMapView()->zoomIn();
+ } else {
+	miniMapView()->zoomOut();
+ }
+ e->accept();
 }
 
 void BosonUfoMiniMapDisplay::paintWidget()

@@ -41,6 +41,7 @@ class QPixmap;
 class QPainter;
 class QPaintEvent;
 class QMouseEvent;
+class QWheelEvent;
 template<class T> class QPtrVector;
 template<class T> class QPtrList;
 
@@ -81,6 +82,7 @@ signals:
 
 protected slots:
 	void slotMouseEvent(QMouseEvent* e);
+	void slotWheelEvent(QWheelEvent* e);
 	void slotWidgetResized();
 
 protected:
