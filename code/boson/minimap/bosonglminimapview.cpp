@@ -25,6 +25,7 @@
 #include "bodebug.h"
 #include "../bosonprofiling.h"
 #include "../defines.h"
+#include "bosonzoomscrollviewport.h"
 #include <bogl.h>
 
 #include <klocale.h>
@@ -250,112 +251,58 @@ public:
 	const BoGLMatrices* mGameGLMatrices;
 	CameraLines mCameraLines;
 
-	unsigned int mViewWidth;
-	unsigned int mViewHeight;
-
-	int mViewCenterX;
-	int mViewCenterY;
-
-	float mZoomStep;
+	BosonZoomScrollViewport* mViewport;
 };
 
 BosonGLMiniMapView::BosonGLMiniMapView(const BoGLMatrices* gameGLMatrices, QObject* parent)
 	: BosonGLCompleteMiniMap(parent)
 {
  d = new BosonGLMiniMapViewPrivate;
- d->mZoomStep = 1.0f;
+ d->mViewport = new BosonZoomScrollViewport(this);
 
  d->mGameGLMatrices = gameGLMatrices;
- d->mViewCenterX = 0;
- d->mViewCenterY = 0;
- d->mViewWidth = 1;
- d->mViewHeight = 1;
 }
 
 BosonGLMiniMapView::~BosonGLMiniMapView()
 {
+ delete d->mViewport;
  delete d;
+}
+
+void BosonGLMiniMapView::createMap(unsigned int w, unsigned int h)
+{
+ BosonGLCompleteMiniMap::createMap(w, h);
+ d->mViewport->setDataSize(w, h);
 }
 
 void BosonGLMiniMapView::setViewSize(unsigned int w, unsigned int h)
 {
- d->mViewWidth = w;
- d->mViewHeight = h;
-
- // avoid possible divisions by zero
- d->mViewWidth = QMAX(d->mViewWidth, 1);
- d->mViewHeight = QMAX(d->mViewHeight, 1);
-
- centerViewOnCell(d->mViewCenterX, d->mViewCenterY);
+ d->mViewport->setViewSize(w, h);
 }
-
 
 void BosonGLMiniMapView::centerViewOnCell(int x, int y)
 {
- x = QMIN(x, (int)mapWidth() - 1);
- y = QMIN(y, (int)mapHeight() - 1);
- x = QMAX(x, 0);
- y = QMAX(y, 0);
- d->mViewCenterX = x;
- d->mViewCenterY = y;
-}
-
-int BosonGLMiniMapView::xTranslation() const
-{
- if (d->mViewWidth * 1.0f / zoomOutFactor() >= mapWidth()) {
-	// we can display the whole map
-	return 0;
- }
- int w2 = (int)((d->mViewWidth / 2) * 1.0f / zoomOutFactor());
- int ret = d->mViewCenterX - w2;
- ret = QMAX(ret, 0);
- ret = QMIN(ret, (int)(mapWidth() - d->mViewWidth * 1.0f / zoomOutFactor()));
-
- return -ret;
-}
-
-int BosonGLMiniMapView::yTranslation() const
-{
- if (d->mViewHeight * 1.0 / zoomOutFactor() >= mapHeight()) {
-	// we can display the whole map
-	return (int)(d->mViewHeight * 1.0f / zoomOutFactor()- mapHeight());
- }
-
- // flip y: 0 is bottom
- int realCenterY = (int)(mapHeight() - d->mViewCenterY) - 1;
- realCenterY = QMAX(realCenterY, 0);
-
- int h2 = (int)((d->mViewHeight / 2) * 1.0f / zoomOutFactor());
- int ret = realCenterY - h2;
- ret = QMAX(ret, 0);
- ret = QMIN(ret, (int)(mapHeight() - d->mViewHeight * 1.0f / zoomOutFactor()));
-
- return -ret;
+ d->mViewport->centerViewOnDataPoint(x, y);
 }
 
 int BosonGLMiniMapView::viewCenterX() const
 {
- return d->mViewCenterX;
+ return d->mViewport->viewCenterX();
 }
 
 int BosonGLMiniMapView::viewCenterY() const
 {
- return d->mViewCenterY;
+ return d->mViewport->viewCenterY();
 }
 
 void BosonGLMiniMapView::zoomIn()
 {
- d->mZoomStep /= 2.0f;
- d->mZoomStep = QMAX(d->mZoomStep, 0.125f);
-
- centerViewOnCell(d->mViewCenterX, d->mViewCenterY);
+ d->mViewport->zoomIn();
 }
 
 void BosonGLMiniMapView::zoomOut()
 {
- d->mZoomStep *= 2.0f;
-
- centerViewOnCell(d->mViewCenterX, d->mViewCenterY);
+ d->mViewport->zoomOut();
 }
 
 void BosonGLMiniMapView::render()
@@ -366,50 +313,12 @@ void BosonGLMiniMapView::render()
 
  glPushMatrix();
 
- glScalef(zoomOutFactor(), zoomOutFactor(), 1.0f);
- glTranslatef((float)xTranslation(), (float)yTranslation(), 0.0f);
+ glMultMatrixf(d->mViewport->transformationMatrix().data());
 
- glScalef((float)mapWidth(), (float)mapHeight(), 1.0f);
  BosonGLCompleteMiniMap::render();
  renderCamera();
 
  glPopMatrix();
-}
-
-float BosonGLMiniMapView::zoomOutFactor() const
-{
- float f = 1.0f;
- if (d->mZoomStep > 0.001f) {
-	if (d->mZoomStep > 1.0f) {
-		int scaledW = (int)floor(d->mZoomStep * ((float)d->mViewWidth));
-		int scaledH = (int)floor(d->mZoomStep * ((float)d->mViewHeight));
-		int dw = ((int)mapWidth()) - scaledW;
-		int dh = ((int)mapHeight()) - scaledH;
-		if (dw < 0 && dh < 0) {
-			float view = 0.0f;
-			float maxRequired = 0.0f;
-			if (dw >= dh) {
-				view = (float)d->mViewWidth;
-				maxRequired = (float)mapWidth();
-			} else {
-				view = (float)d->mViewHeight;
-				maxRequired = (float)mapHeight();
-			}
-
-			// we search the smallest zoomStep, so that
-			//   view * zoomStep >= maxRequired
-			// is still satisfied.
-			float zoomStep = maxRequired / view;
-			if (zoomStep <= 0.0001f) { // error
-				zoomStep = 1.0f;
-			}
-			d->mZoomStep = zoomStep;
-		}
-	}
-
-	f = 1.0f / d->mZoomStep;
- }
- return f;
 }
 
 void BosonGLMiniMapView::renderCamera()
@@ -476,6 +385,11 @@ void BosonGLMiniMapView::renderCamera()
 	drawLine(BLN, TLN, 1, 1);
  glEnd();
  glColor3ub(255, 255, 255);
+}
+
+QPoint BosonGLMiniMapView::widgetToCell(const QPoint& pos) const
+{
+ return d->mViewport->widgetPointToDataPoint(pos);
 }
 
 // cuts the line at z=0.0
@@ -573,37 +487,5 @@ static void cut_line_segment_at_plane(const BoPlane& plane, BoVector3Float& line
  } else {
 	linePoint2 = intersection;
  }
-}
-
-QPoint BosonGLMiniMapView::widgetToCell(const QPoint& pos) const
-{
- if (d->mViewWidth <= 0 || d->mViewHeight <= 0) {
-	return QPoint(-1, -1);
- }
- if (pos.x() < 0 || pos.y() < 0 || pos.x() >= (int)d->mViewWidth || pos.y() >= (int)d->mViewHeight) {
-	return QPoint(-1, -1);
- }
-
- if (fabsf(zoomOutFactor()) <= 0.0001f) {
-	return QPoint(-1, -1);
- }
-
- const int xTrans = -xTranslation();
- const int yTrans = -yTranslation();
-
- float zoomFactor = 1.0f / zoomOutFactor();
-
- int xCell = xTrans + (int)(pos.x() * zoomFactor);
-
- int yPos = d->mViewHeight - pos.y() - 1;
- int y = yTrans + (int)(yPos * zoomFactor);
- int yCell = mapHeight() - y - 1;
-
- if (xCell < 0 || (unsigned int)xCell >= mapWidth() ||
-	yCell < 0 || (unsigned int)yCell >= mapHeight()) {
-	return QPoint(-1, -1);
- }
-
- return QPoint(xCell, yCell);
 }
 
