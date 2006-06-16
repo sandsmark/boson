@@ -72,6 +72,9 @@ void BosonZoomScrollViewport::setDataSize(unsigned int w, unsigned int h)
 {
  d->mDataWidth = w;
  d->mDataHeight = h;
+
+ fixZoomStep();
+ centerViewOnDataPoint(d->mViewCenterX, d->mViewCenterY);
 }
 
 unsigned int BosonZoomScrollViewport::dataWidth() const
@@ -92,6 +95,8 @@ void BosonZoomScrollViewport::setViewSize(unsigned int w, unsigned int h)
  // avoid possible divisions by zero
  d->mViewWidth = QMAX(d->mViewWidth, 1);
  d->mViewHeight = QMAX(d->mViewHeight, 1);
+
+ fixZoomStep();
 
  centerViewOnDataPoint(d->mViewCenterX, d->mViewCenterY);
 }
@@ -154,6 +159,7 @@ void BosonZoomScrollViewport::zoomIn()
 {
  d->mZoomStep /= 2.0f;
  d->mZoomStep = QMAX(d->mZoomStep, 0.125f);
+ fixZoomStep();
 
  centerViewOnDataPoint(d->mViewCenterX, d->mViewCenterY);
 }
@@ -161,44 +167,55 @@ void BosonZoomScrollViewport::zoomIn()
 void BosonZoomScrollViewport::zoomOut()
 {
  d->mZoomStep *= 2.0f;
+ fixZoomStep();
 
  centerViewOnDataPoint(d->mViewCenterX, d->mViewCenterY);
 }
 
-float BosonZoomScrollViewport::zoomOutFactor() const
+float BosonZoomScrollViewport::calculateValidZoomStep(float desiredStep) const
 {
- float f = 1.0f;
- if (d->mZoomStep > 0.001f) {
-	if (d->mZoomStep > 1.0f) {
-		int scaledW = (int)floor(d->mZoomStep * ((float)d->mViewWidth));
-		int scaledH = (int)floor(d->mZoomStep * ((float)d->mViewHeight));
-		int dw = ((int)dataWidth()) - scaledW;
-		int dh = ((int)dataHeight()) - scaledH;
-		if (dw < 0 && dh < 0) {
-			float view = 0.0f;
-			float maxRequired = 0.0f;
-			if (dw >= dh) {
-				view = (float)d->mViewWidth;
-				maxRequired = (float)dataWidth();
-			} else {
-				view = (float)d->mViewHeight;
-				maxRequired = (float)dataHeight();
-			}
-
-			// we search the smallest zoomStep, so that
-			//   view * zoomStep >= maxRequired
-			// is still satisfied.
-			float zoomStep = maxRequired / view;
-			if (zoomStep <= 0.0001f) { // error
-				zoomStep = 1.0f;
-			}
-			d->mZoomStep = zoomStep;
-		}
+ if (desiredStep <= 0.001f) {
+	return 1.0f;
+ }
+ int scaledW = (int)floor(desiredStep * ((float)d->mViewWidth));
+ int scaledH = (int)floor(desiredStep * ((float)d->mViewHeight));
+ int dw = ((int)dataWidth()) - scaledW;
+ int dh = ((int)dataHeight()) - scaledH;
+ if (dw < 0 && dh < 0) {
+	float view = 0.0f;
+	float maxRequired = 0.0f;
+	if (dw >= dh) {
+		view = (float)d->mViewWidth;
+		maxRequired = (float)dataWidth();
+	} else {
+		view = (float)d->mViewHeight;
+		maxRequired = (float)dataHeight();
 	}
 
-	f = 1.0f / d->mZoomStep;
+	// we search the smallest zoomStep, so that
+	//   view * zoomStep >= maxRequired
+	// is still satisfied.
+	float zoomStep = maxRequired / view;
+	if (zoomStep <= 0.0001f) { // error
+		zoomStep = 1.0f;
+	}
+	return zoomStep;
  }
- return f;
+ return desiredStep;
+}
+
+void BosonZoomScrollViewport::fixZoomStep()
+{
+ d->mZoomStep = calculateValidZoomStep(d->mZoomStep);
+}
+
+float BosonZoomScrollViewport::zoomOutFactor() const
+{
+ if (d->mZoomStep <= 0.001f) {
+	return 1.0f;
+ }
+ float zoomStep = calculateValidZoomStep(d->mZoomStep);
+ return 1.0f / zoomStep;
 }
 
 QPoint BosonZoomScrollViewport::widgetPointToDataPoint(const QPoint& pos) const
