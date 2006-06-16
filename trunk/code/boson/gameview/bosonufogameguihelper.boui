@@ -584,6 +584,27 @@
       <takesKeyboardFocus/>
      </Properties>
      <Widget>
+      <ClassName>BoUfoWidget</ClassName>
+      <Properties>
+       <name>mWidget59</name>
+       <constraints/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <opaque/>
+       <layout/>
+       <minimumWidth/>
+       <minimumHeight>10</minimumHeight>
+       <preferredWidth/>
+       <preferredHeight>10</preferredHeight>
+       <backgroundImageFile/>
+       <verticalAlignment/>
+       <horizontalAlignment/>
+       <borderType/>
+       <stretch/>
+       <takesKeyboardFocus/>
+      </Properties>
+     </Widget>
+     <Widget>
       <ClassName>BoUfoHBox</ClassName>
       <Properties>
        <name>mResourcesBox</name>
@@ -610,10 +631,10 @@
         <constraints/>
         <opaque/>
         <layout>UVBoxLayout</layout>
-        <minimumWidth/>
-        <minimumHeight/>
-        <preferredWidth/>
-        <preferredHeight/>
+        <minimumWidth>100</minimumWidth>
+        <minimumHeight>80</minimumHeight>
+        <preferredWidth>100</preferredWidth>
+        <preferredHeight>80</preferredHeight>
         <backgroundImageFile/>
         <verticalAlignment/>
         <horizontalAlignment/>
@@ -746,10 +767,10 @@
         <constraints/>
         <opaque/>
         <layout>UVBoxLayout</layout>
-        <minimumWidth/>
-        <minimumHeight/>
-        <preferredWidth/>
-        <preferredHeight/>
+        <minimumWidth>60</minimumWidth>
+        <minimumHeight>80</minimumHeight>
+        <preferredWidth>60</preferredWidth>
+        <preferredHeight>80</preferredHeight>
         <backgroundImageFile/>
         <verticalAlignment/>
         <horizontalAlignment/>
@@ -1114,6 +1135,27 @@
       </Properties>
      </Widget>
     </Widget>
+    <Widget>
+     <ClassName>BoUfoWidget</ClassName>
+     <Properties>
+      <name>spacerRight</name>
+      <constraints/>
+      <gridLayoutColumns/>
+      <gridLayoutRows/>
+      <opaque/>
+      <layout/>
+      <minimumWidth>5</minimumWidth>
+      <minimumHeight/>
+      <preferredWidth>5</preferredWidth>
+      <preferredHeight/>
+      <backgroundImageFile/>
+      <verticalAlignment/>
+      <horizontalAlignment/>
+      <borderType/>
+      <stretch/>
+      <takesKeyboardFocus/>
+     </Properties>
+    </Widget>
    </Widget>
    <Widget>
     <ClassName>BoUfoVBox</ClassName>
@@ -1241,6 +1283,27 @@
       <borderType/>
       <takesKeyboardFocus/>
      </Properties>
+     <Widget>
+      <ClassName>BoUfoWidget</ClassName>
+      <Properties>
+       <name>mWidget60</name>
+       <constraints/>
+       <gridLayoutColumns/>
+       <gridLayoutRows/>
+       <opaque/>
+       <layout/>
+       <minimumWidth/>
+       <minimumHeight/>
+       <preferredWidth/>
+       <preferredHeight/>
+       <backgroundImageFile/>
+       <verticalAlignment/>
+       <horizontalAlignment/>
+       <borderType/>
+       <stretch/>
+       <takesKeyboardFocus/>
+      </Properties>
+     </Widget>
     </Widget>
     <Widget>
      <ClassName>BoUfoWidget</ClassName>
