@@ -58,6 +58,8 @@ public:
 	BosonGLMiniMapView(const BoGLMatrices*, QObject* parent);
 	virtual ~BosonGLMiniMapView();
 
+	virtual void createMap(unsigned int w, unsigned int h);
+
 	void setViewSize(unsigned int w, unsigned int h);
 	int viewCenterX() const;
 	int viewCenterY() const;
@@ -73,9 +75,6 @@ protected:
 	void renderCamera();
 
 	void centerViewOnCell(int x, int y);
-	int xTranslation() const;
-	int yTranslation() const;
-	float zoomOutFactor() const;
 
 private:
 	void renderQuad();
