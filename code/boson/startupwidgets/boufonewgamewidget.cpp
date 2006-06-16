@@ -35,6 +35,7 @@
 #include "../bosondata.h"
 #include "bosonstartupnetwork.h"
 #include "boufocolorchooser.h"
+#include "boufomappreview.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -277,7 +278,7 @@ public:
 
     QGuardedPtr<Player> mLocalPlayer;
 
-    BoUfoLabel* mMapPreview;
+    BoUfoMapPreview* mMapPreview;
     BoUfoColorChooser* mPlayerColor;
 
     int mComputerPlayerNumber;
@@ -308,11 +309,11 @@ BoUfoNewGameWidget::BoUfoNewGameWidget(BosonStartupNetwork* interface)
         this, SLOT(slotPlayerColorChanged(int)));
 
  // TODO: use a fixed size
- d->mMapPreview = new BoUfoLabel();
+ d->mMapPreview = new BoUfoMapPreview();
  mMapPreviewContainer->setLayoutClass(BoUfoWidget::UHBoxLayout);
  mMapPreviewContainer->addWidget(d->mMapPreview);
- d->mMapPreview->setVerticalAlignment(BoUfoWidget::AlignVCenter);
- d->mMapPreview->setHorizontalAlignment(BoUfoWidget::AlignHCenter);
+// d->mMapPreview->setVerticalAlignment(BoUfoWidget::AlignVCenter);
+// d->mMapPreview->setHorizontalAlignment(BoUfoWidget::AlignHCenter);
 
  initPlayFields();
  d->mPlayFieldSelection->setCurrentCampaignWithIndex(0);
@@ -765,14 +766,7 @@ void BoUfoNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  } else {
     mMapDescription->setText(description->comment());
  }
- if (field->mapPreviewPNGData().size() > 0) {
-   d->mMapPreview->setText("");
-   QImage preview(field->mapPreviewPNGData());
-   d->mMapPreview->setIcon(preview);
- } else {
-   d->mMapPreview->setText(i18n("No preview available"));
-   d->mMapPreview->setIcon(BoUfoImage());
- }
+ d->mMapPreview->setPlayField(field);
  playerCountChanged();
  possibleSidesChanged();
 }
