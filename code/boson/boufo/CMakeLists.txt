@@ -59,6 +59,7 @@ set(boufo_SRCS
 	boufodebugwidget.cpp
 	boufostandalonefont.cpp
 	boufoprofiling.cpp
+	boufozoomscrollviewporthandler.cpp
 	${ufoext_SRCS}
 	${bosonfont_SRCS}
 )

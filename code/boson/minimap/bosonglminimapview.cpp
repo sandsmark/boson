@@ -25,7 +25,7 @@
 #include "bodebug.h"
 #include "../bosonprofiling.h"
 #include "../defines.h"
-#include "bosonzoomscrollviewport.h"
+#include "../boufo/boufozoomscrollviewporthandler.h"
 #include <bogl.h>
 
 #include <klocale.h>
@@ -251,14 +251,14 @@ public:
 	const BoGLMatrices* mGameGLMatrices;
 	CameraLines mCameraLines;
 
-	BosonZoomScrollViewport* mViewport;
+	BoUfoZoomScrollViewportHandler* mViewport;
 };
 
 BosonGLMiniMapView::BosonGLMiniMapView(const BoGLMatrices* gameGLMatrices, QObject* parent)
 	: BosonGLCompleteMiniMap(parent)
 {
  d = new BosonGLMiniMapViewPrivate;
- d->mViewport = new BosonZoomScrollViewport(this);
+ d->mViewport = new BoUfoZoomScrollViewportHandler(this);
 
  d->mGameGLMatrices = gameGLMatrices;
 }

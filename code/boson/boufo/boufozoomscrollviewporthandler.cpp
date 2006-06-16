@@ -17,8 +17,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "bosonzoomscrollviewport.h"
-#include "bosonzoomscrollviewport.moc"
+#include "boufozoomscrollviewporthandler.h"
+#include "boufozoomscrollviewporthandler.moc"
 
 #include "../../bomemory/bodummymemory.h"
 #include "../bo3dtools.h"
@@ -30,10 +30,10 @@
 #include <qvaluelist.h>
 #include <qpair.h>
 
-class BosonZoomScrollViewportPrivate
+class BoUfoZoomScrollViewportHandlerPrivate
 {
 public:
-	BosonZoomScrollViewportPrivate()
+	BoUfoZoomScrollViewportHandlerPrivate()
 	{
 	}
 
@@ -49,10 +49,10 @@ public:
 	float mZoomStep;
 };
 
-BosonZoomScrollViewport::BosonZoomScrollViewport(QObject* parent)
+BoUfoZoomScrollViewportHandler::BoUfoZoomScrollViewportHandler(QObject* parent)
 	: QObject(parent)
 {
- d = new BosonZoomScrollViewportPrivate;
+ d = new BoUfoZoomScrollViewportHandlerPrivate;
 
  d->mDataWidth = 0;
  d->mDataHeight = 0;
@@ -63,12 +63,12 @@ BosonZoomScrollViewport::BosonZoomScrollViewport(QObject* parent)
  d->mViewHeight = 1;
 }
 
-BosonZoomScrollViewport::~BosonZoomScrollViewport()
+BoUfoZoomScrollViewportHandler::~BoUfoZoomScrollViewportHandler()
 {
  delete d;
 }
 
-void BosonZoomScrollViewport::setDataSize(unsigned int w, unsigned int h)
+void BoUfoZoomScrollViewportHandler::setDataSize(unsigned int w, unsigned int h)
 {
  d->mDataWidth = w;
  d->mDataHeight = h;
@@ -77,17 +77,17 @@ void BosonZoomScrollViewport::setDataSize(unsigned int w, unsigned int h)
  centerViewOnDataPoint(d->mViewCenterX, d->mViewCenterY);
 }
 
-unsigned int BosonZoomScrollViewport::dataWidth() const
+unsigned int BoUfoZoomScrollViewportHandler::dataWidth() const
 {
  return d->mDataWidth;
 }
 
-unsigned int BosonZoomScrollViewport::dataHeight() const
+unsigned int BoUfoZoomScrollViewportHandler::dataHeight() const
 {
  return d->mDataHeight;
 }
 
-void BosonZoomScrollViewport::setViewSize(unsigned int w, unsigned int h)
+void BoUfoZoomScrollViewportHandler::setViewSize(unsigned int w, unsigned int h)
 {
  d->mViewWidth = w;
  d->mViewHeight = h;
@@ -102,7 +102,7 @@ void BosonZoomScrollViewport::setViewSize(unsigned int w, unsigned int h)
 }
 
 
-void BosonZoomScrollViewport::centerViewOnDataPoint(int x, int y)
+void BoUfoZoomScrollViewportHandler::centerViewOnDataPoint(int x, int y)
 {
  x = QMIN(x, (int)dataWidth() - 1);
  y = QMIN(y, (int)dataHeight() - 1);
@@ -112,7 +112,7 @@ void BosonZoomScrollViewport::centerViewOnDataPoint(int x, int y)
  d->mViewCenterY = y;
 }
 
-int BosonZoomScrollViewport::xTranslation() const
+int BoUfoZoomScrollViewportHandler::xTranslation() const
 {
  if (d->mViewWidth * 1.0f / zoomOutFactor() >= dataWidth()) {
 	// we can display the whole data
@@ -126,7 +126,7 @@ int BosonZoomScrollViewport::xTranslation() const
  return -ret;
 }
 
-int BosonZoomScrollViewport::yTranslation() const
+int BoUfoZoomScrollViewportHandler::yTranslation() const
 {
  if (d->mViewHeight * 1.0 / zoomOutFactor() >= dataHeight()) {
 	// we can display the whole data
@@ -145,17 +145,17 @@ int BosonZoomScrollViewport::yTranslation() const
  return -ret;
 }
 
-int BosonZoomScrollViewport::viewCenterX() const
+int BoUfoZoomScrollViewportHandler::viewCenterX() const
 {
  return d->mViewCenterX;
 }
 
-int BosonZoomScrollViewport::viewCenterY() const
+int BoUfoZoomScrollViewportHandler::viewCenterY() const
 {
  return d->mViewCenterY;
 }
 
-void BosonZoomScrollViewport::zoomIn()
+void BoUfoZoomScrollViewportHandler::zoomIn()
 {
  d->mZoomStep /= 2.0f;
  d->mZoomStep = QMAX(d->mZoomStep, 0.125f);
@@ -164,7 +164,7 @@ void BosonZoomScrollViewport::zoomIn()
  centerViewOnDataPoint(d->mViewCenterX, d->mViewCenterY);
 }
 
-void BosonZoomScrollViewport::zoomOut()
+void BoUfoZoomScrollViewportHandler::zoomOut()
 {
  d->mZoomStep *= 2.0f;
  fixZoomStep();
@@ -172,7 +172,7 @@ void BosonZoomScrollViewport::zoomOut()
  centerViewOnDataPoint(d->mViewCenterX, d->mViewCenterY);
 }
 
-float BosonZoomScrollViewport::calculateValidZoomStep(float desiredStep) const
+float BoUfoZoomScrollViewportHandler::calculateValidZoomStep(float desiredStep) const
 {
  if (desiredStep <= 0.001f) {
 	return 1.0f;
@@ -204,12 +204,12 @@ float BosonZoomScrollViewport::calculateValidZoomStep(float desiredStep) const
  return desiredStep;
 }
 
-void BosonZoomScrollViewport::fixZoomStep()
+void BoUfoZoomScrollViewportHandler::fixZoomStep()
 {
  d->mZoomStep = calculateValidZoomStep(d->mZoomStep);
 }
 
-float BosonZoomScrollViewport::zoomOutFactor() const
+float BoUfoZoomScrollViewportHandler::zoomOutFactor() const
 {
  if (d->mZoomStep <= 0.001f) {
 	return 1.0f;
@@ -218,7 +218,7 @@ float BosonZoomScrollViewport::zoomOutFactor() const
  return 1.0f / zoomStep;
 }
 
-QPoint BosonZoomScrollViewport::widgetPointToDataPoint(const QPoint& pos) const
+QPoint BoUfoZoomScrollViewportHandler::widgetPointToDataPoint(const QPoint& pos) const
 {
  if (d->mViewWidth <= 0 || d->mViewHeight <= 0) {
 	return QPoint(-1, -1);
@@ -250,7 +250,7 @@ QPoint BosonZoomScrollViewport::widgetPointToDataPoint(const QPoint& pos) const
  return QPoint(xCell, yCell);
 }
 
-BoMatrix BosonZoomScrollViewport::transformationMatrix() const
+BoMatrix BoUfoZoomScrollViewportHandler::transformationMatrix() const
 {
  BoMatrix matrix;
 
