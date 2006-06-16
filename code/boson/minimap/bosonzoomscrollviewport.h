@@ -119,6 +119,9 @@ protected:
 	int yTranslation() const;
 	float zoomOutFactor() const;
 
+	void fixZoomStep();
+	float calculateValidZoomStep(float desiredStep) const;
+
 private:
 	BosonZoomScrollViewportPrivate* d;
 };
