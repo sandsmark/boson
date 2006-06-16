@@ -278,7 +278,6 @@ set(bosongamelib_SRCS
 	bosonmainwidgetmenuinput.cpp
 	boufoactionext.cpp
 	bogltooltip.cpp
-	minimap/bosonzoomscrollviewport.cpp
 	minimap/bosonglcompleteminimap.cpp
 	minimap/bosonglminimapview.cpp
 	minimap/bosonufominimap.cpp

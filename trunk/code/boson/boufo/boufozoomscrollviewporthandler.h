@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef BOSONZOOMSCROLLVIEWPORT_H
-#define BOSONZOOMSCROLLVIEWPORT_H
+#ifndef BOUFOZOOMSCROLLVIEWPORTHANDLER_H
+#define BOUFOZOOMSCROLLVIEWPORTHANDLER_H
 
 #include <qobject.h>
 
@@ -26,7 +26,7 @@
 
 class BoMatrix;
 
-class BosonZoomScrollViewportPrivate;
+class BoUfoZoomScrollViewportHandlerPrivate;
 /**
  * Provides the means for developing a viewport widget that supports zooming and
  * scrolling.
@@ -45,12 +45,12 @@ class BosonZoomScrollViewportPrivate;
  *
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonZoomScrollViewport : public QObject
+class BoUfoZoomScrollViewportHandler : public QObject
 {
 	Q_OBJECT
 public:
-	BosonZoomScrollViewport(QObject* parent);
-	virtual ~BosonZoomScrollViewport();
+	BoUfoZoomScrollViewportHandler(QObject* parent);
+	virtual ~BoUfoZoomScrollViewportHandler();
 
 	/**
 	 * The size of the to-be-displayed data. For example the size of the
@@ -123,7 +123,7 @@ protected:
 	float calculateValidZoomStep(float desiredStep) const;
 
 private:
-	BosonZoomScrollViewportPrivate* d;
+	BoUfoZoomScrollViewportHandlerPrivate* d;
 };
 
 #endif
