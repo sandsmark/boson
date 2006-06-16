@@ -376,27 +376,6 @@
             <takesKeyboardFocus/>
            </Properties>
           </Widget>
-          <Widget>
-           <ClassName>BoUfoWidget</ClassName>
-           <Properties>
-            <name>mWidget76</name>
-            <constraints/>
-            <gridLayoutColumns/>
-            <gridLayoutRows/>
-            <opaque/>
-            <layout/>
-            <minimumWidth/>
-            <minimumHeight/>
-            <preferredWidth/>
-            <preferredHeight/>
-            <backgroundImageFile/>
-            <verticalAlignment/>
-            <horizontalAlignment/>
-            <borderType/>
-            <stretch/>
-            <takesKeyboardFocus/>
-           </Properties>
-          </Widget>
          </Widget>
         </Widget>
         <Widget>
@@ -644,6 +623,27 @@
          <Widget>
           <ClassName>BoUfoWidget</ClassName>
           <Properties>
+           <name>spacerOverviewPreview</name>
+           <constraints/>
+           <gridLayoutColumns/>
+           <gridLayoutRows/>
+           <opaque/>
+           <layout/>
+           <minimumWidth/>
+           <minimumHeight>10</minimumHeight>
+           <preferredWidth/>
+           <preferredHeight>10</preferredHeight>
+           <backgroundImageFile/>
+           <verticalAlignment/>
+           <horizontalAlignment/>
+           <borderType>NoBorder</borderType>
+           <stretch/>
+           <takesKeyboardFocus/>
+          </Properties>
+         </Widget>
+         <Widget>
+          <ClassName>BoUfoWidget</ClassName>
+          <Properties>
            <name>mMapPreviewContainer</name>
            <constraints/>
            <gridLayoutColumns/>
@@ -655,34 +655,11 @@
            <preferredWidth/>
            <preferredHeight/>
            <backgroundImageFile/>
-           <verticalAlignment/>
-           <horizontalAlignment/>
+           <verticalAlignment>AlignVCenter</verticalAlignment>
+           <horizontalAlignment>AlignHCenter</horizontalAlignment>
            <borderType/>
            <stretch>1</stretch>
            <takesKeyboardFocus/>
-          </Properties>
-         </Widget>
-         <Widget>
-          <ClassName>BoUfoCheckBox</ClassName>
-          <Properties>
-           <name>mStartExplored</name>
-           <constraints/>
-           <gridLayoutColumns/>
-           <gridLayoutRows/>
-           <opaque/>
-           <layout/>
-           <minimumWidth/>
-           <minimumHeight/>
-           <preferredWidth/>
-           <preferredHeight/>
-           <backgroundImageFile/>
-           <verticalAlignment/>
-           <horizontalAlignment/>
-           <borderType/>
-           <stretch/>
-           <takesKeyboardFocus/>
-           <text>Start with explored map</text>
-           <checked>1</checked>
           </Properties>
          </Widget>
         </Widget>
@@ -1183,6 +1160,50 @@
         <Widget>
          <ClassName>BoUfoWidget</ClassName>
          <Properties>
+          <name>spacerPlayeroptionsV0</name>
+          <constraints/>
+          <gridLayoutColumns/>
+          <gridLayoutRows/>
+          <opaque/>
+          <layout/>
+          <minimumWidth/>
+          <minimumHeight>5</minimumHeight>
+          <preferredWidth/>
+          <preferredHeight>5</preferredHeight>
+          <backgroundImageFile/>
+          <verticalAlignment/>
+          <horizontalAlignment/>
+          <borderType/>
+          <stretch/>
+          <takesKeyboardFocus/>
+         </Properties>
+        </Widget>
+        <Widget>
+         <ClassName>BoUfoCheckBox</ClassName>
+         <Properties>
+          <name>mStartExplored</name>
+          <constraints/>
+          <gridLayoutColumns/>
+          <gridLayoutRows/>
+          <opaque/>
+          <layout/>
+          <minimumWidth/>
+          <minimumHeight/>
+          <preferredWidth/>
+          <preferredHeight/>
+          <backgroundImageFile/>
+          <verticalAlignment/>
+          <horizontalAlignment/>
+          <borderType/>
+          <stretch/>
+          <takesKeyboardFocus/>
+          <text>Start with explored map</text>
+          <checked>1</checked>
+         </Properties>
+        </Widget>
+        <Widget>
+         <ClassName>BoUfoWidget</ClassName>
+         <Properties>
           <name>spacerPlayerOptionsBottom</name>
           <constraints/>
           <gridLayoutColumns/>
@@ -1354,7 +1375,7 @@
          <ClassName>BoUfoPushButton</ClassName>
          <Properties>
           <opaque/>
-          <minimumHeight></minimumHeight>
+          <minimumHeight/>
           <preferredHeight/>
           <constraints/>
           <verticalAlignment/>
@@ -1363,7 +1384,7 @@
           <layout/>
           <name>mAddAIPlayer</name>
           <iconFile/>
-          <minimumWidth></minimumWidth>
+          <minimumWidth/>
           <text>&amp;Add computer player</text>
           <backgroundImageFile/>
           <stretch/>
