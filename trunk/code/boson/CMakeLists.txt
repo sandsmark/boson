@@ -138,6 +138,7 @@ set(startupwidgets_SRCS
 	startupwidgets/bocreatenewmap.cpp
 	startupwidgets/bosonloadsavegamehandler.cpp
 	startupwidgets/boufoloadfromlogwidget.cpp
+	startupwidgets/boufomappreview.cpp
 )
 boson_add_boui_files(startupwidgets_SRCS
 	startupwidgets/welcomewidget.boui
