@@ -43,7 +43,7 @@ IF (PYTHON_EXECUTABLE)
 	set(_python_version "${_python_config_variable}")
 
 	FIND_LIBRARY(PYTHON_LIBRARY
-		NAMES "python${_python_version}/config"
+		NAMES "python${_python_version}"
 		PATH_SUFFIXES "python${_python_version}/config"
 	)
 
