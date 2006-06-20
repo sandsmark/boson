@@ -99,10 +99,16 @@ ENDIF (CMAKE_SYSTEM_NAME MATCHES BSD)
 #SET(CMAKE_MODULE_LINKER_FLAGS "-Wl,--fatal-warnings -avoid-version -Wl,--no-undefined -lc")
 
 #now try to find some kde stuff
+# AB: note we search in 2 passes:
+#       1. search in "often used" directories, and in particular in $KDEDIR.
+#       2. if not found by 1.: search again, but only in the standard cmake dirs.
+#     this ensures, that if $KDEDIR is set to a special directory, we'll pick up
+#     that one, instead of e.g. /usr/lib from standard cmake dirs.
 
 #at first the KDE include direcory
 # kpassdlg.h comes from kdeui and doesn't exist in KDE4 anymore
 FIND_PATH(KDE3_INCLUDE_DIR kpassdlg.h
+  PATHS
   $ENV{KDEDIR}/include
   /opt/kde/include
   /opt/kde3/include
@@ -110,7 +116,9 @@ FIND_PATH(KDE3_INCLUDE_DIR kpassdlg.h
   /usr/include/
   /usr/include/kde
   /usr/local/include/kde
+  NO_DEFAULT_PATH
 )
+FIND_PATH(KDE3_INCLUDE_DIR kpassdlg.h)
 
 #now the KDE library directory
 FIND_LIBRARY(KDE3_KDECORE_LIBRARY NAMES kdecore
@@ -120,7 +128,9 @@ FIND_LIBRARY(KDE3_KDECORE_LIBRARY NAMES kdecore
   /opt/kde3/lib
   /usr/lib
   /usr/local/lib
+  NO_DEFAULT_PATH
 )
+FIND_LIBRARY(KDE3_KDECORE_LIBRARY NAMES kdecore)
 
 GET_FILENAME_COMPONENT(KDE3_LIB_DIR ${KDE3_KDECORE_LIBRARY} PATH )
 
@@ -132,21 +142,32 @@ GET_FILENAME_COMPONENT(KDE3_LIB_DIR ${KDE3_KDECORE_LIBRARY} PATH )
 #)
 
 #now search for the dcop utilities
-FIND_PROGRAM(KDE3_DCOPIDL_EXECUTABLE NAME dcopidl PATHS
+FIND_PROGRAM(KDE3_DCOPIDL_EXECUTABLE NAME dcopidl
+  PATHS
   $ENV{KDEDIR}/bin
   /opt/kde/bin
   /opt/kde3/bin
-  )
+  NO_DEFAULT_PATH
+)
+FIND_PROGRAM(KDE3_DCOPIDL_EXECUTABLE NAME dcopidl)
 
-FIND_PROGRAM(KDE3_DCOPIDL2CPP_EXECUTABLE NAME dcopidl2cpp PATHS
+FIND_PROGRAM(KDE3_DCOPIDL2CPP_EXECUTABLE NAME dcopidl2cpp
+  PATHS
   $ENV{KDEDIR}/bin
   /opt/kde/bin
-  /opt/kde3/bin)
+  /opt/kde3/bin
+  NO_DEFAULT_PATH
+)
+FIND_PROGRAM(KDE3_DCOPIDL2CPP_EXECUTABLE NAME dcopidl2cpp)
 
-FIND_PROGRAM(KDE3_KCFGC_EXECUTABLE NAME kconfig_compiler PATHS
+FIND_PROGRAM(KDE3_KCFGC_EXECUTABLE NAME kconfig_compiler
+  PATHS
   $ENV{KDEDIR}/bin
   /opt/kde/bin
-  /opt/kde3/bin)
+  /opt/kde3/bin
+  NO_DEFAULT_PATH
+)
+FIND_PROGRAM(KDE3_KCFGC_EXECUTABLE NAME kconfig_compiler)
 
 
 # KDE3Macros.cmake contains all the KDE specific macros
