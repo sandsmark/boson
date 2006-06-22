@@ -22,6 +22,7 @@ set(CMAKE_SOURCE_DIR ${boson_SOURCE_DIR})
 set(CMAKE_BINARY_DIR ${boson_BINARY_DIR})
 
 include(BosonMisc)
+include(BosonMacros)
 
 # AB: TODO: include in official cmake files?
 set(KDE3_XDG_APPS_DIR /share/applications)
