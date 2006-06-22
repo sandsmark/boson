@@ -102,11 +102,9 @@ MACRO(BOSON_READ_STATIC_DEPENDENCIES_FROM_LA _la_file dependencies)
 ENDMACRO(BOSON_READ_STATIC_DEPENDENCIES_FROM_LA)
 
 MACRO(BOSON_USE_STATIC_QT_AND_KDE)
-   MESSAGE(STATUS "TODO: use proper path to *.la files")
-   # TODO: use KDEDIR/QTDIR or so (i.e. use path to real libfoo.a and replace
-   #       ".a" by ".la")
-   SET(_qt_mt_la "/home/andi/kde/boson/static/qt-copy/lib/libqt-mt.la")
-   SET(_kdecore_la "/home/andi/kde/boson/static/kdedir/lib/libkdecore.la")
+   GET_FILENAME_COMPONENT(_qt_lib_dir ${QT_QT_LIBRARY} PATH)
+   SET(_qt_mt_la "${_qt_lib_dir}/libqt-mt.la")
+   SET(_kdecore_la "${KDE3_LIB_DIR}/libkdecore.la")
 
    BOSON_READ_STATIC_DEPENDENCIES_FROM_LA(${_qt_mt_la} _static_qt_dependencies)
    BOSON_READ_STATIC_DEPENDENCIES_FROM_LA(${_kdecore_la} _static_kdecore_dependencies)
