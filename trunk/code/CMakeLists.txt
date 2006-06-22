@@ -116,6 +116,10 @@ include_directories(
 )
 
 
+if(BOSON_LINK_STATIC)
+  boson_use_static_qt_and_kde()
+endif(BOSON_LINK_STATIC)
+
 # create config.h
 #include(ConfigureChecks.cmake)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h )
