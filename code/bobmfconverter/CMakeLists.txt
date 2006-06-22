@@ -100,7 +100,7 @@ set(bobmfconverter_SRCS
 kde3_automoc(${bobmfconverter_SRCS})
 
 kde3_add_executable(bobmfconverter ${bobmfconverter_SRCS})
-target_link_libraries(bobmfconverter
+boson_target_link_libraries(bobmfconverter
 	${QT_AND_KDECORE_LIBS}
 	${LIB3DS_LIBRARY}
 )

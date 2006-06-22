@@ -17,7 +17,7 @@ set(boserver_SRCS
 kde3_automoc(${boserver_SRCS})
 
 kde3_add_executable(boserver ${boserver_SRCS})
-target_link_libraries(boserver
+boson_target_link_libraries(boserver
 	kgame
 	bodebug
 	${QT_AND_KDECORE_LIBS}

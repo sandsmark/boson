@@ -21,7 +21,7 @@ kde3_automoc(${boufotest_SRCS})
 kde3_add_executable(boufotest
 	${boufotest_SRCS}
 )
-target_link_libraries(boufotest
+boson_target_link_libraries(boufotest
 	bodebug
 	bogl
 	boufo
@@ -36,7 +36,7 @@ kde3_automoc(${boufobuttontest_SRCS})
 kde3_add_executable(boufobuttontest
 	${boufobuttontest_SRCS}
 )
-target_link_libraries(boufobuttontest
+boson_target_link_libraries(boufobuttontest
 	bodebug
 	bogl
 	boufo
@@ -51,7 +51,7 @@ kde3_automoc(${boufolistboxtest_SRCS})
 kde3_add_executable(boufolistboxtest
 	${boufolistboxtest_SRCS}
 )
-target_link_libraries(boufolistboxtest
+boson_target_link_libraries(boufolistboxtest
 	bodebug
 	bogl
 	boufo
@@ -66,7 +66,7 @@ kde3_automoc(${boufowidgets_SRCS})
 kde3_add_executable(boufowidgets
 	${boufowidgets_SRCS}
 )
-target_link_libraries(boufowidgets
+boson_target_link_libraries(boufowidgets
 	bodebug
 	bogl
 	boufo

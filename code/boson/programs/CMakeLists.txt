@@ -29,7 +29,7 @@ kde3_automoc(${boson_SRCS})
 kde3_add_executable(boson
 	${boson_SRCS}
 )
-target_link_libraries(boson
+boson_target_link_libraries(boson
 	bosongamelib
 	${LIB_BOMEMORY}
 )
@@ -43,7 +43,7 @@ set(bosonNoGUI_SRCS
 )
 kde3_automoc(${bosonNoGUI_SRCS})
 kde3_add_executable(boson-no-gui ${bosonNoGUI_SRCS})
-target_link_libraries(boson-no-gui
+boson_target_link_libraries(boson-no-gui
 	gameengine
 	boufo
 	common
@@ -65,7 +65,7 @@ kde3_add_ui_files(bounit_SRCS
 )
 kde3_automoc(${bounit_SRCS})
 kde3_add_executable(bounit ${bounit_SRCS})
-target_link_libraries(bounit
+boson_target_link_libraries(bounit
 	gameengine
 	common
 	bosoninfo
@@ -94,7 +94,7 @@ boson_add_boui_files(borender_SRCS
 )
 kde3_automoc(${borender_SRCS})
 kde3_add_executable(borender ${borender_SRCS})
-target_link_libraries(borender
+boson_target_link_libraries(borender
 	bosonmainlib
 	boufo
 	${LIB3DS_LIBRARY}
@@ -113,7 +113,7 @@ set(bocursor_SRCS
 )
 kde3_automoc(${bocursor_SRCS})
 kde3_add_executable(bocursor ${bocursor_SRCS})
-target_link_libraries(bocursor
+boson_target_link_libraries(bocursor
 	common
 	bosoninfo
 	kio
@@ -134,7 +134,7 @@ kde3_add_ui_files(bomodelpixmaps_SRCS
 )
 kde3_automoc(${bomodelpixmaps_SRCS})
 kde3_add_executable(bomodelpixmaps ${bomodelpixmaps_SRCS})
-target_link_libraries(bomodelpixmaps
+boson_target_link_libraries(bomodelpixmaps
 	bosonmainlib
 	boufo
 	${LIB3DS_LIBRARY}
@@ -149,7 +149,7 @@ set(boinfo_SRCS
 )
 kde3_automoc(${boinfo_SRCS})
 kde3_add_executable(boinfo ${boinfo_SRCS})
-target_link_libraries(boinfo
+boson_target_link_libraries(boinfo
 	bosoninfo
 	common
 	kio
@@ -168,7 +168,7 @@ set(bo3dsdebug_SRCS
 )
 kde3_automoc(${bo3dsdebug_SRCS})
 kde3_add_executable(bo3dsdebug ${bo3dsdebug_SRCS})
-target_link_libraries(bo3dsdebug
+boson_target_link_libraries(bo3dsdebug
 	common
 	boufo
 	kio
@@ -185,7 +185,7 @@ set(boconditioneditor_SRCS
 )
 kde3_automoc(${boconditioneditor_SRCS})
 kde3_add_executable(boconditioneditor ${boconditioneditor_SRCS})
-target_link_libraries(boconditioneditor
+boson_target_link_libraries(boconditioneditor
 	gameengine
 	common
 	boufo
@@ -205,7 +205,7 @@ kde3_add_ui_files(boprofiling_SRCS
 )
 kde3_automoc(${boprofiling_SRCS})
 kde3_add_executable(boprofiling ${boprofiling_SRCS})
-target_link_libraries(boprofiling
+boson_target_link_libraries(boprofiling
 	common
 	kio
 	kdeui
@@ -224,7 +224,7 @@ kde3_automoc(${bocommandframetester_SRCS})
 kde3_add_executable(bocommandframetester
 	${bocommandframetester_SRCS}
 )
-target_link_libraries(bocommandframetester
+boson_target_link_libraries(bocommandframetester
 	bosongamelib
 	${LIB_BOMEMORY}
 )
@@ -249,7 +249,7 @@ set(bofileconverter_SRCS
 )
 kde3_automoc(${bofileconverter_SRCS})
 kde3_add_executable(bofileconverter ${bofileconverter_SRCS})
-target_link_libraries(bofileconverter
+boson_target_link_libraries(bofileconverter
 	gameengine
 	common
 	kio
@@ -263,7 +263,7 @@ set(bocreatepreview_SRCS
 )
 kde3_automoc(${bocreatepreview_SRCS})
 kde3_add_executable(bocreatepreview ${bocreatepreview_SRCS})
-target_link_libraries(bocreatepreview
+boson_target_link_libraries(bocreatepreview
 	gameengine
 	common
 	kio

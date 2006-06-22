@@ -25,7 +25,7 @@ kde3_automoc(${boufodesigner_SRCS})
 
 add_executable(boufodesigner ${boufodesigner_SRCS})
 
-target_link_libraries(boufodesigner
+boson_target_link_libraries(boufodesigner
 	boufo
 	bodebug
 	bogl
