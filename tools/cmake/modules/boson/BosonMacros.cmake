@@ -1,6 +1,12 @@
+# This file contains the following macros:
 # BOSON_ADD_BOUI_FILES
-# defines X11_XMU_LIB
-# defines X11_XRANDR_LIB
+# BOSON_READ_STATIC_DEPENDENCIES_FROM_LA
+#
+# This file defines the following variables:
+# QT_MT_REQUIRED (to TRUE)
+# BOUIC_EXECUTABLE (to our bouic binary)
+# X11_XMU_LIB
+# X11_XRANDR_LIB
 
 
 # AB: I used cmake 2.3 to write this, so let's require this. probably would work
@@ -54,5 +60,44 @@ MACRO ( BOSON_ADD_BOUI_FILES _sources )
 
    ENDFOREACH (_current_FILE)
 ENDMACRO (BOSON_ADD_BOUI_FILES)
+
+
+# reads the .la _la_file of a library and places the libraries that it depends on in the dependencies variable
+MACRO(BOSON_READ_STATIC_DEPENDENCIES_FROM_LA _la_file dependencies)
+	set(_dependencies "")
+	if (EXISTS "${_la_file}")
+		file(READ ${_la_file} _la_data)
+		string(REGEX MATCH "dependency_libs='.*" _dependencies "${_la_data}")
+		string(REGEX REPLACE "' *\n.*" "" _dependencies "${_dependencies}")
+		string(REGEX REPLACE "dependency_libs='" "" _dependencies "${_dependencies}")
+
+		# turn into cmake list
+		string(REGEX REPLACE " " ";" _dependencies ${_dependencies})
+
+		set(_dependencies_tmp "${_dependencies}")
+		set(_dependencies "")
+		foreach (element ${_dependencies_tmp})
+			# we don't use -R at all in boson.
+			# certainly not with static libs.
+			if (${element} MATCHES "^ *-R")
+				set(element "")
+			endif (${element} MATCHES "^ *-R")
+
+			# "libfoo.la" -> "libfoo"
+			string(REGEX REPLACE "\\.la" "" element "${element}")
+
+			# "/path/to/libs/libfoo" -> "-lfoo"
+			string(REGEX REPLACE "^ */.*/lib" "-l" element "${element}")
+
+			if (element)
+				set(_dependencies "${_dependencies};${element}")
+			endif (element)
+		endforeach(element)
+	else (EXISTS "${_la_file}")
+		message(STATUS "${_la_file} does not exist. Need a .la file to find dependencies of static library. Linking will probably fail")
+	endif (EXISTS "${_la_file}")
+	set(${dependencies} "${_dependencies}")
+ENDMACRO(BOSON_READ_STATIC_DEPENDENCIES_FROM_LA)
+
 
 # vim: et sw=3 textwidth=0
