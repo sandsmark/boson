@@ -19,11 +19,9 @@ set(gameviewplugin_SRCS
 kde3_automoc(${gameviewplugin_SRCS})
 if(BOSON_USE_DEBUG_PLUGINS)
   add_library(bosongameviewplugin MODULE ${gameviewplugin_SRCS})
-  set(LIB_GAMEVIEW_PLUGIN "")
   install_targets(${BOSON_PLUGIN_INSTALL_DIR} bosongameviewplugin)
 else(BOSON_USE_DEBUG_PLUGINS)
   add_library(bosongameviewplugin STATIC ${gameviewplugin_SRCS})
-  set(LIB_GAMEVIEW_PLUGIN bosongameviewplugin)
 endif(BOSON_USE_DEBUG_PLUGINS)
 
 
