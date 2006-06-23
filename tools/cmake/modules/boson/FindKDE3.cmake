@@ -5,7 +5,11 @@
 # KDE3_INCLUDE_DIR         - the KDE include directory
 # KDE3_INCLUDE_DIRS        - the KDE and the Qt include directory, for use with INCLUDE_DIRECTORIES()
 # KDE3_LIB_DIR             - the directory where the KDE libraries are installed, for use with LINK_DIRECTORIES()
-# QT_AND_KDECORE_LIBRARIES - this contains both the Qt and the kdecore library
+# QT_AND_KDECORE_LIBS      - this contains both the Qt and the kdecore library
+# QT_AND_KDECORE_KDEUI_LIBS - this contains the Qt, kdecore and kdeui
+#                             libraries
+# QT_AND_KDECORE_KDEUI_KIO_LIBS - this contains the Qt, kdecore, kdeui and
+#                                 kio libraries
 # KDE3_DCOPIDL_EXECUTABLE  - the dcopidl executable
 # KDE3_DCOPIDL2CPP_EXECUTABLE - the dcopidl2cpp executable
 # KDE3_KCFGC_EXECUTABLE    - the kconfig_compiler executable
@@ -76,6 +80,8 @@ FIND_PACKAGE(X11 REQUIRED)
 
 
 SET(QT_AND_KDECORE_LIBS kdecore ${QT_LIBRARIES})
+SET(QT_AND_KDECORE_KDEUI_LIBS kdeui ${QT_AND_KDECORE_LIBS})
+SET(QT_AND_KDECORE_KDEUI_KIO_LIBS kio ${QT_AND_KDECORE_KDEUI_LIBS})
 
 #add some KDE specific stuff
 SET(KDE3_DEFINITIONS -DQT_CLEAN_NAMESPACE -D_GNU_SOURCE)
