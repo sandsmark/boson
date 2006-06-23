@@ -14,8 +14,14 @@ add_subdirectory( groundrenderer )
 add_subdirectory( sound/bosound )
 add_subdirectory( programs )
 
-# TODO: USE_BO_PLUGINS
-# TODO: BOSON_LINK_STATIC
+set(LIB_MESHRENDERER_PLUGIN "")
+set(LIB_GROUNDRENDERER_PLUGIN "")
+set(LIB_GAMEVIEW_PLUGIN "")
+if(NOT BOSON_USE_DEBUG_PLUGINS)
+  set(LIB_MESHRENDERER_PLUGIN bomeshrendererplugin)
+  set(LIB_GROUNDRENDERER_PLUGIN bogroundrendererplugin)
+  set(LIB_GAMEVIEW_PLUGIN bosongameviewplugin)
+endif(NOT BOSON_USE_DEBUG_PLUGINS)
 
 
 include_directories(
@@ -260,7 +266,7 @@ target_link_libraries(bosonmainlib
 	modelrendering
 	gameengine
 	common
-	kio
+	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
 	${LIB3DS_LIBRARY}
 
 	${X11_XRANDR_LIB}

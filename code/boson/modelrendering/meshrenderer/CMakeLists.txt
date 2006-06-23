@@ -17,11 +17,8 @@ set(meshrenderer_SRCS
 kde3_automoc(${meshrenderer_SRCS})
 if(BOSON_USE_DEBUG_PLUGINS)
   add_library(bomeshrendererplugin MODULE ${meshrenderer_SRCS})
-  set(LIB_MESHRENDERER_PLUGIN "")
   install_targets(${BOSON_PLUGIN_INSTALL_DIR} bomeshrendererplugin)
 else(BOSON_USE_DEBUG_PLUGINS)
   add_library(bomeshrendererplugin STATIC ${meshrenderer_SRCS})
-  set(LIB_MESHRENDERER_PLUGIN bomeshrendererplugin)
 endif(BOSON_USE_DEBUG_PLUGINS)
-
 
