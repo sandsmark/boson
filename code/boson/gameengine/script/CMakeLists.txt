@@ -18,5 +18,5 @@ set(script_SRCS
 kde3_automoc(${script_SRCS})
 
 add_library(bosonscript STATIC ${script_SRCS})
-target_link_libraries(bosonscript ${PYTHON_LIBRARIES})
+boson_target_link_libraries(bosonscript ${PYTHON_LIBRARIES})
 
