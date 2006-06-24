@@ -171,6 +171,7 @@ MACRO(KDE3_ADD_UI_FILES _sources )
          COMMAND ${CMAKE_COMMAND}
          ARGS
          -DKDE_UIC_EXECUTABLE:FILEPATH=${QT_UIC_EXECUTABLE}
+         -DKDE_UIC_PLUGIN_DIR:PATH=${KDE3_LIB_DIR}/kde3/plugins/designer
          -DKDE_UIC_FILE:FILEPATH=${_tmp_FILE}
          -DKDE_UIC_CPP_FILE:FILEPATH=${_src}
          -DKDE_UIC_H_FILE:FILEPATH=${_header}
