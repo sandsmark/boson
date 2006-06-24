@@ -41,8 +41,8 @@ add_library(bosonsound STATIC ${bosonsound_sources})
 
 if (OPENAL_FOUND)
 	add_subdirectory(openal)
-	target_link_libraries(bosonsound bosonsoundopenal)
-	target_link_libraries(bosonsound ${OPENAL_LIBRARY})
+	boson_target_link_libraries(bosonsound bosonsoundopenal)
+	boson_target_link_libraries(bosonsound ${OPENAL_LIBRARY})
 	set(BOSON_USE_OPENAL 1)
 endif (OPENAL_FOUND)
 

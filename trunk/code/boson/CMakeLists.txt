@@ -58,7 +58,7 @@ set(common_SRCS
 )
 kde3_automoc(${common_SRCS})
 add_library(common STATIC ${common_SRCS})
-target_link_libraries(common
+boson_target_link_libraries(common
 	bodebug
 	bogl
 	bomath
@@ -126,7 +126,7 @@ set(gameengine_SRCS
 )
 kde3_automoc(${gameengine_SRCS})
 add_library(gameengine STATIC ${gameengine_SRCS})
-target_link_libraries(gameengine
+boson_target_link_libraries(gameengine
 	bosonscript
 	kgame
 )
@@ -210,7 +210,7 @@ add_library(modelrendering STATIC ${modelrendering_SRCS})
 #     way around.
 #     -> but we need bomaterial.*, otherwise the commandframe tester won't link
 #        (weird enough: boson does link successfully)
-target_link_libraries(modelrendering
+boson_target_link_libraries(modelrendering
 	bosonmainlib
 	${LIB_MESHRENDERER_PLUGIN}
 )
@@ -257,7 +257,7 @@ kde3_automoc(${bosonmainlib_SRCS})
 add_library(bosonmainlib STATIC ${bosonmainlib_SRCS})
 
 # TODO: if not plugins: meshrenderer, groundrenderer, gameview plugins
-target_link_libraries(bosonmainlib
+boson_target_link_libraries(bosonmainlib
 	bosoninfo
 	bosonsound
 	bosonsoundcommon
@@ -322,7 +322,7 @@ kde3_add_ui_files(bosongamelib_SRCS
 )
 kde3_automoc( ${bosongamelib_SRCS} )
 add_library(bosongamelib STATIC ${bosongamelib_SRCS})
-target_link_libraries(bosongamelib
+boson_target_link_libraries(bosongamelib
 	bosonmainlib
 	boufo
 	${X11_XMU_LIB}
