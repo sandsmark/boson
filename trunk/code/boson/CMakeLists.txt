@@ -188,6 +188,10 @@ set(gameview_SRCS
 	gameview/bosoneffectparticle.cpp
 	gameview/bosoneffectpropertiesparticle.cpp
 	gameview/boselection.cpp
+	gameview/minimap/bosonglcompleteminimap.cpp
+	gameview/minimap/bosonglminimapview.cpp
+	gameview/minimap/bosonufominimap.cpp
+	gameview/minimap/bosonufominimapdisplay.cpp
 )
 boson_add_boui_files(gameview_SRCS
 	gameview/bosonufogameguihelper.boui
@@ -285,10 +289,6 @@ set(bosongamelib_SRCS
 	bosonmainwidgetmenuinput.cpp
 	boufoactionext.cpp
 	bogltooltip.cpp
-	minimap/bosonglcompleteminimap.cpp
-	minimap/bosonglminimapview.cpp
-	minimap/bosonufominimap.cpp
-	minimap/bosonufominimapdisplay.cpp
 	optionsdialog/optionsdialog.cpp
 	optionsdialog/optionswidgets.cpp
 	optionsdialog/opengloptions.cpp
