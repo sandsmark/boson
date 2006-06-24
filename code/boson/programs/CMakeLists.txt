@@ -47,8 +47,7 @@ boson_target_link_libraries(boson-no-gui
 	gameengine
 	boufo
 	common
-	kio
-	${QT_AND_KDECORE_LIBS}
+	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
 	${LIB_BOMEMORY}
 )
 
@@ -69,9 +68,7 @@ boson_target_link_libraries(bounit
 	gameengine
 	common
 	bosoninfo
-	kio
-	kdeui
-	${QT_AND_KDECORE_LIBS}
+	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
 	${X11_XMU_LIB}
 	${LIB_BOMEMORY}
 )
@@ -116,9 +113,7 @@ kde3_add_executable(bocursor ${bocursor_SRCS})
 boson_target_link_libraries(bocursor
 	common
 	bosoninfo
-	kio
-	kdeui
-	${QT_AND_KDECORE_LIBS}
+	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
 	${X11_XMU_LIB}
 	${LIB_BOMEMORY}
 )
@@ -152,9 +147,7 @@ kde3_add_executable(boinfo ${boinfo_SRCS})
 boson_target_link_libraries(boinfo
 	bosoninfo
 	common
-	kio
-	kdeui
-	${QT_AND_KDECORE_LIBS}
+	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
 	${X11_XMU_LIB}
 	${LIB_BOMEMORY}
 )
@@ -171,9 +164,7 @@ kde3_add_executable(bo3dsdebug ${bo3dsdebug_SRCS})
 boson_target_link_libraries(bo3dsdebug
 	common
 	boufo
-	kio
-	kdeui
-	${QT_AND_KDECORE_LIBS}
+	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
 	${LIB3DS_LIBRARY}
 	${LIB_BOMEMORY}
 )
@@ -189,9 +180,7 @@ boson_target_link_libraries(boconditioneditor
 	gameengine
 	common
 	boufo
-	kio
-	kdeui
-	${QT_AND_KDECORE_LIBS}
+	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
 	${LIB_BOMEMORY}
 )
 
@@ -207,9 +196,7 @@ kde3_automoc(${boprofiling_SRCS})
 kde3_add_executable(boprofiling ${boprofiling_SRCS})
 boson_target_link_libraries(boprofiling
 	common
-	kio
-	kdeui
-	${QT_AND_KDECORE_LIBS}
+	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
 	${X11_XMU_LIB}
 	${LIB_BOMEMORY}
 )
@@ -252,8 +239,7 @@ kde3_add_executable(bofileconverter ${bofileconverter_SRCS})
 boson_target_link_libraries(bofileconverter
 	gameengine
 	common
-	kio
-	${QT_AND_KDECORE_LIBS}
+	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
 	${LIB_BOMEMORY}
 )
 
@@ -266,8 +252,7 @@ kde3_add_executable(bocreatepreview ${bocreatepreview_SRCS})
 boson_target_link_libraries(bocreatepreview
 	gameengine
 	common
-	kio
-	${QT_AND_KDECORE_LIBS}
+	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
 	${LIB_BOMEMORY}
 )
 
