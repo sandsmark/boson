@@ -55,7 +55,7 @@
 #include "../bogroundrenderermanager.h"
 #include "../modelrendering/bomeshrenderermanager.h"
 #include "../bolight.h"
-#include "../minimap/bosonufominimap.h"
+#include "minimap/bosonufominimap.h"
 #include "../info/boinfo.h"
 #include "../speciesdata.h"
 #include "../bowaterrenderer.h"

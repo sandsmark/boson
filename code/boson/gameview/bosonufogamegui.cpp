@@ -35,7 +35,7 @@
 #include "../botexture.h"
 #include "../bocamera.h"
 #include "../bosonufochat.h"
-#include "../minimap/bosonufominimap.h"
+#include "minimap/bosonufominimap.h"
 #include "commandframe/bosoncommandframe.h"
 #include "../gameengine/bosonmessageids.h"
 #include "boselection.h"
