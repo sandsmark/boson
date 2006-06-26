@@ -157,7 +157,7 @@ int BoUfoZoomScrollViewportHandler::viewCenterY() const
 
 void BoUfoZoomScrollViewportHandler::zoomIn()
 {
- d->mZoomStep /= 2.0f;
+ d->mZoomStep /= 1.5f;
  d->mZoomStep = QMAX(d->mZoomStep, 0.125f);
  fixZoomStep();
 
@@ -166,7 +166,7 @@ void BoUfoZoomScrollViewportHandler::zoomIn()
 
 void BoUfoZoomScrollViewportHandler::zoomOut()
 {
- d->mZoomStep *= 2.0f;
+ d->mZoomStep *= 1.5f;
  fixZoomStep();
 
  centerViewOnDataPoint(d->mViewCenterX, d->mViewCenterY);
