@@ -87,10 +87,6 @@ public:
 	{
 		return unit()->id();
 	}
-	inline UnitBase::WorkType work() const
-	{
-		return unit()->work();
-	}
 	inline UnitBase::WorkType advanceWork() const
 	{
 		return unit()->advanceWork();
@@ -107,9 +103,14 @@ public:
 	/**
 	 * Call turnTo according to the current speed (you want to use this!)
 	 **/
-	void turnTo();
+	bool turnTo();
 
 	void advanceMove(unsigned int advanceCallsCount);
+
+	/**
+	 * Stops moving and completes current move order
+	 **/
+	virtual void stopMoving(bool success);
 
 
 

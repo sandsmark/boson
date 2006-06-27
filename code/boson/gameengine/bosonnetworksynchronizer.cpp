@@ -566,7 +566,7 @@ protected:
 	static void streamUnit(QDataStream& stream, Unit* u)
 	{
 		stream << (Q_UINT32)u->id();
-		stream << (Q_INT32)u->work();
+		stream << (Q_INT32)u->advanceWork();
 		stream << (Q_UINT32)u->health();
 #if PATH_LOG
 		// stream some info from the pathinfo object.

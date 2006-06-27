@@ -60,7 +60,6 @@ public:
 		mUnitList = 0;
 		mProperties = 0;
 		mWeaponProperties = 0;
-		mWaypoints = 0;
 		mProduction = 0;
 		mUnitsInRange = 0;
 		mUnitCollisions = 0;
@@ -72,7 +71,6 @@ public:
 	KListView* mUnitList;
 	KListView* mProperties;
 	KListView* mWeaponProperties;
-	KListBox* mWaypoints;
 	KListView* mProduction;
 	KListView* mUnitsInRange;
 	KListView* mUnitCollisions;
@@ -91,7 +89,7 @@ public:
 	int mName;
 	int mHealth;
 	int mSpeed;
-	int mWork;
+	int mAdvanceWork;
 	int mWidth;
 	int mHeight;
 	int mBoundingRect;
@@ -112,7 +110,7 @@ KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
  d->mX = d->mUnitList->addColumn(i18n("X"));
  d->mY = d->mUnitList->addColumn(i18n("Y"));
  d->mZ = d->mUnitList->addColumn(i18n("Z"));
- d->mWork = d->mUnitList->addColumn(i18n("Work"));
+ d->mAdvanceWork = d->mUnitList->addColumn(i18n("AdvanceWork"));
  d->mName = d->mUnitList->addColumn(i18n("Name"));
  d->mHealth = d->mUnitList->addColumn(i18n("Health"));
 // d->mUnitList->addColumn(i18n("Costs"));
@@ -151,13 +149,6 @@ KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
  weaponPropertiesLayout->addWidget(d->mWeaponProperties, 1);
 
  QVBox* vbox = new QVBox(splitter);
- QWidget* waypointBox = new QWidget(vbox);
- QVBoxLayout* waypointLayout = new QVBoxLayout(waypointBox);
- QLabel* waypointTitle = new QLabel(i18n("Waypoints"), waypointBox);
- waypointLayout->addWidget(waypointTitle, 0);
- d->mWaypoints = new KListBox(waypointBox);
- waypointLayout->addWidget(d->mWaypoints, 1);
-
  QWidget* productionBox = new QWidget(vbox);
  QVBoxLayout* productionLayout = new QVBoxLayout(productionBox);
  QLabel* productionTitle = new QLabel(i18n("Productions"), productionBox);
@@ -204,7 +195,6 @@ KGameUnitDebug::~KGameUnitDebug()
  d->mItems.clear();
  d->mProperties->clear();
  d->mWeaponProperties->clear();
- d->mWaypoints->clear();
  d->mProduction->clear();
  d->mUnitsInRange->clear();
  d->mUnitCollisions->clear();
@@ -225,7 +215,6 @@ void KGameUnitDebug::slotUpdate()
  d->mItems.clear();
  d->mProperties->clear();
  d->mWeaponProperties->clear();
- d->mWaypoints->clear();
  d->mProduction->clear();
  d->mUnitsInRange->clear();
  d->mUnitCollisions->clear();
@@ -275,7 +264,7 @@ void KGameUnitDebug::update(QListViewItem* item, Unit* unit)
  item->setText(d->mX, QString::number(unit->x()));
  item->setText(d->mY, QString::number(unit->y()));
  item->setText(d->mZ, QString::number(unit->z()));
- item->setText(d->mWork, QString::number((int)unit->work()));
+ item->setText(d->mAdvanceWork, QString::number((int)unit->advanceWork()));
  item->setText(d->mName, unit->name());
  item->setText(d->mHealth, QString::number(unit->health()));
  item->setText(d->mSpeed, QString::number(unit->speed()));
@@ -364,7 +353,6 @@ void KGameUnitDebug::slotUnitSelected(QListViewItem* item)
 		boWarning() << k_funcinfo << "id " << id << " not found" << endl;
 	}
  }
- updateWaypoints(unit);
  updateProduction(unit);
  updateUnitsInRange(unit);
  updateUnitCollisions(unit);
@@ -417,18 +405,6 @@ void KGameUnitDebug::updateProperties(Unit* unit)
 		item->setText(2, value);
 		++it;
 	}
- }
-}
-
-void KGameUnitDebug::updateWaypoints(Unit* unit)
-{
- d->mWaypoints->clear();
- if (!unit) {
-	return;
- }
- QValueList<BoVector2Fixed> points = unit->waypointList();
- for (unsigned int i = 0; i < points.count(); i++) {
-	(void)new QListBoxText(d->mWaypoints, i18n("x=%1 y=%2").arg(points[i].x()).arg(points[i].y()));
  }
 }
 

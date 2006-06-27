@@ -381,6 +381,13 @@ void BoCanvasAdvance::advanceFunctionAndMove(unsigned int advanceCallsCount, boo
 	QPtrListIterator<BosonItem> itemIt(*it);
 	for (; itemIt.current(); ++itemIt) {
 		BosonItem* s = itemIt.current();
+		if (work != UnitBase::WorkDestroyed && RTTI::isUnit(s->rtti())) {
+			Unit* unit = (Unit*)s;
+			if (unit->isDestroyed()) {
+				// Don't call advanceFunction for destroyed unit, except for advanceDestroyed
+				continue;
+			}
+		}
 		if (advanceFlag) { // bah - inside the loop..
 			s->advanceFunction(advanceCallsCount); // once this was called this object is allowed to change its advanceFunction()
 		} else {
@@ -931,7 +938,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 
 	// This stops everything
 	// (except moving of flying units)
-	unit->stopAttacking();
+	unit->clearOrders();
 
 	// TODO: flying units: fall down the air
 	// -> we MUST stop the unit, otherwise it'd go off the map very fast.
@@ -1019,7 +1026,7 @@ void BosonCanvas::removeUnit(Unit* unit)
  Player* owner = unit->owner();
  //unit->setAnimated(false);
  unit->setHealth(0); // in case of an accidental change before
- unit->setWork(UnitBase::WorkDestroyed);
+ unit->setAdvanceWork(UnitBase::WorkDestroyed);
  owner->unitDestroyed(unit); // remove from player without deleting
  emit signalUnitRemoved(unit);
 

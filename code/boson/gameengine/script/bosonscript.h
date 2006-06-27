@@ -321,13 +321,13 @@ class BosonScript
      **/
     int unitType(int id) const;
     /**
-     * @return Work of unit with id id
+     * @return Advance work of unit with id id
      * Work shows what unit is currently doing - attacking, moving, etc, or just
      * standing.
      * Note that this only returns int "code" of work. Look at unitbase.h to
      * find out what different values mean.
      **/
-    int unitWork(int id) const;
+    int unitAdvanceWork(int id) const;
     int unitSightRange(int id) const;
     /**
      * @return Whether unit with id id is mobile unit

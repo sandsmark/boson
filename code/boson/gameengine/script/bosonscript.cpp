@@ -863,7 +863,7 @@ int BosonScript::unitType(int id) const
   return u->unitProperties()->typeId();
 }
 
-int BosonScript::unitWork(int id) const
+int BosonScript::unitAdvanceWork(int id) const
 {
   Unit* u = findUnit(id);
   if(!u)
@@ -872,7 +872,7 @@ int BosonScript::unitWork(int id) const
     return -1;
   }
 
-  return (int)u->work();
+  return (int)u->advanceWork();
 }
 
 int BosonScript::unitSightRange(int id) const

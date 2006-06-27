@@ -41,6 +41,8 @@ class UnitMover;
 class UnitMoverFlying;
 class UnitMoverLand;
 class UnitConstruction;
+class UnitOrder;
+class UnitOrderData;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
 template<class T> class BoRect2;
@@ -70,7 +72,6 @@ public:
 	enum PropertyIds {
 		// properties in Unit. IDs from 1024 to 1279 may be used here
 		// (1024+0 .. 1024+255)
-		IdWaypoints = 1024 + 2,
 		IdWantedRotation = 1024 + 6,
 		IdPathPoints = 1024 + 10,
 
@@ -131,7 +132,6 @@ public:
 	 **/
 	virtual UnitPlugin* plugin(int pluginType) const;
 
-	virtual void setWork(WorkType w);
 	void setPluginWork(int pluginType);
 
 	UnitConstruction* construction() const
@@ -294,60 +294,12 @@ public:
 	 **/
 	virtual void advanceTurn(unsigned int);
 
-	/**
-	 * @return Target of the unit.
-	 * Note that target is not neccessarily the unit that this unit attacks - it
-	 * is also used for following. In this case, the followed unit will be target
-	 * for the followers.
-	 **/
-	Unit* target() const;
-	virtual void setTarget(Unit* target);
-
 	bool inRange(unsigned long int, Unit* unit) const;
-
-// waypoint stuff: // also in facility - produced units receive this initial waypoint
-	/**
-	 * Add pos to the waypoint list.
-	 **/
-	void addWaypoint(const BoVector2Fixed& pos);
-
-	const BoVector2Fixed& currentWaypoint() const;
-	unsigned int waypointCount() const;
-	/**
-	 * Removes all waypoints from the list.
-	 **/
-	void clearWaypoints();
-
-	/**
-	 * Remove the first waypoint from the list.
-	 **/
-	void waypointDone();
-
-	/**
-	 * @return A list of all waypoints for debugging
-	 **/
-	const QValueList<BoVector2Fixed>& waypointList() const;
 
 	/**
 	 * @return List of path-points
 	 **/
 	const QValueList<BoVector2Fixed>& pathPointList() const;
-
-	/**
-	 * Move this unit to a specified point. Also make sure that previous
-	 * @ref work is cleared. After the path is found the unit starts to get
-	 * animated and to move to the destination.
-	 * @param pos The point on the canvas to move to.
-	 * @param attack If this is true, unit will stop and attack any enemy units in range while moving
-	 **/
-	virtual void moveTo(const BoVector2Fixed& pos, bool attack = false);
-
-	/**
-	 * Moves this unit to the target.
-	 * range specifies distance between target and this unit in cells. If range
-	 * is 0, unit tries to move next to the target.
-	 **/
-	bool moveTo(BosonItem* target, int range = 0);
 
 
 	// TODO: maybe make this protected?
@@ -365,21 +317,21 @@ public:
 
 	/**
 	 * Turns unit smoothly to given degrees
+	 * @return true if unit was turned immediately, false when suborder was
+	 *  constructed to rotate the unit during next advance calls
 	 **/
-	virtual void turnTo(int degrees);
+	virtual bool turnTo(bofixed degrees);
+
+	/**
+	 * Same as above, but turns to given unit
+	 **/
+	virtual bool turnToUnit(Unit* target);
 
 	/**
 	 * Updates unit's x- and y-rotation, so that it will be rotated accordingly to
 	 * to the slope of the terrain it's on
 	 **/
 	void updateRotation();
-
-	/**
-	 * Just stop moving. Don't call this if you don't want to stop attacking
-	 * as well! This sets @ref work to @ref WorkIdle
-	 **/
-	virtual void stopMoving();
-	void stopAttacking();
 
 	virtual bool saveAsXML(QDomElement& root);
 	virtual bool loadFromXML(const QDomElement& root);
@@ -404,37 +356,6 @@ public:
 
 
 	/**
-	 * @return X-coordinate of unit's current destination (where it's moving).
-	 * If unit isn't moving, returned value is undefined.
-	 * Returned value is in canvas coordinates.
-	 **/
-	bofixed destinationX() const;
-	/**
-	 * @return Y-coordinate of unit's current destination (where it's moving).
-	 * If unit isn't moving, returned value is undefined.
-	 * Returned value is in canvas coordinates.
-	 **/
-	bofixed destinationY() const;
-	/**
-	 * @return Current moving range of the unit (how close to destination point it
-	 *  must move).
-	 * If unit isn't moving, returned value is undefined.
-	 * Returned value is in cell coordinates.
-		**/
-	int moveRange() const;
-
-	/**
-	 * @return Whether unit should attack any enemy units in range while moving.
-	 **/
-	bool moveAttacking() const;
-
-	/**
-	 * @return Whether unit should slow down (instead of immediately stopping)
-	 *  before moving destination is reached.
-	 **/
-	bool slowDownAtDestination() const;
-
-	/**
 	 * @return Current pathinfo structure for this unit.
 	 * Note that this is quite internal and shouldn't be used by anything else
 	 * than Unit and it's inheritants if possible.
@@ -457,7 +378,7 @@ public:
 	 * Attack enemy units in range
 	 * @return whether there was any enemy in range
 	 **/
-	bool attackEnemyUnitsInRange();
+	Unit* attackEnemyUnitsInRange(Unit* target = 0);
 
 	/**
 	 * @return Best enemy unit in range to attack
@@ -504,6 +425,49 @@ public:
 	 * maybe rotate around x and y axis.
 	 **/
 	void updateZ(bofixed moveByX, bofixed moveByY, bofixed* moveZ, bofixed* rotateX, bofixed* rotateY);
+
+	/**
+	 * @return UnitOrder object specifying currently executed order or 0 if unit
+	 *  doesn't have any orders atm.
+	 **/
+	UnitOrder* currentOrder() const;
+	UnitOrderData* currentOrderData() const;
+	/**
+	 * @return Current toplevel order for this unit. As orders can have
+	 *  suborders, this can be different from @ref currentOrder;
+	 **/
+	UnitOrder* toplevelOrder() const;
+	UnitOrderData* toplevelOrderData() const;
+
+	/**
+	 * Clears all orders that units has (including scheduled ones)
+	 **/
+	void clearOrders();
+
+	/**
+	 * Adds new toplevel order for this unit. If the unit already has
+	 *  @ref toplevelOrder, then the new order becomes scheduled, i.e. it will be
+	 *  carried out once all previously scheduled orders have been completed
+	 **/
+	bool addToplevelOrder(UnitOrder* order);
+
+	/**
+	 * Replaces all current order with the given one.
+	 * This is mostly equal to calling  clearOrders(); addToplevelOrder(order);
+	 **/
+	bool replaceToplevelOrders(UnitOrder* order);
+
+	/**
+	 * Adds new suborder to @ref currentOrder of this unit. Given suborder will
+	 *  become new @ref currentOrder . This is mostly meant for internal use.
+	 * @return Whether it is possible to fulfill given order. E.g. if you order
+	 *  unit to move to unpassable terrain, it return false
+	 **/
+	bool addCurrentSuborder(UnitOrder* order);
+
+	void currentSuborderDone(bool success);
+	bool lastOrderStatus() const;
+
 
 protected:
 	void shootAt(BosonWeapon* w, Unit* target);
@@ -559,6 +523,10 @@ protected:
 	bool cellOccupied(int x, int y, bool ignoremoving = false) const;
 
 	virtual int getAnimationMode() const;
+
+	bool currentOrderChanged();
+	bool currentOrderAdded();
+	void currentOrderRemoved();
 
 
 private:

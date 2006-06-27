@@ -53,7 +53,6 @@ protected slots:
 	void slotUnitPropertyChanged(KGamePropertyBase*);
 
 protected:
-	void updateWaypoints(Unit*);
 	void updateProduction(Unit*);
 	void updateUnitsInRange(Unit*);
 	void updateUnitCollisions(Unit*);

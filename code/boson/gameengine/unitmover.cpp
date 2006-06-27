@@ -27,6 +27,7 @@
 #include "bosonprofiling.h"
 #include "boitemlist.h"
 #include "cell.h"
+#include "unitorder.h"
 
 #include <qdom.h>
 
@@ -58,7 +59,7 @@ UnitMover::~UnitMover()
 
 bool UnitMover::init()
 {
- unit()->setWork(UnitBase::WorkIdle);
+ unit()->setAdvanceWork(UnitBase::WorkIdle);
  return true;
 }
 
@@ -190,35 +191,35 @@ void UnitMover::advanceFollow(unsigned int advanceCallsCount)
 	return;
  }
  BosonProfiler profiler("advanceFollow");
- if (!unit()->target()) {
+
+ UnitFollowOrder* followorder = (UnitFollowOrder*)unit()->currentOrder();
+ Unit* target = followorder->target();
+ if (!target) {
 	boWarning() << k_funcinfo << "cannot follow NULL unit" << endl;
-	unit()->stopAttacking();  // stopAttacking should maybe be renamed to stopEverything
-			//  or just stop because it's used in several places to stop unit from
-			//  doing whatever it does.
+	unit()->currentSuborderDone(false);
 	return;
  }
- if (unit()->target()->isDestroyed()) {
+ if (target->isDestroyed()) {
 	boDebug(401) << k_funcinfo << "Unit is destroyed!" << endl;
-	unit()->stopAttacking();
+	unit()->currentSuborderDone(true);
 	return;
  }
-// if (!isNextTo(target())) {  // This doesn't work for some reason :-(  Dunno why.
- if (QMAX(QABS(unit()->x() - unit()->target()->x()), QABS(unit()->y() - unit()->target()->y())) > 1.0f) {
-	// We're not next to unit
+
+ if (QMAX(QABS(unit()->x() - target->x()), QABS(unit()->y() - target->y())) > followorder->distance()+1) {
+	// We're too far from the followed unit
 	// AB: warning - this does a lookup on all items and therefore is slow!
 	// --> but we need it as a simple test on the pointer causes trouble if
 	// that pointer is already deleted. any nice solutions?
-	if (!canvas()->allItems()->contains(unit()->target())) {
+	if (!canvas()->allItems()->contains(target)) {
 		boDebug(401) << k_funcinfo << "Unit seems to be destroyed!" << endl;
-		unit()->stopAttacking();
+		unit()->currentSuborderDone(true);
 		return;
 	}
-	boDebug(401) << k_funcinfo << "unit (" << unit()->target()->id() << ") not in range - moving..." << endl;
-	if (!unit()->moveTo(unit()->target()->x(), unit()->target()->y(), 1)) {
-		unit()->setWork(UnitBase::WorkIdle);
-	} else {
-		unit()->setAdvanceWork(UnitBase::WorkMove);
+	boDebug(401) << k_funcinfo << "unit (" << target->id() << ") not in range - moving..." << endl;
+	if (!unit()->addCurrentSuborder(new UnitMoveToUnitOrder(target, followorder->distance(), false))) {
+		unit()->currentSuborderDone(false);
 	}
+	return;
  }
  // Do nothing (unit is in range)
 }
@@ -251,7 +252,8 @@ void UnitMover::advanceMoveCheck()
 	boError(401) << k_funcinfo << "leaving unit a current topleft pos: ("
 			<< unit()->boundingRect().topLeft().x() << ";"
 			<< unit()->boundingRect().topLeft().y() << ")" << endl;
-	unit()->stopMoving();
+	// TODO: is this the right thing to do?
+	unit()->clearOrders();
 	return;
  }
  // Check if bottom-right point of the unit will be on canvas after moving
@@ -284,51 +286,54 @@ void UnitMover::advanceMoveCheck()
 	boError(401) << k_funcinfo << "leaving unit a current bottomright pos: ("
 			<< unit()->boundingRect().bottomRight().x() << ";"
 			<< unit()->boundingRect().bottomRight().y() << ")" << endl;
-	unit()->stopMoving();
+	// TODO: is this the right thing to do?
+	unit()->clearOrders();
 	return;
  }
 }
 
-void UnitMover::turnTo()
+bool UnitMover::turnTo()
 {
  bofixed xspeed = unit()->xVelocity();
  bofixed yspeed = unit()->yVelocity();
  // Set correct rotation
  // Try to find rotation fast first
  if ((xspeed == 0) && (yspeed < 0)) { // North
-	unit()->turnTo(0);
+	return unit()->turnTo(0);
  } else if ((xspeed > 0) && (yspeed == 0)) { // East
-	unit()->turnTo(90);
+	return unit()->turnTo(90);
  } else if ((xspeed == 0) && (yspeed > 0)) { // South
-	unit()->turnTo(180);
+	return unit()->turnTo(180);
  } else if ((xspeed < 0) && (yspeed == 0)) { // West
-	unit()->turnTo(270);
+	return unit()->turnTo(270);
  } else if (QABS(xspeed) == QABS(yspeed)) {
 	if ((xspeed > 0) && (yspeed < 0)) { // NE
-		unit()->turnTo(45);
+		return unit()->turnTo(45);
 	} else if ((xspeed > 0) && (yspeed > 0)) { // SE
-		unit()->turnTo(135);
+		return unit()->turnTo(135);
 	} else if ((xspeed < 0) && (yspeed > 0)) { // SW
-		unit()->turnTo(225);
+		return unit()->turnTo(225);
 	} else if ((xspeed < 0) && (yspeed < 0)) { // NW
-		unit()->turnTo(315);
+		return unit()->turnTo(315);
 	} else if(xspeed == 0 && yspeed == 0) {
 //		boDebug() << k_funcinfo << "xspeed == 0 and yspeed == 0" << endl;
 	}
  } else {
 	// Slow way - calculate direction
-	unit()->turnTo((int)Bo3dTools::rotationToPoint(xspeed, yspeed));
+	return unit()->turnTo(Bo3dTools::rotationToPoint(xspeed, yspeed));
  }
 }
 
 bool UnitMover::attackEnemyUnitsInRangeWhileMoving()
 {
  PROFILE_METHOD
- // Don't attack other units unless work is WorkMove
- if (work() != UnitBase::WorkMove) {
+ if (!pathInfo()->moveAttacking) {
 	return false;
  }
- if (pathInfo()->moveAttacking && unit()->attackEnemyUnitsInRange()) {
+
+ UnitMoveOrderData* orderdata = (UnitMoveOrderData*)unit()->currentOrderData();
+ orderdata->target = unit()->attackEnemyUnitsInRange(orderdata->target);
+ if (orderdata->target) {
 	boDebug(401) << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
 	if (unit()->isFlying()) {
 		// Don't stop moving
@@ -341,6 +346,29 @@ bool UnitMover::attackEnemyUnitsInRangeWhileMoving()
  }
  return false;
 }
+
+void UnitMover::stopMoving(bool success)
+{
+// boDebug() << k_funcinfo << endl;
+ unit()->clearPathPoints();
+
+ // Release highlevel path here once we cache them
+
+ if (!unit()->isFlying()) {
+	unit()->setMovingStatus(UnitBase::Standing);
+	unit()->setVelocity(0.0, 0.0, 0.0);
+
+	if (pathInfo() && pathInfo()->slowDownAtDest) {
+		unit()->setSpeed(0);
+	}
+ }
+ UnitOrder* order = unit()->currentOrder();
+ if (order && (order->type() == UnitOrder::Move || order->type() == UnitOrder::MoveToUnit)) {
+	unit()->currentSuborderDone(success);
+ }
+}
+
+
 
 void UnitMover::addUpgrade(const UpgradeProperties* upgrade)
 {
@@ -421,8 +449,7 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
  if (unit()->maxSpeed() == 0) {
 	// If unit's max speed is 0, it cannot move
 	boError(401) << k_funcinfo << "unit " << id() << ": maxspeed == 0" << endl;
-	unit()->stopMoving();
-	unit()->setMovingStatus(UnitBase::Standing);
+	stopMoving(false);
 	return;
  }
 
@@ -436,8 +463,19 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 	// If there aren't any enemies, find new path
 	if (!newPath()) {
 		// No path was found
-		unit()->stopMoving();
+		stopMoving(false);
 		return;
+	}
+ }
+ if (unit()->currentOrder()->type() == UnitOrder::MoveToUnit) {
+	const BoVector2Fixed& targetpos = ((UnitMoveToUnitOrder*)unit()->currentOrder())->target()->center();
+	if (((UnitMoveToUnitOrderData*)unit()->currentOrderData())->lastTargetPos.dotProduct(targetpos) > 5*5) {
+		// Update path
+		if (!newPath()) {
+			// No path was found
+			stopMoving(false);
+			return;
+		}
 	}
  }
 
@@ -448,18 +486,19 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 		//  only partial.
 		if (!newPath()) {
 			// Probably no path could be found or we're already at destination point
-			unit()->stopMoving();
+			stopMoving(false);  // TODO: is false correct here?
 			return;
 		}
 	} else {
 		// TODO: rotate a bit randomly
-		// TODO: support multiple waypoints
-		unit()->stopMoving();
+		stopMoving(true);
 		return;
 	}
  }
 
  boDebug(401) << k_funcinfo << "unit " << id() << endl;
+#warning TODO!!!
+#if 0
  if (advanceWork() != work()) {
 	if (work() == UnitBase::WorkAttack) {
 		// Unit is attacking. ATM it's moving to target.
@@ -484,26 +523,19 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 			return;
 		}
 		// TODO: make sure that target() hasn't moved!
-		// if it has moved also adjust waypoints
+		// if it has moved also adjust pathpoints
 	}
- } else if (pathInfo()->moveAttacking) {
+ } else
+#endif
+ if (pathInfo()->moveAttacking) {
 	// Attack any enemy units in range
 	// Don't check for enemies every time (if we don't have a target) because it
 	//  slows things down
-#ifndef CHECK_ENEMIES_ONLY_AT_WAYPOINT
-	if (unit()->target() || (advanceCallsCount % 10 == 0)) {
+	if (((UnitMoveOrderData*)unit()->currentOrderData())->target || (advanceCallsCount % 10 == 0)) {
 		if (attackEnemyUnitsInRangeWhileMoving()) {
 			return;
 		}
 	}
-#else
-	// Attack only if we already have target
-	if (unit()->target()) {
-		if (attackEnemyUnitsInRangeWhileMoving()) {
-			return;
-		}
-	}
-#endif
  }
 
  // x and y are center of the unit here
@@ -540,7 +572,6 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 			}
 		} else {
 			// TODO: rotate a bit randomly
-			// TODO: support multiple waypoints
 			break;
 		}
 	}
@@ -614,10 +645,10 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 
  //avoidance();
 
- turnTo();
+ bool turning = turnTo();
 
  // If we just started moving and now want to turn, then set velocity back to 0
- if ((advanceWork() == UnitBase::WorkTurn) && (oldspeed == 0)) {
+ if (turning && (oldspeed == 0)) {
 	unit()->setVelocity(0, 0, 0);
  }
 }
@@ -630,6 +661,14 @@ void UnitMoverLand::advanceMoveCheck()
  PROFILE_METHOD;
  //boDebug(401) << k_funcinfo << endl;
 
+ if (!unit()->currentOrder() || (unit()->currentOrder()->type() != UnitOrder::Move && unit()->currentOrder()->type() != UnitOrder::MoveToUnit)) {
+	// We might be e.g. turning
+	// TODO: before turning, we have possibly already moved, so we should still
+	//  check our new pos here
+	// TODO: also consider e.g. MoveToUnit order
+	return;
+ }
+
  // Take special action if path is (was) blocked and we're waiting
  if (pathInfo()->waiting) {
 	// We try to move every 5 advance calls
@@ -639,8 +678,7 @@ void UnitMoverLand::advanceMoveCheck()
 			// Obstacle is still there. Continue waiting
 			if (pathInfo()->waiting >= 600) {
 				// Enough of waiting (30 secs). Give up.
-				unit()->stopMoving();
-				unit()->setWork(UnitBase::WorkIdle);
+				stopMoving(false);
 				return;
 			} else if (pathInfo()->waiting % (20 + QMIN(pathInfo()->pathrecalced * 20, 80)) == 0) {
 				// First wait 20 adv. calls (1 sec) before recalculating path, then 40
@@ -727,7 +765,7 @@ void UnitMoverLand::advanceMoveCheck()
  // Find the next cell we'll be on
  if (mNextWaypointIntersections->count() == 0) {
 	boWarning() << k_funcinfo << unit()->id() << ": mNextWaypointIntersections is empty" << endl;
-	unit()->stopMoving();
+	stopMoving(false);
 	return;
  }
 
@@ -815,7 +853,7 @@ int UnitMoverLand::selectNextPathPoint(int xpos, int ypos)
 		}
 	}
 	if (cango) {
-		// skip previous waypoint (go directly to this one)
+		// skip previous pathpoint (go directly to this one)
 		unit()->pathPointDone();
 		currentPathPointChanged(xpos, ypos);
 		skipped++;
@@ -975,6 +1013,13 @@ bool UnitMoverLand::newPath()
  // Update our start position
  pathInfo()->start.set(unit()->centerX(), unit()->centerY());
 
+ if (unit()->currentOrder()->type() == UnitOrder::MoveToUnit) {
+	// Update destination
+	const BoVector2Fixed& targetpos = ((UnitMoveToUnitOrder*)unit()->currentOrder())->target()->center();
+	pathInfo()->dest = targetpos;
+	((UnitMoveToUnitOrderData*)unit()->currentOrderData())->lastTargetPos = targetpos;
+ }
+
  // Clear previous pathpoints
  unit()->clearPathPoints();
 
@@ -1133,7 +1178,7 @@ void UnitMoverFlying::advanceMoveInternal(unsigned int advanceCallsCount)
  if (unit()->maxSpeed() == 0) {
 	// If unit's max speed is 0, it cannot move
 	boError(401) << k_funcinfo << "unit " << id() << ": maxspeed == 0" << endl;
-	unit()->stopMoving();
+	stopMoving(false);
 	unit()->setMovingStatus(UnitBase::Standing);
 	return;
  }
@@ -1142,9 +1187,14 @@ void UnitMoverFlying::advanceMoveInternal(unsigned int advanceCallsCount)
 
 
  // Calculate velocity
- // Missile always moves towards it's target
- BoVector3Fixed targetpos(unit()->currentWaypoint().x(), unit()->currentWaypoint().y(), 0);
+ BoVector3Fixed targetpos(unit()->pathInfo()->dest.x(), unit()->pathInfo()->dest.y(), 0);
+ if (unit()->currentOrder()->type() == UnitOrder::MoveToUnit) {
+	const BoVector2Fixed& targetunitpos = ((UnitMoveToUnitOrder*)unit()->currentOrder())->target()->center();
+	targetpos.set(targetunitpos.x(), targetunitpos.y(), 0);
+ }
  targetpos.setZ(canvas()->heightAtPoint(targetpos.x(), targetpos.y()) + 3);
+#warning TODO!!!
+#if 0
  if (advanceWork() != work()) {
 	if (work() == UnitBase::WorkAttack) {
 		// Unit is attacking. ATM it's moving to target.
@@ -1172,11 +1222,13 @@ void UnitMoverFlying::advanceMoveInternal(unsigned int advanceCallsCount)
 			targetpos.setZ(targetpos.z() + 3);
 		}
 	}
- } else if (pathInfo()->moveAttacking) {
+ } else
+#endif
+if (pathInfo()->moveAttacking) {
 	// Attack any enemy units in range
 	// Don't check for enemies every time (if we don't have a target) because it
 	//  slows things down
-	if (unit()->target() || (advanceCallsCount % 10 == 0)) {
+	if (((UnitMoveOrderData*)unit()->currentOrderData())->target || (advanceCallsCount % 10 == 0)) {
 		attackEnemyUnitsInRangeWhileMoving();
 	}
  }
@@ -1194,8 +1246,8 @@ void UnitMoverFlying::advanceMoveInternal(unsigned int advanceCallsCount)
  BoVector3Fixed totarget(targetpos.x() - x, targetpos.y() - y, targetpos.z() - z);
  bofixed totargetlen = totarget.length();
  // We need check this here to avoid division by 0 later
- if (totargetlen <= unit()->speed()) {
-	unit()->stopMoving();
+ if (totargetlen <= pathInfo()->range || totargetlen <= unit()->speed()) {
+	stopMoving(true);
 	return;
  }
  // Normalize totarget. totarget vector now shows direction to target

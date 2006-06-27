@@ -53,7 +53,6 @@ UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canva
 
  registerData(&mShieldReloadCounter, IdShieldReloadCounter);
  registerData(&mDeletionTimer, IdDeletionTimer);
- registerData(&mWork, IdWork);
  registerData(&mAdvanceWork, IdAdvanceWork);
  registerData(&mMovingStatus, IdMovingStatus);
  registerData(&mHealthFactor, IdHealthFactor);
@@ -69,7 +68,6 @@ UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canva
  mDeletionTimer.setEmittingSignal(false);
  mShieldReloadCounter.setEmittingSignal(false);
 
- mWork.setLocal((int)WorkIdle);
  mAdvanceWork.setLocal((int)WorkIdle);
  mMovingStatus.setLocal((int)Standing);
  mShieldReloadCounter.setLocal(0);
@@ -117,7 +115,6 @@ void UnitBase::initStatic()
  if (initialized) {
 	return;
  }
- addPropertyId(IdWork, QString::fromLatin1("Work"));
  addPropertyId(IdAdvanceWork, QString::fromLatin1("AdvanceWork"));
  addPropertyId(IdDeletionTimer, QString::fromLatin1("DeletionTimer"));
  addPropertyId(IdShieldReloadCounter, QString::fromLatin1("ShieldReloadCounter"));

@@ -37,6 +37,7 @@
 #include "bosonweapon.h"
 #include "bosonpath.h"
 #include "boevent.h"
+#include "unitorder.h"
 #include "../bo3dtools.h"
 
 #include <klocale.h>
@@ -281,7 +282,7 @@ void ProductionPlugin::pauseProduction()
 	return;
  }
 
- unit()->setWork(Unit::WorkIdle);
+ unit()->setAdvanceWork(Unit::WorkIdle);
 
  QCString eventName;
  if (currentProductionType() == ProduceUnit) {
@@ -415,7 +416,7 @@ void ProductionPlugin::advance(unsigned int)
 {
  unsigned long int id = currentProductionId();
  if (id <= 0) { // no production
-	unit()->setWork(Unit::WorkIdle);
+	unit()->setAdvanceWork(Unit::WorkIdle);
 	mProductionState = 0;
 	mMineralsPaid = 0;
 	mOilPaid = 0;
@@ -795,18 +796,15 @@ void RepairPlugin::repair(Unit* u)
 {
  boDebug() << k_funcinfo << endl;
  if (unit()->isFacility()) {
-	if (!u->moveTo(unit(), 0)) {
+	// TODO: do we also need to clear u's current orders?
+	if (!u->addToplevelOrder(new UnitMoveToUnitOrder(unit()))) {
 		boDebug() << k_funcinfo << u->id() << " cannot find a way to repairyard" << endl;
-		u->setWork(Unit::WorkIdle);
-	} else {
-		u->setWork(Unit::WorkMove);
+		unit()->currentSuborderDone(false);
 	}
  } else {
-	if (!unit()->moveTo(u, 0)) {
+	if (!unit()->addCurrentSuborder(new UnitMoveToUnitOrder(u))) {
 		boDebug() << k_funcinfo << "Cannot find way to " << u->id() << endl;
-		unit()->setWork(Unit::WorkIdle);
-	} else {
-		unit()->setAdvanceWork(Unit::WorkMove);
+		unit()->currentSuborderDone(false);
 	}
  }
 }
@@ -888,7 +886,7 @@ HarvesterPlugin::~HarvesterPlugin()
 void HarvesterPlugin::advance(unsigned int)
 {
  if (mHarvestingType == 0) {
-	unit()->setWork(Unit::WorkIdle);
+	unit()->currentSuborderDone(true);
 	return;
  } else if (mHarvestingType == 1) {
 	advanceMine();
@@ -992,7 +990,7 @@ void HarvesterPlugin::advanceMine()
  const HarvesterProperties* prop = (HarvesterProperties*)properties(PluginProperties::Harvester);
  if (!prop) {
 	boError(430) << k_funcinfo << "NULL harvester properties" << endl;
-	unit()->setWork(Unit::WorkIdle);
+	mHarvestingType = 0; // stop
 	return;
  }
  if (!mResourceMine || !mResourceMine->isUsableTo(this)) {
@@ -1012,7 +1010,7 @@ void HarvesterPlugin::advanceMine()
 		mineId = QString::number(mResourceMine->unit()->id());
 	}
 	boDebug(430) << k_funcinfo << "cannot mine at " << mResourceMine << " (" << mineId << ")" << endl;
-	unit()->setWork(Unit::WorkIdle);
+	mHarvestingType = 0; // stop
 
 	// TODO: handle special case when mine has become empty!
 	// -> we should go to a refinery now
@@ -1030,13 +1028,11 @@ void HarvesterPlugin::advanceMine()
  // Check if unit is at mining location. If not, go there
  if (!isAtResourceMine()) {
 	Unit* u = mResourceMine->unit();
-	if (!unit()->moveTo(u, 0)) {
+	if (!unit()->addCurrentSuborder(new UnitMoveToUnitOrder(u))) {
 		boDebug(430) << k_funcinfo << "Cannot move to refinery (id=" << u->id() <<
 				") at (" << u->x() << "; " << u->y() << ")" << endl;
-		unit()->setWork(Unit::WorkIdle);
-		return;
+		unit()->currentSuborderDone(false);
 	}
-	unit()->setAdvanceWork(Unit::WorkMove);
 	return;
  }
  if (resourcesMined() >= prop->maxResources()) {
@@ -1097,13 +1093,11 @@ void HarvesterPlugin::advanceRefine()
 
  if (!isAtRefinery()) {
 	Unit* u = mRefinery->unit();
-	if (!unit()->moveTo(u, 0)) {
+	if (!unit()->addCurrentSuborder(new UnitMoveToUnitOrder(u))) {
 		boDebug(430) << k_funcinfo << "Cannot move to refinery (id=" << u->id() <<
 				") at (" << u->x() << "; " << u->y() << ")" << endl;
-		unit()->setWork(Unit::WorkIdle);
-		return;
+		unit()->currentSuborderDone(false);
 	}
-	unit()->setAdvanceWork(Unit::WorkMove);
 	return;
  }
  const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
@@ -1219,13 +1213,12 @@ void HarvesterPlugin::mineAt(ResourceMinePlugin* resource)
 	boError() << k_funcinfo << resource->unit()->id() << " not a suitable resource mine" << endl;
 	return;
  }
- if (!unit()->moveTo(resource->unit(), 0)) {
+ if (!unit()->addCurrentSuborder(new UnitMoveToUnitOrder(resource->unit()))) {
 	boDebug() << k_funcinfo << "cannot find a way to resource mine" << endl;
 	boDebug() << k_funcinfo << "TODO: search another resource mine" << endl;
+	unit()->currentSuborderDone(false);
 	return;
  }
- unit()->setPluginWork(UnitPlugin::Harvester);
- unit()->setAdvanceWork(Unit::WorkMove);
  mResourceMine = resource;
 
  mHarvestingType = 1;
@@ -1246,13 +1239,12 @@ void HarvesterPlugin::refineAt(RefineryPlugin* refinery)
 	boDebug() << k_funcinfo << "sorry, refinery is already destroyed. cannot use it" << endl;
 	return;
  }
- if (!unit()->moveTo(refinery->unit(), 0)) {
+ if (!unit()->addCurrentSuborder(new UnitMoveToUnitOrder(refinery->unit()))) {
 	boDebug() << k_funcinfo << "cannot find a way to refinery" << endl;
 	boDebug() << k_funcinfo << "TODO: search another refinery" << endl;
+	unit()->currentSuborderDone(false);
 	return;
  }
- unit()->setPluginWork(UnitPlugin::Harvester);
- unit()->setAdvanceWork(Unit::WorkMove);
  mRefinery = refinery;
 
  mHarvestingType = 2; // refining
@@ -1379,10 +1371,11 @@ void BombingPlugin::bomb(int weaponId, BoVector2Fixed pos)
  mTargetX = pos.x();
  mTargetY = pos.y();
 
- if (!unit()->moveTo(mTargetX, mTargetY, 0)) {
+ if (!unit()->addCurrentSuborder(new UnitMoveOrder(pos, 0, false))) {
 	boError() << k_funcinfo << "Moving failed. Now what?" << endl;
-	unit()->setWork(Unit::WorkIdle);
-	} else {
+	unit()->currentSuborderDone(false);
+	return;
+ } else {
 	unit()->pathInfo()->slowDownAtDest = false;
 	unit()->pathInfo()->moveAttacking = false;
 	// Instead of setting unit's advanceWork to WorkMove, we call
@@ -1436,13 +1429,14 @@ void BombingPlugin::advance(unsigned int advanceCalls)
 	newx = QMAX(unit()->width() / 2, QMIN(newx, (canvas()->mapWidth() - 1) - unit()->width() / 2));
 	newy = QMAX(unit()->height() / 2, QMIN(newy, (canvas()->mapHeight() - 1) - unit()->height() / 2));
 
-  boDebug() << k_funcinfo << "Getaway point is at (" << newx << "; " << newy << ")" << endl;
-	if (!unit()->moveTo(newx, newy)) {
+	// FIXME: hackish
+	unit()->currentSuborderDone(true);
+	boDebug() << k_funcinfo << "Getaway point is at (" << newx << "; " << newy << ")" << endl;
+	if (!unit()->addCurrentSuborder(new UnitMoveOrder(BoVector2Fixed(newx, newy), 0, false))) {
 		boWarning() << k_funcinfo << "Aargh! Can't move away from drop-point!" << endl;
-		unit()->setWork(Unit::WorkIdle);
 	} else {
 		unit()->pathInfo()->moveAttacking = false;
-		unit()->setWork(Unit::WorkMove);  // We don't want to return here anymore
+		//unit()->setWork(Unit::WorkMove);  // We don't want to return here anymore
 	}
 
 	mWeapon = 0;
@@ -1508,7 +1502,7 @@ void MiningPlugin::mine(int weaponId)
 	return;
  }
 
- unit()->stopMoving();
+// unit()->stopMoving();
 
  mWeapon = w;
  mPlacingCounter = MINE_PLACE_TIME;
@@ -1572,9 +1566,10 @@ void MiningPlugin::advance(unsigned int)
 		newy = QMAX(bofixed(0), QMIN(newy, bofixed((canvas()->mapHeight() - 1))));
 
 		boDebug() << k_funcinfo << "i: " << i << "; Getaway point is at (" << newx << "; " << newy << ")" << endl;
-		if (unit()->moveTo(newx, newy)) {
-			unit()->addWaypoint(BoVector2Fixed(newx, newy));
-			unit()->setWork(Unit::WorkMove);  // We don't want to return here anymore
+		// FIXME: hackish
+		unit()->currentSuborderDone(true);
+		boDebug() << k_funcinfo << "Getaway point is at (" << newx << "; " << newy << ")" << endl;
+		if (!unit()->addCurrentSuborder(new UnitMoveOrder(BoVector2Fixed(newx, newy), 0, false))) {
 			couldmove = true;
 			break;
 		}
@@ -1582,7 +1577,7 @@ void MiningPlugin::advance(unsigned int)
 
 	if (!couldmove) {
 		boDebug() << k_funcinfo << "Can't move away!" << endl;
-		unit()->setWork(Unit::WorkIdle);  // We don't want to return here anymore
+		unit()->setAdvanceWork(Unit::WorkIdle);  // We don't want to return here anymore
 	}
 
 	mWeapon = 0;

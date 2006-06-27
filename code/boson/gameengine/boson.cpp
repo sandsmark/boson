@@ -1722,19 +1722,10 @@ void Boson::makeUnitLog()
 		ts << "Unit " << u->id() << ":  pos(" << u->x() << "; " << u->y() << "; " << u->z() <<
 				"); rot(" << u->xRotation() << "; " << u->yRotation() << "; " << u->rotation() <<
 				"); speed: " << u->speed() << "; maxSpeed: " << u->maxSpeed() <<
-				"); work: " << (int)u->work() << "; advWork: " << (int)u->advanceWork() <<
+				"); advWork: " << (int)u->advanceWork() <<
 				"); movingStatus: " << (int)u->movingStatus() << "; advWork: " << (int)u->advanceWork() <<
 				"; health: " << u->health();
 		// Target
-		if (u->target()) {
-			ts << " target: " << u->target()->id();
-		}
-		ts << endl;
-		// Waypoints
-		ts << "        " << u->waypointCount() << " waypoints:";
-		for (QValueList<BoVector2Fixed>::const_iterator pit = u->waypointList().begin(); pit != u->waypointList().end(); pit++) {
-			ts << " (" << (*pit).x() << "; " << (*pit).y() << ")";
-		}
 		ts << endl;
 		// Pathpoints
 		ts << "        " << u->pathPointList().count() << " pathpoints:";

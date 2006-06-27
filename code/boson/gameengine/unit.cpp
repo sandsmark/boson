@@ -40,6 +40,7 @@
 #include "bo3dtools.h"
 #include "bosonprofiling.h"
 #include "unitmover.h"
+#include "unitorder.h"
 
 #include <kgame/kgamepropertylist.h>
 #include <kgame/kgame.h>
@@ -62,23 +63,20 @@ class UnitPrivate
 public:
 	UnitPrivate()
 	{
-		mTarget = 0;
-
 		mWeapons = 0;
 
 		mMoveData = 0;
 
 		mUnitMover = 0;
+
+		mCurrentOrder = 0;
 	}
-	KGamePropertyList<BoVector2Fixed> mWaypoints;
 	KGamePropertyList<BoVector2Fixed> mPathPoints;
-	KGameProperty<int> mWantedRotation;
 
 	// be *very* careful with those - NewGameDialog uses Unit::save() which
 	// saves all KGameProperty objects. If non-KGameProperty properties are
 	// changed before all players entered the game we'll have a broken
 	// network game.
-	Unit* mTarget;
 
 	// these must NOT be touched (items added or removed) after the c'tor.
 	// loading code will depend in this list to be at the c'tor state!
@@ -86,13 +84,16 @@ public:
 	BosonWeapon** mWeapons;
 
 	BosonMoveData* mMoveData;
-	BosonPathInfo mPathInfo;
 
 	unsigned long int mMaxWeaponRange;
 	unsigned long int mMaxLandWeaponRange;
 	unsigned long int mMaxAirWeaponRange;
 
 	UnitMover* mUnitMover;
+
+	QValueList<UnitOrderData*> mToplevelOrders;
+	UnitOrderData* mCurrentOrder;
+	UnitOrder::FinishStatus mLastOrderStatus;
 };
 
 Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
@@ -115,10 +116,7 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  // depend in any way on the .3ds file or another OpenGL thing.
  setSize(prop->unitWidth(), prop->unitHeight(), prop->unitDepth());
 
- registerData(&d->mWaypoints, IdWaypoints);
  registerData(&d->mPathPoints, IdPathPoints);
- registerData(&d->mWantedRotation, IdWantedRotation);
- d->mWantedRotation.setLocal(0);
 
  mUnitConstruction = 0;
  if (prop->isFacility()) {
@@ -136,8 +134,6 @@ Unit::~Unit()
 {
  delete d->mUnitMover;
  delete mUnitConstruction;
- d->mWaypoints.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
- d->mWaypoints.clear();
  unselect();
  d->mPlugins.clear();
  BoPointerIterator<BosonWeapon> it = d->mWeapons;
@@ -201,7 +197,7 @@ bool Unit::init()
  speciesTheme()->loadNewUnit(this);
 
  if (unitProperties()->isFacility()) {
-	setWork(WorkConstructed);
+	setAdvanceWork(WorkConstructed);
 	updateAnimationMode();
  }
 
@@ -213,7 +209,6 @@ void Unit::initStatic()
  // we initialize the properties for Unit, MobileUnit, Facility and the plugins
  // here
  // Unit
- addPropertyId(IdWaypoints, QString::fromLatin1("Waypoints"));
  addPropertyId(IdPathPoints, QString::fromLatin1("PathPoints"));
  addPropertyId(IdWantedRotation, QString::fromLatin1("WantedRotation"));
 
@@ -260,41 +255,6 @@ void Unit::select(bool markAsLeader)
  BosonItem::select(markAsLeader);
 }
 
-bofixed Unit::destinationX() const
-{
- return pathInfo()->dest.x();
-}
-
-bofixed Unit::destinationY() const
-{
- return pathInfo()->dest.y();
-}
-
-int Unit::moveRange() const
-{
- return pathInfo()->range;
-}
-
-Unit* Unit::target() const
-{
- return d->mTarget;
-}
-
-void Unit::setTarget(Unit* target)
-{
- if (target && mUnitConstruction && !mUnitConstruction->isConstructionComplete()) {
-	boWarning() << k_funcinfo << "not yet constructed completely" << endl;
-	return;
- }
- d->mTarget = target;
- if (!d->mTarget) {
-	return;
- }
- if (d->mTarget->isDestroyed()) {
-	d->mTarget = 0;
- }
-}
-
 void Unit::setHealth(unsigned long int h)
 {
  if (h > maxHealth()) {
@@ -325,14 +285,6 @@ void Unit::setSightRange(unsigned long int r)
  }
 }
 
-void Unit::setWork(WorkType w)
-{
- if (currentPlugin() && w != WorkPlugin) {
-	mCurrentPlugin = 0;
- }
- UnitBase::setWork(w);
-}
-
 void Unit::setPluginWork(int pluginType)
 {
  UnitPlugin* p = plugin(pluginType);
@@ -340,7 +292,7 @@ void Unit::setPluginWork(int pluginType)
 	boError() << k_funcinfo << id() << " does not have plugin " << pluginType << endl;
 	return;
  }
- setWork(WorkPlugin);
+ setAdvanceWork(WorkPlugin);
  mCurrentPlugin = p;
 }
 
@@ -580,23 +532,22 @@ void Unit::advanceIdle(unsigned int advanceCallsCount)
 
 void Unit::advanceIdleBasic(unsigned int advanceCallsCount)
 {
- if (!target()) {
-	if (advanceCallsCount % 40 != 10) {
-		return;
-	}
- } else if (advanceCallsCount % 10 != 0) {
+ if (advanceCallsCount % 40 != 10) {
 	return;
  }
  BosonProfiler profiler("advanceIdle");
 
- if ((!unitProperties()->canShoot() ||!d->mWeapons[0]) && (!unitProperties()->isAircraft())) {
+ if (unitProperties()->canShoot() && d->mWeapons[0]) {
+	// Attack enemy units in range
+	Unit* target = bestEnemyUnitInRange();
+	if (target) {
+		addCurrentSuborder(new UnitAttackOrder(target, false));
+	}
+ } else if (!unitProperties()->isAircraft()) {
 	// this unit does not have any weapons, so it will never shoot anyway.
 	// no need to call advanceIdle() again
 	setAdvanceWork(WorkNone);
-	return;
  }
-
- attackEnemyUnitsInRange();
 }
 
 void Unit::advanceConstruction(unsigned int advanceCallsCount)
@@ -606,14 +557,14 @@ void Unit::advanceConstruction(unsigned int advanceCallsCount)
  }
 }
 
-bool Unit::attackEnemyUnitsInRange()
+Unit* Unit::attackEnemyUnitsInRange(Unit* target)
 {
  PROFILE_METHOD
  if (!unitProperties()->canShoot()) {
-	return false;
+	return 0;
  }
  if (!d->mWeapons[0]) {
-	return false;
+	return 0;
  }
 
  // TODO: Note that this is not completely realistic nor good: it may be good to
@@ -635,46 +586,37 @@ bool Unit::attackEnemyUnitsInRange()
 	// We use target to store best enemy in range so we don't have to look for it every time.
 	// If there's no target or target isn't in range anymore, find new best enemy unit in range
 	// FIXME: check for max(Land|Air)WeaponRange
-	if (!target() || target()->isDestroyed() ||
-			!inRange(maxWeaponRange(), target())) {
-		d->mTarget = bestEnemyUnitInRange();
-		if (!target()) {
-			return false;
+	if (!target || target->isDestroyed() ||
+			!inRange(maxWeaponRange(), target)) {
+		target = bestEnemyUnitInRange();
+		if (!target) {
+			return 0;
 		}
 	}
 	targetfound = true;
 
 	// If unit is mobile, rotate to face the target if it isn't facing it yet
 	if (!w->turret() && isMobile() && !isFlying()) {
-		bofixed rot = Bo3dTools::rotationToPoint(target()->x() - x(), target()->y() - y());
-		if (rot < rotation() - 5 || rot > rotation() + 5) {
-			// Rotate to face target
-			if (QABS(rotation() - rot) > unitProperties()->rotationSpeed()) {
-				turnTo((int)rot);
-				setAdvanceWork(WorkTurn);
-				return true;
-			} else {
-				// If we can get wanted rotation with only little turning, then we don't call turnTo()
-				setRotation(rot);
-				updateRotation();
-			}
+		if (!turnToUnit(target)) {
+			// Suborder was constructed to turn the unit. Return for now
+			return target;
 		}
 	}
 
 	// And finally... let it have everything we've got
-	if (w->canShootAt(target()) && inRange(w->range(), target())) {
-		shootAt(w, target());
-		if (target()->isDestroyed()) {
-			d->mTarget = 0;
+	if (w->canShootAt(target) && inRange(w->range(), target)) {
+		shootAt(w, target);
+		if (target->isDestroyed()) {
+			target = 0;
 		}
 	}
  }
 
- // It might be that none of the unit's weapons is reloaded, but target has been
+/* // It might be that none of the unit's weapons is reloaded, but target has been
  //  found. So we check for this now.
- targetfound = targetfound || (target());
+ targetfound = targetfound || (target);*/
 
- return targetfound;
+ return target;
 }
 
 Unit* Unit::bestEnemyUnitInRange()
@@ -761,61 +703,51 @@ void Unit::advanceAttack(unsigned int advanceCallsCount)
 	return;
  }
  BosonProfiler profiler("advanceAttack");
-
  boDebug(300) << k_funcinfo << endl;
- if (!target()) {
+
+ UnitAttackOrder* attackorder = (UnitAttackOrder*)currentOrder();
+ Unit* target = attackorder->target();
+
+ if (!target) {
 	boWarning() << k_funcinfo << id() << " cannot attack NULL target" << endl;
-	stopAttacking();
+	currentSuborderDone(false);
 	return;
  }
- if (target()->isDestroyed()) {
-	boDebug(300) << "Target (" << target()->id() << ") is destroyed!" << endl;
-	stopAttacking();
+ if (target->isDestroyed()) {
+	boDebug(300) << "Target (" << target->id() << ") is destroyed!" << endl;
+	currentSuborderDone(true);
 	return;
  }
 
- boDebug(300) << "    " << k_funcinfo << "checking if unit " << target()->id() << ") is in range" << endl;
+ boDebug(300) << "    " << k_funcinfo << "checking if unit " << target->id() << ") is in range" << endl;
  int range;
- if (target()->isFlying()) {
+ if (target->isFlying()) {
 	range = maxAirWeaponRange();
  } else {
 	range = maxLandWeaponRange();
  }
 
- if (!inRange(range, target())) {
+ if (!inRange(range, target)) {
+	if (!attackorder->canMove()) {
+		currentSuborderDone(true);
+		return;
+	}
 	// AB: warning - this does a lookup on all items and therefore is slow!
 	// --> but we need it as a simple test on the pointer causes trouble if
 	// that pointer is already deleted. any nice solutions?
-	if (!canvas()->allItems()->contains(target())) {
+	if (!canvas()->allItems()->contains(target)) {
 		boDebug(300) << "Target seems to be destroyed!" << endl;
-		stopAttacking();
+		currentSuborderDone(true);
 		return;
 	}
-	boDebug(300) << "unit (" << target()->id() << ") not in range - moving..." << endl;
+	boDebug(300) << "unit (" << target->id() << ") not in range - moving..." << endl;
 	if (range >= 1) {
 		range--;
 	}
-	if (!moveTo(target()->x(), target()->y(), range)) {
-		setWork(WorkIdle);
-	} else {
-		addWaypoint(BoVector2Fixed(target()->x(), target()->y()));
-		setAdvanceWork(WorkMove);
+	if (!addCurrentSuborder(new UnitMoveToUnitOrder(target, range, false))) {
+		currentSuborderDone(false);
 	}
 	return;
- }
-
- if (isMobile() && !isFlying()) {
-	bofixed rot = Bo3dTools::rotationToPoint(target()->x() - x(), target()->y() - y());
-	if(rot < rotation() - 5 || rot > rotation() + 5) {
-		if(QABS(rotation() - rot) > unitProperties()->rotationSpeed()) {
-			turnTo((int)rot);
-			setAdvanceWork(WorkTurn);
-			return;
-		} else {
-			setRotation(rot);
-			updateRotation();
-		}
-	}
  }
 
  // Shoot at target with as many weapons as possible
@@ -824,11 +756,22 @@ void Unit::advanceAttack(unsigned int advanceCallsCount)
  BosonWeapon* w;
  for (; *wit; ++wit) {
 	w = *wit;
-	if (w->properties()->autoUse() && w->reloaded() && w->canShootAt(target()) && inRange(w->range(), target())) {
-		shootAt(w, target());
-		if (!target() || target()->isDestroyed()) {
+	boDebug(300) << "      " << k_funcinfo << "trying weapon " << w->properties()->weaponName() << endl;
+	if (w->properties()->autoUse() && w->reloaded() && w->canShootAt(target) && inRange(w->range(), target)) {
+		// If unit is mobile, rotate to face the target if it isn't facing it yet
+		if (!w->turret() && isMobile() && !isFlying()) {
+			if (!turnToUnit(target)) {
+				boDebug(300) << "        " << k_funcinfo << "turning to target..." << endl;
+				// Suborder was constructed to turn the unit. Return for now
+				return;
+			}
+		}
+
+		boDebug(300) << "        " << k_funcinfo << "fire!" << endl;
+		shootAt(w, target);
+		if (!target || target->isDestroyed()) {
 			boDebug(300) << "    " << k_funcinfo << "target gone, returning" << endl;
-			stopAttacking();
+			currentSuborderDone(true);
 			moveIdle();
 			return;
 		}
@@ -873,7 +816,7 @@ void Unit::advancePlugin(unsigned int advanceCallsCount)
  BosonProfiler profiler("advancePlugin");
  if (!currentPlugin()) {
 	boWarning() << k_funcinfo << "NULL plugin!" << endl;
-	setWork(WorkIdle);
+	currentSuborderDone(false);
  } else {
 	currentPlugin()->advance(advanceCallsCount);
  }
@@ -882,11 +825,23 @@ void Unit::advancePlugin(unsigned int advanceCallsCount)
 void Unit::advanceTurn(unsigned int)
 {
  BosonProfiler profiler("advanceTurn");
+ if (currentOrder()->type() != UnitOrder::Turn && currentOrder()->type() != UnitOrder::TurnToUnit) {
+	boDebug() << k_funcinfo << "Invalid order type " << currentOrder()->type() << endl;
+	currentSuborderDone(false);
+	return;
+ }
  // Unit is still while turning
  setVelocity(0, 0, 0);
 
- int dir = (int)rotation();
- int a = dir - d->mWantedRotation;  // How many degrees to turn
+ bofixed wanteddir;
+ if (currentOrder()->type() == UnitOrder::TurnToUnit) {
+	Unit* target = ((UnitTurnToUnitOrder*)currentOrder())->target();
+	wanteddir = Bo3dTools::rotationToPoint(target->x() - x(), target->y() - y());
+ } else {
+	wanteddir = ((UnitTurnOrder*)currentOrder())->direction();
+ }
+ bofixed dir = rotation();
+ bofixed a = dir - wanteddir;  // How many degrees to turn
  bool turncw = false;  // Direction of turning, CW or CCW
 
  // First find out direction of turning and huw much is left to turn
@@ -900,12 +855,12 @@ void Unit::advanceTurn(unsigned int)
  }
 
  if (a <= unitProperties()->rotationSpeed()) {
-	dir = d->mWantedRotation;
+	dir = wanteddir;
  } else {
 	if (turncw) {
-		dir += unitProperties()->rotationSpeed();
+		dir += (int)unitProperties()->rotationSpeed();
 	} else {
-		dir -= unitProperties()->rotationSpeed();
+		dir -= (int)unitProperties()->rotationSpeed();
 	}
  }
  // Check for overflows
@@ -915,57 +870,12 @@ void Unit::advanceTurn(unsigned int)
 	dir -= 360;
  }
 
- setRotation(bofixed(dir));
+ setRotation(dir);
  updateRotation();
 
- if (d->mWantedRotation == dir) {
-	/**
-	 * AFAICS there are 3 possibilities:
-	 * 1. The user explicitly wanted the unit to turn.
-	 *    -> we are done now, set work to WorkIdle
-	 *       (work also includes advanceWork!)
-	 * 2. The user wanted to do something else (move, shoot, ...) and for
-	 *    this the unit had to turn.
-	 *    -> continue with original work, by setting advanceWork to work()
-	 * 3. The user wanted to do something else (just like 2.) and for that
-	 *    the unit had to _move_ which required the unit to turn.
-	 *    -> continue moving, i.e. set advanceWork to WorkMove
-	 **/
-	if (work() == WorkTurn) {
-		setWork(WorkIdle);
-	} else if (advanceWork() != work()) {
-		if (pathPointCount() != 0 || waypointCount() != 0) {
-			// this is probably case 3 (but case 2 is possible, too)
-			setAdvanceWork(WorkMove);
-		} else {
-			setAdvanceWork(work());
-		}
-	}
+ if (dir == wanteddir) {
+	currentSuborderDone(true);
  }
-}
-
-void Unit::addWaypoint(const BoVector2Fixed& pos)
-{
- d->mWaypoints.append(pos);
-}
-
-void Unit::waypointDone()
-{
- if (d->mWaypoints.count() == 0) {
-	boError() << k_funcinfo << id() << ": no waypoints" << endl;
-	return;
- }
- d->mWaypoints.remove(d->mWaypoints.at(0));
-}
-
-const QValueList<BoVector2Fixed>& Unit::waypointList() const
-{
- return d->mWaypoints;
-}
-
-unsigned int Unit::waypointCount() const
-{
- return d->mWaypoints.count();
 }
 
 void Unit::resetPathInfo()
@@ -974,87 +884,6 @@ void Unit::resetPathInfo()
  pathInfo()->reset();
  pathInfo()->unit = this;
  pathInfo()->flying = unitProperties()->isAircraft();
-}
-
-
-void Unit::moveTo(const BoVector2Fixed& pos, bool attack)
-{
- PROFILE_METHOD
- if (mUnitConstruction && !mUnitConstruction->isConstructionComplete()) {
-	boWarning(380) << k_funcinfo << "not yet constructed completely" << endl;
-	return;
- }
- d->mTarget = 0;
-
- // We want land unit's center point to be in the middle of the cell after
- //  moving.
- bofixed add = 0;
- if (!unitProperties()->isAircraft()) {
-	BO_CHECK_NULL_RET(moveData());
-	add = (((moveData()->size % 2) == 1) ? 0.5 : 0);
- }
- bofixed x = (int)pos.x() + add;
- bofixed y = (int)pos.y() + add;
-
- if (moveTo(x, y, -1)) {
-	boDebug(380) << k_funcinfo << "unit " << id() << ": Will move to (" << x << "; " << y << ")" << endl;
-	pathInfo()->moveAttacking = attack;
-	pathInfo()->slowDownAtDest = true;
-	setWork(WorkMove);
- } else {
-	boDebug(380) << k_funcinfo << "unit " << id() << ": CANNOT move to (" << x << "; " << y << ")" << endl;
-	setWork(WorkIdle);
-	stopMoving();
- }
-}
-
-bool Unit::moveTo(BosonItem* target, int range)
-{
- if (mUnitConstruction && !mUnitConstruction->isConstructionComplete()) {
-	boWarning(380) << k_funcinfo << "not yet constructed completely" << endl;
-	return false;
- }
- // TODO: try to merge this with the moveTo() method below
- if (maxSpeed() == 0) {
-	// If unit's max speed is 0, it cannot move
-	return false;
- }
-
- if (!target) {
-	boError(380) << k_funcinfo << "NULL target" << endl;
-	return false;
- }
-
- bofixed x = target->centerX();
- bofixed y = target->centerY();
- if (unitProperties()->isAircraft()) {
-	// Aircrafts cannot go near the border of the map to make sure they have
-	//  enough room for turning around
-	x = QMIN(QMAX(x, bofixed(6)), (bofixed)canvas()->mapWidth() - 6);
-	y = QMIN(QMAX(y, bofixed(6)), (bofixed)canvas()->mapHeight() - 6);
- }
-
-
- // Update path info
- resetPathInfo();
- pathInfo()->target = target;
- pathInfo()->range = range;
- boDebug(380) << k_funcinfo << "unit " << id() << ": target: (" << target->id() << "); range: " << range << endl;
-
- // Remove old way/pathpoints
- clearWaypoints();
- clearPathPoints();
-
-
- // Path is not searched here (it would break pathfinding for groups). Instead,
- //  moving status is set to MustSearch and in MobileUnit::advanceMove(), path
- //  is searched for.
- setMovingStatus(MustSearch);
-
- addWaypoint(BoVector2Fixed(x, y));
- pathInfo()->slowDownAtDest = true;
-
- return true;
 }
 
 bool Unit::moveTo(bofixed x, bofixed y, int range)
@@ -1094,13 +923,10 @@ bool Unit::moveTo(bofixed x, bofixed y, int range)
  pathInfo()->range = range;
  boDebug(380) << k_funcinfo << "unit " << id() << ": dest: (" << x << "; " << y << "); range: " << range << endl;
 
- // Remove old way/pathpoints
+ // Remove old pathpoints
  // TODO: maybe call stopMoving() instead and remove setMovingStatus(Standing)
  //  from there...
- clearWaypoints();
  clearPathPoints();
-
- addWaypoint(BoVector2Fixed(x, y));
 
  // Path is not searched here (it would break pathfinding for groups). Instead,
  //  moving status is set to MustSearch and in MobileUnit::advanceMove(), path
@@ -1108,16 +934,6 @@ bool Unit::moveTo(bofixed x, bofixed y, int range)
  setMovingStatus(MustSearch);
 
  return true;
-}
-
-void Unit::clearWaypoints()
-{
- d->mWaypoints.clear();
-}
-
-const BoVector2Fixed& Unit::currentWaypoint() const
-{
- return d->mWaypoints[0];
 }
 
 void Unit::addPathPoint(const BoVector2Fixed& pos)
@@ -1154,39 +970,6 @@ const QValueList<BoVector2Fixed>& Unit::pathPointList() const
  return d->mPathPoints;
 }
 
-void Unit::stopMoving()
-{
-// boDebug() << k_funcinfo << endl;
- clearWaypoints();
- clearPathPoints();
-
- // Release highlevel path here once we cache them
-
- // Call this only if we are only moving - stopMoving() is also called e.g. on
- // WorkAttack, when the unit is not yet in range.
- if (work() == WorkMove) {
-	setWork(WorkIdle);
- } else if (advanceWork() != work()) {
-	setAdvanceWork(work());
- }
- if (!isFlying()) {
-	setMovingStatus(Standing);
-	setVelocity(0.0, 0.0, 0.0);
-
-	if (pathInfo()->slowDownAtDest) {
-		setSpeed(0);
-	}
- }
-}
-
-void Unit::stopAttacking()
-{
- stopMoving(); // FIXME not really intuitive... nevertheless its currently useful.
- setMovingStatus(Standing);
- setTarget(0);
- setWork(WorkIdle);
-}
-
 bool Unit::saveAsXML(QDomElement& root)
 {
  // we should probably add pure virtual methods save() and load() to the plugins,
@@ -1213,10 +996,10 @@ bool Unit::saveAsXML(QDomElement& root)
 
  // also store the target:
  unsigned long int targetId = 0;
- if (target()) {
+ /*if (target()) {
 	targetId = target()->id();
  }
- root.setAttribute(QString::fromLatin1("Target"), (unsigned int)targetId);
+ root.setAttribute(QString::fromLatin1("Target"), (unsigned int)targetId);*/
 
  if (d->mPlugins.count() != 0) {
 	QDomElement pluginElement = doc.createElement(QString::fromLatin1("UnitPlugin"));
@@ -1239,7 +1022,7 @@ bool Unit::saveAsXML(QDomElement& root)
  }
 
  // Save pathinfo
- QDomElement pathinfoxml = doc.createElement(QString::fromLatin1("PathInfo"));
+/* QDomElement pathinfoxml = doc.createElement(QString::fromLatin1("PathInfo"));
  root.appendChild(pathinfoxml);
  // Save start/dest points and range
  saveVector2AsXML(pathInfo()->start, pathinfoxml, "start");
@@ -1258,7 +1041,7 @@ bool Unit::saveAsXML(QDomElement& root)
  pathinfoxml.setAttribute("moveAttacking", pathInfo()->moveAttacking ? 1 : 0);
  pathinfoxml.setAttribute("slowDownAtDest", pathInfo()->slowDownAtDest ? 1 : 0);
  pathinfoxml.setAttribute("waiting", pathInfo()->waiting);
- pathinfoxml.setAttribute("pathrecalced", pathInfo()->pathrecalced);
+ pathinfoxml.setAttribute("pathrecalced", pathInfo()->pathrecalced);*/
 
  if (mUnitConstruction) {
 	if (!mUnitConstruction->saveAsXML(root)) {
@@ -1307,24 +1090,6 @@ bool Unit::loadFromXML(const QDomElement& root)
 	mCurrentPlugin = 0;
  }
 
- // note: don't use setTarget() here, as it does some additional calculations
- unsigned int targetId = 0;
- if (root.hasAttribute(QString::fromLatin1("Target"))) {
-	targetId = root.attribute(QString::fromLatin1("Target")).toUInt(&ok);
-	if (!ok) {
-		boError(260) << k_funcinfo << "Invalid value for Target tag" << endl;
-		targetId = 0;
-	}
- }
- if (targetId == 0) {
-	d->mTarget = 0;
- } else {
-	d->mTarget = boGame->findUnit(targetId, 0);
-	if (!d->mTarget) {
-		boWarning(260) << k_funcinfo << "Could not find target with unitId=" << targetId << endl;
-	}
- }
-
  if (d->mPlugins.count() != 0) {
 	QDomNodeList list = root.elementsByTagName(QString::fromLatin1("UnitPlugin"));
 	for (unsigned int i = 0; i < list.count(); i++) {
@@ -1364,7 +1129,7 @@ bool Unit::loadFromXML(const QDomElement& root)
 
 
  // Load pathinfo
- pathInfo()->reset();
+ /*pathInfo()->reset();
  QDomElement pathinfoxml = root.namedItem("PathInfo").toElement();
  if (!pathinfoxml.isNull()) {
 	loadVector2FromXML(&pathInfo()->start, pathinfoxml, "start");
@@ -1435,7 +1200,7 @@ bool Unit::loadFromXML(const QDomElement& root)
 	// These aren't saved
 	pathInfo()->unit = this;
 	pathInfo()->flying = unitProperties()->isAircraft();
- }
+ }*/
  // Null pathinfoxml is valid too: in this case, we're loading from playfield
  //  file, not from savegame
 
@@ -1585,6 +1350,9 @@ void Unit::setAdvanceWork(WorkType w)
 	// performance). but do not return here!
 	canvas()->changeAdvanceList((BosonItem*)this);
  }
+ if (currentPlugin() && w != WorkPlugin) {
+	mCurrentPlugin = 0;
+ }
  UnitBase::setAdvanceWork(w);
 
  // we even do this if nothing changed - just in case...
@@ -1654,19 +1422,16 @@ bool Unit::isNextTo(Unit* target) const
  return false;
 }
 
-void Unit::turnTo(int dir)
+bool Unit::turnTo(bofixed dir)
 {
  if (isDestroyed()) {
 	boError(380) << k_funcinfo << "unit is already destroyed!" << endl;
-	return;
+	return true;
  }
 
- if ((int)rotation() != dir) {
+ if (rotation() != dir) {
 	// Find out how much we have to turn
-	bofixed delta = rotation() - dir;
-	if (delta < 0) {
-		delta = QABS(delta);
-	}
+	bofixed delta = QABS(rotation() - dir);
 	if (delta > 180) {
 		delta = 360 - delta;
 	}
@@ -1675,23 +1440,58 @@ void Unit::turnTo(int dir)
 		// Turn immediately (and hope this method won't be called more than once per
 		//  advance call)
 		setRotation(dir);
-		return;
+		updateRotation();
+		return true;
 	}
 	boDebug(380) << k_funcinfo << id() << ": will slowly rotate from " << rotation() << " to " << dir << endl;
+	addCurrentSuborder(new UnitTurnOrder(dir));
+	return false;
 	// If we're moving, we want to take one more step with current velocity, but
 	//  setAdvanceWork() resets it to 0, so we have this workaround here
-	bofixed _xVelocity = 0, _yVelocity = 0;
+	/*bofixed _xVelocity = 0, _yVelocity = 0;
 	if (advanceWork() == WorkMove) {
 		_xVelocity = xVelocity();
 		_yVelocity = yVelocity();
 	}
 	d->mWantedRotation = dir;
 	setAdvanceWork(WorkTurn);
-	setVelocity(_xVelocity, _yVelocity, 0);
+	setVelocity(_xVelocity, _yVelocity, 0);*/
+ } else {
+	// Unit already has correct rotation
+	return true;
+ }
+}
+
+bool Unit::turnToUnit(Unit* target)
+{
+ if (isDestroyed()) {
+	boError(380) << k_funcinfo << "unit is already destroyed!" << endl;
+	return true;
  }
 
-// boDebug(380) << k_funcinfo << id() << ": turning to " << deg << endl;
- d->mWantedRotation = dir;
+ bofixed wanteddir = Bo3dTools::rotationToPoint(target->x() - x(), target->y() - y());
+ boDebug() << k_funcinfo << "rotation: " << rotation() << "; wanted: " << wanteddir << endl;
+ if (rotation() != wanteddir) {
+	// Find out how much we have to turn
+	bofixed delta = QABS(rotation() - wanteddir);
+	if (delta > 180) {
+		delta = 360 - delta;
+	}
+
+	if (delta < unitProperties()->rotationSpeed()) {
+		// Turn immediately (and hope this method won't be called more than once per
+		//  advance call)
+		setRotation(wanteddir);
+		updateRotation();
+		return true;
+	}
+	boDebug(380) << k_funcinfo << id() << ": will slowly rotate from " << rotation() << " to " << wanteddir << endl;
+	addCurrentSuborder(new UnitTurnToUnitOrder(target));
+	return false;
+ } else {
+	// Unit already has correct rotation
+	return true;
+ }
 }
 
 void Unit::loadWeapons()
@@ -1754,16 +1554,6 @@ bool Unit::canShootAt(Unit *u)
  return false;
 }
 
-bool Unit::moveAttacking() const
-{
- return pathInfo()->moveAttacking;
-}
-
-bool Unit::slowDownAtDestination() const
-{
- return pathInfo()->slowDownAtDest;
-}
-
 bofixed Unit::distanceSquared(const Unit* u) const
 {
  bofixed dx = QMAX(bofixed(0), QABS(centerX() - u->centerX()) - width()/2 - u->width()/2);
@@ -1818,7 +1608,11 @@ void Unit::setMovingStatus(MovingStatus m)
 
 BosonPathInfo* Unit::pathInfo() const
 {
- return &d->mPathInfo;
+ if (currentOrder() && (currentOrder()->type() == UnitOrder::Move || currentOrder()->type() == UnitOrder::MoveToUnit)) {
+	return ((UnitMoveOrderData*)currentOrderData())->pathinfo;
+ } else {
+	return 0;
+ }
 }
 
 void Unit::unitDestroyed(Unit* unit)
@@ -1826,11 +1620,12 @@ void Unit::unitDestroyed(Unit* unit)
  if (unit == this) {
 	return;
  }
- if (target() == unit) {
-	setTarget(0);
-	if (work() == WorkAttack) {
-		stopAttacking();
-		return;
+ // TODO: it might be that e.g. we currently have a turn order which is child
+ //  of the attack order with destoryed unit as a target. So we should check
+ //  all orders we have (including all toplevel ones), not just the current one
+ if (currentOrder() && currentOrder()->type() == UnitOrder::AttackUnit) {
+	if (((UnitAttackOrder*)currentOrder())->target() == unit) {
+		currentSuborderDone(true);
 	}
  }
  QPtrListIterator<UnitPlugin> it(d->mPlugins);
@@ -1846,11 +1641,10 @@ void Unit::itemRemoved(BosonItem* item)
  if (item == (BosonItem*)this) {
 	return;
  }
- if ((BosonItem*)target() == item) {
-	setTarget(0);
-	if (work() == WorkAttack) {
-		stopAttacking();
-		return;
+ // TODO: see comment in unitDestoryed() above
+ if (currentOrder() && currentOrder()->type() == UnitOrder::AttackUnit) {
+	if ((BosonItem*)((UnitAttackOrder*)currentOrder())->target() == item) {
+		currentSuborderDone(true);
 	}
  }
  QPtrListIterator<UnitPlugin> it(d->mPlugins);
@@ -1998,6 +1792,261 @@ void Unit::moveIdle()
  }
 }
 
+UnitOrderData* Unit::currentOrderData() const
+{
+ return d->mCurrentOrder;
+}
+
+UnitOrder* Unit::currentOrder() const
+{
+ if (d->mCurrentOrder) {
+	return d->mCurrentOrder->order();
+ } else {
+	return 0;
+ }
+}
+
+UnitOrderData* Unit::toplevelOrderData() const
+{
+ if (d->mToplevelOrders.count() > 0) {
+	return d->mToplevelOrders.first();
+ } else {
+	return 0;
+ }
+}
+
+UnitOrder* Unit::toplevelOrder() const
+{
+ if (d->mToplevelOrders.count() > 0) {
+	return d->mToplevelOrders.first()->order();
+ } else {
+	return 0;
+ }
+}
+
+void Unit::clearOrders()
+{
+ if (d->mToplevelOrders.isEmpty()) {
+	// TODO: uncomment (temporary hack)
+	//return; // To avoid calling currentOrderChanged() below
+ }
+
+ currentOrderRemoved();
+ while (!d->mToplevelOrders.isEmpty()) {
+	delete d->mToplevelOrders.first();
+	d->mToplevelOrders.pop_front();
+ }
+ //d->mCurrentOrder = 0;
+ // TODO: is this necessary?
+ currentOrderChanged();
+}
+
+bool Unit::replaceToplevelOrders(UnitOrder* order)
+{
+ currentOrderRemoved();
+ while (!d->mToplevelOrders.isEmpty()) {
+	delete d->mToplevelOrders.first();
+	d->mToplevelOrders.pop_front();
+ }
+
+ return addToplevelOrder(order);
+}
+
+bool Unit::addToplevelOrder(UnitOrder* order)
+{
+ d->mToplevelOrders.append(UnitOrderData::createData(order));
+ if (d->mToplevelOrders.count() == 1) {
+	if (!currentOrderAdded()) {
+		currentSuborderDone(false);
+		return false;
+	}
+ }
+ return true;
+}
+
+bool Unit::currentOrderChanged()
+{
+ d->mCurrentOrder = 0;
+ if (!d->mToplevelOrders.isEmpty()) {
+	d->mCurrentOrder = d->mToplevelOrders.first()->currentOrder();
+ }
+
+ if (!d->mCurrentOrder) {
+	setAdvanceWork(WorkIdle);
+	return true;
+ }
+
+ setAdvanceWork(d->mCurrentOrder->order()->work());
+ return true;
+}
+
+bool Unit::currentOrderAdded()
+{
+ if (mUnitConstruction && !mUnitConstruction->isConstructionComplete()) {
+	boWarning(380) << k_funcinfo << "not yet constructed completely" << endl;
+	return false;
+ }
+
+ if (!currentOrderChanged()) {
+	return false;
+ }
+
+ UnitOrder* order = d->mCurrentOrder->order();
+// switch (order->type()) {
+	if(order->type() == UnitOrder::Move) {
+		// Move order
+		UnitMoveOrder* moveo = (UnitMoveOrder*)order;
+		// We want land unit's center point to be in the middle of the cell after
+		//  moving.
+		bofixed add = 0;
+		if (!unitProperties()->isAircraft()) {
+			if (!moveData()) {
+				return false;
+			}
+			add = (((moveData()->size % 2) == 1) ? 0.5 : 0);
+		}
+		bofixed x = (int)moveo->position().x() + add;
+		bofixed y = (int)moveo->position().y() + add;
+
+		if (moveTo(x, y, moveo->range())) {
+			boDebug(380) << k_funcinfo << "unit " << id() << ": Will move to (" << x << "; " << y << ")" << endl;
+			pathInfo()->moveAttacking = moveo->withAttacking();
+			pathInfo()->slowDownAtDest = true;
+		} else {
+			boDebug(380) << k_funcinfo << "unit " << id() << ": CANNOT move to (" << x << "; " << y << ")" << endl;
+			return false;
+		}
+
+	} else if(order->type() == UnitOrder::MoveToUnit) {
+		// MoveToUnit order
+		UnitMoveToUnitOrder* movetounito = (UnitMoveToUnitOrder*)order;
+		const BoVector2Fixed& pos = movetounito->target()->center();
+		if (moveTo(pos.x(), pos.y(), movetounito->range())) {
+			boDebug(380) << k_funcinfo << "unit " << id() << ": Will move to unit " << movetounito->target()->id() << endl;
+			pathInfo()->moveAttacking = movetounito->withAttacking();
+			pathInfo()->slowDownAtDest = true;
+		} else {
+			boDebug(380) << k_funcinfo << "unit " << id() << ": CANNOT move to unit " << movetounito->target()->id() << endl;
+			return false;
+		}
+
+	} else if(order->type() == UnitOrder::AttackUnit) {
+		// AttackUnit order
+		UnitAttackOrder* attacko = (UnitAttackOrder*)order;
+		if (!canShootAt(attacko->target())) {
+			return false;
+		}
+
+	} else if(order->type() == UnitOrder::Follow) {
+		// Follow order
+
+	} else if(order->type() == UnitOrder::Turn) {
+	} else if(order->type() == UnitOrder::TurnToUnit) {
+		// Turn order
+
+	} else if(order->type() == UnitOrder::Harvest) {
+		// Harvest order
+		UnitHarvestOrder* harvestorder = (UnitHarvestOrder*)order;
+		HarvesterPlugin* h = (HarvesterPlugin*)plugin(UnitPlugin::Harvester);
+		if (!h) {
+			boError() << k_lineinfo << "only harvester can mine" << endl;
+			return false;
+		}
+		ResourceMinePlugin* r = (ResourceMinePlugin*)harvestorder->target()->plugin(UnitPlugin::ResourceMine);
+		if (!r) {
+			boError() << k_lineinfo << "can mine at resource mine only" << endl;
+			return false;
+		}
+		h->mineAt(r);
+
+	} else if(order->type() == UnitOrder::Refine) {
+		// Refine order
+		UnitRefineOrder* refineorder = (UnitRefineOrder*)order;
+		HarvesterPlugin* h = (HarvesterPlugin*)plugin(UnitPlugin::Harvester);
+		if (!h) {
+			boError() << k_lineinfo << "only harvester can refine" << endl;
+			return false;
+		}
+		RefineryPlugin* refinery = (RefineryPlugin*)refineorder->target()->plugin(UnitPlugin::Refinery);
+		if (!refinery) {
+			boWarning() << k_lineinfo << "refinery must be a refinery" << endl;
+			return false;
+		}
+		h->refineAt(refinery);
+
+	} else {
+		// Invalid order
+		boError() << k_funcinfo << "Invalid current order type " << order->type() << endl;
+		return false;
+ }
+
+ return true;
+}
+
+bool Unit::addCurrentSuborder(UnitOrder* order)
+{
+ if (currentOrderData()) {
+	// order will be child of currentOrder()
+	UnitOrderData* orderdata = UnitOrderData::createData(order);
+	currentOrderData()->setSuborder(orderdata);
+	d->mCurrentOrder = orderdata;
+	if (!currentOrderAdded()) {
+		// order couldn't be added, remove it
+		currentSuborderDone(false);
+		return false;
+	} else {
+		return true;
+	}
+ } else {
+	// order will be toplevel order
+	return addToplevelOrder(order);
+ }
+}
+
+void Unit::currentSuborderDone(bool success)
+{
+ if (!d->mCurrentOrder) {
+	boError() << k_funcinfo << "No current order!" << endl;
+	return;
+ }
+ d->mLastOrderStatus = (success ? UnitOrder::Success : UnitOrder::Failure);
+
+ currentOrderRemoved();
+
+ if (d->mCurrentOrder->parent()) {
+	d->mCurrentOrder->parent()->suborderDone();  // Deletes the child order
+ } else {
+	delete d->mToplevelOrders.first();
+	d->mToplevelOrders.pop_front();
+ }
+ currentOrderChanged();
+}
+
+void Unit::currentOrderRemoved()
+{
+ UnitOrder* order = currentOrder();
+ if (!order) {
+	return;
+ }
+
+ if (order->type() == UnitOrder::Move || order->type() == UnitOrder::MoveToUnit) {
+	clearPathPoints();
+	if (!isFlying()) {
+		setMovingStatus(Standing);
+		setVelocity(0.0, 0.0, 0.0);
+
+		if (pathInfo() && pathInfo()->slowDownAtDest) {
+			setSpeed(0);
+		}
+	}
+ }
+}
+
+bool Unit::lastOrderStatus() const
+{
+ return (d->mLastOrderStatus == UnitOrder::Success);
+}
+
 
 
 /////////////////////////////////////////////////
@@ -2031,7 +2080,7 @@ void UnitConstruction::advanceConstruction(unsigned int advanceCallsCount)
 
 bool UnitConstruction::isConstructionComplete() const
 {
- if (unit()->work() == UnitBase::WorkConstructed) {
+ if (unit()->advanceWork() == UnitBase::WorkConstructed) {
 	return false;
  }
  if (currentConstructionStep() < constructionSteps()) {
@@ -2060,7 +2109,7 @@ void UnitConstruction::setConstructionStep(unsigned int step)
 
  mConstructionStep = step;
  if (step == constructionSteps()) {
-	unit()->setWork(UnitBase::WorkIdle);
+	unit()->setAdvanceWork(UnitBase::WorkIdle);
 	unit()->owner()->facilityCompleted(unit());
 	unit()->updateAnimationMode();
  }

@@ -135,25 +135,7 @@ QString BoToolTipCreatorDebug::createToolTip(const BosonItem* item) const
  tip += i18n("\nId : %1").arg(u->id());
  tip += i18n("\nName: %1").arg(u->name()); // AB: could be left out for debugging tooltips
  tip += i18n("\nHealth: %1").arg(u->health()); // AB: could be left out for debugging tooltips
- tip += i18n("\nWork: %1").arg(u->work());
  tip += i18n("\nAdvance Work: %1").arg(u->advanceWork());
- tip += i18n("\nTarget: %1").arg(u->target() ? QString::number(u->target()->id()) : i18n("None"));
- tip += i18n("\nDestination: %1,%2").arg(u->destinationX()).arg(u->destinationY());
-
- // AB: waypoints are important imho
- QValueList<BoVector2Fixed> waypoints = u->waypointList();
- if (waypoints.count() == 0) {
-	tip += i18n("\nNo waypoints");
- } else {
-	QValueList<BoVector2Fixed>::Iterator it;
-	tip += i18n("\nWaypoints: ");
-	for (it = waypoints.begin(); it != waypoints.end(); ++it) {
-		if (it != waypoints.begin()) {
-			tip += i18n(",");
-		}
-		tip += i18n("(%1,%2)").arg((*it).x()).arg((*it).y());
-	}
- }
 
  QValueList<BoVector2Fixed> pathpoints = u->pathPointList();
  if (pathpoints.count() == 0) {

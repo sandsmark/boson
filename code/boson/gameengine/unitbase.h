@@ -71,7 +71,7 @@ public:
 		//IdShields = 512 + 2,
 		IdShieldReloadCounter = 512 + 3,
 		//IdSightRange = 512 + 5,
-		IdWork = 512 + 10,
+		//IdWork = 512 + 10,
 		IdAdvanceWork = 512 + 11,
 		IdMovingStatus = 512 + 12,
 		IdDeletionTimer = 512 + 15,
@@ -140,15 +140,6 @@ public:
 
 	/**
 	 * Change what this unit is currently doing.
-	 **/
-	virtual void setWork(WorkType w)
-	{
-		mWork = w;
-		setAdvanceWork(w);
-	}
-
-	/**
-	 * Change what this unit is currently doing.
 	 *
 	 * The difference to @ref setWork is important in @ref
 	 * BosonCanvas::slotAdvance. This method decides what the unit is meant
@@ -161,12 +152,6 @@ public:
 	 * You need to change this only very seldom.
 	 **/
 	virtual void setAdvanceWork(WorkType w) { mAdvanceWork = w; }
-
-	/**
-	 * @return What this unit is currently doing. See @ref WorkType on
-	 * information what this can be.
-	 **/
-	inline WorkType work() const { return (WorkType)mWork.value(); }
 
 	/**
 	 * See also @ref setAdvanceWork, where usage is explained. You should
@@ -428,7 +413,6 @@ private:
 
 	KGameProperty<unsigned long int> mShieldReloadCounter;
 	KGameProperty<unsigned int> mDeletionTimer;
-	KGamePropertyInt mWork;
 	KGamePropertyInt mAdvanceWork;
 	KGamePropertyInt mMovingStatus;
 
