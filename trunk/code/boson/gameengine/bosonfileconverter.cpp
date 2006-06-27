@@ -1530,10 +1530,7 @@ bool BosonFileConverter::convertPlayField_From_0_11_81_To_0_12(QMap<QString, QBy
  return true;
 }
 
-// AB: this should be used as template for the first conversion from 0.12 to
-// something newer
-#if 0
-bool BosonFileConverter::convertPlayField_From_0_12_To_0_12_1(QMap<QString, QByteArray>& files)
+bool BosonFileConverter::convertPlayField_From_0_12_To_0_12_80(QMap<QString, QByteArray>& files)
 {
  QDomDocument kgameDoc(QString::fromLatin1("Boson"));
  if (!loadXMLDoc(&kgameDoc, files["kgame.xml"])) {
@@ -1551,11 +1548,26 @@ bool BosonFileConverter::convertPlayField_From_0_12_To_0_12_1(QMap<QString, QByt
  kgameRoot.setAttribute("Version", BOSON_SAVEGAME_FORMAT_VERSION_0_13);
 #endif
 
+ QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
+ if (!loadXMLDoc(&canvasDoc, files["canvas.xml"])) {
+	boError() << k_funcinfo << "could not load canvas.xml" << endl;
+	return false;
+ }
+ QDomElement canvasRoot = canvasDoc.documentElement();
+ QDomNodeList itemsList = canvasRoot.elementsByTagName("Items");
+
+ // Remove some properties from each item
+ QStringList ids;
+ ids.append(QString::number(522)); // IdWork
+ ids.append(QString::number(1026)); // IdWaypoints
+ ids.append(QString::number(1030)); // IdWantedRotation
+ removePropertyIds_0_9_1(itemsList, ids);
+
  files.insert("kgame.xml", kgameDoc.toString().utf8());
+ files.insert("canvas.xml", canvasDoc.toString().utf8());
 
  return true;
 }
-#endif
 
 void BosonFileConverter::removePropertyIds_0_9_1(const QDomNodeList& itemsList, const QStringList& ids)
 {
