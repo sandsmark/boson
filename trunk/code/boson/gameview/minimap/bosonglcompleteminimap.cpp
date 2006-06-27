@@ -763,7 +763,7 @@ void BosonGLCompleteMiniMap::updateRadarTexture(const QPtrList<const Unit>* rada
 #endif
  glPointSize(visiblepointsize * radarBlipScaleFactor);
 
- BoVector4Float basecolor(-0.05, -0.05, -0.02, 0.8);
+ BoVector4Float basecolor(0.2, 0.4, 0.15, 0.8);
  BoVector4Float addcolor(0.03, 0.1, 0.01, 0.0);
 
  glBegin(GL_POINTS);
