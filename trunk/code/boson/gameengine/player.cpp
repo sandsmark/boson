@@ -233,17 +233,11 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
 			int cmd = 0;
 			KGameMessage::extractPropertyCommand(stream2, propertyId, cmd);
 			switch (propertyId) {
-				case Unit::IdWaypoints:
-					// waypoints have PolicyClean, so they
-					// send a message which is handled here.
-					break;
 				default:
 					break;
 			}
 			break;
 		}
-		case Unit::IdWork:
-		//...
 		default:
 			// completely unused
 			break;
@@ -1285,7 +1279,7 @@ void Player::writeGameLog(QTextStream& log)
  while (it.current()) {
 	u = it.current();
 	log << "Unit: " << u->id() << "  " << u->x() << " " << u->y() << " " << u->z() << "  " << u->rotation() <<
-			"  " << u->speed() << "  " << u->health() << "  " << u->work() << " " << u->advanceWork() << endl;
+			"  " << u->speed() << "  " << u->health() << " " << u->advanceWork() << endl;
 	++it;
  }
  log << endl;

@@ -89,7 +89,7 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"unitPosition", py_unitPosition, METH_VARARGS, 0 },
   { (char*)"unitOwner", py_unitOwner, METH_VARARGS, 0 },
   { (char*)"unitType", py_unitType, METH_VARARGS, 0 },
-  { (char*)"unitWork", py_unitWork, METH_VARARGS, 0 },
+  { (char*)"unitAdvanceWork", py_unitAdvanceWork, METH_VARARGS, 0 },
   { (char*)"unitSightRange", py_unitSightRange, METH_VARARGS, 0 },
   { (char*)"isUnitMobile", py_isUnitMobile, METH_VARARGS, 0 },
   { (char*)"isUnitTypeMobile", py_isUnitTypeMobile, METH_VARARGS, 0 },
@@ -1370,7 +1370,7 @@ PyObject* PythonScript::py_unitType(PyObject*, PyObject* args)
   return Py_BuildValue((char*)"i", currentScript()->unitType(id));
 }
 
-PyObject* PythonScript::py_unitWork(PyObject*, PyObject* args)
+PyObject* PythonScript::py_unitAdvanceWork(PyObject*, PyObject* args)
 {
   BO_CHECK_NULL_RET0(currentScript());
   int id;
@@ -1379,7 +1379,7 @@ PyObject* PythonScript::py_unitWork(PyObject*, PyObject* args)
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", currentScript()->unitWork(id));
+  return Py_BuildValue((char*)"i", currentScript()->unitAdvanceWork(id));
 }
 
 PyObject* PythonScript::py_unitSightRange(PyObject*, PyObject* args)

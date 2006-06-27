@@ -268,7 +268,7 @@ void EditorUnitConfigWidget::updateUnit(Unit* unit)
 		//  back to WorkConstructed, so that it's construction will be completed in
 		//  the game
 		if (unit->construction()->isConstructionComplete()) {
-			unit->setWork(UnitBase::WorkConstructed);
+			unit->setAdvanceWork(UnitBase::WorkConstructed);
 		}
 	}
  }

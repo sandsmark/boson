@@ -72,6 +72,7 @@ set(gameengine_SRCS
 	gameengine/unitbase.cpp
 	gameengine/unit.cpp
 	gameengine/unitmover.cpp
+	gameengine/unitorder.cpp
 	gameengine/unitproperties.cpp
 	gameengine/pluginproperties.cpp
 	gameengine/unitplugins.cpp

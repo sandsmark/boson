@@ -34,6 +34,7 @@
 #include "bodebug.h"
 #include "bosonweapon.h"
 #include "boevent.h"
+#include "unitorder.h"
 
 #include <klocale.h>
 
@@ -157,15 +158,10 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			boWarning(380) << k_lineinfo << "no unit to move" << endl;
 			break;
 		}
-		if (unitsToMove.count() == 1) {
-			unitsToMove.first()->moveTo(message.mPos, attack);
-		} else {
-			QPtrListIterator<Unit> it(unitsToMove);
-			it.toFirst();
-			while (it.current()) {
-				it.current()->moveTo(message.mPos, attack);
-				++it;
-			}
+		QPtrListIterator<Unit> it(unitsToMove);
+		while (it.current()) {
+			it.current()->replaceToplevelOrders(new UnitMoveOrder(message.mPos, -1, attack));
+			++it;
 		}
 		break;
 	}
@@ -205,10 +201,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			}
 			if (unit->unitProperties()->canShoot()) {
 				boDebug() << unitId << " attacks " << message.mAttackedUnitId << endl;
-				unit->setTarget(attackedUnit);
-				if (unit->target()) {
-					unit->setWork(Unit::WorkAttack);
-				}
+				unit->replaceToplevelOrders(new UnitAttackOrder(attackedUnit));
 			}
 		}
 		break;
@@ -244,7 +237,8 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		}
 		QPtrListIterator<Unit> it(unitsToStop);
 		while (it.current()) {
-			it.current()->stopAttacking();  // call stopAttacking() because it also sets unit's work to WorkIdle ... and it doesn't hurt
+			//it.current()->stopAttacking();  // call stopAttacking() because it also sets unit's work to WorkIdle ... and it doesn't hurt
+			it.current()->clearOrders();
 			++it;
 		}
 		break;
@@ -280,17 +274,17 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			break;
 		}
 
-		u = findUnit(message.mResourceMineId, 0);
-		if (!u) {
+		Unit* mineunit = findUnit(message.mResourceMineId, 0);
+		if (!mineunit) {
 			boError() << k_lineinfo << "cannot find resourcemine unit " << message.mResourceMineId << " for player " << player << endl;
 			break;
 		}
-		ResourceMinePlugin* r = (ResourceMinePlugin*)u->plugin(UnitPlugin::ResourceMine);
+		ResourceMinePlugin* r = (ResourceMinePlugin*)mineunit->plugin(UnitPlugin::ResourceMine);
 		if (!r) {
 			boError() << k_lineinfo << "can mine at resource mine only" << endl;
 			break;
 		}
-		h->mineAt(r);
+		u->replaceToplevelOrders(new UnitHarvestOrder(mineunit));
 		break;
 	}
 	case BosonMessageIds::MoveRefine:
@@ -338,7 +332,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 				boError() << k_lineinfo << "must be a harvester" << endl;
 				continue;
 			}
-			h->refineAt(refinery);
+			u->replaceToplevelOrders(new UnitRefineOrder(refineryUnit));
 		}
 		break;
 	}
@@ -584,10 +578,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 				boDebug() << "Cannot follow destroyed units" << endl;
 				continue;
 			}
-			unit->setTarget(followUnit);
-			if (unit->target()) {
-				unit->setWork(Unit::WorkFollow);
-			}
+			unit->addToplevelOrder(new UnitFollowOrder(followUnit));
 		}
 		break;
 	}
