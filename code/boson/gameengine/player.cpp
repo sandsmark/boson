@@ -222,26 +222,7 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
  }
  Unit* unit = it.current();
  if (unit) { // this was a unit property
-	// there are only very few messages which are handled here! try to avoid
-	// this!
-	QDataStream stream2(buffer, IO_ReadOnly);
-	int propertyId = 0;
-	KGameMessage::extractPropertyHeader(stream2, propertyId);
-	switch (propertyId) {
-		case KGamePropertyBase::IdCommand: // KGamePropertyList or KGamePropertyArray
-		{
-			int cmd = 0;
-			KGameMessage::extractPropertyCommand(stream2, propertyId, cmd);
-			switch (propertyId) {
-				default:
-					break;
-			}
-			break;
-		}
-		default:
-			// completely unused
-			break;
-	}
+	// nothing to do here anymore (revisions < r7629 did something here)
 	return;
  }
 
