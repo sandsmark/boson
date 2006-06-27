@@ -1877,6 +1877,13 @@ bool Unit::currentOrderChanged()
  }
 
  setAdvanceWork(d->mCurrentOrder->order()->work());
+ // For WorkPlugin, we also need to set correct mCurrentPlugin
+ if(d->mCurrentOrder->type() == UnitOrder::Harvest) {
+	mCurrentPlugin = plugin(UnitPlugin::Harvester);
+ } else if(d->mCurrentOrder->type() == UnitOrder::Refine) {
+	mCurrentPlugin = plugin(UnitPlugin::Harvester);
+ }
+
  return true;
 }
 
