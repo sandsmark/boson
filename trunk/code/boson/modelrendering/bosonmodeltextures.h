@@ -65,17 +65,6 @@ public:
 	 **/
 	BoTexture* texture(const QString& textureName) const;
 
-	/**
-	 * @return The absolute path to all textures
-	 **/
-	const QString& texturePath() const;
-
-	/**
-	 * Set a custom texture path. This replaces the initial texture path
-	 * that is found automatically.
-	 **/
-	void setTexturePath(const QString& dir);
-
 protected:
 	/**
 	 * Create the static object of this class (see @ref modelTextures). This
