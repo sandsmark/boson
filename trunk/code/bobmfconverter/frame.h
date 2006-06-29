@@ -35,14 +35,14 @@ class Frame
     int id() const  { return mId; }
     void setId(int id)  { mId = id; }
 
-    BoMatrix* matrix(unsigned int i) const ;
+    inline BoMatrix* matrix(unsigned int i) const  { return mMatrices[i]; }
     void setMatrix(unsigned int i, BoMatrix* m);
 
-    Mesh* mesh(unsigned int i) const;
+    inline Mesh* mesh(unsigned int i) const  { return mMeshes[i]; }
     void setMesh(unsigned int i, Mesh* m);
 
     void allocateNodes(unsigned int i);
-    unsigned int nodeCount() const  { return mNodeCount; }
+    inline unsigned int nodeCount() const  { return mNodeCount; }
 
     /**
      * Remove the mesh @p mesh from the allocated list of meshes. If @p mesh is

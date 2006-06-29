@@ -45,9 +45,12 @@ class MeshOptimizer : public Processor
     bool areInSameFrames(Mesh* m1, Mesh* m2);
     bool animationsDiffer(Mesh* m1, Mesh* m2);
 //    bool areMeshesEqual(Mesh* m1, Mesh* m2);
+    unsigned int computeFramesHash(Mesh* m);
 
 
   private:
+    bool* mHasMultipleNodes;  // Stores whether a mesh has multiple nodes
+    unsigned int* mMeshFrameHashes;  // Stores hash describing which frames a mesh is in
 };
 
 

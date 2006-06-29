@@ -46,12 +46,19 @@ bool MeshOptimizer::process()
     return false;
   }
 
+  mHasMultipleNodes = new bool[lod()->meshCount()];
+  mMeshFrameHashes = new unsigned int[lod()->meshCount()];
+
   QValueList<Mesh*> meshes;
   QValueVector<Mesh*> validmeshes;
   // Put all meshes of the lod to meshes list
   for(unsigned int i = 0; i < lod()->meshCount(); i++)
   {
-    meshes.append(lod()->mesh(i));
+    Mesh* m = lod()->mesh(i);
+    m->setId(i);  // Failsafe
+    meshes.append(m);
+    mMeshFrameHashes[i] = computeFramesHash(m);
+    mHasMultipleNodes[i] = hasMultipleNodes(m);
   }
 
   while(meshes.count() > 0)
@@ -78,6 +85,10 @@ bool MeshOptimizer::process()
     boDebug() << k_funcinfo << "Merged " << oldcount << " meshes into " << validmeshes.count() << endl;
   }
 
+
+  delete[] mMeshFrameHashes;
+  delete[] mHasMultipleNodes;
+
   return true;
 }
 
@@ -96,7 +107,7 @@ void MeshOptimizer::findEqualMeshes(QValueList<Mesh*>* equal, QValueList<Mesh*>*
   }
   // Check if mesh has multiple nodes
   Mesh* mesh = equal->first();
-  if(hasMultipleNodes(mesh))
+  if(mHasMultipleNodes[mesh->id()])
   {
     return;
   }
@@ -108,15 +119,21 @@ void MeshOptimizer::findEqualMeshes(QValueList<Mesh*>* equal, QValueList<Mesh*>*
     seen++;
     Mesh* test = *it;
     // Check if mesh and test are equal
-    if(mesh->material() != test->material())
+    if(mHasMultipleNodes[test->id()])
+    {
+      continue;
+    }
+    // Similar to areInSameFrames() but faster and might give false negatives
+    //  (those will be filtered out later by areInSameFrames())
+    else if(mMeshFrameHashes[mesh->id()] != mMeshFrameHashes[test->id()])
+    {
+      continue;
+    }
+    else if(mesh->material() != test->material())
     {
       continue;
     }
     else if(mesh->isTeamColor() != test->isTeamColor())
-    {
-      continue;
-    }
-    else if(hasMultipleNodes(test))
     {
       continue;
     }
@@ -194,6 +211,30 @@ bool MeshOptimizer::areInSameFrames(Mesh* m1, Mesh* m2)
   return true;
 }
 
+unsigned int MeshOptimizer::computeFramesHash(Mesh* m)
+{
+  unsigned int hash = 0;
+  unsigned int g = 0;
+  for(unsigned int i = 0; i < lod()->frameCount(); i++)
+  {
+    Frame* f = lod()->frame(i);
+    unsigned int nodeCount = f->nodeCount();
+    for(unsigned int j = 0; j < nodeCount; j++)
+    {
+      if(f->mesh(j) == m)
+      {
+        hash += i;
+        break;
+      }
+    }
+    g = hash & 0xff000000;
+    hash = (hash << 7);
+    hash ^= g;
+  }
+  //boDebug() << k_funcinfo << "Hash of mesh " << m->id() << " is 0x" << QString::number(hash, 16).rightJustify(8, '0') << "  (" << hash << ")" << endl;
+  return hash;
+}
+
 bool MeshOptimizer::animationsDiffer(Mesh* m1, Mesh* m2)
 {
   BoMatrix* matrix = 0;
@@ -201,7 +242,8 @@ bool MeshOptimizer::animationsDiffer(Mesh* m1, Mesh* m2)
   for(unsigned int i = 0; i < lod()->frameCount(); i++)
   {
     Frame* f = lod()->frame(i);
-    for(unsigned int j = 0; j < f->nodeCount(); j++)
+    unsigned int nodeCount = f->nodeCount();
+    for(unsigned int j = 0; j < nodeCount; j++)
     {
       if(f->mesh(j) == m1 || f->mesh(j) == m2)
       {
