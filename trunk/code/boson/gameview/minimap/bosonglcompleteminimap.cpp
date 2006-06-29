@@ -379,6 +379,7 @@ public:
 	bool mUpdatesEnabled;
 	int mMiniMapChangesSinceRendering;
 	int mAdvanceCallsSinceLastUpdate;
+	int mAdvanceCallsSinceLastIndicatorsUpdate;
 	QMap<GLubyte*, bool> mTextureUpdatesEnabled;
 
 	BosonCanvas* mCanvas;
@@ -598,6 +599,7 @@ void BosonGLCompleteMiniMap::slotAdvance(unsigned int advanceCallsCount)
 {
  Q_UNUSED(advanceCallsCount);
  d->mAdvanceCallsSinceLastUpdate++;
+ d->mAdvanceCallsSinceLastIndicatorsUpdate++;
 }
 
 void BosonGLCompleteMiniMap::render()
@@ -669,6 +671,9 @@ void BosonGLCompleteMiniMap::updateRadarTexture(const QPtrList<const Unit>* rada
  BO_CHECK_NULL_RET(localPlayerIO());
 
  d->mAdvanceCallsSinceLastUpdate = 0;
+ if (d->mAdvanceCallsSinceLastIndicatorsUpdate >= 80) {
+	d->mAdvanceCallsSinceLastIndicatorsUpdate = 0;
+ }
  // Init rendering
  glPushAttrib(GL_ALL_ATTRIB_BITS);
  glViewport(0, 0, d->mMapWidth, d->mMapHeight);
@@ -834,7 +839,7 @@ void BosonGLCompleteMiniMap::renderRadarRangeIndicators(const QPtrList<const Uni
 {
  BO_CHECK_NULL_RET(d->mRadarRangeTexture);
 
- if (d->mAdvanceCallsSinceLastUpdate >= 20) {
+ if (d->mAdvanceCallsSinceLastIndicatorsUpdate > 50) {
 	return;
  }
 
@@ -849,7 +854,7 @@ void BosonGLCompleteMiniMap::renderRadarRangeIndicators(const QPtrList<const Uni
 
  glScalef(1.0f / d->mMapWidth, 1.0f / d->mMapHeight, 1.0f);
 
- float progress = d->mAdvanceCallsSinceLastUpdate / 20.0f;
+ float progress = d->mAdvanceCallsSinceLastIndicatorsUpdate / 50.0f;
  for (QPtrListIterator<const Unit> it(*radarlist); it.current(); ++it) {
 	const Unit* unit = it.current();
 	const RadarPlugin* prop = (const RadarPlugin*)unit->plugin(UnitPlugin::Radar);
