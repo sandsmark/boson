@@ -35,8 +35,8 @@ Weapons=2
 
 [Model]
 Animation-Idle-Start=0
-Animation-Idle-End=198
-Animation-Idle-Speed=2
+Animation-Idle-End=8
+Animation-Idle-Speed=1
 
 [Sounds]
 OrderAttack=order_attack

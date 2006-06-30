@@ -36,9 +36,9 @@ UnitWidth=1
 Weapons=2
 
 [Model]
-Animation-Idle-Start=0
-Animation-Idle-End=19
-Animation-Idle-Speed=2
+#Animation-Idle-Start=0
+#Animation-Idle-End=19
+#Animation-Idle-Speed=2
 
 [Sounds]
 OrderAttack=order_attack
