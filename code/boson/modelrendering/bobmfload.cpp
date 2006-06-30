@@ -595,6 +595,13 @@ QString BoBMFLoad::convertModel(const QString& modelfile, const QString& configf
     return QString::null;
   }
   cachedmodel += QString("model-%1.bmf").arg(hash);
+  // Get path for saved textures
+  QString texturepath = KGlobal::dirs()->saveLocation("data", "boson/themes/textures/");
+  if(texturepath.isEmpty())
+  {
+    boError() << k_funcinfo << "Failed to get save location for textures" << endl;
+    return QString::null;
+  }
   // Find path to bobmfconverter binary
   QString converter = KGlobal::dirs()->findResource("exe", "bobmfconverter");
   if(converter.isEmpty())
@@ -610,7 +617,9 @@ QString BoBMFLoad::convertModel(const QString& modelfile, const QString& configf
   KProcess proc;
   proc << converter;
   // Add default cmdline args
-  proc << "-lods" << "5" <<  "-keepframes" <<  "-texnametolower" <<  "-useboth" << "-dontloadtex";
+  proc << "-texnametolower" <<  "-useboth" << "-resetmaterials";
+  proc << "-texoptimize" << "-texpath" << texturepath << "-texname" << "unittex-"+hash+".jpg";
+  proc << "-t" << KGlobal::dirs()->findResourceDir("data", "boson/themes/textures/concrt1.jpg") + "/boson/themes/textures/";
   proc << "-o" << cachedmodel;
   if(!configfile.isEmpty())
   {

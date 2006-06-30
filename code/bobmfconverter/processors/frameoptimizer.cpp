@@ -31,7 +31,7 @@
 
 FrameOptimizer::FrameOptimizer() : Processor()
 {
-  mRemoveAll = false;
+  mKeepFrames = 0;
   setName("FrameOptimizer");
 }
 
@@ -60,9 +60,14 @@ bool FrameOptimizer::process()
   Frame* lastFrame = lod()->frame(0);
   validFrames.append(lastFrame);
 
-  if(mRemoveAll)
+  if(mKeepFrames > 0)
   {
-    boDebug() << k_funcinfo << "Removing all frames (but the first one)" << endl;
+    mKeepFrames = QMIN(mKeepFrames, (int)lod()->frameCount());
+    for(int i = 1; i < mKeepFrames; i++)
+    {
+      validFrames.append(lod()->frame(i));
+    }
+    boDebug() << k_funcinfo << "Keeping only " << mKeepFrames << " first frames (of " << lod()->frameCount() << ")" << endl;
     lod()->removeAllFramesBut(validFrames);
     return true;
   }

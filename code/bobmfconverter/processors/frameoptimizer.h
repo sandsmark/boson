@@ -37,12 +37,12 @@ class FrameOptimizer : public Processor
 
     virtual bool process();
 
-    void setRemoveAllFrames(bool r)  { mRemoveAll = r; }
-    bool removeAllFrames() const  { return mRemoveAll; }
+    void setKeepFramesCount(int keep)  { mKeepFrames = keep; }
+    bool keepFramesCount() const  { return mKeepFrames; }
 
 
   private:
-    bool mRemoveAll;
+    int mKeepFrames;
 };
 
 
