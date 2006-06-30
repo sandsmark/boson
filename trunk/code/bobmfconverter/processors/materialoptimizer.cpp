@@ -34,6 +34,7 @@
 MaterialOptimizer::MaterialOptimizer() : Processor()
 {
   setName("MaterialOptimizer");
+  mReset = false;
 }
 
 MaterialOptimizer::~MaterialOptimizer()
@@ -47,6 +48,11 @@ bool MaterialOptimizer::process()
     boError() << k_funcinfo << "NULL LOD!" << endl;
     return false;
   }*/
+
+  if(mReset)
+  {
+    resetMaterials();
+  }
 
   QValueVector<Material*> validmaterials;
   for(unsigned int i = 0; i < model()->materialCount(); i++)
@@ -121,6 +127,19 @@ void MaterialOptimizer::mergeMaterials(Material* merge, Material* valid)
         l->mesh(j)->setMaterial(valid);
       }
     }
+  }
+}
+
+void MaterialOptimizer::resetMaterials()
+{
+  for(unsigned int i = 0; i < model()->materialCount(); i++)
+  {
+    Material* mat = model()->material(i);
+    mat->setAmbient(BoVector4Float(0.8, 0.8, 0.8, 1.0));
+    mat->setDiffuse(BoVector4Float(1.0, 1.0, 1.0, 1.0));
+    mat->setSpecular(BoVector4Float(0.0, 0.0, 0.0, 1.0));
+    mat->setEmissive(BoVector4Float(0.0, 0.0, 0.0, 1.0));
+    mat->setShininess(0.0f);
   }
 }
 

@@ -33,11 +33,13 @@
 #include "processors/materialoptimizer.h"
 #include "processors/defaultmaterials.h"
 #include "processors/normalcalculator.h"
+#include "processors/nodeoptimizer.h"
 
 #include <qstring.h>
 #include <qfileinfo.h>
 #include <qvaluelist.h>
 #include <qpair.h>
+#include <qregexp.h>
 
 #include <kinstance.h>
 #include <ksimpleconfig.h>
@@ -63,7 +65,7 @@ bool g_lod_useError = false;
 bool g_lod_useBoth = false;
 float g_lod_baseError = 0.075;
 float g_lod_errorMod = 4.0;
-bool g_frames_removeAll = false;
+int g_frames_keepCount = -1;
 unsigned int g_frame_base = 0;
 bool g_frames_keepAll = true;
 float g_modelSize = 1.0;
@@ -77,6 +79,7 @@ bool g_tex_dontLoad = false;
 bool g_meshes_merge = true;
 bool g_usenormalcalculator = true;
 float g_normalcalculator_threshold = 0.6;
+bool g_materials_reset = false;
 
 
 double starttime;
@@ -225,6 +228,7 @@ bool processCommandLine(int argc, char** argv)
       usage += "  -center            Centers the model\n";
       usage += "  -dontloadtex       Will not try to load the used textures\n";
       usage += "  -dontmergemeshes   Will not try to merge model's meshes\n";
+      usage += "  -resetmaterials    Resets all model's materials to a default one\n";
       //usage += "  \n";
       cout << usage;
       return false;
@@ -305,7 +309,7 @@ bool processCommandLine(int argc, char** argv)
     }
     else if(larg == "-noframes")
     {
-      g_frames_removeAll = true;
+      g_frames_keepCount = 1;
     }
     else if(larg == "-keepframes")
     {
@@ -355,6 +359,10 @@ bool processCommandLine(int argc, char** argv)
     else if(larg == "-dontmergemeshes")
     {
       g_meshes_merge = false;
+    }
+    else if(larg == "-resetmaterials")
+    {
+      g_materials_reset = true;
     }
     else
     {
@@ -465,6 +473,23 @@ bool loadConfigFile(Model* m)
   g_meshes_merge = cfg.readBoolEntry("MergeMeshes", g_meshes_merge);
   g_usenormalcalculator = cfg.readBoolEntry("UseNormalCalculator", g_usenormalcalculator);
   g_normalcalculator_threshold = (float)cfg.readDoubleNumEntry("NormalCalculatorThreshold", g_normalcalculator_threshold);
+  g_frames_keepCount = cfg.readNumEntry("KeepFramesCount", g_frames_keepCount);
+  g_numLods = cfg.readNumEntry("LODs", g_numLods);
+
+  if(g_frames_keepCount == -1)
+  {
+    g_frames_keepCount = 1;
+    QMap<QString, QString> entries = cfg.entryMap("Model");
+    QRegExp animationend("Animation-[A-Za-z]+-End");
+    for(QMap<QString, QString>::Iterator it = entries.begin(); it != entries.end(); ++it)
+    {
+      if(animationend.exactMatch(it.key()))
+      {
+        g_frames_keepCount = QMAX(g_frames_keepCount, cfg.readNumEntry(it.key(), 0)+1);
+      }
+    }
+    boDebug() << k_funcinfo << "Automatically set number of kept frames to " << g_frames_keepCount << endl;
+  }
 
   return true;
 }
@@ -652,11 +677,11 @@ bool doModelProcessing(Model* m)
 
   processorList.append(new DefaultMaterials);
   processorList.append(new UnusedDataRemover);
-  if(!g_frames_keepAll || g_frames_removeAll)
+  if(!g_frames_keepAll || g_frames_keepCount > 0)
   {
     FrameOptimizer* frameOptimizer = new FrameOptimizer();
     frameOptimizer->setName("DuplicateFrameRemover");
-    frameOptimizer->setRemoveAllFrames(g_frames_removeAll);
+    frameOptimizer->setKeepFramesCount(g_frames_keepCount);
     processorList.append(frameOptimizer);
   }
 
@@ -675,11 +700,15 @@ bool doModelProcessing(Model* m)
     processorList.append(textureOptimizer);
   }
 
+  processorList.append(new NodeOptimizer());
+
   if(g_usenormalcalculator)
   {
     processorList.append(new NormalCalculator(g_normalcalculator_threshold));
   }
-  processorList.append(new MaterialOptimizer());
+  MaterialOptimizer* materialOptimizer = new MaterialOptimizer();
+  materialOptimizer->setResetMaterials(g_materials_reset);
+  processorList.append(materialOptimizer);
   if(g_meshes_merge)
   {
     processorList.append(new MeshOptimizer());

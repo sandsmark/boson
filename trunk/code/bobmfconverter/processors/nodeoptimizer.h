@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2005 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,34 +17,33 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef MATERIALOPTIMIZER_H
-#define MATERIALOPTIMIZER_H
+#ifndef NODEOPTIMIZER_H
+#define NODEOPTIMIZER_H
 
 
 #include "processor.h"
 
-class Model;
-class LOD;
-class Material;
+class Mesh;
+class BoMatrix;
 
 
-class MaterialOptimizer : public Processor
+class NodeOptimizer : public Processor
 {
   public:
-    MaterialOptimizer();
-    virtual ~MaterialOptimizer();
+    NodeOptimizer();
+    virtual ~NodeOptimizer();
 
     virtual bool process();
-    void setResetMaterials(bool r)  { mReset = r; }
 
 
   protected:
-    float materialDifference(Material* m1, Material* m2);
-    void mergeMaterials(Material* merge, Material* valid);
-    void resetMaterials();
+    bool hasMultipleNodes(Mesh* m);
+    void breakup(Mesh* mesh);
+    Mesh* duplicateMesh(Mesh* original, BoMatrix* transform);
 
-    bool mReset;
+
+  private:
 };
 
 
-#endif //MATERIALOPTIMIZER_H
+#endif //NODEOPTIMIZER_H
