@@ -26,6 +26,7 @@
 #include "../../gameengine/playerio.h"
 #include "../../gameengine/player.h"
 #include "../../gameengine/unit.h"
+#include "../../gameengine/unitorder.h"
 #include "../../gameengine/unitproperties.h"
 #include "../../gameengine/bosonpropertyxml.h"
 #include "../../boufo/boufotabwidget.h"
@@ -261,14 +262,8 @@ void BoUnitDebugWidget::update(Unit* unit)
 
  text += i18n("Location: (%1, %2, %3)").arg(unit->x()).arg(unit->y()).arg(unit->z());
  text += i18n("Rotation: (%1, %2, %3)").arg(unit->xRotation()).arg(unit->yRotation()).arg(unit->rotation());
- text += i18n("Work: %1").arg(unit->work()); // TODO: int -> string
  text += i18n("AdvanceWork: %1").arg(unit->advanceWork()); // TODO: int -> string
- if (unit->target()) {
-	Unit* t = unit->target();
-	text += i18n("Target: %1 at (%2, %3, %4)").arg(t->id()).arg(t->x()).arg(t->y()).arg(t->z());
- } else {
-	text += i18n("Unit has no target");
- }
+ text += i18n("CurrentOrder type: %1").arg(unit->currentOrder() ? unit->currentOrder()->type() : 0); // TODO: int -> string
 
 
  text += "\n";
