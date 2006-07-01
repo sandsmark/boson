@@ -690,62 +690,56 @@ void BosonCanvas::updateSight(Unit* unit, bofixed oldX, bofixed oldY)
 		y + sight) - y;
 
 
- if (oldX != -1 && oldY != -1) {
-	unsigned int oldCenterX = (unsigned int)(unit->centerX() + (oldX - unit->x()));
-	unsigned int oldCenterY = (unsigned int)(unit->centerY() + (oldY - unit->y()));
-	int deltaX = x - oldCenterX;
-	int deltaY = y - oldCenterY;
-	if (!deltaX && !deltaY) {
-		return;
-	}
+ unsigned int oldCenterX = (unsigned int)(unit->centerX() + (oldX - unit->x()));
+ unsigned int oldCenterY = (unsigned int)(unit->centerY() + (oldY - unit->y()));
+ int deltaX = x - oldCenterX;
+ int deltaY = y - oldCenterY;
+ if (!deltaX && !deltaY) {
+	return;
+ }
 
-	int oldleft = ((oldCenterX < sight) ? 0 : (oldCenterX - sight)) - x;
-	int oldtop = ((oldCenterY < sight) ? 0 : (oldCenterY - sight)) - y;
-	int oldright = ((oldCenterX + sight > d->mMap->width()) ? d->mMap->width() : (oldCenterX + sight)) - x;
-	int oldbottom = ((oldCenterY + sight > d->mMap->height()) ? d->mMap->height() : (oldCenterY + sight)) - y;
+ int oldleft = ((oldCenterX < sight) ? 0 : (oldCenterX - sight)) - x;
+ int oldtop = ((oldCenterY < sight) ? 0 : (oldCenterY - sight)) - y;
+ int oldright = ((oldCenterX + sight > d->mMap->width()) ? d->mMap->width() : (oldCenterX + sight)) - x;
+ int oldbottom = ((oldCenterY + sight > d->mMap->height()) ? d->mMap->height() : (oldCenterY + sight)) - y;
 
-	if (QMAX(deltaX, deltaY) <= 3) {
-		// Speed up the common case by looking through every cell just once
-		left = QMIN(left, oldleft);
-		top = QMIN(top, oldtop);
-		right = QMAX(right, oldright);
-		bottom = QMAX(bottom, oldbottom);
-		for (int i = left; i < right; i++) {
-			for (int j = top; j < bottom; j++) {
-				int olddist = (i+deltaX)*(i+deltaX) + (j+deltaY)*(j+deltaY);
-				int newdist = i*i + j*j;
-				if ((newdist >= sight2) && (olddist < sight2)) {
-					// This cell is now out of sight but was previously in sight
-					unit->owner()->removeFogRef(x + i, y + j);
-				} else if ((newdist < sight2) && (olddist >= sight2)) {
-					unit->owner()->addFogRef(x + i, y + j);
-				}
-			}
-		}
-	} else {
-		// First remove cells which were visible but aren't anymore...
-		for (int i = oldleft; i < oldright; i++) {
-			for (int j = oldtop; j < oldbottom; j++) {
-				if ((i*i + j*j >= sight2) && ((i+deltaX)*(i+deltaX) + (j+deltaY)*(j+deltaY) < sight2)) {
-					// This cell is now out of sight but was previously in sight
-					unit->owner()->removeFogRef(x + i, y + j);
-				}
-			}
-		}
-
-		// ... then add those which just became visible
-		for (int i = left; i < right; i++) {
-			for (int j = top; j < bottom; j++) {
-				if ((i*i + j*j < sight2) && ((i+deltaX)*(i+deltaX) + (j+deltaY)*(j+deltaY) >= sight2)) {
-					unit->owner()->addFogRef(x + i, y + j);
-				}
+ if (QMAX(deltaX, deltaY) <= 5) {
+	// Speed up the common case by looking through every cell just once
+	left = QMIN(left, oldleft);
+	top = QMIN(top, oldtop);
+	right = QMAX(right, oldright);
+	bottom = QMAX(bottom, oldbottom);
+	for (int i = left; i < right; i++) {
+		for (int j = top; j < bottom; j++) {
+			int olddist = (i+deltaX)*(i+deltaX) + (j+deltaY)*(j+deltaY);
+			int newdist = i*i + j*j;
+			if ((newdist >= sight2) && (olddist < sight2)) {
+				// This cell is now out of sight but was previously in sight
+				unit->owner()->removeFogRef(x + i, y + j);
+			} else if ((newdist < sight2) && (olddist >= sight2)) {
+				unit->owner()->addFogRef(x + i, y + j);
 			}
 		}
 	}
  } else {
-	// This is the first time we update sight for this unit. Just unfog
-	//  everything the unit can see
-	addSight(unit);
+	// First remove cells which were visible but aren't anymore...
+	for (int i = oldleft; i < oldright; i++) {
+		for (int j = oldtop; j < oldbottom; j++) {
+			if ((i*i + j*j >= sight2) && ((i+deltaX)*(i+deltaX) + (j+deltaY)*(j+deltaY) < sight2)) {
+				// This cell is now out of sight but was previously in sight
+				unit->owner()->removeFogRef(x + i, y + j);
+			}
+		}
+	}
+
+	// ... then add those which just became visible
+	for (int i = left; i < right; i++) {
+		for (int j = top; j < bottom; j++) {
+			if ((i*i + j*j < sight2) && ((i+deltaX)*(i+deltaX) + (j+deltaY)*(j+deltaY) >= sight2)) {
+				unit->owner()->addFogRef(x + i, y + j);
+			}
+		}
+	}
  }
 }
 
