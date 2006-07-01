@@ -49,6 +49,7 @@ MACRO ( BOSON_ADD_BOUI_FILES _sources )
         COMMAND
         DEPENDS ${_tmp_FILE} ${_header}
      )
+     SET_SOURCE_FILES_PROPERTIES(${_src} OBJECT_DEPENDS ${_moc})
 
      ADD_CUSTOM_COMMAND(OUTPUT ${_moc}
         COMMAND ${QT_MOC_EXECUTABLE}
