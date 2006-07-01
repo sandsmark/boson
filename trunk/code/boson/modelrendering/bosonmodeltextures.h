@@ -65,7 +65,19 @@ public:
 	 **/
 	BoTexture* texture(const QString& textureName) const;
 
-protected:
+	/**
+	 * @return The additional texture path which is used in addition to standard
+	 * kde dirs
+	 **/
+	const QString& additionalTexturePath() const;
+
+	/**
+	 * Set an additional texture path. This is used before looking into standard
+	 * kde dirs when searching for textures
+	 **/
+	void setAdditionalTexturePath(const QString& dir);
+
+  protected:
 	/**
 	 * Create the static object of this class (see @ref modelTextures). This
 	 * is called in @ref modelTextures - no need for you to call it

@@ -597,14 +597,14 @@ void BoModelPixmaps::selectModelFile(const QString& file)
 
  QStringList found;
  QStringList notFound;
- QString path = BosonModelTextures::modelTextures()->texturePath() + "/";
  for (QStringList::iterator it = textures.begin(); it != textures.end(); ++it) {
 	BoTexture* tex = BosonModelTextures::modelTextures()->texture(*it);
 	bool foundTexture = true;
+	QFileInfo textureInfo;
 	if (!tex) {
 		foundTexture = false;
 	} else {
-		QFileInfo textureInfo(tex->filePath());
+		textureInfo.setFile(tex->filePath());
 		if (!textureInfo.exists()) {
 			foundTexture = false;
 		}
@@ -615,7 +615,7 @@ void BoModelPixmaps::selectModelFile(const QString& file)
 		boDebug() << k_funcinfo << "texture not found: " << *it << endl;
 	} else {
 		found.append(*it);
-		addTextureCopyright(path + *it);
+		addTextureCopyright(textureInfo.dirPath() + "/" + *it);
 	}
  }
  d->mGUI->mTexturesFoundList->insertStringList(found);
@@ -624,7 +624,7 @@ void BoModelPixmaps::selectModelFile(const QString& file)
 
 void BoModelPixmaps::slotSelectTextureDirectory()
 {
- QString old = BosonModelTextures::modelTextures()->texturePath();
+ QString old = BosonModelTextures::modelTextures()->additionalTexturePath();
  QString dir = BoFileDialog::getExistingDirectory(old, this);
  if (dir.isEmpty()) {
 	return;
@@ -641,7 +641,7 @@ void BoModelPixmaps::selectTextureDirectory(const QString& dir_)
  if (dir.right(1) != "/") {
 	dir += "/";
  }
- BosonModelTextures::modelTextures()->setTexturePath(dir);
+ BosonModelTextures::modelTextures()->setAdditionalTexturePath(dir);
  QString model = mModelFileName;
  reset();
  if (!model.isEmpty()) {
