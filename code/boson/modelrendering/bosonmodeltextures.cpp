@@ -27,6 +27,7 @@
 
 #include <qimage.h>
 #include <qgl.h>
+#include <qfile.h>
 
 #include <kglobal.h>
 #include <kstandarddirs.h>
@@ -43,6 +44,8 @@ public:
 	}
 	QMap<QString, BoTexture*> mName2Texture;
 	QMap<BoTexture*, QValueList<BosonModel*> > mModels;
+
+	QString mAdditionalTexturePath;
 };
 
 BosonModelTextures::BosonModelTextures()
@@ -92,7 +95,11 @@ BoTexture* BosonModelTextures::insert(BosonModel* model, const QString& textureN
  BoTexture* tex = 0;
  if (!d->mName2Texture.contains(textureName)) {
 	BosonProfiler prof("BosonModelTextures::insert: load texture");
-  tex = new BoTexture(locate("data", "boson/themes/textures/" + textureName), BoTexture::Model);
+	QString textureAbsPath = d->mAdditionalTexturePath + textureName;
+	if (d->mAdditionalTexturePath.isEmpty() || !QFile::exists(textureAbsPath)) {
+		textureAbsPath = locate("data", "boson/themes/textures/" + textureName);
+	}
+	tex = new BoTexture(textureAbsPath, BoTexture::Model);
 	d->mName2Texture.insert(textureName, tex);
  } else {
 	tex = texture(textureName);
@@ -150,3 +157,12 @@ BoTexture* BosonModelTextures::texture(const QString& texName) const
  return d->mName2Texture[texName];
 }
 
+void BosonModelTextures::setAdditionalTexturePath(const QString& dir)
+{
+ d->mAdditionalTexturePath = dir;
+}
+
+const QString& BosonModelTextures::additionalTexturePath() const
+{
+ return d->mAdditionalTexturePath;
+}
