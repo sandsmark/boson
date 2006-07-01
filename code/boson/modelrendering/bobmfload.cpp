@@ -635,10 +635,22 @@ QString BoBMFLoad::convertModel(const QString& modelfile, const QString& configf
     return QString::null;
   }
 
-  cachedmodel = KGlobal::dirs()->findResource("data", QString("%1/model-%2.bmf").arg("boson/modelcache").arg(hash));
+  QString modelcacheFileName = QString("%1/model-%2.bmf").arg("boson/modelcache").arg(hash);
+  cachedmodel = KGlobal::dirs()->findResource("data", modelcacheFileName);
   if(cachedmodel.isEmpty())
   {
-    boError() << k_funcinfo << "bobmfconverter did not write file " << cachedmodel << endl;
+    QString args;
+    // AB: apparently this includes arg 0, i.e. the command that is called
+    QValueList<QCString> argList = proc.args();
+    for (QValueList<QCString>::iterator it = argList.begin(); it != argList.end(); ++it)
+    {
+      args += QString(" %1").arg(*it);
+    }
+
+    boError() << k_funcinfo << "bobmfconverter did not write file." << endl
+      << "input file: " << modelfile << endl
+      << "expected output file: " << modelcacheFileName << endl
+      << "args: " << args << endl;
     return QString::null;
   }
 
