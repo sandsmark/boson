@@ -562,15 +562,6 @@ public:
 		return mEffectsRotationIsDirty;
 	}
 
-	inline void setScheduledForSightUpdate(bool set)
-	{
-		mScheduledForSightUpdate = set;
-	}
-	inline bool isScheduledForSightUpdate() const
-	{
-		return mScheduledForSightUpdate;
-	}
-
 protected:
 	/**
 	 * @return The current animation mode. @ref UnitAnimationIdle by
@@ -648,8 +639,6 @@ private:
 
 	bool mEffectsPositionIsDirty;
 	bool mEffectsRotationIsDirty;
-
-	bool mScheduledForSightUpdate;
 
 	// AB: this is NOT saved to any file! it is calculated on the fly by
 	// updateAnimationMode() and getAnimationMode()

@@ -381,6 +381,15 @@ public:
 	 **/
 	inline bofixed healthFactor() const { return mHealthFactor; }
 
+	inline void setScheduledForSightUpdate(bool set)
+	{
+		mScheduledForSightUpdate = set;
+	}
+	inline bool isScheduledForSightUpdate() const
+	{
+		return mScheduledForSightUpdate;
+	}
+
 protected:
 	/**
 	 * Should get called in every @ref Unit::advance call. This counts the
@@ -434,6 +443,8 @@ private:
 
 
 	bool mAdvanceWasChargedThisAdvanceCall; // updated every advance call, no need to save
+
+	bool mScheduledForSightUpdate;
 };
 
 #endif

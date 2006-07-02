@@ -51,6 +51,8 @@ UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canva
  mUnitProperties = prop; // WARNING: this might be 0 at this point! MUST be != 0 for Unit, but ScenarioUnit uses 0 here
  mAdvanceWasChargedThisAdvanceCall = false;
 
+ mScheduledForSightUpdate = false;
+
  registerData(&mShieldReloadCounter, IdShieldReloadCounter);
  registerData(&mDeletionTimer, IdDeletionTimer);
  registerData(&mAdvanceWork, IdAdvanceWork);

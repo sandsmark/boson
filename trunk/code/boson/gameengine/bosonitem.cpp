@@ -131,7 +131,6 @@ BosonItem::BosonItem(Player* owner, BosonCanvas* canvas)
  mIsVisible = true;
  mEffectsPositionIsDirty = true;
  mEffectsRotationIsDirty = true;
- mScheduledForSightUpdate = false;
 
  mXVelocity = 0;
  mYVelocity = 0;
