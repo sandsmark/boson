@@ -73,6 +73,8 @@ ItemType ItemType::typeForShot(unsigned long int shotType, unsigned long int uni
  return ItemType(shotType, unitType, weaponPropertyId);
 }
 
+class BoCanvasSightManager;
+
 class BosonCanvas::BosonCanvasPrivate
 {
 public:
@@ -88,6 +90,7 @@ public:
 		mPathFinder = 0;
 
 		mEventListener = 0;
+		mSightManager = 0;
 	}
 	BoCanvasQuadTreeCollection* mQuadTreeCollection;
 	BosonCanvasStatistics* mStatistics;
@@ -120,7 +123,181 @@ public:
 	BoCanvasEventListener* mEventListener;
 
 	QIntDict<BosonMoveData> mUnitProperties2MoveData;
+
+	BoCanvasSightManager* mSightManager;
 };
+
+
+class BoCanvasSightManager
+{
+public:
+	BoCanvasSightManager(BosonCanvas* canvas) { mMap = 0; mCanvas = canvas; }
+
+	void setMap(BosonMap* map) { mMap = map; }
+
+	void unitMoved(Unit* u, bofixed oldX, bofixed oldY);
+	void updateSights();
+
+	void addSight(Unit* unit);
+	void removeSight(Unit* unit);
+	void updateSight(Unit* unit, bofixed oldX, bofixed oldY);
+
+private:
+	class ScheduledUnit
+	{
+	public:
+		ScheduledUnit(Unit* u, bofixed x, bofixed y) { unit = u; lastX = x; lastY = y; }
+		ScheduledUnit() {}
+
+		Unit* unit;
+		bofixed lastX;
+		bofixed lastY;
+	};
+
+	QValueList<ScheduledUnit> mScheduledUpdates;
+	BosonMap* mMap;
+	BosonCanvas* mCanvas;
+};
+
+void BoCanvasSightManager::unitMoved(Unit* u, bofixed oldX, bofixed oldY)
+{
+ if (u->isScheduledForSightUpdate()) {
+	return;
+ }
+
+ mScheduledUpdates.append(ScheduledUnit(u, oldX, oldY));
+ u->setScheduledForSightUpdate(true);
+}
+
+void BoCanvasSightManager::updateSights()
+{
+ while (!mScheduledUpdates.isEmpty()) {
+	const ScheduledUnit& s = mScheduledUpdates.first();
+	if (!s.unit->isScheduledForSightUpdate()) {
+		// Unit's sight has already been updated (e.g. when sight range increases)
+		continue;
+	}
+	updateSight(s.unit, s.lastX, s.lastY);
+
+	mScheduledUpdates.pop_front();
+ }
+}
+
+void BoCanvasSightManager::updateSight(Unit* unit, bofixed oldX, bofixed oldY)
+{
+ PROFILE_METHOD;
+ unsigned int sight = (int)unit->sightRange();
+ int sight2 = sight * sight;
+ unsigned int x = (unsigned int)unit->centerX();
+ unsigned int y = (unsigned int)unit->centerY();
+
+ int left = ((x > sight) ? (x - sight) : 0) - x;
+ int top = ((y > sight) ? (y - sight) : 0) - y;
+ int right = ((x + sight > mMap->width()) ?  mMap->width() :
+		x + sight) - x;
+ int bottom = ((y + sight > mMap->height()) ?  mMap->height() :
+		y + sight) - y;
+
+
+ unsigned int oldCenterX = (unsigned int)(unit->centerX() + (oldX - unit->x()));
+ unsigned int oldCenterY = (unsigned int)(unit->centerY() + (oldY - unit->y()));
+ int deltaX = x - oldCenterX;
+ int deltaY = y - oldCenterY;
+ if (!deltaX && !deltaY) {
+	return;
+ }
+
+ int oldleft = ((oldCenterX < sight) ? 0 : (oldCenterX - sight)) - x;
+ int oldtop = ((oldCenterY < sight) ? 0 : (oldCenterY - sight)) - y;
+ int oldright = ((oldCenterX + sight > mMap->width()) ? mMap->width() : (oldCenterX + sight)) - x;
+ int oldbottom = ((oldCenterY + sight > mMap->height()) ? mMap->height() : (oldCenterY + sight)) - y;
+
+ if (QMAX(deltaX, deltaY) <= 5) {
+	// Speed up the common case by looking through every cell just once
+	left = QMIN(left, oldleft);
+	top = QMIN(top, oldtop);
+	right = QMAX(right, oldright);
+	bottom = QMAX(bottom, oldbottom);
+	for (int i = left; i < right; i++) {
+		for (int j = top; j < bottom; j++) {
+			int olddist = (i+deltaX)*(i+deltaX) + (j+deltaY)*(j+deltaY);
+			int newdist = i*i + j*j;
+			if ((newdist >= sight2) && (olddist < sight2)) {
+				// This cell is now out of sight but was previously in sight
+				unit->owner()->removeFogRef(x + i, y + j);
+			} else if ((newdist < sight2) && (olddist >= sight2)) {
+				unit->owner()->addFogRef(x + i, y + j);
+			}
+		}
+	}
+ } else {
+	// First remove cells which were visible but aren't anymore...
+	for (int i = oldleft; i < oldright; i++) {
+		for (int j = oldtop; j < oldbottom; j++) {
+			if ((i*i + j*j >= sight2) && ((i+deltaX)*(i+deltaX) + (j+deltaY)*(j+deltaY) < sight2)) {
+				// This cell is now out of sight but was previously in sight
+				unit->owner()->removeFogRef(x + i, y + j);
+			}
+		}
+	}
+
+	// ... then add those which just became visible
+	for (int i = left; i < right; i++) {
+		for (int j = top; j < bottom; j++) {
+			if ((i*i + j*j < sight2) && ((i+deltaX)*(i+deltaX) + (j+deltaY)*(j+deltaY) >= sight2)) {
+				unit->owner()->addFogRef(x + i, y + j);
+			}
+		}
+	}
+ }
+ unit->setScheduledForSightUpdate(false);
+}
+
+void BoCanvasSightManager::addSight(Unit* unit)
+{
+ unsigned int sight = (int)unit->sightRange();
+ int sight2 = sight * sight;
+ unsigned int x = (unsigned int)unit->centerX();
+ unsigned int y = (unsigned int)unit->centerY();
+
+ int left = ((x > sight) ? (x - sight) : 0) - x;
+ int top = ((y > sight) ? (y - sight) : 0) - y;
+ int right = ((x + sight > mMap->width()) ?  mMap->width() :
+		x + sight) - x;
+ int bottom = ((y + sight > mMap->height()) ?  mMap->height() :
+		y + sight) - y;
+ for (int i = left; i < right; i++) {
+	for (int j = top; j < bottom; j++) {
+		if (i*i + j*j < sight2) {
+			unit->owner()->addFogRef(x + i, y + j);
+		}
+	}
+ }
+ unit->setScheduledForSightUpdate(false);
+}
+
+void BoCanvasSightManager::removeSight(Unit* unit)
+{
+ unsigned int sight = (int)unit->sightRange();
+ int sight2 = sight * sight;
+ unsigned int x = (unsigned int)unit->centerX();
+ unsigned int y = (unsigned int)unit->centerY();
+
+ int left = ((x > sight) ? (x - sight) : 0) - x;
+ int top = ((y > sight) ? (y - sight) : 0) - y;
+ int right = ((x + sight > mMap->width()) ?  mMap->width() :
+		x + sight) - x;
+ int bottom = ((y + sight > mMap->height()) ?  mMap->height() :
+		y + sight) - y;
+ for (int i = left; i < right; i++) {
+	for (int j = top; j < bottom; j++) {
+		if (i*i + j*j < sight2) {
+			unit->owner()->removeFogRef(x + i, y + j);
+		}
+	}
+ }
+ unit->setScheduledForSightUpdate(false);
+}
 
 
 /**
@@ -195,6 +372,12 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
  boProfiling->push("Unharge units");
  unchargeUnits(advanceCallsCount, advanceFlag);
  boProfiling->pop(); // Advance Items
+
+ if (advanceCallsCount % 20 == 7) {
+	boProfiling->push("SightManager");
+	mCanvas->d->mSightManager->updateSights();
+	boProfiling->pop();
+ }
 
 
  // TODO: use a condition for this code: every n advance call the condition
@@ -515,6 +698,7 @@ void BosonCanvas::init()
  d->mDestroyedUnits.setAutoDelete(false);
  mAdvanceFunctionLocked = false;
  mCollisions = new BosonCollisions();
+ d->mSightManager = new BoCanvasSightManager(this);
  d->mQuadTreeCollection = new BoCanvasQuadTreeCollection(this);
  d->mStatistics = new BosonCanvasStatistics(this);
  d->mProperties = new KGamePropertyHandler(this);
@@ -569,6 +753,8 @@ void BosonCanvas::quitGame()
  }
  d->mChangeAdvanceList.clear();
  d->mNextItemId = 0;
+ delete d->mSightManager;
+ d->mSightManager = 0;
 
  BoItemListHandler::itemListHandler()->slotDeleteLists();
 }
@@ -660,12 +846,13 @@ bool BosonCanvas::canGo(const UnitProperties* prop, int x, int y, bool _default)
 void BosonCanvas::setMap(BosonMap* map)
 {
  d->mMap = map;
+ d->mSightManager->setMap(map);
  collisions()->setMap(map);
 }
 
 void BosonCanvas::unitMoved(Unit* unit, bofixed oldX, bofixed oldY)
 {
- updateSight(unit, oldX, oldY);
+ d->mSightManager->unitMoved(unit, oldX, oldY);
 
 // test if any unit has this unit as target. If sou then adjust the destination.
 //TODO
@@ -676,115 +863,17 @@ void BosonCanvas::unitMoved(Unit* unit, bofixed oldX, bofixed oldY)
 
 void BosonCanvas::updateSight(Unit* unit, bofixed oldX, bofixed oldY)
 {
- PROFILE_METHOD;
- unsigned int sight = (int)unit->sightRange();
- int sight2 = sight * sight;
- unsigned int x = (unsigned int)unit->centerX();
- unsigned int y = (unsigned int)unit->centerY();
-
- int left = ((x > sight) ? (x - sight) : 0) - x;
- int top = ((y > sight) ? (y - sight) : 0) - y;
- int right = ((x + sight > d->mMap->width()) ?  d->mMap->width() :
-		x + sight) - x;
- int bottom = ((y + sight > d->mMap->height()) ?  d->mMap->height() :
-		y + sight) - y;
-
-
- unsigned int oldCenterX = (unsigned int)(unit->centerX() + (oldX - unit->x()));
- unsigned int oldCenterY = (unsigned int)(unit->centerY() + (oldY - unit->y()));
- int deltaX = x - oldCenterX;
- int deltaY = y - oldCenterY;
- if (!deltaX && !deltaY) {
-	return;
- }
-
- int oldleft = ((oldCenterX < sight) ? 0 : (oldCenterX - sight)) - x;
- int oldtop = ((oldCenterY < sight) ? 0 : (oldCenterY - sight)) - y;
- int oldright = ((oldCenterX + sight > d->mMap->width()) ? d->mMap->width() : (oldCenterX + sight)) - x;
- int oldbottom = ((oldCenterY + sight > d->mMap->height()) ? d->mMap->height() : (oldCenterY + sight)) - y;
-
- if (QMAX(deltaX, deltaY) <= 5) {
-	// Speed up the common case by looking through every cell just once
-	left = QMIN(left, oldleft);
-	top = QMIN(top, oldtop);
-	right = QMAX(right, oldright);
-	bottom = QMAX(bottom, oldbottom);
-	for (int i = left; i < right; i++) {
-		for (int j = top; j < bottom; j++) {
-			int olddist = (i+deltaX)*(i+deltaX) + (j+deltaY)*(j+deltaY);
-			int newdist = i*i + j*j;
-			if ((newdist >= sight2) && (olddist < sight2)) {
-				// This cell is now out of sight but was previously in sight
-				unit->owner()->removeFogRef(x + i, y + j);
-			} else if ((newdist < sight2) && (olddist >= sight2)) {
-				unit->owner()->addFogRef(x + i, y + j);
-			}
-		}
-	}
- } else {
-	// First remove cells which were visible but aren't anymore...
-	for (int i = oldleft; i < oldright; i++) {
-		for (int j = oldtop; j < oldbottom; j++) {
-			if ((i*i + j*j >= sight2) && ((i+deltaX)*(i+deltaX) + (j+deltaY)*(j+deltaY) < sight2)) {
-				// This cell is now out of sight but was previously in sight
-				unit->owner()->removeFogRef(x + i, y + j);
-			}
-		}
-	}
-
-	// ... then add those which just became visible
-	for (int i = left; i < right; i++) {
-		for (int j = top; j < bottom; j++) {
-			if ((i*i + j*j < sight2) && ((i+deltaX)*(i+deltaX) + (j+deltaY)*(j+deltaY) >= sight2)) {
-				unit->owner()->addFogRef(x + i, y + j);
-			}
-		}
-	}
- }
+ d->mSightManager->updateSight(unit, oldX, oldY);
 }
 
 void BosonCanvas::addSight(Unit* unit)
 {
- unsigned int sight = (int)unit->sightRange();
- int sight2 = sight * sight;
- unsigned int x = (unsigned int)unit->centerX();
- unsigned int y = (unsigned int)unit->centerY();
-
- int left = ((x > sight) ? (x - sight) : 0) - x;
- int top = ((y > sight) ? (y - sight) : 0) - y;
- int right = ((x + sight > d->mMap->width()) ?  d->mMap->width() :
-		x + sight) - x;
- int bottom = ((y + sight > d->mMap->height()) ?  d->mMap->height() :
-		y + sight) - y;
- for (int i = left; i < right; i++) {
-	for (int j = top; j < bottom; j++) {
-		if (i*i + j*j < sight2) {
-			unit->owner()->addFogRef(x + i, y + j);
-		}
-	}
- }
+ d->mSightManager->addSight(unit);
 }
 
 void BosonCanvas::removeSight(Unit* unit)
 {
- unsigned int sight = (int)unit->sightRange();
- int sight2 = sight * sight;
- unsigned int x = (unsigned int)unit->centerX();
- unsigned int y = (unsigned int)unit->centerY();
-
- int left = ((x > sight) ? (x - sight) : 0) - x;
- int top = ((y > sight) ? (y - sight) : 0) - y;
- int right = ((x + sight > d->mMap->width()) ?  d->mMap->width() :
-		x + sight) - x;
- int bottom = ((y + sight > d->mMap->height()) ?  d->mMap->height() :
-		y + sight) - y;
- for (int i = left; i < right; i++) {
-	for (int j = top; j < bottom; j++) {
-		if (i*i + j*j < sight2) {
-			unit->owner()->removeFogRef(x + i, y + j);
-		}
-	}
- }
+ d->mSightManager->removeSight(unit);
 }
 
 void BosonCanvas::newShot(BosonShot*)
