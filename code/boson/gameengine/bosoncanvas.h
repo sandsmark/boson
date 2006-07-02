@@ -581,6 +581,7 @@ private:
 
 private:
 	friend class BoCanvasAdvance;
+	friend class BoCanvasSightManager;
 	class BosonCanvasPrivate;
 	BosonCanvasPrivate* d;
 	BosonCollisions* mCollisions;
