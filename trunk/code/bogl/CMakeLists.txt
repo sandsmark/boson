@@ -12,6 +12,6 @@ set(bogl_SRCS
 	bogl_resolve_symbols.cpp
 )
 
-add_library(bogl STATIC ${bogl_SRCS})
+boson_add_library(bogl STATIC ${bogl_SRCS})
 
 

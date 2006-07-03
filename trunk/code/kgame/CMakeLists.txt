@@ -41,5 +41,5 @@ set(libkdegames_sources
 )
 kde3_automoc(${libkdegames_sources})
 
-add_library(kgame STATIC ${libkdegames_sources})
+boson_add_library(kgame STATIC ${libkdegames_sources})
 

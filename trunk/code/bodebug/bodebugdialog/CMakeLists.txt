@@ -15,7 +15,7 @@ set(bodebugdialog_sources
 kde3_automoc(${bodebugdialog_sources})
 
 
-kde3_add_executable(bodebugdialog ${bodebugdialog_sources})
+boson_add_executable(bodebugdialog ${bodebugdialog_sources})
 boson_target_link_libraries(bodebugdialog
 	bodebug
 	kdeui

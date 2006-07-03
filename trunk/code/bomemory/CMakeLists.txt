@@ -15,7 +15,7 @@ set(bomemory_SRCS
 )
 
 if(BOSON_USE_BOMEMORY)
-  add_library(bomemory STATIC ${bomemory_SRCS})
+  boson_add_library(bomemory STATIC ${bomemory_SRCS})
   set(LIB_BOMEMORY bomemory)
 else(BOSON_USE_BOMEMORY)
   set(LIB_BOMEMORY "")

@@ -66,7 +66,7 @@ set(boufo_SRCS
 
 kde3_automoc(${boufo_SRCS})
 
-add_library(boufo STATIC ${boufo_SRCS})
+boson_add_library(boufo STATIC ${boufo_SRCS})
 
 target_link_libraries(boufo ufo)
 

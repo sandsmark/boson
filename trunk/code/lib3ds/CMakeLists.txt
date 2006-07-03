@@ -30,5 +30,5 @@ set(lib3ds_SRCS
 #     so we just use the flags that lib3ds uses here and throw the normal flags
 #     away.
 set(CMAKE_C_FLAGS "")
-add_library(lib3ds STATIC ${lib3ds_SRCS})
+boson_add_library(lib3ds STATIC ${lib3ds_SRCS})
 

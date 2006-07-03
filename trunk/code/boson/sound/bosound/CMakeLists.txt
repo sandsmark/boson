@@ -36,8 +36,8 @@ kde3_automoc(${bosonsoundcommon_sources})
 kde3_automoc(${bosonsound_sources})
 
 
-add_library(bosonsoundcommon STATIC ${bosonsoundcommon_sources})
-add_library(bosonsound STATIC ${bosonsound_sources})
+boson_add_library(bosonsoundcommon STATIC ${bosonsoundcommon_sources})
+boson_add_library(bosonsound STATIC ${bosonsound_sources})
 
 if (OPENAL_FOUND)
 	add_subdirectory(openal)
