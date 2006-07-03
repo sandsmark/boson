@@ -3,6 +3,9 @@
 # BOSON_READ_STATIC_DEPENDENCIES_FROM_LA
 # BOSON_USE_STATIC_QT_AND_KDE
 # BOSON_TARGET_LINK_LIBRARIES
+# BOSON_MAKE_MESSAGES_POT (used internally - should not usually be used outside this file)
+# BOSON_ADD_LIBRARY
+# BOSON_ADD_EXECUTABLE
 #
 # This file defines the following variables:
 # QT_MT_REQUIRED (to TRUE)
@@ -260,5 +263,57 @@ MACRO(BOSON_TARGET_LINK_LIBRARIES target)
    ENDIF (BOSON_LINK_STATIC)
    TARGET_LINK_LIBRARIES(${target} ${args})
 ENDMACRO(BOSON_TARGET_LINK_LIBRARIES)
+
+
+MACRO(BOSON_MAKE_MESSAGES_POT target)
+   # TODO: at the beginning of the target "messages" we should delete the .pot file somehow!
+   # -> we cannot do it here, as we usually are NOT at the beginning of the target
+
+   # TODO: headers? !
+   SET(_sources ${ARGN})
+
+   MAKE_DIRECTORY(${CMAKE_BINARY_DIR}/po)
+   SET(_output_file "${CMAKE_BINARY_DIR}/po/boson.pot")
+
+   # TODO: configure check for xgettext + version
+   SET(_xgettext "xgettext")
+
+   # TODO: i18n with > 1 parameter ?
+   SET(_xgettext_args -j;-o;"${_output_file}";-ki18n;-kI18N_NOOP;-kI18N_NOOP2;-ktr2i18n)
+
+   # TODO: remove the WORKING_DIRECTORY hack. we need full paths to files, as files might be in CMAKE_CURRENT_BINARY_DIR, too (generated files)
+   #       -> AB: actually atm this is not NECESSARY (but should be done anyway):
+   #              both, .ui and .boui generated files are added to the sources
+   #              with absolute paths
+   ADD_CUSTOM_TARGET(messages-${target}
+      COMMAND ${_xgettext} ${_xgettext_args} ${_sources}
+      DEPENDS ${ARGN}
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+   )
+
+   # dummy target for "make messages"
+   # TODO: only one "messages" target which should reside in code/CMakeLists.txt
+   ADD_CUSTOM_TARGET(messages)
+   ADD_DEPENDENCIES(messages messages-${target})
+
+ENDMACRO(BOSON_MAKE_MESSAGES_POT)
+
+
+MACRO(BOSON_ADD_LIBRARY target)
+   ADD_LIBRARY(${target} ${ARGN})
+
+   SET(_sources ${ARGN})
+   IF ("${ARGV1}" MATCHES "(STATIC)|(SHARED)|(MODULE)")
+      LIST(REMOVE_AT _sources 0)
+   ENDIF ("${ARGV1}" MATCHES "(STATIC)|(SHARED)|(MODULE)")
+
+   BOSON_MAKE_MESSAGES_POT(${target} ${_sources})
+ENDMACRO(BOSON_ADD_LIBRARY)
+
+MACRO(BOSON_ADD_EXECUTABLE target)
+   KDE3_ADD_EXECUTABLE(${target} ${ARGN})
+
+   BOSON_MAKE_MESSAGES_POT(${target} ${ARGN})
+ENDMACRO(BOSON_ADD_EXECUTABLE)
 
 # vim: et sw=3 textwidth=0
