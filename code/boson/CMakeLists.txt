@@ -41,7 +41,7 @@ set(imageio_SRCS
 	imageio/tga.cpp
 	imageio/pcx.cpp
 )
-add_library(imageio STATIC ${imageio_SRCS})
+boson_add_library(imageio STATIC ${imageio_SRCS})
 
 
 set(common_SRCS
@@ -57,7 +57,7 @@ set(common_SRCS
 	qlistviewitemnumber.cpp
 )
 kde3_automoc(${common_SRCS})
-add_library(common STATIC ${common_SRCS})
+boson_add_library(common STATIC ${common_SRCS})
 boson_target_link_libraries(common
 	bodebug
 	bogl
@@ -126,7 +126,7 @@ set(gameengine_SRCS
 	gameengine/bosonitempropertyhandler.cpp
 )
 kde3_automoc(${gameengine_SRCS})
-add_library(gameengine STATIC ${gameengine_SRCS})
+boson_add_library(gameengine STATIC ${gameengine_SRCS})
 boson_target_link_libraries(gameengine
 	bosonscript
 	kgame
@@ -209,7 +209,7 @@ set(modelrendering_SRCS
 	modelrendering/bobmfload.cpp
 )
 kde3_automoc(${modelrendering_SRCS})
-add_library(modelrendering STATIC ${modelrendering_SRCS})
+boson_add_library(modelrendering STATIC ${modelrendering_SRCS})
 
 # AB: this sucks. bosonmainlib should depend on modelrendering, not the other
 #     way around.
@@ -259,7 +259,7 @@ kde3_add_ui_files(bosonmainlib_SRCS
 	bosonprofilingdialoggui.ui
 )
 kde3_automoc(${bosonmainlib_SRCS})
-add_library(bosonmainlib STATIC ${bosonmainlib_SRCS})
+boson_add_library(bosonmainlib STATIC ${bosonmainlib_SRCS})
 
 # TODO: if not plugins: meshrenderer, groundrenderer, gameview plugins
 boson_target_link_libraries(bosonmainlib
@@ -322,7 +322,7 @@ kde3_add_ui_files(bosongamelib_SRCS
 	bosondebugmodelsbase.ui
 )
 kde3_automoc( ${bosongamelib_SRCS} )
-add_library(bosongamelib STATIC ${bosongamelib_SRCS})
+boson_add_library(bosongamelib STATIC ${bosongamelib_SRCS})
 boson_target_link_libraries(bosongamelib
 	bosonmainlib
 	boufo

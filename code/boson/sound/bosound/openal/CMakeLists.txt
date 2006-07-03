@@ -12,5 +12,5 @@ set(bosonsoundopenal_sources
 )
 kde3_automoc(${bosonsoundopenal_sources})
 
-add_library(bosonsoundopenal STATIC ${bosonsoundopenal_sources})
+boson_add_library(bosonsoundopenal STATIC ${bosonsoundopenal_sources})
 

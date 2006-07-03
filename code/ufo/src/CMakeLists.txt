@@ -159,6 +159,6 @@ set(ufo_SRCS
 	${xml_SRCS}
 )
 
-add_library(ufo STATIC ${ufo_SRCS})
+boson_add_library(ufo STATIC ${ufo_SRCS})
 
 

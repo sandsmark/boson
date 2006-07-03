@@ -13,5 +13,5 @@ set(math_SRCS
 	boglmatrices.cpp
 )
 
-add_library(bomath STATIC ${math_SRCS})
+boson_add_library(bomath STATIC ${math_SRCS})
 

@@ -12,7 +12,7 @@ set(bouic_SRCS
 
 kde3_automoc(${bouic_SRCS})
 
-kde3_add_executable(bouic ${bouic_SRCS})
+boson_add_executable(bouic ${bouic_SRCS})
 boson_target_link_libraries(bouic
 	${QT_LIBRARIES}
 )

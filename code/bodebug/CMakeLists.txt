@@ -28,6 +28,6 @@ kde3_add_dcop_skels(bodebug_sources ${bodebug_DCOP_SKEL_SOURCES})
 
 kde3_automoc( ${bodebug_sources} )
 
-add_library(bodebug STATIC ${bodebug_sources})
+boson_add_library(bodebug STATIC ${bodebug_sources})
 
 
