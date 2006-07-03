@@ -40,6 +40,7 @@ set(BOSON_PLUGIN_INSTALL_DIR ${KDE3_PLUGIN_INSTALL_DIR}/plugins/boson)
 
 
 
+# TODO: mark as advanced
 option(BOSON_LINK_STATIC
   "link statically to most libraries, like KDE and Qt"
   OFF
@@ -129,6 +130,15 @@ if (UNIX)
    link_directories(/usr/local/lib)
    include_directories(/usr/local/include)
 endif (UNIX)
+
+
+add_custom_target(messages)
+# AB: this MUST be the FIRST target that is executed by "make messages" !
+add_custom_target(messages-recreate-boson_pot
+   COMMAND echo "" > ${CMAKE_BINARY_DIR}/po/boson.pot
+)
+add_dependencies(messages messages-recreate-boson_pot)
+
 
 add_subdirectory( lib3ds )
 add_subdirectory( bomemory )
