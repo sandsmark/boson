@@ -1,6 +1,6 @@
 project(boson)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.3.5)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.4.2)
 
 # Disallow in-source build
 STRING(COMPARE EQUAL "${boson_SOURCE_DIR}" "${boson_BINARY_DIR}" insource)
