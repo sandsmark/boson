@@ -131,13 +131,11 @@ void BoUfoMapPreviewDisplay::slotMouseEvent(QMouseEvent* e)
  pos.setY(QMAX(0, pos.y()));
  pos.setX(QMIN(pos.x(), width()));
  pos.setY(QMIN(pos.y(), height()));
- boDebug() << k_funcinfo << "foo: " << pos.x() << " " << pos.y() << endl;
 
  QPoint cell = d->mViewport->widgetPointToDataPoint(pos);
  if (cell.x() < 0 || cell.y() < 0) {
 	return;
  }
- boDebug() << k_funcinfo << "cell: " << cell.x() << " " << cell.y() << endl;
 
  // we accept all mouse events except mousemove events. this means that only
  // mouse move events are propagated to the parent (necessary for updating
