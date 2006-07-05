@@ -123,7 +123,6 @@ void BoUfoMapPreviewDisplay::slotWidgetResized()
 void BoUfoMapPreviewDisplay::slotMouseEvent(QMouseEvent* e)
 {
  QPoint pos = e->pos();
- boDebug() << k_funcinfo << pos.x() << " " << pos.y() << endl;
 
  // AB: when using click+move, the coordinates may go off this widget. we don't
  // want this.
