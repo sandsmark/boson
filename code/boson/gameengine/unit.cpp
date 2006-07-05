@@ -532,7 +532,7 @@ void Unit::advanceIdle(unsigned int advanceCallsCount)
 
 void Unit::advanceIdleBasic(unsigned int advanceCallsCount)
 {
- if (advanceCallsCount % 40 != 10) {
+ if (advanceCallsCount % 40 != (id() % 40)) {
 	return;
  }
  BosonProfiler profiler("advanceIdle");
@@ -1827,8 +1827,8 @@ UnitOrder* Unit::toplevelOrder() const
 void Unit::clearOrders()
 {
  if (d->mToplevelOrders.isEmpty()) {
-	// TODO: uncomment (temporary hack)
-	//return; // To avoid calling currentOrderChanged() below
+	setAdvanceWork(WorkIdle);  // Failsafe
+	return;
  }
 
  currentOrderRemoved();
@@ -1836,8 +1836,6 @@ void Unit::clearOrders()
 	delete d->mToplevelOrders.first();
 	d->mToplevelOrders.pop_front();
  }
- //d->mCurrentOrder = 0;
- // TODO: is this necessary?
  currentOrderChanged();
 }
 
