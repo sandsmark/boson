@@ -326,6 +326,9 @@ public:
 	void addSight(Unit* unit);
 	void removeSight(Unit* unit);
 
+	void addRadar(Unit* unit);
+	void removeRadar(Unit* unit);
+
 	Cell* cellAt(Unit* unit) const;
 
 	/**

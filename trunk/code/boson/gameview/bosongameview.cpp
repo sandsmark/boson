@@ -1443,8 +1443,6 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
 		d->mGLMiniMap, SLOT(slotItemAdded(BosonItem*)));
 	connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
 			d->mGLMiniMap, SLOT(slotAdvance(unsigned int)));
-	connect(d->mEventListener, SIGNAL(signalFacilityConstructed(Unit*)),
-			d->mGLMiniMap, SLOT(slotFacilityConstructed(Unit*)));
 
 	connect(d->mGLMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
 			this, SLOT(slotReCenterDisplay(const QPoint&)));

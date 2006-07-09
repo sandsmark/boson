@@ -42,7 +42,7 @@ class QPainter;
 class QPaintEvent;
 class QMouseEvent;
 template<class T> class QPtrVector;
-template<class T> class QPtrList;
+template<class T> class QValueList;
 
 
 class BosonGLCompleteMiniMapPrivate;
@@ -105,7 +105,6 @@ public slots:
 	void slotUnitMoved(Unit* unit, bofixed oldX, bofixed oldY);
 	void slotUnitRemoved(Unit* unit);
 	void slotItemAdded(BosonItem* item);
-	void slotFacilityConstructed(Unit* fac);
 	void slotUpdateTerrainAtCorner(int x, int y);
 	void slotExplored(int x, int y);
 	void slotUnexplored(int x, int y);
@@ -114,8 +113,8 @@ private:
 	void initializeItems();
 
 	void renderMiniMap();
-	void updateRadarTexture(const QPtrList<const Unit>* radars, BosonMiniMapQuadtreeNode* unitTree);
-	void renderRadarRangeIndicators(const QPtrList<const Unit>* radarlist);
+	void updateRadarTexture(const QValueList<const Unit*>* radars, BosonMiniMapQuadtreeNode* unitTree);
+	void renderRadarRangeIndicators(const QValueList<const Unit*>* radarlist);
 
 	/**
 	 * Calculate the color of the cell at @p x, @p y according to the @ref
@@ -126,7 +125,7 @@ private:
 	 **/
 	void calculateGround(int x, int y);
 
-	const QPtrList<const Unit>* radarList() const;
+	const QValueList<const Unit*>* radarList() const;
 	BosonMiniMapQuadtreeNode* unitTree() const;
 
 	void setPoint(int x, int y, const QColor& color, GLubyte* textureData, BoTexture* texture);

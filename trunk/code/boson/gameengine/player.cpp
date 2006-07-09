@@ -86,6 +86,8 @@ public:
 	QValueList<unsigned long int> mResearchedUpgrades;
 
 	BoUpgradesCollection mUpgradesCollection;
+
+	QValueList<const Unit*> mRadarUnits;
 };
 
 Player::Player(bool isNeutralPlayer) : KPlayer()
@@ -1322,6 +1324,21 @@ void Player::removeUpgrade(const UpgradeProperties* upgrade)
 const QValueList<const UpgradeProperties*>* Player::upgrades() const
 {
  return d->mUpgradesCollection.upgrades();
+}
+
+const QValueList<const Unit*>* Player::radarUnits() const
+{
+ return &d->mRadarUnits;
+}
+
+void Player::addRadar(Unit* u)
+{
+ d->mRadarUnits.append(u);
+}
+
+void Player::removeRadar(Unit* u)
+{
+ d->mRadarUnits.remove(u);
 }
 
 void Player::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 sender)

@@ -137,10 +137,18 @@ public:
 
 	void unitMoved(Unit* u, bofixed oldX, bofixed oldY);
 	void updateSights();
+	void updateRadars();
 
 	void addSight(Unit* unit);
 	void removeSight(Unit* unit);
 	void updateSight(Unit* unit, bofixed oldX, bofixed oldY);
+
+	void addRadar(Unit* unit);
+	void removeRadar(Unit* unit);
+	enum RadarChangeType { Move = 0, Add, Remove };
+	void updateChangedRadar(Unit* unit, bofixed oldX, bofixed oldY, RadarChangeType type = Move);
+	void updateRadarSignal(Unit* unit, bofixed oldX, bofixed oldY);
+	bofixed radarSignalStrength(const RadarPlugin* radar, bofixed x, bofixed y, Unit* u);
 
 private:
 	class ScheduledUnit
@@ -154,32 +162,47 @@ private:
 		bofixed lastY;
 	};
 
-	QValueList<ScheduledUnit> mScheduledUpdates;
+	// List of units that have moved, their sights need to be updated
+	QValueList<ScheduledUnit> mScheduledSightUpdates;
+	// List of all units that have moved, their radar signal strengths have
+	//  to be updated
+	QValueList<ScheduledUnit> mScheduledRadarUpdates;
+	// List of _radar_ units that have moved, everything in their _range_ need to
+	//  be updated
+	QValueList<ScheduledUnit> mChangedRadars;
+
 	BosonMap* mMap;
 	BosonCanvas* mCanvas;
 };
 
 void BoCanvasSightManager::unitMoved(Unit* u, bofixed oldX, bofixed oldY)
 {
- if (u->isScheduledForSightUpdate()) {
-	return;
+ if (!u->isScheduledForSightUpdate()) {
+	mScheduledSightUpdates.append(ScheduledUnit(u, oldX, oldY));
+	u->setScheduledForSightUpdate(true);
  }
 
- mScheduledUpdates.append(ScheduledUnit(u, oldX, oldY));
- u->setScheduledForSightUpdate(true);
+ if (!u->isScheduledForRadarUpdate()) {
+	if (u->plugin(UnitPlugin::Radar)) {
+		mChangedRadars.append(ScheduledUnit(u, oldX, oldY));
+	}
+	mScheduledRadarUpdates.append(ScheduledUnit(u, oldX, oldY));
+	u->setScheduledForRadarUpdate(true);
+ }
 }
 
 void BoCanvasSightManager::updateSights()
 {
- while (!mScheduledUpdates.isEmpty()) {
-	const ScheduledUnit& s = mScheduledUpdates.first();
+ while (!mScheduledSightUpdates.isEmpty()) {
+	const ScheduledUnit& s = mScheduledSightUpdates.first();
 	if (!s.unit->isScheduledForSightUpdate()) {
 		// Unit's sight has already been updated (e.g. when sight range increases)
+		mScheduledSightUpdates.pop_front();
 		continue;
 	}
 	updateSight(s.unit, s.lastX, s.lastY);
 
-	mScheduledUpdates.pop_front();
+	mScheduledSightUpdates.pop_front();
  }
 }
 
@@ -204,6 +227,7 @@ void BoCanvasSightManager::updateSight(Unit* unit, bofixed oldX, bofixed oldY)
  int deltaX = x - oldCenterX;
  int deltaY = y - oldCenterY;
  if (!deltaX && !deltaY) {
+	unit->setScheduledForSightUpdate(false);
 	return;
  }
 
@@ -283,6 +307,21 @@ void BoCanvasSightManager::removeSight(Unit* unit)
  unsigned int x = (unsigned int)unit->centerX();
  unsigned int y = (unsigned int)unit->centerY();
 
+ if (unit->isScheduledForSightUpdate()) {
+	// If unit has already moved since the last sight update, we need to use the
+	//  old coordinate
+	QValueList<ScheduledUnit>::iterator it;
+	for (it = mScheduledSightUpdates.begin(); it != mScheduledSightUpdates.end(); ++it) {
+		const ScheduledUnit& s = *it;
+		if (s.unit == unit) {
+			x = (unsigned int)(unit->centerX() + (s.lastX - unit->x()));
+			y = (unsigned int)(unit->centerY() + (s.lastY - unit->y()));
+			mScheduledSightUpdates.remove(it);
+			break;
+		}
+	}
+ }
+
  int left = ((x > sight) ? (x - sight) : 0) - x;
  int top = ((y > sight) ? (y - sight) : 0) - y;
  int right = ((x + sight > mMap->width()) ?  mMap->width() :
@@ -298,6 +337,163 @@ void BoCanvasSightManager::removeSight(Unit* unit)
  }
  unit->setScheduledForSightUpdate(false);
 }
+
+void BoCanvasSightManager::updateRadars()
+{
+ // First update changed radars
+ while (!mChangedRadars.isEmpty()) {
+	const ScheduledUnit& s = mChangedRadars.first();
+	updateChangedRadar(s.unit, s.lastX, s.lastY);
+
+	mChangedRadars.pop_front();
+ }
+
+ // Then update all moved non-radar units
+ while (!mScheduledRadarUpdates.isEmpty()) {
+	const ScheduledUnit& s = mScheduledRadarUpdates.first();
+	if (!s.unit->isScheduledForRadarUpdate()) {
+		mScheduledRadarUpdates.pop_front();
+		continue;
+	}
+	updateRadarSignal(s.unit, s.lastX, s.lastY);
+
+	mScheduledRadarUpdates.pop_front();
+ }
+}
+
+void BoCanvasSightManager::updateChangedRadar(Unit* unit, bofixed oldX, bofixed oldY, RadarChangeType type)
+{
+ PROFILE_METHOD;
+ const RadarPlugin* prop = (const RadarPlugin*)unit->plugin(UnitPlugin::Radar);
+ if (!prop) {
+	boError() << k_funcinfo << "unit " << unit->id() << " is not radar!" << endl;
+	return;
+ }
+
+ if (type != Move) {
+	oldX = unit->x();
+	oldY = unit->y();
+ }
+
+ // Maximum range of the radar
+ // See below for the radar equation, here we calculate maximum distance of an
+ //  object with size = 4.0 so that it's still detected by the radar
+ bofixed maxrange = powf((prop->transmittedPower() * 4.0f) / prop->minReceivedPower(), 0.25f);
+
+ // Calculate bbox of the radar-affected area
+ bofixed minx = QMAX(QMIN(unit->x(), oldX) - maxrange, bofixed(0));
+ bofixed maxx = QMIN(QMAX(unit->x(), oldX) + maxrange, bofixed(mMap->width()));
+ bofixed miny = QMAX(QMIN(unit->y(), oldY) - maxrange, bofixed(0));
+ bofixed maxy = QMIN(QMAX(unit->y(), oldY) + maxrange, bofixed(mMap->height()));
+
+ BoRect2Fixed area(minx,  miny, maxx, maxy);
+ BoItemList* items = mCanvas->collisions()->collisionsAtCells(area, 0, false);
+
+ BoItemList::ConstIterator it;
+ for (it = items->begin(); it != items->end(); ++it) {
+	if (!RTTI::isUnit((*it)->rtti())) {
+		continue;
+	}
+	Unit* u = (Unit*)*it;
+	if (u->isDestroyed()) {
+		continue;
+	} else if (u->isScheduledForRadarUpdate()) {
+		// This unit's signalstrengths will be recalculated for all players anyway.
+		//  Just skip it for now
+		continue;
+	}
+	// Make sure the radar can detect the unit
+	if (u->isFlying() && !prop->detectsAirUnits()) {
+		continue;
+	} else if (!u->isFlying() && !prop->detectsLandUnits()) {
+		continue;
+	}
+
+	// We know that u hasn't moved since it's signal strength was last
+	//  calculated (otherwise it would be scheduled for radar update), so we can
+	//  just substract the signal strength from radar's old position and then add
+	//  it from it's new position
+	bofixed oldstrength = 0;
+	bofixed newstrength = 0;
+	if (type != Add) {
+		oldstrength = radarSignalStrength(prop, oldX, oldY, u);
+	}
+	if (type != Remove) {
+		newstrength = radarSignalStrength(prop, unit->x(), unit->y(), u);
+	}
+	// Note that we update only the radar owner's signal
+	u->setRadarSignalStrength(unit->owner()->bosonId(), u->radarSignalStrength(unit->owner()->bosonId()) - oldstrength + newstrength);
+ }
+}
+
+void BoCanvasSightManager::updateRadarSignal(Unit* unit, bofixed oldX, bofixed oldY)
+{
+ PROFILE_METHOD;
+ QPtrList<Player>* players = boGame->activeGamePlayerList();
+ for (QPtrListIterator<Player> it(*players); it.current(); ++it) {
+	Player* player = it.current();
+	bofixed signalstrength = 0;
+
+	const QValueList<const Unit*>* radars = player->radarUnits();
+	for (QValueList<const Unit*>::const_iterator it = radars->begin(); it != radars->end(); ++it) {
+		const Unit* u = *it;
+		const RadarPlugin* radar = (const RadarPlugin*)u->plugin(UnitPlugin::Radar);
+		if (u->isFlying() && radar->detectsAirUnits()) {
+			signalstrength += radarSignalStrength(radar, u->x(), u->y(), unit);
+		} else if (!u->isFlying() && radar->detectsLandUnits()) {
+			signalstrength += radarSignalStrength(radar, u->x(), u->y(), unit);
+		}
+	}
+
+	unit->setRadarSignalStrength(player->bosonId(), signalstrength);
+ }
+
+ unit->setScheduledForRadarUpdate(false);
+}
+
+void BoCanvasSightManager::addRadar(Unit* unit)
+{
+ updateChangedRadar(unit, -1, -1, Add);
+}
+
+void BoCanvasSightManager::removeRadar(Unit* unit)
+{
+ updateChangedRadar(unit, -1, -1, Remove);
+}
+
+bofixed BoCanvasSightManager::radarSignalStrength(const RadarPlugin* radar, bofixed x, bofixed y, Unit* u)
+{
+ float dx = x - u->centerX();
+ float dy = y - u->centerY();
+ float distsqr = dx*dx + dy*dy;
+ if (distsqr < 1) {
+	distsqr = 1;
+ }
+
+ // To calculate strength of radar signal, we use simplified radar equation:
+ //      R = (T * S) / (D^4)
+ //  where R - received power
+ //        T - transmitter power
+ //        S - size of the object (how well it reflects the signal)
+ //        D - distance between radar and the object
+ // See http://en.wikipedia.org/wiki/Radar for more info about radars and
+ //  radar equation.
+ float receivedpower = (radar->transmittedPower() * (float)u->width()) / (distsqr * distsqr);
+ float signalstrength = receivedpower / radar->minReceivedPower();
+ //boDebug() << k_funcinfo << radar->unit()->id() << " -> " << u->id() << ": " << receivedpower << " / " << signalstrength << endl;
+ if (signalstrength >= 1) {
+	// Clamp to 200 to avoid overflows
+	if (signalstrength > 200.0f) {
+		return bofixed(200);
+	} else {
+		return bofixed(signalstrength);
+	}
+ } else {
+	return 0;
+ }
+}
+
+
 
 
 /**
@@ -374,8 +570,13 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
  boProfiling->pop(); // Advance Items
 
  if (advanceCallsCount % 20 == 7) {
-	boProfiling->push("SightManager");
+	boProfiling->push("SightManager::updateSights()");
 	mCanvas->d->mSightManager->updateSights();
+	boProfiling->pop();
+ }
+ if (advanceCallsCount % 40 == 18) {
+	boProfiling->push("SightManager::updateRadars()");
+	mCanvas->d->mSightManager->updateRadars();
 	boProfiling->pop();
  }
 
@@ -874,6 +1075,26 @@ void BosonCanvas::addSight(Unit* unit)
 void BosonCanvas::removeSight(Unit* unit)
 {
  d->mSightManager->removeSight(unit);
+}
+
+void BosonCanvas::addRadar(Unit* unit)
+{
+ if (!unit->plugin(UnitPlugin::Radar)) {
+	return;
+ }
+
+ d->mSightManager->addRadar(unit);
+ unit->owner()->addRadar(unit);
+}
+
+void BosonCanvas::removeRadar(Unit* unit)
+{
+ if (!unit->plugin(UnitPlugin::Radar)) {
+	return;
+ }
+
+ d->mSightManager->removeRadar(unit);
+ unit->owner()->removeRadar(unit);
 }
 
 void BosonCanvas::newShot(BosonShot*)
@@ -1963,9 +2184,12 @@ BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type
  }
  if (item) {
 	if (RTTI::isUnit(rtti)) {
+		Unit* unit = (Unit*)item;
 		// We also need to recalc occupied status for cells that unit is on.
 		// FIXME: this is hackish
-		unitMovingStatusChanges((Unit*)item, UnitBase::Moving, UnitBase::Standing);
+		unitMovingStatusChanges(unit, UnitBase::Moving, UnitBase::Standing);
+		// This unit might be a radar
+		addRadar(unit);
 	}
 	emit signalItemAdded(item);
  }

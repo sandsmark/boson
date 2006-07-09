@@ -52,6 +52,10 @@ UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canva
  mAdvanceWasChargedThisAdvanceCall = false;
 
  mScheduledForSightUpdate = false;
+ mScheduledForRadarUpdate = false;
+ for (int i = 0; i < BOSON_MAX_PLAYERS; i++) {
+	mRadarSignalStrength[i] = 0;
+ }
 
  registerData(&mShieldReloadCounter, IdShieldReloadCounter);
  registerData(&mDeletionTimer, IdDeletionTimer);

@@ -234,6 +234,10 @@ public:
 
 	const UpgradeProperties* technologyProperties(unsigned long int type) const;
 
+	const QValueList<const Unit*>* radarUnits() const;
+	void addRadar(Unit* u);
+	void removeRadar(Unit* u);
+
 	/**
 	 * Initialize the map for this player - this is mostly the fog of war,
 	 * currently.
@@ -427,7 +431,7 @@ public:
 
 	void writeGameLog(QTextStream& log);
 
-      virtual void networkTransmission(QDataStream& stream, int msgid, Q_UINT32 sender);
+	virtual void networkTransmission(QDataStream& stream, int msgid, Q_UINT32 sender);
 
 signals:
 	void signalLoadUnit(unsigned long int unitType, unsigned long int id, Player* owner);
