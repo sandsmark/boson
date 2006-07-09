@@ -389,6 +389,23 @@ public:
 	{
 		return mScheduledForSightUpdate;
 	}
+	inline void setScheduledForRadarUpdate(bool set)
+	{
+		mScheduledForRadarUpdate = set;
+	}
+	inline bool isScheduledForRadarUpdate() const
+	{
+		return mScheduledForRadarUpdate;
+	}
+
+	inline bofixed radarSignalStrength(int playerid) const
+	{
+		return mRadarSignalStrength[playerid - 128];
+	}
+	inline void setRadarSignalStrength(int playerid, bofixed value)
+	{
+		mRadarSignalStrength[playerid - 128] = value;
+	}
 
 protected:
 	/**
@@ -445,6 +462,8 @@ private:
 	bool mAdvanceWasChargedThisAdvanceCall; // updated every advance call, no need to save
 
 	bool mScheduledForSightUpdate;
+	bool mScheduledForRadarUpdate;
+	bofixed mRadarSignalStrength[BOSON_MAX_PLAYERS];
 };
 
 #endif

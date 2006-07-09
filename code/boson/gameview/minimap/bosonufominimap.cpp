@@ -314,13 +314,6 @@ void BosonUfoMiniMap::slotItemAdded(BosonItem* item)
  }
 }
 
-void BosonUfoMiniMap::slotFacilityConstructed(Unit* fac)
-{
- if (miniMapView()) {
-	miniMapView()->slotFacilityConstructed(fac);
- }
-}
-
 void BosonUfoMiniMap::slotUpdateTerrainAtCorner(int x, int y)
 {
  if (miniMapView()) {

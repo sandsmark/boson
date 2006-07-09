@@ -151,7 +151,7 @@ protected:
 	void renderBulletTrailEffects(BoVisibleEffects& visible);
 	void renderFadeEffects(BoVisibleEffects& visible);
 	void renderPathLines(const BosonCanvas* canvas, QValueList<QPoint>& path, bool isFlying, float _z);
-	void createRenderItemList(QValueVector<BoRenderItem>* renderItemList, const QPtrList<BosonItemContainer>& allItems);
+	void createRenderItemList(QValueVector<BoRenderItem>* renderItemList, QValueList<Unit*>* radarContactList, const QPtrList<BosonItemContainer>& allItems);
 	void createSelectionsList(BoItemList* selections, const QValueVector<BoRenderItem>* relevantItems);
 	void createVisibleEffectsList(BoVisibleEffects*, const QPtrList<BosonEffect>& allEffects, unsigned int mapWidth, unsigned int mapHeight);
 

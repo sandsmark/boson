@@ -264,10 +264,17 @@ void Unit::setHealth(unsigned long int h)
 	boError() << "Ooop - maxHealth == 0" << endl;
 	return;
  }
+ // Radar's range depends on the unit's health, so we need to remove the radar,
+ //  then change unit's health and then readd the radar
+ if (plugin(UnitPlugin::Radar)) {
+	canvas()->removeRadar(this);
+ }
  UnitBase::setHealth(h);
  if (isDestroyed()) {
 	unselect();
 	updateAnimationMode();
+ } else if (plugin(UnitPlugin::Radar)) {
+	canvas()->addRadar(this);
  }
 }
 
@@ -2117,6 +2124,10 @@ void UnitConstruction::setConstructionStep(unsigned int step)
 	unit()->setAdvanceWork(UnitBase::WorkIdle);
 	unit()->owner()->facilityCompleted(unit());
 	unit()->updateAnimationMode();
+	// TODO: should this be moved somewhere else?
+	if (unit()->plugin(UnitPlugin::Radar)) {
+		unit()->canvas()->addRadar(unit());
+	}
  }
 }
 
@@ -2132,6 +2143,9 @@ bool UnitConstruction::loadFromXML(const QDomElement& root)
  }
 
  unit()->updateAnimationMode();
+ if (isConstructionComplete() && unit()->plugin(UnitPlugin::Radar)) {
+	unit()->canvas()->addRadar(unit());
+ }
 
  return true;
 }

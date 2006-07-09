@@ -576,6 +576,7 @@ public:
 	BoSceneRenderTarget* mMainSceneRenderTarget;
 	BoSceneRenderTargetCache* mSceneRenderTargetCache;
 
+	QValueList<Unit*> mRadarContactsList;
 	QValueList<Unit*> mIconicUnits;
 	BoTexture* mUnitIconLand;
 	BoTexture* mUnitIconAir;
@@ -787,7 +788,7 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
 
 
  // Create list of visible items
- createRenderItemList(&d->mRenderItemList, allItems); // AB: this is very fast. < 1.5ms on experimental5 for me
+ createRenderItemList(&d->mRenderItemList, &d->mRadarContactsList, allItems); // AB: this is very fast. < 1.5ms on experimental5 for me
 
  // Create list of visible terrain chunks and calculate their min/max distance
  // Not necessary, it's done in BosonGameView::cameraChanged()
@@ -1450,12 +1451,13 @@ void BosonCanvasRenderer::stopRenderingToTexture()
  glPopAttrib();
 }
 
-void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* renderItemList, const QPtrList<BosonItemContainer>& allItems)
+void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* renderItemList, QValueList<Unit*>* radarContactList, const QPtrList<BosonItemContainer>& allItems)
 {
  BO_CHECK_NULL_RET(localPlayerIO());
 
  renderItemList->clear();
  renderItemList->reserve(allItems.count());
+ radarContactList->clear();
 
  d->mMinItemDist = 1000000.0f;
  d->mMaxItemDist = 0.0f;
@@ -1495,6 +1497,12 @@ void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* rende
 	// but concerning z-position they are rendered from bottom to top!
 
 	if (!localPlayerIO()->canSee(item)) {
+		if (RTTI::isUnit(item->rtti())) {
+			Unit* u = (Unit*)item;
+			if (u->radarSignalStrength(localPlayerIO()->playerId()) >= 1) {
+				radarContactList->append(u);
+			}
+		}
 		continue;
 	}
 
@@ -1801,7 +1809,7 @@ void BosonCanvasRenderer::renderSelections(const BoItemList* selectedItems)
 
 void BosonCanvasRenderer::renderUnitIcons()
 {
- if (d->mIconicUnits.count() == 0) {
+ if (d->mIconicUnits.count() == 0 && d->mRadarContactsList.count() == 0) {
 	return;
  }
 
@@ -1862,6 +1870,30 @@ void BosonCanvasRenderer::renderUnitIcons()
 		glTexCoord2f(1.0, 1.0);  glVertex3fv((pos + (upperright * iconsize) + shift).data());
 		glTexCoord2f(1.0, 0.0);  glVertex3fv((pos + (lowerright * iconsize) + shift).data());
 		glTexCoord2f(0.0, 0.0);  glVertex3fv((pos + (lowerleft  * iconsize) + shift).data());
+	glEnd();
+ }
+
+ // Render radar contacts
+ d->mUnitIconFacility->bind();
+ for (QValueList<Unit*>::Iterator it = d->mRadarContactsList.begin(); it != d->mRadarContactsList.end(); ++it) {
+	Unit* u = *it;
+	BoVector3Float pos(u->centerX(), -u->centerY(), u->centerZ());
+	float distSq = (camera()->cameraPos() - pos).dotProduct();
+	float dist = sqrt(distSq);
+	float sqrtwidth = sqrt(u->width());
+
+	// Select icon size
+	float iconsize = 0.5f * (dist / 70) * sqrtwidth;
+	BoVector3Float shift = z * iconsize;
+	float alpha = 0.3 + QMIN((float)u->radarSignalStrength(localPlayerIO()->playerId()) / 20.0f, 0.5f);
+	glColor4f(0.4, 0.4, 0.4, alpha);
+
+	// Render icon
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0, 1.0);  glVertex3fv((pos + (upperleft  * iconsize) + shift).data());
+	glTexCoord2f(1.0, 1.0);  glVertex3fv((pos + (upperright * iconsize) + shift).data());
+	glTexCoord2f(1.0, 0.0);  glVertex3fv((pos + (lowerright * iconsize) + shift).data());
+	glTexCoord2f(0.0, 0.0);  glVertex3fv((pos + (lowerleft  * iconsize) + shift).data());
 	glEnd();
  }
 

@@ -385,7 +385,6 @@ public:
 	BosonCanvas* mCanvas;
 	PlayerIO* mLocalPlayerIO;
 
-	QPtrList<const Unit> mRadars;
 	BosonMiniMapQuadtreeNode* mUnitTree;
 };
 
@@ -622,7 +621,7 @@ void BosonGLCompleteMiniMap::renderMiniMap()
 
  if (d->mAdvanceCallsSinceLastUpdate >= 40) {
 	d->mUnitTarget->enable();
-	updateRadarTexture(&d->mRadars, d->mUnitTree);
+	updateRadarTexture(radarList(), d->mUnitTree);
 	d->mUnitTarget->disable();
  }
 
@@ -666,7 +665,7 @@ void BosonGLCompleteMiniMap::renderMiniMap()
  glPopMatrix();
 }
 
-void BosonGLCompleteMiniMap::updateRadarTexture(const QPtrList<const Unit>* radarlist, BosonMiniMapQuadtreeNode* unitTree)
+void BosonGLCompleteMiniMap::updateRadarTexture(const QValueList<const Unit*>* radarlist, BosonMiniMapQuadtreeNode* unitTree)
 {
  BO_CHECK_NULL_RET(localPlayerIO());
 
@@ -694,59 +693,6 @@ void BosonGLCompleteMiniMap::updateRadarTexture(const QPtrList<const Unit>* rada
  gluOrtho2D(0.0f, d->mMapWidth, 0.0f, d->mMapHeight);
  glDisable(GL_DEPTH_TEST);
 
- // Create a vector of radars and their ranges
- QValueVector<const RadarPlugin*> radars;
- QValueVector<float> ranges;
- QValueVector<BoVector2Float> centers;
-
- float minx = 1000000.0f, maxx = -1000000.0f, miny = 1000000.0f, maxy = -1000000.0f;
- for (QPtrListIterator<const Unit> it(*radarlist); it.current(); ++it) {
-	const Unit* unit = it.current();
-	const RadarPlugin* prop = (const RadarPlugin*)unit->plugin(UnitPlugin::Radar);
-	if (!prop) {
-		continue;
-	}
-
-	radars.append(prop);
-	centers.append(unit->center().toFloat());
-
-	// Maximum range of the radar
-	// See below for the radar equation, here we calculate maximum distance of an
-	//  object with size = 0.5 so that it's still detected by the radar
-	float maxrange = powf((prop->transmittedPower() * 3.0f) / prop->minReceivedPower(), 0.25f);
-	ranges.append(maxrange * maxrange);
-
-	// Update bbox of the radar-affected area
-	minx = QMIN(minx, (float)unit->x() - maxrange);
-	maxx = QMAX(maxx, (float)unit->x() + maxrange);
-	miny = QMIN(miny, (float)unit->y() - maxrange);
-	maxy = QMAX(maxy, (float)unit->y() + maxrange);
- }
- BoRect2Fixed area((int)QMAX(0.0f, minx),  (int)QMAX(0.0f, miny),
-		(int)QMIN(d->mMapWidth, maxx + 1),  (int)QMIN(d->mMapHeight, maxy + 1));
-
- // Get a list of all items in the affected area
-#ifdef USE_EXPERIMENTAL_QUADTREE_THINGY
- BoItemList* items;
- {
- BosonProfiler p("unitTree->approximateUnitsInRect(area);");
- items = unitTree->approximateUnitsInRect(area);
- }
-#else
- BoItemList* items = d->mCanvas->collisions()->collisionsAtCells(area, 0, false);
-#endif
-
-
- // For every item, see if it's visible by the radar and render a dot if it is.
- // To determine whether the item is detected by the radar (and how well it's
- //  detected), we use simplified radar equation:
- //      R = (T * S) / (D^4)
- //  where R - received power
- //        T - transmitter power
- //        S - size of the object (how well it reflects the signal)
- //        D - distance between radar and the object
- // See http://en.wikipedia.org/wiki/Radar for more info about radars and
- //  radar equation.
 
  // Use additive blending
  glEnable(GL_BLEND);
@@ -760,7 +706,7 @@ void BosonGLCompleteMiniMap::updateRadarTexture(const QPtrList<const Unit>* rada
  //     -> previously we displayed the whole minimap in a 150x150 quad, now we
  //        display only a part of the minimap there and thus the blips are
  //        larger anyway
- float visiblepointsize = 2.0f;
+ float visiblepointsize = 3.0f;
 #if 0
  const float radarBlipScaleFactor = QMAX(d->mMapWidth, d->mMapHeight) / (float)miniMapScreenWidth()
 #else
@@ -773,6 +719,7 @@ void BosonGLCompleteMiniMap::updateRadarTexture(const QPtrList<const Unit>* rada
 
  glBegin(GL_POINTS);
  BoItemList::ConstIterator it;
+ BoItemList* items = d->mCanvas->allItems();
  for (it = items->begin(); it != items->end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
@@ -795,25 +742,11 @@ void BosonGLCompleteMiniMap::updateRadarTexture(const QPtrList<const Unit>* rada
 	bool flying = u->isFlying();
 	float strongestsignal = 0.0f;
 	// Go through all the radars and pick the one with the strongest signal
-	for (unsigned int i = 0; i < radars.count(); i++) {
-		if ((flying && !radars[i]->detectsAirUnits()) || (!flying && !radars[i]->detectsLandUnits())) {
-			// This radar can't detect this unit
-			continue;
-		}
-		float distsqr = (itempos - centers[i]).dotProduct();
-		if (distsqr > ranges[i]) {
-			// Most likely not visible to this radar
-			continue;
-		} else {
-			float receivedpower = (radars[i]->transmittedPower() * (float)u->width()) / (distsqr * distsqr);
-			// We additonally divide by minReceivedPower() to get "signal strength"
-			strongestsignal = QMAX(strongestsignal, receivedpower / radars[i]->minReceivedPower());
-		}
-	}
-	if (strongestsignal >= 1.0f) {
+	bofixed signal = u->radarSignalStrength(localPlayerIO()->playerId());
+	if (signal >= 1.0f) {
 		// Signal was picked up by at least one radar.
 		// Render the dot
-		glColor4fv((basecolor + addcolor * strongestsignal).data());
+		glColor4fv((basecolor + addcolor * signal).data());
 		glVertex3f(itempos.x(), itempos.y(), 0.0f);
 	}
  }
@@ -835,7 +768,7 @@ void BosonGLCompleteMiniMap::updateRadarTexture(const QPtrList<const Unit>* rada
  glPopAttrib();
 }
 
-void BosonGLCompleteMiniMap::renderRadarRangeIndicators(const QPtrList<const Unit>* radarlist)
+void BosonGLCompleteMiniMap::renderRadarRangeIndicators(const QValueList<const Unit*>* radarlist)
 {
  BO_CHECK_NULL_RET(d->mRadarRangeTexture);
 
@@ -855,8 +788,8 @@ void BosonGLCompleteMiniMap::renderRadarRangeIndicators(const QPtrList<const Uni
  glScalef(1.0f / d->mMapWidth, 1.0f / d->mMapHeight, 1.0f);
 
  float progress = d->mAdvanceCallsSinceLastIndicatorsUpdate / 50.0f;
- for (QPtrListIterator<const Unit> it(*radarlist); it.current(); ++it) {
-	const Unit* unit = it.current();
+ for (QValueList<const Unit*>::const_iterator it = radarlist->begin(); it != radarlist->end(); ++it) {
+	const Unit* unit = *it;
 	const RadarPlugin* prop = (const RadarPlugin*)unit->plugin(UnitPlugin::Radar);
 	if (!prop) {
 		continue;
@@ -998,7 +931,6 @@ void BosonGLCompleteMiniMap::slotUnitRemoved(Unit* unit)
 	d->mUnitTree->removeUnit(unit);
  }
 #endif
- d->mRadars.remove(unit);
 }
 
 void BosonGLCompleteMiniMap::slotItemAdded(BosonItem* item)
@@ -1015,27 +947,11 @@ void BosonGLCompleteMiniMap::slotItemAdded(BosonItem* item)
 	d->mUnitTree->addUnit(u);
  }
 #endif
-
- if (u->owner() != localPlayerIO()->player()) {
-	return;
- }
- const RadarPlugin* prop = (RadarPlugin*)u->plugin(UnitPlugin::Radar);
- if (!prop) {
-	return;
- }
- d->mRadars.append(u);
 }
 
-void BosonGLCompleteMiniMap::slotFacilityConstructed(Unit* fac)
+const QValueList<const Unit*>* BosonGLCompleteMiniMap::radarList() const
 {
- // Facilities have the construction phase so they have to be rechecked
- //  (whether they are radars) once they are constructed.
- slotItemAdded(fac);
-}
-
-const QPtrList<const Unit>* BosonGLCompleteMiniMap::radarList() const
-{
- return &d->mRadars;
+ return localPlayerIO()->player()->radarUnits();
 }
 
 BosonMiniMapQuadtreeNode* BosonGLCompleteMiniMap::unitTree() const
@@ -1092,7 +1008,6 @@ void BosonGLCompleteMiniMap::initializeItems()
 	return;
  }
  boDebug() << k_funcinfo << "initializing items" << endl;
- d->mRadars.clear();
  BoItemList* allItems = canvas()->allItems();
  for (BoItemList::iterator it = allItems->begin(); it != allItems->end(); ++it) {
 	slotItemAdded(*it);
