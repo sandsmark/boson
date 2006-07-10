@@ -346,7 +346,7 @@ void RadarProperties::loadPlugin(KSimpleConfig* config)
  }
  config->setGroup(propertyGroup());
  mTransmittedPower = config->readDoubleNumEntry("TransmittedPower", 10000.0f);
- mMinReceivedPower = config->readDoubleNumEntry("MinReceivedPower", 0.001f);
+ mMinReceivedPower = config->readDoubleNumEntry("MinReceivedPower", 0.05f);
  mDetectsLandUnits = config->readBoolEntry("DetectsLandUnits", true);
  mDetectsAirUnits = config->readBoolEntry("DetectsAirUnits", true);
 }
@@ -356,5 +356,41 @@ void RadarProperties::savePlugin(KSimpleConfig* config)
  config->setGroup(propertyGroup());
  config->writeEntry("TransmittedPower", mTransmittedPower);
  config->writeEntry("MinReceivedPower", mMinReceivedPower);
+}
+
+
+RadarJammerProperties::RadarJammerProperties(const UnitProperties* parent)
+		: PluginProperties(parent)
+{
+}
+
+RadarJammerProperties::~RadarJammerProperties()
+{
+}
+
+QString RadarJammerProperties::propertyGroup()
+{
+ return QString::fromLatin1("RadarJammerPlugin");
+}
+
+QString RadarJammerProperties::name() const
+{
+ return i18n("Radar Jammer Plugin");
+}
+
+void RadarJammerProperties::loadPlugin(KSimpleConfig* config)
+{
+ if (!config->hasGroup(propertyGroup())) {
+	boError() << k_funcinfo << "unit has no production plugin" << endl;
+	return;
+ }
+ config->setGroup(propertyGroup());
+ mTransmittedPower = config->readDoubleNumEntry("TransmittedPower", 500.0f);
+}
+
+void RadarJammerProperties::savePlugin(KSimpleConfig* config)
+{
+ config->setGroup(propertyGroup());
+ config->writeEntry("TransmittedPower", mTransmittedPower);
 }
 

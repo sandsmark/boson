@@ -191,6 +191,9 @@ bool Unit::init()
  if (prop->properties(PluginProperties::Radar)) {
 	d->mPlugins.append(new RadarPlugin(this));
  }
+ if (prop->properties(PluginProperties::RadarJammer)) {
+	d->mPlugins.append(new RadarJammerPlugin(this));
+ }
 
  loadWeapons();
 
@@ -269,12 +272,20 @@ void Unit::setHealth(unsigned long int h)
  if (plugin(UnitPlugin::Radar)) {
 	canvas()->removeRadar(this);
  }
+ if (plugin(UnitPlugin::RadarJammer)) {
+	canvas()->removeRadarJammer(this);
+ }
  UnitBase::setHealth(h);
  if (isDestroyed()) {
 	unselect();
 	updateAnimationMode();
- } else if (plugin(UnitPlugin::Radar)) {
-	canvas()->addRadar(this);
+ } else {
+	if (plugin(UnitPlugin::Radar)) {
+		canvas()->addRadar(this);
+	}
+	if (plugin(UnitPlugin::RadarJammer)) {
+		canvas()->addRadarJammer(this);
+	}
  }
 }
 
@@ -2128,6 +2139,9 @@ void UnitConstruction::setConstructionStep(unsigned int step)
 	if (unit()->plugin(UnitPlugin::Radar)) {
 		unit()->canvas()->addRadar(unit());
 	}
+	if (unit()->plugin(UnitPlugin::RadarJammer)) {
+		unit()->canvas()->addRadarJammer(unit());
+	}
  }
 }
 
@@ -2143,8 +2157,13 @@ bool UnitConstruction::loadFromXML(const QDomElement& root)
  }
 
  unit()->updateAnimationMode();
- if (isConstructionComplete() && unit()->plugin(UnitPlugin::Radar)) {
-	unit()->canvas()->addRadar(unit());
+ if (isConstructionComplete()) {
+	if (unit()->plugin(UnitPlugin::Radar)) {
+		unit()->canvas()->addRadar(unit());
+	}
+	if (unit()->plugin(UnitPlugin::RadarJammer)) {
+		unit()->canvas()->addRadarJammer(unit());
+	}
  }
 
  return true;

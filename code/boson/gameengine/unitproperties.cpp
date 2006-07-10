@@ -247,6 +247,9 @@ bool UnitProperties::loadAllPluginProperties(KSimpleConfig* conf)
  if (conf->hasGroup(RadarProperties::propertyGroup())) {
 	loadPluginProperties(new RadarProperties(this), conf);
  }
+ if (conf->hasGroup(RadarJammerProperties::propertyGroup())) {
+	loadPluginProperties(new RadarJammerProperties(this), conf);
+ }
  return true;
 }
 

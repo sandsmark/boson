@@ -329,6 +329,10 @@ public:
 	void addRadar(Unit* unit);
 	void removeRadar(Unit* unit);
 
+	void addRadarJammer(Unit* unit);
+	void removeRadarJammer(Unit* unit);
+	const QValueList<const Unit*>* radarJammerUnits() const;
+
 	Cell* cellAt(Unit* unit) const;
 
 	/**
