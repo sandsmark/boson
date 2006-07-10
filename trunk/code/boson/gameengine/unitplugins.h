@@ -702,18 +702,34 @@ public:
 	virtual void itemRemoved(BosonItem*);
 
 	/**
+	 * Call this whenever unit's health changes. It recalculates radar's
+	 *  transmitted power and range (which are dependant on health)
+	 **/
+	void unitHealthChanged();
+
+	/**
 	 * @return Power transmitted by the transmitter antenna.
 	 * Note that this has _no_ correspondance to the power resource.
 	 **/
-	float transmittedPower() const;
+	float transmittedPower() const { return mTransmittedPower; }
 
 	/**
 	 * @return Minimum received power to notice the target
 	 **/
 	float minReceivedPower() const;
 
+	/**
+	 * @return Range of the radar
+	 * It's unlikely that any objects outside this range would be detected
+	 **/
+	bofixed range() const { return mRange; }
+
 	bool detectsLandUnits() const;
 	bool detectsAirUnits() const;
+
+private:
+	bofixed mRange;
+	float mTransmittedPower;
 };
 
 #endif
