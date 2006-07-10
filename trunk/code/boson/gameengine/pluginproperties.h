@@ -60,7 +60,8 @@ public:
 		Weapon = 4,
 		ResourceMine = 5,
 		AmmunitionStorage = 6,
-		Radar = 7
+		Radar = 7,
+		RadarJammer = 8
 	};
 	PluginProperties(const UnitProperties* parent);
 	virtual ~PluginProperties();
@@ -317,6 +318,29 @@ private:
 	float mMinReceivedPower;
 	bool mDetectsLandUnits;
 	bool mDetectsAirUnits;
+};
+
+class RadarJammerProperties : public PluginProperties
+{
+public:
+	RadarJammerProperties(const UnitProperties* parent);
+	~RadarJammerProperties();
+
+	static QString propertyGroup();
+
+	virtual QString name() const;
+	virtual void loadPlugin(KSimpleConfig* config);
+	virtual void savePlugin(KSimpleConfig* config);
+	virtual int pluginType() const { return RadarJammer; }
+
+	/**
+	 * @return Power transmitted by the jammer.
+	 * Note that this has _no_ correspondance to the power resource.
+	 **/
+	float transmittedPower() const { return mTransmittedPower; }
+
+private:
+	float mTransmittedPower;
 };
 
 

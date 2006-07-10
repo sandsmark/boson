@@ -150,6 +150,12 @@ public:
 	void updateRadarSignal(Unit* unit, bofixed oldX, bofixed oldY);
 	bofixed radarSignalStrength(const RadarPlugin* radar, bofixed x, bofixed y, Unit* u);
 
+	void addRadarJammer(Unit* unit);
+	void removeRadarJammer(Unit* unit);
+	const QValueList<const Unit*>* radarJammerUnits() const { return &mRadarJammers; }
+	void updateChangedJammer(Unit* unit, bofixed oldX, bofixed oldY, RadarChangeType type = Move);
+	bofixed jammerSignalStrength(const RadarJammerPlugin* radar, bofixed x, bofixed y, Unit* u);
+
 private:
 	class ScheduledUnit
 	{
@@ -170,6 +176,11 @@ private:
 	// List of _radar_ units that have moved, everything in their _range_ need to
 	//  be updated
 	QValueList<ScheduledUnit> mChangedRadars;
+	// List of _radar jammer_ units that have moved, everything in their _range_
+	//  need to be updated
+	QValueList<ScheduledUnit> mChangedJammers;
+
+	QValueList<const Unit*> mRadarJammers;
 
 	BosonMap* mMap;
 	BosonCanvas* mCanvas;
@@ -185,6 +196,9 @@ void BoCanvasSightManager::unitMoved(Unit* u, bofixed oldX, bofixed oldY)
  if (!u->isScheduledForRadarUpdate()) {
 	if (u->plugin(UnitPlugin::Radar)) {
 		mChangedRadars.append(ScheduledUnit(u, oldX, oldY));
+	}
+	if (u->plugin(UnitPlugin::RadarJammer)) {
+		mChangedJammers.append(ScheduledUnit(u, oldX, oldY));
 	}
 	mScheduledRadarUpdates.append(ScheduledUnit(u, oldX, oldY));
 	u->setScheduledForRadarUpdate(true);
@@ -348,7 +362,15 @@ void BoCanvasSightManager::updateRadars()
 	mChangedRadars.pop_front();
  }
 
- // Then update all moved non-radar units
+ // Then changed jammers
+ while (!mChangedJammers.isEmpty()) {
+	const ScheduledUnit& s = mChangedJammers.first();
+	updateChangedJammer(s.unit, s.lastX, s.lastY);
+
+	mChangedJammers.pop_front();
+ }
+
+ // And finally all moved non-radar units
  while (!mScheduledRadarUpdates.isEmpty()) {
 	const ScheduledUnit& s = mScheduledRadarUpdates.first();
 	if (!s.unit->isScheduledForRadarUpdate()) {
@@ -426,9 +448,18 @@ void BoCanvasSightManager::updateChangedRadar(Unit* unit, bofixed oldX, bofixed 
  }
 }
 
-void BoCanvasSightManager::updateRadarSignal(Unit* unit, bofixed oldX, bofixed oldY)
+void BoCanvasSightManager::updateRadarSignal(Unit* unit, bofixed, bofixed)
 {
  PROFILE_METHOD;
+ // First calculate jammer signal strength
+ bofixed jammersignalstrength = 0;
+ for (QValueList<const Unit*>::iterator it = mRadarJammers.begin(); it != mRadarJammers.end(); ++it) {
+	const Unit* u = *it;
+	const RadarJammerPlugin* jammer = (const RadarJammerPlugin*)u->plugin(UnitPlugin::RadarJammer);
+	jammersignalstrength += jammerSignalStrength(jammer, u->x(), u->y(), unit);
+ }
+
+ // Then radar signal strength for all player
  QPtrList<Player>* players = boGame->activeGamePlayerList();
  for (QPtrListIterator<Player> it(*players); it.current(); ++it) {
 	Player* player = it.current();
@@ -445,6 +476,8 @@ void BoCanvasSightManager::updateRadarSignal(Unit* unit, bofixed oldX, bofixed o
 		}
 	}
 
+	// Substract jammer's signal
+	signalstrength = QMAX(bofixed(0), signalstrength - jammersignalstrength);
 	unit->setRadarSignalStrength(player->bosonId(), signalstrength);
  }
 
@@ -469,29 +502,114 @@ bofixed BoCanvasSightManager::radarSignalStrength(const RadarPlugin* radar, bofi
 {
  float dx = x - u->centerX();
  float dy = y - u->centerY();
- float distsqr = dx*dx + dy*dy;
- if (distsqr < 1) {
-	distsqr = 1;
+ float dist = sqrtf(dx*dx + dy*dy);
+ if (dist < 1) {
+	dist = 1;
  }
- if (distsqr > radar->range() * radar->range()) {
+ if (dist*dist > radar->range()*radar->range()) {
 	return 0;
  }
 
  // To calculate strength of radar signal, we use simplified radar equation:
- //      R = (T * S) / (D^4)
+ //      R = (T * S) / (D^3)
  //  where R - received power
  //        T - transmitter power
  //        S - size of the object (how well it reflects the signal)
  //        D - distance between radar and the object
  // See http://en.wikipedia.org/wiki/Radar for more info about radars and
  //  radar equation.
- float receivedpower = (radar->transmittedPower() * (float)u->width()) / (distsqr * distsqr);
+ float receivedpower = (radar->transmittedPower() * (float)u->width()) / (dist*dist*dist);
  float signalstrength = receivedpower / radar->minReceivedPower();
  //boDebug() << k_funcinfo << radar->unit()->id() << " -> " << u->id() << ": " << receivedpower << " / " << signalstrength << endl;
  if (signalstrength >= 1) {
 	// Clamp to 200 to avoid overflows
 	if (signalstrength > 200.0f) {
 		return bofixed(200);
+	} else {
+		return bofixed(signalstrength);
+	}
+ } else {
+	return 0;
+ }
+}
+
+void BoCanvasSightManager::addRadarJammer(Unit* unit)
+{
+ // Update radar's range and transmitted power
+ ((RadarJammerPlugin*)unit->plugin(UnitPlugin::RadarJammer))->unitHealthChanged();
+ mRadarJammers.append(unit);
+ updateChangedJammer(unit, -1, -1, Add);
+}
+
+void BoCanvasSightManager::removeRadarJammer(Unit* unit)
+{
+ // Note: do NOT call RadarJammerPlugin::unitHealthChanged() here! Jammer must
+ //  be removed using _old_ health/range
+ mRadarJammers.remove(unit);
+ updateChangedJammer(unit, -1, -1, Remove);
+}
+
+void BoCanvasSightManager::updateChangedJammer(Unit* unit, bofixed oldX, bofixed oldY, RadarChangeType type)
+{
+ PROFILE_METHOD;
+ const RadarJammerPlugin* prop = (const RadarJammerPlugin*)unit->plugin(UnitPlugin::RadarJammer);
+ if (!prop) {
+	boError() << k_funcinfo << "unit " << unit->id() << " is not radar jammer!" << endl;
+	return;
+ }
+
+ if (type != Move) {
+	oldX = unit->x();
+	oldY = unit->y();
+ }
+
+ // Maximum range of the jammer
+ bofixed maxrange = prop->range();
+
+ // Calculate bbox of the radar-affected area
+ bofixed minx = QMAX(QMIN(unit->x(), oldX) - maxrange, bofixed(0));
+ bofixed maxx = QMIN(QMAX(unit->x(), oldX) + maxrange, bofixed(mMap->width()));
+ bofixed miny = QMAX(QMIN(unit->y(), oldY) - maxrange, bofixed(0));
+ bofixed maxy = QMIN(QMAX(unit->y(), oldY) + maxrange, bofixed(mMap->height()));
+
+ BoRect2Fixed area(minx,  miny, maxx, maxy);
+ BoItemList* items = mCanvas->collisions()->collisionsAtCells(area, 0, false);
+
+ BoItemList::ConstIterator it;
+ for (it = items->begin(); it != items->end(); ++it) {
+	if (!RTTI::isUnit((*it)->rtti())) {
+		continue;
+	}
+	Unit* u = (Unit*)*it;
+	if (u->isDestroyed()) {
+		continue;
+	} else if (u->isScheduledForRadarUpdate()) {
+		// This unit's signal strength will be recalculated anyway. Just skip it for now
+		continue;
+	}
+	// Recalculate signal strength (for all players)
+	updateRadarSignal(u, u->x(), u->y());
+ }
+}
+
+bofixed BoCanvasSightManager::jammerSignalStrength(const RadarJammerPlugin* jammer, bofixed x, bofixed y, Unit* u)
+{
+ float dx = x - u->centerX();
+ float dy = y - u->centerY();
+ float distsqr = dx*dx + dy*dy;
+ if (distsqr < 1) {
+	distsqr = 1;
+ }
+ if (distsqr > jammer->range() * jammer->range()) {
+	return 0;
+ }
+
+ float signalstrength = jammer->transmittedPower() / distsqr;
+ //boDebug() << k_funcinfo << radar->unit()->id() << " -> " << u->id() << ": " << receivedpower << " / " << signalstrength << endl;
+ if (signalstrength >= 0.5f) {
+	// Clamp to 500 to avoid overflows
+	if (signalstrength > 500.0f) {
+		return bofixed(500);
 	} else {
 		return bofixed(signalstrength);
 	}
@@ -1102,6 +1220,29 @@ void BosonCanvas::removeRadar(Unit* unit)
 
  d->mSightManager->removeRadar(unit);
  unit->owner()->removeRadar(unit);
+}
+
+void BosonCanvas::addRadarJammer(Unit* unit)
+{
+ if (!unit->plugin(UnitPlugin::RadarJammer)) {
+	return;
+ }
+
+ d->mSightManager->addRadarJammer(unit);
+}
+
+void BosonCanvas::removeRadarJammer(Unit* unit)
+{
+ if (!unit->plugin(UnitPlugin::RadarJammer)) {
+	return;
+ }
+
+ d->mSightManager->removeRadarJammer(unit);
+}
+
+const QValueList<const Unit*>* BosonCanvas::radarJammerUnits() const
+{
+ return d->mSightManager->radarJammerUnits();
 }
 
 void BosonCanvas::newShot(BosonShot*)
@@ -2195,8 +2336,9 @@ BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type
 		// We also need to recalc occupied status for cells that unit is on.
 		// FIXME: this is hackish
 		unitMovingStatusChanges(unit, UnitBase::Moving, UnitBase::Standing);
-		// This unit might be a radar
+		// This unit might be a radar and/or radar jammer
 		addRadar(unit);
+		addRadarJammer(unit);
 	}
 	emit signalItemAdded(item);
  }

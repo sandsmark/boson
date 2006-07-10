@@ -2150,3 +2150,50 @@ void RadarPlugin::unitHealthChanged()
  //  detected by the radar
  mRange = (bofixed)powf((mTransmittedPower * 4.0f) / prop->minReceivedPower(), 0.25f);
 }
+
+
+RadarJammerPlugin::RadarJammerPlugin(Unit* owner)
+		: UnitPlugin(owner)
+{
+ mTransmittedPower = 0.0f;
+ mRange = 0;
+}
+RadarJammerPlugin::~RadarJammerPlugin()
+{
+}
+
+bool RadarJammerPlugin::saveAsXML(QDomElement& root) const
+{
+ return true;
+}
+
+bool RadarJammerPlugin::loadFromXML(const QDomElement& root)
+{
+ return true;
+}
+
+void RadarJammerPlugin::advance(unsigned int)
+{
+}
+
+void RadarJammerPlugin::unitDestroyed(Unit*)
+{
+}
+
+void RadarJammerPlugin::itemRemoved(BosonItem*)
+{
+}
+
+void RadarJammerPlugin::unitHealthChanged()
+{
+ const RadarJammerProperties * prop = (RadarJammerProperties*)unit()->properties(PluginProperties::RadarJammer);
+ if (!prop) {
+	mTransmittedPower = 0.0f;
+	mRange = 0;
+	return;
+ }
+ mTransmittedPower = prop->transmittedPower() * (float)unit()->healthFactor();
+ // Maximum range of the jammer
+ mRange = (bofixed)sqrt(mTransmittedPower / 0.5f);
+}
+

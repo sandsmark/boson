@@ -65,6 +65,7 @@ public:
 		Refinery = 8,
 		AmmunitionStorage = 9,
 		Radar = 10,
+		RadarJammer = 11,
 
 		PluginEnd // MUST be the last entry!
 	};
@@ -726,6 +727,44 @@ public:
 
 	bool detectsLandUnits() const;
 	bool detectsAirUnits() const;
+
+private:
+	bofixed mRange;
+	float mTransmittedPower;
+};
+
+class RadarJammerPlugin : public UnitPlugin
+{
+public:
+	RadarJammerPlugin (Unit* owner);
+	~RadarJammerPlugin();
+
+	virtual int pluginType() const { return RadarJammer; }
+
+	virtual bool loadFromXML(const QDomElement& root);
+	virtual bool saveAsXML(QDomElement& root) const;
+	virtual void advance(unsigned int advanceCallsCount);
+
+	virtual void unitDestroyed(Unit*);
+	virtual void itemRemoved(BosonItem*);
+
+	/**
+	 * Call this whenever unit's health changes. It recalculates jammer's
+	 *  transmitted power (which is dependant on health)
+	 **/
+	void unitHealthChanged();
+
+	/**
+	 * @return Power transmitted by the jammer.
+	 * Note that this has _no_ correspondance to the power resource.
+	 **/
+	float transmittedPower() const { return mTransmittedPower; }
+
+	/**
+	 * @return Range of the jammer
+	 * It's unlikely that any objects outside this range would be affected
+	 **/
+	bofixed range() const { return mRange; }
 
 private:
 	bofixed mRange;
