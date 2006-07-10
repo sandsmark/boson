@@ -2080,6 +2080,8 @@ int AmmunitionStoragePlugin::changeAmmunition(const QString& type, int change)
 RadarPlugin::RadarPlugin(Unit* owner)
 		: UnitPlugin(owner)
 {
+ mTransmittedPower = 0.0f;
+ mRange = 0;
 }
 RadarPlugin::~RadarPlugin()
 {
@@ -2105,15 +2107,6 @@ void RadarPlugin::unitDestroyed(Unit*)
 
 void RadarPlugin::itemRemoved(BosonItem*)
 {
-}
-
-float RadarPlugin::transmittedPower() const
-{
- const RadarProperties * prop = (RadarProperties*)unit()->properties(PluginProperties::Radar);
- if (!prop) {
-	return 0.0f;
- }
- return prop->transmittedPower() * (float)unit()->healthFactor();
 }
 
 float RadarPlugin::minReceivedPower() const
@@ -2143,3 +2136,17 @@ bool RadarPlugin::detectsAirUnits() const
  return prop->detectsAirUnits();
 }
 
+void RadarPlugin::unitHealthChanged()
+{
+ const RadarProperties * prop = (RadarProperties*)unit()->properties(PluginProperties::Radar);
+ if (!prop) {
+	mTransmittedPower = 0.0f;
+	mRange = 0;
+	return;
+ }
+ mTransmittedPower = prop->transmittedPower() * (float)unit()->healthFactor();
+ // Maximum range of the radar
+ // We calculate maximum distance so that an object with size = 4.0 is still
+ //  detected by the radar
+ mRange = (bofixed)powf((mTransmittedPower * 4.0f) / prop->minReceivedPower(), 0.25f);
+}

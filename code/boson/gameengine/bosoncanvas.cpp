@@ -378,7 +378,7 @@ void BoCanvasSightManager::updateChangedRadar(Unit* unit, bofixed oldX, bofixed 
  // Maximum range of the radar
  // See below for the radar equation, here we calculate maximum distance of an
  //  object with size = 4.0 so that it's still detected by the radar
- bofixed maxrange = powf((prop->transmittedPower() * 4.0f) / prop->minReceivedPower(), 0.25f);
+ bofixed maxrange = prop->range();
 
  // Calculate bbox of the radar-affected area
  bofixed minx = QMAX(QMIN(unit->x(), oldX) - maxrange, bofixed(0));
@@ -453,11 +453,15 @@ void BoCanvasSightManager::updateRadarSignal(Unit* unit, bofixed oldX, bofixed o
 
 void BoCanvasSightManager::addRadar(Unit* unit)
 {
+ // Update radar's range and transmitted power
+ ((RadarPlugin*)unit->plugin(UnitPlugin::Radar))->unitHealthChanged();
  updateChangedRadar(unit, -1, -1, Add);
 }
 
 void BoCanvasSightManager::removeRadar(Unit* unit)
 {
+ // Note: do NOT call RadarPlugin::unitHealthChanged() here! Radar must be
+ //  removed using _old_ health/range
  updateChangedRadar(unit, -1, -1, Remove);
 }
 
@@ -468,6 +472,9 @@ bofixed BoCanvasSightManager::radarSignalStrength(const RadarPlugin* radar, bofi
  float distsqr = dx*dx + dy*dy;
  if (distsqr < 1) {
 	distsqr = 1;
+ }
+ if (distsqr > radar->range() * radar->range()) {
+	return 0;
  }
 
  // To calculate strength of radar signal, we use simplified radar equation:
