@@ -31,6 +31,7 @@
 #include "../gameengine/rtti.h"
 #include "../gameengine/unit.h"
 #include "../gameengine/unitproperties.h"
+#include "../gameengine/unitplugins.h"
 #include "../gameengine/speciestheme.h"
 #include "../speciesdata.h"
 #include "../bosonconfig.h"
@@ -544,6 +545,7 @@ public:
 		mUnitIconLand = 0;
 		mUnitIconAir = 0;
 		mUnitIconFacility = 0;
+		mJammingIcon = 0;
 	}
 	const BosonCanvas* mCanvas;
 	QValueVector<BoRenderItem> mRenderItemList;
@@ -581,6 +583,7 @@ public:
 	BoTexture* mUnitIconLand;
 	BoTexture* mUnitIconAir;
 	BoTexture* mUnitIconFacility;
+	BoTexture* mJammingIcon;
 };
 
 BosonCanvasRenderer::BosonCanvasRenderer()
@@ -612,6 +615,7 @@ BosonCanvasRenderer::~BosonCanvasRenderer()
  delete d->mUnitIconLand;
  delete d->mUnitIconAir;
  delete d->mUnitIconFacility;
+ delete d->mJammingIcon;
  delete d;
 }
 
@@ -640,6 +644,7 @@ void BosonCanvasRenderer::initGL()
  d->mUnitIconLand = new BoTexture(path + "uniticon-land.png");
  d->mUnitIconAir = new BoTexture(path + "uniticon-air.png");
  d->mUnitIconFacility = new BoTexture(path + "uniticon-facility.png");
+ d->mJammingIcon = new BoTexture(path + "jamming.png");
 }
 
 void BosonCanvasRenderer::slotWidgetResized()
@@ -1809,7 +1814,8 @@ void BosonCanvasRenderer::renderSelections(const BoItemList* selectedItems)
 
 void BosonCanvasRenderer::renderUnitIcons()
 {
- if (d->mIconicUnits.count() == 0 && d->mRadarContactsList.count() == 0) {
+ if (d->mIconicUnits.count() == 0 && d->mRadarContactsList.count() == 0 &&
+		d->mCanvas->radarJammerUnits()->count() == 0) {
 	return;
  }
 
@@ -1887,6 +1893,36 @@ void BosonCanvasRenderer::renderUnitIcons()
 	BoVector3Float shift = z * iconsize;
 	float alpha = 0.3 + QMIN((float)u->radarSignalStrength(localPlayerIO()->playerId()) / 20.0f, 0.5f);
 	glColor4f(0.4, 0.4, 0.4, alpha);
+
+	// Render icon
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0, 1.0);  glVertex3fv((pos + (upperleft  * iconsize) + shift).data());
+	glTexCoord2f(1.0, 1.0);  glVertex3fv((pos + (upperright * iconsize) + shift).data());
+	glTexCoord2f(1.0, 0.0);  glVertex3fv((pos + (lowerright * iconsize) + shift).data());
+	glTexCoord2f(0.0, 0.0);  glVertex3fv((pos + (lowerleft  * iconsize) + shift).data());
+	glEnd();
+ }
+
+ // Render jammers
+ d->mJammingIcon->bind();
+ const QValueList<const Unit*>* jammers = d->mCanvas->radarJammerUnits();
+ for (QValueList<const Unit*>::const_iterator it = jammers->begin(); it != jammers->end(); ++it) {
+	// If player doesn't have any radars, he can't see the jammers
+	if (localPlayerIO()->radarUnits()->count() == 0) {
+		continue;
+	}
+	const Unit* u = *it;
+	RadarJammerPlugin* jammer = (RadarJammerPlugin*)u->plugin(UnitPlugin::RadarJammer);
+	BoVector3Float pos(u->centerX(), -u->centerY(), u->centerZ());
+	float distSq = (camera()->cameraPos() - pos).dotProduct();
+	float dist = sqrt(distSq);
+	float sqrtwidth = sqrt(u->width());
+
+	// Select icon size
+	float iconsize = 0.06f * (dist / 70) * sqrtf(jammer->transmittedPower());
+	BoVector3Float shift = z * iconsize;
+	//float alpha = 0.3 + QMIN((float)u->radarSignalStrength(localPlayerIO()->playerId()) / 20.0f, 0.5f);
+	glColor4f(1.0, 1.0, 1.0, 0.6);
 
 	// Render icon
 	glBegin(GL_QUADS);

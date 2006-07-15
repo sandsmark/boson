@@ -423,6 +423,11 @@ bool PlayerIO::hasUnitWithType(unsigned long int type) const
  return player()->hasUnitWithType(type);
 }
 
+const QValueList<const Unit*>* PlayerIO::radarUnits() const
+{
+ return player()->radarUnits();
+}
+
 
 bool PlayerIO::isValidCell(int x, int y) const
 {

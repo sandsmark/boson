@@ -268,6 +268,8 @@ public:
 	bool hasTechnology(unsigned long int id) const;
 	bool hasUnitWithType(unsigned long int type) const;
 
+	const QValueList<const Unit*>* radarUnits() const;
+
 	/**
 	 * @return The item at @p canvasVector, if any.
 	 **/
