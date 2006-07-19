@@ -111,11 +111,38 @@ ENDIF (CMAKE_SYSTEM_NAME MATCHES BSD)
 #     this ensures, that if $KDEDIR is set to a special directory, we'll pick up
 #     that one, instead of e.g. /usr/lib from standard cmake dirs.
 
-#at first the KDE include direcory
+FIND_PROGRAM(KDECONFIG_EXECUTABLE NAME kde-config
+  PATHS
+  $ENV{KDEDIR}/bin
+  ${KDE3PREFIX}/include
+  /opt/kde/bin
+  /opt/kde3/bin
+  NO_DEFAULT_PATH
+)
+FIND_PROGRAM(KDECONFIG_EXECUTABLE NAME kde-config)
+
+SET(KDE3PREFIX)
+IF(KDECONFIG_EXECUTABLE)
+   EXECUTE_PROCESS(COMMAND ${KDECONFIG_EXECUTABLE} --version
+                   OUTPUT_VARIABLE kde_config_version )
+
+   STRING(REGEX MATCH "KDE: .\\." kde_version ${kde_config_version})
+   IF (${kde_version} MATCHES "KDE: 3\\.")
+      EXECUTE_PROCESS(COMMAND ${KDECONFIG_EXECUTABLE} --prefix
+                        OUTPUT_VARIABLE kdedir )
+      STRING(REGEX REPLACE "\n" "" KDE3PREFIX "${kdedir}")
+
+
+      message(STATUS "kde3prefix: ${KDE3PREFIX}")
+    ENDIF (${kde_version} MATCHES "KDE: 3\\.")
+ENDIF(KDECONFIG_EXECUTABLE)
+
+
 # kpassdlg.h comes from kdeui and doesn't exist in KDE4 anymore
 FIND_PATH(KDE3_INCLUDE_DIR kpassdlg.h
   PATHS
   $ENV{KDEDIR}/include
+  ${KDE3PREFIX}/include
   /opt/kde/include
   /opt/kde3/include
   /usr/local/include
@@ -130,6 +157,7 @@ FIND_PATH(KDE3_INCLUDE_DIR kpassdlg.h)
 FIND_LIBRARY(KDE3_KDECORE_LIBRARY NAMES kdecore
   PATHS
   $ENV{KDEDIR}/lib
+  ${KDE3PREFIX}/lib
   /opt/kde/lib
   /opt/kde3/lib
   /usr/lib
@@ -143,6 +171,7 @@ GET_FILENAME_COMPONENT(KDE3_LIB_DIR ${KDE3_KDECORE_LIBRARY} PATH )
 #now the KDE service types directory
 #FIND_PATH(KDE3_SERVICETYPES_DIR ktexteditor.desktop
 #  $ENV{KDEDIR}/share/servicetypes/
+#  ${KDE3PREFIX}/share/servicetypes/
 #  /opt/kde/share/servicetypes/
 #  /opt/kde3/share/servicetypes/
 #)
@@ -151,6 +180,7 @@ GET_FILENAME_COMPONENT(KDE3_LIB_DIR ${KDE3_KDECORE_LIBRARY} PATH )
 FIND_PROGRAM(KDE3_DCOPIDL_EXECUTABLE NAME dcopidl
   PATHS
   $ENV{KDEDIR}/bin
+  ${KDE3PREFIX}/bin
   /opt/kde/bin
   /opt/kde3/bin
   NO_DEFAULT_PATH
@@ -160,6 +190,7 @@ FIND_PROGRAM(KDE3_DCOPIDL_EXECUTABLE NAME dcopidl)
 FIND_PROGRAM(KDE3_DCOPIDL2CPP_EXECUTABLE NAME dcopidl2cpp
   PATHS
   $ENV{KDEDIR}/bin
+  ${KDE3PREFIX}/bin
   /opt/kde/bin
   /opt/kde3/bin
   NO_DEFAULT_PATH
@@ -169,6 +200,7 @@ FIND_PROGRAM(KDE3_DCOPIDL2CPP_EXECUTABLE NAME dcopidl2cpp)
 FIND_PROGRAM(KDE3_KCFGC_EXECUTABLE NAME kconfig_compiler
   PATHS
   $ENV{KDEDIR}/bin
+  ${KDE3PREFIX}/bin
   /opt/kde/bin
   /opt/kde3/bin
   NO_DEFAULT_PATH
