@@ -2148,7 +2148,7 @@ void RadarPlugin::unitHealthChanged()
  // Maximum range of the radar
  // We calculate maximum distance so that an object with size = 4.0 is still
  //  detected by the radar
- mRange = (bofixed)powf((mTransmittedPower * 4.0f) / prop->minReceivedPower(), 0.25f);
+ mRange = (bofixed)powf((mTransmittedPower * 4.0f) / prop->minReceivedPower(), 0.333f);
 }
 
 

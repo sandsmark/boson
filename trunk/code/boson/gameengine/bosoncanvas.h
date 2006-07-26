@@ -328,6 +328,7 @@ public:
 
 	void addRadar(Unit* unit);
 	void removeRadar(Unit* unit);
+	const QValueList<const Unit*>* radarUnits() const;
 
 	void addRadarJammer(Unit* unit);
 	void removeRadarJammer(Unit* unit);
