@@ -286,7 +286,35 @@ BosonConfigScript::~BosonConfigScript()
  delete d;
 }
 
-void BosonConfigScript::execute(BosonConfig* config)
+void BosonConfigScript::copyScript(const BosonConfigScript& script)
+{
+ for (QPtrListIterator<BoConfigEntry> it(script.d->mEntries); it.current(); ++it) {
+	BoConfigEntry* s = it.current();
+	switch ((BoConfigEntry::Type)s->type()) {
+
+#define CASE(x) case BoConfigEntry::x: \
+		{ \
+			BoConfig##x##Entry* e; \
+			e = new BoConfig##x##Entry(0, s->key(), ((BoConfig##x##Entry*)s)->value()); \
+			addValue(e); \
+			break; \
+		}
+
+		CASE(Bool);
+		CASE(Int);
+		CASE(UInt);
+		CASE(Double);
+		CASE(String);
+		CASE(IntList);
+		CASE(Color);
+
+#undef CASE
+
+	}
+ }
+}
+
+void BosonConfigScript::execute(BosonConfig* config) const
 {
  BO_CHECK_NULL_RET(config);
  for (QPtrListIterator<BoConfigEntry> it(d->mEntries); it.current(); ++it) {
@@ -298,7 +326,6 @@ void BosonConfigScript::execute(BosonConfig* config)
 		continue;
 	}
 	apply(myValue, value);
-	++it;
  }
 }
 
@@ -412,7 +439,7 @@ void BosonConfigScript::addValue(BoConfigEntry* entry)
  d->mEntries.append(entry);
 }
 
-void BosonConfigScript::apply(BoConfigEntry* scriptValue, BoConfigEntry* configValue)
+void BosonConfigScript::apply(BoConfigEntry* scriptValue, BoConfigEntry* configValue) const
 {
  BO_CHECK_NULL_RET(scriptValue);
  BO_CHECK_NULL_RET(configValue);
