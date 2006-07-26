@@ -37,7 +37,7 @@ Animation-Idle-Speed=1
 
 [RadarPlugin]
 TransmittedPower=25000
-MinReceivedPower=0.00025
+MinReceivedPower=0.04
 DetectsAirUnits=true
 DetectsLandUnits=false
 
