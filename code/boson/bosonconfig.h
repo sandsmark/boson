@@ -537,6 +537,8 @@ public:
 	BosonConfigScript(const QString& name);
 	~BosonConfigScript();
 
+	void copyScript(const BosonConfigScript& script);
+
 	const QString& name() const
 	{
 		return mName;
@@ -576,11 +578,11 @@ public:
 	 **/
 	void addDefaultValueOf(const QString& key, BosonConfig* config);
 
-	void execute(BosonConfig* config);
+	void execute(BosonConfig* config) const;
 
 protected:
 	void addValue(BoConfigEntry* entry);
-	void apply(BoConfigEntry* scriptValue, BoConfigEntry* configValue);
+	void apply(BoConfigEntry* scriptValue, BoConfigEntry* configValue) const;
 
 private:
 	BosonConfigScriptPrivate* d;
