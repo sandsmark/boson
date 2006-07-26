@@ -31,7 +31,7 @@ PowerConsumed=200
 
 [RadarPlugin]
 TransmittedPower=10000
-MinReceivedPower=0.003
+MinReceivedPower=0.08
 
 [Model]
 Animation-Idle-Start=0

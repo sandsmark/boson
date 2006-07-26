@@ -32,7 +32,7 @@ PowerConsumed=200
 
 [RadarPlugin]
 TransmittedPower=20000
-MinReceivedPower=0.001
+MinReceivedPower=0.05
 DetectsAirUnits=false
 DetectsLandUnits=true
 
