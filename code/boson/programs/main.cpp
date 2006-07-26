@@ -67,6 +67,8 @@ static KCmdLineOptions options[] =
     { "default-lodcount <count>", I18N_NOOP("Use <count> for default level of detail count"), 0 },
     { "nomodels", I18N_NOOP("Disable model loading for faster startup (you won't see the units)"), 0 },
     { "notexturecompression", I18N_NOOP("Disable texture compression for faster startup"), 0 },
+    { "fast", I18N_NOOP("Fast Startup"), 0 },
+    { "veryfast", I18N_NOOP("Very Fast Startup (debugging only!)"), 0 },
     { 0, 0, 0 }
 };
 
@@ -192,10 +194,7 @@ int main(int argc, char **argv)
 	}
 	boConfig->setIntValue("DefaultLodCount", v);
  }
- if (args->isSet("models")) {
-	boConfig->setBoolValue("ForceDisableModelLoading", false);
- } else {
-	boWarning() << "model loading disabled - you will not see any units!" << endl;
+ if (!args->isSet("models")) {
 	boConfig->setBoolValue("ForceDisableModelLoading", true);
  }
  if (args->isSet("texturecompression")) {
@@ -215,6 +214,9 @@ int main(int argc, char **argv)
  }
  args->clear();
 
+ if (boConfig->boolValue("ForceDisableModelLoading")) {
+	boWarning() << "model loading disabled - you will not see any units!" << endl;
+ }
  int ret = app.exec();
 
  delete iface;
@@ -260,6 +262,23 @@ void postBosonConfigInit()
  if (args->isSet("indirect")) {
 	boWarning() << k_funcinfo << "use indirect rendering (slow!)" << endl;
 	boConfig->setBoolValue("ForceWantDirect", false);
+ }
+
+ if (args->isSet("fast")) {
+	const BosonConfigScript* script = boConfig->configScript("FastStartup");
+	if (!script) {
+		BO_NULL_ERROR(script);
+	} else {
+		script->execute(boConfig);
+	}
+ }
+ if (args->isSet("veryfast")) {
+	const BosonConfigScript* script = boConfig->configScript("VeryFastStartup");
+	if (!script) {
+		BO_NULL_ERROR(script);
+	} else {
+		script->execute(boConfig);
+	}
  }
 }
 
