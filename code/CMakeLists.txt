@@ -15,6 +15,9 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/boson")
 
 set(CMAKE_BUILD_WITH_INSTALL_RPATH 1)
 
+# Use colored output
+set(CMAKE_COLOR_MAKEFILE ON)
+
 # AB: this is for the boson-all release package. code is a subdirectory of it
 #     the rest of this file (and CMakeLists.txt in subdirs) assume that
 #     CMAKE_SOURCE_DIR==boson_SOURCE_DIR.
