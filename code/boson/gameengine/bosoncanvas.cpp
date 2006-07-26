@@ -149,6 +149,11 @@ public:
 	void updateChangedRadar(Unit* unit, bofixed oldX, bofixed oldY, RadarChangeType type = Move);
 	void updateRadarSignal(Unit* unit, bofixed oldX, bofixed oldY);
 	bofixed radarSignalStrength(const RadarPlugin* radar, bofixed x, bofixed y, Unit* u);
+	/**
+	 * Recalculates signal strength of radar and radarjammer units
+	 **/
+	void recalculateSpecialSignalStrengths();
+	const QValueList<const Unit*>* radarUnits() const { return &mRadarUnits; }
 
 	void addRadarJammer(Unit* unit);
 	void removeRadarJammer(Unit* unit);
@@ -180,6 +185,7 @@ private:
 	//  need to be updated
 	QValueList<ScheduledUnit> mChangedJammers;
 
+	QValueList<const Unit*> mRadarUnits;
 	QValueList<const Unit*> mRadarJammers;
 
 	BosonMap* mMap;
@@ -354,12 +360,14 @@ void BoCanvasSightManager::removeSight(Unit* unit)
 
 void BoCanvasSightManager::updateRadars()
 {
+ bool recalculateSpecialSignalStrengthsRequired = false;
  // First update changed radars
  while (!mChangedRadars.isEmpty()) {
 	const ScheduledUnit& s = mChangedRadars.first();
 	updateChangedRadar(s.unit, s.lastX, s.lastY);
 
 	mChangedRadars.pop_front();
+	recalculateSpecialSignalStrengthsRequired = true;
  }
 
  // Then changed jammers
@@ -368,6 +376,7 @@ void BoCanvasSightManager::updateRadars()
 	updateChangedJammer(s.unit, s.lastX, s.lastY);
 
 	mChangedJammers.pop_front();
+	recalculateSpecialSignalStrengthsRequired = true;
  }
 
  // And finally all moved non-radar units
@@ -380,6 +389,10 @@ void BoCanvasSightManager::updateRadars()
 	updateRadarSignal(s.unit, s.lastX, s.lastY);
 
 	mScheduledRadarUpdates.pop_front();
+ }
+
+ if (recalculateSpecialSignalStrengthsRequired) {
+	recalculateSpecialSignalStrengths();
  }
 }
 
@@ -431,20 +444,7 @@ void BoCanvasSightManager::updateChangedRadar(Unit* unit, bofixed oldX, bofixed 
 		continue;
 	}
 
-	// We know that u hasn't moved since it's signal strength was last
-	//  calculated (otherwise it would be scheduled for radar update), so we can
-	//  just substract the signal strength from radar's old position and then add
-	//  it from it's new position
-	bofixed oldstrength = 0;
-	bofixed newstrength = 0;
-	if (type != Add) {
-		oldstrength = radarSignalStrength(prop, oldX, oldY, u);
-	}
-	if (type != Remove) {
-		newstrength = radarSignalStrength(prop, unit->x(), unit->y(), u);
-	}
-	// Note that we update only the radar owner's signal
-	u->setRadarSignalStrength(unit->owner()->bosonId(), u->radarSignalStrength(unit->owner()->bosonId()) - oldstrength + newstrength);
+	updateRadarSignal(u, -1, -1);
  }
 }
 
@@ -459,19 +459,19 @@ void BoCanvasSightManager::updateRadarSignal(Unit* unit, bofixed, bofixed)
 	jammersignalstrength += jammerSignalStrength(jammer, u->x(), u->y(), unit);
  }
 
- // Then radar signal strength for all player
+ // Then radar signal strength for all players
  QPtrList<Player>* players = boGame->activeGamePlayerList();
  for (QPtrListIterator<Player> it(*players); it.current(); ++it) {
 	Player* player = it.current();
 	bofixed signalstrength = 0;
 
 	const QValueList<const Unit*>* radars = player->radarUnits();
-	for (QValueList<const Unit*>::const_iterator it = radars->begin(); it != radars->end(); ++it) {
-		const Unit* u = *it;
+	for (QValueList<const Unit*>::const_iterator rit = radars->begin(); rit != radars->end(); ++rit) {
+		const Unit* u = *rit;
 		const RadarPlugin* radar = (const RadarPlugin*)u->plugin(UnitPlugin::Radar);
-		if (u->isFlying() && radar->detectsAirUnits()) {
+		if (unit->isFlying() && radar->detectsAirUnits()) {
 			signalstrength += radarSignalStrength(radar, u->x(), u->y(), unit);
-		} else if (!u->isFlying() && radar->detectsLandUnits()) {
+		} else if (!unit->isFlying() && radar->detectsLandUnits()) {
 			signalstrength += radarSignalStrength(radar, u->x(), u->y(), unit);
 		}
 	}
@@ -488,13 +488,16 @@ void BoCanvasSightManager::addRadar(Unit* unit)
 {
  // Update radar's range and transmitted power
  ((RadarPlugin*)unit->plugin(UnitPlugin::Radar))->unitHealthChanged();
+ mRadarUnits.append(unit);
  updateChangedRadar(unit, -1, -1, Add);
+ recalculateSpecialSignalStrengths();
 }
 
 void BoCanvasSightManager::removeRadar(Unit* unit)
 {
  // Note: do NOT call RadarPlugin::unitHealthChanged() here! Radar must be
  //  removed using _old_ health/range
+ mRadarUnits.remove(unit);
  updateChangedRadar(unit, -1, -1, Remove);
 }
 
@@ -533,12 +536,111 @@ bofixed BoCanvasSightManager::radarSignalStrength(const RadarPlugin* radar, bofi
  }
 }
 
+void BoCanvasSightManager::recalculateSpecialSignalStrengths()
+{
+ PROFILE_METHOD;
+ QPtrList<Player>* players = boGame->activeGamePlayerList();
+
+ // Calculate signal strengths for radars
+ // Go through all radar units
+ for (QValueList<const Unit*>::Iterator it = mRadarUnits.begin(); it != mRadarUnits.end(); ++it) {
+	// This is the radar unit that we're trying to detect
+	Unit* radarUnit = (Unit*)*it;
+	float radarUnitTransmittedPower = ((const RadarPlugin*)radarUnit->plugin(UnitPlugin::Radar))->transmittedPower();
+	// Go through all players
+	for (QPtrListIterator<Player> pit(*players); pit.current(); ++pit) {
+		Player* player = pit.current();
+		if (radarUnit->owner() == player) {
+			continue;
+		}
+		// This is strength of signal coming from radarUnit and detected by player
+		bofixed signalStrength = 0;
+
+		// Go through all player's radars and calculate signal strengths
+		const QValueList<const Unit*>* playerRadars = player->radarUnits();
+		for (QValueList<const Unit*>::const_iterator rit = playerRadars->begin(); rit != playerRadars->end(); ++rit) {
+			const Unit* u = *rit;
+			const RadarPlugin* radar = (const RadarPlugin*)u->plugin(UnitPlugin::Radar);
+			// Make sure player's radar can detect radarUnit
+			// TODO: is this a good idea? Maybe radars should always be able to detect each other?
+			if (radarUnit->isFlying() && !radar->detectsAirUnits()) {
+				continue;
+			} else if (!radarUnit->isFlying() && !radar->detectsLandUnits()) {
+				continue;
+			}
+
+			// Calculate how well u can detect radarUnit
+			float dx = radarUnit->centerX() - u->centerX();
+			float dy = radarUnit->centerY() - u->centerY();
+			float distSqr = dx*dx + dy*dy;
+			// Note that we use  4*distSqr  instead of just  distSqr  to make the
+			//  detection range a bit smaller (2 times smaller in fact)
+			float receivedpower = radarUnitTransmittedPower / (4 * distSqr);
+			float currentSignalStrength = receivedpower / radar->minReceivedPower();
+			if (currentSignalStrength > 100.0f) {
+				signalStrength += bofixed(100);
+			} else if (currentSignalStrength >= 1.0f) {
+				signalStrength += currentSignalStrength;
+			}
+		}
+		radarUnit->setRadarSignalStrength(player->bosonId(), signalStrength);
+	}
+ }
+
+ // Calculate signal strengths for jammers in a similar fashion
+ // Go through all jammer units
+ for (QValueList<const Unit*>::Iterator it = mRadarJammers.begin(); it != mRadarJammers.end(); ++it) {
+	// This is the jammer unit that we're trying to detect
+	Unit* jammerUnit = (Unit*)*it;
+	float jammerUnitTransmittedPower = ((const RadarJammerPlugin*)jammerUnit->plugin(UnitPlugin::RadarJammer))->transmittedPower();
+	// Go through all players
+	for (QPtrListIterator<Player> pit(*players); pit.current(); ++pit) {
+		Player* player = pit.current();
+		if (jammerUnit->owner() == player) {
+			continue;
+		}
+		// This is strength of signal coming from jammerUnit and detected by player
+		bofixed signalStrength = 0;
+
+		// Go through all player's radars and calculate signal strengths
+		const QValueList<const Unit*>* playerRadars = player->radarUnits();
+		for (QValueList<const Unit*>::const_iterator rit = playerRadars->begin(); rit != playerRadars->end(); ++rit) {
+			const Unit* u = *rit;
+			const RadarPlugin* radar = (const RadarPlugin*)u->plugin(UnitPlugin::Radar);
+			// Make sure player's radar can detect jammerUnit
+			// TODO: is this a good idea? Maybe radars should always be able to detect each other?
+			if (jammerUnit->isFlying() && !radar->detectsAirUnits()) {
+				continue;
+			} else if (!jammerUnit->isFlying() && !radar->detectsLandUnits()) {
+				continue;
+			}
+
+			// Calculate how well u can detect jammerUnit
+			float dx = jammerUnit->centerX() - u->centerX();
+			float dy = jammerUnit->centerY() - u->centerY();
+			float distSqr = dx*dx + dy*dy;
+			// Note that we use  2*distSqr  instead of just  distSqr  to make the
+			//  detection range a bit smaller (sqrt(2) times smaller in fact)
+			float receivedpower = jammerUnitTransmittedPower / (2 * distSqr);
+			float currentSignalStrength = receivedpower / radar->minReceivedPower();
+			if (currentSignalStrength > 100.0f) {
+				signalStrength += bofixed(100);
+			} else if (currentSignalStrength >= 1.0f) {
+				signalStrength += currentSignalStrength;
+			}
+		}
+		jammerUnit->setRadarSignalStrength(player->bosonId(), signalStrength);
+	}
+ }
+}
+
 void BoCanvasSightManager::addRadarJammer(Unit* unit)
 {
  // Update radar's range and transmitted power
  ((RadarJammerPlugin*)unit->plugin(UnitPlugin::RadarJammer))->unitHealthChanged();
  mRadarJammers.append(unit);
  updateChangedJammer(unit, -1, -1, Add);
+ recalculateSpecialSignalStrengths();
 }
 
 void BoCanvasSightManager::removeRadarJammer(Unit* unit)
@@ -1243,6 +1345,11 @@ void BosonCanvas::removeRadarJammer(Unit* unit)
 const QValueList<const Unit*>* BosonCanvas::radarJammerUnits() const
 {
  return d->mSightManager->radarJammerUnits();
+}
+
+const QValueList<const Unit*>* BosonCanvas::radarUnits() const
+{
+ return d->mSightManager->radarUnits();
 }
 
 void BosonCanvas::newShot(BosonShot*)
