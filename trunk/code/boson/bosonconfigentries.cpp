@@ -207,5 +207,14 @@ void BosonConfig::initScripts()
  softwareRendering->addStringValue("GroundRendererClass", "BoVeryFastGroundRenderer");
 
 
+ BosonConfigScript* fastStartup = new BosonConfigScript("FastStartup");
+ addConfigScript(fastStartup);
+ fastStartup->addBoolValue("ForceDisableTextureCompression", true);
+ fastStartup->addBoolValue("ForceDisableSound", true);
+
+ BosonConfigScript* veryFastStartup = new BosonConfigScript("VeryFastStartup");
+ addConfigScript(veryFastStartup);
+ veryFastStartup->copyScript(*fastStartup);
+ veryFastStartup->addBoolValue("ForceDisableModelLoading", true);
 }
 
