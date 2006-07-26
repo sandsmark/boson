@@ -167,6 +167,7 @@ bool BoEventListener::saveScriptData(QByteArray* scriptData) const
 
 bool BoEventListener::loadScript(const QByteArray& script, const QByteArray& scriptData)
 {
+ PROFILE_METHOD
  if (d->mScript) {
 	boError() << k_funcinfo << "script already loaded" << endl;
 	return false;
@@ -420,6 +421,7 @@ BoCanvasEventListener::~BoCanvasEventListener()
 
 BosonScript* BoCanvasEventListener::createScriptParser() const
 {
+ PROFILE_METHOD
  return BosonScript::newScriptParser(BosonScript::Python, -1);
 }
 
@@ -549,6 +551,7 @@ BoComputerPlayerEventListener::~BoComputerPlayerEventListener()
 
 BosonScript* BoComputerPlayerEventListener::createScriptParser() const
 {
+ PROFILE_METHOD
  int playerId = -1;
  if (!playerIO()) {
 	BO_NULL_ERROR(playerIO());

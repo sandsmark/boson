@@ -288,6 +288,7 @@ bool BoEventManager::saveAllEventListenersXML(QMap<QString, QByteArray>* files) 
 
 bool BoEventManager::copyEventListenerScripts(const QMap<QString, QByteArray>& files)
 {
+ PROFILE_METHOD
  d->mAvailableScripts.clear();
  // AB: note that even if we don't use one of the scripts in the current game,
  // then we still need to leave it the in memory. we might need it later,
@@ -331,6 +332,7 @@ QByteArray BoEventManager::createEmptyEventListenerXML()
 
 bool BoEventManager::loadAllEventListenerScripts()
 {
+ PROFILE_METHOD
  boDebug() << k_funcinfo << endl;
  QPtrListIterator<BoEventListener> it(d->mEventListeners);
  for (; it.current(); ++it) {
@@ -385,6 +387,7 @@ bool BoEventManager::loadAllEventListenersXML()
 
 bool BoEventManager::loadEventListenerScript(BoEventListener* listener)
 {
+ PROFILE_METHOD
  if (!listener) {
 	BO_NULL_ERROR(listener);
 	return false;
