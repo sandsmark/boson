@@ -45,6 +45,89 @@
 
 #include <klocale.h>
 
+/**
+ * Helper class for @ref actionClicked. This class helps at the case that one or
+ * more selected units are supposed to do something at an allied unit (e.g. a
+ * unit that the local player owns).
+ *
+ * Examples here may be "move harvester to refinery" or "goto repairyard" and so
+ * on.
+ **/
+class ActionAtAlliedTargetUnit
+{
+public:
+	ActionAtAlliedTargetUnit(PlayerIO* localPlayerIO, BoSelection* selection, Unit* target)
+	{
+		mLocalPlayerIO = localPlayerIO;
+		mSelection = selection;
+		mTargetUnit = target;
+	}
+	~ActionAtAlliedTargetUnit()
+	{
+	}
+
+	bool targetIsRefineryForSelection() const
+	{
+		if (!targetUnit()->properties(PluginProperties::Refinery)) {
+			return false;
+		}
+		const RefineryProperties* prop = (RefineryProperties*)targetUnit()->properties(PluginProperties::Refinery);
+
+		if (prop->canRefineMinerals() && selection()->hasMineralHarvester()) {
+			return true;
+		}
+		if (prop->canRefineOil() && selection()->hasOilHarvester()) {
+			return true;
+		}
+		return false;
+	}
+
+	bool targetIsRepairYardForSelection() const
+	{
+		if (!targetUnit()->isFacility()) {
+			// mobile repair units move to damaged units, not the
+			// other way around
+			return false;
+		}
+		if (!targetUnit()->plugin(UnitPlugin::Repair)) {
+			return false;
+		}
+		return true;
+	}
+
+	bool canFollowTarget() const
+	{
+		if (!selection()->hasMobileUnit()) {
+			return false;
+		}
+		if (!targetUnit()->isMobile()) {
+			return false;
+		}
+		return true;
+	}
+
+protected:
+	PlayerIO* localPlayerIO() const
+	{
+		return mLocalPlayerIO;
+	}
+	BoSelection* selection() const
+	{
+		return mSelection;
+	}
+	Unit* targetUnit() const
+	{
+		return mTargetUnit;
+	}
+
+private:
+	PlayerIO* mLocalPlayerIO;
+	BoSelection* mSelection;
+	Unit* mTargetUnit;
+};
+
+
+
 BosonGameViewInput::BosonGameViewInput()
 	: BosonGameViewInputBase()
 {
@@ -141,21 +224,7 @@ void BosonGameViewInput::actionClicked(const BoMouseEvent& event)
  }
 
  if (!unit) {
-	//FIXME: first check if a the unit can produce! even mobile units can
-	//have the production plugin!!
 	if (selection()->hasMobileUnit()) { // move the selection to pos
-		if (selection()->count() == 1) {
-			// there are special things to do for a single selected unit
-			// (e.g. mining if the unit is a harvester)
-			/*
-			 * AB: obsolete, as harvesting will take place on units
-			 * (->mines) only!
-			if (actionHarvest(event.canvasVector())) {
-				return;
-			}
-			*/
-		}
-
 		if (boConfig->boolValue("RMBMovesWithAttack")) {
 			if (!actionMoveWithAttack(event.groundCanvasVector())) {
 				return;
@@ -186,33 +255,23 @@ void BosonGameViewInput::actionClicked(const BoMouseEvent& event)
 		// IDEA: what about "I cannot shoot that!" sound?
 	} else if (localPlayerIO()->isAllied(unit)) {
 		// click on a friendly unit
-		if (unit->isFacility() && unit->plugin(UnitPlugin::Repair)) {
-			// some kind of repairyard - repair all units
-			// (not yet implemented) //FIXME
-			// note that currently the unit can go to every friendly
-			// player, even non-local players
+
+		ActionAtAlliedTargetUnit action(localPlayerIO(), selection(), unit);
+		if (action.targetIsRepairYardForSelection()) {
 			if (!actionRepair(unit)) {
 				return;
 			}
-		} else if (unit->properties(PluginProperties::Refinery)) {
-			const RefineryProperties* prop = (RefineryProperties*)unit->properties(PluginProperties::Refinery);
-			if((prop->canRefineMinerals() && selection()->hasMineralHarvester()) ||
-					(prop->canRefineOil() && selection()->hasOilHarvester())) {
-				// go to the refinery
-				if (!actionRefine(unit)) {
-					return;
-				}
+		} else if (action.targetIsRefineryForSelection()) {
+			if (!actionRefine(unit)) {
+				return;
 			}
-		} else if (selection()->hasMobileUnit() && unit->isMobile()) {
+		} else if (action.canFollowTarget()) {
 			if (!actionFollow(unit)) {
 				return;
 			}
 		} else {
-			// selection and clicked unit both are friendly
-			// no repairyard and no refinery
-			// (at least no valid)
-			// add other possibilities here
 		}
+
 	} else if (localPlayerIO()->isNeutral(unit)) {
 		// click on a neutral unit
 		// note: this is NOT a friendly unit, so we won' repair it or
