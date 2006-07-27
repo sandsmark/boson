@@ -1388,7 +1388,9 @@ void BosonCanvasRenderer::renderBoundingBox(const BosonItem* item)
 
 void BosonCanvasRenderer::renderBoundingBox(const BoVector3Float& c1, const BoVector3Float& c2)
 {
- boTextureManager->disableTexturing();
+ glPushAttrib(GL_ALL_ATTRIB_BITS);
+ glDisable(GL_TEXTURE_2D);
+ glDisable(GL_LIGHTING);
  glColor3ub(127, 127, 127);
  glLineWidth(1.0);
  glBegin(GL_LINES);
@@ -1407,6 +1409,7 @@ void BosonCanvasRenderer::renderBoundingBox(const BoVector3Float& c1, const BoVe
 	glVertex3f(c2.x(), c2.y(), c1.z());  glVertex3f(c2.x(), c2.y(), c2.z());
 	glVertex3f(c1.x(), c2.y(), c1.z());  glVertex3f(c1.x(), c2.y(), c2.z());
  glEnd();
+ glPopAttrib();
 }
 
 bool BosonCanvasRenderer::mustRenderToTexture(BoVisibleEffects& visible)
