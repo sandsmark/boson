@@ -201,3 +201,6 @@ UnitMoveToUnitOrderData::~UnitMoveToUnitOrderData()
 {
 }
 
+/*
+ * vim: et sw=2
+ */
