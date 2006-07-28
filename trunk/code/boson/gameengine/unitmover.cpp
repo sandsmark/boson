@@ -322,6 +322,8 @@ bool UnitMover::turnTo()
 	// Slow way - calculate direction
 	return unit()->turnTo(Bo3dTools::rotationToPoint(xspeed, yspeed));
  }
+
+ return false;
 }
 
 bool UnitMover::attackEnemyUnitsInRangeWhileMoving()
