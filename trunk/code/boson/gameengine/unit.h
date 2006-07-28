@@ -55,6 +55,42 @@ class QDomElement;
 
 class KGameUnitDebug;
 
+
+/**
+ * A small helper class that establishes an interfaace between @ref
+ * UnitOrderQueue and @ref Unit.
+ *
+ * This interface handles the direction UnitOrderQueue->Unit only, i.e. it
+ * contains methods that may be called by UnitOrderQueue in order to make Unit
+ * do something. The other direction is not necessary, as @ref Unit can call
+ * methods of @ref UnitOrderQueue directly.
+ *
+ * This interface is required so that the methods can be protected or private
+ * in @ref Unit, yet @ref UnitOrderQueue can still call them.
+ * @ref Unit is meant to derive (using protected or private inheritance!)
+ * from this class.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class UnitOrdersInterface
+{
+public:
+	virtual ~UnitOrdersInterface()
+	{
+	}
+
+	virtual bool currentOrderChanged() = 0;
+	virtual bool currentOrderAdded() = 0;
+	virtual void currentOrderRemoved() = 0;
+
+	/**
+	 * @return TRUE if another order can be added (usually). Otherwise
+	 * FALSE, e.g. if the construction of the facility is not yet completed.
+	 **/
+	virtual bool canAddOrder() const = 0;
+};
+
+
 class UnitPrivate;
 /**
  * Implementation of the visual parts of a unit. As far as possible all stuff
@@ -66,7 +102,7 @@ class UnitPrivate;
  * therefore not possible! This is done to save as much memory as possible.
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class Unit : public UnitBase
+class Unit : public UnitBase, private UnitOrdersInterface
 {
 public:
 	enum PropertyIds {
@@ -524,9 +560,23 @@ protected:
 
 	virtual int getAnimationMode() const;
 
-	bool currentOrderChanged();
-	bool currentOrderAdded();
-	void currentOrderRemoved();
+private:
+	/**
+	 * See @ref UnitOrdersInterface
+	 **/
+	virtual bool currentOrderChanged();
+	/**
+	 * See @ref UnitOrdersInterface
+	 **/
+	virtual bool currentOrderAdded();
+	/**
+	 * See @ref UnitOrdersInterface
+	 **/
+	virtual void currentOrderRemoved();
+	/**
+	 * See @ref UnitOrdersInterface
+	 **/
+	virtual bool canAddOrder() const;
 
 
 private:

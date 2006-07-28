@@ -54,6 +54,221 @@
 #include "defines.h"
 
 
+class UnitOrderQueuePrivate;
+/**
+ * A queue of UnitOrders.
+ **/
+class UnitOrderQueue
+{
+public:
+	UnitOrderQueue(UnitOrdersInterface* parent, Unit* parentUnit);
+	~UnitOrderQueue();
+
+	UnitOrder* currentOrder() const;
+	UnitOrderData* currentOrderData() const;
+
+	UnitOrder* toplevelOrder() const;
+	UnitOrderData* toplevelOrderData() const;
+
+	void clearOrders();
+
+	bool addToplevelOrder(UnitOrder* order);
+	bool addCurrentSuborder(UnitOrder* order);
+
+	bool replaceToplevelOrders(UnitOrder* order);
+
+	bool lastOrderStatus() const;
+
+	void currentSuborderDone(bool success);
+
+protected:
+	bool currentOrderChanged();
+	bool currentOrderAdded();
+	void currentOrderRemoved();
+	bool canAddOrder() const;
+
+private:
+	UnitOrdersInterface* mParent;
+	Unit* mParentUnit;
+	UnitOrderQueuePrivate* d;
+};
+
+class UnitOrderQueuePrivate
+{
+public:
+	UnitOrderQueuePrivate()
+	{
+		mCurrentOrder = 0;
+	}
+	QValueList<UnitOrderData*> mToplevelOrders;
+	UnitOrderData* mCurrentOrder;
+	UnitOrder::FinishStatus mLastOrderStatus;
+};
+
+UnitOrderQueue::UnitOrderQueue(UnitOrdersInterface* parent, Unit* parentUnit)
+{
+ d = new UnitOrderQueuePrivate;
+ d->mLastOrderStatus = UnitOrder::Success;
+ mParent = parent;
+
+ // AB: this pointer is not nice. this class should not need it.
+ //     however it is used in clearOrders() once, atm.
+ mParentUnit = parentUnit;
+}
+
+UnitOrderQueue::~UnitOrderQueue()
+{
+ delete d;
+}
+
+UnitOrder* UnitOrderQueue::currentOrder() const
+{
+ if (d->mCurrentOrder) {
+	return d->mCurrentOrder->order();
+ } else {
+	return 0;
+ }
+}
+
+UnitOrderData* UnitOrderQueue::currentOrderData() const
+{
+ return d->mCurrentOrder;
+}
+
+UnitOrder* UnitOrderQueue::toplevelOrder() const
+{
+ if (d->mToplevelOrders.count() > 0) {
+	return d->mToplevelOrders.first()->order();
+ } else {
+	return 0;
+ }
+}
+
+UnitOrderData* UnitOrderQueue::toplevelOrderData() const
+{
+ if (d->mToplevelOrders.count() > 0) {
+	return d->mToplevelOrders.first();
+ } else {
+	return 0;
+ }
+}
+
+void UnitOrderQueue::clearOrders()
+{
+ if (d->mToplevelOrders.isEmpty()) {
+	// AB: this call is ugly: it accesses the unit directly, instead of the
+	//     UnitOrdersInterface. However I don't want to include something
+	//     like clearOrdersFailsafe() in the interface either.
+	mParentUnit->setAdvanceWork(UnitBase::WorkIdle);  // Failsafe
+	return;
+ }
+
+ currentOrderRemoved();
+ while (!d->mToplevelOrders.isEmpty()) {
+	delete d->mToplevelOrders.first();
+	d->mToplevelOrders.pop_front();
+ }
+ currentOrderChanged();
+}
+
+bool UnitOrderQueue::replaceToplevelOrders(UnitOrder* order)
+{
+ currentOrderRemoved();
+ while (!d->mToplevelOrders.isEmpty()) {
+	delete d->mToplevelOrders.first();
+	d->mToplevelOrders.pop_front();
+ }
+
+ return addToplevelOrder(order);
+}
+
+bool UnitOrderQueue::addToplevelOrder(UnitOrder* order)
+{
+ d->mToplevelOrders.append(UnitOrderData::createData(order));
+ if (d->mToplevelOrders.count() == 1) {
+	if (!currentOrderAdded()) {
+		currentSuborderDone(false);
+		return false;
+	}
+ }
+ return true;
+}
+
+bool UnitOrderQueue::currentOrderChanged()
+{
+ d->mCurrentOrder = 0;
+ if (!d->mToplevelOrders.isEmpty()) {
+	d->mCurrentOrder = d->mToplevelOrders.first()->currentOrder();
+ }
+
+ return mParent->currentOrderChanged();
+}
+
+bool UnitOrderQueue::currentOrderAdded()
+{
+ if (!canAddOrder()) {
+	return false;
+ }
+ if (!currentOrderChanged()) {
+	return false;
+ }
+ return mParent->currentOrderAdded();
+}
+
+bool UnitOrderQueue::addCurrentSuborder(UnitOrder* order)
+{
+ if (currentOrderData()) {
+	// order will be child of currentOrder()
+	UnitOrderData* orderdata = UnitOrderData::createData(order);
+	currentOrderData()->setSuborder(orderdata);
+	d->mCurrentOrder = orderdata;
+	if (!currentOrderAdded()) {
+		// order couldn't be added, remove it
+		currentSuborderDone(false);
+		return false;
+	} else {
+		return true;
+	}
+ } else {
+	// order will be toplevel order
+	return addToplevelOrder(order);
+ }
+}
+
+void UnitOrderQueue::currentSuborderDone(bool success)
+{
+ if (!d->mCurrentOrder) {
+	boError() << k_funcinfo << "No current order!" << endl;
+	return;
+ }
+ d->mLastOrderStatus = (success ? UnitOrder::Success : UnitOrder::Failure);
+
+ currentOrderRemoved();
+
+ if (d->mCurrentOrder->parent()) {
+	d->mCurrentOrder->parent()->suborderDone();  // Deletes the child order
+ } else {
+	delete d->mToplevelOrders.first();
+	d->mToplevelOrders.pop_front();
+ }
+ currentOrderChanged();
+}
+
+void UnitOrderQueue::currentOrderRemoved()
+{
+ mParent->currentOrderRemoved();
+}
+
+bool UnitOrderQueue::canAddOrder() const
+{
+ return mParent->canAddOrder();
+}
+
+bool UnitOrderQueue::lastOrderStatus() const
+{
+ return (d->mLastOrderStatus == UnitOrder::Success);
+}
+
 
 
 bool Unit::mInitialized = false;
@@ -69,7 +284,7 @@ public:
 
 		mUnitMover = 0;
 
-		mCurrentOrder = 0;
+		mOrderQueue = 0;
 	}
 	KGamePropertyList<BoVector2Fixed> mPathPoints;
 
@@ -91,9 +306,7 @@ public:
 
 	UnitMover* mUnitMover;
 
-	QValueList<UnitOrderData*> mToplevelOrders;
-	UnitOrderData* mCurrentOrder;
-	UnitOrder::FinishStatus mLastOrderStatus;
+	UnitOrderQueue* mOrderQueue;
 };
 
 Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
@@ -117,6 +330,8 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  setSize(prop->unitWidth(), prop->unitHeight(), prop->unitDepth());
 
  registerData(&d->mPathPoints, IdPathPoints);
+
+ d->mOrderQueue = new UnitOrderQueue(this, this);
 
  mUnitConstruction = 0;
  if (prop->isFacility()) {
@@ -144,6 +359,7 @@ Unit::~Unit()
  if (canvas()->pathFinder()) {
 	// Release highlevel path here once we cache them
  }
+ delete d->mOrderQueue;
  delete d;
 }
 
@@ -1812,91 +2028,51 @@ void Unit::moveIdle()
 
 UnitOrderData* Unit::currentOrderData() const
 {
- return d->mCurrentOrder;
+ return d->mOrderQueue->currentOrderData();
 }
 
 UnitOrder* Unit::currentOrder() const
 {
- if (d->mCurrentOrder) {
-	return d->mCurrentOrder->order();
- } else {
-	return 0;
- }
+ return d->mOrderQueue->currentOrder();
 }
 
 UnitOrderData* Unit::toplevelOrderData() const
 {
- if (d->mToplevelOrders.count() > 0) {
-	return d->mToplevelOrders.first();
- } else {
-	return 0;
- }
+ return d->mOrderQueue->toplevelOrderData();
 }
 
 UnitOrder* Unit::toplevelOrder() const
 {
- if (d->mToplevelOrders.count() > 0) {
-	return d->mToplevelOrders.first()->order();
- } else {
-	return 0;
- }
+ return d->mOrderQueue->toplevelOrder();
 }
 
 void Unit::clearOrders()
 {
- if (d->mToplevelOrders.isEmpty()) {
-	setAdvanceWork(WorkIdle);  // Failsafe
-	return;
- }
-
- currentOrderRemoved();
- while (!d->mToplevelOrders.isEmpty()) {
-	delete d->mToplevelOrders.first();
-	d->mToplevelOrders.pop_front();
- }
- currentOrderChanged();
+ d->mOrderQueue->clearOrders();
 }
 
 bool Unit::replaceToplevelOrders(UnitOrder* order)
 {
- currentOrderRemoved();
- while (!d->mToplevelOrders.isEmpty()) {
-	delete d->mToplevelOrders.first();
-	d->mToplevelOrders.pop_front();
- }
-
- return addToplevelOrder(order);
+ return d->mOrderQueue->replaceToplevelOrders(order);
 }
 
 bool Unit::addToplevelOrder(UnitOrder* order)
 {
- d->mToplevelOrders.append(UnitOrderData::createData(order));
- if (d->mToplevelOrders.count() == 1) {
-	if (!currentOrderAdded()) {
-		currentSuborderDone(false);
-		return false;
-	}
- }
- return true;
+ return d->mOrderQueue->addToplevelOrder(order);
 }
 
 bool Unit::currentOrderChanged()
 {
- d->mCurrentOrder = 0;
- if (!d->mToplevelOrders.isEmpty()) {
-	d->mCurrentOrder = d->mToplevelOrders.first()->currentOrder();
- }
-
- if (!d->mCurrentOrder) {
+ if (!currentOrderData() || !currentOrder()) {
 	setAdvanceWork(WorkIdle);
 	return true;
  }
 
- setAdvanceWork(d->mCurrentOrder->order()->work());
+ setAdvanceWork(currentOrder()->work());
  // For WorkPlugin, we also need to set correct mCurrentPlugin
- if(d->mCurrentOrder->type() == UnitOrder::Harvest) {
+ if (currentOrderData()->type() == UnitOrder::Harvest) {
 	mCurrentPlugin = plugin(UnitPlugin::Harvester);
- } else if(d->mCurrentOrder->type() == UnitOrder::Refine) {
+ } else if (currentOrderData()->type() == UnitOrder::Refine) {
 	mCurrentPlugin = plugin(UnitPlugin::Harvester);
  }
 
@@ -1905,16 +2081,7 @@ bool Unit::currentOrderChanged()
 
 bool Unit::currentOrderAdded()
 {
- if (mUnitConstruction && !mUnitConstruction->isConstructionComplete()) {
-	boWarning(380) << k_funcinfo << "not yet constructed completely" << endl;
-	return false;
- }
-
- if (!currentOrderChanged()) {
-	return false;
- }
-
- UnitOrder* order = d->mCurrentOrder->order();
+ UnitOrder* order = currentOrder();
 // switch (order->type()) {
 	if(order->type() == UnitOrder::Move) {
 		// Move order
@@ -2008,41 +2175,12 @@ bool Unit::currentOrderAdded()
 
 bool Unit::addCurrentSuborder(UnitOrder* order)
 {
- if (currentOrderData()) {
-	// order will be child of currentOrder()
-	UnitOrderData* orderdata = UnitOrderData::createData(order);
-	currentOrderData()->setSuborder(orderdata);
-	d->mCurrentOrder = orderdata;
-	if (!currentOrderAdded()) {
-		// order couldn't be added, remove it
-		currentSuborderDone(false);
-		return false;
-	} else {
-		return true;
-	}
- } else {
-	// order will be toplevel order
-	return addToplevelOrder(order);
- }
+ return d->mOrderQueue->addCurrentSuborder(order);
 }
 
 void Unit::currentSuborderDone(bool success)
 {
- if (!d->mCurrentOrder) {
-	boError() << k_funcinfo << "No current order!" << endl;
-	return;
- }
- d->mLastOrderStatus = (success ? UnitOrder::Success : UnitOrder::Failure);
-
- currentOrderRemoved();
-
- if (d->mCurrentOrder->parent()) {
-	d->mCurrentOrder->parent()->suborderDone();  // Deletes the child order
- } else {
-	delete d->mToplevelOrders.first();
-	d->mToplevelOrders.pop_front();
- }
- currentOrderChanged();
+ d->mOrderQueue->currentSuborderDone(success);
 }
 
 void Unit::currentOrderRemoved()
@@ -2065,9 +2203,17 @@ void Unit::currentOrderRemoved()
  }
 }
 
+bool Unit::canAddOrder() const
+{
+ if (mUnitConstruction && !mUnitConstruction->isConstructionComplete()) {
+	return false;
+ }
+ return true;
+}
+
 bool Unit::lastOrderStatus() const
 {
- return (d->mLastOrderStatus == UnitOrder::Success);
+ return d->mOrderQueue->lastOrderStatus();
 }
 
 
