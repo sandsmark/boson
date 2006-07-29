@@ -1,8 +1,8 @@
 /*
     This file is part of the Boson game
     Copyright (C) 1999-2000 Thomas Capricelli (capricel@email.enst.fr)
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -184,7 +184,13 @@ bool UnitOrderQueue::replaceToplevelOrders(UnitOrder* order)
 
 bool UnitOrderQueue::addToplevelOrder(UnitOrder* order)
 {
- d->mToplevelOrders.append(UnitOrderData::createData(order));
+ UnitOrderData* data = UnitOrderData::createData(order);
+ if (!data) {
+	boError() << k_funcinfo << "no UnitOrderData object for UnitOrder object created" << endl;
+	delete order;
+	return false;
+ }
+ d->mToplevelOrders.append(data);
  if (d->mToplevelOrders.count() == 1) {
 	if (!currentOrderAdded()) {
 		currentSuborderDone(false);
@@ -220,6 +226,11 @@ bool UnitOrderQueue::addCurrentSuborder(UnitOrder* order)
  if (currentOrderData()) {
 	// order will be child of currentOrder()
 	UnitOrderData* orderdata = UnitOrderData::createData(order);
+	if (!orderdata) {
+		boError() << k_funcinfo << "no UnitOrderData object for UnitOrder object created" << endl;
+		delete order;
+		return false;
+	}
 	currentOrderData()->setSuborder(orderdata);
 	d->mCurrentOrder = orderdata;
 	if (!currentOrderAdded()) {
@@ -2087,7 +2098,6 @@ bool Unit::currentOrderAdded()
  UnitOrder* order = currentOrder();
 // switch (order->type()) {
 	if(order->type() == UnitOrder::Move) {
-		// Move order
 		UnitMoveOrder* moveo = (UnitMoveOrder*)order;
 		// We want land unit's center point to be in the middle of the cell after
 		//  moving.
@@ -2111,7 +2121,6 @@ bool Unit::currentOrderAdded()
 		}
 
 	} else if(order->type() == UnitOrder::MoveToUnit) {
-		// MoveToUnit order
 		UnitMoveToUnitOrder* movetounito = (UnitMoveToUnitOrder*)order;
 		const BoVector2Fixed& pos = movetounito->target()->center();
 		if (moveTo(pos.x(), pos.y(), movetounito->range())) {
@@ -2124,21 +2133,17 @@ bool Unit::currentOrderAdded()
 		}
 
 	} else if(order->type() == UnitOrder::AttackUnit) {
-		// AttackUnit order
 		UnitAttackOrder* attacko = (UnitAttackOrder*)order;
 		if (!canShootAt(attacko->target())) {
 			return false;
 		}
 
 	} else if(order->type() == UnitOrder::Follow) {
-		// Follow order
 
 	} else if(order->type() == UnitOrder::Turn) {
 	} else if(order->type() == UnitOrder::TurnToUnit) {
-		// Turn order
 
 	} else if(order->type() == UnitOrder::Harvest) {
-		// Harvest order
 		UnitHarvestOrder* harvestorder = (UnitHarvestOrder*)order;
 		HarvesterPlugin* h = (HarvesterPlugin*)plugin(UnitPlugin::Harvester);
 		if (!h) {
@@ -2153,20 +2158,18 @@ bool Unit::currentOrderAdded()
 		h->mineAt(r);
 
 	} else if(order->type() == UnitOrder::Refine) {
-		// Refine order
 		UnitRefineOrder* refineorder = (UnitRefineOrder*)order;
 		HarvesterPlugin* h = (HarvesterPlugin*)plugin(UnitPlugin::Harvester);
 		if (!h) {
-			boError() << k_lineinfo << "only harvester can refine" << endl;
+			boError() << k_lineinfo << "only harvester can execute refine orders" << endl;
 			return false;
 		}
 		RefineryPlugin* refinery = (RefineryPlugin*)refineorder->target()->plugin(UnitPlugin::Refinery);
 		if (!refinery) {
-			boWarning() << k_lineinfo << "refinery must be a refinery" << endl;
+			boWarning() << k_lineinfo << "invalid refinery given" << endl;
 			return false;
 		}
 		h->refineAt(refinery);
-
 	} else {
 		// Invalid order
 		boError() << k_funcinfo << "Invalid current order type " << order->type() << endl;
