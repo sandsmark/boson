@@ -262,8 +262,10 @@ void UnitOrderQueue::currentSuborderDone(bool success)
  } else {
 	delete d->mToplevelOrders.first();
 	d->mToplevelOrders.pop_front();
-	if (!currentOrderAdded()) {
-		currentSuborderDone(false);
+	if (!d->mToplevelOrders.isEmpty()) {
+		if (!currentOrderAdded()) {
+			currentSuborderDone(false);
+		}
 	}
  }
 }
