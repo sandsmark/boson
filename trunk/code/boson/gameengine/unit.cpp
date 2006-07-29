@@ -247,11 +247,14 @@ void UnitOrderQueue::currentSuborderDone(bool success)
 
  if (d->mCurrentOrder->parent()) {
 	d->mCurrentOrder->parent()->suborderDone();  // Deletes the child order
+	currentOrderChanged();
  } else {
 	delete d->mToplevelOrders.first();
 	d->mToplevelOrders.pop_front();
+	if (!currentOrderAdded()) {
+		currentSuborderDone(false);
+	}
  }
- currentOrderChanged();
 }
 
 void UnitOrderQueue::currentOrderRemoved()
