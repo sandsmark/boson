@@ -218,6 +218,9 @@ bool UnitOrderQueue::currentOrderAdded()
  if (!currentOrderChanged()) {
 	return false;
  }
+ if (!d->mCurrentOrder) {
+	return true;
+ }
  return mParent->currentOrderAdded();
 }
 
@@ -262,10 +265,8 @@ void UnitOrderQueue::currentSuborderDone(bool success)
  } else {
 	delete d->mToplevelOrders.first();
 	d->mToplevelOrders.pop_front();
-	if (!d->mToplevelOrders.isEmpty()) {
-		if (!currentOrderAdded()) {
-			currentSuborderDone(false);
-		}
+	if (!currentOrderAdded()) {
+		currentSuborderDone(false);
 	}
  }
 }
