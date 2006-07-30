@@ -92,8 +92,8 @@ public:
 	 * or so - just to display it in a list one day
 	 **/
 	virtual QString name() const = 0;
-	virtual void loadPlugin(KSimpleConfig* config) = 0;
-	virtual void savePlugin(KSimpleConfig* config) = 0;
+	virtual bool loadPlugin(KSimpleConfig* config) = 0;
+	virtual bool savePlugin(KSimpleConfig* config) = 0;
 
 	/**
 	 * @return A unique ID for the plugin. See @ref PluginPropertiesTypes
@@ -120,8 +120,8 @@ public:
 	static QString propertyGroup();
 
 	virtual QString name() const;
-	virtual void loadPlugin(KSimpleConfig* config);
-	virtual void savePlugin(KSimpleConfig* config);
+	virtual bool loadPlugin(KSimpleConfig* config);
+	virtual bool savePlugin(KSimpleConfig* config);
 	virtual int pluginType() const { return Production; }
 
 	QValueList<unsigned long int> producerList() const { return mProducerList; }
@@ -141,8 +141,8 @@ public:
 	static QString propertyGroup();
 
 	virtual QString name() const;
-	virtual void loadPlugin(KSimpleConfig* config);
-	virtual void savePlugin(KSimpleConfig* config);
+	virtual bool loadPlugin(KSimpleConfig* config);
+	virtual bool savePlugin(KSimpleConfig* config);
 	virtual int pluginType() const { return Repair; }
 
 private:
@@ -158,8 +158,8 @@ public:
 	static QString propertyGroup();
 
 	virtual QString name() const;
-	virtual void loadPlugin(KSimpleConfig* config);
-	virtual void savePlugin(KSimpleConfig* config);
+	virtual bool loadPlugin(KSimpleConfig* config);
+	virtual bool savePlugin(KSimpleConfig* config);
 	virtual int pluginType() const { return Harvester; }
 
 	/**
@@ -212,8 +212,8 @@ public:
 	static QString propertyGroup();
 
 	virtual QString name() const;
-	virtual void loadPlugin(KSimpleConfig* config);
-	virtual void savePlugin(KSimpleConfig* config);
+	virtual bool loadPlugin(KSimpleConfig* config);
+	virtual bool savePlugin(KSimpleConfig* config);
 	virtual int pluginType() const { return PluginProperties::Refinery; }
 
 	/**
@@ -242,8 +242,8 @@ public:
 	static QString propertyGroup();
 
 	virtual QString name() const;
-	virtual void loadPlugin(KSimpleConfig* config);
-	virtual void savePlugin(KSimpleConfig* config);
+	virtual bool loadPlugin(KSimpleConfig* config);
+	virtual bool savePlugin(KSimpleConfig* config);
 	virtual int pluginType() const { return ResourceMine; }
 
 	bool canProvideMinerals() const { return mMinerals; }
@@ -265,8 +265,8 @@ public:
 	static QString propertyGroup();
 
 	virtual QString name() const;
-	virtual void loadPlugin(KSimpleConfig* config);
-	virtual void savePlugin(KSimpleConfig* config);
+	virtual bool loadPlugin(KSimpleConfig* config);
+	virtual bool savePlugin(KSimpleConfig* config);
 	virtual int pluginType() const { return AmmunitionStorage; }
 
 	/**
@@ -295,8 +295,8 @@ public:
 	static QString propertyGroup();
 
 	virtual QString name() const;
-	virtual void loadPlugin(KSimpleConfig* config);
-	virtual void savePlugin(KSimpleConfig* config);
+	virtual bool loadPlugin(KSimpleConfig* config);
+	virtual bool savePlugin(KSimpleConfig* config);
 	virtual int pluginType() const { return Radar; }
 
 	/**
@@ -329,8 +329,8 @@ public:
 	static QString propertyGroup();
 
 	virtual QString name() const;
-	virtual void loadPlugin(KSimpleConfig* config);
-	virtual void savePlugin(KSimpleConfig* config);
+	virtual bool loadPlugin(KSimpleConfig* config);
+	virtual bool savePlugin(KSimpleConfig* config);
 	virtual int pluginType() const { return RadarJammer; }
 
 	/**
