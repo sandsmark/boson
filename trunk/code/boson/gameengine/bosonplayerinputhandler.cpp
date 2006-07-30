@@ -559,6 +559,10 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			boError() << "Cannot follow NULL unit" << endl;
 			return true;
 		}
+		if (followUnit->isDestroyed()) {
+			boDebug() << "Cannot follow destroyed units" << endl;
+			return true;
+		}
 		for (QValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
 			Q_ULONG unitId = *it;
 			if (unitId == message.mFollowUnitId) {
@@ -572,10 +576,6 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			}
 			if (unit->isDestroyed()) {
 				boDebug() << "cannot follow with destroyed units" << endl;
-				continue;
-			}
-			if (followUnit->isDestroyed()) {
-				boDebug() << "Cannot follow destroyed units" << endl;
 				continue;
 			}
 			unit->addToplevelOrder(new UnitFollowOrder(followUnit));
