@@ -102,7 +102,7 @@ bofixed BosonWeaponProperties::bofixedWeaponBaseValue(const QString& name, const
   return bofixedBaseValue(QString("Weapon_%1:%2").arg(id() - 1).arg(name), type, defaultValue);
 }
 
-void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg)
+bool BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg)
 {
   // FIXME: don't load all values for all weapon types
   mName = cfg->readEntry("Name", "");
@@ -204,9 +204,10 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg)
   {
     loadAction(ActionDropBomb, cfg, "ActionDropBomb", true);
   }
+  return true;
 }
 
-void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
+bool BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
 {
   // Group must have been set before
   // Save type
@@ -270,6 +271,7 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
       // TODO: return false
     }
   }
+  return true;
 }
 
 void BosonWeaponProperties::reset()

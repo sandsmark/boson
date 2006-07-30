@@ -76,20 +76,22 @@ QString RepairProperties::name() const
  return i18n("Repair Plugin");
 }
 
-void RepairProperties::loadPlugin(KSimpleConfig* config)
+bool RepairProperties::loadPlugin(KSimpleConfig* config)
 {
  if (!config->hasGroup(propertyGroup())) {
 	boError() << k_funcinfo << "unit has no repair plugin" << endl;
-	return;
+	return false;
  }
  config->setGroup(propertyGroup());
+ return true;
 }
 
-void RepairProperties::savePlugin(KSimpleConfig* config)
+bool RepairProperties::savePlugin(KSimpleConfig* config)
 {
  config->setGroup(propertyGroup());
  // KConfig automatically deletes empty groups
  config->writeEntry("Dummy", "This entry is here just to prevent KConfig from deleting this group");
+ return true;
 }
 
 ProductionProperties::ProductionProperties(const UnitProperties* parent)
@@ -111,20 +113,22 @@ QString ProductionProperties::name() const
  return i18n("Production Plugin");
 }
 
-void ProductionProperties::loadPlugin(KSimpleConfig* config)
+bool ProductionProperties::loadPlugin(KSimpleConfig* config)
 {
  if (!config->hasGroup(propertyGroup())) {
-	boError() << k_funcinfo << "unit has no production plugin" << endl;
-	return;
+	boError() << k_funcinfo << "unit has no such plugin" << endl;
+	return false;
  }
  config->setGroup(propertyGroup());
  mProducerList = BosonConfig::readUnsignedLongNumList(config, "ProducerList");
+ return true;
 }
 
-void ProductionProperties::savePlugin(KSimpleConfig* config)
+bool ProductionProperties::savePlugin(KSimpleConfig* config)
 {
  config->setGroup(propertyGroup());
  BosonConfig::writeUnsignedLongNumList(config, "ProducerList", mProducerList);
+ return true;
 }
 
 
@@ -150,11 +154,11 @@ QString HarvesterProperties::name() const
  return i18n("Harvester Plugin");
 }
 
-void HarvesterProperties::loadPlugin(KSimpleConfig* config)
+bool HarvesterProperties::loadPlugin(KSimpleConfig* config)
 {
  if (!config->hasGroup(propertyGroup())) {
 	boError() << k_funcinfo << "unit has no harvester plugin" << endl;
-	return;
+	return false;
  }
  config->setGroup(propertyGroup());
  mCanMineMinerals = config->readBoolEntry("CanMineMinerals", false);
@@ -166,9 +170,10 @@ void HarvesterProperties::loadPlugin(KSimpleConfig* config)
  // Convert speeds from amount/second to amount/adv.call
  mMiningSpeed = (int)(config->readDoubleNumEntry("MiningSpeed", 100) / 20.0f);
  mUnloadingSpeed = (int)(config->readDoubleNumEntry("UnloadingSpeed", 200) / 20.0f);
+ return true;
 }
 
-void HarvesterProperties::savePlugin(KSimpleConfig* config)
+bool HarvesterProperties::savePlugin(KSimpleConfig* config)
 {
  config->setGroup(propertyGroup());
  config->writeEntry("CanMineMinerals", mCanMineMinerals);
@@ -177,6 +182,7 @@ void HarvesterProperties::savePlugin(KSimpleConfig* config)
  // Convert speeds from amount/adv.call to amount/second
  config->writeEntry("MiningSpeed", mMiningSpeed * 20.0f);
  config->writeEntry("UnloadingSpeed", mUnloadingSpeed * 20.0f);
+ return true;
 }
 
 
@@ -201,11 +207,11 @@ QString RefineryProperties::name() const
  return i18n("Refinery Plugin");
 }
 
-void RefineryProperties::loadPlugin(KSimpleConfig* config)
+bool RefineryProperties::loadPlugin(KSimpleConfig* config)
 {
  if (!config->hasGroup(propertyGroup())) {
 	boError() << k_funcinfo << "unit has no refinery plugin" << endl;
-	return;
+	return false;
  }
  config->setGroup(propertyGroup());
  mCanRefineMinerals = config->readBoolEntry("CanRefineMinerals", false);
@@ -213,13 +219,15 @@ void RefineryProperties::loadPlugin(KSimpleConfig* config)
  if (mCanRefineMinerals && mCanRefineOil) {
 	boWarning() << k_funcinfo << "unit shouldn't refine minerals *and* oil" << endl;
  }
+ return true;
 }
 
-void RefineryProperties::savePlugin(KSimpleConfig* config)
+bool RefineryProperties::savePlugin(KSimpleConfig* config)
 {
  config->setGroup(propertyGroup());
  config->writeEntry("CanRefineMinerals", mCanRefineMinerals);
  config->writeEntry("CanRefineOil", mCanRefineOil);
+ return true;
 }
 
 
@@ -244,25 +252,23 @@ QString ResourceMineProperties::propertyGroup()
  return QString::fromLatin1("ResourceMinePlugin");
 }
 
-void ResourceMineProperties::loadPlugin(KSimpleConfig* config)
+bool ResourceMineProperties::loadPlugin(KSimpleConfig* config)
 {
  if (!config->hasGroup(propertyGroup())) {
 	boError() << k_funcinfo << "unit has no harvester plugin" << endl;
-	return;
+	return false;
  }
  config->setGroup(propertyGroup());
  mMinerals = config->readBoolEntry("CanProvideMinerals", false);
  mOil = config->readBoolEntry("CanProvideOil", false);
+ return true;
 }
 
-void ResourceMineProperties::savePlugin(KSimpleConfig* config)
+bool ResourceMineProperties::savePlugin(KSimpleConfig* config)
 {
- if (!config->hasGroup(propertyGroup())) {
-	boError() << k_funcinfo << "unit has no harvester plugin" << endl;
-	return;
- }
  config->writeEntry("CanProvideMinerals", mMinerals);
  config->writeEntry("CanProvideOil", mOil);
+ return true;
 }
 
 AmmunitionStorageProperties::AmmunitionStorageProperties(const UnitProperties* parent)
@@ -284,22 +290,24 @@ QString AmmunitionStorageProperties::name() const
  return i18n("Ammunition Storage Plugin");
 }
 
-void AmmunitionStorageProperties::loadPlugin(KSimpleConfig* config)
+bool AmmunitionStorageProperties::loadPlugin(KSimpleConfig* config)
 {
  if (!config->hasGroup(propertyGroup())) {
-	boError() << k_funcinfo << "unit has no production plugin" << endl;
-	return;
+	boError() << k_funcinfo << "unit has no such plugin" << endl;
+	return false;
  }
  config->setGroup(propertyGroup());
  mCanStore = config->readListEntry("CanStore");
  mMustBePickedUp = config->readListEntry("MustBePickedUp");
+ return true;
 }
 
-void AmmunitionStorageProperties::savePlugin(KSimpleConfig* config)
+bool AmmunitionStorageProperties::savePlugin(KSimpleConfig* config)
 {
  config->setGroup(propertyGroup());
  config->writeEntry("CanStore", mCanStore);
  config->writeEntry("MustBePickedUp", mMustBePickedUp);
+ return true;
 }
 
 bool AmmunitionStorageProperties::mustBePickedUp(const QString& type) const
@@ -338,24 +346,26 @@ QString RadarProperties::name() const
  return i18n("Radar Plugin");
 }
 
-void RadarProperties::loadPlugin(KSimpleConfig* config)
+bool RadarProperties::loadPlugin(KSimpleConfig* config)
 {
  if (!config->hasGroup(propertyGroup())) {
-	boError() << k_funcinfo << "unit has no production plugin" << endl;
-	return;
+	boError() << k_funcinfo << "unit has no such plugin" << endl;
+	return false;
  }
  config->setGroup(propertyGroup());
  mTransmittedPower = config->readDoubleNumEntry("TransmittedPower", 10000.0f);
  mMinReceivedPower = config->readDoubleNumEntry("MinReceivedPower", 0.05f);
  mDetectsLandUnits = config->readBoolEntry("DetectsLandUnits", true);
  mDetectsAirUnits = config->readBoolEntry("DetectsAirUnits", true);
+ return true;
 }
 
-void RadarProperties::savePlugin(KSimpleConfig* config)
+bool RadarProperties::savePlugin(KSimpleConfig* config)
 {
  config->setGroup(propertyGroup());
  config->writeEntry("TransmittedPower", mTransmittedPower);
  config->writeEntry("MinReceivedPower", mMinReceivedPower);
+ return true;
 }
 
 
@@ -378,19 +388,23 @@ QString RadarJammerProperties::name() const
  return i18n("Radar Jammer Plugin");
 }
 
-void RadarJammerProperties::loadPlugin(KSimpleConfig* config)
+bool RadarJammerProperties::loadPlugin(KSimpleConfig* config)
 {
  if (!config->hasGroup(propertyGroup())) {
-	boError() << k_funcinfo << "unit has no production plugin" << endl;
-	return;
+	boError() << k_funcinfo << "unit has no such plugin" << endl;
+	return false;
  }
  config->setGroup(propertyGroup());
  mTransmittedPower = config->readDoubleNumEntry("TransmittedPower", 500.0f);
+ return true;
 }
 
-void RadarJammerProperties::savePlugin(KSimpleConfig* config)
+bool RadarJammerProperties::savePlugin(KSimpleConfig* config)
 {
  config->setGroup(propertyGroup());
  config->writeEntry("TransmittedPower", mTransmittedPower);
+ return true;
 }
+
+
 

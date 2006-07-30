@@ -194,8 +194,8 @@ class BosonWeaponProperties : public PluginProperties
     QValueList<unsigned long int> hitEffectIds() const  { return mHitEffectIds; }
 
     virtual QString name() const;
-    virtual void loadPlugin(KSimpleConfig* config);
-    virtual void savePlugin(KSimpleConfig* config);
+    virtual bool loadPlugin(KSimpleConfig* config);
+    virtual bool savePlugin(KSimpleConfig* config);
     virtual int pluginType() const  { return Weapon; }
 
     const QMap<int, QString>* actionStrings() const  { return &mActionStrings; }
