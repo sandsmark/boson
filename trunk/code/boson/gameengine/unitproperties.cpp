@@ -227,39 +227,65 @@ bool UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
 bool UnitProperties::loadAllPluginProperties(KSimpleConfig* conf)
 {
  if (conf->hasGroup(ProductionProperties::propertyGroup())) {
-	loadPluginProperties(new ProductionProperties(this), conf);
+	if (!loadPluginProperties(new ProductionProperties(this), conf)) {
+		return false;
+	}
  }
  if (conf->hasGroup(RepairProperties::propertyGroup())) {
-	loadPluginProperties(new RepairProperties(this), conf);
+	if (!loadPluginProperties(new RepairProperties(this), conf)) {
+		return false;
+	}
  }
  if (conf->hasGroup(HarvesterProperties::propertyGroup())) {
-	loadPluginProperties(new HarvesterProperties(this), conf);
+	if (!loadPluginProperties(new HarvesterProperties(this), conf)) {
+		return false;
+	}
  }
  if (conf->hasGroup(RefineryProperties::propertyGroup())) {
-	loadPluginProperties(new RefineryProperties(this), conf);
+	if (!loadPluginProperties(new RefineryProperties(this), conf)) {
+		return false;
+	}
  }
  if (conf->hasGroup(ResourceMineProperties::propertyGroup())) {
-	loadPluginProperties(new ResourceMineProperties(this), conf);
+	if (!loadPluginProperties(new ResourceMineProperties(this), conf)) {
+		return false;
+	}
  }
  if (conf->hasGroup(AmmunitionStorageProperties::propertyGroup())) {
-	loadPluginProperties(new AmmunitionStorageProperties(this), conf);
+	if (!loadPluginProperties(new AmmunitionStorageProperties(this), conf)) {
+		return false;
+	}
  }
  if (conf->hasGroup(RadarProperties::propertyGroup())) {
-	loadPluginProperties(new RadarProperties(this), conf);
+	if (!loadPluginProperties(new RadarProperties(this), conf)) {
+		return false;
+	}
  }
  if (conf->hasGroup(RadarJammerProperties::propertyGroup())) {
-	loadPluginProperties(new RadarJammerProperties(this), conf);
+	if (!loadPluginProperties(new RadarJammerProperties(this), conf)) {
+		return false;
+	}
  }
  return true;
 }
 
+// takes ownership of prop!
 bool UnitProperties::loadPluginProperties(PluginProperties* prop, KSimpleConfig* conf)
 {
- if (!prop || !conf) {
-	boError() << k_funcinfo << "oops" << endl;
+ if (!prop) {
+	BO_NULL_ERROR(prop);
 	return false;
  }
- prop->loadPlugin(conf);
+ if (!conf) {
+	BO_NULL_ERROR(prop);
+	delete prop;
+	return false;
+ }
+ if (!prop->loadPlugin(conf)) {
+	boError() << k_funcinfo << "unable to load PluginProperties " << prop->pluginType() << endl;
+	delete prop;
+	return false;
+ }
  d->mPlugins.append(prop);
  return true;
 }
