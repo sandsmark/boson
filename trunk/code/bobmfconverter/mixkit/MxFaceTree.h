@@ -114,10 +114,16 @@ public:
     // Distance computations
     //
 
-    void bound_cluster_sqrdistance(uint,const double*,double *min,double *max);
+// AB: removed due to licensing issues with MxTriProject.cxx which is required
+// for this
+//    void bound_cluster_sqrdistance(uint,const double*,double *min,double *max);
 
-    double find_min_sqrdistance(const double*,MxFaceProbe*,uint root=MXID_NIL);
-    double exhaustive_min_sqrdistance(const double*,MxFaceProbe*);
+// AB: removed due to licensing issues with MxTriProject.cxx which is required
+// for this
+//    double find_min_sqrdistance(const double*,MxFaceProbe*,uint root=MXID_NIL);
+// AB: removed due to licensing issues with MxTriProject.cxx which is required
+// for this
+//    double exhaustive_min_sqrdistance(const double*,MxFaceProbe*);
 
     ////////////////////////////////////////////////////////////////////////
     //
