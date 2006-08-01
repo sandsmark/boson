@@ -19,6 +19,7 @@ static inline Quadric corner_quadric(MxStdModel *m, uint f, uint i)
 static inline Quadric corner_quadric(MxStdModel *m, uint v)
 	{ return Quadric(m->vertex(v), 1); }
 
+#if 0
 MxDualSlim::MxDualSlim(MxStdModel *m0, MxDualModel *d0, MxFaceTree *t0)
     : heap(d0->edge_count()),
       face_nodes(m0->face_count()),
@@ -81,6 +82,7 @@ void MxDualSlim::update_node_bounds(uint id)
     update_frame_bounds(c, n.faces);
 }
 
+#if 0
 void MxDualSlim::initialize()
 {
     uint i;
@@ -102,7 +104,8 @@ void MxDualSlim::initialize()
 	compute_edge_info(t);
     }
 }
-
+#endif
+#if 0
 void MxDualSlim::compute_edge_info(MxDualSlimEdge *e)
 {
     MxDualEdge& edge = dual->edge(e->id);
@@ -195,7 +198,9 @@ void MxDualSlim::compute_edge_info(MxDualSlimEdge *e)
     else
 	heap.insert(e);
 }
+#endif
 
+#if 0
 void MxDualSlim::contract(MxDualSlimEdge *e)
 {
     MxDualEdge& edge = dual->edge(e->id);
@@ -240,7 +245,9 @@ void MxDualSlim::contract(MxDualSlimEdge *e)
     for(i=0; i<dual->node_edges(conx.n1).length(); i++)
 	compute_edge_info(get_edge(dual->node_edges(conx.n1)[i]));
 }
+#endif
 
+#if 0
 bool MxDualSlim::aggregate(uint target)
 {
     while( root_cluster_count > target )
@@ -278,3 +285,5 @@ bool MxDualSlim::limit_aggregate(float maxerr)
 
     return true;
 }
+#endif
+#endif // 0

@@ -35,7 +35,9 @@ private:
 public:
     MxFitFrame();
     MxFitFrame(double *c, double *u0, double *u1, double *u2);
-    MxFitFrame(const MxQuadric3&, uint nverts);
+// AB: removed due to licensing issues with MxMat[3|4]-jacobi.cxx which
+// is required for this
+//    MxFitFrame(const MxQuadric3&, uint nverts);
 
     double       *min()       { return vmin; }
     const double *min() const { return vmin; }
@@ -52,7 +54,9 @@ public:
     void clear_normal();
     void finalize_normal();
 
-    bool compute_frame(const MxQuadric3&, uint nverts);
+// AB: removed due to licensing issues with MxMat[3|4]-jacobi.cxx which
+// is required for this
+//    bool compute_frame(const MxQuadric3&, uint nverts);
     bool compute_frame(const float *, const float *, const float *);
     void reset_bounds();
     void accumulate_bounds(const MxFitFrame&);
