@@ -36,6 +36,9 @@ public:
     uint nverts;		// The number of vertices in this cluster
 };
 
+// AB: removed due to licensing issues with MxMat[3|4]-jacobi.cxx which
+// is required for this
+#if 0
 class MxDualSlim
 {
 private:
@@ -57,8 +60,12 @@ protected:
 
     void update_frame_bounds(MxFaceCluster&, const MxFaceList&);
     void update_node_bounds(uint);
-    void compute_edge_info(MxDualSlimEdge *e);
-    void contract(MxDualSlimEdge *e);
+// AB: removed due to licensing issues with MxMat[3|4]-jacobi.cxx which
+// is required for this
+//    void compute_edge_info(MxDualSlimEdge *e);
+// AB: removed due to licensing issues with MxMat[3|4]-jacobi.cxx which
+// is required for this
+//    void contract(MxDualSlimEdge *e);
 
 public:
     bool weight_by_area;
@@ -72,11 +79,17 @@ public:
     MxDualSlimNode&       node_info(uint i)       { return face_nodes(i); }
     const MxDualSlimNode& node_info(uint i) const { return face_nodes(i); }
 
-    void initialize();
-    bool aggregate(uint target);
-    bool limit_aggregate(float maxerr);
+// AB: removed due to licensing issues with MxMat[3|4]-jacobi.cxx which
+// is required for this
+//    void initialize();
+// AB: removed due to licensing issues with MxMat[3|4]-jacobi.cxx which
+// is required for this
+//    bool aggregate(uint target);
+// AB: removed due to licensing issues with MxMat[3|4]-jacobi.cxx which
+// is required for this
+//    bool limit_aggregate(float maxerr);
 };
-
+#endif
 
 
 

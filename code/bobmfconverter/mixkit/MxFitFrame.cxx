@@ -28,6 +28,7 @@ MxFitFrame::MxFitFrame(double *c, double *u0, double *u1, double *u2)
     mxv_set(avg_normal, u2, 3);
 }
 
+#if 0
 MxFitFrame::MxFitFrame(const MxQuadric3& Q_fit, uint nverts)
 {
     reset_bounds();
@@ -36,7 +37,10 @@ MxFitFrame::MxFitFrame(const MxQuadric3& Q_fit, uint nverts)
     if( !compute_frame(Q_fit, nverts) )
 	fatal_error("MxFitFrame -- unable to construct frame from quadric.");
 }
+#endif
 
+
+#if 0
 bool MxFitFrame::compute_frame(const MxQuadric3& Q_fit, uint _nverts)
 {
     Mat3 A = Q_fit.tensor();
@@ -57,6 +61,7 @@ bool MxFitFrame::compute_frame(const MxQuadric3& Q_fit, uint _nverts)
 
     return true;
 }
+#endif
 
 bool MxFitFrame::compute_frame(const float *p0,const float *p1,const float *p2)
 {
