@@ -162,8 +162,12 @@ protected:
 	/**
 	 * Finds new path to destination.
 	 * Destination must have been set before in @ref pathInfo
+	 * @return TRUE on success. @ref pathInfo contains the new path
+	 * and @ref unit::pathPointList has been updated. FALSE on failure, @ref
+	 * Unit::pathPointList is empty then. The unit should stop moving in
+	 * this case afterwards.
 	 **/
-	bool newPath();
+	bool calculateNewPath();
 
 	/**
 	 * Move towards p, going at most maxdist (in canvas coords).

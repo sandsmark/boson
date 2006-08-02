@@ -484,7 +484,7 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 		return;
 	}
 	// If there aren't any enemies, find new path
-	if (!newPath()) {
+	if (!calculateNewPath()) {
 		// No path was found
 		stopMoving(false);
 		return;
@@ -494,7 +494,7 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 	const BoVector2Fixed& targetpos = ((UnitMoveToUnitOrder*)unit()->currentOrder())->target()->center();
 	if (((UnitMoveToUnitOrderData*)unit()->currentOrderData())->lastTargetPos.dotProduct(targetpos) > 5*5) {
 		// Update path
-		if (!newPath()) {
+		if (!calculateNewPath()) {
 			// No path was found
 			stopMoving(false);
 			return;
@@ -507,7 +507,7 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 	if (pathInfo()->result == BosonPath::OutOfRange) {
 		// New pathfinding query has to made, because last returned path was
 		//  only partial.
-		if (!newPath()) {
+		if (!calculateNewPath()) {
 			// Probably no path could be found or we're already at destination point
 			stopMoving(false);  // TODO: is false correct here?
 			return;
@@ -557,7 +557,7 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 		if (pathInfo()->result == BosonPath::OutOfRange) {
 			// New pathfinding query has to made, because last returned path was
 			//  only partial.
-			if (!newPath()) {
+			if (!calculateNewPath()) {
 				// Probably no path could be found
 				// Unit will stop moving during the next advance call (because we want
 				//  to move as much as we already have in this loop)
@@ -599,7 +599,7 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 	// Make sure it's possible to go to the pathpoint
 	if (!canGoToCurrentPathPoint(x + xspeed, y + yspeed)) {
 		// Gotta find another path
-		if (!newPath()) {
+		if (!calculateNewPath()) {
 			// Probably no path could be found
 			// Unit will stop moving during the next advance call (because we want
 			//  to move as much as we already have in this loop)
@@ -685,7 +685,7 @@ void UnitMoverLand::advanceMoveCheck()
 				//  calls, then 60 etc, but never more than 100 calls.
 				boDebug(401) << k_funcinfo << "unit " << id() << ": Recalcing path, waiting: " << pathInfo()->waiting <<
 						"; pathrecalced: " << pathInfo()->pathrecalced << endl;
-				newPath();
+				calculateNewPath();
 				pathInfo()->pathrecalced++;
 				pathInfo()->waiting = 0;
 				// New path will be used next advance call
@@ -1005,9 +1005,9 @@ bofixed UnitMoverLand::moveTowardsPoint(const BoVector2Fixed& p, bofixed x, bofi
  }
 }
 
-bool UnitMoverLand::newPath()
+bool UnitMoverLand::calculateNewPath()
 {
- BosonProfiler profiler("newPath");
+ BosonProfiler profiler("calculateNewPath");
  boDebug(401) << k_funcinfo << "unit " << id() << endl;
 
  // Update our start position
