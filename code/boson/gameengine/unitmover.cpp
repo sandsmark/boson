@@ -254,7 +254,15 @@ bool UnitMover::advancedRectWillBeOnCanvas() const
 
 void UnitMover::advanceMove(unsigned int advanceCallsCount)
 {
+ // actually move
  advanceMoveInternal(advanceCallsCount);
+
+ // check whether velocity/whatever of this unit causes it to go off the map or
+ // collide with other units. if so, revert the changes and stop moving.
+ //
+ // advanceMoveInternal() should also ensure these things, so advanceMoveCheck()
+ // should be a noop in theory - but since moving is a very complex task, it
+ // usually is required anyway.
  advanceMoveCheck();
 }
 
@@ -512,36 +520,6 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
  }
 
  boDebug(401) << k_funcinfo << "unit " << id() << endl;
-#warning TODO!!!
-#if 0
- if (advanceWork() != work()) {
-	if (work() == UnitBase::WorkAttack) {
-		// Unit is attacking. ATM it's moving to target.
-		// no need to move to the position of the unit...
-		// just check if unit is in range now.
-		if (!unit()->target()) {
-			boError() << k_funcinfo << "unit " << id() << " is in WorkAttack, but has NULL target!" << endl;
-			unit()->stopAttacking();
-			unit()->setMovingStatus(UnitBase::Standing);
-			return;
-		}
-		int range;
-		if (unit()->target()->isFlying()) {
-			range = unit()->maxAirWeaponRange();
-		} else {
-			range = unit()->maxLandWeaponRange();
-		}
-		if (unit()->inRange(range, unit()->target())) {
-			boDebug(401) << k_funcinfo << "unit " << id() << ": target is in range now" << endl;
-			unit()->setMovingStatus(UnitBase::Standing);
-			unit()->stopMoving();
-			return;
-		}
-		// TODO: make sure that target() hasn't moved!
-		// if it has moved also adjust pathpoints
-	}
- } else
-#endif
  if (pathInfo()->moveAttacking) {
 	// Attack any enemy units in range
 	// Don't check for enemies every time (if we don't have a target) because it
@@ -671,6 +649,13 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 // AB: WARNING crushing is currently disabled!
 //
 // see #warning below
+#warning FIXME: advanceMoveCheck() should be used to _check_ for things only
+// AB: advanceMoveCheck() was meant to _check_ whether the move is valid, i.e.
+//     check if the calculated velocity or so may cause the unit to go off the
+//     map or collide with a different unit.
+//     however atm it is heavily used to actually do a lot of calculations,
+//     which is not intended at all.
+//     this should be fixed.
 void UnitMoverLand::advanceMoveCheck()
 {
  PROFILE_METHOD;
@@ -1371,3 +1356,4 @@ if (pathInfo()->moveAttacking) {
 
  unit()->setMovingStatus(UnitBase::Moving);
 }
+
