@@ -179,6 +179,79 @@ void UnitMover::initCellIntersectionTable()
  }
 }
 
+bool UnitMover::advancedRectWillBeOnCanvas() const
+{
+#define VERBOSE_ERROR 1
+ // Check if top-left point of the unit will be on canvas after moving
+ if (!canvas()->onCanvas(unit()->boundingRectAdvanced().topLeft())) {
+#if VERBOSE_ERROR
+	BoVector2Fixed point = unit()->boundingRectAdvanced().topLeft();
+	QString problem;
+	if (!canvas()->onCanvas(BoVector2Fixed(0, point.y()))) {
+		problem = QString("top==%1").arg(point.y());
+	} else if (!canvas()->onCanvas(BoVector2Fixed(point.x(), 0))) {
+		problem = QString("left==%1").arg(point.x());
+	} else {
+		boError(401) << k_funcinfo
+				<< "internal error: (0," << point.y() <<
+				") and (" << point.x()
+				<< ",0) are on canvas, but (" << point.x() <<
+				"," << point.y() << ") isn't !"
+				<< endl;
+		problem = "internal";
+	}
+	boError(401) << k_funcinfo << "unit " << id()
+			<< " not on canvas (topLeftAdvanced): (" << point.x()
+			<< ";" << point.y() << ")" << " problem was: "
+			<< problem << endl;
+	boError(401) << k_funcinfo << "leaving unit a current topleft pos: ("
+			<< unit()->boundingRect().topLeft().x() << ";"
+			<< unit()->boundingRect().topLeft().y() << ")" << endl;
+#endif //VERBOSE_ERROR
+
+	return false;
+ }
+
+// Check if bottom-right point of the unit will be on canvas after moving
+ if (!canvas()->onCanvas(unit()->boundingRectAdvanced().bottomRight())) {
+#if VERBOSE_ERROR
+	BoVector2Fixed point = unit()->boundingRectAdvanced().bottomRight();
+	QString problem;
+	if (!canvas()->onCanvas(BoVector2Fixed(0, point.y()))) {
+		problem = QString("bottom==%1").arg(point.y());
+	} else if (!canvas()->onCanvas(BoVector2Fixed(point.x(), 0))) {
+		problem = QString("right==%1").arg(point.x());
+	} else {
+		boError(401) << k_funcinfo
+				<< "internal error: (0," << point.y() <<
+				") and (" << point.x()
+				<< ",0) are on canvas, but (" << point.x() <<
+				"," << point.y() << ") isn't !"
+				<< endl;
+	}
+	boError(401) << k_funcinfo << "unit " << id()
+			<< " not on canvas (bottomRightAdvanced): ("
+			<< point.x() << ";" << point.y() << ")"
+			<< "  current rightEdge: " << unit()->rightEdge()
+			<< " ; current bottomEdge:" << unit()->bottomEdge()
+			<< " ; xVelocity: " << unit()->xVelocity()
+			<< " ; (int)xVelocity: " << (int)unit()->xVelocity()
+			<< " ; yVelocity: " << unit()->yVelocity()
+			<< " ; (int)yVelocity: " << (int)unit()->yVelocity()
+			<< " problem was: "
+			<< problem << endl;
+	boError(401) << k_funcinfo << "leaving unit a current bottomright pos: ("
+			<< unit()->boundingRect().bottomRight().x() << ";"
+			<< unit()->boundingRect().bottomRight().y() << ")" << endl;
+#endif // VERBOSE_ERROR
+
+	return false;
+ }
+
+#undef VERBOSE_ERROR
+ return true;
+}
+
 void UnitMover::advanceMove(unsigned int advanceCallsCount)
 {
  advanceMoveInternal(advanceCallsCount);
@@ -224,71 +297,11 @@ void UnitMover::advanceFollow(unsigned int advanceCallsCount)
  // Do nothing (unit is in range)
 }
 
-
 void UnitMover::advanceMoveCheck()
 {
  PROFILE_METHOD;
- // Check if top-left point of the unit will be on canvas after moving
- if (!canvas()->onCanvas(unit()->boundingRectAdvanced().topLeft())) {
-	BoVector2Fixed point = unit()->boundingRectAdvanced().topLeft();
-	QString problem;
-	if (!canvas()->onCanvas(BoVector2Fixed(0, point.y()))) {
-		problem = QString("top==%1").arg(point.y());
-	} else if (!canvas()->onCanvas(BoVector2Fixed(point.x(), 0))) {
-		problem = QString("left==%1").arg(point.x());
-	} else {
-		boError(401) << k_funcinfo
-				<< "internal error: (0," << point.y() <<
-				") and (" << point.x()
-				<< ",0) are on canvas, but (" << point.x() <<
-				"," << point.y() << ") isn't !"
-				<< endl;
-		problem = "internal";
-	}
-	boError(401) << k_funcinfo << "unit " << id()
-			<< " not on canvas (topLeftAdvanced): (" << point.x()
-			<< ";" << point.y() << ")" << " problem was: "
-			<< problem << endl;
-	boError(401) << k_funcinfo << "leaving unit a current topleft pos: ("
-			<< unit()->boundingRect().topLeft().x() << ";"
-			<< unit()->boundingRect().topLeft().y() << ")" << endl;
-	// TODO: is this the right thing to do?
+ if (!advancedRectWillBeOnCanvas()) {
 	unit()->clearOrders();
-	return;
- }
- // Check if bottom-right point of the unit will be on canvas after moving
- if (!canvas()->onCanvas(unit()->boundingRectAdvanced().bottomRight())) {
-	BoVector2Fixed point = unit()->boundingRectAdvanced().bottomRight();
-	QString problem;
-	if (!canvas()->onCanvas(BoVector2Fixed(0, point.y()))) {
-		problem = QString("bottom==%1").arg(point.y());
-	} else if (!canvas()->onCanvas(BoVector2Fixed(point.x(), 0))) {
-		problem = QString("right==%1").arg(point.x());
-	} else {
-		boError(401) << k_funcinfo
-				<< "internal error: (0," << point.y() <<
-				") and (" << point.x()
-				<< ",0) are on canvas, but (" << point.x() <<
-				"," << point.y() << ") isn't !"
-				<< endl;
-	}
-	boError(401) << k_funcinfo << "unit " << id()
-			<< " not on canvas (bottomRightAdvanced): ("
-			<< point.x() << ";" << point.y() << ")"
-			<< "  current rightEdge: " << unit()->rightEdge()
-			<< " ; current bottomEdge:" << unit()->bottomEdge()
-			<< " ; xVelocity: " << unit()->xVelocity()
-			<< " ; (int)xVelocity: " << (int)unit()->xVelocity()
-			<< " ; yVelocity: " << unit()->yVelocity()
-			<< " ; (int)yVelocity: " << (int)unit()->yVelocity()
-			<< " problem was: "
-			<< problem << endl;
-	boError(401) << k_funcinfo << "leaving unit a current bottomright pos: ("
-			<< unit()->boundingRect().bottomRight().x() << ";"
-			<< unit()->boundingRect().bottomRight().y() << ")" << endl;
-	// TODO: is this the right thing to do?
-	unit()->clearOrders();
-	return;
  }
 }
 
@@ -710,7 +723,7 @@ void UnitMoverLand::advanceMoveCheck()
 	}
  }
 
- // Make sure unit is one canvas
+ // Make sure unit is on canvas
  UnitMover::advanceMoveCheck();
 
  if (unit()->pathPointCount() == 0) {

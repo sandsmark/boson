@@ -117,6 +117,7 @@ public:
 
 protected:
 	static void initCellIntersectionTable();
+	bool advancedRectWillBeOnCanvas() const;
 	void changeUpgrades(const UpgradeProperties* upgrade);
 
 	virtual void advanceMoveInternal(unsigned int) = 0; // move one step futher to path
