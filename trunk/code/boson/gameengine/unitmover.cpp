@@ -460,7 +460,7 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
  BosonProfiler profiler("advanceMoveInternal");
  //boDebug(401) << k_funcinfo << endl;
 
- if (pathInfo()->waiting) {
+ if (pathInfo()->waiting != 0) {
 	// If path is blocked and we're waiting, then there's no point in
 	//  recalculating velocity and other stuff every advance call
 	// TODO: check for enemies
@@ -670,7 +670,7 @@ void UnitMoverLand::advanceMoveCheck()
  }
 
  // Take special action if path is (was) blocked and we're waiting
- if (pathInfo()->waiting) {
+ if (pathInfo()->waiting != 0) {
 	// We try to move every 5 advance calls
 	if (pathInfo()->waiting % 5 == 0) {
 		// Try to move again
