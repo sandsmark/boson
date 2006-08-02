@@ -44,8 +44,6 @@ set(libmixkit_SRCS
 	mixkit/MxGeom2D.cxx
 	mixkit/MxGeom3D.cxx
 	mixkit/MxHeap.cxx
-	mixkit/MxMat3-jacobi.cxx
-	mixkit/MxMat4-jacobi.cxx
 	mixkit/MxMatrix.cxx
 	mixkit/MxPropSlim.cxx
 	mixkit/MxQMetric.cxx
@@ -54,7 +52,6 @@ set(libmixkit_SRCS
 	mixkit/MxSMF.cxx
 	mixkit/MxStdModel.cxx
 	mixkit/MxStdSlim.cxx
-	mixkit/MxTriProject.cxx
 	mixkit/mixmops.cxx
 	mixkit/mixmsg.cxx
 #	mixkit/MxCamera.cxx
