@@ -1039,7 +1039,7 @@ void BosonGLCompleteMiniMap::initFogOfWar(PlayerIO* p)
  } else {
 	for (unsigned int x = 0; x < canvas()->mapWidth(); x++) {
 		for (unsigned int y = 0; y < canvas()->mapHeight(); y++) {
-			if (p && !p->canSee(x, y)) {
+      if (!p->isExplored(x, y)) {
 				slotUnexplored(x, y);
 			} else {
 				slotExplored(x, y);
