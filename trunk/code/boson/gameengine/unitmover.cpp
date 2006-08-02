@@ -477,7 +477,7 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
  }
 
  // Check if path is already found or not
- if (unit()->movingStatus() == UnitBase::MustSearch) {
+ if (unit()->movingStatus() == UnitBase::MustSearchPath) {
 	// Path is not yet searched
 	// If we're moving with attacking, first check for any enemies in the range.
 	if (attackEnemyUnitsInRangeWhileMoving()) {
