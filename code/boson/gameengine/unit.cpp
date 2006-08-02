@@ -1180,9 +1180,9 @@ bool Unit::moveTo(bofixed x, bofixed y, int range)
  clearPathPoints();
 
  // Path is not searched here (it would break pathfinding for groups). Instead,
- //  moving status is set to MustSearch and in MobileUnit::advanceMove(), path
+ //  moving status is set to MustSearchPath and in MobileUnit::advanceMove(), path
  //  is searched for.
- setMovingStatus(MustSearch);
+ setMovingStatus(MustSearchPath);
 
  return true;
 }
@@ -2099,6 +2099,10 @@ bool Unit::currentOrderChanged()
 bool Unit::currentOrderAdded()
 {
  UnitOrder* order = currentOrder();
+ if (!order) {
+	BO_NULL_ERROR(order);
+	return false;
+ }
 // switch (order->type()) {
 	if(order->type() == UnitOrder::Move) {
 		UnitMoveOrder* moveo = (UnitMoveOrder*)order;
@@ -2214,6 +2218,9 @@ void Unit::currentOrderRemoved()
 
 bool Unit::canAddOrder() const
 {
+ if (isDestroyed()) {
+	return false;
+ }
  if (mUnitConstruction && !mUnitConstruction->isConstructionComplete()) {
 	return false;
  }

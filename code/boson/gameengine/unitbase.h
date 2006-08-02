@@ -109,7 +109,9 @@ public:
 		WorkFollow = 8,
 		WorkPlugin = 9,
 		WorkTurn = 10,
-		WorkNone = 11
+		WorkNone = 11,
+		WorkEnterUnit = 12,
+		WorkLeaveUnit = 13
 	};
 
 	/**
@@ -121,16 +123,16 @@ public:
 	 * @li Moving Unit is moving atm (or turning)
 	 * @li Waiting Unit wants to move, but it's way is blocked atm. It will continue moving asap
 	 * @li Engaging Unit was moving, but then spotted enemy and is engaging it.
-	 * @li Removing Special status notifing that unit is being deleted
-	 * @li MustSearch Special status notifing that path is not yet searched (but unit intends to move)
+	 * @li RemovingThis Special status notifing that unit is being deleted
+	 * @li MustSearchPath Special status notifing that path is not yet searched (but unit intends to move)
 	 **/
 	enum MovingStatus {
 		Standing = 0,
 		Moving = 1,
 		Waiting = 2,
 		Engaging = 3,
-		Removing = 4,
-		MustSearch = 5
+		RemovingThis = 4,
+		MustSearchPath = 5
 	};
 
 	UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);

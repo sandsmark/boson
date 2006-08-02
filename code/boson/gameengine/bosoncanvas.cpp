@@ -1889,7 +1889,7 @@ void BosonCanvas::deleteItem(BosonItem* item)
  if (RTTI::isUnit(item->rtti())) {
 	Unit* u = (Unit*)item;
 	// Update occupied status of cells that unit occupied
-	u->setMovingStatus(UnitBase::Removing);
+	u->setMovingStatus(UnitBase::RemovingThis);
 	// In editor mode, we need to do couple of things before deleting the unit,
 	//  to prevent crashes later (e.g. when selecting units)
 	if (!boGame->gameMode()) {
