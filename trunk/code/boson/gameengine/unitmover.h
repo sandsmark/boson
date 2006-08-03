@@ -156,6 +156,8 @@ public:
 
 protected:
 	virtual void advanceMoveInternal(unsigned int advanceCallsCount);
+	void advanceMoveInternal2(unsigned int advanceCallsCount);
+	void advanceMoveInternal3(unsigned int advanceCallsCount);
 	virtual void advanceMoveCheck();
 
 
