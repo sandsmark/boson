@@ -458,8 +458,16 @@ bool UnitMoverLand::init()
 void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 {
  BosonProfiler profiler("advanceMoveInternal");
- //boDebug(401) << k_funcinfo << endl;
+ advanceMoveInternal2(advanceCallsCount);
+}
 
+// TODO: rename. maybe "calculate path", "update path", "ensure path", "ensure
+//       pathpoints" or something like that.
+//       -> it does not actually move, but will calculate path if necessary, and
+//          will abort moving if necessary.
+//
+void UnitMoverLand::advanceMoveInternal2(unsigned int advanceCallsCount)
+{
  if (pathInfo()->waiting != 0) {
 	// If path is blocked and we're waiting, then there's no point in
 	//  recalculating velocity and other stuff every advance call
@@ -502,24 +510,6 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 	}
  }
 
- // Make sure we have pathpoints
- if (unit()->pathPointCount() == 0) {
-	if (pathInfo()->result == BosonPath::OutOfRange) {
-		// New pathfinding query has to made, because last returned path was
-		//  only partial.
-		if (!calculateNewPath()) {
-			// Probably no path could be found or we're already at destination point
-			stopMoving(false);  // TODO: is false correct here?
-			return;
-		}
-	} else {
-		// TODO: rotate a bit randomly
-		stopMoving(true);
-		return;
-	}
- }
-
- boDebug(401) << k_funcinfo << "unit " << id() << endl;
  if (pathInfo()->moveAttacking) {
 	// Attack any enemy units in range
 	// Don't check for enemies every time (if we don't have a target) because it
@@ -531,13 +521,23 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 	}
  }
 
- // x and y are center of the unit here
+ advanceMoveInternal3(advanceCallsCount);
+}
+
+
+// TODO: rename. maybe "actually move", "move or turn", "accelerate decelerate
+//       or turn" or something like that.
+//       -> here we actually "move", as in "set velocity" (moving is done
+//          _after_ the advance call in BosonCanvas).
+//          also we might need to calculate another part of the path, if path
+//          was calculated partially only
+void UnitMoverLand::advanceMoveInternal3(unsigned int advanceCallsCount)
+{
  bofixed x = unit()->centerX();
  bofixed y = unit()->centerY();
 
 
- //boDebug(401) << k_funcinfo << "unit " << id() << ": pos: (" << x << "; "<< y << ")" << endl;
- // If we're close to destination, decelerate, otherwise  accelerate
+ // If we're close to destination, decelerate, otherwise accelerate
  // TODO: we should also slow down when turning at pathpoint.
  // TODO: support range != 0
  bofixed oldspeed = unit()->speed();
@@ -549,6 +549,7 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
  bofixed yspeed = 0;
  bofixed dist = unit()->speed();
  BoVector2Fixed pp;
+
 
  // We move through the pathpoints, until we've passed dist distance
  while (dist > 0) {
@@ -626,6 +627,7 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 		}
 	}
  }
+
 
  // If the unit didn't move, we can just return now (this is valid)
  if ((xspeed == 0) && (yspeed == 0)) {
@@ -1045,6 +1047,10 @@ bool UnitMoverLand::calculateNewPath()
  mLastCellX = -1;
  mLastCellY = -1;
  mNextWaypointIntersections = &mCellIntersectionTable[5][5];
+
+ // AB: FIXME: do we need a unit()->setMovingStatus() here?
+ //            -> it's pretty dumb to have movingStatus() == MustSearchPath at
+ //               this point
 
  return true;
 }
