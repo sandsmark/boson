@@ -459,6 +459,9 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 {
  BosonProfiler profiler("advanceMoveInternal");
  advanceMoveInternal2(advanceCallsCount);
+ // advanceMoveInternal3() is called only conditionally by advanceMoveInternal2()
+
+ advanceMoveInternal4(advanceCallsCount);
 }
 
 // TODO: rename. maybe "calculate path", "update path", "ensure path", "ensure
@@ -648,17 +651,10 @@ void UnitMoverLand::advanceMoveInternal3(unsigned int advanceCallsCount)
  }
 }
 
-// AB: WARNING crushing is currently disabled!
-//
-// see #warning below
-#warning FIXME: advanceMoveCheck() should be used to _check_ for things only
-// AB: advanceMoveCheck() was meant to _check_ whether the move is valid, i.e.
-//     check if the calculated velocity or so may cause the unit to go off the
-//     map or collide with a different unit.
-//     however atm it is heavily used to actually do a lot of calculations,
-//     which is not intended at all.
-//     this should be fixed.
-void UnitMoverLand::advanceMoveCheck()
+
+// TODO: rename. maybe "check for waiting" or "check fo blocked path" or so.
+// -> this handles "waiting" (when path is blocked)
+void UnitMoverLand::advanceMoveInternal4(unsigned int advanceCallsCount)
 {
  PROFILE_METHOD;
  //boDebug(401) << k_funcinfo << endl;
@@ -710,23 +706,12 @@ void UnitMoverLand::advanceMoveCheck()
 	}
  }
 
- // Make sure unit is on canvas
- UnitMover::advanceMoveCheck();
+}
 
- if (unit()->pathPointCount() == 0) {
-	// This is allowed and means that unit will stop after this this advance call
-	return;
- }
-
- if (unit()->xVelocity() == 0 && unit()->yVelocity() == 0) {
-	// Probably unit stopped to attack other units
-	return;
- }
-
- //boDebug(401) << k_funcinfo << "unit " << id() << endl;
-
- // Crushing & waiting
-#warning What the hell does crushing do in advanceMove_Check_() ??
+void UnitMoverLand::advanceMoveDoCrushing(unsigned int advanceCallsCount)
+{
+ // AB: FIXME: this really is no moving code. it does not belong in this class
+ // at all.
 #define CRUSHING 0
 #if CRUSHING
  bool wait = false;
@@ -744,7 +729,7 @@ void UnitMoverLand::advanceMoveCheck()
 			continue;
 		}
 		// Make sure we actually can crush this unit
-		if (u->maxHealth() > unitProperties()->crushDamage()) {
+		if (!unit()->canCrush(u)) {
 			boDebug(401) << k_funcinfo << id() << ": Colliding with uncrushable unit " << u->id() << endl;
 			// Whoops. Now what?
 			wait = true;
@@ -756,12 +741,36 @@ void UnitMoverLand::advanceMoveCheck()
 		canvas()->destroyUnit(u);
 	}
  }
-#endif
- /*if (wait) {
-	setVelocity(0, 0, 0);
-	setMovingStatus(UnitBase::Waiting);
-	setSpeed(0);
- }*/
+#endif // CRUSHING
+#undef CRUSHING
+}
+
+// AB: WARNING crushing is currently disabled!
+//
+// see #warning below
+#warning FIXME: advanceMoveCheck() should be used to _check_ for things only
+// AB: advanceMoveCheck() was meant to _check_ whether the move is valid, i.e.
+//     check if the calculated velocity or so may cause the unit to go off the
+//     map or collide with a different unit.
+//     however atm it is heavily used to actually do a lot of calculations,
+//     which is not intended at all.
+//     this should be fixed.
+void UnitMoverLand::advanceMoveCheck()
+{
+ PROFILE_METHOD;
+
+ // Make sure unit is on canvas
+ UnitMover::advanceMoveCheck();
+
+ if (unit()->pathPointCount() == 0) {
+	// This is allowed and means that unit will stop after this advance call
+	return;
+ }
+
+ if (unit()->xVelocity() == 0 && unit()->yVelocity() == 0) {
+	// Probably unit stopped to attack other units
+	return;
+ }
 
  // Check if we need to wait
  // Find the next cell we'll be on
@@ -811,7 +820,13 @@ void UnitMoverLand::advanceMoveCheck()
  pathInfo()->waiting = 0;
  pathInfo()->pathrecalced = 0;
 
- //boDebug(401) << k_funcinfo << "unit " << id() << ": done" << endl;
+
+#warning What the hell does crushing do in advanceMove_Check_() ??
+#define CRUSHING 0
+#if CRUSHING
+ advanceMoveDoCrushing(advanceCallsCount);
+#endif // CRUSHING
+#undef CRUSHING
 }
 
 void UnitMoverLand::currentPathPointChanged(int unitx, int unity)
