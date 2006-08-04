@@ -408,7 +408,15 @@ public:
 
 	void loadWeapons();
 
-	bool canShootAt(Unit* u);
+	bool canShootAt(Unit* u) const;
+
+	/**
+	 * @return TRUE if this unit can "crush" @p u, i.e. walk over it and
+	 * destroy it by doing so. Otherwise FALSE. This method assumes that
+	 * this unit actually collides with @p u. It does not check for it's
+	 * position itself.
+	 **/
+	bool canCrush(Unit* u) const;
 
 	/**
 	 * Attack enemy units in range
