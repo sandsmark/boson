@@ -1794,13 +1794,31 @@ void Unit::loadWeapons()
  recalculateMaxWeaponRange();
 }
 
-bool Unit::canShootAt(Unit *u)
+bool Unit::canShootAt(Unit *u) const
 {
  BoPointerIterator<BosonWeapon> it(d->mWeapons);
  for (; *it; ++it) {
 	if ((*it)->canShootAt(u)) {
 		return true;
 	}
+ }
+ return false;
+}
+
+bool Unit::canCrush(Unit *u) const
+{
+ if (!u || u == this) {
+	return false;
+ }
+ if (u->isFlying() && !isFlying()) {
+	return false;
+ }
+ if (isFlying()) {
+	// AB: atm flying units won't crush each other
+	return false;
+ }
+ if (u->maxHealth() <= unitProperties()->crushDamage()) {
+	return true;
  }
  return false;
 }
