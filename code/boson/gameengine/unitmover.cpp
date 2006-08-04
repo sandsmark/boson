@@ -471,6 +471,7 @@ void UnitMoverLand::advanceMoveInternal(unsigned int advanceCallsCount)
 //
 void UnitMoverLand::advanceMoveInternal2(unsigned int advanceCallsCount)
 {
+ BO_CHECK_NULL_RET(pathInfo());
  if (pathInfo()->waiting != 0) {
 	// If path is blocked and we're waiting, then there's no point in
 	//  recalculating velocity and other stuff every advance call
@@ -706,6 +707,7 @@ void UnitMoverLand::advanceMoveInternal4(unsigned int advanceCallsCount)
 	}
  }
 
+ advanceMoveInternal5(advanceCallsCount);
 }
 
 void UnitMoverLand::advanceMoveDoCrushing(unsigned int advanceCallsCount)
@@ -745,23 +747,9 @@ void UnitMoverLand::advanceMoveDoCrushing(unsigned int advanceCallsCount)
 #undef CRUSHING
 }
 
-// AB: WARNING crushing is currently disabled!
-//
-// see #warning below
-#warning FIXME: advanceMoveCheck() should be used to _check_ for things only
-// AB: advanceMoveCheck() was meant to _check_ whether the move is valid, i.e.
-//     check if the calculated velocity or so may cause the unit to go off the
-//     map or collide with a different unit.
-//     however atm it is heavily used to actually do a lot of calculations,
-//     which is not intended at all.
-//     this should be fixed.
-void UnitMoverLand::advanceMoveCheck()
+// TODO: rename.
+void UnitMoverLand::advanceMoveInternal5(unsigned int advanceCallsCount)
 {
- PROFILE_METHOD;
-
- // Make sure unit is on canvas
- UnitMover::advanceMoveCheck();
-
  if (unit()->pathPointCount() == 0) {
 	// This is allowed and means that unit will stop after this advance call
 	return;
@@ -819,8 +807,55 @@ void UnitMoverLand::advanceMoveCheck()
 
  pathInfo()->waiting = 0;
  pathInfo()->pathrecalced = 0;
+}
+
+// AB: WARNING crushing is currently disabled!
+//     -> it does NOT belong into this method!
+//
+// AB: advanceMoveCheck() was meant to _check_ whether the move is valid, i.e.
+//     check if the calculated velocity or so may cause the unit to go off the
+//     map or collide with a different unit.
+//     however atm it is heavily used to actually do a lot of calculations,
+//     which is not intended at all.
+//     this should be fixed.
+void UnitMoverLand::advanceMoveCheck()
+{
+ PROFILE_METHOD;
+ BO_CHECK_NULL_RET(unit());
+
+ if (unit()->xVelocity() == 0 && unit()->yVelocity() == 0) {
+	return;
+ }
+
+ // Make sure unit is on canvas
+ UnitMover::advanceMoveCheck();
+
+ if (!unit()->currentOrder() || (unit()->currentOrder()->type() != UnitOrder::Move && unit()->currentOrder()->type() != UnitOrder::MoveToUnit)) {
+	// apparently the velocity was set to something != 0 although it should
+	// not. revert.
+	unit()->setVelocity(0, 0, 0);
+	return;
+ }
+
+// TODO .. rewrite this. should check for collisions on position + velocity
+//         --> if collisions occur: check if they are about to be crushed. if
+//             not: don't move there. stop moving completely.
+#if 0
+ // Make sure the next cell is free of any obstacles
+ if (unit()->cellOccupied(mNextCellX, mNextCellY)) {
+	// Gotta wait
+	unit()->setVelocity(0, 0, 0);
+	unit()->setSpeed(0);
+	stopMoving(false);
+	return;
+ }
+#endif
 
 
+
+// AB: crushing does NOT belong here. but it MUST be after advanceMoveCheck() -
+//     i.e. at a pointer where the unit _definitely_ goes by the velocities it
+//     has been set to.
 #warning What the hell does crushing do in advanceMove_Check_() ??
 #define CRUSHING 0
 #if CRUSHING
