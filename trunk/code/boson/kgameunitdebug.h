@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,12 +22,62 @@
 #include <qwidget.h>
 
 class QListViewItem;
+class KListView;
 
 class KGamePropertyBase;
+class KGamePropertyHandler;
 
 class Boson;
+class BosonItem;
+class BosonCanvas;
 class Unit;
 
+class KGameUnitDebugItemListPrivate;
+class KGameUnitDebugItemList : public QWidget
+{
+	Q_OBJECT
+public:
+	KGameUnitDebugItemList(QWidget* parent);
+	~KGameUnitDebugItemList();
+
+	void clear();
+	void update(const BosonCanvas* canvas);
+	void updateProperty(BosonItem* item, KGamePropertyBase* prop);
+
+signals:
+	void signalItemSelected(BosonItem* item);
+
+protected:
+	void addItem(BosonItem* item);
+	void update(BosonItem*);
+
+protected slots:
+	void slotSelected(QListViewItem*);
+	void slotItemListMenu(QListViewItem*, const QPoint&, int);
+	void slotItemListToggleShowColumn(int);
+	void slotItemPropertyChanged(KGamePropertyBase*);
+
+private:
+	KGameUnitDebugItemListPrivate* d;
+};
+
+
+class KGameUnitDebugDataHandlerDisplay : public QWidget
+{
+	Q_OBJECT
+public:
+	KGameUnitDebugDataHandlerDisplay(QWidget* parent);
+	~KGameUnitDebugDataHandlerDisplay();
+
+	void clear();
+	void displayDataHandler(KGamePropertyHandler* dataHandler);
+
+private:
+	KListView* mProperties;
+};
+
+
+class KGameUnitDebugPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -41,26 +91,24 @@ public:
 	void setBoson(Boson*);
 
 protected:
-	void addUnit(Unit* unit);
-	void update(QListViewItem*, Unit*);
 
 protected slots:
 	void slotUpdate();
-	void slotUnitSelected(QListViewItem*);
-	void slotUnitListMenu(QListViewItem*, const QPoint&, int);
-	void slotUnitListToggleShowColumn(int);
 
-	void slotUnitPropertyChanged(KGamePropertyBase*);
+	void slotItemSelected(BosonItem*);
 
 protected:
-	void updateProduction(Unit*);
-	void updateUnitsInRange(Unit*);
-	void updateUnitCollisions(Unit*);
-	void updateCells(Unit*);
-	void updateProperties(Unit*);
+	void updateCells(BosonItem*);
+	void updateProperties(BosonItem*);
+	void updateProduction(BosonItem*);
+	void updateUnitCollisions(BosonItem*);
+
+	void addPropertiesPage();
+	void addProductionsPage();
+	void addCollisionsPage();
+	void addCellsPage();
 
 private:
-	class KGameUnitDebugPrivate;
 	KGameUnitDebugPrivate* d;
 };
 
