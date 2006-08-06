@@ -566,10 +566,18 @@ void UnitMoverLand::advanceMoveInternal3(unsigned int advanceCallsCount)
 				// Probably no path could be found
 				// Unit will stop moving during the next advance call (because we want
 				//  to move as much as we already have in this loop)
+				if (xspeed == yspeed == 0) {
+					stopMoving(false);  // TODO: is false correct here?
+					return;
+				}
 				break;
 			}
 		} else {
 			// TODO: rotate a bit randomly
+			if (xspeed == yspeed == 0) {
+				stopMoving(true);
+				return;
+			}
 			break;
 		}
 	}
