@@ -109,9 +109,7 @@ public:
 		WorkFollow = 8,
 		WorkPlugin = 9,
 		WorkTurn = 10,
-		WorkNone = 11,
-		WorkEnterUnit = 12,
-		WorkLeaveUnit = 13
+		WorkNone = 11
 	};
 
 	/**
