@@ -338,19 +338,6 @@ public:
 	const QValueList<BoVector2Fixed>& pathPointList() const;
 
 
-	// TODO: maybe make this protected?
-	/**
-	 * Internal moving method.
-	 * This is the most central method for having unit starting moving to specific
-	 * point. You shouldn't use this directly, but instead use 'client methods',
-	 * which will then call this one.
-	 *
-	 * Moves unit's _center_ exactly to given position. If range is not -1, unit
-	 * will move until it's at most that range _cells_ away from destination.
-	 * Destination is in canvas coords.
-	 **/
-	bool moveTo(bofixed x, bofixed y, int range = -1);
-
 	/**
 	 * Turns unit smoothly to given degrees
 	 * @return true if unit was turned immediately, false when suborder was
@@ -567,6 +554,22 @@ protected:
 	bool cellOccupied(int x, int y, bool ignoremoving = false) const;
 
 	virtual int getAnimationMode() const;
+
+	/**
+	 * Internal moving method.
+	 * This is the most central method for having unit starting moving to specific
+	 * point. You shouldn't use this directly, but instead use 'client methods',
+	 * which will then call this one.
+	 *
+	 * Moves unit's _center_ exactly to given position. If range is not -1, unit
+	 * will move until it's at most that range _cells_ away from destination.
+	 * Destination is in canvas coords.
+	 *
+	 * See also @ref addToplevelOrder and @ref addCurrentSuborder as well as
+	 * @ref UnitMoveOrder
+	 **/
+	bool moveTo(bofixed x, bofixed y, int range = -1);
+
 
 private:
 	/**
