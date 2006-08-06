@@ -496,7 +496,18 @@ public:
 	 **/
 	bool addCurrentSuborder(UnitOrder* order);
 
+	/**
+	 * Notify the unit that the suborder that is currently being executed
+	 * has been completed. @p success indicates whether the order was
+	 * completed successfully or not (e.g. unit could not reach the desired
+	 * destination)
+	 **/
 	void currentSuborderDone(bool success);
+
+	/**
+	 * @return TRUE if the last executed order was completed successfully,
+	 * FALSE if it failed.
+	 **/
 	bool lastOrderStatus() const;
 
 
