@@ -55,19 +55,10 @@ class UnitOrder
     enum FinishStatus { Success = 1, Failure };
     virtual OrderType type() const = 0;
     virtual UnitBase::WorkType work() const = 0;
-    /*
-    UnitOrder* suborder() const  { return mSuborder; }
-    UnitOrder* parent() const  { return mParent; }
-    // TODO: ok to delete current suborder?
-    void setSuborder(UnitOrder* o)  { delete mSuborder; o->mParent = this; mSuborder = o; }
-    void suborderDone()  { delete mSuborder; mSuborder = 0; }
+    virtual UnitOrder* duplicate() const = 0;
 
-    UnitOrder* currentOrder()  { return mSuborder ? mSuborder->currentOrder() : this; }
-
-
-  protected:
-    UnitOrder* mSuborder;
-    UnitOrder* mParent;*/
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root);
 };
 
 
@@ -79,6 +70,10 @@ class UnitMoveOrder : public UnitOrder
 
     virtual OrderType type() const  { return Move; }
     virtual UnitBase::WorkType work() const  { return UnitBase::WorkMove; };
+    virtual UnitOrder* duplicate() const  { return new UnitMoveOrder(*this); };
+
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root);
 
     inline const BoVector2Fixed& position() const  { return mPos; }
     inline void setPosition(const BoVector2Fixed& p)  { mPos = p; }
@@ -104,6 +99,10 @@ class UnitMoveToUnitOrder : public UnitMoveOrder
     virtual ~UnitMoveToUnitOrder();
 
     virtual OrderType type() const  { return MoveToUnit; }
+    virtual UnitOrder* duplicate() const  { return new UnitMoveToUnitOrder(*this); };
+
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root);
 
     Unit* target() const  { return mTarget; }
 
@@ -121,6 +120,10 @@ class UnitAttackOrder : public UnitOrder
 
     virtual OrderType type() const  { return AttackUnit; }
     virtual UnitBase::WorkType work() const  { return UnitBase::WorkAttack; };
+    virtual UnitOrder* duplicate() const  { return new UnitAttackOrder(*this); };
+
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root);
 
     inline Unit* target() const  { return mTarget; }
     inline void setTarget(Unit* u)   { mTarget = u; }
@@ -143,6 +146,10 @@ class UnitAttackGroundOrder : public UnitOrder
 
     virtual OrderType type() const  { return AttackGround; }
     virtual UnitBase::WorkType work() const  { return UnitBase::WorkAttack; };
+    virtual UnitOrder* duplicate() const  { return new UnitAttackGroundOrder(*this); };
+
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root);
 
     inline const BoVector2Fixed& position() const  { return mPos; }
     inline void setPosition(const BoVector2Fixed& p)  { mPos = p; }
@@ -161,6 +168,10 @@ class UnitTurnOrder : public UnitOrder
 
     virtual OrderType type() const  { return Turn; }
     virtual UnitBase::WorkType work() const  { return UnitBase::WorkTurn; };
+    virtual UnitOrder* duplicate() const  { return new UnitTurnOrder(*this); };
+
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root);
 
     inline bofixed direction() const  { return mDirection; }
     inline void setDirection(bofixed d)   { mDirection = d; }
@@ -179,6 +190,10 @@ class UnitTurnToUnitOrder : public UnitOrder
 
     virtual OrderType type() const  { return TurnToUnit; }
     virtual UnitBase::WorkType work() const  { return UnitBase::WorkTurn; };
+    virtual UnitOrder* duplicate() const  { return new UnitTurnToUnitOrder(*this); };
+
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root);
 
     inline Unit* target() const  { return mTarget; }
     inline void setTarget(Unit* u)   { mTarget = u; }
@@ -197,6 +212,10 @@ class UnitFollowOrder : public UnitOrder
 
     virtual OrderType type() const  { return Follow; }
     virtual UnitBase::WorkType work() const  { return UnitBase::WorkFollow; };
+    virtual UnitOrder* duplicate() const  { return new UnitFollowOrder(*this); };
+
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root);
 
     inline Unit* target() const  { return mTarget; }
     inline void setTarget(Unit* u)   { mTarget = u; }
@@ -219,6 +238,10 @@ class UnitHarvestOrder : public UnitOrder
 
     virtual OrderType type() const  { return Harvest; }
     virtual UnitBase::WorkType work() const  { return UnitBase::WorkPlugin; };
+    virtual UnitOrder* duplicate() const  { return new UnitHarvestOrder(*this); };
+
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root);
 
     inline Unit* target() const  { return mTarget; }
     inline void setTarget(Unit* u)   { mTarget = u; }
@@ -238,6 +261,10 @@ class UnitRefineOrder : public UnitOrder
 
     virtual OrderType type() const  { return Refine; }
     virtual UnitBase::WorkType work() const  { return UnitBase::WorkPlugin; };
+    virtual UnitOrder* duplicate() const  { return new UnitRefineOrder(*this); };
+
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root);
 
     inline Unit* target() const  { return mTarget; }
     inline void setTarget(Unit* u)   { mTarget = u; }
@@ -247,25 +274,18 @@ class UnitRefineOrder : public UnitOrder
     Unit* mTarget;
 };
 
-/*class UnitGuardRangeOrder : public UnitOrder
-{
-  public:
-    UnitGuardRangeOrder();
-    virtual ~UnitGuardRangeOrder();
-
-    virtual OrderType type() const  { return GuardRange; }
-    virtual UnitBase::WorkType work() const  { return UnitBase::WorkPlugin; };
-
-    inline Unit* target() const  { return mTarget; }
-    inline void setTarget(Unit* u)   { mTarget = u; }
 
 
-  protected:
-    Unit* mTarget;
-};*/
-
-
-
+/**
+ * Stores unit-specific data for an order.
+ *
+ * Difference between @ref UnitOrder and this class is that @ref UnitOrder
+ *  objects can be shared between units and thus mustn't contain unit-specific
+ *  data such as path in case of moving. Such data is instead stored in this
+ *  class.
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
 class UnitOrderData
 {
   public:
@@ -274,6 +294,9 @@ class UnitOrderData
 
     UnitOrder::OrderType type() const  { return mOrder ? mOrder->type() : UnitOrder::Invalid; }
     UnitOrder* order()  { return mOrder; }
+
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root);
 
     static UnitOrderData* createData(UnitOrder* order);
 
@@ -300,6 +323,9 @@ class UnitMoveOrderData : public UnitOrderData
     UnitMoveOrderData(UnitOrder* order);
     virtual ~UnitMoveOrderData();
 
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root);
+
     BosonPathInfo* pathinfo;
     Unit* target;
 };
@@ -309,6 +335,9 @@ class UnitMoveToUnitOrderData : public UnitMoveOrderData
   public:
     UnitMoveToUnitOrderData(UnitOrder* order);
     virtual ~UnitMoveToUnitOrderData();
+
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root);
 
     BoVector2Fixed lastTargetPos;
 };
