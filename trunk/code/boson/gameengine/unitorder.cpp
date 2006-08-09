@@ -21,18 +21,29 @@
 
 #include "bodebug.h"
 #include "bosonpath.h"
+#include "unit.h"
+
+#include <qdom.h>
 
 
 
 UnitOrder::UnitOrder()
 {
-  /*mSuborder = 0;
-  mParent = 0;*/
 }
 
 UnitOrder::~UnitOrder()
 {
-  //delete mSuborder;
+}
+
+bool UnitOrder::saveAsXML(QDomElement& root)
+{
+  root.setAttribute("OrderType", (int)type());
+  return true;
+}
+
+bool UnitOrder::loadFromXML(const QDomElement& root)
+{
+  return true;
 }
 
 
@@ -48,6 +59,44 @@ UnitMoveOrder::~UnitMoveOrder()
 {
 }
 
+bool UnitMoveOrder::saveAsXML(QDomElement& root)
+{
+  if(!UnitOrder::saveAsXML(root))
+  {
+    return false;
+  }
+  saveVector2AsXML(mPos, root, "Position");
+  root.setAttribute("Range", mRange);
+  root.setAttribute("WithAttacking", mWithAttacking ? 1 : 0);
+  return true;
+}
+
+bool UnitMoveOrder::loadFromXML(const QDomElement& root)
+{
+  if(!UnitOrder::loadFromXML(root))
+  {
+    return false;
+  }
+  loadVector2FromXML(&mPos, root, "Position");
+
+  bool ok;
+  mRange = root.attribute("Range").toInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for Range attribute" << endl;
+    return false;
+  }
+  mWithAttacking = (bool)root.attribute("WithAttacking").toInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for WithAttacking attribute" << endl;
+    return false;
+  }
+
+  return true;
+}
+
+
 
 UnitMoveToUnitOrder::UnitMoveToUnitOrder(Unit* target, int range, bool attacking) :
     UnitMoveOrder(BoVector2Fixed(), range, attacking)
@@ -57,6 +106,25 @@ UnitMoveToUnitOrder::UnitMoveToUnitOrder(Unit* target, int range, bool attacking
 
 UnitMoveToUnitOrder::~UnitMoveToUnitOrder()
 {
+}
+
+bool UnitMoveToUnitOrder::saveAsXML(QDomElement& root)
+{
+  if(!UnitOrder::saveAsXML(root))
+  {
+    return false;
+  }
+  root.setAttribute("TargetId", mTarget->id());
+  return true;
+}
+
+bool UnitMoveToUnitOrder::loadFromXML(const QDomElement& root)
+{
+  if(!UnitOrder::loadFromXML(root))
+  {
+    return false;
+  }
+  return true;
 }
 
 
@@ -70,6 +138,26 @@ UnitAttackOrder::~UnitAttackOrder()
 {
 }
 
+bool UnitAttackOrder::saveAsXML(QDomElement& root)
+{
+  if(!UnitOrder::saveAsXML(root))
+  {
+    return false;
+  }
+  root.setAttribute("TargetId", mTarget->id());
+  root.setAttribute("CanMove", mCanMove ? 1 : 0);
+  return true;
+}
+
+bool UnitAttackOrder::loadFromXML(const QDomElement& root)
+{
+  if(!UnitOrder::loadFromXML(root))
+  {
+    return false;
+  }
+  return true;
+}
+
 
 UnitAttackGroundOrder::UnitAttackGroundOrder(const BoVector2Fixed& pos)
 {
@@ -78,6 +166,26 @@ UnitAttackGroundOrder::UnitAttackGroundOrder(const BoVector2Fixed& pos)
 
 UnitAttackGroundOrder::~UnitAttackGroundOrder()
 {
+}
+
+bool UnitAttackGroundOrder::saveAsXML(QDomElement& root)
+{
+  if(!UnitOrder::saveAsXML(root))
+  {
+    return false;
+  }
+  saveVector2AsXML(mPos, root, "Position");
+  return true;
+}
+
+bool UnitAttackGroundOrder::loadFromXML(const QDomElement& root)
+{
+  if(!UnitOrder::loadFromXML(root))
+  {
+    return false;
+  }
+  loadVector2FromXML(&mPos, root, "Position");
+  return true;
 }
 
 
@@ -91,6 +199,33 @@ UnitTurnOrder::~UnitTurnOrder()
 {
 }
 
+bool UnitTurnOrder::saveAsXML(QDomElement& root)
+{
+  if(!UnitOrder::saveAsXML(root))
+  {
+    return false;
+  }
+  root.setAttribute("Direction", mDirection);
+  return true;
+}
+
+bool UnitTurnOrder::loadFromXML(const QDomElement& root)
+{
+  if(!UnitOrder::loadFromXML(root))
+  {
+    return false;
+  }
+
+  bool ok;
+  mDirection = root.attribute("Direction").toInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for WithAttacking attribute" << endl;
+    return false;
+  }
+  return true;
+}
+
 
 
 UnitTurnToUnitOrder::UnitTurnToUnitOrder(Unit* target)
@@ -100,6 +235,25 @@ UnitTurnToUnitOrder::UnitTurnToUnitOrder(Unit* target)
 
 UnitTurnToUnitOrder::~UnitTurnToUnitOrder()
 {
+}
+
+bool UnitTurnToUnitOrder::saveAsXML(QDomElement& root)
+{
+  if(!UnitOrder::saveAsXML(root))
+  {
+    return false;
+  }
+  root.setAttribute("TargetId", mTarget->id());
+  return true;
+}
+
+bool UnitTurnToUnitOrder::loadFromXML(const QDomElement& root)
+{
+  if(!UnitOrder::loadFromXML(root))
+  {
+    return false;
+  }
+  return true;
 }
 
 
@@ -114,6 +268,26 @@ UnitFollowOrder::~UnitFollowOrder()
 {
 }
 
+bool UnitFollowOrder::saveAsXML(QDomElement& root)
+{
+  if(!UnitOrder::saveAsXML(root))
+  {
+    return false;
+  }
+  root.setAttribute("TargetId", mTarget->id());
+  root.setAttribute("Distance", mDistance);
+  return true;
+}
+
+bool UnitFollowOrder::loadFromXML(const QDomElement& root)
+{
+  if(!UnitOrder::loadFromXML(root))
+  {
+    return false;
+  }
+  return true;
+}
+
 
 
 UnitHarvestOrder::UnitHarvestOrder(Unit* at)
@@ -125,6 +299,25 @@ UnitHarvestOrder::~UnitHarvestOrder()
 {
 }
 
+bool UnitHarvestOrder::saveAsXML(QDomElement& root)
+{
+  if(!UnitOrder::saveAsXML(root))
+  {
+    return false;
+  }
+  root.setAttribute("TargetId", mTarget->id());
+  return true;
+}
+
+bool UnitHarvestOrder::loadFromXML(const QDomElement& root)
+{
+  if(!UnitOrder::loadFromXML(root))
+  {
+    return false;
+  }
+  return true;
+}
+
 
 
 UnitRefineOrder::UnitRefineOrder(Unit* at)
@@ -134,6 +327,25 @@ UnitRefineOrder::UnitRefineOrder(Unit* at)
 
 UnitRefineOrder::~UnitRefineOrder()
 {
+}
+
+bool UnitRefineOrder::saveAsXML(QDomElement& root)
+{
+  if(!UnitOrder::saveAsXML(root))
+  {
+    return false;
+  }
+  root.setAttribute("TargetId", mTarget->id());
+  return true;
+}
+
+bool UnitRefineOrder::loadFromXML(const QDomElement& root)
+{
+  if(!UnitOrder::loadFromXML(root))
+  {
+    return false;
+  }
+  return true;
 }
 
 
@@ -180,6 +392,33 @@ UnitOrderData* UnitOrderData::createData(UnitOrder* order)
   return data;
 }
 
+bool UnitOrderData::saveAsXML(QDomElement& root)
+{
+  QDomDocument doc = root.ownerDocument();
+  if(mSuborder)
+  {
+    QDomElement suborderxml = doc.createElement("SuborderData");
+    root.appendChild(suborderxml);
+    if(!mSuborder->saveAsXML(suborderxml))
+    {
+      return false;
+    }
+  }
+  QDomElement orderxml = doc.createElement("Order");
+  root.appendChild(orderxml);
+  if(!mOrder->saveAsXML(orderxml))
+  {
+    return false;
+  }
+
+  return true;
+}
+
+bool UnitOrderData::loadFromXML(const QDomElement& root)
+{
+  return true;
+}
+
 
 UnitMoveOrderData::UnitMoveOrderData(UnitOrder* order) : UnitOrderData(order)
 {
@@ -192,6 +431,33 @@ UnitMoveOrderData::~UnitMoveOrderData()
   delete pathinfo;
 }
 
+bool UnitMoveOrderData::saveAsXML(QDomElement& root)
+{
+  if(!UnitOrderData::saveAsXML(root))
+  {
+    return false;
+  }
+
+  QDomDocument doc = root.ownerDocument();
+  QDomElement pathinfoxml = doc.createElement("PathInfo");
+  root.appendChild(pathinfoxml);
+  /*if(!pathinfo->saveAsXML(root))
+  {
+    return false;
+  }*/
+  root.setAttribute("TargetId", target->id());
+  return true;
+}
+
+bool UnitMoveOrderData::loadFromXML(const QDomElement& root)
+{
+  if(!UnitOrderData::loadFromXML(root))
+  {
+    return false;
+  }
+  return true;
+}
+
 
 UnitMoveToUnitOrderData::UnitMoveToUnitOrderData(UnitOrder* order) : UnitMoveOrderData(order)
 {
@@ -199,6 +465,26 @@ UnitMoveToUnitOrderData::UnitMoveToUnitOrderData(UnitOrder* order) : UnitMoveOrd
 
 UnitMoveToUnitOrderData::~UnitMoveToUnitOrderData()
 {
+}
+
+bool UnitMoveToUnitOrderData::saveAsXML(QDomElement& root)
+{
+  if(!UnitOrderData::saveAsXML(root))
+  {
+    return false;
+  }
+  saveVector2AsXML(lastTargetPos, root, "LastTargetPos");
+  return true;
+}
+
+bool UnitMoveToUnitOrderData::loadFromXML(const QDomElement& root)
+{
+  if(!UnitOrderData::loadFromXML(root))
+  {
+    return false;
+  }
+  loadVector2FromXML(&lastTargetPos, root, "LastTargetPos");
+  return true;
 }
 
 /*
