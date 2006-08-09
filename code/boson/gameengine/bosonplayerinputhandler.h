@@ -26,6 +26,7 @@ class QDataStream;
 class Player;
 class Boson;
 class Unit;
+class UnitOrder;
 class BosonCanvas;
 class BosonMessageEditorMove;
 class BosonMessageEditorMoveDeleteItems;
@@ -36,6 +37,7 @@ typedef BoVector2<bofixed> BoVector2Fixed;
 typedef BoRect2<bofixed> BoRect2Fixed;
 
 template<class T> class QPtrStack;
+template<class T> class QPtrList;
 template<class T> class QValueList;
 template<class T> class QValueVector;
 
@@ -95,6 +97,9 @@ protected:
 	void editorChangeHeight(const QValueVector<Q_UINT32>& cornersX, const QValueVector<Q_UINT32>& cornersY, const QValueVector<bofixed>& heights);
 
 	BosonMessageEditorMove* createNewUndoDeleteItemsMessage(const BosonMessageEditorMoveDeleteItems&) const;
+
+	void giveOrder(const QPtrList<Unit>& units, const UnitOrder& order, bool replace = true);
+	void giveOrder(Unit* unit, const UnitOrder& order, bool replace = true);
 
 signals:
 	void signalChangeTexMap(int x, int y, unsigned int textureCount, unsigned int* textures, unsigned char* alpha);

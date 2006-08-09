@@ -158,11 +158,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			boWarning(380) << k_lineinfo << "no unit to move" << endl;
 			break;
 		}
-		QPtrListIterator<Unit> it(unitsToMove);
-		while (it.current()) {
-			it.current()->replaceToplevelOrders(new UnitMoveOrder(message.mPos, -1, attack));
-			++it;
-		}
+		giveOrder(unitsToMove, UnitMoveOrder(message.mPos, -1, attack));
 		break;
 	}
 	case BosonMessageIds::MoveAttack:
@@ -177,6 +173,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			boError() << "Cannot attack NULL unit" << endl;
 			return true;
 		}
+		QPtrList<Unit> unitsToAttackWith;
 		for (QValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
 			Q_ULONG unitId = *it;
 			if (unitId == message.mAttackedUnitId) {
@@ -201,9 +198,10 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			}
 			if (unit->unitProperties()->canShoot()) {
 				boDebug() << unitId << " attacks " << message.mAttackedUnitId << endl;
-				unit->replaceToplevelOrders(new UnitAttackOrder(attackedUnit));
+				unitsToAttackWith.append(unit);
 			}
 		}
+		giveOrder(unitsToAttackWith, UnitAttackOrder(attackedUnit));
 		break;
 	}
 	case BosonMessageIds::MoveStop:
@@ -237,7 +235,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		}
 		QPtrListIterator<Unit> it(unitsToStop);
 		while (it.current()) {
-			//it.current()->stopAttacking();  // call stopAttacking() because it also sets unit's work to WorkIdle ... and it doesn't hurt
+			// TODO: what about delayed orders?
 			it.current()->clearOrders();
 			++it;
 		}
@@ -284,7 +282,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			boError() << k_lineinfo << "can mine at resource mine only" << endl;
 			break;
 		}
-		u->replaceToplevelOrders(new UnitHarvestOrder(mineunit));
+		giveOrder(u, UnitHarvestOrder(mineunit));
 		break;
 	}
 	case BosonMessageIds::MoveRefine:
@@ -314,6 +312,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			boWarning() << k_lineinfo << "refinery must be a refinery" << endl;
 			break;
 		}
+		QPtrList<Unit> units;
 		for (QValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
 			Q_ULONG unitId = *it;
 			Unit* u = findUnit(unitId, player);
@@ -332,8 +331,9 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 				boError() << k_lineinfo << "must be a harvester" << endl;
 				continue;
 			}
-			u->replaceToplevelOrders(new UnitRefineOrder(refineryUnit));
+			units.append(u);
 		}
+		giveOrder(units, UnitRefineOrder(refineryUnit));
 		break;
 	}
 	case BosonMessageIds::MoveRepair:
@@ -871,6 +871,24 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
  }
  // message processed
  return true;
+}
+
+void BosonPlayerInputHandler::giveOrder(const QPtrList<Unit>& units, const UnitOrder& order, bool replace)
+{
+ QPtrListIterator<Unit> it(units);
+ while (it.current()) {
+	giveOrder(it.current(), order, replace);
+	++it;
+ }
+}
+
+void BosonPlayerInputHandler::giveOrder(Unit* unit, const UnitOrder& order, bool replace)
+{
+ if (replace) {
+	unit->replaceToplevelOrders(order.duplicate());
+ } else {
+	unit->addToplevelOrder(order.duplicate());
+ }
 }
 
 void BosonPlayerInputHandler::editorDeleteItems(const QValueList<Q_ULONG>& items)
