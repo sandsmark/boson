@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2005-2006 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -223,10 +223,7 @@ bool LoaderAC::load()
 
     if(line.left(8) == "MATERIAL")
     {
-      if(!loadMaterial(line))
-      {
-        return false;
-      }
+      mMaterialLines.append(line);
     }
     else if(line.left(6) == "OBJECT")
     {
@@ -546,6 +543,37 @@ bool LoaderAC::loadFace(QTextStream& stream, ACFace* face)
   return true;
 }
 
+Material* LoaderAC::requestMaterial(const QString& line, const QString& texture)
+{
+  if(!mMaterialLines.contains(line))
+  {
+    boError() << k_funcinfo << "requested unknown material line" << endl;
+    return 0;
+  }
+  QValueList<Material*> list = mLine2Materials[line];
+  for(QValueList<Material*>::iterator it = list.begin(); it != list.end(); ++it)
+  {
+    if(!(*it)->texture() && texture.isEmpty())
+    {
+      return *it;
+    }
+    if((*it)->texture() && (*it)->texture()->filename() == texture)
+    {
+      return *it;
+    }
+  }
+
+  if(!loadMaterial(line))
+  {
+    boError() << k_funcinfo << "could not load material from line " << line << endl;
+    return 0;
+  }
+  Material* mat = model()->material(model()->materialCount() - 1);
+  mat->setTexture(model()->getTexture(texture));
+  mLine2Materials[line].append(mat);
+  return mat;
+}
+
 bool LoaderAC::loadMaterial(const QString& line)
 {
   // Parse AC3D material
@@ -632,9 +660,14 @@ bool LoaderAC::convertIntoMesh(Frame* f, int* index, ACObject* obj)
   lod()->addMesh(boMesh);
 
   // Set mesh's material
-  int matIndex = obj->faces[0].material;
+  int ac3dMatIndex = obj->faces[0].material;
+  QString ac3dMatLine;
+  if(ac3dMatIndex >= 0 && ac3dMatIndex < mMaterialLines.count())
+  {
+    ac3dMatLine = mMaterialLines[ac3dMatIndex];
+  }
   bool hadDifferentMaterials = false;
-  Material* material = model()->material(matIndex);
+  Material* material = requestMaterial(ac3dMatLine, obj->texture);
   if(!material)
   {
     BO_NULL_ERROR(material);
@@ -682,7 +715,7 @@ bool LoaderAC::convertIntoMesh(Frame* f, int* index, ACObject* obj)
 
   for(int i = 0; i < obj->numfaces; i++)
   {
-    if(obj->faces[i].material != matIndex)
+    if(obj->faces[i].material != ac3dMatIndex)
     {
       hadDifferentMaterials = true;
     }

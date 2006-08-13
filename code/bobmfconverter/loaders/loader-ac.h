@@ -24,6 +24,10 @@
 #include "loader.h"
 #include "bo3dtools.h"
 
+#include <qmap.h>
+#include <qvaluelist.h>
+
+class Material;
 class Mesh;
 class Face;
 class QStringList;
@@ -56,8 +60,15 @@ class LoaderAC : public Loader
 
     void translateObject(ACObject* obj, const BoVector3Float& trans);
 
+    Material* requestMaterial(const QString& line, const QString& texture);
+
 
   private:
+    QMap<QString, QValueList<Material*> > mLine2Materials;
+    QValueList<QString> mMaterialLines;
 };
 
+/*
+ * vim: et sw=4
+ */
 #endif
