@@ -34,6 +34,18 @@
 static float workaround_depth_value_1_0 = 1.0f;
 static bool workaround_depth_value_enabled = false;
 
+QString debugStringVector(const BoVector2Float& v, int prec)
+{
+  return QString("%1,%2").arg(v.x(), 0, 'f', prec).arg(v.y(), 0, 'f', prec);
+}
+
+QString debugStringVector(const BoVector2Fixed& v, int prec)
+{
+  BoVector2Float v2;
+  v2.set(v[0], v[1]);
+  return debugStringVector(v2, prec);
+}
+
 bool saveVector2AsXML(const BoVector2Fixed& v, QDomElement& root, const QString& name)
 {
   root.setAttribute(name + ".x", v[0]);
