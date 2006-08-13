@@ -102,6 +102,19 @@ template<class T> class BoRect2
       return BoVector2<T>((left() + right()) / 2, (top() + bottom()) / 2);
     }
 
+    bool contains(const BoVector2<T>& p) const
+    {
+      if (left() > p.x() || right() < p.x())
+      {
+        return false;
+      }
+      if (top() > p.y() || bottom() < p.y())
+      {
+        return false;
+      }
+      return true;
+    }
+
 
   private:
     BoVector2<T> mTopLeft;
@@ -129,7 +142,7 @@ template<class T> class BoRect3
     }
     BoRect3<T>& operator=(const BoRect3<T>& r)
     {
-      set(topLeftBack(), bottomRightFront());
+      set(r.topLeftBack(), r.bottomRightFront());
       return *this;
     }
 
@@ -185,6 +198,23 @@ template<class T> class BoRect3
       return BoVector3<T>((left() + right()) / 2,
           (top() + bottom()) / 2,
           (back() + front()) / 2);
+    }
+
+    bool contains(const BoVector3<T>& p) const
+    {
+      if (left() > p.x() || right() < p.x())
+      {
+        return false;
+      }
+      if (top() > p.y() || bottom() < p.y())
+      {
+        return false;
+      }
+      if (back() > p.z() || front() < p.z())
+      {
+        return false;
+      }
+      return true;
     }
 
 
