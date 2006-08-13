@@ -24,9 +24,9 @@ Shields=0
 SightRange=15
 SupportMiniMap=false
 TerrainType=1
-UnitDepth=2.7
-UnitHeight=12
-UnitWidth=24
+UnitDepth=3
+UnitHeight=6
+UnitWidth=9
 Weapons=0
 PowerConsumed=100
 
