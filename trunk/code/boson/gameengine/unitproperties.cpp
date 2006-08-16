@@ -174,10 +174,22 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
 	mProducer = conf.readUnsignedNumEntry("Producer", defaultProducer);
  }
 
- loadAllPluginProperties(&conf);
- loadTextureNames(&conf);
- loadSoundNames(&conf);
- loadWeapons(&conf);
+ if (!loadAllPluginProperties(&conf)) {
+	boError() << k_funcinfo << fileName << ": failed loading plugin properties" << endl;
+	return false;
+ }
+ if (!loadTextureNames(&conf)) {
+	boError() << k_funcinfo << fileName << ": failed loading texture names" << endl;
+	return false;
+ }
+ if (!loadSoundNames(&conf)) {
+	boError() << k_funcinfo << fileName << ": failed loading sound names" << endl;
+	return false;
+ }
+ if (!loadWeapons(&conf)) {
+	boError() << k_funcinfo << fileName << ": failed loading weapons" << endl;
+	return false;
+ }
 
  if (!loadActions(&conf)) {
 	boError() << k_funcinfo << "loading actions failed" << endl;
