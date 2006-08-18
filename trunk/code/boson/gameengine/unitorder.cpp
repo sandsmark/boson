@@ -21,6 +21,7 @@
 
 #include "bodebug.h"
 #include "bosonpath.h"
+#include "unitplugins.h"
 #include "unit.h"
 
 #include <qdom.h>
@@ -299,6 +300,11 @@ UnitHarvestOrder::~UnitHarvestOrder()
 {
 }
 
+int UnitHarvestOrder::workPluginType() const
+{
+  return UnitPlugin::Harvester;
+}
+
 bool UnitHarvestOrder::saveAsXML(QDomElement& root)
 {
   if(!UnitOrder::saveAsXML(root))
@@ -327,6 +333,11 @@ UnitRefineOrder::UnitRefineOrder(Unit* at)
 
 UnitRefineOrder::~UnitRefineOrder()
 {
+}
+
+int UnitRefineOrder::workPluginType() const
+{
+  return UnitPlugin::Harvester;
 }
 
 bool UnitRefineOrder::saveAsXML(QDomElement& root)

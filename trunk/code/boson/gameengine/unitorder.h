@@ -49,12 +49,32 @@ class UnitOrder
     UnitOrder();
     virtual ~UnitOrder();
 
-    enum OrderType { Invalid = 0, Move, MoveToUnit, AttackUnit, AttackGround,
-        Turn, TurnToUnit,
-        Follow, Harvest, Refine };
+    enum OrderType
+    {
+        Invalid = 0,
+        Move,
+        MoveToUnit,
+        AttackUnit,
+        AttackGround,
+        Turn,
+        TurnToUnit,
+        Follow,
+        Harvest,
+        Refine
+    };
     enum FinishStatus { Success = 1, Failure };
+
     virtual OrderType type() const = 0;
     virtual UnitBase::WorkType work() const = 0;
+
+    /**
+     * @return 0 if @ref work is not @ref UnitBase::WorkPlugin. If @ref work is
+     * @ref UnitBase::WorkPlugin, this is meant to return the @ref
+     * UnitPlugin::pluginType that should be used. For example @ref
+     * UnitHarvestOrder should use @ref UnitPlugins::Harvester here.
+     **/
+    virtual int workPluginType() const { return 0; }
+
     virtual UnitOrder* duplicate() const = 0;
 
     virtual bool saveAsXML(QDomElement& root);
@@ -69,7 +89,7 @@ class UnitMoveOrder : public UnitOrder
     virtual ~UnitMoveOrder();
 
     virtual OrderType type() const  { return Move; }
-    virtual UnitBase::WorkType work() const  { return UnitBase::WorkMove; };
+    virtual UnitBase::WorkType work() const  { return UnitBase::WorkMove; }
     virtual UnitOrder* duplicate() const  { return new UnitMoveOrder(*this); };
 
     virtual bool saveAsXML(QDomElement& root);
@@ -119,7 +139,7 @@ class UnitAttackOrder : public UnitOrder
     virtual ~UnitAttackOrder();
 
     virtual OrderType type() const  { return AttackUnit; }
-    virtual UnitBase::WorkType work() const  { return UnitBase::WorkAttack; };
+    virtual UnitBase::WorkType work() const  { return UnitBase::WorkAttack; }
     virtual UnitOrder* duplicate() const  { return new UnitAttackOrder(*this); };
 
     virtual bool saveAsXML(QDomElement& root);
@@ -145,7 +165,7 @@ class UnitAttackGroundOrder : public UnitOrder
     virtual ~UnitAttackGroundOrder();
 
     virtual OrderType type() const  { return AttackGround; }
-    virtual UnitBase::WorkType work() const  { return UnitBase::WorkAttack; };
+    virtual UnitBase::WorkType work() const  { return UnitBase::WorkAttack; }
     virtual UnitOrder* duplicate() const  { return new UnitAttackGroundOrder(*this); };
 
     virtual bool saveAsXML(QDomElement& root);
@@ -167,7 +187,7 @@ class UnitTurnOrder : public UnitOrder
     virtual ~UnitTurnOrder();
 
     virtual OrderType type() const  { return Turn; }
-    virtual UnitBase::WorkType work() const  { return UnitBase::WorkTurn; };
+    virtual UnitBase::WorkType work() const  { return UnitBase::WorkTurn; }
     virtual UnitOrder* duplicate() const  { return new UnitTurnOrder(*this); };
 
     virtual bool saveAsXML(QDomElement& root);
@@ -189,7 +209,7 @@ class UnitTurnToUnitOrder : public UnitOrder
     virtual ~UnitTurnToUnitOrder();
 
     virtual OrderType type() const  { return TurnToUnit; }
-    virtual UnitBase::WorkType work() const  { return UnitBase::WorkTurn; };
+    virtual UnitBase::WorkType work() const  { return UnitBase::WorkTurn; }
     virtual UnitOrder* duplicate() const  { return new UnitTurnToUnitOrder(*this); };
 
     virtual bool saveAsXML(QDomElement& root);
@@ -211,7 +231,7 @@ class UnitFollowOrder : public UnitOrder
     virtual ~UnitFollowOrder();
 
     virtual OrderType type() const  { return Follow; }
-    virtual UnitBase::WorkType work() const  { return UnitBase::WorkFollow; };
+    virtual UnitBase::WorkType work() const  { return UnitBase::WorkFollow; }
     virtual UnitOrder* duplicate() const  { return new UnitFollowOrder(*this); };
 
     virtual bool saveAsXML(QDomElement& root);
@@ -237,7 +257,8 @@ class UnitHarvestOrder : public UnitOrder
     virtual ~UnitHarvestOrder();
 
     virtual OrderType type() const  { return Harvest; }
-    virtual UnitBase::WorkType work() const  { return UnitBase::WorkPlugin; };
+    virtual UnitBase::WorkType work() const  { return UnitBase::WorkPlugin; }
+    virtual int workPluginType() const;
     virtual UnitOrder* duplicate() const  { return new UnitHarvestOrder(*this); };
 
     virtual bool saveAsXML(QDomElement& root);
@@ -260,7 +281,8 @@ class UnitRefineOrder : public UnitOrder
     virtual ~UnitRefineOrder();
 
     virtual OrderType type() const  { return Refine; }
-    virtual UnitBase::WorkType work() const  { return UnitBase::WorkPlugin; };
+    virtual UnitBase::WorkType work() const  { return UnitBase::WorkPlugin; }
+    virtual int workPluginType() const;
     virtual UnitOrder* duplicate() const  { return new UnitRefineOrder(*this); };
 
     virtual bool saveAsXML(QDomElement& root);
@@ -345,3 +367,6 @@ class UnitMoveToUnitOrderData : public UnitMoveOrderData
 
 #endif
 
+/*
+ * vim: et sw=2
+ */

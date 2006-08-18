@@ -445,8 +445,8 @@ void Unit::initStatic()
  // we initialize the properties for Unit, MobileUnit, Facility and the plugins
  // here
  // Unit
- addPropertyId(IdPathPoints, QString::fromLatin1("PathPoints"));
  addPropertyId(IdWantedRotation, QString::fromLatin1("WantedRotation"));
+ addPropertyId(IdPathPoints, QString::fromLatin1("PathPoints"));
 
  // Facility
  addPropertyId(IdConstructionStep, QString::fromLatin1("ConstructionStep"));
@@ -1131,6 +1131,8 @@ void Unit::advanceTurn(unsigned int)
 
 void Unit::resetPathInfo()
 {
+ BO_CHECK_NULL_RET(pathInfo());
+
  // Release highlevel path here once we cache them
  pathInfo()->reset();
  pathInfo()->unit = this;
@@ -1148,7 +1150,7 @@ bool Unit::moveTo(bofixed x, bofixed y, int range)
 	return false;
  }
 
- if (unitProperties()->isAircraft()) {
+ if (isFlying()) {
 	// Aircrafts cannot go near the border of the map to make sure they have
 	//  enough room for turning around
 	x = QMIN(QMAX(x, bofixed(6)), (bofixed)canvas()->mapWidth() - 6);
@@ -2104,11 +2106,14 @@ bool Unit::currentOrderChanged()
  }
 
  setAdvanceWork(currentOrder()->work());
+
  // For WorkPlugin, we also need to set correct mCurrentPlugin
- if (currentOrderData()->type() == UnitOrder::Harvest) {
-	mCurrentPlugin = plugin(UnitPlugin::Harvester);
- } else if (currentOrderData()->type() == UnitOrder::Refine) {
-	mCurrentPlugin = plugin(UnitPlugin::Harvester);
+ if (currentOrder()->work() == WorkPlugin) {
+	mCurrentPlugin = plugin(currentOrder()->workPluginType());
+	if (!mCurrentPlugin) {
+		boError() << k_funcinfo << "cannot find valid plugin for WorkPlugin" << endl;
+		return false;
+	}
  }
 
  return true;
@@ -2122,19 +2127,26 @@ bool Unit::currentOrderAdded()
 	return false;
  }
 // switch (order->type()) {
-	if(order->type() == UnitOrder::Move) {
+	if (order->type() == UnitOrder::Move) {
+		bool moveToCenterOfCell = true;
 		UnitMoveOrder* moveo = (UnitMoveOrder*)order;
-		// We want land unit's center point to be in the middle of the cell after
-		//  moving.
-		bofixed add = 0;
-		if (!unitProperties()->isAircraft()) {
-			if (!moveData()) {
-				return false;
+		bofixed x = moveo->position().x();
+		bofixed y = moveo->position().y();
+
+		if (moveToCenterOfCell) {
+			// We want land unit's center point to be in the middle of the cell after
+			//  moving.
+			bofixed add = 0;
+			if (!unitProperties()->isAircraft()) {
+				if (!moveData()) {
+					boDebug() << k_funcinfo << "no moveData. not adding order." << endl;
+					return false;
+				}
+				add = (((moveData()->size % 2) == 1) ? 0.5 : 0);
 			}
-			add = (((moveData()->size % 2) == 1) ? 0.5 : 0);
+			x = (int)moveo->position().x() + add;
+			y = (int)moveo->position().y() + add;
 		}
-		bofixed x = (int)moveo->position().x() + add;
-		bofixed y = (int)moveo->position().y() + add;
 
 		if (moveTo(x, y, moveo->range())) {
 			boDebug(380) << k_funcinfo << "unit " << id() << ": Will move to (" << x << "; " << y << ")" << endl;
@@ -2145,7 +2157,7 @@ bool Unit::currentOrderAdded()
 			return false;
 		}
 
-	} else if(order->type() == UnitOrder::MoveToUnit) {
+	} else if (order->type() == UnitOrder::MoveToUnit) {
 		UnitMoveToUnitOrder* movetounito = (UnitMoveToUnitOrder*)order;
 		const BoVector2Fixed& pos = movetounito->target()->center();
 		if (moveTo(pos.x(), pos.y(), movetounito->range())) {
@@ -2157,18 +2169,18 @@ bool Unit::currentOrderAdded()
 			return false;
 		}
 
-	} else if(order->type() == UnitOrder::AttackUnit) {
+	} else if (order->type() == UnitOrder::AttackUnit) {
 		UnitAttackOrder* attacko = (UnitAttackOrder*)order;
 		if (!canShootAt(attacko->target())) {
 			return false;
 		}
 
-	} else if(order->type() == UnitOrder::Follow) {
+	} else if (order->type() == UnitOrder::Follow) {
 
-	} else if(order->type() == UnitOrder::Turn) {
-	} else if(order->type() == UnitOrder::TurnToUnit) {
+	} else if (order->type() == UnitOrder::Turn) {
+	} else if (order->type() == UnitOrder::TurnToUnit) {
 
-	} else if(order->type() == UnitOrder::Harvest) {
+	} else if (order->type() == UnitOrder::Harvest) {
 		UnitHarvestOrder* harvestorder = (UnitHarvestOrder*)order;
 		HarvesterPlugin* h = (HarvesterPlugin*)plugin(UnitPlugin::Harvester);
 		if (!h) {
@@ -2182,7 +2194,7 @@ bool Unit::currentOrderAdded()
 		}
 		h->mineAt(r);
 
-	} else if(order->type() == UnitOrder::Refine) {
+	} else if (order->type() == UnitOrder::Refine) {
 		UnitRefineOrder* refineorder = (UnitRefineOrder*)order;
 		HarvesterPlugin* h = (HarvesterPlugin*)plugin(UnitPlugin::Harvester);
 		if (!h) {
