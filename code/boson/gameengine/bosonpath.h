@@ -94,6 +94,7 @@ class BosonPath
      *  data will be written into the same object.
      **/
     void findPath(BosonPathInfo* info);
+    void preparePathInfo(BosonPathInfo* info);
 
     void cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2);
 
