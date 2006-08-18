@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2005 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2002-2005 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2002-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -936,12 +936,14 @@ bool HarvesterPlugin::loadFromXML(const QDomElement& root)
 	// --> it was saved this way, so we must load it this way.
 	Unit* u = game()->findUnit(refineryId, 0);
 	if (!u) {
-		boError() << k_funcinfo << "cannot find refinery mine " << refineryId << endl;
+		boError() << k_funcinfo << "cannot find refinery " << refineryId << endl;
+		return false;
 	} else {
 		mRefinery = (RefineryPlugin*)u->plugin(UnitPlugin::Refinery);
 		if (!mRefinery) {
 			boError() << k_funcinfo << "unit " << refineryId << " is not a refinery" << endl;
 			mRefinery = 0;
+			return false;
 		}
 	}
  }
