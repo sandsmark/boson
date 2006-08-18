@@ -262,6 +262,10 @@ void BosonLocalPlayerInput::harvest(const HarvesterPlugin* harvester, const Reso
 void BosonLocalPlayerInput::moveWithoutAttack(const QPtrList<Unit>& units, bofixed x, bofixed y)
 {
   boDebug() << k_funcinfo << endl;
+  if (units.isEmpty())
+  {
+    return;
+  }
   QValueList<Q_ULONG> moveUnits;
   QPtrListIterator<Unit> it(units);
   while (it.current())
@@ -291,6 +295,10 @@ void BosonLocalPlayerInput::moveWithAttack(const QPtrList<Unit>& units, bofixed 
   // FIXME: maybe moveWithAttack() and moveWithoutAttack() should be merged to
   //  single move() with bool attack param
   boDebug() << k_funcinfo << endl;
+  if (units.isEmpty())
+  {
+    return;
+  }
   QValueList<Q_ULONG> moveUnits;
   QPtrListIterator<Unit> it(units);
   while (it.current())
@@ -341,6 +349,10 @@ void BosonLocalPlayerInput::attack(const QPtrList<Unit>& units, Unit* target)
 {
   boDebug() << k_funcinfo << endl;
   if (!target)
+  {
+    return;
+  }
+  if (units.isEmpty())
   {
     return;
   }
@@ -399,6 +411,10 @@ void BosonLocalPlayerInput::repair(const QPtrList<Unit>& units, Unit* repairyard
   {
     return;
   }
+  if (units.isEmpty())
+  {
+    return;
+  }
   // TODO
 }
 
@@ -406,6 +422,14 @@ void BosonLocalPlayerInput::refine(const QPtrList<Unit>& units, Unit* refinery)
 {
   BO_CHECK_NULL_RET(refinery);
   boDebug() << k_funcinfo << endl;
+  if (!refinery)
+  {
+    return;
+  }
+  if (units.isEmpty())
+  {
+    return;
+  }
 
   QValueList<Q_ULONG> refineUnits;
   QPtrListIterator<Unit> it(units);
@@ -433,6 +457,10 @@ void BosonLocalPlayerInput::follow(const QPtrList<Unit>& units, Unit* target)
 {
   boDebug() << k_funcinfo << endl;
   if (!target)
+  {
+    return;
+  }
+  if (units.isEmpty())
   {
     return;
   }
