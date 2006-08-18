@@ -140,24 +140,11 @@ public:
 
 	/**
 	 * Change what this unit is currently doing.
-	 *
-	 * The difference to @ref setWork is important in @ref
-	 * BosonCanvas::slotAdvance. This method decides what the unit is meant
-	 * to do (concerning the Unit::advanceXYZ() methods) depending on @ref
-	 * advanceWork. This is usually the same as @ref work, but think e.g. of
-	 * a unit that should mine minerals but first needs to move to the
-	 * minerals field. It needs to have @ref WorkPlugin but to make moving
-	 * work it needs to have @ref advanceWork == @ref WorkMove.
-	 *
-	 * You need to change this only very seldom.
 	 **/
 	virtual void setAdvanceWork(WorkType w) { mAdvanceWork = w; }
 
 	/**
-	 * See also @ref setAdvanceWork, where usage is explained. You should
-	 * not use this, use @ref work instead!
-	 * @return Usually the same as @ref work, but sometime the advanceWork
-	 * differs from the actual @ref work.
+	 * @return What the unit is currently doing.
 	 **/
 	inline WorkType advanceWork() const { return (WorkType)mAdvanceWork.value(); }
 
