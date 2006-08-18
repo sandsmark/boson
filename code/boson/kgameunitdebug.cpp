@@ -31,6 +31,7 @@
 #include "bodebug.h"
 #include "bo3dtools.h"
 #include "gameengine/bosonpropertyxml.h"
+#include "gameengine/bosonpath.h"
 #include "qlistviewitemnumber.h"
 
 #include <klistview.h>
@@ -304,6 +305,7 @@ public:
 		mProduction = 0;
 		mUnitCollisions = 0;
 		mCells = 0;
+		mPathInfo = 0;
 	}
 
 	Boson* mBoson;
@@ -316,6 +318,7 @@ public:
 	KListView* mProduction;
 	KListView* mUnitCollisions;
 	KListView* mCells;
+	KListView* mPathInfo;
 };
 
 KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
@@ -330,12 +333,12 @@ KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
 		this, SLOT(slotItemSelected(BosonItem*)));
 
  d->mTabWidget = new QTabWidget(splitter);
- topLayout->addWidget(d->mTabWidget);
 
  addPropertiesPage();
  addCellsPage();
  addCollisionsPage();
  addProductionsPage();
+ addPathInfoPage();
 
  QPushButton* update = new QPushButton(i18n("Update"), this);
  connect(update, SIGNAL(pressed()), this, SLOT(slotUpdate()));
@@ -349,6 +352,7 @@ KGameUnitDebug::~KGameUnitDebug()
  d->mProduction->clear();
  d->mUnitCollisions->clear();
  d->mCells->clear();
+ d->mPathInfo->clear();
  delete d;
 }
 
@@ -408,6 +412,19 @@ void KGameUnitDebug::addCellsPage()
  d->mTabWidget->addTab(cellsBox, i18n("Cells"));
 }
 
+void KGameUnitDebug::addPathInfoPage()
+{
+ d->mPathInfo = new KListView(d->mTabWidget);
+ d->mPathInfo->setAllColumnsShowFocus(true);
+ d->mPathInfo->addColumn(i18n("Name"));
+ d->mPathInfo->addColumn(i18n("Value"));
+// d->mPathInfo->addColumn(i18n("Number"));
+// d->mPathInfo->addColumn(i18n("TypeId"));
+// d->mPathInfo->addColumn(i18n("ETA"));
+ d->mTabWidget->addTab(d->mPathInfo, i18n("PathInfo"));
+ d->mTabWidget->setTabEnabled(d->mPathInfo, false);
+}
+
 void KGameUnitDebug::setBoson(Boson* b)
 {
  d->mBoson = b;
@@ -422,6 +439,7 @@ void KGameUnitDebug::slotUpdate()
  d->mProduction->clear();
  d->mUnitCollisions->clear();
  d->mCells->clear();
+ d->mPathInfo->clear();
 
  if (!d->mBoson) {
 	return;
@@ -440,12 +458,14 @@ void KGameUnitDebug::slotItemSelected(BosonItem* item)
  updateProperties(item);
  updateProduction(item);
  updateUnitCollisions(item);
+ updatePathInfo(item);
 
  bool isUnit = false;
  if (RTTI::isUnit(item->rtti())) {
 	isUnit = true;
  }
  d->mTabWidget->setTabEnabled(d->mProduction, isUnit);
+ d->mTabWidget->setTabEnabled(d->mPathInfo, isUnit);
 }
 
 void KGameUnitDebug::updateProperties(BosonItem* item)
@@ -534,4 +554,31 @@ void KGameUnitDebug::updateCells(BosonItem* item)
  }
 }
 
+void KGameUnitDebug::updatePathInfo(BosonItem* item)
+{
+ d->mPathInfo->clear();
+ if (!item || !RTTI::isUnit(item->rtti())) {
+	return;
+ }
+ Unit* unit = (Unit*)item;
+
+ BosonPathInfo* info = unit->pathInfo();
+ if (!info) {
+	return;
+ }
+
+ QListViewItem* start = new QListViewItem(d->mPathInfo, i18n("Start"));
+ start->setText(1, i18n("(%1;%2)").arg(info->start.x()).arg(info->start.y()));
+ QListViewItem* dest = new QListViewItem(d->mPathInfo, i18n("Dest"));
+ dest->setText(1, i18n("(%1;%2)").arg(info->dest.x()).arg(info->dest.y()));
+ new QListViewItem(d->mPathInfo, i18n("Range"), QString::number(info->range));
+ QListViewItem* target = new QListViewItem(d->mPathInfo, i18n("Target"));
+ if (info->target) {
+	target->setText(1, QString::number(info->target->id()));
+ }
+
+ new QListViewItem(d->mPathInfo, i18n("Waiting"), QString::number(info->waiting));
+ new QListViewItem(d->mPathInfo, i18n("PathRecalced"), QString::number(info->pathrecalced));
+
+}
 
