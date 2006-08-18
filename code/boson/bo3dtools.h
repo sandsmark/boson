@@ -84,12 +84,12 @@ bool saveMatrixAsXML(const BoMatrix& matrix, QDomElement& root);
 bool loadMatrixFromXML(BoMatrix* matrix, const QDomElement& root);
 
 // convenience function to convert a BoVector into a string for debugging
-QString debugStringVector(const BoVector2Float&, int prec);
-QString debugStringVector(const BoVector2Fixed&, int prec);
-QString debugStringVector(const BoVector3Float&, int prec);
-QString debugStringVector(const BoVector3Fixed&, int prec);
-QString debugStringVector(const BoVector4Float&, int prec);
-QString debugStringVector(const BoVector4Fixed&, int prec);
+QString debugStringVector(const BoVector2Float&, int prec = 4);
+QString debugStringVector(const BoVector2Fixed&, int prec = 4);
+QString debugStringVector(const BoVector3Float&, int prec = 4);
+QString debugStringVector(const BoVector3Fixed&, int prec = 4);
+QString debugStringVector(const BoVector4Float&, int prec = 4);
+QString debugStringVector(const BoVector4Fixed&, int prec = 4);
 
 QString debugStringQuaternion(const BoQuaternion&, int prec);
 
