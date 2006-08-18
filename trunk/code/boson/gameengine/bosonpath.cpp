@@ -397,6 +397,8 @@ void BosonPath::findPath(BosonPathInfo* info)
   //boDebug(500) << k_funcinfo << endl;
   PROFILE_METHOD;
 
+  preparePathInfo(info);
+
   if(info->flying)
   {
     // Flying unit
@@ -404,16 +406,6 @@ void BosonPath::findPath(BosonPathInfo* info)
   }
   else
   {
-    // Clear the pathinfo
-    info->llpath.clear();
-    info->hlpath.clear();
-    info->result = None;
-    // Land unit
-    if(info->unit)
-    {
-      info->movedata = info->unit->moveData();
-      info->player = info->unit->ownerIO();
-    }
 
     if(info->target)
     {
@@ -460,6 +452,20 @@ void BosonPath::findPath(BosonPathInfo* info)
       "unit " << (info->unit ? (int)info->unit->id() : -1) << "; took " << elapsed/1000.0f << " ms;   result: " <<
       (info->result == GoalReached ? "GoalReached" : (info->result == OutOfRange ? "OutOfRange" :
       (info->result == NoPath ? "NoPath" : "None"))) << ", path length: " << info->llpath.count() << endl;
+}
+
+void BosonPath::preparePathInfo(BosonPathInfo* info)
+{
+  // Clear the pathinfo
+  info->llpath.clear();
+  info->hlpath.clear();
+  info->result = None;
+
+  if(info->unit)
+  {
+    info->movedata = info->unit->moveData();
+    info->player = info->unit->ownerIO();
+  }
 }
 
 
