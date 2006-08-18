@@ -222,12 +222,14 @@ void BosonItem::makeCells(Cell* allCells, QPtrVector<Cell>* cells, const BoRect2
  }
 }
 
+// FIXME: rotation!
 bool BosonItem::bosonCollidesWith(BosonItem* item) const
 {
  BoVector3Fixed itempos(item->x() + item->xVelocity(), item->y() + item->yVelocity(), item->z() + item->zVelocity());
  return bosonCollidesWith(itempos, itempos + BoVector3Fixed(item->width(), item->height(), item->depth()));
 }
 
+// FIXME: rotation!
 bool BosonItem::bosonCollidesWith(const BoVector3Fixed& v1, const BoVector3Fixed& v2) const
 {
 // boDebug() << "  ++> " << k_funcinfo << "Item coords: (" << x() << "; " << y() << "; " << z() <<
