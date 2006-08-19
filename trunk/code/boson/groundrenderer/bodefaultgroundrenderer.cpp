@@ -61,11 +61,9 @@ BoDefaultGroundRenderer::BoDefaultGroundRenderer()
 
 BoDefaultGroundRenderer::~BoDefaultGroundRenderer()
 {
- boDebug() << k_funcinfo << endl;
  clearVBOs();
  delete[] mIndicesArray;
 
- boDebug() << k_funcinfo << mTextureIndices.count() << endl;
  for (unsigned int i = 0; i < mTextureIndices.count(); i++) {
 	delete mTextureIndices[i];
  }

@@ -926,7 +926,6 @@ BoGroundRendererBase::BoGroundRendererBase()
 
 BoGroundRendererBase::~BoGroundRendererBase()
 {
- boDebug() << k_funcinfo << endl;
  mColorMapRenderers.setAutoDelete(true);
  mColorMapRenderers.clear();
  delete mFogTexture;
