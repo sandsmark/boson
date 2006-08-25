@@ -2622,6 +2622,16 @@ BosonItem* BosonCanvas::findItem(unsigned long int id) const
  return d->mAllItems.findItem(id);
 }
 
+Unit* BosonCanvas::findUnit(unsigned long int id) const
+{
+ BosonItem* item = findItem(id);
+ if (!item || !RTTI::isUnit(item->rtti())) {
+	return 0;
+ } else {
+	return (Unit*)item;
+ }
+}
+
 void BosonCanvas::clearMoveDatas()
 {
  d->mUnitProperties2MoveData.setAutoDelete(false);

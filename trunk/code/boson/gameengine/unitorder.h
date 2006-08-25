@@ -78,7 +78,9 @@ class UnitOrder
     virtual UnitOrder* duplicate() const = 0;
 
     virtual bool saveAsXML(QDomElement& root);
-    virtual bool loadFromXML(const QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root, BosonCanvas* canvas);
+
+    static UnitOrder* createAndLoadFromXML(const QDomElement& root, BosonCanvas* canvas);
 };
 
 
@@ -86,6 +88,7 @@ class UnitMoveOrder : public UnitOrder
 {
   public:
     UnitMoveOrder(const BoVector2Fixed& pos, int range = -1, bool attacking = true);
+    UnitMoveOrder();
     virtual ~UnitMoveOrder();
 
     virtual OrderType type() const  { return Move; }
@@ -93,7 +96,7 @@ class UnitMoveOrder : public UnitOrder
     virtual UnitOrder* duplicate() const  { return new UnitMoveOrder(*this); };
 
     virtual bool saveAsXML(QDomElement& root);
-    virtual bool loadFromXML(const QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root, BosonCanvas* canvas);
 
     inline const BoVector2Fixed& position() const  { return mPos; }
     inline void setPosition(const BoVector2Fixed& p)  { mPos = p; }
@@ -116,13 +119,14 @@ class UnitMoveToUnitOrder : public UnitMoveOrder
 {
   public:
     UnitMoveToUnitOrder(Unit* target, int range = 0, bool attacking = false);
+    UnitMoveToUnitOrder();
     virtual ~UnitMoveToUnitOrder();
 
     virtual OrderType type() const  { return MoveToUnit; }
     virtual UnitOrder* duplicate() const  { return new UnitMoveToUnitOrder(*this); };
 
     virtual bool saveAsXML(QDomElement& root);
-    virtual bool loadFromXML(const QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root, BosonCanvas* canvas);
 
     Unit* target() const  { return mTarget; }
 
@@ -136,6 +140,7 @@ class UnitAttackOrder : public UnitOrder
 {
   public:
     UnitAttackOrder(Unit* target, bool canmove = true);
+    UnitAttackOrder();
     virtual ~UnitAttackOrder();
 
     virtual OrderType type() const  { return AttackUnit; }
@@ -143,7 +148,7 @@ class UnitAttackOrder : public UnitOrder
     virtual UnitOrder* duplicate() const  { return new UnitAttackOrder(*this); };
 
     virtual bool saveAsXML(QDomElement& root);
-    virtual bool loadFromXML(const QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root, BosonCanvas* canvas);
 
     inline Unit* target() const  { return mTarget; }
     inline void setTarget(Unit* u)   { mTarget = u; }
@@ -162,6 +167,7 @@ class UnitAttackGroundOrder : public UnitOrder
 {
   public:
     UnitAttackGroundOrder(const BoVector2Fixed& pos);
+    UnitAttackGroundOrder();
     virtual ~UnitAttackGroundOrder();
 
     virtual OrderType type() const  { return AttackGround; }
@@ -169,7 +175,7 @@ class UnitAttackGroundOrder : public UnitOrder
     virtual UnitOrder* duplicate() const  { return new UnitAttackGroundOrder(*this); };
 
     virtual bool saveAsXML(QDomElement& root);
-    virtual bool loadFromXML(const QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root, BosonCanvas* canvas);
 
     inline const BoVector2Fixed& position() const  { return mPos; }
     inline void setPosition(const BoVector2Fixed& p)  { mPos = p; }
@@ -184,6 +190,7 @@ class UnitTurnOrder : public UnitOrder
 {
   public:
     UnitTurnOrder(bofixed dir);
+    UnitTurnOrder();
     virtual ~UnitTurnOrder();
 
     virtual OrderType type() const  { return Turn; }
@@ -191,7 +198,7 @@ class UnitTurnOrder : public UnitOrder
     virtual UnitOrder* duplicate() const  { return new UnitTurnOrder(*this); };
 
     virtual bool saveAsXML(QDomElement& root);
-    virtual bool loadFromXML(const QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root, BosonCanvas* canvas);
 
     inline bofixed direction() const  { return mDirection; }
     inline void setDirection(bofixed d)   { mDirection = d; }
@@ -206,6 +213,7 @@ class UnitTurnToUnitOrder : public UnitOrder
 {
   public:
     UnitTurnToUnitOrder(Unit* target);
+    UnitTurnToUnitOrder();
     virtual ~UnitTurnToUnitOrder();
 
     virtual OrderType type() const  { return TurnToUnit; }
@@ -213,7 +221,7 @@ class UnitTurnToUnitOrder : public UnitOrder
     virtual UnitOrder* duplicate() const  { return new UnitTurnToUnitOrder(*this); };
 
     virtual bool saveAsXML(QDomElement& root);
-    virtual bool loadFromXML(const QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root, BosonCanvas* canvas);
 
     inline Unit* target() const  { return mTarget; }
     inline void setTarget(Unit* u)   { mTarget = u; }
@@ -228,6 +236,7 @@ class UnitFollowOrder : public UnitOrder
 {
   public:
     UnitFollowOrder(Unit* target, bofixed distance = 2);
+    UnitFollowOrder();
     virtual ~UnitFollowOrder();
 
     virtual OrderType type() const  { return Follow; }
@@ -235,7 +244,7 @@ class UnitFollowOrder : public UnitOrder
     virtual UnitOrder* duplicate() const  { return new UnitFollowOrder(*this); };
 
     virtual bool saveAsXML(QDomElement& root);
-    virtual bool loadFromXML(const QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root, BosonCanvas* canvas);
 
     inline Unit* target() const  { return mTarget; }
     inline void setTarget(Unit* u)   { mTarget = u; }
@@ -254,6 +263,7 @@ class UnitHarvestOrder : public UnitOrder
 {
   public:
     UnitHarvestOrder(Unit* at);
+    UnitHarvestOrder();
     virtual ~UnitHarvestOrder();
 
     virtual OrderType type() const  { return Harvest; }
@@ -262,7 +272,7 @@ class UnitHarvestOrder : public UnitOrder
     virtual UnitOrder* duplicate() const  { return new UnitHarvestOrder(*this); };
 
     virtual bool saveAsXML(QDomElement& root);
-    virtual bool loadFromXML(const QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root, BosonCanvas* canvas);
 
     inline Unit* target() const  { return mTarget; }
     inline void setTarget(Unit* u)   { mTarget = u; }
@@ -278,6 +288,7 @@ class UnitRefineOrder : public UnitOrder
 {
   public:
     UnitRefineOrder(Unit* at);
+    UnitRefineOrder();
     virtual ~UnitRefineOrder();
 
     virtual OrderType type() const  { return Refine; }
@@ -286,7 +297,7 @@ class UnitRefineOrder : public UnitOrder
     virtual UnitOrder* duplicate() const  { return new UnitRefineOrder(*this); };
 
     virtual bool saveAsXML(QDomElement& root);
-    virtual bool loadFromXML(const QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root, BosonCanvas* canvas);
 
     inline Unit* target() const  { return mTarget; }
     inline void setTarget(Unit* u)   { mTarget = u; }
@@ -318,9 +329,10 @@ class UnitOrderData
     UnitOrder* order()  { return mOrder; }
 
     virtual bool saveAsXML(QDomElement& root);
-    virtual bool loadFromXML(const QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root, BosonCanvas* canvas);
 
     static UnitOrderData* createData(UnitOrder* order);
+    static UnitOrderData* createAndLoadFromXML(const QDomElement& root, BosonCanvas* canvas);
 
 
     UnitOrderData* suborder() const  { return mSuborder; }
@@ -346,7 +358,7 @@ class UnitMoveOrderData : public UnitOrderData
     virtual ~UnitMoveOrderData();
 
     virtual bool saveAsXML(QDomElement& root);
-    virtual bool loadFromXML(const QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root, BosonCanvas* canvas);
 
     BosonPathInfo* pathinfo;
     Unit* target;
@@ -359,7 +371,7 @@ class UnitMoveToUnitOrderData : public UnitMoveOrderData
     virtual ~UnitMoveToUnitOrderData();
 
     virtual bool saveAsXML(QDomElement& root);
-    virtual bool loadFromXML(const QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root, BosonCanvas* canvas);
 
     BoVector2Fixed lastTargetPos;
 };
