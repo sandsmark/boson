@@ -1155,10 +1155,11 @@ bool Player::saveFogOfWar(QDomElement& root) const
  QDomElement explored = doc.createElement(QString::fromLatin1("Explored"));
  explored.appendChild(doc.createTextNode(BoBinCoder::toCoded(d->mExplored)));
  root.appendChild(explored);
-#warning TODO!!!
- //QDomElement fog = doc.createElement(QString::fromLatin1("Fogged"));
- //fog.appendChild(doc.createTextNode(BoBinCoder::toCoded(d->mFoggedRef)));
- //root.appendChild(fog);
+
+ QDomElement fog = doc.createElement(QString::fromLatin1("Fogged"));
+ int fogsize = d->mMap->width() * d->mMap->height() * sizeof(unsigned short int);
+ fog.appendChild(doc.createTextNode(BoBinCoder::toCoded((const char*)d->mFoggedRef, fogsize)));
+ root.appendChild(fog);
  return true;
 }
 
@@ -1193,7 +1194,28 @@ bool Player::loadFogOfWar(const QDomElement& root)
 		return false;
 	}
  }
-#warning TODO!!! Load real fog (mFoggedRef)!!!
+
+ QDomElement fogelement = root.namedItem(QString::fromLatin1("Fogged")).toElement();
+ if (fogelement.isNull()) {
+	boError() << k_funcinfo << "No Fogged tag found" << endl;
+	return false;
+ }
+ QString fogtext = fogelement.text();
+ if (fogtext.isEmpty()) {
+	boError() << k_funcinfo << "no content for Fogged tag found" << endl;
+	return false;
+ }
+ boDebug() << k_funcinfo << "decoding" << endl;
+ d->mFoggedRef = new unsigned short int[d->mMap->width() * d->mMap->height()];
+ int cellCount = d->mMap->width() * d->mMap->height();
+ BoBinCoder::toCharArray(fogtext, (char*)d->mFoggedRef, cellCount * sizeof(unsigned short int));
+
+ d->mUnfoggedCount = 0;
+ for (int i = 0; i < cellCount; i++) {
+	if (d->mFoggedRef[i] >= 1) {
+		d->mUnfoggedCount++;
+	}
+ }
  return true;
 }
 
