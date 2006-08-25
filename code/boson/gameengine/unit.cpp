@@ -81,6 +81,10 @@ public:
 
 	void currentSuborderDone(bool success);
 
+
+	bool saveAsXML(QDomElement& root);
+	bool loadFromXML(const QDomElement& root, BosonCanvas* canvas);
+
 protected:
 	bool currentOrderChanged();
 	bool currentOrderAdded();
@@ -284,6 +288,42 @@ bool UnitOrderQueue::canAddOrder() const
 bool UnitOrderQueue::lastOrderStatus() const
 {
  return (d->mLastOrderStatus == UnitOrder::Success);
+}
+
+bool UnitOrderQueue::saveAsXML(QDomElement& root)
+{
+ QDomDocument doc = root.ownerDocument();
+ QValueList<UnitOrderData*>::Iterator it;
+ for (it = d->mToplevelOrders.begin(); it != d->mToplevelOrders.end(); ++it) {
+	QDomElement orderdataxml = doc.createElement("OrderData");
+	root.appendChild(orderdataxml);
+	(*it)->saveAsXML(orderdataxml);
+ }
+
+ root.setAttribute("LastOrderStatus", (int)d->mLastOrderStatus);
+ return true;
+}
+
+bool UnitOrderQueue::loadFromXML(const QDomElement& root, BosonCanvas* canvas)
+{
+ QDomNodeList list = root.elementsByTagName("OrderData");
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement orderdataelement = list.item(i).toElement();
+	if (orderdataelement.isNull()) {
+		boError(260) << k_funcinfo << "OrderData tag is not an element" << endl;
+		return false;
+	}
+
+	UnitOrderData* data = UnitOrderData::createAndLoadFromXML(orderdataelement, canvas);
+	if (!data) {
+		return false;
+	}
+	d->mToplevelOrders.append(data);
+ }
+
+ // TODO: is this enough?
+ currentOrderChanged();
+ return true;
 }
 
 
@@ -1274,6 +1314,13 @@ bool Unit::saveAsXML(QDomElement& root)
 	}
  }
 
+ // Save orders queue
+ QDomElement orderqueuexml = doc.createElement("OrderQueue");
+ root.appendChild(orderqueuexml);
+ if (!d->mOrderQueue->saveAsXML(orderqueuexml)) {
+	return false;
+ }
+
  // Save pathinfo
 /* QDomElement pathinfoxml = doc.createElement(QString::fromLatin1("PathInfo"));
  root.appendChild(pathinfoxml);
@@ -1380,6 +1427,15 @@ bool Unit::loadFromXML(const QDomElement& root)
  updateRotation();
  setAdvanceWork(advanceWork());
 
+
+
+ // Load orders queue
+ QDomElement orderqueuexml = root.namedItem("OrderQueue").toElement();
+ if (!orderqueuexml.isNull()) {
+	if (!d->mOrderQueue->loadFromXML(orderqueuexml, canvas())) {
+		return false;
+	}
+ }
 
  // Load pathinfo
  /*pathInfo()->reset();
