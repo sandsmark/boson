@@ -2736,6 +2736,72 @@ QValueList<BoVector2Fixed> BosonPath::findLocations(Player* player, int x, int y
 
 /*****  BosonPathInfo  *****/
 
+bool BosonPathInfo::saveAsXML(QDomElement& root)
+{
+  // Most of these things aren't necessary as they are also stored elsewhere
+  // If you need to save/load anything, uncomment as necessary and don't forget
+  //  to change loadFromXML() as well
+
+  // Save start/dest points and range
+  //saveVector2AsXML(start, root, "start");
+  //saveVector2AsXML(dest, root, "dest");
+  //root.setAttribute("target", target ? (int)target->id() : (int)-1);
+  //root.setAttribute("range", range);
+  // Save last pf query result
+  root.setAttribute("result", result);
+  // Save llpath
+  //root.setAttribute("llpathlength", llpath.count());
+  //for(unsigned int i = 0; i < llpath.count(); i++
+  //{
+  //  saveVector2AsXML(llpath[i], root, QString("llpath-%1").arg(i));
+  //}
+  // hlpath doesn't have to be saved atm
+  // Save misc stuff
+  root.setAttribute("moveAttacking", moveAttacking ? 1 : 0);
+  root.setAttribute("slowDownAtDest", slowDownAtDest ? 1 : 0);
+  root.setAttribute("waiting", waiting);
+  root.setAttribute("pathrecalced", pathrecalced);
+
+  return true;
+}
+
+bool BosonPathInfo::loadFromXML(const QDomElement& root)
+{
+  bool ok;
+  result = (BosonPath::Result)root.attribute("result").toInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for result attribute" << endl;
+    return false;
+  }
+  moveAttacking = root.attribute("moveAttacking").toInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for moveAttacking attribute" << endl;
+    return false;
+  }
+  slowDownAtDest = root.attribute("slowDownAtDest").toInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for slowDownAtDest attribute" << endl;
+    return false;
+  }
+  waiting = root.attribute("waiting").toInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for waiting attribute" << endl;
+    return false;
+  }
+  pathrecalced = root.attribute("pathrecalced").toInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for pathrecalced attribute" << endl;
+    return false;
+  }
+
+  return true;
+}
+
 
 
 /*****  BosonPathVisualization  *****/

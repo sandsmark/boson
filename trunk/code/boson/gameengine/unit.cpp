@@ -1321,28 +1321,6 @@ bool Unit::saveAsXML(QDomElement& root)
 	return false;
  }
 
- // Save pathinfo
-/* QDomElement pathinfoxml = doc.createElement(QString::fromLatin1("PathInfo"));
- root.appendChild(pathinfoxml);
- // Save start/dest points and range
- saveVector2AsXML(pathInfo()->start, pathinfoxml, "start");
- saveVector2AsXML(pathInfo()->dest, pathinfoxml, "dest");
- pathinfoxml.setAttribute(QString::fromLatin1("target"), pathInfo()->target ? pathInfo()->target->id() : 0);
- pathinfoxml.setAttribute("range", pathInfo()->range);
- // Save last pf query result
- pathinfoxml.setAttribute("result", pathInfo()->result);
- // Save llpath
- pathinfoxml.setAttribute("llpathlength", pathInfo()->llpath.count());
- for (unsigned int i = 0; i < pathInfo()->llpath.count(); i++) {
-	saveVector2AsXML(pathInfo()->llpath[i], pathinfoxml, QString("llpath-%1").arg(i));
- }
- // hlpath doesn't have to be saved atm
- // Save misc stuff
- pathinfoxml.setAttribute("moveAttacking", pathInfo()->moveAttacking ? 1 : 0);
- pathinfoxml.setAttribute("slowDownAtDest", pathInfo()->slowDownAtDest ? 1 : 0);
- pathinfoxml.setAttribute("waiting", pathInfo()->waiting);
- pathinfoxml.setAttribute("pathrecalced", pathInfo()->pathrecalced);*/
-
  if (mUnitConstruction) {
 	if (!mUnitConstruction->saveAsXML(root)) {
 		return false;
@@ -1436,83 +1414,10 @@ bool Unit::loadFromXML(const QDomElement& root)
 		return false;
 	}
  }
-
- // Load pathinfo
- /*pathInfo()->reset();
- QDomElement pathinfoxml = root.namedItem("PathInfo").toElement();
- if (!pathinfoxml.isNull()) {
-	loadVector2FromXML(&pathInfo()->start, pathinfoxml, "start");
-	loadVector2FromXML(&pathInfo()->dest, pathinfoxml, "dest");
-	pathInfo()->range = pathinfoxml.attribute("range").toInt(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "Error loading range attribute ('" << pathinfoxml.attribute("range") << "')" << endl;
-		return false;
-	}
-	if (root.hasAttribute(QString::fromLatin1("result"))) {
-		pathInfo()->result = (BosonPath::Result)pathinfoxml.attribute("result").toInt(&ok);
-		if (!ok) {
-			boError() << k_funcinfo << "Error loading result attribute ('" << pathinfoxml.attribute("result") << "')" << endl;
-			return false;
-		}
-	}
-	// target
-	unsigned int pathinfoTargetId = 0;
-	if (root.hasAttribute(QString::fromLatin1("target"))) {
-		pathinfoTargetId = root.attribute(QString::fromLatin1("target")).toUInt(&ok);
-		if (!ok) {
-			boError() << k_funcinfo << "Error loading pathinfo target attribute ('" <<
-					pathinfoxml.attribute("target") << "')" << endl;
-			pathinfoTargetId = 0;
-		}
-	}
-	if (pathinfoTargetId == 0) {
-		pathInfo()->target = 0;
-	} else {
-		pathInfo()->target = canvas()->findItem(pathinfoTargetId);
-		if (!pathInfo()->target) {
-			boWarning(260) << k_funcinfo << "Could not find target with id=" << pathinfoTargetId << endl;
-		}
-	}
-
-	// llpath
-	unsigned int llpathlength = pathinfoxml.attribute("llpathlength").toInt(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "Error loading llpathlength attribute ('" << pathinfoxml.attribute("llpathlength") << "')" << endl;
-		return false;
-	}
-	pathInfo()->llpath.reserve(llpathlength);
-	for(unsigned int i = 0; i < llpathlength; i++) {
-		loadVector2FromXML(&pathInfo()->llpath[i], pathinfoxml, QString("llpath-%1").arg(i));
-	}
-
-	// misc
-	pathInfo()->moveAttacking = (pathinfoxml.attribute("moveAttacking").toInt(&ok));
-	if (!ok) {
-		boError() << k_funcinfo << "Error loading moveAttacking attribute ('" << pathinfoxml.attribute("moveAttacking") << "')" << endl;
-		return false;
-	}
-	pathInfo()->slowDownAtDest = (pathinfoxml.attribute("slowDownAtDest").toInt(&ok));
-	if (!ok) {
-		boError() << k_funcinfo << "Error loading slowDownAtDest attribute ('" << pathinfoxml.attribute("slowDownAtDest") << "')" << endl;
-		return false;
-	}
-	pathInfo()->waiting = pathinfoxml.attribute("waiting").toInt(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "Error loading waiting attribute ('" << pathinfoxml.attribute("waiting") << "')" << endl;
-		return false;
-	}
-	pathInfo()->pathrecalced = pathinfoxml.attribute("pathrecalced").toInt(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "Error loading pathrecalced attribute ('" << pathinfoxml.attribute("pathrecalced") << "')" << endl;
-		return false;
-	}
-	// These aren't saved
+ if (pathInfo()) {
 	pathInfo()->unit = this;
 	pathInfo()->flying = unitProperties()->isAircraft();
- }*/
- // Null pathinfoxml is valid too: in this case, we're loading from playfield
- //  file, not from savegame
-
+ }
 
  recalculateMaxWeaponRange();
 
