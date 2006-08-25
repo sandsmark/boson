@@ -376,6 +376,9 @@ class BosonPathInfo
       pathrecalced = 0;
     }
 
+    bool saveAsXML(QDomElement& root);
+    bool loadFromXML(const QDomElement& root);
+
     // Unit/player that we're searching path for. These can be 0!!!
     Unit* unit;
     PlayerIO* player;

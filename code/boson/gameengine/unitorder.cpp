@@ -648,10 +648,10 @@ bool UnitMoveOrderData::saveAsXML(QDomElement& root)
   QDomDocument doc = root.ownerDocument();
   QDomElement pathinfoxml = doc.createElement("PathInfo");
   root.appendChild(pathinfoxml);
-  /*if(!pathinfo->saveAsXML(pathinfoxml))
+  if(!pathinfo->saveAsXML(pathinfoxml))
   {
     return false;
-  }*/
+  }
   root.setAttribute("TargetId", target ? (int)target->id() : (int)-1);
   return true;
 }
@@ -678,10 +678,10 @@ bool UnitMoveOrderData::loadFromXML(const QDomElement& root, BosonCanvas* canvas
     boError() << k_funcinfo << "Missing PathInfo element!" << endl;
     return false;
   }
-  /*if(!pathinfo->loadFromXML(pathinfoxml))
+  if(!pathinfo->loadFromXML(pathinfoxml))
   {
     return false;
-}*/
+  }
 
   return true;
 }
