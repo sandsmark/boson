@@ -102,11 +102,13 @@ protected:
 	void updateProperties(BosonItem*);
 	void updateProduction(BosonItem*);
 	void updateUnitCollisions(BosonItem*);
+	void updatePathInfo(BosonItem* item);
 
 	void addPropertiesPage();
 	void addProductionsPage();
 	void addCollisionsPage();
 	void addCellsPage();
+	void addPathInfoPage();
 
 private:
 	KGameUnitDebugPrivate* d;
