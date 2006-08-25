@@ -50,7 +50,7 @@ unsigned int BoBinCoder::recode64(unsigned char c)
 
 // Code 6-bits in one byte
 // input is an array on length len, which contains only 0s and 1s (!!!)
-// This function isn't used at the moment - so you can discard it, if 
+// This function isn't used at the moment - so you can discard it, if
 // you want
 QString BoBinCoder::BinVector2MYBASE64(const char *array,const size_t len)
 {
@@ -58,7 +58,7 @@ QString BoBinCoder::BinVector2MYBASE64(const char *array,const size_t len)
   unsigned int value=0;
   size_t bitcount=0;
   QString a;
-  
+
   for(i=0;i!=len;i++)
     {
       unsigned int actValue=array[i];
@@ -72,9 +72,9 @@ QString BoBinCoder::BinVector2MYBASE64(const char *array,const size_t len)
 	  bitcount=0;
 	  value=0;
 	}
-    }	
+    }
   a+=char(code64(value));
-  
+
   return a;
 }
 
@@ -102,7 +102,7 @@ QString BoBinCoder::Vector2MYBASE64(const char*array,const size_t len)
 	  actValue&=0xFF;
 
 	  actValue<<=actBitsLen;
-	  
+
 	  actBits|=actValue;
 	  actBitsLen+=8;
 	}
@@ -118,16 +118,16 @@ QString BoBinCoder::Vector2MYBASE64(const char*array,const size_t len)
 
   if(actBitsLen>0)
     {
-      // take lower 6 bits - simply take the rest 
+      // take lower 6 bits - simply take the rest
       size_t output=actBits&0x3F;
-      
+
       ostr+=char(code64(output));
     }
   return ostr;
 }
 
 // note that the buffer must have a length of 'size'!
-// This function isn't used at the moment - so you can discard it, if 
+// This function isn't used at the moment - so you can discard it, if
 // you want
 void BoBinCoder::MYBASE642BinVector(const QString &s,size_t size,char *buffer)
 {
@@ -158,7 +158,7 @@ void BoBinCoder::MYBASE642Vector(const QString &s,size_t size,char *buffer)
 
   while(pos<size)
     {
-      // if there are too few bits left and there is something left in the 
+      // if there are too few bits left and there is something left in the
       // input-queue
       while(actBitsLen<8 && inputpos<s.length())
 	{
@@ -176,7 +176,7 @@ void BoBinCoder::MYBASE642Vector(const QString &s,size_t size,char *buffer)
       actBits>>=8;
       actBitsLen-=8;
     }
-  
+
 }
 
 QString BoBinCoder::addNewLines(QString a)
@@ -229,7 +229,7 @@ QBitArray BoBinCoder::toBinary(const QString &b)
 {
   QString a = removeNewLines(b);
   // size of coded real-size - should be optimized by compiler
-  // WARNING : This could lead to problems, if 
+  // WARNING : This could lead to problems, if
   size_t csize=sizeof(size_t)*8/6+1;
   size_t reallen;
   MYBASE642Vector(a,sizeof(size_t),(char*)&reallen);
@@ -252,5 +252,18 @@ QBitArray BoBinCoder::toBinary(const QString &b)
   }
   delete[] buffer;
   return bit;
+}
+
+void BoBinCoder::toCharArray(const QString &coded, char* array, int len)
+{
+  QString a = removeNewLines(coded);
+  MYBASE642Vector(a,len,array);
+}
+
+QString BoBinCoder::toCoded(const char* buffer, int len)
+{
+  QString a=Vector2MYBASE64(buffer,len);
+  a=addNewLines(a);
+  return a;
 }
 

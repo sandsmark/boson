@@ -56,6 +56,9 @@ class BoBinCoder
    **/
   static QString toCoded(const QBitArray &binary);
 
+  static void toCharArray(const QString &coded, char* array, int len);
+  static QString toCoded(const char* binary, int len);
+
  private:
   static QString addNewLines(QString a);
   static QString removeNewLines(QString a);
