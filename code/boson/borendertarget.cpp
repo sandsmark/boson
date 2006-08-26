@@ -188,7 +188,8 @@ bool BoRenderTarget::disable()
 void BoRenderTarget::initPBuffer()
 {
   // How many bits per channel
-  int bpc = (mFlags & Float) ? 32 : 8;
+  // 1 is minimum bpc of the color buffer, biggest available one is preferred
+  int bpc = (mFlags & Float) ? 32 : 1;
 
   int attrib[40];
   int i = 0;
@@ -210,7 +211,7 @@ void BoRenderTarget::initPBuffer()
   }
   if(mFlags & Depth) {
     attrib[i++] = GLX_DEPTH_SIZE;
-    attrib[i++] = 24;
+    attrib[i++] = 1;  // 1 is minimum size of the depth buffer, biggest available one is preferred
   }
   if(mFlags & Float)
   {
