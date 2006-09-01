@@ -86,7 +86,7 @@ def mine():
   global player
   units = BoScript.allPlayerUnits(player)
   for u in units:
-    if BoScript.canUnitMineOil(u) and BoScript.unitWork(u)==0:
+    if BoScript.canUnitMineOil(u) and BoScript.unitAdvanceWork(u)==0:
       boprint("debug", "id %s" % u)
       pos=BoScript.unitPosition(u)
       oil=BoScript.nearestOilLocations(int(pos[0]),int(pos[1]),1,150)
@@ -94,7 +94,7 @@ def mine():
       if len(oil) > 0:
         BoScript.mineUnit(u, oil[0][0], oil[0][1])
         boprint("debug", "Mine oil done")
-    elif BoScript.canUnitMineMinerals(u) and BoScript.unitWork(u)==0 :
+    elif BoScript.canUnitMineMinerals(u) and BoScript.unitAdvanceWork(u)==0 :
       boprint("debug", "id %s" % u)
       pos=BoScript.unitPosition(u)
       oil=BoScript.nearestMineralLocations(int(pos[0]),int(pos[1]),1,150)
