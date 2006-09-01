@@ -55,8 +55,8 @@ def unitPlaced(unitid, ownerid, pos, type):
 def produce():
   units = BoScript.allPlayerUnits(ai.player)
   for u in units:
-    # AB: unitWork(u) == 0 means that the unit is idle
-    if BoScript.canUnitProduce(u) and BoScript.unitWork(u) == 0:
+    # AB: unitAdvanceWork(u) == 0 means that the unit is idle
+    if BoScript.canUnitProduce(u) and BoScript.unitAdvanceWork(u) == 0:
       boprint("debug", "start production algorithm for unit %d" % u)
       prod = BoScript.productionTypes(u)
       canProduceFacilities = 0
@@ -75,8 +75,8 @@ def produce():
 def place():
   units = BoScript.allPlayerUnits(ai.player)
   for u in units:
-    # AB; unitWork(u) == 9 means "WorkPlugin", which is e.g. produce
-    if BoScript.canUnitProduce(u) and BoScript.unitWork(u) == 9 and BoScript.hasUnitCompletedProduction(u):
+    # AB; unitAdvanceWork(u) == 9 means "WorkPlugin", which is e.g. produce
+    if BoScript.canUnitProduce(u) and BoScript.unitAdvanceWork(u) == 9 and BoScript.hasUnitCompletedProduction(u):
       boprint("debug", "start placement algorithm for unit %d" % u)
       placeUnit(u, BoScript.completedProductionType(u))
 

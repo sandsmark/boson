@@ -123,7 +123,7 @@ class Unit:
     Current work the unit is involved in, e.g., attacking, moving, ...
     For a complete list of possible return values see unitbase.h .
     @return the ID of the current work."""
-    return BoScript.unitWork( self.mID )
+    return BoScript.unitAdvanceWork( self.mID )
   def sightRange( self ):
     """
     @return how many cells away the unit can see."""
