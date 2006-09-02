@@ -30,6 +30,9 @@ UnitWidth=9
 Weapons=0
 PowerConsumed=100
 
+[ProductionPlugin]
+ProducerList=4
+
 [Sounds]
 OrderAttack=order_attack
 OrderMove=order_move
