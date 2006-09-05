@@ -93,7 +93,9 @@ public:
 		mXScreenWidthMM = 0;
 		mXScreenHeightMM = 0;
 
+#if 0
 		mNVidiaErrors = 0;
+#endif
 
 		mHaveLibs = 0;
 
@@ -160,7 +162,9 @@ public:
 	QLabel* mXScreenWidthMM;
 	QLabel* mXScreenHeightMM;
 
+#if 0
 	KListBox* mNVidiaErrors;
+#endif
 
 	KListView* mHaveLibs;
 	QValueList<int> mHaveLibsList;
@@ -350,9 +354,14 @@ void BoInfoDialog::initXPage()
 
 void BoInfoDialog::initNVidiaPage()
 {
+ // AB: NVidia page has been disabled for now.
+ //     it's contents are based on how the NVidia driver looked like a long time
+ //     ago - much of it is not valid anymore.
+#if 0
  QVBox* vbox = addVBoxPage(i18n("&NVidia"));
  (void)new QLabel(i18n("This page is relevant for users of the proprietary NVidia driver only. All errors listed here are actually GOOD for all other people."), vbox);
  d->mNVidiaErrors = new KListBox(vbox);
+#endif
 }
 
 void BoInfoDialog::initOSPage()
@@ -502,12 +511,14 @@ void BoInfoDialog::resetXPage()
 
 void BoInfoDialog::resetNVidiaPage()
 {
+#if 0
  d->mNVidiaErrors->clear();
  QStringList list = d->data()->checkProprietaryNVidiaDriver();
  if (list.count() == 0) {
 	list.append(i18n("No errors found. It seems your proprietary NVidia driver has been installed correctly."));
  }
  d->mNVidiaErrors->insertStringList(list);
+#endif
 }
 
 void BoInfoDialog::resetOSPage()
