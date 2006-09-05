@@ -27,34 +27,21 @@
 #include "bogl.h"
 #include "boglx.h"
 
+#include "bogl_private.h"
 #include "bodebug.h"
 
 #include <qstringlist.h>
 #include <qlibrary.h>
 
-// bogl variables
-bool bogl_inited = false;
+BoGL* BoGL::mBoGL = 0;
 
-
-void boglInit()
-{
-  if(bogl_inited)
-  {
-    boDebug() << k_funcinfo << "OpenGL already inited, returning" << endl;
-    return;
-  }
 
 #ifndef GLX_ARB_get_proc_address
-
   // AB: if this is a linux system, it MUST support GLX_ARB_get_proc_address, as
   //     it is part of the linux OpenGL ARB.
 #error cannot find GLX_ARB_get_proc_address. OpenGL installation broken?
-
 #endif //GLX_ARB_get_proc_address
 
-  // Done
-  bogl_inited = true;
-}
 
 QStringList boglGetOpenGLExtensions()
 {
@@ -64,12 +51,86 @@ QStringList boglGetOpenGLExtensions()
 
 QStringList boglGetGLUExtensions()
 {
- QString extensions = (const char*)gluGetString(GLU_EXTENSIONS);
- return QStringList::split(" ", extensions);
+ return BoGL::bogl()->GLUExtensions();
 }
 
 unsigned int boglGetOpenGLVersion()
 {
+ return BoGL::bogl()->OpenGLVersion();
+}
+
+QString boglGetOpenGLVersionString()
+{
+ return BoGL::bogl()->OpenGLVersionString();
+}
+
+QString boglGetOpenGLVendorString()
+{
+ return BoGL::bogl()->OpenGLVendorString();
+}
+
+QString boglGetOpenGLRendererString()
+{
+ return BoGL::bogl()->OpenGLRendererString();
+}
+
+QString boglGetGLUVersionString()
+{
+ return BoGL::bogl()->GLUVersionString();
+}
+
+
+
+BoGL::BoGL()
+{
+ d = new BoGLPrivate();
+ d->mIsInitialized = false;;
+#if !BOGL_DO_DLOPEN
+ d->mIsResolved = true;
+#else
+ d->mIsResolved = false;
+#endif
+}
+
+BoGL::~BoGL()
+{
+ delete d;
+}
+
+// TODO: delete on program exit (to make valgrind happy)
+BoGL* BoGL::bogl()
+{
+ if (!mBoGL) {
+	mBoGL = new BoGL();
+ }
+ return mBoGL;
+}
+
+bool BoGL::isResolved() const
+{
+ return d->mIsResolved;
+}
+
+bool BoGL::initialize()
+{
+ if (isInitialized()) {
+	return isInitialized();
+ }
+ if (!isResolved()) {
+	boError() << k_funcinfo << "GL methods have not yet been resolved." << endl;
+	return isInitialized();
+ }
+ if (glXGetCurrentContext() == 0) {
+	boError() << k_funcinfo << "cannot initialize BoGL without a current GLX context" << endl;
+	// AB: most (if not all) GL functions need a current context.
+	//     this includes glGetString(), even for e.g. GL_VERSION !!
+	//     -> glGetString(GL_VERSION) without a current context may work for
+	//        some drivers, but does not work for all drivers.
+	//        so don't allow this.
+	return isInitialized();
+ }
+ d->mIsInitialized = true;
+
  // Find out OpenGL version
  QString oglversionstring = QString((const char*)glGetString(GL_VERSION));
  unsigned int oglversionmajor = 0, oglversionminor = 0, oglversionrelease = 0;
@@ -77,12 +138,15 @@ unsigned int boglGetOpenGLVersion()
  if (oglversionlength == -1) {
 	oglversionlength = oglversionstring.length();
  }
-
  QString versionstr = oglversionstring.left(oglversionlength);
  QStringList versioninfo = QStringList::split(QChar('.'), oglversionstring.left(oglversionlength));
  if (versioninfo.count() < 2 || versioninfo.count() > 3) {
-	boError() << k_funcinfo << "versioninfo has " << versioninfo.count() <<
-			" entries (version string: '" << oglversionstring << "')" << endl;
+	boError() << k_funcinfo << "versioninfo has "
+			<< versioninfo.count()
+			<< " entries (version string: '"
+			<< oglversionstring
+			<< "')"
+			<< endl;
  } else {
 	oglversionmajor = versioninfo[0].toUInt();
 	oglversionminor = versioninfo[1].toUInt();
@@ -90,26 +154,77 @@ unsigned int boglGetOpenGLVersion()
 		oglversionrelease = versioninfo[2].toUInt();
 	}
  }
- return MAKE_VERSION_BOGL(oglversionmajor, oglversionminor, oglversionrelease);
+ d->mOpenGLVersion = MAKE_VERSION_BOGL(oglversionmajor, oglversionminor, oglversionrelease);
+ d->mOpenGLVersionString = oglversionstring;
+ d->mOpenGLVendorString = QString::fromLatin1((const char*)glGetString(GL_VENDOR));
+ d->mOpenGLRendererString = QString::fromLatin1((const char*)glGetString(GL_RENDERER));
+
+ QString glExtensions = (const char*)glGetString(GL_EXTENSIONS);
+ d->mOpenGLExtensions = QStringList::split(" ", glExtensions);
+
+ d->mGLUVersionString = QString::fromLatin1((const char*)gluGetString(GLU_VERSION));
+
+ QString gluExtensions = (const char*)gluGetString(GLU_EXTENSIONS);
+ d->mGLUExtensions = QStringList::split(" ", gluExtensions);
+
+ boglResolveGLExtensionSymbols();
+ return isInitialized();
 }
 
-QString boglGetOpenGLVersionString()
+bool BoGL::isInitialized() const
 {
- return QString::fromLatin1((const char*)glGetString(GL_VERSION));
+ return d->mIsInitialized;
 }
 
-QString boglGetOpenGLVendorString()
+const QString& BoGL::OpenGLFile() const
 {
- return QString::fromLatin1((const char*)glGetString(GL_VENDOR));
+ return d->mOpenGLLibraryFile;
 }
 
-QString boglGetOpenGLRendererString()
+const QString& BoGL::GLUFile() const
 {
- return QString::fromLatin1((const char*)glGetString(GL_RENDERER));
+ return d->mGLULibraryFile;
 }
 
-QString boglGetGLUVersionString()
+unsigned int BoGL::OpenGLVersion() const
 {
- return QString::fromLatin1((const char*)gluGetString(GLU_VERSION));
+ const_cast<BoGL*>(this)->initialize();
+ return d->mOpenGLVersion;
+}
+
+QString BoGL::OpenGLVersionString() const
+{
+ const_cast<BoGL*>(this)->initialize();
+ return d->mOpenGLVersionString;
+}
+
+QString BoGL::OpenGLVendorString() const
+{
+ const_cast<BoGL*>(this)->initialize();
+ return d->mOpenGLVendorString;
+}
+
+QString BoGL::OpenGLRendererString() const
+{
+ const_cast<BoGL*>(this)->initialize();
+ return d->mOpenGLRendererString;
+}
+
+QStringList BoGL::OpenGLExtensions() const
+{
+ const_cast<BoGL*>(this)->initialize();
+ return d->mOpenGLExtensions;
+}
+
+QString BoGL::GLUVersionString() const
+{
+ const_cast<BoGL*>(this)->initialize();
+ return d->mGLUVersionString;
+}
+
+QStringList BoGL::GLUExtensions() const
+{
+ const_cast<BoGL*>(this)->initialize();
+ return d->mGLUExtensions;
 }
 

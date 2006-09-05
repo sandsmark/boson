@@ -74,7 +74,7 @@ CursorPreview::~CursorPreview()
 
 void CursorPreview::initializeGL()
 {
- boglInit();
+ BoGL::bogl()->initialize();
  glClearColor(0.0, 0.0, 0.0, 0.0);
  glShadeModel(GL_FLAT);
  glDisable(GL_DITHER);

@@ -42,37 +42,145 @@ class QStringList;
 //  OpenGL type's name
 #define GLsizeiptrARB GLsizeiptrARB_ORIGINAL
 
-// Include OpenGL headers
 #include <GL/gl.h>
 #include <GL/glu.h>
-
-// AB: the Qt includes are required to avoid conflicts with GLX
-//#include <qnamespace.h>
-//#include <qglobal.h>
-//#include <qevent.h>
-//#include <GL/glx.h>
-
 
 #include <bogl_decl_p.h>
 
 #undef GLsizeiptrARB
 
 
-// bogl variables
-extern bool bogl_inited;
 
-// bogl functions
-void boglInit();
-bool boglResolveGLSymbols();
+class BoGLPrivate;
+class BoGL
+{
+public:
+	~BoGL();
+
+	/**
+	 * @return The global BoGL object. If no object has been created yet, it
+	 * creates a new object and returns it.
+	 **/
+	static BoGL* bogl();
+
+	/**
+	 * Try to resolve the OpenGL symbols. For this we first try to load a
+	 * libGL.so and libGLU.so (using dlopen()) and then resolve the required
+	 * functions.
+	 *
+	 * @return The value of @ref isResolved, i.e. TRUE if resolving has been
+	 * successful, otherwise FALSE.
+	 **/
+	bool resolveGLSymbols();
+	bool isResolved() const;
+
+	/**
+	 * Manually initialize the internal data structures.
+	 *
+	 * This method expects that @ref isResolved is TRUE. Additionally there
+	 * must be a current GLX context available (as OpenGL functions are only
+	 * guaranteed to work correctly once a context has been created).
+	 *
+	 * Calling this method again after initializing has been successful is a
+	 * noop and results in no error.
+	 *
+	 * @return The value of @ref isInitialized
+	 **/
+	bool initialize();
+	bool isInitialized() const;
+
+	/**
+	 * @return The (absolute) filename of libGL.so that is being used, i.e.
+	 * that was picked by @ref resolveGLSymbols. @ref QString::null if @ref
+	 * resolveGLSymbols has not been called yet.
+	 **/
+	const QString& OpenGLFile() const;
+	/**
+	 * @return The (absolute) filename of libGLU.so that is being used, i.e.
+	 * that was picked by @ref resolveGLSymbols. @ref QString::null if @ref
+	 * resolveGLSymbols has not been called yet.
+	 **/
+	const QString& GLUFile() const;
+
+	/**
+	 * Must be called @em after the context has been created/made current.
+	 * Put it into the initializeGL() calll.
+	 *
+	 * It is necessary to create the context first, because apparently
+	 * glGetString(GL_EXTENSIONS) depends on it, which is required.
+	 **/
+	void resolveGLExtensionSymbols();
+
+	/**
+	 * @return The OpenGL version that is installed. See the @ref
+	 * MAKE_VERSION_BOGL macro.
+	 *
+	 * This method automatically calls @ref initialize.
+	 **/
+	unsigned int OpenGLVersion() const;
+	/**
+	 * @return The version string that is returned by the OpenGL
+	 * installation that is being used.
+	 *
+	 * This method automatically calls @ref initialize.
+	 **/
+	QString OpenGLVersionString() const;
+	/**
+	 * @return The vendor string that is returned by the OpenGL
+	 * installation that is being used.
+	 *
+	 * This method automatically calls @ref initialize.
+	 **/
+	QString OpenGLVendorString() const;
+	/**
+	 * @return The renderer string that is returned by the OpenGL
+	 * installation that is being used.
+	 *
+	 * This method automatically calls @ref initialize.
+	 **/
+	QString OpenGLRendererString() const;
+	/**
+	 * @return The extensions that are returned by the OpenGL
+	 * installation that is being used.
+	 *
+	 * This method automatically calls @ref initialize.
+	 **/
+	QStringList OpenGLExtensions() const;
+	/**
+	 * @return The version string that is returned by the GLU
+	 * installation that is being used.
+	 *
+	 * This method automatically calls @ref initialize.
+	 **/
+	QString GLUVersionString() const;
+	/**
+	 * @return The extensions that are returned by the GLU
+	 * installation that is being used.
+	 *
+	 * This method automatically calls @ref initialize.
+	 **/
+	QStringList GLUExtensions() const;
+
+protected:
+	BoGL();
+
+private:
+	static BoGL* mBoGL;
+	BoGLPrivate* d;
+};
+
 
 /**
- * Must be called @em after the context has been created/made current. Put it
- * into the initializeGL() calll.
+ * bogl functions
  *
- * It is necessary to create the context first, because apparently
- * glGetString(GL_EXTENSIONS) depends on it, which is required.
+ * This is a C style interface to @ref BoGL
  **/
-void boglResolveGLExtensionSymbols();
+
+/**
+ * See @ref BoGL::resolveGLSymbols
+ **/
+bool boglResolveGLSymbols();
+
 unsigned int boglGetOpenGLVersion();
 QString boglGetOpenGLVersionString();
 QString boglGetOpenGLVendorString();
@@ -87,6 +195,19 @@ class QLibrary;
 bool boglResolveLibGLSymbols(QLibrary& gl);
 bool boglResolveLibGLUSymbols(QLibrary& glu);
 
+/**
+ * @internal
+ *
+ * This function is called by @ref BoGL::initialize automatically. You don't
+ * need to call this.
+ *
+ * Must be called @em after the context has been created/made current. Put it
+ * into the initializeGL() calll.
+ *
+ * It is necessary to create the context first, because apparently
+ * glGetString(GL_EXTENSIONS) depends on it, which is required.
+ **/
+void boglResolveGLExtensionSymbols();
 
 
 

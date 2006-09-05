@@ -25,6 +25,7 @@
 
 #include "bogl.h"
 #include "boglx.h"
+#include "bogl_private.h"
 
 #include "bodebug.h"
 
@@ -43,45 +44,7 @@ static void resolveWildcards(QStringList* files, const QString& argument);
 
 bool boglResolveGLSymbols()
 {
-#if !BOGL_DO_DLOPEN
- return true;
-#endif
-
- static bool isResolved = false;
- if (isResolved) {
-	return true;
- }
-
- bool ret = true;
-
- QLibrary* gl = loadLibrary("GL");
- if (!gl) {
-	return false;
- }
- if (ret) {
-	ret = boglResolveLibGLSymbols(*gl);
- }
- delete gl;
- gl = 0;
- if (!ret) {
-	return false;
- }
-
- QLibrary* glu = loadLibrary("GLU");
- if (!glu) {
-	return false;
- }
- if (ret) {
-	ret = boglResolveLibGLUSymbols(*glu);
- }
- delete glu;
- glu = 0;
- if (!ret) {
-	return false;
- }
-
- isResolved = true;
- return true;
+ return BoGL::bogl()->resolveGLSymbols();
 }
 
  // QLibrary assumes that the library ends with .so, however e.g. on
@@ -103,8 +66,7 @@ static QLibrary* loadLibrary(const QString& name)
 	return 0;
  }
 
-// boWarning() << k_funcinfo << "library " << name << " could not be loaded using standard QLibrary/dlopen(). Trying to guess correct filename" << endl;
- boDebug() << k_funcinfo << "Trying to guess correct filename for libGL" << endl;
+// boDebug() << k_funcinfo << "Trying to guess correct filename for libGL" << endl;
 
  // we are trying to emulate the search order of dlopen() now:
  // 1. if exectuable file contains a DT_RPATH tag and no DT_RUNPATH, then
@@ -153,7 +115,7 @@ static QLibrary* loadLibrary(const QString& name)
  QString suffix = ".so";
  for (QStringList::iterator dirit = dirs.begin(); dirit != dirs.end(); ++dirit) {
 	QString dirname = *dirit;
-	boDebug() << "searching in dir " << dirname << endl;
+//	boDebug() << "searching in dir " << dirname << endl;
 
 	QDir dir;
 	if (!dir.cd(dirname)) {
@@ -183,7 +145,7 @@ static QLibrary* loadLibrary(const QString& name)
 		QString file = dir.absPath() + "/" + *it;
 		lib = loadLibraryFromFile(file);
 		if (lib) {
-			boDebug() << "using file " << file << endl;
+//			boDebug() << "using file " << file << endl;
 			return lib;
 		}
 		boWarning() << k_funcinfo << "library file " << file << " exists but cannot be loaded" << endl;
@@ -323,4 +285,74 @@ void resolveWildcards(QStringList* files, const QString& argument)
 	resolveWildcards(files, dirname + '/' + *it + suffixDir);
  }
 }
+
+
+bool BoGL::resolveGLSymbols()
+{
+#if !BOGL_DO_DLOPEN
+ return true;
+#endif
+
+ if (isResolved()) {
+	return true;
+ }
+
+ bool ret = true;
+
+ QString libGL;
+ QString libGLU;
+
+ QLibrary* gl = loadLibrary("GL");
+ if (!gl) {
+	return false;
+ }
+ if (ret) {
+	ret = boglResolveLibGLSymbols(*gl);
+ }
+ libGL = gl->library();
+ if (libGL.isEmpty()) {
+	ret = false;
+ }
+ if (ret && libGL.left(1) != "/") {
+	boError() << k_funcinfo << "library returned by loadLibrary() does not use absolute filename: " << libGL << endl;
+	ret = false;
+ }
+ delete gl;
+ gl = 0;
+ if (!ret) {
+	return false;
+ }
+
+ QLibrary* glu = loadLibrary("GLU");
+ if (!glu) {
+	return false;
+ }
+ if (ret) {
+	ret = boglResolveLibGLUSymbols(*glu);
+ }
+ libGLU = glu->library();
+ if (libGLU.isEmpty()) {
+	ret = false;
+ }
+ if (ret && libGLU.left(1) != "/") {
+	boError() << k_funcinfo << "library returned by loadLibrary() does not use absolute filename: " << libGLU << endl;
+	ret = false;
+ }
+ delete glu;
+ glu = 0;
+ if (!ret) {
+	return false;
+ }
+
+ d->mOpenGLLibraryFile = libGL;
+ d->mGLULibraryFile = libGLU;
+
+ d->mIsResolved = true;
+
+ boDebug() << "Resolved GL symbols from file " << OpenGLFile() << endl;
+ boDebug() << "Resolved GLU symbols from file " << GLUFile() << endl;
+
+ return true;
+}
+
 
