@@ -37,7 +37,7 @@ extern "C" {
 	typedef GLhandleARB (*_glCreateShaderObjectARB) (GLenum);
 	typedef GLvoid (*_glShaderSourceARB) (GLhandleARB, GLsizei, const GLcharARB**, const GLint*);
 	typedef GLvoid (*_glCompileShaderARB) (GLhandleARB);
-	typedef GLhandleARB (*_glCreateProgramObjectARB) (GLvoid);
+	typedef GLhandleARB (*_glCreateProgramObjectARB) ();
 	typedef GLvoid (*_glAttachObjectARB) (GLhandleARB, GLhandleARB);
 	typedef GLvoid (*_glLinkProgramARB) (GLhandleARB);
 	typedef GLvoid (*_glUseProgramObjectARB) (GLhandleARB);
