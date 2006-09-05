@@ -71,7 +71,7 @@ int main(int argc, char **argv)
  BosonGLWidget* glWidget = new BosonGLWidget(0);
  glWidget->hide();
  glWidget->makeCurrent();
- boglInit();
+ BoGL::bogl()->initialize();
  BoInfo::boInfo()->update(glWidget);
 
 // if (args->count() == 0) {
