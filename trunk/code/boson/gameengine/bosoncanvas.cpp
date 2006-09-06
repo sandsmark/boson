@@ -2557,18 +2557,13 @@ unsigned long int BosonCanvas::nextItemId()
 void BosonCanvas::initPathFinder()
 {
  PROFILE_METHOD
- boDebug() << k_funcinfo << endl;
 
  if (d->mPathFinder) {
 	boError() << k_funcinfo << "PathFinder already created!" << endl;
 	return;
  }
 
- boDebug() << k_funcinfo << "Constructing..." << endl;
  d->mPathFinder = new BosonPath(map());
- boDebug() << k_funcinfo << "Constructing done!" << endl;
-
- boDebug() << k_funcinfo << "Initing..." << endl;
  d->mPathFinder->init(this);
 
  for (BoItemList::ConstIterator it = allItems()->begin(); it != allItems()->end(); ++it) {
@@ -2577,9 +2572,6 @@ void BosonCanvas::initPathFinder()
 		u->setMoveData(moveData(u->unitProperties()));
 	}
  }
- boDebug() << k_funcinfo << "Initing done!" << endl;
-
- boDebug() << k_funcinfo << "DONE" << endl;
 }
 
 BosonPath* BosonCanvas::pathFinder() const

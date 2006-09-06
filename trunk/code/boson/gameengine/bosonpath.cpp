@@ -641,7 +641,7 @@ BosonPath::Result BosonPath::getLowLevelPath(BosonPathInfo* info)
   }
   else
   {
-    //boDebug() << k_funcinfo << "No path found" << endl;
+    //boDebug(500) << k_funcinfo << "No path found" << endl;
   }
 
   }
@@ -927,7 +927,7 @@ void BosonPath::lowLevelFinishSearch(BosonPathLowLevelData* data)
     // Failsafe
     if(temp.count() > 10000)
     {
-      boError() << k_funcinfo << "Temp is too big! Last pos: (" << x << "; " << y <<
+      boError(500) << k_funcinfo << "Temp is too big! Last pos: (" << x << "; " << y <<
           "); flags: " << mCellStatus[pos].flags << endl;
       break;
     }
@@ -1224,7 +1224,7 @@ bool BosonPath::getHighLevelPath(BosonPathInfo* info)
   }
   else
   {
-    boDebug() << k_funcinfo << "No path found" << endl;
+    boDebug(500) << k_funcinfo << "No path found" << endl;
     info->result = NoPath;
   }
 
@@ -1449,7 +1449,7 @@ void BosonPath::highLevelFinishSearch(BosonPathHighLevelData* data)
     // Failsafe
     if(temp.count() > 10000)
     {
-      boError() << k_funcinfo << "Temp is too big! Last pos: (" << x << "; " << y <<
+      boError(500) << k_funcinfo << "Temp is too big! Last pos: (" << x << "; " << y <<
           "); flags: " << mBlocks[pos].flags << endl;
       break;
     }
@@ -1890,7 +1890,7 @@ void BosonPath::initMoveDatas(BosonCanvas* canvas)
     ++playerit;
   }
 
-  boDebug() << k_funcinfo << "Created " << mMoveDatas.count() << " movedatas" << endl;
+  boDebug(500) << k_funcinfo << "Created " << mMoveDatas.count() << " movedatas" << endl;
 }
 
 void BosonPath::initCellStatusArray()
@@ -2722,7 +2722,7 @@ QValueList<BoVector2Fixed> BosonPath::findLocations(Player* player, int x, int y
     }
   }
 
-  boDebug() << k_funcinfo << "Found only " << found << " of " << n << " locations" << endl;
+  boDebug(500) << k_funcinfo << "Found only " << found << " of " << n << " locations" << endl;
   delete[] visited;
   return locations;
 
@@ -2771,31 +2771,31 @@ bool BosonPathInfo::loadFromXML(const QDomElement& root)
   result = (BosonPath::Result)root.attribute("result").toInt(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for result attribute" << endl;
+    boError(500) << k_funcinfo << "Invalid value for result attribute" << endl;
     return false;
   }
   moveAttacking = root.attribute("moveAttacking").toInt(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for moveAttacking attribute" << endl;
+    boError(500) << k_funcinfo << "Invalid value for moveAttacking attribute" << endl;
     return false;
   }
   slowDownAtDest = root.attribute("slowDownAtDest").toInt(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for slowDownAtDest attribute" << endl;
+    boError(500) << k_funcinfo << "Invalid value for slowDownAtDest attribute" << endl;
     return false;
   }
   waiting = root.attribute("waiting").toInt(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for waiting attribute" << endl;
+    boError(500) << k_funcinfo << "Invalid value for waiting attribute" << endl;
     return false;
   }
   pathrecalced = root.attribute("pathrecalced").toInt(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for pathrecalced attribute" << endl;
+    boError(500) << k_funcinfo << "Invalid value for pathrecalced attribute" << endl;
     return false;
   }
 
