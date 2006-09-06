@@ -402,8 +402,6 @@ BosonCursorCollection::~BosonCursorCollection()
 
 BosonCursor* BosonCursorCollection::loadCursor(int type, const QString& cursorDir_, QString& cursorDir)
 {
- boDebug() << k_funcinfo << endl;
-
  cursorDir = cursorDir_;
  if (cursorDir.isNull()) {
 	cursorDir = BosonCursor::defaultTheme();
@@ -441,8 +439,6 @@ BosonCursor* BosonCursorCollection::loadCursor(int type, const QString& cursorDi
 
 BosonCursor* BosonCursorCollection::changeCursor(int type, const QString& cursorDir, QString* actualCursorDir)
 {
- boDebug() << k_funcinfo << endl;
-
  QString dir;
  BosonCursor* b = loadCursor(type, cursorDir, dir);
  if (actualCursorDir) {

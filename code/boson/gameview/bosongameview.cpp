@@ -832,7 +832,6 @@ public:
 BosonGameView::BosonGameView()
 		: BoUfoCustomWidget()
 {
- boDebug() << k_funcinfo << endl;
  init();
 }
 

@@ -78,17 +78,13 @@ void BoGroundRendererManager::initStatic()
  if (mManager) {
 	return;
  }
- boDebug() << k_funcinfo << endl;
  mManager = new BoGroundRendererManager;
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BoGroundRendererManager::deleteStatic()
 {
- boDebug() << k_funcinfo << endl;
  delete mManager;
  mManager = 0;
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 BoGroundRendererManager* BoGroundRendererManager::manager()

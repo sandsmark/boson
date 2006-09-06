@@ -51,7 +51,6 @@ BosonGameViewPluginManager::BosonGameViewPluginManager() : BoPluginManager()
 
 BosonGameViewPluginManager::~BosonGameViewPluginManager()
 {
- boDebug() << k_funcinfo << endl;
  unloadLibrary();
  delete d;
 }
@@ -61,17 +60,13 @@ void BosonGameViewPluginManager::initStatic()
  if (mManager) {
 	return;
  }
- boDebug() << k_funcinfo << endl;
  mManager = new BosonGameViewPluginManager;
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonGameViewPluginManager::deleteStatic()
 {
- boDebug() << k_funcinfo << endl;
  delete mManager;
  mManager = 0;
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 BosonGameViewPluginManager* BosonGameViewPluginManager::manager()

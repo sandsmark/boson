@@ -1304,7 +1304,6 @@ void BoUfoActionCollection::remove(BoUfoAction* action, bool deleteIt)
 
 void BoUfoActionCollection::clearActions()
 {
- boDebug() << k_funcinfo << endl;
  if (parent() && parent()->inherits("BoUfoManager")) {
 	BoUfoManager* m = (BoUfoManager*)parent();
 	m->setMenuBarData(0);
@@ -1531,7 +1530,6 @@ void BoUfoMenuBar::createMenuBar()
 	d->mMenuBar->getParent()->setIndexOf(d->mMenuBar, 0);
  }
 
- boDebug() << k_funcinfo << "creating submenus" << endl;
  createUfoMenuBarSubMenu(d->mMenuBar);
 }
 
@@ -1604,7 +1602,6 @@ void BoUfoToolBar::createToolBar()
  d->mUfoManager->toolBarContentWidget()->ufoWidget()->setFont(d->mUfoManager->rootPane()->getFont());
  d->mUfoManager->toolBarContentWidget()->setVisible(d->mIsVisible);
 
- boDebug() << k_funcinfo << "creating toolbar submenus" << endl;
  createUfoToolBarSubMenu(d->mUfoManager->toolBarContentWidget()->ufoWidget());
 }
 

@@ -179,7 +179,6 @@ BosonMap* Player::map() const
 
 void Player::quitGame(bool destruct)
 {
- boDebug() << k_funcinfo << endl;
  d->mMobilesCount = 0;
  d->mFacilitiesCount = 0;
  d->mUnfoggedCount = 0;
@@ -190,9 +189,7 @@ void Player::quitGame(bool destruct)
  d->mMap = 0;
  d->mResearchedUpgrades.clear();
 
- boDebug() << k_funcinfo << "clearing units" << endl;
  d->mUnits.clear();
- boDebug() << k_funcinfo << "units cleared" << endl;
  delete d->mStatistics;
  d->mStatistics = 0;
 

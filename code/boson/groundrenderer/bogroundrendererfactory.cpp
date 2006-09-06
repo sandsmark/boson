@@ -80,7 +80,6 @@ QObject* BoGroundRendererFactory::createObject(QObject* parent, const char* name
  if (initrenderer) {
 	((BoGroundRenderer*)o)->initGroundRenderer();
  }
- boDebug() << k_funcinfo << "created object of class " << o->className() << endl;
  emit objectCreated(o);
  return o;
 }

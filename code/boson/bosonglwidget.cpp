@@ -504,7 +504,6 @@ BosonGLWidget::BosonGLWidget(QWidget* parent, const char* name, bool direct)
 	: QWidget(parent, name, Qt::WRepaintNoErase)
 #endif
 {
- boDebug() << k_funcinfo << endl;
  d = new BosonGLWidgetPrivate;
  d->mWantDirect = direct;
  init();
@@ -512,9 +511,7 @@ BosonGLWidget::BosonGLWidget(QWidget* parent, const char* name, bool direct)
 
 BosonGLWidget::~BosonGLWidget()
 {
- boDebug() << k_funcinfo << "delete context" << endl;
  delete d->mContext;
- boDebug() << k_funcinfo << "context deleted" << endl;
  delete d;
 }
 
@@ -609,10 +606,8 @@ void BosonGLWidget::initGL()
 	boError() << k_funcinfo << "Invalid GL widget! Cannot initialize" << endl;
 	return;
  }
- boDebug() << k_funcinfo << endl;
  makeCurrent();
  initializeGL();
- boDebug() << k_funcinfo << "done" << endl;
  context()->setIsInitialized(true);
 
  resizeGL(width(), height());
@@ -668,7 +663,6 @@ bool BosonGLWidget::switchContext(BoContext* newContext)
 
 void BosonGLWidget::setContext(BoContext* context)
 {
- boDebug() << k_funcinfo << endl;
  if (!context) {
 	boError() << k_funcinfo << "NULL context" << endl;
 	return;
@@ -878,7 +872,6 @@ QPixmap BosonGLWidget::renderPixmap(int w, int h, bool useContext)
  bool success = TRUE;
 
  if ( useContext && isValid() && renderCxPm( &pm ) ) {
-	boDebug() << k_funcinfo << "renderCxPm() succeeded" << endl;
 	return pm;
  }
 

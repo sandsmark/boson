@@ -65,7 +65,6 @@ QObject* BoMeshRendererFactory::createObject(QObject* parent, const char* name,
 	boError() << k_funcinfo << "no such class available: " << className << endl;
 	return 0;
  }
- boDebug() << k_funcinfo << "created object of class " << o->className() << endl;
  emit objectCreated(o);
  return o;
 }
