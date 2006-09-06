@@ -86,6 +86,10 @@ InfoOutput=4
 [700]
 InfoOutput=4
 
+# PluginManager if off by default
+[800]
+InfoOutput=4
+
 # KGame is off by default
 [11001]
 InfoOutput=4
