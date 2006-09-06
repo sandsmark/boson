@@ -71,24 +71,24 @@ bool BoPluginManager::makePluginCurrent(const QString& name)
 {
  QStringList list = availablePlugins();
  if (list.isEmpty()) {
-	boError() << k_funcinfo << "no classes available" << endl;
+	boError(800) << k_funcinfo << "no classes available" << endl;
 	return false;
  }
  if (name.isEmpty()) {
 	if (list.first().isEmpty()) {
-		boError() << k_funcinfo << "first class found is invalid!" << endl;
+		boError(800) << k_funcinfo << "first class found is invalid!" << endl;
 		return false;
 	}
 	QString plugin = boConfig->stringValue(configKey());
 	if (!list.contains(plugin)) {
-		boWarning() << k_funcinfo << "boConfig requested plugin " << plugin << " but it was not available" << endl;
+		boWarning(800) << k_funcinfo << "boConfig requested plugin " << plugin << " but it was not available" << endl;
 		plugin = list.first();
 	}
 	return makePluginCurrent(plugin);
  }
 
  if (!availablePlugins().contains(name)) {
-	boError() << k_funcinfo << "class " << name << " not available" << endl;
+	boError(800) << k_funcinfo << "class " << name << " not available" << endl;
 	return false;
  }
  if (currentPluginName() == name) {
@@ -97,10 +97,10 @@ bool BoPluginManager::makePluginCurrent(const QString& name)
 
  QObject* plugin = createPlugin(name);
  if (plugin) {
-	boDebug() << k_funcinfo << "created plugin" << endl;
+	boDebug(800) << k_funcinfo << "created plugin" << endl;
 	return makePluginCurrent(plugin);
  } else {
-	boError() << k_funcinfo << "Error loading plugin " << name << endl;
+	boError(800) << k_funcinfo << "Error loading plugin " << name << endl;
  }
  return false;
 }
@@ -121,7 +121,7 @@ QStringList BoPluginManager::availablePlugins()
  BoPluginInformation* info = (BoPluginInformation*)d->mLibraryFactory->create(0, 0, "BoPluginInformation");
  if (!info) {
 	// should never happen, as we check for it at loading
-	boError() << k_funcinfo << "no information object?!" << endl;
+	boError(800) << k_funcinfo << "no information object?!" << endl;
 	return list;
  }
  list = info->plugins();
@@ -141,7 +141,7 @@ QString BoPluginManager::currentPluginName() const
 
 QObject* BoPluginManager::createPlugin(const QString& name)
 {
- boDebug() << k_funcinfo << name << endl;
+ boDebug(800) << k_funcinfo << name << endl;
  if (!loadLibrary()) {
 	return 0;
  }
@@ -176,7 +176,7 @@ bool BoPluginManager::loadLibrary()
  file = KGlobal::dirs()->findResource("lib", QString("kde3/plugins/boson/%1.so").arg(lib));
  if (file.isEmpty()) {
 	error = i18n("Unable to find a file for this plugin");
-	boError() << k_funcinfo << error << endl;
+	boError(800) << k_funcinfo << error << endl;
 	ret = false;
  } else {
 	d->mLibrary = new QLibrary(file);
@@ -193,7 +193,7 @@ bool BoPluginManager::loadLibrary()
  }
 
  if (ret) {
-	boDebug() << k_funcinfo << "library " << lib << " loaded. resolving symbols" << endl;
+	boDebug(800) << k_funcinfo << "library " << lib << " loaded. resolving symbols" << endl;
 
 	if (ret) {
 		QCString init_name = QCString("init_") + lib.latin1();
@@ -201,7 +201,7 @@ bool BoPluginManager::loadLibrary()
 		if (!init_func) {
 			ret = false;
 			error = i18n("Could not resolve %1").arg(init_name);
-			boError() << k_funcinfo << error << endl;
+			boError(800) << k_funcinfo << error << endl;
 		}
 	}
 	if (ret) {
@@ -211,17 +211,17 @@ bool BoPluginManager::loadLibrary()
 		if (!version_func) {
 			ret = false;
 			error = i18n("Could not resolve %1").arg(version_name);
-			boError() << k_funcinfo << error << endl;
+			boError(800) << k_funcinfo << error << endl;
 		}
 	}
  }
 
  if (ret) {
-	boDebug() << k_funcinfo << "symbols resolved. checking version" << endl;
+	boDebug(800) << k_funcinfo << "symbols resolved. checking version" << endl;
 	int version = version_func();
 	if (version != BOSON_VERSION) {
 		error = i18n("Version mismatch: plugin compiled for %1, you are running %2").arg(version).arg(BOSON_VERSION);
-		boError() << k_funcinfo << error << endl;
+		boError(800) << k_funcinfo << error << endl;
 		ret = false;
 	}
  }
@@ -229,7 +229,7 @@ bool BoPluginManager::loadLibrary()
  file = "(no plugin)";
 #endif // USE_BO_PLUGINS
  if (ret) {
-	boDebug() << k_funcinfo << "initializing plugin" << endl;
+	boDebug(800) << k_funcinfo << "initializing plugin" << endl;
 #if USE_BO_PLUGINS
 	d->mLibraryFactory = init_func();
 #else
@@ -237,26 +237,26 @@ bool BoPluginManager::loadLibrary()
 #endif
 	if (!d->mLibraryFactory) {
 		error = i18n("Could not load factory (init returned NULL)");
-		boError() << k_funcinfo << error << endl;
+		boError(800) << k_funcinfo << error << endl;
 		ret = false;
 	}
  }
  if (ret) {
-	boDebug() << k_funcinfo << "searching for information object" << endl;
+	boDebug(800) << k_funcinfo << "searching for information object" << endl;
 	QCString info_name = QCString("BoPluginInformation");
 	QObject* info = d->mLibraryFactory->create(0, 0, info_name);
 	if (!info) {
 		error = i18n("Could not find the information object. searched for: %1").arg(info_name);
-		boError() << k_funcinfo << error << endl;
+		boError(800) << k_funcinfo << error << endl;
 		ret = false;
 	} else {
 		delete info;
 	}
  }
  if (ret) {
-	boDebug() << k_funcinfo << "library should be ready to use now" << endl;
+	boDebug(800) << k_funcinfo << "library should be ready to use now" << endl;
  } else {
-	boError() << k_funcinfo << "library loading failed. fatal error." << endl;
+	boError(800) << k_funcinfo << "library loading failed. fatal error." << endl;
 	KMessageBox::sorry(0, i18n("Plugin could not be loaded - check your installation!\nFailed plugin: %1\nTried file: %2\nError: %3").arg(lib).arg(file).arg(error));
 	unloadLibrary();
 	exit(1);
@@ -266,16 +266,16 @@ bool BoPluginManager::loadLibrary()
 
 bool BoPluginManager::unloadLibrary()
 {
- boDebug() << k_funcinfo << "unsetting old plugin" << endl;
+ boDebug(800) << k_funcinfo << "unsetting old plugin" << endl;
  unsetCurrentPlugin();
- boDebug() << k_funcinfo << "deleting factory" << endl;
+ boDebug(800) << k_funcinfo << "deleting factory" << endl;
  delete d->mLibraryFactory;
  d->mLibraryFactory = 0;
  d->mLibraryPlugins.clear();
  bool ret = true;
  if (d->mLibrary) {
 	if (!d->mLibrary->unload()) {
-		boError() << k_funcinfo << "unloading lib failed!" << endl;
+		boError(800) << k_funcinfo << "unloading lib failed!" << endl;
 		ret = false;
 	}
  }
@@ -293,9 +293,9 @@ bool BoPluginManager::makePluginCurrent(QObject* plugin)
 	return true;
  }
  if (mCurrentPlugin) {
-	boDebug() << k_funcinfo << "unsetting old plugin" << endl;
+	boDebug(800) << k_funcinfo << "unsetting old plugin" << endl;
 	unsetCurrentPlugin();
-	boDebug() << k_funcinfo << "old plugin unset" << endl;
+	boDebug(800) << k_funcinfo << "old plugin unset" << endl;
  }
  mCurrentPlugin = plugin;
 
@@ -311,7 +311,7 @@ void BoPluginManager::unsetCurrentPlugin()
 	// nothing to do
 	return;
  }
- boDebug() << k_funcinfo << endl;
+ boDebug(800) << k_funcinfo << endl;
  deinitializePlugin();
  delete mCurrentPlugin;
  mCurrentPlugin = 0;
@@ -320,11 +320,11 @@ void BoPluginManager::unsetCurrentPlugin()
 bool BoPluginManager::checkCurrentPlugin()
 {
  if (!currentPlugin()) {
-	boDebug() << k_funcinfo << "getting a default plugin" << endl;
+	boDebug(800) << k_funcinfo << "getting a default plugin" << endl;
 	// pick a default plugin
 	bool ret = makePluginCurrent(QString::null);
 	if (ret) {
-		boDebug() << k_funcinfo << "default plugin loaded" << endl;
+		boDebug(800) << k_funcinfo << "default plugin loaded" << endl;
 	}
 	return ret;
  }
@@ -334,14 +334,14 @@ bool BoPluginManager::checkCurrentPlugin()
 bool BoPluginManager::reloadPlugin(bool* unusable)
 {
  if (!unloadLibrary()) {
-	boError() << k_funcinfo << "unloading failed" << endl;
+	boError(800) << k_funcinfo << "unloading failed" << endl;
 	if (unusable) {
 		*unusable = true;
 	}
 	return false;
  }
  if (!loadLibrary()) {
-	boError() << k_funcinfo << "library loading failed" << endl;
+	boError(800) << k_funcinfo << "library loading failed" << endl;
 	if (unusable) {
 		*unusable = true;
 	}
