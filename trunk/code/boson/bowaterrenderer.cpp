@@ -231,7 +231,6 @@ void BoWaterRenderer::initOpenGL()
     return;
   }
 
-  boDebug() << k_funcinfo << "Checking for OpenGL extensions..." << endl;
   QStringList extensions = boglGetOpenGLExtensions();
 
   // TODO: some of these are part of the core in later OpenGL versions.
@@ -276,8 +275,6 @@ void BoWaterRenderer::initOpenGL()
   {
     boDebug() << k_funcinfo << "Shaders not supported!" << endl;
   }
-
-  boDebug() << k_funcinfo << "Extensions checking done" << endl;
 
 
   // Config settings.

@@ -71,7 +71,6 @@ public:
       boWarning() << k_funcinfo << "empty campaign name - using <unnamed>" << endl;
       name = i18n("<unnamed>");
     }
-    boDebug() << "adding campaign " << name << endl;
     mIndex2Campaign.insert(mSelectCampaign->count(), campaign);
     mSelectCampaign->insertItem(name);
 
@@ -288,7 +287,6 @@ public:
 BoUfoNewGameWidget::BoUfoNewGameWidget(BosonStartupNetwork* interface)
     : BosonUfoNewGameWidgetBase()
 {
- boDebug() << k_funcinfo << endl;
  BO_CHECK_NULL_RET(boGame);
  BO_CHECK_NULL_RET(interface);
  d = new BoUfoNewGameWidgetPrivate;
@@ -357,7 +355,6 @@ BoUfoNewGameWidget::BoUfoNewGameWidget(BosonStartupNetwork* interface)
 
 BoUfoNewGameWidget::~BoUfoNewGameWidget()
 {
- boDebug() << k_funcinfo << endl;
  // Save stuff like player name, color etc.
  if (boGame) {
     boConfig->saveLocalPlayerName(localPlayer()->name());
@@ -407,7 +404,6 @@ void BoUfoNewGameWidget::initLocalPlayer()
 
 void BoUfoNewGameWidget::initPlayFields()
 {
- boDebug() << k_funcinfo << boData->availablePlayFields().count() << " playfields found" << endl;
  // Get list of campaigns
  QStringList list = boData->availableCampaigns();
  // the default campaign _must_ be there (even if its empty!)
@@ -439,7 +435,6 @@ void BoUfoNewGameWidget::initPlayFields()
 
 void BoUfoNewGameWidget::initSpecies()
 {
- boDebug() << k_funcinfo << endl;
  // update possible species:
  mPlayerSpecies->clear();
  d->mSpeciesIndex2Comment.clear();
@@ -473,7 +468,6 @@ void BoUfoNewGameWidget::initSpecies()
 
 void BoUfoNewGameWidget::updateColors()
 {
- boDebug() << k_funcinfo << endl;
  if (!localPlayer()) {
     boError() << k_funcinfo << "NULL local player" << endl;
     return;
@@ -516,7 +510,6 @@ void BoUfoNewGameWidget::initInitialPlayField()
 
 void BoUfoNewGameWidget::slotNetStart()
 {
- boDebug() << k_funcinfo << endl;
  if (!boGame->isAdmin()) {
     return;
  }
@@ -595,7 +588,6 @@ void BoUfoNewGameWidget::slotNetStart()
 
 void BoUfoNewGameWidget::slotNetPlayerJoinedGame(KPlayer* p)
 {
- boDebug() << k_funcinfo << endl;
  BO_CHECK_NULL_RET(p);
  if (((Player*)p)->isNeutralPlayer()) {
     // Don't show neutral player in players' list
@@ -693,7 +685,6 @@ void BoUfoNewGameWidget::slotNetPlayerLeftGame(KPlayer* p)
 
 void BoUfoNewGameWidget::slotNetSpeciesChanged(Player* p)
 {
- boDebug() << k_funcinfo << endl;
  if (mSelectedPlayer == p) {
     // Update species combobox
     QMap<int, QString>::Iterator it;
@@ -710,7 +701,6 @@ void BoUfoNewGameWidget::slotNetSpeciesChanged(Player* p)
 
 void BoUfoNewGameWidget::slotNetSideChanged(Player* p)
 {
- boDebug() << k_funcinfo << endl;
  possibleSidesChanged();
 }
 
@@ -723,7 +713,6 @@ void BoUfoNewGameWidget::slotNetColorChanged(Player* p)
 void BoUfoNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
 {
  BO_CHECK_NULL_RET(field);
- boDebug() << k_funcinfo << "id: " << field->identifier() << endl;
  d->mPlayFieldSelection->setCurrentPlayFieldWithIdentifier(field->identifier());
  if (d->mPlayFieldSelection->playFieldIdentifier() != field->identifier()) {
    boError() << k_funcinfo << "could not set correct playfield " << field->identifier() << endl;
@@ -737,7 +726,6 @@ void BoUfoNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  }
  mMinPlayers = field->information()->minPlayers();
  mMaxPlayers = field->information()->maxPlayers();
- boDebug() << "minPlayers: " << mMinPlayers << " ; maxPlayers: " << mMaxPlayers << endl;
 
  // Update general map info
  mMapSize->setText(i18n("%1x%2\n").arg(field->information()->mapWidth()).arg(field->information()->mapHeight()));
@@ -774,7 +762,6 @@ void BoUfoNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
 void BoUfoNewGameWidget::slotNetPlayerNameChanged(Player* p)
 {
  BO_CHECK_NULL_RET(p);
- boDebug() << k_funcinfo << endl;
 
  if (p == mSelectedPlayer) {
     mPlayerName->setText(p->name());
@@ -812,7 +799,6 @@ void BoUfoNewGameWidget::slotNetSetLocalPlayer(Player* p)
 
 void BoUfoNewGameWidget::slotNetSetAdmin(bool admin)
 {
- boDebug() << k_funcinfo << endl;
  slotSetAdmin(admin);
 }
 
@@ -833,7 +819,6 @@ void BoUfoNewGameWidget::slotNetConnectionBroken()
 void BoUfoNewGameWidget::slotPlayerNameChanged()
 {
  BO_CHECK_NULL_RET(localPlayer());
- boDebug() << k_funcinfo << endl;
  Player* p = mSelectedPlayer;
  if (!p) {
     p = localPlayer();
@@ -855,7 +840,6 @@ void BoUfoNewGameWidget::slotPlayerNameChanged()
 
 void BoUfoNewGameWidget::slotPlayerColorChanged(int index)
 {
- boDebug() << k_funcinfo << index << endl;
  if (index < 0 || (unsigned int)index >= SpeciesTheme::defaultColors().count()) {
     boWarning() << k_funcinfo << "Invalid index: " << index << endl;
     return;
@@ -904,7 +888,6 @@ void BoUfoNewGameWidget::slotCampaignSelected(int first, int last)
 
 void BoUfoNewGameWidget::slotPlayerSpeciesChanged(int index)
 {
- boDebug() << k_funcinfo << endl;
  BO_CHECK_NULL_RET(localPlayer());
 
  Player* p = mSelectedPlayer;
@@ -925,7 +908,6 @@ void BoUfoNewGameWidget::slotPlayerSpeciesChanged(int index)
 
 void BoUfoNewGameWidget::slotPlayerSideChanged(int index)
 {
- boDebug() << k_funcinfo << endl;
  BO_CHECK_NULL_RET(localPlayer());
 
  Player* p = mSelectedPlayer;
@@ -947,7 +929,6 @@ void BoUfoNewGameWidget::slotPlayerSideChanged(int index)
 void BoUfoNewGameWidget::slotAddComputerPlayer()
 {
  BO_CHECK_NULL_RET(boGame);
- boDebug() << k_funcinfo << endl;
  // FIXME: maybe allow other players to add AIs?
  if (!boGame->isAdmin()) {
     KMessageBox::sorry(0, i18n("You must be ADMIN to do this"));
@@ -983,7 +964,6 @@ void BoUfoNewGameWidget::slotAddComputerPlayer()
 
 void BoUfoNewGameWidget::slotRemovePlayer()
 {
- boDebug() << k_funcinfo << endl;
  BO_CHECK_NULL_RET(localPlayer());
 
  if (mSelectedPlayer != localPlayer()) {
@@ -1003,7 +983,6 @@ void BoUfoNewGameWidget::slotPlayerSelected(int first, int last)
 
 void BoUfoNewGameWidget::slotPlayerSelected(int index)
 {
- boDebug() << k_funcinfo << index << endl;
  if (d->mItem2Player.contains(index)) {
    mSelectedPlayer = (Player*)d->mItem2Player[index];
  } else {
@@ -1050,8 +1029,6 @@ Player* BoUfoNewGameWidget::localPlayer() const
 
 void BoUfoNewGameWidget::slotCancel()
 {
- boDebug() << k_funcinfo << endl;
-
  // AB: we use a timer, so that the newgame widget can be deleted in the slot
  // (otherwise this would not be allowed, as we are in a pushbutton click)
  QTimer::singleShot(0, this, SIGNAL(signalCancelled()));
@@ -1065,19 +1042,16 @@ void BoUfoNewGameWidget::slotStartGame()
 
 void BoUfoNewGameWidget::addAIPlayer()
 {
- boDebug() << k_funcinfo << endl;
  // commandline interface for adding computer players
  slotAddComputerPlayer();
 }
 
 void BoUfoNewGameWidget::playersChanged()
 {
- boDebug() << k_funcinfo << endl;
 }
 
 void BoUfoNewGameWidget::playerCountChanged()
 {
- boDebug() << k_funcinfo << endl;
  if (mConnectedPlayersList->count() >= mMaxPlayers) {
     mAddAIPlayer->setEnabled(false);
  } else {
@@ -1089,7 +1063,6 @@ void BoUfoNewGameWidget::playerCountChanged()
 
 void BoUfoNewGameWidget::possibleSidesChanged()
 {
- boDebug() << k_funcinfo << endl;
  BO_CHECK_NULL_RET(boGame);
  mPlayerDesiredSide->clear();
  d->mSideIndex2Side.clear();
@@ -1165,7 +1138,6 @@ void BoUfoNewGameWidget::possibleSidesChanged()
 
 void BoUfoNewGameWidget::slotSetAdmin(bool admin)
 {
- boDebug() << k_funcinfo << endl;
  mStartGame->setEnabled(admin);
  mAddAIPlayer->setEnabled(admin);
  d->mPlayFieldSelection->setAdmin(admin);
@@ -1173,19 +1145,16 @@ void BoUfoNewGameWidget::slotSetAdmin(bool admin)
 
 void BoUfoNewGameWidget::slotOfferingConnections()
 {
- boDebug() << k_funcinfo << endl;
  boGame->slotAddChatSystemMessage("Boson", i18n("You are now running as server and are offering connections"));
 }
 
 void BoUfoNewGameWidget::slotConnectingToServer()
 {
- boDebug() << k_funcinfo << endl;
  mInited = false;
 }
 
 void BoUfoNewGameWidget::slotConnectedToServer()
 {
- boDebug() << k_funcinfo << endl;
  boGame->slotAddChatSystemMessage("Boson", i18n("You are now connected to the server %1:%2").arg(boGame->bosonHostName()).arg(boGame->bosonPort()));
  mInited = true;
  // Select localplayer

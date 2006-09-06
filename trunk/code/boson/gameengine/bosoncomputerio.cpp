@@ -39,7 +39,6 @@
 
 BosonComputerIO::BosonComputerIO() : KGameComputerIO()
 {
- boDebug() << k_funcinfo << endl;
  mEventListener = 0;
 }
 
@@ -58,7 +57,6 @@ bool BosonComputerIO::initializeIO()
  }
 
  // warning: p->game() is NULL at this point. using boGame here is ugly.
- boDebug() << k_funcinfo << endl;
  if (!boGame) {
 	BO_NULL_ERROR(boGame);
 	return false;
