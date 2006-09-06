@@ -61,7 +61,6 @@ BoMeshRendererManager::BoMeshRendererManager() : BoPluginManager()
 
 BoMeshRendererManager::~BoMeshRendererManager()
 {
- boDebug() << k_funcinfo << endl;
  unloadLibrary();
  if (d->mAllModels.count() != 0) {
 	boWarning() << k_funcinfo << "model list not empty" << endl;
@@ -93,17 +92,13 @@ void BoMeshRendererManager::initStatic()
  if (mManager) {
 	return;
  }
- boDebug() << k_funcinfo << endl;
  mManager = new BoMeshRendererManager;
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BoMeshRendererManager::deleteStatic()
 {
- boDebug() << k_funcinfo << endl;
  delete mManager;
  mManager = 0;
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 BoMeshRendererManager* BoMeshRendererManager::manager()
@@ -150,7 +145,6 @@ void BoMeshRendererManager::initializePlugin()
 void BoMeshRendererManager::deinitializePlugin()
 {
  BO_CHECK_NULL_RET(currentRenderer());
- boDebug() << k_funcinfo << endl;
  QPtrListIterator<BosonModel> it(d->mAllModels);
  while (it.current()) {
 	currentRenderer()->deinitializeData(it.current());

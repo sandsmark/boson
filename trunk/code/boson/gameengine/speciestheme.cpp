@@ -116,11 +116,9 @@ SpeciesTheme::SpeciesTheme()
 
 SpeciesTheme::~SpeciesTheme()
 {
- boDebug() << k_funcinfo << endl;
  reset();
 
  delete d;
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 void SpeciesTheme::reset()
@@ -151,7 +149,6 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
 	setTeamColor(teamColor);
  }
  mThemePath = speciesDir;
- boDebug() << k_funcinfo << "theme path: " << themePath() << endl;
 
  // don't preload units here as the species can still be changed in new game
  // dialog
@@ -533,7 +530,6 @@ bool SpeciesTheme::saveGameDataAsXML(QDomElement& root) const
 
 bool SpeciesTheme::loadGameDataFromXML(const QDomElement& root)
 {
- boDebug() << k_funcinfo << identifier() << endl;
  QDomElement unitTypes = root.namedItem("UnitTypes").toElement();
  if (unitTypes.isNull()) {
 	boError() << k_funcinfo << "NULL UnitTypes tag" << endl;

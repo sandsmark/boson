@@ -77,7 +77,6 @@ BoLightManager::~BoLightManager()
 void BoLightManager::init()
 {
   glGetIntegerv(GL_MAX_LIGHTS, &mMaxActiveLights);
-  boDebug() << k_funcinfo << mMaxActiveLights << " lights are supported" << endl;
 
   mActiveLights = new QValueVector<BoLight*>();
   mAllLights = new QValueList<BoLight*>();

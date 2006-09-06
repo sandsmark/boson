@@ -1527,9 +1527,7 @@ BoGLQueryStates::~BoGLQueryStates()
 
 void BoGLQueryStates::init()
 {
- boDebug() << k_funcinfo << endl;
  d->mImplementationValues.getValues();
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BoGLQueryStates::getStates()

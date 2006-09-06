@@ -203,7 +203,6 @@ BosonUfoPlacementPreviewWidget::BosonUfoPlacementPreviewWidget()
 
 BosonUfoPlacementPreviewWidget::~BosonUfoPlacementPreviewWidget()
 {
- boDebug() << k_funcinfo << endl;
  quitGame();
  delete d;
 }
@@ -507,7 +506,6 @@ BosonUfoLineVisualizationWidget::BosonUfoLineVisualizationWidget()
 
 BosonUfoLineVisualizationWidget::~BosonUfoLineVisualizationWidget()
 {
- boDebug() << k_funcinfo << endl;
  delete d;
 }
 
@@ -641,7 +639,6 @@ BosonUfoCursorWidget::BosonUfoCursorWidget()
 
 BosonUfoCursorWidget::~BosonUfoCursorWidget()
 {
- boDebug() << k_funcinfo << endl;
  delete d->mCursorCollection;
  delete d;
 }
@@ -707,7 +704,6 @@ void BosonUfoCursorWidget::paintWidget()
 
 void BosonUfoCursorWidget::slotChangeCursor(int mode, const QString& cursorDir)
 {
- boDebug() << k_funcinfo << endl;
  if (boGame) {
 	if (!boGame->gameMode()) {
 		// editor mode
@@ -747,7 +743,6 @@ BosonUfoSelectionRectWidget::BosonUfoSelectionRectWidget()
 
 BosonUfoSelectionRectWidget::~BosonUfoSelectionRectWidget()
 {
- boDebug() << k_funcinfo << endl;
  delete d;
 }
 
@@ -895,7 +890,6 @@ BosonUfoFPSGraphWidget::BosonUfoFPSGraphWidget()
 
 BosonUfoFPSGraphWidget::~BosonUfoFPSGraphWidget()
 {
- boDebug() << k_funcinfo << endl;
  delete d;
 }
 
@@ -1150,7 +1144,6 @@ BosonUfoProfilingGraphWidget::BosonUfoProfilingGraphWidget()
 
 BosonUfoProfilingGraphWidget::~BosonUfoProfilingGraphWidget()
 {
- boDebug() << k_funcinfo << endl;
  d->mItems.setAutoDelete(true);
  d->mItems.clear();
  resetProfilingTypes();
@@ -1376,7 +1369,6 @@ void BosonUfoProfilingGraphWidget::slotSetUpdateInterval(int interval)
 	boError() << k_funcinfo << interval << endl;
 	return;
  }
- boDebug() << k_funcinfo << interval << endl;
  d->mUpdateTimer->stop();
  d->mUpdateTimer->start(interval);
 }

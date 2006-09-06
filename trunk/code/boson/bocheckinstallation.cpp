@@ -32,8 +32,6 @@
 
 QString BoCheckInstallation::checkInstallation()
 {
- boDebug() << k_funcinfo << endl;
-
  QStringList requiredFiles;
  requiredFiles.append(locate("data", "boson/pics/boson-startup-bg.png"));
  requiredFiles.append(locate("data", "boson/pics/boson-startup-logo.png"));
@@ -56,8 +54,6 @@ QString BoCheckInstallation::checkInstallation()
 	}
  }
 
-
- boDebug() << k_funcinfo << "successful" << endl;
  return QString::null;
 }
 

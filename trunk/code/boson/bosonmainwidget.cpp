@@ -261,7 +261,6 @@ void BosonMainWidget::initializeGL()
  d->mFPSCounter->reset();
 
  if (!context()->deviceIsPixmap()) {
-	boDebug() << k_funcinfo << "starting timer" << endl;
 	// start rendering (will also start the timer if necessary)
 	QTimer::singleShot(d->mUpdateInterval, this, SLOT(slotUpdateGL()));
 
@@ -274,7 +273,6 @@ void BosonMainWidget::initializeGL()
 
  boProfiling->push("init texture manager");
  BoTextureManager::initStatic();
- boTextureManager->initOpenGL();
  boProfiling->pop();
 
  connect(kapp->eventLoop(), SIGNAL(signalUpdateGL()), this, SLOT(slotUpdateGL()));
@@ -288,7 +286,6 @@ void BosonMainWidget::initializeGL()
 void BosonMainWidget::initUfoGUI()
 {
  PROFILE_METHOD
- boDebug() << k_funcinfo << endl;
  glPushAttrib(GL_ALL_ATTRIB_BITS);
 
  boProfiling->push("initUfo()");
@@ -364,14 +361,11 @@ void BosonMainWidget::initUfoGUI()
 
  d->mGameView->setMouseEventsEnabled(true, true);
 
- boDebug() << k_funcinfo << "creating BoUfoAction GUI" << endl;
  boProfiling->push("createGUI()");
  ufoManager()->actionCollection()->createGUI();
  boProfiling->pop();
- boDebug() << k_funcinfo << "creating BoUfoAction GUI done" << endl;
 
  glPopAttrib();
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonMainWidget::setGameEngine(BosonGameEngine* gameEngine)
@@ -505,7 +499,6 @@ void BosonMainWidget::renderUfo()
 
 void BosonMainWidget::slotSetUpdateInterval(unsigned int ms)
 {
- boDebug() << k_funcinfo << ms << endl;
  d->mUpdateInterval = ms;
  QTimer::singleShot(d->mUpdateInterval, this, SLOT(slotUpdateGL()));
 }

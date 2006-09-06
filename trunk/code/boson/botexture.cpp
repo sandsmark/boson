@@ -865,7 +865,6 @@ void BoTextureManager::initOpenGL()
   }
 
   // Get list of supported opengl extensions
-  boDebug() << k_funcinfo << "Checking for OpenGL extensions..." << endl;
   const BoInfoGLCache* glInfo = BoInfo::boInfo()->gl();
   QStringList extensions = glInfo->openGLExtensions();
   // Get OpenGL (runtime) version
@@ -916,12 +915,11 @@ void BoTextureManager::initOpenGL()
   mSupportsNPOTTextures = glInfo->supportsNPOTTextures();
   if(!mSupportsNPOTTextures)
   {
-    boDebug() << k_funcinfo << "NPOT textures are not supported!" << endl;
+    boDebug() << k_funcinfo << "non-power-of-two textures are not supported!" << endl;
   }
 
   // Check if anisotropic texture filtering is supported
   mMaxAnisotropy = glInfo->maxTextureMaxAnisotropy();
-  boDebug() << k_funcinfo << "Max anisotropy: " << mMaxAnisotropy << endl;
   if(boConfig->intValue("TextureAnisotropy") > mMaxAnisotropy)
   {
     boConfig->setIntValue("TextureAnisotropy", mMaxAnisotropy);
@@ -933,7 +931,6 @@ void BoTextureManager::initOpenGL()
   mActiveTextureType = new int[mTextureUnits];
   invalidateCache();
 
-  boDebug() << k_funcinfo << "OpenGL initialized" << endl;
   mOpenGLInited = true;
 }
 

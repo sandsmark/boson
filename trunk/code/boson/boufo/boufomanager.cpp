@@ -295,7 +295,6 @@ static ufo::UKeyCode_t convertQtKeyToUfo(int key)
 BoUfoManager::BoUfoManager(int w, int h, bool opaque)
 	: QObject(0, "ufomanager")
 {
- boDebug() << k_funcinfo << w << "x" << h << endl;
  mGlobalFont = new BoUfoFontInfo();
  if (!ufo::UToolkit::getToolkit()) {
 	ufo::UXToolkit* tk = new ufo::UXToolkit();
@@ -423,9 +422,7 @@ BoUfoManager::~BoUfoManager()
 	boDebug() << k_funcinfo << "removed all widgets" << endl;
  }
  delete mGlobalFont;
- boDebug() << k_funcinfo << "deleting context" << endl;
  delete mContext;
- boDebug() << k_funcinfo << "deleting display" << endl;
  delete mDisplay;
 
  BoUfoProfiling::unreference();
@@ -654,7 +651,6 @@ bool BoUfoManager::sendResizeEvent(int w, int h)
 	BO_NULL_ERROR(conext());
 	return false;
  }
- boDebug() << k_funcinfo << w << "x" << h << endl;
  ufo::URectangle deviceRect(0, 0, w, h);
  ufo::URectangle contextRect(0, 0, w, h);
  context()->setDeviceBounds(deviceRect);
@@ -931,7 +927,6 @@ bool BoUfoManager::focusedWidgetTakesKeyEvents() const
 void BoUfoManager::setGlobalFont(const BoUfoFontInfo& font)
 {
  BO_CHECK_NULL_RET(mGlobalFont);
- boDebug() << k_funcinfo << font.debugString() << endl;
  *mGlobalFont = font;
  if (rootPaneWidget()) {
 	if (rootPaneWidget()->providesOwnFont()) {
