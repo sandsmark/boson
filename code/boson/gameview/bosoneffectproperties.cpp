@@ -88,7 +88,6 @@ void BosonEffectPropertiesManager::loadEffectProperties()
   }
   path += "boson/themes/effects/";
   QString fileName = path + "effects.boson";
-  boDebug() << k_funcinfo << "Using " << fileName << endl;
 
   BosonEffect::initStatic(path + "particles/");
 

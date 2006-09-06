@@ -439,9 +439,6 @@ bool BosonStartingCheckIOs::startTask()
 			boError() << k_funcinfo << "player " << p->bosonId() << " has no IO!" << endl;
 			return false;
 		}
-		for (QPtrListIterator<KGameIO> it(*p->ioList()); it.current(); ++it) {
-			boDebug() << k_funcinfo << "player " << p->bosonId() << " has IO: " << it.current()->rtti() << " - " << it.current() << endl;
-		}
 	}
  }
 

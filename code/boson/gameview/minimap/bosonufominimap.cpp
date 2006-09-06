@@ -277,13 +277,11 @@ QImage BosonUfoMiniMap::imageFromTheme(const QString& file, const QString& theme
 void BosonUfoMiniMap::createMap(BosonCanvas* c, const BoGLMatrices* gameGLMatrices)
 {
  BO_CHECK_NULL_RET(c);
- boDebug() << k_funcinfo << endl;
 
  d->mMiniMapDisplay->createMap(c, gameGLMatrices);
  if (!d->mImageTheme.isEmpty()) {
 	setImageTheme(d->mImageTheme);
  }
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonUfoMiniMap::slotAdvance(unsigned int advanceCallsCount)

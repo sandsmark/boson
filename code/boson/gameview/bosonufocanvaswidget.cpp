@@ -174,15 +174,12 @@ BosonUfoCanvasWidget::BosonUfoCanvasWidget()
 
 BosonUfoCanvasWidget::~BosonUfoCanvasWidget()
 {
- boDebug() << k_funcinfo << endl;
  quitGame();
  delete d->mGroundQuadTree;
  delete d->mCanvasRenderer;
  delete d->mEffectManager;
  BosonEffectPropertiesManager::deleteStatic();
  delete d;
-
- boDebug() << k_funcinfo << "donee" << endl;
 }
 
 bool BosonUfoCanvasWidget::initializeItems()
@@ -274,7 +271,6 @@ void BosonUfoCanvasWidget::setCanvas(const BosonCanvas* canvas)
 
 void BosonUfoCanvasWidget::initItemEffects()
 {
- boDebug() << k_funcinfo << endl;
  if (d->mEffects.count() > 0) {
 	boDebug() << k_funcinfo << "effects already initialized. most likely loaded from xml - we are loading a game, no initializing required." << endl;
 	return;

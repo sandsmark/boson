@@ -252,7 +252,6 @@ void BoSelection::saveAsXML(QDomElement& root)
 
 void BoSelection::loadFromXML(const QDomElement& root, bool activate)
 {
- boDebug() << k_funcinfo << "activate: " << activate << endl;
  QDomElement units = root.namedItem(QString::fromLatin1("Units")).toElement();
  if (units.isNull()) {
 	boError(260) << k_funcinfo << "no units" << endl;
@@ -303,7 +302,6 @@ void BoSelection::loadFromXML(const QDomElement& root, bool activate)
  }
 
  if(activate) {
-	boDebug() << k_funcinfo << "emitting signal" << endl;
 	emit signalSelectionChanged(this);
  }
 }
@@ -405,8 +403,6 @@ void BoSelectionGroup::slotClearSelectionGroup(int number)
 
 bool BoSelectionGroup::loadFromXML(const QDomElement& root)
 {
- boDebug() << k_funcinfo << endl;
-
  if (root.isNull()) {
 	return false;
  }

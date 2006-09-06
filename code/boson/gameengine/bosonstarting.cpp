@@ -205,7 +205,6 @@ void BosonStarting::slotPlayFieldCreated(BosonPlayField* playField, bool* ownerC
 	BO_NULL_ERROR(playField);
 	// don't return
  }
- boDebug() << k_funcinfo << endl;
  mDestPlayField = playField;
  *ownerChanged = true;
 

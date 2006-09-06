@@ -72,7 +72,6 @@ bool BoHeightMap::save(QDataStream& stream) const
 	BO_NULL_ERROR(mHeightMap);
 	return false;
  }
- boDebug() << k_funcinfo << "saving real heightmap to network stream" << endl;
  for (unsigned int x = 0; x < width(); x++) {
 	for (unsigned int y = 0; y < height(); y++) {
 		float h = heightAt(x, y);
@@ -84,7 +83,6 @@ bool BoHeightMap::save(QDataStream& stream) const
 
 bool BoHeightMap::load(QDataStream& stream)
 {
- boDebug() << k_funcinfo << endl;
  if (!mHeightMap) {
 	BO_NULL_ERROR(mHeightMap);
 	return false;
@@ -102,7 +100,6 @@ bool BoHeightMap::load(QDataStream& stream)
 
 bool BoTexMap::save(QDataStream& stream) const
 {
- boDebug() << k_funcinfo << endl;
  if (!mTexMap) {
 	BO_NULL_ERROR(mTexMap);
 	return false;
@@ -144,7 +141,6 @@ bool BoTexMap::save(QDataStream& stream) const
 
 bool BoTexMap::load(QDataStream& stream)
 {
- boDebug() << k_funcinfo << endl;
  if (stream.atEnd()) {
 	boError() << k_funcinfo << "empty stream" << endl;
 	return false;
@@ -210,7 +206,6 @@ bool BoTexMap::load(QDataStream& stream)
  for (unsigned int i = textures; i < mTextureCount; i++) {
 	initialize(i, 0);
  }
- boDebug() << "done" << endl;
  return true;
 }
 
@@ -257,7 +252,6 @@ bool BoTexMap::importTexMap(const QImage* img)
 	return false;
  }
 
- boDebug() << k_funcinfo << endl;
 
  for (unsigned int y = 0; y < height(); y++) {
 	for (unsigned int x = 0; x < width(); x++) {
@@ -566,7 +560,6 @@ bool BosonMap::loadWaterFromFile(const QByteArray& waterXML)
 
 bool BosonMap::loadCompleteMap(QDataStream& stream)
 {
- boDebug() << k_funcinfo << endl;
  QByteArray mapBuffer;
  stream >> mapBuffer;
  if (!loadMapFromFile(mapBuffer)) {
@@ -597,7 +590,6 @@ bool BosonMap::loadCompleteMap(QDataStream& stream)
 
 bool BosonMap::loadMapGeo(unsigned int width, unsigned int height)
 {
- boDebug() << k_funcinfo << endl;
  if (!isValidMapGeo(width, height)) {
 	boError()<< k_funcinfo << "map geo is not valid: " << width << "x" << height << endl;
 	return false;
@@ -658,7 +650,6 @@ bool BosonMap::importHeightMapImage(const QImage& image)
 
 bool BosonMap::loadHeightMapImage(const QByteArray& heightMapBuffer)
 {
- boDebug() << k_funcinfo << endl;
  if (!isValidMapGeo(width(), height())) {
 	boError() << k_funcinfo << "invalid map geo" << endl;
 	return false;
@@ -681,7 +672,6 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMapBuffer)
 	}
 	return ret;
  }
- boDebug() << k_funcinfo << "loading real height map" << endl;
  QImage map(heightMapBuffer);
  if (map.isNull()) {
 	boError() << k_funcinfo << "received an invalid image buffer - null image" << endl;
@@ -741,7 +731,6 @@ bool BosonMap::loadHeightMap(QDataStream& stream)
 	mHeightMap = 0;
  }
  mHeightMap = new BoHeightMap(width() + 1, height() + 1);
- boDebug() << k_funcinfo << "loading height map from network stream" << endl;
  bool ret = mHeightMap->load(stream);
  if (ret) {
 	delete mNormalMap;
@@ -753,8 +742,6 @@ bool BosonMap::loadHeightMap(QDataStream& stream)
 
 bool BosonMap::loadTexMap(QDataStream& stream)
 {
- boDebug() << k_funcinfo << endl;
-
  // we allocate memory for all possible textures, even if this map doesn't use
  // them all. we also have to initialize all textures.
  // one day we may want to change this to save a few kb of memory on some maps
@@ -770,7 +757,6 @@ bool BosonMap::loadTexMap(QDataStream& stream)
 
 bool BosonMap::saveTexMap(QDataStream& stream) const
 {
- boDebug() << k_funcinfo << endl;
  if (!mTexMap) {
 	BO_NULL_ERROR(mTexMap);
 	return false;
@@ -986,13 +972,10 @@ QByteArray BosonMap::saveHeightMapImage() const
 	boError() << k_funcinfo << "Unable to create height map!" << endl;
 	return QByteArray();
  }
- boDebug() << k_funcinfo << "heightmap: " << image.width() << "x" << image.height() << endl;
  if (!mHeightMap) {
-	boDebug() << k_funcinfo << "dummy height map..." << endl;
 	int l = BoHeightMap::heightToPixel(0.0f);
 	image.fill(l);
  } else {
-	boDebug() << k_funcinfo << "real height map" << endl;
 	// AB: this *might* be correct, but i am not sure about this. (02/11/22)
 	for (int y = 0; y < image.height(); y++) {
 		uint* p = (uint*)image.scanLine(y); // AB: maybe use setPixel() instead, due to endianness
@@ -1032,12 +1015,9 @@ QByteArray BosonMap::saveTexMapImage(unsigned int texture) const
 	boError() << k_funcinfo << "Unable to create texmap!" << endl;
 	return QByteArray();
  }
- boDebug() << k_funcinfo << "texmap: " << image.width() << "x" << image.height() << endl;
  if (!mHeightMap) {
-	boDebug() << k_funcinfo << "dummy texmap..." << endl;
 	image.fill(0);
  } else {
-	boDebug() << k_funcinfo << "real texmap" << endl;
 	// AB: this *might* be correct, but i am not sure about this. (02/11/22)
 	for (int y = 0; y < image.height(); y++) {
 		uint* p = (uint*)image.scanLine(y); // AB: maybe use setPixel() instead, due to endianness
@@ -1131,7 +1111,6 @@ void BosonMap::setHeightsAtCorners(const QValueList< QPair<QPoint, float> >& hei
 {
  BO_CHECK_NULL_RET(mHeightMap);
  BO_CHECK_NULL_RET(mNormalMap);
- boDebug() << k_funcinfo << endl;
 
  int minX = 0;
  int maxX = 0;
@@ -1233,7 +1212,6 @@ float BosonMap::cellAverageHeight(int x, int y) const
 
 bool BosonMap::generateCellsFromTexMap()
 {
- boDebug() << k_funcinfo << endl;
  if (!groundTheme()) {
 	BO_NULL_ERROR(groundTheme());
 	return false;
@@ -1296,7 +1274,6 @@ void BosonMap::slotChangeTexMap(int x, int y, unsigned int texCount, unsigned in
 
 void BosonMap::recalculateNormalsInRect(int x1, int y1, int x2, int y2)
 {
- boDebug() << k_funcinfo << "Rect: (" << x1 << "; " << y1 << ")-(" << x2 << "; " << y2 << ")" << endl;
  // FIXME: simplify this method? Is it possible?
 
  // First calculate plane normals for all cells in rect
@@ -1371,7 +1348,6 @@ void BosonMap::recalculateNormalsInRect(int x1, int y1, int x2, int y2)
  }
 #undef NORM
  delete[] normals;
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonMap::heightsInRectChanged(int minX, int minY, int maxX, int maxY)
