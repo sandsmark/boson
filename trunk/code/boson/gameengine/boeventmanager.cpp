@@ -188,7 +188,6 @@ bool BoEventManager::loadFromXML(const QDomElement& root)
 
 bool BoEventManager::saveAllEventListenerScripts(QMap<QString, QByteArray>* scripts) const
 {
- boDebug() << k_funcinfo << endl;
  // save in 2 steps.
  // 1. save the actual scripts
  // 2. save the current script data (i.e. the variable values).
@@ -231,8 +230,6 @@ bool BoEventManager::saveAllEventListenerScripts(QMap<QString, QByteArray>* scri
 
 bool BoEventManager::saveAllEventListenersXML(QMap<QString, QByteArray>* files) const
 {
- boDebug() << k_funcinfo << endl;
-
  // first save the initial data, as provided by copyEventListenerXML()
  // this makes sure that we always save all eventlisteners that might be
  // required for the map, including those of IOs that are currently not in use
@@ -333,7 +330,6 @@ QByteArray BoEventManager::createEmptyEventListenerXML()
 bool BoEventManager::loadAllEventListenerScripts()
 {
  PROFILE_METHOD
- boDebug() << k_funcinfo << endl;
  QPtrListIterator<BoEventListener> it(d->mEventListeners);
  for (; it.current(); ++it) {
 	QString name = it.current()->scriptFileName();
@@ -352,7 +348,6 @@ bool BoEventManager::loadAllEventListenerScripts()
 
 bool BoEventManager::loadAllEventListenersXML()
 {
- boDebug() << k_funcinfo << endl;
  for (QPtrListIterator<BoEventListener> it(d->mEventListeners); it.current(); ++it) {
 	QString name = it.current()->xmlFileName();
 	if (name.isEmpty()) {
@@ -404,7 +399,6 @@ bool BoEventManager::loadEventListenerScript(BoEventListener* listener)
 	// note this is perfectly valid!
 	return true;
  }
- boDebug() << k_funcinfo << "loading listener script " << name << endl;
  QByteArray script = scriptForFile(fullScriptName);
  QByteArray scriptData = scriptForFile(fullScriptDataName);
  if (!listener->loadScript(script, scriptData)) {

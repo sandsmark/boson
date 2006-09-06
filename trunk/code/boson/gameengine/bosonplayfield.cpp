@@ -164,7 +164,6 @@ bool BosonPlayFieldInformation::loadInformation(BPFFile* file)
 	return false;
  } else {
 	// file format is >= boson 0.9
-//	boDebug() << k_funcinfo << "file format is current" << endl;
 	mapXML = file->mapXMLData();
 	playersXML = file->playersData();
  }
@@ -263,11 +262,9 @@ BosonPlayField::BosonPlayField(QObject* parent) : QObject(parent, "BosonPlayFiel
 
 BosonPlayField::~BosonPlayField()
 {
- boDebug() << k_funcinfo << endl;
  delete mMap;
  delete mDescription;
  delete mPlayFieldInformation;
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 bool BosonPlayField::preLoadAllPlayFields()
@@ -308,7 +305,7 @@ bool BosonPlayField::preLoadAllPlayFields()
 			continue;
 		}
 		if (!BosonData::bosonData()->insertPlayField(data)) {
-			boDebug() << k_funcinfo << "could not insert playField "
+			boWarning() << k_funcinfo << "could not insert playField "
 					<< data->idString()
 					<< " (maybe already inserted)" << endl;
 			delete data;
@@ -452,7 +449,6 @@ bool BosonPlayField::loadDescriptionFromFile(const QByteArray& xml)
 
 bool BosonPlayField::loadMapFromFile(const QByteArray& mapXML, const QByteArray& heightMapImage, const QByteArray& texMap, const QByteArray& waterXML)
 {
- boDebug() << k_funcinfo << endl;
  if (mapXML.size() == 0) {
 	boError() << k_funcinfo << "empty byte array for mapXML" << endl;
 	return false;
@@ -476,22 +472,18 @@ bool BosonPlayField::loadMapFromFile(const QByteArray& mapXML, const QByteArray&
 	boError() << k_funcinfo << "Could not load map" << endl;
 	return false;
  }
-// boDebug() << k_funcinfo << endl;
- boDebug() << k_funcinfo << "loading tex map" << endl;
  QDataStream texMapStream(texMap, IO_ReadOnly);
  ret = mMap->loadTexMap(texMapStream);
  if (!ret) {
 	boError() << k_funcinfo << "Could not load map (texmap failed)" << endl;
 	return false;
  }
- boDebug() << k_funcinfo << "generating cells" << endl;
  ret = mMap->generateCellsFromTexMap();
  if (!ret) {
 	boError() << k_funcinfo << "Could not load map (cell generation failed)" << endl;
 	return false;
  }
 
- boDebug() << k_funcinfo << "loading height map image" << endl;
  ret = mMap->loadHeightMapImage(heightMapImage);
  if (!ret) {
 	boError() << k_funcinfo << "Could not load map (height map failed)" << endl;
@@ -691,7 +683,6 @@ QStringList BosonPlayField::findPlayFieldsOfCampaign(const QString& campaign)
 // load from harddisk to virtual files in the QMap.
 bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
 {
- boDebug() << k_funcinfo << endl;
  if (!destFiles.isEmpty()) {
 	boError() << k_funcinfo << "destFiles must be empty" << endl;
 	return false;
@@ -899,7 +890,6 @@ bool BosonPlayField::savePlayFieldToFiles(QMap<QString, QByteArray>& files)
 	boError() << k_funcinfo << "failed saving the texmap" << endl;
 	return false;
  }
- boDebug() << k_funcinfo << "saving map succeeded" << endl;
 
  // TODO: _all_ descriptions, not just default one
  QByteArray descriptionXML = saveDescriptionToFile().utf8();
@@ -921,7 +911,6 @@ bool BosonPlayField::savePlayFieldToFiles(QMap<QString, QByteArray>& files)
  files.insert("map/texmap", texMap);
  files.insert("mappreview/map.png", mapPreviewPNG);
  files.insert("C/description.xml", descriptionXML);
- boDebug() << k_funcinfo << "succeeded" << endl;
  return true;
 }
 

@@ -516,7 +516,6 @@ void BosonGLCompleteMiniMap::createMap(unsigned int w, unsigned int h)
 	boError() << k_funcinfo << "map already created. delete this object and create a new one!" << endl;
 	return;
  }
- boDebug() << k_funcinfo << endl;
 
  d->mMapCreated = true;
  d->mMapWidth = w;
@@ -576,13 +575,11 @@ void BosonGLCompleteMiniMap::createMap(unsigned int w, unsigned int h)
  d->mUnitTree = BosonMiniMapQuadtreeNode::createTree(canvas()->mapWidth(), canvas()->mapHeight());
 #endif
 
- boDebug() << k_funcinfo << "initializing ground" << endl;
  for (unsigned int x = 0; x < canvas()->mapWidth(); x++) {
 	for (unsigned int y = 0; y < canvas()->mapHeight(); y++) {
 		calculateGround(x, y);
 	}
  }
- boDebug() << k_funcinfo << "initializing ground done" << endl;
 
  if (localPlayerIO()) {
 	initializeItems();
@@ -591,7 +588,6 @@ void BosonGLCompleteMiniMap::createMap(unsigned int w, unsigned int h)
  }
 
  setUpdatesEnabled(true);
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonGLCompleteMiniMap::slotAdvance(unsigned int advanceCallsCount)
@@ -1007,12 +1003,10 @@ void BosonGLCompleteMiniMap::initializeItems()
  if (!d->mMapCreated) {
 	return;
  }
- boDebug() << k_funcinfo << "initializing items" << endl;
  BoItemList* allItems = canvas()->allItems();
  for (BoItemList::iterator it = allItems->begin(); it != allItems->end(); ++it) {
 	slotItemAdded(*it);
  }
- boDebug() << k_funcinfo << "initializing items done" << endl;
 }
 
 void BosonGLCompleteMiniMap::initFogOfWar(PlayerIO* p)
@@ -1023,7 +1017,6 @@ void BosonGLCompleteMiniMap::initFogOfWar(PlayerIO* p)
 	boError() << k_funcinfo << "map has not yet been created" << endl;
 	return;
  }
- boDebug() << k_funcinfo << endl;
 
  setUpdatesEnabled(false);
 

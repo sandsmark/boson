@@ -71,7 +71,6 @@ Boson* BosonScript::mGame = 0;
 
 BosonScript* BosonScript::newScriptParser(Language lang, int playerId)
 {
-  boDebug() << k_funcinfo << endl;
   BosonScript* s = 0;
   if(lang == Python)
   {
@@ -87,21 +86,17 @@ BosonScript* BosonScript::newScriptParser(Language lang, int playerId)
 
 BosonScript::BosonScript(int playerId)
 {
-  boDebug() << k_funcinfo << endl;
   mInterface = new BosonScriptInterface(0);
   mPlayerId = playerId;
 }
 
 BosonScript::~BosonScript()
 {
-  boDebug() << k_funcinfo << endl;
   delete mInterface;
 }
 
 void BosonScript::sendInput(QDataStream& stream)
 {
-  boDebug() << k_funcinfo << endl;
-
   if(!game())
   {
     boError() << k_funcinfo << "NULL game" << endl;

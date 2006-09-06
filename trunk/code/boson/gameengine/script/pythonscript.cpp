@@ -37,7 +37,7 @@
 // note: for this to work, getPythonLock() must be called first
 #define CHECK_PYTHON_ERROR if(PyErr_Occurred() != NULL) \
         { \
-          boError() << k_funcinfo << "(line: " << __LINE__ << ") Python error: " << endl; \
+          boError(700) << k_funcinfo << "(line: " << __LINE__ << ") Python error: " << endl; \
           PyErr_Print(); \
           PyErr_Clear(); \
         }
@@ -179,8 +179,6 @@ PyMethodDef PythonScript::mCallbacks[] = {
 
 PythonScript::PythonScript(int playerId) : BosonScript(playerId)
 {
-  boDebug() << k_funcinfo << endl;
-
   if(!mScriptingInited)
   {
     initScripting();
@@ -203,8 +201,6 @@ PythonScript::PythonScript(int playerId) : BosonScript(playerId)
 
 PythonScript::~PythonScript()
 {
-  boDebug() << k_funcinfo << endl;
-
   getPythonLock();
   CHECK_PYTHON_ERROR;
 
@@ -221,7 +217,6 @@ PythonScript::~PythonScript()
 
 void PythonScript::initScripting()
 {
-  boDebug() << k_funcinfo << endl;
   Py_Initialize();
   PyEval_InitThreads();
   mThreadState = PyThreadState_Get();
@@ -231,7 +226,6 @@ void PythonScript::initScripting()
 
 void PythonScript::uninitScripting()
 {
-  boDebug() << k_funcinfo << endl;
   PyInterpreterState* mainState = mThreadState->interp;
   PyThreadState* myState = PyThreadState_New(mainState);
   PyThreadState_Swap(myState);
@@ -256,12 +250,11 @@ void PythonScript::freePythonLock()
 
 bool PythonScript::loadScript(QString file)
 {
-  boDebug() << k_funcinfo << "file: " << file << endl;
   QFileInfo fi(file);
 
   if(!fi.exists())
   {
-    boError() << k_funcinfo << "No such file: '" << fi.absFilePath() << "'. Aborting." << endl;
+    boError(700) << k_funcinfo << "No such file: '" << fi.absFilePath() << "'. Aborting." << endl;
     return false;
   }
   QString filePath = fi.dirPath(true);
@@ -269,7 +262,7 @@ bool PythonScript::loadScript(QString file)
   QFile f(file);
   if(!f.open(IO_ReadOnly))
   {
-    boError() << k_funcinfo << "Can't open file '" << file << "' for reading. Aborting." << endl;
+    boError(700) << k_funcinfo << "Can't open file '" << file << "' for reading. Aborting." << endl;
     return false;
   }
 
@@ -295,8 +288,8 @@ bool PythonScript::loadScriptFromString(const QString& string)
   if(!obj)
   {
     PyErr_Print();
-    boError() << k_funcinfo << "obj is NULL" << endl;
-    boError() << k_funcinfo << "Probably there's a parse error in the script. Aborting." << endl;
+    boError(700) << k_funcinfo << "obj is NULL" << endl;
+    boError(700) << k_funcinfo << "Probably there's a parse error in the script. Aborting." << endl;
     freePythonLock();
     return false;
   }
@@ -321,7 +314,7 @@ void PythonScript::callFunction(const QString& function, PyObject* args)
 
   if(!mDict)
   {
-    boError() << k_funcinfo << "No file loaded!" << endl;
+    boError(700) << k_funcinfo << "No file loaded!" << endl;
     return;
   }
 
@@ -332,7 +325,7 @@ void PythonScript::callFunction(const QString& function, PyObject* args)
   if(!func)
   {
     PyErr_Print();
-    boError() << k_funcinfo << "No such function: " << function << endl;
+    boError(700) << k_funcinfo << "No such function: " << function << endl;
     freePythonLock();
     return;
   }
@@ -341,7 +334,7 @@ void PythonScript::callFunction(const QString& function, PyObject* args)
   if(!pValue)
   {
     PyErr_Print();
-    boError() << k_funcinfo << "Error while calling function " << function << endl;
+    boError(700) << k_funcinfo << "Error while calling function " << function << endl;
   }
   else
   {
@@ -357,7 +350,7 @@ void PythonScript::callFunction(const QString& function, PyObject* args)
     QDataStream stream(&f);
     if(!save(stream))
     {
-      boError() << k_funcinfo  << "Couldn't save!" << endl;
+      boError(700) << k_funcinfo  << "Couldn't save!" << endl;
     }
     f.close();
   }*/
@@ -381,7 +374,7 @@ int PythonScript::callFunctionWithReturn(const QString& function, PyObject* args
 
   if(!mDict)
   {
-    boError() << k_funcinfo << "No file loaded!" << endl;
+    boError(700) << k_funcinfo << "No file loaded!" << endl;
     return -1;
   }
 
@@ -392,7 +385,7 @@ int PythonScript::callFunctionWithReturn(const QString& function, PyObject* args
   if(!func)
   {
     PyErr_Print();
-    boError() << k_funcinfo << "No such function: " << function << endl;
+    boError(700) << k_funcinfo << "No such function: " << function << endl;
     freePythonLock();
     return -1;
   }
@@ -402,7 +395,7 @@ int PythonScript::callFunctionWithReturn(const QString& function, PyObject* args
   if(!pValue)
   {
     PyErr_Print();
-    boError() << k_funcinfo << "Error while calling function " << function << endl;
+    boError(700) << k_funcinfo << "Error while calling function " << function << endl;
     ret = -1;
   }
   else
@@ -421,7 +414,7 @@ int PythonScript::callFunctionWithReturn(const QString& function, PyObject* args
     }
     else
     {
-      boDebug() << "unhandled return value type" << endl;
+      boWarning(700) << "unhandled return value type" << endl;
       ret = 0;
     }
     Py_DECREF(pValue);
@@ -448,12 +441,12 @@ void PythonScript::callEventHandler(const BoEvent* e, const QString& function, c
 {
   if(!e)
   {
-    boError() << k_funcinfo << "NULL event!" << endl;
+    boError(700) << k_funcinfo << "NULL event!" << endl;
     return;
   }
   if(function.isEmpty())
   {
-    boError() << k_funcinfo << "function name is empty!" << endl;
+    boError(700) << k_funcinfo << "function name is empty!" << endl;
     return;
   }
 
@@ -483,13 +476,13 @@ void PythonScript::callEventHandler(const BoEvent* e, const QString& function, c
       PyObject* o = PyDict_GetItemString(lastdict, (char*)(*it).latin1());
       if(!o)
       {
-        boError() << k_funcinfo << "Couldn't find object '" << *it << "'! Full function name was '" << function << "'" << endl;
+        boError(700) << k_funcinfo << "Couldn't find object '" << *it << "'! Full function name was '" << function << "'" << endl;
         return;
       }
       // Make sure o is module
       if(!PyModule_Check(o))
       {
-        boError() << k_funcinfo << "'" << *it << "' is not a module! Full function name was '" << function << "'" << endl;
+        boError(700) << k_funcinfo << "'" << *it << "' is not a module! Full function name was '" << function << "'" << endl;
         return;
       }
       lastdict = PyModule_GetDict(o);
@@ -501,7 +494,7 @@ void PythonScript::callEventHandler(const BoEvent* e, const QString& function, c
   // Make sure we have valid dict
   if(!dict)
   {
-    boError() << k_funcinfo << "Couldn't find dict!" << endl;
+    boError(700) << k_funcinfo << "Couldn't find dict!" << endl;
     return;
   }
 
@@ -546,7 +539,7 @@ void PythonScript::callEventHandler(const BoEvent* e, const QString& function, c
     }
     else
     {
-      boError() << k_funcinfo << "Unknown format char '" << QString(args.at(i)) << "' in format string '" <<
+      boError(700) << k_funcinfo << "Unknown format char '" << QString(args.at(i)) << "' in format string '" <<
           args << "'" << endl;
     }
 
@@ -564,7 +557,7 @@ void PythonScript::callEventHandler(const BoEvent* e, const QString& function, c
   if(!func)
   {
     PyErr_Print();
-    boError() << k_funcinfo << "No such function: " << funcname << endl;
+    boError(700) << k_funcinfo << "No such function: " << funcname << endl;
     freePythonLock();
     return;
   }
@@ -573,7 +566,7 @@ void PythonScript::callEventHandler(const BoEvent* e, const QString& function, c
   if(!pValue)
   {
     PyErr_Print();
-    boError() << k_funcinfo << "Error while calling function " << funcname << endl;
+    boError(700) << k_funcinfo << "Error while calling function " << funcname << endl;
   }
   else
   {
@@ -621,7 +614,7 @@ QMap<PyObject*, PyObject*> g_seenModules;
 
 bool PythonScript::save(QDataStream& stream)
 {
-  boDebug() << k_funcinfo << endl;
+  boDebug(700) << k_funcinfo << endl;
 
   getPythonLock();
   CHECK_PYTHON_ERROR;
@@ -643,13 +636,13 @@ bool PythonScript::save(QDataStream& stream)
 #endif
   if(!data)
   {
-    boError() << k_funcinfo << "null data!" << endl;
+    boError(700) << k_funcinfo << "null data!" << endl;
     PyErr_Print();
     freePythonLock();
     return false;
   }
 
-  boDebug() << k_funcinfo << "Data string length is " << PyString_Size(data) << endl;
+  boDebug(700) << k_funcinfo << "Data string length is " << PyString_Size(data) << endl;
 
   stream << mLoadedScripts;
   // We can't just stream PyString_AsString(data), because it might contain
@@ -659,7 +652,7 @@ bool PythonScript::save(QDataStream& stream)
   CHECK_PYTHON_ERROR;
   freePythonLock();
 
-  boDebug() << k_funcinfo << "END" << endl;
+  boDebug(700) << k_funcinfo << "END" << endl;
   return true;
 }
 
@@ -675,7 +668,7 @@ PyObject* PythonScript::saveModule(PyObject* module) const
    *     * All submodules in the module, saved in a PyDict. Note that this
    *       module can be empty, then module has no submodules.
    **/
-  boDebug() << k_funcinfo << endl;
+  boDebug(700) << k_funcinfo << endl;
 
 
   // Find dictionary of the module
@@ -725,9 +718,9 @@ PyObject* PythonScript::saveModule(PyObject* module) const
     } else if(PyObject_CheckReadBuffer(value)) {
     } else if(PyModule_Check(value)) {
       // Add module to submodules' list
-      boDebug() << k_funcinfo << "Saving module '" << PyString_AsString(key) << "', exact: " << PyModule_CheckExact(value) << endl;
+      boDebug(700) << k_funcinfo << "Saving module '" << PyString_AsString(key) << "', exact: " << PyModule_CheckExact(value) << endl;
       if (g_seenModules.contains(value)) {
-        boDebug() << k_funcinfo << "module already seen .. ignoring" << endl;
+        boDebug(700) << k_funcinfo << "module already seen .. ignoring" << endl;
       } else {
         PyDict_SetItem(submodules, key, saveModule(value));
       }
@@ -739,7 +732,7 @@ PyObject* PythonScript::saveModule(PyObject* module) const
       continue;
     }
     // Add the object to dict
-    boDebug() << k_funcinfo << "Saving object '" << PyString_AsString(key) << "'" << endl;
+    boDebug(700) << k_funcinfo << "Saving object '" << PyString_AsString(key) << "'" << endl;
     PyDict_SetItem(variables, key, value);
   }
 
@@ -747,13 +740,13 @@ PyObject* PythonScript::saveModule(PyObject* module) const
   PyDict_SetItemString(maindict, (char*)"__BO_variables", variables);
   PyDict_SetItemString(maindict, (char*)"__BO_submodules", submodules);
 
-  boDebug() << k_funcinfo << "END" << endl;
+  boDebug(700) << k_funcinfo << "END" << endl;
   return maindict;
 }
 
 void PythonScript::loadModule(PyObject* module, PyObject* data)
 {
-  boDebug() << k_funcinfo << endl;
+  boDebug(700) << k_funcinfo << endl;
   // Find dictionary of the module
   PyObject* moduledict = PyModule_GetDict(module);
 
@@ -764,21 +757,21 @@ void PythonScript::loadModule(PyObject* module, PyObject* data)
   // Make sure the dicts are valid
   if(!variables)
   {
-    boError() << k_funcinfo << "Couldn't find variables dict!" << endl;
+    boError(700) << k_funcinfo << "Couldn't find variables dict!" << endl;
     return;
   }
   if(!submodules)
   {
-    boError() << k_funcinfo << "Couldn't find submodules dict!" << endl;
+    boError(700) << k_funcinfo << "Couldn't find submodules dict!" << endl;
     return;
   }
 
   // Load the variables
-  boDebug() << k_funcinfo << "Loading and merging " << PyDict_Size(variables) << " variables" << endl;
+  boDebug(700) << k_funcinfo << "Loading and merging " << PyDict_Size(variables) << " variables" << endl;
   PyDict_Merge(moduledict, variables, true);
 
   // Load the submodules
-  boDebug() << k_funcinfo << "Loading and merging " << PyDict_Size(submodules) << " submodules" << endl;
+  boDebug(700) << k_funcinfo << "Loading and merging " << PyDict_Size(submodules) << " submodules" << endl;
   PyObject* key;
   PyObject* value;
   int pos = 0;
@@ -790,7 +783,7 @@ void PythonScript::loadModule(PyObject* module, PyObject* data)
     {
       if(!PyModule_Check(m))
       {
-        boError() << k_funcinfo << "Parent module has non-module item '" << PyString_AsString(key) << "'! Can't load module with same name!" << endl;
+        boError(700) << k_funcinfo << "Parent module has non-module item '" << PyString_AsString(key) << "'! Can't load module with same name!" << endl;
         continue;
       }
     }
@@ -801,11 +794,11 @@ void PythonScript::loadModule(PyObject* module, PyObject* data)
       PyDict_SetItem(moduledict, key, m);
     }
     // Load the module
-    boDebug() << k_funcinfo << "Loading module '" << PyString_AsString(key) << "'" << endl;
+    boDebug(700) << k_funcinfo << "Loading module '" << PyString_AsString(key) << "'" << endl;
     loadModule(m, value);
   }
 
-  boDebug() << k_funcinfo << "END" << endl;
+  boDebug(700) << k_funcinfo << "END" << endl;
 }
 
 bool PythonScript::load(QDataStream& stream)
@@ -823,7 +816,7 @@ bool PythonScript::load(QDataStream& stream)
   PyObject* maindict = PyMarshal_ReadObjectFromString(data, datalen);
   if(!maindict)
   {
-    boError() << k_funcinfo << "Could not load main dict!" << endl;
+    boError(700) << k_funcinfo << "Could not load main dict!" << endl;
     return false;
   }
   // loadScriptFromString() also acquires the python lock, so we must free it
@@ -841,7 +834,7 @@ bool PythonScript::load(QDataStream& stream)
 
   delete[] data;
 
-  boDebug() << k_funcinfo << "END" << endl;
+  boDebug(700) << k_funcinfo << "END" << endl;
   return true;
 }
 

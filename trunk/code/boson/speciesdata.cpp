@@ -199,14 +199,12 @@ SpeciesData::SpeciesData(const QString& speciesPath)
 
 SpeciesData::~SpeciesData()
 {
- boDebug() << k_funcinfo << endl;
  d->mTeamData.clear();
  d->mUnitModels.clear();
  d->mObjectModels.clear();
  d->mActions.clear();
  d->mImages.clear();
  delete d;
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 void SpeciesData::initStatic()
@@ -222,7 +220,6 @@ void SpeciesData::initStatic()
 SpeciesData* SpeciesData::speciesData(const QString& speciesDir)
 {
  initStatic();
- boDebug() << k_funcinfo << speciesDir << endl;
  SpeciesData* species = mSpeciesData->find(speciesDir);
  if (!species) {
 	species = new SpeciesData(speciesDir);

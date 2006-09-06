@@ -44,8 +44,6 @@
 
 #define FIX_EDGES 1
 
-static int g_cellsVisibleCalls = 0;
-
 
 BoGroundRendererQuadTreeNode* BoGroundRendererQuadTreeNode::createTree(unsigned int w, unsigned int h)
 {
@@ -380,10 +378,8 @@ void CellListBuilderTree::updateMapCache(const BosonMap* map)
 {
  if (mMap != map) {
 	mMap = 0;
-	boDebug() << k_funcinfo << "recreating map tree" << endl;
 	BosonProfiler prof("mapTreeGeneration");
 	recreateTree(map);
-	boDebug() << k_funcinfo << "recreating map tree done" << endl;
  }
  mMap = map;
 }
@@ -416,9 +412,7 @@ if (list) {
 	}
  }
 
- g_cellsVisibleCalls = 0;
  addVisibleCells(renderCells, mRoot);
-// boDebug() << k_funcinfo << g_cellsVisibleCalls << " calls - will render cells: " << mCount << endl;
 
  *renderCellsCount = mCount;
 // mMap = 0;
@@ -491,7 +485,6 @@ void CellListBuilderTree::addCells(int* cells, const BoGroundRendererQuadTreeNod
 
 bool CellListBuilderTree::cellsVisible(const BoGroundRendererQuadTreeNode* node, bool* partially)
 {
- g_cellsVisibleCalls++;
  if (!node) {
 	*partially = false;
 	return false;
@@ -773,7 +766,6 @@ void FogTexture::initFogTexture(const BosonMap* map)
 	mLastMap = map;
 	int w = BoTexture::nextPower2(mLastMapWidth + 2);
 	int h = BoTexture::nextPower2(mLastMapHeight + 2);
-	boDebug() << "FOGTEX: " << k_funcinfo << "w: " << w << "; h: " << h  << endl;
 	mFogTextureDataW = w;
 	mFogTextureDataH = h;
 	mFogTextureData = new unsigned char[w * h * 4];
@@ -960,7 +952,6 @@ void BoGroundRendererBase::updateMapCache(const BosonMap* map)
  if (mCurrentMap == map) {
 	return;
  }
- boDebug() << k_funcinfo << endl;
  mCurrentGroundThemeData = 0;
  mCurrentMap = map;
  BO_CHECK_NULL_RET(mCurrentMap);
@@ -1012,7 +1003,6 @@ void BoGroundRendererBase::updateMapCache(const BosonMap* map)
  }
  mCellListBuilder->updateMapCache(mCurrentMap);
  cellTextureChanged(0, 0, map->width(), map->height());
- boDebug() << k_funcinfo << "created arrays for " << vertexCount << " vertices" << endl;
 }
 
 void BoGroundRendererBase::generateCellList(const BosonMap* map)
@@ -1165,7 +1155,6 @@ BoColorMapRenderer* BoGroundRendererBase::getUpdatedColorMapRenderer(BoColorMap*
 	r->update();
 	return r;
  }
- boDebug() << k_funcinfo << "creating new colormap renderer" << endl;
  r = new BoColorMapRenderer(map);
  mColorMapRenderers.insert(map, r);
  return r;

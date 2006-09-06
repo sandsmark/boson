@@ -135,7 +135,6 @@ void BosonUfoMiniMapDisplay::setShowMiniMap(bool s)
 void BosonUfoMiniMapDisplay::createMap(BosonCanvas* c, const BoGLMatrices* gameGLMatrices)
 {
  BO_CHECK_NULL_RET(c);
- boDebug() << k_funcinfo << endl;
 
  delete d->mMiniMapView;
  d->mMiniMapView = new BosonGLMiniMapView(gameGLMatrices, this);
@@ -143,7 +142,6 @@ void BosonUfoMiniMapDisplay::createMap(BosonCanvas* c, const BoGLMatrices* gameG
  d->mMiniMapView->setCanvas(c);
  d->mMiniMapView->setLocalPlayerIO(localPlayerIO());
  d->mMiniMapView->createMap(c->mapWidth(), c->mapHeight());
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 

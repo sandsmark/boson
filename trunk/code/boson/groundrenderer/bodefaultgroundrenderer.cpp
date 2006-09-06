@@ -346,7 +346,6 @@ void BoDefaultGroundRenderer::updateMapCache(const BosonMap* map)
  if (!map) {
 	return;
  }
- boDebug() << k_funcinfo << map->width() << " " << map->height() << endl;
  mTextureIndices.resize(map->groundTheme()->groundTypeCount());
  for (unsigned int i = 0; i < map->groundTheme()->groundTypeCount(); i++) {
 	mTextureIndices[i] = new QMemArray<unsigned int>();
@@ -356,8 +355,6 @@ void BoDefaultGroundRenderer::updateMapCache(const BosonMap* map)
  boglGenBuffers(1, &mVBOVertex);
  boglGenBuffers(1, &mVBONormal);
  boglGenBuffers(1, &mVBOColor);
-
- boDebug() << k_funcinfo << endl;
 
  // apply data to the vertex VBO
  updateVertexVBO();
@@ -402,6 +399,7 @@ void BoDefaultGroundRenderer::updateVertexVBO()
  boglBindBuffer(GL_ARRAY_BUFFER, mVBOVertex);
  // AB: could probably be done more efficiently
  boglBufferData(GL_ARRAY_BUFFER, vertexCount * 3 * sizeof(float), mVertexArray, GL_STATIC_DRAW);
+ boDebug() << k_funcinfo << "done" << endl;
 #endif
 }
 
@@ -426,6 +424,7 @@ void BoDefaultGroundRenderer::updateColorVBO()
  boglBindBuffer(GL_ARRAY_BUFFER, mVBOColor);
  // AB: could probably be done more efficiently
  boglBufferData(GL_ARRAY_BUFFER, vertexCount * mCurrentMap->groundTheme()->groundTypeCount() * 4 * sizeof(unsigned char), mColorArray, GL_STATIC_DRAW);
+ boDebug() << k_funcinfo << "done" << endl;
 #endif
 }
 

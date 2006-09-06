@@ -39,7 +39,6 @@ static KStaticDeleter<KRandomSequence> sd;
 
 void BosonEffect::initStatic(const QString& particletexdir)
 {
-  boDebug() << k_funcinfo << "" << endl;
   if (mRandom)
   {
     boError(150) << k_funcinfo << "called twice" << endl;
