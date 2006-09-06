@@ -1336,7 +1336,6 @@ QValueList<QColor> Boson::availableTeamColors() const
  QPtrListIterator<Player> it(*gamePlayerList());
  while (it.current()) {
 	if (it.current()->speciesTheme()) {
-		boDebug() << k_funcinfo << endl;
 		colors.remove(it.current()->speciesTheme()->teamColor());
 	}
 	++it;

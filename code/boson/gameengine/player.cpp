@@ -92,7 +92,6 @@ public:
 
 Player::Player(bool isNeutralPlayer) : KPlayer()
 {
- boDebug() << k_funcinfo << endl;
  mSpecies = 0;
  d = new PlayerPrivate;
  d->mExploredCount = 0;
@@ -132,13 +131,11 @@ Player::Player(bool isNeutralPlayer) : KPlayer()
 
 Player::~Player()
 {
- boDebug() << k_funcinfo << endl;
  quitGame(true);
  dataHandler()->clear(); // this must not be in quitGame()
  delete mSpecies;
  delete d->mPlayerIO;
  delete d;
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 int Player::bosonId() const
@@ -352,7 +349,6 @@ bool Player::save(QDataStream& stream)
 {
 // we need save() and load() for the new game dialog. The units part should be
 // unused, only the species theme should be necessary.
- boDebug() << k_funcinfo << endl;
  if (!KPlayer::save(stream)) {
 	boError() << k_funcinfo << "Couldn't save KPlayer" << endl;
 	return false;
@@ -388,7 +384,6 @@ bool Player::save(QDataStream& stream)
 
 bool Player::load(QDataStream& stream)
 {
- boDebug() << k_funcinfo << endl;
  if (!KPlayer::load(stream)) {
 	boError() << k_funcinfo << "Couldn't load KPlayer" << endl;
 	return false;
@@ -970,7 +965,6 @@ void Player::technologyResearched(ProductionPlugin* plugin, unsigned long int ty
 {
  BO_CHECK_NULL_RET(plugin);
  BO_CHECK_NULL_RET(plugin->unit());
- boDebug() << k_funcinfo << "type: " << type << endl;
  // Check if it isn't researched already
  if (d->mResearchedUpgrades.contains(type)) {
 	boError() << k_funcinfo << "upgrade " << type << " already researched!" << endl;
@@ -1176,7 +1170,6 @@ bool Player::loadFogOfWar(const QDomElement& root)
 	d->mExploredCount = d->mExplored.size();
 	return false;
  }
- boDebug() << k_funcinfo << "decoding" << endl;
  d->mExplored = BoBinCoder::toBinary(text);
  d->mExploredCount = 0;
  for (unsigned int i = 0; i < d->mExplored.size(); i++) {
@@ -1184,7 +1177,6 @@ bool Player::loadFogOfWar(const QDomElement& root)
 		d->mExploredCount++;
 	}
  }
- boDebug() << k_funcinfo << "decoded: " << d->mExplored.size() << endl;
  if (d->mMap) {
 	if (d->mMap->width() * d->mMap->height() != d->mExplored.size()) {
 		boError() << k_funcinfo << "exploration fog loaded: " << d->mExplored.size() << " map size: " << d->mMap->width() << "x" << d->mMap->height() << endl;
@@ -1202,7 +1194,6 @@ bool Player::loadFogOfWar(const QDomElement& root)
 	boError() << k_funcinfo << "no content for Fogged tag found" << endl;
 	return false;
  }
- boDebug() << k_funcinfo << "decoding" << endl;
  d->mFoggedRef = new unsigned short int[d->mMap->width() * d->mMap->height()];
  int cellCount = d->mMap->width() * d->mMap->height();
  BoBinCoder::toCharArray(fogtext, (char*)d->mFoggedRef, cellCount * sizeof(unsigned short int));
