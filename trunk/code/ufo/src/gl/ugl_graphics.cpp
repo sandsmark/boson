@@ -135,10 +135,6 @@ UGL_Graphics::resetDeviceViewMatrix() {
 
 URectangle
 UGL_Graphics::mapToDevice(const URectangle & rect) {
-	// FIXME
-	// this works only when the graphic viewport was set by the graphics object
-	//const UPoint & pos = w->pointToRootPoint(rect.x, rect.y);
-
 	int vport[4];
 	ugl_driver->glGetIntegerv(GL_VIEWPORT, vport);
 
@@ -151,8 +147,6 @@ UGL_Graphics::mapFromDevice(const URectangle & rect) {
 	int vport[4];
 	ugl_driver->glGetIntegerv(GL_VIEWPORT, vport);
 
-	// FIXME
-	// this is simply wrong
 	// y-flip
 	return URectangle(rect.x - vport[0], - vport[1] - vport[3] + rect.y + rect.h, rect.w, rect.h);
 }
@@ -493,17 +487,34 @@ UGL_Graphics::drawVertexArray(VertexType type, UVertexArray * buffer) {
 			glType = GL_LINE_STRIP;
 		break;
 	}
+	// workaround for buggy glPopClientAttrib in MESA 6.4.*
+	GLboolean vertexArrayWasEnabled = false;
+	GLboolean colorArrayWasEnabled = false;
+	ugl_driver->glGetBooleanv(GL_VERTEX_ARRAY, &vertexArrayWasEnabled);
+	ugl_driver->glGetBooleanv(GL_COLOR_ARRAY, &colorArrayWasEnabled);
 	if (buffer->getType() == UVertexArray::V3F) {
+		ugl_driver->glEnableClientState(GL_VERTEX_ARRAY);
 		ugl_driver->glInterleavedArrays(GL_V3F, 0, buffer->getArray());
 		ugl_driver->glDrawArrays(glType, 0, buffer->getCount());
+		if (!vertexArrayWasEnabled) {
+			ugl_driver->glDisableClientState(GL_VERTEX_ARRAY);
+		}
 	} else if (buffer->getType() == UVertexArray::C3F_V3F) {
 		// we use color arrays ...
-		ugl_driver->glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
+		//ugl_driver->glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
+		ugl_driver->glEnableClientState(GL_VERTEX_ARRAY);
+		ugl_driver->glEnableClientState(GL_COLOR_ARRAY);
 		ugl_driver->glShadeModel(GL_SMOOTH);
 		ugl_driver->glInterleavedArrays(GL_C3F_V3F, 0, buffer->getArray());
 		ugl_driver->glDrawArrays(glType, 0, buffer->getCount());
 		ugl_driver->glShadeModel(GL_FLAT);
-		ugl_driver->glPopClientAttrib();
+		//ugl_driver->glPopClientAttrib();
+		if (!vertexArrayWasEnabled) {
+			ugl_driver->glDisableClientState(GL_VERTEX_ARRAY);
+		}
+		if (!colorArrayWasEnabled) {
+			ugl_driver->glDisableClientState(GL_COLOR_ARRAY);
+		}
 	}
 			ugl_driver->glTranslatef(-ufo_line_add, -ufo_line_add, 0);
 	switch (type) {

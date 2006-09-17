@@ -33,6 +33,10 @@ Patches applied currently:
   method.
   The methods used are virtual and do nothing by default - it is up to the
   user to implement real profiling.
+- Backporting from official libcvs (2006/09/17):
+   Patch to ugl_prototypes.hpp (r1.10 in official cvs)
+   Patch to ugl_graphics.cpp (r1.21 in official cvs)
+  -> workaround for mesa bug
 
 
 
