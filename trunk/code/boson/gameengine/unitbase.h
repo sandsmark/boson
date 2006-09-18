@@ -133,6 +133,21 @@ public:
 		MustSearchPath = 5
 	};
 
+	/**
+	 * Describes whether and how this unit is or has been detected by a player
+	*
+	* @li VS_Never Unit has never been seen by the player
+	* @li VS_Earlier Unit was seen earlier but is not visible anymore
+	* @li VS_Radar Unit is detected by the player's radar
+	* @li VS_Visible Unit is visible by the player
+	 **/
+	enum VisibleStatus {
+		VS_Never = 0,
+		VS_Earlier = 1,
+		VS_Radar = 2,
+		VS_Visible = 4
+	};
+
 	UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
 	virtual ~UnitBase();
 
@@ -394,6 +409,15 @@ public:
 		mRadarSignalStrength[playerid - 128] = value;
 	}
 
+	inline VisibleStatus visibleStatus(int playerid) const
+	{
+		return mVisibleStatus[playerid - 128];
+	}
+	inline void setVisibleStatus(int playerid, VisibleStatus value)
+	{
+		mVisibleStatus[playerid - 128] = value;
+	}
+
 protected:
 	/**
 	 * Should get called in every @ref Unit::advance call. This counts the
@@ -451,6 +475,7 @@ private:
 	bool mScheduledForSightUpdate;
 	bool mScheduledForRadarUpdate;
 	bofixed mRadarSignalStrength[BOSON_MAX_PLAYERS];
+	VisibleStatus mVisibleStatus[BOSON_MAX_PLAYERS];
 };
 
 #endif

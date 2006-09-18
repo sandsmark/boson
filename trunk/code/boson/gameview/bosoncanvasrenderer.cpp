@@ -1509,14 +1509,19 @@ void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* rende
 	// width/height.
 	// but concerning z-position they are rendered from bottom to top!
 
-	if (!localPlayerIO()->canSee(item)) {
-		if (RTTI::isUnit(item->rtti())) {
-			Unit* u = (Unit*)item;
+	if (RTTI::isUnit(item->rtti())) {
+		Unit* u = (Unit*)item;
+		if (!(u->visibleStatus(localPlayerIO()->playerId()) & (UnitBase::VS_Visible | UnitBase::VS_Earlier))) {
 			if (u->radarSignalStrength(localPlayerIO()->playerId()) >= 1) {
 				radarContactList->append(u);
 			}
+			continue;
 		}
-		continue;
+	} else {
+		// It's an item, not unit
+		if (!localPlayerIO()->canSee(item)) {
+			continue;
+		}
 	}
 
 	unsigned int modelid = 0;

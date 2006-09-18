@@ -170,10 +170,10 @@ void BosonGameViewInputBase::selectArea(BoItemList* itemsInArea, bool replace)
 		boError() << k_funcinfo << "item is not on the canvas" << endl;
 		continue;
 	}
-	if (!localPlayerIO()->canSee(*it)) {
-		continue;
-	}
 	Unit* unit = (Unit*)*it;
+	if (!(unit->visibleStatus(localPlayerIO()->playerId()) & (UnitBase::VS_Visible | UnitBase::VS_Earlier))) {
+		//continue;
+	}
 	CanSelectUnit s = canSelect(unit);
 	switch (s) {
 		case CanSelectSingleOk:

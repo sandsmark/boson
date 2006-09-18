@@ -45,6 +45,7 @@
 #include "bosonpath.h"
 #include "bowater.h"
 #include "bocanvasquadtreenode.h"
+#include "playerio.h"
 
 #include <klocale.h>
 #include <kgame/kgamepropertyhandler.h>
@@ -142,6 +143,8 @@ public:
 	void addSight(Unit* unit);
 	void removeSight(Unit* unit);
 	void updateSight(Unit* unit, bofixed oldX, bofixed oldY);
+
+	void updateVisibleStatus(Unit* unit);
 
 	void addRadar(Unit* unit);
 	void removeRadar(Unit* unit);
@@ -294,6 +297,10 @@ void BoCanvasSightManager::updateSight(Unit* unit, bofixed oldX, bofixed oldY)
 		}
 	}
  }
+
+ // Update visible status of the unit for all players
+ updateVisibleStatus(unit);
+
  unit->setScheduledForSightUpdate(false);
 }
 
@@ -356,6 +363,31 @@ void BoCanvasSightManager::removeSight(Unit* unit)
 	}
  }
  unit->setScheduledForSightUpdate(false);
+}
+
+void BoCanvasSightManager::updateVisibleStatus(Unit* unit)
+{
+ QPtrList<Player>* players = boGame->activeGamePlayerList();
+ for (QPtrListIterator<Player> pit(*players); pit.current(); ++pit) {
+	Player* player = pit.current();
+	if (unit->owner() == player) {
+		continue;
+	}
+	bool visible = player->playerIO()->canSee(unit);
+	UnitBase::VisibleStatus status = unit->visibleStatus(player->bosonId());
+	if ((status & UnitBase::VS_Visible) == visible) {
+		continue;
+	}
+	if (visible) {
+		if (unit->isFacility()) {
+			unit->setVisibleStatus(player->bosonId(), (UnitBase::VisibleStatus)(status | UnitBase::VS_Visible | UnitBase::VS_Earlier));
+		} else {
+			unit->setVisibleStatus(player->bosonId(), (UnitBase::VisibleStatus)(status | UnitBase::VS_Visible));
+		}
+	} else {
+		unit->setVisibleStatus(player->bosonId(), (UnitBase::VisibleStatus)(status & ~UnitBase::VS_Visible));
+	}
+ }
 }
 
 void BoCanvasSightManager::updateRadars()

@@ -135,7 +135,7 @@ QPtrList<Unit> PlayerIO::allUnits() const
 	if (u->isDestroyed()) {
 		continue;
 	}
-	if (!canSee(u)) {
+  if (!(u->visibleStatus(playerId()) & (UnitBase::VS_Visible | UnitBase::VS_Earlier))) {
 		continue;
 	}
 	list.append(u);
@@ -368,7 +368,7 @@ Unit* PlayerIO::findUnit(unsigned long int id) const
  if (!u) {
 	return 0;
  }
- if (!canSee(u)) {
+ if (!(u->visibleStatus(playerId()) & (UnitBase::VS_Visible | UnitBase::VS_Earlier))) {
 	return 0;
  }
  return u;
@@ -389,12 +389,15 @@ BoItemList* PlayerIO::unitsAtCells(const QPtrVector<const Cell>* cells) const
 		boError() << "invalid cell at " << i << endl;
 		continue;
 	}
-	if (!canSee(c)) {
-		continue;
-	}
 	cellItems = c->items();
 	for (it = cellItems->begin(); it != cellItems->end(); ++it) {
 		s = *it;
+		if (!RTTI::isUnit(s->rtti())) {
+			continue;
+		}
+		if (!(((Unit*)s)->visibleStatus(playerId()) & (UnitBase::VS_Visible | UnitBase::VS_Earlier))) {
+			continue;
+		}
 		if (collisions->findIndex(s) < 0) {
 			collisions->append(s);
 		}
