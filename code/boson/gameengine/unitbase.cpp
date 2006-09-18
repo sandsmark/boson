@@ -55,6 +55,10 @@ UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canva
  mScheduledForRadarUpdate = false;
  for (int i = 0; i < BOSON_MAX_PLAYERS; i++) {
 	mRadarSignalStrength[i] = 0;
+	mVisibleStatus[i] = VS_Never;
+ }
+ if (owner->isActiveGamePlayer()) {
+	setVisibleStatus(owner->bosonId(), VS_Visible);
  }
 
  registerData(&mShieldReloadCounter, IdShieldReloadCounter);

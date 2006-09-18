@@ -459,6 +459,9 @@ protected:
 	bool loadFogOfWar(const QDomElement& root);
 	bool loadAmmunition(const QDomElement& root);
 
+  void fog(int x, int y);
+  void unfog(int x, int y);
+
 private:
 	PlayerPrivate* d;
 

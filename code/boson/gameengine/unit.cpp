@@ -1490,7 +1490,7 @@ BoItemList* Unit::unitsInRange(unsigned long int range) const
 	if (u->isDestroyed()) {
 		continue;
 	}
-	if (!ownerIO()->canSee(u)) {
+	if (!(u->visibleStatus(owner()->bosonId()) & (UnitBase::VS_Visible | UnitBase::VS_Earlier))) {
 		continue;
 	}
 	if (!inRange(range, u)) {

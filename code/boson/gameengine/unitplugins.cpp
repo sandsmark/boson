@@ -1150,7 +1150,7 @@ ResourceMinePlugin* HarvesterPlugin::findClosestResourceMine() const
  bofixed mineDist = 0.0f;
  while (it.current()) {
 	Unit* u = it.current();
-	if (!player()->playerIO()->canSee(u)) {
+	if (!(u->visibleStatus(player()->bosonId()) & (UnitBase::VS_Visible | UnitBase::VS_Earlier))) {
 		++it;
 		continue;
 	}

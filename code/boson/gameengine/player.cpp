@@ -37,6 +37,8 @@
 #include "bodebug.h"
 #include "bobincoder.h"
 #include "boevent.h"
+#include "boitemlist.h"
+#include "cell.h"
 
 #include <kgame/kgame.h>
 #include <kgame/kgamemessage.h>
@@ -472,9 +474,8 @@ void Player::addFogRef(int x, int y)
  unsigned int index = x + d->mMap->width() * y;
  d->mFoggedRef[index]++;
  if (d->mFoggedRef[index] == 1) {
-	d->mUnfoggedCount++;
 	explore(x, y);
-	emit signalUnfog(x, y);
+	unfog(x, y);
  }
 }
 
@@ -491,10 +492,60 @@ void Player::removeFogRef(int x, int y)
  }
  d->mFoggedRef[index]--;
  if (d->mFoggedRef[index] == 0) {
-	d->mUnfoggedCount--;
-	emit signalFog(x, y);
+	fog(x, y);
  }
 }
+
+void Player::fog(int x, int y)
+{
+ d->mUnfoggedCount--;
+
+ if (isActiveGamePlayer()) {
+	const BoItemList* cellItems = d->mMap->cell(x, y)->items();
+	for (BoItemList::ConstIterator it = cellItems->begin(); it != cellItems->end(); ++it) {
+		if (!RTTI::isUnit((*it)->rtti())) {
+			// this item is not important for us here
+			continue;
+		}
+		Unit* unit = (Unit*)*it;
+		if (playerIO()->canSee(unit)) {
+			continue;
+		}
+		// We can't see this unit anymore
+		unit->setVisibleStatus(bosonId(), (UnitBase::VisibleStatus)(unit->visibleStatus(bosonId()) & ~UnitBase::VS_Visible));
+	}
+ }
+
+ emit signalFog(x, y);
+}
+
+void Player::unfog(int x, int y)
+{
+ d->mUnfoggedCount++;
+
+ if (isActiveGamePlayer()) {
+	const BoItemList* cellItems = d->mMap->cell(x, y)->items();
+	for (BoItemList::ConstIterator it = cellItems->begin(); it != cellItems->end(); ++it) {
+		if (!RTTI::isUnit((*it)->rtti())) {
+			// this item is not important for us here
+			continue;
+		}
+		Unit* unit = (Unit*)*it;
+		if (!playerIO()->canSee(unit)) {
+			continue;
+		}
+		// We can now see this unit
+		if (unit->isFacility()) {
+			unit->setVisibleStatus(bosonId(), (UnitBase::VisibleStatus)(unit->visibleStatus(bosonId()) | UnitBase::VS_Visible | UnitBase::VS_Earlier));
+		} else {
+			unit->setVisibleStatus(bosonId(), (UnitBase::VisibleStatus)(unit->visibleStatus(bosonId()) | UnitBase::VS_Visible));
+		}
+	}
+ }
+
+ emit signalUnfog(x, y);
+}
+
 
 bool Player::isFogged(int x, int y) const
 {

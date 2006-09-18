@@ -728,7 +728,7 @@ void BosonGLCompleteMiniMap::updateRadarTexture(const QValueList<const Unit*>* r
 		continue;
 	}
 	BoVector2Float itempos = u->center().toFloat();
-	if (localPlayerIO()->canSee(u) && localPlayerIO()->isEnemy(u)) {
+	if (u->visibleStatus(localPlayerIO()->playerId()) & (UnitBase::VS_Visible | UnitBase::VS_Earlier) && localPlayerIO()->isEnemy(u)) {
 		// Visible enemies will be shown as red dots
 		// TODO: render all visible enemies, not just those in radar range
 		glColor4f(0.7, 0.0, 0.0, 1.0);
