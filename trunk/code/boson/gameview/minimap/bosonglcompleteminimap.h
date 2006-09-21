@@ -33,8 +33,6 @@ class Cell;
 class KGameIO;
 class BoGLMatrices;
 class BoTexture;
-class BosonItem;
-class BosonMiniMapQuadtreeNode;
 class RadarPlugin;
 
 class QPixmap;
@@ -102,9 +100,6 @@ public:
 
 public slots:
 	void slotAdvance(unsigned int advanceCallsCount);
-	void slotUnitMoved(Unit* unit, bofixed oldX, bofixed oldY);
-	void slotUnitRemoved(Unit* unit);
-	void slotItemAdded(BosonItem* item);
 	void slotUpdateTerrainAtCorner(int x, int y);
 	void slotExplored(int x, int y);
 	void slotUnexplored(int x, int y);
@@ -113,7 +108,7 @@ private:
 	void initializeItems();
 
 	void renderMiniMap();
-	void updateRadarTexture(const QValueList<const Unit*>* radars, BosonMiniMapQuadtreeNode* unitTree);
+	void updateRadarTexture(const QValueList<const Unit*>* radars);
 	void renderRadarRangeIndicators(const QValueList<const Unit*>* radarlist);
 
 	/**
@@ -126,7 +121,6 @@ private:
 	void calculateGround(int x, int y);
 
 	const QValueList<const Unit*>* radarList() const;
-	BosonMiniMapQuadtreeNode* unitTree() const;
 
 	void setPoint(int x, int y, const QColor& color, GLubyte* textureData, BoTexture* texture);
 	void unsetPoint(int x, int y, GLubyte* textureData, BoTexture* texture);

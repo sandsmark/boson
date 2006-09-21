@@ -353,8 +353,9 @@ void BosonGLMiniMapView::renderCamera()
  TLN.setY((TLN.y()) / mapHeight() + 1.0f);
 
  // Render a semitransparent yellow quad to better illustrate the visible area
- glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT);
+// glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT);
  glEnable(GL_BLEND);
+ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  glShadeModel(GL_SMOOTH);
  glBegin(GL_QUADS);
 	// Far side of the quad is more transparent...
@@ -362,28 +363,30 @@ void BosonGLMiniMapView::renderCamera()
 	glVertex3fv(TLF.data());
 	glVertex3fv(TRF.data());
 	// ... and the front one is less
-	glColor4f(1.0, 1.0, 0.0, 0.3);
+	glColor4f(1.0, 1.0, 0.0, 0.25);
 	glVertex3fv(BRF.data());
 	glVertex3fv(BLF.data());
  glEnd();
- glPopAttrib();
 
  // now the points should be final - we can draw our lines onto the minimap
- glColor3ub(192, 192, 192);
+ glColor3ub(160, 160, 160);
+ glEnable(GL_LINE_SMOOTH);
  glBegin(GL_LINES);
 	drawLine(BLF, BRF, 1, 1);
-	drawLine(BRF, BRN, 1, 1);
-	drawLine(BRN, BLN, 1, 1);
-	drawLine(BLN, BLF, 1, 1);
+	//drawLine(BRF, BRN, 1, 1);
+	//drawLine(BRN, BLN, 1, 1);
+	//drawLine(BLN, BLF, 1, 1);
 	drawLine(TLF, TRF, 1, 1);
-	drawLine(TRF, TRN, 1, 1);
-	drawLine(TRN, TLN, 1, 1);
-	drawLine(TLN, TLF, 1, 1);
+	//drawLine(TRF, TRN, 1, 1);
+	//drawLine(TRN, TLN, 1, 1);
+	//drawLine(TLN, TLF, 1, 1);
 	drawLine(BLF, TLF, 1, 1);
 	drawLine(BRF, TRF, 1, 1);
-	drawLine(BRN, TRN, 1, 1);
-	drawLine(BLN, TLN, 1, 1);
+	//drawLine(BRN, TRN, 1, 1);
+	//drawLine(BLN, TLN, 1, 1);
  glEnd();
+ glDisable(GL_LINE_SMOOTH);
+ glDisable(GL_BLEND);
  glColor3ub(255, 255, 255);
 }
 
