@@ -2476,6 +2476,7 @@ BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type
 		// FIXME: this is hackish
 		unitMovingStatusChanges(unit, UnitBase::Moving, UnitBase::Standing);
 		// This unit might be a radar and/or radar jammer
+		d->mSightManager->updateVisibleStatus(unit);
 		addRadar(unit);
 		addRadarJammer(unit);
 	}
