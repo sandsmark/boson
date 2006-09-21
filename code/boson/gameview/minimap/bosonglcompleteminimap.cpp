@@ -674,10 +674,6 @@ void BosonGLCompleteMiniMap::updateRadarTexture(const QValueList<const Unit*>* r
  glViewport(0, 0, d->mMapWidth, d->mMapHeight);
  glDisable(GL_SCISSOR_TEST);
  glClear(GL_COLOR_BUFFER_BIT);
- if (radarlist->isEmpty()) {
-	glPopAttrib();
-	return;
- }
 
  glMatrixMode(GL_MODELVIEW);
  glPushMatrix();
