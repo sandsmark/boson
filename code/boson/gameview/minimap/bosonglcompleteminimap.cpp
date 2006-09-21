@@ -48,7 +48,7 @@
 
 
 
-#define USE_EXPERIMENTAL_QUADTREE_THINGY
+//#define USE_EXPERIMENTAL_QUADTREE_THINGY
 #ifdef USE_EXPERIMENTAL_QUADTREE_THINGY
 #include "boquadtreenode.h"
 
@@ -352,8 +352,6 @@ public:
 
 		mCanvas = 0;
 		mLocalPlayerIO = 0;
-
-		mUnitTree = 0;
 	}
 
 	bool mMapCreated;
@@ -384,8 +382,6 @@ public:
 
 	BosonCanvas* mCanvas;
 	PlayerIO* mLocalPlayerIO;
-
-	BosonMiniMapQuadtreeNode* mUnitTree;
 };
 
 BosonGLCompleteMiniMap::BosonGLCompleteMiniMap(QObject* parent)
@@ -570,11 +566,6 @@ void BosonGLCompleteMiniMap::createMap(unsigned int w, unsigned int h)
 
  setUpdatesEnabled(false);
 
-#ifdef USE_EXPERIMENTAL_QUADTREE_THINGY
- delete d->mUnitTree;
- d->mUnitTree = BosonMiniMapQuadtreeNode::createTree(canvas()->mapWidth(), canvas()->mapHeight());
-#endif
-
  for (unsigned int x = 0; x < canvas()->mapWidth(); x++) {
 	for (unsigned int y = 0; y < canvas()->mapHeight(); y++) {
 		calculateGround(x, y);
@@ -617,7 +608,7 @@ void BosonGLCompleteMiniMap::renderMiniMap()
 
  if (d->mAdvanceCallsSinceLastUpdate >= 40) {
 	d->mUnitTarget->enable();
-	updateRadarTexture(radarList(), d->mUnitTree);
+	updateRadarTexture(radarList());
 	d->mUnitTarget->disable();
  }
 
@@ -661,7 +652,7 @@ void BosonGLCompleteMiniMap::renderMiniMap()
  glPopMatrix();
 }
 
-void BosonGLCompleteMiniMap::updateRadarTexture(const QValueList<const Unit*>* radarlist, BosonMiniMapQuadtreeNode* unitTree)
+void BosonGLCompleteMiniMap::updateRadarTexture(const QValueList<const Unit*>* radarlist)
 {
  BO_CHECK_NULL_RET(localPlayerIO());
 
@@ -904,51 +895,9 @@ void BosonGLCompleteMiniMap::setColor(int x, int y, const QColor& color, int alp
  }
 }
 
-void BosonGLCompleteMiniMap::slotUnitMoved(Unit* unit, bofixed oldX, bofixed oldY)
-{
- BO_CHECK_NULL_RET(unit);
-#ifdef USE_EXPERIMENTAL_QUADTREE_THINGY
- BosonProfiler p("d->mUnitTree->unitMoved()");
- if (d->mUnitTree) {
-	d->mUnitTree->unitMoved(unit, oldX, oldY);
- }
-#endif
-}
-
-void BosonGLCompleteMiniMap::slotUnitRemoved(Unit* unit)
-{
- BO_CHECK_NULL_RET(unit);
-#ifdef USE_EXPERIMENTAL_QUADTREE_THINGY
- if (d->mUnitTree) {
-	d->mUnitTree->removeUnit(unit);
- }
-#endif
-}
-
-void BosonGLCompleteMiniMap::slotItemAdded(BosonItem* item)
-{
- BO_CHECK_NULL_RET(localPlayerIO());
- BO_CHECK_NULL_RET(item);
- if (!RTTI::isUnit(item->rtti())) {
-	return;
- }
- Unit* u = (Unit*)item;
-#ifdef USE_EXPERIMENTAL_QUADTREE_THINGY
- BO_CHECK_NULL_RET(d->mUnitTree);
- if (d->mUnitTree) {
-	d->mUnitTree->addUnit(u);
- }
-#endif
-}
-
 const QValueList<const Unit*>* BosonGLCompleteMiniMap::radarList() const
 {
  return localPlayerIO()->player()->radarUnits();
-}
-
-BosonMiniMapQuadtreeNode* BosonGLCompleteMiniMap::unitTree() const
-{
- return d->mUnitTree;
 }
 
 void BosonGLCompleteMiniMap::slotUpdateTerrainAtCorner(int x, int y)
@@ -999,10 +948,7 @@ void BosonGLCompleteMiniMap::initializeItems()
  if (!d->mMapCreated) {
 	return;
  }
- BoItemList* allItems = canvas()->allItems();
- for (BoItemList::iterator it = allItems->begin(); it != allItems->end(); ++it) {
-	slotItemAdded(*it);
- }
+ // TODO: can this method be removed?
 }
 
 void BosonGLCompleteMiniMap::initFogOfWar(PlayerIO* p)

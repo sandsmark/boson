@@ -1434,12 +1434,6 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
 	if (displayInput()) {
 		disconnect(d->mGLMiniMap, 0, displayInput(), 0);
 	}
-	connect(mCanvas, SIGNAL(signalUnitMoved(Unit*, bofixed, bofixed)),
-		d->mGLMiniMap, SLOT(slotUnitMoved(Unit*, bofixed, bofixed)));
-	connect(mCanvas, SIGNAL(signalUnitRemoved(Unit*)),
-		d->mGLMiniMap, SLOT(slotUnitRemoved(Unit*)));
-	connect(mCanvas, SIGNAL(signalItemAdded(BosonItem*)),
-		d->mGLMiniMap, SLOT(slotItemAdded(BosonItem*)));
 	connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
 			d->mGLMiniMap, SLOT(slotAdvance(unsigned int)));
 

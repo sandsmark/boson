@@ -97,9 +97,6 @@ public slots:
 
 
 	void slotAdvance(unsigned int advanceCallsCount);
-	void slotUnitMoved(Unit* unit, bofixed oldX, bofixed oldY);
-	void slotUnitRemoved(Unit* unit);
-	void slotItemAdded(BosonItem* item);
 	void slotUpdateTerrainAtCorner(int x, int y);
 	void slotExplored(int x, int y);
 	void slotUnexplored(int x, int y);
