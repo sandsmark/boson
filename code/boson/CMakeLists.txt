@@ -254,6 +254,7 @@ set(bosonmainlib_SRCS
 	borendertarget.cpp
 	bonuminput.cpp
 	sound/bosonaudiointerface.cpp
+	bosongldriverworkarounds.cpp
 )
 kde3_add_ui_files(bosonmainlib_SRCS
 	bosonprofilingdialoggui.ui

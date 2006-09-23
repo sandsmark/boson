@@ -675,6 +675,16 @@ void BoWaterRenderer::renderChunk(BoLakeGL* lake, BoLakeGL::WaterChunk* chunk, f
   long int tm_initinfo, tm_initenv, tm_texmatrix, tm_miscinit, tm_dirty, tm_renderinit, tm_render, tm_uninit;
   BosonProfilingItem profiler;
 
+  if(boConfig->boolValue("EnableMesaVertexArrayWorkarounds"))
+  {
+    // broken mesa (<= 6.4.2 for stable an <= 6.5.1 for developer releases)
+    // will crash here, as we use glPopClientAttrib().
+    // -> mesa has a bug there, causing it to crash under certain circumstances
+    //    that we always fullfill here.
+    //    so we simply don't display any water.
+    return;
+  }
+
   // Create new RenderInfo object
   RenderInfo* info = new RenderInfo;
   info->lake = lake;

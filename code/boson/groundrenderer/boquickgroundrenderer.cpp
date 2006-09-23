@@ -103,6 +103,10 @@ bool BoQuickGroundRenderer::usable() const
   {
     return false;
   }
+  if(boConfig->boolValue("EnableMesaVertexArraysWorkarounds"))
+  {
+    return false;
+  }
 
   return true;
 }
