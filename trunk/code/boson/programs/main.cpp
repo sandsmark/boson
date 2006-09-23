@@ -64,6 +64,7 @@ static KCmdLineOptions options[] =
     { "noai", I18N_NOOP("Disable AI"), 0 },
     { "indirect", I18N_NOOP("Use Indirect rendering (sloooow!! - debugging only)"), 0 },
     { "ati-depth-workaround", I18N_NOOP("Enable the ATI (proprietary) driver workaround for reading the depth buffer. Will use depth of 0.00390625. This workaround is deprecated and not required anymore!"), 0 },
+    { "mesa-vertexarray-workaround", I18N_NOOP("Enable the MESA driver workaround for vertex arrays. This is required for mesa <= 6.5.1, which will probably crash otherwise."), 0 },
     { "ati-depth-workaround-depth <depth>", I18N_NOOP("Use with --ati-depth-workaround. Supply a depth value for your system (default=0.00390625)"), 0 },
     { "default-lodcount <count>", I18N_NOOP("Use <count> for default level of detail count"), 0 },
     { "nomodels", I18N_NOOP("Disable model loading for faster startup (you won't see the units)"), 0 },
@@ -121,6 +122,8 @@ int main(int argc, char **argv)
  BoApplication app(argv0);
  KGlobal::locale()->insertCatalogue("libkdegames");
 
+ KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
+
     // register ourselves as a dcop client
 //    app.dcopClient()->registerAs(app.name(), false);
 
@@ -150,6 +153,9 @@ int main(int argc, char **argv)
  }
 
  BosonGLDriverWorkarounds::initWorkarounds();
+ if (args->isSet("mesa-vertexarray-workaround")) {
+	boConfig->setBoolValue("EnableMesaVertexArraysWorkarounds", true);
+ }
 
  top->initUfoGUI();
 
@@ -172,7 +178,6 @@ int main(int argc, char **argv)
 	Bo3dTools::enableReadDepthBufferWorkaround((float)depth);
  }
 
- KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
  if (args->isSet("ati-depth-workaround") || args->isSet("ati-depth-workaround-depth")) {
 	// this is the value that a call to
 	// glReadPixels(x,y,1,1,GL_DEPTH_COMPONENT, GL_FLOAT, &depth); returns
