@@ -28,16 +28,16 @@
 #include "bogl_private.h"
 
 #include "bodebug.h"
+#include "myqlibrary.h"
 
-#include <qlibrary.h>
 #include <qstringlist.h>
 #include <qtextstream.h>
 #include <qfile.h>
 
 #include <stdlib.h>
 
-static QLibrary* loadLibrary(const QString& fileName);
-static QLibrary* loadLibraryFromFile(const QString& file);
+static MyQLibrary* loadLibrary(const QString& fileName);
+static MyQLibrary* loadLibraryFromFile(const QString& file);
 static void scanLdSoConf(QStringList* dirs, const QString& file, QStringList* scannedFiles = 0);
 static QStringList resolveWildcards(const QString& argument);
 static void resolveWildcards(QStringList* files, const QString& argument);
@@ -51,11 +51,13 @@ bool boglResolveGLSymbols()
  // vanilla debian systems libGLU.so may not exist. Only libGLU.so.1.3 does.
  // Therefore we must check whether the library got loaded and if not, we must
  // try to use all libGL.* (libGLU.*) files found.
-static QLibrary* loadLibrary(const QString& name)
+ //
+ // UPDATE: we use MyQLibrary now (not QLibrary anymore). same problem though,
+ //         as MyQLibrary will expect an absolute filename.
+static MyQLibrary* loadLibrary(const QString& name)
 {
- // "name" is not a file at this point, but it is good enough here.
  if (name.startsWith("/")) {
-	QLibrary* lib = loadLibraryFromFile(name);
+	MyQLibrary* lib = loadLibraryFromFile(name);
 	if (lib) {
 		return lib;
 	}
@@ -111,7 +113,7 @@ static QLibrary* loadLibrary(const QString& name)
 
  dirs.append("/usr/X11R6/lib");
 
- QLibrary* lib = 0;
+ MyQLibrary* lib = 0;
  QString suffix = ".so";
  for (QStringList::iterator dirit = dirs.begin(); dirit != dirs.end(); ++dirit) {
 	QString dirname = *dirit;
@@ -159,10 +161,9 @@ static QLibrary* loadLibrary(const QString& name)
  return lib;
 }
 
-static QLibrary* loadLibraryFromFile(const QString& file)
+static MyQLibrary* loadLibraryFromFile(const QString& file)
 {
- QLibrary* lib = new QLibrary(file);
- lib->setAutoUnload(false);
+ MyQLibrary* lib = new MyQLibrary(file);
  if (!lib->isLoaded() && !lib->load()) {
 	delete lib;
 	lib = 0;
@@ -302,7 +303,7 @@ bool BoGL::resolveGLSymbols()
  QString libGL;
  QString libGLU;
 
- QLibrary* gl = loadLibrary("GL");
+ MyQLibrary* gl = loadLibrary("GL");
  if (!gl) {
 	return false;
  }
@@ -323,7 +324,7 @@ bool BoGL::resolveGLSymbols()
 	return false;
  }
 
- QLibrary* glu = loadLibrary("GLU");
+ MyQLibrary* glu = loadLibrary("GLU");
  if (!glu) {
 	return false;
  }
