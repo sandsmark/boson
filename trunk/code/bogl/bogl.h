@@ -191,9 +191,9 @@ QStringList boglGetGLUExtensions();
 
 
 // internal
-class QLibrary;
-bool boglResolveLibGLSymbols(QLibrary& gl);
-bool boglResolveLibGLUSymbols(QLibrary& glu);
+class MyQLibrary;
+bool boglResolveLibGLSymbols(MyQLibrary& gl);
+bool boglResolveLibGLUSymbols(MyQLibrary& glu);
 
 /**
  * @internal

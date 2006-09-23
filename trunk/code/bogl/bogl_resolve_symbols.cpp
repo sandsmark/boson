@@ -25,8 +25,8 @@
 #include "boglx.h"
 
 #include "bodebug.h"
+#include "myqlibrary.h"
 
-#include <qlibrary.h>
 #include <qstringlist.h>
 
 #include <stdlib.h>
@@ -61,15 +61,15 @@
 
 
 
-static bool boglResolveGLXSymbols(QLibrary& gl);
-static bool boglResolveOpenGL_1_1_Symbols(QLibrary& gl);
-static bool boglResolveOpenGL_1_2_Symbols(QLibrary& gl);
-static bool boglResolveOpenGL_1_2_1_Symbols(QLibrary& gl);
-static bool boglResolveOpenGL_1_3_Symbols(QLibrary& gl);
-static bool boglResolveOpenGL_1_4_Symbols(QLibrary& gl);
-static bool boglResolveOpenGL_1_5_Symbols(QLibrary& gl);
-static bool boglResolveOpenGL_2_0_Symbols(QLibrary& gl);
-static bool boglResolveGLUSymbols(QLibrary& gl);
+static bool boglResolveGLXSymbols(MyQLibrary& gl);
+static bool boglResolveOpenGL_1_1_Symbols(MyQLibrary& gl);
+static bool boglResolveOpenGL_1_2_Symbols(MyQLibrary& gl);
+static bool boglResolveOpenGL_1_2_1_Symbols(MyQLibrary& gl);
+static bool boglResolveOpenGL_1_3_Symbols(MyQLibrary& gl);
+static bool boglResolveOpenGL_1_4_Symbols(MyQLibrary& gl);
+static bool boglResolveOpenGL_1_5_Symbols(MyQLibrary& gl);
+static bool boglResolveOpenGL_2_0_Symbols(MyQLibrary& gl);
+static bool boglResolveGLUSymbols(MyQLibrary& gl);
 static bool boglResolveARB_multitexture_Symbols();
 static bool boglResolveEXT_blend_color_Symbols();
 static bool boglResolveEXT_polygon_offset_Symbols();
@@ -78,7 +78,7 @@ static bool boglResolveARB_vertex_buffer_object_Symbols();
 static bool boglResolveARB_shader_objects_Symbols();
 static bool boglResolveEXT_framebuffer_object_Symbols();
 
-bool boglResolveLibGLSymbols(QLibrary& gl)
+bool boglResolveLibGLSymbols(MyQLibrary& gl)
 {
  if (!boglResolveGLXSymbols(gl)) {
 	return false;
@@ -145,7 +145,7 @@ void boglResolveGLExtensionSymbols()
 
 }
 
-bool boglResolveLibGLUSymbols(QLibrary& gl)
+bool boglResolveLibGLUSymbols(MyQLibrary& gl)
 {
  if (!boglResolveGLUSymbols(gl)) {
 	return false;
@@ -217,7 +217,7 @@ extern "C" {
 	_gluUnProject4 bo_gluUnProject4;
 }; // "C"
 
-bool boglResolveGLUSymbols(QLibrary& gl)
+bool boglResolveGLUSymbols(MyQLibrary& gl)
 {
  RESOLVE_CHECK(gluBeginCurve);
  RESOLVE_CHECK(gluBeginPolygon);
@@ -347,7 +347,7 @@ extern "C" {
 }; // extern "C"
 
 
-bool boglResolveGLXSymbols(QLibrary& gl)
+bool boglResolveGLXSymbols(MyQLibrary& gl)
 {
  RESOLVE_CHECK(glXChooseVisual);
  RESOLVE_CHECK(glXCopyContext);
@@ -762,7 +762,7 @@ extern "C" {
 
 }; // extern "C"
 
-bool boglResolveOpenGL_1_1_Symbols(QLibrary& gl)
+bool boglResolveOpenGL_1_1_Symbols(MyQLibrary& gl)
 {
  RESOLVE_CHECK(glGetError);
  RESOLVE_CHECK(glBegin);
@@ -1148,7 +1148,7 @@ extern "C" {
 	_glBlendEquation bo_glBlendEquation;
 }; // "C"
 
-bool boglResolveOpenGL_1_2_Symbols(QLibrary& gl)
+bool boglResolveOpenGL_1_2_Symbols(MyQLibrary& gl)
 {
  RESOLVE_CHECK(glTexImage3D);
  RESOLVE_CHECK(glTexSubImage3D);
@@ -1195,7 +1195,7 @@ bool boglResolveOpenGL_1_2_Symbols(QLibrary& gl)
  return true;
 }
 
-bool boglResolveOpenGL_1_2_1_Symbols(QLibrary& gl)
+bool boglResolveOpenGL_1_2_1_Symbols(MyQLibrary& gl)
 {
  // OpenGL 1.2.1 does not introduce new functions
  Q_UNUSED(gl);
@@ -1253,7 +1253,7 @@ extern "C" {
 	_glMultTransposeMatrixf bo_glMultTransposeMatrixf;
 };
 
-bool boglResolveOpenGL_1_3_Symbols(QLibrary& gl)
+bool boglResolveOpenGL_1_3_Symbols(MyQLibrary& gl)
 {
  RESOLVE(glCompressedTexImage1D);
  RESOLVE(glCompressedTexImage2D);
@@ -1353,7 +1353,7 @@ extern "C" {
 	_glWindowPos3sv bo_glWindowPos3sv;
 }; // extern "C"
 
-bool boglResolveOpenGL_1_4_Symbols(QLibrary& gl)
+bool boglResolveOpenGL_1_4_Symbols(MyQLibrary& gl)
 {
  RESOLVE(glFogCoordPointer);
  RESOLVE(glFogCoordf);
@@ -1428,7 +1428,7 @@ extern "C" {
 	_glGetQueryObjectuiv bo_glGetQueryObjectuiv;
 }; // extern "C"
 
-bool boglResolveOpenGL_1_5_Symbols(QLibrary& gl)
+bool boglResolveOpenGL_1_5_Symbols(MyQLibrary& gl)
 {
  RESOLVE(glBindBuffer);
  RESOLVE(glDeleteBuffers);
@@ -1549,7 +1549,7 @@ extern "C" {
 	_glBlendEquationSeparate bo_glBlendEquationSeparate;
 }; // extern "C"
 
-bool boglResolveOpenGL_2_0_Symbols(QLibrary& gl)
+bool boglResolveOpenGL_2_0_Symbols(MyQLibrary& gl)
 {
  RESOLVE(glDrawBuffers);
  RESOLVE(glStencilOpSeparate);
