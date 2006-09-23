@@ -675,7 +675,7 @@ void BoWaterRenderer::renderChunk(BoLakeGL* lake, BoLakeGL::WaterChunk* chunk, f
   long int tm_initinfo, tm_initenv, tm_texmatrix, tm_miscinit, tm_dirty, tm_renderinit, tm_render, tm_uninit;
   BosonProfilingItem profiler;
 
-  if(boConfig->boolValue("EnableMesaVertexArrayWorkarounds"))
+  if(boConfig->boolValue("EnableMesaVertexArraysWorkarounds"))
   {
     // broken mesa (<= 6.4.2 for stable an <= 6.5.1 for developer releases)
     // will crash here, as we use glPopClientAttrib().
