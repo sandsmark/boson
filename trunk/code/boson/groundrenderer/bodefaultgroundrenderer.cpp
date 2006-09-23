@@ -70,6 +70,19 @@ BoDefaultGroundRenderer::~BoDefaultGroundRenderer()
  mTextureIndices.clear();
 }
 
+bool BoDefaultGroundRenderer::usable() const
+{
+ bool u = BoGroundRendererBase::usable();
+ if (!u) {
+	return false;
+ }
+ if (boConfig->boolValue("EnableMesaVertexArraysWorkarounds")) {
+	// this renderer makes extensive use of vertex arrays. dont use it.
+	return false;
+ }
+ return true;
+}
+
 void BoDefaultGroundRenderer::clearVBOs()
 {
 #if USE_VBOS

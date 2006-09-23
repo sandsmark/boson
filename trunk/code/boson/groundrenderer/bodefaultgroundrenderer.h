@@ -45,6 +45,8 @@ public:
 	virtual void cellTextureChanged(int x1, int y1, int x2, int y2);
 	virtual void cellHeightChanged(int x1, int y1, int x2, int y2);
 
+	virtual bool usable() const;
+
 protected:
 	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map, RenderFlags flags);
 	virtual void generateCellList(const BosonMap* map);
