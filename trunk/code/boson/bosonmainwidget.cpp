@@ -277,14 +277,17 @@ void BosonMainWidget::initializeGL()
 
  connect(kapp->eventLoop(), SIGNAL(signalUpdateGL()), this, SLOT(slotUpdateGL()));
 
- initUfoGUI();
-
  recursive = false;
  boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonMainWidget::initUfoGUI()
 {
+ static bool initialized = false;
+ if (initialized) {
+	return;
+ }
+ initialized = true;
  PROFILE_METHOD
  glPushAttrib(GL_ALL_ATTRIB_BITS);
 

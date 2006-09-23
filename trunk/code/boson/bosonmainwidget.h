@@ -69,6 +69,11 @@ public:
 	BosonMainWidget(QWidget* parent, bool wantDirect = true);
 	virtual ~BosonMainWidget();
 
+	/**
+	 * Must be called exactly once right after the c'tor
+	 **/
+	void initUfoGUI();
+
 	void setGameEngine(BosonGameEngine*);
 
 
@@ -194,7 +199,6 @@ protected slots:
 
 private:
 	void init();
-	void initUfoGUI();
 
 	void initBoson();
 	void deleteBoson();

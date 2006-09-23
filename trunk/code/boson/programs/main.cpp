@@ -147,6 +147,9 @@ int main(int argc, char **argv)
  if (!top->directRendering()) {
 	KMessageBox::information(0, i18n("Direct rendering is NOT enabled! 3d acceleration is DISABLED.\nBoson will run very slowly (seconds per frame instead of frames per second).\n\nIf you are sure that your 3d drivers are installed correctly and support 3d acceleration, please let us know about this problem and help us fixing it: boson-devel@lists.sourceforge.net"));
  }
+
+ top->initUfoGUI();
+
  app.setMainWidget(top);
  top->show();
 
