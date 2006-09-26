@@ -1161,13 +1161,13 @@ bool BosonPlayField::convertFilesToCurrentFormat(QMap<QString, QByteArray>& dest
 		}
 		break;
 	}
-	case BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x03, 0x02):
+	case BOSON_SAVEGAME_FORMAT_VERSION_0_12:
 	{
 		const char* from = "0.12";
-		const char* to = "0.12.80";
+		const char* to = "0.13";
 		boDebug() << k_funcinfo << "converting from " << from << " to " << to << " format" << endl;
 		BosonFileConverter converter;
-		if (!converter.convertPlayField_From_0_12_To_0_12_80(destFiles)) {
+		if (!converter.convertPlayField_From_0_12_To_0_13(destFiles)) {
 			boError() << k_funcinfo << "could not convert from boson " << from << " to boson " << to << " file format" << endl;
 			ret = false;
 		} else {

@@ -563,7 +563,7 @@ Unit name will be visible for user, it should be descriptive and not very long a
                                 <cstring>mAboutLabel</cstring>
                             </property>
                             <property name="text">
-                                <string>&lt;b&gt;Boson Unit Editor&lt;/b&gt;  version 0.12</string>
+                                <string>&lt;b&gt;Boson Unit Editor&lt;/b&gt;  version 0.13</string>
                             </property>
                         </widget>
                         <widget class="QLabel">
