@@ -1530,7 +1530,7 @@ bool BosonFileConverter::convertPlayField_From_0_11_81_To_0_12(QMap<QString, QBy
  return true;
 }
 
-bool BosonFileConverter::convertPlayField_From_0_12_To_0_12_80(QMap<QString, QByteArray>& files)
+bool BosonFileConverter::convertPlayField_From_0_12_To_0_13(QMap<QString, QByteArray>& files)
 {
  QDomDocument kgameDoc(QString::fromLatin1("Boson"));
  if (!loadXMLDoc(&kgameDoc, files["kgame.xml"])) {
@@ -1540,13 +1540,7 @@ bool BosonFileConverter::convertPlayField_From_0_12_To_0_12_80(QMap<QString, QBy
 
  QDomElement kgameRoot = kgameDoc.documentElement();
 
-
-#if BOSON_VERSION_MINOR < 0x13
- kgameRoot.setAttribute("Version", BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x03, 0x03));
-#else
-#error TODO: the above version should be BOSON_SAVEGAME_FORMAT_VERSION_0_13
  kgameRoot.setAttribute("Version", BOSON_SAVEGAME_FORMAT_VERSION_0_13);
-#endif
 
  QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
  if (!loadXMLDoc(&canvasDoc, files["canvas.xml"])) {
