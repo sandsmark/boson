@@ -218,16 +218,16 @@ boson_target_link_libraries(bocommandframetester
 
 install_targets(/bin
 	boson
-	boson-no-gui
+#	boson-no-gui
 	bounit
-	borender
+#	borender
 	bocursor
 	bomodelpixmaps
 	boinfo
-	bo3dsdebug
+#	bo3dsdebug
 	boconditioneditor
 	boprofiling
-	bocommandframetester
+#	bocommandframetester
 )
 
 ################ bofileconverter #################
