@@ -291,27 +291,6 @@ void BosonUfoMiniMap::slotAdvance(unsigned int advanceCallsCount)
  }
 }
 
-void BosonUfoMiniMap::slotUnitMoved(Unit* unit, bofixed oldX, bofixed oldY)
-{
- if (miniMapView()) {
-	miniMapView()->slotUnitMoved(unit, oldX, oldY);
- }
-}
-
-void BosonUfoMiniMap::slotUnitRemoved(Unit* unit)
-{
- if (miniMapView()) {
-	miniMapView()->slotUnitRemoved(unit);
- }
-}
-
-void BosonUfoMiniMap::slotItemAdded(BosonItem* item)
-{
- if (miniMapView()) {
-	miniMapView()->slotItemAdded(item);
- }
-}
-
 void BosonUfoMiniMap::slotUpdateTerrainAtCorner(int x, int y)
 {
  if (miniMapView()) {
