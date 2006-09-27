@@ -125,6 +125,7 @@ set(gameengine_SRCS
 	gameengine/bosonitempropertyhandler.cpp
 	gameengine/fileconverter/bosonplayfieldconverter.cpp
 	gameengine/fileconverter/bosonfileconverter.cpp
+	gameengine/fileconverter/bosavegameconverter.cpp
 )
 kde3_automoc(${gameengine_SRCS})
 boson_add_library(gameengine STATIC ${gameengine_SRCS})

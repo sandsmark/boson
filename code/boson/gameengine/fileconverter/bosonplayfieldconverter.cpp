@@ -22,6 +22,7 @@
 #include "../../bomemory/bodummymemory.h"
 #include "../boversion.h"
 #include "bosonfileconverter.h"
+#include "bosavegameconverter.h"
 #include "bodebug.h"
 
 #include <qdom.h>
@@ -84,9 +85,22 @@ bool BosonPlayFieldConverter::convertFilesToCurrentFormat(QMap<QString, QByteArr
 	return false;
  }
 
- // AB: this is the point where you should insert your conversion code !
+ bool conversionSucceeded = true;
  bool handled = false;
- if (!convertFilesToCurrentFormat(destFiles, version, &handled)) {
+ QMap<int, BoSaveGameConverter*> converters = BoSaveGameConverter::createConverters();
+ if (!converters.contains(version)) {
+	handled = false;
+	conversionSucceeded = true;
+ } else {
+	conversionSucceeded = converters[version]->convertFiles(destFiles);
+	handled = true;
+ }
+ for (QMap<int, BoSaveGameConverter*>::iterator it = converters.begin(); it != converters.end(); ++it) {
+	delete it.data();
+ }
+ converters.clear();
+
+ if (!conversionSucceeded) {
 	boError() << k_funcinfo << "conversion failed" << endl;
 	return false;
  }
@@ -121,181 +135,5 @@ bool BosonPlayFieldConverter::convertFilesToCurrentFormat(QMap<QString, QByteArr
  return true;
 }
 
-
-bool BosonPlayFieldConverter::convertFilesToCurrentFormat(QMap<QString, QByteArray>& destFiles, unsigned int version, bool* handled)
-{
- // AB: this is where the conversion should be done!
- // (of course - most actual conversion code will be in BosonFileConverter)
-
- *handled = true;
- bool ret = false;
- switch (version) {
-	case BOSON_SAVEGAME_FORMAT_VERSION_0_9:
-	{
-		boDebug() << k_funcinfo << "converting from 0.9 to 0.9.1 format" << endl;
-		BosonFileConverter converter;
-		if (!converter.convertPlayField_From_0_9_To_0_9_1(destFiles)) {
-			boError() << k_funcinfo << "could not convert from boson 0.9 to boson 0.9.1 file format" << endl;
-			ret = false;
-		} else {
-			ret = true;
-		}
-		break;
-	}
-	case BOSON_SAVEGAME_FORMAT_VERSION_0_9_1:
-	{
-		boDebug() << k_funcinfo << "converting from 0.9.1 to 0.10 format" << endl;
-		BosonFileConverter converter;
-		if (!converter.convertPlayField_From_0_9_1_To_0_10(destFiles)) {
-			boError() << k_funcinfo << "could not convert from boson 0.9 to boson 0.9.1 file format" << endl;
-			ret = false;
-		} else {
-			ret = true;
-		}
-		break;
-	}
-	case BOSON_SAVEGAME_FORMAT_VERSION_0_10:
-	{
-		boDebug() << k_funcinfo << "converting from 0.10 to 0.10.80 format" << endl;
-		BosonFileConverter converter;
-		if (!converter.convertPlayField_From_0_10_To_0_10_80(destFiles)) {
-			boError() << k_funcinfo << "could not convert from boson 0.10 to boson 0.10.80 file format" << endl;
-			ret = false;
-		} else {
-			ret = true;
-		}
-		break;
-	}
-	case BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x04): // development version ("0.10.80")
-	{
-		boDebug() << k_funcinfo << "converting from 0.10.80 to 0.10.81 format" << endl;
-		BosonFileConverter converter;
-		if (!converter.convertPlayField_From_0_10_80_To_0_10_81(destFiles)) {
-			boError() << k_funcinfo << "could not convert from boson 0.10.80 to boson 0.10.81 file format" << endl;
-			ret = false;
-		} else {
-			ret = true;
-		}
-		break;
-	}
-	case BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x05): // development version ("0.10.81")
-	{
-		boDebug() << k_funcinfo << "converting from 0.10.81 to 0.10.82 format" << endl;
-		BosonFileConverter converter;
-		if (!converter.convertPlayField_From_0_10_81_To_0_10_82(destFiles)) {
-			boError() << k_funcinfo << "could not convert from boson 0.10.81 to boson 0.10.82 file format" << endl;
-			ret = false;
-		} else {
-			ret = true;
-		}
-		break;
-	}
-	case BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x06): // development version ("0.10.82")
-	{
-		boDebug() << k_funcinfo << "converting from 0.10.82 to 0.10.83 format" << endl;
-		BosonFileConverter converter;
-		if (!converter.convertPlayField_From_0_10_82_To_0_10_83(destFiles)) {
-			boError() << k_funcinfo << "could not convert from boson 0.10.82 to boson 0.10.83 file format" << endl;
-			ret = false;
-		} else {
-			ret = true;
-		}
-		break;
-	}
-	case BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x07): // development version ("0.10.83")
-	{
-		boDebug() << k_funcinfo << "converting from 0.10.83 to 0.10.84 format" << endl;
-		BosonFileConverter converter;
-		if (!converter.convertPlayField_From_0_10_83_To_0_10_84(destFiles)) {
-			boError() << k_funcinfo << "could not convert from boson 0.10.83 to boson 0.10.84 file format" << endl;
-			ret = false;
-		} else {
-			ret = true;
-		}
-		break;
-	}
-	case BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x08): // development version ("0.10.84")
-	{
-		boDebug() << k_funcinfo << "converting from 0.10.84 to 0.10.85 format" << endl;
-		BosonFileConverter converter;
-		if (!converter.convertPlayField_From_0_10_84_To_0_10_85(destFiles)) {
-			boError() << k_funcinfo << "could not convert from boson 0.10.84 to boson 0.10.85 file format" << endl;
-			ret = false;
-		} else {
-			ret = true;
-		}
-		break;
-	}
-	case BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x09): // development version ("0.10.85")
-	{
-		boDebug() << k_funcinfo << "converting from 0.10.85 to 0.11 format" << endl;
-		BosonFileConverter converter;
-		if (!converter.convertPlayField_From_0_10_85_To_0_11(destFiles)) {
-			boError() << k_funcinfo << "could not convert from boson 0.10.85 to boson 0.11 file format" << endl;
-			ret = false;
-		} else {
-			ret = true;
-		}
-		break;
-	}
-	case BOSON_SAVEGAME_FORMAT_VERSION_0_11:
-	{
-		boDebug() << k_funcinfo << "converting from 0.11 to 0.11.80 format" << endl;
-		BosonFileConverter converter;
-		if (!converter.convertPlayField_From_0_11_To_0_11_80(destFiles)) {
-			boError() << k_funcinfo << "could not convert from boson 0.11 to boson 0.11.80 file format" << endl;
-			ret = false;
-		} else {
-			ret = true;
-		}
-		break;
-	}
-	case BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x03, 0x00): // development version ("0.11.80")
-	{
-		boDebug() << k_funcinfo << "converting from 0.11.80 to 0.11.81 format" << endl;
-		BosonFileConverter converter;
-		if (!converter.convertPlayField_From_0_11_80_To_0_11_81(destFiles)) {
-			boError() << k_funcinfo << "could not convert from boson 0.11.80 to boson 0.11.81 file format" << endl;
-			ret = false;
-		} else {
-			ret = true;
-		}
-		break;
-	}
-	case BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x03, 0x01): // development version ("0.11.81")
-	{
-		const char* from = "0.11.81";
-		const char* to = "0.12";
-		boDebug() << k_funcinfo << "converting from " << from << " to " << to << " format" << endl;
-		BosonFileConverter converter;
-		if (!converter.convertPlayField_From_0_11_81_To_0_12(destFiles)) {
-			boError() << k_funcinfo << "could not convert from boson " << from << " to boson " << to << " file format" << endl;
-			ret = false;
-		} else {
-			ret = true;
-		}
-		break;
-	}
-	case BOSON_SAVEGAME_FORMAT_VERSION_0_12:
-	{
-		const char* from = "0.12";
-		const char* to = "0.13";
-		boDebug() << k_funcinfo << "converting from " << from << " to " << to << " format" << endl;
-		BosonFileConverter converter;
-		if (!converter.convertPlayField_From_0_12_To_0_13(destFiles)) {
-			boError() << k_funcinfo << "could not convert from boson " << from << " to boson " << to << " file format" << endl;
-			ret = false;
-		} else {
-			ret = true;
-		}
-		break;
-	}
-	default:
-		*handled = false;
-		ret = true;
-		break;
- }
- return ret;
-}
 
 

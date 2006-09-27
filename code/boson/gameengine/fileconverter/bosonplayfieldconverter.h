@@ -19,8 +19,6 @@
 #ifndef BOSONPLAYFIELDCONVERTER_H
 #define BOSONPLAYFIELDCONVERTER_H
 
-#include <qobject.h>
-
 class BosonMap;
 class Boson;
 class BPFFile;
@@ -33,6 +31,8 @@ class QDomDocument;
 class QDomElement;
 class QDataStream;
 template<class T, class T2> class QMap;
+
+#include <qstring.h>
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -55,22 +55,6 @@ public:
 
 protected:
 
-	/**
-	 * Called by the above method. This one should care about the actual
-	 * conversion.
-	 *
-	 * Here you are meant to place the actual conversion code.
-	 * @param handled set to TRUE when the @p version has been recognized and (!)
-	 * used to convert the files to a new format (i.e. at least changed
-	 * the version number). Otherwise set to FALSE (i.e. if the files have
-	 * not been touched at all).
-	 *
-	 * @return FALSE, if the file should have been converted, but we failed
-	 * while doing so. Otherwise TRUE.
-	 **/
-	bool convertFilesToCurrentFormat(QMap<QString, QByteArray>& destFiles, unsigned int version, bool* handled);
-
-private:
 };
 
 #endif
