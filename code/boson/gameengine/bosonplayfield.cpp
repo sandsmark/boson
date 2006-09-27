@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2006 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #include "../bomemory/bodummymemory.h"
 #include "boversion.h"
 #include "bosonmap.h"
-#include "bosonfileconverter.h"
+#include "fileconverter/bosonfileconverter.h"
 #include "bosondata.h"
 #include "bodebug.h"
 #include "bofile.h"
@@ -119,47 +119,7 @@ bool BosonPlayFieldInformation::loadInformation(BPFFile* file)
  }
  QByteArray mapXML;
  QByteArray playersXML;
- if (!file->hasMapDirectory() && file->hasFile("scenario.xml")) {
-	// a missing map/ directory means that we have an old file. convert it
-	// to out new format.
-	// this might be pretty slow!
-	boWarning() << k_funcinfo << "loading old file format in " << file->fileName() << endl;
-	QByteArray scenarioXML = file->scenarioData();
-	BosonFileConverter converter;
-	QByteArray canvasXML;
-	QByteArray kgameXML;
-	if (!converter.convertScenario_From_0_8_To_0_9(scenarioXML, &playersXML, &canvasXML, &kgameXML)) {
-		boError() << k_funcinfo << "failed converting from 0.8 file format" << endl;
-		return false;
-	}
-	if (playersXML.size() == 0) {
-		boError() << k_funcinfo << "empty playersXML after successfull conversion. code bug?" << endl;
-		return false;
-	}
-
-	mapXML = file->mapXMLData();
-	if (mapXML.size() == 0) {
-		QByteArray map = file->mapData();
-		if (map.size() == 0) {
-			boError() << k_funcinfo << "neither map nor map.xml found. broken file." << endl;
-			return false;
-		}
-		if (!file->hasFile("texmap")) {
-			boWarning() << k_funcinfo << "converting map from boson 0.8 - this will take some time!" << endl;
-			QByteArray texMap;
-			if (!converter.convertMapFile_From_0_8_To_0_9(map, &mapXML, &texMap)) {
-				boError() << k_funcinfo << "failed converting from 0.8 file" << endl;
-				return false;
-			}
-		} else {
-			boDebug() << k_funcinfo << "converting map from boson 0.8.128 to map.xml" << endl;
-			if (!converter.convertMapFile_From_0_8_128_To_0_9(map, &mapXML)) {
-				boError() << k_funcinfo << "failed converting from 0.8.128 file" << endl;
-				return false;
-			}
-		}
-	}
- } else if (!file->hasMapDirectory()) {
+ if (!file->hasMapDirectory()) {
 	boError() << k_funcinfo << "file format not supported" << endl;
 	return false;
  } else {
@@ -701,26 +661,8 @@ bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
  QByteArray kgameXML = boFile.kgameData();
  QByteArray mapPreviewPNG = boFile.fileData("map.png", "mappreview");
  if (!boFile.hasMapDirectory()) {
-	boWarning() << k_funcinfo << "need to convert from an old file" << endl;
-	BosonFileConverter converter;
-
-	// convert map first
-	if (texMap.size() == 0) {
-		if (!converter.convertMapFile_From_0_8_To_0_9(boFile.mapData(), &mapXML, &texMap)) {
-			boError() << k_funcinfo << "failed converting from boson 0.8" << endl;
-			return false;
-		}
-	} else {
-		if (!converter.convertMapFile_From_0_8_128_To_0_9(boFile.mapData(), &mapXML)) {
-			boError() << k_funcinfo << "failed converting from boson 0.8.128" << endl;
-			return false;
-		}
-	}
-
-	// convert scenario
-	QByteArray scenario = boFile.scenarioData();
-	converter.convertScenario_From_0_8_To_0_9(scenario, &playersXML, &canvasXML, &kgameXML);
-	boDebug() << k_funcinfo << "conversion completed" << endl;
+	boError() << k_funcinfo << "file has no map directory - file format too old (< Boson 0.9). Cannot convert this." << endl;
+	return false;
  }
 
  if (texMap.size() == 0) {
