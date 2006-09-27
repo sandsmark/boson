@@ -1,0 +1,4 @@
+#include "facilities.wml" type="Facilities" name="Barracks" \
+        description="Here you can build land units (tank, oil harvester...)." \
+        name2="barracks" type2="fix" \
+        before_url="powerplant.html" before_text="Power Plant" after_url="weaonsfactory.html" after_text="Weapons Factory" up_url="index.html"

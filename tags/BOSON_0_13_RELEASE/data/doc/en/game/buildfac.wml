@@ -1,0 +1,19 @@
+#include "top.wml"
+    <h1>
+      Building facilities
+    </h1>
+    <p>&nbsp;</p>
+    <p>
+      To build facilities choose one from the left sidebar while
+      having <a href="../facilities/commandbunker.html">Command Bunker</a> selected.<br>
+      You can see that the building is getting constructed. When it is finished, click on it and place it with the right
+      mouse button on a free place on the map.
+      The colored building shows you if:<br>
+      - You are near enough to your other buildings.<br>
+      - You can build on this terrain.<br>
+      Unfortunately this feature is broken...<br>
+      If the building is not available, look at the <a href="../facilities/map.html">Facilities dependency tree</a>
+      and check if you have all required buildings.
+    </p>
+#include "nav.wml" before_url="cursor.html" before_text="The cursors" after_url="buildunit.html" after_text="Building Units" up_url="index.html"
+#include "footer.wml"

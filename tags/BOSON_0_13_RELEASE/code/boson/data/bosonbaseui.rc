@@ -1,0 +1,62 @@
+<!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
+<kpartgui name="bosonbase" version="3">
+<MenuBar>
+  <Menu name="debug" group="debugmenu"><text>&amp;Debug</text>
+    <Action name="debug_edit_conditions" append="debug_dialog" />
+    <Action name="debug_light0" append="debug_dialog" />
+    <Action name="debug_memory" append="debug_dialog"/>
+    <Action name="debug_mode" append="debug_checkbox" />
+    <Action name="debug_colormap" append="debug_checkbox" />
+    <Action name="show_resources" append="debug_checkbox" />
+    <Action name="debug_map_coordinates" append="debug_checkbox" />
+    <Action name="debug_pf_data" append="debug_checkbox" />
+    <Action name="debug_cell_grid" append="debug_checkbox" />
+    <Action name="debug_matrices" append="debug_checkbox" />
+    <Action name="debug_works" append="debug_checkbox" />
+    <Action name="debug_camera" append="debug_checkbox" />
+    <Action name="debug_rendercounts" append="debug_checkbox" />
+    <Action name="debug_enable_cheating" append="debug_checkbox" />
+    <Action name="debug_wireframes" append="debug_checkbox" />
+    <Action name="debug_boundingboxes" append="debug_checkbox" />
+    <Action name="debug_fps" append="debug_checkbox" />
+    <Action name="debug_advance_calls" append="debug_checkbox" />
+    <Action name="debug_texture_memory" append="debug_checkbox" />
+    <Action name="debug_memory_usage" append="debug_checkbox" />
+    <Action name="debug_memory_vmdata_only" append="debug_checkbox" />
+    <Action name="debug_profiling_graph" append="debug_checkbox" />
+    <Action name="debug_rendering_config" append="debug_checkbox" />
+    <Action name="debug_network_traffic" append="debug_checkbox" />
+    <Action name="debug_glfinish_before_profiling" append="debug_checkbox" />
+    <Action name="debug_cpu_usage" append="debug_checkbox" />
+    <Action name="debug_groundrenderer_debug" append="debug_checkbox" />
+    <Action name="debug_players" append="debug_action" />
+    <Action name="debug_explore" append="debug_action" />
+    <Action name="debug_unfog" append="debug_action" />
+    <Action name="debug_fog" append="debug_action" />
+    <Action name="debug_gamelog" append="debug_action" />
+    <Menu name="debug_lazy" append="debug_action"><text>&amp;Lazyness</text>
+      <Action name="debug_lazy_reload_model_textures" />
+      <Action name="debug_lazy_reload_meshrenderer" />
+      <Action name="debug_lazy_reload_groundrenderer" />
+      <Action name="debug_lazy_reload_gameviewplugin" />
+    </Menu>
+    <Action name="debug_show_unit_debug_widget" append="debug_checkbox" />
+  </Menu>
+  <Menu name="settings" group="settingsmenu"><text>&amp;Settings</text>
+    <Action name="options_show_chat" append="show_merge" />
+    <Action name="options_show_cmdframe" append="show_merge" />
+    <Action name="options_zoom" />
+  </Menu>
+</MenuBar>
+<ToolBar name="mainToolBar"><text>Main Toolbar</text>
+  <Action name="debug_map_coordinates" />
+  <Action name="debug_cell_grid" />
+  <Action name="debug_works" />
+  <Action name="debug_rendercounts" />
+  <Action name="debug_fps" />
+  <Action name="debug_advance_calls" />
+  <Action name="debug_profiling_graph" />
+  <Action name="debug_cpu_usage" />
+</ToolBar>
+</kpartgui>
+

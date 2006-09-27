@@ -1,0 +1,66 @@
+This is a copy of libufo cvs with a couple of patches applied.
+
+libufo CVS checkout date: 2005/12/01
+
+Patches applied currently:
+- Patch to uwidget.hpp and uwidget.cpp to take a ufo::UCollectable* derivded
+  class as widget deleter. This object is deleted at the very first in the d'tor.
+- Patch to include/ufo/ufo_gl.hpp and usysteminfo.hpp to include bogl.h instead
+  of gl.h and glu.h
+- Patch to ufo/include/ufo/usysteminfo.hpp and ufo/include/ufo/ux/uxglxdriver.hpp
+  to include boglx.h instead of glx.h
+  note that this must be included before X11/Xlib.h
+- Patch to ulayeredpane.cpp to insert new widgets at the beginning of a layer
+  (which makes it the last widget that is painted), if not specified otherwise
+- Patch to ugl_driver.cpp to use bogl functions instead of loading the OpenGL
+  library once again
+- Patch to signal/uobjectslot.hpp:
+  Replacing the static_cast by a dynamic_cast in the ufo::UObjectSlot c'tor, in
+  order to make it compile
+- Patch to uabstractcontext.hpp, uabstractcontext.cpp and uwidget.cpp
+  to improve events for our needs:
+  Instead of delivering a mouse event to root->getVisibleWidgetAt(), we
+  implement a getVisibleWidgetsDFS() function, that starts at the root and finds
+  all currently visible widgets (at the relevant point) using a depth first search
+  and returns them in a stack.
+  We then dispatch it to every widget on the stack until one widget consumes
+  the event (in that case we stop then).
+  This especially fixes layered panes: previously an event was delivered to the
+  topmost layer only and to the layered pane itself, if the widget was not
+  interested in that event. Now the event is first delivered to the topmost
+  layer, then to the layers below it, then to the layered pane.
+- Patch to uwidget.cpp to use the widget deleter for profiling of the paint()
+  method.
+  The methods used are virtual and do nothing by default - it is up to the
+  user to implement real profiling.
+- Backporting from official libcvs (2006/09/17):
+   Patch to ugl_prototypes.hpp (r1.10 in official cvs)
+   Patch to ugl_graphics.cpp (r1.21 in official cvs)
+  -> workaround for mesa bug
+
+
+
+Use
+ make_ufo_dir.sh ufo_dir code/ufo
+from the tools module (boson cvs) to update this directory (all changes will be lost!).
+
+This copy of libufo is required because of several reasons:
+- libufo can not (because of it's current development state) preserve binary
+  compatibility and not even source compatibility among releases. Therefore
+  boson must compile _exactly_ against a certain version of libufo (a more recent
+  version may not work anymore)
+  -> this is a lot of work for users (and developers)
+- Some patches against latest libufo are required for boson. Without them boson
+  cannot make actual use of libufo. It is a hell of work to developers (and
+  eventually users) to track all required patches (or install modified libufo
+  versions).
+  E.g. as of today version 0.7.3 is the most current official libufo version,
+  but that does not support multiline labels (not even cvs does as of today).
+  Multiline labels are an absolutely required feature.
+- Because of the lack of binary compatibility it only makes sense to link
+  statically against libufo. However that requires yet another custom
+  configure switch - it's a pain to the developers to make the users actually
+  understand and do that, but it's even worse to the users who have to remember
+  and follow 10 million different ways of compiling a hundred different libs,
+  only to install boson.
+

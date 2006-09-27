@@ -1,0 +1,22 @@
+[Boson Facility]
+ConstructionSteps=0
+
+[Boson Unit]
+Name=Tree5 (big)
+Health=40
+Id=21
+DestroyedEffects=22002
+RemoveWreckageImmediately=true
+IsFacility=true
+MineralCost=100
+OilCost=0
+#Producer=10
+#ProductionTime=20
+SupportMiniMap=false
+TerrainType=1
+UnitDepth=2.5
+UnitHeight=0.4
+UnitWidth=0.4
+
+[Model]
+Size=1.4

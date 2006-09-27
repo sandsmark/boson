@@ -1,0 +1,22 @@
+[Boson Facility]
+ConstructionSteps=0
+
+[Boson Unit]
+Name=Bush1
+Health=20
+Id=70
+DestroyedEffects=22001
+RemoveWreckageImmediately=true
+IsFacility=true
+MineralCost=50
+OilCost=0
+#Producer=10
+#ProductionTime=20
+SupportMiniMap=false
+TerrainType=1
+UnitDepth=0.4
+UnitHeight=0.4
+UnitWidth=0.4
+
+[Model]
+Size=0.8

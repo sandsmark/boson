@@ -1,0 +1,5 @@
+#include "facilities.wml" type="Facilities" name="Oil Refinery" \
+        description="Since you cannot use the natural oil from your oil towers you need to send your \
+        <a href='../units/oilharvester.html'>Oil Harvesters</a> to the Oil Refinery. It will produce industrial useable oil for you." \
+        name2="oilrefinery" type2="fix" \
+        before_url="mineralrefinery.html" before_text="Mineral Refinery" after_url="powerplant.html" after_text="Power Plant" up_url="index.html"

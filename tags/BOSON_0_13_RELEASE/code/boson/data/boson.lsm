@@ -1,0 +1,19 @@
+Begin3
+Title:          Boson
+Version:        0.12
+Entered-date:   27MAY06
+Description:    network real time strategy game
+Keywords:       server, strategy, game, KDE, X11, Qt, RTS, OpenGL
+Author:         Andreas Beckermann <b_mann@gmx.de>
+Maintained-by:  Andreas Beckermann <b_mann@gmx.de>
+Primary-site:   http://sourceforge.net/project/showfiles.php?group_id=15087
+                36M  boson-all-0.12.tar.bz2
+                1.8M boson-code-0.12.tar.bz2
+                18M  boson-data-0.12.tar.bz2
+                16M  boson-music-0.12.tar.bz2
+Alternate-site: ftp.kde.org /pub/kde/unstable/apps/KDE3.x/games/
+Home-page:      http://boson.eu.org/
+Original-site:
+Platform:       Linux and other Unices, needs Qt>=3.1.0, kdelibs>=3.1, lib3ds and OpenGL
+Copying-policy: GNU General Public License
+End

@@ -1,0 +1,19 @@
+[Boson Facility]
+ConstructionSteps=0
+
+[Boson Unit]
+Name=Factory1
+Health=400
+Armor=5
+Id=60
+IsFacility=true
+MineralCost=160
+OilCost=20
+#Producer=10
+#ProductionTime=20
+SupportMiniMap=false
+TerrainType=1
+UnitDepth=3
+UnitHeight=4
+UnitWidth=4
+

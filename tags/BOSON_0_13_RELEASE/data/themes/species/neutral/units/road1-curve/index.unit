@@ -1,0 +1,17 @@
+[Boson Facility]
+ConstructionSteps=0
+
+[Boson Unit]
+Name=Road1-Curve
+Health=30
+Id=64
+IsFacility=true
+MineralCost=160
+OilCost=20
+#Producer=10
+#ProductionTime=20
+SupportMiniMap=false
+TerrainType=1
+UnitDepth=0.1
+UnitHeight=1
+UnitWidth=3.9

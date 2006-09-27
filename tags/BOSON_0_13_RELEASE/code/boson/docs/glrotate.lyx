@@ -1,0 +1,1232 @@
+#LyX 1.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 221
+\textclass article
+\language german
+\inputencoding auto
+\fontscheme default
+\graphics default
+\paperfontsize default
+\papersize Default
+\paperpackage a4
+\use_geometry 0
+\use_amsmath 0
+\use_natbib 0
+\use_numerical_citations 0
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\quotes_times 2
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+
+\layout Standard
+
+This document tries to make clear how to transform values from a gluLookAt()
+ call to glRotate(a, 1, 0, 0); glRotate(b, 0, 1, 0); glRotate(c, 0, 0, 1);
+ glTranslate(foobar); and the other way round.
+\layout Standard
+
+This is work in progress, so don't expect too much atm.
+\layout Standard
+
+Be warned: I am not a maths expert and I _really_ suck at making 
+\begin_inset Quotes eld
+\end_inset 
+
+good
+\begin_inset Quotes erd
+\end_inset 
+
+ maths algorithms.
+ Furthermore I always _hated_ cos and sin.
+ I could never handle them correctly.
+\layout Standard
+
+There _is_ an easier _and_ better way, I am sure on this.
+ But I don't know it - feel free to tell me!
+\layout Section
+
+Rotation matrices
+\layout Subsection
+
+Rotation about x-axis
+\layout Description
+
+glRotate(
+\begin_inset Formula $\alpha$
+\end_inset 
+
+, 1.0, 0.0, 0.0);
+\layout Standard
+
+
+\begin_inset Formula \[
+R_{X}=\left(\begin{array}{ccc}
+1 & 0 & 0\\
+0 & \cos\alpha & -\sin\alpha\\
+0 & \sin\alpha & \cos\alpha\end{array}\right)\]
+
+\end_inset 
+
+
+\layout Subsection
+
+Rotation about y-axis
+\layout Description
+
+glRotate(
+\begin_inset Formula $\beta$
+\end_inset 
+
+, 0.0, 1.0, 0.0);
+\layout Standard
+
+
+\begin_inset Formula \[
+R_{Y}=\left(\begin{array}{ccc}
+\cos\beta & 0 & \sin\beta\\
+0 & 1 & 0\\
+-\sin\beta & 0 & \cos\beta\end{array}\right)\]
+
+\end_inset 
+
+
+\layout Subsection
+
+Rotation about z-axis
+\layout Description
+
+glRotate(
+\begin_inset Formula $\gamma$
+\end_inset 
+
+, 0.0, 0.0, 1.0);
+\layout Standard
+
+
+\begin_inset Formula \[
+R_{Z}=\left(\begin{array}{ccc}
+\cos\gamma & -\sin\gamma & 0\\
+\sin\gamma & \cos\gamma & 0\\
+0 & 0 & 1\end{array}\right)\]
+
+\end_inset 
+
+
+\layout Subsection
+
+Rotation about x-axis, then about y-axis
+\layout Standard
+
+
+\begin_inset Formula \[
+R_{XY}=R_{X}*R_{Y}=\left(\begin{array}{ccc}
+\cos\beta & 0 & \sin\beta\\
+\sin\alpha\sin\beta & \cos\alpha & -\sin\alpha\cos\beta\\
+-\cos\alpha\sin\beta & \sin\alpha & \cos\alpha\cos\beta\end{array}\right)\]
+
+\end_inset 
+
+
+\layout Subsection
+
+Rotation about x-axis, then about y-axis, then about z-axis
+\layout Standard
+
+
+\begin_inset Formula \[
+R_{XYZ}=R_{XY}*R_{Z}=\left(\begin{array}{ccc}
+\cos\beta\cos\gamma & -\cos\beta\sin\gamma & \sin\beta\\
+\sin\alpha\sin\beta\cos\gamma+\cos\alpha\sin\gamma & -\sin\alpha\sin\beta\sin\gamma+\cos\alpha\cos\gamma & -\sin\alpha\cos\beta\\
+-\cos\alpha\sin\beta\cos\gamma+\sin\alpha\sin\gamma & \cos\alpha\sin\beta\sin\gamma+\sin\alpha\cos\gamma & \cos\alpha\cos\beta\end{array}\right)\]
+
+\end_inset 
+
+
+\layout Standard
+
+It is clear, that 
+\begin_inset Formula $R_{XYZ_{13}}$
+\end_inset 
+
+, i.e.
+ the element of Row 1, Column 3, is very interesting.
+ It is just 
+\begin_inset Formula $\sin\beta$
+\end_inset 
+
+, so nothing to calculate.
+ Later more.
+\layout Section
+
+gluLookAt()
+\layout Standard
+
+gluLookAt() takes three vectors - the 
+\begin_inset Quotes eld
+\end_inset 
+
+cameraPos
+\begin_inset Quotes erd
+\end_inset 
+
+ vector (eye vector), the 
+\begin_inset Quotes eld
+\end_inset 
+
+lookAt
+\begin_inset Quotes erd
+\end_inset 
+
+ vector (center vector) and the 
+\begin_inset Quotes eld
+\end_inset 
+
+up
+\begin_inset Quotes erd
+\end_inset 
+
+ vector.
+ It then calculates a matrix from from these vectors, multiplies the current
+ modelview matrix by it and then translates to -cameraPos.
+\layout Standard
+
+This matrix is what we want (the translation will get done by us as well).
+\layout Standard
+
+The same matrix can be achieved using our three glRotate() calls, as you
+ can achieve just 
+\emph on 
+any
+\emph default 
+ rotation using one of these ways (gluLookAt() or 3 rotations).
+ Above you can see the matrix that results from three glRotate() calls in
+ a row.
+ Now let's have a look on what gluLookAt() does with the vectors to get
+ this matrix:
+\layout Subsection
+
+The matrix
+\layout Standard
+
+The resulting matrix looks very easy:
+\layout Standard
+
+
+\begin_inset Formula \[
+M=\left(\begin{array}{ccc}
+x[0] & x[1] & x[2]\\
+y[0] & y[1] & y[2]\\
+z[0] & z[1] & z[2]\end{array}\right)\]
+
+\end_inset 
+
+
+\layout Standard
+
+getting x, y and z is slightly more difficult though.
+\layout Subsubsection
+
+The z vector
+\layout Standard
+
+We start with this one, as it depends on the parameters of gluLookAt() only.
+ It is simple:
+\layout Standard
+
+z = cameraPos - lookAt;
+\layout Standard
+
+z = z.normalize();
+\layout Subsubsection
+
+The x and y vectors
+\layout Description
+
+
+\begin_inset Quotes eld
+\end_inset 
+
+cross
+\begin_inset Quotes erd
+\end_inset 
+
+ stands for the cross product.
+\layout Standard
+
+x = up cross z; 
+\layout Standard
+
+y = z cross x;
+\layout Standard
+
+x = x.normalize();
+\layout Standard
+
+y = y.normalize();
+\layout Subsubsection
+
+Disclaimer
+\layout Standard
+
+I neither can nor want to give you an explanation why this works this way.
+ Mesa does it this way - that's all that matters currently.
+\layout Section
+
+Make them equal
+\layout Standard
+
+Now look at the two matrices again:
+\layout Standard
+
+
+\begin_inset Formula \[
+M=\left(\begin{array}{ccc}
+x[0] & x[1] & x[2]\\
+y[0] & y[1] & y[2]\\
+z[0] & z[2] & z[2]\end{array}\right)\]
+
+\end_inset 
+
+
+\layout Standard
+
+and
+\layout Standard
+
+
+\begin_inset Formula \[
+R_{XYZ}=\left(\begin{array}{ccc}
+\cos\beta\cos\gamma & -\cos\beta\sin\gamma & \sin\beta\\
+\sin\alpha\sin\beta\cos\gamma+\cos\alpha\sin\gamma & -\sin\alpha\sin\beta\sin\gamma+\cos\alpha\cos\gamma & -\sin\alpha\cos\beta\\
+-\cos\alpha\sin\beta\cos\gamma+\sin\alpha\sin\gamma & \cos\alpha\sin\beta\sin\gamma+\sin\alpha\cos\gamma & \cos\alpha\cos\beta\end{array}\right)\]
+
+\end_inset 
+
+
+\layout Standard
+
+We know all elements of M, as we have just called gluLookAt() or have calculated
+ the values for gluLookAt() or whatever.
+ Anyway - we know these values and want the angles 
+\begin_inset Formula $\alpha$
+\end_inset 
+
+, 
+\begin_inset Formula $\beta$
+\end_inset 
+
+ and 
+\begin_inset Formula $\gamma$
+\end_inset 
+
+.
+ Of course we do know that both rotation matrices (M and 
+\begin_inset Formula $R_{XYZ}$
+\end_inset 
+
+) are equal.
+ We just want to find out which angles should be used to achieve the same
+ rotation matrix as gluLookAt() does.
+\layout Standard
+
+You will see this one very fast:
+\layout Standard
+
+
+\begin_inset Formula \[
+x[2]=\sin\beta\]
+
+\end_inset 
+
+
+\layout Standard
+
+Now one could think that we already have 
+\begin_inset Formula $\beta$
+\end_inset 
+
+, as 
+\begin_inset Formula $\beta=\arcsin(\sin\beta)$
+\end_inset 
+
+.
+ Unfortunately this is not that easy.
+\layout Subsection
+
+Definitions of 
+\begin_inset Formula $\arcsin$
+\end_inset 
+
+ and 
+\begin_inset Formula $\arccos$
+\end_inset 
+
+
+\layout Standard
+
+Note that we are operating on radians.
+ Multiply by 
+\begin_inset Formula $180/\pi$
+\end_inset 
+
+ to get degree.
+\layout Standard
+
+
+\begin_inset Formula \[
+\arcsin:\left[-1;1\right]\rightarrow\left[-\pi/2;\pi/2\right]\]
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Formula \[
+\arccos:\left[-1;1\right]\rightarrow\left[0;\pi\right]\]
+
+\end_inset 
+
+
+\layout Standard
+
+Because it is very handy, here the same in degree:
+\layout Standard
+
+
+\begin_inset Formula \[
+\arcsin:\left[-1;1\right]\rightarrow\left[-90;90\right]\]
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Formula \[
+\arccos:\left[-1;1\right]\rightarrow\left[0;180\right]\]
+
+\end_inset 
+
+
+\layout Standard
+
+So you see that 360 degrees are not defined.
+ An important relation is this one:
+\layout Standard
+
+
+\begin_inset Formula \[
+\sin x=\sin\left(\pi-x\right)\]
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Formula \[
+\cos x=\cos\left(2*\pi-x\right)\]
+
+\end_inset 
+
+
+\layout Subsection
+
+Why we ignore this
+\layout Standard
+
+Ok, now we know that 
+\begin_inset Formula $\arcsin$
+\end_inset 
+
+ is not unique.
+ So we either have take the other equations into account, or we prove that
+ we can ignore that multiple angles can lead to the same sine and just use
+ the angle returned by 
+\begin_inset Formula $\arcsin$
+\end_inset 
+
+.
+\layout Standard
+
+We have 3 rotations - one about the x-, the y- and the z-axis.
+ You can easily imagine, that we can replace a rotation around one axis
+ completely by two rotations around the other two axis under certain circumstanc
+es.
+ E.g.
+ a rotation by 180 degree around the z-axis can be achieved by a rotation
+ by 180 degree around the x-axis, followed by a rotation by 180 degree around
+ the y-axis.
+\layout Standard
+
+So we assume that 
+\layout Standard
+
+
+\begin_inset Formula $\beta=\arcsin(\sin\beta)=\arcsin(x[2])$
+\end_inset 
+
+.
+\layout Standard
+
+I say now, that this will always give you the correct angles, although 
+\begin_inset Formula $\beta$
+\end_inset 
+
+ will be in the range of 
+\begin_inset Formula $\pm\frac{\pi}{2}$
+\end_inset 
+
+.
+ You will always be able to emulate the remaining angles (
+\begin_inset Formula $\beta$
+\end_inset 
+
+ could be in the range of up to 
+\begin_inset Formula $\pm\pi$
+\end_inset 
+
+) using the remaining 
+\begin_inset Formula $\alpha$
+\end_inset 
+
+ and 
+\begin_inset Formula $\gamma$
+\end_inset 
+
+.
+ Just believe me that this is possible, or read the following prove.
+\layout Subsubsection
+
+Prove
+\layout Standard
+
+You will most certainly want to skip this for now and focus on the rest
+ below, that is more related to the actual formula that we want to develop.
+\layout Standard
+
+Anyway it is important to show that we actually 
+\emph on 
+can
+\emph default 
+ assume that 
+\begin_inset Formula $\beta=\arcsin(\sin\beta)=\arcsin x[2]$
+\end_inset 
+
+, without fearing that we might get a different rotation.
+\layout Standard
+
+We know for sure, that 
+\begin_inset Formula $\sin\beta=x[2]$
+\end_inset 
+
+.
+ This gives the following possible values for 
+\begin_inset Formula $\beta$
+\end_inset 
+
+:
+\layout Subparagraph
+
+Let 
+\begin_inset Formula $x[2]\ge0$
+\end_inset 
+
+:
+\layout Standard
+
+
+\begin_inset Formula $\beta_{1}=\arcsin x[2],\beta_{2}=\pi-\arcsin x[2]=\pi-\beta_{1}$
+\end_inset 
+
+
+\layout Standard
+
+Using the fact that 
+\begin_inset Formula $\cos x=-\cos(\pi-x)$
+\end_inset 
+
+ you can see, that 
+\begin_inset Formula $\cos\beta_{1}=-\cos\beta_{2}$
+\end_inset 
+
+.
+ 
+\layout Standard
+
+So if 
+\begin_inset Formula $x[2]\ge0$
+\end_inset 
+
+, we know that 
+\begin_inset Formula $\beta$
+\end_inset 
+
+ must be 
+\begin_inset Formula $\beta_{1}$
+\end_inset 
+
+ or 
+\begin_inset Formula $\beta_{2}$
+\end_inset 
+
+.
+\layout Subparagraph
+
+Now let 
+\begin_inset Formula $x[2]<0$
+\end_inset 
+
+:
+\layout Standard
+
+
+\begin_inset Formula $\beta_{1}=\arcsin x[2],\beta_{3}=-\pi-\arcsin x[2]=-(\pi+\arcsin x[2])=-(\pi+\beta_{1})$
+\end_inset 
+
+
+\layout Standard
+
+Using the fact that 
+\begin_inset Formula $\cos x=-\cos(\pi+x)$
+\end_inset 
+
+ and 
+\begin_inset Formula $\cos x=\cos(-x)$
+\end_inset 
+
+ you can see, that 
+\begin_inset Formula $\cos\beta_{1}=-\cos\beta_{3}$
+\end_inset 
+
+.
+\layout Standard
+
+So if 
+\begin_inset Formula $x[1]<0$
+\end_inset 
+
+, 
+\begin_inset Formula $\beta$
+\end_inset 
+
+ must be 
+\begin_inset Formula $\beta_{!}$
+\end_inset 
+
+ or 
+\begin_inset Formula $\beta_{2}$
+\end_inset 
+
+.
+\layout Subparagraph
+
+
+\series medium 
+In both cases (
+\begin_inset Formula $x[2]\ge0$
+\end_inset 
+
+ and 
+\begin_inset Formula $x[2]<0$
+\end_inset 
+
+) the equation 
+\begin_inset Formula $\cos\beta=-\cos\beta'$
+\end_inset 
+
+ is valid, where 
+\begin_inset Formula $\beta':=\beta_{1}$
+\end_inset 
+
+ and 
+\begin_inset Formula $\beta$
+\end_inset 
+
+ the angle that differs from 
+\begin_inset Formula $\arcsin x[2]$
+\end_inset 
+
+ (i.e.
+ either 
+\begin_inset Formula $\pi-\arcsin x[2]$
+\end_inset 
+
+ or 
+\begin_inset Formula $-\pi-\arcsin x[2]$
+\end_inset 
+
+).
+\layout Standard
+
+Now what we have to show is that we can we still achieve the correct rotation
+ matrix if we 
+\emph on 
+always
+\emph default 
+ choose 
+\begin_inset Formula $\beta'=\beta_{1}$
+\end_inset 
+
+, but never 
+\begin_inset Formula $\beta$
+\end_inset 
+
+ as our angle.
+ We need to show that we can achieve the rotation that is done by 
+\begin_inset Formula $\beta,\gamma,\alpha$
+\end_inset 
+
+ as well if we use 
+\begin_inset Formula $\beta'$
+\end_inset 
+
+ instead - if we choose 
+\begin_inset Formula $\alpha'$
+\end_inset 
+
+ and 
+\begin_inset Formula $\gamma'$
+\end_inset 
+
+ carefully.
+ Let's have a look at x[0] and x[1] for that.
+\layout Standard
+
+
+\begin_inset Formula $x[0]=\cos\beta'\cos\gamma'$
+\end_inset 
+
+ you see, if we find an angle 
+\begin_inset Formula $\gamma'$
+\end_inset 
+
+ with 
+\begin_inset Formula $\cos\gamma'=-\cos\gamma$
+\end_inset 
+
+ (
+\begin_inset Formula $\gamma$
+\end_inset 
+
+ is of course the angle that will result from the assumption that 
+\begin_inset Formula $\beta=\arcsin x[2]$
+\end_inset 
+
+).
+ Finding this angle is easy, as 
+\begin_inset Formula $\cos x=-\cos(x+\pi)=-\cos(\pi-x)$
+\end_inset 
+
+.
+ We choose 
+\begin_inset Formula $\gamma':=\pi+\gamma$
+\end_inset 
+
+.
+\layout Standard
+
+
+\begin_inset Formula $x[1]=-\cos\beta'\sin\gamma'$
+\end_inset 
+
+ and here you can see again, that it is possible to get to where we want.
+ Since 
+\begin_inset Formula $\sin x=-\sin(\pi+x)$
+\end_inset 
+
+ and we have already chosen 
+\begin_inset Formula $\gamma':=\gamma+\pi$
+\end_inset 
+
+, the condition is met: 
+\begin_inset Formula $x[1]=-\cos\beta'\sin\gamma'=-(-\cos\beta)(-\sin\gamma)$
+\end_inset 
+
+.
+ Note that we have chosen an unique angle 
+\begin_inset Formula $\gamma'$
+\end_inset 
+
+ now, as we have taken both the sine and the cosine into account (only one
+ is not unique, as neither 
+\begin_inset Formula $\arccos$
+\end_inset 
+
+ nor 
+\begin_inset Formula $\arcsin$
+\end_inset 
+
+ is unique).
+\layout Standard
+
+You can do exactly the same with y[2] and z[2] concerning 
+\begin_inset Formula $\alpha'$
+\end_inset 
+
+ and 
+\begin_inset Formula $\alpha$
+\end_inset 
+
+.
+\layout Standard
+
+So now we know, that 
+\begin_inset Formula $\alpha':=\pi+\alpha$
+\end_inset 
+
+ and 
+\begin_inset Formula $\gamma':=\pi+\gamma$
+\end_inset 
+
+, but we have to make sure that this will actually work with the other elements
+ of the matrix (y[0], y[1], z[0], z[1]).
+ Actually I believe we don't have to, as we have already taken both, the
+ sine and the cosine into account and therefore found the unique angles.
+ But anyway - I do not trust my mathematic skills and therefore we go for
+ sure here.
+\layout Standard
+
+Let's pick y[0] as an example:
+\layout Standard
+
+
+\begin_inset Formula $y[0]=\sin\alpha'\sin\beta\cos\gamma'+\cos\alpha'\sin\gamma'$
+\end_inset 
+
+, which must be equal to 
+\begin_inset Formula $\sin\alpha\sin\beta\cos\gamma+\cos\alpha\sin\gamma$
+\end_inset 
+
+.
+\layout Standard
+
+Note that 
+\begin_inset Formula $\sin\beta$
+\end_inset 
+
+ is constant here - it is always x[2], so we don't have to take this into
+ account.
+\layout Standard
+
+Since 
+\begin_inset Formula $\sin x=-\sin(x+\pi)$
+\end_inset 
+
+ and 
+\begin_inset Formula $\cos x=-\cos(x+\pi)$
+\end_inset 
+
+ you can easily see that these really are equal:
+\layout Standard
+
+
+\begin_inset Formula \begin{eqnarray*}
+y[0] & = & \sin\alpha'\sin\beta\sin\gamma'+\cos\alpha'\sin\gamma'\\
+ & = & \sin(\alpha+\pi)\sin\beta\cos(\gamma+\pi)+\cos(\alpha+\pi)\sin(\gamma+\pi)\\
+ & = & (-\sin\alpha)\sin\beta(-\cos\gamma)+(-\cos\alpha)(­\sin\gamma)\\
+ & = & \sin\alpha\sin\beta\cos\gamma+\cos\alpha\sin\gamma\end{eqnarray*}
+
+\end_inset 
+
+
+\layout Standard
+
+The rest works the same way, since all of y[0],y[1],z[0],z[1] contain always
+ multiplications with exactly two variable factors (
+\begin_inset Formula $\sin\beta$
+\end_inset 
+
+ is constant), and the variable factors are exactly the negative of what
+ we get, if we assume 
+\begin_inset Formula $\beta=\arcsin x[2]$
+\end_inset 
+
+.
+\layout Standard
+
+So now we have proven, that we 
+\emph on 
+can
+\emph default 
+ assume 
+\begin_inset Formula $\beta=\arcsin x[2]$
+\end_inset 
+
+, as it will end up in exactly the same rotation matrix.
+\layout Subsection
+
+Equations
+\layout Standard
+
+The final equations are pretty easy, as we already know 
+\begin_inset Formula $\beta=\arcsin x[2]$
+\end_inset 
+
+ (see above).
+\layout Standard
+
+
+\begin_inset Formula \begin{eqnarray*}
+ & x[0]= & \cos\beta\cos\gamma\\
+\Leftrightarrow & \cos\gamma= & \frac{x[0]}{\cos\beta}\end{eqnarray*}
+
+\end_inset 
+
+, as long as 
+\begin_inset Formula $\cos\beta\neq0$
+\end_inset 
+
+.
+\layout Standard
+
+
+\begin_inset Formula \begin{eqnarray*}
+ & x[1]= & -\cos\beta\sin\gamma\\
+\Leftrightarrow & \sin\gamma= & -\frac{x[1]}{\cos\beta}\end{eqnarray*}
+
+\end_inset 
+
+, as long as 
+\begin_inset Formula $\cos\beta\neq0$
+\end_inset 
+
+.
+\layout Standard
+
+With both, 
+\begin_inset Formula $\sin\gamma$
+\end_inset 
+
+ and 
+\begin_inset Formula $\cos\gamma$
+\end_inset 
+
+ we can find 
+\begin_inset Formula $\gamma$
+\end_inset 
+
+ in a unique way now, using atan2() (from math.h).
+ In contrast to 
+\begin_inset Formula $\cos$
+\end_inset 
+
+, 
+\begin_inset Formula $\sin$
+\end_inset 
+
+ and 
+\begin_inset Formula $\tan$
+\end_inset 
+
+, atan2() returns a unique angle - you can simply use the sine and the cosine
+ as parameters: 
+\begin_inset Formula $\gamma=atan2(-\frac{x[1]}{\cos\beta,}\frac{x[0]}{\cos\beta})$
+\end_inset 
+
+.
+\layout Standard
+
+Retrieve 
+\begin_inset Formula $\alpha$
+\end_inset 
+
+ the same way, using y[2] and z[2]: 
+\begin_inset Formula $\alpha=atan2(-\frac{y[2]}{\cos\beta},\frac{z[2]}{\cos\beta})$
+\end_inset 
+
+.
+ 
+\layout Standard
+
+Now we are done.
+\layout Section
+
+The inverse
+\layout Standard
+
+Now we have seen how to generate 3 rotation angles for a matrix generated
+ by gluLookAt().
+ Now we need to do the inverse operation: we have 3 rotation values (and
+ the camera position) and want to have the values cameraPos, lookAt and
+ up (3 vectors) of gluLookAt.
+\layout Standard
+
+For this we already know that
+\begin_inset Formula \[
+M=\left(\begin{array}{ccc}
+x[0] & x[1] & x[2]\\
+y[0] & y[1] & y[2]\\
+z[0] & z[1] & z[2]\end{array}\right)\]
+
+\end_inset 
+
+
+\layout Standard
+
+and
+\layout Standard
+
+
+\begin_inset Formula \[
+R_{XYZ}=\left(\begin{array}{ccc}
+\cos\beta\cos\gamma & -\cos\beta\sin\gamma & \sin\beta\\
+\sin\alpha\sin\beta\cos\gamma+\cos\alpha\sin\gamma & -\sin\alpha\sin\beta\sin\gamma+\cos\alpha\cos\gamma & -\sin\alpha\cos\beta\\
+-\cos\alpha\sin\beta\cos\gamma+\sin\alpha\sin\gamma & \cos\alpha\sin\beta\sin\gamma+\sin\alpha\cos\gamma & \cos\alpha\cos\beta\end{array}\right)\]
+
+\end_inset 
+
+
+\layout Standard
+
+with M==gluLookAt() matrix and 
+\begin_inset Formula $R_{XYZ}$
+\end_inset 
+
+=rotation matrix.
+ With 
+\begin_inset Formula $\alpha$
+\end_inset 
+
+,
+\begin_inset Formula $\beta$
+\end_inset 
+
+and 
+\begin_inset Formula $\gamma$
+\end_inset 
+
+ it is very easy to calculate all entries of M, as 
+\begin_inset Formula $M=R_{XYZ}$
+\end_inset 
+
+.
+\layout Standard
+
+Now we need to calculate the vectors for gluLookAt() from the matrix M.
+ As you have seen M is generated by gluLookAt() using
+\layout Standard
+
+
+\begin_inset Formula \begin{eqnarray*}
+z & = & cameraPos-lookAt\\
+z' & = & z.normalize();\\
+x & = & up\, cross\, z'\\
+y & = & z'\, cross\, x\\
+x' & = & x.normalize();\\
+y' & = & y.normalize();\end{eqnarray*}
+
+\end_inset 
+
+
+\layout Standard
+
+I think the cameraPos vector is the easiers, as the equation doesn't depend
+ on the cross product, but on a simple subtraction only.
+ Let's have a look at it:
+\layout Standard
+
+
+\begin_inset Formula \begin{eqnarray*}
+z & = & cameraPos-lookAt\\
+z' & = & z.normalize();\end{eqnarray*}
+
+\end_inset 
+
+
+\layout Standard
+
+or
+\layout Standard
+
+
+\begin_inset Formula \begin{eqnarray*}
+z & = & cameraPos-lookAt\\
+z' & = & \frac{z}{\sqrt{z_{0}^{2}+z_{1}^{2}+z_{2}^{2}}}\end{eqnarray*}
+
+\end_inset 
+
+
+\layout Standard
+
+Of course we assume everywhere that normalizing is possible, i.e.
+ the length (
+\begin_inset Formula $\sqrt{z_{0}^{2}+z_{1}^{2}+z_{2}^{2}}$
+\end_inset 
+
+) isn't zero.
+\layout Standard
+
+Remember that z is a vector and therefore 
+\begin_inset Formula $\frac{z}{\sqrt{z_{0}^{2}+z_{1}^{2}+z_{2}^{2}}}$
+\end_inset 
+
+ is a skalar multiplication.
+ Our problem now is, that M contains the elements of x', y' and z', but
+ we need x, y and z to calculate our vectors.
+ In our special case we know z' and cameraPos, but we need lookAt (z isn't
+ known either).
+ We can break down the equation 
+\begin_inset Formula $z'=\frac{z}{\sqrt{z_{0}^{2}+z_{1}^{2}+z_{2}^{2}}}$
+\end_inset 
+
+ a bit:
+\layout Standard
+
+
+\begin_inset Formula \begin{eqnarray*}
+z'_{0}=\frac{z_{0}}{\sqrt{z_{0}^{2}+z_{1}^{2}+z_{2}^{2}}} & <=> & z_{0}=z'_{0}*\sqrt{z_{0}^{2}+z_{1}^{2}+z_{2}^{2}}\\
+z'_{1}=\frac{z_{1}}{\sqrt{z_{0}^{2}+z_{1}^{2}+z_{2}^{2}}} & <=> & z_{1}=z'_{1}*\sqrt{z_{0}^{2}+z_{1}^{2}+z_{2}^{2}}\\
+z'_{2}=\frac{z_{2}}{\sqrt{z_{0}^{2}+z_{1}^{2}+z_{2}^{2}}} & <=> & z_{2}=z'_{2}*\sqrt{z_{0}^{2}+z_{1}^{2}+z_{2}^{2}}\end{eqnarray*}
+
+\end_inset 
+
+
+\layout Standard
+
+This is totally equal, but I find it easier to read.
+ When we know 
+\begin_inset Formula $z_{0}$
+\end_inset 
+
+,
+\begin_inset Formula $z_{1}$
+\end_inset 
+
+,
+\begin_inset Formula $z_{2}$
+\end_inset 
+
+ we will know the lookAt vector, too.
+\layout Standard
+
+
+\begin_inset Formula \begin{eqnarray*}
+ & z_{0} & =z'_{0}*\sqrt{z_{0}^{2}+z_{1}^{2}+z_{2}^{2}}\\
+=> & z_{0}^{2} & =(z'_{0})^{2}*(z_{0}^{2}+z_{1}^{2}+z_{2}^{2})\\
+<=> & z_{0}^{2}-(z'_{0})^{2}*z_{0}^{2} & =(z'_{0})^{2}*(z_{1}^{2}+z_{2}^{2})\\
+<=> & z_{0}^{2} & =\frac{(z'_{0})^{2}*(z_{1}^{2}+z_{2}^{2})}{1-(z'_{0})^{2}}\end{eqnarray*}
+
+\end_inset 
+
+
+\layout Standard
+
+Now we can use 
+\begin_inset Formula $z_{0}^{2}$
+\end_inset 
+
+ for 
+\begin_inset Formula $z_{1}$
+\end_inset 
+
+ and 
+\begin_inset Formula $z_{2}$
+\end_inset 
+
+.
+\layout Standard
+
+
+\begin_inset Formula \begin{eqnarray*}
+ & z_{1} & =z'_{1}*\sqrt{z_{0}^{2}+z_{1}^{2}+z_{2}^{2}}\\
+=> & z{}_{1} & =z'_{1}*\sqrt{\frac{(z'_{0})^{2}*(z_{1}^{2}+z_{2}^{2})}{1-(z'_{0})^{2}}+z_{1}^{2}+z_{2}^{2}}\\
+=> & z_{1}^{2} & =(z'_{1})^{2}*\left(\frac{(z'_{0})^{2}*(z_{1}^{2}+z_{2}^{2})}{1-(z'_{0})^{2}}+z_{1}^{2}+z_{2}^{2}\right)\\
+<=> & z_{1}^{2}-(z'_{1})^{2}*z_{1}^{2} & =(z'_{1})^{2}*\left(\frac{(z'_{0})^{2}*(z_{1}^{2}+z_{2}^{2})}{1-(z'_{0})^{2}}+\frac{\left(1-(z'_{0})^{2}\right)*z_{2}^{2}}{1-(z'_{0})^{2}}\right)\\
+<=> & z_{1}^{2}*\left(1-(z'_{1})^{2}\right)*\left(1-(z'_{0})^{2}\right) & =(z'_{1})^{2}*\left((z'_{0})^{2}*\left(z_{1}^{2}+z_{2}^{2}\right)+\left(1-(z'_{0})^{2}\right)*z_{2}^{2}\right)\\
+<=> & z_{1}^{2}*\left(1-(z'_{1})^{2}\right)*\left(1-(z'_{0})^{2}\right)-(z'_{1})^{2}*(z'_{0})^{2}*z_{1}^{2} & =(z'_{1})^{2}*\left((z'_{0})^{2}*\left(z_{2}^{2}\right)+\left(1-(z'_{0})^{2}\right)*z_{2}^{2}\right)\\
+<=> & z_{1}^{2}*\left(\left(1-(z'_{1})^{2}\right)*\left(1-(z'_{0})^{2}\right)-(z'_{1})^{2}*(z'_{0})^{2}\right) & =(z'_{1})^{2}*\left((z'_{0})^{2}*z_{2}^{2}+\left(1-(z'_{0})^{2}\right)*z_{2}^{2}\right)\\
+<=> & z_{1}^{2}*\left(1-(z'_{0})^{2}-(z'_{1})^{2}+(z'_{0})^{2}(z'_{1})^{2}-(z'_{1})^{2}*(z'_{0})^{2}\right) & =(z'_{1})^{2}*\left(z_{2}^{2}*\left((z'_{0})^{2}+1-(z'_{0})^{2}\right)\right)\\
+<=> & z_{1}^{2}*\left(1-(z'_{0})^{2}-(z'_{1})^{2}\right) & =(z'_{1})^{2}*z_{2}^{2}\\
+<=> & z_{1}^{2} & =\frac{z_{2}^{2}*(z'_{1})^{2}}{1-(z'_{0})^{2}-(z'_{1})^{2}}\end{eqnarray*}
+
+\end_inset 
+
+
+\layout Standard
+
+Note that I left nearly every single step in this equation - that is why
+ it is so long.
+ So it should be easier to fix errors.
+ Now insert 
+\begin_inset Formula $z_{0}$
+\end_inset 
+
+ again:
+\layout Standard
+
+
+\begin_inset Formula \begin{eqnarray*}
+ & z_{2} & =z'_{2}*\sqrt{z_{0}^{2}+z_{1}^{2}+z_{2}^{2}}\\
+=> & z_{2} & =z'_{2}*\sqrt{\frac{(z'_{0})^{2}*(z_{1}^{2}+z_{2}^{2})}{1-(z'_{0})^{2}}+z_{1}^{2}+z_{2}^{2}}\\
+=> & z_{2}^{2} & =\frac{(z'_{2})^{2}*(z'_{0})^{2}*\left(z_{1}^{2}+z_{2}^{2}\right)}{1-(z'_{0})^{2}}+(z'_{2})^{2}*z_{1}^{2}+(z'_{2})^{2}*z_{2}^{2}\\
+<=> & z_{2}^{2}*\left(1-(z'_{2})^{2}-\frac{(z'_{2})^{2}*(z'_{0})^{2}}{1-(z'_{0})^{2}}\right) & =\frac{(z'_{2})^{2}*(z'_{0})^{2}*z_{1}^{2}}{1-(z'_{0})^{2}}+(z'_{2})^{2}*z_{1}^{2}\\
+<=> & z_{2}^{2} & =\frac{\frac{(z'_{2})^{2}*(z'_{0})^{2}*z_{1}^{2}}{1-(z'_{0})^{2}}+(z'_{2})^{2}*z_{1}^{2}}{\frac{\left(1-(z'_{0})^{2}\right)+\left(-(z'_{2})^{2}+(z'_{2})^{2}*(z'_{0})^{2}\right)-(z'_{2})^{2}*(z'_{0})^{2}}{1-(z'_{0})^{2}}}\\
+<=> & z_{2}^{2} & =\frac{\left((z'_{2})^{2}*(z'_{0})^{2}*z_{1}^{2}\right)+(z'_{2})^{2}*z_{1}^{2}-(z'_{2})^{2}*z_{1}^{2}*(z'_{0})^{2}}{1-(z'_{0})^{2}}*\frac{1-(z'_{0})^{2}}{1-(z'_{0})^{2}-(z'_{2})^{2}}\\
+<=> & z_{2}^{2} & =\frac{(z'_{2})^{2}*(z'_{0})^{2}*z_{1}^{2}+(z'_{2})^{2}*z_{1}^{2}-(z'_{2})^{2}*z_{1}^{2}*(z'_{0})^{2}}{1-(z'_{0})^{2}-(z'_{2})^{2}}\\
+<=> & z_{2}^{2} & =\frac{z_{1}^{2}*\left((z'_{2})^{2}*(z'_{0})^{2}+(z'_{2})^{2}-(z'_{2})^{2}*(z'_{0})^{2}\right)}{1-(z'_{0})^{2}-(z'_{2})^{2}}\\
+<=> & z_{2}^{2} & =\frac{z_{1}^{2}*(z'_{2})^{2}}{1-(z'_{0})^{2}-(z'_{2})^{2}}\end{eqnarray*}
+
+\end_inset 
+
+
+\layout Standard
+
+I used a different way here, so chances are good, that it is at least mostly
+ right :) As you can see 
+\begin_inset Formula $z_{1}^{2}$
+\end_inset 
+
+ and 
+\begin_inset Formula $z_{2}^{2}$
+\end_inset 
+
+ are equal, except for 
+\begin_inset Formula $z_{1}$
+\end_inset 
+
+ and 
+\begin_inset Formula $z_{2}$
+\end_inset 
+
+(and 
+\begin_inset Formula $z'_{1}$
+\end_inset 
+
+, 
+\begin_inset Formula $z'_{2}$
+\end_inset 
+
+) flipped.
+ Now 
+\begin_inset Formula $z_{2}^{2}$
+\end_inset 
+
+ into the equation of 
+\begin_inset Formula $z_{1}^{2}$
+\end_inset 
+
+:
+\layout Standard
+
+
+\begin_inset Formula \begin{eqnarray*}
+ & z_{1}^{2} & =\frac{z_{2}^{2}*(z'_{1})^{2}}{1-(z'_{0})^{2}-(z'_{1})^{2}}\\
+=> & z_{1}^{2} & =\frac{\frac{z_{1}^{2}*(z'_{2})^{2}}{1-(z'_{0})^{2}-(z'_{2})^{2}}*(z'_{1})^{2}}{1-(z'_{0})^{2}-(z'_{1})^{2}}\\
+<=> & z_{1}^{2} & =\frac{z_{1}^{2}*(z'_{2})^{2}*(z'_{1})^{2}}{1-(z'_{0})^{2}-(z'_{2})^{2}}*\frac{1}{1-(z'_{0})^{2}-(z'_{1})^{2}}\\
+<=> & z_{1}^{2} & =z_{1}^{2}*\frac{(z'_{2})^{2}*(z'_{1})^{2}}{\left(1-(z'_{0})^{2}-(z'_{2})^{2}\right)*\left(1-(z'_{0})^{2}-(z'_{1})^{2}\right)}\\
+<=> & z_{1}^{2} & =z_{1}^{2}*\frac{(z'_{2})^{2}*(z'_{1})^{2}}{1-2*(z'_{0})^{2}-(z'_{1})^{2}+(z'_{0})^{2*2}+(z'_{0})^{2}*(z'_{1})^{2}-(z'_{2})^{2}+(z'_{2})^{2}*(z'_{0})^{2}+(z'_{2})^{2}*(z'_{1})^{2}}\end{eqnarray*}
+
+\end_inset 
+
+
+\layout Standard
+
+And as you can see now, we have either an error or calculated nonsense.
+\the_end

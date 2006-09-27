@@ -1,0 +1,53 @@
+
+This is about how to install the *SVN* version of boson!
+
+See http://boson.eu.org/install.php for instructions on installing released
+version.
+
+Note: this file might be outdates. http://boson.eu.org provides the most current instructions!
+
+
+Well.. basically, you need
+
+    code/
+    data/
+
+from boson SVN.
+see
+
+    http://sourceforge.net/projects/boson
+
+for more info about how to get the SVN modules.
+
+Making the game :
+=================
+
+You should _not_ be root to make the game.
+
+Currently you need to do:
+  export QTDIR=/path/to/qt
+  export KDEDIR=`kde-config --prefix`
+  mkdir build
+  cd build
+  cmake -DCMAKE_INSTALL_PREFIX=/where/to/install/to ..
+  make
+to compile boson.
+
+QTDIR is e.g. /usr/share/qt3 on debian systems.
+
+
+Installing the game :
+=====================
+You have to be _root_ to install it.
+type : "make install"
+
+
+Installing data :
+=================
+
+Data are in the SVN module "data/"
+
+Repeat exactly the same steps as above, but in the "data" directory instead of
+the "code" directory.
+
+

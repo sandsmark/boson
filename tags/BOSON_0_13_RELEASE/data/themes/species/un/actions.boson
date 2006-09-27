@@ -1,0 +1,27 @@
+[ActionAttack]
+Pixmap=attack.png
+Text=Attack
+
+[ActionFollow]
+Pixmap=follow.png
+Text=Follow
+
+[ActionMove]
+Pixmap=move.png
+Text=Move
+
+[ActionHarvest]
+Pixmap=harvest.png
+Text=Harvest
+
+[ActionStop]
+Pixmap=stop.png
+Text=Stop
+
+[ActionAttackGround]
+Pixmap=attack.png
+Text=AttackGround (weapon)
+
+[ActionDropBomb]
+Pixmap=bomb.png
+Text=Drop bomb

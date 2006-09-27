@@ -1,0 +1,67 @@
+[Armor+2]
+Id=48
+Name=Basic facility armor (for all facilities)
+MineralCost=800
+OilCost=200
+Producer=5
+ProductionTime=50
+ProduceAction=ProduceUpgradeArmor
+RequireUnits=12,5,3
+ApplyToFacilities=true
+Armor=+2
+Description=Upgrades basic armor for all facilities\n--\nArmor +2
+
+[Shields+10]
+Id=49
+Name=Better shields for all facilities
+MineralCost=2000
+OilCost=2000
+Producer=5
+ProductionTime=100
+ProduceAction=ProduceUpgradeArmor
+RequireUnits=12,5,3
+ApplyToFacilities=true
+Shields=+10
+PowerConsumed=+50
+Description=Upgrades shields for all facilities\nNote that this needs a lot of power: +5 for every shield-unit and facility!\n--\nShields +10\nPower Usage +50
+
+[SamSite missile upgrade]
+Id=10001
+Name=Upgrade SamSite missiles
+MineralCost=750
+OilCost=150
+Producer=5
+ProductionTime=25
+ProduceAction=ProduceUpgradeSamSiteMissiles
+ApplyToTypes=6
+RequireUnits=14,12,3
+Weapon_0:Damage=+5
+Weapon_0:Speed=+2.1
+Description=Upgrade SamSite missile\n--\nDamage +5\nSpeed +2.1
+
+[Turrets upgrade]
+Id=10002
+Name=Upgrade turrets
+MineralCost=600
+OilCost=150
+Producer=5
+ProductionTime=25
+ProduceAction=ProduceUpgradeTurrets
+ApplyToTypes=10
+RequireUnits=12
+Weapon_0:Damage=+5
+Description=Upgrade Turrets damage\n--\nDamage +5
+
+[Grizzly missile upgrade]
+Id=10003
+Name=Upgrade Grizzly missiles
+MineralCost=750
+OilCost=150
+Producer=5
+ProductionTime=25
+ProduceAction=ProduceUpgradeGrizzlyMissile
+ApplyToTypes=10006
+RequireUnits=14,12,3
+Weapon_0:Damage=+5
+Weapon_0:Speed=+1.6
+Description=Upgrade Grizzly missiles\n--\nDamage +5\nSpeed +1.6

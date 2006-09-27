@@ -1,0 +1,114 @@
+#include "top.wml"
+    <!-- START_FAQ -->
+    <h1>
+      Frequently Asked Questions (FAQ)
+    </h1>
+    <p>&nbsp;</p>
+    <p>
+      Here you will find answers for most of your questions.
+    </p>
+    <h4>General</h4>
+      <a href="#gen_1">- When is Boson finished ?</a><br>
+      <a href="#gen_3">- How do I submit a bug report ?</a><br>
+      <a href="#gen_98">- Are there other supported languages than english ?</a><br>
+      <a href="#gen_99">- Boson crashed my computer, what can I do ?</a><br>
+    <h4>Game</h4>
+      <a href="#game_1">- Where is the menubar ?</a><br>
+      <a href="#game_2">- Why is Boson so slow ?</a><br>
+    <h4>Rendering</h4>
+      <a href="#rend_1">- Are there options to improve 3D rendering ?</a><br>
+
+
+    <br><br><br>
+    <h3>General</h3>
+    <a name="gen_1">- When is Boson finished ?</a>
+    <p>&gt;&gt; When boson is up and running with a level already loaded in the moment you
+    think about starting boson - then we can release 1.0 ;-) &lt;&lt;
+    </p>
+    <br>
+
+    <a name="gen_3">- How do I submit a bug report ?</a>
+    <p>
+    You can submit a bugreport through <a href="http://bugs.kde.org/wizard.cgi" target="_blank">bugs.kde.org</a>.<br>
+    Or simply start Boson, you will find the "Report Bug..." entry in the "Help" menu.<br>
+    If you don't get a menu on startup than hit the right mouse button and select "Show Menubar".<br><br>
+    Please include a backtrace if you have one. Also, if self compiled, configuring with "--enable-debug=full" helps us.<br>
+    If Boson crashed, please send us the emergency logs. You can use tar/gzip or zip and attach them to the bugreport.
+    These logs help us to "replay" the situation in which boson crashed. You can find them in the directory where boson
+    was started.<br><br>
+
+    If you have speed problems, please klick <a href="#game_2">here</a>.
+    </p>
+    <br>
+
+    <a name="gen_98">- Are there other supported languages than english ?</a>
+    <p>No, Boson is a game in development, text changes very often. It is hard to maintain different languages yet.
+    </p>
+    <br>
+
+    <a name="gen_99">- Boson crashed my computer, what can I do ?</a>
+    <p>It looks like some people have a problem with a Boson/KDE/OpenGL/malloc/driver combination.<br>
+    If you have total crashes or kernel memory errors please start Boson under an other window manager like fvwm2 or failsave.<br>
+    The system crashes should go away but please contact us because we need more people with the same problem.<br>
+    A possible fix might be a kernel update to 2.4.20+.
+    </p>
+    <br>
+
+    <h3>Game</h3>
+    <a name="game_1">- Where is the menubar ?</a>
+    <p>
+    To enable the application menubar press the right mouse button on the welcome screen and click on "Show Menubar".
+    </p>
+    <br>
+
+    <a name="game_2">- Why is boson so slow ?</a>
+    <p>
+    There may be many reasons, some things that can help:<br>
+    - Check your hardware: <a href="started.html">here</a><br>
+    - Try resizing the window and/or make it smaller<br>
+    - Increase the update interval in the Boson settings<br>
+    - Turn off light and materials<br>
+    - Change the color depth of your XServer to 16bit<br>
+    - Check the speed of other OpenGL games like tuxkart and tuxracer, maybe they also run slow<br>
+    - Start the program called "<a href="game/apps.html">boinfo</a>" and check if the values under this tabs are correct:<br>
+        <blockquote>
+        <table border="0" class="nav">
+            <tr><th colspan="2" align="left">OpenGL</th></tr>
+            <tr><td>Is Direct</td><td>Yes</th></tr>
+            <tr><th colspan="2" align="left">NVidia</td></tr>
+            <tr><td>Textfield *</td><td>No errors found...</td></tr>
+            <tr><th colspan="2" align="left">Operating System</th></tr>
+            <tr><td>TDFX *</td><td>Yes</td></tr>
+            <tr><td>Have MTRR</td><td>Yes</td></tr>
+        </table>
+         * If you are using this driver
+        </blockquote>
+    <br>
+    If all that doesn't help you can send a bugreport to the <a href="mailto:boson-devel@lists.sourceforge.net">mailing list</a>.
+    Please don't send other bugs to the mailinglist, see <a href="#gen_3">here</a>.<br>
+    To find speed problems we need more information:<br>
+    - Save the information from "<a href="game/apps.html">boinfo</a>". You can save them under "Files".<br>
+    - Some seconds after startup of a game you will get a message that you can make profiling snapshots with Ctrl+P.<br>
+    &nbsp; Send both files with a description of your speed problem to our mailinglist.
+    </p>
+    <br>
+
+    <h3>Rendering</h3>
+    <a name="rend_1">- Are there options to improve 3D rendering ?</a>
+    <p>
+    Note, this things will make Boson slower!<br>
+    NVIDIA:<br>
+    <code>__GL_FSAA_MODE=X</code><br>
+    <code>__GL_DEFAULT_LOG_ANISO=X</code><br>
+    Export this as variables on your console before starting Boson.<br>
+    You will have to look at your NVIDIA driver documentation for the
+    correct values since the are different from card to card.<br>
+    Other:<br>
+    If you have informations about other cards/drivers please drop us a note.
+    </p>
+    <br>
+
+    <!-- END_FAQ -->
+
+#include "nav.wml" before_url="editor/facilities.html" before_text="Building facilities" after_url="credits.html" after_text="Credits" up_url="index.html"
+#include "footer.wml"
