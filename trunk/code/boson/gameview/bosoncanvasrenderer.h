@@ -149,7 +149,7 @@ protected:
 	void renderFog(BoVisibleEffects&);
 	void renderParticles(BoVisibleEffects&);
 	void renderBulletTrailEffects(BoVisibleEffects& visible);
-	void renderFadeEffects(BoVisibleEffects& visible);
+	void renderFadeEffects(BoVisibleEffects& visible, bool enableShaderEffects);
 	void renderPathLines(const BosonCanvas* canvas, QValueList<QPoint>& path, bool isFlying, float _z);
 	void createRenderItemList(QValueVector<BoRenderItem>* renderItemList, QValueList<Unit*>* radarContactList, const QPtrList<BosonItemContainer>& allItems);
 	void createSelectionsList(BoItemList* selections, const QValueVector<BoRenderItem>* relevantItems);

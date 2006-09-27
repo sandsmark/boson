@@ -635,9 +635,8 @@ void BosonCanvasRenderer::initGL()
  }
 
  if (!extensions.contains("GL_EXT_framebuffer_object")) {
-	boError() << k_funcinfo << "boson requires GL_EXT_framebuffer_object" << endl;
-	// TODO: return false or so?
-	// -> glGenerateMipmapEXT() will be 0
+	// Effects requiring RTT (render-to-texture) will be disabled
+	boDebug() << k_funcinfo << "GL_EXT_framebuffer_object not found. RTT is disabled" << endl;
  }
 
  QString path = KGlobal::dirs()->findResourceDir("data", "boson/themes/ui/standard/uniticon-land.png");
@@ -931,7 +930,7 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
 	glEnd();
  }
 
- renderFadeEffects(d->mVisibleEffects);
+ renderFadeEffects(d->mVisibleEffects, renderToTexture);
 
  if (renderToTexture) {
 	d->mSceneRenderTargetCache->finishedUsingRenderTarget(d->mMainSceneRenderTarget);
@@ -1416,6 +1415,9 @@ bool BosonCanvasRenderer::mustRenderToTexture(BoVisibleEffects& visible)
 {
  // TODO: use dedicated boconfig key
  if (!boConfig->boolValue("UseUnitShaders")) {
+	return false;
+ } else if (!boglGetOpenGLExtensions().contains("GL_EXT_framebuffer_object")) {
+	// FBO is required for RTT
 	return false;
  }
 
@@ -2297,7 +2299,7 @@ void BosonCanvasRenderer::renderBulletTrailEffects(BoVisibleEffects& visible)
  }
 }
 
-void BosonCanvasRenderer::renderFadeEffects(BoVisibleEffects& visible)
+void BosonCanvasRenderer::renderFadeEffects(BoVisibleEffects& visible, bool enableShaderEffects)
 {
  PROFILE_METHOD;
  BO_CHECK_NULL_RET(d->mGameMatrices);
@@ -2351,8 +2353,6 @@ void BosonCanvasRenderer::renderFadeEffects(BoVisibleEffects& visible)
  }
 
 
- // TODO: use dedicated boconfig key
- bool enableShaderEffects = boConfig->boolValue("UseUnitShaders");
  // Restore OpenGL states and return if there's no shader effects to render
  if (!enableShaderEffects || rendered == (int)visible.mFadeEffects.count()) {
 	glDisable(GL_BLEND);
