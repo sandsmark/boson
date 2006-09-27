@@ -30,7 +30,6 @@
 #include "bofile.h"
 #include "player.h"
 #include "bodebug.h"
-#include "bosonfileconverter.h"
 #include "boeventmanager.h"
 
 #include <kgame/kgamemessage.h>
