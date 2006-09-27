@@ -33,7 +33,7 @@ template<class T, class T2> class QMap;
  * To add a new converter:
  * @li Derive a new class from BoSaveGameConverter
  * @li implement the @ref convert method
- * @li implement @ref handlesVersion (and remaining pure virtual methods)
+ * @li implement @ref handlesVersion
  * @li Add the new converter to @ref createConverters
  *
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -62,17 +62,16 @@ public:
 	 **/
 	virtual int handlesVersion() const = 0;
 
+	void setHandlesBosonVersionString(const QString& string);
+
 	/**
 	 * @return A string describing the (human readable) Boson version this
 	 * savegame format belongs to. Usually "0.9", "0.12", and so on.
 	 *
-	 * Add a * ".80" or larger to the current version number for developer releases,
-	 * e.g. "0.12.80" for savegame format before Boson 0.13 but after 0.12.
-	 *
 	 * This string has informational purposes only and is meant to be
 	 * displayed in error messages and debug output.
 	 **/
-	virtual QString handlesBosonVersionString() const = 0;
+	const QString& handlesBosonVersionString() const;
 
 	bool convertFiles(QMap<QString, QByteArray>& destFiles);
 
@@ -85,9 +84,16 @@ protected:
 	virtual bool convert(QMap<QString, QByteArray>& destFiles) = 0;
 
 private:
-	static void insertNewConverterToMap(QMap<int, BoSaveGameConverter*>, BoSaveGameConverter*);
+	static void insertNewConverterToMap(QMap<int, BoSaveGameConverter*>&, BoSaveGameConverter*);
+
+	/**
+	 * Initialize @ref BoSaveGameConverter::handlesBosonVersionString with
+	 * meaningful information
+	 **/
+	static void initVersionNames(QMap<int, BoSaveGameConverter*>& converters);
 
 private:
+	QString mHandlesBosonVersionString;
 };
 
 

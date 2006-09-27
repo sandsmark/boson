@@ -25,16 +25,29 @@
 
 #include <qmap.h>
 
+#include <klocale.h>
+
 // AB: must be the LAST include
 #include "no_game_code.h"
 
 
 BoSaveGameConverter::BoSaveGameConverter()
 {
+ mHandlesBosonVersionString = i18n("(unknown version)");
 }
 
 BoSaveGameConverter::~BoSaveGameConverter()
 {
+}
+
+void BoSaveGameConverter::setHandlesBosonVersionString(const QString& v)
+{
+ mHandlesBosonVersionString = v;
+}
+
+const QString& BoSaveGameConverter::handlesBosonVersionString() const
+{
+ return mHandlesBosonVersionString;
 }
 
 bool BoSaveGameConverter::convertFiles(QMap<QString, QByteArray>& destFiles)
@@ -55,10 +68,6 @@ public:
 	{
 		return BOSON_SAVEGAME_FORMAT_VERSION_0_9;
 	}
-	virtual QString handlesBosonVersionString() const
-	{
-		return "0.9";
-	}
 	virtual bool convert(QMap<QString, QByteArray>& destFiles);
 };
 
@@ -74,10 +83,6 @@ public:
 	virtual int handlesVersion() const
 	{
 		return BOSON_SAVEGAME_FORMAT_VERSION_0_9_1;
-	}
-	virtual QString handlesBosonVersionString() const
-	{
-		return "0.9.1";
 	}
 	virtual bool convert(QMap<QString, QByteArray>& destFiles);
 };
@@ -95,10 +100,6 @@ public:
 	{
 		return BOSON_SAVEGAME_FORMAT_VERSION_0_10;
 	}
-	virtual QString handlesBosonVersionString() const
-	{
-		return "0.10";
-	}
 	virtual bool convert(QMap<QString, QByteArray>& destFiles);
 };
 
@@ -114,10 +115,6 @@ public:
 	virtual int handlesVersion() const
 	{
 		return BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x04);
-	}
-	virtual QString handlesBosonVersionString() const
-	{
-		return "0.10.80";
 	}
 	virtual bool convert(QMap<QString, QByteArray>& destFiles);
 };
@@ -135,10 +132,6 @@ public:
 	{
 		return BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x05);
 	}
-	virtual QString handlesBosonVersionString() const
-	{
-		return "0.10.81";
-	}
 	virtual bool convert(QMap<QString, QByteArray>& destFiles);
 };
 
@@ -154,10 +147,6 @@ public:
 	virtual int handlesVersion() const
 	{
 		return BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x06);
-	}
-	virtual QString handlesBosonVersionString() const
-	{
-		return "0.10.82";
 	}
 	virtual bool convert(QMap<QString, QByteArray>& destFiles);
 };
@@ -175,10 +164,6 @@ public:
 	{
 		return BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x07);
 	}
-	virtual QString handlesBosonVersionString() const
-	{
-		return "0.10.83";
-	}
 	virtual bool convert(QMap<QString, QByteArray>& destFiles);
 };
 
@@ -194,10 +179,6 @@ public:
 	virtual int handlesVersion() const
 	{
 		return BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x08);
-	}
-	virtual QString handlesBosonVersionString() const
-	{
-		return "0.10.84";
 	}
 	virtual bool convert(QMap<QString, QByteArray>& destFiles);
 };
@@ -215,10 +196,6 @@ public:
 	{
 		return BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x09);
 	}
-	virtual QString handlesBosonVersionString() const
-	{
-		return "0.10.85";
-	}
 	virtual bool convert(QMap<QString, QByteArray>& destFiles);
 };
 
@@ -234,10 +211,6 @@ public:
 	virtual int handlesVersion() const
 	{
 		return BOSON_SAVEGAME_FORMAT_VERSION_0_11;
-	}
-	virtual QString handlesBosonVersionString() const
-	{
-		return "0.11";
 	}
 	virtual bool convert(QMap<QString, QByteArray>& destFiles);
 };
@@ -255,10 +228,6 @@ public:
 	{
 		return BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x03, 0x00);
 	}
-	virtual QString handlesBosonVersionString() const
-	{
-		return "0.11.80";
-	}
 	virtual bool convert(QMap<QString, QByteArray>& destFiles);
 };
 
@@ -274,10 +243,6 @@ public:
 	virtual int handlesVersion() const
 	{
 		return BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x03, 0x01);
-	}
-	virtual QString handlesBosonVersionString() const
-	{
-		return "0.11.81";
 	}
 	virtual bool convert(QMap<QString, QByteArray>& destFiles);
 };
@@ -295,10 +260,6 @@ public:
 	{
 		return BOSON_SAVEGAME_FORMAT_VERSION_0_12;
 	}
-	virtual QString handlesBosonVersionString() const
-	{
-		return "0.12";
-	}
 	virtual bool convert(QMap<QString, QByteArray>& destFiles);
 };
 
@@ -308,6 +269,64 @@ bool BoSaveGameConverter_012::convert(QMap<QString, QByteArray>& destFiles)
  return converter.convertPlayField_From_0_12_To_0_13(destFiles);
 }
 
+
+void BoSaveGameConverter::initVersionNames(QMap<int, BoSaveGameConverter*>& converters)
+{
+ QMap<int, QString> saveGameVersion2ReleaseName;
+
+ /*
+  * This list should contain all official releases.
+  *
+  * Development releases (such as 0.11.80) are allowed here, but not required.
+  */
+ saveGameVersion2ReleaseName.insert(BOSON_SAVEGAME_FORMAT_VERSION_0_8, i18n("0.8"));
+ saveGameVersion2ReleaseName.insert(BOSON_SAVEGAME_FORMAT_VERSION_0_8_128, i18n("0.8.128"));
+ saveGameVersion2ReleaseName.insert(BOSON_SAVEGAME_FORMAT_VERSION_0_9, i18n("0.9"));
+ saveGameVersion2ReleaseName.insert(BOSON_SAVEGAME_FORMAT_VERSION_0_9_1, i18n("0.9.1"));
+ saveGameVersion2ReleaseName.insert(BOSON_SAVEGAME_FORMAT_VERSION_0_10, i18n("0.10"));
+ saveGameVersion2ReleaseName.insert(BOSON_SAVEGAME_FORMAT_VERSION_0_11, i18n("0.11"));
+ saveGameVersion2ReleaseName.insert(BOSON_SAVEGAME_FORMAT_VERSION_0_12, i18n("0.12"));
+ saveGameVersion2ReleaseName.insert(BOSON_SAVEGAME_FORMAT_VERSION_0_13, i18n("0.13"));
+
+#if BOSON_VERSION_MINOR >= 0x14
+#error define BOSON_SAVEGAME_FORMAT_VERSION_x_yy for the release and insert it here!
+#endif
+
+
+ QValueList<int> releasedVersions = saveGameVersion2ReleaseName.keys();
+ qHeapSort(releasedVersions);
+
+ QValueList<int> converterVersions = converters.keys();
+ qHeapSort(converterVersions);
+
+ QValueList<int>::iterator releaseVersionIt = releasedVersions.begin();
+ for (QValueList<int>::iterator it = converterVersions.begin(); it != converterVersions.end(); ++it) {
+	QValueList<int>::iterator it2 = releaseVersionIt;
+	while (it2 != releasedVersions.end() && *it2 <= *it) {
+		releaseVersionIt = it2;
+		++it2;
+	}
+
+	QString version = saveGameVersion2ReleaseName[*releaseVersionIt];
+	if (*releaseVersionIt != *it) {
+		version = i18n("(development release after %1)").arg(version);
+	}
+	converters[*releaseVersionIt]->setHandlesBosonVersionString(version);
+ }
+}
+
+void BoSaveGameConverter::insertNewConverterToMap(QMap<int, BoSaveGameConverter*>& converters, BoSaveGameConverter* converter)
+{
+ if (!converter) {
+	return;
+ }
+ if (converters.contains(converter->handlesVersion())) {
+	boError() << k_funcinfo << "version " << converter->handlesVersion() << " already handled by a converter!" << endl;
+	delete converter;
+	return;
+ }
+ converters.insert(converter->handlesVersion(), converter);
+}
 
 QMap<int, BoSaveGameConverter*> BoSaveGameConverter::createConverters()
 {
@@ -325,6 +344,7 @@ QMap<int, BoSaveGameConverter*> BoSaveGameConverter::createConverters()
  insertNewConverterToMap(map, new BoSaveGameConverter_011());
  insertNewConverterToMap(map, new BoSaveGameConverter_012());
 
+ initVersionNames(map);
  return map;
 }
 
