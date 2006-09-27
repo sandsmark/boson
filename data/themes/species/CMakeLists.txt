@@ -5,5 +5,3 @@ add_subdirectory(human)
 add_subdirectory(neutral)
 add_subdirectory(smackware1)
 
-add_subdirectory(un)
-add_subdirectory(kangalo)
