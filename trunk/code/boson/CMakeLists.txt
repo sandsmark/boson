@@ -85,7 +85,6 @@ set(gameengine_SRCS
 	gameengine/cell.cpp
 	gameengine/bofile.cpp
 	gameengine/bpfdescription.cpp
-	gameengine/bosonfileconverter.cpp
 	gameengine/bosoncampaign.cpp
 	gameengine/bosonmessage.cpp
 	gameengine/boson.cpp
@@ -124,6 +123,8 @@ set(gameengine_SRCS
 	gameengine/bosonitem.cpp
 	gameengine/bosonshot.cpp
 	gameengine/bosonitempropertyhandler.cpp
+	gameengine/fileconverter/bosonplayfieldconverter.cpp
+	gameengine/fileconverter/bosonfileconverter.cpp
 )
 kde3_automoc(${gameengine_SRCS})
 boson_add_library(gameengine STATIC ${gameengine_SRCS})
