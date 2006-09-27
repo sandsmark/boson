@@ -2,7 +2,7 @@
 
 # set this to the svn tag name, e.g. BOSON_0_12_RELEASE
 # leave it empty to use HEAD
-BOSON_RELEASE="BOSON_0_12_RELEASE"
+BOSON_RELEASE="BOSON_0_13_RELEASE"
 
 BOSON_SUBVERSION_BASE="$HOME/kde/boson/subversion"
 
