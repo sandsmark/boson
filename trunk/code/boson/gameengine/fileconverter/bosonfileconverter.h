@@ -28,6 +28,8 @@ class QDomNodeList;
 class QDomElement;
 class QStringList;
 
+// this class exists mainly for historic reasons. you can implement your
+// converter directly in @ref BoSaveGameConverter derived classes.
 class BosonFileConverter
 {
 public:
