@@ -306,17 +306,22 @@ add_screenshot("Some units from new species",
     "8. February 2006 (CVS)", "0602-1-thumb.jpg", "0602-1.jpg");
 
 add_screenshot("Attack in between hills",
-    "<b>NEW:</b> 27. May 2006 (0.12)", "0.12-1-thumb.jpg", "0.12-1.jpg");
+    "27. May 2006 (0.12)", "0.12-1-thumb.jpg", "0.12-1.jpg");
 add_screenshot("Defending the base",
-    "<b>NEW:</b> 27. May 2006 (0.12)", "0.12-2-thumb.jpg", "0.12-2.jpg");
+    "27. May 2006 (0.12)", "0.12-2-thumb.jpg", "0.12-2.jpg");
 add_screenshot("Specular highlights on units with high-quality shaders",
-    "<b>NEW:</b> 27. May 2006 (0.12)", "0.12-3-thumb.jpg", "0.12-3.jpg");
+    "27. May 2006 (0.12)", "0.12-3-thumb.jpg", "0.12-3.jpg");
 add_screenshot("Attacking enemy's air units",
-    "<b>NEW:</b> 27. May 2006 (0.12)", "0.12-4-thumb.jpg", "0.12-4.jpg");
+    "27. May 2006 (0.12)", "0.12-4-thumb.jpg", "0.12-4.jpg");
 add_screenshot("Battle for the oilfields... sounds familiar?",
-    "<b>NEW:</b> 27. May 2006 (0.12)", "0.12-5-thumb.jpg", "0.12-5.jpg");
+    "27. May 2006 (0.12)", "0.12-5-thumb.jpg", "0.12-5.jpg");
 add_screenshot("Night is coming and the shadows are getting long",
-    "<b>NEW:</b> 27. May 2006 (0.12)", "0.12-6-thumb.jpg", "0.12-6.jpg");
+    "27. May 2006 (0.12)", "0.12-6-thumb.jpg", "0.12-6.jpg");
+
+add_screenshot("Both types of fog of war can be seen. Gray circles mark radar contacts",
+    "<b>NEW:</b> 1. October 2006 (0.13)", "0.13-1-thumb.jpg", "0.13-1.jpg");
+add_screenshot("Distant units are represented by icons, also new fog of war system can be seen",
+    "<b>NEW:</b> 1. October 2006 (0.13)", "0.13-2-thumb.jpg", "0.13-2.jpg");
 
 $ss_count = count($screens);
 

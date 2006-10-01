@@ -71,30 +71,30 @@ draw_bigbox_subheader("All-in-one package");
 draw_bigbox_text("This is a big package that contains source code, data files
 and music. You do not need to download any package below if you download this
 one. You can get it from
-<a href=\"download.php?dl=boson-all-0.12.tar.bz2\">here</a>
-(35 960 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=419522\">here</a>.<br><br>");
+<a href=\"download.php?dl=boson-all-0.13.tar.bz2\">here</a>
+(36 177 KB) or via SF.net's web interface from
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=451731\">here</a>.<br><br>");
 
 draw_bigbox_subheader("Source code");
 draw_bigbox_text("You can download a tarball (.tar.bz2) with the code from
-<a href=\"download.php?dl=boson-code-0.12.tar.bz2\">here</a>
-(1769 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=419522\">here</a>.
+<a href=\"download.php?dl=boson-code-0.13.tar.bz2\">here</a>
+(1795 KB) or via SF.net's web interface from
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=451731\">here</a>.
 Note that you also need to download the data package to play Boson.<br><br>");
 
 draw_bigbox_subheader("Data package");
 draw_bigbox_text("This tarball contains the data files needed for playing Boson.
 You can download it from
-<a href=\"download.php?dl=boson-data-0.12.tar.bz2\">here</a>
-(17 893 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=419522\">here</a>.<br><br>");
+<a href=\"download.php?dl=boson-data-0.13.tar.bz2\">here</a>
+(18 080 KB) or via SF.net's web interface from
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=451731\">here</a>.<br><br>");
 
 draw_bigbox_subheader("Music");
 draw_bigbox_text("You don't need the music package to play Boson, but it's
 recommended. :-) You can download the tarball from
-<a href=\"download.php?dl=boson-music-0.12.tar.bz2\">here</a>
-(16 308 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=419522\">here</a>.<br><br>");
+<a href=\"download.php?dl=boson-music-0.13.tar.bz2\">here</a>
+(16 320 KB) or via SF.net's web interface from
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=451731\">here</a>.<br><br>");
 
 /*draw_bigbox_subheader("Gentoo");
 draw_bigbox_text("Boson-0.9.1 is in the official portage tree, unmasked.<br>
@@ -143,6 +143,8 @@ draw_bigbox_subheader("Older versions");
 draw_bigbox_text("Currently, you can download old releases only via
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087\">SF.net's web interface</a>.<br>
 Available versions are:<br>
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=419522\">Boson 0.12</a>
+(released on 27th May 2006),<br>
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=353607\">Boson 0.11</a>
 (released on 3rd September 2005),<br>
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=235412\">Boson 0.10</a>

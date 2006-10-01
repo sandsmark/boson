@@ -71,7 +71,7 @@ draw_bigbox_text("These requirements apply to the latest stable release
 
 draw_bigbox_subheader("<a name=\"compiler\"></a>Compiler requirements");
 draw_bigbox_text("To compile Boson (you don't need a compiler if you're downloading a binary version),
-    you need <a href=\"http://gcc.gnu.org/\" target=\"_blank\">Gcc</a> version 3.3 or better.");
+    you need <a href=\"http://gcc.gnu.org/\" target=\"_blank\">Gcc</a> version 3.3 or better. Note that Gcc 4.2 is not supported!");
 
 draw_bigbox_end();
 

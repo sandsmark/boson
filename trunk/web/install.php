@@ -52,8 +52,8 @@ draw_bigbox_text("Note that these instructions only apply if you're using a sour
 
 draw_bigbox_subheader("If you downloaded the big package");
 
-draw_bigbox_text("</p><pre>$ tar xjvf boson-all-0.12.tar.bz2
-$ cd boson-all-0.12
+draw_bigbox_text("</p><pre>$ tar xjvf boson-all-0.13.tar.bz2
+$ cd boson-all-0.13
 $ mkdir build
 $ cd build
 $ cmake ..
@@ -66,7 +66,7 @@ Note that if you want to install at a custom prefix, use
 
 draw_bigbox_subheader("If you downloaded code, data and music separately do all of the following");
 
-draw_bigbox_text("</p><pre>$ tar xjvf boson-code-0.12.tar.bz2
+draw_bigbox_text("</p><pre>$ tar xjvf boson-code-0.13.tar.bz2
 $ cd code
 $ mkdir build
 $ cd build
@@ -74,7 +74,7 @@ $ cmake ..
 $ make
 $ su
 # make install</pre>
-  <pre>$ tar xjvf boson-data-0.12.tar.bz2
+  <pre>$ tar xjvf boson-data-0.13.tar.bz2
 $ cd data
 $ mkdir build
 $ cd build
@@ -82,7 +82,7 @@ $ cmake ..
 $ make
 $ su
 # make install</pre>
-  <pre>$ tar xjvf boson-music-0.12.tar.bz2
+  <pre>$ tar xjvf boson-music-0.13.tar.bz2
 $ cd music
 $ mkdir build
 $ cd build
