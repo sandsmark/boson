@@ -113,7 +113,7 @@ Then download boson-all-0.13.tar.bz2 and follow these instructions: <br>
 If you want to install at a different prefix,
 use \"cmake -DCMAKE_INSTALL_PREFIX=/install/boson/to ..\" instead of
 the \"cmake ..\" line.<br>
-Installation instructions can also be found at
+Installation instructions can also be found at<br>
  <a href=\"http://boson.eu.org/install.php\">http://boson.eu.org/install.php</a>
 </p>
 
