@@ -353,8 +353,8 @@ if($show_ss == -1)
     <!-- Screenshots section -->";
     echo "
         <tr><td width=\"100%\">
-          Click on the thumbnails to see bigger versions. Screenshots taken from CVS
-          are from the development version.
+          Click on the thumbnails to see bigger versions. Screenshots taken from
+          CVS/SVN are from the development version.
           Unit models and other things are not final.<br><br>
         </td></tr>
         <tr><td><table width=\"100%\">";
