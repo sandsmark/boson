@@ -1,4 +1,21 @@
 [article]
+id=061001
+date=October 1st 2006 19:00
+title=0.13 released
+text=
+    <a href="announces/boson-0.13.php">Boson 0.13 is now available</a>.<br>
+    In addition to many internal changes and
+    improvements, this release includes new fog of war system supporting sight
+    fog in addition to exploration fog that we had earlier. Another noticeable
+    feature is that distant units are now rendered as icons making them easier
+    to recognize as well as increasing performance.<br>
+    A few new screenshots illustrating those features can be found on our
+    <a href="screenshots.php">screenshots page</a>.<br>
+    Longer changelog for the new release can be found
+    <a href="announces/changelog-0.13.php">here</a>.
+    <br><br>
+
+[article]
 id=060527
 date=May 27th 2006 00:00
 title=0.12 is out!
