@@ -6,6 +6,7 @@ Remember to update/check before releasing:
   - boversion.h: BOSON_VERSION_STRING and BOSON_VERSION_[MINOR|MICRO]
   - bouniteditor.ui
   - code/ChangeLog: echo "version foobar has been released on ..."
+  - data/pics/boson-startup-textframe.png
 - code/boson/data/boson.lsm: Version, Entered-Date, Primary-site, Alternate-site, maybe. Keywords and Platform
 - make sure that cmake directories and other externals are included !
 - website: news, download.html
