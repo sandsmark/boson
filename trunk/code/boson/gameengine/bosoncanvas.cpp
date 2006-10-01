@@ -1198,6 +1198,7 @@ BosonCanvas::~BosonCanvas()
  delete mCollisions;
  clearMoveDatas();
  delete d->mQuadTreeCollection;
+ delete d->mSightManager;
  delete d;
  boDebug()<< k_funcinfo <<"done"<< endl;
 }
