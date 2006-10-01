@@ -241,7 +241,7 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
 
   GLsizei logsize;
   GLsizei logarraysize;
-  char* log;
+  char* log = 0;
 
   // Load vertex shader, if it was given
   if(!vertexsrc.isEmpty())
@@ -265,7 +265,7 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
     {
       boError(130) << k_funcinfo << "Couldn't compile vertex shader!" << endl << log << endl;
       printUsedSources();
-      delete log;
+      delete[] log;
       return false;
     }
     else if(logsize > 0)
@@ -277,7 +277,7 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
     glAttachShader(mProgram, vertexshader);
     // Delete shader
     glDeleteShader(vertexshader);
-    delete log;
+    delete[] log;
   }
 
   // Load fragment shader, if it was given
@@ -303,7 +303,7 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
     {
       boError(130) << k_funcinfo << "Couldn't compile fragment shader!" << endl << log << endl;
       printUsedSources();
-      delete log;
+      delete[] log;
       return false;
     }
     else if(logsize > 0)
@@ -315,7 +315,7 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
     glAttachShader(mProgram, fragmentshader);
     // Delete shader
     glDeleteShader(fragmentshader);
-    delete log;
+    delete[] log;
   }
 
   // Link the program
@@ -334,7 +334,7 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
   {
     boError(130) << k_funcinfo << "Couldn't link the program!" << endl << log << endl;
     printUsedSources();
-    delete log;
+    delete[] log;
     return false;
   }
   else if(logsize > 0)
@@ -342,7 +342,7 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
     boDebug(130) << "Shader linking log:" << endl << log << endl;
     printUsedSources();
   }
-  delete log;
+  delete[] log;
 
   delete mUniformLocations;
   mUniformLocations = new QDict<int>(17);
