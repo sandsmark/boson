@@ -73,13 +73,13 @@ and music. You do not need to download any package below if you download this
 one. You can get it from
 <a href=\"download.php?dl=boson-all-0.13.tar.bz2\">here</a>
 (36 177 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=451731\">here</a>.<br><br>");
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&package_id=123796release_id=451731\">here</a>.<br><br>");
 
 draw_bigbox_subheader("Source code");
 draw_bigbox_text("You can download a tarball (.tar.bz2) with the code from
 <a href=\"download.php?dl=boson-code-0.13.tar.bz2\">here</a>
 (1795 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=451731\">here</a>.
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&package_id=12379&release_id=451731\">here</a>.
 Note that you also need to download the data package to play Boson.<br><br>");
 
 draw_bigbox_subheader("Data package");
@@ -87,14 +87,14 @@ draw_bigbox_text("This tarball contains the data files needed for playing Boson.
 You can download it from
 <a href=\"download.php?dl=boson-data-0.13.tar.bz2\">here</a>
 (18 080 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=451731\">here</a>.<br><br>");
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&package_id=12379&release_id=451731\">here</a>.<br><br>");
 
 draw_bigbox_subheader("Music");
 draw_bigbox_text("You don't need the music package to play Boson, but it's
 recommended. :-) You can download the tarball from
 <a href=\"download.php?dl=boson-music-0.13.tar.bz2\">here</a>
 (16 320 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=451731\">here</a>.<br><br>");
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&package_id=12379&release_id=451731\">here</a>.<br><br>");
 
 /*draw_bigbox_subheader("Gentoo");
 draw_bigbox_text("Boson-0.9.1 is in the official portage tree, unmasked.<br>
