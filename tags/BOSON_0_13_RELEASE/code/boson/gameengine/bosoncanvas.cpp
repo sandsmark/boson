@@ -135,6 +135,7 @@ public:
 	BoCanvasSightManager(BosonCanvas* canvas) { mMap = 0; mCanvas = canvas; }
 
 	void setMap(BosonMap* map) { mMap = map; }
+	void quitGame();
 
 	void unitMoved(Unit* u, bofixed oldX, bofixed oldY);
 	void updateSights();
@@ -194,6 +195,16 @@ private:
 	BosonMap* mMap;
 	BosonCanvas* mCanvas;
 };
+
+void BoCanvasSightManager::quitGame()
+{
+ mScheduledSightUpdates.clear();
+ mScheduledRadarUpdates.clear();
+ mChangedRadars.clear();
+ mChangedJammers.clear();
+ mRadarUnits.clear();
+ mRadarJammers.clear();
+}
 
 void BoCanvasSightManager::unitMoved(Unit* u, bofixed oldX, bofixed oldY)
 {
@@ -1187,6 +1198,7 @@ BosonCanvas::~BosonCanvas()
  delete mCollisions;
  clearMoveDatas();
  delete d->mQuadTreeCollection;
+ delete d->mSightManager;
  delete d;
  boDebug()<< k_funcinfo <<"done"<< endl;
 }
@@ -1213,8 +1225,7 @@ void BosonCanvas::quitGame()
  }
  d->mChangeAdvanceList.clear();
  d->mNextItemId = 0;
- delete d->mSightManager;
- d->mSightManager = 0;
+ d->mSightManager->quitGame();
 
  BoItemListHandler::itemListHandler()->slotDeleteLists();
 }

@@ -2654,7 +2654,7 @@ QValueList<BoVector2Fixed> BosonPath::findLocations(Player* player, int x, int y
       VISITED(n2.x, n2.y) = true;
 
       // Check if cell is explored or not
-      if(player->isExplored(n2.x, n2.y))
+      if(!player->isExplored(n2.x, n2.y))
       {
         continue;
       }
@@ -2671,6 +2671,10 @@ QValueList<BoVector2Fixed> BosonPath::findLocations(Player* player, int x, int y
           }
           Unit* u = (Unit*)*it;
           if(u->isDestroyed())
+          {
+            continue;
+          }
+          if(!(u->visibleStatus(player->bosonId()) & (UnitBase::VS_Visible | UnitBase::VS_Earlier)))
           {
             continue;
           }
@@ -2693,6 +2697,10 @@ QValueList<BoVector2Fixed> BosonPath::findLocations(Player* player, int x, int y
           }
           Unit* u = (Unit*)*it;
           if(u->isDestroyed())
+          {
+            continue;
+          }
+          if(!(u->visibleStatus(player->bosonId()) & (UnitBase::VS_Visible | UnitBase::VS_Earlier)))
           {
             continue;
           }
