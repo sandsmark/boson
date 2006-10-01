@@ -1180,6 +1180,9 @@ void UnitMoverFlying::advanceIdle()
 
 void UnitMoverFlying::flyInCircle()
 {
+ if (unit()->maxSpeed() == 0) {
+	return;
+ }
  bofixed speedfactor = unit()->speed() / unit()->maxSpeed();
  if (speedfactor < 0.7) {
 	unit()->accelerate();
