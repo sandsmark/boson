@@ -77,20 +77,20 @@ mostly unplayable.
 </p>
 
 <p class=\"announcement\">
-For a longer, though still very incomplete list see
+For a longer, though still very incomplete list see<br>
  <a href=\"http://boson.eu.org/announces/changelog-0.13.php\">http://boson.eu.org/announces/changelog-0.13.php</a>
 </p>
 
 <p class=\"announcement\">
 <b>Requirements</b><br>
-You can find a list of hardware and software requirements at
+You can find a list of hardware and software requirements at<br>
  <a href=\"http://boson.eu.org/info.php\">http://boson.eu.org/info.php</a><br>
 Note that proper 3d acceleration is required.
 </p>
 
 <p class=\"announcement\">
 <b>Downloading Boson</b><br>
-Source packages can be found at
+Source packages can be found at<br>
  <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=451731\">http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=451731</a>
 </p>
 
