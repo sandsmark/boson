@@ -20,15 +20,15 @@ class MxHeapable
 {
 private:
     float import;
-    int token;
+    long int token;
 
 public:
     MxHeapable() { not_in_heap(); heap_key(0.0f); }
 
     inline bool is_in_heap() { return token != -47; }
     inline void not_in_heap() { token = -47; }
-    inline int get_heap_pos() { return token; }
-    inline void set_heap_pos(int t) { token=t; }
+    inline unsigned int get_heap_pos() { return (unsigned int)token; }
+    inline void set_heap_pos(unsigned int t) { token=t; }
 
     inline void  heap_key(float k) { import=k; }
     inline float heap_key() const  { return import; }
