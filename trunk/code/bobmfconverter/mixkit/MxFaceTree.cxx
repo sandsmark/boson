@@ -54,6 +54,7 @@ static MxFaceTree *__input_tree = NULL;
 bool MxFaceTree::smf_hook(char *cmd, int argc, char *argv[], MxStdModel& m)
 {
     MxFaceTree *tree = __input_tree;
+    (void)argc; // Q_UNUSED
 
 
     if( streq(cmd, "f^") )
