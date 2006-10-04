@@ -124,7 +124,7 @@ MxHeapable *MxHeap::remove(MxHeapable *t)
 {
     if( !t->is_in_heap() ) return NULL;
 
-    int i = t->get_heap_pos();
+    unsigned int i = t->get_heap_pos();
     swap(i, length()-1);
     drop();
     t->not_in_heap();
