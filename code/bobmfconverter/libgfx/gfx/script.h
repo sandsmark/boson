@@ -65,7 +65,7 @@ public:
 
 typedef int (*CmdHandler)(const CmdLine&);
 
-struct CmdObject { virtual int operator()(const CmdLine& cmd) = 0; };
+struct CmdObject { virtual ~CmdObject() {} virtual int operator()(const CmdLine& cmd) = 0; };
 
 struct CmdFunction : public CmdObject
 {
