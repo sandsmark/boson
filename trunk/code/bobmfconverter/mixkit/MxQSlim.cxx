@@ -282,7 +282,7 @@ void MxEdgeQSlim::apply_mesh_penalties(MxQSlimEdge *info)
     if( max_degree > vertex_degree_limit )
 	bias += (max_degree-vertex_degree_limit) * meshing_penalty * 0.001;
 
-#if ALTERNATE_DEGREE_BIAS
+#if defined ALTERNATE_DEGREE_BIAS && ALTERNATE_DEGREE_BIAS
     // ??BUG:  This code was supposed to be a slight improvement over
     //         the earlier version above.  But it performs worse.
     //         Should check into why sometime.
@@ -319,7 +319,7 @@ void MxEdgeQSlim::apply_mesh_penalties(MxQSlimEdge *info)
 	    bias += (1-c_min);
     }
 
-#if USE_OLD_INVERSION_CHECK
+#if defined USE_OLD_INVERSION_CHECK && USE_OLD_INVERSION_CHECK
     double Nmin1 = check_local_inversion(info->v1, info->v2, info->vnew);
     double Nmin2 = check_local_inversion(info->v2, info->v1, info->vnew);
     if( MIN(Nmin1, Nmin2) < 0.0 )
