@@ -13,9 +13,10 @@
 #include "MxVector.h"
 
 MxDualModel::MxDualModel(MxStdModel *m0)
-    : node_labels(m0->face_count()),
-      node_marks(m0->face_count()),
-      edge_links(m0->face_count()), edges(3*m0->face_count()/2)
+    : edges(3*m0->face_count()/2),
+      edge_links(m0->face_count()),
+      node_labels(m0->face_count()),
+      node_marks(m0->face_count())
 {
     m = m0;
 
@@ -30,7 +31,7 @@ MxDualModel::MxDualModel(MxStdModel *m0)
 
 void MxDualModel::mark_node_neighbors(uint n,  uint mark)
 {
-    for(uint i=0; i<node_edges(n).length(); i++)
+    for(int i=0; i<node_edges(n).length(); i++)
     {
 	MxDualEdge& e = edge(node_edges(n)[i]);
 	node_mark(e.opposite_vertex(n), mark);
@@ -48,7 +49,7 @@ void MxDualModel::collect_edges()
 	star.reset();
 	m->collect_vertex_star(i, star);
 
-	for(uint j=0; j<star.length(); j++)
+	for(int j=0; j<star.length(); j++)
 	    if( i < star[j] )
 	    {
 		faces.reset();
@@ -78,14 +79,14 @@ void MxDualModel::update_border_lengths(const MxDualContraction& conx)
 {
     uint v1 = conx.n1;
 
-    for(uint i=0; i<conx.dead_edges.length(); i++)
+    for(int i=0; i<conx.dead_edges.length(); i++)
     {
 	uint target = conx.dead_edges[i];
 	const MxDualEdge& dead = edge(target);
 	uint o = dead.v1;
 	if( o==v1 ) continue;
 
-	for(uint j=0; j<node_edges(v1).length(); j++)
+	for(int j=0; j<node_edges(v1).length(); j++)
 	{
 	    uint k = node_edges(v1)[j];
 
@@ -112,7 +113,7 @@ void MxDualModel::contract(MxDualContraction& conx)
 
     // Relink/remove all edges of n2
     //
-    for(uint i=0; i<node_edges(n2).length(); i++)
+    for(int i=0; i<node_edges(n2).length(); i++)
     {
 	uint e_id = node_edges(n2)[i];
 	MxDualEdge& e = edge(e_id);
@@ -151,11 +152,11 @@ bool MxDualModel::meshedge_is_boundary(const MxEdge& e, uint n1)
     uint root = node_ancestor(n1);
     uint count = 0;
 
-    for(uint i=0; i<faces.length(); i++)
+    for(int i=0; i<faces.length(); i++)
         if( root==node_ancestor(faces[i]) )
 	    count++;
 
-    return count>0 && count!=faces.length();
+    return count>0 && count!=(uint)faces.length();
 }
 
 bool MxDualModel::meshedge_is_boundary(const MxEdge& e, uint n1, uint n2)
@@ -170,7 +171,7 @@ bool MxDualModel::meshedge_is_boundary(const MxEdge& e, uint n1, uint n2)
     uint count1 = 0;
     uint count2 = 0;
 
-    for(uint i=0; i<faces.length(); i++)
+    for(int i=0; i<faces.length(); i++)
     {
         uint r = node_ancestor(faces[i]);
 
@@ -200,7 +201,7 @@ void MxDualModel::compute_mesh_boundary(uint n1, MxEdgeList& edges)
         star.reset();
         m->collect_vertex_star(i, star);
 
-        for(uint j=0; j<star.length(); j++)
+        for(int j=0; j<star.length(); j++)
             if( i < star[j] )
             {
                 MxEdge e(i, star[j]);
@@ -226,7 +227,7 @@ void MxDualModel::compute_mesh_boundary(uint n1, uint n2, MxEdgeList& edges)
         star.reset();
         m->collect_vertex_star(i, star);
 
-        for(uint j=0; j<star.length(); j++)
+        for(int j=0; j<star.length(); j++)
             if( i < star[j] )
             {
                 MxEdge e(i, star[j]);
