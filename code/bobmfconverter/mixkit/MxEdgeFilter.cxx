@@ -47,7 +47,7 @@ void MxEdgeFilter::collect_star_for_update(MxVertexID v)
 {
     MxVertexList star;
     m->collect_vertex_star(v, star);
-    for(uint i=0; i<star.length(); i++)
+    for(int i=0; i<star.length(); i++)
 	update_list.add(create_edge(v, star[i], false));
 }
 
@@ -60,7 +60,7 @@ void MxEdgeFilter::collect_edges()
 	star.reset();
 	m->collect_vertex_star(i, star);
 
-	for(uint j=0; j<star.length(); j++)
+	for(int j=0; j<star.length(); j++)
 	    if( i<star[j] )
 	    {
 		create_edge(i, star[j]);
@@ -92,7 +92,7 @@ bool MxEdgeFilter::filter1()
 
     filter_target_edge(edge);
 
-    for(uint i=0; i<update_list.length(); i++)
+    for(int i=0; i<update_list.length(); i++)
 	rank_and_update_edge(update_list[i]);
 
 	// Allow for the possibility that this edge will be modified
