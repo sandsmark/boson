@@ -127,7 +127,7 @@ bool MxAspVar::read_from(const char *str, uint i)
 
 bool MxAspVar::apply(int argc, const char **argv, MxAspStore *store)
 {
-    if( type==MXASP_PROC && argc>=as.proc_var->args_expected )
+    if( type==MXASP_PROC && argc>=(int)as.proc_var->args_expected )
     {
 	if( as.proc_var->args_expected==0 )
 	{
@@ -142,7 +142,7 @@ bool MxAspVar::apply(int argc, const char **argv, MxAspStore *store)
 			 value, as.proc_var->args_expected);
 
 	    arg.own_memory(true);
-	    for(uint i=0; i<argc; i++) arg.read_from(argv[i], i);
+	    for(int i=0; i<argc; i++) arg.read_from(argv[i], i);
 
 	    apply(&arg, store);
 	}
@@ -175,7 +175,7 @@ MxAspStore::MxAspStore()
 
 MxAspVar *MxAspStore::lookup(const char *name) const
 {
-    for(uint i=0; i<vars.length(); i++)
+    for(int i=0; i<vars.length(); i++)
 	if( streq(vars[i].nameof(), name) )
 	    //
 	    // NOTE: You might think it odd that we need the cast here.
@@ -215,7 +215,7 @@ bool MxAspStore::execute_command(int argc, const char *cmd, const char **argv)
     {
 	if( avar )
 	{
-	    for(uint i=1; i<argc; i++)
+	    for(int i=1; i<argc; i++)
 		avar->read_from(argv[i], i-1);
 	}
 	else
@@ -260,14 +260,14 @@ bool MxAspStore::execute_command(int argc, const char *cmd, const char **argv)
 void MxAspStore::write(ostream& out)
 {
     out << "# ASP automatic state dump" << endl;
-    for(uint i=0; i<vars.length(); i++)
+    for(int i=0; i<vars.length(); i++)
 	out << "set " << vars[i] << endl;
 }
 
 
 
 static
-char *typenames[] =
+const char *typenames[] =
 {
     "null",
     "bool",
