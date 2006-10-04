@@ -57,9 +57,9 @@ void MxHeap::downheap(unsigned int i)
     uint r = right(i);
     uint largest;
 
-    while( l<length() )
+    while( l<(uint)length() )
     {
-	if( r<length() && ref(l)->heap_key() < ref(r)->heap_key() )
+	if( r<(uint)length() && ref(l)->heap_key() < ref(r)->heap_key() )
 	    largest = r;
 	else 
 	    largest = l;
