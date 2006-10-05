@@ -20,7 +20,7 @@ class MxHeapable
 {
 private:
     float import;
-    long int token;
+    int token;
 
 public:
     MxHeapable() { not_in_heap(); heap_key(0.0f); }
