@@ -34,6 +34,10 @@ void MxHeap::swap(unsigned int i, unsigned int j)
 
 void MxHeap::upheap(unsigned int i)
 {
+    if(i >= (unsigned int)length())
+    {
+	return;
+    }
     MxHeapable *moving = ref(i);
     uint index = i;
     uint p = parent(i);
@@ -51,6 +55,10 @@ void MxHeap::upheap(unsigned int i)
 
 void MxHeap::downheap(unsigned int i)
 {
+    if(i >= (unsigned int)length())
+    {
+	return;
+    }
     MxHeapable *moving = ref(i);
     uint index = i;
     uint l = left(i);
