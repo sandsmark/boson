@@ -1,0 +1,134 @@
+#!/bin/bash
+
+# set this to the svn tag name, e.g. BOSON_0_12_RELEASE
+# leave it empty to use HEAD
+BOSON_RELEASE="BOSON_0_13_RELEASE"
+
+BOSON_SUBVERSION_BASE="$HOME/kde/boson/subversion"
+
+#configuration ends here
+
+
+if [ "x$BOSON_RELEASE" = "x" ]; then
+	BOSON_BASE="$BOSON_SUBVERSION_BASE/trunk/"
+else
+	BOSON_BASE="$BOSON_SUBVERSION_BASE/tags/$BOSON_RELEASE/"
+fi
+BOSON_TOOLS="$BOSON_BASE/tools"
+BOSON_CODE="$BOSON_BASE/code"
+BOSON_DATA="$BOSON_BASE/data"
+BOSON_MUSIC="$BOSON_BASE/music"
+
+#configuration ends here
+
+
+BO_VERSION=$1
+
+DEST_BASE="$PWD/$BO_VERSION"
+DEST_ALL_DIRNAME="boson-all-$BO_VERSION"
+DEST_CODE_DIRNAME="boson-code-$BO_VERSION"
+DEST_DATA_DIRNAME="boson-data-$BO_VERSION"
+DEST_MUSIC_DIRNAME="boson-music-$BO_VERSION"
+DEST_ALL="$DEST_BASE/$DEST_ALL_DIRNAME"
+DEST_CODE="$DEST_BASE/$DEST_CODE_DIRNAME"
+DEST_DATA="$DEST_BASE/$DEST_DATA_DIRNAME"
+DEST_MUSIC="$DEST_BASE/$DEST_MUSIC_DIRNAME"
+
+REALPATH=`which realpath`
+if [ -x "$REALPATH" ]; then
+	BOSON_BASE=`$REALPATH $BOSON_BASE`
+	BOSON_TOOLS=`$REALPATH $BOSON_TOOLS`
+	BOSON_CODE=`$REALPATH $BOSON_CODE`
+	BOSON_DATA=`$REALPATH $BOSON_DATA`
+	BOSON_MUSIC=`$REALPATH $BOSON_MUSIC`
+else
+	echo "We recommend to install realpath before starting this script!  Might avoid some problems."
+	echo "(it is not mandatory, if you use correct configurations)"
+fi
+
+
+# first test if all param/paths are correct and update from svn
+
+if [ "x$BO_VERSION" = "x" ]; then
+	echo "Usage: $0 <version>"
+	exit 1
+fi
+
+if [ ! -d "$BOSON_BASE" ]; then
+	echo "ERROR: expected svn checkout at $BOSON_BASE"
+	exit 1
+fi
+
+if [ -d "$DEST_BASE" ]; then
+	echo "ERROR: $DEST_BASE already exists"
+	exit 1
+fi
+
+if [ ! -d "$BOSON_CODE" ]; then
+	echo "ERROR: $BOSON_CODE doesn't exist"
+	echo "You need to have code, data and tools in the directory $BOSON_BASE !"
+	exit 1
+fi
+if [ ! -d "$BOSON_DATA" ]; then
+	echo "ERROR: $BOSON_DATA doesn't exist"
+	exit 1
+fi
+if [ ! -d "$BOSON_MUSIC" ]; then
+	echo "ERROR: Didn't find music dir $BOSON_MUSIC."
+	echo "Do mkdir music ; cd music ; wget boson.sf.net/music/*.tar.bz2 first!"
+	exit 1
+fi
+
+##################
+# update from svn
+##################
+if [ "x$BOSON_RELEASE" != "x" ]; then
+	echo "Updating $BOSON_BASE"
+	cd $BOSON_BASE && svn up || exit 1
+else
+	echo "No BOSON_RELEASE version specified, won't update from svn but rather use existing sources."
+	echo "Do NOT use this as a release version!!"
+	sleep 3
+fi
+
+
+echo "Generate release files in $DEST_BASE"
+
+####################################################
+# export from svn. we do NOT preserve local changes.
+####################################################
+svn export -r BASE "$BOSON_BASE" "$DEST_BASE" || exit 1
+mv "$DEST_BASE/code" "$DEST_CODE"
+mv "$DEST_BASE/data" "$DEST_DATA"
+mv "$DEST_BASE/music" "$DEST_MUSIC"
+svn export -r BASE "$BOSON_BASE" "$DEST_ALL" || exit 1
+rm -rf "$DEST_ALL/tools"
+
+svn export -r BASE "$BOSON_BASE/tools/cmake" "$DEST_CODE/cmake" || exit 1
+svn export -r BASE "$BOSON_BASE/tools/cmake" "$DEST_DATA/cmake" || exit 1
+svn export -r BASE "$BOSON_BASE/tools/cmake" "$DEST_MUSIC/cmake" || exit 1
+svn export -r BASE "$BOSON_BASE/tools/cmake" "$DEST_ALL/cmake" || exit 1
+
+echo "SVN exports completed"
+
+echo "project(boson-all)" > "$DEST_ALL/CMakeLists.txt"
+echo "" >> "$DEST_ALL/CMakeLists.txt"
+echo "add_subdirectory(code)" >> "$DEST_ALL/CMakeLists.txt"
+echo "add_subdirectory(data)" >> "$DEST_ALL/CMakeLists.txt"
+echo "add_subdirectory(music)" >> "$DEST_ALL/CMakeLists.txt"
+
+
+######################
+# create the packages
+######################
+echo "Creating tar archives"
+tar -C "$DEST_BASE" -cjf "$DEST_BASE/$DEST_ALL_DIRNAME.tar.bz2" "$DEST_ALL_DIRNAME" > /dev/null || exit 1
+tar -C "$DEST_BASE" -cjf "$DEST_BASE/$DEST_CODE_DIRNAME.tar.bz2" "$DEST_CODE_DIRNAME" > /dev/null || exit 1
+tar -C "$DEST_BASE" -cjf "$DEST_BASE/$DEST_DATA_DIRNAME.tar.bz2" "$DEST_DATA_DIRNAME" > /dev/null || exit 1
+tar -C "$DEST_BASE" -cjf "$DEST_BASE/$DEST_MUSIC_DIRNAME.tar.bz2" "$DEST_MUSIC_DIRNAME" > /dev/null || exit 1
+
+
+echo "Packaging should be completed now (unless you see any errors above, that could not get catched!"
+echo "You will find the packages (.tar.bz2 files) in $DEST_BASE"
+echo "Test the packages before uploading!!"
+

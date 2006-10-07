@@ -1,0 +1,8 @@
+#include "facilities.wml" type="Facilities" name="Repair Pad" \
+        description="Many talented engineers are working here to repair your units as fast as possible. \
+        Select a unit and click with the right mouse button on the Repair Pad.<br><br>\
+        Unfortunately, the engineers which created the construnction plans of your units got mad and \
+        no one is able to get them out of the computers. We are working at it, but until we have the construction plans you won't \
+        be able to use the Repair Pad." \
+        name2="repairpad" type2="fix" \
+        before_url="techcenter.html" before_text="Tech Center" after_url="helipad.html" after_text="Helipad" up_url="index.html"

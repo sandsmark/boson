@@ -1,0 +1,4 @@
+#include "facilities.wml" type="Units" name="Ship" \
+        description="A ship is only useful if you fight against other ships. You can destroy them with your <a href='tornado.html'>Tornados</a>." \
+        name2="ship" type2="mob" \
+        before_url="wolf.html" before_text="Wolf" after_url="ferry.html" after_text="Ferry" up_url="index.html"

@@ -1,0 +1,4 @@
+#include "facilities.wml" type="Facilities" name="Mineral Refinery" \
+        description="Send a <a href='../units/mineralharvester.html'>Mineral Harvester</a> to mineral refinery to get more minerals." \
+        name2="mineralrefinery" type2="fix" \
+        before_url="commandbunker.html" before_text="Command Bunker" after_url="oilrefinery.html" after_text="Oil Refinery" up_url="index.html"

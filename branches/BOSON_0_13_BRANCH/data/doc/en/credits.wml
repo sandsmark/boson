@@ -1,0 +1,29 @@
+#include "top.wml"
+
+    <h1>
+      Credits
+    </h1>
+    <p>&nbsp;</p>
+        <table border="0">
+                <tr><th align="left">Code</th></tr>
+                <tr><td width="350">Initial design and implementation</td><td><a href="mailto:orzel@freehackers.org">Thomas Capricelli</a></td></tr>
+                <tr><td>Core developer and maintainer</td><td><a href="mailto:b_mann@gmx.de">Andreas Beckermann</a></td></tr>
+                <tr><td>Core developer</td><td><a href="mailto:rivolaks@hot.ee">Rivo Laks</a></td></tr>
+                <tr><td>Release coordinator</td><td><a href="mailto:orzel@kde.org">Thomas Capricelli</a></td></tr>
+                <tr><td>&nbsp;</td></tr>
+
+                <tr><th align="left">Multimedia</th></tr>
+                <tr><td>Graphics of the main themes (earth, humans)</td><td><a href="mailto:BenniAdler@bigfoot.de">Benjamin Adler</a></td></tr>
+                <tr><td>Music (progressive, jungle themes) and sounds</td><td><a href="http://www.rebellion-scs.de/boson/" target="_blank">Nils Trzebin</a></td></tr>
+                <tr><td>Music ('soft' theme)</td><td><a href="http://perso.libertysurf.fr/grossard/boson/" target="_blank">Ludovic Grossard</a></td></tr>
+                <tr><td>Sound effects</td><td><a href="mailto:t.h@gmxpro.de">Timo Huebel</a></td></tr>
+                <tr><td>&nbsp;</td></tr>
+
+                <tr><th align="left">Other</th></tr>
+                <tr><td>Webmaster, initial homepage, mailing-list maintainer</td><td><a href="mailto:orzel@kde.org">Thomas Capricelli</a></td></tr>
+                <tr><td>Homepage design</td><td><a href="mailto:BenniAdler@bigfoot.de">Benjamin Adler</a> and <a href="mailto:rivolaks@hot.ee">Rivo Laks</a></td></tr>
+                <tr><td>Boson Handbook</td><td><a href="mailto:felix.seeger@gmx.de">Felix Seeger</a></td></tr>
+
+        </table>
+#include "nav.wml" before_url="faq.html" before_text="FAQ" after_text="&nbsp;" up_url="index.html"
+#include "footer.wml"

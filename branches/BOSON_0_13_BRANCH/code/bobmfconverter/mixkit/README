@@ -1,0 +1,11 @@
+This is a copy of mixkit, from
+  http://graphics.cs.uiuc.edu/~garland/software/qslim.html
+(qslim contains mixkit)
+
+mixkit claims to be under the LGPL, but I believe it is not (see COPYING.txt for
+comments on this).
+
+Because we _need_ it to be under the (L)GPL, I have removed the offending files
+and thus this is a modified version of mixkit only.
+
+Andi

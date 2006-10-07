@@ -1,0 +1,208 @@
+? kio/kio/kgzipfilter.cpp
+? kio/kio/kgzipfilter.h
+Index: admin/acinclude.m4.in
+===================================================================
+RCS file: /home/kde/kde-common/admin/acinclude.m4.in,v
+retrieving revision 2.461.2.2
+diff -u -3 -p -r2.461.2.2 acinclude.m4.in
+--- admin/acinclude.m4.in	12 Nov 2004 22:48:09 -0000	2.461.2.2
++++ admin/acinclude.m4.in	23 Apr 2005 18:03:31 -0000
+@@ -1492,6 +1492,8 @@ LDFLAGS="$ac_ldflags_safe"
+ LIBS="$ac_libs_safe"
+ 
+ AC_LANG_RESTORE
++dnl AB: make static library work
++ac_qt_libraries=/home/andi/kde/boson/static/qt-copy/lib
+ if test "$ac_qt_includes" = NO || test "$ac_qt_libraries" = NO; then
+   ac_cv_have_qt="have_qt=no"
+   ac_qt_notfound=""
+@@ -1505,7 +1507,7 @@ if test "$ac_qt_includes" = NO || test "
+   else
+     if test "x$kde_use_qt_mt" = "xyes"; then
+        missing_qt_mt="
+-Make sure that you have compiled Qt with thread support!"
++ Make sure that you have compiled Qt with thread support!"
+        ac_qt_notfound="(library $qtlib-mt)";
+     else
+        ac_qt_notfound="(library $qtlib)";
+Index: dcop/dcopclient.cpp
+===================================================================
+RCS file: /home/kde/kdelibs/dcop/dcopclient.cpp,v
+retrieving revision 1.181
+diff -u -3 -p -r1.181 dcopclient.cpp
+--- dcop/dcopclient.cpp	13 Jul 2004 12:45:47 -0000	1.181
++++ dcop/dcopclient.cpp	23 Apr 2005 18:03:31 -0000
+@@ -699,11 +699,40 @@ static bool isServerSocketOwnedByUser(co
+ }
+ #endif
+ 
+-
++#ifdef HAVE_BACKTRACE
++#include <execinfo.h>
++#else
++#warning no backtraces
++#endif
+ bool DCOPClient::attachInternal( bool registerAsAnonymous )
+ {
+     char errBuf[1024];
+ 
++    qDebug("attachInternal(): trying to attach to DCOP server. this is not supposed to happen in boson!");
++#ifdef HAVE_BACKTRACE
++    QString s;
++    void* trace[256];
++    int n = backtrace(trace, 256);
++    if (!n) {
++	return false;
++    }
++    char** strings = backtrace_symbols (trace, n);
++
++    s = "[\n";
++
++    for (int i = 0; i < n; ++i) {
++        s += QString::number(i) +
++             QString::fromLatin1(": ") +
++             QString::fromLatin1(strings[i]) + QString::fromLatin1("\n");
++    }
++    s += "]\n";
++    if (strings) {
++        free (strings);
++    }
++    qDebug("backtrace: %s", s.latin1());
++#endif
++    return false;
++
+     if ( isAttached() )
+         detach();
+ 
+Index: kio/kio/Makefile.am
+===================================================================
+RCS file: /home/kde/kdelibs/kio/kio/Makefile.am,v
+retrieving revision 1.212
+diff -u -3 -p -r1.212 Makefile.am
+--- kio/kio/Makefile.am	10 May 2004 20:23:14 -0000	1.212
++++ kio/kio/Makefile.am	23 Apr 2005 18:03:39 -0000
+@@ -34,6 +34,7 @@ libksycoca_la_SOURCES = \
+ 	kuserprofile.cpp kservicegroupfactory.cpp \
+ 	kurifilter.cpp \
+ 	kfilterbase.cpp kfilterdev.cpp \
++	kgzipfilter.cpp \
+ 	kshellcompletion.cpp kurlcompletion.cpp \
+ 	kautomount.cpp krun.cpp \
+ 	kfileitem.cpp kdirlister.cpp kimageio.cpp \
+Index: kio/kio/kfilterbase.cpp
+===================================================================
+RCS file: /home/kde/kdelibs/kio/kio/kfilterbase.cpp,v
+retrieving revision 1.13.6.1
+diff -u -3 -p -r1.13.6.1 kfilterbase.cpp
+--- kio/kio/kfilterbase.cpp	1 Sep 2004 17:30:01 -0000	1.13.6.1
++++ kio/kio/kfilterbase.cpp	23 Apr 2005 18:03:40 -0000
+@@ -46,8 +46,40 @@ KFilterBase * KFilterBase::findFilterByF
+     return findFilterByMimeType(mime->name());
+ }
+ 
++#define BOSON_STATIC 1
++#ifdef BOSON_STATIC
++#include "kgzipfilter.h"
++#include "../../kdecore/kstaticdeleter.h"
++
++class KGzipFilterFactory : public KLibFactory
++{
++public:
++    KGzipFilterFactory() : KLibFactory() {}
++    ~KGzipFilterFactory(){}
++    QObject *createObject( QObject *, const char *, const char*, const QStringList & )
++    {
++        return new KGzipFilter;
++    }
++};
++
++
++static KGzipFilterFactory *g_gzipFilterFactory = 0;
++static KStaticDeleter<KGzipFilterFactory> g_sdGzipFilterFactory;
++#endif
+ KFilterBase * KFilterBase::findFilterByMimeType( const QString & mimeType )
+ {
++#ifdef BOSON_STATIC
++    if (mimeType == "application/x-gzip")
++    {
++        kdDebug() << "filter for application/x-gzip requested, using hardcoded filter" << endl;
++        if (!g_gzipFilterFactory)
++        {
++          g_sdGzipFilterFactory.setObject(g_gzipFilterFactory, new KGzipFilterFactory());
++        }
++        return static_cast<KFilterBase*>(g_gzipFilterFactory->create(0, "kgzipfilter"));
++#endif
++    }
++#endif
+     KTrader::OfferList offers = KTrader::self()->query( "KDECompressionFilter",
+                                                         QString("'") + mimeType + "' in ServiceTypes" );
+     KTrader::OfferList::ConstIterator it = offers.begin();
+Index: kio/kio/kprotocolinfo.cpp
+===================================================================
+RCS file: /home/kde/kdelibs/kio/kio/kprotocolinfo.cpp,v
+retrieving revision 1.21.6.1
+diff -u -3 -p -r1.21.6.1 kprotocolinfo.cpp
+--- kio/kio/kprotocolinfo.cpp	8 Aug 2004 10:43:50 -0000	1.21.6.1
++++ kio/kio/kprotocolinfo.cpp	23 Apr 2005 18:03:40 -0000
+@@ -72,43 +72,18 @@ bool KProtocolInfo::isFilterProtocol( co
+   return isFilterProtocol (url.protocol());
+ }
+ 
+-bool KProtocolInfo::isFilterProtocol( const QString &protocol )
+-{
+-  // We call the findProtocol (const QString&) to bypass any proxy settings.
+-  KProtocolInfo::Ptr prot = KProtocolInfoFactory::self()->findProtocol(protocol);
+-  if ( !prot )
+-    return false;
+-
+-  return !prot->m_isSourceProtocol;
+-}
+ 
+ bool KProtocolInfo::isHelperProtocol( const KURL &url )
+ {
+   return isHelperProtocol (url.protocol());
+ }
+ 
+-bool KProtocolInfo::isHelperProtocol( const QString &protocol )
+-{
+-  // We call the findProtocol (const QString&) to bypass any proxy settings.
+-  KProtocolInfo::Ptr prot = KProtocolInfoFactory::self()->findProtocol(protocol);
+-  if ( !prot )
+-    return false;
+-
+-  return prot->m_isHelperProtocol;
+-}
+ 
+ bool KProtocolInfo::isKnownProtocol( const KURL &url )
+ {
+   return isKnownProtocol (url.protocol());
+ }
+ 
+-bool KProtocolInfo::isKnownProtocol( const QString &protocol )
+-{
+-  // We call the findProtocol (const QString&) to bypass any proxy settings.
+-  KProtocolInfo::Ptr prot = KProtocolInfoFactory::self()->findProtocol(protocol);
+-  return ( prot != 0);
+-}
+-
+ bool KProtocolInfo::supportsListing( const KURL &url )
+ {
+   KProtocolInfo::Ptr prot = findProtocol(url);
+Index: kio/kio/slave.cpp
+===================================================================
+RCS file: /home/kde/kdelibs/kio/kio/slave.cpp,v
+retrieving revision 1.61.2.1
+diff -u -3 -p -r1.61.2.1 slave.cpp
+--- kio/kio/slave.cpp	8 Sep 2004 12:36:20 -0000	1.61.2.1
++++ kio/kio/slave.cpp	23 Apr 2005 18:03:40 -0000
+@@ -353,6 +353,10 @@ Slave* Slave::createSlave( const QString
+     if (protocol == "data")
+         return new DataProtocol();
+ 
++    kdError() << k_funcinfo << "trying to attach to DCOP server. this is not supposed to happen in boson!" << endl;
++    kdDebug() << kdBacktrace() << endl;
++    return 0;
++
+     DCOPClient *client = kapp->dcopClient();
+     if (!client->isAttached())
+ 	client->attach();

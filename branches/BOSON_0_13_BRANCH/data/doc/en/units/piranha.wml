@@ -1,0 +1,4 @@
+#include "facilities.wml" type="Units" name="Piranha" \
+        description="This is a land mine placement tank. Very useful to seal off passes and such things." \
+        name2="piranha" type2="mob" \
+        before_url="panther.html" before_text="Panter" after_url="tiger.html" after_text="Tiger" up_url="index.html"

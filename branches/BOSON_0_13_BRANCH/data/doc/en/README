@@ -1,0 +1,71 @@
+The Boson handbook uses wml (http://www.thewml.org).
+
+----------
+Includes
+----------
+At the moment there are three includes. You can find them in includes ;)
+- top.wml
+- nav.wml
+- footer.wml
+
+top.wml
+        This file includes the html header, css, some meta tags, the title and <body>
+        You can change the default title:
+        #include top.wml title="new title"
+        And you can add some params to the body:
+        #include top.wml title="new title" body_args="style=background-image:url($(basedir)bg.png);background-attachment:fixed;background-repeat:no-repeat;background-position:center;"
+
+nav.wml
+        This is the navigation used at the bottom of the page.
+        This example is from tank.wml:
+        #include "nav.wml" before_url="batzen.html" before_text="Batzen" after_url="ship.html" after_text="Ship"
+        I think that is self explained.
+        You can remove the before_* after_* and top_url vars. Than you will only get <--, --> and ^ without a link. Useful for the first and last file.
+        The top link should go to the index.html site in the same directory. If you are on such a index site, go one dir up.
+
+footer.wml
+        It adds the "maintained by" line and the </body></html> tags.
+
+facilities.wml
+        This will generate a complete facilities page for you.
+
+indexes.wml and indexes_footer.wml
+        Simple include for a page index
+
+
+----------
+Eperl
+----------
+Some parts of the handbook are using perl to get "live data"
+This is also done through wml. You can add perl simply like this:
+<:
+$test = "<tr><td>TEST</td></tr>";
+print $test;
+:>
+Everything that goes to stdout will be included in the html file.
+Stderr will end in a wml error.
+
+
+----------
+Facilities
+----------
+We use wml and perl to get the properties of the buildings and units.
+You can find the call of perl in every facilitiy doc file:
+<:
+use get_values;
+
+# ( facility type, facility name)
+get_values->getval("fix", "warfactory");
+:>
+We import get_values (get_values.pm) and than we call the getval method.
+The first param is the facility type, fix == building | mob == unit
+The name, you need to enter the name that is used for the folder where the index.unit file is
+
+You can define the values which will be writen to the html files in values.list.
+If you wonder where we set @INC: Andreas hacked am_edit, we set $PERLLIB during make.
+
+
+
+have fun
+Felix  (felix.seeger@gmx.de)
+

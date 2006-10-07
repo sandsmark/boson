@@ -1,0 +1,7 @@
+This directory contains the math library of Boson.
+
+In this directory, the use of Qt or of any file in code/boson is disallowed.
+This is a general purpose library, that can be used outside of the Boson source
+tree, too. This is very handy for development (for me at least), as one can
+easily write test programs that make use of 3d maths the same way Boson does.
+

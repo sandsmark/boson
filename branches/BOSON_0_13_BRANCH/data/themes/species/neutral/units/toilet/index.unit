@@ -1,0 +1,18 @@
+[Boson Facility]
+ConstructionSteps=0
+
+[Boson Unit]
+Name=Toilet
+Health=30
+Id=30
+IsFacility=true
+MineralCost=160
+OilCost=20
+#Producer=10
+#ProductionTime=20
+SupportMiniMap=false
+TerrainType=1
+UnitDepth=0.48
+UnitHeight=0.24
+UnitWidth=0.24
+

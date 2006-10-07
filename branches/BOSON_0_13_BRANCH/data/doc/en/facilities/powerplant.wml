@@ -1,0 +1,6 @@
+#include "facilities.wml" type="Facilities" name="Power Plant" \
+        description="All your facilities need electric power, but only the fewest have their own generators. \
+        You will need the Power Plant to get more facilities available, once the batteries of a facility are \
+        charged they are independet from the power plant. For details see the <a href='map.html'>facilities dependency tree</a>." \
+        name2="powerplant" type2="fix" \
+        before_url="oilrefinery.html" before_text="Oil Refinery" after_url="weaponsfactory.html" after_text="Weapons Factory" up_url="index.html"

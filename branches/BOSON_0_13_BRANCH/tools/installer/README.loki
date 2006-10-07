@@ -1,0 +1,149 @@
+This README is a list of instructions to get a standalone installer for boson
+working.
+As installer we use the loki installer, which you can retrieve from
+www.icculus.org.
+Checkout at least the modules loki_setupdb and loki_setup from their cvs.
+
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+Note that you should create an installer package only using a static binary!!
+See README.boson-static
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+
+* in loki_setupdb: ./autogen.sh; ./configure; make
+* in loki_setup:
+  * ./autogen.sh
+  * ./configure --enable-libxml-static --enable-libglade-static
+  * make
+  * mkdir -p image/setup.data/bin/Linux/x86/glibc-2.1
+    Directory names Linux, x86 and glibc-2.1 may vary in your system.
+    Check top of Makefile.
+    See also the README of the loki_installer for more on the
+    directory structure.
+  * make install
+    -> this installs into loki_setup/image !
+* the image directory contains everything now for the installer itself. The rest
+  is modifications for boson.
+* Copy setup.xml from our cvs to loki_setup/image/setup.data/
+
+
+setup.xml
+---------
+---------
+The following explains how to edit the default setup.xml as delivered by
+loki_setup to get a setup.xml for boson.
+Note that you do NOT need to do these steps if you are using the setup.xml file
+from our cvs!
+
+Edit the setup.xml. The file README.xml explains what to do. Here a (probably
+incomplete) list for boson:
+ * Attribute "product" of "install": set to "Boson"
+ * Attribute "desc" of "install": set to "Boson"
+ * Attribute "version" of "install": set to the current version of boson
+ * Remove "update_url" attribute of "install"
+ * Remove "readme" element (or write a README file!)
+ * Set the eula element to "COPYING" and copy code/COPYING to image/COPYING
+ * Add one <component> element.
+ * Component: set attribute "name" to "Default", "version" to the boson version.
+ * Component: set attribute "default" to "yes"
+ * Add two <option> elements to the component, one for the main program, one for
+   music. Note that you can of course add more option elements.
+ * Set attribute "install" of the main option element to "true"
+ * Set attribute "required" of the main option element to "true"
+ * Add a short text into the option element describing this option, such as
+   "Base Install".
+ * Add a <help> element giving details on the option.
+ * Note: you can also add <lang lang="..."> and <help lang="..."> elements
+   to translate the "Base Install" or the <help> text.
+ * Add <binary> elements for every binary. add attributes arch="any",
+   libc="any" to them.
+   Place the name of the binary as text inside the element. example:
+   <bianry arch="any" libc="any">boson</binary>
+   * Required binaries:
+     * boson
+     * bobmfconverer (no symlink attribute!, use keepdirs="yes" attribute !!1)
+       -> this binary should be in a bin/ directory, so that boson can find it
+     * boinfo
+     * boufodesigner
+     * bounit
+     * boprofiling
+     * borender ?
+     -> All of them except of bobmfconverter might make sense in a separate
+        option element!
+ * add symlink="..." attributes to the binary elements, if you want that
+   binary to be symlinked for the user. do this only if calling that binary
+   would be useful to the user such as with boson and boinfo.
+ * add play="gui" attribute to the main binary element
+ * add a <files> element to the main option element. List all files and
+   directories that should be installed (except of the binaries). Currently this
+   is:
+   <files>
+     share
+     patches
+   </files>
+ * music option element: add a install="yes" attribute
+ * music option element: add a path="share/apps/boson/music/" attribute
+ * music option element: add a <files> Element listing all music dirs and files.
+   Currently that is:
+    <files>
+      music/*
+    </files>
+
+
+
+Copying files
+-------------
+-------------
+----------------------------------------------------------------------------
+The following describes the (obsolete) manual way.
+Use tools/installer/create_boson_installer.sh instead.
+----------------------------------------------------------------------------
+Once the setup.xml file has been written to image/setup.data/setup.xml, the
+files necessary for boson have to be copied to the image directory as well:
+cd loki_setup/image
+mkdir -p bin/Linux/x86/glibc-2.1
+cp /path/to/static/binaries/boson bin/Linux/x86/glibc-2.1/
+-> note that glibc-2.1 may vary on your system /(and of course Linux and x86 as
+   well)
+
+cp /path/to/static/binaries/* bin/Linux/x86/glibc-2.1
+-> AB: copy all binaries as listed in setup.xml. This is a TODO, as currently
+       only boson is a static binary.
+
+mkdir -p share/apps/boson
+mkdir -p share/config/ui
+cp /path/to/boson/code/boson/data/bodebugrc share/config/
+cp /path/to/boson/code/boson/data/bodebug.areas share/config/
+cp /path/to/kdelibs/kdeui/ui_standards.rc share/config/ui/
+cp -r /path/to/boson/installation/share/apps/boson/* share/apps/boson/
+mv share/apps/boson/music music
+for i in `find -name "*.bpf"`; do gzip $i; mv $i.gz $i; done
+-> This is necessary because the loki installer automatically uncompresses all
+   gzipped files, which we do not want.
+cp -r ~/.kde/share/apps/boson/modelcache share/apps/boson
+-> assuming you have already started boson at least once (and therefore created
+   the modelcache files)
+
+mkdir -p share/apps/boson/themes/scripts/pythonlib
+cp /path/to/python/Lib/*.py share/apps/boson/themes/scripts/pythonlib/
+
+mkdir patches
+cp /path/to/patches/* patches
+-> here you should copy _all_ patches to kdelibs,Qt,boson,OpenAL or
+   whatever that have been applied in order to create the static binary.
+
+
+Creating the archive
+--------------------
+--------------------
+Once all files have been copied, you can leave the image directory. Enter the
+loki_setup directory and execute:
+makeself/makeself.sh image boson-0.11pre-x86.run "Boson" ./setup.sh
+
+This creates a "boson-0.11pre-x86.run" file from the image directory. setup.sh from the
+image directory is called when boson-0.11pre-x86.run is started.
+
+The archive should be ready to use now.
+

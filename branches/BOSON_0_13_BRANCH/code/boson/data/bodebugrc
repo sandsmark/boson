@@ -1,0 +1,95 @@
+# this file is pretty similar to the kdebugrc, as installed by kdecore.
+# these entries are valid for boson only.
+# Below is the description of these entries, as it is found in kdebugrc.
+#
+# This files includes the default behaviour for some specific debug areas
+# This allows to leave the kdDebug* calls in the code, but still have them
+# disabled for most users.
+#
+# This file will be installed as $KDEDIR/share/config/bodebugrc
+#
+# There are four levels of output: Info, Warn, Error and Fatal
+# corresponding to boDebug(), boWarn(), boError(), boFatal()
+#
+# For every of them you can define a target by *Output=n
+# using the following numbers:
+#
+#   0 = file
+#   1 = message box
+#   2 = shell (stderr)
+#   3 = syslog
+#   4 = off
+#   5 = application dependant. if application doesnt support this (the usual
+#       case) this is equal to 4 (off).
+#
+# For file output you can give a filename by *Filename=<file>
+# otherwise bodebug.dbg in the current directory is used.
+#
+# example:
+#
+# For the debug area 100 you want output of debug messages
+# to a file /var/log/dbg.log and error messages as message boxes.
+# Additionaly the program should abort on fatal errors.
+#
+# [100]
+# InfoOutput=0
+# InfoFilename=/var/log/dbg.log
+# ErrorOutput=1
+# AbortFatal=1
+#
+
+# BoLOD is off by default
+[120]
+InfoOutput=4
+
+# BoLOD verbose if off by default
+[121]
+InfoOutput=4
+
+# Advance is off by default
+[300]
+InfoOutput=4
+
+#  Collisions is off by default
+[310]
+InfoOutput=4
+
+# BosonShot is off by default
+[350]
+InfoOutput=4
+
+# Event is off by default
+[360]
+InfoOutput=4
+
+# Movement is off by default
+[380]
+InfoOutput=4
+
+# AdvanceMove is off by default
+[401]
+InfoOutput=4
+
+# Harvester Advance is off by default
+[430]
+InfoOutput=4
+
+# BosonPath is off by default
+[500]
+InfoOutput=4
+
+# Ammunition is off by default
+[610]
+InfoOutput=4
+
+# BoScript if off by default
+[700]
+InfoOutput=4
+
+# PluginManager if off by default
+[800]
+InfoOutput=4
+
+# KGame is off by default
+[11001]
+InfoOutput=4

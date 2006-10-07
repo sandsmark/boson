@@ -1,0 +1,6 @@
+#include "indexes.wml" title="The Boson editor" description="The editor allows you to create your own boson maps and games."
+
+<dt>5.1 <a href="overview.html">Overview</a></dt>
+<dt>5.2 <a href="facilities.html">Building facilities and units</a></dt>
+
+#include "indexes_footer.wml" before_url="../units/koyote.html" before_text="Koyote" after_url="overview.html" after_text="Overview" up_url="../index.html"

@@ -1,0 +1,9 @@
+In this directory you should be able to find the patches that have been applied
+to boson/KDE/Qt or whatever to a static boson binary.
+
+Note that this is still highly experimental (but seems to work much better
+than expected)
+
+Note that some changes are highly dependent on my system, e.g. include absolute
+paths.
+
