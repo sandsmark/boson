@@ -208,13 +208,13 @@ set(bocommandframetester_SRCS
 	mainnogui.cpp
 )
 kde3_automoc(${bocommandframetester_SRCS})
-boson_add_executable(bocommandframetester
-	${bocommandframetester_SRCS}
-)
-boson_target_link_libraries(bocommandframetester
-	bosongamelib
-	${LIB_BOMEMORY}
-)
+#boson_add_executable(bocommandframetester
+#	${bocommandframetester_SRCS}
+#)
+#boson_target_link_libraries(bocommandframetester
+#	bosongamelib
+#	${LIB_BOMEMORY}
+#)
 
 install_targets(/bin
 	boson
