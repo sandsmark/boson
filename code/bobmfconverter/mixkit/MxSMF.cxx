@@ -43,10 +43,8 @@ MxSMFReader::cmd_entry MxSMFReader::read_cmds[] = {
 
 
 MxSMFReader::MxSMFReader()
-    : vfirst_stack(1, 2),
-      vcorrect_stack(0, 2),
-      vx_stack(Mat4::I(), 2),
-      tx_stack(Mat4::I(), 2)
+    : vx_stack(Mat4::I(), 2), tx_stack(Mat4::I(), 2),
+      vcorrect_stack(0, 2), vfirst_stack(1, 2)
 {
     next_vertex=1;
     next_face=1;

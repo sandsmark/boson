@@ -52,8 +52,6 @@ QString BoCheckInstallation::checkInstallation()
 	if (KGlobal::dirs()->findExe("bobmfconverter").isNull()) {
 		return i18n("You seem not to have the \"bobmfconverer\" binary installed!\nPlease check your installation.");
 	}
-
-	// TODO: check version
  }
 
  return QString::null;

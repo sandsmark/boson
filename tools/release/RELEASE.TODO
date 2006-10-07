@@ -1,39 +1,58 @@
 Remember to update/check before releasing:
 ------------------------------------------
-- fileconverter/bosavegameconverter.cpp: provide proper release name and
-  BOSON_SAVEGAME_FORMAT_VERSION_XYZ define
+- bosonfileconverter.cpp/bosonplayfield.cpp: #define the savegame format
+  (BOSON_SAVEGAME_FORMAT_VERSIO_...)
+  -> make sure that define is used in the file converter for the released
+     version
 - change version number:
   - boversion.h: BOSON_VERSION_STRING and BOSON_VERSION_[MINOR|MICRO]
   - bouniteditor.ui
+  - *.cpp *.h --> grep
   - code/ChangeLog: echo "version foobar has been released on ..."
-  - data/pics/boson-startup-textframe.png
 - code/boson/data/boson.lsm: Version, Entered-Date, Primary-site, Alternate-site, maybe. Keywords and Platform
 - make sure that cmake directories and other externals are included !
 - website: news, download.html
 - remember that the lsm file (for ftp servers) and the ChangeLog both include
   the release-date!
 - release ONLY from a cvs RELEASE tag!
-  -> svn co https://svn.sourceforge.net/svnroot/boson/tags/BOSON_0_13_RELEASE
-  -> in order to create the tag:
-     cd subversion/tags ; svn mkdir BOSON_0_13_RELEASE
-     cd subversion/trunk ; svn cp code ../tags/BOSON_0_13_RELEASE
-     (same with data and tools)
+  -> svn co https://svn.sourceforge.net/svnroot/boson/tags/BOSON_0_12_RELEASE/code
+
+
+Special notes about the -music package:
+- remember that it needs all the configure stuff just like the data package
+- probably look into the 0.6 package and do it exactly the same way as we've
+  done there
+- release this package *only* if it actually changed
+
 
 
 Release Instructions:
 ---------------------
- cd subversion/tags
- svn up BOSON_0_13_RELEASE
- cd BOSON_0_13_RELEASE
- tools/release/dist 0.13
+ mkdir release ; cd release
+ mkdir svn ; cd svn
+ svn co https://svn.sourceforge.net/svnroot/boson/tags/BOSON_0_12_RELEASE
+ cd ..
+ svn export svn/BOSON_0_12_RELEASE BOSON_0_12_RELEASE
 
-This should create the necessary packages (i.e. the .tar.bz2 files) in the
-"0.13" subdirectory.
+ cd BOSON_0_12_RELEASE
+ mkdir music ; cd music
+ wget http://boson.sf.net/music/foobar.tar.bz2   
+# where foobar are the music files
+ cd ..
+
+Now you should have code and data (cleanly!) from svn and a dir music
+with .tar.bz2 files containing music.
+You should now edit release/dist from the "tools" module in cvs and start it in
+the current (release) directory.
+
+This should create the necessary packages (i.e. the .tar.bz2 files) which should
+get uploaded.
+
 
 Upload:
 -------
 - code,data,music (separate .tar.bz2 packages)
-- code+data+music=="-all" package (single .tar.bz2 package)
+- code+data+music (single .tar.bz2 package)
 - .lsm (some ftp sites require this)
 
 Upload to:
@@ -46,15 +65,17 @@ Make Announcements (major releases):
 ------------------------------------
 - boson-devel@lists.sf.net
 - kde-games-devel@mail.kde.org
-- kde-announce@mail.kde.org
 - sf.net project news
+- freshmeat
 - freehackers.org
+- kde-announce@mail.kde.org
+- games.kde.org
 - linuxgames.com
 - holarse.de
-- happypenguin.org
+- happypenguins.org
 - linux-gamers.net
-- freshmeat?
-- for "large" release maybe the dot?
+- do NOT announce on dot.kde.org (they wait a long time and then post a quicky
+  only)
 
 Make Announcements (minor releases):
 ------------------------------------
@@ -65,7 +86,11 @@ Make Announcements (minor releases):
 We depend on:
 -------------
 - kdelibs 3
-- Qt 3
+- qt 3
+- maybe kdebase3
+ --> never tried without kdebase!
+- lib3ds
 - OpenGL
+- wml (compilation only! - for docs)
 - OpenAL
 

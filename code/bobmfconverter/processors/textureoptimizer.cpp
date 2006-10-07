@@ -536,7 +536,7 @@ Texture* TextureOptimizer::combineAllTextures()
 
   boDebug() << k_funcinfo << "Saving combined texture..." << endl;
   // Find out format of the combined texture
-  const char* format;
+  char* format;
   if(mTexFilename.endsWith(".jpg", false) || mTexFilename.endsWith(".jpeg", false))
   {
     format = "JPEG";

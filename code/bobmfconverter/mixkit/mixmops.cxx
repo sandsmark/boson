@@ -27,7 +27,7 @@
 static
 double internal_solve(double *_a, double *b, const int N)
 {
-    int i, j = 0, k;
+    int i, j, k;
     double max, t, det, sum, pivot;
 
     /*---------- forward elimination ----------*/
@@ -80,9 +80,8 @@ double internal_solve(double *_a, double *b, const int N)
 // Uses Gaussian elimination with partial pivoting.
 //
 static
-double internal_invert(double *_a, double *_b, const int _N)
+double internal_invert(double *_a, double *_b, const int N)
 {
-    const uint N = _N;
     uint i, j, k;
     double max, t, det, pivot;
 
@@ -148,9 +147,9 @@ float mxm_invert(float *r, const float *a, const int N)
     mxm_local_block(r2, double, N);
 
     uint i;
-    for(i=0; i<(uint)N*N; i++) a2[i] = a[i];
+    for(i=0; i<N*N; i++) a2[i] = a[i];
     float det = internal_invert(a2, r2, N);
-    for(i=0; i<(uint)N*N; i++) r[i] = r2[i];
+    for(i=0; i<N*N; i++) r[i] = r2[i];
 
     mxm_free_local(a2);
     mxm_free_local(r2);

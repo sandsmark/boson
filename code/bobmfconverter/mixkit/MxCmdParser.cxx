@@ -94,7 +94,7 @@ void MxCmdParser::parse_line(char *line, void *closure)
     //
     string_list args;
 
-    for(i=0; i<(uint)phrases.length(); i++)
+    for(i=0; i<phrases.length(); i++)
     {
         char *phrase = phrases[i];
         args.reset();
@@ -110,7 +110,7 @@ void MxCmdParser::parse_line(char *line, void *closure)
 	cmd.phrases[i].reset();
         if( args.length() )
         {
-            for(j=0; j<(uint)args.length(); j++)
+            for(j=0; j<args.length(); j++)
                 cmd.phrases[i].add(args[j]);
         }
     }
@@ -125,7 +125,7 @@ void MxCmdParser::parse_line(char *line, void *closure)
 	mxmsg_signal(MXMSG_WARN, "Unknown operator on input", line);
 }
 
-bool MxCmdParser::execute_command(const MxCmd& , void *)
+bool MxCmdParser::execute_command(const MxCmd& cmd, void *)
 {
     return false;
 }

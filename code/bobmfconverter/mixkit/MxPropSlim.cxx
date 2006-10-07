@@ -16,8 +16,8 @@ typedef MxQuadric Quadric;
 
 MxPropSlim::MxPropSlim(MxStdModel *m0)
     : MxStdSlim(m0),
-      edge_links(m0->vert_count()),
-      __quadrics(m0->vert_count())
+      __quadrics(m0->vert_count()),
+      edge_links(m0->vert_count())
 {
     consider_color();
     consider_texture();
@@ -46,7 +46,7 @@ void MxPropSlim::consider_normals(bool will)
     D = compute_dimension(m);
 }
 
-uint MxPropSlim::compute_dimension(MxStdModel *)
+uint MxPropSlim::compute_dimension(MxStdModel *m)
 {
     uint d = 3;
 
@@ -396,7 +396,7 @@ void MxPropSlim::create_edge(MxVertexID i, MxVertexID j)
 void MxPropSlim::discontinuity_constraint(MxVertexID i, MxVertexID j,
 					  const MxFaceList& faces)
 {
-    for(int f=0; f<faces.length(); f++)
+    for(uint f=0; f<faces.length(); f++)
     {
 	Vec3 org(m->vertex(i)), dest(m->vertex(j));
 	Vec3 e = dest - org;
@@ -434,7 +434,7 @@ void MxPropSlim::apply_contraction(const MxPairContraction& conx,
 
     // Must update edge_info here so that the meshing penalties
     // will be computed with respect to the new mesh rather than the old
-    for(int i=0; i<edge_links(conx.v1).length(); i++)
+    for(uint i=0; i<edge_links(conx.v1).length(); i++)
         compute_edge_info(edge_links(conx.v1)[i]);
 }
 
@@ -455,7 +455,7 @@ void MxPropSlim::collect_edges()
         star.reset();
         m->collect_vertex_star(i, star);
 
-        for(int j=0; j<star.length(); j++)
+        for(uint j=0; j<star.length(); j++)
             if( i < star(j) )  // Only add particular edge once
                 create_edge(i, star(j));
     }
@@ -471,7 +471,7 @@ void MxPropSlim::constrain_boundaries()
 	star.reset();
 	m->collect_vertex_star(i, star);
 
-	for(int j=0; j<star.length(); j++)
+	for(uint j=0; j<star.length(); j++)
 	    if( i < star(j) )
 	    {
 		faces.reset();
@@ -517,7 +517,7 @@ void MxPropSlim::update_pre_contract(const MxPairContraction& conx)
     star.reset();
     m->collect_vertex_star(v1, star);
 
-    for(i=0; i<(uint)edge_links(v2).length(); i++)
+    for(i=0; i<edge_links(v2).length(); i++)
     {
         edge_info *e = edge_links(v2)(i);
         MxVertexID u = (e->v1==v2)?e->v2:e->v1;

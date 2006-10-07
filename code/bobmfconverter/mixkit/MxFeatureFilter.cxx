@@ -34,7 +34,7 @@ uint MxFeatureFilter::add_splitter(uint i)
 {
     if( i==MXID_NIL ) return MXID_NIL;
 
-    if( (unsigned int)splitter.length() >= sizeof(uint)/2 )
+    if( splitter.length() >= sizeof(uint)/2 )
 	mxmsg_signalf(MXMSG_WARN,
 		      "Maximum of %d split planes exceeded."
 		      "Will ignore all planes above limit.",
@@ -93,7 +93,7 @@ void MxFeatureFilter::slice_model(MxPlane3& p)
         star.reset();
         m->collect_vertex_star(i, star);
 
-        for(int j=0; j<star.length(); j++)
+        for(uint j=0; j<star.length(); j++)
             if( i < star[j] )
 		split_edge_with_plane(i, star[j], p);
     }
@@ -115,7 +115,7 @@ uint MxFeatureFilter::classify_point(float *v)
 {
     uint label = 0;
 
-    for(int i=0; i<planes.length(); i++)
+    for(uint i=0; i<planes.length(); i++)
     {
 	float *p = planes[i];
 	float d = mxv_dot(v, p, 3) + p[3];
@@ -159,7 +159,7 @@ MxDualModel *MxFeatureFilter::extract_features()
 
     // All edges which cross a splitting plane must be split by that plane.
     //
-    for(i=0; i<(uint)planes.length(); i++)
+    for(i=0; i<planes.length(); i++)
 	slice_model(planes[i]);
     flabel.resize(m->face_count()); // may have added new faces by splitting
 
@@ -222,14 +222,14 @@ void MxFeatureFilter::compute_contour_target(uint inside,
     inside = dual->node_ancestor(inside);
     Q_total.clear();
 
-    for(i=0; i<(uint)contour.length(); i++)
+    for(i=0; i<contour.length(); i++)
     {
 	const MxEdge& e=contour[i];
 
 	faces.reset();
 	m->collect_edge_neighbors(e.v1, e.v2, faces);
 
-	for(int j=0; j<faces.length(); j++)
+	for(uint j=0; j<faces.length(); j++)
 	    if( dual->node_ancestor(faces[j]) != inside )
 	    {
 		MxFace& f = m->face(faces[j]);
@@ -251,7 +251,7 @@ void MxFeatureFilter::compute_contour_target(uint inside,
 	//
 	float nverts=0.0f;
 	mxv_set(vnew, 0.0, 3);
-	for(i=0; i<(uint)contour.length(); i++)
+	for(i=0; i<contour.length(); i++)
 	{
 	    mxv_addinto(vnew, m->vertex(contour[i].v1), 3);  nverts += 1.0f;
 	    mxv_addinto(vnew, m->vertex(contour[i].v2), 3);  nverts += 1.0f;
@@ -267,13 +267,13 @@ void MxFeatureFilter::contract_contour(MxEdgeList& contour, float *vnew)
 
     // Compute the list of vertices on the boundary
     //
-    for(i=0; i<(uint)contour.length(); i++)
+    for(i=0; i<contour.length(); i++)
     {
         m->vertex_mark(contour[i].v1, 0);
         m->vertex_mark(contour[i].v2, 0);
     }
 
-    for(i=0; i<(uint)contour.length(); i++)
+    for(i=0; i<contour.length(); i++)
     {
         if( !m->vertex_mark(contour[i].v1) )
         {

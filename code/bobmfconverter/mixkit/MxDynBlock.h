@@ -77,7 +77,7 @@ public:   MxSizedDynBlock(uint n=T_SIZE) : MxDynBlock<T>(n) { }
 template<class T>
 inline bool varray_find(const MxDynBlock<T>& A, const T& t, uint *index=NULL)
 {
-    for(int i=0; i<A.length(); i++)
+    for(unsigned int i=0; i<A.length(); i++)
 	if( A[i] == t )
 	{
 	    if( index ) *index = i;

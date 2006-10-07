@@ -38,21 +38,21 @@ string CmdLine::argline() const
 
 int CmdLine::collect_as_strings(vector<string> &v, int offset) const
 {
-    for(unsigned int i=offset; i<tokens.size(); i++)
+    for(int i=offset; i<tokens.size(); i++)
 	v.push_back( substr(tokens[i]) );
     return tokens.size();
 }
 
 int CmdLine::collect_as_numbers(vector<double> &v, int offset) const
 {
-    for(unsigned int i=offset; i<tokens.size(); i++)
+    for(int i=offset; i<tokens.size(); i++)
 	v.push_back(token_to_double(i));
     return tokens.size();
 }
 
 int CmdLine::collect_as_numbers(vector<int> &v, int offset) const
 {
-    for(unsigned int i=offset; i<tokens.size(); i++)
+    for(int i=offset; i<tokens.size(); i++)
 	v.push_back(token_to_int(i));
     return tokens.size();
 }
@@ -60,7 +60,7 @@ int CmdLine::collect_as_numbers(vector<int> &v, int offset) const
 int CmdLine::collect_as_numbers(double *v, int size, int offset) const
 {
     int i;
-    for(i=0; (i+offset)<(int)tokens.size() && i<size; i++)
+    for(i=0; (i+offset)<tokens.size() && i<size; i++)
 	v[i] = token_to_double(i+offset);
     return i;
 }
@@ -68,7 +68,7 @@ int CmdLine::collect_as_numbers(double *v, int size, int offset) const
 int CmdLine::collect_as_numbers(float *v, int size, int offset) const
 {
     int i;
-    for(i=0; (i+offset)<(int)tokens.size() && i<size; i++)
+    for(i=0; (i+offset)<tokens.size() && i<size; i++)
 	v[i] = token_to_float(i+offset);
     return i;
 }
@@ -76,7 +76,7 @@ int CmdLine::collect_as_numbers(float *v, int size, int offset) const
 int CmdLine::collect_as_numbers(int *v, int size, int offset) const
 {
     int i;
-    for(i=0; (i+offset)<(int)tokens.size() && i<size; i++)
+    for(i=0; (i+offset)<tokens.size() && i<size; i++)
 	v[i] = token_to_int(i+offset);
     return i;
 }
@@ -108,7 +108,7 @@ CmdObject *CmdEnv::lookup_command(const std::string& name)
     return iter!=script_commands.end() ? iter->second : NULL;
 }
 
-static int ignored(const CmdLine& ) { return SCRIPT_OK; }
+static int ignored(const CmdLine& line) { return SCRIPT_OK; }
 
 void CmdEnv::ignore_command(const std::string& name)
 {

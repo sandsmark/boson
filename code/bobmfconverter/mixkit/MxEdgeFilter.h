@@ -47,7 +47,6 @@ public:
 
 public:
     MxEdgeFilter(MxStdModel *m0);
-    virtual ~MxEdgeFilter() {}
 
     void initialize();
     bool filter(uint target);

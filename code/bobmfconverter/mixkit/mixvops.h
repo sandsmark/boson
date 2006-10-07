@@ -45,7 +45,7 @@
 
 #define __OP __LINKAGE __T *
 
-#define forall(i, N) for(int i=0; i<N; i++)
+#define forall(i, N) for(unsigned int i=0; i<N; i++)
 
 #define def3(name, op) __OP name(__T *r, const __T *u, const __T *v, __DIM) { forall(i,N) op; return r; }
 
@@ -125,7 +125,7 @@ __LINKAGE __T mxv_L2(const __T *u, const __T *v, __DIM)
 __LINKAGE bool mxv_eql(const __T *u, const __T *v, __DIM)
 {
     bool e=true;
-    for(int i=0; e && i<N; i++) e = e && (u[i]==v[i]);
+    for(uint i=0; e && i<N; i++) e = e && (u[i]==v[i]);
     return e;
 }
 
@@ -136,14 +136,14 @@ __LINKAGE bool mxv_equal(const __T *u, const __T *v, __DIM)
 
 __OP mxv_basis(__T *r, uint b, __DIM)
 {
-    forall(i, N)  r[i] = ((uint)i==b)?1.0:0.0;  return r;
+    forall(i, N)  r[i] = (i==b)?1.0:0.0;  return r;
 }
 
 #ifndef MIXVOPS_NO_IOSTREAMS
 __LINKAGE ostream& mxv_write(ostream& out, const __T *v, __DIM)
 {
     out << v[0];
-    for(int i=1; i<N; i++)   out << " " << v[i];
+    for(unsigned int i=1; i<N; i++)   out << " " << v[i];
     return out;
 }
 __LINKAGE ostream& mxv_write(const __T *v, __DIM)

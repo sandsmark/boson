@@ -53,7 +53,6 @@ public:
 
 public:
     MxStdSlim(MxStdModel *m0);
-    virtual ~MxStdSlim() {}
 
     virtual void initialize() = 0;
     virtual bool decimate(uint) = 0;

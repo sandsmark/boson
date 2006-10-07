@@ -38,7 +38,7 @@ void MxQSlim::collect_quadrics()
 {
     uint j;
 
-    for(j=0; j<(uint)quadrics.length(); j++)
+    for(j=0; j<quadrics.length(); j++)
 	quadrics(j).clear();
 
     for(MxFaceID i=0; i<m->face_count(); i++)
@@ -79,14 +79,14 @@ void MxQSlim::collect_quadrics()
 
 void MxQSlim::transform_quadrics(const Mat4& P)
 {
-    for(int j=0; j<quadrics.length(); j++)
+    for(uint j=0; j<quadrics.length(); j++)
 	quadrics(j).transform(P);
 }
 
 void MxQSlim::discontinuity_constraint(MxVertexID i, MxVertexID j,
 				       const MxFaceList& faces)
 {
-    for(int f=0; f<faces.length(); f++)
+    for(uint f=0; f<faces.length(); f++)
     {
 	Vec3 org(m->vertex(i)), dest(m->vertex(j));
 	Vec3 e = dest - org;
@@ -122,7 +122,7 @@ void MxQSlim::constrain_boundaries()
 	star.reset();
 	m->collect_vertex_star(i, star);
 
-	for(int j=0; j<star.length(); j++)
+	for(uint j=0; j<star.length(); j++)
 	    if( i < star(j) )
 	    {
 		faces.reset();
@@ -163,7 +163,7 @@ double MxEdgeQSlim::check_local_compactness(uint v1, uint/*v2*/,
     const MxFaceList& N1 = m->neighbors(v1);
     double c_min = 1.0;
 
-    for(int i=0; i<N1.length(); i++)
+    for(uint i=0; i<N1.length(); i++)
 	if( m->face_mark(N1[i]) == 1 )
 	{
 	    const MxFace& f = m->face(N1[i]);
@@ -184,7 +184,7 @@ double MxEdgeQSlim::check_local_inversion(uint v1,uint/*v2*/,const float *vnew)
     double Nmin = 1.0;
     const MxFaceList& N1 = m->neighbors(v1);
 
-    for(int i=0; i<N1.length(); i++)
+    for(uint i=0; i<N1.length(); i++)
 	if( m->face_mark(N1[i]) == 1 )
 	{
 	    const MxFace& f = m->face(N1[i]);
@@ -211,7 +211,7 @@ uint MxEdgeQSlim::check_local_validity(uint v1, uint /*v2*/, const float *vnew)
     uint nfailed = 0;
     uint i;
 
-    for(i=0; i<(uint)N1.length(); i++)
+    for(i=0; i<N1.length(); i++)
 	if( m->face_mark(N1[i]) == 1 )
 	{
 	    MxFace& f = m->face(N1[i]);
@@ -245,11 +245,11 @@ uint MxEdgeQSlim::check_local_degree(uint v1, uint v2, const float *)
 
     // Compute the degree of the vertex after contraction
     //
-    for(i=0; i<(uint)N1.length(); i++)
+    for(i=0; i<N1.length(); i++)
 	if( m->face_mark(N1[i]) == 1 )
 	    degree++;
 
-    for(i=0; i<(uint)N2.length(); i++)
+    for(i=0; i<N2.length(); i++)
 	if( m->face_mark(N2[i]) == 1 )
 	    degree++;
 
@@ -269,9 +269,9 @@ void MxEdgeQSlim::apply_mesh_penalties(MxQSlimEdge *info)
 
     // Set up the face marks as the check_xxx() functions expect.
     //
-    for(i=0; i<(uint)N2.length(); i++) m->face_mark(N2[i], 0);
-    for(i=0; i<(uint)N1.length(); i++) m->face_mark(N1[i], 1);
-    for(i=0; i<(uint)N2.length(); i++) m->face_mark(N2[i], m->face_mark(N2[i])+1);
+    for(i=0; i<N2.length(); i++) m->face_mark(N2[i], 0);
+    for(i=0; i<N1.length(); i++) m->face_mark(N1[i], 1);
+    for(i=0; i<N2.length(); i++) m->face_mark(N2[i], m->face_mark(N2[i])+1);
 
     double base_error = info->heap_key();
     double bias = 0.0;
@@ -282,7 +282,7 @@ void MxEdgeQSlim::apply_mesh_penalties(MxQSlimEdge *info)
     if( max_degree > vertex_degree_limit )
 	bias += (max_degree-vertex_degree_limit) * meshing_penalty * 0.001;
 
-#if defined ALTERNATE_DEGREE_BIAS && ALTERNATE_DEGREE_BIAS
+#if ALTERNATE_DEGREE_BIAS
     // ??BUG:  This code was supposed to be a slight improvement over
     //         the earlier version above.  But it performs worse.
     //         Should check into why sometime.
@@ -319,7 +319,7 @@ void MxEdgeQSlim::apply_mesh_penalties(MxQSlimEdge *info)
 	    bias += (1-c_min);
     }
 
-#if defined USE_OLD_INVERSION_CHECK && USE_OLD_INVERSION_CHECK
+#if USE_OLD_INVERSION_CHECK
     double Nmin1 = check_local_inversion(info->v1, info->v2, info->vnew);
     double Nmin2 = check_local_inversion(info->v2, info->v1, info->vnew);
     if( MIN(Nmin1, Nmin2) < 0.0 )
@@ -418,7 +418,7 @@ void MxEdgeQSlim::collect_edges()
 	star.reset();
 	m->collect_vertex_star(i, star);
 
-	for(int j=0; j<star.length(); j++)
+	for(uint j=0; j<star.length(); j++)
 	    if( i < star(j) )  // Only add particular edge once
 		create_edge(i, star(j));
     }
@@ -450,10 +450,10 @@ void MxEdgeQSlim::update_pre_contract(const MxPairContraction& conx)
     // the total edges.  Instead, we need to collect the "star"
     // from the edge links maintained at v1.
     //
-    for(i=0; i<(uint)edge_links(v1).length(); i++)
+    for(i=0; i<edge_links(v1).length(); i++)
 	star.add(edge_links(v1)[i]->opposite_vertex(v1));
 
-    for(i=0; i<(uint)edge_links(v2).length(); i++)
+    for(i=0; i<edge_links(v2).length(); i++)
     {
 	MxQSlimEdge *e = edge_links(v2)(i);
 	MxVertexID u = (e->v1==v2)?e->v2:e->v1;
@@ -483,7 +483,6 @@ void MxEdgeQSlim::update_pre_contract(const MxPairContraction& conx)
 
 void MxEdgeQSlim::update_post_contract(const MxPairContraction& conx)
 {
-    (void)conx; // Q_UNUSED
 }
 
 void MxEdgeQSlim::apply_contraction(const MxPairContraction& conx)
@@ -502,7 +501,7 @@ void MxEdgeQSlim::apply_contraction(const MxPairContraction& conx)
 
     // Must update edge info here so that the meshing penalties
     // will be computed with respect to the new mesh rather than the old
-    for(int i=0; i<edge_links(conx.v1).length(); i++)
+    for(uint i=0; i<edge_links(conx.v1).length(); i++)
 	compute_edge_info(edge_links(conx.v1)[i]);
 }
 
@@ -521,7 +520,7 @@ void MxEdgeQSlim::update_post_expand(const MxPairContraction& conx)
     m->collect_vertex_star(conx.v2, star2);
 
     i = 0;
-    while( i<(uint)edge_links(v1).length() )
+    while( i<edge_links(v1).length() )
     {
 	MxQSlimEdge *e = edge_links(v1)(i);
 	MxVertexID u = (e->v1==v1)?e->v2:e->v1;
@@ -770,10 +769,10 @@ bool MxFaceQSlim::decimate(uint target)
 	    //
 	    // Update valid counts
 	    valid_verts -= 2;
-	    for(i=0; i<(uint)changed.length(); i++)
+	    for(i=0; i<changed.length(); i++)
 		if( !m->face_is_valid(changed(i)) ) valid_faces--;
 
-	    for(i=0; i<(uint)changed.length(); i++)
+	    for(i=0; i<changed.length(); i++)
 		if( m->face_is_valid(changed(i)) )
 		    compute_face_info(changed(i));
 		else

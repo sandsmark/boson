@@ -29,7 +29,7 @@ public:
     typedef void (MxSMFReader::*read_cmd)(int argc,
 					  char *argv[],
 					  MxStdModel& m);
-    struct cmd_entry { const char *name; read_cmd cmd; };
+    struct cmd_entry { char *name; read_cmd cmd; };
 
 private:
     MxStack<unsigned int> vfirst_stack;

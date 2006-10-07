@@ -39,7 +39,6 @@ public:
 
 public:
     MxCmdParser();
-    virtual ~MxCmdParser() {}
 
     MxAspStore *asp_store() { return &store; }
 
