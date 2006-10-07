@@ -102,7 +102,7 @@ inline TVec3<T> operator-(const TVec3<T> &u, const TVec3<T>& v)
 template<class T> inline TVec3<T> operator-(const TVec3<T> &v)
 	{ return TVec3<T>(-v[0], -v[1], -v[2]); }
 
-#if _MSC_VER>=1200
+#if defined _MSC_VER && _MSC_VER>=1200
 // Normally, we use the <class T, class N> construct below to allow the scalar
 // argument to be different than the template type.  This, for example, allows
 // the user to write things like v/2.  Unfortunately, Microsoft VC6.0 (aka
