@@ -607,9 +607,24 @@ void BosonGLCompleteMiniMap::renderMiniMap()
  glPushMatrix();
 
  if (d->mAdvanceCallsSinceLastUpdate >= 40) {
-	d->mUnitTarget->enable();
-	updateRadarTexture(radarList());
-	d->mUnitTarget->disable();
+	if (d->mUnitTarget && d->mUnitTarget->valid()) {
+		d->mUnitTarget->enable();
+		updateRadarTexture(radarList());
+		d->mUnitTarget->disable();
+	} else {
+		// AB: I have no idea what to do here.
+		//     -> we must do the same as updateRadarTexture(), but
+		//        without BoRenderTarget, but since I don't really
+		//        understand that code, I have no idea what needs
+		//        to be done.
+		//
+		//        at a very least we would need to know _when_ it is
+		//        possible that this fails and document it.
+		//        but we must NEVER try to update the texture once per
+		//        frame if BoRenderTarget isn't supported on that
+		//        system.
+		#warning FIXME
+	}
  }
 
  glPushAttrib(GL_ENABLE_BIT);
