@@ -90,7 +90,7 @@ Quat slerp(const Quat& from, const Quat& to, double t)
     const double s_to = to.scalar();
 
     double cosine = v_from*v_to + s_from*s_to;
-    double sine = sqrt(1 - cosine*cosine);
+//    double sine = sqrt(1 - cosine*cosine);
 
     if( (1+cosine) < FEQ_EPS )
     {

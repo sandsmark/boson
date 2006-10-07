@@ -22,9 +22,9 @@ MxPairContraction& MxPairContraction::operator=(const MxPairContraction& c)
     delta_faces.reset();
     dead_faces.reset();
 
-    for(uint i=0; i<c.delta_faces.length(); i++)
+    for(int i=0; i<c.delta_faces.length(); i++)
 	delta_faces.add(c.delta_faces[i]);
-    for(uint j=0; j<c.dead_faces.length(); j++)
+    for(int j=0; j<c.dead_faces.length(); j++)
 	dead_faces.add(c.dead_faces[j]);
 
     delta_pivot = c.delta_pivot;
@@ -34,7 +34,7 @@ MxPairContraction& MxPairContraction::operator=(const MxPairContraction& c)
 
 MxStdModel::~MxStdModel()
 {
-    for(uint i=0; i<face_links.length(); i++)  delete face_links[i];
+    for(int i=0; i<face_links.length(); i++)  delete face_links[i];
 }
 
 MxVertexID MxStdModel::alloc_vertex(float x, float y, float z)
@@ -47,6 +47,7 @@ MxVertexID MxStdModel::alloc_vertex(float x, float y, float z)
 
     face_links.add(new MxFaceList);
     unsigned int l = face_links.last_id();
+    (void)l; // Q_UNUSED
     SanityCheck( l == id );
     SanityCheck( neighbors(id).length() == 0 );
 
@@ -97,7 +98,7 @@ void MxStdModel::mark_neighborhood(MxVertexID vid, unsigned short mark)
 {
     AssertBound( vid < vert_count() ); 
 
-    for(unsigned int i=0; i<neighbors(vid).length(); i++)
+    for(int i=0; i<neighbors(vid).length(); i++)
     {
 	unsigned int f = neighbors(vid)(i);
 	fmark(f, mark);
@@ -108,7 +109,7 @@ void MxStdModel::collect_unmarked_neighbors(MxVertexID vid,MxFaceList& faces)
 {
     AssertBound( vid < vert_count() ); 
 
-    for(unsigned int i=0; i<neighbors(vid).length(); i++)
+    for(int i=0; i<neighbors(vid).length(); i++)
     {
 	unsigned int fid = neighbors(vid)(i);
 	if( !fmark(fid) )
@@ -122,7 +123,7 @@ void MxStdModel::collect_unmarked_neighbors(MxVertexID vid,MxFaceList& faces)
 void MxStdModel::mark_neighborhood_delta(MxVertexID vid, short delta)
 {
     AssertBound( vid < vert_count() );
-    for(uint i=0; i<neighbors(vid).length(); i++)
+    for(int i=0; i<neighbors(vid).length(); i++)
     {
 	uint f = neighbors(vid)(i);
 	fmark(f, fmark(f)+delta);
@@ -133,7 +134,7 @@ void MxStdModel::partition_marked_neighbors(MxVertexID v, unsigned short pivot,
 					    MxFaceList& lo, MxFaceList& hi)
 {
     AssertBound( v < vert_count() );
-    for(uint i=0; i<neighbors(v).length(); i++)
+    for(int i=0; i<neighbors(v).length(); i++)
     {
 	uint f = neighbors(v)(i);
 	if( fmark(f) )
@@ -147,16 +148,16 @@ void MxStdModel::partition_marked_neighbors(MxVertexID v, unsigned short pivot,
 
 void MxStdModel::mark_corners(const MxFaceList& faces, unsigned short mark)
 {
-    for(uint i=0; i<faces.length(); i++)
-	for(uint j=0; j<3; j++)
+    for(int i=0; i<faces.length(); i++)
+	for(int j=0; j<3; j++)
 	    vmark(face(faces(i))(j), mark);
 }
 
 void MxStdModel::collect_unmarked_corners(const MxFaceList& faces,
 					  MxVertexList& verts)
 {
-    for(uint i=0; i<faces.length(); i++)
-	for(uint j=0; j<3; j++)
+    for(int i=0; i<faces.length(); i++)
+	for(int j=0; j<3; j++)
 	{
 	    MxVertexID v = face(faces(i))(j);
 	    if( !vmark(v) )
@@ -214,7 +215,7 @@ void MxStdModel::collect_neighborhood(MxVertexID v, int depth,
 	    fmark(faces[i], 1);
 
 	// Collect all unmarked faces
-	uint limit = faces.length();
+	int limit = faces.length();
 	for(i=0; i<limit; i++)
 	{
 	    collect_unmarked_neighbors(face(faces[i])[0], faces);
@@ -231,7 +232,7 @@ void MxStdModel::compute_vertex_normal(MxVertexID v, float *n)
     mxv_set(n, 0.0f, 3);
 
     unsigned int i;
-    for(i=0; i<star.length(); i++)
+    for(i=0; i<(unsigned int)star.length(); i++)
     {
 	float fn[3];
 
@@ -284,7 +285,7 @@ void MxStdModel::remap_vertex(unsigned int from, unsigned int to)
     SanityCheck( vertex_is_valid(from) );
     SanityCheck( vertex_is_valid(to) );
     
-    for(unsigned int i=0; i<neighbors(from).length(); i++)
+    for(int i=0; i<neighbors(from).length(); i++)
 	face(neighbors(from)(i)).remap_vertex(from, to);
 
     mark_neighborhood(from, 0);
@@ -326,7 +327,7 @@ unsigned int MxStdModel::split_edge(unsigned int v1, unsigned int v2,
 
     unsigned int vnew = add_vertex(x,y,z);
 
-    for(unsigned int i=0; i<faces.length(); i++)
+    for(unsigned int i=0; i<(unsigned int)faces.length(); i++)
     {
 	unsigned int f = faces(i);
 	unsigned int v3 = face(f).opposite_vertex(v1, v2);
@@ -420,7 +421,7 @@ void MxStdModel::compact_vertices()
 
 		vertex_mark_valid(newID);
 
-		for(unsigned int i=0; i<neighbors(newID).length(); i++)
+		for(int i=0; i<neighbors(newID).length(); i++)
 		    face(neighbors(newID)(i)).remap_vertex(oldID, newID);
 	    }
 	    newID++;
@@ -452,7 +453,7 @@ void MxStdModel::unlink_face(MxFaceID fid)
 
 void MxStdModel::remove_degeneracy(MxFaceList& faces)
 {
-    for(unsigned int i=0; i<faces.length(); i++)
+    for(int i=0; i<faces.length(); i++)
     {
 	SanityCheck( face_is_valid(faces(i)) );
 	MxFace& f = face(faces(i));
@@ -512,12 +513,12 @@ void MxStdModel::apply_contraction(const MxPairContraction& conx)
     uint i;
     //
     // Remove dead faces
-    for(i=0; i<conx.dead_faces.length(); i++)
+    for(i=0; i<(uint)conx.dead_faces.length(); i++)
 	unlink_face(conx.dead_faces(i));
 
     //
     // Update changed faces
-    for(i=conx.delta_pivot; i<conx.delta_faces.length(); i++)
+    for(i=conx.delta_pivot; i<(uint)conx.delta_faces.length(); i++)
     {
 	MxFaceID fid = conx.delta_faces(i);
 	face(fid).remap_vertex(v2, v1);
@@ -529,7 +530,7 @@ void MxStdModel::apply_contraction(const MxPairContraction& conx)
     if( normal_binding() == MX_PERFACE )
     {
 	float n[3];
-	for(i=0; i<conx.delta_faces.length(); i++)
+	for(i=0; i<(uint)conx.delta_faces.length(); i++)
 	{
 	    compute_face_normal(conx.delta_faces[i], n);
 	    normal(conx.delta_faces[i]) = MxNormal(n);
@@ -550,7 +551,7 @@ void MxStdModel::apply_expansion(const MxPairExpansion& conx)
     mxv_subfrom(vertex(v1), conx.dv1, 3);
 
     uint i,j;
-    for(i=0; i<conx.dead_faces.length(); i++)
+    for(i=0; i<(uint)conx.dead_faces.length(); i++)
     {
 	MxFaceID fid = conx.dead_faces(i);
 	face_mark_valid(fid);
@@ -559,12 +560,13 @@ void MxStdModel::apply_expansion(const MxPairExpansion& conx)
 	neighbors(face(fid)(2)).add(fid);
     }
 
-    for(i=conx.delta_pivot; i<conx.delta_faces.length(); i++)
+    for(i=conx.delta_pivot; i<(uint)conx.delta_faces.length(); i++)
     {
 	MxFaceID fid = conx.delta_faces(i);
 	face(fid).remap_vertex(v1, v2);
 	neighbors(v2).add(fid);
 	bool found = varray_find(neighbors(v1), fid, &j);
+	(void)found; // Q_UNUSED
 	SanityCheck( found );
 	neighbors(v1).remove(j);
     }
@@ -574,13 +576,13 @@ void MxStdModel::apply_expansion(const MxPairExpansion& conx)
     if( normal_binding() == MX_PERFACE )
     {
 	float n[3];
-	for(i=0; i<conx.delta_faces.length(); i++)
+	for(i=0; i<(uint)conx.delta_faces.length(); i++)
 	{
 	    compute_face_normal(conx.delta_faces[i], n);
 	    normal(conx.delta_faces[i]) = MxNormal(n);
 	}
 
-	for(i=0; i<conx.dead_faces.length(); i++)
+	for(i=0; i<(uint)conx.dead_faces.length(); i++)
 	{
 	    compute_face_normal(conx.dead_faces[i], n);
 	    normal(conx.dead_faces[i]) = MxNormal(n);
@@ -656,7 +658,7 @@ void MxStdModel::contract(MxVertexID v1, MxVertexID v2, MxVertexID v3,
     if( normal_binding() == MX_PERFACE )
     {
 	float n[3];
-	for(uint i=0; i<changed.length(); i++)
+	for(uint i=0; i<(uint)changed.length(); i++)
 	    if( face_is_valid(changed[i]) )
 	    {
 		compute_face_normal(changed[i], n);
@@ -672,13 +674,13 @@ void MxStdModel::contract(MxVertexID v1, const MxVertexList& rest,
 
     // Collect all effected faces
     mark_neighborhood(v1, 0);
-    for(i=0; i<rest.length(); i++)
+    for(i=0; i<(uint)rest.length(); i++)
 	mark_neighborhood(rest(i), 0);
 
     changed.reset();
 
     collect_unmarked_neighbors(v1, changed);
-    for(i=0; i<rest.length(); i++)
+    for(i=0; i<(uint)rest.length(); i++)
 	collect_unmarked_neighbors(rest(i), changed);
 
     // Move v1 to vnew
@@ -687,7 +689,7 @@ void MxStdModel::contract(MxVertexID v1, const MxVertexList& rest,
     vertex(v1)(2) = vnew[Z];
 
     // Replace all occurrences of vi with v1
-    for(i=0; i<rest.length(); i++)
+    for(i=0; i<(uint)rest.length(); i++)
 	remap_vertex(rest(i), v1);
 
     remove_degeneracy(changed);

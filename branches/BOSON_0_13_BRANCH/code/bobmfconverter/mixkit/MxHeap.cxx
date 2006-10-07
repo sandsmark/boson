@@ -34,6 +34,10 @@ void MxHeap::swap(unsigned int i, unsigned int j)
 
 void MxHeap::upheap(unsigned int i)
 {
+    if(i >= (unsigned int)length())
+    {
+	return;
+    }
     MxHeapable *moving = ref(i);
     uint index = i;
     uint p = parent(i);
@@ -51,15 +55,19 @@ void MxHeap::upheap(unsigned int i)
 
 void MxHeap::downheap(unsigned int i)
 {
+    if(i >= (unsigned int)length())
+    {
+	return;
+    }
     MxHeapable *moving = ref(i);
     uint index = i;
     uint l = left(i);
     uint r = right(i);
     uint largest;
 
-    while( l<length() )
+    while( l<(uint)length() )
     {
-	if( r<length() && ref(l)->heap_key() < ref(r)->heap_key() )
+	if( r<(uint)length() && ref(l)->heap_key() < ref(r)->heap_key() )
 	    largest = r;
 	else 
 	    largest = l;
@@ -124,7 +132,7 @@ MxHeapable *MxHeap::remove(MxHeapable *t)
 {
     if( !t->is_in_heap() ) return NULL;
 
-    int i = t->get_heap_pos();
+    unsigned int i = t->get_heap_pos();
     swap(i, length()-1);
     drop();
     t->not_in_heap();

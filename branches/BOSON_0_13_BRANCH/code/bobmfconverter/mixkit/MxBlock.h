@@ -20,6 +20,7 @@
 enum _array_alloc_policy { ARRAY_ALLOC_INPLACE };
 inline void *operator new(size_t, void *p, _array_alloc_policy) { return p; }
 
+#if defined _MSC_VER
 #if _MSC_VER >= 1200
 //
 // This matching delete operator is necessary to avoid warnings in
@@ -28,6 +29,7 @@ inline void *operator new(size_t, void *p, _array_alloc_policy) { return p; }
 //
 inline void operator delete(void *mem, void *spot, _array_alloc_policy) { }
 #endif
+#endif // _MSC_VER
 
 template<class T>
 class MxBlock

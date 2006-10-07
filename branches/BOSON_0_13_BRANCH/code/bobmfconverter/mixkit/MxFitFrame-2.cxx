@@ -87,10 +87,6 @@ struct OBBox0 {
     Vector E;     /* extent along basis vectors */
 };
 
-static
-double Dot(const Vector& P, const Vector& Q)
-	{ return P[0]*Q[0]+P[1]*Q[1]+P[2]*Q[2]; }
-
 #define Dot(P,Q) ((P)*(Q))
 
 static

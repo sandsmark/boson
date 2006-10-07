@@ -112,7 +112,7 @@ void mxmsg_lethality_level(MxSeverityLevel l) { current_lethality = l; }
 MxSeverityLevel mxmsg_severity_level() { return current_severity; }
 void mxmsg_severity_level(MxSeverityLevel l) { current_severity = l; }
 
-static char *severity_names[] =
+static const char *severity_names[] =
 {
     "FATAL ERROR",
     "ASSERT",
