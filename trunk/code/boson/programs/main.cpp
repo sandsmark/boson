@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -148,6 +148,20 @@ int main(int argc, char **argv)
 
  bool forceWantDirect = boConfig->boolValue("ForceWantDirect");
  BosonMainWidget* top = new BosonMainWidget(0, forceWantDirect);
+
+ QString glDriverBroken = top->glDriverBroken();
+ if (!top->directRendering()) {
+	boWarning() << "using INDIRECT (software) rendering" << endl;
+ }
+ if (!glDriverBroken.isEmpty()) {
+	KMessageBox::information(0, i18n("Your OpenGL driver appears to be broken! The reported error is:\n%1"
+			"\n\nGL library used: %2"
+			"\nGLU library used: %3"
+			"\n\nThis error will be ignored, but will probably cause problems later on!").
+			arg(glDriverBroken).
+			arg(BoGL::bogl()->OpenGLFile()).
+			arg(BoGL::bogl()->GLUFile()));
+ }
  if (!top->directRendering()) {
 	KMessageBox::information(0, i18n("Direct rendering is NOT enabled! 3d acceleration is DISABLED.\nBoson will run very slowly (seconds per frame instead of frames per second).\n\nIf you are sure that your 3d drivers are installed correctly and support 3d acceleration, please let us know about this problem and help us fixing it: boson-devel@lists.sourceforge.net"));
  }
