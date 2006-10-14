@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2006 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -120,6 +120,20 @@ public:
 
 	BoContext* context() const;
 	bool directRendering() const;
+
+	/**
+	 * This method checks if the OpenGL driver is believed to be broken by 
+	 * any reason. This is in particular the case when NVidia drivers are
+	 * used, but a MESA libGL.so is picked up.
+	 *
+	 * Note that this method CANNOT be 100% accurate: it may report a GL
+	 * driver that is believed to be working, although it is still broken.
+	 * However if a broken driver is reported, that usually is accurate.
+	 *
+	 * @return A i18n'ed error message describing the problem if there is
+	 * any, otherwise @ref QString::null.
+	 **/
+	QString glDriverBroken();
 
 	virtual void makeCurrent();
 	void swapBuffers();
