@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2006 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -443,7 +443,7 @@ bool BoContext::chooseContext(bool wantDirect, bool wantDoubleBuffer)
 // glFormat.setPlane( res );
  glXGetConfig( disp, (XVisualInfo*)mVi, GLX_DOUBLEBUFFER, &res );
  if (!res && wantDoubleBuffer) {
-	 KMessageBox::error(0, i18n("Double buffering is not supported by your system. Exit now"));
+	KMessageBox::error(0, i18n("Double buffering is not supported by your system. Exit now"));
 	kapp->exit(1);
 	return false;
  } else if (!wantDoubleBuffer && res) {
@@ -453,7 +453,7 @@ bool BoContext::chooseContext(bool wantDirect, bool wantDoubleBuffer)
  mDepth = res;
  glXGetConfig( disp, (XVisualInfo*)mVi, GLX_RGBA, &res );
  if (!res) {
-	 KMessageBox::error(0, i18n("RGBA is not supported by your system. Exit now"));
+	KMessageBox::error(0, i18n("RGBA is not supported by your system. Exit now"));
 	kapp->exit(1);
 	return false;
  }
@@ -611,6 +611,11 @@ void BosonGLWidget::initGL()
  context()->setIsInitialized(true);
 
  resizeGL(width(), height());
+
+ QString brokenDriver = glDriverBroken();
+ if (!brokenDriver.isEmpty()) {
+	boWarning() << "Possibly broken GL driver detected. Error message: " << brokenDriver << endl;
+ }
 }
 
 bool BosonGLWidget::directRendering() const
@@ -619,6 +624,32 @@ bool BosonGLWidget::directRendering() const
 	return false;
  }
  return d->mContext->isDirect();
+}
+
+QString BosonGLWidget::glDriverBroken()
+{
+ if (!isValid()) {
+	boError() << k_funcinfo << "Invalid GL widget!" << endl;
+	return false;
+ }
+ makeCurrent();
+ if (!isInitialized()) {
+	initGL();
+ }
+ QString GLvendor = BoGL::bogl()->OpenGLVendorString();
+ QString GLXvendor = (const char*)glXGetClientString(x11Display(), GLX_VENDOR);
+ bool GLIsNVidia = GLvendor.lower().contains("nvidia");
+ bool GLXIsNVidia = GLXvendor.lower().contains("nvidia");
+
+ if (GLIsNVidia != GLXIsNVidia) {
+	if (GLIsNVidia) {
+		return i18n("Vendor of GL driver is NVidia, but vendor of GLX driver is not. This may be caused by a wrong (e.g. MESA based) libGL.so library");
+	} else if (GLXIsNVidia) {
+		return i18n("Vendor of GL driver is not NVidia, but vendor of GLX driver is. This may be caused by a wrong libGL.so library");
+	}
+ }
+
+ return QString::null;
 }
 
 void BosonGLWidget::swapBuffers()
