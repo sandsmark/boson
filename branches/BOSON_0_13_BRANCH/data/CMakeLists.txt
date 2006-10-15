@@ -10,7 +10,7 @@ endif(insource)
 
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
-#set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/boson")
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/boson")
 
 # generate non-quiet makefiles
 set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -33,9 +33,14 @@ set(BOSON_PLUGIN_INSTALL_DIR ${KDE3_PLUGIN_INSTALL_DIR}/plugins/boson)
 
 
 # search packages used by KDE
+# AB: FindKDE3.cmake adds compiler flags, but we don't want this.
+set(orig_c_flags ${CMAKE_C_FLAGS})
+set(orig_cxx_flags ${CMAKE_CXX_FLAGS})
 find_package(Qt3 REQUIRED)
-find_package(KDE3 REQUIRED)
+find_package(BosonKDE3 REQUIRED)
 find_package(Perl REQUIRED)
+set(CMAKE_C_FLAGS ${orig_c_flags})
+set(CMAKE_CXX_FLAGS ${orig_cxx_flags})
 
 
 add_definitions(${QT_DEFINITIONS} ${KDE3_DEFINITIONS} -DHAVE_CONFIG_H=1)
