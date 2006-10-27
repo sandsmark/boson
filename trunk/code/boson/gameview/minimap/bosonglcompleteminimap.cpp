@@ -31,7 +31,7 @@
 #include "bodebug.h"
 #include "../botexture.h"
 #include "../gameengine/rtti.h"
-#include "../gameengine/unitplugins.h"
+#include "../gameengine/unitplugins/unitplugins.h"
 #include "../gameengine/bosoncanvas.h"
 #include "../borendertarget.h"
 #include "../bosonprofiling.h"

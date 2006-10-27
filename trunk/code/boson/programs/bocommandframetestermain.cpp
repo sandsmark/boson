@@ -38,7 +38,7 @@
 #include "../gameengine/bosoncanvas.h"
 #include "../gameengine/unit.h"
 #include "../gameengine/bosonstarting.h"
-#include "../gameengine/unitplugins.h"
+#include "../gameengine/unitplugins/unitplugins.h"
 #include "../gameview/boselection.h"
 #include "../gameview/commandframe/bosoncommandframe.h"
 #include "../gameview/bosonlocalplayerinput.h"

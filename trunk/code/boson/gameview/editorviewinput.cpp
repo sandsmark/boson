@@ -36,7 +36,7 @@
 #include "../gameengine/unitproperties.h"
 #include "../gameengine/pluginproperties.h"
 #include "../gameengine/unit.h"
-#include "../gameengine/unitplugins.h"
+#include "../gameengine/unitplugins/unitplugins.h"
 #include "../gameengine/speciestheme.h"
 #include "../gameengine/cell.h"
 #include "bodebug.h"

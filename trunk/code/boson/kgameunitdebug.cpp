@@ -23,7 +23,7 @@
 #include "gameengine/boson.h"
 #include "gameengine/cell.h"
 #include "gameengine/unit.h"
-#include "gameengine/unitplugins.h"
+#include "gameengine/unitplugins/unitplugins.h"
 #include "gameengine/player.h"
 #include "gameengine/boitemlist.h"
 #include "gameengine/bosoncanvas.h"

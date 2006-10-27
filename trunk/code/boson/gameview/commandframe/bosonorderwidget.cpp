@@ -25,7 +25,7 @@
 #include "bosonorderbutton.h"
 #include "bosoncommandframe.h"
 #include "../../gameengine/unit.h"
-#include "../../gameengine/unitplugins.h"
+#include "../../gameengine/unitplugins/unitplugins.h"
 #include "../../gameengine/unitproperties.h"
 #include "../../gameengine/bosongroundtheme.h"
 #include "../../gameengine/playerio.h"

@@ -31,7 +31,7 @@
 #include "../boitemlist.h"
 #include "../../bosonconfig.h"
 #include "../unitproperties.h"
-#include "../unitplugins.h"
+#include "../unitplugins/unitplugins.h"
 #include "../../bosonprofiling.h"
 #include "../bosonpath.h"
 #include "../speciestheme.h"

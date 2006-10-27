@@ -23,7 +23,7 @@
 #include "bodebug.h"
 #include "gameengine/rtti.h"
 #include "gameengine/unit.h"
-#include "gameengine/unitplugins.h"
+#include "gameengine/unitplugins/unitplugins.h"
 #include "gameengine/speciestheme.h"
 #include "gameengine/unitproperties.h"
 #include "gameengine/upgradeproperties.h"
