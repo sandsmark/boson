@@ -26,7 +26,7 @@
 #include "bosonmessageids.h"
 #include "player.h"
 #include "unit.h"
-#include "unitplugins.h"
+#include "unitplugins/unitplugins.h"
 #include "speciestheme.h"
 #include "unitproperties.h"
 #include "bosoncanvas.h"

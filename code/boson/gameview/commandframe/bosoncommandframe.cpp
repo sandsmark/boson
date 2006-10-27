@@ -27,7 +27,7 @@
 #include "editorunitconfigwidget.h"
 #include "bocommandframeeventlistener.h"
 #include "../../gameengine/unit.h"
-#include "../../gameengine/unitplugins.h"
+#include "../../gameengine/unitplugins/unitplugins.h"
 #include "../../gameengine/unitproperties.h"
 #include "../../gameengine/upgradeproperties.h"
 #include "../../gameengine/pluginproperties.h"

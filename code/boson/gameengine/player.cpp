@@ -25,7 +25,7 @@
 #include "speciestheme.h"
 #include "unit.h"
 #include "unitproperties.h"
-#include "unitplugins.h"
+#include "unitplugins/unitplugins.h"
 #include "bosonmessageids.h"
 #include "bosonmap.h"
 #include "bosonstatistics.h"

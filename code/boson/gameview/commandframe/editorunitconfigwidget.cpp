@@ -22,7 +22,7 @@
 
 #include "../../../bomemory/bodummymemory.h"
 #include "../../gameengine/unit.h"
-#include "../../gameengine/unitplugins.h"
+#include "../../gameengine/unitplugins/unitplugins.h"
 #include "../../gameengine/unitproperties.h"
 #include "../../defines.h"
 #include "../../boufo/boufolabel.h"

@@ -30,7 +30,7 @@
 #include "unitproperties.h"
 #include "bosonpath.h"
 #include "bosonstatistics.h"
-#include "unitplugins.h"
+#include "unitplugins/unitplugins.h"
 #include "boitemlist.h"
 #include "pluginproperties.h"
 #include "boson.h"

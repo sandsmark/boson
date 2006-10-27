@@ -75,7 +75,17 @@ set(gameengine_SRCS
 	gameengine/unitorder.cpp
 	gameengine/unitproperties.cpp
 	gameengine/pluginproperties.cpp
-	gameengine/unitplugins.cpp
+	gameengine/unitplugins/unitplugin.cpp
+	gameengine/unitplugins/ammunitionstorageplugin.cpp
+	gameengine/unitplugins/bombingplugin.cpp
+	gameengine/unitplugins/harvesterplugin.cpp
+	gameengine/unitplugins/miningplugin.cpp
+	gameengine/unitplugins/productionplugin.cpp
+	gameengine/unitplugins/radarplugin.cpp
+	gameengine/unitplugins/radarjammerplugin.cpp
+	gameengine/unitplugins/refineryplugin.cpp
+	gameengine/unitplugins/repairplugin.cpp
+	gameengine/unitplugins/resourcemineplugin.cpp
 	gameengine/upgradeproperties.cpp
 	gameengine/bosonweapon.cpp
 	gameengine/boitemlist.cpp

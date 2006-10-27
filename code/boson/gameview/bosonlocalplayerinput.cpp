@@ -24,6 +24,7 @@
 #include "../bomemory/bodummymemory.h"
 #include "../boaction.h"
 #include "../gameengine/unit.h"
+#include "../gameengine/unitplugins/unitplugins.h"
 #include "../gameengine/unitproperties.h"
 #include "../gameengine/player.h"
 #include "../gameengine/playerio.h"

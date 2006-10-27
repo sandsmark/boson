@@ -22,7 +22,7 @@
 
 #include "bosonshot.h"
 #include "pluginproperties.h"
-#include "unitplugins.h"
+#include "unitplugins/unitplugin.h"
 #include "../bo3dtools.h"
 
 #include <qptrlist.h>

@@ -21,7 +21,7 @@
 
 #include "bodebug.h"
 #include "bosonpath.h"
-#include "unitplugins.h"
+#include "unitplugins/unitplugins.h"
 #include "unit.h"
 #include "bosoncanvas.h"
 

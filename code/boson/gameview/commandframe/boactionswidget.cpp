@@ -24,7 +24,7 @@
 #include "../../../bomemory/bodummymemory.h"
 #include "bosonorderbutton.h"
 #include "../../gameengine/unit.h"
-#include "../../gameengine/unitplugins.h"
+#include "../../gameengine/unitplugins/unitplugins.h"
 #include "../../gameengine/unitproperties.h"
 #include "../../bosonconfig.h"
 #include "../../defines.h"

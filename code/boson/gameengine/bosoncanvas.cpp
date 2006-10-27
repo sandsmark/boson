@@ -25,7 +25,7 @@
 #include "player.h"
 #include "cell.h"
 #include "unit.h"
-#include "unitplugins.h"
+#include "unitplugins/unitplugins.h"
 #include "bosonmap.h"
 #include "unitproperties.h"
 #include "speciestheme.h"
