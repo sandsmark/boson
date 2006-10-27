@@ -1993,8 +1993,6 @@ void BosonGameView::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag
 
 void BosonGameView::loadFromXML(const QDomElement& root)
 {
- boDebug() << k_funcinfo << endl;
-
  // AB: note that a failure in this methods is an error, but it does not abort
  // loading.
 
@@ -2042,7 +2040,6 @@ void BosonGameView::loadFromXML(const QDomElement& root)
 
 void BosonGameView::saveAsXML(QDomElement& root)
 {
- boDebug() << k_funcinfo << endl;
  QDomDocument doc = root.ownerDocument();
 
  // Save selection groups
