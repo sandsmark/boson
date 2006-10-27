@@ -453,6 +453,7 @@ public:
 	int width() const { return renderTarget->width(); }
 	int height() const { return renderTarget->height(); }
 	bool hasDepth() const { return (depthTexture != 0); }
+	bool valid() const { return renderTarget->valid(); }
 
 
 	BoRenderTarget* renderTarget;
@@ -813,8 +814,9 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
 
  bool renderToTexture = mustRenderToTexture(d->mVisibleEffects);
  if (renderToTexture) {
-	startRenderingToTexture();
-
+	renderToTexture = startRenderingToTexture();
+ }
+ if (renderToTexture) {
 	// Push near and far planes as close to each other as possible to make
 	//  maximum use of the depth buffer (and texture).
 	// TODO: this has some problems:
@@ -1003,6 +1005,10 @@ void BosonCanvasRenderer::renderShadowMap(const BosonCanvas* canvas)
 	d->mShadowTarget = new BoRenderTarget(shadowResolution, shadowResolution,
 			BoRenderTarget::RGBA | BoRenderTarget::Depth, 0, d->mShadowTexture);
 	boDebug() << k_funcinfo << "Target type: " << d->mShadowTarget->type() << endl;
+ }
+
+ if (!d->mShadowTarget->valid()) {
+	return;
  }
 
 
@@ -1431,12 +1437,15 @@ bool BosonCanvasRenderer::mustRenderToTexture(BoVisibleEffects& visible)
  return false;
 }
 
-void BosonCanvasRenderer::startRenderingToTexture()
+bool BosonCanvasRenderer::startRenderingToTexture()
 {
  int widgetwidth = d->mGameMatrices->viewport()[2];
  int widgetheight = d->mGameMatrices->viewport()[3];
 
  d->mMainSceneRenderTarget = d->mSceneRenderTargetCache->getRenderTarget(widgetwidth, widgetheight, true);
+ if (!d->mMainSceneRenderTarget->valid()) {
+	return false;
+ }
 
  // Enable the rendertarget
  glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -1458,6 +1467,8 @@ void BosonCanvasRenderer::startRenderingToTexture()
  glDisable(GL_SCISSOR_TEST);
  glDepthFunc(GL_LEQUAL);
  glEnable(GL_DEPTH_TEST);
+
+ return true;
 }
 
 void BosonCanvasRenderer::stopRenderingToTexture()
