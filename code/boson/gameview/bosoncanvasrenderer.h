@@ -160,7 +160,11 @@ protected:
 	void deactivateShadowMap();
 	void extractViewFrustum(BoVector3Float* points, const BoFrustum& viewFrustum);
 	bool mustRenderToTexture(BoVisibleEffects& visible);
-	void startRenderingToTexture();
+	/**
+	 * @return TRUE on success, FALSE if an error occurred. If FALSE is
+	 * returned, no GL state change has been made.
+	 **/
+	bool startRenderingToTexture();
 	void stopRenderingToTexture();
 
 	void renderBoundingBox(const BosonItem* item);
