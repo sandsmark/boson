@@ -49,14 +49,12 @@
 // this class still handles input, but also output (as it reports events)
 BosonLocalPlayerInput::BosonLocalPlayerInput(bool gameMode) : KGameIO()
 {
-  boDebug() << k_funcinfo << endl;
   mEventListener = 0;
   mGameMode = gameMode;
 }
 
 BosonLocalPlayerInput::~BosonLocalPlayerInput()
 {
-  boDebug() << k_funcinfo << endl;
   delete mEventListener;
 }
 
@@ -69,7 +67,6 @@ bool BosonLocalPlayerInput::initializeIO()
     BO_NULL_ERROR(player());
     return false;
   }
-  boDebug() << k_funcinfo << endl;
   if (!boGame)
   {
     BO_NULL_ERROR(boGame);
@@ -104,7 +101,6 @@ bool BosonLocalPlayerInput::initializeIO()
 
 void BosonLocalPlayerInput::slotAction(const BoSpecificAction& action)
 {
-  boDebug() << k_funcinfo << "Action type: " << action.type() << endl;
   if (action.isProduceAction())
   {
     produceAction(action);
@@ -121,7 +117,6 @@ void BosonLocalPlayerInput::slotAction(const BoSpecificAction& action)
       break;
     default:
       // Other actions will be handled in BosonGameViewInput
-      boDebug() << k_funcinfo << "Emitting signalAction" << endl;
       emit signalAction(action);
       break;
   }
@@ -522,8 +517,6 @@ void BosonLocalPlayerInput::placeUnit(Player* owner, unsigned long int unitType,
 
 void BosonLocalPlayerInput::changeHeight(int x, int y, bofixed height)
 {
-  boDebug() << k_funcinfo << endl;
-
   QValueList< QPair<QPoint, bofixed> > heights;
   heights.append(QPair<QPoint, bofixed>(QPoint(x, y), height));
   changeHeight(heights);
@@ -531,8 +524,6 @@ void BosonLocalPlayerInput::changeHeight(int x, int y, bofixed height)
 
 void BosonLocalPlayerInput::changeHeight(const QValueList< QPair<QPoint, bofixed> >& heights)
 {
-  boDebug() << k_funcinfo << endl;
-
   QValueVector<Q_UINT32> cornersX(heights.count());
   QValueVector<Q_UINT32> cornersY(heights.count());
   QValueVector<bofixed> cornersHeight(heights.count());
