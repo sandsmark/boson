@@ -29,7 +29,7 @@
 #include "unitproperties.h"
 #include "bosonprofiling.h"
 #include "bosonmap.h"
-#include "unitplugins/unitplugins.h"
+#include "unitplugins/resourcemineplugin.h"
 #include "speciestheme.h"
 #include "playerio.h"
 

@@ -42,7 +42,6 @@
 #include "../gameengine/boson.h"
 #include "bodebug.h"
 #include "../gameengine/bosonshot.h"
-#include "../gameengine/unitplugins/unitplugins.h"
 #include "../bo3dtools.h"
 #include "bosongameviewinputbase.h"
 #include "bosongameviewinput.h"
