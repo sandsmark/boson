@@ -936,7 +936,7 @@ bool HarvesterPlugin::loadFromXML(const QDomElement& root)
 	// --> it was saved this way, so we must load it this way.
 	Unit* u = game()->findUnit(refineryId, 0);
 	if (!u) {
-		boError() << k_funcinfo << "cannot find refinery " << refineryId << endl;
+		boError() << k_funcinfo << "cannot find refinery mine " << refineryId << endl;
 		return false;
 	} else {
 		mRefinery = (RefineryPlugin*)u->plugin(UnitPlugin::Refinery);
