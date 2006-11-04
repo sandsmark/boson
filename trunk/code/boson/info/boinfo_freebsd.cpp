@@ -18,6 +18,7 @@
 */
 
 #include "boinfo.h"
+#include "bocurrentinfo.h"
 
 #include "bodebug.h"
 #include "../../bomemory/bodummymemory.h"
@@ -135,6 +136,18 @@ float BoInfo::cpuSpeed() const
 }
 
 bool BoInfo::haveMtrr() const
+{
+ return false;
+}
+
+bool BoCurrentInfo::memoryInUse(QString*, QString*, QString*,
+		QString*, QString*, QString*, QString*,
+		QString*) const
+{
+ return false;
+}
+
+bool BoCurrentInfo::cpuTime(unsigned long int*, unsigned long int*, long int*, long int*) const
 {
  return false;
 }
