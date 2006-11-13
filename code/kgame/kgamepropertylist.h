@@ -139,7 +139,7 @@ public:
 
   void remove( const type& d )
   {
-    Iterator it=find(d);
+    Iterator it=QValueList<type>::find(d);
     remove(it);
   }
 
