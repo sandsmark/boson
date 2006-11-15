@@ -244,7 +244,7 @@ public:
   inline Iterator begin() { return QValueList<type>::begin(); }
   inline Iterator end() { return QValueList<type>::end(); }
   inline Iterator at(uint i) { return QValueList<type>::at(i); }
-  inline uint count() { return QValueList<type>::count(); }
+  inline uint count() const { return QValueList<type>::count(); }
 
 protected:
   void extractProperty(const QByteArray& b)
