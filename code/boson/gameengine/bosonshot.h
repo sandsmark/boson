@@ -184,7 +184,7 @@ class BosonShot : public BosonItem
 
     // values from BosonWeapon. note that some classes may not use them at all
     // (e.g. reimplement damage() with their own values)
-    KGameProperty<long int> mWeaponDamage;
+    KGameProperty<Q_INT32> mWeaponDamage;
     KGameProperty<bofixed> mWeaponDamageRange;
     KGameProperty<bofixed> mWeaponFullDamageRange;
     KGameProperty<bofixed> mWeaponSpeed;
@@ -374,10 +374,10 @@ class BosonShotExplosion : public BosonShot
     static void initStatic();
 
   private:
-    KGameProperty<long int> mDamage;
+    KGameProperty<Q_INT32> mDamage;
     KGameProperty<bofixed> mDamageRange;
     KGameProperty<bofixed> mFullDamageRange;
-    KGameProperty<int> mDelay;
+    KGameProperty<Q_INT32> mDelay;
 };
 
 
