@@ -323,6 +323,24 @@ void BosonCustomPropertyXML::slotRequestValue(KGamePropertyBase* prop, QString& 
 			s << ' ';
 			s << *it;
 		}
+	} else if (typeid(*prop) == typeid(KGamePropertyList<Q_INT32>)) {
+		KGamePropertyList<Q_INT32>* list = (KGamePropertyList<Q_INT32>*)prop;
+		QTextStream s(&value, IO_WriteOnly);
+		s << QString::number(list->count());
+		KGamePropertyList<Q_INT32>::Iterator it;
+		for (it = list->begin(); it != list->end(); ++it) {
+			s << ' ';
+			s << *it;
+		}
+	} else if (typeid(*prop) == typeid(KGamePropertyList<Q_UINT32>)) {
+		KGamePropertyList<Q_UINT32>* list = (KGamePropertyList<Q_UINT32>*)prop;
+		QTextStream s(&value, IO_WriteOnly);
+		s << QString::number(list->count());
+		KGamePropertyList<Q_UINT32>::Iterator it;
+		for (it = list->begin(); it != list->end(); ++it) {
+			s << ' ';
+			s << *it;
+		}
 	}
  }
 
@@ -472,6 +490,32 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 			s >> c;
 			s >> point;
 			list->append(point);
+		}
+	} else if (typeid(*prop) == typeid(KGamePropertyList<Q_UINT32>)) {
+		KGamePropertyList<Q_UINT32>* list = (KGamePropertyList<Q_UINT32>*)prop;
+		list->clear();
+		unsigned int count = 0;
+		QChar c;
+		Q_UINT32 v;
+		QTextStream s((QString*)&value, IO_ReadOnly);
+		s >> count;
+		for (unsigned int i = 0; i < count; i++) {
+			s >> c; // space
+			s >> v;
+			list->append(v);
+		}
+	} else if (typeid(*prop) == typeid(KGamePropertyList<Q_INT32>)) {
+		KGamePropertyList<Q_INT32>* list = (KGamePropertyList<Q_INT32>*)prop;
+		list->clear();
+		unsigned int count = 0;
+		QChar c;
+		Q_INT32 v;
+		QTextStream s((QString*)&value, IO_ReadOnly);
+		s >> count;
+		for (unsigned int i = 0; i < count; i++) {
+			s >> c; // space
+			s >> v;
+			list->append(v);
 		}
 	}
  }
