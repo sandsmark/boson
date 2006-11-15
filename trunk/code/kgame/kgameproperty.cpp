@@ -59,6 +59,7 @@ KGamePropertyBase::~KGamePropertyBase()
 void KGamePropertyBase::init()
 {
  mOwner = 0;
+ mId = -1;
  setDirty(false);
 
  // this is very useful and used by e.g. KGameDialog so
