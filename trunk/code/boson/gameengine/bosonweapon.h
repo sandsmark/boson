@@ -419,8 +419,8 @@ class BosonWeapon : public UnitPlugin
 
   private:
     const BosonWeaponProperties* mProp;
-    KGameProperty<int> mReloadCounter;
-    KGameProperty<unsigned long int> mAmmunition;
+    KGameProperty<Q_INT32> mReloadCounter;
+    KGameProperty<Q_UINT32> mAmmunition;
 
     BoUpgradeableProperty<unsigned long int> mRange;
     BoUpgradeableProperty<long int> mDamage;
