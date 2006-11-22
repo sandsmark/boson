@@ -155,7 +155,6 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			}
 		}
 		if (unitsToMove.count() == 0) {
-			boWarning(380) << k_lineinfo << "no unit to move" << endl;
 			break;
 		}
 		giveOrder(unitsToMove, UnitMoveOrder(message.mPos, -1, attack));
@@ -227,10 +226,12 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 				boDebug() << "cannot stop destroyed units" << endl;
 				continue;
 			}
+			if (unit->isInsideUnit()) {
+				continue;
+			}
 			unitsToStop.append(unit);
 		}
 		if (unitsToStop.count() == 0) {
-			boWarning() << k_lineinfo << "no unit to stop" << endl;
 			break;
 		}
 		QPtrListIterator<Unit> it(unitsToStop);
@@ -582,6 +583,54 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		}
 		break;
 	}
+	case BosonMessageIds::MoveEnterUnit:
+	{
+		BosonMessageMoveEnterUnit message;
+		if (!message.load(stream)) {
+			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
+			break;
+		}
+		Unit* enterUnit = findUnit(message.mEnterUnitId, 0);
+		if (!enterUnit) {
+			boError() << k_lineinfo << "Cannot enter NULL unit" << endl;
+			return true;
+		}
+		if (enterUnit->isDestroyed()) {
+			boDebug() << k_lineinfo << "Cannot enter destroyed units" << endl;
+			return true;
+		}
+		UnitStoragePlugin* enterStorage = (UnitStoragePlugin*)enterUnit->plugin(UnitPlugin::UnitStorage);
+
+		if (!enterStorage) {
+			boDebug() << k_lineinfo << "Cannot enter unit without UnitStorage plugin" << endl;
+			return true;
+		}
+
+		for (QValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
+			Q_ULONG unitId = *it;
+			if (unitId == message.mEnterUnitId) {
+				boWarning() << "Cannot enter myself" << endl;
+				continue;
+			}
+			Unit* unit = findUnit(unitId, player);
+			if (!unit) {
+				boDebug() << "unit " << unitId << " not found for this player" << endl;
+				continue;
+			}
+			if (unit->isDestroyed()) {
+				boDebug() << "cannot enter with destroyed units" << endl;
+				continue;
+			}
+
+			if (!enterStorage->canStore(unit)) {
+				continue;
+			}
+
+			boDebug() << k_lineinfo << unit->id() << " entering " << enterUnit->id() << endl;
+			unit->addToplevelOrder(new UnitEnterUnitOrder(enterUnit));
+		}
+		break;
+	}
 	case BosonMessageIds::MoveLayMine:
 	{
 		BosonMessageMoveLayMine message;
@@ -882,12 +931,32 @@ void BosonPlayerInputHandler::giveOrder(const QPtrList<Unit>& units, const UnitO
  }
 }
 
-void BosonPlayerInputHandler::giveOrder(Unit* unit, const UnitOrder& order, bool replace)
+void BosonPlayerInputHandler::giveOrder(Unit* unit, const UnitOrder& order_, bool replace)
 {
+ BO_CHECK_NULL_RET(unit);
+ UnitOrder* order = order_.duplicate();
+
+ if (unit->isInsideUnit()) {
+	bool needToLeave = true;
+	if (order->type() == UnitOrder::EnterUnit) {
+		UnitEnterUnitOrder* o = (UnitEnterUnitOrder*)order;
+		if (o->isLeaveOrder()) {
+			needToLeave = false;
+		}
+	}
+
+	if (needToLeave) {
+		UnitEnterUnitOrder leave(unit);
+		leave.setIsLeaveOrder(true);
+		giveOrder(unit, leave, replace);
+		replace = false;
+	}
+ }
+
  if (replace) {
-	unit->replaceToplevelOrders(order.duplicate());
+	unit->replaceToplevelOrders(order);
  } else {
-	unit->addToplevelOrder(order.duplicate());
+	unit->addToplevelOrder(order);
  }
 }
 

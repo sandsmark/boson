@@ -275,17 +275,6 @@ public:
 	 **/
 	bool isMobile() const;
 
-	/**
-	 * One day we might have units which can go on air <em>and</em> on land
-	 * or which just can land. Examples might be helicopters or planes at an
-	 * airport. For these units we need to know whether they are flying or
-	 * not.
-	 * @return Whether this unit is currently flying. Always false if @ref
-	 * unitProperties()->isAircraft is false. Currently this is juste the
-	 * same as @ref unitProperties()->isAircraft.
-	 **/
-	bool isFlying() const;
-
 	void increaseDeletionTimer();
 	unsigned int deletionTimer() const;
 
@@ -448,10 +437,10 @@ private:
 
 	BosonItemPropertyHandler* mWeaponProperties;
 
-	KGameProperty<unsigned long int> mShieldReloadCounter;
-	KGameProperty<unsigned int> mDeletionTimer;
-	KGamePropertyInt mAdvanceWork;
-	KGamePropertyInt mMovingStatus;
+	KGameProperty<Q_UINT32> mShieldReloadCounter;
+	KGameProperty<Q_UINT32> mDeletionTimer;
+	KGameProperty<Q_INT32> mAdvanceWork;
+	KGameProperty<Q_INT32> mMovingStatus;
 
 	KGameProperty<bofixed> mHealthFactor;
 	KGameProperty<bofixed> mArmorFactor;

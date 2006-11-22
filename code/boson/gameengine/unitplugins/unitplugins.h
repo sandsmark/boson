@@ -31,5 +31,7 @@
 #include "ammunitionstorageplugin.h"
 #include "radarplugin.h"
 #include "radarjammerplugin.h"
+#include "enterunitplugin.h"
+#include "unitstorageplugin.h"
 
 #endif

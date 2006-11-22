@@ -278,6 +278,16 @@ bool UnitProperties::loadAllPluginProperties(KSimpleConfig* conf)
 		return false;
 	}
  }
+ if (conf->hasGroup(UnitStorageProperties::propertyGroup())) {
+	if (isMobile()) {
+		boError() << k_funcinfo << "atm mobile units are not allowed to have a UnitStorage plugin: first we must ensure that while a unit is entering or leaving, the storage unit cannot move!" << endl;
+		boError() << k_funcinfo << "also if units are inside and the storage moves, the stored units must be moved along (and probably not be visible on the screen)" << endl;
+		return false;
+	}
+	if (!loadPluginProperties(new UnitStorageProperties(this), conf)) {
+		return false;
+	}
+ }
  return true;
 }
 

@@ -28,6 +28,7 @@
 #include "boitemlist.h"
 #include "cell.h"
 #include "unitorder.h"
+#include "unitplugins/enterunitplugin.h"
 
 #include <qdom.h>
 
@@ -99,6 +100,14 @@ bool UnitMover::loadFromXML(const QDomElement& root)
  }
 
  return true;
+}
+
+bool UnitMover::cellOccupied(int x, int y, bool ignoremoving) const
+{
+ if (!unit()) {
+	return false;
+ }
+ return unit()->cellOccupied(x, y, ignoremoving);
 }
 
 void UnitMover::initStatic()
@@ -386,9 +395,16 @@ void UnitMover::stopMoving(bool success)
 	}
  }
  UnitOrder* order = unit()->currentOrder();
- if (order && (order->type() == UnitOrder::Move || order->type() == UnitOrder::MoveToUnit)) {
+ if (order && (order->isMoveOrder())) {
 	unit()->currentSuborderDone(success);
  }
+
+// boDebug() << k_funcinfo << "x=" << unit()->x() << " y=" << unit()->y() << " centerx=" << unit()->centerX() << " centery=" << unit()->centerY() << endl;
+}
+
+void UnitMover::pathPointDone()
+{
+ unit()->pathPointDone();
 }
 
 
@@ -439,6 +455,16 @@ UnitMoverLand::UnitMoverLand(Unit* u) : UnitMover(u)
 
 UnitMoverLand::~UnitMoverLand()
 {
+}
+
+int UnitMoverLand::pathPointCount() const
+{
+ return unit()->pathPointCount();
+}
+
+const BoVector2Fixed& UnitMoverLand::currentPathPoint() const
+{
+ return unit()->currentPathPoint();
 }
 
 bool UnitMoverLand::init()
@@ -535,7 +561,7 @@ void UnitMoverLand::advanceMoveInternal2(unsigned int advanceCallsCount)
 //          _after_ the advance call in BosonCanvas).
 //          also we might need to calculate another part of the path, if path
 //          was calculated partially only
-void UnitMoverLand::advanceMoveInternal3(unsigned int advanceCallsCount)
+void UnitMoverLand::advanceMoveInternal3(unsigned int)
 {
  bofixed x = unit()->centerX();
  bofixed y = unit()->centerY();
@@ -631,7 +657,7 @@ void UnitMoverLand::advanceMoveInternal3(unsigned int advanceCallsCount)
 	if ((x + xspeed == pp.x()) && (y + yspeed == pp.y())) {
 		// Unit has reached pathpoint
 		boDebug(401) << k_funcinfo << "unit " << id() << ": unit is at pathpoint" << endl;
-		unit()->pathPointDone();
+		pathPointDone();
 		currentPathPointChanged((int)(x + xspeed), (int)(y + yspeed));
 		// Check for enemies
 		if (attackEnemyUnitsInRangeWhileMoving()) {
@@ -668,7 +694,7 @@ void UnitMoverLand::advanceMoveInternal4(unsigned int advanceCallsCount)
  PROFILE_METHOD;
  //boDebug(401) << k_funcinfo << endl;
 
- if (!unit()->currentOrder() || (unit()->currentOrder()->type() != UnitOrder::Move && unit()->currentOrder()->type() != UnitOrder::MoveToUnit)) {
+ if (!unit()->currentOrder() || !unit()->currentOrder()->isMoveOrder()) {
 	// We might be e.g. turning
 	// TODO: before turning, we have possibly already moved, so we should still
 	//  check our new pos here
@@ -681,7 +707,7 @@ void UnitMoverLand::advanceMoveInternal4(unsigned int advanceCallsCount)
 	// We try to move every 5 advance calls
 	if (pathInfo()->waiting % 5 == 0) {
 		// Try to move again
-		if (unit()->cellOccupied(mNextCellX, mNextCellY)) {
+		if (cellOccupied(mNextCellX, mNextCellY)) {
 			// Obstacle is still there. Continue waiting
 			if (pathInfo()->waiting >= 600) {
 				// Enough of waiting (30 secs). Give up.
@@ -718,7 +744,7 @@ void UnitMoverLand::advanceMoveInternal4(unsigned int advanceCallsCount)
  advanceMoveInternal5(advanceCallsCount);
 }
 
-void UnitMoverLand::advanceMoveDoCrushing(unsigned int advanceCallsCount)
+void UnitMoverLand::advanceMoveDoCrushing(unsigned int)
 {
  // AB: FIXME: this really is no moving code. it does not belong in this class
  // at all.
@@ -756,8 +782,18 @@ void UnitMoverLand::advanceMoveDoCrushing(unsigned int advanceCallsCount)
 }
 
 // TODO: rename.
-void UnitMoverLand::advanceMoveInternal5(unsigned int advanceCallsCount)
+void UnitMoverLand::advanceMoveInternal5(unsigned int)
 {
+ if (unit()->isInsideUnit()) {
+	// FIXME: is this correct here?
+	//        I honestly have no clue if this method is needed if we move
+	//        inside a unit.
+	//        we definitely don't have a mNextWaypointIntersections pointer,
+	//        so we somehow need to work around that.
+	return;
+ }
+
+ BO_CHECK_NULL_RET(mNextWaypointIntersections);
  if (unit()->pathPointCount() == 0) {
 	// This is allowed and means that unit will stop after this advance call
 	return;
@@ -803,7 +839,7 @@ void UnitMoverLand::advanceMoveInternal5(unsigned int advanceCallsCount)
  mNextCellY += mNextWaypointIntersectionsYOffset;
 
  // Make sure the next cell is free of any obstacles
- if (unit()->cellOccupied(mNextCellX, mNextCellY)) {
+ if (cellOccupied(mNextCellX, mNextCellY)) {
 	// Gotta wait
 	unit()->setVelocity(0, 0, 0);
 	unit()->setMovingStatus(UnitBase::Waiting);
@@ -838,7 +874,7 @@ void UnitMoverLand::advanceMoveCheck()
  // Make sure unit is on canvas
  UnitMover::advanceMoveCheck();
 
- if (!unit()->currentOrder() || (unit()->currentOrder()->type() != UnitOrder::Move && unit()->currentOrder()->type() != UnitOrder::MoveToUnit)) {
+ if (!unit()->currentOrder() || !unit()->currentOrder()->isMoveOrder()) {
 	// apparently the velocity was set to something != 0 although it should
 	// not. revert.
 	unit()->setVelocity(0, 0, 0);
@@ -850,7 +886,7 @@ void UnitMoverLand::advanceMoveCheck()
 //             not: don't move there. stop moving completely.
 #if 0
  // Make sure the next cell is free of any obstacles
- if (unit()->cellOccupied(mNextCellX, mNextCellY)) {
+ if (cellOccupied(mNextCellX, mNextCellY)) {
 	// Gotta wait
 	unit()->setVelocity(0, 0, 0);
 	unit()->setSpeed(0);
@@ -889,6 +925,9 @@ int UnitMoverLand::selectNextPathPoint(int xpos, int ypos)
  if (unitProperties()->isAircraft()) {
 	return 0;
  }
+ if (unit()->isInsideUnit()) {
+	return 0;
+ }
  //return 0;
  // TODO: better name?
  // Find next pathpoint where we can go in straight line
@@ -906,7 +945,7 @@ int UnitMoverLand::selectNextPathPoint(int xpos, int ypos)
 	for (unsigned int i = 0; i < mCellIntersectionTable[xindex][yindex].count(); i++) {
 		// Check if this cell is accessable
 		// TODO: check terrain
-		if (unit()->cellOccupied(xpos + mCellIntersectionTable[xindex][yindex][i].x(),
+		if (cellOccupied(xpos + mCellIntersectionTable[xindex][yindex][i].x(),
 				ypos + mCellIntersectionTable[xindex][yindex][i].y(), true)) {
 			cango = false;
 			break;
@@ -914,7 +953,7 @@ int UnitMoverLand::selectNextPathPoint(int xpos, int ypos)
 	}
 	if (cango) {
 		// skip previous pathpoint (go directly to this one)
-		unit()->pathPointDone();
+		pathPointDone();
 		currentPathPointChanged(xpos, ypos);
 		skipped++;
 	}
@@ -1007,6 +1046,15 @@ bool UnitMoverLand::canGoToCurrentPathPoint(int xpos, int ypos)
  if (unitProperties()->isAircraft()) {
 	return true;
  }
+ if (!pathInfo()) {
+	BO_NULL_ERROR(pathInfo());
+	return false;
+ }
+
+ if (!pathInfo()->movedata) {
+	BO_NULL_ERROR(pathInfo()->movedata);
+	return false;
+ }
  int ppx = (int)unit()->currentPathPoint().x();
  int ppy = (int)unit()->currentPathPoint().y();
  if ((QABS(ppx - xpos) >= 6) || (QABS(ppy - ypos) >= 6)) {
@@ -1031,7 +1079,7 @@ bool UnitMoverLand::canGoToCurrentPathPoint(int xpos, int ypos)
 			if (u->movingStatus() == UnitBase::Moving) {
 				// Hopefully it will move away
 				continue;
-			} else if(u->maxHealth() <= pathInfo()->movedata->crushDamage && u->owner() != unit()->owner()) {
+			} else if (u->maxHealth() <= pathInfo()->movedata->crushDamage && u->owner() != unit()->owner()) {
 				// We can just crush it
 				continue;
 			}
@@ -1084,21 +1132,23 @@ bool UnitMoverLand::calculateNewPath()
  unit()->clearPathPoints();
 
  // Don't try to find the path if we're already at the destination point
- if(QMAX(QABS(pathInfo()->dest.x() - pathInfo()->start.x()), QABS(pathInfo()->dest.x() - pathInfo()->start.x()))
+ // FIXME: AB: rivo: 1.0f is a very long distance - by using 0.5 or so we could
+ //            have much more precise movements. useful for moving inside units.
+ //            would that be ok?
+ //        AB: even better: what about using unit()->boundingRect().contains() ?
+ if (QMAX(QABS(pathInfo()->dest.x() - pathInfo()->start.x()), QABS(pathInfo()->dest.x() - pathInfo()->start.x()))
 		< 1.0f) {
 	return false;
  }
 
- // Find path
- canvas()->pathFinder()->findPath(pathInfo());
-
- if (pathInfo()->result == BosonPath::NoPath || pathInfo()->llpath.count() == 0) {
+ QValueVector<BoVector2Fixed> pathPoints;
+ if (!calculateNewPathPathPoints(&pathPoints)) {
 	// Stop moving
 	return false;
  }
- // Copy low-level path to pathpoints' list
- for (int unsigned i = 0; i < pathInfo()->llpath.count(); i++) {
-	unit()->addPathPoint(pathInfo()->llpath[i]);
+
+ for (int unsigned i = 0; i < pathPoints.count(); i++) {
+	unit()->addPathPoint(pathPoints[i]);
  }
 
  // Reset last cell
@@ -1109,6 +1159,26 @@ bool UnitMoverLand::calculateNewPath()
  // AB: FIXME: do we need a unit()->setMovingStatus() here?
  //            -> it's pretty dumb to have movingStatus() == MustSearchPath at
  //               this point
+
+ return true;
+}
+
+bool UnitMoverLand::calculateNewPathPathPoints(QValueVector<BoVector2Fixed>* pathPoints)
+{
+ pathPoints->clear();
+ if (!pathInfo()) {
+	return false;
+ }
+
+ // Find path
+ canvas()->pathFinder()->findPath(pathInfo());
+
+ if (pathInfo()->result == BosonPath::NoPath || pathInfo()->llpath.count() == 0) {
+	return false;
+ }
+
+ // Copy low-level path to pathpoints' list
+ *pathPoints = pathInfo()->llpath;
 
  return true;
 }
@@ -1250,7 +1320,7 @@ void UnitMoverFlying::advanceMoveInternal(unsigned int advanceCallsCount)
 	return;
  }
 
- boDebug(401) << k_funcinfo << "unit " << id() << endl;
+// boDebug(401) << k_funcinfo << "unit " << id() << endl;
 
 
  // Calculate velocity
@@ -1311,7 +1381,14 @@ if (pathInfo()->moveAttacking) {
 
  // Calculate totarget vector
  BoVector3Fixed totarget(targetpos.x() - x, targetpos.y() - y, targetpos.z() - z);
+#if 1
+ // AB: z position of flying units are pretty much unused atm
+ totarget.setZ(0);
+#endif
  bofixed totargetlen = totarget.length();
+
+// boDebug() << "flying_advanceMoveInternal "<< id() << " is at " << x << "," << y << "," << z << " z2=" << unit()->z() << " target at: " << targetpos.x() << "," << targetpos.y() << " " << targetpos.z() << " totargetlen: " << totargetlen << " range: " << pathInfo()->range << " unitspeed: " << unit()->speed() << endl;
+
  // We need check this here to avoid division by 0 later
  if (totargetlen <= pathInfo()->range || totargetlen <= unit()->speed()) {
 	stopMoving(true);
@@ -1422,5 +1499,489 @@ if (pathInfo()->moveAttacking) {
  unit()->setYRotation(mRoll);
 
  unit()->setMovingStatus(UnitBase::Moving);
+}
+
+
+UnitMoverInsideUnit::UnitMoverInsideUnit(Unit* u)
+	: UnitMoverLand(u)
+{
+}
+
+UnitMoverInsideUnit::~UnitMoverInsideUnit()
+{
+}
+
+bool UnitMoverInsideUnit::calculateNewPathPathPoints(QValueVector<BoVector2Fixed>* pathPoints)
+{
+ pathPoints->clear();
+ if (!pathInfo()) {
+	boError(401) << k_funcinfo  << "NULL pathInfo()" << endl;
+	return false;
+ }
+
+ EnterUnitPlugin* enterUnit = (EnterUnitPlugin*)unit()->plugin(UnitPlugin::EnterUnit);
+ if (!enterUnit) {
+	boError(401) << k_funcinfo  << "cannot move inside a unit without a EnterUnitPlugin" << endl;
+	return false;
+ }
+
+ if (unit()->currentOrder()->type() != UnitOrder::MoveInsideUnit) {
+	// Move, MoveToUnit etc. are not supported
+	return false;
+ }
+
+ canvas()->pathFinder()->preparePathInfo(pathInfo());
+
+ // actually search path here
+ // TODO: maybe use "enterUnit->getPathPoints()" instead?
+ switch (enterUnit->movingInStatus()) {
+	default:
+	case EnterUnitPlugin::StatusIsOutside:
+		boDebug(401) << k_funcinfo << "movingInStatus " << enterUnit->movingInStatus() << " should not be handled by this class" << endl;
+		return false;
+	case EnterUnitPlugin::StatusMovingToStoragePosition:
+	case EnterUnitPlugin::StatusMovingToOutside:
+	{
+		boDebug(401) << k_funcinfo << "moving in/out: adding pathpoint" << endl;
+
+		bofixed add_ = 0;
+		if (!unit()->unitProperties()->isAircraft()) {
+			if (pathInfo() && pathInfo()->movedata) {
+				add_ = (((pathInfo()->movedata->size % 2) == 1) ? 0.5 : 0);
+			}
+		}
+		BoVector2Fixed add(add_, add_);
+
+		QValueList<BoVector2Fixed> path = enterUnit->remainingInsidePath();
+		pathPoints->clear();
+		pathPoints->reserve(path.count());
+		for (QValueList<BoVector2Fixed>::iterator it = path.begin(); it != path.end(); ++it) {
+			pathPoints->append(*it + add);
+		}
+
+		break;
+	}
+	case EnterUnitPlugin::StatusHasEntered:
+		boDebug(401) << k_funcinfo << "isInside: nothing yet" << endl;
+		return false;
+		break;
+ }
+
+
+ return true;
+}
+
+void UnitMoverInsideUnit::advanceMoveInternal(unsigned int advanceCallsCount)
+{
+ if (!unit()->isInsideUnit()) {
+	boError(401) << k_funcinfo << "not inside a unit" << endl;
+	return;
+ }
+ BO_CHECK_NULL_RET(unit()->currentOrder());
+// boDebug() << k_funcinfo << endl;
+
+ // safety check - at this point we should always have a move order.
+ if (unit()->currentOrder()->isMoveOrder()) {
+	if (unit()->currentOrder()->type() != UnitOrder::MoveInsideUnit) {
+		// AB: I'd like to add a LEAVE suborder now, however that would
+		//     clear the current move order, since setMovingStatus() is
+		//     not MustSearchPath anymore, once the LEAVE order is
+		//     completed.
+		//     -> so instead we MUST have a separate LEAVE order before
+		//        a unit that is inside a unit can move again.
+#if 1
+		boDebug(401) << k_funcinfo << "not a MoveInsideUnit order. suborder done. (rather supposed to LEAVE here)" << endl;
+		unit()->currentSuborderDone(false);
+		return;
+#else
+		boDebug(401) << k_funcinfo << "adding LEAVE order" << endl;
+		UnitEnterUnitOrder* o = new UnitEnterUnitOrder(unit());
+		o->setIsLeaveOrder(true);
+		unit()->addCurrentSuborder(o);
+		return;
+#endif
+	}
+ }
+
+ if (!unit()->currentOrder()->isMoveOrder()) {
+	boError(401) << k_funcinfo << "dont have a move order" << endl;
+	return;
+ }
+
+ EnterUnitPlugin* enterUnit = (EnterUnitPlugin*)unit()->plugin(UnitPlugin::EnterUnit);
+ if (!enterUnit) {
+	BO_NULL_ERROR(enterUnit);
+	return;
+ }
+
+ EnterUnitPlugin::LandingStatus landingStatus = enterUnit->landingStatus();
+ if (!unit()->unitProperties()->isAircraft()) {
+	landingStatus = EnterUnitPlugin::LandingStatusNone;
+ }
+
+ switch (landingStatus) {
+	case EnterUnitPlugin::LandingStatusNone:
+	{
+		UnitMoverLand::advanceMoveInternal(advanceCallsCount);
+		break;
+	}
+	case EnterUnitPlugin::LandingStatusGoingTowardsTakeOffPoint:
+	{
+		bool isTakingOff = false;
+		advanceMoveInternalTakingOff(advanceCallsCount, isTakingOff);
+		break;
+	}
+	case EnterUnitPlugin::LandingStatusIsTakingOff:
+	{
+		bool isTakingOff = true;
+		advanceMoveInternalTakingOff(advanceCallsCount, isTakingOff);
+		break;
+	}
+	case EnterUnitPlugin::LandingStatusFlyingTowardsLandingPoint:
+	{
+		bool isLanding = false;
+		advanceMoveInternalLanding(advanceCallsCount, isLanding);
+		break;
+	}
+	case EnterUnitPlugin::LandingStatusIsLanding:
+	{
+		bool isLanding = true;
+		advanceMoveInternalLanding(advanceCallsCount, isLanding);
+		break;
+	}
+	default:
+		boError(401) << k_funcinfo << "unhandled landingStatus() " << enterUnit->landingStatus() << endl;
+		return;
+ }
+}
+
+void UnitMoverInsideUnit::advanceMoveCheck()
+{
+ // AB: NOT UnitMoverLand::advanceMoveCheck().
+ //     -> onCanvas check only, no collision checks.
+ //        colliding with other units while inside a unit is ok.
+ UnitMover::advanceMoveCheck();
+}
+
+// isLanding == true: once next pathpoint is reached, we do setIsFlying(false).
+// isLanding == false: once next pathpoint is reached, we start landing.
+//                     -> i.e. we are moving towards landing point
+void UnitMoverInsideUnit::advanceMoveInternalLanding(unsigned int advanceCallsCount, bool isLanding)
+{
+// boDebug(401) << k_funcinfo << endl;
+
+ if (unit()->maxSpeed() == 0) {
+#if 0
+#error: TODO
+// -> leave storing unit?
+#else
+	// If unit's max speed is 0, it cannot move
+	boError(401) << k_funcinfo << "unit " << id() << ": maxspeed == 0" << endl;
+	stopMoving(false);
+	unit()->setMovingStatus(UnitBase::Standing);
+#endif
+	return;
+ }
+
+ if (unit()->movingStatus() == UnitBase::MustSearchPath) {
+	if (!calculateNewPath()) {
+		// No path was found
+		stopMoving(false);
+		boDebug(401) << k_funcinfo << "no path found" << endl;
+		return;
+	}
+	boDebug(401) << k_funcinfo << "path found. should be :)" << endl;
+ }
+
+ if (pathPointCount() == 0) {
+	stopMoving(true);
+	return;
+ }
+
+ BoVector2Fixed pp = currentPathPoint();
+ BoVector3Fixed targetpos = BoVector3Fixed(pp.x(), pp.y(), unit()->centerZ());
+// boDebug(401) << k_funcinfo << debugStringVector(targetpos) << endl;
+
+// targetpos.setZ(canvas()->heightAtPoint(targetpos.x(), targetpos.y()) + 3);
+
+
+ bofixed x = unit()->centerX();
+ bofixed y = unit()->centerY();
+ bofixed z = unit()->centerZ();
+
+ unit()->accelerate();
+
+
+ BoVector3Fixed totarget(targetpos.x() - x, targetpos.y() - y, targetpos.z() - z);
+#if 1
+ // AB: z position of flying units are pretty much unused atm
+ totarget.setZ(0);
+#endif
+ bofixed totargetlen = totarget.length();
+
+ if (totargetlen <= pathInfo()->range || totargetlen <= unit()->speed()) {
+#if 0
+	boDebug(401) << k_funcinfo << "landing pathpoint complete - totargetlen="
+			<< totargetlen
+			<< " targetpos="
+			<< debugStringVector(targetpos)
+			<< " pos="
+			<< debugStringVector(BoVector3Fixed(x, y, z))
+			<< " isLanding="
+			<< isLanding
+			<< endl;
+#endif
+
+	EnterUnitPlugin* enterUnit = (EnterUnitPlugin*)unit()->plugin(UnitPlugin::EnterUnit);
+	if (enterUnit) {
+		if (isLanding) {
+			enterUnit->completeLanding();
+		} else {
+			enterUnit->startLanding();
+		}
+	}
+	pathPointDone();
+	return;
+ }
+
+ // Normalize totarget. totarget vector now shows direction to target
+ totarget.scale(1.0f / totargetlen);
+
+ // Check if the target is to our left or right
+ bofixed wantedrotation = Bo3dTools::rotationToPoint(totarget.x(), totarget.y());
+ bofixed rotationdelta = unit()->rotation() - wantedrotation;  // How many degrees to turn
+ bofixed newrotation = unit()->rotation();
+ bool turncw = false;  // Direction of turning, CW or CCW
+
+ // Find out direction of turning and huw much is left to turn
+ if (rotationdelta < 0) {
+	rotationdelta = QABS(rotationdelta);
+	turncw = true;
+ }
+ if (rotationdelta > 180) {
+	rotationdelta = 180 - (rotationdelta - 180);
+	turncw = !turncw;
+ }
+
+ // AB: we ignore rotationSpeed() completely at this point.
+ //     -> we already are inside a unit, moving must not fail anymore!
+ newrotation = wantedrotation;
+
+ if (newrotation < 0) {
+	newrotation += 360;
+ } else if (newrotation >= 360) {
+	newrotation -= 360;
+ }
+
+ // Calculate velocity
+ BoVector3Fixed velo;
+ velo.setX(cos(Bo3dTools::deg2rad(newrotation - 90)) * unit()->speed());
+ velo.setY(sin(Bo3dTools::deg2rad(newrotation - 90)) * unit()->speed());
+
+ bofixed groundz = canvas()->heightAtPoint(x + velo.x(), y + velo.y());
+ if (z + velo.z() < groundz + unitProperties()->preferredAltitude() - 1) {
+	velo.setZ(groundz - z + unitProperties()->preferredAltitude() - 1);
+ } else if (z + velo.z() > groundz + unitProperties()->preferredAltitude() + 1) {
+	velo.setZ(groundz - z + unitProperties()->preferredAltitude() + 1);
+ }
+
+ bofixed wantedroll = QMIN(rotationdelta / unitProperties()->rotationSpeed(), bofixed(1)) * 45;
+ if (!turncw) {
+	// Turning left
+	wantedroll = -wantedroll;
+ }
+
+ const bofixed maxrollincrease = 2;
+ float mRoll = unit()->yRotation();
+ bofixed delta = wantedroll - mRoll;
+ if (delta > 0) {
+	mRoll += QMIN(delta, maxrollincrease);
+ } else if (delta < 0) {
+	mRoll -= QMIN(QABS(delta), maxrollincrease);
+ }
+
+ unit()->setVelocity(velo.x(), velo.y(), velo.z());
+ unit()->setRotation(newrotation);
+ //setXRotation(Bo3dTools::rotationToPoint(sqrt(1 - velo.z() * velo.z()), velo.z()) - 90);
+ unit()->setYRotation(mRoll);
+
+ unit()->setMovingStatus(UnitBase::Moving);
+
+}
+
+void UnitMoverInsideUnit::advanceMoveInternalTakingOff(unsigned int advanceCallsCount, bool isTakingOff)
+{
+// boDebug(401) << k_funcinfo << endl;
+
+ if (unit()->maxSpeed() == 0) {
+	// If unit's max speed is 0, it cannot move
+	boError(401) << k_funcinfo << "unit " << id() << ": maxspeed == 0" << endl;
+	stopMoving(false);
+	unit()->setMovingStatus(UnitBase::Standing);
+	return;
+ }
+
+ if (unit()->movingStatus() == UnitBase::MustSearchPath) {
+	if (!calculateNewPath()) {
+		// No path was found
+		stopMoving(false);
+		boDebug(401) << k_funcinfo << "no path found" << endl;
+		return;
+	}
+	boDebug(401) << k_funcinfo << "path found. should be :)" << endl;
+ }
+
+ if (pathPointCount() == 0) {
+	stopMoving(true);
+	return;
+ }
+
+ BoVector2Fixed pp = currentPathPoint();
+ BoVector3Fixed targetpos = BoVector3Fixed(pp.x(), pp.y(), unit()->centerZ());
+// boDebug(401) << k_funcinfo << debugStringVector(targetpos) << endl;
+
+// targetpos.setZ(canvas()->heightAtPoint(targetpos.x(), targetpos.y()) + 3);
+
+
+ bofixed x = unit()->centerX();
+ bofixed y = unit()->centerY();
+ bofixed z = unit()->centerZ();
+
+ unit()->accelerate();
+
+
+ BoVector3Fixed totarget(targetpos.x() - x, targetpos.y() - y, targetpos.z() - z);
+#if 1
+ // AB: z position of flying units are pretty much unused atm
+ totarget.setZ(0);
+#endif
+ bofixed totargetlen = totarget.length();
+
+ if (totargetlen <= pathInfo()->range || totargetlen <= unit()->speed()) {
+#if 0
+	boDebug(401) << k_funcinfo << "starting pathpoint complete - totargetlen="
+			<< totargetlen
+			<< " targetpos="
+			<< debugStringVector(targetpos)
+			<< " pos="
+			<< debugStringVector(BoVector3Fixed(x, y, z))
+			<< " isTakingOff="
+			<< isTakingOff
+			<< endl;
+#endif
+
+	EnterUnitPlugin* enterUnit = (EnterUnitPlugin*)unit()->plugin(UnitPlugin::EnterUnit);
+	if (enterUnit) {
+		if (isTakingOff) {
+			enterUnit->completeTakingOff();
+		} else {
+			enterUnit->startTakingOff();
+		}
+	}
+	pathPointDone();
+	return;
+ }
+
+ // Normalize totarget. totarget vector now shows direction to target
+ totarget.scale(1.0f / totargetlen);
+
+ // Check if the target is to our left or right
+ bofixed wantedrotation = Bo3dTools::rotationToPoint(totarget.x(), totarget.y());
+ bofixed rotationdelta = unit()->rotation() - wantedrotation;  // How many degrees to turn
+ bofixed newrotation = unit()->rotation();
+ bool turncw = false;  // Direction of turning, CW or CCW
+
+ // Find out direction of turning and huw much is left to turn
+ if (rotationdelta < 0) {
+	rotationdelta = QABS(rotationdelta);
+	turncw = true;
+ }
+ if (rotationdelta > 180) {
+	rotationdelta = 180 - (rotationdelta - 180);
+	turncw = !turncw;
+ }
+
+ // AB: we ignore rotationSpeed() completely at this point.
+ //     -> we already are inside a unit, moving must not fail anymore!
+ newrotation = wantedrotation;
+
+ if (newrotation < 0) {
+	newrotation += 360;
+ } else if (newrotation >= 360) {
+	newrotation -= 360;
+ }
+
+ // Calculate velocity
+ BoVector3Fixed velo;
+ velo.setX(cos(Bo3dTools::deg2rad(newrotation - 90)) * unit()->speed());
+ velo.setY(sin(Bo3dTools::deg2rad(newrotation - 90)) * unit()->speed());
+
+ bofixed groundz = canvas()->heightAtPoint(x + velo.x(), y + velo.y());
+ if (z + velo.z() < groundz + unitProperties()->preferredAltitude() - 1) {
+	velo.setZ(groundz - z + unitProperties()->preferredAltitude() - 1);
+ } else if (z + velo.z() > groundz + unitProperties()->preferredAltitude() + 1) {
+	velo.setZ(groundz - z + unitProperties()->preferredAltitude() + 1);
+ }
+
+ bofixed wantedroll = QMIN(rotationdelta / unitProperties()->rotationSpeed(), bofixed(1)) * 45;
+ if (!turncw) {
+	// Turning left
+	wantedroll = -wantedroll;
+ }
+
+ const bofixed maxrollincrease = 2;
+ float mRoll = unit()->yRotation();
+ bofixed delta = wantedroll - mRoll;
+ if (delta > 0) {
+	mRoll += QMIN(delta, maxrollincrease);
+ } else if (delta < 0) {
+	mRoll -= QMIN(QABS(delta), maxrollincrease);
+ }
+
+ unit()->setVelocity(velo.x(), velo.y(), velo.z());
+ unit()->setRotation(newrotation);
+ //setXRotation(Bo3dTools::rotationToPoint(sqrt(1 - velo.z() * velo.z()), velo.z()) - 90);
+ unit()->setYRotation(mRoll);
+
+ unit()->setMovingStatus(UnitBase::Moving);
+}
+
+bool UnitMoverInsideUnit::cellOccupied(int x, int y, bool ignoremoving) const
+{
+ Q_UNUSED(x);
+ Q_UNUSED(y);
+ Q_UNUSED(ignoremoving);
+
+ return false;
+}
+
+void UnitMoverInsideUnit::pathPointDone()
+{
+ BO_CHECK_NULL_RET(unit());
+ if (!unit()->isInsideUnit()) {
+	return;
+ }
+ EnterUnitPlugin* enterUnit = (EnterUnitPlugin*)unit()->plugin(UnitPlugin::EnterUnit);
+ BO_CHECK_NULL_RET(enterUnit);
+
+ UnitMover::pathPointDone();
+ enterUnit->pathPointDone();
+}
+
+bool UnitMoverInsideUnit::canGoToCurrentPathPoint(int xpos, int ypos)
+{
+ if (!pathInfo()) {
+	BO_NULL_ERROR(pathInfo());
+	return false;
+ }
+ if (!unit()->isInsideUnit()) {
+	boError(401) << k_funcinfo << "this class should not be used when unit is not inside a unit!" << endl;
+	return UnitMoverLand::canGoToCurrentPathPoint(xpos, ypos);
+ }
+
+ // AB: no validity checks are done to pathpoints.
+ //     all pathpoints inside a unit are assumed to be reachable, once we
+ //     received them from the storing unit.
+ return true;
 }
 

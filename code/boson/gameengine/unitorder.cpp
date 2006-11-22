@@ -21,7 +21,7 @@
 
 #include "bodebug.h"
 #include "bosonpath.h"
-#include "unitplugins/unitplugins.h"
+#include "unitplugins/unitplugin.h"
 #include "unit.h"
 #include "bosoncanvas.h"
 
@@ -157,6 +157,34 @@ bool UnitMoveOrder::loadFromXML(const QDomElement& root, BosonCanvas* canvas)
     return false;
   }
 
+  return true;
+}
+
+
+UnitMoveInsideUnitOrder::UnitMoveInsideUnitOrder(const BoVector2Fixed& pos)
+  : UnitMoveOrder(pos, -1, false)
+{
+}
+
+UnitMoveInsideUnitOrder::~UnitMoveInsideUnitOrder()
+{
+}
+
+bool UnitMoveInsideUnitOrder::saveAsXML(QDomElement& root)
+{
+  if(!UnitMoveOrder::saveAsXML(root))
+  {
+    return false;
+  }
+  return true;
+}
+
+bool UnitMoveInsideUnitOrder::loadFromXML(const QDomElement& root, BosonCanvas* canvas)
+{
+  if(!UnitMoveOrder::loadFromXML(root, canvas))
+  {
+    return false;
+  }
   return true;
 }
 
@@ -522,6 +550,57 @@ bool UnitRefineOrder::loadFromXML(const QDomElement& root, BosonCanvas* canvas)
 
 
 
+UnitEnterUnitOrder::UnitEnterUnitOrder(Unit* unit)
+{
+  mTarget = unit;
+  mIsLeaveOrder = false;
+}
+
+UnitEnterUnitOrder::~UnitEnterUnitOrder()
+{
+}
+
+int UnitEnterUnitOrder::workPluginType() const
+{
+  return UnitPlugin::EnterUnit;
+}
+
+bool UnitEnterUnitOrder::saveAsXML(QDomElement& root)
+{
+  if(!UnitOrder::saveAsXML(root))
+  {
+    return false;
+  }
+  root.setAttribute("TargetId", mTarget->id());
+  root.setAttribute("IsLeaveOrder", mIsLeaveOrder ? 1 : 0);
+  return true;
+}
+
+bool UnitEnterUnitOrder::loadFromXML(const QDomElement& root, BosonCanvas* canvas)
+{
+  if(!UnitOrder::loadFromXML(root, canvas))
+  {
+    return false;
+  }
+  bool ok;
+  int targetid = root.attribute("TargetId").toInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for TargetId attribute" << endl;
+    return false;
+  }
+  mTarget = canvas->findUnit(targetid);
+  mIsLeaveOrder = (bool)root.attribute("IsLeaveOrder").toInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for IsLeaveOrder attribute" << endl;
+    return false;
+  }
+  return true;
+}
+
+
+
 UnitOrderData::UnitOrderData(UnitOrder* order)
 {
   mSuborder = 0;
@@ -542,6 +621,7 @@ UnitOrderData* UnitOrderData::createData(UnitOrder* order)
   UnitOrderData* data = 0;
   switch(order->type())
   {
+    case UnitOrder::MoveInsideUnit:
     case UnitOrder::Move:
       data = new UnitMoveOrderData(order);
       break;
@@ -554,6 +634,7 @@ UnitOrderData* UnitOrderData::createData(UnitOrder* order)
     case UnitOrder::TurnToUnit:
     case UnitOrder::Harvest:
     case UnitOrder::Refine:
+    case UnitOrder::EnterUnit:
       data = new UnitOrderData(order);
       break;
     default:

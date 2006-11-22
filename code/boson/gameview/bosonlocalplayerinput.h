@@ -83,6 +83,7 @@ class BosonLocalPlayerInput : public KGameIO
     void repair(const QPtrList<Unit>& units, Unit* repairyard);
     void refine(const QPtrList<Unit>& units, Unit* refinery);
     void follow(const QPtrList<Unit>& units, Unit* target);
+    void enterUnit(const QPtrList<Unit>& units, Unit* target);
 
     void placeUnit(Player* owner, unsigned long int unitType, bofixed x, bofixed y);
     void changeHeight(int x, int y, bofixed height);
