@@ -51,21 +51,38 @@ class UnitOrder
 
     enum OrderType
     {
+        // do NOT change numbers or insert something in between!
+        // -> the type of an order is saved and thus must remain constant
+        //    between releases
         Invalid = 0,
-        Move,
-        MoveToUnit,
-        AttackUnit,
-        AttackGround,
-        Turn,
-        TurnToUnit,
-        Follow,
-        Harvest,
-        Refine
+        Move = 1,
+        MoveToUnit = 2,
+        MoveInsideUnit = 3,
+        AttackUnit = 4,
+        AttackGround = 5,
+        Turn = 6,
+        TurnToUnit = 7,
+        Follow = 8,
+        Harvest = 9,
+        Refine = 10,
+        EnterUnit = 11
     };
     enum FinishStatus { Success = 1, Failure };
 
     virtual OrderType type() const = 0;
     virtual UnitBase::WorkType work() const = 0;
+
+    /**
+     * @return TRUE if this is a move order, otherwise FALSE.
+     *
+     * A move order is an order that <em>directly</em> handles moving (not
+     * through a suborder), such as @ref UnitMoveOrder and
+     * @ref UnitMoveToUnitOrder.
+     *
+     * A move order <em>MUST</em> provide a @ref UnitMoveOrderData dervided
+     * class in @ref UnitOrderData::createData.
+     **/
+    virtual bool isMoveOrder() const { return false; }
 
     /**
      * @return 0 if @ref work is not @ref UnitBase::WorkPlugin. If @ref work is
@@ -93,6 +110,7 @@ class UnitMoveOrder : public UnitOrder
 
     virtual OrderType type() const  { return Move; }
     virtual UnitBase::WorkType work() const  { return UnitBase::WorkMove; }
+    virtual bool isMoveOrder() const { return true; }
     virtual UnitOrder* duplicate() const  { return new UnitMoveOrder(*this); };
 
     virtual bool saveAsXML(QDomElement& root);
@@ -115,6 +133,22 @@ class UnitMoveOrder : public UnitOrder
 };
 
 
+class UnitMoveInsideUnitOrder : public UnitMoveOrder
+{
+  public:
+    UnitMoveInsideUnitOrder(const BoVector2Fixed& pos);
+    virtual ~UnitMoveInsideUnitOrder();
+
+    virtual OrderType type() const  { return MoveInsideUnit; }
+    virtual UnitOrder* duplicate() const  { return new UnitMoveInsideUnitOrder(*this); };
+
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root, BosonCanvas* canvas);
+
+  protected:
+};
+
+
 class UnitMoveToUnitOrder : public UnitMoveOrder
 {
   public:
@@ -123,6 +157,7 @@ class UnitMoveToUnitOrder : public UnitMoveOrder
     virtual ~UnitMoveToUnitOrder();
 
     virtual OrderType type() const  { return MoveToUnit; }
+    virtual bool isMoveOrder() const { return true; }
     virtual UnitOrder* duplicate() const  { return new UnitMoveToUnitOrder(*this); };
 
     virtual bool saveAsXML(QDomElement& root);
@@ -310,15 +345,48 @@ class UnitRefineOrder : public UnitOrder
 
 
 /**
- * Stores unit-specific data for an order.
+ * Order a unit to "enter" another unit, such as a plane that lands on an
+ * airport or some unit that enters a repairyard or something like that.
  *
- * Difference between @ref UnitOrder and this class is that @ref UnitOrder
- *  objects can be shared between units and thus mustn't contain unit-specific
- *  data such as path in case of moving. Such data is instead stored in this
- *  class.
+ * The unit being entered must have a @ref UnitStoragePlugin and it must be able
+ * to hold this unit.
  *
- * @author Rivo Laks <rivolaks@hot.ee>
+ * @author Andreas Beckermann <b_mann@gmx.de>
  **/
+class UnitEnterUnitOrder : public UnitOrder
+{
+  public:
+    UnitEnterUnitOrder(Unit* unit);
+    virtual ~UnitEnterUnitOrder();
+
+    virtual OrderType type() const  { return EnterUnit; }
+    virtual UnitBase::WorkType work() const { return UnitBase::WorkPlugin; }
+    virtual int workPluginType() const;
+    virtual UnitOrder* duplicate() const { return new UnitEnterUnitOrder(*this); }
+
+    /**
+     * Change the "Enter" order into a "Leave" order.
+     **/
+    void setIsLeaveOrder(bool isLeave) { mIsLeaveOrder = isLeave; }
+    /**
+     * @return FALSE if this order is a "enter unit" order (the default) or TRUE
+     * if it is a "leave unit" order.
+     **/
+    bool isLeaveOrder() const { return mIsLeaveOrder; }
+
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root, BosonCanvas* canvas);
+
+    inline Unit* target() const  { return mTarget; }
+    inline void setTarget(Unit* u) { mTarget = u; }
+
+
+  protected:
+    Unit* mTarget;
+    bool mIsLeaveOrder;
+};
+
+
 class UnitOrderData
 {
   public:

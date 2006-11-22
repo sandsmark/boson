@@ -882,6 +882,33 @@ bool BosonMessageMoveFollow::load(QDataStream& stream)
  return true;
 }
 
+bool BosonMessageMoveEnterUnit::save(QDataStream& stream) const
+{
+ stream << (Q_UINT32)messageId();
+ stream << (Q_UINT32)mEnterUnitId;
+ stream << (Q_UINT32)mItems.count();
+ QValueList<Q_ULONG>::const_iterator it;
+ for (it = mItems.begin(); it != mItems.end(); ++it) {
+	stream << (*it);
+ }
+ return true;
+}
+
+bool BosonMessageMoveEnterUnit::load(QDataStream& stream)
+{
+ // AB: msgid has been read already
+ stream >> mEnterUnitId;
+ Q_UINT32 count;
+ stream >> count;
+ mItems.clear();
+ for (Q_UINT32 i = 0; i < count; i++) {
+	Q_ULONG item;
+	stream >> item;
+	mItems.append(item);
+ }
+ return true;
+}
+
 bool BosonMessageMoveLayMine::save(QDataStream& stream) const
 {
  if (mUnits.count() != mWeapons.count()) {

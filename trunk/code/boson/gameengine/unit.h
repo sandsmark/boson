@@ -1,8 +1,8 @@
 /*
     This file is part of the Boson game
     Copyright (C) 1999-2000 Thomas Capricelli (capricel@email.enst.fr)
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
+    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@ class BosonPathInfo;
 class UnitMover;
 class UnitMoverFlying;
 class UnitMoverLand;
+class UnitMoverInsideUnit;
 class UnitConstruction;
 class UnitOrder;
 class UnitOrderData;
@@ -110,6 +111,8 @@ public:
 		// (1024+0 .. 1024+255)
 		IdWantedRotation = 1024 + 6,
 		IdPathPoints = 1024 + 10,
+		IdIsInsideUnit = 1024 + 11,
+		IdIsFlying = 1024 + 12,
 
 		// properties in MobileUnit or Facility.
 		// IDs from 1280 to 1535 may be used here
@@ -132,7 +135,20 @@ public:
 		IdBombingDropDist = 1536 + 10,
 		IdBombingLastDistFromDropPoint = 1536 + 11,
 		IdMineralsPaid = 1536 + 12,
-		IdOilPaid = 1536 + 13
+		IdOilPaid = 1536 + 13,
+		IdEnterPointOutside1 = 1536 + 14,
+		IdEnterPointOutside2 = 1536 + 15,
+		IdEnterUnitRemainingInsidePath = 1536 + 16,
+		IdEnterUnitPathIndex = 1536 + 17,
+		IdMovingInStatus = 1536 + 18,
+		IdLandingStatus = 1536 + 19,
+		IdEnterUnitTriedMovingCounter = 1536 + 20,
+		IdStoringStatus = 1536 + 21,
+		IdPendingEnterRequests = 1536 + 22,
+		IdApprovedEnterRequests = 1536 + 23,
+		IdPendingLeaveRequests = 1536 + 24,
+		IdApprovedLeaveRequests = 1536 + 25,
+		IdEnteringUnitOnPath = 1536 + 26
 	};
 
 	Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
@@ -510,6 +526,43 @@ public:
 	 **/
 	bool lastOrderStatus() const;
 
+	/**
+	 * Set whether this unit is inside a different unit.
+	 *
+	 * See @ref isInsideUnit and @ref EnterUnitPlugin.
+	 **/
+	void setIsInsideUnit(bool isInside);
+
+	/**
+	 * Some (mobile) units can move inside units that have a @ref
+	 * UnitStoragePlugin. Units with such a plugin can be e.g. a
+	 * transportation unit, a repairyard or an airport.
+	 *
+	 * If this unit is considered to be "inside" such a unit, this method
+	 * returns true, otherwise false. This method considers a unit "inside"
+	 * a unit, if the @ref UnitStoragePlugin has taken control of this unit
+	 * and in particular of movements of this units, this means that even if
+	 * this unit is still physically outside the destination unit, it is
+	 * considered "inside" already, if it has started to move in.
+	 *
+	 * @return TRUE if this unit is "inside" a different unit, otherwise
+	 * FALSE.
+	 **/
+	bool isInsideUnit() const;
+
+	/**
+	 * One day we might have units which can go on air <em>and</em> on land
+	 * or which just can land. Examples might be helicopters or planes at an
+	 * airport. For these units we need to know whether they are flying or
+	 * not.
+	 * @return Whether this unit is currently flying. Always false if @ref
+	 * unitProperties()->isAircraft is false. Currently this is juste the
+	 * same as @ref unitProperties()->isAircraft.
+	 **/
+	bool isFlying() const;
+
+	void setIsFlying(bool f);
+
 
 protected:
 	void shootAt(BosonWeapon* w, Unit* target);
@@ -526,6 +579,11 @@ protected:
 	 * This does basic tasks common to all units
 	 **/
 	void advanceIdleBasic(unsigned int advanceCallsCount);
+
+	/**
+	 * If this unit has a unit storage, it does some additional "idle" tasks.
+	 **/
+	void advanceIdleUnitStorage(unsigned int advanceCallsCount);
 
 
 	/**
@@ -581,6 +639,7 @@ protected:
 	 **/
 	bool moveTo(bofixed x, bofixed y, int range = -1);
 
+	UnitMover* unitMover() const;
 
 private:
 	/**
@@ -691,7 +750,7 @@ public:
 
 private:
 	Unit* mFacility;
-	KGameProperty<unsigned int> mConstructionStep;
+	KGameProperty<Q_UINT32> mConstructionStep;
 };
 
 

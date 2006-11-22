@@ -86,6 +86,8 @@ set(gameengine_SRCS
 	gameengine/unitplugins/refineryplugin.cpp
 	gameengine/unitplugins/repairplugin.cpp
 	gameengine/unitplugins/resourcemineplugin.cpp
+	gameengine/unitplugins/enterunitplugin.cpp
+	gameengine/unitplugins/unitstorageplugin.cpp
 	gameengine/upgradeproperties.cpp
 	gameengine/bosonweapon.cpp
 	gameengine/boitemlist.cpp

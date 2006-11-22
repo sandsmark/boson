@@ -115,10 +115,12 @@ public:
 
 
 
+
 protected:
 	static void initCellIntersectionTable();
 	bool advancedRectWillBeOnCanvas() const;
 	void changeUpgrades(const UpgradeProperties* upgrade);
+	virtual bool cellOccupied(int x, int y, bool ignoremoving = false) const;
 
 	virtual void advanceMoveInternal(unsigned int) = 0; // move one step futher to path
 
@@ -130,6 +132,11 @@ protected:
 	 * This is most notably @ref advanceMove
 	**/
 	virtual void advanceMoveCheck();
+
+	/**
+	 * Calls @ref Unit::pathPointDone
+	 **/
+	virtual void pathPointDone();
 
 protected:
 	static QValueVector<BoVector2Fixed> mCellIntersectionTable[11][11];
@@ -176,6 +183,14 @@ protected:
 	bool calculateNewPath();
 
 	/**
+	 * Called by @ref calculateNewPath to actually calculate the pathpoints.
+	 *
+	 * @return TRUE on success, otherwise FALSE (unit should stop moving
+	 * then).
+	 **/
+	virtual bool calculateNewPathPathPoints(QValueVector<BoVector2Fixed>* points);
+
+	/**
 	 * Move towards p, going at most maxdist (in canvas coords).
 	 * How much unit should move, will be added to xspeed and yspeed.
 	 * (x; y) marks unit's current position
@@ -186,8 +201,17 @@ protected:
 
 	int selectNextPathPoint(int xpos, int ypos);
 	void avoidance();
-	bool canGoToCurrentPathPoint(int xpos, int ypos);
+	virtual bool canGoToCurrentPathPoint(int xpos, int ypos);
 	void currentPathPointChanged(int unitx, int unity);
+
+	/**
+	 * @return @ref Unit::pathPointCount
+	 **/
+	int pathPointCount() const;
+	/**
+	 * @return @ref Unit::currentPathPoint
+	 **/
+	const BoVector2Fixed& currentPathPoint() const;
 
 private:
 	// Should these be made KGameProperty?
@@ -223,6 +247,25 @@ protected:
 
 private:
 	bofixed mRoll;
+};
+
+class UnitMoverInsideUnit : public UnitMoverLand
+{
+public:
+	UnitMoverInsideUnit(Unit* u);
+	~UnitMoverInsideUnit();
+
+protected:
+	virtual void advanceMoveInternal(unsigned int advanceCallsCount);
+
+	virtual bool cellOccupied(int x, int y, bool ignoremoving = false) const;
+	virtual bool canGoToCurrentPathPoint(int xpos, int ypos);
+	virtual bool calculateNewPathPathPoints(QValueVector<BoVector2Fixed>* points);
+	virtual void advanceMoveCheck();
+	virtual void pathPointDone();
+
+	void advanceMoveInternalLanding(unsigned int advanceCallsCount, bool isLanding);
+	void advanceMoveInternalTakingOff(unsigned int advanceCallsCount, bool isTakingOff);
 };
 
 #endif

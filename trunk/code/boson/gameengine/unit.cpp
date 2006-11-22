@@ -340,10 +340,13 @@ public:
 		mMoveData = 0;
 
 		mUnitMover = 0;
+		mUnitInsideUnitMover = 0;
 
 		mOrderQueue = 0;
 	}
 	KGamePropertyList<BoVector2Fixed> mPathPoints;
+	KGameProperty<Q_INT8> mIsInsideUnit;
+	KGameProperty<Q_INT8> mIsFlying;
 
 	// be *very* careful with those - NewGameDialog uses Unit::save() which
 	// saves all KGameProperty objects. If non-KGameProperty properties are
@@ -362,8 +365,11 @@ public:
 	unsigned long int mMaxAirWeaponRange;
 
 	UnitMover* mUnitMover;
+	UnitMover* mUnitInsideUnitMover;
 
 	UnitOrderQueue* mOrderQueue;
+
+	bool mHaveUnitStorage;
 };
 
 Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
@@ -387,6 +393,12 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  setSize(prop->unitWidth(), prop->unitHeight(), prop->unitDepth());
 
  registerData(&d->mPathPoints, IdPathPoints);
+ registerData(&d->mIsInsideUnit, IdIsInsideUnit);
+ registerData(&d->mIsFlying, IdIsFlying);
+
+ d->mIsInsideUnit = false;
+ d->mIsFlying = false;
+ d->mHaveUnitStorage = false;
 
  d->mOrderQueue = new UnitOrderQueue(this, this);
 
@@ -396,15 +408,20 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  } else {
 	if (unitProperties()->isAircraft()) {
 		d->mUnitMover = new UnitMoverFlying(this);
+		d->mIsFlying = true;
 	} else {
 		d->mUnitMover = new UnitMoverLand(this);
+		d->mIsFlying = false;
 	}
+
+	d->mUnitInsideUnitMover = new UnitMoverInsideUnit(this);
  }
 }
 
 Unit::~Unit()
 {
  delete d->mUnitMover;
+ delete d->mUnitInsideUnitMover;
  delete mUnitConstruction;
  unselect();
  d->mPlugins.clear();
@@ -467,6 +484,19 @@ bool Unit::init()
  if (prop->properties(PluginProperties::RadarJammer)) {
 	d->mPlugins.append(new RadarJammerPlugin(this));
  }
+ d->mHaveUnitStorage = false;
+ if (prop->properties(PluginProperties::UnitStorage)) {
+	d->mPlugins.append(new UnitStoragePlugin(this));
+
+	// AB: this variable is simply to avoid a slow plugin() call in
+	// advanceIdle() if the unit has no storage.
+	d->mHaveUnitStorage = true;
+ }
+
+ // we always have this plugin (and atm there is no corresponding
+ // PluginProperties)
+ d->mPlugins.append(new EnterUnitPlugin(this));
+
 
  loadWeapons();
 
@@ -487,6 +517,8 @@ void Unit::initStatic()
  // Unit
  addPropertyId(IdWantedRotation, QString::fromLatin1("WantedRotation"));
  addPropertyId(IdPathPoints, QString::fromLatin1("PathPoints"));
+ addPropertyId(IdIsInsideUnit, QString::fromLatin1("IsInsideUnit"));
+ addPropertyId(IdIsFlying, QString::fromLatin1("IsFlying"));
 
  // Facility
  addPropertyId(IdConstructionStep, QString::fromLatin1("ConstructionStep"));
@@ -506,6 +538,19 @@ void Unit::initStatic()
  addPropertyId(IdBombingLastDistFromDropPoint, QString::fromLatin1("IdBombingLastDistFromDropPoint"));
  addPropertyId(IdMineralsPaid, QString::fromLatin1("IdMineralsPaid"));
  addPropertyId(IdOilPaid, QString::fromLatin1("IdOilPaid"));
+ addPropertyId(IdEnterPointOutside1, QString::fromLatin1("IdEnterPointOutside1"));
+ addPropertyId(IdEnterPointOutside2, QString::fromLatin1("IdEnterPointOutside2"));
+ addPropertyId(IdEnterUnitRemainingInsidePath, QString::fromLatin1("IdEnterUnitRemainingInsidePath"));
+ addPropertyId(IdEnterUnitPathIndex, QString::fromLatin1("IdEnterUnitPathIndex"));
+ addPropertyId(IdMovingInStatus, QString::fromLatin1("IdMovingInStatus"));
+ addPropertyId(IdLandingStatus, QString::fromLatin1("IdLandingStatus"));
+ addPropertyId(IdEnterUnitTriedMovingCounter, QString::fromLatin1("IdEnterUnitTriedMovingCounter"));
+ addPropertyId(IdStoringStatus, QString::fromLatin1("IdStoringStatus"));
+ addPropertyId(IdPendingEnterRequests, QString::fromLatin1("IdPendingEnterRequests"));
+ addPropertyId(IdApprovedEnterRequests, QString::fromLatin1("IdApprovedEnterRequests"));
+ addPropertyId(IdPendingLeaveRequests, QString::fromLatin1("IdPendingLeaveRequests"));
+ addPropertyId(IdApprovedLeaveRequests, QString::fromLatin1("IdApprovedLeaveRequests"));
+ addPropertyId(IdEnteringUnitOnPath, QString::fromLatin1("IdEnteringUnitOnPath"));
 
  UnitMover::initStatic();
 
@@ -819,6 +864,10 @@ void Unit::advanceIdle(unsigned int advanceCallsCount)
 {
  advanceIdleBasic(advanceCallsCount);
  moveIdle();
+
+ if (d->mHaveUnitStorage) {
+	advanceIdleUnitStorage(advanceCallsCount);
+ }
 }
 
 void Unit::advanceIdleBasic(unsigned int advanceCallsCount)
@@ -834,10 +883,33 @@ void Unit::advanceIdleBasic(unsigned int advanceCallsCount)
 	if (target) {
 		addCurrentSuborder(new UnitAttackOrder(target, false));
 	}
- } else if (!unitProperties()->isAircraft()) {
+ } else if (!unitProperties()->isAircraft() && !d->mHaveUnitStorage) {
 	// this unit does not have any weapons, so it will never shoot anyway.
 	// no need to call advanceIdle() again
 	setAdvanceWork(WorkNone);
+ }
+}
+
+void Unit::advanceIdleUnitStorage(unsigned int advanceCallsCount)
+{
+ if (advanceCallsCount % 40 != (id() % 40)) {
+	return;
+ }
+
+ UnitStoragePlugin* storage = (UnitStoragePlugin*)plugin(UnitPlugin::UnitStorage);
+ if (!storage) { // e.g. because construction is incomplete
+	return;
+ }
+ if (storage->storageStatus() != UnitStoragePlugin::StatusDoorsClosed) {
+	boDebug() << k_funcinfo << "storage has not yet closed doors. giving control to storage." << endl;
+	setPluginWork(UnitPlugin::UnitStorage);
+	return;
+ }
+
+ if (storage->requestsCount() > 0) {
+	boDebug() << k_funcinfo << "storage has requests. giving control to storage." << endl;
+	setPluginWork(UnitPlugin::UnitStorage);
+	return;
  }
 }
 
@@ -1075,15 +1147,15 @@ void Unit::advanceAttack(unsigned int advanceCallsCount)
 
 void Unit::advanceFollow(unsigned int advanceCallsCount)
 {
- if (d->mUnitMover) {
-	d->mUnitMover->advanceFollow(advanceCallsCount);
+ if (unitMover()) {
+	unitMover()->advanceFollow(advanceCallsCount);
  }
 }
 
 void Unit::advanceMove(unsigned int advanceCallsCount)
 {
- if (d->mUnitMover) {
-	d->mUnitMover->advanceMove(advanceCallsCount);
+ if (unitMover()) {
+	unitMover()->advanceMove(advanceCallsCount);
  }
 }
 
@@ -1332,6 +1404,10 @@ bool Unit::saveAsXML(QDomElement& root)
 		return false;
 	}
  }
+
+ // AB: atm we don't need to save d->mUnitInsideUnitMover. hopefully that won't
+ //     change...
+
  return true;
 }
 
@@ -1840,7 +1916,7 @@ void Unit::setMovingStatus(MovingStatus m)
 
 BosonPathInfo* Unit::pathInfo() const
 {
- if (currentOrder() && (currentOrder()->type() == UnitOrder::Move || currentOrder()->type() == UnitOrder::MoveToUnit)) {
+ if (currentOrder() && currentOrder()->isMoveOrder()) {
 	return ((UnitMoveOrderData*)currentOrderData())->pathinfo;
  } else {
 	return 0;
@@ -2019,8 +2095,8 @@ int Unit::getAnimationMode() const
 
 void Unit::moveIdle()
 {
- if (d->mUnitMover) {
-	d->mUnitMover->advanceIdle();
+ if (unitMover()) {
+	unitMover()->advanceIdle();
  }
 }
 
@@ -2088,7 +2164,7 @@ bool Unit::currentOrderAdded()
 	return false;
  }
 // switch (order->type()) {
-	if (order->type() == UnitOrder::Move) {
+	if (order->type() == UnitOrder::Move || order->type() == UnitOrder::MoveInsideUnit) {
 		bool moveToCenterOfCell = true;
 		UnitMoveOrder* moveo = (UnitMoveOrder*)order;
 		bofixed x = moveo->position().x();
@@ -2097,16 +2173,20 @@ bool Unit::currentOrderAdded()
 		if (moveToCenterOfCell) {
 			// We want land unit's center point to be in the middle of the cell after
 			//  moving.
-			bofixed add = 0;
 			if (!unitProperties()->isAircraft()) {
+				bofixed add = 0;
 				if (!moveData()) {
 					boDebug() << k_funcinfo << "no moveData. not adding order." << endl;
 					return false;
 				}
 				add = (((moveData()->size % 2) == 1) ? 0.5 : 0);
+				x = (int)moveo->position().x() + add;
+				y = (int)moveo->position().y() + add;
+			} else {
+				// AB: flying units barely use the cells for
+				// moving, so there is no point at cell-exact
+				// moving.
 			}
-			x = (int)moveo->position().x() + add;
-			y = (int)moveo->position().y() + add;
 		}
 
 		if (moveTo(x, y, moveo->range())) {
@@ -2168,6 +2248,27 @@ bool Unit::currentOrderAdded()
 			return false;
 		}
 		h->refineAt(refinery);
+	} else if (order->type() == UnitOrder::EnterUnit) {
+		UnitEnterUnitOrder* enterOrder = (UnitEnterUnitOrder*)order;
+		if (!isMobile()) {
+			boError() << k_lineinfo << "only mobile units can enter other units" << endl;
+			return false;
+		}
+		EnterUnitPlugin* enterUnit = (EnterUnitPlugin*)plugin(UnitPlugin::EnterUnit);
+		if (!enterUnit) {
+			boError() << k_lineinfo << "cannot enter a unit: no EnterUnit plugin" << endl;
+			return false;
+		}
+
+		if (enterOrder->isLeaveOrder()) {
+			if (!enterUnit->leave()) {
+				return false;
+			}
+		} else {
+			if (!enterUnit->enter(enterOrder->target())) {
+				return false;
+			}
+		}
 	} else {
 		// Invalid order
 		boError() << k_funcinfo << "Invalid current order type " << order->type() << endl;
@@ -2194,7 +2295,7 @@ void Unit::currentOrderRemoved()
 	return;
  }
 
- if (order->type() == UnitOrder::Move || order->type() == UnitOrder::MoveToUnit) {
+ if (order->isMoveOrder()) {
 	clearPathPoints();
 	if (!isFlying()) {
 		setMovingStatus(Standing);
@@ -2215,12 +2316,64 @@ bool Unit::canAddOrder() const
  if (mUnitConstruction && !mUnitConstruction->isConstructionComplete()) {
 	return false;
  }
+
+ UnitStoragePlugin* storage = (UnitStoragePlugin*)plugin(UnitPlugin::UnitStorage);
+ if (storage) {
+	if (storage->storageStatus() != UnitStoragePlugin::StatusDoorsClosed) {
+		return false;
+	}
+ }
+
  return true;
 }
 
 bool Unit::lastOrderStatus() const
 {
  return d->mOrderQueue->lastOrderStatus();
+}
+
+void Unit::setIsInsideUnit(bool inside)
+{
+ d->mIsInsideUnit = inside;
+}
+
+bool Unit::isInsideUnit() const
+{
+ return d->mIsInsideUnit.value();
+}
+
+UnitMover* Unit::unitMover() const
+{
+ if (isInsideUnit()) {
+	return d->mUnitInsideUnitMover;
+ }
+ return d->mUnitMover;
+}
+
+void Unit::setIsFlying(bool f)
+{
+ if (!unitProperties()) {
+	BO_NULL_ERROR(f);
+	return;
+ }
+ if (!unitProperties()->isAircraft()) {
+	if (f) {
+		boError() << k_funcinfo << "is not an aircraft" << endl;
+	}
+	return;
+ }
+ d->mIsFlying = f;
+}
+
+bool Unit::isFlying() const
+{
+ if (!unitProperties()) {
+	return false;
+ }
+ if (!unitProperties()->isAircraft()) {
+	return false;
+ }
+ return d->mIsFlying;
 }
 
 

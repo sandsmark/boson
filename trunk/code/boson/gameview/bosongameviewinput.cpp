@@ -106,6 +106,28 @@ public:
 		return true;
 	}
 
+
+	bool canEnterTarget() const
+	{
+		if (!selection()->hasMobileUnit()) {
+			return false;
+		}
+
+		UnitStoragePlugin* storage = (UnitStoragePlugin*)targetUnit()->plugin(UnitPlugin::UnitStorage);
+		if (!storage) {
+			return false;
+		}
+
+		QPtrList<Unit> allUnits = selection()->allUnits();
+		for (QPtrListIterator<Unit> it(allUnits); it.current(); ++it) {
+			if (storage->canStore(it.current())) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 protected:
 	PlayerIO* localPlayerIO() const
 	{
@@ -267,6 +289,10 @@ void BosonGameViewInput::actionClicked(const BoMouseEvent& event)
 			}
 		} else if (action.canFollowTarget()) {
 			if (!actionFollow(unit)) {
+				return;
+			}
+		} else if (action.canEnterTarget()) {
+			if (!actionEnterUnit(unit)) {
 				return;
 			}
 		} else {
@@ -587,6 +613,53 @@ bool BosonGameViewInput::actionFollow(Unit* unit)
 		boViewData->speciesData(u->speciesTheme())->playSound(u, SoundOrderMove);
 	}
  }
+ return true;
+}
+
+bool BosonGameViewInput::actionEnterUnit(Unit* unit)
+{
+ if (!localPlayerIO()) {
+	BO_NULL_ERROR(localPlayerIO());
+	return false;
+ }
+ if (!selection()) {
+	BO_NULL_ERROR(selection());
+	return false;
+ }
+ if (!canvas()) {
+	BO_NULL_ERROR(canvas());
+	return false;
+ }
+ if (!localPlayerInput()) {
+	BO_NULL_ERROR(localPlayerInput());
+	return false;
+ }
+ if (!unit) {
+	return false;
+ }
+ UnitStoragePlugin* storage = (UnitStoragePlugin*)unit->plugin(UnitPlugin::UnitStorage);
+ if (!storage) {
+	return false;
+ }
+
+ QPtrList<Unit> allUnits = selection()->allUnits();
+ QPtrList<Unit> list;
+ for (QPtrListIterator<Unit> it(allUnits); it.current(); ++it) {
+	if (!it.current()->isMobile()) {
+		continue;
+	}
+	if (!storage->canStore(it.current())) {
+		boDebug() << k_lineinfo << "storage can not store unit " << it.current()->id() << endl;
+		continue;
+	}
+
+	list.append(it.current());
+ }
+ if (list.isEmpty()) {
+	return false;
+ }
+
+ localPlayerInput()->enterUnit(list, unit);
  return true;
 }
 

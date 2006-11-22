@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2006 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,9 +20,11 @@
 #define PLUGINPROPERTIES_H
 
 #include "boupgradeableproperty.h"
+#include "../../math/bovector.h"
 
 #include <qstring.h>
 #include <qvaluelist.h>
+#include <qvaluevector.h>
 
 class UnitProperties;
 class SpeciesTheme;
@@ -61,7 +63,8 @@ public:
 		ResourceMine = 5,
 		AmmunitionStorage = 6,
 		Radar = 7,
-		RadarJammer = 8
+		RadarJammer = 8,
+		UnitStorage = 9
 	};
 	PluginProperties(const UnitProperties* parent);
 	virtual ~PluginProperties();
@@ -341,6 +344,117 @@ public:
 
 private:
 	float mTransmittedPower;
+};
+
+class UnitStorageProperties : public PluginProperties
+{
+public:
+	/**
+	 * The type of units that can use a certain path
+	 **/
+	enum PathUnitType {
+		/**
+		 * Default. The enter and exit points of the path must be on the
+		 * border of the unit (i.e. bottom, top, left or right side of
+		 * the unit).
+		 **/
+		PathTypeLand = 0,
+
+		/**
+		 * Path for planes, i.e. flying units that can NOT "stand still"
+		 * in the air. The enter/exit points can be at any position
+		 * inside the unit, but the plane can land/start in a certain
+		 * specified direction only.
+		 **/
+		PathTypePlane = 1,
+
+		/**
+		 * Like a plane, but a helicopter can simply move over the enter
+		 * point and reduce its z position until it has landed. No
+		 * requirements on x and y direction of the landing unit.
+		 **/
+		PathTypeHelicopter = 2,
+
+		/**
+		 * Like Land units, but for ships.
+		 **/
+		PathTypeShip = 3
+	};
+
+public:
+	UnitStorageProperties(const UnitProperties* parent);
+	~UnitStorageProperties();
+
+	static QString propertyGroup();
+
+	virtual QString name() const;
+	virtual bool loadPlugin(KSimpleConfig* config);
+	virtual bool savePlugin(KSimpleConfig* config);
+	virtual int pluginType() const { return UnitStorage; }
+
+	/**
+	 * @return The number of enter paths that are supported by this unit.
+	 **/
+	unsigned int enterPathCount() const;
+
+	/**
+	 * @return The enter path number @p i. The returned vectors are meant to be
+	 * pathpoints for the unit.
+	 **/
+	QValueList<BoVector2Float> enterPath(unsigned int i) const;
+
+	/**
+	 * @return The "leavePath" that corresponds to the @ref enterPath with
+	 * number @p i.
+	 **/
+	QValueList<BoVector2Float> leavePathForEnterPath(unsigned int i) const;
+
+	/**
+	 * @return Which kind of unit can use the path number @p i.
+	 **/
+	PathUnitType enterPathUnitType(unsigned int i) const;
+
+	BoVector2Float enterDirection(unsigned int i) const;
+
+protected:
+	bool loadEnterPath(int i, KSimpleConfig* config);
+	bool saveEnterPath(int i, KSimpleConfig* config);
+
+protected:
+	class Path {
+	public:
+		Path()
+		{
+			clear();
+		}
+		Path(const Path& p)
+		{
+			*this = p;
+		}
+		Path& operator=(const Path& p)
+		{
+			mPathPoints = p.mPathPoints;
+			mType = p.mType;
+			mLeaveMethod = p.mLeaveMethod;
+			return *this;
+		}
+		void clear()
+		{
+			mPathPoints.clear();
+			mType = PathTypeLand;
+			mLeaveMethod = 0;
+		}
+		bool loadPath(KSimpleConfig* config);
+		bool savePath(KSimpleConfig* config);
+
+		// AB: note: float, not fixed! -> values in [0;1]
+		QValueList<BoVector2Float> mPathPoints;
+		PathUnitType mType;
+		int mLeaveMethod;
+	};
+
+private:
+	QValueVector<Path> mEnterPaths;
 };
 
 

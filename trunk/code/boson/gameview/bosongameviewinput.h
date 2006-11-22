@@ -53,6 +53,7 @@ protected:
 	bool actionRepair(Unit* repairYard);
 	bool actionRefine(Unit* refinery);
 	bool actionHarvest(Unit* resourceMine);
+	bool actionEnterUnit(Unit* target);
 
 	CanSelectUnit canSelect(Unit* unit) const;
 

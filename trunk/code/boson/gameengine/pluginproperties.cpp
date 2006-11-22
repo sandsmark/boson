@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2006 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -407,4 +407,246 @@ bool RadarJammerProperties::savePlugin(KSimpleConfig* config)
 }
 
 
+UnitStorageProperties::UnitStorageProperties(const UnitProperties* parent)
+		: PluginProperties(parent)
+{
+}
+
+UnitStorageProperties::~UnitStorageProperties()
+{
+}
+
+QString UnitStorageProperties::propertyGroup()
+{
+ return QString::fromLatin1("UnitStoragePlugin");
+}
+
+QString UnitStorageProperties::name() const
+{
+ return i18n("Unit Storage Plugin");
+}
+
+bool UnitStorageProperties::loadPlugin(KSimpleConfig* config)
+{
+ if (!config->hasGroup(propertyGroup())) {
+	boError() << k_funcinfo << "unit has no such plugin" << endl;
+	return false;
+ }
+ config->setGroup(propertyGroup());
+
+ mEnterPaths.clear();
+ int enterPaths = config->readUnsignedNumEntry("EnterPaths", 0);
+ if (enterPaths < 0 || enterPaths >= 100) {
+	boError() << k_funcinfo << "invalid EnterPaths count" << endl;
+	return false;
+ }
+ mEnterPaths.resize(enterPaths);
+ for (int i = 0; i < enterPaths; i++) {
+	if (!loadEnterPath(i, config)) {
+		boError() << k_funcinfo << "failed loading enter path " << i << endl;
+		return false;
+	}
+ }
+
+ return true;
+}
+
+bool UnitStorageProperties::savePlugin(KSimpleConfig* config)
+{
+ config->setGroup(propertyGroup());
+ config->writeEntry("EnterPaths", mEnterPaths.count());
+ for (unsigned int i = 0; i < mEnterPaths.count(); i++) {
+	if (!saveEnterPath(i, config)) {
+		boError() << k_funcinfo << "failed saving enter path " << i << endl;
+		return false;
+	}
+ }
+ return true;
+}
+
+bool UnitStorageProperties::loadEnterPath(int path, KSimpleConfig* config)
+{
+ if (path < 0 || (unsigned int)path >= mEnterPaths.count()) {
+	return false;
+ }
+ QString group = propertyGroup() + QString::fromLatin1("_EnterPath_%1").arg(path);
+ if (!config->hasGroup(group)) {
+	boError() << k_funcinfo << "no such group " << group << endl;
+	return false;
+ }
+ KConfigGroupSaver configGroupSaver(config, group);
+ if (!mEnterPaths[path].loadPath(config)) {
+	boError() << k_funcinfo << "Unable to load path " << path << endl;
+	return false;
+ }
+ return true;
+}
+
+bool UnitStorageProperties::saveEnterPath(int path, KSimpleConfig* config)
+{
+ if (path < 0 || (unsigned int)path >= mEnterPaths.count()) {
+	return false;
+ }
+ QString group = propertyGroup() + QString::fromLatin1("_EnterPath_%1").arg(path);
+ KConfigGroupSaver configGroupSaver(config, group);
+ if (!mEnterPaths[path].savePath(config)) {
+	boError() << k_funcinfo << "Unable to save path " << path << endl;
+	return false;
+ }
+ return true;
+}
+
+bool UnitStorageProperties::Path::loadPath(KSimpleConfig* config)
+{
+ clear();
+
+ int points = config->readUnsignedNumEntry("Points");
+ if (points <= 0 || points >= 100) {
+	boError() << k_funcinfo << "invalid Points count: " << points << endl;
+	return false;
+ }
+ float x0 = -1.0f;
+ float y0 = -1.0f;
+ for (int i = 0; i < points; i++) {
+	float x = config->readDoubleNumEntry(QString::fromLatin1("Point%1_X").arg(i));
+	float y = config->readDoubleNumEntry(QString::fromLatin1("Point%1_Y").arg(i));
+	if (i == 0) {
+		x0 = x;
+		y0 = y;
+	}
+	mPathPoints.append(BoVector2Float(x, y));
+ }
+
+ QString typeString = config->readEntry("UnitType", QString::fromLatin1("Land"));
+ mType = PathTypeLand;
+ if (typeString == QString::fromLatin1("Land")) {
+	mType = PathTypeLand;
+ } else if (typeString == QString::fromLatin1("Plane")) {
+	mType = PathTypePlane;
+ } else if (typeString == QString::fromLatin1("Helicopter")) {
+	mType = PathTypeHelicopter;
+ } else if (typeString == QString::fromLatin1("Ship")) {
+	mType = PathTypeShip;
+ } else {
+	boError() << k_funcinfo << "invalid UnitType: " << typeString << endl;
+	return false;
+ }
+
+ if (mType == PathTypeLand || mType == PathTypeShip) {
+	if (x0 != 0.0f && x0 != 1.0f && y0 != 0.0f && y0 != 1.0f) {
+		boError() << k_funcinfo << "either X or Y coordinate of the first Point of a Path must be on the border (i.e. 0.0 or 1.0)." << endl;
+		return false;
+	}
+ }
+
+
+ if (mType != PathTypeHelicopter) {
+	// helicopters may simply land on their destination. all other units
+	// must move to somewhere inside the unit.
+	if (points < 2) {
+		boError() << k_funcinfo << "non-helicopter paths must have at least 2 points" << endl;
+		return false;
+	}
+ }
+
+
+ // possible methods might be (atm only "Reverse" is used):
+ // * Reverse - use reversed "ingoing" paths for leaving this unit
+ //             -> must useful method (simplest)
+ // * Dedicated - specify a dedicated path for leaving the unit
+ //               -> e.g. a runway for landing planes and one for starting
+ //                  planes
+ // * OnceCompleted - leave immediately once the "ingoing" path has been
+ //                   completed. for this the last point must be a border point,
+ //                   too (x or y either 0.0 or 1.0).
+ //                   this could be useful for things like bridges - we dont
+ //                   want to store the unit inside the unit
+ QString leaveMethod = config->readEntry("Leave", QString::fromLatin1("Reverse"));
+ if (leaveMethod != QString::fromLatin1("Reverse")) {
+	boError() << k_funcinfo << "atm only Leave=Reverse supported" << endl;
+	return false;
+ }
+
+ return true;
+}
+
+bool UnitStorageProperties::Path::savePath(KSimpleConfig* config)
+{
+ config->writeEntry("Points", mPathPoints.count());
+ for (unsigned int i = 0; i < mPathPoints.count(); i++) {
+	BoVector2Float p = mPathPoints[i];
+	config->writeEntry(QString::fromLatin1("Point%1_X").arg(i), p.x());
+	config->writeEntry(QString::fromLatin1("Point%1_Y").arg(i), p.y());
+ }
+
+ switch (mType) {
+	case PathTypeLand:
+		config->writeEntry("UnitType", QString::fromLatin1("Land"));
+		break;
+	case PathTypePlane:
+		config->writeEntry("UnitType", QString::fromLatin1("Plane"));
+		break;
+	case PathTypeHelicopter:
+		config->writeEntry("UnitType", QString::fromLatin1("Helicopter"));
+		break;
+	case PathTypeShip:
+		config->writeEntry("UnitType", QString::fromLatin1("Ship"));
+		break;
+	default:
+		boError() << k_funcinfo << "unhandled type: " << (int)mType << endl;
+		return false;
+ }
+ config->writeEntry("Leave", QString::fromLatin1("Reverse"));
+ return true;
+}
+
+unsigned int UnitStorageProperties::enterPathCount() const
+{
+ return mEnterPaths.count();
+}
+
+QValueList<BoVector2Float> UnitStorageProperties::enterPath(unsigned int i) const
+{
+ if (i >= enterPathCount()) {
+	boError() << k_funcinfo << "index out of range: " << i << endl;
+	return QValueList<BoVector2Float>();
+ }
+ return mEnterPaths[i].mPathPoints;
+}
+
+QValueList<BoVector2Float> UnitStorageProperties::leavePathForEnterPath(unsigned int i) const
+{
+ QValueList<BoVector2Float> leave;
+ QValueList<BoVector2Float> enter = enterPath(i);
+
+ // TODO: atm we assume "Reverse" as Leave method.
+ for (QValueList<BoVector2Float>::iterator it = enter.begin(); it != enter.end(); ++it) {
+	leave.prepend(*it);
+ }
+ return leave;
+}
+
+UnitStorageProperties::PathUnitType UnitStorageProperties::enterPathUnitType(unsigned int i) const
+{
+ if (i >= enterPathCount()) {
+	boError() << k_funcinfo << "index out of range: " << i << endl;
+	return PathTypeLand;
+ }
+ return mEnterPaths[i].mType;
+}
+
+
+BoVector2Float UnitStorageProperties::enterDirection(unsigned int i) const
+{
+ if (i >= enterPathCount()) {
+	boError() << k_funcinfo << "index out of range: " << i << endl;
+	return BoVector2Float(1.0f, 0.0f);
+ }
+ if (mEnterPaths[i].mPathPoints.count() < 2) {
+	return BoVector2Float(0.0f, 0.0f);
+ }
+ BoVector2Float dir = mEnterPaths[i].mPathPoints[1] - mEnterPaths[i].mPathPoints[0];
+ dir.normalize();
+ return dir;
+}
 

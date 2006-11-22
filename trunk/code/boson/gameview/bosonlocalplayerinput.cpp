@@ -24,7 +24,8 @@
 #include "../bomemory/bodummymemory.h"
 #include "../boaction.h"
 #include "../gameengine/unit.h"
-#include "../gameengine/unitplugins/unitplugins.h"
+#include "../gameengine/unitplugins/harvesterplugin.h"
+#include "../gameengine/unitplugins/resourcemineplugin.h"
 #include "../gameengine/unitproperties.h"
 #include "../gameengine/player.h"
 #include "../gameengine/playerio.h"
@@ -470,6 +471,38 @@ void BosonLocalPlayerInput::follow(const QPtrList<Unit>& units, Unit* target)
   }
 
   BosonMessageMoveFollow message(target->id(), followUnits);
+
+  QByteArray b;
+  QDataStream stream(b, IO_WriteOnly);
+  if (!message.save(stream))
+  {
+    boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
+    return;
+  }
+
+  QDataStream msg(b, IO_ReadOnly);
+  sendInput(msg);
+}
+
+void BosonLocalPlayerInput::enterUnit(const QPtrList<Unit>& units, Unit* target)
+{
+  boDebug() << k_funcinfo << endl;
+  if (!target)
+  {
+    return;
+  }
+  if (units.isEmpty())
+  {
+    return;
+  }
+
+  QValueList<Q_ULONG> enterUnits;
+  for (QPtrListIterator<Unit> it(units); it.current(); ++it)
+  {
+    enterUnits.append((Q_ULONG)it.current()->id());
+  }
+
+  BosonMessageMoveEnterUnit message(target->id(), enterUnits);
 
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);

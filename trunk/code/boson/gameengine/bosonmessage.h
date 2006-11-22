@@ -507,6 +507,29 @@ public:
 	QValueList<Q_ULONG> mItems;
 };
 
+class BosonMessageMoveEnterUnit : public BosonMessage
+{
+public:
+	BosonMessageMoveEnterUnit() : BosonMessage() {}
+	BosonMessageMoveEnterUnit(Q_UINT32 enterUnitId, const QValueList<Q_ULONG>& items)
+		: BosonMessage(),
+		mEnterUnitId(enterUnitId),
+		mItems(items)
+	{
+	}
+
+	virtual bool save(QDataStream& stream) const;
+	virtual bool load(QDataStream& stream);
+	virtual int messageId() const
+	{
+		return BosonMessageIds::MoveEnterUnit;
+	}
+
+public:
+	Q_UINT32 mEnterUnitId;
+	QValueList<Q_ULONG> mItems;
+};
+
 class BosonMessageMoveLayMine : public BosonMessage
 {
 public:

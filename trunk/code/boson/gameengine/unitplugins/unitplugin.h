@@ -66,6 +66,8 @@ public:
 		AmmunitionStorage = 9,
 		Radar = 10,
 		RadarJammer = 11,
+		UnitStorage = 12,
+		EnterUnit = 13,
 
 		PluginEnd // MUST be the last entry!
 	};

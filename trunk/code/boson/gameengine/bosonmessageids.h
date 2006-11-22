@@ -78,6 +78,7 @@ public:
 		MoveRefine = 107,
 		MoveStop = 108,  // Stop unit(s) from moving or attacking
 		MoveFollow = 109,  // Follow another unit
+		MoveEnterUnit = 110,  // Enter a unit (airplane, repairyard, ...)
 
 		MoveLayMine = 120,
 		MoveDropBomb = 121,
