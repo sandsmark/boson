@@ -88,8 +88,10 @@ public:
 protected:
 	bool currentOrderChanged();
 	bool currentOrderAdded();
-	void currentOrderRemoved();
+	void currentSuborderRemoved();
 	bool canAddOrder() const;
+
+	void toplevelOrderRemoved();
 
 private:
 	UnitOrdersInterface* mParent;
@@ -167,7 +169,11 @@ void UnitOrderQueue::clearOrders()
 	return;
  }
 
+#if 1
+ toplevelOrderRemoved();
+#else
  currentOrderRemoved();
+#endif
  while (!d->mToplevelOrders.isEmpty()) {
 	delete d->mToplevelOrders.first();
 	d->mToplevelOrders.pop_front();
@@ -177,13 +183,33 @@ void UnitOrderQueue::clearOrders()
 
 bool UnitOrderQueue::replaceToplevelOrders(UnitOrder* order)
 {
+#if 1
+ toplevelOrderRemoved();
+#else
  currentOrderRemoved();
+#endif
  while (!d->mToplevelOrders.isEmpty()) {
 	delete d->mToplevelOrders.first();
 	d->mToplevelOrders.pop_front();
  }
 
  return addToplevelOrder(order);
+}
+
+void UnitOrderQueue::toplevelOrderRemoved()
+{
+ boDebug() << k_funcinfo << endl;
+ if (!currentOrder()) {
+	boDebug() << k_funcinfo << "nothing to remove" << endl;
+	return;
+ }
+ while (currentOrder() != toplevelOrder()) {
+	currentSuborderDone(false);
+ }
+
+ // remove toplevel order
+ currentSuborderDone(false);
+ boDebug() << k_funcinfo << "toplevel order removed" << endl;
 }
 
 bool UnitOrderQueue::addToplevelOrder(UnitOrder* order)
@@ -261,7 +287,7 @@ void UnitOrderQueue::currentSuborderDone(bool success)
  }
  d->mLastOrderStatus = (success ? UnitOrder::Success : UnitOrder::Failure);
 
- currentOrderRemoved();
+ currentSuborderRemoved();
 
  if (d->mCurrentOrder->parent()) {
 	d->mCurrentOrder->parent()->suborderDone();  // Deletes the child order
@@ -275,9 +301,9 @@ void UnitOrderQueue::currentSuborderDone(bool success)
  }
 }
 
-void UnitOrderQueue::currentOrderRemoved()
+void UnitOrderQueue::currentSuborderRemoved()
 {
- mParent->currentOrderRemoved();
+ mParent->currentSuborderRemoved();
 }
 
 bool UnitOrderQueue::canAddOrder() const
@@ -2288,7 +2314,7 @@ void Unit::currentSuborderDone(bool success)
  d->mOrderQueue->currentSuborderDone(success);
 }
 
-void Unit::currentOrderRemoved()
+void Unit::currentSuborderRemoved()
 {
  UnitOrder* order = currentOrder();
  if (!order) {
@@ -2297,13 +2323,23 @@ void Unit::currentOrderRemoved()
 
  if (order->isMoveOrder()) {
 	clearPathPoints();
-	if (!isFlying()) {
+	if (!isFlying() || isInsideUnit()) {
+		if (isInsideUnit() && isFlying()) {
+			boWarning() << k_funcinfo << "unit still flying - enter order must have been aborted (this should not be allowed!" << endl;
+		}
 		setMovingStatus(Standing);
 		setVelocity(0.0, 0.0, 0.0);
 
 		if (pathInfo() && pathInfo()->slowDownAtDest) {
 			setSpeed(0);
 		}
+	}
+ }
+
+ if (order->type() == UnitOrder::EnterUnit) {
+	EnterUnitPlugin* e = (EnterUnitPlugin*)plugin(UnitPlugin::EnterUnit);
+	if (e) {
+		e->abort();
 	}
  }
 }

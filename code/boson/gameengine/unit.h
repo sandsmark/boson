@@ -82,7 +82,7 @@ public:
 
 	virtual bool currentOrderChanged() = 0;
 	virtual bool currentOrderAdded() = 0;
-	virtual void currentOrderRemoved() = 0;
+	virtual void currentSuborderRemoved() = 0;
 
 	/**
 	 * @return TRUE if another order can be added (usually). Otherwise
@@ -653,7 +653,7 @@ private:
 	/**
 	 * See @ref UnitOrdersInterface
 	 **/
-	virtual void currentOrderRemoved();
+	virtual void currentSuborderRemoved();
 	/**
 	 * See @ref UnitOrdersInterface
 	 **/
