@@ -209,6 +209,7 @@ void EnterUnitPlugin::abort()
 {
  boDebug() << k_funcinfo << "status: " << movingInStatus() << endl;
  switch (movingInStatus()) {
+	case StatusHasLeft:
 	case StatusHasEntered:
 	case StatusIsOutside:
 		// nothing to abort
@@ -242,10 +243,9 @@ void EnterUnitPlugin::abort()
 		break;
 	}
 
-	case StatusHasLeft: // only a dummy state, should never be reached
 	default:
 	{
-		boError() << k_funcinfo << "unexpected status" << (int)movingInStatus() << endl;
+		boError() << k_funcinfo << "unexpected status " << (int)movingInStatus() << endl;
 		break;
 	}
  }
@@ -874,6 +874,11 @@ void EnterUnitPlugin::pathPointDone()
 //    this is because this plugin is not yet notified when entering/leaving is
 //    aborted!!
 //    -> also make sure that certain states CANT be aborted!
+//
+//    UPDATE: fixed.
+//            however a related problem remains: entering/leaving can still be
+//            aborted in ALL states, although it should not be itnerruptible in
+//            certain states!
 // 4. does ANY of this code code still work correctly, if the UnitStorage is
 //    rotated?
 
