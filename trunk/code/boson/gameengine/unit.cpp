@@ -169,28 +169,60 @@ void UnitOrderQueue::clearOrders()
 	return;
  }
 
-#if 1
- toplevelOrderRemoved();
-#else
- currentOrderRemoved();
-#endif
- while (!d->mToplevelOrders.isEmpty()) {
-	delete d->mToplevelOrders.first();
+ // note: this is UGLY!
+ //       we hardcode the check for MoveInsideUnit, as currently only that order
+ //       must be uninterruptible.
+ //       also we have duplicated code: mostly the same code is in
+ //       replaceToplevelOrders(), too.
+ if (currentOrder() && (currentOrder()->type() == UnitOrder::MoveInsideUnit ||
+		currentOrderData()->parent() && currentOrderData()->parent()->order()->type() == UnitOrder::MoveInsideUnit)) {
+	// AB: MoveInsideUnit orders can't be interrupted.
+	UnitOrderData* current = d->mToplevelOrders.front();
 	d->mToplevelOrders.pop_front();
+	while (!d->mToplevelOrders.isEmpty()) {
+		delete d->mToplevelOrders.first();
+		d->mToplevelOrders.pop_front();
+	}
+	d->mToplevelOrders.append(current);
+ } else {
+#if 1
+	toplevelOrderRemoved();
+#else
+	currentOrderRemoved();
+#endif
+	while (!d->mToplevelOrders.isEmpty()) {
+		delete d->mToplevelOrders.first();
+		d->mToplevelOrders.pop_front();
+	}
+	currentOrderChanged();
  }
- currentOrderChanged();
 }
 
 bool UnitOrderQueue::replaceToplevelOrders(UnitOrder* order)
 {
-#if 1
- toplevelOrderRemoved();
-#else
- currentOrderRemoved();
-#endif
- while (!d->mToplevelOrders.isEmpty()) {
-	delete d->mToplevelOrders.first();
+// note: see also comment in clearOrders()
+//       the difference to clearOrders() is in the else branch only (no
+//       currentOrderChanged() call)
+ if (currentOrder() && (currentOrder()->type() == UnitOrder::MoveInsideUnit ||
+		currentOrderData()->parent() && currentOrderData()->parent()->order()->type() == UnitOrder::MoveInsideUnit)) {
+	// AB: MoveInsideUnit orders can't be interrupted.
+	UnitOrderData* current = d->mToplevelOrders.front();
 	d->mToplevelOrders.pop_front();
+	while (!d->mToplevelOrders.isEmpty()) {
+		delete d->mToplevelOrders.first();
+		d->mToplevelOrders.pop_front();
+	}
+	d->mToplevelOrders.append(current);
+ } else {
+#if 1
+	toplevelOrderRemoved();
+#else
+	currentOrderRemoved();
+#endif
+	while (!d->mToplevelOrders.isEmpty()) {
+		delete d->mToplevelOrders.first();
+		d->mToplevelOrders.pop_front();
+	}
  }
 
  return addToplevelOrder(order);
@@ -2323,10 +2355,7 @@ void Unit::currentSuborderRemoved()
 
  if (order->isMoveOrder()) {
 	clearPathPoints();
-	if (!isFlying() || isInsideUnit()) {
-		if (isInsideUnit() && isFlying()) {
-			boWarning() << k_funcinfo << "unit still flying - enter order must have been aborted (this should not be allowed!" << endl;
-		}
+	if (!isFlying()) {
 		setMovingStatus(Standing);
 		setVelocity(0.0, 0.0, 0.0);
 
