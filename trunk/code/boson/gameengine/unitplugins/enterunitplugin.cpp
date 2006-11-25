@@ -223,6 +223,7 @@ void EnterUnitPlugin::abort()
 	case StatusMovingToStoragePosition:
 	{
 		// can't be aborted!
+		boWarning() << k_funcinfo << "StatusMovingToStoragePosition can't be aborted!" << endl;
 		return;
 	}
 	case StatusWaitForLeavePermission:
@@ -237,6 +238,7 @@ void EnterUnitPlugin::abort()
 		// already took off.
 		// but otherwise we might be able to abort leaving, by moving
 		// back to storage position.
+		boWarning() << k_funcinfo << "StatusMovingToOutside can't (yet?) be aborted!" << endl;
 		break;
 	}
 
