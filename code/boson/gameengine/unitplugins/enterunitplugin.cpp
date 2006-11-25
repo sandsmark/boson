@@ -867,20 +867,6 @@ void EnterUnitPlugin::pathPointDone()
 //    -> actually this TODO is still valid, but MUCH less important now)
 // 2.1 wait with leaving, if exit is blocked (kind done: see above)
 //    -> actually this TODO is still valid, but MUCH less important now)
-// 3. aborting:
-//    e.g. try to enter unit and move it somewhere else before
-//    entering starts. --> unit is not in StatusIsOutside anymore!
-//
-//    this is because this plugin is not yet notified when entering/leaving is
-//    aborted!!
-//    -> also make sure that certain states CANT be aborted!
-//
-//    UPDATE: fixed.
-//            however a related problem remains: entering/leaving can still be
-//            aborted in ALL states, although it should not be itnerruptible in
-//            certain states!
-// 4. does ANY of this code code still work correctly, if the UnitStorage is
-//    rotated?
 
 
 
