@@ -77,7 +77,7 @@ draw_link("Main page", "index.php");
 echo "<br>";
 draw_link("All news", "news.php");
 draw_link("Screenshots", "screenshots.php");
-draw_link("Movies", "movies.php");
+//draw_link("Movies", "movies.php");
 draw_link("Download", "download.php");
 draw_link("Install", "install.php");
 draw_link("More information", "info.php");
