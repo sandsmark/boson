@@ -72,6 +72,6 @@ ELSE (NOT PYTHON_LIBRARY)
 
 	# PYTHON_LIBRARY is used for the cache entry only
 	# PYTHON_LIBRARIES is meant to be public
-	set(PYTHON_LIBRARIES "${PYTHON_LIBRARY} ${_python_dependency_libs}")
+	set(PYTHON_LIBRARIES ${PYTHON_LIBRARY} ${_python_dependency_libs})
 ENDIF (NOT PYTHON_LIBRARY)
 
