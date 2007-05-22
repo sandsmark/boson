@@ -72,7 +72,11 @@ void BoInfo::updateOSInfo()
 	insert(OSVersionString, kernelVersion);
  }
 
+#ifdef UTS_RELEASE
  kernelVersion = UTS_RELEASE;
+#else
+ kernelVersion = "(Unknown)";
+#endif
  insert(BoInfo::OSVersionString + BoInfo::CompileOffset, kernelVersion);
 
  QString kernelModules = readFile("/proc/modules");
