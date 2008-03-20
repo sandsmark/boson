@@ -15,3 +15,7 @@
 /* AB: this define is obsolete. use BOSON_USE_DEBUG_PLUGINS instead */
 #define USE_BO_PLUGINS ${BOSON_USE_DEBUG_PLUGINS}
 
+/* Whether (if 1) to use dlopen() to open libGL and libGLU or (if 0) to link
+   directly to these libraries */
+#define BOGL_DO_DLOPEN ${BOGL_DO_DLOPEN}
+

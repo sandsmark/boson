@@ -39,7 +39,7 @@ typedef struct __GLXFBConfigRec *GLXFBConfigSGIX;
 #define GLX_SGIX_pbuffer 1
 #endif
 
-#include <boglx_decl_p.h>
+#include <gl/boglx_decl_p.h>
 
 
 

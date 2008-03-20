@@ -56,6 +56,10 @@ option(BOSON_USE_BOMEMORY
   "debug memory usage. this is a very experimental debugging option!"
   OFF
 )
+option(BOGL_DO_DLOPEN
+  "dlopen() the OpenGL libraries instead of linking directly to them if enabled."
+  OFF
+)
 
 if(BOSON_LINK_STATIC)
   set(BOSON_USE_DEBUG_PLUGINS OFF)
@@ -73,6 +77,11 @@ if(BOSON_USE_DEBUG_PLUGINS)
 else(BOSON_USE_DEBUG_PLUGINS)
   set(BOSON_USE_DEBUG_PLUGINS 0)
 endif(BOSON_USE_DEBUG_PLUGINS)
+if(BOGL_DO_DLOPEN)
+  set(BOGL_DO_DLOPEN 1)
+else(BOGL_DO_DLOPEN)
+  set(BOGL_DO_DLOPEN 0)
+endif(BOGL_DO_DLOPEN)
 
 
 # search packages used by KDE

@@ -85,11 +85,7 @@ BoGL::BoGL()
 {
  d = new BoGLPrivate();
  d->mIsInitialized = false;;
-#if !BOGL_DO_DLOPEN
- d->mIsResolved = true;
-#else
  d->mIsResolved = false;
-#endif
 }
 
 BoGL::~BoGL()
@@ -167,7 +163,6 @@ bool BoGL::initialize()
  QString gluExtensions = (const char*)gluGetString(GLU_EXTENSIONS);
  d->mGLUExtensions = QStringList::split(" ", gluExtensions);
 
- boglResolveGLExtensionSymbols();
  return isInitialized();
 }
 

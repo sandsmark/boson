@@ -103,15 +103,6 @@ public:
 	const QString& GLUFile() const;
 
 	/**
-	 * Must be called @em after the context has been created/made current.
-	 * Put it into the initializeGL() calll.
-	 *
-	 * It is necessary to create the context first, because apparently
-	 * glGetString(GL_EXTENSIONS) depends on it, which is required.
-	 **/
-	void resolveGLExtensionSymbols();
-
-	/**
 	 * @return The OpenGL version that is installed. See the @ref
 	 * MAKE_VERSION_BOGL macro.
 	 *
@@ -192,22 +183,9 @@ QStringList boglGetGLUExtensions();
 
 // internal
 class MyQLibrary;
-bool boglResolveLibGLSymbols(MyQLibrary& gl);
-bool boglResolveLibGLUSymbols(MyQLibrary& glu);
+bool boglResolveLibGLSymbols(MyQLibrary* gl);
+bool boglResolveLibGLUSymbols(MyQLibrary* glu);
 
-/**
- * @internal
- *
- * This function is called by @ref BoGL::initialize automatically. You don't
- * need to call this.
- *
- * Must be called @em after the context has been created/made current. Put it
- * into the initializeGL() calll.
- *
- * It is necessary to create the context first, because apparently
- * glGetString(GL_EXTENSIONS) depends on it, which is required.
- **/
-void boglResolveGLExtensionSymbols();
 
 
 

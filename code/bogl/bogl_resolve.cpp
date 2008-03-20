@@ -290,15 +290,13 @@ void resolveWildcards(QStringList* files, const QString& argument)
 
 bool BoGL::resolveGLSymbols()
 {
-#if !BOGL_DO_DLOPEN
- return true;
-#endif
-
  if (isResolved()) {
 	return true;
  }
 
  bool ret = true;
+
+#if BOGL_DO_DLOPEN
 
  QString libGL;
  QString libGLU;
@@ -308,7 +306,7 @@ bool BoGL::resolveGLSymbols()
 	return false;
  }
  if (ret) {
-	ret = boglResolveLibGLSymbols(*gl);
+	ret = boglResolveLibGLSymbols(gl);
  }
  libGL = gl->library();
  if (libGL.isEmpty()) {
@@ -329,7 +327,7 @@ bool BoGL::resolveGLSymbols()
 	return false;
  }
  if (ret) {
-	ret = boglResolveLibGLUSymbols(*glu);
+	ret = boglResolveLibGLUSymbols(glu);
  }
  libGLU = glu->library();
  if (libGLU.isEmpty()) {
@@ -348,10 +346,24 @@ bool BoGL::resolveGLSymbols()
  d->mOpenGLLibraryFile = libGL;
  d->mGLULibraryFile = libGLU;
 
- d->mIsResolved = true;
-
  boDebug() << "Resolved GL symbols from file " << OpenGLFile() << endl;
  boDebug() << "Resolved GLU symbols from file " << GLUFile() << endl;
+#else // BOGL_DO_DLOPEN
+ ret = boglResolveLibGLSymbols(0);
+ if (!ret) {
+	boError() << k_funcinfo << "resolving GL symbols failed";
+	return false;
+ }
+ ret = boglResolveLibGLUSymbols(0);
+ if (!ret) {
+	boError() << k_funcinfo << "resolving GLU symbols failed";
+	return false;
+ }
+ boDebug() << "Resolved GL symbols (GL/GLU linked to binary)" << endl;
+#endif // BOGL_DO_DLOPEN
+
+ d->mIsResolved = true;
+
 
  return true;
 }
