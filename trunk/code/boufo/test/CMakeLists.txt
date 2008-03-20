@@ -4,7 +4,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/bodebug
   ${CMAKE_SOURCE_DIR}/bogl
   ${CMAKE_SOURCE_DIR}/ufo/include
-  ${CMAKE_SOURCE_DIR}/boson/boufo
+  ${CMAKE_SOURCE_DIR}/boufo
   ${QT_INCLUDE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 )
