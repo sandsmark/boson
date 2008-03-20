@@ -123,7 +123,27 @@ public:
 	UBoUfoWidgetDeleter()
 	{
 	}
+
+	/**
+	 * Called right before the widget that this widget deleter belongs to is
+	 * painted (see @ref UWidget::paint).
+	 *
+	 * This may e.g. be used to implement profiling of the paint method.
+	 * The default implementation does nothing.
+	 *
+	 * See also @ref endPaint
+	 **/
 	virtual void startPaint() {}
+
+	/**
+	 * Called right after the widget that this widget deleter belongs to is
+	 * painted (see @ref UWidget::paint).
+	 *
+	 * This may e.g. be used to implement profiling of the paint method.
+	 * The default implementation does nothing.
+	 *
+	 * See also @ref startPaint
+	 **/
 	virtual void endPaint() {}
 };
 
