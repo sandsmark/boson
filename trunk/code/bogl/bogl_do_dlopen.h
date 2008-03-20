@@ -20,7 +20,7 @@
 #ifndef BOGL_DO_DLOPEN_H
 #define BOGL_DO_DLOPEN_H
 
-#define BOGL_DO_DLOPEN 1
+#include "config.h"
 
 #endif
 
