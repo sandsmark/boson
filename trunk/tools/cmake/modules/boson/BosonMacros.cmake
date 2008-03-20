@@ -26,7 +26,7 @@ FIND_LIBRARY(X11_XRANDR_LIB Xrandr ${X11_LIB_SEARCH_PATH})
 
 
 
-SET(BOUIC_EXECUTABLE ${CMAKE_BINARY_DIR}/boson/boufo/bouic/bouic)
+SET(BOUIC_EXECUTABLE ${CMAKE_BINARY_DIR}/boufo/bouic/bouic)
 
 # similar to KDE3_ADD_UI_FILES()
 # usage: BOSON_ADD_BOUI_FILES(foo_SRCS ${boui_files})
