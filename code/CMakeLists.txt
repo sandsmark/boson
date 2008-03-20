@@ -151,6 +151,7 @@ add_subdirectory( bodebug )
 add_subdirectory( bogl )
 add_subdirectory( kgame )
 add_subdirectory( ufo )
+add_subdirectory( boufo )
 add_subdirectory( boson )
 add_subdirectory( server )
 

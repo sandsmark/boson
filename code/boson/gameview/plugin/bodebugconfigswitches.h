@@ -19,7 +19,7 @@
 #ifndef BODEBUGCONFIGSWITCHES_H
 #define BODEBUGCONFIGSWITCHES_H
 
-#include "../../boufo/boufo.h"
+#include "boufo.h"
 
 class BoDebugConfigSwitchesPrivate;
 /**

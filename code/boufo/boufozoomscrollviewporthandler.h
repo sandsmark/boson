@@ -21,7 +21,7 @@
 
 #include <qobject.h>
 
-#include "../bomath.h"
+#include "math/bomath.h"
 #include <bogl.h>
 
 class BoMatrix;

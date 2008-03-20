@@ -19,7 +19,7 @@
 #ifndef BONETWORKTRAFFICWIDGET_H
 #define BONETWORKTRAFFICWIDGET_H
 
-#include "../../boufo/boufo.h"
+#include "boufo.h"
 
 class BoNetworkTrafficWidgetPrivate;
 /**

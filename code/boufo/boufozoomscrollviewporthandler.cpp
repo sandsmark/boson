@@ -21,7 +21,7 @@
 #include "boufozoomscrollviewporthandler.moc"
 
 #include "../../bomemory/bodummymemory.h"
-#include "../bo3dtools.h"
+#include "math/bo3dtoolsbase.h"
 #include "bodebug.h"
 #include <bogl.h>
 

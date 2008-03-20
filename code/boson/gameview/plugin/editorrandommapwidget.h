@@ -19,7 +19,7 @@
 #ifndef EDITORRANDOMMAPWIDGET_H
 #define EDITORRANDOMMAPWIDGET_H
 
-#include "../../boufo/boufo.h"
+#include "boufo.h"
 
 class BosonCanvas;
 class PlayerIO;
