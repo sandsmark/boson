@@ -36,8 +36,10 @@
 
 #include <stdlib.h>
 
+#if BOGL_DO_DLOPEN
 static MyQLibrary* loadLibrary(const QString& fileName);
 static MyQLibrary* loadLibraryFromFile(const QString& file);
+#endif // BOGL_DO_DLOPEN
 static void scanLdSoConf(QStringList* dirs, const QString& file, QStringList* scannedFiles = 0);
 static QStringList resolveWildcards(const QString& argument);
 static void resolveWildcards(QStringList* files, const QString& argument);
@@ -47,6 +49,7 @@ bool boglResolveGLSymbols()
  return BoGL::bogl()->resolveGLSymbols();
 }
 
+#if BOGL_DO_DLOPEN
  // QLibrary assumes that the library ends with .so, however e.g. on
  // vanilla debian systems libGLU.so may not exist. Only libGLU.so.1.3 does.
  // Therefore we must check whether the library got loaded and if not, we must
@@ -170,6 +173,7 @@ static MyQLibrary* loadLibraryFromFile(const QString& file)
  }
  return lib;
 }
+#endif // BOGL_DO_DLOPEN
 
 static void scanLdSoConf(QStringList* dirs, const QString& file, QStringList* scannedFiles)
 {

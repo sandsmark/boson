@@ -255,6 +255,8 @@ bool boglResolveGLUSymbols(MyQLibrary* gl_)
  RESOLVE_CHECK(gluUnProject);
  RESOLVE_CHECK(gluUnProject4);
 #else // BOGL_DO_DLOPEN
+ Q_UNUSED(gl_);
+
  // first revert the "#define gluXXX bo_gluXXX" from bogl.h
  #undef gluBeginCurve
  #undef gluBeginPolygon
