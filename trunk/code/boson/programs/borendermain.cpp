@@ -45,7 +45,7 @@
 #include "../botexture.h"
 #include "../bomousemovediff.h"
 #include "../bosonviewdata.h"
-#include "../boufo/boufo.h"
+#include "boufo.h"
 #include "../boufo/boufoaction.h"
 #include "../info/boinfo.h"
 #include "borendergui.h"

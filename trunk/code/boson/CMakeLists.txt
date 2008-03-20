@@ -8,7 +8,6 @@ add_subdirectory( data )
 add_subdirectory( gameengine/script )
 add_subdirectory( info )
 add_subdirectory( gameview/plugin )
-add_subdirectory( boufo )
 add_subdirectory( modelrendering/meshrenderer )
 add_subdirectory( groundrenderer )
 add_subdirectory( sound/bosound )
@@ -29,7 +28,7 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/bodebug
 	${CMAKE_SOURCE_DIR}/bogl
 	${CMAKE_CURRENT_SOURCE_DIR}/sound/bosound
-	${CMAKE_CURRENT_SOURCE_DIR}/boufo
+	${CMAKE_SOURCE_DIR}/boufo
 	${CMAKE_CURRENT_SOURCE_DIR}/gameengine
 	${KDE3_INCLUDE_DIRS}
 	${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}

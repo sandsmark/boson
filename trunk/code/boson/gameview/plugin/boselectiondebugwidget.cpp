@@ -29,7 +29,7 @@
 #include "../../gameengine/unitorder.h"
 #include "../../gameengine/unitproperties.h"
 #include "../../gameengine/bosonpropertyxml.h"
-#include "../../boufo/boufotabwidget.h"
+#include "boufotabwidget.h"
 #include "../../gameview/bosonitemrenderer.h"
 #include "../../bosonviewdata.h"
 #include "../../modelrendering/bosonmodel.h"

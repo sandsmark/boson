@@ -19,7 +19,7 @@
 #ifndef BOSELECTIONDEBUGWIDGET_H
 #define BOSELECTIONDEBUGWIDGET_H
 
-#include "../../boufo/boufo.h"
+#include "boufo.h"
 
 class BosonCanvas;
 class PlayerIO;

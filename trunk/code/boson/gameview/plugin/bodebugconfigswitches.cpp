@@ -21,7 +21,7 @@
 #include "bodebugconfigswitches.moc"
 
 #include "bodebug.h"
-#include "../../boufo/boufocheckbox.h"
+#include "boufocheckbox.h"
 #include "../../bosonconfig.h"
 
 #include <qsignalmapper.h>

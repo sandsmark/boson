@@ -21,7 +21,7 @@
 #include "bosongameviewplugindefault.moc"
 
 #include "../../../bomemory/bodummymemory.h"
-#include "../../boufo/boufo.h"
+#include "boufo.h"
 #include "../../bosonconfig.h"
 #include "editorrandommapwidget.h"
 #include "boselectiondebugwidget.h"

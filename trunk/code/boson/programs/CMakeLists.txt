@@ -6,7 +6,7 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/bogl
 	${CMAKE_SOURCE_DIR}/boson
 	${CMAKE_SOURCE_DIR}/boson/gameengine
-	${CMAKE_SOURCE_DIR}/boson/boufo
+	${CMAKE_SOURCE_DIR}/boufo
 	${QT_INCLUDE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 )
