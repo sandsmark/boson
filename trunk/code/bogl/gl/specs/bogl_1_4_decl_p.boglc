@@ -1,0 +1,223 @@
+include "bogl_1_3_decl_p.h"
+
+# additions in OpenGL 1.4:
+# previously extensions and now directly included:
+# * SGIS_generate_mipmap
+# * NV_blend_square
+# * ARB_depth_texture
+# * ARB_shadow
+# * EXT_fog_coord
+# * EXT_multi_draw_arrays
+# * ARB_point_parameters
+# * EXT_secondary_color
+# * EXT_blend_func_separate
+# * EXT_stencil_wrap
+# * ARB_texture_env_crossbar
+# * EXT_texture_lod_bias
+# * ARB_texture_mirrored_repeat
+# * ARB_window_pos
+
+
+# new functions:
+# * SGIS_generate_mipmap
+#   none
+# * NV_blend_square
+#   none
+# * ARB_depth_texture
+#   none
+# * ARB_shadow
+#   none
+# * EXT_fog_coord
+#   glFogCoord[fd]()
+#   glFogCoord[fd]v()
+#   glFogCoordPointer()
+# * EXT_multi_draw_arrays
+#   glMultiDrawArrays()
+#   glMultiDrawElements()
+# * ARB_point_parameters
+#   glPointParameterf()
+#   glPointParameterfv()
+#   glPointParameteri()    // AB: not in the extension, but in the 1.4 spec
+#   glPointParameteriv()   // AB: not in the extension, but in the 1.4 spec
+# * EXT_secondary_color
+#   glSecondaryColor3[bsifd ubusui]()
+#   glSecondaryColor3[bsifd ubusui]v()
+#   glSecondaryColorPointer()
+# * EXT_blend_func_separate
+#   glBlendFuncSeparate()
+# * EXT_stencil_wrap
+#   none
+# * ARB_texture_env_crossbar
+#   none
+# * EXT_texture_lod_bias
+#   none
+# * ARB_texture_mirrored_repeat
+#   none
+# * ARB_window_pos
+#   glWindowPos2[dfis]()
+#   glWindowPos2[dfis]v()
+#   glWindowPos3[dfis]()
+#   glWindowPos3[dfis]v()
+#
+#
+# new defines:
+# * SGIS_generate_mipmap
+#   GL_GENERATE_MIPMAP
+#   GL_GENERATE_MIPMAP_HINT
+# * NV_blend_square
+#   none
+# * ARB_depth_texture
+#   GL_DEPTH_COMPONENT
+#   GL_DEPTH_COMPONENT16
+#   GL_DEPTH_COMPONENT24
+#   GL_DEPTH_COMPONENT32
+#   GL_TEXTURE_DEPTH_SIZE
+#   GL_DEPTH_TEXTURE_MODE
+# * ARB_shadow
+#   GL_TEXTURE_COMPARE_MODE
+#   GL_TEXTURE_COMPARE_FUNC
+#   GL_COMPARE_R_TO_TEXTURE
+# * EXT_fog_coord
+#   FOG_COORDINATE_SOURCE
+#   FOG_COORDINATE
+#   FRAGMENT_DEPTH
+#   CURRENT_FOG_COORDINATE
+#   FOG_COORDINATE_ARRAY_TYPE
+#   FOG_COORDINATE_ARRAY_STRIDE
+#   FOG_COORDINATE_ARRAY_POINTER
+#   GL_FOG_COORDINATE_ARRAY
+# * EXT_multi_draw_arrays
+#   none
+# * ARB_point_parameters
+#   POINT_SIZE_MIN
+#   POINT_SIZE_MAX
+#   POINT_FADE_THRESHOLD_SIZE
+#   POINT_DISTANCE_ATTENUATION
+# * EXT_secondary_color
+#   GL_COLOR_SUM
+#   GL_CURRENT_SECONDARY_COLOR
+#   GL_SECONDARY_COLOR_ARRAY_SIZE
+#   GL_SECONDARY_COLOR_ARRAY_TYPE
+#   GL_SECONDARY_COLOR_ARRAY_STRIDE
+#   GL_SECONDARY_COLOR_ARRAY_POINTER
+#   GL_SECONDARY_COLOR_ARRAY
+# * EXT_blend_func_separate
+#   GL_BLEND_DST_RGB
+#   GL_BLEND_SRC_RGB
+#   GL_BLEND_DST_ALPHA
+#   GL_BLEND_SRC_ALPHA
+# * EXT_stencil_wrap
+#   GL_INCR_WRAP
+#   GL_DECR_WRAP
+# * ARB_texture_env_crossbar
+#   none (GL_TEXTUREi was already in 1.3)
+# * EXT_texture_lod_bias
+#   GL_TEXTURE_FILTER_CONTROL
+#   GL_TEXTURE_LOD_BIAS
+#   GL_MAX_TEXTURE_LOD_BIAS
+# * ARB_texture_mirrored_repeat
+#   GL_MIRRORED_REPEAT
+# * ARB_window_pos
+#   none
+
+
+function void . glFogCoordf . GLfloat
+function void . glFogCoordd . GLdouble
+function void . glFogCoordfv . const GLfloat*
+function void . glFogCoorddv . const GLdouble*
+function void . glFogCoordPointer . GLenum, GLsizei, const GLvoid*
+function void . glMultiDrawArrays . GLenum, GLint*, GLsizei*, GLsizei
+function void . glMultiDrawElements . GLenum, GLsizei*, GLenum, const GLvoid**, GLsizei
+function void . glPointParameterf . GLenum, GLfloat
+function void . glPointParameterfv . GLenum, const GLfloat*
+function void . glPointParameteri . GLenum, GLint
+function void . glPointParameteriv . GLenum, const GLint*
+function void . glSecondaryColor3b . GLbyte, GLbyte, GLbyte
+function void . glSecondaryColor3s . GLshort, GLshort, GLshort
+function void . glSecondaryColor3i . GLint, GLint, GLint
+function void . glSecondaryColor3f . GLfloat, GLfloat, GLfloat
+function void . glSecondaryColor3d . GLdouble, GLdouble, GLdouble
+function void . glSecondaryColor3bv . const GLbyte*
+function void . glSecondaryColor3sv . const GLshort*
+function void . glSecondaryColor3iv . const GLint*
+function void . glSecondaryColor3fv . const GLfloat*
+function void . glSecondaryColor3dv . const GLdouble*
+function void . glSecondaryColor3ub . GLubyte, GLubyte, GLubyte
+function void . glSecondaryColor3us . GLushort, GLushort, GLushort
+function void . glSecondaryColor3ui . GLuint, GLuint, GLuint
+function void . glSecondaryColor3ubv . const GLubyte*
+function void . glSecondaryColor3usv . const GLushort*
+function void . glSecondaryColor3uiv . const GLuint*
+function void . glSecondaryColorPointer . GLint, GLenum, GLsizei, const GLvoid*
+function void . glBlendFuncSeparate . GLenum, GLenum, GLenum,GLenum
+function void . glWindowPos2d . GLdouble, GLdouble
+function void . glWindowPos2f . GLfloat, GLfloat
+function void . glWindowPos2i . GLint, GLint
+function void . glWindowPos2s . GLshort, GLshort
+function void . glWindowPos2dv . const GLdouble*
+function void . glWindowPos2fv . const GLfloat*
+function void . glWindowPos2iv . const GLint*
+function void . glWindowPos2sv . const GLshort*
+function void . glWindowPos3d . GLdouble, GLdouble, GLdouble
+function void . glWindowPos3f . GLfloat, GLfloat, GLfloat
+function void . glWindowPos3i . GLint, GLint, GLint
+function void . glWindowPos3s . GLshort, GLshort, GLshort
+function void . glWindowPos3dv . const GLdouble*
+function void . glWindowPos3fv . const GLfloat*
+function void . glWindowPos3iv . const GLint*
+function void . glWindowPos3sv . const GLshort*
+
+
+# SGIS_generate_mipmap
+define GL_GENERATE_MIPMAP              0x8191
+define GL_GENERATE_MIPMAP_HINT         0x8192
+# ARB_depth_texture
+define GL_DEPTH_COMPONENT              0x1902
+define GL_DEPTH_COMPONENT16            0x81A5
+define GL_DEPTH_COMPONENT24            0x81A6
+define GL_DEPTH_COMPONENT32            0x81A7
+define GL_TEXTURE_DEPTH_SIZE           0x884A
+define GL_DEPTH_TEXTURE_MODE           0x884B
+# ARB_shadow
+define GL_TEXTURE_COMPARE_MODE         0x884C
+define GL_TEXTURE_COMPARE_FUNC         0x884D
+define GL_COMPARE_R_TO_TEXTURE         0x884E
+# EXT_fog_coord
+define GL_FOG_COORDINATE_SOURCE        0x8450
+define GL_FOG_COORDINATE               0x8451
+define GL_FRAGMENT_DEPTH               0x8452
+define GL_CURRENT_FOG_COORDINATE       0x8453
+define GL_FOG_COORDINATE_ARRAY_TYPE    0x8454
+define GL_FOG_COORDINATE_ARRAY_STRIDE  0x8455
+define GL_FOG_COORDINATE_ARRAY_POINTER 0x8456
+define GL_FOG_COORDINATE_ARRAY         0x8457
+# ARB_point_parameters
+define GL_POINT_SIZE_MIN               0x8126
+define GL_POINT_SIZE_MAX               0x8127
+define GL_POINT_FADE_THRESHOLD_SIZE    0x8128
+define GL_POINT_DISTANCE_ATTENUATION   0x8129
+# EXT_secondary_color
+define GL_COLOR_SUM                    0x8458
+define GL_CURRENT_SECONDARY_COLOR      0x8459
+define GL_SECONDARY_COLOR_ARRAY_SIZE   0x845A
+define GL_SECONDARY_COLOR_ARRAY_TYPE   0x845B
+define GL_SECONDARY_COLOR_ARRAY_STRIDE 0x845C
+define GL_SECONDARY_COLOR_ARRAY_POINTER 0x845D
+define GL_SECONDARY_COLOR_ARRAY        0x845E
+# EXT_blend_func_separate
+define GL_BLEND_DST_RGB                0x80C8
+define GL_BLEND_SRC_RGB                0x80C9
+define GL_BLEND_DST_ALPHA              0x80CA
+define GL_BLEND_SRC_ALPHA              0x80CB
+# EXT_stencil_wrap
+define GL_INCR_WRAP                    0x8507
+define GL_DECR_WRAP                    0x8508
+# EXT_texture_lod_bias
+define GL_TEXTURE_FILTER_CONTROL       0x8500
+define GL_TEXTURE_LOD_BIAS             0x8501
+define GL_MAX_TEXTURE_LOD_BIAS         0x84FD
+# ARB_texture_mirrored_repeat
+define GL_MIRRORED_REPEAT_ARB          0x8370
+
+
+

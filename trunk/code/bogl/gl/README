@@ -1,3 +1,5 @@
+The headers are generated using make_headers.sh from the files in specs/!
+
 why we need these declarations sorted by version:
 * dlopen() and dlsym() causes problems with GL sometimes.
   -> it would be nice if we'd be able to replace this

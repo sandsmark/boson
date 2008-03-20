@@ -1,0 +1,4 @@
+# note: compliant OpenGL implementations don't have to implement an extension!
+
+function void . glPolygonOffsetEXT . GLfloat factor, GLfloat bias
+

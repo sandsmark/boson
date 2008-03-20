@@ -1,0 +1,33 @@
+# "boglc", the bogl compiler, will use each *.boglc files to generate a header, for use
+# in bogl.
+# note that both, the .boglc file and the generated header, are meant to be internal:
+# do not include the header directly, include bogl.h instead.
+#
+# the .boglc file defines the functions signatures of the functions that should be in
+# the header.
+#
+# format of the .boglc files:
+# 1. every line starting (!) with # will be ignored.
+# 2. every empty line will be added to the header.
+# 3. every line starting with "function" is meant to represent exactly one
+#    function in the following format:
+#      function <return_type> . <function_name> . <list_of_parameter_types>
+#    where <list_of_parameter_types> is a "," separated list types.
+#    you may use a variable name for every parameter, just like in C (use only
+#    a-z, A-Z, 0-9, _ and -).
+# 4. every line starting with "define", "ifdef", "ifndef", "endif" or "include"
+#    will be treated like normal C preprocessor commands.
+#    i.e. the whole line will end up in the header with "#" prepended.
+#    note however that the "function" lines may appear in a totally different
+#    order in the header than in the .boglc file. so do NOT protect any function
+#    lines using ifdef or ifndef.
+# 5. every line starting with "typedef" will be treated like normal C++
+#    typedefs. i.e. the whole line will end up in the header (unmodified).
+#
+#    note that the spaces in the format above are NOT mandatory, but recommended
+#    (for readability). additional spaces before and after ever "." are allowed.
+#    example for "void glVertex3f(GLfloat x, GLfloat y, GLfloat z);":
+#      function void . glVertex3f . GLfloat x, GLfloat y, GLfloat z
+
+# TODO: comments that are included in the header and comments that are NOT
+#       included (probably "#" vs "##")
