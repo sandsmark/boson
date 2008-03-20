@@ -1,0 +1,9 @@
+The *_decl_p.h files are generated from the *.boglc files in specs/ and
+specs/extensions/.
+
+TODO: auto-generate them, i.e. let cmake do that.
+  -> I have not yet been able to figure out a way to do that: we need bogl.h to
+     depend on these files, so that they are generated whenever bogl.h is used
+     somewhere, however I have no clue how to do that.
+     -> dependencies on .cpp files are easy (set_source_files_properties with
+        OBJECT_DEPENDS), but I have no idea how to do that for headers.

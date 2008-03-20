@@ -1,0 +1,62 @@
+# note: compliant OpenGL implementations don't have to implement an extension!
+
+
+# new functions:
+#   glMultiTexCoord{1234}{sifd}ARB()
+#   glMultiTexCoord{1234}{sifd}vARB()
+#   glClientActiveTextureARB()
+#   glActiveTextureARB()
+
+
+function void . glMultiTexCoord1dARB . GLenum target, GLdouble s
+function void . glMultiTexCoord1dvARB . GLenum target, const GLdouble* v
+function void . glMultiTexCoord1fARB . GLenum target, GLfloat s
+function void . glMultiTexCoord1fvARB . GLenum target, const GLfloat* v
+function void . glMultiTexCoord1iARB . GLenum target, GLint s
+function void . glMultiTexCoord1ivARB . GLenum target, const GLint* v
+function void . glMultiTexCoord1sARB . GLenum target, GLshort s
+function void . glMultiTexCoord1svARB . GLenum target, const GLshort* v
+function void . glMultiTexCoord2dARB . GLenum target, GLdouble s, GLdouble t
+function void . glMultiTexCoord2dvARB . GLenum target, const GLdouble* v
+function void . glMultiTexCoord2fARB . GLenum target, GLfloat s, GLfloat t
+function void . glMultiTexCoord2fvARB . GLenum target, const GLfloat* v
+function void . glMultiTexCoord2iARB . GLenum target, GLint s, GLint t
+function void . glMultiTexCoord2ivARB . GLenum target, const GLint* v
+function void . glMultiTexCoord2sARB . GLenum target, GLshort s, GLshort t
+function void . glMultiTexCoord2svARB . GLenum target, const GLshort* v
+function void . glMultiTexCoord3dARB . GLenum target, GLdouble s, GLdouble t, GLdouble r
+function void . glMultiTexCoord3dvARB . GLenum target, const GLdouble* v
+function void . glMultiTexCoord3fARB . GLenum target, GLfloat s, GLfloat t, GLfloat r
+function void . glMultiTexCoord3fvARB . GLenum target, const GLfloat* v
+function void . glMultiTexCoord3iARB . GLenum target, GLint s, GLint t, GLint r
+function void . glMultiTexCoord3ivARB . GLenum target, const GLint* v
+function void . glMultiTexCoord3sARB . GLenum target, GLshort s, GLshort t, GLshort r
+function void . glMultiTexCoord3svARB . GLenum target, const GLshort* v
+function void . glMultiTexCoord4dARB . GLenum target, GLdouble s, GLdouble t, GLdouble r, GLdouble q
+function void . glMultiTexCoord4dvARB . GLenum target, const GLdouble* v
+function void . glMultiTexCoord4fARB . GLenum target, GLfloat s, GLfloat t, GLfloat r, GLfloat q
+function void . glMultiTexCoord4fvARB . GLenum target, const GLfloat* v
+function void . glMultiTexCoord4iARB . GLenum target, GLint s, GLint t, GLint r, GLint q
+function void . glMultiTexCoord4ivARB . GLenum target, const GLint* v
+function void . glMultiTexCoord4sARB . GLenum target, GLshort s, GLshort t, GLshort r, GLshort q
+function void . glMultiTexCoord4svARB . GLenum target, const GLshort* v
+function void . glClientActiveTextureARB . GLenum texture
+function void . glActiveTextureARB . GLenum texture
+
+
+
+define GL_TEXTURE0_ARB                       0x84C0
+define GL_TEXTURE1_ARB                       0x84C1
+define GL_TEXTURE2_ARB                       0x84C2
+define GL_TEXTURE3_ARB                       0x84C3
+define GL_TEXTURE4_ARB                       0x84C4
+define GL_TEXTURE5_ARB                       0x84C5
+define GL_TEXTURE6_ARB                       0x84C6
+define GL_TEXTURE7_ARB                       0x84C7
+define GL_TEXTURE8_ARB                       0x84C8
+define GL_TEXTURE9_ARB                       0x84C9
+define GL_CLIENT_ACTIVE_TEXTURE_ARB          0x84E1
+define GL_ACTIVE_TEXTURE_ARB                 0x84E0
+define GL_MAX_TEXTURE_UNITS_ARB              0x84E2
+
+
