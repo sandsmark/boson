@@ -44,6 +44,7 @@ copy_file_find_not_params="$copy_file_find_not_params ! -name Repository"
 copy_file_find_not_params="$copy_file_find_not_params ! -name Entries"
 copy_file_find_not_params="$copy_file_find_not_params ! -name ufo_config_gnu.hpp.in"
 copy_file_find_not_params="$copy_file_find_not_params ! -name configure.in.in"
+copy_file_find_not_params="$copy_file_find_not_params ! -regex .*\.svn/.*"
 
 if [ -e $DST ]; then
 	echo "\"$DST\" already exists - we will delete files in it. Continue? (y/n)"
