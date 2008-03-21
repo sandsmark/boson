@@ -45,7 +45,6 @@ kde3_automoc(${bosonNoGUI_SRCS})
 boson_add_executable(boson-no-gui ${bosonNoGUI_SRCS})
 boson_target_link_libraries(boson-no-gui
 	gameengine
-	boufo
 	common
 	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
 	${LIB_BOMEMORY}
