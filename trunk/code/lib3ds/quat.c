@@ -15,7 +15,7 @@
  *
  * You should  have received  a copy of the GNU Lesser General Public License
  * along with  this program;  if not, write to the  Free Software Foundation,
- * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
  * $Id: quat.c,v 1.6 2004/11/20 08:31:31 efalk Exp $
  */

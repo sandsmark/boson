@@ -15,7 +15,7 @@
  *
  * You should  have received  a copy of the GNU Lesser General Public License
  * along with  this program;  if not, write to the  Free Software Foundation,
- * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
  * $Id: tracks.c,v 1.15 2006/01/27 10:50:33 madmac Exp $
  */
