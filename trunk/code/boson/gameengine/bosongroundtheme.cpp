@@ -204,7 +204,7 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
 
  bool ret = true;
 
- mGroundTypes.resize(grounds);
+ QPtrVector<BosonGroundType> types(grounds);
  for (unsigned int i = 0; i < grounds && ret; i++) {
 	BosonGroundType* ground = loadGroundType(conf, i);
 	if (!ground) {
@@ -212,18 +212,44 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
 		ret = false;
 		continue;
 	}
-	mGroundTypes.insert(i, ground);
+	types.insert(i, ground);
  }
 
+
  if (!ret) {
-	boError() << k_funcinfo << "Could not load ground theme config file " << file << endl;
-	mGroundTypes.clear();
+	boError() << k_funcinfo << "Could not load ground types from config file " << file << endl;
+	types.setAutoDelete(true);
+	types.clear();
 	return ret;
  }
 
- d->mId = identifier;
- d->mGroundThemeDir = dir;
+ types.setAutoDelete(false);
+ if (!applyGroundThemeConfig(identifier, types, dir)) {
+	types.setAutoDelete(true);
+	types.clear();
+	boError() << k_funcinfo << "Could not apply ground theme loaded from config file " << file << endl;
+	return false;
+ }
+
  return ret;
+}
+
+bool BosonGroundTheme::applyGroundThemeConfig(const QString& identifier, const QPtrVector<BosonGroundType>& types, const QString& themeDir)
+{
+ if (!d->mId.isNull()) {
+	boError() << k_funcinfo << "theme already loaded in this object" << endl;
+	return false;
+ }
+ mGroundTypes = types;
+ mGroundTypes.setAutoDelete(true);
+ d->mId = identifier;
+ d->mGroundThemeDir = themeDir;
+
+ for (unsigned int i = 0; i < mGroundTypes.count(); i++) {
+	mGroundTypes[i]->index = i;
+ }
+
+ return true;
 }
 
 BosonGroundType* BosonGroundTheme::loadGroundType(KSimpleConfig& conf, unsigned int index)
