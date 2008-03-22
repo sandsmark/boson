@@ -400,6 +400,10 @@ bool BosonMap::createNewMap(unsigned int width, unsigned int height, BosonGround
 	BO_NULL_ERROR(theme);
 	return false;
  }
+ if (theme->groundTypeCount() == 0) {
+	boError() << k_funcinfo << "invalid groundtheme " << theme << ": it does not contain any ground types" << endl;
+	return false;
+ }
  mMapWidth = width;
  mMapHeight = height;
  if (!applyGroundTheme(theme)) {
