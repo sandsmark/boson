@@ -38,6 +38,7 @@ protected:
 	void initMap();
 	void cleanupMap();
 	bool testCreateNewMaps();
+	bool testSaveLoadMaps();
 
 	bool checkIfMapIsValid(BosonMap* map, unsigned int width, unsigned int height, BosonGroundTheme* theme);
 	bool checkIfMapsAreEqual(BosonMap* map1, BosonMap* map2);

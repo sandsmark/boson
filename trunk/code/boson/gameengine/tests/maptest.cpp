@@ -90,6 +90,7 @@ bool MapTest::test()
 
 
  DO_TEST(testCreateNewMaps());
+ DO_TEST(testSaveLoadMaps());
 
  return true;
 }
@@ -128,6 +129,56 @@ bool MapTest::testCreateNewMaps()
  if (!checkIfMapsAreEqual(mMap, copy)) {
 	return false;
  }
+ delete copy;
+
+ return true;
+}
+
+bool MapTest::testSaveLoadMaps()
+{
+ const unsigned int width = 100;
+ const unsigned int height = 200;
+
+ BosonGroundTheme* theme = BosonData::bosonData()->groundTheme("dummy_ID");
+ if (!theme) {
+	BO_NULL_ERROR(theme);
+	return false;
+ }
+ mMap->createNewMap(width, height, theme);
+ if (!checkIfMapIsValid(mMap, width, height, theme)) {
+	return false;
+ }
+
+ QMap<QString, QByteArray> savedMap = mMap->saveMapToFiles();
+ MY_VERIFY(savedMap.isEmpty() == false);
+
+ BosonMap* copy = new BosonMap(this);
+ bool success = copy->loadMapFromFiles(savedMap);
+ MY_VERIFY(success == true);
+ if (!checkIfMapIsValid(copy, width, height, theme)) {
+	return false;
+ }
+
+ if (!checkIfMapsAreEqual(mMap, copy)) {
+	return false;
+ }
+
+ // check that a loaded map can still be saved correctly.
+ // the resulting map should match exctly both, mMap and copy
+ QMap<QString, QByteArray> savedMap2 = copy->saveMapToFiles();
+ BosonMap* copy2 = new BosonMap(this);
+ success = copy2->loadMapFromFiles(savedMap2);
+ MY_VERIFY(success == true);
+ if (!checkIfMapIsValid(copy2, width, height, theme)) {
+	return false;
+ }
+ if (!checkIfMapsAreEqual(mMap, copy2)) {
+	return false;
+ }
+
+
+ delete copy;
+ delete copy2;
 
  return true;
 }
