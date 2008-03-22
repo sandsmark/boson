@@ -768,6 +768,12 @@ bool BosonMap::loadTexMap(QDataStream& stream)
  return mTexMap->load(stream);
 }
 
+bool BosonMap::loadTexMapFromFile(const QByteArray& array)
+{
+ QDataStream stream(array, IO_ReadOnly);
+ return loadTexMap(stream);
+}
+
 bool BosonMap::saveTexMap(QDataStream& stream) const
 {
  if (!mTexMap) {
@@ -783,6 +789,16 @@ bool BosonMap::saveTexMap(QDataStream& stream) const
 	return false;
  }
  return mTexMap->save(stream);
+}
+
+QByteArray BosonMap::saveTexMapToFile() const
+{
+ QByteArray array;
+ QDataStream stream(array, IO_WriteOnly);
+ if (!saveTexMap(stream)) {
+	return QByteArray();
+ }
+ return array;
 }
 
 QByteArray BosonMap::saveMapGeomToFile() const
@@ -1409,5 +1425,88 @@ void BosonMap::registerQuadTree(BoGroundQuadTreeNode* tree)
 void BosonMap::unregisterQuadTree(BoGroundQuadTreeNode* tree)
 {
  d->mQuadTreeCollection->unregisterTree(tree);
+}
+
+QMap<QString, QByteArray> BosonMap::saveMapToFiles() const
+{
+ QMap<QString, QByteArray> files;
+
+ QByteArray mapXML;
+ QByteArray waterXML;
+ QByteArray heightMap;
+ QByteArray texMap;
+ mapXML = saveMapGeomToFile();
+ if (mapXML.size() == 0) {
+	boError() << k_funcinfo << "error saving the map geometry" << endl;
+	return files;
+ }
+ waterXML = saveWaterToFile();
+ if (waterXML.size() == 0) {
+	boError() << k_funcinfo << "error saving the water" << endl;
+	return files;
+ }
+ heightMap = saveHeightMapImage();
+ if (heightMap.size() == 0) {
+	boError() << k_funcinfo << "error saving the heightMap" << endl;
+	return files;
+ }
+ texMap = saveTexMapToFile();
+ if (texMap.size() == 0) {
+	boError() << k_funcinfo << "error saving the texMap" << endl;
+	return files;
+ }
+
+ files.insert("map/map.xml", mapXML);
+ files.insert("map/water.xml", waterXML);
+ files.insert("map/heightmap.png", heightMap);
+ files.insert("map/texmap", texMap);
+
+ return files;
+}
+
+bool BosonMap::loadMapFromFiles(const QMap<QString, QByteArray>& files)
+{
+ if (mCells) {
+	boError() << k_funcinfo << "cells already constructed cannot load another map into this object" << endl;
+	return false;
+ }
+ QByteArray mapXML = files["map/map.xml"];
+ QByteArray waterXML = files["map/water.xml"];
+ QByteArray texMap = files["map/texmap"];
+ QByteArray heightMap = files["map/heightmap.png"];
+ if (mapXML.size() == 0) {
+	boError() << k_funcinfo << "empty map.xml" << endl;
+	return false;
+ }
+ if (waterXML.size() == 0) {
+	boError() << k_funcinfo << "empty water.xml" << endl;
+	return false;
+ }
+ if (texMap.size() == 0) {
+	boError() << k_funcinfo << "empty texMap" << endl;
+	return false;
+ }
+ if (heightMap.size() == 0) {
+	boError() << k_funcinfo << "empty heightMap" << endl;
+	return false;
+ }
+
+ if (!loadMapGeomFromFile(mapXML)) {
+	return false;
+ }
+ if (!loadTexMapFromFile(texMap)) {
+	return false;
+ }
+ if (!generateCellsFromTexMap()) {
+	boError() << k_funcinfo << "generating cells from texmap failed" << endl;
+	return false;
+ }
+ if (!loadHeightMapImage(heightMap)) {
+	return false;
+ }
+ if (!loadWaterFromFile(waterXML)) {
+	return false;
+ }
+ return true;
 }
 
