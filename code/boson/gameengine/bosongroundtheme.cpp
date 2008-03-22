@@ -67,10 +67,6 @@ BosonGroundTheme::~BosonGroundTheme()
 
 bool BosonGroundTheme::createGroundThemeList()
 {
- if (BosonData::bosonData()->availableGroundThemes().count() != 0) {
-	boWarning() << k_funcinfo << "groundthemes already loaded" << endl;
-	return true;
- }
  QStringList list = groundThemeFiles();
  if (list.isEmpty()) {
 	boWarning() << k_funcinfo << "Cannot find any ground themes!" << endl;
