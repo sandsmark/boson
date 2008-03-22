@@ -694,7 +694,14 @@ public:
 
 
 
-	QByteArray saveMapToFile() const;
+	/**
+	 * Save the map geometry (widht/height, i.e. all datat required to
+	 * create the @ref cells array) and groundtheme ID, as well as the file
+	 * format version to an XML file. The XML file is returned on success
+	 * (as a @ref QByteArray), otherwise an empty @ref QByteArray is
+	 * returned
+	 **/
+	QByteArray saveMapGeomToFile() const;
 	QByteArray saveMapPreviewPNGToFile() const;
 	QByteArray saveWaterToFile() const;
 
@@ -704,7 +711,7 @@ public:
 	 * the file on disk. This will not load things such as height map, which
 	 * are in a different file.
 	 **/
-	bool loadMapFromFile(const QByteArray& map);
+	bool loadMapGeomFromFile(const QByteArray& map);
 
 	bool loadWaterFromFile(const QByteArray& water);
 
@@ -713,7 +720,7 @@ public:
 	 * files in the .bpf file. This is e.g. the height map.
 	 *
 	 * The stream must have been creates using @ref saveCompleteMap,
-	 * <em>not</em> @ref saveMapToFile!
+	 * <em>not</em> @ref saveMapGeomToFile!
 	 **/
 	bool loadCompleteMap(QDataStream& stream);
 
@@ -770,7 +777,7 @@ public:
 
 	/**
 	 * @return The file format version of the map, that is used when
-	 * saving a map file (see @ref saveMapToFile).
+	 * saving a map file (see @ref saveMapGeomToFile).
 	 **/
 	static int mapFileFormatVersion();
 

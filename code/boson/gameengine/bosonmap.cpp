@@ -477,7 +477,7 @@ bool BosonMap::createNewMap(unsigned int width, unsigned int height, BosonGround
  return ret;
 }
 
-bool BosonMap::loadMapFromFile(const QByteArray& mapXML)
+bool BosonMap::loadMapGeomFromFile(const QByteArray& mapXML)
 {
  boDebug(270) << k_funcinfo << endl;
  QDomDocument doc(QString::fromLatin1("BosonMap"));
@@ -566,7 +566,7 @@ bool BosonMap::loadCompleteMap(QDataStream& stream)
 {
  QByteArray mapBuffer;
  stream >> mapBuffer;
- if (!loadMapFromFile(mapBuffer)) {
+ if (!loadMapGeomFromFile(mapBuffer)) {
 	boError() << k_funcinfo << "Could not load basic map" << endl;
 	return false;
  }
@@ -785,7 +785,7 @@ bool BosonMap::saveTexMap(QDataStream& stream) const
  return mTexMap->save(stream);
 }
 
-QByteArray BosonMap::saveMapToFile() const
+QByteArray BosonMap::saveMapGeomToFile() const
 {
  if (!isValidMapGeo(width(), height())) {
 	boError() << k_funcinfo << "Map geo is not valid" << endl;
@@ -947,7 +947,7 @@ bool BosonMap::saveCompleteMap(QDataStream& stream) const
  //     the map data.
 
  QByteArray buffer;
- buffer = saveMapToFile();
+ buffer = saveMapGeomToFile();
  if (buffer.size() == 0) {
 	boError() << k_funcinfo << "Could not save basic map" << endl;
 	return false;
