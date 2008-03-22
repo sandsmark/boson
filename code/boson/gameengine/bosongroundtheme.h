@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2003-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,11 +21,12 @@
 
 #include <qstring.h>
 #include <qwindowdefs.h> // QRgb
-#include <qintdict.h>
+#include <qptrvector.h>
 
 class QImage;
 class QPixmap;
 class QStringList;
+class KSimpleConfig;
 
 class BosonMap;
 
@@ -65,8 +66,14 @@ public:
 	BosonGroundTheme();
 	~BosonGroundTheme();
 
+	/**
+	 * @return A unique identifier describing this ground theme.
+	 **/
 	const QString& identifier() const;
 
+	/**
+	 * @return The directory where the ground theme data (index.ground, textures, ...) are stored
+	 **/
 	const QString& themeDirectory() const;
 
 	/**
@@ -107,9 +114,12 @@ public:
 
 	BosonGroundType* groundType(unsigned int i) const;
 
+protected:
+	BosonGroundType* loadGroundType(KSimpleConfig& conf, unsigned int i);
+
 private:
 	BosonGroundThemePrivate* d;
-	QIntDict<BosonGroundType> mGroundTypes;
+	QPtrVector<BosonGroundType> mGroundTypes;
 };
 
 #endif
