@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -427,7 +427,7 @@ bool BosonPlayField::loadMapFromFile(const QByteArray& mapXML, const QByteArray&
  }
  delete mMap;
  mMap = new BosonMap(this);
- bool ret = mMap->loadMapFromFile(mapXML);
+ bool ret = mMap->loadMapGeomFromFile(mapXML);
  if (!ret) {
 	boError() << k_funcinfo << "Could not load map" << endl;
 	return false;
@@ -467,13 +467,13 @@ QString BosonPlayField::saveDescriptionToFile() const
  return mDescription->toString();
 }
 
-QByteArray BosonPlayField::saveMapToFile() const
+QByteArray BosonPlayField::saveMapGeomToFile() const
 {
  if (!mMap) {
 	boError() << k_funcinfo << "NULL map" << endl;
 	return QByteArray();
  }
- return mMap->saveMapToFile();
+ return mMap->saveMapGeomToFile();
 }
 
 QByteArray BosonPlayField::saveWaterToFile() const
@@ -813,7 +813,7 @@ bool BosonPlayField::savePlayFieldToFiles(QMap<QString, QByteArray>& files)
  QByteArray heightMap;
  QByteArray texMap;
  QByteArray waterXML;
- mapXML = saveMapToFile();
+ mapXML = saveMapGeomToFile();
  if (mapXML.size() == 0) {
 	boError() << k_funcinfo << "failed saving the map" << endl;
 	return false;

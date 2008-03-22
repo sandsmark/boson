@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -234,7 +234,7 @@ protected:
 	bool loadMapFromFile(const QByteArray& xml, const QByteArray& heightMapImage, const QByteArray& texMap, const QByteArray& waterXML);
 
 	QString saveDescriptionToFile() const;
-	QByteArray saveMapToFile() const;
+	QByteArray saveMapGeomToFile() const;
 	QByteArray saveWaterToFile() const;
 	QByteArray saveTexMapToFile() const;
 	QByteArray saveMapPreviewPNGToFile() const;
