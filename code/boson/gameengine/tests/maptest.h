@@ -40,6 +40,7 @@ protected:
 	bool testCreateNewMaps();
 
 	bool checkIfMapIsValid(BosonMap* map, unsigned int width, unsigned int height, BosonGroundTheme* theme);
+	bool checkIfMapsAreEqual(BosonMap* map1, BosonMap* map2);
 
 private:
 	BosonMap* mMap;

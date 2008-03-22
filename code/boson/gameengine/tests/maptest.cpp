@@ -118,6 +118,17 @@ bool MapTest::testCreateNewMaps()
 
  MY_VERIFY(mMap->modified() == false);
 
+
+ // it must be possible to save a newly created map and load it again
+ QMap<QString, QByteArray> savedMap = mMap->saveMapToFiles();
+ MY_VERIFY(savedMap.isEmpty() == false);
+ BosonMap* copy = new BosonMap(this);
+ bool success = copy->loadMapFromFiles(savedMap);
+ MY_VERIFY(success == true);
+ if (!checkIfMapsAreEqual(mMap, copy)) {
+	return false;
+ }
+
  return true;
 }
 
@@ -153,3 +164,22 @@ bool MapTest::checkIfMapIsValid(BosonMap* map, unsigned int width, unsigned int 
 
  return true;
 }
+
+bool MapTest::checkIfMapsAreEqual(BosonMap* map1, BosonMap* map2)
+{
+ MY_VERIFY(map1->width() == map2->width());
+ MY_VERIFY(map1->height() == map2->height());
+ MY_VERIFY(map1->groundTheme() == map2->groundTheme());
+
+ MY_VERIFY(map1->modified() == map2->modified());
+ MY_VERIFY(map1->lakes()->isEmpty() == map2->lakes()->isEmpty());
+
+ // TODO: check contents of
+ // * heightMap
+ // * texMap
+ // * normalMap
+ // * waterDepthAtCorner()
+
+ return true;
+}
+
