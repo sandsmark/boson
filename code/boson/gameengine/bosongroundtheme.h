@@ -106,6 +106,20 @@ public:
 	bool loadGroundThemeConfig(const QString& file);
 
 	/**
+	 * You normally do not need to use this, use @ref loadGroundThemeConfig
+	 * instead.
+	 *
+	 * This method applies the (already loaded) @ref BosonGroundType objects
+	 * in @p types to this theme. The theme directory (see @ref
+	 * themeDirectory) is set to @p themeDir and the ID of this theme to @p
+	 * identifier.
+	 *
+	 * This method may be used if manual loading of a theme is desired,
+	 * instead of loading from a config file.
+	 **/
+	bool applyGroundThemeConfig(const QString& identifier, const QPtrVector<BosonGroundType>& types, const QString& themeDir);
+
+	/**
 	 * Create a list of BosonGroundTheme objects by searching for
 	 * index.ground files. You can retrieve all available objects from @ref
 	 * BosonData.
