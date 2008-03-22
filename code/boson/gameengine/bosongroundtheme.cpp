@@ -28,75 +28,6 @@
 
 #include <ksimpleconfig.h>
 
-/**
- * @short plugin for BosonData providing access to a @ref BosonGroundTheme object
- **/
-class BosonGroundData : public BosonDataObject
-{
-public:
-	/**
-	 * @param groundFile The index.ground file of this groundTheme.
-	 * @param groundTheme The @ref BosonGroundTheme object we are operating
-	 * on. Note that this class will take ownership of the pointer and
-	 * delete it on destruction!
-	 **/
-	BosonGroundData(const QString& groundFile, BosonGroundTheme* groundTheme);
-
-	virtual ~BosonGroundData()
-	{
-		delete mGroundTheme;
-	}
-
-	/*
-	 * @return The identifier of this groundTheme. Should be in the
-	 * index.ground file (e.g. "earth").
-	 **/
-	virtual QString idString() const
-	{
-		return mId;
-	}
-	virtual void* pointer() const
-	{
-		return (void*)groundTheme();
-	}
-	BosonGroundTheme* groundTheme() const
-	{
-		return mGroundTheme;
-	}
-
-	virtual bool load()
-	{
-		if (!groundTheme()) {
-			BO_NULL_ERROR(groundTheme());
-			return false;
-		}
-		return true;
-	}
-
-private:
-	BosonGroundTheme* mGroundTheme;
-	QString mId;
-};
-
-BosonGroundData::BosonGroundData(const QString& groundFile, BosonGroundTheme* groundTheme)
-	: BosonDataObject(groundFile)
-{
- mGroundTheme = groundTheme;
- if (!mGroundTheme->loadGroundThemeConfig(groundFile)) {
-	boError() << k_funcinfo << "unable to load ground theme config file " << groundFile << endl;
-	mId = QString::null;
-	return;
- }
- mId = mGroundTheme->identifier();
- if (mId.isEmpty()) {
-	boError() << k_funcinfo << "no identifier in " << groundFile << endl;
-	mId = QString::null;
-	return;
- }
-}
-
-
-
 BosonGroundType::BosonGroundType()
 {
  index = -1;
@@ -147,16 +78,18 @@ bool BosonGroundTheme::createGroundThemeList()
  }
  QStringList::Iterator it;
  for (it = list.begin(); it != list.end(); ++it) {
-	BosonGroundData* data = new BosonGroundData(*it, new BosonGroundTheme());
-	if (data->idString().isEmpty()) {
-		// probably loadGroundThemeConfig() error
-		boError() << k_funcinfo << *it << " could not be loaded" << endl;
-		delete data;
+	BosonGroundTheme* theme = new BosonGroundTheme();
+	if (!theme->loadGroundThemeConfig(*it)) {
+		boError() << k_funcinfo << "unable to load ground theme config file " << *it << endl;
+		delete theme;
 		continue;
 	}
+
+	BosonGenericDataObject* data = new BosonGenericDataObject(*it, theme->identifier(), theme);
 	if (!BosonData::bosonData()->insertGroundTheme(data)) {
 		boWarning() << k_funcinfo << "unable to insert theme " << *it << endl;
 		delete data;
+		continue;
 	}
  }
  if (BosonData::bosonData()->availableGroundThemes().count() == 0) {
