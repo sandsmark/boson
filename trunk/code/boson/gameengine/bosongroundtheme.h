@@ -31,6 +31,10 @@ class KSimpleConfig;
 class BosonMap;
 
 
+/**
+ * Container class describing a single ground type, such as "water", "desert" or
+ * "snow". It is loaded and used by @ref BosonGroundTheme.
+ **/
 class BosonGroundType
 {
 public:
@@ -53,7 +57,16 @@ public:
 
 class BosonGroundThemePrivate;
 /**
- * Andreas Beckermann <b_mann@gmx.de>
+ * A BosonGroundTheme describes what kinds of ground (grass, desert, snow, ...)
+ * can be used in the game (in particular in @ref BosonMap). These kinds of
+ * ground are described by @ref BosonGroundType objects which are loaded by @ref
+ * loadGroundThemeConfig.
+ *
+ * This class does @em not load the actual data (in particular the textures) of
+ * the ground themes. This is done by the @ref BosonGroundThemeData class.
+ *
+ * @short Loads and holds the available @ref BosonGroundType objects
+ * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class BosonGroundTheme
 {
@@ -61,7 +74,7 @@ public:
 	/**
 	 * Create an empty BosonGroundTheme object.
 	 *
-	 * Use @ref loadGroundTheme to load a theme.
+	 * Use @ref loadGroundThemeConfig to load a theme.
 	 **/
 	BosonGroundTheme();
 	~BosonGroundTheme();
@@ -87,7 +100,8 @@ public:
 	 * config data uses only very little memory, but enables us to easily
 	 * display and parse a complete list of available groundThemes.
 	 *
-	 * This method does <em>not</em> load any actual textures.
+	 * This method does <em>not</em> load any actual textures, use @ref
+	 * BosonGroundTheme::loadGroundTheme for that.
 	 **/
 	bool loadGroundThemeConfig(const QString& file);
 
