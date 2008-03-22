@@ -62,10 +62,11 @@ private:
 /**
  * A @ref BosonDataObject implementation that operates on void* pointers.
  **/
-class BosonGenericDataObject
+class BosonGenericDataObject : public BosonDataObject
 {
 public:
 	BosonGenericDataObject(const QString& file, const QString& id, void* pointer)
+		: BosonDataObject(file)
 	{
 		mFile = file;
 		mId = id;
