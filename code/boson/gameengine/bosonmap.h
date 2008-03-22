@@ -705,6 +705,29 @@ public:
 	QByteArray saveMapPreviewPNGToFile() const;
 	QByteArray saveWaterToFile() const;
 
+	/**
+	 * Save the map to various files (map/map.xml, map/heightmap.png, ...).
+	 *
+	 * Each file is stored as a @ref QByteArray object, i.e. the "files" are
+	 * meant as virtual files, they are not written to the hard disk.
+	 *
+	 * The map preview is NOT saved by this method. Use @ref
+	 * saveMapPreviewPNGToFile to save it manually.
+	 *
+	 * @return A map containing all files describing this map, with the
+	 * filename as key and the file as value. An empty map is returned on
+	 * error.
+	 **/
+	QMap<QString, QByteArray> saveMapToFiles() const;
+
+	/**
+	 * Load files saved using @ref saveMapToFiles.
+	 *
+	 * The @p files array is allowed to hold additional (not map related)
+	 * files. They will simply be ignored.
+	 **/
+	bool loadMapFromFiles(const QMap<QString, QByteArray>& files);
+
 
 	/**
 	 * Load the "main" map, i.e. the map geo (it's size) and it's cells from
@@ -747,6 +770,17 @@ public:
 	 **/
 	bool loadTexMap(QDataStream& stream);
 	bool saveTexMap(QDataStream& stream) const;
+
+	/**
+	 * Like @ref saveTexMap, but returns a @ref QByteArray containing the
+	 * data, or an empty @ref QByteArray if an error occured.
+	 **/
+	QByteArray saveTexMapToFile() const;
+
+	/**
+	 * Like @ref loadTexMap.
+	 **/
+	bool loadTexMapFromFile(const QByteArray& array);
 
 	QByteArray saveTexMapImage(unsigned int texture) const;
 

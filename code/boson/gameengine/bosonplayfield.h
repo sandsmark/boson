@@ -231,7 +231,7 @@ public:
 
 protected:
 	bool loadDescriptionFromFile(const QByteArray& xml);
-	bool loadMapFromFile(const QByteArray& xml, const QByteArray& heightMapImage, const QByteArray& texMap, const QByteArray& waterXML);
+	bool loadMapFromFiles(const QMap<QString, QByteArray>& files);
 
 	QString saveDescriptionToFile() const;
 	QByteArray saveMapGeomToFile() const;
