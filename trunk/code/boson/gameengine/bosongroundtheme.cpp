@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2003-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -204,35 +204,14 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
 
  bool ret = true;
 
+ mGroundTypes.resize(grounds);
  for (unsigned int i = 0; i < grounds && ret; i++) {
-	QString group = QString::fromLatin1("Ground_%1").arg(i);
-	if (!conf.hasGroup(group)) {
-		boError() << k_funcinfo << file << " has no group " << group << endl;
+	BosonGroundType* ground = loadGroundType(conf, i);
+	if (!ground) {
+		boError() << k_funcinfo << "unable to load groundtype " << i << " from file " << file << endl;
 		ret = false;
 		continue;
 	}
-	conf.setGroup(group);
-
-	BosonGroundType* ground = new BosonGroundType;
-	ground->index = i;
-	ground->name = conf.readEntry("Name", group);
-	ground->textureFile = conf.readEntry("Texture", QString::null);
-	if (ground->textureFile.isEmpty()) {
-		boError() << k_funcinfo << file << " Group=" << group << " has no or invalid Texture key" << endl;
-		ret = false;
-		delete ground;
-		break;
-	}
-	ground->bumpTextureFile = conf.readEntry("BumpTexture", "bump-null");
-	ground->bumpScale = (float)(conf.readDoubleNumEntry("BumpScale", 0.04f));
-	ground->bumpBias = (float)(conf.readDoubleNumEntry("BumpBias", 0.5f)) * ground->bumpScale;
-	ground->textureSize = (float)(conf.readDoubleNumEntry("TextureSize", 5.0f));
-	ground->shaderFile = conf.readEntry("Shader", "ground-default");
-	BoVector3Float color = BosonConfig::readBoVector3FloatEntry(&conf, "MiniMapColor");
-	ground->color = qRgb((int)color.x(), (int)color.y(), (int)color.z());
-	ground->animationDelay = conf.readUnsignedNumEntry("AnimationDelay", 1);
-	ground->iconFile = conf.readEntry("Pixmap", QString::null);
-
 	mGroundTypes.insert(i, ground);
  }
 
@@ -245,6 +224,37 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
  d->mId = identifier;
  d->mGroundThemeDir = dir;
  return ret;
+}
+
+BosonGroundType* BosonGroundTheme::loadGroundType(KSimpleConfig& conf, unsigned int index)
+{
+ QString group = QString::fromLatin1("Ground_%1").arg(index);
+ if (!conf.hasGroup(group)) {
+	boError() << k_funcinfo << "no such group " << group << endl;
+	return 0;
+}
+ conf.setGroup(group);
+
+ BosonGroundType* ground = new BosonGroundType;
+ ground->index = index;
+ ground->name = conf.readEntry("Name", group);
+ ground->textureFile = conf.readEntry("Texture", QString::null);
+ if (ground->textureFile.isEmpty()) {
+	boError() << k_funcinfo << "Group=" << group << " has no or invalid Texture key" << endl;
+	delete ground;
+	return 0;
+ }
+ ground->bumpTextureFile = conf.readEntry("BumpTexture", "bump-null");
+ ground->bumpScale = (float)(conf.readDoubleNumEntry("BumpScale", 0.04f));
+ ground->bumpBias = (float)(conf.readDoubleNumEntry("BumpBias", 0.5f)) * ground->bumpScale;
+ ground->textureSize = (float)(conf.readDoubleNumEntry("TextureSize", 5.0f));
+ ground->shaderFile = conf.readEntry("Shader", "ground-default");
+ BoVector3Float color = BosonConfig::readBoVector3FloatEntry(&conf, "MiniMapColor");
+ ground->color = qRgb((int)color.x(), (int)color.y(), (int)color.z());
+ ground->animationDelay = conf.readUnsignedNumEntry("AnimationDelay", 1);
+ ground->iconFile = conf.readEntry("Pixmap", QString::null);
+
+ return ground;
 }
 
 BosonGroundType* BosonGroundTheme::groundType(unsigned int i) const
