@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 1999-2000 Thomas Capricelli (capricel@email.enst.fr)
-    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2008 Andreas Beckermann (b_mann@gmx.de)
     Copyright (C) 2001-2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
@@ -402,8 +402,8 @@ bool BosonMap::createNewMap(unsigned int width, unsigned int height, BosonGround
  }
  mMapWidth = width;
  mMapHeight = height;
- if (!applyGroundTheme(theme->identifier())) {
-	boError() << k_funcinfo << "invalid groundtheme " << theme->identifier() << endl;
+ if (!applyGroundTheme(theme)) {
+	boError() << k_funcinfo << "invalid groundtheme " << theme << endl;
 	return false;
  }
 
@@ -620,6 +620,15 @@ bool BosonMap::applyGroundTheme(const QString& id)
  BosonGroundTheme* theme = (BosonGroundTheme*)BosonData::bosonData()->groundTheme(id);
  if (!theme) {
 	boError() << k_funcinfo << "Cannot find groundTheme with id=" << id << endl;
+	return false;
+ }
+ return applyGroundTheme(theme);
+}
+
+bool BosonMap::applyGroundTheme(BosonGroundTheme* theme)
+{
+ if (!theme) {
+	BO_NULL_ERROR(theme);
 	return false;
  }
  mGroundTheme = theme;
