@@ -88,7 +88,6 @@ bool boglResolveLibGLSymbols(MyQLibrary* gl_)
 #else // BOGL_DO_DLOPEN
 #undef glXGetProcAddressARB
  bo_glXGetProcAddressARB = (_glXGetProcAddressARB)glXGetProcAddressARB((const GLubyte*)"glXGetProcAddressARB");
- boDebug() << bo_glXGetProcAddressARB << endl;
 #endif // BOGL_DO_DLOPEN
 
  // resolve GL, GL extension and GLX functions
