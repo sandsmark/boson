@@ -564,32 +564,9 @@ bool BosonMap::loadWaterFromFile(const QByteArray& waterXML)
 
 bool BosonMap::loadCompleteMap(QDataStream& stream)
 {
- QByteArray mapBuffer;
- stream >> mapBuffer;
- if (!loadMapGeomFromFile(mapBuffer)) {
-	boError() << k_funcinfo << "Could not load basic map" << endl;
-	return false;
- }
- if (!loadHeightMap(stream)) {
-	boError() << k_funcinfo << "Could not load height map" << endl;
-	return false;
- }
- if (stream.atEnd()) {
-	// do NOT try to generate a texmap. here we are loading a remote stream,
-	// which must contain the correct texmap.
-	boError() << k_funcinfo << "stream has no texmap! must not happen here!" << endl;
-	return false;
- }
- if (!loadTexMap(stream)) {
-	boError() << k_funcinfo << "Could not load texmap" << endl;
-	return false;
- }
- createCells();
- if (!mCells) {
-	boError() << k_funcinfo << "NULL cells" << endl;
-	return false;
- }
- return true;
+ QMap<QString, QByteArray> files;
+ stream >> files;
+ return loadMapFromFiles(files);
 }
 
 bool BosonMap::loadMapGeo(unsigned int width, unsigned int height)
@@ -962,21 +939,12 @@ bool BosonMap::saveCompleteMap(QDataStream& stream) const
  // AB: note we don't save the map preview here - it can be reconstructed from
  //     the map data.
 
- QByteArray buffer;
- buffer = saveMapGeomToFile();
- if (buffer.size() == 0) {
-	boError() << k_funcinfo << "Could not save basic map" << endl;
+ QMap<QString, QByteArray> files = saveMapToFiles();
+ if (files.isEmpty()) {
+	boError() << k_funcinfo << "unable to save map" << endl;
 	return false;
  }
- stream << buffer;
-
- if (!saveHeightMap(stream)) {
-	boError() << k_funcinfo << "Could not save height map" << endl;
-	return false;
- }
- if (!saveTexMap(stream)) {
-	boError() << k_funcinfo << "Could not save texmap" << endl;
- }
+ stream << files;
  return true;
 }
 

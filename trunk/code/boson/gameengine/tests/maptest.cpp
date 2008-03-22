@@ -110,12 +110,24 @@ bool MapTest::testCreateNewMaps()
 	return false;
  }
 
- // TODO: check contents of
- // * heightMap (all corners should be 0.0)
- // * texMap
- // * normalMap
- // * waterDepthAtCorner()
  MY_VERIFY(mMap->lakes()->isEmpty() == true);
+ for (unsigned int x = 0; x <= mMap->width(); x++) {
+	for (unsigned int y = 0; y <= mMap->height(); y++) {
+		MY_VERIFY(mMap->heightAtCorner(x, y) == 0.0f);
+		MY_VERIFY(mMap->waterDepthAtCorner(x, y) == 0.0f);
+	}
+ }
+ for (unsigned int i = 0; i < mMap->groundTheme()->groundTypeCount(); i++) {
+	for (unsigned int x = 0; x <= mMap->width(); x++) {
+		for (unsigned int y = 0; y <= mMap->height(); y++) {
+			if (i == 0) {
+				MY_VERIFY(mMap->texMapAlpha(i, x, y) == 255);
+			} else {
+				MY_VERIFY(mMap->texMapAlpha(i, x, y) == 0);
+			}
+		}
+	}
+ }
 
  MY_VERIFY(mMap->modified() == false);
 
@@ -212,6 +224,20 @@ bool MapTest::checkIfMapIsValid(BosonMap* map, unsigned int width, unsigned int 
 	MY_VERIFY(map->texMap(i) != 0);
  }
  MY_VERIFY(map->lakes() != 0);
+for (unsigned int x = 0; x <= mMap->width(); x++) {
+	for (unsigned int y = 0; y <= mMap->height(); y++) {
+		int value = 0;
+		for (unsigned int i = 0; i < mMap->groundTheme()->groundTypeCount(); i++) {
+			value += mMap->texMapAlpha(i, x, y);
+		}
+
+		// AB: is this correct: does the sum of all alphas _have_ to be
+		//     255? we do NOT ensure this in BosonMap, I believe other
+		//     values would still be valid, too, i.e. we should remove
+		//     this test
+		MY_VERIFY(value == 255);
+	}
+ }
 
  return true;
 }
@@ -225,11 +251,19 @@ bool MapTest::checkIfMapsAreEqual(BosonMap* map1, BosonMap* map2)
  MY_VERIFY(map1->modified() == map2->modified());
  MY_VERIFY(map1->lakes()->isEmpty() == map2->lakes()->isEmpty());
 
- // TODO: check contents of
- // * heightMap
- // * texMap
- // * normalMap
- // * waterDepthAtCorner()
+ for (unsigned int x = 0; x <= map1->width(); x++) {
+	for (unsigned int y = 0; y <= map1->height(); y++) {
+		MY_VERIFY(map1->heightAtCorner(x, y) == map2->heightAtCorner(x, y));
+		 MY_VERIFY(map1->waterDepthAtCorner(x, y) == map2->waterDepthAtCorner(x, y));
+	}
+ }
+ for (unsigned int i = 0; i < map1->groundTheme()->groundTypeCount(); i++) {
+	for (unsigned int x = 0; x <= map1->width(); x++) {
+		for (unsigned int y = 0; y <= map1->height(); y++) {
+			MY_VERIFY(map1->texMapAlpha(i, x, y) == map2->texMapAlpha(i, x, y));
+		}
+	}
+ }
 
  return true;
 }
