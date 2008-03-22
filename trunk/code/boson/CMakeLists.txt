@@ -12,6 +12,7 @@ add_subdirectory( modelrendering/meshrenderer )
 add_subdirectory( groundrenderer )
 add_subdirectory( sound/bosound )
 add_subdirectory( programs )
+add_subdirectory( gameengine/tests )
 
 set(LIB_MESHRENDERER_PLUGIN "")
 set(LIB_GROUNDRENDERER_PLUGIN "")
