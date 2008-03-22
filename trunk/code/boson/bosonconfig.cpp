@@ -778,6 +778,9 @@ void BosonConfig::addConfigEntry(BoConfigEntry* c)
 QString BosonConfig::readLocalPlayerName(KConfig* conf)
 {
  if (!conf) {
+	if (!kapp) {
+		return getenv("LOGNAME");
+	}
 	conf = kapp->config();
  }
  QString oldGroup = conf->group();
@@ -790,6 +793,9 @@ QString BosonConfig::readLocalPlayerName(KConfig* conf)
 void BosonConfig::saveLocalPlayerName(const QString& name, KConfig* conf)
 {
  if (!conf) {
+	if (!kapp) {
+		return;
+	}
 	conf = kapp->config();
  }
  QString oldGroup = conf->group();
@@ -801,6 +807,9 @@ void BosonConfig::saveLocalPlayerName(const QString& name, KConfig* conf)
 QString BosonConfig::readComputerPlayerName(KConfig* conf)
 {
  if (!conf) {
+	if (!kapp) {
+		return "Computer";
+	}
 	conf = kapp->config();
  }
  QString oldGroup = conf->group();
@@ -813,6 +822,9 @@ QString BosonConfig::readComputerPlayerName(KConfig* conf)
 void BosonConfig::saveComputerPlayerName(const QString& name, KConfig* conf)
 {
  if (!conf) {
+	if (!kapp) {
+		return;
+	}
 	conf = kapp->config();
  }
  QString oldGroup = conf->group();
@@ -824,6 +836,9 @@ void BosonConfig::saveComputerPlayerName(const QString& name, KConfig* conf)
 QColor BosonConfig::readLocalPlayerColor(KConfig* conf)
 {
  if (!conf) {
+	if (!kapp) {
+		return Qt::red;
+	}
 	conf = kapp->config();
  }
  QString oldGroup = conf->group();
@@ -836,6 +851,9 @@ QColor BosonConfig::readLocalPlayerColor(KConfig* conf)
 void BosonConfig::saveLocalPlayerColor(const QColor& color, KConfig* conf)
 {
  if (!conf) {
+	if (!kapp) {
+		return;
+	}
 	conf = kapp->config();
  }
  QString oldGroup = conf->group();
@@ -847,6 +865,9 @@ void BosonConfig::saveLocalPlayerColor(const QColor& color, KConfig* conf)
 QString BosonConfig::readLocalPlayerMap(KConfig* conf)
 {
  if (!conf) {
+	if (!kapp) {
+		return QString::null;
+	}
 	conf = kapp->config();
  }
  QString oldGroup = conf->group();
@@ -859,6 +880,9 @@ QString BosonConfig::readLocalPlayerMap(KConfig* conf)
 void BosonConfig::saveLocalPlayerMap(const QString& id, KConfig* conf)
 {
  if (!conf) {
+	if (!kapp) {
+		return;
+	}
 	conf = kapp->config();
  }
  QString oldGroup = conf->group();
@@ -870,6 +894,9 @@ void BosonConfig::saveLocalPlayerMap(const QString& id, KConfig* conf)
 QString BosonConfig::readEditorMap(KConfig* conf)
 {
  if (!conf) {
+	if (!kapp) {
+		return QString::null;
+	}
 	conf = kapp->config();
  }
  QString oldGroup = conf->group();
@@ -882,6 +909,9 @@ QString BosonConfig::readEditorMap(KConfig* conf)
 void BosonConfig::saveEditorMap(const QString& id, KConfig* conf)
 {
  if (!conf) {
+	if (!kapp) {
+		return;
+	}
 	conf = kapp->config();
  }
  QString oldGroup = conf->group();
@@ -893,6 +923,9 @@ void BosonConfig::saveEditorMap(const QString& id, KConfig* conf)
 bool BosonConfig::readEditorCreateNewMap(KConfig* conf)
 {
  if (!conf) {
+	if (!kapp) {
+		return true;
+	}
 	conf = kapp->config();
  }
  QString oldGroup = conf->group();
@@ -905,6 +938,9 @@ bool BosonConfig::readEditorCreateNewMap(KConfig* conf)
 void BosonConfig::saveEditorCreateNewMap(bool createnew, KConfig* conf)
 {
  if (!conf) {
+	if (!kapp) {
+		return;
+	}
 	conf = kapp->config();
  }
  QString oldGroup = conf->group();
@@ -916,6 +952,9 @@ void BosonConfig::saveEditorCreateNewMap(bool createnew, KConfig* conf)
 void BosonConfig::reset(KConfig* conf)
 {
  if (!conf) {
+	if (!kapp) {
+		return;
+	}
 	conf = kapp->config();
  }
  QString oldGroup = conf->group();
@@ -934,6 +973,9 @@ void BosonConfig::reset(KConfig* conf)
 void BosonConfig::save(bool /*editor*/, KConfig* conf)
 {
  if (!conf) {
+	if (!kapp) {
+		return;
+	}
 	conf = kapp->config();
  }
  QString oldGroup = conf->group();
@@ -1021,6 +1063,9 @@ void BosonConfig::addDynamicEntry(BoConfigEntry* entry, KConfig* conf)
  }
  d->mDynamicEntries.insert(entry->key(), entry);
  if (!conf) {
+	if (!kapp) {
+		return;
+	}
 	conf = kapp->config();
  }
  entry->load(conf);
