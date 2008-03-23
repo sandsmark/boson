@@ -42,8 +42,19 @@ BPFDescription::BPFDescription()
  setTextForElement("Comment", "");
 }
 
+BPFDescription::BPFDescription(const BPFDescription& data)
+{
+ *this = data;
+}
+
 BPFDescription::~BPFDescription()
 {
+}
+
+BPFDescription& BPFDescription::operator=(const BPFDescription& data)
+{
+ mFile.setContent(data.toString());
+ return *this;
 }
 
 QDomElement BPFDescription::element(const QString& name) const

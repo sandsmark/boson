@@ -42,13 +42,16 @@ public:
 	 * Create a new description.xml file
 	 **/
 	BPFDescription();
+	BPFDescription(const BPFDescription& data);
 
 	/**
 	 * Load a description.xml file
 	 **/
-	BPFDescription(const QString& data);
+	explicit BPFDescription(const QString& data);
 
 	~BPFDescription();
+
+	BPFDescription& operator=(const BPFDescription& data);
 
 	QString name() const
 	{
@@ -68,7 +71,7 @@ public:
 		setTextForElement(QString::fromLatin1("Comment"), comment);
 	}
 
-	QString toString() { return mFile.toString(); }
+	QString toString() const { return mFile.toString(); }
 
 protected:
 	QDomElement element(const QString& name) const;
