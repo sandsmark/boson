@@ -83,6 +83,18 @@ private:
 
 
 /**
+ * A playfield is a "level" in boson. It contains of a map (see @ref BosonMap
+ * and @ref map),
+ * a description of the playfield (see @ref description) and rules (which may
+ * e.g. limit what units may be used on this playfield - not yet implemented)
+ * and winning conditions (not yet implemented).
+ *
+ * This class provides in particular methods to load a playfield from the hard
+ * disk (@ref preLoadAllPlayFields followed by @ref loadFromDiskToFiles) or from
+ * a stream (@ref loadPlayField). The playfield is intended to be loaded once
+ * from disk (by one player only) and then sent over network to all players,
+ * where it is loaded from the stream.
+ *
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class BosonPlayField : public QObject
