@@ -203,9 +203,9 @@ bool BosonPlayField::preLoadPlayField(const QString& file)
 	return true;
  }
 
+ mFileName = file;
  *mPreview = BPFLoader::loadFilePreview(mFileName);
  mPreLoaded = mPreview->isLoaded();
- mFileName = file;
 
  if (!mPreview->isLoaded()) {
 	boError() << k_funcinfo << "preview loading failed" << endl;
