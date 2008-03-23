@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2006-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include "../boapplication.h"
 #include "../gameengine/bosonplayfield.h"
 #include "../gameengine/bosonsaveload.h"
+#include "../gameengine/bpfloader.h"
 #include "../bosondata.h"
 
 #include <kaboutdata.h>
@@ -83,13 +84,13 @@ int main(int argc, char **argv)
 
  boDebug() << k_funcinfo << "loading playfield " << inFile << endl;
 
- QByteArray buffer = BosonPlayField::loadFromDiskToStream(inFile);
+ QByteArray buffer = BPFLoader::loadFromDiskToStream(inFile);
  if (buffer.size() == 0) {
 	boError() << k_funcinfo << "unable to load playfield " << inFile << endl;
 	return 1;
  }
  QMap<QString, QByteArray> files;
- if (!BosonPlayField::unstreamFiles(files, buffer)) {
+ if (!BPFLoader::unstreamFiles(files, buffer)) {
 	boError() << k_funcinfo << "invalid file format for playfield " << inFile << endl;
 	return 1;
  }

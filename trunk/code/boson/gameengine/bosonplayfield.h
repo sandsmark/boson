@@ -182,9 +182,9 @@ public:
 	bool preLoadPlayField(const QString& file);
 
 	/**
-	 * Load the playfield from @p files to this object. Use @ref
-	 * loadFromDiskToFiles to load a .bpf file from disk to virtual files
-	 * that can be used here.
+	 * Load the playfield from @p files to this object.
+	 *
+	 * See @ref BPFLoader on how to retrieve these virtual @p files.
 	 **/
 	bool loadPlayFieldFromFiles(const QMap<QString, QByteArray>& files);
 
@@ -193,58 +193,6 @@ public:
 	 * files that are stored into @p destFiles.
 	 **/
 	bool savePlayFieldToFiles(QMap<QString, QByteArray>& destFiles);
-
-	/**
-	 * @overload
-	 *
-	 * Call @ref preLoadPlayField before you call this, so that the filename
-	 * is available to this class.
-	 *
-	 * Use @ref loadPlayFieldFromFiles to actually load data into this object.
-	 **/
-	bool loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles);
-
-	/**
-	 * Load the .bpf file specified to @p fileName and place the virtual
-	 * files in it (a .bpf file is actually an archive) into @p destFiles.
-	 *
-	 * Note: this method does not really belong here, as it is meant to load
-	 * ALL files from the .bpf file, including player data and game data,
-	 * that does not belong to the playfield. This method is here mainly for
-	 * historic reasons.
-	 **/
-	static bool loadFromDiskToFiles(const QString& fileName, QMap<QString, QByteArray>& destFiles);
-
-	/**
-	 * Convenience function for @ref loadFromDiskToFiles followed by @ref
-	 * streamFiles.
-	 *
-	 * @return A @ref QByteArray containing the specified playfield
-	 * or an empty @ref QByteArray if an error occurred.
-	 **/
-	static QByteArray loadFromDiskToStream(const QString& file);
-
-	/**
-	 * @short Stream all (virtual) files in @p files.
-	 *
-	 * Helper method for loading a playfield. This takes a set of virtual
-	 * files (in @p files), as e.g. loaded from a .bpf file, and writes it
-	 * into a single @ref QByteArray along with some additional information
-	 * that makes it easier to read the data back again.
-	 **/
-	static QByteArray streamFiles(const QMap<QString, QByteArray>& files);
-
-	/**
-	 * @short Unstream all (virtual) files to @p destFiles
-	 *
-	 * Helper method for loading a playfield. This takes a @ref QByteArray
-	 * @p buffer which is meant to contain a playfield that was streamed
-	 * using @ref streamFiles and writes the files to @p destFiles.
-	 *
-	 * @return TRUE on success, FALSE otherwise.
-	 **/
-	static bool unstreamFiles(QMap<QString, QByteArray>& destFiles, const QByteArray& buffer);
-
 	/////////////////////////////////////////////////////////////////
 	//////////////////// Methods for loading/saving a playfield (end)
 	/////////////////////////////////////////////////////////////////

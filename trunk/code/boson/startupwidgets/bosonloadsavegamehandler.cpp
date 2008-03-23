@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2006-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 #include "../gameengine/player.h"
 #include "../gameengine/speciestheme.h"
 #include "../gameengine/bosoncomputerio.h"
+#include "../gameengine/bpfloader.h"
 #include "../gameview/bosonlocalplayerinput.h"
 #include "bodebug.h"
 
@@ -117,18 +118,13 @@ QByteArray BosonLoadSaveGameHandler::prepareLoadGame(const QString& loadingFileN
 	boError(260) << k_funcinfo << "Cannot load game with NULL filename" << endl;
 	return QByteArray();
  }
- BosonPlayField loadField;
- if (!loadField.preLoadPlayField(loadingFileName)) {
-	boError(260) << k_funcinfo << "could not preload " << loadingFileName << endl;
-	return QByteArray();
- }
 
  QMap<QString, QByteArray> files;
- if (!loadField.loadFromDiskToFiles(files)) {
+ if (!BPFLoader::loadFromDiskToFiles(loadingFileName, files)) {
 	boError(260) << k_funcinfo << "could not load " << loadingFileName << endl;
 	return QByteArray();
  }
- QByteArray playField = BosonPlayField::streamFiles(files);
+ QByteArray playField = BPFLoader::streamFiles(files);
  if (playField.size() == 0) {
 	boError(260) << k_funcinfo << "empty playfield loaded from " << loadingFileName << endl;
 	return QByteArray();

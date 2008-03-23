@@ -92,6 +92,7 @@ set(gameengine_SRCS
 	gameengine/bosonweapon.cpp
 	gameengine/boitemlist.cpp
 	gameengine/boitemlisthandler.cpp
+	gameengine/bpfloader.cpp
 	gameengine/bosonplayfield.cpp
 	gameengine/bosonmap.cpp
 	gameengine/cell.cpp

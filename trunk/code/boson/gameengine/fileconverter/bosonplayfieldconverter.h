@@ -37,6 +37,8 @@ template<class T, class T2> class QMap;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
+// FIXME: the class name has historic reasons only. This converts the complete
+// .bpf file, not only the parts that the @ref BosonPlayField class uses.
 class BosonPlayFieldConverter
 {
 public:
