@@ -236,12 +236,6 @@ public:
 	 **/
 	void changeMap(BosonMap* map);
 
-	/**
-	 * Make @p d the new description of this playfield. Called by the editor
-	 * only.
-	 **/
-	void changeDescription(BPFDescription* d);
-
 	// AB: not really supported currently (2008/03/22)!
 	bool modified() const;
 	//////////////////////////////////////////////////////
