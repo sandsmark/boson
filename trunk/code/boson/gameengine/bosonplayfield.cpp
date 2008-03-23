@@ -446,12 +446,6 @@ void BosonPlayField::changeMap(BosonMap* m)
  mMap = m;
 }
 
-void BosonPlayField::changeDescription(BPFDescription* d)
-{
- delete mDescription;
- mDescription = d;
-}
-
 bool BosonPlayField::modified() const
 {
  if (mMap && mMap->modified()) {
