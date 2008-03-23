@@ -117,34 +117,83 @@ BPFLoader::~BPFLoader()
 
 BPFPreview BPFLoader::loadFilePreview(const QString& file)
 {
- BPFPreviewPrivate* data = new BPFPreviewPrivate;
- BPFPreview previewObject(data);
+ QMap<QString, QByteArray> files;
+ if (!loadFilePreviewFromDiskToFiles(file, files)) {
+	return BPFPreview();;
+ }
+ return loadFilePreviewFromFiles(files);
+}
+
+bool BPFLoader::loadFilePreviewFromDiskToFiles(const QString& file, QMap<QString,QByteArray>& destFiles)
+{
  BPFFile boFile(file, true);
  if (!boFile.checkTar()) {
 	boError() << k_funcinfo << "Oops - broken file " << file << endl;
 	return false;
  }
 
+ QByteArray mapXML; // for BosonPlayFieldInformation
+ QByteArray playersXML; // for BosonPlayFieldInformation
+ if (!boFile.hasMapDirectory()) {
+	boError() << k_funcinfo << "file format not supported" << endl;
+	return false;
+ } else {
+	// file format is >= boson 0.9
+	mapXML = boFile.mapXMLData();
+	playersXML = boFile.playersData();
+ }
+
+ QMap<QString, QByteArray> descriptions = boFile.descriptionsData();
+ QByteArray descriptionXML = descriptions["C/description.xml"];
+ if (!boFile.hasMapDirectory() && descriptions["C/description.xml"].size() == 0) {
+	boError() << k_funcinfo << "old savegame format not supported." << endl;
+	return false;
+ }
+ if (!descriptions.contains("C/description.xml")) {
+	boError() << k_funcinfo << "no C/description.xml file found" << endl;
+	return false;
+ }
+ QByteArray mapPreviewPNG = boFile.fileData("map.png", "mappreview");
+
+
+ destFiles.insert("map/map.xml", mapXML);
+ destFiles.insert("players.xml", playersXML);
+ if (mapPreviewPNG.size() != 0) {
+	// mappreview is optional. it's being displayed in the newgame widget.
+	destFiles.insert("mappreview/map.png", mapPreviewPNG);
+ }
+ for (QMap<QString, QByteArray>::iterator it = descriptions.begin(); it != descriptions.end(); ++it) {
+	destFiles.insert(it.key(), it.data());
+ }
+
+ destFiles.insert("identifier", createIdentifier(boFile, destFiles));
+
+
 #warning TODO: convert file to current format (if it isnt already)
 
- if (!data->mPlayFieldInformation->loadInformation(&boFile)) {
+ return true;
+}
+
+BPFPreview BPFLoader::loadFilePreviewFromFiles(const QMap<QString, QByteArray>& files)
+{
+ BPFPreviewPrivate* data = new BPFPreviewPrivate;
+ BPFPreview previewObject(data);
+
+ if (!data->mPlayFieldInformation->loadInformation(files)) {
 	boError() << k_funcinfo << "Could not load playfield information" << endl;
 	return BPFPreview();
  }
- QMap<QString, QByteArray> descriptions = boFile.descriptionsData();
- QByteArray descriptionXML = descriptions["C/description.xml"];
- if (descriptionXML.size() == 0 && !boFile.hasMapDirectory()) {
-	boError() << k_funcinfo << "old savegame format not supported." << endl;
-	return BPFPreview();
- }
+ QByteArray descriptionXML = files["C/description.xml"];
  if (descriptionXML.size() == 0) {
 	boError() << k_funcinfo << "Oops - NULL description file" << endl;
 	return BPFPreview();
  }
  delete data->mDescription;
  data->mDescription = new BPFDescription(QString(descriptionXML));
- data->mIdentifier = boFile.identifier();
- data->mMapPreviewPNGData = boFile.fileData("map.png", "mappreview");
+ data->mMapPreviewPNGData = files["mappreview/map.png"];
+ QByteArray identifierFile = files["identifier"];
+ QDataStream identifierStream(identifierFile, IO_ReadOnly);
+ identifierStream >> data->mIdentifier;
 
  data->mIsLoaded = true;
 
@@ -152,7 +201,7 @@ BPFPreview BPFLoader::loadFilePreview(const QString& file)
 }
 
 
-bool  BPFLoader::loadFromDiskToFiles(const QString& fileName, QMap<QString, QByteArray>& destFiles)
+bool BPFLoader::loadFromDiskToFiles(const QString& fileName, QMap<QString, QByteArray>& destFiles)
 {
  if (!destFiles.isEmpty()) {
 	boError() << k_funcinfo << "destFiles must be empty" << endl;
@@ -228,6 +277,7 @@ bool  BPFLoader::loadFromDiskToFiles(const QString& fileName, QMap<QString, QByt
 	// mappreview is optional. it's being displayed in the newgame widget.
 	destFiles.insert("mappreview/map.png", mapPreviewPNG);
  }
+ destFiles.insert("identifier", createIdentifier(boFile, destFiles));
 
  BosonPlayFieldConverter converter;
  if (!converter.convertFilesToCurrentFormat(destFiles)) {
@@ -295,4 +345,16 @@ bool BPFLoader::unstreamFiles(QMap<QString, QByteArray>& files, const QByteArray
  return true;
 }
 
+
+QByteArray BPFLoader::createIdentifier(const BPFFile& boFile, const QMap<QString, QByteArray>& files)
+{
+ Q_UNUSED(files); // currently not used. it is atm unsure if we will use it at some point
+ // FIXME: currently we use the filename as identifier, however since playfields can
+ //        be in subdirectories, this is NOT a unique identifier.
+ //        maybe use MD5 of file?
+ QByteArray buffer;
+ QDataStream stream(buffer, IO_WriteOnly);
+ stream << QString(boFile.identifier());
+ return buffer;
+}
 
