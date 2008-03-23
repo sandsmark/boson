@@ -34,6 +34,7 @@
 #include "../gameengine/bosonmessageids.h"
 #include "../bocamera.h"
 #include "../boaction.h"
+#include "../gameengine/bpfdescription.h"
 #include "../gameengine/bosonplayfield.h"
 #include "../gameengine/bosonmap.h"
 #include "../gameengine/bosongroundtheme.h"
@@ -1284,11 +1285,13 @@ void BosonMenuInput::slotEditorEditMapDescription()
  BO_CHECK_NULL_RET(boGame->playField());
  BO_CHECK_NULL_RET(boGame->playField()->description());
 
+ BPFDescription* modifiedDescription = new BPFDescription(*boGame->playField()->description());
+ boGame->playField()->setModifiedDescription(modifiedDescription);
 
 // TODO: non-modal might be fine. one could use that for translations (one
 // dialog the original language, one the translated language)
  BPFDescriptionDialog* dialog = new BPFDescriptionDialog(0, true);
- dialog->setDescription(boGame->playField()->description());
+ dialog->setDescription(modifiedDescription);
  dialog->exec();
 
  delete dialog;

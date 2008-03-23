@@ -25,6 +25,7 @@ class BosonMap;
 class Boson;
 class BPFFile;
 class BPFDescription;
+class BPFPreview;
 
 class KArchiveDirectory;
 class KTar;
@@ -33,54 +34,6 @@ class QDomDocument;
 class QDomElement;
 class QDataStream;
 template<class T, class T2> class QMap;
-
-/**
- * CLass that provides information about the playfield, such as map size and
- * winning conditions.
- *
- * These information can be displayed on the startup widgets.
- * @author Andreas Beckermann <b_mann@gmx.de>
- **/
-class BosonPlayFieldInformation
-{
-public:
-	BosonPlayFieldInformation();
-	~BosonPlayFieldInformation();
-
-	unsigned int mapWidth() const
-	{
-		return mMapWidth;
-	}
-	unsigned int mapHeight() const
-	{
-		return mMapHeight;
-	}
-
-	unsigned int minPlayers() const
-	{
-		return mMinPlayers;
-	}
-	int maxPlayers() const
-	{
-		return mMaxPlayers;
-	}
-
-	bool loadInformation(BPFFile* file);
-	bool loadInformation(const QMap<QString, QByteArray>& files);
-
-protected:
-	bool loadPlayersInformation(const QByteArray& xml);
-	bool loadMapInformation(const QByteArray& xml);
-
-private:
-	unsigned int mMapWidth;
-	unsigned int mMapHeight;
-	// AB: add description data ?
-
-	unsigned int mMinPlayers;
-	int mMaxPlayers;
-};
-
 
 // FIXME: do we really want to store rules and winning conditions here?
 //        -> both may depend on players and units that are in the game (e.g.
@@ -129,19 +82,29 @@ public:
 	QByteArray mapPreviewPNGData() const;
 
 	BosonMap* map() const { return mMap; }
-	BPFDescription* description() const { return mDescription; }
-	const QString& identifier() const { return mIdentifier; }
 	const QString& fileName() const { return mFileName; }
 
 	/**
-	 * @return The @ref BosonPlayFieldInformation object of this playfield
-	 * (always non-NULL). Use @ref isPreLoaded to find out whether it
-	 * already contains useful information.
+	 * "Preview" information (map width/size, description, ...) for
+	 * this playfield.
+	 *
+	 * Should be loaded using @ref preLoadPlayField.
 	 **/
-	const BosonPlayFieldInformation* information() const
-	{
-		return mPlayFieldInformation;
-	}
+	const BPFPreview& preview() const;
+
+	/**
+	 * Shortcut for preview().identifier()
+	 **/
+	const QString& identifier() const;
+
+	/**
+	 * @return A pointer to the @ref BPFDescription object set by
+	 *         @ref setModifiedDescription (if any) or
+	 *         preview().description()
+	 *         if @ref setModifiedDescription has never been called
+	 *         (the default).
+	 **/
+	const BPFDescription* description() const;
 
 	/**
 	 * This simply deletes the map. This may be useful for game starting, as
@@ -236,6 +199,14 @@ public:
 	 **/
 	void changeMap(BosonMap* map);
 
+	/**
+	 * Set a @ref BPFDescription object that is meant to replace the
+	 * original @ref description object from @ref preview.
+	 *
+	 * This method is meant to be used in the editor only.
+	 **/
+	void setModifiedDescription(BPFDescription* description);
+
 	// AB: not really supported currently (2008/03/22)!
 	bool modified() const;
 	//////////////////////////////////////////////////////
@@ -270,7 +241,6 @@ public:
 	static QStringList findAvailablePlayFields();
 
 protected:
-	bool loadDescriptionFromFile(const QByteArray& xml);
 	bool loadMapFromFiles(const QMap<QString, QByteArray>& files);
 
 	QString saveDescriptionToFile() const;
@@ -281,12 +251,11 @@ protected:
 
 private:
 	BosonMap* mMap;
-	BosonPlayFieldInformation* mPlayFieldInformation;
-	BPFDescription* mDescription;
 	QByteArray mMapPreviewPNGData;
-	QString mIdentifier; // AB: this is not yet fully implemented - e.g. it isn't changed when saving or changing the map. should be the filename (see BPFFile::identifier())
 	bool mPreLoaded;
 	QString mFileName;
+	BPFPreview* mPreview;
+	BPFDescription* mModifiedDescription;
 };
 
 #endif

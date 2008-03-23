@@ -23,7 +23,6 @@
 #include <qmap.h>
 
 class BPFDescription;
-class BosonPlayFieldInformation;
 class BPFPreviewPrivate;
 class BPFFile;
 
@@ -53,10 +52,26 @@ public:
 
 	BPFPreview& operator=(const BPFPreview& p);
 
+	static BPFPreview loadFilePreviewFromFiles(const QMap<QString, QByteArray>& files);
+
 	bool isLoaded() const;
 	const QString& identifier() const;
-	const BosonPlayFieldInformation* information() const;
 	const BPFDescription* description() const;
+	BPFDescription* description(); // AB: non-const, so that a non-const pointer can be retrieved from a non-const BPFPreview only
+	QByteArray mapPreviewPNGData() const;
+
+	unsigned int mapWidth() const;
+	unsigned int mapHeight() const;
+
+	unsigned int minPlayers() const;
+	int maxPlayers() const;
+
+	// AB: additional information, such as winning conditions, should be
+	// added here
+
+private:
+	static bool loadFilePreviewPlayersInformation(BPFPreviewPrivate* data, const QByteArray& xml);
+	static bool loadFilePreviewMapInformation(BPFPreviewPrivate* data, const QByteArray& xml);
 
 private:
 	BPFPreviewPrivate* d; // explicitly shared!
@@ -99,12 +114,16 @@ public:
 
 	/**
 	 * Shortcut for @ref loadFilePreviewFromDiskToFiles followed by @ref
-	 * loadFilePreviewFromFiles
+	 * BPFPreview::loadFilePreviewFromFiles
 	 **/
 	static BPFPreview loadFilePreview(const QString& file);
 
+	/**
+	 * Like @ref loadFromDiskToFiles, but loads only those files needed to
+	 * load a @ref BPFPreview. See also @ref
+	 * BPFPreview::loadFilePreviewFromFiles
+	 **/
 	static bool loadFilePreviewFromDiskToFiles(const QString& file, QMap<QString,QByteArray>& destFiles);
-	static BPFPreview loadFilePreviewFromFiles(const QMap<QString, QByteArray>& files);
 
 	/**
 	 * Load the .bpf file specified to @p fileName and place the virtual

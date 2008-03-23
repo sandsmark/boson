@@ -32,6 +32,7 @@
 #include "../gameengine/bosonplayfield.h"
 #include "../gameengine/bpfdescription.h"
 #include "../gameengine/bosonmap.h"
+#include "../gameengine/bpfloader.h" // BPFPreview. FIXME: dedicated file!
 #include "../bosondata.h"
 #include "bosonstartupnetwork.h"
 #include "boufocolorchooser.h"
@@ -724,11 +725,11 @@ void BoUfoNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
     boWarning() << k_funcinfo << "playfield not yet preloaded?!" << endl;
     field->preLoadPlayField(field->identifier());
  }
- mMinPlayers = field->information()->minPlayers();
- mMaxPlayers = field->information()->maxPlayers();
+ mMinPlayers = field->preview().minPlayers();
+ mMaxPlayers = field->preview().maxPlayers();
 
  // Update general map info
- mMapSize->setText(i18n("%1x%2\n").arg(field->information()->mapWidth()).arg(field->information()->mapHeight()));
+ mMapSize->setText(i18n("%1x%2\n").arg(field->preview().mapWidth()).arg(field->preview().mapHeight()));
  if (mMinPlayers == mMaxPlayers) {
     mMapPlayers->setText(i18n("%1").arg(mMinPlayers));
  } else {

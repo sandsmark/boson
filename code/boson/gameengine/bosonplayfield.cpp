@@ -95,133 +95,19 @@ bool BosonPlayFieldData::load()
 }
 
 
-
-BosonPlayFieldInformation::BosonPlayFieldInformation()
-{
- mMapWidth = 0;
- mMapHeight = 0;
- mMinPlayers = 1;
- mMaxPlayers = 1;
-}
-
-BosonPlayFieldInformation::~BosonPlayFieldInformation()
-{
-}
-
-bool BosonPlayFieldInformation::loadInformation(BPFFile* file)
-{
- if (!file) {
-	BO_NULL_ERROR(file);
-	return false;
- }
- QByteArray mapXML;
- QByteArray playersXML;
- if (!file->hasMapDirectory()) {
-	boError() << k_funcinfo << "file format not supported" << endl;
-	return false;
- } else {
-	// file format is >= boson 0.9
-	mapXML = file->mapXMLData();
-	playersXML = file->playersData();
- }
- QMap<QString, QByteArray> files;
- files.insert("map/map.xml", mapXML);
- files.insert("players.xml", playersXML);
- return loadInformation(files);
-}
-
-// AB: note that files must contain the files in the _current_ format. no
-// conversion happens here
-bool BosonPlayFieldInformation::loadInformation(const QMap<QString, QByteArray>& files)
-{
- QByteArray mapXML = files["map/map.xml"];
- QByteArray playersXML = files["players.xml"];
- if (!loadPlayersInformation(playersXML)) {
-	boError() << k_funcinfo << "unable to load players information" << endl;
-	return false;
- }
- if (!loadMapInformation(mapXML)) {
-	boError() << k_funcinfo << "unable to load map information" << endl;
-	return false;
- }
-
- return true;
-}
-
-bool BosonPlayFieldInformation::loadPlayersInformation(const QByteArray& xml)
-{
- QString errorMsg;
- int line = 0, column = 0;
- QDomDocument doc(QString::fromLatin1("Players"));
- if (!doc.setContent(QString(xml), &errorMsg, &line, &column)) {
-	boError() << k_funcinfo << "unable to set XML content - error in line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
-	return false;
- }
- QDomElement root = doc.documentElement();
-
- // AB: atm there is no usable way to retrieve a minplayers value. also atm we
- // don't have any use for minplayers anyway, as we don't have scenarios (i.e.
- // winning conditions) yet. so we use 1 as default.
- mMinPlayers = 1;
-
- // count the Player tags that don't have a IsNeutral attribute (maximal one
- // exists - exactly one for files created with boson >= 0.10)
- mMaxPlayers = 0;
- QDomNodeList list = root.elementsByTagName("Player");
- for (unsigned int i = 0; i < list.count(); i++) {
-	if (list.item(i).toElement().hasAttribute("IsNeutral")) {
-		continue;
-	}
-	mMaxPlayers++;
- }
-
-
- return true;
-}
-
-bool BosonPlayFieldInformation::loadMapInformation(const QByteArray& xml)
-{
- QString errorMsg;
- int line = 0, column = 0;
- QDomDocument doc(QString::fromLatin1("BosonMap"));
- if (!doc.setContent(QString(xml), &errorMsg, &line, &column)) {
-	boError() << k_funcinfo << "unable to set XML content - error in line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
-	return false;
- }
- QDomElement root = doc.documentElement();
- QDomElement geometry = root.namedItem("Geometry").toElement();
- if (geometry.isNull()) {
-	boError() << k_funcinfo << "no Geometry tag found" << endl;
-	return false;
- }
- bool ok = false;
- mMapWidth = geometry.attribute("Width").toUInt(&ok);
- if (!ok) {
-	boError() << k_funcinfo << "invalid number for Width" << endl;
-	return false;
- }
- mMapHeight = geometry.attribute("Height").toUInt(&ok);
- if (!ok) {
-	boError() << k_funcinfo << "invalid number for Width" << endl;
-	return false;
- }
- return true;
-}
-
-
 BosonPlayField::BosonPlayField(QObject* parent) : QObject(parent, "BosonPlayField")
 {
  mMap = 0;
  mPreLoaded = false;
- mPlayFieldInformation = new BosonPlayFieldInformation();
- mDescription = new BPFDescription();
+ mModifiedDescription = 0;
+ mPreview = new BPFPreview();
 }
 
 BosonPlayField::~BosonPlayField()
 {
  delete mMap;
- delete mDescription;
- delete mPlayFieldInformation;
+ delete mModifiedDescription;
+ delete mPreview;
 }
 
 bool BosonPlayField::preLoadAllPlayFields()
@@ -316,30 +202,15 @@ bool BosonPlayField::preLoadPlayField(const QString& file)
  if (isPreLoaded()) {
 	return true;
  }
- BPFFile boFile(file, true);
- if (!boFile.checkTar()) {
-	boError() << k_funcinfo << "Oops - broken file " << file << endl;
-	return false;
- }
- if (!mPlayFieldInformation->loadInformation(&boFile)) {
-	boError() << k_funcinfo << "Could not load playfield information" << endl;
-	return false;
- }
- QMap<QString, QByteArray> descriptions = boFile.descriptionsData();
- QByteArray descriptionXML = descriptions["C/description.xml"];
- if (descriptionXML.size() == 0 && !boFile.hasMapDirectory()) {
-	boError() << k_funcinfo << "old savegame format not supported." << endl;
-	return false;
- }
- if (!loadDescriptionFromFile(descriptionXML)) {
-	boError() << k_funcinfo << "Could not load description file" << endl;
-	return false;
- }
- mIdentifier = boFile.identifier();
- mMapPreviewPNGData = boFile.fileData("map.png", "mappreview");
 
+ *mPreview = BPFLoader::loadFilePreview(mFileName);
+ mPreLoaded = mPreview->isLoaded();
  mFileName = file;
- mPreLoaded = true;
+
+ if (!mPreview->isLoaded()) {
+	boError() << k_funcinfo << "preview loading failed" << endl;
+	return false;
+ }
 
  return true;
 }
@@ -371,16 +242,14 @@ bool BosonPlayField::loadPlayFieldFromFiles(const QMap<QString, QByteArray>& fil
 	return false;
  }
 
- if (!mPlayFieldInformation->loadInformation(files)) {
-	boError() << k_funcinfo << "Could not load playfield information" << endl;
+ *mPreview = BPFPreview::loadFilePreviewFromFiles(files);
+ if (!mPreview->isLoaded()) {
+	boError() << k_funcinfo << "error loading file preview" << endl;
 	return false;
  }
+
  if (!loadMapFromFiles(files)) {
 	boError() << k_funcinfo << "error loading the map" << endl;
-	return false;
- }
- if (!loadDescriptionFromFile(files["C/description.xml"])) {
-	boError() << k_funcinfo << "error loading the default description" << endl;
 	return false;
  }
 
@@ -390,17 +259,6 @@ bool BosonPlayField::loadPlayFieldFromFiles(const QMap<QString, QByteArray>& fil
  // when we have winning conditions one day (probably in "scenario.xml"), we
  // should load it here as well.
 
- return true;
-}
-
-bool BosonPlayField::loadDescriptionFromFile(const QByteArray& xml)
-{
- if (xml.size() == 0) {
-	boError() << k_funcinfo << "Oops - NULL description file" << endl;
-	return false;
- }
- delete mDescription;
- mDescription = new BPFDescription(QString(xml));
  return true;
 }
 
@@ -417,11 +275,11 @@ bool BosonPlayField::loadMapFromFiles(const QMap<QString, QByteArray>& files)
 
 QString BosonPlayField::saveDescriptionToFile() const
 {
- if (!mDescription) {
-	BO_NULL_ERROR(mDescription);
+ if (!description()) {
+	BO_NULL_ERROR(description());
 	return QString::null;
 }
- return mDescription->toString();
+ return description()->toString();
 }
 
 QByteArray BosonPlayField::saveMapPreviewPNGToFile() const
@@ -467,20 +325,20 @@ void BosonPlayField::finalizeLoading()
 
 QString BosonPlayField::playFieldName() const
 {
- if (!mDescription) {
-	BO_NULL_ERROR(mDescription);
+ if (!description()) {
+	BO_NULL_ERROR(description());
 	return QString::null;
  }
- return mDescription->name();
+ return description()->name();
 }
 
 QString BosonPlayField::playFieldComment() const
 {
- if (!mDescription) {
-	BO_NULL_ERROR(mDescription);
+ if (!description()) {
+	BO_NULL_ERROR(description());
 	return QString::null;
  }
- return mDescription->comment();
+ return description()->comment();
 }
 
 bool BosonPlayField::importHeightMapImage(const QImage& image)
@@ -512,7 +370,7 @@ QByteArray BosonPlayField::exportTexMap(unsigned int texture) const
 
 QByteArray BosonPlayField::mapPreviewPNGData() const
 {
- return mMapPreviewPNGData;
+ return preview().mapPreviewPNGData();
 }
 
 
@@ -564,8 +422,8 @@ bool BosonPlayField::savePlayFieldToFiles(QMap<QString, QByteArray>& files)
 	BO_NULL_ERROR(mMap);
 	return false;
  }
- if (!mDescription) {
-	BO_NULL_ERROR(mDescription);
+ if (!description()) {
+	BO_NULL_ERROR(description());
 	return false;
  }
  QMap<QString, QByteArray> mapFiles = mMap->saveMapToFiles();
@@ -588,8 +446,7 @@ bool BosonPlayField::savePlayFieldToFiles(QMap<QString, QByteArray>& files)
 	return false;
  }
 
- QByteArray mapPreviewPNG;
- mapPreviewPNG = saveMapPreviewPNGToFile();
+ QByteArray mapPreviewPNG = saveMapPreviewPNGToFile();
  if (mapPreviewPNG.size() == 0) {
 	boError() << k_funcinfo << "saving map preview failed" << endl;
 	return false;
@@ -604,4 +461,27 @@ bool BosonPlayField::savePlayFieldToFiles(QMap<QString, QByteArray>& files)
  return true;
 }
 
+const BPFPreview& BosonPlayField::preview() const
+{
+ return *mPreview;
+}
+
+const QString& BosonPlayField::identifier() const
+{
+ return preview().identifier();
+}
+
+const BPFDescription* BosonPlayField::description() const
+{
+ if (mModifiedDescription) {
+	return mModifiedDescription;
+ }
+ return preview().description();
+}
+
+void BosonPlayField::setModifiedDescription(BPFDescription* description)
+{
+ delete mModifiedDescription;
+ mModifiedDescription = description;
+}
 
