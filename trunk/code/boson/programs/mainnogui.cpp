@@ -323,8 +323,10 @@ QByteArray MainNoGUI::loadPlayFieldFromDisk(const MainNoGUIStartOptions& options
 	return QByteArray();
  }
 
+ QString fileName = field->fileName();
+
  boDebug() << k_funcinfo << "loading " << identifier << endl;
- QByteArray data = field->loadFromDiskToStream();
+ QByteArray data = BosonPlayField::loadFromDiskToStream(fileName);
  return data;
 }
 

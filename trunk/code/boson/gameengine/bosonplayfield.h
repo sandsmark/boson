@@ -122,6 +122,7 @@ public:
 	BosonMap* map() const { return mMap; }
 	BPFDescription* description() const { return mDescription; }
 	const QString& identifier() const { return mIdentifier; }
+	const QString& fileName() const { return mFileName; }
 
 	/**
 	 * @return The @ref BosonPlayFieldInformation object of this playfield
@@ -209,14 +210,10 @@ public:
 	 * Convenience function for @ref loadFromDiskToFiles followed by @ref
 	 * streamFiles.
 	 *
-	 * Note that @ref preLoadPlayField must have been called before you can
-	 * call this method. See also @ref loadFromDiskToFiles.
-	 *
-	 * @return A @ref QByteArray containing the desired playfield (as
-	 * specified to @ref preLoadPlayField) or an empty @ref QByteArray if an
-	 * error occurred.
+	 * @return A @ref QByteArray containing the specified playfield
+	 * or an empty @ref QByteArray if an error occurred.
 	 **/
-	QByteArray loadFromDiskToStream();
+	static QByteArray loadFromDiskToStream(const QString& file);
 
 	/**
 	 * @short Stream all (virtual) files in @p files.

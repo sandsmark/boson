@@ -666,10 +666,11 @@ bool  BosonPlayField::loadFromDiskToFiles(const QString& fileName, QMap<QString,
  }
  return true;
 }
-QByteArray BosonPlayField::loadFromDiskToStream()
+
+QByteArray BosonPlayField::loadFromDiskToStream(const QString& file)
 {
  QMap<QString, QByteArray> files;
- if (!loadFromDiskToFiles(files)) {
+ if (!BosonPlayField::loadFromDiskToFiles(file, files)) {
 	boError() << k_funcinfo << "could not load playfield from disk" << endl;
 	return QByteArray();
  }

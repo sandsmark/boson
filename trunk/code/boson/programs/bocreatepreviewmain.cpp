@@ -81,13 +81,7 @@ int main(int argc, char **argv)
 
  boDebug() << k_funcinfo << "loading " << inFile << endl;
 
- BosonPlayField* field = new BosonPlayField();
- if (!field->preLoadPlayField(inFile)) {
-	boError() << k_funcinfo << "cannot preload " << inFile << endl;
-	return 1;
- }
-
- QByteArray buffer = field->loadFromDiskToStream();
+ QByteArray buffer = BosonPlayField::loadFromDiskToStream(inFile);
  if (buffer.size() == 0) {
 	boError() << k_funcinfo << "unable to load " << inFile << endl;
 	return 1;
@@ -103,6 +97,7 @@ int main(int argc, char **argv)
 	return 1;
  }
 
+ BosonPlayField* field = new BosonPlayField();
  if (!field->loadPlayFieldFromFiles(files)) {
 	boError() << k_funcinfo << "could load playfield from disk into memory, but failed at loading data into our data structures" << endl;
 	return 1;
