@@ -270,6 +270,8 @@ MACRO(BOSON_MAKE_MESSAGES_POT target)
    # -> we cannot do it here, as we usually are NOT at the beginning of the target
 
    # TODO: headers? !
+   # TODO: *.desktop
+   # TODO: *ui.rc
    SET(_sources ${ARGN})
 
    MAKE_DIRECTORY(${CMAKE_BINARY_DIR}/po)
