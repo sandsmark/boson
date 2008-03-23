@@ -349,7 +349,7 @@ bool BosonPlayField::preLoadPlayField(const QString& file)
 
 // AB: correct (i.e. current) file format assumed. must be converted before this
 // is called.
-bool BosonPlayField::loadPlayField(const QMap<QString, QByteArray>& files)
+bool BosonPlayField::loadPlayFieldFromFiles(const QMap<QString, QByteArray>& files)
 {
  if (!files.contains("map/map.xml")) {
 	boError() << k_funcinfo << "no map.xml found" << endl;

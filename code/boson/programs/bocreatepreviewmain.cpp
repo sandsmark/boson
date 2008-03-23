@@ -103,7 +103,7 @@ int main(int argc, char **argv)
 	return 1;
  }
 
- if (!field->loadPlayField(files)) {
+ if (!field->loadPlayFieldFromFiles(files)) {
 	boError() << k_funcinfo << "could load playfield from disk into memory, but failed at loading data into our data structures" << endl;
 	return 1;
  }

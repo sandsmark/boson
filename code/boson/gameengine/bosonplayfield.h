@@ -91,7 +91,7 @@ private:
  *
  * This class provides in particular methods to load a playfield from the hard
  * disk (@ref preLoadAllPlayFields followed by @ref loadFromDiskToFiles) or from
- * a stream (@ref loadPlayField). The playfield is intended to be loaded once
+ * a stream (@ref loadPlayFieldFromFiles). The playfield is intended to be loaded once
  * from disk (by one player only) and then sent over network to all players,
  * where it is loaded from the stream.
  *
@@ -166,8 +166,8 @@ public:
 	/**
 	 * Load the important data (description for example) from the playField.
 	 *
-	 * Use @ref loadPlayFieldto load <em>all</em> data. preLoadPlayField is
-	 * much faster than @ref loadPlayField.
+	 * Use @ref loadPlayFieldFromFiles to load <em>all</em> data. preLoadPlayField is
+	 * much faster than @ref loadPlayFieldFromFiles.
 	 **/
 	bool preLoadPlayField(const QString& file);
 
@@ -176,7 +176,7 @@ public:
 	 * loadFromDiskToFiles to load a .bpf file from disk to virtual files
 	 * that can be used here.
 	 **/
-	bool loadPlayField(const QMap<QString, QByteArray>& files);
+	bool loadPlayFieldFromFiles(const QMap<QString, QByteArray>& files);
 
 	/**
 	 * This saves this @ref BosonPlayField object into a set of virtual
@@ -190,7 +190,7 @@ public:
 	 * Call @ref preLoadPlayField before you call this, so that the filename
 	 * is available to this class.
 	 *
-	 * Use @ref loadPlayField to actually load data into this object.
+	 * Use @ref loadPlayFieldFromFiles to actually load data into this object.
 	 **/
 	bool loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles);
 
