@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@
 #include "../bosondata.h"
 #include "../gameengine/speciestheme.h"
 #include "../gameengine/bosoncomputerio.h"
+#include "../gameengine/bpfloader.h"
 #include <config.h>
 
 #include <kaboutdata.h>
@@ -326,7 +327,7 @@ QByteArray MainNoGUI::loadPlayFieldFromDisk(const MainNoGUIStartOptions& options
  QString fileName = field->fileName();
 
  boDebug() << k_funcinfo << "loading " << identifier << endl;
- QByteArray data = BosonPlayField::loadFromDiskToStream(fileName);
+ QByteArray data = BPFLoader::loadFromDiskToStream(fileName);
  return data;
 }
 

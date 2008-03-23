@@ -29,6 +29,7 @@
 #include "../defines.h"
 #include "../gameengine/boson.h"
 #include "../gameengine/boeventmanager.h"
+#include "../gameengine/bpfloader.h"
 #include "bodebug.h"
 
 #include <kmessagebox.h>
@@ -192,7 +193,7 @@ QByteArray BoCreateNewMap::createNewMap()
  files.insert("eventlistener/localplayer.xml", eventListenerXML);
  files.insert("eventlistener/canvas.xml", eventListenerXML);
 
- QByteArray b = BosonPlayField::streamFiles(files);
+ QByteArray b = BPFLoader::streamFiles(files);
  boDebug() << k_funcinfo << "files got streamed" << endl;
  return b;
 }

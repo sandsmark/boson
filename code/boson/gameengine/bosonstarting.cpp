@@ -30,6 +30,7 @@
 #include "bosonprofiling.h"
 #include "bodebug.h"
 #include "bosonsaveload.h"
+#include "bpfloader.h"
 
 #include <klocale.h>
 #include <kgame/kmessageclient.h>
@@ -230,7 +231,7 @@ bool BosonStarting::start()
  BosonStartingBosonLocker lock(boGame); // calls Boson::lock() and unlocks it again on destruction
 
  QMap<QString, QByteArray> files;
- if (!BosonPlayField::unstreamFiles(files, mNewGameData)) {
+ if (!BPFLoader::unstreamFiles(files, mNewGameData)) {
 	boError(270) << k_funcinfo << "invalid newgame stream" << endl;
 	return false;
  }

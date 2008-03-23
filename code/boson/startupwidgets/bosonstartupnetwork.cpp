@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2003-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 #include "bosonstartupnetwork.moc"
 
 #include "../../bomemory/bodummymemory.h"
+#include "../gameengine/bpfloader.h"
 #include "../gameengine/boson.h"
 #include "../gameengine/bosonplayfield.h"
 #include "../gameengine/player.h"
@@ -137,7 +138,7 @@ bool BosonStartupNetwork::sendNewGame(BosonPlayField* field, bool editor, const 
 		boError() << k_funcinfo << "playfield " << field->identifier() << " has not yet been preloaded" << endl;
 		return false;
 	}
-	data = BosonPlayField::loadFromDiskToStream(field->fileName());
+	data = BPFLoader::loadFromDiskToStream(field->fileName());
 	if (data.size() == 0) {
 		boError() << k_funcinfo << "no data - saving to stream failed" << endl;
 		return false;
