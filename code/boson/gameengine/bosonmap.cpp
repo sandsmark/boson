@@ -479,7 +479,6 @@ bool BosonMap::createNewMap(unsigned int width, unsigned int height, BosonGround
 
 bool BosonMap::loadMapGeomFromFile(const QByteArray& mapXML)
 {
- boDebug(270) << k_funcinfo << endl;
  QDomDocument doc(QString::fromLatin1("BosonMap"));
  QString errorMsg;
  int line, column;
@@ -544,7 +543,6 @@ bool BosonMap::loadMapGeomFromFile(const QByteArray& mapXML)
 
 bool BosonMap::loadWaterFromFile(const QByteArray& waterXML)
 {
- boDebug(270) << k_funcinfo << endl;
  QDomDocument doc(QString::fromLatin1("Water"));
  QString errorMsg;
  int line, column;
