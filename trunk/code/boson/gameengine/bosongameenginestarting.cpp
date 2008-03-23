@@ -203,7 +203,7 @@ bool BosonStartingLoadPlayField::startTask()
  }
 
 
- if (!playField->loadPlayField(*mFiles)) {
+ if (!playField->loadPlayFieldFromFiles(*mFiles)) {
 	boError(270) << k_funcinfo << "error loading the playfield" << endl;
 	return false;
  }
