@@ -234,9 +234,6 @@ protected:
 	bool loadMapFromFiles(const QMap<QString, QByteArray>& files);
 
 	QString saveDescriptionToFile() const;
-	QByteArray saveMapGeomToFile() const;
-	QByteArray saveWaterToFile() const;
-	QByteArray saveTexMapToFile() const;
 	QByteArray saveMapPreviewPNGToFile() const;
 
 	/**

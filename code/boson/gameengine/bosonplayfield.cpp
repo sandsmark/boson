@@ -427,39 +427,6 @@ QString BosonPlayField::saveDescriptionToFile() const
  return mDescription->toString();
 }
 
-QByteArray BosonPlayField::saveMapGeomToFile() const
-{
- if (!mMap) {
-	boError() << k_funcinfo << "NULL map" << endl;
-	return QByteArray();
- }
- return mMap->saveMapGeomToFile();
-}
-
-QByteArray BosonPlayField::saveWaterToFile() const
-{
- if (!mMap) {
-	boError() << k_funcinfo << "NULL map" << endl;
-	return QByteArray();
- }
- return mMap->saveWaterToFile();
-}
-
-QByteArray BosonPlayField::saveTexMapToFile() const
-{
- if (!mMap) {
-	boError() << k_funcinfo << "NULL map" << endl;
-	return QByteArray();
- }
- QByteArray file;
- QDataStream stream(file, IO_WriteOnly);
- if (!mMap->saveTexMap(stream)) {
-	boError() << k_funcinfo << "Error saving texmap" << endl;
-	return QByteArray();
- }
- return file;
-}
-
 QByteArray BosonPlayField::saveMapPreviewPNGToFile() const
 {
  if (!mMap) {
