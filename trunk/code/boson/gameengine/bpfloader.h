@@ -25,6 +25,7 @@
 class BPFDescription;
 class BosonPlayFieldInformation;
 class BPFPreviewPrivate;
+class BPFFile;
 
 /**
  * @short Short information/preview of "BosonPlayField" (.bpf) files
@@ -96,7 +97,14 @@ public:
 	BPFLoader();
 	~BPFLoader();
 
+	/**
+	 * Shortcut for @ref loadFilePreviewFromDiskToFiles followed by @ref
+	 * loadFilePreviewFromFiles
+	 **/
 	static BPFPreview loadFilePreview(const QString& file);
+
+	static bool loadFilePreviewFromDiskToFiles(const QString& file, QMap<QString,QByteArray>& destFiles);
+	static BPFPreview loadFilePreviewFromFiles(const QMap<QString, QByteArray>& files);
 
 	/**
 	 * Load the .bpf file specified to @p fileName and place the virtual
@@ -138,6 +146,15 @@ public:
 	 * @return TRUE on success, FALSE otherwise.
 	 **/
 	static bool unstreamFiles(QMap<QString, QByteArray>& destFiles, const QByteArray& buffer);
+
+protected:
+	/**
+	 * @return A virtual "file" that contains an identifier for the
+	 * specified file. It should be used for @ref BosonPlayField::identifier
+	 * primarily. The "file" is simply a QDataStream containing a single
+	 * QString.
+	 **/
+	static QByteArray createIdentifier(const BPFFile& boFile, const QMap<QString, QByteArray>& files);
 };
 
 #endif
