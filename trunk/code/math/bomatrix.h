@@ -38,7 +38,7 @@
  * </pre>
  * Will be stored in memory like this:
  * <pre>
- * A11 A21 A31 A41 A12 A22 A32 A42 A13 A23 A33 A43 A41 A42 A43 A44
+ * A11 A21 A31 A41 A12 A22 A32 A42 A13 A23 A33 A43 A14 A24 A34 A44
  * </pre>
  *
  * @short A 4x4 matrix as used by boson and OpenGL
