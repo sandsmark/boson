@@ -129,6 +129,11 @@ bool Model::checkLoadedModel() const
       return false;
     }
     Frame* f = lod->frame(i);
+    if(f->nodeCount() == 0)
+    {
+      boError(100) << k_funcinfo << "no nodes in frame " << i << endl;
+      return false;
+    }
     for(unsigned int j = 0; j < f->nodeCount(); j++)
     {
       if(!f->mesh(j))
