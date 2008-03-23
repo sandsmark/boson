@@ -81,15 +81,9 @@ int main(int argc, char **argv)
  QString inFile = args->arg(0);
  QString outFile = args->arg(1);
 
- BosonPlayField* field = new BosonPlayField();
- if (!field->preLoadPlayField(inFile)) {
-	boError() << k_funcinfo << "playifeld " << inFile << " has not yet been preloaded" << endl;
-	return 1;
- }
-
  boDebug() << k_funcinfo << "loading playfield " << inFile << endl;
 
- QByteArray buffer = field->loadFromDiskToStream();
+ QByteArray buffer = BosonPlayField::loadFromDiskToStream(inFile);
  if (buffer.size() == 0) {
 	boError() << k_funcinfo << "unable to load playfield " << inFile << endl;
 	return 1;

@@ -137,7 +137,7 @@ bool BosonStartupNetwork::sendNewGame(BosonPlayField* field, bool editor, const 
 		boError() << k_funcinfo << "playfield " << field->identifier() << " has not yet been preloaded" << endl;
 		return false;
 	}
-	data = field->loadFromDiskToStream();
+	data = BosonPlayField::loadFromDiskToStream(field->fileName());
 	if (data.size() == 0) {
 		boError() << k_funcinfo << "no data - saving to stream failed" << endl;
 		return false;
