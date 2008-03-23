@@ -116,6 +116,11 @@ private:
 /**
  * @short A BosonPlayField (.bpf) File.
  *
+ * Note: the class @ref BosonPlayField does @em not represent the entire .bpf
+ * file, the common name has historic reasons only. The .bpf file also includes
+ * player data, unit data, scripts, ... that are part of the game, but not of
+ * @ref BosonPlayField.
+ *
  * UPDATE: we use this for .bsg files as well now. Both share the same file
  * format since boson 0.9
  * @author Andreas Beckermann <b_mann@gmx.de>
