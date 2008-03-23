@@ -736,7 +736,7 @@ void BoUfoNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  }
 
  // Update description of the map
- BPFDescription* description = field->description();
+ const BPFDescription* description = field->description();
  if (!description) {
     boWarning() << k_funcinfo << "NULL description" << endl;
     BosonPlayField::preLoadAllPlayFields();

@@ -316,7 +316,7 @@ void BoUfoStartEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  QStringList list = boData->availablePlayFields();
 
  const BosonPlayFieldInformation* information = field->information();
- BPFDescription* description = field->description();
+ const BPFDescription* description = field->description();
 
  // AB: I am not fully sure if a text browser is the right choice for this
  // widget. but being able to use links in the description is surely a good
@@ -440,7 +440,7 @@ void BoUfoStartEditorWidget::slotNewMapToggled(bool isNewMap)
 	mMapDescription->setText(i18n("Enter description here"));
  } else if (d->mSelectedMap) {
 	const BosonPlayFieldInformation* information = d->mSelectedMap->information();
-	BPFDescription* description = d->mSelectedMap->description();
+	const BPFDescription* description = d->mSelectedMap->description();
 
 	BO_CHECK_NULL_RET(information);
 	BO_CHECK_NULL_RET(description);
