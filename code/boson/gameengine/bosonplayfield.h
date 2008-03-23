@@ -104,24 +104,6 @@ public:
 	BosonPlayField(QObject* parent = 0);
 	~BosonPlayField();
 
-	bool loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles);
-	QByteArray loadFromDiskToStream(QMap<QString, QByteArray>* destFiles = 0);
-
-	bool savePlayFieldToFiles(QMap<QString, QByteArray>& destFiles);
-
-	/**
-	 * Stream all (virtual) files in @p files.
-	 **/
-	static QByteArray streamFiles(const QMap<QString, QByteArray>& files);
-	static bool unstreamFiles(QMap<QString, QByteArray>& destFiles, const QByteArray& buffer);
-
-	/**
-	 * Load the important data (description for example) from the playField.
-	 * Use @ref loadPlayField to load <em>all</em> data. preLoadPlayField is
-	 * much faster than @ref loadPlayField.
-	 **/
-	bool preLoadPlayField(const QString& file);
-
 	/**
 	 * The map preview is meant to be displayed in the newgame widget as a
 	 * short preview of the map before he actually plays it. The preview is
@@ -136,39 +118,6 @@ public:
 	 * empty byte array is returned then.
 	 **/
 	QByteArray mapPreviewPNGData() const;
-
-	/**
-	 * Load the playfield from @p files to this object.
-	 **/
-	bool loadPlayField(const QMap<QString, QByteArray>& files);
-
-	bool importHeightMapImage(const QImage& image);
-
-	/**
-	 * @return a @ref QByteArray with the heightmap encoded as a .png  image. You
-	 * can write this directly to the disk or use a @ref QImage constructor
-	 * that takes a @ref QByteArray.
-	 **/
-	QByteArray exportHeightMap() const;
-
-	/**
-	 * @return a @ref QByteArray with the texmap encoded as a .png  image. You
-	 * can write this directly to the disk or use a @ref QImage constructor
-	 * that takes a @ref QByteArray.
-	 **/
-	QByteArray exportTexMap(unsigned int texture) const;
-
-	/**
-	 * Make @p map the new map of this playfield. Called by the editor
-	 * only.
-	 **/
-	void changeMap(BosonMap* map);
-
-	/**
-	 * Make @p d the new description of this playfield. Called by the editor
-	 * only.
-	 **/
-	void changeDescription(BPFDescription* d);
 
 	BosonMap* map() const { return mMap; }
 	BPFDescription* description() const { return mDescription; }
@@ -195,8 +144,6 @@ public:
 
 	void quit();
 
-	bool modified() const;
-
 	QString playFieldName() const;
 	QString playFieldComment() const;
 
@@ -213,6 +160,139 @@ public:
 	 **/
 	void finalizeLoading();
 
+	///////////////////////////////////////////////////////////
+	//////////////////// Methods for loading/saving a playfield
+	///////////////////////////////////////////////////////////
+	/**
+	 * Load the important data (description for example) from the playField.
+	 *
+	 * Use @ref loadPlayFieldto load <em>all</em> data. preLoadPlayField is
+	 * much faster than @ref loadPlayField.
+	 **/
+	bool preLoadPlayField(const QString& file);
+
+	/**
+	 * Load the playfield from @p files to this object. Use @ref
+	 * loadFromDiskToFiles to load a .bpf file from disk to virtual files
+	 * that can be used here.
+	 **/
+	bool loadPlayField(const QMap<QString, QByteArray>& files);
+
+	/**
+	 * This saves this @ref BosonPlayField object into a set of virtual
+	 * files that are stored into @p destFiles.
+	 **/
+	bool savePlayFieldToFiles(QMap<QString, QByteArray>& destFiles);
+
+	/**
+	 * @overload
+	 *
+	 * Call @ref preLoadPlayField before you call this, so that the filename
+	 * is available to this class.
+	 *
+	 * Use @ref loadPlayField to actually load data into this object.
+	 **/
+	bool loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles);
+
+	/**
+	 * Load the .bpf file specified to @p fileName and place the virtual
+	 * files in it (a .bpf file is actually an archive) into @p destFiles.
+	 *
+	 * Note: this method does not really belong here, as it is meant to load
+	 * ALL files from the .bpf file, including player data and game data,
+	 * that does not belong to the playfield. This method is here mainly for
+	 * historic reasons.
+	 **/
+	static bool loadFromDiskToFiles(const QString& fileName, QMap<QString, QByteArray>& destFiles);
+
+	/**
+	 * Convenience function for @ref loadFromDiskToFiles followed by @ref
+	 * streamFiles.
+	 *
+	 * Note that @ref preLoadPlayField must have been called before you can
+	 * call this method. See also @ref loadFromDiskToFiles.
+	 *
+	 * @return A @ref QByteArray containing the desired playfield (as
+	 * specified to @ref preLoadPlayField) or an empty @ref QByteArray if an
+	 * error occurred.
+	 **/
+	QByteArray loadFromDiskToStream();
+
+	/**
+	 * @short Stream all (virtual) files in @p files.
+	 *
+	 * Helper method for loading a playfield. This takes a set of virtual
+	 * files (in @p files), as e.g. loaded from a .bpf file, and writes it
+	 * into a single @ref QByteArray along with some additional information
+	 * that makes it easier to read the data back again.
+	 **/
+	static QByteArray streamFiles(const QMap<QString, QByteArray>& files);
+
+	/**
+	 * @short Unstream all (virtual) files to @p destFiles
+	 *
+	 * Helper method for loading a playfield. This takes a @ref QByteArray
+	 * @p buffer which is meant to contain a playfield that was streamed
+	 * using @ref streamFiles and writes the files to @p destFiles.
+	 *
+	 * @return TRUE on success, FALSE otherwise.
+	 **/
+	static bool unstreamFiles(QMap<QString, QByteArray>& destFiles, const QByteArray& buffer);
+
+	/////////////////////////////////////////////////////////////////
+	//////////////////// Methods for loading/saving a playfield (end)
+	/////////////////////////////////////////////////////////////////
+
+
+	////////////////////////////////////////////////
+	//////////////////// Methods for the editor only
+	////////////////////////////////////////////////
+	/**
+	 * See also @ref BosonMap::importHeightMapImage
+	 *
+	 * This method is meant for the editor only.
+	 **/
+	bool importHeightMapImage(const QImage& image);
+
+	/**
+	 * See also @ref BosonMap::saveHeightMapImage
+	 *
+	 * This method is meant for the editor only.
+	 *
+	 * @return a @ref QByteArray with the heightmap encoded as a .png  image. You
+	 * can write this directly to the disk or use a @ref QImage constructor
+	 * that takes a @ref QByteArray.
+	 **/
+	QByteArray exportHeightMap() const;
+
+	/**
+	 * See also @ref BosonMap::saveTexMapImage
+	 *
+	 * This method is meant for the editor only.
+	 *
+	 * @return a @ref QByteArray with the texmap encoded as a .png  image. You
+	 * can write this directly to the disk or use a @ref QImage constructor
+	 * that takes a @ref QByteArray.
+	 **/
+	QByteArray exportTexMap(unsigned int texture) const;
+
+	/**
+	 * Make @p map the new map of this playfield. Called by the editor
+	 * only.
+	 **/
+	void changeMap(BosonMap* map);
+
+	/**
+	 * Make @p d the new description of this playfield. Called by the editor
+	 * only.
+	 **/
+	void changeDescription(BPFDescription* d);
+
+	// AB: not really supported currently (2008/03/22)!
+	bool modified() const;
+	//////////////////////////////////////////////////////
+	//////////////////// Methods for the editor only (end)
+	//////////////////////////////////////////////////////
 public:
 	/**
 	 * Preload all playFields into memory. Note that this will consume pretty much

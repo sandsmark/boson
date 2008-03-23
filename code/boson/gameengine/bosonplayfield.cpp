@@ -570,15 +570,19 @@ QStringList BosonPlayField::findPlayFieldsOfCampaign(const QString& campaign)
 // load from harddisk to virtual files in the QMap.
 bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
 {
+ if (!isPreLoaded()) {
+	boError() << k_funcinfo << "playfield not yet preloaded" << endl;
+ }
+ return BosonPlayField::loadFromDiskToFiles(mFileName, destFiles);
+}
+
+bool  BosonPlayField::loadFromDiskToFiles(const QString& fileName, QMap<QString, QByteArray>& destFiles)
+{
  if (!destFiles.isEmpty()) {
 	boError() << k_funcinfo << "destFiles must be empty" << endl;
 	return false;
  }
- if (!isPreLoaded()) {
-	boError() << k_funcinfo << "playfield not yet preloaded" << endl;
-	return false;
- }
- BPFFile boFile(mFileName, true);
+ BPFFile boFile(fileName, true);
  QByteArray heightMap = boFile.heightMapData();
  QByteArray texMap = boFile.texMapData();
  QByteArray mapXML = boFile.mapXMLData();
@@ -662,26 +666,14 @@ bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
  }
  return true;
 }
-
-QByteArray BosonPlayField::loadFromDiskToStream(QMap<QString, QByteArray>* destFiles)
+QByteArray BosonPlayField::loadFromDiskToStream()
 {
- if (destFiles && !destFiles->isEmpty()) {
-	boError() << k_funcinfo << "destFiles must be empty" << endl;
-	return QByteArray();
- }
- if (!isPreLoaded()) {
-	boError() << k_funcinfo << "playfield not yet preloaded" << endl;
-	return QByteArray();
- }
  QMap<QString, QByteArray> files;
  if (!loadFromDiskToFiles(files)) {
 	boError() << k_funcinfo << "could not load playfield from disk" << endl;
 	return QByteArray();
  }
 
- if (destFiles) {
-	*destFiles = files;
- }
  return streamFiles(files);
 }
 
