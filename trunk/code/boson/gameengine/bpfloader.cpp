@@ -34,21 +34,28 @@ class BPFPreviewPrivate : public QShared
 public:
 	BPFPreviewPrivate() : QShared()
 	{
-		mPlayFieldInformation = 0;
 		mDescription = 0;
 		mIsLoaded = false;
+
+		mMapWidth = 0;
+		mMapHeight = 0;
+		mMinPlayers = 1;
+		mMaxPlayers = 1;
 	}
 	~BPFPreviewPrivate()
 	{
-		delete mPlayFieldInformation;
 		delete mDescription;
 	}
 
 	bool mIsLoaded;
-	BosonPlayFieldInformation* mPlayFieldInformation;
 	BPFDescription* mDescription;
 	QString mIdentifier;
 	QByteArray mMapPreviewPNGData;
+
+	unsigned int mMapWidth;
+	unsigned int mMapHeight;
+	unsigned int mMinPlayers;
+	int mMaxPlayers;
 };
 
 BPFPreview::BPFPreview()
@@ -86,6 +93,105 @@ BPFPreview& BPFPreview::operator=(const BPFPreview& p)
  return *this;
 }
 
+BPFPreview BPFPreview::loadFilePreviewFromFiles(const QMap<QString, QByteArray>& files)
+{
+ BPFPreviewPrivate* data = new BPFPreviewPrivate;
+ BPFPreview previewObject(data);
+
+ if (!files.contains("map/map.xml")) {
+	boError() << k_funcinfo << "map/map.xml not found" << endl;
+	return false;
+ }
+ if (!files.contains("players.xml")) {
+	boError() << k_funcinfo << "players.xml not found" << endl;
+	return false;
+ }
+ if (!loadFilePreviewPlayersInformation(data, files["players.xml"])) {
+	boError() << k_funcinfo << "unable to load players information" << endl;
+	return false;
+ }
+ if (!loadFilePreviewMapInformation(data, files["map/map.xml"])) {
+	boError() << k_funcinfo << "unable to load map information" << endl;
+	return false;
+ }
+
+ QByteArray descriptionXML = files["C/description.xml"];
+ if (descriptionXML.size() == 0) {
+	boError() << k_funcinfo << "Oops - NULL description file" << endl;
+	return BPFPreview();
+ }
+ delete data->mDescription;
+ data->mDescription = new BPFDescription(QString(descriptionXML));
+ data->mMapPreviewPNGData = files["mappreview/map.png"];
+ QByteArray identifierFile = files["identifier"];
+ QDataStream identifierStream(identifierFile, IO_ReadOnly);
+ identifierStream >> data->mIdentifier;
+
+ data->mIsLoaded = true;
+
+ return previewObject;
+}
+
+bool BPFPreview::loadFilePreviewPlayersInformation(BPFPreviewPrivate* data, const QByteArray& xml)
+{
+ QString errorMsg;
+ int line = 0, column = 0;
+ QDomDocument doc(QString::fromLatin1("Players"));
+ if (!doc.setContent(QString(xml), &errorMsg, &line, &column)) {
+	boError() << k_funcinfo << "unable to set XML content - error in line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
+	return false;
+ }
+ QDomElement root = doc.documentElement();
+
+ // AB: atm there is no usable way to retrieve a minplayers value. also atm we
+ // don't have any use for minplayers anyway, as we don't have scenarios (i.e.
+ // winning conditions) yet. so we use 1 as default.
+ data->mMinPlayers = 1;
+
+ // count the Player tags that don't have a IsNeutral attribute (maximal one
+ // exists - exactly one for files created with boson >= 0.10)
+ data->mMaxPlayers = 0;
+ QDomNodeList list = root.elementsByTagName("Player");
+ for (unsigned int i = 0; i < list.count(); i++) {
+	if (list.item(i).toElement().hasAttribute("IsNeutral")) {
+		continue;
+	}
+	data->mMaxPlayers++;
+ }
+
+
+ return true;
+}
+
+bool BPFPreview::loadFilePreviewMapInformation(BPFPreviewPrivate* data, const QByteArray& xml)
+{
+ QString errorMsg;
+ int line = 0, column = 0;
+ QDomDocument doc(QString::fromLatin1("BosonMap"));
+ if (!doc.setContent(QString(xml), &errorMsg, &line, &column)) {
+	boError() << k_funcinfo << "unable to set XML content - error in line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
+	return false;
+ }
+ QDomElement root = doc.documentElement();
+ QDomElement geometry = root.namedItem("Geometry").toElement();
+ if (geometry.isNull()) {
+	boError() << k_funcinfo << "no Geometry tag found" << endl;
+	return false;
+ }
+ bool ok = false;
+ data->mMapWidth = geometry.attribute("Width").toUInt(&ok);
+ if (!ok) {
+	boError() << k_funcinfo << "invalid number for Width" << endl;
+	return false;
+ }
+ data->mMapHeight = geometry.attribute("Height").toUInt(&ok);
+ if (!ok) {
+	boError() << k_funcinfo << "invalid number for Width" << endl;
+	return false;
+ }
+ return true;
+}
+
 bool BPFPreview::isLoaded() const
 {
  return d->mIsLoaded;
@@ -96,14 +202,39 @@ const QString& BPFPreview::identifier() const
  return d->mIdentifier;
 }
 
-const BosonPlayFieldInformation* BPFPreview::information() const
-{
- return d->mPlayFieldInformation;
-}
-
 const BPFDescription* BPFPreview::description() const
 {
  return d->mDescription;
+}
+
+BPFDescription* BPFPreview::description()
+{
+ return d->mDescription;
+}
+
+QByteArray BPFPreview::mapPreviewPNGData() const
+{
+ return d->mMapPreviewPNGData;
+}
+
+unsigned int BPFPreview::mapWidth() const
+{
+ return d->mMapWidth;
+}
+
+unsigned int BPFPreview::mapHeight() const
+{
+ return d->mMapHeight;
+}
+
+unsigned int BPFPreview::minPlayers() const
+{
+ return d->mMinPlayers;
+}
+
+int BPFPreview::maxPlayers() const
+{
+ return d->mMaxPlayers;
 }
 
 
@@ -118,10 +249,10 @@ BPFLoader::~BPFLoader()
 BPFPreview BPFLoader::loadFilePreview(const QString& file)
 {
  QMap<QString, QByteArray> files;
- if (!loadFilePreviewFromDiskToFiles(file, files)) {
+ if (!BPFLoader::loadFilePreviewFromDiskToFiles(file, files)) {
 	return BPFPreview();;
  }
- return loadFilePreviewFromFiles(files);
+ return BPFPreview::loadFilePreviewFromFiles(files);
 }
 
 bool BPFLoader::loadFilePreviewFromDiskToFiles(const QString& file, QMap<QString,QByteArray>& destFiles)
@@ -132,8 +263,8 @@ bool BPFLoader::loadFilePreviewFromDiskToFiles(const QString& file, QMap<QString
 	return false;
  }
 
- QByteArray mapXML; // for BosonPlayFieldInformation
- QByteArray playersXML; // for BosonPlayFieldInformation
+ QByteArray mapXML;
+ QByteArray playersXML;
  if (!boFile.hasMapDirectory()) {
 	boError() << k_funcinfo << "file format not supported" << endl;
 	return false;
@@ -172,32 +303,6 @@ bool BPFLoader::loadFilePreviewFromDiskToFiles(const QString& file, QMap<QString
 #warning TODO: convert file to current format (if it isnt already)
 
  return true;
-}
-
-BPFPreview BPFLoader::loadFilePreviewFromFiles(const QMap<QString, QByteArray>& files)
-{
- BPFPreviewPrivate* data = new BPFPreviewPrivate;
- BPFPreview previewObject(data);
-
- if (!data->mPlayFieldInformation->loadInformation(files)) {
-	boError() << k_funcinfo << "Could not load playfield information" << endl;
-	return BPFPreview();
- }
- QByteArray descriptionXML = files["C/description.xml"];
- if (descriptionXML.size() == 0) {
-	boError() << k_funcinfo << "Oops - NULL description file" << endl;
-	return BPFPreview();
- }
- delete data->mDescription;
- data->mDescription = new BPFDescription(QString(descriptionXML));
- data->mMapPreviewPNGData = files["mappreview/map.png"];
- QByteArray identifierFile = files["identifier"];
- QDataStream identifierStream(identifierFile, IO_ReadOnly);
- identifierStream >> data->mIdentifier;
-
- data->mIsLoaded = true;
-
- return previewObject;
 }
 
 

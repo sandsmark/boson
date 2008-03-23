@@ -35,6 +35,7 @@
 #include "../gameengine/bosongroundtheme.h"
 #include "../bosondata.h"
 #include "../gameengine/bosonsaveload.h"
+#include "../gameengine/bpfloader.h" // BPFPreview. FIXME: dedicated file!
 #include "../gameview/bosonlocalplayerinput.h" // ugly. we should not include stuff from the gameview in here.
 #include "bosonstartupnetwork.h"
 #include "bocreatenewmap.h"
@@ -240,7 +241,7 @@ void BoUfoStartEditorWidget::slotNetStart()
 		boError() << k_funcinfo << "NULL playfield" << endl;
 		return;
 	}
-	maxPlayers = field->information()->maxPlayers();
+	maxPlayers = field->preview().maxPlayers();
  }
 
  QValueList<QColor> availableTeamColors = boGame->availableTeamColors();
@@ -315,7 +316,7 @@ void BoUfoStartEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  boDebug() << k_funcinfo << "id: " << field->identifier() << endl;
  QStringList list = boData->availablePlayFields();
 
- const BosonPlayFieldInformation* information = field->information();
+ BPFPreview preview = field->preview();
  const BPFDescription* description = field->description();
 
  // AB: I am not fully sure if a text browser is the right choice for this
@@ -327,10 +328,10 @@ void BoUfoStartEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
 	mMapDescription->setText(description->comment());
  }
 
- mMapWidth->setValue(information->mapWidth());
- mMapHeight->setValue(information->mapHeight());
+ mMapWidth->setValue(preview.mapWidth());
+ mMapHeight->setValue(preview.mapHeight());
  mGroundTheme->setCurrentItem(0); // TODO - we do not yet support more than one :(
- mMaxPlayers->setValue(information->maxPlayers());
+ mMaxPlayers->setValue(preview.maxPlayers());
 
  d->mSelectedMap = field;
 }
@@ -439,10 +440,9 @@ void BoUfoStartEditorWidget::slotNewMapToggled(bool isNewMap)
 	mFilling->setCurrentItem(0);
 	mMapDescription->setText(i18n("Enter description here"));
  } else if (d->mSelectedMap) {
-	const BosonPlayFieldInformation* information = d->mSelectedMap->information();
+	BPFPreview preview = d->mSelectedMap->preview();
 	const BPFDescription* description = d->mSelectedMap->description();
 
-	BO_CHECK_NULL_RET(information);
 	BO_CHECK_NULL_RET(description);
 
 	if (description->comment().isEmpty()) {
@@ -451,10 +451,10 @@ void BoUfoStartEditorWidget::slotNewMapToggled(bool isNewMap)
 		mMapDescription->setText(description->comment());
 	}
 	mMapSize->setCurrentItem(6);  // custom
-	mMapWidth->setValue(information->mapWidth());
-	mMapHeight->setValue(information->mapHeight());
+	mMapWidth->setValue(preview.mapWidth());
+	mMapHeight->setValue(preview.mapHeight());
 	mGroundTheme->setCurrentItem(0); // TODO - we do not yet support more than one :(
-	mMaxPlayers->setValue(information->maxPlayers());
+	mMaxPlayers->setValue(preview.maxPlayers());
  }
 
  mMapSize->setEnabled(isNewMap);
