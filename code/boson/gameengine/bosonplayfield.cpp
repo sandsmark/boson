@@ -42,10 +42,6 @@
 #include "bosonplayfield.moc"
 
 
-// the version of the stream that the ADMIN sends to start a game
-#define BO_ADMIN_STREAM_VERSION (Q_UINT32)0x01
-
-
 class BosonPlayFieldData : public BosonDataObject
 {
 public:
@@ -687,7 +683,7 @@ QByteArray BosonPlayField::streamFiles(const QMap<QString, QByteArray>& files)
  }
  QDataStream stream(buffer, IO_WriteOnly);
  stream << QCString("boplayfield");
- stream << (Q_UINT32)0x00; // version tag. probably not needed AB: maybe use BO_ADMIN_STREAM_VERSION
+ stream << (Q_UINT32)0x00; // version tag. probably not needed
  stream << files;
  stream << QCString("boplayfield_end");
  return buffer;
