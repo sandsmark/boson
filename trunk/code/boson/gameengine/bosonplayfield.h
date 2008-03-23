@@ -82,6 +82,15 @@ private:
 };
 
 
+// FIXME: do we really want to store rules and winning conditions here?
+//        -> both may depend on players and units that are in the game (e.g.
+//           "unit ID xyz cannot be destroyed"), so it rather belongs to the
+//           BosonCanvas?!
+//           -> if we store rules+winning condition in BosonCanvas, then this
+//              class is useless. it provides .bpf file loading (which does not
+//              belong here anyway) and playfield description/name/comment
+//              (which could also be stored in the map or somewhere else) only.
+//              the rest is stored in BosonMap
 /**
  * A playfield is a "level" in boson. It contains of a map (see @ref BosonMap
  * and @ref map),
@@ -324,29 +333,6 @@ protected:
 
 	QString saveDescriptionToFile() const;
 	QByteArray saveMapPreviewPNGToFile() const;
-
-	/**
-	 * This takes a set of files, as loaded by @ref loadFromDiskToFiles, and
-	 * checks whether they have the most current file format. If they don't
-	 * have, this method tries to convert them.
-	 *
-	 * @since Boson 0.9.1
-	 **/
-	bool convertFilesToCurrentFormat(QMap<QString, QByteArray>& destFiles);
-
-	/**
-	 * Called by the above method. This one should care about the actual
-	 * conversion.
-	 *
-	 * Here you are meant to place the actual conversion code.
-	 * @param handled set to TRUE when the @p version has been recognized and (!)
-	 * used to convert the files to a new format (i.e. at least changed
-	 * the version number). Otherwise set to FALSE (i.e. if the files have
-	 * not been touched at all).
-	 * @return FALSE, if the file should have been converted, but we failed
-	 * while doing so. Otherwise TRUE.
-	 **/
-	bool convertFilesToCurrentFormat(QMap<QString, QByteArray>& destFiles, unsigned int version, bool* handled);
 
 	static QStringList findAvailableCampaigns();
 	static QStringList findPlayFieldsOfCampaign(const QString& campaign);
