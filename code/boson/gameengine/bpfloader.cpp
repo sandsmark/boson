@@ -100,19 +100,19 @@ BPFPreview BPFPreview::loadFilePreviewFromFiles(const QMap<QString, QByteArray>&
 
  if (!files.contains("map/map.xml")) {
 	boError() << k_funcinfo << "map/map.xml not found" << endl;
-	return false;
+	return BPFPreview();
  }
  if (!files.contains("players.xml")) {
 	boError() << k_funcinfo << "players.xml not found" << endl;
-	return false;
+	return BPFPreview();
  }
  if (!loadFilePreviewPlayersInformation(data, files["players.xml"])) {
 	boError() << k_funcinfo << "unable to load players information" << endl;
-	return false;
+	return BPFPreview();
  }
  if (!loadFilePreviewMapInformation(data, files["map/map.xml"])) {
 	boError() << k_funcinfo << "unable to load map information" << endl;
-	return false;
+	return BPFPreview();
  }
 
  QByteArray descriptionXML = files["C/description.xml"];
