@@ -44,7 +44,7 @@ PlayFieldTest::~PlayFieldTest()
  delete mPlayField;
 }
 
-void PlayFieldTest::initTest()
+bool PlayFieldTest::initTest()
 {
  delete mPlayField;
  mPlayField = new BosonPlayField(this);
@@ -63,6 +63,8 @@ void PlayFieldTest::initTest()
  description->setName("name");
  description->setComment("comment");
  mPlayField->setModifiedDescription(description);
+
+ return true;
 }
 
 void PlayFieldTest::cleanupTest()

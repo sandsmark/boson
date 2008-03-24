@@ -33,7 +33,10 @@ class BosonGroundTheme;
 	}
 
 #define DO_TEST(x) \
-	initTest(); \
+	if (!initTest()) { \
+		boError() << "initTest() failed for test: " #x << endl; \
+		return false; \
+	}\
 	if (!x) { \
 		boDebug() << "test failed: " #x << endl; \
 		cleanupTest(); \

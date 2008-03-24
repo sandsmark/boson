@@ -43,13 +43,15 @@ MapTest::~MapTest()
  delete mMap;
 }
 
-void MapTest::initTest()
+bool MapTest::initTest()
 {
  delete mMap;
  mMap = new BosonMap(this);
 
  BosonGroundTheme* theme = TestFrameWork::createNewGroundTheme("dummy_theme_ID", g_groundTypeCount);
  BosonData::bosonData()->insertGroundTheme(new BosonGenericDataObject("dummy_file", theme->identifier(), theme));
+
+ return true;
 }
 
 void MapTest::cleanupTest()

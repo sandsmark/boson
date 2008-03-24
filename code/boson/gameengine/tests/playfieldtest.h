@@ -35,7 +35,7 @@ public:
 	bool test();
 
 protected:
-	void initTest();
+	bool initTest();
 	void cleanupTest();
 
 	bool testCreateNewPlayField();
