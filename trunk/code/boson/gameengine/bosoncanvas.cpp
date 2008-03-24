@@ -1163,11 +1163,6 @@ void BoCanvasAdvance::notifyAboutDestroyedUnits(const QPtrList<Unit>& destroyedU
 BosonCanvas::BosonCanvas(QObject* parent)
 		: QObject(parent, "BosonCanvas")
 {
- init();
-}
-
-void BosonCanvas::init()
-{
  d = new BosonCanvasPrivate;
  d->mDestroyedUnits.setAutoDelete(false);
  mAdvanceFunctionLocked = false;
@@ -1179,18 +1174,23 @@ void BosonCanvas::init()
  d->mNextItemId.registerData(IdNextItemId, d->mProperties,
 		KGamePropertyBase::PolicyLocal, "NextItemId");
  d->mNextItemId.setLocal(0);
+ d->mEventListener = 0;
+}
 
- if (!boGame) {
-	boError() << k_funcinfo << "NULL boGame object: cannot install event listener" << endl;
- } else {
-	d->mEventListener = new BoCanvasEventListener(boGame->eventManager(), this);
-	connect(d->mEventListener, SIGNAL(signalGameOver()),
-			this, SIGNAL(signalGameOver()));
-	if (!d->mEventListener->initScript()) {
-		boError() << k_funcinfo << "cannot init eventlistener script" << endl;
-		return; // TODO: return false
-	}
+bool BosonCanvas::init(BoEventManager* eventManager)
+{
+ if (!eventManager) {
+	BO_NULL_ERROR(eventManager);
+	return false;
  }
+ d->mEventListener = new BoCanvasEventListener(eventManager, this);
+ connect(d->mEventListener, SIGNAL(signalGameOver()),
+		this, SIGNAL(signalGameOver()));
+ if (!d->mEventListener->initScript()) {
+	boError() << k_funcinfo << "cannot init eventlistener script" << endl;
+	return false;
+ }
+ return true;
 }
 
 BosonCanvas::~BosonCanvas()

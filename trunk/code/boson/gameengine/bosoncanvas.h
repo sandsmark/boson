@@ -41,6 +41,7 @@ class BosonPath;
 class BosonMoveData;
 class BosonShotFragment;
 class BoEventListener;
+class BoEventManager;
 class BoCanvasQuadTreeNode;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
@@ -147,8 +148,13 @@ public:
 	};
 
 public:
+	/**
+	 * Create a new canvas. Call @ref init before using this canvas!
+	 **/
 	BosonCanvas(QObject* parent);
 	~BosonCanvas();
+
+	bool init(BoEventManager* manager);
 
 	unsigned long int nextItemId();
 
@@ -584,9 +590,6 @@ protected:
 	void unlockAdvanceFunction() { mAdvanceFunctionLocked = false; }
 
 	void removeFromAdvanceLists(BosonItem* item);
-
-private:
-	void init();
 
 private:
 	friend class BoCanvasAdvance;

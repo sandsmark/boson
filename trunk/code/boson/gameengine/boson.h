@@ -91,7 +91,7 @@ public:
 	 * Create a new @ref BosonCanvas object. The object will be deleted when
 	 * this Boson object is destroyed, see @ref deleteBoson.
 	 **/
-	void createCanvas();
+	bool createCanvas();
 
 	/**
 	 * @return The @ref BosonCanvas object. See also @ref createCanvas.

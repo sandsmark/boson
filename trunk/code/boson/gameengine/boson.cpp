@@ -608,17 +608,21 @@ void Boson::deleteBoson()
  mBoson = 0;
 }
 
-void Boson::createCanvas()
+bool Boson::createCanvas()
 {
  if (d->mCanvas) {
-	boWarning() << k_funcinfo << "there is already a canvas created! no touching that object..." << endl;
-	// do NOT delete it, as it might be used somewhere else as wel else as
-	// welll
-	return;
+	boWarning() << k_funcinfo << "there is already a canvas created! not touching that object..." << endl;
+	// do NOT delete it, as it might be used somewhere else as well
+	return false;
  }
  d->mCanvas = new BosonCanvas(this);
  connect(d->mCanvas, SIGNAL(signalGameOver()),
 		this, SLOT(slotGameOver()));
+ if (!d->mCanvas->init(eventManager())) {
+	boError() << k_funcinfo << "initializing the canvas failed" << endl;
+	return false;
+ }
+ return true;
 }
 
 BosonCanvas* Boson::canvasNonConst() const

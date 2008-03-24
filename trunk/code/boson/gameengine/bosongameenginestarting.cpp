@@ -237,7 +237,9 @@ bool BosonStartingCreateCanvas::startTask()
 	BO_NULL_ERROR(playField()->map());
 	return false;
  }
- boGame->createCanvas();
+ if (!boGame->createCanvas()) {
+	return false;
+ }
 
  BosonCanvas* canvas = boGame->canvasNonConst();
  if (!canvas) {
