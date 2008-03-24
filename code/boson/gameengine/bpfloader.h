@@ -42,7 +42,7 @@ class BPFFile;
  *
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BPFPreview
+class BPFPreview // TODO: dedicated file!
 {
 public:
 	BPFPreview();
