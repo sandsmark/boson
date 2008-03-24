@@ -27,9 +27,6 @@ class BPFFile;
 class BPFDescription;
 class BPFPreview;
 
-class KArchiveDirectory;
-class KTar;
-class KArchiveFile;
 class QDomDocument;
 class QDomElement;
 class QDataStream;
@@ -45,17 +42,11 @@ template<class T, class T2> class QMap;
 //              (which could also be stored in the map or somewhere else) only.
 //              the rest is stored in BosonMap
 /**
- * A playfield is a "level" in boson. It contains of a map (see @ref BosonMap
+ * A playfield is a "level" in boson. It consists of a map (see @ref BosonMap
  * and @ref map),
  * a description of the playfield (see @ref description) and rules (which may
  * e.g. limit what units may be used on this playfield - not yet implemented)
  * and winning conditions (not yet implemented).
- *
- * This class provides in particular methods to load a playfield from the hard
- * disk (@ref preLoadAllPlayFields followed by @ref loadFromDiskToFiles) or from
- * a stream (@ref loadPlayFieldFromFiles). The playfield is intended to be loaded once
- * from disk (by one player only) and then sent over network to all players,
- * where it is loaded from the stream.
  *
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -66,44 +57,7 @@ public:
 	BosonPlayField(QObject* parent = 0);
 	~BosonPlayField();
 
-	/**
-	 * The map preview is meant to be displayed in the newgame widget as a
-	 * short preview of the map before he actually plays it. The preview is
-	 * usually stored inside the playfield file (.bpf/.bsg) and thus very
-	 * static.
-	 *
-	 * You need to call @ref preLoadPlayField before using this.
-	 *
-	 * @return An PNG map preview. This preview is meant to display the @em
-	 * original map, so if the map was edited, the preview is out of date.
-	 * It is possible that there is no preview available for this map, an
-	 * empty byte array is returned then.
-	 **/
-	QByteArray mapPreviewPNGData() const;
-
 	BosonMap* map() const { return mMap; }
-	const QString& fileName() const { return mFileName; }
-
-	/**
-	 * "Preview" information (map width/size, description, ...) for
-	 * this playfield.
-	 *
-	 * Should be loaded using @ref preLoadPlayField.
-	 **/
-	const BPFPreview& preview() const;
-
-	/**
-	 * Shortcut for preview().identifier()
-	 **/
-	const QString& identifier() const;
-
-	/**
-	 * @return A pointer to the @ref BPFDescription object set by
-	 *         @ref setModifiedDescription (if any) or
-	 *         preview().description()
-	 *         if @ref setModifiedDescription has never been called
-	 *         (the default).
-	 **/
 	const BPFDescription* description() const;
 
 	/**
@@ -121,30 +75,6 @@ public:
 	QString playFieldComment() const;
 
 	/**
-	 * @return Whether the the playfield has been pre-loaded. This is
-	 * the case when @ref preLoadPlayField has been called.
-	 **/
-	bool isPreLoaded() const { return mPreLoaded; }
-
-	/**
-	 * This emulates that loading has been completed. Useful when we are
-	 * creating new maps. Do <em>not</em> use this of you are not creating a
-	 * new map!
-	 **/
-	void finalizeLoading();
-
-	///////////////////////////////////////////////////////////
-	//////////////////// Methods for loading/saving a playfield
-	///////////////////////////////////////////////////////////
-	/**
-	 * Load the important data (description for example) from the playField.
-	 *
-	 * Use @ref loadPlayFieldFromFiles to load <em>all</em> data. preLoadPlayField is
-	 * much faster than @ref loadPlayFieldFromFiles.
-	 **/
-	bool preLoadPlayField(const QString& file);
-
-	/**
 	 * Load the playfield from @p files to this object.
 	 *
 	 * See @ref BPFLoader on how to retrieve these virtual @p files.
@@ -156,10 +86,6 @@ public:
 	 * files that are stored into @p destFiles.
 	 **/
 	bool savePlayFieldToFiles(QMap<QString, QByteArray>& destFiles);
-	/////////////////////////////////////////////////////////////////
-	//////////////////// Methods for loading/saving a playfield (end)
-	/////////////////////////////////////////////////////////////////
-
 
 	////////////////////////////////////////////////
 	//////////////////// Methods for the editor only
@@ -251,11 +177,7 @@ protected:
 
 private:
 	BosonMap* mMap;
-	QByteArray mMapPreviewPNGData;
-	bool mPreLoaded;
-	QString mFileName;
-	BPFPreview* mPreview;
-	BPFDescription* mModifiedDescription;
+	BPFDescription* mDescription;
 };
 
 #endif

@@ -27,7 +27,6 @@
 #include "bosonplayfield.h"
 #include "bosonmap.h"
 #include "bosongroundtheme.h"
-#include "bpfloader.h" // BPFPreview - TODO: dedicated file!
 #include "bpfdescription.h"
 #include "boglobal.h"
 #include "bosondata.h"
@@ -143,14 +142,8 @@ bool PlayFieldTest::checkIfPlayFieldIsValid(BosonPlayField* field)
  MY_VERIFY(field->map() != 0);
  MY_VERIFY(field->map()->width() > 0);
  MY_VERIFY(field->map()->height() > 0);
+ MY_VERIFY(field->description() != 0);
 
-#if 0
- MY_VERIFY(field->preview().mapWidth() == field->map()->width());
- MY_VERIFY(field->preview().mapHeight() == field->map()->height());
- MY_VERIFY(field->preview().minPlayers() >= 1);
- MY_VERIFY(field->preview().maxPlayers() >= (int)field->preview().minPlayers() || field->preview().maxPlayers() < 0);
- MY_VERIFY(field->preview().description() != 0);
-#endif
  return true;
 }
 
@@ -159,16 +152,8 @@ bool PlayFieldTest::checkIfPlayFieldsAreEqual(BosonPlayField* field1, BosonPlayF
  MY_VERIFY(field1->map()->width() == field2->map()->width());
  MY_VERIFY(field1->map()->height() == field2->map()->height());
  MY_VERIFY(field1->map()->groundTheme() == field2->map()->groundTheme());
-
-#if 0
- MY_VERIFY(field1->preview().isLoaded() == field2->preview().isLoaded());
- MY_VERIFY(field1->preview().mapPreviewPNGData() == field2->preview().mapPreviewPNGData());
- MY_VERIFY(field1->preview().minPlayers() == field2->preview().minPlayers());
- MY_VERIFY(field1->preview().maxPlayers() == field2->preview().maxPlayers());
- MY_VERIFY(field1->preview().identifier() == field2->preview().identifier());
- MY_VERIFY(field1->preview().description()->name() == field2->preview().description()->name());
- MY_VERIFY(field1->preview().description()->comment() == field2->preview().description()->comment());
-#endif
+ MY_VERIFY(field1->description()->name() == field2->description()->name());
+ MY_VERIFY(field1->description()->comment() == field2->description()->comment());
 
  return true;
 }

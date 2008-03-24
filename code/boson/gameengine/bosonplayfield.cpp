@@ -98,16 +98,13 @@ bool BosonPlayFieldPreviewData::load()
 BosonPlayField::BosonPlayField(QObject* parent) : QObject(parent, "BosonPlayField")
 {
  mMap = 0;
- mPreLoaded = false;
- mModifiedDescription = 0;
- mPreview = new BPFPreview();
+ mDescription = new BPFDescription();
 }
 
 BosonPlayField::~BosonPlayField()
 {
  delete mMap;
- delete mModifiedDescription;
- delete mPreview;
+ delete mDescription;
 }
 
 bool BosonPlayField::preLoadAllPlayFields()
@@ -198,26 +195,6 @@ QString BosonPlayField::defaultPlayField()
  return l[0];
 }
 
-bool BosonPlayField::preLoadPlayField(const QString& file)
-{
- if (isPreLoaded()) {
-	return true;
- }
-
- mFileName = file;
- *mPreview = BPFLoader::loadFilePreview(mFileName);
- mPreLoaded = mPreview->isLoaded();
-
- if (!mPreview->isLoaded()) {
-	boError() << k_funcinfo << "preview loading failed" << endl;
-	return false;
- }
-
- return true;
-}
-
-// AB: correct (i.e. current) file format assumed. must be converted before this
-// is called.
 bool BosonPlayField::loadPlayFieldFromFiles(const QMap<QString, QByteArray>& files)
 {
  if (!files.contains("map/map.xml")) {
@@ -243,11 +220,8 @@ bool BosonPlayField::loadPlayFieldFromFiles(const QMap<QString, QByteArray>& fil
 	return false;
  }
 
- *mPreview = BPFPreview::loadFilePreviewFromFiles(files);
- if (!mPreview->isLoaded()) {
-	boError() << k_funcinfo << "error loading file preview" << endl;
-	return false;
- }
+ delete mDescription;
+ mDescription = new BPFDescription(QString(files["C/description.xml"]));
 
  if (!loadMapFromFiles(files)) {
 	boError() << k_funcinfo << "error loading the map" << endl;
@@ -319,11 +293,6 @@ void BosonPlayField::deleteMap()
  mMap = 0;
 }
 
-void BosonPlayField::finalizeLoading()
-{
- mPreLoaded = true;
-}
-
 QString BosonPlayField::playFieldName() const
 {
  if (!description()) {
@@ -368,12 +337,6 @@ QByteArray BosonPlayField::exportTexMap(unsigned int texture) const
  }
  return mMap->saveTexMapImage(texture);
 }
-
-QByteArray BosonPlayField::mapPreviewPNGData() const
-{
- return preview().mapPreviewPNGData();
-}
-
 
 QStringList BosonPlayField::findAvailablePlayFields()
 {
@@ -462,27 +425,14 @@ bool BosonPlayField::savePlayFieldToFiles(QMap<QString, QByteArray>& files)
  return true;
 }
 
-const BPFPreview& BosonPlayField::preview() const
-{
- return *mPreview;
-}
-
-const QString& BosonPlayField::identifier() const
-{
- return preview().identifier();
-}
-
 const BPFDescription* BosonPlayField::description() const
 {
- if (mModifiedDescription) {
-	return mModifiedDescription;
- }
- return preview().description();
+ return mDescription;
 }
 
 void BosonPlayField::setModifiedDescription(BPFDescription* description)
 {
- delete mModifiedDescription;
- mModifiedDescription = description;
+ delete mDescription;
+ mDescription = description;
 }
 
