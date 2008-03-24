@@ -259,6 +259,9 @@ public:
 	{
 		mViewFrustum = 0;
 	}
+	virtual ~BoGroundRendererCellListLOD()
+	{
+	}
 
 	/**
 	 * Called by the cell list builder. No need to call yourself.
