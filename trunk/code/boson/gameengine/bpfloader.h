@@ -59,6 +59,18 @@ public:
 	const QString& identifier() const;
 	const BPFDescription* description() const;
 	BPFDescription* description(); // AB: non-const, so that a non-const pointer can be retrieved from a non-const BPFPreview only
+
+	/**
+	 * The map preview is meant to be displayed in the newgame widget as a
+	 * short preview of the map before he actually plays it. The preview is
+	 * usually stored inside the playfield file (.bpf/.bsg) and thus very
+	 * static.
+	 *
+	 * @return A PNG map preview. This preview is meant to display the @em
+	 * original map, so if the map was edited, the preview is out of date.
+	 * It is possible that there is no preview available for this map, an
+	 * empty byte array is returned then.
+	 **/
 	QByteArray mapPreviewPNGData() const;
 
 	unsigned int mapWidth() const;
