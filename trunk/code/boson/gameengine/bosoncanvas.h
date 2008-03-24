@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 1999-2000 Thomas Capricelli (capricel@email.enst.fr)
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -429,6 +429,20 @@ public:
 	}
 
 	bool advanceFunctionLocked() const { return mAdvanceFunctionLocked; }
+
+	/**
+	 * This method uses @ref loadFromXML to load this canvas from @p
+	 * canvasData. @p canvasData is interpreted as the contents of an XML
+	 * file with the root element describing the canvas.
+	 **/
+	bool loadCanvas(const QString& canvasData);
+
+	/**
+	 * @return The canvas saved to an XML file, converted to a string. See
+	 * also @ref QDomDocument::toCString() and @ref saveAsXML. This string
+	 * can be used to load the canvas again using @ref loadCanvas.
+	 **/
+	QCString saveCanvas() const;
 
 	bool loadFromXML(const QDomElement& root);
 	bool saveAsXML(QDomElement& root) const;
