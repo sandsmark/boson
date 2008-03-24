@@ -35,8 +35,8 @@ public:
 	bool test();
 
 protected:
-	void initMap();
-	void cleanupMap();
+	void initTest();
+	void cleanupTest();
 	bool testCreateNewMaps();
 	bool testSaveLoadMaps();
 
