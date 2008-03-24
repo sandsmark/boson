@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 2002-2005 Rivo Laks (rivolaks@hot.ee)
-    Copyright (C) 2002-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -151,13 +151,17 @@ public:
     QStringList list = campaign->playFields();
     QStringList items;
     for (unsigned int i = 0; i < list.count(); i++) {
-      BosonPlayField* field = boData->playField(list[i]);
-      if (!field) {
-        BO_NULL_ERROR(field);
+      BPFPreview* preview = boData->playFieldPreview(list[i]);
+      if (!preview) {
+        BO_NULL_ERROR(preview);
+        continue;
+      }
+      if (!preview->description()) {
+        BO_NULL_ERROR(preview->description());
         continue;
       }
       int index = items.count();
-      items.append(field->playFieldName());
+      items.append(preview->description()->name());
       mIndex2PlayFieldIdentifier.insert(index, list[i]);
     }
 
@@ -331,8 +335,8 @@ BoUfoNewGameWidget::BoUfoNewGameWidget(BosonStartupNetwork* interface)
         this, SLOT(slotNetSideChanged(Player*)));
  connect(networkInterface(), SIGNAL(signalTeamColorChanged(Player*)),
         this, SLOT(slotNetColorChanged(Player*)));
- connect(networkInterface(), SIGNAL(signalPlayFieldChanged(BosonPlayField*)),
-        this, SLOT(slotNetPlayFieldChanged(BosonPlayField*)));
+ connect(networkInterface(), SIGNAL(signalPlayFieldChanged(BPFPreview*)),
+        this, SLOT(slotNetPlayFieldChanged(BPFPreview*)));
  connect(networkInterface(), SIGNAL(signalPlayerNameChanged(Player*)),
         this, SLOT(slotNetPlayerNameChanged(Player*)));
  connect(networkInterface(), SIGNAL(signalSetLocalPlayer(Player*)),
@@ -553,15 +557,14 @@ void BoUfoNewGameWidget::slotNetStart()
         }
     }
 
-    BosonPlayField* field = 0;
     QString identifier = d->mPlayFieldSelection->playFieldIdentifier();
     if (identifier.isNull()) {
         KMessageBox::sorry(0, i18n("You have to select a map first"));
         return;
     }
-    field = boData->playField(identifier);
+    BPFPreview* preview = boData->playFieldPreview(identifier);
 
-    if (!field) {
+    if (!preview) {
         KMessageBox::sorry(0, i18n("The selected item seems to be a map, but it cannot be found.\nYou have encountered a bug."));
         return;
     }
@@ -575,7 +578,7 @@ void BoUfoNewGameWidget::slotNetStart()
     boConfig->addDynamicEntryBool("ExploreMapOnStartup");
     boConfig->setBoolValue("ExploreMapOnStartup", mStartExplored->checked());
     if (ret) {
-      ret = networkInterface()->sendNewGame(field, false);
+      ret = networkInterface()->sendNewGame(preview, false);
     }
     if (!ret) {
         KMessageBox::sorry(0, i18n("The selected map could not be saved to a network stream. This might be due to a broken map file, or due to a boson bug.\nAnyway - the game cannot be started."));
@@ -711,25 +714,29 @@ void BoUfoNewGameWidget::slotNetColorChanged(Player* p)
  updateColors();
 }
 
-void BoUfoNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
+void BoUfoNewGameWidget::slotNetPlayFieldChanged(BPFPreview* preview)
 {
- BO_CHECK_NULL_RET(field);
- d->mPlayFieldSelection->setCurrentPlayFieldWithIdentifier(field->identifier());
- if (d->mPlayFieldSelection->playFieldIdentifier() != field->identifier()) {
-   boError() << k_funcinfo << "could not set correct playfield " << field->identifier() << endl;
-   field = boData->playField(d->mPlayFieldSelection->playFieldIdentifier());
-   BO_CHECK_NULL_RET(field);
+ BO_CHECK_NULL_RET(preview);
+ if (!preview->isLoaded()) {
+   boError() << k_funcinfo << "playfieldpreview not yet loaded (all playfieldpreviews should be loaded already at this point" << endl;
+   return;
  }
- if (!field->isPreLoaded()) {
-    // well, if that happens - something evil must have happened!
-    boWarning() << k_funcinfo << "playfield not yet preloaded?!" << endl;
-    field->preLoadPlayField(field->identifier());
+ d->mPlayFieldSelection->setCurrentPlayFieldWithIdentifier(preview->identifier());
+ if (d->mPlayFieldSelection->playFieldIdentifier() != preview->identifier()) {
+   boError() << k_funcinfo << "could not set correct playfield " << preview->identifier() << endl;
+   BPFPreview* p = boData->playFieldPreview(d->mPlayFieldSelection->playFieldIdentifier());
+   BO_CHECK_NULL_RET(p);
+   preview = p;
+   if (!preview->isLoaded()) {
+     boError() << k_funcinfo << "fallback playfieldpreview is not loaded (all previews should be loaded at this point)" << endl;
+     return;
+   }
  }
- mMinPlayers = field->preview().minPlayers();
- mMaxPlayers = field->preview().maxPlayers();
+ mMinPlayers = preview->minPlayers();
+ mMaxPlayers = preview->maxPlayers();
 
  // Update general map info
- mMapSize->setText(i18n("%1x%2\n").arg(field->preview().mapWidth()).arg(field->preview().mapHeight()));
+ mMapSize->setText(i18n("%1x%2\n").arg(preview->mapWidth()).arg(preview->mapHeight()));
  if (mMinPlayers == mMaxPlayers) {
     mMapPlayers->setText(i18n("%1").arg(mMinPlayers));
  } else {
@@ -737,15 +744,10 @@ void BoUfoNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  }
 
  // Update description of the map
- const BPFDescription* description = field->description();
+ const BPFDescription* description = preview->description();
  if (!description) {
-    boWarning() << k_funcinfo << "NULL description" << endl;
-    BosonPlayField::preLoadAllPlayFields();
-    description = field->description();
-    if (!description) {
-        boError() << k_funcinfo << "unable to load the description" << endl;
-        return;
-    }
+   boError() << k_funcinfo << "unable to load the description" << endl;
+   return;
  }
  // AB: I am not fully sure if a text browser is the right choice for this
  // widget. but being able to use links in the description is surely a good
@@ -755,7 +757,7 @@ void BoUfoNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  } else {
     mMapDescription->setText(description->comment());
  }
- d->mMapPreview->setPlayField(field);
+ d->mMapPreview->setPlayField(*preview);
  playerCountChanged();
  possibleSidesChanged();
 }

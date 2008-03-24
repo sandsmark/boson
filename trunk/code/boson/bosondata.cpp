@@ -42,7 +42,7 @@ public:
 	}
 
 	QDict<BosonDataObject> mGroundThemes;
-	QDict<BosonDataObject> mPlayFields;
+	QDict<BosonDataObject> mPlayFieldPreviews;
 	QDict<BosonDataObject> mCampaigns;
 };
 
@@ -50,7 +50,7 @@ BosonData::BosonData()
 {
  d = new BosonDataPrivate;
  d->mGroundThemes.setAutoDelete(true);
- d->mPlayFields.setAutoDelete(true);
+ d->mPlayFieldPreviews.setAutoDelete(true);
  d->mCampaigns.setAutoDelete(true);
 }
 
@@ -63,7 +63,7 @@ BosonData::~BosonData()
 void BosonData::clearData()
 {
  d->mCampaigns.clear();
- d->mPlayFields.clear();
+ d->mPlayFieldPreviews.clear();
  d->mGroundThemes.clear();
 }
 
@@ -116,44 +116,36 @@ bool BosonData::loadGroundTheme(const QString& id)
  return d->mGroundThemes[id]->load();
 }
 
-bool BosonData::insertPlayField(BosonDataObject* field)
+bool BosonData::insertPlayFieldPreview(BosonDataObject* preview)
 {
- if (!field) {
+ if (!preview) {
 	return true;
  }
- if (d->mPlayFields[field->idString()]) {
+ if (d->mPlayFieldPreviews[preview->idString()]) {
 	return false;
  }
- d->mPlayFields.insert(field->idString(), field);
+ d->mPlayFieldPreviews.insert(preview->idString(), preview);
  return true;
 }
 
-BosonPlayField* BosonData::playField(const QString& id) const
+BPFPreview* BosonData::playFieldPreview(const QString& id) const
 {
- if (!d->mPlayFields[id]) {
+ if (!d->mPlayFieldPreviews[id]) {
 	return 0;
  }
- return (BosonPlayField*)d->mPlayFields[id]->pointer();
+ return (BPFPreview*)d->mPlayFieldPreviews[id]->pointer();
 }
 
 QStringList BosonData::availablePlayFields() const
 {
  QStringList list;
- QDictIterator<BosonDataObject> it(d->mPlayFields);
+ QDictIterator<BosonDataObject> it(d->mPlayFieldPreviews);
  for (; it.current(); ++it) {
 	list.append(it.currentKey());
  }
  return list;
 }
 
-bool BosonData::loadPlayField(const QString& id)
-{
- if (!d->mPlayFields[id]) {
-	boWarning() << k_funcinfo << "no playField with id=" << id << endl;
-	return false;
- }
- return d->mPlayFields[id]->load();
-}
 
 bool BosonData::insertCampaign(BosonDataObject* campaign)
 {

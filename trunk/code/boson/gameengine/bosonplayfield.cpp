@@ -18,6 +18,7 @@
 */
 
 #include "bosonplayfield.h"
+#include "bosonplayfield.moc"
 
 #include "../bomemory/bodummymemory.h"
 #include "boversion.h"
@@ -40,17 +41,14 @@
 #include <kstandarddirs.h>
 #include <klocale.h>
 
-#include "bosonplayfield.moc"
-
-
-class BosonPlayFieldData : public BosonDataObject
+class BosonPlayFieldPreviewData : public BosonDataObject
 {
 public:
-	BosonPlayFieldData(const QString& mapFile, BosonPlayField* field);
+	BosonPlayFieldPreviewData(const QString& mapFile, BPFPreview* preview);
 
-	virtual ~BosonPlayFieldData()
+	virtual ~BosonPlayFieldPreviewData()
 	{
-		delete mPlayField;
+		delete mPreview;
 	}
 
 	virtual QString idString() const
@@ -59,40 +57,42 @@ public:
 	}
 	virtual void* pointer() const
 	{
-		return (void*)playField();
+		return (void*)preview();
 	}
-	BosonPlayField* playField() const
+	BPFPreview* preview() const
 	{
-		return mPlayField;
+		return mPreview;
 	}
 
 	virtual bool load();
 private:
-	BosonPlayField* mPlayField;
+	BPFPreview* mPreview;
 	QString mId;
 };
 
-BosonPlayFieldData::BosonPlayFieldData(const QString& mapFile, BosonPlayField* field)
-	: BosonDataObject(mapFile)
+BosonPlayFieldPreviewData::BosonPlayFieldPreviewData(const QString& file, BPFPreview* preview)
+	: BosonDataObject(file)
 {
- mPlayField = field;
- if (!mPlayField->preLoadPlayField(mapFile)) {
-	boError() << k_funcinfo << "unable to load playField from " << mapFile << endl;
+ mPreview = preview;
+ *mPreview = BPFLoader::loadFilePreview(file);
+ if (!mPreview->isLoaded()) {
+	boError() << k_funcinfo << "unable to load playFieldPreview from " << file << endl;
 	mId = QString::null;
 	return;
  }
- mId = mPlayField->identifier();
+ mId = mPreview->identifier();
  if (mId.isEmpty()) {
-	boError() << k_funcinfo << "no identifier in " << mapFile << endl;
+	boError() << k_funcinfo << "no identifier in " << file << endl;
 	mId = QString::null;
 	return;
  }
 }
 
-bool BosonPlayFieldData::load()
+bool BosonPlayFieldPreviewData::load()
 {
  return true;
 }
+
 
 
 BosonPlayField::BosonPlayField(QObject* parent) : QObject(parent, "BosonPlayField")
@@ -139,22 +139,23 @@ bool BosonPlayField::preLoadAllPlayFields()
 	}
 	BosonCampaign* campaign = new BosonCampaign(*campaignIt, campaignName);
 	for (it = list.begin(); it != list.end(); ++it) {
-		BosonPlayField* playField = new BosonPlayField();
-		// this will also preload the playfield!
-		BosonPlayFieldData* data = new BosonPlayFieldData(*it, playField);
-		if (data->idString().isEmpty()) {
+		BPFPreview* playFieldPreview = new BPFPreview();
+		// this will also load the preview!
+		BosonPlayFieldPreviewData* previewData = new BosonPlayFieldPreviewData(*it, playFieldPreview);
+		if (previewData->idString().isEmpty()) {
 			boError() << k_funcinfo << *it << " could not be loaded" << endl;
-			delete data;
+			delete previewData;
 			continue;
 		}
-		if (!BosonData::bosonData()->insertPlayField(data)) {
-			boWarning() << k_funcinfo << "could not insert playField "
-					<< data->idString()
+		if (!BosonData::bosonData()->insertPlayFieldPreview(previewData)) {
+			boWarning() << k_funcinfo << "could not insert playFieldPreview "
+					<< previewData->idString()
 					<< " (maybe already inserted)" << endl;
-			delete data;
+			delete previewData;
 			continue;
 		}
-		campaign->addPlayField(playField);
+
+		campaign->addPlayField(playFieldPreview);
 	}
 	if (campaign->playFieldCount() == 0) {
 		boWarning() << k_funcinfo << "could not load any playfields for campaign " << campaign->name() << endl;

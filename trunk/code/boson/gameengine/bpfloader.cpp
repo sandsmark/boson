@@ -48,6 +48,7 @@ public:
 	}
 
 	bool mIsLoaded;
+	QString mFileName;
 	BPFDescription* mDescription;
 	QString mIdentifier;
 	QByteArray mMapPreviewPNGData;
@@ -123,9 +124,14 @@ BPFPreview BPFPreview::loadFilePreviewFromFiles(const QMap<QString, QByteArray>&
  delete data->mDescription;
  data->mDescription = new BPFDescription(QString(descriptionXML));
  data->mMapPreviewPNGData = files["mappreview/map.png"];
+
  QByteArray identifierFile = files["identifier"];
  QDataStream identifierStream(identifierFile, IO_ReadOnly);
  identifierStream >> data->mIdentifier;
+
+ QByteArray fileNameFile = files["filename"];
+ QDataStream fileNameStream(fileNameFile, IO_ReadOnly);
+ fileNameStream >> data->mFileName;
 
  data->mIsLoaded = true;
 
@@ -200,6 +206,11 @@ bool BPFPreview::isLoaded() const
 const QString& BPFPreview::identifier() const
 {
  return d->mIdentifier;
+}
+
+const QString& BPFPreview::fileName() const
+{
+ return d->mFileName;
 }
 
 const BPFDescription* BPFPreview::description() const
@@ -285,6 +296,9 @@ bool BPFLoader::loadFilePreviewFromDiskToFiles(const QString& file, QMap<QString
 	return false;
  }
  QByteArray mapPreviewPNG = boFile.fileData("map.png", "mappreview");
+ QByteArray fileNameBuffer;
+ QDataStream fileNameStream(fileNameBuffer, IO_WriteOnly);
+ fileNameStream << file;
 
 
  destFiles.insert("map/map.xml", mapXML);
@@ -298,6 +312,7 @@ bool BPFLoader::loadFilePreviewFromDiskToFiles(const QString& file, QMap<QString
  }
 
  destFiles.insert("identifier", createIdentifier(boFile, destFiles));
+ destFiles.insert("filename", fileNameBuffer);
 
 
 #warning TODO: convert file to current format (if it isnt already)
@@ -367,6 +382,11 @@ bool BPFLoader::loadFromDiskToFiles(const QString& fileName, QMap<QString, QByte
  }
 
  QByteArray externalXML = boFile.externalData();
+
+ QByteArray fileNameBuffer;
+ QDataStream fileNameStream(fileNameBuffer, IO_WriteOnly);
+ fileNameStream << fileName;
+
  destFiles.insert("map/texmap", texMap);
  destFiles.insert("map/heightmap.png", heightMap);
  destFiles.insert("map/map.xml", mapXML);
@@ -383,6 +403,7 @@ bool BPFLoader::loadFromDiskToFiles(const QString& fileName, QMap<QString, QByte
 	destFiles.insert("mappreview/map.png", mapPreviewPNG);
  }
  destFiles.insert("identifier", createIdentifier(boFile, destFiles));
+ destFiles.insert("filename", fileNameBuffer);
 
  BosonPlayFieldConverter converter;
  if (!converter.convertFilesToCurrentFormat(destFiles)) {

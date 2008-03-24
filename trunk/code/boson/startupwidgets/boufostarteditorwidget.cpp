@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 2002-2005 Rivo Laks (rivolaks@hot.ee)
-    Copyright (C) 2002-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ public:
 	QMap<int, QString> mSpeciesIndex2Identifier;
 	QMap<int, QString> mSpeciesIndex2Comment;
 
-	BosonPlayField* mSelectedMap;
+	BPFPreview* mSelectedMap;
 
 	QValueList<int> mMapSizes;
 };
@@ -83,8 +83,8 @@ BoUfoStartEditorWidget::BoUfoStartEditorWidget(BosonStartupNetwork* interface)
 
  connect(networkInterface(), SIGNAL(signalStartGameClicked()),
 		this, SLOT(slotNetStart()));
- connect(networkInterface(), SIGNAL(signalPlayFieldChanged(BosonPlayField*)),
-		this, SLOT(slotNetPlayFieldChanged(BosonPlayField*)));
+ connect(networkInterface(), SIGNAL(signalPlayFieldChanged(BPFPreview*)),
+		this, SLOT(slotNetPlayFieldChanged(BPFPreview*)));
 
  // AB: this widget isn't the ideal place for this...
  initKGame();
@@ -127,12 +127,16 @@ void BoUfoStartEditorWidget::initPlayFields()
  QStringList list = boData->availablePlayFields();
  boDebug() << k_funcinfo << list.count() << endl;
  for (unsigned int i = 0; i < list.count(); i++) {
-	if (!boData->playField(list[i])) {
-		boWarning() << k_funcinfo << "NULL playField " << list[i] << endl;
+	if (!boData->playFieldPreview(list[i])) {
+		boWarning() << k_funcinfo << "NULL playFieldpreview " << list[i] << endl;
+		continue;
+	}
+	if (!boData->playFieldPreview(list[i])->description()) {
+		boWarning() << k_funcinfo << "NULL description in playFieldpreview " << list[i] << endl;
 		continue;
 	}
 	int index = mSelectMap->count();
-	mSelectMap->insertItem(boData->playField(list[i])->playFieldName());
+	mSelectMap->insertItem(boData->playFieldPreview(list[i])->description()->name());
 	d->mIndex2Map.insert(index, list[i]);
  }
 
@@ -201,7 +205,6 @@ void BoUfoStartEditorWidget::slotNetStart()
 {
  BO_CHECK_NULL_RET(boGame);
  boDebug() << k_funcinfo << endl;
- BosonPlayField* field = 0;
  int maxPlayers = 0;
  // WARNING: we have one EVIL assumption here. We assume that the current
  // playfield is actually the currently *selected* playfield!
@@ -220,8 +223,10 @@ void BoUfoStartEditorWidget::slotNetStart()
 	return;
  }
 
+ BPFPreview* preview = 0;
  QByteArray newMap;
  if (mCreateNewMap->selected()) {
+	preview = 0;
 	newMap = createNewMap();
 	if (newMap.size() == 0) {
 		boError() << k_funcinfo << "could not create new map" << endl;
@@ -236,12 +241,12 @@ void BoUfoStartEditorWidget::slotNetStart()
 		return;
 	}
 	QString playFieldIdentifier = d->mIndex2Map[mSelectMap->selectedItem()];
-	field = boData->playField(playFieldIdentifier);
-	if (!field) {
-		boError() << k_funcinfo << "NULL playfield" << endl;
+	preview = boData->playFieldPreview(playFieldIdentifier);
+	if (!preview) {
+		boError() << k_funcinfo << "NULL playfieldpreview" << endl;
 		return;
 	}
-	maxPlayers = field->preview().maxPlayers();
+	maxPlayers = preview->maxPlayers();
  }
 
  QValueList<QColor> availableTeamColors = boGame->availableTeamColors();
@@ -277,15 +282,15 @@ void BoUfoStartEditorWidget::slotNetStart()
  }
 
  networkInterface()->addNeutralPlayer(true);
- networkInterface()->sendNewGame(field, true, &newMap);
+ networkInterface()->sendNewGame(preview, true, &newMap);
 }
 
 
-void BoUfoStartEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
+void BoUfoStartEditorWidget::slotNetPlayFieldChanged(BPFPreview* preview)
 {
  boDebug() << k_funcinfo << endl;
 
- if (!field) {
+ if (!preview) {
 	// New map was selected and playfield was reset. Ignore it
 	return;
  }
@@ -299,12 +304,12 @@ void BoUfoStartEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  QMap<int, QString>::Iterator it;
  int item = -1;
  for (it = d->mIndex2Map.begin(); it != d->mIndex2Map.end() && item < 0; ++it) {
-	if (it.data() == field->identifier()) {
+	if (it.data() == preview->identifier()) {
 		item = it.key();
 	}
  }
  if (item < 0) {
-	boError() << k_funcinfo << "Cannot find playfield item for " << field->identifier() << endl;
+	boError() << k_funcinfo << "Cannot find playfield item for " << preview->identifier() << endl;
  } else {
 	mSelectMap->blockSignals(true);
 	mSelectMap->setSelectedItem(item);
@@ -312,12 +317,12 @@ void BoUfoStartEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  }
 
 
- BO_CHECK_NULL_RET(field->description());
- boDebug() << k_funcinfo << "id: " << field->identifier() << endl;
+ BO_CHECK_NULL_RET(preview->description());
+ boDebug() << k_funcinfo << "id: " << preview->identifier() << endl;
  QStringList list = boData->availablePlayFields();
 
- BPFPreview preview = field->preview();
- const BPFDescription* description = field->description();
+ const BPFDescription* description = preview->description();
+ BO_CHECK_NULL_RET(description);
 
  // AB: I am not fully sure if a text browser is the right choice for this
  // widget. but being able to use links in the description is surely a good
@@ -328,12 +333,12 @@ void BoUfoStartEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
 	mMapDescription->setText(description->comment());
  }
 
- mMapWidth->setValue(preview.mapWidth());
- mMapHeight->setValue(preview.mapHeight());
+ mMapWidth->setValue(preview->mapWidth());
+ mMapHeight->setValue(preview->mapHeight());
  mGroundTheme->setCurrentItem(0); // TODO - we do not yet support more than one :(
- mMaxPlayers->setValue(preview.maxPlayers());
+ mMaxPlayers->setValue(preview->maxPlayers());
 
- d->mSelectedMap = field;
+ d->mSelectedMap = preview;
 }
 
 void BoUfoStartEditorWidget::slotPlayFieldChanged(int, int)
@@ -440,7 +445,7 @@ void BoUfoStartEditorWidget::slotNewMapToggled(bool isNewMap)
 	mFilling->setCurrentItem(0);
 	mMapDescription->setText(i18n("Enter description here"));
  } else if (d->mSelectedMap) {
-	BPFPreview preview = d->mSelectedMap->preview();
+	BPFPreview* preview = d->mSelectedMap;
 	const BPFDescription* description = d->mSelectedMap->description();
 
 	BO_CHECK_NULL_RET(description);
@@ -451,10 +456,10 @@ void BoUfoStartEditorWidget::slotNewMapToggled(bool isNewMap)
 		mMapDescription->setText(description->comment());
 	}
 	mMapSize->setCurrentItem(6);  // custom
-	mMapWidth->setValue(preview.mapWidth());
-	mMapHeight->setValue(preview.mapHeight());
+	mMapWidth->setValue(preview->mapWidth());
+	mMapHeight->setValue(preview->mapHeight());
 	mGroundTheme->setCurrentItem(0); // TODO - we do not yet support more than one :(
-	mMaxPlayers->setValue(preview.maxPlayers());
+	mMaxPlayers->setValue(preview->maxPlayers());
  }
 
  mMapSize->setEnabled(isNewMap);

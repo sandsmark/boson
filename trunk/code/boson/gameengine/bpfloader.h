@@ -55,6 +55,7 @@ public:
 	static BPFPreview loadFilePreviewFromFiles(const QMap<QString, QByteArray>& files);
 
 	bool isLoaded() const;
+	const QString& fileName() const;
 	const QString& identifier() const;
 	const BPFDescription* description() const;
 	BPFDescription* description(); // AB: non-const, so that a non-const pointer can be retrieved from a non-const BPFPreview only

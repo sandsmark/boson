@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2003-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include "bosonplayfield.h"
 #include "bosondata.h"
 #include "bodebug.h"
+#include "bpfloader.h" // BPFPreview TODO: dedicated file
 
 #include <qptrlist.h>
 #include <qstringlist.h>
@@ -69,7 +70,7 @@ public:
 	BosonCampaignPrivate()
 	{
 	}
-	QPtrList<BosonPlayField> mPlayFields;
+	QPtrList<BPFPreview> mPlayFields;
 	QString mName;
 	QString mIdentifier;
 };
@@ -91,7 +92,7 @@ BosonCampaign::~BosonCampaign()
  delete d;
 }
 
-void BosonCampaign::addPlayField(BosonPlayField* p)
+void BosonCampaign::addPlayField(BPFPreview* p)
 {
  if (!p) {
 	return;
@@ -99,7 +100,7 @@ void BosonCampaign::addPlayField(BosonPlayField* p)
  d->mPlayFields.append(p);
 }
 
-void BosonCampaign::removePlayField(BosonPlayField* p)
+void BosonCampaign::removePlayField(BPFPreview* p)
 {
  if (!p) {
 	return;
@@ -132,7 +133,7 @@ QString BosonCampaign::identifier() const
 QStringList BosonCampaign::playFields() const
 {
  QStringList list;
- QPtrListIterator<BosonPlayField> it(d->mPlayFields);
+ QPtrListIterator<BPFPreview> it(d->mPlayFields);
  for (; it.current(); ++it) {
 	list.append(it.current()->identifier());
  }

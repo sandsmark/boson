@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 2002-2005 Rivo Laks (rivolaks@hot.ee)
-    Copyright (C) 2002-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 
 class BosonStartupNetwork;
 class BosonPlayField;
+class BPFPreview;
 class Player;
 class KPlayer;
 class KGamePropertyBase;
@@ -71,7 +72,7 @@ protected slots: // implementations for the .ui slots
 private slots:
 	void slotNetStart();
 
-	void slotNetPlayFieldChanged(BosonPlayField* field);
+	void slotNetPlayFieldChanged(BPFPreview* preview);
 
 protected:
 	BosonStartupNetwork* networkInterface() const { return mNetworkInterface; }

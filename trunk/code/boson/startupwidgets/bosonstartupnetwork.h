@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2003-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ class Player;
 class KGamePropertyBase;
 class KPlayer;
 class BosonPlayField;
+class BPFPreview;
 
 // does all the network stuff for startup widgets
 class BosonStartupNetwork : public QObject
@@ -49,7 +50,7 @@ public:
 	 * should contain all the data necessary for starting a game in editor
 	 * mode. @p field must be NULL then.
 	 **/
-	bool sendNewGame(BosonPlayField* field, bool editor, const QByteArray* newPlayField = 0);
+	bool sendNewGame(BPFPreview* field, bool editor, const QByteArray* newPlayField = 0);
 	bool sendLoadGame(const QByteArray& data);
 	void sendChangeTeamColor(Player* p, const QColor& color);
 	void sendChangeSpecies(Player* p, const QString& species, const QColor& color);
@@ -91,7 +92,7 @@ signals:
 	void signalSideChanged(Player* player);
 	void signalTeamColorChanged(Player* player);
 	void signalPlayFieldChanged(const QString& identifier); // obsolete
-	void signalPlayFieldChanged(BosonPlayField*);
+	void signalPlayFieldChanged(BPFPreview*);
 	void signalStartGameClicked();
 	void signalSetLocalPlayer(Player* p);
 	void signalSetAdmin(bool isAdmin);
