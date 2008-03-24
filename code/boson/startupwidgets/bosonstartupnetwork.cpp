@@ -117,14 +117,14 @@ void BosonStartupNetwork::slotPlayerLeftGame(KPlayer* p)
  emit signalPlayerLeftGame(p);
 }
 
-bool BosonStartupNetwork::sendNewGame(BosonPlayField* field, bool editor, const QByteArray* newPlayField)
+bool BosonStartupNetwork::sendNewGame(BPFPreview* preview, bool editor, const QByteArray* newPlayField)
 {
  if (!mGame) {
 	BO_NULL_ERROR(mGame);
 	return false;
  }
- if (!field && !newPlayField) {
-	BO_NULL_ERROR(field);
+ if (!preview && !newPlayField) {
+	BO_NULL_ERROR(preview);
 	BO_NULL_ERROR(newPlayField);
 	return false;
  }
@@ -133,12 +133,12 @@ bool BosonStartupNetwork::sendNewGame(BosonPlayField* field, bool editor, const 
 	return false;
  }
  QByteArray data;
- if (field) {
-	if (!field->isPreLoaded()) {
-		boError() << k_funcinfo << "playfield " << field->identifier() << " has not yet been preloaded" << endl;
+ if (preview) {
+	if (!preview->isLoaded()) {
+		boError() << k_funcinfo << "playfieldpreview " << preview->identifier() << " has not yet been loaded" << endl;
 		return false;
 	}
-	data = BPFLoader::loadFromDiskToStream(field->fileName());
+	data = BPFLoader::loadFromDiskToStream(preview->fileName());
 	if (data.size() == 0) {
 		boError() << k_funcinfo << "no data - saving to stream failed" << endl;
 		return false;
@@ -316,12 +316,12 @@ void BosonStartupNetwork::sendChangePlayField(int index)
 
 void BosonStartupNetwork::slotPlayFieldChanged(const QString& id)
 {
- BosonPlayField* field = 0;
+ BPFPreview* preview = 0;
  if (!id.isEmpty()) {
-	field = boData->playField(id);
+	preview = boData->playFieldPreview(id);
  }
 
  emit signalPlayFieldChanged(id);
- emit signalPlayFieldChanged(field);
+ emit signalPlayFieldChanged(preview);
 }
 

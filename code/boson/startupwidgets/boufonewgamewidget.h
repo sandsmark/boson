@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 2002-2005 Rivo Laks (rivolaks@hot.ee)
-    Copyright (C) 2002-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ class Player;
 class KPlayer;
 class KGamePropertyBase;
 class BosonCampaign;
+class BPFPreview;
 
 class BoUfoNewGameWidgetPrivate;
 class BoUfoNewGameWidget : public BosonUfoNewGameWidgetBase
@@ -121,7 +122,7 @@ private slots:
 	 **/
 	void slotNetColorChanged(Player*);
 
-	void slotNetPlayFieldChanged(BosonPlayField* field);
+	void slotNetPlayFieldChanged(BPFPreview* preview);
 
 	/**
 	 * Called when the name of a player has been changed

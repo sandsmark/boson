@@ -27,6 +27,7 @@ class QStringList;
 class BosonGroundTheme;
 class BosonPlayField;
 class BosonCampaign;
+class BPFPreview;
 template<class T> class BoGlobalObject;
 
 class BosonDataObject
@@ -116,9 +117,8 @@ public:
 	BosonGroundTheme* groundTheme(const QString& id) const;
 	QStringList availableGroundThemes() const;
 
-	bool insertPlayField(BosonDataObject* object);
-	bool loadPlayField(const QString& id);
-	BosonPlayField* playField(const QString& id) const;
+	bool insertPlayFieldPreview(BosonDataObject* object);
+	BPFPreview* playFieldPreview(const QString& id) const;
 	QStringList availablePlayFields() const;
 
 	bool insertCampaign(BosonDataObject* object);

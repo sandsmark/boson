@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2003-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #define BOSONCAMPAIGN_H
 
 class BosonPlayField;
+class BPFPreview;
 
 class QString;
 class QStringList;
@@ -61,12 +62,12 @@ public:
 	 * Remember that you must remove the playfield, when you delete it
 	 * somewhere!
 	 **/
-	void addPlayField(BosonPlayField*);
+	void addPlayField(BPFPreview*);
 
 	/**
 	 * Remove the playfield from the campaign. It is not deleted!
 	 **/
-	void removePlayField(BosonPlayField*);
+	void removePlayField(BPFPreview*);
 
 	/**
 	 * @return The number of @ref BosonPlayField objects in this campaign

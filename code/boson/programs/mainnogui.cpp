@@ -314,17 +314,17 @@ QByteArray MainNoGUI::loadPlayFieldFromDisk(const MainNoGUIStartOptions& options
  if (identifier.isEmpty()) {
 	identifier = BosonPlayField::defaultPlayField();
  }
- BosonPlayField* field = boData->playField(identifier);
- if (!field) {
+ BPFPreview* preview = boData->playFieldPreview(identifier);
+ if (!preview) {
 	boError() << k_funcinfo << "no playfield " << identifier << endl;
 	return QByteArray();
  }
- if (!field->isPreLoaded()) {
-	boError() << k_funcinfo << "playfield " << identifier << " has no yet been preloaded?!" << endl;
+ if (!preview->isLoaded()) {
+	boError() << k_funcinfo << "playfieldpreview " << identifier << " has no yet been loaded?!" << endl;
 	return QByteArray();
  }
 
- QString fileName = field->fileName();
+ QString fileName = preview->fileName();
 
  boDebug() << k_funcinfo << "loading " << identifier << endl;
  QByteArray data = BPFLoader::loadFromDiskToStream(fileName);

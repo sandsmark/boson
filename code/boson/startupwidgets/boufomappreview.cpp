@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2006-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "../gameengine/player.h"
 #include "../gameengine/bosonplayfield.h"
 #include "../gameengine/bosonmap.h"
+#include "../gameengine/bpfloader.h" // for BPFPreview // TODO: dedicated file!
 #include "../boufo/boufoimage.h"
 #include "../boufo/boufozoomscrollviewporthandler.h"
 #include "bodebug.h"
@@ -240,17 +241,17 @@ BoUfoMapPreview::~BoUfoMapPreview()
  delete d;
 }
 
-void BoUfoMapPreview::setPlayField(BosonPlayField* field)
+void BoUfoMapPreview::setPlayField(const BPFPreview& preview)
 {
- if (!field) {
+ if (!preview.isLoaded()) {
 	//d->mLabel->setText(i18n("No preview available"));
 	d->mPreviewDisplay->setPreview(QImage());
 	return;
  }
- if (field->mapPreviewPNGData().size() <= 0) {
+ if (preview.mapPreviewPNGData().size() <= 0) {
 	setPlayField(0);
  } else {
-	d->mPreviewDisplay->setPreview(QImage(field->mapPreviewPNGData()));
+	d->mPreviewDisplay->setPreview(QImage(preview.mapPreviewPNGData()));
  }
 }
 

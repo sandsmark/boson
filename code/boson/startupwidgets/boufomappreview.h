@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2006-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 
 class BosonPlayField;
 class QImage;
+class BPFPreview;
 
 class BoUfoMapPreviewPrivate;
 /**
@@ -42,7 +43,7 @@ public:
 	BoUfoMapPreview();
 	~BoUfoMapPreview();
 
-	void setPlayField(BosonPlayField* field);
+	void setPlayField(const BPFPreview& preview);
 
 public slots:
 
