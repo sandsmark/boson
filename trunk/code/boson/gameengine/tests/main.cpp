@@ -29,6 +29,7 @@
 
 #include "maptest.h"
 #include "playfieldtest.h"
+#include "canvastest.h"
 
 #include <kaboutdata.h>
 #include <kcmdlineargs.h>
@@ -93,6 +94,11 @@ static bool startTests()
 	return false;
  }
 
+ CanvasTest canvasTest;
+ if (!canvasTest.test()) {
+	boDebug() << k_funcinfo << "CanvasTest failed" << endl;
+	return false;
+ }
  return true;
 }
 
