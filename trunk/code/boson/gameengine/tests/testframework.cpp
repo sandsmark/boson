@@ -24,6 +24,8 @@
 #include "bodebug.h"
 #include "bosonmap.h"
 #include "bosongroundtheme.h"
+#include "bosonplayfield.h"
+#include "bpfdescription.h"
 
 #include "boglobal.h"
 #include "bosondata.h"
@@ -62,6 +64,41 @@ BosonGroundTheme* TestFrameWork::createNewGroundTheme(const QString& identifier,
 	theme->applyGroundThemeConfig(identifier, types, "dummy_directory");
  }
  return theme;
+}
+
+BosonMap* TestFrameWork::createDummyMap(const QString& groundThemeId)
+{
+ BosonGroundTheme* theme = BosonData::bosonData()->groundTheme(groundThemeId);
+ if (!theme) {
+	boError() << k_funcinfo << "BosonData does not know groundThemeId " << groundThemeId << endl;
+	return 0;
+ }
+ BosonMap* map = new BosonMap();
+
+ const unsigned int width = 100;
+ const unsigned int height = 200;
+ map->createNewMap(width, height, theme);
+
+ return map;
+}
+
+BosonPlayField* TestFrameWork::createDummyPlayField(const QString& groundThemeId)
+{
+ BosonMap* map = createDummyMap(groundThemeId);
+ if (!map) {
+	boError() << k_funcinfo << "could not create a map" << endl;
+	return 0;
+ }
+
+ BPFDescription* description = new BPFDescription;
+ description->setName("DummyPlayField");
+ description->setComment("Dummy PlayField for testing");
+
+ BosonPlayField* playField = new BosonPlayField();
+ playField->changeMap(map);
+ playField->setModifiedDescription(description);
+
+ return playField;
 }
 
 

@@ -23,6 +23,7 @@
 #include <qobject.h>
 
 class BosonMap;
+class BosonPlayField;
 class BosonGroundTheme;
 
 #define MY_VERIFY(x) \
@@ -63,6 +64,13 @@ public:
 	 * code, it is never loaded from a file.
 	 **/
 	static BosonGroundTheme* createNewGroundTheme(const QString& identifier, unsigned int groundTypeCount);
+
+	/**
+	 * Create a map based on @p groundThemeId. The theme referenced by @p
+	 * groundThemeId must have been inserted to @ref BosonData already.
+	 **/
+	static BosonMap* createDummyMap(const QString& groundThemeId);
+	static BosonPlayField* createDummyPlayField(const QString& groundThemeId);
 };
 
 #endif
