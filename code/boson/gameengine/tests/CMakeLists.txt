@@ -11,6 +11,7 @@ include_directories(
 
 set(tests_SRCS
 	main.cpp
+	testframework.cpp
 	maptest.cpp
 )
 kde3_automoc(${tests_SRCS})

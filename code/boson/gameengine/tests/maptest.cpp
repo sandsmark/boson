@@ -21,6 +21,7 @@
 #include "maptest.h"
 #include "maptest.moc"
 
+#include "testframework.h"
 #include "bodebug.h"
 #include "bosonmap.h"
 #include "bosongroundtheme.h"
@@ -29,11 +30,7 @@
 #include "boglobal.h"
 #include "bosondata.h"
 
-#define MY_VERIFY(x) \
-	if (!(x)) { \
-		boDebug() << "failed: " #x << endl; \
-		return false; \
-	}
+const unsigned int g_groundTypeCount = 3;
 
 MapTest::MapTest(QObject* parent)
 	: QObject(parent)
@@ -46,26 +43,16 @@ MapTest::~MapTest()
  delete mMap;
 }
 
-void MapTest::initMap()
+void MapTest::initTest()
 {
  delete mMap;
  mMap = new BosonMap(this);
 
- BosonGroundTheme* theme = new BosonGroundTheme();
- {
-	QPtrVector<BosonGroundType> types(1);
-	BosonGroundType* type1 = new BosonGroundType();
-	type1->name = "dummy";
-	type1->textureFile = "dummy_file.jpg"; // AB: does not actually exist. we won't use it anyway.
-
-	types.insert(0, type1);
-
-	theme->applyGroundThemeConfig("dummy_ID", types, "dummy_directory");
- }
+ BosonGroundTheme* theme = TestFrameWork::createNewGroundTheme("dummy_theme_ID", g_groundTypeCount);
  BosonData::bosonData()->insertGroundTheme(new BosonGenericDataObject("dummy_file", theme->identifier(), theme));
 }
 
-void MapTest::cleanupMap()
+void MapTest::cleanupTest()
 {
  delete mMap;
  mMap = 0;
@@ -77,17 +64,7 @@ bool MapTest::test()
  // AB: I do NOT like this one here! we should not need this! very unclean!
  BoGlobal::initStatic();
 
- cleanupMap();
-
-#define DO_TEST(x) \
-	initMap(); \
-	if (!x) { \
-		boDebug() << "test failed: " #x << endl; \
-		cleanupMap(); \
-		return false; \
-	}; \
-	cleanupMap();
-
+ cleanupTest();
 
  DO_TEST(testCreateNewMaps());
  DO_TEST(testSaveLoadMaps());
@@ -100,11 +77,12 @@ bool MapTest::testCreateNewMaps()
  const unsigned int width = 100;
  const unsigned int height = 200;
 
- BosonGroundTheme* theme = BosonData::bosonData()->groundTheme("dummy_ID");
+ BosonGroundTheme* theme = BosonData::bosonData()->groundTheme("dummy_theme_ID");
  if (!theme) {
 	BO_NULL_ERROR(theme);
 	return false;
  }
+ MY_VERIFY(theme->groundTypeCount() == g_groundTypeCount);
  mMap->createNewMap(width, height, theme);
  if (!checkIfMapIsValid(mMap, width, height, theme)) {
 	return false;
@@ -151,7 +129,7 @@ bool MapTest::testSaveLoadMaps()
  const unsigned int width = 100;
  const unsigned int height = 200;
 
- BosonGroundTheme* theme = BosonData::bosonData()->groundTheme("dummy_ID");
+ BosonGroundTheme* theme = BosonData::bosonData()->groundTheme("dummy_theme_ID");
  if (!theme) {
 	BO_NULL_ERROR(theme);
 	return false;
@@ -176,7 +154,7 @@ bool MapTest::testSaveLoadMaps()
  }
 
  // check that a loaded map can still be saved correctly.
- // the resulting map should match exctly both, mMap and copy
+ // the resulting map should match exactly both, mMap and copy
  QMap<QString, QByteArray> savedMap2 = copy->saveMapToFiles();
  BosonMap* copy2 = new BosonMap(this);
  success = copy2->loadMapFromFiles(savedMap2);
