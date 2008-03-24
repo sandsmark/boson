@@ -1186,7 +1186,7 @@ bool BosonCanvas::init(BoEventManager* eventManager)
 	BO_NULL_ERROR(eventManager);
 	return false;
  }
- if (!d->mEventListener) {
+ if (d->mEventListener) {
 	boError() << k_funcinfo << "canvas already initialized" << endl;
 	return false;
  }
