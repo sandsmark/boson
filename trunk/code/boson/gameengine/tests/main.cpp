@@ -28,6 +28,7 @@
 #include "boglobal.h"
 
 #include "maptest.h"
+#include "playfieldtest.h"
 
 #include <kaboutdata.h>
 #include <kcmdlineargs.h>
@@ -80,9 +81,15 @@ int main(int argc, char **argv)
 
 static bool startTests()
 {
- MapTest test;
- if (!test.test()) {
+ MapTest mapTest;
+ if (!mapTest.test()) {
 	boDebug() << k_funcinfo << "MapTest failed" << endl;
+	return false;
+ }
+
+ PlayFieldTest playFieldTest;
+ if (!playFieldTest.test()) {
+	boDebug() << k_funcinfo << "PlayFieldTest failed" << endl;
 	return false;
  }
 

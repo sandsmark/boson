@@ -13,6 +13,7 @@ set(tests_SRCS
 	main.cpp
 	testframework.cpp
 	maptest.cpp
+	playfieldtest.cpp
 )
 kde3_automoc(${tests_SRCS})
 
