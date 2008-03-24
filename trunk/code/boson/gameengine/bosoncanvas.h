@@ -472,6 +472,7 @@ public:
 	 **/
 	void deleteItems(const QValueList<unsigned long int>& items);
 
+	BoEventManager* eventManager() const;
 	BoEventListener* eventListener() const;
 
 	/**

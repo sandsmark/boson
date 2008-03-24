@@ -49,6 +49,7 @@
 #include "bowater.h"
 #include "bocanvasquadtreenode.h"
 #include "playerio.h"
+#include "boeventmanager.h"
 
 #include <klocale.h>
 #include <kgame/kgamepropertyhandler.h>
@@ -900,11 +901,11 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
 	if (has) {
 		BoEvent* miniMapEvent = new BoEvent("GainedMinimap");
 		miniMapEvent->setPlayerId(p->bosonId());
-		mEventManager->queueEvent(miniMapEvent);
+		mCanvas->eventManager()->queueEvent(miniMapEvent);
 	} else {
 		BoEvent* event = new BoEvent("LostMinimap");
 		event->setPlayerId(p->bosonId());
-		mEventManager->queueEvent(event);
+		mCanvas->eventManager()->queueEvent(event);
 	}
  }
 
@@ -1189,8 +1190,8 @@ bool BosonCanvas::init(BoEventManager* eventManager)
 	boError() << k_funcinfo << "canvas already initialized" << endl;
 	return false;
  }
- mEventManager = eventManager;
- d->mEventListener = new BoCanvasEventListener(mEventManager, this);
+ d->mEventManager = eventManager;
+ d->mEventListener = new BoCanvasEventListener(d->mEventManager, this);
  connect(d->mEventListener, SIGNAL(signalGameOver()),
 		this, SIGNAL(signalGameOver()));
  if (!d->mEventListener->initScript()) {
@@ -1605,24 +1606,24 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	BoEvent* unitDestroyed = new BoEvent("UnitWithTypeDestroyed", QString::number(unit->type()));
 	unitDestroyed->setUnitId(unit->id());
 	unitDestroyed->setPlayerId(unit->owner()->bosonId());
-	mEventManager->queueEvent(unitDestroyed);
+	eventManager()->queueEvent(unitDestroyed);
 
 	// the following events are not emitted for the neutral player
 	if (owner->isActiveGamePlayer()) {
 		if (owner->mobilesCount() == 0) {
 			BoEvent* event = new BoEvent("AllMobileUnitsDestroyed");
 			event->setPlayerId(unit->owner()->bosonId());
-			mEventManager->queueEvent(event);
+			eventManager()->queueEvent(event);
 		}
 		if (owner->facilitiesCount() == 0) {
 			BoEvent* allFacilitiesDestroyed = new BoEvent("AllFacilitiesDestroyed");
 			allFacilitiesDestroyed->setPlayerId(unit->owner()->bosonId());
-			mEventManager->queueEvent(allFacilitiesDestroyed);
+			eventManager()->queueEvent(allFacilitiesDestroyed);
 		}
 		if (owner->allUnits()->count() == 0) {
 			BoEvent* event = new BoEvent("AllUnitsDestroyed");
 			event->setPlayerId(unit->owner()->bosonId());
-			mEventManager->queueEvent(event);
+			eventManager()->queueEvent(event);
 		}
 	}
  }
@@ -2667,6 +2668,11 @@ void BosonCanvas::unitMovingStatusChanges(Unit* u, int oldstatus, int newstatus)
  if (pathFinder()) {
 	pathFinder()->unitMovingStatusChanges(u, oldstatus, newstatus);
  }
+}
+
+BoEventManager* BosonCanvas::eventManager() const
+{
+ return d->mEventManager;
 }
 
 BoEventListener* BosonCanvas::eventListener() const
