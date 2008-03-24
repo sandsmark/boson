@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 1999-2000 Thomas Capricelli (capricel@email.enst.fr)
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1991,6 +1991,24 @@ void BosonCanvas::deleteUnusedShots()
  }
 }
 
+bool BosonCanvas::loadCanvas(const QString& canvasData)
+{
+ if (canvasData.isEmpty()) {
+	return false;
+ }
+ QDomDocument doc(QString::fromLatin1("Canvas"));
+
+ QString errorMessage;
+ int lineNo, columnNo;
+ if (!doc.setContent(canvasData, &errorMessage, &lineNo, &columnNo)) {
+	boError() << k_funcinfo << "parse error in line " << lineNo << ",column " << columnNo
+			<< " error message: " << errorMessage << endl;
+	return false;
+ }
+ QDomElement root = doc.documentElement();
+ return loadFromXML(root);
+}
+
 bool BosonCanvas::loadFromXML(const QDomElement& root)
 {
  PROFILE_METHOD
@@ -2277,6 +2295,17 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& element, BosonItem* item)
 	return false;
  }
  return true;
+}
+
+QCString BosonCanvas::saveCanvas() const
+{
+ QDomDocument doc(QString::fromLatin1("Canvas"));
+ QDomElement root = doc.createElement(QString::fromLatin1("Canvas"));
+ doc.appendChild(root);
+ if (!saveAsXML(root)) {
+	return QCString();
+ }
+ return doc.toCString();
 }
 
 bool BosonCanvas::saveAsXML(QDomElement& root) const

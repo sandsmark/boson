@@ -409,19 +409,22 @@ QCString BosonSaveLoad::savePlayersAsXML()
 QCString BosonSaveLoad::saveCanvasAsXML()
 {
  PROFILE_METHOD
- QDomDocument doc(QString::fromLatin1("Canvas"));
- QDomElement root = doc.createElement(QString::fromLatin1("Canvas")); // XML file for canvas
- doc.appendChild(root);
 
  if (d->mCanvas) {
-	d->mCanvas->saveAsXML(root);
+	return d->mCanvas->saveCanvas();
  } else {
 	boDebug() << k_funcinfo << "NULL canvas - saving nothing" << endl;
+
+	QDomDocument doc(QString::fromLatin1("Canvas"));
+	QDomElement root = doc.createElement(QString::fromLatin1("Canvas"));
+	doc.appendChild(root);
+
 	QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
 	root.appendChild(handler);
+	return doc.toCString();
  }
 
- return doc.toCString();
+ return QCString();
 }
 
 QCString BosonSaveLoad::saveExternalAsXML()
