@@ -78,7 +78,7 @@ void GameOverDialog::createStatistics(Boson* boson, Player* winner, Player* p)
 
  d->mWinnerLabel->setText(i18n("And the winner is: %1").arg(winner->name()));
  
- QPtrList<Player> players = *d->mBoson->gamePlayerList();
+ QPtrList<Player> players = d->mBoson->gamePlayerList();
  QPtrListIterator<Player> it(players);
  while (it.current()) {
 	PlayerBox* winnerBox = addPlayer((Player*)it.current());

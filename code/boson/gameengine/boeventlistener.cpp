@@ -485,8 +485,9 @@ bool BoCanvasEventListener::checkGameOver(QPtrList<Player>* fullfilledWinningCon
  // AB: atm we use the winning condition "at most 1 player left in game"
  QPtrList<Player> fullfilled;
 
- for (unsigned int i = 0; i < boGame->activeGamePlayerCount(); i++) {
-	Player* p = boGame->activeGamePlayerList()->at(i);
+ QPtrList<Player> activeGamePlayerList = boGame->activeGamePlayerList();
+ for (unsigned int i = 0; i < activeGamePlayerList.count(); i++) {
+	Player* p = activeGamePlayerList.at(i);
 	if (p->bosonId() <= 127 || p->bosonId() >= 256) {
 		boError() << k_funcinfo << "not an active game player: " << p->bosonId() << endl;
 		continue;
@@ -513,8 +514,9 @@ void BoCanvasEventListener::checkGameOverAndEndGame()
 {
  QPtrList<Player> fullfilledWinningConditions;
  if (checkGameOver(&fullfilledWinningConditions)) {
-	for (unsigned int i = 0; i < boGame->activeGamePlayerCount(); i++) {
-		Player* p = (Player*)boGame->activeGamePlayerList()->at(i);
+	QPtrList<Player> activeGamePlayerList = boGame->activeGamePlayerList();
+	for (unsigned int i = 0; i < activeGamePlayerList.count(); i++) {
+		Player* p = activeGamePlayerList.at(i);
 		if (fullfilledWinningConditions.contains(p)) {
 			BoEvent* won = new BoEvent("PlayerWon");
 			won->setPlayerId(p->bosonId());

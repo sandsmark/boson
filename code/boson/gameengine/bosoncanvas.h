@@ -150,8 +150,10 @@ public:
 public:
 	/**
 	 * Create a new canvas. Call @ref init before using this canvas!
+	 *
+	 * @param gameMode TRUE for normal game mode, FALSE for editor mode.
 	 **/
-	BosonCanvas(QObject* parent);
+	BosonCanvas(QObject* parent, bool gameMode = true);
 	~BosonCanvas();
 
 	bool init(BoEventManager* manager);

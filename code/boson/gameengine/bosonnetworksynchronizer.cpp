@@ -284,8 +284,8 @@ public:
 	{
 		QByteArray playersBuffer;
 		QDataStream playersStream(playersBuffer, IO_WriteOnly);
-		QPtrListIterator<Player> playerIt(*mGame->allPlayerList());
-		playersStream << (Q_UINT32)mGame->allPlayerList()->count();
+		QPtrListIterator<Player> playerIt(mGame->allPlayerList());
+		playersStream << (Q_UINT32)mGame->allPlayerList().count();
 		while (playerIt.current()) {
 			Player* p = (Player*)playerIt.current();
 			playersStream << (Q_UINT32)p->unfoggedCells();
@@ -1355,7 +1355,7 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
 		boError(370) << k_funcinfo << "no Players tag found" << endl;
 		return false;
 	}
-	QPtrList<Player> allPlayerList = *mGame->allPlayerList();
+	QPtrList<Player> allPlayerList = mGame->allPlayerList();
 	for (KPlayer* kplayer = allPlayerList.first(); kplayer; kplayer = allPlayerList.next()) {
 		Player* player = (Player*)kplayer;
 		QDomElement playerElement;
@@ -1429,7 +1429,7 @@ QByteArray BosonNetworkSyncer::createSyncMessage()
  doc.appendChild(root);
  {
 	QDomElement players = doc.createElement("Players");
-	QPtrList<Player> list = *mGame->allPlayerList();
+	QPtrList<Player> list = mGame->allPlayerList();
 	for (Player* p = list.first(); p; p = list.next()) {
 		QDomElement player = doc.createElement("Player");
 		if (!p->saveAsXML(player)) {

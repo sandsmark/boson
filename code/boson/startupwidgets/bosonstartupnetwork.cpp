@@ -77,7 +77,7 @@ void BosonStartupNetwork::setGame(Boson* game)
  connect(mGame, SIGNAL(destroyed()),
 		this, SLOT(slotUnsetKGame()));
 
- QPtrList<Player> list = *mGame->allPlayerList();
+ QPtrList<Player> list = mGame->allPlayerList();
  QPtrListIterator<Player> it(list);;
  for (; it.current(); ++it) {
 	slotPlayerJoinedGame(it.current());
@@ -104,7 +104,7 @@ void BosonStartupNetwork::slotPlayerPropertyChanged(KGamePropertyBase* prop, KPl
 void BosonStartupNetwork::slotPlayerJoinedGame(KPlayer* p)
 {
  BO_CHECK_NULL_RET(p);
- boDebug() << k_funcinfo << "there are " << boGame->allPlayerList()->count() << " players in game now with " << boGame->gamePlayerList()->count() << " game players" << endl;
+ boDebug() << k_funcinfo << "there are " << boGame->allPlayerCount() << " players in game now with " << boGame->gamePlayerCount() << " game players" << endl;
  connect(p, SIGNAL(signalPropertyChanged(KGamePropertyBase*, KPlayer*)),
 		this, SLOT(slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*)));
 

@@ -522,7 +522,7 @@ void BosonMenuInputData::createEditorPlayerMenu()
 {
  BO_CHECK_NULL_RET(boGame);
  BO_CHECK_NULL_RET(d->mActionEditorPlayer);
- QPtrList<Player> players = *boGame->gamePlayerList();
+ QPtrList<Player> players = boGame->gamePlayerList();
  QStringList items;
 
  d->mEditorPlayers.clear();
@@ -545,7 +545,7 @@ void BosonMenuInputData::createDebugPlayersMenu()
  d->mActionDebugPlayers = new BoUfoActionMenu(i18n("Players"),
 		actionCollection(), "debug_players");
 
- QPtrList<Player> players = *boGame->gamePlayerList();
+ QPtrList<Player> players = boGame->gamePlayerList();
  QPtrListIterator<Player> it(players);
  for (; it.current(); ++it) {
 	KPlayer* player = it.current();
@@ -1029,7 +1029,7 @@ void BosonMenuInput::slotExploreAll(Player* pl)
  }
  QPtrList<Player> list;
  if (!pl) {
-	list = *boGame->allPlayerList();
+	list = boGame->allPlayerList();
  } else {
 	list.append(pl);
  }
@@ -1061,7 +1061,7 @@ void BosonMenuInput::slotUnfogAll(Player* pl)
  }
  QPtrList<Player> list;
  if (!pl) {
-	list = *boGame->allPlayerList();
+	list = boGame->allPlayerList();
  } else {
 	list.append(pl);
  }
@@ -1093,7 +1093,7 @@ void BosonMenuInput::slotFogAll(Player* pl)
  }
  QPtrList<Player> list;
  if (!pl) {
-	list = *boGame->allPlayerList();
+	list = boGame->allPlayerList();
  } else {
 	list.append(pl);
  }
@@ -1149,7 +1149,8 @@ void BosonMenuInput::slotEditConditions()
 					boError() << k_funcinfo << "PlayerId attribute not a valid number" << endl;
 					continue;
 				}
-				Player* p = boGame->gamePlayerList()->at(index);
+				QPtrList<Player> gamePlayerList = boGame->gamePlayerList();
+				Player* p = gamePlayerList.at(index);
 				e.setAttribute("PlayerId", p->bosonId());
 			}
 		}

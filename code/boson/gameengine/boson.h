@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 1999-2000 Thomas Capricelli (capricel@email.enst.fr)
-    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2008 Andreas Beckermann (b_mann@gmx.de)
     Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
@@ -35,6 +35,7 @@ class QDomDocument;
 class QDataStream;
 class QTextStream;
 class BosonSaveLoad;
+class BosonPlayerListManager;
 class BoMessage;
 class BoEvent;
 class BoEventManager;
@@ -115,22 +116,37 @@ public:
 	PlayerIO* playerIOAtGameIndex(unsigned int playerIndex) const;
 	PlayerIO* playerIOAtActiveGameIndex(unsigned int playerIndex) const;
 
+	BosonPlayerListManager* playerListManager() const;
+
+	/**
+	 * @return @ref BosonPlayerListManager::allPlayerCount
+	 **/
 	unsigned int allPlayerCount() const;
+
+	/**
+	 * @return @ref BosonPlayerListManager::gamePlayerCount
+	 **/
 	unsigned int gamePlayerCount() const;
+
+	/**
+	 * @return @ref BosonPlayerListManager::activeGamePlayerCount
+	 **/
 	unsigned int activeGamePlayerCount() const;
 
 	/**
-	 * @return The same as @ref KGame::playerList
+	 * @return @ref BosonPlayerListManager::allPlayerList
 	 **/
-	QPtrList<Player>* allPlayerList() const;
+	const QPtrList<Player>& allPlayerList() const;
 
 	/**
 	 * "game players" are players with ID >= 128 and <= 511. These are
 	 * players who actually may own and move units in the game.
 	 *
 	 * This includes both, human controllable and neutral players.
+	 *
+	 * @return @ref BosonPlayerListManager::gamePlayerList
 	 **/
-	QPtrList<Player>* gamePlayerList() const;
+	const QPtrList<Player>& gamePlayerList() const;
 
 	/**
 	 * "active game players" are players with ID >= 128 and <= 255. These
@@ -138,8 +154,10 @@ public:
 	 * actual part in the game.
 	 *
 	 * They are in particular @em not neutral players.
+	 *
+	 * @return @ref BosonPlayerListManager::activeGamePlayerList
 	 **/
-	QPtrList<Player>* activeGamePlayerList() const;
+	const QPtrList<Player>& activeGamePlayerList() const;
 
 	/**
 	 * Initialize a @ref BosonSaveLoad object with the relevant data.

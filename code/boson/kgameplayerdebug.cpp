@@ -118,7 +118,7 @@ void KGamePlayerDebug::slotUpdate()
 	return;
  }
  */
- QPtrList<Player> list = *d->mBoson->allPlayerList();
+ QPtrList<Player> list = d->mBoson->allPlayerList();
  for (unsigned int i = 0; i < list.count(); i++) {
 	Player* player = (Player*)list.at(i);
 	PlayerGroupBox* box = d->mPlayerBoxes[player];
