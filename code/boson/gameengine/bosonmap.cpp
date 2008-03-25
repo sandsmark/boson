@@ -1361,7 +1361,7 @@ void BosonMap::addColorMap(BoColorMap* map, const QString& name)
 {
  if (d->mColorMaps[name]) {
 	boWarning() << k_funcinfo << "already have a colormap named " << name << endl;
-	BoColorMap* old = d->mColorMaps[name];
+	BoColorMap* old = d->mColorMaps.take(name);
 	delete old;
  }
  d->mColorMaps.insert(name, map);
