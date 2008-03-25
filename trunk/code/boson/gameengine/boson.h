@@ -125,7 +125,7 @@ public:
 	QPtrList<Player>* allPlayerList() const;
 
 	/**
-	 * "game players" are players with ID >= 127 and <= 511. These are
+	 * "game players" are players with ID >= 128 and <= 511. These are
 	 * players who actually may own and move units in the game.
 	 *
 	 * This includes both, human controllable and neutral players.
