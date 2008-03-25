@@ -238,18 +238,11 @@ bool BosonStartingCreateCanvas::startTask()
 	BO_NULL_ERROR(playField()->map());
 	return false;
  }
- if (!boGame->createCanvas()) {
+ if (!boGame->createCanvas(playField()->map())) {
 	return false;
  }
 
- BosonCanvas* canvas = boGame->canvasNonConst();
- if (!canvas) {
-	BO_NULL_ERROR(canvas);
-	return false;
- }
- canvas->setMap(playField()->map());
-
- emit signalCanvasCreated(canvas);
+ emit signalCanvasCreated(boGame->canvasNonConst());
 
  return true;
 }

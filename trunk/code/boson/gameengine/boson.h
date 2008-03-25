@@ -40,6 +40,7 @@ class BoMessage;
 class BoEvent;
 class BoEventManager;
 class BoAdvanceMessageTimes;
+class BosonMap;
 class bofixed;
 template<class T> class BoVector2;
 typedef BoVector2<bofixed> BoVector2Fixed;
@@ -92,7 +93,7 @@ public:
 	 * Create a new @ref BosonCanvas object. The object will be deleted when
 	 * this Boson object is destroyed, see @ref deleteBoson.
 	 **/
-	bool createCanvas();
+	bool createCanvas(BosonMap* map);
 
 	/**
 	 * @return The @ref BosonCanvas object. See also @ref createCanvas.

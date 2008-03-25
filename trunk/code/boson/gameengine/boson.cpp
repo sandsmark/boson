@@ -608,7 +608,7 @@ void Boson::deleteBoson()
  mBoson = 0;
 }
 
-bool Boson::createCanvas()
+bool Boson::createCanvas(BosonMap* map)
 {
  if (d->mCanvas) {
 	boWarning() << k_funcinfo << "there is already a canvas created! not touching that object..." << endl;
@@ -618,7 +618,7 @@ bool Boson::createCanvas()
  d->mCanvas = new BosonCanvas(this, gameMode());
  connect(d->mCanvas, SIGNAL(signalGameOver()),
 		this, SLOT(slotGameOver()));
- if (!d->mCanvas->init(playerListManager(), eventManager())) {
+ if (!d->mCanvas->init(map, playerListManager(), eventManager())) {
 	boError() << k_funcinfo << "initializing the canvas failed" << endl;
 	return false;
  }
