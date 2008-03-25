@@ -29,48 +29,52 @@
 #include "bosongroundtheme.h"
 #include "bpfdescription.h"
 #include "boeventmanager.h"
+#include "bosonplayerlistmanager.h"
 #include "boglobal.h"
 #include "bosondata.h"
 
-CanvasTest::CanvasTest(QObject* parent)
-	: QObject(parent)
+// AB: note: we _need_ a new map/playfield for every new canvas, as the canvas
+//     is allowed to (and will) modify the map
+//     -> at the very leas: the pathfinder will add colormaps
+class CanvasContainer
 {
- mCanvas = 0;
- mPlayField = 0;
- mEventManager = 0;
-}
+public:
+	CanvasContainer()
+	{
+		mPlayField = 0;
+		mCanvas = 0;
+		mPlayerListManager = 0;
+		mEventManager = 0;
+	}
+	~CanvasContainer()
+	{
+		delete mCanvas;
+		delete mPlayField;
+		delete mEventManager;
+		delete mPlayerListManager;
+	}
 
-CanvasTest::~CanvasTest()
+	bool createCanvas(const QString& groundThemeId);
+
+	BoEventManager* mEventManager;
+	BosonPlayerListManager* mPlayerListManager;
+	BosonPlayField* mPlayField;
+	BosonCanvas* mCanvas;
+};
+
+bool CanvasContainer::createCanvas(const QString& groundThemeId)
 {
- delete mCanvas;
- delete mPlayField;
- delete mEventManager;
-}
-
-bool CanvasTest::initTest()
-{
- delete mCanvas;
- delete mPlayField;
- delete mEventManager;
- mPlayField = 0;
- mEventManager = 0;
- mCanvas = 0;
-
-
- mCanvas = new BosonCanvas(this);
- mEventManager = new BoEventManager(this);
-
- const unsigned int groundTypeCount = 3;
- BosonGroundTheme* theme = TestFrameWork::createNewGroundTheme("dummy_theme_ID", groundTypeCount);
- BosonData::bosonData()->insertGroundTheme(new BosonGenericDataObject("dummy_file", theme->identifier(), theme));
-
- mPlayField = TestFrameWork::createDummyPlayField("dummy_theme_ID");
+ mPlayField = TestFrameWork::createDummyPlayField(groundThemeId);
  if (!mPlayField) {
 	boError() << k_funcinfo << "NULL playfield created" << endl;
 	return false;
  }
 
- if (!mCanvas->init(mEventManager)) {
+ mEventManager = new BoEventManager(0);
+ mPlayerListManager = new BosonPlayerListManager(0);
+ mCanvas = new BosonCanvas(0);
+
+ if (!mCanvas->init(mPlayerListManager, mEventManager)) {
 	boError() << k_funcinfo << "initializing canvas failed" << endl;
 	return false;
  }
@@ -79,14 +83,39 @@ bool CanvasTest::initTest()
  return true;
 }
 
+CanvasTest::CanvasTest(QObject* parent)
+	: QObject(parent)
+{
+ mCanvasContainer = 0;
+}
+
+CanvasTest::~CanvasTest()
+{
+ delete mCanvasContainer;
+}
+
+bool CanvasTest::initTest()
+{
+ delete mCanvasContainer;
+ mCanvasContainer = 0;
+
+ const unsigned int groundTypeCount = 3;
+ BosonGroundTheme* theme = TestFrameWork::createNewGroundTheme("dummy_theme_ID", groundTypeCount);
+ BosonData::bosonData()->insertGroundTheme(new BosonGenericDataObject("dummy_file", theme->identifier(), theme));
+
+ mCanvasContainer = new CanvasContainer();
+ if (!mCanvasContainer->createCanvas("dummy_theme_ID")) {
+	return false;
+ }
+
+ return true;
+}
+
 void CanvasTest::cleanupTest()
 {
- delete mPlayField;
- delete mCanvas;
- delete mEventManager;
- mEventManager = 0;
- mPlayField = 0;
- mCanvas = 0;
+ delete mCanvasContainer;
+ mCanvasContainer = 0;
+
  BosonData::bosonData()->clearData();
 }
 
@@ -105,64 +134,63 @@ bool CanvasTest::test()
 bool CanvasTest::testCreateNewCanvas()
 {
  // initTest() already created a new canvas
- if (!checkIfCanvasIsValid(mCanvas)) {
+ BosonCanvas* canvas = mCanvasContainer->mCanvas;
+ if (!checkIfCanvasIsValid(canvas)) {
 	return false;
  }
 
- MY_VERIFY(mCanvas->allItemsCount() == 0);
+ MY_VERIFY(canvas->allItemsCount() == 0);
 
  return true;
 }
 
 bool CanvasTest::testSaveLoadCanvas()
 {
- QCString canvasXML = mCanvas->saveCanvas();
+ QCString canvasXML = mCanvasContainer->mCanvas->saveCanvas();
  if (canvasXML.isEmpty()) {
 	boError() << k_funcinfo "saving failed" << endl;
 	return false;
  }
- BoEventManager* eventManager2 = new BoEventManager(this);
- BosonCanvas* canvas2 = new BosonCanvas(this);
- if (!canvas2->init(eventManager2)) {
+
+ CanvasContainer* canvasContainer2 = new CanvasContainer();
+ if (!canvasContainer2->createCanvas("dummy_theme_ID")) {
 	return false;
  }
- if (!canvas2->loadCanvas(canvasXML)) {
+ if (!canvasContainer2->mCanvas->loadCanvas(canvasXML)) {
 	boError() << k_funcinfo "loading failed" << endl;
 	return false;
  }
- if (!checkIfCanvasIsValid(canvas2)) {
+ if (!checkIfCanvasIsValid(canvasContainer2->mCanvas)) {
 	return false;
  }
- if (!checkIfCanvasAreEqual(mCanvas, canvas2)) {
+ if (!checkIfCanvasAreEqual(mCanvasContainer->mCanvas, canvasContainer2->mCanvas)) {
 	return false;
  }
 
  // check that a loaded canvas can still be saved correctly.
  // the resulting canvas should match exactly both, mCanvas and canvas2
- QCString canvasXML2 = canvas2->saveCanvas();
+ QCString canvasXML2 = canvasContainer2->mCanvas->saveCanvas();
  if (canvasXML2.isEmpty()) {
 	boError() << k_funcinfo << "saving of canvas2 failed" << endl;
 	return false;
  }
- BoEventManager* eventManager3 = new BoEventManager(this);
- BosonCanvas* canvas3 = new BosonCanvas(this);
- if (!canvas3->init(eventManager3)) {
+
+ CanvasContainer* canvasContainer3 = new CanvasContainer();
+ if (!canvasContainer3->createCanvas("dummy_theme_ID")) {
 	return false;
  }
- if (!canvas3->loadCanvas(canvasXML2)) {
+ if (!canvasContainer3->mCanvas->loadCanvas(canvasXML2)) {
 	return false;
  }
- if (!checkIfCanvasIsValid(canvas3)) {
+ if (!checkIfCanvasIsValid(canvasContainer3->mCanvas)) {
 	return false;
  }
- if (!checkIfCanvasAreEqual(mCanvas, canvas3)) {
+ if (!checkIfCanvasAreEqual(mCanvasContainer->mCanvas, canvasContainer3->mCanvas)) {
 	return false;
  }
 
- delete canvas2;
- delete canvas3;
- delete eventManager2;
- delete eventManager3;
+ delete canvasContainer2;
+ delete canvasContainer3;
 
  return true;
 }

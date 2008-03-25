@@ -43,6 +43,7 @@ class BosonShotFragment;
 class BoEventListener;
 class BoEventManager;
 class BoCanvasQuadTreeNode;
+class BosonPlayerListManager;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
 typedef BoVector2<bofixed> BoVector2Fixed;
@@ -156,7 +157,7 @@ public:
 	BosonCanvas(QObject* parent, bool gameMode = true);
 	~BosonCanvas();
 
-	bool init(BoEventManager* manager);
+	bool init(BosonPlayerListManager* playerListManager, BoEventManager* eventManager);
 
 	unsigned long int nextItemId();
 

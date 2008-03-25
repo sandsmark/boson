@@ -26,6 +26,9 @@ class BosonPlayField;
 class BosonMap;
 class BosonCanvas;
 class BoEventManager;
+class BosonPlayerListManager;
+
+class CanvasContainer;
 
 class CanvasTest : public QObject
 {
@@ -47,9 +50,7 @@ protected:
 	bool checkIfCanvasAreEqual(BosonCanvas* canvas1, BosonCanvas* canvas2);
 
 private:
-	BoEventManager* mEventManager;
-	BosonPlayField* mPlayField;
-	BosonCanvas* mCanvas;
+	CanvasContainer* mCanvasContainer;
 };
 
 #endif

@@ -48,6 +48,7 @@ class Unit;
 class BosonMoveData;
 class PlayerIO;
 class BosonItem;
+class BosonPlayerListManager;
 
 class QDomElement;
 
@@ -105,7 +106,7 @@ class BosonPath
     /**
      * Initializes the pathfinder
      **/
-    void init(BosonCanvas* canvas);
+    void init(BosonCanvas* canvas, BosonPlayerListManager* playerListManager);
 
     /**
      * Advances the pathfinder. This includes e.g. updating changed blocks.
@@ -131,7 +132,7 @@ class BosonPath
   protected:
     // TODO: add const to more methods
     /*****  Init methods  *****/
-    void initMoveDatas(BosonCanvas* canvas);
+    void initMoveDatas(BosonCanvas* canvas, BosonPlayerListManager* playerListManager);
     void initCellStatusArray();
     void initCellPassabilityMaps();
     void initBlocks();

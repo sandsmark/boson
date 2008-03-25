@@ -618,7 +618,7 @@ bool Boson::createCanvas()
  d->mCanvas = new BosonCanvas(this, gameMode());
  connect(d->mCanvas, SIGNAL(signalGameOver()),
 		this, SLOT(slotGameOver()));
- if (!d->mCanvas->init(eventManager())) {
+ if (!d->mCanvas->init(playerListManager(), eventManager())) {
 	boError() << k_funcinfo << "initializing the canvas failed" << endl;
 	return false;
  }
