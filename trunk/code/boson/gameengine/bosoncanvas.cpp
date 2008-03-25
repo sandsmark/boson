@@ -41,7 +41,6 @@
 #include "bosonprofiling.h"
 #include "bosoncanvasstatistics.h"
 #include "bodebug.h"
-#include "boson.h"
 #include "boevent.h"
 #include "boeventlistener.h"
 #include "bosonpropertyxml.h"
@@ -50,6 +49,7 @@
 #include "bocanvasquadtreenode.h"
 #include "playerio.h"
 #include "boeventmanager.h"
+#include "bosonplayerlistmanager.h"
 
 #include <klocale.h>
 #include <kgame/kgamepropertyhandler.h>
@@ -94,6 +94,7 @@ public:
 
 		mPathFinder = 0;
 
+		mPlayerListManager = 0;
 		mEventManager = 0;
 		mEventListener = 0;
 		mSightManager = 0;
@@ -127,6 +128,8 @@ public:
 
 	BosonPath* mPathFinder;
 
+	BosonPlayerListManager* mPlayerListManager;
+
 	BoEventManager* mEventManager;
 	BoCanvasEventListener* mEventListener;
 
@@ -139,7 +142,12 @@ public:
 class BoCanvasSightManager
 {
 public:
-	BoCanvasSightManager(BosonCanvas* canvas) { mMap = 0; mCanvas = canvas; }
+	BoCanvasSightManager(BosonCanvas* canvas, BosonPlayerListManager* playerListManager)
+	{
+		mMap = 0;
+		mCanvas = canvas;
+		mPlayerListManager = playerListManager;
+	}
 
 	void setMap(BosonMap* map) { mMap = map; }
 	void quitGame();
@@ -201,6 +209,7 @@ private:
 
 	BosonMap* mMap;
 	BosonCanvas* mCanvas;
+	BosonPlayerListManager* mPlayerListManager;
 };
 
 void BoCanvasSightManager::quitGame()
@@ -385,7 +394,7 @@ void BoCanvasSightManager::removeSight(Unit* unit)
 
 void BoCanvasSightManager::updateVisibleStatus(Unit* unit)
 {
- QPtrList<Player> players = boGame->activeGamePlayerList();
+ QPtrList<Player> players = mPlayerListManager->activeGamePlayerList();
  for (QPtrListIterator<Player> pit(players); pit.current(); ++pit) {
 	Player* player = pit.current();
 	if (unit->owner() == player) {
@@ -510,7 +519,7 @@ void BoCanvasSightManager::updateRadarSignal(Unit* unit, bofixed, bofixed)
  }
 
  // Then radar signal strength for all players
- QPtrList<Player> players = boGame->activeGamePlayerList();
+ QPtrList<Player> players = mPlayerListManager->activeGamePlayerList();
  for (QPtrListIterator<Player> it(players); it.current(); ++it) {
 	Player* player = it.current();
 	bofixed signalstrength = 0;
@@ -589,7 +598,7 @@ bofixed BoCanvasSightManager::radarSignalStrength(const RadarPlugin* radar, bofi
 void BoCanvasSightManager::recalculateSpecialSignalStrengths()
 {
  PROFILE_METHOD;
- QPtrList<Player> players = boGame->activeGamePlayerList();
+ QPtrList<Player> players = mPlayerListManager->activeGamePlayerList();
 
  // Calculate signal strengths for radars
  // Go through all radar units
@@ -785,9 +794,10 @@ bofixed BoCanvasSightManager::jammerSignalStrength(const RadarJammerPlugin* jamm
 class BoCanvasAdvance
 {
 public:
-	BoCanvasAdvance(BosonCanvas* c)
+	BoCanvasAdvance(BosonCanvas* c, BosonPlayerListManager* playerListManager)
 	{
 		mCanvas = c;
+		mPlayerListManager = playerListManager;
 	}
 	void advance(const BoItemList& allItems, unsigned int advanceCallsCount, bool advanceFlag);
 
@@ -807,6 +817,7 @@ protected:
 
 private:
 	BosonCanvas* mCanvas;
+	BosonPlayerListManager* mPlayerListManager;
 };
 
 void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCallsCount, bool advanceFlag)
@@ -814,7 +825,7 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
  boProfiling->push(prof_funcinfo + " - Whole method");
 
  QMap<Player*, bool> player2HasMiniMap;
- for (QPtrListIterator<Player> it(boGame->gamePlayerList()); it.current(); ++it) {
+ for (QPtrListIterator<Player> it(mPlayerListManager->gamePlayerList()); it.current(); ++it) {
 	Player* p = it.current();
 	player2HasMiniMap.insert(p, p->hasMiniMap());
  }
@@ -872,7 +883,7 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
  // if this value is reached, "free" refill stops. only using ammunition center
  // (i.e. by producing new ammo), new ammo can be gained.
  const unsigned long int maxAmmo = 1000;
- for (QPtrListIterator<Player> it(boGame->activeGamePlayerList()); it.current(); ++it) {
+ for (QPtrListIterator<Player> it(mPlayerListManager->activeGamePlayerList()); it.current(); ++it) {
 	Player* p = it.current();
 	QString type = "Generic";
 	if (p->ammunition(type) < maxAmmo) {
@@ -917,7 +928,7 @@ void BoCanvasAdvance::chargeUnits(unsigned int advanceCallsCount, bool advanceFl
 {
  Q_UNUSED(advanceCallsCount);
  Q_UNUSED(advanceFlag);
- for (QPtrListIterator<Player> it(boGame->gamePlayerList()); it.current(); ++it) {
+ for (QPtrListIterator<Player> it(mPlayerListManager->gamePlayerList()); it.current(); ++it) {
 	Player* p = it.current();
 	p->updatePowerChargeForCurrentAdvanceCall();
  }
@@ -927,7 +938,7 @@ void BoCanvasAdvance::unchargeUnits(unsigned int advanceCallsCount, bool advance
 {
  Q_UNUSED(advanceCallsCount);
  Q_UNUSED(advanceFlag);
- for (QPtrListIterator<Player> it(boGame->gamePlayerList()); it.current(); ++it) {
+ for (QPtrListIterator<Player> it(mPlayerListManager->gamePlayerList()); it.current(); ++it) {
 	Player* p = it.current();
 	p->unchargeUnitsForAdvance();
  }
@@ -1172,7 +1183,7 @@ BosonCanvas::BosonCanvas(QObject* parent, bool gameMode)
  d->mDestroyedUnits.setAutoDelete(false);
  mAdvanceFunctionLocked = false;
  mCollisions = new BosonCollisions();
- d->mSightManager = new BoCanvasSightManager(this);
+ d->mSightManager = 0;
  d->mQuadTreeCollection = new BoCanvasQuadTreeCollection(this);
  d->mStatistics = new BosonCanvasStatistics(this);
  d->mProperties = new KGamePropertyHandler(this);
@@ -1182,8 +1193,12 @@ BosonCanvas::BosonCanvas(QObject* parent, bool gameMode)
  d->mEventListener = 0;
 }
 
-bool BosonCanvas::init(BoEventManager* eventManager)
+bool BosonCanvas::init(BosonPlayerListManager* playerListManager, BoEventManager* eventManager)
 {
+ if (!playerListManager) {
+	BO_NULL_ERROR(playerListManager);
+	return false;
+ }
  if (!eventManager) {
 	BO_NULL_ERROR(eventManager);
 	return false;
@@ -1192,7 +1207,11 @@ bool BosonCanvas::init(BoEventManager* eventManager)
 	boError() << k_funcinfo << "canvas already initialized" << endl;
 	return false;
  }
+ d->mPlayerListManager = playerListManager;
  d->mEventManager = eventManager;
+
+ d->mSightManager = new BoCanvasSightManager(this, d->mPlayerListManager);
+
  d->mEventListener = new BoCanvasEventListener(d->mEventManager, this);
  connect(d->mEventListener, SIGNAL(signalGameOver()),
 		this, SIGNAL(signalGameOver()));
@@ -1275,7 +1294,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag)
  boProfiling->pushStorage("Advance");
  boProfiling->push("slotAdvance()");
 
- BoCanvasAdvance a(this);
+ BoCanvasAdvance a(this, d->mPlayerListManager);
  a.advance(d->mAllItems, advanceCallsCount, advanceFlag);
 
  boProfiling->pop();
@@ -2073,7 +2092,7 @@ bool BosonCanvas::loadItemsFromXML(const QDomElement& root)
 		boError(260) << k_funcinfo << "PlayerId of Items Tag " << i << " is not a valid number" << endl;
 		continue;
 	}
-	Player* owner = (Player*)boGame->findPlayerByUserId(id);
+	Player* owner = d->mPlayerListManager->findPlayerByUserId(id);
 	if (!owner) {
 		// AB: this is totally valid. less players in game, than in the
 		// file.
@@ -2350,7 +2369,7 @@ bool BosonCanvas::saveItemsAsXML(QDomElement& root) const
 {
  QDomDocument doc = root.ownerDocument();
  QMap<unsigned int, QDomElement> owner2Items;
- QPtrList<Player> gamePlayerList = boGame->gamePlayerList();
+ QPtrList<Player> gamePlayerList = d->mPlayerListManager->gamePlayerList();
  for (KPlayer* p = gamePlayerList.first(); p; p = gamePlayerList.next()) {
 	QDomElement items = doc.createElement(QString::fromLatin1("Items"));
 
@@ -2650,7 +2669,7 @@ void BosonCanvas::initPathFinder()
  }
 
  d->mPathFinder = new BosonPath(map());
- d->mPathFinder->init(this);
+ d->mPathFinder->init(this, d->mPlayerListManager);
 
  for (BoItemList::ConstIterator it = allItems()->begin(); it != allItems()->end(); ++it) {
 	if (RTTI::isUnit((*it)->rtti())) {

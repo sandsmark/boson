@@ -25,13 +25,13 @@
 #include "defines.h"
 #include "player.h"
 #include "bodebug.h"
-#include "boson.h"
 #include "unitproperties.h"
 #include "bosonprofiling.h"
 #include "bosonmap.h"
 #include "unitplugins/resourcemineplugin.h"
 #include "speciestheme.h"
 #include "playerio.h"
+#include "bosonplayerlistmanager.h"
 
 #include <qptrqueue.h>
 #include <qdom.h>
@@ -383,7 +383,7 @@ BosonPath::~BosonPath()
   delete[] mBlockConnectionsDirty;
 }
 
-void BosonPath::init(BosonCanvas* canvas)
+void BosonPath::init(BosonCanvas* canvas, BosonPlayerListManager* playerListManager)
 {
   PROFILE_METHOD;
   boDebug(500) << k_funcinfo << endl;
@@ -395,7 +395,7 @@ void BosonPath::init(BosonCanvas* canvas)
   //mForestMap = calculateForestmap();
   mForestMap = 0;
 
-  initMoveDatas(canvas);
+  initMoveDatas(canvas, playerListManager);
   initCellPassabilityMaps();
   initCellStatusArray();
   initBlocks();
@@ -1842,7 +1842,7 @@ void BosonPath::initOffsets()
   }
 }
 
-void BosonPath::initMoveDatas(BosonCanvas* canvas)
+void BosonPath::initMoveDatas(BosonCanvas* canvas, BosonPlayerListManager* playerListManager)
 {
   PROFILE_METHOD;
   // TODO: delete current movedatas
@@ -1850,7 +1850,7 @@ void BosonPath::initMoveDatas(BosonCanvas* canvas)
   canvas->clearMoveDatas();
 
   // Go through all units and create all possible movedatas
-  QPtrListIterator<Player> playerit(boGame->gamePlayerList());
+  QPtrListIterator<Player> playerit(playerListManager->gamePlayerList());
   while(playerit.current())
   {
     Player* p = playerit.current();
