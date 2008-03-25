@@ -96,10 +96,11 @@ bool BosonGUIStarting::createTasks(QPtrList<BosonStartingTask>* tasks)
  BosonStartingLoadEffects* effects = new BosonStartingLoadEffects(i18n("Load Effects"));
  tasks->append(effects);
 
- for (QPtrListIterator<Player> it(*boGame->gamePlayerList()); it.current(); ++it) {
+ QPtrList<Player> gamePlayerList = boGame->gamePlayerList();
+ for (QPtrListIterator<Player> it(gamePlayerList); it.current(); ++it) {
 	Player* p = (Player*)it.current();
 	QString text;
-	unsigned int index = boGame->gamePlayerList()->find(it.current());
+	unsigned int index = gamePlayerList.find(it.current());
 	if (p->isActiveGamePlayer()) {
 		text = i18n("Load player data of player %1 (of %2)").arg(index + 1).arg(boGame->activeGamePlayerCount());
 	} else {
@@ -407,9 +408,10 @@ bool BosonStartingCheckIOs::startTask()
 	BO_NULL_ERROR(boGame);
 	return false;
  }
- for (unsigned int i = 0; i < boGame->allPlayerCount(); i++) {
+ QPtrList<Player> allPlayerList = boGame->allPlayerList();
+ for (unsigned int i = 0; i < boGame->allPlayerList().count(); i++) {
 	boDebug(270) << "init IO for player " << i << endl;
-	Player* p = boGame->allPlayerList()->at(i);
+	Player* p = allPlayerList.at(i);
 	if (!p) {
 		BO_NULL_ERROR(p);
 		return false;

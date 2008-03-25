@@ -101,6 +101,7 @@ set(gameengine_SRCS
 	gameengine/bosoncampaign.cpp
 	gameengine/bosonmessage.cpp
 	gameengine/boson.cpp
+	gameengine/bosonplayerlistmanager.cpp
 	gameengine/bomessage.cpp
 	gameengine/bosoncanvas.cpp
 	gameengine/bosoncanvasstatistics.cpp

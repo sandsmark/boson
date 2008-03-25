@@ -336,8 +336,9 @@ void BosonStarting::sendStartingCompleted(bool success)
  QDataStream stream(b, IO_WriteOnly);
  stream << (Q_INT8)success;
  QCString themeMD5;
- for (unsigned int i = 0; i < boGame->allPlayerCount(); i++) {
-	Player* p = (Player*)boGame->allPlayerList()->at(i);
+ QPtrList<Player> allPlayerList = boGame->allPlayerList();
+ for (unsigned int i = 0; i < allPlayerList.count(); i++) {
+	Player* p = allPlayerList.at(i);
 	SpeciesTheme* theme = p->speciesTheme();
 	if (!theme) {
 		// make an invalid string.

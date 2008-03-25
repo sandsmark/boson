@@ -1833,7 +1833,7 @@ void BosonPath::initMoveDatas(BosonCanvas* canvas)
   canvas->clearMoveDatas();
 
   // Go through all units and create all possible movedatas
-  QPtrListIterator<Player> playerit(*boGame->gamePlayerList());
+  QPtrListIterator<Player> playerit(boGame->gamePlayerList());
   while(playerit.current())
   {
     Player* p = playerit.current();

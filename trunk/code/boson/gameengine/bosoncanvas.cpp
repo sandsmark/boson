@@ -98,6 +98,7 @@ public:
 		mEventListener = 0;
 		mSightManager = 0;
 	}
+	bool mGameMode;
 	BoCanvasQuadTreeCollection* mQuadTreeCollection;
 	BosonCanvasStatistics* mStatistics;
 
@@ -384,8 +385,8 @@ void BoCanvasSightManager::removeSight(Unit* unit)
 
 void BoCanvasSightManager::updateVisibleStatus(Unit* unit)
 {
- QPtrList<Player>* players = boGame->activeGamePlayerList();
- for (QPtrListIterator<Player> pit(*players); pit.current(); ++pit) {
+ QPtrList<Player> players = boGame->activeGamePlayerList();
+ for (QPtrListIterator<Player> pit(players); pit.current(); ++pit) {
 	Player* player = pit.current();
 	if (unit->owner() == player) {
 		continue;
@@ -509,8 +510,8 @@ void BoCanvasSightManager::updateRadarSignal(Unit* unit, bofixed, bofixed)
  }
 
  // Then radar signal strength for all players
- QPtrList<Player>* players = boGame->activeGamePlayerList();
- for (QPtrListIterator<Player> it(*players); it.current(); ++it) {
+ QPtrList<Player> players = boGame->activeGamePlayerList();
+ for (QPtrListIterator<Player> it(players); it.current(); ++it) {
 	Player* player = it.current();
 	bofixed signalstrength = 0;
 
@@ -588,7 +589,7 @@ bofixed BoCanvasSightManager::radarSignalStrength(const RadarPlugin* radar, bofi
 void BoCanvasSightManager::recalculateSpecialSignalStrengths()
 {
  PROFILE_METHOD;
- QPtrList<Player>* players = boGame->activeGamePlayerList();
+ QPtrList<Player> players = boGame->activeGamePlayerList();
 
  // Calculate signal strengths for radars
  // Go through all radar units
@@ -597,7 +598,7 @@ void BoCanvasSightManager::recalculateSpecialSignalStrengths()
 	Unit* radarUnit = (Unit*)*it;
 	float radarUnitTransmittedPower = ((const RadarPlugin*)radarUnit->plugin(UnitPlugin::Radar))->transmittedPower();
 	// Go through all players
-	for (QPtrListIterator<Player> pit(*players); pit.current(); ++pit) {
+	for (QPtrListIterator<Player> pit(players); pit.current(); ++pit) {
 		Player* player = pit.current();
 		if (radarUnit->owner() == player) {
 			continue;
@@ -643,7 +644,7 @@ void BoCanvasSightManager::recalculateSpecialSignalStrengths()
 	Unit* jammerUnit = (Unit*)*it;
 	float jammerUnitTransmittedPower = ((const RadarJammerPlugin*)jammerUnit->plugin(UnitPlugin::RadarJammer))->transmittedPower();
 	// Go through all players
-	for (QPtrListIterator<Player> pit(*players); pit.current(); ++pit) {
+	for (QPtrListIterator<Player> pit(players); pit.current(); ++pit) {
 		Player* player = pit.current();
 		if (jammerUnit->owner() == player) {
 			continue;
@@ -813,7 +814,7 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
  boProfiling->push(prof_funcinfo + " - Whole method");
 
  QMap<Player*, bool> player2HasMiniMap;
- for (QPtrListIterator<Player> it(*boGame->gamePlayerList()); it.current(); ++it) {
+ for (QPtrListIterator<Player> it(boGame->gamePlayerList()); it.current(); ++it) {
 	Player* p = it.current();
 	player2HasMiniMap.insert(p, p->hasMiniMap());
  }
@@ -871,7 +872,7 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
  // if this value is reached, "free" refill stops. only using ammunition center
  // (i.e. by producing new ammo), new ammo can be gained.
  const unsigned long int maxAmmo = 1000;
- for (QPtrListIterator<Player> it(*boGame->activeGamePlayerList()); it.current(); ++it) {
+ for (QPtrListIterator<Player> it(boGame->activeGamePlayerList()); it.current(); ++it) {
 	Player* p = it.current();
 	QString type = "Generic";
 	if (p->ammunition(type) < maxAmmo) {
@@ -916,7 +917,7 @@ void BoCanvasAdvance::chargeUnits(unsigned int advanceCallsCount, bool advanceFl
 {
  Q_UNUSED(advanceCallsCount);
  Q_UNUSED(advanceFlag);
- for (QPtrListIterator<Player> it(*boGame->gamePlayerList()); it.current(); ++it) {
+ for (QPtrListIterator<Player> it(boGame->gamePlayerList()); it.current(); ++it) {
 	Player* p = it.current();
 	p->updatePowerChargeForCurrentAdvanceCall();
  }
@@ -926,7 +927,7 @@ void BoCanvasAdvance::unchargeUnits(unsigned int advanceCallsCount, bool advance
 {
  Q_UNUSED(advanceCallsCount);
  Q_UNUSED(advanceFlag);
- for (QPtrListIterator<Player> it(*boGame->gamePlayerList()); it.current(); ++it) {
+ for (QPtrListIterator<Player> it(boGame->gamePlayerList()); it.current(); ++it) {
 	Player* p = it.current();
 	p->unchargeUnitsForAdvance();
  }
@@ -1163,10 +1164,11 @@ void BoCanvasAdvance::notifyAboutDestroyedUnits(const QPtrList<Unit>& destroyedU
 }
 
 
-BosonCanvas::BosonCanvas(QObject* parent)
+BosonCanvas::BosonCanvas(QObject* parent, bool gameMode)
 		: QObject(parent, "BosonCanvas")
 {
  d = new BosonCanvasPrivate;
+ d->mGameMode = gameMode;
  d->mDestroyedUnits.setAutoDelete(false);
  mAdvanceFunctionLocked = false;
  mCollisions = new BosonCollisions();
@@ -1946,7 +1948,7 @@ void BosonCanvas::deleteItem(BosonItem* item)
 	u->setMovingStatus(UnitBase::RemovingThis);
 	// In editor mode, we need to do couple of things before deleting the unit,
 	//  to prevent crashes later (e.g. when selecting units)
-	if (!boGame->gameMode()) {
+	if (!d->mGameMode) {
 		u->owner()->unitDestroyed(u);
 		emit signalUnitRemoved(u);
 	}
@@ -2348,7 +2350,7 @@ bool BosonCanvas::saveItemsAsXML(QDomElement& root) const
 {
  QDomDocument doc = root.ownerDocument();
  QMap<unsigned int, QDomElement> owner2Items;
- QPtrList<Player> gamePlayerList = *boGame->gamePlayerList();
+ QPtrList<Player> gamePlayerList = boGame->gamePlayerList();
  for (KPlayer* p = gamePlayerList.first(); p; p = gamePlayerList.next()) {
 	QDomElement items = doc.createElement(QString::fromLatin1("Items"));
 
@@ -2426,7 +2428,7 @@ bool BosonCanvas::onCanvas(const BoVector3Fixed& pos) const
 
 void BosonCanvas::deleteItems(const QValueList<unsigned long int>& _ids)
 {
- if (!boGame || boGame->gameMode()) {
+ if (d->mGameMode) {
 	boError() << k_funcinfo << "not in editor mode" << endl;
 	return;
  }

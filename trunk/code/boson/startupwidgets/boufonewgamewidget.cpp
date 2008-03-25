@@ -538,14 +538,15 @@ void BoUfoNewGameWidget::slotNetStart()
     // All good
     //slotPlayerNameChanged();
     // Check if each player has unique team color
-    for (unsigned int i = 0; i < boGame->gamePlayerCount() - 1; i++) {
-        Player* p = boGame->gamePlayerList()->at(i);
+    QPtrList<Player> gamePlayerList = boGame->gamePlayerList();
+    for (unsigned int i = 0; i < gamePlayerList.count() - 1; i++) {
+        Player* p = gamePlayerList.at(i);
         if (!p) {
             BO_NULL_ERROR(p);
             continue;
         }
-        for (unsigned int j = i + 1; j < boGame->gamePlayerCount(); j++) {
-            Player* p2 = boGame->gamePlayerList()->at(j);
+        for (unsigned int j = i + 1; j < gamePlayerList.count(); j++) {
+            Player* p2 = gamePlayerList.at(j);
             if (!p2) {
                 BO_NULL_ERROR(p2);
                 continue;
@@ -636,8 +637,9 @@ void BoUfoNewGameWidget::slotNetPlayerJoinedGame(KPlayer* p)
             boGame->slotAddChatSystemMessage("Boson", i18n("%1 added AI player %2 to the game").arg(mainPlayer->name()).arg(p->name()));
         }
     }
-    for (int i = 0; i < (int)boGame->gamePlayerCount() - 1; i++) {
-        Player* p2 = boGame->gamePlayerList()->at(i);
+    QPtrList<Player> gamePlayerList = boGame->gamePlayerList();
+    for (int i = 0; i < (int)gamePlayerList.count() - 1; i++) {
+        Player* p2 = gamePlayerList.at(i);
         if (p2 == (Player*)p) {
             continue;
         }
@@ -657,7 +659,7 @@ void BoUfoNewGameWidget::slotNetPlayerJoinedGame(KPlayer* p)
 
 void BoUfoNewGameWidget::slotNetPlayerLeftGame(KPlayer* p)
 {
- boDebug() << k_funcinfo << "there are " << boGame->allPlayerList()->count() << " players in game now with " << boGame->gamePlayerList()->count() << " game players" << endl;
+ boDebug() << k_funcinfo << "there are " << boGame->allPlayerCount() << " players in game now with " << boGame->gamePlayerCount() << " game players" << endl;
 
  if (((Player*)p)->isNeutralPlayer()) {
     // Neutral player shouldn't be removed because it's not added until the game
@@ -1098,7 +1100,7 @@ void BoUfoNewGameWidget::possibleSidesChanged()
    watchId = 1;
    do {
      isTaken = false;
-     QPtrListIterator<Player> it(*boGame->allPlayerList());
+     QPtrListIterator<Player> it(boGame->allPlayerList());
      for (; it.current(); ++it) {
        Player* p = it.current();
        if (p->bosonId() == watchId && p != mSelectedPlayer) {

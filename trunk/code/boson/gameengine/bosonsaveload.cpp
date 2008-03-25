@@ -389,7 +389,7 @@ QCString BosonSaveLoad::savePlayersAsXML()
 	return QCString();
  }
 
- QPtrList<Player> list = *d->mBoson->gamePlayerList();
+ QPtrList<Player> list = d->mBoson->gamePlayerList();
  boDebug() << k_funcinfo << "saving " << list.count() << " players" << endl;
  for (Player* p = list.first(); p; p = list.next()) {
 	// KGame also stored ID, RTTI and KPlayer::calcIOValue() here.
@@ -496,8 +496,9 @@ bool BosonSaveLoad::loadPlayersFromXML(const QMap<QString, QByteArray>& files)
 	boError(270) << k_funcinfo << "no Player tags in file" << endl;
 	return false;
  }
- for (unsigned int i = 0; i < d->mBoson->gamePlayerCount(); i++) {
-	Player* p = (Player*)d->mBoson->gamePlayerList()->at(i);
+ QPtrList<Player> gamePlayerList = d->mBoson->gamePlayerList();
+ for (unsigned int i = 0; i < gamePlayerList.count(); i++) {
+	Player* p = gamePlayerList.at(i);
 	QDomElement player;
 	for (unsigned int j = 0; j < list.count() && player.isNull(); j++) {
 		QDomElement e = list.item(j).toElement();

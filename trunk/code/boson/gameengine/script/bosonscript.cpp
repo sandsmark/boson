@@ -187,7 +187,7 @@ QValueList<int> BosonScript::allGamePlayers() const
     return players;
   }
 
-  QPtrListIterator<Player> it(*game()->gamePlayerList());
+  QPtrListIterator<Player> it(game()->gamePlayerList());
   for (; it.current(); ++it)
   {
     Player* p = it.current();
@@ -1646,7 +1646,7 @@ void BosonScript::exploreAllPlayers()
     boError() << k_funcinfo << "NULL map" << endl;
     return;
   }
-  QPtrList<Player> list = *game()->allPlayerList();
+  QPtrList<Player> list = game()->allPlayerList();
   for(unsigned int i = 0; i < list.count(); i++)
   {
     Player* p = list.at(i);
@@ -1706,7 +1706,7 @@ void BosonScript::unfogAllPlayers()
     boError() << k_funcinfo << "NULL map" << endl;
     return;
   }
-  QPtrList<Player> list = *game()->allPlayerList();
+  QPtrList<Player> list = game()->allPlayerList();
   for(unsigned int i = 0; i < list.count(); i++)
   {
     Player* p = list.at(i);
@@ -1766,7 +1766,7 @@ void BosonScript::fogAllPlayers()
     boError() << k_funcinfo << "NULL map" << endl;
     return;
   }
-  QPtrList<Player> list = *game()->allPlayerList();
+  QPtrList<Player> list = game()->allPlayerList();
   for(unsigned int i = 0; i < list.count(); i++)
   {
     Player* p = list.at(i);

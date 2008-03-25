@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 1999-2000 Thomas Capricelli (capricel@email.enst.fr)
-    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2008 Andreas Beckermann (b_mann@gmx.de)
     Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
@@ -48,6 +48,7 @@
 #include "boeventloop.h"
 #include "bosonpath.h"
 #include "bosonmap.h"
+#include "bosonplayerlistmanager.h"
 
 #include <klocale.h>
 #include <kdeversion.h>
@@ -269,6 +270,7 @@ public:
 	BosonPrivate()
 	{
 		mGameTimer = 0;
+		mPlayerListManager = 0;
 		mCanvas = 0;
 		mPlayField = 0;
 
@@ -285,6 +287,7 @@ public:
 	}
 	QTimer* mGameTimer;
 
+	BosonPlayerListManager* mPlayerListManager;
 	BosonCanvas* mCanvas;
 	BosonPlayField* mPlayField;
 
@@ -308,11 +311,6 @@ public:
 
 	bool mGameIsOver;
 	bool mLoadFromLogMode;
-
-
-	QPtrList<Player> mAllPlayerList;
-	QPtrList<Player> mGamePlayerList;
-	QPtrList<Player> mActiveGamePlayerList;
 };
 
 
@@ -515,6 +513,7 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 {
  setPolicy(PolicyClean);
  d = new BosonPrivate;
+ d->mPlayerListManager = new BosonPlayerListManager(this);
  d->mPlayerInputHandler = new BosonPlayerInputHandler(this);
  connect(d->mPlayerInputHandler, SIGNAL(signalChangeTexMap(int, int, unsigned int, unsigned int*, unsigned char*)),
 		this, SLOT(slotChangeTexMap(int, int, unsigned int, unsigned int*, unsigned char*)));
@@ -594,6 +593,7 @@ Boson::~Boson()
  delete d->mAdvance;
  delete d->mGameTimer;
  delete d->mCanvas;
+ delete d->mPlayerListManager;
  delete d;
 }
 
@@ -615,7 +615,7 @@ bool Boson::createCanvas()
 	// do NOT delete it, as it might be used somewhere else as well
 	return false;
  }
- d->mCanvas = new BosonCanvas(this);
+ d->mCanvas = new BosonCanvas(this, gameMode());
  connect(d->mCanvas, SIGNAL(signalGameOver()),
 		this, SLOT(slotGameOver()));
  if (!d->mCanvas->init(eventManager())) {
@@ -684,7 +684,7 @@ PlayerIO* Boson::findPlayerIO(Q_UINT32 id) const
 PlayerIO* Boson::playerIOAtAllIndex(unsigned int index) const
 {
  unsigned int i = 0;
- for (QPtrListIterator<Player> it(*allPlayerList()); it.current(); ++it) {
+ for (QPtrListIterator<Player> it(allPlayerList()); it.current(); ++it) {
 	if (index == i) {
 		return it.current()->playerIO();
 	}
@@ -696,7 +696,7 @@ PlayerIO* Boson::playerIOAtAllIndex(unsigned int index) const
 PlayerIO* Boson::playerIOAtGameIndex(unsigned int index) const
 {
  unsigned int i = 0;
- for (QPtrListIterator<Player> it(*gamePlayerList()); it.current(); ++it) {
+ for (QPtrListIterator<Player> it(gamePlayerList()); it.current(); ++it) {
 	if (index == i) {
 		return it.current()->playerIO();
 	}
@@ -708,7 +708,7 @@ PlayerIO* Boson::playerIOAtGameIndex(unsigned int index) const
 PlayerIO* Boson::playerIOAtActiveGameIndex(unsigned int index) const
 {
  unsigned int i = 0;
- for (QPtrListIterator<Player> it(*activeGamePlayerList()); it.current(); ++it) {
+ for (QPtrListIterator<Player> it(activeGamePlayerList()); it.current(); ++it) {
 	if (index == i) {
 		return it.current()->playerIO();
 	}
@@ -717,34 +717,34 @@ PlayerIO* Boson::playerIOAtActiveGameIndex(unsigned int index) const
  return 0;
 }
 
-QPtrList<Player>* Boson::allPlayerList() const
+const QPtrList<Player>& Boson::allPlayerList() const
 {
- return &d->mAllPlayerList;
+ return d->mPlayerListManager->allPlayerList();
 }
 
-QPtrList<Player>* Boson::gamePlayerList() const
+const QPtrList<Player>& Boson::gamePlayerList() const
 {
- return &d->mGamePlayerList;
+ return d->mPlayerListManager->gamePlayerList();
 }
 
-QPtrList<Player>* Boson::activeGamePlayerList() const
+const QPtrList<Player>& Boson::activeGamePlayerList() const
 {
- return &d->mActiveGamePlayerList;
+ return d->mPlayerListManager->activeGamePlayerList();
 }
 
 unsigned int Boson::allPlayerCount() const
 {
- return allPlayerList()->count();
+ return d->mPlayerListManager->allPlayerCount();
 }
 
 unsigned int Boson::gamePlayerCount() const
 {
- return gamePlayerList()->count();
+ return d->mPlayerListManager->gamePlayerCount();
 }
 
 unsigned int Boson::activeGamePlayerCount() const
 {
- return activeGamePlayerList()->count();
+ return d->mPlayerListManager->activeGamePlayerCount();
 }
 
 void Boson::sendMessageSyncRandom()
@@ -770,7 +770,7 @@ void Boson::quitGame()
 
 void Boson::removeAllPlayers()
 {
- QPtrList<Player> list = *allPlayerList();
+ QPtrList<Player> list = allPlayerList();
  for (unsigned int i = 0; i < list.count(); i++) {
 	removePlayer(list.at(i)); // might not be necessary - sends remove over network
 	systemRemovePlayer(list.at(i), true); // remove immediately, even before network removing is received.
@@ -1127,7 +1127,7 @@ Unit* Boson::findUnit(unsigned long int id, Player* searchIn) const
  if (searchIn) {
 	return searchIn->findUnit(id);
  }
- QPtrListIterator<Player> it(*gamePlayerList());
+ QPtrListIterator<Player> it(gamePlayerList());
  while (it.current()) {
 	Unit* unit = it.current()->findUnit(id);
 	if (unit) {
@@ -1337,7 +1337,7 @@ void Boson::slotPlayerLeftGame(KPlayer* p)
 QValueList<QColor> Boson::availableTeamColors() const
 {
  QValueList<QColor> colors = SpeciesTheme::defaultColors();
- QPtrListIterator<Player> it(*gamePlayerList());
+ QPtrListIterator<Player> it(gamePlayerList());
  while (it.current()) {
 	if (it.current()->speciesTheme()) {
 		colors.remove(it.current()->speciesTheme()->teamColor());
@@ -1406,7 +1406,8 @@ void Boson::networkTransmission(BoMessage* m)
 	//     this message is received by the client (non-ADMIN) only.
 
 
-	for (unsigned int i = 0; i < allPlayerCount(); i++) {
+	QPtrList<Player> allPlayers = allPlayerList();
+	for (unsigned int i = 0; i < allPlayers.count(); i++) {
 		// AB: all client players will be added again by the KGame
 		//     initialization:
 		//     the setupGame() inactivates the players and in
@@ -1428,7 +1429,7 @@ void Boson::networkTransmission(BoMessage* m)
 		//
 		//     Therefore we assign the (invalid) ID 0 here which causes
 		//     both clients to pick a new ID when the player is added.
-		allPlayerList()->at(i)->setUserId(0);
+		allPlayers.at(i)->setUserId(0);
 		recalculatePlayerLists();
 	}
  }
@@ -1714,7 +1715,7 @@ void Boson::makeUnitLog()
  QTextStream ts(log, IO_WriteOnly);
 
  ts << "CYCLE " << advanceCallsCount() << ":" << endl;
- QPtrListIterator<Player> it(*gamePlayerList());
+ QPtrListIterator<Player> it(gamePlayerList());
  while (it.current()) {
 	ts << "Player " << it.current()->bosonId() << endl;
 	QPtrListIterator<Unit> uit(*it.current()->allUnits());
@@ -1764,7 +1765,7 @@ void Boson::writeGameLog(QTextStream& log)
  PROFILE_METHOD;
 
  log << "Advance calls count: " << advanceCallsCount() << endl;
- QPtrListIterator<Player> it(*gamePlayerList());
+ QPtrListIterator<Player> it(gamePlayerList());
  while (it.current()) {
 	it.current()->writeGameLog(log);
 	++it;
@@ -1794,7 +1795,7 @@ unsigned int Boson::advanceCallsCount() const
 
 Player* Boson::addNeutralPlayer()
 {
- QPtrListIterator<Player> it(*gamePlayerList());
+ QPtrListIterator<Player> it(gamePlayerList());
  while (it.current()) {
 	if (it.current()->isNeutralPlayer()) {
 		boWarning() << k_funcinfo << "already have a neutral player. removing." << endl;
@@ -2033,27 +2034,16 @@ bool Boson::changeUserIdOfPlayer(Player* p, unsigned int newId)
 
 void Boson::recalculatePlayerLists()
 {
- recalculatePlayerListsWithPlayerRemoved(0);
+ d->mPlayerListManager->recalculatePlayerLists(*playerList());
 }
 
 void Boson::recalculatePlayerListsWithPlayerRemoved(KPlayer* removedPlayer)
 {
- d->mAllPlayerList.clear();
- d->mGamePlayerList.clear();
- d->mActiveGamePlayerList.clear();
- for (QPtrListIterator<KPlayer> it(*playerList()); it.current(); ++it) {
-	if (it.current() == removedPlayer) {
-		continue;
-	}
-	Player* p = (Player*)it.current();
-	d->mAllPlayerList.append(p);
-	if (p->isGamePlayer()) {
-		d->mGamePlayerList.append(p);
-	}
-	if (p->isActiveGamePlayer()) {
-		d->mActiveGamePlayerList.append(p);
-	}
- }
+ d->mPlayerListManager->recalculatePlayerListsWithPlayerRemoved(*playerList(), removedPlayer);
 }
 
+BosonPlayerListManager* Boson::playerListManager() const
+{
+ return d->mPlayerListManager;
+}
 

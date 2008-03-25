@@ -531,8 +531,9 @@ void EditorViewInput::action(const BoSpecificAction& action)
 bool EditorViewInput::selectAll(const UnitProperties* prop, bool replace)
 {
  QPtrList<Unit> list;
- for (unsigned int i = 0; i < boGame->gamePlayerCount(); i++) {
-	QPtrListIterator<Unit> it(*((boGame->gamePlayerList()->at(i))->allUnits()));
+ QPtrList<Player> gamePlayerList = boGame->gamePlayerList();
+ for (unsigned int i = 0; i < gamePlayerList.count(); i++) {
+	QPtrListIterator<Unit> it(*((gamePlayerList.at(i))->allUnits()));
 	while (it.current()) {
 		if (it.current()->unitProperties()->typeId() == prop->typeId()) {
 			if (canSelect(it.current()) == CanSelectMultipleOk) {

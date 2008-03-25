@@ -924,13 +924,14 @@ void BosonMainWidget::slotGameStarted()
 
  boDebug(270) << k_funcinfo << "init player" << endl;
  Player* localPlayer = 0;
- for (unsigned int i = 0; i < boGame->allPlayerCount(); i++) {
-	Player* p = (Player*)boGame->allPlayerList()->at(i);
+ QPtrList<Player> allPlayerList = boGame->allPlayerList();
+ for (unsigned int i = 0; i < allPlayerList.count(); i++) {
+	Player* p = allPlayerList.at(i);
 	disconnect(p, SIGNAL(signalPropertyChanged(KGamePropertyBase*,KPlayer*)),
 			this, 0);
  }
- for (unsigned int i = 0; i < boGame->allPlayerCount(); i++) {
-	Player* p = (Player*)boGame->allPlayerList()->at(i);
+ for (unsigned int i = 0; i < allPlayerList.count(); i++) {
+	Player* p = allPlayerList.at(i);
 	if (!p->isVirtual()) {
 		// a non-virtual player is a player that is running on this host
 		// (either the local player or a computer player - never a
@@ -964,7 +965,7 @@ void BosonMainWidget::slotGameStarted()
 		// pick one player for editor mode
 		// (it doesnt matter which)
 		boDebug() << k_funcinfo << "picking a local player for editor mode" << endl;
-		localPlayer = (Player*)boGame->gamePlayerList()->at(0);
+		localPlayer = (Player*)boGame->gamePlayerList().getFirst();
 	} else {
 		// we are loading a game
 		// we are chosing the first player here - this is
@@ -973,7 +974,7 @@ void BosonMainWidget::slotGameStarted()
 		//
 		// if we ever do that, we should remove these line here!
 		boDebug() << k_funcinfo << "picking a local player for loading games" << endl;
-		localPlayer = (Player*)boGame->gamePlayerList()->at(0);
+		localPlayer = (Player*)boGame->gamePlayerList().getFirst();
 	}
  }
  if (!localPlayer) {

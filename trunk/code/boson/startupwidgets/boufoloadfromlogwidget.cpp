@@ -148,7 +148,7 @@ void BoUfoLoadFromLogWidget::slotStartGame()
 
  boWarning() << k_funcinfo << "using hardcoded teamcolor values and default species for all players" << endl;
  int red = 0;
- for (QPtrListIterator<Player> it(*boGame->gamePlayerList()); it.current(); ++it) {
+ for (QPtrListIterator<Player> it(boGame->gamePlayerList()); it.current(); ++it) {
 	QColor c(red, 100, 100);
 	networkInterface()->sendChangeSpecies((Player*)it.current(), SpeciesTheme::defaultSpecies(), c);
 	red += 20;
