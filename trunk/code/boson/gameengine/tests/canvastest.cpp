@@ -106,6 +106,7 @@ bool CanvasTest::initTest()
  if (!mCanvasContainer->createCanvas("dummy_theme_ID")) {
 	return false;
  }
+ mCanvasContainer->mCanvas->loadCanvas(BosonCanvas::emptyCanvasFile(0));
 
  return true;
 }
@@ -202,7 +203,7 @@ bool CanvasTest::checkIfCanvasIsValid(BosonCanvas* canvas)
  MY_VERIFY(canvas->map()->heightMap() != 0);
  MY_VERIFY(canvas->eventListener() != 0);
  MY_VERIFY(canvas->canvasStatistics() != 0);
-// MY_VERIFY(canvas->pathFinder() != 0); // FIXME!
+ MY_VERIFY(canvas->pathFinder() != 0);
  MY_VERIFY(canvas->collisions() != 0);
  MY_VERIFY(canvas->map()->width() == canvas->mapWidth());
  MY_VERIFY(canvas->map()->height() == canvas->mapHeight());
