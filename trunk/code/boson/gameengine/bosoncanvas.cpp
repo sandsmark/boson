@@ -2405,6 +2405,31 @@ bool BosonCanvas::saveItemsAsXML(QDomElement& root) const
  return true;
 }
 
+QCString BosonCanvas::emptyCanvasFile(unsigned int playerCount)
+{
+ QDomDocument doc(QString::fromLatin1("Canvas"));
+ QDomElement root = doc.createElement(QString::fromLatin1("Canvas"));
+ doc.appendChild(root);
+ root.appendChild(doc.createElement(QString::fromLatin1("DataHandler")));
+ root.appendChild(doc.createElement(QString::fromLatin1("Effects")));
+
+ QDomElement eventListener = doc.createElement(QString::fromLatin1("EventListener"));
+ root.appendChild(eventListener);
+ eventListener.appendChild(doc.createElement(QString::fromLatin1("Conditions")));
+
+ for (unsigned int i = 0; i < playerCount + 1; i++) {
+	QDomElement items = doc.createElement(QString::fromLatin1("Items"));
+	root.appendChild(items);
+	items.setAttribute(QString::fromLatin1("PlayerId"), 128 + i);
+	if (i < playerCount) {
+		items.setAttribute(QString::fromLatin1("PlayerId"), 128 + i);
+	} else {
+		items.setAttribute(QString::fromLatin1("PlayerId"), 256);
+	}
+ }
+ return doc.toCString();
+}
+
 void BosonCanvas::changeAdvanceList(BosonItem* item)
 {
  if (!d->mChangeAdvanceList.contains(item)) { // AB: this requires a complete search (I guess at least)! might be slow

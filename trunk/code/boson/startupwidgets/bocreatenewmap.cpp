@@ -135,13 +135,8 @@ QByteArray BoCreateNewMap::createNewMap()
  playField.changeMap(0); // deletes the map!
 
  QDomDocument playersDoc(QString::fromLatin1("Players"));
- QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
  QDomElement playersRoot = playersDoc.createElement(QString::fromLatin1("Players"));
- QDomElement canvasRoot = canvasDoc.createElement(QString::fromLatin1("Canvas"));
  playersDoc.appendChild(playersRoot);
- canvasDoc.appendChild(canvasRoot);
- canvasRoot.appendChild(canvasDoc.createElement(QString::fromLatin1("DataHandler")));
- canvasRoot.appendChild(canvasDoc.createElement(QString::fromLatin1("Effects")));
  for (unsigned int i = 0; i < mPlayerCount + 1; i++) {
 	QDomElement p = playersDoc.createElement(QString::fromLatin1("Player"));
 	p.appendChild(playersDoc.createElement(QString::fromLatin1("Upgrades")));
@@ -150,23 +145,16 @@ QByteArray BoCreateNewMap::createNewMap()
 	p.appendChild(speciesTheme);
 	speciesTheme.appendChild(playersDoc.createElement(QString::fromLatin1("UnitTypes")));
 
-	QDomElement items = canvasDoc.createElement(QString::fromLatin1("Items"));
-	canvasRoot.appendChild(items);
 
 	if (i < mPlayerCount) {
 		p.setAttribute("PlayerId", 128 + i);
-		items.setAttribute("PlayerId", 128 + i);
 	} else {
 		p.setAttribute("PlayerId", 256);
 		p.setAttribute("IsNeutral", 1);
-		items.setAttribute("PlayerId", 256);
 	}
  }
- QDomElement canvasEventListener = canvasDoc.createElement(QString::fromLatin1("EventListener"));
- canvasRoot.appendChild(canvasEventListener);
- canvasEventListener.appendChild(canvasDoc.createElement(QString::fromLatin1("Conditions")));
  files.insert("players.xml", playersDoc.toCString());
- files.insert("canvas.xml", canvasDoc.toCString());
+ files.insert("canvas.xml", BosonCanvas::emptyCanvasFile(mPlayerCount));
 
  BPFDescription desc;
  desc.setName(mMapName);
