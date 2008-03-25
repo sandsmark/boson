@@ -87,6 +87,12 @@ public:
 	 **/
 	const QPtrList<Player>& activeGamePlayerList() const;
 
+	/**
+	 * @return The @ref Player object with @ref Player::userId @p id, or
+	 * NULL if no such player exists.
+	 **/
+	Player* findPlayerByUserId(int id) const;
+
 private:
 	QPtrList<Player> mAllPlayerList;
 	QPtrList<Player> mGamePlayerList;
