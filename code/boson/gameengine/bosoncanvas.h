@@ -157,7 +157,18 @@ public:
 	BosonCanvas(QObject* parent, bool gameMode = true);
 	~BosonCanvas();
 
-	bool init(BosonPlayerListManager* playerListManager, BoEventManager* eventManager);
+	/**
+	 * Initialize this canvas. This @em must be called after the
+	 * constructor.
+	 *
+	 * Note that this does @em not do the complete initializing! After
+	 * calling this, you will at the very least have to call
+	 * @ref loadCanvas or @ref loadFromXML.
+	 *
+	 * The canvas is NOT fully initialized and NOT usable before it is
+	 * loaded as well! (in particular the pathfinder is still NULL)
+	 **/
+	bool init(BosonMap* map, BosonPlayerListManager* playerListManager, BoEventManager* eventManager);
 
 	unsigned long int nextItemId();
 
@@ -187,7 +198,6 @@ public:
 	bool canGo(const UnitProperties* prop, const BoRect2Fixed& rect, bool _default = false) const;
 	bool canGo(const UnitProperties* prop, int x, int y, bool _default = false) const;
 
-	void setMap(BosonMap* map);
 	BosonMap* map() const;
 
 	/**

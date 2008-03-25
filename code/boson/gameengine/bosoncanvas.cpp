@@ -1193,7 +1193,7 @@ BosonCanvas::BosonCanvas(QObject* parent, bool gameMode)
  d->mEventListener = 0;
 }
 
-bool BosonCanvas::init(BosonPlayerListManager* playerListManager, BoEventManager* eventManager)
+bool BosonCanvas::init(BosonMap* map, BosonPlayerListManager* playerListManager, BoEventManager* eventManager)
 {
  if (!playerListManager) {
 	BO_NULL_ERROR(playerListManager);
@@ -1207,10 +1207,14 @@ bool BosonCanvas::init(BosonPlayerListManager* playerListManager, BoEventManager
 	boError() << k_funcinfo << "canvas already initialized" << endl;
 	return false;
  }
+ d->mMap = map;
  d->mPlayerListManager = playerListManager;
  d->mEventManager = eventManager;
 
+ collisions()->setMap(d->mMap);
+
  d->mSightManager = new BoCanvasSightManager(this, d->mPlayerListManager);
+ d->mSightManager->setMap(d->mMap);
 
  d->mEventListener = new BoCanvasEventListener(d->mEventManager, this);
  connect(d->mEventListener, SIGNAL(signalGameOver()),
@@ -1344,13 +1348,6 @@ bool BosonCanvas::canGo(const UnitProperties* prop, int x, int y, bool _default)
  }
 
  return md->cellPassable[y * mapWidth() + x];
-}
-
-void BosonCanvas::setMap(BosonMap* map)
-{
- d->mMap = map;
- d->mSightManager->setMap(map);
- collisions()->setMap(map);
 }
 
 void BosonCanvas::unitMoved(Unit* unit, bofixed oldX, bofixed oldY)
