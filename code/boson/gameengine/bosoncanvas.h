@@ -457,6 +457,17 @@ public:
 	 **/
 	QCString saveCanvas() const;
 
+	/**
+	 * This method is meant for use in the editor or in test programs, it is
+	 * of no use for the game itself (you always have a .bpf file to load
+	 * then).
+	 *
+	 * @return A @ref QDomDocument (saved as a string, see @ref
+	 * QDomDocument::toCString) describing an empty canvas. This can be used
+	 * with @ref loadCanvas.
+	 **/
+	static QCString emptyCanvasFile(unsigned int playerCount);
+
 	bool loadFromXML(const QDomElement& root);
 	bool saveAsXML(QDomElement& root) const;
 
