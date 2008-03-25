@@ -347,6 +347,23 @@ BosonPath::BosonPath(BosonMap* map)
 {
   boDebug(500) << k_funcinfo << endl;
   mMap = map;
+  if(!mMap)
+  {
+    BO_NULL_ERROR(mMap);
+  }
+  mSlopeMap = 0;
+  mForestMap = 0;
+  mSlopeColormap = 0;
+  mForestColormap = 0;
+  mCellStatus = 0;
+  mCellStatusDirty = 0;
+  mCellStatusDirtyCount = 0;
+  mCellStatusDirtySize = 0;
+  mBlocks = 0;
+  mBlocksCountX = 0;
+  mBlocksCountY = 0;
+  mBlockConnections = 0;
+  mBlockConnectionsDirty = 0;
   boDebug(500) << k_funcinfo << "END" << endl;
 }
 
