@@ -87,4 +87,19 @@ void BosonPlayerListManager::recalculatePlayerListsWithPlayerRemoved(const QPtrL
  }
 }
 
+// AB: this is not completely equivalent to KGame::findPlayerByUserId(), as we
+// ignore the KGame::inactivePlayerList().
+// however since Boson does not use that list this should not make any
+// difference.
+Player* BosonPlayerListManager::findPlayerByUserId(int id) const
+{
+ for (QPtrListIterator<Player> it(allPlayerList()); it.current(); ++it)
+ {
+   if (it.current()->userId() == id)
+   {
+     return it.current();
+   }
+ }
+ return 0;
+}
 
