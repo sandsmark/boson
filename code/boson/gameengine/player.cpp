@@ -1048,11 +1048,6 @@ void Player::technologyResearched(ProductionPlugin* plugin, unsigned long int ty
  ((Boson*)game())->queueEvent(event);
 }
 
-bool Player::advanceFlag() const
-{
- return ((Boson*)game())->advanceFlag();
-}
-
 bool Player::saveAsXML(QDomElement& root)
 {
  PROFILE_METHOD

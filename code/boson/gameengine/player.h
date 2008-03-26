@@ -144,11 +144,6 @@ public:
 	const QColor& teamColor() const;
 
 	/**
-	 * Convenience method for ((Boson*)game()->advanceFlag
-	 **/
-	bool advanceFlag() const;
-
-	/**
 	 * Set SpeciesTheme and take ownership of the provided pointer (i.e.
 	 * delete it on destruction).
 	 *

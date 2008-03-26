@@ -86,7 +86,7 @@ bool CanvasContainer::createCanvas(const QString& groundThemeId)
 
  mEventManager = new BoEventManager(0);
  mPlayerListManager = new BosonPlayerListManager(0);
- mCanvas = new BosonCanvas(0);
+ mCanvas = new BosonCanvas(true, 0);
 
  if (!mCanvas->init(mPlayField->map(), mPlayerListManager, mEventManager)) {
 	boError() << k_funcinfo << "initializing canvas failed" << endl;

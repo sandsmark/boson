@@ -100,6 +100,7 @@ public:
 		mSightManager = 0;
 	}
 	bool mGameMode;
+	bool mAdvanceFlag;
 	BoCanvasQuadTreeCollection* mQuadTreeCollection;
 	BosonCanvasStatistics* mStatistics;
 
@@ -1175,10 +1176,11 @@ void BoCanvasAdvance::notifyAboutDestroyedUnits(const QPtrList<Unit>& destroyedU
 }
 
 
-BosonCanvas::BosonCanvas(QObject* parent, bool gameMode)
+BosonCanvas::BosonCanvas(bool advanceFlag, QObject* parent, bool gameMode)
 		: QObject(parent, "BosonCanvas")
 {
  d = new BosonCanvasPrivate;
+ d->mAdvanceFlag = advanceFlag;
  d->mGameMode = gameMode;
  d->mDestroyedUnits.setAutoDelete(false);
  mAdvanceFunctionLocked = false;
@@ -1237,6 +1239,16 @@ BosonCanvas::~BosonCanvas()
  delete d->mSightManager;
  delete d;
  boDebug()<< k_funcinfo <<"done"<< endl;
+}
+
+bool BosonCanvas::advanceFlag() const
+{
+ return d->mAdvanceFlag;
+}
+
+void BosonCanvas::setAdvanceFlag(bool a)
+{
+ d->mAdvanceFlag = a;
 }
 
 BosonCanvasStatistics* BosonCanvas::canvasStatistics() const
