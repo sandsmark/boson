@@ -138,6 +138,9 @@ QColor SpeciesTheme::defaultColor()
 void SpeciesTheme::setThemePath(const QString& speciesDir)
 {
  mThemePath = speciesDir;
+ if (!mThemePath.endsWith(QString::fromLatin1("/"))) {
+	mThemePath += QString::fromLatin1("/");
+ }
 }
 
 QCString SpeciesTheme::unitPropertiesMD5() const
