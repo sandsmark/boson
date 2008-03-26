@@ -32,6 +32,13 @@
 #include "bosonplayerlistmanager.h"
 #include "boglobal.h"
 #include "bosondata.h"
+#include "speciestheme.h"
+#include "unitproperties.h"
+#include "player.h"
+
+#include <ktempfile.h>
+
+#include <qtextstream.h>
 
 // AB: note: we _need_ a new map/playfield for every new canvas, as the canvas
 //     is allowed to (and will) modify the map
@@ -48,18 +55,25 @@ public:
 	}
 	~CanvasContainer()
 	{
+		for (QPtrListIterator<Player> it(mPlayerListManager->allPlayerList()); it.current(); ++it) {
+			delete it.current();
+		}
 		delete mCanvas;
 		delete mPlayField;
 		delete mEventManager;
 		delete mPlayerListManager;
 	}
 
+	// also creates players for the canvas!
 	bool createCanvas(const QString& groundThemeId);
 
 	BoEventManager* mEventManager;
 	BosonPlayerListManager* mPlayerListManager;
 	BosonPlayField* mPlayField;
 	BosonCanvas* mCanvas;
+
+protected:
+	bool createPlayers(unsigned int count);
 };
 
 bool CanvasContainer::createCanvas(const QString& groundThemeId)
@@ -78,6 +92,41 @@ bool CanvasContainer::createCanvas(const QString& groundThemeId)
 	boError() << k_funcinfo << "initializing canvas failed" << endl;
 	return false;
  }
+
+ if (!createPlayers(2)) {
+	boError() << k_funcinfo << "creating players failed" << endl;
+	return false;
+ }
+
+ return true;
+}
+
+// AB: creates count+1 players (count players + 1 neutral player)
+bool CanvasContainer::createPlayers(unsigned int count)
+{
+ QPtrList<KPlayer> players;
+ for (unsigned int i = 0; i < count; i++) {
+	SpeciesTheme* theme = TestFrameWork::createAndLoadDummySpeciesTheme(QColor(i * 10, 0, 0));
+	if (!theme) {
+		boError() << k_funcinfo << "creating a speciestheme failed" << endl;
+		return false;
+	}
+
+	Player* p = new Player();
+	p->setUserId(128 + i);
+	p->setSpeciesTheme(theme);
+	players.append(p);
+ }
+ SpeciesTheme* neutralTheme = TestFrameWork::createAndLoadDummySpeciesTheme(QColor(0, 100, 0), true);
+ if (!neutralTheme) {
+	boError() << k_funcinfo << "creating a neutral speciestheme failed" << endl;
+	return false;
+ }
+ Player* neutralPlayer = new Player(true);
+ neutralPlayer->setUserId(256);
+ neutralPlayer->setSpeciesTheme(neutralTheme);
+
+ mPlayerListManager->recalculatePlayerLists(players);
 
  return true;
 }

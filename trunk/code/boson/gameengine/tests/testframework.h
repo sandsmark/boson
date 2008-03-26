@@ -25,6 +25,7 @@
 class BosonMap;
 class BosonPlayField;
 class BosonGroundTheme;
+class SpeciesTheme;
 
 #define MY_VERIFY(x) \
 	if (!(x)) { \
@@ -74,6 +75,8 @@ public:
 	 **/
 	static BosonMap* createDummyMap(const QString& groundThemeId);
 	static BosonPlayField* createDummyPlayField(const QString& groundThemeId);
+
+	static SpeciesTheme* createAndLoadDummySpeciesTheme(const QColor& teamColor, bool neutralSpecies = false);
 };
 
 #endif
