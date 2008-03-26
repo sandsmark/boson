@@ -27,6 +27,7 @@ class BosonMap;
 class BosonCanvas;
 class BoEventManager;
 class BosonPlayerListManager;
+class BosonItem;
 
 class CanvasContainer;
 
@@ -45,6 +46,7 @@ protected:
 
 	bool testCreateNewCanvas();
 	bool testSaveLoadCanvas();
+	bool testMoveUnits();
 
 	bool checkIfCanvasIsValid(BosonCanvas* canvas);
 	bool checkIfCanvasAreEqual(BosonCanvas* canvas1, BosonCanvas* canvas2);

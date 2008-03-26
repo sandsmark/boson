@@ -38,6 +38,7 @@
 #include "rtti.h"
 #include "boitemlist.h"
 #include "unit.h"
+#include "cell.h"
 
 #include <ktempfile.h>
 
@@ -183,6 +184,7 @@ bool CanvasTest::test()
 
  DO_TEST(testCreateNewCanvas());
  DO_TEST(testSaveLoadCanvas());
+ DO_TEST(testMoveUnits());
 
  return true;
 }
@@ -334,7 +336,13 @@ bool CanvasTest::checkIfCanvasAreEqual(BosonCanvas* canvas1, BosonCanvas* canvas
 	MY_VERIFY(item1->xRotation() == item2->xRotation());
 	MY_VERIFY(item1->yRotation() == item2->yRotation());
 
-	// TODO: check cells
+	QPtrVector<Cell>* cells1 = item1->cells();
+	QPtrVector<Cell>* cells2 = item2->cells();
+	MY_VERIFY(cells1->size() == cells2->size());
+	for (unsigned int i = 0; i < cells1->size(); i++) {
+		MY_VERIFY((*cells1)[i]->x() == (*cells2)[i]->x());
+		MY_VERIFY((*cells1)[i]->y() == (*cells2)[i]->y());
+	}
 
 	MY_VERIFY(RTTI::isUnit(item1->rtti()));
 	Unit* unit1 = static_cast<Unit*>(item1);
@@ -350,6 +358,51 @@ bool CanvasTest::checkIfCanvasAreEqual(BosonCanvas* canvas1, BosonCanvas* canvas
 	MY_VERIFY(unit1->isMobile() == unit2->isMobile());
 
  }
+
+ return true;
+}
+
+bool CanvasTest::testMoveUnits()
+{
+ int unitType1 = 1; // UnitProperties ID
+ BoVector3Fixed unit1Pos(10.0, 10.0, 0.0);
+ Unit* unit1 = static_cast<Unit*>(mCanvasContainer->mCanvas->createNewItem(RTTI::UnitStart + unitType1,
+		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
+		ItemType(unitType1),
+		unit1Pos));
+
+ int unitType2 = unitType1;
+ BoVector3Fixed unit2Pos(20.0, 10.0, 0.0);
+ Unit* unit2 = static_cast<Unit*>(mCanvasContainer->mCanvas->createNewItem(RTTI::UnitStart + unitType2,
+		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
+		ItemType(unitType2),
+		unit2Pos));
+
+ int unitType3 = unitType1;
+ BoVector3Fixed unit3Pos(20.0, 10.0, 0.0);
+ Unit* unit3 = static_cast<Unit*>(mCanvasContainer->mCanvas->createNewItem(RTTI::UnitStart + unitType3,
+		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
+		ItemType(unitType3),
+		unit3Pos));
+
+ MY_VERIFY(BoVector3Fixed(unit1->x(), unit1->y(), unit1->z()) == unit1Pos);
+ MY_VERIFY(BoVector3Fixed(unit2->x(), unit2->y(), unit2->z()) == unit2Pos);
+ MY_VERIFY(BoVector3Fixed(unit3->x(), unit3->y(), unit3->z()) == unit3Pos);
+
+ // TODO: cells?
+
+ unit1->moveBy(10.0, 0.0, 0.0);
+ unit2->moveBy(0.0, 10.0, 0.0);
+ unit3->moveBy(10.0, 10.0, 0.0);
+ unit1Pos += BoVector3Fixed(10.0, 0.0, 0.0);
+ unit2Pos += BoVector3Fixed(0.0, 10.0, 0.0);
+ unit3Pos += BoVector3Fixed(10.0, 10.0, 0.0);
+
+ MY_VERIFY(BoVector3Fixed(unit1->x(), unit1->y(), unit1->z()) == unit1Pos);
+ MY_VERIFY(BoVector3Fixed(unit2->x(), unit2->y(), unit2->z()) == unit2Pos);
+ MY_VERIFY(BoVector3Fixed(unit3->x(), unit3->y(), unit3->z()) == unit3Pos);
+
+ // TODO: cells?
 
  return true;
 }
