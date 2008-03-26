@@ -35,6 +35,9 @@
 #include "speciestheme.h"
 #include "unitproperties.h"
 #include "player.h"
+#include "rtti.h"
+#include "boitemlist.h"
+#include "unit.h"
 
 #include <ktempfile.h>
 
@@ -199,11 +202,37 @@ bool CanvasTest::testCreateNewCanvas()
 
 bool CanvasTest::testSaveLoadCanvas()
 {
+ int unitType1 = 1; // UnitProperties ID
+ BoVector3Fixed unit1Pos(10.0, 10.0, 0.0);
+ mCanvasContainer->mCanvas->createNewItem(RTTI::UnitStart + unitType1,
+		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
+		ItemType(unitType1),
+		unit1Pos);
+
+ int unitType2 = unitType1;
+ BoVector3Fixed unit2Pos(20.0, 10.0, 0.0);
+ mCanvasContainer->mCanvas->createNewItem(RTTI::UnitStart + unitType2,
+		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
+		ItemType(unitType2),
+		unit2Pos);
+
+ int unitType3 = unitType1;
+ BoVector3Fixed unit3Pos(20.0, 10.0, 0.0);
+ mCanvasContainer->mCanvas->createNewItem(RTTI::UnitStart + unitType3,
+		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
+		ItemType(unitType3),
+		unit3Pos);
+
+ MY_VERIFY(mCanvasContainer->mCanvas->allItemsCount() == 3);
+
  QCString canvasXML = mCanvasContainer->mCanvas->saveCanvas();
  if (canvasXML.isEmpty()) {
 	boError() << k_funcinfo "saving failed" << endl;
 	return false;
  }
+
+ // muse be unchanged, save must not add/remove items
+ MY_VERIFY(mCanvasContainer->mCanvas->allItemsCount() == 3);
 
  CanvasContainer* canvasContainer2 = new CanvasContainer();
  if (!canvasContainer2->createCanvas("dummy_theme_ID")) {
@@ -273,9 +302,54 @@ bool CanvasTest::checkIfCanvasAreEqual(BosonCanvas* canvas1, BosonCanvas* canvas
  MY_VERIFY(canvas1->map()->groundTheme() == canvas2->map()->groundTheme());
  MY_VERIFY(canvas1->allItemsCount() == canvas2->allItemsCount());
 
- // TODO: check if canvasStatistics() contents match
- // TODO: check if all units are at the same position and have the same IDs
- //       (possibly more? health?)
+ BoItemList::iterator it1 = canvas1->allItems()->begin();
+ BoItemList::iterator it2 = canvas2->allItems()->begin();
+ for (unsigned int i = 0; i < canvas1->allItemsCount(); i++) {
+	BosonItem* item1 = *it1;
+	BosonItem* item2 = *it2;
+	++it1;
+	++it2;
+
+	MY_VERIFY(item1->rtti() == item2->rtti());
+
+	// AB: note: we explicitly do _NOT_ check every property, only a subset
+	// of the most important ones.
+
+	MY_VERIFY(item1->x() == item2->x());
+	MY_VERIFY(item1->y() == item2->y());
+	MY_VERIFY(item1->z() == item2->z());
+	MY_VERIFY(item1->width() == item2->width());
+	MY_VERIFY(item1->height() == item2->height());
+	MY_VERIFY(item1->depth() == item2->depth());
+	MY_VERIFY(item1->xVelocity() == item2->xVelocity());
+	MY_VERIFY(item1->yVelocity() == item2->yVelocity());
+	MY_VERIFY(item1->zVelocity() == item2->zVelocity());
+	MY_VERIFY(item1->speed() == item2->speed());
+	MY_VERIFY(item1->maxSpeed() == item2->maxSpeed());
+	MY_VERIFY(item1->accelerationSpeed() == item2->accelerationSpeed());
+	MY_VERIFY(item1->decelerationSpeed() == item2->decelerationSpeed());
+	MY_VERIFY(item1->decelerationDistance() == item2->decelerationDistance());
+	MY_VERIFY(item1->isVisible() == item2->isVisible());
+	MY_VERIFY(item1->rotation() == item2->rotation());
+	MY_VERIFY(item1->xRotation() == item2->xRotation());
+	MY_VERIFY(item1->yRotation() == item2->yRotation());
+
+	// TODO: check cells
+
+	MY_VERIFY(RTTI::isUnit(item1->rtti()));
+	Unit* unit1 = static_cast<Unit*>(item1);
+	Unit* unit2 = static_cast<Unit*>(item2);
+
+	MY_VERIFY(unit1->id() == unit2->id());
+	MY_VERIFY(unit1->type() == unit2->type());
+	MY_VERIFY(unit1->advanceWork() == unit2->advanceWork());
+	MY_VERIFY(unit1->health() == unit2->health());
+	MY_VERIFY(unit1->maxHealth() == unit2->maxHealth());
+	MY_VERIFY(unit1->isDestroyed() == unit2->isDestroyed());
+	MY_VERIFY(unit1->isFacility() == unit2->isFacility());
+	MY_VERIFY(unit1->isMobile() == unit2->isMobile());
+
+ }
 
  return true;
 }
