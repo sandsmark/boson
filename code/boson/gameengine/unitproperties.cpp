@@ -87,7 +87,7 @@ bool UnitProperties::loadUnitType(const QString& fileName)
  mTypeId = conf.readUnsignedLongNumEntry("Id", 0); // 0 == invalid // Note: Id == Unit::type() , NOT Unit::id() !
  if (typeId() <= 0) {
 	boError() << "Invalid TypeId: " << typeId() << " in unit file " << fileName << endl;
-	// we continue - but we'll crash soon
+	return false;
  }
  mTerrain = (TerrainType)conf.readNumEntry("TerrainType", (int)TerrainLand);
  switch (mTerrain) {
