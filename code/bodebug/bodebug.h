@@ -1,7 +1,7 @@
 /*  This file is part of the Boson game. It was originally part of the KDE libraries
     Copyright (C) 1997 Matthias Kalle Dalheimer (kalle@kde.org)
                   2000-2002 Stephan Kulow (coolo@kde.org)
-                  2002 Andreas Beckermann (b_mann@gmx.de)
+                  2002-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -558,6 +558,16 @@ public:
     emit notify(area, data, level);
   }
 
+  /**
+   * Disable the use of debug areas, all debug output is treated as if it
+   * belonged to area 0. I.e. boDebug(x) is always equal to boDebug().
+   *
+   * This also means that the bodebug.areas file does @em not have to be loaded
+   * and thus doesnt need to be installed.
+   **/
+  static void disableAreas() { mUseAreas = false; }
+  static bool useAreas() { return mUseAreas; }
+
 signals:
   /**
    * @param area The string that belongs to the specified debug area. The
@@ -576,6 +586,7 @@ private:
   static BoDebug* mDebug;
   class BoDebugPrivate;
   BoDebugPrivate* d;
+  static bool mUseAreas;
 };
 
 #if 0

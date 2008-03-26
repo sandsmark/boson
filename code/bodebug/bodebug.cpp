@@ -1,6 +1,6 @@
 /*  This file is part of the Boson game. It was originally part of the KDE libraries
     Copyright (C) 1997 Matthias Kalle Dalheimer (kalle@kde.org)
-    Copyright (C) 2002 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2002-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -191,6 +191,9 @@ static KStaticDeleter<boDebugPrivate> pcd;
 
 static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const QString& _output)
 {
+  if (!BoDebug::useAreas()) {
+    nArea = 0;
+  }
   if ( !boDebug_data )
   {
       pcd.setObject(boDebug_data, new boDebugPrivate());
@@ -509,6 +512,7 @@ void boClearDebugConfig()
 
 static KStaticDeleter<BoDebug> sd;
 BoDebug* BoDebug::mDebug = 0;
+bool BoDebug::mUseAreas = true;
 
 BoDebug::BoDebug() : QObject(0)
 {
