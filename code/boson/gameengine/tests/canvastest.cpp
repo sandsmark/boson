@@ -115,6 +115,8 @@ bool CanvasContainer::createPlayers(unsigned int count)
 	Player* p = new Player();
 	p->setUserId(128 + i);
 	p->setSpeciesTheme(theme);
+	p->initMap(mPlayField->map());
+	// AB: do we need a p->loadFromXML()?
 	players.append(p);
  }
  SpeciesTheme* neutralTheme = TestFrameWork::createAndLoadDummySpeciesTheme(QColor(0, 100, 0), true);
@@ -125,6 +127,8 @@ bool CanvasContainer::createPlayers(unsigned int count)
  Player* neutralPlayer = new Player(true);
  neutralPlayer->setUserId(256);
  neutralPlayer->setSpeciesTheme(neutralTheme);
+ neutralPlayer->initMap(mPlayField->map());
+ // AB: do we need a neutralPlayer->loadFromXML()?
 
  mPlayerListManager->recalculatePlayerLists(players);
 
