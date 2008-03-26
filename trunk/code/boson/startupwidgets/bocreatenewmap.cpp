@@ -30,6 +30,7 @@
 #include "../gameengine/boson.h"
 #include "../gameengine/boeventmanager.h"
 #include "../gameengine/bpfloader.h"
+#include "../gameengine/bosoncanvas.h"
 #include "bodebug.h"
 
 #include <kmessagebox.h>
