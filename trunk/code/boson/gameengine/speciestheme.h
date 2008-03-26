@@ -78,8 +78,9 @@ public:
 	void setThemePath(const QString& dir);
 
 	/**
-	 * @return the path to the species theme (ending with
-	 * boson/themes/species/your_species/)
+	 * @return the path to the species theme, see @ref setThemePath. The
+	 * themepath is usually ending with boson/themes/species/your_species/
+	 * and is guaranteed to end with a "/".
 	 **/
 	const QString& themePath() const { return mThemePath; }
 
