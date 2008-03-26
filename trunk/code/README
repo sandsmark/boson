@@ -18,7 +18,7 @@ Minimum software requirements:
         XFree 4.x server - see http://www.xfree86.org/
         OpenGL - The OpenGL library (should be included in your XFree Server or graphics card driver)
         Qt 3.1 or better - see http://www.trolltech.com/
-        kdelibs 3.1 or better (3.0 is untested) - see http://www.kde.org/
+        kdelibs 3.5 or better (3.2, 3.3 and 3.4 are untested), but before 4.0 - see http://www.kde.org/
         Python 2.0 or better (2.3 is recommended) - see http://www.python.org/
         libvorbis (for sound and music) - see http://www.vorbis.com/
         lib3ds (Units and building rendering) - see http://lib3ds.sf.net/
