@@ -370,7 +370,8 @@ void KGameSpeciesDebug::loadSpecies()
  QStringList::Iterator it;
  for (it = species.begin(); it != species.end(); ++it) {
 	SpeciesTheme* s = new SpeciesTheme();
-	s->loadTheme((*it).left((*it).length() - QString::fromLatin1("index.desktop").length()), red); // dummy color - don't use QColor(0,0,0)
+	s->setThemePath((*it).left((*it).length() - QString::fromLatin1("index.desktop").length()));
+	s->setTeamColor(red); // dummy color
 	boViewData->addSpeciesTheme(s);
 	SpeciesData* speciesData = boViewData->speciesData(s);
 	speciesData->loadObjects(s->teamColor());

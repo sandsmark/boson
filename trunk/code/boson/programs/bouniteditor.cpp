@@ -55,8 +55,8 @@
 #include <qcombobox.h>
 
 
-EditorUnitProperties::EditorUnitProperties(SpeciesTheme* theme, bool fullMode)
-	: UnitProperties(theme, fullMode)
+EditorUnitProperties::EditorUnitProperties(SpeciesTheme* theme)
+	: UnitProperties(theme)
 {
 }
 
@@ -173,10 +173,6 @@ void EditorUnitProperties::setConstructedEffectIds(QValueList<unsigned long int>
 
 void EditorUnitProperties::reset()
 {
- if (mFullMode) {
-	// UnitProperties should be never reset in full mode (aka game mode)
-	boWarning() << k_funcinfo << "Resetting UnitProperties in full mode!!!" << endl;
- }
  clearPlugins(false); // reset() is only used by unit editor (this far), so don't delete weapons
  // Set variables to default values
  d->mUnitPath = "";
@@ -553,7 +549,7 @@ void BoUnitEditor::init()
  mOtherPageHandler = new BoOtherPageHandler(this);
 
  mUnitLoaded = false; // Bad hack
- mUnit = new EditorUnitProperties(0, false);
+ mUnit = new EditorUnitProperties(0);
  mSearchPaths = new BosonSearchPathsWidget(0);
  connect(mSearchPaths->mOkButton, SIGNAL(clicked()), this, SLOT(slotHideSearchPaths()));
  mSearchPaths->hide();
@@ -725,7 +721,7 @@ QStringList BoUnitEditor::verifyProperties()
 void BoUnitEditor::slotLoadUnit( QString dir )
 {
  mUnit->reset();
- mUnit->loadUnitType(dir + "/index.unit", false);
+ mUnit->loadUnitType(dir + "/index.unit");
  updateWidgets();
  mUnitLoaded = true;
  // If unit has any weapons, make the first one selected

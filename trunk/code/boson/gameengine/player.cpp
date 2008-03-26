@@ -244,14 +244,10 @@ void Player::loadTheme(const QString& species, const QColor& teamColor)
 		return;
 	}
  }
- SpeciesTheme* newTheme = new SpeciesTheme();
- if (!newTheme->loadTheme(species, teamColor)) {
-	boError() << k_funcinfo << "cannot load theme " << species << endl;
-	delete newTheme;
-	return;
- }
  delete mSpecies;
- mSpecies = newTheme;
+ mSpecies = new SpeciesTheme();
+ mSpecies->setThemePath(species);
+ mSpecies->setTeamColor(teamColor);
 }
 
 void Player::addUnit(Unit* unit, int dataHandlerId)
@@ -363,7 +359,7 @@ bool Player::save(QDataStream& stream)
 	stream << speciesTheme()->teamColor();
  } else {
 	 stream << QString::null;
-	 stream << QColor(0, 0, 0);
+	 stream << QColor();
  }
 
  // Save unitpropID

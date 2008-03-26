@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 1999-2000 Thomas Capricelli (capricel@email.enst.fr)
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2008 Andreas Beckermann (b_mann@gmx.de)
     Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
@@ -57,7 +57,11 @@ class SpeciesTheme
 {
 public:
 	/**
-	 * Construct a theme. See @ref loadTheme.
+	 * Construct a theme.
+	 *
+	 * The theme must be set up (see e.g. @ref setThemePath and @ref
+	 * setTeamColor) and loaded (see e.g. @ref loadTechnologies, @ref
+	 * readUnitConfigs) before it can be used.
 	 **/
 	SpeciesTheme();
 
@@ -65,18 +69,19 @@ public:
 
 
 	/**
-	 * Load a theme. Look for index.unit files in the units directory,
-	 * read and store these information - see @ref readUnitConfigs.
+	 * Set the directory where the theme searches for additional files,
+	 * such as unit configs (see @ref readUnitConfigs), pixmaps,
+	 * technologies (see @ref loadTechnologies) and so on.
 	 *
-	 * Note that loadTheme is quite fast as it does <em>not</em> preload the
-	 * pixmaps of the units. These are loaded as soon as a unit is accessed
-	 * first time.
-	 * @param species The theme name to be loaded. Must not be i18n'ed as it
-	 * is used in the directoryname.
-	 * @param teamColor The color of this team or QColor(0,0,0) for a default
-	 * color
+	 * This should be called exactly once after construction of the theme.
 	 **/
-	bool loadTheme(const QString& species, const QColor&);
+	void setThemePath(const QString& dir);
+
+	/**
+	 * @return the path to the species theme (ending with
+	 * boson/themes/species/your_species/)
+	 **/
+	const QString& themePath() const { return mThemePath; }
 
 	/**
 	 * @return The color of the team of this player. See also @ref
@@ -90,6 +95,10 @@ public:
 	 *
 	 * So you cannot use this anymore as soon as you called @ref
 	 * loadUnitImage
+	 *
+	 * @param color The desired color, or an invalid color (see @ref
+	 * QColor::isValid) to use a default color (see @ref defaultColor).
+	 *
 	 * @return True if the color could be changed, otherwise false.
 	 **/
 	bool setTeamColor(const QColor& color);
@@ -103,6 +112,13 @@ public:
 	 * Load all available technologies. This must be done before starting game
 	 **/
 	bool loadTechnologies();
+
+	/**
+	 * Read the config files for all units available on this computer. The
+	 * values are used by @ref loadNewUnit and @ref loadEntry - they don't
+	 * have to load the config file theirselves.
+	 **/
+	bool readUnitConfigs();
 
 	/**
 	 * @return Concatenation of all @ref UnitProperties::md5 sums in this
@@ -146,12 +162,6 @@ public:
 	 * upgrades with different types may have the same @p id.
 	 **/
 	const UpgradeProperties* upgrade(const QString& type, unsigned long int id) const;
-
-	/**
-	 * @return the path to the species theme (ending with
-	 * boson/themes/species/your_species/)
-	 **/
-	const QString& themePath() const { return mThemePath; }
 
 	/**
 	 * @return The typeIds of all facilities in this theme. See also @ref
@@ -217,13 +227,6 @@ public:
 	QString identifier() const;
 
 	static QValueList<QColor> defaultColors();
-
-	/**
-	 * Read the config files for all units available on this computer. The
-	 * values are used by @ref loadNewUnit and @ref loadEntry - they don't
-	 * have to load the config file theirselves.
-	 **/
-	bool readUnitConfigs(bool full = true);
 
 	/**
 	 * Save the game data to XML. The "game data" is all data that depends

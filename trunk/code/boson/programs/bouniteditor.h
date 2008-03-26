@@ -31,7 +31,7 @@ class BosonWeaponPropertiesEditor;
 class EditorUnitProperties : public UnitProperties
 {
 public:
-	EditorUnitProperties(SpeciesTheme* theme, bool fullMode);
+	EditorUnitProperties(SpeciesTheme* theme);
 
 	TerrainType terrainType() const { return mTerrain; }
 

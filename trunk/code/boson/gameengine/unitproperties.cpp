@@ -37,7 +37,7 @@
 
 #include <qfile.h>
 
-UnitProperties::UnitProperties(SpeciesTheme* theme, bool fullMode)
+UnitProperties::UnitProperties(SpeciesTheme* theme)
 	: BoBaseValueCollection(),
 	mHealth(this, "Health", "MaxValue"),
 	mSightRange(this, "SightRange", "MaxValue"),
@@ -54,13 +54,11 @@ UnitProperties::UnitProperties(SpeciesTheme* theme, bool fullMode)
 {
  init();
  mTheme = theme;
- mFullMode = fullMode;
 }
 
 void UnitProperties::init()
 {
  d = new UnitPropertiesPrivate;
- mFullMode = true;
  mTheme = 0;
  mIsFacility = false;
  d->mPlugins.setAutoDelete(true);
@@ -71,9 +69,8 @@ UnitProperties::~UnitProperties()
  delete d;
 }
 
-bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
+bool UnitProperties::loadUnitType(const QString& fileName)
 {
- mFullMode = fullmode;
  bool isFacility;
  QFile file(fileName);
  if (!file.open(IO_ReadOnly)) {
