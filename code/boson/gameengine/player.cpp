@@ -1051,10 +1051,6 @@ void Player::technologyResearched(ProductionPlugin* plugin, unsigned long int ty
 bool Player::saveAsXML(QDomElement& root)
 {
  PROFILE_METHOD
- if (!game()) {
-	boError() << k_funcinfo << "NULL game" << endl;
-	return false;
- }
  if (!speciesTheme()) {
 	BO_NULL_ERROR(speciesTheme());
 	return false;
@@ -1116,10 +1112,6 @@ bool Player::loadFromXML(const QDomElement& root)
  // this does NOT load the units!
 
  bool ok = false;
- if (!game()) {
-	boError() << k_funcinfo << "NULL game" << endl;
-	return false;
- }
  if (root.hasAttribute("IsNeutral")) {
 	if (root.attribute("IsNeutral").toUInt(&ok) != 1) {
 		boError() << k_funcinfo << "invalid file format: IsNeutral must be 1 if it is present" << endl;
