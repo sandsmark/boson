@@ -33,7 +33,6 @@
 #include "unitplugins/unitplugins.h"
 #include "boitemlist.h"
 #include "pluginproperties.h"
-#include "boson.h"
 #include "bosonweapon.h"
 #include "bopointeriterator.h"
 #include "bodebug.h"
