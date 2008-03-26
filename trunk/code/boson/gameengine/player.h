@@ -66,6 +66,43 @@ public:
 	Player(bool neutral = false);
 	virtual ~Player();
 
+	/**
+	 * Initialize the map for this player - this is mostly the fog of war,
+	 * currently.
+	 *
+	 * Note that this function depends on calling @ref quitGame correctly,
+	 * i.e. whenever the map changes.
+	 * @param unexplored Whether the map is initially unexplored or not. You can
+	 * specify false here for the editor. Note that the fog is <em>not</em>
+	 * changed if it was initialized before (i.e. size != 0)! This is
+	 * usually the case for loading games.
+	 * @param fogged Whether the map is initially fogged. You can specify false
+	 * for the editor.
+	 **/
+	void initMap(BosonMap* map, bool unexplored = true, bool fogged = true);
+
+	void loadTheme(const QString& species, const QColor& teamColor);
+
+	bool saveAsXML(QDomElement& element);
+	bool loadFromXML(const QDomElement& element);
+
+	virtual bool load(QDataStream& stream);
+	virtual bool save(QDataStream& stream);
+
+	/**
+	 * Quit the current game for this player. This will reset some variables
+	 * so that the player can play on a new map.
+	 *
+	 * Note that this does <em>not</em> delete e.g. the species theme of the
+	 * player!
+	 *
+	 * Currently players are deleted for a new map anyway, but maybe this
+	 * behavior will change one day.
+	 * @param destruct TRUE is relevant for the destructor only. Then
+	 * deleted objects won't be new'ed again.
+	 **/
+	void quitGame(bool destruct = false);
+
 	int bosonId() const;
 
 	/**
@@ -97,34 +134,14 @@ public:
 	bool isNeutralPlayer() const;
 
 	PlayerIO* playerIO() const;
-
 	BosonMap* map() const;
-
-	/**
-	 * Quit the current game for this player. This will reset some variables
-	 * so that the player can play on a new map.
-	 *
-	 * Note that this does <em>not</em> delete e.g. the species theme of the
-	 * player!
-	 *
-	 * Currently players are deleted for a new map anyway, but maybe this
-	 * behavior will change one day.
-	 * @param destruct TRUE is relevant for the destructor only. Then
-	 * deleted objects won't be new'ed again.
-	 **/
-	void quitGame(bool destruct = false);
-
-	void loadTheme(const QString& species, const QColor& teamColor);
-
-	/**
-	 * Add @p unit to this player.
-	 * @param dataHandlerId Used for loading only. The datahandler ID is
-	 * already known, so use that value. If -1 we will use the next
-	 * integer value.
-	 **/
-	void addUnit(Unit* unit, int datHandlerId = -1);
-	void unitDestroyed(Unit* unit);
 	SpeciesTheme* speciesTheme() const { return mSpecies; }
+	BosonStatistics* statistics() const;
+
+	/**
+	 * @return @ref SpeciesTheme::teamColor
+	 **/
+	const QColor& teamColor() const;
 
 	/**
 	 * Convenience method for ((Boson*)game()->advanceFlag
@@ -132,169 +149,13 @@ public:
 	bool advanceFlag() const;
 
 	/**
-	 * @return @ref SpeciesTheme::teamColor
-	 **/
-	const QColor& teamColor() const;
-
-	Unit* findUnit(unsigned long int unitId) const;
-
-	bool saveAsXML(QDomElement& element);
-	bool loadFromXML(const QDomElement& element);
-
-	virtual bool load(QDataStream& stream);
-	virtual bool save(QDataStream& stream);
-
-	/**
-	 * @return <em>All</em> units of this player. Please don't use this as
-	 * it is very unclean. This is meant for KGameUnitDebug only.
-	 **/
-	QPtrList<Unit>* allUnits() const;
-
-	/**
-	 * Convenience method for theme()->unitProperties()
-	 **/
-	const UnitProperties* unitProperties(unsigned long int unitType) const;
-
-	void explore(int x, int y);
-	void unexplore(int x, int y);
-
-	void addFogRef(int x, int y);
-	void removeFogRef(int x, int y);
-
-	/**
-	 * @return Whether the coordinates @p cellX, @p cellY are explored for
-	 * this player.
-	 * Explored means that player has seen this cell, so he can see the terrain,
-	 * but this doesn't mean he can see enemy units (@ref isFogged determines
-	 * that)
-	 **/
-	bool isExplored(int cellX, int cellY) const;
-
-	/**
-	 * @param x Position of the cell in <em>Cell</em>-coordinates
-	 * @param y Position of the cell in <em>Cell</em>-coordinates
-	 * @return Whether the map is fogged for this player at the
-	 * (cell)-coordinates x,y.
-	 **/
-	bool isFogged(int x, int y) const;
-
-	/**
-	 * @return How many cells are currently fogged for this player
-	 **/
-	unsigned int unfoggedCells() const;
-  unsigned int exploredCells() const;
-
-	unsigned long int minerals() const;
-	unsigned long int oil() const;
-	void setMinerals(unsigned long int m);
-	void setOil(unsigned long int o);
-
-	/**
-	 * Use up given amount of player's minerals.
-	 * If player currently has less minerals than @p amount, FALSE is returned
-	 * immediately. Otherwise, player's amount of minerals is decreased by the
-	 * @p amount and TRUE is returned.
-	 **/
-	bool useMinerals(unsigned long int amount);
-	/**
-	 * Use up given amount of player's oil.
-	 * If player currently has less oil than @p amount, FALSE is returned
-	 * immediately. Otherwise, player's amount of oil is decreased by the
-	 * @p amount and TRUE is returned.
-	 **/
-	bool useOil(unsigned long int amount);
-	/**
-	 * Use up given amount of player's minerals and oil.
-	 * This is same as calling both @ref useMinerals and @ref useOil except that
-	 * either both or none of the resources is decreased.
-	 **/
-	bool useResources(unsigned long int mineralamount, unsigned long int oilamount);
-
-	/**
-	 * @return The amount of ammunition of type @p type in the "global
-	 * pool", i.e. the amount of ammunition that ist "just there" and can be
-	 * used by units from everywhere (they don't need to go to a certain
-	 * pouint and pick it up).
-	 **/
-	unsigned long int ammunition(const QString& type) const;
-	void setAmmunition(const QString& type, unsigned long int a);
-
-	/**
-	 * @return A number between 0 and @p requested that represents the
-	 * amount of ammo that is delivered to the caller. The ammunition of the
-	 * player is reduced by this amount.
-	 **/
-	unsigned long int requestAmmunition(const QString& type, unsigned long int requested);
-
-	void clearUpgrades();
-	void addUpgrade(const UpgradeProperties* upgrade);
-	void removeUpgrade(const UpgradeProperties* upgrade);
-	void removeUpgrade(unsigned long int id);
-	const QValueList<const UpgradeProperties*>* upgrades() const;
-
-	const UpgradeProperties* technologyProperties(unsigned long int type) const;
-
-	const QValueList<const Unit*>* radarUnits() const;
-	void addRadar(Unit* u);
-	void removeRadar(Unit* u);
-
-	/**
-	 * Initialize the map for this player - this is mostly the fog of war,
-	 * currently.
+	 * Set SpeciesTheme and take ownership of the provided pointer (i.e.
+	 * delete it on destruction).
 	 *
-	 * Note that this function depends on calling @ref quitGame correctly,
-	 * i.e. whenever the map changes.
-	 * @param unexplored Whether the map is initially unexplored or not. You can
-	 * specify false here for the editor. Note that the fog is <em>not</em>
-	 * changed if it was initialized before (i.e. size != 0)! This is
-	 * usually the case for loading games.
-	 * @param fogged Whether the map is initially fogged. You can specify false
-	 * for the editor.
+	 * You should usually prefer @ref loadTheme over this method! This
+	 * method is primarily meant for test applications!
 	 **/
-	void initMap(BosonMap* map, bool unexplored = true, bool fogged = true);
-
-	/**
-	 * Called by @ref Facility when the construction has been completed.
-	 * When this facility has some special functions they should be
-	 * activated now (e.g. the mini map for the radar station)
-	 **/
-	void facilityCompleted(Unit* fac);
-
-	/**
-	 * @return TRUE if the player can display a minimap (i.e. he has a radar
-	 * station), otherwise FALSE.
-	 **/
-	bool hasMiniMap() const;
-
-	/**
-	 * Calculates the amount of power (i.e. electricity) the units of this
-	 * player generate and consume.
-	 *
-	 * If the player consumes more than he generates, then
-	 * certain tasks should be slower than usual (or not be functional at
-	 * all).
-	 *
-	 * @param includeUnconstructedFacilities If FALSE (the default) only the
-	 * power that is actually generated and consumed is taken into account.
-	 * If TRUE, the power generated by facilities that are not yet fully
-	 * constructed is included, i.e. the power they will soon generate.
-	 **/
-	void calculatePower(unsigned long int* powerGenerated = 0, unsigned long int* powerConsumed = 0, bool includeUnconstructedFacilities = false) const;
-
-	/**
-	 * Removes the consumed power from the units.
-	 *
-	 * Should be called once per advance call, @em after the units (items)
-	 * were advanced. @em MUST be called exactly once per @ref chargeUnits
-	 * call in an advance call.
-	 **/
-	void unchargeUnitsForAdvance();
-
-	void updatePowerChargeForCurrentAdvanceCall();
-	inline bofixed powerChargeForCurrentAdvanceCall() const
-	{
-		return mPowerChargeForCurrentAdvanceCall;
-	}
+	void setSpeciesTheme(SpeciesTheme* theme);
 
 	/**
 	 * @return If the player is already "destroyed", i.e. doesn't have the
@@ -361,17 +222,6 @@ public:
 	}
 
 	/**
-	 * This is called by the global @ref BoCanvasEventListener to indicate
-	 * that the player has lost the game.
-	 *
-	 * The concrete moment of when this is called depends on the winning
-	 * conditions of the current map.
-	 **/
-	void setOutOfGame();
-
-	BosonStatistics* statistics() const;
-
-	/**
 	 * @return TRUE if player is an enemy or FALSE if it is e.g. allied with
 	 * us. See also @ref isNeutral and @ref isAllied
 	 **/
@@ -402,6 +252,165 @@ public:
 
 	int mobilesCount();
 	int facilitiesCount();
+
+	/**
+	 * Add @p unit to this player.
+	 * @param dataHandlerId Used for loading only. The datahandler ID is
+	 * already known, so use that value. If -1 we will use the next
+	 * integer value.
+	 **/
+	void addUnit(Unit* unit, int datHandlerId = -1);
+	void unitDestroyed(Unit* unit);
+
+	Unit* findUnit(unsigned long int unitId) const;
+
+	/**
+	 * @return <em>All</em> units of this player. Please don't use this as
+	 * it is very unclean. This is meant for KGameUnitDebug only.
+	 **/
+	QPtrList<Unit>* allUnits() const;
+
+	/**
+	 * Convenience method for theme()->unitProperties()
+	 **/
+	const UnitProperties* unitProperties(unsigned long int unitType) const;
+
+	/**
+	 * @return TRUE if the player can display a minimap (i.e. he has a radar
+	 * station), otherwise FALSE.
+	 **/
+	bool hasMiniMap() const;
+
+	void explore(int x, int y);
+	void unexplore(int x, int y);
+
+	void addFogRef(int x, int y);
+	void removeFogRef(int x, int y);
+
+	/**
+	 * @return Whether the coordinates @p cellX, @p cellY are explored for
+	 * this player.
+	 * Explored means that player has seen this cell, so he can see the terrain,
+	 * but this doesn't mean he can see enemy units (@ref isFogged determines
+	 * that)
+	 **/
+	bool isExplored(int cellX, int cellY) const;
+
+	/**
+	 * @param x Position of the cell in <em>Cell</em>-coordinates
+	 * @param y Position of the cell in <em>Cell</em>-coordinates
+	 * @return Whether the map is fogged for this player at the
+	 * (cell)-coordinates x,y.
+	 **/
+	bool isFogged(int x, int y) const;
+
+	/**
+	 * @return How many cells are currently fogged for this player
+	 **/
+	unsigned int unfoggedCells() const;
+	unsigned int exploredCells() const;
+
+	unsigned long int minerals() const;
+	unsigned long int oil() const;
+	void setMinerals(unsigned long int m);
+	void setOil(unsigned long int o);
+
+	/**
+	 * Use up given amount of player's minerals.
+	 * If player currently has less minerals than @p amount, FALSE is returned
+	 * immediately. Otherwise, player's amount of minerals is decreased by the
+	 * @p amount and TRUE is returned.
+	 **/
+	bool useMinerals(unsigned long int amount);
+
+	/**
+	 * Use up given amount of player's oil.
+	 * If player currently has less oil than @p amount, FALSE is returned
+	 * immediately. Otherwise, player's amount of oil is decreased by the
+	 * @p amount and TRUE is returned.
+	 **/
+	bool useOil(unsigned long int amount);
+
+	/**
+	 * Use up given amount of player's minerals and oil.
+	 * This is same as calling both @ref useMinerals and @ref useOil except that
+	 * either both or none of the resources is decreased.
+	 **/
+	bool useResources(unsigned long int mineralamount, unsigned long int oilamount);
+
+	/**
+	 * @return The amount of ammunition of type @p type in the "global
+	 * pool", i.e. the amount of ammunition that ist "just there" and can be
+	 * used by units from everywhere (they don't need to go to a certain
+	 * pouint and pick it up).
+	 **/
+	unsigned long int ammunition(const QString& type) const;
+	void setAmmunition(const QString& type, unsigned long int a);
+
+	/**
+	 * @return A number between 0 and @p requested that represents the
+	 * amount of ammo that is delivered to the caller. The ammunition of the
+	 * player is reduced by this amount.
+	 **/
+	unsigned long int requestAmmunition(const QString& type, unsigned long int requested);
+
+	void clearUpgrades();
+	void addUpgrade(const UpgradeProperties* upgrade);
+	void removeUpgrade(const UpgradeProperties* upgrade);
+	void removeUpgrade(unsigned long int id);
+	const QValueList<const UpgradeProperties*>* upgrades() const;
+
+	const UpgradeProperties* technologyProperties(unsigned long int type) const;
+
+	const QValueList<const Unit*>* radarUnits() const;
+	void addRadar(Unit* u);
+	void removeRadar(Unit* u);
+
+	/**
+	 * Called by @ref Facility when the construction has been completed.
+	 * When this facility has some special functions they should be
+	 * activated now (e.g. the mini map for the radar station)
+	 **/
+	void facilityCompleted(Unit* fac);
+
+	/**
+	 * Calculates the amount of power (i.e. electricity) the units of this
+	 * player generate and consume.
+	 *
+	 * If the player consumes more than he generates, then
+	 * certain tasks should be slower than usual (or not be functional at
+	 * all).
+	 *
+	 * @param includeUnconstructedFacilities If FALSE (the default) only the
+	 * power that is actually generated and consumed is taken into account.
+	 * If TRUE, the power generated by facilities that are not yet fully
+	 * constructed is included, i.e. the power they will soon generate.
+	 **/
+	void calculatePower(unsigned long int* powerGenerated = 0, unsigned long int* powerConsumed = 0, bool includeUnconstructedFacilities = false) const;
+
+	/**
+	 * Removes the consumed power from the units.
+	 *
+	 * Should be called once per advance call, @em after the units (items)
+	 * were advanced. @em MUST be called exactly once per @ref chargeUnits
+	 * call in an advance call.
+	 **/
+	void unchargeUnitsForAdvance();
+
+	void updatePowerChargeForCurrentAdvanceCall();
+	inline bofixed powerChargeForCurrentAdvanceCall() const
+	{
+		return mPowerChargeForCurrentAdvanceCall;
+	}
+
+	/**
+	 * This is called by the global @ref BoCanvasEventListener to indicate
+	 * that the player has lost the game.
+	 *
+	 * The concrete moment of when this is called depends on the winning
+	 * conditions of the current map.
+	 **/
+	void setOutOfGame();
 
 	/**
 	 * @return TRUE if this player can build units with type unitType, FALSE
@@ -459,8 +468,8 @@ protected:
 	bool loadFogOfWar(const QDomElement& root);
 	bool loadAmmunition(const QDomElement& root);
 
-  void fog(int x, int y);
-  void unfog(int x, int y);
+	void fog(int x, int y);
+	void unfog(int x, int y);
 
 private:
 	PlayerPrivate* d;

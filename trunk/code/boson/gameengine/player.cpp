@@ -193,12 +193,14 @@ void Player::quitGame(bool destruct)
  delete d->mStatistics;
  d->mStatistics = 0;
 
+ delete[] d->mFoggedRef;
+ d->mFoggedRef = 0;
+
  if (!destruct) {
 	d->mStatistics = new BosonStatistics;
 	d->mMinerals.setLocal(0);
 	d->mOil.setLocal(0);
 	d->mExplored.resize(0);
-	delete[] d->mFoggedRef;
 	d->mAmmunition.clear();
 	d->mAmmunition.insert("Generic", 0);
  }
@@ -245,9 +247,21 @@ void Player::loadTheme(const QString& species, const QColor& teamColor)
 	}
  }
  delete mSpecies;
- mSpecies = new SpeciesTheme();
- mSpecies->setThemePath(species);
- mSpecies->setTeamColor(teamColor);
+ mSpecies = 0;
+ SpeciesTheme* theme = new SpeciesTheme();
+ theme->setThemePath(species);
+ theme->setTeamColor(teamColor);
+ setSpeciesTheme(theme);
+}
+
+void Player::setSpeciesTheme(SpeciesTheme* theme)
+{
+ if (mSpecies) {
+	boError() << k_funcinfo << "already have a SpeciesTheme. cannot set new one." << endl;
+	delete theme;
+	return;
+ }
+ mSpecies = theme;
 }
 
 void Player::addUnit(Unit* unit, int dataHandlerId)
