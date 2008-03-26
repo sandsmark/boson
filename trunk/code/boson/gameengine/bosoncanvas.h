@@ -153,8 +153,11 @@ public:
 	 * Create a new canvas. Call @ref init before using this canvas!
 	 *
 	 * @param gameMode TRUE for normal game mode, FALSE for editor mode.
+	 * @param advanceFlag The initial value of the @ref advanceFlag. Use
+	 * @ref Boson::advanceFlag here and use @ref setAdvanceFlag whenever the
+	 * value changes.
 	 **/
-	BosonCanvas(QObject* parent, bool gameMode = true);
+	BosonCanvas(bool advanceFlag, QObject* parent, bool gameMode = true);
 	~BosonCanvas();
 
 	/**
@@ -169,6 +172,9 @@ public:
 	 * loaded as well! (in particular the pathfinder is still NULL)
 	 **/
 	bool init(BosonMap* map, BosonPlayerListManager* playerListManager, BoEventManager* eventManager);
+
+	bool advanceFlag() const;
+	void setAdvanceFlag(bool a);
 
 	unsigned long int nextItemId();
 

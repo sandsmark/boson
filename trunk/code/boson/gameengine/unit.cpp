@@ -1705,31 +1705,31 @@ void Unit::setAdvanceWork(WorkType w)
  // we even do this if nothing changed - just in case...
  switch (w) {
 	case WorkIdle:
-		setAdvanceFunction(&Unit::advanceIdle, owner()->advanceFlag());
+		setAdvanceFunction(&Unit::advanceIdle, canvas()->advanceFlag());
 		break;
 	case WorkNone:
-		setAdvanceFunction(&Unit::advanceNone, owner()->advanceFlag());
+		setAdvanceFunction(&Unit::advanceNone, canvas()->advanceFlag());
 		break;
 	case WorkMove:
-		setAdvanceFunction(&Unit::advanceMove, owner()->advanceFlag());
+		setAdvanceFunction(&Unit::advanceMove, canvas()->advanceFlag());
 		break;
 	case WorkAttack:
-		setAdvanceFunction(&Unit::advanceAttack, owner()->advanceFlag());
+		setAdvanceFunction(&Unit::advanceAttack, canvas()->advanceFlag());
 		break;
 	case WorkConstructed:
-		setAdvanceFunction(&Unit::advanceConstruction, owner()->advanceFlag());
+		setAdvanceFunction(&Unit::advanceConstruction, canvas()->advanceFlag());
 		break;
 	case WorkDestroyed:
-		setAdvanceFunction(&Unit::advanceDestroyed, owner()->advanceFlag());
+		setAdvanceFunction(&Unit::advanceDestroyed, canvas()->advanceFlag());
 		break;
 	case WorkFollow:
-		setAdvanceFunction(&Unit::advanceFollow, owner()->advanceFlag());
+		setAdvanceFunction(&Unit::advanceFollow, canvas()->advanceFlag());
 		break;
 	case WorkPlugin:
-		setAdvanceFunction(&Unit::advancePlugin, owner()->advanceFlag());
+		setAdvanceFunction(&Unit::advancePlugin, canvas()->advanceFlag());
 		break;
 	case WorkTurn:
-		setAdvanceFunction(&Unit::advanceTurn, owner()->advanceFlag());
+		setAdvanceFunction(&Unit::advanceTurn, canvas()->advanceFlag());
 		break;
  }
 }

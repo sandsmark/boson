@@ -243,6 +243,7 @@ void BoAdvance::receiveAdvanceCall()
  // methods changes the advance function. this change must not appear to the
  // currently used function, but to the other one.
  toggleAdvanceFlag();
+ mBoson->canvasNonConst()->setAdvanceFlag(mAdvanceFlag);
 
  if (mBoson->gameMode()) {
 	// AB: slots connected to signals are not guaranteed to be executed in a
@@ -615,7 +616,7 @@ bool Boson::createCanvas(BosonMap* map)
 	// do NOT delete it, as it might be used somewhere else as well
 	return false;
  }
- d->mCanvas = new BosonCanvas(this, gameMode());
+ d->mCanvas = new BosonCanvas(advanceFlag(), this, gameMode());
  connect(d->mCanvas, SIGNAL(signalGameOver()),
 		this, SLOT(slotGameOver()));
  if (!d->mCanvas->init(map, playerListManager(), eventManager())) {
