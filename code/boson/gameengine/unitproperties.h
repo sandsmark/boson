@@ -133,7 +133,7 @@ public:
 		ProducerCommandBunker = 10
 	};
 
-	UnitProperties(SpeciesTheme*, bool fullMode = true);
+	UnitProperties(SpeciesTheme*);
 	~UnitProperties();
 
 
@@ -144,7 +144,7 @@ public:
 	 * The file should contain units/your_unit_dir/index.unit at the end
 	 * and should be an absolute path.
 	 **/
-	bool loadUnitType(const QString& fileName, bool fullmode = true);
+	bool loadUnitType(const QString& fileName);
 
 	/**
 	 * @return The @ref SpeciesTheme this property belongs to.
@@ -496,7 +496,6 @@ protected:
 protected:
 	UnitPropertiesPrivate* d;
 	SpeciesTheme* mTheme;
-	bool mFullMode;
 
 	unsigned long int mTypeId; // note: 0 is invalid!
 	bofixed mUnitWidth;

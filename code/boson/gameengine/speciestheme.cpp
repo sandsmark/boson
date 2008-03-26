@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 1999-2000 Thomas Capricelli (capricel@email.enst.fr)
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2008 Andreas Beckermann (b_mann@gmx.de)
     Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
@@ -135,24 +135,9 @@ QColor SpeciesTheme::defaultColor()
  return QColor(default_color[defaultColorIndex - 1]);
 }
 
-bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
+void SpeciesTheme::setThemePath(const QString& speciesDir)
 {
- QDir dir(speciesDir);
- if (!dir.exists()) {
-	boError() << k_funcinfo << "directory " << speciesDir << " does not exist. cannot load theme from there." << endl;
-	return false;
- }
-
- if (teamColor == QColor(0,0,0)) { // no color specified
-	setTeamColor(defaultColor());
- } else {
-	setTeamColor(teamColor);
- }
  mThemePath = speciesDir;
-
- // don't preload units here as the species can still be changed in new game
- // dialog
- return true;
 }
 
 QCString SpeciesTheme::unitPropertiesMD5() const
@@ -227,7 +212,7 @@ void SpeciesTheme::loadNewUnit(Unit* unit)
  }
 }
 
-bool SpeciesTheme::readUnitConfigs(bool full)
+bool SpeciesTheme::readUnitConfigs()
 {
  // AB: at least the object models are touched here :(
  // they depend on teamcolor, so we won't be able to change teamcolor anymore!
@@ -237,7 +222,14 @@ bool SpeciesTheme::readUnitConfigs(bool full)
 	return true;
  }
  QDir dir(themePath());
- dir.cd(QString::fromLatin1("units"));
+ if (!dir.exists()) {
+	boError() << k_funcinfo << "directory " << themePath() << " does not exist. cannot load theme from there." << endl;
+	return false;
+ }
+ if (!dir.cd(QString::fromLatin1("units"))) {
+	boError() << k_funcinfo << "could not enter \"units\" subdirectory of " << themePath() << endl;
+	return false;
+ }
  QStringList dirList = dir.entryList(QDir::Dirs);
  QStringList list;
  for (unsigned int i = 0; i < dirList.count(); i++) {
@@ -258,7 +250,7 @@ bool SpeciesTheme::readUnitConfigs(bool full)
  }
  for (QStringList::ConstIterator it = list.begin(); it != list.end(); ++it) {
 	UnitProperties* prop = new UnitProperties(this);
-	if (!prop->loadUnitType(*it, full)) {
+	if (!prop->loadUnitType(*it)) {
 		boError(270) << k_funcinfo << "could not load " << *it << endl;
 		delete prop;
 		return false;
@@ -479,7 +471,11 @@ QString SpeciesTheme::identifier() const
 
 bool SpeciesTheme::setTeamColor(const QColor& color)
 {
- mTeamColor = color;
+ if (!color.isValid()) {
+	mTeamColor = defaultColor();
+ } else {
+	mTeamColor = color;
+ }
  return true;
 }
 
