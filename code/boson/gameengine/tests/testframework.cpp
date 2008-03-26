@@ -26,10 +26,16 @@
 #include "bosongroundtheme.h"
 #include "bosonplayfield.h"
 #include "bpfdescription.h"
+#include "speciestheme.h"
 
 #include "boglobal.h"
 #include "bosondata.h"
 
+#include <ktempfile.h>
+#include <ktempdir.h>
+#include <qdir.h>
+
+#include <memory> // std::auto_ptr
 
 TestFrameWork::TestFrameWork(QObject* parent)
 	: QObject(parent)
@@ -101,5 +107,58 @@ BosonPlayField* TestFrameWork::createDummyPlayField(const QString& groundThemeId
  return playField;
 }
 
+SpeciesTheme* TestFrameWork::createAndLoadDummySpeciesTheme(const QColor& teamColor, bool neutralSpecies)
+{
+ const int unitCount = 3;
 
+ KTempDir speciesDir_("/tmp/");
+ speciesDir_.setAutoDelete(true); // AB: deletes the dir recursively (implemented using ::system("/bin/rm -rf"))
+
+ QDir* speciesDir = speciesDir_.qDir();
+ if (!speciesDir) {
+	return 0;
+ }
+ std::auto_ptr<QDir> speciesDirDeleter(speciesDir);
+
+ if (!speciesDir->mkdir("units")) {
+	return false;
+ }
+ QDir unitsDir(speciesDir->absFilePath("units"));
+
+ SpeciesTheme* theme = new SpeciesTheme();
+ theme->setThemePath(speciesDir_.name());
+ theme->setTeamColor(teamColor);
+
+ QFile technologies(speciesDir->absFilePath("index.technologies"));
+ // open && close once, to write an empty file
+ if (!technologies.open(IO_WriteOnly)) {
+	boError() << k_funcinfo << "could not write technologies file " << technologies.name() << endl;
+	return false;
+ }
+ technologies.close();
+
+ for (int i = 0; i < unitCount; i++) {
+	if (!unitsDir.mkdir(QString("unit_%1").arg(i))) {
+		return false;
+	}
+	QFile file(speciesDir->absFilePath(QString("units/unit_%1/index.unit").arg(i)));
+	if (!file.open(IO_WriteOnly)) {
+		return false;
+	}
+	QTextStream stream(&file);
+	stream << "[Boson Unit]\n";
+	stream << "Id=" << i+1 << "\n";
+	stream << "Name=Unit " << i+1 << "\n";
+	file.close();
+ }
+
+ if (!theme->loadTechnologies()) {
+	return false;
+ }
+ if (!theme->readUnitConfigs()) {
+	return false;
+ }
+
+ return theme;
+}
 

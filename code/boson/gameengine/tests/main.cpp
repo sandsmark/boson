@@ -34,6 +34,7 @@
 #include <kaboutdata.h>
 #include <kcmdlineargs.h>
 #include <klocale.h>
+#include <kinstance.h>
 
 static const char *description =
     I18N_NOOP("Boson (mostly unit-)tests");
@@ -49,6 +50,7 @@ static bool startTests();
 
 int main(int argc, char **argv)
 {
+ BoDebug::disableAreas(); // dont load bodebug.areas
  KAboutData about("bosontests",
 		I18N_NOOP("BosonTests"),
 		version,
@@ -70,6 +72,8 @@ int main(int argc, char **argv)
 
  BoGlobal::initStatic();
  BoGlobal::boGlobal()->initGlobalObjects();
+
+ KInstance instance(&about);
 
  if (!startTests()) {
 	boDebug() << "tests FAILED" << endl;
