@@ -53,12 +53,7 @@ int main(int argc, char **argv)
  BoDebug::disableAreas(); // dont load bodebug.areas
  KAboutData about("bosontests",
 		I18N_NOOP("BosonTests"),
-		version,
-		description,
-		KAboutData::License_GPL,
-		"(C) 1999-2000,2001-2008 The Boson team",
-		0,
-		"http://boson.eu.org");
+		version);
  about.addAuthor("Andreas Beckermann",
 		I18N_NOOP("Coding & Current Maintainer"),
 		"b_mann@gmx.de");
