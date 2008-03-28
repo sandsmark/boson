@@ -225,6 +225,9 @@ public:
 	 **/
 	inline unsigned long int id() const { return mId; }
 
+	// TODO: change semantics of x() and y(): they should return centerX()
+	// and centerY()!
+#if 0
 	/**
 	 * @return The x-coordinate of the left edge of the object.Note that
 	 * this has <em>nothing</em> to do with the OpenGL coordinates.
@@ -239,10 +242,14 @@ public:
 	 * equal for z)
 	 **/
 	inline bofixed y() const { return mY; }
+#endif
 
 	/**
 	 * @return The z-position of the item.
 	 **/
+	// TODO: currently z() is the "bottom" of the item.
+	//       we probably should use centerZ() instead!
+	//       -> (x,y,z) would then be exactly the center point of an item
 	inline bofixed z() const { return mZ; }
 
 	/**
@@ -263,13 +270,13 @@ public:
 	 **/
 	inline bofixed depth() const { return mDepth; }
 
-	inline bofixed leftEdge() const { return x(); }
-	inline bofixed topEdge() const { return y(); }
+	inline bofixed leftEdge() const { return mX; }
+	inline bofixed topEdge() const { return mY; }
 	inline bofixed rightEdge() const { return leftEdge() + width(); }
 	inline bofixed bottomEdge() const { return topEdge() + height(); }
 
-	inline bofixed centerX() const { return x() + width() / 2; };
-	inline bofixed centerY() const { return y() + height() / 2; };
+	inline bofixed centerX() const { return leftEdge() + width() / 2; };
+	inline bofixed centerY() const { return topEdge() + height() / 2; };
 	inline bofixed centerZ() const { return z() + depth() / 2; };
 	BoVector2Fixed center() const;
 
@@ -281,9 +288,13 @@ public:
 	 * parameter checking, i.e. we don't check whether these cooridnates are
 	 * valid.
 	 **/
-	inline void move(bofixed nx, bofixed ny, bofixed nz)
+	inline void moveLeftTopTo(bofixed nx, bofixed ny, bofixed nz)
 	{
-		moveBy(nx - x(), ny - y(), nz - z());
+		moveBy(nx - leftEdge(), ny - topEdge(), nz - z());
+	}
+	inline void moveCenterTo(bofixed nx, bofixed ny, bofixed nz)
+	{
+		moveBy(nx - centerX(), ny - centerY(), nz - z());
 	}
 
 	/**
@@ -307,7 +318,7 @@ public:
 	{
 		if (dx || dy || dz) {
 			removeFromCells();
-			setPos(x() + dx, y() + dy, z() + dz);
+			setPos(leftEdge() + dx, topEdge() + dy, z() + dz);
 			addToCells();
 			setEffectsPositionDirty(true);
 		}

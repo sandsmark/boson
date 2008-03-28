@@ -545,7 +545,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			boWarning() << k_lineinfo << "not yet completed" << endl;
 			break;
 		}
-		mGame->buildProducedUnit(production, unitType, message.mPos);
+		mGame->buildProducedUnitAtTopLeftPos(production, unitType, message.mPos);
 		break;
 	}
 	case BosonMessageIds::MoveFollow:
@@ -719,7 +719,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			break;
 		}
 
-		u->moveBy(message.mPos.x() - u->x(), message.mPos.y() - u->y(), 0);
+		u->moveBy(message.mPos.x() - u->centerX(), message.mPos.y() - u->centerY(), 0);
 
 		break;
 	}
@@ -765,7 +765,8 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
 			break;
 		}
 
-		Unit* u = editorPlaceUnit(message.mOwner, message.mUnitType, message.mPos, message.mRotation);
+		// TODO: convert the MovePlaceUnit message to provide the "center" of the destination and use a editorPlaceUnitAtCenterPos instead
+		Unit* u = editorPlaceUnitAtTopLeftPos(message.mOwner, message.mUnitType, message.mPos, message.mRotation);
 
 		if (!u) {
 			boError() << k_funcinfo << "placing unit failed" << endl;
@@ -869,7 +870,8 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
 		for (unsigned int i = 0; i < message.mUnits.count(); i++) {
 			BosonMessageEditorMovePlaceUnit* p = message.mUnits[i];
 
-			Unit* u = editorPlaceUnit(p->mOwner, p->mUnitType, p->mPos, p->mRotation);
+			// TODO: convert the MovePlaceUnit message to provide the "center" of the destination and use a editorPlaceUnitAtCenterPos instead
+			Unit* u = editorPlaceUnitAtTopLeftPos(p->mOwner, p->mUnitType, p->mPos, p->mRotation);
 
 			if (!u) {
 				boError() << k_funcinfo << "placing unit failed" << endl;
@@ -966,7 +968,7 @@ void BosonPlayerInputHandler::editorDeleteItems(const QValueList<Q_ULONG>& items
  canvas()->deleteItems(items);
 }
 
-Unit* BosonPlayerInputHandler::editorPlaceUnit(Q_UINT32 owner, Q_UINT32 unitType, const BoVector2Fixed& pos, const bofixed& rotation)
+Unit* BosonPlayerInputHandler::editorPlaceUnitAtTopLeftPos(Q_UINT32 owner, Q_UINT32 unitType, const BoVector2Fixed& pos, const bofixed& rotation)
 {
  BO_CHECK_NULL_RET0(canvas());
 
@@ -994,7 +996,7 @@ Unit* BosonPlayerInputHandler::editorPlaceUnit(Q_UINT32 owner, Q_UINT32 unitType
  }*/
 
  BoVector3Fixed pos3(pos.x(), pos.y(), 0.0f);
- Unit* u = (Unit*)canvas()->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType), pos3);
+ Unit* u = (Unit*)canvas()->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType, p, ItemType(unitType), pos3);
  u->setRotation(rotation);
  u->updateRotation();
  if (u->isFacility()) {
@@ -1044,7 +1046,7 @@ BosonMessageEditorMove* BosonPlayerInputHandler::createNewUndoDeleteItemsMessage
 	}
 	doc.appendChild(root);
 
-	m = new BosonMessageEditorMovePlaceUnit(u->type(), u->owner()->bosonId(), BoVector2Fixed(u->x(), u->y()), u->rotation());
+	m = new BosonMessageEditorMovePlaceUnit(u->type(), u->owner()->bosonId(), BoVector2Fixed(u->centerX(), u->centerY()), u->rotation());
 	placeUnit.append(m);
 	QString xml = doc.toString();
 	unitData.append(xml);

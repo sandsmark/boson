@@ -337,8 +337,8 @@ QPoint PlayerIO::homeBase() const
 	// no units for player
 	return QPoint(0, 0);
  }
- return QPoint((int)commandCenter->x(),
-		(int)commandCenter->y());
+ return QPoint((int)commandCenter->centerX(),
+		(int)commandCenter->centerY());
 }
 
 BosonItem* PlayerIO::findItemAt(const BoVector3Fixed& canvasVector) const

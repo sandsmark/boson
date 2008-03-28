@@ -753,7 +753,7 @@ bool BosonScript::canPlaceProductionAt(int factoryid, int unitType, float x, flo
     boError() << k_funcinfo << "no such unittype " << unitType << endl;
     return false;
   }
-  return canvas()->canPlaceUnitAt(prop, BoVector2Fixed(x, y), prod);
+  return canvas()->canPlaceUnitAtCenterPos(prop, BoVector2Fixed(x, y), prod);
 }
 
 QValueList<int> BosonScript::unitsOnCell(int x, int y) const
@@ -821,7 +821,7 @@ BoVector2Fixed BosonScript::unitPosition(int id) const
     return BoVector2Fixed(-1, -1);
   }
 
-  return BoVector2Fixed(u->x(), u->y());
+  return BoVector2Fixed(u->centerX(), u->centerY());
 }
 
 int BosonScript::unitOwner(int id) const

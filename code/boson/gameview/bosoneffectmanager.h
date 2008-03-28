@@ -47,7 +47,7 @@ public:
 	QPtrList<BosonEffect> newExplodingFragmentHitEffects(const UnitProperties* prop, const BoVector3Fixed& pos) const;
 
 
-	QPtrList<BosonEffect> newShootEffects(const BosonWeaponProperties* prop, const BoVector3Fixed& pos, bofixed rotation) const;
+	QPtrList<BosonEffect> newShootEffects(const BosonWeaponProperties* prop, const BoVector3Fixed& topLeftPos, bofixed rotation) const;
 	QPtrList<BosonEffect> newFlyEffects(const BosonWeaponProperties* prop, const BoVector3Fixed& pos, bofixed rotation) const;
 	QPtrList<BosonEffect> newHitEffects(const BosonWeaponProperties* prop, const BoVector3Fixed& pos) const;
 

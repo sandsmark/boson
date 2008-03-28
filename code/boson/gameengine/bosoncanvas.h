@@ -194,7 +194,7 @@ public:
 	 * This will also do the necessary steps for newly added items, such as
 	 * loading unit defaults and adding the unit to the @p owner.
 	 **/
-	BosonItem* createNewItem(int rtti, Player* owner, const ItemType& type, const BoVector3Fixed& pos);
+	BosonItem* createNewItemAtTopLeftPos(int rtti, Player* owner, const ItemType& type, const BoVector3Fixed& pos);
 
 	/**
 	 * Test whether the unit can go over rect. This method only tests for
@@ -285,7 +285,7 @@ public:
 	 *
 	 * Also adjust the mini map - see @ref signalUnitMoved
 	 **/
-	void unitMoved(Unit* unit, bofixed oldX, bofixed oldY);
+	void unitMoved(Unit* unit, bofixed oldCenterX, bofixed oldCenterY);
 
 	void unitMovingStatusChanges(Unit* u, int oldstatus, int newstatus);
 
@@ -426,7 +426,8 @@ public:
 	 * mobile units in BUILD_RANGE of the facility.
 	 * @return TRUE if the unit can be placed at pos, otherwise FALSE
 	 **/
-	bool canPlaceUnitAt(const UnitProperties* unit, const BoVector2Fixed& pos, ProductionPlugin* factory) const;
+	bool canPlaceUnitAtCenterPos(const UnitProperties* unit, const BoVector2Fixed& topLeftPos, ProductionPlugin* factory) const;
+	bool canPlaceUnitAtTopLeftPos(const UnitProperties* unit, const BoVector2Fixed& centerPos, ProductionPlugin* factory) const;
 
 	/**
 	 * Clear the canvas, preparing it for destruction.
@@ -588,7 +589,7 @@ protected:
 	 *
 	 * @param id A unique ID for the item. See @ref BosonItem::setId
 	 **/
-	BosonItem* createItem(int rtti, Player* owner, const ItemType& type, const BoVector3Fixed& pos, unsigned long int id);
+	BosonItem* createItemAtTopLeftPos(int rtti, Player* owner, const ItemType& type, const BoVector3Fixed& pos, unsigned long int id);
 
 	Unit* createUnit(Player* owner, unsigned long int unitType);
 	BosonShot* createShot(Player* owner, unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId);

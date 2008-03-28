@@ -260,7 +260,7 @@ void BoUnitDebugWidget::update(Unit* unit)
  QString text;
  text += i18n("Name: %1, Type: %2, Id: %3, RTTI: %4\n").arg(unit->name()).arg(unit->type()).arg(unit->id()).arg(unit->rtti());
 
- text += i18n("Location: (%1, %2, %3)").arg(unit->x()).arg(unit->y()).arg(unit->z());
+ text += i18n("Location: (%1, %2, %3)").arg(unit->centerX()).arg(unit->centerY()).arg(unit->z());
  text += i18n("Rotation: (%1, %2, %3)").arg(unit->xRotation()).arg(unit->yRotation()).arg(unit->rotation());
  text += i18n("AdvanceWork: %1").arg(unit->advanceWork()); // TODO: int -> string
  text += i18n("CurrentOrder type: %1").arg(unit->currentOrder() ? unit->currentOrder()->type() : 0); // TODO: int -> string

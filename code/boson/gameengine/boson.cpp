@@ -1270,7 +1270,7 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 // boDebug() << k_funcinfo << endl;
 }
 
-bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitType, BoVector2Fixed pos)
+bool Boson::buildProducedUnitAtTopLeftPos(ProductionPlugin* factory, unsigned long int unitType, BoVector2Fixed topLeftPos)
 {
  if (!d->mCanvas) {
 	BO_NULL_ERROR(d->mCanvas);
@@ -1289,12 +1289,12 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
 	boError() << k_funcinfo << "NULL factory unit" << endl;
 	return false;
  }
- if (!(d->mCanvas)->canPlaceUnitAt(p->unitProperties(unitType), pos, 0)) {
+ if (!(d->mCanvas)->canPlaceUnitAtTopLeftPos(p->unitProperties(unitType), topLeftPos, 0)) {
 	boDebug() << k_funcinfo << "Cannot create unit here" << endl;
 	return false;
  }
- BoVector3Fixed pos3(pos.x(), pos.y(), 0.0f);
- Unit* unit = (Unit*)d->mCanvas->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType), pos3);
+ BoVector3Fixed pos3(topLeftPos.x(), topLeftPos.y(), 0.0f);
+ Unit* unit = (Unit*)d->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType, p, ItemType(unitType), pos3);
  if (!unit) {
 	boError() << k_funcinfo << "NULL unit" << endl;
 	return false;
@@ -1724,7 +1724,7 @@ void Boson::makeUnitLog()
 		Unit* u = uit.current();
 		BosonPathInfo* path = u->pathInfo();
 		// Generic info
-		ts << "Unit " << u->id() << ":  pos(" << u->x() << "; " << u->y() << "; " << u->z() <<
+		ts << "Unit " << u->id() << ":  pos(" << u->centerX() << "; " << u->centerY() << "; " << u->z() <<
 				"); rot(" << u->xRotation() << "; " << u->yRotation() << "; " << u->rotation() <<
 				"); speed: " << u->speed() << "; maxSpeed: " << u->maxSpeed() <<
 				"); advWork: " << (int)u->advanceWork() <<

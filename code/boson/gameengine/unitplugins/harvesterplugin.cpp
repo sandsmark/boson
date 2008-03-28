@@ -211,7 +211,7 @@ void HarvesterPlugin::advanceMine()
 	Unit* u = mResourceMine->unit();
 	if (!unit()->addCurrentSuborder(new UnitMoveToUnitOrder(u))) {
 		boDebug(430) << k_funcinfo << "Cannot move to refinery (id=" << u->id() <<
-				") at (" << u->x() << "; " << u->y() << ")" << endl;
+				") at (" << u->centerX() << "; " << u->centerY() << ")" << endl;
 		unit()->currentSuborderDone(false);
 	}
 	return;
@@ -276,7 +276,7 @@ void HarvesterPlugin::advanceRefine()
 	Unit* u = mRefinery->unit();
 	if (!unit()->addCurrentSuborder(new UnitMoveToUnitOrder(u))) {
 		boDebug(430) << k_funcinfo << "Cannot move to refinery (id=" << u->id() <<
-				") at (" << u->x() << "; " << u->y() << ")" << endl;
+				") at (" << u->centerX() << "; " << u->centerY() << ")" << endl;
 		unit()->currentSuborderDone(false);
 	}
 	return;
@@ -339,7 +339,7 @@ ResourceMinePlugin* HarvesterPlugin::findClosestResourceMine() const
 		continue;
 	}
 	if (m->isUsableTo(this)) {
-		bofixed dist = QMAX(QABS(unit()->x() - u->x()), QABS(unit()->y() - u->y()));
+		bofixed dist = QMAX(QABS(unit()->centerX() - u->centerX()), QABS(unit()->centerY() - u->centerY()));
 		if ((dist < mineDist) || (mineDist == 0.0f)) {
 			mineDist = dist;
 			mine = m;
@@ -368,7 +368,7 @@ RefineryPlugin* HarvesterPlugin::findClosestRefinery() const
 		continue;
 	}
 	if (r->isUsableTo(this)) {
-		bofixed dist = QMAX(QABS(unit()->x() - it.current()->x()), QABS(unit()->y() - it.current()->y()));
+		bofixed dist = QMAX(QABS(unit()->centerX() - it.current()->centerX()), QABS(unit()->centerY() - it.current()->centerY()));
 		if ((dist < refdist) || (refdist == 0.0f)) {
 			refdist = dist;
 			ref = r;

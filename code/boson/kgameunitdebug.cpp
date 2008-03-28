@@ -95,8 +95,8 @@ KGameUnitDebugItemList::KGameUnitDebugItemList(QWidget* parent)
  d->mIndexOwner = d->mItemList->addColumn(i18n("Owner"));
  d->mIndexRTTI = d->mItemList->addColumn(i18n("RTTI"));
  d->mIndexName = d->mItemList->addColumn(i18n("Name"));
- d->mIndexX = d->mItemList->addColumn(i18n("X"));
- d->mIndexY = d->mItemList->addColumn(i18n("Y"));
+ d->mIndexX = d->mItemList->addColumn(i18n("CenterX"));
+ d->mIndexY = d->mItemList->addColumn(i18n("CenterY"));
  d->mIndexZ = d->mItemList->addColumn(i18n("Z"));
 
  // hide some columns by defaul
@@ -190,8 +190,8 @@ void KGameUnitDebugItemList::update(BosonItem* gameItem)
 	name = i18n("(Unknown)");
  }
  listItem->setText(d->mIndexName, name);
- listItem->setText(d->mIndexX, QString::number(gameItem->x()));
- listItem->setText(d->mIndexY, QString::number(gameItem->y()));
+ listItem->setText(d->mIndexX, QString::number(gameItem->centerX()));
+ listItem->setText(d->mIndexY, QString::number(gameItem->centerY()));
  listItem->setText(d->mIndexZ, QString::number(gameItem->z()));
 }
 

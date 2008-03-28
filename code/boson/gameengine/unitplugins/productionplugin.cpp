@@ -100,7 +100,7 @@ void ProductionPlugin::productionPlaced(Unit* produced)
  BoEvent* productionPlaced = new BoEvent("ProducedUnitWithTypePlaced", QString::number(produced->type()), QString::number(unit()->id()));
  productionPlaced->setUnitId(produced->id());
  productionPlaced->setPlayerId(produced->owner()->bosonId());
- productionPlaced->setLocation(BoVector3Fixed(produced->x(), produced->y(), produced->z()));
+ productionPlaced->setLocation(BoVector3Fixed(produced->centerX(), produced->centerY(), produced->z()));
  boGame->queueEvent(productionPlaced);
 
  // the current production is done.
@@ -173,7 +173,7 @@ void ProductionPlugin::addProduction(ProductionType type, unsigned long int id)
  if (!eventName.isNull()) {
 	BoEvent* event = new BoEvent(eventName, QString::number(id), QString::number(unit()->id()));
 	event->setPlayerId(player()->bosonId());
-	event->setLocation(BoVector3Fixed(unit()->x(), unit()->y(), unit()->z()));
+	event->setLocation(BoVector3Fixed(unit()->centerX(), unit()->centerY(), unit()->z()));
 	game()->queueEvent(event);
  }
 }
@@ -204,7 +204,7 @@ void ProductionPlugin::pauseProduction()
  if (!eventName.isNull()) {
 	BoEvent* event = new BoEvent(eventName, QString::number(currentProductionId()), QString::number(unit()->id()));
 	event->setPlayerId(player()->bosonId());
-	event->setLocation(BoVector3Fixed(unit()->x(), unit()->y(), unit()->z()));
+	event->setLocation(BoVector3Fixed(unit()->centerX(), unit()->centerY(), unit()->z()));
 	game()->queueEvent(event);
  }
 }
@@ -235,7 +235,7 @@ void ProductionPlugin::unpauseProduction()
  if (!eventName.isNull()) {
 	BoEvent* event = new BoEvent(eventName, QString::number(currentProductionId()), QString::number(unit()->id()));
 	event->setPlayerId(player()->bosonId());
-	event->setLocation(BoVector3Fixed(unit()->x(), unit()->y(), unit()->z()));
+	event->setLocation(BoVector3Fixed(unit()->centerX(), unit()->centerY(), unit()->z()));
 	game()->queueEvent(event);
  }
 }
@@ -266,7 +266,7 @@ void ProductionPlugin::abortProduction(ProductionType type, unsigned long int id
  if (!eventName.isNull()) {
 	BoEvent* event = new BoEvent(eventName, QString::number(id), QString::number(unit()->id()));
 	event->setPlayerId(player()->bosonId());
-	event->setLocation(BoVector3Fixed(unit()->x(), unit()->y(), unit()->z()));
+	event->setLocation(BoVector3Fixed(unit()->centerX(), unit()->centerY(), unit()->z()));
 	game()->queueEvent(event);
  }
 }
@@ -432,8 +432,8 @@ void ProductionPlugin::productionCompleted()
 #warning converting to ints! -> we should use float here
  theight = unit()->height();
  twidth = unit()-> width();
- tilex = (int)(unit()->x());
- tiley = (int)(unit()->y() + theight);
+ tilex = (int)(unit()->leftEdge());
+ tiley = (int)(unit()->topEdge() + theight);
  int tries; // Tiles to try for free space
  int ctry; // Current try
  currentx = tilex - 1;
@@ -454,10 +454,10 @@ void ProductionPlugin::productionCompleted()
 			currentx++;
 		}
 
-		if (canvas()->canPlaceUnitAt(speciesTheme()->unitProperties(id), BoVector2Fixed(currentx, currenty), this)) {
+		if (canvas()->canPlaceUnitAtTopLeftPos(speciesTheme()->unitProperties(id), BoVector2Fixed(currentx, currenty), this)) {
 			// Free cell - place unit at it
 			mProductionState = mProductionState + 1;
-			((Boson*)player()->game())->buildProducedUnit(this, id, BoVector2Fixed(currentx, currenty));
+			((Boson*)player()->game())->buildProducedUnitAtTopLeftPos(this, id, BoVector2Fixed(currentx, currenty));
 			return;
 		}
 	}

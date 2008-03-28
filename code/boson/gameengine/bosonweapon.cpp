@@ -302,7 +302,10 @@ void BosonWeaponProperties::reset()
   mSounds.insert(SoundWeaponHit, "hit");
 }
 
-BosonShot* BosonWeaponProperties::newShot(Unit* attacker, const BosonWeapon* weapon, BoVector3Fixed pos, BoVector3Fixed target) const
+// TODO: creates a shot with the top-left corner being at "pos". we should
+// convert this to a method that creates a shot with the _center_ point at
+// "pos"!
+BosonShot* BosonWeaponProperties::newShotAtTopLeftPos(Unit* attacker, const BosonWeapon* weapon, BoVector3Fixed pos, BoVector3Fixed target) const
 {
   if(!attacker)
   {
@@ -319,7 +322,7 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, const BosonWeapon* wea
     case BosonShot::Bullet:
     {
       ItemType type(BosonShot::Bullet, unitProperties()->typeId(), id());
-      s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, pos);
+      s = (BosonShot*)canvas->createNewItemAtTopLeftPos(RTTI::Shot, attacker->owner(), type, pos);
       break;
     }
     case BosonShot::Rocket:
@@ -332,13 +335,13 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, const BosonWeapon* wea
       realPos = realPosFloat.toFixed();
       realPos += pos;
       ItemType type(BosonShot::Rocket, unitProperties()->typeId(), id());
-      s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, realPos);
+      s = (BosonShot*)canvas->createNewItemAtTopLeftPos(RTTI::Shot, attacker->owner(), type, realPos);
       break;
     }
     case BosonShot::Mine:
     {
       ItemType type(BosonShot::Mine, unitProperties()->typeId(), id());
-      s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, pos);
+      s = (BosonShot*)canvas->createNewItemAtTopLeftPos(RTTI::Shot, attacker->owner(), type, pos);
       break;
     }
     case BosonShot::Bomb:
@@ -351,7 +354,7 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, const BosonWeapon* wea
       realPos = realPosFloat.toFixed();
       realPos += pos;
       ItemType type(BosonShot::Bomb, unitProperties()->typeId(), id());
-      s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, pos);
+      s = (BosonShot*)canvas->createNewItemAtTopLeftPos(RTTI::Shot, attacker->owner(), type, pos);
       break;
     }
     default:
@@ -400,7 +403,10 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, const BosonWeapon* wea
   return s;
 }
 
-BosonShot* BosonWeaponProperties::newShot(Unit* attacker, const BosonWeapon* weapon, BoVector3Fixed pos, Unit* target) const
+// TODO: creates a shot with the top-left corner being at "pos". we should
+// convert this to a method that creates a shot with the _center_ point at
+// "pos"!
+BosonShot* BosonWeaponProperties::newShotAtTopLeftPos(Unit* attacker, const BosonWeapon* weapon, BoVector3Fixed pos, Unit* target) const
 {
   if(!attacker)
   {
@@ -424,7 +430,7 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, const BosonWeapon* wea
       realPos = realPosFloat.toFixed();
       realPos += pos;
       ItemType type(BosonShot::Missile, unitProperties()->typeId(), id());
-      s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, realPos);
+      s = (BosonShot*)canvas->createNewItemAtTopLeftPos(RTTI::Shot, attacker->owner(), type, realPos);
       break;
     }
     default:
@@ -433,7 +439,7 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, const BosonWeapon* wea
       BoVector3Fixed targetpos(target->centerX(), target->centerY(), target->z());
 
       // abort further processing, return.
-      return newShot(attacker, weapon, pos, targetpos);
+      return newShotAtTopLeftPos(attacker, weapon, pos, targetpos);
     }
   }
 
@@ -639,7 +645,8 @@ void BosonWeapon::shoot(Unit* u)
     {
       turret()->pointTo(BoVector3Fixed(u->centerX(), u->centerY(), u->z()) - mypos, unit());
     }
-    BosonShot* shot = mProp->newShot(unit(), this, mypos, u);
+    // TODO: use newShotAtCenterPos() instead!
+    BosonShot* shot = mProp->newShotAtTopLeftPos(unit(), this, mypos, u);
     canvas()->shotFired(shot, this);
     mReloadCounter = reloadingTime();
     return;
@@ -695,14 +702,15 @@ void BosonWeapon::shoot(const BoVector3Fixed& pos, const BoVector3Fixed& target)
   {
     turret()->pointTo(target - pos, unit());
   }
-  BosonShot* shot = mProp->newShot(unit(), this, pos, target);
+  // TODO: use newShotAtCenterPos() instead!
+  BosonShot* shot = mProp->newShotAtTopLeftPos(unit(), this, pos, target);
   canvas()->shotFired(shot, this);
 
   // Bullet needs to be moved to target and exploded immediately
   if(mProp->shotType() == BosonShot::Bullet)
   {
     ((BosonShotBullet*)shot)->setTarget(target);
-    shot->move(target.x(), target.y(), target.z());
+    shot->moveLeftTopTo(target.x(), target.y(), target.z());
     shot->explode();
   }
 
@@ -746,7 +754,9 @@ bool BosonWeapon::dropBomb(const BoVector2Fixed& hvelocity)
   BoVector3Fixed pos(unit()->centerX(), unit()->centerY(), unit()->z());
   // Substract half the object size from pos, so that bomb's center will be at pos
   pos += BoVector3Fixed(-0.25, -0.25, 0);  // FIXME: use real object size
-  BosonShotBomb* bomb = (BosonShotBomb*)mProp->newShot(unit(), this, pos, pos);
+
+  // TODO: use newShotAtCenterPos() instead!
+  BosonShotBomb* bomb = (BosonShotBomb*)mProp->newShotAtTopLeftPos(unit(), this, pos, pos);
   bomb->setHorizontalVelocity(hvelocity);
   canvas()->shotFired(bomb, this);
   mReloadCounter = reloadingTime();

@@ -92,7 +92,7 @@ protected:
 	bool editorPlayerInput(Q_UINT32 msgid, QDataStream& stream, Player* player);
 
 	void editorDeleteItems(const QValueList<Q_ULONG>& items);
-	Unit* editorPlaceUnit(Q_UINT32 owner, Q_UINT32 unitType, const BoVector2Fixed& pos, const bofixed& rotation);
+	Unit* editorPlaceUnitAtTopLeftPos(Q_UINT32 owner, Q_UINT32 unitType, const BoVector2Fixed& pos, const bofixed& rotation);
 
 	void editorChangeHeight(const QValueVector<Q_UINT32>& cornersX, const QValueVector<Q_UINT32>& cornersY, const QValueVector<bofixed>& heights);
 
