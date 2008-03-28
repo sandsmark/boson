@@ -1387,8 +1387,8 @@ void BosonCanvasRenderer::renderGround(const BosonMap* map, RenderFlags flags)
 void BosonCanvasRenderer::renderBoundingBox(const BosonItem* item)
 {
  // Corners of bb of item
- BoVector3Float c1(item->x(), -item->y(), item->z());
- BoVector3Float c2(item->x() + item->width(), -(item->y() + item->height()), item->z() + item->depth());
+ BoVector3Float c1(item->leftEdge(), -item->topEdge(), item->z());
+ BoVector3Float c2(item->rightEdge(), -(item->bottomEdge()), item->z() + item->depth());
  renderBoundingBox(c1, c2);
 }
 
@@ -1779,8 +1779,8 @@ void BosonCanvasRenderer::renderSelections(const BoItemList* selectedItems)
 		continue;
 	}
 
-	GLfloat x = (item->x() + item->width() / 2);
-	GLfloat y = -((item->y() + item->height() / 2));
+	GLfloat x = item->centerX();
+	GLfloat y = -item->centerY();
 	GLfloat z = item->z();
 
 	GLfloat w = ((float)item->width());
