@@ -316,6 +316,31 @@ BoRect2Fixed BosonItem::boundingRectAdvanced() const
  return BoRect2Fixed(left, top, left + width(), top + height());
 }
 
+void BosonItem::itemAboutToMove(bofixed dx, bofixed dy, bofixed dz)
+{
+ Q_UNUSED(dx);
+ Q_UNUSED(dy);
+ Q_UNUSED(dz);
+
+ removeFromCells();
+
+ // TODO: update collision detection datastructures
+}
+
+void BosonItem::itemHasMoved(bofixed dx, bofixed dy, bofixed dz)
+{
+ Q_UNUSED(dx);
+ Q_UNUSED(dy);
+ Q_UNUSED(dz);
+
+ mCellsDirty = true;
+
+ addToCells();
+ setEffectsPositionDirty(true);
+
+ // TODO: update collision detection datastructures
+}
+
 void BosonItem::addToCells()
 {
  // We don't do anything for shots (at the moment)
@@ -336,12 +361,13 @@ void BosonItem::removeFromCells()
 
 void BosonItem::setSize(bofixed width, bofixed height, bofixed depth)
 {
+ itemAboutToMove(0, 0, 0);
  removeFromCells();
  mWidth = width;
  mHeight = height;
  mDepth = depth;
  mCellsDirty = true;
- addToCells();
+ itemHasMoved(0, 0, 0);
 }
 
 BosonCollisions* BosonItem::collisions() const

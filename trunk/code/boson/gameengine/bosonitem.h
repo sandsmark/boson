@@ -228,19 +228,7 @@ public:
 	// TODO: change semantics of x() and y(): they should return centerX()
 	// and centerY()!
 #if 0
-	/**
-	 * @return The x-coordinate of the left edge of the object.Note that
-	 * this has <em>nothing</em> to do with the OpenGL coordinates.
-	 * These are the internal canvas coordinates.
-	 **/
 	inline bofixed x() const { return mX; }
-
-	/**
-	 * @return The y-coordinate of the unit on the canvas. Note that this is
-	 * <em>not</em> the OpenGL coordinate! <em>NOT</em> canvas coordinates as
-	 * @ref x() and @ref y() (acutally canvas and OpenGL coordiantes are
-	 * equal for z)
-	 **/
 	inline bofixed y() const { return mY; }
 #endif
 
@@ -270,13 +258,13 @@ public:
 	 **/
 	inline bofixed depth() const { return mDepth; }
 
-	inline bofixed leftEdge() const { return mX; }
-	inline bofixed topEdge() const { return mY; }
+	inline bofixed leftEdge() const { return mX - width() / 2; }
+	inline bofixed topEdge() const { return mY - height() / 2; }
 	inline bofixed rightEdge() const { return leftEdge() + width(); }
 	inline bofixed bottomEdge() const { return topEdge() + height(); }
 
-	inline bofixed centerX() const { return leftEdge() + width() / 2; };
-	inline bofixed centerY() const { return topEdge() + height() / 2; };
+	inline bofixed centerX() const { return mX; }
+	inline bofixed centerY() const { return mY; }
 	inline bofixed centerZ() const { return z() + depth() / 2; };
 	BoVector2Fixed center() const;
 
@@ -292,7 +280,7 @@ public:
 	{
 		moveBy(nx - leftEdge(), ny - topEdge(), nz - z());
 	}
-	inline void moveCenterTo(bofixed nx, bofixed ny, bofixed nz)
+	inline void moveCenterTo(bofixed nx, bofixed ny, bofixed nz) // FIXME: nz is still NOT the center (see z())
 	{
 		moveBy(nx - centerX(), ny - centerY(), nz - z());
 	}
@@ -317,10 +305,11 @@ public:
 	virtual void moveBy(bofixed dx, bofixed dy, bofixed dz)
 	{
 		if (dx || dy || dz) {
-			removeFromCells();
-			setPos(leftEdge() + dx, topEdge() + dy, z() + dz);
-			addToCells();
-			setEffectsPositionDirty(true);
+			itemAboutToMove(dx, dy, dz);
+			mX += dx;
+			mY += dy;
+			mZ += dz;
+			itemHasMoved(dx, dy, dz);
 		}
 	}
 
@@ -587,18 +576,14 @@ protected:
 
 private:
 	/**
-	 * Change position of the item. WARNING: you <em>must</em> call @ref
-	 * removeFromCells <em>before</em> calling this function!
-	 *
-	 * You should call @ref addToCells after this function.
+	 * Called right before changing the position of this item.
 	 **/
-	inline void setPos(bofixed x, bofixed y, bofixed z)
-	{
-		mX = x;
-		mY = y;
-		mZ = z;
-		mCellsDirty = true;
-	}
+	void itemAboutToMove(bofixed dx, bofixed dy, bofixed dy);
+
+	/**
+	 * Called right after changing the position of this item.
+	 **/
+	void itemHasMoved(bofixed dx, bofixed dy, bofixed dy);
 
 	/**
 	 * Add the item to the cells on the canvas. This should get called
@@ -621,9 +606,9 @@ private:
 	// FIXME: use KGameProperty here. We can do so, since we don't use
 	// QCanvasSprite anymore.
 	unsigned long int mId;
-	bofixed mX;
-	bofixed mY;
-	bofixed mZ;
+	bofixed mX; // centerX
+	bofixed mY; // centerY
+	bofixed mZ; // NOT the center! still the bottom of the unit (should be changed to centerZ too!)
 	bofixed mWidth;
 	bofixed mHeight;
 	bofixed mDepth;
