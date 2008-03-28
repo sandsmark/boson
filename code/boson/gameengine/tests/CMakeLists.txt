@@ -11,11 +11,11 @@ include_directories(
 
 # unit tests
 set(tests_SRCS
-	main.cpp
-	testframework.cpp
-	maptest.cpp
-	playfieldtest.cpp
-	canvastest.cpp
+	unittests/main.cpp
+	unittests/testframework.cpp
+	unittests/maptest.cpp
+	unittests/playfieldtest.cpp
+	unittests/canvastest.cpp
 )
 kde3_automoc(${tests_SRCS})
 
