@@ -27,3 +27,12 @@ boson_target_link_libraries(tests
 	${LIB_BOMEMORY}
 )
 
+# non-unit tests, just some random test applications
+boson_add_executable(collisiontest collisiontest.cpp unittests/testframework.cpp)
+boson_target_link_libraries(collisiontest
+	gameengine
+	common
+	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
+	${LIB_BOMEMORY}
+)
+
