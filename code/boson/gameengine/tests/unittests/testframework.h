@@ -26,6 +26,9 @@ class BosonMap;
 class BosonPlayField;
 class BosonGroundTheme;
 class SpeciesTheme;
+class BoEventManager;
+class BosonPlayerListManager;
+class BosonCanvas;
 
 #define MY_VERIFY(x) \
 	if (!(x)) { \
@@ -77,6 +80,28 @@ public:
 	static BosonPlayField* createDummyPlayField(const QString& groundThemeId);
 
 	static SpeciesTheme* createAndLoadDummySpeciesTheme(const QColor& teamColor, bool neutralSpecies = false);
+};
+
+// AB: note: we _need_ a new map/playfield for every new canvas, as the canvas
+//     is allowed to (and will) modify the map
+//     -> at the very least: the pathfinder will add colormaps
+class CanvasContainer
+{
+public:
+	CanvasContainer();
+	~CanvasContainer();
+
+	// also creates players for the canvas!
+	bool createCanvas(const QString& groundThemeId);
+
+public:
+	BoEventManager* mEventManager;
+	BosonPlayerListManager* mPlayerListManager;
+	BosonPlayField* mPlayField;
+	BosonCanvas* mCanvas;
+
+protected:
+	bool createPlayers(unsigned int count);
 };
 
 #endif

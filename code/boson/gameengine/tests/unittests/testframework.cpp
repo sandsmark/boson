@@ -27,6 +27,10 @@
 #include "bosonplayfield.h"
 #include "bpfdescription.h"
 #include "speciestheme.h"
+#include "player.h"
+#include "bosoncanvas.h"
+#include "boeventmanager.h"
+#include "bosonplayerlistmanager.h"
 
 #include "boglobal.h"
 #include "bosondata.h"
@@ -160,5 +164,84 @@ SpeciesTheme* TestFrameWork::createAndLoadDummySpeciesTheme(const QColor& teamCo
  }
 
  return theme;
+}
+
+
+CanvasContainer::CanvasContainer()
+{
+ mPlayField = 0;
+ mCanvas = 0;
+ mPlayerListManager = 0;
+ mEventManager = 0;
+}
+
+CanvasContainer::~CanvasContainer()
+{
+ for (QPtrListIterator<Player> it(mPlayerListManager->allPlayerList()); it.current(); ++it) {
+	delete it.current();
+ }
+ delete mCanvas;
+ delete mPlayField;
+ delete mEventManager;
+ delete mPlayerListManager;
+}
+
+bool CanvasContainer::createCanvas(const QString& groundThemeId)
+{
+ mPlayField = TestFrameWork::createDummyPlayField(groundThemeId);
+ if (!mPlayField) {
+	boError() << k_funcinfo << "NULL playfield created" << endl;
+	return false;
+ }
+
+ mEventManager = new BoEventManager(0);
+ mPlayerListManager = new BosonPlayerListManager(0);
+ mCanvas = new BosonCanvas(true, 0);
+
+ if (!mCanvas->init(mPlayField->map(), mPlayerListManager, mEventManager)) {
+	boError() << k_funcinfo << "initializing canvas failed" << endl;
+	return false;
+ }
+
+ if (!createPlayers(2)) {
+	boError() << k_funcinfo << "creating players failed" << endl;
+	return false;
+ }
+
+ return true;
+}
+
+// AB: creates count+1 players (count players + 1 neutral player)
+bool CanvasContainer::createPlayers(unsigned int count)
+{
+ QPtrList<KPlayer> players;
+ for (unsigned int i = 0; i < count; i++) {
+	SpeciesTheme* theme = TestFrameWork::createAndLoadDummySpeciesTheme(QColor(i * 10, 0, 0));
+	if (!theme) {
+		boError() << k_funcinfo << "creating a speciestheme failed" << endl;
+		return false;
+	}
+
+	Player* p = new Player();
+	p->setUserId(128 + i);
+	p->setSpeciesTheme(theme);
+	p->initMap(mPlayField->map());
+	// AB: do we need a p->loadFromXML()?
+	players.append(p);
+ }
+ SpeciesTheme* neutralTheme = TestFrameWork::createAndLoadDummySpeciesTheme(QColor(0, 100, 0), true);
+ if (!neutralTheme) {
+	boError() << k_funcinfo << "creating a neutral speciestheme failed" << endl;
+	return false;
+ }
+ Player* neutralPlayer = new Player(true);
+ neutralPlayer->setUserId(256);
+ neutralPlayer->setSpeciesTheme(neutralTheme);
+ neutralPlayer->initMap(mPlayField->map());
+ // AB: do we need a neutralPlayer->loadFromXML()?
+
+ mPlayerListManager->recalculatePlayerLists(players);
+
+ return true;
 }
 
