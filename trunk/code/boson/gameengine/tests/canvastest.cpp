@@ -206,21 +206,21 @@ bool CanvasTest::testSaveLoadCanvas()
 {
  int unitType1 = 1; // UnitProperties ID
  BoVector3Fixed unit1Pos(10.0, 10.0, 0.0);
- mCanvasContainer->mCanvas->createNewItem(RTTI::UnitStart + unitType1,
+ mCanvasContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType1,
 		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
 		ItemType(unitType1),
 		unit1Pos);
 
  int unitType2 = unitType1;
  BoVector3Fixed unit2Pos(20.0, 10.0, 0.0);
- mCanvasContainer->mCanvas->createNewItem(RTTI::UnitStart + unitType2,
+ mCanvasContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType2,
 		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
 		ItemType(unitType2),
 		unit2Pos);
 
  int unitType3 = unitType1;
  BoVector3Fixed unit3Pos(20.0, 10.0, 0.0);
- mCanvasContainer->mCanvas->createNewItem(RTTI::UnitStart + unitType3,
+ mCanvasContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType3,
 		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
 		ItemType(unitType3),
 		unit3Pos);
@@ -317,8 +317,8 @@ bool CanvasTest::checkIfCanvasAreEqual(BosonCanvas* canvas1, BosonCanvas* canvas
 	// AB: note: we explicitly do _NOT_ check every property, only a subset
 	// of the most important ones.
 
-	MY_VERIFY(item1->x() == item2->x());
-	MY_VERIFY(item1->y() == item2->y());
+	MY_VERIFY(item1->centerX() == item2->centerX());
+	MY_VERIFY(item1->centerY() == item2->centerY());
 	MY_VERIFY(item1->z() == item2->z());
 	MY_VERIFY(item1->width() == item2->width());
 	MY_VERIFY(item1->height() == item2->height());
@@ -366,28 +366,29 @@ bool CanvasTest::testMoveUnits()
 {
  int unitType1 = 1; // UnitProperties ID
  BoVector3Fixed unit1Pos(10.0, 10.0, 0.0);
- Unit* unit1 = static_cast<Unit*>(mCanvasContainer->mCanvas->createNewItem(RTTI::UnitStart + unitType1,
+ Unit* unit1 = static_cast<Unit*>(mCanvasContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType1,
 		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
 		ItemType(unitType1),
 		unit1Pos));
 
  int unitType2 = unitType1;
  BoVector3Fixed unit2Pos(20.0, 10.0, 0.0);
- Unit* unit2 = static_cast<Unit*>(mCanvasContainer->mCanvas->createNewItem(RTTI::UnitStart + unitType2,
+ Unit* unit2 = static_cast<Unit*>(mCanvasContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType2,
 		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
 		ItemType(unitType2),
 		unit2Pos));
 
  int unitType3 = unitType1;
  BoVector3Fixed unit3Pos(20.0, 10.0, 0.0);
- Unit* unit3 = static_cast<Unit*>(mCanvasContainer->mCanvas->createNewItem(RTTI::UnitStart + unitType3,
+ Unit* unit3 = static_cast<Unit*>(mCanvasContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType3,
 		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
 		ItemType(unitType3),
 		unit3Pos));
 
- MY_VERIFY(BoVector3Fixed(unit1->x(), unit1->y(), unit1->z()) == unit1Pos);
- MY_VERIFY(BoVector3Fixed(unit2->x(), unit2->y(), unit2->z()) == unit2Pos);
- MY_VERIFY(BoVector3Fixed(unit3->x(), unit3->y(), unit3->z()) == unit3Pos);
+ // TODO: leftEdge->centerX, topEdge->centerY
+ MY_VERIFY(BoVector3Fixed(unit1->leftEdge(), unit1->topEdge(), unit1->z()) == unit1Pos);
+ MY_VERIFY(BoVector3Fixed(unit2->leftEdge(), unit2->topEdge(), unit2->z()) == unit2Pos);
+ MY_VERIFY(BoVector3Fixed(unit3->leftEdge(), unit3->topEdge(), unit3->z()) == unit3Pos);
 
  // TODO: cells?
 
@@ -398,9 +399,10 @@ bool CanvasTest::testMoveUnits()
  unit2Pos += BoVector3Fixed(0.0, 10.0, 0.0);
  unit3Pos += BoVector3Fixed(10.0, 10.0, 0.0);
 
- MY_VERIFY(BoVector3Fixed(unit1->x(), unit1->y(), unit1->z()) == unit1Pos);
- MY_VERIFY(BoVector3Fixed(unit2->x(), unit2->y(), unit2->z()) == unit2Pos);
- MY_VERIFY(BoVector3Fixed(unit3->x(), unit3->y(), unit3->z()) == unit3Pos);
+ // TODO: leftEdge->centerX, topEdge->centerY
+ MY_VERIFY(BoVector3Fixed(unit1->leftEdge(), unit1->topEdge(), unit1->z()) == unit1Pos);
+ MY_VERIFY(BoVector3Fixed(unit2->leftEdge(), unit2->topEdge(), unit2->z()) == unit2Pos);
+ MY_VERIFY(BoVector3Fixed(unit3->leftEdge(), unit3->topEdge(), unit3->z()) == unit3Pos);
 
  // TODO: cells?
 

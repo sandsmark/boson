@@ -225,7 +225,7 @@ void BosonItem::makeCells(Cell* allCells, QPtrVector<Cell>* cells, const BoRect2
 // FIXME: rotation!
 bool BosonItem::bosonCollidesWith(BosonItem* item) const
 {
- BoVector3Fixed itempos(item->x() + item->xVelocity(), item->y() + item->yVelocity(), item->z() + item->zVelocity());
+ BoVector3Fixed itempos(item->leftEdge() + item->xVelocity(), item->topEdge() + item->yVelocity(), item->z() + item->zVelocity());
  return bosonCollidesWith(itempos, itempos + BoVector3Fixed(item->width(), item->height(), item->depth()));
 }
 
@@ -252,10 +252,10 @@ bool BosonItem::bosonCollidesWith(const BoVector3Fixed& v1, const BoVector3Fixed
 
  // BB 1
  bofixed minx1, miny1, maxx1, maxy1;
- minx1 = x() + xVelocity() - halfw;
- miny1 = y() + yVelocity() - halfh + 1;
- maxx1 = x() + xVelocity() + width() + halfw;
- maxy1 = y() + yVelocity() + height() + halfh - 1;
+ minx1 = leftEdge() + xVelocity() - halfw;
+ miny1 = topEdge() + yVelocity() - halfh + 1;
+ maxx1 = leftEdge() + xVelocity() + width() + halfw;
+ maxy1 = topEdge() + yVelocity() + height() + halfh - 1;
  if ((centerx > minx1) && (centerx < maxx1) && (centery > miny1) && (centery < maxy1)) {
 	// Box's center is in BB 1
 //	boDebug() << "        " << k_funcinfo << "Items COLLIDE (1)!!!" << endl;
@@ -264,10 +264,10 @@ bool BosonItem::bosonCollidesWith(const BoVector3Fixed& v1, const BoVector3Fixed
 
  // BB 2
  bofixed minx2, miny2, maxx2, maxy2;
- minx2 = x() + xVelocity() - halfw + 1;
- miny2 = y() + yVelocity() - halfh;
- maxx2 = x() + xVelocity() + width() + halfw - 1;
- maxy2 = y() + yVelocity() + height() + halfh;
+ minx2 = leftEdge() + xVelocity() - halfw + 1;
+ miny2 = topEdge() + yVelocity() - halfh;
+ maxx2 = leftEdge() + xVelocity() + width() + halfw - 1;
+ maxy2 = topEdge() + yVelocity() + height() + halfh;
  if ((centerx > minx2) && (centerx < maxx2) && (centery > miny2) && (centery < maxy2)) {
 	// Box's center is in BB 2
 //	boDebug() << "        " << k_funcinfo << "Items COLLIDE (2)!!!" << endl;
@@ -275,8 +275,8 @@ bool BosonItem::bosonCollidesWith(const BoVector3Fixed& v1, const BoVector3Fixed
  }
 
  // Check manhattan dist between centers
- bofixed mycenterx = x() + xVelocity() + width() / 2;
- bofixed mycentery = y() + yVelocity() + height() / 2;
+ bofixed mycenterx = leftEdge() + xVelocity() + width() / 2;
+ bofixed mycentery = topEdge() + yVelocity() + height() / 2;
  if (QABS(mycenterx - centerx) + QABS(mycentery - centery) < (width() / 2 + halfw + height() / 2 + halfh - 1)) {
 	// Box's center still collides with us
 //	boDebug() << "        " << k_funcinfo << "Items COLLIDE! (3)!!" << endl;
@@ -364,8 +364,8 @@ bool BosonItem::saveAsXML(QDomElement& root)
  root.setAttribute(QString::fromLatin1("GroupType"), (int)0);
 
 
- root.setAttribute(QString::fromLatin1("x"), x());
- root.setAttribute(QString::fromLatin1("y"), y());
+ root.setAttribute(QString::fromLatin1("x"), leftEdge());
+ root.setAttribute(QString::fromLatin1("y"), topEdge());
  root.setAttribute(QString::fromLatin1("z"), z());
  root.setAttribute(QString::fromLatin1("Rtti"), (int)rtti());
  root.setAttribute(QString::fromLatin1("Id"), (unsigned int)id());

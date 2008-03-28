@@ -239,7 +239,8 @@ QPtrList<BosonEffect> BosonEffectManager::newExplodingFragmentHitEffects(const U
 
 
 
-QPtrList<BosonEffect> BosonEffectManager::newShootEffects(const BosonWeaponProperties* prop, const BoVector3Fixed& pos, bofixed rotation) const
+// topLeftPos.x() == leftEdge(), topLeftPos.y() == topEdge(), topEdge.z() == z()
+QPtrList<BosonEffect> BosonEffectManager::newShootEffects(const BosonWeaponProperties* prop, const BoVector3Fixed& topLeftPos, bofixed rotation) const
 {
  if (!prop) {
 	BO_NULL_ERROR(prop);
@@ -249,7 +250,7 @@ QPtrList<BosonEffect> BosonEffectManager::newShootEffects(const BosonWeaponPrope
 	return QPtrList<BosonEffect>();
  }
  const WeaponPropertiesEffects* e = d->mWeaponPropertiesEffects[prop];
- return BosonEffectProperties::newEffects(e->shootEffectProperties(), pos, BoVector3Fixed(0, 0, rotation));
+ return BosonEffectProperties::newEffects(e->shootEffectProperties(), topLeftPos, BoVector3Fixed(0, 0, rotation));
 }
 
 QPtrList<BosonEffect> BosonEffectManager::newFlyEffects(const BosonWeaponProperties* prop, const BoVector3Fixed& pos, bofixed rotation) const

@@ -218,7 +218,7 @@ public:
 	 * UnitProperties::typeId
 	 * @param pos The position of the new unit.
 	 **/
-	bool buildProducedUnit(ProductionPlugin* factory, unsigned long int unitType, BoVector2Fixed pos);
+	bool buildProducedUnitAtTopLeftPos(ProductionPlugin* factory, unsigned long int unitType, BoVector2Fixed topLeftPos);
 
 	virtual void networkTransmission(QDataStream&, int msgid, Q_UINT32 receiver, Q_UINT32 sender, Q_UINT32 clientID);
 

@@ -446,7 +446,7 @@ bool BosonGameViewInput::actionBuild(const BoVector3Fixed& groundCanvasVector)
 	boError() << k_funcinfo << "NULL unit properties" << endl;
 	return false;
  }
- if (!canvas()->canPlaceUnitAt(prop, BoVector2Fixed(x, y), production)) {
+ if (!canvas()->canPlaceUnitAtTopLeftPos(prop, BoVector2Fixed(x, y), production)) {
 	boDebug() << k_funcinfo << "Cannot place production here" << endl;
 	boGame->slotAddChatSystemMessage(i18n("You can't place a %1 there").arg(prop->name()));
 	return false;
@@ -690,7 +690,7 @@ void BosonGameViewInput::updatePlacementPreviewData()
  // note: this applies to mobiles as well as for facilities!
  // (mobiles are usually auto placed, but manual placement might get used if
  // auto-placement failed)
- bool canPlace = canvas()->canPlaceUnitAt(prop, BoVector2Fixed(cursorCanvasVector().x(), cursorCanvasVector().y()), pp);
+ bool canPlace = canvas()->canPlaceUnitAtTopLeftPos(prop, BoVector2Fixed(cursorCanvasVector().x(), cursorCanvasVector().y()), pp);
  emit signalSetPlacementPreviewData(prop, canPlace, placementFreePlacement(), !placementDisableCollisions());
 
 }

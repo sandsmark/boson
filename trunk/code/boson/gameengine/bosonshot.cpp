@@ -178,13 +178,13 @@ void BosonShot::advanceMoveCheck()
   {
     return;
   }
-  bofixed xPos = x() + xVelocity();
-  bofixed yPos = y() + yVelocity();
+  bofixed xPos = centerX() + xVelocity();
+  bofixed yPos = centerY() + yVelocity();
   // ensure that the next position will be valid
   if(xPos < 0 || xPos >= canvas()->mapWidth())
   {
     velocityX = 0;
-    xPos = x();
+    xPos = centerX();
     if(xPos < 0 || xPos >= canvas()->mapWidth())
     {
       boError(350) << k_funcinfo << "Internal error! xPos is still invalid: " << xPos << endl;
@@ -193,7 +193,7 @@ void BosonShot::advanceMoveCheck()
   if(yPos < 0 || yPos >= canvas()->mapHeight())
   {
     velocityY = 0;
-    yPos = y();
+    yPos = centerY();
     if(yPos < 0 || yPos >= canvas()->mapHeight())
     {
       boError(350) << k_funcinfo << "Internal error! yPos is still invalid: " << yPos << endl;
@@ -315,7 +315,7 @@ bool BosonShotBullet::init()
 
 void BosonShotBullet::moveToTarget()
 {
-  move(mTarget.x(), mTarget.y(), mTarget.z());
+  moveCenterTo(mTarget.x(), mTarget.y(), mTarget.z());
 }
 
 void BosonShotBullet::setTarget(const BoVector3Fixed& target)
@@ -356,6 +356,7 @@ void BosonShotRocket::initStatic()
   addPropertyId(IdMaxHeight, "MaxHeight");
 }
 
+// AB: "pos" is the _center_ of the rocket
 void BosonShotRocket::init(const BoVector3Fixed& pos, const BoVector3Fixed& target)
 {
   boDebug(350) << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
@@ -394,7 +395,7 @@ void BosonShotRocket::init(const BoVector3Fixed& pos, const BoVector3Fixed& targ
   mEffectVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]);
 
   // Initialization
-  move(pos[0], pos[1], pos[2]);
+  moveCenterTo(pos[0], pos[1], pos[2]);
   setRotation(Bo3dTools::rotationToPoint(mVelo[0], mVelo[1]));
   mZ = 0; // For parable calculations only, must be 0 at the beginning
   mPassedDist = 0;
@@ -430,7 +431,7 @@ void BosonShotRocket::advanceMoveInternal()
   setXRotation(Bo3dTools::rotationToPoint(mEffectVelo * speed(), zvelo) - 90 );
 
   // Check if missile is still active
-  bofixed newdist = (mTarget - BoVector3Fixed(x() + xVelocity(), y() + yVelocity(), z() + zVelocity())).dotProduct();
+  bofixed newdist = (mTarget - BoVector3Fixed(centerX() + xVelocity(), centerY() + yVelocity(), z() + zVelocity())).dotProduct();
   if(newdist > mLastDistToTarget)
   {
     explode();
@@ -528,7 +529,7 @@ bool BosonShotRocket::loadFromXML(const QDomElement& root)
 
   mVelo.set(xvelo, yvelo, zvelo);
   mTarget.set(targetx, targety, targetz);
-  mLastDistToTarget = (mTarget - BoVector3Fixed(x(), y(), z())).dotProduct();
+  mLastDistToTarget = (mTarget - BoVector3Fixed(centerX(), centerY(), z())).dotProduct();
   mEffectVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]);
   setRotation(Bo3dTools::rotationToPoint(mVelo[0], mVelo[1]));
   setSpeed(speed);
@@ -540,7 +541,7 @@ bool BosonShotRocket::loadFromXML(const QDomElement& root)
 
 void BosonShotRocket::moveToTarget()
 {
-  move(mTarget.x(), mTarget.y(), mTarget.z());
+  moveCenterTo(mTarget.x(), mTarget.y(), mTarget.z());
 }
 
 
@@ -569,6 +570,7 @@ void BosonShotMissile::initStatic()
   addPropertyId(IdPassedDist, "PassedDist");
 }
 
+// AB: "pos" is the _center_ of the shot
 void BosonShotMissile::init(const BoVector3Fixed& pos, Unit* target)
 {
   boDebug(350) << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
@@ -592,7 +594,7 @@ void BosonShotMissile::init(const BoVector3Fixed& pos, Unit* target)
   setMaxSpeed(mWeaponSpeed);
 
   // Initialization
-  move(pos[0], pos[1], pos[2]);
+  moveCenterTo(pos[0], pos[1], pos[2]);
   //setRotation(Bo3dTools::rotationToPoint(target->x() - pos.x(), target->y() - pos.y()));
 
   mPassedDist = 0;
@@ -600,12 +602,12 @@ void BosonShotMissile::init(const BoVector3Fixed& pos, Unit* target)
   // Initial velocity
   if(properties()->startAngle() == -1)
   {
-    mVelo.set(mTarget->x() - x(), mTarget->y() - y(), mTarget->z() - z());
+    mVelo.set(mTarget->centerX() - centerX(), mTarget->centerY() - centerY(), mTarget->z() - z());
     mVelo.normalize();
   }
   else
   {
-    mVelo.set(mTarget->x() - x(), mTarget->y() - y(), 0);
+    mVelo.set(mTarget->centerX() - centerX(), mTarget->centerY() - centerY(), 0);
     mVelo.normalize();
     mVelo.scale(cos(properties()->startAngle() * DEG2RAD));
     mVelo.setZ(sin(properties()->startAngle() * DEG2RAD));
@@ -639,7 +641,7 @@ void BosonShotMissile::advanceMoveInternal()
   //boDebug(350) << k_funcinfo << id() << ": my pos: (" << x() << "; " << y() << "; " << z() << ")" << endl;
   // Calculate velocity
   // Missile always moves towards it's target
-  BoVector3Fixed totarget(mTargetPos.x() - x(), mTargetPos.y() - y(), mTargetPos.z() - z());
+  BoVector3Fixed totarget(mTargetPos.x() - centerX(), mTargetPos.y() - centerY(), mTargetPos.z() - z());
   bofixed totargetlen = totarget.length();
   // We need check this here to avoid division by 0 later
   if(totargetlen <= speed())
@@ -814,7 +816,7 @@ void BosonShotExplosion::activate(const BoVector3Fixed& pos, long int damage, bo
   mDamageRange = damagerange;
   mFullDamageRange = fulldamagerange;
   mDelay = delay;
-  move(pos.x(), pos.y(), pos.z());
+  moveCenterTo(pos.x(), pos.y(), pos.z());
 }
 
 bool BosonShotExplosion::saveAsXML(QDomElement& root)
@@ -867,10 +869,11 @@ void BosonShotMine::initStatic()
   addPropertyId(IdActivated, "Activated");
 }
 
+// AB: "pos" is the _center_ of the mine
 void BosonShotMine::init(const BoVector3Fixed& pos)
 {
   mActivated = false;
-  move(pos.x(), pos.y(), pos.z());
+  moveCenterTo(pos.x(), pos.y(), pos.z());
   setVisible(true);
 }
 
@@ -946,12 +949,13 @@ void BosonShotBomb::initStatic()
   addPropertyId(IdActivated, "Activated");
 }
 
+// AB: "pos" is the _center_ of the bomb
 void BosonShotBomb::init(const BoVector3Fixed& pos)
 {
   // TODO: BosonShotBomb and BosonShotMine share quite a lot code. Maybe make
   //  bomb inherit from mine (bomb is basically a falling mine)
   mActivated = false;
-  move(pos.x(), pos.y(), pos.z());
+  moveCenterTo(pos.x(), pos.y(), pos.z());
   setVisible(true);
 }
 
@@ -1105,7 +1109,7 @@ void BosonShotFragment::activate(const BoVector3Fixed& pos, const UnitProperties
   mVelo.setZ(FRAGMENT_MIN_Z_SPEED + (r->getDouble() * (FRAGMENT_MAX_Z_SPEED - FRAGMENT_MIN_Z_SPEED)));
   boDebug(350) << k_funcinfo << "Velocity is: (" << mVelo.x() << "; " << mVelo.y() << "; " << mVelo.z() << ")" << endl;
 
-  move(pos.x(), pos.y(), pos.z() + 0.2);  // +0.2 prevents immediate contact with the terrain
+  moveCenterTo(pos.x(), pos.y(), pos.z() + 0.2);  // +0.2 prevents immediate contact with the terrain
   setRotation(Bo3dTools::rotationToPoint(mVelo.x(), mVelo.y()));
   setVisible(true);
 }

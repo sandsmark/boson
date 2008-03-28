@@ -186,8 +186,8 @@ class BosonWeaponProperties : public PluginProperties
      * @return Created shot. Note that it's not added to canvas.
      * Note that pos or target may not be used depending on shot's type
      **/
-    BosonShot* newShot(Unit* attacker, const BosonWeapon* weapon, BoVector3Fixed pos, BoVector3Fixed target) const;
-    BosonShot* newShot(Unit* attacker, const BosonWeapon* weapon, BoVector3Fixed pos, Unit* target) const;
+    BosonShot* newShotAtTopLeftPos(Unit* attacker, const BosonWeapon* weapon, BoVector3Fixed pos, BoVector3Fixed target) const;
+    BosonShot* newShotAtTopLeftPos(Unit* attacker, const BosonWeapon* weapon, BoVector3Fixed pos, Unit* target) const;
 
     QValueList<unsigned long int> shootEffectIds() const  { return mShootEffectIds; }
     QValueList<unsigned long int> flyEffectIds() const  { return mFlyEffectIds; }

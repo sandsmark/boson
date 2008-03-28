@@ -295,7 +295,7 @@ void UnitMover::advanceFollow(unsigned int advanceCallsCount)
 	return;
  }
 
- if (QMAX(QABS(unit()->x() - target->x()), QABS(unit()->y() - target->y())) > followorder->distance()+1) {
+ if (QMAX(QABS(unit()->centerX() - target->centerX()), QABS(unit()->centerY() - target->centerY())) > followorder->distance()+1) {
 	// We're too far from the followed unit
 	// AB: warning - this does a lookup on all items and therefore is slow!
 	// --> but we need it as a simple test on the pointer causes trouble if
@@ -970,10 +970,10 @@ void UnitMoverLand::avoidance()
  BoVector2Fixed toRight(toRight3.x(), -toRight3.y());
  bofixed avoidstrength = 0;
  // Find all units which are near us
- BoRect2Fixed rect(unit()->x() - unit()->speed() * 40 - 1,
-		unit()->y() - unit()->speed() * 40 - 1,
-		unit()->x() + unit()->width() + unit()->speed() * 40 + 1,
-		unit()->y() + unit()->height() + unit()->speed() * 40 + 1);
+ BoRect2Fixed rect(unit()->leftEdge() - unit()->speed() * 40 - 1,
+		unit()->topEdge() - unit()->speed() * 40 - 1,
+		unit()->rightEdge() + unit()->speed() * 40 + 1,
+		unit()->bottomEdge() + unit()->speed() * 40 + 1);
  BoItemList* items = canvas()->collisions()->collisionsAtCells(rect, unit(), false);
  // Go through the units
  for (BoItemList::ConstIterator it = items->begin(); it != items->end(); ++it) {
@@ -1208,7 +1208,7 @@ bool UnitMoverFlying::init()
  }
 
  unit()->setSpeed(maxSpeed() * 0.75);
- unit()->move(unit()->x(), unit()->y(), unit()->unitProperties()->preferredAltitude());
+ unit()->moveCenterTo(unit()->centerX(), unit()->centerY(), unit()->unitProperties()->preferredAltitude());
  return true;
 }
 
@@ -1271,15 +1271,15 @@ void UnitMoverFlying::flyInCircle()
  velo.setY(sin(Bo3dTools::deg2rad(newrot - 90)) * unit()->speed());
 
  // Don't go off the map
- if (unit()->x() < 0.5 || unit()->y() < 0.5 ||
-		unit()->x() > bofixed(canvas()->mapWidth()) - unit()->width() - 0.5 || unit()->y() > bofixed(canvas()->mapHeight()) - unit()->height() - 0.5) {
-	bofixed x = unit()->x();
-	bofixed y = unit()->y();
-	x = QMAX(x, bofixed(1));
-	y = QMAX(y, bofixed(1));
-	x = QMIN(x, bofixed(canvas()->mapWidth()) - unit()->width() - 1);
-	y = QMIN(y, bofixed(canvas()->mapHeight()) - unit()->height() - 1);
-	unit()->move(x, y, unit()->z());
+ if (unit()->leftEdge() < 0.5 || unit()->topEdge() < 0.5 ||
+		unit()->rightEdge() > bofixed(canvas()->mapWidth()) - 0.5 || unit()->bottomEdge() > bofixed(canvas()->mapHeight()) - 0.5) {
+	bofixed x = unit()->centerX();
+	bofixed y = unit()->centerY();
+	x = QMAX(x, bofixed(1 + unit()->width()/2.0));
+	y = QMAX(y, bofixed(1 + unit()->height()/2.0));
+	x = QMIN(x, bofixed(canvas()->mapWidth()) - unit()->width()/2.0 - 1);
+	y = QMIN(y, bofixed(canvas()->mapHeight()) - unit()->height()/2.0 - 1);
+	unit()->moveCenterTo(x, y, unit()->z());
  }
 
  bofixed groundz = canvas()->heightAtPoint(unit()->centerX() + velo.x(), unit()->centerY() + velo.y());

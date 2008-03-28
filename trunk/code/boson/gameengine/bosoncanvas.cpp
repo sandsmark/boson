@@ -153,7 +153,7 @@ public:
 	void setMap(BosonMap* map) { mMap = map; }
 	void quitGame();
 
-	void unitMoved(Unit* u, bofixed oldX, bofixed oldY);
+	void unitMoved(Unit* u, bofixed oldCenterX, bofixed oldCenterY);
 	void updateSights();
 	void updateRadars();
 
@@ -166,8 +166,8 @@ public:
 	void addRadar(Unit* unit);
 	void removeRadar(Unit* unit);
 	enum RadarChangeType { Move = 0, Add, Remove };
-	void updateChangedRadar(Unit* unit, bofixed oldX, bofixed oldY, RadarChangeType type = Move);
-	void updateRadarSignal(Unit* unit, bofixed oldX, bofixed oldY);
+	void updateChangedRadar(Unit* unit, bofixed oldCenterX, bofixed oldCenterY, RadarChangeType type = Move);
+	void updateRadarSignal(Unit* unit, bofixed oldCenterX, bofixed oldCenterY);
 	bofixed radarSignalStrength(const RadarPlugin* radar, bofixed x, bofixed y, Unit* u);
 	/**
 	 * Recalculates signal strength of radar and radarjammer units
@@ -178,19 +178,19 @@ public:
 	void addRadarJammer(Unit* unit);
 	void removeRadarJammer(Unit* unit);
 	const QValueList<const Unit*>* radarJammerUnits() const { return &mRadarJammers; }
-	void updateChangedJammer(Unit* unit, bofixed oldX, bofixed oldY, RadarChangeType type = Move);
+	void updateChangedJammer(Unit* unit, bofixed oldCenterX, bofixed oldCenterY, RadarChangeType type = Move);
 	bofixed jammerSignalStrength(const RadarJammerPlugin* radar, bofixed x, bofixed y, Unit* u);
 
 private:
 	class ScheduledUnit
 	{
 	public:
-		ScheduledUnit(Unit* u, bofixed x, bofixed y) { unit = u; lastX = x; lastY = y; }
+		ScheduledUnit(Unit* u, bofixed centerX, bofixed centerY) { unit = u; lastCenterX = centerX; lastCenterY = centerY; }
 		ScheduledUnit() {}
 
 		Unit* unit;
-		bofixed lastX;
-		bofixed lastY;
+		bofixed lastCenterX;
+		bofixed lastCenterY;
 	};
 
 	// List of units that have moved, their sights need to be updated
@@ -223,21 +223,21 @@ void BoCanvasSightManager::quitGame()
  mRadarJammers.clear();
 }
 
-void BoCanvasSightManager::unitMoved(Unit* u, bofixed oldX, bofixed oldY)
+void BoCanvasSightManager::unitMoved(Unit* u, bofixed oldCenterX, bofixed oldCenterY)
 {
  if (!u->isScheduledForSightUpdate()) {
-	mScheduledSightUpdates.append(ScheduledUnit(u, oldX, oldY));
+	mScheduledSightUpdates.append(ScheduledUnit(u, oldCenterX, oldCenterY));
 	u->setScheduledForSightUpdate(true);
  }
 
  if (!u->isScheduledForRadarUpdate()) {
 	if (u->plugin(UnitPlugin::Radar)) {
-		mChangedRadars.append(ScheduledUnit(u, oldX, oldY));
+		mChangedRadars.append(ScheduledUnit(u, oldCenterX, oldCenterY));
 	}
 	if (u->plugin(UnitPlugin::RadarJammer)) {
-		mChangedJammers.append(ScheduledUnit(u, oldX, oldY));
+		mChangedJammers.append(ScheduledUnit(u, oldCenterX, oldCenterY));
 	}
-	mScheduledRadarUpdates.append(ScheduledUnit(u, oldX, oldY));
+	mScheduledRadarUpdates.append(ScheduledUnit(u, oldCenterX, oldCenterY));
 	u->setScheduledForRadarUpdate(true);
  }
 }
@@ -251,13 +251,13 @@ void BoCanvasSightManager::updateSights()
 		mScheduledSightUpdates.pop_front();
 		continue;
 	}
-	updateSight(s.unit, s.lastX, s.lastY);
+	updateSight(s.unit, s.lastCenterX, s.lastCenterY);
 
 	mScheduledSightUpdates.pop_front();
  }
 }
 
-void BoCanvasSightManager::updateSight(Unit* unit, bofixed oldX, bofixed oldY)
+void BoCanvasSightManager::updateSight(Unit* unit, bofixed oldCenterX_, bofixed oldCenterY_)
 {
  PROFILE_METHOD;
  unsigned int sight = (int)unit->sightRange();
@@ -273,8 +273,8 @@ void BoCanvasSightManager::updateSight(Unit* unit, bofixed oldX, bofixed oldY)
 		y + sight) - y;
 
 
- unsigned int oldCenterX = (unsigned int)(unit->centerX() + (oldX - unit->x()));
- unsigned int oldCenterY = (unsigned int)(unit->centerY() + (oldY - unit->y()));
+ unsigned int oldCenterX = oldCenterX_;
+ unsigned int oldCenterY = oldCenterY_;
  int deltaX = x - oldCenterX;
  int deltaY = y - oldCenterY;
  if (!deltaX && !deltaY) {
@@ -369,8 +369,8 @@ void BoCanvasSightManager::removeSight(Unit* unit)
 	for (it = mScheduledSightUpdates.begin(); it != mScheduledSightUpdates.end(); ++it) {
 		const ScheduledUnit& s = *it;
 		if (s.unit == unit) {
-			x = (unsigned int)(unit->centerX() + (s.lastX - unit->x()));
-			y = (unsigned int)(unit->centerY() + (s.lastY - unit->y()));
+			x = (unsigned int)(unit->centerX() + (s.lastCenterX - unit->centerX()));
+			y = (unsigned int)(unit->centerY() + (s.lastCenterY - unit->centerY()));
 			mScheduledSightUpdates.remove(it);
 			break;
 		}
@@ -424,7 +424,7 @@ void BoCanvasSightManager::updateRadars()
  // First update changed radars
  while (!mChangedRadars.isEmpty()) {
 	const ScheduledUnit& s = mChangedRadars.first();
-	updateChangedRadar(s.unit, s.lastX, s.lastY);
+	updateChangedRadar(s.unit, s.lastCenterX, s.lastCenterY);
 
 	mChangedRadars.pop_front();
 	recalculateSpecialSignalStrengthsRequired = true;
@@ -433,7 +433,7 @@ void BoCanvasSightManager::updateRadars()
  // Then changed jammers
  while (!mChangedJammers.isEmpty()) {
 	const ScheduledUnit& s = mChangedJammers.first();
-	updateChangedJammer(s.unit, s.lastX, s.lastY);
+	updateChangedJammer(s.unit, s.lastCenterX, s.lastCenterY);
 
 	mChangedJammers.pop_front();
 	recalculateSpecialSignalStrengthsRequired = true;
@@ -446,7 +446,7 @@ void BoCanvasSightManager::updateRadars()
 		mScheduledRadarUpdates.pop_front();
 		continue;
 	}
-	updateRadarSignal(s.unit, s.lastX, s.lastY);
+	updateRadarSignal(s.unit, s.lastCenterX, s.lastCenterY);
 
 	mScheduledRadarUpdates.pop_front();
  }
@@ -456,7 +456,7 @@ void BoCanvasSightManager::updateRadars()
  }
 }
 
-void BoCanvasSightManager::updateChangedRadar(Unit* unit, bofixed oldX, bofixed oldY, RadarChangeType type)
+void BoCanvasSightManager::updateChangedRadar(Unit* unit, bofixed oldCenterX, bofixed oldCenterY, RadarChangeType type)
 {
  PROFILE_METHOD;
  const RadarPlugin* prop = (const RadarPlugin*)unit->plugin(UnitPlugin::Radar);
@@ -466,8 +466,8 @@ void BoCanvasSightManager::updateChangedRadar(Unit* unit, bofixed oldX, bofixed 
  }
 
  if (type != Move) {
-	oldX = unit->x();
-	oldY = unit->y();
+	oldCenterX = unit->centerX();
+	oldCenterY = unit->centerY();
  }
 
  // Maximum range of the radar
@@ -476,10 +476,10 @@ void BoCanvasSightManager::updateChangedRadar(Unit* unit, bofixed oldX, bofixed 
  bofixed maxrange = prop->range();
 
  // Calculate bbox of the radar-affected area
- bofixed minx = QMAX(QMIN(unit->x(), oldX) - maxrange, bofixed(0));
- bofixed maxx = QMIN(QMAX(unit->x(), oldX) + maxrange, bofixed(mMap->width()));
- bofixed miny = QMAX(QMIN(unit->y(), oldY) - maxrange, bofixed(0));
- bofixed maxy = QMIN(QMAX(unit->y(), oldY) + maxrange, bofixed(mMap->height()));
+ bofixed minx = QMAX(QMIN(unit->centerX(), oldCenterX) - maxrange, bofixed(0));
+ bofixed maxx = QMIN(QMAX(unit->centerX(), oldCenterX) + maxrange, bofixed(mMap->width()));
+ bofixed miny = QMAX(QMIN(unit->centerY(), oldCenterY) - maxrange, bofixed(0));
+ bofixed maxy = QMIN(QMAX(unit->centerY(), oldCenterY) + maxrange, bofixed(mMap->height()));
 
  BoRect2Fixed area(minx,  miny, maxx, maxy);
  BoItemList* items = mCanvas->collisions()->collisionsAtCells(area, 0, false);
@@ -516,7 +516,7 @@ void BoCanvasSightManager::updateRadarSignal(Unit* unit, bofixed, bofixed)
  for (QValueList<const Unit*>::iterator it = mRadarJammers.begin(); it != mRadarJammers.end(); ++it) {
 	const Unit* u = *it;
 	const RadarJammerPlugin* jammer = (const RadarJammerPlugin*)u->plugin(UnitPlugin::RadarJammer);
-	jammersignalstrength += jammerSignalStrength(jammer, u->x(), u->y(), unit);
+	jammersignalstrength += jammerSignalStrength(jammer, u->centerX(), u->centerY(), unit);
  }
 
  // Then radar signal strength for all players
@@ -530,9 +530,9 @@ void BoCanvasSightManager::updateRadarSignal(Unit* unit, bofixed, bofixed)
 		const Unit* u = *rit;
 		const RadarPlugin* radar = (const RadarPlugin*)u->plugin(UnitPlugin::Radar);
 		if (unit->isFlying() && radar->detectsAirUnits()) {
-			signalstrength += radarSignalStrength(radar, u->x(), u->y(), unit);
+			signalstrength += radarSignalStrength(radar, u->centerX(), u->centerY(), unit);
 		} else if (!unit->isFlying() && radar->detectsLandUnits()) {
-			signalstrength += radarSignalStrength(radar, u->x(), u->y(), unit);
+			signalstrength += radarSignalStrength(radar, u->centerX(), u->centerY(), unit);
 		}
 	}
 
@@ -711,7 +711,7 @@ void BoCanvasSightManager::removeRadarJammer(Unit* unit)
  updateChangedJammer(unit, -1, -1, Remove);
 }
 
-void BoCanvasSightManager::updateChangedJammer(Unit* unit, bofixed oldX, bofixed oldY, RadarChangeType type)
+void BoCanvasSightManager::updateChangedJammer(Unit* unit, bofixed oldCenterX, bofixed oldCenterY, RadarChangeType type)
 {
  PROFILE_METHOD;
  const RadarJammerPlugin* prop = (const RadarJammerPlugin*)unit->plugin(UnitPlugin::RadarJammer);
@@ -721,18 +721,18 @@ void BoCanvasSightManager::updateChangedJammer(Unit* unit, bofixed oldX, bofixed
  }
 
  if (type != Move) {
-	oldX = unit->x();
-	oldY = unit->y();
+	oldCenterX = unit->centerX();
+	oldCenterY = unit->centerY();
  }
 
  // Maximum range of the jammer
  bofixed maxrange = prop->range();
 
  // Calculate bbox of the radar-affected area
- bofixed minx = QMAX(QMIN(unit->x(), oldX) - maxrange, bofixed(0));
- bofixed maxx = QMIN(QMAX(unit->x(), oldX) + maxrange, bofixed(mMap->width()));
- bofixed miny = QMAX(QMIN(unit->y(), oldY) - maxrange, bofixed(0));
- bofixed maxy = QMIN(QMAX(unit->y(), oldY) + maxrange, bofixed(mMap->height()));
+ bofixed minx = QMAX(QMIN(unit->centerX(), oldCenterX) - maxrange, bofixed(0));
+ bofixed maxx = QMIN(QMAX(unit->centerX(), oldCenterX) + maxrange, bofixed(mMap->width()));
+ bofixed miny = QMAX(QMIN(unit->centerY(), oldCenterY) - maxrange, bofixed(0));
+ bofixed maxy = QMIN(QMAX(unit->centerY(), oldCenterY) + maxrange, bofixed(mMap->height()));
 
  BoRect2Fixed area(minx,  miny, maxx, maxy);
  BoItemList* items = mCanvas->collisions()->collisionsAtCells(area, 0, false);
@@ -750,7 +750,7 @@ void BoCanvasSightManager::updateChangedJammer(Unit* unit, bofixed oldX, bofixed
 		continue;
 	}
 	// Recalculate signal strength (for all players)
-	updateRadarSignal(u, u->x(), u->y());
+	updateRadarSignal(u, u->centerX(), u->centerY());
  }
 }
 
@@ -1362,15 +1362,15 @@ bool BosonCanvas::canGo(const UnitProperties* prop, int x, int y, bool _default)
  return md->cellPassable[y * mapWidth() + x];
 }
 
-void BosonCanvas::unitMoved(Unit* unit, bofixed oldX, bofixed oldY)
+void BosonCanvas::unitMoved(Unit* unit, bofixed oldCenterX, bofixed oldCenterY)
 {
- d->mSightManager->unitMoved(unit, oldX, oldY);
+ d->mSightManager->unitMoved(unit, oldCenterX, oldCenterY);
 
 // test if any unit has this unit as target. If sou then adjust the destination.
 //TODO
 
 // used to adjust the mini map
- emit signalUnitMoved(unit, oldX, oldY);
+ emit signalUnitMoved(unit, oldCenterX, oldCenterY);
 }
 
 void BosonCanvas::updateSight(Unit* unit, bofixed oldX, bofixed oldY)
@@ -1450,7 +1450,7 @@ void BosonCanvas::shotHit(BosonShot* s)
 
  emit signalShotHit(s);
 
- explosion(BoVector3Fixed(s->x(), s->y(), s->z()), s->damage(), s->damageRange(),
+ explosion(BoVector3Fixed(s->centerX(), s->centerY(), s->z()), s->damage(), s->damageRange(),
 		s->fullDamageRange(), s->owner());
 }
 
@@ -1591,12 +1591,14 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	// the unit is added to a list - now displayed as a wreckage only.
 	removeUnit(unit);
 	// Pos is center of unit
-	BoVector3Fixed pos(unit->x() + unit->width() / 2, unit->y() + unit->height() / 2, unit->z());
+	BoVector3Fixed pos(unit->centerX(), unit->centerY(), unit->z());
 	//pos += unit->unitProperties()->hitPoint();
 	// Make explosion if needed
 	const UnitProperties* prop = unit->unitProperties();
 	if (prop->explodingDamage() > 0) {
-		BosonShotExplosion* e = (BosonShotExplosion*)createNewItem(RTTI::Shot, unit->owner(), ItemType(BosonShot::Explosion, 0, 0), pos);
+		// TODO: createItemAtTopLeftPos() creates the top-left corner of
+		// the item at "pos", but we want the center point at "pos".
+		BosonShotExplosion* e = (BosonShotExplosion*)createNewItemAtTopLeftPos(RTTI::Shot, unit->owner(), ItemType(BosonShot::Explosion, 0, 0), pos);
 		// Do we want ability to set fullDamageRange here?
 		if (e) {
 			// AB: pos parameter is redundant due to createNewItem()
@@ -1606,7 +1608,9 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	}
 	// Add explosion fragments
 	for (unsigned int i = 0; i < unit->unitProperties()->explodingFragmentCount(); i++) {
-		BosonShotFragment* f = (BosonShotFragment*)createNewItem(RTTI::Shot, unit->owner(), ItemType(BosonShot::Fragment, 0, 0), pos);
+		// TODO: createItemAtTopLeftPos() creates the top-left corner of
+		// the item at "pos", but we want the center point at "pos".
+		BosonShotFragment* f = (BosonShotFragment*)createNewItemAtTopLeftPos(RTTI::Shot, unit->owner(), ItemType(BosonShot::Fragment, 0, 0), pos);
 		if (f) {
 			// AB: pos parameter is redundant due to createNewItem()
 			// change
@@ -1687,7 +1691,7 @@ Cell* BosonCanvas::cellAt(Unit* unit) const
  if (!unit) {
 	return 0;
  }
- return cellAt(unit->x() + unit->width() / 2, unit->y() + unit->width() / 2);
+ return cellAt(unit->centerX(), unit->centerY());
 }
 
 Cell* BosonCanvas::cellAt(bofixed x, bofixed y) const
@@ -1877,7 +1881,16 @@ void BosonCanvas::addToCells(BosonItem* item)
  }
 }
 
-bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const BoVector2Fixed& pos, ProductionPlugin* factory) const
+bool BosonCanvas::canPlaceUnitAtCenterPos(const UnitProperties* prop, const BoVector2Fixed& pos, ProductionPlugin* factory) const
+{
+ // TODO: canPlaceUnitAtTopLeftPos() should be obsolete, the code should be in
+ // this method instead!
+ // -> once that is done remove the "AtCenterPos" suffix from the method name.
+ return canPlaceUnitAtTopLeftPos(prop, pos - BoVector2Fixed(prop->unitWidth()/2.0, prop->unitHeight()/2.0), factory);
+}
+
+// FIXME: obsolete. use canPlaceUnitAtCenterPos() instead
+bool BosonCanvas::canPlaceUnitAtTopLeftPos(const UnitProperties* prop, const BoVector2Fixed& pos, ProductionPlugin* factory) const
 {
  if (!prop) {
 	BO_NULL_ERROR(prop);
@@ -2269,7 +2282,7 @@ BosonItem* BosonCanvas::createItemFromXML(const QDomElement& item, Player* owner
 	// createItem().
 	// (i.e. the owner->addUnit() and the theme->loadNewUnit() call. also a
 	// few additional exceptions (editor, flying unit)).
-	Unit* u = (Unit*)createItem(RTTI::UnitStart + type, owner, ItemType(type), pos, id);
+	Unit* u = (Unit*)createItemAtTopLeftPos(RTTI::UnitStart + type, owner, ItemType(type), pos, id);
 
 	if (!u) {
 		boError(260) << k_funcinfo << "could not create unit type=" << type << " for owner=" << owner->bosonId() << endl;
@@ -2302,7 +2315,7 @@ BosonItem* BosonCanvas::createItemFromXML(const QDomElement& item, Player* owner
 
 	return (BosonItem*)u;
  } else if (RTTI::isShot(rtti)) {
-	BosonShot* s = (BosonShot*)createItem(RTTI::Shot, owner, ItemType(type, group, groupType), pos, id);
+	BosonShot* s = (BosonShot*)createItemAtTopLeftPos(RTTI::Shot, owner, ItemType(type, group, groupType), pos, id);
 	if (!s) {
 		boError() << k_funcinfo << "Invalid shot - type=" << type << " group=" << group << " groupType=" << groupType << endl;
 		return 0;
@@ -2523,10 +2536,10 @@ void BosonCanvas::deleteItems(QPtrList<BosonItem>& items)
  }
 }
 
-BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, const ItemType& type, const BoVector3Fixed& pos)
+BosonItem* BosonCanvas::createNewItemAtTopLeftPos(int rtti, Player* owner, const ItemType& type, const BoVector3Fixed& pos)
 {
  PROFILE_METHOD
- BosonItem* item = createItem(rtti, owner, type, pos, nextItemId());
+ BosonItem* item = createItemAtTopLeftPos(rtti, owner, type, pos, nextItemId());
  if (!item) {
 	return 0;
  }
@@ -2548,7 +2561,7 @@ BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, const ItemType& t
  return item;
 }
 
-BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type, const BoVector3Fixed& pos, unsigned long int id)
+BosonItem* BosonCanvas::createItemAtTopLeftPos(int rtti, Player* owner, const ItemType& type, const BoVector3Fixed& pos, unsigned long int id)
 {
  PROFILE_METHOD
  BosonItem* item = 0;
@@ -2568,7 +2581,7 @@ BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type
  if (item) {
 	addItem(item);
 	item->setId(id);
-	item->move(pos.x(), pos.y(), pos.z());
+	item->moveLeftTopTo(pos.x(), pos.y(), pos.z());
 	if (item && !item->init()) {
 		boError() << k_funcinfo << "item initialization failed. cannot create item." << endl;
 		deleteItem(item);

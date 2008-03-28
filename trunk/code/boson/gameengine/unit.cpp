@@ -734,8 +734,8 @@ void Unit::moveBy(bofixed moveX, bofixed moveY, bofixed moveZ)
  // this will most probably cause trouble in the future, but it is necessary for
  // things like addToCells().
 
- bofixed oldX = x();
- bofixed oldY = y();
+ bofixed oldX = centerX();
+ bofixed oldY = centerY();
 
  if (!isFlying()) {
 	bofixed rotateX = 0.0f;
@@ -752,8 +752,8 @@ void Unit::moveBy(bofixed moveX, bofixed moveY, bofixed moveZ)
 void Unit::updateZ(bofixed moveByX, bofixed moveByY, bofixed* moveByZ, bofixed* rotateX, bofixed* rotateY)
 {
  // Center point of the unit.
- bofixed centerx = x() + moveByX + width() / 2;
- bofixed centery = y() + moveByY + height() / 2;
+ bofixed centerx = centerX() + moveByX;
+ bofixed centery = centerY() + moveByY;
 
  // Calculate unit's rotation (depends on ground height).
  // These are offsets (from center point) to front and right side of the unit.
@@ -1065,7 +1065,7 @@ Unit* Unit::bestEnemyUnitInRange()
  // Iterate through the list of enemies and pick the best ones
  for (; it != list->end(); ++it) {
 	u = ((Unit*)*it);
-	dist = QMAX(QABS((int)(u->x() - x())), QABS((int)(u->y() - y())));
+	dist = QMAX(QABS((int)(u->centerX() - centerX())), QABS((int)(u->centerY() - centerY())));
 	// Quick check if we can shoot at u
 	if (u->isFlying()) {
 		if (!unitProperties()->canShootAtAirUnits()) {
@@ -1256,7 +1256,7 @@ void Unit::advanceTurn(unsigned int)
  bofixed wanteddir;
  if (currentOrder()->type() == UnitOrder::TurnToUnit) {
 	Unit* target = ((UnitTurnToUnitOrder*)currentOrder())->target();
-	wanteddir = Bo3dTools::rotationToPoint(target->x() - x(), target->y() - y());
+	wanteddir = Bo3dTools::rotationToPoint(target->centerX() - centerX(), target->centerY() - centerY());
  } else {
 	wanteddir = ((UnitTurnOrder*)currentOrder())->direction();
  }
@@ -1573,7 +1573,7 @@ bool Unit::loadFromXML(const QDomElement& root)
 
 bool Unit::inRange(unsigned long int r, Unit* target) const
 {
- return (QMAX(QABS((target->x() - x())), QABS((target->y() - y()))) <= bofixed(r));
+ return (QMAX(QABS((target->centerX() - centerX())), QABS((target->centerY() - centerY()))) <= bofixed(r));
 }
 
 void Unit::shootAt(BosonWeapon* w, Unit* target)
@@ -1816,7 +1816,7 @@ bool Unit::turnToUnit(Unit* target)
 	return true;
  }
 
- bofixed wanteddir = Bo3dTools::rotationToPoint(target->x() - x(), target->y() - y());
+ bofixed wanteddir = Bo3dTools::rotationToPoint(target->centerX() - centerX(), target->centerY() - centerY());
  boDebug() << k_funcinfo << "rotation: " << rotation() << "; wanted: " << wanteddir << endl;
  if (rotation() != wanteddir) {
 	// Find out how much we have to turn

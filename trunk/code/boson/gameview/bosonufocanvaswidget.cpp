@@ -109,7 +109,7 @@ void BosonItemEffects::clearEffects()
 
 void BosonItemEffects::updateEffectsPosition()
 {
- BoVector3Fixed pos(item()->x() + item()->width() / 2, item()->y() + item()->height() / 2, item()->z());
+ BoVector3Fixed pos(item()->centerX(), item()->centerY(), item()->z());
  pos.canvasToWorld();
  for (QPtrListIterator<BosonEffect> it(*mEffects); it.current(); ++it) {
 	it.current()->setPosition(pos);
@@ -570,7 +570,7 @@ void BosonUfoCanvasWidget::slotShotHit(BosonShot* shot)
  BO_CHECK_NULL_RET(c);
 
  BosonItemEffects* effects = c->effects();
- BoVector3Fixed pos(shot->x(), shot->y(), shot->z());
+ BoVector3Fixed topLeftPos(shot->leftEdge(), shot->topEdge(), shot->z());
 
  if (effects && shot->properties()) {
 	d->mEffectManager->loadWeaponType(shot->properties());
@@ -613,7 +613,7 @@ void BosonUfoCanvasWidget::slotShotHit(BosonShot* shot)
  if (shot->properties()) {
 	// Add hit effects
 	d->mEffectManager->loadWeaponType(shot->properties());
-	addEffects(d->mEffectManager->newHitEffects(shot->properties(), pos));
+	addEffects(d->mEffectManager->newHitEffects(shot->properties(), topLeftPos));
  }
 
  if (shot->properties() && shot->properties()->speciesTheme()) {
@@ -649,12 +649,11 @@ void BosonUfoCanvasWidget::slotUnitDestroyed(Unit* unit)
 
  }
 
- // Pos is center of unit
- BoVector3Fixed pos(unit->x() + unit->width() / 2, unit->y() + unit->height() / 2, unit->z());
+ BoVector3Fixed centerPos(unit->centerX(), unit->centerY(), unit->z());
  //pos += unit->unitProperties()->hitPoint();
  // Add destroyed effects
  d->mEffectManager->loadUnitType(unit->unitProperties());
- addEffects(d->mEffectManager->newDestroyedEffects(unit->unitProperties(), pos[0], pos[1], pos[2]));
+ addEffects(d->mEffectManager->newDestroyedEffects(unit->unitProperties(), centerPos[0], centerPos[1], centerPos[2]));
 }
 
 void BosonUfoCanvasWidget::slotFragmentCreated(BosonShotFragment* fragment)
@@ -663,7 +662,11 @@ void BosonUfoCanvasWidget::slotFragmentCreated(BosonShotFragment* fragment)
  BO_CHECK_NULL_RET(c);
  BosonItemEffects* effects = c->effects();
  BO_CHECK_NULL_RET(effects);
- BoVector3Fixed pos(fragment->x(), fragment->y(), fragment->z());
+
+ // FIXME: left/top or centerX()/centerY()? do effects use "center" as "pos" or
+ //        "left/top"?
+ BoVector3Fixed pos(fragment->leftEdge(), fragment->topEdge(), fragment->z());
+
  d->mEffectManager->loadUnitType(fragment->unitProperties());
  effects->setEffects(d->mEffectManager->newExplodingFragmentFlyEffects(fragment->unitProperties(), pos), &d->mEffects);
 }
@@ -680,8 +683,8 @@ void BosonUfoCanvasWidget::addFacilityConstructedEffects(Unit* unit)
  BO_CHECK_NULL_RET(c);
  BosonItemEffects* effects = c->effects();
  BO_CHECK_NULL_RET(effects);
- float x = unit->x() + unit->width() / 2;
- float y = unit->y() + unit->height() / 2;
+ float x = unit->centerX();
+ float y = unit->centerY();
  float z = unit->z();
  d->mEffectManager->loadUnitType(unit->unitProperties());
  effects->setEffects(d->mEffectManager->newConstructedEffects(unit->unitProperties(), x, y, z), &d->mEffects);
@@ -714,14 +717,14 @@ void BosonUfoCanvasWidget::slotAddItemContainerData(BosonItemContainer* c)
  }
  c->setItemRenderer(itemRenderer);
 
- float x = item->x() + item->width() / 2;
- float y = item->y() + item->height() / 2;
+ float centerX = item->centerX();
+ float centerY = item->centerY();
  float z = item->z();
  if (RTTI::isUnit(item->rtti())) {
 	Unit* u = (Unit*)item;
 	if (u->isMobile()) {
 		d->mEffectManager->loadUnitType(u->unitProperties());
-		effects->setEffects(d->mEffectManager->newConstructedEffects(u->unitProperties(), x, y, z), &d->mEffects);
+		effects->setEffects(d->mEffectManager->newConstructedEffects(u->unitProperties(), centerX, centerY, z), &d->mEffects);
 	} else {
 		// facilities need to be constructed first
 	}
@@ -735,7 +738,10 @@ void BosonUfoCanvasWidget::slotAddItemContainerData(BosonItemContainer* c)
 		case BosonShot::Rocket:
 		{
 			d->mEffectManager->loadWeaponType(shot->properties());
-			BoVector3Fixed pos(shot->x(), shot->y(), shot->z());
+			// FIXME: left/top or centerX()/centerY()? do effects use "center" as "pos" or
+			//        "left/top"?
+			BoVector3Fixed pos(shot->leftEdge(), shot->topEdge(), shot->z());
+
 			effects->setEffects(d->mEffectManager->newFlyEffects(shot->properties(), pos, 0.0), &d->mEffects);
 			break;
 		}

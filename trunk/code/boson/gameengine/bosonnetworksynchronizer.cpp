@@ -514,8 +514,8 @@ protected:
 		} else {
 			stream << (Q_INT32)-1;
 		}
-		stream << i->x();
-		stream << i->y();
+		stream << i->centerX();
+		stream << i->centerY();
 		stream << i->z();
 		stream << i->rotation();
 		stream << i->xRotation();

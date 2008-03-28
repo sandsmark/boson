@@ -862,7 +862,7 @@ void Player::facilityCompleted(Unit* fac)
 	return;
  }
 
- BoVector3Fixed location(fac->x(), fac->y(), fac->z());
+ BoVector3Fixed location(fac->centerX(), fac->centerY(), fac->z());
  BoEvent* constructedEvent = new BoEvent("FacilityWithTypeConstructed", QString::number(fac->type()));
  constructedEvent->setPlayerId(bosonId());
  constructedEvent->setUnitId(fac->id());
@@ -1044,7 +1044,7 @@ void Player::technologyResearched(ProductionPlugin* plugin, unsigned long int ty
 
  BoEvent* event = new BoEvent("TechnologyWithTypeResearched", QString::number(type), QString::number(plugin->unit()->id()));
  event->setPlayerId(bosonId());
- event->setLocation(BoVector3Fixed(plugin->unit()->x(), plugin->unit()->y(), plugin->unit()->z()));
+ event->setLocation(BoVector3Fixed(plugin->unit()->centerX(), plugin->unit()->centerY(), plugin->unit()->z()));
  ((Boson*)game())->queueEvent(event);
 }
 
@@ -1320,7 +1320,7 @@ void Player::writeGameLog(QTextStream& log)
  Unit* u;
  while (it.current()) {
 	u = it.current();
-	log << "Unit: " << u->id() << "  " << u->x() << " " << u->y() << " " << u->z() << "  " << u->rotation() <<
+	log << "Unit: " << u->id() << "  " << u->centerX() << " " << u->centerY() << " " << u->z() << "  " << u->rotation() <<
 			"  " << u->speed() << "  " << u->health() << " " << u->advanceWork() << endl;
 	++it;
  }

@@ -96,8 +96,8 @@ void MiningPlugin::advance(unsigned int)
 	// FIXME: code taken from BombingPlugin. This could probably be written better
 	bofixed dist = 1.0f + unit()->width() / 2.0f;
 	boDebug() << k_funcinfo << "Getaway dist: " << dist << "; rot: " << unit()->rotation() << endl;
-	bofixed oldx = unit()->x();
-	bofixed oldy = unit()->y();
+	bofixed oldx = unit()->centerX();
+	bofixed oldy = unit()->centerY();
 	bofixed newx, newy;
 	bool couldmove = false;
 

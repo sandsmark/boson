@@ -263,7 +263,7 @@ bool EditorViewInput::actionPlace(const BoVector3Fixed& groundCanvasVector, bool
 	if (prop->isMobile()) {
 		force = false;
 	}
-	if (!force && !canvas()->canPlaceUnitAt(prop, BoVector2Fixed(x, y), 0)) {
+	if (!force && !canvas()->canPlaceUnitAtTopLeftPos(prop, BoVector2Fixed(x, y), 0)) {
 		boDebug() << k_funcinfo << "Can't place unit at " << x << " " << y << endl;
 		boGame->slotAddChatSystemMessage(i18n("You can't place a %1 there!").arg(prop->name()));
 		ret = false;
@@ -496,7 +496,7 @@ void EditorViewInput::updatePlacementPreviewData()
 
 	BO_CHECK_NULL_RET(prop);
 
-	bool canPlace = canvas()->canPlaceUnitAt(prop, BoVector2Fixed(cursorCanvasVector().x(), cursorCanvasVector().y()), 0);
+	bool canPlace = canvas()->canPlaceUnitAtTopLeftPos(prop, BoVector2Fixed(cursorCanvasVector().x(), cursorCanvasVector().y()), 0);
 	emit signalSetPlacementPreviewData(prop, canPlace, placementFreePlacement(), !placementDisableCollisions());
  } else if (d->mPlacement.isGround()) {
 	if (d->mPlacement.textureCount() == 0) {
