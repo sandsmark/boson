@@ -166,7 +166,12 @@ void BosonGameViewInputBase::selectArea(BoItemList* itemsInArea, bool replace)
 	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
 	}
-	if (!canvas()->onCanvas((*it)->x(), (*it)->y())) {
+
+	if (!canvas()->onCanvas((*it)->leftEdge(), (*it)->topEdge())) {
+		boError() << k_funcinfo << "item is not on the canvas" << endl;
+		continue;
+	}
+	if (!canvas()->onCanvas((*it)->rightEdge(), (*it)->bottomEdge())) {
 		boError() << k_funcinfo << "item is not on the canvas" << endl;
 		continue;
 	}

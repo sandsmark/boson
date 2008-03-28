@@ -1262,7 +1262,7 @@ void BosonGameView::slotCenterOnSelectionGroup(int n)
  if (!leader) {
 	return;
  }
- slotReCenterDisplay(QPoint((int)leader->x(), (int)leader->y()));
+ slotReCenterDisplay(QPoint((int)leader->centerX(), (int)leader->centerY()));
 }
 
 void BosonGameView::rotate(float delta)
