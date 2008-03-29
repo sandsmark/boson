@@ -184,7 +184,7 @@
         <sender>mUpdate</sender>
         <signal>clicked()</signal>
         <receiver>BosonDebugTexturesBase</receiver>
-        <slot>reject()</slot>
+        <slot>slotUpdate()</slot>
     </connection>
 </connections>
 <slots>
