@@ -1305,13 +1305,13 @@ Cell* BosonCanvas::cells() const
  return d->mMap->cells();
 }
 
-void BosonCanvas::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag)
+void BosonCanvas::slotAdvance(unsigned int advanceCallsCount)
 {
  boProfiling->pushStorage("Advance");
  boProfiling->push("slotAdvance()");
 
  BoCanvasAdvance a(this, d->mPlayerListManager);
- a.advance(d->mAllItems, advanceCallsCount, advanceFlag);
+ a.advance(d->mAllItems, advanceCallsCount, advanceFlag());
 
  boProfiling->pop();
  boProfiling->popStorage();
