@@ -250,7 +250,7 @@ void BoAdvance::receiveAdvanceCall()
 	//     certain order. But we must guarantee to execute
 	//     BosonCanvas::slotAdvance() first, so we better call it manually.
 	if (mBoson->canvasNonConst()) {
-		mBoson->canvasNonConst()->slotAdvance(advanceCallsCount(), flag);
+		mBoson->canvasNonConst()->slotAdvance(advanceCallsCount());
 	}
 	emit mBoson->signalAdvance(advanceCallsCount(), flag);
  }
