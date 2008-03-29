@@ -1315,6 +1315,7 @@ bool Unit::moveTo(bofixed x, bofixed y, int range)
 	return false;
  }
  if (maxSpeed() == 0) {
+	boDebug(380) << k_funcinfo << "maxSpeed() == 0" << endl;
 	// If unit's max speed is 0, it cannot move
 	return false;
  }
