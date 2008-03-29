@@ -1310,8 +1310,13 @@ void BosonCanvas::slotAdvance(unsigned int advanceCallsCount)
  boProfiling->pushStorage("Advance");
  boProfiling->push("slotAdvance()");
 
+ // we must use the previousAdvanceFlag in this advance call, so that all
+ // changes to advanceWork apply in the NEXT advance call.
+ // (otherwise they would apply NOW, but be discarded in the next call)
+ bool previousAdvanceFlag = !advanceFlag();
+
  BoCanvasAdvance a(this, d->mPlayerListManager);
- a.advance(d->mAllItems, advanceCallsCount, advanceFlag());
+ a.advance(d->mAllItems, advanceCallsCount, previousAdvanceFlag);
 
  boProfiling->pop();
  boProfiling->popStorage();
