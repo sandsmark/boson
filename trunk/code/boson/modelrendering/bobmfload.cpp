@@ -26,6 +26,7 @@
 #include "bosonmodel.h"
 #include "../../bobmfconverter/bmf.h"
 #include "bodebug.h"
+#include "bosonprofiling.h"
 
 #include <qfile.h>
 #include <qdatastream.h>
@@ -65,6 +66,7 @@ QString BoBMFLoad::file() const
 
 bool BoBMFLoad::loadModel()
 {
+  BosonProfiler profiler("BoBMFLoad::loadModel()");
   boDebug(100) << k_funcinfo << file() << endl;
   if(mFile.isEmpty())
   {
@@ -116,6 +118,7 @@ bool BoBMFLoad::loadModel()
   }
 
 
+  BosonProfiler profiler3("BoBMFLoad::loadModel(): foo1");
   // Load the model
   // Info section
   if(!loadInfo(stream))
@@ -142,6 +145,7 @@ bool BoBMFLoad::loadModel()
   {
     return false;
   }
+  profiler3.pop();
 
 
   stream >> magic;
@@ -222,6 +226,7 @@ bool BoBMFLoad::loadInfo(QDataStream& stream)
 
 bool BoBMFLoad::loadArrays(QDataStream& stream)
 {
+  BosonProfiler profiler("BoBMFLoad::loadArrays()");
   Q_UINT32 magic;
   // Load vertex and index arrays
   stream >> magic;
@@ -238,9 +243,13 @@ bool BoBMFLoad::loadArrays(QDataStream& stream)
 
   // Load points (vertices)
   mModel->allocatePointArray(points);
+  BosonProfiler profilerReadRawBytesPointArray("BoBMFLoad::loadArrays(): readRawBytes() for pointArray");
+  boDebug() << points * 8 * sizeof(float) << endl;
   stream.readRawBytes((char*)mModel->pointArray(), points * 8 * sizeof(float));
+  profilerReadRawBytesPointArray.pop();
   // Load indices
   mModel->allocateIndexArray(indices, indextype);
+  BosonProfiler profilerReadRawBytesIndexArray("BoBMFLoad::loadArrays(): readRawBytes() for indexArray");
   if(indextype == BMF_DATATYPE_UNSIGNED_SHORT)
   {
     stream.readRawBytes((char*)mModel->indexArray(), indices * sizeof(Q_UINT16));
@@ -249,6 +258,7 @@ bool BoBMFLoad::loadArrays(QDataStream& stream)
   {
     stream.readRawBytes((char*)mModel->indexArray(), indices * sizeof(Q_UINT32));
   }
+  profilerReadRawBytesIndexArray.pop();
 
   // The data is little-endian, so if the system uses big-endian, it has to
   //  be converted.
@@ -388,6 +398,7 @@ bool BoBMFLoad::loadLODs(QDataStream& stream)
 
 bool BoBMFLoad::loadLOD(QDataStream& stream, int lod)
 {
+  BosonProfiler profiler("BoBMFLoad::loadLOD()");
   Q_UINT32 magic;
   stream >> magic;
   if(magic != BMF_MAGIC_LOD)
@@ -515,6 +526,7 @@ bool BoBMFLoad::loadMeshes(QDataStream& stream, int lod)
 
 bool BoBMFLoad::loadFrames(QDataStream& stream, int lod)
 {
+  BosonProfiler profiler("BoBMFLoad::loadFrames()");
   Q_UINT32 magic;
   stream >> magic;
   if(magic != BMF_MAGIC_FRAMES)
