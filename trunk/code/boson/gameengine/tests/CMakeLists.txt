@@ -16,6 +16,7 @@ set(tests_SRCS
 	unittests/maptest.cpp
 	unittests/playfieldtest.cpp
 	unittests/canvastest.cpp
+	unittests/movetest.cpp
 )
 kde3_automoc(${tests_SRCS})
 

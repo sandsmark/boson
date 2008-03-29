@@ -30,14 +30,12 @@
 #include "maptest.h"
 #include "playfieldtest.h"
 #include "canvastest.h"
+#include "movetest.h"
 
 #include <kaboutdata.h>
 #include <kcmdlineargs.h>
 #include <klocale.h>
 #include <kinstance.h>
-
-static const char *description =
-    I18N_NOOP("Boson (mostly unit-)tests");
 
 static const char *version = BOSON_VERSION_STRING;
 
@@ -81,23 +79,16 @@ int main(int argc, char **argv)
 
 static bool startTests()
 {
- MapTest mapTest;
- if (!mapTest.test()) {
-	boDebug() << k_funcinfo << "MapTest failed" << endl;
-	return false;
- }
+#define ADD_TEST(x) \
+	x test_##x; \
+	if (!test_##x.test()) { \
+		boError() << k_funcinfo << #x " failed" << endl; \
+	}
+ ADD_TEST(MapTest);
+ ADD_TEST(PlayFieldTest);
+ ADD_TEST(CanvasTest);
+ ADD_TEST(MoveTest);
 
- PlayFieldTest playFieldTest;
- if (!playFieldTest.test()) {
-	boDebug() << k_funcinfo << "PlayFieldTest failed" << endl;
-	return false;
- }
-
- CanvasTest canvasTest;
- if (!canvasTest.test()) {
-	boDebug() << k_funcinfo << "CanvasTest failed" << endl;
-	return false;
- }
  return true;
 }
 

@@ -153,6 +153,12 @@ SpeciesTheme* TestFrameWork::createAndLoadDummySpeciesTheme(const QColor& teamCo
 	stream << "[Boson Unit]\n";
 	stream << "Id=" << i+1 << "\n";
 	stream << "Name=Unit " << i+1 << "\n";
+	if (i == 0) {
+		stream << "\n";
+		stream << "[Boson Mobile Unit]\n";
+		stream << "CanGoOnLand=true\n";
+		stream << "Speed=2\n";
+	}
 	file.close();
  }
 
