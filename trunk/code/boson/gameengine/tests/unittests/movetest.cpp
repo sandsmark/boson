@@ -33,6 +33,7 @@
 #include "unit.h"
 #include "unitorder.h"
 #include "cell.h"
+#include "bo3dtools.h"
 
 // FIXME: is "MoveTest" a good name? it suggests BosonItem::move() is being
 //        tested, but we test advanceMove() primarily here
@@ -89,14 +90,38 @@ bool MoveTest::testMove()
 {
  boDebug() << k_funcinfo << endl;
  int unitType1 = 1; // UnitProperties ID
- BoVector3Fixed unit1Pos(10.0, 10.0, 0.0);
- Unit* unit1 = static_cast<Unit*>(mCanvasContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType1,
+
+ // unit moves from A to B without an obstacle of any kind (other unit or
+ // terrain) in the way.
+ BoVector3Fixed unitMoveNoObstaclesPos(10.0, 10.0, 0.0);
+ BoVector2Fixed unitMoveNoObstaclesDest = BoVector2Fixed(unitMoveNoObstaclesPos.x(), unitMoveNoObstaclesPos.y())
+		+ BoVector2Fixed(10.0, 10.0);
+ Unit* unitMoveNoObstacles = static_cast<Unit*>(mCanvasContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType1,
 		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
 		ItemType(unitType1),
-		unit1Pos));
+		unitMoveNoObstaclesPos));
 
- BoVector2Fixed moveToDest(20.0, 20.0);
- bool ok = unit1->replaceToplevelOrders(new UnitMoveOrder(moveToDest));
+ // unit moves from A to B with a unit in the way, which can easily be evaded.
+ BoVector3Fixed unitMoveWithObstaclePos(50.0, 50.0, 0.0);
+ BoVector2Fixed unitMoveWithObstacleDest = BoVector2Fixed(unitMoveWithObstaclePos.x(), unitMoveWithObstaclePos.y())
+		+ BoVector2Fixed(10.0, 0.0);
+ BoVector3Fixed unitMoveIsObstaclePos(55.0, 50.0, 0.0);
+ Unit* unitMoveWithObstacle = static_cast<Unit*>(mCanvasContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType1,
+		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
+		ItemType(unitType1),
+		unitMoveWithObstaclePos));
+ Unit* unitMoveIsObstacle = static_cast<Unit*>(mCanvasContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType1,
+		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
+		ItemType(unitType1),
+		unitMoveIsObstaclePos));
+ Q_UNUSED(unitMoveIsObstacle);
+
+ bool ok;
+boDebug() << debugStringVector(unitMoveNoObstaclesDest) << endl;
+ ok = unitMoveNoObstacles->replaceToplevelOrders(new UnitMoveOrder(unitMoveNoObstaclesDest));
+ MY_VERIFY(ok == true);
+boDebug() << debugStringVector(unitMoveWithObstaclePos) << endl;
+ ok = unitMoveWithObstacle->replaceToplevelOrders(new UnitMoveOrder(unitMoveWithObstacleDest));
  MY_VERIFY(ok == true);
 
  unsigned int estimatedMovingTime = 200;
@@ -105,13 +130,18 @@ bool MoveTest::testMove()
  while (advanceCallsCount < (estimatedMovingTime * 1.2)) {
 	mCanvasContainer->mCanvas->setAdvanceFlag(!mCanvasContainer->mCanvas->advanceFlag());
 	mCanvasContainer->mCanvas->slotAdvance(advanceCallsCount);
-	//boDebug() << unit1->centerX() << " " << unit1->centerY() << endl;
 	advanceCallsCount++;
+
+	// TODO: check if "unitMoveIsObstacle" is actually evaded, i.e. that
+	// unitMoveIsObstacle and unitMoveWithObstacle do not collide with each
+	// other
  }
 
  // FIXME: _much_ more precise checking!
- MY_VERIFY(fabsf(unit1->centerX() - moveToDest.x()) <= 1.1);
- MY_VERIFY(fabsf(unit1->centerY() - moveToDest.y()) <= 1.1);
+ MY_VERIFY(fabsf(unitMoveNoObstacles->centerX() - unitMoveNoObstaclesDest.x()) <= 1.1);
+ MY_VERIFY(fabsf(unitMoveNoObstacles->centerY() - unitMoveNoObstaclesDest.y()) <= 1.1);
+ MY_VERIFY(fabsf(unitMoveWithObstacle->centerX() - unitMoveWithObstacleDest.x()) <= 1.1);
+ MY_VERIFY(fabsf(unitMoveWithObstacle->centerY() - unitMoveWithObstacleDest.y()) <= 1.1);
 
 
  // TODO: the UnitMoveOrder should cause a UnitTurnOrder as suborder. check for
