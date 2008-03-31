@@ -32,6 +32,7 @@
 #include "canvastest.h"
 #include "movetest.h"
 #include "constructiontest.h"
+#include "productiontest.h"
 
 #include <kaboutdata.h>
 #include <kcmdlineargs.h>
@@ -91,6 +92,7 @@ static bool startTests()
  ADD_TEST(CanvasTest);
  ADD_TEST(MoveTest);
  ADD_TEST(ConstructionTest);
+ ADD_TEST(ProductionTest);
 
  return true;
 }

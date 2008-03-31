@@ -95,6 +95,14 @@ public:
 	 * guaranteed to be previded:
 	 * @li Id=1: mobile ground unit
 	 * @li Id=2: facility with the default number of construction steps
+	 * @li Id=3: facility with 0 construction steps (is constructed
+	 *           immediately) and a production plugin for mobile units
+	 *           (can produce Id=1)
+	 * @li Id=4: facility with 0 construction steps (is constructed
+	 *           immediately) and a production plugin for facilities
+	 *           (can produce Id=2)
+	 * @li Id=5: facility with 0 construction steps that produces power
+	 *           (i.e. is a power plant)
 	 **/
 	static SpeciesTheme* createAndLoadDummySpeciesTheme(const QColor& teamColor, bool neutralSpecies = false);
 };
