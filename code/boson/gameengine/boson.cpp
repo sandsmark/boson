@@ -579,13 +579,27 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
  KCrash::setEmergencySaveFunction(emergencySave);
 #endif
 
- ((BoEventLoop*)qApp->eventLoop())->setAdvanceMessageInterval(ADVANCE_INTERVAL);
- ((BoEventLoop*)qApp->eventLoop())->setAdvanceObject(this);
+ if (qApp && qApp->eventLoop()) {
+	if (qApp->eventLoop()->isA("BoEventLoop")) {
+		((BoEventLoop*)qApp->eventLoop())->setAdvanceMessageInterval(ADVANCE_INTERVAL);
+		((BoEventLoop*)qApp->eventLoop())->setAdvanceObject(this);
+	} else {
+		boWarning() << k_funcinfo << " qApp->eventLoop() is not  BoEventLoop!" << endl;
+	}
+ }
 }
 
 Boson::~Boson()
 {
- ((BoEventLoop*)qApp->eventLoop())->setAdvanceObject(0);
+ if (qApp && qApp->eventLoop()) {
+	if (qApp->eventLoop()->isA("BoEventLoop")) {
+		((BoEventLoop*)qApp->eventLoop())->setAdvanceObject(0);
+	} else {
+		boWarning() << k_funcinfo << " qApp->eventLoop() is not  BoEventLoop!" << endl;
+	}
+ }
+
+
  KCrash::setEmergencySaveFunction(NULL);
  delete d->mNetworkSynchronizer;
  delete d->mGameStatistics;
