@@ -87,16 +87,10 @@ bool ProductionTest::testProductionMobileUnits()
  unsigned int unitTypeMobile = 1;
  unsigned int unitTypePowerPlant = 5;
 
- // power plant (otherwise production will be very slow or wont even start)
- static_cast<Unit*>(mBosonContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitTypePowerPlant,
-		mBosonContainer->mPlayerListManager->gamePlayerList().getFirst(),
-		ItemType(unitTypePowerPlant),
-		BoVector3Fixed(30.0, 10.0, 0.0)));
+ // power plant (otherwise production may be very slow or wont even start)
+ mBosonContainer->createNewUnitAtTopLeftPos(unitTypePowerPlant, BoVector3Fixed(30.0, 10.0, 0.0));
 
- Unit* factory = static_cast<Unit*>(mBosonContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitTypeFactoryMobile,
-		mBosonContainer->mPlayerListManager->gamePlayerList().getFirst(),
-		ItemType(unitTypeFactoryMobile),
-		BoVector3Fixed(10.0, 10.0, 0.0)));
+ Unit* factory = mBosonContainer->createNewUnitAtTopLeftPos(unitTypeFactoryMobile, BoVector3Fixed(10.0, 10.0, 0.0));
 
  MY_VERIFY(factory->construction()->isConstructionComplete() == true);
  ProductionPlugin* production = static_cast<ProductionPlugin*>(factory->plugin(UnitPlugin::Production));
