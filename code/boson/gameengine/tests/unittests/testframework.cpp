@@ -31,6 +31,7 @@
 #include "bosoncanvas.h"
 #include "boeventmanager.h"
 #include "bosonplayerlistmanager.h"
+#include "boson.h"
 
 #include "boglobal.h"
 #include "bosondata.h"
@@ -150,14 +151,19 @@ SpeciesTheme* TestFrameWork::createAndLoadDummySpeciesTheme(const QColor& teamCo
 		return false;
 	}
 	QTextStream stream(&file);
+	unsigned int id = i + 1;
 	stream << "[Boson Unit]\n";
-	stream << "Id=" << i+1 << "\n";
-	stream << "Name=Unit " << i+1 << "\n";
-	if (i == 0) {
+	stream << "Id=" << id << "\n";
+	stream << "Name=Unit " << id << "\n";
+	if (id == 1) {
 		stream << "\n";
 		stream << "[Boson Mobile Unit]\n";
 		stream << "CanGoOnLand=true\n";
 		stream << "Speed=2\n";
+	} else if (id == 2) {
+		stream << "IsFacility=true\n";
+		stream << "\n";
+		stream << "[Boson Facility]\n";
 	}
 	file.close();
  }
@@ -220,6 +226,11 @@ bool CanvasContainer::createCanvas(const QString& groundThemeId)
 // AB: creates count+1 players (count players + 1 neutral player)
 bool CanvasContainer::createPlayers(unsigned int count)
 {
+ return CanvasContainer::createPlayers(count, mPlayerListManager, mPlayField);
+}
+
+bool CanvasContainer::createPlayers(unsigned int count, BosonPlayerListManager* playerListManager, BosonPlayField* playField)
+{
  QPtrList<KPlayer> players;
  for (unsigned int i = 0; i < count; i++) {
 	SpeciesTheme* theme = TestFrameWork::createAndLoadDummySpeciesTheme(QColor(i * 10, 0, 0));
@@ -231,7 +242,7 @@ bool CanvasContainer::createPlayers(unsigned int count)
 	Player* p = new Player();
 	p->setUserId(128 + i);
 	p->setSpeciesTheme(theme);
-	p->initMap(mPlayField->map());
+	p->initMap(playField->map());
 	// AB: do we need a p->loadFromXML()?
 	players.append(p);
  }
@@ -243,11 +254,60 @@ bool CanvasContainer::createPlayers(unsigned int count)
  Player* neutralPlayer = new Player(true);
  neutralPlayer->setUserId(256);
  neutralPlayer->setSpeciesTheme(neutralTheme);
- neutralPlayer->initMap(mPlayField->map());
+ neutralPlayer->initMap(playField->map());
  // AB: do we need a neutralPlayer->loadFromXML()?
 
- mPlayerListManager->recalculatePlayerLists(players);
+ playerListManager->recalculatePlayerLists(players);
 
  return true;
+}
+
+BosonContainer::BosonContainer()
+{
+ mPlayField = 0;
+ mBoson = 0;
+ mCanvas = 0;
+ mPlayerListManager = 0;
+}
+
+BosonContainer::~BosonContainer()
+{
+ Boson::deleteBoson();
+ mBoson = 0;
+ delete mPlayField;
+ mPlayerListManager = 0;
+ mCanvas = 0;
+}
+
+bool BosonContainer::createBoson(const QString& groundThemeId)
+{
+ if (Boson::boson()) {
+	boError() << k_funcinfo << "Boson object already created. can have only one Boson object at a time!" << endl;
+	return false;
+ }
+ mPlayField = TestFrameWork::createDummyPlayField(groundThemeId);
+ if (!mPlayField) {
+	boError() << k_funcinfo << "NULL playfield created" << endl;
+	return false;
+ }
+ Boson::initBoson();
+ mBoson = Boson::boson();
+ mPlayerListManager = mBoson->playerListManager();
+ if (!mBoson->createCanvas(mPlayField->map())) {
+	return false;
+ }
+ mCanvas = mBoson->canvasNonConst();
+ if (!createPlayers(2)) {
+	boError() << k_funcinfo << "creating players failed" << endl;
+	return false;
+ }
+ return true;
+}
+
+// note we do NOT add the players to the Boson object (it would require an event
+// loop)
+bool BosonContainer::createPlayers(unsigned int count)
+{
+ return CanvasContainer::createPlayers(count, mBoson->playerListManager(), mPlayField);
 }
 
