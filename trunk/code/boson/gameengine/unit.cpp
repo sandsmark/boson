@@ -560,7 +560,9 @@ bool Unit::init()
  speciesTheme()->loadNewUnit(this);
 
  if (unitProperties()->isFacility()) {
-	setAdvanceWork(WorkConstructed);
+	if (unitProperties()->constructionSteps() > 0) {
+		setAdvanceWork(WorkConstructed);
+	}
 	updateAnimationMode();
  }
 
