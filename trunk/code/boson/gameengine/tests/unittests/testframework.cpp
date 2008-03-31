@@ -313,6 +313,21 @@ bool BosonContainer::createBoson(const QString& groundThemeId)
 // loop)
 bool BosonContainer::createPlayers(unsigned int count)
 {
- return CanvasContainer::createPlayers(count, mBoson->playerListManager(), mPlayField);
+ bool ret = CanvasContainer::createPlayers(count, mBoson->playerListManager(), mPlayField);
+ if (!ret) {
+	return ret;
+ }
+
+ // HACK!
+ // KPlayer::setGame() is normally called by KGame::systemAddPlayer(), but we
+ // use a clean policy, i.e. KGame::addPlayer() causes a network message and
+ // only once it is received, systemAddPlayer() is called.
+ // -> this will never be received, because (atm?) we dont have an event loop in
+ //    the tests (and dont want any).
+ for (QPtrListIterator<Player> it(mBoson->playerListManager()->allPlayerList()); it.current(); ++it) {
+	it.current()->setGame(mBoson);
+ }
+
+ return ret;
 }
 
