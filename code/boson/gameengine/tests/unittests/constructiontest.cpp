@@ -100,6 +100,7 @@ bool ConstructionTest::testConstruction()
 
  MY_VERIFY(facility->construction()->isConstructionComplete() == false);
  MY_VERIFY(facility->construction()->currentConstructionStep() == 0);
+ MY_VERIFY(facility->advanceWork() == UnitBase::WorkConstructed);
 
  // AB: a construction step is made only every n advance calls. currently n==20
  const unsigned int constructionStepInterval = 20;
@@ -115,6 +116,7 @@ bool ConstructionTest::testConstruction()
 	MY_VERIFY(facility->construction()->currentConstructionStep() == expectedConstructionStep);
 	if (expectedConstructionStep < totalConstructionSteps) {
 		MY_VERIFY(facility->construction()->isConstructionComplete() == false);
+		MY_VERIFY(facility->advanceWork() == UnitBase::WorkConstructed);
 	}
 	if (expectedConstructionStep == totalConstructionSteps) {
 		MY_VERIFY(facility->construction()->isConstructionComplete() == true);
@@ -124,10 +126,37 @@ bool ConstructionTest::testConstruction()
 
  MY_VERIFY(facility->construction()->isConstructionComplete() == true);
  MY_VERIFY(facility->currentOrder() == 0);
+ MY_VERIFY(facility->advanceWork() != UnitBase::WorkConstructed);
 
  // TODO: when construction is completed, an event should be sent. check if
  // that even actually has been sent!
 
+
+ int unitType2 = 3;
+ Unit* facilityNoConstructionStep = static_cast<Unit*>(mBosonContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType2,
+		mBosonContainer->mPlayerListManager->gamePlayerList().getFirst(),
+		ItemType(unitType2),
+		BoVector3Fixed(10.0, 10.0, 0.0)));
+
+ MY_VERIFY(facilityNoConstructionStep != 0);
+ MY_VERIFY(facilityNoConstructionStep->construction() != 0); // a facility must ALWAYS have such an object
+
+ // this unittype should be completely constructed once placed.
+ MY_VERIFY(facilityNoConstructionStep->construction()->constructionSteps() == 0);
+ MY_VERIFY(facilityNoConstructionStep->construction()->currentConstructionStep() == 0);
+
+ MY_VERIFY(facilityNoConstructionStep->construction()->isConstructionComplete() == true);
+ MY_VERIFY(facilityNoConstructionStep->advanceWork() != UnitBase::WorkConstructed);
+
+ // an advance call should not change the construction state.
+ mBosonContainer->mCanvas->setAdvanceFlag(!mBosonContainer->mCanvas->advanceFlag());
+ mBosonContainer->mCanvas->slotAdvance(advanceCallsCount);
+ advanceCallsCount++;
+
+ MY_VERIFY(facilityNoConstructionStep->construction()->constructionSteps() == 0);
+ MY_VERIFY(facilityNoConstructionStep->construction()->currentConstructionStep() == 0);
+
+ MY_VERIFY(facilityNoConstructionStep->construction()->isConstructionComplete() == true);
 
  return true;
 }
