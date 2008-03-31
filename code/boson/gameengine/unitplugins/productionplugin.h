@@ -51,13 +51,13 @@ public:
 
 	/**
 	 * @return The type ID (see @ref UnitProperties::typeId) of the
-	 * completed production (if any).
+	 * completed production, if any. 0 If no such production available.
 	 **/
 	unsigned long int completedProductionId() const;
 	ProductionType completedProductionType() const;
 
 	/**
-	 * @return The type ID of the current production. -1 if there is no
+	 * @return The type ID of the current production. 0 if there is no
 	 * production.
 	 **/
 	inline unsigned long int currentProductionId() const
