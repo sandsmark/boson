@@ -114,7 +114,7 @@ BosonPlayField* TestFrameWork::createDummyPlayField(const QString& groundThemeId
 
 SpeciesTheme* TestFrameWork::createAndLoadDummySpeciesTheme(const QColor& teamColor, bool neutralSpecies)
 {
- const int unitCount = 3;
+ const int unitCount = 5;
 
  KTempDir speciesDir_("/tmp/");
  speciesDir_.setAutoDelete(true); // AB: deletes the dir recursively (implemented using ::system("/bin/rm -rf"))
@@ -156,19 +156,43 @@ SpeciesTheme* TestFrameWork::createAndLoadDummySpeciesTheme(const QColor& teamCo
 	stream << "Id=" << id << "\n";
 	stream << "Name=Unit " << id << "\n";
 	if (id == 1) {
+		// id==1 is a mobile ground unit
 		stream << "\n";
 		stream << "[Boson Mobile Unit]\n";
 		stream << "CanGoOnLand=true\n";
 		stream << "Speed=2\n";
+		stream << "Producer=1\n";
 	} else if (id == 2) {
+		// id==2 is a dummy facility with default values
 		stream << "IsFacility=true\n";
+		stream << "Producer=2\n";
 		stream << "\n";
 		stream << "[Boson Facility]\n";
 	} else if (id == 3) {
+		// id==3 is a factory that produces mobile units
 		stream << "IsFacility=true\n";
 		stream << "\n";
 		stream << "[Boson Facility]\n";
 		stream << "ConstructionSteps=0\n";
+		stream << "\n";
+		stream << "[ProductionPlugin]\n";
+		stream << "ProducerList=1\n";
+	} else if (id == 4) {
+		// id==4 is a factory that produces facilities
+		stream << "IsFacility=true\n";
+		stream << "\n";
+		stream << "[Boson Facility]\n";
+		stream << "ConstructionSteps=0\n";
+		stream << "\n";
+		stream << "[ProductionPlugin]\n";
+		stream << "ProducerList=2\n";
+	} else if (id == 5) {
+		// id==5 is a power plant
+		stream << "IsFacility=true\n";
+		stream << "\n";
+		stream << "[Boson Facility]\n";
+		stream << "ConstructionSteps=0\n";
+		stream << "PowerGenerated=2000\n";
 	}
 	file.close();
  }
@@ -248,6 +272,8 @@ bool CanvasContainer::createPlayers(unsigned int count, BosonPlayerListManager* 
 	p->setUserId(128 + i);
 	p->setSpeciesTheme(theme);
 	p->initMap(playField->map());
+	p->setMinerals(1000000);
+	p->setOil(1000000);
 	// AB: do we need a p->loadFromXML()?
 	players.append(p);
  }
