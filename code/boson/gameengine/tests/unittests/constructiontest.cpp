@@ -85,10 +85,7 @@ bool ConstructionTest::testConstruction()
  boDebug() << k_funcinfo << endl;
  int unitType1 = 2; // UnitProperties ID
 
- Unit* facility = static_cast<Unit*>(mBosonContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType1,
-		mBosonContainer->mPlayerListManager->gamePlayerList().getFirst(),
-		ItemType(unitType1),
-		BoVector3Fixed(10.0, 10.0, 0.0)));
+ Unit* facility = mBosonContainer->createNewUnitAtTopLeftPos(unitType1, BoVector3Fixed(10.0, 10.0, 0.0));
 
  MY_VERIFY(facility != 0);
  MY_VERIFY(facility->construction() != 0); // a facility must ALWAYS have such an object
@@ -133,10 +130,7 @@ bool ConstructionTest::testConstruction()
 
 
  int unitType2 = 3;
- Unit* facilityNoConstructionStep = static_cast<Unit*>(mBosonContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType2,
-		mBosonContainer->mPlayerListManager->gamePlayerList().getFirst(),
-		ItemType(unitType2),
-		BoVector3Fixed(10.0, 10.0, 0.0)));
+ Unit* facilityNoConstructionStep = mBosonContainer->createNewUnitAtTopLeftPos(unitType2, BoVector3Fixed(10.0, 30.0, 0.0));
 
  MY_VERIFY(facilityNoConstructionStep != 0);
  MY_VERIFY(facilityNoConstructionStep->construction() != 0); // a facility must ALWAYS have such an object

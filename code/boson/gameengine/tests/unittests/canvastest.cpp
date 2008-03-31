@@ -111,24 +111,15 @@ bool CanvasTest::testSaveLoadCanvas()
 {
  int unitType1 = 1; // UnitProperties ID
  BoVector3Fixed unit1Pos(10.0, 10.0, 0.0);
- mCanvasContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType1,
-		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
-		ItemType(unitType1),
-		unit1Pos);
+ mCanvasContainer->createNewUnitAtTopLeftPos(unitType1, unit1Pos);
 
  int unitType2 = unitType1;
  BoVector3Fixed unit2Pos(20.0, 10.0, 0.0);
- mCanvasContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType2,
-		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
-		ItemType(unitType2),
-		unit2Pos);
+ mCanvasContainer->createNewUnitAtTopLeftPos(unitType2, unit2Pos);
 
  int unitType3 = unitType1;
  BoVector3Fixed unit3Pos(20.0, 10.0, 0.0);
- mCanvasContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType3,
-		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
-		ItemType(unitType3),
-		unit3Pos);
+ mCanvasContainer->createNewUnitAtTopLeftPos(unitType3, unit3Pos);
 
  MY_VERIFY(mCanvasContainer->mCanvas->allItemsCount() == 3);
 
@@ -271,24 +262,15 @@ bool CanvasTest::testMoveUnits()
 {
  int unitType1 = 1; // UnitProperties ID
  BoVector3Fixed unit1Pos(10.0, 10.0, 0.0);
- Unit* unit1 = static_cast<Unit*>(mCanvasContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType1,
-		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
-		ItemType(unitType1),
-		unit1Pos));
+ Unit* unit1 = mCanvasContainer->createNewUnitAtTopLeftPos(unitType1, unit1Pos);
 
  int unitType2 = unitType1;
  BoVector3Fixed unit2Pos(20.0, 10.0, 0.0);
- Unit* unit2 = static_cast<Unit*>(mCanvasContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType2,
-		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
-		ItemType(unitType2),
-		unit2Pos));
+ Unit* unit2 = mCanvasContainer->createNewUnitAtTopLeftPos(unitType2, unit2Pos);
 
  int unitType3 = unitType1;
  BoVector3Fixed unit3Pos(20.0, 10.0, 0.0);
- Unit* unit3 = static_cast<Unit*>(mCanvasContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType3,
-		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
-		ItemType(unitType3),
-		unit3Pos));
+ Unit* unit3 = mCanvasContainer->createNewUnitAtTopLeftPos(unitType3, unit3Pos);
 
  // TODO: leftEdge->centerX, topEdge->centerY
  MY_VERIFY(BoVector3Fixed(unit1->leftEdge(), unit1->topEdge(), unit1->z()) == unit1Pos);

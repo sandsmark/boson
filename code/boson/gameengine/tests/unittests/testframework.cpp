@@ -32,6 +32,8 @@
 #include "boeventmanager.h"
 #include "bosonplayerlistmanager.h"
 #include "boson.h"
+#include "rtti.h"
+#include "unit.h"
 
 #include "boglobal.h"
 #include "bosondata.h"
@@ -252,6 +254,17 @@ bool CanvasContainer::createCanvas(const QString& groundThemeId)
  return true;
 }
 
+Unit* CanvasContainer::createNewUnitAtTopLeftPos(unsigned int unitType, const BoVector3Fixed& pos)
+{
+ if (!mCanvas || !mPlayerListManager || mPlayerListManager->gamePlayerList().isEmpty()) {
+	return 0;
+ }
+ return static_cast<Unit*>(mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType,
+		mPlayerListManager->gamePlayerList().getFirst(),
+		ItemType(unitType),
+		pos));
+}
+
 // AB: creates count+1 players (count players + 1 neutral player)
 bool CanvasContainer::createPlayers(unsigned int count)
 {
@@ -355,5 +368,16 @@ bool BosonContainer::createPlayers(unsigned int count)
  }
 
  return ret;
+}
+
+Unit* BosonContainer::createNewUnitAtTopLeftPos(unsigned int unitType, const BoVector3Fixed& pos)
+{
+ if (!mCanvas || !mPlayerListManager || mPlayerListManager->gamePlayerList().isEmpty()) {
+	return 0;
+ }
+ return static_cast<Unit*>(mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType,
+		mPlayerListManager->gamePlayerList().getFirst(),
+		ItemType(unitType),
+		pos));
 }
 

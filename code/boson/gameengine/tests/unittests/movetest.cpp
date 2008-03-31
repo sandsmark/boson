@@ -96,24 +96,15 @@ bool MoveTest::testMove()
  BoVector3Fixed unitMoveNoObstaclesPos(10.0, 10.0, 0.0);
  BoVector2Fixed unitMoveNoObstaclesDest = BoVector2Fixed(unitMoveNoObstaclesPos.x(), unitMoveNoObstaclesPos.y())
 		+ BoVector2Fixed(10.0, 10.0);
- Unit* unitMoveNoObstacles = static_cast<Unit*>(mCanvasContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType1,
-		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
-		ItemType(unitType1),
-		unitMoveNoObstaclesPos));
+ Unit* unitMoveNoObstacles = mCanvasContainer->createNewUnitAtTopLeftPos(unitType1, unitMoveNoObstaclesPos);
 
  // unit moves from A to B with a unit in the way, which can easily be evaded.
  BoVector3Fixed unitMoveWithObstaclePos(50.0, 50.0, 0.0);
  BoVector2Fixed unitMoveWithObstacleDest = BoVector2Fixed(unitMoveWithObstaclePos.x(), unitMoveWithObstaclePos.y())
 		+ BoVector2Fixed(10.0, 0.0);
  BoVector3Fixed unitMoveIsObstaclePos(55.0, 50.0, 0.0);
- Unit* unitMoveWithObstacle = static_cast<Unit*>(mCanvasContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType1,
-		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
-		ItemType(unitType1),
-		unitMoveWithObstaclePos));
- Unit* unitMoveIsObstacle = static_cast<Unit*>(mCanvasContainer->mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType1,
-		mCanvasContainer->mPlayerListManager->gamePlayerList().getFirst(),
-		ItemType(unitType1),
-		unitMoveIsObstaclePos));
+ Unit* unitMoveWithObstacle = mCanvasContainer->createNewUnitAtTopLeftPos(unitType1, unitMoveWithObstaclePos);
+ Unit* unitMoveIsObstacle = mCanvasContainer->createNewUnitAtTopLeftPos(unitType1, unitMoveIsObstaclePos);
  Q_UNUSED(unitMoveIsObstacle);
 
  bool ok;

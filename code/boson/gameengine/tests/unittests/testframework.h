@@ -22,6 +22,8 @@
 
 #include <qobject.h>
 
+#include "math/bovector.h"
+
 class Boson;
 class BosonMap;
 class BosonPlayField;
@@ -30,6 +32,7 @@ class SpeciesTheme;
 class BoEventManager;
 class BosonPlayerListManager;
 class BosonCanvas;
+class Unit;
 
 #define MY_VERIFY(x) \
 	if (!(x)) { \
@@ -134,6 +137,12 @@ public:
 	// also creates players for the canvas!
 	bool createCanvas(const QString& groundThemeId);
 
+	/**
+	 * Create a new unit with type @p unitType at @p pos. The unit is always
+	 * owned by the @em first player.
+	 **/
+	Unit* createNewUnitAtTopLeftPos(unsigned int unitType, const BoVector3Fixed& pos);
+
 public:
 	BoEventManager* mEventManager;
 	BosonPlayerListManager* mPlayerListManager;
@@ -158,6 +167,12 @@ public:
 
 	// also creates players for the canvas!
 	bool createBoson(const QString& groundThemeId);
+
+	/**
+	 * Create a new unit with type @p unitType at @p pos. The unit is always
+	 * owned by the @em first player.
+	 **/
+	Unit* createNewUnitAtTopLeftPos(unsigned int unitType, const BoVector3Fixed& pos);
 
 public:
 	Boson* mBoson;
