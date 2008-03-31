@@ -463,7 +463,12 @@ void ProductionPlugin::productionCompleted()
 		if (canvas()->canPlaceUnitAtTopLeftPos(speciesTheme()->unitProperties(id), BoVector2Fixed(currentx, currenty), this)) {
 			// Free cell - place unit at it
 			mProductionState = mProductionState + 1;
-			((Boson*)player()->game())->buildProducedUnitAtTopLeftPos(this, id, BoVector2Fixed(currentx, currenty));
+			if (!((Boson*)player()->game())->buildProducedUnitAtTopLeftPos(this, id, BoVector2Fixed(currentx, currenty))) {
+				boError() << k_funcinfo << "OOPS - produced unit has NOT been placed! production is lost!" << endl;
+				// FIXME: try again later? at a different
+				// position?
+				// -> should never happen!
+			}
 			return;
 		}
 	}
