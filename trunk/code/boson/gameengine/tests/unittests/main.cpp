@@ -31,6 +31,7 @@
 #include "playfieldtest.h"
 #include "canvastest.h"
 #include "movetest.h"
+#include "constructiontest.h"
 
 #include <kaboutdata.h>
 #include <kcmdlineargs.h>
@@ -83,11 +84,13 @@ static bool startTests()
 	x test_##x; \
 	if (!test_##x.test()) { \
 		boError() << k_funcinfo << #x " failed" << endl; \
+		return false; \
 	}
  ADD_TEST(MapTest);
  ADD_TEST(PlayFieldTest);
  ADD_TEST(CanvasTest);
  ADD_TEST(MoveTest);
+ ADD_TEST(ConstructionTest);
 
  return true;
 }

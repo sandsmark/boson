@@ -22,6 +22,7 @@
 
 #include <qobject.h>
 
+class Boson;
 class BosonMap;
 class BosonPlayField;
 class BosonGroundTheme;
@@ -48,6 +49,14 @@ class BosonCanvas;
 	}; \
 	cleanupTest();
 
+/**
+ * This class provides functions used by various tests.
+ *
+ * It is intended to be used by both, the unit tests and "misc" test
+ * applications.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class TestFrameWork : public QObject
 {
 	Q_OBJECT
@@ -79,12 +88,35 @@ public:
 	static BosonMap* createDummyMap(const QString& groundThemeId);
 	static BosonPlayField* createDummyPlayField(const QString& groundThemeId);
 
+	/**
+	 * Create and load a @ref SpeciesTheme suitable for testing.
+	 *
+	 * The theme has several different unittypes, at least the following are
+	 * guaranteed to be previded:
+	 * @li Id=1: mobile ground unit
+	 * @li Id=2: facility with the default number of construction steps
+	 **/
 	static SpeciesTheme* createAndLoadDummySpeciesTheme(const QColor& teamColor, bool neutralSpecies = false);
 };
 
 // AB: note: we _need_ a new map/playfield for every new canvas, as the canvas
 //     is allowed to (and will) modify the map
 //     -> at the very least: the pathfinder will add colormaps
+/**
+ * This class provides a @ref BosonCanvas object and all objects required for
+ * it, such as a @ref BosonPlayField. @ref TestFrameWork is used to create/load
+ * these objects, unless straight-forward initializations are possible.
+ *
+ * A few @ref Player objects are also provided by this class.
+ *
+ * Note that this class does @em not provide all objects required to use all
+ * @ref BosonCanvas features - in particular no @ref Boson object and no Qt
+ * event loop and no @ref QApplication object is required by this class. However
+ * some @ref BosonCanvas features may depend on them and they may crash if you
+ * try to use them.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class CanvasContainer
 {
 public:
@@ -99,6 +131,31 @@ public:
 	BosonPlayerListManager* mPlayerListManager;
 	BosonPlayField* mPlayField;
 	BosonCanvas* mCanvas;
+
+protected:
+	bool createPlayers(unsigned int count);
+
+public:
+	/**
+	 * @internal
+	 **/
+	static bool createPlayers(unsigned int count, BosonPlayerListManager* playerListManager, BosonPlayField* playField);
+};
+
+class BosonContainer
+{
+public:
+	BosonContainer();
+	~BosonContainer();
+
+	// also creates players for the canvas!
+	bool createBoson(const QString& groundThemeId);
+
+public:
+	Boson* mBoson;
+	BosonPlayField* mPlayField;
+	BosonCanvas* mCanvas;
+	BosonPlayerListManager* mPlayerListManager;
 
 protected:
 	bool createPlayers(unsigned int count);
