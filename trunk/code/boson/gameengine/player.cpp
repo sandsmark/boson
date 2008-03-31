@@ -867,7 +867,7 @@ void Player::facilityCompleted(Unit* fac)
  constructedEvent->setPlayerId(bosonId());
  constructedEvent->setUnitId(fac->id());
  constructedEvent->setLocation(location);
- boGame->queueEvent(constructedEvent);
+ static_cast<Boson*>(game())->queueEvent(constructedEvent);
 }
 
 void Player::setOutOfGame()
