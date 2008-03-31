@@ -313,8 +313,14 @@ double ProductionPlugin::productionProgress() const
 	productionTime = speciesTheme()->unitProperties(currentProductionId())->productionTime();
  } else if (currentProductionType() == ProduceTech) {
 	productionTime = speciesTheme()->technology(currentProductionId())->productionTime();
+ } else if (currentProductionType() == ProduceNothing) {
+	return 0.0;
  } else {
 	boDebug() << k_funcinfo << "Unknown productiontype: " << currentProductionType() << endl;
+ }
+ if (productionTime == 0) {
+	boError() << k_funcinfo << "productionTime == 0 is invalid" << endl;
+	return 0.0;
  }
  double percentage = (double)(mProductionState * 100) / (double)productionTime;
  return percentage;
