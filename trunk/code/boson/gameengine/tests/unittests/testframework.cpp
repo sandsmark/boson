@@ -164,6 +164,11 @@ SpeciesTheme* TestFrameWork::createAndLoadDummySpeciesTheme(const QColor& teamCo
 		stream << "IsFacility=true\n";
 		stream << "\n";
 		stream << "[Boson Facility]\n";
+	} else if (id == 3) {
+		stream << "IsFacility=true\n";
+		stream << "\n";
+		stream << "[Boson Facility]\n";
+		stream << "ConstructionSteps=0\n";
 	}
 	file.close();
  }
