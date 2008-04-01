@@ -38,6 +38,8 @@ protected:
 	void cleanupTest();
 
 	bool testProductionMobileUnits();
+	bool testPauseResumeAbortProduction();
+	bool testProductionQueue();
 
 private:
 	BosonContainer* mBosonContainer;
