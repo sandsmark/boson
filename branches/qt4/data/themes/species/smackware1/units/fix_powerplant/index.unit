@@ -1,0 +1,39 @@
+[Boson Facility]
+CanRefineMinerals=false
+CanRefineOil=false
+ConstructionSteps=25
+
+[Boson Unit]
+Armor=0
+ConstructedEffects=10510
+Description=Provides power for other facilities.\nYou need at least one powerplant to be able to build other units.
+DestroyedEffects=1010,3010,6010,7010
+ExplodingDamage=0
+ExplodingDamageRange=0
+Health=350
+HitPoint=-0.3,-0.1,0.76
+Id=2
+IsFacility=true
+MineralCost=400
+Name=Power Generator
+OilCost=150
+Producer=10
+ProductionTime=20
+Requirements=5
+Shields=0
+SightRange=6
+SupportMiniMap=false
+TerrainType=1
+UnitDepth=1.125
+UnitHeight=3
+UnitWidth=3
+Weapons=0
+PowerGenerated=1500
+
+[Sounds]
+OrderAttack=order_attack
+OrderMove=order_move
+ReportDestroyed=report_destroyed
+ReportProduced=report_produced
+ReportUnderAttack=report_underattack
+Shoot=shoot

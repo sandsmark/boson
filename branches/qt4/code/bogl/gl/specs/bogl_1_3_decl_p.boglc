@@ -1,0 +1,116 @@
+include "bogl_1_2_1_decl_p.h"
+
+# additions in OpenGL 1.3:
+# previously extensions and now directly included:
+# * ARB_texture_compression
+# * ARB_texture_cube_map
+# * ARB_multisample
+# * ARB_multitexture
+# * ARB_texture_env_add
+# * ARB_texture_env_combine
+# * ARB_texture_env_dot3
+# * ARB_texture_border_clamp
+# * ARB_transpose_matrix
+
+
+# new functions:
+# * ARB_texture_compression:
+#   glCompressedTexImage3D()
+#   glCompressedTexImage2D()
+#   glCompressedTexImage1D()
+#   glCompressedTexSubImage3D()
+#   glCompressedTexSubImage2D()
+#   glCompressedTexSubImage1D()
+#   glGetCompressedTexImage()
+# * ARB_texture_cube_map
+#   none
+# * ARB_multisample
+#   glSampleCoverage()
+# * ARB_multitexture (see also OpenGL 1.2.1 - just remove the ARB suffix)
+#   glMultiTexCoord{1234}{sifd}()
+#   glMultiTexCoord{1234}{sifd}v()
+#   glClientActiveTexture()
+#   glActiveTexture()
+# * ARB_texture_env_add
+#   none
+# * ARB_texture_env_combine
+#   none
+# * ARB_texture_env_dot3
+#   none
+# * ARB_texture_border_clamp
+#   none
+# * ARB_transpose_matrix
+#   glLoadTransposeMatrixf()
+#   glLoadTransposeMatrixd()
+#   glMultTransposeMatrixf()
+#   glMultTransposeMatrixd()
+
+
+function void . glCompressedTexImage1D . GLenum target, GLint level, GLenum internalformat, GLsizei width, GLint border, GLsizei imageSize, const GLvoid* data
+function void . glCompressedTexImage2D . GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data
+function void . glCompressedTexImage3D . GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid* data
+function void . glCompressedTexSubImage1D . GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLsizei imageSize, const GLvoid* data
+function void . glCompressedTexSubImage2D . GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data
+function void . glCompressedTexSubImage3D . GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const GLvoid* data
+function void . glGetCompressedTexImage . GLenum target, GLint lod, GLvoid* img
+function void . glSampleCoverage . GLclampf value, GLboolean invert
+function void . glMultiTexCoord1d . GLenum target, GLdouble s
+function void . glMultiTexCoord1dv . GLenum target, const GLdouble* v
+function void . glMultiTexCoord1f . GLenum target, GLfloat s
+function void . glMultiTexCoord1fv . GLenum target, const GLfloat* v
+function void . glMultiTexCoord1i . GLenum target, GLint s
+function void . glMultiTexCoord1iv . GLenum target, const GLint* v
+function void . glMultiTexCoord1s . GLenum target, GLshort s
+function void . glMultiTexCoord1sv . GLenum target, const GLshort* v
+function void . glMultiTexCoord2d . GLenum target, GLdouble s, GLdouble t
+function void . glMultiTexCoord2dv . GLenum target, const GLdouble* v
+function void . glMultiTexCoord2f . GLenum target, GLfloat s, GLfloat t
+function void . glMultiTexCoord2fv . GLenum target, const GLfloat* v
+function void . glMultiTexCoord2i . GLenum target, GLint s, GLint t
+function void . glMultiTexCoord2iv . GLenum target, const GLint* v
+function void . glMultiTexCoord2s . GLenum target, GLshort s, GLshort t
+function void . glMultiTexCoord2sv . GLenum target, const GLshort* v
+function void . glMultiTexCoord3d . GLenum target, GLdouble s, GLdouble t, GLdouble r
+function void . glMultiTexCoord3dv . GLenum target, const GLdouble* v
+function void . glMultiTexCoord3f . GLenum target, GLfloat s, GLfloat t, GLfloat r
+function void . glMultiTexCoord3fv . GLenum target, const GLfloat* v
+function void . glMultiTexCoord3i . GLenum target, GLint s, GLint t, GLint r
+function void . glMultiTexCoord3iv . GLenum target, const GLint* v
+function void . glMultiTexCoord3s . GLenum target, GLshort s, GLshort t, GLshort r
+function void . glMultiTexCoord3sv . GLenum target, const GLshort* v
+function void . glMultiTexCoord4d . GLenum target, GLdouble s, GLdouble t, GLdouble r, GLdouble q
+function void . glMultiTexCoord4dv . GLenum target, const GLdouble* v
+function void . glMultiTexCoord4f . GLenum target, GLfloat s, GLfloat t, GLfloat r, GLfloat q
+function void . glMultiTexCoord4fv . GLenum target, const GLfloat* v
+function void . glMultiTexCoord4i . GLenum target, GLint s, GLint t, GLint r, GLint q
+function void . glMultiTexCoord4iv . GLenum target, const GLint* v
+function void . glMultiTexCoord4s . GLenum target, GLshort s, GLshort t, GLshort r, GLshort q
+function void . glMultiTexCoord4sv . GLenum target, const GLshort* v
+function void . glClientActiveTexture . GLenum texture
+function void . glActiveTexture . GLenum texture
+function void . glLoadTransposeMatrixd . const GLdouble m[16]
+function void . glLoadTransposeMatrixf . const GLfloat m[16]
+function void . glMultTransposeMatrixd . const GLdouble m[16]
+function void . glMultTransposeMatrixf . const GLfloat m[16]
+
+
+
+
+# AB: the defines in this file are incomplete!!
+
+define GL_TEXTURE0                       0x84C0
+define GL_TEXTURE1                       0x84C1
+define GL_TEXTURE2                       0x84C2
+define GL_TEXTURE3                       0x84C3
+define GL_TEXTURE4                       0x84C4
+define GL_TEXTURE5                       0x84C5
+define GL_TEXTURE6                       0x84C6
+define GL_TEXTURE7                       0x84C7
+define GL_TEXTURE8                       0x84C8
+define GL_TEXTURE9                       0x84C9
+define GL_CLIENT_ACTIVE_TEXTURE          0x84E1
+define GL_ACTIVE_TEXTURE                 0x84E0
+define GL_MAX_TEXTURE_UNITS              0x84E2
+
+
+

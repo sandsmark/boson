@@ -1,0 +1,227 @@
+(This is a list of instructions that describe how this package has been created)
+
+mkdir static
+cp -r /path/to/qt-copy static/qt-copy
+cp -r /path/to/kdelibs static/kdelibs
+cd static
+
+Qt:
+---
+---
+cd qt-copy
+cvs up -r QT_3_3_4_RELEASE
+make -f Makefile.cvs
+
+configure:
+ * we use -no-xinerama because I believe we don't need it
+ * we use -no-nis because I believe we don't need it (what is it? is that the sound thing? that one usually isn't present and therefore isn't used anyway)
+ * we use -no-xshape because I believe we don't need it (not present on my system anyway)
+ * we use -no-xft to remove dependencies. however this may be useful even to us (antialiased fonts. however since we use OpenGL fonts we cannot use them anyway for most things!)
+ * we use -no-cups because we don't need it
+ * we use -no-stl, -fast, -qt-gif, -no-exceptions because README.qt-copy says so
+ * we use -qt-zlib, -qt-libpng, qt-libjpeg to remove dependencies
+ * what about -no-sm ? do we need -sm for KDE?
+./configure -static -qt-gif -no-exceptions -thread -no-stl -fast -no-dlopen-opengl -no-xinerama -no-nis -no-cups -qt-zlib -qt-libpng -qt-libjpeg -no-xshape -no-xft -no-sm
+
+make sub-src
+make sub-tools
+cd ..
+
+
+arts:
+-----
+-----
+  Note: this is required for libartsc only, so that OpenAL will support aRts output. This arts
+  package is _NOT_ used by kdelibs.
+cd arts
+cvs up -r ARTS_1_1_4_RELEASE
+make -f Makefile.cvs
+QTDIR=/home/andi/kde/boson/static/qt-copy ./configure --enable-static
+make
+cd ..
+
+kdelibs:
+--------
+--------
+cd kdelibs
+cvs up -r KDE_3_3_2_RELEASE
+TODO: arts?
+ * edit admin/acinclude.m4.in to find libqt-mt.a instead of .so
+   -> currently e.g. by setting ac_qt_libraries=/path/to/static/qt-copy/lib
+ * edit admin/acinclude.m4.in to ignore the fact that KDE plugins for uic are
+   not found (this is because kdelibs is not being installed)
+ * edit kio/kio/kprotocolinfo.cpp, remove isFilterProtocol(), isHelperProtocol(),
+   isKnownProtocol() each with parameter const QString&. they are already
+   defined in kdecore/kprotocolinfo_kdecore.cpp
+ * copy kioslave/gzip/kgzipfilter.[cpp|h] to kio/kio/ and add the .cpp to Makefile.am
+   (right after kfilterbase.cpp)
+ * edit kio/kfilterbase.cpp: move KGzipFilterFactory from kgzipfilter.cpp to here.
+ * edit kio/kfilterbase.cpp, so that KFilterBase::findFilterByMimeType() returns filter from
+   the kgzipfilter library without doing a KTrader::query() (which would require the dcopserver
+   to be running).
+   This can be done by maintaining a KStaticDeleter<KGzipFilterFactory> which is created
+   in findFilterByMimeType when an "application/x-gzip" filter is requested and returns
+   KGzipFilterFactory::create(0, "kgzipfilter"); from it then.
+
+make -f Makefile.cvs
+TODO: --prefix=?
+      UPDATE: probably use --prefix=/home/andi/kde/boson/static/kdedir, same about KDEDIR
+TODO: really disable debug?
+QTDIR=/home/andi/kde/boson/static/qt-copy ./configure --disable-libfam --without-java --disable-debug --enable-static
+make
+
+ AB: note: with arts not being installed this will output an error in the arts
+ directory. however it can safely be ignored as long as the required dirs have
+ been compiled successfully
+ boson requires: kdecore, kdeui, kio, kdewidgets (for uic), kabc (for kdewidgets),
+                 kresources (for kabc)
+ -> just make -k should do the trick.
+
+
+
+cd ..
+
+openal:
+-------
+AB: this is kinda optional, but I did it anyway.
+I have used the debian sources for OpenAL.
+ * download openal_0.2004090900.orig.tar.gz and openal_0.2004090900-1.1.diff.gz
+ * untar, apply the patch, rename dir to openal
+cd openal/linux
+./autogen
+
+ * I want to support arts output device, as we are a KDE game and therefore
+   should support the KDE soundserver
+ * dlopen()ing the artsc library is required, as arts hardcodes the path to
+   libartscbackend.la. calling arts_init() will always use the hardcoded path,
+   so we cannot support systems that use other paths than mine does (and since
+   we install arts in dir separated from the actual system, _all_ systems will do)
+ * vorbis is required.
+ * alsa output makes at least sense.
+ * use --enable-smpeg to support mp3, however keep in mind that there are
+   licensing restrictions on mp3 decoders. the official binary should not provide
+   an mp3 decoder.
+   -> you will need to compile a static SDL, too, that provides smpeg!
+
+./configure --enable-arts --enable-arts-dlopen --enable-vorbis --enable-null --enable-waveout --enable-alsa --enable-optimizations
+make
+cd ..
+
+python:
+-------
+-------
+AB: I have used the debian sources for python.
+ * download python2.4_2.4dfsg.orig.tar.gz and python2.4_2.4dfsg-1.diff.gz
+ * untar, apply the patch, rename dir to python2.4
+ * debian uses the following configure options:
+    --prefix=/usr, --with-fpectl, --enable-ipv6, --enable-unicode=ucs4, --without-cxx, --enable-shared
+  -> --prefix does not matter for us, I believe
+  -> --enable-ipv6 is of no use for us, since scripts are not supposed to do any networking
+  -> --with-fpectl enables SIGPIPE catching, which is not even desired by us
+  -> --enable-unicode=ucs4   ? is that of use to us? I doubt so
+  -> --without-cxx : I am not sure what exactly this does, but I guess it doesn't harm, so we keep it
+  -> --enable-shared is not required for us, since we want static libs.
+
+cd python2.4
+./configure --without-cxx
+
+ * edit Modules/Setup to include the math module and some more: uncomment the lines
+   cmath cmathmodule.c # -lm # complex math library functions
+   math mathmodule.c # -lm # math library functions, e.g. sin()
+   time timemodule.c # -lm # time operations and variables
+   binascii binascii.c
+ * in Modules/Setup add the line (below the cmath/math lines):
+   _random _randommodule.c
+
+
+make
+cd ..
+
+ * note that for the final package you need to the scripts from
+   python/python2.4/Lib/ to our scripts directory
+   (currently share/apps/boson/themes/scripts/pythonlib/):
+   cp Lib/*py /path/to/package/share/apps/boson/themes/scripts/pythonlib/
+
+
+boson:
+------
+------
+cd code
+cvs up -A (or whatever)
+
+admin/acinclude.m4.in
+---------------------
+ * modify admin/acinclude.m4.in to ignore the fact that KDE plugins for uic
+   are not found (see kdelibs)
+
+
+Makefile.ams
+------------
+ * remove all libraries from libboson_la_LIBADD, that should be linked statically
+   do NOT remove local libs, like those pointing to $(top_builddir)
+ * also remove such libraries from local libs that boson depends on, such as
+   libkgame_LIBADD in kgame/Makefile.am (this one is obsolete!)
+   -> you will notice that you missed a library when boson is fully compiled & linked but
+      ldd boson still gives some of those libraries!
+      (note that some libraraies in ldd boson are fine - e.g. libGL which is not meant to
+       be linked statically!)
+   currently the following files need to be modified:
+   * boson/Makefile.am
+   * maybe bosound/Makefile.am -> if we want to remove OpenAL dependency.
+          replace $(BO_LIB_OPENAL) by just $(top_builddir)/bosound/openal/libbosonsoundal.la
+   * maybe boson/script/Makefile.am -> if we want to remove python dependency
+ * add all these libraries to boson_LDADD (and borender_LDADD if you want this, too).
+   use the static versions! e.g. instead of -lkdeui use $(BO_STATIC_KDE_LIBS)/libkdeui.a
+   ($(BO_STATIC_KDE_LIBS) is provided by --with-static-kde-dir)
+   -> note that you might need to add additional libs that were previously linked dynamically
+      by the dynamic versions of these libs.  you will notice this when a linker error occurs
+      at the end of the compilation (the Makefile.am can still be changed then)
+   currently the following libraries need to be added:
+   * $(BO_STATIC_KDE_LIBS)/libkio.a
+   * $(BO_STATIC_KDE_LIBS)/libkdesu.a (kio dependency)
+   * $(BO_STATIC_KDE_LIBS)/libkdeui.a
+   * $(BO_STATIC_KDE_LIBS)/libkdecore.a
+   * $(BO_STATIC_KDE_LIBS)/libkdefx.a (kdecore dependency)
+   * $(BO_STATIC_KDE_LIBS)/libDCOP.a (kdecore dependency)
+   * $(BO_STATIC_QT_LIBS)/libqt-mt.a
+   * -lart_lgp2 (kdecore dependency)  (note: this may link dynamically! might not be desired)
+   * -lidn (kdecore dependency)  (note: this may link dynamically! might not be desired)
+ * bobmfconverter/Makefile.am needs to be modified in the same manner as boson/Makefile.am.
+   i.e. add more or less the same libraries to bobmfconverter_LDADD as you added to boson_LDADD
+   -> actually much less: only qt and kdecore and their dependencies. just replace $(LIB_QT) and $(LIB_KDECORE) accordingly.
+   --> just replacing them by the variables $(LIB_KDE_MISC_STATIC), $(LIB_QT_STATIC), $(LIB_MISC_NON_STATIC) should work.
+ * server/Makefile.am needs to be modified in the same manner as boson/Makefile.am and bobmfconverter/Makefile.am.
+   Actually exactly the same modifications that applied to bobmfconverter apply to the server, too.
+
+make -f Makefile.cvs
+
+./configure --disable-plugins --enable-static \
+                --with-qt-dir=/home/andi/kde/boson/static/qt-copy \
+                --with-static-qt-dir=/home/andi/kde/boson/static/qt-copy \
+                --with-static-kde-dir=/home/andi/kde/boson/static/kdedir \
+                --enable-debug=yes
+NOTES:
+ * if configure complains about Qt not being installed and config.log contains
+   undefined references to X libs: modify the corresponding configure check in
+   acinclude.m4.in to link to these X libs.
+   the execute Makefile.cvs and ./configure again.
+ * --with-qt-dir and --with-static-qt-dir should be the same directory.
+   --with qt-dir exists because of the KDE build system. it could be removed,
+   but that would make maintaining the acinclude.m4.in much more difficult, so
+   we keep it.
+   the other one exists especially to be able to give an error when it was not
+   provided on the command line.
+ * --enable-debug=yes is of course optional, but highly recommended.
+   note that not using --enable-debug=yes produced different compiler
+   optimizations. using binaries with different compiler settings is much more
+   likely to produce out-of-sync errors.
+
+
+after configure:
+* AB: by some reason uic doesn't always honor includehints tags in the .ui file.
+      so maybe the generated .cpp files need to be modified with the correct
+      includes
+
+
+
+# vim: et textwidth=0

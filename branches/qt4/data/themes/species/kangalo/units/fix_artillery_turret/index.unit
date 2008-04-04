@@ -1,0 +1,57 @@
+[Boson Facility]
+ConstructionSteps=20
+
+[Boson Unit]
+Armor=12
+ConstructedEffects=
+Description=Heavy long-range cannon, very effective against facilities and big groups of enemy units.
+DestroyedEffects=
+ExplodingDamage=0
+ExplodingDamageRange=0
+Health=220
+HitPoint=0,0,0
+Id=25
+IsFacility=true
+MineralCost=600
+Name=Heavy Turret
+OilCost=300
+PowerConsumed=70
+PowerGenerated=0
+Producer=10
+ProductionTime=40
+Requirements=2,3,12
+SightRange=11
+TerrainType=1
+UnitDepth=1
+UnitHeight=2
+UnitWidth=2
+Weapons=1
+
+[Sounds]
+OrderAttack=order_attack
+OrderMove=order_move
+OrderSelect=order_select
+ReportDestroyed=report_destroyed
+ReportProduced=report_produced
+ReportUnderAttack=report_underattack
+
+[Weapon_0]
+AccelerationSpeed=20
+CanShootAtAirUnits=false
+CanShootAtLandUnits=true
+Damage=140
+DamageRange=3
+FlyEffects=
+Height=0.25
+HitEffects=2001
+Model=bullet
+Name=Cannon
+Offset=0,0,0
+Range=20
+Reload=9
+RequiredAmmunition=5
+ShootEffects=12020
+Speed=20
+TakeTargetVeloIntoAccount=true
+Type=Rocket
+

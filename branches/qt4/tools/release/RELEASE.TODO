@@ -1,0 +1,71 @@
+Remember to update/check before releasing:
+------------------------------------------
+- fileconverter/bosavegameconverter.cpp: provide proper release name and
+  BOSON_SAVEGAME_FORMAT_VERSION_XYZ define
+- change version number:
+  - boversion.h: BOSON_VERSION_STRING and BOSON_VERSION_[MINOR|MICRO]
+  - bouniteditor.ui
+  - code/ChangeLog: echo "version foobar has been released on ..."
+  - data/pics/boson-startup-textframe.png
+- code/boson/data/boson.lsm: Version, Entered-Date, Primary-site, Alternate-site, maybe. Keywords and Platform
+- make sure that cmake directories and other externals are included !
+- website: news, download.html
+- remember that the lsm file (for ftp servers) and the ChangeLog both include
+  the release-date!
+- release ONLY from a cvs RELEASE tag!
+  -> svn co https://svn.sourceforge.net/svnroot/boson/tags/BOSON_0_13_RELEASE
+  -> in order to create the tag:
+     cd subversion/tags ; svn mkdir BOSON_0_13_RELEASE
+     cd subversion/trunk ; svn cp code ../tags/BOSON_0_13_RELEASE
+     (same with data and tools)
+
+
+Release Instructions:
+---------------------
+ cd subversion/tags
+ svn up BOSON_0_13_RELEASE
+ cd BOSON_0_13_RELEASE
+ tools/release/dist 0.13
+
+This should create the necessary packages (i.e. the .tar.bz2 files) in the
+"0.13" subdirectory.
+
+Upload:
+-------
+- code,data,music (separate .tar.bz2 packages)
+- code+data+music=="-all" package (single .tar.bz2 package)
+- .lsm (some ftp sites require this)
+
+Upload to:
+----------
+- sf.net file release --> do not upload to boson.eu.org but use the file release
+  as primary instead
+- ftp.kde.org (lsm!) -> see ftp.upload.kde.org/[00NAMES|00LSM.README]
+
+Make Announcements (major releases):
+------------------------------------
+- boson-devel@lists.sf.net
+- kde-games-devel@mail.kde.org
+- kde-announce@mail.kde.org
+- sf.net project news
+- freehackers.org
+- linuxgames.com
+- holarse.de
+- happypenguin.org
+- linux-gamers.net
+- freshmeat?
+- for "large" release maybe the dot?
+
+Make Announcements (minor releases):
+------------------------------------
+- boson-devel@lists.sf.net
+- sf.net news
+- freshmeat
+
+We depend on:
+-------------
+- kdelibs 3
+- Qt 3
+- OpenGL
+- OpenAL
+

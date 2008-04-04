@@ -1,0 +1,88 @@
+# note: compliant OpenGL implementations don't have to implement an extension!
+
+
+ifndef GL_ARB_shader_objects
+typedef char GLcharARB;
+typedef unsigned int GLhandleARB;
+endif
+
+function GLvoid . glDeleteObjectARB . GLhandleARB
+function GLhandleARB . glGetHandleARB . GLenum
+function GLvoid . glDetachObjectARB . GLhandleARB, GLhandleARB
+function GLhandleARB . glCreateShaderObjectARB . GLenum
+function GLvoid . glShaderSourceARB . GLhandleARB, GLsizei, const GLcharARB**, const GLint*
+function GLvoid . glCompileShaderARB . GLhandleARB
+function GLhandleARB . glCreateProgramObjectARB . 
+function GLvoid . glAttachObjectARB . GLhandleARB, GLhandleARB
+function GLvoid . glLinkProgramARB . GLhandleARB
+function GLvoid . glUseProgramObjectARB . GLhandleARB
+function GLvoid . glValidateProgramARB . GLhandleARB
+function GLvoid . glUniform1fARB . GLint, GLfloat
+function GLvoid . glUniform2fARB . GLint, GLfloat, GLfloat
+function GLvoid . glUniform3fARB . GLint, GLfloat, GLfloat, GLfloat
+function GLvoid . glUniform4fARB . GLint, GLfloat, GLfloat, GLfloat, GLfloat
+function GLvoid . glUniform1iARB . GLint, GLint
+function GLvoid . glUniform2iARB . GLint, GLint, GLint
+function GLvoid . glUniform3iARB . GLint, GLint, GLint, GLint
+function GLvoid . glUniform4iARB . GLint, GLint, GLint, GLint, GLint
+function GLvoid . glUniform1fvARB . GLint, GLsizei, const GLfloat*
+function GLvoid . glUniform2fvARB . GLint, GLsizei, const GLfloat*
+function GLvoid . glUniform3fvARB . GLint, GLsizei, const GLfloat*
+function GLvoid . glUniform4fvARB . GLint, GLsizei, const GLfloat*
+function GLvoid . glUniform1ivARB . GLint, GLsizei, const GLint*
+function GLvoid . glUniform2ivARB . GLint, GLsizei, const GLint*
+function GLvoid . glUniform3ivARB . GLint, GLsizei, const GLint*
+function GLvoid . glUniform4ivARB . GLint, GLsizei, const GLint*
+function GLvoid . glUniformMatrix2fvARB . GLint, GLsizei, GLboolean, const GLfloat*
+function GLvoid . glUniformMatrix3fvARB . GLint, GLsizei, GLboolean, const GLfloat*
+function GLvoid . glUniformMatrix4fvARB . GLint, GLsizei, GLboolean, const GLfloat*
+function GLvoid . glGetObjectParameterfvARB . GLhandleARB, GLenum, GLfloat*
+function GLvoid . glGetObjectParameterivARB . GLhandleARB, GLenum, GLint*
+function GLvoid . glGetInfoLogARB . GLhandleARB, GLsizei, GLsizei*, GLcharARB*
+function GLvoid . glGetAttachedObjectsARB . GLhandleARB, GLsizei, GLsizei*, GLhandleARB*
+function GLint . glGetUniformLocationARB . GLhandleARB, const GLcharARB*
+function GLvoid . glGetActiveUniformARB . GLhandleARB, GLuint, GLsizei, GLsizei*, GLint*, GLenum*, const GLcharARB*
+function GLvoid . glGetUniformfvARB . GLhandleARB, GLint, GLfloat*
+function GLvoid . glGetUniformivARB . GLhandleARB, GLint, GLint*
+function GLvoid . glGetShaderSourceARB . GLhandleARB, GLsizei, GLsizei*, GLcharARB*
+
+
+
+define GL_PROGRAM_OBJECT_ARB                              0x8B40
+define GL_OBJECT_TYPE_ARB                                 0x8B4E
+define GL_OBJECT_SUBTYPE_ARB                              0x8B4F
+define GL_OBJECT_DELETE_STATUS_ARB                        0x8B80
+define GL_OBJECT_COMPILE_STATUS_ARB                       0x8B81
+define GL_OBJECT_LINK_STATUS_ARB                          0x8B82
+define GL_OBJECT_VALIDATE_STATUS_ARB                      0x8B83
+define GL_OBJECT_INFO_LOG_LENGTH_ARB                      0x8B84
+define GL_OBJECT_ATTACHED_OBJECTS_ARB                     0x8B85
+define GL_OBJECT_ACTIVE_UNIFORMS_ARB                      0x8B86
+define GL_OBJECT_ACTIVE_UNIFORM_MAX_LENGTH_ARB            0x8B87
+define GL_OBJECT_SHADER_SOURCE_LENGTH_ARB                 0x8B88
+define GL_SHADER_OBJECT_ARB                               0x8B48
+define GL_FLOAT                                           0x1406
+define GL_FLOAT_VEC2_ARB                                  0x8B50
+define GL_FLOAT_VEC3_ARB                                  0x8B51
+define GL_FLOAT_VEC4_ARB                                  0x8B52
+define GL_INT                                             0x1404
+define GL_INT_VEC2_ARB                                    0x8B53
+define GL_INT_VEC3_ARB                                    0x8B54
+define GL_INT_VEC4_ARB                                    0x8B55
+define GL_BOOL_ARB                                        0x8B56
+define GL_BOOL_VEC2_ARB                                   0x8B57
+define GL_BOOL_VEC3_ARB                                   0x8B58
+define GL_BOOL_VEC4_ARB                                   0x8B59
+define GL_FLOAT_MAT2_ARB                                  0x8B5A
+define GL_FLOAT_MAT3_ARB                                  0x8B5B
+define GL_FLOAT_MAT4_ARB                                  0x8B5C
+define GL_SAMPLER_1D_ARB                                  0x8B5D
+define GL_SAMPLER_2D_ARB                                  0x8B5E
+define GL_SAMPLER_3D_ARB                                  0x8B5F
+define GL_SAMPLER_CUBE_ARB                                0x8B60
+define GL_SAMPLER_1D_SHADOW_ARB                           0x8B61
+define GL_SAMPLER_2D_SHADOW_ARB                           0x8B62
+define GL_SAMPLER_2D_RECT_ARB                             0x8B63
+define GL_SAMPLER_2D_RECT_SHADOW_ARB                      0x8B64
+
+

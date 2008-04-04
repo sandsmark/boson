@@ -1,0 +1,4 @@
+#include "facilities.wml" type="Units" name="Tornado" \
+        description="An Tornado is a very powerful unit, it doesn't  have the best weapon, but it is the fastest air unit available." \
+        name2="tornado" type2="mob" \
+        before_url="ferry.html" before_text="Ferry" after_url="transall.html" after_text="Transall" up_url="index.html"

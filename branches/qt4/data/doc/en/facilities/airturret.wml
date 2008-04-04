@@ -1,0 +1,5 @@
+#include "facilities.wml" type="Facilities" name="Air Turret" \
+        description="This is a very powerful version of the normal <a href='turret.html'>turret</a><br>It can shoot at flying \
+        untis and is your best friend to face <a href='../units/transall.html'>Transalls</a> and <a href='../units/warthog.html'>Warthogs</a>." \
+        name2="airturret" type2="fix" \
+        before_url="turret.html" before_text="Turret" after_url="samsite.html" after_text="Sam-Site" up_url="index.html"

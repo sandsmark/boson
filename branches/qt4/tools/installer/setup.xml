@@ -1,0 +1,90 @@
+<?xml version="1.0" standalone="yes"?>
+
+<install product="boson"
+         desc="Boson"
+         version="0.12pre"
+         uninstall="uninstall.sh"
+         binarypath="/usr/bin"
+         promptbinaries="yes"
+         >
+  <!-- AB: update_url="http://www.lokigames.com/updates/" has been removed -->
+  <!-- AB: express="yes" has been removed. most will have to use "expert" anyway. -->
+  <!--
+  <readme>
+    README
+  </readme>
+  -->
+  <eula>
+   COPYING
+  </eula>
+  <component name="Default" version="0.12pre" default="yes">
+   <option install="true" required="true">
+    Base Install
+    <lang lang="fr">Installation de base</lang>
+    <lang lang="es">Instalación base</lang>
+    <lang lang="it">Installazione base</lang>
+    <lang lang="de">Minimale Installation</lang>
+    <help          >Required for play</help>
+    <help lang="fr">Requis pour jouer</help>
+    <help lang="es">Se necesita para jugar</help>
+    <help lang="it">È necessaria per giocare</help>
+    <help lang="de">Zum Spielen benötigt</help>
+
+    <binary arch="any"
+            libc="any"
+            symlink="boson"
+            play="gui"
+            >
+    <!-- AB: icon="icon.xpm" has been removed -->
+      boson
+    </binary>
+    <binary arch="any"
+            libc="any"
+            symlink="boson.bin"
+            >
+      boson.bin
+    </binary>
+    <binary arch="any" libc="any" symlink="boserver">
+      boserver
+    </binary>
+    <binary arch="any" libc="any" keepdirs="yes">
+      bin/bobmfconverter
+    </binary>
+    <binary arch="any" libc="any" symlink="boinfo">
+      boinfo
+    </binary>
+    <binary arch="any" libc="any" symlink="boufodesigner">
+      boufodesigner
+    </binary>
+    <binary arch="any" libc="any" symlink="bocursor">
+      bocursor
+    </binary>
+    <!-- TODO?
+    <binary arch="any" libc="any" symlink="boprofiling">
+      boprofiling
+    </binary>
+    <binary arch="any" libc="any" symlink="borender">
+      borender
+    </binary>
+    <binary arch="any" libc="any" symlink="bounit">
+      bounit
+    </binary>
+    -->
+    <files>
+      share
+      patches
+    </files>
+   </option>
+   <!--
+   <option
+       install="true"
+       path="share/apps/boson/music/"
+       >
+    Music
+    <files>
+      music/*
+    </files>
+   </option>
+   -->
+  </component>
+</install>

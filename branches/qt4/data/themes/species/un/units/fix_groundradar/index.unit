@@ -1,0 +1,46 @@
+[Boson Facility]
+CanRefineMinerals=false
+CanRefineOil=false
+ConstructionSteps=18
+
+[Boson Unit]
+Armor=0
+ConstructedEffects=
+Description=Provides information about ground units on the minimap.
+DestroyedEffects=1010,3010,6010,7010
+ExplodingDamage=0
+ExplodingDamageRange=0
+Health=400
+HitPoint=0,0,0.5
+Id=20
+IsFacility=true
+MineralCost=700
+Name=Groundradar
+OilCost=200
+Producer=10
+ProductionTime=30
+Requirements=2,5
+SightRange=15
+SupportMiniMap=true
+TerrainType=1
+UnitDepth=8
+UnitHeight=5
+UnitWidth=5
+Weapons=0
+PowerConsumed=200
+
+[RadarPlugin]
+TransmittedPower=20000
+MinReceivedPower=0.05
+DetectsAirUnits=false
+DetectsLandUnits=true
+
+
+[Sounds]
+OrderAttack=order_attack
+OrderMove=order_move
+OrderSelect=order_select
+ReportDestroyed=report_destroyed
+ReportProduced=report_produced
+ReportUnderAttack=report_underattack
+Shoot=shoot

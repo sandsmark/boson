@@ -1,0 +1,5 @@
+#include "facilities.wml" type="Units" name="Transall" \
+        description="This is a special version of the C-160 tactical transport aircraft, the C-160B.<br> \
+        It was upgraded with a bomber installation to get a powerful aircraft and to have a reason why a transport unit drops bombs." \
+        name2="transall" type2="mob" \
+        before_url="tornado.html" before_text="Tornado" after_url="warthog.html" after_text="Warthog" up_url="index.html"

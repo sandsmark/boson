@@ -1,0 +1,67 @@
+# AB: I won't separate this file up into GLU versions.
+#     that's a lot of work and I don't think it's so important for GLU.
+
+
+function void . gluBeginCurve . GLUnurbs* nurb
+function void . gluBeginPolygon . GLUtesselator* tess
+function void . gluBeginSurface . GLUnurbs* nurb
+function void . gluBeginTrim . GLUnurbs* nurb
+function GLint . gluBuild1DMipmapLevels . GLenum target, GLint internalFormat, GLsizei width, GLenum format, GLenum type, GLint level, GLint base, GLint max, const void* data
+function GLint . gluBuild1DMipmaps . GLenum target, GLint internalFormat, GLsizei width, GLenum format, GLenum type, const void* data
+function GLint . gluBuild2DMipmapLevels . GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, GLint level, GLint base, GLint max, const void* data
+function GLint . gluBuild2DMipmaps . GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* data
+function GLint . gluBuild3DMipmapLevels . GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, GLint level, GLint base, GLint max, const void* data
+function GLint . gluBuild3DMipmaps . GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* data
+function GLboolean . gluCheckExtension . const GLubyte* extName, const GLubyte* extString
+function void . gluCylinder . GLUquadric* quad, GLdouble base, GLdouble top, GLdouble height, GLint slices, GLint stacks
+function void . gluDeleteNurbsRenderer . GLUnurbs* nurb
+function void . gluDeleteQuadric . GLUquadric* quad
+function void . gluDeleteTess . GLUtesselator* tess
+function void . gluDisk . GLUquadric* quad, GLdouble inner, GLdouble outer, GLint slices, GLint loops
+function void . gluEndCurve . GLUnurbs* nurb
+function void . gluEndPolygon . GLUtesselator* tess
+function void . gluEndSurface . GLUnurbs* nurb
+function void . gluEndTrim . GLUnurbs* nurb
+function const GLubyte* . gluErrorString . GLenum error
+function void . gluGetNurbsProperty . GLUnurbs* nurb, GLenum property, GLfloat* data
+function const GLubyte* . gluGetString . GLenum name
+function void . gluGetTessProperty . GLUtesselator* tess, GLenum which, GLdouble* data
+function void . gluLoadSamplingMatrices . GLUnurbs* nurb, const GLfloat* model, const GLfloat* perspective, const GLint* view
+function void . gluLookAt . GLdouble eyeX, GLdouble eyeY, GLdouble eyeZ, GLdouble centerX, GLdouble centerY, GLdouble centerZ, GLdouble upX, GLdouble upY, GLdouble upZ
+function GLUnurbs* . gluNewNurbsRenderer . 
+function GLUquadric* . gluNewQuadric . 
+function GLUtesselator* . gluNewTess . 
+function void . gluNextContour . GLUtesselator* tess, GLenum type
+function void . gluNurbsCallback . GLUnurbs* nurb, GLenum which, _GLUfuncptr CallBackFunc
+function void . gluNurbsCallbackData . GLUnurbs* nurb, GLvoid* userData
+function void . gluNurbsCallbackDataEXT . GLUnurbs* nurb, GLvoid* userData
+function void . gluNurbsCurve . GLUnurbs* nurb, GLint knotCount, GLfloat* knots, GLint stride, GLfloat* control, GLint order, GLenum type
+function void . gluNurbsProperty . GLUnurbs* nurb, GLenum property, GLfloat value
+function void . gluNurbsSurface . GLUnurbs* nurb, GLint sKnotCount, GLfloat* sKnots, GLint tKnotCount, GLfloat* tKnots, GLint sStride, GLint tStride, GLfloat* control, GLint sOrder, GLint tOrder, GLenum type
+function void . gluOrtho2D . GLdouble left, GLdouble right, GLdouble bottom, GLdouble top
+function void . gluPartialDisk . GLUquadric* quad, GLdouble inner, GLdouble outer, GLint slices, GLint loops, GLdouble start, GLdouble sweep
+function void . gluPerspective . GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar
+function void . gluPickMatrix . GLdouble x, GLdouble y, GLdouble delX, GLdouble delY, GLint* viewport
+function GLint . gluProject . GLdouble objX, GLdouble objY, GLdouble objZ, const GLdouble* model, const GLdouble* proj, const GLint* view, GLdouble* winX, GLdouble* winY, GLdouble* winZ
+function void . gluPwlCurve . GLUnurbs* nurb, GLint count, GLfloat* data, GLint stride, GLenum type
+function void . gluQuadricCallback . GLUquadric* quad, GLenum which, _GLUfuncptr CallBackFunc
+function void . gluQuadricDrawStyle . GLUquadric* quad, GLenum draw
+function void . gluQuadricNormals . GLUquadric* quad, GLenum normal
+function void . gluQuadricOrientation . GLUquadric* quad, GLenum orientation
+function void . gluQuadricTexture . GLUquadric* quad, GLboolean texture
+function GLint . gluScaleImage . GLenum format, GLsizei wIn, GLsizei hIn, GLenum typeIn, const void* dataIn, GLsizei wOut, GLsizei hOut, GLenum typeOut, GLvoid* dataOut
+function void . gluSphere . GLUquadric* quad, GLdouble radius, GLint slices, GLint stacks
+function void . gluTessBeginContour . GLUtesselator* tess
+function void . gluTessBeginPolygon . GLUtesselator* tess, GLvoid* data
+function void . gluTessCallback . GLUtesselator* tess, GLenum which, _GLUfuncptr CallBackFunc
+function void . gluTessEndContour . GLUtesselator* tess
+function void . gluTessEndPolygon . GLUtesselator* tess
+function void . gluTessNormal . GLUtesselator* tess, GLdouble valueX, GLdouble valueY, GLdouble valueZ
+function void . gluTessProperty . GLUtesselator* tess, GLenum which, GLdouble data
+function void . gluTessVertex . GLUtesselator* tess, GLdouble* location, GLvoid* data
+function GLint . gluUnProject . GLdouble winX, GLdouble winY, GLdouble winZ, const GLdouble* model, const GLdouble* proj, const GLint* view, GLdouble* objX, GLdouble* objY, GLdouble* objZ
+function GLint . gluUnProject4 . GLdouble winX, GLdouble winY, GLdouble winZ, GLdouble clipW, const GLdouble* model, const GLdouble* proj, const GLint* view, GLdouble near, GLdouble far, GLdouble* objX, GLdouble* objY, GLdouble* objZ, GLdouble* objW
+
+
+
+

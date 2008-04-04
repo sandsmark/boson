@@ -1,0 +1,12 @@
+# AB:
+# OpenGL 1.2.1 introduced ARB extensions.
+
+include "bogl_1_2_decl_p.h"
+
+# additions in OpenGL 1.2.1:
+# ARB extensions (do not HAVE to be implemented by an OpenGL implementation!):
+# * ARB_multitexture
+
+
+include "extensions/arb_multitexture_decl_p.h"
+

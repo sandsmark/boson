@@ -1,0 +1,32 @@
+Boson, a real-time strategy game
+--------------------------------
+
+What is it ?
+Boson is an OpenGL real-time strategy game. It is designed to run on Unix (Linux) computers, and is built on top of the KDE, Qt and kdegames libraries.
+
+Licensing:
+Boson's code, graphics, sounds and music files are published under the GNU General Public License (GPL).
+
+Minimum hardware requirements:
+ Note: If you have a older graphics card like a TNT2 you will need a fast CPU.
+        500 MHz ix86 Prozessor (don't know anything about other machines) AMD 64 is also known to work
+        256 MB RAM
+        3D accelerator card (this is the most important part!)
+        Optional: Sound card
+
+Minimum software requirements:
+        XFree 4.x server - see http://www.xfree86.org/
+        OpenGL - The OpenGL library (should be included in your XFree Server or graphics card driver)
+        Qt 3.1 or better - see http://www.trolltech.com/
+        kdelibs 3.5 or better (3.2, 3.3 and 3.4 are untested), but before 4.0 - see http://www.kde.org/
+        Python 2.0 or better (2.3 is recommended) - see http://www.python.org/
+        libvorbis (for sound and music) - see http://www.vorbis.com/
+        lib3ds (Units and building rendering) - see http://lib3ds.sf.net/
+        OpenAL (audio library) - see http://www.openal.org/
+        WML and Perl - For the handbook - see http://www.thewml.org
+            There is also an online version of the handbook at http://boson.halux2001.de/handbook/en/
+
+
+Also check the website for more info :
+
+                http://boson.eu.org/

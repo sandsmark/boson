@@ -1,0 +1,92 @@
+#    This file is part of the Boson game
+#    Copyright (C) 2005-2008 Andreas Beckermann <b_mann@gmx.de>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+#
+#
+#
+# this file is an input file for boglc, to bogl compiler.
+# see README.format for details on the format of this file.
+#
+
+
+# This file contains declarations of GL/glx.h ONLY!
+# Do NOT add any other functions here!
+
+function XVisualInfo* . glXChooseVisual . Display *dpy, int screen, int *attribList
+function void . glXCopyContext . Display *dpy, GLXContext src, GLXContext dst, unsigned long mask
+function GLXContext . glXCreateContext . Display *dpy, XVisualInfo *vis, GLXContext shareList, Bool direct
+function GLXPixmap . glXCreateGLXPixmap . Display *dpy, XVisualInfo *vis, Pixmap pixmap
+function void . glXDestroyContext . Display *dpy, GLXContext ctx
+function void . glXDestroyGLXPixmap . Display *dpy, GLXPixmap pix
+function int . glXGetConfig . Display *dpy, XVisualInfo *vis, int attrib, int *value
+function GLXContext . glXGetCurrentContext .
+function GLXDrawable . glXGetCurrentDrawable .
+function Bool . glXIsDirect . Display *dpy, GLXContext ctx
+function Bool . glXMakeCurrent . Display *dpy, GLXDrawable drawable, GLXContext ctx
+function Bool . glXQueryExtension . Display *dpy, int *errorBase, int *eventBase
+function Bool . glXQueryVersion . Display *dpy, int *major, int *minor
+function void . glXSwapBuffers . Display *dpy, GLXDrawable drawable
+function void . glXUseXFont . Font font, int first, int count, int listBase
+function void . glXWaitGL .
+function void . glXWaitX .
+function const char* . glXGetClientString . Display *dpy, int name
+function const char* . glXQueryServerString . Display *dpy, int screen, int name
+function const char* . glXQueryExtensionsString . Display *dpy, int screen
+function GLXFBConfig* . glXGetFBConfigs . Display *dpy, int screen, int *nelements
+function GLXFBConfig* . glXChooseFBConfig . Display *dpy, int screen, const int *attrib_list, int *nelements
+function int . glXGetFBConfigAttrib . Display *dpy, GLXFBConfig config, int attribute, int *value
+function XVisualInfo* . glXGetVisualFromFBConfig . Display *dpy, GLXFBConfig config
+function GLXWindow . glXCreateWindow . Display *dpy, GLXFBConfig config, Window win, const int *attrib_list
+function void . glXDestroyWindow . Display *dpy, GLXWindow win
+function GLXPixmap . glXCreatePixmap . Display *dpy, GLXFBConfig config, Pixmap pixmap, const int *attrib_list
+function void . glXDestroyPixmap . Display *dpy, GLXPixmap pixmap
+function GLXPbuffer . glXCreatePbuffer . Display *dpy, GLXFBConfig config, const int *attrib_list
+function void . glXDestroyPbuffer . Display *dpy, GLXPbuffer pbuf
+function void . glXQueryDrawable . Display *dpy, GLXDrawable draw, int attribute, unsigned int *value
+function GLXContext . glXCreateNewContext . Display *dpy, GLXFBConfig config, int render_type, GLXContext share_list, Bool direct
+function Bool . glXMakeContextCurrent . Display *display, GLXDrawable draw, GLXDrawable read, GLXContext ctx
+function GLXDrawable . glXGetCurrentReadDrawable .
+function Display* . glXGetCurrentDisplay .
+function int . glXQueryContext . Display *dpy, GLXContext ctx, int attribute, int *value
+function void . glXSelectEvent . Display *dpy, GLXDrawable draw, unsigned long event_mask
+function void . glXGetSelectedEvent . Display *dpy, GLXDrawable draw, unsigned long *event_mask
+function void* . glXGetProcAddress . const GLubyte *procname
+function GLXContextID . glXGetContextIDEXT . const GLXContext ctx
+function GLXContext . glXImportContextEXT . Display *dpy, GLXContextID contextID
+function void . glXFreeContextEXT . Display *dpy, GLXContext ctx
+function int . glXQueryContextInfoEXT . Display *dpy, GLXContext ctx, int attribute, int *value
+function Display* . glXGetCurrentDisplayEXT .
+function void* . glXGetProcAddressARB . const GLubyte *procName
+function void* . glXAllocateMemoryNV . GLsizei size, GLfloat readfreq, GLfloat writefreq, GLfloat priority
+function void* . glXFreeMemoryNV . GLvoid *pointer
+function GLuint . glXGetAGPOffsetMESA . const GLvoid *pointer
+
+# GLX_SGIX_fbconfig
+function int . glXGetFBConfigAttribSGIX . Display *dpy, GLXFBConfigSGIX config, int attribute, int *value_return
+function GLXFBConfigSGIX* . glXChooseFBConfigSGIX . Display *dpy, int screen, const int *attrib_list, int *nelements
+function GLXPixmap . glXCreateGLXPixmapWithConfigSGIX . Display *dpy, GLXFBConfigSGIX config, Pixmap pixmap
+function GLXContext . glXCreateContextWithConfigSGIX . Display *dpy, GLXFBConfigSGIX config, int render_type, GLXContext share_list, Bool direct
+function XVisualInfo* . glXGetVisualFromFBConfigSGIX . Display *dpy, GLXFBConfigSGIX config
+function GLXFBConfigSGIX . glXGetFBConfigFromVisualSGIX . Display *dpy, XVisualInfo *vis
+
+# GLX_SGIX_pbuffer
+function GLXPbuffer . glXCreateGLXPbufferSGIX . Display *dpy, GLXFBConfig config, unsigned int width, unsigned int height, const int *attrib_list
+function void . glXDestroyGLXPbufferSGIX . Display *dpy, GLXPbuffer pbuf
+function void . glXQueryGLXPbufferSGIX . Display *dpy, GLXPbuffer pbuf, int attribute, unsigned int *value
+function void . glXSelectEventSGIX . Display *dpy, GLXDrawable drawable, unsigned long mask
+function void . glXGetSelectedEventSGIX . Display *dpy, GLXDrawable drawable, unsigned long *mask
+
+

@@ -1,0 +1,36 @@
+#include "top.wml"
+#use wml::std::grid
+
+<h1>Facilities</h1>
+
+<grid layout=5x3 padding=15 border=0 bgcolor="#204020">
+#include "simple_facilities.wml" type="Facilities" name="Map" \
+        name2="map" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Command Bunker" \
+        name2="commandbunker" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Mineral Refinery" \
+        name2="mineralrefinery" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Oil Refinery" \
+        name2="oilrefinery" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Power Plant" \
+        name2="powerplant" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Weapons Factory" \
+        name2="weaponsfactory" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Comsat" \
+        name2="comsat" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Tech Center" \
+        name2="techcenter" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Repair Pad" \
+        name2="repairpad" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Helipad" \
+        name2="helipad" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Turret" \
+        name2="turret" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Air Turret" \
+        name2="airturret" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Sam-Site" \
+        name2="samsite" type2="fix"
+</grid>
+
+#include "nav.wml" before_url="../game/technologies.html" before_text="Technologies" after_url="map.html" after_text="Facilities dependency tree" up_url="../index.html"
+#include "footer.wml"

@@ -1,0 +1,44 @@
+[Boson Mobile Unit]
+CanGoOnLand=true
+CanGoOnWater=false
+Speed=1.6
+
+[Boson Unit]
+Armor=2
+ConstructedEffects=
+Description=Collects minerals from mineral mines.
+DestroyedEffects=1001,3001,6001,7001
+ExplodingDamage=0
+ExplodingDamageRange=0
+Health=160
+HitPoint=0,0,0.5
+Id=10003
+IsFacility=false
+MineralCost=900
+Name=Mineral Harvester
+OilCost=500
+Producer=0
+ProductionTime=30
+Requirements=13,3
+SightRange=8
+TerrainType=1
+UnitDepth=0.375
+UnitHeight=0.75
+UnitWidth=0.75
+Weapons=0
+
+[HarvesterPlugin]
+CanMineMinerals=true
+CanMineOil=false
+MaxResources=250
+MiningSpeed=60
+UnloadingSpeed=200
+
+[Sounds]
+OrderAttack=order_attack
+OrderMove=order_move
+OrderSelect=order_select
+ReportDestroyed=report_destroyed
+ReportProduced=report_produced
+ReportUnderAttack=report_underattack
+Shoot=shoot

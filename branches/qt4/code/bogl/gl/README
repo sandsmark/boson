@@ -1,0 +1,19 @@
+The headers and the bogl_resolve_symbols.cpp file are generated using
+make_files.sh from the files in specs/!
+
+why we need these declarations sorted by version:
+* dlopen() and dlsym() causes problems with GL sometimes.
+  -> it would be nice if we'd be able to replace this
+* using gl*() functions directly causes even more problems: system A
+  compiles&&links boson but has GL version x, system B runs that binary, but has
+  GL version y with x != y.
+  -> we need to resolve functions on runtime, otherwise we may get
+     * not support special features of system B, if y > x
+     * not run at all, due to undefined references
+* glXGetProcAddressARB() might be a way out of this problem (yet to be tested at
+  this point!), but it does not guarantee that it returns NULL if a function is
+  not available
+  -> we need additional checks for the available functions (e.g. using
+  glGetVersion() and/or by checking for the extensions)
+
+this is what we need these files for.

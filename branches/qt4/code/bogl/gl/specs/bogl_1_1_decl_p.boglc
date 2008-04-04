@@ -1,0 +1,373 @@
+#    This file is part of the Boson game
+#    Copyright (C) 2005-2008 Andreas Beckermann <b_mann@gmx.de>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+#
+#
+#
+# this file is an input file for boglc, to bogl compiler.
+# see README.format for details on the format of this file.
+#
+#
+# TODO: comments that are included in the header and comments that are NOT
+#       included (probably "#" vs "##")
+
+
+#
+# AB: this is for OpenGL 1.0 and 1.1, since I don't have a 1.0 spec
+#
+
+function GLenum . glGetError .
+function void . glBegin . GLenum mode
+function void . glEnd .
+function void . glEdgeFlag . GLboolean flag
+function void . glEdgeFlagv . const GLboolean* flag
+function void . glVertex2d . GLdouble x, GLdouble y
+function void . glVertex2f . GLfloat x, GLfloat y
+function void . glVertex2i . GLint x, GLint y
+function void . glVertex2s . GLshort x, GLshort y
+function void . glVertex3d . GLdouble x, GLdouble y, GLdouble z
+function void . glVertex3f . GLfloat x, GLfloat y, GLfloat z
+function void . glVertex3i . GLint x, GLint y, GLint z
+function void . glVertex3s . GLshort x, GLshort y, GLshort z
+function void . glVertex4d . GLdouble x, GLdouble y, GLdouble z, GLdouble w
+function void . glVertex4f . GLfloat x, GLfloat y, GLfloat z, GLfloat w
+function void . glVertex4i . GLint x, GLint y, GLint z, GLint w
+function void . glVertex4s . GLshort x, GLshort y, GLshort z, GLshort w
+function void . glVertex2dv . const GLdouble* v
+function void . glVertex2fv . const GLfloat* v
+function void . glVertex2iv . const GLint* v
+function void . glVertex2sv . const GLshort* v
+function void . glVertex3dv . const GLdouble* v
+function void . glVertex3fv . const GLfloat* v
+function void . glVertex3iv . const GLint* v
+function void . glVertex3sv . const GLshort* v
+function void . glVertex4dv . const GLdouble* v
+function void . glVertex4fv . const GLfloat* v
+function void . glVertex4iv . const GLint* v
+function void . glVertex4sv . const GLshort* v
+function void . glTexCoord1d . GLdouble s
+function void . glTexCoord1f . GLfloat s
+function void . glTexCoord1i . GLint s
+function void . glTexCoord1s . GLshort s
+function void . glTexCoord2d . GLdouble s, GLdouble t
+function void . glTexCoord2f . GLfloat s, GLfloat t
+function void . glTexCoord2i . GLint s, GLint t
+function void . glTexCoord2s . GLshort s, GLshort t
+function void . glTexCoord3d . GLdouble s, GLdouble t, GLdouble r
+function void . glTexCoord3f . GLfloat s, GLfloat t, GLfloat r
+function void . glTexCoord3i . GLint s, GLint t, GLint r
+function void . glTexCoord3s . GLshort s, GLshort t, GLshort r
+function void . glTexCoord4d . GLdouble s, GLdouble t, GLdouble r, GLdouble q
+function void . glTexCoord4f . GLfloat s, GLfloat t, GLfloat r, GLfloat q
+function void . glTexCoord4i . GLint s, GLint t, GLint r, GLint q
+function void . glTexCoord4s . GLshort s, GLshort t, GLshort r, GLshort q
+function void . glTexCoord1dv . const GLdouble* v
+function void . glTexCoord1fv . const GLfloat* v
+function void . glTexCoord1iv . const GLint* v
+function void . glTexCoord1sv . const GLshort* v
+function void . glTexCoord2dv . const GLdouble* v
+function void . glTexCoord2fv . const GLfloat* v
+function void . glTexCoord2iv . const GLint* v
+function void . glTexCoord2sv . const GLshort* v
+function void . glTexCoord3dv . const GLdouble* v
+function void . glTexCoord3fv . const GLfloat* v
+function void . glTexCoord3iv . const GLint* v
+function void . glTexCoord3sv . const GLshort* v
+function void . glTexCoord4dv . const GLdouble* v
+function void . glTexCoord4fv . const GLfloat* v
+function void . glTexCoord4iv . const GLint* v
+function void . glTexCoord4sv . const GLshort* v
+function void . glNormal3b . GLbyte nx, GLbyte ny, GLbyte nz
+function void . glNormal3d . GLdouble nx, GLdouble ny, GLdouble nz
+function void . glNormal3f . GLfloat nx, GLfloat ny, GLfloat nz
+function void . glNormal3i . GLint nx, GLint ny, GLint nz
+function void . glNormal3s . GLshort nx, GLshort ny, GLshort nz
+function void . glNormal3bv . const GLbyte* v
+function void . glNormal3dv . const GLdouble* v
+function void . glNormal3fv . const GLfloat* v
+function void . glNormal3iv . const GLint* v
+function void . glNormal3sv . const GLshort* v
+function void . glColor3b . GLbyte red, GLbyte green, GLbyte blue
+function void . glColor3d . GLdouble red, GLdouble green, GLdouble blue
+function void . glColor3f . GLfloat red, GLfloat green, GLfloat blue
+function void . glColor3i . GLint red, GLint green, GLint blue
+function void . glColor3s . GLshort red, GLshort green, GLshort blue
+function void . glColor3ub . GLubyte red, GLubyte green, GLubyte blue
+function void . glColor3ui . GLuint red, GLuint green, GLuint blue
+function void . glColor3us . GLushort red, GLushort green, GLushort blue
+function void . glColor4b . GLbyte red, GLbyte green, GLbyte blue, GLbyte alpha
+function void . glColor4d . GLdouble red, GLdouble green, GLdouble blue, GLdouble alpha
+function void . glColor4f . GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha
+function void . glColor4i . GLint red, GLint green, GLint blue, GLint alpha
+function void . glColor4s . GLshort red, GLshort green, GLshort blue, GLshort alpha
+function void . glColor4ub . GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha
+function void . glColor4ui . GLuint red, GLuint green, GLuint blue, GLuint alpha
+function void . glColor4us . GLushort red, GLushort green, GLushort blue, GLushort alpha
+function void . glColor3bv . const GLbyte* v
+function void . glColor3dv . const GLdouble* v
+function void . glColor3fv . const GLfloat* v
+function void . glColor3iv . const GLint* v
+function void . glColor3sv . const GLshort* v
+function void . glColor3ubv . const GLubyte* v
+function void . glColor3uiv . const GLuint* v
+function void . glColor3usv . const GLushort* v
+function void . glColor4bv . const GLbyte* v
+function void . glColor4dv . const GLdouble* v
+function void . glColor4fv . const GLfloat* v
+function void . glColor4iv . const GLint* v
+function void . glColor4sv . const GLshort* v
+function void . glColor4ubv . const GLubyte* v
+function void . glColor4uiv . const GLuint* v
+function void . glColor4usv . const GLushort* v
+function void . glIndexd . GLdouble c
+function void . glIndexf . GLfloat c
+function void . glIndexi . GLint c
+function void . glIndexs . GLshort c
+function void . glIndexub . GLubyte c
+function void . glIndexdv . const GLdouble func
+function void . glIndexfv . const GLfloat func
+function void . glIndexiv . const GLint func
+function void . glIndexsv . const GLshort func
+function void . glIndexubv . const GLubyte func
+function void . glRectd . GLdouble x1, GLdouble y1, GLdouble x2, GLdouble y2
+function void . glRectf . GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2
+function void . glRecti . GLint x1, GLint y1, GLint x2, GLint y2
+function void . glRects . GLshort x1, GLshort y1, GLshort x2, GLshort y2
+function void . glRectdv . const GLdouble* v1, const GLdouble* v2
+function void . glRectfv . const GLfloat* v1, const GLfloat* v2
+function void . glRectiv . const GLint* v1, const GLint* v2
+function void . glRectsv . const GLshort* v1, const GLshort* v2
+function void . glDepthRange . GLclampd near_val, GLclampd far_val
+function void . glViewport . GLint x, GLint y, GLsizei width, GLsizei height
+function void . glMatrixMode . GLenum mode
+function void . glLoadMatrixd . const GLdouble* m
+function void . glLoadMatrixf . const GLfloat* m
+function void . glMultMatrixd . const GLdouble* m
+function void . glMultMatrixf . const GLfloat* m
+function void . glLoadIdentity . 
+function void . glRotated . GLdouble angle, GLdouble x, GLdouble y, GLdouble z
+function void . glRotatef . GLfloat angle, GLfloat x, GLfloat y, GLfloat z
+function void . glTranslated . GLdouble x, GLdouble y, GLdouble z
+function void . glTranslatef . GLfloat x, GLfloat y, GLfloat z
+function void . glScaled . GLdouble x, GLdouble y, GLdouble z
+function void . glScalef . GLfloat x, GLfloat y, GLfloat z
+function void . glFrustum . GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble near_val, GLdouble far_val
+function void . glOrtho . GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble near_val, GLdouble far_val
+function void . glPushMatrix . 
+function void . glPopMatrix . 
+function void . glEnable . GLenum cap
+function void . glDisable . GLenum cap
+function void . glTexGend . GLenum coord, GLenum pname, GLdouble param
+function void . glTexGenf . GLenum coord, GLenum pname, GLfloat param
+function void . glTexGeni . GLenum coord, GLenum pname, GLint param
+function void . glTexGendv . GLenum coord, GLenum pname, const GLdouble* params
+function void . glTexGenfv . GLenum coord, GLenum pname, const GLfloat* params
+function void . glTexGeniv . GLenum coord, GLenum pname, const GLint* params
+function void . glClipPlane . GLenum plane, const GLdouble* equation
+function void . glRasterPos2d . GLdouble x, GLdouble y
+function void . glRasterPos2f . GLfloat x, GLfloat y
+function void . glRasterPos2i . GLint x, GLint y
+function void . glRasterPos2s . GLshort x, GLshort y
+function void . glRasterPos3d . GLdouble x, GLdouble y, GLdouble z
+function void . glRasterPos3f . GLfloat x, GLfloat y, GLfloat z
+function void . glRasterPos3i . GLint x, GLint y, GLint z
+function void . glRasterPos3s . GLshort x, GLshort y, GLshort z
+function void . glRasterPos4d . GLdouble x, GLdouble y, GLdouble z, GLdouble w
+function void . glRasterPos4f . GLfloat x, GLfloat y, GLfloat z, GLfloat w
+function void . glRasterPos4i . GLint x, GLint y, GLint z, GLint w
+function void . glRasterPos4s . GLshort x, GLshort y, GLshort z, GLshort w
+function void . glRasterPos2dv . const GLdouble* v
+function void . glRasterPos2fv . const GLfloat* v
+function void . glRasterPos2iv . const GLint* v
+function void . glRasterPos2sv . const GLshort* v
+function void . glRasterPos3dv . const GLdouble* v
+function void . glRasterPos3fv . const GLfloat* v
+function void . glRasterPos3iv . const GLint* v
+function void . glRasterPos3sv . const GLshort* v
+function void . glRasterPos4dv . const GLdouble* v
+function void . glRasterPos4fv . const GLfloat* v
+function void . glRasterPos4iv . const GLint* v
+function void . glRasterPos4sv . const GLshort* v
+function void . glMaterialf . GLenum face, GLenum pname, GLfloat param
+function void . glMateriali . GLenum face, GLenum pname, GLint param
+function void . glMaterialfv . GLenum face, GLenum pname, const GLfloat* params
+function void . glMaterialiv . GLenum face, GLenum pname, const GLint* params
+function void . glFrontFace . GLenum mode
+function void . glLightf . GLenum light, GLenum pname, GLfloat param
+function void . glLighti . GLenum light, GLenum pname, GLint param
+function void . glLightfv . GLenum light, GLenum pname, const GLfloat* params
+function void . glLightiv . GLenum light, GLenum pname, const GLint* params
+function void . glLightModelf . GLenum pname, GLfloat param
+function void . glLightModeli . GLenum pname, GLint param
+function void . glLightModelfv . GLenum pname, const GLfloat* params
+function void . glLightModeliv . GLenum pname, const GLint* params
+function void . glColorMaterial . GLenum face, GLenum mode
+function void . glShadeModel . GLenum mode
+function void . glPointSize . GLfloat size
+function void . glLineWidth . GLfloat width
+function void . glLineStipple . GLint factor, GLushort pattern
+function void . glCullFace . GLenum mode
+function void . glPolygonStipple . const GLubyte* mask
+function void . glPolygonMode . GLenum face, GLenum mode
+function void . glPolygonOffset . GLfloat factor, GLfloat units
+function void . glPixelStoref . GLenum pname, GLfloat param
+function void . glPixelStorei . GLenum pname, GLint param
+function void . glPixelTransferf . GLenum pname, GLfloat param
+function void . glPixelTransferi . GLenum pname, GLint param
+function void . glPixelMapfv . GLenum map, GLint mapsize, const GLfloat* values
+function void . glPixelMapuiv . GLenum map, GLint mapsize, const GLuint* values
+function void . glPixelMapusv . GLenum map, GLint mapsize, const GLushort* values
+function void . glDrawPixels . GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels
+function void . glPixelZoom . GLfloat xfactor, GLfloat yfactor
+function void . glBitmap . GLsizei width, GLsizei height, GLfloat xorig, GLfloat yorig, GLfloat xmove, GLfloat ymove, const GLubyte* bitmap
+function void . glTexImage1D . GLenum target, GLint level, GLint internalFormat, GLsizei width, GLint border, GLenum format, GLenum type, const GLvoid* pixels
+function void . glTexImage2D . GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid* pixels
+function void . glCopyTexImage1D . GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLint border
+function void . glCopyTexImage2D . GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border
+function void . glTexSubImage1D . GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const GLvoid* pixels
+function void . glTexSubImage2D . GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels
+function void . glCopyTexSubImage1D . GLenum target, GLint level, GLint xoffset, GLint x, GLint y, GLsizei width
+function void . glCopyTexSubImage2D . GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height
+function void . glTexParameterf . GLenum target, GLenum pname, GLfloat param
+function void . glTexParameteri . GLenum target, GLenum pname, GLint param
+function void . glTexParameterfv . GLenum target, GLenum pname, const GLfloat* params
+function void . glTexParameteriv . GLenum target, GLenum pname, const GLint* params
+function void . glBindTexture . GLenum target, GLuint texture
+function void . glDeleteTextures . GLsizei n, const GLuint* textures
+function void . glGenTextures . GLsizei n, GLuint* textures
+function GLboolean . glAreTexturesResident . GLsizei n, const GLuint* textures, GLboolean* residences
+function void . glPrioritizeTextures . GLsizei n, const GLuint* textures, const GLclampf* priorities
+function void . glTexEnvf . GLenum target, GLenum pname, GLfloat param
+function void . glTexEnvi . GLenum target, GLenum pname, GLint param
+function void . glTexEnvfv . GLenum target, GLenum pname, const GLfloat* params
+function void . glTexEnviv . GLenum target, GLenum pname, const GLint* params
+function void . glFogf . GLenum pname, GLfloat param
+function void . glFogi . GLenum pname, GLint param
+function void . glFogfv . GLenum pname, const GLfloat* params
+function void . glFogiv . GLenum pname, const GLint* params
+function void . glScissor . GLint x, GLint y, GLsizei width, GLsizei height
+function void . glAlphaFunc . GLenum func, GLclampf ref
+function void . glStencilFunc . GLenum func, GLint ref, GLuint mask
+function void . glStencilOp . GLenum fail, GLenum zfail, GLenum zpass
+function void . glDepthFunc . GLenum func
+function void . glBlendFunc . GLenum sfactor, GLenum dfactor
+function void . glLogicOp . GLenum opcode
+function void . glDrawBuffer . GLenum mode
+function void . glIndexMask . GLuint mask
+function void . glDepthMask . GLboolean flag
+function void . glColorMask . GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha
+function void . glStencilMask . GLuint mask
+function void . glClear . GLbitfield mask
+function void . glClearColor . GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha
+function void . glClearIndex . GLfloat c
+function void . glClearDepth . GLclampd depth
+function void . glClearStencil . GLint s
+function void . glClearAccum . GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha
+function void . glAccum . GLenum op, GLfloat value
+function void . glReadPixels . GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels
+function void . glReadBuffer . GLenum mode
+function void . glCopyPixels . GLint x, GLint y, GLsizei width, GLsizei height, GLenum type
+function void . glMap2d . GLenum target, GLdouble u1, GLdouble u2, GLint ustride, GLint uorder, GLdouble v1, GLdouble v2, GLint vstride, GLint vorder, const GLdouble* points
+function void . glMap2f . GLenum target, GLfloat u1, GLfloat u2, GLint ustride, GLint uorder, GLfloat v1, GLfloat v2, GLint vstride, GLint vorder, const GLfloat* points
+function void . glMap1d . GLenum target, GLdouble u1, GLdouble u2, GLint stride, GLint order, const GLdouble* points
+function void . glMap1f . GLenum target, GLfloat u1, GLfloat u2, GLint stride, GLint order, const GLfloat* points
+function void . glEvalCoord1d . GLdouble u
+function void . glEvalCoord1f . GLfloat u
+function void . glEvalCoord1dv . const GLdouble* u
+function void . glEvalCoord1fv . const GLfloat* u
+function void . glEvalCoord2d . GLdouble u, GLdouble v
+function void . glEvalCoord2f . GLfloat u, GLfloat v
+function void . glEvalCoord2dv . const GLdouble* u
+function void . glEvalCoord2fv . const GLfloat* u
+function void . glMapGrid1d . GLint un, GLdouble u1, GLdouble u2
+function void . glMapGrid1f . GLint un, GLfloat u1, GLfloat u2
+function void . glMapGrid2d . GLint un, GLdouble u1, GLdouble u2, GLint vn, GLdouble v1, GLdouble v2
+function void . glMapGrid2f . GLint un, GLfloat u1, GLfloat u2, GLint vn, GLfloat v1, GLfloat v2
+function void . glEvalMesh1 . GLenum mode, GLint i1, GLint i2
+function void . glEvalMesh2 . GLenum mode, GLint i1, GLint i2, GLint j1, GLint j2
+function void . glEvalPoint1 . GLint i
+function void . glEvalPoint2 . GLint i, GLint j
+function void . glInitNames . 
+function void . glLoadName . GLuint name
+function void . glPushName . GLuint name
+function void . glPopName . 
+function GLint . glRenderMode . GLenum mode
+function void . glSelectBuffer . GLsizei size, GLuint* buffer
+function void . glFeedbackBuffer . GLsizei size, GLenum type, GLfloat* buffer
+function void . glPassThrough . GLfloat token
+function void . glNewList . GLuint list, GLenum mode
+function void . glEndList . 
+function void . glCallList . GLuint list
+function void . glCallLists . GLsizei n, GLenum type, const GLvoid* lists
+function void . glListBase . GLuint base
+function GLuint . glGenLists . GLsizei range
+function GLboolean . glIsList . GLuint list
+function void . glDeleteLists . GLuint list, GLsizei range
+function void . glFlush . 
+function void . glFinish . 
+function void . glHint . GLenum target, GLenum mode
+function void . glGetBooleanv . GLenum pname, GLboolean* params
+function void . glGetIntegerv . GLenum pname, GLint* params
+function void . glGetDoublev . GLenum pname, GLdouble* params
+function void . glGetFloatv . GLenum pname, GLfloat* params
+function GLboolean . glIsEnabled . GLenum cap
+function void . glGetClipPlane . GLenum plane, GLdouble* equation
+function void . glGetLightfv . GLenum light, GLenum pname, GLfloat* params
+function void . glGetLightiv . GLenum light, GLenum pname, GLint* params
+function void . glGetMaterialfv . GLenum face, GLenum pname, GLfloat* params
+function void . glGetMaterialiv . GLenum face, GLenum pname, GLint* params
+function void . glGetTexEnvfv . GLenum target, GLenum pname, GLfloat* params
+function void . glGetTexEnviv . GLenum target, GLenum pname, GLint* params
+function void . glGetTexGendv . GLenum coord, GLenum pname, GLdouble* params
+function void . glGetTexGenfv . GLenum coord, GLenum pname, GLfloat* params
+function void . glGetTexGeniv . GLenum coord, GLenum pname, GLint* params
+function void . glGetTexParameterfv . GLenum target, GLenum pname, GLfloat* params
+function void . glGetTexParameteriv . GLenum target, GLenum pname, GLint* params
+function void . glGetTexLevelParameterfv . GLenum target, GLint level, GLenum pname, GLfloat* params
+function void . glGetTexLevelParameteriv . GLenum target, GLint level, GLenum pname, GLint* params
+function void . glGetPixelMapfv . GLenum map, GLfloat* values
+function void . glGetPixelMapuiv . GLenum map, GLuint* values
+function void . glGetPixelMapusv . GLenum map, GLushort* values
+function void . glGetMapdv . GLenum target, GLenum query, GLdouble* v
+function void . glGetMapfv . GLenum target, GLenum query, GLfloat* v
+function void . glGetMapiv . GLenum target, GLenum query, GLint* v
+function void . glGetTexImage . GLenum target, GLint level, GLenum format, GLenum type, GLvoid* pixels
+function GLboolean . glIsTexture . GLuint texture
+function void . glGetPolygonStipple . GLubyte* mask
+function void . glGetPointerv . GLenum pname, GLvoid **params
+function const GLubyte* . glGetString . GLenum name
+function void . glPushAttrib . GLbitfield mask
+function void . glPopAttrib . 
+function void . glPushClientAttrib . GLbitfield mask
+function void . glPopClientAttrib . 
+
+function void . glEdgeFlagPointer . GLsizei stride, const GLvoid* ptr
+function void . glTexCoordPointer . GLint size, GLenum type, GLsizei stride, const GLvoid* ptr
+function void . glColorPointer . GLint size, GLenum type, GLsizei stride, const GLvoid* ptr
+function void . glIndexPointer . GLenum type, GLsizei stride, const GLvoid* ptr
+function void . glNormalPointer . GLenum type, GLsizei stride, const GLvoid* ptr
+function void . glVertexPointer . GLint size, GLenum type, GLsizei stride, const GLvoid* ptr
+function void . glEnableClientState . GLenum cap
+function void . glDisableClientState . GLenum cap
+function void . glArrayElement . GLint i
+function void . glDrawArrays . GLenum mode, GLint first, GLsizei count
+function void . glDrawElements . GLenum mode, GLsizei count, GLenum type, const GLvoid* indices
+function void . glInterleavedArrays . GLenum format, GLsizei stride, const GLvoid* pointer
+
+
+
+
+

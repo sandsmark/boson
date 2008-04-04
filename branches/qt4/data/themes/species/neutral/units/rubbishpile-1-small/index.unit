@@ -1,0 +1,18 @@
+[Boson Facility]
+ConstructionSteps=0
+
+[Boson Unit]
+Name=Rubbish pile (small)
+Health=15
+Id=57
+IsFacility=true
+MineralCost=100
+OilCost=0
+#Producer=10
+#ProductionTime=20
+SupportMiniMap=false
+TerrainType=1
+UnitDepth=0.12
+UnitHeight=0.6
+UnitWidth=0.6
+

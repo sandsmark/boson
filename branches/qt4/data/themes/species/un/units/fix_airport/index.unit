@@ -1,0 +1,41 @@
+[Boson Facility]
+CanRefineMinerals=false
+CanRefineOil=false
+ConstructionSteps=18
+
+[Boson Unit]
+Armor=8
+ConstructedEffects=
+Description=Planes can land here
+DestroyedEffects=1010,3010,6010,7010
+ExplodingDamage=0
+ExplodingDamageRange=0
+Health=1200
+HitPoint=0,0,0.5
+Id=19
+IsFacility=true
+MineralCost=2500
+Name=Airport
+OilCost=2000
+Producer=10
+ProductionTime=80
+Requirements=2,3,5
+SightRange=17
+TerrainType=1
+UnitDepth=1.2
+UnitHeight=5
+UnitWidth=10
+Weapons=0
+PowerConsumed=300
+
+[ProductionPlugin]
+ProducerList=2
+
+[Sounds]
+OrderAttack=order_attack
+OrderMove=order_move
+OrderSelect=order_select
+ReportDestroyed=report_destroyed
+ReportProduced=report_produced
+ReportUnderAttack=report_underattack
+Shoot=shoot

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+GenericName=Unit Editor for Boson
+Name=BoUnit
+Exec=bounit
+Icon=boson
+Path=
+X-DocPath=boson/index.html
+Type=Application
+Terminal=false
+

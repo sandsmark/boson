@@ -1,0 +1,6 @@
+#include "facilities.wml" type="Facilities" name="Comsat" \
+        description="The Comsat has an important job, it is the connection to the satellites in the orbit, thus allowing you to scan the terrain \
+        and provide a Mini Map for a better overview.<br>\
+        Also the <a href='helipad.html'>Helipad</a> needs it for the aerial surveillance." \
+        name2="comsat" type2="fix" \
+        before_url="weaponsfactory.html" before_text="Weapons Factory" after_url="techcenter.html" after_text="Tech Center" up_url="index.html"
