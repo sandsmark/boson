@@ -105,7 +105,7 @@ void KPlayer::init()
 
 KPlayer::~KPlayer()
 {
-  kDebug(11001) << ": this=" << this <<", id=" << this->id();
+  kDebug(11001) << ": this=" << this <<", id=" << this->kgameId();
 
   // Delete IODevices
   qDeleteAll(d->mInputList);
@@ -225,7 +225,7 @@ bool KPlayer::forwardInput(QDataStream &msg,bool transmit,quint32 sender)
   }
 }
 
-void KPlayer::setId(quint32 newid)
+void KPlayer::setKGameId(quint32 newid)
 {
   // Needs to be after the sendProcess
   d->mId=newid;
@@ -244,7 +244,7 @@ void KPlayer::setName(const QString& name)
 const QString& KPlayer::name() const
 { return d->mName.value(); }
 
-quint32 KPlayer::id() const
+quint32 KPlayer::kgameId() const
 { return d->mId; }
 
 KGamePropertyHandler * KPlayer::dataHandler()
@@ -341,7 +341,7 @@ int KPlayer::calcIOValue()
 
 bool KPlayer::setTurn(bool b, bool exclusive)
 {
-  kDebug(11001) << ":" << id() << " (" << this << ") to" << b;
+  kDebug(11001) << ":" << kgameId() << " (" << this << ") to" << b;
   if (!isActive())
   {
     return false;
@@ -371,7 +371,7 @@ bool KPlayer::load(QDataStream &stream)
 {
   qint32 id,priority;
   stream >> id >> priority;
-  setId(id);
+  setKGameId(id);
   setNetworkPriority(priority);
 
   // Load Player Data
@@ -395,7 +395,7 @@ bool KPlayer::load(QDataStream &stream)
 
 bool KPlayer::save(QDataStream &stream)
 {
-  stream << (qint32)id() << (qint32)networkPriority();
+  stream << (qint32)kgameId() << (qint32)networkPriority();
 
   d->mProperties.save(stream);
 
@@ -408,7 +408,7 @@ bool KPlayer::save(QDataStream &stream)
 
 void KPlayer::networkTransmission(QDataStream &stream,int msgid,quint32 sender)
 {
-  //kDebug(11001) ": msgid=" << msgid << "sender=" << sender << "we are=" << id();
+  //kDebug(11001) ": msgid=" << msgid << "sender=" << sender << "we are=" <<kgameId();
   // PlayerProperties processed
   bool issender;
   if (game())
@@ -456,7 +456,7 @@ void KPlayer::sendProperty(int msgid, QDataStream& stream, bool* sent)
 {
   if (game())
   {
-    bool s = game()->sendPlayerProperty(msgid, stream, id());
+    bool s = game()->sendPlayerProperty(msgid, stream, kgameId());
     if (s)
     {
       *sent = true;
@@ -485,7 +485,7 @@ void KPlayer::Debug()
    kDebug(11001) << "------------------- KPLAYER -----------------------";
    kDebug(11001) << "this:    " << this;
    kDebug(11001) << "rtti:    " << rtti();
-   kDebug(11001) << "id  :    " << id();
+   kDebug(11001) << "id  :    " << kgameId();
    kDebug(11001) << "Name :   " << name();
    kDebug(11001) << "Group:   " << group();
    kDebug(11001) << "Async:   " << asyncInput();
