@@ -253,7 +253,7 @@ void BosonShot::explode()
  setInactive();
 }
 
-long int BosonShot::damage() const
+qint32 BosonShot::damage() const
 {
   return mWeaponDamage;
 }
@@ -810,7 +810,7 @@ void BosonShotExplosion::initStatic()
   addPropertyId(IdDelay, "Delay");
 }
 
-void BosonShotExplosion::activate(const BoVector3Fixed& pos, long int damage, bofixed damagerange, bofixed fulldamagerange, int delay)
+void BosonShotExplosion::activate(const BoVector3Fixed& pos, qint32 damage, bofixed damagerange, bofixed fulldamagerange, int delay)
 {
   mDamage = damage;
   mDamageRange = damagerange;
@@ -1182,7 +1182,7 @@ bool BosonShotFragment::loadFromXML(const QDomElement& root)
 
   mVelo.set(velox, veloy, veloz);
   setRotation(Bo3dTools::rotationToPoint(mVelo.x(), mVelo.y()));
-  mUnitProperties = owner()->speciesTheme()->unitProperties((unsigned long int)props);
+  mUnitProperties = owner()->speciesTheme()->unitProperties((quint32)props);
   if(!mUnitProperties)
   {
     boError(350) << k_funcinfo << "NULL properties for " << props << endl;
@@ -1209,7 +1209,7 @@ void BosonShotFragment::advanceMoveInternal()
   setVelocity(mVelo.x(), mVelo.y(), mVelo.z());
 }
 
-long int BosonShotFragment::damage() const
+qint32 BosonShotFragment::damage() const
 {
   return mUnitProperties->explodingFragmentDamage();
 }

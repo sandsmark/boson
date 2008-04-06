@@ -215,7 +215,7 @@ public:
 	 * @param unitId The unit to search for
 	 * @param searchIn The player to search the unit in. 0 for all players
 	 **/
-	Unit* findUnit(unsigned long int unitId, Player* searchIn) const;
+	Unit* findUnit(quint32 unitId, Player* searchIn) const;
 
 	/**
 	 * The factory completed to produce a unit and is now told to build
@@ -225,7 +225,7 @@ public:
 	 * UnitProperties::typeId
 	 * @param pos The position of the new unit.
 	 **/
-	bool buildProducedUnitAtTopLeftPos(ProductionPlugin* factory, unsigned long int unitType, BoVector2Fixed topLeftPos);
+	bool buildProducedUnitAtTopLeftPos(ProductionPlugin* factory, quint32 unitType, BoVector2Fixed topLeftPos);
 
 	virtual void networkTransmission(QDataStream&, int msgid, quint32 receiver, quint32 sender, quint32 clientID);
 
@@ -370,6 +370,7 @@ public: // small KGame extenstions for boson
 	 * here due to an old KGame bug.
 	 **/
 	virtual bool load(QDataStream& stream, bool reset = true);
+	using KGame::load;
 
 	/**
 	 * Dummy implementation that simply calls @ref KGame::save or @ref
@@ -378,6 +379,7 @@ public: // small KGame extenstions for boson
 	 * here.
 	 **/
 	virtual bool save(QDataStream& stream, bool savePlayers = true);
+	using KGame::save;
 
 	/**
 	 * @return The port that is used for network games. The port we listen

@@ -72,7 +72,7 @@ public:
 		return mConstUpgrades;
 	}
 
-	const UpgradeProperties* upgrade(unsigned long int id) const
+	const UpgradeProperties* upgrade(quint32 id) const
 	{
 		return mConstUpgrades[id];
 	}
@@ -274,7 +274,7 @@ bool SpeciesTheme::readUnitConfigs()
  return true;
 }
 
-const UnitProperties* SpeciesTheme::unitProperties(unsigned long int unitType) const
+const UnitProperties* SpeciesTheme::unitProperties(quint32 unitType) const
 {
  if (unitType == 0) {
 	boError() << k_funcinfo << "invalid unit type " << unitType << endl;
@@ -287,7 +287,7 @@ const UnitProperties* SpeciesTheme::unitProperties(unsigned long int unitType) c
  return d->mUnitProperties[unitType];
 }
 
-UnitProperties* SpeciesTheme::nonConstUnitProperties(unsigned long int unitType) const
+UnitProperties* SpeciesTheme::nonConstUnitProperties(quint32 unitType) const
 {
  if (unitType == 0) {
 	boError() << k_funcinfo << "invalid unit type " << unitType << endl;
@@ -300,7 +300,7 @@ UnitProperties* SpeciesTheme::nonConstUnitProperties(unsigned long int unitType)
  return d->mUnitProperties[unitType];
 }
 
-bool SpeciesTheme::hasUnitProperties(unsigned long int unitType) const
+bool SpeciesTheme::hasUnitProperties(quint32 unitType) const
 {
  if (unitType == 0) {
 	return false;
@@ -311,12 +311,12 @@ bool SpeciesTheme::hasUnitProperties(unsigned long int unitType) const
  return true;
 }
 
-const UpgradeProperties* SpeciesTheme::technology(unsigned long int techType) const
+const UpgradeProperties* SpeciesTheme::technology(quint32 techType) const
 {
  return upgrade("Technology", techType);
 }
 
-const UpgradeProperties* SpeciesTheme::upgrade(const QString& type, unsigned long int id) const
+const UpgradeProperties* SpeciesTheme::upgrade(const QString& type, quint32 id) const
 {
  if (id == 0) {
 	boError() << k_funcinfo << "invalid id 0" << endl;
@@ -334,9 +334,9 @@ const UpgradeProperties* SpeciesTheme::upgrade(const QString& type, unsigned lon
  return upgrade;
 }
 
-Q3ValueList<unsigned long int> SpeciesTheme::allFacilities() const
+Q3ValueList<quint32> SpeciesTheme::allFacilities() const
 {
- Q3ValueList<unsigned long int> list;
+ Q3ValueList<quint32> list;
  Q3IntDictIterator<UnitProperties> it(d->mUnitProperties);
  while (it.current()) {
 	if (it.current()->isFacility()) {
@@ -347,9 +347,9 @@ Q3ValueList<unsigned long int> SpeciesTheme::allFacilities() const
  return list;
 }
 
-Q3ValueList<unsigned long int> SpeciesTheme::allMobiles() const
+Q3ValueList<quint32> SpeciesTheme::allMobiles() const
 {
- Q3ValueList<unsigned long int> list;
+ Q3ValueList<quint32> list;
  Q3IntDictIterator<UnitProperties> it(d->mUnitProperties);
  while (it.current()) {
 	if (it.current()->isMobile()) {
@@ -410,9 +410,9 @@ QStringList SpeciesTheme::allObjects(QStringList* files) const
  return objects;
 }
 
-Q3ValueList<unsigned long int> SpeciesTheme::productions(const Q3ValueList<unsigned long int>& producers) const
+Q3ValueList<quint32> SpeciesTheme::productions(const Q3ValueList<quint32>& producers) const
 {
- Q3ValueList<unsigned long int> list;
+ Q3ValueList<quint32> list;
  Q3IntDictIterator<UnitProperties> it(d->mUnitProperties);
  while (it.current()) {
 	if (producers.contains(it.current()->producer())) {
@@ -423,9 +423,9 @@ Q3ValueList<unsigned long int> SpeciesTheme::productions(const Q3ValueList<unsig
  return list;
 }
 
-Q3ValueList<unsigned long int> SpeciesTheme::technologies(const Q3ValueList<unsigned long int>& producers) const
+Q3ValueList<quint32> SpeciesTheme::technologies(const Q3ValueList<quint32>& producers) const
 {
- Q3ValueList<unsigned long int> list;
+ Q3ValueList<quint32> list;
  if (!d->mUpgrades["Technology"]) {
 	return list;
  }
@@ -550,7 +550,7 @@ bool SpeciesTheme::loadGameDataFromXML(const QDomElement& root)
 		continue;
 	}
 	bool ok = false;
-	unsigned long int id = type.attribute("Id").toULong(&ok);
+	quint32 id = type.attribute("Id").toULong(&ok);
 	if (!ok) {
 		boError() << k_funcinfo << "invalid number for Id of UnitType" << endl;
 		return false;

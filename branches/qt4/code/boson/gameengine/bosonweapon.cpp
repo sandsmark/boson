@@ -31,6 +31,8 @@
 #include <math.h>
 
 #include <ksimpleconfig.h>
+#include <KConfig>
+#include <KConfigGroup>
 
 #include <qdom.h>
 
@@ -41,7 +43,7 @@
 
 
 /*****  BosonWeaponProperties  *****/
-BosonWeaponProperties::BosonWeaponProperties(const UnitProperties* prop, unsigned long int id) :
+BosonWeaponProperties::BosonWeaponProperties(const UnitProperties* prop, quint32 id) :
     PluginProperties(prop),
     // AB: note that ids start with _1_ here, but with _0_ in the config files.
     // so we must subtract one for the strings.
@@ -72,12 +74,12 @@ QString BosonWeaponProperties::name() const
   return "Weapon";
 }
 
-bool BosonWeaponProperties::insertULongWeaponBaseValue(unsigned long int v, const QString& name, const QString& type)
+bool BosonWeaponProperties::insertULongWeaponBaseValue(quint32 v, const QString& name, const QString& type)
 {
   return insertULongBaseValue(v, QString("Weapon_%1:%2").arg(id() - 1).arg(name), type);
 }
 
-bool BosonWeaponProperties::insertLongWeaponBaseValue(long int v, const QString& name, const QString& type)
+bool BosonWeaponProperties::insertLongWeaponBaseValue(qint32 v, const QString& name, const QString& type)
 {
   return insertLongBaseValue(v, QString("Weapon_%1:%2").arg(id() - 1).arg(name), type);
 }
@@ -87,12 +89,12 @@ bool BosonWeaponProperties::insertBoFixedWeaponBaseValue(bofixed v, const QStrin
   return insertBoFixedBaseValue(v, QString("Weapon_%1:%2").arg(id() - 1).arg(name), type);
 }
 
-unsigned long int BosonWeaponProperties::ulongWeaponBaseValue(const QString& name, const QString& type, unsigned long int defaultValue) const
+quint32 BosonWeaponProperties::ulongWeaponBaseValue(const QString& name, const QString& type, quint32 defaultValue) const
 {
   return ulongBaseValue(QString("Weapon_%1:%2").arg(id() - 1).arg(name), type, defaultValue);
 }
 
-long int BosonWeaponProperties::longWeaponBaseValue(const QString& name, const QString& type, long int defaultValue) const
+qint32 BosonWeaponProperties::longWeaponBaseValue(const QString& name, const QString& type, qint32 defaultValue) const
 {
   return longBaseValue(QString("Weapon_%1:%2").arg(id() - 1).arg(name), type, defaultValue);
 }
@@ -102,12 +104,12 @@ bofixed BosonWeaponProperties::bofixedWeaponBaseValue(const QString& name, const
   return bofixedBaseValue(QString("Weapon_%1:%2").arg(id() - 1).arg(name), type, defaultValue);
 }
 
-bool BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg)
+bool BosonWeaponProperties::loadPlugin(const KConfigGroup& cfg)
 {
   // FIXME: don't load all values for all weapon types
-  mName = cfg->readEntry("Name", "");
+  mName = cfg.readEntry("Name", "");
   // Find out type of the weapon
-  QString shottype = cfg->readEntry("Type", "Rocket");
+  QString shottype = cfg.readEntry("Type", "Rocket");
   if(shottype == "Bullet")
   {
     mShotType = BosonShot::Bullet;
@@ -134,47 +136,47 @@ bool BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg)
     mShotType = BosonShot::Rocket;
   }
   // Other parameters
-  insertULongWeaponBaseValue(cfg->readUnsignedLongNumEntry("Range", 0), "Range", "MaxValue");
-  mMaxFlyDistance = cfg->readDoubleNumEntry("MaxFlyDistance", ulongWeaponBaseValue("Range", "MaxValue") * 1.5f);
-  mStartAngle = cfg->readDoubleNumEntry("StartAngle", -1);
+  insertULongWeaponBaseValue(cfg.readEntry("Range", (quint32)0), "Range", "MaxValue");
+  mMaxFlyDistance = cfg.readEntry("MaxFlyDistance", (double)(ulongWeaponBaseValue("Range", "MaxValue") * 1.5f));
+  mStartAngle = cfg.readEntry("StartAngle", -1.0);
   if(mStartAngle != -1 && (mStartAngle < 0 || mStartAngle > 90))
   {
     boError() << k_funcinfo << "StartAngle must be in range 0-90 or -1" << endl;
     mStartAngle = -1;
   }
   // Reload interval is converted from seconds to advance calls here
-  insertULongWeaponBaseValue((unsigned long int)(cfg->readDoubleNumEntry("Reload", 0) * 20.0f), "Reload", "MaxValue");
+  insertULongWeaponBaseValue((quint32)(cfg.readEntry("Reload", 0.0) * 20.0f), "Reload", "MaxValue");
  // We divide speeds with 20, because speeds in config files are cells/second,
  //  but we want cells/advance call
-  insertBoFixedWeaponBaseValue(cfg->readDoubleNumEntry("Speed", 0) / 20.0f, "Speed", "MaxValue");
+  insertBoFixedWeaponBaseValue(cfg.readEntry("Speed", 0.0) / 20.0f, "Speed", "MaxValue");
   if(speed() == 0 && mShotType == BosonShot::Rocket)
   {
     boWarning() << k_funcinfo << "Type is rocket, but speed is 0, setting type to bullet" << endl;
     mShotType = BosonShot::Bullet;
   }
-  mAccelerationSpeed = (cfg->readDoubleNumEntry("AccelerationSpeed", 4) / 20.0f / 20.0f);
-  bofixed turningspeed = (cfg->readDoubleNumEntry("TurningSpeed", 120) / 20.0f);
+  mAccelerationSpeed = (cfg.readEntry("AccelerationSpeed", 4.0) / 20.0f / 20.0f);
+  bofixed turningspeed = (cfg.readEntry("TurningSpeed", 120.0) / 20.0f);
   // We convert turning speed for performace reasons
   mTurningSpeed = tan(turningspeed * DEG2RAD);
-  insertLongWeaponBaseValue(cfg->readLongNumEntry("Damage", 0), "Damage", "MaxValue");
-  insertBoFixedWeaponBaseValue(cfg->readDoubleNumEntry("DamageRange", 1), "DamageRange", "MaxValue");
-  insertBoFixedWeaponBaseValue(cfg->readDoubleNumEntry("FullDamageRange", 0.25 * bofixedWeaponBaseValue("DamageRange")), "FullDamageRange", "MaxValue");
+  insertLongWeaponBaseValue(cfg.readEntry("Damage", (qint32)0), "Damage", "MaxValue");
+  insertBoFixedWeaponBaseValue(cfg.readEntry("DamageRange", 1.0), "DamageRange", "MaxValue");
+  insertBoFixedWeaponBaseValue(cfg.readEntry("FullDamageRange", 0.25 * bofixedWeaponBaseValue("DamageRange")), "FullDamageRange", "MaxValue");
   if(bofixedWeaponBaseValue("FullDamageRange") > bofixedWeaponBaseValue("DamageRange"))
   {
     boWarning() << k_funcinfo << "FullDamageRange must not be bigger than DamageRange!" << endl;
     insertBoFixedWeaponBaseValue(bofixedWeaponBaseValue("DamageRange"), "FullDamageRange", "MaxValue");
   }
-  insertBoFixedWeaponBaseValue(cfg->readDoubleNumEntry("RequiredAmmunition", 1), "RequiredAmmunition", "MaxValue");
-  mCanShootAtAirUnits = cfg->readBoolEntry("CanShootAtAirUnits", false);
-  mCanShootAtLandUnits = cfg->readBoolEntry("CanShootAtLandUnits", false);
-  mHeight = cfg->readDoubleNumEntry("Height", 0.25);
-  mOffset = BosonConfig::readBoVector3FixedEntry(cfg, "Offset");
-  mAutoUse = cfg->readBoolEntry("AutoUse", true);
+  insertBoFixedWeaponBaseValue(cfg.readEntry("RequiredAmmunition", 1.0), "RequiredAmmunition", "MaxValue");
+  mCanShootAtAirUnits = cfg.readEntry("CanShootAtAirUnits", false);
+  mCanShootAtLandUnits = cfg.readEntry("CanShootAtLandUnits", false);
+  mHeight = cfg.readEntry("Height", 0.25);
+  mOffset = BosonConfig::readBoVector3FixedEntry(&cfg, "Offset");
+  mAutoUse = cfg.readEntry("AutoUse", true);
   if(mAutoUse && (mShotType == BosonShot::Mine || mShotType == BosonShot::Bomb))
   {
     boWarning() << k_funcinfo << "AutoUse=true doesn't make sense for mines and bombs" << endl;
   }
-  if(!cfg->readListEntry("TurretMeshes").isEmpty())
+  if(!cfg.readEntry("TurretMeshes", QList<QString>()).isEmpty())
   {
     mTurret = new BosonWeaponTurretProperties();
     if(!mTurret->loadTurret(cfg))
@@ -183,18 +185,18 @@ bool BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg)
       // TODO: return false
     }
   }
-  mAmmunitionType = cfg->readEntry("AmmunitionType", "Generic");
-  mTakeTargetVeloIntoAccount = cfg->readBoolEntry("TakeTargetVeloIntoAccount", false);
-  mShootEffectIds = BosonConfig::readUnsignedLongNumList(cfg, "ShootEffects");
-  mFlyEffectIds = BosonConfig::readUnsignedLongNumList(cfg, "FlyEffects");
-  mHitEffectIds = BosonConfig::readUnsignedLongNumList(cfg, "HitEffects");
+  mAmmunitionType = cfg.readEntry("AmmunitionType", "Generic");
+  mTakeTargetVeloIntoAccount = cfg.readEntry("TakeTargetVeloIntoAccount", false);
+  mShootEffectIds = BosonConfig::readUnsignedLongNumList(&cfg, "ShootEffects");
+  mFlyEffectIds = BosonConfig::readUnsignedLongNumList(&cfg, "FlyEffects");
+  mHitEffectIds = BosonConfig::readUnsignedLongNumList(&cfg, "HitEffects");
   // We need to have some kind of model even for bullet (though it won't be shown),
   //  because BosonShot will crash otherwise (actually it's BosonItem)
-  mModelFileName = cfg->readEntry("Model", "missile");
+  mModelFileName = cfg.readEntry("Model", "missile");
   mSounds.clear();
-  mSounds.insert(SoundWeaponShoot, cfg->readEntry("SoundShoot", "shoot"));
-  mSounds.insert(SoundWeaponFly, cfg->readEntry("SoundFly", "missile_fly"));
-  mSounds.insert(SoundWeaponHit, cfg->readEntry("SoundHit", "hit"));
+  mSounds.insert(SoundWeaponShoot, cfg.readEntry("SoundShoot", "shoot"));
+  mSounds.insert(SoundWeaponFly, cfg.readEntry("SoundFly", "missile_fly"));
+  mSounds.insert(SoundWeaponHit, cfg.readEntry("SoundHit", "hit"));
   //loadAction(ActionAttackGround, cfg, "ActionAttackGround");
   if(shotType() == BosonShot::Mine)
   {
@@ -207,7 +209,7 @@ bool BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg)
   return true;
 }
 
-bool BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
+bool BosonWeaponProperties::savePlugin(KConfig* cfg)
 {
   // Group must have been set before
   // Save type
@@ -472,7 +474,7 @@ QMap<int, QString> BosonWeaponProperties::sounds() const
   return mSounds;
 }
 
-void BosonWeaponProperties::loadAction(UnitAction type, KSimpleConfig* cfg, const QString& key, bool useDefault)
+void BosonWeaponProperties::loadAction(UnitAction type, const KConfigGroup& cfg, const QString& key, bool useDefault)
 {
   if(!cfg->hasKey(key) && !useDefault)
   {
@@ -619,8 +621,8 @@ void BosonWeapon::refillAmmunition(Unit* owner)
     boError() << k_funcinfo << "called, but don't require ammo" << endl;
     return;
   }
-  unsigned long int required = requiredAmmunition() - mAmmunition;
-  unsigned long int ammo = owner->requestAmmunition(ammunitionType(), required);
+  quint32 required = requiredAmmunition() - mAmmunition;
+  quint32 ammo = owner->requestAmmunition(ammunitionType(), required);
   boDebug(610) << k_funcinfo << "requested " << required << " ammo, received " << ammo << endl;
   if(ammo > required)
   {
@@ -792,7 +794,7 @@ BosonWeaponTurretProperties::~BosonWeaponTurretProperties()
   delete d;
 }
 
-bool BosonWeaponTurretProperties::loadTurret(KSimpleConfig* cfg)
+bool BosonWeaponTurretProperties::loadTurret(const KConfigGroup& cfg)
 {
 
   d->meshNames = cfg->readListEntry("TurretMeshes");
@@ -808,7 +810,7 @@ bool BosonWeaponTurretProperties::loadTurret(KSimpleConfig* cfg)
   return true;
 }
 
-bool BosonWeaponTurretProperties::saveTurret(KSimpleConfig* cfg) const
+bool BosonWeaponTurretProperties::saveTurret(KConfigGroup& cfg) const
 {
   cfg->writeEntry("TurretMeshes", d->meshNames);
   cfg->writeEntry("TurretInitialZRotation", d->initialZRotation);

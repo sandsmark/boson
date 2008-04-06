@@ -146,17 +146,17 @@ const QString& UnitBase::name() const
  return unitProperties()->name();
 }
 
-unsigned long int UnitBase::maxSightRange() const
+quint32 UnitBase::maxSightRange() const
 {
  return mMaxSightRange.value(upgradesCollection());
 }
 
-unsigned long int UnitBase::sightRange() const
+quint32 UnitBase::sightRange() const
 {
- return (unsigned long int)(sightRangeFactor() * maxSightRange());
+ return (quint32)(sightRangeFactor() * maxSightRange());
 }
 
-void UnitBase::setSightRange(unsigned long int r)
+void UnitBase::setSightRange(quint32 r)
 {
  if (r > maxSightRange()) {
 	r = maxSightRange();
@@ -168,17 +168,17 @@ void UnitBase::setSightRange(unsigned long int r)
  }
 }
 
-unsigned long int UnitBase::maxArmor() const
+quint32 UnitBase::maxArmor() const
 {
  return mMaxArmor.value(upgradesCollection());
 }
 
-unsigned long int UnitBase::armor() const
+quint32 UnitBase::armor() const
 {
- return (unsigned long int)(armorFactor() * maxArmor());
+ return (quint32)(armorFactor() * maxArmor());
 }
 
-void UnitBase::setArmor(unsigned long int a)
+void UnitBase::setArmor(quint32 a)
 {
  if (a > maxArmor()) {
 	a = maxArmor();
@@ -190,17 +190,17 @@ void UnitBase::setArmor(unsigned long int a)
  }
 }
 
-unsigned long int UnitBase::maxShields() const
+quint32 UnitBase::maxShields() const
 {
  return mMaxShields.value(upgradesCollection());
 }
 
-unsigned long int UnitBase::shields() const
+quint32 UnitBase::shields() const
 {
- return (unsigned long int)(shieldsFactor() * maxShields());
+ return (quint32)(shieldsFactor() * maxShields());
 }
 
-void UnitBase::setShields(unsigned long int s)
+void UnitBase::setShields(quint32 s)
 {
  if (s > maxShields()) {
 	s = maxShields();
@@ -212,17 +212,17 @@ void UnitBase::setShields(unsigned long int s)
  }
 }
 
-unsigned long int UnitBase::maxHealth() const
+quint32 UnitBase::maxHealth() const
 {
  return mMaxHealth.value(upgradesCollection());
 }
 
-unsigned long int UnitBase::health() const
+quint32 UnitBase::health() const
 {
- return (unsigned long int)(healthFactor() * maxHealth());
+ return (quint32)(healthFactor() * maxHealth());
 }
 
-void UnitBase::setHealth(unsigned long int h)
+void UnitBase::setHealth(quint32 h)
 {
  if (h > maxHealth()) {
 	h = maxHealth();
@@ -234,12 +234,12 @@ void UnitBase::setHealth(unsigned long int h)
  }
 }
 
-unsigned long int UnitBase::powerConsumedByUnit() const
+quint32 UnitBase::powerConsumedByUnit() const
 {
  return mPowerConsumed.value(upgradesCollection());
 }
 
-unsigned long int UnitBase::powerGeneratedByUnit() const
+quint32 UnitBase::powerGeneratedByUnit() const
 {
  return mPowerGenerated.value(upgradesCollection());
 }
@@ -293,7 +293,7 @@ bool UnitBase::requestPowerChargeForAdvance()
  return isChargedForAdvance();
 }
 
-unsigned long int UnitBase::type() const
+quint32 UnitBase::type() const
 {
  return unitProperties()->typeId();
 }

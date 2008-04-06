@@ -55,7 +55,7 @@ public:
 	/**
 	 * Remove a previously added item from the cell
 	 **/
-	inline uint removeItem(BosonItem* u) { return mItems.remove(u); }
+	inline void removeItem(BosonItem* u) { mItems.remove(u); }
 
 
 	/**

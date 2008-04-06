@@ -45,7 +45,7 @@ public:
 	~BosonStatistics();
 
 	void increaseShots();
-	unsigned long int shots() const;
+	quint32 shots() const;
 
 	void addLostMobileUnit(UnitBase* unit);
 	void addLostFacility(UnitBase* unit);
@@ -87,24 +87,24 @@ public:
 	void increaseRefinedOil(unsigned int increaseBy  = 1);
 
 
-	unsigned long int producedMobileUnits() const { return mProducedMobileUnits; }
-	unsigned long int producedFacilities() const { return mProducedFacilities; }
-	unsigned long int producedUnits() const { return producedFacilities() + producedMobileUnits(); }
-	unsigned long int minedMinerals() const { return mMinedMinerals; }
-	unsigned long int minedOil() const { return mMinedOil; }
-	unsigned long int refinedMinerals() const { return mRefinedMinerals; }
-	unsigned long int refinedOil() const { return mRefinedOil; }
+	quint32 producedMobileUnits() const { return mProducedMobileUnits; }
+	quint32 producedFacilities() const { return mProducedFacilities; }
+	quint32 producedUnits() const { return producedFacilities() + producedMobileUnits(); }
+	quint32 minedMinerals() const { return mMinedMinerals; }
+	quint32 minedOil() const { return mMinedOil; }
+	quint32 refinedMinerals() const { return mRefinedMinerals; }
+	quint32 refinedOil() const { return mRefinedOil; }
 
-	unsigned long int lostMobileUnits() const { return mLostMobileUnits; }
-	unsigned long int lostFacilities() const { return mLostFacilities; }
-	unsigned long int lostUnits() const { return lostMobileUnits() + lostFacilities(); }
+	quint32 lostMobileUnits() const { return mLostMobileUnits; }
+	quint32 lostFacilities() const { return mLostFacilities; }
+	quint32 lostUnits() const { return lostMobileUnits() + lostFacilities(); }
 	
-	unsigned long int destroyedMobileUnits() const { return mDestroyedMobileUnits; }
-	unsigned long int destroyedFacilities() const { return mDestroyedFacilities; }
-	unsigned long int destroyedUnits() const { return destroyedMobileUnits() + destroyedFacilities(); }
-	unsigned long int destroyedOwnMobileUnits() const { return mDestroyedOwnMobileUnits; }
-	unsigned long int destroyedOwnFacilities() const { return mDestroyedOwnFacilities; }
-	unsigned long int destroyedOwnUnits() const { return destroyedOwnMobileUnits() + destroyedOwnFacilities(); }
+	quint32 destroyedMobileUnits() const { return mDestroyedMobileUnits; }
+	quint32 destroyedFacilities() const { return mDestroyedFacilities; }
+	quint32 destroyedUnits() const { return destroyedMobileUnits() + destroyedFacilities(); }
+	quint32 destroyedOwnMobileUnits() const { return mDestroyedOwnMobileUnits; }
+	quint32 destroyedOwnFacilities() const { return mDestroyedOwnFacilities; }
+	quint32 destroyedOwnUnits() const { return destroyedOwnMobileUnits() + destroyedOwnFacilities(); }
 
 	/**
 	 * Note that one part of the points are calculated immediately, e.g. in
@@ -117,7 +117,7 @@ public:
 	 * factory is not yet taken into account! A winning player must get more
 	 * points (<em>way</em> more) than a defeated player
 	 **/
-	long int points() const;
+	qint32 points() const;
 
 
 	static unsigned int winningPoints();
@@ -157,32 +157,32 @@ protected:
 	/**
 	 * Save @p value into @p root as an element with @p tagName
 	 **/
-	void saveULong(QDomElement& root, const QString& tagName, unsigned long int value) const;
-	void saveLong(QDomElement& root, const QString& tagName, long int value) const;
+	void saveULong(QDomElement& root, const QString& tagName, quint32 value) const;
+	void saveLong(QDomElement& root, const QString& tagName, qint32 value) const;
 
 	/**
 	 * Search in @p root for a tag with @p tagName and store its value into
 	 * @p value
 	 **/
-	void loadULong(const QDomElement& root , const QString& tagName, unsigned long int* value);
-	void loadLong(const QDomElement& root , const QString& tagName, long int* value);
+	void loadULong(const QDomElement& root , const QString& tagName, quint32* value);
+	void loadLong(const QDomElement& root , const QString& tagName, qint32* value);
 
 private:
-	unsigned long int mShots; // note: the unsigned is important here! long is about 2 billion, but that's really not much for shots!
-	unsigned long int mMinedMinerals;
-	unsigned long int mMinedOil;
-	unsigned long int mRefinedMinerals;
-	unsigned long int mRefinedOil;
-	unsigned long int mProducedMobileUnits;
-	unsigned long int mProducedFacilities;
-	unsigned long int mDestroyedMobileUnits;
-	unsigned long int mDestroyedFacilities;
-	unsigned long int mDestroyedOwnMobileUnits;
-	unsigned long int mDestroyedOwnFacilities;
-	unsigned long int mLostMobileUnits;
-	unsigned long int mLostFacilities;
+	quint32 mShots; // note: the unsigned is important here! long is about 2 billion, but that's really not much for shots!
+	quint32 mMinedMinerals;
+	quint32 mMinedOil;
+	quint32 mRefinedMinerals;
+	quint32 mRefinedOil;
+	quint32 mProducedMobileUnits;
+	quint32 mProducedFacilities;
+	quint32 mDestroyedMobileUnits;
+	quint32 mDestroyedFacilities;
+	quint32 mDestroyedOwnMobileUnits;
+	quint32 mDestroyedOwnFacilities;
+	quint32 mLostMobileUnits;
+	quint32 mLostFacilities;
 
-	long int mPoints;
+	qint32 mPoints;
 };
 
 #endif

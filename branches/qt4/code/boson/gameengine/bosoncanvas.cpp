@@ -65,7 +65,7 @@
 
 #include <math.h>
 
-ItemType ItemType::typeForUnit(unsigned long int unitType)
+ItemType ItemType::typeForUnit(quint32 unitType)
 {
  return ItemType(unitType);
 }
@@ -77,7 +77,7 @@ ItemType ItemType::typeForFragment()
 {
  return ItemType(BosonShot::Fragment, 0, 0);
 }
-ItemType ItemType::typeForShot(unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId)
+ItemType ItemType::typeForShot(quint32 shotType, quint32 unitType, quint32 weaponPropertyId)
 {
  return ItemType(shotType, unitType, weaponPropertyId);
 }
@@ -129,7 +129,7 @@ public:
 	// _that_ big battles. in the future (if we maybe add even more items)
 	// we might use unsigned long long for this.
 	// but for now we are safe.
-	KGameProperty<unsigned long int> mNextItemId;
+	KGameProperty<quint32> mNextItemId;
 
 	BosonPath* mPathFinder;
 
@@ -881,13 +881,13 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
  // TODO: use the actual _small_ amount once a "ammunition center" exists, where
  // the player can build new ammo (to increase the refill rate)
 #if 0
- const unsigned long int amount = 5;
+ const quint32 amount = 5;
 #else
- const unsigned long int amount = 100;
+ const quint32 amount = 100;
 #endif
  // if this value is reached, "free" refill stops. only using ammunition center
  // (i.e. by producing new ammo), new ammo can be gained.
- const unsigned long int maxAmmo = 1000;
+ const quint32 maxAmmo = 1000;
  for (Q3PtrListIterator<Player> it(mPlayerListManager->activeGamePlayerList()); it.current(); ++it) {
 	Player* p = it.current();
 	QString type = "Generic";
@@ -1463,10 +1463,10 @@ void BosonCanvas::shotHit(BosonShot* s)
 		s->fullDamageRange(), s->owner());
 }
 
-void BosonCanvas::explosion(const BoVector3Fixed& pos, long int damage, bofixed range, bofixed fullrange, Player* owner)
+void BosonCanvas::explosion(const BoVector3Fixed& pos, qint32 damage, bofixed range, bofixed fullrange, Player* owner)
 {
  // Decrease health of all units within damaging range of explosion
- long int d;
+ qint32 d;
  bofixed dist;
  Q3ValueList<Unit*> l = collisions()->unitCollisionsInSphere(pos, range);
  for (unsigned int i = 0; i < l.count(); i++) {
@@ -1477,7 +1477,7 @@ void BosonCanvas::explosion(const BoVector3Fixed& pos, long int damage, bofixed 
 	if (dist <= fullrange || range == fullrange) {
 		d = damage;
 	} else {
-		d = (long int)((1 - (dist - fullrange) / (range - fullrange)) * damage);
+		d = (qint32)((1 - (dist - fullrange) / (range - fullrange)) * damage);
 	}
 	unitDamaged(u, d);
 	if (u->isDestroyed() && owner) {
@@ -1490,11 +1490,11 @@ void BosonCanvas::explosion(const BoVector3Fixed& pos, long int damage, bofixed 
  }
 }
 
-void BosonCanvas::unitDamaged(Unit* unit, long int damage)
+void BosonCanvas::unitDamaged(Unit* unit, qint32 damage)
 {
  // Shield
  if (unit->shields() > 0) {
-	if (unit->shields() >= (unsigned long int)damage) {
+	if (unit->shields() >= (quint32)damage) {
 		// Unit will not be damaged (it has enough shields)
 		unit->setShields(unit->shields() - damage);
 		// TODO: show some shield animation
@@ -2182,9 +2182,9 @@ BosonItem* BosonCanvas::createItemFromXML(const QDomElement& item, Player* owner
 	return 0;
  }
 
- unsigned long int type = 0;
- unsigned long int group = 0;
- unsigned long int groupType = 0;
+ quint32 type = 0;
+ quint32 group = 0;
+ quint32 groupType = 0;
 
  if (!item.hasAttribute(QString::fromLatin1("Type"))) {
 	// check for deprecated attributes
@@ -2253,7 +2253,7 @@ BosonItem* BosonCanvas::createItemFromXML(const QDomElement& item, Player* owner
  }
 
 
- unsigned long int id = 0;
+ quint32 id = 0;
  if (!item.hasAttribute(QString::fromLatin1("Id"))) {
 	boError(260) << k_funcinfo << "missing attribute: Id for Item tag" << endl;
 	return 0;
@@ -2501,16 +2501,16 @@ bool BosonCanvas::onCanvas(const BoVector3Fixed& pos) const
  return onCanvas(pos.x(), pos.y());
 }
 
-void BosonCanvas::deleteItems(const Q3ValueList<unsigned long int>& _ids)
+void BosonCanvas::deleteItems(const Q3ValueList<quint32>& _ids)
 {
  if (d->mGameMode) {
 	boError() << k_funcinfo << "not in editor mode" << endl;
 	return;
  }
- Q3ValueList<unsigned long int> ids = _ids;
+ Q3ValueList<quint32> ids = _ids;
  BoItemList::Iterator it;
  while (!ids.isEmpty()) {
-	unsigned long int id = ids.first();
+	quint32 id = ids.first();
 	ids.pop_front();
 	BosonItem* item = 0;
 	for (it = d->mAllItems.begin(); !item && it != d->mAllItems.end(); ++it) {
@@ -2570,7 +2570,7 @@ BosonItem* BosonCanvas::createNewItemAtTopLeftPos(int rtti, Player* owner, const
  return item;
 }
 
-BosonItem* BosonCanvas::createItemAtTopLeftPos(int rtti, Player* owner, const ItemType& type, const BoVector3Fixed& pos, unsigned long int id)
+BosonItem* BosonCanvas::createItemAtTopLeftPos(int rtti, Player* owner, const ItemType& type, const BoVector3Fixed& pos, quint32 id)
 {
  PROFILE_METHOD
  BosonItem* item = 0;
@@ -2613,7 +2613,7 @@ BosonItem* BosonCanvas::createItemAtTopLeftPos(int rtti, Player* owner, const It
  return item;
 }
 
-Unit* BosonCanvas::createUnit(Player* owner, unsigned long int unitType)
+Unit* BosonCanvas::createUnit(Player* owner, quint32 unitType)
 {
  PROFILE_METHOD
  BO_CHECK_NULL_RET0(owner);
@@ -2631,7 +2631,7 @@ Unit* BosonCanvas::createUnit(Player* owner, unsigned long int unitType)
  return unit;
 }
 
-BosonShot* BosonCanvas::createShot(Player* owner, unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId)
+BosonShot* BosonCanvas::createShot(Player* owner, quint32 shotType, quint32 unitType, quint32 weaponPropertyId)
 {
  PROFILE_METHOD
  BO_CHECK_NULL_RET0(owner);
@@ -2708,7 +2708,7 @@ BosonShot* BosonCanvas::createShot(Player* owner, unsigned long int shotType, un
  return s;
 }
 
-unsigned long int BosonCanvas::nextItemId()
+quint32 BosonCanvas::nextItemId()
 {
  // note that per definition 0 is an invalid item ID!
  d->mNextItemId = d->mNextItemId + 1;
@@ -2775,12 +2775,12 @@ bool BosonCanvas::loadConditions(const QDomElement& root)
  return eventListener()->loadConditions(root);
 }
 
-BosonItem* BosonCanvas::findItem(unsigned long int id) const
+BosonItem* BosonCanvas::findItem(quint32 id) const
 {
  return d->mAllItems.findItem(id);
 }
 
-Unit* BosonCanvas::findUnit(unsigned long int id) const
+Unit* BosonCanvas::findUnit(quint32 id) const
 {
  BosonItem* item = findItem(id);
  if (!item || !RTTI::isUnit(item->rtti())) {

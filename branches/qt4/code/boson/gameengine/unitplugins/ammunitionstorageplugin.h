@@ -53,7 +53,7 @@ public:
 
 	bool canStore(const QString& type) const;
 
-	unsigned long int requestAmmunitionGlobally(const QString& type, unsigned long int requested);
+	quint32 requestAmmunitionGlobally(const QString& type, quint32 requested);
 
 	/**
 	 * Like @ref requestAmmunitionGlobally, but this implies that the unit
@@ -67,9 +67,9 @@ public:
 	 * decided not to give ammunition to the unit @p picksUp, most likely it
 	 * is not close enough.
 	 **/
-	unsigned long int pickupAmmunition(Unit* picksUp, const QString& type, unsigned long int requested, bool* denied = 0);
+	quint32 pickupAmmunition(Unit* picksUp, const QString& type, quint32 requested, bool* denied = 0);
 
-	unsigned long int ammunitionStored(const QString& type) const;
+	quint32 ammunitionStored(const QString& type) const;
 
 	/**
 	 * Try to put an amount of @p ammo of type @p type into the storage.
@@ -78,7 +78,7 @@ public:
 	 * @return The amount of ammo that was actually stored. Always <= @p
 	 * ammo.
 	 **/
-	unsigned long int tryToFillStorage(const QString& type, unsigned long int ammo);
+	quint32 tryToFillStorage(const QString& type, quint32 ammo);
 
 protected:
 	int changeAmmunition(const QString& type, int change);
@@ -86,10 +86,10 @@ protected:
 	/**
 	 * @internal
 	 **/
-	unsigned long int giveAmmunition(const QString& type, unsigned long int requested);
+	quint32 giveAmmunition(const QString& type, quint32 requested);
 
 private:
-	QMap<QString, unsigned long int> mAmmunitionStorage;
+	QMap<QString, quint32> mAmmunitionStorage;
 };
 
 #endif

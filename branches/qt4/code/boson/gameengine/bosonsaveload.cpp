@@ -96,12 +96,12 @@ void BosonSaveLoad::setPlayField(BosonPlayField* playField)
  d->mPlayField = playField;
 }
 
-unsigned long int BosonSaveLoad::latestSavegameVersion()
+quint32 BosonSaveLoad::latestSavegameVersion()
 {
  return BOSON_SAVEGAME_FORMAT_VERSION;
 }
 
-unsigned long int BosonSaveLoad::savegameFormatVersion(const QString& kgameXML)
+quint32 BosonSaveLoad::savegameFormatVersion(const QString& kgameXML)
 {
  if (kgameXML.isEmpty()) {
 	return 0;

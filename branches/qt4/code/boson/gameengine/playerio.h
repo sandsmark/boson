@@ -73,7 +73,7 @@ public:
 
 	Player* player() const { return mPlayer; }
 	const QString& name() const;
-	unsigned long int playerId() const;
+	quint32 playerId() const;
 
 	/**
 	 * @return Player::game()
@@ -129,12 +129,12 @@ public:
 	/**
 	 * @return Player::unitProperties
 	 **/
-	const UnitProperties* unitProperties(unsigned long int type) const;
+	const UnitProperties* unitProperties(quint32 type) const;
 
 	/**
 	 * @return Player::technologyProperties
 	 **/
-	const UpgradeProperties* technologyProperties(unsigned long int type) const;
+	const UpgradeProperties* technologyProperties(quint32 type) const;
 
 
 	/**
@@ -241,18 +241,18 @@ public:
 	/**
 	 * @return @ref Player::minerals
 	 **/
-	unsigned long int minerals() const;
+	quint32 minerals() const;
 	/**
 	 * @return @ref Player::oil
 	 **/
-	unsigned long int oil() const;
-	bool useMinerals(unsigned long int amount);
-	bool useOil(unsigned long int amount);
-	bool useResources(unsigned long int mineralamount, unsigned long int oilamount);
+	quint32 oil() const;
+	bool useMinerals(quint32 amount);
+	bool useOil(quint32 amount);
+	bool useResources(quint32 mineralamount, quint32 oilamount);
 	/**
 	 * @return @ref Player::ammunition
 	 **/
-	unsigned long int ammunition(const QString& type) const;
+	quint32 ammunition(const QString& type) const;
 	/**
 	 * @return @ref Player::statistics
 	 **/
@@ -266,10 +266,10 @@ public:
 	 **/
 	QPoint homeBase() const;
 
-	bool canBuild(unsigned long int unitType) const;
-	bool canResearchTech(unsigned long int id) const;
-	bool hasTechnology(unsigned long int id) const;
-	bool hasUnitWithType(unsigned long int type) const;
+	bool canBuild(quint32 unitType) const;
+	bool canResearchTech(quint32 id) const;
+	bool hasTechnology(quint32 id) const;
+	bool hasUnitWithType(quint32 type) const;
 
 	const Q3ValueList<const Unit*>* radarUnits() const;
 
@@ -284,14 +284,14 @@ public:
 	 * player.
 	 **/
 	Unit* findUnitAt(const BoVector3Fixed& canvasVector) const;
-	Unit* findUnit(unsigned long int unitId) const;
+	Unit* findUnit(quint32 unitId) const;
 
 	BoItemList* unitsAtCells(const Q3PtrVector<const Cell>* cells) const;
 
 	/**
 	 * @return Player::calculatePower
 	 **/
-	void calculatePower(unsigned long int* powerGenerated = 0, unsigned long int* powerConsumed = 0, bool includeUnconstructedFacilities = false) const;
+	void calculatePower(quint32* powerGenerated = 0, quint32* powerConsumed = 0, bool includeUnconstructedFacilities = false) const;
 
 	/**
 	 * Finds n nearest mineral locations to point (x, y), that are visible

@@ -37,12 +37,12 @@ public:
 	virtual ~BaseValueEntryBase()
 	{
 	}
-	virtual unsigned long int toULong() const = 0;
-	virtual long int toLong() const = 0;
+	virtual quint32 toUInt() const = 0;
+	virtual qint32 toInt() const = 0;
 	virtual bofixed toBoFixed() const = 0;
 
-	virtual void setValue(unsigned long int v) = 0;
-	virtual void setValue(long int v) = 0;
+	virtual void setValue(quint32 v) = 0;
+	virtual void setValue(qint32 v) = 0;
 	virtual void setValue(bofixed v) = 0;
 };
 
@@ -75,12 +75,12 @@ public:
 		return mValue;
 	}
 
-	virtual unsigned long int toULong() const { return (unsigned long int)mValue; }
-	virtual long int toLong() const { return (long int)mValue; }
+	virtual quint32 toUInt() const { return (quint32)mValue; }
+	virtual qint32 toInt() const { return (qint32)mValue; }
 	virtual bofixed toBoFixed() const { return (bofixed)mValue; }
 
-	virtual void setValue(unsigned long int v) { mValue = (T)v; }
-	virtual void setValue(long int v)  { mValue = (T)v; }
+	virtual void setValue(quint32 v) { mValue = (T)v; }
+	virtual void setValue(qint32 v)  { mValue = (T)v; }
 	virtual void setValue(bofixed v)  { mValue = (T)v; }
 
 private:
@@ -114,14 +114,14 @@ BoBaseValueCollection::~BoBaseValueCollection()
  delete d;
 }
 
-bool BoBaseValueCollection::insertULongBaseValue(unsigned long int v, const QString& name, const QString& type, bool replace)
+bool BoBaseValueCollection::insertULongBaseValue(quint32 v, const QString& name, const QString& type, bool replace)
 {
  if (type != "MaxValue" && type != "MinValue") {
 	boError() << k_funcinfo << "invalid type " << type << endl;
 	return false;
  }
  if (!(d->mProperties[type]).contains(name)) {
-	BaseValueEntryBase* value = new BaseValueEntry<unsigned long int>(v);
+	BaseValueEntryBase* value = new BaseValueEntry<quint32>(v);
 	(d->mProperties[type]).insert(name, value);
  }
  if (replace) {
@@ -130,14 +130,14 @@ bool BoBaseValueCollection::insertULongBaseValue(unsigned long int v, const QStr
  return true;
 }
 
-bool BoBaseValueCollection::insertLongBaseValue(long int v, const QString& name, const QString& type, bool replace)
+bool BoBaseValueCollection::insertLongBaseValue(qint32 v, const QString& name, const QString& type, bool replace)
 {
  if (type != "MaxValue" && type != "MinValue") {
 	boError() << k_funcinfo << "invalid type " << type << endl;
 	return false;
  }
  if (!(d->mProperties[type]).contains(name)) {
-	BaseValueEntryBase* value = new BaseValueEntry<long int>(v);
+	BaseValueEntryBase* value = new BaseValueEntry<qint32>(v);
 	(d->mProperties[type]).insert(name, value);
  }
  if (replace) {
@@ -162,7 +162,7 @@ bool BoBaseValueCollection::insertBoFixedBaseValue(bofixed v, const QString& nam
  return true;
 }
 
-bool BoBaseValueCollection::getBaseValue(unsigned long int* ret, const QString& name, const QString& type) const
+bool BoBaseValueCollection::getBaseValue(quint32* ret, const QString& name, const QString& type) const
 {
  if (type != "MaxValue" && type != "MinValue") {
 	boError() << k_funcinfo << "invalid type " << type << endl;
@@ -172,11 +172,11 @@ bool BoBaseValueCollection::getBaseValue(unsigned long int* ret, const QString& 
 	boError() << k_funcinfo << "no such property " << name << endl;
 	return false;
  }
- *ret = (d->mProperties[type])[name]->toULong();
+ *ret = (d->mProperties[type])[name]->toUInt();
  return true;
 }
 
-bool BoBaseValueCollection::getBaseValue(long int* ret, const QString& name, const QString& type) const
+bool BoBaseValueCollection::getBaseValue(qint32* ret, const QString& name, const QString& type) const
 {
  if (type != "MaxValue" && type != "MinValue") {
 	boError() << k_funcinfo << "invalid type " << type << endl;
@@ -186,7 +186,7 @@ bool BoBaseValueCollection::getBaseValue(long int* ret, const QString& name, con
 	boError() << k_funcinfo << "no such property " << name << endl;
 	return false;
  }
- *ret = (d->mProperties[type])[name]->toLong();
+ *ret = (d->mProperties[type])[name]->toInt();
  return true;
 }
 
@@ -204,18 +204,18 @@ bool BoBaseValueCollection::getBaseValue(bofixed* ret, const QString& name, cons
  return true;
 }
 
-unsigned long int BoBaseValueCollection::ulongBaseValue(const QString& name, const QString& type, unsigned long int defaultValue) const
+quint32 BoBaseValueCollection::ulongBaseValue(const QString& name, const QString& type, quint32 defaultValue) const
 {
- unsigned long int v = defaultValue;
+ quint32 v = defaultValue;
  if (!getBaseValue(&v, name, type)) {
 	return defaultValue;
  }
  return v;
 }
 
-long int BoBaseValueCollection::longBaseValue(const QString& name, const QString& type, long int defaultValue) const
+qint32 BoBaseValueCollection::longBaseValue(const QString& name, const QString& type, qint32 defaultValue) const
 {
- long int v = defaultValue;
+ qint32 v = defaultValue;
  if (!getBaseValue(&v, name, type)) {
 	return defaultValue;
  }
@@ -267,7 +267,7 @@ void BoUpgradesCollection::clearUpgrades()
 }
 
 
-const UpgradeProperties* BoUpgradesCollection::findUpgrade(unsigned long int id) const
+const UpgradeProperties* BoUpgradesCollection::findUpgrade(quint32 id) const
 {
  Q3ValueList<const UpgradeProperties*>::const_iterator it;
  for (it = upgrades()->begin(); it != upgrades()->end(); ++it) {
@@ -328,7 +328,7 @@ bool BoUpgradesCollection::loadFromXML(const SpeciesTheme* speciesTheme, const Q
 		continue;
 	}
 	bool ok = false;
-	unsigned long int id = e.attribute("Id").toULong(&ok);
+	quint32 id = e.attribute("Id").toUInt(&ok);
 	if (!ok) {
 		boError() << k_funcinfo << "invalid Id attribute" << endl;
 		return false;
@@ -350,7 +350,7 @@ bool BoUpgradesCollection::loadFromXML(const SpeciesTheme* speciesTheme, const Q
 }
 
 
-bool BoUpgradeablePropertyBase::upgradeValue(const Q3ValueList<const UpgradeProperties*>* list, unsigned long int* v) const
+bool BoUpgradeablePropertyBase::upgradeValue(const Q3ValueList<const UpgradeProperties*>* list, quint32* v) const
 {
  Q3ValueList<const UpgradeProperties*>::const_iterator it;
  for (it = list->begin(); it != list->end(); ++it) {
@@ -362,7 +362,7 @@ bool BoUpgradeablePropertyBase::upgradeValue(const Q3ValueList<const UpgradeProp
  return true;
 }
 
-bool BoUpgradeablePropertyBase::upgradeValue(const Q3ValueList<const UpgradeProperties*>* list, long int* v) const
+bool BoUpgradeablePropertyBase::upgradeValue(const Q3ValueList<const UpgradeProperties*>* list, qint32* v) const
 {
  Q3ValueList<const UpgradeProperties*>::const_iterator it;
  for (it = list->begin(); it != list->end(); ++it) {

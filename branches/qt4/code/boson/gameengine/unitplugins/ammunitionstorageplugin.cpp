@@ -42,10 +42,10 @@ AmmunitionStoragePlugin::~AmmunitionStoragePlugin()
 bool AmmunitionStoragePlugin::saveAsXML(QDomElement& root) const
 {
  QDomDocument doc = root.ownerDocument();
- for (QMap<QString, unsigned long int>::const_iterator it = mAmmunitionStorage.begin(); it != mAmmunitionStorage.end(); ++it) {
+ for (QMap<QString, quint32>::const_iterator it = mAmmunitionStorage.begin(); it != mAmmunitionStorage.end(); ++it) {
 	QDomElement e = doc.createElement("AmmunitionStorage");
 	e.setAttribute("Type", it.key());
-	e.setAttribute("Value", QString::number(it.data()));
+	e.setAttribute("Value", QString::number(it.value()));
  }
  return true;
 }
@@ -71,7 +71,7 @@ bool AmmunitionStoragePlugin::loadFromXML(const QDomElement& root)
 		return false;
 	}
 	bool ok;
-	unsigned long int value = e.attribute("Value").toULong(&ok);
+	quint32 value = e.attribute("Value").toULong(&ok);
 	if (!ok) {
 		boError() << k_funcinfo << "invalid Value attribute for Type=" << type << endl;
 		return false;
@@ -103,7 +103,7 @@ bool AmmunitionStoragePlugin::canStore(const QString& type) const
  return prop->canStore(type);
 }
 
-unsigned long int AmmunitionStoragePlugin::requestAmmunitionGlobally(const QString& type, unsigned long int requested)
+quint32 AmmunitionStoragePlugin::requestAmmunitionGlobally(const QString& type, quint32 requested)
 {
  if (mustBePickedUp(type)) {
 	return 0;
@@ -111,7 +111,7 @@ unsigned long int AmmunitionStoragePlugin::requestAmmunitionGlobally(const QStri
  return giveAmmunition(type, requested);
 }
 
-unsigned long int AmmunitionStoragePlugin::pickupAmmunition(Unit* picksUp, const QString& type, unsigned long int requested, bool* denied)
+quint32 AmmunitionStoragePlugin::pickupAmmunition(Unit* picksUp, const QString& type, quint32 requested, bool* denied)
 {
  if (denied) {
 	*denied = false;
@@ -134,7 +134,7 @@ unsigned long int AmmunitionStoragePlugin::pickupAmmunition(Unit* picksUp, const
  return giveAmmunition(type, requested);
 }
 
-unsigned long int AmmunitionStoragePlugin::giveAmmunition(const QString& type, unsigned long int requested)
+quint32 AmmunitionStoragePlugin::giveAmmunition(const QString& type, quint32 requested)
 {
  if (!canStore(type)) {
 	return 0;
@@ -149,10 +149,10 @@ unsigned long int AmmunitionStoragePlugin::giveAmmunition(const QString& type, u
 	boError() << k_funcinfo << "ammunition storage increased!" << endl;
 	return 0;
  }
- return (unsigned long int)(-change);
+ return (quint32)(-change);
 }
 
-unsigned long int AmmunitionStoragePlugin::ammunitionStored(const QString& type) const
+quint32 AmmunitionStoragePlugin::ammunitionStored(const QString& type) const
 {
  if (!canStore(type)) {
 	return 0;
@@ -163,7 +163,7 @@ unsigned long int AmmunitionStoragePlugin::ammunitionStored(const QString& type)
  return mAmmunitionStorage[type];
 }
 
-unsigned long int AmmunitionStoragePlugin::tryToFillStorage(const QString& type, unsigned long int ammo)
+quint32 AmmunitionStoragePlugin::tryToFillStorage(const QString& type, quint32 ammo)
 {
  if (!canStore(type)) {
 	return 0;
@@ -177,7 +177,7 @@ unsigned long int AmmunitionStoragePlugin::tryToFillStorage(const QString& type,
 	boError() << k_funcinfo << "ammo has been reduced!" << endl;
 	return 0;
  }
- return (unsigned long int)(change);
+ return (quint32)(change);
 }
 
 void AmmunitionStoragePlugin::unitDestroyed(Unit*)
@@ -199,14 +199,14 @@ int AmmunitionStoragePlugin::changeAmmunition(const QString& type, int change)
  if (!mAmmunitionStorage.contains(type)) {
 	mAmmunitionStorage.insert(type, 0);
  }
- unsigned long int stored = mAmmunitionStorage[type];
+ quint32 stored = mAmmunitionStorage[type];
  if (change > 0) {
 	// AB: atm there is no capacity limitation
 	stored = stored + change;
 
 	change = change;
  } else {
-	unsigned long int subtracted = -change;
+	quint32 subtracted = -change;
 	if (subtracted > stored) {
 		subtracted = stored;
 	}

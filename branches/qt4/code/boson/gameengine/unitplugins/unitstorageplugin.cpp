@@ -26,8 +26,8 @@
 #include "pluginproperties.h"
 #include "bo3dtools.h"
 #include "bodebug.h"
+#include "bosonpropertylist.h"
 
-#include <kgame/kgamepropertylist.h>
 #include <kgame/kgamepropertyarray.h>
 
 #include <qdom.h>
@@ -43,10 +43,10 @@ public:
 
 	KGameProperty<qint32> mStoringStatus;
 
-	KGamePropertyList<quint32> mPendingEnterRequests;
-	KGamePropertyList<quint32> mApprovedEnterRequests;
-	KGamePropertyList<quint32> mPendingLeaveRequests;
-	KGamePropertyList<quint32> mApprovedLeaveRequests;
+	BosonPropertyList<quint32> mPendingEnterRequests;
+	BosonPropertyList<quint32> mApprovedEnterRequests;
+	BosonPropertyList<quint32> mPendingLeaveRequests;
+	BosonPropertyList<quint32> mApprovedLeaveRequests;
 
 	KGamePropertyArray<quint32> mEnteringUnitOnPath;
 };
@@ -311,8 +311,8 @@ bool UnitStoragePlugin::getLeavePathFor(const Unit* leavingUnit, Q3ValueList<BoV
  }
  UnitStorageProperties::PathUnitType type = (UnitStorageProperties::PathUnitType)pathTypeForUnit(leavingUnit);
 
- unsigned int path = d->mEnteringUnitOnPath.size();
- for (unsigned int i = 0; i < d->mEnteringUnitOnPath.size(); i++) {
+ int path = d->mEnteringUnitOnPath.size();
+ for (int i = 0; i < d->mEnteringUnitOnPath.size(); i++) {
 	if (d->mEnteringUnitOnPath[i] == leavingUnit->id()) {
 		path = i;
 	}
@@ -353,7 +353,7 @@ bool UnitStoragePlugin::pathIsTaken(unsigned int i) const
 unsigned int UnitStoragePlugin::freePathCount() const
 {
  unsigned int count = 0;
- for (unsigned int i = 0; i < d->mEnteringUnitOnPath.size(); i++) {
+ for (int i = 0; i < d->mEnteringUnitOnPath.size(); i++) {
 	if (d->mEnteringUnitOnPath[i] == 0) {
 		count++;
 	}
@@ -398,7 +398,7 @@ bool UnitStoragePlugin::takeMe(Unit* enteringUnit, unsigned int path)
 	return false;
  }
 
- if (path >= d->mEnteringUnitOnPath.count()) {
+ if (path >= (unsigned int)d->mEnteringUnitOnPath.count()) {
 	return false;
  }
  if (d->mEnteringUnitOnPath[path] != 0) {
@@ -434,10 +434,10 @@ void UnitStoragePlugin::arrivedAtStoragePosition(Unit* enteringUnit)
  //     or if leaving was aborted/denied.
 
  boDebug() << k_funcinfo << "unit: " << enteringUnit->id() << endl;
- d->mPendingEnterRequests.remove(enteringUnit->id());
- d->mApprovedEnterRequests.remove(enteringUnit->id());
- d->mPendingLeaveRequests.remove(enteringUnit->id());
- d->mApprovedLeaveRequests.remove(enteringUnit->id());
+ d->mPendingEnterRequests.removeAll(enteringUnit->id());
+ d->mApprovedEnterRequests.removeAll(enteringUnit->id());
+ d->mPendingLeaveRequests.removeAll(enteringUnit->id());
+ d->mApprovedLeaveRequests.removeAll(enteringUnit->id());
 
 // boDebug() << k_funcinfo << requestsCount() << " status=" << (int)storageStatus() << endl;
 // boDebug() << k_funcinfo << unit()->advanceWork() << endl;
@@ -471,8 +471,8 @@ void UnitStoragePlugin::revokeEnterRequest(const Unit* enteringUnit)
  if (!enteringUnit) {
 	return;
  }
- d->mPendingEnterRequests.remove(enteringUnit->id());
- d->mApprovedEnterRequests.remove(enteringUnit->id());
+ d->mPendingEnterRequests.removeAll(enteringUnit->id());
+ d->mApprovedEnterRequests.removeAll(enteringUnit->id());
  boDebug() << k_funcinfo << enteringUnit->id() << " revoked enter permission. remaining requests: " << d->mPendingEnterRequests.count() + d->mApprovedEnterRequests.count() << endl;
 }
 
@@ -504,8 +504,8 @@ void UnitStoragePlugin::requestLeavePermission(const Unit* leavingUnit)
 	return;
  }
 
- d->mApprovedLeaveRequests.remove(leavingUnit->id());
- d->mPendingLeaveRequests.remove(leavingUnit->id());
+ d->mApprovedLeaveRequests.removeAll(leavingUnit->id());
+ d->mPendingLeaveRequests.removeAll(leavingUnit->id());
 
  d->mPendingLeaveRequests.append(leavingUnit->id());
 }
@@ -515,8 +515,8 @@ void UnitStoragePlugin::revokeLeaveRequest(const Unit* leavingUnit)
  if (!leavingUnit) {
 	return;
  }
- d->mPendingLeaveRequests.remove(leavingUnit->id());
- d->mApprovedLeaveRequests.remove(leavingUnit->id());
+ d->mPendingLeaveRequests.removeAll(leavingUnit->id());
+ d->mApprovedLeaveRequests.removeAll(leavingUnit->id());
 }
 
 void UnitStoragePlugin::getLeavePermissionResult(const Unit* leavingUnit, bool* wait, bool* permission)
@@ -544,12 +544,12 @@ void UnitStoragePlugin::removeFromAllLists(const Unit* unit)
 	return;
  }
 
- d->mPendingEnterRequests.remove(unit->id());
- d->mApprovedEnterRequests.remove(unit->id());
- d->mPendingLeaveRequests.remove(unit->id());
- d->mApprovedLeaveRequests.remove(unit->id());
+ d->mPendingEnterRequests.removeAll(unit->id());
+ d->mApprovedEnterRequests.removeAll(unit->id());
+ d->mPendingLeaveRequests.removeAll(unit->id());
+ d->mApprovedLeaveRequests.removeAll(unit->id());
 
- for (unsigned int i = 0; i < d->mEnteringUnitOnPath.size(); i++) {
+ for (int i = 0; i < d->mEnteringUnitOnPath.size(); i++) {
 	if (d->mEnteringUnitOnPath[i] == unit->id()) {
 		d->mEnteringUnitOnPath[i] = 0;
 	}
@@ -569,8 +569,8 @@ void UnitStoragePlugin::approveOneRequest()
  }
 
  if (d->mPendingLeaveRequests.count() > 0) {
-	unsigned long int unitId = d->mPendingLeaveRequests.first();
-	d->mPendingLeaveRequests.remove(unitId);
+	quint32 unitId = d->mPendingLeaveRequests.first();
+	d->mPendingLeaveRequests.removeAll(unitId);
 	d->mApprovedLeaveRequests.append(unitId);
 
 	boDebug() << k_funcinfo << "approving leave request for unit " << unitId << endl;
@@ -586,8 +586,8 @@ void UnitStoragePlugin::approveOneRequest()
 		d->mPendingEnterRequests.clear();
 		boDebug() << k_funcinfo << "capacity full. deny all enter requests" << endl;
 	} else {
-		unsigned long int unitId = d->mPendingEnterRequests.first();
-		d->mPendingEnterRequests.remove(unitId);
+		quint32 unitId = d->mPendingEnterRequests.first();
+		d->mPendingEnterRequests.removeAll(unitId);
 		d->mApprovedEnterRequests.append(unitId);
 		boDebug() << k_funcinfo << "approve enter request for unit " << unitId << endl;
 	}

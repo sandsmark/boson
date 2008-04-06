@@ -68,13 +68,13 @@ public:
 		mKeepMessageDetailsSeconds = 0;
 	}
 
-	long long mTotalBytesSent;
-	long long mTotalBytesReceived;
+	qint64 mTotalBytesSent;
+	qint64 mTotalBytesReceived;
 
-	long long mTotalKGameBytesSent;
-	long long mTotalKGameBytesReceived;
-	long long mTotalBosonBytesSent;
-	long long mTotalBosonBytesReceived;
+	qint64 mTotalKGameBytesSent;
+	qint64 mTotalKGameBytesReceived;
+	qint64 mTotalBosonBytesSent;
+	qint64 mTotalBosonBytesReceived;
 
 	int mKeepMessageDetailsSeconds;
 	Q3PtrList<BosonNetworkTrafficDetails> mMessageDetails;
@@ -177,32 +177,32 @@ void BosonNetworkTraffic::setKeepMessageDetailsFor(quint32 seconds)
  d->mKeepMessageDetailsSeconds = seconds;
 }
 
-long long BosonNetworkTraffic::totalBytesReceived() const
+qint64 BosonNetworkTraffic::totalBytesReceived() const
 {
  return d->mTotalBytesReceived;
 }
 
-long long BosonNetworkTraffic::totalBytesSent() const
+qint64 BosonNetworkTraffic::totalBytesSent() const
 {
  return d->mTotalBytesSent;
 }
 
-long long BosonNetworkTraffic::totalKGameBytesReceived() const
+qint64 BosonNetworkTraffic::totalKGameBytesReceived() const
 {
  return d->mTotalKGameBytesReceived;
 }
 
-long long BosonNetworkTraffic::totalKGameBytesSent() const
+qint64 BosonNetworkTraffic::totalKGameBytesSent() const
 {
  return d->mTotalKGameBytesSent;
 }
 
-long long BosonNetworkTraffic::totalBosonBytesReceived() const
+qint64 BosonNetworkTraffic::totalBosonBytesReceived() const
 {
  return d->mTotalBosonBytesReceived;
 }
 
-long long BosonNetworkTraffic::totalBosonBytesSent() const
+qint64 BosonNetworkTraffic::totalBosonBytesSent() const
 {
  return d->mTotalBosonBytesSent;
 }

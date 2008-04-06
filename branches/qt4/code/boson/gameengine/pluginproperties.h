@@ -31,6 +31,8 @@ class SpeciesTheme;
 class PluginPropertiesEditor;
 
 class KSimpleConfig;
+class KConfigGroup;
+class KConfig;
 
 // note that we can have PluginProperties that do <em>not</em> have any UnitPlugin, and
 // we can also have UnitPlugins that <em>don't</em> have any
@@ -95,8 +97,8 @@ public:
 	 * or so - just to display it in a list one day
 	 **/
 	virtual QString name() const = 0;
-	virtual bool loadPlugin(KSimpleConfig* config) = 0;
-	virtual bool savePlugin(KSimpleConfig* config) = 0;
+	virtual bool loadPlugin(const KConfigGroup& config) = 0;
+	virtual bool savePlugin(KConfig* config) = 0;
 
 	/**
 	 * @return A unique ID for the plugin. See @ref PluginPropertiesTypes
@@ -123,14 +125,14 @@ public:
 	static QString propertyGroup();
 
 	virtual QString name() const;
-	virtual bool loadPlugin(KSimpleConfig* config);
-	virtual bool savePlugin(KSimpleConfig* config);
+	virtual bool loadPlugin(const KConfigGroup& config);
+	virtual bool savePlugin(KConfig* config);
 	virtual int pluginType() const { return Production; }
 
-	Q3ValueList<unsigned long int> producerList() const { return mProducerList; }
+	Q3ValueList<quint32> producerList() const { return mProducerList; }
 
 private:
-	Q3ValueList<unsigned long int> mProducerList;
+	Q3ValueList<quint32> mProducerList;
 
 	friend class ProductionPropertiesEditor;
 };
@@ -144,8 +146,8 @@ public:
 	static QString propertyGroup();
 
 	virtual QString name() const;
-	virtual bool loadPlugin(KSimpleConfig* config);
-	virtual bool savePlugin(KSimpleConfig* config);
+	virtual bool loadPlugin(const KConfigGroup& config);
+	virtual bool savePlugin(KConfig* config);
 	virtual int pluginType() const { return Repair; }
 
 private:
@@ -161,8 +163,8 @@ public:
 	static QString propertyGroup();
 
 	virtual QString name() const;
-	virtual bool loadPlugin(KSimpleConfig* config);
-	virtual bool savePlugin(KSimpleConfig* config);
+	virtual bool loadPlugin(const KConfigGroup& config);
+	virtual bool savePlugin(KConfig* config);
 	virtual int pluginType() const { return Harvester; }
 
 	/**
@@ -215,8 +217,8 @@ public:
 	static QString propertyGroup();
 
 	virtual QString name() const;
-	virtual bool loadPlugin(KSimpleConfig* config);
-	virtual bool savePlugin(KSimpleConfig* config);
+	virtual bool loadPlugin(const KConfigGroup& config);
+	virtual bool savePlugin(KConfig* config);
 	virtual int pluginType() const { return PluginProperties::Refinery; }
 
 	/**
@@ -245,8 +247,8 @@ public:
 	static QString propertyGroup();
 
 	virtual QString name() const;
-	virtual bool loadPlugin(KSimpleConfig* config);
-	virtual bool savePlugin(KSimpleConfig* config);
+	virtual bool loadPlugin(const KConfigGroup& config);
+	virtual bool savePlugin(KConfig* config);
 	virtual int pluginType() const { return ResourceMine; }
 
 	bool canProvideMinerals() const { return mMinerals; }
@@ -268,8 +270,8 @@ public:
 	static QString propertyGroup();
 
 	virtual QString name() const;
-	virtual bool loadPlugin(KSimpleConfig* config);
-	virtual bool savePlugin(KSimpleConfig* config);
+	virtual bool loadPlugin(const KConfigGroup& config);
+	virtual bool savePlugin(KConfig* config);
 	virtual int pluginType() const { return AmmunitionStorage; }
 
 	/**
@@ -285,8 +287,8 @@ public:
 private:
 	friend class AmmunitionStoragePropertiesEditor;
 
-	Q3ValueList<QString> mCanStore;
-	Q3ValueList<QString> mMustBePickedUp;
+	QList<QString> mCanStore;
+	QList<QString> mMustBePickedUp;
 };
 
 class RadarProperties : public PluginProperties
@@ -298,8 +300,8 @@ public:
 	static QString propertyGroup();
 
 	virtual QString name() const;
-	virtual bool loadPlugin(KSimpleConfig* config);
-	virtual bool savePlugin(KSimpleConfig* config);
+	virtual bool loadPlugin(const KConfigGroup& config);
+	virtual bool savePlugin(KConfig* config);
 	virtual int pluginType() const { return Radar; }
 
 	/**
@@ -332,8 +334,8 @@ public:
 	static QString propertyGroup();
 
 	virtual QString name() const;
-	virtual bool loadPlugin(KSimpleConfig* config);
-	virtual bool savePlugin(KSimpleConfig* config);
+	virtual bool loadPlugin(const KConfigGroup& config);
+	virtual bool savePlugin(KConfig* config);
 	virtual int pluginType() const { return RadarJammer; }
 
 	/**
@@ -388,8 +390,8 @@ public:
 	static QString propertyGroup();
 
 	virtual QString name() const;
-	virtual bool loadPlugin(KSimpleConfig* config);
-	virtual bool savePlugin(KSimpleConfig* config);
+	virtual bool loadPlugin(const KConfigGroup& config);
+	virtual bool savePlugin(KConfig* config);
 	virtual int pluginType() const { return UnitStorage; }
 
 	/**
@@ -417,8 +419,8 @@ public:
 	BoVector2Float enterDirection(unsigned int i) const;
 
 protected:
-	bool loadEnterPath(int i, KSimpleConfig* config);
-	bool saveEnterPath(int i, KSimpleConfig* config);
+	bool loadEnterPath(int i, const KConfig* config);
+	bool saveEnterPath(int i, KConfig* config);
 
 protected:
 	class Path {
@@ -444,8 +446,8 @@ protected:
 			mType = PathTypeLand;
 			mLeaveMethod = 0;
 		}
-		bool loadPath(KSimpleConfig* config);
-		bool savePath(KSimpleConfig* config);
+		bool loadPath(const KConfigGroup& config);
+		bool savePath(KConfigGroup& config);
 
 		// AB: note: float, not fixed! -> values in [0;1]
 		Q3ValueList<BoVector2Float> mPathPoints;

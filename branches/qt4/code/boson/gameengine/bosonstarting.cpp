@@ -153,7 +153,7 @@ void BosonStarting::slotStartNewGameWithTimer()
 
 bool BosonStarting::executeTasks(const Q3PtrList<BosonStartingTask>& tasks)
 {
- unsigned long int duration = 0;
+ quint32 duration = 0;
  for (Q3PtrListIterator<BosonStartingTask> it(tasks); it.current(); ++it) {
 	disconnect(it.current(), SIGNAL(signalStartSubTask(const QString&)), this, 0);
 	connect(it.current(), SIGNAL(signalStartSubTask(const QString&)),

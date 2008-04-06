@@ -68,12 +68,12 @@ protected:
 	/**
 	 * Convenience method for mGame->findUnit(id, searchIn)
 	 **/
-	Unit* findUnit(unsigned long int id, Player* searchIn) const;
+	Unit* findUnit(quint32 id, Player* searchIn) const;
 
 	/**
 	 * Convenience method for (Player*)mGame->findPlayerByKGameId(id)
 	 **/
-	Player* findPlayerByKGameId(unsigned long int id) const;
+	Player* findPlayerByKGameId(quint32 id) const;
 
 	/**
 	 * Convenience method for (Player*)mGame->findPlayerByUserId(id)

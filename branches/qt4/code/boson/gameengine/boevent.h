@@ -72,20 +72,20 @@ public:
 	 **/
 	virtual bool matches(const BoEventMatching* m, const BoEvent* e) const;
 
-	void setPlayerId(unsigned long int playerId)
+	void setPlayerId(quint32 playerId)
 	{
 		mHasPlayerId = true;
 		mPlayerId = playerId;
 	}
-	unsigned long int playerId() const
+	quint32 playerId() const
 	{
 		return mPlayerId;
 	}
-	void setUnitId(unsigned long int unitId)
+	void setUnitId(quint32 unitId)
 	{
 		mUnitId = unitId;
 	}
-	unsigned long int unitId() const
+	quint32 unitId() const
 	{
 		return mUnitId;
 	}
@@ -130,12 +130,12 @@ public:
 	 *
 	 * atm 20 advance calls are ~1 second (at default game speed)
 	 **/
-	void setDelayedDelivery(unsigned long int advanceCalls)
+	void setDelayedDelivery(quint32 advanceCalls)
 	{
 		mDelayedDelivery = advanceCalls;
 	}
 
-	unsigned long int delayedDelivery() const
+	quint32 delayedDelivery() const
 	{
 		return mDelayedDelivery;
 	}
@@ -143,7 +143,7 @@ public:
 	/**
 	 * Called by @ref BoEventManager::queueEvent only.
 	 **/
-	void setId(unsigned long int id)
+	void setId(quint32 id)
 	{
 		mId = id;
 	}
@@ -152,7 +152,7 @@ public:
 	 * The ID is supposed to be used in debugging only at the moment.
 	 * @return The id of the event.
 	 **/
-	unsigned long int id() const
+	quint32 id() const
 	{
 		return mId;
 	}
@@ -197,14 +197,14 @@ private:
 	void init(const Q3CString& name);
 
 private:
-	unsigned long int mId;
+	quint32 mId;
 	Q3CString mName;
-	unsigned long int mDelayedDelivery;
+	quint32 mDelayedDelivery;
 	bool mHasLocation;
 	BoVector3Fixed mLocation;
-	unsigned long int mUnitId;
+	quint32 mUnitId;
 	bool mHasPlayerId;
-	unsigned long int mPlayerId;
+	quint32 mPlayerId;
 
 	QString mData1;
 	QString mData2;

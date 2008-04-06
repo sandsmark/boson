@@ -170,7 +170,7 @@ public:
 	 **/
 	const QString& name() const;
 
-	unsigned long int maxHealth() const;
+	quint32 maxHealth() const;
 
 	/**
 	 * Health aka hitpoints
@@ -182,12 +182,12 @@ public:
 	 * armor?
 	 * @return The health of the unit.
 	 **/
-	virtual unsigned long int health() const;
+	virtual quint32 health() const;
 
 	/**
 	 * Change the health of this unit.
 	 **/
-	virtual void setHealth(unsigned long int h);
+	virtual void setHealth(quint32 h);
 
 	bool isDestroyed() const
 	{
@@ -205,22 +205,22 @@ public:
 	 **/
 	KGamePropertyHandler* weaponDataHandler();
 
-	unsigned long int shields() const;
-	void setShields(unsigned long int shields);
-	unsigned long int maxShields() const;
+	quint32 shields() const;
+	void setShields(quint32 shields);
+	quint32 maxShields() const;
 
-	unsigned long int armor() const;
-	void setArmor(unsigned long int armor);
-	unsigned long int maxArmor() const;
+	quint32 armor() const;
+	void setArmor(quint32 armor);
+	quint32 maxArmor() const;
 
-	unsigned long int powerConsumedByUnit() const;
-	unsigned long int powerGeneratedByUnit() const;
+	quint32 powerConsumedByUnit() const;
+	quint32 powerGeneratedByUnit() const;
 
 	/**
 	 * The type of the unit as described in the index.unit file of this
 	 * unit. See also @ref UnitProperties::typeId
 	 **/
-	unsigned long int type() const;
+	quint32 type() const;
 
 	/**
 	 * @return The RTTI of this unit.
@@ -230,9 +230,9 @@ public:
 	/**
 	 * @return How far this unit can see. This is a number of cells
 	 **/
-	unsigned long int sightRange() const;
-	virtual void setSightRange(unsigned long int r);
-	unsigned long int maxSightRange() const;
+	quint32 sightRange() const;
+	virtual void setSightRange(quint32 r);
+	quint32 maxSightRange() const;
 
 	virtual bool saveAsXML(QDomElement& root);
 	virtual bool loadFromXML(const QDomElement& root);
@@ -453,12 +453,12 @@ private:
 	KGameProperty<bofixed> mPowerChargeForReload;
 
 
-	BoUpgradeableProperty<unsigned long int> mMaxHealth;
-	BoUpgradeableProperty<unsigned long int> mMaxArmor;
-	BoUpgradeableProperty<unsigned long int> mMaxShields;
-	BoUpgradeableProperty<unsigned long int> mMaxSightRange;
-	BoUpgradeableProperty<unsigned long int> mPowerGenerated;
-	BoUpgradeableProperty<unsigned long int> mPowerConsumed;
+	BoUpgradeableProperty<quint32> mMaxHealth;
+	BoUpgradeableProperty<quint32> mMaxArmor;
+	BoUpgradeableProperty<quint32> mMaxShields;
+	BoUpgradeableProperty<quint32> mMaxSightRange;
+	BoUpgradeableProperty<quint32> mPowerGenerated;
+	BoUpgradeableProperty<quint32> mPowerConsumed;
 
 
 	bool mAdvanceWasChargedThisAdvanceCall; // updated every advance call, no need to save

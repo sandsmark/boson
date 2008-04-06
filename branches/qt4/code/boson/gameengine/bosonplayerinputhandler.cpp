@@ -61,12 +61,12 @@ BosonCanvas* BosonPlayerInputHandler::canvas() const
  return mGame->canvasNonConst();
 }
 
-Unit* BosonPlayerInputHandler::findUnit(unsigned long int id, Player* p) const
+Unit* BosonPlayerInputHandler::findUnit(quint32 id, Player* p) const
 {
  return mGame->findUnit(id, p);
 }
 
-Player* BosonPlayerInputHandler::findPlayerByKGameId(unsigned long int id) const
+Player* BosonPlayerInputHandler::findPlayerByKGameId(quint32 id) const
 {
  return (Player*)mGame->findPlayerByKGameId(id);
 }
@@ -439,16 +439,16 @@ bool BosonPlayerInputHandler::gamePlayerInput(quint32 msgid, QDataStream& stream
 				break;
 			}
 		}
-		if (!production->canCurrentlyProduce((ProductionType)message.mProduceType, (unsigned long int)message.mType)) {
+		if (!production->canCurrentlyProduce((ProductionType)message.mProduceType, (quint32)message.mType)) {
 			boError() << k_lineinfo << "Unit "
 					<< message.mFactoryId
 					<< " can't produce type " <<
-					(unsigned long int)message.mType
+					(quint32)message.mType
 					<< " of producetype "
 					<< message.mProduceType << endl;
 			break;
 		}
-		production->addProduction((ProductionType)message.mProduceType, (unsigned long int)message.mType);
+		production->addProduction((ProductionType)message.mProduceType, (quint32)message.mType);
 
 		break;
 	}
@@ -479,7 +479,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(quint32 msgid, QDataStream& stream
 			break;
 		}
 
-		if (!production->contains((ProductionType)message.mProduceType, (unsigned long int)message.mType)) {
+		if (!production->contains((ProductionType)message.mProduceType, (quint32)message.mType)) {
 			boDebug() << k_lineinfo << "Production " << message.mProduceType << " with id "
 					 << message.mType << " is not in production queue" << endl;
 			break;
@@ -1028,7 +1028,7 @@ BosonMessageEditorMove* BosonPlayerInputHandler::createNewUndoDeleteItemsMessage
  Q3ValueList<BosonMessageEditorMovePlaceUnit*> placeUnit;
  Q3ValueList<QString> unitData;
  for (unsigned int i = 0; i < message.mItems.count(); i++) {
-	unsigned long int id = message.mItems[i];
+	quint32 id = message.mItems[i];
 	BosonItem* item = canvas()->findItem(id);
 	if (!item) {
 		boError() << k_funcinfo << "cannot find item " << id << endl;

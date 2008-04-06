@@ -86,7 +86,7 @@ bool BoEvent::loadFromXML(const QDomElement& root)
  }
  if (root.hasAttribute("PlayerId")) {
 	// note: we load the _ID_ here, although save() saves the _index_
-	unsigned long int id = root.attribute("PlayerId").toULong(&ok);
+	quint32 id = root.attribute("PlayerId").toULong(&ok);
 	if (!ok) {
 		boError(360) << k_funcinfo << "Invalid PlayerId" << endl;
 		return false;

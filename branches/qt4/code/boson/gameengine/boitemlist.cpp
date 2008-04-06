@@ -24,8 +24,6 @@
 #include "bodebug.h"
 #include "rtti.h"
 #include "unit.h"
-//Added by qt3to4:
-#include <Q3ValueList>
 
 BoItemList::BoItemList()
 {
@@ -60,7 +58,7 @@ void BoItemList::registerList()
  }
 }
 
-BosonItem* BoItemList::findItem(unsigned long int id) const
+BosonItem* BoItemList::findItem(quint32 id) const
 {
  ConstIterator it = begin();
  for (; it != end(); ++it) {

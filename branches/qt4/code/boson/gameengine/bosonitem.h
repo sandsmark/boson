@@ -219,13 +219,13 @@ public:
 	 * Set a unique Id for this item. The Id <em>must</em> be unique for
 	 * <em>all</em> items in the game. Otherwise the results are undefined.
 	 **/
-	void setId(unsigned long int id) { mId = id; }
+	void setId(quint32 id) { mId = id; }
 
 	/**
 	 * @return An id that identifies this item uniquely. There are never 2
 	 * different items with the same Id.
 	 **/
-	inline unsigned long int id() const { return mId; }
+	inline quint32 id() const { return mId; }
 
 	// TODO: change semantics of x() and y(): they should return centerX()
 	// and centerY()!
@@ -607,7 +607,7 @@ private:
 	Player* mOwner;
 	// FIXME: use KGameProperty here. We can do so, since we don't use
 	// QCanvasSprite anymore.
-	unsigned long int mId;
+	quint32 mId;
 	bofixed mX; // centerX
 	bofixed mY; // centerY
 	bofixed mZ; // NOT the center! still the bottom of the unit (should be changed to centerZ too!)

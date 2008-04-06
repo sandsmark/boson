@@ -83,7 +83,7 @@ public:
 	{
 		return unit()->canvas();
 	}
-	inline unsigned long int id() const
+	inline quint32 id() const
 	{
 		return unit()->id();
 	}

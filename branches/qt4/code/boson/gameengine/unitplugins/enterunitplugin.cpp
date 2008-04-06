@@ -847,7 +847,7 @@ bool EnterUnitPlugin::isAtEnterPoint2() const
  return r.contains(mEnterPoint2.value());
 }
 
-Q3ValueList<BoVector2Fixed> EnterUnitPlugin::remainingInsidePath() const
+QList<BoVector2Fixed> EnterUnitPlugin::remainingInsidePath() const
 {
  return mRemainingInsidePath;
 }

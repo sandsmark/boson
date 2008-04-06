@@ -50,7 +50,7 @@ public:
 	{
 	}
 	KGamePropertyHandler* mProperties;
-	KGameProperty<unsigned long int> mNextEventId;
+	KGameProperty<quint32> mNextEventId;
 
 	Q3PtrList<BoEvent> mEvents;
 	Q3PtrList<BoEventListener> mEventListeners;
@@ -427,7 +427,7 @@ bool BoEventManager::queueEvent(BoEvent* event)
 	return true;
  }
  boDebug(360) << k_funcinfo << "queue event " << event->name() << endl;
- unsigned long int id = d->mNextEventId;
+ quint32 id = d->mNextEventId;
  d->mNextEventId = d->mNextEventId + 1;
  event->setId(id);
 

@@ -59,7 +59,7 @@ const QString& PlayerIO::name() const
  return player()->name();
 }
 
-unsigned long int PlayerIO::playerId() const
+quint32 PlayerIO::playerId() const
 {
  return player()->bosonId();
 }
@@ -97,12 +97,12 @@ SpeciesTheme* PlayerIO::speciesTheme() const
  return player()->speciesTheme();
 }
 
-const UnitProperties* PlayerIO::unitProperties(unsigned long int type) const
+const UnitProperties* PlayerIO::unitProperties(quint32 type) const
 {
  return player()->unitProperties(type);
 }
 
-const UpgradeProperties* PlayerIO::technologyProperties(unsigned long int type) const
+const UpgradeProperties* PlayerIO::technologyProperties(quint32 type) const
 {
  return player()->technologyProperties(type);
 }
@@ -178,32 +178,32 @@ const QColor& PlayerIO::teamColor() const
  return player()->teamColor();
 }
 
-unsigned long int PlayerIO::minerals() const
+quint32 PlayerIO::minerals() const
 {
  return player()->minerals();
 }
 
-unsigned long int PlayerIO::oil() const
+quint32 PlayerIO::oil() const
 {
  return player()->oil();
 }
 
-bool PlayerIO::useMinerals(unsigned long int amount)
+bool PlayerIO::useMinerals(quint32 amount)
 {
  return player()->useMinerals(amount);
 }
 
-bool PlayerIO::useOil(unsigned long int amount)
+bool PlayerIO::useOil(quint32 amount)
 {
  return player()->useOil(amount);
 }
 
-bool PlayerIO::useResources(unsigned long int mineralamount, unsigned long int oilamount)
+bool PlayerIO::useResources(quint32 mineralamount, quint32 oilamount)
 {
  return player()->useResources(mineralamount, oilamount);
 }
 
-unsigned long int PlayerIO::ammunition(const QString& type) const
+quint32 PlayerIO::ammunition(const QString& type) const
 {
  return player()->ammunition(type);
 }
@@ -361,7 +361,7 @@ Unit* PlayerIO::findUnitAt(const BoVector3Fixed& canvasVector) const
  return 0;
 }
 
-Unit* PlayerIO::findUnit(unsigned long int id) const
+Unit* PlayerIO::findUnit(quint32 id) const
 {
  // AB: note that player()->findUnit(id) is not correct here!
  // -> id may be of a different player, too!
@@ -408,22 +408,22 @@ BoItemList* PlayerIO::unitsAtCells(const Q3PtrVector<const Cell>* cells) const
  return collisions;
 }
 
-bool PlayerIO::canBuild(unsigned long int unitType) const
+bool PlayerIO::canBuild(quint32 unitType) const
 {
  return player()->canBuild(unitType);
 }
 
-bool PlayerIO::canResearchTech(unsigned long int id) const
+bool PlayerIO::canResearchTech(quint32 id) const
 {
  return player()->canResearchTech(id);
 }
 
-bool PlayerIO::hasTechnology(unsigned long int id) const
+bool PlayerIO::hasTechnology(quint32 id) const
 {
  return player()->hasTechnology(id);
 }
 
-bool PlayerIO::hasUnitWithType(unsigned long int type) const
+bool PlayerIO::hasUnitWithType(quint32 type) const
 {
  return player()->hasUnitWithType(type);
 }
@@ -485,7 +485,7 @@ bool PlayerIO::removeGameIO(KGameIO* io, bool deleteit)
  return player()->removeGameIO(io, deleteit);
 }
 
-void PlayerIO::calculatePower(unsigned long int* powerGenerated, unsigned long int* powerConsumed, bool includeUnconstructedFacilities) const
+void PlayerIO::calculatePower(quint32* powerGenerated, quint32* powerConsumed, bool includeUnconstructedFacilities) const
 {
  player()->calculatePower(powerGenerated, powerConsumed, includeUnconstructedFacilities);
 }
