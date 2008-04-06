@@ -22,26 +22,8 @@
 #include "tga.h"
 #include "pcx.h"
 
-#include <qimage.h>
+// AB: completely untested.
 
-void BoImageIO::init()
-{
- static bool initialized = false;
- if (initialized) {
-	return;
- }
- QImageIO::defineIOHandler("TGA",
-		"^\x01\x01[\x02|\x0a]\x01\x01\x01\x01\x01\x01\x01\x01\x01",
-		"",
-		kimgio_tga_read,
-		kimgio_tga_write
-		);
- QImageIO::defineIOHandler("PCX",
-		"^\012",
-		"",
-		kimgio_pcx_read,
-		kimgio_pcx_write
-		);
- initialized = true;
-}
+Q_IMPORT_PLUGIN(pcx)
+Q_IMPORT_PLUGIN(tga)
 
