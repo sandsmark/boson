@@ -14,6 +14,8 @@ add_subdirectory( sound/bosound )
 add_subdirectory( programs )
 add_subdirectory( gameengine/tests )
 
+add_definitions(-DQT3_SUPPORT)
+
 set(LIB_MESHRENDERER_PLUGIN "")
 set(LIB_GROUNDRENDERER_PLUGIN "")
 set(LIB_GAMEVIEW_PLUGIN "")
