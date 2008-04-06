@@ -109,7 +109,7 @@ class BosonShot : public BosonItem
      * If you supply weapon properties in ctor, this equals to properties()->damage().
      * Otherwise, you should re-implement it in derived classes
      **/
-    virtual long int damage() const;
+    virtual qint32 damage() const;
     /**
      * @return Damage range of this shot.
      * If you supply weapon properties in ctor, this equals to properties()->damageRange().
@@ -265,6 +265,7 @@ class BosonShotRocket : public BosonShot
     virtual bool loadFromXML(const QDomElement& root);
 
     void init(const BoVector3Fixed& pos, const BoVector3Fixed& target);
+    using BosonShot::init;
 
     inline virtual int type() const { return BosonShot::Rocket; }
 
@@ -313,6 +314,7 @@ class BosonShotMissile : public BosonShot
     virtual bool loadFromXML(const QDomElement& root);
 
     void init(const BoVector3Fixed& pos, Unit* target);
+    using BosonShot::init;
 
     inline virtual int type() const { return BosonShot::Rocket; }
 
@@ -356,14 +358,14 @@ class BosonShotExplosion : public BosonShot
 
     BosonShotExplosion(Player* owner, BosonCanvas* canvas);
 
-    void activate(const BoVector3Fixed& pos, long int damange, bofixed damageRange, bofixed fulldamagerange, int delay);
+    void activate(const BoVector3Fixed& pos, qint32 damange, bofixed damageRange, bofixed fulldamagerange, int delay);
 
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
 
     inline virtual int type() const { return BosonShot::Explosion; }
 
-    virtual long int damage() const  { return mDamage; }
+    virtual qint32 damage() const  { return mDamage; }
     virtual bofixed damageRange() const  { return mDamageRange; }
     virtual bofixed fullDamageRange() const  { return mFullDamageRange; }
 
@@ -404,6 +406,7 @@ class BosonShotMine : public BosonShot
     virtual bool loadFromXML(const QDomElement& root);
 
     void init(const BoVector3Fixed& pos);
+    using BosonShot::init;
 
     inline virtual int type() const { return BosonShot::Mine; }
 
@@ -441,6 +444,7 @@ class BosonShotBomb : public BosonShot
     virtual bool loadFromXML(const QDomElement& root);
 
     void init(const BoVector3Fixed& pos);
+    using BosonShot::init;
 
     void setHorizontalVelocity(const BoVector2Fixed& velo) { mHorizontalVelocity = velo; }
 
@@ -483,7 +487,7 @@ class BosonShotFragment : public BosonShot
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
 
-    virtual long int damage() const;
+    virtual qint32 damage() const;
     virtual bofixed damageRange() const;
     virtual bofixed fullDamageRange() const;
 

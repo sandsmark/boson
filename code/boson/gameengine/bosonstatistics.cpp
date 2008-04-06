@@ -50,7 +50,7 @@ BosonStatistics::~BosonStatistics()
 {
 }
 
-unsigned long int BosonStatistics::shots() const
+quint32 BosonStatistics::shots() const
 {
 // FIXME: in a long game this value can be greater than the maximal unsigned long
 // value! we need to take care of this! One solution might be to add a variable
@@ -135,17 +135,17 @@ void BosonStatistics::addProducedFacility(UnitBase*, ProductionPlugin*)
  mPoints += pointsPerProducedFacility();
 }
 
-long int BosonStatistics::points() const
+qint32 BosonStatistics::points() const
 {
- long int points = mPoints;
+ qint32 points = mPoints;
 
 // I'm not sure if shot's should get points at all!
 // Probably it's better to use an inverse here. less shots is better, more shots
 // are worse. but perhaps we simply don't give shots at all.
-// points += (unsigned long int)(shots() * 0.001);
+// points += (quint32)(shots() * 0.001);
 
- points += (unsigned long int)(refinedMinerals() * pointsPerRefinedMinerals());
- points += (unsigned long int)(refinedOil() * pointsPerRefinedOil());
+ points += (quint32)(refinedMinerals() * pointsPerRefinedMinerals());
+ points += (quint32)(refinedOil() * pointsPerRefinedOil());
 
  return points;
 }
@@ -206,7 +206,7 @@ unsigned int BosonStatistics::winningPoints()
  return 5000;
 }
 
-void BosonStatistics::saveULong(QDomElement& root, const QString& tagName, unsigned long int value) const
+void BosonStatistics::saveULong(QDomElement& root, const QString& tagName, quint32 value) const
 {
  QDomDocument doc = root.ownerDocument();
  QDomElement element = doc.createElement(tagName);
@@ -215,7 +215,7 @@ void BosonStatistics::saveULong(QDomElement& root, const QString& tagName, unsig
  root.appendChild(element);
 }
 
-void BosonStatistics::saveLong(QDomElement& root, const QString& tagName, long int value) const
+void BosonStatistics::saveLong(QDomElement& root, const QString& tagName, qint32 value) const
 {
  QDomDocument doc = root.ownerDocument();
  QDomElement element = doc.createElement(tagName);
@@ -224,7 +224,7 @@ void BosonStatistics::saveLong(QDomElement& root, const QString& tagName, long i
  root.appendChild(element);
 }
 
-void BosonStatistics::loadULong(const QDomElement& root, const QString& tagName, unsigned long int* value)
+void BosonStatistics::loadULong(const QDomElement& root, const QString& tagName, quint32* value)
 {
  QDomElement element = root.namedItem(tagName).toElement();
  if (element.isNull()) {
@@ -239,7 +239,7 @@ void BosonStatistics::loadULong(const QDomElement& root, const QString& tagName,
  }
 }
 
-void BosonStatistics::loadLong(const QDomElement& root, const QString& tagName, long int* value)
+void BosonStatistics::loadLong(const QDomElement& root, const QString& tagName, qint32* value)
 {
  QDomElement element = root.namedItem(tagName).toElement();
  if (element.isNull()) {

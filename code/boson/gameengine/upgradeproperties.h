@@ -34,7 +34,7 @@ class BosonWeapon;
 class SpeciesTheme;
 
 class QString;
-class KSimpleConfig;
+class KConfig;
 
 template<class T> class Q3ValueList;
 
@@ -77,12 +77,12 @@ class UpgradeProperties
      * as health).
      * @return The new maximum value of the property
      **/
-    bool upgradeValue(const QString& name, unsigned long int* v, const QString& type = "MaxValue") const;
+    bool upgradeValue(const QString& name, quint32* v, const QString& type = "MaxValue") const;
 
     /**
      * @overload
      **/
-    bool upgradeValue(const QString& name, long int* v, const QString& type = "MaxValue") const;
+    bool upgradeValue(const QString& name, qint32* v, const QString& type = "MaxValue") const;
 
     /**
      * @overload
@@ -92,7 +92,7 @@ class UpgradeProperties
     /**
      * Load upgrade properties
      **/
-    virtual bool load(KSimpleConfig* cfg, const QString& group);
+    virtual bool load(KConfig* cfg, const QString& group);
 
     /**
      * @return The type of this upgrade. The type together with the @ref id
@@ -104,7 +104,7 @@ class UpgradeProperties
      * @return Id of this upgrade. The Id is unique among different upgrades of
      * the same @ref type.
      **/
-    unsigned long int id() const { return mId; }
+    quint32 id() const { return mId; }
 
     /**
      * @return Name of this upgrade
@@ -118,12 +118,12 @@ class UpgradeProperties
     /**
      * @return Mineral cost of this upgrade
      **/
-    unsigned long int mineralCost() const { return mMineralCost; }
+    quint32 mineralCost() const { return mMineralCost; }
 
     /**
      * @return Oil cost of this upgrade
      **/
-    unsigned long int oilCost() const { return mOilCost; }
+    quint32 oilCost() const { return mOilCost; }
 
     /**
      * @return producer of this upgrade. Producer ids are used
@@ -138,12 +138,12 @@ class UpgradeProperties
     /**
      * @return List of units required by this upgrade
      **/
-    Q3ValueList<unsigned long int> requiredUnits() const;
+    Q3ValueList<quint32> requiredUnits() const;
 
     /**
      * @return List of technologies required by this upgrade
      **/
-    Q3ValueList<unsigned long int> requiredTechnologies() const;
+    Q3ValueList<quint32> requiredTechnologies() const;
 
     const QString& produceActionString() const { return mProduceActionString; }
 
@@ -175,7 +175,7 @@ class UpgradeProperties
      * @return A list of unit types the upgrade applies to. This can be a fixed
      * list of units or all mobiles/all facilities.
      **/
-    Q3ValueList<unsigned long int> appliesToTypes(const Player* player) const;
+    Q3ValueList<quint32> appliesToTypes(const Player* player) const;
 
   private:
     /**
@@ -186,11 +186,11 @@ class UpgradeProperties
 
   private:
     QString mType;
-    unsigned long int mId;
+    quint32 mId;
     QString mName;
     QString mDescription;
-    unsigned long int mMineralCost;
-    unsigned long int mOilCost;
+    quint32 mMineralCost;
+    quint32 mOilCost;
     unsigned int mProducer;
     unsigned int mProductionTime;
     bool mApplyToFacilities;

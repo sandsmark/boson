@@ -27,6 +27,7 @@
 
 class QColor;
 class KConfig;
+class KConfigGroup;
 class BosonConfig;
 class BosonConfigScript;
 class bofixed;
@@ -267,8 +268,8 @@ public:
 	 * Read and return a @ref BoVector3. Will return @p aDefault if @p key
 	 * is not found.
 	 **/
-	static BoVector3Float readBoVector3FloatEntry(const KConfig* cfg, const QString& key, const BoVector3Float& aDefault);
-	static BoVector3Fixed readBoVector3FixedEntry(const KConfig* cfg, const QString& key, const BoVector3Fixed& aDefault);
+	static BoVector3Float readBoVector3FloatEntry(const KConfigGroup* cfg, const QString& key, const BoVector3Float& aDefault);
+	static BoVector3Fixed readBoVector3FixedEntry(const KConfigGroup* cfg, const QString& key, const BoVector3Fixed& aDefault);
 
 	/**
 	 * @overload
@@ -277,37 +278,37 @@ public:
 	 * default. We don't use a default value in the parameter, as we would
 	 * have to include bo3dtools.h for that.
 	 **/
-	static BoVector3Float readBoVector3FloatEntry(const KConfig* cfg, const QString& key);
-	static BoVector3Fixed readBoVector3FixedEntry(const KConfig* cfg, const QString& key);
+	static BoVector3Float readBoVector3FloatEntry(const KConfigGroup* cfg, const QString& key);
+	static BoVector3Fixed readBoVector3FixedEntry(const KConfigGroup* cfg, const QString& key);
 
-	static BoVector4Float readBoVector4FloatEntry(const KConfig* cfg, const QString& key, const BoVector4Float& aDefault);
-	static BoVector4Float readBoVector4FloatEntry(const KConfig* cfg, const QString& key);
-	static BoVector4Fixed readBoVector4FixedEntry(const KConfig* cfg, const QString& key, const BoVector4Fixed& aDefault);
-	static BoVector4Fixed readBoVector4FixedEntry(const KConfig* cfg, const QString& key);
+	static BoVector4Float readBoVector4FloatEntry(const KConfigGroup* cfg, const QString& key, const BoVector4Float& aDefault);
+	static BoVector4Float readBoVector4FloatEntry(const KConfigGroup* cfg, const QString& key);
+	static BoVector4Fixed readBoVector4FixedEntry(const KConfigGroup* cfg, const QString& key, const BoVector4Fixed& aDefault);
+	static BoVector4Fixed readBoVector4FixedEntry(const KConfigGroup* cfg, const QString& key);
 
-	static void writeEntry(KConfig* cfg, const QString& key, const BoVector3Float& value);
-	static void writeEntry(KConfig* cfg, const QString& key, const BoVector3Fixed& value);
-	static void writeEntry(KConfig* cfg, const QString& key, const BoVector4Float& value);
-	static void writeEntry(KConfig* cfg, const QString& key, const BoVector4Fixed& value);
+	static void writeEntry(KConfigGroup* cfg, const QString& key, const BoVector3Float& value);
+	static void writeEntry(KConfigGroup* cfg, const QString& key, const BoVector3Fixed& value);
+	static void writeEntry(KConfigGroup* cfg, const QString& key, const BoVector4Float& value);
+	static void writeEntry(KConfigGroup* cfg, const QString& key, const BoVector4Fixed& value);
 
 
-	static QString readLocalPlayerName(KConfig* conf = 0);
-	static void saveLocalPlayerName(const QString& name, KConfig* conf = 0);
+	static QString readLocalPlayerName(KConfigGroup* conf = 0);
+	static void saveLocalPlayerName(const QString& name, KConfigGroup* conf = 0);
 
-	static QString readComputerPlayerName(KConfig* conf = 0);
-	static void saveComputerPlayerName(const QString& name, KConfig* conf = 0);
+	static QString readComputerPlayerName(KConfigGroup* conf = 0);
+	static void saveComputerPlayerName(const QString& name, KConfigGroup* conf = 0);
 
-	static QColor readLocalPlayerColor(KConfig* conf = 0);
-	static void saveLocalPlayerColor(const QColor& color, KConfig* conf = 0);
+	static QColor readLocalPlayerColor(KConfigGroup* conf = 0);
+	static void saveLocalPlayerColor(const QColor& color, KConfigGroup* conf = 0);
 
-	static QString readLocalPlayerMap(KConfig* conf = 0);
-	static void saveLocalPlayerMap(const QString& id, KConfig* conf = 0);
+	static QString readLocalPlayerMap(KConfigGroup* conf = 0);
+	static void saveLocalPlayerMap(const QString& id, KConfigGroup* conf = 0);
 
-	static QString readEditorMap(KConfig* conf = 0);
-	static void saveEditorMap(const QString& id, KConfig* conf = 0);
+	static QString readEditorMap(KConfigGroup* conf = 0);
+	static void saveEditorMap(const QString& id, KConfigGroup* conf = 0);
 
-	static bool readEditorCreateNewMap(KConfig* conf = 0);
-	static void saveEditorCreateNewMap(bool createnew, KConfig* conf = 0);
+	static bool readEditorCreateNewMap(KConfigGroup* conf = 0);
+	static void saveEditorCreateNewMap(bool createnew, KConfigGroup* conf = 0);
 
 // below we have config options that are stored in this class (and saved in
 // save())
@@ -481,17 +482,17 @@ public:
 	void addConfigEntry(BoConfigEntry*);
 
 	/**
-	 * Loads list of unsinged long int's from KConfig (which only supports loading
+	 * Loads list of quint32's from KConfig (which only supports loading
 	 * list of _int's_)
 	 **/
-	static Q3ValueList<unsigned long int> readUnsignedLongNumList(const KConfig* cfg, const QString key);
-	static void writeUnsignedLongNumList(KConfig* cfg, const QString key, Q3ValueList<unsigned long int> list);
+	static Q3ValueList<quint32> readUnsignedLongNumList(const KConfigGroup* cfg, const QString key);
+	static void writeUnsignedLongNumList(KConfigGroup* cfg, const QString key, Q3ValueList<quint32> list);
 
 	/**
 	 * Loads list of float's from KConfig
 	 **/
-	static Q3ValueList<float> readFloatNumList(const KConfig* cfg, const QString key);
-	static void writeFloatNumList(Q3ValueList<float> list, KConfig* cfg, const QString key);
+	static Q3ValueList<float> readFloatNumList(const KConfigGroup* cfg, const QString key);
+	static void writeFloatNumList(Q3ValueList<float> list, KConfigGroup* cfg, const QString key);
 
 	/**
 	 * Adds @p script to the internal list of available config scripts.

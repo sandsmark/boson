@@ -90,7 +90,7 @@ public:
 	{
 	}
 
-	void sendLog(Boson* game, const QByteArray& log, unsigned long int syncId)
+	void sendLog(Boson* game, const QByteArray& log, quint32 syncId)
 	{
 		if (!game->isAdmin()) {
 			boError(370) << k_funcinfo << "must not be called if not admin!!" << endl;

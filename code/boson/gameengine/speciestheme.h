@@ -142,20 +142,20 @@ public:
 	 **/
 	void loadNewUnit(Unit* unit);
 
-	const UnitProperties* unitProperties(unsigned long int unitType) const;
+	const UnitProperties* unitProperties(quint32 unitType) const;
 
 	/**
 	 * See also @ref allUnitsNonConst
 	 **/
-	UnitProperties* nonConstUnitProperties(unsigned long int unitType) const;
+	UnitProperties* nonConstUnitProperties(quint32 unitType) const;
 
-	bool hasUnitProperties(unsigned long int unitType) const;
+	bool hasUnitProperties(quint32 unitType) const;
 
 	/**
 	 * @return The technology with @p id. Equivalent to
 	 * upgrade("Technology", id)
 	 **/
-	const UpgradeProperties* technology(unsigned long int id) const;
+	const UpgradeProperties* technology(quint32 id) const;
 
 	/**
 	 * @return The specified upgrade of this SpeciesTheme
@@ -166,19 +166,19 @@ public:
 	 * groupd of upgrades of the same @p type in this theme. Different
 	 * upgrades with different types may have the same @p id.
 	 **/
-	const UpgradeProperties* upgrade(const QString& type, unsigned long int id) const;
+	const UpgradeProperties* upgrade(const QString& type, quint32 id) const;
 
 	/**
 	 * @return The typeIds of all facilities in this theme. See also @ref
 	 * UnitProperties::typeId
 	 **/
-	Q3ValueList<unsigned long int> allFacilities() const;
+	Q3ValueList<quint32> allFacilities() const;
 
 	/**
 	 * @return The typeIds of all mobile units in this theme. See also @ref
 	 * UnitProperties::typeId
 	 **/
-	Q3ValueList<unsigned long int> allMobiles() const;
+	Q3ValueList<quint32> allMobiles() const;
 
 	/**
 	 * @return A list of all unit properties in this theme
@@ -199,13 +199,13 @@ public:
 	 * @return A list of all units that have a @ref UnitProperties::producer
 	 * specified in producerList.
 	 **/
-	Q3ValueList<unsigned long int> productions(const Q3ValueList<unsigned long int>& producerList) const;
+	Q3ValueList<quint32> productions(const Q3ValueList<quint32>& producerList) const;
 
 	/**
 	 * @return A list of all technologies that have a producer specified in
 	 * producerList.
 	 **/
-	Q3ValueList<unsigned long int> technologies(const Q3ValueList<unsigned long int>& producerList) const;
+	Q3ValueList<quint32> technologies(const Q3ValueList<quint32>& producerList) const;
 
 	/**
 	 * Reset this theme. Delete all pixmaps, unitProperties, ...

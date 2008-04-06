@@ -232,7 +232,7 @@ bool BosonScript::isNeutral(int player) const
   return false;
 }
 
-unsigned long int BosonScript::powerGenerated(int playerId) const
+quint32 BosonScript::powerGenerated(int playerId) const
 {
   if(!game())
   {
@@ -255,12 +255,12 @@ unsigned long int BosonScript::powerGenerated(int playerId) const
     return 0;
   }
 
-  unsigned long int powerGenerated = 0;
+  quint32 powerGenerated = 0;
   p->calculatePower(&powerGenerated, 0);
   return powerGenerated;
 }
 
-unsigned long int BosonScript::powerConsumed(int playerId) const
+quint32 BosonScript::powerConsumed(int playerId) const
 {
   if(!game())
   {
@@ -276,12 +276,12 @@ unsigned long int BosonScript::powerConsumed(int playerId) const
     return 0;
   }
 
-  unsigned long int powerConsumed = 0;
+  quint32 powerConsumed = 0;
   p->calculatePower(0, &powerConsumed);
   return powerConsumed;
 }
 
-unsigned long int BosonScript::powerGeneratedAfterConstructions(int playerId) const
+quint32 BosonScript::powerGeneratedAfterConstructions(int playerId) const
 {
   if(!game())
   {
@@ -297,12 +297,12 @@ unsigned long int BosonScript::powerGeneratedAfterConstructions(int playerId) co
     return 0;
   }
 
-  unsigned long int powerGenerated = 0;
+  quint32 powerGenerated = 0;
   p->calculatePower(&powerGenerated, 0, true);
   return powerGenerated;
 }
 
-unsigned long int BosonScript::powerConsumedAfterConstructions(int playerId) const
+quint32 BosonScript::powerConsumedAfterConstructions(int playerId) const
 {
   PlayerIO* p = findPlayerIOByUserId(playerId);
 
@@ -312,7 +312,7 @@ unsigned long int BosonScript::powerConsumedAfterConstructions(int playerId) con
     return 0;
   }
 
-  unsigned long int powerConsumed = 0;
+  quint32 powerConsumed = 0;
   p->calculatePower(0, &powerConsumed, true);
   return powerConsumed;
 }
@@ -345,7 +345,7 @@ bool BosonScript::isCellExplored(int playerId, int x, int y) const
 
 
 /*****  Resource methods  *****/
-unsigned long int BosonScript::minerals(int playerId) const
+quint32 BosonScript::minerals(int playerId) const
 {
   if(!game())
   {
@@ -384,7 +384,7 @@ void BosonScript::addMinerals(int player, int amount)
   game()->sendMessage(b, BosonMessageIds::IdModifyMinerals);
 }
 
-unsigned long int BosonScript::oil(int playerId) const
+quint32 BosonScript::oil(int playerId) const
 {
   if(!game())
   {
@@ -1043,7 +1043,7 @@ bool BosonScript::hasUnitCompletedProduction(int id) const
   return (completedProductionType(id) > 0);
 }
 
-unsigned long int BosonScript::completedProductionType(int id) const
+quint32 BosonScript::completedProductionType(int id) const
 {
   if(!game())
   {
@@ -1202,9 +1202,9 @@ Q3ValueList<int> BosonScript::productionTypes(int id) const
   }
 
   // Add units to production list
-  Q3ValueList<unsigned long int> unitsList = u->speciesTheme()->productions(production->producerList());
+  Q3ValueList<quint32> unitsList = u->speciesTheme()->productions(production->producerList());
   // Filter out things that player can't actually build (requirements aren't met yet)
-  Q3ValueList<unsigned long int>::Iterator it;
+  Q3ValueList<quint32>::Iterator it;
   it = unitsList.begin();
   for (; it != unitsList.end(); ++it) {
     if (u->ownerIO()->canBuild(*it)) {
@@ -1848,7 +1848,7 @@ PlayerIO* BosonScript::scriptPlayerIO() const
   return findPlayerIOByUserId(playerId());
 }
 
-Unit* BosonScript::findUnit(unsigned long int id) const
+Unit* BosonScript::findUnit(quint32 id) const
 {
   Unit* u = 0;
   if(playerId() == 0)

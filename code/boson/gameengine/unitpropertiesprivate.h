@@ -40,7 +40,7 @@ public:
 	QString mName;
 	QString mDescription;
 	QString mUnitPath; // the path to the unit files
-	Q3ValueList<unsigned long int> mRequirements;
+	Q3ValueList<quint32> mRequirements;
 
 	Q3PtrList<PluginProperties> mPlugins;
 
@@ -49,10 +49,10 @@ public:
 
 	QMap<int, QString> mActionStrings;
 
-	Q3ValueList<unsigned long int> mDestroyedEffectIds;
-	Q3ValueList<unsigned long int> mConstructedEffectIds;
-	Q3ValueList<unsigned long int> mExplodingFragmentFlyEffectIds;
-	Q3ValueList<unsigned long int> mExplodingFragmentHitEffectIds;
+	Q3ValueList<quint32> mDestroyedEffectIds;
+	Q3ValueList<quint32> mConstructedEffectIds;
+	Q3ValueList<quint32> mExplodingFragmentFlyEffectIds;
+	Q3ValueList<quint32> mExplodingFragmentHitEffectIds;
 	BoVector3Fixed mHitPoint;  // FIXME: better name
 
 	BoUpgradesCollection mUpgradesCollection;

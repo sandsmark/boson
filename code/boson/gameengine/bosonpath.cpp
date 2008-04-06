@@ -402,7 +402,7 @@ void BosonPath::init(BosonCanvas* canvas, BosonPlayerListManager* playerListMana
   initCellStatusArray();
   initBlocks();
 
-  long int elapsed = profiler.elapsedSinceStart();
+  qint32 elapsed = profiler.elapsedSinceStart();
   boDebug(500) << k_funcinfo << "END, elapsed: " << elapsed / 1000.0 << " ms" << endl;
 }
 
@@ -466,7 +466,7 @@ void BosonPath::findPath(BosonPathInfo* info)
   // Reset statuses in the search area
   resetDirtyCellStatuses();
 
-  long int elapsed = methodProfiler.popElapsed();
+  qint32 elapsed = methodProfiler.popElapsed();
   boDebug(500) << k_funcinfo << (info->flying ? "flying " : "") <<
       "unit " << (info->unit ? (int)info->unit->id() : -1) << "; took " << elapsed/1000.0f << " ms;   result: " <<
       (info->result == GoalReached ? "GoalReached" : (info->result == OutOfRange ? "OutOfRange" :
@@ -1858,8 +1858,8 @@ void BosonPath::initMoveDatas(BosonCanvas* canvas, BosonPlayerListManager* playe
     Player* p = playerit.current();
     SpeciesTheme* theme = p->speciesTheme();
 
-    Q3ValueList<unsigned long int> unitpropids = theme->allMobiles();
-    Q3ValueList<unsigned long int>::Iterator it;
+    Q3ValueList<quint32> unitpropids = theme->allMobiles();
+    Q3ValueList<quint32>::Iterator it;
     for(it = unitpropids.begin(); it != unitpropids.end(); ++it)
     {
       const UnitProperties* prop = theme->unitProperties(*it);
@@ -2517,7 +2517,7 @@ void BosonPath::updateChangedBlocks()
     }
     mBlockConnectionsDirty[blockpos*4 + dir] = false;
   }
-  long int elapsed = methodProfiler.popElapsed();
+  qint32 elapsed = methodProfiler.popElapsed();
   boDebug(500) << k_funcinfo << "Updated " << blocksToUpdate << " blocks and " <<
       connectionsToUpdate << " connections in " << elapsed/1000.0f << " ms" << endl;
   }

@@ -40,7 +40,8 @@ template<class T1, class T2> class QMap;
 template<class T> class BoVector3;
 typedef BoVector3<bofixed> BoVector3Fixed;
 
-class KSimpleConfig;
+class KConfig;
+class KConfigGroup;
 
 
 /**
@@ -186,7 +187,7 @@ public:
 	 *
 	 * This value applies to newly produced units only.
 	 **/
-	unsigned long int maxHealth() const { return mHealth.value(upgradesCollection()); }
+	quint32 maxHealth() const { return mHealth.value(upgradesCollection()); }
 
 	/**
 	 * @return Maximum shields of units of this type. Note that for a
@@ -195,7 +196,7 @@ public:
 	 *
 	 * This value applies to newly produced units only.
 	 **/
-	unsigned long int maxShields() const { return mShields.value(upgradesCollection()); }
+	quint32 maxShields() const { return mShields.value(upgradesCollection()); }
 
 	/**
 	 * @return Maximum armor of units of this type. Note that for a
@@ -204,20 +205,20 @@ public:
 	 *
 	 * This value applies to newly produced units only.
 	 **/
-	unsigned long int maxArmor() const { return mArmor.value(upgradesCollection()); }
+	quint32 maxArmor() const { return mArmor.value(upgradesCollection()); }
 
 	/**
 	 * @return How much this unit costs (of your mineral account).
 	 **/
-	unsigned long int mineralCost() const { return mMineralCost.value(upgradesCollection()); }
+	quint32 mineralCost() const { return mMineralCost.value(upgradesCollection()); }
 
 	/**
 	 * @return How much this unit costs (of your oil account)
 	 **/
-	unsigned long int oilCost() const { return mOilCost.value(upgradesCollection()); }
+	quint32 oilCost() const { return mOilCost.value(upgradesCollection()); }
 
-	unsigned long int powerConsumed() const { return mPowerConsumed.value(upgradesCollection()); }
-	unsigned long int powerGenerated() const { return mPowerGenerated.value(upgradesCollection()); }
+	quint32 powerConsumed() const { return mPowerConsumed.value(upgradesCollection()); }
+	quint32 powerGenerated() const { return mPowerGenerated.value(upgradesCollection()); }
 
 	/**
 	 * @return Maximum sight range of units of this type. Note that for a
@@ -236,7 +237,7 @@ public:
 	 * they will all be of the same type (e.g. they are all ships).
 	 * 0 means invalid typeId.
 	 **/
-	unsigned long int typeId() const { return mTypeId; }
+	quint32 typeId() const { return mTypeId; }
 
 	/**
 	 * @return The name of this unit type. Examples are "Aircraft", "Quad",
@@ -380,7 +381,7 @@ public:
 	 * @return The number of @ref Unit::advance calls this unit needs
 	 * (usually) to be produced.
 	 **/
-	unsigned long int productionTime() const { return mProductionTime.value(upgradesCollection()); }
+	quint32 productionTime() const { return mProductionTime.value(upgradesCollection()); }
 
 	/**
 	 * @return TRUE if this unittype gives you the ability to show a
@@ -398,7 +399,7 @@ public:
 	 *  of this type
 	 * @see Player::canBuild
 	 **/
-	Q3ValueList<unsigned long int> requirements() const;
+	Q3ValueList<quint32> requirements() const;
 
 	/**
 	 * .3ds files seem to support only filenames of 8+3 length. We work
@@ -419,10 +420,10 @@ public:
 
 	QMap<int, QString> sounds() const;
 
-	const Q3ValueList<unsigned long int>& destroyedEffectIds() const;
-	const Q3ValueList<unsigned long int>& constructedEffectIds() const;
-	const Q3ValueList<unsigned long int>& explodingFragmentFlyEffectIds() const;
-	const Q3ValueList<unsigned long int>& explodingFragmentHitEffectIds() const;
+	const Q3ValueList<quint32>& destroyedEffectIds() const;
+	const Q3ValueList<quint32>& constructedEffectIds() const;
+	const Q3ValueList<quint32>& explodingFragmentFlyEffectIds() const;
+	const Q3ValueList<quint32>& explodingFragmentHitEffectIds() const;
 
 	const Q3PtrList<PluginProperties>* plugins() const;
 
@@ -430,7 +431,7 @@ public:
 	/**
 	 * @return Damage done by explosion when this unit is destroyed
 	 **/
-	long int explodingDamage() const { return mExplodingDamage; }
+	qint32 explodingDamage() const { return mExplodingDamage; }
 	/**
 	 * @return Radius of explosion when this unit is destroyed
 	 **/
@@ -447,15 +448,15 @@ public:
 	/**
 	 * @return BosonWeaponProperties with id id or NULL if they doesn't exist
 	 **/
-	const BosonWeaponProperties* weaponProperties(unsigned long int id) const;
-	BosonWeaponProperties* nonConstWeaponProperties(unsigned long int id) const;
+	const BosonWeaponProperties* weaponProperties(quint32 id) const;
+	BosonWeaponProperties* nonConstWeaponProperties(quint32 id) const;
 
 	QString actionString(UnitAction type) const;
 
 	const QMap<int, QString>* allActionStrings() const;
 
 	unsigned int explodingFragmentCount() const { return mExplodingFragmentCount; }
-	long int explodingFragmentDamage() const { return mExplodingFragmentDamage; }
+	qint32 explodingFragmentDamage() const { return mExplodingFragmentDamage; }
 	const bofixed& explodingFragmentDamageRange() const { return mExplodingFragmentDamageRange; }
 
 	bool removeWreckageImmediately() const { return mRemoveWreckageImmediately; }
@@ -468,7 +469,7 @@ public:
 	void clearUpgrades();
 	void addUpgrade(const UpgradeProperties* prop);
 	void removeUpgrade(const UpgradeProperties* prop);
-	void removeUpgrade(unsigned long int id);
+	void removeUpgrade(quint32 id);
 
 	/**
 	 * @return Whether unit of this type can go onto cell with given coordinates.
@@ -478,15 +479,15 @@ public:
 	bool canGo(int x, int y);
 
 protected:
-	bool loadActions(KSimpleConfig* conf);
-	bool loadMobileProperties(KSimpleConfig* conf);
-	bool loadFacilityProperties(KSimpleConfig* conf);
-	bool loadAllPluginProperties(KSimpleConfig* conf);
-	bool loadPluginProperties(PluginProperties* prop, KSimpleConfig* conf);
+	bool loadActions(KConfig* conf);
+	bool loadMobileProperties(KConfig* conf);
+	bool loadFacilityProperties(KConfig* conf);
+	bool loadAllPluginProperties(KConfig* conf);
+	bool loadPluginProperties(PluginProperties* prop, const KConfigGroup& conf);
 
-	bool loadTextureNames(KSimpleConfig* conf);
-	bool loadSoundNames(KSimpleConfig* conf);
-	bool loadWeapons(KSimpleConfig* conf);
+	bool loadTextureNames(KConfig* conf);
+	bool loadSoundNames(KConfig* conf);
+	bool loadWeapons(KConfig* conf);
 
 	friend class BoUnitEditor;
 
@@ -501,7 +502,7 @@ protected:
 	UnitPropertiesPrivate* d;
 	SpeciesTheme* mTheme;
 
-	unsigned long int mTypeId; // note: 0 is invalid!
+	quint32 mTypeId; // note: 0 is invalid!
 	bofixed mUnitWidth;
 	bofixed mUnitHeight;
 	bofixed mUnitDepth;
@@ -510,19 +511,19 @@ protected:
 	bool mSupportMiniMap;
 	bool mCanShootAtAirUnits;
 	bool mCanShootAtLandUnits;
-	BoUpgradeableProperty<unsigned long int> mHealth;
-	BoUpgradeableProperty<unsigned long int> mSightRange;
-	BoUpgradeableProperty<unsigned long int> mProductionTime;
-	BoUpgradeableProperty<unsigned long int> mMineralCost;
-	BoUpgradeableProperty<unsigned long int> mOilCost;
-	BoUpgradeableProperty<unsigned long int> mArmor;
-	BoUpgradeableProperty<unsigned long int> mShields;
-	BoUpgradeableProperty<unsigned long int> mPowerConsumed;
-	BoUpgradeableProperty<unsigned long int> mPowerGenerated;
-	long int mExplodingDamage;
+	BoUpgradeableProperty<quint32> mHealth;
+	BoUpgradeableProperty<quint32> mSightRange;
+	BoUpgradeableProperty<quint32> mProductionTime;
+	BoUpgradeableProperty<quint32> mMineralCost;
+	BoUpgradeableProperty<quint32> mOilCost;
+	BoUpgradeableProperty<quint32> mArmor;
+	BoUpgradeableProperty<quint32> mShields;
+	BoUpgradeableProperty<quint32> mPowerConsumed;
+	BoUpgradeableProperty<quint32> mPowerGenerated;
+	qint32 mExplodingDamage;
 	bofixed mExplodingDamageRange;
 	unsigned int mExplodingFragmentCount;
-	long int mExplodingFragmentDamage;
+	qint32 mExplodingFragmentDamage;
 	bofixed mExplodingFragmentDamageRange;
 	bool mRemoveWreckageImmediately;
 

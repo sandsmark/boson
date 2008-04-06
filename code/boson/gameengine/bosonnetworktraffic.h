@@ -125,11 +125,11 @@ public:
 	void addMessage(BosonNetworkTrafficDetails* message);
 	void clear();
 
-	long long totalBytesSent() const
+	qint64 totalBytesSent() const
 	{
 		return mTotalBytesSent;
 	}
-	long long totalBytesReceived() const
+	qint64 totalBytesReceived() const
 	{
 		return mTotalBytesReceived;
 	}
@@ -147,8 +147,8 @@ public:
 private:
 	int mMsgid;
 	int mUserMsgid;
-	long long mTotalBytesSent;
-	long long mTotalBytesReceived;
+	qint64 mTotalBytesSent;
+	qint64 mTotalBytesReceived;
 	unsigned int mMessagesSent;
 	unsigned int mMessagesReceived;
 };
@@ -185,25 +185,25 @@ public:
 	 **/
 	void setKeepMessageDetailsFor(quint32 seconds);
 
-	long long totalBytesReceived() const;
-	long long totalBytesSent() const;
+	qint64 totalBytesReceived() const;
+	qint64 totalBytesSent() const;
 
 	/**
 	 * Amount of bytes received by messages internal to KGame.
 	 **/
-	long long totalKGameBytesReceived() const;
+	qint64 totalKGameBytesReceived() const;
 	/**
 	 * Amount of bytes sent by messages internal to KGame.
 	 **/
-	long long totalKGameBytesSent() const;
+	qint64 totalKGameBytesSent() const;
 	/**
 	 * Amount of bytes received by Boson messages.
 	 **/
-	long long totalBosonBytesReceived() const;
+	qint64 totalBosonBytesReceived() const;
 	/**
 	 * Amount of bytes sent by Boson messages.
 	 **/
-	long long totalBosonBytesSent() const;
+	qint64 totalBosonBytesSent() const;
 
 	const Q3PtrList<BosonNetworkTrafficDetails>& messageDetails() const;
 	const Q3PtrList<BosonNetworkTrafficStatistics>& statistics() const;

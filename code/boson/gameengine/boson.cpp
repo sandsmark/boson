@@ -1140,7 +1140,7 @@ void Boson::slotSendAdvance()
  d->mAdvance->sendAdvance();
 }
 
-Unit* Boson::findUnit(unsigned long int id, Player* searchIn) const
+Unit* Boson::findUnit(quint32 id, Player* searchIn) const
 {
  if (searchIn) {
 	return searchIn->findUnit(id);
@@ -1287,7 +1287,7 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 // boDebug() << k_funcinfo << endl;
 }
 
-bool Boson::buildProducedUnitAtTopLeftPos(ProductionPlugin* factory, unsigned long int unitType, BoVector2Fixed topLeftPos)
+bool Boson::buildProducedUnitAtTopLeftPos(ProductionPlugin* factory, quint32 unitType, BoVector2Fixed topLeftPos)
 {
  if (!d->mCanvas) {
 	BO_NULL_ERROR(d->mCanvas);

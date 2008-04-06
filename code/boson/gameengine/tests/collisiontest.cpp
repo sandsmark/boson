@@ -169,7 +169,7 @@ bool start()
 		//     (very imprecise), but should be pretty fast.
 		//     so that is what we are testing here, collisionsAtCells()
 		//     should be really fast.
-		unsigned long int range = 3; // FIXME: what would be a realistic value? (check unit configs)
+		quint32 range = 3; // FIXME: what would be a realistic value? (check unit configs)
 		BoRect2Fixed rect(u->leftEdge() - range, u->topEdge() - range, u->rightEdge() + range, u->bottomEdge() + range);
 		const bool exact = false;
 		collisions->collisionsAtCells(rect, u, exact);

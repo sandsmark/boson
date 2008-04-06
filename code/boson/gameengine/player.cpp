@@ -77,10 +77,10 @@ public:
 	unsigned short int* mFoggedRef;
 	unsigned int mExploredCount; // helper variable, doesn't need to be saved
 	unsigned int mUnfoggedCount; // helper variable, doesn't need to be saved
-	KGameProperty<unsigned long int> mMinerals;
-	KGameProperty<unsigned long int> mOil;
+	KGameProperty<quint32> mMinerals;
+	KGameProperty<quint32> mOil;
 	KGamePropertyBool mIsNeutralPlayer;
-	QMap<QString, unsigned long int> mAmmunition; // TODO: use KGameProperty somehow
+	QMap<QString, quint32> mAmmunition; // TODO: use KGameProperty somehow
 
 	BosonStatistics* mStatistics;
 
@@ -89,7 +89,7 @@ public:
 
 	PlayerIO* mPlayerIO;
 
-	Q3ValueList<unsigned long int> mResearchedUpgrades;
+	Q3ValueList<quint32> mResearchedUpgrades;
 
 	BoUpgradesCollection mUpgradesCollection;
 
@@ -349,7 +349,7 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
  }
 }
 
-Unit* Player::findUnit(unsigned long int unitId) const
+Unit* Player::findUnit(quint32 unitId) const
 {
  Q3PtrListIterator<Unit> it(d->mUnits);
  while (it.current()) {
@@ -442,7 +442,7 @@ Q3PtrList<Unit>* Player::allUnits() const
  return &(d->mUnits);
 }
 
-const UnitProperties* Player::unitProperties(unsigned long int unitType) const
+const UnitProperties* Player::unitProperties(quint32 unitType) const
 {
  if (!speciesTheme()) {
 	boError() << k_funcinfo << "NULL theme" << endl;
@@ -637,17 +637,17 @@ bool Player::isExplored(int x, int y) const
  return d->mExplored.at(index);
 }
 
-unsigned long int Player::minerals() const
+quint32 Player::minerals() const
 {
  return d->mMinerals;
 }
 
-unsigned long int Player::oil() const
+quint32 Player::oil() const
 {
  return d->mOil;
 }
 
-unsigned long int Player::ammunition(const QString& type) const
+quint32 Player::ammunition(const QString& type) const
 {
  if (!d->mAmmunition.contains(type)) {
 	return 0;
@@ -655,17 +655,17 @@ unsigned long int Player::ammunition(const QString& type) const
  return d->mAmmunition[type];
 }
 
-void Player::setOil(unsigned long int o)
+void Player::setOil(quint32 o)
 {
  d->mOil = o;
 }
 
-void Player::setMinerals(unsigned long int m)
+void Player::setMinerals(quint32 m)
 {
  d->mMinerals = m;
 }
 
-bool Player::useMinerals(unsigned long int amount)
+bool Player::useMinerals(quint32 amount)
 {
  if (minerals() < amount) {
 	return false;
@@ -675,7 +675,7 @@ bool Player::useMinerals(unsigned long int amount)
  }
 }
 
-bool Player::useOil(unsigned long int amount)
+bool Player::useOil(quint32 amount)
 {
  if (oil() < amount) {
 	return false;
@@ -685,7 +685,7 @@ bool Player::useOil(unsigned long int amount)
  }
 }
 
-bool Player::useResources(unsigned long int mineralamount, unsigned long int oilamount)
+bool Player::useResources(quint32 mineralamount, quint32 oilamount)
 {
  if (minerals() < mineralamount || oil() < oilamount) {
 	return false;
@@ -696,15 +696,15 @@ bool Player::useResources(unsigned long int mineralamount, unsigned long int oil
  }
 }
 
-void Player::setAmmunition(const QString& type, unsigned long int a)
+void Player::setAmmunition(const QString& type, quint32 a)
 {
  d->mAmmunition.insert(type, a);
 }
 
-unsigned long int Player::requestAmmunition(const QString& type, unsigned long int requested)
+quint32 Player::requestAmmunition(const QString& type, quint32 requested)
 {
  boDebug(610) << k_funcinfo << "type=" << type << " requested=" << requested << endl;
- unsigned long int ammo = 0;
+ quint32 ammo = 0;
  if (ammunition(type) < requested) {
 	ammo = ammunition(type);
  } else {
@@ -759,8 +759,8 @@ const QColor& Player::teamColor() const
 
 bool Player::hasMiniMap() const
 {
- unsigned long int powerGenerated = 0;
- unsigned long int powerConsumed = 0;
+ quint32 powerGenerated = 0;
+ quint32 powerConsumed = 0;
  calculatePower(&powerGenerated, &powerConsumed);
  if (powerGenerated < powerConsumed) {
 	return false;
@@ -792,8 +792,8 @@ void Player::unchargeUnitsForAdvance()
 
 void Player::updatePowerChargeForCurrentAdvanceCall()
 {
- unsigned long int powerGenerated = 0;
- unsigned long int powerConsumed = 0;
+ quint32 powerGenerated = 0;
+ quint32 powerConsumed = 0;
  calculatePower(&powerGenerated, &powerConsumed);
 
  // the factor specifies how much the unit is influenced by the lack of power.
@@ -827,7 +827,7 @@ void Player::updatePowerChargeForCurrentAdvanceCall()
  mPowerChargeForCurrentAdvanceCall = factor;
 }
 
-void Player::calculatePower(unsigned long int* _powerGenerated, unsigned long int* _powerConsumed, bool includeUnconstructedFacilities) const
+void Player::calculatePower(quint32* _powerGenerated, quint32* _powerConsumed, bool includeUnconstructedFacilities) const
 {
  // AB: this method takes O(n) !
  //     note that it would be very hard to improve this:
@@ -951,13 +951,13 @@ int Player::facilitiesCount()
  return d->mFacilitiesCount;
 }
 
-bool Player::canBuild(unsigned long int unitType) const
+bool Player::canBuild(quint32 unitType) const
 {
- Q3ValueList<unsigned long int> neededTypes = speciesTheme()->unitProperties(unitType)->requirements();
+ Q3ValueList<quint32> neededTypes = speciesTheme()->unitProperties(unitType)->requirements();
  if (neededTypes.isEmpty()) {
 	return true;
  }
- Q3ValueList<unsigned long int>::Iterator it;
+ Q3ValueList<quint32>::Iterator it;
  for (it = neededTypes.begin(); it != neededTypes.end(); ++it) {
 	// FIXME: this is SLOW. Cache values and refresh them when new unit is
 	//  created or destroyed
@@ -968,12 +968,12 @@ bool Player::canBuild(unsigned long int unitType) const
  return true;
 }
 
-bool Player::canResearchTech(unsigned long int id) const
+bool Player::canResearchTech(quint32 id) const
 {
  // Check for technologies
- Q3ValueList<unsigned long int> neededTechs = speciesTheme()->technology(id)->requiredTechnologies();
+ Q3ValueList<quint32> neededTechs = speciesTheme()->technology(id)->requiredTechnologies();
  if (!neededTechs.isEmpty()) {
-	Q3ValueList<unsigned long int>::Iterator it;
+	Q3ValueList<quint32>::Iterator it;
 	for (it = neededTechs.begin(); it != neededTechs.end(); ++it) {
 		if (!hasTechnology(*it)) {
 			return false;
@@ -982,9 +982,9 @@ bool Player::canResearchTech(unsigned long int id) const
  }
 
  // Check for units
- Q3ValueList<unsigned long int> neededUnits = speciesTheme()->technology(id)->requiredUnits();
+ Q3ValueList<quint32> neededUnits = speciesTheme()->technology(id)->requiredUnits();
  if (!neededUnits.isEmpty()) {
-	Q3ValueList<unsigned long int>::Iterator it;
+	Q3ValueList<quint32>::Iterator it;
 	for (it = neededUnits.begin(); it != neededUnits.end(); ++it) {
 		if (!hasUnitWithType(*it)) {
 			return false;
@@ -995,7 +995,7 @@ bool Player::canResearchTech(unsigned long int id) const
  return true;
 }
 
-bool Player::hasUnitWithType(unsigned long int type) const
+bool Player::hasUnitWithType(quint32 type) const
 {
  Q3PtrListIterator<Unit> it(d->mUnits);
  while (it.current()) {
@@ -1013,7 +1013,7 @@ bool Player::hasUnitWithType(unsigned long int type) const
  return false;
 }
 
-bool Player::hasTechnology(unsigned long int id) const
+bool Player::hasTechnology(quint32 id) const
 {
  if (d->mResearchedUpgrades.contains(id)) {
 	return true;
@@ -1021,12 +1021,12 @@ bool Player::hasTechnology(unsigned long int id) const
  return false;
 }
 
-const UpgradeProperties* Player::technologyProperties(unsigned long int type) const
+const UpgradeProperties* Player::technologyProperties(quint32 type) const
 {
  return speciesTheme()->technology(type);
 }
 
-void Player::technologyResearched(ProductionPlugin* plugin, unsigned long int type)
+void Player::technologyResearched(ProductionPlugin* plugin, quint32 type)
 {
  BO_CHECK_NULL_RET(plugin);
  BO_CHECK_NULL_RET(plugin->unit());
@@ -1269,9 +1269,9 @@ bool Player::saveAmmunition(QDomElement& root) const
  ammunition = doc.createElement("AmmunitionPool");
  root.appendChild(ammunition);
 
- for (QMap<QString, unsigned long int>::const_iterator it = d->mAmmunition.begin(); it != d->mAmmunition.end(); ++it) {
+ for (QMap<QString, quint32>::const_iterator it = d->mAmmunition.begin(); it != d->mAmmunition.end(); ++it) {
 	QString type = it.key();
-	unsigned long int value = it.data();
+	quint32 value = it.data();
 	QDomElement ammo = doc.createElement("Ammunition");
 	ammo.setAttribute("Type", type);
 	ammo.setAttribute("Value", value);
@@ -1303,7 +1303,7 @@ bool Player::loadAmmunition(const QDomElement& root)
 		return false;
 	}
 	bool ok;
-	unsigned long int value = e.attribute("Value").toULong(&ok);
+	quint32 value = e.attribute("Value").toULong(&ok);
 	if (!ok) {
 		boError() << k_funcinfo << "invalid Value attribute for type=" << type << endl;
 		return false;
@@ -1364,7 +1364,7 @@ void Player::addUpgrade(const UpgradeProperties* upgrade)
  }
 }
 
-void Player::removeUpgrade(unsigned long int id)
+void Player::removeUpgrade(quint32 id)
 {
  removeUpgrade(d->mUpgradesCollection.findUpgrade(id));
 }

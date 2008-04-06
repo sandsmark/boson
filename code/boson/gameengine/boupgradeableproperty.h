@@ -50,8 +50,9 @@ public:
 	BoBaseValueCollection();
 	~BoBaseValueCollection();
 
-	bool insertULongBaseValue(unsigned long int v, const QString& name, const QString& type = "MaxValue", bool replace = true);
-	bool insertLongBaseValue(long int v, const QString& name, const QString& type = "MaxValue", bool replace = true);
+#warning TODO: rename *LongBaseValue -> *IntBaseValue
+	bool insertULongBaseValue(quint32 v, const QString& name, const QString& type = "MaxValue", bool replace = true);
+	bool insertLongBaseValue(qint32 v, const QString& name, const QString& type = "MaxValue", bool replace = true);
 	bool insertBoFixedBaseValue(bofixed v, const QString& name, const QString& type = "MaxValue", bool replace = true);
 
 	/**
@@ -59,14 +60,14 @@ public:
 	 * versions of the method for all data types. For type safety you should
 	 * prefer @ref insertULongBaseValue instead.
 	 **/
-	bool insertBaseValue(unsigned long int v, const QString& name, const QString& type = "MaxValue", bool replace = true)
+	bool insertBaseValue(quint32 v, const QString& name, const QString& type = "MaxValue", bool replace = true)
 	{
 		return insertULongBaseValue(v, name, type, replace);
 	}
 	/**
 	 * @overload
 	 **/
-	bool insertBaseValue(long int v, const QString& name, const QString& type = "MaxValue", bool replace = true)
+	bool insertBaseValue(qint32 v, const QString& name, const QString& type = "MaxValue", bool replace = true)
 	{
 		return insertLongBaseValue(v, name, type, replace);
 	}
@@ -85,16 +86,16 @@ public:
 	 * @param type Either "MaxValue" or "MinValue". Use "MaxValue" if you
 	 * are not sure.
 	 **/
-	bool getBaseValue(unsigned long int* ret, const QString& name, const QString& type = "MaxValue") const;
-	bool getBaseValue(long int* ret, const QString& name, const QString& type = "MaxValue") const;
+	bool getBaseValue(quint32* ret, const QString& name, const QString& type = "MaxValue") const;
+	bool getBaseValue(qint32* ret, const QString& name, const QString& type = "MaxValue") const;
 	bool getBaseValue(bofixed* ret, const QString& name, const QString& type = "MaxValue") const;
 
 	/**
 	 * @return @ref getBaseValue or @p defaultValue if the @p
 	 * name @p type pair does not exist.
 	 **/
-	unsigned long int ulongBaseValue(const QString& name, const QString& type = "MaxValue", unsigned long int defaultValue = 0) const;
-	long int longBaseValue(const QString& name, const QString& type = "MaxValue", long int defaultValue = 0) const;
+	quint32 ulongBaseValue(const QString& name, const QString& type = "MaxValue", quint32 defaultValue = 0) const;
+	qint32 longBaseValue(const QString& name, const QString& type = "MaxValue", qint32 defaultValue = 0) const;
 	bofixed bofixedBaseValue(const QString& name, const QString& type = "MaxValue", bofixed defaultValue = 0) const;
 
 
@@ -124,7 +125,7 @@ public:
 	bool saveAsXML(QDomElement& root) const;
 	bool loadFromXML(const SpeciesTheme* speciesTheme, const QDomElement& root);
 
-	inline unsigned long int upgradesCacheCounter() const
+	inline quint32 upgradesCacheCounter() const
 	{
 		return mUpgradesCacheCounter;
 	}
@@ -132,7 +133,7 @@ public:
 	{
 		return mUpgrades;
 	}
-	const UpgradeProperties* findUpgrade(unsigned long int id) const;
+	const UpgradeProperties* findUpgrade(quint32 id) const;
 
 	void clearUpgrades();
 	void addUpgrade(const UpgradeProperties* upgrade);
@@ -140,7 +141,7 @@ public:
 
 private:
 	Q3ValueList<const UpgradeProperties*>* mUpgrades;
-	unsigned long int mUpgradesCacheCounter;
+	quint32 mUpgradesCacheCounter;
 };
 
 /**
@@ -201,8 +202,8 @@ protected:
 		return baseValueCollection()->getBaseValue(v, name(), type());
 	}
 
-	bool upgradeValue(const Q3ValueList<const UpgradeProperties*>* list, unsigned long int* v) const;
-	bool upgradeValue(const Q3ValueList<const UpgradeProperties*>* list, long int* v) const;
+	bool upgradeValue(const Q3ValueList<const UpgradeProperties*>* list, quint32* v) const;
+	bool upgradeValue(const Q3ValueList<const UpgradeProperties*>* list, qint32* v) const;
 	bool upgradeValue(const Q3ValueList<const UpgradeProperties*>* list, bofixed* v) const;
 
 protected:
@@ -211,7 +212,7 @@ protected:
 	 * from this, then some upgrades have changed since the value was
 	 * calculated the last time. We then need to recalculate the cache.
 	 */
-	mutable unsigned long int mCacheCounter;
+	mutable quint32 mCacheCounter;
 
 private:
 	QString mName;
@@ -281,7 +282,7 @@ public:
 	}
 
 protected:
-	T value(const Q3ValueList<const UpgradeProperties*>* upgrades, unsigned long int cacheCounter) const
+	T value(const Q3ValueList<const UpgradeProperties*>* upgrades, quint32 cacheCounter) const
 	{
 		if (mCacheCounter != cacheCounter || cacheCounter == 0) {
 			T value;

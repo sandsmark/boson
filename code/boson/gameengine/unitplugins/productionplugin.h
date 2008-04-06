@@ -55,14 +55,14 @@ public:
 	 * @return The type ID (see @ref UnitProperties::typeId) of the
 	 * completed production, if any. 0 If no such production available.
 	 **/
-	unsigned long int completedProductionId() const;
+	quint32 completedProductionId() const;
 	ProductionType completedProductionType() const;
 
 	/**
 	 * @return The type ID of the current production. 0 if there is no
 	 * production.
 	 **/
-	inline unsigned long int currentProductionId() const
+	inline quint32 currentProductionId() const
 	{
 		if (!hasProduction()) {
 			return 0;
@@ -92,14 +92,14 @@ public:
 	 * Add production of type and with id (see @ref UnitProprties::typeId) to the
 	 * construction list and start the production.
 	 **/
-	void addProduction(ProductionType type, unsigned long int id);
+	void addProduction(ProductionType type, quint32 id);
 
 	void pauseProduction();
 	void unpauseProduction();
-	void abortProduction(ProductionType type, unsigned long int id);
+	void abortProduction(ProductionType type, quint32 id);
 
-	Q3ValueList<QPair<ProductionType, unsigned long int> > productionList() const { return mProductions; }
-	bool contains(ProductionType type, unsigned long int id); // { return productionList().contains(typeId);}
+	Q3ValueList<QPair<ProductionType, quint32> > productionList() const { return mProductions; }
+	bool contains(ProductionType type, quint32 id); // { return productionList().contains(typeId);}
 
 	/**
 	 * @return A list with all unittypes that this plugin could prodcue if
@@ -111,7 +111,7 @@ public:
 	 * unittypes that cannot be produced currently, but could be, if the
 	 * necessary requirements were met.
 	 **/
-	Q3ValueList<unsigned long int> allUnitProductions(Q3ValueList<unsigned long int>* producible, Q3ValueList<unsigned long int>* notYetProducible) const;
+	Q3ValueList<quint32> allUnitProductions(Q3ValueList<quint32>* producible, Q3ValueList<quint32>* notYetProducible) const;
 
 	/**
 	 * This behaves like @ref allUnitProductions with one exception:
@@ -119,21 +119,21 @@ public:
 	 * All technologies that already have been researched and thus cannot be
 	 * researched anymore, are not returned.
 	 **/
-	Q3ValueList<unsigned long int> allTechnologyProductions(Q3ValueList<unsigned long int>* producible, Q3ValueList<unsigned long int>* notYetProducible) const;
+	Q3ValueList<quint32> allTechnologyProductions(Q3ValueList<quint32>* producible, Q3ValueList<quint32>* notYetProducible) const;
 
 
 
 	/**
 	 * See @ref canCurrentlyProduceUnit and @ref canCurrentlyProduceTechnology
 	 **/
-	bool canCurrentlyProduce(ProductionType p, unsigned long int type) const;
+	bool canCurrentlyProduce(ProductionType p, quint32 type) const;
 
 	/**
 	 * @return TRUE if this plugin can produce the unit @p type. This is the
 	 * case if this plugin is a producer of @p type and all requirements are
 	 * fullfilled.
 	 **/
-	bool canCurrentlyProduceUnit(unsigned long int type) const;
+	bool canCurrentlyProduceUnit(quint32 type) const;
 
 	/**
 	 * @return TRUE if this plugin can produce (i.e. research) technology @p
@@ -141,7 +141,7 @@ public:
 	 * all requirements are fullfilled and if @p type has not yet been
 	 * researched.
 	 **/
-	bool canCurrentlyProduceTechnology(unsigned long int type) const;
+	bool canCurrentlyProduceTechnology(quint32 type) const;
 
 	/**
 	 * @return The percentage of the production progress. 0 means the
@@ -164,7 +164,7 @@ protected:
 	 *
 	 * This will re-fund any minerals/oil paid for this production so far.
 	 **/
-	bool removeProduction(ProductionType type, unsigned long int id);
+	bool removeProduction(ProductionType type, quint32 id);
 
 	/**
 	 * @overload
@@ -187,10 +187,10 @@ private:
 	void productionCompleted();
 
 private:
-	Q3ValueList<QPair<ProductionType, unsigned long int> > mProductions;
+	Q3ValueList<QPair<ProductionType, quint32> > mProductions;
 	KGameProperty<unsigned int> mProductionState;
-	KGameProperty<unsigned long int> mMineralsPaid;
-	KGameProperty<unsigned long int> mOilPaid;
+	KGameProperty<quint32> mMineralsPaid;
+	KGameProperty<quint32> mOilPaid;
 };
 
 #endif

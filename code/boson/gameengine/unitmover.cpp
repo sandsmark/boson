@@ -302,7 +302,7 @@ void UnitMover::advanceFollow(unsigned int advanceCallsCount)
 	// AB: warning - this does a lookup on all items and therefore is slow!
 	// --> but we need it as a simple test on the pointer causes trouble if
 	// that pointer is already deleted. any nice solutions?
-	if (!canvas()->allItems()->contains(target)) {
+	if (!canvas()->allItems()->containsBool(target)) {
 		boDebug(401) << k_funcinfo << "Unit seems to be destroyed!" << endl;
 		unit()->currentSuborderDone(true);
 		return;
@@ -818,7 +818,7 @@ void UnitMoverLand::advanceMoveInternal5(unsigned int)
  int currenty = (int)(unit()->center().y() + unit()->yVelocity());
  mNextCellX = -1;
  BO_CHECK_NULL_RET(mNextWaypointIntersections);
- for (unsigned int i = 0; i < mNextWaypointIntersections->count(); i++) {
+ for (int i = 0; i < mNextWaypointIntersections->count(); i++) {
 	if (currentx == mNextWaypointIntersections->at(i).x() && currenty == mNextWaypointIntersections->at(i).y()) {
 		if (i+1 >= mNextWaypointIntersections->count()) {
 			// This is the last cell, i.e. we're at pathpoint cell
@@ -944,7 +944,7 @@ int UnitMoverLand::selectNextPathPoint(int xpos, int ypos)
 	}
 	int xindex = newCellX - xpos + 5;
 	int yindex = newCellY - ypos + 5;
-	for (unsigned int i = 0; i < mCellIntersectionTable[xindex][yindex].count(); i++) {
+	for (int i = 0; i < mCellIntersectionTable[xindex][yindex].count(); i++) {
 		// Check if this cell is accessable
 		// TODO: check terrain
 		if (cellOccupied(xpos + mCellIntersectionTable[xindex][yindex][i].x(),
@@ -1065,7 +1065,7 @@ bool UnitMoverLand::canGoToCurrentPathPoint(int xpos, int ypos)
  }
  int xindex = ppx - xpos + 5;
  int yindex = ppy - ypos + 5;
- for (unsigned int i = 0; i < UnitMover::mCellIntersectionTable[xindex][yindex].count(); i++) {
+ for (int i = 0; i < UnitMover::mCellIntersectionTable[xindex][yindex].count(); i++) {
 	// Check if this cell is accessable
 	// TODO: check terrain
 	const BoItemList* items = canvas()->cell(xpos + UnitMover::mCellIntersectionTable[xindex][yindex][i].x(),
@@ -1149,7 +1149,7 @@ bool UnitMoverLand::calculateNewPath()
 	return false;
  }
 
- for (int unsigned i = 0; i < pathPoints.count(); i++) {
+ for (int i = 0; i < pathPoints.count(); i++) {
 	unit()->addPathPoint(pathPoints[i]);
  }
 

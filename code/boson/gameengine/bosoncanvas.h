@@ -52,6 +52,7 @@ template<class T> class BoVector2;
 template<class T> class BoVector3;
 typedef BoVector2<bofixed> BoVector2Fixed;
 typedef BoVector3<bofixed> BoVector3Fixed;
+class QPoint;
 
 class KPlayer;
 class QDataStream;
@@ -87,7 +88,7 @@ public:
 	 * weapons in the group).
 	 * The groupType can be unused for some items.
 	 **/
-	ItemType(unsigned long int type, unsigned long int group = 0, unsigned long int groupType = 0)
+	ItemType(quint32 type, quint32 group = 0, quint32 groupType = 0)
 	{
 		mType = type;
 		mGroup = group;
@@ -108,16 +109,16 @@ public:
 	// AB: this class is meant as a "short" way of grouping all 3 parameters
 	// to a single parameter for createItem(). no need to make members
 	// private.
-	unsigned long int mType;
-	unsigned long int mGroup;
-	unsigned long int mGroupType;
+	quint32 mType;
+	quint32 mGroup;
+	quint32 mGroupType;
 
 public:
 	/**
 	 * Convenience method for creating a ItemType object for a unit with @p
 	 * unitType.
 	 **/
-	static ItemType typeForUnit(unsigned long int unitType);
+	static ItemType typeForUnit(quint32 unitType);
 	/**
 	 * Convenience method for creating a ItemType object for a @ref
 	 * BosonShotExplosion object
@@ -133,7 +134,7 @@ public:
 	 * Convenience method for creating a ItemType object for a generic @ref
 	 * BosonShot object
 	 **/
-	static ItemType typeForShot(unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId);
+	static ItemType typeForShot(quint32 shotType, quint32 unitType, quint32 weaponPropertyId);
 };
 
 /**
@@ -180,7 +181,7 @@ public:
 	bool advanceFlag() const;
 	void setAdvanceFlag(bool a);
 
-	unsigned long int nextItemId();
+	quint32 nextItemId();
 
 	BosonCanvasStatistics* canvasStatistics() const;
 
@@ -312,14 +313,14 @@ public:
 	 * @param range Radius of explosion. All units range or less cells away will be damaged
 	 * @param owner Player who caused the explosion. Used for statistics. May be null
 	 **/
-	void explosion(const BoVector3Fixed& pos, long int damage, bofixed range, bofixed fullrange, Player* owner);
+	void explosion(const BoVector3Fixed& pos, qint32 damage, bofixed range, bofixed fullrange, Player* owner);
 
 	/**
 	 * Called when unit is damaged (usually by missile).
 	 * It calculates new health for the unit, creates effects if needed
 	 * and marks unit as destoyed if it doesn't have any hitpoints left anymore.
 	 **/
-	void unitDamaged(Unit* unit, long int damage);
+	void unitDamaged(Unit* unit, qint32 damage);
 
 	/**
 	 * Mark the unit as destroyed and play the destroyed sound.
@@ -384,8 +385,8 @@ public:
 	void deleteDestroyed();
 	void deleteUnusedShots();
 
-	BosonItem* findItem(unsigned long int id) const;
-	Unit* findUnit(unsigned long int id) const;
+	BosonItem* findItem(quint32 id) const;
+	Unit* findUnit(quint32 id) const;
 
 	/**
 	 * Convenience method. See @ref BosonCollisions::findUnitAt
@@ -505,7 +506,7 @@ public:
 	/**
 	 * Valid in editor mode only. Delete the specified items.
 	 **/
-	void deleteItems(const Q3ValueList<unsigned long int>& items);
+	void deleteItems(const Q3ValueList<quint32>& items);
 
 	BoEventManager* eventManager() const;
 	BoEventListener* eventListener() const;
@@ -593,10 +594,10 @@ protected:
 	 *
 	 * @param id A unique ID for the item. See @ref BosonItem::setId
 	 **/
-	BosonItem* createItemAtTopLeftPos(int rtti, Player* owner, const ItemType& type, const BoVector3Fixed& pos, unsigned long int id);
+	BosonItem* createItemAtTopLeftPos(int rtti, Player* owner, const ItemType& type, const BoVector3Fixed& pos, quint32 id);
 
-	Unit* createUnit(Player* owner, unsigned long int unitType);
-	BosonShot* createShot(Player* owner, unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId);
+	Unit* createUnit(Player* owner, quint32 unitType);
+	BosonShot* createShot(Player* owner, quint32 shotType, quint32 unitType, quint32 weaponPropertyId);
 
 	/**
 	 * Load <em>all</em> items from @p root - this means for all players!

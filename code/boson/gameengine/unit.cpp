@@ -40,8 +40,8 @@
 #include "bosonprofiling.h"
 #include "unitmover.h"
 #include "unitorder.h"
+#include "bosonpropertylist.h"
 
-#include <kgame/kgamepropertylist.h>
 #include <kgame/kgame.h>
 #include <krandomsequence.h>
 
@@ -179,7 +179,7 @@ void UnitOrderQueue::clearOrders()
 		currentOrderData()->parent() && currentOrderData()->parent()->order()->type() == UnitOrder::MoveInsideUnit)) {
 	// AB: MoveInsideUnit orders can't be interrupted.
 	UnitOrderData* current = d->mToplevelOrders.front();
-	d->mToplevelOrders.pop_front();
+	d->mToplevelOrders.removeFirst();
 	while (!d->mToplevelOrders.isEmpty()) {
 		delete d->mToplevelOrders.first();
 		d->mToplevelOrders.pop_front();
@@ -366,7 +366,7 @@ bool UnitOrderQueue::saveAsXML(QDomElement& root)
 bool UnitOrderQueue::loadFromXML(const QDomElement& root, BosonCanvas* canvas)
 {
  QDomNodeList list = root.elementsByTagName("OrderData");
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	QDomElement orderdataelement = list.item(i).toElement();
 	if (orderdataelement.isNull()) {
 		boError(260) << k_funcinfo << "OrderData tag is not an element" << endl;
@@ -403,7 +403,7 @@ public:
 
 		mOrderQueue = 0;
 	}
-	KGamePropertyList<BoVector2Fixed> mPathPoints;
+	BosonPropertyList<BoVector2Fixed> mPathPoints;
 	KGameProperty<qint8> mIsInsideUnit;
 	KGameProperty<qint8> mIsFlying;
 
@@ -419,9 +419,9 @@ public:
 
 	BosonMoveData* mMoveData;
 
-	unsigned long int mMaxWeaponRange;
-	unsigned long int mMaxLandWeaponRange;
-	unsigned long int mMaxAirWeaponRange;
+	quint32 mMaxWeaponRange;
+	quint32 mMaxLandWeaponRange;
+	quint32 mMaxAirWeaponRange;
 
 	UnitMover* mUnitMover;
 	UnitMover* mUnitInsideUnitMover;
@@ -637,7 +637,7 @@ void Unit::select(bool markAsLeader)
  BosonItem::select(markAsLeader);
 }
 
-void Unit::setHealth(unsigned long int h)
+void Unit::setHealth(quint32 h)
 {
  if (h > maxHealth()) {
 	h = maxHealth();
@@ -668,7 +668,7 @@ void Unit::setHealth(unsigned long int h)
  }
 }
 
-void Unit::setSightRange(unsigned long int r)
+void Unit::setSightRange(quint32 r)
 {
  if(canvas()) {
 	canvas()->removeSight(this);
@@ -857,7 +857,7 @@ void Unit::reload(unsigned int count)
  unchargePowerForReload();
 }
 
-unsigned long int Unit::requestAmmunition(const QString& type, unsigned long int requested)
+quint32 Unit::requestAmmunition(const QString& type, quint32 requested)
 {
  if (!owner()) {
 	BO_NULL_ERROR(owner);
@@ -874,7 +874,7 @@ unsigned long int Unit::requestAmmunition(const QString& type, unsigned long int
  // 3. ammunition that needs to be picked up at a unit.
 
  // this searches for ammo of type 1 and 2
- unsigned long int ammo = owner()->requestAmmunition(type, requested);
+ quint32 ammo = owner()->requestAmmunition(type, requested);
  if (ammo > requested) {
 	boError(610) << k_funcinfo << "received more ammo than requested" << endl;
 	ammo = requested;
@@ -1159,7 +1159,7 @@ void Unit::advanceAttack(unsigned int advanceCallsCount)
 	// AB: warning - this does a lookup on all items and therefore is slow!
 	// --> but we need it as a simple test on the pointer causes trouble if
 	// that pointer is already deleted. any nice solutions?
-	if (!canvas()->allItems()->contains(target)) {
+	if (!canvas()->allItems()->containsBool(target)) {
 		boDebug(300) << "Target seems to be destroyed!" << endl;
 		currentSuborderDone(true);
 		return;
@@ -1389,10 +1389,10 @@ void Unit::pathPointDone()
 	boError() << k_funcinfo << "no pathpoints" << endl;
 	return;
  }
- d->mPathPoints.pop_front();
+ d->mPathPoints.removeFirst();
 }
 
-const Q3ValueList<BoVector2Fixed>& Unit::pathPointList() const
+const BosonPropertyList<BoVector2Fixed>& Unit::pathPointList() const
 {
  return d->mPathPoints;
 }
@@ -1422,7 +1422,7 @@ bool Unit::saveAsXML(QDomElement& root)
  }
 
  // also store the target:
- unsigned long int targetId = 0;
+ quint32 targetId = 0;
  /*if (target()) {
 	targetId = target()->id();
  }
@@ -1508,7 +1508,7 @@ bool Unit::loadFromXML(const QDomElement& root)
 
  if (d->mPlugins.count() != 0) {
 	QDomNodeList list = root.elementsByTagName(QString::fromLatin1("UnitPlugin"));
-	for (unsigned int i = 0; i < list.count(); i++) {
+	for (int i = 0; i < list.count(); i++) {
 		QDomElement e = list.item(i).toElement();
 		if (e.isNull()) {
 			continue;
@@ -1576,7 +1576,7 @@ bool Unit::loadFromXML(const QDomElement& root)
  return true;
 }
 
-bool Unit::inRange(unsigned long int r, Unit* target) const
+bool Unit::inRange(quint32 r, Unit* target) const
 {
  return (qMax(qAbs((target->centerX() - centerX())), qAbs((target->centerY() - centerY()))) <= bofixed(r));
 }
@@ -1600,7 +1600,7 @@ void Unit::shootAt(BosonWeapon* w, Unit* target)
  ownerIO()->statistics()->increaseShots();
 }
 
-BoItemList* Unit::unitsInRange(unsigned long int range) const
+BoItemList* Unit::unitsInRange(quint32 range) const
 {
  PROFILE_METHOD
  // TODO: we use a *rect* for the range this is extremely bad.
@@ -1641,7 +1641,7 @@ BoItemList* Unit::unitsInRange(unsigned long int range) const
  return units;
 }
 
-BoItemList* Unit::enemyUnitsInRange(unsigned long int range) const
+BoItemList* Unit::enemyUnitsInRange(quint32 range) const
 {
  PROFILE_METHOD
  boProfiling->push("unitsInRange()");
@@ -1945,7 +1945,7 @@ const QColor* Unit::teamColor() const
  return &ownerIO()->teamColor();
 }
 
-BosonWeapon* Unit::weapon(unsigned long int id) const
+BosonWeapon* Unit::weapon(quint32 id) const
 {
  BoPointerIterator<BosonWeapon> it(d->mWeapons);
  for (; *it; ++it) {
@@ -2042,17 +2042,17 @@ void Unit::removeUpgrade(const UpgradeProperties* upgrade)
  }
 }
 
-unsigned long int Unit::maxWeaponRange() const
+quint32 Unit::maxWeaponRange() const
 {
  return d->mMaxWeaponRange;
 }
 
-unsigned long int Unit::maxAirWeaponRange() const
+quint32 Unit::maxAirWeaponRange() const
 {
  return d->mMaxAirWeaponRange;
 }
 
-unsigned long int Unit::maxLandWeaponRange() const
+quint32 Unit::maxLandWeaponRange() const
 {
  return d->mMaxLandWeaponRange;
 }

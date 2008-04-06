@@ -97,7 +97,10 @@ void BombingPlugin::bomb(int weaponId, BoVector2Fixed pos)
  // t = sqrt(2s / a)
  bofixed droptime = sqrt(2 * height / w->properties()->accelerationSpeed());
  mDropDist = droptime * unit()->maxSpeed();  // In advance calls
- boDebug() << k_funcinfo << "Target point: (" << mTargetX << "; " << mTargetY << "); dropdist: " << mDropDist << endl;
+ boDebug() << k_funcinfo
+		<< "Target point: (" << mTargetX.value()
+		<< "; " << mTargetY.value()
+		<< "); dropdist: " << mDropDist.value() << endl;
  mWeapon = w;
 
  unit()->setPluginWork(UnitPlugin::Bombing);

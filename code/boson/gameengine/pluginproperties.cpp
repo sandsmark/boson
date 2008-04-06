@@ -26,7 +26,8 @@
 #include "bosonconfig.h"
 
 #include <klocale.h>
-#include <ksimpleconfig.h>
+#include <KConfigGroup>
+#include <KConfig>
 //Added by qt3to4:
 #include <Q3ValueList>
 
@@ -78,21 +79,19 @@ QString RepairProperties::name() const
  return i18n("Repair Plugin");
 }
 
-bool RepairProperties::loadPlugin(KSimpleConfig* config)
+bool RepairProperties::loadPlugin(const KConfigGroup& config)
 {
- if (!config->hasGroup(propertyGroup())) {
-	boError() << k_funcinfo << "unit has no repair plugin" << endl;
+ if (!config.isValid()) {
+	boError() << k_funcinfo << "config not valid";
 	return false;
  }
- config->setGroup(propertyGroup());
  return true;
 }
 
-bool RepairProperties::savePlugin(KSimpleConfig* config)
+bool RepairProperties::savePlugin(KConfig* config)
 {
- config->setGroup(propertyGroup());
- // KConfig automatically deletes empty groups
- config->writeEntry("Dummy", "This entry is here just to prevent KConfig from deleting this group");
+ KConfigGroup group = config->group(propertyGroup());
+ group.writeEntry("Dummy", "This entry is here just to prevent KConfig from deleting this group");
  return true;
 }
 
@@ -115,21 +114,20 @@ QString ProductionProperties::name() const
  return i18n("Production Plugin");
 }
 
-bool ProductionProperties::loadPlugin(KSimpleConfig* config)
+bool ProductionProperties::loadPlugin(const KConfigGroup& config)
 {
- if (!config->hasGroup(propertyGroup())) {
-	boError() << k_funcinfo << "unit has no such plugin" << endl;
+ if (!config.isValid()) {
+	boError() << k_funcinfo << "config not valid";
 	return false;
  }
- config->setGroup(propertyGroup());
- mProducerList = BosonConfig::readUnsignedLongNumList(config, "ProducerList");
+ mProducerList = BosonConfig::readUnsignedLongNumList(&config, "ProducerList");
  return true;
 }
 
-bool ProductionProperties::savePlugin(KSimpleConfig* config)
+bool ProductionProperties::savePlugin(KConfig* config)
 {
- config->setGroup(propertyGroup());
- BosonConfig::writeUnsignedLongNumList(config, "ProducerList", mProducerList);
+ KConfigGroup group = config->group(propertyGroup());
+ BosonConfig::writeUnsignedLongNumList(&group, "ProducerList", mProducerList);
  return true;
 }
 
@@ -156,34 +154,33 @@ QString HarvesterProperties::name() const
  return i18n("Harvester Plugin");
 }
 
-bool HarvesterProperties::loadPlugin(KSimpleConfig* config)
+bool HarvesterProperties::loadPlugin(const KConfigGroup& config)
 {
- if (!config->hasGroup(propertyGroup())) {
-	boError() << k_funcinfo << "unit has no harvester plugin" << endl;
+ if (!config.isValid()) {
+	boError() << k_funcinfo << "config not valid";
 	return false;
  }
- config->setGroup(propertyGroup());
- mCanMineMinerals = config->readBoolEntry("CanMineMinerals", false);
- mCanMineOil = config->readBoolEntry("CanMineOil", false);
+ mCanMineMinerals = config.readEntry("CanMineMinerals", false);
+ mCanMineOil = config.readEntry("CanMineOil", false);
  if (mCanMineMinerals && mCanMineOil) {
 	boWarning() << k_funcinfo << "units should't mine minerals *and* oil" << endl;
  }
- mMaxResources = config->readUnsignedNumEntry("MaxResources", 100);
+ mMaxResources = config.readEntry("MaxResources", (quint32)100);
  // Convert speeds from amount/second to amount/adv.call
- mMiningSpeed = (int)(config->readDoubleNumEntry("MiningSpeed", 100) / 20.0f);
- mUnloadingSpeed = (int)(config->readDoubleNumEntry("UnloadingSpeed", 200) / 20.0f);
+ mMiningSpeed = (int)(config.readEntry("MiningSpeed", 100.0) / 20.0f);
+ mUnloadingSpeed = (int)(config.readEntry("UnloadingSpeed", 200.0) / 20.0f);
  return true;
 }
 
-bool HarvesterProperties::savePlugin(KSimpleConfig* config)
+bool HarvesterProperties::savePlugin(KConfig* config)
 {
- config->setGroup(propertyGroup());
- config->writeEntry("CanMineMinerals", mCanMineMinerals);
- config->writeEntry("CanMineOil", mCanMineOil);
- config->writeEntry("MaxResources", mMaxResources);
+ KConfigGroup group = config->group(propertyGroup());
+ group.writeEntry("CanMineMinerals", mCanMineMinerals);
+ group.writeEntry("CanMineOil", mCanMineOil);
+ group.writeEntry("MaxResources", mMaxResources);
  // Convert speeds from amount/adv.call to amount/second
- config->writeEntry("MiningSpeed", mMiningSpeed * 20.0f);
- config->writeEntry("UnloadingSpeed", mUnloadingSpeed * 20.0f);
+ group.writeEntry("MiningSpeed", mMiningSpeed * 20.0f);
+ group.writeEntry("UnloadingSpeed", mUnloadingSpeed * 20.0f);
  return true;
 }
 
@@ -209,26 +206,25 @@ QString RefineryProperties::name() const
  return i18n("Refinery Plugin");
 }
 
-bool RefineryProperties::loadPlugin(KSimpleConfig* config)
+bool RefineryProperties::loadPlugin(const KConfigGroup& config)
 {
- if (!config->hasGroup(propertyGroup())) {
-	boError() << k_funcinfo << "unit has no refinery plugin" << endl;
+ if (!config.isValid()) {
+	boError() << k_funcinfo << "config not valid";
 	return false;
  }
- config->setGroup(propertyGroup());
- mCanRefineMinerals = config->readBoolEntry("CanRefineMinerals", false);
- mCanRefineOil = config->readBoolEntry("CanRefineOil", false);
+ mCanRefineMinerals = config.readEntry("CanRefineMinerals", false);
+ mCanRefineOil = config.readEntry("CanRefineOil", false);
  if (mCanRefineMinerals && mCanRefineOil) {
 	boWarning() << k_funcinfo << "unit shouldn't refine minerals *and* oil" << endl;
  }
  return true;
 }
 
-bool RefineryProperties::savePlugin(KSimpleConfig* config)
+bool RefineryProperties::savePlugin(KConfig* config)
 {
- config->setGroup(propertyGroup());
- config->writeEntry("CanRefineMinerals", mCanRefineMinerals);
- config->writeEntry("CanRefineOil", mCanRefineOil);
+ KConfigGroup group = config->group(propertyGroup());
+ group.writeEntry("CanRefineMinerals", mCanRefineMinerals);
+ group.writeEntry("CanRefineOil", mCanRefineOil);
  return true;
 }
 
@@ -254,22 +250,22 @@ QString ResourceMineProperties::propertyGroup()
  return QString::fromLatin1("ResourceMinePlugin");
 }
 
-bool ResourceMineProperties::loadPlugin(KSimpleConfig* config)
+bool ResourceMineProperties::loadPlugin(const KConfigGroup& config)
 {
- if (!config->hasGroup(propertyGroup())) {
-	boError() << k_funcinfo << "unit has no harvester plugin" << endl;
+ if (!config.isValid()) {
+	boError() << k_funcinfo << "config not valid";
 	return false;
  }
- config->setGroup(propertyGroup());
- mMinerals = config->readBoolEntry("CanProvideMinerals", false);
- mOil = config->readBoolEntry("CanProvideOil", false);
+ mMinerals = config.readEntry("CanProvideMinerals", false);
+ mOil = config.readEntry("CanProvideOil", false);
  return true;
 }
 
-bool ResourceMineProperties::savePlugin(KSimpleConfig* config)
+bool ResourceMineProperties::savePlugin(KConfig* config)
 {
- config->writeEntry("CanProvideMinerals", mMinerals);
- config->writeEntry("CanProvideOil", mOil);
+ KConfigGroup group = config->group(propertyGroup());
+ group.writeEntry("CanProvideMinerals", mMinerals);
+ group.writeEntry("CanProvideOil", mOil);
  return true;
 }
 
@@ -292,23 +288,22 @@ QString AmmunitionStorageProperties::name() const
  return i18n("Ammunition Storage Plugin");
 }
 
-bool AmmunitionStorageProperties::loadPlugin(KSimpleConfig* config)
+bool AmmunitionStorageProperties::loadPlugin(const KConfigGroup& config)
 {
- if (!config->hasGroup(propertyGroup())) {
-	boError() << k_funcinfo << "unit has no such plugin" << endl;
+ if (!config.isValid()) {
+	boError() << k_funcinfo << "config not valid";
 	return false;
  }
- config->setGroup(propertyGroup());
- mCanStore = config->readListEntry("CanStore");
- mMustBePickedUp = config->readListEntry("MustBePickedUp");
+ mCanStore = config.readEntry("CanStore", QList<QString>());
+ mMustBePickedUp = config.readEntry("MustBePickedUp", QList<QString>());
  return true;
 }
 
-bool AmmunitionStorageProperties::savePlugin(KSimpleConfig* config)
+bool AmmunitionStorageProperties::savePlugin(KConfig* config)
 {
- config->setGroup(propertyGroup());
- config->writeEntry("CanStore", mCanStore);
- config->writeEntry("MustBePickedUp", mMustBePickedUp);
+ KConfigGroup group = config->group(propertyGroup());
+ group.writeEntry("CanStore", mCanStore);
+ group.writeEntry("MustBePickedUp", mMustBePickedUp);
  return true;
 }
 
@@ -348,25 +343,24 @@ QString RadarProperties::name() const
  return i18n("Radar Plugin");
 }
 
-bool RadarProperties::loadPlugin(KSimpleConfig* config)
+bool RadarProperties::loadPlugin(const KConfigGroup& config)
 {
- if (!config->hasGroup(propertyGroup())) {
-	boError() << k_funcinfo << "unit has no such plugin" << endl;
+ if (!config.isValid()) {
+	boError() << k_funcinfo << "config not valid";
 	return false;
  }
- config->setGroup(propertyGroup());
- mTransmittedPower = config->readDoubleNumEntry("TransmittedPower", 10000.0f);
- mMinReceivedPower = config->readDoubleNumEntry("MinReceivedPower", 0.05f);
- mDetectsLandUnits = config->readBoolEntry("DetectsLandUnits", true);
- mDetectsAirUnits = config->readBoolEntry("DetectsAirUnits", true);
+ mTransmittedPower = config.readEntry("TransmittedPower", 10000.0f);
+ mMinReceivedPower = config.readEntry("MinReceivedPower", 0.05f);
+ mDetectsLandUnits = config.readEntry("DetectsLandUnits", true);
+ mDetectsAirUnits = config.readEntry("DetectsAirUnits", true);
  return true;
 }
 
-bool RadarProperties::savePlugin(KSimpleConfig* config)
+bool RadarProperties::savePlugin(KConfig* config)
 {
- config->setGroup(propertyGroup());
- config->writeEntry("TransmittedPower", mTransmittedPower);
- config->writeEntry("MinReceivedPower", mMinReceivedPower);
+ KConfigGroup group = config->group(propertyGroup());
+ group.writeEntry("TransmittedPower", mTransmittedPower);
+ group.writeEntry("MinReceivedPower", mMinReceivedPower);
  return true;
 }
 
@@ -390,21 +384,20 @@ QString RadarJammerProperties::name() const
  return i18n("Radar Jammer Plugin");
 }
 
-bool RadarJammerProperties::loadPlugin(KSimpleConfig* config)
+bool RadarJammerProperties::loadPlugin(const KConfigGroup& config)
 {
- if (!config->hasGroup(propertyGroup())) {
-	boError() << k_funcinfo << "unit has no such plugin" << endl;
+ if (!config.isValid()) {
+	boError() << k_funcinfo << "config not valid";
 	return false;
  }
- config->setGroup(propertyGroup());
- mTransmittedPower = config->readDoubleNumEntry("TransmittedPower", 500.0f);
+ mTransmittedPower = config.readEntry("TransmittedPower", 500.0f);
  return true;
 }
 
-bool RadarJammerProperties::savePlugin(KSimpleConfig* config)
+bool RadarJammerProperties::savePlugin(KConfig* config)
 {
- config->setGroup(propertyGroup());
- config->writeEntry("TransmittedPower", mTransmittedPower);
+ KConfigGroup group = config->group(propertyGroup());
+ group.writeEntry("TransmittedPower", mTransmittedPower);
  return true;
 }
 
@@ -428,23 +421,22 @@ QString UnitStorageProperties::name() const
  return i18n("Unit Storage Plugin");
 }
 
-bool UnitStorageProperties::loadPlugin(KSimpleConfig* config)
+bool UnitStorageProperties::loadPlugin(const KConfigGroup& config)
 {
- if (!config->hasGroup(propertyGroup())) {
-	boError() << k_funcinfo << "unit has no such plugin" << endl;
+ if (!config.isValid()) {
+	boError() << k_funcinfo << "config not valid";
 	return false;
  }
- config->setGroup(propertyGroup());
 
  mEnterPaths.clear();
- int enterPaths = config->readUnsignedNumEntry("EnterPaths", 0);
+ int enterPaths = config.readEntry("EnterPaths", (quint32)0);
  if (enterPaths < 0 || enterPaths >= 100) {
 	boError() << k_funcinfo << "invalid EnterPaths count" << endl;
 	return false;
  }
  mEnterPaths.resize(enterPaths);
  for (int i = 0; i < enterPaths; i++) {
-	if (!loadEnterPath(i, config)) {
+	if (!loadEnterPath(i, config.config())) {
 		boError() << k_funcinfo << "failed loading enter path " << i << endl;
 		return false;
 	}
@@ -453,11 +445,11 @@ bool UnitStorageProperties::loadPlugin(KSimpleConfig* config)
  return true;
 }
 
-bool UnitStorageProperties::savePlugin(KSimpleConfig* config)
+bool UnitStorageProperties::savePlugin(KConfig* config)
 {
- config->setGroup(propertyGroup());
- config->writeEntry("EnterPaths", mEnterPaths.count());
- for (unsigned int i = 0; i < mEnterPaths.count(); i++) {
+ KConfigGroup group = config->group(propertyGroup());
+ group.writeEntry("EnterPaths", mEnterPaths.count());
+ for (int i = 0; i < mEnterPaths.count(); i++) {
 	if (!saveEnterPath(i, config)) {
 		boError() << k_funcinfo << "failed saving enter path " << i << endl;
 		return false;
@@ -466,43 +458,46 @@ bool UnitStorageProperties::savePlugin(KSimpleConfig* config)
  return true;
 }
 
-bool UnitStorageProperties::loadEnterPath(int path, KSimpleConfig* config)
+bool UnitStorageProperties::loadEnterPath(int path, const KConfig* config)
 {
- if (path < 0 || (unsigned int)path >= mEnterPaths.count()) {
+ if (path < 0 || path >= mEnterPaths.count()) {
 	return false;
  }
- QString group = propertyGroup() + QString::fromLatin1("_EnterPath_%1").arg(path);
- if (!config->hasGroup(group)) {
-	boError() << k_funcinfo << "no such group " << group << endl;
+ QString groupName = propertyGroup() + QString::fromLatin1("_EnterPath_%1").arg(path);
+ KConfigGroup group = config->group(groupName);
+ if (!group.isValid()) {
+	boError() << k_funcinfo << "no such group " << groupName << endl;
 	return false;
  }
- KConfigGroupSaver configGroupSaver(config, group);
- if (!mEnterPaths[path].loadPath(config)) {
+ if (!mEnterPaths[path].loadPath(group)) {
 	boError() << k_funcinfo << "Unable to load path " << path << endl;
 	return false;
  }
  return true;
 }
 
-bool UnitStorageProperties::saveEnterPath(int path, KSimpleConfig* config)
+bool UnitStorageProperties::saveEnterPath(int path, KConfig* config)
 {
- if (path < 0 || (unsigned int)path >= mEnterPaths.count()) {
+ if (path < 0 || path >= mEnterPaths.count()) {
 	return false;
  }
- QString group = propertyGroup() + QString::fromLatin1("_EnterPath_%1").arg(path);
- KConfigGroupSaver configGroupSaver(config, group);
- if (!mEnterPaths[path].savePath(config)) {
+ KConfigGroup group = config->group(propertyGroup() + QString::fromLatin1("_EnterPath_%1").arg(path));
+ if (!mEnterPaths[path].savePath(group)) {
 	boError() << k_funcinfo << "Unable to save path " << path << endl;
 	return false;
  }
  return true;
 }
 
-bool UnitStorageProperties::Path::loadPath(KSimpleConfig* config)
+bool UnitStorageProperties::Path::loadPath(const KConfigGroup& config)
 {
+ if (!config.isValid()) {
+	boError() << k_funcinfo << "config not valid";
+	return false;
+ }
  clear();
 
- int points = config->readUnsignedNumEntry("Points");
+ int points = config.readEntry("Points", (quint32)0);
  if (points <= 0 || points >= 100) {
 	boError() << k_funcinfo << "invalid Points count: " << points << endl;
 	return false;
@@ -510,8 +505,8 @@ bool UnitStorageProperties::Path::loadPath(KSimpleConfig* config)
  float x0 = -1.0f;
  float y0 = -1.0f;
  for (int i = 0; i < points; i++) {
-	float x = config->readDoubleNumEntry(QString::fromLatin1("Point%1_X").arg(i));
-	float y = config->readDoubleNumEntry(QString::fromLatin1("Point%1_Y").arg(i));
+	float x = config.readEntry(QString::fromLatin1("Point%1_X").arg(i), 0.0f);
+	float y = config.readEntry(QString::fromLatin1("Point%1_Y").arg(i), 0.0f);
 	if (i == 0) {
 		x0 = x;
 		y0 = y;
@@ -519,7 +514,7 @@ bool UnitStorageProperties::Path::loadPath(KSimpleConfig* config)
 	mPathPoints.append(BoVector2Float(x, y));
  }
 
- QString typeString = config->readEntry("UnitType", QString::fromLatin1("Land"));
+ QString typeString = config.readEntry("UnitType", QString::fromLatin1("Land"));
  mType = PathTypeLand;
  if (typeString == QString::fromLatin1("Land")) {
 	mType = PathTypeLand;
@@ -563,7 +558,7 @@ bool UnitStorageProperties::Path::loadPath(KSimpleConfig* config)
  //                   too (x or y either 0.0 or 1.0).
  //                   this could be useful for things like bridges - we dont
  //                   want to store the unit inside the unit
- QString leaveMethod = config->readEntry("Leave", QString::fromLatin1("Reverse"));
+ QString leaveMethod = config.readEntry("Leave", QString::fromLatin1("Reverse"));
  if (leaveMethod != QString::fromLatin1("Reverse")) {
 	boError() << k_funcinfo << "atm only Leave=Reverse supported" << endl;
 	return false;
@@ -572,33 +567,33 @@ bool UnitStorageProperties::Path::loadPath(KSimpleConfig* config)
  return true;
 }
 
-bool UnitStorageProperties::Path::savePath(KSimpleConfig* config)
+bool UnitStorageProperties::Path::savePath(KConfigGroup& config)
 {
- config->writeEntry("Points", mPathPoints.count());
- for (unsigned int i = 0; i < mPathPoints.count(); i++) {
+ config.writeEntry("Points", mPathPoints.count());
+ for (int i = 0; i < mPathPoints.count(); i++) {
 	BoVector2Float p = mPathPoints[i];
-	config->writeEntry(QString::fromLatin1("Point%1_X").arg(i), p.x());
-	config->writeEntry(QString::fromLatin1("Point%1_Y").arg(i), p.y());
+	config.writeEntry(QString::fromLatin1("Point%1_X").arg(i), p.x());
+	config.writeEntry(QString::fromLatin1("Point%1_Y").arg(i), p.y());
  }
 
  switch (mType) {
 	case PathTypeLand:
-		config->writeEntry("UnitType", QString::fromLatin1("Land"));
+		config.writeEntry("UnitType", QString::fromLatin1("Land"));
 		break;
 	case PathTypePlane:
-		config->writeEntry("UnitType", QString::fromLatin1("Plane"));
+		config.writeEntry("UnitType", QString::fromLatin1("Plane"));
 		break;
 	case PathTypeHelicopter:
-		config->writeEntry("UnitType", QString::fromLatin1("Helicopter"));
+		config.writeEntry("UnitType", QString::fromLatin1("Helicopter"));
 		break;
 	case PathTypeShip:
-		config->writeEntry("UnitType", QString::fromLatin1("Ship"));
+		config.writeEntry("UnitType", QString::fromLatin1("Ship"));
 		break;
 	default:
 		boError() << k_funcinfo << "unhandled type: " << (int)mType << endl;
 		return false;
  }
- config->writeEntry("Leave", QString::fromLatin1("Reverse"));
+ config.writeEntry("Leave", QString::fromLatin1("Reverse"));
  return true;
 }
 

@@ -49,10 +49,10 @@ class Unit;
 class BoItemList
 {
 public:
-	typedef Q3ValueList<BosonItem*>::Iterator Iterator;
-	typedef Q3ValueList<BosonItem*>::ConstIterator ConstIterator;
-	typedef Q3ValueList<BosonItem*>::iterator iterator;
-	typedef Q3ValueList<BosonItem*>::const_iterator const_iterator;
+	typedef QLinkedList<BosonItem*>::Iterator Iterator;
+	typedef QLinkedList<BosonItem*>::ConstIterator ConstIterator;
+	typedef QLinkedList<BosonItem*>::iterator iterator;
+	typedef QLinkedList<BosonItem*>::const_iterator const_iterator;
 	BoItemList();
 
 	/**
@@ -79,23 +79,30 @@ public:
 
 
 	// obsolete:
-	Iterator appendItem(BosonItem* item) { return append(item); }
-	unsigned int removeItem(BosonItem* item) { return remove(item); }
+//	Iterator appendItem(BosonItem* item) { return append(item); }
+//	unsigned int removeItem(BosonItem* item) { return remove(item); }
 
-	Iterator append(BosonItem* item) { return mList.append(item); }
-	unsigned int remove(BosonItem* item) { return mList.remove(item); }
-	inline unsigned int count() const { return mList.count(); }
+	void append(BosonItem* item) { mList.append(item); }
+	void remove(BosonItem* item)
+	{
+		QLinkedList<BosonItem*>::iterator it = qFind(mList.begin(), mList.end(), item);
+		if (it != mList.end()) {
+			mList.erase(it);
+		}
+	}
+	inline int count() const { return mList.count(); }
 	inline bool isEmpty() const { return mList.isEmpty(); }
-	inline Iterator begin() { return mList.begin(); }
-	inline ConstIterator begin() const { return mList.begin(); }
-	inline Iterator end() { return mList.end(); }
-	inline ConstIterator end() const { return mList.end(); }
-	// AB: FIXME: we don't care about the number of items in the list. make
-	// contains() return bool, that would be faster as we can stop once it
-	// is found
-	unsigned int contains(BosonItem* item) const { return mList.contains(item); } // FIXME: gcc does not accept const BosonItem* item
-	int findIndex(BosonItem* item) const { return mList.findIndex(item); } // FIXME: gcc does not accept const BosonItem* item
-	BosonItem* findItem(unsigned long int id) const;
+	inline iterator begin() { return mList.begin(); }
+	inline const_iterator begin() const { return mList.begin(); }
+	inline iterator end() { return mList.end(); }
+	inline const_iterator end() const { return mList.end(); }
+//	unsigned int contains(BosonItem* item) const { return mList.contains(item); } // FIXME: gcc does not accept const BosonItem* item
+
+	// TODO: rename to contains(), once we made sure that the uint return
+	// value is not used (i.e. once boson compiles with containsBool())
+	bool containsBool(BosonItem* item) const { return mList.contains(item); } // FIXME: gcc does not accept const BosonItem* item
+//	int findIndex(BosonItem* item) const { return mList.findIndex(item); } // FIXME: gcc does not accept const BosonItem* item
+	BosonItem* findItem(quint32 id) const;
 	void clear() { mList.clear(); }
 
 
@@ -160,7 +167,7 @@ protected:
 	void registerList();
 
 private:
-	Q3ValueList<BosonItem*> mList;
+	QLinkedList<BosonItem*> mList;
 };
 
 #endif

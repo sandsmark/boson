@@ -30,7 +30,8 @@
 #include "bosonweapon.h"
 #include "bosoncanvas.h"
 
-#include <ksimpleconfig.h>
+#include <KConfig>
+#include <KConfigGroup>
 #include <klocale.h>
 
 #include <qstring.h>
@@ -44,12 +45,12 @@ class UpgradeApplyer
       mProp = prop;
     }
 
-    // AB: valid types for T currently: unsigned long int, bofixed
+    // AB: valid types for T currently: quint32, bofixed
     // note that only numerical values are valid!
     template<class T> bool upgradeValue(const QString& data, T* value, const QString& type) const;
 
   protected:
-    unsigned long int applyValue(const QString& data, unsigned long int oldvalue) const;
+    quint32 applyValue(const QString& data, quint32 oldvalue) const;
     bofixed applyValue(const QString& data, bofixed oldvalue) const;
 
     bool parseEntryType(const QString& typeString, UpgradeProperties::UpgradeType* type, int* weaponid) const;
@@ -81,9 +82,9 @@ public:
   {
   }
 
-  Q3ValueList<unsigned long int> mRequireUnits;
-  Q3ValueList<unsigned long int> mRequireTechnologies;
-  Q3ValueList<unsigned long int> mApplyToTypes;
+  Q3ValueList<quint32> mRequireUnits;
+  Q3ValueList<quint32> mRequireTechnologies;
+  Q3ValueList<quint32> mApplyToTypes;
 
   QMap<QString, QString> mEntryList;
 };
@@ -159,32 +160,33 @@ bool UpgradeProperties::appliesTo(const BosonWeapon* weapon) const
   return weapon->properties();
 }
 
-bool UpgradeProperties::load(KSimpleConfig* cfg, const QString& group)
+bool UpgradeProperties::load(KConfig* cfg_, const QString& groupName)
 {
-  boDebug(600) << k_funcinfo << "Loading from group " << group << endl;
+  boDebug(600) << k_funcinfo << "Loading from group " << groupName << endl;
+
+  KConfigGroup group = cfg_->group(groupName);
 
   // Load entry list
-  d->mEntryList = cfg->entryMap(group);
+  d->mEntryList = group.entryMap();
 
   // Load basic stuff
-  cfg->setGroup(group);
-  mId = cfg->readUnsignedLongNumEntry("Id", 0);
+  mId = group.readEntry("Id", (quint32)0);
   if(mId == 0) {
     boError(600) << k_funcinfo << "Invalid id: 0" << endl;
     return false;
   }
-  mName = cfg->readEntry("Name", i18n("unknown"));
-  mDescription = cfg->readEntry("Description");
-  mMineralCost = cfg->readUnsignedLongNumEntry("MineralCost", 0);
-  mOilCost = cfg->readUnsignedLongNumEntry("OilCost", 0);
-  mProducer = cfg->readUnsignedNumEntry("Producer", 0);
-  mProductionTime = (int)(cfg->readDoubleNumEntry("ProductionTime", 5) * 20.0f);
-  mProduceActionString = cfg->readEntry("ProduceAction", "");
-  d->mRequireUnits = BosonConfig::readUnsignedLongNumList(cfg, "RequireUnits");
-  d->mRequireTechnologies = BosonConfig::readUnsignedLongNumList(cfg, "RequireTechnologies");
-  d->mApplyToTypes = BosonConfig::readUnsignedLongNumList(cfg, "ApplyToTypes");
-  mApplyToFacilities = cfg->readBoolEntry("ApplyToFacilities", false);
-  mApplyToMobiles = cfg->readBoolEntry("ApplyToMobiles", false);
+  mName = group.readEntry("Name", i18n("unknown"));
+  mDescription = group.readEntry("Description");
+  mMineralCost = group.readEntry("MineralCost", (quint32)0);
+  mOilCost = group.readEntry("OilCost", (quint32)0);
+  mProducer = group.readEntry("Producer", (quint32)0);
+  mProductionTime = (int)(group.readEntry("ProductionTime", 5.0) * 20.0f);
+  mProduceActionString = group.readEntry("ProduceAction", "");
+  d->mRequireUnits = BosonConfig::readUnsignedLongNumList(&group, "RequireUnits");
+  d->mRequireTechnologies = BosonConfig::readUnsignedLongNumList(&group, "RequireTechnologies");
+  d->mApplyToTypes = BosonConfig::readUnsignedLongNumList(&group, "ApplyToTypes");
+  mApplyToFacilities = group.readEntry("ApplyToFacilities", false);
+  mApplyToMobiles = group.readEntry("ApplyToMobiles", false);
 
   // Remove unwanted entries from the entry list
   d->mEntryList.remove("Id");
@@ -208,20 +210,20 @@ bool UpgradeProperties::load(KSimpleConfig* cfg, const QString& group)
 
 
 
-Q3ValueList<unsigned long int> UpgradeProperties::requiredUnits() const
+Q3ValueList<quint32> UpgradeProperties::requiredUnits() const
 {
   return d->mRequireUnits;
 }
 
 
-Q3ValueList<unsigned long int> UpgradeProperties::requiredTechnologies() const
+Q3ValueList<quint32> UpgradeProperties::requiredTechnologies() const
 {
   return d->mRequireTechnologies;
 }
 
-Q3ValueList<unsigned long int> UpgradeProperties::appliesToTypes(const Player* player) const
+Q3ValueList<quint32> UpgradeProperties::appliesToTypes(const Player* player) const
 {
-  Q3ValueList<unsigned long int> tmp = d->mApplyToTypes;
+  Q3ValueList<quint32> tmp = d->mApplyToTypes;
   if(mApplyToFacilities)
   {
     tmp += player->speciesTheme()->allFacilities();
@@ -232,8 +234,8 @@ Q3ValueList<unsigned long int> UpgradeProperties::appliesToTypes(const Player* p
   }
 
   // make sure that every type is at most once in the list
-  Q3ValueList<unsigned long int> list;
-  Q3ValueList<unsigned long int>::Iterator it;
+  Q3ValueList<quint32> list;
+  Q3ValueList<quint32>::Iterator it;
   for(it = tmp.begin(); it != tmp.end(); ++it)
   {
     if(!list.contains(*it))
@@ -268,7 +270,7 @@ bool UpgradeProperties::downgradeUnit(UnitBase* unit) const
   return true;
 }
 
-bool UpgradeProperties::upgradeValue(const QString& name, unsigned long int* v, const QString& type) const
+bool UpgradeProperties::upgradeValue(const QString& name, quint32* v, const QString& type) const
 {
   if(!d->mEntryList.contains(name))
   {
@@ -278,7 +280,7 @@ bool UpgradeProperties::upgradeValue(const QString& name, unsigned long int* v, 
   return a.upgradeValue(d->mEntryList[name], v, type);
 }
 
-bool UpgradeProperties::upgradeValue(const QString& name, long int* v, const QString& type) const
+bool UpgradeProperties::upgradeValue(const QString& name, qint32* v, const QString& type) const
 {
   if(!d->mEntryList.contains(name))
   {
@@ -309,7 +311,7 @@ void UpgradeProperties::convertEntries()
     // If it's weapon's key, we have to do some preprocessing:
     if(key.left(7) == "Weapon_")
     {
-      int i = key.find(':');
+      int i = key.indexOf(':');
       if(i < 1)
       {
         // Invalid entry
@@ -323,26 +325,26 @@ void UpgradeProperties::convertEntries()
     if(key == "Speed")
     {
       // Can be both unit's or weapon's key
-      it.data() = QString::number(it.data().toFloat() / 20.0f);
+      it.value() = QString::number(it.value().toFloat() / 20.0f);
     }
     // Convert from seconds to adv.calls  (multiply by 20)
     else if(key == "UnitProductionTime")
     {
-      it.data() = QString::number(it.data().toFloat() * 20.0f);
+      it.value() = QString::number(it.value().toFloat() * 20.0f);
     }
     else if(key == "Reload")
     {
-      it.data() = QString::number(it.data().toFloat() * 20.0f);
+      it.value() = QString::number(it.value().toFloat() * 20.0f);
     }
   }
 }
 
-unsigned long int UpgradeApplyer::applyValue(const QString& data, unsigned long int oldvalue) const
+quint32 UpgradeApplyer::applyValue(const QString& data, quint32 oldvalue) const
 {
   UpgradeProperties::ValueType type;
   QString valuestr;
   parseEntry(data, type, valuestr);
-  unsigned long int value = valuestr.toULong();
+  quint32 value = valuestr.toULong();
   return applyValueInternal(type, oldvalue, value);
 }
 
@@ -367,7 +369,7 @@ template<class T> T UpgradeApplyer::applyValueInternal(UpgradeProperties::ValueT
   }
   else if(type == UpgradeProperties::Percent)
   {
-    return (unsigned long int)(value * oldvalue / 100.0);
+    return (quint32)(value * oldvalue / 100.0);
   }
   else
   {

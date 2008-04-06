@@ -85,12 +85,12 @@ public:
 	 * @return The file format version of @p kgameXML or 0 if this is not a
 	 * valid file.
 	 **/
-	unsigned long int savegameFormatVersion(const QString& kgameXML);
+	quint32 savegameFormatVersion(const QString& kgameXML);
 
 	/**
 	 * @return Latest Boson savegame format version
 	 **/
-	static unsigned long int latestSavegameVersion();
+	static quint32 latestSavegameVersion();
 
 
 	bool loadKGameFromXML(const QMap<QString, QByteArray>& files);

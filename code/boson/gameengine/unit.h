@@ -55,6 +55,7 @@ typedef BoVector3<bofixed> BoVector3Fixed;
 typedef BoRect2<bofixed> BoRect2Fixed;
 template<class T> class Q3ValueList;
 template<class T> class Q3PtrList;
+template<class T> class BosonPropertyList;
 class QDomElement;
 
 class KGameUnitDebug;
@@ -166,9 +167,9 @@ public:
 	void setMoveData(BosonMoveData* moveData);
 	BosonMoveData* moveData() const;
 
-	virtual void setHealth(unsigned long int h);
+	virtual void setHealth(quint32 h);
 
-	virtual void setSightRange(unsigned long int r);
+	virtual void setSightRange(quint32 r);
 
 	/**
 	 * @return The current plugin, used in e.g. @ref advance or NULL if
@@ -236,7 +237,7 @@ public:
 	 * @return A value between 0 and @p requested, representing the amount
 	 * by which the weapon gets refilled.
 	 **/
-	unsigned long int requestAmmunition(const QString& type, unsigned long int requested);
+	quint32 requestAmmunition(const QString& type, quint32 requested);
 
 	/**
 	 * Call the advance*() function that is currently used. The advance
@@ -349,12 +350,12 @@ public:
 	 **/
 	virtual void advanceTurn(unsigned int);
 
-	bool inRange(unsigned long int, Unit* unit) const;
+	bool inRange(quint32, Unit* unit) const;
 
 	/**
 	 * @return List of path-points
 	 **/
-	const Q3ValueList<BoVector2Fixed>& pathPointList() const;
+	const BosonPropertyList<BoVector2Fixed>& pathPointList() const;
 
 
 	/**
@@ -383,13 +384,13 @@ public:
 	 * Note that it doesn't include units on cells that are not visible
 	 * (e.g. fogged) for local player.
 	 **/
-	BoItemList* unitsInRange(unsigned long int range) const;
+	BoItemList* unitsInRange(quint32 range) const;
 
 	/**
 	 * @return Just like @ref unitsInRange but only enemy units.
 	 * Note that it doesn't include units on fogged cells (see @ref unitsInRange)
 	 **/
-	BoItemList* enemyUnitsInRange(unsigned long int range) const;
+	BoItemList* enemyUnitsInRange(quint32 range) const;
 
 	/**
 	 * Calls @ref BosonCanvas setWorkChanged
@@ -447,14 +448,14 @@ public:
 	/**
 	 * @return Weapon with given id for this unit. 0 if it doesn't exist.
 	 **/
-	BosonWeapon* weapon(unsigned long int id) const;
+	BosonWeapon* weapon(quint32 id) const;
 
 	/**
 	 * @return maximum range of weapons of this unit e.g. range of weapon with the longest range
 	 **/
-	unsigned long int maxWeaponRange() const;
-	unsigned long int maxAirWeaponRange() const;
-	unsigned long int maxLandWeaponRange() const;
+	quint32 maxWeaponRange() const;
+	quint32 maxAirWeaponRange() const;
+	quint32 maxLandWeaponRange() const;
 
 
 	virtual void setMovingStatus(MovingStatus m);

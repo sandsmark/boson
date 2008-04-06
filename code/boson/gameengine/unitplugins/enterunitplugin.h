@@ -22,10 +22,8 @@
 #include "unitplugin.h"
 
 #include <kgame/kgameproperty.h>
-#include <kgame/kgamepropertylist.h>
 #include "../../bo3dtools.h"
-//Added by qt3to4:
-#include <Q3ValueList>
+#include "bosonpropertylist.h"
 
 template<class T> class BoVector2;
 template<class T> class BoRect2;
@@ -153,7 +151,7 @@ public:
 	 **/
 	UnitStoragePlugin* storingUnit() const;
 
-	Q3ValueList<BoVector2Fixed> remainingInsidePath() const;
+	QList<BoVector2Fixed> remainingInsidePath() const;
 
 	/**
 	 * Called by @ref UnitMoverInsideUnit only. This removes the very first
@@ -201,7 +199,7 @@ private:
 
 	// a list of pathpoints inside the unit leading to the destination of
 	// the path
-	KGamePropertyList<BoVector2Fixed> mRemainingInsidePath;
+	BosonPropertyList<BoVector2Fixed> mRemainingInsidePath;
 
 	KGameProperty<qint32> mMovingInStatus;
 	KGameProperty<qint32> mLandingStatus;
