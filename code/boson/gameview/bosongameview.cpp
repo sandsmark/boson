@@ -95,8 +95,14 @@
 #include <qimage.h>
 #include <qdir.h>
 #include <qdom.h>
-#include <qvaluevector.h>
+#include <q3valuevector.h>
 #include <qapplication.h>
+//Added by qt3to4:
+#include <QWheelEvent>
+#include <QMouseEvent>
+#include <Q3ValueList>
+#include <QEvent>
+#include <Q3PtrList>
 
 
 #warning d->mMouseMoveDiff.start() mostly removed. probably fix displayInput()->actionLoced() actions !
@@ -121,7 +127,7 @@ static bool cameraModifier(const BoMouseEvent& event)
 	cameraModifier = event.altButton();
  } else if (boConfig->boolValue("CameraModifier") == "Shift") {
 	cameraModifier = event.shiftButton();
- } else if (boConfig->boolValue("CameraModifier") == "CTRL") {
+ } else if (boConfig->boolValue("CameraModifier") == "Qt::CTRL") {
 	cameraModifier = event.ctrlButton();
  }
 #else
@@ -623,10 +629,10 @@ BoItemList* SelectionRect::items(const BosonUfoCanvasWidget* ufoCanvasWidget) co
  QRect widgetRect_;
  widgetRect(&widgetRect_);
 
- QValueList<BosonItem*> items = ufoCanvasWidget->itemsAtWidgetRect(widgetRect_);
+ Q3ValueList<BosonItem*> items = ufoCanvasWidget->itemsAtWidgetRect(widgetRect_);
 
  BoItemList* list = new BoItemList();
- for (QValueList<BosonItem*>::iterator it = items.begin(); it != items.end(); ++it) {
+ for (Q3ValueList<BosonItem*>::iterator it = items.begin(); it != items.end(); ++it) {
 	list->append(*it);
  }
 
@@ -771,9 +777,9 @@ public:
 
 		mEventListener = 0;
 
-		mLeftButtonState = 0;
+		mQt::LeftButtonState = 0;
 		mMiddleButtonState = 0;
-		mRightButtonState = 0;
+		mQt::RightButtonState = 0;
 	}
 
 	BosonViewData* mViewData;
@@ -821,9 +827,9 @@ public:
 	BosonGameViewEventListener* mEventListener;
 
 	BoMouseDoubleClickRecognizer mDoubleClickRecognizer;
-	BoLeftMouseButtonState* mLeftButtonState;
+	BoLeftMouseButtonState* mQt::LeftButtonState;
 	BoMiddleMouseButtonState* mMiddleButtonState;
-	BoRightMouseButtonState* mRightButtonState;
+	BoRightMouseButtonState* mQt::RightButtonState;
 
 	bool mGameMode;
 };
@@ -866,9 +872,9 @@ BosonGameView::~BosonGameView()
  BoLightManager::deleteStatic();
  BosonViewData::setGlobalViewData(0);
  delete d->mViewData;
- delete d->mLeftButtonState;
+ delete d->mQt::LeftButtonState;
  delete d->mMiddleButtonState;
- delete d->mRightButtonState;
+ delete d->mQt::RightButtonState;
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
 }
@@ -932,10 +938,10 @@ void BosonGameView::init()
 
  d->mScriptConnector = new BosonGameViewScriptConnector(this);
 
- d->mLeftButtonState = new BoLeftMouseButtonState(this, d->mGameGLMatrices);
- d->mLeftButtonState->setSelectionRect(d->mSelectionRect);
+ d->mQt::LeftButtonState = new BoLeftMouseButtonState(this, d->mGameGLMatrices);
+ d->mQt::LeftButtonState->setSelectionRect(d->mSelectionRect);
  d->mMiddleButtonState = new BoMiddleMouseButtonState(this, d->mGameGLMatrices);
- d->mRightButtonState = new BoRightMouseButtonState(this, d->mGameGLMatrices);
+ d->mQt::RightButtonState = new BoRightMouseButtonState(this, d->mGameGLMatrices);
 
 
 
@@ -1310,7 +1316,7 @@ void BosonGameView::initUfoGUI()
  d->mUfoCanvasWidget->setGameGLMatrices(d->mGameGLMatrices);
  d->mUfoCanvasWidget->setCamera(&d->mCamera);
  d->mUfoCanvasWidget->setCanvas(canvas());
- d->mLeftButtonState->setUfoCanvasWidget(d->mUfoCanvasWidget);
+ d->mQt::LeftButtonState->setUfoCanvasWidget(d->mUfoCanvasWidget);
 
  d->mUfoPlacementPreviewWidget = new BosonUfoPlacementPreviewWidget();
  d->mUfoPlacementPreviewWidget->setGameGLMatrices(d->mGameGLMatrices);
@@ -2184,15 +2190,15 @@ void BosonGameView::slotMouseEvent(QMouseEvent* e)
  event.setGroundWorldPos(posX, posY, posZ);
  if (e->type() != QEvent::Wheel) {
 	event.setGameViewWidgetPos(e->pos());
-	event.setControlButton(e->state() & ControlButton);
-	event.setShiftButton(e->state() & ShiftButton);
-	event.setAltButton(e->state() & AltButton);
+	event.setQt::ControlModifier(e->state() & ControlButton);
+	event.setQt::ShiftModifier(e->state() & ShiftButton);
+	event.setQt::AltModifier(e->state() & AltButton);
  } else {
 	QWheelEvent* w = (QWheelEvent*)e;
 	event.setGameViewWidgetPos(w->pos());
-	event.setControlButton(w->state() & ControlButton);
-	event.setShiftButton(w->state() & ShiftButton);
-	event.setAltButton(w->state() & AltButton);
+	event.setQt::ControlModifier(w->state() & ControlButton);
+	event.setQt::ShiftModifier(w->state() & ShiftButton);
+	event.setQt::AltModifier(w->state() & AltButton);
  }
  event.setUnitAtEventPos(d->mUfoCanvasWidget->unitAtWidgetPos(event.gameViewWidgetPos()));
 
@@ -2225,14 +2231,14 @@ void BosonGameView::slotMouseEvent(QMouseEvent* e)
 
 		d->mDoubleClickRecognizer.mousePressEvent(e);
 		switch (e->button()) {
-			case LeftButton:
-				d->mLeftButtonState->pressButton(event.gameViewWidgetPos());
+			case Qt::LeftButton:
+				d->mQt::LeftButtonState->pressButton(event.gameViewWidgetPos());
 				break;
 			case MidButton:
 				d->mMiddleButtonState->pressButton(event.gameViewWidgetPos());
 				break;
-			case RightButton:
-				d->mRightButtonState->pressButton(event.gameViewWidgetPos());
+			case Qt::RightButton:
+				d->mQt::RightButtonState->pressButton(event.gameViewWidgetPos());
 				break;
 			default:
 				break;
@@ -2362,14 +2368,14 @@ void BosonGameView::mouseEventWheel(float delta, Orientation orientation, const 
 
 void BosonGameView::mouseEventMove(int buttonState, const BoMouseEvent& event)
 {
- if (buttonState & LeftButton) {
-	d->mLeftButtonState->mouseMoved(event);
+ if (buttonState & Qt::LeftButton) {
+	d->mQt::LeftButtonState->mouseMoved(event);
  }
  if (buttonState & MidButton) {
 	d->mMiddleButtonState->mouseMoved(event);
  }
- if (buttonState & RightButton) {
-	d->mRightButtonState->mouseMoved(event);
+ if (buttonState & Qt::RightButton) {
+	d->mQt::RightButtonState->mouseMoved(event);
  }
 
  updateCursorCanvasVector(event.gameViewWidgetPos());
@@ -2387,9 +2393,9 @@ void BosonGameView::mouseEventMove(int buttonState, const BoMouseEvent& event)
 void BosonGameView::mouseEventRelease(ButtonState button, const BoMouseEvent& event)
 {
  switch (button) {
-	case LeftButton:
+	case Qt::LeftButton:
 	{
-		d->mLeftButtonState->releaseButton(event);
+		d->mQt::LeftButtonState->releaseButton(event);
 		break;
 	}
 	case MidButton:
@@ -2397,9 +2403,9 @@ void BosonGameView::mouseEventRelease(ButtonState button, const BoMouseEvent& ev
 		d->mMiddleButtonState->releaseButton(event);
 		break;
 	}
-	case RightButton:
+	case Qt::RightButton:
 	{
-		d->mRightButtonState->releaseButton(event);
+		d->mQt::RightButtonState->releaseButton(event);
 		break;
 	}
 	default:
@@ -2412,9 +2418,9 @@ void BosonGameView::mouseEventRelease(ButtonState button, const BoMouseEvent& ev
 void BosonGameView::mouseEventReleaseDouble(ButtonState button, const BoMouseEvent& event)
 {
  switch (button) {
-	case LeftButton:
+	case Qt::LeftButton:
 	{
-		d->mLeftButtonState->releaseButton(event, true);
+		d->mQt::LeftButtonState->releaseButton(event, true);
 		break;
 	}
 	case MidButton:
@@ -2422,9 +2428,9 @@ void BosonGameView::mouseEventReleaseDouble(ButtonState button, const BoMouseEve
 		d->mMiddleButtonState->releaseButton(event, true);
 		break;
 	}
-	case RightButton:
+	case Qt::RightButton:
 	{
-		d->mRightButtonState->releaseButton(event, true);
+		d->mQt::RightButtonState->releaseButton(event, true);
 		break;
 	}
 	default:
@@ -2999,8 +3005,8 @@ void BosonGameViewScriptConnector::slotCommitCameraChanges(int ticks)
 
 void BosonGameViewScriptConnector::slotSetAcceptUserInput(bool accept)
 {
- QPtrList<KGameIO>* iolist = mDisplay->localPlayerIO()->ioList();
- QPtrListIterator<KGameIO> it(*iolist);
+ Q3PtrList<KGameIO>* iolist = mDisplay->localPlayerIO()->ioList();
+ Q3PtrListIterator<KGameIO> it(*iolist);
  while (it.current()) {
 	(*it)->blockSignals(!accept);
 	++it;

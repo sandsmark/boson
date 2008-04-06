@@ -20,13 +20,15 @@
 #define BOSELECTIONDEBUGWIDGET_H
 
 #include "boufo.h"
+//Added by qt3to4:
+#include <Q3ValueList>
 
 class BosonCanvas;
 class PlayerIO;
 class BoSelection;
 class Unit;
 class bofixed;
-template<class T> class QValueList;
+template<class T> class Q3ValueList;
 template<class T1, class T2> class QPair;
 
 class BoSelectionDebugWidgetPrivate;

@@ -28,8 +28,8 @@
 #include "gameengine/bosongroundtheme.h"
 #include "bosongroundthemedata.h"
 
-#include <qptrlist.h>
-#include <qptrdict.h>
+#include <q3ptrlist.h>
+#include <q3ptrdict.h>
 
 // AB: just a pointer to the actual object. we do NOT use a static deleter or so
 //     here, the static pointer exists only to provide global access.
@@ -65,12 +65,12 @@ public:
 	{
 	}
 
-	QPtrDict<BosonItemContainer> mItem2ItemContainer;
-	QPtrList<BosonItemContainer> mAllItemContainers;
+	Q3PtrDict<BosonItemContainer> mItem2ItemContainer;
+	Q3PtrList<BosonItemContainer> mAllItemContainers;
 
 	QMap<const SpeciesTheme*, SpeciesData*> mSpeciesTheme2SpeciesData;
 
-	QPtrList<BosonGroundThemeData> mAllGroundThemeDatas;
+	Q3PtrList<BosonGroundThemeData> mAllGroundThemeDatas;
 	QMap<const BosonGroundTheme*, BosonGroundThemeData*> mGroundTheme2GroundThemeData;
 
 };
@@ -147,7 +147,7 @@ BosonItemContainer* BosonViewData::itemContainer(BosonItem* item)
  return c;
 }
 
-const QPtrList<BosonItemContainer>& BosonViewData::allItemContainers() const
+const Q3PtrList<BosonItemContainer>& BosonViewData::allItemContainers() const
 {
  return d->mAllItemContainers;
 }

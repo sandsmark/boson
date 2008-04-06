@@ -20,6 +20,11 @@
 #define BOSONGLCOMPLETEMINIMAP_H
 
 #include <qobject.h>
+//Added by qt3to4:
+#include <QPixmap>
+#include <QMouseEvent>
+#include <Q3ValueList>
+#include <QPaintEvent>
 
 #include "../bomath.h"
 #include <bogl.h>
@@ -39,8 +44,8 @@ class QPixmap;
 class QPainter;
 class QPaintEvent;
 class QMouseEvent;
-template<class T> class QPtrVector;
-template<class T> class QValueList;
+template<class T> class Q3PtrVector;
+template<class T> class Q3ValueList;
 
 
 class BosonGLCompleteMiniMapPrivate;
@@ -108,8 +113,8 @@ private:
 	void initializeItems();
 
 	void renderMiniMap();
-	void updateRadarTexture(const QValueList<const Unit*>* radars);
-	void renderRadarRangeIndicators(const QValueList<const Unit*>* radarlist);
+	void updateRadarTexture(const Q3ValueList<const Unit*>* radars);
+	void renderRadarRangeIndicators(const Q3ValueList<const Unit*>* radarlist);
 
 	/**
 	 * Calculate the color of the cell at @p x, @p y according to the @ref
@@ -120,7 +125,7 @@ private:
 	 **/
 	void calculateGround(int x, int y);
 
-	const QValueList<const Unit*>* radarList() const;
+	const Q3ValueList<const Unit*>* radarList() const;
 
 	void setPoint(int x, int y, const QColor& color, GLubyte* textureData, BoTexture* texture);
 	void unsetPoint(int x, int y, GLubyte* textureData, BoTexture* texture);

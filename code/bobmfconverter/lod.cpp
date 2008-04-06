@@ -24,7 +24,7 @@
 #include "debug.h"
 
 #include <qstring.h>
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 
 
 LOD::LOD()
@@ -51,12 +51,12 @@ LOD::LOD(LOD* base)
 
 LOD::~LOD()
 {
-  for(unsigned int i = 0; i < mFrames.count(); i++)
+  for(int i = 0; i < mFrames.count(); i++)
   {
     delete mFrames[i];
   }
   mFrames.clear();
-  for(unsigned int i = 0; i < mMeshes.count(); i++)
+  for(int i = 0; i < mMeshes.count(); i++)
   {
     delete mMeshes[i];
   }
@@ -76,14 +76,14 @@ unsigned int LOD::createFrame()
   return mFrames.count() - 1;
 }
 
-void LOD::removeAllFramesBut(const QValueVector<Frame*>& frames)
+void LOD::removeAllFramesBut(const Q3ValueVector<Frame*>& frames)
 {
   if(frames.count() == 0)
   {
     boError() << k_funcinfo << "must keep at least one frame" << endl;
     return;
   }
-  for(QValueVector<Frame*>::const_iterator it = frames.begin(); it != frames.end(); ++it)
+  for(Q3ValueVector<Frame*>::const_iterator it = frames.begin(); it != frames.end(); ++it)
   {
     if(qFind(mFrames.begin(), mFrames.end(), *it) == mFrames.end())
     {
@@ -92,7 +92,7 @@ void LOD::removeAllFramesBut(const QValueVector<Frame*>& frames)
     }
   }
 
-  for(QValueVector<Frame*>::iterator it = mFrames.begin(); it != mFrames.end(); ++it)
+  for(Q3ValueVector<Frame*>::iterator it = mFrames.begin(); it != mFrames.end(); ++it)
   {
     if(qFind(frames.begin(), frames.end(), *it) == frames.end())
     {
@@ -102,14 +102,14 @@ void LOD::removeAllFramesBut(const QValueVector<Frame*>& frames)
   mFrames = frames;
 }
 
-void LOD::removeAllMeshesBut(const QValueVector<Mesh*>& meshes)
+void LOD::removeAllMeshesBut(const Q3ValueVector<Mesh*>& meshes)
 {
   if(meshes.count() == 0)
   {
     boError() << k_funcinfo << "must keep at least one mesh" << endl;
     return;
   }
-  for(QValueVector<Mesh*>::const_iterator it = meshes.begin(); it != meshes.end(); ++it)
+  for(Q3ValueVector<Mesh*>::const_iterator it = meshes.begin(); it != meshes.end(); ++it)
   {
     if(qFind(mMeshes.begin(), mMeshes.end(), *it) == mMeshes.end())
     {
@@ -118,8 +118,8 @@ void LOD::removeAllMeshesBut(const QValueVector<Mesh*>& meshes)
     }
   }
 
-  QValueList<Mesh*> deleteMeshes;
-  for(QValueVector<Mesh*>::iterator it = mMeshes.begin(); it != mMeshes.end(); ++it)
+  Q3ValueList<Mesh*> deleteMeshes;
+  for(Q3ValueVector<Mesh*>::iterator it = mMeshes.begin(); it != mMeshes.end(); ++it)
   {
     if(qFind(meshes.begin(), meshes.end(), *it) == meshes.end())
     {
@@ -131,7 +131,7 @@ void LOD::removeAllMeshesBut(const QValueVector<Mesh*>& meshes)
   }
   mMeshes = meshes;
 
-  for(QValueList<Mesh*>::iterator it = deleteMeshes.begin(); it != deleteMeshes.end(); ++it)
+  for(Q3ValueList<Mesh*>::iterator it = deleteMeshes.begin(); it != deleteMeshes.end(); ++it)
   {
     removeReferencesToMesh(*it);
     delete *it;

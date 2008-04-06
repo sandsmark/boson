@@ -24,13 +24,16 @@
 #include "bodebug.h"
 #include "bodebuglog.h"
 #include "qlistviewitemnumber.h"
+//Added by qt3to4:
+#include <Q3VBoxLayout>
+#include <Q3PtrList>
 
 #include <klocale.h>
 
-#include <qlistview.h>
+#include <q3listview.h>
 #include <qlayout.h>
-#include <qvbox.h>
-#include <qtextedit.h>
+#include <q3vbox.h>
+#include <q3textedit.h>
 #include <qlabel.h>
 
 class BoDebugLogWidgetPrivate
@@ -39,19 +42,19 @@ public:
 	BoDebugLogWidgetPrivate()
 	{
 	}
-	QListView* mMessages;
-	QTextEdit* mBacktrace;
-	QMap<QListViewItem*, QString> mItem2Backtrace;
+	Q3ListView* mMessages;
+	Q3TextEdit* mBacktrace;
+	QMap<Q3ListViewItem*, QString> mItem2Backtrace;
 };
 
 BoDebugLogWidget::BoDebugLogWidget(QWidget* parent, const char* name) : QWidget(parent, name)
 {
  d = new BoDebugLogWidgetPrivate;
- QVBoxLayout* topLayout = new QVBoxLayout(this);
+ Q3VBoxLayout* topLayout = new Q3VBoxLayout(this);
  QSplitter* splitter = new QSplitter(Vertical, this);
  topLayout->addWidget(splitter);
- d->mMessages = new QListView(splitter);
- connect(d->mMessages, SIGNAL(selectionChanged(QListViewItem*)), this, SLOT(slotMessageSelected(QListViewItem*)));
+ d->mMessages = new Q3ListView(splitter);
+ connect(d->mMessages, SIGNAL(selectionChanged(Q3ListViewItem*)), this, SLOT(slotMessageSelected(Q3ListViewItem*)));
 
  d->mMessages->setAllColumnsShowFocus(true);
  d->mMessages->addColumn(i18n("Nr"));
@@ -62,9 +65,9 @@ BoDebugLogWidget::BoDebugLogWidget(QWidget* parent, const char* name) : QWidget(
 
  QWidget* backtraceBox = new QWidget(splitter);
  QLabel* backtraceLabel = new QLabel(i18n("Backtrace"), backtraceBox);
- d->mBacktrace = new QTextEdit(backtraceBox);
+ d->mBacktrace = new Q3TextEdit(backtraceBox);
  d->mBacktrace->setReadOnly(true);
- QVBoxLayout* backtraceLayout = new QVBoxLayout(backtraceBox);
+ Q3VBoxLayout* backtraceLayout = new Q3VBoxLayout(backtraceBox);
  backtraceLayout->addWidget(backtraceLabel);
  backtraceLayout->addWidget(d->mBacktrace);
 }
@@ -75,7 +78,7 @@ BoDebugLogWidget::~BoDebugLogWidget()
  delete d;
 }
 
-void BoDebugLogWidget::slotMessageSelected(QListViewItem* item)
+void BoDebugLogWidget::slotMessageSelected(Q3ListViewItem* item)
 {
  QString backtrace;
  if (item) {
@@ -87,12 +90,12 @@ void BoDebugLogWidget::slotMessageSelected(QListViewItem* item)
  d->mBacktrace->setText(backtrace);
 }
 
-void BoDebugLogWidget::setMessages(const QPtrList<BoDebugMessage>& m)
+void BoDebugLogWidget::setMessages(const Q3PtrList<BoDebugMessage>& m)
 {
  d->mMessages->clear();
  d->mItem2Backtrace.clear();
  d->mBacktrace->setText(QString::null);
- QPtrListIterator<BoDebugMessage> it(m);
+ Q3PtrListIterator<BoDebugMessage> it(m);
  int i = 0;
  while (it.current()) {
 	QListViewItemNumber* item = new QListViewItemNumber(d->mMessages);
@@ -146,10 +149,10 @@ BoDebugLogDialog::BoDebugLogDialog(QWidget* parent, const char* name)
 {
  d = new BoDebugLogDialogPrivate;
 
- QVBox* errorPage = addVBoxPage(i18n("Errors"));
- QVBox* warningPage = addVBoxPage(i18n("Warnings"));
- QVBox* debugPage = addVBoxPage(i18n("Debug"));
- QVBox* allPage = addVBoxPage(i18n("All"));
+ KVBox* errorPage = addVBoxPage(i18n("Errors"));
+ KVBox* warningPage = addVBoxPage(i18n("Warnings"));
+ KVBox* debugPage = addVBoxPage(i18n("Debug"));
+ KVBox* allPage = addVBoxPage(i18n("All"));
 
  BoDebugLogWidget* error = new BoDebugLogWidget(errorPage);
  BoDebugLogWidget* warning = new BoDebugLogWidget(warningPage);

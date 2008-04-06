@@ -25,6 +25,10 @@
 #include "../bomath.h"
 
 #include <qobject.h>
+//Added by qt3to4:
+#include <Q3CString>
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 class BosonMap;
 class Cell;
@@ -52,9 +56,9 @@ typedef BoVector3<bofixed> BoVector3Fixed;
 class KPlayer;
 class QDataStream;
 class QDomElement;
-template<class T> class QPtrList;
-template<class T> class QValueList;
-template<class T> class QPtrVector;
+template<class T> class Q3PtrList;
+template<class T> class Q3ValueList;
+template<class T> class Q3PtrVector;
 template<class T1, class T2> class QMap;
 template<class T1, class T2> class QPair;
 
@@ -229,7 +233,7 @@ public:
 	/**
 	 * See @ref BosonMap::setHeightsAtCorners
 	 **/
-	void setHeightsAtCorners(const QValueList< QPair<QPoint, float> >& heights);
+	void setHeightsAtCorners(const Q3ValueList< QPair<QPoint, float> >& heights);
 
 	/**
 	 * @return BosonMap::heightAtCorner
@@ -353,11 +357,11 @@ public:
 
 	void addRadar(Unit* unit);
 	void removeRadar(Unit* unit);
-	const QValueList<const Unit*>* radarUnits() const;
+	const Q3ValueList<const Unit*>* radarUnits() const;
 
 	void addRadarJammer(Unit* unit);
 	void removeRadarJammer(Unit* unit);
-	const QValueList<const Unit*>* radarJammerUnits() const;
+	const Q3ValueList<const Unit*>* radarJammerUnits() const;
 
 	Cell* cellAt(Unit* unit) const;
 
@@ -416,7 +420,7 @@ public:
 	/**
 	 * Checks if any items, except exclude, collide with given box
 	 **/
-	QValueList<Unit*> collisionsInBox(const BoVector3Fixed& v1, const BoVector3Fixed& v2, BosonItem* exclude) const { return collisions()->collisionsInBox(v1, v2, exclude); }
+	Q3ValueList<Unit*> collisionsInBox(const BoVector3Fixed& v1, const BoVector3Fixed& v2, BosonItem* exclude) const { return collisions()->collisionsInBox(v1, v2, exclude); }
 
 	/**
 	 * @param pos The location where the unit should get placed.
@@ -462,7 +466,7 @@ public:
 	 * also @ref QDomDocument::toCString() and @ref saveAsXML. This string
 	 * can be used to load the canvas again using @ref loadCanvas.
 	 **/
-	QCString saveCanvas() const;
+	Q3CString saveCanvas() const;
 
 	/**
 	 * This method is meant for use in the editor or in test programs, it is
@@ -473,7 +477,7 @@ public:
 	 * QDomDocument::toCString) describing an empty canvas. This can be used
 	 * with @ref loadCanvas.
 	 **/
-	static QCString emptyCanvasFile(unsigned int playerCount);
+	static Q3CString emptyCanvasFile(unsigned int playerCount);
 
 	bool loadFromXML(const QDomElement& root);
 	bool saveAsXML(QDomElement& root) const;
@@ -501,7 +505,7 @@ public:
 	/**
 	 * Valid in editor mode only. Delete the specified items.
 	 **/
-	void deleteItems(const QValueList<unsigned long int>& items);
+	void deleteItems(const Q3ValueList<unsigned long int>& items);
 
 	BoEventManager* eventManager() const;
 	BoEventListener* eventListener() const;
@@ -622,7 +626,7 @@ protected:
 	/**
 	 * Delete a list of items. See also @ref deleteItem
 	 **/
-	void deleteItems(QPtrList<BosonItem>& items);
+	void deleteItems(Q3PtrList<BosonItem>& items);
 	void deleteItems(BoItemList& items);
 
 	/**

@@ -20,16 +20,18 @@
 #ifndef WEBINTERFACE_H
 #define WEBINTERFACE_H
 
-#include <qserversocket.h>
+#include <q3serversocket.h>
+//Added by qt3to4:
+#include <Q3TextStream>
 
 class Server;
-class QTextStream;
+class Q3TextStream;
 
-class WebInterface : public QServerSocket
+class WebInterface : public Q3ServerSocket
 {
   Q_OBJECT
   public:
-    WebInterface(Server* s, Q_UINT16 port);
+    WebInterface(Server* s, quint16 port);
     ~WebInterface();
 
     virtual void newConnection(int socket);
@@ -39,19 +41,19 @@ class WebInterface : public QServerSocket
     void discardClient();
 
   protected:
-    void sendStatistics(QTextStream& os);
+    void sendStatistics(Q3TextStream& os);
 
-    void writeHTTPHeader(QTextStream& os);
-    void writeHTMLHeader(QTextStream& os, const QString& title);
-    void writeHTMLFooter(QTextStream& os);
-    void writeServerStatistics(QTextStream& os);
-    void writeServerInfos(QTextStream& os);
-    void writeGameInfos(QTextStream& os);
-    void writeGameStatistics(QTextStream& os);
-    void writeClientStats(QTextStream& os);
-    void writePlayerStats(QTextStream& os);
-    void writeGame(QTextStream& os);
-    void writeTraffic(QTextStream& os);
+    void writeHTTPHeader(Q3TextStream& os);
+    void writeHTMLHeader(Q3TextStream& os, const QString& title);
+    void writeHTMLFooter(Q3TextStream& os);
+    void writeServerStatistics(Q3TextStream& os);
+    void writeServerInfos(Q3TextStream& os);
+    void writeGameInfos(Q3TextStream& os);
+    void writeGameStatistics(Q3TextStream& os);
+    void writeClientStats(Q3TextStream& os);
+    void writePlayerStats(Q3TextStream& os);
+    void writeGame(Q3TextStream& os);
+    void writeTraffic(Q3TextStream& os);
 
     //void writeln(QTextStream& os, const QString& line);
 

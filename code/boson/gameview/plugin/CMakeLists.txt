@@ -17,7 +17,6 @@ set(gameviewplugin_SRCS
 	bonetworktrafficwidget.cpp
 )
 
-kde3_automoc(${gameviewplugin_SRCS})
 if(BOSON_USE_DEBUG_PLUGINS)
   boson_add_library(bosongameviewplugin MODULE ${gameviewplugin_SRCS})
   install_targets(${BOSON_PLUGIN_INSTALL_DIR} bosongameviewplugin)

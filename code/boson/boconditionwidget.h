@@ -25,12 +25,12 @@ class QDomElement;
 class QDomNodeList;
 class QComboBox;
 class QDomDocument;
-class QListBoxItem;
+class Q3ListBoxItem;
 class QLineEdit;
 class QPushButton;
 class QCheckBox;
-class QListBox;
-class KListBox;
+class Q3ListBox;
+class K3ListBox;
 class KIntNumInput;
 
 class BoEventMatching;
@@ -97,12 +97,12 @@ protected slots:
 
 protected:
 	void updateEventMatching(int index, const BoEventMatching* m);
-	QListBoxItem* createEventMatchingItem(const BoEventMatching* m);
+	Q3ListBoxItem* createEventMatchingItem(const BoEventMatching* m);
 	void clearXML();
 
 private:
 	QComboBox* mForPlayer;
-	KListBox* mEventMatchings;
+	K3ListBox* mEventMatchings;
 	QPushButton* mAddMatching;
 	QPushButton* mRemoveMatching;
 	BoEventMatchingWidget* mEventMatchingWidget;
@@ -196,7 +196,7 @@ private slots:
 	void slotDeleteCurrentCondition();
 
 private:
-	QListBox* mConditions;
+	Q3ListBox* mConditions;
 	QPushButton* mEvents;
 	QPushButton* mStatusConditions;
 	QPushButton* mAction;

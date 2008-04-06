@@ -25,7 +25,9 @@
 #include "../global.h"
 
 #include <qobject.h>
-#include <qptrlist.h>
+#include <q3ptrlist.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 class BosonCanvas;
 class BosonCursor;
@@ -54,9 +56,9 @@ class BosonItemContainer;
 class KGameChat;
 class KGameIO;
 class QDomElement;
-template<class T> class QPtrList;
-template<class T> class QValueVector;
-template<class T> class QValueList;
+template<class T> class Q3PtrList;
+template<class T> class Q3ValueVector;
+template<class T> class Q3ValueList;
 
 
 
@@ -105,7 +107,7 @@ public:
 	 * @param effects A list of all BosonEffect objects existing in the
 	 * game.
 	 **/
-	void paintGL(const QPtrList<BosonItemContainer>& allItems, const QPtrList<BosonEffect>& effects);
+	void paintGL(const Q3PtrList<BosonItemContainer>& allItems, const Q3PtrList<BosonEffect>& effects);
 
 	/**
 	 * Uses the list of currently visible items to emulate OpenGL "picking"
@@ -118,7 +120,7 @@ public:
 	 * This is intended: it makes sure that the user does not have to click
 	 * _exactly_ on a pixel of the item, buit can click "close to it", too.
 	 **/
-	QValueList<BosonItem*> emulatePickItems(const QRect& pickRect) const;
+	Q3ValueList<BosonItem*> emulatePickItems(const QRect& pickRect) const;
 
 	unsigned int renderedItems() const;
 	unsigned int renderedCells() const;
@@ -136,8 +138,8 @@ public slots:
 	void slotItemRemoved(BosonItem* item);
 
 protected slots:
-	void slotAddFeedbackAttack(const QPtrList<Unit>& attacker, const Unit* unit);
-	void slotAddFeedbackMoveTo(const QPtrList<Unit>& units, const BoVector2Fixed& pos, bool withAttack);
+	void slotAddFeedbackAttack(const Q3PtrList<Unit>& attacker, const Unit* unit);
+	void slotAddFeedbackMoveTo(const Q3PtrList<Unit>& units, const BoVector2Fixed& pos, bool withAttack);
 	void slotWidgetResized();
 
 protected:
@@ -150,10 +152,10 @@ protected:
 	void renderParticles(BoVisibleEffects&);
 	void renderBulletTrailEffects(BoVisibleEffects& visible);
 	void renderFadeEffects(BoVisibleEffects& visible, bool enableShaderEffects);
-	void renderPathLines(const BosonCanvas* canvas, QValueList<QPoint>& path, bool isFlying, float _z);
-	void createRenderItemList(QValueVector<BoRenderItem>* renderItemList, QValueList<Unit*>* radarContactList, const QPtrList<BosonItemContainer>& allItems);
-	void createSelectionsList(BoItemList* selections, const QValueVector<BoRenderItem>* relevantItems);
-	void createVisibleEffectsList(BoVisibleEffects*, const QPtrList<BosonEffect>& allEffects, unsigned int mapWidth, unsigned int mapHeight);
+	void renderPathLines(const BosonCanvas* canvas, Q3ValueList<QPoint>& path, bool isFlying, float _z);
+	void createRenderItemList(Q3ValueVector<BoRenderItem>* renderItemList, Q3ValueList<Unit*>* radarContactList, const Q3PtrList<BosonItemContainer>& allItems);
+	void createSelectionsList(BoItemList* selections, const Q3ValueVector<BoRenderItem>* relevantItems);
+	void createVisibleEffectsList(BoVisibleEffects*, const Q3PtrList<BosonEffect>& allEffects, unsigned int mapWidth, unsigned int mapHeight);
 
 	void renderShadowMap(const BosonCanvas* canvas);
 	void activateShadowMap();

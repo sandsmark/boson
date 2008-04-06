@@ -22,7 +22,7 @@
 
 #include "bo3dtools.h"
 
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 
 class BoCamera;
 class BoGameCamera;
@@ -146,8 +146,8 @@ class BoAutoCamera
     virtual void moveCompleted();
     virtual void prepareSegmentInterpolation(float endtime);
 
-    bool getCurrentVector(QValueList<InterpolationData>& points, float time, BoVector3Float& result);
-    bool getCurrentValue(QValueList<InterpolationDataFloat>& values, float time, float& result);
+    bool getCurrentVector(Q3ValueList<InterpolationData>& points, float time, BoVector3Float& result);
+    bool getCurrentValue(Q3ValueList<InterpolationDataFloat>& values, float time, float& result);
 
     void setPositionDirty(bool d = true);
     float currentTime()  { return mCurrentTime; }
@@ -166,9 +166,9 @@ class BoAutoCamera
     float mCurrentTime;
     MoveMode mMoveMode;
     InterpolationMode mInterpolationMode;
-    QValueList<InterpolationData> mLookAtPoints;
-    QValueList<InterpolationData> mPosPoints;
-    QValueList<InterpolationData> mUpPoints;
+    Q3ValueList<InterpolationData> mLookAtPoints;
+    Q3ValueList<InterpolationData> mPosPoints;
+    Q3ValueList<InterpolationData> mUpPoints;
     bool mMoving;
 };
 
@@ -229,9 +229,9 @@ class BoAutoGameCamera : public BoAutoCamera
     void init();
 
   private:
-    QValueList<InterpolationDataFloat> mDistancePoints;
-    QValueList<InterpolationDataFloat> mRotationPoints;
-    QValueList<InterpolationDataFloat> mXRotationPoints;
+    Q3ValueList<InterpolationDataFloat> mDistancePoints;
+    Q3ValueList<InterpolationDataFloat> mRotationPoints;
+    Q3ValueList<InterpolationDataFloat> mXRotationPoints;
 };
 
 #endif

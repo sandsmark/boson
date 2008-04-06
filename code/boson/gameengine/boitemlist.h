@@ -20,7 +20,7 @@
 #define BOITEMLIST_H
 
 #include "../bomath.h"
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 
 class BosonItem;
 class Unit;
@@ -49,10 +49,10 @@ class Unit;
 class BoItemList
 {
 public:
-	typedef QValueList<BosonItem*>::Iterator Iterator;
-	typedef QValueList<BosonItem*>::ConstIterator ConstIterator;
-	typedef QValueList<BosonItem*>::iterator iterator;
-	typedef QValueList<BosonItem*>::const_iterator const_iterator;
+	typedef Q3ValueList<BosonItem*>::Iterator Iterator;
+	typedef Q3ValueList<BosonItem*>::ConstIterator ConstIterator;
+	typedef Q3ValueList<BosonItem*>::iterator iterator;
+	typedef Q3ValueList<BosonItem*>::const_iterator const_iterator;
 	BoItemList();
 
 	/**
@@ -114,7 +114,7 @@ public:
 	 * if TRUE, otherwise not
 	 * @return The units on this cell
 	 **/
-	QValueList<Unit*> units(bool collidingOnly = true, bool includeMoving = true, Unit* forUnit = 0, QValueList<BosonItem*>* nonUnit = 0) const;
+	Q3ValueList<Unit*> units(bool collidingOnly = true, bool includeMoving = true, Unit* forUnit = 0, Q3ValueList<BosonItem*>* nonUnit = 0) const;
 
 	/**
 	 * @param collidingOnly if TRUE return only items that are interesting
@@ -127,7 +127,7 @@ public:
 	 * if TRUE, otherwise not
 	 * @return The items on this cell
 	 **/
-	QValueList<BosonItem*> items(bool collidingOnly = true, bool includeMoving = true, Unit* forUnit = 0) const;
+	Q3ValueList<BosonItem*> items(bool collidingOnly = true, bool includeMoving = true, Unit* forUnit = 0) const;
 
 	/**
 	 * @param forUnit the unit for which we test whether this is occupied.
@@ -160,7 +160,7 @@ protected:
 	void registerList();
 
 private:
-	QValueList<BosonItem*> mList;
+	Q3ValueList<BosonItem*> mList;
 };
 
 #endif

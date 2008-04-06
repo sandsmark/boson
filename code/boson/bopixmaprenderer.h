@@ -1,3 +1,6 @@
+//Added by qt3to4:
+#include <QPixmap>
+#include <Q3ValueList>
 /*
     This file is part of the Boson game
     Copyright (C) 2003-2005 Andreas Beckermann (b_mann@gmx.de)
@@ -24,7 +27,7 @@ class BosonGLWidget;
 class BoContext;
 
 class QString;
-template<class T> class QValueList;
+template<class T> class Q3ValueList;
 class QPixmap;
 
 class BoPixmapRendererPrivate;

@@ -20,19 +20,23 @@
 #define KGAME3DSMODELDEBUG_H
 
 #include <qwidget.h>
+//Added by qt3to4:
+#include <QLabel>
+#include <QEvent>
+#include <Q3VBoxLayout>
 
-#include <klistview.h>
+#include <k3listview.h>
 
 #include <lib3ds/types.h>
 
-class QListBoxItem;
-class QListViewItem;
+class Q3ListBoxItem;
+class Q3ListViewItem;
 class QLabel;
 class QPushButton;
-class QVBoxLayout;
+class Q3VBoxLayout;
 class QCheckBox;
-class KPopupMenu;
-class KListBox;
+class KMenu;
+class K3ListBox;
 
 struct _Lib3dsTextureMap;
 typedef struct _Lib3dsObjectData Lib3dsObjectData;
@@ -47,7 +51,7 @@ class Bo3DSTrackLin3;
 class Bo3DSTrackBool;
 class Bo3DSTrackMorph;
 
-class BoListView : public KListView
+class BoListView : public K3ListView
 {
 	Q_OBJECT
 public:
@@ -57,7 +61,7 @@ public:
 
 	/**
 	 * Insert the @ref QListView::columnText of @p column to the @ref
-	 * KPopupMenu that appears when the user right clicks on the header.
+	 * KMenu that appears when the user right clicks on the header.
 	 *
 	 * The user will be able to hide the column then by clicking that menu
 	 * entry.
@@ -74,7 +78,7 @@ protected:
 	virtual bool eventFilter(QObject* o, QEvent* e);
 	
 private:
-	KPopupMenu* mPopup;
+	KMenu* mPopup;
 };
 
 
@@ -138,10 +142,10 @@ protected slots:
 	void slotFrameChanged(int frame);
 	void slotConstructMeshList();
 	void slotConstructNodeList();
-	void slotDisplayMaterial(QListBoxItem*);
-	void slotDisplayMesh(QListViewItem*);
-	void slotDisplayNode(QListViewItem*);
-	void slotConnectToFace(QListViewItem*);
+	void slotDisplayMaterial(Q3ListBoxItem*);
+	void slotDisplayMesh(Q3ListViewItem*);
+	void slotDisplayNode(Q3ListViewItem*);
+	void slotConnectToFace(Q3ListViewItem*);
 	void slotUseLib3dsCoordinates(bool);
 	void slotShowPointIndices(bool);
 	void slotHideConnectableWidgets(bool);
@@ -151,7 +155,7 @@ protected:
 	void updateMeshPage();
 	void updateNodePage();
 
-	void addNodeToList(QListViewItem* parent, Lib3dsNode* node);
+	void addNodeToList(Q3ListViewItem* parent, Lib3dsNode* node);
 
 private:
 	void init();
@@ -220,7 +224,7 @@ protected:
 	QWidget* addWidget(const QString& label, QWidget* w);
 
 private:
-	QVBoxLayout* mLayout;
+	Q3VBoxLayout* mLayout;
 
 	QLabel* mPivot;
 	QLabel* mInstance;
@@ -251,16 +255,16 @@ protected slots:
 	void slotDisplayTrack(Bo3DSTrack*);
 
 protected:
-	QListViewItem* createItem(Bo3DSTrackKey* key, int type);
+	Q3ListViewItem* createItem(Bo3DSTrackKey* key, int type);
 
-	void configureTCB(QListViewItem* item, const Bo3DSTrackTCB& tcb);
-	void configureKey(QListViewItem* item, Bo3DSTrackKey* key, int type);
+	void configureTCB(Q3ListViewItem* item, const Bo3DSTrackTCB& tcb);
+	void configureKey(Q3ListViewItem* item, Bo3DSTrackKey* key, int type);
 
 private:
 	QLabel* mFlags;
 	QLabel* mType;
-	KListBox* mFlagList;
-	KListView* mKeys;
+	K3ListBox* mFlagList;
+	K3ListView* mKeys;
 	int mKeyData0;
 	int mKeyData1;
 	int mKeyData2;

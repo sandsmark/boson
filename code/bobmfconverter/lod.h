@@ -21,7 +21,7 @@
 #define LOD_H
 
 
-#include <qvaluevector.h>
+#include <q3valuevector.h>
 
 class Mesh;
 class Frame;
@@ -38,13 +38,13 @@ class LOD
     unsigned int addMesh(Mesh* m);
     Mesh* mesh(unsigned int i) const  { return mMeshes[i]; }
     unsigned int meshCount() const  { return mMeshes.count(); }
-    void removeAllMeshesBut(const QValueVector<Mesh*>& meshes);
+    void removeAllMeshesBut(const Q3ValueVector<Mesh*>& meshes);
     void removeReferencesToMesh(Mesh* mesh);
 
     unsigned int createFrame();
     Frame* frame(unsigned int i) const  { return mFrames[i]; }
     unsigned int frameCount() const  { return mFrames.count(); }
-    void removeAllFramesBut(const QValueVector<Frame*>& frames);
+    void removeAllFramesBut(const Q3ValueVector<Frame*>& frames);
 
     float distance() const  { return mDist; }
     void setDistance(float dist)  { mDist = dist; }
@@ -53,8 +53,8 @@ class LOD
 
 
   private:
-    QValueVector<Mesh*> mMeshes;
-    QValueVector<Frame*> mFrames;
+    Q3ValueVector<Mesh*> mMeshes;
+    Q3ValueVector<Frame*> mFrames;
     float mDist;
 };
 

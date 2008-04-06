@@ -54,10 +54,14 @@
 #include <klocale.h>
 #include <kgame/kgamepropertyhandler.h>
 
-#include <qpointarray.h>
+#include <q3pointarray.h>
 #include <qdatastream.h>
 #include <qdom.h>
-#include <qintdict.h>
+#include <q3intdict.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3CString>
+#include <Q3PtrList>
 
 #include <math.h>
 
@@ -104,7 +108,7 @@ public:
 	BoCanvasQuadTreeCollection* mQuadTreeCollection;
 	BosonCanvasStatistics* mStatistics;
 
-	QPtrList<Unit> mDestroyedUnits;
+	Q3PtrList<Unit> mDestroyedUnits;
 
 	BosonMap* mMap; // just a pointer - no memory allocated
 
@@ -113,8 +117,8 @@ public:
 	// by default ALL items are in "work" == -1. if an item changes its work
 	// (i.e. it is a unit and it called setAdvanceWork()) then it will go to
 	// another list (once slotAdvance() reaches its end)
-	QMap<int, QPtrList<BosonItem> > mWork2AdvanceList;
-	QPtrList<BosonItem> mChangeAdvanceList; // work has been changed - request to change advance list
+	QMap<int, Q3PtrList<BosonItem> > mWork2AdvanceList;
+	Q3PtrList<BosonItem> mChangeAdvanceList; // work has been changed - request to change advance list
 
 	KGamePropertyHandler* mProperties;
 
@@ -134,7 +138,7 @@ public:
 	BoEventManager* mEventManager;
 	BoCanvasEventListener* mEventListener;
 
-	QIntDict<BosonMoveData> mUnitProperties2MoveData;
+	Q3IntDict<BosonMoveData> mUnitProperties2MoveData;
 
 	BoCanvasSightManager* mSightManager;
 };
@@ -173,11 +177,11 @@ public:
 	 * Recalculates signal strength of radar and radarjammer units
 	 **/
 	void recalculateSpecialSignalStrengths();
-	const QValueList<const Unit*>* radarUnits() const { return &mRadarUnits; }
+	const Q3ValueList<const Unit*>* radarUnits() const { return &mRadarUnits; }
 
 	void addRadarJammer(Unit* unit);
 	void removeRadarJammer(Unit* unit);
-	const QValueList<const Unit*>* radarJammerUnits() const { return &mRadarJammers; }
+	const Q3ValueList<const Unit*>* radarJammerUnits() const { return &mRadarJammers; }
 	void updateChangedJammer(Unit* unit, bofixed oldCenterX, bofixed oldCenterY, RadarChangeType type = Move);
 	bofixed jammerSignalStrength(const RadarJammerPlugin* radar, bofixed x, bofixed y, Unit* u);
 
@@ -194,19 +198,19 @@ private:
 	};
 
 	// List of units that have moved, their sights need to be updated
-	QValueList<ScheduledUnit> mScheduledSightUpdates;
+	Q3ValueList<ScheduledUnit> mScheduledSightUpdates;
 	// List of all units that have moved, their radar signal strengths have
 	//  to be updated
-	QValueList<ScheduledUnit> mScheduledRadarUpdates;
+	Q3ValueList<ScheduledUnit> mScheduledRadarUpdates;
 	// List of _radar_ units that have moved, everything in their _range_ need to
 	//  be updated
-	QValueList<ScheduledUnit> mChangedRadars;
+	Q3ValueList<ScheduledUnit> mChangedRadars;
 	// List of _radar jammer_ units that have moved, everything in their _range_
 	//  need to be updated
-	QValueList<ScheduledUnit> mChangedJammers;
+	Q3ValueList<ScheduledUnit> mChangedJammers;
 
-	QValueList<const Unit*> mRadarUnits;
-	QValueList<const Unit*> mRadarJammers;
+	Q3ValueList<const Unit*> mRadarUnits;
+	Q3ValueList<const Unit*> mRadarJammers;
 
 	BosonMap* mMap;
 	BosonCanvas* mCanvas;
@@ -287,12 +291,12 @@ void BoCanvasSightManager::updateSight(Unit* unit, bofixed oldCenterX_, bofixed 
  int oldright = ((oldCenterX + sight > mMap->width()) ? mMap->width() : (oldCenterX + sight)) - x;
  int oldbottom = ((oldCenterY + sight > mMap->height()) ? mMap->height() : (oldCenterY + sight)) - y;
 
- if (QMAX(deltaX, deltaY) <= 5) {
+ if (qMax(deltaX, deltaY) <= 5) {
 	// Speed up the common case by looking through every cell just once
-	left = QMIN(left, oldleft);
-	top = QMIN(top, oldtop);
-	right = QMAX(right, oldright);
-	bottom = QMAX(bottom, oldbottom);
+	left = qMin(left, oldleft);
+	top = qMin(top, oldtop);
+	right = qMax(right, oldright);
+	bottom = qMax(bottom, oldbottom);
 	for (int i = left; i < right; i++) {
 		for (int j = top; j < bottom; j++) {
 			int olddist = (i+deltaX)*(i+deltaX) + (j+deltaY)*(j+deltaY);
@@ -365,7 +369,7 @@ void BoCanvasSightManager::removeSight(Unit* unit)
  if (unit->isScheduledForSightUpdate()) {
 	// If unit has already moved since the last sight update, we need to use the
 	//  old coordinate
-	QValueList<ScheduledUnit>::iterator it;
+	Q3ValueList<ScheduledUnit>::iterator it;
 	for (it = mScheduledSightUpdates.begin(); it != mScheduledSightUpdates.end(); ++it) {
 		const ScheduledUnit& s = *it;
 		if (s.unit == unit) {
@@ -395,8 +399,8 @@ void BoCanvasSightManager::removeSight(Unit* unit)
 
 void BoCanvasSightManager::updateVisibleStatus(Unit* unit)
 {
- QPtrList<Player> players = mPlayerListManager->activeGamePlayerList();
- for (QPtrListIterator<Player> pit(players); pit.current(); ++pit) {
+ Q3PtrList<Player> players = mPlayerListManager->activeGamePlayerList();
+ for (Q3PtrListIterator<Player> pit(players); pit.current(); ++pit) {
 	Player* player = pit.current();
 	if (unit->owner() == player) {
 		continue;
@@ -476,10 +480,10 @@ void BoCanvasSightManager::updateChangedRadar(Unit* unit, bofixed oldCenterX, bo
  bofixed maxrange = prop->range();
 
  // Calculate bbox of the radar-affected area
- bofixed minx = QMAX(QMIN(unit->centerX(), oldCenterX) - maxrange, bofixed(0));
- bofixed maxx = QMIN(QMAX(unit->centerX(), oldCenterX) + maxrange, bofixed(mMap->width()));
- bofixed miny = QMAX(QMIN(unit->centerY(), oldCenterY) - maxrange, bofixed(0));
- bofixed maxy = QMIN(QMAX(unit->centerY(), oldCenterY) + maxrange, bofixed(mMap->height()));
+ bofixed minx = qMax(qMin(unit->centerX(), oldCenterX) - maxrange, bofixed(0));
+ bofixed maxx = qMin(qMax(unit->centerX(), oldCenterX) + maxrange, bofixed(mMap->width()));
+ bofixed miny = qMax(qMin(unit->centerY(), oldCenterY) - maxrange, bofixed(0));
+ bofixed maxy = qMin(qMax(unit->centerY(), oldCenterY) + maxrange, bofixed(mMap->height()));
 
  BoRect2Fixed area(minx,  miny, maxx, maxy);
  BoItemList* items = mCanvas->collisions()->collisionsAtCells(area, 0, false);
@@ -513,20 +517,20 @@ void BoCanvasSightManager::updateRadarSignal(Unit* unit, bofixed, bofixed)
  PROFILE_METHOD;
  // First calculate jammer signal strength
  bofixed jammersignalstrength = 0;
- for (QValueList<const Unit*>::iterator it = mRadarJammers.begin(); it != mRadarJammers.end(); ++it) {
+ for (Q3ValueList<const Unit*>::iterator it = mRadarJammers.begin(); it != mRadarJammers.end(); ++it) {
 	const Unit* u = *it;
 	const RadarJammerPlugin* jammer = (const RadarJammerPlugin*)u->plugin(UnitPlugin::RadarJammer);
 	jammersignalstrength += jammerSignalStrength(jammer, u->centerX(), u->centerY(), unit);
  }
 
  // Then radar signal strength for all players
- QPtrList<Player> players = mPlayerListManager->activeGamePlayerList();
- for (QPtrListIterator<Player> it(players); it.current(); ++it) {
+ Q3PtrList<Player> players = mPlayerListManager->activeGamePlayerList();
+ for (Q3PtrListIterator<Player> it(players); it.current(); ++it) {
 	Player* player = it.current();
 	bofixed signalstrength = 0;
 
-	const QValueList<const Unit*>* radars = player->radarUnits();
-	for (QValueList<const Unit*>::const_iterator rit = radars->begin(); rit != radars->end(); ++rit) {
+	const Q3ValueList<const Unit*>* radars = player->radarUnits();
+	for (Q3ValueList<const Unit*>::const_iterator rit = radars->begin(); rit != radars->end(); ++rit) {
 		const Unit* u = *rit;
 		const RadarPlugin* radar = (const RadarPlugin*)u->plugin(UnitPlugin::Radar);
 		if (unit->isFlying() && radar->detectsAirUnits()) {
@@ -537,7 +541,7 @@ void BoCanvasSightManager::updateRadarSignal(Unit* unit, bofixed, bofixed)
 	}
 
 	// Substract jammer's signal
-	signalstrength = QMAX(bofixed(0), signalstrength - jammersignalstrength);
+	signalstrength = qMax(bofixed(0), signalstrength - jammersignalstrength);
 	unit->setRadarSignalStrength(player->bosonId(), signalstrength);
  }
 
@@ -599,16 +603,16 @@ bofixed BoCanvasSightManager::radarSignalStrength(const RadarPlugin* radar, bofi
 void BoCanvasSightManager::recalculateSpecialSignalStrengths()
 {
  PROFILE_METHOD;
- QPtrList<Player> players = mPlayerListManager->activeGamePlayerList();
+ Q3PtrList<Player> players = mPlayerListManager->activeGamePlayerList();
 
  // Calculate signal strengths for radars
  // Go through all radar units
- for (QValueList<const Unit*>::Iterator it = mRadarUnits.begin(); it != mRadarUnits.end(); ++it) {
+ for (Q3ValueList<const Unit*>::Iterator it = mRadarUnits.begin(); it != mRadarUnits.end(); ++it) {
 	// This is the radar unit that we're trying to detect
 	Unit* radarUnit = (Unit*)*it;
 	float radarUnitTransmittedPower = ((const RadarPlugin*)radarUnit->plugin(UnitPlugin::Radar))->transmittedPower();
 	// Go through all players
-	for (QPtrListIterator<Player> pit(players); pit.current(); ++pit) {
+	for (Q3PtrListIterator<Player> pit(players); pit.current(); ++pit) {
 		Player* player = pit.current();
 		if (radarUnit->owner() == player) {
 			continue;
@@ -617,8 +621,8 @@ void BoCanvasSightManager::recalculateSpecialSignalStrengths()
 		bofixed signalStrength = 0;
 
 		// Go through all player's radars and calculate signal strengths
-		const QValueList<const Unit*>* playerRadars = player->radarUnits();
-		for (QValueList<const Unit*>::const_iterator rit = playerRadars->begin(); rit != playerRadars->end(); ++rit) {
+		const Q3ValueList<const Unit*>* playerRadars = player->radarUnits();
+		for (Q3ValueList<const Unit*>::const_iterator rit = playerRadars->begin(); rit != playerRadars->end(); ++rit) {
 			const Unit* u = *rit;
 			const RadarPlugin* radar = (const RadarPlugin*)u->plugin(UnitPlugin::Radar);
 			// Make sure player's radar can detect radarUnit
@@ -649,12 +653,12 @@ void BoCanvasSightManager::recalculateSpecialSignalStrengths()
 
  // Calculate signal strengths for jammers in a similar fashion
  // Go through all jammer units
- for (QValueList<const Unit*>::Iterator it = mRadarJammers.begin(); it != mRadarJammers.end(); ++it) {
+ for (Q3ValueList<const Unit*>::Iterator it = mRadarJammers.begin(); it != mRadarJammers.end(); ++it) {
 	// This is the jammer unit that we're trying to detect
 	Unit* jammerUnit = (Unit*)*it;
 	float jammerUnitTransmittedPower = ((const RadarJammerPlugin*)jammerUnit->plugin(UnitPlugin::RadarJammer))->transmittedPower();
 	// Go through all players
-	for (QPtrListIterator<Player> pit(players); pit.current(); ++pit) {
+	for (Q3PtrListIterator<Player> pit(players); pit.current(); ++pit) {
 		Player* player = pit.current();
 		if (jammerUnit->owner() == player) {
 			continue;
@@ -663,8 +667,8 @@ void BoCanvasSightManager::recalculateSpecialSignalStrengths()
 		bofixed signalStrength = 0;
 
 		// Go through all player's radars and calculate signal strengths
-		const QValueList<const Unit*>* playerRadars = player->radarUnits();
-		for (QValueList<const Unit*>::const_iterator rit = playerRadars->begin(); rit != playerRadars->end(); ++rit) {
+		const Q3ValueList<const Unit*>* playerRadars = player->radarUnits();
+		for (Q3ValueList<const Unit*>::const_iterator rit = playerRadars->begin(); rit != playerRadars->end(); ++rit) {
 			const Unit* u = *rit;
 			const RadarPlugin* radar = (const RadarPlugin*)u->plugin(UnitPlugin::Radar);
 			// Make sure player's radar can detect jammerUnit
@@ -729,10 +733,10 @@ void BoCanvasSightManager::updateChangedJammer(Unit* unit, bofixed oldCenterX, b
  bofixed maxrange = prop->range();
 
  // Calculate bbox of the radar-affected area
- bofixed minx = QMAX(QMIN(unit->centerX(), oldCenterX) - maxrange, bofixed(0));
- bofixed maxx = QMIN(QMAX(unit->centerX(), oldCenterX) + maxrange, bofixed(mMap->width()));
- bofixed miny = QMAX(QMIN(unit->centerY(), oldCenterY) - maxrange, bofixed(0));
- bofixed maxy = QMIN(QMAX(unit->centerY(), oldCenterY) + maxrange, bofixed(mMap->height()));
+ bofixed minx = qMax(qMin(unit->centerX(), oldCenterX) - maxrange, bofixed(0));
+ bofixed maxx = qMin(qMax(unit->centerX(), oldCenterX) + maxrange, bofixed(mMap->width()));
+ bofixed miny = qMax(qMin(unit->centerY(), oldCenterY) - maxrange, bofixed(0));
+ bofixed maxy = qMin(qMax(unit->centerY(), oldCenterY) + maxrange, bofixed(mMap->height()));
 
  BoRect2Fixed area(minx,  miny, maxx, maxy);
  BoItemList* items = mCanvas->collisions()->collisionsAtCells(area, 0, false);
@@ -814,7 +818,7 @@ protected:
 	void syncAdvanceFunctions(const BoItemList& allItems, bool advanceFlag); // MUST be called after advanceFunction() stuff
 	void updateWork2AdvanceList();
 	void maximalAdvanceCountTasks(unsigned int advanceCallsCount); // "maximalAdvanceCount" is nonsense here, but the name has historic reasons
-	void notifyAboutDestroyedUnits(const QPtrList<Unit>& destroyedUnits, unsigned int first, const BoItemList& allItems);
+	void notifyAboutDestroyedUnits(const Q3PtrList<Unit>& destroyedUnits, unsigned int first, const BoItemList& allItems);
 
 private:
 	BosonCanvas* mCanvas;
@@ -826,7 +830,7 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
  boProfiling->push(prof_funcinfo + " - Whole method");
 
  QMap<Player*, bool> player2HasMiniMap;
- for (QPtrListIterator<Player> it(mPlayerListManager->gamePlayerList()); it.current(); ++it) {
+ for (Q3PtrListIterator<Player> it(mPlayerListManager->gamePlayerList()); it.current(); ++it) {
 	Player* p = it.current();
 	player2HasMiniMap.insert(p, p->hasMiniMap());
  }
@@ -884,7 +888,7 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
  // if this value is reached, "free" refill stops. only using ammunition center
  // (i.e. by producing new ammo), new ammo can be gained.
  const unsigned long int maxAmmo = 1000;
- for (QPtrListIterator<Player> it(mPlayerListManager->activeGamePlayerList()); it.current(); ++it) {
+ for (Q3PtrListIterator<Player> it(mPlayerListManager->activeGamePlayerList()); it.current(); ++it) {
 	Player* p = it.current();
 	QString type = "Generic";
 	if (p->ammunition(type) < maxAmmo) {
@@ -929,7 +933,7 @@ void BoCanvasAdvance::chargeUnits(unsigned int advanceCallsCount, bool advanceFl
 {
  Q_UNUSED(advanceCallsCount);
  Q_UNUSED(advanceFlag);
- for (QPtrListIterator<Player> it(mPlayerListManager->gamePlayerList()); it.current(); ++it) {
+ for (Q3PtrListIterator<Player> it(mPlayerListManager->gamePlayerList()); it.current(); ++it) {
 	Player* p = it.current();
 	p->updatePowerChargeForCurrentAdvanceCall();
  }
@@ -939,7 +943,7 @@ void BoCanvasAdvance::unchargeUnits(unsigned int advanceCallsCount, bool advance
 {
  Q_UNUSED(advanceCallsCount);
  Q_UNUSED(advanceFlag);
- for (QPtrListIterator<Player> it(mPlayerListManager->gamePlayerList()); it.current(); ++it) {
+ for (Q3PtrListIterator<Player> it(mPlayerListManager->gamePlayerList()); it.current(); ++it) {
 	Player* p = it.current();
 	p->unchargeUnitsForAdvance();
  }
@@ -992,7 +996,7 @@ void BoCanvasAdvance::advanceFunctionAndMove(unsigned int advanceCallsCount, boo
 {
  PROFILE_METHOD;
  // FIXME: the mWork2AdvanceList map should be a parameter
- QMap<int, QPtrList<BosonItem> >::Iterator it;
+ QMap<int, Q3PtrList<BosonItem> >::Iterator it;
  for (it = mCanvas->d->mWork2AdvanceList.begin(); it != mCanvas->d->mWork2AdvanceList.end(); ++it) {
 	int work = it.key();
 	bool skip = false;
@@ -1051,7 +1055,7 @@ void BoCanvasAdvance::advanceFunctionAndMove(unsigned int advanceCallsCount, boo
 	}
 	BosonProfiler profiler(QString("advanceFunction() and moveBy() for work==%1").arg(work));
 //	boDebug() << "advancing " << (*it).count() << " items with advanceWork=" << work << endl;
-	QPtrListIterator<BosonItem> itemIt(*it);
+	Q3PtrListIterator<BosonItem> itemIt(*it);
 	for (; itemIt.current(); ++itemIt) {
 		BosonItem* s = itemIt.current();
 		if (work != UnitBase::WorkDestroyed && RTTI::isUnit(s->rtti())) {
@@ -1093,7 +1097,7 @@ void BoCanvasAdvance::syncAdvanceFunctions(const BoItemList& allItems, bool adva
 
 void BoCanvasAdvance::updateWork2AdvanceList()
 {
- QPtrListIterator<BosonItem> changeIt(mCanvas->d->mChangeAdvanceList);
+ Q3PtrListIterator<BosonItem> changeIt(mCanvas->d->mChangeAdvanceList);
  for (; changeIt.current(); ++changeIt) {
 	BosonItem* item = changeIt.current();
 	mCanvas->removeFromAdvanceLists(item); // AB: this will probably take too much time :(
@@ -1119,8 +1123,8 @@ void BoCanvasAdvance::maximalAdvanceCountTasks(unsigned int advanceCallsCount)
  }
  BosonProfiler profiler2("Advance MAXIMAL_ADVANCE_COUNT: all tasks");
  boDebug(300) << "MAXIMAL_ADVANCE_COUNT" << endl;
- QPtrListIterator<Unit> deletionIt(mCanvas->d->mDestroyedUnits);
- QPtrList<BosonItem> deleteList;
+ Q3PtrListIterator<Unit> deletionIt(mCanvas->d->mDestroyedUnits);
+ Q3PtrList<BosonItem> deleteList;
  boProfiling->push("Advance MAXIMAL_ADVANCE_COUNT: construction of item deletion list");
  while (deletionIt.current()) {
 	deletionIt.current()->increaseDeletionTimer();
@@ -1132,7 +1136,7 @@ void BoCanvasAdvance::maximalAdvanceCountTasks(unsigned int advanceCallsCount)
  boProfiling->pop();
 
  boProfiling->push("Advance MAXIMAL_ADVANCE_COUNT: update destroyed list");
- QPtrListIterator<BosonItem> destroyedIt(deleteList);
+ Q3PtrListIterator<BosonItem> destroyedIt(deleteList);
  while (destroyedIt.current()) {
 	mCanvas->d->mDestroyedUnits.removeRef((Unit*)destroyedIt.current());
 	++destroyedIt;
@@ -1149,10 +1153,10 @@ void BoCanvasAdvance::maximalAdvanceCountTasks(unsigned int advanceCallsCount)
  boProfiling->pop();
 }
 
-void BoCanvasAdvance::notifyAboutDestroyedUnits(const QPtrList<Unit>& destroyedUnits, unsigned int first, const BoItemList& allItems)
+void BoCanvasAdvance::notifyAboutDestroyedUnits(const Q3PtrList<Unit>& destroyedUnits, unsigned int first, const BoItemList& allItems)
 {
  unsigned int i = 0;
- QPtrListIterator<Unit> destIt(destroyedUnits);
+ Q3PtrListIterator<Unit> destIt(destroyedUnits);
  while (destIt.current() && i < first) {
 	++destIt;
  }
@@ -1263,7 +1267,7 @@ void BosonCanvas::quitGame()
  delete d->mPathFinder;
  d->mPathFinder = 0;
  deleteDestroyed();
- QMap<int, QPtrList<BosonItem> >::Iterator it;
+ QMap<int, Q3PtrList<BosonItem> >::Iterator it;
  for (it = d->mWork2AdvanceList.begin(); it != d->mWork2AdvanceList.end(); ++it) {
 	(*it).clear();
  }
@@ -1280,8 +1284,8 @@ void BosonCanvas::quitGame()
 
 void BosonCanvas::deleteDestroyed()
 {
- QPtrList<BosonItem> items;
- QPtrListIterator<Unit> it(d->mDestroyedUnits);
+ Q3PtrList<BosonItem> items;
+ Q3PtrListIterator<Unit> it(d->mDestroyedUnits);
  while (it.current()) {
 	items.append(it.current());
 	++it;
@@ -1431,12 +1435,12 @@ void BosonCanvas::removeRadarJammer(Unit* unit)
  d->mSightManager->removeRadarJammer(unit);
 }
 
-const QValueList<const Unit*>* BosonCanvas::radarJammerUnits() const
+const Q3ValueList<const Unit*>* BosonCanvas::radarJammerUnits() const
 {
  return d->mSightManager->radarJammerUnits();
 }
 
-const QValueList<const Unit*>* BosonCanvas::radarUnits() const
+const Q3ValueList<const Unit*>* BosonCanvas::radarUnits() const
 {
  return d->mSightManager->radarUnits();
 }
@@ -1464,7 +1468,7 @@ void BosonCanvas::explosion(const BoVector3Fixed& pos, long int damage, bofixed 
  // Decrease health of all units within damaging range of explosion
  long int d;
  bofixed dist;
- QValueList<Unit*> l = collisions()->unitCollisionsInSphere(pos, range);
+ Q3ValueList<Unit*> l = collisions()->unitCollisionsInSphere(pos, range);
  for (unsigned int i = 0; i < l.count(); i++) {
 	Unit* u = l[i];
 	// Calculate actual distance of unit from explosion's center (this takes
@@ -1730,7 +1734,7 @@ void BosonCanvas::setHeightAtCorner(int x, int y, float height)
  map()->setHeightAtCorner(x, y, height);
 }
 
-void BosonCanvas::setHeightsAtCorners(const QValueList< QPair<QPoint, float> >& heights)
+void BosonCanvas::setHeightsAtCorners(const Q3ValueList< QPair<QPoint, float> >& heights)
 {
  BO_CHECK_NULL_RET(map());
  map()->setHeightsAtCorners(heights);
@@ -1834,7 +1838,7 @@ float BosonCanvas::terrainHeightAtPoint(bofixed x, bofixed y) const
 
 void BosonCanvas::removeFromCells(BosonItem* item)
 {
- const QPtrVector<Cell>* cells = item->cells();
+ const Q3PtrVector<Cell>* cells = item->cells();
  for (unsigned int i = 0; i < cells->count(); i++) {
 	Cell* c = cells->at(i);
 	if (!c) {
@@ -1850,10 +1854,10 @@ void BosonCanvas::removeFromCells(BosonItem* item)
 	int x2 = x1;
 	int y2 = y1;
 	for (unsigned int i = 1; i < cells->count(); i++) {
-		x1 = QMIN(x1, cells->at(i)->x());
-		y1 = QMIN(y1, cells->at(i)->y());
-		x2 = QMAX(x2, cells->at(i)->x());
-		y2 = QMAX(y2, cells->at(i)->y());
+		x1 = qMin(x1, cells->at(i)->x());
+		y1 = qMin(y1, cells->at(i)->y());
+		x2 = qMax(x2, cells->at(i)->x());
+		y2 = qMax(y2, cells->at(i)->y());
 	}
 	d->mQuadTreeCollection->cellUnitsChanged(this, x1, y1, x2, y2);
  }
@@ -1861,7 +1865,7 @@ void BosonCanvas::removeFromCells(BosonItem* item)
 
 void BosonCanvas::addToCells(BosonItem* item)
 {
- const QPtrVector<Cell>* cells = item->cells();
+ const Q3PtrVector<Cell>* cells = item->cells();
  for (unsigned int i = 0; i < cells->count(); i++) {
 	Cell* c = cells->at(i);
 	if (!c) {
@@ -1877,10 +1881,10 @@ void BosonCanvas::addToCells(BosonItem* item)
 	int x2 = x1;
 	int y2 = y1;
 	for (unsigned int i = 1; i < cells->count(); i++) {
-		x1 = QMIN(x1, cells->at(i)->x());
-		y1 = QMIN(y1, cells->at(i)->y());
-		x2 = QMAX(x2, cells->at(i)->x());
-		y2 = QMAX(y2, cells->at(i)->y());
+		x1 = qMin(x1, cells->at(i)->x());
+		y1 = qMin(y1, cells->at(i)->y());
+		x2 = qMax(x2, cells->at(i)->x());
+		y2 = qMax(y2, cells->at(i)->y());
 	}
 	d->mQuadTreeCollection->cellUnitsChanged(this, x1, y1, x2, y2);
  }
@@ -1941,8 +1945,8 @@ bool BosonCanvas::canPlaceUnitAtTopLeftPos(const UnitProperties* prop, const BoV
 	const RefineryProperties* refinery = (RefineryProperties*)prop->properties(PluginProperties::Refinery);
 	if(refinery) {
 		// Refineries can't be built close to resource mines
-		QValueList<Unit*> list = collisions()->unitCollisionsInRange(r.center(), REFINERY_FORBID_RANGE);
-		QValueList<Unit*>::Iterator it;
+		Q3ValueList<Unit*> list = collisions()->unitCollisionsInRange(r.center(), REFINERY_FORBID_RANGE);
+		Q3ValueList<Unit*>::Iterator it;
 		for (it = list.begin(); it != list.end(); it++) {
 			ResourceMinePlugin* resource = (ResourceMinePlugin*)(*it)->plugin(UnitPlugin::ResourceMine);
 			if(resource) {
@@ -1954,8 +1958,8 @@ bool BosonCanvas::canPlaceUnitAtTopLeftPos(const UnitProperties* prop, const BoV
 		}
 	}
 	// must be in BUILD_RANGE of any facility of the player
-	QValueList<Unit*> list = collisions()->unitCollisionsInRange(r.center(), BUILD_RANGE);
-	QValueList<Unit*>::Iterator it;
+	Q3ValueList<Unit*> list = collisions()->unitCollisionsInRange(r.center(), BUILD_RANGE);
+	Q3ValueList<Unit*>::Iterator it;
 	for (it = list.begin(); it != list.end(); it++) {
 		if ((*it)->isFacility() && (*it)->owner() == factory->player()) {
 			return true;
@@ -2021,7 +2025,7 @@ void BosonCanvas::removeItem(BosonItem* item)
  }
 
  // remove from all advance lists
- for (QMap<int, QPtrList<BosonItem> >::Iterator it = d->mWork2AdvanceList.begin(); it != d->mWork2AdvanceList.end(); ++it) {
+ for (QMap<int, Q3PtrList<BosonItem> >::Iterator it = d->mWork2AdvanceList.begin(); it != d->mWork2AdvanceList.end(); ++it) {
 	(*it).removeRef(item);
  }
  d->mChangeAdvanceList.removeRef(item);
@@ -2031,7 +2035,7 @@ void BosonCanvas::removeItem(BosonItem* item)
 
 void BosonCanvas::deleteUnusedShots()
 {
- QPtrList<BosonItem> unusedShots;
+ Q3PtrList<BosonItem> unusedShots;
  BoItemList::Iterator it;
  for (it = d->mAllItems.begin(); it != d->mAllItems.end(); ++it) {
 	if (RTTI::isShot((*it)->rtti())) {
@@ -2104,8 +2108,8 @@ bool BosonCanvas::loadItemsFromXML(const QDomElement& root)
  // are direct child of root!!
  // -> this is speed relevant for large maps
  QDomNodeList list = root.elementsByTagName(QString::fromLatin1("Items"));
- QValueList<QDomElement> allItemElements;
- QValueList<BosonItem*> allItems;
+ Q3ValueList<QDomElement> allItemElements;
+ Q3ValueList<BosonItem*> allItems;
  for (unsigned int i = 0; i < list.count(); i++) {
 	QDomElement items = list.item(i).toElement();
 	if (items.isNull()) {
@@ -2353,13 +2357,13 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& element, BosonItem* item)
  return true;
 }
 
-QCString BosonCanvas::saveCanvas() const
+Q3CString BosonCanvas::saveCanvas() const
 {
  QDomDocument doc(QString::fromLatin1("Canvas"));
  QDomElement root = doc.createElement(QString::fromLatin1("Canvas"));
  doc.appendChild(root);
  if (!saveAsXML(root)) {
-	return QCString();
+	return Q3CString();
  }
  return doc.toCString();
 }
@@ -2396,7 +2400,7 @@ bool BosonCanvas::saveItemsAsXML(QDomElement& root) const
 {
  QDomDocument doc = root.ownerDocument();
  QMap<unsigned int, QDomElement> owner2Items;
- QPtrList<Player> gamePlayerList = d->mPlayerListManager->gamePlayerList();
+ Q3PtrList<Player> gamePlayerList = d->mPlayerListManager->gamePlayerList();
  for (KPlayer* p = gamePlayerList.first(); p; p = gamePlayerList.next()) {
 	QDomElement items = doc.createElement(QString::fromLatin1("Items"));
 
@@ -2435,7 +2439,7 @@ bool BosonCanvas::saveItemsAsXML(QDomElement& root) const
  return true;
 }
 
-QCString BosonCanvas::emptyCanvasFile(unsigned int playerCount)
+Q3CString BosonCanvas::emptyCanvasFile(unsigned int playerCount)
 {
  QDomDocument doc(QString::fromLatin1("Canvas"));
  QDomElement root = doc.createElement(QString::fromLatin1("Canvas"));
@@ -2481,7 +2485,7 @@ void BosonCanvas::removeFromAdvanceLists(BosonItem* item)
  // whenever we add an item to a list, we also add this item to that dict (and
  // of course remove when it when it gets removed from the list). then we could
  // get the correct list in constant time.
- QMap<int, QPtrList<BosonItem> >::Iterator it;
+ QMap<int, Q3PtrList<BosonItem> >::Iterator it;
  for (it = d->mWork2AdvanceList.begin(); it != d->mWork2AdvanceList.end(); ++it) {
 	(*it).removeRef(item);
  }
@@ -2497,13 +2501,13 @@ bool BosonCanvas::onCanvas(const BoVector3Fixed& pos) const
  return onCanvas(pos.x(), pos.y());
 }
 
-void BosonCanvas::deleteItems(const QValueList<unsigned long int>& _ids)
+void BosonCanvas::deleteItems(const Q3ValueList<unsigned long int>& _ids)
 {
  if (d->mGameMode) {
 	boError() << k_funcinfo << "not in editor mode" << endl;
 	return;
  }
- QValueList<unsigned long int> ids = _ids;
+ Q3ValueList<unsigned long int> ids = _ids;
  BoItemList::Iterator it;
  while (!ids.isEmpty()) {
 	unsigned long int id = ids.first();
@@ -2520,7 +2524,7 @@ void BosonCanvas::deleteItems(const QValueList<unsigned long int>& _ids)
 
 void BosonCanvas::deleteItems(BoItemList& items)
 {
- QPtrList<BosonItem> list;
+ Q3PtrList<BosonItem> list;
  BoItemList::Iterator it;
  for (it = items.begin(); it != items.end(); ++it) {
 	list.append(*it);
@@ -2532,7 +2536,7 @@ void BosonCanvas::deleteItems(BoItemList& items)
  items.clear();
 }
 
-void BosonCanvas::deleteItems(QPtrList<BosonItem>& items)
+void BosonCanvas::deleteItems(Q3PtrList<BosonItem>& items)
 {
  while (items.count() > 0) {
 	BosonItem* i = items.first();
@@ -2789,8 +2793,8 @@ Unit* BosonCanvas::findUnit(unsigned long int id) const
 void BosonCanvas::clearMoveDatas()
 {
  d->mUnitProperties2MoveData.setAutoDelete(false);
- QPtrList<BosonMoveData> datas;
- for (QIntDictIterator<BosonMoveData> it(d->mUnitProperties2MoveData); it.current(); ++it) {
+ Q3PtrList<BosonMoveData> datas;
+ for (Q3IntDictIterator<BosonMoveData> it(d->mUnitProperties2MoveData); it.current(); ++it) {
 	if (!datas.contains(it.current())) {
 		datas.append(it.current());
 	}

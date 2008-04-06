@@ -57,12 +57,20 @@
 #include <qlayout.h>
 #include <qlabel.h>
 #include <qtabwidget.h>
-#include <qlistbox.h>
-#include <qgroupbox.h>
+#include <q3listbox.h>
+#include <q3groupbox.h>
 #include <qlineedit.h>
 #include <qfile.h>
 #include <qbuffer.h>
 #include <qimage.h>
+//Added by qt3to4:
+#include <Q3TextStream>
+#include <Q3HBoxLayout>
+#include <Q3ValueList>
+#include <Q3GridLayout>
+#include <Q3CString>
+#include <QPixmap>
+#include <Q3VBoxLayout>
 
 #include <math.h>
 #include <stdlib.h>
@@ -91,22 +99,22 @@ void postBosonConfigInit();
 BoTextureCopyright::BoTextureCopyright(QWidget* parent)
 	: QWidget(parent)
 {
- QVBoxLayout* layout = new QVBoxLayout(this);
+ Q3VBoxLayout* layout = new Q3VBoxLayout(this);
  mTexture = new QLabel(this);
  layout->addWidget(mTexture);
 
  QWidget* w;
- QHBoxLayout* h;
+ Q3HBoxLayout* h;
 
  w = new QWidget(this);
- h = new QHBoxLayout(w);
+ h = new Q3HBoxLayout(w);
  h->setAutoAdd(true);
  new QLabel(i18n("Author"), w);
  mCopyrightOwner = new QLineEdit(w);
  layout->addWidget(w);
 
  w = new QWidget(this);
- h = new QHBoxLayout(w);
+ h = new Q3HBoxLayout(w);
  h->setAutoAdd(true);
  new QLabel(i18n("License"), w);
  mLicense = new QLineEdit(w);
@@ -468,10 +476,10 @@ BoModelPixmaps::BoModelPixmaps()
  d->mGUI = new BoModelPixmapsGUI(this);
  d->mGUI->mTextureCopyrights->setOrientation(Qt::Vertical);
  d->mGUI->mTextureCopyrights->setColumnLayout(1, Qt::Vertical);
- QScrollView* textureCopyrightScroll = new QScrollView(d->mGUI->mTextureCopyrights);
- textureCopyrightScroll->setResizePolicy(QScrollView::AutoOneFit);
+ Q3ScrollView* textureCopyrightScroll = new Q3ScrollView(d->mGUI->mTextureCopyrights);
+ textureCopyrightScroll->setResizePolicy(Q3ScrollView::AutoOneFit);
  d->mTextureCopyrights = new QWidget(textureCopyrightScroll->viewport());
- QVBoxLayout* textureCopyrightsLayout = new QVBoxLayout(d->mTextureCopyrights, 5, 5);
+ Q3VBoxLayout* textureCopyrightsLayout = new Q3VBoxLayout(d->mTextureCopyrights, 5, 5);
  textureCopyrightsLayout->setAutoAdd(true);
  textureCopyrightScroll->addChild(d->mTextureCopyrights);
 
@@ -485,7 +493,7 @@ BoModelPixmaps::BoModelPixmaps()
 		this, SLOT(slotPackageIt()));
  QWidget* pixmapsWidget = d->mGUI->mTabWidget->page(0);
  BO_CHECK_NULL_RET(pixmapsWidget);
- mModelPixmapLabelsLayout = new QGridLayout(pixmapsWidget, -1, 3);
+ mModelPixmapLabelsLayout = new Q3GridLayout(pixmapsWidget, -1, 3);
  displayLabels(6);
 
  setCentralWidget(d->mGUI);
@@ -675,10 +683,10 @@ void BoModelPixmaps::retrievePixmaps()
  boDebug() << k_funcinfo << endl;
  BO_CHECK_NULL_RET(mGLWidget->camera());
 
- QValueList<BoVector3Float> cameraPosList;
- QValueList<BoVector3Float> lookAtList;
- QValueList<BoVector3Float> upList;
- QValueList<QString> namesList;
+ Q3ValueList<BoVector3Float> cameraPosList;
+ Q3ValueList<BoVector3Float> lookAtList;
+ Q3ValueList<BoVector3Float> upList;
+ Q3ValueList<QString> namesList;
 
  BoVector3Float center = (mGLWidget->model()->boundingBoxMin() + mGLWidget->model()->boundingBoxMax()) / 2;
  BoVector3Float dimensions = mGLWidget->model()->boundingBoxMax() - mGLWidget->model()->boundingBoxMin();
@@ -797,7 +805,7 @@ void BoModelPixmaps::retrievePixmaps()
 	QPixmap p = mPixmapRenderer->getPixmap();
 
 	QImage img = p.convertToImage();
-	img = img.smoothScale(PIXMAP_THUMBNAIL_WIDTH, PIXMAP_THUMBNAIL_HEIGHT, QImage::ScaleMin);
+	img = img.smoothScale(PIXMAP_THUMBNAIL_WIDTH, PIXMAP_THUMBNAIL_HEIGHT, Qt::ScaleMin);
 	QPixmap thumbnail;
 	thumbnail.convertFromImage(img);
 
@@ -850,12 +858,12 @@ void BoModelPixmaps::fitModelIntoView(const BoVector3Float& cameraPos, const BoV
  BoVector3Float Emin(E[0].x(), E[0].y(), E[0].z());
  BoVector3Float Emax(E[0].x(), E[0].y(), E[0].z());
  for (int i = 0; i < 8; i++) {
-	Emin.setX(QMIN(Emin.x(), E[i].x()));
-	Emin.setY(QMIN(Emin.y(), E[i].y()));
-	Emin.setZ(QMIN(Emin.z(), E[i].z()));
-	Emax.setX(QMAX(Emax.x(), E[i].x()));
-	Emax.setY(QMAX(Emax.y(), E[i].y()));
-	Emax.setZ(QMAX(Emax.z(), E[i].z()));
+	Emin.setX(qMin(Emin.x(), E[i].x()));
+	Emin.setY(qMin(Emin.y(), E[i].y()));
+	Emin.setZ(qMin(Emin.z(), E[i].z()));
+	Emax.setX(qMax(Emax.x(), E[i].x()));
+	Emax.setY(qMax(Emax.y(), E[i].y()));
+	Emax.setZ(qMax(Emax.z(), E[i].z()));
  }
  //boDebug() << "min: (" << Emin.x() << "; " << Emin.y() << "; " << Emin.z() << ")" << endl;
  //boDebug() << "max: (" << Emax.x() << "; " << Emax.y() << "; " << Emax.z() << ")" << endl;
@@ -863,7 +871,7 @@ void BoModelPixmaps::fitModelIntoView(const BoVector3Float& cameraPos, const BoV
  BoVector3Float Emid = (Emin + Emax) / 2;
 
  // Change the projection matrix
- float scale = QMIN(2 / (Emax.x() - Emin.x()),  2 / (Emax.y() - Emin.y()));
+ float scale = qMin(2 / (Emax.x() - Emin.x()),  2 / (Emax.y() - Emin.y()));
  scale /= 1.15f;  // To get some border
  float translateX = -Emid.x(); // Should be 0 or very close to it
  float translateY = -Emid.y(); // Should be 0 or very close to it
@@ -926,7 +934,7 @@ bool BoModelPixmaps::slotCheckPackage()
  if (d->mGUI->mTexturesNotFoundList->count() > 0) {
 	d->mGUI->mPackagingWarnings->insertItem(i18n("Some textures not found!"));
  }
- for (QPtrListIterator<BoTextureCopyright> it(mTextureCopyright); it.current(); ++it) {
+ for (Q3PtrListIterator<BoTextureCopyright> it(mTextureCopyright); it.current(); ++it) {
 	if (it.current()->author().isEmpty()) {
 		d->mGUI->mPackagingWarnings->insertItem(i18n("Texture %1 has unknown author!").arg(it.current()->textureFile()));
 	}
@@ -968,7 +976,7 @@ void BoModelPixmaps::packageIt(const QString& fileName)
  }
 
  KTar tar(fileName, QString::fromLatin1("application/x-gzip"));
- if (!tar.open(IO_WriteOnly)) {
+ if (!tar.open(QIODevice::WriteOnly)) {
 	KMessageBox::sorry(this, i18n("Could not open %1 for writing").arg(fileName));
 	return;
  }
@@ -981,7 +989,7 @@ void BoModelPixmaps::packageIt(const QString& fileName)
  QString group = top->group();
 
  QFile file(mModelFileName);
- if (!file.open(IO_ReadOnly)) {
+ if (!file.open(QIODevice::ReadOnly)) {
 	KMessageBox::sorry(this, i18n("Could not open %1 for reading").arg(file.name()));
 	return;
  }
@@ -989,7 +997,7 @@ void BoModelPixmaps::packageIt(const QString& fileName)
  file.close();
 
  QByteArray modelCopyrightData;
- QTextStream modelCopyrightStream(modelCopyrightData, IO_WriteOnly);
+ Q3TextStream modelCopyrightStream(modelCopyrightData, QIODevice::WriteOnly);
  modelCopyrightStream << "[Copyright]\n";
  modelCopyrightStream << "Author=";
  if (d->mGUI->mModelAuthor->text().isEmpty()) {
@@ -1009,10 +1017,10 @@ void BoModelPixmaps::packageIt(const QString& fileName)
  tar.writeFile(mainDir + QFileInfo(file).baseName() + ".copyright", user, group, modelCopyrightData.size(), modelCopyrightData);
 
  QStringList textureLicenses;
- for (QPtrListIterator<BoTextureCopyright> it(mTextureCopyright); it.current(); ++it) {
+ for (Q3PtrListIterator<BoTextureCopyright> it(mTextureCopyright); it.current(); ++it) {
 	QString texture = it.current()->texture();
 	file.setName(texture);
-	if (!file.open(IO_ReadOnly)) {
+	if (!file.open(QIODevice::ReadOnly)) {
 		KMessageBox::sorry(this, i18n("Could not open %1 for reading").arg(file.name()));
 		return;
 	}
@@ -1020,7 +1028,7 @@ void BoModelPixmaps::packageIt(const QString& fileName)
 	file.close();
 
 	QByteArray copyright;
-	QTextStream s(copyright, IO_WriteOnly);
+	Q3TextStream s(copyright, QIODevice::WriteOnly);
 	s << "[Copyright]\n";
 	s << "Author=";
 	if (it.current()->author().isEmpty()) {
@@ -1047,14 +1055,14 @@ void BoModelPixmaps::packageIt(const QString& fileName)
 	tar.writeFile(mainDir + "textures/" + QFileInfo(file).baseName() + ".copyright", user, group, copyright.size(), copyright);
  }
 
- for (QPtrListIterator<BoModelPixmapCollection> it(mModelPixmaps); it.current(); ++it) {
+ for (Q3PtrListIterator<BoModelPixmapCollection> it(mModelPixmaps); it.current(); ++it) {
 	QString name = it.current()->name();
 	QPixmap p = it.current()->pixmap();
 	QPixmap thumb = it.current()->thumbnail();
 
 	QByteArray pixmapData;
 	QBuffer pixmapBuffer(pixmapData);
-	pixmapBuffer.open(IO_WriteOnly);
+	pixmapBuffer.open(QIODevice::WriteOnly);
 	if (!p.save(&pixmapBuffer, "JPEG", 75)) {
 		KMessageBox::sorry(this, i18n("An image could not be saved"));
 		return;
@@ -1063,7 +1071,7 @@ void BoModelPixmaps::packageIt(const QString& fileName)
 
 	QByteArray thumbnailData;
 	QBuffer thumbnailBuffer(thumbnailData);
-	thumbnailBuffer.open(IO_WriteOnly);
+	thumbnailBuffer.open(QIODevice::WriteOnly);
 	if (!thumb.save(&thumbnailBuffer, "JPEG", 75)) {
 		KMessageBox::sorry(this, i18n("A thumbnail could not be saved"));
 		return;
@@ -1075,7 +1083,7 @@ void BoModelPixmaps::packageIt(const QString& fileName)
  }
 
  QByteArray summaryData;
- QTextStream summary(summaryData, IO_WriteOnly);
+ Q3TextStream summary(summaryData, QIODevice::WriteOnly);
  summary << "Summary\n";
  summary << "Model license: ";
  if (d->mGUI->mModelLicense->text().isEmpty()) {
@@ -1127,7 +1135,7 @@ int main(int argc, char **argv)
  // we need to do extra stuff after BosonConfig's initialization
  BosonConfig::setPostInitFunction(&postBosonConfigInit);
 
- QCString argv0(argv[0]);
+ Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();

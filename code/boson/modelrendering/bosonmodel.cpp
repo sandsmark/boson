@@ -37,9 +37,9 @@
 #include <ksimpleconfig.h>
 
 #include <qstringlist.h>
-#include <qvaluelist.h>
-#include <qintdict.h>
-#include <qptrvector.h>
+#include <q3valuelist.h>
+#include <q3intdict.h>
+#include <q3ptrvector.h>
 #include <qfile.h>
 
 #include <math.h>
@@ -187,7 +187,7 @@ BoMatrix* BoFrame::matrix(int index) const
  return mMatrices[index];
 }
 
-void BoFrame::renderFrame(const QValueVector<const BoMatrix*>& itemMatrices,const QColor* teamColor, bool transparentmeshes, RenderFlags flags, int mode)
+void BoFrame::renderFrame(const Q3ValueVector<const BoMatrix*>& itemMatrices,const QColor* teamColor, bool transparentmeshes, RenderFlags flags, int mode)
 {
  if (itemMatrices.count() != mNodeCount) {
 	boError() << k_funcinfo << "must have exactly one item matrix per node. itemMatrices parameter provided " << itemMatrices.count() << " matrices, have " << mNodeCount << " nodes." << endl;
@@ -330,7 +330,7 @@ public:
 	BoMaterial* mMaterials;
 	unsigned int mMaterialCount;
 
-	QIntDict<BosonAnimation> mAnimations;
+	Q3IntDict<BosonAnimation> mAnimations;
 	QString mDirectory;
 	QString mFile;
 
@@ -679,11 +679,11 @@ void BosonModel::allocateIndexArray(unsigned int size, unsigned int type)
  d->mIndexArrayType = type;
  if(type == GL_UNSIGNED_SHORT)
  {
-	d->mIndices = (unsigned char*)new Q_UINT16[size];
+	d->mIndices = (unsigned char*)new quint16[size];
  }
  else
  {
-	d->mIndices = (unsigned char*)new Q_UINT32[size];
+	d->mIndices = (unsigned char*)new quint32[size];
  }
 }
 

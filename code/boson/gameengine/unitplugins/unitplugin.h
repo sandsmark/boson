@@ -25,7 +25,7 @@
 
 #include "../bogameproperty.h"
 
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 #include <qmap.h>
 #include <qpair.h>
 

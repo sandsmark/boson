@@ -45,8 +45,10 @@
 #include <kgame/kgame.h>
 #include <krandomsequence.h>
 
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 #include <qdom.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 #include <math.h>
 
@@ -105,7 +107,7 @@ public:
 	{
 		mCurrentOrder = 0;
 	}
-	QValueList<UnitOrderData*> mToplevelOrders;
+	Q3ValueList<UnitOrderData*> mToplevelOrders;
 	UnitOrderData* mCurrentOrder;
 	UnitOrder::FinishStatus mLastOrderStatus;
 };
@@ -350,7 +352,7 @@ bool UnitOrderQueue::lastOrderStatus() const
 bool UnitOrderQueue::saveAsXML(QDomElement& root)
 {
  QDomDocument doc = root.ownerDocument();
- QValueList<UnitOrderData*>::Iterator it;
+ Q3ValueList<UnitOrderData*>::Iterator it;
  for (it = d->mToplevelOrders.begin(); it != d->mToplevelOrders.end(); ++it) {
 	QDomElement orderdataxml = doc.createElement("OrderData");
 	root.appendChild(orderdataxml);
@@ -402,8 +404,8 @@ public:
 		mOrderQueue = 0;
 	}
 	KGamePropertyList<BoVector2Fixed> mPathPoints;
-	KGameProperty<Q_INT8> mIsInsideUnit;
-	KGameProperty<Q_INT8> mIsFlying;
+	KGameProperty<qint8> mIsInsideUnit;
+	KGameProperty<qint8> mIsFlying;
 
 	// be *very* careful with those - NewGameDialog uses Unit::save() which
 	// saves all KGameProperty objects. If non-KGameProperty properties are
@@ -412,7 +414,7 @@ public:
 
 	// these must NOT be touched (items added or removed) after the c'tor.
 	// loading code will depend in this list to be at the c'tor state!
-	QPtrList<UnitPlugin> mPlugins;
+	Q3PtrList<UnitPlugin> mPlugins;
 	BosonWeapon** mWeapons;
 
 	BosonMoveData* mMoveData;
@@ -696,7 +698,7 @@ UnitPlugin* Unit::plugin(int pluginType) const
  if (mUnitConstruction && !mUnitConstruction->isConstructionComplete()) {
 	return 0;
  }
- QPtrListIterator<UnitPlugin> it(d->mPlugins);
+ Q3PtrListIterator<UnitPlugin> it(d->mPlugins);
  for (; it.current(); ++it) {
 	if (it.current()->pluginType() == pluginType) {
 		return it.current();
@@ -796,12 +798,12 @@ void Unit::updateZ(bofixed moveByX, bofixed moveByY, bofixed* moveByZ, bofixed* 
 
  // Calculate rotations
  // Calculate angle from frontz to rearz
- bofixed xrot = Bo3dTools::rad2deg(atan(QABS(frontz - rearz) / height()));
+ bofixed xrot = Bo3dTools::rad2deg(atan(qAbs(frontz - rearz) / height()));
  *rotateX = (frontz >= rearz) ? xrot : -xrot;
 
  // Calculate y rotation
  // Calculate angle from leftz to rightz
- bofixed yrot = Bo3dTools::rad2deg(atan(QABS(rightz - leftz) / width()));
+ bofixed yrot = Bo3dTools::rad2deg(atan(qAbs(rightz - leftz) / width()));
  *rotateY = (leftz >= rightz) ? yrot : -yrot;
 
 
@@ -882,7 +884,7 @@ unsigned long int Unit::requestAmmunition(const QString& type, unsigned long int
  }
 
  boDebug(610) << k_funcinfo << "searching for unit to pick ammo up from" << endl;
- for (QPtrListIterator<Unit> it(*owner()->allUnits()); it.current(); ++it) {
+ for (Q3PtrListIterator<Unit> it(*owner()->allUnits()); it.current(); ++it) {
 	if (it.current()->isDestroyed()) {
 		continue;
 	}
@@ -1067,7 +1069,7 @@ Unit* Unit::bestEnemyUnitInRange()
  // Iterate through the list of enemies and pick the best ones
  for (; it != list->end(); ++it) {
 	u = ((Unit*)*it);
-	dist = QMAX(QABS((int)(u->centerX() - centerX())), QABS((int)(u->centerY() - centerY())));
+	dist = qMax(qAbs((int)(u->centerX() - centerX())), qAbs((int)(u->centerY() - centerY())));
 	// Quick check if we can shoot at u
 	if (u->isFlying()) {
 		if (!unitProperties()->canShootAtAirUnits()) {
@@ -1268,7 +1270,7 @@ void Unit::advanceTurn(unsigned int)
 
  // First find out direction of turning and huw much is left to turn
  if (a < 0) {
-	a = QABS(a);
+	a = qAbs(a);
 	turncw = true;
  }
  if (a > 180) {
@@ -1325,8 +1327,8 @@ bool Unit::moveTo(bofixed x, bofixed y, int range)
  if (isFlying()) {
 	// Aircrafts cannot go near the border of the map to make sure they have
 	//  enough room for turning around
-	x = QMIN(QMAX(x, bofixed(6)), (bofixed)canvas()->mapWidth() - 6);
-	y = QMIN(QMAX(y, bofixed(6)), (bofixed)canvas()->mapHeight() - 6);
+	x = qMin(qMax(x, bofixed(6)), (bofixed)canvas()->mapWidth() - 6);
+	y = qMin(qMax(y, bofixed(6)), (bofixed)canvas()->mapHeight() - 6);
  }
 
  // TODO: move the destination point a bit in case the unit partially goes off
@@ -1390,7 +1392,7 @@ void Unit::pathPointDone()
  d->mPathPoints.pop_front();
 }
 
-const QValueList<BoVector2Fixed>& Unit::pathPointList() const
+const Q3ValueList<BoVector2Fixed>& Unit::pathPointList() const
 {
  return d->mPathPoints;
 }
@@ -1428,7 +1430,7 @@ bool Unit::saveAsXML(QDomElement& root)
 
  if (d->mPlugins.count() != 0) {
 	QDomElement pluginElement = doc.createElement(QString::fromLatin1("UnitPlugin"));
-	QPtrListIterator<UnitPlugin> it(d->mPlugins);
+	Q3PtrListIterator<UnitPlugin> it(d->mPlugins);
 	for (; it.current(); ++it) {
 		it.current()->saveAsXML(pluginElement);
 
@@ -1576,7 +1578,7 @@ bool Unit::loadFromXML(const QDomElement& root)
 
 bool Unit::inRange(unsigned long int r, Unit* target) const
 {
- return (QMAX(QABS((target->centerX() - centerX())), QABS((target->centerY() - centerY()))) <= bofixed(r));
+ return (qMax(qAbs((target->centerX() - centerX())), qAbs((target->centerY() - centerY()))) <= bofixed(r));
 }
 
 void Unit::shootAt(BosonWeapon* w, Unit* target)
@@ -1659,10 +1661,10 @@ BoItemList* Unit::enemyUnitsInRange(unsigned long int range) const
  return enemy;
 }
 
-QValueList<Unit*> Unit::unitCollisions(bool exact)
+Q3ValueList<Unit*> Unit::unitCollisions(bool exact)
 {
  PROFILE_METHOD
- QValueList<Unit*> units;
+ Q3ValueList<Unit*> units;
  boDebug(310) << k_funcinfo << endl;
  BoItemList* collisionList = collisions()->collisionsAtCells(cells(), (BosonItem*)this, exact);
  if (collisionList->isEmpty()) {
@@ -1757,12 +1759,12 @@ bool Unit::isNextTo(Unit* target) const
  const int r = 10;
  // in theory r = 1 should be enough... both of the above make problems under
  // certain circumstances
- if (QABS(rightEdge() - target->leftEdge()) <= r ||
-		QABS(leftEdge() - target->rightEdge()) <= r ||
+ if (qAbs(rightEdge() - target->leftEdge()) <= r ||
+		qAbs(leftEdge() - target->rightEdge()) <= r ||
 		rightEdge() <= target->rightEdge() && leftEdge() <= target->leftEdge()// will never happen with current pixmaps
 		) {
-	if (QABS(topEdge() - target->bottomEdge() <= r) ||
-			QABS(bottomEdge() - target->topEdge()) <= r||
+	if (qAbs(topEdge() - target->bottomEdge() <= r) ||
+			qAbs(bottomEdge() - target->topEdge()) <= r||
 			topEdge() <= target->topEdge() && bottomEdge() <= target->bottomEdge()// will never happen with current pixmaps
 			) {
 		boDebug() << k_funcinfo << "ok - inrange" << endl;
@@ -1781,7 +1783,7 @@ bool Unit::turnTo(bofixed dir)
 
  if (rotation() != dir) {
 	// Find out how much we have to turn
-	bofixed delta = QABS(rotation() - dir);
+	bofixed delta = qAbs(rotation() - dir);
 	if (delta > 180) {
 		delta = 360 - delta;
 	}
@@ -1823,7 +1825,7 @@ bool Unit::turnToUnit(Unit* target)
  boDebug() << k_funcinfo << "rotation: " << rotation() << "; wanted: " << wanteddir << endl;
  if (rotation() != wanteddir) {
 	// Find out how much we have to turn
-	bofixed delta = QABS(rotation() - wanteddir);
+	bofixed delta = qAbs(rotation() - wanteddir);
 	if (delta > 180) {
 		delta = 360 - delta;
 	}
@@ -1855,7 +1857,7 @@ void Unit::loadWeapons()
  int count = 0;
  bool hasbomb = false;
  bool hasmine = false;
- QPtrListIterator<PluginProperties> it(*(unitProperties()->plugins()));
+ Q3PtrListIterator<PluginProperties> it(*(unitProperties()->plugins()));
  for (; it.current(); ++it) {
 	if (it.current()->pluginType() == PluginProperties::Weapon) {
 		count++;
@@ -1924,17 +1926,17 @@ bool Unit::canCrush(Unit *u) const
 
 bofixed Unit::distanceSquared(const Unit* u) const
 {
- bofixed dx = QMAX(bofixed(0), QABS(centerX() - u->centerX()) - width()/2 - u->width()/2);
- bofixed dy = QMAX(bofixed(0), QABS(centerY() - u->centerY()) - height()/2 - u->height()/2);
- bofixed dz = QMAX(bofixed(0), QABS(centerZ() - u->centerZ()) - depth()/2 - u->depth()/2);
+ bofixed dx = qMax(bofixed(0), qAbs(centerX() - u->centerX()) - width()/2 - u->width()/2);
+ bofixed dy = qMax(bofixed(0), qAbs(centerY() - u->centerY()) - height()/2 - u->height()/2);
+ bofixed dz = qMax(bofixed(0), qAbs(centerZ() - u->centerZ()) - depth()/2 - u->depth()/2);
  return dx*dx + dy*dy + dz*dz;
 }
 
 bofixed Unit::distanceSquared(const BoVector3Fixed& pos) const
 {
- bofixed dx = QMAX(bofixed(0), QABS(pos.x() - centerX()) - width()/2);
- bofixed dy = QMAX(bofixed(0), QABS(pos.y() - centerY()) - height()/2);
- bofixed dz = QMAX(bofixed(0), QABS(pos.z() - centerZ()) - depth()/2);
+ bofixed dx = qMax(bofixed(0), qAbs(pos.x() - centerX()) - width()/2);
+ bofixed dy = qMax(bofixed(0), qAbs(pos.y() - centerY()) - height()/2);
+ bofixed dz = qMax(bofixed(0), qAbs(pos.z() - centerZ()) - depth()/2);
  return dx*dx + dy*dy + dz*dz;
 }
 
@@ -1996,7 +1998,7 @@ void Unit::unitDestroyed(Unit* unit)
 		currentSuborderDone(true);
 	}
  }
- QPtrListIterator<UnitPlugin> it(d->mPlugins);
+ Q3PtrListIterator<UnitPlugin> it(d->mPlugins);
  while (it.current()) {
 	it.current()->unitDestroyed(unit);
 	++it;
@@ -2015,7 +2017,7 @@ void Unit::itemRemoved(BosonItem* item)
 		currentSuborderDone(true);
 	}
  }
- QPtrListIterator<UnitPlugin> it(d->mPlugins);
+ Q3PtrListIterator<UnitPlugin> it(d->mPlugins);
  while (it.current()) {
 	it.current()->itemRemoved(item);
 	++it;
@@ -2076,7 +2078,7 @@ void Unit::recalculateMaxWeaponRange()
 		}
 	}
  }
- d->mMaxWeaponRange = QMAX(d->mMaxAirWeaponRange, d->mMaxLandWeaponRange);
+ d->mMaxWeaponRange = qMax(d->mMaxAirWeaponRange, d->mMaxLandWeaponRange);
 }
 
 bool Unit::cellOccupied(int x, int y, bool ignoremoving) const

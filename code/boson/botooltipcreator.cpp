@@ -32,7 +32,9 @@
 #include "bo3dtools.h"
 
 #include <qstring.h>
-#include <qptrvector.h>
+#include <q3ptrvector.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 #include <klocale.h>
 
@@ -117,7 +119,7 @@ QString BoToolTipCreatorDebug::createToolTip(const BosonItem* item) const
  tip += i18n("\nRotation: (%1,%2,%3)").arg(item->xRotation()).arg(item->yRotation()).arg(item->rotation());
  tip += i18n("\nSize: (%1,%2)").arg(item->width()).arg(item->height());
 
- QPtrVector<Cell>* cells = item->cellsConst();
+ Q3PtrVector<Cell>* cells = item->cellsConst();
  tip += i18n("\nCells: ");
  for (unsigned int i = 0; i < cells->count(); i++) {
 	if (i != 0) {
@@ -138,11 +140,11 @@ QString BoToolTipCreatorDebug::createToolTip(const BosonItem* item) const
  tip += i18n("\nHealth: %1").arg(u->health()); // AB: could be left out for debugging tooltips
  tip += i18n("\nAdvance Work: %1").arg(u->advanceWork());
 
- QValueList<BoVector2Fixed> pathpoints = u->pathPointList();
+ Q3ValueList<BoVector2Fixed> pathpoints = u->pathPointList();
  if (pathpoints.count() == 0) {
 	tip += i18n("\nNo pathpoints");
  } else {
-	QValueList<BoVector2Fixed>::Iterator it;
+	Q3ValueList<BoVector2Fixed>::Iterator it;
 	tip += i18n("\nPathpoints: ");
 	for (it = pathpoints.begin(); it != pathpoints.end(); ++it) {
 		if (it != pathpoints.begin()) {

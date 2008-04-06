@@ -25,14 +25,16 @@
 #include "bo3dtools.h"
 
 #include <qmap.h>
-#include <qvaluelist.h>
+#include <q3valuelist.h>
+//Added by qt3to4:
+#include <Q3TextStream>
 
 class Material;
 class Mesh;
 class Face;
 class QStringList;
 class Frame;
-class QTextStream;
+class Q3TextStream;
 class ACObject;
 class ACFace;
 
@@ -48,8 +50,8 @@ class LoaderAC : public Loader
 
   protected:
     // These load data from ac3d file into special objects in memory
-    bool loadObject(QTextStream& stream, ACObject* obj);
-    bool loadFace(QTextStream& stream, ACFace* face);
+    bool loadObject(Q3TextStream& stream, ACObject* obj);
+    bool loadFace(Q3TextStream& stream, ACFace* face);
     bool loadMaterial(const QString& line);
 
     // This converts ACObject into BoMesh and adds it to frame
@@ -64,8 +66,8 @@ class LoaderAC : public Loader
 
 
   private:
-    QMap<QString, QValueList<Material*> > mLine2Materials;
-    QValueList<QString> mMaterialLines;
+    QMap<QString, Q3ValueList<Material*> > mLine2Materials;
+    Q3ValueList<QString> mMaterialLines;
 };
 
 /*

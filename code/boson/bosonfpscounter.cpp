@@ -25,7 +25,7 @@
 #include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -66,7 +66,7 @@ public:
 	{
 		mCurrentFrame = 0;
 	}
-	QPtrList<Frame> mFrameQueue;
+	Q3PtrList<Frame> mFrameQueue;
 	Frame* mCurrentFrame;
 
 	double mFPSCache;
@@ -120,7 +120,7 @@ double BosonFPSCounter::calculateFPS(unsigned int frames, const struct timeval& 
 unsigned int BosonFPSCounter::countFramesSince(const struct timeval& since, unsigned int* skippedFrames) const
 {
  unsigned int frames = 0;
- QPtrListIterator<Frame> it(d->mFrameQueue);
+ Q3PtrListIterator<Frame> it(d->mFrameQueue);
  for (it.toLast(); it.current(); --it) {
 	Frame* frame = it.current();
 	if (frame->mFrameEnd.tv_sec >= since.tv_sec) {
@@ -258,7 +258,7 @@ long long BosonFPSCounter::timeSinceLastFrame(bool onlyNonSkippedFrames) const
  struct timeval now;
  gettimeofday(&now, 0);
  Frame* f = 0;
- QPtrListIterator<Frame> it(d->mFrameQueue);
+ Q3PtrListIterator<Frame> it(d->mFrameQueue);
  for (it.toLast(); it.current() && !f; --it) {
 	if (onlyNonSkippedFrames && it.current()->mSkipped) {
 		continue;

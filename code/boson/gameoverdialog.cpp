@@ -29,7 +29,12 @@
 
 #include <qlabel.h>
 #include <qlayout.h>
-#include <qptrdict.h>
+#include <q3ptrdict.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <Q3VBoxLayout>
+#include <Q3Frame>
+#include <Q3PtrList>
 
 class GameOverDialog::GameOverDialogPrivate
 {
@@ -47,8 +52,8 @@ public:
 	Boson* mBoson;
 
 	QLabel* mWinnerLabel;
-	QHBoxLayout* mPlayerLayout;
-	QPtrDict<PlayerBox> mPlayers;
+	Q3HBoxLayout* mPlayerLayout;
+	Q3PtrDict<PlayerBox> mPlayers;
 };
 
 GameOverDialog::GameOverDialog(QWidget* parent, bool modal) 
@@ -58,12 +63,12 @@ GameOverDialog::GameOverDialog(QWidget* parent, bool modal)
  d = new GameOverDialogPrivate;
  setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
 
- QVBoxLayout* l = new QVBoxLayout(plainPage(), KDialog::spacingHint(), 
+ Q3VBoxLayout* l = new Q3VBoxLayout(plainPage(), KDialog::spacingHint(), 
 		KDialog::marginHint());
  d->mWinnerLabel = new QLabel(plainPage());
  l->addWidget(d->mWinnerLabel);
 
- d->mPlayerLayout = new QHBoxLayout(l);
+ d->mPlayerLayout = new Q3HBoxLayout(l);
 }
 
 GameOverDialog::~GameOverDialog()
@@ -78,12 +83,12 @@ void GameOverDialog::createStatistics(Boson* boson, Player* winner, Player* p)
 
  d->mWinnerLabel->setText(i18n("And the winner is: %1").arg(winner->name()));
  
- QPtrList<Player> players = d->mBoson->gamePlayerList();
- QPtrListIterator<Player> it(players);
+ Q3PtrList<Player> players = d->mBoson->gamePlayerList();
+ Q3PtrListIterator<Player> it(players);
  while (it.current()) {
 	PlayerBox* winnerBox = addPlayer((Player*)it.current());
 	if ((Player*)it.current() == winner) {
-		winnerBox->setFrameStyle(QFrame::Box | QFrame::Raised);
+		winnerBox->setFrameStyle(Q3Frame::Box | Q3Frame::Raised);
 		winnerBox->setWinner(true);
 	} else {
 		winnerBox->setWinner(false);
@@ -104,13 +109,13 @@ GameOverDialog::PlayerBox* GameOverDialog::addPlayer(Player* p)
  return box;
 }
 
-GameOverDialog::PlayerBox::PlayerBox(Player* p, QWidget* parent) : QFrame(parent)
+GameOverDialog::PlayerBox::PlayerBox(Player* p, QWidget* parent) : Q3Frame(parent)
 {
  mPlayer = p;
  setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
  setFrameStyle(Box | Sunken);
  setLineWidth(1);
- QVBoxLayout* l = new QVBoxLayout(this, KDialog::spacingHint(), 
+ Q3VBoxLayout* l = new Q3VBoxLayout(this, KDialog::spacingHint(), 
 		KDialog::marginHint());
  QLabel* name = new QLabel(p->name(), this);
  l->addWidget(name);

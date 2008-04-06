@@ -25,6 +25,8 @@
 
 #include <qstring.h>
 #include <qobject.h>
+//Added by qt3to4:
+#include <Q3CString>
 
 class QDomDocument;
 class QDomElement;
@@ -106,10 +108,10 @@ protected:
 	friend class BosonStarting;
 	// TODO: move relevant stuff to BosonStarting.
 
-	QCString saveKGameAsXML();
-	QCString savePlayersAsXML();
-	QCString saveCanvasAsXML();
-	QCString saveExternalAsXML();
+	Q3CString saveKGameAsXML();
+	Q3CString savePlayersAsXML();
+	Q3CString saveCanvasAsXML();
+	Q3CString saveExternalAsXML();
 	bool saveEventListenerScripts(QMap<QString, QByteArray>* files);
 	bool saveEventListenersXML(QMap<QString, QByteArray>* files);
 

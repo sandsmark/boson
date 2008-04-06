@@ -22,12 +22,18 @@
 #define BOUFOIMAGE_H
 
 #include <qobject.h>
+//Added by qt3to4:
+#include <QPixmap>
+#include <QWheelEvent>
+#include <QMouseEvent>
+#include <Q3ValueList>
+#include <QKeyEvent>
 
 class QMouseEvent;
 class QWheelEvent;
 class QKeyEvent;
 template<class T1, class T2> class QMap;
-template<class T1> class QValueList;
+template<class T1> class Q3ValueList;
 class QDomElement;
 
 class BoUfoActionCollection;

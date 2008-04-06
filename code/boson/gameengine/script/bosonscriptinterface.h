@@ -1,3 +1,5 @@
+//Added by qt3to4:
+#include <Q3ValueList>
 /*
     This file is part of the Boson game
     Copyright (C) 2004 Andreas Beckermann (b_mann@gmx.de)
@@ -39,7 +41,7 @@ class QString;
 class QDataStream;
 class QPoint;
 
-template<class T> class QValueList;
+template<class T> class Q3ValueList;
 
 #include <qobject.h>
 

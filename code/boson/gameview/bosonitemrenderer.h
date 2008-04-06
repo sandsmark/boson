@@ -24,7 +24,7 @@
 #include <bogl.h>
 
 #include <qglobal.h>
-#include <qvaluevector.h>
+#include <q3valuevector.h>
 
 class BosonModel;
 class BosonAnimation;
@@ -180,10 +180,10 @@ private:
 	float mCurrentFrame;
 
 	// one matrix per mesh ("node") per frame in each lod
-	QValueVector< QValueVector<const BoMatrix*> > mItemMatrices;
+	Q3ValueVector< Q3ValueVector<const BoMatrix*> > mItemMatrices;
 
 	unsigned int mMaxFramesInModel;
-	QValueVector<const BoFrame*> mFramePointers;
+	Q3ValueVector<const BoFrame*> mFramePointers;
 };
 
 #endif

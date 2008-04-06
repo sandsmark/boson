@@ -28,24 +28,27 @@
 
 #include <qtimer.h>
 #include <qlayout.h>
-#include <qlistbox.h>
-#include <qlistview.h>
+#include <q3listbox.h>
+#include <q3listview.h>
 #include <qsplitter.h>
 #include <qfile.h>
 #include <qdom.h>
 #include <qlabel.h>
 #include <qcursor.h>
 #include <qaction.h>
-#include <qpopupmenu.h>
+#include <q3popupmenu.h>
 #include <qmenubar.h>
 #include <qmessagebox.h>
-#include <qfiledialog.h>
+#include <q3filedialog.h>
 #include <qpushbutton.h>
 #include <qlineedit.h>
 #include <qcombobox.h>
-#include <qvgroupbox.h>
-#include <qwidgetstack.h>
+#include <q3vgroupbox.h>
+#include <q3widgetstack.h>
 #include <qsettings.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <Q3VBoxLayout>
 
 #include <math.h>
 #include <stdlib.h>
@@ -83,10 +86,10 @@ static bool isContainerWidget(const QString& className)
 
 BoWidgetTree::BoWidgetTree(QWidget* parent, const char* name) : QWidget(parent, name)
 {
- QVBoxLayout* layout = new QVBoxLayout(this);
- mListView = new QListView(this);
- connect(mListView, SIGNAL(selectionChanged(QListViewItem*)),
-		this, SLOT(slotSelectionChanged(QListViewItem*)));
+ Q3VBoxLayout* layout = new Q3VBoxLayout(this);
+ mListView = new Q3ListView(this);
+ connect(mListView, SIGNAL(selectionChanged(Q3ListViewItem*)),
+		this, SLOT(slotSelectionChanged(Q3ListViewItem*)));
  mListView->setRootIsDecorated(true);
  mListView->setSorting(-1);
  layout->addWidget(mListView);
@@ -94,7 +97,7 @@ BoWidgetTree::BoWidgetTree(QWidget* parent, const char* name) : QWidget(parent, 
  mListView->addColumn(tr("ClassName"));
  mListView->addColumn(tr("name"));
 
- QHBoxLayout* buttonLayout = new QHBoxLayout(layout);
+ Q3HBoxLayout* buttonLayout = new Q3HBoxLayout(layout);
  mInsertWidget = new QPushButton(tr("Insert"), this);
  connect(mInsertWidget, SIGNAL(clicked()),
 		this, SLOT(slotInsert()));
@@ -117,7 +120,7 @@ BoWidgetTree::~BoWidgetTree()
 {
 }
 
-bool BoWidgetTree::isContainer(QListViewItem* item) const
+bool BoWidgetTree::isContainer(Q3ListViewItem* item) const
 {
  if (!item) {
 	return false;
@@ -136,7 +139,7 @@ bool BoWidgetTree::isContainer(const QDomElement& e) const
 
 void BoWidgetTree::slotInsert()
 {
- QListViewItem* item = mListView->selectedItem();
+ Q3ListViewItem* item = mListView->selectedItem();
  if (item) {
 	QDomElement e = mItem2Element[item];
 	emit signalInsertWidget(e);
@@ -147,7 +150,7 @@ void BoWidgetTree::slotInsert()
 
 void BoWidgetTree::slotRemove()
 {
- QListViewItem* item = mListView->selectedItem();
+ Q3ListViewItem* item = mListView->selectedItem();
  if (item) {
 	if (!item->parent()) {
 		boWarning() << k_funcinfo << "Cannot remove root" << endl;
@@ -162,19 +165,19 @@ void BoWidgetTree::slotRemove()
 
 void BoWidgetTree::slotMoveUp()
 {
- QListViewItem* item = mListView->selectedItem();
+ Q3ListViewItem* item = mListView->selectedItem();
  if (!item) {
 	boError() << k_funcinfo << "nothing selected" << endl;
 	return;
  }
- QListViewItem* parent = item->parent();
+ Q3ListViewItem* parent = item->parent();
  if (item && !parent) {
 	boWarning() << k_funcinfo << "Cannot move root" << endl;
 	return;
  }
 
- QListViewItem* prev = 0;
- QListViewItem* i;
+ Q3ListViewItem* prev = 0;
+ Q3ListViewItem* i;
  for (i = parent->firstChild(); i; i = i->nextSibling()) {
 	if (i == item) {
 		break;
@@ -205,19 +208,19 @@ void BoWidgetTree::slotMoveUp()
 void BoWidgetTree::slotMoveDown()
 {
 // boDebug() << k_funcinfo << endl;
- QListViewItem* item = mListView->selectedItem();
+ Q3ListViewItem* item = mListView->selectedItem();
  if (!item) {
 	boError() << k_funcinfo << "nothing selected" << endl;
 	return;
  }
- QListViewItem* parent = item->parent();
+ Q3ListViewItem* parent = item->parent();
  if (item && !parent) {
 	boWarning() << k_funcinfo << "Cannot move root" << endl;
 	return;
  }
 
- QListViewItem* prev = 0;
- QListViewItem* next = item->nextSibling();
+ Q3ListViewItem* prev = 0;
+ Q3ListViewItem* next = item->nextSibling();
  if (next) {
 	// parent is a container widget anyway, but we need to check it for the
 	// sibling
@@ -248,11 +251,11 @@ void BoWidgetTree::slotMoveDown()
  moveElement(item, parent, next);
 }
 
-void BoWidgetTree::moveElement(QListViewItem* widget, QListViewItem* parent, QListViewItem* before)
+void BoWidgetTree::moveElement(Q3ListViewItem* widget, Q3ListViewItem* parent, Q3ListViewItem* before)
 {
  BO_CHECK_NULL_RET(widget);
  BO_CHECK_NULL_RET(parent);
- QListViewItem* oldParent = widget->parent();
+ Q3ListViewItem* oldParent = widget->parent();
  BO_CHECK_NULL_RET(oldParent);
 
  QDomElement w = mItem2Element[widget];
@@ -280,7 +283,7 @@ void BoWidgetTree::moveElement(QListViewItem* widget, QListViewItem* parent, QLi
 
  if (b.isNull()) {
 	p.appendChild(w);
-	QListViewItem* after = parent->firstChild();
+	Q3ListViewItem* after = parent->firstChild();
 	while (after->nextSibling()) {
 		after = after->nextSibling();
 	}
@@ -288,8 +291,8 @@ void BoWidgetTree::moveElement(QListViewItem* widget, QListViewItem* parent, QLi
  } else {
 	p.insertBefore(w, b);
 
-	QListViewItem* after = 0;
-	QListViewItem* n = parent->firstChild();
+	Q3ListViewItem* after = 0;
+	Q3ListViewItem* n = parent->firstChild();
 	for (; n; n = n->nextSibling()) {
 		if (n == before) {
 			break;
@@ -318,7 +321,7 @@ void BoWidgetTree::updateGUI(const QDomElement& root)
 	boDebug() << root.ownerDocument().toString() << endl;
 	return;
  }
- QListViewItem* itemRoot = new QListViewItem(mListView,
+ Q3ListViewItem* itemRoot = new Q3ListViewItem(mListView,
 		root.namedItem("ClassName").toElement().text(),
 		root.namedItem("Properties").namedItem("name").toElement().text());
  itemRoot->setOpen(true);
@@ -328,9 +331,9 @@ void BoWidgetTree::updateGUI(const QDomElement& root)
  slotSelectionChanged(0);
 }
 
-void BoWidgetTree::updateGUI(const QDomElement& root, QListViewItem* itemParent)
+void BoWidgetTree::updateGUI(const QDomElement& root, Q3ListViewItem* itemParent)
 {
- QListViewItem* after = 0;
+ Q3ListViewItem* after = 0;
  QDomNode n;
  for (n = root.firstChild(); !n.isNull(); n = n.nextSibling()) {
 	QDomElement e = n.toElement();
@@ -345,7 +348,7 @@ void BoWidgetTree::updateGUI(const QDomElement& root, QListViewItem* itemParent)
 		boWarning() << k_funcinfo << "empty ClassName" << endl;
 	}
 	QString name = e.namedItem("Properties").namedItem("name").toElement().text();
-	QListViewItem* item = new QListViewItem(itemParent, after, className, name);
+	Q3ListViewItem* item = new Q3ListViewItem(itemParent, after, className, name);
 	after = item; // new items are appended to the end
 	item->setOpen(true);
 	mItem2Element.insert(item, e);
@@ -353,7 +356,7 @@ void BoWidgetTree::updateGUI(const QDomElement& root, QListViewItem* itemParent)
  }
 }
 
-void BoWidgetTree::slotSelectionChanged(QListViewItem* item)
+void BoWidgetTree::slotSelectionChanged(Q3ListViewItem* item)
 {
 // boDebug() << k_funcinfo << endl;
  QDomElement e;
@@ -379,9 +382,9 @@ void BoWidgetTree::slotSelectionChanged(QListViewItem* item)
 
 void BoWidgetTree::selectWidget(const QDomElement& widget)
 {
- QListViewItem* item = 0;
+ Q3ListViewItem* item = 0;
  if (!widget.isNull()) {
-	QMap<QListViewItem*,QDomElement>::Iterator it;
+	QMap<Q3ListViewItem*,QDomElement>::Iterator it;
 	for (it = mItem2Element.begin(); it != mItem2Element.end(); ++it) {
 		if (it.data() == widget) {
 			item = it.key();

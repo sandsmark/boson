@@ -28,13 +28,13 @@
 
 QDataStream& operator<<(QDataStream& stream, const bofixed& f)
 {
- stream << (Q_INT32)f.rawInt();
+ stream << (qint32)f.rawInt();
  return stream;
 }
 
 QDataStream& operator>>(QDataStream& stream, bofixed& f)
 {
- Q_INT32 v;
+ qint32 v;
  stream >> v;
  f.setFromRawInt(v);
  return stream;

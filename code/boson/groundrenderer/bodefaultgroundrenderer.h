@@ -21,8 +21,10 @@
 
 #include "bogroundrendererbase.h"
 
-#include <qmemarray.h>
-#include <qvaluevector.h>
+#include <q3memarray.h>
+#include <q3valuevector.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 class PlayerIO;
 class QString;
@@ -73,9 +75,9 @@ private:
 	unsigned int mIndicesCount;
 	bool mIndicesDirty;
 
-	QValueList<int> mIndicesCountList; // used by strips only atm
+	Q3ValueList<int> mIndicesCountList; // used by strips only atm
 
-	QValueVector< QMemArray<unsigned int>* > mTextureIndices;
+	Q3ValueVector< Q3MemArray<unsigned int>* > mTextureIndices;
 };
 
 #endif

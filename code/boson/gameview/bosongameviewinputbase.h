@@ -23,6 +23,8 @@
 #include "../global.h"
 
 #include <qobject.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 class BoSelection;
 class BosonCanvas;
@@ -44,7 +46,7 @@ typedef BoVector2<bofixed> BoVector2Fixed;
 typedef BoVector3<bofixed> BoVector3Fixed;
 typedef BoRect2<bofixed> BoRect2Fixed;
 
-template<class T> class QPtrList;
+template<class T> class Q3PtrList;
 
 class BosonGameViewInputBase : public QObject
 {
@@ -175,7 +177,7 @@ public:
 	 * Select a list of units. You should prefer this to a direct @ref
 	 * BoSelection::selectUnits
 	 **/
-	void selectUnits(QPtrList<Unit>, bool replace);
+	void selectUnits(Q3PtrList<Unit>, bool replace);
 
 	/**
 	 * See @ref EditorViewInput::placeUnit

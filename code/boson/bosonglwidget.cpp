@@ -35,8 +35,13 @@
 #include <boglx.h>
 #include <qgl.h> // convertToGLFormat()
 #include <qimage.h> // convertToGLFormat()
-#include <qpaintdevicemetrics.h>
-#include <qintdict.h>
+#include <q3paintdevicemetrics.h>
+#include <q3intdict.h>
+//Added by qt3to4:
+#include <Q3CString>
+#include <QPixmap>
+#include <QResizeEvent>
+#include <QPaintEvent>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -83,7 +88,7 @@ _CMapEntry::~_CMapEntry()
 	XFreeColormap( QPaintDevice::x11AppDisplay(), cmap );
 }
 
-static QIntDict<_CMapEntry> *cmap_dict = 0;
+static Q3IntDict<_CMapEntry> *cmap_dict = 0;
 static bool		    mesa_gl   = FALSE;
 
 static void cleanup_cmaps()
@@ -98,7 +103,7 @@ static void cleanup_cmaps()
 static Colormap choose_cmap( Display *dpy, XVisualInfo *vi )
 {
  if ( !cmap_dict ) {
-	cmap_dict = new QIntDict<_CMapEntry>;
+	cmap_dict = new Q3IntDict<_CMapEntry>;
 	const char *v = glXQueryServerString(dpy, vi->screen, GLX_VERSION);
 	if ( v ) {
 		mesa_gl = strstr(v,"Mesa") != 0;
@@ -189,7 +194,7 @@ public:
 		mGLXPixmap = 0;
 	}
 	GLXContext mContext;
-	Q_UINT32 mGLXPixmap;
+	quint32 mGLXPixmap;
 };
 
 BoContext::BoContext(QPaintDevice* device)
@@ -288,12 +293,12 @@ void* BoContext::tryVisual(const QGLFormat& f)
  static bool useTranspExt = FALSE;
  static bool useTranspExtChecked = FALSE;
  if (f.plane() && !useTranspExtChecked && mPaintDevice) {
-	QCString estr( glXQueryExtensionsString( mPaintDevice->x11Display(),
+	Q3CString estr( glXQueryExtensionsString( mPaintDevice->x11Display(),
 						 mPaintDevice->x11Screen()));
 	useTranspExt = estr.contains( "GLX_EXT_visual_info" );
 	//# (A bit simplistic; that could theoretically be a substring)
 	if ( useTranspExt ) {
-		QCString cstr(glXGetClientString(mPaintDevice->x11Display(),
+		Q3CString cstr(glXGetClientString(mPaintDevice->x11Display(),
 				GLX_VENDOR));
 		useTranspExt = !cstr.contains( "Xi Graphics" ); // bug workaround
 		if ( useTranspExt ) {
@@ -474,7 +479,7 @@ bool BoContext::chooseContext(bool wantDirect, bool wantDoubleBuffer)
  mDirect = glXIsDirect(disp, d->mContext);
 
  if (deviceIsPixmap()) {
-	d->mGLXPixmap = (Q_UINT32)glXCreateGLXPixmap(disp, (XVisualInfo*)mVi,
+	d->mGLXPixmap = (quint32)glXCreateGLXPixmap(disp, (XVisualInfo*)mVi,
 			mPaintDevice->handle());
 	if (!d->mGLXPixmap) {
 		boError() << k_funcinfo << "glXCreateGLXPixmap() returned NULL pixmap" << endl;
@@ -527,7 +532,7 @@ void BosonGLWidget::makeCurrent()
  d->mContext->makeCurrent();
 }
 
-void BosonGLWidget::reparent(QWidget* parent, WFlags f, const QPoint& p, bool showIt)
+void BosonGLWidget::reparent(QWidget* parent, Qt::WFlags f, const QPoint& p, bool showIt)
 {
  // AB: shamelessy stolen from QGLWidget::reparent()
  // ### Another work-around for the Utah-GLX driver -
@@ -576,7 +581,7 @@ void BosonGLWidget::slotUpdateGL()
  if (!isInitialized()) {
 	initGL();
 	//AB: see QGLWidget::glDraw()
-	QPaintDeviceMetrics dm(this);
+	Q3PaintDeviceMetrics dm(this);
 	resizeGL(dm.width(), dm.height());
  }
  paintGL();
@@ -962,7 +967,7 @@ bool BosonGLWidget::renderCxPm( QPixmap* pm )
 				choose_cmap( pm->x11Display(),
 				(XVisualInfo*)d->mContext->mVi ) );
 #else
- glPm = (Q_UINT32)glXCreateGLXPixmap( x11Display(),
+ glPm = (quint32)glXCreateGLXPixmap( x11Display(),
 					(XVisualInfo*)d->mContext->mVi,
 					(Pixmap)pm->handle() );
 #endif

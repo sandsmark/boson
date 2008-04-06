@@ -24,7 +24,7 @@
 #include "bosonsound.h"
 #include "../boaudiocommand.h"
 
-#include <qdict.h>
+#include <q3dict.h>
 #include <qfile.h>
 #include <qfileinfo.h>
 
@@ -43,7 +43,7 @@ public:
 	}
 
 	BosonMusic* mBosonMusic;
-	QDict<BosonSound> mBosonSound;
+	Q3Dict<BosonSound> mBosonSound;
 
 	bool mIsNull;
 };
@@ -175,7 +175,7 @@ bool BosonAudioAL::loadFileToBuffer(ALuint buffer, const QString& file)
 	return false;
  }
  QFile f(file);
- if (!f.open(IO_ReadOnly)) {
+ if (!f.open(QIODevice::ReadOnly)) {
 	boError() << k_funcinfo << "unable to open file " << file << endl;
 	return false;
  }

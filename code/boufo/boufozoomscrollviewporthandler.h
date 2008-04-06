@@ -25,6 +25,7 @@
 #include <bogl.h>
 
 class BoMatrix;
+class QPoint;
 
 class BoUfoZoomScrollViewportHandlerPrivate;
 /**

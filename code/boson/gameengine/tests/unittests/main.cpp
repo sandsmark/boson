@@ -37,7 +37,9 @@
 #include <kaboutdata.h>
 #include <kcmdlineargs.h>
 #include <klocale.h>
-#include <kinstance.h>
+#include <kcomponentdata.h>
+//Added by qt3to4:
+#include <Q3CString>
 
 static const char *version = BOSON_VERSION_STRING;
 
@@ -58,7 +60,7 @@ int main(int argc, char **argv)
 		I18N_NOOP("Coding & Current Maintainer"),
 		"b_mann@gmx.de");
 
- QCString argv0(argv[0]);
+ Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
 #if BOSON_LINK_STATIC

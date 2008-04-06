@@ -22,8 +22,8 @@
 #include <qwidget.h>
 #include <qmap.h>
 
-class QListView;
-class QListViewItem;
+class Q3ListView;
+class Q3ListViewItem;
 class QPushButton;
 class QDomElement;
 
@@ -40,7 +40,7 @@ public:
 	void selectWidget(const QDomElement& widget);
 
 protected:
-	bool isContainer(QListViewItem* item) const;
+	bool isContainer(Q3ListViewItem* item) const;
 	bool isContainer(const QDomElement&) const;
 
 signals:
@@ -50,24 +50,24 @@ signals:
 	void signalHierarchyChanged();
 
 protected:
-	void updateGUI(const QDomElement& root, QListViewItem* item);
-	void moveElement(QListViewItem* widget, QListViewItem* parent, QListViewItem* before);
+	void updateGUI(const QDomElement& root, Q3ListViewItem* item);
+	void moveElement(Q3ListViewItem* widget, Q3ListViewItem* parent, Q3ListViewItem* before);
 
 protected slots:
-	void slotSelectionChanged(QListViewItem*);
+	void slotSelectionChanged(Q3ListViewItem*);
 	void slotInsert();
 	void slotRemove();
 	void slotMoveUp();
 	void slotMoveDown();
 
 private:
-	QListView* mListView;
+	Q3ListView* mListView;
 	QPushButton* mInsertWidget;
 	QPushButton* mRemoveWidget;
 	QPushButton* mMoveUp;
 	QPushButton* mMoveDown;
 
-	QMap<QListViewItem*, QDomElement> mItem2Element;
+	QMap<Q3ListViewItem*, QDomElement> mItem2Element;
 };
 
 #endif

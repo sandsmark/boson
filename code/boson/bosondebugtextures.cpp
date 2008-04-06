@@ -23,10 +23,12 @@
 #include "botexture.h"
 #include "bodebug.h"
 #include "qlistviewitemnumber.h"
+//Added by qt3to4:
+#include <Q3PtrList>
 
 #include <klocale.h>
 
-#include <qlistview.h>
+#include <q3listview.h>
 #include <qlabel.h>
 
 
@@ -58,8 +60,8 @@ void BosonDebugTextures::slotUpdate()
 	return;
  }
  long int memorySum = 0;
- QPtrList<const BoTexture> textures = boTextureManager->allTextures();
- for (QPtrListIterator<const BoTexture> it(textures); it.current(); ++it) {
+ Q3PtrList<const BoTexture> textures = boTextureManager->allTextures();
+ for (Q3PtrListIterator<const BoTexture> it(textures); it.current(); ++it) {
 	QString file = it.current()->filePath();
 	int approximateMemory = it.current()->memoryUsed();
 	memorySum += approximateMemory;

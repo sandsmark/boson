@@ -27,6 +27,8 @@
 
 #include <klocale.h>
 #include <ksimpleconfig.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 PluginProperties::PluginProperties(const UnitProperties* parent)
 	: BoBaseValueCollection()
@@ -605,22 +607,22 @@ unsigned int UnitStorageProperties::enterPathCount() const
  return mEnterPaths.count();
 }
 
-QValueList<BoVector2Float> UnitStorageProperties::enterPath(unsigned int i) const
+Q3ValueList<BoVector2Float> UnitStorageProperties::enterPath(unsigned int i) const
 {
  if (i >= enterPathCount()) {
 	boError() << k_funcinfo << "index out of range: " << i << endl;
-	return QValueList<BoVector2Float>();
+	return Q3ValueList<BoVector2Float>();
  }
  return mEnterPaths[i].mPathPoints;
 }
 
-QValueList<BoVector2Float> UnitStorageProperties::leavePathForEnterPath(unsigned int i) const
+Q3ValueList<BoVector2Float> UnitStorageProperties::leavePathForEnterPath(unsigned int i) const
 {
- QValueList<BoVector2Float> leave;
- QValueList<BoVector2Float> enter = enterPath(i);
+ Q3ValueList<BoVector2Float> leave;
+ Q3ValueList<BoVector2Float> enter = enterPath(i);
 
  // TODO: atm we assume "Reverse" as Leave method.
- for (QValueList<BoVector2Float>::iterator it = enter.begin(); it != enter.end(); ++it) {
+ for (Q3ValueList<BoVector2Float>::iterator it = enter.begin(); it != enter.end(); ++it) {
 	leave.prepend(*it);
  }
  return leave;

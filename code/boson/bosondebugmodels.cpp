@@ -22,13 +22,15 @@
 
 #include "bodebug.h"
 #include "qlistviewitemnumber.h"
+//Added by qt3to4:
+#include <Q3PtrList>
 #include "modelrendering/bosonmodel.h"
 #include "modelrendering/bomesh.h"
 #include "speciesdata.h"
 
 #include <klocale.h>
 
-#include <qlistview.h>
+#include <q3listview.h>
 #include <qlabel.h>
 
 
@@ -58,8 +60,8 @@ void BosonDebugModels::slotUpdate()
  long int pointArrayMemorySum = 0;
  long int indexArrayMemorySum = 0;
 
- QPtrList<BosonModel> models = SpeciesData::allLoadedModelsInAllSpecies();
- for (QPtrListIterator<BosonModel> it(models); it.current(); ++it) {
+ Q3PtrList<BosonModel> models = SpeciesData::allLoadedModelsInAllSpecies();
+ for (Q3PtrListIterator<BosonModel> it(models); it.current(); ++it) {
 	QString file = it.current()->file();
 	int pointArrayMemory = it.current()->pointArraySize() * BoMesh::pointSize() * sizeof(float);
 	int indexArrayMemory = it.current()->indexArraySize();

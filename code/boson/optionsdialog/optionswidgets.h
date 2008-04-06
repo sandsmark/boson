@@ -20,10 +20,10 @@
 #ifndef OPTIONSWIDGETS_H
 #define OPTIONSWIDGETS_H
 
-#include <qvbox.h>
+#include <q3vbox.h>
 #include <qstringlist.h>
 #include <qmap.h>
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 
 #include "global.h"
 
@@ -61,10 +61,10 @@ public:
 	virtual void setDefaults(); // reset to hardcoded defaults
 
 private:
-	QValueList<ConfigOptionWidget*> mConfigOptionWidgets;
+	Q3ValueList<ConfigOptionWidget*> mConfigOptionWidgets;
 };
 
-class GeneralOptions : public QVBox, public OptionsWidget
+class GeneralOptions : public Q3VBox, public OptionsWidget
 {
 	Q_OBJECT
 public:
@@ -77,7 +77,7 @@ private:
 	ConfigOptionWidgetBool* mRMBMovesWithAttack;
 };
 
-class CursorOptions : public QVBox, public OptionsWidget
+class CursorOptions : public Q3VBox, public OptionsWidget
 {
 	Q_OBJECT
 public:
@@ -99,7 +99,7 @@ private:
 	QStringList mCursorThemes;
 };
 
-class ScrollingOptions : public QVBox, public OptionsWidget
+class ScrollingOptions : public Q3VBox, public OptionsWidget
 {
 	Q_OBJECT
 public:
@@ -123,7 +123,7 @@ private:
 	QComboBox* mMouseWheelShiftAction;
 };
 
-class SoundOptions : public QVBox, public OptionsWidget
+class SoundOptions : public Q3VBox, public OptionsWidget
 {
 	Q_OBJECT
 public:
@@ -142,7 +142,7 @@ private:
 };
 
 
-class ChatOptions : public QVBox, public OptionsWidget
+class ChatOptions : public Q3VBox, public OptionsWidget
 {
 	Q_OBJECT
 public:
@@ -154,7 +154,7 @@ private:
 	ConfigOptionWidgetInt* mScreenMaxItems;
 };
 
-class ToolTipOptions : public QVBox, public OptionsWidget
+class ToolTipOptions : public Q3VBox, public OptionsWidget
 {
 	Q_OBJECT
 public:

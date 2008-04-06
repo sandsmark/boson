@@ -45,6 +45,8 @@
 #include <qbitmap.h>
 #include <qpainter.h>
 #include <qimage.h>
+//Added by qt3to4:
+#include <QMouseEvent>
 
 #define BAR_WIDTH 10 // FIXME hardcoded value
 
@@ -61,14 +63,14 @@ static void drawProgress(float progress, float w, float h)
  glEnable(GL_BLEND);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
- float factor_100 = (QMIN(100.0f - progress, 12.5f)) / 12.5f;
- float factor_875 = (QMIN(87.5f  - progress, 12.5f)) / 12.5f;
- float factor_750 = (QMIN(75.0f  - progress, 12.5f)) / 12.5f;
- float factor_625 = (QMIN(62.5f  - progress, 12.5f)) / 12.5f;
- float factor_500 = (QMIN(50.0f  - progress, 12.5f)) / 12.5f;
- float factor_375 = (QMIN(37.5f  - progress, 12.5f)) / 12.5f;
- float factor_250 = (QMIN(25.0f  - progress, 12.5f)) / 12.5f;
- float factor_125 = (QMIN(12.5f  - progress, 12.5f)) / 12.5f;
+ float factor_100 = (qMin(100.0f - progress, 12.5f)) / 12.5f;
+ float factor_875 = (qMin(87.5f  - progress, 12.5f)) / 12.5f;
+ float factor_750 = (qMin(75.0f  - progress, 12.5f)) / 12.5f;
+ float factor_625 = (qMin(62.5f  - progress, 12.5f)) / 12.5f;
+ float factor_500 = (qMin(50.0f  - progress, 12.5f)) / 12.5f;
+ float factor_375 = (qMin(37.5f  - progress, 12.5f)) / 12.5f;
+ float factor_250 = (qMin(25.0f  - progress, 12.5f)) / 12.5f;
+ float factor_125 = (qMin(12.5f  - progress, 12.5f)) / 12.5f;
 
  // AB: this code could be made faster, but this would make it less readable
  glBegin(GL_TRIANGLE_FAN);

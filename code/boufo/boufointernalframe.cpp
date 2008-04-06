@@ -74,7 +74,8 @@ void BoUfoInternalFrame::setBounds(int x, int y, int w, int h)
 
 void BoUfoInternalFrame::setTitle(const QString& t)
 {
- frame()->setTitle(t.latin1());
+ QByteArray tmp = t.toAscii();
+ frame()->setTitle(std::string(tmp.constData(), tmp.length()));
 }
 
 QString BoUfoInternalFrame::title() const

@@ -50,6 +50,13 @@
 #include <qobject.h>
 #include <qdom.h>
 #include <qdir.h>
+//Added by qt3to4:
+#include <QKeyEvent>
+#include <Q3ValueList>
+#include <QResizeEvent>
+#include <QMouseEvent>
+#include <QEvent>
+#include <QWheelEvent>
 
 #include <bodebug.h>
 
@@ -106,16 +113,16 @@ static ufo::UMod_t convertQtModifierStateToUfo(int modifiers, ufo::UMod_t origUf
 	s |= ufo::UMod::MiddleButton;
  }
 
- if (modifiers & Qt::ShiftButton) {
+ if (modifiers & Qt::ShiftModifier) {
 	s |= ufo::UMod::Shift;
  }
- if (modifiers & Qt::ControlButton) {
+ if (modifiers & Qt::ControlModifier) {
 	s |= ufo::UMod::Ctrl;
  }
- if (modifiers & Qt::AltButton) {
+ if (modifiers & Qt::AltModifier) {
 	s |= ufo::UMod::Alt;
  }
- if (modifiers & Qt::MetaButton) {
+ if (modifiers & Qt::MetaModifier) {
 	s |= ufo::UMod::Meta;
  }
 
@@ -223,10 +230,10 @@ static ufo::UKeyCode_t convertQtKeyToUfo(int key)
 	case Qt::Key_Down:
 		uk = ufo::UKey::UK_DOWN;
 		break;
-	case Qt::Key_Prior: // PageUp
+	case Qt::Key_PageUp: // PageUp
 		uk = ufo::UKey::UK_PAGEUP;
 		break;
-	case Qt::Key_Next: // PageDown
+	case Qt::Key_PageDown: // PageDown
 		uk = ufo::UKey::UK_PAGEDOWN;
 		break;
 	case Qt::Key_Shift:
@@ -293,14 +300,15 @@ static ufo::UKeyCode_t convertQtKeyToUfo(int key)
 
 
 BoUfoManager::BoUfoManager(int w, int h, bool opaque)
-	: QObject(0, "ufomanager")
+	: QObject(0)
 {
+ setObjectName("ufomanager");
  mGlobalFont = new BoUfoFontInfo();
  if (!ufo::UToolkit::getToolkit()) {
 	ufo::UXToolkit* tk = new ufo::UXToolkit();
 	tk->getStyleManager()->setStyle(new ufo::UBosonStyle);
 	QString data_dir;
-	if (KGlobal::_instance) { // NULL in boufodesigner
+	if (KGlobal::hasMainComponent()) { // NULL in boufodesigner
 		data_dir = KGlobal::dirs()->findResourceDir("data", "boson/pics/boson-startup-logo.png");
 	}
 	if (data_dir.isEmpty()) {
@@ -402,10 +410,10 @@ BoUfoManager::~BoUfoManager()
 	g_currentManager = 0;
  }
  {
-	QValueList<ufo::UContext*> remove;
+	Q3ValueList<ufo::UContext*> remove;
 	QMap<ufo::UContext*, BoUfoManager*>::iterator it;
 	for (it = g_context2Manager.begin(); it != g_context2Manager.end(); ++it) {
-		if (it.data() == this) {
+		if (it.value() == this) {
 			remove.append(it.key());
 		}
 	}
@@ -571,10 +579,13 @@ bool BoUfoManager::sendEvent(QEvent* e)
  //     timer) and then release the button, then the event won't ever get
  //     delivered to the original widget.
  bool updateButtons = false;
- Qt::ButtonState state = Qt::NoButton;
+ Qt::MouseButtons qtMouseState;
+ Qt::KeyboardModifiers qtKeyboardState;
+// Qt::ButtonState state = Qt::NoButton;
  switch (e->type()) {
 	case QEvent::Wheel:
-		state = ((QWheelEvent*)e)->state();
+		qtMouseState = ((QWheelEvent*)e)->buttons();
+		qtKeyboardState = ((QWheelEvent*)e)->modifiers();
 		updateKeys = true;
 		break;
 	case QEvent::MouseMove:
@@ -583,17 +594,22 @@ bool BoUfoManager::sendEvent(QEvent* e)
 	case QEvent::MouseButtonPress:
 	case QEvent::MouseButtonRelease:
 	case QEvent::MouseButtonDblClick:
-		state = ((QMouseEvent*)e)->state();
+		qtMouseState = ((QMouseEvent*)e)->buttons();
+		qtKeyboardState = ((QMouseEvent*)e)->modifiers();
 		updateKeys = true;
 		break;
 	case QEvent::KeyPress:
 	case QEvent::KeyRelease:
-		state = ((QKeyEvent*)e)->state();
+		qtKeyboardState = ((QKeyEvent*)e)->modifiers();
 		updateKeys = true;
 		break;
 	default:
 		break;
  }
+
+
+#warning TODO: port to Qt4
+#if 0
  if (updateKeys) {
 	int x, y;
 	ufo::UMod_t mouseState = display()->getMouseState(&x, &y);
@@ -615,6 +631,7 @@ bool BoUfoManager::sendEvent(QEvent* e)
 		display()->dispatchMouseButtonUp(context(), x, y, ufo::UMod::RightButton);
 	}
  }
+#endif
 
  switch (e->type()) {
 	case QEvent::Wheel:
@@ -786,7 +803,7 @@ bool BoUfoManager::sendKeyPressEvent(QKeyEvent* e)
 	return false;
  }
  ufo::UKeyCode_t key = convertQtKeyToUfo(e->key());
- wchar_t keyChar = e->ascii(); // AB: I have no idea what I am doing here
+ wchar_t keyChar = e->text()[0].toAscii(); // AB: I have no idea what I am doing here
 
  bool ret = display()->dispatchKeyDown(context(), key, keyChar);
  if (ret) {
@@ -812,7 +829,7 @@ bool BoUfoManager::sendKeyReleaseEvent(QKeyEvent* e)
 	return false;
  }
  ufo::UKeyCode_t key = convertQtKeyToUfo(e->key());
- wchar_t keyChar = e->ascii(); // AB: I have no idea what I am doing here
+ wchar_t keyChar = e->text()[0].toAscii(); // AB: I have no idea what I am doing here
 
  bool ret = display()->dispatchKeyUp(context(), key, keyChar);
  if (ret) {
@@ -829,7 +846,9 @@ void BoUfoManager::setUfoToolkitProperty(const QString& key, const QString& valu
  if (!tk) {
 	return;
  }
- tk->putProperty(key.latin1(), value.latin1());
+ QByteArray tmp1 = key.toAscii();
+ QByteArray tmp2 = value.toAscii();
+ tk->putProperty(std::string(tmp1.constData(), tmp1.length()), std::string(tmp2.constData(), tmp2.length()));
 }
 
 QString BoUfoManager::ufoToolkitProperty(const QString& key) const
@@ -838,7 +857,8 @@ QString BoUfoManager::ufoToolkitProperty(const QString& key) const
  if (!tk) {
 	return QString::null;
  }
- return QString::fromLatin1(tk->getProperty(key.latin1()).c_str());
+ QByteArray tmp = key.toAscii();
+ return QString::fromLatin1(tk->getProperty(std::string(tmp.constData(), tmp.length())).c_str());
 }
 
 QMap<QString, QString> BoUfoManager::toolkitProperties() const
@@ -864,7 +884,7 @@ QMap<QString, QString> BoUfoManager::toolkitProperties() const
  return p;
 }
 
-QValueList<BoUfoFontInfo> BoUfoManager::listFonts(const BoUfoFontInfo& fontInfo)
+Q3ValueList<BoUfoFontInfo> BoUfoManager::listFonts(const BoUfoFontInfo& fontInfo)
 {
  QString originalFontPlugin = ufoToolkitProperty("font");
  QString fontPlugin = fontInfo.fontPlugin();
@@ -873,7 +893,7 @@ QValueList<BoUfoFontInfo> BoUfoManager::listFonts(const BoUfoFontInfo& fontInfo)
  }
  setUfoToolkitProperty("font", fontInfo.fontPlugin());
 
- QValueList<BoUfoFontInfo> ret;
+ Q3ValueList<BoUfoFontInfo> ret;
  std::vector<ufo::UFontInfo> fonts = toolkit()->listFonts(fontInfo.ufoFontInfo());
  for (unsigned int i = 0; i < fonts.size(); i++) {
 	ret.append(BoUfoFontInfo(fontPlugin, fonts[i]));
@@ -882,12 +902,12 @@ QValueList<BoUfoFontInfo> BoUfoManager::listFonts(const BoUfoFontInfo& fontInfo)
  return ret;
 }
 
-QValueList<BoUfoFontInfo> BoUfoManager::listFonts()
+Q3ValueList<BoUfoFontInfo> BoUfoManager::listFonts()
 {
  QString originalFontPlugin = ufoToolkitProperty("font");
  if (!toolkit()) {
 	BO_NULL_ERROR(toolkit());
-	return QValueList<BoUfoFontInfo>();
+	return Q3ValueList<BoUfoFontInfo>();
  }
 
  QStringList fontPlugins;
@@ -898,7 +918,7 @@ QValueList<BoUfoFontInfo> BoUfoManager::listFonts()
 	}
  }
 
- QValueList<BoUfoFontInfo> ret;
+ Q3ValueList<BoUfoFontInfo> ret;
  for (QStringList::iterator it = fontPlugins.begin(); it != fontPlugins.end(); ++it) {
 	setUfoToolkitProperty("font", *it);
 	std::vector<ufo::UFontInfo> fonts = toolkit()->listFonts();

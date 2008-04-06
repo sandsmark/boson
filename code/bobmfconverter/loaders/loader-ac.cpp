@@ -27,11 +27,13 @@
 #include "frame.h"
 #include "texture.h"
 
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 #include <qstringlist.h>
-#include <qvaluevector.h>
+#include <q3valuevector.h>
 #include <qfile.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 
 #define SURFACE_SHADED (1<<4)
@@ -119,12 +121,12 @@ class ACObject
 };
 
 
-QValueVector<QString> splitString(const QString& str)
+Q3ValueVector<QString> splitString(const QString& str)
 {
- QValueVector<QString> tokens;  // All tokens
+ Q3ValueVector<QString> tokens;  // All tokens
  QString current;  // Token being processed atm
 
- for (unsigned int i = 0; i < str.length(); i++) {
+ for (int i = 0; i < str.length(); i++) {
 	if (!str[i].isSpace()) {
 		if (str[i] == '"') {
 			// Quoted word(s). Loop until we find ending quote.
@@ -192,13 +194,13 @@ bool LoaderAC::load()
 
   // Code taken from AC3DLoader
   QFile f(filename());
-  if(!f.open(IO_ReadOnly))
+  if(!f.open(QIODevice::ReadOnly))
   {
     boError() << k_funcinfo << "can't open " << filename() << endl;;
     return false;
   }
 
-  QTextStream stream(&f);
+  Q3TextStream stream(&f);
   QString line;
   int i = 1;
   line = stream.readLine(); // line of text excluding '\n'
@@ -276,10 +278,10 @@ bool LoaderAC::load()
   return true;
 }
 
-bool LoaderAC::loadObject(QTextStream& stream, ACObject* obj)
+bool LoaderAC::loadObject(Q3TextStream& stream, ACObject* obj)
 {
   QString line;
-  QValueVector<QString> tokens;
+  Q3ValueVector<QString> tokens;
 
   while(!stream.atEnd())
   {
@@ -292,7 +294,7 @@ bool LoaderAC::loadObject(QTextStream& stream, ACObject* obj)
       continue;
     }
 
-    if(tokens[0].lower() == "data")
+    if(tokens[0].toLower() == "data")
     {
       if(tokens.count() != 2)
       {
@@ -309,7 +311,7 @@ bool LoaderAC::loadObject(QTextStream& stream, ACObject* obj)
         }
       }
     }
-    else if(tokens[0].lower() == "name")
+    else if(tokens[0].toLower() == "name")
     {
       if(tokens.count() != 2)
       {
@@ -320,7 +322,7 @@ bool LoaderAC::loadObject(QTextStream& stream, ACObject* obj)
         obj->name = tokens[1];
       }
     }
-    else if(tokens[0].lower() == "texture")
+    else if(tokens[0].toLower() == "texture")
     {
       if(tokens.count() != 2)
       {
@@ -331,7 +333,7 @@ bool LoaderAC::loadObject(QTextStream& stream, ACObject* obj)
         obj->texture = tokens[1];
       }
     }
-    else if(tokens[0].lower() == "texrep")
+    else if(tokens[0].toLower() == "texrep")
     {
       if(tokens.count() != 3)
       {
@@ -343,7 +345,7 @@ bool LoaderAC::loadObject(QTextStream& stream, ACObject* obj)
         obj->texrepY = tokens[1].toFloat();
       }
     }
-    else if(tokens[0].lower() == "texoff")
+    else if(tokens[0].toLower() == "texoff")
     {
       if(tokens.count() != 3)
       {
@@ -355,11 +357,11 @@ bool LoaderAC::loadObject(QTextStream& stream, ACObject* obj)
         obj->texoffY = tokens[1].toFloat();
       }
     }
-    else if(tokens[0].lower() == "rot")
+    else if(tokens[0].toLower() == "rot")
     {
       boError() << k_funcinfo << "'rot' is not yet supported!!!" << endl;
     }
-    else if(tokens[0].lower() == "loc")
+    else if(tokens[0].toLower() == "loc")
     {
       if(tokens.count() != 4)
       {
@@ -370,7 +372,7 @@ bool LoaderAC::loadObject(QTextStream& stream, ACObject* obj)
         obj->loc = BoVector3Float(tokens[1].toFloat(), tokens[2].toFloat(), tokens[3].toFloat());
       }
     }
-    else if(tokens[0].lower() == "numvert")
+    else if(tokens[0].toLower() == "numvert")
     {
       if(tokens.count() != 2)
       {
@@ -390,7 +392,7 @@ bool LoaderAC::loadObject(QTextStream& stream, ACObject* obj)
         line = stream.readLine();
       }
     }
-    else if(tokens[0].lower() == "numsurf")
+    else if(tokens[0].toLower() == "numsurf")
     {
       if(tokens.count() != 2)
       {
@@ -409,7 +411,7 @@ bool LoaderAC::loadObject(QTextStream& stream, ACObject* obj)
         }
       }
     }
-    else if(tokens[0].lower() == "kids")
+    else if(tokens[0].toLower() == "kids")
     {
       if(tokens.count() != 2)
       {
@@ -441,10 +443,10 @@ bool LoaderAC::loadObject(QTextStream& stream, ACObject* obj)
   return true;
 }
 
-bool LoaderAC::loadFace(QTextStream& stream, ACFace* face)
+bool LoaderAC::loadFace(Q3TextStream& stream, ACFace* face)
 {
   QString line;
-  QValueVector<QString> tokens;
+  Q3ValueVector<QString> tokens;
 
   while(!stream.atEnd())
   {
@@ -456,7 +458,7 @@ bool LoaderAC::loadFace(QTextStream& stream, ACFace* face)
       continue;
     }
 
-    if(tokens[0].lower() == "surf")
+    if(tokens[0].toLower() == "surf")
     {
       if(tokens.count() != 2)
       {
@@ -496,7 +498,7 @@ bool LoaderAC::loadFace(QTextStream& stream, ACFace* face)
         }
       }
     }
-    else if(tokens[0].lower() == "mat")
+    else if(tokens[0].toLower() == "mat")
     {
       if(tokens.count() != 2)
       {
@@ -507,7 +509,7 @@ bool LoaderAC::loadFace(QTextStream& stream, ACFace* face)
         face->material = tokens[1].toInt();
       }
     }
-    else if(tokens[0].lower() == "refs")
+    else if(tokens[0].toLower() == "refs")
     {
       if(tokens.count() != 2)
       {
@@ -550,8 +552,8 @@ Material* LoaderAC::requestMaterial(const QString& line, const QString& texture)
     boError() << k_funcinfo << "requested unknown material line" << endl;
     return 0;
   }
-  QValueList<Material*> list = mLine2Materials[line];
-  for(QValueList<Material*>::iterator it = list.begin(); it != list.end(); ++it)
+  Q3ValueList<Material*> list = mLine2Materials[line];
+  for(Q3ValueList<Material*>::iterator it = list.begin(); it != list.end(); ++it)
   {
     if(!(*it)->texture() && texture.isEmpty())
     {
@@ -577,7 +579,7 @@ Material* LoaderAC::requestMaterial(const QString& line, const QString& texture)
 bool LoaderAC::loadMaterial(const QString& line)
 {
   // Parse AC3D material
-  QValueVector<QString> tokens = splitString(line);
+  Q3ValueVector<QString> tokens = splitString(line);
 
   if(tokens.count() != 22)
   {
@@ -691,7 +693,7 @@ bool LoaderAC::convertIntoMesh(Frame* f, int* index, ACObject* obj)
     }
   }
   // Check if it's a teamcolored-mesh
-  boMesh->setIsTeamColor(obj->name.find("teamcolor", 0, false) == 0);
+  boMesh->setIsTeamColor(obj->name.indexOf("teamcolor", 0, Qt::CaseInsensitive) == 0);
 
 
   // Load faces

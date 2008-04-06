@@ -42,10 +42,12 @@
 #include <klocale.h>
 
 #include <qtimer.h>
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 #include <qpoint.h>
 #include <qdom.h>
-#include <qintdict.h>
+#include <q3intdict.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 #include <math.h>
 
@@ -171,7 +173,7 @@ void BoSelectionGroupDebugWidget::update(BoSelection* selection)
  } else {
 	text += i18n("Leader: NULL\n");
  }
- QPtrList<Unit> units = selection->allUnits();
+ Q3PtrList<Unit> units = selection->allUnits();
  QString ids = QString::number(units.at(0)->id());
  for (unsigned int i = 1; i < units.count(); i++) {
 	ids += QString(", %1").arg(units.at(i)->id());
@@ -205,8 +207,8 @@ void BoSelectionGroupDebugWidget::update(BoSelection* selection)
 	unsigned int count = 1;
 
 	QString ids = QString::number(u->id());
-	QPtrList<Unit> tmp = units; // copy, so that we can remove() from units
-	for (QPtrListIterator<Unit> it(tmp); it.current(); ++it) {
+	Q3PtrList<Unit> tmp = units; // copy, so that we can remove() from units
+	for (Q3PtrListIterator<Unit> it(tmp); it.current(); ++it) {
 		if (it.current()->type() == type) {
 			ids += QString(", %1").arg(it.current()->id());
 			units.removeRef(it.current());
@@ -270,8 +272,8 @@ void BoUnitDebugWidget::update(Unit* unit)
  text += i18n("KGameProperty objects:\n");
 
  BosonCustomPropertyXML propertyXML;
- QIntDict<KGamePropertyBase>& dict = unit->dataHandler()->dict();
- for (QIntDictIterator<KGamePropertyBase> it(dict); it.current(); ++it) {
+ Q3IntDict<KGamePropertyBase>& dict = unit->dataHandler()->dict();
+ for (Q3IntDictIterator<KGamePropertyBase> it(dict); it.current(); ++it) {
 	QString value = propertyXML.propertyValue(it.current());
 	if (value.isNull()) {
 		value = i18n("<value could not be retrieved>");

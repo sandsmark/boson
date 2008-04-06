@@ -1,7 +1,7 @@
 /*
     This file is part of the KDE games library
     Copyright (C) 2003 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2003 Martin Heni (martin@heni-online.de)
+    Copyright (C) 2003 Martin Heni (kde at heni-online.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -17,6 +17,7 @@
     the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
     Boston, MA 02110-1301, USA.
 */
+
 #ifndef __KGAMEVERSION_H__
 #define __KGAMEVERSION_H__
 

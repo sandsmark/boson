@@ -27,6 +27,8 @@
 
 #include <qlayout.h>
 #include <qcheckbox.h>
+//Added by qt3to4:
+#include <Q3VBoxLayout>
 
 
 ConfigOptionWidget::ConfigOptionWidget(const QString& configKey, QWidget* parent)
@@ -45,7 +47,7 @@ ConfigOptionWidget::~ConfigOptionWidget()
 ConfigOptionWidgetInt::ConfigOptionWidgetInt(const QString& configKey, QWidget* parent)
 	: ConfigOptionWidget(configKey, parent)
 {
- QVBoxLayout* layout = new QVBoxLayout(this);
+ Q3VBoxLayout* layout = new Q3VBoxLayout(this);
  mNumInput = new KIntNumInput(this);
  connect(mNumInput, SIGNAL(valueChanged(int)), this, SIGNAL(signalValueChanged()));
  layout->addWidget(mNumInput);
@@ -124,7 +126,7 @@ void ConfigOptionWidgetInt::loadDefault()
 ConfigOptionWidgetUInt::ConfigOptionWidgetUInt(const QString& configKey, QWidget* parent)
 	: ConfigOptionWidget(configKey, parent)
 {
- QVBoxLayout* layout = new QVBoxLayout(this);
+ Q3VBoxLayout* layout = new Q3VBoxLayout(this);
  mNumInput = new KIntNumInput(this);
  connect(mNumInput, SIGNAL(valueChanged(int)), this, SIGNAL(signalValueChanged()));
  layout->addWidget(mNumInput);
@@ -208,7 +210,7 @@ void ConfigOptionWidgetUInt::loadDefault()
 ConfigOptionWidgetDouble::ConfigOptionWidgetDouble(const QString& configKey, QWidget* parent)
 	: ConfigOptionWidget(configKey, parent)
 {
- QVBoxLayout* layout = new QVBoxLayout(this);
+ Q3VBoxLayout* layout = new Q3VBoxLayout(this);
  mNumInput = new KDoubleNumInput(this);
  connect(mNumInput, SIGNAL(valueChanged(double)), this, SIGNAL(signalValueChanged()));
  layout->addWidget(mNumInput);
@@ -289,7 +291,7 @@ void ConfigOptionWidgetDouble::loadDefault()
 ConfigOptionWidgetBool::ConfigOptionWidgetBool(const QString& configKey, QWidget* parent)
 	: ConfigOptionWidget(configKey, parent)
 {
- QVBoxLayout* layout = new QVBoxLayout(this);
+ Q3VBoxLayout* layout = new Q3VBoxLayout(this);
  mCheckBox = new QCheckBox(this);
  layout->addWidget(mCheckBox);
 

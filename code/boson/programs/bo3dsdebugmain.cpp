@@ -26,6 +26,9 @@
 
 #include <qlayout.h>
 #include <qstringlist.h>
+//Added by qt3to4:
+#include <Q3VBoxLayout>
+#include <Q3CString>
 
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
@@ -58,7 +61,7 @@ int main(int argc, char ** argv)
 		"http://boson.eu.org");
  data.addAuthor("Andreas Beckermann", I18N_NOOP("Maintainer"), "b_mann@gmx.de");
 
- QCString argv0(argv[0]);
+ Q3CString argv0(argv[0]);
  KCmdLineArgs::init( argc, argv, &data );
  KCmdLineArgs::addCmdLineOptions( options );
 
@@ -71,7 +74,7 @@ int main(int argc, char ** argv)
 		"debug3dsdialog", false, true);
 
  QWidget* w = dialog->plainPage();
- QVBoxLayout* layout = new QVBoxLayout(w);
+ Q3VBoxLayout* layout = new Q3VBoxLayout(w);
  KGame3DSModelDebug* models = new KGame3DSModelDebug(w);
  layout->addWidget(models);
 

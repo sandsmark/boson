@@ -41,6 +41,8 @@
 
 #include <qtimer.h>
 #include <qfile.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 class BoUfoLoadFromLogWidgetPrivate
 {
@@ -48,7 +50,7 @@ public:
 	BoUfoLoadFromLogWidgetPrivate()
 	{
 	}
-	QPtrList<BoMessage> mLogMessages;
+	Q3PtrList<BoMessage> mLogMessages;
 };
 
 
@@ -98,16 +100,16 @@ bool BoUfoLoadFromLogWidget::loadFromLog(const QString& file)
 	return false;
  }
  QFile f(file);
- if (!f.open(IO_ReadOnly)) {
+ if (!f.open(QIODevice::ReadOnly)) {
 	boError() << k_funcinfo << "could not open " << file << " for reading" << endl;
 	return false;
  }
 
- QPtrList<BoMessage> messages;
+ Q3PtrList<BoMessage> messages;
  messages.setAutoDelete(true);
  BoMessageLogger::loadMessageLog(&f, &messages);
  BoMessage* start = 0;
- QPtrListIterator<BoMessage> it(messages);
+ Q3PtrListIterator<BoMessage> it(messages);
  while (it.current()) {
 //	if (it.current()->msgid == KGameMessage::IdUser + BosonMessageIds::IdGameIsStarted) {
 	if (it.current()->msgid == KGameMessage::IdUser + BosonMessageIds::IdNewGame) {
@@ -148,7 +150,7 @@ void BoUfoLoadFromLogWidget::slotStartGame()
 
  boWarning() << k_funcinfo << "using hardcoded teamcolor values and default species for all players" << endl;
  int red = 0;
- for (QPtrListIterator<Player> it(boGame->gamePlayerList()); it.current(); ++it) {
+ for (Q3PtrListIterator<Player> it(boGame->gamePlayerList()); it.current(); ++it) {
 	QColor c(red, 100, 100);
 	networkInterface()->sendChangeSpecies((Player*)it.current(), SpeciesTheme::defaultSpecies(), c);
 	red += 20;

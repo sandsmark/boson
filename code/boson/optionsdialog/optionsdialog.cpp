@@ -26,8 +26,8 @@
 
 #include <klocale.h>
 
-#include <qvbox.h>
-#include <qptrlist.h>
+#include <q3vbox.h>
+#include <q3ptrlist.h>
 
 class OptionsDialogPrivate
 {
@@ -35,7 +35,7 @@ public:
 	OptionsDialogPrivate()
 	{
 	}
-	QPtrList<OptionsWidget> mOptionsWidgets;
+	Q3PtrList<OptionsWidget> mOptionsWidgets;
 };
 
 OptionsDialog::OptionsDialog(QWidget* parent)
@@ -68,14 +68,14 @@ OptionsDialog::~OptionsDialog()
 
 void OptionsDialog::initGeneralPage()
 {
- QVBox* vbox = addVBoxPage(i18n("&General"));
+ KVBox* vbox = addVBoxPage(i18n("&General"));
  GeneralOptions* o = new GeneralOptions(vbox);
  addOptions(o);
 }
 
 void OptionsDialog::initCursorPage()
 {
- QVBox* vbox = addVBoxPage(i18n("C&ursor"));
+ KVBox* vbox = addVBoxPage(i18n("C&ursor"));
  CursorOptions* o = new CursorOptions(vbox);
  connect(o, SIGNAL(signalCursorChanged(int, const QString&)),
 		this, SIGNAL(signalCursorChanged(int, const QString&)));
@@ -84,21 +84,21 @@ void OptionsDialog::initCursorPage()
 
 void OptionsDialog::initScrollingPage()
 {
- QVBox* vbox = addVBoxPage(i18n("&Scrolling"));
+ KVBox* vbox = addVBoxPage(i18n("&Scrolling"));
  ScrollingOptions* o = new ScrollingOptions(vbox);
  addOptions(o);
 }
 
 void OptionsDialog::initSoundsPage()
 {
- QVBox* vbox = addVBoxPage(i18n("S&ounds"));
+ KVBox* vbox = addVBoxPage(i18n("S&ounds"));
  SoundOptions* o = new SoundOptions(vbox);
  addOptions(o);
 }
 
 void OptionsDialog::initOpenGLPage()
 {
- QVBox* vbox = addVBoxPage(i18n("&OpenGL"));
+ KVBox* vbox = addVBoxPage(i18n("&OpenGL"));
  OpenGLOptions* o = new OpenGLOptions(vbox);
  connect(o, SIGNAL(signalFontChanged(const BoFontInfo&)),
 		this, SIGNAL(signalFontChanged(const BoFontInfo&)));
@@ -107,21 +107,21 @@ void OptionsDialog::initOpenGLPage()
 
 void OptionsDialog::initWaterPage()
 {
- QVBox* vbox = addVBoxPage(i18n("&Water"));
+ KVBox* vbox = addVBoxPage(i18n("&Water"));
  WaterOptions* o = new WaterOptions(vbox);
  addOptions(o);
 }
 
 void OptionsDialog::initChatPage()
 {
- QVBox* vbox = addVBoxPage(i18n("C&hat"));
+ KVBox* vbox = addVBoxPage(i18n("C&hat"));
  ChatOptions* o = new ChatOptions(vbox);
  addOptions(o);
 }
 
 void OptionsDialog::initToolTipPage()
 {
- QVBox* vbox = addVBoxPage(i18n("&Tool Tips"));
+ KVBox* vbox = addVBoxPage(i18n("&Tool Tips"));
  ToolTipOptions* o = new ToolTipOptions(vbox);
  addOptions(o);
 }
@@ -133,7 +133,7 @@ void OptionsDialog::addOptions(OptionsWidget* o)
 
 void OptionsDialog::slotLoad()
 {
- QPtrListIterator<OptionsWidget> it(d->mOptionsWidgets);
+ Q3PtrListIterator<OptionsWidget> it(d->mOptionsWidgets);
  for (; it.current(); ++it) {
 	it.current()->load();
  }
@@ -141,7 +141,7 @@ void OptionsDialog::slotLoad()
 
 void OptionsDialog::slotDefault()
 {
- QPtrListIterator<OptionsWidget> it(d->mOptionsWidgets);
+ Q3PtrListIterator<OptionsWidget> it(d->mOptionsWidgets);
  for (; it.current(); ++it) {
 	it.current()->setDefaults();
  }
@@ -158,7 +158,7 @@ void OptionsDialog::slotOk()
 void OptionsDialog::slotApply()
 {
  boDebug(210) << k_funcinfo << endl;
- QPtrListIterator<OptionsWidget> it(d->mOptionsWidgets);
+ Q3PtrListIterator<OptionsWidget> it(d->mOptionsWidgets);
  for (; it.current(); ++it) {
 	it.current()->apply();
  }

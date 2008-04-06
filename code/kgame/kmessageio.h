@@ -24,17 +24,15 @@
 #ifndef _KMESSAGEIO_H_
 #define _KMESSAGEIO_H_
 
-#include <qcstring.h>
-#include <qhostaddress.h>
-#include <qobject.h>
-#include <qstring.h>
-#include <qptrqueue.h>
-#include <qfile.h>
-#include <bodebug.h>
+#include <QtCore/QObject>
+#include <QtCore/QProcess>
+#include <QtCore/QString>
+#include <QtNetwork/QHostAddress>
+#include <kdebug.h>
 
-class QSocket;
+class QTcpSocket;
 class KProcess;
-//class QFile;
+class QFile;
 
 
 /**
@@ -61,7 +59,7 @@ public:
   /**
    * The usual QObject constructor, does nothing else.
    **/
-  KMessageIO (QObject *parent = 0, const char *name = 0);
+  KMessageIO (QObject *parent = 0);
 
   /**
    * The usual destructor, does nothing special.
@@ -79,7 +77,7 @@ public:
   //virtual bool isNetwork () const = 0;
   virtual bool isNetwork () const
   {
-   boError(11001) << "Calling PURE virtual isNetwork...BAD" << endl;
+   kError(11001) << "Calling PURE virtual isNetwork...BAD";
    return false;
   }
 
@@ -93,7 +91,7 @@ public:
   //virtual bool isConnected () const = 0;
   virtual bool isConnected () const
   {
-   boError(11001) << "Calling PURE virtual isConencted...BAD" << endl;
+   kError(11001) << "Calling PURE virtual isConencted...BAD";
    return false;
   }
 
@@ -105,27 +103,25 @@ public:
     have the same ID number. You have to do so yourself, KMessageIO doesn't
     change this value on its own!
   */
-  void setId (Q_UINT32 id);
+  void setId (quint32 id);
 
   /**
     Queries the ID of this object.
   */
-  Q_UINT32 id ();
+  quint32 id ();
 
   /**
-    @since 3.2
     @return 0 in the default implementation. Reimplemented in @ref KMessageSocket.
   */
-  virtual Q_UINT16 peerPort () const { return 0; }
+  virtual quint16 peerPort () const { return 0; }
 
   /**
-    @since 3.2
     @return "localhost" in the default implementation. Reimplemented in @ref KMessageSocket
   */
   virtual QString peerName () const { return QString::fromLatin1("localhost"); }
 
 
-signals:
+Q_SIGNALS:
   /**
     This signal is emitted when /e send() on the connected KMessageIO
     object is called. The parameter contains the same data array in /e msg
@@ -143,7 +139,7 @@ signals:
   */
   void connectionBroken ();
 
-public slots:
+public Q_SLOTS:
 
   /**
     This slot sends the data block in /e msg to the connected object, that will
@@ -157,7 +153,7 @@ public slots:
   virtual void send (const QByteArray &msg) = 0;
 
 protected:
-  Q_UINT32 m_id;
+  quint32 m_id;
 };
 
 
@@ -181,8 +177,7 @@ public:
     If the connection could not be established (e.g. unknown host or no server
     socket at this port), the signal /e connectionBroken is emitted.
   */
-  KMessageSocket (QString host, Q_UINT16 port, QObject *parent = 0,
-                  const char *name = 0);
+  KMessageSocket (const QString& host, quint16 port, QObject *parent = 0 );
 
   /**
     Connects to a server socket on /e host with /e port. You can immediately
@@ -192,8 +187,7 @@ public:
     If the connection could not be established (e.g. unknown host or no server
     socket at this port), the signal /e connectionBroken is emitted.
   */
-  KMessageSocket (QHostAddress host, Q_UINT16 port, QObject *parent = 0,
-                  const char *name = 0);
+  KMessageSocket (QHostAddress host, quint16 port, QObject *parent = 0);
 
   /**
     Uses /e socket to do the communication.
@@ -206,7 +200,7 @@ public:
     together with this KMessageSocket object. (Use 0 as parent for the QSocket
     object t ensure it is not deleted.)
   */
-  KMessageSocket (QSocket *socket, QObject *parent = 0, const char *name = 0);
+  explicit KMessageSocket (QTcpSocket *socket, QObject *parent = 0);
 
   /**
     Uses the socket specified by the socket descriptor socketFD to do the
@@ -219,7 +213,7 @@ public:
     manipulate the socket afterwards, especially don't close it. The socket is
     automatically closed when KMessageSocket is deleted.
   */
-  KMessageSocket (int socketFD, QObject *parent = 0, const char *name = 0);
+  explicit KMessageSocket (int socketFD, QObject *parent = 0);
 
   /**
     Destructor, closes the socket.
@@ -232,14 +226,12 @@ public:
   virtual int rtti() const {return 1;}
 
   /**
-    @since 3.2
-    @return The port that this object is connected to. See @ref QSocket::peerPort
+    @return The port that this object is connected to. See QSocket::peerPort
   */
-  virtual Q_UINT16 peerPort () const;
+  virtual quint16 peerPort () const;
 
   /**
-    @since 3.2
-    @return The hostname this object is connected to. See @ref QSocket::peerName.
+    @return The hostname this object is connected to. See QSocket::peerName.
   */
   virtual QString peerName () const;
 
@@ -261,14 +253,14 @@ public:
   */
   void send (const QByteArray &msg);
 
-protected slots:
+protected Q_SLOTS:
   virtual void processNewData ();
 
 protected:
   void initSocket ();
-  QSocket *mSocket;
+  QTcpSocket *mSocket;
   bool mAwaitingHeader;
-  Q_UINT32 mNextBlockLength;
+  quint32 mNextBlockLength;
 
   bool isRecursive;  // workaround for "bug" in QSocket, Qt 2.2.3 or older
 };
@@ -304,8 +296,7 @@ public:
 
     If that object is already connected, the object remains unconnected.
   */
-  KMessageDirect (KMessageDirect *partner = 0, QObject *parent = 0, const char
-*name = 0);
+  explicit KMessageDirect (KMessageDirect *partner = 0, QObject *parent = 0);
 
   /**
     Destructor, closes the connection.
@@ -350,11 +341,10 @@ class KMessageProcess : public KMessageIO
   Q_OBJECT 
 
   public:
-    KMessageProcess(QObject *parent, QString file);
+    KMessageProcess(QObject *parent, const QString& file);
     ~KMessageProcess();
     bool isConnected() const;
     void send (const QByteArray &msg);
-    void writeToProcess();
 
     /**
       @return FALSE as this is no network IO.
@@ -368,19 +358,20 @@ class KMessageProcess : public KMessageIO
 
 
 
-  public slots:
-  void  slotReceivedStdout(KProcess *proc, char *buffer, int buflen);
-  void  slotReceivedStderr(KProcess *proc, char *buffer, int buflen);
-  void  slotProcessExited(KProcess *p);
-  void  slotWroteStdin(KProcess *p);
+  public Q_SLOTS:
+  void  slotReceivedStdout();
+  void  slotReceivedStderr();
+  void  slotProcessExited(int, QProcess::ExitStatus);
+
+  Q_SIGNALS:
+    void signalReceivedStderr(QString msg);
 
   private:
     QString mProcessName;
     KProcess *mProcess;
-    QPtrQueue <QByteArray> mQueue;
-    QByteArray *mSendBuffer;
+    QByteArray* mSendBuffer;
     QByteArray mReceiveBuffer;
-    unsigned int mReceiveCount;
+    int mReceiveCount;
 };
 
 class KMessageFilePipe : public KMessageIO
@@ -410,7 +401,7 @@ class KMessageFilePipe : public KMessageIO
     QFile *mReadFile;
     QFile *mWriteFile;
     QByteArray mReceiveBuffer;
-    unsigned int mReceiveCount;
+    int mReceiveCount;
 };
 
 #endif

@@ -24,9 +24,12 @@
 
 #include <kapplication.h>
 
-#include <qintdict.h>
+#include <q3intdict.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 #include <AL/al.h>
+#include <krandom.h>
 
 class BoPlayObject
 {
@@ -160,9 +163,9 @@ public:
 
 	BosonAudioAL* mParent;
 
-	QIntDict<BoPlayObject> mSounds;
+	Q3IntDict<BoPlayObject> mSounds;
 
-	QMap<QString, QPtrList<BoPlayObject> > mUnitSounds;
+	QMap<QString, Q3PtrList<BoPlayObject> > mUnitSounds;
 };
 
 BosonSound::BosonSound(BosonAudioAL* parent)
@@ -188,8 +191,8 @@ void BosonSound::addEventSound(const QString& name, const QString& file)
 	boWarning(200) << k_funcinfo << "cannot add empty filename for event " << name << endl;
 	return;
  }
- QPtrList<BoPlayObject> list = d->mUnitSounds[name];
- QPtrListIterator<BoPlayObject> it(list);
+ Q3PtrList<BoPlayObject> list = d->mUnitSounds[name];
+ Q3PtrListIterator<BoPlayObject> it(list);
  for (; it.current(); ++it) {
 	if (it.current()->file() == file) {
 		return;
@@ -244,11 +247,11 @@ void BosonSound::playSound(const QString& name)
  if (!sound()) {
 	return;
  }
- QPtrList<BoPlayObject>& list = d->mUnitSounds[name];
+ Q3PtrList<BoPlayObject>& list = d->mUnitSounds[name];
 
  BoPlayObject* p = 0;
  if (list.count() > 0) {
-	int no = kapp->random() % list.count();
+	int no = KRandom::random() % list.count();
 	p = list.at(no);
  } else {
 	boWarning(200) << k_funcinfo << "empty list for " << name << endl;

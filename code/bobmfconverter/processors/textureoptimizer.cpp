@@ -31,10 +31,13 @@
 
 #include <math.h>
 
-#include <qdict.h>
+#include <q3dict.h>
 #include <qimage.h>
-#include <qwmatrix.h>
+#include <qmatrix.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
+#include <QPainter>
 
 //#define USE_BP
 
@@ -65,7 +68,7 @@ class TextureOptimizer::TextureInfo
     float maxtexelx;
     float maxtexely;
 
-    bool operator<(const TextureOptimizer::TextureInfo& i)
+    bool operator<(const TextureOptimizer::TextureInfo& i) const
     {
       return (i.score < score);
     }
@@ -109,7 +112,7 @@ bool TextureOptimizer::process()
     normalizeTexCoords(lod()->mesh(i));
   }
 
-  QDictIterator<Texture> it(*model()->texturesDict());
+  Q3DictIterator<Texture> it(*model()->texturesDict());
   while(it.current())
   {
     calculateTotalUsedArea(it.current());
@@ -146,9 +149,9 @@ bool TextureOptimizer::normalizeTexCoords(Mesh* m)
     }
 
     // Create new batch
-    QValueList<Vertex*> batch;
+    Q3ValueList<Vertex*> batch;
     // Find all vertices belonging to that batch using floodfill algorithm
-    QValueList<Vertex*> open;
+    Q3ValueList<Vertex*> open;
     open.append(m->vertex(i));
     vertexprocessed[i] = true;
     while(!open.isEmpty())
@@ -157,7 +160,7 @@ bool TextureOptimizer::normalizeTexCoords(Mesh* m)
       Vertex* v = open.first();
       open.pop_front();
       // Add all vertices sharing common face with v
-      for(unsigned int j = 0; j < v->faces.count(); j++)
+      for(int j = 0; j < v->faces.count(); j++)
       {
         Face* f = v->faces[j];
         for(unsigned int k = 0; k < f->vertexCount(); k++)
@@ -180,11 +183,11 @@ bool TextureOptimizer::normalizeTexCoords(Mesh* m)
     // Find min coords of all vertices in batch
     float minx = batch.first()->tex.x();
     float miny = batch.first()->tex.y();
-    QValueList<Vertex*>::Iterator it;
+    Q3ValueList<Vertex*>::Iterator it;
     for(it = batch.begin(); it != batch.end(); ++it)
     {
-      minx = QMIN(minx, (*it)->tex.x());
-      miny = QMIN(miny, (*it)->tex.y());
+      minx = qMin(minx, (*it)->tex.x());
+      miny = qMin(miny, (*it)->tex.y());
     }
     // How much to add to texcoords
     float addx = -floorf(minx);
@@ -257,10 +260,10 @@ void TextureOptimizer::calculateTotalUsedArea(Texture* t)
       BoVector2Float t2 = face->vertex(2)->tex;
       float texarea = calculateArea(t0, t1, t2);
       // Find min/max texels
-      min.setX(QMIN(min.x(), QMIN(t0.x(), QMIN(t1.x(), t2.x()))));
-      min.setY(QMIN(min.y(), QMIN(t0.y(), QMIN(t1.y(), t2.y()))));
-      max.setX(QMAX(max.x(), QMAX(t0.x(), QMAX(t1.x(), t2.x()))));
-      max.setY(QMAX(max.y(), QMAX(t0.y(), QMAX(t1.y(), t2.y()))));
+      min.setX(qMin(min.x(), qMin(t0.x(), qMin(t1.x(), t2.x()))));
+      min.setY(qMin(min.y(), qMin(t0.y(), qMin(t1.y(), t2.y()))));
+      max.setX(qMax(max.x(), qMax(t0.x(), qMax(t1.x(), t2.x()))));
+      max.setY(qMax(max.y(), qMax(t0.y(), qMax(t1.y(), t2.y()))));
       // Add the areas to total area sizes
       if(finite(facearea) && finite(texarea))
       {
@@ -336,10 +339,10 @@ Texture* TextureOptimizer::combineAllTextures()
 {
   // Create TextureInfo objects for each texture
   // Also gather some statistics (e.g. total face/tex area)
-  QValueVector<TextureInfo> textures(model()->texturesDict()->count());
+  Q3ValueVector<TextureInfo> textures(model()->texturesDict()->count());
   float totaltexarea = 0.0f;
   float totalfacearea = 0.0f;
-  QDictIterator<Texture> it(*model()->texturesDict());
+  Q3DictIterator<Texture> it(*model()->texturesDict());
   for(unsigned int i = 0; it.current(); ++it, i++)
   {
     Texture* t = it.current();
@@ -362,7 +365,7 @@ Texture* TextureOptimizer::combineAllTextures()
   //  * High total face area (used on many faces)
   //  * High used texture area
   float totalscore = 0.0f;
-  for(unsigned int i = 0; i < textures.count(); i++)
+  for(int i = 0; i < textures.count(); i++)
   {
     Texture* t = textures[i].tex;
     float avgresolution = t->totalUsedTexArea() / t->totalUsedFaceArea();
@@ -374,7 +377,7 @@ Texture* TextureOptimizer::combineAllTextures()
   }
 
   // Debug
-  for(unsigned int i = 0; i < textures.count(); i++)
+  for(int i = 0; i < textures.count(); i++)
   {
     TextureInfo tinfo = textures[i];
     float avgresolution = tinfo.tex->totalUsedTexArea() / tinfo.tex->totalUsedFaceArea();
@@ -389,7 +392,7 @@ Texture* TextureOptimizer::combineAllTextures()
 
   // Load the textures
   boDebug() << k_funcinfo << "Loading textures..." << endl;
-  for(unsigned int i = 0; i < textures.count(); i++)
+  for(int i = 0; i < textures.count(); i++)
   {
     if(!textures[i].tex->load())
     {
@@ -400,7 +403,7 @@ Texture* TextureOptimizer::combineAllTextures()
   boDebug() << k_funcinfo << "Creating combined texture..." << endl;
   Texture* combinedtex = new Texture(mTexFilename);
   // Create combined texture image
-  QImage img(mTexSize, mTexSize, 32);
+  QImage img(mTexSize, mTexSize, QImage::Format_RGB32);
   // Fill the image with 50% gray
   img.fill(qRgb(128, 128, 128));
 //  img.fill(qRgb(255, 255, 96));
@@ -408,14 +411,14 @@ Texture* TextureOptimizer::combineAllTextures()
 
   // Sort the list of textures by amount of space they'll get in the combined
   //  texture
-  qHeapSort(textures);
+  qSort(textures);
 
   // We divide the combined texture into 16x16 pixel blocks, every block is
   //  used by (at most) one texture.
   // Calculate how many such blocks textures can use
   unsigned int totalblocks = (mTexSize / 16) * (mTexSize / 16);
   unsigned int blocksside = (mTexSize / 16);
-  for(unsigned int i = 0; i < textures.count(); i++)
+  for(int i = 0; i < textures.count(); i++)
   {
     textures[i].blocks = (unsigned int)(textures[i].score / totalscore * totalblocks);
 
@@ -447,8 +450,8 @@ Texture* TextureOptimizer::combineAllTextures()
   {
     float wantedarea = (textures[i].score / totalscore) * (mTexSize * mTexSize);
     float scale = sqrt(wantedarea / textures[i].ratio);
-    boxw[i] = QMIN((int)mTexSize, (int)(scale * textures[i].ratio));
-    boxh[i] = QMIN((int)mTexSize, (int)(scale));
+    boxw[i] = qMin((int)mTexSize, (int)(scale * textures[i].ratio));
+    boxh[i] = qMin((int)mTexSize, (int)(scale));
   }
   // Pass 1
   BP::init_all(mTexSize, textures.count(), 200, 1500);
@@ -470,7 +473,7 @@ Texture* TextureOptimizer::combineAllTextures()
   int maxY = 0;
   for(unsigned int i = 0; i < textures.count(); i++)
   {
-    maxY = QMAX(maxY, BP::posY(i) + BP::posH(i));
+    maxY = qMax(maxY, BP::posY(i) + BP::posH(i));
   }
   float scale = mTexSize / (float)maxY;
   boDebug() << "    " << "Textures will be scaled vertically by " << scale << endl;
@@ -517,7 +520,7 @@ Texture* TextureOptimizer::combineAllTextures()
   {
     for(int hdiv = 0; hdiv < hdivisions; hdiv++)
     {
-      unsigned int i = vdiv * hdivisions + hdiv;
+      int i = vdiv * hdivisions + hdiv;
       if(i >= textures.count())
       {
         continue;
@@ -537,11 +540,11 @@ Texture* TextureOptimizer::combineAllTextures()
   boDebug() << k_funcinfo << "Saving combined texture..." << endl;
   // Find out format of the combined texture
   const char* format;
-  if(mTexFilename.endsWith(".jpg", false) || mTexFilename.endsWith(".jpeg", false))
+  if(mTexFilename.endsWith(".jpg", Qt::CaseInsensitive) || mTexFilename.endsWith(".jpeg", Qt::CaseInsensitive))
   {
     format = "JPEG";
   }
-  else if(mTexFilename.endsWith(".png", false))
+  else if(mTexFilename.endsWith(".png", Qt::CaseInsensitive))
   {
     format = "PNG";
   }
@@ -585,36 +588,39 @@ void TextureOptimizer::copyTextureToCombinedTexture(TextureInfo* src, QImage* ds
   if(src->rotated)
   {
     // Scale the image first. Note the swapped w/h
-    baseimage = t->image()->smoothScale(intbaseh, intbasew);
+    baseimage = t->image()->scaled(intbaseh, intbasew, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     // Now transform the image: rotate it 90 degrees around lower-left corner
-    QWMatrix wm;
+    QMatrix wm;
     wm.translate(0, -intbaseh);
     wm.rotate(90);
-    baseimage = baseimage.xForm(wm);
+    baseimage = baseimage.transformed(wm);
     // Finally mirror the image vertically
-    baseimage = baseimage.mirror();
+    baseimage = baseimage.mirrored();
     boDebug() << "      " << "baseimage size after rotation: " <<
         baseimage.width() << "x" << baseimage.height() << " (intbasesize: " <<
         intbasew << "x" << intbaseh << ")" << endl;
   }
   else
   {
-    baseimage = t->image()->smoothScale(intbasew, intbaseh);
+    baseimage = t->image()->scaled(intbasew, intbaseh, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
   }
   // Tile the base texture
-  QImage tiledimage(w, h, 32);
+  QImage tiledimage(w, h, QImage::Format_RGB32);
   //tiledimage.fill(qRgb(255, 255, 96));
   for(int x = 0; x < endpixx; x += intbasew)
   {
     for(int y = 0; y < endpixy; y += intbaseh)
     {
-      int copyx = QMAX(x, startpixx) % intbasew;
-      int copyy = QMAX(y, startpixy) % intbaseh;
-      bitBlt(&tiledimage, QMAX(x, startpixx) - startpixx, QMAX(y, startpixy) - startpixy,
-          &baseimage, copyx, copyy, intbasew, intbaseh,  0);
+      int copyx = qMax(x, startpixx) % intbasew;
+      int copyy = qMax(y, startpixy) % intbaseh;
+      QPainter p(&tiledimage);
+      p.drawImage(qMax(x, startpixx) - startpixx, qMax(y, startpixy) - startpixy,
+          baseimage, copyx, copyy, intbasew, intbaseh,  0);
     }
   }
-  bitBlt(dst, dstx, dsty,  &tiledimage, 0, 0, w, h, 0);
+  QPainter p(dst);
+  p.drawImage(dstx, dsty, tiledimage, 0, 0, w, h, 0);
+  p.end();
 
   // Calculate how much we have to translate/scale texcoords
   // Min/max texel coords of the texture in combined texture
@@ -661,10 +667,10 @@ void TextureOptimizer::modifyTexCoordsForCombinedTexture(TextureOptimizer::Textu
     {
       Vertex* v = m->vertex(j);
       BoVector2Float tex = v->tex;
-        minx = QMIN(minx, tex.x());
-        miny = QMIN(miny, tex.y());
-        maxx = QMAX(maxx, tex.x());
-        maxy = QMAX(maxy, tex.y());
+        minx = qMin(minx, tex.x());
+        miny = qMin(miny, tex.y());
+        maxx = qMax(maxx, tex.x());
+        maxy = qMax(maxy, tex.y());
       if(tinfo->rotated)
       {
         float tmpx = (tex.y() - t->usedAreaMinY()) * (texelw / usedtexh) + tinfo->mintexelx;

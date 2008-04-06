@@ -16,7 +16,6 @@ set(groundrenderer_SRCS
 	bogroundrendererbase.cpp
 	bocolormaprenderer.cpp
 )
-kde3_automoc(${groundrenderer_SRCS})
 if(BOSON_USE_DEBUG_PLUGINS)
   boson_add_library(bogroundrendererplugin MODULE ${groundrenderer_SRCS})
   install_targets(${BOSON_PLUGIN_INSTALL_DIR} bogroundrendererplugin)

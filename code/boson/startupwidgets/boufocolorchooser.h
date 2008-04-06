@@ -21,10 +21,13 @@
 #define BOUFOCOLORCHOOSER_H
 
 #include "../boufo/boufo.h"
+//Added by qt3to4:
+#include <QMouseEvent>
+#include <Q3ValueList>
 
 class QColor;
-template<class T> class QValueVector;
-template<class T> class QValueList;
+template<class T> class Q3ValueVector;
+template<class T> class Q3ValueList;
 
 class BoUfoColorChooserPrivate;
 class BoUfoColorChooser : public BoUfoWidget
@@ -41,8 +44,8 @@ public:
 	 * Note that this does not influence whether a button is taken!
 	 * The taken flag applies to a button, not to a color.
 	 **/
-	void setColors(const QValueVector<QColor>& colors);
-	void setColors(const QValueList<QColor>& colors);
+	void setColors(const Q3ValueVector<QColor>& colors);
+	void setColors(const Q3ValueList<QColor>& colors);
 
 	void setTaken(int index, bool taken);
 	/**

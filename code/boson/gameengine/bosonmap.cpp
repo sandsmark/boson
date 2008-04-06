@@ -32,11 +32,14 @@
 #include "bowater.h"
 #include "bogroundquadtreenode.h"
 
-#include <qdict.h>
+#include <q3dict.h>
 #include <qdatastream.h>
 #include <qimage.h>
 #include <qdom.h>
 #include <qbuffer.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 #define BOSONMAP_VERSION 0x01 // current version
 
@@ -122,17 +125,17 @@ bool BoTexMap::save(QDataStream& stream) const
 	return false;
  }
  stream << BOSONMAP_TEXMAP_MAGIC_COOKIE;
- stream << (Q_UINT32)BOSONMAP_VERSION;
+ stream << (quint32)BOSONMAP_VERSION;
 
  // there is a groundTheme identifier in the "map" file, but an invalid texture
  // count would suck greatly (->crash). so we stream it.
- stream << (Q_UINT32)mTextureCount;
+ stream << (quint32)mTextureCount;
 
  // now the actual texmap for this texture
  for (unsigned int i = 0; i < mTextureCount; i++) {
 	for (unsigned int x = 0; x < width(); x++) {
 		for (unsigned int y = 0; y < height(); y++) {
-			stream << (Q_UINT8)texMapAlpha(i, x, y);
+			stream << (quint8)texMapAlpha(i, x, y);
 		}
 	}
  }
@@ -158,7 +161,7 @@ bool BoTexMap::load(QDataStream& stream)
 	return false;
  }
  QString cookie;
- Q_UINT32 version;
+ quint32 version;
  stream >> cookie;
  if (cookie != BOSONMAP_TEXMAP_MAGIC_COOKIE) {
 	boError() << k_funcinfo << "invalid cookie" << endl;
@@ -169,7 +172,7 @@ bool BoTexMap::load(QDataStream& stream)
 	boError() << k_funcinfo << "version " << version << " not supported" << endl;
 	return false;
  }
- Q_UINT32 textures;
+ quint32 textures;
  stream >> textures;
  if (textures == 0) {
 	boError() << k_funcinfo << "0 textures is not possible" << endl;
@@ -195,7 +198,7 @@ bool BoTexMap::load(QDataStream& stream)
  for (unsigned int i = 0; i < textures; i++) {
 	for (unsigned int x = 0; x < width(); x++) {
 		for (unsigned int y = 0; y < height(); y++) {
-			Q_UINT8 c;
+			quint8 c;
 			stream >> c;
 			setTexMapAlpha(i, x, y, c);
 		}
@@ -351,7 +354,7 @@ public:
 		mQuadTreeCollection = 0;
 	}
 
-	QDict<BoColorMap> mColorMaps;
+	Q3Dict<BoColorMap> mColorMaps;
 	BoWaterManager* mWaterManager;
 	BoGroundQuadTreeCollection* mQuadTreeCollection;
 };
@@ -423,7 +426,7 @@ bool BosonMap::createNewMap(unsigned int width, unsigned int height, BosonGround
  // the map is saved completely first, and then loaded from the stream.
  // we do this to catch errors early.
  QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
+ QDataStream stream(buffer, QIODevice::WriteOnly);
  if (ret) {
 	ret = saveCompleteMap(stream);
  }
@@ -445,7 +448,7 @@ bool BosonMap::createNewMap(unsigned int width, unsigned int height, BosonGround
 
  d->mWaterManager->setMap(this);
 
- QDataStream readStream(buffer, IO_ReadOnly);
+ QDataStream readStream(buffer, QIODevice::ReadOnly);
  ret = loadCompleteMap(readStream);
  if (!ret) {
 	boError() << k_funcinfo << "unable to load previously saved map from stream! looks like an internal error" << endl;
@@ -627,7 +630,7 @@ bool BosonMap::importHeightMapImage(const QImage& image)
 	return false;
  }
  QByteArray b;
- QDataStream s(b, IO_WriteOnly);
+ QDataStream s(b, QIODevice::WriteOnly);
  QImageIO io;
  io.setIODevice(s.device());
  io.setFormat("PNG");
@@ -646,11 +649,11 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMapBuffer)
 	// initialize the height map with 0.0
 //	boDebug() << k_funcinfo << "loading dummy height map" << endl;
 	QByteArray buffer;
-	QDataStream writeStream(buffer, IO_WriteOnly);
+	QDataStream writeStream(buffer, QIODevice::WriteOnly);
 	BoHeightMap heightMap(width() + 1, height() + 1);
 	bool ret = heightMap.save(writeStream);
 	if (ret) {
-		QDataStream readStream(buffer, IO_ReadOnly);
+		QDataStream readStream(buffer, QIODevice::ReadOnly);
 		ret = loadHeightMap(readStream);
 		if (!ret) {
 			boError() << k_funcinfo << "unable to load heightmap from stream" << endl;
@@ -697,10 +700,10 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMapBuffer)
 	}
  }
  QByteArray buffer;
- QDataStream writeStream(buffer, IO_WriteOnly);
+ QDataStream writeStream(buffer, QIODevice::WriteOnly);
  bool ret = heightMap.save(writeStream);
  if (ret) {
-	QDataStream readStream(buffer, IO_ReadOnly);
+	QDataStream readStream(buffer, QIODevice::ReadOnly);
 	ret = loadHeightMap(readStream);
 	if (!ret) {
 		boError() << k_funcinfo << "unable to load heightmap from stream" << endl;
@@ -745,7 +748,7 @@ bool BosonMap::loadTexMap(QDataStream& stream)
 
 bool BosonMap::loadTexMapFromFile(const QByteArray& array)
 {
- QDataStream stream(array, IO_ReadOnly);
+ QDataStream stream(array, QIODevice::ReadOnly);
  return loadTexMap(stream);
 }
 
@@ -769,7 +772,7 @@ bool BosonMap::saveTexMap(QDataStream& stream) const
 QByteArray BosonMap::saveTexMapToFile() const
 {
  QByteArray array;
- QDataStream stream(array, IO_WriteOnly);
+ QDataStream stream(array, QIODevice::WriteOnly);
  if (!saveTexMap(stream)) {
 	return QByteArray();
  }
@@ -823,7 +826,7 @@ QByteArray BosonMap::saveMapPreviewPNGToFile() const
 {
  QByteArray imageData;
  QBuffer imageBuffer(imageData);
- imageBuffer.open(IO_WriteOnly);
+ imageBuffer.open(QIODevice::WriteOnly);
  QImage image(width(), height(), 32);
 
  for (unsigned int y = 0; y < height(); y++) {
@@ -989,7 +992,7 @@ QByteArray BosonMap::saveHeightMapImage() const
  }
 
  QByteArray array;
- QDataStream stream(array, IO_WriteOnly);
+ QDataStream stream(array, QIODevice::WriteOnly);
  QImageIO io;
  io.setIODevice(stream.device());
  io.setFormat("PNG");
@@ -1030,7 +1033,7 @@ QByteArray BosonMap::saveTexMapImage(unsigned int texture) const
  }
 
  QByteArray array;
- QDataStream stream(array, IO_WriteOnly);
+ QDataStream stream(array, QIODevice::WriteOnly);
  QImageIO io;
  io.setIODevice(stream.device());
  io.setFormat("PNG");
@@ -1102,7 +1105,7 @@ float BosonMap::heightAtCorner(int x, int y) const
  return mHeightMap->heightAt(x, y);
 }
 
-void BosonMap::setHeightsAtCorners(const QValueList< QPair<QPoint, float> >& heights)
+void BosonMap::setHeightsAtCorners(const Q3ValueList< QPair<QPoint, float> >& heights)
 {
  BO_CHECK_NULL_RET(mHeightMap);
  BO_CHECK_NULL_RET(mNormalMap);
@@ -1111,29 +1114,29 @@ void BosonMap::setHeightsAtCorners(const QValueList< QPair<QPoint, float> >& hei
  int maxX = 0;
  int minY = 0;
  int maxY = 0;
- QValueList< QPair<QPoint, float> >::const_iterator it;
+ Q3ValueList< QPair<QPoint, float> >::const_iterator it;
  for (it = heights.begin(); it != heights.end(); ++it) {
 	int x = (*it).first.x();
 	int y = (*it).first.y();
 	mHeightMap->setHeightAt(x, y, (*it).second);
 
-	minX = QMIN(minX, x);
-	minY = QMIN(minY, y);
-	maxX = QMAX(maxX, x);
-	maxY = QMAX(maxY, y);
+	minX = qMin(minX, x);
+	minY = qMin(minY, y);
+	maxX = qMax(maxX, x);
+	maxY = qMax(maxY, y);
  }
 
  // Update affected normals
- minX = QMAX(0, minX - 1);
- maxX = QMIN((int)width(), maxX + 1);
- minY = QMAX(0, minY - 1);
- maxY = QMIN((int)height(), maxY + 1);
+ minX = qMax(0, minX - 1);
+ maxX = qMin((int)width(), maxX + 1);
+ minY = qMax(0, minY - 1);
+ maxY = qMin((int)height(), maxY + 1);
  heightsInRectChanged(minX, minY, maxX, maxY);
 }
 
 void BosonMap::setHeightAtCorner(int x, int y, float h)
 {
- QValueList< QPair<QPoint, float> > heights;
+ Q3ValueList< QPair<QPoint, float> > heights;
  heights.append(QPair<QPoint, float>(QPoint(x, y), h));
  setHeightsAtCorners(heights);
 }
@@ -1147,7 +1150,7 @@ float BosonMap::waterDepthAtCorner(int x, int y) const
  return d->mWaterManager->waterDepthAtCorner(x, y);
 }
 
-const QPtrList<BoLake>* BosonMap::lakes() const
+const Q3PtrList<BoLake>* BosonMap::lakes() const
 {
  BO_CHECK_NULL_RET0(d->mWaterManager);
  return d->mWaterManager->lakes();
@@ -1197,8 +1200,8 @@ float BosonMap::cellAverageHeight(int x, int y) const
 
  for (int i = x; i <= x + 1; i++) {
 	for (int j = y; j <= y + 1; j++) {
-		minz = QMIN(minz, heightAtCorner(i, j));
-		maxz = QMAX(maxz, heightAtCorner(i, j));
+		minz = qMin(minz, heightAtCorner(i, j));
+		maxz = qMax(maxz, heightAtCorner(i, j));
 	}
  }
 
@@ -1276,10 +1279,10 @@ void BosonMap::recalculateNormalsInRect(int x1, int y1, int x2, int y2)
  //  the border of given rect.
  // Here we calculate rect for cells, taking this border and map size into
  //  account
- int cx1 = QMAX(0, x1 - 1);
- int cy1 = QMAX(0, y1 - 1);
- int cx2 = QMIN((int)width() - 1, x2 + 1);
- int cy2 = QMIN((int)height() - 1, y2 + 1);
+ int cx1 = qMax(0, x1 - 1);
+ int cy1 = qMax(0, y1 - 1);
+ int cx2 = qMin((int)width() - 1, x2 + 1);
+ int cy2 = qMin((int)height() - 1, y2 + 1);
 
  int w = cx2 - cx1 + 1;  // Width and height of the rect
  int h = cy2 - cy1 + 1;
@@ -1368,7 +1371,7 @@ void BosonMap::addColorMap(BoColorMap* map, const QString& name)
  emit signalColorMapsChanged();
 }
 
-QDict<BoColorMap>* BosonMap::colorMaps()
+Q3Dict<BoColorMap>* BosonMap::colorMaps()
 {
  return &d->mColorMaps;
 }

@@ -21,18 +21,21 @@
 
 #include <qdialog.h>
 #include <qmap.h>
-#include <qptrlist.h>
+#include <q3ptrlist.h>
+//Added by qt3to4:
+#include <Q3VBoxLayout>
+#include <QLabel>
 
-class QListBox;
-class QListBoxItem;
-class QListView;
-class QListViewItem;
+class Q3ListBox;
+class Q3ListBoxItem;
+class Q3ListView;
+class Q3ListViewItem;
 class QLabel;
 class QPushButton;
 class QComboBox;
 class QLineEdit;
-class QWidgetStack;
-class QVBoxLayout;
+class Q3WidgetStack;
+class Q3VBoxLayout;
 class QDomElement;
 class BoUfoWidget;
 
@@ -101,12 +104,12 @@ protected:
 	BoConnection* addConnection(bool isSender);
 
 private:
-	QVBoxLayout* mConnectionsLayout;
-	QPtrList<BoConnection> mConnections;
+	Q3VBoxLayout* mConnectionsLayout;
+	Q3PtrList<BoConnection> mConnections;
 	bool mIsSignal;
 	QString mMethodName;
 
-	QWidgetStack* mAddConnection;
+	Q3WidgetStack* mAddConnection;
 	QWidget* mAddConnectionSignal;
 	QWidget* mAddConnectionSlot;
 };
@@ -132,7 +135,7 @@ protected:
 	bool isValidVisibility(const QString& type) const;
 
 protected slots:
-	QListViewItem* slotAddMethod();
+	Q3ListViewItem* slotAddMethod();
 	void slotDeleteMethod();
 
 	void slotMethodReturnTypeChanged(const QString&);
@@ -142,10 +145,10 @@ protected slots:
 	void slotMethodVisibilityChanged(int);
 	void slotMethodVisibilityChanged(const QString&);
 
-	void slotCurrentMethodChanged(QListViewItem*);
+	void slotCurrentMethodChanged(Q3ListViewItem*);
 
 private:
-	QListView* mMethods;
+	Q3ListView* mMethods;
 	int mMethodReturnIndex;
 	int mMethodNameIndex;
 	int mMethodTypeIndex;
@@ -156,8 +159,8 @@ private:
 	QComboBox* mMethodType;
 	QComboBox* mMethodVisibility;
 
-	QWidgetStack* mConnections;
-	QMap<QListViewItem*, BoConnectionsContainer*> mMethod2Connections;
+	Q3WidgetStack* mConnections;
+	QMap<Q3ListViewItem*, BoConnectionsContainer*> mMethod2Connections;
 };
 
 #endif

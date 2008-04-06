@@ -23,16 +23,16 @@
 #include "boglobal.h"
 #include "bodebug.h"
 
-#include <kstaticdeleter.h>
+#include <k3staticdeleter.h>
 #include <kglobal.h>
 #include <kstandarddirs.h>
 
-#include <qdict.h>
+#include <q3dict.h>
 
 static BoGlobalObject<BosonData> globalDataObject(BoGlobalObjectBase::BoGlobalData);
 
 BosonData* BosonData::mBosonData = 0;
-static KStaticDeleter<BosonData> sd;
+static K3StaticDeleter<BosonData> sd;
 
 class BosonDataPrivate
 {
@@ -41,9 +41,9 @@ public:
 	{
 	}
 
-	QDict<BosonDataObject> mGroundThemes;
-	QDict<BosonDataObject> mPlayFieldPreviews;
-	QDict<BosonDataObject> mCampaigns;
+	Q3Dict<BosonDataObject> mGroundThemes;
+	Q3Dict<BosonDataObject> mPlayFieldPreviews;
+	Q3Dict<BosonDataObject> mCampaigns;
 };
 
 BosonData::BosonData()
@@ -100,7 +100,7 @@ BosonGroundTheme* BosonData::groundTheme(const QString& id) const
 QStringList BosonData::availableGroundThemes() const
 {
  QStringList list;
- QDictIterator<BosonDataObject> it(d->mGroundThemes);
+ Q3DictIterator<BosonDataObject> it(d->mGroundThemes);
  for (; it.current(); ++it) {
 	list.append(it.currentKey());
  }
@@ -139,7 +139,7 @@ BPFPreview* BosonData::playFieldPreview(const QString& id) const
 QStringList BosonData::availablePlayFields() const
 {
  QStringList list;
- QDictIterator<BosonDataObject> it(d->mPlayFieldPreviews);
+ Q3DictIterator<BosonDataObject> it(d->mPlayFieldPreviews);
  for (; it.current(); ++it) {
 	list.append(it.currentKey());
  }
@@ -170,7 +170,7 @@ BosonCampaign* BosonData::campaign(const QString& id) const
 QStringList BosonData::availableCampaigns() const
 {
  QStringList list;
- QDictIterator<BosonDataObject> it(d->mCampaigns);
+ Q3DictIterator<BosonDataObject> it(d->mCampaigns);
  for (; it.current(); ++it) {
 	list.append(it.currentKey());
  }

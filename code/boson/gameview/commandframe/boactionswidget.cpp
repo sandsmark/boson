@@ -38,7 +38,10 @@
 
 #include <klocale.h>
 
-#include <qintdict.h>
+#include <q3intdict.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 
 class BoActionsWidgetPrivate
@@ -48,7 +51,7 @@ public:
 	{
 	}
 
-	QIntDict<BosonOrderButton> mOrderButton;
+	Q3IntDict<BosonOrderButton> mOrderButton;
 };
 
 BoActionsWidget::BoActionsWidget()
@@ -84,14 +87,14 @@ void BoActionsWidget::ensureButtons(unsigned int number)
 
 void BoActionsWidget::hideButtons()
 {
- QIntDictIterator<BosonOrderButton> it(d->mOrderButton);
+ Q3IntDictIterator<BosonOrderButton> it(d->mOrderButton);
  while (it.current()) {
 	it.current()->setUnit(0);
 	++it;
  }
 }
 
-void BoActionsWidget::showUnitActions(Unit* unit, const QPtrList<Unit>& allUnits)
+void BoActionsWidget::showUnitActions(Unit* unit, const Q3PtrList<Unit>& allUnits)
 {
  boDebug(220) << k_funcinfo << "unit: " << unit << endl;
  if (!unit) {
@@ -101,7 +104,7 @@ void BoActionsWidget::showUnitActions(Unit* unit, const QPtrList<Unit>& allUnits
 
  hideButtons();
 
- QValueList<BoSpecificAction> actions;
+ Q3ValueList<BoSpecificAction> actions;
 
  // Add all unit actions
  const QMap<int, QString>* allActionStrings = unit->unitProperties()->allActionStrings();
@@ -125,7 +128,7 @@ void BoActionsWidget::showUnitActions(Unit* unit, const QPtrList<Unit>& allUnits
  }
 
  // Add weapon actions
- QPtrListIterator<PluginProperties> wit(*(unit->unitProperties()->plugins()));
+ Q3PtrListIterator<PluginProperties> wit(*(unit->unitProperties()->plugins()));
  for (; wit.current(); ++wit) {
 	if (wit.current()->pluginType() == PluginProperties::Weapon) {
 		BosonWeaponProperties* w = (BosonWeaponProperties*)wit.current();
@@ -157,7 +160,7 @@ void BoActionsWidget::showUnitActions(Unit* unit, const QPtrList<Unit>& allUnits
 
  ensureButtons(actions.count());
  int button = 0;
- for (QValueList<BoSpecificAction>::iterator it = actions.begin(); it != actions.end(); ++it) {
+ for (Q3ValueList<BoSpecificAction>::iterator it = actions.begin(); it != actions.end(); ++it) {
 	boDebug(220) << k_funcinfo << "Setting action for button " << button << endl;
 	resetButton(d->mOrderButton[button]);
 	d->mOrderButton[button]->setAction(*it);

@@ -25,8 +25,8 @@
 #include "frame.h"
 #include "mesh.h"
 
-#include <qvaluelist.h>
-#include <qvaluevector.h>
+#include <q3valuelist.h>
+#include <q3valuevector.h>
 
 
 NodeOptimizer::NodeOptimizer() : Processor()
@@ -46,8 +46,8 @@ bool NodeOptimizer::process()
     return false;
   }
 
-  QValueList<Mesh*> meshes;
-  QValueVector<Mesh*> validmeshes;
+  Q3ValueList<Mesh*> meshes;
+  Q3ValueVector<Mesh*> validmeshes;
   // Put all meshes of the lod to meshes list
   unsigned int initialMeshCount = lod()->meshCount();
   for(unsigned int i = 0; i < initialMeshCount; i++)
@@ -100,8 +100,8 @@ bool NodeOptimizer::hasMultipleNodes(Mesh* m)
 
 void NodeOptimizer::breakup(Mesh* mesh)
 {
-  QValueVector<BoMatrix> mMatrices;
-  QValueVector<Mesh*> mMeshes;
+  Q3ValueVector<BoMatrix> mMatrices;
+  Q3ValueVector<Mesh*> mMeshes;
 
   for(unsigned int i = 0; i < lod()->frameCount(); i++)
   {

@@ -20,9 +20,11 @@
 #define BOQUADTREECOLLECTION_H
 
 #include <qobject.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 class BoQuadTreeNode;
-template<class T> class QPtrList;
+template<class T> class Q3PtrList;
 
 class BoQuadTreeCollectionPrivate;
 /**
@@ -52,7 +54,7 @@ public:
 	void registerTree(BoQuadTreeNode* root);
 	void unregisterTree(BoQuadTreeNode* root);
 
-	const QPtrList<BoQuadTreeNode>& trees() const;
+	const Q3PtrList<BoQuadTreeNode>& trees() const;
 
 private:
 	BoQuadTreeCollectionPrivate* d;

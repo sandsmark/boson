@@ -25,6 +25,8 @@
 #include "speciestheme.h"
 
 #include <qdom.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 class BaseValueEntryBase
 {
@@ -234,7 +236,7 @@ bofixed BoBaseValueCollection::bofixedBaseValue(const QString& name, const QStri
 
 BoUpgradesCollection::BoUpgradesCollection()
 {
- mUpgrades = new QValueList<const UpgradeProperties*>();
+ mUpgrades = new Q3ValueList<const UpgradeProperties*>();
 
  // all properties' counters are initialized with 0, so when we
  // set this counter to 1, all properties are initiall dirty
@@ -267,7 +269,7 @@ void BoUpgradesCollection::clearUpgrades()
 
 const UpgradeProperties* BoUpgradesCollection::findUpgrade(unsigned long int id) const
 {
- QValueList<const UpgradeProperties*>::const_iterator it;
+ Q3ValueList<const UpgradeProperties*>::const_iterator it;
  for (it = upgrades()->begin(); it != upgrades()->end(); ++it) {
 	if ((*it)->id() == id) {
 		return *it;
@@ -296,7 +298,7 @@ bool BoUpgradesCollection::saveAsXML(QDomElement& root) const
 	return false;
  }
  QDomDocument doc = root.ownerDocument();
- QValueList<const UpgradeProperties*>::const_iterator it;
+ Q3ValueList<const UpgradeProperties*>::const_iterator it;
  for (it = upgrades()->begin(); it != upgrades()->end(); ++it) {
 	QDomElement e = doc.createElement("Upgrade");
 	e.setAttribute("Id", QString::number((*it)->id()));
@@ -348,9 +350,9 @@ bool BoUpgradesCollection::loadFromXML(const SpeciesTheme* speciesTheme, const Q
 }
 
 
-bool BoUpgradeablePropertyBase::upgradeValue(const QValueList<const UpgradeProperties*>* list, unsigned long int* v) const
+bool BoUpgradeablePropertyBase::upgradeValue(const Q3ValueList<const UpgradeProperties*>* list, unsigned long int* v) const
 {
- QValueList<const UpgradeProperties*>::const_iterator it;
+ Q3ValueList<const UpgradeProperties*>::const_iterator it;
  for (it = list->begin(); it != list->end(); ++it) {
 	if (!(*it)->upgradeValue(name(), v, type())) {
 		boError() << k_funcinfo << "upgrade failed" << endl;
@@ -360,9 +362,9 @@ bool BoUpgradeablePropertyBase::upgradeValue(const QValueList<const UpgradePrope
  return true;
 }
 
-bool BoUpgradeablePropertyBase::upgradeValue(const QValueList<const UpgradeProperties*>* list, long int* v) const
+bool BoUpgradeablePropertyBase::upgradeValue(const Q3ValueList<const UpgradeProperties*>* list, long int* v) const
 {
- QValueList<const UpgradeProperties*>::const_iterator it;
+ Q3ValueList<const UpgradeProperties*>::const_iterator it;
  for (it = list->begin(); it != list->end(); ++it) {
 	if (!(*it)->upgradeValue(name(), v, type())) {
 		boError() << k_funcinfo << "upgrade failed" << endl;
@@ -372,9 +374,9 @@ bool BoUpgradeablePropertyBase::upgradeValue(const QValueList<const UpgradePrope
  return true;
 }
 
-bool BoUpgradeablePropertyBase::upgradeValue(const QValueList<const UpgradeProperties*>* list, bofixed* v) const
+bool BoUpgradeablePropertyBase::upgradeValue(const Q3ValueList<const UpgradeProperties*>* list, bofixed* v) const
 {
- QValueList<const UpgradeProperties*>::const_iterator it;
+ Q3ValueList<const UpgradeProperties*>::const_iterator it;
  for (it = list->begin(); it != list->end(); ++it) {
 	if (!(*it)->upgradeValue(name(), v, type())) {
 		boError() << k_funcinfo << "upgrade failed" << endl;

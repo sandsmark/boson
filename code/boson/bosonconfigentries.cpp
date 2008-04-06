@@ -29,6 +29,8 @@
 #include <klocale.h>
 
 #include <stdlib.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 void BosonConfig::initConfigEntries()
 {
@@ -44,7 +46,7 @@ void BosonConfig::initConfigEntries()
  addDynamicEntryDouble("MiniMapZoom", 1.0);
  addDynamicEntryUInt("ChatScreenRemoveTime", 10);
  addDynamicEntryInt("ChatScreenMaxItems", 5);
- addDynamicEntryIntList("DeactivateUnitSounds", QValueList<int>());
+ addDynamicEntryIntList("DeactivateUnitSounds", Q3ValueList<int>());
  addDynamicEntryBool("AlignSelectionBoxes", true);
  addDynamicEntryBool("RMBMovesWithAttack", true);
  addDynamicEntryInt("MouseWheelAction", CameraZoom);

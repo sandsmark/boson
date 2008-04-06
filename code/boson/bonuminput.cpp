@@ -27,6 +27,9 @@
 #include <qlayout.h>
 #include <qslider.h>
 #include <qlabel.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <Q3VBoxLayout>
 
 #include <kdialog.h>
 #include <knuminput.h>
@@ -48,9 +51,9 @@ public:
 
 		mLabel = 0;
 	}
-	QVBoxLayout* mTopLayout;
-	QHBoxLayout* mMainLayout;
-	QHBoxLayout* mSliderLayout;
+	Q3VBoxLayout* mTopLayout;
+	Q3HBoxLayout* mMainLayout;
+	Q3HBoxLayout* mSliderLayout;
 
 	QLabel* mLabel;
 };
@@ -69,9 +72,9 @@ void BoNumInput::init()
 {
  d = new BoNumInputPrivate;
 
- d->mTopLayout = new QVBoxLayout(this, 0, KDialog::spacingHint(), "bonuminput_toplayout");
- d->mMainLayout = new QHBoxLayout(d->mTopLayout);
- d->mSliderLayout = new QHBoxLayout(d->mMainLayout);
+ d->mTopLayout = new Q3VBoxLayout(this, 0, KDialog::spacingHint(), "bonuminput_toplayout");
+ d->mMainLayout = new Q3HBoxLayout(d->mTopLayout);
+ d->mSliderLayout = new Q3HBoxLayout(d->mMainLayout);
 }
 
 void BoNumInput::setLabel(const QString& text, int a)
@@ -82,16 +85,16 @@ void BoNumInput::setLabel(const QString& text, int a)
 	return;
  }
  d->mLabel = new QLabel(text, this);
- d->mLabel->setAlignment((a & (~(AlignTop|AlignBottom|AlignVCenter))) | AlignVCenter);
+ d->mLabel->setAlignment((a & (~(Qt::AlignTop|Qt::AlignBottom|Qt::AlignVCenter))) | Qt::AlignVCenter);
 
  // if no vertical alignment set, use Top alignment
- if(!(a & (AlignTop|AlignBottom|AlignVCenter))) {
-	a |= AlignTop;
+ if(!(a & (Qt::AlignTop|Qt::AlignBottom|Qt::AlignVCenter))) {
+	a |= Qt::AlignTop;
  }
 
- if (a & AlignTop) {
+ if (a & Qt::AlignTop) {
 	topLayout()->insertWidget(0, d->mLabel);
- } else if (a & AlignBottom) {
+ } else if (a & Qt::AlignBottom) {
 	topLayout()->addWidget(d->mLabel);
  } else {
 	mainLayout()->insertWidget(0, d->mLabel);
@@ -106,17 +109,17 @@ QString BoNumInput::label() const
  return QString::null;
 }
 
-QHBoxLayout* BoNumInput::mainLayout() const
+Q3HBoxLayout* BoNumInput::mainLayout() const
 {
  return d->mMainLayout;
 }
 
-QHBoxLayout* BoNumInput::sliderLayout() const
+Q3HBoxLayout* BoNumInput::sliderLayout() const
 {
  return d->mSliderLayout;
 }
 
-QVBoxLayout* BoNumInput::topLayout() const
+Q3VBoxLayout* BoNumInput::topLayout() const
 {
  return d->mTopLayout;
 }
@@ -164,8 +167,8 @@ void BoIntNumInput::slotSpinValueChanged(int v)
 
 void BoIntNumInput::setRange(int min, int max, int step, bool slider)
 {
- min = QMIN(min, max);
- max = QMAX(min, max);
+ min = qMin(min, max);
+ max = qMax(min, max);
  d->mSpin->setMinValue(min);
  d->mSpin->setMaxValue(max);
  d->mSpin->setLineStep(step);
@@ -175,7 +178,7 @@ void BoIntNumInput::setRange(int min, int max, int step, bool slider)
  if (slider) {
 	if (!d->mSlider) {
 		d->mSlider = new QSlider(QSlider::Horizontal, this, "bointnuminput_slider");
-		d->mSlider->setTickmarks(QSlider::Below);
+		d->mSlider->setTickmarks(QSlider::TicksBelow);
 		connect(d->mSlider, SIGNAL(valueChanged(int)), this, SLOT(slotSliderMoved(int)));
 		sliderLayout()->addWidget(d->mSlider);
 	}
@@ -279,8 +282,8 @@ void BoFloatNumInput::setRange(float min, float max, float step, bool slider)
  if (d->mSlider) {
 	d->mSlider->blockSignals(true);
  }
- min = QMIN(min, max);
- max = QMAX(min, max);
+ min = qMin(min, max);
+ max = qMax(min, max);
  d->mSpin->setRange(min, max, step, d->mSpin->precision());
 
  step = d->mSpin->lineStep(); // in case it wasn't fully valid
@@ -294,7 +297,7 @@ void BoFloatNumInput::setRange(float min, float max, float step, bool slider)
 	int sstep = spin->lineStep();
 	if (!d->mSlider) {
 		d->mSlider = new QSlider(QSlider::Horizontal, this, "bofloatnuminput_slider");
-		d->mSlider->setTickmarks(QSlider::Below);
+		d->mSlider->setTickmarks(QSlider::TicksBelow);
 		connect(d->mSlider, SIGNAL(valueChanged(int)), this, SLOT(slotSliderMoved(int)));
 		sliderLayout()->addWidget(d->mSlider);
 	}

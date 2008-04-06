@@ -20,7 +20,7 @@
 #define MAINNOGUI_H
 
 #include <qobject.h>
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 #include "../defines.h"
 
 class KPlayer;
@@ -67,7 +67,7 @@ public:
 	unsigned int remotePlayers;
 	QString playField;
 
-	QValueList<MainNoGUIAIPlayerOptions> computerPlayers;
+	Q3ValueList<MainNoGUIAIPlayerOptions> computerPlayers;
 
 	bool isClient; // either client or server
 	QString host; // only used if isClient == true

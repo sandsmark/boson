@@ -27,8 +27,8 @@
 #include "../boglobal.h"
 
 #include <qstringlist.h>
-#include <qdict.h>
-#include <qdeepcopy.h>
+#include <q3dict.h>
+#include <q3deepcopy.h>
 #include <qdir.h>
 #include <qregexp.h>
 
@@ -65,7 +65,7 @@ public:
 	}
 
 	BosonMusicInterface* mMusicInterface;
-	QDict<BosonSoundInterface> mBosonSoundInterfaces;
+	Q3Dict<BosonSoundInterface> mBosonSoundInterfaces;
 
 #if USE_PROCESS
 	BoAudioProcessController* mProcess;

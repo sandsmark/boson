@@ -26,8 +26,8 @@
 #include "bodebug.h"
 #include "script/bosonscript.h"
 
-#include <qvaluelist.h>
-#include <qptrlist.h>
+#include <q3valuelist.h>
+#include <q3ptrlist.h>
 #include <qdom.h>
 
 
@@ -106,17 +106,17 @@ public:
 
 	// only the "main" disjunction has pointers to the other ones. the
 	// "main" disjunction is the one in the event manager.
-	QPtrList<BoCondition> mAlternatives; // other disjunctions, i.e. ORs
+	Q3PtrList<BoCondition> mAlternatives; // other disjunctions, i.e. ORs
 
 	// TODO: negations.
 	// if event X was received then condition is FALSE.
 	// (alternatives might still be TRUE)
 	// e.g. ((E0 AND !E1) OR (E0 AND E2)) means "either E0 was received and
 	// E1 was NOT received, or E0 and E2 were received"
-	QPtrList<BoEventMatching> mEvents;
-	QPtrList<BoEventMatching> mEventsLeft;
+	Q3PtrList<BoEventMatching> mEvents;
+	Q3PtrList<BoEventMatching> mEventsLeft;
 
-	QPtrList<BoStatusCondition> mStatusConditions;
+	Q3PtrList<BoStatusCondition> mStatusConditions;
 };
 
 BoCondition::BoCondition()
@@ -141,13 +141,13 @@ BoCondition::~BoCondition()
 
 void BoCondition::processEvent(const BoEvent* event)
 {
- QPtrListIterator<BoCondition> orIt(d->mAlternatives);
+ Q3PtrListIterator<BoCondition> orIt(d->mAlternatives);
  while (orIt.current()) {
 	orIt.current()->processEvent(event);
 	++orIt;
  }
 
- QPtrListIterator<BoEventMatching> it(d->mEventsLeft);
+ Q3PtrListIterator<BoEventMatching> it(d->mEventsLeft);
  BoEventMatching* match = 0;
  while (it.current() && !match) {
 	if (it.current()->matches(event)) {
@@ -170,7 +170,7 @@ bool BoCondition::saveAsXML(QDomElement& root) const
  QDomDocument doc = root.ownerDocument();
  QDomElement eventsLeft = doc.createElement("Events");
  root.appendChild(eventsLeft);
- QPtrListIterator<BoEventMatching> it(d->mEvents);
+ Q3PtrListIterator<BoEventMatching> it(d->mEvents);
  while (it.current()) {
 	QDomElement m = doc.createElement("EventMatching");
 	if (!it.current()->saveAsXML(m)) {
@@ -188,7 +188,7 @@ bool BoCondition::saveAsXML(QDomElement& root) const
 
  QDomElement statusConditions = doc.createElement("StatusConditions");
  root.appendChild(statusConditions);
- QPtrListIterator<BoStatusCondition> statIt(d->mStatusConditions);
+ Q3PtrListIterator<BoStatusCondition> statIt(d->mStatusConditions);
  while (statIt.current()) {
 	QDomElement e = doc.createElement("StatusCondition");
 	if (!statIt.current()->save(e)) {
@@ -285,7 +285,7 @@ bool BoCondition::conditionDone(BosonScript* script) const
 	return true;
  }
  if (!d->mAlternatives.isEmpty()) {
-	QPtrListIterator<BoCondition> it(d->mAlternatives);
+	Q3PtrListIterator<BoCondition> it(d->mAlternatives);
 	while (it.current()) {
 		if (it.current()->thisConditionDone(script)) {
 			return true;
@@ -308,7 +308,7 @@ bool BoCondition::thisConditionDone(BosonScript* script) const
 	BO_NULL_ERROR(script);
 	return false;
  }
- QPtrListIterator<BoStatusCondition> it(d->mStatusConditions);
+ Q3PtrListIterator<BoStatusCondition> it(d->mStatusConditions);
  while (it.current()) {
 	if (!it.current()->isFullfilled(script)) {
 		return false;
@@ -343,7 +343,7 @@ bool BoCondition::reset()
  }
 
  d->mEventsLeft.clear();
- QPtrListIterator<BoEventMatching> it(d->mEvents);
+ Q3PtrListIterator<BoEventMatching> it(d->mEvents);
  while (it.current()) {
 	d->mEventsLeft.append(it.current());
 	++it;

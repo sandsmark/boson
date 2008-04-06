@@ -32,10 +32,13 @@
 #include "bosonpropertyxml.h"
 #include "bodebug.h"
 
-#include <kstaticdeleter.h>
+#include <k3staticdeleter.h>
 
 #include <qdom.h>
 #include <qmap.h>
+#include <Q3IntDict>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
 	: BosonItem(owner, canvas),
@@ -400,17 +403,18 @@ bool UnitBase::saveScenario(QDomElement& unit)
  // we just don't save it here!)
 
  bool ret = true;
- QIntDict<KGamePropertyBase> dict = dataHandler()->dict();
- QIntDictIterator<KGamePropertyBase> it(dict);
- for (; it.current(); ++it) {
-	QString s = dataHandler()->propertyValue(it.current());
+ QMultiHash<int, KGamePropertyBase*> dict = dataHandler()->dict();
+ QHashIterator<int, KGamePropertyBase*> it(dict);
+ while (it.hasNext()) {
+	it.next();
+	QString s = dataHandler()->propertyValue(it.value());
 	if (s.isNull()) {
 		// AB: we need to connect to
 		// KGamePropertyHandler::signalRequestValue if this ever
 		// happens!
 		boWarning() << k_funcinfo << "Cannot save property "
-				<< it.current()->id() << "="
-				<< dataHandler()->propertyName(it.current()->id())
+				<< it.value()->id() << "="
+				<< dataHandler()->propertyName(it.value()->id())
 				<< " to XML" << endl;
 		ret = false; // saving basically failed. we continue anyway, maybe we can use the rest
 		continue;
@@ -420,7 +424,7 @@ bool UnitBase::saveScenario(QDomElement& unit)
 	// all properties
 //	QDomElement unit = parent.ownerDocument().createElement("Unit");
 	QDomElement property = unit.ownerDocument().createElement("Property");
-	property.setAttribute(QString::fromLatin1("Id"), QString::number(it.current()->id()));
+	property.setAttribute(QString::fromLatin1("Id"), QString::number(it.value()->id()));
 	// TODO: add an attribute with "name=..." - when loading first use the
 	// Id, and if it's not present use the name. would make files more
 	// readable. we need to write a propertyId->propertyName fuction, as we
@@ -466,7 +470,7 @@ PlayerIO* UnitBase::ownerIO() const
  return owner()->playerIO();
 }
 
-const QValueList<const UpgradeProperties*>* UnitBase::upgrades() const
+const Q3ValueList<const UpgradeProperties*>* UnitBase::upgrades() const
 {
  return upgradesCollection().upgrades();
 }

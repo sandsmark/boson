@@ -22,6 +22,9 @@
 #include "bomath.h"
 
 #include <qobject.h>
+//Added by qt3to4:
+#include <QMouseEvent>
+#include <Q3ValueList>
 
 // AB: note: this file does _not_ belong to gameview/ as it could (in theory)
 // one day get used for non-game tooltips as well
@@ -64,7 +67,7 @@ public:
 	 * registerTipCreator. Use @ref tipCreatorName to get a name for the
 	 * type.
 	 **/
-	QValueList<int> availableTipCreators() const;
+	Q3ValueList<int> availableTipCreators() const;
 
 	/**
 	 * @return A name for the @ref BoToolTipCreator @p type. This name can

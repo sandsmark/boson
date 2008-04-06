@@ -65,7 +65,7 @@
                             <string>Available units:</string>
                         </property>
                     </widget>
-                    <widget class="KListBox">
+                    <widget class="K3ListBox">
                         <property name="name">
                             <cstring>mUnitsList</cstring>
                         </property>
@@ -1758,7 +1758,7 @@ Construction steps are used to get feeling that your unit is constructed step by
                                         <string>Current weapons:</string>
                                     </property>
                                 </widget>
-                                <widget class="KListBox">
+                                <widget class="K3ListBox">
                                     <property name="name">
                                         <cstring>mWeaponsList</cstring>
                                     </property>
@@ -4582,7 +4582,7 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
 </slots>
 <layoutdefaults spacing="6" margin="11"/>
 <includehints>
-    <includehint>klistbox.h</includehint>
+    <includehint>k3listbox.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>klineedit.h</includehint>
@@ -4626,7 +4626,7 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
-    <includehint>klistbox.h</includehint>
+    <includehint>k3listbox.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>

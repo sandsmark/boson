@@ -86,7 +86,8 @@ void BoUfoLineEdit::setText(const QString& text)
  if (text.isNull()) {
 	mLineEdit->setText("");
  } else {
-	mLineEdit->setText(text.latin1());
+	QByteArray tmp = text.toAscii();
+	mLineEdit->setText(std::string(tmp.constData(), tmp.length()));
  }
 }
 

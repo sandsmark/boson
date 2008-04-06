@@ -23,8 +23,8 @@
 #include "../../math/bovector.h"
 
 #include <qstring.h>
-#include <qvaluelist.h>
-#include <qvaluevector.h>
+#include <q3valuelist.h>
+#include <q3valuevector.h>
 
 class UnitProperties;
 class SpeciesTheme;
@@ -127,10 +127,10 @@ public:
 	virtual bool savePlugin(KSimpleConfig* config);
 	virtual int pluginType() const { return Production; }
 
-	QValueList<unsigned long int> producerList() const { return mProducerList; }
+	Q3ValueList<unsigned long int> producerList() const { return mProducerList; }
 
 private:
-	QValueList<unsigned long int> mProducerList;
+	Q3ValueList<unsigned long int> mProducerList;
 
 	friend class ProductionPropertiesEditor;
 };
@@ -285,8 +285,8 @@ public:
 private:
 	friend class AmmunitionStoragePropertiesEditor;
 
-	QValueList<QString> mCanStore;
-	QValueList<QString> mMustBePickedUp;
+	Q3ValueList<QString> mCanStore;
+	Q3ValueList<QString> mMustBePickedUp;
 };
 
 class RadarProperties : public PluginProperties
@@ -401,13 +401,13 @@ public:
 	 * @return The enter path number @p i. The returned vectors are meant to be
 	 * pathpoints for the unit.
 	 **/
-	QValueList<BoVector2Float> enterPath(unsigned int i) const;
+	Q3ValueList<BoVector2Float> enterPath(unsigned int i) const;
 
 	/**
 	 * @return The "leavePath" that corresponds to the @ref enterPath with
 	 * number @p i.
 	 **/
-	QValueList<BoVector2Float> leavePathForEnterPath(unsigned int i) const;
+	Q3ValueList<BoVector2Float> leavePathForEnterPath(unsigned int i) const;
 
 	/**
 	 * @return Which kind of unit can use the path number @p i.
@@ -448,13 +448,13 @@ protected:
 		bool savePath(KSimpleConfig* config);
 
 		// AB: note: float, not fixed! -> values in [0;1]
-		QValueList<BoVector2Float> mPathPoints;
+		Q3ValueList<BoVector2Float> mPathPoints;
 		PathUnitType mType;
 		int mLeaveMethod;
 	};
 
 private:
-	QValueVector<Path> mEnterPaths;
+	Q3ValueVector<Path> mEnterPaths;
 };
 
 

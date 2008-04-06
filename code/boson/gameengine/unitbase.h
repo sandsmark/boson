@@ -26,11 +26,13 @@
 #include "boupgradeableproperty.h"
 
 #include <kgame/kgameproperty.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 class KGamePropertyHandler;
 class QDomElement;
 template<class T, class T2> class QMap;
-template<class T> class QValueList;
+template<class T> class Q3ValueList;
 
 class Player;
 class PlayerIO;
@@ -356,7 +358,7 @@ public:
 	 **/
 	virtual bool saveScenario(QDomElement& node);
 
-	const QValueList<const UpgradeProperties*>* upgrades() const;
+	const Q3ValueList<const UpgradeProperties*>* upgrades() const;
 
 	void clearUpgrades();
 	virtual void addUpgrade(const UpgradeProperties* upgrade);
@@ -437,10 +439,10 @@ private:
 
 	BosonItemPropertyHandler* mWeaponProperties;
 
-	KGameProperty<Q_UINT32> mShieldReloadCounter;
-	KGameProperty<Q_UINT32> mDeletionTimer;
-	KGameProperty<Q_INT32> mAdvanceWork;
-	KGameProperty<Q_INT32> mMovingStatus;
+	KGameProperty<quint32> mShieldReloadCounter;
+	KGameProperty<quint32> mDeletionTimer;
+	KGameProperty<qint32> mAdvanceWork;
+	KGameProperty<qint32> mMovingStatus;
 
 	KGameProperty<bofixed> mHealthFactor;
 	KGameProperty<bofixed> mArmorFactor;

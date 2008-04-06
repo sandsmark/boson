@@ -42,9 +42,12 @@
 #include <kcmdlineargs.h>
 
 #include <qimage.h>
-#include <qpopupmenu.h>
+#include <q3popupmenu.h>
 #include <qcursor.h>
-#include <qguardedptr.h>
+#include <qpointer.h>
+//Added by qt3to4:
+#include <QMouseEvent>
+#include <QEvent>
 
 #include <stdlib.h>
 
@@ -66,7 +69,7 @@ public:
 
 	BosonStartupNetwork* mNetworkInterface;
 
-	QGuardedPtr<Player> mLocalPlayer;
+	QPointer<Player> mLocalPlayer;
 
 	bool mSinglePlayer;
 	BosonLoadSaveGameHandler* mLoadSaveGameHandler;
@@ -93,7 +96,7 @@ void BoUfoStartupWidget::init()
 
  setLayoutClass(BoUfoWidget::UVBoxLayout);
  BoUfoLabel* logo = new BoUfoLabel();
- logo->setHorizontalAlignment(BoUfoWidget::AlignHCenter);
+ logo->setHorizontalAlignment(BoUfoWidget::Qt::AlignHCenter);
  logo->setIcon(logoImage);
 
  addSpacing(25);
@@ -479,7 +482,7 @@ bool BoUfoStartupWidget::eventFilter(QObject* o, QEvent* e)
 {
  switch (e->type()) {
 	case QEvent::MouseButtonPress:
-		if (((QMouseEvent*)e)->button() == RightButton) {
+		if (((QMouseEvent*)e)->button() == Qt::RightButton) {
 			// this is pretty ugly, but im afraid its necessary.
 			KMainWindow* main = (KMainWindow*)qApp->mainWidget();
 			if (!main) {
@@ -490,7 +493,7 @@ bool BoUfoStartupWidget::eventFilter(QObject* o, QEvent* e)
 				boError() << k_funcinfo << "NULL factory (this is expected until the startup widgets are ported to libufo)" << endl;
 				return true;
 			}
-			QPopupMenu* p = (QPopupMenu*)main->factory()->container("welcomepopup", main);
+			Q3PopupMenu* p = (Q3PopupMenu*)main->factory()->container("welcomepopup", main);
 			if (p) {
 				p->popup(QCursor::pos());
 			}

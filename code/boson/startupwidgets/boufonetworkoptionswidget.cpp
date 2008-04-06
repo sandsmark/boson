@@ -38,8 +38,8 @@ BoUfoNetworkOptionsWidget::BoUfoNetworkOptionsWidget()
 
  connect(boGame, SIGNAL(signalConnectionBroken()),
 		this, SLOT(slotConnectionBroken()));
- connect(boGame, SIGNAL(signalClientJoinedGame(Q_UINT32, KGame*)),
-		this, SLOT(slotClientJoinedGame(Q_UINT32, KGame*)));
+ connect(boGame, SIGNAL(signalClientJoinedGame(quint32, KGame*)),
+		this, SLOT(slotClientJoinedGame(quint32, KGame*)));
 
  mJoinGame->setSelected(true);
 }
@@ -129,7 +129,7 @@ void BoUfoNetworkOptionsWidget::slotConnectionBroken()
  KMessageBox::error(0, i18n("Cannot Connect to Network!"));
 }
 
-void BoUfoNetworkOptionsWidget::slotClientJoinedGame(Q_UINT32 gameId, KGame*)
+void BoUfoNetworkOptionsWidget::slotClientJoinedGame(quint32 gameId, KGame*)
 {
  if (gameId == boGame->gameId()) {
 	boDebug() << k_funcinfo << "connection succeeded - gameid: " << gameId << endl;

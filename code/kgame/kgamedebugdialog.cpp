@@ -1,7 +1,7 @@
 /*
     This file is part of the KDE games library
     Copyright (C) 2001 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2001 Martin Heni (martin@heni-online.de)
+    Copyright (C) 2001 Martin Heni (kde at heni-online.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -25,17 +25,21 @@
 #include "kplayer.h"
 #include "kgamepropertyhandler.h"
 
-#include <klistview.h>
-#include <klistbox.h>
+#include <klistwidget.h>
 #include <klocale.h>
-#include <bodebug.h>
+#include <kdebug.h>
+#include <kpushbutton.h>
+#include <KStandardGuiItem>
 
-#include <qlayout.h>
-#include <qstring.h>
-#include <qintdict.h>
-#include <qlabel.h>
-#include <qdatetime.h>
-#include <qpushbutton.h>
+#include <QTreeWidget>
+#include <QLayout>
+
+#include <QLabel>
+#include <QDateTime>
+#include <QVBoxLayout>
+#include <QFrame>
+#include <QHBoxLayout>
+#include <QGridLayout>
 
 #include <typeinfo>
 
@@ -85,45 +89,50 @@ public:
 	const KGame* mGame;
 
 	QFrame* mGamePage;
-	KListView* mGameProperties;
-	QListViewItem* mGameAddress;
-	QListViewItem* mGameId;
-	QListViewItem* mGameCookie;
-	QListViewItem* mGameMaster;
-	QListViewItem* mGameAdmin;
-	QListViewItem* mGameOffering;
-	QListViewItem* mGameStatus;
-	QListViewItem* mGameRunning;
-	QListViewItem* mGameMaxPlayers;
-	QListViewItem* mGameMinPlayers;
-	QListViewItem* mGamePlayerCount;
+	QTreeWidget* mGameProperties;
+	QTreeWidgetItem* mGameAddress;
+	QTreeWidgetItem* mGameId;
+	QTreeWidgetItem* mGameCookie;
+	QTreeWidgetItem* mGameMaster;
+	QTreeWidgetItem* mGameAdmin;
+	QTreeWidgetItem* mGameOffering;
+	QTreeWidgetItem* mGameStatus;
+	QTreeWidgetItem* mGameRunning;
+	QTreeWidgetItem* mGameMaxPlayers;
+	QTreeWidgetItem* mGameMinPlayers;
+	QTreeWidgetItem* mGamePlayerCount;
 	
 	QFrame* mPlayerPage;
-	KListBox* mPlayerList;
-	KListView* mPlayerProperties;
-	QListViewItem* mPlayerAddress;
-	QListViewItem* mPlayerId;
-	QListViewItem* mPlayerName;
-	QListViewItem* mPlayerGroup;
-	QListViewItem* mPlayerUserId;
-	QListViewItem* mPlayerMyTurn;
-	QListViewItem* mPlayerAsyncInput;
-	QListViewItem* mPlayerKGameAddress;
-	QListViewItem* mPlayerVirtual;
-	QListViewItem* mPlayerActive;
-	QListViewItem* mPlayerRtti;
-	QListViewItem* mPlayerNetworkPriority;
+	KListWidget* mPlayerList;
+	QTreeWidget* mPlayerProperties;
+	QTreeWidgetItem* mPlayerAddress;
+	QTreeWidgetItem* mPlayerId;
+	QTreeWidgetItem* mPlayerName;
+	QTreeWidgetItem* mPlayerGroup;
+	QTreeWidgetItem* mPlayerUserId;
+	QTreeWidgetItem* mPlayerMyTurn;
+	QTreeWidgetItem* mPlayerAsyncInput;
+	QTreeWidgetItem* mPlayerKGameAddress;
+	QTreeWidgetItem* mPlayerVirtual;
+	QTreeWidgetItem* mPlayerActive;
+	QTreeWidgetItem* mPlayerRtti;
+	QTreeWidgetItem* mPlayerNetworkPriority;
 
 	QFrame* mMessagePage;
-	KListView* mMessageList;
-	KListBox* mHideIdList;
+	QTreeWidget* mMessageList;
+	KListWidget* mHideIdList;
 };
 
-KGameDebugDialog::KGameDebugDialog(KGame* g, QWidget* parent, bool modal) :
-		KDialogBase(Tabbed, i18n("KGame Debug Dialog"), Close, Close, 
-		parent, 0, modal, true)
+KGameDebugDialog::KGameDebugDialog(KGame* g, QWidget* parent, bool modal)
+    : KPageDialog(parent),
+      d( new KGameDebugDialogPrivate )
 {
- d = new KGameDebugDialogPrivate;
+ setCaption(i18n("KGame Debug Dialog"));
+ setButtons(Close);
+ setDefaultButton(Close);
+ setModal(modal);
+ showButtonSeparator(true);
+ setFaceType(KPageDialog::Tabbed);
 
  initGamePage();
  initPlayerPage();
@@ -139,19 +148,27 @@ KGameDebugDialog::~KGameDebugDialog()
 
 void KGameDebugDialog::initGamePage()
 {
- d->mGamePage = addPage(i18n("Debug &KGame"));
- QVBoxLayout* topLayout = new QVBoxLayout(d->mGamePage, marginHint(), spacingHint());
- QHBoxLayout* layout = new QHBoxLayout(topLayout);
+ d->mGamePage = new QFrame();
+ addPage(d->mGamePage,i18n("Debug &KGame"));
+ QVBoxLayout* topLayout = new QVBoxLayout(d->mGamePage);
+ topLayout->setMargin( marginHint() );
+ topLayout->setSpacing( spacingHint() );
+ QHBoxLayout* layout = new QHBoxLayout;
+ topLayout->addLayout(layout);
 
- KListView* v = new KListView(d->mGamePage);
- v->addColumn(i18n("Data"));
- v->addColumn(i18n("Value"));
+ QTreeWidget* v = new QTreeWidget(d->mGamePage);
+ QTreeWidgetItem* vheader = new QTreeWidgetItem();
+ vheader->setText(0, tr("Data"));
+ vheader->setText(1, tr("Value"));
+ v->setHeaderItem(vheader);
  layout->addWidget(v);
 
- d->mGameProperties = new KListView(d->mGamePage);
- d->mGameProperties->addColumn(i18n("Property"));
- d->mGameProperties->addColumn(i18n("Value"));
- d->mGameProperties->addColumn(i18n("Policy"));
+ d->mGameProperties = new QTreeWidget(d->mGamePage);
+ QTreeWidgetItem* mGamePropertiesHeader = new QTreeWidgetItem();
+ mGamePropertiesHeader->setText(0, tr("Property"));
+ mGamePropertiesHeader->setText(1, tr("Value"));
+ mGamePropertiesHeader->setText(2, tr("Policy"));
+ d->mGameProperties->setHeaderItem(mGamePropertiesHeader);
  layout->addWidget(d->mGameProperties);
  
  QPushButton* b = new QPushButton(i18n("Update"), d->mGamePage);
@@ -159,74 +176,87 @@ void KGameDebugDialog::initGamePage()
  topLayout->addWidget(b);
 
 // game data
- d->mGameAddress = new QListViewItem(v, i18n("KGame Pointer"));
- d->mGameId = new QListViewItem(v, i18n("Game ID"));
- d->mGameCookie = new QListViewItem(v, i18n("Game Cookie"));
- d->mGameMaster = new QListViewItem(v, i18n("Is Master"));
- d->mGameAdmin = new QListViewItem(v, i18n("Is Admin"));
- d->mGameOffering = new QListViewItem(v, i18n("Is Offering Connections"));
- d->mGameStatus = new QListViewItem(v, i18n("Game Status"));
- d->mGameRunning = new QListViewItem(v, i18n("Game is Running"));
- d->mGameMaxPlayers = new QListViewItem(v, i18n("Maximal Players"));
- d->mGameMinPlayers = new QListViewItem(v, i18n("Minimal Players"));
- d->mGamePlayerCount = new QListViewItem(v, i18n("Players"));
+ d->mGameAddress = new QTreeWidgetItem(v, QStringList(i18n("KGame Pointer")));
+ d->mGameId = new QTreeWidgetItem(v, QStringList(i18n("Game ID")));
+ d->mGameCookie = new QTreeWidgetItem(v, QStringList(i18n("Game Cookie")));
+ d->mGameMaster = new QTreeWidgetItem(v, QStringList(i18n("Is Master")));
+ d->mGameAdmin = new QTreeWidgetItem(v, QStringList(i18n("Is Admin")));
+ d->mGameOffering = new QTreeWidgetItem(v, QStringList(i18n("Is Offering Connections")));
+ d->mGameStatus = new QTreeWidgetItem(v, QStringList(i18n("Game Status")));
+ d->mGameRunning = new QTreeWidgetItem(v, QStringList(i18n("Game is Running")));
+ d->mGameMaxPlayers = new QTreeWidgetItem(v, QStringList(i18n("Maximal Players")));
+ d->mGameMinPlayers = new QTreeWidgetItem(v, QStringList(i18n("Minimal Players")));
+ d->mGamePlayerCount = new QTreeWidgetItem(v, QStringList(i18n("Players")));
 }
 
 void KGameDebugDialog::initPlayerPage()
 {
- d->mPlayerPage = addPage(i18n("Debug &Players"));
- QVBoxLayout* topLayout = new QVBoxLayout(d->mPlayerPage, marginHint(), spacingHint());
- QHBoxLayout* layout = new QHBoxLayout(topLayout);
+ d->mPlayerPage = new QFrame();
+ addPage(d->mPlayerPage,i18n("Debug &Players"));
+ QVBoxLayout* topLayout = new QVBoxLayout(d->mPlayerPage);
+ topLayout->setMargin( marginHint() );
+ topLayout->setSpacing( spacingHint() );
+ QHBoxLayout* layout = new QHBoxLayout;
+ topLayout->addLayout(layout);
 
  //TODO: connect to the KGame signals for joined/removed players!!!
- QVBoxLayout* listLayout = new QVBoxLayout(layout);
+ QVBoxLayout* listLayout = new QVBoxLayout;
+ layout->addLayout(listLayout);
  QLabel* listLabel = new QLabel(i18n("Available Players"), d->mPlayerPage);
  listLayout->addWidget(listLabel);
- d->mPlayerList = new KListBox(d->mPlayerPage);
- connect(d->mPlayerList, SIGNAL(executed(QListBoxItem*)), this, SLOT(slotUpdatePlayerData(QListBoxItem*)));
+ d->mPlayerList = new KListWidget(d->mPlayerPage);
+ connect(d->mPlayerList, SIGNAL(executed(QListWidgetItem*)), this, SLOT(slotUpdatePlayerData(QListWidgetItem*)));
  listLayout->addWidget(d->mPlayerList);
  d->mPlayerList->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding));
 
- KListView* v = new KListView(d->mPlayerPage);
+ QTreeWidget* v = new QTreeWidget(d->mPlayerPage);
  layout->addWidget(v);
- v->addColumn(i18n("Data"));
- v->addColumn(i18n("Value"));
+ QTreeWidgetItem* vheader = new QTreeWidgetItem();
+ vheader->setText(0, tr("Data"));
+ vheader->setText(1, tr("Value"));
+ v->setHeaderItem(vheader);
  
- d->mPlayerProperties = new KListView(d->mPlayerPage);
- d->mPlayerProperties->addColumn(i18n("Property"));
- d->mPlayerProperties->addColumn(i18n("Value"));
- d->mPlayerProperties->addColumn(i18n("Policy"));
+ d->mPlayerProperties = new QTreeWidget(d->mPlayerPage);
+ QTreeWidgetItem* mPlayerPropertiesHeader = new QTreeWidgetItem();
+ mPlayerPropertiesHeader->setText(0, tr("Property"));
+ mPlayerPropertiesHeader->setText(1, tr("Value"));
+ mPlayerPropertiesHeader->setText(2, tr("Policy")); d->mPlayerProperties->setHeaderItem(mPlayerPropertiesHeader);
  layout->addWidget(d->mPlayerProperties);
  
  QPushButton* b = new QPushButton(i18n("Update"), d->mPlayerPage);
  connect(b, SIGNAL(pressed()), this, SLOT(slotUpdatePlayerList()));
  topLayout->addWidget(b);
 
- d->mPlayerAddress = new QListViewItem(v, i18n("Player Pointer"));
- d->mPlayerId = new QListViewItem(v, i18n("Player ID"));
- d->mPlayerName = new QListViewItem(v, i18n("Player Name"));
- d->mPlayerGroup = new QListViewItem(v, i18n("Player Group"));
- d->mPlayerUserId = new QListViewItem(v, i18n("Player User ID"));
- d->mPlayerMyTurn = new QListViewItem(v, i18n("My Turn"));
- d->mPlayerAsyncInput = new QListViewItem(v, i18n("Async Input"));
- d->mPlayerKGameAddress = new QListViewItem(v, i18n("KGame Address"));
- d->mPlayerVirtual = new QListViewItem(v, i18n("Player is Virtual"));
- d->mPlayerActive = new QListViewItem(v, i18n("Player is Active"));
- d->mPlayerRtti = new QListViewItem(v, i18n("RTTI"));
- d->mPlayerNetworkPriority = new QListViewItem(v, i18n("Network Priority"));
+ d->mPlayerAddress = new QTreeWidgetItem(v, QStringList(i18n("Player Pointer")));
+ d->mPlayerId = new QTreeWidgetItem(v, QStringList(i18n("Player ID")));
+ d->mPlayerName = new QTreeWidgetItem(v, QStringList(i18n("Player Name")));
+ d->mPlayerGroup = new QTreeWidgetItem(v, QStringList(i18n("Player Group")));
+ d->mPlayerUserId = new QTreeWidgetItem(v, QStringList(i18n("Player User ID")));
+ d->mPlayerMyTurn = new QTreeWidgetItem(v, QStringList(i18n("My Turn")));
+ d->mPlayerAsyncInput = new QTreeWidgetItem(v, QStringList(i18n("Async Input")));
+ d->mPlayerKGameAddress = new QTreeWidgetItem(v, QStringList(i18n("KGame Address")));
+ d->mPlayerVirtual = new QTreeWidgetItem(v, QStringList(i18n("Player is Virtual")));
+ d->mPlayerActive = new QTreeWidgetItem(v, QStringList(i18n("Player is Active")));
+ d->mPlayerRtti = new QTreeWidgetItem(v, QStringList(i18n("RTTI")));
+ d->mPlayerNetworkPriority = new QTreeWidgetItem(v, QStringList(i18n("Network Priority")));
 }
 
 void KGameDebugDialog::initMessagePage()
 {
- d->mMessagePage = addPage(i18n("Debug &Messages"));
- QGridLayout* layout = new QGridLayout(d->mMessagePage, 11, 7, marginHint(), spacingHint());
- d->mMessageList = new KListView(d->mMessagePage);
- layout->addMultiCellWidget(d->mMessageList, 0, 9, 0, 3);
- d->mMessageList->addColumn(i18n("Time"));
- d->mMessageList->addColumn(i18n("ID"));
- d->mMessageList->addColumn(i18n("Receiver"));
- d->mMessageList->addColumn(i18n("Sender"));
- d->mMessageList->addColumn(i18n("ID - Text"));
+ d->mMessagePage = new QFrame();
+ addPage(d->mMessagePage,i18n("Debug &Messages"));
+ QGridLayout* layout = new QGridLayout(d->mMessagePage);
+ layout->setMargin(marginHint());
+ layout->setSpacing(spacingHint());
+ d->mMessageList = new QTreeWidget(d->mMessagePage);
+ layout->addWidget(d->mMessageList, 0, 0, 10, 4);
+
+ QTreeWidgetItem* mMessageListHeader = new QTreeWidgetItem();
+ mMessageListHeader->setText(0, tr("Time"));
+ mMessageListHeader->setText(1, tr("ID"));
+ mMessageListHeader->setText(2, tr("Receiver")); mMessageListHeader->setText(2, tr("Sender"));
+ mMessageListHeader->setText(2, tr("ID - Text"));
+ d->mMessageList->setHeaderItem(mMessageListHeader);
 
  QPushButton* hide = new QPushButton(i18n("&>>"), d->mMessagePage);
  connect(hide, SIGNAL(pressed()), this, SLOT(slotHideId()));
@@ -237,13 +267,13 @@ void KGameDebugDialog::initMessagePage()
  layout->addWidget(show, 6, 4);
 
  QLabel* l = new QLabel(i18n("Do not show IDs:"), d->mMessagePage);
- layout->addMultiCellWidget(l, 0, 0, 5, 6);
- d->mHideIdList = new KListBox(d->mMessagePage);
- layout->addMultiCellWidget(d->mHideIdList, 1, 8, 5, 6);
+ layout->addWidget(l, 0, 5, 1, 2);
+ d->mHideIdList = new KListWidget(d->mMessagePage);
+ layout->addWidget(d->mHideIdList, 1, 5, 8, 2);
 
- QPushButton* clear = new QPushButton(i18n("Clear"), d->mMessagePage);
+ QPushButton* clear = new KPushButton(KStandardGuiItem::clear(), d->mMessagePage);
  connect(clear, SIGNAL(pressed()), this, SLOT(slotClearMessages()));
- layout->addMultiCellWidget(clear, 10, 10, 0, 6);
+ layout->addWidget(clear, 10, 0, 1, 7);
  //TODO: "show all but..." and "show nothing but..."
 }
 
@@ -283,22 +313,22 @@ void KGameDebugDialog::clearGameData()
 
 void KGameDebugDialog::slotUpdatePlayerData()
 {
- if (!d->mGame || d->mPlayerList->currentItem() == -1) {
+ if (!d->mGame || d->mPlayerList->currentRow() == -1) {
 	return;
  }
- slotUpdatePlayerData(d->mPlayerList->item(d->mPlayerList->currentItem()));
+ slotUpdatePlayerData(d->mPlayerList->item(d->mPlayerList->currentRow()));
 }
 
 void KGameDebugDialog::slotUpdatePlayerList()
 {
- QListBoxItem* i = d->mPlayerList->firstItem(); 
- for (; i; i = d->mPlayerList->firstItem()) {
+ QListWidgetItem* i = d->mPlayerList->item(0); 
+ for (; d->mPlayerList->count() > 0; i = d->mPlayerList->item(0)) {
 	removePlayer(i);
  }
 
- QPtrList<KPlayer> list = *d->mGame->playerList();
- for (KPlayer* p = list.first(); p; p = list.next()) {
-	addPlayer(p);
+ for ( QList<KPlayer*>::const_iterator it = d->mGame->playerList()->begin(); it!=d->mGame->playerList()->end();it++ )
+ {
+  addPlayer(*it);
  }
 }
 
@@ -312,7 +342,7 @@ void KGameDebugDialog::slotUpdateGameData()
  clearGameData();
 
  QString buf;
- buf.sprintf("%p", d->mGame);
+ buf.sprintf("%p", (void*)d->mGame);
  d->mGameAddress->setText(1, buf);
  d->mGameId->setText(1, QString::number(d->mGame->gameId()));
  d->mGameCookie->setText(1, QString::number(d->mGame->cookie()));
@@ -328,10 +358,11 @@ void KGameDebugDialog::slotUpdateGameData()
 //TODO ios
 
  KGamePropertyHandler* handler = d->mGame->dataHandler();
- QIntDictIterator<KGamePropertyBase> it(handler->dict());
- while (it.current()) {
+ QHashIterator<int, KGamePropertyBase*> it(handler->dict());
+ while (it.hasNext()) {
+	it.next();
 	QString policy;
-	switch (it.current()->policy()) {
+	switch (it.value()->policy()) {
 		case KGamePropertyBase::PolicyClean:
 			policy = i18n("Clean");
 			break;
@@ -346,40 +377,38 @@ void KGameDebugDialog::slotUpdateGameData()
 			policy = i18n("Undefined");
 			break;
 	}
-	(void) new QListViewItem(d->mGameProperties,
-			handler->propertyName(it.current()->id()),
-			handler->propertyValue(it.current()), 
-			policy);
-//	boDebug(11001) << k_funcinfo << ": checking for all game properties: found property name " << name << endl;
-	++it;
+  QStringList items;
+  items << handler->propertyName(it.value()->id()) << handler->propertyValue(it.value()) << policy;
+	new QTreeWidgetItem(d->mGameProperties,items);
+//	kDebug(11001) << ": checking for all game properties: found property name" << name;
  }
 }
 
-void KGameDebugDialog::slotUpdatePlayerData(QListBoxItem* item)
+void KGameDebugDialog::slotUpdatePlayerData(QListWidgetItem* item)
 {
  if (!item || !d->mGame) {
 	return;
  }
 
- KPlayer* p = d->mGame->findPlayerByKGameId(item->text().toInt());
+ KPlayer* p = d->mGame->findPlayer(item->text().toInt());
 
  if (!p) {
-	boError(11001) << k_funcinfo << ": cannot find player" << endl;
+	kError(11001) << ": cannot find player";
 	return;
  }
 
  clearPlayerData();
 
  QString buf;
- buf.sprintf("%p", p);
+ buf.sprintf("%p", (void*)p);
  d->mPlayerAddress->setText(1, buf);
- d->mPlayerId->setText(1, QString::number(p->kgameId()));
+ d->mPlayerId->setText(1, QString::number(p->id()));
  d->mPlayerName->setText(1, p->name());
  d->mPlayerGroup->setText(1, p->group());
  d->mPlayerUserId->setText(1, QString::number(p->userId()));
  d->mPlayerMyTurn->setText(1, p->myTurn() ? i18n("True") : i18n("False"));
  d->mPlayerAsyncInput->setText(1, p->asyncInput() ? i18n("True") : i18n("False"));
- buf.sprintf("%p", p->game());
+ buf.sprintf("%p", (void*)p->game());
  d->mPlayerKGameAddress->setText(1, buf);
  d->mPlayerVirtual->setText(1, p->isVirtual() ? i18n("True") : i18n("False"));
  d->mPlayerActive->setText(1, p->isActive() ? i18n("True") : i18n("False"));
@@ -390,10 +419,11 @@ void KGameDebugDialog::slotUpdatePlayerData(QListBoxItem* item)
 
 // Properties
  KGamePropertyHandler * handler = p->dataHandler();
- QIntDictIterator<KGamePropertyBase> it((handler->dict()));
- while (it.current()) {
+ QHashIterator<int, KGamePropertyBase*> it((handler->dict()));
+ while (it.hasNext()) {
+	it.next();
 	QString policy;
-	switch (it.current()->policy()) {
+	switch (it.value()->policy()) {
 		case KGamePropertyBase::PolicyClean:
 			policy = i18n("Clean");
 			break;
@@ -408,11 +438,9 @@ void KGameDebugDialog::slotUpdatePlayerData(QListBoxItem* item)
 			policy = i18n("Undefined");
 			break;
 	}
-	(void)new QListViewItem(d->mPlayerProperties,
-			handler->propertyName(it.current()->id()),
-			handler->propertyValue(it.current()),
-			policy);
-	++it;
+  QStringList items;
+  items << handler->propertyName(it.value()->id()) << handler->propertyValue(it.value()) << policy;
+	new QTreeWidgetItem(d->mPlayerProperties,items);
  }
 }
 
@@ -433,14 +461,14 @@ void KGameDebugDialog::setKGame(const KGame* g)
 	connect(d->mGame, SIGNAL(destroyed()), this, SLOT(slotUnsetKGame()));
 //	connect();
 
-	QPtrList<KPlayer> list = *d->mGame->playerList();
-	for (KPlayer* p = list.first(); p; p = list.next()) {
-		addPlayer(p);
-	}
+  for ( QList<KPlayer*>::const_iterator it = d->mGame->playerList()->begin(); it!=d->mGame->playerList()->end();it++ )
+  {
+	  addPlayer(*it);
+  }
 
 	slotUpdateGameData();
 
-	connect(d->mGame, SIGNAL(signalMessageUpdate(int, Q_UINT32, Q_UINT32)), this, SLOT(slotMessageUpdate(int, Q_UINT32, Q_UINT32)));
+	connect(d->mGame, SIGNAL(signalMessageUpdate(int, quint32, quint32)), this, SLOT(slotMessageUpdate(int, quint32, quint32)));
  }
 }
 
@@ -456,20 +484,20 @@ void KGameDebugDialog::slotUnsetKGame()
 void KGameDebugDialog::addPlayer(KPlayer* p)
 {
  if (!p) {
-	boError(11001) << "trying to add NULL player" << endl;
+	kError(11001) << "trying to add NULL player";
 	return;
  }
 
- (void) new QListBoxText(d->mPlayerList, QString::number(p->kgameId()));
+ (void) new QListWidgetItem(QString::number(p->id()), d->mPlayerList);
  //TODO connect to signals, like deleted/removed, ...
 }
 
-void KGameDebugDialog::removePlayer(QListBoxItem* i)
+void KGameDebugDialog::removePlayer(QListWidgetItem* i)
 {
  if (!i || !d->mGame) {
 	return;
  }
- KPlayer* p = d->mGame->findPlayerByKGameId(i->text().toInt());
+ KPlayer* p = d->mGame->findPlayer(i->text().toInt());
  if (!p) {
 	return;
  }
@@ -480,7 +508,7 @@ void KGameDebugDialog::removePlayer(QListBoxItem* i)
  delete i;
 }
 
-void KGameDebugDialog::slotMessageUpdate(int msgid, Q_UINT32 receiver, Q_UINT32 sender)
+void KGameDebugDialog::slotMessageUpdate(int msgid, quint32 receiver, quint32 sender)
 {
  if (!showId(msgid)) {
 	return;
@@ -496,9 +524,11 @@ void KGameDebugDialog::slotMessageUpdate(int msgid, Q_UINT32 receiver, Q_UINT32 
 		msgidText = i18n("Unknown");
 	}
  }
- (void) new QListViewItem( d->mMessageList, QTime::currentTime().toString(), 
-		QString::number(msgid), QString::number(receiver), 
-		QString::number(sender), msgidText);
+ QStringList items;
+ items << QTime::currentTime().toString() <<
+    QString::number(msgid) << QString::number(receiver) <<
+    QString::number(sender) << msgidText;
+ new QTreeWidgetItem( d->mMessageList, items);
 }
 
 void KGameDebugDialog::slotClearMessages()
@@ -517,7 +547,7 @@ void KGameDebugDialog::slotShowId()
  if (!d->mHideIdList->currentItem()) {
 	return;
  }
- d->mHideIdList->removeItem(d->mHideIdList->currentItem());
+ d->mHideIdList->takeItem(d->mHideIdList->currentRow());
 }
 
 void KGameDebugDialog::slotHideId()
@@ -529,13 +559,13 @@ void KGameDebugDialog::slotHideId()
  if (!showId(msgid)) {
 	return;
  }
- (void)new QListBoxText(d->mHideIdList, QString::number(msgid));
+ (void)new QListWidgetItem(QString::number(msgid), d->mHideIdList);
 }
 
 bool KGameDebugDialog::showId(int msgid)
 {
- QListBoxItem* i = d->mHideIdList->firstItem();
- for (; i; i = i->next()) {
+ for (int j = 0; j < d->mHideIdList->count(); ++j) {
+ 	QListWidgetItem* i = d->mHideIdList->item(j);
 	if (i->text().toInt() == msgid) {
 		return false;
 	}

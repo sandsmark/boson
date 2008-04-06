@@ -66,7 +66,7 @@
 #include <kaboutdata.h>
 #include <klocale.h>
 #include <kaction.h>
-#include <kpopupmenu.h>
+#include <kmenu.h>
 #include <kstandarddirs.h>
 #include <kdialogbase.h>
 #include <kcolordialog.h>
@@ -75,6 +75,15 @@
 #include <qtimer.h>
 #include <qlayout.h>
 #include <qinputdialog.h>
+//Added by qt3to4:
+#include <QWheelEvent>
+#include <QPixmap>
+#include <QMouseEvent>
+#include <Q3ValueList>
+#include <Q3HBoxLayout>
+#include <Q3VBoxLayout>
+#include <Q3CString>
+#include <Q3PtrList>
 
 #include <math.h>
 #include <stdlib.h>
@@ -144,8 +153,8 @@ public:
 	}
 	BoRenderGUI* mGUI;
 	ModelDisplay* mModelDisplay;
-	QPtrList<SpeciesTheme> mSpecies;
-	QPtrDict<SpeciesTheme> mAction2Species;
+	Q3PtrList<SpeciesTheme> mSpecies;
+	Q3PtrDict<SpeciesTheme> mAction2Species;
 
 	// TODO: use a BoUfo widget. don't use a separate window.
 	BoMaterialWidget* mMaterialWidget;
@@ -505,7 +514,7 @@ void BoRenderGLWidget::initUfoAction()
 
  BoUfoActionMenu* modelMenu = new BoUfoActionMenu(i18n("&Model"),
 		 actionCollection, "model");
- for (QPtrListIterator<SpeciesTheme> it(d->mSpecies); it.current(); ++it) {
+ for (Q3PtrListIterator<SpeciesTheme> it(d->mSpecies); it.current(); ++it) {
 	SpeciesTheme* s = it.current();
 	BoUfoActionMenu* menu = new BoUfoActionMenu(s->identifier(), actionCollection,
 			QString("model_species_%1").arg(s->identifier()));
@@ -525,7 +534,7 @@ void BoRenderGLWidget::initUfoAction()
 	connect(selectObject, SIGNAL(signalActivated(int)),
 			this, SLOT(slotObjectChanged(int)));
 
-	QValueList<const UnitProperties*> units = s->allUnits();
+	Q3ValueList<const UnitProperties*> units = s->allUnits();
 	QStringList list;
 	for (unsigned int j = 0; j < units.count(); j++) {
 		list.append(units[j]->name());
@@ -731,17 +740,17 @@ void BoRenderGLWidget::slotDebugModels()
 		"debugmodelsdialog", false, true);
  connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
  QWidget* w = dialog->plainPage();
- QVBoxLayout* l = new QVBoxLayout(w);
+ Q3VBoxLayout* l = new Q3VBoxLayout(w);
  KGame3DSModelDebug* models = new KGame3DSModelDebug(w);
  l->addWidget(models);
 
- QPtrListIterator<SpeciesTheme> it(d->mSpecies);
+ Q3PtrListIterator<SpeciesTheme> it(d->mSpecies);
  for (; it.current(); ++it) {
 	SpeciesTheme* theme = it.current();
 
 	// units
-	QValueList<const UnitProperties*> prop = it.current()->allUnits();
-	QValueList<const UnitProperties*>::Iterator propIt;
+	Q3ValueList<const UnitProperties*> prop = it.current()->allUnits();
+	Q3ValueList<const UnitProperties*>::Iterator propIt;
 	for (propIt = prop.begin(); propIt != prop.end(); ++propIt) {
 		QStringList fileNames = SpeciesData::unitModelFiles();
 		bool found = false;
@@ -784,7 +793,7 @@ void BoRenderGLWidget::slotDebugSpecies()
 		"debugspeciesdialog", false, true);
  connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
  QWidget* w = dialog->plainPage();
- QVBoxLayout* l = new QVBoxLayout(w);
+ Q3VBoxLayout* l = new Q3VBoxLayout(w);
  KGameSpeciesDebug* species = new KGameSpeciesDebug(w);
  l->addWidget(species);
  species->loadSpecies();
@@ -894,7 +903,7 @@ void BoRenderGLWidget::loadObjectModel(SpeciesTheme* s, const QString& file)
 SpeciesTheme* BoRenderGLWidget::findTheme(const QString& theme) const
 {
  SpeciesTheme* s = 0;
- for (QPtrListIterator<SpeciesTheme> it(d->mSpecies); it.current() && !s; ++it) {
+ for (Q3PtrListIterator<SpeciesTheme> it(d->mSpecies); it.current() && !s; ++it) {
 	if (it.current()->identifier().lower() == theme.lower()) {
 		s = it.current();
 	}
@@ -935,8 +944,8 @@ void BoRenderGLWidget::changeUnit(const QString& theme, const QString& unit)
 	boError() << k_funcinfo << "Could not find theme " << theme << endl;
 	return;
  }
- QValueList<const UnitProperties*> units = s->allUnits();
- QValueList<const UnitProperties*>::Iterator i = units.begin();
+ Q3ValueList<const UnitProperties*> units = s->allUnits();
+ Q3ValueList<const UnitProperties*>::Iterator i = units.begin();
  for (; i != units.end() && !prop; ++i) {
 	const UnitProperties* p = *i;
 	// warning: this might cause trouble once we start translations! but we
@@ -954,7 +963,7 @@ void BoRenderGLWidget::changeUnit(const QString& theme, const QString& unit)
 void BoRenderGLWidget::changeUnit(const QString& theme, unsigned long int type)
 {
  SpeciesTheme* s = 0;
- for (QPtrListIterator<SpeciesTheme> it(d->mSpecies); it.current() && !s; ++it) {
+ for (Q3PtrListIterator<SpeciesTheme> it(d->mSpecies); it.current() && !s; ++it) {
 	if (it.current()->identifier().lower() == theme.lower()) {
 		s = it.current();
 	}
@@ -994,7 +1003,7 @@ void BoRenderGLWidget::uncheckAllBut(BoUfoAction* action)
 	boError() << k_funcinfo << "not a valid BoUfoSelectAction" << endl;
 	return;
  }
- QPtrDictIterator<SpeciesTheme> it(d->mAction2Species);
+ Q3PtrDictIterator<SpeciesTheme> it(d->mAction2Species);
  for (; it.current(); ++it) {
 	BoUfoAction* a = (BoUfoAction*)it.currentKey();
 	if (a == action) {
@@ -1018,7 +1027,7 @@ void BoRenderGLWidget::slotUnitChanged(int index)
  SpeciesTheme* s = d->mAction2Species[p];
  BO_CHECK_NULL_RET(s);
 
- QValueList<const UnitProperties*> props = s->allUnits();
+ Q3ValueList<const UnitProperties*> props = s->allUnits();
  if (index >= (int)props.count()) {
 	boError() << k_funcinfo << "index " << index << " out of range" << endl;
 	return;
@@ -1462,9 +1471,9 @@ void ModelDisplay::slotMousePressEvent(QMouseEvent* e)
  }
  e->accept();
  switch (e->button()) {
-	case QMouseEvent::LeftButton:
+	case Qt::LeftButton:
 		break;
-	case QMouseEvent::RightButton:
+	case Qt::RightButton:
 		mMouseMoveDiff->moveEvent(e->pos());
 		break;
 	default:
@@ -1479,10 +1488,10 @@ void ModelDisplay::slotMouseReleaseEvent(QMouseEvent* e)
  }
  e->accept();
  switch (e->button()) {
-	case QMouseEvent::LeftButton:
+	case Qt::LeftButton:
 		selectMesh(mMeshUnderMouse);
 		break;
-	case QMouseEvent::RightButton:
+	case Qt::RightButton:
 		break;
 	default:
 		break;
@@ -1508,8 +1517,8 @@ void ModelDisplay::slotMouseMoveEvent(QMouseEvent* e)
  mMouseMoveDiff->moveEvent(e);
 
 
- if (e->state() & LeftButton) {
- } else if (e->state() & RightButton) {
+ if (e->state() & Qt::LeftButton) {
+ } else if (e->state() & Qt::RightButton) {
 	// dx == rot. around x axis. this is equal to d_y_ mouse movement.
 	int dx = mMouseMoveDiff->dy();
 	int dy = mMouseMoveDiff->dx(); // rotation around y axis
@@ -1641,14 +1650,14 @@ void ModelDisplay::updateCamera(const BoVector3Float& cameraPos, const BoVector3
 RenderMain::RenderMain() : KMainWindow()
 {
  QWidget* w = new QWidget(this);
- QHBoxLayout* layout = new QHBoxLayout(w);
+ Q3HBoxLayout* layout = new Q3HBoxLayout(w);
 
  mGLWidget = new BoRenderGLWidget(w, boConfig->boolValue("ForceWantDirect", true));
  mGLWidget->initWidget();
  mGLWidget->setMinimumSize(400, 400);
  layout->addWidget(mGLWidget, 1);
  mGLWidget->setMouseTracking(true);
- mGLWidget->setFocusPolicy(StrongFocus);
+ mGLWidget->setFocusPolicy(Qt::StrongFocus);
 
  setCentralWidget(w);
  mIface = new BoDebugDCOPIface();
@@ -1712,7 +1721,7 @@ int main(int argc, char **argv)
  // we need to do extra stuff after BosonConfig's initialization
  BosonConfig::setPostInitFunction(&postBosonConfigInit);
 
- QCString argv0(argv[0]);
+ Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();

@@ -411,8 +411,8 @@ void BoGameCamera::checkCameraPosition()
   {
     float camposx = cameraPos().x();
     float camposy = -cameraPos().y();
-    camposx = QMAX(0.0f, QMIN(camposx, (float)mCanvas->mapWidth()));
-    camposy = QMAX(0.0f, QMIN(camposy, (float)mCanvas->mapHeight()));
+    camposx = qMax(0.0f, qMin(camposx, (float)mCanvas->mapWidth()));
+    camposy = qMax(0.0f, qMin(camposy, (float)mCanvas->mapHeight()));
     float groundz = mCanvas->heightAtPoint(camposx, camposy);
     if(cameraPos().z() < groundz + CAMERA_MIN_HEIGHT)
     {
@@ -422,15 +422,15 @@ void BoGameCamera::checkCameraPosition()
       const float step = 1 / (float)iterations;
       for(float factor = 1 - step; factor >= 0; factor -= step)
       {
-        mActualDistance = QMAX(CAMERA_MIN_DISTANCE, mDistance * factor);
+        mActualDistance = qMax(CAMERA_MIN_DISTANCE, mDistance * factor);
         // Recalc camera pos
         setPositionDirty();
         BoVector3Float newcamerapos = cameraPos();
         // Find out ground height at the new camera pos
         camposx = cameraPos().x();
         camposy = -cameraPos().y();
-        camposx = QMAX(0.0f, QMIN(camposx, (float)mCanvas->mapWidth()));
-        camposy = QMAX(0.0f, QMIN(camposy, (float)mCanvas->mapHeight()));
+        camposx = qMax(0.0f, qMin(camposx, (float)mCanvas->mapWidth()));
+        camposy = qMax(0.0f, qMin(camposy, (float)mCanvas->mapHeight()));
         groundz = mCanvas->heightAtPoint(camposx, camposy);
         if(cameraPos().z() >= groundz + CAMERA_MIN_HEIGHT)
         {
@@ -470,7 +470,7 @@ void BoGameCamera::checkXRotation()
     // No restrictions
     return;
   }
-  mXRotation = QMAX(0, QMIN(CAMERA_MAX_XROTATION, mXRotation));
+  mXRotation = qMax(0, qMin(CAMERA_MAX_XROTATION, mXRotation));
 }
 
 
@@ -588,7 +588,7 @@ void BoGameCamera::setCameraPos(const BoVector3Float& pos)
 
 void BoGameCamera::setXRotation(GLfloat r)
 {
-  mXRotation = QMAX(0, QMIN(CAMERA_MAX_XROTATION, r));
+  mXRotation = qMax(0, qMin(CAMERA_MAX_XROTATION, r));
   setPositionDirty();
 
   checkXRotation();
@@ -613,7 +613,7 @@ void BoGameCamera::setRotation(GLfloat r)
 
 void BoGameCamera::setDistance(GLfloat dist)
 {
-  mDistance = QMIN(CAMERA_MAX_DISTANCE, QMAX(CAMERA_MIN_DISTANCE, dist));
+  mDistance = qMin(CAMERA_MAX_DISTANCE, qMax(CAMERA_MIN_DISTANCE, dist));
   mActualDistance = mDistance;
 
   setPositionDirty();

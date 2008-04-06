@@ -25,6 +25,8 @@
 #include "bosoncanvas.h"
 #include "player.h"
 #include "bodebug.h"
+//Added by qt3to4:
+#include <Q3PtrList>
 
 class BosonGameStatisticsPrivate
 {
@@ -70,16 +72,16 @@ void BosonGameStatistics::receiveAdvanceMessage(BosonCanvas* canvas)
  }
 
  QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
+ QDataStream stream(buffer, QIODevice::WriteOnly);
 
  unsigned int playerCount = d->mBoson->gamePlayerCount();
- stream << (Q_UINT32)playerCount;
- QPtrList<Player> gamePlayerList = d->mBoson->gamePlayerList();
+ stream << (quint32)playerCount;
+ Q3PtrList<Player> gamePlayerList = d->mBoson->gamePlayerList();
  for (unsigned int i = 0; i < playerCount; i++) {
 	Player* p = gamePlayerList.at(i);
-	stream << (Q_UINT32)p->bosonId();
-	stream << (Q_UINT32)p->mobilesCount();
-	stream << (Q_UINT32)p->facilitiesCount();
+	stream << (quint32)p->bosonId();
+	stream << (quint32)p->mobilesCount();
+	stream << (quint32)p->facilitiesCount();
  }
 
  // WARNING: these information can easily be used for cheating!

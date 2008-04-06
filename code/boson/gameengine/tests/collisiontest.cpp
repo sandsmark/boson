@@ -39,7 +39,10 @@
 #include <kaboutdata.h>
 #include <kcmdlineargs.h>
 #include <klocale.h>
-#include <kinstance.h>
+#include <kcomponentdata.h>
+//Added by qt3to4:
+#include <Q3CString>
+#include <Q3PtrList>
 
 static const char *version = BOSON_VERSION_STRING;
 
@@ -62,7 +65,7 @@ int main(int argc, char **argv)
 		I18N_NOOP("Coding & Current Maintainer"),
 		"b_mann@gmx.de");
 
- QCString argv0(argv[0]);
+ Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
 #if BOSON_LINK_STATIC
@@ -130,7 +133,7 @@ bool start()
 	}
  }
 
- QPtrList<Unit> units;
+ Q3PtrList<Unit> units;
  for (BoItemList::Iterator it = canvas->allItems()->begin(); it != canvas->allItems()->end(); ++it) {
 	if (RTTI::isUnit((*it)->rtti())) {
 		units.append((Unit*)*it);
@@ -146,7 +149,7 @@ bool start()
 	// move the units, so that we don't have some kind of collision cache or
 	// so around!
 	// (e.g. in the form of a "cells" cache)
-	for (QPtrListIterator<Unit> it(units); it.current(); ++it) {
+	for (Q3PtrListIterator<Unit> it(units); it.current(); ++it) {
 		Unit* u = it.current();
 		if ((iteration % 2) == 0) {
 			u->moveBy(1.0, 0.0, 0.0);
@@ -156,7 +159,7 @@ bool start()
 	}
 
 	// we assume one collision check _for_every_unit_ in every step!
-	for (QPtrListIterator<Unit> it(units); it.current(); ++it) {
+	for (Q3PtrListIterator<Unit> it(units); it.current(); ++it) {
 		Unit* u = it.current();
 
 		// AB: Unit::unitsInRange() is called once per advanceIdle()
@@ -182,7 +185,7 @@ bool start()
 
 bool createPlayers(unsigned int count, BosonPlayField* playField, BosonPlayerListManager* playerListManager)
 {
- QPtrList<KPlayer> players;
+ Q3PtrList<KPlayer> players;
  for (unsigned int i = 0; i < count; i++) {
 	SpeciesTheme* theme = TestFrameWork::createAndLoadDummySpeciesTheme(QColor(i * 10, 0, 0));
 	if (!theme) {

@@ -25,13 +25,17 @@
 #include "../bomath.h"
 
 #include "boupgradeableproperty.h"
+//Added by qt3to4:
+#include <Q3CString>
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 class SpeciesTheme;
 class PluginProperties;
 class BosonWeaponProperties;
-template<class T> class QValueList;
-template<class T> class QPtrList;
-template<class T> class QIntDict;
+template<class T> class Q3ValueList;
+template<class T> class Q3PtrList;
+template<class T> class Q3IntDict;
 template<class T1, class T2> class QMap;
 template<class T> class BoVector3;
 typedef BoVector3<bofixed> BoVector3Fixed;
@@ -156,7 +160,7 @@ public:
 	 * from. Note that when @ref loadUnitType was not called, the md5 sum is
 	 * empty (null).
 	 **/
-	const QCString& md5() const;
+	const Q3CString& md5() const;
 
 	/**
 	 * @return The unrotated width of the unit. The value is number of cells
@@ -394,7 +398,7 @@ public:
 	 *  of this type
 	 * @see Player::canBuild
 	 **/
-	QValueList<unsigned long int> requirements() const;
+	Q3ValueList<unsigned long int> requirements() const;
 
 	/**
 	 * .3ds files seem to support only filenames of 8+3 length. We work
@@ -415,12 +419,12 @@ public:
 
 	QMap<int, QString> sounds() const;
 
-	const QValueList<unsigned long int>& destroyedEffectIds() const;
-	const QValueList<unsigned long int>& constructedEffectIds() const;
-	const QValueList<unsigned long int>& explodingFragmentFlyEffectIds() const;
-	const QValueList<unsigned long int>& explodingFragmentHitEffectIds() const;
+	const Q3ValueList<unsigned long int>& destroyedEffectIds() const;
+	const Q3ValueList<unsigned long int>& constructedEffectIds() const;
+	const Q3ValueList<unsigned long int>& explodingFragmentFlyEffectIds() const;
+	const Q3ValueList<unsigned long int>& explodingFragmentHitEffectIds() const;
 
-	const QPtrList<PluginProperties>* plugins() const;
+	const Q3PtrList<PluginProperties>* plugins() const;
 
 
 	/**

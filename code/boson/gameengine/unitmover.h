@@ -23,7 +23,7 @@
 
 #include "unit.h"
 
-#include <qvaluevector.h>
+#include <q3valuevector.h>
 
 class QDomElement;
 class UpgradeProperties;
@@ -139,7 +139,7 @@ protected:
 	virtual void pathPointDone();
 
 protected:
-	static QValueVector<BoVector2Fixed> mCellIntersectionTable[11][11];
+	static Q3ValueVector<BoVector2Fixed> mCellIntersectionTable[11][11];
 
 private:
 
@@ -188,7 +188,7 @@ protected:
 	 * @return TRUE on success, otherwise FALSE (unit should stop moving
 	 * then).
 	 **/
-	virtual bool calculateNewPathPathPoints(QValueVector<BoVector2Fixed>* points);
+	virtual bool calculateNewPathPathPoints(Q3ValueVector<BoVector2Fixed>* points);
 
 	/**
 	 * Move towards p, going at most maxdist (in canvas coords).
@@ -220,7 +220,7 @@ private:
 
 	int mNextCellX;
 	int mNextCellY;
-	QValueVector<BoVector2Fixed>* mNextWaypointIntersections;
+	Q3ValueVector<BoVector2Fixed>* mNextWaypointIntersections;
 	int mNextWaypointIntersectionsXOffset;
 	int mNextWaypointIntersectionsYOffset;
 };
@@ -260,7 +260,7 @@ protected:
 
 	virtual bool cellOccupied(int x, int y, bool ignoremoving = false) const;
 	virtual bool canGoToCurrentPathPoint(int xpos, int ypos);
-	virtual bool calculateNewPathPathPoints(QValueVector<BoVector2Fixed>* points);
+	virtual bool calculateNewPathPathPoints(Q3ValueVector<BoVector2Fixed>* points);
 	virtual void advanceMoveCheck();
 	virtual void pathPointDone();
 

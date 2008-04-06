@@ -35,11 +35,12 @@ set(kgame_sources
 
 set(libkdegames_sources
 	kchatbase.cpp
+	kchatbasemodel.cpp
+	kchatbaseitemdelegate.cpp
 	kgameprogress.cpp
-	kstdgameaction.cpp
+	kstandardgameaction.cpp
 	${kgame_sources}
 )
-kde3_automoc(${libkdegames_sources})
 
 boson_add_library(kgame STATIC ${libkdegames_sources})
 

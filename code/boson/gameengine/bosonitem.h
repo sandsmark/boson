@@ -25,6 +25,8 @@
 #include <bogl.h>
 
 #include <qglobal.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 class BosonCanvas;
 class BosonCollisions;
@@ -45,8 +47,8 @@ class BoFrustum;
 class KGamePropertyHandler;
 class KGamePropertyBase;
 class QColor;
-template<class T> class QPtrList;
-template<class T> class QPtrVector;
+template<class T> class Q3PtrList;
+template<class T> class Q3PtrVector;
 template<class T1, class T2> class QMap;
 class QDomElement;
 class QDataStream;
@@ -373,7 +375,7 @@ public:
 	 * item has moved - so usually it's not slow to call it.
 	 * @return An array of all cells this unit occupies.
 	 **/
-	QPtrVector<Cell>* cells();
+	Q3PtrVector<Cell>* cells();
 
 	/**
 	 * This does <em>not</em> recalculate the cells, as @ref cells does when
@@ -382,14 +384,14 @@ public:
 	 * not use in collision detection or pathfinder code! rather for
 	 * tooltips and that kind)
 	 **/
-	QPtrVector<Cell>* cellsConst() const;
+	Q3PtrVector<Cell>* cellsConst() const;
 
 	/**
 	 * This is a more generic version of the above method. You can use it to
 	 * calculate which cells the unit would occupy if it was at a certain
 	 * position.
 	 **/
-	static void makeCells(Cell* allCells, QPtrVector<Cell>* cells, const BoRect2<bofixed>& rect, int mapWidth, int mapHeight);
+	static void makeCells(Cell* allCells, Q3PtrVector<Cell>* cells, const BoRect2<bofixed>& rect, int mapWidth, int mapHeight);
 
 	/**
 	 * @return Whether this unit collides with given unit.
@@ -427,11 +429,11 @@ public:
 	 * Raises speed by @ref accelerationSpeed unless @ref currentSpeed is
 	 * @ref maxSpeed
 	 **/
-	inline void accelerate() { mCurrentSpeed = QMIN(maxSpeed(), speed() + accelerationSpeed()); }
+	inline void accelerate() { mCurrentSpeed = qMin(maxSpeed(), speed() + accelerationSpeed()); }
 	/**
 	 * Lowers speed by @ref decelerationSpeed unless @ref currentSpeed is 0
 	 **/
-	inline void decelerate() { mCurrentSpeed = QMAX(bofixed(0), speed() - decelerationSpeed()); }
+	inline void decelerate() { mCurrentSpeed = qMax(bofixed(0), speed() - decelerationSpeed()); }
 	/**
 	 * @return How fast this unit accelerates.
 	 * Acceleration speed shows how much speed of unit changes per advance call.
@@ -629,7 +631,7 @@ private:
 	bool mIsSelected;
 	bool mIsGroupLeaderOfSelection;
 
-	QPtrVector<Cell>* mCells;
+	Q3PtrVector<Cell>* mCells;
 	bool mCellsDirty;
 	bool mIsVisible;
 

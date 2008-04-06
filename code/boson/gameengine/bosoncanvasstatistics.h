@@ -1,3 +1,6 @@
+//Added by qt3to4:
+#include <Q3PtrList>
+#include <Q3ValueList>
 /*
     This file is part of the Boson game
     Copyright (C) 2003-2004 Andreas Beckermann (b_mann@gmx.de)
@@ -21,9 +24,9 @@
 
 class BosonCanvas;
 
-template<class T> class QPtrList;
-template<class T> class QValueList;
-template<class T> class QPtrVector;
+template<class T> class Q3PtrList;
+template<class T> class Q3ValueList;
+template<class T> class Q3PtrVector;
 template<class T1, class T2> class QMap;
 
 

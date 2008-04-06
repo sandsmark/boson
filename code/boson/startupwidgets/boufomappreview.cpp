@@ -32,6 +32,9 @@
 #include <klocale.h>
 
 #include <qimage.h>
+//Added by qt3to4:
+#include <QWheelEvent>
+#include <QMouseEvent>
 
 class BoUfoMapPreviewDisplayPrivate
 {
@@ -127,10 +130,10 @@ void BoUfoMapPreviewDisplay::slotMouseEvent(QMouseEvent* e)
 
  // AB: when using click+move, the coordinates may go off this widget. we don't
  // want this.
- pos.setX(QMAX(0, pos.x()));
- pos.setY(QMAX(0, pos.y()));
- pos.setX(QMIN(pos.x(), width()));
- pos.setY(QMIN(pos.y(), height()));
+ pos.setX(qMax(0, pos.x()));
+ pos.setY(qMax(0, pos.y()));
+ pos.setX(qMin(pos.x(), width()));
+ pos.setY(qMin(pos.y(), height()));
 
  QPoint cell = d->mViewport->widgetPointToDataPoint(pos);
  if (cell.x() < 0 || cell.y() < 0) {
@@ -231,8 +234,8 @@ BoUfoMapPreview::BoUfoMapPreview()
  stretch->setStretch(1);
  vbox->addWidget(stretch);
 
-// d->mLabel->setVerticalAlignment(BoUfoWidget::AlignVCenter);
-// d->mLabel->setHorizontalAlignment(BoUfoWidget::AlignHCenter);
+// d->mLabel->setVerticalAlignment(BoUfoWidget::Qt::AlignVCenter);
+// d->mLabel->setHorizontalAlignment(BoUfoWidget::Qt::AlignHCenter);
 
 }
 

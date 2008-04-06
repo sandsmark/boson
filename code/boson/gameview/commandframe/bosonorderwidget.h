@@ -24,6 +24,10 @@
 
 #include "../../global.h"
 #include "../../boaction.h"
+//Added by qt3to4:
+#include <QMouseEvent>
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 class Unit;
 class Player;
@@ -33,8 +37,8 @@ class UnitProperties;
 class BosonCommandFrame;
 class UpgradeProperties;
 
-template<class T> class QPtrList;
-template<class T> class QValueList;
+template<class T> class Q3PtrList;
+template<class T> class Q3ValueList;
 
 class BosonOrderWidgetPrivate;
 /**
@@ -69,7 +73,7 @@ public:
 	 * See also @ref hideOrderButtons, @ref showUnits and @ref
 	 * setOrderButtonsGround
 	 **/
-	void setOrderButtons(const QValueList<BoSpecificAction>& actions);
+	void setOrderButtons(const Q3ValueList<BoSpecificAction>& actions);
 
 	/**
 	 * @overload
@@ -77,7 +81,7 @@ public:
 	 * This version takes an additional parameter that forces the actions
 	 * at the specified indices to be "grayed out".
 	 **/
-	void setOrderButtons(const QValueList<BoSpecificAction>& actions, const QValueList<int>& grayActionsOut);
+	void setOrderButtons(const Q3ValueList<BoSpecificAction>& actions, const Q3ValueList<int>& grayActionsOut);
 
 	/**
 	 * Use the @ref BosonGroundTheme, for the order buttons, i.e. allow
@@ -92,7 +96,7 @@ public:
 	 * Use @ref setOrderButtons or @ref hideOrderButtons if the player
 	 * selected one unit only.
 	 **/
-	void showUnits(const QPtrList<Unit>& units);
+	void showUnits(const Q3PtrList<Unit>& units);
 
 	void productionAdvanced(Unit* factory, double percentage);
 
@@ -136,7 +140,7 @@ protected slots:
 	void slotPlaceGround(unsigned int groundtype);
 
 	void slotMouseEnteredButton();
-	void slotMouseLeftButton();
+	void slotMouseQt::LeftButton();
 	void slotMouseMoved(QMouseEvent* e);
 	void slotCheckCursor();
 

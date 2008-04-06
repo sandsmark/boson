@@ -22,7 +22,7 @@
 #include <config.h>
 
 #if BOSON_LINK_STATIC
-#include <qfiledialog.h>
+#include <q3filedialog.h>
 #else
 #include <kfiledialog.h>
 #endif
@@ -47,7 +47,7 @@ public:
 			const QString& caption = QString::null)
 	{
 #if BOSON_LINK_STATIC
-		return QFileDialog::getSaveFileName(startWith, filter, parent, 0, caption);
+		return Q3FileDialog::getSaveFileName(startWith, filter, parent, 0, caption);
 #else
 		return KFileDialog::getSaveFileName(startWith, filter, parent, caption);
 #endif
@@ -59,7 +59,7 @@ public:
 			const QString& caption = QString::null)
 	{
 #if BOSON_LINK_STATIC
-		return QFileDialog::getOpenFileName(startWith, filter, parent, 0, caption);
+		return Q3FileDialog::getOpenFileName(startWith, filter, parent, 0, caption);
 #else
 		return KFileDialog::getOpenFileName(startWith, filter, parent, caption);
 #endif
@@ -70,7 +70,7 @@ public:
 			const QString& caption = QString::null)
 	{
 #if BOSON_LINK_STATIC
-		return QFileDialog::getExistingDirectory(dir, parent, 0, caption);
+		return Q3FileDialog::getExistingDirectory(dir, parent, 0, caption);
 #else
 		return KFileDialog::getExistingDirectory(dir, parent, caption);
 #endif

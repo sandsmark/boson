@@ -35,8 +35,11 @@
 #include <ksimpleconfig.h>
 
 #include <qimage.h>
-#include <qvaluevector.h>
+#include <q3valuevector.h>
 #include <qdir.h>
+//Added by qt3to4:
+#include <QPixmap>
+#include <Q3PtrList>
 
 
 BosonGroundTypeData::BosonGroundTypeData()
@@ -77,9 +80,9 @@ public:
 		mGroundTheme = 0;
 	}
 	const BosonGroundTheme* mGroundTheme;
-	QIntDict<BosonGroundTypeData> mGroundTypes;
-	QDict<BoTexture> mBumpTextures;
-	QDict<BoShader> mShaders;
+	Q3IntDict<BosonGroundTypeData> mGroundTypes;
+	Q3Dict<BoTexture> mBumpTextures;
+	Q3Dict<BoShader> mShaders;
 };
 
 BosonGroundThemeData::BosonGroundThemeData()
@@ -203,8 +206,8 @@ bool BosonGroundThemeData::loadTextures(const QString& dir, unsigned int i)
 	tmppix.fill(Qt::green);
  }
  // Final pixmap will be at most 50x50 pixels big
- int w = QMIN(tmppix.width(), 50);
- int h = QMIN(tmppix.height(), 50);
+ int w = qMin(tmppix.width(), 50);
+ int h = qMin(tmppix.height(), 50);
  groundData->icon = new QPixmap(w, h);
  bitBlt(groundData->icon, 0, 0, &tmppix, 0, 0, w, h);
  return true;
@@ -221,7 +224,7 @@ void BosonGroundThemeData::loadShaders(const QString& dirName, BosonGroundTypeDa
  QDir dir(dirName);
  QString name = ground->groundType->bumpTextureFile;
  QStringList files = dir.entryList(name + "*.png " + name + "*.jpg", QDir::Files, QDir::Name);
- QPtrList<BoTexture> bumpTextures;
+ Q3PtrList<BoTexture> bumpTextures;
  for (QStringList::Iterator it = files.begin(); it != files.end(); it++) {
 	QString file = dirName + "/" + *it;
 	BoTexture* tex = d->mBumpTextures[file];

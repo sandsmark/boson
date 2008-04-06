@@ -51,7 +51,7 @@ QString readFile(const char* fileName)
  if (!file.exists()) {
      return QString::null;
  }
- if (!file.open(IO_ReadOnly)) {
+ if (!file.open(QIODevice::ReadOnly)) {
      return QString::null;
  }
  QString string;

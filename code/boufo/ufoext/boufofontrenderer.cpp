@@ -30,7 +30,7 @@
 #include <bodebug.h>
 
 #include <kglobal.h>
-#include <kstddirs.h>
+#include <kstandarddirs.h>
 
 class BoUfoFontMetrics : public ufo::UFontMetrics
 {
@@ -189,7 +189,8 @@ ufo::UFontInfo BoUfoFontRenderer::getFontInfo() const
  // uh, dirty conversion
  std::string face;
  if (!mFont->fontInfo().name().isEmpty()) {
-	face = mFont->fontInfo().name().latin1();
+	QByteArray tmp = mFont->fontInfo().name().toLatin1();
+	face = std::string(tmp.constData(), tmp.length());
  }
  ufo::UFontInfo ret(
 	ufo::UFontInfo::DefaultFamily,
@@ -356,7 +357,7 @@ std::vector<ufo::UFontInfo> BoUfoFontPlugin::listFonts()
 
  // the default location. this can be both normal system dir as
  // well as ~/.kde
- if (KGlobal::_instance) {
+ if (KGlobal::hasMainComponent()) {
 	txfFonts = KGlobal::dirs()->findAllResources("data", "boson/fonts/*.txf");
  }
  // the fallback dir, set by UFO_FONT_DIR
@@ -377,7 +378,8 @@ std::vector<ufo::UFontInfo> BoUfoFontPlugin::listFonts()
  }
 
  for (QStringList::iterator it = txfFonts.begin(); it != txfFonts.end(); ++it) {
-	std::string face((*it).latin1());
+	QByteArray tmp = (*it).toLatin1();
+	std::string face(tmp.constData(), tmp.length());
 	ret.push_back(ufo::UFontInfo(
 			face,
 			4.0f,

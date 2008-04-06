@@ -102,8 +102,8 @@ void BoCanvasQuadTreeNode::calculateUnitMinMaxZ(const BosonCanvas* canvas)
 				mUnitMaxZ = z2;
 				firstUnit = false;
 			} else {
-				mUnitMinZ = QMAX(mUnitMinZ, z2);
-				mUnitMaxZ = QMAX(mUnitMaxZ, z2);
+				mUnitMinZ = qMax(mUnitMinZ, z2);
+				mUnitMaxZ = qMax(mUnitMaxZ, z2);
 			}
 		}
 	}
@@ -122,8 +122,8 @@ void BoCanvasQuadTreeNode::calculateUnitMinMaxZ(const BosonCanvas* canvas)
 			mUnitMaxZ = ((BoCanvasQuadTreeNode*)children[0])->unitMaxZ();
 			firstChild = false;
 		} else {
-			mUnitMinZ = QMIN(mUnitMinZ, ((BoCanvasQuadTreeNode*)children[i])->unitMinZ());
-			mUnitMaxZ = QMAX(mUnitMaxZ, ((BoCanvasQuadTreeNode*)children[i])->unitMaxZ());
+			mUnitMinZ = qMin(mUnitMinZ, ((BoCanvasQuadTreeNode*)children[i])->unitMinZ());
+			mUnitMaxZ = qMax(mUnitMaxZ, ((BoCanvasQuadTreeNode*)children[i])->unitMaxZ());
 		}
 	}
  }
@@ -138,8 +138,8 @@ void BoCanvasQuadTreeNode::updateMinMaxZ()
 	mMaxZ = groundMaxZ();
 	return;
  }
- mMinZ = QMIN(groundMinZ(), unitMinZ());
- mMaxZ = QMAX(groundMaxZ(), unitMaxZ());
+ mMinZ = qMin(groundMinZ(), unitMinZ());
+ mMaxZ = qMax(groundMaxZ(), unitMaxZ());
 }
 
 
@@ -155,7 +155,7 @@ BoCanvasQuadTreeCollection::~BoCanvasQuadTreeCollection()
 void BoCanvasQuadTreeCollection::cellUnitsChanged(const BosonCanvas* canvas, int x1, int y1, int x2, int y2)
 {
  PROFILE_METHOD
- for (QPtrListIterator<BoQuadTreeNode> it(trees()); it.current(); ++it) {
+ for (Q3PtrListIterator<BoQuadTreeNode> it(trees()); it.current(); ++it) {
 	((BoCanvasQuadTreeNode*)it.current())->cellUnitsChanged(canvas, x1, y1, x2, y2);
  }
 }

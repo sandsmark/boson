@@ -21,8 +21,6 @@ set(boufodesigner_SRCS
 	main.cpp
 )
 
-kde3_automoc(${boufodesigner_SRCS})
-
 boson_add_executable(boufodesigner ${boufodesigner_SRCS})
 
 boson_target_link_libraries(boufodesigner

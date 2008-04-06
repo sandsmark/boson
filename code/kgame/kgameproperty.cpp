@@ -1,7 +1,7 @@
 /*
     This file is part of the KDE games library
     Copyright (C) 2001 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2001 Martin Heni (martin@heni-online.de)
+    Copyright (C) 2001 Martin Heni (kde  at heni-online.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -23,8 +23,6 @@
 #include "kgamemessage.h"
 #include "kplayer.h"
 #include "kgame.h"
-
-#include <bodebug.h>
 
 #define KPLAYERHANDLER_LOAD_COOKIE 6239
 
@@ -59,7 +57,6 @@ KGamePropertyBase::~KGamePropertyBase()
 void KGamePropertyBase::init()
 {
  mOwner = 0;
- mId = -1;
  setDirty(false);
 
  // this is very useful and used by e.g. KGameDialog so
@@ -76,23 +73,23 @@ void KGamePropertyBase::init()
  setPolicy(PolicyLocal);
 }
 
-int KGamePropertyBase::registerData(int id, KGame* owner, QString name)
+int KGamePropertyBase::registerData(int id, KGame* owner, const QString& name)
 { return registerData(id, owner->dataHandler(), name);  }
 
-int KGamePropertyBase::registerData(int id, KPlayer* owner, QString name)
+int KGamePropertyBase::registerData(int id, KPlayer* owner, const QString& name)
 { return registerData(id, owner->dataHandler(), name);  }
 
-int KGamePropertyBase::registerData( KGamePropertyHandler* owner,PropertyPolicy p, QString name)
+int KGamePropertyBase::registerData( KGamePropertyHandler* owner,PropertyPolicy p, const QString& name)
 { return registerData(-1, owner,p, name);  }
 
-int KGamePropertyBase::registerData(int id, KGamePropertyHandler* owner, QString name)
+int KGamePropertyBase::registerData(int id, KGamePropertyHandler* owner, const QString& name)
 { return registerData(id, owner,PolicyUndefined, name);  }
 
-int KGamePropertyBase::registerData(int id, KGamePropertyHandler* owner,PropertyPolicy p, QString name)
+int KGamePropertyBase::registerData(int id, KGamePropertyHandler* owner,PropertyPolicy p, const QString& name)
 {
 // we don't support changing the id
  if (!owner) {
-	boWarning(11001) << k_funcinfo << "Resetting owner=0. Sure you want to do this?" << endl;
+	kWarning(11001) << "Resetting owner=0. Sure you want to do this?";
 	mOwner=0;
 	return -1;
  }
@@ -124,13 +121,13 @@ void KGamePropertyBase::unregisterData()
 bool KGamePropertyBase::sendProperty()
 {
  QByteArray b;
- QDataStream s(b, IO_WriteOnly);
+ QDataStream s(&b, QIODevice::WriteOnly);
  KGameMessage::createPropertyHeader(s, id());
  save(s);
  if (mOwner) {
 	return mOwner->sendProperty(s);
  } else {
-	boError(11001) << k_funcinfo << "Cannot send because there is no receiver defined" << endl;
+	kError(11001) << "Cannot send because there is no receiver defined";
 	return false;
  }
 }
@@ -138,13 +135,13 @@ bool KGamePropertyBase::sendProperty()
 bool KGamePropertyBase::sendProperty(const QByteArray& data)
 {
  QByteArray b;
- QDataStream s(b, IO_WriteOnly);
+ QDataStream s(&b, QIODevice::WriteOnly);
  KGameMessage::createPropertyHeader(s, id());
- s.writeRawBytes(data.data(), data.size());
+ s.writeRawData(data.data(), data.size());
  if (mOwner) {
 	return mOwner->sendProperty(s);
  } else {
-	boError(11001) << k_funcinfo << ": Cannot send because there is no receiver defined" << endl;
+	kError(11001) << ": Cannot send because there is no receiver defined";
 	return false;
  }
 }
@@ -170,25 +167,25 @@ bool KGamePropertyBase::unlock(bool force)
 void KGamePropertyBase::setLock(bool l)
 {
  QByteArray b;
- QDataStream s(b, IO_WriteOnly);
+ QDataStream s(&b, QIODevice::WriteOnly);
  KGameMessage::createPropertyCommand(s, IdCommand, id(), CmdLock);
  
- s << (Q_INT8)l;
+ s << (qint8)l;
  if (mOwner) {
 	mOwner->sendProperty(s);
  } else {
-	boError(11001) << k_funcinfo << ": Cannot send because there is no receiver defined" << endl;
+	kError(11001) << ": Cannot send because there is no receiver defined";
 	return ;
  }
 }
 
 void KGamePropertyBase::emitSignal()
 {
- //boDebug(11001) << k_funcinfo << ": mOwnerP="<< mOwner << " id=" << id()   << endl;
+ //kDebug(11001) << ": mOwnerP="<< mOwner << "id=" << id();
  if (mOwner ) {
 	mOwner->emitSignal(this);
  } else {
-	boError(11001) << k_funcinfo << ":id="<<id()<<" Cannot emitSignal because there is no handler set" << endl;
+	kError(11001) << ":id="<<id()<<" Cannot emitSignal because there is no handler set";
  }
 }
 
@@ -198,7 +195,7 @@ void KGamePropertyBase::command(QDataStream& s, int cmd, bool isSender)
 	case CmdLock:
 	{
 		if (!isSender) {
-			Q_INT8 locked;
+			qint8 locked;
 			s >> locked;
 			mFlags.bits.locked = (bool)locked ;
 			break;

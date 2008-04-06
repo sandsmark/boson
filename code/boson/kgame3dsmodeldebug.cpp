@@ -28,28 +28,35 @@
 #include <qcombobox.h>
 #include <qcheckbox.h>
 #include <qmap.h>
-#include <qintdict.h>
+#include <q3intdict.h>
 #include <qlayout.h>
 #include <qlabel.h>
 #include <qtabwidget.h>
-#include <qptrdict.h>
-#include <qvgroupbox.h>
-#include <qgrid.h>
-#include <qheader.h>
+#include <q3ptrdict.h>
+#include <q3vgroupbox.h>
+#include <q3grid.h>
+#include <q3header.h>
 #include <qsplitter.h>
-#include <qvbox.h>
+#include <q3vbox.h>
 #include <qstringlist.h>
 #include <qtooltip.h>
 #include <qpushbutton.h>
-#include <qbuttongroup.h>
+#include <q3buttongroup.h>
 #include <qdir.h>
-#include <qptrqueue.h>
+#include <q3ptrqueue.h>
+//Added by qt3to4:
+#include <QMouseEvent>
+#include <Q3ValueList>
+#include <Q3HBoxLayout>
+#include <QEvent>
+#include <Q3VBoxLayout>
+#include <Q3PtrList>
 
 #include <ksimpleconfig.h>
-#include <klistbox.h>
-#include <klistview.h>
+#include <k3listbox.h>
+#include <k3listview.h>
 #include <klocale.h>
-#include <kpopupmenu.h>
+#include <kmenu.h>
 #include <kstandarddirs.h>
 #include <knuminput.h>
 
@@ -281,7 +288,7 @@ public:
 		mFlags = 0x00;
 		mKeys.clear();
 	}
-	const QIntDict<Bo3DSTrackKey>& keys() const
+	const Q3IntDict<Bo3DSTrackKey>& keys() const
 	{
 		return mKeys;
 	}
@@ -296,7 +303,7 @@ protected:
 	// bad choice and they have to do a lot of additional code because of
 	// this, but they don't have a choice, as they use plain c - but we do
 	// have a choice :)
-	QIntDict<Bo3DSTrackKey> mKeys;
+	Q3IntDict<Bo3DSTrackKey> mKeys;
 };
 
 // AB: a Lin1 track stores 3 floats in every key. yet have to find out the exact
@@ -430,7 +437,7 @@ public:
 
 		// TODO dummy implementation only!
 #if 0
-		QIntDictIterator<Bo3DSTrackKey> it(mKeys);
+		Q3IntDictIterator<Bo3DSTrackKey> it(mKeys);
 		while (t < (float)it.currentKey()) {
 			result = !result;
 			++it;
@@ -557,8 +564,8 @@ BoNodeTracksWidget::BoNodeTracksWidget(QWidget* parent) : QWidget(parent)
  mMorphTrack = new Bo3DSTrackMorph;
  mHideTrack = new Bo3DSTrackBool;
 
- QVBoxLayout* l = new QVBoxLayout(this);
- QGrid* grid = new QGrid(2, this);
+ Q3VBoxLayout* l = new Q3VBoxLayout(this);
+ Q3Grid* grid = new Q3Grid(2, this);
  l->addWidget(grid);
  mPosition = new QPushButton(i18n("Position track"), grid);
  mPosition->setToggleButton(true);
@@ -678,22 +685,22 @@ void BoNodeTracksWidget::setNodeObjectData(Lib3dsObjectData* d)
 
 BoTrackWidget::BoTrackWidget(QWidget* parent) : QWidget(parent)
 {
- QVBoxLayout* l = new QVBoxLayout(this);
+ Q3VBoxLayout* l = new Q3VBoxLayout(this);
 
- QHBox* hbox = new QHBox(this);
+ Q3HBox* hbox = new Q3HBox(this);
  l->addWidget(hbox);
  (void)new QLabel(i18n("Flags: "), hbox);
  mFlags = new QLabel(hbox);
  (void)new QLabel(i18n("Type: "), hbox);
  mType = new QLabel(hbox);
 
- mFlagList = new KListBox(this);
+ mFlagList = new K3ListBox(this);
  l->addWidget(mFlagList);
  l->addStretch(0);
 
  QLabel* keyLabel = new QLabel(i18n("Keys"), this);
  l->addWidget(keyLabel);
- mKeys = new KListView(this);
+ mKeys = new K3ListView(this);
  mKeys->setAllColumnsShowFocus(true);
  QFontMetrics metrics(font());
  mKeys->addColumn(i18n("Frame"));
@@ -734,39 +741,39 @@ void BoTrackWidget::slotDisplayTrack(Bo3DSTrack* track)
 		mFlagList->show();
 		unsigned long int all = 0x00;
 		if (flags & LIB3DS_REPEAT) {
-			(void)new QListBoxText(mFlagList, QString::fromLatin1("LIB3DS_REPEAT"));
+			(void)new Q3ListBoxText(mFlagList, QString::fromLatin1("LIB3DS_REPEAT"));
 			all |= LIB3DS_REPEAT;
 		}
 		if (flags & LIB3DS_SMOOTH) {
-			(void)new QListBoxText(mFlagList, QString::fromLatin1("LIB3DS_SMOOTH"));
+			(void)new Q3ListBoxText(mFlagList, QString::fromLatin1("LIB3DS_SMOOTH"));
 			all |= LIB3DS_SMOOTH;
 		}
 		if (flags & LIB3DS_LOCK_X) {
-			(void)new QListBoxText(mFlagList, QString::fromLatin1("LIB3DS_LOCK_X"));
+			(void)new Q3ListBoxText(mFlagList, QString::fromLatin1("LIB3DS_LOCK_X"));
 			all |= LIB3DS_LOCK_X;
 		}
 		if (flags & LIB3DS_LOCK_Y) {
-			(void)new QListBoxText(mFlagList, QString::fromLatin1("LIB3DS_LOCK_Y"));
+			(void)new Q3ListBoxText(mFlagList, QString::fromLatin1("LIB3DS_LOCK_Y"));
 			all |= LIB3DS_LOCK_Y;
 		}
 		if (flags & LIB3DS_LOCK_Z) {
-			(void)new QListBoxText(mFlagList, QString::fromLatin1("LIB3DS_LOCK_Z"));
+			(void)new Q3ListBoxText(mFlagList, QString::fromLatin1("LIB3DS_LOCK_Z"));
 			all |= LIB3DS_LOCK_Z;
 		}
 		if (flags & LIB3DS_UNLINK_X) {
-			(void)new QListBoxText(mFlagList, QString::fromLatin1("LIB3DS_UNLINK_X"));
+			(void)new Q3ListBoxText(mFlagList, QString::fromLatin1("LIB3DS_UNLINK_X"));
 			all |= LIB3DS_UNLINK_X;
 		}
 		if (flags & LIB3DS_UNLINK_Y) {
-			(void)new QListBoxText(mFlagList, QString::fromLatin1("LIB3DS_UNLINK_Y"));
+			(void)new Q3ListBoxText(mFlagList, QString::fromLatin1("LIB3DS_UNLINK_Y"));
 			all |= LIB3DS_UNLINK_Y;
 		}
 		if (flags & LIB3DS_UNLINK_Z) {
-			(void)new QListBoxText(mFlagList, QString::fromLatin1("LIB3DS_UNLINK_Z"));
+			(void)new Q3ListBoxText(mFlagList, QString::fromLatin1("LIB3DS_UNLINK_Z"));
 			all |= LIB3DS_UNLINK_Z;
 		}
 		if ((flags | all) != all) {
-			(void)new QListBoxText(mFlagList, i18n("Some flags not recognized! Remaining: %1").arg((flags | all) ^ all));
+			(void)new Q3ListBoxText(mFlagList, i18n("Some flags not recognized! Remaining: %1").arg((flags | all) ^ all));
 		}
 	} else {
 		mFlagList->hide();
@@ -818,24 +825,24 @@ void BoTrackWidget::slotDisplayTrack(Bo3DSTrack* track)
 			break;
 	}
 
-	QIntDictIterator<Bo3DSTrackKey> it(track->keys());
+	Q3IntDictIterator<Bo3DSTrackKey> it(track->keys());
 	while (it.current()) {
-		QListViewItem* item = createItem(it.current(), track->type());
+		Q3ListViewItem* item = createItem(it.current(), track->type());
 		++it;
 	}
  }
 }
 
-QListViewItem* BoTrackWidget::createItem(Bo3DSTrackKey* key, int type)
+Q3ListViewItem* BoTrackWidget::createItem(Bo3DSTrackKey* key, int type)
 {
  BO_CHECK_NULL_RET0(key);
- QListViewItem* item = new QListViewItem(mKeys);
+ Q3ListViewItem* item = new Q3ListViewItem(mKeys);
  configureTCB(item, key->tcb());
  configureKey(item, key, type);
  return item;
 }
 
-void BoTrackWidget::configureTCB(QListViewItem* item, const Bo3DSTrackTCB& tcb)
+void BoTrackWidget::configureTCB(Q3ListViewItem* item, const Bo3DSTrackTCB& tcb)
 {
  BO_CHECK_NULL_RET(item);
  item->setText(0, QString("%1").arg(tcb.mFrame, 3));
@@ -866,7 +873,7 @@ void BoTrackWidget::configureTCB(QListViewItem* item, const Bo3DSTrackTCB& tcb)
  item->setText(7, QString::number(tcb.mEaseFrom));
 }
 
-void BoTrackWidget::configureKey(QListViewItem* item, Bo3DSTrackKey* key, int type)
+void BoTrackWidget::configureKey(Q3ListViewItem* item, Bo3DSTrackKey* key, int type)
 {
  BO_CHECK_NULL_RET(item);
  BO_CHECK_NULL_RET(key);
@@ -916,8 +923,8 @@ class BoMaterialDataWidget : public QWidget
 public:
 	BoMaterialDataWidget(QWidget* parent) : QWidget(parent)
 	{
-		QVBoxLayout* l = new QVBoxLayout(this);
-		QGrid* grid = new QGrid(2, this);
+		Q3VBoxLayout* l = new Q3VBoxLayout(this);
+		Q3Grid* grid = new Q3Grid(2, this);
 		l->addWidget(grid);
 
 		(void)new QLabel(i18n("Ambient"), grid);
@@ -1085,10 +1092,10 @@ private:
 	QLabel* mWireSize;
 };
 
-class BoFaceView : public KListView
+class BoFaceView : public K3ListView
 {
 public:
-	BoFaceView(QWidget* parent) : KListView(parent)
+	BoFaceView(QWidget* parent) : K3ListView(parent)
 	{
 		mUseLib3dsCoordinates = true;
 		mShowPointIndices = false;
@@ -1133,9 +1140,9 @@ public:
 		mShowPointIndices = p;
 	}
 
-	QListViewItem* addFace(int index, Lib3dsFace* face, Lib3dsMesh* mesh)
+	Q3ListViewItem* addFace(int index, Lib3dsFace* face, Lib3dsMesh* mesh)
 	{
-		QListViewItem* item = new QListViewItem(this);
+		Q3ListViewItem* item = new Q3ListViewItem(this);
 		QString no;
 		if (mesh->faces >= 1000) {
 			no.sprintf("%04d", index);
@@ -1160,7 +1167,7 @@ protected:
 	/**
 	 * Set the points and the normal columns
 	 **/
-	void setPoints(QListViewItem* item, Lib3dsFace* face, Lib3dsMesh* mesh)
+	void setPoints(Q3ListViewItem* item, Lib3dsFace* face, Lib3dsMesh* mesh)
 	{
 		// note: calculating the inverse of the mesh matrix is slow but
 		// we do it for every face. causes less work for the API - the
@@ -1237,7 +1244,7 @@ private:
 
 BoNodeObjectDataWidget::BoNodeObjectDataWidget(QWidget* parent) : QWidget(parent, "nodeobjectdatawidget")
 {
- mLayout = new QVBoxLayout(this);
+ mLayout = new Q3VBoxLayout(this);
 
  mPivot = (QLabel*)addWidget(i18n("Pivot"), new QLabel(this));
  QToolTip::add(mPivot, i18n("The pivot point of the node"));
@@ -1348,7 +1355,7 @@ QWidget* BoNodeObjectDataWidget::addWidget(const QString& label, QWidget* w)
 {
  QWidget* box = new QWidget(this, "widgetbox");
  w->reparent(box, QPoint(0,0)); // ugly, but useful
- QHBoxLayout* l = new QHBoxLayout(box);
+ Q3HBoxLayout* l = new Q3HBoxLayout(box);
  l->addWidget(new QLabel(label, box, "label"));
  l->addWidget(w);
  mLayout->addWidget(box);
@@ -1359,7 +1366,7 @@ QWidget* BoNodeObjectDataWidget::addWidget(const QString& label, QWidget* w)
 
 
 
-BoListView::BoListView(QWidget* parent) : KListView(parent)
+BoListView::BoListView(QWidget* parent) : K3ListView(parent)
 {
  mPopup = 0;
  setAllColumnsShowFocus(true);
@@ -1374,7 +1381,7 @@ void BoListView::allowHide(int column)
  if (!mPopup) {
 	header()->setClickEnabled(true);
 	header()->installEventFilter(this);
-	mPopup = new KPopupMenu(this);
+	mPopup = new KMenu(this);
 	mPopup->insertTitle(i18n("View columns"));
 	mPopup->setCheckable(true);
 
@@ -1416,12 +1423,12 @@ bool BoListView::eventFilter(QObject* o, QEvent* e)
 {
  // shamelessy stolen from KMail :)
  if (mPopup && (e->type() == QEvent::MouseButtonPress &&
-		static_cast<QMouseEvent*>(e)->button() == RightButton &&
+		static_cast<QMouseEvent*>(e)->button() == Qt::RightButton &&
 		o->isA("QHeader"))) {
 	mPopup->popup( static_cast<QMouseEvent*>(e)->globalPos() );
 	return true;
  }
- return KListView::eventFilter(o, e);
+ return K3ListView::eventFilter(o, e);
 }
 
 class KGame3DSModelDebug::KGame3DSModelDebugPrivate
@@ -1466,7 +1473,7 @@ public:
 		m3ds = 0;
 	}
 
-	QVBoxLayout* mTopLayout;
+	Q3VBoxLayout* mTopLayout;
 	QComboBox* mModelBox;
 	QMap<int, QString> mModelFiles;
 
@@ -1475,17 +1482,17 @@ public:
 	QWidget* mMeshPage;
 	QWidget* mNodePage;
 
-	KListBox* mMaterialBox;
+	K3ListBox* mMaterialBox;
 	BoMaterialDataWidget* mMaterialData;
-	QPtrDict<Lib3dsMaterial> mListItem2Material;
-	KListView* mTextureView;
+	Q3PtrDict<Lib3dsMaterial> mListItem2Material;
+	K3ListView* mTextureView;
 
-	KListView* mMeshView;
-	QPtrDict<Lib3dsMesh> mListItem2Mesh;
-	QPtrDict<Lib3dsFace> mListItem2Face;
+	K3ListView* mMeshView;
+	Q3PtrDict<Lib3dsMesh> mListItem2Mesh;
+	Q3PtrDict<Lib3dsFace> mListItem2Face;
 	BoFaceView* mFaceList;
-	KListView* mPointList;
-	QVBox* mConnectableWidget;
+	K3ListView* mPointList;
+	Q3VBox* mConnectableWidget;
 	BoFaceView* mConnectedFacesList;
 	BoFaceView* mUnconnectedFacesList;
 	QCheckBox* mUseLib3dsCoordinates;
@@ -1494,8 +1501,8 @@ public:
 	BoMatrixWidget* mMeshMatrix;
 	BoMatrixWidget* mInvMeshMatrix;
 
-	KListView* mNodeView;
-	QPtrDict<Lib3dsNode> mListItem2Node;
+	K3ListView* mNodeView;
+	Q3PtrDict<Lib3dsNode> mListItem2Node;
 	KIntNumInput* mCurrentFrame;
 	BoMatrixWidget* mNodeMatrix;
 	BoNodeObjectDataWidget* mNodeObjectData;
@@ -1528,8 +1535,8 @@ KGame3DSModelDebug::~KGame3DSModelDebug()
 void KGame3DSModelDebug::init()
 {
  d->mCurrentItem = -1;
- d->mTopLayout = new QVBoxLayout(this);
- QHBoxLayout* modelLayout = new QHBoxLayout(d->mTopLayout);
+ d->mTopLayout = new Q3VBoxLayout(this);
+ Q3HBoxLayout* modelLayout = new Q3HBoxLayout(d->mTopLayout);
  QLabel* modelLabel = new QLabel(i18n("Model: "), this);
  d->mModelBox = new QComboBox(this);
  connect(d->mModelBox, SIGNAL(activated(int)), this, SLOT(slotModelChanged(int)));
@@ -1550,17 +1557,17 @@ void KGame3DSModelDebug::init()
 void KGame3DSModelDebug::initMaterialPage()
 {
  d->mMaterialPage = new QWidget(d->mTabWidget);
- QHBoxLayout* l = new QHBoxLayout(d->mMaterialPage, 10, 10);
+ Q3HBoxLayout* l = new Q3HBoxLayout(d->mMaterialPage, 10, 10);
  QSplitter* splitter = new QSplitter(d->mMaterialPage);
  l->addWidget(splitter, 0);
 
- d->mMaterialBox = new KListBox(splitter);
- connect(d->mMaterialBox, SIGNAL(executed(QListBoxItem*)), this, SLOT(slotDisplayMaterial(QListBoxItem*)));
+ d->mMaterialBox = new K3ListBox(splitter);
+ connect(d->mMaterialBox, SIGNAL(executed(Q3ListBoxItem*)), this, SLOT(slotDisplayMaterial(Q3ListBoxItem*)));
  QFontMetrics metrics(font());
 
  d->mMaterialData = new BoMaterialDataWidget(splitter);
 
- d->mTextureView = new KListView(splitter);
+ d->mTextureView = new K3ListView(splitter);
  d->mTextureView->setAllColumnsShowFocus(true);
  d->mTextureView->addColumn(i18n("Map"));
  d->mTextureView->addColumn(i18n("Name"));
@@ -1586,13 +1593,13 @@ void KGame3DSModelDebug::initMeshPage()
  // contain any information on it's position - it is always at (0,0,0).
  // a "node" is an instance of a mesh
  d->mMeshPage = new QWidget(d->mTabWidget);
- QHBoxLayout* l = new QHBoxLayout(d->mMeshPage, 10, 10);
+ Q3HBoxLayout* l = new Q3HBoxLayout(d->mMeshPage, 10, 10);
  QSplitter* splitter = new QSplitter(d->mMeshPage);
  l->addWidget(splitter);
  QFontMetrics metrics(font());
 
- QVBox* meshView = new QVBox(splitter);
- d->mMeshView = new KListView(meshView);
+ Q3VBox* meshView = new Q3VBox(splitter);
+ d->mMeshView = new K3ListView(meshView);
  d->mMeshView->setAllColumnsShowFocus(true);
  d->mMeshView->addColumn(i18n("Name"), metrics.width(i18n("Name")));
  d->mMeshView->addColumn(i18n("Color"), metrics.width(QString::number(111)));
@@ -1602,20 +1609,20 @@ void KGame3DSModelDebug::initMeshPage()
  d->mMeshView->addColumn(i18n("Flags count"), metrics.width(QString::number(11)));
  d->mMeshView->addColumn(i18n("Max point index"), metrics.width(QString::number(11)));
  d->mMeshView->addColumn(i18n("# of instances"), metrics.width(QString::number(11)));
- connect(d->mMeshView, SIGNAL(executed(QListViewItem*)), this, SLOT(slotDisplayMesh(QListViewItem*)));
- QVBox* modelInfo = new QVBox(meshView); // actually it doesn't fit to "meshView", but rather display info about the model
- QHBox* faces = new QHBox(modelInfo);
+ connect(d->mMeshView, SIGNAL(executed(Q3ListViewItem*)), this, SLOT(slotDisplayMesh(Q3ListViewItem*)));
+ Q3VBox* modelInfo = new Q3VBox(meshView); // actually it doesn't fit to "meshView", but rather display info about the model
+ Q3HBox* faces = new Q3HBox(modelInfo);
  (void)new QLabel(i18n("Total Mesh Faces: "), faces);
  d->mMeshFacesCountLabel = new QLabel(faces);
  QToolTip::add(d->mMeshFacesCountLabel, i18n("This is the total number of faces in (different) meshes. Note that every mesh can appear several times in a model, so this number is <em>not</em> the total number of faces in the model!"));
- QHBox* vertices = new QHBox(modelInfo);
+ Q3HBox* vertices = new Q3HBox(modelInfo);
  (void)new QLabel(i18n("Total Mesh Vertices (Faces * 3): "), vertices);
  d->mMeshVertexCountLabel = new QLabel(vertices);
 
- QVBox* faceView = new QVBox(splitter);
+ Q3VBox* faceView = new Q3VBox(splitter);
  d->mFaceList = new BoFaceView(faceView);
- connect(d->mFaceList, SIGNAL(executed(QListViewItem*)), this, SLOT(slotConnectToFace(QListViewItem*)));
- d->mConnectableWidget = new QVBox(faceView);
+ connect(d->mFaceList, SIGNAL(executed(Q3ListViewItem*)), this, SLOT(slotConnectToFace(Q3ListViewItem*)));
+ d->mConnectableWidget = new Q3VBox(faceView);
  (void)new QLabel(i18n("Connectable to selected face:"), d->mConnectableWidget);
  d->mConnectedFacesList = new BoFaceView(d->mConnectableWidget);
  (void)new QLabel(i18n("Unconnectable to selected face:"), d->mConnectableWidget);
@@ -1637,8 +1644,8 @@ void KGame3DSModelDebug::initMeshPage()
  d->mHideConnectableWidgets->hide();
 #endif
 
- QVBox* pointView = new QVBox(splitter);
- d->mPointList = new KListView(pointView);
+ Q3VBox* pointView = new Q3VBox(splitter);
+ d->mPointList = new K3ListView(pointView);
  d->mPointList->setAllColumnsShowFocus(true);
  d->mPointList->addColumn(i18n("Point"));
  d->mPointList->addColumn(i18n("x"));
@@ -1647,11 +1654,11 @@ void KGame3DSModelDebug::initMeshPage()
  d->mPointList->addColumn(i18n("Texel x"));
  d->mPointList->addColumn(i18n("Texel y"));
 
- QVBox* matrixBox = new QVBox(splitter);
- QVGroupBox* meshMatrixBox = new QVGroupBox(i18n("Mesh Matrix"), matrixBox);
+ Q3VBox* matrixBox = new Q3VBox(splitter);
+ Q3VGroupBox* meshMatrixBox = new Q3VGroupBox(i18n("Mesh Matrix"), matrixBox);
  d->mMeshMatrix = new BoMatrixWidget(meshMatrixBox);
  QToolTip::add(d->mMeshMatrix, i18n("This is the mesh matrix (i.e. mesh->matrix in a lib3ds mesh)."));
- QVGroupBox* invMeshMatrixBox = new QVGroupBox(i18n("Inv Mesh Matrix"), matrixBox);
+ Q3VGroupBox* invMeshMatrixBox = new Q3VGroupBox(i18n("Inv Mesh Matrix"), matrixBox);
  d->mInvMeshMatrix = new BoMatrixWidget(invMeshMatrixBox);
  QToolTip::add(d->mInvMeshMatrix, i18n("This is the inverse of the mesh matrix."));
 
@@ -1663,26 +1670,26 @@ void KGame3DSModelDebug::initNodePage()
  // a node is an "instance" of a mesh from a lib3ds point of view. the mesh is
  // the "class" and the node is the "object".
  d->mNodePage = new QWidget(d->mTabWidget);
- QVBoxLayout* l = new QVBoxLayout(d->mNodePage, 10, 10);
+ Q3VBoxLayout* l = new Q3VBoxLayout(d->mNodePage, 10, 10);
  QSplitter* splitter = new QSplitter(d->mNodePage);
  l->addWidget(splitter, 1);
  QFontMetrics metrics(font());
 
- QVBox* nodeView = new QVBox(splitter);
- d->mNodeView = new KListView(nodeView);
+ Q3VBox* nodeView = new Q3VBox(splitter);
+ d->mNodeView = new K3ListView(nodeView);
  d->mNodeView->setAllColumnsShowFocus(true);
  d->mNodeView->setRootIsDecorated(true);
  d->mNodeView->addColumn(i18n("Name"));
  d->mNodeView->addColumn(i18n("ID"));
  d->mNodeView->addColumn(i18n("flags1"));
  d->mNodeView->addColumn(i18n("flags2"));
- connect(d->mNodeView, SIGNAL(executed(QListViewItem*)),
-		this, SLOT(slotDisplayNode(QListViewItem*)));
- QVBox* nodesInfo = new QVBox(nodeView);
- QHBox* faces = new QHBox(nodesInfo);
+ connect(d->mNodeView, SIGNAL(executed(Q3ListViewItem*)),
+		this, SLOT(slotDisplayNode(Q3ListViewItem*)));
+ Q3VBox* nodesInfo = new Q3VBox(nodeView);
+ Q3HBox* faces = new Q3HBox(nodesInfo);
  (void)new QLabel(i18n("Node Faces: "), faces);
  d->mNodeFacesCountLabel = new QLabel(faces);
- QHBox* vertices = new QHBox(nodesInfo);
+ Q3HBox* vertices = new Q3HBox(nodesInfo);
  (void)new QLabel(i18n("Node Vertices (Faces * 3): "), vertices);
  QToolTip::add(d->mNodeFacesCountLabel, i18n("This is the total number of faces in <em>all</em> nodes and therefore the total number of rendered faces."));
  d->mNodeVertexCountLabel = new QLabel(vertices);
@@ -1698,10 +1705,10 @@ void KGame3DSModelDebug::initNodePage()
  //
  // and node->matrix
 
- QVBox* box = new QVBox(splitter);
- QVGroupBox* nodeMatrixBox = new QVGroupBox(i18n("Matrix"), box);
+ Q3VBox* box = new Q3VBox(splitter);
+ Q3VGroupBox* nodeMatrixBox = new Q3VGroupBox(i18n("Matrix"), box);
  d->mNodeMatrix = new BoMatrixWidget(nodeMatrixBox);
- QVGroupBox* trackBox = new QVGroupBox(i18n("Track"), box);
+ Q3VGroupBox* trackBox = new Q3VGroupBox(i18n("Track"), box);
  d->mTrackView = new BoTrackWidget(trackBox);
  connect(d->mNodeObjectData, SIGNAL(signalDisplayTrack(Bo3DSTrack*)),
 		d->mTrackView, SLOT(slotDisplayTrack(Bo3DSTrack*)));
@@ -1743,14 +1750,14 @@ void KGame3DSModelDebug::addFiles(const QString& _dir)
 	dirs.remove("..");
 	for (unsigned int j = 0; j < dirs.count(); j++) {
 		if (allDirs.contains(dirs[j]) == 0) {
-			allDirs.append(dir.absFilePath(dirs[j]));
+			allDirs.append(dir.absoluteFilePath(dirs[j]));
 		}
 	}
 
 	QStringList files = dir.entryList(QString::fromLatin1("*.3ds"), QDir::Files | QDir::Readable);
 	for (unsigned int j = 0; j < files.count(); j++) {
 		if (allFiles.contains(files[j]) == 0) {
-			allFiles.append(dir.absFilePath(files[j]));
+			allFiles.append(dir.absoluteFilePath(files[j]));
 		}
 	}
  }
@@ -1812,7 +1819,7 @@ void KGame3DSModelDebug::updateMaterialPage()
  Lib3dsMaterial* mat = d->m3ds->materials;
  for (; mat; mat = mat->next) {
 	QString m = mat->name;
-	QListBoxText* item = new QListBoxText(d->mMaterialBox, m);
+	Q3ListBoxText* item = new Q3ListBoxText(d->mMaterialBox, m);
 	d->mListItem2Material.insert(item, mat);
  }
 }
@@ -1859,12 +1866,12 @@ void KGame3DSModelDebug::updateNodePage()
  slotFrameChanged(0);
 
  int faces = 0;
- QValueList<Lib3dsNode*> allNodes;
+ Q3ValueList<Lib3dsNode*> allNodes;
  Lib3dsNode* node = d->m3ds->nodes;
  for (; node; node = node->next) {
 	allNodes.append(node);
  }
- QValueList<Lib3dsNode*>::Iterator it;
+ Q3ValueList<Lib3dsNode*>::Iterator it;
  for (it = allNodes.begin(); it != allNodes.end(); ++it) {
 	Lib3dsNode* node = *it;
 	if (node->type != LIB3DS_OBJECT_NODE) {
@@ -1896,7 +1903,7 @@ void KGame3DSModelDebug::slotConstructMeshList()
  Lib3dsMesh* mesh = d->m3ds->meshes;
  for (; mesh; mesh = mesh->next) {
 	QString name(mesh->name);
-	QListViewItem* item = new QListViewItem(d->mMeshView);
+	Q3ListViewItem* item = new Q3ListViewItem(d->mMeshView);
 	item->setText(0, name);
 	item->setText(1, QString::number(mesh->color));
 	item->setText(2, QString::number(mesh->points));
@@ -1906,13 +1913,13 @@ void KGame3DSModelDebug::slotConstructMeshList()
 	int indices = 0;
 	for (unsigned int i = 0; i < mesh->faces; i++) {
 		Lib3dsFace* f = &mesh->faceL[i];
-		indices = QMAX(indices, f->points[0]);
-		indices = QMAX(indices, f->points[1]);
-		indices = QMAX(indices, f->points[2]);
+		indices = qMax(indices, f->points[0]);
+		indices = qMax(indices, f->points[1]);
+		indices = qMax(indices, f->points[2]);
 	}
 	item->setText(6, QString::number(indices));
 	unsigned int instances = 0;
-	QPtrQueue<Lib3dsNode> allNodes;
+	Q3PtrQueue<Lib3dsNode> allNodes;
 	for (Lib3dsNode* n = d->m3ds->nodes; n; n = n->next) {
 		allNodes.enqueue(n);
 	}
@@ -1945,17 +1952,17 @@ void KGame3DSModelDebug::slotConstructNodeList()
 
 }
 
-void KGame3DSModelDebug::addNodeToList(QListViewItem* parent, Lib3dsNode* node)
+void KGame3DSModelDebug::addNodeToList(Q3ListViewItem* parent, Lib3dsNode* node)
 {
  BO_CHECK_NULL_RET(node);
  if (node->type != LIB3DS_OBJECT_NODE) {
 	return;
  }
- QListViewItem* item = 0;
+ Q3ListViewItem* item = 0;
  if (parent) {
-	item = new QListViewItem(parent);
+	item = new Q3ListViewItem(parent);
  } else {
-	item = new QListViewItem(d->mNodeView);
+	item = new Q3ListViewItem(d->mNodeView);
  }
  item->setText(0, node->name);
  item->setText(1, QString::number(node->node_id));
@@ -1982,7 +1989,7 @@ void KGame3DSModelDebug::slotShowPointIndices(bool)
  slotDisplayMesh(d->mMeshView->currentItem());
 }
 
-void KGame3DSModelDebug::slotDisplayMesh(QListViewItem* item)
+void KGame3DSModelDebug::slotDisplayMesh(Q3ListViewItem* item)
 {
  d->mFaceList->clear();
  d->mPointList->clear();
@@ -2004,7 +2011,7 @@ void KGame3DSModelDebug::slotDisplayMesh(QListViewItem* item)
  d->mFaceList->setShowPointIndices(d->mShowPointIndices->isChecked());
  for (unsigned int i = 0; i < mesh->faces; i++) {
 	Lib3dsFace* face = &mesh->faceL[i];
-	QListViewItem* item = d->mFaceList->addFace(i, face, mesh);
+	Q3ListViewItem* item = d->mFaceList->addFace(i, face, mesh);
 	d->mListItem2Face.insert(item, face);
  }
 
@@ -2018,7 +2025,7 @@ void KGame3DSModelDebug::slotDisplayMesh(QListViewItem* item)
 	} else {
 		no.sprintf("%02d", i);
 	}
-	QListViewItem* item = new QListViewItem(d->mPointList);
+	Q3ListViewItem* item = new Q3ListViewItem(d->mPointList);
 	item->setText(0, no);
 	item->setText(1, QString::number(mesh->pointL[i].pos[0]));
 	item->setText(2, QString::number(mesh->pointL[i].pos[1]));
@@ -2040,7 +2047,7 @@ void KGame3DSModelDebug::slotDisplayMesh(QListViewItem* item)
  // TODO: mesh->map_data
 }
 
-void KGame3DSModelDebug::slotDisplayMaterial(QListBoxItem* item)
+void KGame3DSModelDebug::slotDisplayMaterial(Q3ListBoxItem* item)
 {
  d->mTextureView->clear();
  Lib3dsMaterial* mat = d->mListItem2Material[item];
@@ -2073,7 +2080,7 @@ void KGame3DSModelDebug::slotDisplayMaterial(QListBoxItem* item)
  addTextureMap(i18n("Reflection Mask"), &mat->reflection_mask);
 }
 
-void KGame3DSModelDebug::slotDisplayNode(QListViewItem* item)
+void KGame3DSModelDebug::slotDisplayNode(Q3ListViewItem* item)
 {
  if (!item) {
 	boDebug() << k_funcinfo << "NULL item" << endl;
@@ -2120,7 +2127,7 @@ QString KGame3DSModelDebug::rgbText(Lib3dsRgb r)
 
 void KGame3DSModelDebug::addTextureMap(const QString& name, _Lib3dsTextureMap* t)
 {
- QListViewItem* item = new QListViewItem(d->mTextureView);
+ Q3ListViewItem* item = new Q3ListViewItem(d->mTextureView);
  item->setText(0, name);
  item->setText(1, t->name);
  QString flags = QString::number(t->flags); // TODO: display the actual flags, too - see _Lib3dsTextureMapFlags in material.h
@@ -2137,7 +2144,7 @@ void KGame3DSModelDebug::addTextureMap(const QString& name, _Lib3dsTextureMap* t
  item->setText(12, rgbText(t->tint_b));
 }
 
-void KGame3DSModelDebug::slotConnectToFace(QListViewItem* item)
+void KGame3DSModelDebug::slotConnectToFace(Q3ListViewItem* item)
 {
 #if ALLOW_FACE_CONNECTIONS
  Lib3dsFace* face = d->mListItem2Face[item];
@@ -2148,14 +2155,14 @@ void KGame3DSModelDebug::slotConnectToFace(QListViewItem* item)
 	return;
  }
  boDebug() << k_funcinfo << endl;
- QPtrList<Lib3dsFace> connected;
+ Q3PtrList<Lib3dsFace> connected;
  Lib3dsMesh* mesh = d->mListItem2Mesh[d->mMeshView->selectedItem()];
  if (!mesh) {
 	boError() << k_funcinfo << "NULL mesh" << endl;
 	return;
  }
  Bo3DSLoad::findAdjacentFaces(&connected, mesh, face);
- QPtrList<Lib3dsFace> faces;
+ Q3PtrList<Lib3dsFace> faces;
  d->mConnectedFacesList->setUseLib3dsCoordinates(d->mUseLib3dsCoordinates->isChecked());
  d->mUnconnectedFacesList->setUseLib3dsCoordinates(d->mUseLib3dsCoordinates->isChecked());
  d->mConnectedFacesList->setShowPointIndices(d->mShowPointIndices->isChecked());

@@ -31,6 +31,9 @@
 
 #include <qmap.h>
 #include <qtimer.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <QMouseEvent>
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -60,7 +63,7 @@ BoToolTipCreatorFactory::~BoToolTipCreatorFactory()
  delete d;
 }
 
-QValueList<int> BoToolTipCreatorFactory::availableTipCreators() const
+Q3ValueList<int> BoToolTipCreatorFactory::availableTipCreators() const
 {
  return d->mNames.keys();
 }
@@ -370,7 +373,7 @@ void BoGLToolTip::setCursorPos(const QPoint& pos)
 	if (pos.x() > viewportWidth / 2) {
 		x = pos.x() + cursorOffset;
 	} else {
-		x = QMAX(0, pos.x() - cursorOffset - width);
+		x = qMax(0, pos.x() - cursorOffset - width);
 	}
  }
 

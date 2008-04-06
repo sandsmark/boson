@@ -56,7 +56,7 @@ public:
 	void setStepSize(float);
 	float stepSize() const;
 
-	void setLabel(const QString& label, int a = AlignLeft | AlignTop);
+	void setLabel(const QString& label, int a = Qt::AlignLeft | Qt::AlignTop);
 	QString label() const;
 
 	virtual void setOpaque(bool o);

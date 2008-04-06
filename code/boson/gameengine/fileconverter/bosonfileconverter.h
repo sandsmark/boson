@@ -20,8 +20,10 @@
 #define BOSONFILECONVERTER_H
 
 #include <qdatastream.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
-template<class T> class QValueList;
+template<class T> class Q3ValueList;
 template<class T, class T2> class QMap;
 class QDomDocument;
 class QDomNodeList;

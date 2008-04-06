@@ -28,8 +28,10 @@
 #include <qcombobox.h>
 #include <qlabel.h>
 #include <qlayout.h>
-#include <qintdict.h>
-#include <qhbox.h>
+#include <q3intdict.h>
+#include <q3hbox.h>
+//Added by qt3to4:
+#include <Q3VBoxLayout>
 
 #include <klocale.h>
 
@@ -50,7 +52,7 @@ public:
 	}
 	bool mBlockChanges;
 	QComboBox* mMaterialsList;
-	QIntDict<BoMaterial> mMaterials;
+	Q3IntDict<BoMaterial> mMaterials;
 
 	BoMaterial* mActiveMaterial;
 
@@ -67,37 +69,37 @@ BoMaterialWidget::BoMaterialWidget(QWidget* parent, const char* name) : QWidget(
 
  d->mBlockChanges = false;
 
- QVBoxLayout* layout = new QVBoxLayout(this);
+ Q3VBoxLayout* layout = new Q3VBoxLayout(this);
  d->mMaterialsList = new QComboBox(this);
  connect(d->mMaterialsList, SIGNAL(activated(int)), this, SLOT(slotActiveMaterialChanged(int)));
  layout->addWidget(d->mMaterialsList);
 
- QHBox* hbox = 0;
- hbox = new QHBox(this);
+ Q3HBox* hbox = 0;
+ hbox = new Q3HBox(this);
  layout->addWidget(hbox);
  (void)new QLabel(i18n("Name:"), hbox);
  d->mName = new QLabel(hbox);
 
  d->mAmbient = new BoVector4Input(this);
- d->mAmbient->setLabel(i18n("Ambient:"), AlignLeft | AlignVCenter);
+ d->mAmbient->setLabel(i18n("Ambient:"), Qt::AlignLeft | Qt::AlignVCenter);
  d->mAmbient->setRange(0.0f, 1.0f, 0.1f);
  connect(d->mAmbient, SIGNAL(signalValueChanged(const BoVector4Float&)), this, SLOT(slotUpdateMaterial()));
  layout->addWidget(d->mAmbient);
 
  d->mDiffuse = new BoVector4Input(this);
- d->mDiffuse->setLabel(i18n("Diffuse:"), AlignLeft | AlignVCenter);
+ d->mDiffuse->setLabel(i18n("Diffuse:"), Qt::AlignLeft | Qt::AlignVCenter);
  d->mDiffuse->setRange(0.0f, 1.0f, 0.1f);
  connect(d->mDiffuse, SIGNAL(signalValueChanged(const BoVector4Float&)), this, SLOT(slotUpdateMaterial()));
  layout->addWidget(d->mDiffuse);
 
  d->mSpecular = new BoVector4Input(this);
- d->mSpecular->setLabel(i18n("Specular:"), AlignLeft | AlignVCenter);
+ d->mSpecular->setLabel(i18n("Specular:"), Qt::AlignLeft | Qt::AlignVCenter);
  d->mSpecular->setRange(0.0f, 1.0f, 0.1f);
  connect(d->mSpecular, SIGNAL(signalValueChanged(const BoVector4Float&)), this, SLOT(slotUpdateMaterial()));
  layout->addWidget(d->mSpecular);
 
  d->mShininess = new BoFloatNumInput(this);
- d->mShininess->setLabel(i18n("Shininess:"), AlignLeft | AlignVCenter);
+ d->mShininess->setLabel(i18n("Shininess:"), Qt::AlignLeft | Qt::AlignVCenter);
  d->mShininess->setRange(0.0f, 1.0f, 0.1f);
  connect(d->mShininess, SIGNAL(signalValueChanged(float)), this, SLOT(slotUpdateMaterial()));
  layout->addWidget(d->mShininess);

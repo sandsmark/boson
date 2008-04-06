@@ -22,7 +22,7 @@
 
 #include "memnode.h"
 
-#include <qptrdict.h>
+#include <q3ptrdict.h>
 #endif
 
 #include <sys/types.h>

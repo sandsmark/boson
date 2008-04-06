@@ -34,6 +34,8 @@
 
 #include <qmap.h>
 #include <qimage.h>
+//Added by qt3to4:
+#include <Q3CString>
 
 static const char *description =
     I18N_NOOP("Boson file converter");
@@ -61,7 +63,7 @@ int main(int argc, char **argv)
 		I18N_NOOP("Coding & Current Maintainer"),
 		"b_mann@gmx.de");
 
- QCString argv0(argv[0]);
+ Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
 #if BOSON_LINK_STATIC

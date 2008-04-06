@@ -21,17 +21,19 @@
 
 #include <qwidget.h>
 #include <qmap.h>
-#include <qvaluelist.h>
+#include <q3valuelist.h>
+//Added by qt3to4:
+#include <QLabel>
 
 class QLabel;
 class QPushButton;
-class QListBox;
+class Q3ListBox;
 class KTar;
 class KArchiveFile;
 class KArchiveDirectory;
 class QDomElement;
 class QDomDocument;
-class QListBoxItem;
+class Q3ListBoxItem;
 
 class BoConditionEditorMain : public QWidget
 {
@@ -60,14 +62,14 @@ private:
 	QPushButton* mSelectFile;
 	QPushButton* mSelectSaveFile;
 	QPushButton* mEditConditions;
-	QListBox* mConditions;
+	Q3ListBox* mConditions;
 
 	KTar* mFile;
-	QMap<QListBoxItem*, QDomElement> mItem2Element;
-	QMap<QListBoxItem*, QWidget*> mItem2Widget;
+	QMap<Q3ListBoxItem*, QDomElement> mItem2Element;
+	QMap<Q3ListBoxItem*, QWidget*> mItem2Widget;
 	QMap<const KArchiveFile*, QDomDocument> mFile2XML;
-	QMap<const KArchiveFile*, QListBoxItem*> mFile2Item;
-	QValueList<unsigned long int> mPlayerIds;
+	QMap<const KArchiveFile*, Q3ListBoxItem*> mFile2Item;
+	Q3ValueList<unsigned long int> mPlayerIds;
 };
 
 #endif

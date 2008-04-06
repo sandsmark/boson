@@ -24,7 +24,9 @@
 #include "boshader.h"
 #include <bogl.h>
 
-#include <qvaluevector.h>
+#include <q3valuevector.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 
 /*****  BoLightManager  *****/
@@ -78,15 +80,15 @@ void BoLightManager::init()
 {
   glGetIntegerv(GL_MAX_LIGHTS, &mMaxActiveLights);
 
-  mActiveLights = new QValueVector<BoLight*>();
-  mAllLights = new QValueList<BoLight*>();
+  mActiveLights = new Q3ValueVector<BoLight*>();
+  mAllLights = new Q3ValueList<BoLight*>();
   mNextLightId = 0;
   BoShader::setActiveLights(0);
 }
 
 BoLight* BoLightManager::light(int id)
 {
-  for(QValueList<BoLight*>::Iterator it = mAllLights->begin(); it != mAllLights->end(); it++)
+  for(Q3ValueList<BoLight*>::Iterator it = mAllLights->begin(); it != mAllLights->end(); it++)
   {
     if((*it)->id() == id)
     {
@@ -123,7 +125,7 @@ BoLight* BoLightManager::createLight()
 void BoLightManager::deleteLight(int id)
 {
   BoLight* l = 0;
-  for(QValueList<BoLight*>::Iterator it = mAllLights->begin(); it != mAllLights->end(); it++)
+  for(Q3ValueList<BoLight*>::Iterator it = mAllLights->begin(); it != mAllLights->end(); it++)
   {
     if((*it)->id() == id)
     {
@@ -155,7 +157,7 @@ void BoLightManager::deleteLight(int id)
         // Make another light active
         BoLight* otherlight;
         // Find first inactive light...
-        for(QValueList<BoLight*>::Iterator it = mAllLights->begin(); it != mAllLights->end(); it++)
+        for(Q3ValueList<BoLight*>::Iterator it = mAllLights->begin(); it != mAllLights->end(); it++)
         {
           if(!(*it)->isActive())
           {

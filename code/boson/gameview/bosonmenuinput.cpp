@@ -55,16 +55,15 @@
 #include <kgame/kgamedebugdialog.h>
 #include <kmessagebox.h>
 #include <kfiledialog.h>
-#include <klineeditdlg.h>
 
-#include <qguardedptr.h>
-#include <qptrdict.h>
+#include <qpointer.h>
+#include <q3ptrdict.h>
 #include <qsignalmapper.h>
 #include <qtimer.h>
-#include <qvbox.h>
+#include <q3vbox.h>
 #include <qpixmap.h>
 #include <qimage.h>
-#include <qvaluestack.h>
+#include <q3valuestack.h>
 #include <qlayout.h>
 #include <qdom.h>
 #include <qfile.h>
@@ -73,7 +72,10 @@
 #include <qcombobox.h>
 #include <qlabel.h>
 #include <qvalidator.h>
-#include <qdict.h>
+#include <q3dict.h>
+//Added by qt3to4:
+#include <Q3PtrList>
+#include <Q3VBoxLayout>
 
 #include <unistd.h>
 
@@ -110,15 +112,15 @@ public:
 	BoUfoActionCollection* mActionCollection;
 
 #if 0
-	QGuardedPtr<BoUfoToggleAction> mActionMenubar;
+	QPointer<BoUfoToggleAction> mActionMenubar;
 #endif
-	QGuardedPtr<BoUfoActionMenu> mActionDebugPlayers;
-	QGuardedPtr<BoUfoActionMenu> mActionDebugColormap;
-	QGuardedPtr<BoUfoSelectAction> mActionEditorPlayer;
-	QGuardedPtr<BoUfoSelectAction> mActionEditorPlace;
-	QGuardedPtr<BoUfoToggleAction> mActionEditorChangeHeight;
-	QPtrList<KPlayer> mEditorPlayers;
-	QPtrDict<KPlayer> mActionDebugPlayer2Player;
+	QPointer<BoUfoActionMenu> mActionDebugPlayers;
+	QPointer<BoUfoActionMenu> mActionDebugColormap;
+	QPointer<BoUfoSelectAction> mActionEditorPlayer;
+	QPointer<BoUfoSelectAction> mActionEditorPlace;
+	QPointer<BoUfoToggleAction> mActionEditorChangeHeight;
+	Q3PtrList<KPlayer> mEditorPlayers;
+	Q3PtrDict<KPlayer> mActionDebugPlayer2Player;
 
 	QSignalMapper* mSelectMapper;
 	QSignalMapper* mCreateMapper;
@@ -522,12 +524,12 @@ void BosonMenuInputData::createEditorPlayerMenu()
 {
  BO_CHECK_NULL_RET(boGame);
  BO_CHECK_NULL_RET(d->mActionEditorPlayer);
- QPtrList<Player> players = boGame->gamePlayerList();
+ Q3PtrList<Player> players = boGame->gamePlayerList();
  QStringList items;
 
  d->mEditorPlayers.clear();
  d->mActionEditorPlayer->clear();
- for (QPtrListIterator<Player> it(players); it.current(); ++it) {
+ for (Q3PtrListIterator<Player> it(players); it.current(); ++it) {
 	d->mEditorPlayers.append(it.current());
 	items.append(it.current()->name());
  }
@@ -545,8 +547,8 @@ void BosonMenuInputData::createDebugPlayersMenu()
  d->mActionDebugPlayers = new BoUfoActionMenu(i18n("Players"),
 		actionCollection(), "debug_players");
 
- QPtrList<Player> players = boGame->gamePlayerList();
- QPtrListIterator<Player> it(players);
+ Q3PtrList<Player> players = boGame->gamePlayerList();
+ Q3PtrListIterator<Player> it(players);
  for (; it.current(); ++it) {
 	KPlayer* player = it.current();
 	BoUfoActionMenu* menu = new BoUfoActionMenu(player->name(),
@@ -577,7 +579,7 @@ void BosonMenuInputData::slotDebugPlayer(int id)
 	boError() << k_funcinfo << "sender() is not a BoUfoActionMenu" << endl;
 	return;
  }
- QPtrDictIterator<KPlayer> it(d->mActionDebugPlayer2Player);
+ Q3PtrDictIterator<KPlayer> it(d->mActionDebugPlayer2Player);
  BoUfoActionMenu* menu = (BoUfoActionMenu*)sender();
  KPlayer* p = 0;
  while (it.current() && !p) {
@@ -593,7 +595,7 @@ void BosonMenuInputData::slotDebugPlayer(int id)
 	return;
  }
 
- Q_UINT32 playerId = ((Player*)p)->bosonId();
+ quint32 playerId = ((Player*)p)->bosonId();
  switch (id) {
 	case ID_DEBUG_PLAYER_INPUT:
 		emit signalDebugEditPlayerInputs((Player*)p);
@@ -640,7 +642,7 @@ void BosonMenuInputData::slotUpdateColorMapsMenu()
  BosonMap* map = boGame->playField()->map();
  BO_CHECK_NULL_RET(map);
  BO_CHECK_NULL_RET(map->colorMaps());
- QDictIterator<BoColorMap> it(*map->colorMaps());
+ Q3DictIterator<BoColorMap> it(*map->colorMaps());
  while (it.current()) {
 	d->mActionDebugColormap->insertItem(it.currentKey(), i++);
 	++it;
@@ -658,7 +660,7 @@ void BosonMenuInputData::slotChangeColorMap(int index)
 
  // Find the wanted colormap
  int i = 1;
- QDictIterator<BoColorMap> it(*map->colorMaps());
+ Q3DictIterator<BoColorMap> it(*map->colorMaps());
  while (it.current()) {
 	if (index == i) {
 		// Set it to be the active one
@@ -785,12 +787,12 @@ void BosonMenuInput::initIO(KPlayer* player)
 		this, SLOT(slotSetDebugMode(int)));
  connect(mData, SIGNAL(signalDebugEditPlayerInputs(Player*)),
 		this, SLOT(slotDebugEditPlayerInputs(Player*)));
- connect(mData, SIGNAL(signalDebugKillPlayer(Q_UINT32)),
-		this, SLOT(slotDebugKillPlayer(Q_UINT32)));
- connect(mData, SIGNAL(signalDebugModifyMinerals(Q_UINT32, int)),
-		this, SLOT(slotDebugModifyMinerals(Q_UINT32, int)));
- connect(mData, SIGNAL(signalDebugModifyOil(Q_UINT32, int)),
-		this, SLOT(slotDebugModifyOil(Q_UINT32, int)));
+ connect(mData, SIGNAL(signalDebugKillPlayer(quint32)),
+		this, SLOT(slotDebugKillPlayer(quint32)));
+ connect(mData, SIGNAL(signalDebugModifyMinerals(quint32, int)),
+		this, SLOT(slotDebugModifyMinerals(quint32, int)));
+ connect(mData, SIGNAL(signalDebugModifyOil(quint32, int)),
+		this, SLOT(slotDebugModifyOil(quint32, int)));
  connect(mData, SIGNAL(signalToggleCheating(bool)),
 		this, SLOT(slotToggleCheating(bool)));
  connect(mData, SIGNAL(signalExploreAll()),
@@ -960,7 +962,7 @@ void BosonMenuInput::slotDebugEditPlayerInputs(Player* p)
 		KDialogBase::Ok | KDialogBase::Cancel, KDialogBase::Ok, 0,
 		"playerinputs", true, true);
  connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
- QVBoxLayout* layout = new QVBoxLayout(dialog->plainPage());
+ Q3VBoxLayout* layout = new Q3VBoxLayout(dialog->plainPage());
 
  BoEditPlayerInputsWidget* widget = new BoEditPlayerInputsWidget(dialog->plainPage());
  layout->addWidget(widget);
@@ -975,29 +977,29 @@ void BosonMenuInput::slotDebugEditPlayerInputs(Player* p)
  dialog->show();
 }
 
-void BosonMenuInput::slotDebugKillPlayer(Q_UINT32 playerId)
+void BosonMenuInput::slotDebugKillPlayer(quint32 playerId)
 {
  QByteArray b;
- QDataStream stream(b, IO_WriteOnly);
- stream << (Q_UINT32)playerId;
+ QDataStream stream(b, QIODevice::WriteOnly);
+ stream << (quint32)playerId;
  boGame->sendMessage(b, BosonMessageIds::IdKillPlayer);
 }
 
-void BosonMenuInput::slotDebugModifyMinerals(Q_UINT32 playerId, int amount)
+void BosonMenuInput::slotDebugModifyMinerals(quint32 playerId, int amount)
 {
  QByteArray b;
- QDataStream stream(b, IO_WriteOnly);
- stream << (Q_UINT32)playerId;
- stream << (Q_INT32)amount;
+ QDataStream stream(b, QIODevice::WriteOnly);
+ stream << (quint32)playerId;
+ stream << (qint32)amount;
  boGame->sendMessage(b, BosonMessageIds::IdModifyMinerals);
 }
 
-void BosonMenuInput::slotDebugModifyOil(Q_UINT32 playerId, int amount)
+void BosonMenuInput::slotDebugModifyOil(quint32 playerId, int amount)
 {
  QByteArray b;
- QDataStream stream(b, IO_WriteOnly);
- stream << (Q_UINT32)playerId;
- stream << (Q_INT32)amount;
+ QDataStream stream(b, QIODevice::WriteOnly);
+ stream << (quint32)playerId;
+ stream << (qint32)amount;
  boGame->sendMessage(b, BosonMessageIds::IdModifyOil);
 }
 
@@ -1027,7 +1029,7 @@ void BosonMenuInput::slotExploreAll(Player* pl)
 	boError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
- QPtrList<Player> list;
+ Q3PtrList<Player> list;
  if (!pl) {
 	list = boGame->allPlayerList();
  } else {
@@ -1059,7 +1061,7 @@ void BosonMenuInput::slotUnfogAll(Player* pl)
 	boError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
- QPtrList<Player> list;
+ Q3PtrList<Player> list;
  if (!pl) {
 	list = boGame->allPlayerList();
  } else {
@@ -1091,7 +1093,7 @@ void BosonMenuInput::slotFogAll(Player* pl)
 	boError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
- QPtrList<Player> list;
+ Q3PtrList<Player> list;
  if (!pl) {
 	list = boGame->allPlayerList();
  } else {
@@ -1118,7 +1120,7 @@ void BosonMenuInput::slotEditConditions()
  KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Conditions"),
 		KDialogBase::Ok | KDialogBase::Cancel, KDialogBase::Ok, 0,
 		"editconditions", true, true);
- QVBoxLayout* layout = new QVBoxLayout(dialog->plainPage());
+ Q3VBoxLayout* layout = new Q3VBoxLayout(dialog->plainPage());
  BoConditionWidget* widget = new BoConditionWidget(dialog->plainPage());
  layout->addWidget(widget);
 
@@ -1131,7 +1133,7 @@ void BosonMenuInput::slotEditConditions()
 		boError() << k_funcinfo << "unable to save canvas conditions from game" << endl;
 		KMessageBox::information(0, i18n("Canvas conditions could not be imported to the widget"));
 	} else {
-		QValueStack<QDomElement> stack;
+		Q3ValueStack<QDomElement> stack;
 		stack.push(root);
 		while (!stack.isEmpty()) {
 			QDomElement e = stack.pop();
@@ -1149,7 +1151,7 @@ void BosonMenuInput::slotEditConditions()
 					boError() << k_funcinfo << "PlayerId attribute not a valid number" << endl;
 					continue;
 				}
-				QPtrList<Player> gamePlayerList = boGame->gamePlayerList();
+				Q3PtrList<Player> gamePlayerList = boGame->gamePlayerList();
 				Player* p = gamePlayerList.at(index);
 				e.setAttribute("PlayerId", p->bosonId());
 			}
@@ -1438,7 +1440,7 @@ void BosonMenuInput::slotEditorExportTexMap()
  }
 
  QDialog* d = new QDialog(0, 0, true);
- QVBoxLayout* layout = new QVBoxLayout(d);
+ Q3VBoxLayout* layout = new Q3VBoxLayout(d);
  QLabel* label = new QLabel(i18n("Select texture to export:"), d);
  QComboBox* combo = new QComboBox(d);
  QPushButton* button = new QPushButton(i18n("Ok"), d);

@@ -22,7 +22,7 @@
 #include "../bogroundrenderer.h"
 #include "../gameengine/bogroundquadtreenode.h"
 
-#include <qptrdict.h>
+#include <q3ptrdict.h>
 
 class Cell;
 class PlayerIO;
@@ -240,7 +240,7 @@ private:
 	BosonGroundThemeData* mCurrentGroundThemeData;
 
 	FogTexture* mFogTexture;
-	QPtrDict<BoColorMapRenderer> mColorMapRenderers;
+	Q3PtrDict<BoColorMapRenderer> mColorMapRenderers;
 };
 
 

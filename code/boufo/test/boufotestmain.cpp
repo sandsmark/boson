@@ -28,6 +28,12 @@
 
 #include <qtimer.h>
 #include <qdatetime.h>
+//Added by qt3to4:
+#include <QWheelEvent>
+#include <QResizeEvent>
+#include <QMouseEvent>
+#include <QKeyEvent>
+#include <QEvent>
 
 #include <iostream>
 #include <math.h>

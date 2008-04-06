@@ -24,6 +24,8 @@
 #include <kgame/kgameproperty.h>
 #include <kgame/kgamepropertylist.h>
 #include "../../bo3dtools.h"
+//Added by qt3to4:
+#include <Q3ValueList>
 
 template<class T> class BoVector2;
 template<class T> class BoRect2;
@@ -151,7 +153,7 @@ public:
 	 **/
 	UnitStoragePlugin* storingUnit() const;
 
-	QValueList<BoVector2Fixed> remainingInsidePath() const;
+	Q3ValueList<BoVector2Fixed> remainingInsidePath() const;
 
 	/**
 	 * Called by @ref UnitMoverInsideUnit only. This removes the very first
@@ -195,16 +197,16 @@ private:
 	KGameProperty<BoVector2Fixed> mEnterPoint1;
 	KGameProperty<BoVector2Fixed> mEnterPoint2;
 
-	KGameProperty<Q_INT32> mPathIndex;
+	KGameProperty<qint32> mPathIndex;
 
 	// a list of pathpoints inside the unit leading to the destination of
 	// the path
 	KGamePropertyList<BoVector2Fixed> mRemainingInsidePath;
 
-	KGameProperty<Q_INT32> mMovingInStatus;
-	KGameProperty<Q_INT32> mLandingStatus;
+	KGameProperty<qint32> mMovingInStatus;
+	KGameProperty<qint32> mLandingStatus;
 
-	KGameProperty<Q_INT32> mTriedMovingCounter;
+	KGameProperty<qint32> mTriedMovingCounter;
 };
 
 #endif

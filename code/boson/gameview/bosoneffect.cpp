@@ -26,7 +26,7 @@
 #include "bolight.h"
 
 #include <krandomsequence.h>
-#include <kstaticdeleter.h>
+#include <k3staticdeleter.h>
 
 #include <qstring.h>
 #include <qdom.h>
@@ -34,7 +34,7 @@
 
 // Static initialization stuff
 KRandomSequence* BosonEffect::mRandom = 0;
-static KStaticDeleter<KRandomSequence> sd;
+static K3StaticDeleter<KRandomSequence> sd;
 
 
 void BosonEffect::initStatic(const QString& particletexdir)

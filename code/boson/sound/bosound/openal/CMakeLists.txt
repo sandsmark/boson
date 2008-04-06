@@ -10,7 +10,6 @@ set(bosonsoundopenal_sources
 	bosonsound.cpp
 	bosonmusic.cpp
 )
-kde3_automoc(${bosonsoundopenal_sources})
 
 boson_add_library(bosonsoundopenal STATIC ${bosonsoundopenal_sources})
 

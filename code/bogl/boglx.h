@@ -23,6 +23,7 @@
 #include <bogl.h>
 
 #include <qevent.h> // to avoid GLX/Qt conflicts
+#include <qtextstream.h> // Xlib defines Status. qtextstream.h must be included before anyheader that defines status (according to the #error in qtextstream.h)
 #include <GL/glx.h>
 
 #ifndef GLX_NV_float_buffer

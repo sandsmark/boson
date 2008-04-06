@@ -20,7 +20,7 @@
 #define BOSONPLAYERLISTMANAGER_H
 
 #include <qobject.h>
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 
 class KPlayer;
 class Player;
@@ -45,7 +45,7 @@ public:
 	 * Note that all @ref KPlayer objects in @p playerList must be @ref
 	 * Player objects.
 	 **/
-	void recalculatePlayerLists(const QPtrList<KPlayer>& playerList);
+	void recalculatePlayerLists(const Q3PtrList<KPlayer>& playerList);
 
 	/**
 	 * Recalculates the internal list of players to match those players in
@@ -59,7 +59,7 @@ public:
 	 * Note that all @ref KPlayer objects in @p playerList must be @ref
 	 * Player objects.
 	 **/
-	virtual void recalculatePlayerListsWithPlayerRemoved(const QPtrList<KPlayer>& playerList, KPlayer* removedPlayer);
+	virtual void recalculatePlayerListsWithPlayerRemoved(const Q3PtrList<KPlayer>& playerList, KPlayer* removedPlayer);
 
 	unsigned int allPlayerCount() const;
 	unsigned int gamePlayerCount() const;
@@ -68,7 +68,7 @@ public:
 	/**
 	 * @return The same as @ref KGame::playerList
 	 **/
-	const QPtrList<Player>& allPlayerList() const;
+	const Q3PtrList<Player>& allPlayerList() const;
 
 	/**
 	 * "game players" are players with ID >= 128 and <= 511. These are
@@ -76,7 +76,7 @@ public:
 	 *
 	 * This includes both, human controllable and neutral players.
 	 **/
-	const QPtrList<Player>& gamePlayerList() const;
+	const Q3PtrList<Player>& gamePlayerList() const;
 
 	/**
 	 * "active game players" are players with ID >= 128 and <= 255. These
@@ -85,7 +85,7 @@ public:
 	 *
 	 * They are in particular @em not neutral players.
 	 **/
-	const QPtrList<Player>& activeGamePlayerList() const;
+	const Q3PtrList<Player>& activeGamePlayerList() const;
 
 	/**
 	 * @return The @ref Player object with @ref Player::userId @p id, or
@@ -94,9 +94,9 @@ public:
 	Player* findPlayerByUserId(int id) const;
 
 private:
-	QPtrList<Player> mAllPlayerList;
-	QPtrList<Player> mGamePlayerList;
-	QPtrList<Player> mActiveGamePlayerList;
+	Q3PtrList<Player> mAllPlayerList;
+	Q3PtrList<Player> mGamePlayerList;
+	Q3PtrList<Player> mActiveGamePlayerList;
 };
 
 #endif

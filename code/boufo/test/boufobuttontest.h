@@ -22,9 +22,14 @@
 #include "bodebugdcopiface.h"
 
 #include <qgl.h> // AB: _Q_GLWidget
-#include <qmainwindow.h>
+#include <q3mainwindow.h>
 #include <qdom.h>
 #include <qmap.h>
+//Added by qt3to4:
+#include <QMouseEvent>
+#include <QKeyEvent>
+#include <QEvent>
+#include <QWheelEvent>
 
 class BoUfoWidget;
 class BoUfoManager;

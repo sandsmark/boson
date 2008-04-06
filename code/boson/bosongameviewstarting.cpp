@@ -31,6 +31,8 @@
 #include <klocale.h>
 
 #include <qmap.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 BosonGameViewStarting::BosonGameViewStarting(BosonStarting* starting, QObject* parent)
 	: BosonStartingTaskCreator(parent)
@@ -59,7 +61,7 @@ void BosonGameViewStarting::setFiles(QMap<QString, QByteArray>* files)
  mFiles = files;
 }
 
-bool BosonGameViewStarting::createTasks(QPtrList<BosonStartingTask>* tasks)
+bool BosonGameViewStarting::createTasks(Q3PtrList<BosonStartingTask>* tasks)
 {
  if (!mStarting) {
 	BO_NULL_ERROR(mStarting);

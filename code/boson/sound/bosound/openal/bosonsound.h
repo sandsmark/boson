@@ -21,7 +21,7 @@
 
 #include "../bosonabstractaudiointerface.h"
 
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 #include <qmap.h>
 
 #include <AL/al.h>
@@ -92,7 +92,7 @@ protected:
 //	void addEvent(const QString& dir, const QString& name);
 
 private:
-	typedef QPtrList<BoPlayObject> SoundList;
+	typedef Q3PtrList<BoPlayObject> SoundList;
 	typedef QMap<int, SoundList> SoundEvents;
 	typedef QMap<unsigned long int, SoundEvents> UnitSounds;
 	class BosonSoundPrivate;

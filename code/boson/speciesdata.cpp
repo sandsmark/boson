@@ -31,19 +31,21 @@
 #include "sound/bosonaudiointerface.h"
 #include "boufo/boufoimage.h"
 
-#include <qintdict.h>
-#include <qdict.h>
+#include <q3intdict.h>
+#include <q3dict.h>
 #include <qfile.h>
 #include <qimage.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
-#include <kstaticdeleter.h>
+#include <k3staticdeleter.h>
 #include <kstandarddirs.h>
 #include <ksimpleconfig.h>
-#include <ktempfile.h>
+#include <ktemporaryfile.h>
 
-static KStaticDeleter< QDict<SpeciesData> > sd;
-QDict<SpeciesData>* SpeciesData::mSpeciesData = 0;
+static K3StaticDeleter< Q3Dict<SpeciesData> > sd;
+Q3Dict<SpeciesData>* SpeciesData::mSpeciesData = 0;
 
 static void killAlphaMask(QImage& img)
 {
@@ -110,15 +112,15 @@ BosonModel* BosonModelFactory::createObjectModel(const KSimpleConfig* config, co
  // So we create a temporary config file and copy necessary data there.
  // TODO: separate BosonModelFactory into it's own file and make it also handle
  //  model caching?
- KTempFile tmpconfig;
+ KTemporaryFile tmpconfig;
  // We want the temporary file to be deleted when we're done.
  tmpconfig.setAutoDelete(true);
 
  // We write the config file manually, using QTextStream.
  // There's no point in creating KConfig object to write a single entry.
- QTextStream* ts = tmpconfig.textStream();
+ Q3TextStream* ts = tmpconfig.textStream();
  if (!ts) {
-	boError() << k_funcinfo << "Couldn't create textstream object for KTempFile" << endl;
+	boError() << k_funcinfo << "Couldn't create textstream object for KTemporaryFile" << endl;
 	return 0;
  }
  (*ts) << "[Model]" << endl;
@@ -150,12 +152,12 @@ public:
 	// current OpenGL context!
 	// we should separate our OpenGL context from BosonBigDisplay first
 	QString mThemePath;
-	QIntDict<TeamColorData> mTeamData;
-	QDict<BoAction> mActions;
-	QDict<BoUfoImage> mImages;
+	Q3IntDict<TeamColorData> mTeamData;
+	Q3Dict<BoAction> mActions;
+	Q3Dict<BoUfoImage> mImages;
 
-	QIntDict<BosonModel> mUnitModels;
-	QDict<BosonModel> mObjectModels;
+	Q3IntDict<BosonModel> mUnitModels;
+	Q3Dict<BosonModel> mObjectModels;
 
 	BosonSoundInterface* mSound;
 };
@@ -174,8 +176,8 @@ public:
 		mBigOverview.clear();
 	}
 
-	QIntDict<BoUfoImage> mSmallOverview;
-	QIntDict<BoUfoImage> mBigOverview;
+	Q3IntDict<BoUfoImage> mSmallOverview;
+	Q3IntDict<BoUfoImage> mBigOverview;
 };
 
 SpeciesData::SpeciesData(const QString& speciesPath)
@@ -212,7 +214,7 @@ void SpeciesData::initStatic()
  if (mSpeciesData) {
 	return;
  }
- mSpeciesData = new QDict<SpeciesData>();
+ mSpeciesData = new Q3Dict<SpeciesData>();
  mSpeciesData->setAutoDelete(true);
  sd.setObject(mSpeciesData);
 }
@@ -361,7 +363,7 @@ bool SpeciesData::loadUnitOverview(const UnitProperties* prop, const QColor& tea
 		image.fill(Qt::red.rgb());
 	}
 	if (image.width() != 100 || image.height() != 100) {
-		image = image.smoothScale(100, 100, QImage::ScaleMin);
+		image = image.smoothScale(100, 100, Qt::ScaleMin);
 	}
 
 	// AB: maybe we want to remove this in the future
@@ -381,7 +383,7 @@ bool SpeciesData::loadUnitOverview(const UnitProperties* prop, const QColor& tea
 		image.fill(Qt::red.rgb());
 	}
 	if (image.width() != 50 || image.height() != 50) {
-		image = image.smoothScale(50, 50, QImage::ScaleMin);
+		image = image.smoothScale(50, 50, Qt::ScaleMin);
 	}
 
 	// AB: maybe we want to remove this in the future
@@ -657,7 +659,7 @@ bool SpeciesData::loadUnitSounds(const UnitProperties* prop)
  }
  // Load sounds of weapons of this unit
  if (prop->canShoot()) {
-	QPtrListIterator<PluginProperties> it(*(prop->plugins()));
+	Q3PtrListIterator<PluginProperties> it(*(prop->plugins()));
 	while (it.current()) {
 		if (it.current()->pluginType() == PluginProperties::Weapon) {
 			QMap<int, QString> weaponSounds = ((BosonWeaponProperties*)it.current())->sounds();
@@ -673,27 +675,27 @@ bool SpeciesData::loadUnitSounds(const UnitProperties* prop)
  return true;
 }
 
-QPtrList<BosonModel> SpeciesData::allLoadedModels() const
+Q3PtrList<BosonModel> SpeciesData::allLoadedModels() const
 {
- QPtrList<BosonModel> models;
- for (QIntDictIterator<BosonModel> it(d->mUnitModels); it.current(); ++it) {
+ Q3PtrList<BosonModel> models;
+ for (Q3IntDictIterator<BosonModel> it(d->mUnitModels); it.current(); ++it) {
 	models.append(it.current());
  }
- for (QDictIterator<BosonModel> it(d->mObjectModels); it.current(); ++it) {
+ for (Q3DictIterator<BosonModel> it(d->mObjectModels); it.current(); ++it) {
 	models.append(it.current());
  }
  return models;
 }
 
-QPtrList<BosonModel> SpeciesData::allLoadedModelsInAllSpecies()
+Q3PtrList<BosonModel> SpeciesData::allLoadedModelsInAllSpecies()
 {
- QPtrList<BosonModel> models;
+ Q3PtrList<BosonModel> models;
  if (!mSpeciesData) {
 	return models;
  }
- for (QDictIterator<SpeciesData> it(*mSpeciesData); it.current(); ++it) {
-	QPtrList<BosonModel> list = it.current()->allLoadedModels();
-	for (QPtrListIterator<BosonModel> it2(list); it2.current(); ++it2) {
+ for (Q3DictIterator<SpeciesData> it(*mSpeciesData); it.current(); ++it) {
+	Q3PtrList<BosonModel> list = it.current()->allLoadedModels();
+	for (Q3PtrListIterator<BosonModel> it2(list); it2.current(); ++it2) {
 		models.append(it2.current());
 	}
  }

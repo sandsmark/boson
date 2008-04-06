@@ -25,7 +25,7 @@
 
 class BosonProfilingItem;
 class ProfilingItem;
-class QListViewItem;
+class Q3ListViewItem;
 class QListViewItemNumberTime;
 
 class BosonProfilingDialogPrivate;
@@ -56,7 +56,7 @@ protected slots:
 	void slotUpdate();
 	void slotSaveToFile();
 	void slotLoadFromFile();
-	void slotShowSumForEvent(QListViewItem*);
+	void slotShowSumForEvent(Q3ListViewItem*);
 
 private:
 	BosonProfilingDialogPrivate* d;

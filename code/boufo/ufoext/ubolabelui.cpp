@@ -40,6 +40,8 @@
 #include <ufo/font/ufontmetrics.hpp>
 #include <ufo/util/udimension.hpp>
 
+#include <qstring.h>
+
 
 using namespace ufo;
 
@@ -444,20 +446,20 @@ UBoLabelUI::styleLayoutCompoundWidget(
 
 	int dx, dy;
 	// horizontal
-	if (hAlignment == AlignLeft) {
+	if (hAlignment == Qt::AlignLeft) {
 		dx = viewRect->x - cl_x;
-	} else if (hAlignment == AlignRight) {
+	} else if (hAlignment == Qt::AlignRight) {
 		dx = (viewRect->x + viewRect->w) - (cl_x + cl_width);
-	} else { // ufo::AlignCenter
+	} else { // ufo::Qt::AlignCenter
 		dx = (viewRect->x + (viewRect->w / 2)) - (cl_x + (cl_width / 2));
 	}
 
 	// vertical
-	if (vAlignment == AlignTop) {
+	if (vAlignment == Qt::AlignTop) {
 		dy = viewRect->y - cl_y;
-	} else if (vAlignment == AlignBottom) {
+	} else if (vAlignment == Qt::AlignBottom) {
 		dy = (viewRect->y + viewRect->h) - (cl_y + cl_height);
-	} else { // ufo::AlignCenter
+	} else { // ufo::Qt::AlignCenter
 		dy = (viewRect->y + (viewRect->h / 2)) - (cl_y + (cl_height / 2));
 	}
 
@@ -538,11 +540,11 @@ UBoLabelUI::stylePaintControlCaption(UGraphics * g,
 		//     additionally have to align here, as we support multiple
 		//     lines.
 		int lineX;
-		if (hAlignment == AlignLeft) {
+		if (hAlignment == Qt::AlignLeft) {
 			lineX = rect.x;
-		} else if (hAlignment == AlignCenter) {
+		} else if (hAlignment == Qt::AlignCenter) {
 			lineX = rect.x + (size.w / 2);
-		} else { // AlignRight
+		} else { // Qt::AlignRight
 			lineX = rect.x + rect.w - size.w;
 		}
 		g->drawString(s, lineX, y);

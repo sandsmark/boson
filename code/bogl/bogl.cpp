@@ -46,7 +46,7 @@ BoGL* BoGL::mBoGL = 0;
 QStringList boglGetOpenGLExtensions()
 {
  QString extensions = (const char*)glGetString(GL_EXTENSIONS);
- return QStringList::split(" ", extensions);
+ return extensions.split(" ");
 }
 
 QStringList boglGetGLUExtensions()
@@ -130,12 +130,12 @@ bool BoGL::initialize()
  // Find out OpenGL version
  QString oglversionstring = QString((const char*)glGetString(GL_VERSION));
  unsigned int oglversionmajor = 0, oglversionminor = 0, oglversionrelease = 0;
- int oglversionlength = oglversionstring.find(' ');
+ int oglversionlength = oglversionstring.indexOf(' ');
  if (oglversionlength == -1) {
 	oglversionlength = oglversionstring.length();
  }
  QString versionstr = oglversionstring.left(oglversionlength);
- QStringList versioninfo = QStringList::split(QChar('.'), oglversionstring.left(oglversionlength));
+ QStringList versioninfo = oglversionstring.left(oglversionlength).split(QChar('.'));
  if (versioninfo.count() < 2 || versioninfo.count() > 3) {
 	boError() << k_funcinfo << "versioninfo has "
 			<< versioninfo.count()
@@ -156,12 +156,12 @@ bool BoGL::initialize()
  d->mOpenGLRendererString = QString::fromLatin1((const char*)glGetString(GL_RENDERER));
 
  QString glExtensions = (const char*)glGetString(GL_EXTENSIONS);
- d->mOpenGLExtensions = QStringList::split(" ", glExtensions);
+ d->mOpenGLExtensions = glExtensions.split(" ");
 
  d->mGLUVersionString = QString::fromLatin1((const char*)gluGetString(GLU_VERSION));
 
  QString gluExtensions = (const char*)gluGetString(GLU_EXTENSIONS);
- d->mGLUExtensions = QStringList::split(" ", gluExtensions);
+ d->mGLUExtensions = gluExtensions.split(" ");
 
  return isInitialized();
 }

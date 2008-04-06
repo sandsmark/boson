@@ -35,50 +35,52 @@
 #include <qlayout.h>
 #include <qlineedit.h>
 #include <qlabel.h>
-#include <qhbox.h>
-#include <qvbox.h>
+#include <q3hbox.h>
+#include <q3vbox.h>
 #include <qcombobox.h>
-#include <qvgroupbox.h>
+#include <q3vgroupbox.h>
 #include <qpushbutton.h>
 #include <qcheckbox.h>
 #include <qdir.h>
+//Added by qt3to4:
+#include <Q3VBoxLayout>
 
 
 // FIXME: rename -> OpenGLConfig or so
-SpriteConfig::SpriteConfig(QWidget* w) : QVGroupBox(i18n("OpenGL Cursor"), w)
+SpriteConfig::SpriteConfig(QWidget* w) : Q3VGroupBox(i18n("OpenGL Cursor"), w)
 {
- QHBox* hbox = new QHBox(this);
+ Q3HBox* hbox = new Q3HBox(this);
  (void)new QLabel(i18n("File Prefix:"), hbox);
  mFilePrefix = new QLineEdit(hbox);
 
- hbox = new QHBox(this);
+ hbox = new Q3HBox(this);
  (void)new QLabel(i18n("HotspotX"), hbox);
  mHotspotX = new KIntNumInput(0, hbox);
  mHotspotX->setRange(0, 100);
 
- hbox = new QHBox(this);
+ hbox = new Q3HBox(this);
  (void)new QLabel(i18n("HotspotY"), hbox);
  mHotspotY = new KIntNumInput(0, hbox);
  mHotspotY->setRange(0, 100);
 
- hbox = new QHBox(this);
+ hbox = new Q3HBox(this);
  (void)new QLabel(i18n("Animated"), hbox);
  mIsAnimated = new QCheckBox(hbox);
 
- mAnimationSettings = new QVBox(this);
+ mAnimationSettings = new Q3VBox(this);
  connect(mIsAnimated, SIGNAL(toggled(bool)), mAnimationSettings, SLOT(setEnabled(bool)));
 
- hbox = new QHBox(mAnimationSettings);
+ hbox = new Q3HBox(mAnimationSettings);
  (void)new QLabel(i18n("Animation Speed (ms)"), hbox);
  mAnimationSpeed= new KIntNumInput(0, hbox);
  mAnimationSpeed->setRange(0, 2000);
 
- hbox = new QHBox(mAnimationSettings);
+ hbox = new Q3HBox(mAnimationSettings);
  (void)new QLabel(i18n("FrameCount"), hbox);
  mFrameCount = new KIntNumInput(1, hbox);
  mFrameCount->setRange(1, 100);
 
- hbox = new QHBox(mAnimationSettings);
+ hbox = new Q3HBox(mAnimationSettings);
  (void)new QLabel(i18n("Rotate (degree)"), hbox);
  mRotateDegree = new KIntNumInput(0, hbox);
  mRotateDegree->setRange(-360, 360);
@@ -152,26 +154,26 @@ BosonCursorEditor::~BosonCursorEditor()
 
 void BosonCursorEditor::init()
 {
- QVBoxLayout* vLayout = new QVBoxLayout(this);
+ Q3VBoxLayout* vLayout = new Q3VBoxLayout(this);
  vLayout->setAutoAdd(true);
- QHBox* hbox = new QHBox(this);
+ Q3HBox* hbox = new Q3HBox(this);
  (void)new QLabel(i18n("Base Directory"), hbox);
  mBaseDirectory = new QPushButton(hbox);
  connect(mBaseDirectory, SIGNAL(clicked()), this, SLOT(slotChangeBaseDirectory()));
 
- hbox = new QHBox(this);
+ hbox = new Q3HBox(this);
  (void)new QLabel(i18n("Cursor Mode"), hbox);
  mCursorMode = new QComboBox(hbox);
  mCursorMode->insertItem(i18n("OpenGL Cursor"), CursorOpenGL);
  mCursorMode->insertItem(i18n("KDE Standard Cursor"), CursorKDE);
  connect(mCursorMode, SIGNAL(activated(int)), this, SLOT(slotCursorModeChanged(int)));
 
- hbox = new QHBox(this);
+ hbox = new Q3HBox(this);
  (void)new QLabel(i18n("Cursor Type"), hbox);
  mCursorType = new QComboBox(hbox);
  connect(mCursorType, SIGNAL(activated(int)), this, SLOT(slotCursorTypeChanged(int)));
 
- hbox = new QHBox(this);
+ hbox = new Q3HBox(this);
  (void)new QLabel(i18n("Cursor Theme"), hbox);
  mCursorTheme = new QComboBox(hbox);
  connect(mCursorTheme, SIGNAL(activated(int)),

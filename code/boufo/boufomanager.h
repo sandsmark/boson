@@ -22,12 +22,18 @@
 #define BOUFOMANAGER_H
 
 #include <qobject.h>
+//Added by qt3to4:
+#include <QWheelEvent>
+#include <Q3ValueList>
+#include <QMouseEvent>
+#include <QKeyEvent>
+#include <QEvent>
 
 class QMouseEvent;
 class QWheelEvent;
 class QKeyEvent;
 template<class T1, class T2> class QMap;
-template<class T1> class QValueList;
+template<class T1> class Q3ValueList;
 class QDomElement;
 
 class BoUfoActionCollection;
@@ -251,8 +257,8 @@ public:
 	void setGlobalFont(const BoUfoFontInfo& font);
 	const BoUfoFontInfo& globalFont() const;
 
-	QValueList<BoUfoFontInfo> listFonts();
-	QValueList<BoUfoFontInfo> listFonts(const BoUfoFontInfo&);
+	Q3ValueList<BoUfoFontInfo> listFonts();
+	Q3ValueList<BoUfoFontInfo> listFonts(const BoUfoFontInfo&);
 
 	bool focusedWidgetTakesKeyEvents() const;
 

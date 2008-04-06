@@ -161,7 +161,7 @@ unsigned int ResourceMinePlugin::mineStep(const HarvesterPlugin* harvester, int 
 	BO_NULL_ERROR(harvester);
 	return 0;
  }
- int maxCapacity = QMAX((int)harvester->maxResources() - (int)harvester->resourcesMined(), 0);
+ int maxCapacity = qMax((int)harvester->maxResources() - (int)harvester->resourcesMined(), 0);
  int maxAvailable = resourcesAvailable;
  if (resourcesAvailable < 0) {
 	// infinite resources

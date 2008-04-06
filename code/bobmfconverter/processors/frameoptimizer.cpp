@@ -25,8 +25,8 @@
 #include "frame.h"
 #include "bo3dtools.h"
 
-#include <qvaluelist.h>
-#include <qvaluevector.h>
+#include <q3valuelist.h>
+#include <q3valuevector.h>
 
 
 FrameOptimizer::FrameOptimizer() : Processor()
@@ -56,13 +56,13 @@ bool FrameOptimizer::process()
   // Go through all frames and remove identical ones
   // We only go through them linearly, because different animations may include
   //  equal frames.
-  QValueVector<Frame*> validFrames;
+  Q3ValueVector<Frame*> validFrames;
   Frame* lastFrame = lod()->frame(0);
   validFrames.append(lastFrame);
 
   if(mKeepFrames > 0)
   {
-    mKeepFrames = QMIN(mKeepFrames, (int)lod()->frameCount());
+    mKeepFrames = qMin(mKeepFrames, (int)lod()->frameCount());
     for(int i = 1; i < mKeepFrames; i++)
     {
       validFrames.append(lod()->frame(i));
@@ -104,7 +104,7 @@ bool FrameOptimizer::process()
     }
   }
 
-  if(validFrames.count() != lod()->frameCount())
+  if(validFrames.count() != (int)lod()->frameCount())
   {
     // Replace frames list
     // Just for debug

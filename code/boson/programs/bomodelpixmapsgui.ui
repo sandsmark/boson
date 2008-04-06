@@ -58,7 +58,7 @@
                             <string>This program requires that the camera looks down at the top of the model by default. Here you can add some initial rotations to ensure that.</string>
                         </property>
                         <property name="alignment">
-                            <set>WordBreak|AlignVCenter</set>
+                            <set>WordBreak|Qt::AlignVCenter</set>
                         </property>
                     </widget>
                     <widget class="QLayoutWidget">

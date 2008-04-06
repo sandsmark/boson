@@ -25,7 +25,7 @@
 #include "bodebug.h"
 #include "bpfloader.h" // BPFPreview TODO: dedicated file
 
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 #include <qstringlist.h>
 
 class BosonCampaignData : public BosonDataObject
@@ -70,7 +70,7 @@ public:
 	BosonCampaignPrivate()
 	{
 	}
-	QPtrList<BPFPreview> mPlayFields;
+	Q3PtrList<BPFPreview> mPlayFields;
 	QString mName;
 	QString mIdentifier;
 };
@@ -133,7 +133,7 @@ QString BosonCampaign::identifier() const
 QStringList BosonCampaign::playFields() const
 {
  QStringList list;
- QPtrListIterator<BPFPreview> it(d->mPlayFields);
+ Q3PtrListIterator<BPFPreview> it(d->mPlayFields);
  for (; it.current(); ++it) {
 	list.append(it.current()->identifier());
  }

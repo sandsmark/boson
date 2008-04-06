@@ -27,7 +27,7 @@
 #include <config.h> // USE_BO_PLUGINS
 
 #include <kapplication.h>
-#include <kstaticdeleter.h>
+#include <k3staticdeleter.h>
 #include <kglobal.h>
 #include <kstandarddirs.h>
 #include <klocale.h>
@@ -35,8 +35,10 @@
 #include <klibloader.h>
 
 #include <qstringlist.h>
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 #include <qlibrary.h>
+//Added by qt3to4:
+#include <Q3CString>
 
 #include <stdlib.h>
 #include <dlfcn.h>
@@ -196,7 +198,7 @@ bool BoPluginManager::loadLibrary()
 	boDebug(800) << k_funcinfo << "library " << lib << " loaded. resolving symbols" << endl;
 
 	if (ret) {
-		QCString init_name = QCString("init_") + lib.latin1();
+		Q3CString init_name = Q3CString("init_") + lib.latin1();
 		init_func = (init_function)d->mLibrary->resolve(init_name);
 		if (!init_func) {
 			ret = false;
@@ -206,7 +208,7 @@ bool BoPluginManager::loadLibrary()
 	}
 	if (ret) {
 		typedef void (*FunctionType)();
-		QCString version_name = QCString("version_") + lib.latin1();
+		Q3CString version_name = Q3CString("version_") + lib.latin1();
 		version_func = (version_function)d->mLibrary->resolve(version_name);
 		if (!version_func) {
 			ret = false;
@@ -243,7 +245,7 @@ bool BoPluginManager::loadLibrary()
  }
  if (ret) {
 	boDebug(800) << k_funcinfo << "searching for information object" << endl;
-	QCString info_name = QCString("BoPluginInformation");
+	Q3CString info_name = Q3CString("BoPluginInformation");
 	QObject* info = d->mLibraryFactory->create(0, 0, info_name);
 	if (!info) {
 		error = i18n("Could not find the information object. searched for: %1").arg(info_name);

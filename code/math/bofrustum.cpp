@@ -50,8 +50,8 @@ void BoFrustum::loadPickViewFrustum(const BoRect2Float& pickRect, const int* vie
  const float viewY = (float)viewport[1];
  const float viewW = (float)viewport[2];
  const float viewH = (float)viewport[3];
- const float pickW = QMAX(pickRect.width(), 1);
- const float pickH = QMAX(pickRect.height(), 1);
+ const float pickW = qMax(pickRect.width(), 1.0f);
+ const float pickH = qMax(pickRect.height(), 1.0f);
  const float pickCenterX = pickCenter.x();
  const float pickCenterY = viewH - pickCenter.y();
 

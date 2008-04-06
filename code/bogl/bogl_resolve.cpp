@@ -31,7 +31,7 @@
 #include "myqlibrary.h"
 
 #include <qstringlist.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
 #include <qfile.h>
 
 #include <stdlib.h>
@@ -193,31 +193,31 @@ static void scanLdSoConf(QStringList* dirs, const QString& file, QStringList* sc
  }
  scannedFiles->append(file);
  QFile conf(file);
- if (conf.open(IO_ReadOnly)) {
+ if (conf.open(QIODevice::ReadOnly)) {
 	// AB: we use lines that begin with '/' only (whitespaces
 	//     ignored)
 	// AB: we also use lines that start with "include", which is used by a
 	//     fedora core patch to glibc.
-	QTextStream s(&conf);
+	Q3TextStream s(&conf);
 	while (!s.atEnd()) {
 		QString line;
 		line = s.readLine();
 
 		// remove comments
-		if (line.find('#') >= 0) {
-			line = line.left(line.find('#') + 1);
+		if (line.indexOf('#') >= 0) {
+			line = line.left(line.indexOf('#') + 1);
 		}
 
-		line = line.stripWhiteSpace();
+		line = line.trimmed();
 		if (line.startsWith("include")) {
 			QString inc = line.right(line.length() - QString("include").length());
-			inc = inc.stripWhiteSpace();
+			inc = inc.trimmed();
 			if (!inc.startsWith("/")) {
 				inc = QString("/etc/") + inc;
 			}
 			QDir dir;
 			QStringList incFiles = resolveWildcards(inc);
-			for (unsigned int i = 0; i < incFiles.count(); i++) {
+			for (int i = 0; i < incFiles.count(); i++) {
 				scanLdSoConf(dirs, incFiles[i], scannedFiles);
 			}
 
@@ -251,8 +251,8 @@ void resolveWildcards(QStringList* files, const QString& argument)
 	boDebug() << k_funcinfo << "argument \"" << argument << "\" did not start with '/', relative filenames are not supported." << endl;
 	return;
  }
- int index1 = argument.find("*");
- int index2 = argument.find("?");
+ int index1 = argument.indexOf("*");
+ int index2 = argument.indexOf("?");
  if (index1 < 0 && index2 < 0) {
 	files->append(argument);
 	return;
@@ -266,7 +266,7 @@ void resolveWildcards(QStringList* files, const QString& argument)
 	return;
  }
  QString prefix = argument.left(index); // everything before the first '*' or '?'
- QString dirname = prefix.left(prefix.findRev("/")); // the dirname in prefix
+ QString dirname = prefix.left(prefix.lastIndexOf("/")); // the dirname in prefix
  QDir dir(dirname);
  if (!dir.exists()) {
 	boDebug() << "directory " << dirname << " does not exist" << endl;
@@ -275,17 +275,17 @@ void resolveWildcards(QStringList* files, const QString& argument)
  QString afterDir = argument.right(argument.length() - (dirname.length() + 1));
  QString inDir;
  QString suffixDir;
- if (afterDir.find('/') >= 0) {
+ if (afterDir.indexOf('/') >= 0) {
 	// note: suffixDir includes leading '/'
-	suffixDir = afterDir.right(afterDir.length() - (afterDir.find('/')));
-	inDir = afterDir.left(afterDir.find('/'));
+	suffixDir = afterDir.right(afterDir.length() - (afterDir.indexOf('/')));
+	inDir = afterDir.left(afterDir.indexOf('/'));
  } else {
 	inDir = afterDir;
  }
 
  // argument == dirname + '/' + inDir + suffixDir
 
- QStringList entries = dir.entryList(inDir, QDir::Readable | QDir::Files | QDir::Dirs);
+ QStringList entries = dir.entryList(QStringList() << inDir, QDir::Readable | QDir::Files | QDir::Dirs);
  for (QStringList::iterator it = entries.begin(); it != entries.end(); ++it) {
 	resolveWildcards(files, dirname + '/' + *it + suffixDir);
  }

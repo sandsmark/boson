@@ -20,12 +20,12 @@
 #define BOEDITTURRETPROPERTIESDIALOG_H
 
 #include <kdialogbase.h>
-#include <qlistview.h>
+#include <q3listview.h>
 
 #include <lib3ds/types.h>
 
 class QStringList;
-class QListViewItem;
+class Q3ListViewItem;
 
 class BoEditTurretPropertiesDialogPrivate;
 /**
@@ -52,7 +52,7 @@ protected slots:
 	virtual void slotApply();
 
 protected:
-	void addMesh(Lib3dsNode* node, QListViewItem* parent);
+	void addMesh(Lib3dsNode* node, Q3ListViewItem* parent);
 	void updateListView();
 
 protected slots:
@@ -61,12 +61,12 @@ private:
 	BoEditTurretPropertiesDialogPrivate* d;
 };
 
-class BoCheckListView : public QListView
+class BoCheckListView : public Q3ListView
 {
 	Q_OBJECT
 public:
 	BoCheckListView(QWidget* parent)
-		: QListView(parent)
+		: Q3ListView(parent)
 	{
 	}
 

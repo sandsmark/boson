@@ -23,7 +23,7 @@
 
 #include "../bo3dtools.h"
 
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 
 
 class BosonMap;
@@ -120,7 +120,7 @@ class BoWaterManager
     bool loadFromXML(const QDomElement& root);
     bool saveToXML(QDomElement& root);
 
-    const QPtrList<BoLake>* lakes() const;
+    const Q3PtrList<BoLake>* lakes() const;
 
     void initDefaultWaterLevel(float level);
     void initCellMaps();  // FIXME: name

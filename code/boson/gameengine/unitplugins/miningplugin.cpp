@@ -128,8 +128,8 @@ void MiningPlugin::advance(unsigned int)
 		}
 
 		// Make sure coords are valid
-		newx = QMAX(bofixed(0), QMIN(newx, bofixed((canvas()->mapWidth() - 1))));
-		newy = QMAX(bofixed(0), QMIN(newy, bofixed((canvas()->mapHeight() - 1))));
+		newx = qMax(bofixed(0), qMin(newx, bofixed((canvas()->mapWidth() - 1))));
+		newy = qMax(bofixed(0), qMin(newy, bofixed((canvas()->mapHeight() - 1))));
 
 		boDebug() << k_funcinfo << "i: " << i << "; Getaway point is at (" << newx << "; " << newy << ")" << endl;
 		// FIXME: hackish

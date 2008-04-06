@@ -1,6 +1,6 @@
 /*
     This file is part of the KDE games library
-    Copyright (C) 2001 Martin Heni (martin@heni-online.de)
+    Copyright (C) 2001 Martin Heni (kde at heni-online.de)
     Copyright (C) 2001 Andreas Beckermann (b_mann@gmx.de)
 
     This library is free software; you can redistribute it and/or
@@ -21,74 +21,236 @@
 #ifndef __KGAMEPROPERTYLIST_H_
 #define __KGAMEPROPERTYLIST_H_
 
-#include <qvaluelist.h>
 
-#include <bodebug.h>
+#include <kdebug.h>
 
 #include "kgamemessage.h"
 #include "kgameproperty.h"
 #include "kgamepropertyhandler.h"
 
-// AB: things NOT supported of KGamePropertyBase:
-//     1. policies. an instance of this class is always PolicyClean (recommended
-//        anyway!)
-//     2. emitting signals. objects of this class will never emit signals.
-//        if you call setEmittingSignal(true) on this, you get undefined
-//        behaviour.
+// AB: also see README.LIB!
+
 template<class type>
-class KGamePropertyList : public QValueList<type>, public KGamePropertyBase
+class KGamePropertyList : public QList<type>, public KGamePropertyBase
 {
 public:
-    KGamePropertyList() :QValueList<type>(), KGamePropertyBase()
-    {
-      setEmittingSignal(false);
-    }
+     /**
+     * Typedefs
+     */
+    typedef QListIterator<type> Iterator;
 
-    KGamePropertyList( const KGamePropertyList<type> &a ) : QValueList<type>(a)
+  KGamePropertyList() :QList<type>(), KGamePropertyBase()
+  {
+  }
+
+  KGamePropertyList( const KGamePropertyList<type> &a ) : QList<type>(a)
+  {
+  }
+
+  uint findIterator(Iterator me)
+  {
+    Iterator it;
+    uint cnt=0;
+    for( it = this->begin(); it != this->end(); ++it )
     {
-      setEmittingSignal(false);
-    }
-    ~KGamePropertyList()
-    {
-      if(id() == -1)
+      if (me==it) 
       {
-        // AB: very bad: it can be used just fine, but saving/loading won't work
-        //     -> bug is not always noticed.
-        boError() << k_funcinfo << "KGamePropertyList has never been registered! probably a bug!" << endl;
+        return cnt;
+      }
+      cnt++;
+    }
+    return this->count();
+  }
+
+  Iterator insert( Iterator it, const type& d )
+  {
+    it=QList<type>::insert(it,d);
+
+    QByteArray b;
+    QDataStream s(b, QIODevice::WriteOnly);
+    KGameMessage::createPropertyCommand(s,KGamePropertyBase::IdCommand,id(),CmdInsert);
+    int i=findIterator(it);
+    s << i;
+    s << d;
+    if (policy() == PolicyClean || policy() == PolicyDirty)
+    {
+      if (mOwner)
+      {
+        mOwner->sendProperty(s);
       }
     }
-
-    void load(QDataStream& s)
+    if (policy() == PolicyDirty || policy() == PolicyLocal)
     {
-      QValueList<type>::clear();
-      Q_UINT32 size;
-      type data;
-      s >> size;
+      extractProperty(b);
+    }
+    return it;
+  }
 
-      for (Q_UINT32 i=0; i < size; i++)
+  void  prepend( const type& d) { insert(this->begin(),d); }
+  
+  void  append( const type& d ) 
+  {
+    QByteArray b;
+    QDataStream s(b, QIODevice::WriteOnly);
+    KGameMessage::createPropertyCommand(s,KGamePropertyBase::IdCommand,id(),CmdAppend);
+    s << d;
+    if (policy() == PolicyClean || policy() == PolicyDirty)
+    {
+      if (mOwner)
       {
-        s >> data;
-        QValueList<type>::append(data);
+        mOwner->sendProperty(s);
       }
     }
-
-    void save(QDataStream &s)
+    if (policy() == PolicyDirty || policy() == PolicyLocal)
     {
-      type data;
-      Q_UINT32 size = QValueList<type>::count();
-      s << size;
-      QValueListIterator<type> it;
-      for(it = QValueList<type>::begin(); it != QValueList<type>::end(); ++it)
+      extractProperty(b);
+    }
+  }
+
+  Iterator erase( Iterator it )
+  {
+    QByteArray b;
+    QDataStream s(b, QIODevice::WriteOnly);
+    KGameMessage::createPropertyCommand(s,KGamePropertyBase::IdCommand,id(),CmdRemove);
+    int i=findIterator(it);
+    s << i;
+    if (policy() == PolicyClean || policy() == PolicyDirty)
+    {
+      if (mOwner)
       {
-        data = *it;
-        s << data;
+        mOwner->sendProperty(s);
       }
     }
+    if (policy() == PolicyDirty || policy() == PolicyLocal)
+    {
+      extractProperty(b);
+    }
+    //TODO: return value - is it correct for PolicyLocal|PolicyDirty?
+//    return QValueList<type>::remove(it);
+    return it;
+  }
+
+  Iterator remove( Iterator it )
+  {
+    return erase(it);
+  }
+
+  void remove( const type& d )
+  {
+    Iterator it=find(d);
+    remove(it);
+  }
+
+  void clear()
+  {
+    QByteArray b;
+    QDataStream s(b, QIODevice::WriteOnly);
+    KGameMessage::createPropertyCommand(s,KGamePropertyBase::IdCommand,id(),CmdClear);
+    if (policy() == PolicyClean || policy() == PolicyDirty)
+    {
+      if (mOwner)
+      {
+        mOwner->sendProperty(s);
+      }
+    }
+    if (policy() == PolicyDirty || policy() == PolicyLocal)
+    {
+      extractProperty(b);
+    }
+  }
+
+  void load(QDataStream& s)
+  {
+    kDebug(11001) << "KGamePropertyList load" << id();
+    QList<type>::clear();
+    uint size;
+    type data;
+    s >> size;
+
+    for (unsigned int i=0;i<size;i++)
+    {
+      s >> data;
+      QList<type>::append(data);
+    }
+    if (isEmittingSignal()) emitSignal();
+  }
+
+  void save(QDataStream &s)
+  {
+    kDebug(11001) << "KGamePropertyList save "<<id();
+    type data;
+    uint size=this->count();
+    s << size;
+    Iterator it;
+    for( it = this->begin(); it != this->end(); ++it )
+    {
+      data=*it;
+      s << data;
+    }
+  }
+
+  void command(QDataStream &stream, int msgid, bool isSender)
+  {
+    KGamePropertyBase::command(stream, msgid);
+    kDebug(11001) << "---> LIST id="<<id()<<" got command ("<<msgid<<") !!!"; 
+    Iterator it;
+    switch(msgid)
+    {
+      case CmdInsert:
+      {
+        uint i;
+        type data;
+        stream >> i >> data;
+        it=this->at(i);
+        QList<type>::insert(it,data);
+//        kDebug(11001) << "CmdInsert:id="<<id()<<" i="<<i<<" data="<<data; 
+        if (isEmittingSignal()) emitSignal();
+        break;
+      }
+      case CmdAppend:
+      {
+        type data;
+	stream >> data;
+        QList<type>::append(data);
+//        kDebug(11001) << "CmdAppend:id=" << id() << "data=" << data;
+        if (isEmittingSignal()) emitSignal();
+	break;
+      }
+      case CmdRemove:
+      {
+        uint i;
+        stream >> i;
+        it=this->at(i);
+        QList<type>::remove(it);
+        kDebug(11001) << "CmdRemove:id="<<id()<<" i="<<i; 
+        if (isEmittingSignal()) emitSignal();
+        break;
+      }
+      case CmdClear:
+      {
+        QList<type>::clear();
+        kDebug(11001) << "CmdClear:id="<<id(); 
+        if (isEmittingSignal()) emitSignal();
+        break;
+      }
+      default: 
+        kDebug(11001) << "Error in KPropertyList::command: Unknown command" << msgid;
+    }
+  }
+
+protected:
+  void extractProperty(const QByteArray& b)
+  // this is called for Policy[Dirty|Local] after putting the stuff into the
+  // stream
+  {
+    QDataStream s(b, QIODevice::ReadOnly);
+    int cmd;
+    int propId;
+    KGameMessage::extractPropertyHeader(s, propId);
+    KGameMessage::extractPropertyCommand(s, propId, cmd);
+    command(s, cmd, true);
+  }
 
 };
 
 #endif
-
-/*
- * vim: et sw=4
- */

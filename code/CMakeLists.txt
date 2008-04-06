@@ -1,6 +1,6 @@
 project(boson)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.4.2)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.4.8)
 
 # Disallow in-source build
 STRING(COMPARE EQUAL "${boson_SOURCE_DIR}" "${boson_BINARY_DIR}" insource)
@@ -26,20 +26,6 @@ set(CMAKE_BINARY_DIR ${boson_BINARY_DIR})
 
 include(BosonMisc)
 include(BosonMacros)
-
-# AB: TODO: include in official cmake files?
-set(KDE3_XDG_APPS_DIR /share/applications)
-set(KDE3_DATA_INSTALL_DIR /share/apps)
-set(KDE3_LIB_INSTALL_DIR /lib)
-set(KDE3_PLUGIN_INSTALL_DIR ${KDE3_LIB_INSTALL_DIR}/kde3)
-
-# AB: we need this for bodebug. TODO: we should probably use
-#                                     KDE3_DATA_INSTALL_DIR/boson/bodebug
-#                                     instead
-set(KDE3_CONFIG_INSTALL_DIR /share/config)
-# AB: TODO: include in official cmake files? (end)
-
-set(BOSON_PLUGIN_INSTALL_DIR ${KDE3_PLUGIN_INSTALL_DIR}/plugins/boson)
 
 
 
@@ -85,19 +71,24 @@ endif(BOGL_DO_DLOPEN)
 
 
 # search packages used by KDE
-# AB: FindKDE3.cmake adds compiler flags, but we don't want this.
-set(orig_c_flags ${CMAKE_C_FLAGS})
-set(orig_cxx_flags ${CMAKE_CXX_FLAGS})
-find_package(Qt3 REQUIRED)
-find_package(BosonKDE3 REQUIRED)
-find_package(Perl REQUIRED)
-set(CMAKE_C_FLAGS ${orig_c_flags})
-set(CMAKE_CXX_FLAGS ${orig_cxx_flags})
+## AB: FindKDE3.cmake adds compiler flags, but we don't want this.
+#set(orig_c_flags ${CMAKE_C_FLAGS})
+#set(orig_cxx_flags ${CMAKE_CXX_FLAGS})
+#find_package(Qt3 REQUIRED)
+#find_package(BosonKDE3 REQUIRED)
+#find_package(Perl REQUIRED)
+#set(CMAKE_C_FLAGS ${orig_c_flags})
+#set(CMAKE_CXX_FLAGS ${orig_cxx_flags})
+set(QT_MIN_VERSION "4.4.0")
+find_package(Qt4 REQUIRED)
+find_package(KDE4 REQUIRED)
 
-# cmake <= 2.4.2 sometimes catch moc/uic from qt4. make sure that has not
-# happened to us.
-include(CheckQt3Executables)
-check_qt3_executables()
+
+
+set(BOSON_PLUGIN_INSTALL_DIR ${PLUGIN_INSTALL_DIR}/plugins/boson)
+
+
+
 
 # packages required by boson
 # note: we may have more deeper in the directory structure (e.g. python in
@@ -107,14 +98,10 @@ find_package(OpenGL REQUIRED)
 #find_package(Lib3ds REQUIRED)
 set(LIB3DS_INCLUDE_DIR "${boson_SOURCE_DIR}/lib3ds")
 set(LIB3DS_LIBRARY_DIR "${boson_BINARY_DIR}/lib3ds")
-set(LIB3DS_LIBRARY "lib3ds")
+set(LIB3DS_LIBRARY "3ds")
 
-# AB: apparently the "REQUIRED" parameter only works if the Find<name>.cmake
-#     package supports it.
-#     many don't. (the KDE3 package does)
-
-add_definitions(${QT_DEFINITIONS} ${KDE3_DEFINITIONS} -DHAVE_CONFIG_H=1)
-link_directories(${KDE3_LIB_DIR})
+add_definitions(${QT_DEFINITIONS} ${KDE4_DEFINITIONS} -DHAVE_CONFIG_H=1)
+link_directories(${KDE4_LIB_DIR})
 
 
 include_directories(
@@ -124,14 +111,15 @@ include_directories(
   #        #include <kgame/header.h> instead of #include <header.h>
   ${CMAKE_CURRENT_SOURCE_DIR}/kgame
   ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
-  ${KDE3_INCLUDE_DIR}
-  ${QT_INCLUDE_DIR}
+  ${KDE4_INCLUDES} # KDE4_INCLUDE_DIR, Qt includes, ...
 )
 
 
-if(BOSON_LINK_STATIC)
-  boson_use_static_qt_and_kde()
-endif(BOSON_LINK_STATIC)
+# TODO: fix for Qt4 port
+#if(BOSON_LINK_STATIC)
+#  boson_use_static_qt_and_kde()
+#endif(BOSON_LINK_STATIC)
+
 
 # create config.h
 #include(ConfigureChecks.cmake)
@@ -144,12 +132,14 @@ if (UNIX)
 endif (UNIX)
 
 
-add_custom_target(messages)
-# AB: this MUST be the FIRST target that is executed by "make messages" !
-add_custom_target(messages-recreate-boson_pot
-   COMMAND echo "" > ${CMAKE_BINARY_DIR}/po/boson.pot
-)
-add_dependencies(messages messages-recreate-boson_pot)
+# TODO: fix for Qt4 port
+#
+#add_custom_target(messages)
+## AB: this MUST be the FIRST target that is executed by "make messages" !
+#add_custom_target(messages-recreate-boson_pot
+#   COMMAND echo "" > ${CMAKE_BINARY_DIR}/po/boson.pot
+#)
+#add_dependencies(messages messages-recreate-boson_pot)
 
 
 add_subdirectory( lib3ds )
@@ -162,7 +152,7 @@ add_subdirectory( kgame )
 add_subdirectory( ufo )
 add_subdirectory( boufo )
 add_subdirectory( boson )
-add_subdirectory( server )
+#add_subdirectory( server )
 
 
 ########### install files ###############

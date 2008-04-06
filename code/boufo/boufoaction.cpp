@@ -42,14 +42,15 @@
 #include <kstdaccel.h>
 #include <kglobal.h>
 #include <kaboutdata.h>
-#include <kaccel.h>
 
-#include <qdict.h>
-#include <qintdict.h>
+#include <q3dict.h>
+#include <q3intdict.h>
 #include <qdom.h>
 #include <qfile.h>
-#include <qvaluelist.h>
-#include <qguardedptr.h>
+#include <q3valuelist.h>
+#include <qpointer.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 #include <stdlib.h>
 #include <string.h>
@@ -78,8 +79,8 @@ public:
 	}
 	bool reset()
 	{
-		QFile file(locate("config", "ui/ui_standards.rc"));
-		if (!file.open(IO_ReadOnly)) {
+		QFile file(KStandardDirs::locate("config", "ui/ui_standards.rc"));
+		if (!file.open(QIODevice::ReadOnly)) {
 			boError() << k_funcinfo << "could not open ui_standards.rc" << endl;
 			return false;
 		}
@@ -88,7 +89,7 @@ public:
 	bool mergeFile(const QString& fileName)
 	{
 		QFile file(fileName);
-		if (!file.open(IO_ReadOnly)) {
+		if (!file.open(QIODevice::ReadOnly)) {
 			boError() << k_funcinfo << "could not open " << fileName << endl;
 			return false;
 		}
@@ -200,7 +201,7 @@ protected:
 		QStringList processedTopItems;
 		for (it = addTopItems.begin(); it != addTopItems.end(); ++it) {
 			QString name = it.key();
-			QDomElement addItem = it.data();
+			QDomElement addItem = it.value();
 			if (baseTopItems.contains(name)) {
 				QDomElement baseItem = baseTopItems[name];
 				if (baseItem.tagName() != "Menu") {
@@ -228,7 +229,7 @@ protected:
 		// but first create a element that contains all addTopItems.
 		QDomElement addItemsElement = addMenuBar.ownerDocument().createElement("Dummy");
 		for (it = addTopItems.begin(); it != addTopItems.end(); ++it) {
-			addItemsElement.appendChild(it.data());
+			addItemsElement.appendChild(it.value());
 		}
 #if 0
 		for (QDomNode n = baseMenuBar.firstChild(); !n.isNull(); n = n.nextSibling()) {
@@ -620,20 +621,26 @@ class BoUfoActionPrivate
 public:
 	BoUfoActionPrivate()
 	{
+#if 0
 		mAccel = 0;
+#endif
 	}
 	KShortcut mDefaultShortcut;
 	QString mText;
 	KShortcut mShortcut;
 
-	QPtrList<ufo::UWidget> mWidgets;
+	Q3PtrList<ufo::UWidget> mWidgets;
 
+#warning TODO: port to Qt4
+#if 0
 	KAccel* mAccel;
+#endif
 };
 
 BoUfoAction::BoUfoAction(const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name)
-	: QObject(parent, name)
+	: QObject(parent)
 {
+ setObjectName(name);
  init(parent, text, cut, receiver, slot);
 }
 
@@ -644,9 +651,11 @@ BoUfoAction::~BoUfoAction()
  if (mParentCollection) {
 	mParentCollection->remove(this, false);
  }
+#if 0
  if (d->mAccel) {
 	d->mAccel->remove(name());
  }
+#endif
  delete d;
 }
 
@@ -672,7 +681,9 @@ void BoUfoAction::init(BoUfoActionCollection* parent, const QString& text, const
 
 void BoUfoAction::initShortcut()
 {
- if (qstrcmp(name(), "unnamed") == 0) {
+#warning TODO: port to Qt4
+#if 0
+ if (objectName() == "unnamed") {
 	return;
  }
  if (!mParentCollection) {
@@ -684,10 +695,13 @@ void BoUfoAction::initShortcut()
 	return;
  }
  insertToKAccel(mParentCollection->kaccel());
+#endif
 }
 
 void BoUfoAction::insertToKAccel(KAccel* accel)
 {
+#warning TODO: port to Qt4
+#if 0
  if (d->mAccel) {
 	boError() << k_funcinfo << "d->mAccel not NULL" << endl;
 	return;
@@ -696,6 +710,7 @@ void BoUfoAction::insertToKAccel(KAccel* accel)
  d->mAccel->insert(name(), d->mText, QString::null, d->mShortcut,
 		this, SLOT(slotActivated()),
 		true, isEnabled());
+#endif
 }
 
 void BoUfoAction::setEnabled(bool e)
@@ -704,10 +719,13 @@ void BoUfoAction::setEnabled(bool e)
 	return;
  }
  mIsEnabled = e;
+#warning TODO: port to Qt4
+#if 0
  if (d->mAccel) {
 	d->mAccel->setEnabled(name(), e);
  }
- QPtrListIterator<ufo::UWidget> it(d->mWidgets);
+#endif
+ Q3PtrListIterator<ufo::UWidget> it(d->mWidgets);
  while (it.current()) {
 	it.current()->setEnabled(e);
 	++it;
@@ -722,7 +740,7 @@ void BoUfoAction::setText(const QString& text)
 	return;
  }
  d->mText = text;
- QPtrListIterator<ufo::UWidget> it(d->mWidgets);
+ Q3PtrListIterator<ufo::UWidget> it(d->mWidgets);
  while (it.current()) {
 	ufo::UButton* b = dynamic_cast<ufo::UButton*>(it.current());
 	if (b) {
@@ -730,7 +748,8 @@ void BoUfoAction::setText(const QString& text)
 		// * UMenuItem
 		// * UMenu (is a UMenuItem)
 		// * UCheckBoxMenuItem (is a UMenuItem)
-		b->setText(d->mText.latin1());
+		QByteArray tmp = d->mText.toAscii();
+		b->setText(std::string(tmp.constData(), tmp.length()));
 	} else {
 		boWarning() << k_funcinfo << "unknown class of widget not handled yet" << endl;
 	}
@@ -772,7 +791,7 @@ void BoUfoAction::removeWidget(ufo::UWidget* w, bool del)
  }
 }
 
-const QPtrList<ufo::UWidget>& BoUfoAction::widgets() const
+const Q3PtrList<ufo::UWidget>& BoUfoAction::widgets() const
 {
  return d->mWidgets;
 }
@@ -793,7 +812,8 @@ void BoUfoAction::plug(ufo::UWidget* w)
  ufo::UMenuBar* menuBar = dynamic_cast<ufo::UMenuBar*>(w);
  ufo::UMenu* menu = dynamic_cast<ufo::UMenu*>(w);
  if (menuBar || menu) {
-	ufo::UMenuItem* menuItem = new ufo::UMenuItem(text().latin1());
+	QByteArray tmp = text().toAscii();
+	ufo::UMenuItem* menuItem = new ufo::UMenuItem(std::string(tmp.constData(), tmp.length()));
 	menuItem->setFont(w->getFont());
 	BoUfoActionDeleter* deleter = new BoUfoActionDeleter(this, menuItem);
 	menuItem->setBoUfoWidgetDeleter(deleter);
@@ -819,8 +839,8 @@ void BoUfoAction::plug(ufo::UWidget* w)
 
 void BoUfoAction::unplug()
 {
- QPtrList<ufo::UWidget> widgets = d->mWidgets;
- QPtrListIterator<ufo::UWidget> it(widgets);
+ Q3PtrList<ufo::UWidget> widgets = d->mWidgets;
+ Q3PtrListIterator<ufo::UWidget> it(widgets);
  while (it.current()) {
 	removeWidget(it.current(), true);
 	++it;
@@ -842,7 +862,8 @@ void BoUfoToggleAction::plug(ufo::UWidget* w)
  ufo::UMenuBar* menuBar = dynamic_cast<ufo::UMenuBar*>(w);
  ufo::UMenu* menu = dynamic_cast<ufo::UMenu*>(w);
  if (menuBar || menu) {
-	ufo::UCheckBoxMenuItem* menuItem = new ufo::UCheckBoxMenuItem(text().latin1());
+	QByteArray tmp = text().toAscii();
+	ufo::UCheckBoxMenuItem* menuItem = new ufo::UCheckBoxMenuItem(std::string(tmp.constData(), tmp.length()));
 	menuItem->setFont(w->getFont());
 	BoUfoActionDeleter* deleter = new BoUfoActionDeleter(this, menuItem);
 	menuItem->setBoUfoWidgetDeleter(deleter);
@@ -891,8 +912,8 @@ void BoUfoToggleAction::setChecked(bool c)
  }
  recursive = true;
  mChecked = c;
- QPtrList<ufo::UWidget> list = widgets();
- QPtrListIterator<ufo::UWidget> it(list);
+ Q3PtrList<ufo::UWidget> list = widgets();
+ Q3PtrListIterator<ufo::UWidget> it(list);
  while (it.current()) {
 	ufo::UCheckBoxMenuItem* checkBoxItem = dynamic_cast<ufo::UCheckBoxMenuItem*>(it.current());
 	ufo::UCheckBox* checkBox = dynamic_cast<ufo::UCheckBox*>(it.current());
@@ -920,8 +941,8 @@ public:
 	BoUfoActionMenuPrivate()
 	{
 	}
-	QPtrList<BoUfoAction> mActions;
-	QIntDict<BoUfoAction> mId2Action;
+	Q3PtrList<BoUfoAction> mActions;
+	Q3IntDict<BoUfoAction> mId2Action;
 };
 
 
@@ -946,7 +967,8 @@ void BoUfoActionMenu::plug(ufo::UWidget* w)
  ufo::UMenuBar* menuBar = dynamic_cast<ufo::UMenuBar*>(w);
  ufo::UMenu* menu = dynamic_cast<ufo::UMenu*>(w);
  if (menuBar || menu) {
-	ufo::UMenu* m = new ufo::UMenu(text().latin1());
+	QByteArray tmp = text().toAscii();
+	ufo::UMenu* m = new ufo::UMenu(std::string(tmp.constData(), tmp.length()));
 	m->setFont(w->getFont());
 	BoUfoActionDeleter* deleter = new BoUfoActionDeleter(this, m);
 	m->setBoUfoWidgetDeleter(deleter);
@@ -1005,7 +1027,7 @@ BoUfoAction* BoUfoActionMenu::item(int id) const
 
 int BoUfoActionMenu::itemId(BoUfoAction* a) const
 {
- QIntDictIterator<BoUfoAction> it(d->mId2Action);
+ Q3IntDictIterator<BoUfoAction> it(d->mId2Action);
  while (it.current()) {
 	if (it.current() == a) {
 		return it.currentKey();
@@ -1017,8 +1039,8 @@ int BoUfoActionMenu::itemId(BoUfoAction* a) const
 
 void BoUfoActionMenu::clear()
 {
- QPtrList<BoUfoAction> list = d->mActions;
- QPtrListIterator<BoUfoAction> it(list);
+ Q3PtrList<BoUfoAction> list = d->mActions;
+ Q3PtrListIterator<BoUfoAction> it(list);
  while (it.current()) {
 	remove(it.current());
 	++it;
@@ -1033,7 +1055,7 @@ void BoUfoActionMenu::slotMenuItemActivated()
 	return;
  }
  BoUfoAction* a = (BoUfoAction*)sender();
- QPtrListIterator<BoUfoAction> it(actions());
+ Q3PtrListIterator<BoUfoAction> it(actions());
  while (it.current()) {
 	if (it.current() == a) {
 		int id = itemId(a);
@@ -1053,9 +1075,9 @@ void BoUfoActionMenu::slotMenuItemActivated()
 
 void BoUfoActionMenu::redoMenus()
 {
- QPtrList<ufo::UWidget> list = widgets();
+ Q3PtrList<ufo::UWidget> list = widgets();
 // boDebug() << k_funcinfo << "widgets=" << list.count() << " actions=" << d->mActions.count() << endl;
- QPtrListIterator<ufo::UWidget> it(list);
+ Q3PtrListIterator<ufo::UWidget> it(list);
  while (it.current()) {
 	ufo::UMenu* menu = dynamic_cast<ufo::UMenu*>(it.current());
 	++it;
@@ -1064,7 +1086,7 @@ void BoUfoActionMenu::redoMenus()
 		// widgets are actually menu items.
 		menu->getPopupMenu()->removeAll();
 
-		QPtrListIterator<BoUfoAction> it(d->mActions);
+		Q3PtrListIterator<BoUfoAction> it(d->mActions);
 		while (it.current()) {
 			it.current()->plug(menu);
 			++it;
@@ -1073,7 +1095,7 @@ void BoUfoActionMenu::redoMenus()
  }
 }
 
-const QPtrList<BoUfoAction>& BoUfoActionMenu::actions() const
+const Q3PtrList<BoUfoAction>& BoUfoActionMenu::actions() const
 {
  return d->mActions;
 }
@@ -1103,9 +1125,9 @@ BoUfoSelectAction::~BoUfoSelectAction()
 
 void BoUfoSelectAction::clear()
 {
- QPtrList<BoUfoAction> list = actions();
+ Q3PtrList<BoUfoAction> list = actions();
  BoUfoActionMenu::clear();
- QPtrListIterator<BoUfoAction> it(list);
+ Q3PtrListIterator<BoUfoAction> it(list);
  while (it.current()) {
 	delete it.current();
  }
@@ -1125,8 +1147,8 @@ void BoUfoSelectAction::setItems(const QStringList& list)
 
 void BoUfoSelectAction::setCurrentItem(int id)
 {
- QPtrList<BoUfoAction> list = actions();
- QPtrListIterator<BoUfoAction> it(list);
+ Q3PtrList<BoUfoAction> list = actions();
+ Q3PtrListIterator<BoUfoAction> it(list);
  for (int i = 0; it.current(); ++it, i++) {
 	if (!it.current()->inherits("BoUfoToggleAction")) {
 		boWarning() << k_funcinfo << "oops - not a BoUfoToggleAction" << endl;
@@ -1147,8 +1169,8 @@ void BoUfoSelectAction::setCurrentItem(int id)
 
 int BoUfoSelectAction::currentItem() const
 {
- QPtrList<BoUfoAction> list = actions();
- QPtrListIterator<BoUfoAction> it(list);
+ Q3PtrList<BoUfoAction> list = actions();
+ Q3PtrListIterator<BoUfoAction> it(list);
  for (int i = 0; it.current(); ++it, i++) {
 	if (!it.current()->inherits("BoUfoToggleAction")) {
 		boWarning() << k_funcinfo << "oops - not a BoUfoToggleAction" << endl;
@@ -1170,28 +1192,34 @@ public:
 	{
 		mParentCollection = 0;
 
+#if 0
 		mAccel = 0;
 		mAccelWatchWidget = 0;
+#endif
 	}
 	BoUfoActionCollection* mParentCollection;
-	QPtrList<BoUfoActionCollection> mChildCollections;
+	Q3PtrList<BoUfoActionCollection> mChildCollections;
 
-	QDict<BoUfoAction> mActionDict;
+	Q3Dict<BoUfoAction> mActionDict;
 	QStringList mGUIFiles; // ui.rc files
 
+#if 0
 	KAccel* mAccel;
-	QGuardedPtr<QWidget> mAccelWatchWidget;
+	QPointer<QWidget> mAccelWatchWidget;
+#endif
 };
 
 BoUfoActionCollection::BoUfoActionCollection(QObject* parent, const char* name)
-	: QObject(parent, name)
+	: QObject(parent)
 {
+ setObjectName(name);
  init();
 }
 
 BoUfoActionCollection::BoUfoActionCollection(BoUfoActionCollection* parentCollection, QObject* parent, const char* name)
-	: QObject(parent, name)
+	: QObject(parent)
 {
+ setObjectName(name);
  init();
  d->mParentCollection = parentCollection;
  if (d->mParentCollection) {
@@ -1201,8 +1229,8 @@ BoUfoActionCollection::BoUfoActionCollection(BoUfoActionCollection* parentCollec
 
 BoUfoActionCollection::~BoUfoActionCollection()
 {
- QPtrList<BoUfoActionCollection> children = d->mChildCollections;
- QPtrListIterator<BoUfoActionCollection> it(children);
+ Q3PtrList<BoUfoActionCollection> children = d->mChildCollections;
+ Q3PtrListIterator<BoUfoActionCollection> it(children);
  while (it.current()) {
 	it.current()->clearActions();
 	++it;
@@ -1213,14 +1241,18 @@ BoUfoActionCollection::~BoUfoActionCollection()
  clearActions();
  d->mActionDict.setAutoDelete(true);
  d->mActionDict.clear();
+#if 0
  delete d->mAccel;
+#endif
  delete d;
 }
 
 void BoUfoActionCollection::init()
 {
  d = new BoUfoActionCollectionPrivate;
+#if 0
  d->mAccel = 0;
+#endif
  d->mActionDict.setAutoDelete(true);
  d->mParentCollection = 0;
 }
@@ -1229,7 +1261,9 @@ void BoUfoActionCollection::registerChildCollection(BoUfoActionCollection* c)
 {
  BO_CHECK_NULL_RET(c);
  d->mChildCollections.append(c);
+#if 0
  c->setAccelWidget(d->mAccelWatchWidget);
+#endif
 }
 
 void BoUfoActionCollection::unregisterChildCollection(BoUfoActionCollection* c)
@@ -1240,11 +1274,16 @@ void BoUfoActionCollection::unregisterChildCollection(BoUfoActionCollection* c)
 
 KAccel* BoUfoActionCollection::kaccel() const
 {
+#if 0
  return d->mAccel;
+#else
+ return 0;
+#endif
 }
 
 void BoUfoActionCollection::setAccelWidget(QWidget* widget)
 {
+#if 0
  if (d->mAccel) {
 	boWarning() << "accel object already constructed. deleting." << endl;
 	delete d->mAccel;
@@ -1252,19 +1291,20 @@ void BoUfoActionCollection::setAccelWidget(QWidget* widget)
  }
  d->mAccelWatchWidget = widget;
  d->mAccel = new KAccel(d->mAccelWatchWidget, this, "BoUfoActionCollection-Accel");
- for (QDictIterator<BoUfoAction> it(d->mActionDict); it.current(); ++it) {
+ for (Q3DictIterator<BoUfoAction> it(d->mActionDict); it.current(); ++it) {
 	it.current()->insertToKAccel(d->mAccel);
  }
- for (QPtrListIterator<BoUfoActionCollection> it(d->mChildCollections); it.current(); ++it) {
+ for (Q3PtrListIterator<BoUfoActionCollection> it(d->mChildCollections); it.current(); ++it) {
 	it.current()->setAccelWidget(widget);
  }
+#endif
 }
 
 void BoUfoActionCollection::insert(BoUfoAction* action)
 {
- char unnamed[100];
- const char* name = action->name();
- if (qstrcmp(name, "unnamed") == 0) {
+ QString name = action->objectName();
+ if (name == "unnamed") {
+	char unnamed[100];
 	sprintf(unnamed, "unnamed-%p", (void*)action);
 	name = unnamed;
  }
@@ -1283,9 +1323,9 @@ void BoUfoActionCollection::remove(BoUfoAction* action, bool deleteIt)
  if (d->mActionDict.isEmpty()) {
 	return;
  }
- char unnamed[100];
- const char* name = action->name();
- if (qstrcmp(name, "unnamed") == 0) {
+ QString name = action->objectName();
+ if (name == "unnamed") {
+	char unnamed[100];
 	sprintf(unnamed, "unnamed-%p", (void*)action);
 	name = unnamed;
  }
@@ -1309,7 +1349,7 @@ void BoUfoActionCollection::clearActions()
 	m->setToolBarData(0);
  }
  if (d->mParentCollection) {
-	QDictIterator<BoUfoAction> it(d->mActionDict);
+	Q3DictIterator<BoUfoAction> it(d->mActionDict);
 	while (it.current()) {
 		d->mParentCollection->remove(it.current(), false);
 		++it;
@@ -1325,7 +1365,7 @@ BoUfoAction* BoUfoActionCollection::action(const QString& name) const
  if (a) {
 	return a;
  }
- QPtrListIterator<BoUfoActionCollection> it(d->mChildCollections);
+ Q3PtrListIterator<BoUfoActionCollection> it(d->mChildCollections);
  while (it.current()) {
 	BoUfoAction* a = it.current()->action(name);
 	if (a) {
@@ -1410,7 +1450,7 @@ bool BoUfoActionCollection::createGUI()
  }
 
  QStringList fileList = guiFiles();
- for (QPtrListIterator<BoUfoActionCollection> it(d->mChildCollections); it.current(); ++it) {
+ for (Q3PtrListIterator<BoUfoActionCollection> it(d->mChildCollections); it.current(); ++it) {
 	QStringList l = it.current()->guiFiles();
 	QStringList::iterator i;
 	for (i = l.begin(); i != l.end(); ++i) {
@@ -1625,7 +1665,7 @@ public:
 	BoUfoMenuBarMenuPrivate()
 	{
 	}
-	QValueList<BoUfoMenuBarItem*> mItems;
+	Q3ValueList<BoUfoMenuBarItem*> mItems;
 };
 
 BoUfoMenuBarMenu::BoUfoMenuBarMenu(const QString& text, QObject* parent, const char* name)
@@ -1636,7 +1676,7 @@ BoUfoMenuBarMenu::BoUfoMenuBarMenu(const QString& text, QObject* parent, const c
 
 BoUfoMenuBarMenu::~BoUfoMenuBarMenu()
 {
- QValueList<BoUfoMenuBarItem*>::Iterator it;
+ Q3ValueList<BoUfoMenuBarItem*>::Iterator it;
  for (it = d->mItems.begin(); it != d->mItems.end(); ++it) {
 	delete *it;
  }
@@ -1669,7 +1709,7 @@ unsigned int BoUfoMenuBarMenu::itemCount() const
  return d->mItems.count();
 }
 
-const QValueList<BoUfoMenuBarItem*>& BoUfoMenuBarMenu::items() const
+const Q3ValueList<BoUfoMenuBarItem*>& BoUfoMenuBarMenu::items() const
 {
  return d->mItems;
 }
@@ -1679,11 +1719,12 @@ void BoUfoMenuBarMenu::createUfoMenuBarSubMenu(ufo::UWidget* parentWidget)
  BO_CHECK_NULL_RET(parentWidget);
 
  for (unsigned int i = 0; i < itemCount(); i++) {
-	if (items()[i]->isA("BoUfoMenuBarMenu")) {
+	if (qobject_cast<BoUfoMenuBarMenu*>(items()[i])) {
 		BoUfoMenuBarMenu* m = (BoUfoMenuBarMenu*)items()[i];
 
 		// TODO: we could provide an icon
-		ufo::UMenu* menu = new ufo::UMenu(m->text().latin1());
+		QByteArray tmp = m->text().toAscii();
+		ufo::UMenu* menu = new ufo::UMenu(std::string(tmp.constData(), tmp.length()));
 		menu->setFont(parentWidget->getFont());
 		parentWidget->add(menu);
 
@@ -1694,7 +1735,8 @@ void BoUfoMenuBarMenu::createUfoMenuBarSubMenu(ufo::UWidget* parentWidget)
 		if (!action) {
 			// e.g. a separator
 			ufo::UMenuItem* menuItem = 0;
-			menuItem = new ufo::UMenuItem(item->text().latin1());
+			QByteArray tmp = item->text().toAscii();
+			menuItem = new ufo::UMenuItem(std::string(tmp.constData(), tmp.length()));
 			menuItem->setFont(parentWidget->getFont());
 			parentWidget->add(menuItem);
 		} else {
@@ -1710,7 +1752,7 @@ void BoUfoMenuBarMenu::createUfoToolBarSubMenu(ufo::UWidget* parentWidget)
  BO_CHECK_NULL_RET(parentWidget);
 
  for (unsigned int i = 0; i < itemCount(); i++) {
-	if (items()[i]->isA("BoUfoMenuBarMenu")) {
+	if (qobject_cast<BoUfoMenuBarMenu*>(items()[i])) {
 		BoUfoMenuBarMenu* m = (BoUfoMenuBarMenu*)items()[i];
 
 		// TODO: we could provide an icon
@@ -1730,7 +1772,8 @@ void BoUfoMenuBarMenu::createUfoToolBarSubMenu(ufo::UWidget* parentWidget)
 		if (!action) {
 			// e.g. a separator
 			ufo::UMenuItem* menuItem = 0;
-			menuItem = new ufo::UMenuItem(item->text().latin1());
+			QByteArray tmp = item->text().toAscii();
+			menuItem = new ufo::UMenuItem(std::string(tmp.constData(), tmp.length()));
 			menuItem->setFont(parentWidget->getFont());
 			parentWidget->add(menuItem);
 		} else {
@@ -1743,8 +1786,9 @@ void BoUfoMenuBarMenu::createUfoToolBarSubMenu(ufo::UWidget* parentWidget)
 
 
 BoUfoMenuBarItem::BoUfoMenuBarItem(BoUfoAction* action, const QString& text, QObject* parent, const char* name)
-	: QObject(parent, name)
+	: QObject(parent)
 {
+ setObjectName(name);
  mAction = action;
  mText = text;
 }
@@ -1757,7 +1801,7 @@ BoUfoMenuBarItem::~BoUfoMenuBarItem()
 struct BoUfoStdActionInfo
 {
 	BoUfoStdAction::StdAction id;
-	KStdAccel::StdAccel globalAccel;
+	KStandardShortcut::StandardShortcut globalAccel;
 	int shortcut;
 	const char* name;
 	const char* label;
@@ -1767,32 +1811,32 @@ struct BoUfoStdActionInfo
 
 const BoUfoStdActionInfo g_actionInfo[] = {
 	// File menu
-	{ BoUfoStdAction::FileNew, KStdAccel::New, 0, "file_new", I18N_NOOP("&New"), 0, "filenew"},
-	{ BoUfoStdAction::FileOpen, KStdAccel::Open, 0, "file_open", I18N_NOOP("&Open..."), 0, "fileopen"},
-	{ BoUfoStdAction::FileSave, KStdAccel::Save, 0, "file_save", I18N_NOOP("&Save"), 0, "filesave"},
-	{ BoUfoStdAction::FileSaveAs, KStdAccel::AccelNone, 0, "file_save_as", I18N_NOOP("Save &As..."), 0, "filesaveas"},
-	{ BoUfoStdAction::FileClose, KStdAccel::Close, 0, "file_close", I18N_NOOP("&Close"), 0, "fileclose"},
-	{ BoUfoStdAction::FileQuit, KStdAccel::Quit, 0, "file_quit", I18N_NOOP("&Quit"), 0, "filequit"},
+	{ BoUfoStdAction::FileNew, KStandardShortcut::New, 0, "file_new", I18N_NOOP("&New"), 0, "filenew"},
+	{ BoUfoStdAction::FileOpen, KStandardShortcut::Open, 0, "file_open", I18N_NOOP("&Open..."), 0, "fileopen"},
+	{ BoUfoStdAction::FileSave, KStandardShortcut::Save, 0, "file_save", I18N_NOOP("&Save"), 0, "filesave"},
+	{ BoUfoStdAction::FileSaveAs, KStandardShortcut::AccelNone, 0, "file_save_as", I18N_NOOP("Save &As..."), 0, "filesaveas"},
+	{ BoUfoStdAction::FileClose, KStandardShortcut::Close, 0, "file_close", I18N_NOOP("&Close"), 0, "fileclose"},
+	{ BoUfoStdAction::FileQuit, KStandardShortcut::Quit, 0, "file_quit", I18N_NOOP("&Quit"), 0, "filequit"},
 
 	// Game menu
-	{ BoUfoStdAction::GameNew, KStdAccel::New, 0, "game_new", I18N_NOOP("&New"), 0, "filenew"},
-	{ BoUfoStdAction::GameLoad, KStdAccel::Open, 0, "game_load", I18N_NOOP("&Load..."), 0, "fileopen"},
-	{ BoUfoStdAction::GameSave, KStdAccel::Save, 0, "game_save", I18N_NOOP("&Save"), 0, "filesave"},
-	{ BoUfoStdAction::GameSaveAs, KStdAccel::AccelNone, 0, "game_save_as", I18N_NOOP("Save &As..."), 0, "filesaveas"},
-	{ BoUfoStdAction::GameEnd, KStdAccel::End, 0, "game_end", I18N_NOOP("&End Game"), 0, "fileclose"},
-	{ BoUfoStdAction::GamePause, KStdAccel::AccelNone, Qt::Key_P, "game_pause", I18N_NOOP("Pa&use"), 0, "player_pause"},
-	{ BoUfoStdAction::GameQuit, KStdAccel::Quit, 0, "game_quit", I18N_NOOP("&Quit"), 0, "exit"},
+	{ BoUfoStdAction::GameNew, KStandardShortcut::New, 0, "game_new", I18N_NOOP("&New"), 0, "filenew"},
+	{ BoUfoStdAction::GameLoad, KStandardShortcut::Open, 0, "game_load", I18N_NOOP("&Load..."), 0, "fileopen"},
+	{ BoUfoStdAction::GameSave, KStandardShortcut::Save, 0, "game_save", I18N_NOOP("&Save"), 0, "filesave"},
+	{ BoUfoStdAction::GameSaveAs, KStandardShortcut::AccelNone, 0, "game_save_as", I18N_NOOP("Save &As..."), 0, "filesaveas"},
+	{ BoUfoStdAction::GameEnd, KStandardShortcut::End, 0, "game_end", I18N_NOOP("&End Game"), 0, "fileclose"},
+	{ BoUfoStdAction::GamePause, KStandardShortcut::AccelNone, Qt::Key_P, "game_pause", I18N_NOOP("Pa&use"), 0, "player_pause"},
+	{ BoUfoStdAction::GameQuit, KStandardShortcut::Quit, 0, "game_quit", I18N_NOOP("&Quit"), 0, "exit"},
 
 	// Edit menu
-	{ BoUfoStdAction::EditUndo, KStdAccel::Undo, 0, "edit_undo", I18N_NOOP("&Undo"), 0, "undo"},
-	{ BoUfoStdAction::EditRedo, KStdAccel::Redo, 0, "edit_redo", I18N_NOOP("Re&do"), 0, "redo"},
+	{ BoUfoStdAction::EditUndo, KStandardShortcut::Undo, 0, "edit_undo", I18N_NOOP("&Undo"), 0, "undo"},
+	{ BoUfoStdAction::EditRedo, KStandardShortcut::Redo, 0, "edit_redo", I18N_NOOP("Re&do"), 0, "redo"},
 
 	// Settings menu
-	{ BoUfoStdAction::ShowMenubar, KStdAccel::ShowMenubar, 0, "options_show_menubar", I18N_NOOP("Show &Menubar"), 0, "showmenu"},
-	{ BoUfoStdAction::ShowToolbar, KStdAccel::AccelNone, 0, "options_show_toolbar", I18N_NOOP("Show &Toolbar"), 0, 0},
-	{ BoUfoStdAction::ShowStatusbar, KStdAccel::AccelNone, 0, "options_show_statusbar", I18N_NOOP("Show St&atusbar"), 0, 0},
-	{ BoUfoStdAction::KeyBindings, KStdAccel::AccelNone, 0, "options_configure_keybinding", I18N_NOOP("Configure S&hortcuts..."), 0, "configure_shortcuts"},
-	{ BoUfoStdAction::Preferences, KStdAccel::AccelNone, 0, "options_configure", I18N_NOOP("&Configure %1..."), 0, "configure"},
+	{ BoUfoStdAction::ShowMenubar, KStandardShortcut::ShowMenubar, 0, "options_show_menubar", I18N_NOOP("Show &Menubar"), 0, "showmenu"},
+	{ BoUfoStdAction::ShowToolbar, KStandardShortcut::AccelNone, 0, "options_show_toolbar", I18N_NOOP("Show &Toolbar"), 0, 0},
+	{ BoUfoStdAction::ShowStatusbar, KStandardShortcut::AccelNone, 0, "options_show_statusbar", I18N_NOOP("Show St&atusbar"), 0, 0},
+	{ BoUfoStdAction::KeyBindings, KStandardShortcut::AccelNone, 0, "options_configure_keybinding", I18N_NOOP("Configure S&hortcuts..."), 0, "configure_shortcuts"},
+	{ BoUfoStdAction::Preferences, KStandardShortcut::AccelNone, 0, "options_configure", I18N_NOOP("&Configure %1..."), 0, "configure"},
 
 
 	// TODO: In KDE > 3.3 there is a "fullscreen" action in
@@ -1803,7 +1847,7 @@ const BoUfoStdActionInfo g_actionInfo[] = {
 	// some people (once from ui_standards.rc and once from our own *ui.rc
 	// file) or not at all (if we remove it from our files, it won't appear
 	// for people with KDE <= 3.3)
-	{ BoUfoStdAction::FullScreen, KStdAccel::FullScreen, 0, "window_fullscreen", I18N_NOOP("F&ull Screen Mode"), 0, "window_fullscreen"},
+	{ BoUfoStdAction::FullScreen, KStandardShortcut::FullScreen, 0, "window_fullscreen", I18N_NOOP("F&ull Screen Mode"), 0, "window_fullscreen"},
 };
 
 const BoUfoStdActionInfo* infoPtr(BoUfoStdAction::StdAction id)
@@ -1825,16 +1869,20 @@ BoUfoAction* BoUfoStdAction::create(StdAction id, const QObject* receiver, const
 	return 0;
  }
  QString label;
- KShortcut cut = (info->globalAccel == KStdAccel::AccelNone
+ KShortcut cut = (info->globalAccel == KStandardShortcut::AccelNone
 		? KShortcut(info->shortcut)
-		: KStdAccel::shortcut(info->globalAccel));
+		: KStandardShortcut::shortcut(info->globalAccel));
  const char* n = name ? name : info->name;
  switch (id) {
 	case Preferences:
 	{
+#warning TODO: port to Qt4
+#if 0
 		const KAboutData* aboutData = KGlobal::instance()->aboutData();
+		QByteArray tmp = d->mText.toAscii();
 		QString appName = (aboutData) ? aboutData->programName() : QString::fromLatin1(qApp->name());
 		label = i18n(info->label).arg(appName);
+#endif
 		break;
 	}
 	default:

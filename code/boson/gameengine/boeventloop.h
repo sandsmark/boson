@@ -34,7 +34,7 @@ class BoEventLoop : public QEventLoop
 {
 	Q_OBJECT
 public:
-	BoEventLoop(QObject* parent = 0, const char* name = 0);
+	BoEventLoop(QObject* parent = 0);
 	~BoEventLoop();
 
 	virtual bool processEvents(ProcessEventsFlags flags);

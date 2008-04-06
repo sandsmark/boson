@@ -22,13 +22,15 @@
 
 #include "global.h"
 #include <qstring.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 class QColor;
 class KConfig;
 class BosonConfig;
 class BosonConfigScript;
 class bofixed;
-template<class T> class QValueList;
+template<class T> class Q3ValueList;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
 template<class T> class BoVector4;
@@ -341,7 +343,7 @@ public:
 	BoConfigDoubleEntry* addDynamicEntryDouble(const QString& configKey, double defaultValue = 0.0, bool saveConfig = true);
 	BoConfigStringEntry* addDynamicEntryString(const QString& configKey, QString defaultValue = QString::null, bool saveConfig = true);
 	BoConfigColorEntry* addDynamicEntryColor(const QString& configKey, QColor defaultValue, bool saveConfig = true);
-	BoConfigIntListEntry* addDynamicEntryIntList(const QString& configKey, const QValueList<int>& defaultValue, bool saveConfig = true);
+	BoConfigIntListEntry* addDynamicEntryIntList(const QString& configKey, const Q3ValueList<int>& defaultValue, bool saveConfig = true);
 
 	/**
 	 * @return TRUE if a dynamic entry with @p key was added with @ref
@@ -389,7 +391,7 @@ public:
 	/**
 	 * Same as  @ref setBoolValue, but for @ref BoConfigIntListEntry objects.
 	 **/
-	void setIntListValue(const QString& key, const QValueList<int>& v);
+	void setIntListValue(const QString& key, const Q3ValueList<int>& v);
 
 	/**
 	 * Set the value of the config entry @p key (see @ref value) to the
@@ -449,13 +451,13 @@ public:
 	 * @return The value of the entry @p key, or an empty list if no entry
 	 * of the correct type exists.
 	 **/
-	QValueList<int> intListValue(const QString& key) const;
+	Q3ValueList<int> intListValue(const QString& key) const;
 
 	/**
 	 * @return The value of the entry @p key, or @p _default if no entry of
 	 * the correct type exists.
 	 **/
-	QValueList<int> intListValue(const QString& key, const QValueList<int>& _default) const;
+	Q3ValueList<int> intListValue(const QString& key, const Q3ValueList<int>& _default) const;
 
 	/**
 	 * @return The default value of the entry @p key, if existing, otherwise
@@ -468,8 +470,8 @@ public:
 	double doubleDefaultValue(const QString& key, double _default = 0.0) const;
 	QColor colorDefaultValue(const QString& key) const;
 	QColor colorDefaultValue(const QString& key, const QColor& _default) const;
-	QValueList<int> intListDefaultValue(const QString& key) const;
-	QValueList<int> intListDefaultValue(const QString& key, const QValueList<int>& _default) const;
+	Q3ValueList<int> intListDefaultValue(const QString& key) const;
+	Q3ValueList<int> intListDefaultValue(const QString& key, const Q3ValueList<int>& _default) const;
 
 
 public:
@@ -482,14 +484,14 @@ public:
 	 * Loads list of unsinged long int's from KConfig (which only supports loading
 	 * list of _int's_)
 	 **/
-	static QValueList<unsigned long int> readUnsignedLongNumList(const KConfig* cfg, const QString key);
-	static void writeUnsignedLongNumList(KConfig* cfg, const QString key, QValueList<unsigned long int> list);
+	static Q3ValueList<unsigned long int> readUnsignedLongNumList(const KConfig* cfg, const QString key);
+	static void writeUnsignedLongNumList(KConfig* cfg, const QString key, Q3ValueList<unsigned long int> list);
 
 	/**
 	 * Loads list of float's from KConfig
 	 **/
-	static QValueList<float> readFloatNumList(const KConfig* cfg, const QString key);
-	static void writeFloatNumList(QValueList<float> list, KConfig* cfg, const QString key);
+	static Q3ValueList<float> readFloatNumList(const KConfig* cfg, const QString key);
+	static void writeFloatNumList(Q3ValueList<float> list, KConfig* cfg, const QString key);
 
 	/**
 	 * Adds @p script to the internal list of available config scripts.
@@ -568,7 +570,7 @@ public:
 	void addUIntValue(const QString& key, unsigned int value);
 	void addDoubleValue(const QString& key, double value);
 	void addStringValue(const QString& key, const QString& value);
-	void addIntListValue(const QString& key, const QValueList<int>& value);
+	void addIntListValue(const QString& key, const Q3ValueList<int>& value);
 	void addColorValue(const QString& key, const QColor& value);
 
 	/**

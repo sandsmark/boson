@@ -47,7 +47,7 @@ class Game : public KGame
     };
 
 
-    Game(Server* s, Q_UINT16 cookie);
+    Game(Server* s, quint16 cookie);
     ~Game();
 
     bool connectToServer();
@@ -81,7 +81,7 @@ class Game : public KGame
     bool unstreamPlayfieldFiles(QMap<QString, QByteArray>& files, const QByteArray& buffer);
 
   protected slots:
-    void slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 receiver, Q_UINT32 sender);
+    void slotNetworkData(int msgid, const QByteArray& buffer, quint32 receiver, quint32 sender);
     void slotPropertyChanged(KGamePropertyBase*);
 
 

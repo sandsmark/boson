@@ -54,9 +54,9 @@ signals:
 	void signalSetGrabMovie(bool);
 	void signalSetDebugMode(int);
 	void signalDebugEditPlayerInputs(Player* p);
-	void signalDebugKillPlayer(Q_UINT32 playerId);
-	void signalDebugModifyMinerals(Q_UINT32 playerId, int amount);
-	void signalDebugModifyOil(Q_UINT32 playerId, int amount);
+	void signalDebugKillPlayer(quint32 playerId);
+	void signalDebugModifyMinerals(quint32 playerId, int amount);
+	void signalDebugModifyOil(quint32 playerId, int amount);
 	void signalToggleCheating(bool);
 	void signalExploreAll();
 	void signalUnfogAll();
@@ -194,9 +194,9 @@ protected slots:
 
 	void slotSetDebugMode(int);
 	void slotDebugEditPlayerInputs(Player* p);
-	void slotDebugKillPlayer(Q_UINT32 playerId);
-	void slotDebugModifyMinerals(Q_UINT32 playerId, int amount);
-	void slotDebugModifyOil(Q_UINT32 playerId, int amount);
+	void slotDebugKillPlayer(quint32 playerId);
+	void slotDebugModifyMinerals(quint32 playerId, int amount);
+	void slotDebugModifyOil(quint32 playerId, int amount);
 	void slotToggleCheating(bool);
 	void slotExploreAll(Player* pl = 0);
 	void slotUnfogAll(Player* pl = 0);

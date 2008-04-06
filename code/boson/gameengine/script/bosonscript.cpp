@@ -65,6 +65,9 @@
 
 
 #include <qdatastream.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 
 BosonScript* BosonScript::mCurrentScript = 0;
@@ -177,9 +180,9 @@ bool BosonScript::isEnemy(int p) const
   return areEnemies(playerId(), p);
 }
 
-QValueList<int> BosonScript::allGamePlayers() const
+Q3ValueList<int> BosonScript::allGamePlayers() const
 {
-  QValueList<int> players;
+  Q3ValueList<int> players;
 
   if(!game())
   {
@@ -187,7 +190,7 @@ QValueList<int> BosonScript::allGamePlayers() const
     return players;
   }
 
-  QPtrListIterator<Player> it(game()->gamePlayerList());
+  Q3PtrListIterator<Player> it(game()->gamePlayerList());
   for (; it.current(); ++it)
   {
     Player* p = it.current();
@@ -375,9 +378,9 @@ void BosonScript::addMinerals(int player, int amount)
   }
 
   QByteArray b;
-  QDataStream stream(b, IO_WriteOnly);
-  stream << (Q_UINT32)player;
-  stream << (Q_INT32)amount;
+  QDataStream stream(b, QIODevice::WriteOnly);
+  stream << (quint32)player;
+  stream << (qint32)amount;
   game()->sendMessage(b, BosonMessageIds::IdModifyMinerals);
 }
 
@@ -414,33 +417,33 @@ void BosonScript::addOil(int player, int amount)
   }
 
   QByteArray b;
-  QDataStream stream(b, IO_WriteOnly);
-  stream << (Q_UINT32)player;
-  stream << (Q_INT32)amount;
+  QDataStream stream(b, QIODevice::WriteOnly);
+  stream << (quint32)player;
+  stream << (qint32)amount;
   game()->sendMessage(b, BosonMessageIds::IdModifyOil);
 }
 
-QValueList<BoVector2Fixed> BosonScript::nearestMineralLocations(int x, int y, unsigned int n, unsigned int radius)
+Q3ValueList<BoVector2Fixed> BosonScript::nearestMineralLocations(int x, int y, unsigned int n, unsigned int radius)
 {
   PlayerIO* p = scriptPlayerIO();
 
   if(!p)
   {
     boError() << k_funcinfo << "No player with id " << playerId() << endl;
-    return QValueList<BoVector2Fixed>();
+    return Q3ValueList<BoVector2Fixed>();
   }
 
   return p->nearestMineralLocations(x, y, n, radius);
 }
 
-QValueList<BoVector2Fixed> BosonScript::nearestOilLocations(int x, int y, unsigned int n, unsigned int radius)
+Q3ValueList<BoVector2Fixed> BosonScript::nearestOilLocations(int x, int y, unsigned int n, unsigned int radius)
 {
   PlayerIO* p = scriptPlayerIO();
 
   if(!p)
   {
     boError() << k_funcinfo << "No player with id " << playerId() << endl;
-    return QValueList<BoVector2Fixed>();
+    return Q3ValueList<BoVector2Fixed>();
   }
 
   return p->nearestOilLocations(x, y, n, radius);
@@ -451,9 +454,9 @@ QValueList<BoVector2Fixed> BosonScript::nearestOilLocations(int x, int y, unsign
 void BosonScript::moveUnit(int id, float x, float y)
 {
   QByteArray b;
-  QDataStream stream(b, IO_WriteOnly);
+  QDataStream stream(b, QIODevice::WriteOnly);
 
-  QValueList<Q_ULONG> moveUnits;
+  Q3ValueList<Q_ULONG> moveUnits;
   moveUnits.append((Q_ULONG)id);
   BosonMessageMoveMove message(false, BoVector2Fixed(x, y), moveUnits);
   if(!message.save(stream))
@@ -462,16 +465,16 @@ void BosonScript::moveUnit(int id, float x, float y)
     return;
   }
 
-  QDataStream msg(b, IO_ReadOnly);
+  QDataStream msg(b, QIODevice::ReadOnly);
   sendInput(msg);
 }
 
 void BosonScript::moveUnitWithAttacking(int id, float x, float y)
 {
   QByteArray b;
-  QDataStream stream(b, IO_WriteOnly);
+  QDataStream stream(b, QIODevice::WriteOnly);
 
-  QValueList<Q_ULONG> moveUnits;
+  Q3ValueList<Q_ULONG> moveUnits;
   moveUnits.append((Q_ULONG)id);
   BosonMessageMoveMove message(true, BoVector2Fixed(x, y), moveUnits);
   if(!message.save(stream))
@@ -480,16 +483,16 @@ void BosonScript::moveUnitWithAttacking(int id, float x, float y)
     return;
   }
 
-  QDataStream msg(b, IO_ReadOnly);
+  QDataStream msg(b, QIODevice::ReadOnly);
   sendInput(msg);
 }
 
 void BosonScript::attack(int attackerId, int targetId)
 {
   QByteArray b;
-  QDataStream stream(b, IO_WriteOnly);
+  QDataStream stream(b, QIODevice::WriteOnly);
 
-  QValueList<Q_ULONG> units;
+  Q3ValueList<Q_ULONG> units;
   units.append((Q_ULONG)attackerId);
   BosonMessageMoveAttack message(targetId, units);
   if(!message.save(stream))
@@ -498,16 +501,16 @@ void BosonScript::attack(int attackerId, int targetId)
     return;
   }
 
-  QDataStream msg(b, IO_ReadOnly);
+  QDataStream msg(b, QIODevice::ReadOnly);
   sendInput(msg);
 }
 
 void BosonScript::stopUnit(int id)
 {
   QByteArray b;
-  QDataStream stream(b, IO_WriteOnly);
+  QDataStream stream(b, QIODevice::WriteOnly);
 
-  QValueList<Q_ULONG> units;
+  Q3ValueList<Q_ULONG> units;
   units.append((Q_ULONG)id);
   BosonMessageMoveStop message(units);
   if(!message.save(stream))
@@ -516,7 +519,7 @@ void BosonScript::stopUnit(int id)
     return;
   }
 
-  QDataStream msg(b, IO_WriteOnly);
+  QDataStream msg(b, QIODevice::WriteOnly);
   sendInput(msg);
 }
 
@@ -544,7 +547,7 @@ void BosonScript::mineUnit(int id, float x, float y)
   }
 
   QByteArray b;
-  QDataStream stream(b, IO_WriteOnly);
+  QDataStream stream(b, QIODevice::WriteOnly);
 
   BosonMessageMoveMine message(id, resourceUnit->id());
   if(!message.save(stream))
@@ -553,14 +556,14 @@ void BosonScript::mineUnit(int id, float x, float y)
     return;
   }
 
-  QDataStream msg(b, IO_ReadOnly);
+  QDataStream msg(b, QIODevice::ReadOnly);
   sendInput(msg);
 }
 
 void BosonScript::setUnitRotation(int id, float rotation)
 {
   QByteArray b;
-  QDataStream stream(b, IO_WriteOnly);
+  QDataStream stream(b, QIODevice::WriteOnly);
 
   BosonMessageMoveRotate message(id, playerId(), rotation);
   if(!message.save(stream))
@@ -569,17 +572,17 @@ void BosonScript::setUnitRotation(int id, float rotation)
     return;
   }
 
-  QDataStream msg(b, IO_ReadOnly);
+  QDataStream msg(b, QIODevice::ReadOnly);
   sendInput(msg);
 }
 
 void BosonScript::dropBomb(int id, int weapon, float x, float y)
 {
   QByteArray b;
-  QDataStream stream(b, IO_WriteOnly);
+  QDataStream stream(b, QIODevice::WriteOnly);
 
-  QValueList<Q_ULONG> units;
-  QValueList<Q_ULONG> weapons;
+  Q3ValueList<Q_ULONG> units;
+  Q3ValueList<Q_ULONG> weapons;
   units.append((Q_ULONG)id);
   weapons.append((Q_ULONG)weapon);
   BosonMessageMoveDropBomb message(BoVector2Fixed(x, y), units, weapons);
@@ -589,23 +592,23 @@ void BosonScript::dropBomb(int id, int weapon, float x, float y)
     return;
   }
 
-  QDataStream msg(b, IO_ReadOnly);
+  QDataStream msg(b, QIODevice::ReadOnly);
   sendInput(msg);
 }
 
 void BosonScript::produceUnit(int factory, int production)
 {
   QByteArray b;
-  QDataStream stream(b, IO_WriteOnly);
+  QDataStream stream(b, QIODevice::WriteOnly);
 
-  BosonMessageMoveProduce message((Q_UINT32)ProduceUnit, playerId(), factory, production);
+  BosonMessageMoveProduce message((quint32)ProduceUnit, playerId(), factory, production);
   if(!message.save(stream))
   {
     boError() << k_funcinfo << "failed saving message " << message.messageId() << " to stream" << endl;
     return;
   }
 
-  QDataStream msg(b, IO_ReadOnly);
+  QDataStream msg(b, QIODevice::ReadOnly);
   sendInput(msg);
 }
 
@@ -617,18 +620,18 @@ void BosonScript::spawnUnit(int type, float x, float y)
     return;
   }
   QByteArray b;
-  QDataStream stream(b, IO_WriteOnly);
+  QDataStream stream(b, QIODevice::WriteOnly);
 
 #warning AB: This is an editor message. it should not be here.
   boWarning() << k_funcinfo << "FIXME" << endl;
 #if 0
-  stream << (Q_UINT32)BosonMessageIds::MovePlaceUnit;
-  stream << (Q_UINT32)player;
-  stream << (Q_UINT32)type;
+  stream << (quint32)BosonMessageIds::MovePlaceUnit;
+  stream << (quint32)player;
+  stream << (quint32)type;
   stream << BoVector2Fixed(x, y);
 #endif
 
-  QDataStream msg(b, IO_ReadOnly);
+  QDataStream msg(b, QIODevice::ReadOnly);
   sendInput(msg);
 }
 
@@ -640,7 +643,7 @@ void BosonScript::teleportUnit(int id, float x, float y)
     return;
   }
   QByteArray b;
-  QDataStream stream(b, IO_WriteOnly);
+  QDataStream stream(b, QIODevice::WriteOnly);
 
   BosonMessageMoveTeleport message(id, playerId(), BoVector2Fixed(x, y));
   if(!message.save(stream))
@@ -649,7 +652,7 @@ void BosonScript::teleportUnit(int id, float x, float y)
     return;
   }
 
-  QDataStream msg(b, IO_ReadOnly);
+  QDataStream msg(b, QIODevice::ReadOnly);
   sendInput(msg);
 }
 
@@ -695,16 +698,16 @@ void BosonScript::placeProduction(int factoryid, float x, float y)
   }
 
   QByteArray b;
-  QDataStream stream(b, IO_WriteOnly);
+  QDataStream stream(b, QIODevice::WriteOnly);
 
-  BosonMessageMoveBuild message((Q_UINT32)ProduceUnit, p->playerId(), u->id(), BoVector2Fixed(x, y));
+  BosonMessageMoveBuild message((quint32)ProduceUnit, p->playerId(), u->id(), BoVector2Fixed(x, y));
   if(!message.save(stream))
   {
     boError() << k_funcinfo << "failed saving message " << message.messageId() << " to stream" << endl;
     return;
   }
 
-  QDataStream msg(b, IO_ReadOnly);
+  QDataStream msg(b, QIODevice::ReadOnly);
   sendInput(msg);
 }
 
@@ -756,9 +759,9 @@ bool BosonScript::canPlaceProductionAt(int factoryid, int unitType, float x, flo
   return canvas()->canPlaceUnitAtCenterPos(prop, BoVector2Fixed(x, y), prod);
 }
 
-QValueList<int> BosonScript::unitsOnCell(int x, int y) const
+Q3ValueList<int> BosonScript::unitsOnCell(int x, int y) const
 {
-  QValueList<int> list;
+  Q3ValueList<int> list;
   if(!canvas())
   {
     boError() << k_funcinfo << "NULL canvas" << endl;
@@ -776,9 +779,9 @@ QValueList<int> BosonScript::unitsOnCell(int x, int y) const
   return list;
 }
 
-QValueList<int> BosonScript::unitsInRect(int x1, int y1, int x2, int y2) const
+Q3ValueList<int> BosonScript::unitsInRect(int x1, int y1, int x2, int y2) const
 {
-  QValueList<int> list;
+  Q3ValueList<int> list;
   if(!canvas())
   {
     boError() << k_funcinfo << "NULL canvas" << endl;
@@ -992,7 +995,7 @@ bool BosonScript::canUnitShoot(int id) const
 
 bool BosonScript::canUnitTypeShoot(int playerId, int type) const
 {
-  QValueList<int> list;
+  Q3ValueList<int> list;
   if(!game())
   {
     boError() << k_funcinfo << "NULL game" << endl;
@@ -1089,7 +1092,7 @@ bool BosonScript::canUnitMineMinerals(int id) const
 
 bool BosonScript::canUnitTypeMineMinerals(int playerId, int type) const
 {
-  QValueList<int> list;
+  Q3ValueList<int> list;
   if(!game())
   {
     boError() << k_funcinfo << "NULL game" << endl;
@@ -1144,7 +1147,7 @@ bool BosonScript::canUnitMineOil(int id) const
 
 bool BosonScript::canUnitTypeMineOil(int playerId, int type) const
 {
-  QValueList<int> list;
+  Q3ValueList<int> list;
   if(!game())
   {
     boError() << k_funcinfo << "NULL game" << endl;
@@ -1174,9 +1177,9 @@ bool BosonScript::canUnitTypeMineOil(int playerId, int type) const
   return false;
 }
 
-QValueList<int> BosonScript::productionTypes(int id) const
+Q3ValueList<int> BosonScript::productionTypes(int id) const
 {
-  QValueList<int> list;
+  Q3ValueList<int> list;
 
   if(!game())
   {
@@ -1199,9 +1202,9 @@ QValueList<int> BosonScript::productionTypes(int id) const
   }
 
   // Add units to production list
-  QValueList<unsigned long int> unitsList = u->speciesTheme()->productions(production->producerList());
+  Q3ValueList<unsigned long int> unitsList = u->speciesTheme()->productions(production->producerList());
   // Filter out things that player can't actually build (requirements aren't met yet)
-  QValueList<unsigned long int>::Iterator it;
+  Q3ValueList<unsigned long int>::Iterator it;
   it = unitsList.begin();
   for (; it != unitsList.end(); ++it) {
     if (u->ownerIO()->canBuild(*it)) {
@@ -1229,9 +1232,9 @@ bool BosonScript::isUnitAlive(int id) const
   return !u->isDestroyed();
 }
 
-QValueList<int> BosonScript::allPlayerUnits(int id) const
+Q3ValueList<int> BosonScript::allPlayerUnits(int id) const
 {
-  QValueList<int> list;
+  Q3ValueList<int> list;
   if(!game())
   {
     boError() << k_funcinfo << "NULL game" << endl;
@@ -1246,8 +1249,8 @@ QValueList<int> BosonScript::allPlayerUnits(int id) const
     return list;
   }
 
-  const QPtrList<Unit>& units = p->allMyLivingUnits();
-  QPtrListIterator<Unit> it(units);
+  const Q3PtrList<Unit>& units = p->allMyLivingUnits();
+  Q3PtrListIterator<Unit> it(units);
   while(it.current())
   {
     list.append(it.current()->id());
@@ -1276,9 +1279,9 @@ int BosonScript::allPlayerUnitsCount(int id) const
   return p->allMyLivingUnits().count();
 }
 
-QValueList<int> BosonScript::playerUnitsOfType(int playerId, int type) const
+Q3ValueList<int> BosonScript::playerUnitsOfType(int playerId, int type) const
 {
-  QValueList<int> list;
+  Q3ValueList<int> list;
   if(!game())
   {
     boError() << k_funcinfo << "NULL game" << endl;
@@ -1293,8 +1296,8 @@ QValueList<int> BosonScript::playerUnitsOfType(int playerId, int type) const
     return list;
   }
 
-  const QPtrList<Unit>& units = p->allMyLivingUnits();
-  QPtrListIterator<Unit> it(units);
+  const Q3PtrList<Unit>& units = p->allMyLivingUnits();
+  Q3PtrListIterator<Unit> it(units);
   while(it.current())
   {
     if((int)it.current()->type() == type)
@@ -1311,9 +1314,9 @@ int BosonScript::playerUnitsOfTypeCount(int playerId, int type) const
   return playerUnitsOfType(playerId, type).count();
 }
 
-QValueList<int> BosonScript::allUnitsVisibleFor(int id) const
+Q3ValueList<int> BosonScript::allUnitsVisibleFor(int id) const
 {
-  QValueList<int> list;
+  Q3ValueList<int> list;
 
   PlayerIO* p = findPlayerIOByUserId(id);
 
@@ -1323,8 +1326,8 @@ QValueList<int> BosonScript::allUnitsVisibleFor(int id) const
     return list;
   }
 
-  const QPtrList<Unit>& units = p->allUnits();
-  QPtrListIterator<Unit> it(units);
+  const Q3PtrList<Unit>& units = p->allUnits();
+  Q3PtrListIterator<Unit> it(units);
   while(it.current())
   {
     list.append(it.current()->id());
@@ -1333,9 +1336,9 @@ QValueList<int> BosonScript::allUnitsVisibleFor(int id) const
   return list;
 }
 
-QValueList<int> BosonScript::allEnemyUnitsVisibleFor(int id) const
+Q3ValueList<int> BosonScript::allEnemyUnitsVisibleFor(int id) const
 {
-  QValueList<int> list;
+  Q3ValueList<int> list;
 
   PlayerIO* p = findPlayerIOByUserId(id);
 
@@ -1345,8 +1348,8 @@ QValueList<int> BosonScript::allEnemyUnitsVisibleFor(int id) const
     return list;
   }
 
-  const QPtrList<Unit>& units = p->allEnemyUnits();
-  QPtrListIterator<Unit> it(units);
+  const Q3PtrList<Unit>& units = p->allEnemyUnits();
+  Q3PtrListIterator<Unit> it(units);
   while(it.current())
   {
     list.append(it.current()->id());
@@ -1646,7 +1649,7 @@ void BosonScript::exploreAllPlayers()
     boError() << k_funcinfo << "NULL map" << endl;
     return;
   }
-  QPtrList<Player> list = game()->allPlayerList();
+  Q3PtrList<Player> list = game()->allPlayerList();
   for(unsigned int i = 0; i < list.count(); i++)
   {
     Player* p = list.at(i);
@@ -1706,7 +1709,7 @@ void BosonScript::unfogAllPlayers()
     boError() << k_funcinfo << "NULL map" << endl;
     return;
   }
-  QPtrList<Player> list = game()->allPlayerList();
+  Q3PtrList<Player> list = game()->allPlayerList();
   for(unsigned int i = 0; i < list.count(); i++)
   {
     Player* p = list.at(i);
@@ -1766,7 +1769,7 @@ void BosonScript::fogAllPlayers()
     boError() << k_funcinfo << "NULL map" << endl;
     return;
   }
-  QPtrList<Player> list = game()->allPlayerList();
+  Q3PtrList<Player> list = game()->allPlayerList();
   for(unsigned int i = 0; i < list.count(); i++)
   {
     Player* p = list.at(i);

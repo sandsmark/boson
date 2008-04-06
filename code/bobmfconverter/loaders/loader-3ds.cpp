@@ -27,6 +27,8 @@
 #include "frame.h"
 
 #include <qstringlist.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 #include <lib3ds/file.h>
 #include <lib3ds/node.h>
@@ -86,7 +88,7 @@ bool Loader3DS::load()
     boError() << k_funcinfo << "NULL model" << endl;
     return false;
   }
-  m3ds = lib3ds_file_load(filename());
+  m3ds = lib3ds_file_load(filename().toLatin1().data());
   if (!m3ds) {
     boError(100) << k_funcinfo << "Can't load " << filename() << endl;
     return false;
@@ -377,14 +379,14 @@ void debugTex(Lib3dsMaterial* mat, Lib3dsMesh* mesh)
       << endl;
 }
 
-void Loader3DS::findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMesh* mesh, Lib3dsFace* search)
+void Loader3DS::findAdjacentFaces(Q3PtrList<Lib3dsFace>* adjacentFaces, Lib3dsMesh* mesh, Lib3dsFace* search)
 {
   if (!adjacentFaces || !mesh) {
     return;
   }
 
   // add all available faces to a list.
-  QPtrList<Lib3dsFace> faces;
+  Q3PtrList<Lib3dsFace> faces;
   for (unsigned int i = 0; i < mesh->faces; i++) {
     Lib3dsFace* face = &mesh->faceL[i];
     if (face == search) {
@@ -400,11 +402,11 @@ void Loader3DS::findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMes
   adjacentFaces->append(search); // always adjacent to itself :)
 
   for (unsigned int i = 0; i < adjacentFaces->count(); i++) {
-    QPtrList<Lib3dsFace> found; // these need to get removed from faces list
+    Q3PtrList<Lib3dsFace> found; // these need to get removed from faces list
     BoVector3Float current[3]; // the triangle/face we search for
     makeVectors(current, mesh, adjacentFaces->at(i));
 
-    QPtrListIterator<Lib3dsFace> it(faces);
+    Q3PtrListIterator<Lib3dsFace> it(faces);
     for (; it.current(); ++it) {
       BoVector3Float v[3];
       makeVectors(v, mesh, it.current());
@@ -428,7 +430,7 @@ bool Loader3DS::isTeamColor(const Lib3dsMesh* mesh)
     BO_NULL_ERROR(mesh);
     return false;
   }
-  if (QString::fromLatin1(mesh->name).find("teamcolor", 0, false) == 0) {
+  if (QString::fromLatin1(mesh->name).indexOf("teamcolor", 0, Qt::CaseInsensitive) == 0) {
     return true;
   }
   return false;

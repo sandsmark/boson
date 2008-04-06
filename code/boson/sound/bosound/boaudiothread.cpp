@@ -24,7 +24,7 @@
 #include "bosonaudio.h"
 #include "bodebug.h"
 
-#include <qptrqueue.h>
+#include <q3ptrqueue.h>
 #include <qfile.h>
 
 
@@ -44,7 +44,7 @@ public:
 
 	BosonAudio* mAudio;
 
-	QPtrQueue<BoAudioCommand> mCommandQueue;
+	Q3PtrQueue<BoAudioCommand> mCommandQueue;
 };
 
 BoAudioThread::BoAudioThread()
@@ -124,7 +124,7 @@ void BoAudioThread::slotReceiveStdin(int sock)
 	return;
  }
  QFile readFile;
- readFile.open(IO_ReadOnly | IO_Raw, sock);
+ readFile.open(QIODevice::ReadOnly | QIODevice::Unbuffered, sock);
  int ch = readFile.getch();
  if (ch == -1) {
 	return;

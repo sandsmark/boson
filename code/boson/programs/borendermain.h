@@ -24,11 +24,14 @@
 #include <boufo/boufocustomwidget.h>
 #include "bo3dtools.h"
 
-#include <qptrlist.h>
-#include <qptrdict.h>
-#include <qintdict.h>
-#include <qvaluelist.h>
+#include <q3ptrlist.h>
+#include <q3ptrdict.h>
+#include <q3intdict.h>
+#include <q3valuelist.h>
 #include <qstringlist.h>
+//Added by qt3to4:
+#include <QWheelEvent>
+#include <QMouseEvent>
 
 #include <kmainwindow.h>
 

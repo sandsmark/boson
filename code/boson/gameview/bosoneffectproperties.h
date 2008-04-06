@@ -24,9 +24,9 @@
 #include "bosoneffect.h"
 #include "bo3dtools.h"
 
-#include <qptrlist.h>
-#include <qvaluelist.h>
-#include <qintdict.h>
+#include <q3ptrlist.h>
+#include <q3valuelist.h>
+#include <q3intdict.h>
 #include <qstring.h>
 
 
@@ -81,7 +81,7 @@ class BosonEffectPropertiesManager
     static BosonEffectProperties* newParticleEffectProperties(const QString& type);
 
   private:
-    QIntDict<BosonEffectProperties> mEffectProperties;
+    Q3IntDict<BosonEffectProperties> mEffectProperties;
 
     static BosonEffectPropertiesManager* mManager;
 };
@@ -156,19 +156,19 @@ class BosonEffectProperties
      * E.g. if you have "MyKey=1,2,4", then effect properties with ids 1, 2 and
      *  4 are returned.
      **/
-    static QPtrList<BosonEffectProperties> loadEffectProperties(KSimpleConfig* cfg, QString key);
+    static Q3PtrList<BosonEffectProperties> loadEffectProperties(KSimpleConfig* cfg, QString key);
     /**
      * Same as above, but uses already specified list of ids instead of loading
      *  them.
      **/
-    static QPtrList<BosonEffectProperties> loadEffectProperties(const QValueList<unsigned long int>& ids);
+    static Q3PtrList<BosonEffectProperties> loadEffectProperties(const Q3ValueList<unsigned long int>& ids);
 
     /**
      * Static helper method to create new effects.
      * For each properties object in given list, creates new effect(s) with
      *  given position and rotation and finally returns list of created effects.
      **/
-    static QPtrList<BosonEffect> newEffects(const QPtrList<BosonEffectProperties>* properties,
+    static Q3PtrList<BosonEffect> newEffects(const Q3PtrList<BosonEffectProperties>* properties,
         const BoVector3Fixed& pos = BoVector3Fixed(), const BoVector3Fixed& rot = BoVector3Fixed());
     /**
      * Same as above, but takes single BosonEffectProperties object as an
@@ -176,7 +176,7 @@ class BosonEffectProperties
      * Use this to correctly have _list_ of effects created for collection
      *  effects.
      **/
-    static QPtrList<BosonEffect> newEffects(const BosonEffectProperties* properties,
+    static Q3PtrList<BosonEffect> newEffects(const BosonEffectProperties* properties,
         const BoVector3Fixed& pos = BoVector3Fixed(), const BoVector3Fixed& rot = BoVector3Fixed());
 
 
@@ -394,15 +394,15 @@ class BosonEffectPropertiesCollection : public BosonEffectProperties
      * @return 0
      **/
     virtual BosonEffect* newEffect(const BoVector3Fixed& pos, const BoVector3Fixed& rot = BoVector3Fixed()) const;
-    QPtrList<BosonEffect> newEffectsList(const BoVector3Fixed& pos, const BoVector3Fixed& rot = BoVector3Fixed()) const;
+    Q3PtrList<BosonEffect> newEffectsList(const BoVector3Fixed& pos, const BoVector3Fixed& rot = BoVector3Fixed()) const;
 
 
   protected:
     void reset();
 
 
-    QPtrList<BosonEffectProperties> mEffects;
-    QValueList<unsigned long int> mEffectIds;
+    Q3PtrList<BosonEffectProperties> mEffects;
+    Q3ValueList<unsigned long int> mEffectIds;
 };
 
 #endif //BOSONEFFECTPROPERTIES_H

@@ -23,9 +23,11 @@
 
 #include <qwidget.h>
 #include <qdom.h>
+//Added by qt3to4:
+#include <QLabel>
 
-class QListViewItem;
-class QListView;
+class Q3ListViewItem;
+class Q3ListView;
 class QLabel;
 
 class BoPropertiesWidget : public QWidget
@@ -45,11 +47,11 @@ protected:
 	void createProperties(const QDomElement& root);
 
 protected slots:
-	void slotItemRenamed(QListViewItem* item, int col);
+	void slotItemRenamed(Q3ListViewItem* item, int col);
 
 private:
 	QLabel* mClassLabel;
-	QListView* mListView;
+	Q3ListView* mListView;
 	QDomElement mWidgetElement;
 };
 

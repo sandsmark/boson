@@ -25,10 +25,13 @@
 #include <qlayout.h>
 #include <qlabel.h>
 #include <qpushbutton.h>
-#include <qfiledialog.h>
+#include <q3filedialog.h>
 #include <qlineedit.h>
 #include <qdir.h>
 #include <qsettings.h>
+//Added by qt3to4:
+#include <Q3VBoxLayout>
+#include <Q3HBoxLayout>
 
 
 class OptionsDialogPrivate
@@ -45,16 +48,16 @@ OptionsDialog::OptionsDialog(QWidget* parent)
 	: QDialog(parent, false)
 {
  d = new OptionsDialogPrivate;
- QVBoxLayout* layout = new QVBoxLayout(this);
+ Q3VBoxLayout* layout = new Q3VBoxLayout(this);
 
- QVBoxLayout* vbox;
- QHBoxLayout* hbox;
+ Q3VBoxLayout* vbox;
+ Q3HBoxLayout* hbox;
  QLabel* label;
 
- vbox = new QVBoxLayout(layout);
+ vbox = new Q3VBoxLayout(layout);
  label = new QLabel(tr("libufo data_dir - all file paths (images/pixmaps, ...) are relative to this directory."), this);
  vbox->addWidget(label);
- hbox = new QHBoxLayout(vbox);
+ hbox = new Q3HBoxLayout(vbox);
  d->mDataDir = new QLineEdit(this);
  QPushButton* browseDataDir = new QPushButton(tr("..."), this);
  connect(browseDataDir, SIGNAL(clicked()),
@@ -72,7 +75,7 @@ OptionsDialog::OptionsDialog(QWidget* parent)
 		this, SLOT(slotApply()));
  connect(cancel, SIGNAL(clicked()),
 		this, SLOT(reject()));
- QHBoxLayout* buttonsLayout = new QHBoxLayout(layout);
+ Q3HBoxLayout* buttonsLayout = new Q3HBoxLayout(layout);
  buttonsLayout->addStretch(1);
  buttonsLayout->addWidget(ok);
  buttonsLayout->addWidget(apply);
@@ -114,7 +117,7 @@ void OptionsDialog::slotBrowseDataDir()
 		}
 	}
  }
- QString dir = QFileDialog::getExistingDirectory(defaultDir, this);
+ QString dir = Q3FileDialog::getExistingDirectory(defaultDir, this);
  if (!dir.isEmpty()) {
 	d->mDataDir->setText(dir);
  }

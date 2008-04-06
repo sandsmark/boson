@@ -29,8 +29,8 @@
 #include "texture.h"
 #include "bo3dtools.h"
 
-#include <qvaluevector.h>
-#include <qdict.h>
+#include <q3valuevector.h>
+#include <q3dict.h>
 
 
 UnusedDataRemover::UnusedDataRemover() : Processor()
@@ -74,7 +74,7 @@ bool UnusedDataRemover::processMeshes()
 {
   // Go through all meshes and see if they're used in any frame/node
 
-  QValueVector<Mesh*> validMeshes;
+  Q3ValueVector<Mesh*> validMeshes;
   unsigned int removedCount = 0;
   for(unsigned int i = 0; i < lod()->meshCount(); i++)
   {
@@ -104,7 +104,7 @@ bool UnusedDataRemover::processMeshes()
 bool UnusedDataRemover::processMaterials()
 {
   // Go through all materials and see if they're used in any mesh
-  QValueVector<Material*> validmaterials;
+  Q3ValueVector<Material*> validmaterials;
   unsigned int removedcount = 0;
   for(unsigned int i = 0; i < model()->materialCount(); i++)
   {
@@ -134,9 +134,9 @@ bool UnusedDataRemover::processMaterials()
 bool UnusedDataRemover::processTextures()
 {
   // Go through all textures and see if they're used in any material
-  QDict<Texture> validtextures;
+  Q3Dict<Texture> validtextures;
   unsigned int removedcount = 0;
-  QDictIterator<Texture> it(*model()->texturesDict());
+  Q3DictIterator<Texture> it(*model()->texturesDict());
   while(it.current())
   {
     if(it.current()->filename().isEmpty())

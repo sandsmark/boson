@@ -27,14 +27,14 @@
 #include "frame.h"
 #include "texture.h"
 
-#include <qptrlist.h>
-#include <qptrvector.h>
+#include <q3ptrlist.h>
+#include <q3ptrvector.h>
 #include <qstringlist.h>
-#include <qvaluevector.h>
+#include <q3valuevector.h>
 #include <qfile.h>
 #include <qfileinfo.h>
 #include <qdir.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
 
 
 #define SURFACE_SHADED (1<<4)
@@ -54,23 +54,23 @@ public:
 	static const int MD2_MAX_FRAMES = 512;
 	static const int MD2_MAX_SKINS = 32;
 
-	Q_INT32 mMagic;
-	Q_INT32 mVersion;
-	Q_INT32 mSkinWidth;
-	Q_INT32 mSkinHeight;
-	Q_INT32 mFrameSize;
-	Q_INT32 mNumSkins; // number of textures
-	Q_INT32 mNumVertices;
-	Q_INT32 mNumTexCoords;
-	Q_INT32 mNumTriangles;
-	Q_INT32 mNumGLCommands;
-	Q_INT32 mNumFrames;
-	Q_INT32 mOffsetSkins;
-	Q_INT32 mOffsetTexCoords;
-	Q_INT32 mOffsetTriangles;
-	Q_INT32 mOffsetFrames;
-	Q_INT32 mOffsetGLCommands;
-	Q_INT32 mOffsetEnd;
+	qint32 mMagic;
+	qint32 mVersion;
+	qint32 mSkinWidth;
+	qint32 mSkinHeight;
+	qint32 mFrameSize;
+	qint32 mNumSkins; // number of textures
+	qint32 mNumVertices;
+	qint32 mNumTexCoords;
+	qint32 mNumTriangles;
+	qint32 mNumGLCommands;
+	qint32 mNumFrames;
+	qint32 mOffsetSkins;
+	qint32 mOffsetTexCoords;
+	qint32 mOffsetTriangles;
+	qint32 mOffsetFrames;
+	qint32 mOffsetGLCommands;
+	qint32 mOffsetEnd;
 
 	// header size: 17 * 4 = 68 bytes
 };
@@ -88,8 +88,8 @@ public:
 		return true;
 	}
 
-	Q_UINT8 mVertex[3];
-	Q_UINT8 mLightNormalIndex;
+	quint8 mVertex[3];
+	quint8 mLightNormalIndex;
 };
 
 class MD2Frame
@@ -126,7 +126,7 @@ public:
 
 	float mScale[3];
 	float mTranslate[3];
-	Q_INT8 mName[16];
+	qint8 mName[16];
 	MD2TriangleVertex* mTriangleVertices;
 };
 
@@ -144,8 +144,8 @@ public:
 		return true;
 	}
 
-	Q_INT16 mVertexIndices[3];
-	Q_INT16 mTextureIndices[3];
+	qint16 mVertexIndices[3];
+	qint16 mTextureIndices[3];
 };
 
 class MD2Skin // a texture
@@ -158,7 +158,7 @@ public:
 		}
 		return true;
 	}
-	Q_INT8 mName[64];
+	qint8 mName[64];
 
 };
 
@@ -172,7 +172,7 @@ public:
 		return true;
 	}
 
-	Q_INT16 mS, mT;
+	qint16 mS, mT;
 };
 
 class MD2GLCommandVertex
@@ -188,7 +188,7 @@ public:
 
 	float mS;
 	float mT;
-	Q_INT32 mVertexIndex;
+	qint32 mVertexIndex;
 };
 
 class MD2GLCommand
@@ -235,7 +235,7 @@ public:
 bool MD2Header::load(QDataStream& stream)
 {
  stream >> mMagic;
- Q_INT32 magic =
+ qint32 magic =
 	((((int)'I'))
 	+ (((int)'D') << 8)
 	+ (((int)'P') << 16)
@@ -318,7 +318,7 @@ bool MD2Header::load(QDataStream& stream)
 	boError(100) << k_funcinfo << "unexpected GLCommands offset " << mOffsetGLCommands << " expected " << pos << endl;
 	return false;
  }
- pos += (sizeof(Q_UINT32) * mNumGLCommands); // AB: note that sizeof(Q_UINT32) != sizeof(MD2GLCommandVertex). the numGLCommand stores number of 32bit variables that are used.
+ pos += (sizeof(quint32) * mNumGLCommands); // AB: note that sizeof(quint32) != sizeof(MD2GLCommandVertex). the numGLCommand stores number of 32bit variables that are used.
  if (mOffsetEnd != pos) {
 	boError(100) << k_funcinfo << "unexpected end offset " << mOffsetEnd << " expected " << pos << endl;
 	return false;
@@ -351,7 +351,7 @@ bool LoaderMD2::load()
  }
 
  QFile f(filename());
- if (!f.open(IO_ReadOnly)) {
+ if (!f.open(QIODevice::ReadOnly)) {
 	boError(100) << k_funcinfo << "can't open " << filename() << endl;;
 	return false;
  }
@@ -362,7 +362,7 @@ bool LoaderMD2::load()
 	boError(100) << k_funcinfo << "unable to load .md2 header" << endl;
 	return false;
  }
- QPtrList<MD2Skin> skins;
+ Q3PtrList<MD2Skin> skins;
  skins.setAutoDelete(true);
  for (int i = 0; i < header.mNumSkins; i++) {
 	MD2Skin* skin = new MD2Skin();
@@ -371,7 +371,7 @@ bool LoaderMD2::load()
 		return false;
 	}
  }
- QPtrVector<MD2TextureCoordinate> textureCoordinates(header.mNumTexCoords);
+ Q3PtrVector<MD2TextureCoordinate> textureCoordinates(header.mNumTexCoords);
  textureCoordinates.setAutoDelete(true);
  for (int i = 0; i < header.mNumTexCoords; i++) {
 	MD2TextureCoordinate* t = new MD2TextureCoordinate();
@@ -380,7 +380,7 @@ bool LoaderMD2::load()
 		return false;
 	}
  }
- QPtrList<MD2Triangle> triangles;
+ Q3PtrList<MD2Triangle> triangles;
  triangles.setAutoDelete(true);
  for (int i = 0; i < header.mNumTriangles; i++) {
 	MD2Triangle* t = new MD2Triangle();
@@ -389,7 +389,7 @@ bool LoaderMD2::load()
 		return false;
 	}
  }
- QPtrList<MD2Frame> frames;
+ Q3PtrList<MD2Frame> frames;
  frames.setAutoDelete(true);
  for (int i = 0; i < header.mNumFrames; i++) {
 	MD2Frame* f = new MD2Frame();
@@ -402,9 +402,9 @@ bool LoaderMD2::load()
 
  // AB: GL commands are a little different than the rest.
  //     the "GL commands" are a set of triangle strips/fans
- Q_INT32 num;
+ qint32 num;
  int pos = 0;
- QPtrList<MD2GLCommand> commands;
+ Q3PtrList<MD2GLCommand> commands;
  commands.setAutoDelete(true);
  while (pos < header.mNumGLCommands * 4) { // we have mNumGLCommands * 4 bytes
 	stream >> num;
@@ -456,13 +456,12 @@ bool LoaderMD2::load()
 	// search for texture files named <model>.foobar in the directory where
 	// <model>.md2 resides.
 	QFileInfo fileInfo(filename());
-	QDir dir(fileInfo.dirPath(true));
-	dir.setNameFilter(fileInfo.baseName() + ".*");
-	QStringList list = dir.entryList();
-	list.remove(fileInfo.fileName());
+	QDir dir(fileInfo.dir().path());
+	QStringList list = dir.entryList(QStringList() << (fileInfo.baseName() + ".*"));
+	list.removeAll(fileInfo.fileName());
 	QStringList listLower;
 	for (QStringList::iterator it = list.begin(); it != list.end(); ++it) {
-		listLower.append((*it).lower());
+		listLower.append((*it).toLower());
 	}
 
 	QStringList exts; // only lowercase extensions here - we match uppercase automatically
@@ -476,9 +475,9 @@ bool LoaderMD2::load()
 	exts.append(".pnm");
 	exts.append(".tga");
 	exts.append(".pcx");
-	QString baseNameLower = fileInfo.baseName().lower();
-	for (unsigned int i = 0; texture.isNull() && i < exts.count(); i++) {
-		int index = listLower.findIndex(baseNameLower + exts[i]);
+	QString baseNameLower = fileInfo.baseName().toLower();
+	for (int i = 0; texture.isNull() && i < exts.count(); i++) {
+		int index = listLower.indexOf(baseNameLower + exts[i]);
 		if (index >= 0) {
 			// AB: we check against listLower, but we return the
 			// actual filename from list

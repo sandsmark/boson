@@ -24,6 +24,8 @@
 #include "bodebug.h"
 #include "rtti.h"
 #include "unit.h"
+//Added by qt3to4:
+#include <Q3ValueList>
 
 BoItemList::BoItemList()
 {
@@ -69,24 +71,24 @@ BosonItem* BoItemList::findItem(unsigned long int id) const
  return 0;
 }
 
-QValueList<BosonItem*> BoItemList::items(bool collidingOnly, bool includeMoving, Unit* forUnit) const
+Q3ValueList<BosonItem*> BoItemList::items(bool collidingOnly, bool includeMoving, Unit* forUnit) const
 {
- QValueList<BosonItem*> list;
- QValueList<Unit*> unitList = units(collidingOnly, includeMoving, forUnit, &list);
+ Q3ValueList<BosonItem*> list;
+ Q3ValueList<Unit*> unitList = units(collidingOnly, includeMoving, forUnit, &list);
 
  //TODO: once we have non-unit items we need to test if they are actually
  //interesting for collision detection!
 
- QValueList<Unit*>::Iterator it = unitList.begin();
+ Q3ValueList<Unit*>::Iterator it = unitList.begin();
  for (; it != unitList.end(); ++it) {
 	list.append((BosonItem*)*it);
  }
  return list;
 }
 
-QValueList<Unit*> BoItemList::units(bool collidingOnly, bool includeMoving, Unit* forUnit, QValueList<BosonItem*>* nonUnits) const
+Q3ValueList<Unit*> BoItemList::units(bool collidingOnly, bool includeMoving, Unit* forUnit, Q3ValueList<BosonItem*>* nonUnits) const
 {
- QValueList<Unit*> list;
+ Q3ValueList<Unit*> list;
  ConstIterator it = begin();
  for (; it != end(); ++it) {
 	if ((Unit*)forUnit == (Unit*)*it) {

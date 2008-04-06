@@ -23,9 +23,12 @@
 #include <bodebug.h>
 
 #include <qlayout.h>
-#include <qlistview.h>
+#include <q3listview.h>
 #include <qdom.h>
 #include <qlabel.h>
+//Added by qt3to4:
+#include <Q3StrList>
+#include <Q3VBoxLayout>
 
 #include <stdlib.h>
 
@@ -49,11 +52,11 @@ static void setElementText(QDomNode element, const QString& text)
  e.appendChild(doc.createTextNode(text));
 }
 
-class QEnumContainerListItem : public QCheckListItem
+class QEnumContainerListItem : public Q3CheckListItem
 {
 public:
-	QEnumContainerListItem(QListView* lv, const QString& text)
-		: QCheckListItem(lv, text, RadioButtonController)
+	QEnumContainerListItem(Q3ListView* lv, const QString& text)
+		: Q3CheckListItem(lv, text, RadioButtonController)
 	{
 		mDisableItemChanged = false;
 		setRenameEnabled(1, false);
@@ -68,10 +71,10 @@ public:
 			return;
 		}
 		disableItemChanged(true);
-		QListViewItem* child = firstChild();
+		Q3ListViewItem* child = firstChild();
 		while (child) {
 			if (child->rtti() == 1) {
-				QCheckListItem* check = (QCheckListItem*)child;
+				Q3CheckListItem* check = (Q3CheckListItem*)child;
 				if (check->isOn()) {
 					int col = 1;
 					setRenameEnabled(col, true);
@@ -95,11 +98,11 @@ private:
 	bool mDisableItemChanged;
 };
 
-class QEnumCheckListItem : public QCheckListItem
+class QEnumCheckListItem : public Q3CheckListItem
 {
 public:
 	QEnumCheckListItem(QEnumContainerListItem* item, const QString& text)
-		: QCheckListItem(item, text, RadioButton)
+		: Q3CheckListItem(item, text, RadioButton)
 	{
 	}
 
@@ -117,7 +120,7 @@ public:
 protected:
 	virtual void stateChange(bool s)
 	{
-		QCheckListItem::stateChange(s);
+		Q3CheckListItem::stateChange(s);
 		BO_CHECK_NULL_RET(parent());
 		QEnumContainerListItem* c = (QEnumContainerListItem*)parent();
 		c->selectedItemChanged();
@@ -128,13 +131,13 @@ protected:
 
 BoPropertiesWidget::BoPropertiesWidget(QWidget* parent, const char* name) : QWidget(parent, name)
 {
- QVBoxLayout* layout = new QVBoxLayout(this);
+ Q3VBoxLayout* layout = new Q3VBoxLayout(this);
  mClassLabel = new QLabel(this);
  layout->addWidget(mClassLabel);
- mListView = new QListView(this);
- connect(mListView, SIGNAL(itemRenamed(QListViewItem*, int)),
-		this, SLOT(slotItemRenamed(QListViewItem*, int)));
- mListView->setDefaultRenameAction(QListView::Accept);
+ mListView = new Q3ListView(this);
+ connect(mListView, SIGNAL(itemRenamed(Q3ListViewItem*, int)),
+		this, SLOT(slotItemRenamed(Q3ListViewItem*, int)));
+ mListView->setDefaultRenameAction(Q3ListView::Accept);
  layout->addWidget(mListView);
  mListView->addColumn(tr("Property"));
  mListView->addColumn(tr("Value"));
@@ -180,7 +183,7 @@ void BoPropertiesWidget::displayProperties(const QDomElement& e)
  }
 
  QDomElement properties = e.namedItem("Properties").toElement();
- QListViewItem* child = mListView->firstChild();
+ Q3ListViewItem* child = mListView->firstChild();
  for (; child; child = child->nextSibling()) {
 	QString name = child->text(0);
 	int index = metaObject->findProperty(name, true);
@@ -207,7 +210,7 @@ void BoPropertiesWidget::displayProperties(const QDomElement& e)
 		}
 		item->setText(1, value);
 
-		QListViewItem* c = item->firstChild();
+		Q3ListViewItem* c = item->firstChild();
 		for (; c; c = c->nextSibling()) {
 			QEnumCheckListItem* check = dynamic_cast<QEnumCheckListItem*>(c);
 			if (!check) {
@@ -275,14 +278,14 @@ void BoPropertiesWidget::createProperties(const QDomElement& e)
 	if (prop->isEnumType() && !prop->isSetType()) {
 		QEnumContainerListItem* item = new QEnumContainerListItem(mListView, e.tagName());
 		item->setOpen(true);
-		QStrList enums = prop->enumKeys();
+		Q3StrList enums = prop->enumKeys();
 		QStrListIterator it(enums);
 		while (it.current()) {
 			(void)new QEnumCheckListItem(item, QString::fromLatin1(it.current()));
 			++it;
 		}
 	} else {
-		QListViewItem* item = new QListViewItem(mListView, e.tagName(), e.text());
+		Q3ListViewItem* item = new Q3ListViewItem(mListView, e.tagName(), e.text());
 		item->setRenameEnabled(1, true);
 	}
 
@@ -291,7 +294,7 @@ void BoPropertiesWidget::createProperties(const QDomElement& e)
 
 }
 
-void BoPropertiesWidget::slotItemRenamed(QListViewItem* item, int col)
+void BoPropertiesWidget::slotItemRenamed(Q3ListViewItem* item, int col)
 {
  if (col != 1) {
 	boError() << k_funcinfo << "column other than Value renamed?! col=" << col << endl;

@@ -24,6 +24,8 @@
 #include "model.h"
 #include "lod.h"
 #include "mesh.h"
+//Added by qt3to4:
+#include <Q3ValueList>
 
 
 NormalCalculator::NormalCalculator(float threshold) : Processor()
@@ -98,7 +100,7 @@ bool NormalCalculator::processMesh(Mesh* mesh)
   for(int i = 0; i < vertexcount; i++)
   {
     // Find all vertices with same position
-    QValueList<Vertex*> candidates;
+    Q3ValueList<Vertex*> candidates;
     processed[i] = true;
 
     for(int j = i; j < vertexcount; j++)
@@ -115,10 +117,10 @@ bool NormalCalculator::processMesh(Mesh* mesh)
 
     if(candidates.count() > 0)
     {
-      QValueList<Vertex*> merge;  // Vertices that will actually be merged
+      Q3ValueList<Vertex*> merge;  // Vertices that will actually be merged
       merge.append(vertices[i]);
       BoVector3Float n = vertices[i]->normal;
-      for(QValueList<Vertex*>::Iterator it = candidates.begin(); it != candidates.end(); ++it)
+      for(Q3ValueList<Vertex*>::Iterator it = candidates.begin(); it != candidates.end(); ++it)
       {
         // Vertices in two faces are merged if the dot product of normals of
         //  these faces exceeds the threshold
@@ -130,7 +132,7 @@ bool NormalCalculator::processMesh(Mesh* mesh)
       }
 
       n.normalize();
-      for(QValueList<Vertex*>::Iterator it = merge.begin(); it != merge.end(); ++it)
+      for(Q3ValueList<Vertex*>::Iterator it = merge.begin(); it != merge.end(); ++it)
       {
         (*it)->normal = n;
         processed[(*it)->id] = true;

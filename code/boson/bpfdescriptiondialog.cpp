@@ -29,10 +29,12 @@
 
 #include <qlayout.h>
 #include <qlineedit.h>
-#include <qvgroupbox.h>
-#include <qhbox.h>
+#include <q3vgroupbox.h>
+#include <q3hbox.h>
 #include <qlabel.h>
-#include <qtextedit.h>
+#include <q3textedit.h>
+//Added by qt3to4:
+#include <Q3VBoxLayout>
 
 class BPFDescriptionDialogPrivate
 {
@@ -48,7 +50,7 @@ public:
 	BPFDescription* mDescription;
 	KComboBox* mLanguage;
 	QLineEdit* mName;
-	QTextEdit* mComment;
+	Q3TextEdit* mComment;
 };
 
 BPFDescriptionDialog::BPFDescriptionDialog(QWidget* parent, bool modal)
@@ -66,28 +68,28 @@ BPFDescriptionDialog::~BPFDescriptionDialog()
 void BPFDescriptionDialog::init()
 {
  d = new BPFDescriptionDialogPrivate;
- QVBoxLayout* topLayout = new QVBoxLayout(plainPage(), KDialog::marginHint(), KDialog::spacingHint(), "toplayout");
+ Q3VBoxLayout* topLayout = new Q3VBoxLayout(plainPage(), KDialog::marginHint(), KDialog::spacingHint(), "toplayout");
 
- QHBox* hbox = new QHBox(plainPage(), "hbox");
+ Q3HBox* hbox = new Q3HBox(plainPage(), "hbox");
  (void)new QLabel(i18n("Language: "), hbox);
  d->mLanguage = new KComboBox(hbox, "language");
  d->mLanguage->insertItem(i18n("C"));
  topLayout->addWidget(hbox);
 
- QVGroupBox* groupBox = new QVGroupBox(i18n("Map Description"), plainPage(), "groupbox");
+ Q3VGroupBox* groupBox = new Q3VGroupBox(i18n("Map Description"), plainPage(), "groupbox");
  topLayout->addWidget(groupBox);
 
  // i don't like QGroupBox's autolayout stuff and I'm too lazy for the clean
  // solution. this one is just as good.
  QWidget* w = new QWidget(groupBox);
- QVBoxLayout* layout = new QVBoxLayout(w);
+ Q3VBoxLayout* layout = new Q3VBoxLayout(w);
 
- hbox = new QHBox(w);
+ hbox = new Q3HBox(w);
  (void)new QLabel(i18n("Map name:"), hbox, "namelabel");
  d->mName = new QLineEdit(hbox, "namelineedit");
  layout->addWidget(hbox);
 
- d->mComment = new QTextEdit(w, "commentedit");
+ d->mComment = new Q3TextEdit(w, "commentedit");
  d->mComment->setText("");
  layout->addWidget(d->mComment);
 }

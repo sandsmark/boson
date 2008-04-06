@@ -25,11 +25,13 @@
 #include "bosoncanvas.h"
 #include "boson.h"
 #include "qlistviewitemnumber.h"
+//Added by qt3to4:
+#include <Q3VBoxLayout>
 
 #include <klocale.h>
 
-#include <qptrlist.h>
-#include <qlistview.h>
+#include <q3ptrlist.h>
+#include <q3listview.h>
 #include <qlayout.h>
 #include <qsplitter.h>
 
@@ -52,8 +54,8 @@ public:
 	KGameAdvanceMessagesDebugPrivate()
 	{
 	}
-	QListView* mMessages;
-	QListView* mCalls;
+	Q3ListView* mMessages;
+	Q3ListView* mCalls;
 };
 
 
@@ -63,17 +65,17 @@ KGameAdvanceMessagesDebug::KGameAdvanceMessagesDebug(QWidget* parent, const char
  d = new KGameAdvanceMessagesDebugPrivate;
  mGame = 0;
 
- QVBoxLayout* layout = new QVBoxLayout(this);
+ Q3VBoxLayout* layout = new Q3VBoxLayout(this);
 
  QSplitter* splitter = new QSplitter(this);
  layout->addWidget(splitter);
 
- d->mMessages = new QListView(splitter);
+ d->mMessages = new Q3ListView(splitter);
  d->mMessages->setAllColumnsShowFocus(true);
  d->mMessages->addColumn(i18n("Message"));
  d->mMessages->addColumn(i18n("Time since last message"));
 
- d->mCalls = new QListView(splitter);
+ d->mCalls = new Q3ListView(splitter);
  d->mCalls->setAllColumnsShowFocus(true);
  d->mCalls->addColumn(i18n("Message"));
  d->mCalls->addColumn(i18n("Msg call"));
@@ -101,7 +103,7 @@ void KGameAdvanceMessagesDebug::setBoson(Boson* b)
 void KGameAdvanceMessagesDebug::slotUpdate()
 {
  BO_CHECK_NULL_RET(mGame);
- QPtrListIterator<BoAdvanceMessageTimes> it(mGame->advanceMessageTimes());
+ Q3PtrListIterator<BoAdvanceMessageTimes> it(mGame->advanceMessageTimes());
  const int advanceInterval = mGame->advanceMessageInterval();
  int messageNumber = 0;
  int callNumber = 0;

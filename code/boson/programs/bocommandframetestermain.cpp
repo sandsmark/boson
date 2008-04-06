@@ -54,6 +54,9 @@
 #include <kmessagebox.h>
 
 #include <qtimer.h>
+//Added by qt3to4:
+#include <Q3CString>
+#include <Q3PtrList>
 
 static void postBosonConfigInit();
 
@@ -242,9 +245,9 @@ void BoCommandFrameTesterMain::slotAdvance(unsigned int advanceCallsCount, bool)
 			playerInput, SLOT(slotAction(const BoSpecificAction&)));
 	}
 
-	QPtrList<Unit> units = playerIO->allMyLivingUnits();
+	Q3PtrList<Unit> units = playerIO->allMyLivingUnits();
 	Unit* factory = 0;
-	for (QPtrListIterator<Unit> it(units); it.current(); ++it) {
+	for (Q3PtrListIterator<Unit> it(units); it.current(); ++it) {
 		ProductionPlugin* p = (ProductionPlugin*)it.current()->plugin(UnitPlugin::Production);
 		if (!p) {
 			continue;
@@ -273,13 +276,13 @@ int main(int argc, char **argv)
 
  BosonConfig::setPostInitFunction(&postBosonConfigInit);
 
- QCString argv0(argv[0]);
+ Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
 
  BoEventLoop eventLoop(0, "main event loop");
  BoApplication app(argv0);
- KGlobal::locale()->insertCatalogue("libkdegames");
+ KGlobal::locale()->insertCatalog("libkdegames");
 
  BoCheckInstallation checkInstallation;
  QString errorMessage = checkInstallation.checkInstallation();

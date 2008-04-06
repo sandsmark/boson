@@ -172,7 +172,8 @@ ufo::UFontInfo BoUfoFontInfo::ufoFontInfo() const
 	face = ""; // unused by this plugin
  } else {
 	family = ufo::UFontInfo::DefaultFamily; // unused by all other plugins
-	face = std::string(mFamily.latin1());
+	QByteArray tmp = mFamily.toAscii();
+	face = std::string(tmp.constData(), tmp.length());
  }
 
  int weight = ufo::UFontInfo::Normal;

@@ -20,11 +20,14 @@
 #define BOSONPROPERTYXML_H
 
 #include <qobject.h>
+//Added by qt3to4:
+#include <Q3TextStream>
+#include <Q3PointArray>
 
 class QString;
 class QDomElement;
 class QPoint;
-class QTextStream;
+class Q3TextStream;
 class KGamePropertyBase;
 class KGamePropertyHandler;
 class bofixed;
@@ -118,12 +121,12 @@ protected slots:
 
 protected:
 	void save(const QPoint& point, QString& string);
-	void save(const QPointArray& pointArray, QString& string);
+	void save(const Q3PointArray& pointArray, QString& string);
 };
 
-QTextStream& operator>>(QTextStream& s, QPoint& p);
-QTextStream& operator<<(QTextStream& s, const QPoint& p);
-QTextStream& operator>>(QTextStream& s, BoVector2Fixed& p);
-QTextStream& operator<<(QTextStream& s, const BoVector2Fixed& p);
+Q3TextStream& operator>>(Q3TextStream& s, QPoint& p);
+Q3TextStream& operator<<(Q3TextStream& s, const QPoint& p);
+Q3TextStream& operator>>(Q3TextStream& s, BoVector2Fixed& p);
+Q3TextStream& operator<<(Q3TextStream& s, const BoVector2Fixed& p);
 
 #endif

@@ -35,6 +35,9 @@
 #include <kmessagebox.h>
 
 #include <qtimer.h>
+//Added by qt3to4:
+#include <Q3CString>
+#include <Q3ValueList>
 
 static const char *description =
     I18N_NOOP("Boson without GUI");
@@ -89,7 +92,7 @@ int main(int argc, char **argv)
  // initialization
  BosonConfig::setPostInitFunction(&postBosonConfigInit);
 
- QCString argv0(argv[0]);
+ Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
 #if BOSON_LINK_STATIC
@@ -98,7 +101,7 @@ int main(int argc, char **argv)
 
  BoEventLoop eventLoop(0, "main event loop");
  BoApplication app(argv0, false, false);
- KGlobal::locale()->insertCatalogue("libkdegames");
+ KGlobal::locale()->insertCatalog("libkdegames");
 
  // register ourselves as a dcop client
 // app.dcopClient()->registerAs(app.name(), false);
@@ -284,7 +287,7 @@ static bool parseAddComputerArgs(MainNoGUIStartOptions* options, KCmdLineArgs* a
 	}
  }
 
- QValueList<MainNoGUIAIPlayerOptions> aiPlayers;
+ Q3ValueList<MainNoGUIAIPlayerOptions> aiPlayers;
  for (QStringList::iterator it = species.begin(); it != species.end(); ++it) {
 	MainNoGUIAIPlayerOptions p;
 	p.species = *it;

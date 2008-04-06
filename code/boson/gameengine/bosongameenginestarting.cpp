@@ -42,6 +42,9 @@
 #include <klocale.h>
 
 #include <qmap.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 BosonGameEngineStarting::BosonGameEngineStarting(BosonStarting* starting, QObject* parent)
 	: BosonStartingTaskCreator(parent)
@@ -63,7 +66,7 @@ void BosonGameEngineStarting::setFiles(QMap<QString, QByteArray>* files)
  mFiles = files;
 }
 
-bool BosonGameEngineStarting::createTasks(QPtrList<BosonStartingTask>* tasks)
+bool BosonGameEngineStarting::createTasks(Q3PtrList<BosonStartingTask>* tasks)
 {
  if (!mStarting) {
 	BO_NULL_ERROR(mStarting);
@@ -92,9 +95,9 @@ bool BosonGameEngineStarting::createTasks(QPtrList<BosonStartingTask>* tasks)
 
  // check if player IDs are valid
  {
-	QValueList<int> players;
-	QValueList<int> watchPlayers;
-	QPtrList<Player> allPlayerList = boGame->allPlayerList();
+	Q3ValueList<int> players;
+	Q3ValueList<int> watchPlayers;
+	Q3PtrList<Player> allPlayerList = boGame->allPlayerList();
 	for (unsigned i = 0; i < allPlayerList.count(); i++) {
 		Player* p = allPlayerList.at(i);
 		int id = p->bosonId();
@@ -160,7 +163,7 @@ bool BosonGameEngineStarting::createTasks(QPtrList<BosonStartingTask>* tasks)
 
 
  int index = 0;
- for (QPtrListIterator<Player> it(boGame->gamePlayerList()); it.current(); ++it) {
+ for (Q3PtrListIterator<Player> it(boGame->gamePlayerList()); it.current(); ++it) {
 	Player* p = (Player*)it.current();
 	QString text;
 	if (p->isActiveGamePlayer()) {
@@ -268,7 +271,7 @@ bool BosonStartingInitPlayerMap::startTask()
 	return false;
  }
  bool mapExplored = boConfig->boolValue("ExploreMapOnStartup");
- QPtrList<Player> allPlayerList = boGame->allPlayerList();
+ Q3PtrList<Player> allPlayerList = boGame->allPlayerList();
  for (unsigned int i = 0; i < allPlayerList.count(); i++) {
 	boDebug(270) << "init map for player " << i << endl;
 	Player* p = allPlayerList.at(i);

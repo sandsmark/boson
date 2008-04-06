@@ -40,9 +40,9 @@
 #include <klocale.h>
 #include <kstandarddirs.h>
 
-#include <qvaluelist.h>
-#include <qvaluevector.h>
-#include <qptrlist.h>
+#include <q3valuelist.h>
+#include <q3valuevector.h>
+#include <q3ptrlist.h>
 
 #define COLOR_UNKNOWN Qt::black // unexplored terrain
 
@@ -71,7 +71,7 @@ public:
 	BosonMiniMapQuadtreeNode(int l, int t, int r, int b, int depth)
 			: BoQuadTreeNode(l, t, r, b, depth)
 	{
-		size = QMAX(r - l, b - t) + 1;
+		size = qMax(r - l, b - t) + 1;
 	}
 
 	static BosonMiniMapQuadtreeNode* createTree(unsigned int width, unsigned int height);
@@ -125,8 +125,8 @@ private:
 	int size;
 	static const int minLeafSize = 4;
 	// TODO: sort those by pointer address so that they can be binary searched
-	QValueVector<Unit*> flyingUnits;
-	QValueVector<Unit*> groundUnits;
+	Q3ValueVector<Unit*> flyingUnits;
+	Q3ValueVector<Unit*> groundUnits;
 };
 
 
@@ -264,8 +264,8 @@ void BosonMiniMapQuadtreeNode::removeUnitFromSelf(Unit* u)
 {
  //boDebug() << "QUADTREE: " << k_funcinfo << "size: " << size << endl;
  // Remove from self
- QValueVector<Unit*>::Iterator it;
- QValueVector<Unit*>* container;
+ Q3ValueVector<Unit*>::Iterator it;
+ Q3ValueVector<Unit*>* container;
  if (u->isFlying()) {
 	container = &flyingUnits;
  } else {
@@ -531,11 +531,11 @@ void BosonGLCompleteMiniMap::createMap(unsigned int w, unsigned int h)
  d->mMapTextureWidth = w2;
  d->mMapTextureHeight = h2;
 
- QValueList<GLubyte*> textures;
+ Q3ValueList<GLubyte*> textures;
  textures.append(d->mTerrainTexture);
  textures.append(d->mWaterTexture);
  textures.append(d->mExploredTexture);
- for (QValueList<GLubyte*>::iterator it = textures.begin(); it != textures.end(); ++it) {
+ for (Q3ValueList<GLubyte*>::iterator it = textures.begin(); it != textures.end(); ++it) {
 	GLubyte* texture = (*it);
 	for (int y = 0; y < d->mMapTextureHeight; y++) {
 		for (int x = 0; x < d->mMapTextureWidth; x++) {
@@ -549,7 +549,7 @@ void BosonGLCompleteMiniMap::createMap(unsigned int w, unsigned int h)
 
  // AB: d->mMapTexture has been resized to 2^n * 2^m. replace the alpha values for
  // all coordinates that are relevant to us.
- for (QValueList<GLubyte*>::iterator it = textures.begin(); it != textures.end(); ++it) {
+ for (Q3ValueList<GLubyte*>::iterator it = textures.begin(); it != textures.end(); ++it) {
 	GLubyte* texture = (*it);
 
 	GLubyte alpha = 255;
@@ -667,7 +667,7 @@ void BosonGLCompleteMiniMap::renderMiniMap()
  glPopMatrix();
 }
 
-void BosonGLCompleteMiniMap::updateRadarTexture(const QValueList<const Unit*>* radarlist)
+void BosonGLCompleteMiniMap::updateRadarTexture(const Q3ValueList<const Unit*>* radarlist)
 {
  BO_CHECK_NULL_RET(localPlayerIO());
 
@@ -706,7 +706,7 @@ void BosonGLCompleteMiniMap::updateRadarTexture(const QValueList<const Unit*>* r
  //        larger anyway
  float visiblepointsize = 3.0f;
 #if 0
- const float radarBlipScaleFactor = QMAX(d->mMapWidth, d->mMapHeight) / (float)miniMapScreenWidth()
+ const float radarBlipScaleFactor = qMax(d->mMapWidth, d->mMapHeight) / (float)miniMapScreenWidth()
 #else
  const float radarBlipScaleFactor = 1.0f;
 #endif
@@ -748,7 +748,7 @@ void BosonGLCompleteMiniMap::updateRadarTexture(const QValueList<const Unit*>* r
 		glVertex3f(itempos.x(), itempos.y(), 0.0f);
 	}
  }
- QPtrListIterator<Unit> playerUnitsIt(*localPlayerIO()->allMyUnits());
+ Q3PtrListIterator<Unit> playerUnitsIt(*localPlayerIO()->allMyUnits());
  glColor4f(0.2, 0.2, 1.0, 1.0);
  while (playerUnitsIt.current()) {
 	if (playerUnitsIt.current()->isDestroyed()) {
@@ -766,7 +766,7 @@ void BosonGLCompleteMiniMap::updateRadarTexture(const QValueList<const Unit*>* r
  glPopAttrib();
 }
 
-void BosonGLCompleteMiniMap::renderRadarRangeIndicators(const QValueList<const Unit*>* radarlist)
+void BosonGLCompleteMiniMap::renderRadarRangeIndicators(const Q3ValueList<const Unit*>* radarlist)
 {
  BO_CHECK_NULL_RET(d->mRadarRangeTexture);
 
@@ -786,7 +786,7 @@ void BosonGLCompleteMiniMap::renderRadarRangeIndicators(const QValueList<const U
  glScalef(1.0f / d->mMapWidth, 1.0f / d->mMapHeight, 1.0f);
 
  float progress = d->mAdvanceCallsSinceLastIndicatorsUpdate / 50.0f;
- for (QValueList<const Unit*>::const_iterator it = radarlist->begin(); it != radarlist->end(); ++it) {
+ for (Q3ValueList<const Unit*>::const_iterator it = radarlist->begin(); it != radarlist->end(); ++it) {
 	const Unit* unit = *it;
 	const RadarPlugin* prop = (const RadarPlugin*)unit->plugin(UnitPlugin::Radar);
 	if (!prop) {
@@ -910,7 +910,7 @@ void BosonGLCompleteMiniMap::setColor(int x, int y, const QColor& color, int alp
  }
 }
 
-const QValueList<const Unit*>* BosonGLCompleteMiniMap::radarList() const
+const Q3ValueList<const Unit*>* BosonGLCompleteMiniMap::radarList() const
 {
  return localPlayerIO()->player()->radarUnits();
 }

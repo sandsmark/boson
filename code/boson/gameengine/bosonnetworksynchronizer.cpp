@@ -38,18 +38,20 @@
 #include <kgame/kmessageclient.h>
 #include <kgame/kgamemessage.h>
 
-#include <kmdcodec.h>
+#include <kcodecs.h>
 #include <klocale.h>
 #include <krandomsequence.h>
 
 #include <qdatastream.h>
-#include <qptrqueue.h>
-#include <qptrlist.h>
+#include <q3ptrqueue.h>
+#include <q3ptrlist.h>
 #include <qbuffer.h>
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 #include <qmap.h>
-#include <qintdict.h>
+#include <q3intdict.h>
 #include <qdom.h>
+//Added by qt3to4:
+#include <Q3CString>
 
 
 // debugging code to find a network bug. will be removed soon
@@ -97,14 +99,14 @@ public:
 		mLog = log;
 		KMD5 md5(mLog);
 		QByteArray buffer;
-		QDataStream stream(buffer, IO_WriteOnly);
-		stream << (Q_UINT32)syncId;
+		QDataStream stream(buffer, QIODevice::WriteOnly);
+		stream << (quint32)syncId;
 		stream << md5.hexDigest();
 		game->sendMessage(buffer, BosonMessageIds::IdNetworkSyncCheck);
 		mClientsLeft = game->messageClient()->clientList();
 		return;
 	}
-	bool receiveAck(Q_UINT32 sender)
+	bool receiveAck(quint32 sender)
 	{
 		mClientsLeft.remove(sender);
 		if (mClientsLeft.isEmpty()) {
@@ -118,19 +120,19 @@ public:
 		return mLog;
 	}
 
-	void addOutOfSyncClient(Q_UINT32 client)
+	void addOutOfSyncClient(quint32 client)
 	{
 		mOutOfSyncClients.append(client);
 	}
-	QValueList<Q_UINT32> outOfSyncClients() const
+	Q3ValueList<quint32> outOfSyncClients() const
 	{
 		return mOutOfSyncClients;
 	}
 
 private:
 	QByteArray mLog;
-	QValueList<Q_UINT32> mClientsLeft;
-	QValueList<Q_UINT32> mOutOfSyncClients;
+	Q3ValueList<quint32> mClientsLeft;
+	Q3ValueList<quint32> mOutOfSyncClients;
 };
 
 
@@ -235,7 +237,7 @@ public:
 	virtual QByteArray makeLog()
 	{
 		QByteArray b;
-		QDataStream s(b, IO_WriteOnly);
+		QDataStream s(b, QIODevice::WriteOnly);
 
 		// note: this acutally _changes_ the random object.
 		// however since we do this at the same time on all clients, it
@@ -249,8 +251,8 @@ protected:
 	virtual QString findLogError(const QByteArray& b1, const QByteArray& b2) const
 	{
 		boDebug(370) << k_funcinfo << endl;
-		QDataStream s1(b1, IO_ReadOnly);
-		QDataStream s2(b2, IO_ReadOnly);
+		QDataStream s1(b1, QIODevice::ReadOnly);
+		QDataStream s2(b2, QIODevice::ReadOnly);
 
 		DECLARE_UNSTREAM(Q_ULONG, randomint);
 		DECLARE_UNSTREAM(double, randomdouble);
@@ -283,16 +285,16 @@ public:
 	virtual QByteArray makeLog()
 	{
 		QByteArray playersBuffer;
-		QDataStream playersStream(playersBuffer, IO_WriteOnly);
-		QPtrListIterator<Player> playerIt(mGame->allPlayerList());
-		playersStream << (Q_UINT32)mGame->allPlayerList().count();
+		QDataStream playersStream(playersBuffer, QIODevice::WriteOnly);
+		Q3PtrListIterator<Player> playerIt(mGame->allPlayerList());
+		playersStream << (quint32)mGame->allPlayerList().count();
 		while (playerIt.current()) {
 			Player* p = (Player*)playerIt.current();
-			playersStream << (Q_UINT32)p->unfoggedCells();
-			playersStream << (Q_UINT32)p->exploredCells();
-			playersStream << (Q_UINT32)p->minerals();
-			playersStream << (Q_UINT32)p->oil();
-			playersStream << (Q_UINT32)p->ammunition("Generic");
+			playersStream << (quint32)p->unfoggedCells();
+			playersStream << (quint32)p->exploredCells();
+			playersStream << (quint32)p->minerals();
+			playersStream << (quint32)p->oil();
+			playersStream << (quint32)p->ammunition("Generic");
 			++playerIt;
 		}
 		return playersBuffer;
@@ -302,18 +304,18 @@ protected:
 	virtual QString findLogError(const QByteArray& b1, const QByteArray& b2) const
 	{
 		boDebug(370) << k_funcinfo << endl;
-		QDataStream s1(b1, IO_ReadOnly);
-		QDataStream s2(b2, IO_ReadOnly);
-		DECLARE_UNSTREAM(Q_UINT32, count);
+		QDataStream s1(b1, QIODevice::ReadOnly);
+		QDataStream s2(b2, QIODevice::ReadOnly);
+		DECLARE_UNSTREAM(quint32, count);
 		if (count != count2) {
 			return i18n("Have players: %1 should be: %2").arg(count2).arg(count);
 		}
 		for (unsigned int i = 0; i < count; i++) {
-			DECLARE_UNSTREAM(Q_UINT32, fogged);
-			DECLARE_UNSTREAM(Q_UINT32, explored);
-			DECLARE_UNSTREAM(Q_UINT32, minerals);
-			DECLARE_UNSTREAM(Q_UINT32, oil);
-			DECLARE_UNSTREAM(Q_UINT32, genericAmmunition);
+			DECLARE_UNSTREAM(quint32, fogged);
+			DECLARE_UNSTREAM(quint32, explored);
+			DECLARE_UNSTREAM(quint32, minerals);
+			DECLARE_UNSTREAM(quint32, oil);
+			DECLARE_UNSTREAM(quint32, genericAmmunition);
 
 #define CHECK(x,x2) if (x != x2) { return i18n("Different players in players log: variable %1: found %2, expected %3").arg(#x).arg(x2).arg(x); }
 			CHECK(fogged, fogged2);
@@ -352,32 +354,32 @@ private:
 QByteArray BoPathSyncCheckMessage::makeLog()
 {
  QByteArray b;
- QDataStream stream(b, IO_WriteOnly);
+ QDataStream stream(b, QIODevice::WriteOnly);
 
  // Stream dirty cell statuses
- stream << (Q_UINT32)mPathFinder->mCellStatusDirtyCount;
- stream << (Q_UINT32)mPathFinder->mCellStatusDirtySize;
+ stream << (quint32)mPathFinder->mCellStatusDirtyCount;
+ stream << (quint32)mPathFinder->mCellStatusDirtySize;
  for (unsigned int i = 0; i < mPathFinder->mCellStatusDirtyCount; i++) {
 	int dirtyindex = mPathFinder->mCellStatusDirty[i];
-	stream << (Q_INT32)dirtyindex;
-	stream << (Q_UINT32)mPathFinder->mCellStatus[dirtyindex].flags;
+	stream << (qint32)dirtyindex;
+	stream << (quint32)mPathFinder->mCellStatus[dirtyindex].flags;
  }
 
  // Stream some info about blocks
  // TODO: maybe don't send all blocks (too much data)?
  unsigned int movedatacount = mPathFinder->mMoveDatas.count();
- stream << (Q_UINT32)movedatacount;
- stream << (Q_INT32)mPathFinder->mBlockSize;
- stream << (Q_INT32)mPathFinder->mBlocksCountX;
- stream << (Q_INT32)mPathFinder->mBlocksCountY;
+ stream << (quint32)movedatacount;
+ stream << (qint32)mPathFinder->mBlockSize;
+ stream << (qint32)mPathFinder->mBlocksCountX;
+ stream << (qint32)mPathFinder->mBlocksCountY;
  for (int i = 0; i < mPathFinder->mBlocksCountX * mPathFinder->mBlocksCountY; i++) {
 	BosonPath::BlockInfo* block = &mPathFinder->mBlocks[i];
 	for(unsigned int j = 0; j < movedatacount; j++) {
-		stream << (Q_INT32)block->centerx[j];
-		stream << (Q_INT32)block->centery[j];
+		stream << (qint32)block->centerx[j];
+		stream << (qint32)block->centery[j];
 	}
  }
- stream << (Q_INT32)mPathFinder->mBlockConnectionsCount;
+ stream << (qint32)mPathFinder->mBlockConnectionsCount;
  for(int i = 0; i < mPathFinder->mBlockConnectionsCount; i++) {
 	stream << mPathFinder->mBlockConnections[i];
  }
@@ -391,34 +393,34 @@ QByteArray BoPathSyncCheckMessage::makeLog()
 QString BoPathSyncCheckMessage::findLogError(const QByteArray& b1, const QByteArray& b2) const
 {
  boDebug(370) << k_funcinfo << endl;
- QDataStream s1(b1, IO_ReadOnly);
- QDataStream s2(b2, IO_ReadOnly);
+ QDataStream s1(b1, QIODevice::ReadOnly);
+ QDataStream s2(b2, QIODevice::ReadOnly);
  QString error;
 
- DECLARE_UNSTREAM_COMPARE(Q_UINT32, cellStatusDirtyCount);
- DECLARE_UNSTREAM_COMPARE(Q_UINT32, cellStatusDirtySize);
+ DECLARE_UNSTREAM_COMPARE(quint32, cellStatusDirtyCount);
+ DECLARE_UNSTREAM_COMPARE(quint32, cellStatusDirtySize);
  for (unsigned int i = 0; i < cellStatusDirtyCount; i++) {
-	DECLARE_UNSTREAM_COMPARE(Q_INT32, dirtyIndex);
-	DECLARE_UNSTREAM_COMPARE(Q_UINT32, dirtyFlags);
+	DECLARE_UNSTREAM_COMPARE(qint32, dirtyIndex);
+	DECLARE_UNSTREAM_COMPARE(quint32, dirtyFlags);
  }
 
- DECLARE_UNSTREAM_COMPARE(Q_UINT32, movedataCount);
- DECLARE_UNSTREAM_COMPARE(Q_INT32, blockSize);
- DECLARE_UNSTREAM_COMPARE(Q_INT32, blocksCountX);
- DECLARE_UNSTREAM_COMPARE(Q_INT32, blocksCountY);
+ DECLARE_UNSTREAM_COMPARE(quint32, movedataCount);
+ DECLARE_UNSTREAM_COMPARE(qint32, blockSize);
+ DECLARE_UNSTREAM_COMPARE(qint32, blocksCountX);
+ DECLARE_UNSTREAM_COMPARE(qint32, blocksCountY);
  for (int i = 0; i < blocksCountX * blocksCountY; i++) {
 	for(unsigned int j = 0; j < movedataCount; j++) {
-		DECLARE_UNSTREAM_COMPARE(Q_INT32, centerx);
-		DECLARE_UNSTREAM_COMPARE(Q_INT32, centery);
+		DECLARE_UNSTREAM_COMPARE(qint32, centerx);
+		DECLARE_UNSTREAM_COMPARE(qint32, centery);
 	}
  }
- DECLARE_UNSTREAM_COMPARE(Q_INT32, blockConnectionsCount);
+ DECLARE_UNSTREAM_COMPARE(qint32, blockConnectionsCount);
  for(int i = 0; i < blockConnectionsCount; i++) {
-	DECLARE_UNSTREAM_COMPARE(Q_UINT32, connection);
+	DECLARE_UNSTREAM_COMPARE(quint32, connection);
  }
- DECLARE_UNSTREAM_COMPARE(Q_UINT32, changedBlocksCount);
- DECLARE_UNSTREAM_COMPARE(Q_UINT32, dirtyConnectionsCount);
- DECLARE_UNSTREAM_COMPARE(Q_UINT32, blockStatusDirtyCount);
+ DECLARE_UNSTREAM_COMPARE(quint32, changedBlocksCount);
+ DECLARE_UNSTREAM_COMPARE(quint32, dirtyConnectionsCount);
+ DECLARE_UNSTREAM_COMPARE(quint32, blockStatusDirtyCount);
 
 
  return error;
@@ -479,9 +481,9 @@ protected:
 	virtual QString findLogError(const QByteArray& b1, const QByteArray& b2) const
 	{
 		boDebug(370) << k_funcinfo << endl;
-		QDataStream s1(b1, IO_ReadOnly);
-		QDataStream s2(b2, IO_ReadOnly);
-		DECLARE_UNSTREAM(Q_UINT32, items);
+		QDataStream s1(b1, QIODevice::ReadOnly);
+		QDataStream s2(b2, QIODevice::ReadOnly);
+		DECLARE_UNSTREAM(quint32, items);
 		if (items != items2) {
 			return i18n("Different item counts in canvas log: found %1, expected %2").arg(items2).arg(items);
 		}
@@ -492,7 +494,7 @@ protected:
 			}
 		}
 
-		DECLARE_UNSTREAM(Q_UINT32, units);
+		DECLARE_UNSTREAM(quint32, units);
 		if (units != units2) {
 			return i18n("Different unit counts in canvas log: found %1, expected %2").arg(units2).arg(units);
 		}
@@ -507,12 +509,12 @@ protected:
 
 	static void streamItem(QDataStream& stream, BosonItem* i)
 	{
-		stream << (Q_UINT32)i->id();
-		stream << (Q_INT32)i->rtti();
+		stream << (quint32)i->id();
+		stream << (qint32)i->rtti();
 		if (i->rtti() == RTTI::Shot) {
-			stream << (Q_INT32)((BosonShot*)i)->type();
+			stream << (qint32)((BosonShot*)i)->type();
 		} else {
-			stream << (Q_INT32)-1;
+			stream << (qint32)-1;
 		}
 		stream << i->centerX();
 		stream << i->centerY();
@@ -521,7 +523,7 @@ protected:
 		stream << i->xRotation();
 		stream << i->yRotation();
 	}
-	static void unstreamItem(QDataStream& stream, Q_UINT32& id, Q_INT32& rtti, Q_INT32& type, bofixed& x, bofixed& y, bofixed& z, bofixed& rotation, bofixed& xrotation, bofixed& yrotation)
+	static void unstreamItem(QDataStream& stream, quint32& id, qint32& rtti, qint32& type, bofixed& x, bofixed& y, bofixed& z, bofixed& rotation, bofixed& xrotation, bofixed& yrotation)
 	{
 		stream >> id;
 		stream >> rtti;
@@ -537,9 +539,9 @@ protected:
 	{
 		QString error;
 
-		DECLARE(Q_UINT32, id);
-		DECLARE(Q_INT32, rtti);
-		DECLARE(Q_INT32, type);
+		DECLARE(quint32, id);
+		DECLARE(qint32, rtti);
+		DECLARE(qint32, type);
 		DECLARE(bofixed, x);
 		DECLARE(bofixed, y);
 		DECLARE(bofixed, z);
@@ -565,9 +567,9 @@ protected:
 
 	static void streamUnit(QDataStream& stream, Unit* u)
 	{
-		stream << (Q_UINT32)u->id();
-		stream << (Q_INT32)u->advanceWork();
-		stream << (Q_UINT32)u->health();
+		stream << (quint32)u->id();
+		stream << (qint32)u->advanceWork();
+		stream << (quint32)u->health();
 #if PATH_LOG
 		// stream some info from the pathinfo object.
 		// we ignore:
@@ -579,42 +581,42 @@ protected:
 		if (u != i->unit && i->unit) {
 			boError(370) << k_funcinfo "u != unit in for pathinfo" << endl;
 		}
-		stream << (Q_UINT32)i->hlstep;
+		stream << (quint32)i->hlstep;
 		stream << i->start;
 		stream << i->dest;
-		stream << (Q_INT32)i->range;
+		stream << (qint32)i->range;
 #if 0
 		if (i->startRegion) {
-			stream << (Q_INT32)i->startRegion->id;
+			stream << (qint32)i->startRegion->id;
 		} else {
-			stream << (Q_INT32)-1;
+			stream << (qint32)-1;
 		}
 		if (i->destRegion) {
-			stream << (Q_INT32)i->destRegion->id;
+			stream << (qint32)i->destRegion->id;
 		} else {
-			stream << (Q_INT32)-1;
+			stream << (qint32)-1;
 		}
 #endif
-		stream << (Q_INT32)-2; // AB: region pointers are often invalid (regions deleted), so we cannot use it.
-		stream << (Q_INT32)-2; // AB: region pointers are often invalid (regions deleted), so we cannot use it.
-		stream << (Q_INT8)i->passable;
-		stream << (Q_INT8)i->canMoveOnLand;
-		stream << (Q_INT8)i->canMoveOnWater;
-		stream << (Q_INT8)i->flying;
-		stream << (Q_INT32)i->passability;
-		stream << (Q_INT8)i->moveAttacking;
-		stream << (Q_INT8)i->slowDownAtDest;
-		stream << (Q_INT32)i->waiting;
-		stream << (Q_INT32)i->pathrecalced;
+		stream << (qint32)-2; // AB: region pointers are often invalid (regions deleted), so we cannot use it.
+		stream << (qint32)-2; // AB: region pointers are often invalid (regions deleted), so we cannot use it.
+		stream << (qint8)i->passable;
+		stream << (qint8)i->canMoveOnLand;
+		stream << (qint8)i->canMoveOnWater;
+		stream << (qint8)i->flying;
+		stream << (qint32)i->passability;
+		stream << (qint8)i->moveAttacking;
+		stream << (qint8)i->slowDownAtDest;
+		stream << (qint32)i->waiting;
+		stream << (qint32)i->pathrecalced;
 #endif
 	}
 #if !PATH_LOG
-	static void unstreamUnit(QDataStream& stream, Q_UINT32& id, Q_INT32& work, Q_UINT32& health)
+	static void unstreamUnit(QDataStream& stream, quint32& id, qint32& work, quint32& health)
 #else
-	static void unstreamUnit(QDataStream& stream, Q_UINT32& id, Q_INT32& work, Q_UINT32& health,
-			Q_UINT32& hlstep, QPoint& start, QPoint&  dest, Q_INT32& range, Q_INT32& startRegId, Q_INT32& destRegId, Q_INT8& passable,
-			Q_INT8& canL, Q_INT8& canW, Q_INT8& flying, Q_INT32& passability, Q_INT8& moveAttacking, Q_INT8& slowDownAtDest,
-			Q_INT32& waiting, Q_INT32& pathrecalced)
+	static void unstreamUnit(QDataStream& stream, quint32& id, qint32& work, quint32& health,
+			quint32& hlstep, QPoint& start, QPoint&  dest, qint32& range, qint32& startRegId, qint32& destRegId, qint8& passable,
+			qint8& canL, qint8& canW, qint8& flying, qint32& passability, qint8& moveAttacking, qint8& slowDownAtDest,
+			qint32& waiting, qint32& pathrecalced)
 #endif
 	{
 		stream >> id;
@@ -643,28 +645,28 @@ protected:
 	{
 		QString error;
 
-		DECLARE(Q_UINT32, id);
-		DECLARE(Q_INT32, work);
-		DECLARE(Q_UINT32, health);
+		DECLARE(quint32, id);
+		DECLARE(qint32, work);
+		DECLARE(quint32, health);
 #if !PATH_LOG
 		unstreamUnit(s1, id, work, health);
 		unstreamUnit(s2, id2, work2, health2);
 #else
-		DECLARE(Q_UINT32, hlstep);
+		DECLARE(quint32, hlstep);
 		DECLARE(QPoint, start);
 		DECLARE(QPoint, dest);
-		DECLARE(Q_INT32, range);
-		DECLARE(Q_INT32, startRegId);
-		DECLARE(Q_INT32, destRegId);
-		DECLARE(Q_INT32, passability);
-		DECLARE(Q_INT32, waiting);
-		DECLARE(Q_INT32, pathrecalced);
-		DECLARE(Q_INT8, passable);
-		DECLARE(Q_INT8, canL);
-		DECLARE(Q_INT8, canW);
-		DECLARE(Q_INT8, flying);
-		DECLARE(Q_INT8, moveAttacking);
-		DECLARE(Q_INT8, slowDown);
+		DECLARE(qint32, range);
+		DECLARE(qint32, startRegId);
+		DECLARE(qint32, destRegId);
+		DECLARE(qint32, passability);
+		DECLARE(qint32, waiting);
+		DECLARE(qint32, pathrecalced);
+		DECLARE(qint8, passable);
+		DECLARE(qint8, canL);
+		DECLARE(qint8, canW);
+		DECLARE(qint8, flying);
+		DECLARE(qint8, moveAttacking);
+		DECLARE(qint8, slowDown);
 		unstreamUnit(s1, id, work, health,
 				hlstep, start, dest, range, startRegId, destRegId, passable,
 				canL, canW, flying, passability, moveAttacking, slowDown,
@@ -737,8 +739,8 @@ QByteArray BoCanvasSyncCheckMessage::makeLog(int start, int count)
  }
 
  QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
- stream << (Q_UINT32)list.count();
+ QDataStream stream(buffer, QIODevice::WriteOnly);
+ stream << (quint32)list.count();
  unsigned int unitsCount = 0;
  for (it = list.begin(); it != list.end(); ++it) {
 	BosonItem* i = *it;
@@ -748,7 +750,7 @@ QByteArray BoCanvasSyncCheckMessage::makeLog(int start, int count)
 	}
  }
 
- stream << (Q_UINT32)unitsCount;
+ stream << (quint32)unitsCount;
  for (it = list.begin(); it != list.end(); ++it) {
 	if (RTTI::isUnit((*it)->rtti())) {
 		Unit* u = (Unit*)(*it);
@@ -817,14 +819,14 @@ QByteArray BoLongSyncCheckMessage::makeLog()
  QByteArray messagesBuffer;
 #if 0
  QBuffer messagesBuffer2(messagesBuffer);
- messagesBuffer2.open(IO_WriteOnly);
+ messagesBuffer2.open(QIODevice::WriteOnly);
  mMessageLogger->saveMessageLog(&messagesBuffer2, 100);
  stream << messages;
 #endif
  streams.insert("MessagesStream", messagesBuffer);
 
  QByteArray b;
- QDataStream logStream(b, IO_WriteOnly);
+ QDataStream logStream(b, QIODevice::WriteOnly);
  logStream << streams;
 
  return b;
@@ -832,8 +834,8 @@ QByteArray BoLongSyncCheckMessage::makeLog()
 
 QString BoLongSyncCheckMessage::findLogError(const QByteArray& b1, const QByteArray& b2) const
 {
- QDataStream s1(b1, IO_ReadOnly);
- QDataStream s2(b2, IO_ReadOnly);
+ QDataStream s1(b1, QIODevice::ReadOnly);
+ QDataStream s2(b2, QIODevice::ReadOnly);
  QMap<QString, QByteArray> streams, streams2;
  s1 >> streams;
  s2 >> streams2;
@@ -918,7 +920,7 @@ bool BosonNetworkSynchronizer::receiveNetworkSyncCheck(QDataStream& stream)
  return d->mSyncChecker.receiveNetworkSyncCheck(stream);
 }
 
-bool BosonNetworkSynchronizer::receiveNetworkSyncCheckAck(QDataStream& stream, Q_UINT32 sender)
+bool BosonNetworkSynchronizer::receiveNetworkSyncCheckAck(QDataStream& stream, quint32 sender)
 {
  return d->mSyncChecker.receiveNetworkSyncCheckAck(stream, sender);
 }
@@ -960,7 +962,7 @@ bool BosonNetworkSynchronizer::receiveNetworkSyncUnlockGame(QDataStream& stream)
  return true;
 }
 
-void BosonNetworkSynchronizer::syncCheckingCompleted(const QValueList<Q_UINT32>& outOfSyncClients)
+void BosonNetworkSynchronizer::syncCheckingCompleted(const Q3ValueList<quint32>& outOfSyncClients)
 {
  if (!outOfSyncClients.isEmpty()) {
 	boDebug(370) << k_funcinfo << outOfSyncClients.count() << " clients out of sync" << endl;
@@ -1094,8 +1096,8 @@ public:
 	BosonNetworkSyncCheckerPrivate()
 	{
 	}
-	QPtrQueue<QByteArray> mLogs;
-	QIntDict<BoAwaitAck> mAwaitAcks;
+	Q3PtrQueue<QByteArray> mLogs;
+	Q3IntDict<BoAwaitAck> mAwaitAcks;
 };
 
 BosonNetworkSyncChecker::BosonNetworkSyncChecker()
@@ -1172,8 +1174,8 @@ bool BosonNetworkSyncChecker::receiveNetworkSyncCheck(QDataStream& stream)
 	boError(370) << k_funcinfo << "no logs available" << endl;
 	return false;
  }
- Q_UINT32 syncId;
- QCString md5String;
+ quint32 syncId;
+ Q3CString md5String;
  stream >> syncId;
  stream >> md5String;
  if (md5String.isEmpty()) {
@@ -1202,7 +1204,7 @@ bool BosonNetworkSyncChecker::receiveNetworkSyncCheck(QDataStream& stream)
  return true;
 }
 
-bool BosonNetworkSyncChecker::receiveNetworkSyncCheckAck(QDataStream& stream, Q_UINT32 sender)
+bool BosonNetworkSyncChecker::receiveNetworkSyncCheckAck(QDataStream& stream, quint32 sender)
 {
  if (!mParent) {
 	BO_NULL_ERROR(mParent);
@@ -1216,9 +1218,9 @@ bool BosonNetworkSyncChecker::receiveNetworkSyncCheckAck(QDataStream& stream, Q_
 	boError(370) << k_funcinfo << "Only ADMIN is allowed to call this" << endl;
 	return false;
  }
- Q_UINT32 id;
- QCString md5;
- Q_INT8 verify;
+ quint32 id;
+ Q3CString md5;
+ qint8 verify;
  QByteArray brokenLog;
  stream >> id;
  stream >> md5;
@@ -1258,13 +1260,13 @@ bool BosonNetworkSyncChecker::receiveNetworkSyncCheckAck(QDataStream& stream, Q_
  return verify;
 }
 
-void BosonNetworkSyncChecker::sendAck(const QCString& md5, bool verify, unsigned int syncId, const QByteArray& origLog)
+void BosonNetworkSyncChecker::sendAck(const Q3CString& md5, bool verify, unsigned int syncId, const QByteArray& origLog)
 {
  QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
- stream << (Q_UINT32)syncId;
+ QDataStream stream(buffer, QIODevice::WriteOnly);
+ stream << (quint32)syncId;
  stream << md5;
- stream << (Q_INT8)verify;
+ stream << (qint8)verify;
  if (!verify) {
 	stream << origLog;
  }
@@ -1355,7 +1357,7 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
 		boError(370) << k_funcinfo << "no Players tag found" << endl;
 		return false;
 	}
-	QPtrList<Player> allPlayerList = mGame->allPlayerList();
+	Q3PtrList<Player> allPlayerList = mGame->allPlayerList();
 	for (KPlayer* kplayer = allPlayerList.first(); kplayer; kplayer = allPlayerList.next()) {
 		Player* player = (Player*)kplayer;
 		QDomElement playerElement;
@@ -1429,7 +1431,7 @@ QByteArray BosonNetworkSyncer::createSyncMessage()
  doc.appendChild(root);
  {
 	QDomElement players = doc.createElement("Players");
-	QPtrList<Player> list = mGame->allPlayerList();
+	Q3PtrList<Player> list = mGame->allPlayerList();
 	for (Player* p = list.first(); p; p = list.next()) {
 		QDomElement player = doc.createElement("Player");
 		if (!p->saveAsXML(player)) {
@@ -1452,7 +1454,7 @@ QByteArray BosonNetworkSyncer::createSyncMessage()
  boWarning(370) << k_funcinfo << "TODO: save the Boson object to the xml document" << endl;
 
 
- QDataStream stream(b, IO_WriteOnly);
+ QDataStream stream(b, QIODevice::WriteOnly);
  stream << doc.toString();
 
  return b;

@@ -1,7 +1,7 @@
 /*
     This file is part of the KDE games library
     Copyright (C) 2001-2002 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2001 Martin Heni (martin@heni-online.de)
+    Copyright (C) 2001 Martin Heni (kde at heni-online.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -21,10 +21,10 @@
 #ifndef __KGAMECHAT_H__
 #define __KGAMECHAT_H__
 
-#include <qstring.h>
+#include <QtCore/QString>
 
 #include "kchatbase.h"
-
+#include <libkdegames_export.h>
 class KPlayer;
 class KGame;
 class KGamePropertyBase;
@@ -40,7 +40,7 @@ class KGameChatPrivate;
  *
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class KGameChat : public KChatBase
+class KDEGAMES_EXPORT KGameChat : public KChatBase
 {
 	Q_OBJECT
 public:
@@ -49,22 +49,21 @@ public:
 	 * the chat message. The @p fromPlayer is the local player (see @ref
 	 * setFromPlayer).
 	 **/
-	KGameChat(KGame* game, int msgid, KPlayer* fromPlayer, QWidget * parent);
+	KGameChat(KGame* game, int msgid, KPlayer* fromPlayer, QWidget * parent, KChatBaseModel* model=0, KChatBaseItemDelegate* delegate=0);
 
 	/**
 	 * @overload
 	 * To make use of this widget you need to call @ref setFromPlayer
 	 * manually.
 	 **/
-	KGameChat(KGame* game, int msgId, QWidget* parent);
+	KGameChat(KGame* game, int msgId, QWidget* parent, KChatBaseModel* model=0, KChatBaseItemDelegate* delegate=0);
 
 	/**
 	 * @overload
 	 * This constructs a widget that is not usable. You must call at least
 	 * setGame, setFromPlayer and setMessageId manually.
-	 * @since 3.2
 	 **/
-	KGameChat(QWidget* parent);
+	explicit KGameChat(QWidget* parent);
 
 	virtual ~KGameChat();
 
@@ -106,7 +105,6 @@ public:
 	 * useful to change the message id.
 	 *
 	 * See also @ref messageId
-	 * @since 3.2
 	 **/
 	void setMessageId(int msgid);
 
@@ -114,14 +112,14 @@ public:
 	 * reimplemented from @ref KChatBase
 	 * @return @ref KPlayer::name() for the player set by @ref setFromPlayer
 	 **/
-	virtual const QString& fromName() const;
+	virtual QString fromName() const;
 
 
-public slots:
+public Q_SLOTS:
 	virtual void addMessage(const QString& fromName, const QString& text) { KChatBase::addMessage(fromName, text);}
 	virtual void addMessage(int fromId, const QString& text);
 
-	void slotReceiveMessage(int, const QByteArray&, Q_UINT32 receiver, Q_UINT32 sender);
+	void slotReceiveMessage(int, const QByteArray&, quint32 receiver, quint32 sender);
 
 protected:
 	/**
@@ -190,7 +188,7 @@ protected:
 	virtual QString sendToPlayerEntry(const QString& name) const;
 
 
-protected slots:
+protected Q_SLOTS:
 	/**
 	 * Unsets a KGame object that has been set using setKGame
 	 * before. You don't have to call this - this is usually done
@@ -208,7 +206,7 @@ protected slots:
 	 * gets forwarded to slotReceiveMessage if @p me equals
 	 * fromPlayer.
 	 **/
-	void slotReceivePrivateMessage(int msgid, const QByteArray& buffer, Q_UINT32 sender, KPlayer* me);
+	void slotReceivePrivateMessage(int msgid, const QByteArray& buffer, quint32 sender, KPlayer* me);
 
 protected:
 	virtual void returnPressed(const QString& text);
@@ -217,7 +215,7 @@ private:
 	void init(KGame* g, int msgid);
 
 private:
-	KGameChatPrivate* d;
+	KGameChatPrivate* const d;
 };
 
 #endif

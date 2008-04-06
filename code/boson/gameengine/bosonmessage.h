@@ -24,8 +24,8 @@
 #include "../bo3dtools.h"
 
 #include <qnamespace.h>
-#include <qvaluelist.h>
-#include <qvaluevector.h>
+#include <q3valuelist.h>
+#include <q3valuevector.h>
 
 class QDataStream;
 
@@ -90,15 +90,15 @@ public:
 	static BosonMessageEditorMove* newCopy(const BosonMessageEditorMove& message);
 
 private:
-	Q_INT8 mUndo;
-	Q_INT8 mRedo;
+	qint8 mUndo;
+	qint8 mRedo;
 };
 
 class BosonMessageEditorMovePlaceUnit : public BosonMessageEditorMove
 {
 public:
 	BosonMessageEditorMovePlaceUnit();
-	BosonMessageEditorMovePlaceUnit(Q_UINT32 unitType, Q_UINT32 owner, const BoVector2Fixed& pos, const bofixed& rotation);
+	BosonMessageEditorMovePlaceUnit(quint32 unitType, quint32 owner, const BoVector2Fixed& pos, const bofixed& rotation);
 
 	virtual bool save(QDataStream& stream) const;
 	virtual bool load(QDataStream& stream);
@@ -108,8 +108,8 @@ public:
 	}
 
 public:
-	Q_UINT32 mUnitType;
-	Q_UINT32 mOwner;
+	quint32 mUnitType;
+	quint32 mOwner;
 	BoVector2Fixed mPos;
 	bofixed mRotation;
 };
@@ -129,11 +129,11 @@ public:
 	 * BosonGroundTheme::groundTypeCount must be present)
 	 * @li The alpha value for that texture
 	 **/
-	BosonMessageEditorMoveChangeTexMap(const QValueVector<Q_UINT32>& cellCornersX,
-			const QValueVector<Q_UINT32>& cellCornersY,
-			const QValueVector<Q_UINT32>& cellCornersTexCount,
-			const QValueVector< QValueVector<Q_UINT32> > cellCornerTextures,
-			const QValueVector< QValueVector<Q_UINT8> > cellCornerAlpha);
+	BosonMessageEditorMoveChangeTexMap(const Q3ValueVector<quint32>& cellCornersX,
+			const Q3ValueVector<quint32>& cellCornersY,
+			const Q3ValueVector<quint32>& cellCornersTexCount,
+			const Q3ValueVector< Q3ValueVector<quint32> > cellCornerTextures,
+			const Q3ValueVector< Q3ValueVector<quint8> > cellCornerAlpha);
 
 	virtual bool save(QDataStream& stream) const;
 	virtual bool load(QDataStream& stream);
@@ -143,11 +143,11 @@ public:
 	}
 
 public:
-	QValueVector<Q_UINT32> mCellCornersX;
-	QValueVector<Q_UINT32> mCellCornersY;
-	QValueVector<Q_UINT32> mCellCornersTextureCount;
-	QValueVector< QValueVector<Q_UINT32> > mCellCornerTextures;
-	QValueVector< QValueVector<Q_UINT8> > mCellCornerAlpha;
+	Q3ValueVector<quint32> mCellCornersX;
+	Q3ValueVector<quint32> mCellCornersY;
+	Q3ValueVector<quint32> mCellCornersTextureCount;
+	Q3ValueVector< Q3ValueVector<quint32> > mCellCornerTextures;
+	Q3ValueVector< Q3ValueVector<quint8> > mCellCornerAlpha;
 };
 
 class BosonMessageEditorMoveChangeHeight : public BosonMessageEditorMove
@@ -155,9 +155,9 @@ class BosonMessageEditorMoveChangeHeight : public BosonMessageEditorMove
 public:
 	BosonMessageEditorMoveChangeHeight();
 	BosonMessageEditorMoveChangeHeight(
-			const QValueVector<Q_UINT32> cellCornersX,
-			const QValueVector<Q_UINT32> cellCornersY,
-			const QValueVector<bofixed> cellCornersHeight
+			const Q3ValueVector<quint32> cellCornersX,
+			const Q3ValueVector<quint32> cellCornersY,
+			const Q3ValueVector<bofixed> cellCornersHeight
 			);
 
 	virtual bool save(QDataStream& stream) const;
@@ -168,16 +168,16 @@ public:
 	}
 
 public:
-	QValueVector<Q_UINT32> mCellCornersX;
-	QValueVector<Q_UINT32> mCellCornersY;
-	QValueVector<bofixed> mCellCornersHeight;
+	Q3ValueVector<quint32> mCellCornersX;
+	Q3ValueVector<quint32> mCellCornersY;
+	Q3ValueVector<bofixed> mCellCornersHeight;
 };
 
 class BosonMessageEditorMoveDeleteItems : public BosonMessageEditorMove
 {
 public:
 	BosonMessageEditorMoveDeleteItems();
-	BosonMessageEditorMoveDeleteItems(const QValueList<Q_ULONG>& items);
+	BosonMessageEditorMoveDeleteItems(const Q3ValueList<Q_ULONG>& items);
 
 	virtual bool save(QDataStream& stream) const;
 	virtual bool load(QDataStream& stream);
@@ -187,7 +187,7 @@ public:
 	}
 
 public:
-	QValueList<Q_ULONG> mItems;
+	Q3ValueList<Q_ULONG> mItems;
 };
 
 class BosonMessageEditorMoveUndoPlaceUnit : public BosonMessageEditorMove
@@ -228,8 +228,8 @@ public:
 	 * @param message The original DeleteItems message.
 	 **/
 	BosonMessageEditorMoveUndoDeleteItems(
-			const QValueList<BosonMessageEditorMovePlaceUnit*>& units,
-			const QValueList<QString>& unitsData,
+			const Q3ValueList<BosonMessageEditorMovePlaceUnit*>& units,
+			const Q3ValueList<QString>& unitsData,
 			const BosonMessageEditorMoveDeleteItems& message
 	);
 
@@ -244,8 +244,8 @@ protected:
 	void clearUnits();
 
 public:
-	QValueList<BosonMessageEditorMovePlaceUnit*> mUnits;
-	QValueList<QString> mUnitsData;
+	Q3ValueList<BosonMessageEditorMovePlaceUnit*> mUnits;
+	Q3ValueList<QString> mUnitsData;
 	BosonMessageEditorMoveDeleteItems mMessage;
 };
 
@@ -274,7 +274,7 @@ class BosonMessageMoveMove : public BosonMessage
 {
 public:
 	BosonMessageMoveMove();
-	BosonMessageMoveMove(bool isAttack, const BoVector2Fixed& pos, const QValueList<Q_ULONG>& items);
+	BosonMessageMoveMove(bool isAttack, const BoVector2Fixed& pos, const Q3ValueList<Q_ULONG>& items);
 
 	virtual bool save(QDataStream& stream) const;
 	virtual bool load(QDataStream& stream);
@@ -284,16 +284,16 @@ public:
 	}
 
 public:
-	Q_INT8 mIsAttack;
+	qint8 mIsAttack;
 	BoVector2Fixed mPos;
-	QValueList<Q_ULONG> mItems;
+	Q3ValueList<Q_ULONG> mItems;
 };
 
 class BosonMessageMoveAttack : public BosonMessage
 {
 public:
 	BosonMessageMoveAttack() : BosonMessage() {}
-	BosonMessageMoveAttack(Q_ULONG attackedUnitId, const QValueList<Q_ULONG>& items)
+	BosonMessageMoveAttack(Q_ULONG attackedUnitId, const Q3ValueList<Q_ULONG>& items)
 		: BosonMessage(),
 		mAttackedUnitId(attackedUnitId),
 		mItems(items)
@@ -309,14 +309,14 @@ public:
 
 public:
 	Q_ULONG mAttackedUnitId;
-	QValueList<Q_ULONG> mItems;
+	Q3ValueList<Q_ULONG> mItems;
 };
 
 class BosonMessageMoveStop : public BosonMessage
 {
 public:
 	BosonMessageMoveStop() : BosonMessage() {}
-	BosonMessageMoveStop(const QValueList<Q_ULONG>& items)
+	BosonMessageMoveStop(const Q3ValueList<Q_ULONG>& items)
 		: BosonMessage(),
 		mItems(items)
 	{
@@ -330,7 +330,7 @@ public:
 	}
 
 public:
-	QValueList<Q_ULONG> mItems;
+	Q3ValueList<Q_ULONG> mItems;
 };
 
 class BosonMessageMoveMine : public BosonMessage
@@ -360,7 +360,7 @@ class BosonMessageMoveRefine: public BosonMessage
 {
 public:
 	BosonMessageMoveRefine() : BosonMessage() {}
-	BosonMessageMoveRefine(Q_UINT32 refineryOwner, Q_ULONG refineryId, const QValueList<Q_ULONG> items)
+	BosonMessageMoveRefine(quint32 refineryOwner, Q_ULONG refineryId, const Q3ValueList<Q_ULONG> items)
 		: BosonMessage(),
 		mRefineryOwner(refineryOwner),
 		mRefineryId(refineryId),
@@ -376,9 +376,9 @@ public:
 	}
 
 public:
-	Q_UINT32 mRefineryOwner;
+	quint32 mRefineryOwner;
 	Q_ULONG mRefineryId;
-	QValueList<Q_ULONG> mItems;
+	Q3ValueList<Q_ULONG> mItems;
 };
 
 // is a TODO
@@ -407,7 +407,7 @@ class BosonMessageMoveProduce : public BosonMessage
 {
 public:
 	BosonMessageMoveProduce() : BosonMessage() {}
-	BosonMessageMoveProduce(Q_UINT32 produceType, Q_UINT32 owner, Q_ULONG factoryId, Q_UINT32 type)
+	BosonMessageMoveProduce(quint32 produceType, quint32 owner, Q_ULONG factoryId, quint32 type)
 		: BosonMessage(),
 		mProduceType(produceType),
 		mOwner(owner),
@@ -424,17 +424,17 @@ public:
 	}
 
 public:
-	Q_UINT32 mProduceType;
-	Q_UINT32 mOwner;
+	quint32 mProduceType;
+	quint32 mOwner;
 	Q_ULONG mFactoryId;
-	Q_UINT32 mType;
+	quint32 mType;
 };
 
 class BosonMessageMoveProduceStop : public BosonMessage
 {
 public:
 	BosonMessageMoveProduceStop() : BosonMessage() {}
-	BosonMessageMoveProduceStop(Q_UINT32 produceType, Q_UINT32 owner, Q_ULONG factoryId, Q_UINT32 type)
+	BosonMessageMoveProduceStop(quint32 produceType, quint32 owner, Q_ULONG factoryId, quint32 type)
 		: BosonMessage(),
 		mProduceType(produceType),
 		mOwner(owner),
@@ -451,17 +451,17 @@ public:
 	}
 
 public:
-	Q_UINT32 mProduceType;
-	Q_UINT32 mOwner;
+	quint32 mProduceType;
+	quint32 mOwner;
 	Q_ULONG mFactoryId;
-	Q_UINT32 mType;
+	quint32 mType;
 };
 
 class BosonMessageMoveBuild : public BosonMessage
 {
 public:
 	BosonMessageMoveBuild() : BosonMessage() {}
-	BosonMessageMoveBuild(Q_UINT32 produceType, Q_UINT32 owner, Q_ULONG factoryId, const BoVector2Fixed& pos)
+	BosonMessageMoveBuild(quint32 produceType, quint32 owner, Q_ULONG factoryId, const BoVector2Fixed& pos)
 		: BosonMessage(),
 		mProduceType(produceType),
 		mOwner(owner),
@@ -478,8 +478,8 @@ public:
 	}
 
 public:
-	Q_UINT32 mProduceType;
-	Q_UINT32 mOwner;
+	quint32 mProduceType;
+	quint32 mOwner;
 	Q_ULONG mFactoryId;
 	BoVector2Fixed mPos;
 };
@@ -488,7 +488,7 @@ class BosonMessageMoveFollow : public BosonMessage
 {
 public:
 	BosonMessageMoveFollow() : BosonMessage() {}
-	BosonMessageMoveFollow(Q_UINT32 followUnitId, const QValueList<Q_ULONG>& items)
+	BosonMessageMoveFollow(quint32 followUnitId, const Q3ValueList<Q_ULONG>& items)
 		: BosonMessage(),
 		mFollowUnitId(followUnitId),
 		mItems(items)
@@ -503,15 +503,15 @@ public:
 	}
 
 public:
-	Q_UINT32 mFollowUnitId;
-	QValueList<Q_ULONG> mItems;
+	quint32 mFollowUnitId;
+	Q3ValueList<Q_ULONG> mItems;
 };
 
 class BosonMessageMoveEnterUnit : public BosonMessage
 {
 public:
 	BosonMessageMoveEnterUnit() : BosonMessage() {}
-	BosonMessageMoveEnterUnit(Q_UINT32 enterUnitId, const QValueList<Q_ULONG>& items)
+	BosonMessageMoveEnterUnit(quint32 enterUnitId, const Q3ValueList<Q_ULONG>& items)
 		: BosonMessage(),
 		mEnterUnitId(enterUnitId),
 		mItems(items)
@@ -526,15 +526,15 @@ public:
 	}
 
 public:
-	Q_UINT32 mEnterUnitId;
-	QValueList<Q_ULONG> mItems;
+	quint32 mEnterUnitId;
+	Q3ValueList<Q_ULONG> mItems;
 };
 
 class BosonMessageMoveLayMine : public BosonMessage
 {
 public:
 	BosonMessageMoveLayMine() : BosonMessage() {}
-	BosonMessageMoveLayMine(const QValueList<Q_ULONG>& units, const QValueList<Q_ULONG>& weapons)
+	BosonMessageMoveLayMine(const Q3ValueList<Q_ULONG>& units, const Q3ValueList<Q_ULONG>& weapons)
 		: BosonMessage(),
 		mUnits(units),
 		mWeapons(weapons)
@@ -549,15 +549,15 @@ public:
 	}
 
 public:
-	QValueList<Q_ULONG> mUnits;
-	QValueList<Q_ULONG> mWeapons;
+	Q3ValueList<Q_ULONG> mUnits;
+	Q3ValueList<Q_ULONG> mWeapons;
 };
 
 class BosonMessageMoveDropBomb : public BosonMessage
 {
 public:
 	BosonMessageMoveDropBomb() : BosonMessage() {}
-	BosonMessageMoveDropBomb(const BoVector2Fixed& pos, const QValueList<Q_ULONG>& units, const QValueList<Q_ULONG>& weapons)
+	BosonMessageMoveDropBomb(const BoVector2Fixed& pos, const Q3ValueList<Q_ULONG>& units, const Q3ValueList<Q_ULONG>& weapons)
 		: BosonMessage(),
 		mPos(pos),
 		mUnits(units),
@@ -574,15 +574,15 @@ public:
 
 public:
 	BoVector2Fixed mPos;
-	QValueList<Q_ULONG> mUnits;
-	QValueList<Q_ULONG> mWeapons;
+	Q3ValueList<Q_ULONG> mUnits;
+	Q3ValueList<Q_ULONG> mWeapons;
 };
 
 class BosonMessageMoveTeleport : public BosonMessage
 {
 public:
 	BosonMessageMoveTeleport() : BosonMessage() {}
-	BosonMessageMoveTeleport(Q_ULONG unitId, Q_UINT32 owner, const BoVector2Fixed& pos)
+	BosonMessageMoveTeleport(Q_ULONG unitId, quint32 owner, const BoVector2Fixed& pos)
 		: BosonMessage(),
 		mUnitId(unitId),
 		mOwner(owner),
@@ -599,7 +599,7 @@ public:
 
 public:
 	Q_ULONG mUnitId;
-	Q_UINT32 mOwner;
+	quint32 mOwner;
 	BoVector2Fixed mPos;
 };
 
@@ -607,7 +607,7 @@ class BosonMessageMoveRotate : public BosonMessage
 {
 public:
 	BosonMessageMoveRotate() : BosonMessage() {}
-	BosonMessageMoveRotate(Q_ULONG unitId, Q_UINT32 owner, const bofixed& rotate)
+	BosonMessageMoveRotate(Q_ULONG unitId, quint32 owner, const bofixed& rotate)
 		: BosonMessage(),
 		mUnitId(unitId),
 		mOwner(owner),
@@ -624,7 +624,7 @@ public:
 
 public:
 	Q_ULONG mUnitId;
-	Q_UINT32 mOwner;
+	quint32 mOwner;
 	bofixed mRotate;
 };
 

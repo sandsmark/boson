@@ -28,7 +28,7 @@
 
 #include <qdir.h>
 #include <qlineedit.h>
-#include <qlistbox.h>
+#include <q3listbox.h>
 
 BosonSearchPathsWidget::BosonSearchPathsWidget(QWidget* parent)
 	: BosonSearchPathsWidgetBase(parent)
@@ -86,7 +86,7 @@ void BosonSearchPathsWidget::slotPathSelected( int index )
 	boDebug() << k_funcinfo << index << endl;
  mCurrentPath = index;
  if(mCurrentPath >= 0) {
-	QListBoxItem* item = mCurrentPaths->item(index);
+	Q3ListBoxItem* item = mCurrentPaths->item(index);
 	BO_CHECK_NULL_RET(item);
 	mNewPath->setText(item->text());
  }

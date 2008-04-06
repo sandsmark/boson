@@ -133,7 +133,7 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
 
  bool ret = true;
 
- QPtrVector<BosonGroundType> types(grounds);
+ Q3PtrVector<BosonGroundType> types(grounds);
  for (unsigned int i = 0; i < grounds && ret; i++) {
 	BosonGroundType* ground = loadGroundType(conf, i);
 	if (!ground) {
@@ -163,7 +163,7 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
  return ret;
 }
 
-bool BosonGroundTheme::applyGroundThemeConfig(const QString& identifier, const QPtrVector<BosonGroundType>& types, const QString& themeDir)
+bool BosonGroundTheme::applyGroundThemeConfig(const QString& identifier, const Q3PtrVector<BosonGroundType>& types, const QString& themeDir)
 {
  if (!d->mId.isNull()) {
 	boError() << k_funcinfo << "theme already loaded in this object" << endl;

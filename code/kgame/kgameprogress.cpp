@@ -1,5 +1,5 @@
 /* This file is part of the KDE libraries
-   Copyright (C) 1996 Martynas Kunigelis
+   Copyright (C) 1996 Martynas Kunigelis martynas.kunigelis@vm.ktu.lt
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Library General Public
@@ -19,44 +19,65 @@
  * KGameProgress -- a progress indicator widget for KDE.
  */
 
-#include <qpainter.h>
-#include <qpixmap.h>
-#include <qstring.h>
-#include <qregexp.h>
-#include <qstyle.h>
-
 #include "kgameprogress.h"
 
-#include <kapplication.h>
+#include <QPaintEvent>
+#include <QPainter>
+#include <QPixmap>
+#include <QRegExp>
+#include <QStyle>
+#include <QFrame>
+#include <QApplication>
+#include <QtGui/QAbstractSlider>
 
-KGameProgress::KGameProgress(QWidget *parent, const char *name)
-	: QFrame(parent, name),
-	QRangeControl(0, 100, 1, 10, 0),
-	orient(Horizontal)
+#include <kglobalsettings.h>
+
+class KGameProgress::KGameProgressPrivate
 {
-	initialize();
+public:
+	KGameProgressPrivate(KGameProgress *qq)
+	    : q(qq)
+	{
+	}
+
+	KGameProgress *q;
+
+	void initialize();
+	int recalcValue(int);
+	void drawText(QPainter *);
+	void adjustStyle();
+
+	QPixmap *bar_pixmap;
+	bool use_supplied_bar_color;
+	QColor bar_color;
+	QColor bar_text_color;
+	QColor text_color;
+	QRect fr;
+	BarStyle bar_style;
+	bool text_enabled;
+	QString format_;
+	QAbstractSlider *slider;
+};
+
+
+KGameProgress::KGameProgress(QWidget *parent)
+	: QFrame(parent), d(new KGameProgressPrivate(this))
+{
+	d->initialize();
+	d->slider->setOrientation(Qt::Horizontal);
 }
 
-KGameProgress::KGameProgress(Orientation orientation, QWidget *parent, const char *name)
-	: QFrame(parent, name),
-	QRangeControl(0, 100, 1, 10, 0),
-	orient(orientation)
+KGameProgress::KGameProgress(Qt::Orientation orientation, QWidget *parent)
+	: QFrame(parent), d(new KGameProgressPrivate(this))
 {
-	initialize();
-}
-
-KGameProgress::KGameProgress(int minValue, int maxValue, int value,
-                     Orientation orientation, QWidget *parent, const char *name)
-	: QFrame(parent, name),
-	QRangeControl(minValue, maxValue, 1, 10, value),
-	orient(orientation)
-{
-	initialize();
+	d->initialize();
+	d->slider->setOrientation(orientation);
 }
 
 KGameProgress::~KGameProgress()
 {
-	delete bar_pixmap;
+	delete d->bar_pixmap;
+	delete d;
 }
 
 void KGameProgress::advance(int offset)
@@ -64,29 +85,34 @@ void KGameProgress::advance(int offset)
 	setValue(value() + offset);
 }
 
-void KGameProgress::initialize()
+void KGameProgress::KGameProgressPrivate::initialize()
 {
+	slider = new QAbstractSlider(q);
+
+	slider->setMinimum(0);
+	slider->setMaximum(100);
+	slider->setValue(0);
+
 	format_ = "%p%";
 	use_supplied_bar_color = false;
 	bar_pixmap = 0;
 	bar_style = Solid;
-	text_enabled = TRUE;
-	setBackgroundMode( PaletteBackground );
-	connect(kapp, SIGNAL(appearanceChanged()), this, SLOT(paletteChange()));
-	paletteChange();
+	text_enabled = true;
+	connect(slider, SIGNAL(valueChanged(int)), q, SLOT(valueChange(int)));
+	connect(KGlobalSettings::self(), SIGNAL(appearanceChanged()), q, SLOT(paletteChange()));
+	q->paletteChange();
 }
 
 void KGameProgress::paletteChange()
 {
-	QPalette p = kapp->palette();
-	const QColorGroup &colorGroup = p.active();
-	if (!use_supplied_bar_color)
-		bar_color = colorGroup.highlight();
-	bar_text_color = colorGroup.highlightedText();
-	text_color = colorGroup.text();
+	QPalette p = qApp->palette();
+	if (!d->use_supplied_bar_color)
+		d->bar_color = p.color( QPalette::Active, QPalette::Highlight );
+	d->bar_text_color = p.color( QPalette::Active, QPalette::HighlightedText );
+	d->text_color = p.color( QPalette::Active, QPalette::Text );
 	setPalette(p);
 
-	adjustStyle();
+	d->adjustStyle();
 }
 
 
@@ -94,68 +120,93 @@ void KGameProgress::setBarPixmap(const QPixmap &pixmap)
 {
 	if (pixmap.isNull())
 		return;
-	if (bar_pixmap)
-		delete bar_pixmap;
+	if (d->bar_pixmap)
+		delete d->bar_pixmap;
 
-	bar_pixmap = new QPixmap(pixmap);
+	d->bar_pixmap = new QPixmap(pixmap);
 }
 
 void KGameProgress::setBarColor(const QColor &color)
 {
-	bar_color = color;
-	use_supplied_bar_color = true;
-	if (bar_pixmap) {
-		delete bar_pixmap;
-		bar_pixmap = 0;
+	d->bar_color = color;
+	d->use_supplied_bar_color = true;
+	if (d->bar_pixmap) {
+		delete d->bar_pixmap;
+		d->bar_pixmap = 0;
 	}
 }
 
 void KGameProgress::setBarStyle(BarStyle style)
 {
-	if (bar_style != style) {
-		bar_style = style;
+	if (d->bar_style != style) {
+		d->bar_style = style;
 		update();
 	}
 }
 
-void KGameProgress::setOrientation(Orientation orientation)
+void KGameProgress::setOrientation(Qt::Orientation orientation)
 {
-	if (orient != orientation) {
-		orient = orientation;
+	if (this->orientation() != orientation) {
+		setOrientation(orientation);
 		update();
 	}
 }
 
 void KGameProgress::setValue(int value)
 {
-	QRangeControl::setValue(value);
+	d->slider->setValue( value );
+}
+
+void KGameProgress::setMinimum(int value)
+{
+	d->slider->setMinimum( value );
+}
+
+void KGameProgress::setMaximum(int value)
+{
+	d->slider->setMaximum( value );
 }
 
 void KGameProgress::setTextEnabled(bool enable)
 {
-	text_enabled = enable;
+	d->text_enabled = enable;
 }
 
-const QColor & KGameProgress::barColor() const
+QColor KGameProgress::barColor() const
 {
-	return bar_color;
+	return d->bar_color;
 }
 
 const QPixmap * KGameProgress::barPixmap() const
 {
-	return bar_pixmap;
+	return d->bar_pixmap;
+}
+
+int KGameProgress::value() const
+{
+	return d->slider->value();
+}
+
+int KGameProgress::minimum() const
+{
+	return d->slider->minimum();
+}
+
+int KGameProgress::maximum() const
+{
+	return d->slider->maximum();
 }
 
 bool KGameProgress::textEnabled() const
 {
-	return text_enabled;
+	return d->text_enabled;
 }
 
 QSize KGameProgress::sizeHint() const
 {
 	QSize s( size() );
 
-	if(orientation() == KGameProgress::Vertical) {
+	if(orientation() == Qt::Vertical) {
 		s.setWidth(24);
 	} else {
 		s.setHeight(24);
@@ -171,59 +222,56 @@ QSize KGameProgress::minimumSizeHint() const
 
 QSizePolicy KGameProgress::sizePolicy() const
 {
-	if ( orientation()==KGameProgress::Vertical )
+	if ( orientation()==Qt::Vertical )
 		return QSizePolicy( QSizePolicy::Fixed, QSizePolicy::Expanding );
 	else
 		return QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Fixed );
 }
 
-KGameProgress::Orientation KGameProgress::orientation() const
+Qt::Orientation KGameProgress::orientation() const
 {
-	return orient;
+	return d->slider->orientation();
 }
 
 KGameProgress::BarStyle KGameProgress::barStyle() const
 {
-	return bar_style;
+	return d->bar_style;
 }
 
-int KGameProgress::recalcValue(int range)
+int KGameProgress::KGameProgressPrivate::recalcValue(int range)
 {
-	int abs_value = value() - minValue();
-	int abs_range = maxValue() - minValue();
+	int abs_value = q->value() - q->minimum();
+	int abs_range = q->maximum() - q->minimum();
 	return abs_range ? range * abs_value / abs_range : 0;
 }
 
-void KGameProgress::valueChange()
+void KGameProgress::valueChange(int newValue)
 {
-	repaint(contentsRect(), FALSE);
-	emit percentageChanged(recalcValue(100));
-}
+	Q_UNUSED(newValue);
 
-void KGameProgress::rangeChange()
-{
-	repaint(contentsRect(), FALSE);
-	emit percentageChanged(recalcValue(100));
+	repaint(contentsRect());
+	emit percentageChanged(d->recalcValue(100));
 }
 
 void KGameProgress::styleChange(QStyle&)
 {
-	adjustStyle();
+	d->adjustStyle();
 }
 
-void KGameProgress::adjustStyle()
+void KGameProgress::KGameProgressPrivate::adjustStyle()
 {
-	switch (style().styleHint(QStyle::SH_GUIStyle)) {
-		case WindowsStyle:
+/// @todo Is the code below still necessary in KDE4 ???
+/*	switch (style()->styleHint(QStyle::SH_GUIStyle)) {
+		case Qt::WindowsStyle:
 			setFrameStyle(QFrame::WinPanel | QFrame::Sunken);
 			break;
-		case MotifStyle:
+		case Qt::MotifStyle:
 		default:
 			setFrameStyle(QFrame::Panel | QFrame::Sunken);
 			setLineWidth( 2 );
 			break;
-	}
-	update();
+	}*/
+	q->update();
 }
 
 void KGameProgress::paletteChange( const QPalette &p )
@@ -233,9 +281,9 @@ void KGameProgress::paletteChange( const QPalette &p )
 	QFrame::paletteChange(p);
 }
 
-void KGameProgress::drawText(QPainter *p)
+void KGameProgress::KGameProgressPrivate::drawText(QPainter *p)
 {
-	QRect r(contentsRect());
+	QRect r(q->contentsRect());
 	//QColor c(bar_color.rgb() ^ backgroundColor().rgb());
 
 	// Rik: Replace the tags '%p', '%v' and '%m' with the current percentage,
@@ -243,103 +291,110 @@ void KGameProgress::drawText(QPainter *p)
 	QString s(format_);
 
 	s.replace(QRegExp(QString::fromLatin1("%p")), QString::number(recalcValue(100)));
-	s.replace(QRegExp(QString::fromLatin1("%v")), QString::number(value()));
-	s.replace(QRegExp(QString::fromLatin1("%m")), QString::number(maxValue()));
+	s.replace(QRegExp(QString::fromLatin1("%v")), QString::number(q->value()));
+	s.replace(QRegExp(QString::fromLatin1("%m")), QString::number(q->maximum()));
 
 	p->setPen(text_color);
 	QFont font = p->font();
 	font.setBold(true);
 	p->setFont(font);
 	//p->setRasterOp(XorROP);
-	p->drawText(r, AlignCenter, s);
+	p->drawText(r, Qt::AlignCenter, s);
 	p->setClipRegion( fr );
 	p->setPen(bar_text_color);
-	p->drawText(r, AlignCenter, s);
+	p->drawText(r, Qt::AlignCenter, s);
 }
 
-void KGameProgress::drawContents(QPainter *p)
+void KGameProgress::paintEvent( QPaintEvent *e )
 {
+	//paint the frame
+	QFrame::paintEvent(e);
+
+	//now for the inside of the Widget
+	QPainter p(this);
+	
 	QRect cr = contentsRect(), er = cr;
-	fr = cr;
-	QBrush fb(bar_color), eb(backgroundColor());
+	d->fr = cr;
+        QBrush fb(d->bar_color), eb(palette().color(backgroundRole()));
 
-	if (bar_pixmap)
-		fb.setPixmap(*bar_pixmap);
+	if (d->bar_pixmap)
+		fb.setTexture(*d->bar_pixmap);
 
-	if (backgroundPixmap())
-		eb.setPixmap(*backgroundPixmap());
+        QPixmap bkgnd_pix = palette().brush(backgroundRole()).texture();
+	if (!bkgnd_pix.isNull())
+		eb.setTexture(bkgnd_pix);
 
-	switch (bar_style) {
+	switch (d->bar_style) {
 		case Solid:
-			if (orient == Horizontal) {
-				fr.setWidth(recalcValue(cr.width()));
-				er.setLeft(fr.right() + 1);
+			if (orientation() == Qt::Horizontal) {
+				d->fr.setWidth(d->recalcValue(cr.width()));
+				er.setLeft(d->fr.right() + 1);
 			} else {
-				fr.setTop(cr.bottom() - recalcValue(cr.height()));
-				er.setBottom(fr.top() - 1);
+				d->fr.setTop(cr.bottom() - d->recalcValue(cr.height()));
+				er.setBottom(d->fr.top() - 1);
 			}
 
-			p->setBrushOrigin(cr.topLeft());
-			p->fillRect(fr, fb);
+			p.setBrushOrigin(cr.topLeft());
+			p.fillRect(d->fr, fb);
 
-			p->fillRect(er, eb);
+			p.fillRect(er, eb);
 
 			break;
 
 		case Blocked:
 			const int margin = 2;
 			int max, num, dx, dy;
-			if (orient == Horizontal) {
-				fr.setHeight(cr.height() - 2 * margin);
-				fr.setWidth((int)(0.67 * fr.height()));
-				fr.moveTopLeft(QPoint(cr.left() + margin, cr.top() + margin));
-				dx = fr.width() + margin;
+			if (orientation() == Qt::Horizontal) {
+				d->fr.setHeight(cr.height() - 2 * margin);
+				d->fr.setWidth((int)(0.67 * d->fr.height()));
+				d->fr.moveTopLeft(QPoint(cr.left() + margin, cr.top() + margin));
+				dx = d->fr.width() + margin;
 				dy = 0;
-				max = (cr.width() - margin) / (fr.width() + margin) + 1;
-				num = recalcValue(max);
+				max = (cr.width() - margin) / (d->fr.width() + margin) + 1;
+				num = d->recalcValue(max);
 			} else {
-				fr.setWidth(cr.width() - 2 * margin);
-				fr.setHeight((int)(0.67 * fr.width()));
-				fr.moveBottomLeft(QPoint(cr.left() + margin, cr.bottom() - margin));
+				d->fr.setWidth(cr.width() - 2 * margin);
+				d->fr.setHeight((int)(0.67 * d->fr.width()));
+				d->fr.moveBottomLeft(QPoint(cr.left() + margin, cr.bottom() - margin));
 				dx = 0;
-				dy = - (fr.height() + margin);
-				max = (cr.height() - margin) / (fr.height() + margin) + 1;
-				num = recalcValue(max);
+				dy = - (d->fr.height() + margin);
+				max = (cr.height() - margin) / (d->fr.height() + margin) + 1;
+				num = d->recalcValue(max);
 			}
-			p->setClipRect(cr.x() + margin, cr.y() + margin,
+			p.setClipRect(cr.x() + margin, cr.y() + margin,
 			               cr.width() - margin, cr.height() - margin);
 			for (int i = 0; i < num; i++) {
-				p->setBrushOrigin(fr.topLeft());
-				p->fillRect(fr, fb);
-				fr.moveBy(dx, dy);
+				p.setBrushOrigin(d->fr.topLeft());
+				p.fillRect(d->fr, fb);
+				d->fr.translate(dx, dy);
 			}
 			
 			if (num != max) {
-				if (orient == Horizontal)
-					er.setLeft(fr.right() + 1);
+				if (orientation() == Qt::Horizontal)
+					er.setLeft(d->fr.right() + 1);
 				else
-					er.setBottom(fr.bottom() + 1);
+					er.setBottom(d->fr.bottom() + 1);
 				if (!er.isNull()) {
-					p->setBrushOrigin(cr.topLeft());
-					p->fillRect(er, eb);
+					p.setBrushOrigin(cr.topLeft());
+					p.fillRect(er, eb);
 				}
 			}
 
 			break;
 	}
 
-	if (text_enabled && bar_style != Blocked)
-		drawText(p);
+	if (d->text_enabled && d->bar_style != Blocked)
+		d->drawText(&p);
 }
 
 void KGameProgress::setFormat(const QString & format)
 {
-	format_ = format;
+	d->format_ = format;
 }
 
 QString KGameProgress::format() const
 {
-	return format_;
+	return d->format_;
 }
 
 #include "kgameprogress.moc"

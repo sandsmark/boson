@@ -20,7 +20,7 @@
 #define BOGLQUERYSTATES_H
 
 class QStringList;
-class QListView;
+class Q3ListView;
 
 class BoGLQueryStatesPrivate;
 class BoGLQueryStates

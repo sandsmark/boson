@@ -32,6 +32,8 @@
 #include "bodebug.h"
 
 #include <kgame/kplayer.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 BosonStartupNetwork::BosonStartupNetwork(QObject* parent) : QObject(parent, "BosonStartupNetwork")
 {
@@ -77,8 +79,8 @@ void BosonStartupNetwork::setGame(Boson* game)
  connect(mGame, SIGNAL(destroyed()),
 		this, SLOT(slotUnsetKGame()));
 
- QPtrList<Player> list = mGame->allPlayerList();
- QPtrListIterator<Player> it(list);;
+ Q3PtrList<Player> list = mGame->allPlayerList();
+ Q3PtrListIterator<Player> it(list);;
  for (; it.current(); ++it) {
 	slotPlayerJoinedGame(it.current());
  }
@@ -172,11 +174,11 @@ bool BosonStartupNetwork::sendNewGame(const QByteArray& data, bool editor)
  QByteArray compresseddata = qCompress(data);
 
  QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
+ QDataStream stream(buffer, QIODevice::WriteOnly);
  if (editor) {
-	stream << (Q_INT8)0;
+	stream << (qint8)0;
  } else {
-	stream << (Q_INT8)1;
+	stream << (qint8)1;
  }
  stream << compresseddata;
  mGame->sendMessage(buffer, BosonMessageIds::IdNewGame);
@@ -226,9 +228,9 @@ void BosonStartupNetwork::sendChangeTeamColor(Player* p, const QColor& color)
  BO_CHECK_NULL_RET(mGame);
  BO_CHECK_NULL_RET(p);
  QByteArray b;
- QDataStream stream(b, IO_WriteOnly);
- stream << (Q_UINT32)p->bosonId();
- stream << (Q_UINT32)color.rgb();
+ QDataStream stream(b, QIODevice::WriteOnly);
+ stream << (quint32)p->bosonId();
+ stream << (quint32)color.rgb();
  mGame->sendMessage(b, BosonMessageIds::ChangeTeamColor);
 }
 
@@ -237,10 +239,10 @@ void BosonStartupNetwork::sendChangeSpecies(Player* p, const QString& species, c
  BO_CHECK_NULL_RET(mGame);
  BO_CHECK_NULL_RET(p);
  QByteArray b;
- QDataStream stream(b, IO_WriteOnly);
- stream << (Q_UINT32)p->bosonId();
+ QDataStream stream(b, QIODevice::WriteOnly);
+ stream << (quint32)p->bosonId();
  stream << species;
- stream << (Q_UINT32)color.rgb();
+ stream << (quint32)color.rgb();
  mGame->sendMessage(b, BosonMessageIds::ChangeSpecies);
 }
 
@@ -249,9 +251,9 @@ void BosonStartupNetwork::sendChangeSide(Player* p, unsigned int sideId)
  BO_CHECK_NULL_RET(mGame);
  BO_CHECK_NULL_RET(p);
  QByteArray b;
- QDataStream stream(b, IO_WriteOnly);
- stream << (Q_UINT32)p->bosonId();
- stream << (Q_UINT32)sideId;
+ QDataStream stream(b, QIODevice::WriteOnly);
+ stream << (quint32)p->bosonId();
+ stream << (quint32)sideId;
  mGame->sendMessage(b, BosonMessageIds::ChangeSide);
 }
 
@@ -276,7 +278,7 @@ void BosonStartupNetwork::sendChangePlayField(const QString& identifier)
  }
  // a NULL identifier means "new map", for the start editor widget
  QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
+ QDataStream stream(buffer, QIODevice::WriteOnly);
  // transmit the identifier/name so that the remote newgame dialogs will be able
  // to display the newly selected playfield
  stream << identifier;

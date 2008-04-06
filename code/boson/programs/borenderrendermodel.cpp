@@ -31,7 +31,7 @@
 #include "bomaterial.h"
 #include <bogl.h>
 
-#include <qvaluevector.h>
+#include <q3valuevector.h>
 #include <qtimer.h>
 
 #include <math.h>
@@ -274,7 +274,7 @@ void BoRenderRenderModel::renderModel(int mode)
 
 		mTurretMatrix.multiply(&lookAt);
 
-		QValueVector<const BoMatrix*> itemMatrices(f->nodeCount());
+		Q3ValueVector<const BoMatrix*> itemMatrices(f->nodeCount());
 		for (unsigned int i = 0; i < f->nodeCount(); i++) {
 			BoMesh* mesh = f->mesh(i);
 			if (!mTurretMeshesEnabled || !mTurretMeshes.contains(mesh->name())) {

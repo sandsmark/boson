@@ -98,7 +98,8 @@ void BoUfoCheckBox::setText(const QString& text)
  if (text.isNull()) {
 	mCheckBox->setText("");
  } else {
-	mCheckBox->setText(text.latin1());
+	QByteArray tmp = text.toAscii();
+	mCheckBox->setText(std::string(tmp.constData(), tmp.length()));
  }
 }
 

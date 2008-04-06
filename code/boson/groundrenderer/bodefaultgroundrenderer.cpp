@@ -36,6 +36,9 @@
 #include <bodebug.h>
 
 #include <math.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3MemArray>
 
 // VBOs or plain vertex arrays
 #define USE_VBOS 0
@@ -244,7 +247,7 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 
 #if USE_QUADS
 #if 1
-	QMemArray<unsigned int>& textureIndices = *mTextureIndices[i];
+	Q3MemArray<unsigned int>& textureIndices = *mTextureIndices[i];
 	glDrawElements(GL_QUADS, textureIndices.count(), GL_UNSIGNED_INT, textureIndices.data());
 #else
 	glDrawElements(GL_QUADS, mIndicesCount, GL_UNSIGNED_INT, mIndicesArray);
@@ -257,7 +260,7 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 	// large one.
 	// however this is disabled atm.
 	int start = 0;
-	for (QValueList<int>::const_iterator it = mIndicesCountList.begin(); it != mIndicesCountList.end(); ++it) {
+	for (Q3ValueList<int>::const_iterator it = mIndicesCountList.begin(); it != mIndicesCountList.end(); ++it) {
 		int indexCount = *it;
 		glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, mIndicesArray + start);
 		start += indexCount;
@@ -361,7 +364,7 @@ void BoDefaultGroundRenderer::updateMapCache(const BosonMap* map)
  }
  mTextureIndices.resize(map->groundTheme()->groundTypeCount());
  for (unsigned int i = 0; i < map->groundTheme()->groundTypeCount(); i++) {
-	mTextureIndices[i] = new QMemArray<unsigned int>();
+	mTextureIndices[i] = new Q3MemArray<unsigned int>();
  }
  mIndicesDirty = true;
 #if USE_VBOS
@@ -472,7 +475,7 @@ void BoDefaultGroundRenderer::calculateIndices(int* renderCells, unsigned int ce
  mIndicesArray = new unsigned int[mIndicesArraySize];
 
  for (unsigned int i = 0; i < map->groundTheme()->groundTypeCount(); i++) {
-	QMemArray<unsigned int>& textureIndices = *mTextureIndices[i];
+	Q3MemArray<unsigned int>& textureIndices = *mTextureIndices[i];
 	textureIndices.resize(cellsCount * 4);
  }
  for (unsigned int i = 0; i < cellsCount; i++) {
@@ -487,7 +490,7 @@ void BoDefaultGroundRenderer::calculateIndices(int* renderCells, unsigned int ce
 	mIndicesArray[i * 4 + 3] = map->cornerArrayPos(x + w, y);
  }
  for (unsigned int i = 0; i < map->groundTheme()->groundTypeCount(); i++) {
-	QMemArray<unsigned int>& textureIndices = *mTextureIndices[i];
+	Q3MemArray<unsigned int>& textureIndices = *mTextureIndices[i];
 	const unsigned char* colorPointer = mColorArray + (map->cornerArrayPos(map->width(), map->height()) + 1) * 4 * i;
 
 	unsigned int count = 0;

@@ -29,6 +29,8 @@
 #include <bogl.h>
 
 #include <math.h>
+//Added by qt3to4:
+#include <QMouseEvent>
 
 static void paintBox(float size)
 {
@@ -218,11 +220,11 @@ void BoOrbiterWidget::mousePressEvent(QMouseEvent* e)
 {
  BO_CHECK_NULL_RET(camera());
  switch (e->button()) {
-	case QMouseEvent::LeftButton:
+	case Qt::LeftButton:
 	boDebug() << k_funcinfo << "left button" << endl;
 		mMouseMoveDiff->moveEvent(e->pos());
 		break;
-	case QMouseEvent::RightButton:
+	case Qt::RightButton:
 	boDebug() << k_funcinfo << "right button" << endl;
 		mMouseMoveDiff->moveEvent(e->pos());
 		break;
@@ -240,7 +242,7 @@ void BoOrbiterWidget::mouseMoveEvent(QMouseEvent* e)
  // orbiter object on the lines.
  int dx = mMouseMoveDiff->dx();
  int dy = mMouseMoveDiff->dy();
- if (e->state() & LeftButton) {
+ if (e->state() & Qt::LeftButton) {
 	BoQuaternion q = camera()->quaternion();
 	BoVector3Float cameraPos;
 	q.transform(&cameraPos, &camera()->cameraPos());
@@ -257,7 +259,7 @@ void BoOrbiterWidget::mouseMoveEvent(QMouseEvent* e)
 	BoQuaternion inv = q2.conjugate(); // equal to inverse(), but faster
 	inv.transform(&cameraPos, &cameraPos);
 	updateOrbiterPosition(cameraPos, q2);
- } else if (e->state() & RightButton) {
+ } else if (e->state() & Qt::RightButton) {
 	BoQuaternion q = camera()->quaternion();
 	BoVector3Float cameraPos;
 	q.transform(&cameraPos, &camera()->cameraPos());

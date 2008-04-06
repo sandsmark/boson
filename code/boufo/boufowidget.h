@@ -23,6 +23,10 @@
 
 #include <qobject.h>
 #include <qevent.h>
+//Added by qt3to4:
+#include <QKeyEvent>
+#include <QMouseEvent>
+#include <QWheelEvent>
 
 class QMouseEvent;
 class QWheelEvent;
@@ -110,13 +114,13 @@ public:
 		EventClick = QEvent::User + 0
 	};
 public:
-	BoUfoMouseEventClick(Type type, const QPoint& pos, int button, int state, int clickCount = 1)
-		: QMouseEvent(type, pos, button, state),
+	BoUfoMouseEventClick(Type type, const QPoint& pos, Qt::MouseButton button, Qt::MouseButtons state, Qt::KeyboardModifiers mod, int clickCount = 1)
+		: QMouseEvent(type, pos, button, state, mod),
 		mClickCount(clickCount)
 	{
 	}
-	BoUfoMouseEventClick(const QPoint& pos, int button, int state, int clickCount = 1)
-		: QMouseEvent((QEvent::Type)EventClick, pos, button, state),
+	BoUfoMouseEventClick(const QPoint& pos, Qt::MouseButton button, Qt::MouseButtons state, Qt::KeyboardModifiers mod, int clickCount = 1)
+		: QMouseEvent((QEvent::Type)EventClick, pos, button, state, mod),
 		mClickCount(clickCount)
 	{
 	}
@@ -221,6 +225,7 @@ public:
 	 * Reimplemented from @ref QObject::setName
 	 **/
 	virtual void setName(const char* name);
+	QString name() const { return objectName(); }
 
 	/**
 	 * Set the vertical alignment, see @ref
@@ -490,7 +495,7 @@ public:
 	/**
 	 * Used by @ref BoUfoCustomWidget only
 	 **/
-	virtual QSize preferredSize(const QSize& maxSize = QSize(QCOORD_MAX, QCOORD_MAX)) const
+	virtual QSize preferredSize(const QSize& maxSize = QSize(-2147483646, 2147483647)) const // AB: default values were QCOORD_MIN, QCOORD_MAX
 	{
 		Q_UNUSED(maxSize);
 		return QSize(0, 0);

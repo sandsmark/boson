@@ -1,3 +1,6 @@
+//Added by qt3to4:
+#include <Q3CString>
+#include <Q3ValueList>
 /*
     This file is part of the Boson game
     Copyright (C) 2004 Andreas Beckermann (b_mann@gmx.de)
@@ -26,7 +29,7 @@ class Boson;
 class Unit;
 class BosonCanvas;
 class BoMessageLogger;
-template<class T> class QValueList;
+template<class T> class Q3ValueList;
 
 #include "../bomath.h"
 #include <qstring.h>
@@ -82,7 +85,7 @@ public:
 	/**
 	 * See @ref BosonSyncChecker::receiveNetworkSyncCheckAck.
 	 **/
-	bool receiveNetworkSyncCheckAck(QDataStream& stream, Q_UINT32 sender);
+	bool receiveNetworkSyncCheckAck(QDataStream& stream, quint32 sender);
 
 	/**
 	 * See @ref BosonNetworkSyncer::receiveNetworkRequestSync
@@ -125,7 +128,7 @@ public:
 	/**
 	 * Called by @ref BosonSyncChecker. Do not call manually.
 	 **/
-	void syncCheckingCompleted(const QValueList<Q_UINT32>& outOfSyncClients);
+	void syncCheckingCompleted(const Q3ValueList<quint32>& outOfSyncClients);
 
 	bool acceptNetworkTransmission(int msgid) const;
 
@@ -214,11 +217,11 @@ public:
 	 *
 	 * @return TRUE if the client is in sync, otherwise FALSE.
 	 **/
-	bool receiveNetworkSyncCheckAck(QDataStream& stream, Q_UINT32 sender);
+	bool receiveNetworkSyncCheckAck(QDataStream& stream, quint32 sender);
 
 protected:
 	void storeLogAndSend(const QByteArray& log);
-	void sendAck(const QCString& expectedString, bool verify, unsigned int syncId, const QByteArray& origLog);
+	void sendAck(const Q3CString& expectedString, bool verify, unsigned int syncId, const QByteArray& origLog);
 
 	QByteArray createLongSyncCheckLog(BosonCanvas* canvas, unsigned int advanceMessageCounter, unsigned int interval) const;
 	QByteArray createCompleteSyncCheckLog(BosonCanvas* canvas) const;

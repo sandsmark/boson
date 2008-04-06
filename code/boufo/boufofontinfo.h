@@ -22,12 +22,17 @@
 #define BOUFOFONTINFO_H
 
 #include <qobject.h>
+//Added by qt3to4:
+#include <QMouseEvent>
+#include <QKeyEvent>
+#include <Q3ValueList>
+#include <QWheelEvent>
 
 class QMouseEvent;
 class QWheelEvent;
 class QKeyEvent;
 template<class T1, class T2> class QMap;
-template<class T1> class QValueList;
+template<class T1> class Q3ValueList;
 class QDomElement;
 
 namespace ufo {

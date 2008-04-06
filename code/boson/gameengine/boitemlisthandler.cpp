@@ -25,7 +25,7 @@
 #include "../boglobal.h"
 #include "bodebug.h"
 
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 #include <qtimer.h>
 
 // currently we delete the lists as soon as we return to the event loop
@@ -43,7 +43,7 @@ public:
 	BoItemListHandlerPrivate()
 	{
 	}
-	QPtrList<BoItemList> mLists;
+	Q3PtrList<BoItemList> mLists;
 	bool mTimerActive;
 };
 
@@ -85,14 +85,14 @@ void BoItemListHandler::unregisterList(BoItemList* list)
 void BoItemListHandler::slotDeleteLists()
 {
  d->mTimerActive = false;
- QPtrList<BoItemList> lists = d->mLists;
+ Q3PtrList<BoItemList> lists = d->mLists;
 
  // every list's unregisters itself in its d'tor, so let's keep that fast by
  // avoiding list lookups.
  d->mLists.clear();
 
  if (lists.count() > 0) {
-	QPtrListIterator<BoItemList> it(lists);
+	Q3PtrListIterator<BoItemList> it(lists);
 	for (; it.current(); ++it) {
 		delete it.current();
 	}

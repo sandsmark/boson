@@ -29,16 +29,18 @@
 #include <kgame/kmessageio.h>
 #include <kgame/kmessageclient.h>
 
-#include <qcstring.h>
+#include <q3cstring.h>
 #include <qdatastream.h>
 #include <qdatetime.h>
 #include <qtimer.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 #include "server.moc"
 
 
 
-Server::Server(Q_UINT16 cookie, QObject* parent) : KMessageServer(cookie, parent)
+Server::Server(quint16 cookie, QObject* parent) : KMessageServer(cookie, parent)
 {
   mCookie = cookie;
 
@@ -54,8 +56,8 @@ Server::Server(Q_UINT16 cookie, QObject* parent) : KMessageServer(cookie, parent
       this, SLOT(slotClientConnected(KMessageIO*)));
   connect(this, SIGNAL(connectionLost(KMessageIO*)),
       this, SLOT(slotConnectionLost(KMessageIO*)));
-  connect(this, SIGNAL(messageReceived(const QByteArray&, Q_UINT32, bool&)),
-      this, SLOT(slotMessageReceived(const QByteArray&, Q_UINT32, bool&)));
+  connect(this, SIGNAL(messageReceived(const QByteArray&, quint32, bool&)),
+      this, SLOT(slotMessageReceived(const QByteArray&, quint32, bool&)));
 }
 
 Server::~Server()
@@ -64,7 +66,7 @@ Server::~Server()
   delete mGame;
 }
 
-bool Server::init(Q_UINT16 port, Q_UINT16 webport)
+bool Server::init(quint16 port, quint16 webport)
 {
   mPort = port;
   bool ok = initNetwork(mPort);
@@ -143,13 +145,13 @@ void Server::broadcastMessage(const QByteArray& msg)
   KMessageServer::broadcastMessage(msg);
 }
 
-void Server::sendMessage(Q_UINT32 id, const QByteArray& msg)
+void Server::sendMessage(quint32 id, const QByteArray& msg)
 {
   mOutTraffic += msg.count() + 5;
   KMessageServer::sendMessage(id, msg);
 }
 
-void Server::sendMessage(const QValueList<Q_UINT32>& ids, const QByteArray& msg)
+void Server::sendMessage(const Q3ValueList<quint32>& ids, const QByteArray& msg)
 {
   mOutTraffic += (msg.count() + 5) * ids.count();
   KMessageServer::sendMessage(ids, msg);
@@ -159,14 +161,14 @@ void Server::getReceivedMessage(const QByteArray& message)
 {
   // Make adeep copy of the message data and create a datastream on it
   QByteArray msg = message.copy();
-  QDataStream stream(msg, IO_ReadOnly);
+  QDataStream stream(msg, QIODevice::ReadOnly);
 
   mInTraffic += 5 + msg.count();  // 5 bytes is packet header
 
   // Find the sender of the msg
   KMessageIO* client = (KMessageIO*)sender();
 
-  Q_UINT32 kgamemsgid;
+  quint32 kgamemsgid;
   stream >> kgamemsgid;
 
   if(kgamemsgid == REQ_BROADCAST)
@@ -184,11 +186,11 @@ void Server::getReceivedMessage(const QByteArray& message)
 void Server::receivedGameMessage(QDataStream& stream)
 {
   // Extract KGame sender/receiver and message id
-  Q_UINT32 kgamesender, kgamereceiver;
+  quint32 kgamesender, kgamereceiver;
   int msgid;
   KGameMessage::extractHeader(stream, kgamesender, kgamereceiver, msgid);
 
-  //kdDebug() << "  gameMsg, id: " << msgid << endl;
+  //kDebug() << "  gameMsg, id: " << msgid << endl;
 
   if(msgid > 256)
   {
@@ -203,28 +205,28 @@ void Server::receivedGameMessage(QDataStream& stream)
 void Server::receivedPlayerMessage(QDataStream& stream)
 {
   // Extract KGame sender/receiver and message id
-  Q_UINT32 kgamesender, kgamereceiver;
+  quint32 kgamesender, kgamereceiver;
   int kgamemsgid;
   KGameMessage::extractHeader(stream, kgamesender, kgamereceiver, kgamemsgid);
 
   boDebug() << "  playerMsg, id: " << kgamemsgid << endl;
 }
 
-void Server::slotMessageReceived(const QByteArray& data, Q_UINT32 clientId, bool& unknown)
+void Server::slotMessageReceived(const QByteArray& data, quint32 clientId, bool& unknown)
 {
   return;
   // Make adeep copy of the message data and create a datastream on it
   QByteArray msg = data.copy();
-  QDataStream stream(msg, IO_ReadOnly);
+  QDataStream stream(msg, QIODevice::ReadOnly);
 
   // Extract KGame sender/receiver and message id
-  Q_UINT32 kgamesender, kgamereceiver;
+  quint32 kgamesender, kgamereceiver;
   int kgamemsgid;
   KGameMessage::extractHeader(stream, kgamesender, kgamereceiver, kgamemsgid);
 
   bool kgamesenderplayer = KGameMessage::isPlayer(kgamesender);
 
-  Q_UINT32 msgid;
+  quint32 msgid;
   stream >> msgid;
   if(msgid > 256)
   {
@@ -249,9 +251,9 @@ void Server::processBosonMessage(QDataStream& stream, int msgid)
   }
   else if(msgid == BosonMessageIds::IdNetworkSyncCheckACK)
   {
-    Q_UINT32 id;
-    QCString md5;
-    Q_INT8 verify;
+    quint32 id;
+    Q3CString md5;
+    qint8 verify;
     stream >> id;
     stream >> md5;
     stream >> verify;
@@ -269,13 +271,13 @@ void Server::processKGameMessage(QDataStream& stream, int msgid)
 
 void Server::processStatusMessage(QDataStream& stream)
 {
-  Q_UINT32 playerCount;
+  quint32 playerCount;
   stream >> playerCount;
   for(unsigned int i = 0; i < playerCount; i++)
   {
-    Q_UINT32 playerId;
-    Q_UINT32 mobiles;
-    Q_UINT32 facilities;
+    quint32 playerId;
+    quint32 mobiles;
+    quint32 facilities;
     stream >> playerId;
     stream >> mobiles;
     stream >> facilities;

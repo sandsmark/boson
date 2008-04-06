@@ -99,13 +99,13 @@ static void tex_make_mip_maps( GLubyte *image, int xsize,
           // AB: this is an alternative solution. but i think the results are
           // not so good.
           t5 /= 4;
-          t5 = QMAX(t5, t1);
-          t5 = QMAX(t5, t2);
+          t5 = qMax(t5, t1);
+          t5 = qMax(t5, t2);
           if (t5 > 30) {
             t5 *= 2;
           }
 #endif
-          t5 = QMIN(t5, 255);
+          t5 = qMin(t5, 255);
           texels [ l2 ] [ (y2 * w2 + x2) * zsize + c ] = t5;
         }
       }

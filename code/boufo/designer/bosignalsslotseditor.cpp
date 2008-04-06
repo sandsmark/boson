@@ -25,15 +25,18 @@
 #include <bodebug.h>
 
 #include <qlayout.h>
-#include <qlistview.h>
+#include <q3listview.h>
 #include <qdom.h>
 #include <qlabel.h>
 #include <qmessagebox.h>
 #include <qpushbutton.h>
 #include <qlineedit.h>
 #include <qcombobox.h>
-#include <qvgroupbox.h>
-#include <qwidgetstack.h>
+#include <q3vgroupbox.h>
+#include <q3widgetstack.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <Q3VBoxLayout>
 
 #include <math.h>
 #include <stdlib.h>
@@ -42,14 +45,14 @@
 BoConnection::BoConnection(bool isSender, QWidget* parent)
 	: QWidget(parent)
 {
- QHBoxLayout* layout = new QHBoxLayout(this);
- QVBoxLayout* connectionLayout = new QVBoxLayout(layout);
+ Q3HBoxLayout* layout = new Q3HBoxLayout(this);
+ Q3VBoxLayout* connectionLayout = new Q3VBoxLayout(layout);
  QWidget* sender = new QWidget(this);
  QWidget* receiver = new QWidget(this);
  connectionLayout->addWidget(sender);
  connectionLayout->addWidget(receiver);
 
- QHBoxLayout* senderLayout = new QHBoxLayout(sender);
+ Q3HBoxLayout* senderLayout = new Q3HBoxLayout(sender);
  QLabel* senderLabel = new QLabel(tr("Sender: "), sender);
  mSender = new QLineEdit(sender);
  QLabel* signalLabel = new QLabel(tr("Signal: "), sender);
@@ -59,7 +62,7 @@ BoConnection::BoConnection(bool isSender, QWidget* parent)
  senderLayout->addWidget(signalLabel);
  senderLayout->addWidget(mSignal);
 
- QHBoxLayout* receiverLayout = new QHBoxLayout(receiver);
+ Q3HBoxLayout* receiverLayout = new Q3HBoxLayout(receiver);
  QLabel* receiverLabel = new QLabel(tr("Receiver: "), receiver);
  mReceiver = new QLineEdit(receiver);
  QLabel* slotLabel = new QLabel(tr("Slot: "), receiver);
@@ -146,15 +149,15 @@ QString BoConnection::slotText() const
 BoConnectionsContainer::BoConnectionsContainer(QWidget* parent)
 	: QWidget(parent)
 {
- QVBoxLayout* layout = new QVBoxLayout(this);
- mConnectionsLayout = new QVBoxLayout(layout);
+ Q3VBoxLayout* layout = new Q3VBoxLayout(this);
+ mConnectionsLayout = new Q3VBoxLayout(layout);
 
- mAddConnection = new QWidgetStack(this);
+ mAddConnection = new Q3WidgetStack(this);
  layout->addWidget(mAddConnection);
 
  mAddConnectionSignal = new QWidget(mAddConnection);
  mAddConnection->addWidget(mAddConnectionSignal);
- QHBoxLayout* signalLayout = new QHBoxLayout(mAddConnectionSignal);
+ Q3HBoxLayout* signalLayout = new Q3HBoxLayout(mAddConnectionSignal);
  QPushButton* addReceiver = new QPushButton(tr("Add Receiver"), mAddConnectionSignal);
  QPushButton* addTrigger = new QPushButton(tr("Add Trigger"), mAddConnectionSignal);
  signalLayout->addWidget(addReceiver);
@@ -164,7 +167,7 @@ BoConnectionsContainer::BoConnectionsContainer(QWidget* parent)
 
  mAddConnectionSlot = new QWidget(mAddConnection);
  mAddConnection->addWidget(mAddConnectionSlot);
- QHBoxLayout* slotLayout = new QHBoxLayout(mAddConnectionSlot);
+ Q3HBoxLayout* slotLayout = new Q3HBoxLayout(mAddConnectionSlot);
  QPushButton* addSlotTrigger = new QPushButton(tr("Add Trigger"), mAddConnectionSlot);
  slotLayout->addWidget(addSlotTrigger);
  connect(addSlotTrigger, SIGNAL(clicked()), this, SLOT(slotAddTrigger()));
@@ -180,7 +183,7 @@ BoConnectionsContainer::~BoConnectionsContainer()
 void BoConnectionsContainer::setMethodName(const QString& name)
 {
  mMethodName = name;
- QPtrListIterator<BoConnection> it(mConnections);
+ Q3PtrListIterator<BoConnection> it(mConnections);
  while (it.current()) {
 	it.current()->setMethodName(mMethodName);
 	++it;
@@ -256,7 +259,7 @@ void BoConnectionsContainer::setSignal(bool isSignal)
 bool BoConnectionsContainer::save(QDomElement& root) const
 {
  QDomDocument doc = root.ownerDocument();
- QPtrListIterator<BoConnection> it(mConnections);
+ Q3PtrListIterator<BoConnection> it(mConnections);
  while (it.current()) {
 	BoConnection* c = it.current();
 	QDomElement connection = doc.createElement("Connection");
@@ -311,19 +314,19 @@ bool BoConnectionsContainer::load(const QDomElement& root)
 BoSignalsSlotsEditor::BoSignalsSlotsEditor(QWidget* parent)
 	: QDialog(parent)
 {
- QVBoxLayout* layout = new QVBoxLayout(this, 5, 5);
- mMethods = new QListView(this);
+ Q3VBoxLayout* layout = new Q3VBoxLayout(this, 5, 5);
+ mMethods = new Q3ListView(this);
  layout->addWidget(mMethods);
  mMethodReturnIndex = mMethods->addColumn(tr("Return type"));
  mMethodNameIndex = mMethods->addColumn(tr("Method"));
  mMethodTypeIndex = mMethods->addColumn(tr("Type")); // signal/slot/method
  mMethodVisibilityIndex = mMethods->addColumn(tr("Visibility")); // public/protected/private
- connect(mMethods, SIGNAL(currentChanged(QListViewItem*)),
-		this, SLOT(slotCurrentMethodChanged(QListViewItem*)));
+ connect(mMethods, SIGNAL(currentChanged(Q3ListViewItem*)),
+		this, SLOT(slotCurrentMethodChanged(Q3ListViewItem*)));
 
  QWidget* w = new QWidget(this);
  layout->addWidget(w);
- QHBoxLayout* hboxLayout = new QHBoxLayout(w);
+ Q3HBoxLayout* hboxLayout = new Q3HBoxLayout(w);
  QPushButton* add = new QPushButton(tr("Add method"), w);
  QPushButton* del = new QPushButton(tr("Delete method"), w);
  hboxLayout->addWidget(add);
@@ -331,13 +334,13 @@ BoSignalsSlotsEditor::BoSignalsSlotsEditor(QWidget* parent)
  connect(add, SIGNAL(clicked()), this, SLOT(slotAddMethod()));
  connect(del, SIGNAL(clicked()), this, SLOT(slotDeleteMethod()));
 
- QVGroupBox* editBox = new QVGroupBox(tr("Edit Method"), this);
+ Q3VGroupBox* editBox = new Q3VGroupBox(tr("Edit Method"), this);
  layout->addWidget(editBox);
  QWidget* editWidget = new QWidget(editBox);
- QVBoxLayout* editLayout = new QVBoxLayout(editWidget);
+ Q3VBoxLayout* editLayout = new Q3VBoxLayout(editWidget);
  QWidget* method = new QWidget(editWidget);
  editLayout->addWidget(method);
- QHBoxLayout* methodLayout = new QHBoxLayout(method);
+ Q3HBoxLayout* methodLayout = new Q3HBoxLayout(method);
  QLabel* methodReturnLabel = new QLabel(tr("Return type: "), method);
  mMethodReturnType = new QLineEdit(method);
  QLabel* methodNameLabel = new QLabel(tr("Name: "), method);
@@ -352,7 +355,7 @@ BoSignalsSlotsEditor::BoSignalsSlotsEditor(QWidget* parent)
 		this, SLOT(slotMethodNameChanged(const QString&)));
  QWidget* methodProperties = new QWidget(editWidget);
  editLayout->addWidget(methodProperties);
- QHBoxLayout* methodPropertiesLayout = new QHBoxLayout(methodProperties);
+ Q3HBoxLayout* methodPropertiesLayout = new Q3HBoxLayout(methodProperties);
  QLabel* methodTypeLabel = new QLabel(tr("Type: "), methodProperties);
  mMethodType = new QComboBox(methodProperties);
  QLabel* methodVisibilityLabel = new QLabel(tr("Visibility: "), methodProperties);
@@ -372,14 +375,14 @@ BoSignalsSlotsEditor::BoSignalsSlotsEditor(QWidget* parent)
  connect(mMethodVisibility, SIGNAL(activated(int)),
 		this, SLOT(slotMethodVisibilityChanged(int)));
 
- QVGroupBox* connectionsBox = new QVGroupBox(tr("Connections"), this);
+ Q3VGroupBox* connectionsBox = new Q3VGroupBox(tr("Connections"), this);
  layout->addWidget(connectionsBox);
- mConnections = new QWidgetStack(connectionsBox);
+ mConnections = new Q3WidgetStack(connectionsBox);
 
 
  w = new QWidget(this);
  layout->addWidget(w);
- hboxLayout = new QHBoxLayout(w);
+ hboxLayout = new Q3HBoxLayout(w);
  QPushButton* ok = new QPushButton(tr("Ok"), w);
  QPushButton* cancel = new QPushButton(tr("Cancel"), w);
  hboxLayout->addWidget(ok);
@@ -445,7 +448,7 @@ bool BoSignalsSlotsEditor::loadMethods(const QDomElement& root)
 		continue;
 	}
 
-	QListViewItem* item = slotAddMethod();
+	Q3ListViewItem* item = slotAddMethod();
 	item->setText(mMethodReturnIndex, ret);
 	item->setText(mMethodNameIndex, name);
 	item->setText(mMethodTypeIndex, type);
@@ -495,7 +498,7 @@ bool BoSignalsSlotsEditor::save(QDomElement& root) const
 bool BoSignalsSlotsEditor::saveMethods(QDomElement& root) const
 {
  QDomDocument doc = root.ownerDocument();
- QListViewItem* method = mMethods->firstChild();
+ Q3ListViewItem* method = mMethods->firstChild();
  for (; method; method = method->nextSibling()) {
 	QDomElement m = doc.createElement("Method");
 	QString ret = method->text(mMethodReturnIndex);
@@ -568,7 +571,7 @@ bool BoSignalsSlotsEditor::isValidVisibility(const QString& v) const
 }
 
 
-void BoSignalsSlotsEditor::slotCurrentMethodChanged(QListViewItem* item)
+void BoSignalsSlotsEditor::slotCurrentMethodChanged(Q3ListViewItem* item)
 {
  mMethodName->setEnabled(item != 0);
  mMethodReturnType->setEnabled(item != 0);
@@ -599,9 +602,9 @@ void BoSignalsSlotsEditor::slotCurrentMethodChanged(QListViewItem* item)
  mConnections->raiseWidget(connection);
 }
 
-QListViewItem* BoSignalsSlotsEditor::slotAddMethod()
+Q3ListViewItem* BoSignalsSlotsEditor::slotAddMethod()
 {
- QListViewItem* item = new QListViewItem(mMethods);
+ Q3ListViewItem* item = new Q3ListViewItem(mMethods);
  item->setText(mMethodReturnIndex, "void");
  item->setText(mMethodNameIndex, "randomName()"); // TODO: use a really random name
  item->setText(mMethodTypeIndex, "slot");
@@ -623,7 +626,7 @@ QListViewItem* BoSignalsSlotsEditor::slotAddMethod()
 
 void BoSignalsSlotsEditor::slotDeleteMethod()
 {
- QListViewItem* item = mMethods->currentItem();
+ Q3ListViewItem* item = mMethods->currentItem();
  if (!item) {
 	return;
  }
@@ -632,7 +635,7 @@ void BoSignalsSlotsEditor::slotDeleteMethod()
 
 void BoSignalsSlotsEditor::slotMethodReturnTypeChanged(const QString& type)
 {
- QListViewItem* item = mMethods->currentItem();
+ Q3ListViewItem* item = mMethods->currentItem();
  if (!item) {
 	return;
  }
@@ -641,7 +644,7 @@ void BoSignalsSlotsEditor::slotMethodReturnTypeChanged(const QString& type)
 
 void BoSignalsSlotsEditor::slotMethodNameChanged(const QString& name)
 {
- QListViewItem* item = mMethods->currentItem();
+ Q3ListViewItem* item = mMethods->currentItem();
  if (!item) {
 	return;
  }
@@ -673,7 +676,7 @@ void BoSignalsSlotsEditor::slotMethodTypeChanged(int index)
 
 void BoSignalsSlotsEditor::slotMethodTypeChanged(const QString& type)
 {
- QListViewItem* item = mMethods->currentItem();
+ Q3ListViewItem* item = mMethods->currentItem();
  if (!item) {
 	return;
  }
@@ -721,7 +724,7 @@ void BoSignalsSlotsEditor::slotMethodVisibilityChanged(int index)
 
 void BoSignalsSlotsEditor::slotMethodVisibilityChanged(const QString& v)
 {
- QListViewItem* item = mMethods->currentItem();
+ Q3ListViewItem* item = mMethods->currentItem();
  if (!item) {
 	return;
  }

@@ -22,12 +22,12 @@
 #include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
 
-#include <kstaticdeleter.h>
+#include <k3staticdeleter.h>
 
-#include <qptrlist.h>
-#include <qintdict.h>
+#include <q3ptrlist.h>
+#include <q3intdict.h>
 
-static KStaticDeleter<BoGlobal> sd;
+static K3StaticDeleter<BoGlobal> sd;
 
 BoGlobal* BoGlobal::mBoGlobal = 0;
 
@@ -37,10 +37,10 @@ public:
 	BoGlobalPrivate()
 	{
 	}
-	QPtrList<BoGlobalObjectBase> mObjects;
+	Q3PtrList<BoGlobalObjectBase> mObjects;
 
 	// used by setPointer() and pointer().
-	QIntDict<void> mPointersById;
+	Q3IntDict<void> mPointersById;
 };
 
 BoGlobal::BoGlobal()
@@ -96,8 +96,8 @@ void BoGlobal::initGlobalObjects()
 
  // we copy the list, so that objects in the list are allowed to call
  // register/unregisterObject() here
- QPtrList<BoGlobalObjectBase> objects = d->mObjects;
- QPtrListIterator<BoGlobalObjectBase> it(objects);
+ Q3PtrList<BoGlobalObjectBase> objects = d->mObjects;
+ Q3PtrListIterator<BoGlobalObjectBase> it(objects);
  for (; it.current(); ++it) {
 	it.current()->loadObject();
  }
@@ -160,7 +160,7 @@ BoGlobalObjectBase::BoGlobalObjectBase(bool initFirst)
 
 BoGlobalObjectBase::~BoGlobalObjectBase()
 {
- if (BoGlobal::boGlobal()) { // set to NULL by KStaticDeleter when it has been deleted!
+ if (BoGlobal::boGlobal()) { // set to NULL by K3StaticDeleter when it has been deleted!
 	BoGlobal::boGlobal()->unregisterObject(this);
  }
 }

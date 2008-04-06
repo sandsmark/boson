@@ -30,6 +30,8 @@
 #include "boufocombobox.h"
 #include "boufocombobox.moc"
 
+#include <QStringList>
+
 #include <bodebug.h>
 
 BoUfoComboBox::BoUfoComboBox() : BoUfoWidget()
@@ -121,7 +123,8 @@ void BoUfoComboBox::setItems(const QStringList& items)
 {
  clear();
  for (QStringList::const_iterator it = items.begin(); it != items.end(); ++it) {
-	mComboBox->addItem((*it).latin1());
+	QByteArray tmp = (*it).toAscii();
+	mComboBox->addItem(std::string(tmp.constData(), tmp.length()));
  }
 }
 
@@ -157,7 +160,7 @@ void BoUfoComboBox::insertItem(const QString& text, int index)
  if (index < 0) {
 	index = list.count();
  }
- list.insert(list.at(index), text);
+ list.insert(index, text);
  setItems(list);
 }
 
@@ -165,7 +168,7 @@ void BoUfoComboBox::removeItem(int index)
 {
  // TODO: implement properly. this is only a trivail and slow implementation.
  QStringList list = items();
- list.remove(list.at(index));
+ list.removeAt(index);
  setItems(list);
 }
 

@@ -27,6 +27,8 @@
 #include <qdir.h>
 #include <qdatetime.h>
 #include <qtimer.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 #include <kstandarddirs.h>
 #include <kmessagebox.h>
@@ -53,7 +55,7 @@ public:
 	BoUfoPushButton* mDeleteButton;
 
 	BoUfoWidget* mButtonWidget;
-	QPtrList<BoUfoSaveGameWidget> mButtons;
+	Q3PtrList<BoUfoSaveGameWidget> mButtons;
 	BoUfoSaveGameWidget* mSelectedGame;
 	BoUfoLabel* mNoGamesLabel;
 };
@@ -76,10 +78,10 @@ void BoUfoLoadSaveGameWidget::init()
 
 #warning TODO: scroll widget
 #if 0
- QScrollView* scroll = new QScrollView(this, "scrollwidget");
- scroll->setResizePolicy(QScrollView::AutoOneFit);
- scroll->setHScrollBarMode(QScrollView::AlwaysOff);
- scroll->setVScrollBarMode(QScrollView::AlwaysOn);
+ Q3ScrollView* scroll = new Q3ScrollView(this, "scrollwidget");
+ scroll->setResizePolicy(Q3ScrollView::AutoOneFit);
+ scroll->setHScrollBarMode(Q3ScrollView::AlwaysOff);
+ scroll->setVScrollBarMode(Q3ScrollView::AlwaysOn);
  d->mButtonWidget = new QWidget(scroll->viewport());
  scroll->addChild(d->mButtonWidget);
 #else
@@ -211,7 +213,7 @@ const QString& BoUfoLoadSaveGameWidget::suffix() const
 
 void BoUfoLoadSaveGameWidget::updateGames()
 {
- QPtrListIterator<BoUfoSaveGameWidget> it(d->mButtons);
+ Q3PtrListIterator<BoUfoSaveGameWidget> it(d->mButtons);
  for (; it.current(); ++it) {
 	it.current()->hide();
  }
@@ -296,7 +298,7 @@ void BoUfoLoadSaveGameWidget::slotDelete()
  QString file = w->file();
  int r = KMessageBox::questionYesNoCancel(0,
 		i18n("Do you really want to delete %1 ?").arg(QFileInfo(file).fileName()),
-		QString::null, KStdGuiItem::yes(), KStdGuiItem::no(), "ConfirmDeleteGame");
+		QString::null, KStandardGuiItem::yes(), KStandardGuiItem::no(), "ConfirmDeleteGame");
  if (r != KMessageBox::Yes) {
 	return;
  }
@@ -350,7 +352,7 @@ void BoUfoLoadSaveGameWidget::slotClicked(BoUfoSaveGameWidget* w)
  }
  if (w->isSelected()) {
 	d->mSelectedGame = w;
-	QPtrListIterator<BoUfoSaveGameWidget> it(d->mButtons);
+	Q3PtrListIterator<BoUfoSaveGameWidget> it(d->mButtons);
 	for (; it.current(); ++it) {
 		if (it.current()->isSelected() && it.current() != d->mSelectedGame) {
 			it.current()->blockSignals(true);
@@ -380,7 +382,7 @@ void BoUfoLoadSaveGameWidget::setSaveMode(bool save)
  }
  d->mLoadSaveButton->setEnabled(save);
  d->mDeleteButton->setEnabled(false);
- QPtrListIterator<BoUfoSaveGameWidget> it(d->mButtons);
+ Q3PtrListIterator<BoUfoSaveGameWidget> it(d->mButtons);
  for (; it.current(); ++it) {
 	it.current()->unselect();
  }

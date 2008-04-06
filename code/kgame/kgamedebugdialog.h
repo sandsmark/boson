@@ -1,7 +1,7 @@
 /*
     This file is part of the KDE games library
     Copyright (C) 2001 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2001 Martin Heni (martin@heni-online.de)
+    Copyright (C) 2001 Martin Heni (kde at heni-online.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -21,16 +21,17 @@
 #ifndef __KGAMEDEBUGDIALOG_H__
 #define __KGAMEDEBUGDIALOG_H__
 
-#include <kdialogbase.h>
+#include <kpagedialog.h>
+#include <libkdegames_export.h>
+
+class QListWidgetItem;
 
 class KGame;
-class KGameIO;
 class KPlayer;
-class KGamePropertyBase;
 
 class KGameDebugDialogPrivate;
 
-class KGameDebugDialog : public KDialogBase
+class KDEGAMES_EXPORT KGameDebugDialog : public KPageDialog
 {
 	Q_OBJECT
 public:
@@ -45,7 +46,7 @@ public:
 	 **/
 	void setKGame(const KGame* g);
 
-public slots:
+public Q_SLOTS:
 	/**
 	 * Unsets a @ref KGame which has been set using @ref setKGame before.
 	 * This is called automatically when the @ref KGame object is destroyed
@@ -74,7 +75,7 @@ public slots:
 
 	void slotClearMessages();
 
-signals:
+Q_SIGNALS:
 	/**
 	 * This signal is emitted when the "debug messages" page couldn't find
 	 * the name of a message id. This is usually the case for user-defined
@@ -82,9 +83,9 @@ signals:
 	 * @param messageid The ID of the message. As given to @ref
 	 * KGame::sendMessage
 	 * @param userid User defined msgIds are internally increased by
-	 * @ref KGameMessage::IdUser. You don't have to care about this but if
+	 * KGameMessage::IdUser. You don't have to care about this but if
 	 * this signal is emitted with userid=false (shouldn't happen) then the
-	 * name of an internal message as defined in @ref
+	 * name of an internal message as defined in 
 	 * KGameMessage::GameMessageIds couldn't be found.
 	 * @param name The name of the msgid. You have to fill this!
 	 **/
@@ -112,20 +113,20 @@ protected:
 	/**
 	 * Remove a player from the list
 	 **/
-	void removePlayer(QListBoxItem* item);
+	void removePlayer(QListWidgetItem* item);
 
 	/**
 	 * @return Whether messages with this msgid shall be displayed or not
 	 **/
 	bool showId(int msgid);
 
-protected slots:
+protected Q_SLOTS:
 	/**
 	 * Update the data of the player specified in item
-	 * @param item The @ref QListBoxItem of the player to be updated. Note
+	 * @param item The @ref QListWidgetItem of the player to be updated. Note
 	 * that the text of this item MUST be the ID of the player
 	 **/
-	void slotUpdatePlayerData(QListBoxItem* item);
+	void slotUpdatePlayerData(QListWidgetItem* item);
 
 	void slotShowId();
 	void slotHideId();
@@ -133,7 +134,7 @@ protected slots:
 	/**
 	 * A message has been received - see @ref KGame::signalMessageUpdate
 	 **/
-	void slotMessageUpdate(int msgid, Q_UINT32 receiver, Q_UINT32 sender);
+	void slotMessageUpdate(int msgid, quint32 receiver, quint32 sender);
 
 private:
 	void initGamePage();
@@ -141,7 +142,7 @@ private:
 	void initMessagePage();
 
 private:
-	KGameDebugDialogPrivate* d;
+	KGameDebugDialogPrivate* const d;
 };
 
 

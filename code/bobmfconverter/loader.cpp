@@ -40,15 +40,15 @@ Loader::~Loader()
 
 Loader* Loader::createLoader(Model* m, LOD* l, const QString& filename)
 {
-  if(filename.lower().endsWith(".3ds"))
+  if(filename.toLower().endsWith(".3ds"))
   {
     return (Loader*)(new Loader3DS(m, l, filename));
   }
-  else if(filename.lower().endsWith(".ac"))
+  else if(filename.toLower().endsWith(".ac"))
   {
     return (Loader*)(new LoaderAC(m, l, filename));
   }
-  else if(filename.lower().endsWith(".md2"))
+  else if(filename.toLower().endsWith(".md2"))
   {
     return (Loader*)(new LoaderMD2(m, l, filename));
   }

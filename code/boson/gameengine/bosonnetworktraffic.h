@@ -22,9 +22,11 @@
 
 #include <qobject.h>
 #include <qdatetime.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 class Boson;
-template<class T> class QPtrList;
+template<class T> class Q3PtrList;
 
 /**
  * @short Details about network traffic caused by a single message.
@@ -36,7 +38,7 @@ template<class T> class QPtrList;
 class BosonNetworkTrafficDetails
 {
 public:
-	BosonNetworkTrafficDetails(bool sent, Q_UINT32 bytes, int msgid, int usermsgid, Q_UINT32 receiver, Q_UINT32 sender)
+	BosonNetworkTrafficDetails(bool sent, quint32 bytes, int msgid, int usermsgid, quint32 receiver, quint32 sender)
 	{
 		mSent = sent;
 		mBytes = bytes;
@@ -55,7 +57,7 @@ public:
 	{
 		return !sentMessage();
 	}
-	Q_UINT32 bytes() const
+	quint32 bytes() const
 	{
 		return mBytes;
 	}
@@ -67,11 +69,11 @@ public:
 	{
 		return mUserMsgid;
 	}
-	Q_UINT32 receiver() const
+	quint32 receiver() const
 	{
 		return mReceiver;
 	}
-	Q_UINT32 sender() const
+	quint32 sender() const
 	{
 		return mSender;
 	}
@@ -81,11 +83,11 @@ public:
 	}
 private:
 	bool mSent;
-	Q_UINT32 mBytes;
+	quint32 mBytes;
 	int mMsgid;
 	int mUserMsgid;
-	Q_UINT32 mReceiver;
-	Q_UINT32 mSender;
+	quint32 mReceiver;
+	quint32 mSender;
 	QTime mTimeStamp;
 };
 
@@ -181,7 +183,7 @@ public:
 	 * The total values (e.g. @ref totalBytesReceived and @ref
 	 * totalBytesSent) are not influenced by this.
 	 **/
-	void setKeepMessageDetailsFor(Q_UINT32 seconds);
+	void setKeepMessageDetailsFor(quint32 seconds);
 
 	long long totalBytesReceived() const;
 	long long totalBytesSent() const;
@@ -203,12 +205,12 @@ public:
 	 **/
 	long long totalBosonBytesSent() const;
 
-	const QPtrList<BosonNetworkTrafficDetails>& messageDetails() const;
-	const QPtrList<BosonNetworkTrafficStatistics>& statistics() const;
+	const Q3PtrList<BosonNetworkTrafficDetails>& messageDetails() const;
+	const Q3PtrList<BosonNetworkTrafficStatistics>& statistics() const;
 
 protected slots:
-	void slotSendBytes(Q_UINT32 bytes, int msgid, int usermsgid, Q_UINT32 sender, Q_UINT32 receiver);
-	void slotReceiveBytes(Q_UINT32 bytes, int msgid, int usermsgid, Q_UINT32 sender, Q_UINT32 receiver);
+	void slotSendBytes(quint32 bytes, int msgid, int usermsgid, quint32 sender, quint32 receiver);
+	void slotReceiveBytes(quint32 bytes, int msgid, int usermsgid, quint32 sender, quint32 receiver);
 
 protected:
 	void removeOldMessages();

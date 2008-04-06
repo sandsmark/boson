@@ -63,8 +63,11 @@
 #include "../borendertarget.h"
 #include "bosonlocalplayerinput.h"
 
-#include <qvaluevector.h>
+#include <q3valuevector.h>
 #include <qdatetime.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 #include <kglobal.h>
 #include <kstandarddirs.h>
@@ -307,8 +310,8 @@ public:
 	}
 	void checkAlive()
 	{
-		QPtrList<BoVisualFeedback> dead;
-		for (QPtrListIterator<BoVisualFeedback> it(mFeedbacks); it.current(); ++it) {
+		Q3PtrList<BoVisualFeedback> dead;
+		for (Q3PtrListIterator<BoVisualFeedback> it(mFeedbacks); it.current(); ++it) {
 			if (it.current()->isDone()) {
 				dead.append(it.current());
 			}
@@ -329,7 +332,7 @@ public:
 
 	void paintGL()
 	{
-		for (QPtrListIterator<BoVisualFeedback> it(mFeedbacks); it.current(); ++it) {
+		for (Q3PtrListIterator<BoVisualFeedback> it(mFeedbacks); it.current(); ++it) {
 			it.current()->paintGL();
 		}
 
@@ -338,7 +341,7 @@ public:
 
 	bool tintItem(const BosonItem* item) const
 	{
-		for (QPtrListIterator<BoVisualFeedback> it(mFeedbackItemTint); it.current(); ++it) {
+		for (Q3PtrListIterator<BoVisualFeedback> it(mFeedbackItemTint); it.current(); ++it) {
 			BoVisualFeedbackItemTint* t = (BoVisualFeedbackItemTint*)it.current();
 			if (t->item() == item) {
 				return true;
@@ -348,7 +351,7 @@ public:
 	}
 	QColor tintColor(const BosonItem* item) const
 	{
-		for (QPtrListIterator<BoVisualFeedback> it(mFeedbackItemTint); it.current(); ++it) {
+		for (Q3PtrListIterator<BoVisualFeedback> it(mFeedbackItemTint); it.current(); ++it) {
 			BoVisualFeedbackItemTint* t = (BoVisualFeedbackItemTint*)it.current();
 			if (t->item() == item) {
 				return t->color();
@@ -358,8 +361,8 @@ public:
 	}
 
 private:
-	QPtrList<BoVisualFeedback> mFeedbacks;
-	QPtrList<BoVisualFeedback> mFeedbackItemTint;
+	Q3PtrList<BoVisualFeedback> mFeedbacks;
+	Q3PtrList<BoVisualFeedback> mFeedbackItemTint;
 };
 
 
@@ -378,12 +381,12 @@ public:
 		mAll.clear();
 	}
 
-	QPtrList<BosonEffectFog> mFogEffects;
-	QPtrList<BosonEffectParticle> mParticles;
-	QPtrList<BosonEffectBulletTrail> mBulletEffects;
-	QPtrList<BosonEffectFade> mFadeEffects;
+	Q3PtrList<BosonEffectFog> mFogEffects;
+	Q3PtrList<BosonEffectParticle> mParticles;
+	Q3PtrList<BosonEffectBulletTrail> mBulletEffects;
+	Q3PtrList<BosonEffectFade> mFadeEffects;
 
-	QPtrList<BosonEffect> mAll;
+	Q3PtrList<BosonEffect> mAll;
 
 	BoParticleList mParticleList;
 	bool mParticlesDirty;
@@ -486,7 +489,7 @@ public:
 	BoSceneRenderTarget* getRenderTarget(int width, int height, bool needdepth = false)
 	{
 		BoSceneRenderTarget* target = 0;
-		QValueList<BoSceneRenderTarget*>::Iterator it;
+		Q3ValueList<BoSceneRenderTarget*>::Iterator it;
 		for (it = mRenderTargets.begin(); it != mRenderTargets.end(); it++) {
 			if (!(*it)->used && (*it)->width() == width &&
 					(*it)->height() == height && (*it)->hasDepth() == needdepth) {
@@ -520,7 +523,7 @@ public:
 
 
 private:
-	QValueList<BoSceneRenderTarget*> mRenderTargets;
+	Q3ValueList<BoSceneRenderTarget*> mRenderTargets;
 };
 
 class BosonCanvasRendererPrivate
@@ -552,7 +555,7 @@ public:
 		mRadarIcon = 0;
 	}
 	const BosonCanvas* mCanvas;
-	QValueVector<BoRenderItem> mRenderItemList;
+	Q3ValueVector<BoRenderItem> mRenderItemList;
 	SelectBoxData* mSelectBoxData;
 	BoVisibleEffects mVisibleEffects;
 	unsigned int mRenderedItems;
@@ -582,8 +585,8 @@ public:
 	BoSceneRenderTarget* mMainSceneRenderTarget;
 	BoSceneRenderTargetCache* mSceneRenderTargetCache;
 
-	QValueList<Unit*> mRadarContactsList;
-	QValueList<Unit*> mIconicUnits;
+	Q3ValueList<Unit*> mRadarContactsList;
+	Q3ValueList<Unit*> mIconicUnits;
 	BoTexture* mUnitIconLand;
 	BoTexture* mUnitIconAir;
 	BoTexture* mUnitIconFacility;
@@ -704,10 +707,10 @@ void BosonCanvasRenderer::setLocalPlayerIO(PlayerIO* io)
  }
  BosonLocalPlayerInput* i = (BosonLocalPlayerInput*)localPlayerIO()->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
  if (i) {
-	connect(i, SIGNAL(signalAttackUnit(const QPtrList<Unit>&, const Unit*)),
-			this, SLOT(slotAddFeedbackAttack(const QPtrList<Unit>&, const Unit*)));
-	connect(i, SIGNAL(signalMoveUnitsTo(const QPtrList<Unit>&, const BoVector2Fixed&, bool)),
-			this, SLOT(slotAddFeedbackMoveTo(const QPtrList<Unit>&, const BoVector2Fixed&, bool)));
+	connect(i, SIGNAL(signalAttackUnit(const Q3PtrList<Unit>&, const Unit*)),
+			this, SLOT(slotAddFeedbackAttack(const Q3PtrList<Unit>&, const Unit*)));
+	connect(i, SIGNAL(signalMoveUnitsTo(const Q3PtrList<Unit>&, const BoVector2Fixed&, bool)),
+			this, SLOT(slotAddFeedbackMoveTo(const Q3PtrList<Unit>&, const BoVector2Fixed&, bool)));
  } else {
 	boError() << k_funcinfo << "local player does not have any BosonLocalPlayerInput!" << endl;
  }
@@ -769,7 +772,7 @@ void BosonCanvasRenderer::reset()
  d->mSceneRenderTargetCache->deleteAllRenderTargets();
 }
 
-void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, const QPtrList<BosonEffect>& effects)
+void BosonCanvasRenderer::paintGL(const Q3PtrList<BosonItemContainer>& allItems, const Q3PtrList<BosonEffect>& effects)
 {
  PROFILE_METHOD;
  BO_CHECK_NULL_RET(localPlayerIO());
@@ -826,8 +829,8 @@ void BosonCanvasRenderer::paintGL(const QPtrList<BosonItemContainer>& allItems, 
 	//  matrix and thus returns invalid z coordinate.
 	BoGroundRendererStatistics* stats = BoGroundRendererManager::manager()->currentRenderer()->statistics();
 	// Distances of new near/far plane _from current near plane_
-	float neardist = QMIN(stats->minDistance(), d->mMinItemDist);
-	float fardist = QMAX(stats->maxDistance(), d->mMaxItemDist);
+	float neardist = qMin(stats->minDistance(), d->mMinItemDist);
+	float fardist = qMax(stats->maxDistance(), d->mMaxItemDist);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(d->mGameMatrices->fovY(), d->mGameMatrices->aspect(), BO_GL_NEAR_PLANE + neardist, BO_GL_NEAR_PLANE + fardist);
@@ -1021,8 +1024,8 @@ void BosonCanvasRenderer::renderShadowMap(const BosonCanvas* canvas)
  //  as possible).
  BoGroundRendererStatistics* stats = BoGroundRendererManager::manager()->currentRenderer()->statistics();
  // Distances of new near/far plane _from current near plane_
- float neardist = QMIN(stats->minDistance(), d->mMinItemDist);
- float fardist = QMAX(stats->maxDistance(), d->mMaxItemDist);
+ float neardist = qMin(stats->minDistance(), d->mMinItemDist);
+ float fardist = qMax(stats->maxDistance(), d->mMaxItemDist);
  /*boDebug() << "Near plane will be pushed by " << neardist << "; far plane by " << fardist << endl <<
 		"  (items: " << d->mMinItemDist << "/" << d->mMaxItemDist <<
 		"; ground: " << stats->minDistance() << "/" << stats->maxDistance() << ")" << endl;*/
@@ -1061,8 +1064,8 @@ void BosonCanvasRenderer::renderShadowMap(const BosonCanvas* canvas)
  for (int i = 1; i < 8; i++) {
 	// This is z-coordinate of F[i] in light eye space.
 	float d = (F[i] - lpos).dotProduct(lightViewDir);
-	near = QMIN(near, d);
-	far = QMAX(far, d);
+	near = qMin(near, d);
+	far = qMax(far, d);
  }
  /*boDebug() << k_funcinfo << "lpos: (" << lpos.x() << "; " << lpos.y() << "; " << lpos.z() << "); focus: (" <<
 		focus.x() << "; " << focus.y() << "; " << focus.z() << ");" <<
@@ -1145,12 +1148,12 @@ void BosonCanvasRenderer::renderShadowMap(const BosonCanvas* canvas)
  BoVector3Float Emin(E[0].x(), E[0].y(), E[0].z());
  BoVector3Float Emax(E[0].x(), E[0].y(), E[0].z());
  for (int i = 0; i < 8; i++) {
-	Emin.setX(QMIN(Emin.x(), E[i].x()));
-	Emin.setY(QMIN(Emin.y(), E[i].y()));
-	Emin.setZ(QMIN(Emin.z(), E[i].z()));
-	Emax.setX(QMAX(Emax.x(), E[i].x()));
-	Emax.setY(QMAX(Emax.y(), E[i].y()));
-	Emax.setZ(QMAX(Emax.z(), E[i].z()));
+	Emin.setX(qMin(Emin.x(), E[i].x()));
+	Emin.setY(qMin(Emin.y(), E[i].y()));
+	Emin.setZ(qMin(Emin.z(), E[i].z()));
+	Emax.setX(qMax(Emax.x(), E[i].x()));
+	Emax.setY(qMax(Emax.y(), E[i].y()));
+	Emax.setZ(qMax(Emax.z(), E[i].z()));
  }
 
  BoVector3Float Emid = (Emin + Emax) / 2;
@@ -1196,12 +1199,12 @@ void BosonCanvasRenderer::renderShadowMap(const BosonCanvas* canvas)
  BoVector3Float Emin(3, 3, 3);
  BoVector3Float Emax(-3, -3, -3);
  for (int i = 0; i < 8; i++) {
-	Emin.setX(QMIN(Emin.x(), E[i].x()));
-	Emin.setY(QMIN(Emin.y(), E[i].y()));
-	Emin.setZ(QMIN(Emin.z(), E[i].z()));
-	Emax.setX(QMAX(Emax.x(), E[i].x()));
-	Emax.setY(QMAX(Emax.y(), E[i].y()));
-	Emax.setZ(QMAX(Emax.z(), E[i].z()));
+	Emin.setX(qMin(Emin.x(), E[i].x()));
+	Emin.setY(qMin(Emin.y(), E[i].y()));
+	Emin.setZ(qMin(Emin.z(), E[i].z()));
+	Emax.setX(qMax(Emax.x(), E[i].x()));
+	Emax.setY(qMax(Emax.y(), E[i].y()));
+	Emax.setZ(qMax(Emax.z(), E[i].z()));
  }
 
  BoVector3Float Emid = (Emin + Emax) / 2;
@@ -1428,7 +1431,7 @@ bool BosonCanvasRenderer::mustRenderToTexture(BoVisibleEffects& visible)
 	return false;
  }
 
- QPtrListIterator<BosonEffectFade> it(visible.mFadeEffects);
+ Q3PtrListIterator<BosonEffectFade> it(visible.mFadeEffects);
  while (it.current()) {
 	if (it.current()->passes() > 0) {
 		return true;
@@ -1478,7 +1481,7 @@ void BosonCanvasRenderer::stopRenderingToTexture()
  glPopAttrib();
 }
 
-void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* renderItemList, QValueList<Unit*>* radarContactList, const QPtrList<BosonItemContainer>& allItems)
+void BosonCanvasRenderer::createRenderItemList(Q3ValueVector<BoRenderItem>* renderItemList, Q3ValueList<Unit*>* radarContactList, const Q3PtrList<BosonItemContainer>& allItems)
 {
  BO_CHECK_NULL_RET(localPlayerIO());
 
@@ -1491,7 +1494,7 @@ void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* rende
 
  BoVector3Float camerapos = camera()->cameraPos();
 
- for (QPtrListIterator<BosonItemContainer> it(allItems); it.current(); ++it) {
+ for (Q3PtrListIterator<BosonItemContainer> it(allItems); it.current(); ++it) {
 	BosonItem* item = it.current()->item();
 	BosonItemRenderer* itemRenderer = it.current()->itemRenderer();
 
@@ -1552,7 +1555,7 @@ void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* rende
 		} else {
 			float f = u->health() / (float)u->maxHealth();
 			float a = f * 0.3f + 0.7f;
-			a = QMIN(a, 1.0f);
+			a = qMin(a, 1.0f);
 			int c = (int)(255 * a);
 			tintColor = QColor(c, c, c);
 		}
@@ -1565,12 +1568,12 @@ void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* rende
 	// TODO: what was this dist for? is it still necessary?
 	renderItemList->append(BoRenderItem(modelid, item, itemRenderer, tintColor));
 
-	d->mMinItemDist = QMIN(d->mMinItemDist, dist - 2*itemRenderer->boundingSphereRadius());
-	d->mMaxItemDist = QMAX(d->mMaxItemDist, dist);
+	d->mMinItemDist = qMin(d->mMinItemDist, dist - 2*itemRenderer->boundingSphereRadius());
+	d->mMaxItemDist = qMax(d->mMaxItemDist, dist);
  }
 
- d->mMinItemDist = QMAX(0, d->mMinItemDist);
- d->mMaxItemDist = QMAX(0, d->mMaxItemDist);
+ d->mMinItemDist = qMax(0, d->mMinItemDist);
+ d->mMaxItemDist = qMax(0, d->mMaxItemDist);
  if (renderItemList->isEmpty()) {
 	d->mMinItemDist = d->mMinItemDist = 0;
  }
@@ -1606,19 +1609,19 @@ void BosonCanvasRenderer::renderItems(RenderFlags flags)
 	int idCount = BosonModel::maxId() + 1;
 
 	// Bucketsort
-	QValueList<BoRenderItem>** lists = new QValueList<BoRenderItem>*[idCount];
+	Q3ValueList<BoRenderItem>** lists = new Q3ValueList<BoRenderItem>*[idCount];
 	for (int i = 0; i < idCount; i++) {
 		lists[i] = 0;
 	}
 	for (unsigned int i = 0; i < itemCount; i++) {
 		int id = d->mRenderItemList[i].modelId;
 		if (!lists[id]) {
-			lists[id] = new QValueList<BoRenderItem>();
+			lists[id] = new Q3ValueList<BoRenderItem>();
 		}
 		lists[id]->append(d->mRenderItemList[i]);
 	}
 	unsigned int pos = 0;
-	QValueList<BoRenderItem>::iterator it;
+	Q3ValueList<BoRenderItem>::iterator it;
 	for (int i = 0; i < idCount; i++) {
 		if (!lists[i]) {
 			continue;
@@ -1640,7 +1643,7 @@ void BosonCanvasRenderer::renderItems(RenderFlags flags)
  }
 
  // List of models with semi-transparent parts
- QValueVector<BoRenderItem> transparentModels;
+ Q3ValueVector<BoRenderItem> transparentModels;
  transparentModels.reserve((int)(itemCount * 0.25));
 
  d->mIconicUnits.clear();
@@ -1750,7 +1753,7 @@ void BosonCanvasRenderer::renderItems(RenderFlags flags)
  }
 }
 
-void BosonCanvasRenderer::createSelectionsList(BoItemList* selectedItems, const QValueVector<BoRenderItem>* items)
+void BosonCanvasRenderer::createSelectionsList(BoItemList* selectedItems, const Q3ValueVector<BoRenderItem>* items)
 {
  selectedItems->clear();
  unsigned int itemCount = items->count();
@@ -1862,7 +1865,7 @@ void BosonCanvasRenderer::renderUnitIcons()
  glEnable(GL_ALPHA_TEST);
  glAlphaFunc(GL_GEQUAL, 0.1);
 
- for (QValueList<Unit*>::Iterator it = d->mIconicUnits.begin(); it != d->mIconicUnits.end(); ++it) {
+ for (Q3ValueList<Unit*>::Iterator it = d->mIconicUnits.begin(); it != d->mIconicUnits.end(); ++it) {
 	Unit* u = *it;
 	BoVector3Float pos(u->centerX(), -u->centerY(), u->centerZ());
 	float distSq = (camera()->cameraPos() - pos).dotProduct();
@@ -1903,7 +1906,7 @@ void BosonCanvasRenderer::renderUnitIcons()
 
  // Render radar contacts
  d->mUnitIconFacility->bind();
- for (QValueList<Unit*>::Iterator it = d->mRadarContactsList.begin(); it != d->mRadarContactsList.end(); ++it) {
+ for (Q3ValueList<Unit*>::Iterator it = d->mRadarContactsList.begin(); it != d->mRadarContactsList.end(); ++it) {
 	Unit* u = *it;
 	// Radars and jammers will be rendered separately
 	if (u->plugin(UnitPlugin::Radar) || u->plugin(UnitPlugin::RadarJammer)) {
@@ -1918,7 +1921,7 @@ void BosonCanvasRenderer::renderUnitIcons()
 	// Select icon size
 	float iconsize = 0.5f * (dist / 70) * sqrtwidth;
 	BoVector3Float shift = z * iconsize;
-	float alpha = 0.3 + QMIN((float)u->radarSignalStrength(localPlayerIO()->playerId()) / 20.0f, 0.5f);
+	float alpha = 0.3 + qMin((float)u->radarSignalStrength(localPlayerIO()->playerId()) / 20.0f, 0.5f);
 	glColor4f(0.4, 0.4, 0.4, alpha);
 
 	// Render icon
@@ -1932,8 +1935,8 @@ void BosonCanvasRenderer::renderUnitIcons()
 
  // Render radars
  d->mRadarIcon->bind();
- const QValueList<const Unit*>* radars = d->mCanvas->radarUnits();
- for (QValueList<const Unit*>::const_iterator rit = radars->begin(); rit != radars->end(); ++rit) {
+ const Q3ValueList<const Unit*>* radars = d->mCanvas->radarUnits();
+ for (Q3ValueList<const Unit*>::const_iterator rit = radars->begin(); rit != radars->end(); ++rit) {
 	const Unit* u = *rit;
 	if (u->radarSignalStrength(localPlayerIO()->playerId()) < 1 || u->ownerIO() == localPlayerIO()) {
 		continue;
@@ -1948,7 +1951,7 @@ void BosonCanvasRenderer::renderUnitIcons()
 	// Select icon size
 	float iconsize = 0.02f * (dist / 70) * sqrtf(radar->transmittedPower());
 	BoVector3Float shift = z * iconsize;
-	//float alpha = 0.3 + QMIN((float)u->radarSignalStrength(localPlayerIO()->playerId()) / 20.0f, 0.5f);
+	//float alpha = 0.3 + qMin((float)u->radarSignalStrength(localPlayerIO()->playerId()) / 20.0f, 0.5f);
 	glColor4f(1.0, 1.0, 1.0, 0.6);
 
 	// Render icon
@@ -1962,8 +1965,8 @@ void BosonCanvasRenderer::renderUnitIcons()
 
  // Render jammers
  d->mJammingIcon->bind();
- const QValueList<const Unit*>* jammers = d->mCanvas->radarJammerUnits();
- for (QValueList<const Unit*>::const_iterator it = jammers->begin(); it != jammers->end(); ++it) {
+ const Q3ValueList<const Unit*>* jammers = d->mCanvas->radarJammerUnits();
+ for (Q3ValueList<const Unit*>::const_iterator it = jammers->begin(); it != jammers->end(); ++it) {
 	const Unit* u = *it;
 	if (u->radarSignalStrength(localPlayerIO()->playerId()) < 1 || u->ownerIO() == localPlayerIO()) {
 		continue;
@@ -1977,7 +1980,7 @@ void BosonCanvasRenderer::renderUnitIcons()
 	// Select icon size
 	float iconsize = 0.06f * (dist / 70) * sqrtf(jammer->transmittedPower());
 	BoVector3Float shift = z * iconsize;
-	//float alpha = 0.3 + QMIN((float)u->radarSignalStrength(localPlayerIO()->playerId()) / 20.0f, 0.5f);
+	//float alpha = 0.3 + qMin((float)u->radarSignalStrength(localPlayerIO()->playerId()) / 20.0f, 0.5f);
 	glColor4f(1.0, 1.0, 1.0, 0.6);
 
 	// Render icon
@@ -1994,7 +1997,7 @@ void BosonCanvasRenderer::renderUnitIcons()
  glDisable(GL_ALPHA_TEST);
 }
 
-void BosonCanvasRenderer::renderPathLines(const BosonCanvas* canvas, QValueList<QPoint>& path, bool isFlying, float _z)
+void BosonCanvasRenderer::renderPathLines(const BosonCanvas* canvas, Q3ValueList<QPoint>& path, bool isFlying, float _z)
 {
  PROFILE_METHOD;
  // render a line from the current position of the unit to the
@@ -2005,7 +2008,7 @@ void BosonCanvasRenderer::renderPathLines(const BosonCanvas* canvas, QValueList<
  // lines is fast).
  boTextureManager->disableTexturing();
  glBegin(GL_LINE_STRIP);
- QValueList<QPoint>::Iterator it;
+ Q3ValueList<QPoint>::Iterator it;
  bool done = false;
  for (it = path.begin(); it != path.end(); ++it) {
 	if ((*it).x() < 0 || (*it).y() < 0) {
@@ -2026,11 +2029,11 @@ void BosonCanvasRenderer::renderPathLines(const BosonCanvas* canvas, QValueList<
 
 }
 
-void BosonCanvasRenderer::createVisibleEffectsList(BoVisibleEffects* v, const QPtrList<BosonEffect>& allEffects, unsigned int mapWidth, unsigned int mapHeight)
+void BosonCanvasRenderer::createVisibleEffectsList(BoVisibleEffects* v, const Q3PtrList<BosonEffect>& allEffects, unsigned int mapWidth, unsigned int mapHeight)
 {
  v->clearAll();
 
- QPtrListIterator<BosonEffect> it(allEffects);
+ Q3PtrListIterator<BosonEffect> it(allEffects);
  while (it.current()) {
 	if (!it.current()->hasStarted()) {
 		// nothing to do. effect hasn't started yet.
@@ -2132,7 +2135,7 @@ void BosonCanvasRenderer::renderParticles(BoVisibleEffects& visible)
 	BoVector3Float dir;
 	visible.mParticleList.clear();
 	// Add all particles to the list
-	QPtrListIterator<BosonEffectParticle> visibleIt(visible.mParticles);
+	Q3PtrListIterator<BosonEffectParticle> visibleIt(visible.mParticles);
 	BosonEffectParticle* s = 0;
 	for (; visibleIt.current(); ++visibleIt) {
 		s = visibleIt.current();
@@ -2205,7 +2208,7 @@ void BosonCanvasRenderer::renderParticles(BoVisibleEffects& visible)
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error x1" << endl;
  }
- QPtrListIterator<BosonParticle> it(visible.mParticleList);
+ Q3PtrListIterator<BosonParticle> it(visible.mParticleList);
  //boDebug(150) << k_funcinfo << "Drawing " << i.count() << " particles" << endl;
  for (; it.current(); ++it) {
 	p = it.current();
@@ -2291,7 +2294,7 @@ void BosonCanvasRenderer::renderBulletTrailEffects(BoVisibleEffects& visible)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBegin(GL_LINES);
-	QPtrListIterator<BosonEffectBulletTrail> it(visible.mBulletEffects);
+	Q3PtrListIterator<BosonEffectBulletTrail> it(visible.mBulletEffects);
 	while (it.current()) {
 		b = it.current();
 		if (b->width() != currentwidth) {
@@ -2340,7 +2343,7 @@ void BosonCanvasRenderer::renderFadeEffects(BoVisibleEffects& visible, bool enab
 
  // Render NON-SHADER effects
  int rendered = 0;
- QPtrListIterator<BosonEffectFade> it(visible.mFadeEffects);
+ Q3PtrListIterator<BosonEffectFade> it(visible.mFadeEffects);
  for (; it.current(); ++it) {
 	effect = it.current();
 	if (effect->passes() != 0) {
@@ -2550,14 +2553,14 @@ void BosonCanvasRenderer::renderFadeEffects(BoVisibleEffects& visible, bool enab
  glLoadIdentity();
 }
 
-void BosonCanvasRenderer::slotAddFeedbackAttack(const QPtrList<Unit>& attacker, const Unit* unit)
+void BosonCanvasRenderer::slotAddFeedbackAttack(const Q3PtrList<Unit>& attacker, const Unit* unit)
 {
  // TODO: add some "ItemTint" for the items that were ordered to attack
  BoVisualFeedbackItemTint* f = new BoVisualFeedbackItemTint(unit, 250, Qt::red);
  d->mVisualFeedbacks->addFeedback(f);
 }
 
-void BosonCanvasRenderer::slotAddFeedbackMoveTo(const QPtrList<Unit>& units, const BoVector2Fixed& cell, bool withAttack)
+void BosonCanvasRenderer::slotAddFeedbackMoveTo(const Q3PtrList<Unit>& units, const BoVector2Fixed& cell, bool withAttack)
 {
  // TODO: add a green "ItemTint" for the items that were ordered to move
  Q_UNUSED(withAttack);
@@ -2574,7 +2577,7 @@ void BosonCanvasRenderer::slotAddFeedbackMoveTo(const QPtrList<Unit>& units, con
 static void updateEffects(BoVisibleEffects& v)
 {
  BosonProfiler prof("updateEffects(): doDelayedUpdates");
- QPtrListIterator<BosonEffect> it(v.mAll);
+ Q3PtrListIterator<BosonEffect> it(v.mAll);
  while (it.current()) {
 	it.current()->doDelayedUpdates();
 	++it;
@@ -2584,7 +2587,7 @@ static void updateEffects(BoVisibleEffects& v)
 
 void BosonCanvasRenderer::slotItemRemoved(BosonItem* item)
 {
- for (QValueVector<BoRenderItem>::iterator it = d->mRenderItemList.begin(); it != d->mRenderItemList.end(); ++it) {
+ for (Q3ValueVector<BoRenderItem>::iterator it = d->mRenderItemList.begin(); it != d->mRenderItemList.end(); ++it) {
 	if ((*it).item == item) {
 		d->mRenderItemList.erase(it);
 		return;
@@ -2593,7 +2596,7 @@ void BosonCanvasRenderer::slotItemRemoved(BosonItem* item)
 }
 
 // AB: large parts are from Mesa-5.1/src/glu/mesa/glu.c: gluPickMatrix().
-QValueList<BosonItem*> BosonCanvasRenderer::emulatePickItems(const QRect& pickRect) const
+Q3ValueList<BosonItem*> BosonCanvasRenderer::emulatePickItems(const QRect& pickRect) const
 {
  PROFILE_METHOD
  BoRect2Float _pickRect((float)pickRect.x(), (float)pickRect.y(), (float)(pickRect.x() + pickRect.width()), (float)(pickRect.y() + pickRect.height()));
@@ -2601,8 +2604,8 @@ QValueList<BosonItem*> BosonCanvasRenderer::emulatePickItems(const QRect& pickRe
  viewFrustum.loadPickViewFrustum(_pickRect, d->mGameMatrices->viewport(), d->mGameMatrices->modelviewMatrix(), d->mGameMatrices->projectionMatrix());
 
 
- QValueList<BosonItem*> items;
- for (QValueVector<BoRenderItem>::const_iterator it = d->mRenderItemList.begin(); it != d->mRenderItemList.end(); ++it) {
+ Q3ValueList<BosonItem*> items;
+ for (Q3ValueVector<BoRenderItem>::const_iterator it = d->mRenderItemList.begin(); it != d->mRenderItemList.end(); ++it) {
 	BosonItem* item = (*it).item;
 	BosonItemRenderer* itemRenderer = (*it).itemRenderer;
 	if (!itemRenderer) {

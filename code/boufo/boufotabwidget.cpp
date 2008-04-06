@@ -33,7 +33,7 @@
 #include "boufopushbutton.h"
 #include <bodebug.h>
 
-#include <qintdict.h>
+#include <q3intdict.h>
 
 class BoUfoTabWidgetPrivate
 {
@@ -46,8 +46,8 @@ public:
 	BoUfoHBox* mButtonsWidget;
 	BoUfoVBox* mTabLayoutWidget;
 
-	QIntDict<BoUfoPushButton> mButtons;
-	QIntDict<BoUfoWidget> mTabs; // ownership is NOT taken
+	Q3IntDict<BoUfoPushButton> mButtons;
+	Q3IntDict<BoUfoWidget> mTabs; // ownership is NOT taken
 	int mCurrentTab;
 };
 
@@ -79,10 +79,10 @@ void BoUfoTabWidget::init()
 void BoUfoTabWidget::setOpaque(bool o)
 {
  BoUfoWidget::setOpaque(o);
- for (QIntDictIterator<BoUfoPushButton> it(d->mButtons); it.current(); ++it) {
+ for (Q3IntDictIterator<BoUfoPushButton> it(d->mButtons); it.current(); ++it) {
 	it.current()->setOpaque(o);
  }
- for (QIntDictIterator<BoUfoWidget> it(d->mTabs); it.current(); ++it) {
+ for (Q3IntDictIterator<BoUfoWidget> it(d->mTabs); it.current(); ++it) {
 	it.current()->setOpaque(o);
  }
 }
@@ -116,7 +116,7 @@ int BoUfoTabWidget::addTab(BoUfoWidget* widget, const QString& label)
 
 void BoUfoTabWidget::removeTab(BoUfoWidget* widget)
 {
- QIntDictIterator<BoUfoWidget> it(d->mTabs);
+ Q3IntDictIterator<BoUfoWidget> it(d->mTabs);
  int id = -1;
  while (it.current() && it.current() != widget) {
 	++it;
@@ -146,7 +146,7 @@ void BoUfoTabWidget::slotButtonClicked()
 	return;
  }
  BoUfoPushButton* senderButton = (BoUfoPushButton*)sender();
- QIntDictIterator<BoUfoPushButton> it(d->mButtons);
+ Q3IntDictIterator<BoUfoPushButton> it(d->mButtons);
  while (it.current()) {
 	if (it.current() == senderButton) {
 		setCurrentTab(it.currentKey());

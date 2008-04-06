@@ -37,6 +37,8 @@
 #include <kcmdlineargs.h>
 #include <klocale.h>
 #include <kmessagebox.h>
+//Added by qt3to4:
+#include <Q3CString>
 
 // sound is enabled by default atm
 #define HARDCODE_NOSOUND 0
@@ -101,7 +103,7 @@ int main(int argc, char **argv)
  // initialization
  BosonConfig::setPostInitFunction(&postBosonConfigInit);
 
- QCString argv0(argv[0]);
+ Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
 #if BOSON_LINK_STATIC
@@ -120,7 +122,7 @@ int main(int argc, char **argv)
 
  BoEventLoop eventLoop(0, "main event loop");
  BoApplication app(argv0);
- KGlobal::locale()->insertCatalogue("libkdegames");
+ KGlobal::locale()->insertCatalog("libkdegames");
 
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
 

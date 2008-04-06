@@ -37,24 +37,30 @@
 
 #include <qtimer.h>
 #include <qlayout.h>
-#include <qlistbox.h>
-#include <qlistview.h>
+#include <q3listbox.h>
+#include <q3listview.h>
 #include <qsplitter.h>
 #include <qfile.h>
 #include <qdom.h>
 #include <qlabel.h>
 #include <qcursor.h>
 #include <qaction.h>
-#include <qpopupmenu.h>
+#include <q3popupmenu.h>
 #include <qmenubar.h>
 #include <qmessagebox.h>
-#include <qfiledialog.h>
+#include <q3filedialog.h>
 #include <qpushbutton.h>
 #include <qlineedit.h>
 #include <qcombobox.h>
-#include <qvgroupbox.h>
-#include <qwidgetstack.h>
+#include <q3vgroupbox.h>
+#include <q3widgetstack.h>
 #include <qsettings.h>
+//Added by qt3to4:
+#include <Q3TextStream>
+#include <Q3HBoxLayout>
+#include <QCloseEvent>
+#include <Q3StrList>
+#include <Q3VBoxLayout>
 
 #include <math.h>
 #include <stdlib.h>
@@ -174,7 +180,7 @@ public:
 
 
 BoUfoDesignerMain::BoUfoDesignerMain()
-	: QMainWindow(0, "mainwindow", WType_TopLevel | WDestructiveClose)
+	: Q3MainWindow(0, "mainwindow", Qt::WType_TopLevel | WDestructiveClose)
 {
  d = new BoUfoDesignerMainPrivate();
  mIface = new BoDebugDCOPIface();
@@ -182,7 +188,7 @@ BoUfoDesignerMain::BoUfoDesignerMain()
  setCentralWidget(topWidget);
  mOptionsDialog = 0;
 
- QHBoxLayout* layout = new QHBoxLayout(topWidget);
+ Q3HBoxLayout* layout = new Q3HBoxLayout(topWidget);
 
  QSplitter* splitter = new QSplitter(topWidget);
  layout->addWidget(splitter);
@@ -255,7 +261,7 @@ bool BoUfoDesignerMain::slotCreateNew()
 bool BoUfoDesignerMain::slotLoadFromFile(const QString& fileName)
 {
  QFile file(fileName);
- if (!file.open(IO_ReadOnly)) {
+ if (!file.open(QIODevice::ReadOnly)) {
 	boError() << k_funcinfo << "could not open " << fileName << endl;
 	return false;
  }
@@ -275,11 +281,11 @@ bool BoUfoDesignerMain::slotLoadFromFile(const QString& fileName)
 bool BoUfoDesignerMain::slotSaveAsFile(const QString& fileName)
 {
  QFile file(fileName);
- if (!file.open(IO_WriteOnly)) {
+ if (!file.open(QIODevice::WriteOnly)) {
 	boError() << k_funcinfo << "could not open " << fileName << " for writing" << endl;
 	return false;
  }
- QTextStream t(&file);
+ Q3TextStream t(&file);
  t << mDocument;
 // file.writeBlock(mDocument.toCString());
  file.close();
@@ -456,7 +462,7 @@ void BoUfoDesignerMain::initProperties(QDomElement& widget, const QString& class
 
  // AB: non-boson superclasses are QObject and Qt. Only QObject has properties
  // and even there only "name". We use "name" as variable name.
- QStrList properties = metaObject->propertyNames(true);
+ Q3StrList properties = metaObject->propertyNames(true);
  QStrListIterator it(properties);
  while (it.current()) {
 	provideProperty(widget, *it);
@@ -551,7 +557,7 @@ void BoUfoDesignerMain::provideProperty(QDomElement& e, const QString& property)
 
 void BoUfoDesignerMain::slotLoad()
 {
- QString fileName = QFileDialog::getOpenFileName(QString::null, tr("boui files (*.boui)"), this, "open dialog");
+ QString fileName = Q3FileDialog::getOpenFileName(QString::null, tr("boui files (*.boui)"), this, "open dialog");
  if (fileName.isEmpty()) {
 	return;
  }
@@ -573,7 +579,7 @@ void BoUfoDesignerMain::slotSave()
 
 void BoUfoDesignerMain::slotSaveAs()
 {
- QString fileName = QFileDialog::getSaveFileName(QString::null, tr("boui files (*.boui)"), this, "save dialog");
+ QString fileName = Q3FileDialog::getSaveFileName(QString::null, tr("boui files (*.boui)"), this, "save dialog");
  if (fileName.isEmpty()) {
 	return;
  }
@@ -604,8 +610,8 @@ void BoUfoDesignerMain::slotEditSignalsSlots()
 
 void BoUfoDesignerMain::initActions()
 {
- QAction* fileNew = new QAction(tr("New"), CTRL + Key_N, this, "new");
- QAction* fileOpen = new QAction(tr("Open..."), CTRL + Key_O, this, "open");
+ QAction* fileNew = new QAction(tr("New"), Qt::CTRL + Qt::Key_N, this, "new");
+ QAction* fileOpen = new QAction(tr("Open..."), Qt::CTRL + Qt::Key_O, this, "open");
  QAction* fileSaveAs = new QAction(tr("Save as..."), 0, this, "saveas");
  d->mSaveAction = new QAction(tr("Save"), 0, this, "save");
  connect(fileNew, SIGNAL(activated()), this, SLOT(slotCreateNew()));
@@ -622,19 +628,19 @@ void BoUfoDesignerMain::initActions()
  QAction* configure = new QAction(tr("&Configure..."), 0, this, "configure");
  connect(configure, SIGNAL(activated()), this, SLOT(slotConfigure()));
 
- QPopupMenu* file = new QPopupMenu(this);
+ Q3PopupMenu* file = new Q3PopupMenu(this);
  menuBar()->insertItem("&File", file);
  fileNew->addTo(file);
  fileOpen->addTo(file);
  d->mSaveAction->addTo(file);
  fileSaveAs->addTo(file);
- QPopupMenu* edit = new QPopupMenu(this);
+ Q3PopupMenu* edit = new Q3PopupMenu(this);
  menuBar()->insertItem("&Edit", edit);
  editSignalsSlots->addTo(edit);
- QPopupMenu* debug = new QPopupMenu(this);
+ Q3PopupMenu* debug = new Q3PopupMenu(this);
  menuBar()->insertItem("&Debug", debug);
  debugUfo->addTo(debug);
- QPopupMenu* settingsMenu = new QPopupMenu(this);
+ Q3PopupMenu* settingsMenu = new Q3PopupMenu(this);
  menuBar()->insertItem("&Settings", settingsMenu);
  configure->addTo(settingsMenu);
 }
@@ -656,7 +662,7 @@ void BoUfoDesignerMain::closeEvent(QCloseEvent* e)
 void BoUfoDesignerMain::slotDebugUfo()
 {
  QDialog* dialog = new QDialog(0,"ufodebugdialog", false, Qt::WDestructiveClose);
- QVBoxLayout* l = new QVBoxLayout(dialog);
+ Q3VBoxLayout* l = new Q3VBoxLayout(dialog);
  BoUfoDebugWidget* debug = new BoUfoDebugWidget(dialog);
  debug->setBoUfoManager(mPreview->ufoManager());
  l->addWidget(debug);

@@ -25,8 +25,8 @@
 #include "frame.h"
 #include "mesh.h"
 
-#include <qvaluelist.h>
-#include <qvaluevector.h>
+#include <q3valuelist.h>
+#include <q3valuevector.h>
 
 
 MeshOptimizer::MeshOptimizer() : Processor()
@@ -49,8 +49,8 @@ bool MeshOptimizer::process()
   mHasMultipleNodes = new bool[lod()->meshCount()];
   mMeshFrameHashes = new unsigned int[lod()->meshCount()];
 
-  QValueList<Mesh*> meshes;
-  QValueVector<Mesh*> validmeshes;
+  Q3ValueList<Mesh*> meshes;
+  Q3ValueVector<Mesh*> validmeshes;
   // Put all meshes of the lod to meshes list
   for(unsigned int i = 0; i < lod()->meshCount(); i++)
   {
@@ -63,7 +63,7 @@ bool MeshOptimizer::process()
 
   while(meshes.count() > 0)
   {
-    QValueList<Mesh*> equal;
+    Q3ValueList<Mesh*> equal;
     // Move first mesh from meshes list to equal
     equal.append(meshes.first());
     meshes.pop_front();
@@ -92,7 +92,7 @@ bool MeshOptimizer::process()
   return true;
 }
 
-void MeshOptimizer::findEqualMeshes(QValueList<Mesh*>* equal, QValueList<Mesh*>* rest)
+void MeshOptimizer::findEqualMeshes(Q3ValueList<Mesh*>* equal, Q3ValueList<Mesh*>* rest)
 {
   // For two meshes two be equal, they need to have:
   //  * same material
@@ -114,7 +114,7 @@ void MeshOptimizer::findEqualMeshes(QValueList<Mesh*>* equal, QValueList<Mesh*>*
 
   int seen = 0;
   int shouldsee = rest->count();
-  for(QValueList<Mesh*>::Iterator it = rest->begin(); it != rest->end(); ++it)
+  for(Q3ValueList<Mesh*>::Iterator it = rest->begin(); it != rest->end(); ++it)
   {
     seen++;
     Mesh* test = *it;
@@ -231,7 +231,7 @@ unsigned int MeshOptimizer::computeFramesHash(Mesh* m)
     hash = (hash << 7);
     hash ^= g;
   }
-  //boDebug() << k_funcinfo << "Hash of mesh " << m->id() << " is 0x" << QString::number(hash, 16).rightJustify(8, '0') << "  (" << hash << ")" << endl;
+  //boDebug() << k_funcinfo << "Hash of mesh " << m->id() << " is 0x" << QString::number(hash, 16).rightJustified(8, '0') << "  (" << hash << ")" << endl;
   return hash;
 }
 
@@ -267,7 +267,7 @@ bool MeshOptimizer::animationsDiffer(Mesh* m1, Mesh* m2)
   return false;
 }
 
-Mesh* MeshOptimizer::mergeMeshes(QValueList<Mesh*>* equal)
+Mesh* MeshOptimizer::mergeMeshes(Q3ValueList<Mesh*>* equal)
 {
   // Base mesh, all other meshes will be added to this
   Mesh* base = equal->first();
@@ -276,7 +276,7 @@ Mesh* MeshOptimizer::mergeMeshes(QValueList<Mesh*>* equal)
     return base;
   }
 
-  QValueList<Mesh*>::Iterator it = equal->begin();
+  Q3ValueList<Mesh*>::Iterator it = equal->begin();
   // Pass 1: count faces/vertices in all meshes
   unsigned int totalVertices = 0;
   unsigned int totalFaces = 0;

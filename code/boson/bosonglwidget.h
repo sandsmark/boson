@@ -21,6 +21,10 @@
 #define BOSONGLWIDGET_H
 
 #include <qwidget.h>
+//Added by qt3to4:
+#include <QPixmap>
+#include <QResizeEvent>
+#include <QPaintEvent>
 
 class QGLFormat;
 
@@ -160,7 +164,7 @@ public:
 	 * @ref QGLWidget::reparent implementation (shamelessy stolen from
 	 * there)
 	 **/
-	virtual void reparent(QWidget* parent, WFlags f, const QPoint& p, bool showIt);
+	virtual void reparent(QWidget* parent, Qt::WFlags f, const QPoint& p, bool showIt);
 
 	/**
 	 * @return QGLWidget::convertToGLFormat

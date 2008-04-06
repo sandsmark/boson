@@ -33,13 +33,16 @@
 
 #include <qlabel.h>
 #include <qlayout.h>
-#include <qvbox.h>
-#include <qhbox.h>
+#include <q3vbox.h>
+#include <q3hbox.h>
 #include <qpushbutton.h>
 #include <qimage.h>
 #include <qcombobox.h>
-#include <qvgroupbox.h>
-#include <qintdict.h>
+#include <q3vgroupbox.h>
+#include <q3intdict.h>
+//Added by qt3to4:
+#include <QPixmap>
+#include <Q3HBoxLayout>
 
 class BoTexMapImportDialogPrivate
 {
@@ -69,8 +72,8 @@ public:
 	QComboBox* mBlue;
 	QComboBox* mAlpha;
 
-	QVGroupBox* mTexturesGroupBox;
-	QIntDict<KIntNumInput> mTextures;
+	Q3VGroupBox* mTexturesGroupBox;
+	Q3IntDict<KIntNumInput> mTextures;
 
 };
 
@@ -80,30 +83,30 @@ BoTexMapImportDialog::BoTexMapImportDialog(QWidget* parent, bool modal)
 {
  d = new BoTexMapImportDialogPrivate();
 
- QHBoxLayout* layout = new QHBoxLayout(plainPage());
+ Q3HBoxLayout* layout = new Q3HBoxLayout(plainPage());
 
- QVBox* texMapImage = new QVBox(plainPage(), "texmapimage");
+ Q3VBox* texMapImage = new Q3VBox(plainPage(), "texmapimage");
  d->mTexMapLabel = new QLabel(texMapImage, "texmaplabel");
  QPushButton* selectTexMapImage = new QPushButton(i18n("Select &texmap..."), texMapImage, "selecttexmapimage");
  connect(selectTexMapImage, SIGNAL(clicked()), this, SLOT(slotSelectTexMapImage()));
  layout->addWidget(texMapImage);
 
- QVGroupBox* colors = new QVGroupBox(i18n("Colors"), plainPage(), "colors");
+ Q3VGroupBox* colors = new Q3VGroupBox(i18n("Colors"), plainPage(), "colors");
  layout->addWidget(colors);
 
- QHBox* hbox = new QHBox(colors, "hbox_red");
+ Q3HBox* hbox = new Q3HBox(colors, "hbox_red");
  (void)new QLabel(i18n("Red: "), hbox);
  d->mRed = new QComboBox(hbox);
 
- hbox = new QHBox(colors, "hbox_green");
+ hbox = new Q3HBox(colors, "hbox_green");
  (void)new QLabel(i18n("Green: "), hbox);
  d->mGreen = new QComboBox(hbox);
 
- hbox = new QHBox(colors, "hbox_blue");
+ hbox = new Q3HBox(colors, "hbox_blue");
  (void)new QLabel(i18n("Blue: "), hbox);
  d->mBlue = new QComboBox(hbox);
 
- hbox = new QHBox(colors, "hbox_alpha");
+ hbox = new Q3HBox(colors, "hbox_alpha");
  (void)new QLabel(i18n("Alpha: "), hbox);
  d->mAlpha = new QComboBox(hbox);
 
@@ -117,7 +120,7 @@ BoTexMapImportDialog::BoTexMapImportDialog(QWidget* parent, bool modal)
  d->mBlue->setEnabled(false);
  d->mAlpha->setEnabled(false);
 
- d->mTexturesGroupBox = new QVGroupBox(i18n("Additional manipulation"), plainPage(), "texturesgroupbox");
+ d->mTexturesGroupBox = new Q3VGroupBox(i18n("Additional manipulation"), plainPage(), "texturesgroupbox");
  layout->addWidget(d->mTexturesGroupBox);
  (void)new QLabel(i18n("Reset textures on entire map to (-1 does not touch at all)"), d->mTexturesGroupBox);
  d->mTextures.setAutoDelete(true);

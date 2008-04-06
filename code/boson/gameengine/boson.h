@@ -23,6 +23,11 @@
 
 #include <kgame/kgame.h>
 #include <sys/time.h>
+//Added by qt3to4:
+#include <Q3TextStream>
+#include <Q3ValueList>
+#include <Q3PtrList>
+#include <QEvent>
 
 class Player;
 class PlayerIO;
@@ -33,7 +38,7 @@ class BosonPlayField;
 class QDomElement;
 class QDomDocument;
 class QDataStream;
-class QTextStream;
+class Q3TextStream;
 class BosonSaveLoad;
 class BosonPlayerListManager;
 class BoMessage;
@@ -46,6 +51,8 @@ template<class T> class BoVector2;
 typedef BoVector2<bofixed> BoVector2Fixed;
 class BosonMessageEditorMove;
 class BosonNetworkTraffic;
+
+class QColor;
 
 #define boGame Boson::boson()
 
@@ -112,7 +119,7 @@ public:
 	void setPlayField(BosonPlayField*);
 	BosonPlayField* playField() const;
 
-	PlayerIO* findPlayerIO(Q_UINT32 id) const;
+	PlayerIO* findPlayerIO(quint32 id) const;
 	PlayerIO* playerIOAtAllIndex(unsigned int playerIndex) const;
 	PlayerIO* playerIOAtGameIndex(unsigned int playerIndex) const;
 	PlayerIO* playerIOAtActiveGameIndex(unsigned int playerIndex) const;
@@ -137,7 +144,7 @@ public:
 	/**
 	 * @return @ref BosonPlayerListManager::allPlayerList
 	 **/
-	const QPtrList<Player>& allPlayerList() const;
+	const Q3PtrList<Player>& allPlayerList() const;
 
 	/**
 	 * "game players" are players with ID >= 128 and <= 511. These are
@@ -147,7 +154,7 @@ public:
 	 *
 	 * @return @ref BosonPlayerListManager::gamePlayerList
 	 **/
-	const QPtrList<Player>& gamePlayerList() const;
+	const Q3PtrList<Player>& gamePlayerList() const;
 
 	/**
 	 * "active game players" are players with ID >= 128 and <= 255. These
@@ -158,7 +165,7 @@ public:
 	 *
 	 * @return @ref BosonPlayerListManager::activeGamePlayerList
 	 **/
-	const QPtrList<Player>& activeGamePlayerList() const;
+	const Q3PtrList<Player>& activeGamePlayerList() const;
 
 	/**
 	 * Initialize a @ref BosonSaveLoad object with the relevant data.
@@ -192,7 +199,7 @@ public:
 
 	void removeAllPlayers();
 
-	QValueList<QColor> availableTeamColors() const;
+	Q3ValueList<QColor> availableTeamColors() const;
 
 	/**
 	 * Kill the @p player, i.e. remove all it's units (if any) from the
@@ -220,7 +227,7 @@ public:
 	 **/
 	bool buildProducedUnitAtTopLeftPos(ProductionPlugin* factory, unsigned long int unitType, BoVector2Fixed topLeftPos);
 
-	virtual void networkTransmission(QDataStream&, int msgid, Q_UINT32 receiver, Q_UINT32 sender, Q_UINT32 clientID);
+	virtual void networkTransmission(QDataStream&, int msgid, quint32 receiver, quint32 sender, quint32 clientID);
 
 	/**
 	 * Called by @ref networkTransmission. This method actually delivers the
@@ -314,7 +321,7 @@ public:
 	 **/
 	unsigned int advanceCallsCount() const;
 
-	void writeGameLog(QTextStream& log);
+	void writeGameLog(Q3TextStream& log);
 	bool saveGameLogs(const QString& prefix);
 
 	/**
@@ -336,7 +343,7 @@ public:
 	bool loadCanvasConditions(const QDomElement& root);
 	bool saveCanvasConditions(QDomElement& root) const;
 
-	bool loadFromLog(QPtrList<BoMessage>* messages);
+	bool loadFromLog(Q3PtrList<BoMessage>* messages);
 
 	/**
 	 * Called when all messages from a "loadfromlog" run have been
@@ -349,7 +356,7 @@ public:
 	const BosonNetworkTraffic* networkTraffic() const;
 
 	// for debugging
-	const QPtrList<BoAdvanceMessageTimes>& advanceMessageTimes() const;
+	const Q3PtrList<BoAdvanceMessageTimes>& advanceMessageTimes() const;
 
 public: // small KGame extenstions for boson
 	/**
@@ -377,7 +384,7 @@ public: // small KGame extenstions for boson
 	 * to when we are server or the peerPort when we are connected to
 	 * another client.
 	 **/
-	Q_UINT16 bosonPort();
+	quint16 bosonPort();
 	bool isServer() const;
 
 	/**
@@ -470,7 +477,7 @@ signals:
 	 * (i.e. data loading). The game (i.e. advance messages) should start
 	 * when all clients completed starting.
 	 **/
-	void signalStartingCompletedReceived(const QByteArray& message, Q_UINT32 sender);
+	void signalStartingCompletedReceived(const QByteArray& message, quint32 sender);
 
 	/**
 	 * Order the canvas to call @ref BosonCanvas::slotAdvance
@@ -602,7 +609,7 @@ protected slots:
 	 * task theirselfes. This way we ensure that a task happens on
 	 * <em>all</em> clients.
 	 **/
-	void slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 receiver, Q_UINT32 sender);
+	void slotNetworkData(int msgid, const QByteArray& buffer, quint32 receiver, quint32 sender);
 
 	void slotClientLeftGame(int clientId, int oldgamestatus, KGame*);
 

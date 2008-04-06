@@ -37,7 +37,7 @@
 /*****  BosonEffectPropertiesParticle  *****/
 
 #warning this is never freed!
-QDict<BoTextureArray> BosonEffectPropertiesParticle::mTextureArrays;
+Q3Dict<BoTextureArray> BosonEffectPropertiesParticle::mTextureArrays;
 QString BosonEffectPropertiesParticle::mTexturePath;
 BoVector3Float BosonEffectPropertiesParticle::mWind(0.2, 0.1, 0.0);
 
@@ -208,7 +208,7 @@ BosonEffect* BosonEffectPropertiesParticleGeneric::newEffect(const BoVector3Fixe
   e->setBlendFunc(mGLSrcBlendFunc, mGLBlendFunc);
   e->setRate(mRate);
   e->setAlignParticles(mAlign);
-  e->setMaxParticleSize(QMAX(mStartSize, mEndSize));
+  e->setMaxParticleSize(qMax(mStartSize, mEndSize));
   if(!rot.isNull())
   {
     e->setRotation(rot);
@@ -370,7 +370,7 @@ BosonEffect* BosonEffectPropertiesParticleTrail::newEffect(const BoVector3Fixed&
   e->setParticleDist(mParticleDist);
   e->setBlendFunc(mGLSrcBlendFunc, mGLBlendFunc);
   e->setSpacing(mSpacing);
-  e->setMaxParticleSize(QMAX(mStartSize, mEndSize));
+  e->setMaxParticleSize(qMax(mStartSize, mEndSize));
   if(!rot.isNull())
   {
     e->setRotation(rot);

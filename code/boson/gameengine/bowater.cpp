@@ -27,8 +27,8 @@
 
 #include <qrect.h>
 #include <qpoint.h>
-#include <qptrlist.h>
-#include <qvaluelist.h>
+#include <q3ptrlist.h>
+#include <q3valuelist.h>
 #include <qdom.h>
 
 #include <math.h>
@@ -63,7 +63,7 @@ class BoWaterData
     }
 
 
-    QPtrList<BoLake> lakes;
+    Q3PtrList<BoLake> lakes;
 
     BosonMap* map;
     // Size of map in _corners_ _not_ in cells!
@@ -134,8 +134,8 @@ void BoLake::findWater(BoWaterManager* manager, int x, int y, const QRect& searc
   maxx = -1; maxy = -1;
   cornercount = 0;
 
-  QValueList<QPoint> open;
-  QValueList<QPoint> closed;
+  Q3ValueList<QPoint> open;
+  Q3ValueList<QPoint> closed;
   QPoint n, n2;
 
   open.push_back(QPoint(x, y));
@@ -148,10 +148,10 @@ void BoLake::findWater(BoWaterManager* manager, int x, int y, const QRect& searc
     closed.push_back(n);
     cornercount++;
 
-    minx = QMIN(minx, n.x());
-    maxx = QMAX(maxx, n.x());
-    miny = QMIN(miny, n.y());
-    maxy = QMAX(maxy, n.y());
+    minx = qMin(minx, n.x());
+    maxx = qMax(maxx, n.x());
+    miny = qMin(miny, n.y());
+    maxy = qMax(maxy, n.y());
 
     for(int i = 0; i < 8; i++)
     {
@@ -177,10 +177,10 @@ void BoLake::findWater(BoWaterManager* manager, int x, int y, const QRect& searc
     }
   }
   // We need 1-cell border for shores
-  minx = QMAX(minx - 1, searcharea.left());
-  maxx = QMIN(maxx + 1, searcharea.right());
-  miny = QMAX(miny - 1, searcharea.top());
-  maxy = QMIN(maxy + 1, searcharea.bottom());
+  minx = qMax(minx - 1, searcharea.left());
+  maxx = qMin(maxx + 1, searcharea.right());
+  miny = qMax(miny - 1, searcharea.top());
+  maxy = qMin(maxy + 1, searcharea.bottom());
 
   // Mark all corners that we have
   int size = (maxx - minx + 1) * (maxy - miny + 1);
@@ -197,7 +197,7 @@ void BoLake::findWater(BoWaterManager* manager, int x, int y, const QRect& searc
   }
   // Go through every corners and add this _and it's neighbors_. We need
   //  neighbors for shores.
-  for(QValueList<QPoint>::iterator it = closed.begin(); it != closed.end(); it++)
+  for(Q3ValueList<QPoint>::iterator it = closed.begin(); it != closed.end(); it++)
   {
     QPoint p = *it;
     for(int i = 0; i < 8; i++)
@@ -216,14 +216,14 @@ void BoLake::findWater(BoWaterManager* manager, int x, int y, const QRect& searc
 
 bool BoLake::hasAnyCorner(float x1, float y1, float x2, float y2)
 {
-  if(hasCorner(QMAX((int)x1, minx), QMAX((int)y1, miny)))
+  if(hasCorner(qMax((int)x1, minx), qMax((int)y1, miny)))
   {
     return true;
   }
 
-  for(int celly = QMAX((int)y1, miny); celly <= QMIN((int)y2, maxy); celly++)
+  for(int celly = qMax((int)y1, miny); celly <= qMin((int)y2, maxy); celly++)
   {
-    for(int cellx = QMAX((int)x1, minx); cellx <= QMIN((int)x2, maxx); cellx++)
+    for(int cellx = qMax((int)x1, minx); cellx <= qMin((int)x2, maxx); cellx++)
     {
       if(hasCorner(cellx, celly))
       {
@@ -360,7 +360,7 @@ bool BoWaterManager::saveToXML(QDomElement& root)
   }
 
   QDomDocument doc = root.ownerDocument();
-  QPtrListIterator<BoLake> it(mData->lakes);
+  Q3PtrListIterator<BoLake> it(mData->lakes);
   for(; it.current(); ++it)
   {
     BoLake* lake = it.current();
@@ -402,7 +402,7 @@ void BoWaterManager::initCellMaps()
   }
 
   // Go through all lakes
-  QPtrListIterator<BoLake> it(mData->lakes);
+  Q3PtrListIterator<BoLake> it(mData->lakes);
   for(; it.current(); ++it)
   {
     BoLake* lake = it.current();
@@ -493,7 +493,7 @@ float BoWaterManager::waterDepthAtCorner(int x, int y)
     return 0.0f;
   }
 
-  QPtrListIterator<BoLake> it(mData->lakes);
+  Q3PtrListIterator<BoLake> it(mData->lakes);
   for(; it.current(); ++it)
   {
     BoLake* lake = it.current();
@@ -501,7 +501,7 @@ float BoWaterManager::waterDepthAtCorner(int x, int y)
     {
       if(lake->hasCorner(x, y))
       {
-        return QMAX(0.0f, lake->level - groundHeight(x, y));
+        return qMax(0.0f, lake->level - groundHeight(x, y));
       }
     }
   }
@@ -537,7 +537,7 @@ void BoWaterManager::setUnderwater(int x, int y, bool underwater)
   mData->underwater[y * mData->width + x] = underwater;
 }
 
-const QPtrList<BoLake>* BoWaterManager::lakes() const
+const Q3PtrList<BoLake>* BoWaterManager::lakes() const
 {
   if(!mData)
   {

@@ -22,7 +22,7 @@
 #include <qwidget.h>
 
 class BosonMap;
-class QListViewItem;
+class Q3ListViewItem;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -38,7 +38,7 @@ public:
 
 protected slots:
 	void slotUpdate();
-	void slotUpdateCell(QListViewItem*);
+	void slotUpdateCell(Q3ListViewItem*);
 	
 private:
 	class KGameCellDebugPrivate;

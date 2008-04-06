@@ -95,14 +95,14 @@ void BoGroundQuadTreeNode::recalculateHeightInThisNode(const BosonMap* map)
 	mGroundMinZ = h;
 	mGroundMaxZ = h;
 	h = map->heightAtCorner(left() + 1, top());
-	mGroundMinZ = QMIN(mGroundMinZ, h);
-	mGroundMaxZ = QMAX(mGroundMaxZ, h);
+	mGroundMinZ = qMin(mGroundMinZ, h);
+	mGroundMaxZ = qMax(mGroundMaxZ, h);
 	h = map->heightAtCorner(left() + 1, top() + 1);
-	mGroundMinZ = QMIN(mGroundMinZ, h);
-	mGroundMaxZ = QMAX(mGroundMaxZ, h);
+	mGroundMinZ = qMin(mGroundMinZ, h);
+	mGroundMaxZ = qMax(mGroundMaxZ, h);
 	h = map->heightAtCorner(left(), top() + 1);
-	mGroundMinZ = QMIN(mGroundMinZ, h);
-	mGroundMaxZ = QMAX(mGroundMaxZ, h);
+	mGroundMinZ = qMin(mGroundMinZ, h);
+	mGroundMaxZ = qMax(mGroundMaxZ, h);
 	return;
  }
  BoQuadTreeNode* children[4];
@@ -111,8 +111,8 @@ void BoGroundQuadTreeNode::recalculateHeightInThisNode(const BosonMap* map)
  mGroundMaxZ = ((BoGroundQuadTreeNode*)children[0])->groundMaxZ();
  for (int i = 1; i < 4; i++) {
 	if (children[i]) {
-		mGroundMinZ = QMIN(mGroundMinZ, ((BoGroundQuadTreeNode*)children[i])->groundMinZ());
-		mGroundMaxZ = QMAX(mGroundMaxZ, ((BoGroundQuadTreeNode*)children[i])->groundMaxZ());
+		mGroundMinZ = qMin(mGroundMinZ, ((BoGroundQuadTreeNode*)children[i])->groundMinZ());
+		mGroundMaxZ = qMax(mGroundMaxZ, ((BoGroundQuadTreeNode*)children[i])->groundMaxZ());
 	}
  }
 }
@@ -129,14 +129,14 @@ BoGroundQuadTreeCollection::~BoGroundQuadTreeCollection()
 
 void BoGroundQuadTreeCollection::cellHeightChanged(const BosonMap* map, int x1, int y1, int x2, int y2)
 {
- for (QPtrListIterator<BoQuadTreeNode> it(trees()); it.current(); ++it) {
+ for (Q3PtrListIterator<BoQuadTreeNode> it(trees()); it.current(); ++it) {
 	((BoGroundQuadTreeNode*)it.current())->cellHeightChanged(map, x1, y1, x2, y2);
  }
 }
 
 void BoGroundQuadTreeCollection::cellTextureChanged(const BosonMap* map, int x1, int y1, int x2, int y2)
 {
- for (QPtrListIterator<BoQuadTreeNode> it(trees()); it.current(); ++it) {
+ for (Q3PtrListIterator<BoQuadTreeNode> it(trees()); it.current(); ++it) {
 	((BoGroundQuadTreeNode*)it.current())->cellTextureChanged(map, x1, y1, x2, y2);
  }
 }

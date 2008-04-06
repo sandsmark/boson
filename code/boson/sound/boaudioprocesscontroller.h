@@ -21,14 +21,14 @@
 
 #include <qobject.h>
 
-class KProcess;
+class K3Process;
 class BoAudioCommand;
 
 class BoAudioProcessControllerPrivate;
 
 /**
  * This class provides a sound process. It could be implemented several ways -
- * e.g. it probably is a read process using @ref KProcess, but it could also be
+ * e.g. it probably is a read process using @ref K3Process, but it could also be
  * a thread using @ref BoAudioThread.
  *
  * At the moment we need a separate process, as threads didn't solve the
@@ -68,10 +68,10 @@ public:
 	void sendCommand(BoAudioCommand* command);
 
 protected slots:
-	void slotShowStdout(KProcess* proc, char* buffer, int length);
-	void slotShowStderr(KProcess* proc, char* buffer, int length);
-	void slotProcessExited(KProcess* proc);
-	void slotWroteStdin(KProcess* proc);
+	void slotShowStdout(K3Process* proc, char* buffer, int length);
+	void slotShowStderr(K3Process* proc, char* buffer, int length);
+	void slotProcessExited(K3Process* proc);
+	void slotWroteStdin(K3Process* proc);
 
 private:
 	BoAudioProcessControllerPrivate* d;

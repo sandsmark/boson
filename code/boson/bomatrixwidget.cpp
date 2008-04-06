@@ -24,9 +24,11 @@
 #include "bo3dtools.h"
 #include "bodebug.h"
 
-#include <qintdict.h>
+#include <q3intdict.h>
 #include <qlayout.h>
 #include <qlabel.h>
+//Added by qt3to4:
+#include <Q3GridLayout>
 
 #include <math.h>
 
@@ -38,14 +40,14 @@ public:
 		mLayout = 0;
 	}
 	BoMatrix mMatrix;
-	QGridLayout* mLayout;
-	QIntDict<QLabel> mLabel;
+	Q3GridLayout* mLayout;
+	Q3IntDict<QLabel> mLabel;
 };
 
 BoMatrixWidget::BoMatrixWidget(QWidget* parent, const char* name) : QWidget(parent, name)
 {
  d = new BoMatrixWidgetPrivate;
- d->mLayout = new QGridLayout(this, 0, 1);
+ d->mLayout = new Q3GridLayout(this, 0, 1);
  for (int i = 0; i < 16; i++) {
 	QLabel* l = new QLabel(this);
 	d->mLabel.insert(i, l);
@@ -164,7 +166,7 @@ public:
 	{
 	}
 	BoMatrix mMatrix;
-	QIntDict<BoUfoLabel> mLabel;
+	Q3IntDict<BoUfoLabel> mLabel;
 };
 
 

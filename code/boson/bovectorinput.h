@@ -22,9 +22,12 @@
 #define BOVECTORINPUT_H
 
 #include <qwidget.h>
+//Added by qt3to4:
+#include <Q3VBoxLayout>
+#include <Q3HBoxLayout>
 
-class QHBoxLayout;
-class QVBoxLayout;
+class Q3HBoxLayout;
+class Q3VBoxLayout;
 class bofixed;
 template<class T> class BoVector3;
 template<class T> class BoVector4;
@@ -41,7 +44,7 @@ public:
 	BoVector3Input(QWidget* parent = 0, const char* name = 0);
 	~BoVector3Input();
 
-	void setLabel(const QString& label, int a = AlignLeft | AlignTop);
+	void setLabel(const QString& label, int a = Qt::AlignLeft | Qt::AlignTop);
 	QString label() const;
 
 	virtual void setRange(float min, float max, float step = 0.1f);
@@ -59,7 +62,7 @@ protected slots:
 	virtual void slotValueChanged(float);
 
 protected:
-	QHBoxLayout* mainLayout() const;
+	Q3HBoxLayout* mainLayout() const;
 
 private:
 	BoVector3InputPrivate* d;

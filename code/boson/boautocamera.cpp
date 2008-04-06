@@ -25,6 +25,8 @@
 #include "bodebug.h"
 
 #include <qdom.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 #include <math.h>
 
@@ -200,7 +202,7 @@ void BoAutoCamera::setInterpolationMode(InterpolationMode mode)
   mInterpolationMode = mode;
 }
 
-bool BoAutoCamera::getCurrentVector(QValueList<InterpolationData>& points, float time, BoVector3Float& result)
+bool BoAutoCamera::getCurrentVector(Q3ValueList<InterpolationData>& points, float time, BoVector3Float& result)
 {
   // Make sure there are any points in the list
   if(points.count() == 0)
@@ -232,7 +234,7 @@ bool BoAutoCamera::getCurrentVector(QValueList<InterpolationData>& points, float
   InterpolationData afterb = beforea;
 
   // Get points a and b from the list
-  QValueList<InterpolationData>::Iterator it;
+  Q3ValueList<InterpolationData>::Iterator it;
   for(it = points.begin(); it != points.end(); ++it)
   {
     if((*it).time >= time)
@@ -308,7 +310,7 @@ bool BoAutoCamera::getCurrentVector(QValueList<InterpolationData>& points, float
   return true;
 }
 
-bool BoAutoCamera::getCurrentValue(QValueList<InterpolationDataFloat>& values, float time, float& result)
+bool BoAutoCamera::getCurrentValue(Q3ValueList<InterpolationDataFloat>& values, float time, float& result)
 {
   // FIXME: LOTS of code duplication (with the getCurrentVector() method above)
 
@@ -342,7 +344,7 @@ bool BoAutoCamera::getCurrentValue(QValueList<InterpolationDataFloat>& values, f
   InterpolationDataFloat afterb = beforea;
 
   // Get points a and b from the list
-  QValueList<InterpolationDataFloat>::Iterator it;
+  Q3ValueList<InterpolationDataFloat>::Iterator it;
   for(it = values.begin(); it != values.end(); ++it)
   {
     if((*it).time >= time)

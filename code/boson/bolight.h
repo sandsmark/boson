@@ -21,10 +21,12 @@
 #define BOLIGHT_H
 
 #include "bo3dtools.h"
+//Added by qt3to4:
+#include <Q3ValueList>
 
 
-template<class T> class QValueVector;
-template<class T> class QValueList;
+template<class T> class Q3ValueVector;
+template<class T> class Q3ValueList;
 class BoLight;
 
 #define boLightManager BoLightManager::manager()
@@ -61,8 +63,8 @@ class BoLightManager
 
   private:
     void init();
-    QValueList<BoLight*>* mAllLights;
-    QValueVector<BoLight*>* mActiveLights;
+    Q3ValueList<BoLight*>* mAllLights;
+    Q3ValueVector<BoLight*>* mActiveLights;
     int mNextLightId;
     int mMaxActiveLights;
 

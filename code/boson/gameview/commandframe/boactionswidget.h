@@ -23,6 +23,8 @@
 #include "../../boufo/boufowidget.h"
 
 #include "../../boaction.h"
+//Added by qt3to4:
+#include <Q3PtrList>
 
 class Unit;
 class BosonOrderButton;
@@ -52,7 +54,7 @@ public:
 	 * @param allUnits All currently selected units. Actions that should
 	 * apply to all these units will use this.
 	 **/
-	void showUnitActions(Unit* unit, const QPtrList<Unit>& allUnits);
+	void showUnitActions(Unit* unit, const Q3PtrList<Unit>& allUnits);
 
 	void resetButton(BosonOrderButton* button);
 

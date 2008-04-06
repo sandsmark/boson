@@ -26,6 +26,9 @@
 #include "../../gameengine/bosonnetworktraffic.h"
 
 #include <qsignalmapper.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 #include <klocale.h>
 
@@ -87,14 +90,14 @@ void BoNetworkTrafficWidget::slotUpdate()
  if (traffic->statistics().count() > 0) {
 	int mostCount = 5;
 
-	QValueList<const BosonNetworkTrafficStatistics*> most;
-	const QPtrListIterator<BosonNetworkTrafficStatistics>& statistics = traffic->statistics();
+	Q3ValueList<const BosonNetworkTrafficStatistics*> most;
+	const Q3PtrListIterator<BosonNetworkTrafficStatistics>& statistics = traffic->statistics();
 	const BosonNetworkTrafficStatistics* previousMax = 0;
 	long long previousMaxTraffic = 0;
 	for (int i = 0; i < mostCount; i++) {
 		const BosonNetworkTrafficStatistics* max = 0;
 		long long maxTraffic = 0;
-		for (QPtrListIterator<BosonNetworkTrafficStatistics> it(statistics); it.current(); ++it) {
+		for (Q3PtrListIterator<BosonNetworkTrafficStatistics> it(statistics); it.current(); ++it) {
 			long long traffic = it.current()->totalBytesReceived() + it.current()->totalBytesSent();
 			if (previousMax && (it.current() == previousMax || traffic > previousMaxTraffic)) {
 				continue;
@@ -114,7 +117,7 @@ void BoNetworkTrafficWidget::slotUpdate()
 
 	QString mostString;
 	mostString += i18n("Most traffic caused by message IDs:\n");
-	for (QValueList<const BosonNetworkTrafficStatistics*>::iterator it = most.begin(); it != most.end(); ++it) {
+	for (Q3ValueList<const BosonNetworkTrafficStatistics*>::iterator it = most.begin(); it != most.end(); ++it) {
 		const BosonNetworkTrafficStatistics* s = *it;
 		mostString += i18n("ID=%1 (%2) bytes sent=%3 (%4 messages) bytes received=%5 (%6 messages)\n").arg(s->msgid()).arg(s->userMsgid()).arg(s->totalBytesSent()).arg(s->messagesSent()).arg(s->totalBytesReceived()).arg(s->messagesReceived());
 	}
@@ -123,8 +126,8 @@ void BoNetworkTrafficWidget::slotUpdate()
 
  const int pastSeconds = 5;
  QTime now = QTime::currentTime();
- const QPtrList<BosonNetworkTrafficDetails>& details = traffic->messageDetails();
- QPtrListIterator<BosonNetworkTrafficDetails> detailsIt(details);
+ const Q3PtrList<BosonNetworkTrafficDetails>& details = traffic->messageDetails();
+ Q3PtrListIterator<BosonNetworkTrafficDetails> detailsIt(details);
  unsigned int trafficSent = 0;
  unsigned int trafficReceived = 0;
  for (detailsIt.toLast(); detailsIt.current(); --detailsIt) {

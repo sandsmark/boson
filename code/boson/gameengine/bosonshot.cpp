@@ -35,7 +35,7 @@
 #include <ksimpleconfig.h>
 #include <krandomsequence.h>
 
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 #include <qdom.h>
 
 #include <math.h>

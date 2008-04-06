@@ -24,8 +24,8 @@
 
 #include "../bo3dtools.h"
 
-#include <qptrlist.h>
-#include <qptrdict.h>
+#include <q3ptrlist.h>
+#include <q3ptrdict.h>
 
 
 class BosonMap;
@@ -180,7 +180,7 @@ class BoQuickGroundRenderer : public BoGroundRenderer
 
     bool mCellListDirty;
 
-    QPtrDict<BoColorMapRenderer> mColorMapRenderers;
+    Q3PtrDict<BoColorMapRenderer> mColorMapRenderers;
 };
 
 #endif

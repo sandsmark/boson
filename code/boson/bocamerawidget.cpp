@@ -32,14 +32,17 @@
 #include <bogl.h>
 
 #include <qlayout.h>
-#include <qvgroupbox.h>
+#include <q3vgroupbox.h>
 #include <qtabwidget.h>
 #include <qlabel.h>
 #include <qcheckbox.h>
 #include <qtooltip.h>
 #include <qmap.h>
-#include <qvbox.h>
-#include <qhbox.h>
+#include <q3vbox.h>
+#include <q3hbox.h>
+//Added by qt3to4:
+#include <Q3PtrList>
+#include <Q3VBoxLayout>
 
 #include <knuminput.h>
 #include <klocale.h>
@@ -254,7 +257,7 @@ public:
 		mCamera = 0;
 	}
 	BoUfoTabWidget* mTab;
-	QPtrList<BoUfoCameraConfigWidgetBase> mConfigWidgets;
+	Q3PtrList<BoUfoCameraConfigWidgetBase> mConfigWidgets;
 	QMap<BoUfoCameraConfigWidgetBase*, QString> mConfigWidget2Name;
 
 	BoCamera* mCamera;
@@ -301,7 +304,7 @@ void BoUfoCameraWidget::addConfigWidget(const QString& name, BoUfoCameraConfigWi
 
 void BoUfoCameraWidget::slotUpdateFromCamera()
 {
- QPtrListIterator<BoUfoCameraConfigWidgetBase> it(d->mConfigWidgets);
+ Q3PtrListIterator<BoUfoCameraConfigWidgetBase> it(d->mConfigWidgets);
  for (; it.current(); ++it) {
 	if (it.current()->camera()) {
 		if (!it.current()->updatesBlocked()) {
@@ -318,7 +321,7 @@ void BoUfoCameraWidget::setCamera(BoCamera* camera)
  if (d->mCamera) {
 	cameraType = d->mCamera->cameraType();
  }
- QPtrListIterator<BoUfoCameraConfigWidgetBase> it(d->mConfigWidgets);
+ Q3PtrListIterator<BoUfoCameraConfigWidgetBase> it(d->mConfigWidgets);
  for (; it.current(); ++it) {
 //	d->mTab->removeTab(it.current());
 	it.current()->hide();
@@ -408,15 +411,15 @@ BoUfoGLUCameraWidget::BoUfoGLUCameraWidget()
  orientationLayoutWidget->addWidget(orientationLabel);
  orientationLayoutWidget->addWidget(d->mOrientation);
 
- d->mLookAtX->setLabel(i18n("Look at X:"), AlignLeft | AlignVCenter);
- d->mLookAtY->setLabel(i18n("Look at Y:"), AlignLeft | AlignVCenter);
- d->mLookAtZ->setLabel(i18n("Look at Z:"), AlignLeft | AlignVCenter);
- d->mCameraPosX->setLabel(i18n("Camera position X:"), AlignLeft | AlignVCenter);
- d->mCameraPosY->setLabel(i18n("Camera position Y:"), AlignLeft | AlignVCenter);
- d->mCameraPosZ->setLabel(i18n("Camera position Z:"), AlignLeft | AlignVCenter);
- d->mUpX->setLabel(i18n("Up vector X:"), AlignLeft | AlignVCenter);
- d->mUpY->setLabel(i18n("Up vector Y:"), AlignLeft | AlignVCenter);
- d->mUpZ->setLabel(i18n("Up vector Z:"), AlignLeft | AlignVCenter);
+ d->mLookAtX->setLabel(i18n("Look at X:"), Qt::AlignLeft | Qt::AlignVCenter);
+ d->mLookAtY->setLabel(i18n("Look at Y:"), Qt::AlignLeft | Qt::AlignVCenter);
+ d->mLookAtZ->setLabel(i18n("Look at Z:"), Qt::AlignLeft | Qt::AlignVCenter);
+ d->mCameraPosX->setLabel(i18n("Camera position X:"), Qt::AlignLeft | Qt::AlignVCenter);
+ d->mCameraPosY->setLabel(i18n("Camera position Y:"), Qt::AlignLeft | Qt::AlignVCenter);
+ d->mCameraPosZ->setLabel(i18n("Camera position Z:"), Qt::AlignLeft | Qt::AlignVCenter);
+ d->mUpX->setLabel(i18n("Up vector X:"), Qt::AlignLeft | Qt::AlignVCenter);
+ d->mUpY->setLabel(i18n("Up vector Y:"), Qt::AlignLeft | Qt::AlignVCenter);
+ d->mUpZ->setLabel(i18n("Up vector Z:"), Qt::AlignLeft | Qt::AlignVCenter);
 
  d->mLookAtX->setRange(MIN_LOOKAT_X, MAX_LOOKAT_X);
  d->mLookAtY->setRange(MIN_LOOKAT_Y, MAX_LOOKAT_Y);
@@ -578,12 +581,12 @@ BoUfoPlainCameraWidget::BoUfoPlainCameraWidget()
  layoutWidget->addWidget(d->mCameraPosY);
  layoutWidget->addWidget(d->mCameraPosZ);
 
- d->mCameraPosX->setLabel(i18n("Camera position X:"), AlignLeft | AlignVCenter);
- d->mCameraPosY->setLabel(i18n("Camera position Y:"), AlignLeft | AlignVCenter);
- d->mCameraPosZ->setLabel(i18n("Camera position Z:"), AlignLeft | AlignVCenter);
- d->mRotateX->setLabel(i18n("Rotation arounx X-axis:"), AlignLeft | AlignVCenter);
- d->mRotateY->setLabel(i18n("Rotation arounx Y-axis:"), AlignLeft | AlignVCenter);
- d->mRotateZ->setLabel(i18n("Rotation arounx Z-axis:"), AlignLeft | AlignVCenter);
+ d->mCameraPosX->setLabel(i18n("Camera position X:"), Qt::AlignLeft | Qt::AlignVCenter);
+ d->mCameraPosY->setLabel(i18n("Camera position Y:"), Qt::AlignLeft | Qt::AlignVCenter);
+ d->mCameraPosZ->setLabel(i18n("Camera position Z:"), Qt::AlignLeft | Qt::AlignVCenter);
+ d->mRotateX->setLabel(i18n("Rotation arounx X-axis:"), Qt::AlignLeft | Qt::AlignVCenter);
+ d->mRotateY->setLabel(i18n("Rotation arounx Y-axis:"), Qt::AlignLeft | Qt::AlignVCenter);
+ d->mRotateZ->setLabel(i18n("Rotation arounx Z-axis:"), Qt::AlignLeft | Qt::AlignVCenter);
 
  d->mCameraPosX->setRange(MIN_CAMERAPOS_X, MAX_CAMERAPOS_X);
  d->mCameraPosY->setRange(MIN_CAMERAPOS_Y, MAX_CAMERAPOS_Y);
@@ -863,12 +866,12 @@ BoUfoGameCameraWidget::BoUfoGameCameraWidget()
  layoutWidget->addWidget(d->mXRotation);
  layoutWidget->addWidget(d->mDistance);
 
- d->mLookAtX->setLabel(i18n("Look at X:"), AlignLeft | AlignVCenter);
- d->mLookAtY->setLabel(i18n("Look at Y:"), AlignLeft | AlignVCenter);
- d->mLookAtZ->setLabel(i18n("Look at Z:"), AlignLeft | AlignVCenter);
- d->mRotation->setLabel(i18n("Rotation:"), AlignLeft | AlignVCenter);
- d->mXRotation->setLabel(i18n("XRotation:"), AlignLeft | AlignVCenter);
- d->mDistance->setLabel(i18n("Distance:"), AlignLeft | AlignVCenter);
+ d->mLookAtX->setLabel(i18n("Look at X:"), Qt::AlignLeft | Qt::AlignVCenter);
+ d->mLookAtY->setLabel(i18n("Look at Y:"), Qt::AlignLeft | Qt::AlignVCenter);
+ d->mLookAtZ->setLabel(i18n("Look at Z:"), Qt::AlignLeft | Qt::AlignVCenter);
+ d->mRotation->setLabel(i18n("Rotation:"), Qt::AlignLeft | Qt::AlignVCenter);
+ d->mXRotation->setLabel(i18n("XRotation:"), Qt::AlignLeft | Qt::AlignVCenter);
+ d->mDistance->setLabel(i18n("Distance:"), Qt::AlignLeft | Qt::AlignVCenter);
 
  d->mGameRestrictions = new BoUfoCheckBox(i18n("Use game restrictions"), this);
  d->mGameRestrictions->setChecked(true);
@@ -1365,7 +1368,7 @@ protected:
 BoLightCameraWidget1::BoLightCameraWidget1(QWidget* parent, bool showGlobalValues)
 	: QWidget(parent)
 {
- QVBoxLayout* l = new QVBoxLayout(this);
+ Q3VBoxLayout* l = new Q3VBoxLayout(this);
  mWidget = new BosonGLWidgetLight(this);
  l->addWidget(mWidget);
  mWidget->initialize();

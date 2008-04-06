@@ -22,20 +22,22 @@
 
 #include <qwidget.h>
 #include <qstringlist.h>
-#include <qvgroupbox.h>
+#include <q3vgroupbox.h>
+//Added by qt3to4:
+#include <QLabel>
 
 class QLabel;
 class QPushButton;
 class QComboBox;
 class QLineEdit;
 class QCheckBox;
-class QVBox;
+class Q3VBox;
 class KIntNumInput;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class SpriteConfig : public QVGroupBox
+class SpriteConfig : public Q3VGroupBox
 {
 	Q_OBJECT
 public:
@@ -54,7 +56,7 @@ private:
 	KIntNumInput* mHotspotY;
 	QCheckBox* mIsAnimated;
 
-	QVBox* mAnimationSettings;
+	Q3VBox* mAnimationSettings;
 	KIntNumInput* mFrameCount;
 	KIntNumInput* mRotateDegree;
 	KIntNumInput* mAnimationSpeed;

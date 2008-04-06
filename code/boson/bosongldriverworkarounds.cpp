@@ -23,7 +23,7 @@
 #include "bogl.h"
 #include "bodebug.h"
 
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 
 BosonGLDriverWorkarounds::BosonGLDriverWorkarounds()
 {
@@ -39,7 +39,7 @@ void BosonGLDriverWorkarounds::initWorkarounds()
  if (glVersion.contains("Mesa ")) {
 	QString mesaVersion = glVersion.right(glVersion.length() - glVersion.find("Mesa ") - QString("Mesa ").length());
 
-	QValueList<int> versionParts;
+	Q3ValueList<int> versionParts;
 	QString rest = mesaVersion;
 	while (rest.contains(".")) {
 		bool ok;
@@ -68,7 +68,7 @@ void BosonGLDriverWorkarounds::initWorkarounds()
 	//     too, so up to at least 6.5.1 will be broken.
 	//     the problem is fixed in more recent (i.e. cvs) versions.
 	bool brokenVertexArrays = false;
-	QValueList<int> maxBrokenVersion;
+	Q3ValueList<int> maxBrokenVersion;
 	maxBrokenVersion.append(6);
 	maxBrokenVersion.append(5);
 	maxBrokenVersion.append(1);
@@ -77,7 +77,7 @@ void BosonGLDriverWorkarounds::initWorkarounds()
 	// 6.4.3
 	// this is intended: I can't tell for sure whether the fix is included
 	// in a 6.4.3 (assuming there will ever be one)
-	for (unsigned int i = 0; i < QMIN(maxBrokenVersion.count(), versionParts.count()); i++) {
+	for (unsigned int i = 0; i < qMin(maxBrokenVersion.count(), versionParts.count()); i++) {
 		if (versionParts[i] < maxBrokenVersion[i]) {
 			brokenVertexArrays = true;
 			break;

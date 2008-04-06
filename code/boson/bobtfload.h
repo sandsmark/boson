@@ -20,7 +20,7 @@
 #define BOBTFLOAD_H
 
 #include <qstring.h>
-#include <qvaluevector.h>
+#include <q3valuevector.h>
 
 class QImage;
 
@@ -83,9 +83,9 @@ private:
 
 	unsigned int mLevels;
 
-	QValueVector<char*> mTextureLevelData;
-	QValueVector<int> mTextureLevelWidth;
-	QValueVector<int> mTextureLevelHeight;
+	Q3ValueVector<char*> mTextureLevelData;
+	Q3ValueVector<int> mTextureLevelWidth;
+	Q3ValueVector<int> mTextureLevelHeight;
 };
 
 #endif

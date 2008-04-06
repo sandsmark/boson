@@ -109,9 +109,9 @@ unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* me
 	for (unsigned int i = 0; i < mesh->indexCount(); i++) {
 		unsigned int index;
 		if (model()->indexArrayType() == GL_UNSIGNED_SHORT) {
-			index = ((Q_UINT16*)mesh->indices())[i];
+			index = ((quint16*)mesh->indices())[i];
 		} else {
-			index = ((Q_UINT32*)mesh->indices())[i];
+			index = ((quint32*)mesh->indices())[i];
 		}
 		const float* p = model()->pointArray() + (index * BoMesh::pointSize());
 		glNormal3fv(p + BoMesh::normalPos());

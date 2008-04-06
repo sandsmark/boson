@@ -27,12 +27,14 @@
 #include "bpfdescription.h"
 #include "bosonplayfield.h"
 #include "defines.h"
+//Added by qt3to4:
+#include <Q3CString>
 
 // AB: we use explicitly sharing. TODO: Qt4: use QExplicitlySharedDataPointer
-class BPFPreviewPrivate : public QShared
+class BPFPreviewPrivate : public Q3Shared
 {
 public:
-	BPFPreviewPrivate() : QShared()
+	BPFPreviewPrivate() : Q3Shared()
 	{
 		mDescription = 0;
 		mIsLoaded = false;
@@ -126,11 +128,11 @@ BPFPreview BPFPreview::loadFilePreviewFromFiles(const QMap<QString, QByteArray>&
  data->mMapPreviewPNGData = files["mappreview/map.png"];
 
  QByteArray identifierFile = files["identifier"];
- QDataStream identifierStream(identifierFile, IO_ReadOnly);
+ QDataStream identifierStream(identifierFile, QIODevice::ReadOnly);
  identifierStream >> data->mIdentifier;
 
  QByteArray fileNameFile = files["filename"];
- QDataStream fileNameStream(fileNameFile, IO_ReadOnly);
+ QDataStream fileNameStream(fileNameFile, QIODevice::ReadOnly);
  fileNameStream >> data->mFileName;
 
  data->mIsLoaded = true;
@@ -297,7 +299,7 @@ bool BPFLoader::loadFilePreviewFromDiskToFiles(const QString& file, QMap<QString
  }
  QByteArray mapPreviewPNG = boFile.fileData("map.png", "mappreview");
  QByteArray fileNameBuffer;
- QDataStream fileNameStream(fileNameBuffer, IO_WriteOnly);
+ QDataStream fileNameStream(fileNameBuffer, QIODevice::WriteOnly);
  fileNameStream << file;
 
 
@@ -384,7 +386,7 @@ bool BPFLoader::loadFromDiskToFiles(const QString& fileName, QMap<QString, QByte
  QByteArray externalXML = boFile.externalData();
 
  QByteArray fileNameBuffer;
- QDataStream fileNameStream(fileNameBuffer, IO_WriteOnly);
+ QDataStream fileNameStream(fileNameBuffer, QIODevice::WriteOnly);
  fileNameStream << fileName;
 
  destFiles.insert("map/texmap", texMap);
@@ -437,23 +439,23 @@ QByteArray BPFLoader::streamFiles(const QMap<QString, QByteArray>& files)
 	boError() << k_funcinfo << "nothing to stream" << endl;
 	return buffer;
  }
- QDataStream stream(buffer, IO_WriteOnly);
- stream << QCString("boplayfield");
- stream << (Q_UINT32)0x00; // version tag. probably not needed AB: maybe use BO_ADMIN_STREAM_VERSION
+ QDataStream stream(buffer, QIODevice::WriteOnly);
+ stream << Q3CString("boplayfield");
+ stream << (quint32)0x00; // version tag. probably not needed AB: maybe use BO_ADMIN_STREAM_VERSION
  stream << files;
- stream << QCString("boplayfield_end");
+ stream << Q3CString("boplayfield_end");
  return buffer;
 }
 
 bool BPFLoader::unstreamFiles(QMap<QString, QByteArray>& files, const QByteArray& buffer)
 {
- QDataStream stream(buffer, IO_ReadOnly);
+ QDataStream stream(buffer, QIODevice::ReadOnly);
  // magic cookie
- QCString magic;
- QCString magicEnd;
- Q_UINT32 version;
+ Q3CString magic;
+ Q3CString magicEnd;
+ quint32 version;
  stream >> magic;
- if (magic != QCString("boplayfield")) {
+ if (magic != Q3CString("boplayfield")) {
 	boError() << k_funcinfo << "magic cookie does not match" << endl;
 	return false;
  }
@@ -464,7 +466,7 @@ bool BPFLoader::unstreamFiles(QMap<QString, QByteArray>& files, const QByteArray
  }
  stream >> files;
  stream >> magicEnd;
- if (magicEnd != QCString("boplayfield_end")) {
+ if (magicEnd != Q3CString("boplayfield_end")) {
 	boError() << k_funcinfo << "magic end-cookie does not match" << endl;
 	return false;
  }
@@ -479,7 +481,7 @@ QByteArray BPFLoader::createIdentifier(const BPFFile& boFile, const QMap<QString
  //        be in subdirectories, this is NOT a unique identifier.
  //        maybe use MD5 of file?
  QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
+ QDataStream stream(buffer, QIODevice::WriteOnly);
  stream << QString(boFile.identifier());
  return buffer;
 }

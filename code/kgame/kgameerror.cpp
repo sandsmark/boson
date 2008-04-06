@@ -1,7 +1,7 @@
 /*
     This file is part of the KDE games library
     Copyright (C) 2001 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2001 Martin Heni (martin@heni-online.de)
+    Copyright (C) 2001 Martin Heni (kde at heni-online.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -26,24 +26,24 @@
 QByteArray KGameError::errVersion(int remoteVersion)
 {
  QByteArray b;
- QDataStream s(b, IO_WriteOnly);
- s << (Q_INT32)KGameMessage::version();
- s << (Q_INT32)remoteVersion;
+ QDataStream s(&b, QIODevice::WriteOnly);
+ s << (qint32)KGameMessage::version();
+ s << (qint32)remoteVersion;
  return b;
 }
 
 QByteArray KGameError::errCookie(int localCookie, int remoteCookie)
 {
  QByteArray b;
- QDataStream s(b, IO_WriteOnly);
- s << (Q_INT32)localCookie;
- s << (Q_INT32)remoteCookie;
+ QDataStream s(&b, QIODevice::WriteOnly);
+ s << (qint32)localCookie;
+ s << (qint32)remoteCookie;
  return b;
 }
 
 QString KGameError::errorText(int errorCode, const QByteArray& message)
 {
- QDataStream s(message, IO_ReadOnly);
+ QDataStream s(message);
  return errorText(errorCode, s);
 }
 
@@ -53,24 +53,24 @@ QString KGameError::errorText(int errorCode, QDataStream& s)
  switch (errorCode) {
 	case Cookie:
 	{
-		Q_INT32 cookie1; 
-		Q_INT32 cookie2;
+		qint32 cookie1; 
+		qint32 cookie2;
 		s >> cookie1;
 		s >> cookie2;
-		text = i18n("Cookie mismatch!\nExpected Cookie: %1\nReceived Cookie: %2").arg(cookie1).arg(cookie2);
+		text = i18n("Cookie mismatch!\nExpected Cookie: %1\nReceived Cookie: %2", cookie1, cookie2);
 		break;
 	}
 	case Version:
 	{
-		Q_INT32 version1;
-		Q_INT32 version2;
+		qint32 version1;
+		qint32 version2;
 		s >> version1;
 		s >> version2;
-		text = i18n("KGame Version mismatch!\nExpected Version: %1\nReceived Version: %2\n").arg(version1).arg(version2);
+		text = i18n("KGame Version mismatch!\nExpected Version: %1\nReceived Version: %2\n", version1, version2);
 		break;
 	}
 	default:
-		text = i18n("Unknown error code %1").arg(errorCode);
+		text = i18n("Unknown error code %1", errorCode);
  }
  return text;
 }

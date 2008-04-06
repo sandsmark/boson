@@ -34,7 +34,7 @@
 #include <klibloader.h>
 
 #include <qstringlist.h>
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 #include <qlibrary.h>
 
 #include <stdlib.h>
@@ -51,7 +51,7 @@ public:
 	{
 	}
 
-	QPtrList<BosonModel> mAllModels;
+	Q3PtrList<BosonModel> mAllModels;
 };
 
 BoMeshRendererManager::BoMeshRendererManager() : BoPluginManager()
@@ -135,7 +135,7 @@ void BoMeshRendererManager::initializePlugin()
  currentRenderer()->setModel(0);
 
  // the model data must be updated for the new renderer
- QPtrListIterator<BosonModel> it(d->mAllModels);
+ Q3PtrListIterator<BosonModel> it(d->mAllModels);
  while (it.current()) {
 	currentRenderer()->initializeData(it.current());
 	++it;
@@ -145,7 +145,7 @@ void BoMeshRendererManager::initializePlugin()
 void BoMeshRendererManager::deinitializePlugin()
 {
  BO_CHECK_NULL_RET(currentRenderer());
- QPtrListIterator<BosonModel> it(d->mAllModels);
+ Q3PtrListIterator<BosonModel> it(d->mAllModels);
  while (it.current()) {
 	currentRenderer()->deinitializeData(it.current());
 	++it;

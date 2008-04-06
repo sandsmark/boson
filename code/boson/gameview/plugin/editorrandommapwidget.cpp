@@ -33,13 +33,13 @@
 #include <kapplication.h>
 
 #include <qtimer.h>
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 #include <qpoint.h>
 
 #include <math.h>
 
 // returns a queue with _ALL_ cells of the map into retQueue, using a BFS.
-static void cornersBFS(const MyMap& map, QValueList<QPoint>* retQueue);
+static void cornersBFS(const MyMap& map, Q3ValueList<QPoint>* retQueue);
 
 class HCorner {
 public:
@@ -841,7 +841,7 @@ void EditorRandomMapWidget::slotCreateTerrain()
 
  map.scaleHeights();
 
- QValueList< QPair<QPoint, bofixed> > heights;
+ Q3ValueList< QPair<QPoint, bofixed> > heights;
  for (int x = 0; x < map.cornerWidth(); x++) {
 	for (int y = 0; y < map.cornerHeight(); y++) {
 		QPoint p(x, y);
@@ -881,8 +881,8 @@ void EditorRandomMapWidget::slotCreateMountains()
  map.loadHeightsFromRealMap(realMap);
 
  // do a BFS on all corners
- QValueList<QPoint> mountains;
- QValueList<QPoint> queue;
+ Q3ValueList<QPoint> mountains;
+ Q3ValueList<QPoint> queue;
  cornersBFS(map, &queue);
  while (!queue.isEmpty()) {
 	QPoint p = queue.front();
@@ -897,21 +897,21 @@ void EditorRandomMapWidget::slotCreateMountains()
  }
  // remove mountains that are too close to other mountains
 #if 0
- for (QValueList<QPoint>::iterator it = mountains.begin(); it != mountains.end(); ++it) {
+ for (Q3ValueList<QPoint>::iterator it = mountains.begin(); it != mountains.end(); ++it) {
 	QPoint p = *it;
 
 	bool removedAllTooClose = true;
 	do {
 		removedAllTooClose = true;
-		QValueList<QPoint>::iterator it2 = it;
+		Q3ValueList<QPoint>::iterator it2 = it;
 		++it2;
 		for (; it2 != mountains.end(); ++it2) {
 			if (it2 == it) {
 				continue;
 			}
 			QPoint p2 = *it2;
-			int dx = QABS(p2.x() - p.x());
-			int dy = QABS(p2.y() - p.y());
+			int dx = qAbs(p2.x() - p.x());
+			int dy = qAbs(p2.y() - p.y());
 			// AB: sqrt probably not necessary, but at this point we dont
 			// care _that_ much about speed
 			float dist = sqrtf(dx * dx + dy * dy);
@@ -943,7 +943,7 @@ void EditorRandomMapWidget::slotCreateMountains()
 	return;
  }
 
- for (QValueList<QPoint>::iterator it = mountains.begin(); it != mountains.end(); ++it) {
+ for (Q3ValueList<QPoint>::iterator it = mountains.begin(); it != mountains.end(); ++it) {
 	if (isSimple) {
 		createMountainSimple(map, *it);
 	} else if (isParticleDeposition) {
@@ -954,7 +954,7 @@ void EditorRandomMapWidget::slotCreateMountains()
  }
 
 
- QValueList< QPair<QPoint, bofixed> > heights;
+ Q3ValueList< QPair<QPoint, bofixed> > heights;
  for (int x = 0; x < map.cornerWidth(); x++) {
 	for (int y = 0; y < map.cornerHeight(); y++) {
 		QPoint p(x, y);
@@ -984,7 +984,7 @@ void EditorRandomMapWidget::createHeightsSimple(MyMap& map)
  float changeBy = d->mChangeBy->value();
 
  // do a BFS on all corners
- QValueList<QPoint> queue;
+ Q3ValueList<QPoint> queue;
  cornersBFS(map, &queue);
  while (!queue.isEmpty()) {
 	QPoint p = queue.front();
@@ -1002,8 +1002,8 @@ void EditorRandomMapWidget::createHeightsSimple(MyMap& map)
 	if (p.x() - 1 >= 0 && p.y() - 1 >= 0) {
 		h = map.heightAtCorner(p.x() - 1, p.y() - 1);
 		havg += h;
-		hmax = QMAX(hmax, h);
-		hmin = QMIN(hmin, h);
+		hmax = qMax(hmax, h);
+		hmin = qMin(hmin, h);
 		c++;
 
 		switch (map.heightChangeDirectionAtCorner(p.x() - 1, p.y() - 1)) {
@@ -1021,8 +1021,8 @@ void EditorRandomMapWidget::createHeightsSimple(MyMap& map)
 	if (p.x() - 1 >= 0) {
 		h = map.heightAtCorner(p.x() - 1, p.y());
 		havg += h;
-		hmax = QMAX(hmax, h);
-		hmin = QMIN(hmin, h);
+		hmax = qMax(hmax, h);
+		hmin = qMin(hmin, h);
 		c++;
 
 		switch (map.heightChangeDirectionAtCorner(p.x() - 1, p.y())) {
@@ -1039,8 +1039,8 @@ void EditorRandomMapWidget::createHeightsSimple(MyMap& map)
 	if (p.y() - 1 >= 0) {
 		h = map.heightAtCorner(p.x(), p.y() - 1);
 		havg += h;
-		hmax = QMAX(hmax, h);
-		hmin = QMIN(hmin, h);
+		hmax = qMax(hmax, h);
+		hmin = qMin(hmin, h);
 		c++;
 
 		switch (map.heightChangeDirectionAtCorner(p.x(), p.y() - 1)) {
@@ -1058,8 +1058,8 @@ void EditorRandomMapWidget::createHeightsSimple(MyMap& map)
 	if (p.x() - 1 >= 0 && p.y() + 1 < cornerHeight) {
 		h = map.heightAtCorner(p.x() - 1, p.y() + 1);
 		havg += h;
-		hmax = QMAX(hmax, h);
-		hmin = QMIN(hmin, h);
+		hmax = qMax(hmax, h);
+		hmin = qMin(hmin, h);
 		c++;
 
 		switch (map.heightChangeDirectionAtCorner(p.x() - 1, p.y() + 1)) {
@@ -1512,7 +1512,7 @@ bool ParticleDeposition::moveParticle(MyMap& map, int x, int y, float particleHe
  }
  float cornerHeight = map.heightAtCorner(x, y);
 
- QValueList<int> candidates;
+ Q3ValueList<int> candidates;
  for (int i = 0; i < 8; i++) {
 	int nx = x;
 	int ny = y;
@@ -1580,10 +1580,10 @@ void MountainSimple::createMountain(MyMap& map, const QPoint& start)
  MyMap tmpMap(map.cornerWidth(), map.cornerHeight());
  tmpMap.resetHeights();
 
- int startX = QMAX(0, p.x() - widthX);
- int endX = QMIN(p.x() + widthX, map.cornerWidth() - 1);
- int startY = QMAX(0, p.y() - widthY);
- int endY = QMIN(p.y() + widthY, map.cornerHeight() - 1);
+ int startX = qMax(0, p.x() - widthX);
+ int endX = qMin(p.x() + widthX, map.cornerWidth() - 1);
+ int startY = qMax(0, p.y() - widthY);
+ int endY = qMin(p.y() + widthY, map.cornerHeight() - 1);
  bool quadratic = false; // factor * factor
  bool sqrtf_linear = true; // sqrtf(factor) * factor
  bool randomize = true;
@@ -1665,15 +1665,15 @@ void MountainSimple::createMountain(MyMap& map, const QPoint& start)
 
 float MountainSimple::linearFactorOfCorner(int x, int y, int maxHeightX, int maxHeightY, int widthX, int widthY) const
 {
- int dx = QABS(x - maxHeightX);
- int dy = QABS(y - maxHeightY);
+ int dx = qAbs(x - maxHeightX);
+ int dy = qAbs(y - maxHeightY);
 
  // dist is element of [0 ; sqrt(widthX^2 + widthY^2)]
  float dist = sqrtf(dx * dx + dy * dy);
 
  // factor is element of [0 ; 1]
  float factor = dist / (sqrtf(widthX * widthX + widthY * widthY));
- factor = QMIN(factor, 1.0f);
+ factor = qMin(factor, 1.0f);
 
  // now dx==dy==0              => factor==1
  // and dx==widthX, dy==widthY => factor==0
@@ -1708,10 +1708,10 @@ float MountainSimple::heightAtCorner2(float factor, float factor2, float height2
  return height2 + (factor - factor2) * maxHeight;
 }
 
-void cornersBFS(const MyMap& map, QValueList<QPoint>* retQueue)
+void cornersBFS(const MyMap& map, Q3ValueList<QPoint>* retQueue)
 {
  retQueue->clear();
- QValueList<QPoint> queue;
+ Q3ValueList<QPoint> queue;
  queue.append(QPoint(0, 0));
  retQueue->append(QPoint(0, 0));
 #define ENQUEUE(x) queue.append(x); retQueue->append(x);

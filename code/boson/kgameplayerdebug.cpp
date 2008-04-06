@@ -28,16 +28,20 @@
 
 #include <klocale.h>
 
-#include <qvgroupbox.h>
-#include <qptrdict.h>
+#include <q3vgroupbox.h>
+#include <q3ptrdict.h>
 #include <qlayout.h>
 #include <qlabel.h>
 #include <qpushbutton.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <Q3VBoxLayout>
+#include <Q3PtrList>
 
-class PlayerGroupBox : public QVGroupBox
+class PlayerGroupBox : public Q3VGroupBox
 {
 public:
-	PlayerGroupBox(QWidget* parent) : QVGroupBox(parent) 
+	PlayerGroupBox(QWidget* parent) : Q3VGroupBox(parent) 
 	{
 		mSpecies = new QLabel(this);
 		mTeamColor = new QLabel(this);
@@ -72,21 +76,21 @@ public:
 
 	Boson* mBoson;
 	Player* mLocalPlayer;
-	QPtrDict<PlayerGroupBox> mPlayerBoxes;
-	QHBoxLayout* mPlayerBoxLayout;
+	Q3PtrDict<PlayerGroupBox> mPlayerBoxes;
+	Q3HBoxLayout* mPlayerBoxLayout;
 };
 
 KGamePlayerDebug::KGamePlayerDebug(QWidget* parent) : QWidget(parent)
 {
  d = new KGamePlayerDebugPrivate;
  d->mPlayerBoxes.setAutoDelete(true);
- QVBoxLayout* topLayout = new QVBoxLayout(this);
+ Q3VBoxLayout* topLayout = new Q3VBoxLayout(this);
 
  QPushButton* update = new QPushButton(this);
  update->setText(i18n("Update"));
  connect(update, SIGNAL(clicked()), this, SLOT(slotUpdate()));
 
- d->mPlayerBoxLayout = new QHBoxLayout(topLayout);
+ d->mPlayerBoxLayout = new Q3HBoxLayout(topLayout);
  topLayout->addWidget(update);
 }
 
@@ -118,7 +122,7 @@ void KGamePlayerDebug::slotUpdate()
 	return;
  }
  */
- QPtrList<Player> list = d->mBoson->allPlayerList();
+ Q3PtrList<Player> list = d->mBoson->allPlayerList();
  for (unsigned int i = 0; i < list.count(); i++) {
 	Player* player = (Player*)list.at(i);
 	PlayerGroupBox* box = d->mPlayerBoxes[player];

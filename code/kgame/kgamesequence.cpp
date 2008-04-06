@@ -1,7 +1,7 @@
 /*
     This file is part of the KDE games library
     Copyright (C) 2003 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2003 Martin Heni (martin@heni-online.de)
+    Copyright (C) 2003 Martin Heni (kde at heni-online.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -24,48 +24,70 @@
 #include "kplayer.h"
 #include "kgame.h"
 
-#include <bodebug.h>
+#include <kdebug.h>
 
-KGameSequence::KGameSequence() : QObject()
+class KGameSequence::KGameSequencePrivate
 {
- mGame = 0;
- mCurrentPlayer = 0;
+  public:
+    KGameSequencePrivate()
+      : mGame(0), mCurrentPlayer(0)
+    {
+    }
+
+    KGame* mGame;
+    KPlayer* mCurrentPlayer;
+};
+
+KGameSequence::KGameSequence()
+  : QObject(), d(new KGameSequencePrivate)
+{
 }
 
 KGameSequence::~KGameSequence()
 {
+ delete d;
 }
 
 void KGameSequence::setGame(KGame* game)
 {
- mGame = game;
+ d->mGame = game;
+}
+
+KGame* KGameSequence::game() const
+{
+ return d->mGame;
+}
+
+KPlayer* KGameSequence::currentPlayer() const
+{
+ return d->mCurrentPlayer;
 }
 
 void KGameSequence::setCurrentPlayer(KPlayer* player)
 {
- mCurrentPlayer = player;
+ d->mCurrentPlayer = player;
 }
 
 KPlayer *KGameSequence::nextPlayer(KPlayer *last,bool exclusive)
 {
- boDebug(11001) << "=================== NEXT PLAYER =========================="<<endl;
+ kDebug(11001) << "=================== NEXT PLAYER ==========================";
  if (!game())
  {
-   boError() << k_funcinfo << "NULL game object" << endl;
+   kError() << "NULL game object";
    return 0;
  }
  unsigned int minId,nextId,lastId;
  KPlayer *nextplayer, *minplayer;
  if (last)
  {
-   lastId = last->kgameId();
+   lastId = last->id();
  }
  else
  {
    lastId = 0;
  }
 
- boDebug(11001) << "nextPlayer: lastId="<<lastId<<endl;
+ kDebug(11001) << "nextPlayer: lastId="<<lastId;
 
  // remove when this has been checked
  minId = 0x7fff;  // we just need a very large number...properly MAX_UINT or so would be ok...
@@ -73,13 +95,14 @@ KPlayer *KGameSequence::nextPlayer(KPlayer *last,bool exclusive)
  nextplayer = 0;
  minplayer = 0;
 
- KPlayer *player;
- for (player = game()->playerList()->first(); player != 0; player=game()->playerList()->next() )
+ QList<KPlayer*>::iterator it = game()->playerList()->begin();
+ for (;it != game()->playerList()->end(); it++ )
  {
+   KPlayer* player = *it;
    // Find the first player for a cycle
-   if (player->kgameId() < minId)
+   if (player->id() < minId)
    {
-     minId=player->kgameId();
+     minId=player->id();
      minplayer=player;
    }
    if (player==last)
@@ -87,9 +110,9 @@ KPlayer *KGameSequence::nextPlayer(KPlayer *last,bool exclusive)
      continue;
    }
    // Find the next player which is bigger than the current one
-   if (player->kgameId() > lastId && player->kgameId() < nextId)
+   if (player->id() > lastId && player->id() < nextId)
    {
-     nextId=player->kgameId();
+     nextId=player->id();
      nextplayer=player;
    }
  }
@@ -100,9 +123,9 @@ KPlayer *KGameSequence::nextPlayer(KPlayer *last,bool exclusive)
    nextplayer=minplayer;
  }
 
- boDebug(11001) << k_funcinfo << " ##### lastId=" << lastId << " exclusive="
-        << exclusive << "  minId=" << minId << " nextid=" << nextId
-        << " count=" << game()->playerList()->count()  << endl;
+ kDebug(11001) << " ##### lastId=" << lastId << "exclusive="
+        << exclusive << "  minId=" << minId << "nextid=" << nextId
+        << "count=" << game()->playerList()->count();
  if (nextplayer)
  {
    nextplayer->setTurn(true,exclusive);

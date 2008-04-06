@@ -56,7 +56,6 @@ set(common_SRCS
 	bopluginmanager.cpp
 	qlistviewitemnumber.cpp
 )
-kde3_automoc(${common_SRCS})
 boson_add_library(common STATIC ${common_SRCS})
 boson_target_link_libraries(common
 	bodebug
@@ -141,7 +140,6 @@ set(gameengine_SRCS
 	gameengine/fileconverter/bosonfileconverter.cpp
 	gameengine/fileconverter/bosavegameconverter.cpp
 )
-kde3_automoc(${gameengine_SRCS})
 boson_add_library(gameengine STATIC ${gameengine_SRCS})
 boson_target_link_libraries(gameengine
 	bosonscript
@@ -171,7 +169,6 @@ boson_add_boui_files(startupwidgets_SRCS
 	startupwidgets/boufoloadfromlogwidgetbase.boui
 	startupwidgets/boufoloadingwidgetbase.boui
 )
-kde3_automoc(${startupwidgets_SRCS})
 
 set(commandframe_SRCS
 	gameview/commandframe/bosoncommandframe.cpp
@@ -182,7 +179,6 @@ set(commandframe_SRCS
 	gameview/commandframe/editorunitconfigwidget.cpp
 	gameview/commandframe/bocommandframeeventlistener.cpp
 )
-kde3_automoc(${commandframe_SRCS})
 
 set(gameview_SRCS
 	gameview/bosonitemrenderer.cpp
@@ -213,7 +209,6 @@ set(gameview_SRCS
 boson_add_boui_files(gameview_SRCS
 	gameview/bosonufogameguihelper.boui
 )
-kde3_automoc(${gameview_SRCS})
 
 
 set(modelrendering_SRCS
@@ -224,7 +219,6 @@ set(modelrendering_SRCS
 	modelrendering/bomeshrenderermanager.cpp
 	modelrendering/bobmfload.cpp
 )
-kde3_automoc(${modelrendering_SRCS})
 boson_add_library(modelrendering STATIC ${modelrendering_SRCS})
 
 # AB: this sucks. bosonmainlib should depend on modelrendering, not the other
@@ -272,10 +266,9 @@ set(bosonmainlib_SRCS
 	sound/bosonaudiointerface.cpp
 	bosongldriverworkarounds.cpp
 )
-kde3_add_ui_files(bosonmainlib_SRCS
+kde4_add_ui_files(bosonmainlib_SRCS
 	bosonprofilingdialoggui.ui
 )
-kde3_automoc(${bosonmainlib_SRCS})
 boson_add_library(bosonmainlib STATIC ${bosonmainlib_SRCS})
 
 # TODO: if not plugins: meshrenderer, groundrenderer, gameview plugins
@@ -334,11 +327,10 @@ set(bosongamelib_SRCS
 	${commandframe_SRCS}
 	${gameview_SRCS}
 )
-kde3_add_ui_files(bosongamelib_SRCS
+kde4_add_ui_files(bosongamelib_SRCS
 	bosondebugtexturesbase.ui
 	bosondebugmodelsbase.ui
 )
-kde3_automoc( ${bosongamelib_SRCS} )
 boson_add_library(bosongamelib STATIC ${bosongamelib_SRCS})
 boson_target_link_libraries(bosongamelib
 	bosonmainlib

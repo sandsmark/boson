@@ -96,11 +96,11 @@ bool UnitPlugin::isNextTo(const Unit* u) const
  bofixed distx, disty;
  distx = (int)(u->centerX() - unit()->centerX());
  disty = (int)(u->centerY() - unit()->centerY());
- distx = QABS(distx);
- disty = QABS(disty);
+ distx = qAbs(distx);
+ disty = qAbs(disty);
  // We might get some precision trouble with floats, so we do this:
- distx = QMAX(distx - 0.1, bofixed(0));
- disty = QMAX(disty - 0.1, bofixed(0));
+ distx = qMax(distx - 0.1, bofixed(0));
+ disty = qMax(disty - 0.1, bofixed(0));
 
  bofixed allowedx, allowedy;
  allowedx = ceilf(unit()->width()) / 2 + ceilf(u->width()) / 2;

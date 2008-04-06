@@ -23,18 +23,21 @@
 #include "bodebug.h"
 
 #include <klocale.h>
-#include <klistview.h>
+#include <k3listview.h>
 #include <kmessagebox.h>
 #include <knuminput.h>
 
 #include <qlabel.h>
 #include <qlayout.h>
-#include <qvbox.h>
-#include <qhbox.h>
+#include <q3vbox.h>
+#include <q3hbox.h>
 #include <qpushbutton.h>
 #include <qcheckbox.h>
 #include <qlineedit.h>
 #include <qstringlist.h>
+//Added by qt3to4:
+#include <Q3VBoxLayout>
+#include <Q3PtrList>
 
 #include <lib3ds/file.h>
 #include <lib3ds/node.h>
@@ -44,32 +47,32 @@ void BoCheckListView::notifyChange()
  emit signalChanged();
 }
 
-class BoCheckListItem : public QCheckListItem
+class BoCheckListItem : public Q3CheckListItem
 {
 public:
-	BoCheckListItem(QListView* parent, const QString& text)
-		: QCheckListItem(parent, text, QCheckListItem::CheckBox)
+	BoCheckListItem(Q3ListView* parent, const QString& text)
+		: Q3CheckListItem(parent, text, Q3CheckListItem::CheckBox)
 	{
 	}
 
-	BoCheckListItem(QListViewItem* parent, const QString& text)
-		: QCheckListItem(parent, text, QCheckListItem::CheckBox)
+	BoCheckListItem(Q3ListViewItem* parent, const QString& text)
+		: Q3CheckListItem(parent, text, Q3CheckListItem::CheckBox)
 	{
 	}
 
 protected:
 	virtual void stateChange(bool s)
 	{
-		QCheckListItem::stateChange(s);
+		Q3CheckListItem::stateChange(s);
 		static bool recursive = false;
 		bool wasRecursive = recursive;
 		recursive = true;
 
-		for (QListViewItem* n = firstChild(); n; n = n->nextSibling()) {
+		for (Q3ListViewItem* n = firstChild(); n; n = n->nextSibling()) {
 			if (n->rtti() != 1) {
 				continue;
 			}
-			QCheckListItem* item = (QCheckListItem*)n;
+			Q3CheckListItem* item = (Q3CheckListItem*)n;
 			item->setOn(s);
 		}
 
@@ -101,7 +104,7 @@ BoEditTurretPropertiesDialog::BoEditTurretPropertiesDialog(QWidget* parent, bool
 {
  d = new BoEditTurretPropertiesDialogPrivate();
 
- QVBoxLayout* layout = new QVBoxLayout(plainPage());
+ Q3VBoxLayout* layout = new Q3VBoxLayout(plainPage());
  d->mInitialZRotation = new KIntNumInput(plainPage());
  d->mInitialZRotation->setRange(0, 360, 1, true);
  d->mInitialZRotation->setLabel(i18n("Initial Z rotation"));
@@ -162,10 +165,10 @@ float BoEditTurretPropertiesDialog::initialZRotation() const
  return (float)d->mInitialZRotation->value();
 }
 
-void BoEditTurretPropertiesDialog::addMesh(Lib3dsNode* node, QListViewItem* parent)
+void BoEditTurretPropertiesDialog::addMesh(Lib3dsNode* node, Q3ListViewItem* parent)
 {
  BO_CHECK_NULL_RET(node);
- QCheckListItem* item = 0;
+ Q3CheckListItem* item = 0;
  if (parent) {
 	item = new BoCheckListItem(parent, QString(node->name));
  } else {
@@ -182,20 +185,20 @@ void BoEditTurretPropertiesDialog::addMesh(Lib3dsNode* node, QListViewItem* pare
 void BoEditTurretPropertiesDialog::updateListView()
 {
  QStringList meshes = turretMeshes();
- QPtrList<QListViewItem> items;
- for (QListViewItem* item = d->mTurretMeshesListView->firstChild(); item; item = item->nextSibling()) {
+ Q3PtrList<Q3ListViewItem> items;
+ for (Q3ListViewItem* item = d->mTurretMeshesListView->firstChild(); item; item = item->nextSibling()) {
 	items.append(item);
  }
  d->mTurretMeshesListView->blockSignals(true);
- for (QPtrListIterator<QListViewItem> it(items); it.current(); ++it) {
-	for (QListViewItem* item = it.current()->firstChild(); item; item = item->nextSibling()) {
+ for (Q3PtrListIterator<Q3ListViewItem> it(items); it.current(); ++it) {
+	for (Q3ListViewItem* item = it.current()->firstChild(); item; item = item->nextSibling()) {
 		items.append(item);
 	}
 
 	if (it.current()->rtti() != 1) {
 		continue;
 	}
-	QCheckListItem* item = (QCheckListItem*)it.current();
+	Q3CheckListItem* item = (Q3CheckListItem*)it.current();
 
 	if (meshes.contains(item->text())) {
 		item->setOn(true);
@@ -215,19 +218,19 @@ void BoEditTurretPropertiesDialog::slotLineEditChanged()
 void BoEditTurretPropertiesDialog::slotItemChanged()
 {
  QStringList meshes;
- QPtrList<QListViewItem> items;
- for (QListViewItem* item = d->mTurretMeshesListView->firstChild(); item; item = item->nextSibling()) {
+ Q3PtrList<Q3ListViewItem> items;
+ for (Q3ListViewItem* item = d->mTurretMeshesListView->firstChild(); item; item = item->nextSibling()) {
 	items.append(item);
  }
- for (QPtrListIterator<QListViewItem> it(items); it.current(); ++it) {
-	for (QListViewItem* item = it.current()->firstChild(); item; item = item->nextSibling()) {
+ for (Q3PtrListIterator<Q3ListViewItem> it(items); it.current(); ++it) {
+	for (Q3ListViewItem* item = it.current()->firstChild(); item; item = item->nextSibling()) {
 		items.append(item);
 	}
 
 	if (it.current()->rtti() != 1) {
 		continue;
 	}
-	QCheckListItem* item = (QCheckListItem*)it.current();
+	Q3CheckListItem* item = (Q3CheckListItem*)it.current();
 	if (item->isOn()) {
 		meshes.append(item->text());
 	}

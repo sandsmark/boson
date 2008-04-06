@@ -23,6 +23,10 @@
 #include <kplayer.h>
 #include <kgameproperty.h>
 #include "../math/bofixed.h"
+//Added by qt3to4:
+#include <Q3TextStream>
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 #ifdef NO_PLAYER_H_HERE
 #error No player.h include is allowed here
@@ -30,7 +34,7 @@
 
 class QColor;
 class QDomElement;
-class QTextStream;
+class Q3TextStream;
 
 class Unit;
 class SpeciesTheme;
@@ -263,7 +267,7 @@ public:
 	 * @return <em>All</em> units of this player. Please don't use this as
 	 * it is very unclean. This is meant for KGameUnitDebug only.
 	 **/
-	QPtrList<Unit>* allUnits() const;
+	Q3PtrList<Unit>* allUnits() const;
 
 	/**
 	 * Convenience method for theme()->unitProperties()
@@ -353,11 +357,11 @@ public:
 	void addUpgrade(const UpgradeProperties* upgrade);
 	void removeUpgrade(const UpgradeProperties* upgrade);
 	void removeUpgrade(unsigned long int id);
-	const QValueList<const UpgradeProperties*>* upgrades() const;
+	const Q3ValueList<const UpgradeProperties*>* upgrades() const;
 
 	const UpgradeProperties* technologyProperties(unsigned long int type) const;
 
-	const QValueList<const Unit*>* radarUnits() const;
+	const Q3ValueList<const Unit*>* radarUnits() const;
 	void addRadar(Unit* u);
 	void removeRadar(Unit* u);
 
@@ -433,9 +437,9 @@ public:
 
 	void technologyResearched(ProductionPlugin* factory, unsigned long int id);
 
-	void writeGameLog(QTextStream& log);
+	void writeGameLog(Q3TextStream& log);
 
-	virtual void networkTransmission(QDataStream& stream, int msgid, Q_UINT32 sender);
+	virtual void networkTransmission(QDataStream& stream, int msgid, quint32 sender);
 
 signals:
 	void signalLoadUnit(unsigned long int unitType, unsigned long int id, Player* owner);
@@ -455,7 +459,7 @@ public slots:
 	 * its property handler must be a @ref UnitPropertyHandler!
 	 **/
 	void slotUnitPropertyChanged(KGamePropertyBase* prop);
-	void slotNetworkData(int msgid, const QByteArray& msg, Q_UINT32 sender, KPlayer*);
+	void slotNetworkData(int msgid, const QByteArray& msg, quint32 sender, KPlayer*);
 
 protected:
 	bool saveFogOfWar(QDomElement& root) const;
@@ -470,9 +474,9 @@ private:
 	PlayerPrivate* d;
 
 	SpeciesTheme* mSpecies;
-	KGameProperty<Q_UINT8> mOutOfGame;
-	KGameProperty<Q_UINT8> mHasLost;
-	KGameProperty<Q_UINT8> mHasWon;
+	KGameProperty<quint8> mOutOfGame;
+	KGameProperty<quint8> mHasLost;
+	KGameProperty<quint8> mHasWon;
 
 	bofixed mPowerChargeForCurrentAdvanceCall; // no need for KGameProperty. this is recalculated every advance call
 };

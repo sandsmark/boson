@@ -20,6 +20,8 @@
 #define BOEVENTMANAGER_H
 
 #include <qobject.h>
+//Added by qt3to4:
+#include <Q3CString>
 
 class Boson;
 class KGamePropertyHandler;
@@ -41,7 +43,7 @@ public:
 	BoEventManager(QObject* parent);
 	~BoEventManager();
 
-	bool knowEventName(const QCString& name) const;
+	bool knowEventName(const Q3CString& name) const;
 
 	/**
 	 * This does NOT take ownership of the listener! You still have to

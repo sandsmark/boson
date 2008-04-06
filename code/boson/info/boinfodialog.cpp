@@ -29,15 +29,17 @@
 #include <kfiledialog.h>
 #include <klocale.h>
 #include <kmessagebox.h>
-#include <klistview.h>
+#include <k3listview.h>
 
 #include <qlabel.h>
-#include <qhbox.h>
-#include <qvbox.h>
+#include <q3hbox.h>
+#include <q3vbox.h>
 #include <qmap.h>
 #include <qvariant.h>
 #include <qlayout.h>
 #include <qpushbutton.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 class BoInfoDialogPrivate
 {
@@ -131,19 +133,19 @@ public:
 	QLabel* mOGRuntimeVersionCode;
 	QLabel* mOGVendorString;
 	QLabel* mOGRendererString;
-	KListBox* mOGExtensions;
+	K3ListBox* mOGExtensions;
 
 	QLabel* mGLURuntimeVersionString;
-	KListBox* mGLUExtensions;
+	K3ListBox* mGLUExtensions;
 
 	QLabel* mGLXClientVersionString;
 	QLabel* mGLXClientVendorString;
-	KListBox* mGLXClientExtensions;
+	K3ListBox* mGLXClientExtensions;
 	QLabel* mGLXVersionMajor;
 	QLabel* mGLXVersionMinor;
 	QLabel* mGLXServerVersionString;
 	QLabel* mGLXServerVendorString;
-	KListBox* mGLXServerExtensions;
+	K3ListBox* mGLXServerExtensions;
 
 	QLabel* mIsDirect;
 
@@ -153,7 +155,7 @@ public:
 	QLabel* mXProtocolRevision;
 	QLabel* mXVendorString;
 	QLabel* mXVendorReleaseNumber;
-	KListBox* mXExtensions;
+	K3ListBox* mXExtensions;
 	QLabel* mXDefaultScreen;
 	QLabel* mXScreenCount;
 	QLabel* mXScreen;
@@ -163,11 +165,11 @@ public:
 	QLabel* mXScreenHeightMM;
 
 #if 0
-	KListBox* mNVidiaErrors;
+	K3ListBox* mNVidiaErrors;
 #endif
 
-	KListView* mHaveLibs;
-	QValueList<int> mHaveLibsList;
+	K3ListView* mHaveLibs;
+	Q3ValueList<int> mHaveLibsList;
 
 	QLabel* mOSType;
 	QLabel* mOSVersion;
@@ -176,7 +178,7 @@ public:
 	QLabel* mOSCPUSpeed;
 	QLabel* mOSHaveMTRR;
 
-	KListView* mCompleteData;
+	K3ListView* mCompleteData;
 
 	QLabel* mCurrentFile;
 };
@@ -213,139 +215,139 @@ BoInfoDialog::~BoInfoDialog()
 
 void BoInfoDialog::initBosonPage()
 {
- QVBox* vbox = addVBoxPage(i18n("&Boson"));
- QHBox* hbox = new QHBox(vbox);
+ KVBox* vbox = addVBoxPage(i18n("&Boson"));
+ Q3HBox* hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Boson version string: "), hbox);
  d->mBosonVersionString = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Boson version code: "), hbox);
  d->mBosonVersionCode = new QLabel(hbox);
 }
 
 void BoInfoDialog::initQtPage()
 {
- QVBox* vbox = addVBoxPage(i18n("&Qt"));
- QHBox* hbox = new QHBox(vbox);
+ KVBox* vbox = addVBoxPage(i18n("&Qt"));
+ Q3HBox* hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Runtime Qt version string: "), hbox);
  d->mRuntimeQtVersionString = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Compile time Qt version string: "), hbox);
  d->mCompileQtVersionString = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Compile time Qt version code: "), hbox);
  d->mCompileQtVersionCode = new QLabel(hbox);
 }
 
 void BoInfoDialog::initKDEPage()
 {
- QVBox* vbox = addVBoxPage(i18n("&KDE"));
- QHBox* hbox = new QHBox(vbox);
+ KVBox* vbox = addVBoxPage(i18n("&KDE"));
+ Q3HBox* hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Runtime KDE version string (valid for KDE >= 3.1 only): "), hbox);
  d->mRuntimeKDEVersionString = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Compile time KDE version string: "), hbox);
  d->mCompileKDEVersionString = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Compile time KDE version code: "), hbox);
  d->mCompileKDEVersionCode = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Runtime KDE version code (not yet valid): "), hbox);
  d->mRuntimeKDEVersionCode = new QLabel(hbox);
 }
 
 void BoInfoDialog::initOpenGLPage()
 {
- QVBox* vbox = addVBoxPage(i18n("&OpenGL"));
- QHBox* hbox = new QHBox(vbox);
+ KVBox* vbox = addVBoxPage(i18n("&OpenGL"));
+ Q3HBox* hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Have OpenGL data:"), hbox);
  d->mOGHaveData = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Runtime OpenGL version string:"), hbox);
  d->mOGRuntimeVersionString = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Runtime OpenGL version code:"), hbox);
  d->mOGRuntimeVersionCode = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("OpenGL vendor string:"), hbox);
  d->mOGVendorString = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("OpenGL renderer string:"), hbox);
  d->mOGRendererString = new QLabel(hbox);
  // TODO OG extensions
 
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Runtime GLU version string:"), hbox);
  d->mGLURuntimeVersionString = new QLabel(hbox);
  // TODO: GLU extensions
 
 
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Client GLX version string:"), hbox);
  d->mGLXClientVersionString = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Client GLX vendor string:"), hbox);
  d->mGLXClientVendorString = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("GLX version major:"), hbox);
  d->mGLXVersionMajor = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("GLX version minor:"), hbox);
  d->mGLXVersionMinor = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Server GLX version string:"), hbox);
  d->mGLXServerVersionString = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Server GLX vendor string:"), hbox);
  d->mGLXServerVendorString = new QLabel(hbox);
  // TODO: GLX client and server extensions
 
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Is Direct:"), hbox);
  d->mIsDirect = new QLabel(hbox);
 }
 
 void BoInfoDialog::initXPage()
 {
- QVBox* vbox = addVBoxPage(i18n("&X"));
- QHBox* hbox = new QHBox(vbox);
+ KVBox* vbox = addVBoxPage(i18n("&X"));
+ Q3HBox* hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Have X data:"), hbox);
  d->mXHaveData = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XDisplayName)), hbox);
  d->mXDisplayName = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XProtocolVersion)), hbox);
  d->mXProtocolVersion = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XProtocolRevision)), hbox);
  d->mXProtocolRevision = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XVendorString)), hbox);
  d->mXVendorString = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XVendorReleaseNumber)), hbox);
  d->mXVendorReleaseNumber = new QLabel(hbox);
 
  // screen information
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XDefaultScreen)), hbox);
  d->mXDefaultScreen = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XScreenCount)), hbox);
  d->mXScreenCount = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XScreen)), hbox);
  d->mXScreen = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XScreenWidth)), hbox);
  d->mXScreenWidth = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XScreenHeight)), hbox);
  d->mXScreenHeight = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XScreenWidthMM)), hbox);
  d->mXScreenWidthMM = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XScreenHeightMM)), hbox);
  d->mXScreenHeightMM = new QLabel(hbox);
  // screen information (end)
@@ -358,40 +360,40 @@ void BoInfoDialog::initNVidiaPage()
  //     it's contents are based on how the NVidia driver looked like a long time
  //     ago - much of it is not valid anymore.
 #if 0
- QVBox* vbox = addVBoxPage(i18n("&NVidia"));
+ KVBox* vbox = addVBoxPage(i18n("&NVidia"));
  (void)new QLabel(i18n("This page is relevant for users of the proprietary NVidia driver only. All errors listed here are actually GOOD for all other people."), vbox);
- d->mNVidiaErrors = new KListBox(vbox);
+ d->mNVidiaErrors = new K3ListBox(vbox);
 #endif
 }
 
 void BoInfoDialog::initOSPage()
 {
- QVBox* vbox = addVBoxPage(i18n("Operating &System"));
- QHBox* hbox = new QHBox(vbox);
+ KVBox* vbox = addVBoxPage(i18n("Operating &System"));
+ Q3HBox* hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Recognized Operating system type:"), hbox);
  d->mOSType = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Operating system version:"), hbox);
  d->mOSVersion = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Kernel Module TDFX (3dfx voodoo):"), hbox);
  d->mOSKernelModuleTDFX = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Kernel Module NVidia:"), hbox);
  d->mOSKernelModuleNVidia= new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("CPU Speed:"), hbox);
  d->mOSCPUSpeed = new QLabel(hbox);
- hbox = new QHBox(vbox);
+ hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Have MTRR:"), hbox);
  d->mOSHaveMTRR = new QLabel(hbox);
 }
 
 void BoInfoDialog::initLibsPage()
 {
- QVBox* vbox = addVBoxPage(i18n("&Libs"));
+ KVBox* vbox = addVBoxPage(i18n("&Libs"));
  (void)new QLabel(i18n("This page is a side product of the NVidia page. Some data may be relevant if you have a problem."), vbox);
- d->mHaveLibs = new KListView(vbox);
+ d->mHaveLibs = new K3ListView(vbox);
  d->mHaveLibs->addColumn(i18n("Key"));
  d->mHaveLibs->addColumn(i18n("Name"));
  d->mHaveLibs->addColumn(i18n("Value"));
@@ -406,9 +408,9 @@ void BoInfoDialog::initLibsPage()
 
 void BoInfoDialog::initCompleteDataPage()
 {
- QVBox* vbox = addVBoxPage(i18n("&Complete Data"));
+ KVBox* vbox = addVBoxPage(i18n("&Complete Data"));
  (void)new QLabel(i18n("All BoInfo data"), vbox);
- d->mCompleteData = new KListView(vbox);
+ d->mCompleteData = new K3ListView(vbox);
  d->mCompleteData->addColumn(i18n("Key"));
  d->mCompleteData->addColumn(i18n("Name"));
  d->mCompleteData->addColumn(i18n("Value"));
@@ -416,8 +418,8 @@ void BoInfoDialog::initCompleteDataPage()
 
 void BoInfoDialog::initFilePage()
 {
- QVBox* vbox = addVBoxPage(i18n("&Files"));
- QHBox* hbox = new QHBox(vbox);
+ KVBox* vbox = addVBoxPage(i18n("&Files"));
+ Q3HBox* hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Current file:"), hbox);
  d->mCurrentFile = new QLabel(i18n("None"), hbox);
 
@@ -542,9 +544,9 @@ void BoInfoDialog::resetOSPage()
 void BoInfoDialog::resetLibsPage()
 {
  d->mHaveLibs->clear();
- QValueList<int>::Iterator it;
+ Q3ValueList<int>::Iterator it;
  for (it = d->mHaveLibsList.begin(); it != d->mHaveLibsList.end(); ++it) {
-	QListViewItem* item = new QListViewItem(d->mHaveLibs);
+	Q3ListViewItem* item = new Q3ListViewItem(d->mHaveLibs);
 	item->setText(0, QString::number(*it));
 	item->setText(1, BoInfo::keyToName(*it));
 	if (!d->data()->contains(*it)) {
@@ -558,7 +560,7 @@ void BoInfoDialog::resetLibsPage()
 
  // manually add the items that can't be added in the list (as they are no
  // strings)
- QListViewItem* dependsOnGLCore = new QListViewItem(d->mHaveLibs);
+ Q3ListViewItem* dependsOnGLCore = new Q3ListViewItem(d->mHaveLibs);
  dependsOnGLCore->setText(0, QString::number(BoInfo::LibGL_so_DependsOnLibGLCore));
  dependsOnGLCore->setText(1, BoInfo::keyToName(BoInfo::LibGL_so_DependsOnLibGLCore));
  if (!d->data()->contains(BoInfo::LibGL_so_DependsOnLibGLCore)) {
@@ -577,7 +579,7 @@ void BoInfoDialog::resetCompleteDataPage()
  QMap<int, QVariant>::Iterator it = data.begin();
  for (; it != data.end(); ++it) {
 	// FIXME: values on multiple lines are broken
-	QListViewItem* item = new QListViewItem(d->mCompleteData);
+	Q3ListViewItem* item = new Q3ListViewItem(d->mCompleteData);
 	item->setMultiLinesEnabled(true);
 	item->setText(0, QString::number(it.key()));
 	item->setText(1, d->data()->keyToName(it.key()));

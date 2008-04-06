@@ -32,7 +32,7 @@
 
 #include <qdatastream.h>
 #include <qcolor.h>
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 #include <qdom.h>
 #include <qimage.h>
 #include <qstringlist.h>
@@ -67,12 +67,12 @@ bool BosonFileConverter::loadXMLDoc(QDomDocument* doc, const QString& xml) const
 
 bool BosonFileConverter::convertMapFile_From_0_8_To_0_9(const QByteArray& map, QByteArray* newMap, QByteArray* texMap)
 {
- QDataStream readStream(map, IO_ReadOnly);
+ QDataStream readStream(map, QIODevice::ReadOnly);
 
  // read in the boson 0.8 map first.
  // read map geo
- Q_INT32 mapWidth;
- Q_INT32 mapHeight;
+ qint32 mapWidth;
+ qint32 mapHeight;
  readStream >> mapWidth;
  readStream >> mapHeight;
 
@@ -90,8 +90,8 @@ bool BosonFileConverter::convertMapFile_From_0_8_To_0_9(const QByteArray& map, Q
  unsigned char* versions = new unsigned char[mapWidth * mapHeight];
  for (int i = 0; i < mapWidth; i++) {
 	for (int j = 0; j < mapHeight; j++) {
-		Q_INT32 g;
-		Q_INT8 version;
+		qint32 g;
+		qint8 version;
 		readStream >> g;
 		if (g < 0 || g > (7 + (4 * (12 + 4 * 16)))) { // Cell::isValidGround() from boson 0.8
 			boError() << k_funcinfo << "not a valid ground" << endl;
@@ -133,11 +133,11 @@ bool BosonFileConverter::convertMapFile_From_0_8_To_0_9(const QByteArray& map, Q
 bool BosonFileConverter::convertMapFile_From_0_8_128_To_0_9(const QByteArray& map, QByteArray* mapXML, int* mapWidth, int* mapHeight)
 {
  boDebug() << k_funcinfo << endl;
- QDataStream stream(map, IO_ReadOnly);
+ QDataStream stream(map, QIODevice::ReadOnly);
  QString magicCookie;
- Q_UINT32 mapVersion;
- Q_INT32 width;
- Q_INT32 height;
+ quint32 mapVersion;
+ qint32 width;
+ qint32 height;
  QString groundTheme;
 
  stream >> magicCookie;
@@ -596,7 +596,7 @@ bool BosonFileConverter::convertPlayField_From_0_9_1_To_0_10(QMap<QString, QByte
  QDomNodeList itemsList = canvasRoot.elementsByTagName("Items");
  // remove Item Type==7 (oiltower), which doesnt exist anymore
  for (unsigned int i = 0; i < itemsList.count(); i++) {
-	QValueList<QDomElement> removeItems;
+	Q3ValueList<QDomElement> removeItems;
 	QDomElement itemsTag = itemsList.item(i).toElement();
 	QDomNodeList items = itemsTag.elementsByTagName(QString::fromLatin1("Item"));
 	for (unsigned int j = 0; j < items.count(); j++) {
@@ -1711,19 +1711,19 @@ bool BosonFileConverter::addAIPyScript_From_0_10_82_To_0_10_83(QByteArray& aiPy,
 bool MapToTexMap_From_0_8_To_0_9::convert(int* groundTypes, QByteArray* newMap, QByteArray* texMap)
 {
  bool ret = true;
- QDataStream writeMapStream(*newMap, IO_WriteOnly);
- QDataStream writeTexMapStream(*texMap, IO_WriteOnly);
+ QDataStream writeMapStream(*newMap, QIODevice::WriteOnly);
+ QDataStream writeTexMapStream(*texMap, QIODevice::WriteOnly);
 
  writeMapStream << BOSONMAP_MAP_MAGIC_COOKIE;
- writeMapStream << (Q_UINT32)BOSONMAP_VERSION_0_9;
+ writeMapStream << (quint32)BOSONMAP_VERSION_0_9;
  writeTexMapStream << BOSONMAP_TEXMAP_MAGIC_COOKIE;
- writeTexMapStream << (Q_UINT32)BOSONMAP_VERSION_0_9;
+ writeTexMapStream << (quint32)BOSONMAP_VERSION_0_9;
 
  // now we can start to convert.
- writeMapStream << (Q_UINT32)mMapWidth;
- writeMapStream << (Q_UINT32)mMapHeight;
+ writeMapStream << (quint32)mMapWidth;
+ writeMapStream << (quint32)mMapHeight;
  writeMapStream << QString::fromLatin1("earth");
- writeTexMapStream << (Q_UINT32)BO_COMPAT_0_8_TEXTURE_COUNT;
+ writeTexMapStream << (quint32)BO_COMPAT_0_8_TEXTURE_COUNT;
 
  if (mMapHeight > 500 || mMapWidth > 500) {
 	boError() << k_funcinfo << "invalid map dimensions" << endl;
@@ -1737,7 +1737,7 @@ bool MapToTexMap_From_0_8_To_0_9::convert(int* groundTypes, QByteArray* newMap, 
  for (unsigned int i = 0; i < BO_COMPAT_0_8_TEXTURE_COUNT && ret; i++) {
 	for (unsigned int x = 0; x < (unsigned int)mMapWidth + 1; x++) {
 		for (unsigned int y = 0; y < (unsigned int)mMapHeight + 1; y++) {
-			writeTexMapStream << (Q_UINT8)tex[texMapArrayPos(i, x, y)];
+			writeTexMapStream << (quint8)tex[texMapArrayPos(i, x, y)];
 		}
 	}
  }

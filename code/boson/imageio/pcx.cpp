@@ -78,7 +78,7 @@ static QDataStream &operator<<( QDataStream &s, const PCXHEADER &ph )
   s << ph.HScreenSize;
   s << ph.VScreenSize;
 
-  Q_UINT8 byte = 0;
+  quint8 byte = 0;
   for ( int i=0; i<54; ++i )
     s << byte;
 
@@ -87,21 +87,21 @@ static QDataStream &operator<<( QDataStream &s, const PCXHEADER &ph )
 
 static PCXHEADER header;
 static QImage img;
-static Q_UINT16 w, h;
+static quint16 w, h;
 
 void PCXHEADER::reset()
 {
   QByteArray dummy( 128 );
   dummy.fill( 0 );
-  QDataStream s( dummy, IO_ReadOnly );
+  QDataStream s( dummy, QIODevice::ReadOnly );
   s >> *this;
 }
 
 static void readLine( QDataStream &s, QByteArray &buf )
 {
-  Q_UINT32 i=0;
-  Q_UINT32 size = buf.size();
-  Q_UINT8 byte, count;
+  quint32 i=0;
+  quint32 size = buf.size();
+  quint8 byte, count;
 
   if ( header.Encoding == 1 )
   {
@@ -175,7 +175,7 @@ static void readImage4( QDataStream &s )
 
     for ( int i=0; i<4; i++ )
     {
-      Q_UINT32 offset = i*header.BytesPerLine;
+      quint32 offset = i*header.BytesPerLine;
       for ( int x=0; x<w; ++x )
         if ( buf[ offset + ( x/8 ) ] & ( 128 >> ( x%8 ) ) )
           pixbuf[ x ] += ( 1 << i );
@@ -214,14 +214,14 @@ static void readImage8( QDataStream &s )
       *p++ = buf[ x ];
   }
 
-  Q_UINT8 flag;
+  quint8 flag;
   s >> flag;
-  kdDebug() << "Flag: " << flag << endl;
+  kDebug() << "Flag: " << flag << endl;
 
   if ( flag == 12 && header.Version == 5 )
   {
     // Read the palette
-    Q_UINT8 r, g, b;
+    quint8 r, g, b;
     for ( int i=0; i<256; ++i )
     {
       s >> r >> g >> b;
@@ -281,19 +281,19 @@ void kimgio_pcx_read( QImageIO *io )
 
   img.reset();
 
-  kdDebug( 399 ) << "Manufacturer: " << header.Manufacturer << endl;
-  kdDebug( 399 ) << "Version: " << header.Version << endl;
-  kdDebug( 399 ) << "Encoding: " << header.Encoding << endl;
-  kdDebug( 399 ) << "Bpp: " << header.Bpp << endl;
-  kdDebug( 399 ) << "Width: " << w << endl;
-  kdDebug( 399 ) << "Height: " << h << endl;
-  kdDebug( 399 ) << "Window: " << header.XMin << "," << header.XMax << "," 
+  kDebug( 399 ) << "Manufacturer: " << header.Manufacturer << endl;
+  kDebug( 399 ) << "Version: " << header.Version << endl;
+  kDebug( 399 ) << "Encoding: " << header.Encoding << endl;
+  kDebug( 399 ) << "Bpp: " << header.Bpp << endl;
+  kDebug( 399 ) << "Width: " << w << endl;
+  kDebug( 399 ) << "Height: " << h << endl;
+  kDebug( 399 ) << "Window: " << header.XMin << "," << header.XMax << "," 
             << header.YMin << "," << header.YMax << endl;
-  kdDebug( 399 ) << "BytesPerLine: " << header.BytesPerLine << endl;
-  kdDebug( 399 ) << "NPlanes: " << header.NPlanes << endl;
+  kDebug( 399 ) << "BytesPerLine: " << header.BytesPerLine << endl;
+  kDebug( 399 ) << "NPlanes: " << header.NPlanes << endl;
 
   // Skip the rest of the header
-  Q_UINT8 byte;
+  quint8 byte;
   while ( s.device()->at() < 128 )
     s >> byte;
 
@@ -314,9 +314,9 @@ void kimgio_pcx_read( QImageIO *io )
     readImage24( s );
   }
 
-  kdDebug( 399 ) << "Image Bytes: " << img.numBytes() << endl;
-  kdDebug( 399 ) << "Image Bytes Per Line: " << img.bytesPerLine() << endl;
-  kdDebug( 399 ) << "Image Depth: " << img.depth() << endl;
+  kDebug( 399 ) << "Image Bytes: " << img.numBytes() << endl;
+  kDebug( 399 ) << "Image Bytes Per Line: " << img.bytesPerLine() << endl;
+  kDebug( 399 ) << "Image Depth: " << img.depth() << endl;
 
   if ( !img.isNull() )
   {
@@ -331,9 +331,9 @@ void kimgio_pcx_read( QImageIO *io )
 
 static void writeLine( QDataStream &s, QByteArray &buf )
 {
-  Q_UINT32 i = 0;
-  Q_UINT32 size = buf.size();
-  Q_UINT8 count, data;
+  quint32 i = 0;
+  quint32 size = buf.size();
+  quint8 count, data;
   char byte;
 
   while ( i < size )
@@ -376,7 +376,7 @@ static void writeImage1( QDataStream &s )
 
   for ( int y=0; y<h; ++y )
   {
-    Q_UINT8 *p = img.scanLine( y );
+    quint8 *p = img.scanLine( y );
 
     for ( int i=0; i<header.BytesPerLine; ++i )
       buf[ i ] = p[ i ];
@@ -403,7 +403,7 @@ static void writeImage4( QDataStream &s )
 
   for ( int y=0; y<h; ++y )
   {
-    Q_UINT8 *p = img.scanLine( y );
+    quint8 *p = img.scanLine( y );
 
     for ( int i=0; i<4; ++i )
       buf[ i ].fill( 0 );
@@ -432,7 +432,7 @@ static void writeImage8( QDataStream &s )
 
   for ( int y=0; y<h; ++y )
   {
-    Q_UINT8 *p = img.scanLine( y );
+    quint8 *p = img.scanLine( y );
 
     for ( int i=0; i<header.BytesPerLine; ++i )
       buf[ i ] = p[ i ];
@@ -441,7 +441,7 @@ static void writeImage8( QDataStream &s )
   }
 
   // Write palette flag
-  Q_UINT8 byte = 12;
+  quint8 byte = 12;
   s << byte;
 
   // Write palette
@@ -489,11 +489,11 @@ void kimgio_pcx_write( QImageIO *io )
   w = img.width();
   h = img.height();
 
-  kdDebug( 399 ) << "Width: " << w << endl;
-  kdDebug( 399 ) << "Height: " << h << endl;
-  kdDebug( 399 ) << "Depth: " << img.depth() << endl;
-  kdDebug( 399 ) << "BytesPerLine: " << img.bytesPerLine() << endl;
-  kdDebug( 399 ) << "Num Colors: " << img.numColors() << endl;
+  kDebug( 399 ) << "Width: " << w << endl;
+  kDebug( 399 ) << "Height: " << h << endl;
+  kDebug( 399 ) << "Depth: " << img.depth() << endl;
+  kDebug( 399 ) << "BytesPerLine: " << img.bytesPerLine() << endl;
+  kDebug( 399 ) << "Num Colors: " << img.numColors() << endl;
 
   header.Manufacturer = 10;
   header.Version = 5;

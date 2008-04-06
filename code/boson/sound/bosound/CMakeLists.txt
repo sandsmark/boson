@@ -32,8 +32,6 @@ set(bosonsound_sources
 	boaudiothread.cpp
 	bosonaudio.cpp
 )
-kde3_automoc(${bosonsoundcommon_sources})
-kde3_automoc(${bosonsound_sources})
 
 
 boson_add_library(bosonsoundcommon STATIC ${bosonsoundcommon_sources})

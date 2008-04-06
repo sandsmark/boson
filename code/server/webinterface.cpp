@@ -24,9 +24,11 @@
 #include "player.h"
 #include "boson/boversion.h"
 
-#include <qsocket.h>
+#include <q3socket.h>
 #include <qregexp.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 #include <kdebug.h>
 #include <kgame/kmessageio.h>
@@ -34,7 +36,7 @@
 #include "webinterface.moc"
 
 
-WebInterface::WebInterface(Server* s, Q_UINT16 port) : QServerSocket(port)
+WebInterface::WebInterface(Server* s, quint16 port) : Q3ServerSocket(port)
 {
   mServer = s;
   boDebug() << "Web interface listening on port " << port << endl;
@@ -46,7 +48,7 @@ WebInterface::~WebInterface()
 
 void WebInterface::newConnection(int socket)
 {
-  QSocket* s = new QSocket(this);
+  Q3Socket* s = new Q3Socket(this);
   connect(s, SIGNAL(readyRead()), this, SLOT(readClient()));
   connect(s, SIGNAL(delayedCloseFinished()), this, SLOT(discardClient()));
   s->setSocket(socket);
@@ -54,14 +56,14 @@ void WebInterface::newConnection(int socket)
 
 void WebInterface::readClient()
 {
-  QSocket* socket = (QSocket*)sender();
+  Q3Socket* socket = (Q3Socket*)sender();
   if(socket->canReadLine())
   {
     QStringList tokens = QStringList::split(QRegExp("[ \r\n][ \r\n]*"), socket->readLine());
     if(tokens[0] == "GET")
     {
-      QTextStream os(socket);
-      os.setEncoding(QTextStream::UnicodeUTF8);
+      Q3TextStream os(socket);
+      os.setEncoding(Q3TextStream::UnicodeUTF8);
       sendStatistics(os);
       socket->close();
     }
@@ -70,11 +72,11 @@ void WebInterface::readClient()
 
 void WebInterface::discardClient()
 {
-  QSocket* socket = (QSocket*)sender();
+  Q3Socket* socket = (Q3Socket*)sender();
   delete socket;
 }
 
-void WebInterface::sendStatistics(QTextStream& os)
+void WebInterface::sendStatistics(Q3TextStream& os)
 {
   writeHTTPHeader(os);
   writeHTMLHeader(os, "Boson Server Statistics");
@@ -90,14 +92,14 @@ void WebInterface::sendStatistics(QTextStream& os)
   writeHTMLFooter(os);
 }
 
-void WebInterface::writeHTTPHeader(QTextStream& os)
+void WebInterface::writeHTTPHeader(Q3TextStream& os)
 {
   os << "HTTP/1.0 200 Ok\r\n";
   os << "Content-Type: text/html; charset:=\"utf-8\"\r\n";
   os << "\r\n";
 }
 
-void WebInterface::writeHTMLHeader(QTextStream& os, const QString& title)
+void WebInterface::writeHTMLHeader(Q3TextStream& os, const QString& title)
 {
   os << "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">";
   os << "<html>\r\n";
@@ -131,7 +133,7 @@ void WebInterface::writeHTMLHeader(QTextStream& os, const QString& title)
             <tr><td>\r\n";
 }
 
-void WebInterface::writeHTMLFooter(QTextStream& os)
+void WebInterface::writeHTMLFooter(Q3TextStream& os)
 {
   os << "</table></td></tr></table></td></tr></table>\r\n";
   os << "</td></tr>\r\n";
@@ -139,7 +141,7 @@ void WebInterface::writeHTMLFooter(QTextStream& os)
   os << "</table></body></html>\r\n";
 }
 
-void WebInterface::writeServerInfos(QTextStream& os)
+void WebInterface::writeServerInfos(Q3TextStream& os)
 {
   QString sServerStatus;
   Game* game = mServer->game();
@@ -173,7 +175,7 @@ void WebInterface::writeServerInfos(QTextStream& os)
                 <br>\r\n";
 }
 
-void WebInterface::writeServerStatistics(QTextStream& os)
+void WebInterface::writeServerStatistics(Q3TextStream& os)
 {
   os << "<table cellpadding=\"2\" cellspacing=\"1\" border=\"0\" width=\"100%\" class=\"sidebarbox\">\r\n \
                     <tr><td class=\"sidebarboxtitlecell\">\r\n \
@@ -190,7 +192,7 @@ void WebInterface::writeServerStatistics(QTextStream& os)
 }
 
 
-void WebInterface::writeGameInfos(QTextStream& os)
+void WebInterface::writeGameInfos(Q3TextStream& os)
 {
   int clientcount = 0;
   int playercount = 0;
@@ -264,7 +266,7 @@ void WebInterface::writeGameInfos(QTextStream& os)
             <br>\r\n";
 }
 
-void WebInterface::writeGameStatistics(QTextStream& os)
+void WebInterface::writeGameStatistics(Q3TextStream& os)
 {
   if(mServer->clientCount() > 0)
   {
@@ -279,7 +281,7 @@ void WebInterface::writeGameStatistics(QTextStream& os)
   }
 }
 
-void WebInterface::writeClientStats(QTextStream& os)
+void WebInterface::writeClientStats(Q3TextStream& os)
 {
     int clientcount = mServer->clientCount();
     if(mServer->game())
@@ -290,11 +292,11 @@ void WebInterface::writeClientStats(QTextStream& os)
         os << "  There is 1 client in the game:<br>\r\n";
     else
         os << "  There are " << clientcount << " clients in the game:<br>\r\n";
-    QValueList<Q_UINT32> clientids = mServer->clientIDs();
-    QValueList<Q_UINT32>::iterator it = clientids.begin();
+    Q3ValueList<quint32> clientids = mServer->clientIDs();
+    Q3ValueList<quint32>::iterator it = clientids.begin();
     for(; it != clientids.end(); it++)
     {
-        Q_UINT32 id = *it;
+        quint32 id = *it;
         if(id == mServer->gameClientId())
         {
         continue;
@@ -304,14 +306,14 @@ void WebInterface::writeClientStats(QTextStream& os)
     }
 }
 
-void WebInterface::writePlayerStats(QTextStream& os)
+void WebInterface::writePlayerStats(Q3TextStream& os)
 {
     Game* game = mServer->game();
     if(game->playerCount() == 1)
         os << "  There is 1 player in game:<br>\r\n";
     else
         os << "  There are " << game->playerCount() << " players in game:<br>\r\n";
-    QPtrListIterator<KPlayer> itP(*game->playerList());
+    Q3PtrListIterator<KPlayer> itP(*game->playerList());
     while(itP.current())
     {
         Player* p = (Player*)itP.current();

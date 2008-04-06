@@ -24,7 +24,7 @@
 #include "../bomemory/bodummymemory.h"
 #include <bodebug.h>
 
-#include <kstaticdeleter.h>
+#include <k3staticdeleter.h>
 
 #include <qstringlist.h>
 #include <qapplication.h>
@@ -64,7 +64,7 @@ static void bo_xrr_enter_orig_mode();
 static bool bo_xrr_enter_mode(int mode, XRRScreenConfiguration* sc);
 #endif // HAVE_XRANDR
 
-static KStaticDeleter<BoFullScreen> sd;
+static K3StaticDeleter<BoFullScreen> sd;
 BoFullScreen* BoFullScreen::mBoFullScreen = 0;
 
 class BoFullScreenPrivate
@@ -145,9 +145,9 @@ void BoFullScreen::resizeToFullScreen(QWidget* w, int width, int height)
 	boError() << k_funcinfo << "w must be a toplevel widget" << endl;
 	return;
  }
- w->reparent(0, QWidget::WType_TopLevel |
-		QWidget::WStyle_Customize |
-		QWidget::WStyle_NoBorder |
+ w->reparent(0, QWidget::Qt::WType_TopLevel |
+		QWidget::Qt::WStyle_Customize |
+		QWidget::Qt::WStyle_NoBorder |
 		QWidget::WDestructiveClose
 		/* | w->getWFlags() & 0xffff0000*/,
 		w->mapToGlobal(QPoint(0, 0)));
@@ -169,7 +169,7 @@ void BoFullScreen::leaveFullScreen()
 	return;
  }
  BoFullScreen::enterOriginalMode();
- w->reparent(0, QWidget::WType_TopLevel | QWidget::WDestructiveClose,
+ w->reparent(0, QWidget::Qt::WType_TopLevel | QWidget::WDestructiveClose,
 		QPoint(0, 0));
  w->show();
 }

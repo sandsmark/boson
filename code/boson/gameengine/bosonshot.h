@@ -23,7 +23,7 @@
 #include "../bo3dtools.h"
 #include "rtti.h"
 #include "bosonitem.h"
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 
 #include <kgame/kgameproperty.h>
 
@@ -34,7 +34,7 @@ class BosonWeapon;
 class UnitProperties;
 
 class QDomElement;
-template<class T> class QPtrList;
+template<class T> class Q3PtrList;
 
 
 /** @short Base class for shots
@@ -184,7 +184,7 @@ class BosonShot : public BosonItem
 
     // values from BosonWeapon. note that some classes may not use them at all
     // (e.g. reimplement damage() with their own values)
-    KGameProperty<Q_INT32> mWeaponDamage;
+    KGameProperty<qint32> mWeaponDamage;
     KGameProperty<bofixed> mWeaponDamageRange;
     KGameProperty<bofixed> mWeaponFullDamageRange;
     KGameProperty<bofixed> mWeaponSpeed;
@@ -374,10 +374,10 @@ class BosonShotExplosion : public BosonShot
     static void initStatic();
 
   private:
-    KGameProperty<Q_INT32> mDamage;
+    KGameProperty<qint32> mDamage;
     KGameProperty<bofixed> mDamageRange;
     KGameProperty<bofixed> mFullDamageRange;
-    KGameProperty<Q_INT32> mDelay;
+    KGameProperty<qint32> mDelay;
 };
 
 

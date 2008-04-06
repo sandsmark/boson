@@ -30,16 +30,16 @@
 #include "bosonitempropertyhandler.h"
 #include "bodebug.h"
 
-#include <qptrlist.h>
-#include <qptrvector.h>
+#include <q3ptrlist.h>
+#include <q3ptrvector.h>
 #include <qdom.h>
 
-#include <kstaticdeleter.h>
+#include <k3staticdeleter.h>
 
 #include <math.h>
 
 QMap<int, QString>* BosonItemProperties::mPropertyMap = 0;
-static KStaticDeleter< QMap<int, QString> > sd;
+static K3StaticDeleter< QMap<int, QString> > sd;
 
 BosonItemProperties::BosonItemProperties()
 {
@@ -144,7 +144,7 @@ BosonItem::BosonItem(Player* owner, BosonCanvas* canvas)
  mIsSelected = false;
  mIsGroupLeaderOfSelection = false;
 
- mCells = new QPtrVector<Cell>();
+ mCells = new Q3PtrVector<Cell>();
  mAnimationMode = UnitAnimationIdle;
 }
 
@@ -163,7 +163,7 @@ BosonItem::~BosonItem()
 
 
 
-QPtrVector<Cell>* BosonItem::cells()
+Q3PtrVector<Cell>* BosonItem::cells()
 {
  if (mCellsDirty) {
 	BoRect2Fixed rect = boundingRect();
@@ -173,26 +173,26 @@ QPtrVector<Cell>* BosonItem::cells()
  return mCells;
 }
 
-QPtrVector<Cell>* BosonItem::cellsConst() const
+Q3PtrVector<Cell>* BosonItem::cellsConst() const
 {
  return mCells;
 }
 
-void BosonItem::makeCells(Cell* allCells, QPtrVector<Cell>* cells, const BoRect2Fixed& rect, int mapWidth, int mapHeight)
+void BosonItem::makeCells(Cell* allCells, Q3PtrVector<Cell>* cells, const BoRect2Fixed& rect, int mapWidth, int mapHeight)
 {
  BO_CHECK_NULL_RET(allCells);
  int left = (int)rect.left();
  int top = (int)rect.top();
  int right = (int)ceil(rect.right());
  int bottom = (int)ceil(rect.bottom());
- left = QMAX(left, 0);
- top = QMAX(top, 0);
- right = QMAX(right, 0);
- bottom = QMAX(bottom, 0);
- left = QMIN(left, mapWidth);
- top = QMIN(top, mapHeight);
- right = QMIN(right, mapWidth);
- bottom = QMIN(bottom, mapHeight);
+ left = qMax(left, 0);
+ top = qMax(top, 0);
+ right = qMax(right, 0);
+ bottom = qMax(bottom, 0);
+ left = qMin(left, mapWidth);
+ top = qMin(top, mapHeight);
+ right = qMin(right, mapWidth);
+ bottom = qMin(bottom, mapHeight);
 
  // AB: WARNING: we do direct array/pointer calculations here, so
  // right/bottom/left/top MUST be valid for the allCells array!
@@ -238,7 +238,7 @@ bool BosonItem::bosonCollidesWith(const BoVector3Fixed& v1, const BoVector3Fixed
  // Check z-coord first
  bofixed v1_z = v1.z();
  bofixed v2_z = v2.z();
- if (QMAX(z() + zVelocity(), v1_z) >= QMIN(z() + zVelocity() + depth(), v2_z)) {
+ if (qMax(z() + zVelocity(), v1_z) >= qMin(z() + zVelocity() + depth(), v2_z)) {
 	// z-coordinates don't intersect
 	return false;
  }
@@ -277,7 +277,7 @@ bool BosonItem::bosonCollidesWith(const BoVector3Fixed& v1, const BoVector3Fixed
  // Check manhattan dist between centers
  bofixed mycenterx = leftEdge() + xVelocity() + width() / 2;
  bofixed mycentery = topEdge() + yVelocity() + height() / 2;
- if (QABS(mycenterx - centerx) + QABS(mycentery - centery) < (width() / 2 + halfw + height() / 2 + halfh - 1)) {
+ if (qAbs(mycenterx - centerx) + qAbs(mycentery - centery) < (width() / 2 + halfw + height() / 2 + halfh - 1)) {
 	// Box's center still collides with us
 //	boDebug() << "        " << k_funcinfo << "Items COLLIDE! (3)!!" << endl;
 	return true;

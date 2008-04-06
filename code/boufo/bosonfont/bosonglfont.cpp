@@ -36,6 +36,7 @@
 #include <qfont.h>
 #include <qstringlist.h>
 #include <qpaintdevice.h>
+#include <QX11Info>
 
 BoFontInfo::BoFontInfo()
 {
@@ -48,11 +49,11 @@ BoFontInfo::BoFontInfo()
  mTextured = true;
 
  QStringList list;
- if (KGlobal::_instance) {
+ if (KGlobal::hasMainComponent()) {
 	list = KGlobal::dirs()->findAllResources("data", "boson/fonts/*.txf");
  }
  if (!list.isEmpty()) {
-	QStringList list2 = list.grep("AvantGarde-Demi.txf");
+	QStringList list2 = list.filter("AvantGarde-Demi.txf");
 	if (!list2.isEmpty()) {
 		mName = list2[0];
 	} else {
@@ -90,7 +91,7 @@ bool BoFontInfo::fromString(const QString& s)
 	*this = BoFontInfo();
 	return true;
  }
- QStringList l = QStringList::split(QChar(','), s);
+ QStringList l = s.split(QChar(','));
  if (l.count() != 8) {
 	boError() << k_funcinfo << "invalid font string " << s << endl;
 	return false;
@@ -142,7 +143,8 @@ public:
 	 **/
 	int width(const QString& text) const
 	{
-		return width((GLubyte*)text.latin1(), text.length());
+		QByteArray tmp = text.toLatin1();
+		return width((GLubyte*)tmp.constData(), tmp.length());
 	}
 	/**
 	 * @return The width of @p string . Any occurances of newlines ('\n') in @p
@@ -246,7 +248,7 @@ bool BoGLXFont::loadFont(const QString& family)
  if (handle == 0) {
 	boError() << k_funcinfo << "qt could not load any bitmap font!" << endl;
 	int count;
-	char** names = XListFonts(QPaintDevice::x11AppDisplay(), "*", 0xffff, &count);
+	char** names = XListFonts(QX11Info::display(), "*", 0xffff, &count);
 	for (int i = 0; i < count && handle == 0; i++) {
 		mFont.setRawName(names[i]);
 		handle = (int)mFont.handle();
@@ -360,7 +362,8 @@ bool BoTXFFont::loadFont(const QString& fileName)
 {
  mFont = new BofntTexFont();
  mFont->setGap(0.0f);
- if (mFont->load(fileName.latin1(), GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR) != FNT_TRUE) {
+ QByteArray tmp = fileName.toLatin1();
+ if (mFont->load(tmp.constData(), GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR) != FNT_TRUE) {
 	boError() << k_funcinfo << "could not load txf font " << fileName << endl;
 	return false;
  }
@@ -492,7 +495,7 @@ int BosonGLFont::width(const QString& text)
 	return 0;
  }
  int wmax = 0;
- QStringList lines = QStringList::split('\n', text);
+ QStringList lines = text.split('\n');
  QStringList::Iterator it;
  for (it = lines.begin(); it != lines.end(); ++it) {
 	int w = mFont->width(*it);
@@ -549,7 +552,7 @@ int BosonGLFont::height(const QString& text, int maxWidth)
 {
  if (text.contains('\n')) {
 	int h = 0;
-	QStringList lines = QStringList::split('\n', text);
+	QStringList lines = text.split('\n');
 	QStringList::Iterator it = lines.begin();
 	for (; it != lines.end(); ++it) {
 		h += height(*it, maxWidth);
@@ -567,8 +570,9 @@ int BosonGLFont::height(const QString& text, int maxWidth)
 	// we can't even render a single char!
 	return 0;
  }
- GLubyte* string = (GLubyte*)text.latin1();
- const int len = text.length();
+ QByteArray tmp = text.toLatin1();
+ GLubyte* string = (GLubyte*)tmp.constData();
+ const int len = tmp.length();
  int pos = 0;
  int lines = 0;
  while (pos < len) {
@@ -596,7 +600,7 @@ int BosonGLFont::renderText(int x, int y, const QString& text, int maxWidth, boo
  if (y < 0) {
 	y = 0;
  }
- QStringList lines = QStringList::split('\n', text);
+ QStringList lines = text.split('\n');
  QStringList::Iterator it;
 // renderer.begin();
  for (it = lines.begin(); it != lines.end(); ++it) {
@@ -623,8 +627,9 @@ int BosonGLFont::renderLine(int x, int y, const QString& text, int maxWidth, boo
  if (w >= maxWidth) {
 	w = maxWidth;
  }
- const int len = text.length();
- GLubyte* string = (GLubyte*)text.latin1();
+ QByteArray tmp = text.toLatin1();
+ const int len = tmp.length();
+ GLubyte* string = (GLubyte*)tmp.constData();
  // we must never ever use more height than height(..) claims we do
  int maxHeight = height(text, maxWidth);
  if (background) {

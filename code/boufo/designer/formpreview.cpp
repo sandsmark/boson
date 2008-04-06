@@ -29,6 +29,12 @@
 
 #include <qtimer.h>
 #include <qcursor.h>
+//Added by qt3to4:
+#include <QWheelEvent>
+#include <QResizeEvent>
+#include <QMouseEvent>
+#include <QKeyEvent>
+#include <QEvent>
 
 #include <math.h>
 #include <stdlib.h>
@@ -72,7 +78,7 @@ FormPreview::FormPreview(const QGLFormat& format, QWidget* parent)
 // qApp->setGlobalMouseTracking(true);
 // qApp->installEventFilter(this);
  setMouseTracking(true);
-// setFocusPolicy(StrongFocus);
+// setFocusPolicy(Qt::StrongFocus);
 
  setMinimumSize(200, 200);
 

@@ -48,10 +48,12 @@
 #include <qlabel.h>
 #include <qcombobox.h>
 #include <qcheckbox.h>
-#include <qvbox.h>
+#include <q3vbox.h>
 #include <qtooltip.h>
 #include <qpushbutton.h>
 #include <qlineedit.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 
 OptionsWidget::OptionsWidget()
@@ -71,28 +73,28 @@ void OptionsWidget::addConfigOptionWidget(ConfigOptionWidget* w)
 void OptionsWidget::loadFromConfigScript(const BosonConfigScript* script)
 {
  BO_CHECK_NULL_RET(script);
- for (QValueList<ConfigOptionWidget*>::iterator it = mConfigOptionWidgets.begin(); it != mConfigOptionWidgets.end(); ++it) {
+ for (Q3ValueList<ConfigOptionWidget*>::iterator it = mConfigOptionWidgets.begin(); it != mConfigOptionWidgets.end(); ++it) {
 	(*it)->loadFromConfigScript(script);
  }
 }
 
 void OptionsWidget::load()
 {
- for (QValueList<ConfigOptionWidget*>::iterator it = mConfigOptionWidgets.begin(); it != mConfigOptionWidgets.end(); ++it) {
+ for (Q3ValueList<ConfigOptionWidget*>::iterator it = mConfigOptionWidgets.begin(); it != mConfigOptionWidgets.end(); ++it) {
 	(*it)->load();
  }
 }
 
 void OptionsWidget::apply()
 {
- for (QValueList<ConfigOptionWidget*>::iterator it = mConfigOptionWidgets.begin(); it != mConfigOptionWidgets.end(); ++it) {
+ for (Q3ValueList<ConfigOptionWidget*>::iterator it = mConfigOptionWidgets.begin(); it != mConfigOptionWidgets.end(); ++it) {
 	(*it)->apply();
  }
 }
 
 void OptionsWidget::setDefaults()
 {
- for (QValueList<ConfigOptionWidget*>::iterator it = mConfigOptionWidgets.begin(); it != mConfigOptionWidgets.end(); ++it) {
+ for (Q3ValueList<ConfigOptionWidget*>::iterator it = mConfigOptionWidgets.begin(); it != mConfigOptionWidgets.end(); ++it) {
 	(*it)->loadDefault();
  }
 }
@@ -102,7 +104,7 @@ void OptionsWidget::setDefaults()
 // General Options
 //////////////////////////////////////////////////////////////////////
 
-GeneralOptions::GeneralOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
+GeneralOptions::GeneralOptions(QWidget* parent) : Q3VBox(parent), OptionsWidget()
 {
  mGameSpeed = new ConfigOptionWidgetInt("GameSpeed", this);
  mGameSpeed->setLabel(i18n("Game Speed"));
@@ -128,15 +130,15 @@ GeneralOptions::~GeneralOptions()
 // Cursor Options
 //////////////////////////////////////////////////////////////////////
 
-CursorOptions::CursorOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
+CursorOptions::CursorOptions(QWidget* parent) : Q3VBox(parent), OptionsWidget()
 {
- QHBox* hbox = new QHBox(this);
+ Q3HBox* hbox = new Q3HBox(this);
  (void)new QLabel(i18n("Cursor"), hbox);
  mCursor = new QComboBox(hbox);
  mCursor->insertItem(i18n("OpenGL Cursor"), CursorOpenGL);
  mCursor->insertItem(i18n("KDE Standard Cursor"), CursorKDE);
 
- hbox = new QHBox(this);
+ hbox = new Q3HBox(this);
  (void)new QLabel(i18n("Cursor theme"), hbox);
  mCursorTheme = new QComboBox(hbox);
  QStringList list = BosonCursor::availableThemes();
@@ -209,7 +211,7 @@ void CursorOptions::setCursor(CursorMode mode)
 // "Scrolling" applies to both arrow scrolling and mouse scrolling!
 //////////////////////////////////////////////////////////////////////
 
-ScrollingOptions::ScrollingOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
+ScrollingOptions::ScrollingOptions(QWidget* parent) : Q3VBox(parent), OptionsWidget()
 {
  mRMBScrolling = new ConfigOptionWidgetBool("RMBMove", this);
  mRMBScrolling->setLabel(i18n("Enable right mouse button scrolling"));
@@ -238,12 +240,12 @@ ScrollingOptions::ScrollingOptions(QWidget* parent) : QVBox(parent), OptionsWidg
  items.insert((int)CameraZoom, i18n("Zoom camera"));
  items.insert((int)CameraRotate, i18n("Rotate camera"));
 
- QHBox* hbox;
- hbox = new QHBox(this);
+ Q3HBox* hbox;
+ hbox = new Q3HBox(this);
  (void)new QLabel(i18n("Mouse wheel action"), hbox);
  mMouseWheelAction = new QComboBox(hbox);
 
- hbox = new QHBox(this);
+ hbox = new Q3HBox(this);
  (void)new QLabel(i18n("Mouse wheel + shift action"), hbox);
  mMouseWheelShiftAction = new QComboBox(hbox);
 
@@ -301,7 +303,7 @@ void ScrollingOptions::setMouseWheelShiftAction(CameraAction action)
 // Sound Options
 //////////////////////////////////////////////////////////////////////
 
-SoundOptions::SoundOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
+SoundOptions::SoundOptions(QWidget* parent) : Q3VBox(parent), OptionsWidget()
 {
  (void)new QLabel(i18n("Disable the following unit sounds (please send a bug report if you can think of more descriptive names):"), this);
  QCheckBox* c;
@@ -367,7 +369,7 @@ void SoundOptions::setUnitSoundsDeactivated(BosonConfig* conf)
 // Chat Options
 //////////////////////////////////////////////////////////////////////
 
-ChatOptions::ChatOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
+ChatOptions::ChatOptions(QWidget* parent) : Q3VBox(parent), OptionsWidget()
 {
  mScreenRemoveTime = new ConfigOptionWidgetUInt("ChatScreenRemoveTime", this);
  mScreenRemoveTime->setLabel(i18n("Remove from screen after seconds (0 to remove never)"));
@@ -389,7 +391,7 @@ ChatOptions::~ChatOptions()
 // ToolTip Options
 //////////////////////////////////////////////////////////////////////
 
-ToolTipOptions::ToolTipOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
+ToolTipOptions::ToolTipOptions(QWidget* parent) : Q3VBox(parent), OptionsWidget()
 {
  // you could reduce the update period to very low values to monitor changes
  // that change very often (you may want to use that in combination with pause),
@@ -401,11 +403,11 @@ ToolTipOptions::ToolTipOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 
  // TODO: the tooltip delay!
 
- QHBox* hbox = new QHBox(this);
+ Q3HBox* hbox = new Q3HBox(this);
  (void)new QLabel(i18n("Tooltip kind:"), hbox);
  mToolTipCreator = new QComboBox(hbox);
  BoToolTipCreatorFactory factory;
- QValueList<int> tips = factory.availableTipCreators();
+ Q3ValueList<int> tips = factory.availableTipCreators();
  for (unsigned int i = 0; i < tips.count(); i++) {
 	mToolTipCreator->insertItem(factory.tipCreatorName(tips[i]));
  }
@@ -420,7 +422,7 @@ void ToolTipOptions::apply()
 {
  OptionsWidget::apply();
  BoToolTipCreatorFactory factory;
- QValueList<int> tips = factory.availableTipCreators();
+ Q3ValueList<int> tips = factory.availableTipCreators();
  int index = mToolTipCreator->currentItem();
  if (index >= 0 && index < (int)tips.count()) {
 	boConfig->setIntValue("ToolTipCreator", tips[index]);
@@ -433,7 +435,7 @@ void ToolTipOptions::setDefaults()
 {
  OptionsWidget::setDefaults();
  BoToolTipCreatorFactory factory;
- QValueList<int> tips = factory.availableTipCreators();
+ Q3ValueList<int> tips = factory.availableTipCreators();
  int index = -1;
  for (unsigned int i = 0; i < tips.count(); i++) {
 	if (tips[i] == boConfig->intDefaultValue("ToolTipCreator")) {
@@ -447,7 +449,7 @@ void ToolTipOptions::load()
 {
  OptionsWidget::load();
  BoToolTipCreatorFactory factory;
- QValueList<int> tips = factory.availableTipCreators();
+ Q3ValueList<int> tips = factory.availableTipCreators();
  int index = -1;
  for (unsigned int i = 0; i < tips.count(); i++) {
 	if (tips[i] == boConfig->intValue("ToolTipCreator")) {

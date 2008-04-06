@@ -25,11 +25,11 @@
 #include "player.h"
 #include "../boson/gameengine/bosonmessageids.h"
 
-#include <qcstring.h>
+#include <q3cstring.h>
 #include <qmap.h>
 #include <qfile.h>
 #include <qdom.h>
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 
 #include <kgame/kmessageclient.h>
 #include <kgame/kgamepropertyhandler.h>
@@ -39,7 +39,7 @@
 #define BOSON_SAVEGAME_END_COOKIE 1718
 
 
-Game::Game(Server* s, Q_UINT16 cookie) : KGame(cookie)
+Game::Game(Server* s, quint16 cookie) : KGame(cookie)
 {
   setPolicy(PolicyClean);
 
@@ -52,8 +52,8 @@ Game::Game(Server* s, Q_UINT16 cookie) : KGame(cookie)
   mMapWidth = -1;
   mMapHeight = -1;
 
-  connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, Q_UINT32)),
-      this, SLOT(slotNetworkData(int, const QByteArray&, Q_UINT32, Q_UINT32)));
+  connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, quint32, quint32)),
+      this, SLOT(slotNetworkData(int, const QByteArray&, quint32, quint32)));
   connect(dataHandler(), SIGNAL(signalPropertyChanged(KGamePropertyBase*)),
       this, SLOT(slotPropertyChanged(KGamePropertyBase*)));
 
@@ -113,9 +113,9 @@ bool Game::loadgame(QDataStream& stream, bool network, bool reset)
   boDebug() << k_funcinfo << endl;
 
   // Load magic data
-  Q_UINT8 a, b1, b2, b3;
-  Q_INT32 c;
-  Q_UINT32 v;
+  quint8 a, b1, b2, b3;
+  qint32 c;
+  quint32 v;
   stream >> a >> b1 >> b2 >> b3;
   if((a != 128) || (b1 != 'B' || b2 != 'S' || b3 != 'G'))
   {
@@ -151,15 +151,15 @@ bool Game::loadgame(QDataStream& stream, bool network, bool reset)
   {
     // set gameStatus to Init. Will be set to Run later
     QByteArray b;
-    QDataStream s(b, IO_WriteOnly);
+    QDataStream s(b, QIODevice::WriteOnly);
     KGameMessage::createPropertyHeader(s, KGamePropertyBase::IdGameStatus);
     s << (int)KGame::Init;
-    QDataStream readStream(b, IO_ReadOnly);
+    QDataStream readStream(b, QIODevice::ReadOnly);
     dataHandler()->processMessage(readStream, dataHandler()->id(), false);
   }
 
   // Check end cookie
-  Q_UINT32 endcookie;
+  quint32 endcookie;
   stream >> endcookie;
   if(endcookie != BOSON_SAVEGAME_END_COOKIE)
   {
@@ -176,9 +176,9 @@ bool Game::playerInput(QDataStream& msg, KPlayer* player)
   return true;
 }
 
-void Game::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 receiver, Q_UINT32 sender)
+void Game::slotNetworkData(int msgid, const QByteArray& buffer, quint32 receiver, quint32 sender)
 {
- QDataStream stream(buffer, IO_ReadOnly);
+ QDataStream stream(buffer, QIODevice::ReadOnly);
   switch(msgid)
   {
     case BosonMessageIds::IdNewGame:
@@ -188,7 +188,7 @@ void Game::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 receive
         return;
       }
       mGameInited = true;
-      Q_INT8 gameMode; // game/editor mode
+      qint8 gameMode; // game/editor mode
       stream >> gameMode;
       if(gameMode != 1) {
         boError() << k_funcinfo << "Not in game mode??? mode: " << gameMode << endl;
@@ -269,7 +269,7 @@ bool Game::loadGameData(const QByteArray& data)
     QString filename(it.key());
     filename.replace("/", "_");
     QFile f("map/" + filename);
-    f.open(IO_WriteOnly);
+    f.open(QIODevice::WriteOnly);
     f.writeBlock(it.data());
   }*/
 
@@ -390,13 +390,13 @@ bool Game::loadPlayersData(QMap<QString, QByteArray>& files)
 bool Game::unstreamPlayfieldFiles(QMap<QString, QByteArray>& files, const QByteArray& buffer)
 {
   // Copied from BosonPlayField::unstreamFiles()
-  QDataStream stream(buffer, IO_ReadOnly);
+  QDataStream stream(buffer, QIODevice::ReadOnly);
   // magic cookie
-  QCString magic;
-  QCString magicEnd;
-  Q_UINT32 version;
+  Q3CString magic;
+  Q3CString magicEnd;
+  quint32 version;
   stream >> magic;
-  if(magic != QCString("boplayfield"))
+  if(magic != Q3CString("boplayfield"))
   {
     boError() << k_funcinfo << "magic cookie does not match" << endl;
     return false;
@@ -409,7 +409,7 @@ bool Game::unstreamPlayfieldFiles(QMap<QString, QByteArray>& files, const QByteA
   }
   stream >> files;
   stream >> magicEnd;
-  if(magicEnd != QCString("boplayfield_end"))
+  if(magicEnd != Q3CString("boplayfield_end"))
   {
     boError() << k_funcinfo << "magic end-cookie does not match" << endl;
     return false;

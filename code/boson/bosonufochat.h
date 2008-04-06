@@ -122,8 +122,8 @@ public:
 
 protected slots:
 	void slotUnsetKGame();
-	void slotReceivePrivateMessage(int msgid, const QByteArray& buffer, Q_UINT32 sender, KPlayer* me);
-	void slotReceiveMessage(int msgid, const QByteArray&, Q_UINT32 receiver, Q_UINT32 sender);
+	void slotReceivePrivateMessage(int msgid, const QByteArray& buffer, quint32 sender, KPlayer* me);
+	void slotReceiveMessage(int msgid, const QByteArray&, quint32 receiver, quint32 sender);
 
 	void slotTimeout();
 	void slotSendText(const QString& text);

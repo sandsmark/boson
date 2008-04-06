@@ -75,4 +75,13 @@ using namespace std;
 #define BO_CHECK_NULL_RET0(p) if (!p) { BO_NULL_ERROR(p) return 0; }
 
 
+#include <QString>
+
+inline ostream& operator<<(ostream& stream, const QString& string)
+{
+  QByteArray tmp = string.toLatin1();
+  stream << tmp.constData();
+  return stream;
+}
+
 #endif // DEBUG_H

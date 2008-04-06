@@ -24,7 +24,7 @@
 #include "boson.h"
 #include "bodebug.h"
 
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 #include <qmap.h>
 
 void BosonNetworkTrafficStatistics::addMessage(BosonNetworkTrafficDetails* message)
@@ -77,9 +77,9 @@ public:
 	long long mTotalBosonBytesReceived;
 
 	int mKeepMessageDetailsSeconds;
-	QPtrList<BosonNetworkTrafficDetails> mMessageDetails;
+	Q3PtrList<BosonNetworkTrafficDetails> mMessageDetails;
 
-	QPtrList<BosonNetworkTrafficStatistics> mStatistics;
+	Q3PtrList<BosonNetworkTrafficStatistics> mStatistics;
 	QMap<int, BosonNetworkTrafficStatistics*> mMsgid2Statistics;
 };
 
@@ -112,10 +112,10 @@ void BosonNetworkTraffic::setBoson(Boson* b)
  mBoson = b;
  clear();
  if (mBoson) {
-	connect(mBoson, SIGNAL(signalSendBytes(Q_UINT32, int, int, Q_UINT32, Q_UINT32)),
-			this, SLOT(slotSendBytes(Q_UINT32, int, int, Q_UINT32, Q_UINT32)));
-	connect(mBoson, SIGNAL(signalReceiveBytes(Q_UINT32, int, int, Q_UINT32, Q_UINT32)),
-			this, SLOT(slotReceiveBytes(Q_UINT32, int, int, Q_UINT32, Q_UINT32)));
+	connect(mBoson, SIGNAL(signalSendBytes(quint32, int, int, quint32, quint32)),
+			this, SLOT(slotSendBytes(quint32, int, int, quint32, quint32)));
+	connect(mBoson, SIGNAL(signalReceiveBytes(quint32, int, int, quint32, quint32)),
+			this, SLOT(slotReceiveBytes(quint32, int, int, quint32, quint32)));
  }
 }
 
@@ -144,7 +144,7 @@ void BosonNetworkTraffic::clearStatistics()
  d->mMsgid2Statistics.clear();
 }
 
-void BosonNetworkTraffic::slotSendBytes(Q_UINT32 bytes, int msgid, int usermsgid, Q_UINT32 sender, Q_UINT32 receiver)
+void BosonNetworkTraffic::slotSendBytes(quint32 bytes, int msgid, int usermsgid, quint32 sender, quint32 receiver)
 {
  d->mTotalBytesSent += bytes;
  if (usermsgid < 0) {
@@ -158,7 +158,7 @@ void BosonNetworkTraffic::slotSendBytes(Q_UINT32 bytes, int msgid, int usermsgid
  removeOldMessages();
 }
 
-void BosonNetworkTraffic::slotReceiveBytes(Q_UINT32 bytes, int msgid, int usermsgid, Q_UINT32 sender, Q_UINT32 receiver)
+void BosonNetworkTraffic::slotReceiveBytes(quint32 bytes, int msgid, int usermsgid, quint32 sender, quint32 receiver)
 {
  d->mTotalBytesReceived += bytes;
  if (usermsgid < 0) {
@@ -172,7 +172,7 @@ void BosonNetworkTraffic::slotReceiveBytes(Q_UINT32 bytes, int msgid, int userms
  removeOldMessages();
 }
 
-void BosonNetworkTraffic::setKeepMessageDetailsFor(Q_UINT32 seconds)
+void BosonNetworkTraffic::setKeepMessageDetailsFor(quint32 seconds)
 {
  d->mKeepMessageDetailsSeconds = seconds;
 }
@@ -207,7 +207,7 @@ long long BosonNetworkTraffic::totalBosonBytesSent() const
  return d->mTotalBosonBytesSent;
 }
 
-const QPtrList<BosonNetworkTrafficDetails>& BosonNetworkTraffic::messageDetails() const
+const Q3PtrList<BosonNetworkTrafficDetails>& BosonNetworkTraffic::messageDetails() const
 {
  return d->mMessageDetails;
 }
@@ -237,7 +237,7 @@ void BosonNetworkTraffic::addToStatistics(BosonNetworkTrafficDetails* message)
  stat->addMessage(message);
 }
 
-const QPtrList<BosonNetworkTrafficStatistics>& BosonNetworkTraffic::statistics() const
+const Q3PtrList<BosonNetworkTrafficStatistics>& BosonNetworkTraffic::statistics() const
 {
  return d->mStatistics;
 }

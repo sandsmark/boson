@@ -23,6 +23,8 @@
 #include <kgame/kmessageserver.h>
 
 #include <qdatetime.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 
 class WebInterface;
@@ -33,17 +35,17 @@ class Server : public KMessageServer
 {
   Q_OBJECT
   public:
-    Server(Q_UINT16 cookie, QObject* parent = 0);
+    Server(quint16 cookie, QObject* parent = 0);
     ~Server();
 
-    bool init(Q_UINT16 port, Q_UINT16 webport);
+    bool init(quint16 port, quint16 webport);
 
     void setMaxClients(int max);
 
 
     virtual void broadcastMessage(const QByteArray& msg);
-    virtual void sendMessage(Q_UINT32 id, const QByteArray& msg);
-    virtual void sendMessage(const QValueList<Q_UINT32>& ids, const QByteArray& msg);
+    virtual void sendMessage(quint32 id, const QByteArray& msg);
+    virtual void sendMessage(const Q3ValueList<quint32>& ids, const QByteArray& msg);
 
 
     unsigned int inTraffic()  { return mInTraffic; }
@@ -52,7 +54,7 @@ class Server : public KMessageServer
     const QDateTime& timeServerStarted()  { return mTimeServerStarted; }
 
     Game* game()  { return mGame; }
-    Q_UINT32 gameClientId()  { return mGameClientId; }
+    quint32 gameClientId()  { return mGameClientId; }
 
 
   public slots:
@@ -76,18 +78,18 @@ class Server : public KMessageServer
   protected slots:
     void slotClientConnected(KMessageIO* client);
     void slotConnectionLost(KMessageIO* client);
-    void slotMessageReceived(const QByteArray& data, Q_UINT32 clientId, bool& unknown);
+    void slotMessageReceived(const QByteArray& data, quint32 clientId, bool& unknown);
 
     virtual void getReceivedMessage(const QByteArray& msg);
 
   private:
     //KMessageServer* mServer;
-    Q_UINT16 mCookie;
-    Q_UINT16 mPort;
+    quint16 mCookie;
+    quint16 mPort;
 
     WebInterface* mWeb;
     Game* mGame;
-    Q_UINT32 mGameClientId;
+    quint32 mGameClientId;
 
     unsigned int mInTraffic;
     unsigned int mOutTraffic;
