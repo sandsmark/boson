@@ -224,7 +224,7 @@ bool BoCondition::loadFromXML(const QDomElement& root)
  d->mEvents.clear();
  d->mEventsLeft.clear();
  QDomNodeList matchings = events.elementsByTagName("EventMatching");
- for (unsigned int i = 0; i < matchings.count(); i++) {
+ for (int i = 0; i < matchings.count(); i++) {
 	QDomElement m = matchings.item(i).toElement();
 	if (m.isNull()) {
 		boError(360) << k_funcinfo << "not an element" << endl;
@@ -253,7 +253,7 @@ bool BoCondition::loadFromXML(const QDomElement& root)
 	return false;
  }
  QDomNodeList statuses = statusConditions.elementsByTagName("StatusCondition");
- for (unsigned int i = 0; i < statuses.count(); i++) {
+ for (int i = 0; i < statuses.count(); i++) {
 	QDomElement e = statuses.item(i).toElement();
 	BoStatusCondition* stat = new BoStatusCondition();
 	if (!stat->load(e)) {

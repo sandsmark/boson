@@ -202,9 +202,9 @@ void BosonShot::advanceMoveCheck()
   setVelocity(velocityX, velocityY, zVelocity());
 }
 
-const QColor* BosonShot::teamColor() const
+QColor BosonShot::teamColor() const
 {
-  return owner() ? &owner()->teamColor() : 0;
+  return owner() ? owner()->teamColor() : QColor();
 }
 
 bool BosonShot::saveAsXML(QDomElement& root)

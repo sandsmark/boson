@@ -96,7 +96,7 @@ bool BosonPlayFieldConverter::convertFilesToCurrentFormat(QMap<QString, QByteArr
 	handled = true;
  }
  for (QMap<int, BoSaveGameConverter*>::iterator it = converters.begin(); it != converters.end(); ++it) {
-	delete it.data();
+	delete it.value();
  }
  converters.clear();
 

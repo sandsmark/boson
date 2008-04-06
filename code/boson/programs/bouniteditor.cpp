@@ -304,16 +304,23 @@ bool EditorUnitProperties::saveFacilityProperties(KSimpleConfig* conf)
  return true;
 }
 
-bool EditorUnitProperties::saveAllPluginProperties(KSimpleConfig* conf)
+bool EditorUnitProperties::saveAllPluginProperties(KConfig* conf)
 {
  int weaponcounter = 0;
  Q3PtrListIterator<PluginProperties> it(d->mPlugins);
  while (it.current()) {
 	if (it.current()->pluginType() == PluginProperties::Weapon)
 	{
-		conf->setGroup(QString("Weapon_%1").arg(weaponcounter++));
+		BosonWeaponProperties* w = (BosonWeaponProperties*)it.current();
+		QString groupName = QString("Weapon_%1").arg(weaponcounter++);
+		if (!w->savePlugin(conf, groupName)) {
+			return false;
+		}
+	} else {
+		if (!it.current()->savePlugin(conf)) {
+			return false;
+		}
 	}
-	it.current()->savePlugin(conf);
 	++it;
  }
  conf->setGroup("Boson Unit");

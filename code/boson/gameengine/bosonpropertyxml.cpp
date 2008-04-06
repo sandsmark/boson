@@ -24,12 +24,13 @@
 #include "bodebug.h"
 #include "../bomath.h"
 #include "../bo3dtools.h"
+#include "bosonpropertylist.h"
 
 #include <kgame/kgameproperty.h>
-#include <kgame/kgamepropertylist.h>
 #include <kgame/kgamepropertyarray.h>
 #include <kgame/kgamepropertyhandler.h>
 
+#include <QStringList>
 #include <qdom.h>
 #include <q3intdict.h>
 #include <q3pointarray.h>
@@ -48,14 +49,10 @@ QString BosonPropertyXML::propertyValue(KGamePropertyBase* prop)
 {
  QString value;
  const type_info* t = prop->typeinfo();
- if (*t == typeid(int)) {
-	value = QString::number(((KGameProperty<int>*)prop)->value());
- } else if (*t == typeid(unsigned int)) {
-	value = QString::number(((KGameProperty<unsigned int>*)prop)->value());
- } else if (*t == typeid(long int)) {
-	value = QString::number(((KGameProperty<long int>*)prop)->value());
- } else if (*t == typeid(unsigned long int)) {
-	value = QString::number(((KGameProperty<unsigned long int>*)prop)->value());
+ if (*t == typeid(qint32)) {
+	value = QString::number(((KGameProperty<qint32>*)prop)->value());
+ } else if (*t == typeid(quint32)) {
+	value = QString::number(((KGameProperty<quint32>*)prop)->value());
  } else if (*t == typeid(float)) {
 	value = QString::number(((KGameProperty<float>*)prop)->value());
  } else if (*t == typeid(bofixed)) {
@@ -89,14 +86,10 @@ void BosonPropertyXML::propertySetValue(KGamePropertyBase* prop, const QString& 
  // it is an invalid string.
  bool ok = true;
 
- if (*t == typeid(int)) {
-	((KGameProperty<int>*)prop)->setValue(value.toInt(&ok));
- } else if (*t == typeid(unsigned int)) {
-	((KGameProperty<unsigned int>*)prop)->setValue(value.toUInt(&ok));
- } else if (*t == typeid(long int)) {
-	((KGameProperty<long int>*)prop)->setValue(value.toLong(&ok));
- } else if (*t == typeid(unsigned long int)) {
-	((KGameProperty<unsigned long int>*)prop)->setValue(value.toULong(&ok));
+ if (*t == typeid(qint32)) {
+	((KGameProperty<qint32>*)prop)->setValue(value.toInt(&ok));
+ } else if (*t == typeid(quint32)) {
+	((KGameProperty<quint32>*)prop)->setValue(value.toUInt(&ok));
  } else if (*t == typeid(float)) {
 	((KGameProperty<float>*)prop)->setValue(value.toFloat(&ok));
  } else if (*t == typeid(bofixed)) {
@@ -143,19 +136,19 @@ bool BosonPropertyXML::saveAsXML(QDomElement& root, const KGamePropertyHandler* 
 {
  if (!dataHandler) {
 	BO_NULL_ERROR(dataHandler);
-	return QString::null;
+	return false;
  }
  QDomDocument doc = root.ownerDocument();
- Q3IntDict<KGamePropertyBase>& dict = dataHandler->dict();
- Q3IntDictIterator<KGamePropertyBase> it(dict);
- for (; it.current(); ++it) {
-	QString value = propertyValue(it.current());
+ QMultiHash<int, KGamePropertyBase*> dict = dataHandler->dict();
+ QMultiHash<int, KGamePropertyBase*>::iterator it = dict.begin();
+ for (; it != dict.end(); ++it) {
+	QString value = propertyValue(it.value());
 	if (value.isNull()) {
-		boWarning() << k_funcinfo << "invalid null value for " << it.current()->id() << endl;
+		boWarning() << k_funcinfo << "invalid null value for " << it.value()->id() << endl;
 		continue;
 	}
 	QDomElement element = doc.createElement(QString::fromLatin1("KGameProperty"));
-	element.setAttribute(QString::fromLatin1("Id"), it.current()->id());
+	element.setAttribute(QString::fromLatin1("Id"), it.value()->id());
 	element.appendChild(doc.createTextNode(value));
 	root.appendChild(element);
  }
@@ -170,7 +163,7 @@ bool BosonPropertyXML::loadFromXML(const QDomElement& root, KGamePropertyHandler
  }
  dataHandler->blockSignals(true);
  QDomNodeList list = root.elementsByTagName(QString::fromLatin1("KGameProperty"));
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	QDomElement element = list.item(i).toElement();
 	if (!element.isElement()) {
 		boError() << k_funcinfo << "item " << i << " is not an element" << endl;
@@ -302,44 +295,44 @@ void BosonCustomPropertyXML::slotRequestValue(KGamePropertyBase* prop, QString& 
 	// typeinfo() wasn't reimplemented. This is the case for all
 	// non-KGameProperty<foobar> objects.
 	// we need to do our own type checking here.
-	if (typeid(*prop) == typeid(KGamePropertyList<QPoint>)) {
-		KGamePropertyList<QPoint>* list = (KGamePropertyList<QPoint>*)prop;
+	if (typeid(*prop) == typeid(BosonPropertyList<QPoint>)) {
+		BosonPropertyList<QPoint>* list = (BosonPropertyList<QPoint>*)prop;
 		// inefficient but easy to code and read.
 		// first we stream the length of the array and then every point.
 		// each separated by a space.
 		Q3TextStream s(&value, QIODevice::WriteOnly);
 		s << QString::number(list->count());
-		KGamePropertyList<QPoint>::Iterator it;
+		BosonPropertyList<QPoint>::iterator it;
 		for (it = list->begin(); it != list->end(); ++it) {
 			s << ' ';
 			s << *it;
 		}
-	} else if (typeid(*prop) == typeid(KGamePropertyList<BoVector2Fixed>)) {
-		KGamePropertyList<BoVector2Fixed>* list = (KGamePropertyList<BoVector2Fixed>*)prop;
+	} else if (typeid(*prop) == typeid(BosonPropertyList<BoVector2Fixed>)) {
+		BosonPropertyList<BoVector2Fixed>* list = (BosonPropertyList<BoVector2Fixed>*)prop;
 		// inefficient but easy to code and read.
 		// first we stream the length of the array and then every vector.
 		// each separated by a space.
 		Q3TextStream s(&value, QIODevice::WriteOnly);
 		s << QString::number(list->count());
-		KGamePropertyList<BoVector2Fixed>::Iterator it;
+		BosonPropertyList<BoVector2Fixed>::iterator it;
 		for (it = list->begin(); it != list->end(); ++it) {
 			s << ' ';
 			s << *it;
 		}
-	} else if (typeid(*prop) == typeid(KGamePropertyList<qint32>)) {
-		KGamePropertyList<qint32>* list = (KGamePropertyList<qint32>*)prop;
+	} else if (typeid(*prop) == typeid(BosonPropertyList<qint32>)) {
+		BosonPropertyList<qint32>* list = (BosonPropertyList<qint32>*)prop;
 		Q3TextStream s(&value, QIODevice::WriteOnly);
 		s << QString::number(list->count());
-		KGamePropertyList<qint32>::Iterator it;
+		BosonPropertyList<qint32>::iterator it;
 		for (it = list->begin(); it != list->end(); ++it) {
 			s << ' ';
 			s << *it;
 		}
-	} else if (typeid(*prop) == typeid(KGamePropertyList<quint32>)) {
-		KGamePropertyList<quint32>* list = (KGamePropertyList<quint32>*)prop;
+	} else if (typeid(*prop) == typeid(BosonPropertyList<quint32>)) {
+		BosonPropertyList<quint32>* list = (BosonPropertyList<quint32>*)prop;
 		Q3TextStream s(&value, QIODevice::WriteOnly);
 		s << QString::number(list->count());
-		KGamePropertyList<quint32>::Iterator it;
+		BosonPropertyList<quint32>::iterator it;
 		for (it = list->begin(); it != list->end(); ++it) {
 			s << ' ';
 			s << *it;
@@ -347,14 +340,14 @@ void BosonCustomPropertyXML::slotRequestValue(KGamePropertyBase* prop, QString& 
 	} else if (typeid(*prop) == typeid(KGamePropertyArray<qint32>)) {
 		KGamePropertyArray<qint32>* array = (KGamePropertyArray<qint32>*)prop;
 		Q3TextStream s(&value, QIODevice::WriteOnly);
-		for (unsigned int i = 0; i < array->size(); i++) {
+		for (int i = 0; i < array->size(); i++) {
 			s << (*array)[i];
 			s << ' ';
 		}
 	} else if (typeid(*prop) == typeid(KGamePropertyArray<quint32>)) {
 		KGamePropertyArray<quint32>* array = (KGamePropertyArray<quint32>*)prop;
 		Q3TextStream s(&value, QIODevice::WriteOnly);
-		for (unsigned int i = 0; i < array->size(); i++) {
+		for (int i = 0; i < array->size(); i++) {
 			s << (*array)[i];
 			s << ' ';
 		}
@@ -374,7 +367,7 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 	s >> point;
 	p->setValue(point);
  } else if (*t == typeid(BoVector2Fixed)) {
-	QStringList l = QStringList::split(',', value);
+	QStringList l = value.split(',');
 	if (l.count() != 2) {
 		boError() << k_funcinfo << "invalid number of elements in vector. expected 2, found " << l.count() << endl;
 		return;
@@ -390,7 +383,7 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 	KGameProperty<BoVector2Fixed>* p = (KGameProperty<BoVector2Fixed>*)prop;
 	p->setValue(BoVector2Fixed(x, y));
  } else if (*t == typeid(BoVector3Fixed)) {
-	QStringList l = QStringList::split(',', value);
+	QStringList l = value.split(',');
 	if (l.count() != 3) {
 		boError() << k_funcinfo << "invalid number of elements in vector. expected 3, found " << l.count() << endl;
 		return;
@@ -408,7 +401,7 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 	KGameProperty<BoVector3Fixed>* p = (KGameProperty<BoVector3Fixed>*)prop;
 	p->setValue(BoVector3Fixed(x, y, z));
  } else if (*t == typeid(BoVector4Fixed)) {
-	QStringList l = QStringList::split(',', value);
+	QStringList l = value.split(',');
 	if (l.count() != 4) {
 		boError() << k_funcinfo << "invalid number of elements in vector. expected 4, found " << l.count() << endl;
 		return;
@@ -428,7 +421,7 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 	KGameProperty<BoVector4Fixed>* p = (KGameProperty<BoVector4Fixed>*)prop;
 	p->setValue(BoVector4Fixed(x, y, z, w));
  } else if (*t == typeid(BoVector2Float)) {
-	QStringList l = QStringList::split(',', value);
+	QStringList l = value.split(',');
 	if (l.count() != 2) {
 		boError() << k_funcinfo << "invalid number of elements in vector. expected 2, found " << l.count() << endl;
 		return;
@@ -444,7 +437,7 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 	KGameProperty<BoVector2Float>* p = (KGameProperty<BoVector2Float>*)prop;
 	p->setValue(BoVector2Float(x, y));
  } else if (*t == typeid(BoVector3Float)) {
-	QStringList l = QStringList::split(',', value);
+	QStringList l = value.split(',');
 	if (l.count() != 3) {
 		boError() << k_funcinfo << "invalid number of elements in vector. expected 3, found " << l.count() << endl;
 		return;
@@ -462,7 +455,7 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 	KGameProperty<BoVector3Float>* p = (KGameProperty<BoVector3Float>*)prop;
 	p->setValue(BoVector3Float(x, y, z));
  } else if (*t == typeid(BoVector4Float)) {
-	QStringList l = QStringList::split(',', value);
+	QStringList l = value.split(',');
 	if (l.count() != 4) {
 		boError() << k_funcinfo << "invalid number of elements in vector. expected 4, found " << l.count() << endl;
 		return;
@@ -482,8 +475,8 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 	KGameProperty<BoVector4Float>* p = (KGameProperty<BoVector4Float>*)prop;
 	p->setValue(BoVector4Float(x, y, z, w));
  } else if (*t == typeid(KGamePropertyBase*)) {
-	if (typeid(*prop) == typeid(KGamePropertyList<QPoint>)) {
-		KGamePropertyList<QPoint>* list = (KGamePropertyList<QPoint>*)prop;
+	if (typeid(*prop) == typeid(BosonPropertyList<QPoint>)) {
+		BosonPropertyList<QPoint>* list = (BosonPropertyList<QPoint>*)prop;
 		list->clear();
 		unsigned int count = 0;
 		QChar c;
@@ -495,8 +488,8 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 			s >> point;
 			list->append(point);
 		}
-	} else if (typeid(*prop) == typeid(KGamePropertyList<BoVector2Fixed>)) {
-		KGamePropertyList<BoVector2Fixed>* list = (KGamePropertyList<BoVector2Fixed>*)prop;
+	} else if (typeid(*prop) == typeid(BosonPropertyList<BoVector2Fixed>)) {
+		BosonPropertyList<BoVector2Fixed>* list = (BosonPropertyList<BoVector2Fixed>*)prop;
 		list->clear();
 		unsigned int count = 0;
 		QChar c;
@@ -508,8 +501,8 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 			s >> point;
 			list->append(point);
 		}
-	} else if (typeid(*prop) == typeid(KGamePropertyList<quint32>)) {
-		KGamePropertyList<quint32>* list = (KGamePropertyList<quint32>*)prop;
+	} else if (typeid(*prop) == typeid(BosonPropertyList<quint32>)) {
+		BosonPropertyList<quint32>* list = (BosonPropertyList<quint32>*)prop;
 		list->clear();
 		unsigned int count = 0;
 		QChar c;
@@ -521,8 +514,8 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 			s >> v;
 			list->append(v);
 		}
-	} else if (typeid(*prop) == typeid(KGamePropertyList<qint32>)) {
-		KGamePropertyList<qint32>* list = (KGamePropertyList<qint32>*)prop;
+	} else if (typeid(*prop) == typeid(BosonPropertyList<qint32>)) {
+		BosonPropertyList<qint32>* list = (BosonPropertyList<qint32>*)prop;
 		list->clear();
 		unsigned int count = 0;
 		QChar c;
@@ -539,7 +532,7 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 		QChar c;
 		qint32 v;
 		Q3TextStream s((QString*)&value, QIODevice::ReadOnly);
-		for (unsigned int i = 0; i < array->size(); i++) {
+		for (int i = 0; i < array->size(); i++) {
 			s >> v;
 			s >> c; // space
 			(*array)[i] = v;
@@ -549,7 +542,7 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 		QChar c;
 		quint32 v;
 		Q3TextStream s((QString*)&value, QIODevice::ReadOnly);
-		for (unsigned int i = 0; i < array->size(); i++) {
+		for (int i = 0; i < array->size(); i++) {
 			s >> v;
 			s >> c; // space
 			(*array)[i] = v;
@@ -561,7 +554,7 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 QString BosonPropertyXML::propertyValue(const QDomElement& root, unsigned long int id)
 {
  QDomNodeList list = root.elementsByTagName(QString::fromLatin1("KGameProperty"));
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	QDomElement element = list.item(i).toElement();
 	if (!element.isNull()) {
 		boError() << k_funcinfo << "item " << i << " is not an element" << endl;
@@ -571,14 +564,14 @@ QString BosonPropertyXML::propertyValue(const QDomElement& root, unsigned long i
 		return element.text();
 	}
  }
- return QString::null;
+ return QString();
 }
 
 bool BosonPropertyXML::removeProperty(QDomElement& root, unsigned long int id)
 {
  bool ret = false;
  QDomNodeList list = root.elementsByTagName(QString::fromLatin1("KGameProperty"));
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	QDomElement element = list.item(i).toElement();
 	if (element.isNull()) {
 		boError() << k_funcinfo << "item " << i << " is not an element" << endl;

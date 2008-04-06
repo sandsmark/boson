@@ -37,6 +37,11 @@
 //Added by qt3to4:
 #include <Q3TextStream>
 
+
+#define DISABLE_BOEVENTLOOP 1
+
+
+
 BoMessage::BoMessage(QByteArray& _message, int _msgid, quint32 _receiver, quint32 _sender, quint32 _clientId, unsigned int _advanceCallsCount)
 		: byteArray(_message),
 		msgid(_msgid),
@@ -123,7 +128,7 @@ QString BoMessage::debug(KGame* game)
 QString BoMessage::debugMore(KGame* game)
 {
  QString m;
- QDataStream s(byteArray, QIODevice::ReadOnly);
+ QDataStream s(byteArray);
  if (msgid == KGameMessage::IdGameProperty) {
 	int propId;
 	KGameMessage::extractPropertyHeader(s, propId);
@@ -134,7 +139,7 @@ QString BoMessage::debugMore(KGame* game)
 		// now
 	} else {
 		KGamePropertyBase* p;
-		p = game->dataHandler()->dict().find(propId);
+		p = game->dataHandler()->dict().find(propId).value();
 		if (!p) {
 			m = QString(" property %1 can't be found").arg(propId);
 		} else {
@@ -212,7 +217,9 @@ bool BoMessageDelayer::processMessage(BoMessage* m)
 				// not, usually.
 				boWarning(300) << k_funcinfo << "advance call " << mBoson->advanceCallsCount() << ": now " << mAdvanceMessageWaiting << " advance messages delayed" << endl;
 			}
+#if !DISABLE_BOEVENTLOOP
 			((BoEventLoop*)qApp->eventLoop())->setAdvanceMessagesWaiting(mAdvanceMessageWaiting);
+#endif
 			break;
 		default:
 			break;
@@ -238,13 +245,15 @@ void BoMessageDelayer::processDelayed()
 	boWarning() << k_funcinfo << "no message here" << endl;
 	return;
  }
- QDataStream s(m->byteArray, QIODevice::ReadOnly);
+ QDataStream s(m->byteArray);
  mDelayedWaiting = false;
  switch (m->msgid - KGameMessage::IdUser) {
 	case BosonMessageIds::AdvanceN:
 //		boWarning(300) << k_funcinfo << "delayed advance msg will be sent!" << endl;
 		mAdvanceMessageWaiting--;
+#if !DISABLE_BOEVENTLOOP
 		((BoEventLoop*)qApp->eventLoop())->setAdvanceMessagesWaiting(mAdvanceMessageWaiting);
+#endif
 		break;
 	default:
 		break;

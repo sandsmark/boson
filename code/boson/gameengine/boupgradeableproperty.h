@@ -50,7 +50,7 @@ public:
 	BoBaseValueCollection();
 	~BoBaseValueCollection();
 
-#warning TODO: rename *LongBaseValue -> *IntBaseValue
+//#warning TODO: rename *LongBaseValue -> *IntBaseValue
 	bool insertULongBaseValue(quint32 v, const QString& name, const QString& type = "MaxValue", bool replace = true);
 	bool insertLongBaseValue(qint32 v, const QString& name, const QString& type = "MaxValue", bool replace = true);
 	bool insertBoFixedBaseValue(bofixed v, const QString& name, const QString& type = "MaxValue", bool replace = true);

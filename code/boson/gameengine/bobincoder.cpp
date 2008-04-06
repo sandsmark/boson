@@ -131,12 +131,12 @@ QString BoBinCoder::Vector2MYBASE64(const char*array,const size_t len)
 // you want
 void BoBinCoder::MYBASE642BinVector(const QString &s,size_t size,char *buffer)
 {
-  size_t i;
   size_t pos=0;
 
-  for(i=0;i<s.length();i++)
+  QByteArray b = s.toUtf8();
+  for(int i=0;i<b.length();i++)
     {
-      unsigned int value=recode64(s[i]);
+      unsigned int value=recode64(b[i]);
       for(size_t bitcount=0;bitcount<6 && pos<size ;bitcount++)
 	{
 	  unsigned actValue=value>>bitcount;
@@ -156,16 +156,18 @@ void BoBinCoder::MYBASE642Vector(const QString &s,size_t size,char *buffer)
   size_t pos=0;
   size_t inputpos=0;
 
+  QByteArray b = s.toUtf8();
+
   while(pos<size)
     {
       // if there are too few bits left and there is something left in the
       // input-queue
-      while(actBitsLen<8 && inputpos<s.length())
+      while(actBitsLen<8 && inputpos<(size_t)b.length())
 	{
 	  // get next input byte (6 bits)
-	  assert(inputpos<s.length());
+	  assert(inputpos<(size_t)b.length());
 
-	  size_t val=recode64(s[inputpos++]);
+	  size_t val=recode64(b[inputpos++]);
 	  val&=0x3F;
 	  val<<=actBitsLen;
 	  actBitsLen+=6;
@@ -181,7 +183,7 @@ void BoBinCoder::MYBASE642Vector(const QString &s,size_t size,char *buffer)
 
 QString BoBinCoder::addNewLines(QString a)
 {
-  for(size_t i=64;i<a.length();i+=65)
+  for(int i=64;i<a.length();i+=65)
     {
       a.insert(i,"\n");
     }
@@ -201,7 +203,7 @@ QString BoBinCoder::toCoded(const QBitArray &bit)
   size_t len=bit.size();
   a=Vector2MYBASE64((const char*)&len,sizeof(size_t));
   char* buffer = new char[bit.size()];
-  for (unsigned int i = 0; i < bit.size(); i++)
+  for (int i = 0; i < bit.size(); i++)
   {
 	if (bit.testBit(i))
 	{

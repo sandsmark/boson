@@ -95,7 +95,7 @@ bool BosonPlayFieldPreviewData::load()
 
 
 
-BosonPlayField::BosonPlayField(QObject* parent) : QObject(parent, "BosonPlayField")
+BosonPlayField::BosonPlayField(QObject* parent) : QObject(parent)
 {
  mMap = 0;
  mDescription = new BPFDescription();
@@ -353,9 +353,9 @@ QStringList BosonPlayField::findAvailableCampaigns()
  QStringList files = BosonData::availableFiles(QString::fromLatin1("maps/*/*.bpf"));
  QStringList::Iterator it = files.begin();
  for (; it != files.end(); ++it) {
-	int slash = (*it).findRev('/');
+	int slash = (*it).lastIndexOf('/');
 	QString path = (*it).left(slash);
-	slash = path.findRev('/');
+	slash = path.lastIndexOf('/');
 
 	// WARNING: here we assume one directory level only! it must be
 	// maps/*/*.bpf, _NOT_ maps/*/*/*.bpf or similar.
@@ -404,7 +404,7 @@ bool BosonPlayField::savePlayFieldToFiles(QMap<QString, QByteArray>& files)
  }
 
  // TODO: _all_ descriptions, not just default one
- QByteArray descriptionXML = saveDescriptionToFile().utf8();
+ QByteArray descriptionXML = saveDescriptionToFile().toUtf8();
  if (descriptionXML.size() == 0) {
 	boError() << k_funcinfo << "saving description failed" << endl;
 	return false;
@@ -418,7 +418,7 @@ bool BosonPlayField::savePlayFieldToFiles(QMap<QString, QByteArray>& files)
 
 
  for (QMap<QString,QByteArray>::iterator it = mapFiles.begin(); it != mapFiles.end(); ++it) {
-	files.insert(it.key(), it.data());
+	files.insert(it.key(), it.value());
  }
  files.insert("mappreview/map.png", mapPreviewPNG);
  files.insert("C/description.xml", descriptionXML);

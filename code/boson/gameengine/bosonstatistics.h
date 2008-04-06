@@ -19,6 +19,8 @@
 #ifndef BOSONSTATISTICS_H
 #define BOSONSTATISTICS_H
 
+#include <qglobal.h>
+
 class UnitBase;
 class ProductionPlugin;
 class Player;

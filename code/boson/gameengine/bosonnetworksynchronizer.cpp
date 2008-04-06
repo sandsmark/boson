@@ -99,7 +99,7 @@ public:
 		mLog = log;
 		KMD5 md5(mLog);
 		QByteArray buffer;
-		QDataStream stream(buffer, QIODevice::WriteOnly);
+		QDataStream stream(&buffer, QIODevice::WriteOnly);
 		stream << (quint32)syncId;
 		stream << md5.hexDigest();
 		game->sendMessage(buffer, BosonMessageIds::IdNetworkSyncCheck);
@@ -237,12 +237,12 @@ public:
 	virtual QByteArray makeLog()
 	{
 		QByteArray b;
-		QDataStream s(b, QIODevice::WriteOnly);
+		QDataStream s(&b, QIODevice::WriteOnly);
 
 		// note: this acutally _changes_ the random object.
 		// however since we do this at the same time on all clients, it
 		// is valid.
-		s << (Q_ULONG)mGame->random()->getLong(100000);
+		s << (quint32)mGame->random()->getLong(100000);
 		s << mGame->random()->getDouble();
 		return b;
 	}
@@ -251,10 +251,10 @@ protected:
 	virtual QString findLogError(const QByteArray& b1, const QByteArray& b2) const
 	{
 		boDebug(370) << k_funcinfo << endl;
-		QDataStream s1(b1, QIODevice::ReadOnly);
-		QDataStream s2(b2, QIODevice::ReadOnly);
+		QDataStream s1(b1);
+		QDataStream s2(b2);
 
-		DECLARE_UNSTREAM(Q_ULONG, randomint);
+		DECLARE_UNSTREAM(quint32, randomint);
 		DECLARE_UNSTREAM(double, randomdouble);
 
 		if (randomint != randomint2) {
@@ -285,17 +285,14 @@ public:
 	virtual QByteArray makeLog()
 	{
 		QByteArray playersBuffer;
-		QDataStream playersStream(playersBuffer, QIODevice::WriteOnly);
-		Q3PtrListIterator<Player> playerIt(mGame->allPlayerList());
+		QDataStream playersStream(&playersBuffer, QIODevice::WriteOnly);
 		playersStream << (quint32)mGame->allPlayerList().count();
-		while (playerIt.current()) {
-			Player* p = (Player*)playerIt.current();
+		foreach (Player* p, mGame->allPlayerList()) {
 			playersStream << (quint32)p->unfoggedCells();
 			playersStream << (quint32)p->exploredCells();
 			playersStream << (quint32)p->minerals();
 			playersStream << (quint32)p->oil();
 			playersStream << (quint32)p->ammunition("Generic");
-			++playerIt;
 		}
 		return playersBuffer;
 	}
@@ -304,8 +301,8 @@ protected:
 	virtual QString findLogError(const QByteArray& b1, const QByteArray& b2) const
 	{
 		boDebug(370) << k_funcinfo << endl;
-		QDataStream s1(b1, QIODevice::ReadOnly);
-		QDataStream s2(b2, QIODevice::ReadOnly);
+		QDataStream s1(b1);
+		QDataStream s2(b2);
 		DECLARE_UNSTREAM(quint32, count);
 		if (count != count2) {
 			return i18n("Have players: %1 should be: %2").arg(count2).arg(count);
@@ -354,7 +351,7 @@ private:
 QByteArray BoPathSyncCheckMessage::makeLog()
 {
  QByteArray b;
- QDataStream stream(b, QIODevice::WriteOnly);
+ QDataStream stream(&b, QIODevice::WriteOnly);
 
  // Stream dirty cell statuses
  stream << (quint32)mPathFinder->mCellStatusDirtyCount;
@@ -393,8 +390,8 @@ QByteArray BoPathSyncCheckMessage::makeLog()
 QString BoPathSyncCheckMessage::findLogError(const QByteArray& b1, const QByteArray& b2) const
 {
  boDebug(370) << k_funcinfo << endl;
- QDataStream s1(b1, QIODevice::ReadOnly);
- QDataStream s2(b2, QIODevice::ReadOnly);
+ QDataStream s1(b1);
+ QDataStream s2(b2);
  QString error;
 
  DECLARE_UNSTREAM_COMPARE(quint32, cellStatusDirtyCount);
@@ -481,8 +478,8 @@ protected:
 	virtual QString findLogError(const QByteArray& b1, const QByteArray& b2) const
 	{
 		boDebug(370) << k_funcinfo << endl;
-		QDataStream s1(b1, QIODevice::ReadOnly);
-		QDataStream s2(b2, QIODevice::ReadOnly);
+		QDataStream s1(b1);
+		QDataStream s2(b2);
 		DECLARE_UNSTREAM(quint32, items);
 		if (items != items2) {
 			return i18n("Different item counts in canvas log: found %1, expected %2").arg(items2).arg(items);
@@ -739,7 +736,7 @@ QByteArray BoCanvasSyncCheckMessage::makeLog(int start, int count)
  }
 
  QByteArray buffer;
- QDataStream stream(buffer, QIODevice::WriteOnly);
+ QDataStream stream(&buffer, QIODevice::WriteOnly);
  stream << (quint32)list.count();
  unsigned int unitsCount = 0;
  for (it = list.begin(); it != list.end(); ++it) {
@@ -826,7 +823,7 @@ QByteArray BoLongSyncCheckMessage::makeLog()
  streams.insert("MessagesStream", messagesBuffer);
 
  QByteArray b;
- QDataStream logStream(b, QIODevice::WriteOnly);
+ QDataStream logStream(&b, QIODevice::WriteOnly);
  logStream << streams;
 
  return b;
@@ -834,8 +831,8 @@ QByteArray BoLongSyncCheckMessage::makeLog()
 
 QString BoLongSyncCheckMessage::findLogError(const QByteArray& b1, const QByteArray& b2) const
 {
- QDataStream s1(b1, QIODevice::ReadOnly);
- QDataStream s2(b2, QIODevice::ReadOnly);
+ QDataStream s1(b1);
+ QDataStream s2(b2);
  QMap<QString, QByteArray> streams, streams2;
  s1 >> streams;
  s2 >> streams2;
@@ -1263,7 +1260,7 @@ bool BosonNetworkSyncChecker::receiveNetworkSyncCheckAck(QDataStream& stream, qu
 void BosonNetworkSyncChecker::sendAck(const Q3CString& md5, bool verify, unsigned int syncId, const QByteArray& origLog)
 {
  QByteArray buffer;
- QDataStream stream(buffer, QIODevice::WriteOnly);
+ QDataStream stream(&buffer, QIODevice::WriteOnly);
  stream << (quint32)syncId;
  stream << md5;
  stream << (qint8)verify;
@@ -1357,9 +1354,7 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
 		boError(370) << k_funcinfo << "no Players tag found" << endl;
 		return false;
 	}
-	Q3PtrList<Player> allPlayerList = mGame->allPlayerList();
-	for (KPlayer* kplayer = allPlayerList.first(); kplayer; kplayer = allPlayerList.next()) {
-		Player* player = (Player*)kplayer;
+	foreach (Player* player, mGame->allPlayerList()) {
 		QDomElement playerElement;
 		for (QDomNode n = players.firstChild(); !n.isNull() && playerElement.isNull(); n = n.nextSibling()) {
 			QDomElement e = n.toElement();
@@ -1431,8 +1426,7 @@ QByteArray BosonNetworkSyncer::createSyncMessage()
  doc.appendChild(root);
  {
 	QDomElement players = doc.createElement("Players");
-	Q3PtrList<Player> list = mGame->allPlayerList();
-	for (Player* p = list.first(); p; p = list.next()) {
+	foreach (Player* p, mGame->allPlayerList()) {
 		QDomElement player = doc.createElement("Player");
 		if (!p->saveAsXML(player)) {
 			boError(370) << k_funcinfo << "unable to save player " << p->bosonId() << endl;
@@ -1454,7 +1448,7 @@ QByteArray BosonNetworkSyncer::createSyncMessage()
  boWarning(370) << k_funcinfo << "TODO: save the Boson object to the xml document" << endl;
 
 
- QDataStream stream(b, QIODevice::WriteOnly);
+ QDataStream stream(&b, QIODevice::WriteOnly);
  stream << doc.toString();
 
  return b;

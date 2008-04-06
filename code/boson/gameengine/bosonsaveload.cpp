@@ -41,8 +41,6 @@
 #include <q3ptrqueue.h>
 #include <q3valuelist.h>
 #include <qregexp.h>
-//Added by qt3to4:
-#include <Q3CString>
 #include <Q3PtrList>
 
 class BosonSaveLoadPrivate
@@ -60,7 +58,7 @@ public:
 	BosonCanvas* mCanvas;
 };
 
-BosonSaveLoad::BosonSaveLoad(Boson* boson) : QObject(boson, "bosonsaveload")
+BosonSaveLoad::BosonSaveLoad(Boson* boson) : QObject(boson)
 {
  d = new BosonSaveLoadPrivate;
  d->mBoson = boson;
@@ -307,10 +305,10 @@ bool BosonSaveLoad::saveToFile(const QMap<QString, QByteArray>& files, const QSt
  }
  writtenFiles.append("mappreview/map.png");
 
- QStringList scripts = QStringList(files.keys()).grep(QRegExp("^scripts"));
+ QStringList scripts = QStringList(files.keys()).filter(QRegExp("^scripts"));
  for (QStringList::iterator it = scripts.begin(); it != scripts.end(); ++it) {
 	QString path = *it;
-	int lastSlash = path.findRev('/');
+	int lastSlash = path.lastIndexOf('/');
 	QString dir = path.left(lastSlash);
 	QString baseName = path.right(path.length() - (lastSlash + 1));
 	if (!f.writeFile(baseName, files[path], dir)) {
@@ -320,10 +318,10 @@ bool BosonSaveLoad::saveToFile(const QMap<QString, QByteArray>& files, const QSt
 	writtenFiles.append(*it);
  }
 
- QStringList eventListener = QStringList(files.keys()).grep(QRegExp("^eventlistener"));
+ QStringList eventListener = QStringList(files.keys()).filter(QRegExp("^eventlistener"));
  for (QStringList::iterator it = eventListener.begin(); it != eventListener.end(); ++it) {
 	QString path = *it;
-	int lastSlash = path.findRev('/');
+	int lastSlash = path.lastIndexOf('/');
 	QString dir = path.left(lastSlash);
 	QString baseName = path.right(path.length() - (lastSlash + 1));
 	bool ret = false;
@@ -349,7 +347,7 @@ bool BosonSaveLoad::saveToFile(const QMap<QString, QByteArray>& files, const QSt
  return true;
 }
 
-Q3CString BosonSaveLoad::saveKGameAsXML()
+QByteArray BosonSaveLoad::saveKGameAsXML()
 {
  PROFILE_METHOD
  QDomDocument doc(QString::fromLatin1("Boson"));
@@ -362,7 +360,7 @@ Q3CString BosonSaveLoad::saveKGameAsXML()
  QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
  if (!propertyXML.saveAsXML(handler, d->mBoson->dataHandler())) { // AB: we should exclude gameStatus from this! we should stay in KGame::Init! -> add a BosonPropertyXML::remove() or so
 	boError() << k_funcinfo << "unable to save KGame data handler" << endl;
-	return Q3CString();
+	return QByteArray();
  }
  // IdGameStatus must _not_ be saved. it must remain in Init state when loading,
  // until loading is completed.
@@ -377,10 +375,10 @@ Q3CString BosonSaveLoad::saveKGameAsXML()
 	return false;
  }
 
- return doc.toCString();
+ return doc.toByteArray();
 }
 
-Q3CString BosonSaveLoad::savePlayersAsXML()
+QByteArray BosonSaveLoad::savePlayersAsXML()
 {
  PROFILE_METHOD
  QDomDocument doc(QString::fromLatin1("Players"));
@@ -389,27 +387,26 @@ Q3CString BosonSaveLoad::savePlayersAsXML()
 
  if (!d->mBoson) {
 	BO_NULL_ERROR(d->mBoson);
-	return Q3CString();
+	return QByteArray();
  }
 
- Q3PtrList<Player> list = d->mBoson->gamePlayerList();
- boDebug() << k_funcinfo << "saving " << list.count() << " players" << endl;
- for (Player* p = list.first(); p; p = list.next()) {
+ boDebug() << k_funcinfo << "saving " << d->mBoson->gamePlayerList().count() << " players" << endl;
+ foreach (Player* p, d->mBoson->gamePlayerList()) {
 	// KGame also stored ID, RTTI and KPlayer::calcIOValue() here.
 	// I believe we won't need them. ID might be useful for network games,
 	// but we load from a file here.
 	QDomElement element = doc.createElement(QString::fromLatin1("Player"));
 	if (!p->saveAsXML(element)) {
 		boError() << k_funcinfo << "Unable to save player " << p->bosonId() << endl;
-		return Q3CString();
+		return QByteArray();
 	}
 	root.appendChild(element);
  }
 
- return doc.toCString();
+ return doc.toByteArray();
 }
 
-Q3CString BosonSaveLoad::saveCanvasAsXML()
+QByteArray BosonSaveLoad::saveCanvasAsXML()
 {
  PROFILE_METHOD
 
@@ -424,13 +421,13 @@ Q3CString BosonSaveLoad::saveCanvasAsXML()
 
 	QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
 	root.appendChild(handler);
-	return doc.toCString();
+	return doc.toByteArray();
  }
 
- return Q3CString();
+ return QByteArray();
 }
 
-Q3CString BosonSaveLoad::saveExternalAsXML()
+QByteArray BosonSaveLoad::saveExternalAsXML()
 {
  PROFILE_METHOD
  QDomDocument doc(QString::fromLatin1("External"));
@@ -439,7 +436,7 @@ Q3CString BosonSaveLoad::saveExternalAsXML()
 
  emit signalSaveExternalStuffAsXML(root);
 
- return doc.toCString();
+ return doc.toByteArray();
 }
 
 
@@ -499,11 +496,9 @@ bool BosonSaveLoad::loadPlayersFromXML(const QMap<QString, QByteArray>& files)
 	boError(270) << k_funcinfo << "no Player tags in file" << endl;
 	return false;
  }
- Q3PtrList<Player> gamePlayerList = d->mBoson->gamePlayerList();
- for (unsigned int i = 0; i < gamePlayerList.count(); i++) {
-	Player* p = gamePlayerList.at(i);
+ foreach (Player* p, d->mBoson->gamePlayerList()) {
 	QDomElement player;
-	for (unsigned int j = 0; j < list.count() && player.isNull(); j++) {
+	for (int j = 0; j < list.count() && player.isNull(); j++) {
 		QDomElement e = list.item(j).toElement();
 		bool ok = false;
 		int id = e.attribute(QString::fromLatin1("PlayerId")).toInt(&ok);
@@ -536,7 +531,7 @@ bool BosonSaveLoad::loadPlayersFromXML(const QMap<QString, QByteArray>& files)
 		}
 	}
 	if (!p->loadFromXML(player)) {
-		boError(270) << k_funcinfo << "failed loading player " << i << endl;
+		boError(270) << k_funcinfo << "failed loading player" << endl;
 		return false;
 	}
  }
@@ -627,7 +622,7 @@ bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
 	boError() << k_funcinfo << "no players in game" << endl;
 	return false;
  }
- for (unsigned int i = 0; i < playerList.count(); i++) {
+ for (int i = 0; i < playerList.count(); i++) {
 	QDomElement p = playerList.item(i).toElement();
 	p.removeAttribute("NetworkPriority");
 	p.removeAttribute("UnitPropId");
@@ -668,16 +663,16 @@ bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
  canvasRoot.removeChild(canvasRoot.namedItem("Pathfinder"));
  canvasRoot.appendChild(canvasDoc.createElement("Effects"));
 
- QByteArray kgameXML = kgameDoc.toCString();
- QByteArray playersXML = playersDoc.toCString();
- QByteArray canvasXML = canvasDoc.toCString();
+ QByteArray kgameXML = kgameDoc.toByteArray();
+ QByteArray playersXML = playersDoc.toByteArray();
+ QByteArray canvasXML = canvasDoc.toByteArray();
  files.remove("external.xml");
  files.insert("kgame.xml", kgameXML);
  files.insert("players.xml", playersXML);
  files.insert("canvas.xml", canvasXML);
 
  QStringList list = files.keys();
- list = list.grep(QRegExp("^scripts\\/.*\\/data\\/"));
+ list = list.filter(QRegExp("^scripts\\/.*\\/data\\/"));
  for (QStringList::Iterator it = list.begin(); it != list.end(); ++it) {
 	files.remove(*it);
  }

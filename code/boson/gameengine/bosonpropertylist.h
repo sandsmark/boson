@@ -45,10 +45,13 @@
  * Every type used in this template must provide operators << and >> for
  * QDataStream.
  **/
-template<class T>
+template<typename T>
 class BosonPropertyList : public KGamePropertyBase
 {
 public:
+	typedef typename QList<T>::iterator iterator;
+	typedef typename QList<T>::const_iterator const_iterator;
+
 	BosonPropertyList() : KGamePropertyBase()
 	{
 	}
@@ -142,6 +145,11 @@ public:
 	{
 		return mList[i];
 	}
+
+	iterator begin() { return mList.begin(); }
+	const_iterator begin() const { return mList.begin(); }
+	iterator end() { return mList.end(); }
+	const_iterator end() const { return mList.end(); }
 
 	void load(QDataStream& s)
 	{

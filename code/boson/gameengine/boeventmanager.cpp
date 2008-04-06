@@ -36,8 +36,8 @@
 #include <qdom.h>
 #include <q3valuevector.h>
 #include <qmap.h>
+#include <QStringList>
 //Added by qt3to4:
-#include <Q3CString>
 #include <Q3PtrList>
 
 #include <stdlib.h>
@@ -55,7 +55,7 @@ public:
 	Q3PtrList<BoEvent> mEvents;
 	Q3PtrList<BoEventListener> mEventListeners;
 
-	Q3ValueVector<Q3CString> mEventNames;
+	Q3ValueVector<QString> mEventNames;
 
 	QMap<QString, QByteArray> mAvailableScripts;
 	QMap<QString, QByteArray> mEventListenerXML;
@@ -83,7 +83,7 @@ BoEventManager::~BoEventManager()
 
 void BoEventManager::declareEvents()
 {
-#define BO_DECLARE_EVENT(name) d->mEventNames.append(Q3CString(#name));
+#define BO_DECLARE_EVENT(name) d->mEventNames.append(QString(#name));
  BO_DECLARE_EVENT(UnitWithTypeProduced);
  BO_DECLARE_EVENT(FacilityWithTypeConstructed);
  BO_DECLARE_EVENT(UnitWithTypeDestroyed);
@@ -168,7 +168,7 @@ bool BoEventManager::loadFromXML(const QDomElement& root)
 	return false;
  }
  QDomNodeList list = events.elementsByTagName("Event");
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	QDomElement e = list.item(i).toElement();
 	if (e.isNull()) {
 		boError(360) << k_funcinfo << "not an element" << endl;
@@ -239,7 +239,7 @@ bool BoEventManager::saveAllEventListenersXML(QMap<QString, QByteArray>* files) 
  // (but may be when loading a savegame later, or when starting a map when we
  // save a playfield here)
  for (QMap<QString, QByteArray>::iterator it = d->mEventListenerXML.begin(); it != d->mEventListenerXML.end(); ++it) {
-	files->insert(it.key(), it.data());
+	files->insert(it.key(), it.value());
  }
 
  // replace the xml files with recent data
@@ -280,7 +280,7 @@ bool BoEventManager::saveAllEventListenersXML(QMap<QString, QByteArray>* files) 
 		boError() << k_funcinfo << "unable to save event listener as XML" << endl;
 		return false;
 	}
-	QByteArray listenerXML = doc.toCString();
+	QByteArray listenerXML = doc.toByteArray();
 	files->insert(file, listenerXML);
  }
  return true;
@@ -295,7 +295,7 @@ bool BoEventManager::copyEventListenerScripts(const QMap<QString, QByteArray>& f
  // e.g. when a human player is replaced by a computer io.
  for (QMap<QString, QByteArray>::const_iterator it = files.begin(); it != files.end(); ++it) {
 	if (it.key().startsWith("scripts/eventlistener/")) {
-		d->mAvailableScripts.insert(it.key(), it.data());
+		d->mAvailableScripts.insert(it.key(), it.value());
 	}
  }
  return true;
@@ -308,7 +308,7 @@ bool BoEventManager::copyEventListenerXML(const QMap<QString, QByteArray>& files
  d->mEventListenerXML.clear();
  for (QMap<QString, QByteArray>::const_iterator it = files.begin(); it != files.end(); ++it) {
 	if (it.key().startsWith("eventlistener/") && it.key().endsWith(".xml")) {
-		d->mEventListenerXML.insert(it.key(), it.data());
+		d->mEventListenerXML.insert(it.key(), it.value());
 	}
  }
  return true;
@@ -326,7 +326,7 @@ QByteArray BoEventManager::createEmptyEventListenerXML()
  QDomElement handlers = doc.createElement("EventHandlers");
  handlers.setAttribute("NextId", QString::number(1));
  e.appendChild(handlers);
- return doc.toString().utf8();
+ return doc.toString().toUtf8();
 }
 
 
@@ -484,19 +484,19 @@ void BoEventManager::removeEventListener(BoEventListener* l)
 
 static int compare_cstrings(const void* s1, const void* s2)
 {
- const Q3CString* string1 = (const Q3CString*)s1;
- const Q3CString* string2 = (const Q3CString*)s2;
- return qstrcmp(*string1, *string2);
+ const QString* string1 = (const QString*)s1;
+ const QString* string2 = (const QString*)s2;
+ return (*string1 == *string2);
 }
 
-bool BoEventManager::knowEventName(const Q3CString& name) const
+bool BoEventManager::knowEventName(const QString& name) const
 {
  if (d->mEventNames.isEmpty()) {
 	return false;
  }
  // d->mEventNames is a sorted array. we make a binary search on it.
  void* e = ::bsearch(&name, d->mEventNames.begin(), d->mEventNames.count(),
-		sizeof(Q3CString), compare_cstrings);
+		sizeof(QString), compare_cstrings);
  if (!e) {
 	return false;
  }

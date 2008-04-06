@@ -22,8 +22,6 @@
 #include "../bo3dtools.h"
 
 #include <qstring.h>
-//Added by qt3to4:
-#include <Q3CString>
 
 class QDomElement;
 class QDomNodeList;
@@ -51,7 +49,7 @@ public:
 	 * @ref data1
 	 * @param _data2 Just like @p _data1.
 	 **/
-	BoEvent(const Q3CString& _name, const QString& _data1 = QString::null, const QString& _data2 = QString::null);
+	BoEvent(const QString& _name, const QString& _data1 = QString::null, const QString& _data2 = QString::null);
 
 	/**
 	 * @overload
@@ -162,15 +160,8 @@ public:
 	 * name of an event uniquely identifies the type of the event, including
 	 * the types of the expected parameters (see especially @ref data1, @ref
 	 * data2).
-	 *
-	 * We use QCString for the name, because it can efficiently be compared
-	 * to const char* string, e.g.
-	 * <pre>
-	 * if (event.name() == "foobar")
-	 * </pre>
-	 * is perfectly fine.
 	 **/
-	Q3CString name() const
+	QString name() const
 	{
 		return mName;
 	}
@@ -194,11 +185,11 @@ public:
 
 
 private:
-	void init(const Q3CString& name);
+	void init(const QString& name);
 
 private:
 	quint32 mId;
-	Q3CString mName;
+	QString mName;
 	quint32 mDelayedDelivery;
 	bool mHasLocation;
 	BoVector3Fixed mLocation;

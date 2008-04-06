@@ -37,6 +37,7 @@
 
 #include <qtimer.h>
 #include <qmap.h>
+#include <QCoreApplication>
 //Added by qt3to4:
 #include <Q3CString>
 #include <Q3ValueList>
@@ -91,7 +92,7 @@ public:
 
 
 
-BosonStarting::BosonStarting(QObject* parent) : QObject(parent, "bosonstarting")
+BosonStarting::BosonStarting(QObject* parent) : QObject(parent)
 {
  d = new BosonStartingPrivate;
  mDestPlayField = 0;
@@ -281,7 +282,7 @@ bool BosonStarting::start()
 void BosonStarting::checkEvents()
 {
  if (qApp->hasPendingEvents()) {
-	qApp->processEvents(100);
+	qApp->processEvents(QEventLoop::AllEvents, 100);
  }
 }
 
@@ -337,12 +338,10 @@ void BosonStarting::sendStartingCompleted(bool success)
  boGame->sendMessageSyncRandom();
 
  QByteArray b;
- QDataStream stream(b, QIODevice::WriteOnly);
+ QDataStream stream(&b, QIODevice::WriteOnly);
  stream << (qint8)success;
  Q3CString themeMD5;
- Q3PtrList<Player> allPlayerList = boGame->allPlayerList();
- for (unsigned int i = 0; i < allPlayerList.count(); i++) {
-	Player* p = allPlayerList.at(i);
+ foreach (Player* p, boGame->allPlayerList()) {
 	SpeciesTheme* theme = p->speciesTheme();
 	if (!theme) {
 		// make an invalid string.
@@ -371,7 +370,7 @@ bool BosonStarting::checkStartingCompletedMessages() const
 	boError(270) << k_funcinfo << "have not StartingCompleted message from ADMIN" << endl;
 	return false;
  }
- QDataStream adminStream(admin, QIODevice::ReadOnly);
+ QDataStream adminStream(admin);
  qint8 adminSuccess;
  adminStream >> adminSuccess;
  if (!adminSuccess) {
@@ -389,7 +388,7 @@ bool BosonStarting::checkStartingCompletedMessages() const
 	if (it.key() == boGame->gameId()) {
 		continue;
 	}
-	QDataStream stream(it.data(), QIODevice::ReadOnly);
+	QDataStream stream(it.value());
 	qint8 success;
 	stream >> success;
 	if (!success) {
@@ -412,7 +411,7 @@ bool BosonStarting::checkStartingCompletedMessages() const
 
 
 BosonStartingTaskCreator::BosonStartingTaskCreator(QObject* parent)
-	: QObject(parent, "bosonstartingtaskcreator")
+	: QObject(parent)
 {
 }
 
@@ -455,7 +454,7 @@ void BosonStartingTask::completeSubTask(unsigned int duration)
 void BosonStartingTask::checkEvents()
 {
  if (qApp->hasPendingEvents()) {
-	qApp->processEvents(100);
+	qApp->processEvents(QEventLoop::AllEvents, 100);
  }
 }
 

@@ -541,10 +541,10 @@ public:
 	/**
 	 * @return The team color this item should get rendered with. This
 	 * should be the @ref Player::teamColor of the owner, if applicable. For
-	 * some items you might want to return simply NULL (which is perfectly
+	 * some items you might want to return simply a NULL QColor (which is perfectly
 	 * valid)
 	 **/
-	virtual const QColor* teamColor() const = 0;
+	virtual QColor teamColor() const = 0;
 
 	inline void setEffectsPositionDirty(bool d)
 	{

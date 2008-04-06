@@ -32,6 +32,8 @@
 #include "bowater.h"
 #include "bogroundquadtreenode.h"
 
+#include <QImageWriter>
+#include <QImageReader>
 #include <q3dict.h>
 #include <qdatastream.h>
 #include <qimage.h>
@@ -235,7 +237,7 @@ bool BoTexMap::importTexMap(const QImage* img)
 	boError() << k_funcinfo << "cannot import an image into an array with less than 3 textures. textureCount() == " << textureCount() << endl;
 	return false;
  }
- bool useAlpha = img->hasAlphaBuffer();
+ bool useAlpha = img->hasAlphaChannel();
  if (useAlpha && textureCount() < 4) {
 	boWarning() << k_funcinfo << "won't import alpha buffer" << endl;
 	useAlpha = false;
@@ -426,7 +428,7 @@ bool BosonMap::createNewMap(unsigned int width, unsigned int height, BosonGround
  // the map is saved completely first, and then loaded from the stream.
  // we do this to catch errors early.
  QByteArray buffer;
- QDataStream stream(buffer, QIODevice::WriteOnly);
+ QDataStream stream(&buffer, QIODevice::WriteOnly);
  if (ret) {
 	ret = saveCompleteMap(stream);
  }
@@ -448,7 +450,7 @@ bool BosonMap::createNewMap(unsigned int width, unsigned int height, BosonGround
 
  d->mWaterManager->setMap(this);
 
- QDataStream readStream(buffer, QIODevice::ReadOnly);
+ QDataStream readStream(buffer);
  ret = loadCompleteMap(readStream);
  if (!ret) {
 	boError() << k_funcinfo << "unable to load previously saved map from stream! looks like an internal error" << endl;
@@ -630,12 +632,11 @@ bool BosonMap::importHeightMapImage(const QImage& image)
 	return false;
  }
  QByteArray b;
- QDataStream s(b, QIODevice::WriteOnly);
- QImageIO io;
- io.setIODevice(s.device());
+ QDataStream s(&b, QIODevice::WriteOnly);
+ QImageWriter io;
+ io.setDevice(s.device());
  io.setFormat("PNG");
- io.setImage(image);
- io.write();
+ io.write(image);
  return loadHeightMapImage(b);
 }
 
@@ -649,11 +650,11 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMapBuffer)
 	// initialize the height map with 0.0
 //	boDebug() << k_funcinfo << "loading dummy height map" << endl;
 	QByteArray buffer;
-	QDataStream writeStream(buffer, QIODevice::WriteOnly);
+	QDataStream writeStream(&buffer, QIODevice::WriteOnly);
 	BoHeightMap heightMap(width() + 1, height() + 1);
 	bool ret = heightMap.save(writeStream);
 	if (ret) {
-		QDataStream readStream(buffer, QIODevice::ReadOnly);
+		QDataStream readStream(buffer);
 		ret = loadHeightMap(readStream);
 		if (!ret) {
 			boError() << k_funcinfo << "unable to load heightmap from stream" << endl;
@@ -663,7 +664,9 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMapBuffer)
 	}
 	return ret;
  }
- QImage map(heightMapBuffer);
+ QDataStream heightMapStream(heightMapBuffer);
+ QImageReader imageReader(heightMapStream.device());
+ QImage map = imageReader.read();
  if (map.isNull()) {
 	boError() << k_funcinfo << "received an invalid image buffer - null image" << endl;
 	return false;
@@ -700,10 +703,10 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMapBuffer)
 	}
  }
  QByteArray buffer;
- QDataStream writeStream(buffer, QIODevice::WriteOnly);
+ QDataStream writeStream(&buffer, QIODevice::WriteOnly);
  bool ret = heightMap.save(writeStream);
  if (ret) {
-	QDataStream readStream(buffer, QIODevice::ReadOnly);
+	QDataStream readStream(buffer);
 	ret = loadHeightMap(readStream);
 	if (!ret) {
 		boError() << k_funcinfo << "unable to load heightmap from stream" << endl;
@@ -748,7 +751,7 @@ bool BosonMap::loadTexMap(QDataStream& stream)
 
 bool BosonMap::loadTexMapFromFile(const QByteArray& array)
 {
- QDataStream stream(array, QIODevice::ReadOnly);
+ QDataStream stream(array);
  return loadTexMap(stream);
 }
 
@@ -772,7 +775,7 @@ bool BosonMap::saveTexMap(QDataStream& stream) const
 QByteArray BosonMap::saveTexMapToFile() const
 {
  QByteArray array;
- QDataStream stream(array, QIODevice::WriteOnly);
+ QDataStream stream(&array, QIODevice::WriteOnly);
  if (!saveTexMap(stream)) {
 	return QByteArray();
  }
@@ -808,7 +811,7 @@ QByteArray BosonMap::saveMapGeomToFile() const
  geometry.setAttribute(QString::fromLatin1("Height"), height());
  root.setAttribute(QString::fromLatin1("GroundTheme"), groundTheme()->identifier());
 
- return doc.toCString();
+ return doc.toByteArray();
 }
 
 QByteArray BosonMap::saveWaterToFile() const
@@ -819,15 +822,15 @@ QByteArray BosonMap::saveWaterToFile() const
  if (!d->mWaterManager->saveToXML(root)) {
 	return QByteArray();
  }
- return doc.toCString();
+ return doc.toByteArray();
 }
 
 QByteArray BosonMap::saveMapPreviewPNGToFile() const
 {
  QByteArray imageData;
- QBuffer imageBuffer(imageData);
+ QBuffer imageBuffer(&imageData);
  imageBuffer.open(QIODevice::WriteOnly);
- QImage image(width(), height(), 32);
+ QImage image(width(), height(), QImage::Format_RGB32);
 
  for (unsigned int y = 0; y < height(); y++) {
 	unsigned int* line = (unsigned int*)image.scanLine(y);
@@ -965,8 +968,8 @@ QByteArray BosonMap::saveHeightMapImage() const
 	boError() << k_funcinfo << "Cannot save empty map" << endl;
 	return QByteArray();
  }
- QImage image;
- if (!image.create(width() + 1, height() + 1, 32, 0)) { // AB: 16bpp isnt available for X11 (only for qt embedded)
+ QImage image(width() + 1, height() + 1, QImage::Format_RGB32);
+ if (image.isNull()) {
 	boError() << k_funcinfo << "Unable to create height map!" << endl;
 	return QByteArray();
  }
@@ -992,12 +995,11 @@ QByteArray BosonMap::saveHeightMapImage() const
  }
 
  QByteArray array;
- QDataStream stream(array, QIODevice::WriteOnly);
- QImageIO io;
- io.setIODevice(stream.device());
+ QDataStream stream(&array, QIODevice::WriteOnly);
+ QImageWriter io;
+ io.setDevice(stream.device());
  io.setFormat("PNG");
- io.setImage(image);
- io.write();
+ io.write(image);
  return array;
 }
 
@@ -1008,8 +1010,8 @@ QByteArray BosonMap::saveTexMapImage(unsigned int texture) const
 	boError() << k_funcinfo << "Cannot save empty map" << endl;
 	return QByteArray();
  }
- QImage image;
- if (!image.create(width() + 1, height() + 1, 32, 0)) { // AB: 16bpp isnt available for X11 (only for qt embedded)
+ QImage image(width() + 1, height() + 1, QImage::Format_RGB32);
+ if (!image.isNull()) {
 	boError() << k_funcinfo << "Unable to create texmap!" << endl;
 	return QByteArray();
  }
@@ -1033,12 +1035,11 @@ QByteArray BosonMap::saveTexMapImage(unsigned int texture) const
  }
 
  QByteArray array;
- QDataStream stream(array, QIODevice::WriteOnly);
- QImageIO io;
- io.setIODevice(stream.device());
+ QDataStream stream(&array, QIODevice::WriteOnly);
+ QImageWriter io;
+ io.setDevice(stream.device());
  io.setFormat("PNG");
- io.setImage(image);
- io.write();
+ io.write(image);
  return array;
 }
 

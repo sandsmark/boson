@@ -19,8 +19,8 @@
 #ifndef BOSONPLAYERLISTMANAGER_H
 #define BOSONPLAYERLISTMANAGER_H
 
-#include <qobject.h>
-#include <q3ptrlist.h>
+#include <QObject>
+#include <QList>
 
 class KPlayer;
 class Player;
@@ -45,7 +45,7 @@ public:
 	 * Note that all @ref KPlayer objects in @p playerList must be @ref
 	 * Player objects.
 	 **/
-	void recalculatePlayerLists(const Q3PtrList<KPlayer>& playerList);
+	void recalculatePlayerLists(const QList<KPlayer*>& playerList);
 
 	/**
 	 * Recalculates the internal list of players to match those players in
@@ -59,7 +59,7 @@ public:
 	 * Note that all @ref KPlayer objects in @p playerList must be @ref
 	 * Player objects.
 	 **/
-	virtual void recalculatePlayerListsWithPlayerRemoved(const Q3PtrList<KPlayer>& playerList, KPlayer* removedPlayer);
+	virtual void recalculatePlayerListsWithPlayerRemoved(const QList<KPlayer*>& playerList, KPlayer* removedPlayer);
 
 	unsigned int allPlayerCount() const;
 	unsigned int gamePlayerCount() const;
@@ -68,7 +68,7 @@ public:
 	/**
 	 * @return The same as @ref KGame::playerList
 	 **/
-	const Q3PtrList<Player>& allPlayerList() const;
+	const QList<Player*>& allPlayerList() const;
 
 	/**
 	 * "game players" are players with ID >= 128 and <= 511. These are
@@ -76,7 +76,7 @@ public:
 	 *
 	 * This includes both, human controllable and neutral players.
 	 **/
-	const Q3PtrList<Player>& gamePlayerList() const;
+	const QList<Player*>& gamePlayerList() const;
 
 	/**
 	 * "active game players" are players with ID >= 128 and <= 255. These
@@ -85,7 +85,7 @@ public:
 	 *
 	 * They are in particular @em not neutral players.
 	 **/
-	const Q3PtrList<Player>& activeGamePlayerList() const;
+	const QList<Player*>& activeGamePlayerList() const;
 
 	/**
 	 * @return The @ref Player object with @ref Player::userId @p id, or
@@ -94,9 +94,9 @@ public:
 	Player* findPlayerByUserId(int id) const;
 
 private:
-	Q3PtrList<Player> mAllPlayerList;
-	Q3PtrList<Player> mGamePlayerList;
-	Q3PtrList<Player> mActiveGamePlayerList;
+	QList<Player*> mAllPlayerList;
+	QList<Player*> mGamePlayerList;
+	QList<Player*> mActiveGamePlayerList;
 };
 
 #endif

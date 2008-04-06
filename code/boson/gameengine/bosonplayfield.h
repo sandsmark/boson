@@ -27,6 +27,7 @@ class BPFFile;
 class BPFDescription;
 class BPFPreview;
 
+class QImage;
 class QDomDocument;
 class QDomElement;
 class QDataStream;

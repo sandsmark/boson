@@ -72,13 +72,11 @@ void BosonGameStatistics::receiveAdvanceMessage(BosonCanvas* canvas)
  }
 
  QByteArray buffer;
- QDataStream stream(buffer, QIODevice::WriteOnly);
+ QDataStream stream(&buffer, QIODevice::WriteOnly);
 
  unsigned int playerCount = d->mBoson->gamePlayerCount();
  stream << (quint32)playerCount;
- Q3PtrList<Player> gamePlayerList = d->mBoson->gamePlayerList();
- for (unsigned int i = 0; i < playerCount; i++) {
-	Player* p = gamePlayerList.at(i);
+ foreach (Player* p, d->mBoson->gamePlayerList()) {
 	stream << (quint32)p->bosonId();
 	stream << (quint32)p->mobilesCount();
 	stream << (quint32)p->facilitiesCount();

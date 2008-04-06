@@ -160,7 +160,7 @@ bool BosonWeaponProperties::loadPlugin(const KConfigGroup& cfg)
   mTurningSpeed = tan(turningspeed * DEG2RAD);
   insertLongWeaponBaseValue(cfg.readEntry("Damage", (qint32)0), "Damage", "MaxValue");
   insertBoFixedWeaponBaseValue(cfg.readEntry("DamageRange", 1.0), "DamageRange", "MaxValue");
-  insertBoFixedWeaponBaseValue(cfg.readEntry("FullDamageRange", 0.25 * bofixedWeaponBaseValue("DamageRange")), "FullDamageRange", "MaxValue");
+  insertBoFixedWeaponBaseValue(cfg.readEntry("FullDamageRange", (double)(0.25 * bofixedWeaponBaseValue("DamageRange"))), "FullDamageRange", "MaxValue");
   if(bofixedWeaponBaseValue("FullDamageRange") > bofixedWeaponBaseValue("DamageRange"))
   {
     boWarning() << k_funcinfo << "FullDamageRange must not be bigger than DamageRange!" << endl;
@@ -209,9 +209,17 @@ bool BosonWeaponProperties::loadPlugin(const KConfigGroup& cfg)
   return true;
 }
 
+// dummy implementation, should not be used.
 bool BosonWeaponProperties::savePlugin(KConfig* cfg)
 {
-  // Group must have been set before
+  Q_UNUSED(cfg);
+  return false;
+}
+
+bool BosonWeaponProperties::savePlugin(KConfig* cfg_, const QString& groupName)
+{
+  KConfigGroup group = cfg_->group(groupName);
+
   // Save type
   QString shottype;
   if(mShotType == BosonShot::Bullet)
@@ -240,34 +248,34 @@ bool BosonWeaponProperties::savePlugin(KConfig* cfg)
     // Default to rocket
     mShotType = BosonShot::Rocket;
   }
-  cfg->writeEntry("Type", shottype);
+  group.writeEntry("Type", shottype);
   // Other parameters
-  cfg->writeEntry("Name", mName);
-  cfg->writeEntry("Range", range());
+  group.writeEntry("Name", mName);
+  group.writeEntry("Range", range());
   // Reload interval is converted from advance calls to seconds here
-  cfg->writeEntry("Reload", reloadingTime() / 20.0f);
+  group.writeEntry("Reload", reloadingTime() / 20.0f);
  // We multiply speeds with 20 because speeds in config files are cells/second,
  //  but here we have cells/advance calls
-  cfg->writeEntry("Speed", speed() * 20.0f);
-  cfg->writeEntry("AccelerationSpeed", mAccelerationSpeed * 20.0f * 20.0f);
-  cfg->writeEntry("TurningSpeed", atan(mTurningSpeed) * RAD2DEG * 20.0f);
-  cfg->writeEntry("StartAngle", mStartAngle);
-  cfg->writeEntry("Damage", damage());
-  cfg->writeEntry("DamageRange", damageRange());
-  cfg->writeEntry("RequiredAmmunition", requiredAmmunition());
-  cfg->writeEntry("CanShootAtAirUnits", mCanShootAtAirUnits);
-  cfg->writeEntry("CanShootAtLandUnits", mCanShootAtLandUnits);
-  cfg->writeEntry("Height", (double)mHeight);
-  BosonConfig::writeEntry(cfg, "Offset", mOffset);
-  BosonConfig::writeUnsignedLongNumList(cfg, "ShootEffects", mShootEffectIds);
-  BosonConfig::writeUnsignedLongNumList(cfg, "FlyEffects", mFlyEffectIds);
-  BosonConfig::writeUnsignedLongNumList(cfg, "HitEffects", mHitEffectIds);
-  cfg->writeEntry("SoundShoot", mSounds[SoundWeaponShoot]);
-  cfg->writeEntry("SoundFly", mSounds[SoundWeaponFly]);
-  cfg->writeEntry("SoundHit", mSounds[SoundWeaponHit]);
+  group.writeEntry("Speed", (double)(speed() * 20.0f));
+  group.writeEntry("AccelerationSpeed", (double)(mAccelerationSpeed * 20.0f * 20.0f));
+  group.writeEntry("TurningSpeed", atan(mTurningSpeed) * RAD2DEG * 20.0f);
+  group.writeEntry("StartAngle", (double)mStartAngle);
+  group.writeEntry("Damage", damage());
+  group.writeEntry("DamageRange", (double)(damageRange()));
+  group.writeEntry("RequiredAmmunition", requiredAmmunition());
+  group.writeEntry("CanShootAtAirUnits", mCanShootAtAirUnits);
+  group.writeEntry("CanShootAtLandUnits", mCanShootAtLandUnits);
+  group.writeEntry("Height", (double)mHeight);
+  BosonConfig::writeEntry(&group, "Offset", mOffset);
+  BosonConfig::writeUnsignedLongNumList(&group, "ShootEffects", mShootEffectIds);
+  BosonConfig::writeUnsignedLongNumList(&group, "FlyEffects", mFlyEffectIds);
+  BosonConfig::writeUnsignedLongNumList(&group, "HitEffects", mHitEffectIds);
+  group.writeEntry("SoundShoot", mSounds[SoundWeaponShoot]);
+  group.writeEntry("SoundFly", mSounds[SoundWeaponFly]);
+  group.writeEntry("SoundHit", mSounds[SoundWeaponHit]);
   if(turret())
   {
-    if(!mTurret->saveTurret(cfg))
+    if(!mTurret->saveTurret(group))
     {
       boError() << k_funcinfo << "could not save the turret" << endl;
       // TODO: return false
@@ -476,11 +484,11 @@ QMap<int, QString> BosonWeaponProperties::sounds() const
 
 void BosonWeaponProperties::loadAction(UnitAction type, const KConfigGroup& cfg, const QString& key, bool useDefault)
 {
-  if(!cfg->hasKey(key) && !useDefault)
+  if(!cfg.hasKey(key) && !useDefault)
   {
     return;
   }
-  mActionStrings.insert(type, cfg->readEntry(key, key));
+  mActionStrings.insert(type, cfg.readEntry(key, key));
 }
 
 
@@ -797,8 +805,8 @@ BosonWeaponTurretProperties::~BosonWeaponTurretProperties()
 bool BosonWeaponTurretProperties::loadTurret(const KConfigGroup& cfg)
 {
 
-  d->meshNames = cfg->readListEntry("TurretMeshes");
-  d->initialZRotation = cfg->readDoubleNumEntry("TurretInitialZRotation", 0.0);
+  d->meshNames = cfg.readEntry("TurretMeshes", QStringList());
+  d->initialZRotation = cfg.readEntry("TurretInitialZRotation", 0.0);
 
 
   d->initialMeshMatrix.rotate(d->initialZRotation, 0.0f, 0.0f, -1.0f);
@@ -812,8 +820,8 @@ bool BosonWeaponTurretProperties::loadTurret(const KConfigGroup& cfg)
 
 bool BosonWeaponTurretProperties::saveTurret(KConfigGroup& cfg) const
 {
-  cfg->writeEntry("TurretMeshes", d->meshNames);
-  cfg->writeEntry("TurretInitialZRotation", d->initialZRotation);
+  cfg.writeEntry("TurretMeshes", d->meshNames);
+  cfg.writeEntry("TurretInitialZRotation", d->initialZRotation);
   return true;
 }
 

@@ -25,6 +25,8 @@
 #include "rtti.h"
 #include "bosonitem.h"
 
+#include <QMap>
+
 class BosonCanvasStatisticsPrivate
 {
 public:

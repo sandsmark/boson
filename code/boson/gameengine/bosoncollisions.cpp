@@ -229,7 +229,7 @@ BoItemList* BosonCollisions::collisionsAtCells(const Q3PtrVector<Cell>* cells, c
 	for (it = cellItems->begin(); it != cellItems->end(); ++it) {
 		s = *it;
 		if (s != item) {
-			if (collisions->findIndex(s) < 0 && (!item || !exact || item->bosonCollidesWith(s))) {
+			if (!collisions->containsBool(s) && (!item || !exact || item->bosonCollidesWith(s))) {
 				collisions->append(s);
 			}
 		}

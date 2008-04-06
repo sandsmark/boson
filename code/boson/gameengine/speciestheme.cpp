@@ -34,7 +34,8 @@
 #include "sound/bosonaudiointerface.h"
 
 #include <kstandarddirs.h>
-#include <ksimpleconfig.h>
+#include <KConfig>
+#include <KConfigGroup>
 #include <klocale.h>
 
 #include <q3intdict.h>
@@ -167,14 +168,14 @@ bool SpeciesTheme::loadTechnologies()
 {
  QFile f(themePath() + "index.technologies");
  if (!f.exists()) {
-	boWarning(270) << k_funcinfo << "Technologies file (" << f.name() << ") does not exists. No technologies loaded" << endl;
+	boWarning(270) << k_funcinfo << "Technologies file (" << f.fileName() << ") does not exists. No technologies loaded" << endl;
 	// We assume that this theme has no technologies and still return true
 	return true;
  }
- KSimpleConfig cfg(f.name());
+ KConfig cfg(f.fileName(), KConfig::SimpleConfig);
  QStringList techs = cfg.groupList();
  if (techs.isEmpty()) {
-	boDebug(270) << k_funcinfo << "No technologies found in technologies file (" << f.name() << ")" << endl;
+	boDebug(270) << k_funcinfo << "No technologies found in technologies file (" << f.fileName() << ")" << endl;
 	return true;
  }
  for (QStringList::Iterator it = techs.begin(); it != techs.end(); ++it) {
@@ -239,7 +240,7 @@ bool SpeciesTheme::readUnitConfigs()
  }
  QStringList dirList = dir.entryList(QDir::Dirs);
  QStringList list;
- for (unsigned int i = 0; i < dirList.count(); i++) {
+ for (int i = 0; i < dirList.count(); i++) {
 	if (dirList[i] == QString::fromLatin1("..") ||
 			dirList[i] == QString::fromLatin1(".")) {
 		continue;
@@ -387,19 +388,19 @@ QStringList SpeciesTheme::allObjects(QStringList* files) const
 	return QStringList();
  }
 
- KSimpleConfig cfg(fileName);
+ KConfig cfg(fileName, KConfig::SimpleConfig);
  QStringList groups = cfg.groupList();
 
  // all groups must have a File entry
  QStringList objects;
- for (unsigned int i = 0; i < groups.count(); i++) {
-		cfg.setGroup(groups[i]);
-		if (!cfg.hasKey(QString::fromLatin1("File"))) {
+ for (int i = 0; i < groups.count(); i++) {
+		KConfigGroup group = cfg.group(groups[i]);
+		if (!group.hasKey(QString::fromLatin1("File"))) {
 			boError() << k_funcinfo << "group " << groups[i] << " has no File key" << endl;
 		} else {
 			objects.append(groups[i]);
 			if (files) {
-				QString file = cfg.readEntry(QString::fromLatin1("File"));
+				QString file = group.readEntry(QString::fromLatin1("File"), QString());
 				files->append(file);
 			}
 		}
@@ -458,10 +459,10 @@ QString SpeciesTheme::defaultSpecies()
 QString SpeciesTheme::speciesDirectory(const QString& identifier)
 {
  QStringList l = availableSpecies();
- for (unsigned int i = 0; i < l.count(); i++) {
-	KSimpleConfig cfg(l[i]);
-	cfg.setGroup("Boson Species");
-	if (cfg.readEntry("Identifier") == identifier) {
+ for (int i = 0; i < l.count(); i++) {
+	KConfig cfg(l[i], KConfig::SimpleConfig);
+	KConfigGroup group = cfg.group("Boson Species");
+	if (group.readEntry("Identifier", QString()) == identifier) {
 		QString d = l[i].left(l[i].length() - strlen("index.species"));
 		return d;
 	}
@@ -471,9 +472,9 @@ QString SpeciesTheme::speciesDirectory(const QString& identifier)
 
 QString SpeciesTheme::identifier() const
 {
- KSimpleConfig cfg(themePath() + QString::fromLatin1("index.species"));
- cfg.setGroup("Boson Species");
- return cfg.readEntry("Identifier");
+ KConfig cfg(themePath() + QString::fromLatin1("index.species"), KConfig::SimpleConfig);
+ KConfigGroup group = cfg.group("Boson Species");
+ return group.readEntry("Identifier", QString());
 }
 
 bool SpeciesTheme::setTeamColor(const QColor& color)
