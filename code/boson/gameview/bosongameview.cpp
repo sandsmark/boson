@@ -777,9 +777,9 @@ public:
 
 		mEventListener = 0;
 
-		mQt::LeftButtonState = 0;
+		mLeftButtonState = 0;
 		mMiddleButtonState = 0;
-		mQt::RightButtonState = 0;
+		mRightButtonState = 0;
 	}
 
 	BosonViewData* mViewData;
@@ -827,9 +827,9 @@ public:
 	BosonGameViewEventListener* mEventListener;
 
 	BoMouseDoubleClickRecognizer mDoubleClickRecognizer;
-	BoLeftMouseButtonState* mQt::LeftButtonState;
+	BoLeftMouseButtonState* mLeftButtonState;
 	BoMiddleMouseButtonState* mMiddleButtonState;
-	BoRightMouseButtonState* mQt::RightButtonState;
+	BoRightMouseButtonState* mRightButtonState;
 
 	bool mGameMode;
 };
@@ -872,9 +872,9 @@ BosonGameView::~BosonGameView()
  BoLightManager::deleteStatic();
  BosonViewData::setGlobalViewData(0);
  delete d->mViewData;
- delete d->mQt::LeftButtonState;
+ delete d->mLeftButtonState;
  delete d->mMiddleButtonState;
- delete d->mQt::RightButtonState;
+ delete d->mRightButtonState;
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
 }
@@ -938,10 +938,10 @@ void BosonGameView::init()
 
  d->mScriptConnector = new BosonGameViewScriptConnector(this);
 
- d->mQt::LeftButtonState = new BoLeftMouseButtonState(this, d->mGameGLMatrices);
- d->mQt::LeftButtonState->setSelectionRect(d->mSelectionRect);
+ d->mLeftButtonState = new BoLeftMouseButtonState(this, d->mGameGLMatrices);
+ d->mLeftButtonState->setSelectionRect(d->mSelectionRect);
  d->mMiddleButtonState = new BoMiddleMouseButtonState(this, d->mGameGLMatrices);
- d->mQt::RightButtonState = new BoRightMouseButtonState(this, d->mGameGLMatrices);
+ d->mRightButtonState = new BoRightMouseButtonState(this, d->mGameGLMatrices);
 
 
 
@@ -1316,7 +1316,7 @@ void BosonGameView::initUfoGUI()
  d->mUfoCanvasWidget->setGameGLMatrices(d->mGameGLMatrices);
  d->mUfoCanvasWidget->setCamera(&d->mCamera);
  d->mUfoCanvasWidget->setCanvas(canvas());
- d->mQt::LeftButtonState->setUfoCanvasWidget(d->mUfoCanvasWidget);
+ d->mLeftButtonState->setUfoCanvasWidget(d->mUfoCanvasWidget);
 
  d->mUfoPlacementPreviewWidget = new BosonUfoPlacementPreviewWidget();
  d->mUfoPlacementPreviewWidget->setGameGLMatrices(d->mGameGLMatrices);
@@ -2190,15 +2190,15 @@ void BosonGameView::slotMouseEvent(QMouseEvent* e)
  event.setGroundWorldPos(posX, posY, posZ);
  if (e->type() != QEvent::Wheel) {
 	event.setGameViewWidgetPos(e->pos());
-	event.setQt::ControlModifier(e->state() & ControlButton);
-	event.setQt::ShiftModifier(e->state() & ShiftButton);
-	event.setQt::AltModifier(e->state() & AltButton);
+	event.setControlModifier(e->state() & ControlButton);
+	event.setShiftModifier(e->state() & ShiftButton);
+	event.setAltModifier(e->state() & AltButton);
  } else {
 	QWheelEvent* w = (QWheelEvent*)e;
 	event.setGameViewWidgetPos(w->pos());
-	event.setQt::ControlModifier(w->state() & ControlButton);
-	event.setQt::ShiftModifier(w->state() & ShiftButton);
-	event.setQt::AltModifier(w->state() & AltButton);
+	event.setControlModifier(w->state() & ControlButton);
+	event.setShiftModifier(w->state() & ShiftButton);
+	event.setAltModifier(w->state() & AltButton);
  }
  event.setUnitAtEventPos(d->mUfoCanvasWidget->unitAtWidgetPos(event.gameViewWidgetPos()));
 
@@ -2232,13 +2232,13 @@ void BosonGameView::slotMouseEvent(QMouseEvent* e)
 		d->mDoubleClickRecognizer.mousePressEvent(e);
 		switch (e->button()) {
 			case Qt::LeftButton:
-				d->mQt::LeftButtonState->pressButton(event.gameViewWidgetPos());
+				d->mLeftButtonState->pressButton(event.gameViewWidgetPos());
 				break;
 			case MidButton:
 				d->mMiddleButtonState->pressButton(event.gameViewWidgetPos());
 				break;
 			case Qt::RightButton:
-				d->mQt::RightButtonState->pressButton(event.gameViewWidgetPos());
+				d->mRightButtonState->pressButton(event.gameViewWidgetPos());
 				break;
 			default:
 				break;
@@ -2369,13 +2369,13 @@ void BosonGameView::mouseEventWheel(float delta, Orientation orientation, const 
 void BosonGameView::mouseEventMove(int buttonState, const BoMouseEvent& event)
 {
  if (buttonState & Qt::LeftButton) {
-	d->mQt::LeftButtonState->mouseMoved(event);
+	d->mLeftButtonState->mouseMoved(event);
  }
  if (buttonState & MidButton) {
 	d->mMiddleButtonState->mouseMoved(event);
  }
  if (buttonState & Qt::RightButton) {
-	d->mQt::RightButtonState->mouseMoved(event);
+	d->mRightButtonState->mouseMoved(event);
  }
 
  updateCursorCanvasVector(event.gameViewWidgetPos());
@@ -2395,7 +2395,7 @@ void BosonGameView::mouseEventRelease(ButtonState button, const BoMouseEvent& ev
  switch (button) {
 	case Qt::LeftButton:
 	{
-		d->mQt::LeftButtonState->releaseButton(event);
+		d->mLeftButtonState->releaseButton(event);
 		break;
 	}
 	case MidButton:
@@ -2405,7 +2405,7 @@ void BosonGameView::mouseEventRelease(ButtonState button, const BoMouseEvent& ev
 	}
 	case Qt::RightButton:
 	{
-		d->mQt::RightButtonState->releaseButton(event);
+		d->mRightButtonState->releaseButton(event);
 		break;
 	}
 	default:
@@ -2420,7 +2420,7 @@ void BosonGameView::mouseEventReleaseDouble(ButtonState button, const BoMouseEve
  switch (button) {
 	case Qt::LeftButton:
 	{
-		d->mQt::LeftButtonState->releaseButton(event, true);
+		d->mLeftButtonState->releaseButton(event, true);
 		break;
 	}
 	case MidButton:
@@ -2430,7 +2430,7 @@ void BosonGameView::mouseEventReleaseDouble(ButtonState button, const BoMouseEve
 	}
 	case Qt::RightButton:
 	{
-		d->mQt::RightButtonState->releaseButton(event, true);
+		d->mRightButtonState->releaseButton(event, true);
 		break;
 	}
 	default:

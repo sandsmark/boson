@@ -41,13 +41,14 @@
 
 #include <klocale.h>
 #include <kshortcut.h>
+#include <KVBox>
 
 #include <qinputdialog.h>
 #include <q3vbox.h>
 #include <qfile.h>
 #include <qfileinfo.h>
-//Added by qt3to4:
 #include <QPixmap>
+#include <QCoreApplication>
 
 #include <unistd.h>
 

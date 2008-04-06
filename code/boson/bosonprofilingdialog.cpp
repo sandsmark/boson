@@ -271,9 +271,11 @@ public:
 };
 
 BosonProfilingDialog::BosonProfilingDialog(QWidget* parent, bool modal)
-		: KDialogBase(Plain, i18n("Boson Profiling"), Ok,
-		Ok, parent, "bosonprofilingdialog", modal, true)
+		: KDialog()
 {
+ setWindowTitle(makeStandardCaption(i18n("Boson Profiling")));
+ setButtons(KDialog::Ok);
+ setDefaultButton(KDialog::Ok);
  d = new BosonProfilingDialogPrivate;
 
  d->mGUI = new BosonProfilingDialogGUI(plainPage());

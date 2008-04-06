@@ -67,7 +67,7 @@
 #include <kmessagebox.h>
 #include <kstandarddirs.h>
 #include <kapplication.h>
-#include <kdialogbase.h>
+#include <kdialog.h>
 #include "boeventloop.h"
 
 #include <qtimer.h>
@@ -80,6 +80,7 @@
 #include <qlayout.h>
 #include <qapplication.h>
 #include <qdesktopwidget.h>
+#include <QImageWriter>
 //Added by qt3to4:
 #include <Q3PtrList>
 #include <QPixmap>
@@ -97,6 +98,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#define DISABLE_BOEVENTLOOP 1
 
 class BosonMainWidgetPrivate
 {
@@ -193,7 +195,7 @@ void BosonMainWidget::init()
 		this, SLOT(slotSkipFrame()));
 
  setUpdatesEnabled(false);
- setFocusPolicy(WheelFocus);
+ setFocusPolicy(Qt::WheelFocus);
  setMouseTracking(true);
 
  if (!isValid()) {
@@ -279,7 +281,9 @@ void BosonMainWidget::initializeGL()
  BoTextureManager::initStatic();
  boProfiling->pop();
 
+#if !DISABLE_BOEVENTLOOP
  connect(kapp->eventLoop(), SIGNAL(signalUpdateGL()), this, SLOT(slotUpdateGL()));
+#endif
 
  recursive = false;
  boDebug() << k_funcinfo << "done" << endl;
@@ -536,12 +540,11 @@ QByteArray BosonMainWidget::grabMovieFrame()
  QPixmap shot = QPixmap::grabWindow(winId());
 
  QByteArray ba;
- QBuffer b(ba);
+ QBuffer b(&ba);
  b.open(QIODevice::WriteOnly);
- QImageIO io(&b, "JPEG");
- io.setImage(shot.convertToImage());
+ QImageWriter io(&b, "JPEG");
  io.setQuality(90);
- io.write();
+ io.write(shot.convertToImage());
  return ba;
 }
 
@@ -928,14 +931,11 @@ void BosonMainWidget::slotGameStarted()
 
  boDebug(270) << k_funcinfo << "init player" << endl;
  Player* localPlayer = 0;
- Q3PtrList<Player> allPlayerList = boGame->allPlayerList();
- for (unsigned int i = 0; i < allPlayerList.count(); i++) {
-	Player* p = allPlayerList.at(i);
+ foreach (Player* p, boGame->allPlayerList()) {
 	disconnect(p, SIGNAL(signalPropertyChanged(KGamePropertyBase*,KPlayer*)),
 			this, 0);
  }
- for (unsigned int i = 0; i < allPlayerList.count(); i++) {
-	Player* p = allPlayerList.at(i);
+ foreach (Player* p, boGame->allPlayerList()) {
 	if (!p->isVirtual()) {
 		// a non-virtual player is a player that is running on this host
 		// (either the local player or a computer player - never a
@@ -969,7 +969,7 @@ void BosonMainWidget::slotGameStarted()
 		// pick one player for editor mode
 		// (it doesnt matter which)
 		boDebug() << k_funcinfo << "picking a local player for editor mode" << endl;
-		localPlayer = (Player*)boGame->gamePlayerList().getFirst();
+		localPlayer = (Player*)boGame->gamePlayerList().first();
 	} else {
 		// we are loading a game
 		// we are chosing the first player here - this is
@@ -978,7 +978,7 @@ void BosonMainWidget::slotGameStarted()
 		//
 		// if we ever do that, we should remove these line here!
 		boDebug() << k_funcinfo << "picking a local player for loading games" << endl;
-		localPlayer = (Player*)boGame->gamePlayerList().getFirst();
+		localPlayer = (Player*)boGame->gamePlayerList().first();
 	}
  }
  if (!localPlayer) {
@@ -1165,14 +1165,15 @@ void BosonMainWidget::slotPreferencesApply()
 
 void BosonMainWidget::slotDebugUfoWidgets()
 {
- KDialogBase* dialog = new KDialogBase(KDialogBase::Plain,
-		i18n("Debug Ufo Widgets"),
-		KDialogBase::Cancel, KDialogBase::Cancel, 0,
-		"debugufowidgets", false, true);
+ KDialog* dialog = new KDialog();
+ dialog->setWindowTitle(KDialog::makeStandardCaption(i18n("Debug Ufo Widgets")));
+ dialog->setButtons(KDialog::Close);
+ dialog->setDefaultButton(KDialog::Close);
  connect(dialog, SIGNAL(finished()), dialog, SLOT(delayedDestruct()));
- BoUfoDebugWidget* debug = new BoUfoDebugWidget(dialog->plainPage());
- Q3VBoxLayout* l = new Q3VBoxLayout(dialog->plainPage());
- l->addWidget(debug);
+ BoUfoDebugWidget* debug = new BoUfoDebugWidget(dialog);
+ dialog->setMainWidget(debug);
+// Q3VBoxLayout* l = new Q3VBoxLayout(dialog->plainPage());
+// l->addWidget(debug);
 
  debug->setBoUfoManager(ufoManager());
 

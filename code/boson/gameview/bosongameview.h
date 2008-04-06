@@ -142,9 +142,9 @@ public:
 		mX = 0.0;
 		mY = 0.0;
 		mZ = 0.0;
-		mQt::ControlModifier = false;
-		mQt::ShiftModifier = false;
-		mQt::AltModifier = false;
+		mControlModifier = false;
+		mShiftModifier = false;
+		mAltModifier = false;
 		mUnitAtEventPos = 0;
 	}
 
@@ -197,35 +197,35 @@ public:
 		*z = mZ;
 	}
 
-	void setQt::ControlModifier(bool b)
+	void setControlModifier(bool b)
 	{
-		mQt::ControlModifier = b;
+		mControlModifier = b;
 	}
 	bool controlButton() const
 	{
-		return mQt::ControlModifier;
+		return mControlModifier;
 	}
-	void setQt::ShiftModifier(bool b)
+	void setShiftModifier(bool b)
 	{
-		mQt::ShiftModifier = b;
+		mShiftModifier = b;
 	}
 	bool shiftButton() const
 	{
-		return mQt::ShiftModifier;
+		return mShiftModifier;
 	}
-	void setQt::AltModifier(bool b)
+	void setAltModifier(bool b)
 	{
-		mQt::AltModifier = b;
+		mAltModifier = b;
 	}
 	bool altButton() const
 	{
-		return mQt::AltModifier;
+		return mAltModifier;
 	}
 
 	bool forceAttack() const
 	{
 		// TODO: make configurable
-		return mQt::ControlModifier;
+		return mControlModifier;
 	}
 
 private:
@@ -236,9 +236,9 @@ private:
 	GLfloat mY;
 	GLfloat mZ;
 
-	bool mQt::ControlModifier;
-	bool mQt::ShiftModifier;
-	bool mQt::AltModifier;
+	bool mControlModifier;
+	bool mShiftModifier;
+	bool mAltModifier;
 
 	Unit* mUnitAtEventPos;
 };
@@ -702,7 +702,7 @@ protected:
 	 * message.
 	 * @param send Set this to TRUE in order to actually send the @p stream
 	 **/
-	void mouseEventRelease(ButtonState button, const BoMouseEvent& action);
+	void mouseEventRelease(Qt::ButtonState button, const BoMouseEvent& action);
 
 	/**
 	 * @param button Which button produced this event.
@@ -715,7 +715,7 @@ protected:
 	 * message.
 	 * @param send Set this to TRUE in order to actually send the @p stream
 	 **/
-	void mouseEventReleaseDouble(ButtonState button, const BoMouseEvent& action);
+	void mouseEventReleaseDouble(Qt::ButtonState button, const BoMouseEvent& action);
 
 	void resetGameViewPlugin();
 	void resetGameViewPlugin(bool gameMode);

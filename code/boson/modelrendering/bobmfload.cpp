@@ -577,7 +577,7 @@ bool BoBMFLoad::loadFrames(QDataStream& stream, int lod)
 
 QString BoBMFLoad::cachedModelFilename(const QString& modelfile, const QString& configfile)
 {
-  Q3CString hash = calculateHash(modelfile, configfile);
+  QString hash = calculateHash(modelfile, configfile);
   QString cachedmodel = KGlobal::dirs()->findResource("data", QString("%1/model-%2.bmf").arg("boson/modelcache").arg(hash));
 
   if(!cachedmodel.isEmpty())
@@ -600,7 +600,7 @@ QString BoBMFLoad::cachedModelFilename(const QString& modelfile, const QString& 
 
 QString BoBMFLoad::convertModel(const QString& modelfile, const QString& configfile)
 {
-  Q3CString hash = calculateHash(modelfile, configfile);
+  QString hash = calculateHash(modelfile, configfile);
 
   // Get the path where the cached model can be saved
   QString cachedmodel = KGlobal::dirs()->saveLocation("data", "boson/modelcache/");
@@ -656,10 +656,10 @@ QString BoBMFLoad::convertModel(const QString& modelfile, const QString& configf
   {
     QString args;
     // AB: apparently this includes arg 0, i.e. the command that is called
-    Q3ValueList<Q3CString> argList = proc.args();
-    for (Q3ValueList<Q3CString>::iterator it = argList.begin(); it != argList.end(); ++it)
+    QList<QByteArray> argList = proc.args();
+    for (QList<QByteArray>::iterator it = argList.begin(); it != argList.end(); ++it)
     {
-      args += QString(" %1").arg(*it);
+      args += QString(" %1").arg(QLatin1String(*it));
     }
 
     boError() << k_funcinfo << "bobmfconverter did not write file." << endl

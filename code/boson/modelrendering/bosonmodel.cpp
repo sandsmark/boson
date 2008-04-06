@@ -34,7 +34,7 @@
 #include "bomeshrenderermanager.h"
 #include "bobmfload.h"
 
-#include <ksimpleconfig.h>
+#include <KConfigGroup>
 
 #include <qstringlist.h>
 #include <q3valuelist.h>
@@ -189,7 +189,7 @@ BoMatrix* BoFrame::matrix(int index) const
 
 void BoFrame::renderFrame(const Q3ValueVector<const BoMatrix*>& itemMatrices,const QColor* teamColor, bool transparentmeshes, RenderFlags flags, int mode)
 {
- if (itemMatrices.count() != mNodeCount) {
+ if ((unsigned int)itemMatrices.count() != mNodeCount) {
 	boError() << k_funcinfo << "must have exactly one item matrix per node. itemMatrices parameter provided " << itemMatrices.count() << " matrices, have " << mNodeCount << " nodes." << endl;
 	return;
  }
@@ -599,7 +599,7 @@ void BosonModel::insertAnimationMode(int mode, unsigned int start, unsigned int 
  d->mAnimations.insert(mode, anim);
 }
 
-void BosonModel::loadAnimationMode(int mode, KSimpleConfig* conf, const QString& name)
+void BosonModel::loadAnimationMode(int mode, KConfigGroup* conf, const QString& name)
 {
  unsigned int start = 0;
  unsigned int end = 0;
@@ -615,10 +615,10 @@ void BosonModel::loadAnimationMode(int mode, KSimpleConfig* conf, const QString&
 	return;
  }
 
- start = conf->readUnsignedNumEntry(basekey + "Start", start);
- end = conf->readUnsignedNumEntry(basekey + "End", end);
- speed = (float)(conf->readDoubleNumEntry(basekey + "Speed", speed));
- loop = conf->readBoolEntry(basekey + "Loop", loop);
+ start = conf->readEntry(basekey + "Start", (quint32)start);
+ end = conf->readEntry(basekey + "End", (quint32)end);
+ speed = (float)(conf->readEntry(basekey + "Speed", (float)speed));
+ loop = conf->readEntry(basekey + "Loop", (bool)loop);
 
  insertAnimationMode(mode, start, end, speed, loop);
 }

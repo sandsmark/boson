@@ -39,7 +39,7 @@ public:
 };
 
 OptionsDialog::OptionsDialog(QWidget* parent)
-	: KDialogBase(Tabbed,
+	: KPageDialog(Tabbed,
 			i18n("Boson Options"),
 			Ok|Apply|Default,
 			Cancel,
