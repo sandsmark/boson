@@ -28,6 +28,7 @@
 #include <qstring.h>
 #include <qdatastream.h>
 #include <qdom.h>
+#include <QPoint>
 
 #include <math.h>
 

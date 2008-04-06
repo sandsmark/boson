@@ -364,12 +364,12 @@ BosonProfiling& BosonProfiling::operator=(const BosonProfiling& p)
  //     -> all current data remains as-is and is not touched.
 
  QByteArray b;
- QDataStream writeStream(b, QIODevice::WriteOnly);
+ QDataStream writeStream(&b, QIODevice::WriteOnly);
  if (!p.save(writeStream)) {
 	boError() << k_funcinfo << "unable to save data to stream" << endl;
 	return *this;
  }
- QDataStream readStream(b, QIODevice::ReadOnly);
+ QDataStream readStream(b);
  if (!load(readStream)) {
 	boError() << k_funcinfo << "unable to read data from stream" << endl;
 	return *this;

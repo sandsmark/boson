@@ -74,7 +74,7 @@ BosonData* BosonData::bosonData()
 
 QStringList BosonData::availableFiles(const QString& searchPattern, bool recursive)
 {
- return KGlobal::dirs()->findAllResources("data", QString::fromLatin1("boson/") + searchPattern, recursive);
+ return KGlobal::dirs()->findAllResources("data", QString::fromLatin1("boson/") + searchPattern, KStandardDirs::Recursive);
 }
 
 bool BosonData::insertGroundTheme(BosonDataObject* theme)
@@ -179,6 +179,6 @@ QStringList BosonData::availableCampaigns() const
 
 QString BosonData::locateDataFile(const QString& fileName) const
 {
- return locate("data", fileName);
+ return KStandardDirs::locate("data", fileName);
 }
 

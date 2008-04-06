@@ -31,6 +31,8 @@
 //Added by qt3to4:
 #include <Q3ValueList>
 
+#include <KConfig>
+#include <KConfigGroup>
 #include <kconfig.h>
 #include <kapplication.h>
 #include <klocale.h>
@@ -84,9 +86,9 @@ BoConfigEntry::~BoConfigEntry()
 {
 }
 
-void BoConfigEntry::activate(KConfig* conf)
+KConfigGroup BoConfigEntry::retrieveGroup(KConfig* conf)
 {
- conf->setGroup("Boson");
+ return conf->group("Boson");
 }
 
 BoConfigBoolEntry::BoConfigBoolEntry(BosonConfig* parent, const QString& key, bool defaultValue, bool saveConfig)
@@ -98,14 +100,14 @@ BoConfigBoolEntry::BoConfigBoolEntry(BosonConfig* parent, const QString& key, bo
 
 void BoConfigBoolEntry::save(KConfig* conf)
 {
- activate(conf);
- conf->writeEntry(key(), mValue);
+ KConfigGroup group = retrieveGroup(conf);
+ group.writeEntry(key(), mValue);
 }
 
 void BoConfigBoolEntry::load(KConfig* conf)
 {
- activate(conf);
- mValue = conf->readBoolEntry(key(), mValue);
+ KConfigGroup group = retrieveGroup(conf);
+ mValue = group.readEntry(key(), mValue);
 }
 
 BoConfigIntEntry::BoConfigIntEntry(BosonConfig* parent, const QString& key, int defaultValue, bool saveConfig)
@@ -117,14 +119,14 @@ BoConfigIntEntry::BoConfigIntEntry(BosonConfig* parent, const QString& key, int 
 
 void BoConfigIntEntry::save(KConfig* conf)
 {
- activate(conf);
- conf->writeEntry(key(), mValue);
+ KConfigGroup group = retrieveGroup(conf);
+ group.writeEntry(key(), mValue);
 }
 
 void BoConfigIntEntry::load(KConfig* conf)
 {
- activate(conf);
- mValue = conf->readNumEntry(key(), mValue);
+ KConfigGroup group = retrieveGroup(conf);
+ mValue = group.readEntry(key(), mValue);
 }
 
 BoConfigUIntEntry::BoConfigUIntEntry(BosonConfig* parent, const QString& key, unsigned int defaultValue, bool saveConfig)
@@ -136,14 +138,14 @@ BoConfigUIntEntry::BoConfigUIntEntry(BosonConfig* parent, const QString& key, un
 
 void BoConfigUIntEntry::save(KConfig* conf)
 {
- activate(conf);
- conf->writeEntry(key(), mValue);
+ KConfigGroup group = retrieveGroup(conf);
+ group.writeEntry(key(), mValue);
 }
 
 void BoConfigUIntEntry::load(KConfig* conf)
 {
- activate(conf);
- mValue = conf->readUnsignedNumEntry(key(), mValue);
+ KConfigGroup group = retrieveGroup(conf);
+ mValue = group.readEntry(key(), mValue);
 }
 
 BoConfigDoubleEntry::BoConfigDoubleEntry(BosonConfig* parent, const QString& key, double defaultValue, bool saveConfig)
@@ -155,14 +157,14 @@ BoConfigDoubleEntry::BoConfigDoubleEntry(BosonConfig* parent, const QString& key
 
 void BoConfigDoubleEntry::save(KConfig* conf)
 {
- activate(conf);
- conf->writeEntry(key(), mValue);
+ KConfigGroup group = retrieveGroup(conf);
+ group.writeEntry(key(), mValue);
 }
 
 void BoConfigDoubleEntry::load(KConfig* conf)
 {
- activate(conf);
- mValue = conf->readDoubleNumEntry(key(), mValue);
+ KConfigGroup group = retrieveGroup(conf);
+ mValue = group.readEntry(key(), mValue);
 }
 
 BoConfigStringEntry::BoConfigStringEntry(BosonConfig* parent, const QString& key, QString defaultValue, bool saveConfig)
@@ -174,14 +176,14 @@ BoConfigStringEntry::BoConfigStringEntry(BosonConfig* parent, const QString& key
 
 void BoConfigStringEntry::save(KConfig* conf)
 {
- activate(conf);
- conf->writeEntry(key(), mValue);
+ KConfigGroup group = retrieveGroup(conf);
+ group.writeEntry(key(), mValue);
 }
 
 void BoConfigStringEntry::load(KConfig* conf)
 {
- activate(conf);
- mValue = conf->readEntry(key(), mValue);
+ KConfigGroup group = retrieveGroup(conf);
+ mValue = group.readEntry(key(), mValue);
 }
 
 class BoConfigIntListEntry : public BoConfigEntry
@@ -197,20 +199,20 @@ public:
 
 	virtual void load(KConfig* conf)
 	{
-		activate(conf);
-		conf->writeEntry(key(), mValue);
+		KConfigGroup group = retrieveGroup(conf);
+		group.writeEntry(key(), mValue);
 	}
 	virtual void save(KConfig* conf)
 	{
-		activate(conf);
-		mValue = conf->readIntListEntry(key());
+		KConfigGroup group = retrieveGroup(conf);
+		mValue = group.readEntry(key(), mValue);
 	}
 
 	virtual int type() const { return IntList; }
 
-	void setValue(Q3ValueList<int> list) { mValue = list; }
-	Q3ValueList<int> value() const { return mValue; }
-	Q3ValueList<int> defaultValue() const { return mDefaultValue; }
+	void setValue(QList<int> list) { mValue = list; }
+	QList<int> value() const { return mValue; }
+	QList<int> defaultValue() const { return mDefaultValue; }
 
 	void append(int e)
 	{
@@ -218,12 +220,12 @@ public:
 			mValue.append(e);
 		}
 	}
-	void remove(int e) { mValue.remove(e); }
+	void remove(int e) { mValue.removeAll(e); }
 	bool contains(int e) { return mValue.contains(e); }
 
 private:
-	Q3ValueList<int> mValue;
-	Q3ValueList<int> mDefaultValue;
+	QList<int> mValue;
+	QList<int> mDefaultValue;
 };
 
 BoConfigColorEntry::BoConfigColorEntry(BosonConfig* parent, const QString& key, const QColor& defaultValue, bool saveConfig)
@@ -235,15 +237,15 @@ BoConfigColorEntry::BoConfigColorEntry(BosonConfig* parent, const QString& key, 
 
 void BoConfigColorEntry::save(KConfig* conf)
 {
- activate(conf);
- conf->writeEntry(key(), value());
+ KConfigGroup group = retrieveGroup(conf);
+ group.writeEntry(key(), value());
 }
 
 void BoConfigColorEntry::load(KConfig* conf)
 {
- activate(conf);
+ KConfigGroup group = retrieveGroup(conf);
  QColor def = value();
- mRGBValue = conf->readColorEntry(key(), &def).rgb();
+ mRGBValue = group.readEntry(key(), def).rgb();
 }
 
 void BoConfigColorEntry::setValue(const QColor& v)
@@ -656,7 +658,7 @@ void BosonConfig::setPostInitFunction(void (*func)())
  globalConfig.setPostInitFunction(func);
 }
 
-BoVector3Float BosonConfig::readBoVector3FloatEntry(const KConfig* cfg, const QString& key, const BoVector3Float& aDefault)
+BoVector3Float BosonConfig::readBoVector3FloatEntry(const KConfigGroup* cfg, const QString& key, const BoVector3Float& aDefault)
 {
  Q3ValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
  if (list.count() != 3) {
@@ -670,12 +672,12 @@ BoVector3Float BosonConfig::readBoVector3FloatEntry(const KConfig* cfg, const QS
  return BoVector3Float(list[0], list[1], list[2]);
 }
 
-BoVector3Float BosonConfig::readBoVector3FloatEntry(const KConfig* cfg, const QString& key)
+BoVector3Float BosonConfig::readBoVector3FloatEntry(const KConfigGroup* cfg, const QString& key)
 {
  return readBoVector3FloatEntry(cfg, key, BoVector3Float());
 }
 
-BoVector3Fixed BosonConfig::readBoVector3FixedEntry(const KConfig* cfg, const QString& key, const BoVector3Fixed& aDefault)
+BoVector3Fixed BosonConfig::readBoVector3FixedEntry(const KConfigGroup* cfg, const QString& key, const BoVector3Fixed& aDefault)
 {
  Q3ValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
  if (list.count() != 3) {
@@ -689,17 +691,17 @@ BoVector3Fixed BosonConfig::readBoVector3FixedEntry(const KConfig* cfg, const QS
  return BoVector3Fixed(list[0], list[1], list[2]);
 }
 
-BoVector3Fixed BosonConfig::readBoVector3FixedEntry(const KConfig* cfg, const QString& key)
+BoVector3Fixed BosonConfig::readBoVector3FixedEntry(const KConfigGroup* cfg, const QString& key)
 {
  return readBoVector3FixedEntry(cfg, key, BoVector3Fixed());
 }
 
-BoVector4Float BosonConfig::readBoVector4FloatEntry(const KConfig* cfg, const QString& key)
+BoVector4Float BosonConfig::readBoVector4FloatEntry(const KConfigGroup* cfg, const QString& key)
 {
  return readBoVector4FloatEntry(cfg, key, BoVector4Float());
 }
 
-BoVector4Float BosonConfig::readBoVector4FloatEntry(const KConfig* cfg, const QString& key, const BoVector4Float& aDefault)
+BoVector4Float BosonConfig::readBoVector4FloatEntry(const KConfigGroup* cfg, const QString& key, const BoVector4Float& aDefault)
 {
  Q3ValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
  if (list.count() != 4) {
@@ -713,12 +715,12 @@ BoVector4Float BosonConfig::readBoVector4FloatEntry(const KConfig* cfg, const QS
  return BoVector4Float(list[0], list[1], list[2], list[3]);
 }
 
-BoVector4Fixed BosonConfig::readBoVector4FixedEntry(const KConfig* cfg, const QString& key)
+BoVector4Fixed BosonConfig::readBoVector4FixedEntry(const KConfigGroup* cfg, const QString& key)
 {
  return readBoVector4FixedEntry(cfg, key, BoVector4Fixed());
 }
 
-BoVector4Fixed BosonConfig::readBoVector4FixedEntry(const KConfig* cfg, const QString& key, const BoVector4Fixed& aDefault)
+BoVector4Fixed BosonConfig::readBoVector4FixedEntry(const KConfigGroup* cfg, const QString& key, const BoVector4Fixed& aDefault)
 {
  Q3ValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
  if (list.count() != 4) {
@@ -732,7 +734,7 @@ BoVector4Fixed BosonConfig::readBoVector4FixedEntry(const KConfig* cfg, const QS
  return BoVector4Fixed(list[0], list[1], list[2], list[3]);
 }
 
-void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector3Float& value)
+void BosonConfig::writeEntry(KConfigGroup* cfg, const QString& key, const BoVector3Float& value)
 {
   Q3ValueList<float> list;
   list.append(value[0]);
@@ -741,7 +743,7 @@ void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector3Fl
   BosonConfig::writeFloatNumList(list, cfg, key);
 }
 
-void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector3Fixed& value)
+void BosonConfig::writeEntry(KConfigGroup* cfg, const QString& key, const BoVector3Fixed& value)
 {
   Q3ValueList<float> list;
   list.append(value[0]);
@@ -750,7 +752,7 @@ void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector3Fi
   BosonConfig::writeFloatNumList(list, cfg, key);
 }
 
-void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector4Float& value)
+void BosonConfig::writeEntry(KConfigGroup* cfg, const QString& key, const BoVector4Float& value)
 {
   Q3ValueList<float> list;
   list.append(value[0]);
@@ -760,7 +762,7 @@ void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector4Fl
   BosonConfig::writeFloatNumList(list, cfg, key);
 }
 
-void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector4Fixed& value)
+void BosonConfig::writeEntry(KConfigGroup* cfg, const QString& key, const BoVector4Fixed& value)
 {
   Q3ValueList<float> list;
   list.append(value[0]);
@@ -780,187 +782,188 @@ void BosonConfig::addConfigEntry(BoConfigEntry* c)
 
 QString BosonConfig::readLocalPlayerName(KConfig* conf)
 {
+ KSharedPtr<KSharedConfig> globalConfig;
  if (!conf) {
 	if (!kapp) {
 		return getenv("LOGNAME");
 	}
-	conf = KGlobal::config();
+	globalConfig = KGlobal::config();
+	conf = globalConfig.data();
  }
- QString oldGroup = conf->group();
- conf->setGroup("Boson");
- QString name = conf->readEntry("LocalPlayer", getenv("LOGNAME"));
- conf->setGroup(oldGroup);
+ KConfigGroup group = conf->group("Boson");
+ QString name = group.readEntry("LocalPlayer", QString::fromLatin1(getenv("LOGNAME")));
  return name;
 }
 
 void BosonConfig::saveLocalPlayerName(const QString& name, KConfig* conf)
 {
+ KSharedPtr<KSharedConfig> globalConfig;
  if (!conf) {
 	if (!kapp) {
 		return;
 	}
-	conf = KGlobal::config();
- }
- QString oldGroup = conf->group();
- conf->setGroup("Boson");
- conf->writeEntry("LocalPlayer", name);
- conf->setGroup(oldGroup);
+ 	globalConfig = KGlobal::config();
+	conf = globalConfig.data();
+}
+ KConfigGroup group = conf->group("Boson");
+ group.writeEntry("LocalPlayer", name);
 }
 
 QString BosonConfig::readComputerPlayerName(KConfig* conf)
 {
+ KSharedPtr<KSharedConfig> globalConfig;
  if (!conf) {
 	if (!kapp) {
 		return "Computer";
 	}
-	conf = KGlobal::config();
+	globalConfig = KGlobal::config();
+	conf = globalConfig.data();
  }
- QString oldGroup = conf->group();
- conf->setGroup("Boson");
- QString name = conf->readEntry("ComputerPlayer", i18n("Computer"));
- conf->setGroup(oldGroup);
+ KConfigGroup group = conf->group("Boson");
+ QString name = group.readEntry("ComputerPlayer", i18n("Computer"));
  return name;
 }
 
 void BosonConfig::saveComputerPlayerName(const QString& name, KConfig* conf)
 {
+ KSharedPtr<KSharedConfig> globalConfig;
  if (!conf) {
 	if (!kapp) {
 		return;
 	}
-	conf = KGlobal::config();
+	globalConfig = KGlobal::config();
+	conf = globalConfig.data();
  }
- QString oldGroup = conf->group();
- conf->setGroup("Boson");
- conf->writeEntry("ComputerPlayer", name);
- conf->setGroup(oldGroup);
+ KConfigGroup group = conf->group("Boson");
+ group.writeEntry("ComputerPlayer", name);
 }
 
 QColor BosonConfig::readLocalPlayerColor(KConfig* conf)
 {
+ KSharedPtr<KSharedConfig> globalConfig;
  if (!conf) {
 	if (!kapp) {
 		return Qt::red;
 	}
-	conf = KGlobal::config();
+	globalConfig = KGlobal::config();
+	conf = globalConfig.data();
  }
- QString oldGroup = conf->group();
- conf->setGroup("Boson");
- QColor color = conf->readColorEntry("LocalPlayerColor", &Qt::red);
- conf->setGroup(oldGroup);
+ KConfigGroup group = conf->group("Boson");
+ QColor color = group.readEntry("LocalPlayerColor", QColor(Qt::red));
  return color;
 }
 
 void BosonConfig::saveLocalPlayerColor(const QColor& color, KConfig* conf)
 {
+ KSharedPtr<KSharedConfig> globalConfig;
  if (!conf) {
 	if (!kapp) {
 		return;
 	}
-	conf = KGlobal::config();
+	globalConfig = KGlobal::config();
+	conf = globalConfig.data();
  }
- QString oldGroup = conf->group();
- conf->setGroup("Boson");
- conf->writeEntry("LocalPlayerColor", color);
- conf->setGroup(oldGroup);
+ KConfigGroup group = conf->group("Boson");
+ group.writeEntry("LocalPlayerColor", color);
 }
 
 QString BosonConfig::readLocalPlayerMap(KConfig* conf)
 {
+ KSharedPtr<KSharedConfig> globalConfig;
  if (!conf) {
 	if (!kapp) {
-		return QString::null;
+		return QString();
 	}
-	conf = KGlobal::config();
+	globalConfig = KGlobal::config();
+	conf = globalConfig.data();
  }
- QString oldGroup = conf->group();
- conf->setGroup("Boson");
- QString name = conf->readEntry("LocalPlayerMap", QString::null);
- conf->setGroup(oldGroup);
+ KConfigGroup group = conf->group("Boson");
+ QString name = group.readEntry("LocalPlayerMap", QString());
  return name;
 }
 
 void BosonConfig::saveLocalPlayerMap(const QString& id, KConfig* conf)
 {
+ KSharedPtr<KSharedConfig> globalConfig;
  if (!conf) {
 	if (!kapp) {
 		return;
 	}
-	conf = KGlobal::config();
+	globalConfig = KGlobal::config();
+	conf = globalConfig.data();
  }
- QString oldGroup = conf->group();
- conf->setGroup("Boson");
- conf->writeEntry("LocalPlayerMap", id);
- conf->setGroup(oldGroup);
+ KConfigGroup group = conf->group("Boson");
+ group.writeEntry("LocalPlayerMap", id);
 }
 
 QString BosonConfig::readEditorMap(KConfig* conf)
 {
+ KSharedPtr<KSharedConfig> globalConfig;
  if (!conf) {
 	if (!kapp) {
-		return QString::null;
+		return QString();
 	}
-	conf = KGlobal::config();
+	globalConfig = KGlobal::config();
+	conf = globalConfig.data();
  }
- QString oldGroup = conf->group();
- conf->setGroup("Editor");
- QString name = conf->readEntry("EditorMap", QString::null);
- conf->setGroup(oldGroup);
+ KConfigGroup group = conf->group("Editor");
+ QString name = group.readEntry("EditorMap", QString());
  return name;
 }
 
 void BosonConfig::saveEditorMap(const QString& id, KConfig* conf)
 {
+ KSharedPtr<KSharedConfig> globalConfig;
  if (!conf) {
 	if (!kapp) {
 		return;
 	}
-	conf = KGlobal::config();
+	globalConfig = KGlobal::config();
+	conf = globalConfig.data();
  }
- QString oldGroup = conf->group();
- conf->setGroup("Editor");
- conf->writeEntry("EditorMap", id);
- conf->setGroup(oldGroup);
+ KConfigGroup group = conf->group("Boson");
+ group.writeEntry("EditorMap", id);
 }
 
 bool BosonConfig::readEditorCreateNewMap(KConfig* conf)
 {
+ KSharedPtr<KSharedConfig> globalConfig;
  if (!conf) {
 	if (!kapp) {
 		return true;
 	}
-	conf = KGlobal::config();
+	globalConfig = KGlobal::config();
+	conf = globalConfig.data();
  }
- QString oldGroup = conf->group();
- conf->setGroup("Editor");
- bool createnew = conf->readBoolEntry("CreateNewMap", true);
- conf->setGroup(oldGroup);
+ KConfigGroup group = conf->group("Editor");
+ bool createnew = group.readEntry("CreateNewMap", true);
  return createnew;
 }
 
 void BosonConfig::saveEditorCreateNewMap(bool createnew, KConfig* conf)
 {
+ KSharedPtr<KSharedConfig> globalConfig;
  if (!conf) {
 	if (!kapp) {
 		return;
 	}
-	conf = KGlobal::config();
+	globalConfig = KGlobal::config();
+	conf = globalConfig.data();
  }
- QString oldGroup = conf->group();
- conf->setGroup("Editor");
- conf->writeEntry("CreateNewMap", createnew);
- conf->setGroup(oldGroup);
+ KConfigGroup group = conf->group("Editor");
+ group.writeEntry("CreateNewMap", createnew);
 }
 
 void BosonConfig::reset(KConfig* conf)
 {
+ KSharedPtr<KSharedConfig> globalConfig;
  if (!conf) {
 	if (!kapp) {
 		return;
 	}
-	conf = KGlobal::config();
+	globalConfig = KGlobal::config();
+	conf = globalConfig.data();
  }
- QString oldGroup = conf->group();
  // the old group is already stored here so we don't have to re-set it in every
  // read function
  Q3PtrListIterator<BoConfigEntry> it(d->mConfigEntries);
@@ -969,29 +972,24 @@ void BosonConfig::reset(KConfig* conf)
 		it.current()->load(conf);
 	}
  }
-
- conf->setGroup(oldGroup);
 }
 
 void BosonConfig::save(bool /*editor*/, KConfig* conf)
 {
+ KSharedPtr<KSharedConfig> globalConfig;
  if (!conf) {
 	if (!kapp) {
 		return;
 	}
-	conf = KGlobal::config();
+	globalConfig = KGlobal::config();
+	conf = globalConfig.data();
  }
- QString oldGroup = conf->group();
- // the old group is already stored here so we don't have to re-set it in every
- // save function
  Q3PtrListIterator<BoConfigEntry> it(d->mConfigEntries);
  for (; it.current(); ++it) {
 	if (it.current()->saveConfig()) {
 		it.current()->save(conf);
 	}
  }
-
- conf->setGroup(oldGroup);
 }
 
 void BosonConfig::setUnitSoundActivated(UnitSoundEvent e, bool activated)
@@ -1010,45 +1008,28 @@ bool BosonConfig::unitSoundActivated(UnitSoundEvent e) const
  return !intListValue("DeactivateUnitSounds").contains((int)e);
 }
 
-Q3ValueList<unsigned long int> BosonConfig::readUnsignedLongNumList(const KConfig* cfg, const QString key)
+// obsolete. use KConfigGroup::readEntry() directly!
+QList<quint32> BosonConfig::readUnsignedLongNumList(const KConfigGroup* cfg, const QString key)
 {
- Q3ValueList<unsigned long int> list;
- Q3ValueList<int> tmplist = cfg->readIntListEntry(key);
- Q3ValueList<int>::Iterator it;
- for (it = tmplist.begin(); it != tmplist.end(); it++) {
-	list.append((unsigned long int)(*it));
- }
- return list;
+ return cfg->readEntry(key, QList<quint32>());
 }
 
-void BosonConfig::writeUnsignedLongNumList(KConfig* cfg, const QString key, Q3ValueList<unsigned long int> list)
+// obsolete. Use KConfigGroup::writeEntry() directly!
+void BosonConfig::writeUnsignedLongNumList(KConfigGroup* cfg, const QString key, QList<quint32> list)
 {
- Q3ValueList<int> tmplist;
- Q3ValueList<unsigned long int>::Iterator it;
- for (it = list.begin(); it != list.end(); it++) {
-	tmplist.append((int)(*it));
- }
-	cfg->writeEntry(key, tmplist);
+ cfg->writeEntry(key, list);
 }
 
-Q3ValueList<float> BosonConfig::readFloatNumList(const KConfig* cfg, const QString key)
+// obsolete. use KConfigGroup::readEntry() directly!
+QList<float> BosonConfig::readFloatNumList(const KConfigGroup* cfg, const QString key)
 {
- QStringList strlist = cfg->readListEntry(key);
- Q3ValueList<float> list;
- for (QStringList::Iterator it = strlist.begin(); it != strlist.end(); it++) {
-	list.append((*it).toFloat());
- }
- return list;
+ return cfg->readEntry(key, QList<float>());
 }
 
-void BosonConfig::writeFloatNumList(Q3ValueList<float> list, KConfig* cfg, const QString key)
+// obsolete. Use KConfigGroup::writeEntry() directly!
+void BosonConfig::writeFloatNumList(QList<float> list, KConfigGroup* cfg, const QString key)
 {
- QStringList strlist;
- QString str;
- for (Q3ValueList<float>::Iterator it = list.begin(); it != list.end(); it++) {
-	strlist.append(str.setNum(*it));
- }
- cfg->writeEntry(key, strlist);
+ cfg->writeEntry(key, list);
 }
 
 void BosonConfig::addDynamicEntry(BoConfigEntry* entry, KConfig* conf)
@@ -1065,11 +1046,13 @@ void BosonConfig::addDynamicEntry(BoConfigEntry* entry, KConfig* conf)
 	return;
  }
  d->mDynamicEntries.insert(entry->key(), entry);
+ KSharedPtr<KSharedConfig> globalConfig;
  if (!conf) {
 	if (!kapp) {
 		return;
 	}
-	conf = KGlobal::config();
+	globalConfig = KGlobal::config();
+	conf = globalConfig.data();
  }
  entry->load(conf);
 }
