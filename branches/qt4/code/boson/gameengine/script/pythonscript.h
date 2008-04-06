@@ -24,6 +24,8 @@
 
 #include <qstring.h>
 #include <qdatastream.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 typedef struct _object PyObject;
 struct PyMethodDef;
@@ -199,7 +201,7 @@ class PythonScript : public BosonScript
     static PyObject* py_mapHeight(PyObject* self, PyObject* args);
 
   protected:
-    static PyObject* QValueListToPyList(QValueList<int>* list);
+    static PyObject* QValueListToPyList(Q3ValueList<int>* list);
 
     static void initScripting();
     static void uninitScripting();

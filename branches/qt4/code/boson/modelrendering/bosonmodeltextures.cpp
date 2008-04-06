@@ -28,13 +28,15 @@
 #include <qimage.h>
 #include <qgl.h>
 #include <qfile.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 #include <kglobal.h>
 #include <kstandarddirs.h>
-#include <kstaticdeleter.h>
+#include <k3staticdeleter.h>
 
 BosonModelTextures* BosonModelTextures::mModelTextures = 0;
-static KStaticDeleter<BosonModelTextures> sd;
+static K3StaticDeleter<BosonModelTextures> sd;
 
 class BosonModelTextures::BosonModelTexturesPrivate
 {
@@ -43,7 +45,7 @@ public:
 	{
 	}
 	QMap<QString, BoTexture*> mName2Texture;
-	QMap<BoTexture*, QValueList<BosonModel*> > mModels;
+	QMap<BoTexture*, Q3ValueList<BosonModel*> > mModels;
 
 	QString mAdditionalTexturePath;
 };
@@ -114,8 +116,8 @@ void BosonModelTextures::removeModel(BosonModel* model)
 	boError(110) << k_funcinfo << "NULL model" << endl;
 	return;
  }
- QValueList<BoTexture*> remove;
- QMap<BoTexture*, QValueList<BosonModel*> >::Iterator it(d->mModels.begin());
+ Q3ValueList<BoTexture*> remove;
+ QMap<BoTexture*, Q3ValueList<BosonModel*> >::Iterator it(d->mModels.begin());
  for (; it != d->mModels.end(); ++it) {
 	(*it).remove(model);
 	if ((*it).count() == 0) {

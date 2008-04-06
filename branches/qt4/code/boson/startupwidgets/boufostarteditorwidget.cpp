@@ -44,9 +44,11 @@
 #include <klocale.h>
 #include <kmessagebox.h>
 
-#include <qptrdict.h>
+#include <q3ptrdict.h>
 #include <qmap.h>
 #include <qtimer.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 class BoUfoStartEditorWidgetPrivate
 {
@@ -56,7 +58,7 @@ public:
 		mSelectedMap = 0;
 	}
 
-	QPtrDict<KPlayer> mItem2Player;
+	Q3PtrDict<KPlayer> mItem2Player;
 	QMap<int, QString> mIndex2Map;
 
 	QMap<int, QString> mSpeciesIndex2Identifier;
@@ -64,7 +66,7 @@ public:
 
 	BPFPreview* mSelectedMap;
 
-	QValueList<int> mMapSizes;
+	Q3ValueList<int> mMapSizes;
 };
 
 
@@ -249,7 +251,7 @@ void BoUfoStartEditorWidget::slotNetStart()
 	maxPlayers = preview->maxPlayers();
  }
 
- QValueList<QColor> availableTeamColors = boGame->availableTeamColors();
+ Q3ValueList<QColor> availableTeamColors = boGame->availableTeamColors();
  if ((int)availableTeamColors.count() < maxPlayers) {
 	boError() << k_funcinfo << "too many players - not enough team colors!" << endl;
 	KMessageBox::sorry(0, i18n("Too many (max-)players. Not enough colors available (internal error)."));

@@ -25,6 +25,8 @@
 #include "../../boufo/boufoimage.h"
 #include "../../global.h"
 #include "../../boaction.h"
+//Added by qt3to4:
+#include <QMouseEvent>
 
 
 class Unit;

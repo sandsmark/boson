@@ -23,6 +23,10 @@
 
 #include "../boufo/boufo.h"
 #include "../bo3dtools.h"
+//Added by qt3to4:
+#include <QMouseEvent>
+#include <QEvent>
+#include <QWheelEvent>
 
 class BoGameCamera;
 class BoAutoGameCamera;
@@ -138,9 +142,9 @@ public:
 		mX = 0.0;
 		mY = 0.0;
 		mZ = 0.0;
-		mControlButton = false;
-		mShiftButton = false;
-		mAltButton = false;
+		mQt::ControlModifier = false;
+		mQt::ShiftModifier = false;
+		mQt::AltModifier = false;
 		mUnitAtEventPos = 0;
 	}
 
@@ -193,35 +197,35 @@ public:
 		*z = mZ;
 	}
 
-	void setControlButton(bool b)
+	void setQt::ControlModifier(bool b)
 	{
-		mControlButton = b;
+		mQt::ControlModifier = b;
 	}
 	bool controlButton() const
 	{
-		return mControlButton;
+		return mQt::ControlModifier;
 	}
-	void setShiftButton(bool b)
+	void setQt::ShiftModifier(bool b)
 	{
-		mShiftButton = b;
+		mQt::ShiftModifier = b;
 	}
 	bool shiftButton() const
 	{
-		return mShiftButton;
+		return mQt::ShiftModifier;
 	}
-	void setAltButton(bool b)
+	void setQt::AltModifier(bool b)
 	{
-		mAltButton = b;
+		mQt::AltModifier = b;
 	}
 	bool altButton() const
 	{
-		return mAltButton;
+		return mQt::AltModifier;
 	}
 
 	bool forceAttack() const
 	{
 		// TODO: make configurable
-		return mControlButton;
+		return mQt::ControlModifier;
 	}
 
 private:
@@ -232,9 +236,9 @@ private:
 	GLfloat mY;
 	GLfloat mZ;
 
-	bool mControlButton;
-	bool mShiftButton;
-	bool mAltButton;
+	bool mQt::ControlModifier;
+	bool mQt::ShiftModifier;
+	bool mQt::AltModifier;
 
 	Unit* mUnitAtEventPos;
 };
@@ -328,7 +332,7 @@ private:
 /**
  * This class emulates a state machine with the events "button press", "button
  * release", and "mouse move", and the guards "ALT pressed", "Shift pressed",
- * and "CTRL pressed". I.e. the guards are the currently pressed modifiers.
+ * and "Qt::CTRL pressed". I.e. the guards are the currently pressed modifiers.
  *
  * The state diagram would look something like the following:
  * <pre>

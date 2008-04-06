@@ -20,6 +20,11 @@
 #define BOSONUFOGLWIDGET_H
 
 #include "bosonglwidget.h"
+//Added by qt3to4:
+#include <QMouseEvent>
+#include <QKeyEvent>
+#include <QEvent>
+#include <QWheelEvent>
 
 class BoUfoManager;
 

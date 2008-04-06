@@ -33,6 +33,9 @@
 #include <kstandarddirs.h>
 
 #include <qstring.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 
 /*****  BosonEffectPropertiesManager  *****/
@@ -122,7 +125,7 @@ void BosonEffectPropertiesManager::loadEffectProperties()
   }
   // BosonEffectProperties (more specifically, collection properties) need
   //  2-stage loading
-  QIntDictIterator<BosonEffectProperties> eit(mEffectProperties);
+  Q3IntDictIterator<BosonEffectProperties> eit(mEffectProperties);
   while(eit.current())
   {
     eit.current()->finishLoading(this);
@@ -279,15 +282,15 @@ bool BosonEffectProperties::load(KSimpleConfig* cfg, const QString& group, bool 
   return true;
 }
 
-QPtrList<BosonEffectProperties> BosonEffectProperties::loadEffectProperties(KSimpleConfig* cfg, QString key)
+Q3PtrList<BosonEffectProperties> BosonEffectProperties::loadEffectProperties(KSimpleConfig* cfg, QString key)
 {
   return loadEffectProperties(BosonConfig::readUnsignedLongNumList(cfg, key));
 }
 
-QPtrList<BosonEffectProperties> BosonEffectProperties::loadEffectProperties(const QValueList<unsigned long int>& ids)
+Q3PtrList<BosonEffectProperties> BosonEffectProperties::loadEffectProperties(const Q3ValueList<unsigned long int>& ids)
 {
-  QPtrList<BosonEffectProperties> props;
-  QValueList<unsigned long int>::const_iterator it;
+  Q3PtrList<BosonEffectProperties> props;
+  Q3ValueList<unsigned long int>::const_iterator it;
   for(it = ids.begin(); it != ids.end(); it++)
   {
     props.append(boEffectPropertiesManager->effectProperties(*it));
@@ -295,18 +298,18 @@ QPtrList<BosonEffectProperties> BosonEffectProperties::loadEffectProperties(cons
   return props;
 }
 
-QPtrList<BosonEffect> BosonEffectProperties::newEffects(const QPtrList<BosonEffectProperties>* properties,
+Q3PtrList<BosonEffect> BosonEffectProperties::newEffects(const Q3PtrList<BosonEffectProperties>* properties,
     const BoVector3Fixed& pos, const BoVector3Fixed& rot)
 {
-  QPtrList<BosonEffect> list;
-  QPtrListIterator<BosonEffectProperties> it(*properties);
+  Q3PtrList<BosonEffect> list;
+  Q3PtrListIterator<BosonEffectProperties> it(*properties);
   while(it.current())
   {
     // FIXME: bad? maybe make newEffect() return QPtrList for all effect properties?
     if(it.current()->type() == BosonEffect::Collection)
     {
-      QPtrList<BosonEffect> effects = ((BosonEffectPropertiesCollection*)it.current())->newEffectsList(pos, rot);
-      QPtrListIterator<BosonEffect> eit(effects);
+      Q3PtrList<BosonEffect> effects = ((BosonEffectPropertiesCollection*)it.current())->newEffectsList(pos, rot);
+      Q3PtrListIterator<BosonEffect> eit(effects);
       while(eit.current())
       {
         list.append(eit.current());
@@ -325,15 +328,15 @@ QPtrList<BosonEffect> BosonEffectProperties::newEffects(const QPtrList<BosonEffe
   return list;
 }
 
-QPtrList<BosonEffect> BosonEffectProperties::newEffects(const BosonEffectProperties* properties,
+Q3PtrList<BosonEffect> BosonEffectProperties::newEffects(const BosonEffectProperties* properties,
     const BoVector3Fixed& pos, const BoVector3Fixed& rot)
 {
-  QPtrList<BosonEffect> list;
+  Q3PtrList<BosonEffect> list;
   // FIXME: bad? maybe make newEffect() return QPtrList for all effect properties?
   if(properties->type() == BosonEffect::Collection)
   {
-    QPtrList<BosonEffect> effects = ((BosonEffectPropertiesCollection*)properties)->newEffectsList(pos, rot);
-    QPtrListIterator<BosonEffect> eit(effects);
+    Q3PtrList<BosonEffect> effects = ((BosonEffectPropertiesCollection*)properties)->newEffectsList(pos, rot);
+    Q3PtrListIterator<BosonEffect> eit(effects);
     while(eit.current())
     {
       list.append(eit.current());
@@ -649,7 +652,7 @@ bool BosonEffectPropertiesCollection::load(KSimpleConfig* cfg, const QString& gr
 
 bool BosonEffectPropertiesCollection::finishLoading(const BosonEffectPropertiesManager* manager)
 {
-  QValueList<unsigned long int>::Iterator it;
+  Q3ValueList<unsigned long int>::Iterator it;
   for(it = mEffectIds.begin(); it != mEffectIds.end(); it++)
   {
     mEffects.append(manager->effectProperties(*it));
@@ -665,24 +668,24 @@ BosonEffect* BosonEffectPropertiesCollection::newEffect(const BoVector3Fixed& po
   return 0;
 }
 
-QPtrList<BosonEffect> BosonEffectPropertiesCollection::newEffectsList(const BoVector3Fixed& pos, const BoVector3Fixed& rot) const
+Q3PtrList<BosonEffect> BosonEffectPropertiesCollection::newEffectsList(const BoVector3Fixed& pos, const BoVector3Fixed& rot) const
 {
-  QPtrList<BosonEffect> list;
-  QPtrListIterator<BosonEffectProperties> it(mEffects);
+  Q3PtrList<BosonEffect> list;
+  Q3PtrListIterator<BosonEffectProperties> it(mEffects);
   while(it.current())
   {
     // We can't just do 'list.append(it.current()->newEffect(pos, rot));'
     //  because it.current() may also be effects collection.
     // TODO: support delay!
     //  maybe increase delay of created effect by delay of collection effect
-    QPtrList<BosonEffect> e = newEffects(it.current(), pos, rot);
+    Q3PtrList<BosonEffect> e = newEffects(it.current(), pos, rot);
     if(e.count() == 1)
     {
       list.append(e.first());
     }
     else if(e.count() > 0)
     {
-      QPtrListIterator<BosonEffect> eit(e);
+      Q3PtrListIterator<BosonEffect> eit(e);
       while(eit.current())
       {
         list.append(eit.current());

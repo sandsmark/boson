@@ -25,10 +25,10 @@
 
 #include <boaudiocommand.h>
 
-#include <kprocess.h>
+#include <k3process.h>
 
 #include <qstringlist.h>
-#include <qptrqueue.h>
+#include <q3ptrqueue.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -41,8 +41,8 @@ public:
 		mProcess = 0;
 		mBuffer = 0;
 	}
-	KProcess* mProcess;
-	QPtrQueue<BoAudioCommand> mCommandQueue;
+	K3Process* mProcess;
+	Q3PtrQueue<BoAudioCommand> mCommandQueue;
 	char* mBuffer;
 };
 
@@ -61,15 +61,15 @@ BoAudioProcessController::~BoAudioProcessController()
 bool BoAudioProcessController::start()
 {
  if (!d->mProcess) {
-	d->mProcess = new KProcess();
-	connect(d->mProcess, SIGNAL(receivedStdout(KProcess*, char*, int)),
-			this, SLOT(slotShowStdout(KProcess*, char*, int)));
-	connect(d->mProcess, SIGNAL(receivedStderr(KProcess*, char*, int)),
-			this, SLOT(slotShowStderr(KProcess*, char*, int)));
-	connect(d->mProcess, SIGNAL(processExited(KProcess*)),
-			this, SLOT(slotProcessExited(KProcess*)));
-	connect(d->mProcess, SIGNAL(wroteStdin(KProcess*)),
-			this, SLOT(slotWroteStdin(KProcess*)));
+	d->mProcess = new K3Process();
+	connect(d->mProcess, SIGNAL(receivedStdout(K3Process*, char*, int)),
+			this, SLOT(slotShowStdout(K3Process*, char*, int)));
+	connect(d->mProcess, SIGNAL(receivedStderr(K3Process*, char*, int)),
+			this, SLOT(slotShowStderr(K3Process*, char*, int)));
+	connect(d->mProcess, SIGNAL(processExited(K3Process*)),
+			this, SLOT(slotProcessExited(K3Process*)));
+	connect(d->mProcess, SIGNAL(wroteStdin(K3Process*)),
+			this, SLOT(slotWroteStdin(K3Process*)));
  } else if (d->mProcess->isRunning()) {
 	boWarning(200) << k_funcinfo << "process already running" << endl;
 	return true;
@@ -81,10 +81,10 @@ bool BoAudioProcessController::start()
  *(d->mProcess) << processPath;
 
  boDebug(200) << k_funcinfo << "starting process" << endl;
- return d->mProcess->start(KProcess::NotifyOnExit, KProcess::All);
+ return d->mProcess->start(K3Process::NotifyOnExit, K3Process::All);
 }
 
-void BoAudioProcessController::slotShowStdout(KProcess* , char* buffer, int length)
+void BoAudioProcessController::slotShowStdout(K3Process* , char* buffer, int length)
 {
  QString s = QString::fromLatin1(buffer, length);
  QStringList list = QStringList::split('\n', s);
@@ -95,7 +95,7 @@ void BoAudioProcessController::slotShowStdout(KProcess* , char* buffer, int leng
  }
 }
 
-void BoAudioProcessController::slotShowStderr(KProcess* , char* buffer, int length)
+void BoAudioProcessController::slotShowStderr(K3Process* , char* buffer, int length)
 {
  QString s = QString::fromLatin1(buffer, length);
  QStringList list = QStringList::split('\n', s);
@@ -168,7 +168,7 @@ void BoAudioProcessController::sendCommand(BoAudioCommand* command)
  }
 }
 
-void BoAudioProcessController::slotProcessExited(KProcess*)
+void BoAudioProcessController::slotProcessExited(K3Process*)
 {
  while (!d->mCommandQueue.isEmpty()) {
 	BoAudioCommand* c = d->mCommandQueue.dequeue();
@@ -178,7 +178,7 @@ void BoAudioProcessController::slotProcessExited(KProcess*)
  d->mBuffer = 0;
 }
 
-void BoAudioProcessController::slotWroteStdin(KProcess*)
+void BoAudioProcessController::slotWroteStdin(K3Process*)
 {
  delete[] d->mBuffer;
  d->mBuffer = 0;

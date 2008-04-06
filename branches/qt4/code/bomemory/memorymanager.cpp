@@ -24,7 +24,7 @@
 #include <string.h>
 
 #include <qstring.h>
-#include <qptrdict.h>
+#include <q3ptrdict.h>
 
 //#define TOO_MUCH_DEBUGGING
 
@@ -67,7 +67,7 @@ public:
 	{
 	}
 
-	QPtrDict<MemNode> mMemoryInfo;
+	Q3PtrDict<MemNode> mMemoryInfo;
 	unsigned long int mMemory;
 };
 
@@ -152,7 +152,7 @@ void MemoryManager::bofree(void* p, bool isFree)
 #endif
 }
 
-const QPtrDict<MemNode>& MemoryManager::allNodes() const
+const Q3PtrDict<MemNode>& MemoryManager::allNodes() const
 {
  return d->mMemoryInfo;
 }

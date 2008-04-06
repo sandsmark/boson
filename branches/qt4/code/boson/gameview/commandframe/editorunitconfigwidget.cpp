@@ -88,17 +88,17 @@ EditorUnitConfigWidget::EditorUnitConfigWidget(BosonCommandFrame* frame)
  hbox->addWidget(d->mId);
 
  d->mHealth = new BoUfoNumInput(); // AB: should be an int input
- d->mHealth->setLabel(i18n("Health: "), AlignVCenter);
+ d->mHealth->setLabel(i18n("Health: "), Qt::AlignVCenter);
  connect(d->mHealth, SIGNAL(signalValueChanged(float)), this, SIGNAL(signalUpdateUnit()));
  addWidget(d->mHealth);
 
  d->mShields = new BoUfoNumInput(); // AB: should be an int input
- d->mShields->setLabel(i18n("Shields: "), AlignVCenter);
+ d->mShields->setLabel(i18n("Shields: "), Qt::AlignVCenter);
  connect(d->mShields, SIGNAL(signalValueChanged(float)), this, SIGNAL(signalUpdateUnit()));
  addWidget(d->mShields);
 
  d->mConstructionStep = new BoUfoNumInput(); // AB: should be an int input
- d->mConstructionStep->setLabel(i18n("Construction step: "), AlignVCenter);
+ d->mConstructionStep->setLabel(i18n("Construction step: "), Qt::AlignVCenter);
  connect(d->mConstructionStep, SIGNAL(signalValueChanged(float)), this, SIGNAL(signalUpdateUnit()));
  addWidget(d->mConstructionStep);
 
@@ -106,20 +106,20 @@ EditorUnitConfigWidget::EditorUnitConfigWidget(BosonCommandFrame* frame)
  addWidget(d->mProductionList);
 
  d->mResourceMineMinerals = new BoUfoNumInput(); // AB: should be an int input
- d->mResourceMineMinerals->setLabel(i18n("Minerals: "), AlignVCenter);
+ d->mResourceMineMinerals->setLabel(i18n("Minerals: "), Qt::AlignVCenter);
  d->mResourceMineMinerals->setRange(-1, 200000);
  connect(d->mResourceMineMinerals, SIGNAL(signalValueChanged(float)), this, SIGNAL(signalUpdateUnit()));
  addWidget(d->mResourceMineMinerals);
 
  d->mResourceMineOil = new BoUfoNumInput(); // AB: should be an int input
- d->mResourceMineOil->setLabel(i18n("Oil: "), AlignVCenter);
+ d->mResourceMineOil->setLabel(i18n("Oil: "), Qt::AlignVCenter);
  connect(d->mResourceMineOil, SIGNAL(signalValueChanged(float)), this, SIGNAL(signalUpdateUnit()));
  d->mResourceMineOil->setRange(-1, 200000);
  addWidget(d->mResourceMineOil);
 
 
  d->mRotation = new BoUfoNumInput();
- d->mRotation->setLabel(i18n("Rotation: "), AlignVCenter);
+ d->mRotation->setLabel(i18n("Rotation: "), Qt::AlignVCenter);
  d->mRotation->setRange(0, 359);
  connect(d->mRotation, SIGNAL(signalValueChanged(float)),
 		this, SIGNAL(signalUpdateUnit()));
@@ -164,7 +164,7 @@ bool EditorUnitConfigWidget::display(Unit* unit)
  //
  // we do so by setting a minimum value >= 2.
  // here we use 10 for cosmetic reasons.
- d->mHealth->setRange(QMIN(10, unit->maxHealth()), unit->maxHealth());
+ d->mHealth->setRange(qMin(10, unit->maxHealth()), unit->maxHealth());
 
  d->mHealth->setValue(unit->health());
  if (!facility || (facility && facility->construction()->constructionSteps() == 0)) {

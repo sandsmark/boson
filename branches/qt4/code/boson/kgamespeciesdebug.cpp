@@ -30,17 +30,21 @@
 
 #include <klocale.h>
 
-#include <qvgroupbox.h>
-#include <qptrdict.h>
+#include <q3vgroupbox.h>
+#include <q3ptrdict.h>
 #include <qlayout.h>
 #include <qlabel.h>
 #include <qpushbutton.h>
 #include <qcombobox.h>
-#include <qintdict.h>
+#include <q3intdict.h>
 #include <qtabwidget.h>
-#include <qvbox.h>
-#include <qvaluelist.h>
+#include <q3vbox.h>
+#include <q3valuelist.h>
 #include <qtooltip.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <Q3PtrList>
+#include <Q3VBoxLayout>
 
 
 class BosonModelsView : public QWidget
@@ -60,15 +64,15 @@ public:
 	void update();
 
 protected:
-	QPtrList<BosonModel> unitModels()
+	Q3PtrList<BosonModel> unitModels()
 	{
-		QPtrList<BosonModel> models;
+		Q3PtrList<BosonModel> models;
 		if (!mSpecies) {
 			return models;
 		}
-		QValueList<unsigned long int> units = mSpecies->allFacilities();
+		Q3ValueList<unsigned long int> units = mSpecies->allFacilities();
 		units += mSpecies->allMobiles();
-		QValueList<unsigned long int>::Iterator it;
+		Q3ValueList<unsigned long int>::Iterator it;
 		for (it = units.begin(); it != units.end(); ++it) {
 			if (boViewData->speciesData(mSpecies)->unitModel(*it)) {
 				models.append(boViewData->speciesData(mSpecies)->unitModel(*it));
@@ -78,9 +82,9 @@ protected:
 		}
 		return models;
 	}
-	QPtrList<BosonModel> objectModels()
+	Q3PtrList<BosonModel> objectModels()
 	{
-		QPtrList<BosonModel> models;
+		Q3PtrList<BosonModel> models;
 		if (!mSpecies) {
 			return models;
 		}
@@ -95,25 +99,25 @@ protected:
 		}
 		return models;
 	}
-	QPtrList<BosonModel> allModels()
+	Q3PtrList<BosonModel> allModels()
 	{
-		QPtrList<BosonModel> models;
+		Q3PtrList<BosonModel> models;
 		if (!mSpecies) {
 			return models;
 		}
 		models = unitModels();
-		QPtrList<BosonModel> objects = objectModels();
-		QPtrListIterator<BosonModel> it(objects);
+		Q3PtrList<BosonModel> objects = objectModels();
+		Q3PtrListIterator<BosonModel> it(objects);
 		for (; it.current(); ++it) {
 			models.append(*it);
 		}
 		return models;
 	}
-	QPtrList<BoMesh> allMeshes()
+	Q3PtrList<BoMesh> allMeshes()
 	{
-		QPtrList<BoMesh> meshes;
-		QPtrList<BosonModel> models = allModels();
-		QPtrListIterator<BosonModel> modelIt(models);
+		Q3PtrList<BoMesh> meshes;
+		Q3PtrList<BosonModel> models = allModels();
+		Q3PtrListIterator<BosonModel> modelIt(models);
 		for (; modelIt.current(); ++modelIt) {
 			BoLOD* lod = modelIt.current()->lod(0);
 			for (unsigned int i = 0; i < lod->meshCount(); i++) {
@@ -134,8 +138,8 @@ protected:
 		if (!mSpecies) {
 			return;
 		}
-		QPtrList<BosonModel> models = allModels();
-		QPtrListIterator<BosonModel> it(models);
+		Q3PtrList<BosonModel> models = allModels();
+		Q3PtrListIterator<BosonModel> it(models);
 		for (; it.current(); ++it) {
 			unsigned int meshCount = it.current()->lod(0)->meshCount();
 			*all += meshCount;
@@ -160,8 +164,8 @@ protected:
 		}
 		// We count both frames() and constructionSteps() as frames
 		// here.
-		QPtrList<BosonModel> models = allModels();
-		QPtrListIterator<BosonModel> it(models);
+		Q3PtrList<BosonModel> models = allModels();
+		Q3PtrListIterator<BosonModel> it(models);
 		for (; it.current(); ++it) {
 			BosonModel* m = it.current();
 			unsigned int frameCount = m->lod(0)->frameCount();
@@ -186,8 +190,8 @@ protected:
 			return;
 		}
 
-		QPtrList<BoMesh> meshes = allMeshes();
-		QPtrListIterator<BoMesh> it(meshes);
+		Q3PtrList<BoMesh> meshes = allMeshes();
+		Q3PtrListIterator<BoMesh> it(meshes);
 		for (; it.current(); ++it) {
 			BoMesh* mesh = it.current();
 			*all += mesh->pointCount();
@@ -213,40 +217,40 @@ private:
 BosonModelsView::BosonModelsView(QWidget* parent) : QWidget(parent, "bosonmodelsview")
 {
  mSpecies = 0;
- QVBoxLayout* topLayout = new QVBoxLayout(this);
+ Q3VBoxLayout* topLayout = new Q3VBoxLayout(this);
 
- QHBoxLayout* hLayout = new QHBoxLayout(topLayout);
+ Q3HBoxLayout* hLayout = new Q3HBoxLayout(topLayout);
  QLabel* unitModelCountLabel = new QLabel(i18n("Unit Models: "), this);
  mUnitModelCount = new QLabel(this);
  hLayout->addWidget(unitModelCountLabel);
  hLayout->addWidget(mUnitModelCount);
 
- hLayout = new QHBoxLayout(topLayout);
+ hLayout = new Q3HBoxLayout(topLayout);
  QLabel* objectModelCountLabel = new QLabel(i18n("Object Models: "), this);
  mObjectModelCount = new QLabel(this);
  hLayout->addWidget(objectModelCountLabel);
  hLayout->addWidget(mObjectModelCount);
 
- hLayout = new QHBoxLayout(topLayout);
+ hLayout = new Q3HBoxLayout(topLayout);
  QLabel* modelCountLabel = new QLabel(i18n("Models: "), this);
  mModelCount = new QLabel(this);
  hLayout->addWidget(modelCountLabel);
  hLayout->addWidget(mModelCount);
 
- hLayout = new QHBoxLayout(topLayout);
+ hLayout = new Q3HBoxLayout(topLayout);
  QLabel* meshCountLabel = new QLabel(i18n("Different Meshes (all / minimal per model / maximal per model): "), this);
  mMeshCount= new QLabel(this);
  hLayout->addWidget(meshCountLabel);
  hLayout->addWidget(mMeshCount);
 
- hLayout = new QHBoxLayout(topLayout);
+ hLayout = new Q3HBoxLayout(topLayout);
  QLabel* frameCountLabel = new QLabel(i18n("Frames (all / minimal per model / maximal per model): "), this);
  mFrameCount = new QLabel(this);
  hLayout->addWidget(frameCountLabel);
  hLayout->addWidget(mFrameCount);
  QToolTip::add(mFrameCount, i18n("The number of frames in all models, including the construction steps (they are generated on the fly and are no actual model-frames)"));
 
- hLayout = new QHBoxLayout(topLayout);
+ hLayout = new Q3HBoxLayout(topLayout);
  QLabel* pointCountLabel = new QLabel(i18n("Points (all / minimal per mesh / maximal per mesh): "), this);
  mPointCount = new QLabel(this);
  hLayout->addWidget(pointCountLabel);
@@ -297,7 +301,7 @@ public:
 SpeciesView::SpeciesView(QWidget* parent) : QWidget(parent, "speciesview")
 {
  d = new SpeciesViewPrivate;
- QVBoxLayout* topLayout = new QVBoxLayout(this);
+ Q3VBoxLayout* topLayout = new Q3VBoxLayout(this);
  QTabWidget* tabWidget = new QTabWidget(this, "tabwidget");
  topLayout->addWidget(tabWidget);
 
@@ -333,7 +337,7 @@ public:
 		mSpeciesView = 0;
 	}
 
-	QIntDict<SpeciesTheme> mThemes;
+	Q3IntDict<SpeciesTheme> mThemes;
 	QComboBox* mSpeciesBox;
 	SpeciesView* mSpeciesView;
 };
@@ -342,9 +346,9 @@ KGameSpeciesDebug::KGameSpeciesDebug(QWidget* parent) : QWidget(parent)
 {
  d = new KGameSpeciesDebugPrivate;
  d->mThemes.setAutoDelete(true);
- QVBoxLayout* topLayout = new QVBoxLayout(this);
+ Q3VBoxLayout* topLayout = new Q3VBoxLayout(this);
 
- QHBoxLayout* speciesLayout = new QHBoxLayout(topLayout);
+ Q3HBoxLayout* speciesLayout = new Q3HBoxLayout(topLayout);
  QLabel* speciesLabel = new QLabel(i18n("Species: "), this);
  d->mSpeciesBox = new QComboBox(this);
  speciesLayout->addWidget(speciesLabel);
@@ -377,9 +381,9 @@ void KGameSpeciesDebug::loadSpecies()
 	speciesData->loadObjects(s->teamColor());
 	speciesData->loadActions();
 	s->readUnitConfigs();
-	QValueList<unsigned long int> units = s->allFacilities();
+	Q3ValueList<unsigned long int> units = s->allFacilities();
 	units += s->allMobiles();
-	QValueList<unsigned long int>::Iterator unitsIt;
+	Q3ValueList<unsigned long int>::Iterator unitsIt;
 	for (unitsIt = units.begin(); unitsIt != units.end(); ++unitsIt) {
 		const UnitProperties* prop = s->unitProperties(*unitsIt);
 		speciesData->loadUnit(prop, s->teamColor());

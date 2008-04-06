@@ -31,6 +31,8 @@
 #include <kgame/kgamepropertyarray.h>
 
 #include <qdom.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 class UnitStoragePluginPrivate
 {
@@ -39,14 +41,14 @@ public:
 	{
 	}
 
-	KGameProperty<Q_INT32> mStoringStatus;
+	KGameProperty<qint32> mStoringStatus;
 
-	KGamePropertyList<Q_UINT32> mPendingEnterRequests;
-	KGamePropertyList<Q_UINT32> mApprovedEnterRequests;
-	KGamePropertyList<Q_UINT32> mPendingLeaveRequests;
-	KGamePropertyList<Q_UINT32> mApprovedLeaveRequests;
+	KGamePropertyList<quint32> mPendingEnterRequests;
+	KGamePropertyList<quint32> mApprovedEnterRequests;
+	KGamePropertyList<quint32> mPendingLeaveRequests;
+	KGamePropertyList<quint32> mApprovedLeaveRequests;
 
-	KGamePropertyArray<Q_UINT32> mEnteringUnitOnPath;
+	KGamePropertyArray<quint32> mEnteringUnitOnPath;
 };
 
 UnitStoragePlugin::UnitStoragePlugin(Unit* owner)
@@ -213,16 +215,16 @@ BoVector2Fixed UnitStoragePlugin::getOutsidePos2(const BoVector2Fixed& inside, c
  return getOutsidePos1(inside, _direction);
 }
 
-QValueList<BoVector2Fixed> UnitStoragePlugin::getAbsoluteFromRelativePath(const QValueList<BoVector2Float>& relative) const
+Q3ValueList<BoVector2Fixed> UnitStoragePlugin::getAbsoluteFromRelativePath(const Q3ValueList<BoVector2Float>& relative) const
 {
- QValueList<BoVector2Fixed> path;
+ Q3ValueList<BoVector2Fixed> path;
  const UnitStorageProperties * prop = (UnitStorageProperties*)unit()->properties(PluginProperties::UnitStorage);
  if (!prop) {
 	BO_NULL_ERROR(prop);
 	return path;
  }
 
- for (QValueList<BoVector2Float>::const_iterator it = relative.begin(); it != relative.end(); ++it) {
+ for (Q3ValueList<BoVector2Float>::const_iterator it = relative.begin(); it != relative.end(); ++it) {
 	path.append(getPathPointPos((*it).x(), (*it).y()));
  }
 
@@ -252,7 +254,7 @@ int UnitStoragePlugin::pathTypeForUnit(const Unit* unit) const
  return UnitStorageProperties::PathTypeLand;
 }
 
-bool UnitStoragePlugin::getEnterPathFor(const Unit* enteringUnit, BoVector2Fixed* enterPosOutside1, BoVector2Fixed* enterPosOutside2, QValueList<BoVector2Fixed>* enterPathInside, unsigned int* pathIndex)
+bool UnitStoragePlugin::getEnterPathFor(const Unit* enteringUnit, BoVector2Fixed* enterPosOutside1, BoVector2Fixed* enterPosOutside2, Q3ValueList<BoVector2Fixed>* enterPathInside, unsigned int* pathIndex)
 {
  const UnitStorageProperties * prop = (UnitStorageProperties*)unit()->properties(PluginProperties::UnitStorage);
  if (!prop) {
@@ -275,7 +277,7 @@ bool UnitStoragePlugin::getEnterPathFor(const Unit* enteringUnit, BoVector2Fixed
 	if (prop->enterPathUnitType(i) != type) {
 		continue;
 	}
-	QValueList<BoVector2Float> relativePath = prop->enterPath(i);
+	Q3ValueList<BoVector2Float> relativePath = prop->enterPath(i);
 	if (relativePath.count() == 0) {
 		boError() << k_funcinfo << "path " << i << " is invalid!" << endl;
 		continue;
@@ -292,7 +294,7 @@ bool UnitStoragePlugin::getEnterPathFor(const Unit* enteringUnit, BoVector2Fixed
  return false;
 }
 
-bool UnitStoragePlugin::getLeavePathFor(const Unit* leavingUnit, QValueList<BoVector2Fixed>* leavePath)
+bool UnitStoragePlugin::getLeavePathFor(const Unit* leavingUnit, Q3ValueList<BoVector2Fixed>* leavePath)
 {
  Q_UNUSED(leavingUnit);
  Q_UNUSED(leavePath);
@@ -324,7 +326,7 @@ bool UnitStoragePlugin::getLeavePathFor(const Unit* leavingUnit, QValueList<BoVe
 	boDebug() << k_funcinfo << "unit " << leavingUnit->id() << " cannot use path " << path << endl;
 	return false;
  }
- QValueList<BoVector2Float> relativePath = prop->leavePathForEnterPath(path);
+ Q3ValueList<BoVector2Float> relativePath = prop->leavePathForEnterPath(path);
  if (relativePath.count() == 0) {
 	boError() << k_funcinfo << "leave path " << path << " is invalid!" << endl;
 	return false;

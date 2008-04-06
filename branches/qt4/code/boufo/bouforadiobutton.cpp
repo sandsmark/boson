@@ -178,7 +178,8 @@ void BoUfoRadioButton::setText(const QString& text)
  if (text.isNull()) {
 	mRadioButton->setText("");
  } else {
-	mRadioButton->setText(text.latin1());
+	QByteArray tmp = text.toAscii();
+	mRadioButton->setText(std::string(tmp.constData(), tmp.length()));
  }
 }
 

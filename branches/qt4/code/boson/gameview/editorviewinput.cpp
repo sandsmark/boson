@@ -49,9 +49,13 @@
 #include <klocale.h>
 #include <kapplication.h>
 
-#include <qptrstack.h>
+#include <q3ptrstack.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 #include <math.h>
+#include <krandom.h>
 
 
 // this just stores a *selection* for placement. This means e.g. if you click
@@ -171,8 +175,8 @@ public:
 	}
 	Placement mPlacement;
 
-	QPtrStack<BosonMessageEditorMove> mUndoStack;
-	QPtrStack<BosonMessageEditorMove> mRedoStack;
+	Q3PtrStack<BosonMessageEditorMove> mUndoStack;
+	Q3PtrStack<BosonMessageEditorMove> mRedoStack;
 };
 
 EditorViewInput::EditorViewInput()
@@ -283,18 +287,18 @@ bool EditorViewInput::actionPlace(const BoVector3Fixed& groundCanvasVector, bool
 		boGame->slotAddChatSystemMessage(i18n("Remove the unit first"));
 		ret = false;
 	} else {
-		unsigned char version = kapp->random() % 4;
+		unsigned char version = KRandom::random() % 4;
 		boDebug() << k_funcinfo << "place ground " << d->mPlacement.cell() << ",version=" << version << endl;
 
 #if 0
-		stream << (Q_UINT32)BosonMessageIds::MoveEditor;
-		stream << (Q_UINT32)BosonMessageIds::MovePlaceCell;
-		stream << (Q_INT32)d->mPlacement.cell();
-		stream << (Q_UINT8)version;
-//		stream << (Q_INT8)Cell::isBigTrans(d->mPlacement.cell());
-		stream << (Q_INT8)false; // never a big trans
-		stream << (Q_INT32)x;
-		stream << (Q_INT32)y;
+		stream << (quint32)BosonMessageIds::MoveEditor;
+		stream << (quint32)BosonMessageIds::MovePlaceCell;
+		stream << (qint32)d->mPlacement.cell();
+		stream << (quint8)version;
+//		stream << (qint8)Cell::isBigTrans(d->mPlacement.cell());
+		stream << (qint8)false; // never a big trans
+		stream << (qint32)x;
+		stream << (qint32)y;
 #else
 		BosonMessageEditorMovePlaceCell message;
 		...
@@ -330,11 +334,11 @@ bool EditorViewInput::actionPlace(const BoVector3Fixed& groundCanvasVector, bool
 
 
 	// we modify 4 corners (hardcoded at the moment)
-	QValueVector<Q_UINT32> cornersX(4);
-	QValueVector<Q_UINT32> cornersY(4);
-	QValueVector<Q_UINT32> cornersTextureCount(4);
-	QValueVector< QValueVector<Q_UINT32> > cornerTextures(4);
-	QValueVector< QValueVector<Q_UINT8> > cornerAlpha(4);
+	Q3ValueVector<quint32> cornersX(4);
+	Q3ValueVector<quint32> cornersY(4);
+	Q3ValueVector<quint32> cornersTextureCount(4);
+	Q3ValueVector< Q3ValueVector<quint32> > cornerTextures(4);
+	Q3ValueVector< Q3ValueVector<quint8> > cornerAlpha(4);
 
 	cornersX[0] = x;
 	cornersX[1] = x + 1;
@@ -361,7 +365,7 @@ bool EditorViewInput::actionPlace(const BoVector3Fixed& groundCanvasVector, bool
 	}
 
 	QByteArray b;
-	QDataStream stream(b, IO_WriteOnly);
+	QDataStream stream(b, QIODevice::WriteOnly);
 
 	BosonMessageEditorMoveChangeTexMap message(cornersX, cornersY, cornersTextureCount, cornerTextures, cornerAlpha);
 	if (!message.save(stream)) {
@@ -369,7 +373,7 @@ bool EditorViewInput::actionPlace(const BoVector3Fixed& groundCanvasVector, bool
 		return false;
 	}
 
-	QDataStream msg(b, IO_ReadOnly);
+	QDataStream msg(b, QIODevice::ReadOnly);
 	localPlayerInput()->sendInput(msg);
 	ret = true;
  }
@@ -457,24 +461,24 @@ void EditorViewInput::deleteSelectedUnits()
 	boDebug() << k_funcinfo << "no unit selected" << endl;
 	return;
  }
- QPtrList<Unit> units = selection()->allUnits();
+ Q3PtrList<Unit> units = selection()->allUnits();
  selection()->clear();
 
- QValueList<Q_ULONG> items;
- QPtrListIterator<Unit> it(units);
+ Q3ValueList<Q_ULONG> items;
+ Q3PtrListIterator<Unit> it(units);
  for (; it.current(); ++it) {
 	items.append(it.current()->id());
  }
 
  QByteArray b;
- QDataStream stream(b, IO_WriteOnly);
+ QDataStream stream(b, QIODevice::WriteOnly);
  BosonMessageEditorMoveDeleteItems message(items);
  if (!message.save(stream)) {
 	boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
 	return;
  }
 
- QDataStream msg(b, IO_ReadOnly);
+ QDataStream msg(b, QIODevice::ReadOnly);
  localPlayerInput()->sendInput(msg);
 }
 
@@ -530,10 +534,10 @@ void EditorViewInput::action(const BoSpecificAction& action)
 
 bool EditorViewInput::selectAll(const UnitProperties* prop, bool replace)
 {
- QPtrList<Unit> list;
- QPtrList<Player> gamePlayerList = boGame->gamePlayerList();
+ Q3PtrList<Unit> list;
+ Q3PtrList<Player> gamePlayerList = boGame->gamePlayerList();
  for (unsigned int i = 0; i < gamePlayerList.count(); i++) {
-	QPtrListIterator<Unit> it(*((gamePlayerList.at(i))->allUnits()));
+	Q3PtrListIterator<Unit> it(*((gamePlayerList.at(i))->allUnits()));
 	while (it.current()) {
 		if (it.current()->unitProperties()->typeId() == prop->typeId()) {
 			if (canSelect(it.current()) == CanSelectMultipleOk) {
@@ -635,7 +639,7 @@ void EditorViewInput::undo()
  message->setUndo();
 
  QByteArray b;
- QDataStream stream(b, IO_WriteOnly);
+ QDataStream stream(b, QIODevice::WriteOnly);
  if (!message->save(stream)) {
 	boError() << k_funcinfo << "unable to save message (" << message->messageId() << ")" << endl;
 	delete message;
@@ -644,7 +648,7 @@ void EditorViewInput::undo()
 
  delete message;
 
- QDataStream msg(b, IO_ReadOnly);
+ QDataStream msg(b, QIODevice::ReadOnly);
  localPlayerInput()->sendInput(msg);
 
  emit signalEditorHasUndo(messageName(d->mUndoStack.top()));
@@ -661,7 +665,7 @@ void EditorViewInput::redo()
  message->setRedo();
 
  QByteArray b;
- QDataStream stream(b, IO_WriteOnly);
+ QDataStream stream(b, QIODevice::WriteOnly);
  if (!message->save(stream)) {
 	boError() << k_funcinfo << "unable to save message (" << message->messageId() << ")" << endl;
 	delete message;
@@ -670,7 +674,7 @@ void EditorViewInput::redo()
 
  delete message;
 
- QDataStream msg(b, IO_ReadOnly);
+ QDataStream msg(b, QIODevice::ReadOnly);
  localPlayerInput()->sendInput(msg);
 
  emit signalEditorHasRedo(messageName(d->mRedoStack.top()));

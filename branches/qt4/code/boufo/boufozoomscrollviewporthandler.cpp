@@ -27,8 +27,9 @@
 
 #include <klocale.h>
 
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 #include <qpair.h>
+#include <QPoint>
 
 class BoUfoZoomScrollViewportHandlerPrivate
 {
@@ -93,8 +94,8 @@ void BoUfoZoomScrollViewportHandler::setViewSize(unsigned int w, unsigned int h)
  d->mViewHeight = h;
 
  // avoid possible divisions by zero
- d->mViewWidth = QMAX(d->mViewWidth, 1);
- d->mViewHeight = QMAX(d->mViewHeight, 1);
+ d->mViewWidth = qMax(d->mViewWidth, (unsigned int)1);
+ d->mViewHeight = qMax(d->mViewHeight, (unsigned int)1);
 
  fixZoomStep();
 
@@ -104,10 +105,10 @@ void BoUfoZoomScrollViewportHandler::setViewSize(unsigned int w, unsigned int h)
 
 void BoUfoZoomScrollViewportHandler::centerViewOnDataPoint(int x, int y)
 {
- x = QMIN(x, (int)dataWidth() - 1);
- y = QMIN(y, (int)dataHeight() - 1);
- x = QMAX(x, 0);
- y = QMAX(y, 0);
+ x = qMin(x, (int)dataWidth() - 1);
+ y = qMin(y, (int)dataHeight() - 1);
+ x = qMax(x, 0);
+ y = qMax(y, 0);
  d->mViewCenterX = x;
  d->mViewCenterY = y;
 }
@@ -120,8 +121,8 @@ int BoUfoZoomScrollViewportHandler::xTranslation() const
  }
  int w2 = (int)((d->mViewWidth / 2) * 1.0f / zoomOutFactor());
  int ret = d->mViewCenterX - w2;
- ret = QMAX(ret, 0);
- ret = QMIN(ret, (int)(dataWidth() - d->mViewWidth * 1.0f / zoomOutFactor()));
+ ret = qMax(ret, 0);
+ ret = qMin(ret, (int)(dataWidth() - d->mViewWidth * 1.0f / zoomOutFactor()));
 
  return -ret;
 }
@@ -135,12 +136,12 @@ int BoUfoZoomScrollViewportHandler::yTranslation() const
 
  // flip y: 0 is bottom
  int realCenterY = (int)(dataHeight() - d->mViewCenterY) - 1;
- realCenterY = QMAX(realCenterY, 0);
+ realCenterY = qMax(realCenterY, 0);
 
  int h2 = (int)((d->mViewHeight / 2) * 1.0f / zoomOutFactor());
  int ret = realCenterY - h2;
- ret = QMAX(ret, 0);
- ret = QMIN(ret, (int)(dataHeight() - d->mViewHeight * 1.0f / zoomOutFactor()));
+ ret = qMax(ret, 0);
+ ret = qMin(ret, (int)(dataHeight() - d->mViewHeight * 1.0f / zoomOutFactor()));
 
  return -ret;
 }
@@ -158,7 +159,7 @@ int BoUfoZoomScrollViewportHandler::viewCenterY() const
 void BoUfoZoomScrollViewportHandler::zoomIn()
 {
  d->mZoomStep /= 1.5f;
- d->mZoomStep = QMAX(d->mZoomStep, 0.125f);
+ d->mZoomStep = qMax(d->mZoomStep, 0.125f);
  fixZoomStep();
 
  centerViewOnDataPoint(d->mViewCenterX, d->mViewCenterY);

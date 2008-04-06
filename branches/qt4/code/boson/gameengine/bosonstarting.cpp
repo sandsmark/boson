@@ -37,6 +37,10 @@
 
 #include <qtimer.h>
 #include <qmap.h>
+//Added by qt3to4:
+#include <Q3CString>
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 #define DO_GUI_INIT_ON_DATA_INIT 1
 
@@ -77,9 +81,9 @@ public:
 	BosonStartingPrivate()
 	{
 	}
-	QPtrList<BosonStartingTaskCreator> mTaskCreators;
+	Q3PtrList<BosonStartingTaskCreator> mTaskCreators;
 
-	QValueList<Q_UINT32> mStartingCompleted; // clients that completed starting
+	Q3ValueList<quint32> mStartingCompleted; // clients that completed starting
 	QMap<unsigned int, QByteArray> mStartingCompletedMessage;
 
 	QString mLoadFromLogFile;
@@ -147,10 +151,10 @@ void BosonStarting::slotStartNewGameWithTimer()
  QTimer::singleShot(0, this, SLOT(slotStart()));
 }
 
-bool BosonStarting::executeTasks(const QPtrList<BosonStartingTask>& tasks)
+bool BosonStarting::executeTasks(const Q3PtrList<BosonStartingTask>& tasks)
 {
  unsigned long int duration = 0;
- for (QPtrListIterator<BosonStartingTask> it(tasks); it.current(); ++it) {
+ for (Q3PtrListIterator<BosonStartingTask> it(tasks); it.current(); ++it) {
 	disconnect(it.current(), SIGNAL(signalStartSubTask(const QString&)), this, 0);
 	connect(it.current(), SIGNAL(signalStartSubTask(const QString&)),
 			this, SIGNAL(signalLoadingStartSubTask(const QString&)));
@@ -164,7 +168,7 @@ bool BosonStarting::executeTasks(const QPtrList<BosonStartingTask>& tasks)
 
  duration = 0;
  emit signalLoadingTaskCompleted(duration);
- for (QPtrListIterator<BosonStartingTask> it(tasks); it.current(); ++it) {
+ for (Q3PtrListIterator<BosonStartingTask> it(tasks); it.current(); ++it) {
 	boDebug(270) << k_funcinfo << "starting task: " << it.current()->text() << endl;
 	emit signalLoadingStartTask(it.current()->text());
 	emit signalLoadingStartSubTask("");
@@ -237,10 +241,10 @@ bool BosonStarting::start()
  }
 
 
- QPtrList<BosonStartingTask> tasks;
+ Q3PtrList<BosonStartingTask> tasks;
  tasks.setAutoDelete(true);
 
- for (QPtrListIterator<BosonStartingTaskCreator> it(d->mTaskCreators); it.current(); ++it) {
+ for (Q3PtrListIterator<BosonStartingTaskCreator> it(d->mTaskCreators); it.current(); ++it) {
 	it.current()->setFiles(&files);
 	if (!it.current()->createTasks(&tasks)) {
 		boError(270) << k_funcinfo << "tasks of " << it.current()->creatorName() << " cannot be created" << endl;
@@ -281,7 +285,7 @@ void BosonStarting::checkEvents()
  }
 }
 
-void BosonStarting::slotStartingCompletedReceived(const QByteArray& buffer, Q_UINT32 sender)
+void BosonStarting::slotStartingCompletedReceived(const QByteArray& buffer, quint32 sender)
 {
  if (!d->mStartingCompleted.contains(sender)) {
 	d->mStartingCompleted.append(sender);
@@ -291,11 +295,11 @@ void BosonStarting::slotStartingCompletedReceived(const QByteArray& buffer, Q_UI
  if (!boGame->isAdmin()) {
 	return;
  }
- QValueList<Q_UINT32> clients = boGame->messageClient()->clientList();
+ Q3ValueList<quint32> clients = boGame->messageClient()->clientList();
  if (clients.count() > d->mStartingCompleted.count()) {
 	return;
  }
- QValueList<Q_UINT32>::Iterator it;
+ Q3ValueList<quint32>::Iterator it;
  for (it = clients.begin(); it != clients.end(); ++it) {
 	if (!d->mStartingCompleted.contains(*it)) {
 		return;
@@ -333,21 +337,21 @@ void BosonStarting::sendStartingCompleted(bool success)
  boGame->sendMessageSyncRandom();
 
  QByteArray b;
- QDataStream stream(b, IO_WriteOnly);
- stream << (Q_INT8)success;
- QCString themeMD5;
- QPtrList<Player> allPlayerList = boGame->allPlayerList();
+ QDataStream stream(b, QIODevice::WriteOnly);
+ stream << (qint8)success;
+ Q3CString themeMD5;
+ Q3PtrList<Player> allPlayerList = boGame->allPlayerList();
  for (unsigned int i = 0; i < allPlayerList.count(); i++) {
 	Player* p = allPlayerList.at(i);
 	SpeciesTheme* theme = p->speciesTheme();
 	if (!theme) {
 		// make an invalid string.
-		themeMD5 = QCString();
+		themeMD5 = Q3CString();
 		break;
 	}
-	QCString num;
+	Q3CString num;
 	num.setNum(p->bosonId());
-	themeMD5 += QCString("Player ") + num + ":\n";
+	themeMD5 += Q3CString("Player ") + num + ":\n";
 	themeMD5 += "UnitProperties:\n" + theme->unitPropertiesMD5();
 	themeMD5 += "\n";
  }
@@ -367,14 +371,14 @@ bool BosonStarting::checkStartingCompletedMessages() const
 	boError(270) << k_funcinfo << "have not StartingCompleted message from ADMIN" << endl;
 	return false;
  }
- QDataStream adminStream(admin, IO_ReadOnly);
- Q_INT8 adminSuccess;
+ QDataStream adminStream(admin, QIODevice::ReadOnly);
+ qint8 adminSuccess;
  adminStream >> adminSuccess;
  if (!adminSuccess) {
 	boError(270) << k_funcinfo << "ADMIN failed in game starting" << endl;
 	return false;
  }
- QCString adminThemeMD5;
+ Q3CString adminThemeMD5;
  adminStream >> adminThemeMD5;
  if (adminThemeMD5.isNull()) {
 	boError(270) << k_funcinfo << "no MD5 string for themes by ADMIN" << endl;
@@ -385,14 +389,14 @@ bool BosonStarting::checkStartingCompletedMessages() const
 	if (it.key() == boGame->gameId()) {
 		continue;
 	}
-	QDataStream stream(it.data(), IO_ReadOnly);
-	Q_INT8 success;
+	QDataStream stream(it.data(), QIODevice::ReadOnly);
+	qint8 success;
 	stream >> success;
 	if (!success) {
 		boError(270) << k_funcinfo << "client " << it.key() << " failed on game starting" << endl;
 		return false;
 	}
-	QCString themeMD5;
+	Q3CString themeMD5;
 	stream >> themeMD5;
 	if (themeMD5 != adminThemeMD5) {
 		boError(270) << k_funcinfo << "theme MD5 sums of client "

@@ -38,9 +38,12 @@
 #include "boglobal.h"
 #include "bosondata.h"
 
-#include <ktempfile.h>
+#include <ktemporaryfile.h>
 #include <ktempdir.h>
 #include <qdir.h>
+//Added by qt3to4:
+#include <Q3TextStream>
+#include <Q3PtrList>
 
 #include <memory> // std::auto_ptr
 
@@ -66,7 +69,7 @@ BosonGroundTheme* TestFrameWork::createNewGroundTheme(const QString& identifier,
 {
  BosonGroundTheme* theme = new BosonGroundTheme();
  {
-	QPtrVector<BosonGroundType> types(groundTypeCount);
+	Q3PtrVector<BosonGroundType> types(groundTypeCount);
 	for (unsigned int i = 0; i < groundTypeCount; i++) {
 		BosonGroundType* type = new BosonGroundType();
 		type->name = "dummy";
@@ -130,15 +133,15 @@ SpeciesTheme* TestFrameWork::createAndLoadDummySpeciesTheme(const QColor& teamCo
  if (!speciesDir->mkdir("units")) {
 	return false;
  }
- QDir unitsDir(speciesDir->absFilePath("units"));
+ QDir unitsDir(speciesDir->absoluteFilePath("units"));
 
  SpeciesTheme* theme = new SpeciesTheme();
  theme->setThemePath(speciesDir_.name());
  theme->setTeamColor(teamColor);
 
- QFile technologies(speciesDir->absFilePath("index.technologies"));
+ QFile technologies(speciesDir->absoluteFilePath("index.technologies"));
  // open && close once, to write an empty file
- if (!technologies.open(IO_WriteOnly)) {
+ if (!technologies.open(QIODevice::WriteOnly)) {
 	boError() << k_funcinfo << "could not write technologies file " << technologies.name() << endl;
 	return false;
  }
@@ -148,11 +151,11 @@ SpeciesTheme* TestFrameWork::createAndLoadDummySpeciesTheme(const QColor& teamCo
 	if (!unitsDir.mkdir(QString("unit_%1").arg(i))) {
 		return false;
 	}
-	QFile file(speciesDir->absFilePath(QString("units/unit_%1/index.unit").arg(i)));
-	if (!file.open(IO_WriteOnly)) {
+	QFile file(speciesDir->absoluteFilePath(QString("units/unit_%1/index.unit").arg(i)));
+	if (!file.open(QIODevice::WriteOnly)) {
 		return false;
 	}
-	QTextStream stream(&file);
+	Q3TextStream stream(&file);
 	unsigned int id = i + 1;
 	stream << "[Boson Unit]\n";
 	stream << "Id=" << id << "\n";
@@ -220,7 +223,7 @@ CanvasContainer::CanvasContainer()
 
 CanvasContainer::~CanvasContainer()
 {
- for (QPtrListIterator<Player> it(mPlayerListManager->allPlayerList()); it.current(); ++it) {
+ for (Q3PtrListIterator<Player> it(mPlayerListManager->allPlayerList()); it.current(); ++it) {
 	delete it.current();
  }
  delete mCanvas;
@@ -273,7 +276,7 @@ bool CanvasContainer::createPlayers(unsigned int count)
 
 bool CanvasContainer::createPlayers(unsigned int count, BosonPlayerListManager* playerListManager, BosonPlayField* playField)
 {
- QPtrList<KPlayer> players;
+ Q3PtrList<KPlayer> players;
  for (unsigned int i = 0; i < count; i++) {
 	SpeciesTheme* theme = TestFrameWork::createAndLoadDummySpeciesTheme(QColor(i * 10, 0, 0));
 	if (!theme) {
@@ -363,7 +366,7 @@ bool BosonContainer::createPlayers(unsigned int count)
  // only once it is received, systemAddPlayer() is called.
  // -> this will never be received, because (atm?) we dont have an event loop in
  //    the tests (and dont want any).
- for (QPtrListIterator<Player> it(mBoson->playerListManager()->allPlayerList()); it.current(); ++it) {
+ for (Q3PtrListIterator<Player> it(mBoson->playerListManager()->allPlayerList()); it.current(); ++it) {
 	it.current()->setGame(mBoson);
  }
 

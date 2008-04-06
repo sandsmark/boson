@@ -22,11 +22,13 @@
 
 
 #include "processor.h"
+//Added by qt3to4:
+#include <Q3ValueList>
 
 class Model;
 class LOD;
 class Mesh;
-template<class T> class QValueList;
+template<class T> class Q3ValueList;
 
 
 class MeshOptimizer : public Processor
@@ -39,8 +41,8 @@ class MeshOptimizer : public Processor
 
 
   protected:
-    void findEqualMeshes(QValueList<Mesh*>* equal, QValueList<Mesh*>* rest);
-    Mesh* mergeMeshes(QValueList<Mesh*>* equal);
+    void findEqualMeshes(Q3ValueList<Mesh*>* equal, Q3ValueList<Mesh*>* rest);
+    Mesh* mergeMeshes(Q3ValueList<Mesh*>* equal);
     bool hasMultipleNodes(Mesh* m);
     bool areInSameFrames(Mesh* m1, Mesh* m2);
     bool animationsDiffer(Mesh* m1, Mesh* m2);

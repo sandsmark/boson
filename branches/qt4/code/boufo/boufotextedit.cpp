@@ -75,7 +75,8 @@ void BoUfoTextEdit::setText(const QString& text)
  if (text.isNull()) {
 	mTextEdit->setText("");
  } else {
-	mTextEdit->setText(text.latin1());
+	QByteArray tmp = text.toAscii();
+	mTextEdit->setText(std::string(tmp.constData(), tmp.length()));
  }
 }
 

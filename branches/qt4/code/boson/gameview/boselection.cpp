@@ -28,7 +28,9 @@
 #include "../gameengine/boson.h"
 
 #include <qdom.h>
-#include <qintdict.h>
+#include <q3intdict.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 BoSelection::BoSelection(QObject* parent) : QObject(parent)
 {
@@ -47,8 +49,8 @@ void BoSelection::copy(BoSelection* selection, bool replace)
  if (!selection) {
 	return;
  }
- QPtrList<Unit> list = selection->allUnits();
- QPtrListIterator<Unit> it(list);
+ Q3PtrList<Unit> list = selection->allUnits();
+ Q3PtrListIterator<Unit> it(list);
  for (; it.current(); ++it) {
 	add(it.current());
  }
@@ -60,7 +62,7 @@ void BoSelection::clear(bool emitSignal)
  if (isEmpty()) {
 	return;
  }
- QPtrListIterator<Unit> it(mSelection);
+ Q3PtrListIterator<Unit> it(mSelection);
  while (it.current()) {
 	remove(it.current());
  }
@@ -99,7 +101,7 @@ void BoSelection::selectUnit(Unit* unit, bool replace)
  emit signalSelectionChanged(this);
 }
 
-void BoSelection::selectUnits(const QPtrList<Unit>& list, bool replace)
+void BoSelection::selectUnits(const Q3PtrList<Unit>& list, bool replace)
 {
  if (!list.count()) {
 	return;
@@ -111,7 +113,7 @@ void BoSelection::selectUnits(const QPtrList<Unit>& list, bool replace)
  if (replace) {
 	clear(false);
  }
- QPtrListIterator<Unit> it(list);
+ Q3PtrListIterator<Unit> it(list);
  while (it.current()) {
 	add(it.current());
 	++it;
@@ -140,7 +142,7 @@ bool BoSelection::remove(Unit* unit)
 
 bool BoSelection::hasMobileUnit() const
 {
- QPtrListIterator<Unit> it(mSelection);
+ Q3PtrListIterator<Unit> it(mSelection);
  while (it.current()) {
 	if (it.current()->isMobile()) {
 		return true;
@@ -152,7 +154,7 @@ bool BoSelection::hasMobileUnit() const
 
 bool BoSelection::hasMineralHarvester() const
 {
- QPtrListIterator<Unit> it(mSelection);
+ Q3PtrListIterator<Unit> it(mSelection);
  while (it.current()) {
 	HarvesterProperties* p = (HarvesterProperties*)it.current()->properties(PluginProperties::Harvester);
 	if (p && p->canMineMinerals()) {
@@ -165,7 +167,7 @@ bool BoSelection::hasMineralHarvester() const
 
 bool BoSelection::hasOilHarvester() const
 {
- QPtrListIterator<Unit> it(mSelection);
+ Q3PtrListIterator<Unit> it(mSelection);
  while (it.current()) {
 	HarvesterProperties* p = (HarvesterProperties*)it.current()->properties(PluginProperties::Harvester);
 	if (p && p->canMineOil()) {
@@ -187,7 +189,7 @@ Unit* BoSelection::leader() const
 
 bool BoSelection::canShoot() const
 {
- QPtrListIterator<Unit> it(mSelection);
+ Q3PtrListIterator<Unit> it(mSelection);
  while (it.current()) {
 	if (it.current()->unitProperties()->canShoot()) {
 		return true;
@@ -199,7 +201,7 @@ bool BoSelection::canShoot() const
 
 bool BoSelection::canShootAt(Unit* unit) const
 {
- QPtrListIterator<Unit> it(mSelection);
+ Q3PtrListIterator<Unit> it(mSelection);
  while (it.current()) {
 	const UnitProperties* prop = it.current()->unitProperties();
 	if (unit->isFlying() && prop->canShootAtAirUnits()) {
@@ -225,7 +227,7 @@ void BoSelection::activate(bool on)
  if (on) {
 	selectUnits(mSelection);
  } else {
-	QPtrListIterator<Unit> it(mSelection);
+	Q3PtrListIterator<Unit> it(mSelection);
 	while (it.current()) {
 		it.current()->unselect();
 		++it;
@@ -239,7 +241,7 @@ void BoSelection::saveAsXML(QDomElement& root)
  QDomDocument doc = root.ownerDocument();
  QDomElement units = doc.createElement(QString::fromLatin1("Units"));
 
- QPtrListIterator<Unit> it(mSelection);
+ Q3PtrListIterator<Unit> it(mSelection);
  while (it.current()) {
 	QDomElement unit = doc.createElement("Unit");
 	unit.setAttribute("Id", (unsigned int)it.current()->id());
@@ -323,7 +325,7 @@ BoSelectionGroup::BoSelectionGroup(int count, QObject* parent)
 {
  mCount = count;
  mSelection = 0;
- mSelectionGroups = new QIntDict<BoSelection>();
+ mSelectionGroups = new Q3IntDict<BoSelection>();
  mSelectionGroups->setAutoDelete(true);
  for (int i = 0; i < mCount; i++) {
 	BoSelection* s = new BoSelection(this);
@@ -346,7 +348,7 @@ void BoSelectionGroup::clearGroups()
 
 void BoSelectionGroup::slotRemoveItem(BosonItem* item)
 {
- QIntDictIterator<BoSelection> it(*mSelectionGroups);
+ Q3IntDictIterator<BoSelection> it(*mSelectionGroups);
  for (; it.current(); ++it) {
 	it.current()->slotRemoveItem(item);
  }
@@ -354,7 +356,7 @@ void BoSelectionGroup::slotRemoveItem(BosonItem* item)
 
 void BoSelectionGroup::slotRemoveUnit(Unit* u)
 {
- QIntDictIterator<BoSelection> it(*mSelectionGroups);
+ Q3IntDictIterator<BoSelection> it(*mSelectionGroups);
  for (; it.current(); ++it) {
 	it.current()->removeUnit(u);
  }

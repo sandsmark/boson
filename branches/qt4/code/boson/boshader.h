@@ -23,8 +23,8 @@
 #include "bo3dtools.h"
 
 #include <qstringlist.h>
-#include <qptrlist.h>
-#include <qdict.h>
+#include <q3ptrlist.h>
+#include <q3dict.h>
 
 class BoLight;
 
@@ -63,9 +63,9 @@ class BoShaderManager
   private:
     static BoShaderManager* mShaderManager;
 
-    QPtrList<BoShader> mShaders;
+    Q3PtrList<BoShader> mShaders;
     QStringList mSuffixList;
-    QDict<QString> mKnownShaderFiles;
+    Q3Dict<QString> mKnownShaderFiles;
 };
 
 /**
@@ -148,7 +148,7 @@ class BoShader
     QString mName;
     QStringList mSources;
 
-    QDict<int>* mUniformLocations;
+    Q3Dict<int>* mUniformLocations;
 
     static BoShader* mCurrentShader;
     static BoVector3Float mCameraPos;

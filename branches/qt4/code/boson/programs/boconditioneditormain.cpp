@@ -37,10 +37,15 @@
 #include <qlayout.h>
 #include <qlabel.h>
 #include <qpushbutton.h>
-#include <qlistbox.h>
-#include <qptrstack.h>
+#include <q3listbox.h>
+#include <q3ptrstack.h>
 #include <qdom.h>
 #include <qfile.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <Q3CString>
+#include <Q3ValueList>
+#include <Q3VBoxLayout>
 
 static const char *description =
     I18N_NOOP("BoCondition editor for Boson");
@@ -65,7 +70,7 @@ int main(int argc, char **argv)
 		"http://boson.eu.org");
  about.addAuthor( "Andreas Beckermann", I18N_NOOP("Coding & Current Maintainer"), "b_mann@gmx.de" );
 
- QCString argv0(argv[0]);
+ Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
  BoApplication app(argv0);
@@ -81,7 +86,7 @@ int main(int argc, char **argv)
  app.setMainWidget(w);
 
  if (args->count() > 0) {
-	KURL url = args->url(0);
+	KUrl url = args->url(0);
 	QString file = url.directory(false) + url.fileName();
 	w->slotLoadFile(file);
  }
@@ -98,17 +103,17 @@ BoConditionEditorMain::BoConditionEditorMain()
 {
  mFile = 0;
 
- QVBoxLayout* topLayout = new QVBoxLayout(this, 5, 5);
+ Q3VBoxLayout* topLayout = new Q3VBoxLayout(this, 5, 5);
 
- QHBoxLayout* hlayout = new QHBoxLayout(topLayout);
+ Q3HBoxLayout* hlayout = new Q3HBoxLayout(topLayout);
  QLabel* fileLabel = new QLabel(i18n("Current file:"), this);
  mFileName = new QLabel(this);
  hlayout->addWidget(fileLabel);
  hlayout->addWidget(mFileName);
 
- QVBoxLayout* vlayout = new QVBoxLayout(0);
+ Q3VBoxLayout* vlayout = new Q3VBoxLayout(0);
  QLabel* conditionLabel = new QLabel(i18n("Available conditions:"), this);
- mConditions = new QListBox(this);
+ mConditions = new Q3ListBox(this);
  connect(mConditions, SIGNAL(selected(int)),
 		this, SLOT(slotEditConditions()));
  vlayout->addWidget(conditionLabel);
@@ -150,7 +155,7 @@ void BoConditionEditorMain::slotLoadFile(const QString& file)
 {
  reset();
  mFile = new KTar(file, QString::fromLatin1("application/x-gzip"));
- if (!mFile->open(IO_ReadOnly)) {
+ if (!mFile->open(QIODevice::ReadOnly)) {
 	KMessageBox::sorry(this, i18n("Could not open %1 for reading").arg(file));
 	mFile->close();
 	reset();
@@ -173,7 +178,7 @@ void BoConditionEditorMain::slotLoadFile(const QString& file)
 	return;
  }
 
- QPtrStack<const KArchiveDirectory> dirs;
+ Q3PtrStack<const KArchiveDirectory> dirs;
  dirs.push(topLevelDir);
  while (!dirs.isEmpty()) {
 	const KArchiveDirectory* dir = dirs.pop();
@@ -220,7 +225,7 @@ void BoConditionEditorMain::slotEditConditions()
  if (index < 0) {
 	return;
  }
- QListBoxItem* item = mConditions->item(index);
+ Q3ListBoxItem* item = mConditions->item(index);
  if (!item) {
 	return;
  }
@@ -267,7 +272,7 @@ void BoConditionEditorMain::reset()
  mSelectSaveFile->setEnabled(false);
  mConditions->clear();
  mItem2Element.clear();
- for (QMap<QListBoxItem*,QWidget*>::iterator it = mItem2Widget.begin(); it != mItem2Widget.end(); ++it) {
+ for (QMap<Q3ListBoxItem*,QWidget*>::iterator it = mItem2Widget.begin(); it != mItem2Widget.end(); ++it) {
 	delete it.data();
  }
  mItem2Widget.clear();
@@ -313,7 +318,7 @@ bool BoConditionEditorMain::loadXMLFile(const KArchiveFile* file)
 	if (file->name() == "canvas.xml") {
 		name = i18n("Global conditions (%1)").arg(file->name());
 	}
-	QListBoxText* item = new QListBoxText(mConditions, name);
+	Q3ListBoxText* item = new Q3ListBoxText(mConditions, name);
 	mItem2Element.insert(item, e);
 	mFile2XML.insert(file, doc);
 	mFile2Item.insert(file, item);
@@ -338,7 +343,7 @@ bool BoConditionEditorMain::parsePlayerIds(const KArchiveFile* file)
 	return false;
  }
 
- QValueList<unsigned long int> ids;
+ Q3ValueList<unsigned long int> ids;
  QDomElement root = doc.documentElement();
  for (QDomNode n = root.firstChild(); !n.isNull(); n = n.nextSibling()) {
 	QDomElement p = n.toElement();
@@ -390,7 +395,7 @@ void BoConditionEditorMain::slotSaveFile(const QString& fileName)
 	return;
  }
  KTar save(fileName, QString::fromLatin1("application/x-gzip"));
- if (!save.open(IO_WriteOnly)) {
+ if (!save.open(QIODevice::WriteOnly)) {
 	KMessageBox::sorry(this, i18n("Could not open %1 for saving").arg(fileName));
 	return;
  }
@@ -445,7 +450,7 @@ bool BoConditionEditorMain::saveFile(KTar* save, const QString& path, const KArc
 				return false;
 			}
 			if (mFile2Item.contains(f)) {
-				QListBoxItem* item = mFile2Item[f];
+				Q3ListBoxItem* item = mFile2Item[f];
 				QDomElement oldConditions;
 				QDomElement newConditions;
 				if (mItem2Element.contains(item)) {

@@ -26,7 +26,7 @@
 #include "mesh.h"
 #include "material.h"
 
-#include <qvaluevector.h>
+#include <q3valuevector.h>
 
 #define MAX_MATERIAL_DIFF 0.1f
 
@@ -54,7 +54,7 @@ bool MaterialOptimizer::process()
     resetMaterials();
   }
 
-  QValueVector<Material*> validmaterials;
+  Q3ValueVector<Material*> validmaterials;
   for(unsigned int i = 0; i < model()->materialCount(); i++)
   {
     Material* mat = model()->material(i);
@@ -97,19 +97,19 @@ float MaterialOptimizer::materialDifference(Material* m1, Material* m2)
 {
   float diff = 0.0f;
   // Ambient color
-  diff += QABS(m1->ambient().x() - m2->ambient().x());
-  diff += QABS(m1->ambient().y() - m2->ambient().y());
-  diff += QABS(m1->ambient().z() - m2->ambient().z());
+  diff += qAbs(m1->ambient().x() - m2->ambient().x());
+  diff += qAbs(m1->ambient().y() - m2->ambient().y());
+  diff += qAbs(m1->ambient().z() - m2->ambient().z());
   // Diffuse color
-  diff += QABS(m1->diffuse().x() - m2->diffuse().x());
-  diff += QABS(m1->diffuse().y() - m2->diffuse().y());
-  diff += QABS(m1->diffuse().z() - m2->diffuse().z());
+  diff += qAbs(m1->diffuse().x() - m2->diffuse().x());
+  diff += qAbs(m1->diffuse().y() - m2->diffuse().y());
+  diff += qAbs(m1->diffuse().z() - m2->diffuse().z());
   // Specular color
-  diff += QABS(m1->specular().x() - m2->specular().x());
-  diff += QABS(m1->specular().y() - m2->specular().y());
-  diff += QABS(m1->specular().z() - m2->specular().z());
+  diff += qAbs(m1->specular().x() - m2->specular().x());
+  diff += qAbs(m1->specular().y() - m2->specular().y());
+  diff += qAbs(m1->specular().z() - m2->specular().z());
   // Shininess
-  diff += QABS(m1->shininess() - m2->shininess()) * 0.33;
+  diff += qAbs(m1->shininess() - m2->shininess()) * 0.33;
 
   return diff;
 }

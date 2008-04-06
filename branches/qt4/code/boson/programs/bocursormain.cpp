@@ -41,6 +41,10 @@
 #include <qlayout.h>
 #include <qcursor.h>
 #include <qtimer.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <Q3CString>
+#include <QMouseEvent>
 
 
 static void postBosonConfigInit();
@@ -192,7 +196,7 @@ int main(int argc, char **argv)
  about.addAuthor( "Andreas Beckermann", I18N_NOOP("Design & Coding"), "b_mann@gmx.de" );
  BosonConfig::setPostInitFunction(&postBosonConfigInit);
 
- QCString argv0(argv[0]);
+ Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
 
@@ -200,7 +204,7 @@ int main(int argc, char **argv)
 
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
  QWidget* w = new QWidget(0);
- QHBoxLayout* l = new QHBoxLayout(w);
+ Q3HBoxLayout* l = new Q3HBoxLayout(w);
  BosonCursorEditor* editor = new BosonCursorEditor(w);
  l->addWidget(editor, 0);
 

@@ -24,6 +24,8 @@
 #include "bodebug.h"
 
 #include <qmap.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 #include <klocale.h>
 
@@ -293,15 +295,15 @@ void BoSaveGameConverter::initVersionNames(QMap<int, BoSaveGameConverter*>& conv
 #endif
 
 
- QValueList<int> releasedVersions = saveGameVersion2ReleaseName.keys();
- qHeapSort(releasedVersions);
+ Q3ValueList<int> releasedVersions = saveGameVersion2ReleaseName.keys();
+ qSort(releasedVersions);
 
- QValueList<int> converterVersions = converters.keys();
- qHeapSort(converterVersions);
+ Q3ValueList<int> converterVersions = converters.keys();
+ qSort(converterVersions);
 
- QValueList<int>::iterator releaseVersionIt = releasedVersions.begin();
- for (QValueList<int>::iterator it = converterVersions.begin(); it != converterVersions.end(); ++it) {
-	QValueList<int>::iterator it2 = releaseVersionIt;
+ Q3ValueList<int>::iterator releaseVersionIt = releasedVersions.begin();
+ for (Q3ValueList<int>::iterator it = converterVersions.begin(); it != converterVersions.end(); ++it) {
+	Q3ValueList<int>::iterator it2 = releaseVersionIt;
 	while (it2 != releasedVersions.end() && *it2 <= *it) {
 		releaseVersionIt = it2;
 		++it2;

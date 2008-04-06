@@ -28,9 +28,13 @@
 #include "../gameengine/bosoncomputerio.h"
 
 #include <qlayout.h>
-#include <qlistbox.h>
+#include <q3listbox.h>
 #include <qlabel.h>
 #include <qpushbutton.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <Q3VBoxLayout>
+#include <Q3ValueList>
 
 #include <kgameio.h>
 
@@ -49,10 +53,10 @@ public:
 
 	Player* mPlayer;
 
-	QListBox* mCurrentPlayerIOs;
-	QListBox* mNewPlayerIOs;
+	Q3ListBox* mCurrentPlayerIOs;
+	Q3ListBox* mNewPlayerIOs;
 
-	QValueList<int> mNewRTTIs;
+	Q3ValueList<int> mNewRTTIs;
 };
 
 BoEditPlayerInputsWidget::BoEditPlayerInputsWidget(QWidget* parent)
@@ -60,21 +64,21 @@ BoEditPlayerInputsWidget::BoEditPlayerInputsWidget(QWidget* parent)
 {
  d = new BoEditPlayerInputsWidgetPrivate;
 
- QHBoxLayout* topLayout = new QHBoxLayout(this);
- QVBoxLayout* vbox = new QVBoxLayout(topLayout);
+ Q3HBoxLayout* topLayout = new Q3HBoxLayout(this);
+ Q3VBoxLayout* vbox = new Q3VBoxLayout(topLayout);
  QLabel* currentLabel = new QLabel(i18n("Current IOs"), this);
  vbox->addWidget(currentLabel);
- d->mCurrentPlayerIOs = new QListBox(this);
+ d->mCurrentPlayerIOs = new Q3ListBox(this);
  vbox->addWidget(d->mCurrentPlayerIOs, 1);
  QPushButton* remove = new QPushButton(i18n("&Remove"), this);
  connect(remove, SIGNAL(clicked()),
 		this, SLOT(slotRemoveIO()));
  vbox->addWidget(remove);
 
- vbox = new QVBoxLayout(topLayout);
+ vbox = new Q3VBoxLayout(topLayout);
  QLabel* newLabel = new QLabel(i18n("Available IOs"), this);
  vbox->addWidget(newLabel);
- d->mNewPlayerIOs = new QListBox(this);
+ d->mNewPlayerIOs = new Q3ListBox(this);
  vbox->addWidget(d->mNewPlayerIOs, 1);
  QPushButton* add = new QPushButton(i18n("&Add"), this);
  connect(add, SIGNAL(clicked()),
@@ -96,8 +100,8 @@ void BoEditPlayerInputsWidget::setPlayer(Player* p)
  d->mNewPlayerIOs->clear();
  d->mNewRTTIs.clear();
 
- for (QPtrListIterator<KGameIO> it(*p->ioList()); it.current(); ++it) {
-	new QListBoxText(d->mCurrentPlayerIOs, rttiString(it.current()->rtti()));
+ for (Q3PtrListIterator<KGameIO> it(*p->ioList()); it.current(); ++it) {
+	new Q3ListBoxText(d->mCurrentPlayerIOs, rttiString(it.current()->rtti()));
  }
 
 
@@ -110,8 +114,8 @@ void BoEditPlayerInputsWidget::setPlayer(Player* p)
  if (!d->mPlayer->findRttiIO(KGameIO::ComputerIO)) {
 	d->mNewRTTIs.append(KGameIO::ComputerIO);
  }
- for (QValueList<int>::iterator it = d->mNewRTTIs.begin(); it != d->mNewRTTIs.end(); ++it) {
-	new QListBoxText(d->mNewPlayerIOs, rttiString(*it));
+ for (Q3ValueList<int>::iterator it = d->mNewRTTIs.begin(); it != d->mNewRTTIs.end(); ++it) {
+	new Q3ListBoxText(d->mNewPlayerIOs, rttiString(*it));
  }
 }
 
@@ -127,7 +131,7 @@ void BoEditPlayerInputsWidget::slotAddIO()
 	boDebug() << k_funcinfo << "index " << current << " out of bounds" << endl;
 	return;
  }
- QValueList<int>::const_iterator it = d->mNewRTTIs.at(current);
+ Q3ValueList<int>::const_iterator it = d->mNewRTTIs.at(current);
  int rtti = *it;
 
  switch (rtti) {

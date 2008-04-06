@@ -23,7 +23,7 @@
 
 #include "bo3dtools.h"
 
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 
 
 class BosonMap;
@@ -118,7 +118,7 @@ class BoLakeGL
         unsigned int vbo_index;
     };
 
-    QPtrList<WaterChunk> chunks;
+    Q3PtrList<WaterChunk> chunks;
 
   protected:
     void init(BoLake* l, const BosonMap*);
@@ -247,7 +247,7 @@ class BoWaterRenderer
 
 
     const BosonMap* mMap;
-    QPtrList<BoLakeGL> mLakes;
+    Q3PtrList<BoLakeGL> mLakes;
 
     float mTime;
     bool mDirty;
@@ -285,7 +285,7 @@ class BoWaterRenderer
     BoTexture* mWaterTex;
     BoTexture* mWaterBump;
     BoTexture* mEnvMap;
-    QPtrList<BoTexture> mWaterAnimBump;
+    Q3PtrList<BoTexture> mWaterAnimBump;
     float mWaterAnimBumpCurrent;
     BoMatrix mModelview;
     BoMatrix mInverseModelview;

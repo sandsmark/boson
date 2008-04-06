@@ -36,9 +36,9 @@
 
 #include <klocale.h>
 
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 #include <qdom.h>
-#include <qintdict.h>
+#include <q3intdict.h>
 
 
 class BoEventHandlerInfo
@@ -56,9 +56,9 @@ public:
 	{
 		mScript = 0;
 	}
-	QPtrList<BoCondition> mConditions;
+	Q3PtrList<BoCondition> mConditions;
 
-	QIntDict<BoEventHandlerInfo> mEventHandlers;
+	Q3IntDict<BoEventHandlerInfo> mEventHandlers;
 	int mNextEventHandlerId;
 
 	BosonScript* mScript;
@@ -157,7 +157,7 @@ bool BoEventListener::saveScriptData(QByteArray* scriptData) const
 	// this event listener doesn't use scripts.
 	return true;
  }
- QDataStream dataStream(*scriptData, IO_WriteOnly);
+ QDataStream dataStream(*scriptData, QIODevice::WriteOnly);
  if (!d->mScript->save(dataStream)) {
 	boError() << k_funcinfo << "saving script failed" << endl;
 	return false;
@@ -182,7 +182,7 @@ bool BoEventListener::loadScript(const QByteArray& script, const QByteArray& scr
  if (scriptData.size() != 0) {
 	d->mScript = createScriptParser();
 
-	QDataStream stream(scriptData, IO_ReadOnly);
+	QDataStream stream(scriptData, QIODevice::ReadOnly);
 	return d->mScript->load(stream);
  }
 
@@ -227,7 +227,7 @@ bool BoEventListener::saveConditions(QDomElement& root) const
 {
  QDomDocument doc = root.ownerDocument();
 
- QPtrListIterator<BoCondition> it(d->mConditions);
+ Q3PtrListIterator<BoCondition> it(d->mConditions);
  while (it.current()) {
 	QDomElement e = doc.createElement("Condition");
 	if (!it.current()->saveAsXML(e)) {
@@ -271,7 +271,7 @@ bool BoEventListener::saveEventHandlers(QDomElement& root) const
 {
  QDomDocument doc = root.ownerDocument();
 
- QIntDictIterator<BoEventHandlerInfo> it(d->mEventHandlers);
+ Q3IntDictIterator<BoEventHandlerInfo> it(d->mEventHandlers);
  for( ; it.current(); ++it) {
 	BoEventHandlerInfo* info = it.current();
 	QDomElement e = doc.createElement("EventHandler");
@@ -340,8 +340,8 @@ void BoEventListener::deliverToConditions(const BoEvent* event)
 {
  PROFILE_METHOD
 // boDebug(360) << k_funcinfo << "conditions: " << d->mConditions.count() << endl;
- QPtrList<BoCondition> remove;
- QPtrListIterator<BoCondition> it(d->mConditions);
+ Q3PtrList<BoCondition> remove;
+ Q3PtrListIterator<BoCondition> it(d->mConditions);
  while (it.current()) {
 	it.current()->processEvent(event);
 	if (it.current()->conditionDone(d->mScript)) {
@@ -368,7 +368,7 @@ void BoEventListener::deliverToScript(const BoEvent* event)
 	}
 	return;
  }
- QIntDictIterator<BoEventHandlerInfo> it(d->mEventHandlers);
+ Q3IntDictIterator<BoEventHandlerInfo> it(d->mEventHandlers);
  for( ; it.current(); ++it) {
 	BoEventHandlerInfo* info = it.current();
 
@@ -473,7 +473,7 @@ void BoCanvasEventListener::processEvent(const BoEvent* event)
 // * provide an XML file (and a dialog in the editor) to define winning
 //   conditions
 // * provide a python script function to test for winning conditions
-bool BoCanvasEventListener::checkGameOver(QPtrList<Player>* fullfilledWinningConditions) const
+bool BoCanvasEventListener::checkGameOver(Q3PtrList<Player>* fullfilledWinningConditions) const
 {
  // AB: we could use some condition object here: once all events from the
  // condition are received, the player has won (or lost) and once a won/lost
@@ -483,9 +483,9 @@ bool BoCanvasEventListener::checkGameOver(QPtrList<Player>* fullfilledWinningCon
 
  boDebug() << k_funcinfo << endl;
  // AB: atm we use the winning condition "at most 1 player left in game"
- QPtrList<Player> fullfilled;
+ Q3PtrList<Player> fullfilled;
 
- QPtrList<Player> activeGamePlayerList = boGame->activeGamePlayerList();
+ Q3PtrList<Player> activeGamePlayerList = boGame->activeGamePlayerList();
  for (unsigned int i = 0; i < activeGamePlayerList.count(); i++) {
 	Player* p = activeGamePlayerList.at(i);
 	if (p->bosonId() <= 127 || p->bosonId() >= 256) {
@@ -512,9 +512,9 @@ bool BoCanvasEventListener::checkGameOver(QPtrList<Player>* fullfilledWinningCon
 
 void BoCanvasEventListener::checkGameOverAndEndGame()
 {
- QPtrList<Player> fullfilledWinningConditions;
+ Q3PtrList<Player> fullfilledWinningConditions;
  if (checkGameOver(&fullfilledWinningConditions)) {
-	QPtrList<Player> activeGamePlayerList = boGame->activeGamePlayerList();
+	Q3PtrList<Player> activeGamePlayerList = boGame->activeGamePlayerList();
 	for (unsigned int i = 0; i < activeGamePlayerList.count(); i++) {
 		Player* p = activeGamePlayerList.at(i);
 		if (fullfilledWinningConditions.contains(p)) {

@@ -22,11 +22,13 @@
 
 #include <qdatetime.h>
 #include <qstring.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 class KGame;
 class Boson;
-template<class T> class QPtrQueue;
-template<class T> class QPtrList;
+template<class T> class Q3PtrQueue;
+template<class T> class Q3PtrList;
 class QIODevice;
 
 /**
@@ -38,9 +40,9 @@ class BoMessage
 public:
 	QByteArray byteArray;
 	int msgid;
-	Q_UINT32 receiver;
-	Q_UINT32 sender;
-	Q_UINT32 clientId;
+	quint32 receiver;
+	quint32 sender;
+	quint32 clientId;
 	unsigned int receivedOnAdvanceCallsCount;
 	unsigned int deliveredOnAdvanceCallsCount;
 	QTime mArrivalTime;
@@ -52,9 +54,9 @@ public:
 	 * parameter is optional as it is informational only (not an actual part
 	 * of the message, but handy for debugging/logging).
 	 **/
-	BoMessage(QByteArray& _message, int _msgid, Q_UINT32 _receiver, Q_UINT32 _sender, Q_UINT32 _clientId, unsigned int _advanceCallsCount = 0);
+	BoMessage(QByteArray& _message, int _msgid, quint32 _receiver, quint32 _sender, quint32 _clientId, unsigned int _advanceCallsCount = 0);
 
-	BoMessage(QDataStream& stream, int _msgid, Q_UINT32 _receiver, Q_UINT32 _sender, Q_UINT32 _clientId, unsigned int _advanceCallsCount = 0);
+	BoMessage(QDataStream& stream, int _msgid, quint32 _receiver, quint32 _sender, quint32 _clientId, unsigned int _advanceCallsCount = 0);
 
 	/**
 	 * Set the delivery time to the current time. Both, arrival and delivery
@@ -136,7 +138,7 @@ protected:
 
 private:
 	Boson* mBoson;
-	QPtrQueue<BoMessage>* mDelayedMessages;
+	Q3PtrQueue<BoMessage>* mDelayedMessages;
 	bool mIsLocked;
 	bool mDelayedWaiting; // FIXME bad name!
 	int mAdvanceMessageWaiting;
@@ -162,10 +164,10 @@ public:
 
 	bool saveHumanReadableMessageLog(QIODevice* logDevice);
 	bool saveMessageLog(QIODevice* logDevice, unsigned int maxCount = 0);
-	static bool loadMessageLog(QIODevice* logDevice, QPtrList<BoMessage>* messages);
+	static bool loadMessageLog(QIODevice* logDevice, Q3PtrList<BoMessage>* messages);
 
 private:
-	QPtrList<BoMessage>* mLoggedMessages;
+	Q3PtrList<BoMessage>* mLoggedMessages;
 };
 
 #endif

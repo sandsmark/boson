@@ -22,8 +22,8 @@
 
 #include <bogl.h>
 
-#include <qptrlist.h>
-#include <qvaluevector.h>
+#include <q3ptrlist.h>
+#include <q3valuevector.h>
 
 
 class QString;
@@ -280,7 +280,7 @@ class BoTextureArray
   public:
     BoTextureArray(const QStringList& files, BoTexture::Class texclass);
     BoTextureArray(const QStringList& files, int options = BoTexture::FilterLinearMipmapLinear | BoTexture::FormatAuto, BoTexture::Type type = BoTexture::Texture2D);
-    BoTextureArray(const QPtrList<BoTexture>& textures);
+    BoTextureArray(const Q3PtrList<BoTexture>& textures);
     ~BoTextureArray();
 
     BoTexture* texture(int i) const  { return mTextures[i]; }
@@ -288,7 +288,7 @@ class BoTextureArray
     unsigned int count() const  { return mTextures.count(); }
 
   private:
-    QValueVector<BoTexture*> mTextures;
+    Q3ValueVector<BoTexture*> mTextures;
     bool mAutoDelete;
 };
 
@@ -462,7 +462,7 @@ class BoTextureManager
     /**
      * @return A list of all currently registered textures.
      **/
-    const QPtrList<const BoTexture>& allTextures() const
+    const Q3PtrList<const BoTexture>& allTextures() const
     {
       return mConstTextures;
     }
@@ -471,8 +471,8 @@ class BoTextureManager
   private:
     static BoTextureManager* mManager;
 
-    QPtrList<BoTexture> mTextures;
-    QPtrList<const BoTexture> mConstTextures;
+    Q3PtrList<BoTexture> mTextures;
+    Q3PtrList<const BoTexture> mConstTextures;
     BoTexture** mActiveTexture;
     int* mActiveTextureType;
     int mActiveTextureUnit;

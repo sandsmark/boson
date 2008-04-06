@@ -25,6 +25,8 @@
 #include "bo3dtools.h"
 
 #include "bosonufoglwidget.h"
+//Added by qt3to4:
+#include <Q3PtrList>
 
 class BosonCanvas;
 class BosonCursor;
@@ -52,8 +54,8 @@ class Boson;
 class KGameChat;
 class KGameIO;
 class QDomElement;
-template<class T> class QPtrList;
-template<class T> class QValueVector;
+template<class T> class Q3PtrList;
+template<class T> class Q3ValueVector;
 class KCmdLineArgs;
 
 class BosonMainWidgetPrivate;

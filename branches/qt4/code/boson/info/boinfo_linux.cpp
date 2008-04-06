@@ -26,6 +26,8 @@
 #include <qfile.h>
 #include <qregexp.h>
 #include <qstringlist.h>
+//Added by qt3to4:
+#include <Q3TextStream>
 
 #include <linux/version.h>
 
@@ -35,7 +37,7 @@ QString readFile(const char* fileName)
  if (!file.exists()) {
 	return QString::null;
  }
- if (!file.open(IO_ReadOnly)) {
+ if (!file.open(QIODevice::ReadOnly)) {
 	return QString::null;
  }
  QString string;
@@ -306,11 +308,11 @@ void ProcPIDStatInfo::print()
 bool ProcPIDStatInfo::read(int pid)
 {
  QFile file(QString("/proc/%1/stat").arg(pid));
- if (!file.open(IO_ReadOnly)) {
+ if (!file.open(QIODevice::ReadOnly)) {
 	return false;
  }
- QTextStream s(&file);
- s.setf(QTextStream::dec);
+ Q3TextStream s(&file);
+ s.setf(Q3TextStream::dec);
  s >> mPID >> mName >> mState;
  s >> mPPID >> mPGrpP >> mSession >> mTTY >> mTTYOwner;
  s >> mFlags;

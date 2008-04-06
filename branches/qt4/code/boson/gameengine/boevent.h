@@ -22,6 +22,8 @@
 #include "../bo3dtools.h"
 
 #include <qstring.h>
+//Added by qt3to4:
+#include <Q3CString>
 
 class QDomElement;
 class QDomNodeList;
@@ -49,7 +51,7 @@ public:
 	 * @ref data1
 	 * @param _data2 Just like @p _data1.
 	 **/
-	BoEvent(const QCString& _name, const QString& _data1 = QString::null, const QString& _data2 = QString::null);
+	BoEvent(const Q3CString& _name, const QString& _data1 = QString::null, const QString& _data2 = QString::null);
 
 	/**
 	 * @overload
@@ -168,7 +170,7 @@ public:
 	 * </pre>
 	 * is perfectly fine.
 	 **/
-	QCString name() const
+	Q3CString name() const
 	{
 		return mName;
 	}
@@ -192,11 +194,11 @@ public:
 
 
 private:
-	void init(const QCString& name);
+	void init(const Q3CString& name);
 
 private:
 	unsigned long int mId;
-	QCString mName;
+	Q3CString mName;
 	unsigned long int mDelayedDelivery;
 	bool mHasLocation;
 	BoVector3Fixed mLocation;

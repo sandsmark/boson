@@ -56,7 +56,8 @@ void BoUfoGroupBox::setTitle(const QString& title)
  if (title.isNull()) {
 	mGroupBox->setTitle("");
  } else {
-	mGroupBox->setTitle(title.latin1());
+	QByteArray tmp = title.toAscii();
+	mGroupBox->setTitle(std::string(tmp.constData(), tmp.length()));
  }
 }
 

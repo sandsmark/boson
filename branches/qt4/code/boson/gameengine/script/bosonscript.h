@@ -22,6 +22,8 @@
 
 
 #include "../../bomath.h"
+//Added by qt3to4:
+#include <Q3ValueList>
 
 class Player;
 class PlayerIO;
@@ -45,7 +47,7 @@ typedef BoRect2<bofixed> BoRect2Fixed;
 class QString;
 class QDataStream;
 
-template<class T> class QValueList;
+template<class T> class Q3ValueList;
 
 class BosonScriptInterface;
 
@@ -180,7 +182,7 @@ class BosonScript
     /**
      * @return List containing ids of all players in the game
      **/
-    QValueList<int> allGamePlayers() const;
+    Q3ValueList<int> allGamePlayers() const;
     /**
      * @return Whether player with given id is neutral player
      **/
@@ -232,14 +234,14 @@ class BosonScript
      * At most radius tiles are searched.
      * If n is 0, all visible mineral mines in given are returned.
      **/
-    QValueList<BoVector2Fixed> nearestMineralLocations(int x, int y, unsigned int n, unsigned int radius);
+    Q3ValueList<BoVector2Fixed> nearestMineralLocations(int x, int y, unsigned int n, unsigned int radius);
     /**
      * Finds n nearest oil locations to point (x, y), that are visible to
      * player with id playerId.
      * At most radius tiles are searched.
      * If n is 0, all visible oil mines in given are returned.
      **/
-    QValueList<BoVector2Fixed> nearestOilLocations(int x, int y, unsigned int n, unsigned int radius);
+    Q3ValueList<BoVector2Fixed> nearestOilLocations(int x, int y, unsigned int n, unsigned int radius);
 
 
     // Units
@@ -297,12 +299,12 @@ class BosonScript
     /**
      * @return List of units on cell (x, y)
      **/
-    QValueList<int> unitsOnCell(int x, int y) const;
+    Q3ValueList<int> unitsOnCell(int x, int y) const;
     /**
      * @return List of units in rectangle (x1, y1, x2 ,y2)
      * Note that coordinates are cell coordinates.
      **/
-    QValueList<int> unitsInRect(int x1, int y1, int x2, int y2) const;
+    Q3ValueList<int> unitsInRect(int x1, int y1, int x2, int y2) const;
     /**
      * @return Whether there are any units on cell (x, y)
      **/
@@ -387,7 +389,7 @@ class BosonScript
     /**
      * @return List of unit types unit with id id can produce
      **/
-    QValueList<int> productionTypes(int id) const;
+    Q3ValueList<int> productionTypes(int id) const;
 
     /**
      * @return Whether unit with id id exists and is not destroyed
@@ -398,7 +400,7 @@ class BosonScript
      * @return List containing ids of all units of player with id id
      * Warning: this method might be slow in case player has many units
      **/
-    QValueList<int> allPlayerUnits(int id) const;
+    Q3ValueList<int> allPlayerUnits(int id) const;
     /**
      * @return How many units player with given id has
      *
@@ -411,14 +413,14 @@ class BosonScript
      * @return List containing all units with given type, belonging to player
      *  with given id
      **/
-    QValueList<int> playerUnitsOfType(int playerId, int type) const;
+    Q3ValueList<int> playerUnitsOfType(int playerId, int type) const;
     /**
      * @return how many units of given type player with given id has
      **/
     int playerUnitsOfTypeCount(int playerId, int type) const;
 
-    QValueList<int> allUnitsVisibleFor(int playerId) const;
-    QValueList<int> allEnemyUnitsVisibleFor(int playerId) const;
+    Q3ValueList<int> allUnitsVisibleFor(int playerId) const;
+    Q3ValueList<int> allEnemyUnitsVisibleFor(int playerId) const;
 
 
     // Camera

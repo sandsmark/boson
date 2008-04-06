@@ -20,6 +20,8 @@
 #define UNITSTORAGEPLUGIN_H
 
 #include "unitplugin.h"
+//Added by qt3to4:
+#include <Q3ValueList>
 
 template<class T> class BoVector2;
 template<class T> class BoRect2;
@@ -99,8 +101,8 @@ public:
 	 * @return TRUE if a way to enter this unit could be found for @p
 	 * enteringUnit. Otherwise FALSE.
 	 **/
-	bool getEnterPathFor(const Unit* enteringUnit, BoVector2Fixed* enterPosOutside1, BoVector2Fixed* enterPosOutside2, QValueList<BoVector2Fixed>* insidePath, unsigned int* pathIndex);
-	bool getLeavePathFor(const Unit* leavingUnit, QValueList<BoVector2Fixed>* insidePath);
+	bool getEnterPathFor(const Unit* enteringUnit, BoVector2Fixed* enterPosOutside1, BoVector2Fixed* enterPosOutside2, Q3ValueList<BoVector2Fixed>* insidePath, unsigned int* pathIndex);
+	bool getLeavePathFor(const Unit* leavingUnit, Q3ValueList<BoVector2Fixed>* insidePath);
 
 	/**
 	 * @p enteringUnit requests to enter this unit. This method stores the
@@ -188,7 +190,7 @@ protected:
 	 **/
 	BoVector2Fixed getOutsidePos2(const BoVector2Fixed& pos, const BoVector2Float& direction) const;
 
-	QValueList<BoVector2Fixed> getAbsoluteFromRelativePath(const QValueList<BoVector2Float>& relative) const;
+	Q3ValueList<BoVector2Fixed> getAbsoluteFromRelativePath(const Q3ValueList<BoVector2Float>& relative) const;
 
 	/**
 	 * @return TRUE if a unit is on path @p i, otherwise FALSE. At most one

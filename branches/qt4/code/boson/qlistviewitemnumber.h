@@ -19,23 +19,23 @@
 #ifndef QLISTVIEWITEMNUMBER_H
 #define QLISTVIEWITEMNUMBER_H
 
-#include <qlistview.h>
+#include <q3listview.h>
 
 /**
  * @short @ref QListViewItem that tries to identify number columns and sort them
  * by their value
  **/
-class QListViewItemNumber : public QListViewItem
+class QListViewItemNumber : public Q3ListViewItem
 {
 public:
-	QListViewItemNumber(QListView* p) : QListViewItem(p)
+	QListViewItemNumber(Q3ListView* p) : Q3ListViewItem(p)
 	{
 	}
-	QListViewItemNumber(QListViewItem* p) : QListViewItem(p)
+	QListViewItemNumber(Q3ListViewItem* p) : Q3ListViewItem(p)
 	{
 	}
 
-	virtual int compare(QListViewItem* i, int col, bool ascending) const;
+	virtual int compare(Q3ListViewItem* i, int col, bool ascending) const;
 };
 
 /**
@@ -45,10 +45,10 @@ public:
 class QListViewItemNumberPrefix : public QListViewItemNumber
 {
 public:
-	QListViewItemNumberPrefix(QListView* p) : QListViewItemNumber(p)
+	QListViewItemNumberPrefix(Q3ListView* p) : QListViewItemNumber(p)
 	{
 	}
-	QListViewItemNumberPrefix(QListViewItem* p) : QListViewItemNumber(p)
+	QListViewItemNumberPrefix(Q3ListViewItem* p) : QListViewItemNumber(p)
 	{
 	}
 

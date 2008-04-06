@@ -24,6 +24,8 @@
 #include "processor.h"
 
 #include <qstring.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 class Model;
 class LOD;
@@ -34,7 +36,7 @@ template<class T> class BoVector2;
 typedef BoVector2<float> BoVector2Float;
 template<class T> class BoVector3;
 typedef BoVector3<float> BoVector3Float;
-template<class T> class QValueList;
+template<class T> class Q3ValueList;
 
 
 class TextureOptimizer : public Processor

@@ -25,6 +25,8 @@
 
 #include <qfileinfo.h>
 #include <qmap.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 #include <ktar.h>
 
@@ -36,9 +38,9 @@ BoFile::BoFile(const QString& file, bool readOnly)
  // AB: open() parses the directory and file entries, but it does NOT read the
  // entire files.
  if (readOnly) {
-	mTar->open(IO_ReadOnly);
+	mTar->open(QIODevice::ReadOnly);
  } else {
-	mTar->open(IO_WriteOnly);
+	mTar->open(QIODevice::WriteOnly);
  }
 }
 
@@ -311,7 +313,7 @@ QMap<QString, QByteArray> BPFFile::scriptsData() const
 	return scripts;
  }
  typedef QPair<QString, const KArchiveDirectory*> MyPair;
- QValueList<MyPair> dirs;
+ Q3ValueList<MyPair> dirs;
  dirs.append(MyPair("scripts", (KArchiveDirectory*)topLevelDir()->entry("scripts")));
  while (!dirs.isEmpty()) {
 	QPair<QString, const KArchiveDirectory*> pair = dirs[0];
@@ -349,7 +351,7 @@ QMap<QString, QByteArray> BPFFile::eventListenerData() const
 	return eventListener;
  }
  typedef QPair<QString, const KArchiveDirectory*> MyPair;
- QValueList<MyPair> dirs;
+ Q3ValueList<MyPair> dirs;
  dirs.append(MyPair("eventlistener", (KArchiveDirectory*)topLevelDir()->entry("eventlistener")));
  while (!dirs.isEmpty()) {
 	QPair<QString, const KArchiveDirectory*> pair = dirs[0];

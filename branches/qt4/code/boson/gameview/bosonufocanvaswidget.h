@@ -22,6 +22,9 @@
 
 #include "../boufo/boufo.h"
 #include "../bo3dtools.h"
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 class BosonCanvas;
 class PlayerIO;
@@ -35,7 +38,7 @@ class BosonEffect;
 class BosonWeapon;
 class BosonItemRenderer;
 class BosonItemContainer;
-template<class T> class QPtrList;
+template<class T> class Q3PtrList;
 
 class BosonItemEffects
 {
@@ -47,17 +50,17 @@ public:
 	{
 		return mItem;
 	}
-	void setEffects(const QPtrList<BosonEffect>& effects, QPtrList<BosonEffect>* takeOwnership);
-	void addEffect(BosonEffect* e, QPtrList<BosonEffect>* takeOwnership);
+	void setEffects(const Q3PtrList<BosonEffect>& effects, Q3PtrList<BosonEffect>* takeOwnership);
+	void addEffect(BosonEffect* e, Q3PtrList<BosonEffect>* takeOwnership);
 	void clearEffects();
 	void removeEffect(BosonEffect* e);
-	const QPtrList<BosonEffect>& effects() const;
+	const Q3PtrList<BosonEffect>& effects() const;
 
 	void updateEffectsPosition();
 	void updateEffectsRotation();
 
 private:
-	QPtrList<BosonEffect>* mEffects;
+	Q3PtrList<BosonEffect>* mEffects;
 	BosonItem* mItem;
 };
 
@@ -86,12 +89,12 @@ public:
 
 	virtual void paintWidget();
 
-	QValueList<BosonItem*> itemsAtWidgetRect(const QRect& widgetRect) const;
+	Q3ValueList<BosonItem*> itemsAtWidgetRect(const QRect& widgetRect) const;
 
 	/**
 	 * Like @ref itemsAtWidgetRect but returns @ref Unit objects only.
 	 **/
-	QValueList<Unit*> unitsAtWidgetRect(const QRect& widgetRect) const;
+	Q3ValueList<Unit*> unitsAtWidgetRect(const QRect& widgetRect) const;
 
 	/**
 	 * Like @ref unitsAtWidgetRect with a rect of width=height=1, but this
@@ -104,7 +107,7 @@ public:
 	/**
 	 * @return BosonCanvasRenderer::emulatePickItems
 	 **/
-	QValueList<BosonItem*> emulatePickItems(const QRect& pickRect) const;
+	Q3ValueList<BosonItem*> emulatePickItems(const QRect& pickRect) const;
 
 	/**
 	 * This method emulates the behaviour of OpenGL "picking", i.e.
@@ -143,7 +146,7 @@ public slots:
 
 protected:
 	void addEffect(BosonEffect* effect);
-	void addEffects(const QPtrList<BosonEffect>& effects);
+	void addEffects(const Q3PtrList<BosonEffect>& effects);
 	void animateItems(unsigned int advanceCallsCount);
 	void setParticlesDirty(bool);
 	void addFacilityConstructedEffects(Unit* facility);

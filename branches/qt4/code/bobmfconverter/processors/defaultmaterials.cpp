@@ -28,8 +28,8 @@
 #include "texture.h"
 #include "bo3dtools.h"
 
-#include <qvaluelist.h>
-#include <qvaluevector.h>
+#include <q3valuelist.h>
+#include <q3valuevector.h>
 
 
 DefaultMaterials::DefaultMaterials() : Processor()

@@ -54,7 +54,7 @@ void BoUfoProgress::setOpaque(bool o)
  BoUfoWidget::setOpaque(o);
 }
 
-void BoUfoProgress::setOrientation(Orientation o)
+void BoUfoProgress::setOrientation(Qt::Orientation o)
 {
  mOrientation = o;
  invalidate();
@@ -82,30 +82,30 @@ double BoUfoProgress::maximumValue() const
 
 void BoUfoProgress::setValue(double v)
 {
- v = QMAX(v, minimumValue());
- v = QMIN(v, maximumValue());
+ v = qMax(v, minimumValue());
+ v = qMin(v, maximumValue());
  mValue = v;
 }
 
 void BoUfoProgress::setRange(double min, double max)
 {
- max = QMAX(max, min);
+ max = qMax(max, min);
  mMinimumValue = min;
  mMaximumValue = max;
 
- mValue = QMAX(mValue, minimumValue());
- mValue = QMIN(mValue, maximumValue());
+ mValue = qMax(mValue, minimumValue());
+ mValue = qMin(mValue, maximumValue());
 }
 
 void BoUfoProgress::setMinimumValue(double min)
 {
- double max = QMAX(min, maximumValue());
+ double max = qMax(min, maximumValue());
  setRange(min, max);
 }
 
 void BoUfoProgress::setMaximumValue(double max)
 {
- double min = QMIN(max, minimumValue());
+ double min = qMin(max, minimumValue());
  setRange(min, max);
 }
 
@@ -281,8 +281,8 @@ BoUfoExtendedProgress::BoUfoExtendedProgress(Qt::Orientation o)
 
 void BoUfoExtendedProgress::setStartExtensionSizeFactor(double e)
 {
- e = QMAX(0.0, e);
- e = QMIN(1.0, e);
+ e = qMax(0.0, e);
+ e = qMin(1.0, e);
  if (endExtensionSizeFactor() + e > 1.0) {
 	e = 1.0 - endExtensionSizeFactor();
  }
@@ -296,8 +296,8 @@ double BoUfoExtendedProgress::startExtensionSizeFactor() const
 
 void BoUfoExtendedProgress::setEndExtensionSizeFactor(double e)
 {
- e = QMAX(0.0, e);
- e = QMIN(1.0, e);
+ e = qMax(0.0, e);
+ e = qMin(1.0, e);
  if (startExtensionSizeFactor() + e > 1.0) {
 	e = 1.0 - startExtensionSizeFactor();
  }
@@ -442,10 +442,10 @@ void BoUfoExtendedProgress::paintExtensions(const QColor& start, const QColor& e
 	}
  }
 
- startFactor = QMIN(startFactor, 1.0);
- startFactor = QMAX(startFactor, 0.0);
- endFactor = QMIN(endFactor, 1.0);
- endFactor = QMAX(endFactor, 0.0);
+ startFactor = qMin(startFactor, 1.0);
+ startFactor = qMax(startFactor, 0.0);
+ endFactor = qMin(endFactor, 1.0);
+ endFactor = qMax(endFactor, 0.0);
 
  QRect barRect = progressBarRect();
  if (orientation() == Qt::Horizontal) {
@@ -588,14 +588,14 @@ QRect BoUfoExtendedProgress::removeDecorationsFromRect(const QRect& barRect_) co
 	} else {
 		bar = 1.0 / mDecorationSizeFactor;
 	}
-	bar = QMIN(bar, 1.0);
-	bar = QMAX(bar, 0.0);
+	bar = qMin(bar, 1.0);
+	bar = qMax(bar, 0.0);
 
 	if (orientation() == Qt::Horizontal) {
 		double totalH = (double)barRect.height();
 		double barH = totalH * bar;
 		double diff = (totalH - barH);
-		diff = QMAX(diff, 0.0);
+		diff = qMax(diff, 0.0);
 
 		barRect.setY(barRect.y() + (int)(diff / 2.0));
 		barRect.setHeight((int)barH);
@@ -603,7 +603,7 @@ QRect BoUfoExtendedProgress::removeDecorationsFromRect(const QRect& barRect_) co
 		double totalW = (double)barRect.width();
 		double barW = totalW * bar;
 		double diff = (totalW - barW);
-		diff = QMAX(diff, 0.0);
+		diff = qMax(diff, 0.0);
 
 		barRect.setX(barRect.x() + (int)(diff / 2.0));
 		barRect.setWidth((int)barW);

@@ -27,16 +27,18 @@
 #include <bodebug.h>
 
 #include <qlayout.h>
-#include <qlistbox.h>
+#include <q3listbox.h>
+//Added by qt3to4:
+#include <Q3VBoxLayout>
 
 #include <stdlib.h>
 
 BoWidgetList::BoWidgetList(QWidget* parent, const char* name) : QWidget(parent, name)
 {
- QVBoxLayout* l = new QVBoxLayout(this);
- mListBox = new QListBox(this);
- connect(mListBox, SIGNAL(highlighted(QListBoxItem*)),
-		this, SLOT(slotWidgetHighlighted(QListBoxItem*)));
+ Q3VBoxLayout* l = new Q3VBoxLayout(this);
+ mListBox = new Q3ListBox(this);
+ connect(mListBox, SIGNAL(highlighted(Q3ListBoxItem*)),
+		this, SLOT(slotWidgetHighlighted(Q3ListBoxItem*)));
  connect(mListBox, SIGNAL(selectionChanged()),
 		this, SLOT(slotWidgetSelectionChanged()));
  l->addWidget(mListBox);
@@ -55,7 +57,7 @@ BoWidgetList::~BoWidgetList()
 QString BoWidgetList::widget() const
 {
  int index = mListBox->currentItem();
- QListBoxItem* item = 0;
+ Q3ListBoxItem* item = 0;
  if (index >= 0) {
 	item = mListBox->item(index);
  }
@@ -65,7 +67,7 @@ QString BoWidgetList::widget() const
  return QString::null;
 }
 
-void BoWidgetList::slotWidgetHighlighted(QListBoxItem* item)
+void BoWidgetList::slotWidgetHighlighted(Q3ListBoxItem* item)
 {
 // boDebug() << k_funcinfo << endl;
  if (item) {
@@ -77,7 +79,7 @@ void BoWidgetList::slotWidgetHighlighted(QListBoxItem* item)
 void BoWidgetList::slotWidgetSelectionChanged()
 {
 // boDebug() << k_funcinfo << endl;
- QListBoxItem* item = mListBox->selectedItem();
+ Q3ListBoxItem* item = mListBox->selectedItem();
  if (item) {
 	QString widget;
 	widget = item->text();
@@ -90,7 +92,7 @@ void BoWidgetList::slotWidgetSelectionChanged()
 void BoWidgetList::clearSelection()
 {
  int index = mListBox->currentItem();
- QListBoxItem* item = 0;
+ Q3ListBoxItem* item = 0;
  if (index >= 0) {
 	item = mListBox->item(index);
  }

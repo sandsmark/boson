@@ -1,3 +1,6 @@
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 /*
     This file is part of the Boson game
     Copyright (C) 2003 Andreas Beckermann (b_mann@gmx.de)
@@ -32,9 +35,9 @@ typedef BoVector2<bofixed> BoVector2Fixed;
 typedef BoVector3<bofixed> BoVector3Fixed;
 typedef BoRect2<bofixed> BoRect2Fixed;
 
-template<class T> class QPtrList;
-template<class T> class QValueList;
-template<class T> class QPtrVector;
+template<class T> class Q3PtrList;
+template<class T> class Q3ValueList;
+template<class T> class Q3PtrVector;
 
 #include "../bomath.h"
 
@@ -92,7 +95,7 @@ public:
 	void setMap(BosonMap* map) { mMap = map; }
 	inline BosonMap* map() const { return mMap; }
 
-	BoItemList* collisionsAtCells(const QPtrVector<Cell>* cells, const BosonItem* item, bool exact) const;
+	BoItemList* collisionsAtCells(const Q3PtrVector<Cell>* cells, const BosonItem* item, bool exact) const;
 	BoItemList* collisions(const BoRect2Fixed& rect, const BosonItem* item = 0, bool exact = true) const; // note: exact == true has n effec for item != 0 ONLY!
 	BoItemList* collisionsAtCells(const BoRect2Fixed& rect, const BosonItem* item = 0, bool exact = true) const; // note: exact == true has n effec for item != 0 ONLY!
 
@@ -116,13 +119,13 @@ public:
 	 * units inside the rect which are also in the circle. Maybe we could
 	 * check for the circle directly.
 	 **/
-	QValueList<Unit*> unitCollisionsInRange(const BoVector2Fixed& pos, bofixed radius) const;
+	Q3ValueList<Unit*> unitCollisionsInRange(const BoVector2Fixed& pos, bofixed radius) const;
 
 	/**
 	 * Same as @ref unitCollisionInRange, but also checks for z-coordinate and
 	 * operates in 3d space
 	 **/
-	QValueList<Unit*> unitCollisionsInSphere(const BoVector3Fixed& pos, bofixed radius) const;
+	Q3ValueList<Unit*> unitCollisionsInSphere(const BoVector3Fixed& pos, bofixed radius) const;
 
 	/**
 	 * Returns whether cell is occupied (there is non-destroyed mobile or
@@ -146,7 +149,7 @@ public:
 	 **/
 	bool cellsOccupied(const BoRect2Fixed& rect) const;
 
-	QValueList<Unit*> collisionsInBox(const BoVector3Fixed& v1, const BoVector3Fixed& v2, BosonItem* exclude) const;
+	Q3ValueList<Unit*> collisionsInBox(const BoVector3Fixed& v1, const BoVector3Fixed& v2, BosonItem* exclude) const;
 
 private:
 	void init();

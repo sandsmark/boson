@@ -38,8 +38,11 @@
 
 #include <klocale.h>
 
-#include <qptrstack.h>
+#include <q3ptrstack.h>
 #include <qdom.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 #include <math.h>
 
@@ -94,14 +97,14 @@ bool BosonPlayerInputHandler::playerInput(QDataStream& stream, Player* player)
  if (!mGame->gameMode()) {
 	// editor mode sends an additional entry safety id, just in case we
 	// might have constructed a wrong display or so
-	Q_UINT32 editor;
+	quint32 editor;
 	stream >> editor;
 	if (editor != BosonMessageIds::MoveEditor) {
 		boError() << k_funcinfo << "Not an editor message, elthough we're in editor mode!" << endl;
 		return true;
 	}
  }
- Q_UINT32 msgid;
+ quint32 msgid;
  stream >> msgid;
  if (mGame->gameMode()) {
 	if (gamePlayerInput(msgid, stream, player)) {
@@ -120,7 +123,7 @@ bool BosonPlayerInputHandler::playerInput(QDataStream& stream, Player* player)
  return true;
 }
 
-bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& stream, Player* player)
+bool BosonPlayerInputHandler::gamePlayerInput(quint32 msgid, QDataStream& stream, Player* player)
 {
  switch (msgid) {
 	case BosonMessageIds::MoveMove:
@@ -132,8 +135,8 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		}
 		bool attack = message.mIsAttack;
 		boDebug(380) << "MOVING: " << k_funcinfo << "attack: " << attack << endl;
-		QPtrList<Unit> unitsToMove;
-		for (QValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
+		Q3PtrList<Unit> unitsToMove;
+		for (Q3ValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
 			Q_ULONG unitId = *it;
 //			boDebug() << "pos: " << mPos.x() << " " << mPos.y() << endl;
 			Unit* unit = findUnit(unitId, player);
@@ -172,8 +175,8 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			boError() << "Cannot attack NULL unit" << endl;
 			return true;
 		}
-		QPtrList<Unit> unitsToAttackWith;
-		for (QValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
+		Q3PtrList<Unit> unitsToAttackWith;
+		for (Q3ValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
 			Q_ULONG unitId = *it;
 			if (unitId == message.mAttackedUnitId) {
 				// can become possible one day - e.g. when
@@ -210,8 +213,8 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			boError() << k_lineinfo << "message (" << message.messageId() << ") could not be read" << endl;
 			break;
 		}
-		QPtrList<Unit> unitsToStop;
-		for (QValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
+		Q3PtrList<Unit> unitsToStop;
+		for (Q3ValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
 			Q_ULONG unitId = *it;
 			Unit* unit = findUnit(unitId, player);
 			if (!unit) {
@@ -234,7 +237,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		if (unitsToStop.count() == 0) {
 			break;
 		}
-		QPtrListIterator<Unit> it(unitsToStop);
+		Q3PtrListIterator<Unit> it(unitsToStop);
 		while (it.current()) {
 			// TODO: what about delayed orders?
 			it.current()->clearOrders();
@@ -313,8 +316,8 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			boWarning() << k_lineinfo << "refinery must be a refinery" << endl;
 			break;
 		}
-		QPtrList<Unit> units;
-		for (QValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
+		Q3PtrList<Unit> units;
+		for (Q3ValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
 			Q_ULONG unitId = *it;
 			Unit* u = findUnit(unitId, player);
 			if (!u) {
@@ -357,9 +360,9 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 		// 3. repair facilities
 		// can we use MoveRepair for all of them?
 		// this is currently about 1. only
-		Q_UINT32 repairOwnerId;
+		quint32 repairOwnerId;
 		Q_ULONG repairId;
-		Q_UINT32 unitCount;
+		quint32 unitCount;
 		stream >> repairOwnerId;
 		stream >> repairId;
 		stream >> unitCount;
@@ -564,7 +567,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			boDebug() << "Cannot follow destroyed units" << endl;
 			return true;
 		}
-		for (QValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
+		for (Q3ValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
 			Q_ULONG unitId = *it;
 			if (unitId == message.mFollowUnitId) {
 				boWarning() << "Cannot follow myself" << endl;
@@ -606,7 +609,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			return true;
 		}
 
-		for (QValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
+		for (Q3ValueList<Q_ULONG>::iterator it = message.mItems.begin(); it != message.mItems.end(); ++it) {
 			Q_ULONG unitId = *it;
 			if (unitId == message.mEnterUnitId) {
 				boWarning() << "Cannot enter myself" << endl;
@@ -639,7 +642,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			break;
 		}
 		boDebug() << k_funcinfo << "MoveLayMine action" << endl;
-		Q_UINT32 unitId, weaponId;
+		quint32 unitId, weaponId;
 		for (unsigned int i = 0; i < message.mUnits.count(); i++) {
 			unitId = message.mUnits[i];
 			weaponId = message.mWeapons[i];
@@ -673,7 +676,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
 			break;
 		}
 		boDebug() << k_funcinfo << "MoveDropBomb action" << endl;
-		Q_UINT32 unitId, weaponId;
+		quint32 unitId, weaponId;
 
 		for (unsigned int i = 0; i < message.mUnits.count(); i++) {
 			unitId = message.mUnits[i];
@@ -754,7 +757,7 @@ bool BosonPlayerInputHandler::gamePlayerInput(Q_UINT32 msgid, QDataStream& strea
  return true;
 }
 
-bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& stream, Player* player)
+bool BosonPlayerInputHandler::editorPlayerInput(quint32 msgid, QDataStream& stream, Player* player)
 {
  switch (msgid) {
 	case BosonMessageIds::MovePlaceUnit:
@@ -787,9 +790,9 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
 		for (unsigned int i = 0; i < message.mCellCornersX.count(); i++) {
 			int x = message.mCellCornersX[i];
 			int y = message.mCellCornersY[i];
-			Q_UINT32 texCount = message.mCellCornersTextureCount[i];
-			Q_UINT32* textures = new Q_UINT32[texCount];
-			Q_UINT8* alpha = new Q_UINT8[texCount];
+			quint32 texCount = message.mCellCornersTextureCount[i];
+			quint32* textures = new quint32[texCount];
+			quint8* alpha = new quint8[texCount];
 			for (unsigned int j = 0; j < texCount; j++) {
 				textures[j] = (message.mCellCornerTextures[i])[j];
 				alpha[j] = (message.mCellCornerAlpha[i])[j];
@@ -810,10 +813,10 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
 		}
 
 		// save the original values (for undo)
-		QValueVector<bofixed> originalHeights(message.mCellCornersX.count());
-		for (Q_UINT32 i = 0; i < message.mCellCornersX.count(); i++) {
-			Q_INT32 cornerX = message.mCellCornersX[i];
-			Q_INT32 cornerY = message.mCellCornersY[i];
+		Q3ValueVector<bofixed> originalHeights(message.mCellCornersX.count());
+		for (quint32 i = 0; i < message.mCellCornersX.count(); i++) {
+			qint32 cornerX = message.mCellCornersX[i];
+			qint32 cornerY = message.mCellCornersY[i];
 			bofixed height = canvas()->heightAtCorner(cornerX, cornerY);
 			originalHeights[i] = height;
 		}
@@ -866,7 +869,7 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
 			break;
 		}
 
-		QValueList<Q_ULONG> redoDeleteItems;
+		Q3ValueList<Q_ULONG> redoDeleteItems;
 		for (unsigned int i = 0; i < message.mUnits.count(); i++) {
 			BosonMessageEditorMovePlaceUnit* p = message.mUnits[i];
 
@@ -924,9 +927,9 @@ bool BosonPlayerInputHandler::editorPlayerInput(Q_UINT32 msgid, QDataStream& str
  return true;
 }
 
-void BosonPlayerInputHandler::giveOrder(const QPtrList<Unit>& units, const UnitOrder& order, bool replace)
+void BosonPlayerInputHandler::giveOrder(const Q3PtrList<Unit>& units, const UnitOrder& order, bool replace)
 {
- QPtrListIterator<Unit> it(units);
+ Q3PtrListIterator<Unit> it(units);
  while (it.current()) {
 	giveOrder(it.current(), order, replace);
 	++it;
@@ -962,13 +965,13 @@ void BosonPlayerInputHandler::giveOrder(Unit* unit, const UnitOrder& order_, boo
  }
 }
 
-void BosonPlayerInputHandler::editorDeleteItems(const QValueList<Q_ULONG>& items)
+void BosonPlayerInputHandler::editorDeleteItems(const Q3ValueList<Q_ULONG>& items)
 {
  BO_CHECK_NULL_RET(canvas());
  canvas()->deleteItems(items);
 }
 
-Unit* BosonPlayerInputHandler::editorPlaceUnitAtTopLeftPos(Q_UINT32 owner, Q_UINT32 unitType, const BoVector2Fixed& pos, const bofixed& rotation)
+Unit* BosonPlayerInputHandler::editorPlaceUnitAtTopLeftPos(quint32 owner, quint32 unitType, const BoVector2Fixed& pos, const bofixed& rotation)
 {
  BO_CHECK_NULL_RET0(canvas());
 
@@ -1022,8 +1025,8 @@ Unit* BosonPlayerInputHandler::editorPlaceUnitAtTopLeftPos(Q_UINT32 owner, Q_UIN
 
 BosonMessageEditorMove* BosonPlayerInputHandler::createNewUndoDeleteItemsMessage(const BosonMessageEditorMoveDeleteItems& message) const
 {
- QValueList<BosonMessageEditorMovePlaceUnit*> placeUnit;
- QValueList<QString> unitData;
+ Q3ValueList<BosonMessageEditorMovePlaceUnit*> placeUnit;
+ Q3ValueList<QString> unitData;
  for (unsigned int i = 0; i < message.mItems.count(); i++) {
 	unsigned long int id = message.mItems[i];
 	BosonItem* item = canvas()->findItem(id);
@@ -1062,7 +1065,7 @@ BosonMessageEditorMove* BosonPlayerInputHandler::createNewUndoDeleteItemsMessage
 }
 
 
-void BosonPlayerInputHandler::editorChangeHeight(const QValueVector<Q_UINT32>& cellCornersX, const QValueVector<Q_UINT32>& cellCornersY, const QValueVector<bofixed>& cellCornersHeight)
+void BosonPlayerInputHandler::editorChangeHeight(const Q3ValueVector<quint32>& cellCornersX, const Q3ValueVector<quint32>& cellCornersY, const Q3ValueVector<bofixed>& cellCornersHeight)
 {
  if (cellCornersX.count() != cellCornersY.count() || cellCornersX.count() != cellCornersHeight.count()) {
 	boError() << k_funcinfo << "invalid sizes" << endl;
@@ -1071,12 +1074,12 @@ void BosonPlayerInputHandler::editorChangeHeight(const QValueVector<Q_UINT32>& c
 
  // TODO: unify. either store float or bofixed, storing float in
  // the map and bofixed in the message is not good.
- QValueList< QPair<QPoint, float> > heights;
- for (Q_UINT32 i = 0; i < cellCornersX.count(); i++) {
+ Q3ValueList< QPair<QPoint, float> > heights;
+ for (quint32 i = 0; i < cellCornersX.count(); i++) {
 	// note: cornerX == mapWidth() and cornerY == mapHeight()
 	// are valid!
-	Q_INT32 cornerX = cellCornersX[i];
-	Q_INT32 cornerY = cellCornersY[i];
+	qint32 cornerX = cellCornersX[i];
+	qint32 cornerY = cellCornersY[i];
 	bofixed height = cellCornersHeight[i];
 	if (cornerX < 0 || (unsigned int)cornerX > canvas()->mapWidth()) {
 		boError() << k_funcinfo << "invalid x coordinate " << cornerX << endl;
@@ -1092,9 +1095,9 @@ void BosonPlayerInputHandler::editorChangeHeight(const QValueVector<Q_UINT32>& c
 
  canvas()->setHeightsAtCorners(heights);
 
- for (Q_UINT32 i = 0; i < cellCornersX.count(); i++) {
-	Q_INT32 cornerX = cellCornersX[i];
-	Q_INT32 cornerY = cellCornersY[i];
+ for (quint32 i = 0; i < cellCornersX.count(); i++) {
+	qint32 cornerX = cellCornersX[i];
+	qint32 cornerY = cellCornersY[i];
 	float height = canvas()->heightAtCorner(cornerX, cornerY);
 
 	// TODO: find out whether we actually still need this

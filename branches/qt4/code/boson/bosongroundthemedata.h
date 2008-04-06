@@ -21,8 +21,10 @@
 
 #include <qstring.h>
 #include <qwindowdefs.h> // QRgb
-#include <qintdict.h>
-#include <qdict.h>
+#include <q3intdict.h>
+#include <q3dict.h>
+//Added by qt3to4:
+#include <QPixmap>
 
 class QImage;
 class QPixmap;

@@ -100,7 +100,8 @@ void BoUfoStandaloneFont::drawString(const QString& string, int x, int y)
  BO_CHECK_NULL_RET(g);
  BO_CHECK_NULL_RET(mFont->getRenderer());
 
- mFont->getRenderer()->drawString(g, string.latin1(), string.length(), x, y);
+ QByteArray tmp = string.toAscii();
+ mFont->getRenderer()->drawString(g, tmp.constData(), string.length(), x, y);
 }
 
 int BoUfoStandaloneFont::height() const
@@ -116,7 +117,8 @@ int BoUfoStandaloneFont::stringWidth(const QString& string) const
  if (!mMetrics) {
 	return 0;
  }
- return mMetrics->getStringWidth(string.latin1(), string.length());
+ QByteArray tmp = string.toAscii();
+ return mMetrics->getStringWidth(tmp.constData(), string.length());
 }
 
 

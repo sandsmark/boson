@@ -95,12 +95,11 @@ set(bobmfconverter_SRCS
 	${libmixkit_SRCS}
 )
 
-kde3_automoc(${bobmfconverter_SRCS})
-
 boson_add_executable(bobmfconverter ${bobmfconverter_SRCS})
 boson_target_link_libraries(bobmfconverter
-	${QT_AND_KDECORE_LIBS}
+	${KDE4_KDECORE_LIBS}
 	${LIB3DS_LIBRARY}
+	${QT_QT3SUPPORT_LIBRARY}
 )
 
 install_targets(/bin

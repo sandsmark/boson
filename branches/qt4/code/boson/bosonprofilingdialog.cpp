@@ -24,22 +24,26 @@
 #include "bodebug.h"
 #include "bofiledialog.h"
 #include "qlistviewitemnumber.h"
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
+#include <Q3VBoxLayout>
 #include "bosonprofilingdialoggui.h"
 
 #include <klocale.h>
-#include <klistview.h>
+#include <k3listview.h>
 #include <kmessagebox.h>
 
 #include <qlabel.h>
 #include <qlayout.h>
-#include <qvbox.h>
-#include <qhbox.h>
+#include <q3vbox.h>
+#include <q3hbox.h>
 #include <qpushbutton.h>
 #include <qcheckbox.h>
 #include <qdatetime.h>
-#include <qintdict.h>
-#include <qmemarray.h>
-#include <qdict.h>
+#include <q3intdict.h>
+#include <q3memarray.h>
+#include <q3dict.h>
 
 
 /**
@@ -130,7 +134,7 @@ public:
 		if (!item->children()) {
 			return;
 		}
-		for (QPtrListIterator<BosonProfilingItem> it(*item->children()); it.current(); ++it) {
+		for (Q3PtrListIterator<BosonProfilingItem> it(*item->children()); it.current(); ++it) {
 			add(it.current(), item);
 		}
 	}
@@ -143,7 +147,7 @@ public:
 		return mName2Sum[name];
 	}
 
-	QValueList<QString> allEventNames() const
+	Q3ValueList<QString> allEventNames() const
 	{
 		return mName2Sum.keys();
 	}
@@ -165,16 +169,16 @@ public:
 
 	const QString& name() const { return mName; }
 	long int time() const { return mTime; }
-	const QPtrList<ProfilingItem>& children() const { return mChildren; }
-	const QPtrList<BosonProfilingItem>& items() const { return mItems; }
+	const Q3PtrList<ProfilingItem>& children() const { return mChildren; }
+	const Q3PtrList<BosonProfilingItem>& items() const { return mItems; }
 
 private:
 	QString mName;
 	long int mTime;
-	QPtrList<ProfilingItem> mChildren;
-	QDict<ProfilingItem> mName2Child;
+	Q3PtrList<ProfilingItem> mChildren;
+	Q3Dict<ProfilingItem> mName2Child;
 
-	QPtrList<BosonProfilingItem> mItems;
+	Q3PtrList<BosonProfilingItem> mItems;
 };
 
 ProfilingItem::ProfilingItem(const QString& name)
@@ -199,7 +203,7 @@ void ProfilingItem::addItem(BosonProfilingItem* item)
  if (!item->children()) {
 	return;
  }
- QPtrListIterator<BosonProfilingItem> it(*item->children());
+ Q3PtrListIterator<BosonProfilingItem> it(*item->children());
  while (it.current()) {
 	insertChild(it.current());
 	++it;
@@ -221,10 +225,10 @@ void ProfilingItem::insertChild(BosonProfilingItem* item)
 class QListViewItemNumberTime : public QListViewItemNumber
 {
 public:
-	QListViewItemNumberTime(QListView* p) : QListViewItemNumber(p)
+	QListViewItemNumberTime(Q3ListView* p) : QListViewItemNumber(p)
 	{
 	}
-	QListViewItemNumberTime(QListViewItem* p) : QListViewItemNumber(p)
+	QListViewItemNumberTime(Q3ListViewItem* p) : QListViewItemNumber(p)
 	{
 	}
 
@@ -260,7 +264,7 @@ public:
 	BosonProfilingDialogGUI* mGUI;
 
 	BosonProfiling mProfiling;
-	QPtrList<BosonProfilingItem> mItems;
+	Q3PtrList<BosonProfilingItem> mItems;
 
 	ProfilingItem* mTopItem;
 	ProfilingEventSumCollection* mEventSumCollection;
@@ -274,18 +278,18 @@ BosonProfilingDialog::BosonProfilingDialog(QWidget* parent, bool modal)
 
  d->mGUI = new BosonProfilingDialogGUI(plainPage());
 
- QVBoxLayout* layout = new QVBoxLayout(plainPage());
+ Q3VBoxLayout* layout = new Q3VBoxLayout(plainPage());
  layout->addWidget(d->mGUI);
 
- d->mGUI->mEvents->setColumnWidthMode(0, QListView::Manual);
+ d->mGUI->mEvents->setColumnWidthMode(0, Q3ListView::Manual);
  d->mGUI->mEvents->setColumnWidth(0, 400);
- d->mGUI->mEventLeafs->setColumnWidthMode(0, QListView::Manual);
+ d->mGUI->mEventLeafs->setColumnWidthMode(0, Q3ListView::Manual);
  d->mGUI->mEventLeafs->setColumnWidth(0, 400);
- d->mGUI->mRawTree->setColumnWidthMode(0, QListView::Manual);
+ d->mGUI->mRawTree->setColumnWidthMode(0, Q3ListView::Manual);
  d->mGUI->mRawTree->setColumnWidth(0, 400);
 
- connect(d->mGUI->mEvents, SIGNAL(currentChanged(QListViewItem*)),
-		this, SLOT(slotShowSumForEvent(QListViewItem*)));
+ connect(d->mGUI->mEvents, SIGNAL(currentChanged(Q3ListViewItem*)),
+		this, SLOT(slotShowSumForEvent(Q3ListViewItem*)));
  connect(d->mGUI->mLoadFromFile, SIGNAL(clicked()),
 		this, SLOT(slotLoadFromFile()));
  connect(d->mGUI->mSaveToFile, SIGNAL(clicked()),
@@ -337,12 +341,12 @@ void BosonProfilingDialog::slotUpdate()
  delete d->mTopItem;
 
  d->mTopItem = new ProfilingItem(QString::null);
- for (QPtrListIterator<BosonProfilingItem> it(d->mItems); it.current(); ++it) {
+ for (Q3PtrListIterator<BosonProfilingItem> it(d->mItems); it.current(); ++it) {
 	d->mTopItem->insertChild(it.current());
  }
  delete d->mEventSumCollection;
  d->mEventSumCollection = new ProfilingEventSumCollection();
- for (QPtrListIterator<BosonProfilingItem> it(d->mItems); it.current(); ++it) {
+ for (Q3PtrListIterator<BosonProfilingItem> it(d->mItems); it.current(); ++it) {
 	d->mEventSumCollection->add(it.current(), 0);
  }
 
@@ -362,7 +366,7 @@ void BosonProfilingDialog::slotSaveToFile()
 	}
  }
  QFile f(file);
- if (!f.open(IO_WriteOnly)) {
+ if (!f.open(QIODevice::WriteOnly)) {
 	KMessageBox::sorry(this, i18n("File %1 could not be opened").arg(file));
 	return;
  }
@@ -390,7 +394,7 @@ void BosonProfilingDialog::slotLoadFromFile()
 void BosonProfilingDialog::loadFromFile(const QString& file)
 {
  QFile f(file);
- if (!f.open(IO_ReadOnly)) {
+ if (!f.open(QIODevice::ReadOnly)) {
 	KMessageBox::sorry(this, i18n("File %1 could not be opened").arg(file));
 	return;
  }
@@ -419,8 +423,8 @@ void BosonProfilingDialog::resetEventLeafsPage()
 {
  d->mGUI->mEventLeafs->clear();
 
- QValueList<QString> events = d->mEventSumCollection->allEventNames();
- for (QValueList<QString>::iterator it = events.begin(); it != events.end(); ++it) {
+ Q3ValueList<QString> events = d->mEventSumCollection->allEventNames();
+ for (Q3ValueList<QString>::iterator it = events.begin(); it != events.end(); ++it) {
 	const ProfilingEventSum* sum = d->mEventSumCollection->sumForEvent(*it);
 	if (!sum) {
 		continue;
@@ -448,7 +452,7 @@ void BosonProfilingDialog::resetRawTreePage()
 {
  d->mGUI->mRawTree->clear();
 
- QPtrListIterator<BosonProfilingItem> it(d->mItems);
+ Q3PtrListIterator<BosonProfilingItem> it(d->mItems);
  while (it.current()) {
 	initRawTreeProfilingItem(new QListViewItemNumberTime(d->mGUI->mRawTree), it.current(), -1);
 	++it;
@@ -478,7 +482,7 @@ void BosonProfilingDialog::initProfilingItem(QListViewItemNumberTime* item, Prof
 	item->setText(8, QString::number(profilingItem->items().count()));
  }
 
- QPtrListIterator<ProfilingItem> it(profilingItem->children());
+ Q3PtrListIterator<ProfilingItem> it(profilingItem->children());
  while (it.current()) {
 	QListViewItemNumberTime* child;
 	if (item) {
@@ -506,7 +510,7 @@ void BosonProfilingDialog::initRawTreeProfilingItem(QListViewItemNumberTime* ite
 	return;
  }
 
- QPtrListIterator<BosonProfilingItem> it(*profilingItem->children());
+ Q3PtrListIterator<BosonProfilingItem> it(*profilingItem->children());
  while (it.current()) {
 	QListViewItemNumberTime* child;
 	child = new QListViewItemNumberTime(item);
@@ -516,7 +520,7 @@ void BosonProfilingDialog::initRawTreeProfilingItem(QListViewItemNumberTime* ite
  }
 }
 
-void BosonProfilingDialog::slotShowSumForEvent(QListViewItem* item)
+void BosonProfilingDialog::slotShowSumForEvent(Q3ListViewItem* item)
 {
  QString eventName;
  int calls = 0;
@@ -554,7 +558,7 @@ void BosonProfilingDialog::slotShowSumForEvent(QListViewItem* item)
 
  d->mGUI->mSelectedEventCalledBy->clear();
  for (QMap<QString, int>::iterator it = callers.begin(); it != callers.end(); ++it) {
-	QListViewItem* item = new QListViewItemNumber(d->mGUI->mSelectedEventCalledBy);
+	Q3ListViewItem* item = new QListViewItemNumber(d->mGUI->mSelectedEventCalledBy);
 	QString callerName = it.key();
 	if (callerName.isNull()) {
 		callerName = i18n("(toplevel event)");

@@ -54,7 +54,8 @@ bool MyQLibrary::load()
  //     we dont use it).
  //     RTLD_NOW could probably be replaced by RTLD_LAZY, but I think _NOW is at
  //     least as good here for us.
- mHandle = dlopen(mFile.latin1(), RTLD_NOW | RTLD_GLOBAL);
+ QByteArray fileTmp = mFile.toLatin1();
+ mHandle = dlopen(fileTmp.constData(), RTLD_NOW | RTLD_GLOBAL);
 
  return isLoaded();
 }

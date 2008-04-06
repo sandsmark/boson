@@ -22,6 +22,9 @@
 #define BOUFOACTION_H
 
 #include <qobject.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 class BoUfoActionCollection;
 class BosonGLWidget;
@@ -29,8 +32,8 @@ class KShortcut;
 class KAccel;
 class BoUfoManager;
 
-template<class T> class QValueList;
-template<class T> class QPtrList;
+template<class T> class Q3ValueList;
+template<class T> class Q3PtrList;
 
 namespace ufo {
 	class UMenuBar;
@@ -86,7 +89,7 @@ public slots:
 protected:
 	void addWidget(ufo::UWidget*);
 	void removeWidget(ufo::UWidget*, bool del = true);
-	const QPtrList<ufo::UWidget>& widgets() const;
+	const Q3PtrList<ufo::UWidget>& widgets() const;
 
 signals:
 	void signalActivated();
@@ -160,7 +163,7 @@ public:
 
 protected:
 	void redoMenus();
-	const QPtrList<BoUfoAction>& actions() const;
+	const Q3PtrList<BoUfoAction>& actions() const;
 
 signals:
 	void signalActivated(int id);
@@ -265,7 +268,7 @@ private:
 };
 
 
-// AB: heavily based on KStdAction/KStdGameAction
+// AB: heavily based on KStandardAction/KStdGameAction
 class BoUfoStdAction
 {
 public:
@@ -416,7 +419,7 @@ public:
 	void createUfoToolBarSubMenu(ufo::UWidget*);
 
 protected:
-	const QValueList<BoUfoMenuBarItem*>& items() const;
+	const Q3ValueList<BoUfoMenuBarItem*>& items() const;
 
 private:
 	BoUfoMenuBarMenuPrivate* d;

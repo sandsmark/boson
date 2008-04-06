@@ -20,7 +20,6 @@ set(tests_SRCS
 	unittests/constructiontest.cpp
 	unittests/productiontest.cpp
 )
-kde3_automoc(${tests_SRCS})
 
 boson_add_executable(tests ${tests_SRCS})
 boson_target_link_libraries(tests

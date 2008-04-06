@@ -40,9 +40,11 @@
 #include "unit.h"
 #include "cell.h"
 
-#include <ktempfile.h>
+#include <ktemporaryfile.h>
 
-#include <qtextstream.h>
+#include <q3textstream.h>
+//Added by qt3to4:
+#include <Q3CString>
 
 CanvasTest::CanvasTest(QObject* parent)
 	: QObject(parent)
@@ -123,7 +125,7 @@ bool CanvasTest::testSaveLoadCanvas()
 
  MY_VERIFY(mCanvasContainer->mCanvas->allItemsCount() == 3);
 
- QCString canvasXML = mCanvasContainer->mCanvas->saveCanvas();
+ Q3CString canvasXML = mCanvasContainer->mCanvas->saveCanvas();
  if (canvasXML.isEmpty()) {
 	boError() << k_funcinfo "saving failed" << endl;
 	return false;
@@ -149,7 +151,7 @@ bool CanvasTest::testSaveLoadCanvas()
 
  // check that a loaded canvas can still be saved correctly.
  // the resulting canvas should match exactly both, mCanvas and canvas2
- QCString canvasXML2 = canvasContainer2->mCanvas->saveCanvas();
+ Q3CString canvasXML2 = canvasContainer2->mCanvas->saveCanvas();
  if (canvasXML2.isEmpty()) {
 	boError() << k_funcinfo << "saving of canvas2 failed" << endl;
 	return false;
@@ -232,8 +234,8 @@ bool CanvasTest::checkIfCanvasAreEqual(BosonCanvas* canvas1, BosonCanvas* canvas
 	MY_VERIFY(item1->xRotation() == item2->xRotation());
 	MY_VERIFY(item1->yRotation() == item2->yRotation());
 
-	QPtrVector<Cell>* cells1 = item1->cells();
-	QPtrVector<Cell>* cells2 = item2->cells();
+	Q3PtrVector<Cell>* cells1 = item1->cells();
+	Q3PtrVector<Cell>* cells2 = item2->cells();
 	MY_VERIFY(cells1->size() == cells2->size());
 	for (unsigned int i = 0; i < cells1->size(); i++) {
 		MY_VERIFY((*cells1)[i]->x() == (*cells2)[i]->x());

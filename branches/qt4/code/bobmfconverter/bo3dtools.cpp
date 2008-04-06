@@ -22,7 +22,7 @@
 //#include "bodebug.h"
 
 #include <qstring.h>
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 #include <qdatastream.h>
 #include <qdom.h>
 #include <qpoint.h>

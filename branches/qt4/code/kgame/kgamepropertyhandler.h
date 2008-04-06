@@ -1,7 +1,7 @@
 /*
     This file is part of the KDE games library
     Copyright (C) 2001 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2001 Martin Heni (martin@heni-online.de)
+    Copyright (C) 2001 Martin Heni (kde at heni-online.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -21,14 +21,14 @@
 #ifndef __KGAMEPROPERTYHANDLER_H_
 #define __KGAMEPROPERTYHANDLER_H_
 
-#include <qobject.h>
-#include <qintdict.h>
+#include <QtCore/QObject>
+#include <QtCore/QMultiHash>
 
 #include "kgameproperty.h"
+#include <libkdegames_export.h>
 
 class QDataStream;
 class KGame;
-class KPlayer;
 //class KGamePropertyBase;
 
 class KGamePropertyHandlerPrivate; // wow - what a name ;-)
@@ -68,7 +68,7 @@ class KGamePropertyHandlerPrivate; // wow - what a name ;-)
  * multiplied. 
  *
  **/
-class KGamePropertyHandler : public QObject
+class KDEGAMES_EXPORT KGamePropertyHandler : public QObject
 {
 	Q_OBJECT
 
@@ -131,7 +131,7 @@ public:
 	 * propertyName. This is used for debugging, e.g. in KGameDebugDialog
 	 * @return true on success
 	 **/
-	bool addProperty(KGamePropertyBase *data, QString name=0);
+	bool addProperty(KGamePropertyBase *data, const QString& name=QString());
 
 	/**
 	 * Removes a property from the handler
@@ -276,7 +276,7 @@ public:
 	/**
 	 * Reference to the internal dictionary
 	 **/
-	QIntDict<KGamePropertyBase> &dict() const;
+        QMultiHash<int, KGamePropertyBase*> &dict() const; 
 
 	/**
 	 * In several situations you just want to have a QString of a
@@ -299,7 +299,7 @@ public:
 	void Debug();
 
 
-signals:
+Q_SIGNALS:
 	/**
 	 * This is emitted by a property. KGamePropertyBase::emitSignal
 	 * calls emitSignal which emits this signal. 
@@ -343,10 +343,10 @@ signals:
 	void signalRequestValue(KGamePropertyBase* property, QString& value);
 
 private:
-	void init();
+	friend class KGamePropertyHandlerPrivate;
+	KGamePropertyHandlerPrivate *const d;
 
-private:
-	KGamePropertyHandlerPrivate* d;
+	Q_DISABLE_COPY(KGamePropertyHandler)
 };
 
 #endif

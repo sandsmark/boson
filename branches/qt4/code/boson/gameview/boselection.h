@@ -20,12 +20,12 @@
 #define BOSELECTION_H
 
 #include <qobject.h>
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 
 class Unit;
 class BosonItem;
 class QDomElement;
-template<class T> class QIntDict;
+template<class T> class Q3IntDict;
 
 /**
  * Represents a selection. Every @ref BosonBigDisplay has its own selection
@@ -60,7 +60,7 @@ public:
 	 * @param replace If TRUE (default) then the current selection is
 	 * replaced. If FALSE, the new units are added to the selection instead.
 	 **/
-	void selectUnits(const QPtrList<Unit>& list, bool replace = true);
+	void selectUnits(const Q3PtrList<Unit>& list, bool replace = true);
 
 	/**
 	 * Select a single unit.
@@ -102,7 +102,7 @@ public:
 	/**
 	 * @return All selected units
 	 **/
-	QPtrList<Unit> allUnits() const { return mSelection; }
+	Q3PtrList<Unit> allUnits() const { return mSelection; }
 
 	/**
 	 * @return TRUE if at least one unit in the selection can shoot,
@@ -160,7 +160,7 @@ signals:
 
 private:
 	bool mIsActivated;
-	QPtrList<Unit> mSelection;
+	Q3PtrList<Unit> mSelection;
 };
 
 
@@ -168,7 +168,7 @@ private:
  * @short A collection of @ref BoSelection objects
  *
  * This class stores the selection groups that can usually be created using
- * CTRL+number.
+ * Qt::CTRL+number.
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class BoSelectionGroup : public QObject
@@ -238,7 +238,7 @@ public slots:
 
 private:
 	int mCount;
-	QIntDict<BoSelection>* mSelectionGroups;
+	Q3IntDict<BoSelection>* mSelectionGroups;
 	BoSelection* mSelection;
 };
 

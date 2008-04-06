@@ -26,7 +26,7 @@
 #include <string.h>
 #include <math.h>
 
-#include <qglobal.h> // Q_INT32, ...
+#include <qglobal.h> // qint32, ...
 
 // Define this when you want bofixed to use normal floats (so that essentially
 //  bofixed = float)
@@ -103,16 +103,16 @@ public:
 		: mValue(f.mValue)
 	{
 	}
-	bofixed(Q_INT32 f)  : mValue(f << BITS_AFTER_POINT) { }
-	bofixed(Q_UINT32 f) : mValue(f << BITS_AFTER_POINT) { }
-	bofixed(Q_INT8 f)   : mValue(((Q_INT32)f) << BITS_AFTER_POINT) { }
-	bofixed(Q_UINT8 f)  : mValue(((Q_INT32)f) << BITS_AFTER_POINT) { }
-	bofixed(Q_INT16 f)  : mValue(((Q_INT32)f) << BITS_AFTER_POINT) { }
-	bofixed(Q_UINT16 f) : mValue(((Q_INT32)f) << BITS_AFTER_POINT) { }
-	bofixed(Q_LONG f)   : mValue(((Q_INT32)f) << BITS_AFTER_POINT) { }
-	bofixed(Q_ULONG f)  : mValue(((Q_INT32)f) << BITS_AFTER_POINT) { }
-	bofixed(float f)    : mValue((Q_INT32)(nearbyintf(f * BITS_POW))) { }
-	bofixed(double f)   : mValue((Q_INT32)(nearbyintf(f * BITS_POW))) { }
+	bofixed(qint32 f)  : mValue(f << BITS_AFTER_POINT) { }
+	bofixed(quint32 f) : mValue(f << BITS_AFTER_POINT) { }
+	bofixed(qint8 f)   : mValue(((qint32)f) << BITS_AFTER_POINT) { }
+	bofixed(quint8 f)  : mValue(((qint32)f) << BITS_AFTER_POINT) { }
+	bofixed(qint16 f)  : mValue(((qint32)f) << BITS_AFTER_POINT) { }
+	bofixed(quint16 f) : mValue(((qint32)f) << BITS_AFTER_POINT) { }
+	bofixed(long f)   : mValue(((qint32)f) << BITS_AFTER_POINT) { }
+	bofixed(unsigned long f)  : mValue(((qint32)f) << BITS_AFTER_POINT) { }
+	bofixed(float f)    : mValue((qint32)(nearbyintf(f * BITS_POW))) { }
+	bofixed(double f)   : mValue((qint32)(nearbyintf(f * BITS_POW))) { }
 
 	inline bool equals(const bofixed& f) const         { return (mValue == f.mValue); }
 	inline bool isGreater(const bofixed& f) const      { return (mValue >  f.mValue); }
@@ -125,7 +125,7 @@ public:
 	 * like casting a floating point number to int, i.e. the digits after
 	 * the decimal point are "cut off".
 	 **/
-	inline Q_INT32 toInt() const { return mValue >> BITS_AFTER_POINT; }
+	inline qint32 toInt() const { return mValue >> BITS_AFTER_POINT; }
 	inline float toFloat() const { return ((float)mValue) / BITS_POW; }
 	inline double toDouble() const { return (double)toFloat(); }
 
@@ -133,20 +133,20 @@ public:
 	 * @return The internal representation of the fixed point value. This
 	 * may be useful for debugging-
 	 **/
-	Q_INT32 rawInt() const { return mValue; }
-	void setFromRawInt(Q_INT32 r) { mValue = r; }
+	qint32 rawInt() const { return mValue; }
+	void setFromRawInt(qint32 r) { mValue = r; }
 
 	bofixed& operator=(const bofixed& f) { mValue = f.mValue; return *this; }
-	bofixed& operator=(Q_INT32 f)  { mValue = f << BITS_AFTER_POINT; return *this; }
-	bofixed& operator=(Q_UINT32 f) { mValue = f << BITS_AFTER_POINT; return *this; }
-	bofixed& operator=(Q_INT8 f)   { mValue = ((Q_INT32)f) << BITS_AFTER_POINT; return *this; }
-	bofixed& operator=(Q_UINT8 f)  { mValue = ((Q_INT32)f) << BITS_AFTER_POINT; return *this; }
-	bofixed& operator=(Q_INT16 f)  { mValue = f << BITS_AFTER_POINT; return *this; }
-	bofixed& operator=(Q_UINT16 f) { mValue = f << BITS_AFTER_POINT; return *this; }
-	bofixed& operator=(Q_LONG f)   { mValue = f << BITS_AFTER_POINT; return *this; }
-	bofixed& operator=(Q_ULONG f)  { mValue = f << BITS_AFTER_POINT; return *this; }
-	bofixed& operator=(float f)    { mValue = (Q_INT32)(nearbyintf(f * BITS_POW)); return *this; }
-	bofixed& operator=(double f)   { mValue = (Q_INT32)(nearbyintf(f * BITS_POW)); return *this; }
+	bofixed& operator=(qint32 f)  { mValue = f << BITS_AFTER_POINT; return *this; }
+	bofixed& operator=(quint32 f) { mValue = f << BITS_AFTER_POINT; return *this; }
+	bofixed& operator=(qint8 f)   { mValue = ((qint32)f) << BITS_AFTER_POINT; return *this; }
+	bofixed& operator=(quint8 f)  { mValue = ((qint32)f) << BITS_AFTER_POINT; return *this; }
+	bofixed& operator=(qint16 f)  { mValue = f << BITS_AFTER_POINT; return *this; }
+	bofixed& operator=(quint16 f) { mValue = f << BITS_AFTER_POINT; return *this; }
+	bofixed& operator=(long f)   { mValue = f << BITS_AFTER_POINT; return *this; }
+	bofixed& operator=(unsigned long f)  { mValue = f << BITS_AFTER_POINT; return *this; }
+	bofixed& operator=(float f)    { mValue = (qint32)(nearbyintf(f * BITS_POW)); return *this; }
+	bofixed& operator=(double f)   { mValue = (qint32)(nearbyintf(f * BITS_POW)); return *this; }
 
 	inline operator float() const { return toFloat(); }
 
@@ -164,43 +164,43 @@ public:
 	inline bofixed operator-() const { bofixed f(*this); f.mValue *= -1; return f; }
 
 	inline bofixed& operator+=(const bofixed& f) { mValue += f.mValue; return *this; }
-	inline bofixed& operator+=(Q_INT32 f)  { return operator+=(bofixed(f)); }
-	inline bofixed& operator+=(Q_UINT32 f) { return operator+=(bofixed(f)); }
-	inline bofixed& operator+=(Q_INT16 f)  { return operator+=(bofixed(f)); }
-	inline bofixed& operator+=(Q_UINT16 f) { return operator+=(bofixed(f)); }
-	inline bofixed& operator+=(Q_INT8 f)   { return operator+=(bofixed(f)); }
-	inline bofixed& operator+=(Q_UINT8 f)  { return operator+=(bofixed(f)); }
-	inline bofixed& operator+=(Q_LONG f)   { return operator+=(bofixed(f)); }
-	inline bofixed& operator+=(Q_ULONG f)  { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(qint32 f)  { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(quint32 f) { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(qint16 f)  { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(quint16 f) { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(qint8 f)   { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(quint8 f)  { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(long f)   { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(unsigned long f)  { return operator+=(bofixed(f)); }
 	inline bofixed& operator+=(float f)    { return operator+=(bofixed(f)); }
 	inline bofixed& operator+=(double f)   { return operator+=(bofixed(f)); }
 
 	inline bofixed& operator-=(const bofixed& f) { mValue -= f.mValue; return *this; }
-	inline bofixed& operator-=(Q_INT32 f)  { return operator-=(bofixed(f)); }
-	inline bofixed& operator-=(Q_UINT32 f) { return operator-=(bofixed(f)); }
-	inline bofixed& operator-=(Q_INT16 f)  { return operator-=(bofixed(f)); }
-	inline bofixed& operator-=(Q_UINT16 f) { return operator-=(bofixed(f)); }
-	inline bofixed& operator-=(Q_INT8 f)   { return operator-=(bofixed(f)); }
-	inline bofixed& operator-=(Q_UINT8 f)  { return operator-=(bofixed(f)); }
-	inline bofixed& operator-=(Q_LONG f)   { return operator-=(bofixed(f)); }
-	inline bofixed& operator-=(Q_ULONG f)  { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(qint32 f)  { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(quint32 f) { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(qint16 f)  { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(quint16 f) { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(qint8 f)   { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(quint8 f)  { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(long f)   { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(unsigned long f)  { return operator-=(bofixed(f)); }
 	inline bofixed& operator-=(float f)    { return operator-=(bofixed(f)); }
 	inline bofixed& operator-=(double f)   { return operator-=(bofixed(f)); }
 
 	inline bofixed& operator*=(const bofixed& f)
 	{
-		Q_INT64 tmp = ((Q_INT64)mValue) * f.mValue;
+		qint64 tmp = ((qint64)mValue) * f.mValue;
 		mValue = (tmp >> BITS_AFTER_POINT);
 		return *this;
 	}
-	inline bofixed& operator*=(Q_INT32 f)  { return operator*=(bofixed(f)); }
-	inline bofixed& operator*=(Q_UINT32 f) { return operator*=(bofixed(f)); }
-	inline bofixed& operator*=(Q_INT16 f)  { return operator*=(bofixed(f)); }
-	inline bofixed& operator*=(Q_UINT16 f) { return operator*=(bofixed(f)); }
-	inline bofixed& operator*=(Q_INT8 f)   { return operator*=(bofixed(f)); }
-	inline bofixed& operator*=(Q_UINT8 f)  { return operator*=(bofixed(f)); }
-	inline bofixed& operator*=(Q_LONG f)   { return operator*=(bofixed(f)); }
-	inline bofixed& operator*=(Q_ULONG f)  { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(qint32 f)  { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(quint32 f) { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(qint16 f)  { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(quint16 f) { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(qint8 f)   { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(quint8 f)  { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(long f)   { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(unsigned long f)  { return operator*=(bofixed(f)); }
 	inline bofixed& operator*=(float f)    { return operator*=(bofixed(f)); }
 	inline bofixed& operator*=(double f)   { return operator*=(bofixed(f)); }
 
@@ -210,24 +210,24 @@ public:
 		// BITS_AFTER_POINT bits. however that would mean losing a lot
 		// of precision, so instead we shift the value that we divide to
 		// the right first.
-		Q_INT64 tmp = ((Q_INT64)mValue) << BITS_AFTER_POINT;
+		qint64 tmp = ((qint64)mValue) << BITS_AFTER_POINT;
 		tmp /= f.mValue;
 		mValue = tmp;
 		return *this;
 	}
-	inline bofixed& operator/=(Q_INT32 f)  { return operator/=(bofixed(f)); }
-	inline bofixed& operator/=(Q_UINT32 f) { return operator/=(bofixed(f)); }
-	inline bofixed& operator/=(Q_INT16 f)  { return operator/=(bofixed(f)); }
-	inline bofixed& operator/=(Q_UINT16 f) { return operator/=(bofixed(f)); }
-	inline bofixed& operator/=(Q_INT8 f)   { return operator/=(bofixed(f)); }
-	inline bofixed& operator/=(Q_UINT8 f)  { return operator/=(bofixed(f)); }
-	inline bofixed& operator/=(Q_LONG f)   { return operator/=(bofixed(f)); }
-	inline bofixed& operator/=(Q_ULONG f)  { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(qint32 f)  { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(quint32 f) { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(qint16 f)  { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(quint16 f) { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(qint8 f)   { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(quint8 f)  { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(long f)   { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(unsigned long f)  { return operator/=(bofixed(f)); }
 	inline bofixed& operator/=(float f)    { return operator/=(bofixed(f)); }
 	inline bofixed& operator/=(double f)   { return operator/=(bofixed(f)); }
 
 private:
-	Q_INT32 mValue;
+	qint32 mValue;
 };
 #else
 class bofixed
@@ -244,14 +244,14 @@ public:
 		: mValue(f.mValue)
 	{
 	}
-	bofixed(Q_INT32 f)  : mValue(f) { }
-	bofixed(Q_UINT32 f) : mValue(f) { }
-	bofixed(Q_INT8 f)   : mValue(f) { }
-	bofixed(Q_UINT8 f)  : mValue(f) { }
-	bofixed(Q_INT16 f)  : mValue(f) { }
-	bofixed(Q_UINT16 f) : mValue(f) { }
-	bofixed(Q_LONG f)   : mValue(f) { }
-	bofixed(Q_ULONG f)  : mValue(f) { }
+	bofixed(qint32 f)  : mValue(f) { }
+	bofixed(quint32 f) : mValue(f) { }
+	bofixed(qint8 f)   : mValue(f) { }
+	bofixed(quint8 f)  : mValue(f) { }
+	bofixed(qint16 f)  : mValue(f) { }
+	bofixed(quint16 f) : mValue(f) { }
+	bofixed(long f)   : mValue(f) { }
+	bofixed(unsigned long f)  : mValue(f) { }
 	bofixed(float f)    : mValue(f) { }
 	bofixed(double f)   : mValue(f) { }
 
@@ -266,26 +266,28 @@ public:
 	 * like casting a floating point number to int, i.e. the digits after
 	 * the decimal point are "cut off".
 	 **/
-	inline Q_INT32 toInt() const { return (Q_INT32)mValue; }
+	inline qint32 toInt() const { return (qint32)mValue; }
 	inline float toFloat() const { return mValue; }
 	inline double toDouble() const { return (double)mValue; }
 
+#if 0
 	/**
 	 * @return The internal representation of the fixed point value. This
 	 * may be useful for debugging-
 	 **/
-	Q_INT32 rawInt() const { return *((Q_UINT32*)&mValue); }
-	void setFromRawInt(Q_INT32 r) { mValue = *((float*)&r); }
+	qint32 rawInt() const { return *((quint32*)&mValue); }
+	void setFromRawInt(qint32 r) { mValue = *((float*)&r); }
+#endif
 
 	bofixed& operator=(const bofixed& f) { mValue = f.mValue; return *this; }
-	bofixed& operator=(Q_INT32 f)  { mValue = f; return *this; }
-	bofixed& operator=(Q_UINT32 f) { mValue = f; return *this; }
-	bofixed& operator=(Q_INT8 f)   { mValue = f; return *this; }
-	bofixed& operator=(Q_UINT8 f)  { mValue = f; return *this; }
-	bofixed& operator=(Q_INT16 f)  { mValue = f; return *this; }
-	bofixed& operator=(Q_UINT16 f) { mValue = f; return *this; }
-	bofixed& operator=(Q_LONG f)   { mValue = f; return *this; }
-	bofixed& operator=(Q_ULONG f)  { mValue = f; return *this; }
+	bofixed& operator=(qint32 f)  { mValue = f; return *this; }
+	bofixed& operator=(quint32 f) { mValue = f; return *this; }
+	bofixed& operator=(qint8 f)   { mValue = f; return *this; }
+	bofixed& operator=(quint8 f)  { mValue = f; return *this; }
+	bofixed& operator=(qint16 f)  { mValue = f; return *this; }
+	bofixed& operator=(quint16 f) { mValue = f; return *this; }
+	bofixed& operator=(long f)   { mValue = f; return *this; }
+	bofixed& operator=(unsigned long f)  { mValue = f; return *this; }
 	bofixed& operator=(float f)    { mValue = f; return *this; }
 	bofixed& operator=(double f)   { mValue = f; return *this; }
 
@@ -305,26 +307,26 @@ public:
 	inline bofixed operator-() const { bofixed f(*this); f.mValue *= -1; return f; }
 
 	inline bofixed& operator+=(const bofixed& f) { mValue += f.mValue; return *this; }
-	inline bofixed& operator+=(Q_INT32 f)  { return operator+=(bofixed(f)); }
-	inline bofixed& operator+=(Q_UINT32 f) { return operator+=(bofixed(f)); }
-	inline bofixed& operator+=(Q_INT16 f)  { return operator+=(bofixed(f)); }
-	inline bofixed& operator+=(Q_UINT16 f) { return operator+=(bofixed(f)); }
-	inline bofixed& operator+=(Q_INT8 f)   { return operator+=(bofixed(f)); }
-	inline bofixed& operator+=(Q_UINT8 f)  { return operator+=(bofixed(f)); }
-	inline bofixed& operator+=(Q_LONG f)   { return operator+=(bofixed(f)); }
-	inline bofixed& operator+=(Q_ULONG f)  { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(qint32 f)  { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(quint32 f) { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(qint16 f)  { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(quint16 f) { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(qint8 f)   { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(quint8 f)  { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(long f)   { return operator+=(bofixed(f)); }
+	inline bofixed& operator+=(unsigned long f)  { return operator+=(bofixed(f)); }
 	inline bofixed& operator+=(float f)    { return operator+=(bofixed(f)); }
 	inline bofixed& operator+=(double f)   { return operator+=(bofixed(f)); }
 
 	inline bofixed& operator-=(const bofixed& f) { mValue -= f.mValue; return *this; }
-	inline bofixed& operator-=(Q_INT32 f)  { return operator-=(bofixed(f)); }
-	inline bofixed& operator-=(Q_UINT32 f) { return operator-=(bofixed(f)); }
-	inline bofixed& operator-=(Q_INT16 f)  { return operator-=(bofixed(f)); }
-	inline bofixed& operator-=(Q_UINT16 f) { return operator-=(bofixed(f)); }
-	inline bofixed& operator-=(Q_INT8 f)   { return operator-=(bofixed(f)); }
-	inline bofixed& operator-=(Q_UINT8 f)  { return operator-=(bofixed(f)); }
-	inline bofixed& operator-=(Q_LONG f)   { return operator-=(bofixed(f)); }
-	inline bofixed& operator-=(Q_ULONG f)  { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(qint32 f)  { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(quint32 f) { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(qint16 f)  { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(quint16 f) { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(qint8 f)   { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(quint8 f)  { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(long f)   { return operator-=(bofixed(f)); }
+	inline bofixed& operator-=(unsigned long f)  { return operator-=(bofixed(f)); }
 	inline bofixed& operator-=(float f)    { return operator-=(bofixed(f)); }
 	inline bofixed& operator-=(double f)   { return operator-=(bofixed(f)); }
 
@@ -333,14 +335,14 @@ public:
 		mValue *= f.mValue;
 		return *this;
 	}
-	inline bofixed& operator*=(Q_INT32 f)  { return operator*=(bofixed(f)); }
-	inline bofixed& operator*=(Q_UINT32 f) { return operator*=(bofixed(f)); }
-	inline bofixed& operator*=(Q_INT16 f)  { return operator*=(bofixed(f)); }
-	inline bofixed& operator*=(Q_UINT16 f) { return operator*=(bofixed(f)); }
-	inline bofixed& operator*=(Q_INT8 f)   { return operator*=(bofixed(f)); }
-	inline bofixed& operator*=(Q_UINT8 f)  { return operator*=(bofixed(f)); }
-	inline bofixed& operator*=(Q_LONG f)   { return operator*=(bofixed(f)); }
-	inline bofixed& operator*=(Q_ULONG f)  { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(qint32 f)  { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(quint32 f) { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(qint16 f)  { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(quint16 f) { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(qint8 f)   { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(quint8 f)  { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(long f)   { return operator*=(bofixed(f)); }
+	inline bofixed& operator*=(unsigned long f)  { return operator*=(bofixed(f)); }
 	inline bofixed& operator*=(float f)    { return operator*=(bofixed(f)); }
 	inline bofixed& operator*=(double f)   { return operator*=(bofixed(f)); }
 
@@ -349,14 +351,14 @@ public:
 		mValue /= f.mValue;
 		return *this;
 	}
-	inline bofixed& operator/=(Q_INT32 f)  { return operator/=(bofixed(f)); }
-	inline bofixed& operator/=(Q_UINT32 f) { return operator/=(bofixed(f)); }
-	inline bofixed& operator/=(Q_INT16 f)  { return operator/=(bofixed(f)); }
-	inline bofixed& operator/=(Q_UINT16 f) { return operator/=(bofixed(f)); }
-	inline bofixed& operator/=(Q_INT8 f)   { return operator/=(bofixed(f)); }
-	inline bofixed& operator/=(Q_UINT8 f)  { return operator/=(bofixed(f)); }
-	inline bofixed& operator/=(Q_LONG f)   { return operator/=(bofixed(f)); }
-	inline bofixed& operator/=(Q_ULONG f)  { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(qint32 f)  { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(quint32 f) { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(qint16 f)  { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(quint16 f) { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(qint8 f)   { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(quint8 f)  { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(long f)   { return operator/=(bofixed(f)); }
+	inline bofixed& operator/=(unsigned long f)  { return operator/=(bofixed(f)); }
 	inline bofixed& operator/=(float f)    { return operator/=(bofixed(f)); }
 	inline bofixed& operator/=(double f)   { return operator/=(bofixed(f)); }
 
@@ -365,225 +367,229 @@ private:
 };
 #endif
 
+#ifndef BOFIXED_IS_FLOAT
 inline bofixed operator+(const bofixed& f1, const bofixed& f2) { bofixed f(f1); f += f2; return f; }
-inline bofixed operator+(const bofixed& f1, Q_INT32 f2)  { bofixed f(f1); f += f2; return f; }
-inline bofixed operator+(const bofixed& f1, Q_UINT32 f2) { bofixed f(f1); f += f2; return f; }
-inline bofixed operator+(const bofixed& f1, Q_INT16 f2)  { bofixed f(f1); f += f2; return f; }
-inline bofixed operator+(const bofixed& f1, Q_UINT16 f2) { bofixed f(f1); f += f2; return f; }
-inline bofixed operator+(const bofixed& f1, Q_INT8 f2)   { bofixed f(f1); f += f2; return f; }
-inline bofixed operator+(const bofixed& f1, Q_UINT8 f2)  { bofixed f(f1); f += f2; return f; }
-inline bofixed operator+(const bofixed& f1, Q_LONG f2 )  { bofixed f(f1); f += f2; return f; }
-inline bofixed operator+(const bofixed& f1, Q_ULONG f2)  { bofixed f(f1); f += f2; return f; }
+inline bofixed operator+(const bofixed& f1, qint32 f2)  { bofixed f(f1); f += f2; return f; }
+inline bofixed operator+(const bofixed& f1, quint32 f2) { bofixed f(f1); f += f2; return f; }
+inline bofixed operator+(const bofixed& f1, qint16 f2)  { bofixed f(f1); f += f2; return f; }
+inline bofixed operator+(const bofixed& f1, quint16 f2) { bofixed f(f1); f += f2; return f; }
+inline bofixed operator+(const bofixed& f1, qint8 f2)   { bofixed f(f1); f += f2; return f; }
+inline bofixed operator+(const bofixed& f1, quint8 f2)  { bofixed f(f1); f += f2; return f; }
+inline bofixed operator+(const bofixed& f1, long f2 )  { bofixed f(f1); f += f2; return f; }
+inline bofixed operator+(const bofixed& f1, unsigned long f2)  { bofixed f(f1); f += f2; return f; }
 inline bofixed operator+(const bofixed& f1, float f2)    { bofixed f(f1); f += f2; return f; }
 inline bofixed operator+(const bofixed& f1, double f2)   { bofixed f(f1); f += f2; return f; }
-inline bofixed operator+(Q_INT32 f1, const bofixed& f2)  { bofixed f(f1); f += f2; return f; }
-inline bofixed operator+(Q_UINT32 f1, const bofixed& f2) { bofixed f(f1); f += f2; return f; }
-inline bofixed operator+(Q_INT8 f1, const bofixed& f2)   { bofixed f(f1); f += f2; return f; }
-inline bofixed operator+(Q_UINT8 f1, const bofixed& f2)  { bofixed f(f1); f += f2; return f; }
-inline bofixed operator+(Q_INT16 f1, const bofixed& f2)  { bofixed f(f1); f += f2; return f; }
-inline bofixed operator+(Q_UINT16 f1, const bofixed& f2) { bofixed f(f1); f += f2; return f; }
-inline bofixed operator+(Q_LONG f1, const bofixed& f2)   { bofixed f(f1); f += f2; return f; }
-inline bofixed operator+(Q_ULONG f1, const bofixed& f2)  { bofixed f(f1); f += f2; return f; }
+inline bofixed operator+(qint32 f1, const bofixed& f2)  { bofixed f(f1); f += f2; return f; }
+inline bofixed operator+(quint32 f1, const bofixed& f2) { bofixed f(f1); f += f2; return f; }
+inline bofixed operator+(qint8 f1, const bofixed& f2)   { bofixed f(f1); f += f2; return f; }
+inline bofixed operator+(quint8 f1, const bofixed& f2)  { bofixed f(f1); f += f2; return f; }
+inline bofixed operator+(qint16 f1, const bofixed& f2)  { bofixed f(f1); f += f2; return f; }
+inline bofixed operator+(quint16 f1, const bofixed& f2) { bofixed f(f1); f += f2; return f; }
+inline bofixed operator+(long f1, const bofixed& f2)   { bofixed f(f1); f += f2; return f; }
+inline bofixed operator+(unsigned long f1, const bofixed& f2)  { bofixed f(f1); f += f2; return f; }
 inline bofixed operator+(float f1, const bofixed& f2)    { bofixed f(f1); f += f2; return f; }
 inline bofixed operator+(double f1, const bofixed& f2)   { bofixed f(f1); f += f2; return f; }
 
 inline bofixed operator-(const bofixed& f1, const bofixed& f2) { bofixed f(f1); f -= f2; return f; }
-inline bofixed operator-(const bofixed& f1, Q_INT32 f2)  { bofixed f(f1); f -= f2; return f; }
-inline bofixed operator-(const bofixed& f1, Q_UINT32 f2) { bofixed f(f1); f -= f2; return f; }
-inline bofixed operator-(const bofixed& f1, Q_INT16 f2)  { bofixed f(f1); f -= f2; return f; }
-inline bofixed operator-(const bofixed& f1, Q_UINT16 f2) { bofixed f(f1); f -= f2; return f; }
-inline bofixed operator-(const bofixed& f1, Q_INT8 f2)   { bofixed f(f1); f -= f2; return f; }
-inline bofixed operator-(const bofixed& f1, Q_UINT8 f2)  { bofixed f(f1); f -= f2; return f; }
-inline bofixed operator-(const bofixed& f1, Q_LONG f2 )  { bofixed f(f1); f -= f2; return f; }
-inline bofixed operator-(const bofixed& f1, Q_ULONG f2)  { bofixed f(f1); f -= f2; return f; }
+inline bofixed operator-(const bofixed& f1, qint32 f2)  { bofixed f(f1); f -= f2; return f; }
+inline bofixed operator-(const bofixed& f1, quint32 f2) { bofixed f(f1); f -= f2; return f; }
+inline bofixed operator-(const bofixed& f1, qint16 f2)  { bofixed f(f1); f -= f2; return f; }
+inline bofixed operator-(const bofixed& f1, quint16 f2) { bofixed f(f1); f -= f2; return f; }
+inline bofixed operator-(const bofixed& f1, qint8 f2)   { bofixed f(f1); f -= f2; return f; }
+inline bofixed operator-(const bofixed& f1, quint8 f2)  { bofixed f(f1); f -= f2; return f; }
+inline bofixed operator-(const bofixed& f1, long f2 )  { bofixed f(f1); f -= f2; return f; }
+inline bofixed operator-(const bofixed& f1, unsigned long f2)  { bofixed f(f1); f -= f2; return f; }
 inline bofixed operator-(const bofixed& f1, float f2)    { bofixed f(f1); f -= f2; return f; }
 inline bofixed operator-(const bofixed& f1, double f2)   { bofixed f(f1); f -= f2; return f; }
-inline bofixed operator-(Q_INT32 f1, const bofixed& f2)  { bofixed f(f1); f -= f2; return f; }
-inline bofixed operator-(Q_UINT32 f1, const bofixed& f2) { bofixed f(f1); f -= f2; return f; }
-inline bofixed operator-(Q_INT8 f1, const bofixed& f2)   { bofixed f(f1); f -= f2; return f; }
-inline bofixed operator-(Q_UINT8 f1, const bofixed& f2)  { bofixed f(f1); f -= f2; return f; }
-inline bofixed operator-(Q_INT16 f1, const bofixed& f2)  { bofixed f(f1); f -= f2; return f; }
-inline bofixed operator-(Q_UINT16 f1, const bofixed& f2) { bofixed f(f1); f -= f2; return f; }
-inline bofixed operator-(Q_LONG f1, const bofixed& f2)   { bofixed f(f1); f -= f2; return f; }
-inline bofixed operator-(Q_ULONG f1, const bofixed& f2)  { bofixed f(f1); f -= f2; return f; }
+inline bofixed operator-(qint32 f1, const bofixed& f2)  { bofixed f(f1); f -= f2; return f; }
+inline bofixed operator-(quint32 f1, const bofixed& f2) { bofixed f(f1); f -= f2; return f; }
+inline bofixed operator-(qint8 f1, const bofixed& f2)   { bofixed f(f1); f -= f2; return f; }
+inline bofixed operator-(quint8 f1, const bofixed& f2)  { bofixed f(f1); f -= f2; return f; }
+inline bofixed operator-(qint16 f1, const bofixed& f2)  { bofixed f(f1); f -= f2; return f; }
+inline bofixed operator-(quint16 f1, const bofixed& f2) { bofixed f(f1); f -= f2; return f; }
+inline bofixed operator-(long f1, const bofixed& f2)   { bofixed f(f1); f -= f2; return f; }
+inline bofixed operator-(unsigned long f1, const bofixed& f2)  { bofixed f(f1); f -= f2; return f; }
 inline bofixed operator-(float f1, const bofixed& f2)    { bofixed f(f1); f -= f2; return f; }
 inline bofixed operator-(double f1, const bofixed& f2)   { bofixed f(f1); f -= f2; return f; }
 
 inline bofixed operator*(const bofixed& f1, const bofixed& f2) { bofixed f(f1); f *= f2; return f; }
-inline bofixed operator*(const bofixed& f1, Q_INT32 f2)  { bofixed f(f1); f *= f2; return f; }
-inline bofixed operator*(const bofixed& f1, Q_UINT32 f2) { bofixed f(f1); f *= f2; return f; }
-inline bofixed operator*(const bofixed& f1, Q_INT16 f2)  { bofixed f(f1); f *= f2; return f; }
-inline bofixed operator*(const bofixed& f1, Q_UINT16 f2) { bofixed f(f1); f *= f2; return f; }
-inline bofixed operator*(const bofixed& f1, Q_INT8 f2)   { bofixed f(f1); f *= f2; return f; }
-inline bofixed operator*(const bofixed& f1, Q_UINT8 f2)  { bofixed f(f1); f *= f2; return f; }
-inline bofixed operator*(const bofixed& f1, Q_LONG f2 )  { bofixed f(f1); f *= f2; return f; }
-inline bofixed operator*(const bofixed& f1, Q_ULONG f2)  { bofixed f(f1); f *= f2; return f; }
+inline bofixed operator*(const bofixed& f1, qint32 f2)  { bofixed f(f1); f *= f2; return f; }
+inline bofixed operator*(const bofixed& f1, quint32 f2) { bofixed f(f1); f *= f2; return f; }
+inline bofixed operator*(const bofixed& f1, qint16 f2)  { bofixed f(f1); f *= f2; return f; }
+inline bofixed operator*(const bofixed& f1, quint16 f2) { bofixed f(f1); f *= f2; return f; }
+inline bofixed operator*(const bofixed& f1, qint8 f2)   { bofixed f(f1); f *= f2; return f; }
+inline bofixed operator*(const bofixed& f1, quint8 f2)  { bofixed f(f1); f *= f2; return f; }
+inline bofixed operator*(const bofixed& f1, long f2 )  { bofixed f(f1); f *= f2; return f; }
+inline bofixed operator*(const bofixed& f1, unsigned long f2)  { bofixed f(f1); f *= f2; return f; }
 inline bofixed operator*(const bofixed& f1, float f2)    { bofixed f(f1); f *= f2; return f; }
 inline bofixed operator*(const bofixed& f1, double f2)   { bofixed f(f1); f *= f2; return f; }
-inline bofixed operator*(Q_INT32 f1, const bofixed& f2)  { bofixed f(f1); f *= f2; return f; }
-inline bofixed operator*(Q_UINT32 f1, const bofixed& f2) { bofixed f(f1); f *= f2; return f; }
-inline bofixed operator*(Q_INT8 f1, const bofixed& f2)   { bofixed f(f1); f *= f2; return f; }
-inline bofixed operator*(Q_UINT8 f1, const bofixed& f2)  { bofixed f(f1); f *= f2; return f; }
-inline bofixed operator*(Q_INT16 f1, const bofixed& f2)  { bofixed f(f1); f *= f2; return f; }
-inline bofixed operator*(Q_UINT16 f1, const bofixed& f2) { bofixed f(f1); f *= f2; return f; }
-inline bofixed operator*(Q_LONG f1, const bofixed& f2)   { bofixed f(f1); f *= f2; return f; }
-inline bofixed operator*(Q_ULONG f1, const bofixed& f2)  { bofixed f(f1); f *= f2; return f; }
+inline bofixed operator*(qint32 f1, const bofixed& f2)  { bofixed f(f1); f *= f2; return f; }
+inline bofixed operator*(quint32 f1, const bofixed& f2) { bofixed f(f1); f *= f2; return f; }
+inline bofixed operator*(qint8 f1, const bofixed& f2)   { bofixed f(f1); f *= f2; return f; }
+inline bofixed operator*(quint8 f1, const bofixed& f2)  { bofixed f(f1); f *= f2; return f; }
+inline bofixed operator*(qint16 f1, const bofixed& f2)  { bofixed f(f1); f *= f2; return f; }
+inline bofixed operator*(quint16 f1, const bofixed& f2) { bofixed f(f1); f *= f2; return f; }
+inline bofixed operator*(long f1, const bofixed& f2)   { bofixed f(f1); f *= f2; return f; }
+inline bofixed operator*(unsigned long f1, const bofixed& f2)  { bofixed f(f1); f *= f2; return f; }
 inline bofixed operator*(float f1, const bofixed& f2)    { bofixed f(f1); f *= f2; return f; }
 inline bofixed operator*(double f1, const bofixed& f2)   { bofixed f(f1); f *= f2; return f; }
 
 inline bofixed operator/(const bofixed& f1, const bofixed& f2) { bofixed f(f1); f /= f2; return f; }
-inline bofixed operator/(const bofixed& f1, Q_INT32 f2)  { bofixed f(f1); f /= f2; return f; }
-inline bofixed operator/(const bofixed& f1, Q_UINT32 f2) { bofixed f(f1); f /= f2; return f; }
-inline bofixed operator/(const bofixed& f1, Q_INT16 f2)  { bofixed f(f1); f /= f2; return f; }
-inline bofixed operator/(const bofixed& f1, Q_UINT16 f2) { bofixed f(f1); f /= f2; return f; }
-inline bofixed operator/(const bofixed& f1, Q_INT8 f2)   { bofixed f(f1); f /= f2; return f; }
-inline bofixed operator/(const bofixed& f1, Q_UINT8 f2)  { bofixed f(f1); f /= f2; return f; }
-inline bofixed operator/(const bofixed& f1, Q_LONG f2 )  { bofixed f(f1); f /= f2; return f; }
-inline bofixed operator/(const bofixed& f1, Q_ULONG f2)  { bofixed f(f1); f /= f2; return f; }
+inline bofixed operator/(const bofixed& f1, qint32 f2)  { bofixed f(f1); f /= f2; return f; }
+inline bofixed operator/(const bofixed& f1, quint32 f2) { bofixed f(f1); f /= f2; return f; }
+inline bofixed operator/(const bofixed& f1, qint16 f2)  { bofixed f(f1); f /= f2; return f; }
+inline bofixed operator/(const bofixed& f1, quint16 f2) { bofixed f(f1); f /= f2; return f; }
+inline bofixed operator/(const bofixed& f1, qint8 f2)   { bofixed f(f1); f /= f2; return f; }
+inline bofixed operator/(const bofixed& f1, quint8 f2)  { bofixed f(f1); f /= f2; return f; }
+inline bofixed operator/(const bofixed& f1, long f2 )  { bofixed f(f1); f /= f2; return f; }
+inline bofixed operator/(const bofixed& f1, unsigned long f2)  { bofixed f(f1); f /= f2; return f; }
 inline bofixed operator/(const bofixed& f1, float f2)    { bofixed f(f1); f /= f2; return f; }
 inline bofixed operator/(const bofixed& f1, double f2)   { bofixed f(f1); f /= f2; return f; }
-inline bofixed operator/(Q_INT32 f1, const bofixed& f2)  { bofixed f(f1); f /= f2; return f; }
-inline bofixed operator/(Q_UINT32 f1, const bofixed& f2) { bofixed f(f1); f /= f2; return f; }
-inline bofixed operator/(Q_INT8 f1, const bofixed& f2)   { bofixed f(f1); f /= f2; return f; }
-inline bofixed operator/(Q_UINT8 f1, const bofixed& f2)  { bofixed f(f1); f /= f2; return f; }
-inline bofixed operator/(Q_INT16 f1, const bofixed& f2)  { bofixed f(f1); f /= f2; return f; }
-inline bofixed operator/(Q_UINT16 f1, const bofixed& f2) { bofixed f(f1); f /= f2; return f; }
-inline bofixed operator/(Q_LONG f1, const bofixed& f2)   { bofixed f(f1); f /= f2; return f; }
-inline bofixed operator/(Q_ULONG f1, const bofixed& f2)  { bofixed f(f1); f /= f2; return f; }
+inline bofixed operator/(qint32 f1, const bofixed& f2)  { bofixed f(f1); f /= f2; return f; }
+inline bofixed operator/(quint32 f1, const bofixed& f2) { bofixed f(f1); f /= f2; return f; }
+inline bofixed operator/(qint8 f1, const bofixed& f2)   { bofixed f(f1); f /= f2; return f; }
+inline bofixed operator/(quint8 f1, const bofixed& f2)  { bofixed f(f1); f /= f2; return f; }
+inline bofixed operator/(qint16 f1, const bofixed& f2)  { bofixed f(f1); f /= f2; return f; }
+inline bofixed operator/(quint16 f1, const bofixed& f2) { bofixed f(f1); f /= f2; return f; }
+inline bofixed operator/(long f1, const bofixed& f2)   { bofixed f(f1); f /= f2; return f; }
+inline bofixed operator/(unsigned long f1, const bofixed& f2)  { bofixed f(f1); f /= f2; return f; }
 inline bofixed operator/(float f1, const bofixed& f2)    { bofixed f(f1); f /= f2; return f; }
 inline bofixed operator/(double f1, const bofixed& f2)   { bofixed f(f1); f /= f2; return f; }
 
 inline bool operator==(const bofixed& f1, const bofixed& f2) { return f1.equals(f2); }
-inline bool operator==(const bofixed& f1, Q_INT32 f2)  { return f1.equals(bofixed(f2)); }
-inline bool operator==(const bofixed& f1, Q_UINT32 f2) { return f1.equals(bofixed(f2)); }
-inline bool operator==(const bofixed& f1, Q_INT16 f2)  { return f1.equals(bofixed(f2)); }
-inline bool operator==(const bofixed& f1, Q_UINT16 f2) { return f1.equals(bofixed(f2)); }
-inline bool operator==(const bofixed& f1, Q_INT8 f2)   { return f1.equals(bofixed(f2)); }
-inline bool operator==(const bofixed& f1, Q_UINT8 f2)  { return f1.equals(bofixed(f2)); }
-inline bool operator==(const bofixed& f1, Q_LONG f2)   { return f1.equals(bofixed(f2)); }
-inline bool operator==(const bofixed& f1, Q_ULONG f2)  { return f1.equals(bofixed(f2)); }
+inline bool operator==(const bofixed& f1, qint32 f2)  { return f1.equals(bofixed(f2)); }
+inline bool operator==(const bofixed& f1, quint32 f2) { return f1.equals(bofixed(f2)); }
+inline bool operator==(const bofixed& f1, qint16 f2)  { return f1.equals(bofixed(f2)); }
+inline bool operator==(const bofixed& f1, quint16 f2) { return f1.equals(bofixed(f2)); }
+inline bool operator==(const bofixed& f1, qint8 f2)   { return f1.equals(bofixed(f2)); }
+inline bool operator==(const bofixed& f1, quint8 f2)  { return f1.equals(bofixed(f2)); }
+inline bool operator==(const bofixed& f1, long f2)   { return f1.equals(bofixed(f2)); }
+inline bool operator==(const bofixed& f1, unsigned long f2)  { return f1.equals(bofixed(f2)); }
 inline bool operator==(const bofixed& f1, float f2)    { return f1.equals(bofixed(f2)); }
 inline bool operator==(const bofixed& f1, double f2)   { return f1.equals(bofixed(f2)); }
-inline bool operator==(Q_INT32 f1, const bofixed& f2)  { return bofixed(f1).equals(f2); }
-inline bool operator==(Q_UINT32 f1, const bofixed& f2) { return bofixed(f1).equals(f2); }
-inline bool operator==(Q_INT16 f1, const bofixed& f2)  { return bofixed(f1).equals(f2); }
-inline bool operator==(Q_UINT16 f1, const bofixed& f2) { return bofixed(f1).equals(f2); }
-inline bool operator==(Q_INT8 f1, const bofixed& f2)   { return bofixed(f1).equals(f2); }
-inline bool operator==(Q_UINT8 f1, const bofixed& f2)  { return bofixed(f1).equals(f2); }
-inline bool operator==(Q_LONG f1, const bofixed& f2)   { return bofixed(f1).equals(f2); }
-inline bool operator==(Q_ULONG f1, const bofixed& f2)  { return bofixed(f1).equals(f2); }
+inline bool operator==(qint32 f1, const bofixed& f2)  { return bofixed(f1).equals(f2); }
+inline bool operator==(quint32 f1, const bofixed& f2) { return bofixed(f1).equals(f2); }
+inline bool operator==(qint16 f1, const bofixed& f2)  { return bofixed(f1).equals(f2); }
+inline bool operator==(quint16 f1, const bofixed& f2) { return bofixed(f1).equals(f2); }
+inline bool operator==(qint8 f1, const bofixed& f2)   { return bofixed(f1).equals(f2); }
+inline bool operator==(quint8 f1, const bofixed& f2)  { return bofixed(f1).equals(f2); }
+inline bool operator==(long f1, const bofixed& f2)   { return bofixed(f1).equals(f2); }
+inline bool operator==(unsigned long f1, const bofixed& f2)  { return bofixed(f1).equals(f2); }
 inline bool operator==(float f1, const bofixed& f2)    { return bofixed(f1).equals(f2); }
 inline bool operator==(double f1, const bofixed& f2)   { return bofixed(f1).equals(f2); }
 
 inline bool operator!=(const bofixed& f1, const bofixed& f2) { return !f1.equals(f2); }
-inline bool operator!=(const bofixed& f1, Q_INT32 f2)  { return !f1.equals(bofixed(f2)); }
-inline bool operator!=(const bofixed& f1, Q_UINT32 f2) { return !f1.equals(bofixed(f2)); }
-inline bool operator!=(const bofixed& f1, Q_INT16 f2)  { return !f1.equals(bofixed(f2)); }
-inline bool operator!=(const bofixed& f1, Q_UINT16 f2) { return !f1.equals(bofixed(f2)); }
-inline bool operator!=(const bofixed& f1, Q_INT8 f2)   { return !f1.equals(bofixed(f2)); }
-inline bool operator!=(const bofixed& f1, Q_UINT8 f2)  { return !f1.equals(bofixed(f2)); }
-inline bool operator!=(const bofixed& f1, Q_LONG f2)   { return !f1.equals(bofixed(f2)); }
-inline bool operator!=(const bofixed& f1, Q_ULONG f2)  { return !f1.equals(bofixed(f2)); }
+inline bool operator!=(const bofixed& f1, qint32 f2)  { return !f1.equals(bofixed(f2)); }
+inline bool operator!=(const bofixed& f1, quint32 f2) { return !f1.equals(bofixed(f2)); }
+inline bool operator!=(const bofixed& f1, qint16 f2)  { return !f1.equals(bofixed(f2)); }
+inline bool operator!=(const bofixed& f1, quint16 f2) { return !f1.equals(bofixed(f2)); }
+inline bool operator!=(const bofixed& f1, qint8 f2)   { return !f1.equals(bofixed(f2)); }
+inline bool operator!=(const bofixed& f1, quint8 f2)  { return !f1.equals(bofixed(f2)); }
+inline bool operator!=(const bofixed& f1, long f2)   { return !f1.equals(bofixed(f2)); }
+inline bool operator!=(const bofixed& f1, unsigned long f2)  { return !f1.equals(bofixed(f2)); }
 inline bool operator!=(const bofixed& f1, float f2)    { return !f1.equals(bofixed(f2)); }
 inline bool operator!=(const bofixed& f1, double f2)   { return !f1.equals(bofixed(f2)); }
-inline bool operator!=(Q_INT32 f1, const bofixed& f2)  { return !bofixed(f1).equals(f2); }
-inline bool operator!=(Q_UINT32 f1, const bofixed& f2) { return !bofixed(f1).equals(f2); }
-inline bool operator!=(Q_INT16 f1, const bofixed& f2)  { return !bofixed(f1).equals(f2); }
-inline bool operator!=(Q_UINT16 f1, const bofixed& f2) { return !bofixed(f1).equals(f2); }
-inline bool operator!=(Q_INT8 f1, const bofixed& f2)   { return !bofixed(f1).equals(f2); }
-inline bool operator!=(Q_UINT8 f1, const bofixed& f2)  { return !bofixed(f1).equals(f2); }
-inline bool operator!=(Q_LONG f1, const bofixed& f2)   { return !bofixed(f1).equals(f2); }
-inline bool operator!=(Q_ULONG f1, const bofixed& f2)  { return !bofixed(f1).equals(f2); }
+inline bool operator!=(qint32 f1, const bofixed& f2)  { return !bofixed(f1).equals(f2); }
+#if 0 // conflicts with QVariant!
+inline bool operator!=(quint32 f1, const bofixed& f2) { return !bofixed(f1).equals(f2); }
+#endif
+inline bool operator!=(qint16 f1, const bofixed& f2)  { return !bofixed(f1).equals(f2); }
+inline bool operator!=(quint16 f1, const bofixed& f2) { return !bofixed(f1).equals(f2); }
+inline bool operator!=(qint8 f1, const bofixed& f2)   { return !bofixed(f1).equals(f2); }
+inline bool operator!=(quint8 f1, const bofixed& f2)  { return !bofixed(f1).equals(f2); }
+inline bool operator!=(long f1, const bofixed& f2)   { return !bofixed(f1).equals(f2); }
+inline bool operator!=(unsigned long f1, const bofixed& f2)  { return !bofixed(f1).equals(f2); }
 inline bool operator!=(float f1, const bofixed& f2)    { return !bofixed(f1).equals(f2); }
 inline bool operator!=(double f1, const bofixed& f2)   { return !bofixed(f1).equals(f2); }
 
 inline bool operator<=(const bofixed& f1, const bofixed& f2) { return f1.isLessEqual(f2); }
-inline bool operator<=(const bofixed& f1, Q_INT32 f2)  { return f1.isLessEqual(bofixed(f2)); }
-inline bool operator<=(const bofixed& f1, Q_UINT32 f2) { return f1.isLessEqual(bofixed(f2)); }
-inline bool operator<=(const bofixed& f1, Q_INT16 f2)  { return f1.isLessEqual(bofixed(f2)); }
-inline bool operator<=(const bofixed& f1, Q_UINT16 f2) { return f1.isLessEqual(bofixed(f2)); }
-inline bool operator<=(const bofixed& f1, Q_INT8 f2)   { return f1.isLessEqual(bofixed(f2)); }
-inline bool operator<=(const bofixed& f1, Q_UINT8 f2)  { return f1.isLessEqual(bofixed(f2)); }
-inline bool operator<=(const bofixed& f1, Q_LONG f2)   { return f1.isLessEqual(bofixed(f2)); }
-inline bool operator<=(const bofixed& f1, Q_ULONG f2)  { return f1.isLessEqual(bofixed(f2)); }
+inline bool operator<=(const bofixed& f1, qint32 f2)  { return f1.isLessEqual(bofixed(f2)); }
+inline bool operator<=(const bofixed& f1, quint32 f2) { return f1.isLessEqual(bofixed(f2)); }
+inline bool operator<=(const bofixed& f1, qint16 f2)  { return f1.isLessEqual(bofixed(f2)); }
+inline bool operator<=(const bofixed& f1, quint16 f2) { return f1.isLessEqual(bofixed(f2)); }
+inline bool operator<=(const bofixed& f1, qint8 f2)   { return f1.isLessEqual(bofixed(f2)); }
+inline bool operator<=(const bofixed& f1, quint8 f2)  { return f1.isLessEqual(bofixed(f2)); }
+inline bool operator<=(const bofixed& f1, long f2)   { return f1.isLessEqual(bofixed(f2)); }
+inline bool operator<=(const bofixed& f1, unsigned long f2)  { return f1.isLessEqual(bofixed(f2)); }
 inline bool operator<=(const bofixed& f1, float f2)    { return f1.isLessEqual(bofixed(f2)); }
 inline bool operator<=(const bofixed& f1, double f2)   { return f1.isLessEqual(bofixed(f2)); }
-inline bool operator<=(Q_INT32 f1, const bofixed& f2)  { return bofixed(f1).isLessEqual(f2); }
-inline bool operator<=(Q_UINT32 f1, const bofixed& f2) { return bofixed(f1).isLessEqual(f2); }
-inline bool operator<=(Q_INT16 f1, const bofixed& f2)  { return bofixed(f1).isLessEqual(f2); }
-inline bool operator<=(Q_UINT16 f1, const bofixed& f2) { return bofixed(f1).isLessEqual(f2); }
-inline bool operator<=(Q_INT8 f1, const bofixed& f2)   { return bofixed(f1).isLessEqual(f2); }
-inline bool operator<=(Q_UINT8 f1, const bofixed& f2)  { return bofixed(f1).isLessEqual(f2); }
-inline bool operator<=(Q_LONG f1, const bofixed& f2)   { return bofixed(f1).isLessEqual(f2); }
-inline bool operator<=(Q_ULONG f1, const bofixed& f2)  { return bofixed(f1).isLessEqual(f2); }
+inline bool operator<=(qint32 f1, const bofixed& f2)  { return bofixed(f1).isLessEqual(f2); }
+inline bool operator<=(quint32 f1, const bofixed& f2) { return bofixed(f1).isLessEqual(f2); }
+inline bool operator<=(qint16 f1, const bofixed& f2)  { return bofixed(f1).isLessEqual(f2); }
+inline bool operator<=(quint16 f1, const bofixed& f2) { return bofixed(f1).isLessEqual(f2); }
+inline bool operator<=(qint8 f1, const bofixed& f2)   { return bofixed(f1).isLessEqual(f2); }
+inline bool operator<=(quint8 f1, const bofixed& f2)  { return bofixed(f1).isLessEqual(f2); }
+inline bool operator<=(long f1, const bofixed& f2)   { return bofixed(f1).isLessEqual(f2); }
+inline bool operator<=(unsigned long f1, const bofixed& f2)  { return bofixed(f1).isLessEqual(f2); }
 inline bool operator<=(float f1, const bofixed& f2)    { return bofixed(f1).isLessEqual(f2); }
 inline bool operator<=(double f1, const bofixed& f2)   { return bofixed(f1).isLessEqual(f2); }
 
 inline bool operator>=(const bofixed& f1, const bofixed& f2) { return f1.isGreaterEqual(f2); }
-inline bool operator>=(const bofixed& f1, Q_INT32 f2)  { return f1.isGreaterEqual(bofixed(f2)); }
-inline bool operator>=(const bofixed& f1, Q_UINT32 f2) { return f1.isGreaterEqual(bofixed(f2)); }
-inline bool operator>=(const bofixed& f1, Q_INT16 f2)  { return f1.isGreaterEqual(bofixed(f2)); }
-inline bool operator>=(const bofixed& f1, Q_UINT16 f2) { return f1.isGreaterEqual(bofixed(f2)); }
-inline bool operator>=(const bofixed& f1, Q_INT8 f2)   { return f1.isGreaterEqual(bofixed(f2)); }
-inline bool operator>=(const bofixed& f1, Q_UINT8 f2)  { return f1.isGreaterEqual(bofixed(f2)); }
-inline bool operator>=(const bofixed& f1, Q_LONG f2)   { return f1.isGreaterEqual(bofixed(f2)); }
-inline bool operator>=(const bofixed& f1, Q_ULONG f2)  { return f1.isGreaterEqual(bofixed(f2)); }
+inline bool operator>=(const bofixed& f1, qint32 f2)  { return f1.isGreaterEqual(bofixed(f2)); }
+inline bool operator>=(const bofixed& f1, quint32 f2) { return f1.isGreaterEqual(bofixed(f2)); }
+inline bool operator>=(const bofixed& f1, qint16 f2)  { return f1.isGreaterEqual(bofixed(f2)); }
+inline bool operator>=(const bofixed& f1, quint16 f2) { return f1.isGreaterEqual(bofixed(f2)); }
+inline bool operator>=(const bofixed& f1, qint8 f2)   { return f1.isGreaterEqual(bofixed(f2)); }
+inline bool operator>=(const bofixed& f1, quint8 f2)  { return f1.isGreaterEqual(bofixed(f2)); }
+inline bool operator>=(const bofixed& f1, long f2)   { return f1.isGreaterEqual(bofixed(f2)); }
+inline bool operator>=(const bofixed& f1, unsigned long f2)  { return f1.isGreaterEqual(bofixed(f2)); }
 inline bool operator>=(const bofixed& f1, float f2)    { return f1.isGreaterEqual(bofixed(f2)); }
 inline bool operator>=(const bofixed& f1, double f2)   { return f1.isGreaterEqual(bofixed(f2)); }
-inline bool operator>=(Q_INT32 f1, const bofixed& f2)  { return bofixed(f1).isGreaterEqual(f2); }
-inline bool operator>=(Q_UINT32 f1, const bofixed& f2) { return bofixed(f1).isGreaterEqual(f2); }
-inline bool operator>=(Q_INT16 f1, const bofixed& f2)  { return bofixed(f1).isGreaterEqual(f2); }
-inline bool operator>=(Q_UINT16 f1, const bofixed& f2) { return bofixed(f1).isGreaterEqual(f2); }
-inline bool operator>=(Q_INT8 f1, const bofixed& f2)   { return bofixed(f1).isGreaterEqual(f2); }
-inline bool operator>=(Q_UINT8 f1, const bofixed& f2)  { return bofixed(f1).isGreaterEqual(f2); }
-inline bool operator>=(Q_LONG f1, const bofixed& f2)   { return bofixed(f1).isGreaterEqual(f2); }
-inline bool operator>=(Q_ULONG f1, const bofixed& f2)  { return bofixed(f1).isGreaterEqual(f2); }
+inline bool operator>=(qint32 f1, const bofixed& f2)  { return bofixed(f1).isGreaterEqual(f2); }
+inline bool operator>=(quint32 f1, const bofixed& f2) { return bofixed(f1).isGreaterEqual(f2); }
+inline bool operator>=(qint16 f1, const bofixed& f2)  { return bofixed(f1).isGreaterEqual(f2); }
+inline bool operator>=(quint16 f1, const bofixed& f2) { return bofixed(f1).isGreaterEqual(f2); }
+inline bool operator>=(qint8 f1, const bofixed& f2)   { return bofixed(f1).isGreaterEqual(f2); }
+inline bool operator>=(quint8 f1, const bofixed& f2)  { return bofixed(f1).isGreaterEqual(f2); }
+inline bool operator>=(long f1, const bofixed& f2)   { return bofixed(f1).isGreaterEqual(f2); }
+inline bool operator>=(unsigned long f1, const bofixed& f2)  { return bofixed(f1).isGreaterEqual(f2); }
 inline bool operator>=(float f1, const bofixed& f2)    { return bofixed(f1).isGreaterEqual(f2); }
 inline bool operator>=(double f1, const bofixed& f2)   { return bofixed(f1).isGreaterEqual(f2); }
 
 inline bool operator<(const bofixed& f1, const bofixed& f2) { return f1.isLess(f2); }
-inline bool operator<(const bofixed& f1, Q_INT32 f2)  { return f1.isLess(bofixed(f2)); }
-inline bool operator<(const bofixed& f1, Q_UINT32 f2) { return f1.isLess(bofixed(f2)); }
-inline bool operator<(const bofixed& f1, Q_INT16 f2)  { return f1.isLess(bofixed(f2)); }
-inline bool operator<(const bofixed& f1, Q_UINT16 f2) { return f1.isLess(bofixed(f2)); }
-inline bool operator<(const bofixed& f1, Q_INT8 f2)   { return f1.isLess(bofixed(f2)); }
-inline bool operator<(const bofixed& f1, Q_UINT8 f2)  { return f1.isLess(bofixed(f2)); }
-inline bool operator<(const bofixed& f1, Q_LONG f2)   { return f1.isLess(bofixed(f2)); }
-inline bool operator<(const bofixed& f1, Q_ULONG f2)  { return f1.isLess(bofixed(f2)); }
+inline bool operator<(const bofixed& f1, qint32 f2)  { return f1.isLess(bofixed(f2)); }
+inline bool operator<(const bofixed& f1, quint32 f2) { return f1.isLess(bofixed(f2)); }
+inline bool operator<(const bofixed& f1, qint16 f2)  { return f1.isLess(bofixed(f2)); }
+inline bool operator<(const bofixed& f1, quint16 f2) { return f1.isLess(bofixed(f2)); }
+inline bool operator<(const bofixed& f1, qint8 f2)   { return f1.isLess(bofixed(f2)); }
+inline bool operator<(const bofixed& f1, quint8 f2)  { return f1.isLess(bofixed(f2)); }
+inline bool operator<(const bofixed& f1, long f2)   { return f1.isLess(bofixed(f2)); }
+inline bool operator<(const bofixed& f1, unsigned long f2)  { return f1.isLess(bofixed(f2)); }
 inline bool operator<(const bofixed& f1, float f2)    { return f1.isLess(bofixed(f2)); }
 inline bool operator<(const bofixed& f1, double f2)   { return f1.isLess(bofixed(f2)); }
-inline bool operator<(Q_INT32 f1, const bofixed& f2)  { return bofixed(f1).isLess(f2); }
-inline bool operator<(Q_UINT32 f1, const bofixed& f2) { return bofixed(f1).isLess(f2); }
-inline bool operator<(Q_INT16 f1, const bofixed& f2)  { return bofixed(f1).isLess(f2); }
-inline bool operator<(Q_UINT16 f1, const bofixed& f2) { return bofixed(f1).isLess(f2); }
-inline bool operator<(Q_INT8 f1, const bofixed& f2)   { return bofixed(f1).isLess(f2); }
-inline bool operator<(Q_UINT8 f1, const bofixed& f2)  { return bofixed(f1).isLess(f2); }
-inline bool operator<(Q_LONG f1, const bofixed& f2)   { return bofixed(f1).isLess(f2); }
-inline bool operator<(Q_ULONG f1, const bofixed& f2)  { return bofixed(f1).isLess(f2); }
+inline bool operator<(qint32 f1, const bofixed& f2)  { return bofixed(f1).isLess(f2); }
+inline bool operator<(quint32 f1, const bofixed& f2) { return bofixed(f1).isLess(f2); }
+inline bool operator<(qint16 f1, const bofixed& f2)  { return bofixed(f1).isLess(f2); }
+inline bool operator<(quint16 f1, const bofixed& f2) { return bofixed(f1).isLess(f2); }
+inline bool operator<(qint8 f1, const bofixed& f2)   { return bofixed(f1).isLess(f2); }
+inline bool operator<(quint8 f1, const bofixed& f2)  { return bofixed(f1).isLess(f2); }
+inline bool operator<(long f1, const bofixed& f2)   { return bofixed(f1).isLess(f2); }
+inline bool operator<(unsigned long f1, const bofixed& f2)  { return bofixed(f1).isLess(f2); }
 inline bool operator<(float f1, const bofixed& f2)    { return bofixed(f1).isLess(f2); }
 inline bool operator<(double f1, const bofixed& f2)   { return bofixed(f1).isLess(f2); }
 
 inline bool operator>(const bofixed& f1, const bofixed& f2) { return f1.isGreater(f2); }
-inline bool operator>(const bofixed& f1, Q_INT32 f2)  { return f1.isGreater(bofixed(f2)); }
-inline bool operator>(const bofixed& f1, Q_UINT32 f2) { return f1.isGreater(bofixed(f2)); }
-inline bool operator>(const bofixed& f1, Q_INT16 f2)  { return f1.isGreater(bofixed(f2)); }
-inline bool operator>(const bofixed& f1, Q_UINT16 f2) { return f1.isGreater(bofixed(f2)); }
-inline bool operator>(const bofixed& f1, Q_INT8 f2)   { return f1.isGreater(bofixed(f2)); }
-inline bool operator>(const bofixed& f1, Q_UINT8 f2)  { return f1.isGreater(bofixed(f2)); }
-inline bool operator>(const bofixed& f1, Q_LONG f2)   { return f1.isGreater(bofixed(f2)); }
-inline bool operator>(const bofixed& f1, Q_ULONG f2)  { return f1.isGreater(bofixed(f2)); }
+inline bool operator>(const bofixed& f1, qint32 f2)  { return f1.isGreater(bofixed(f2)); }
+inline bool operator>(const bofixed& f1, quint32 f2) { return f1.isGreater(bofixed(f2)); }
+inline bool operator>(const bofixed& f1, qint16 f2)  { return f1.isGreater(bofixed(f2)); }
+inline bool operator>(const bofixed& f1, quint16 f2) { return f1.isGreater(bofixed(f2)); }
+inline bool operator>(const bofixed& f1, qint8 f2)   { return f1.isGreater(bofixed(f2)); }
+inline bool operator>(const bofixed& f1, quint8 f2)  { return f1.isGreater(bofixed(f2)); }
+inline bool operator>(const bofixed& f1, long f2)   { return f1.isGreater(bofixed(f2)); }
+inline bool operator>(const bofixed& f1, unsigned long f2)  { return f1.isGreater(bofixed(f2)); }
 inline bool operator>(const bofixed& f1, float f2)    { return f1.isGreater(bofixed(f2)); }
 inline bool operator>(const bofixed& f1, double f2)   { return f1.isGreater(bofixed(f2)); }
-inline bool operator>(Q_INT32 f1, const bofixed& f2)  { return bofixed(f1).isGreater(f2); }
-inline bool operator>(Q_UINT32 f1, const bofixed& f2) { return bofixed(f1).isGreater(f2); }
-inline bool operator>(Q_INT16 f1, const bofixed& f2)  { return bofixed(f1).isGreater(f2); }
-inline bool operator>(Q_UINT16 f1, const bofixed& f2) { return bofixed(f1).isGreater(f2); }
-inline bool operator>(Q_INT8 f1, const bofixed& f2)   { return bofixed(f1).isGreater(f2); }
-inline bool operator>(Q_UINT8 f1, const bofixed& f2)  { return bofixed(f1).isGreater(f2); }
-inline bool operator>(Q_LONG f1, const bofixed& f2)   { return bofixed(f1).isGreater(f2); }
-inline bool operator>(Q_ULONG f1, const bofixed& f2)  { return bofixed(f1).isGreater(f2); }
+inline bool operator>(qint32 f1, const bofixed& f2)  { return bofixed(f1).isGreater(f2); }
+inline bool operator>(quint32 f1, const bofixed& f2) { return bofixed(f1).isGreater(f2); }
+inline bool operator>(qint16 f1, const bofixed& f2)  { return bofixed(f1).isGreater(f2); }
+inline bool operator>(quint16 f1, const bofixed& f2) { return bofixed(f1).isGreater(f2); }
+inline bool operator>(qint8 f1, const bofixed& f2)   { return bofixed(f1).isGreater(f2); }
+inline bool operator>(quint8 f1, const bofixed& f2)  { return bofixed(f1).isGreater(f2); }
+inline bool operator>(long f1, const bofixed& f2)   { return bofixed(f1).isGreater(f2); }
+inline bool operator>(unsigned long f1, const bofixed& f2)  { return bofixed(f1).isGreater(f2); }
 inline bool operator>(float f1, const bofixed& f2)    { return bofixed(f1).isGreater(f2); }
 inline bool operator>(double f1, const bofixed& f2)   { return bofixed(f1).isGreater(f2); }
+#endif // BOFIXED_IS_FLOAT
 
 #endif
 

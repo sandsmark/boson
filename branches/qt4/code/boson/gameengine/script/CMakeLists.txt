@@ -15,8 +15,6 @@ set(script_SRCS
 	bosonscriptinterface.cpp
 )
 
-kde3_automoc(${script_SRCS})
-
 boson_add_library(bosonscript STATIC ${script_SRCS})
 boson_target_link_libraries(bosonscript ${PYTHON_LIBRARIES})
 

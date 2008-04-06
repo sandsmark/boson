@@ -28,6 +28,9 @@
 #include <qwidget.h>
 #include <qlayout.h>
 #include <qlabel.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <Q3VBoxLayout>
 
 #include <kdialog.h>
 
@@ -45,8 +48,8 @@ public:
 		mZ = 0;
 	}
 	QLabel* mLabel;
-	QVBoxLayout* mTopLayout;
-	QHBoxLayout* mMainLayout;
+	Q3VBoxLayout* mTopLayout;
+	Q3HBoxLayout* mMainLayout;
 
 	BoFloatNumInput* mX;
 	BoFloatNumInput* mY;
@@ -57,8 +60,8 @@ BoVector3Input::BoVector3Input(QWidget* parent, const char* name) : QWidget(pare
 {
  d = new BoVector3InputPrivate;
 
- d->mTopLayout = new QVBoxLayout(this);
- d->mMainLayout = new QHBoxLayout(d->mTopLayout);
+ d->mTopLayout = new Q3VBoxLayout(this);
+ d->mMainLayout = new Q3HBoxLayout(d->mTopLayout);
 
  d->mX = new BoFloatNumInput(this);
  d->mY = new BoFloatNumInput(this);
@@ -84,15 +87,15 @@ void BoVector3Input::setLabel(const QString& label, int a)
 	return;
  }
  d->mLabel = new QLabel(label, this);
- d->mLabel->setAlignment((a & (~(AlignTop|AlignBottom|AlignVCenter))) | AlignVCenter);
+ d->mLabel->setAlignment((a & (~(Qt::AlignTop|Qt::AlignBottom|Qt::AlignVCenter))) | Qt::AlignVCenter);
 
  // if no vertical alignment set, use Top alignment
- if (!(a & (AlignTop|AlignBottom|AlignVCenter))) {
-	a |= AlignTop;
+ if (!(a & (Qt::AlignTop|Qt::AlignBottom|Qt::AlignVCenter))) {
+	a |= Qt::AlignTop;
  }
- if (a & AlignTop) {
+ if (a & Qt::AlignTop) {
 	d->mTopLayout->insertWidget(0, d->mLabel);
- } else if (a & AlignBottom) {
+ } else if (a & Qt::AlignBottom) {
 	d->mTopLayout->addWidget(d->mLabel);
  } else {
 	d->mMainLayout->insertWidget(0, d->mLabel);
@@ -143,7 +146,7 @@ void BoVector3Input::slotValueChanged(float)
 }
 
 
-QHBoxLayout* BoVector3Input::mainLayout() const
+Q3HBoxLayout* BoVector3Input::mainLayout() const
 {
  return d->mMainLayout;
 }

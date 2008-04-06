@@ -21,7 +21,7 @@
 
 #include <kdialogbase.h>
 
-class QListViewItem;
+class Q3ListViewItem;
 class QListViewItemNumber;
 class ProfileSlotAdvance;
 class ProfileItemAdvance;

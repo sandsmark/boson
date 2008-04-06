@@ -28,8 +28,8 @@
 #include <kdeversion.h>
 #include <klocale.h>
 #include <kstandarddirs.h>
-#include <kprocio.h>
-#include <kstaticdeleter.h>
+#include <k3procio.h>
+#include <k3staticdeleter.h>
 
 #include <qstringlist.h>
 #include <qmap.h>
@@ -114,7 +114,7 @@ void BoInfo::reset()
 bool BoInfo::save(QDataStream& stream) const
 {
  stream << QString(BOINFO_TAG);
- stream << (Q_UINT32)BOINFO_VERSION;
+ stream << (quint32)BOINFO_VERSION;
  stream << d->mInfos;
  return true;
 }
@@ -122,7 +122,7 @@ bool BoInfo::save(QDataStream& stream) const
 bool BoInfo::load(QDataStream& stream)
 {
  QString tag;
- Q_UINT32 version;
+ quint32 version;
  stream >> tag;
  if (tag != QString(BOINFO_TAG)) {
 	boError() << k_funcinfo << "Expected BoInfo data" << endl;
@@ -140,7 +140,7 @@ bool BoInfo::save(QDomElement& root) const
  // See QVariant::toString() about this!
  boDebug() << k_funcinfo << endl;
  QDomDocument doc = root.ownerDocument();
- root.setAttribute(QString::fromLatin1("Version"), QString::number((Q_UINT32)BOINFO_VERSION));
+ root.setAttribute(QString::fromLatin1("Version"), QString::number((quint32)BOINFO_VERSION));
  QMap<int, QVariant>::Iterator it;
  for (it = d->mInfos.begin(); it != d->mInfos.end(); ++it) {
 	if (!it.data().canCast(QVariant::String)) {
@@ -194,7 +194,7 @@ bool BoInfo::load(QDomElement& root)
 bool BoInfo::saveToFile(const QString& fileName) const
 {
  QFile file(fileName);
- if (!file.open(IO_WriteOnly)) {
+ if (!file.open(QIODevice::WriteOnly)) {
 	boError() << k_funcinfo << "Could not open " << fileName << " for writing" << endl;
 	return false;
  }
@@ -211,7 +211,7 @@ bool BoInfo::saveToFile(const QString& fileName) const
 bool BoInfo::loadFromFile(const QString& fileName)
 {
  QFile file(fileName);
- if (!file.open(IO_ReadOnly)) {
+ if (!file.open(QIODevice::ReadOnly)) {
 	boError() << k_funcinfo << "Could not open " << fileName << endl;
 	return false;
  }
@@ -234,9 +234,9 @@ void BoInfo::copyFrom(const BoInfo& b)
 {
  reset();
  QByteArray buffer;
- QDataStream wstream(buffer, IO_WriteOnly);
+ QDataStream wstream(buffer, QIODevice::WriteOnly);
  b.save(wstream);
- QDataStream rstream(buffer, IO_WriteOnly);
+ QDataStream rstream(buffer, QIODevice::WriteOnly);
  load(rstream);
 }
 
@@ -695,9 +695,9 @@ bool BoInfo::libraryDependsOn(const QString& lib, const QString& dependsOn) cons
 	boWarning() << k_funcinfo << "you don't have " << ldd << endl;
 	return false;
  }
- KProcIO proc;
+ K3ProcIO proc;
  proc << "/usr/bin/ldd" << QFile::encodeName(lib);
- if (!proc.start(KProcIO::Block)) {
+ if (!proc.start(K3ProcIO::Block)) {
 	boWarning() << k_funcinfo << "error starting ldd" << endl;
 	return false;
  }

@@ -40,6 +40,8 @@
 #include <kstandarddirs.h>
 
 #include <qimage.h>
+//Added by qt3to4:
+#include <QMouseEvent>
 
 #include <math.h>
 
@@ -136,7 +138,8 @@ void BoUfoPushButton::setText(const QString& text)
  if (text.isNull()) {
 	mButton->setText("");
  } else {
-	mButton->setText(text.latin1());
+	QByteArray tmp = text.toAscii();
+	mButton->setText(std::string(tmp.constData(), tmp.length()));
  }
 }
 
@@ -169,8 +172,8 @@ void BoUfoPushButton::setIconFile(const QString& file_)
  QString file = file_;
  if (!file_.isEmpty()) {
 	QImage img;
-	if (KGlobal::_instance) { // NULL in boufodesigner
-		file = locate("data", "boson/" + file_);
+	if (KGlobal::hasMainComponent()) { // NULL in boufodesigner
+		file = KStandardDirs::locate("data", "boson/" + file_);
 		if (file.isEmpty()) {
 			boDebug() << k_funcinfo << "file " << file_ << " not found" << endl;
 			file = file_;

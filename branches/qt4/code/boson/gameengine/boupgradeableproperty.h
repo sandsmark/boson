@@ -20,9 +20,11 @@
 #define BOUPGRADEABLEPROPERTY_H
 
 #include <qstring.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 #include "../bomath.h"
 
-template<class T> class QValueList;
+template<class T> class Q3ValueList;
 
 class UnitProperties;
 class BosonWeaponProperties;
@@ -126,7 +128,7 @@ public:
 	{
 		return mUpgradesCacheCounter;
 	}
-	inline const QValueList<const UpgradeProperties*>* upgrades() const
+	inline const Q3ValueList<const UpgradeProperties*>* upgrades() const
 	{
 		return mUpgrades;
 	}
@@ -137,7 +139,7 @@ public:
 	bool removeUpgrade(const UpgradeProperties* upgrade);
 
 private:
-	QValueList<const UpgradeProperties*>* mUpgrades;
+	Q3ValueList<const UpgradeProperties*>* mUpgrades;
 	unsigned long int mUpgradesCacheCounter;
 };
 
@@ -199,9 +201,9 @@ protected:
 		return baseValueCollection()->getBaseValue(v, name(), type());
 	}
 
-	bool upgradeValue(const QValueList<const UpgradeProperties*>* list, unsigned long int* v) const;
-	bool upgradeValue(const QValueList<const UpgradeProperties*>* list, long int* v) const;
-	bool upgradeValue(const QValueList<const UpgradeProperties*>* list, bofixed* v) const;
+	bool upgradeValue(const Q3ValueList<const UpgradeProperties*>* list, unsigned long int* v) const;
+	bool upgradeValue(const Q3ValueList<const UpgradeProperties*>* list, long int* v) const;
+	bool upgradeValue(const Q3ValueList<const UpgradeProperties*>* list, bofixed* v) const;
 
 protected:
 	/*
@@ -279,7 +281,7 @@ public:
 	}
 
 protected:
-	T value(const QValueList<const UpgradeProperties*>* upgrades, unsigned long int cacheCounter) const
+	T value(const Q3ValueList<const UpgradeProperties*>* upgrades, unsigned long int cacheCounter) const
 	{
 		if (mCacheCounter != cacheCounter || cacheCounter == 0) {
 			T value;

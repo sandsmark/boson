@@ -47,12 +47,16 @@
 #include <qfileinfo.h>
 #include <qpushbutton.h>
 #include <qlineedit.h>
-#include <qgroupbox.h>
-#include <qlistview.h>
+#include <q3groupbox.h>
+#include <q3listview.h>
 #include <qcheckbox.h>
 #include <qradiobutton.h>
 #include <qlabel.h>
 #include <qcombobox.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
+#include <kglobal.h>
 
 
 EditorUnitProperties::EditorUnitProperties(SpeciesTheme* theme)
@@ -65,7 +69,7 @@ void EditorUnitProperties::setName(const QString& n)
  d->mName = n;
 }
 
-void EditorUnitProperties::setRequirements(QValueList<unsigned long int> requirements)
+void EditorUnitProperties::setRequirements(Q3ValueList<unsigned long int> requirements)
 {
  d->mRequirements = requirements;
 }
@@ -161,12 +165,12 @@ void EditorUnitProperties::addSound(int event, QString filename)
  d->mSounds.insert(event, filename);
 }
 
-void EditorUnitProperties::setDestroyedEffectIds(QValueList<unsigned long int> ids)
+void EditorUnitProperties::setDestroyedEffectIds(Q3ValueList<unsigned long int> ids)
 {
  d->mDestroyedEffectIds = ids;
 }
 
-void EditorUnitProperties::setConstructedEffectIds(QValueList<unsigned long int> ids)
+void EditorUnitProperties::setConstructedEffectIds(Q3ValueList<unsigned long int> ids)
 {
  d->mConstructedEffectIds = ids;
 }
@@ -303,7 +307,7 @@ bool EditorUnitProperties::saveFacilityProperties(KSimpleConfig* conf)
 bool EditorUnitProperties::saveAllPluginProperties(KSimpleConfig* conf)
 {
  int weaponcounter = 0;
- QPtrListIterator<PluginProperties> it(d->mPlugins);
+ Q3PtrListIterator<PluginProperties> it(d->mPlugins);
  while (it.current()) {
 	if (it.current()->pluginType() == PluginProperties::Weapon)
 	{
@@ -372,11 +376,11 @@ public:
 	{ mProperties->mAccelerationSpeed = speed; }
 	void setModelFileName(const QString& file)
 	{ mProperties->mModelFileName = file; }
-	void setShootEffectIds(const QValueList<unsigned long int>& ids)
+	void setShootEffectIds(const Q3ValueList<unsigned long int>& ids)
 	{ mProperties->mShootEffectIds = ids; }
-	void setFlyEffectIds(const QValueList<unsigned long int>& ids)
+	void setFlyEffectIds(const Q3ValueList<unsigned long int>& ids)
 	{ mProperties->mFlyEffectIds = ids; }
-	void setHitEffectIds(const QValueList<unsigned long int>& ids)
+	void setHitEffectIds(const Q3ValueList<unsigned long int>& ids)
 	{ mProperties->mHitEffectIds = ids; }
 	void setOffset(BoVector3Fixed o)
 	{ mProperties->mOffset = o; }
@@ -430,7 +434,7 @@ public:
 		mProperties = p;
 	}
 
-	void setProducerList(const QValueList<unsigned long int>& list)
+	void setProducerList(const Q3ValueList<unsigned long int>& list)
 	{
 		mProperties->mProducerList = list;
 	}
@@ -497,10 +501,10 @@ private:
 
 
 
-static QString listToString(const QValueList<unsigned long int>& list)
+static QString listToString(const Q3ValueList<unsigned long int>& list)
 {
  QString str;
- QValueList<unsigned long int>::const_iterator it;
+ Q3ValueList<unsigned long int>::const_iterator it;
  for(it = list.begin(); it != list.end(); ++it) {
 	str = str + "," + QString::number(*it);
  }
@@ -510,9 +514,9 @@ static QString listToString(const QValueList<unsigned long int>& list)
  return str;
 }
 
-static QValueList<unsigned long int> stringToList(const QString& str)
+static Q3ValueList<unsigned long int> stringToList(const QString& str)
 {
- QValueList<unsigned long int> list;
+ Q3ValueList<unsigned long int> list;
  QStringList strlist = QStringList::split(",", str);
  QStringList::iterator it;
  for(it = strlist.begin(); it != strlist.end(); ++it) {
@@ -531,7 +535,7 @@ BoUnitEditor::BoUnitEditor(QWidget* parent)
 BoUnitEditor::~BoUnitEditor()
 {
  // Save config
- KConfig* cfg = kapp->config();
+ KConfig* cfg = KGlobal::config();
  cfg->setGroup("Boson Unit Editor");
  cfg->writeEntry("SearchPaths", mSearchPaths->currentPaths());
 
@@ -554,7 +558,7 @@ void BoUnitEditor::init()
  connect(mSearchPaths->mOkButton, SIGNAL(clicked()), this, SLOT(slotHideSearchPaths()));
  mSearchPaths->hide();
  // Load search paths
- KConfig* cfg = kapp->config();
+ KConfig* cfg = KGlobal::config();
  cfg->setGroup("Boson Unit Editor");
  QStringList paths = cfg->readListEntry("SearchPaths");
  mSearchPaths->slotSetPaths(paths);
@@ -1078,7 +1082,7 @@ void BoMappingPageHandler::updateUnitProperties()
  BO_CHECK_NULL_RET(mEditor->mUnit);
  EditorUnitProperties* unit = mEditor->mUnit;
  if(mEditor->mUnitTexturesList->childCount() > 0) {
-	QListViewItemIterator it(mEditor->mUnitTexturesList);
+	Q3ListViewItemIterator it(mEditor->mUnitTexturesList);
 	QStringList textures;
 	for (; it.current(); ++it) {
 		unit->addTextureMapping(it.current()->text(0), it.current()->text(1));
@@ -1101,7 +1105,7 @@ void BoMappingPageHandler::updateWidget()
  mEditor->mUnitTexturesList->clear();
  QMap<QString, QString> textures = unit->longTextureNames();
  for(QMap<QString, QString>::iterator it = textures.begin(); it != textures.end(); ++it) {
-	(void)new QListViewItem(mEditor->mUnitTexturesList, it.key(), it.data());
+	(void)new Q3ListViewItem(mEditor->mUnitTexturesList, it.key(), it.data());
  }
  mEditor->mUnitSoundOrderMove->setText(unit->sound(SoundOrderMove));
  mEditor->mUnitSoundOrderAttack->setText(unit->sound(SoundOrderAttack));
@@ -1116,7 +1120,7 @@ void BoMappingPageHandler::slotAddTexture()
  if(mEditor->mUnitTextureFrom->text().isEmpty() || mEditor->mUnitTextureTo->text().isEmpty()) {
 	return;
  }
- (void)new QListViewItem(mEditor->mUnitTexturesList, mEditor->mUnitTextureFrom->text(),
+ (void)new Q3ListViewItem(mEditor->mUnitTexturesList, mEditor->mUnitTextureFrom->text(),
 		mEditor->mUnitTextureTo->text());
  mEditor->mUnitTextureFrom->clear();
  mEditor->mUnitTextureTo->clear();
@@ -1126,7 +1130,7 @@ void BoMappingPageHandler::slotAddTexture()
 
 void BoMappingPageHandler::slotRemoveTexture()
 {
- QListViewItem* current = mEditor->mUnitTexturesList->currentItem();
+ Q3ListViewItem* current = mEditor->mUnitTexturesList->currentItem();
  delete current;
  mEditor->mConfigChanged = true;
  mEditor->updateConfigWidgets();
@@ -1146,7 +1150,7 @@ BoWeaponPageHandler::BoWeaponPageHandler(BoUnitEditor* parent)
 
  mCurrentWeapon = -1;
 
- mWeapons = new QPtrList<BosonWeaponPropertiesEditor>();
+ mWeapons = new Q3PtrList<BosonWeaponPropertiesEditor>();
 }
 
 BoWeaponPageHandler::~BoWeaponPageHandler()
@@ -1162,7 +1166,7 @@ void BoWeaponPageHandler::updateUnitProperties()
 
  // Sync current weapon first
  updateWeaponProperties();
- QPtrListIterator<BosonWeaponPropertiesEditor> it(*mWeapons);
+ Q3PtrListIterator<BosonWeaponPropertiesEditor> it(*mWeapons);
  while(it.current() != 0) {
 	unit->addPlugin(it.current()->properties());
 	++it;
@@ -1180,7 +1184,7 @@ void BoWeaponPageHandler::updateWidget()
  int weaponCounter = 0;
  mEditor->mWeaponGroup->setEnabled(false);
  mCurrentWeapon = -1;
- QPtrListIterator<PluginProperties> it(*(unit->plugins()));
+ Q3PtrListIterator<PluginProperties> it(*(unit->plugins()));
  while(it.current()) {
 	if(it.current()->pluginType() == PluginProperties::Weapon) {
 		BosonWeaponProperties* w = (BosonWeaponProperties*)(it.current());

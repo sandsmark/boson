@@ -23,6 +23,9 @@
 
 #include <qobject.h>
 #include <qrect.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 #include "../bo3dtools.h"
 
@@ -37,9 +40,9 @@ class BosonGroundType;
 class BosonMap;
 class BoGroundQuadTreeNode;
 class BoLake;
-template<class T> class QDict;
-template<class T> class QValueList;
-template<class T> class QPtrList;
+template<class T> class Q3Dict;
+template<class T> class Q3ValueList;
+template<class T> class Q3PtrList;
 template<class T1, class T2> class QPair;
 
 /**
@@ -152,8 +155,8 @@ public:
 		}
 		// AB: see pixelToHeight() for explanation on these
 		// restrictions
-		h = QMIN(h, 18.75f);
-		h = QMAX(h, -13.125f);
+		h = qMin(h, 18.75f);
+		h = qMax(h, -13.125f);
 		mHeightMap[arrayPos(x, y)] = h;
 	}
 
@@ -615,7 +618,7 @@ public:
 	BosonGroundTheme* groundTheme() const { return mGroundTheme; }
 
 	void addColorMap(BoColorMap* map, const QString& name);
-	QDict<BoColorMap>* colorMaps();
+	Q3Dict<BoColorMap>* colorMaps();
 	void removeColorMap(const QString& name);
 
 	/**
@@ -682,7 +685,7 @@ public:
 	float heightAtCorner(int x, int y) const;
 	void setHeightAtCorner(int x, int y, float height);
 	float cellAverageHeight(int x, int y) const;
-	void setHeightsAtCorners(const QValueList< QPair<QPoint, float> >& heights);
+	void setHeightsAtCorners(const Q3ValueList< QPair<QPoint, float> >& heights);
 
 	/**
 	 * @return The water depth at the specified corner. This is the distance
@@ -690,7 +693,7 @@ public:
 	 **/
 	float waterDepthAtCorner(int x, int y) const;
 
-	const QPtrList<BoLake>* lakes() const;
+	const Q3PtrList<BoLake>* lakes() const;
 
 
 

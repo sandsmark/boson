@@ -25,7 +25,7 @@
 #include <bodebug.h>
 
 #include <qpixmap.h>
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 
 class BoPixmapRendererPrivate
 {
@@ -35,7 +35,7 @@ public:
 		mContext = 0;
 		mOldContext = 0;
 	}
-	QValueList<QPixmap> mPixmaps;
+	Q3ValueList<QPixmap> mPixmaps;
 	QPixmap mPixmap;
 	BoContext* mContext;
 	BoContext* mOldContext;
@@ -144,7 +144,7 @@ void BoPixmapRenderer::flush(const QString& prefix)
 {
  boDebug() << k_funcinfo << "flushing " << d->mPixmaps.count() << " pixmaps. filename prefix " << prefix << endl;
  int i = 0;
- for (QValueList<QPixmap>::iterator it = d->mPixmaps.begin(); it != d->mPixmaps.end(); ++it) {
+ for (Q3ValueList<QPixmap>::iterator it = d->mPixmaps.begin(); it != d->mPixmaps.end(); ++it) {
 	// TODO: use 001, 002, ..., 999 instead of 1, 2, .., 999
 	QString file = prefix + QString("-%1.jpg").arg(i);
 	if (!(*it).save(file, "JPEG", 90)) {

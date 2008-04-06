@@ -30,8 +30,8 @@
 Player::Player() : KPlayer()
 {
   setAsyncInput(true);
-  connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)),
-      this, SLOT(slotNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)));
+  connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, quint32, KPlayer*)),
+      this, SLOT(slotNetworkData(int, const QByteArray&, quint32, KPlayer*)));
 
   KGamePropertyBase* propName = dataHandler()->find(KGamePropertyBase::IdName);
   if(propName)
@@ -63,7 +63,7 @@ Player::~Player()
 {
 }
 
-void Player::slotNetworkData(int msgid, const QByteArray& msg, Q_UINT32 sender, KPlayer*)
+void Player::slotNetworkData(int msgid, const QByteArray& msg, quint32 sender, KPlayer*)
 {
 }
 
@@ -83,7 +83,7 @@ bool Player::load(QDataStream& stream)
   stream >> teamColor;
 
   // Load unitpropID
-  Q_UINT32 unitPropId;
+  quint32 unitPropId;
   stream >> unitPropId;
 
   return true;

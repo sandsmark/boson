@@ -25,6 +25,8 @@
 #include "../../bosonconfig.h"
 
 #include <qsignalmapper.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 class BoDebugConfigSwitchesPrivate
 {
@@ -134,8 +136,8 @@ void BoDebugConfigSwitches::removeBooleanConfigureSwitch(const QString& key)
 
 void BoDebugConfigSwitches::clear()
 {
- QValueList<QString> keys = d->mBooleanSwitches.keys();
- for (QValueList<QString>::iterator it = keys.begin(); it != keys.end(); ++it) {
+ Q3ValueList<QString> keys = d->mBooleanSwitches.keys();
+ for (Q3ValueList<QString>::iterator it = keys.begin(); it != keys.end(); ++it) {
 	removeBooleanConfigureSwitch(*it);
  }
 }

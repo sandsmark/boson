@@ -25,9 +25,13 @@
 
 #include <kmainwindow.h>
 
-#include <qvaluevector.h>
-#include <qvaluelist.h>
+#include <q3valuevector.h>
+#include <q3valuelist.h>
 #include <qpixmap.h>
+//Added by qt3to4:
+#include <Q3GridLayout>
+#include <QLabel>
+#include <Q3PtrList>
 
 class BosonModel;
 class BoPixmapRenderer;
@@ -35,7 +39,7 @@ class BoCamera;
 class KCmdLineArgs;
 class QPushButton;
 class QLabel;
-class QGridLayout;
+class Q3GridLayout;
 
 class BoTextureCopyright : public QWidget
 {
@@ -181,10 +185,10 @@ private:
 
 	QString mModelFileName;
 	QPushButton* mModelFile;
-	QPtrList<BoModelPixmapCollection> mModelPixmaps;
-	QGridLayout* mModelPixmapLabelsLayout;
-	QValueVector<QLabel*> mModelPixmapLabels;
-	QPtrList<BoTextureCopyright> mTextureCopyright;
+	Q3PtrList<BoModelPixmapCollection> mModelPixmaps;
+	Q3GridLayout* mModelPixmapLabelsLayout;
+	Q3ValueVector<QLabel*> mModelPixmapLabels;
+	Q3PtrList<BoTextureCopyright> mTextureCopyright;
 };
 
 

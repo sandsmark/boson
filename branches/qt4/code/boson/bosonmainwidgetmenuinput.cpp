@@ -43,9 +43,11 @@
 #include <kshortcut.h>
 
 #include <qinputdialog.h>
-#include <qvbox.h>
+#include <q3vbox.h>
 #include <qfile.h>
 #include <qfileinfo.h>
+//Added by qt3to4:
+#include <QPixmap>
 
 #include <unistd.h>
 
@@ -56,7 +58,7 @@ static QString findSaveFileName(const QString& prefix, const QString& suffix)
  for (int i = 0; i < 1000; i++) {
 	file.sprintf("%s-%03d.%s", prefix.latin1(), i, suffix.latin1());
 	if (!QFile::exists(file)) {
-		return QFileInfo(file).absFilePath();
+		return QFileInfo(file).absoluteFilePath();
 	}
  }
  return QString::null;
@@ -237,7 +239,7 @@ void BosonMainWidgetMenuInput::slotDebugKGame()
  }
  KGameDebugDialog* dlg = new KGameDebugDialog(boGame, 0, false);
 
- QVBox* b = dlg->addVBoxPage(i18n("Debug &Units"));
+ KVBox* b = dlg->addVBoxPage(i18n("Debug &Units"));
  KGameUnitDebug* units = new KGameUnitDebug(b);
  units->setBoson(boGame);
 

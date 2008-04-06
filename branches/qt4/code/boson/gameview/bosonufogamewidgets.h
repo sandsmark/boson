@@ -22,6 +22,9 @@
 
 #include "../boufo/boufo.h"
 #include "../bo3dtools.h"
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 class BosonCanvas;
 class PlayerIO;
@@ -29,7 +32,7 @@ class Unit;
 class UnitProperties;
 class BosonCursor;
 class BosonGameFPSCounter;
-template<class T> class QPtrList;
+template<class T> class Q3PtrList;
 
 class BosonUfoPlacementPreviewWidgetPrivate;
 /**
@@ -92,7 +95,7 @@ public:
 		pointsize = 1.0f;
 	}
 
-	QValueList<BoVector3Fixed> points;
+	Q3ValueList<BoVector3Fixed> points;
 	BoVector4Float color;
 	int timeout;
 	float pointsize;
@@ -119,7 +122,7 @@ public slots:
 	void slotAdvance(unsigned int advanceCallsCount, bool advanceFlag);
 
 protected slots:
-	void slotAddLineVisualization(const QValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize, int timeout, bofixed zOffset);
+	void slotAddLineVisualization(const Q3ValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize, int timeout, bofixed zOffset);
 
 protected:
 	void advanceLineVisualization();

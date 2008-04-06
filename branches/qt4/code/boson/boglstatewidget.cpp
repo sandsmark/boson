@@ -30,12 +30,14 @@
 
 #include <qstringlist.h>
 #include <qmap.h>
-#include <qlistview.h>
+#include <q3listview.h>
 #include <qlayout.h>
 #include <qpushbutton.h>
-#include <qhbox.h>
+#include <q3hbox.h>
 #include <qcombobox.h>
 #include <qlabel.h>
+//Added by qt3to4:
+#include <Q3VBoxLayout>
 
 #include <stdlib.h>
 
@@ -51,7 +53,7 @@ public:
 		mDisplayDynamic = -1;
 		mDisplayEnable = -1;
 	}
-	QListView* mListView;
+	Q3ListView* mListView;
 
 	QComboBox* mDisplayStates;
 	int mDisplayAll;
@@ -62,21 +64,21 @@ public:
 	BoGLQueryStates mStates;
 };
 
-BoGLStateWidget::BoGLStateWidget(QWidget* parent, const char* name, WFlags f)
+BoGLStateWidget::BoGLStateWidget(QWidget* parent, const char* name, Qt::WFlags f)
 	: QWidget(parent, name, f)
 {
  d = new BoGLStateWidgetPrivate;
- QVBoxLayout* layout = new QVBoxLayout(this);
- d->mListView = new QListView(this);
+ Q3VBoxLayout* layout = new Q3VBoxLayout(this);
+ d->mListView = new Q3ListView(this);
  d->mListView->addColumn(i18n("OpenGL state name"));
  d->mListView->addColumn(i18n("Value"));
  d->mListView->setAllColumnsShowFocus(true);
  layout->addWidget(d->mListView);
 
- QHBox* hbox = new QHBox(this);
+ Q3HBox* hbox = new Q3HBox(this);
  layout->addWidget(hbox);
 
- QHBox* stateSelection = new QHBox(hbox);
+ Q3HBox* stateSelection = new Q3HBox(hbox);
  (void)new QLabel(i18n("Display states:"), stateSelection);
  d->mDisplayStates = new QComboBox(stateSelection);
  connect(d->mDisplayStates, SIGNAL(activated(int)), this, SLOT(slotChangeStates(int)));
@@ -130,7 +132,7 @@ void BoGLStateWidget::slotChangeStates(int index)
  makeList(d->mListView, list);
 }
 
-void BoGLStateWidget::makeList(QListView* l, const QStringList& list)
+void BoGLStateWidget::makeList(Q3ListView* l, const QStringList& list)
 {
  if (!l) {
 	return;
@@ -140,7 +142,7 @@ void BoGLStateWidget::makeList(QListView* l, const QStringList& list)
  }
  l->clear();
  if (list.count() == 0) {
-	new QListViewItem(l, i18n("None"), i18n("-"));
+	new Q3ListViewItem(l, i18n("None"), i18n("-"));
 	return;
  }
  QStringList::ConstIterator it;
@@ -151,7 +153,7 @@ void BoGLStateWidget::makeList(QListView* l, const QStringList& list)
 		boWarning() << k_funcinfo << "invalid string " << *it << endl;
 		continue;
 	}
-	new QListViewItem(l, s[0], s[1]);
+	new Q3ListViewItem(l, s[0], s[1]);
  }
 }
 

@@ -34,6 +34,8 @@
 #include "../bosoncursor.h"
 #include "bosonlocalplayerinput.h"
 #include "../gameengine/bosonitem.h"
+//Added by qt3to4:
+#include <Q3PtrList>
 
 BosonGameViewInputBase::BosonGameViewInputBase()
 	: QObject()
@@ -159,7 +161,7 @@ void BosonGameViewInputBase::selectArea(BoItemList* itemsInArea, bool replace)
 	}
  }
 
- QPtrList<Unit> unitList;
+ Q3PtrList<Unit> unitList;
  Unit* fallBackUnit= 0; // in case no localplayer mobile unit can be found we'll select this instead
  BoItemList::Iterator it;
  for (it = itemsInArea->begin(); it != itemsInArea->end(); ++it) {
@@ -220,7 +222,7 @@ void BosonGameViewInputBase::unselectArea(BoItemList* itemsInArea)
  }
 }
 
-void BosonGameViewInputBase::selectUnits(QPtrList<Unit> unitList, bool replace)
+void BosonGameViewInputBase::selectUnits(Q3PtrList<Unit> unitList, bool replace)
 {
  boDebug() << k_funcinfo << endl;
  BO_CHECK_NULL_RET(selection());

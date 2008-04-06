@@ -30,8 +30,10 @@
 #include "unitproperties.h"
 #include "boson.h"
 
-#include <qptrvector.h>
-#include <qptrlist.h>
+#include <q3ptrvector.h>
+#include <q3ptrlist.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 class PlayerIOPrivate
 {
@@ -120,9 +122,9 @@ bool PlayerIO::hasWon() const
  return player()->hasWon();
 }
 
-QPtrList<Unit> PlayerIO::allUnits() const
+Q3PtrList<Unit> PlayerIO::allUnits() const
 {
- QPtrList<Unit> list;
+ Q3PtrList<Unit> list;
  if (!canvas()) {
 	BO_NULL_ERROR(canvas());
 	return list;
@@ -143,15 +145,15 @@ QPtrList<Unit> PlayerIO::allUnits() const
  return list;
 }
 
-QPtrList<Unit>* PlayerIO::allMyUnits() const
+Q3PtrList<Unit>* PlayerIO::allMyUnits() const
 {
  return player()->allUnits();
 }
 
-QPtrList<Unit> PlayerIO::allMyLivingUnits() const
+Q3PtrList<Unit> PlayerIO::allMyLivingUnits() const
 {
- QPtrList<Unit> list;
- for (QPtrListIterator<Unit> it(*allMyUnits()); it.current(); ++it) {
+ Q3PtrList<Unit> list;
+ for (Q3PtrListIterator<Unit> it(*allMyUnits()); it.current(); ++it) {
 	if (!it.current()->isDestroyed()) {
 		list.append(it.current());
 	}
@@ -159,11 +161,11 @@ QPtrList<Unit> PlayerIO::allMyLivingUnits() const
  return list;
 }
 
-QPtrList<Unit> PlayerIO::allEnemyUnits() const
+Q3PtrList<Unit> PlayerIO::allEnemyUnits() const
 {
- QPtrList<Unit> list;
- const QPtrList<Unit>& all = allUnits();
- for (QPtrListIterator<Unit> it(all); it.current(); ++it) {
+ Q3PtrList<Unit> list;
+ const Q3PtrList<Unit>& all = allUnits();
+ for (Q3PtrListIterator<Unit> it(all); it.current(); ++it) {
 	if (isEnemy(it.current())) {
 		list.append(it.current());
 	}
@@ -239,7 +241,7 @@ bool PlayerIO::canSee(BosonItem* item) const
  if (!item) {
 	return false;
  }
- QPtrVector<Cell>* cells = item->cells();
+ Q3PtrVector<Cell>* cells = item->cells();
  for (unsigned int i = 0; i < cells->count(); i++) {
 	if (canSee((*cells)[i])) {
 		return true;
@@ -317,8 +319,8 @@ bool PlayerIO::isAllied(const Unit* unit) const
 
 QPoint PlayerIO::homeBase() const
 {
- QPtrList<Unit> units = *(player()->allUnits());
- QPtrListIterator<Unit> it(units);
+ Q3PtrList<Unit> units = *(player()->allUnits());
+ Q3PtrListIterator<Unit> it(units);
  Unit* commandCenter = 0;
  for (; it.current() && !commandCenter; ++it) {
 	// now we have a problem. what do we need to check for?
@@ -374,7 +376,7 @@ Unit* PlayerIO::findUnit(unsigned long int id) const
  return u;
 }
 
-BoItemList* PlayerIO::unitsAtCells(const QPtrVector<const Cell>* cells) const
+BoItemList* PlayerIO::unitsAtCells(const Q3PtrVector<const Cell>* cells) const
 {
  BoItemList* collisions = new BoItemList(); // will get deleted by BoItemListHandler
  const BoItemList* cellItems;
@@ -426,7 +428,7 @@ bool PlayerIO::hasUnitWithType(unsigned long int type) const
  return player()->hasUnitWithType(type);
 }
 
-const QValueList<const Unit*>* PlayerIO::radarUnits() const
+const Q3ValueList<const Unit*>* PlayerIO::radarUnits() const
 {
  return player()->radarUnits();
 }
@@ -473,7 +475,7 @@ bool PlayerIO::disconnect(const char* signal, const QObject* receiver, const cha
  return QObject::disconnect(player(), signal, receiver, member);
 }
 
-QPtrList<KGameIO>* PlayerIO::ioList()
+Q3PtrList<KGameIO>* PlayerIO::ioList()
 {
  return player()->ioList();
 }
@@ -489,28 +491,28 @@ void PlayerIO::calculatePower(unsigned long int* powerGenerated, unsigned long i
 }
 
 
-QValueList<BoVector2Fixed> PlayerIO::nearestMineralLocations(int x, int y, unsigned int n, unsigned int radius) const
+Q3ValueList<BoVector2Fixed> PlayerIO::nearestMineralLocations(int x, int y, unsigned int n, unsigned int radius) const
 {
  if (!canvas()) {
 	BO_NULL_ERROR(canvas());
-	return QValueList<BoVector2Fixed>();
+	return Q3ValueList<BoVector2Fixed>();
  }
  if (!canvas()->pathFinder()) {
 	BO_NULL_ERROR(canvas()->pathFinder());
-	return QValueList<BoVector2Fixed>();
+	return Q3ValueList<BoVector2Fixed>();
  }
  return canvas()->pathFinder()->findLocations(player(), x, y, n, radius, BosonPath::Minerals);
 }
 
-QValueList<BoVector2Fixed> PlayerIO::nearestOilLocations(int x, int y, unsigned int n, unsigned int radius) const
+Q3ValueList<BoVector2Fixed> PlayerIO::nearestOilLocations(int x, int y, unsigned int n, unsigned int radius) const
 {
  if (!canvas()) {
 	BO_NULL_ERROR(canvas());
-	return QValueList<BoVector2Fixed>();
+	return Q3ValueList<BoVector2Fixed>();
  }
  if (!canvas()->pathFinder()) {
 	BO_NULL_ERROR(canvas->pathFinder());
-	return QValueList<BoVector2Fixed>();
+	return Q3ValueList<BoVector2Fixed>();
  }
  return canvas()->pathFinder()->findLocations(player(), x, y, n, radius, BosonPath::Oil);
 }

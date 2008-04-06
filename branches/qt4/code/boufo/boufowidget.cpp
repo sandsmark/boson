@@ -53,6 +53,12 @@
 
 #include <qdom.h>
 #include <qimage.h>
+#include <QMetaProperty>
+//Added by qt3to4:
+#include <Q3StrList>
+#include <QMouseEvent>
+#include <QEvent>
+#include <QWheelEvent>
 
 #include <bodebug.h>
 
@@ -102,24 +108,19 @@ static ufo::UMod_t convertQtMouseButtonToUfo(int button)
  return ubutton;
 }
 
-static int convertUfoMouseButtonToQt(ufo::UMod_t button)
+static Qt::MouseButton convertUfoMouseButtonToQt(ufo::UMod_t button)
 {
- int qbutton = Qt::NoButton;
  switch (button) {
 	case ufo::UMod::LeftButton:
-		qbutton = Qt::LeftButton;
-		break;
+		return Qt::LeftButton;
 	case ufo::UMod::RightButton:
-		qbutton = Qt::RightButton;
-		break;
+		return Qt::RightButton;
 	case ufo::UMod::MiddleButton:
-		qbutton = Qt::MidButton;
-		break;
+		return Qt::MidButton;
 	default:
-		qbutton = Qt::NoButton;
-		break;
+		return Qt::NoButton;
  }
- return qbutton;
+ return Qt::NoButton;
 }
 
 static int convertUfoModifierStateToQt(ufo::UMod_t modifiers)
@@ -135,16 +136,49 @@ static int convertUfoModifierStateToQt(ufo::UMod_t modifiers)
 	s |= Qt::MidButton;
  }
  if (modifiers & ufo::UMod::Shift) {
-	s |= Qt::ShiftButton;
+	s |= Qt::ShiftModifier;
  }
  if (modifiers & ufo::UMod::Ctrl) {
-	s |= Qt::ControlButton;
+	s |= Qt::ControlModifier;
  }
  if (modifiers & ufo::UMod::Alt) {
-	s |= Qt::AltButton;
+	s |= Qt::AltModifier;
  }
  if (modifiers & ufo::UMod::Meta) {
-	s |= Qt::MetaButton;
+	s |= Qt::MetaModifier;
+ }
+ return s;
+}
+
+static QFlags<Qt::MouseButton> convertUfoModifierStateToQtMouseButtons(ufo::UMod_t modifiers)
+{
+ QFlags<Qt::MouseButton> s;
+ if (modifiers & ufo::UMod::LeftButton) {
+	s |= Qt::LeftButton;
+ }
+ if (modifiers & ufo::UMod::RightButton) {
+	s |= Qt::RightButton;
+ }
+ if (modifiers & ufo::UMod::MiddleButton) {
+	s |= Qt::MidButton;
+ }
+ return s;
+}
+
+static QFlags<Qt::KeyboardModifier> convertUfoModifierStateToQtKeyboardModifiers(ufo::UMod_t modifiers)
+{
+ QFlags<Qt::KeyboardModifier> s;
+ if (modifiers & ufo::UMod::Shift) {
+	s |= Qt::ShiftModifier;
+ }
+ if (modifiers & ufo::UMod::Ctrl) {
+	s |= Qt::ControlModifier;
+ }
+ if (modifiers & ufo::UMod::Alt) {
+	s |= Qt::AltModifier;
+ }
+ if (modifiers & ufo::UMod::Meta) {
+	s |= Qt::MetaModifier;
  }
  return s;
 }
@@ -162,16 +196,16 @@ static ufo::UMod_t convertQtModifierStateToUfo(int modifiers, ufo::UMod_t origUf
 	s |= ufo::UMod::MiddleButton;
  }
 
- if (modifiers & Qt::ShiftButton) {
+ if (modifiers & Qt::ShiftModifier) {
 	s |= ufo::UMod::Shift;
  }
- if (modifiers & Qt::ControlButton) {
+ if (modifiers & Qt::ControlModifier) {
 	s |= ufo::UMod::Ctrl;
  }
- if (modifiers & Qt::AltButton) {
+ if (modifiers & Qt::AltModifier) {
 	s |= ufo::UMod::Alt;
  }
- if (modifiers & Qt::MetaButton) {
+ if (modifiers & Qt::MetaModifier) {
 	s |= ufo::UMod::Meta;
  }
 
@@ -279,10 +313,10 @@ static ufo::UKeyCode_t convertQtKeyToUfo(int key)
 	case Qt::Key_Down:
 		uk = ufo::UKey::UK_DOWN;
 		break;
-	case Qt::Key_Prior: // PageUp
+	case Qt::Key_PageUp: // PageUp
 		uk = ufo::UKey::UK_PAGEUP;
 		break;
-	case Qt::Key_Next: // PageDown
+	case Qt::Key_PageDown: // PageDown
 		uk = ufo::UKey::UK_PAGEDOWN;
 		break;
 	case Qt::Key_Shift:
@@ -427,13 +461,13 @@ private:
 
 
 
-BoUfoWidget::BoUfoWidget() : QObject(0, 0)
+BoUfoWidget::BoUfoWidget() : QObject(0)
 {
  init(new ufo::UWidget());
  setLayoutClass(UVBoxLayout);
 }
 
-BoUfoWidget::BoUfoWidget(ufo::UWidget* w) : QObject(0, 0)
+BoUfoWidget::BoUfoWidget(ufo::UWidget* w) : QObject(0)
 {
  init(w);
 }
@@ -513,7 +547,7 @@ void BoUfoWidget::unsetFont()
 
 void BoUfoWidget::setName(const char* name)
 {
- QObject::setName(name);
+ QObject::setObjectName(name);
  if (ufoWidget()) {
 	ufoWidget()->setName(name);
  }
@@ -1035,10 +1069,10 @@ void BoUfoWidget::setBackgroundImageFile(const QString& file_)
  QString file = file_;
  if (!file_.isEmpty()) {
 	QImage img;
-	if (KGlobal::_instance) { // NULL in boufodesigner
-		file = locate("data", "boson/" + file_);
+	if (KGlobal::hasMainComponent()) { // NULL in boufodesigner
+		file = KStandardDirs::locate("data", "boson/" + file_);
 		if (file.isEmpty()) {
-			boDebug() << k_funcinfo << "file " << file_ << " not found" << endl;
+			boDebug() << k_funcinfo << "file " << file_ << " not found";
 			file = file_;
 		}
 	} else if (BoUfoManager::currentUfoManager()) {
@@ -1087,11 +1121,14 @@ void BoUfoWidget::setBackgroundColor(const QColor& c)
 
 void BoUfoWidget::loadProperties(const QMap<QString, QString>& properties)
 {
- QStrList propertyNames = metaObject()->propertyNames(true);
- QStrListIterator it(propertyNames);
- while (it.current()) {
-	QString name = it.current();
-	++it;
+ QStringList propertyNames;
+
+ // FIXME: does property() also include properties of super-classes? (e.g.
+ // BoUfoLabel also needs to see the properties of BoUfoWidget)
+ for (int i = 0; i < metaObject()->propertyCount(); i++) {
+	propertyNames.append(metaObject()->property(i).name());
+ }
+ foreach (QString name, propertyNames) {
 	if (!properties.contains(name)) {
 		continue;
 	}
@@ -1099,7 +1136,9 @@ void BoUfoWidget::loadProperties(const QMap<QString, QString>& properties)
 		continue;
 	}
 	QVariant value = properties[name];
-	if (!setProperty(name, value)) {
+	int index = propertyNames.indexOf(name);
+	QMetaProperty property = metaObject()->property(index);
+	if (!property.write(this, value)) {
 		boError() << k_funcinfo << "could not set property " << name << " to " << properties[name] << endl;
 	}
  }
@@ -1107,7 +1146,8 @@ void BoUfoWidget::loadProperties(const QMap<QString, QString>& properties)
 
 void BoUfoWidget::setConstraints(const QString& c)
 {
- ufoWidget()->put("layout", new ufo::UString(c.latin1()));
+ QByteArray tmp = c.toAscii();
+ ufoWidget()->put("layout", new ufo::UString(std::string(tmp.constData(), tmp.length())));
 }
 
 QString BoUfoWidget::constraints() const
@@ -1122,7 +1162,8 @@ QString BoUfoWidget::constraints() const
 void BoUfoWidget::setGridLayoutColumns(int c)
 {
  QString s = QString::number(c);
- ufoWidget()->put("gridLayoutColumns", new ufo::UString(s.latin1()));
+ QByteArray tmp = s.toAscii();
+ ufoWidget()->put("gridLayoutColumns", new ufo::UString(std::string(tmp.constData(), tmp.length())));
 }
 
 int BoUfoWidget::gridLayoutColumns() const
@@ -1143,7 +1184,8 @@ int BoUfoWidget::gridLayoutColumns() const
 void BoUfoWidget::setGridLayoutRows(int r)
 {
  QString s = QString::number(r);
- ufoWidget()->put("gridLayoutRows", new ufo::UString(s.latin1()));
+ QByteArray tmp = s.toAscii();
+ ufoWidget()->put("gridLayoutRows", new ufo::UString(std::string(tmp.constData(), tmp.length())));
 }
 
 int BoUfoWidget::gridLayoutRows() const
@@ -1164,7 +1206,8 @@ int BoUfoWidget::gridLayoutRows() const
 void BoUfoWidget::setStretch(int factor)
 {
  QString f = QString::number(factor);
- ufoWidget()->put("stretch", new ufo::UString(f.latin1()));
+ QByteArray tmp = f.toAscii();
+ ufoWidget()->put("stretch", new ufo::UString(std::string(tmp.constData(), tmp.length())));
 }
 
 int BoUfoWidget::stretch() const
@@ -1255,9 +1298,11 @@ void BoUfoWidget::uslotMouseExited(ufo::UMouseEvent* e)
 
 void BoUfoWidget::uslotMouseMoved(ufo::UMouseEvent* e)
 {
- int button = convertUfoMouseButtonToQt(e->getButton());
+ Qt::MouseButton button = convertUfoMouseButtonToQt(e->getButton());
  int state = convertUfoModifierStateToQt(e->getModifiers());
- QMouseEvent me(QEvent::MouseMove, QPoint(e->getX(), e->getY()), button, state);
+ QFlags<Qt::MouseButton> mouseFlags = convertUfoModifierStateToQtMouseButtons(e->getModifiers());
+ QFlags<Qt::KeyboardModifier> keyFlags = convertUfoModifierStateToQtKeyboardModifiers(e->getModifiers());
+ QMouseEvent me(QEvent::MouseMove, QPoint(e->getX(), e->getY()), button, mouseFlags, keyFlags);
  me.ignore();
  emit signalMouseMoved(&me);
  if (me.isAccepted()) {
@@ -1267,9 +1312,11 @@ void BoUfoWidget::uslotMouseMoved(ufo::UMouseEvent* e)
 
 void BoUfoWidget::uslotMouseDragged(ufo::UMouseEvent* e)
 {
- int button = convertUfoMouseButtonToQt(e->getButton());
+ Qt::MouseButton button = convertUfoMouseButtonToQt(e->getButton());
  int state = convertUfoModifierStateToQt(e->getModifiers());
- QMouseEvent me(QEvent::MouseMove, QPoint(e->getX(), e->getY()), button, state);
+ QFlags<Qt::MouseButton> mouseFlags = convertUfoModifierStateToQtMouseButtons(e->getModifiers());
+ QFlags<Qt::KeyboardModifier> keyFlags = convertUfoModifierStateToQtKeyboardModifiers(e->getModifiers());
+ QMouseEvent me(QEvent::MouseMove, QPoint(e->getX(), e->getY()), button, mouseFlags, keyFlags);
  me.ignore();
  emit signalMouseDragged(&me);
  if (me.isAccepted()) {
@@ -1279,10 +1326,13 @@ void BoUfoWidget::uslotMouseDragged(ufo::UMouseEvent* e)
 
 void BoUfoWidget::uslotMousePressed(ufo::UMouseEvent* e)
 {
- int button = convertUfoMouseButtonToQt(e->getButton());
+ Qt::MouseButton button = convertUfoMouseButtonToQt(e->getButton());
  int state = convertUfoModifierStateToQt(e->getModifiers());
  state &= ~button;
- QMouseEvent me(QEvent::MouseButtonPress, QPoint(e->getX(), e->getY()), button, state);
+ QFlags<Qt::MouseButton> mouseFlags = convertUfoModifierStateToQtMouseButtons(e->getModifiers());
+ QFlags<Qt::KeyboardModifier> keyFlags = convertUfoModifierStateToQtKeyboardModifiers(e->getModifiers());
+ mouseFlags &= ~button;
+ QMouseEvent me(QEvent::MouseButtonPress, QPoint(e->getX(), e->getY()), button, mouseFlags, keyFlags);
  me.ignore();
  emit signalMousePressed(&me);
  if (me.isAccepted()) {
@@ -1292,10 +1342,13 @@ void BoUfoWidget::uslotMousePressed(ufo::UMouseEvent* e)
 
 void BoUfoWidget::uslotMouseReleased(ufo::UMouseEvent* e)
 {
- int button = convertUfoMouseButtonToQt(e->getButton());
+ Qt::MouseButton button = convertUfoMouseButtonToQt(e->getButton());
  int state = convertUfoModifierStateToQt(e->getModifiers());
  state |= button;
- QMouseEvent me(QEvent::MouseButtonRelease, QPoint(e->getX(), e->getY()), button, state);
+ QFlags<Qt::MouseButton> mouseFlags = convertUfoModifierStateToQtMouseButtons(e->getModifiers());
+ QFlags<Qt::KeyboardModifier> keyFlags = convertUfoModifierStateToQtKeyboardModifiers(e->getModifiers());
+ mouseFlags |= (Qt::MouseButtons)button;
+ QMouseEvent me(QEvent::MouseButtonRelease, QPoint(e->getX(), e->getY()), button, mouseFlags, keyFlags);
  me.ignore();
  emit signalMouseReleased(&me);
  if (me.isAccepted()) {
@@ -1305,13 +1358,17 @@ void BoUfoWidget::uslotMouseReleased(ufo::UMouseEvent* e)
 
 void BoUfoWidget::uslotMouseClicked(ufo::UMouseEvent* e)
 {
- int button = convertUfoMouseButtonToQt(e->getButton());
+ Qt::MouseButton button = convertUfoMouseButtonToQt(e->getButton());
  int state = convertUfoModifierStateToQt(e->getModifiers());
  state |= button;
+ QFlags<Qt::MouseButton> mouseFlags = convertUfoModifierStateToQtMouseButtons(e->getModifiers());
+ QFlags<Qt::KeyboardModifier> keyFlags = convertUfoModifierStateToQtKeyboardModifiers(e->getModifiers());
+ mouseFlags |= button;
  BoUfoMouseEventClick me((QEvent::Type)BoUfoMouseEventClick::EventClick,
 		QPoint(e->getX(), e->getY()),
 		button,
-		state,
+		mouseFlags,
+		keyFlags,
 		e->getClickCount());
  emit signalMouseClicked(&me);
  if (me.isAccepted()) {
@@ -1322,14 +1379,15 @@ void BoUfoWidget::uslotMouseClicked(ufo::UMouseEvent* e)
 // TODO: uslotMouseClicked, QEvent::MouseButtonDblClick
 void BoUfoWidget::uslotMouseWheel(ufo::UMouseWheelEvent* e)
 {
- Orientation orientation;
+ Qt::Orientation orientation;
  if (e->getWheel() == 0) {
 	orientation = Qt::Vertical;
  } else {
 	orientation = Qt::Horizontal;
  }
- int state = convertUfoModifierStateToQt(e->getModifiers());
- QWheelEvent we(QPoint(e->getX(), e->getY()), e->getDelta(), state, orientation);
+ QFlags<Qt::MouseButton> mouseFlags = convertUfoModifierStateToQtMouseButtons(e->getModifiers());
+ QFlags<Qt::KeyboardModifier> keyFlags = convertUfoModifierStateToQtKeyboardModifiers(e->getModifiers());
+ QWheelEvent we(QPoint(e->getX(), e->getY()), e->getDelta(), mouseFlags, keyFlags, orientation);
  we.ignore();
  emit signalMouseWheel(&we);
  if (we.isAccepted()) {
@@ -1377,6 +1435,7 @@ void BoUfoWidget::uslotWidgetMoved(ufo::UWidgetEvent* e)
 
 void BoUfoWidget::uslotWidgetResized(ufo::UWidgetEvent* e)
 {
+ Q_UNUSED(e);
  emit signalWidgetResized();
 }
 

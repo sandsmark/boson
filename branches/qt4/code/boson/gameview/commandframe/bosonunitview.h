@@ -20,6 +20,8 @@
 #define BOSONUNITVIEW_H
 
 #include "bosonorderbutton.h"
+//Added by qt3to4:
+#include <QPixmap>
 
 class Unit;
 

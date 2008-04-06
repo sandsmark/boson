@@ -22,6 +22,11 @@
 #include <qgl.h> // AB: _Q_GLWidget
 #include <qdom.h>
 #include <qmap.h>
+//Added by qt3to4:
+#include <QMouseEvent>
+#include <QKeyEvent>
+#include <QEvent>
+#include <QWheelEvent>
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>

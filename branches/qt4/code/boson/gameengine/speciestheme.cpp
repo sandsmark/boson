@@ -37,10 +37,14 @@
 #include <ksimpleconfig.h>
 #include <klocale.h>
 
-#include <qintdict.h>
-#include <qdict.h>
+#include <q3intdict.h>
+#include <q3dict.h>
 #include <qdir.h>
 #include <qdom.h>
+//Added by qt3to4:
+#include <Q3CString>
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 class UpgradesContainer
 {
@@ -63,7 +67,7 @@ public:
 		mUpgrades.insert(upgrade->id(), upgrade);
 		mConstUpgrades.insert(upgrade->id(), upgrade);
 	}
-	const QIntDict<const UpgradeProperties>& upgrades() const
+	const Q3IntDict<const UpgradeProperties>& upgrades() const
 	{
 		return mConstUpgrades;
 	}
@@ -73,8 +77,8 @@ public:
 		return mConstUpgrades[id];
 	}
 private:
-	QIntDict<UpgradeProperties> mUpgrades;
-	QIntDict<const UpgradeProperties> mConstUpgrades;
+	Q3IntDict<UpgradeProperties> mUpgrades;
+	Q3IntDict<const UpgradeProperties> mConstUpgrades;
 };
 
 class SpeciesThemePrivate
@@ -87,9 +91,9 @@ public:
 	// data that cannot go to SpeciesData as it must be modifyable by some
 	// reasons
 	// (e.g. because of upgrades)
-	QIntDict<UnitProperties> mUnitProperties;
+	Q3IntDict<UnitProperties> mUnitProperties;
 
-	QDict< UpgradesContainer > mUpgrades;
+	Q3Dict< UpgradesContainer > mUpgrades;
 };
 
 static int defaultColorIndex = 0;
@@ -143,10 +147,10 @@ void SpeciesTheme::setThemePath(const QString& speciesDir)
  }
 }
 
-QCString SpeciesTheme::unitPropertiesMD5() const
+Q3CString SpeciesTheme::unitPropertiesMD5() const
 {
- QCString string;
- QIntDictIterator<UnitProperties> it(d->mUnitProperties);
+ Q3CString string;
+ Q3IntDictIterator<UnitProperties> it(d->mUnitProperties);
  while (it.current()) {
 	if (string.isNull()) {
 		string = it.current()->md5();
@@ -200,8 +204,8 @@ void SpeciesTheme::loadNewUnit(Unit* unit)
  }
 
  unit->clearUpgrades();
- const QValueList<const UpgradeProperties*>* upgrades = unit->upgradesCollection().upgrades();
- for (QValueList<const UpgradeProperties*>::const_iterator it = upgrades->begin(); it != upgrades->end(); ++it) {
+ const Q3ValueList<const UpgradeProperties*>* upgrades = unit->upgradesCollection().upgrades();
+ for (Q3ValueList<const UpgradeProperties*>::const_iterator it = upgrades->begin(); it != upgrades->end(); ++it) {
 	unit->addUpgrade(*it);
  }
 
@@ -330,10 +334,10 @@ const UpgradeProperties* SpeciesTheme::upgrade(const QString& type, unsigned lon
  return upgrade;
 }
 
-QValueList<unsigned long int> SpeciesTheme::allFacilities() const
+Q3ValueList<unsigned long int> SpeciesTheme::allFacilities() const
 {
- QValueList<unsigned long int> list;
- QIntDictIterator<UnitProperties> it(d->mUnitProperties);
+ Q3ValueList<unsigned long int> list;
+ Q3IntDictIterator<UnitProperties> it(d->mUnitProperties);
  while (it.current()) {
 	if (it.current()->isFacility()) {
 		list.append(it.current()->typeId());
@@ -343,10 +347,10 @@ QValueList<unsigned long int> SpeciesTheme::allFacilities() const
  return list;
 }
 
-QValueList<unsigned long int> SpeciesTheme::allMobiles() const
+Q3ValueList<unsigned long int> SpeciesTheme::allMobiles() const
 {
- QValueList<unsigned long int> list;
- QIntDictIterator<UnitProperties> it(d->mUnitProperties);
+ Q3ValueList<unsigned long int> list;
+ Q3IntDictIterator<UnitProperties> it(d->mUnitProperties);
  while (it.current()) {
 	if (it.current()->isMobile()) {
 		list.append(it.current()->typeId());
@@ -356,15 +360,15 @@ QValueList<unsigned long int> SpeciesTheme::allMobiles() const
  return list;
 }
 
-const QIntDict<UnitProperties>* SpeciesTheme::allUnitsNonConst() const
+const Q3IntDict<UnitProperties>* SpeciesTheme::allUnitsNonConst() const
 {
  return &d->mUnitProperties;
 }
 
-QValueList<const UnitProperties*> SpeciesTheme::allUnits() const
+Q3ValueList<const UnitProperties*> SpeciesTheme::allUnits() const
 {
- QValueList<const UnitProperties*> list;
- QIntDictIterator<UnitProperties> it(d->mUnitProperties);
+ Q3ValueList<const UnitProperties*> list;
+ Q3IntDictIterator<UnitProperties> it(d->mUnitProperties);
  for (; it.current(); ++it) {
 	list.append(it.current());
  }
@@ -406,10 +410,10 @@ QStringList SpeciesTheme::allObjects(QStringList* files) const
  return objects;
 }
 
-QValueList<unsigned long int> SpeciesTheme::productions(const QValueList<unsigned long int>& producers) const
+Q3ValueList<unsigned long int> SpeciesTheme::productions(const Q3ValueList<unsigned long int>& producers) const
 {
- QValueList<unsigned long int> list;
- QIntDictIterator<UnitProperties> it(d->mUnitProperties);
+ Q3ValueList<unsigned long int> list;
+ Q3IntDictIterator<UnitProperties> it(d->mUnitProperties);
  while (it.current()) {
 	if (producers.contains(it.current()->producer())) {
 		list.append(it.current()->typeId());
@@ -419,13 +423,13 @@ QValueList<unsigned long int> SpeciesTheme::productions(const QValueList<unsigne
  return list;
 }
 
-QValueList<unsigned long int> SpeciesTheme::technologies(const QValueList<unsigned long int>& producers) const
+Q3ValueList<unsigned long int> SpeciesTheme::technologies(const Q3ValueList<unsigned long int>& producers) const
 {
- QValueList<unsigned long int> list;
+ Q3ValueList<unsigned long int> list;
  if (!d->mUpgrades["Technology"]) {
 	return list;
  }
- QIntDictIterator<const UpgradeProperties> it(d->mUpgrades["Technology"]->upgrades());
+ Q3IntDictIterator<const UpgradeProperties> it(d->mUpgrades["Technology"]->upgrades());
  while (it.current()) {
 	if (producers.contains(it.current()->producer())) {
 		list.append(it.current()->id());
@@ -482,9 +486,9 @@ bool SpeciesTheme::setTeamColor(const QColor& color)
  return true;
 }
 
-QValueList<QColor> SpeciesTheme::defaultColors()
+Q3ValueList<QColor> SpeciesTheme::defaultColors()
 {
- QValueList<QColor> colors;
+ Q3ValueList<QColor> colors;
  for (int i = 0; i < BOSON_MAX_PLAYERS; i++) {
 	colors.append(QColor(default_color[i]));
  }
@@ -499,7 +503,7 @@ bool SpeciesTheme::saveGameDataAsXML(QDomElement& root) const
  QDomDocument doc = root.ownerDocument();
  QDomElement unitTypes = doc.createElement("UnitTypes");
  root.appendChild(unitTypes);
- for (QIntDictIterator<UnitProperties> it(d->mUnitProperties); it.current(); ++it) {
+ for (Q3IntDictIterator<UnitProperties> it(d->mUnitProperties); it.current(); ++it) {
 	const UnitProperties* prop = it.current();
 	QDomElement type = doc.createElement("UnitType");
 	type.setAttribute("Id", prop->typeId());
@@ -512,9 +516,9 @@ bool SpeciesTheme::saveGameDataAsXML(QDomElement& root) const
 	}
 	type.appendChild(upgradesTag);
 
-	const QPtrList<PluginProperties>* plugins = prop->plugins();
+	const Q3PtrList<PluginProperties>* plugins = prop->plugins();
 	QDomElement pluginsTag = doc.createElement("PluginProperties");
-	for (QPtrListIterator<PluginProperties> it(*plugins); it.current(); ++it) {
+	for (Q3PtrListIterator<PluginProperties> it(*plugins); it.current(); ++it) {
 		QDomElement plugin = doc.createElement("Plugin");
 		plugin.setAttribute("Id", QString::number(it.current()->pluginType()));
 		QDomElement pluginUpgrades = doc.createElement("Upgrades");
@@ -534,7 +538,7 @@ bool SpeciesTheme::loadGameDataFromXML(const QDomElement& root)
 	boError() << k_funcinfo << "NULL UnitTypes tag" << endl;
 	return false;
  }
- for (QIntDictIterator<UnitProperties> it(d->mUnitProperties); it.current(); ++it) {
+ for (Q3IntDictIterator<UnitProperties> it(d->mUnitProperties); it.current(); ++it) {
 	it.current()->clearUpgrades();
  }
  for (QDomNode n = unitTypes.firstChild(); !n.isNull(); n = n.nextSibling()) {
@@ -599,7 +603,7 @@ bool SpeciesTheme::loadGameDataFromXML(const QDomElement& root)
 			return false;
 		}
 		PluginProperties* p = 0;
-		for (QPtrListIterator<PluginProperties> it(*prop->plugins()); it.current() && !p; ++it) {
+		for (Q3PtrListIterator<PluginProperties> it(*prop->plugins()); it.current() && !p; ++it) {
 			if (it.current()->pluginType() == id) {
 				p = it.current();
 			}

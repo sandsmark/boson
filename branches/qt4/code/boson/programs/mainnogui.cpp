@@ -46,6 +46,8 @@
 #include <kmessagebox.h>
 
 #include <qtimer.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 class StartGame
 {
@@ -166,8 +168,8 @@ bool MainNoGUI::startGame(const MainNoGUIStartOptions& options)
 	return false;
  }
  d->mStartingExecuted = true;
- QObject::connect(boGame, SIGNAL(signalStartingCompletedReceived(const QByteArray&, Q_UINT32)),
-		d->mStarting, SLOT(slotStartingCompletedReceived(const QByteArray&, Q_UINT32)));
+ QObject::connect(boGame, SIGNAL(signalStartingCompletedReceived(const QByteArray&, quint32)),
+		d->mStarting, SLOT(slotStartingCompletedReceived(const QByteArray&, quint32)));
  QObject::connect(boGame, SIGNAL(signalSetNewGameData(const QByteArray&, bool*)),
 		d->mStarting, SLOT(slotSetNewGameData(const QByteArray&, bool*)));
  QObject::connect(boGame, SIGNAL(signalStartNewGame()),
@@ -214,8 +216,8 @@ bool MainNoGUI::startGame(const MainNoGUIStartOptions& options)
 	return 1;
  }
  QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
- stream << (Q_INT8)1; // game mode (not editor)
+ QDataStream stream(buffer, QIODevice::WriteOnly);
+ stream << (qint8)1; // game mode (not editor)
  stream << qCompress(gameData);
  d->mStartGame->mPlayField = buffer;
 
@@ -248,8 +250,8 @@ bool MainNoGUI::addComputerPlayersToGame(const MainNoGUIStartOptions& options, u
 	return false;
  }
  QStringList species;
- QValueList<int> ios;
- for (QValueList<MainNoGUIAIPlayerOptions>::const_iterator it = options.computerPlayers.begin(); it != options.computerPlayers.end(); ++it) {
+ Q3ValueList<int> ios;
+ for (Q3ValueList<MainNoGUIAIPlayerOptions>::const_iterator it = options.computerPlayers.begin(); it != options.computerPlayers.end(); ++it) {
 	if ((*it).species.isNull()) {
 		species.append(SpeciesTheme::defaultSpecies());
 	} else {

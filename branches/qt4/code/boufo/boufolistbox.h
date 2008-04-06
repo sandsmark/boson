@@ -22,6 +22,8 @@
 #define BOUFOLISTBOX_H
 
 #include "boufowidget.h"
+//Added by qt3to4:
+#include <Q3ValueList>
 
 class BoUfoListBox : public BoUfoWidget
 {
@@ -59,7 +61,7 @@ public:
 	/**
 	 * @return A list with the indices of all selected items
 	 **/
-	QValueList<unsigned int> selectedItems() const;
+	Q3ValueList<unsigned int> selectedItems() const;
 
 	/**
 	 * @return A list with the text of all selected items

@@ -21,6 +21,8 @@
 #define PRODUCTIONPLUGIN_H
 
 #include "unitplugin.h"
+//Added by qt3to4:
+#include <Q3ValueList>
 
 template<class T> class BoVector2;
 template<class T> class BoRect2;
@@ -96,7 +98,7 @@ public:
 	void unpauseProduction();
 	void abortProduction(ProductionType type, unsigned long int id);
 
-	QValueList<QPair<ProductionType, unsigned long int> > productionList() const { return mProductions; }
+	Q3ValueList<QPair<ProductionType, unsigned long int> > productionList() const { return mProductions; }
 	bool contains(ProductionType type, unsigned long int id); // { return productionList().contains(typeId);}
 
 	/**
@@ -109,7 +111,7 @@ public:
 	 * unittypes that cannot be produced currently, but could be, if the
 	 * necessary requirements were met.
 	 **/
-	QValueList<unsigned long int> allUnitProductions(QValueList<unsigned long int>* producible, QValueList<unsigned long int>* notYetProducible) const;
+	Q3ValueList<unsigned long int> allUnitProductions(Q3ValueList<unsigned long int>* producible, Q3ValueList<unsigned long int>* notYetProducible) const;
 
 	/**
 	 * This behaves like @ref allUnitProductions with one exception:
@@ -117,7 +119,7 @@ public:
 	 * All technologies that already have been researched and thus cannot be
 	 * researched anymore, are not returned.
 	 **/
-	QValueList<unsigned long int> allTechnologyProductions(QValueList<unsigned long int>* producible, QValueList<unsigned long int>* notYetProducible) const;
+	Q3ValueList<unsigned long int> allTechnologyProductions(Q3ValueList<unsigned long int>* producible, Q3ValueList<unsigned long int>* notYetProducible) const;
 
 
 
@@ -185,7 +187,7 @@ private:
 	void productionCompleted();
 
 private:
-	QValueList<QPair<ProductionType, unsigned long int> > mProductions;
+	Q3ValueList<QPair<ProductionType, unsigned long int> > mProductions;
 	KGameProperty<unsigned int> mProductionState;
 	KGameProperty<unsigned long int> mMineralsPaid;
 	KGameProperty<unsigned long int> mOilPaid;

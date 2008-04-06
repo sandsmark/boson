@@ -28,7 +28,7 @@
 class BoUfoProgress : public BoUfoCustomWidget
 {
 	Q_OBJECT
-	Q_PROPERTY(Orientation orientation READ orientation WRITE setOrientation);
+	Q_PROPERTY(Qt::Orientation orientation READ orientation WRITE setOrientation);
 	Q_PROPERTY(double minimumValue READ minimumValue WRITE setMinimumValue);
 	Q_PROPERTY(double maximumValue READ maximumValue WRITE setMaximumValue);
 	Q_PROPERTY(double value READ value WRITE setValue);
@@ -39,10 +39,10 @@ class BoUfoProgress : public BoUfoCustomWidget
 public:
 	// AB: we must not use a QObject parent here. otherwise garbage
 	// collection of libufo and Qt may confuse each other.
-	BoUfoProgress(Qt::Orientation = Horizontal);
+	BoUfoProgress(Qt::Orientation = Qt::Horizontal);
 
-	void setOrientation(Orientation o);
-	Orientation orientation() const;
+	void setOrientation(Qt::Orientation o);
+	Qt::Orientation orientation() const;
 
 	double value() const;
 	void setValue(double v);
@@ -166,7 +166,7 @@ class BoUfoExtendedProgress : public BoUfoProgress
 	Q_PROPERTY(QColor endExtensionDecorationColor READ endExtensionDecorationColor WRITE setEndExtensionDecorationColor);
 	Q_PROPERTY(bool showDecoration READ showDecoration WRITE setShowDecoration);
 public:
-	BoUfoExtendedProgress(Qt::Orientation = Horizontal);
+	BoUfoExtendedProgress(Qt::Orientation = Qt::Horizontal);
 
 	virtual QSize preferredSize(const QSize& maxSize) const;
 	virtual void paintWidget();

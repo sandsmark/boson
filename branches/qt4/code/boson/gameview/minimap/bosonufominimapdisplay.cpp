@@ -29,6 +29,9 @@
 #include "bodebug.h"
 #include "bosonglminimapview.h"
 #include <bogl.h>
+//Added by qt3to4:
+#include <QWheelEvent>
+#include <QMouseEvent>
 
 class BosonUfoMiniMapDisplayPrivate
 {
@@ -159,10 +162,10 @@ void BosonUfoMiniMapDisplay::slotMouseEvent(QMouseEvent* e)
 
  // AB: when using click+move, the coordinates may go off this widget. we don't
  // want this.
- pos.setX(QMAX(0, pos.x()));
- pos.setY(QMAX(0, pos.y()));
- pos.setX(QMIN(pos.x(), width()));
- pos.setY(QMIN(pos.y(), height()));
+ pos.setX(qMax(0, pos.x()));
+ pos.setY(qMax(0, pos.y()));
+ pos.setX(qMin(pos.x(), width()));
+ pos.setY(qMin(pos.y(), height()));
 
  QPoint cell = d->mMiniMapView->widgetToCell(pos);
  if (cell.x() < 0 || cell.y() < 0) {

@@ -21,11 +21,13 @@
 
 
 #include <sys/time.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 class QString;
 class QDataStream;
-template<class T> class QPtrList;
-template<class T> class QPtrStack;
+template<class T> class Q3PtrList;
+template<class T> class Q3PtrStack;
 
 
 
@@ -62,7 +64,7 @@ public:
 	~BosonProfilingItem();
 
 	BosonProfilingItem* clone() const;
-	const QPtrList<BosonProfilingItem>* children() const { return mChildren; }
+	const Q3PtrList<BosonProfilingItem>* children() const { return mChildren; }
 
 	bool save(QDataStream& stream) const;
 	bool load(QDataStream& stream);
@@ -108,7 +110,7 @@ public:
 
 private:
 	QString* mName;
-	QPtrList<BosonProfilingItem>* mChildren;
+	Q3PtrList<BosonProfilingItem>* mChildren;
 	bool mEnded;
 
 	struct timeval mStart;
@@ -136,12 +138,12 @@ public:
 
 	void addItem(BosonProfilingItem* item);
 
-	const QPtrList<BosonProfilingItem>* items() const;
-	QPtrList<BosonProfilingItem> cloneItems() const;
+	const Q3PtrList<BosonProfilingItem>* items() const;
+	Q3PtrList<BosonProfilingItem> cloneItems() const;
 
 private:
 	QString* mName;
-	QPtrList<BosonProfilingItem>* mItems;
+	Q3PtrList<BosonProfilingItem>* mItems;
 	int mMaximalEntries;
 };
 
@@ -268,7 +270,7 @@ public:
 	 *
 	 * @param ret Returns the list of profiling items since @p since.
 	 **/
-	void getItemsSince(QPtrList<const BosonProfilingItem>* ret, const struct timeval& since) const;
+	void getItemsSince(Q3PtrList<const BosonProfilingItem>* ret, const struct timeval& since) const;
 
 	/**
 	 * This behaves exactly like @ref getItemsSince, but the list will be
@@ -276,14 +278,14 @@ public:
 	 *
 	 * @param ret Returns the sorted list of profiling items since @p since.
 	 **/
-	void getItemsSinceSorted(QPtrList<const BosonProfilingItem>* ret, const struct timeval& since) const;
+	void getItemsSinceSorted(Q3PtrList<const BosonProfilingItem>* ret, const struct timeval& since) const;
 
 	/**
 	 * @return A copy of all items currently stored. WARNING: you must
 	 * delete all items in this list to prevent a memory leak!
 	 **/
-	QPtrList<BosonProfilingItem> cloneItems() const;
-	QPtrList<BosonProfilingItem> cloneItems(const QString& storageName) const;
+	Q3PtrList<BosonProfilingItem> cloneItems() const;
+	Q3PtrList<BosonProfilingItem> cloneItems(const QString& storageName) const;
 
 	/**
 	 * Set object that adds an additional task to @ref pop. The

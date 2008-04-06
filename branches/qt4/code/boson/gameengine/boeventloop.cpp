@@ -27,6 +27,9 @@
 
 #include <qdatetime.h>
 #include <qapplication.h>
+//Added by qt3to4:
+#include <QEventLoop>
+#include <QEvent>
 
 /*
  * We have two options: either use sendEvent() or postEvent(). sendEvent() is
@@ -61,8 +64,8 @@ public:
 	QTime mNextAdvanceCall;
 };
 
-BoEventLoop::BoEventLoop(QObject* parent, const char* name)
-	: QEventLoop(parent, name)
+BoEventLoop::BoEventLoop(QObject* parent)
+	: QEventLoop(parent)
 {
  d = new BoEventLoopPrivate;
  d->mAdvanceMessageInterval = 250;
@@ -170,13 +173,13 @@ bool BoEventLoop::processEvents(ProcessEventsFlags flags)
  bool ret;
  ret = QEventLoop::processEvents(flags);
  if (d->mAdvanceMessagesWaiting) {
-	ret = QEventLoop::processEvents(flags & ~WaitForMore);
+	ret = QEventLoop::processEvents(flags & ~WaitForMoreEvents);
  } else {
-//	ret = QEventLoop::processEvents(flags & ~WaitForMore);
+//	ret = QEventLoop::processEvents(flags & ~WaitForMoreEvents);
 	ret = QEventLoop::processEvents(flags);
  }
 
- if (flags & (AllEvents | WaitForMore)) {
+ if (flags & (AllEvents | WaitForMoreEvents)) {
 	// probably this was called from enterLoop(), but if not it's still fine
 	// to do our stuff here, since WaitForMore was requested anyway.
 

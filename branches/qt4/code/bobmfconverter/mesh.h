@@ -24,7 +24,7 @@
 #include "bo3dtools.h"
 
 #include <qstring.h>
-#include <qvaluevector.h>
+#include <q3valuevector.h>
 
 class Material;
 
@@ -60,7 +60,7 @@ class Vertex
     // All smoothing groups of faces AND'ed together (i.e. common smoothing
     //  group which all faces, that have this vertex, have)
     unsigned int smoothgroup;
-    QValueVector<Face*> faces;
+    Q3ValueVector<Face*> faces;
 };
 
 class Face
@@ -113,7 +113,7 @@ class Face
   private:
     unsigned int mNumVertices;
     Vertex** mVertices;
-    QValueVector<Face*> mNeighbors;
+    Q3ValueVector<Face*> mNeighbors;
 };
 
 

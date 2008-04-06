@@ -21,7 +21,9 @@
 
 #include <qstring.h>
 #include <qwindowdefs.h> // QRgb
-#include <qptrvector.h>
+#include <q3ptrvector.h>
+//Added by qt3to4:
+#include <QPixmap>
 
 class QImage;
 class QPixmap;
@@ -117,7 +119,7 @@ public:
 	 * This method may be used if manual loading of a theme is desired,
 	 * instead of loading from a config file.
 	 **/
-	bool applyGroundThemeConfig(const QString& identifier, const QPtrVector<BosonGroundType>& types, const QString& themeDir);
+	bool applyGroundThemeConfig(const QString& identifier, const Q3PtrVector<BosonGroundType>& types, const QString& themeDir);
 
 	/**
 	 * Create a list of BosonGroundTheme objects by searching for
@@ -147,7 +149,7 @@ protected:
 
 private:
 	BosonGroundThemePrivate* d;
-	QPtrVector<BosonGroundType> mGroundTypes;
+	Q3PtrVector<BosonGroundType> mGroundTypes;
 };
 
 #endif

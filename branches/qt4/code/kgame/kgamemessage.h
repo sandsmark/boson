@@ -1,6 +1,6 @@
 /*
     This file is part of the KDE games library
-    Copyright (C) 2001 Martin Heni (martin@heni-online.de)
+    Copyright (C) 2001 Martin Heni (kde at heni-online.de)
     Copyright (C) 2001 Andreas Beckermann (b_mann@gmx.de)
 
     This library is free software; you can redistribute it and/or
@@ -17,12 +17,14 @@
     the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
     Boston, MA 02110-1301, USA.
 */
-#ifndef __KGAMEMSG_H_
-#define __KGAMEMSG_H_
 
-#include <qdatastream.h>
+#ifndef __KGAMEMESSAGE_H_
+#define __KGAMEMESSAGE_H_
 
-class KGameMessage
+#include <QtCore/QDataStream>
+#include <libkdegames_export.h>
+
+class KDEGAMES_EXPORT KGameMessage
 {
   public:
     /**
@@ -33,30 +35,30 @@ class KGameMessage
      * See also @ref rawPlayerId and @ref rawGameId which are the inverse
      * operations
      *
-     * @param playerid the player id - can include a gameid (will get removed)
-     * @param gameid The game id (<64). 0 For broadcast.
-     * @return the new player id
+     * @param player The player id - can include a gameid (will get removed)
+     * @param game The game id (<64). 0 For broadcast.
+     * @return The new player id
      */
-    static Q_UINT32 createPlayerId(int player, Q_UINT32 game);
+    static quint32 createPlayerId(int player, quint32 game);
 
     /**
      * Returns the raw playerid, that is, a id which does not
      * contain the game number encoded in it. See also @ref createPlayerId which
      * is the inverse operation.
      *
-     * @param the player id
-     * @return the raw player id
+     * @param playerid The player id
+     * @return The raw player id
      **/
-    static int rawPlayerId(Q_UINT32 playerid);
+    static int rawPlayerId(quint32 playerid);
 
     /**
      * Returns the raw game id, that is, the game id the player
      * belongs to. Se also @ref createPlayerId which is the inverse operation.
      *
-     * @param the player id
-     * @return the raw game id
+     * @param playerid The player id
+     * @return The raw game id
      **/
-    static Q_UINT32 rawGameId(Q_UINT32 playerid);
+    static quint32 rawGameId(quint32 playerid);
 
     /**
      * Checks whether a message receiver/sender is a player
@@ -64,7 +66,7 @@ class KGameMessage
      * @param id The ID of the sender/receiver
      * @return true/false
      */
-    static bool isPlayer(Q_UINT32 id);
+    static bool isPlayer(quint32 id);
 
     /**
      * Checks whether the sender/receiver of a message is a game
@@ -72,23 +74,23 @@ class KGameMessage
      * @param id The ID of the sender/receiver
      * @return true/false
      */
-    static bool isGame(Q_UINT32 id);
+    static bool isGame(quint32 id);
 
     /**
      * Creates a message header given cookie,sender,receiver,...
      *
      * Also puts "hidden" header into the stream which are used by KGameClient
      * (message length and magic cookie). If you don't need them remove them
-     * with @ref dropExternalHeader
+     * with dropExternalHeader
      */
-    static void createHeader(QDataStream &msg, Q_UINT32 sender, Q_UINT32 receiver, int msgid);
+    static void createHeader(QDataStream &msg, quint32 sender, quint32 receiver, int msgid);
 
     /**
      * Retrieves the information like cookie,sender,receiver,... from a message header 
      *
-     * Note that it could be necessary to call @ref dropExternalHeader first
+     * Note that it could be necessary to call dropExternalHeader first
      */
-    static void extractHeader(QDataStream &msg,Q_UINT32 &sender, Q_UINT32 &receiver, int &msgid);
+    static void extractHeader(QDataStream &msg,quint32 &sender, quint32 &receiver, int &msgid);
 
     /**
      * Creates a property header  given the property id
@@ -120,7 +122,7 @@ class KGameMessage
      * suitable string for it. This string can't be used to identify a message
      * (as it is i18n'ed) but it can make debugging more easy. See also @ref
      * KGameDebugDialog.
-     * @return Either a i18n'ed string (the name of the id) or QString::null if
+     * @return Either a i18n'ed string (the name of the id) or QString() if
      * the msgid is unknown
      **/
     static QString messageId2Text(int msgid);

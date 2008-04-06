@@ -24,10 +24,12 @@
 #include "boglobal.h"
 #include "defines.h"
 
-#include <qptrlist.h>
-#include <qptrstack.h>
-#include <qvaluestack.h>
-#include <qdict.h>
+#include <q3ptrlist.h>
+#include <q3ptrstack.h>
+#include <q3valuestack.h>
+#include <q3dict.h>
+//Added by qt3to4:
+#include <Q3PtrCollection>
 
 static BoGlobalObject<BosonProfiling> globalProfiling(BoGlobalObjectBase::BoGlobalProfiling);
 
@@ -74,33 +76,33 @@ BosonProfilingItem::~BosonProfilingItem()
 
 bool BosonProfilingItem::save(QDataStream& stream) const
 {
- stream << (Q_INT8)mEnded;
- stream << (Q_INT32)mStart.tv_sec;
- stream << (Q_INT32)mStart.tv_usec;
- stream << (Q_INT32)mEnd.tv_sec;
- stream << (Q_INT32)mEnd.tv_usec;
+ stream << (qint8)mEnded;
+ stream << (qint32)mStart.tv_sec;
+ stream << (qint32)mStart.tv_usec;
+ stream << (qint32)mEnd.tv_sec;
+ stream << (qint32)mEnd.tv_usec;
  if (mChildren) {
-	stream << (Q_UINT32)mChildren->count();
-	for (QPtrListIterator<BosonProfilingItem> it(*mChildren); it.current(); ++it) {
+	stream << (quint32)mChildren->count();
+	for (Q3PtrListIterator<BosonProfilingItem> it(*mChildren); it.current(); ++it) {
 		stream << it.current()->name();
 		if (!it.current()->save(stream)) {
 			return false;
 		}
 	}
  } else {
-	stream << (Q_UINT32)0;
+	stream << (quint32)0;
  }
  return true;
 }
 
 bool BosonProfilingItem::load(QDataStream& stream)
 {
- Q_INT8 ended;
+ qint8 ended;
  stream >> ended;
- Q_INT32 startS;
- Q_INT32 startUS;
- Q_INT32 endS;
- Q_INT32 endUS;
+ qint32 startS;
+ qint32 startUS;
+ qint32 endS;
+ qint32 endUS;
  stream >> startS;
  stream >> startUS;
  stream >> endS;
@@ -109,7 +111,7 @@ bool BosonProfilingItem::load(QDataStream& stream)
  mStart.tv_usec = startUS;
  mEnd.tv_sec = endS;
  mEnd.tv_usec = endUS;
- Q_UINT32 children;
+ quint32 children;
  stream >> children;
  if (children > 1000000) {
 	boError() << k_funcinfo << "invalid childcount " << children << " of item " << name() << endl;
@@ -147,7 +149,7 @@ BosonProfilingItem* BosonProfilingItem::clone() const
  if (mChildren) {
 	bool ended = item->mEnded;
 	item->mEnded = false;
-	QPtrListIterator<BosonProfilingItem> it(*mChildren);
+	Q3PtrListIterator<BosonProfilingItem> it(*mChildren);
 	while (it.current()) {
 		item->addChild(it.current()->clone());
 		++it;
@@ -195,7 +197,7 @@ void BosonProfilingItem::addChild(BosonProfilingItem* child)
 	return;
  }
  if (!mChildren) {
-	mChildren = new QPtrList<BosonProfilingItem>();
+	mChildren = new Q3PtrList<BosonProfilingItem>();
  }
  mChildren->append(child);
 }
@@ -203,7 +205,7 @@ void BosonProfilingItem::addChild(BosonProfilingItem* child)
 
 BosonProfilingStorage::BosonProfilingStorage(const QString& name, int maxEntries)
 	: mName(new QString(name)),
-	  mItems(new QPtrList<BosonProfilingItem>()),
+	  mItems(new Q3PtrList<BosonProfilingItem>()),
 	  mMaximalEntries(maxEntries)
 {
 }
@@ -228,9 +230,9 @@ void BosonProfilingStorage::clear()
 
 bool BosonProfilingStorage::save(QDataStream& stream) const
 {
- stream << (Q_INT32)maximalEntries();
- stream << (Q_UINT32)mItems->count();
- for (QPtrListIterator<BosonProfilingItem> it(*mItems); it.current(); ++it) {
+ stream << (qint32)maximalEntries();
+ stream << (quint32)mItems->count();
+ for (Q3PtrListIterator<BosonProfilingItem> it(*mItems); it.current(); ++it) {
 	stream << it.current()->name();
 	if (!it.current()->save(stream)) {
 		return false;
@@ -242,9 +244,9 @@ bool BosonProfilingStorage::save(QDataStream& stream) const
 bool BosonProfilingStorage::load(QDataStream& stream)
 {
  clear();
- Q_INT32 maxEntries;
+ qint32 maxEntries;
  stream >> maxEntries;
- Q_UINT32 count;
+ quint32 count;
  stream >> count;
  if (count > 1000000) {
 	boError() << k_funcinfo << "invalid item count " << count << endl;
@@ -287,15 +289,15 @@ void BosonProfilingStorage::addItem(BosonProfilingItem* item)
  }
 }
 
-const QPtrList<BosonProfilingItem>* BosonProfilingStorage::items() const
+const Q3PtrList<BosonProfilingItem>* BosonProfilingStorage::items() const
 {
  return mItems;
 }
 
-QPtrList<BosonProfilingItem> BosonProfilingStorage::cloneItems() const
+Q3PtrList<BosonProfilingItem> BosonProfilingStorage::cloneItems() const
 {
- QPtrList<BosonProfilingItem> list;
- QPtrListIterator<BosonProfilingItem> it(*mItems);
+ Q3PtrList<BosonProfilingItem> list;
+ Q3PtrListIterator<BosonProfilingItem> it(*mItems);
  while (it.current()) {
 	list.append(it.current()->clone());
 	++it;
@@ -313,12 +315,12 @@ public:
 
 		mPopTask = 0;
 	}
-	QPtrStack<BosonProfilingItem> mStack;
+	Q3PtrStack<BosonProfilingItem> mStack;
 
 	int mDefaultMaxEntries;
 	BosonProfilingStorage* mCurrentStorage;
-	QDict<BosonProfilingStorage> mStorages;
-	QValueStack<QString> mStorageStack;
+	Q3Dict<BosonProfilingStorage> mStorages;
+	Q3ValueStack<QString> mStorageStack;
 
 	BosonProfilingPopTask* mPopTask;
 };
@@ -362,12 +364,12 @@ BosonProfiling& BosonProfiling::operator=(const BosonProfiling& p)
  //     -> all current data remains as-is and is not touched.
 
  QByteArray b;
- QDataStream writeStream(b, IO_WriteOnly);
+ QDataStream writeStream(b, QIODevice::WriteOnly);
  if (!p.save(writeStream)) {
 	boError() << k_funcinfo << "unable to save data to stream" << endl;
 	return *this;
  }
- QDataStream readStream(b, IO_ReadOnly);
+ QDataStream readStream(b, QIODevice::ReadOnly);
  if (!load(readStream)) {
 	boError() << k_funcinfo << "unable to read data from stream" << endl;
 	return *this;
@@ -378,8 +380,8 @@ BosonProfiling& BosonProfiling::operator=(const BosonProfiling& p)
 bool BosonProfiling::save(QDataStream& stream) const
 {
  // AB: do NOT store the current values (including the stacks)
- stream << (Q_UINT32)d->mStorages.count();
- for (QDictIterator<BosonProfilingStorage> it(d->mStorages); it.current(); ++it) {
+ stream << (quint32)d->mStorages.count();
+ for (Q3DictIterator<BosonProfilingStorage> it(d->mStorages); it.current(); ++it) {
 	stream << it.current()->name();
 	if (!it.current()->save(stream)) {
 		return false;
@@ -391,11 +393,11 @@ bool BosonProfiling::save(QDataStream& stream) const
 bool BosonProfiling::load(QDataStream& stream)
 {
  // AB: we do NOT load/clear the current values (including the stacks)
- for (QDictIterator<BosonProfilingStorage> it(d->mStorages); it.current(); ++it) {
+ for (Q3DictIterator<BosonProfilingStorage> it(d->mStorages); it.current(); ++it) {
 	it.current()->clear();
  }
 
- Q_UINT32 storages;
+ quint32 storages;
  stream >> storages;
  if (storages > 1000) {
 	boError() << k_funcinfo << "invalid storages count " << storages << endl;
@@ -485,7 +487,7 @@ void BosonProfiling::popStorage()
 void BosonProfiling::setMaximalEntriesAllStorages(int max)
 {
  d->mDefaultMaxEntries = max;
- QDictIterator<BosonProfilingStorage> it(d->mStorages);
+ Q3DictIterator<BosonProfilingStorage> it(d->mStorages);
  while (it.current()) {
 	it.current()->setMaximalEntries(max);
 	++it;
@@ -529,7 +531,7 @@ void BosonProfiling::clearStorage(const QString& storage)
 
 void BosonProfiling::clearAllStorages()
 {
- QDictIterator<BosonProfilingStorage> it(d->mStorages);
+ Q3DictIterator<BosonProfilingStorage> it(d->mStorages);
  while (it.current()) {
 	clearStorage(it.current()->name());
 	++it;
@@ -537,15 +539,15 @@ void BosonProfiling::clearAllStorages()
 }
 
 
-void BosonProfiling::getItemsSince(QPtrList<const BosonProfilingItem>* ret, const struct timeval& since) const
+void BosonProfiling::getItemsSince(Q3PtrList<const BosonProfilingItem>* ret, const struct timeval& since) const
 {
  BO_CHECK_NULL_RET(ret);
  ret->clear();
 
- QDictIterator<BosonProfilingStorage> storageIt(d->mStorages);
+ Q3DictIterator<BosonProfilingStorage> storageIt(d->mStorages);
  for (; storageIt.current(); ++storageIt) {
-	const QPtrList<BosonProfilingItem>* list = storageIt.current()->items();
-	QPtrListIterator<BosonProfilingItem> itemIt(*list);
+	const Q3PtrList<BosonProfilingItem>* list = storageIt.current()->items();
+	Q3PtrListIterator<BosonProfilingItem> itemIt(*list);
 
 	// search backwards for the first item that starts after since
 	itemIt.toLast(); // AB: this is O(1) (important!)
@@ -571,10 +573,10 @@ void BosonProfiling::getItemsSince(QPtrList<const BosonProfilingItem>* ret, cons
  }
 }
 
-class MySortedProfilingList : public QPtrList<const BosonProfilingItem>
+class MySortedProfilingList : public Q3PtrList<const BosonProfilingItem>
 {
 protected:
-	virtual int compareItems (QPtrCollection::Item item1, QPtrCollection::Item item2)
+	virtual int compareItems (Q3PtrCollection::Item item1, Q3PtrCollection::Item item2)
 	{
 		BosonProfilingItem* p1 = (BosonProfilingItem*)item1;
 		BosonProfilingItem* p2 = (BosonProfilingItem*)item2;
@@ -594,7 +596,7 @@ protected:
 
 };
 
-void BosonProfiling::getItemsSinceSorted(QPtrList<const BosonProfilingItem>* ret, const struct timeval& since) const
+void BosonProfiling::getItemsSinceSorted(Q3PtrList<const BosonProfilingItem>* ret, const struct timeval& since) const
 {
  BO_CHECK_NULL_RET(ret);
  ret->clear();
@@ -607,29 +609,29 @@ void BosonProfiling::getItemsSinceSorted(QPtrList<const BosonProfilingItem>* ret
  // from all storages into a single (sorted) list.
  list.sort();
 
- QPtrListIterator<const BosonProfilingItem> it(list);
+ Q3PtrListIterator<const BosonProfilingItem> it(list);
  while (it.current()) {
 	ret->append(it.current());
 	++it;
  }
 }
 
-QPtrList<BosonProfilingItem> BosonProfiling::cloneItems(const QString& storageName) const
+Q3PtrList<BosonProfilingItem> BosonProfiling::cloneItems(const QString& storageName) const
 {
  BosonProfilingStorage* storage = d->mStorages[storageName];
  if (!storage) {
-	return QPtrList<BosonProfilingItem>();
+	return Q3PtrList<BosonProfilingItem>();
  }
  return storage->cloneItems();
 }
 
-QPtrList<BosonProfilingItem> BosonProfiling::cloneItems() const
+Q3PtrList<BosonProfilingItem> BosonProfiling::cloneItems() const
 {
- QPtrList<BosonProfilingItem> list;
- QDictIterator<BosonProfilingStorage> it(d->mStorages);
+ Q3PtrList<BosonProfilingItem> list;
+ Q3DictIterator<BosonProfilingStorage> it(d->mStorages);
  while (it.current()) {
-	QPtrList<BosonProfilingItem> l = it.current()->cloneItems();
-	QPtrListIterator<BosonProfilingItem> it2(l);
+	Q3PtrList<BosonProfilingItem> l = it.current()->cloneItems();
+	Q3PtrListIterator<BosonProfilingItem> it2(l);
 	while (it2.current()) {
 		list.append(it2.current());
 		++it2;

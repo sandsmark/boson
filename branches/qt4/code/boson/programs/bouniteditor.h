@@ -24,6 +24,9 @@
 
 #include "bosonweapon.h"
 #include "unitproperties.h"
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 class BoUnitEditor;
 class BosonWeaponPropertiesEditor;
@@ -48,9 +51,9 @@ public:
 	void setProducer(unsigned int producer)  { mProducer = producer; }
 	void setTerrainType(TerrainType terrain)  { mTerrain = terrain; }
 	void setSupportMiniMap(bool supportMiniMap)  { mSupportMiniMap = supportMiniMap; }
-	void setRequirements(QValueList<unsigned long int> requirements);
-	void setDestroyedEffectIds(QValueList<unsigned long int> ids);
-	void setConstructedEffectIds(QValueList<unsigned long int> ids);
+	void setRequirements(Q3ValueList<unsigned long int> requirements);
+	void setDestroyedEffectIds(Q3ValueList<unsigned long int> ids);
+	void setConstructedEffectIds(Q3ValueList<unsigned long int> ids);
 	void setExplodingDamageRange(bofixed range)  { mExplodingDamageRange = range; }
 	void setExplodingDamage(long int damage)  { mExplodingDamage = damage; }
 	void setHitPoint(const BoVector3Fixed& hitpoint);
@@ -179,7 +182,7 @@ public slots:
 private:
 	BoUnitEditor* mEditor;
 	int mCurrentWeapon;
-	QPtrList<BosonWeaponPropertiesEditor>* mWeapons;
+	Q3PtrList<BosonWeaponPropertiesEditor>* mWeapons;
 };
 
 class BoPluginsPageHandler : public QObject
@@ -256,7 +259,7 @@ protected:
 
 protected:
 	bool mUnitLoaded;
-	QValueList<int> mUsedIds;
+	Q3ValueList<int> mUsedIds;
 	BosonSearchPathsWidget* mSearchPaths;
 	QMap<int, QString> mUnits;
 	EditorUnitProperties* mUnit;

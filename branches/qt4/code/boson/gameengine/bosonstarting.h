@@ -21,13 +21,15 @@
 #define BOSONSTARTING_H
 
 #include <qobject.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 class BosonPlayField;
 class Player;
 class Boson;
 class BosonCanvas;
 class QDomElement;
-template<class T> class QPtrList;
+template<class T> class Q3PtrList;
 template<class T1, class T2> class QMap;
 class BosonStartingTask;
 
@@ -106,7 +108,7 @@ public slots:
 	 * @param The sender of the message, i.e. the client that completed
 	 * loading.
 	 **/
-	void slotStartingCompletedReceived(const QByteArray& message, Q_UINT32 sender);
+	void slotStartingCompletedReceived(const QByteArray& message, quint32 sender);
 
 	/**
 	 * Set all data that are needed to start a new game. This stream should
@@ -159,7 +161,7 @@ protected:
 	void sendStartingCompleted(bool success);
 	bool checkStartingCompletedMessages() const;
 
-	bool executeTasks(const QPtrList<BosonStartingTask>& tasks);
+	bool executeTasks(const Q3PtrList<BosonStartingTask>& tasks);
 
 signals:
 	void signalDestPlayField(BosonPlayField*);
@@ -189,7 +191,7 @@ public:
 		Q_UNUSED(files);
 	}
 
-	virtual bool createTasks(QPtrList<BosonStartingTask>* tasks) = 0;
+	virtual bool createTasks(Q3PtrList<BosonStartingTask>* tasks) = 0;
 
 	/**
 	 * @return A name describing this class. Should be i18n'ed, as this name

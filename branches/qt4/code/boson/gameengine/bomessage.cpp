@@ -30,12 +30,14 @@
 #include <kgame/kgameproperty.h>
 #include <kgame/kgamepropertyhandler.h>
 
-#include <qptrlist.h>
-#include <qptrqueue.h>
+#include <q3ptrlist.h>
+#include <q3ptrqueue.h>
 #include <qbuffer.h>
 #include <qapplication.h>
+//Added by qt3to4:
+#include <Q3TextStream>
 
-BoMessage::BoMessage(QByteArray& _message, int _msgid, Q_UINT32 _receiver, Q_UINT32 _sender, Q_UINT32 _clientId, unsigned int _advanceCallsCount)
+BoMessage::BoMessage(QByteArray& _message, int _msgid, quint32 _receiver, quint32 _sender, quint32 _clientId, unsigned int _advanceCallsCount)
 		: byteArray(_message),
 		msgid(_msgid),
 		receiver(_receiver),
@@ -47,7 +49,7 @@ BoMessage::BoMessage(QByteArray& _message, int _msgid, Q_UINT32 _receiver, Q_UIN
  mArrivalTime = QTime::currentTime();
 }
 
-BoMessage::BoMessage(QDataStream& stream, int _msgid, Q_UINT32 _receiver, Q_UINT32 _sender, Q_UINT32 _clientId, unsigned int _advanceCallsCount)
+BoMessage::BoMessage(QDataStream& stream, int _msgid, quint32 _receiver, quint32 _sender, quint32 _clientId, unsigned int _advanceCallsCount)
 		: byteArray(((QBuffer*)stream.device())->readAll()),
 		msgid(_msgid),
 		receiver(_receiver),
@@ -121,7 +123,7 @@ QString BoMessage::debug(KGame* game)
 QString BoMessage::debugMore(KGame* game)
 {
  QString m;
- QDataStream s(byteArray, IO_ReadOnly);
+ QDataStream s(byteArray, QIODevice::ReadOnly);
  if (msgid == KGameMessage::IdGameProperty) {
 	int propId;
 	KGameMessage::extractPropertyHeader(s, propId);
@@ -147,7 +149,7 @@ QString BoMessage::debugMore(KGame* game)
 
 BoMessageDelayer::BoMessageDelayer(Boson* b)
 {
- mDelayedMessages = new QPtrQueue<BoMessage>();
+ mDelayedMessages = new Q3PtrQueue<BoMessage>();
  mBoson = b;
  mDelayedMessages->setAutoDelete(true);
  mIsLocked = false;
@@ -236,7 +238,7 @@ void BoMessageDelayer::processDelayed()
 	boWarning() << k_funcinfo << "no message here" << endl;
 	return;
  }
- QDataStream s(m->byteArray, IO_ReadOnly);
+ QDataStream s(m->byteArray, QIODevice::ReadOnly);
  mDelayedWaiting = false;
  switch (m->msgid - KGameMessage::IdUser) {
 	case BosonMessageIds::AdvanceN:
@@ -254,7 +256,7 @@ void BoMessageDelayer::processDelayed()
 
 BoMessageLogger::BoMessageLogger()
 {
- mLoggedMessages = new QPtrList<BoMessage>();
+ mLoggedMessages = new Q3PtrList<BoMessage>();
  mLoggedMessages->setAutoDelete(true);
 }
 
@@ -279,8 +281,8 @@ bool BoMessageLogger::saveHumanReadableMessageLog(QIODevice* logDevice)
 	boError() << k_funcinfo << "device not open" << endl;
 	return false;
  }
- QTextStream log(logDevice);
- QPtrListIterator<BoMessage> it(*mLoggedMessages);
+ Q3TextStream log(logDevice);
+ Q3PtrListIterator<BoMessage> it(*mLoggedMessages);
  while (it.current()) {
 	const BoMessage* m = it.current();
 	log << "Msg: " << m->deliveredOnAdvanceCallsCount << "  "
@@ -306,19 +308,19 @@ bool BoMessageLogger::saveMessageLog(QIODevice* logDevice, unsigned int maxCount
 	return false;
  }
  QDataStream stream(logDevice);
- stream << (Q_UINT32)mLoggedMessages->count();
- QPtrListIterator<BoMessage> it(*mLoggedMessages);
+ stream << (quint32)mLoggedMessages->count();
+ Q3PtrListIterator<BoMessage> it(*mLoggedMessages);
  if (maxCount > 0 && mLoggedMessages->count() > maxCount) {
 	unsigned int diff = mLoggedMessages->count() - maxCount;
 	it += diff;
  }
  while (it.current()) {
 	const BoMessage* m = it.current();
-	stream << (Q_UINT32)m->deliveredOnAdvanceCallsCount;
-	stream << (Q_INT32)m->msgid;
-	stream << (Q_UINT32)m->sender;
-	stream << (Q_UINT32)m->receiver;
-	stream << (Q_UINT32)m->clientId;
+	stream << (quint32)m->deliveredOnAdvanceCallsCount;
+	stream << (qint32)m->msgid;
+	stream << (quint32)m->sender;
+	stream << (quint32)m->receiver;
+	stream << (quint32)m->clientId;
 	stream << m->mArrivalTime;
 	stream << m->mDeliveryTime;
 	stream << m->byteArray;
@@ -327,7 +329,7 @@ bool BoMessageLogger::saveMessageLog(QIODevice* logDevice, unsigned int maxCount
  return true;
 }
 
-bool BoMessageLogger::loadMessageLog(QIODevice* logDevice, QPtrList<BoMessage>* messages)
+bool BoMessageLogger::loadMessageLog(QIODevice* logDevice, Q3PtrList<BoMessage>* messages)
 {
  if (!logDevice) {
 	BO_NULL_ERROR(logDevice);
@@ -346,17 +348,17 @@ bool BoMessageLogger::loadMessageLog(QIODevice* logDevice, QPtrList<BoMessage>* 
 	return false;
  }
  QDataStream stream(logDevice);
- Q_UINT32 count;
+ quint32 count;
  stream >> count;
  for (unsigned int i = 0; i < count; i++) {
 	// AB: we log when the message was delivered _only_
 	// -> receiving of the message is not interesting and makes comparing
 	// network logs very hard (diffs are useless then)
-	Q_UINT32 deliveredOnAdvanceCallsCount;
-	Q_INT32 msgid;
-	Q_UINT32 sender;
-	Q_UINT32 receiver;
-	Q_UINT32 clientId;
+	quint32 deliveredOnAdvanceCallsCount;
+	qint32 msgid;
+	quint32 sender;
+	quint32 receiver;
+	quint32 clientId;
 	QTime arrivalTime;
 	QTime deliveryTime;
 	QByteArray byteArray;

@@ -1,3 +1,6 @@
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 /*
     This file is part of the Boson game
     Copyright (C) 2003-2005 Andreas Beckermann (b_mann@gmx.de)
@@ -38,9 +41,9 @@ template<class T> class BoVector3;
 typedef BoVector2<bofixed> BoVector2Fixed;
 typedef BoVector3<bofixed> BoVector3Fixed;
 
-template<class T> class QPtrVector;
-template<class T> class QPtrList;
-template<class T> class QValueList;
+template<class T> class Q3PtrVector;
+template<class T> class Q3PtrList;
+template<class T> class Q3ValueList;
 class QObject;
 class QString;
 class QColor;
@@ -110,7 +113,7 @@ public:
 	 **/
 	bool hasRtti(int rtti) const;
 	KGameIO* findRttiIO(int rtti) const;
-	QPtrList<KGameIO>* ioList();
+	Q3PtrList<KGameIO>* ioList();
 	bool removeGameIO(KGameIO* io = 0, bool deleteit = true);
 
 	/**
@@ -140,14 +143,14 @@ public:
 	 * Note that if you need the units of this player only, you should the
 	 * much faster @ref allMyUnits instead!
 	 **/
-	QPtrList<Unit> allUnits() const;
-	QPtrList<Unit> allEnemyUnits() const;
+	Q3PtrList<Unit> allUnits() const;
+	Q3PtrList<Unit> allEnemyUnits() const;
 
 	/**
 	 * @return Player::allUnits
 	 **/
-	QPtrList<Unit>* allMyUnits() const;
-	QPtrList<Unit> allMyLivingUnits() const;
+	Q3PtrList<Unit>* allMyUnits() const;
+	Q3PtrList<Unit> allMyLivingUnits() const;
 
 	/**
 	 * @return Whether the coordinates @p cellX, @p cellY are explored for
@@ -268,7 +271,7 @@ public:
 	bool hasTechnology(unsigned long int id) const;
 	bool hasUnitWithType(unsigned long int type) const;
 
-	const QValueList<const Unit*>* radarUnits() const;
+	const Q3ValueList<const Unit*>* radarUnits() const;
 
 	/**
 	 * @return The item at @p canvasVector, if any.
@@ -283,7 +286,7 @@ public:
 	Unit* findUnitAt(const BoVector3Fixed& canvasVector) const;
 	Unit* findUnit(unsigned long int unitId) const;
 
-	BoItemList* unitsAtCells(const QPtrVector<const Cell>* cells) const;
+	BoItemList* unitsAtCells(const Q3PtrVector<const Cell>* cells) const;
 
 	/**
 	 * @return Player::calculatePower
@@ -296,7 +299,7 @@ public:
 	 * At most radius tiles are searched.
 	 * If n is 0, all visible mineral mines in given are returned.
 	 **/
-	QValueList<BoVector2Fixed> nearestMineralLocations(int x, int y, unsigned int n, unsigned int radius) const;
+	Q3ValueList<BoVector2Fixed> nearestMineralLocations(int x, int y, unsigned int n, unsigned int radius) const;
 
 	/**
 	 * Finds n nearest oil locations to point (x, y), that are visible to
@@ -304,7 +307,7 @@ public:
 	 * At most radius tiles are searched.
 	 * If n is 0, all visible oil mines in given are returned.
 	 **/
-	QValueList<BoVector2Fixed> nearestOilLocations(int x, int y, unsigned int n, unsigned int radius) const;
+	Q3ValueList<BoVector2Fixed> nearestOilLocations(int x, int y, unsigned int n, unsigned int radius) const;
 
 private:
 	PlayerIOPrivate* d;

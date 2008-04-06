@@ -179,12 +179,12 @@ unsigned int Model::addMaterial(Material* m)
   return mMaterials.count() - 1;
 }
 
-void Model::setMaterials(const QValueVector<Material*>& materials)
+void Model::setMaterials(const Q3ValueVector<Material*>& materials)
 {
   mMaterials = materials;
 }
 
-void Model::setTextures(const QDict<Texture>& textures)
+void Model::setTextures(const Q3Dict<Texture>& textures)
 {
   mTextures = textures;
 }
@@ -213,7 +213,7 @@ void Model::addTexture(Texture* t)
 bool Model::loadTextures()
 {
   bool ret = true;
-  QDictIterator<Texture> it(mTextures);
+  Q3DictIterator<Texture> it(mTextures);
   while(it.current())
   {
     ret &= it.current()->load();
@@ -261,12 +261,12 @@ void Model::createArrays()
   if(maxIndex <= 65535)
   {
     mIndexArrayType = BMF_DATATYPE_UNSIGNED_SHORT;
-    mIndexArray = (unsigned char*)new Q_UINT16[mIndexArraySize];
+    mIndexArray = (unsigned char*)new quint16[mIndexArraySize];
   }
   else
   {
     mIndexArrayType = BMF_DATATYPE_UNSIGNED_INT;
-    mIndexArray = (unsigned char*)new Q_UINT32[mIndexArraySize];
+    mIndexArray = (unsigned char*)new quint32[mIndexArraySize];
   }
 
   // Copy data into the arrays
@@ -288,14 +288,14 @@ void Model::createArrays()
 void Model::updateIds()
 {
   // Textures
-  QDictIterator<Texture> it(mTextures);
+  Q3DictIterator<Texture> it(mTextures);
   for(unsigned int i = 0; it.current(); ++it, i++)
   {
     it.current()->setId(i);
   }
 
   // Materials
-  for(unsigned int i = 0; i < mMaterials.count(); i++)
+  for(int i = 0; i < mMaterials.count(); i++)
   {
     mMaterials[i]->setId(i);
   }
@@ -366,8 +366,8 @@ void Model::removeEmptyMeshes()
   {
     LOD* l = lod(i);
 
-    QValueVector<Mesh*> meshes;
-    QValueVector<Mesh*> removedmeshes;
+    Q3ValueVector<Mesh*> meshes;
+    Q3ValueVector<Mesh*> removedmeshes;
     for(unsigned int j = 0; j < l->meshCount(); j++)
     {
       Mesh* m = l->mesh(j);
@@ -405,12 +405,12 @@ void Model::updateBoundingBox(unsigned int baseframe)
     {
       BoVector3Float pos;
       matrix->transform(&pos, &mesh->vertex(j)->pos);
-      mMinCoord.setX(QMIN(mMinCoord.x(), pos.x()));
-      mMinCoord.setY(QMIN(mMinCoord.y(), pos.y()));
-      mMinCoord.setZ(QMIN(mMinCoord.z(), pos.z()));
-      mMaxCoord.setX(QMAX(mMaxCoord.x(), pos.x()));
-      mMaxCoord.setY(QMAX(mMaxCoord.y(), pos.y()));
-      mMaxCoord.setZ(QMAX(mMaxCoord.z(), pos.z()));
+      mMinCoord.setX(qMin(mMinCoord.x(), pos.x()));
+      mMinCoord.setY(qMin(mMinCoord.y(), pos.y()));
+      mMinCoord.setZ(qMin(mMinCoord.z(), pos.z()));
+      mMaxCoord.setX(qMax(mMaxCoord.x(), pos.x()));
+      mMaxCoord.setY(qMax(mMaxCoord.y(), pos.y()));
+      mMaxCoord.setZ(qMax(mMaxCoord.z(), pos.z()));
     }
   }
 
@@ -483,7 +483,7 @@ void Model::updateRadius(unsigned int baseframe)
       matrix->transform(&pos, &mesh->vertex(j)->pos);
       // Calculate distance to the pos from the origin point.
       // Note that the distance is left squared for performace reasons.
-      maxdist = QMAX(maxdist, pos.dotProduct());
+      maxdist = qMax(maxdist, pos.dotProduct());
     }
   }
   mRadius = sqrt(maxdist);

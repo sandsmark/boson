@@ -324,7 +324,7 @@ ResourceMinePlugin* HarvesterPlugin::findClosestResourceMine() const
  Player* neutral = (Player*)game()->findPlayerByUserId(256);
 
  BO_CHECK_NULL_RET0(neutral);
- QPtrListIterator<Unit> it(*(neutral->allUnits()));
+ Q3PtrListIterator<Unit> it(*(neutral->allUnits()));
  ResourceMinePlugin* mine = 0;
  bofixed mineDist = 0.0f;
  while (it.current()) {
@@ -339,7 +339,7 @@ ResourceMinePlugin* HarvesterPlugin::findClosestResourceMine() const
 		continue;
 	}
 	if (m->isUsableTo(this)) {
-		bofixed dist = QMAX(QABS(unit()->centerX() - u->centerX()), QABS(unit()->centerY() - u->centerY()));
+		bofixed dist = qMax(qAbs(unit()->centerX() - u->centerX()), qAbs(unit()->centerY() - u->centerY()));
 		if ((dist < mineDist) || (mineDist == 0.0f)) {
 			mineDist = dist;
 			mine = m;
@@ -353,7 +353,7 @@ ResourceMinePlugin* HarvesterPlugin::findClosestResourceMine() const
 RefineryPlugin* HarvesterPlugin::findClosestRefinery() const
 {
  BO_CHECK_NULL_RET0(player());
- QPtrListIterator<Unit> it(*(player()->allUnits()));
+ Q3PtrListIterator<Unit> it(*(player()->allUnits()));
  const HarvesterProperties* prop = (HarvesterProperties*)properties(PluginProperties::Harvester);
  if (!prop) {
 	boError() << k_funcinfo << "NULL harvester plugin" << endl;
@@ -368,7 +368,7 @@ RefineryPlugin* HarvesterPlugin::findClosestRefinery() const
 		continue;
 	}
 	if (r->isUsableTo(this)) {
-		bofixed dist = QMAX(QABS(unit()->centerX() - it.current()->centerX()), QABS(unit()->centerY() - it.current()->centerY()));
+		bofixed dist = qMax(qAbs(unit()->centerX() - it.current()->centerX()), qAbs(unit()->centerY() - it.current()->centerY()));
 		if ((dist < refdist) || (refdist == 0.0f)) {
 			refdist = dist;
 			ref = r;

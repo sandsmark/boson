@@ -106,9 +106,9 @@ void BoUfoNumInput::slotTextEntered(const QString& text)
 
 float BoUfoNumInput::value() const
 {
- double v = mLineEdit->text().toDouble();
- v = QMAX(v, minimumValue());
- v = QMIN(v, maximumValue());
+ float v = mLineEdit->text().toDouble();
+ v = qMax(v, minimumValue());
+ v = qMin(v, maximumValue());
  return v;
 }
 
@@ -148,13 +148,13 @@ void BoUfoNumInput::setValue(float v)
 
 void BoUfoNumInput::slotSetMaxValue(float max)
 {
- double min = QMIN(max, minimumValue());
+ double min = qMin(max, minimumValue());
  setRange(min, max);
 }
 
 void BoUfoNumInput::slotSetMinValue(float min)
 {
- double max = QMAX(min, maximumValue());
+ double max = qMax(min, maximumValue());
  setRange(min, max);
 }
 

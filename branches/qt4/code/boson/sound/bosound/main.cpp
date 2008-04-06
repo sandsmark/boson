@@ -34,6 +34,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <krandom.h>
 
 
 static const char* description = "Boson Audio Process";
@@ -48,7 +49,7 @@ static void listCommands();
 
 int main(int argc, char **argv)
 {
- // we have to use KApplication, as we use kapp->random() in BosonSound!
+ // we have to use KApplication, as we use KRandom::random() in BosonSound!
  KAboutData about("bosonaudioprocess",
 		"Boson Audio Process",
 		BOSON_VERSION_STRING,
@@ -76,10 +77,10 @@ int main(int argc, char **argv)
 
  // and now the communication with the other process.
  QFile readFile;
- readFile.open(IO_ReadOnly | IO_Raw, stdin);
+ readFile.open(QIODevice::ReadOnly | QIODevice::Unbuffered, stdin);
  // we may want to write to stdout to let boson know about errors!
  QFile writeFile;
- writeFile.open(IO_ReadOnly | IO_Raw, stdout);
+ writeFile.open(QIODevice::ReadOnly | QIODevice::Unbuffered, stdout);
 
  QSocketNotifier notifier(readFile.handle(), QSocketNotifier::Read);
  QObject::connect(&notifier, SIGNAL(activated(int)), t, SLOT(slotReceiveStdin(int)));

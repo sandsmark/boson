@@ -20,6 +20,9 @@
 #define GAMEOVERDIALOG_H
 
 #include <kdialogbase.h>
+//Added by qt3to4:
+#include <Q3Frame>
+#include <QLabel>
 
 class Player;
 class Boson;
@@ -52,7 +55,7 @@ private:
  * @short A PlayerBox represents a player in the @ref GameOverDialog
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class GameOverDialog::PlayerBox : public QFrame
+class GameOverDialog::PlayerBox : public Q3Frame
 {
 	Q_OBJECT
 public:

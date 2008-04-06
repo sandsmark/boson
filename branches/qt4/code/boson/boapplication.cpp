@@ -32,6 +32,8 @@
 #include <qfileinfo.h>
 #include <qfile.h>
 #include <qdir.h>
+//Added by qt3to4:
+#include <Q3CString>
 
 #include <stdlib.h>
 
@@ -40,7 +42,7 @@
  * argv[0] that is given to @ref QApplication, as it is broken (@ref
  * KCmdLineArgs::init strips the path out of it).
  **/
-static QString fixedApplicationDirPath(const QCString& argv0);
+static QString fixedApplicationDirPath(const Q3CString& argv0);
 
 /**
  * @internal
@@ -48,7 +50,7 @@ static QString fixedApplicationDirPath(const QCString& argv0);
  **/
 static QString resolveSymlinks( const QString& path, int depth = 0 );
 
-BoApplication::BoApplication(const QCString& argv0, bool allowStyles, bool enableGUI)
+BoApplication::BoApplication(const Q3CString& argv0, bool allowStyles, bool enableGUI)
 	: KApplication(allowStyles, enableGUI)
 {
  // this is for broken installations. people tend to install to /usr/local or
@@ -99,7 +101,7 @@ BoApplication::~BoApplication()
  }
 }
 
-QString fixedApplicationDirPath(const QCString& _argv0)
+QString fixedApplicationDirPath(const Q3CString& _argv0)
 {
  // AB: code has been shamelessy stolen from
  // QApplication::applicationFilePath()/applicationDirPath().
@@ -119,7 +121,7 @@ QString fixedApplicationDirPath(const QCString& _argv0)
 	  If argv0 contains one or more slashes, it is a file path
 	  relative to the current directory.
 	*/
-	absPath = QDir::current().absFilePath( argv0 );
+	absPath = QDir::current().absoluteFilePath( argv0 );
  } else {
 	/*
 	  Otherwise, the file path has to be determined using the
@@ -129,7 +131,7 @@ QString fixedApplicationDirPath(const QCString& _argv0)
 	QStringList paths( QStringList::split(QChar(':'), pEnv) );
 	QStringList::const_iterator p = paths.begin();
 	while ( p != paths.end() ) {
-		QString candidate = QDir::current().absFilePath( *p + "/" + argv0 );
+		QString candidate = QDir::current().absoluteFilePath( *p + "/" + argv0 );
 		if ( QFile::exists(candidate) ) {
 			absPath = candidate;
 			break;
@@ -138,7 +140,7 @@ QString fixedApplicationDirPath(const QCString& _argv0)
 	}
  }
 
- absPath = QDir::cleanDirPath( absPath );
+ absPath = QDir::cleanPath( absPath );
  if ( QFile::exists(absPath) ) {
 	applicationFilePath = resolveSymlinks( absPath );
  } else {
@@ -186,9 +188,9 @@ QString resolveSymlinks( const QString& path, int depth )
 			}
 		relPath += path.right( path.length() - slashPos - 1 );
 		}
-		path2 = QDir::current().absFilePath( relPath );
+		path2 = QDir::current().absoluteFilePath( relPath );
 	}
-	path2 = QDir::cleanDirPath( path2 );
+	path2 = QDir::cleanPath( path2 );
 	return resolveSymlinks( path2, depth + 1 );
  } else {
 	return path;

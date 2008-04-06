@@ -53,16 +53,16 @@
 #include <klocale.h>
 
 #include <qtimer.h>
-#include <qvaluelist.h>
-#include <qptrdict.h>
-#include <qptrlist.h>
+#include <q3valuelist.h>
+#include <q3ptrdict.h>
+#include <q3ptrlist.h>
 #include <qdom.h>
 
 
 BosonItemEffects::BosonItemEffects(BosonItem* item)
 {
  mItem = item;
- mEffects = new QPtrList<BosonEffect>();
+ mEffects = new Q3PtrList<BosonEffect>();
 }
 
 BosonItemEffects::~BosonItemEffects()
@@ -71,21 +71,21 @@ BosonItemEffects::~BosonItemEffects()
  delete mEffects;
 }
 
-const QPtrList<BosonEffect>& BosonItemEffects::effects() const
+const Q3PtrList<BosonEffect>& BosonItemEffects::effects() const
 {
  return *mEffects;
 }
 
-void BosonItemEffects::setEffects(const QPtrList<BosonEffect>& effects, QPtrList<BosonEffect>* takeOwnership)
+void BosonItemEffects::setEffects(const Q3PtrList<BosonEffect>& effects, Q3PtrList<BosonEffect>* takeOwnership)
 {
  clearEffects();
 // boDebug() << k_funcinfo << effects.count() << endl;
- for (QPtrListIterator<BosonEffect> it(effects); it.current(); ++it) {
+ for (Q3PtrListIterator<BosonEffect> it(effects); it.current(); ++it) {
 	addEffect(it.current(), takeOwnership);
  }
 }
 
-void BosonItemEffects::addEffect(BosonEffect* e, QPtrList<BosonEffect>* takeOwnership)
+void BosonItemEffects::addEffect(BosonEffect* e, Q3PtrList<BosonEffect>* takeOwnership)
 {
  e->setOwnerId(mItem->id());
  mEffects->append(e);
@@ -101,7 +101,7 @@ void BosonItemEffects::removeEffect(BosonEffect* e)
 
 void BosonItemEffects::clearEffects()
 {
- for (QPtrListIterator<BosonEffect> it(*mEffects); it.current(); ++it) {
+ for (Q3PtrListIterator<BosonEffect> it(*mEffects); it.current(); ++it) {
 	it.current()->setOwnerId(0);
  }
  mEffects->clear();
@@ -111,7 +111,7 @@ void BosonItemEffects::updateEffectsPosition()
 {
  BoVector3Fixed pos(item()->centerX(), item()->centerY(), item()->z());
  pos.canvasToWorld();
- for (QPtrListIterator<BosonEffect> it(*mEffects); it.current(); ++it) {
+ for (Q3PtrListIterator<BosonEffect> it(*mEffects); it.current(); ++it) {
 	it.current()->setPosition(pos);
  }
  mItem->setEffectsPositionDirty(false);
@@ -120,7 +120,7 @@ void BosonItemEffects::updateEffectsPosition()
 void BosonItemEffects::updateEffectsRotation()
 {
  BoVector3Fixed rotation(item()->xRotation(), item()->yRotation(), item()->rotation());
- for (QPtrListIterator<BosonEffect> it(*mEffects); it.current(); ++it) {
+ for (Q3PtrListIterator<BosonEffect> it(*mEffects); it.current(); ++it) {
 	it.current()->setRotation(rotation);
  }
  mItem->setEffectsRotationDirty(false);
@@ -150,7 +150,7 @@ public:
 	PlayerIO* mLocalPlayerIO;
 	const BosonCanvas* mCanvas;
 
-	QPtrList<BosonEffect> mEffects;
+	Q3PtrList<BosonEffect> mEffects;
 
 	BosonEffectManager* mEffectManager;
 
@@ -194,7 +194,7 @@ bool BosonUfoCanvasWidget::initializeItems()
  connect(boViewData, SIGNAL(signalItemContainerAboutToBeRemoved(BosonItemContainer*)),
 		this, SLOT(slotRemoveItemContainerData(BosonItemContainer*)));
 
- for (QPtrListIterator<BosonItemContainer> it(boViewData->allItemContainers()); it.current(); ++it) {
+ for (Q3PtrListIterator<BosonItemContainer> it(boViewData->allItemContainers()); it.current(); ++it) {
 	if (it.current()->effects()) {
 		boError() << k_funcinfo << "container already has effects. double initializing!" << endl;
 		return false;
@@ -204,7 +204,7 @@ bool BosonUfoCanvasWidget::initializeItems()
 		return false;
 	}
  }
- for (QPtrListIterator<BosonItemContainer> it(boViewData->allItemContainers()); it.current(); ++it) {
+ for (Q3PtrListIterator<BosonItemContainer> it(boViewData->allItemContainers()); it.current(); ++it) {
 	slotAddItemContainerData(it.current());
  }
 
@@ -326,9 +326,9 @@ void BosonUfoCanvasWidget::addEffect(BosonEffect* e)
  d->mEffects.append(e);
 }
 
-void BosonUfoCanvasWidget::addEffects(const QPtrList<BosonEffect>& effects)
+void BosonUfoCanvasWidget::addEffects(const Q3PtrList<BosonEffect>& effects)
 {
- for (QPtrListIterator<BosonEffect> it(effects); it.current(); ++it) {
+ for (Q3PtrListIterator<BosonEffect> it(effects); it.current(); ++it) {
 	addEffect(it.current());
  }
 }
@@ -368,7 +368,7 @@ void BosonUfoCanvasWidget::slotAdvance(unsigned int advanceCallsCount, bool adva
 void BosonUfoCanvasWidget::animateItems(unsigned int advanceCallsCount)
 {
  Q_UNUSED(advanceCallsCount);
- for (QPtrListIterator<BosonItemContainer> it(boViewData->allItemContainers()); it.current(); ++it) {
+ for (Q3PtrListIterator<BosonItemContainer> it(boViewData->allItemContainers()); it.current(); ++it) {
 	BosonItemRenderer* r = it.current()->itemRenderer();
 	if (r) {
 		r->animate();
@@ -379,8 +379,8 @@ void BosonUfoCanvasWidget::animateItems(unsigned int advanceCallsCount)
 void BosonUfoCanvasWidget::advanceEffects(float elapsed)
 {
  BO_CHECK_NULL_RET(d->mCanvas);
- QPtrList<BosonEffect> removeEffects;
- for (QPtrListIterator<BosonItemContainer> it(boViewData->allItemContainers()); it.current(); ++it) {
+ Q3PtrList<BosonEffect> removeEffects;
+ for (Q3PtrListIterator<BosonItemContainer> it(boViewData->allItemContainers()); it.current(); ++it) {
 	BosonItemEffects* e = it.current()->effects();
 	if (!e) {
 		BO_NULL_ERROR(e);
@@ -399,7 +399,7 @@ void BosonUfoCanvasWidget::advanceEffects(float elapsed)
 		e->updateEffectsRotation();
 	}
  }
- for (QPtrListIterator<BosonEffect> it(d->mEffects); it.current(); ++it) {
+ for (Q3PtrListIterator<BosonEffect> it(d->mEffects); it.current(); ++it) {
 	BosonEffect* e = it.current();
 	if (!e->hasStarted()) {
 		e->update(elapsed);
@@ -435,7 +435,7 @@ void BosonUfoCanvasWidget::cameraChanged()
 {
  setParticlesDirty(true);
  BO_CHECK_NULL_RET(d->mCamera);
- QPtrListIterator<BosonEffect> it(d->mEffects);
+ Q3PtrListIterator<BosonEffect> it(d->mEffects);
  while (it.current()) {
 	if (it.current()->type() == BosonEffect::ParticleEnvironmental) {
 		it.current()->setPosition(d->mCamera->cameraPos().toFixed());
@@ -537,7 +537,7 @@ bool BosonUfoCanvasWidget::saveEffectsAsXML(QDomElement& root) const
  QDomDocument doc = root.ownerDocument();
 
  // Save effects
- QPtrListIterator<BosonEffect> effectIt(d->mEffects);
+ Q3PtrListIterator<BosonEffect> effectIt(d->mEffects);
  while (effectIt.current()) {
 	QDomElement e = doc.createElement(QString::fromLatin1("Effect"));
 	effectIt.current()->saveAsXML(e);
@@ -604,7 +604,7 @@ void BosonUfoCanvasWidget::slotShotHit(BosonShot* shot)
 
  // Make shot's effects (e.g. smoke traces) obsolete
  if (effects && effects->effects().count() > 0) {
-	QPtrListIterator<BosonEffect> it(effects->effects());
+	Q3PtrListIterator<BosonEffect> it(effects->effects());
 	while (it.current()) {
 		it.current()->makeObsolete();
 		++it;
@@ -640,7 +640,7 @@ void BosonUfoCanvasWidget::slotUnitDestroyed(Unit* unit)
  BosonItemEffects* e = c->effects();
  if (e && e->effects().count() > 0) {
 	// Make all unit's effects obsolete
-	QPtrListIterator<BosonEffect> it(e->effects());
+	Q3PtrListIterator<BosonEffect> it(e->effects());
 	for (; it.current(); ++it) {
 		it.current()->makeObsolete();
 		it.current()->setOwnerId(0);
@@ -773,16 +773,16 @@ void BosonUfoCanvasWidget::slotRemoveItemContainerData(BosonItemContainer* c)
  delete itemRenderer;
 }
 
-QValueList<BosonItem*> BosonUfoCanvasWidget::itemsAtWidgetRect(const QRect& widgetRect) const
+Q3ValueList<BosonItem*> BosonUfoCanvasWidget::itemsAtWidgetRect(const QRect& widgetRect) const
 {
  return emulatePickItems(widgetRect);
 }
 
-QValueList<Unit*> BosonUfoCanvasWidget::unitsAtWidgetRect(const QRect& widgetRect) const
+Q3ValueList<Unit*> BosonUfoCanvasWidget::unitsAtWidgetRect(const QRect& widgetRect) const
 {
- QValueList<Unit*> units;
- QValueList<BosonItem*> items = itemsAtWidgetRect(widgetRect);
- for (QValueList<BosonItem*>::iterator it = items.begin(); it != items.end(); ++it) {
+ Q3ValueList<Unit*> units;
+ Q3ValueList<BosonItem*> items = itemsAtWidgetRect(widgetRect);
+ for (Q3ValueList<BosonItem*>::iterator it = items.begin(); it != items.end(); ++it) {
 	if (RTTI::isUnit((*it)->rtti())) {
 		units.append((Unit*)*it);
 	}
@@ -792,7 +792,7 @@ QValueList<Unit*> BosonUfoCanvasWidget::unitsAtWidgetRect(const QRect& widgetRec
 
 Unit* BosonUfoCanvasWidget::unitAtWidgetPos(const QPoint& widgetPos) const
 {
- QValueList<Unit*> units = unitsAtWidgetRect(QRect(widgetPos, QSize(1, 1)));
+ Q3ValueList<Unit*> units = unitsAtWidgetRect(QRect(widgetPos, QSize(1, 1)));
  if (units.count() == 0) {
 	return 0;
  }
@@ -802,7 +802,7 @@ Unit* BosonUfoCanvasWidget::unitAtWidgetPos(const QPoint& widgetPos) const
  return units[0];
 }
 
-QValueList<BosonItem*> BosonUfoCanvasWidget::emulatePickItems(const QRect& pickRect) const
+Q3ValueList<BosonItem*> BosonUfoCanvasWidget::emulatePickItems(const QRect& pickRect) const
 {
  return d->mCanvasRenderer->emulatePickItems(pickRect);
 }
@@ -857,9 +857,9 @@ public:
 		float z2 = (c - topLeft).length();
 		float z3 = (c - bottomRight).length();
 		float z4 = (c - bottomLeft).length();
-		float r = QMAX(z1, z2);
-		r = QMAX(r, z3);
-		r = QMAX(r, z4);
+		float r = qMax(z1, z2);
+		r = qMax(r, z3);
+		r = qMax(r, z4);
 		return r;
 	}
 
@@ -867,12 +867,12 @@ public:
 	{
 		float minZ = topLeft.z();
 		float maxZ = minZ;
-		minZ = QMIN(minZ, topRight.z());
-		maxZ = QMAX(maxZ, topRight.z());
-		minZ = QMIN(minZ, bottomRight.z());
-		maxZ = QMAX(maxZ, bottomRight.z());
-		minZ = QMIN(minZ, bottomLeft.z());
-		maxZ = QMAX(maxZ, bottomLeft.z());
+		minZ = qMin(minZ, topRight.z());
+		maxZ = qMax(maxZ, topRight.z());
+		minZ = qMin(minZ, bottomRight.z());
+		maxZ = qMax(maxZ, bottomRight.z());
+		minZ = qMin(minZ, bottomLeft.z());
+		maxZ = qMax(maxZ, bottomLeft.z());
 		return BoRect3Float(topLeft.x(), topLeft.y(), minZ, bottomRight.x(), bottomRight.y(), maxZ);
 	}
 	BoVector3Float topLeft;
@@ -908,18 +908,18 @@ bool BosonUfoCanvasWidget::emulatePickGroundPos(const QPoint& pickPos, BoVector3
  viewFrustum.loadPickViewFrustum(pickRect, d->mGameGLMatrices->viewport(), d->mGameGLMatrices->modelviewMatrix(), d->mGameGLMatrices->projectionMatrix());
  BoVector3Float pos;
 
- QValueVector<BoGroundQuadTreeNode*> retNodes;
- QValueVector<BoGroundQuadTreeNode*> nodes;
+ Q3ValueVector<BoGroundQuadTreeNode*> retNodes;
+ Q3ValueVector<BoGroundQuadTreeNode*> nodes;
  nodes.append(d->mGroundQuadTree);
  int visibleDepth = 0;
  while (!nodes.isEmpty()) {
-	QValueVector<BoGroundQuadTreeNode*> nextNodes;
+	Q3ValueVector<BoGroundQuadTreeNode*> nextNodes;
 	nextNodes.reserve(nodes.count() * 4);
 
-	QValueVector<BoGroundQuadTreeNode*> nextRetNodes;
+	Q3ValueVector<BoGroundQuadTreeNode*> nextRetNodes;
 	nextRetNodes.reserve(nodes.count());
 
-	QValueVector<BoGroundQuadTreeNode*>::iterator it;
+	Q3ValueVector<BoGroundQuadTreeNode*>::iterator it;
 	for (it = nodes.begin(); it != nodes.end(); ++it) {
 		BoRect3Float r = (*it)->groundBoundingBox();
 
@@ -971,7 +971,7 @@ bool BosonUfoCanvasWidget::emulatePickGroundPos(const QPoint& pickPos, BoVector3
  // fallback only
  pos = BoVector3Float(retNodes[0]->left(), -retNodes[0]->top(), map->cellAverageHeight(retNodes[0]->left(), retNodes[0]->top()));
 
- QValueVector<EmulatePickRect> rects;
+ Q3ValueVector<EmulatePickRect> rects;
  for (unsigned int i = 0; i < retNodes.count(); i++) {
 	const int x1 = retNodes[i]->left();
 	const int x2 = retNodes[i]->right() + 1;
@@ -992,7 +992,7 @@ bool BosonUfoCanvasWidget::emulatePickGroundPos(const QPoint& pickPos, BoVector3
  // ...
  const int precision = 4;
  for (int precisionRun = 0; precisionRun < precision; precisionRun++) {
-	QValueVector<EmulatePickRect> nextRects;
+	Q3ValueVector<EmulatePickRect> nextRects;
 	nextRects.reserve(rects.count() * 4);
 	const EmulatePickRect* firstVisible = 0;
 	for (unsigned int i = 0; i < rects.count(); i++) {

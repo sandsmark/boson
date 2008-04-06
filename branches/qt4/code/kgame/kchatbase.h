@@ -1,6 +1,7 @@
 /*
     This file is part of the KDE games library
     Copyright (C) 2001 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2007 Gael de Chalendar (aka Kleag) <kleag@free.fr>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -19,136 +20,18 @@
 #ifndef __KCHATBASE_H__
 #define __KCHATBASE_H__
 
-#include <qframe.h>
-#include <qstring.h>
-#include <qlistbox.h>
+#include <QtGui/QFrame>
 
 #include <kglobalsettings.h>
+#include <libkdegames_export.h>
 
-class QListBoxItem;
+class QListWidgetItem;
 
 class KConfig;
 
-
-class KChatBaseTextPrivate;
-
-/**
- * A QListBoxText implementation for KChatBase.
- *
- * It supports different colors, text fonts, ...
- *
- * A KChatBaseText consists of two text items: first the player part then the
- * text part. This honors KChatBase::addMessage which also uses both. 
- * You can leave the player part out if you don't need it - there won't be any
- * difference. 
- *
- * You can set different colors and fonts for both parts. In the future there
- * will probably some kind of KChatBaseDialog which offers the user the ability
- * to configure things like color and font on the fly.
- **/
-class KChatBaseText : public QListBoxText
-{
-public:
-
-	/**
-	 * Constructs a KChatBaseText object with the player and text part
-	 **/
-	KChatBaseText(const QString& player, const QString& text);
-	
-	/**
-	 * Constructs a KChatBaseText object without player part
-	 **/
-	KChatBaseText(const QString& text);
-	
-	/**
-	 * Destruct a KChatBaseText object.
-	 **/
-	virtual ~KChatBaseText();
-
-	/**
-	 * Set the name part of a message. A message is usually shown like
-	 * "name: text" and you can change both parts independently.
-	 * 
-	 * @see setMessage
-	 * @param name The name of the sender (e.g. the player)
-	 **/
-	void setName(const QString& name);
-
-	/**
-	 * Set the text part of a message. A message is usually shown like
-	 * "name: message" and you can change both parts independently.
-	 * 
-	 * See also setName
-	 * @param message The message that has been sent
-	 **/
-	void setMessage(const QString& message);
-
-	/**
-	 * @return The name part of a message. 
-	 * @see setName
-	 **/
-	const QString& name() const;
-
-	/**
-	 * @return The message text. 
-	 * @see setMessage
-	 **/
-	const QString& message() const;
-
-	/**
-	 * You can set the font of the sender name independently of the message
-	 * itself. This font is used as the "name: " part of the message.
-	 * @return The font that is used for the name
-	 **/
-	QFont nameFont() const;
-
-	/**
-	 * You can set the font of the message independently of the sender name.
-	 * This font is used as the text part of the message.
-	 * @return The font thaz is used for message text
-	 **/
-	QFont messageFont() const;
-
-	/**
-	 * Set the font for the name. 
-	 * @see nameFont
-	 * @param font A pointer to the name font. Only the pointer is stored so
-	 * don't delete the object. This way there is only one object for a lot
-	 * of messages in memory.
-	 **/
-	void setNameFont(const QFont* font);
-
-	/**
-	 * Set the font for the message text.
-	 * @see messageFont
-	 * @param font A pointer to the message font. Only the pointer is stored so
-	 * don't delete the object! This way there is only one object for a lot
-	 * of messages in memory.
-	 **/
-	void setMessageFont(const QFont* font);
-
-	/**
-	 **/
-	virtual int width(QListBox* ) const;
-
-	/**
-	 **/
-	virtual int height(QListBox* ) const;
-
-protected:
-	/**
-	 **/
-	virtual void paint(QPainter*);
-
-private:
-	void init();
-
-private:
-	KChatBaseTextPrivate* d;
-};
-
-
 class KChatBasePrivate;
+class KChatBaseModel;
+class KChatBaseItemDelegate;
 
 /**
  * @short The base class for chat widgets
@@ -165,33 +48,39 @@ class KChatBasePrivate;
  * desired behaviour. You can also change this manually by calling 
  * setCompletionMode.
  *
- * To make KChatBase useful you have to overwrite at least returnPressed.
+ * To make KhatBase useful you have to overwrite at least returnPressed.
  * Here you should send the message to all of your clients (or just some of
  * them, depending on sendingEntry).
  *
  * To add a message just call addMessage with the nickname of the player
- * who sent the message and the message itself. If you don't want to use
- * layoutMessage by any reason you can also call addItem directly. But you
- * should better replace layoutMessage instead.
+ * who sent the message and the message itself. 
  *
  * You probably don't want to use the abstract class KChatBase directly but use
- * one of the derived classess KChat or KGameChat. The latter is the
+ * one of the derived classes KChat or KGameChat. The latter is the
  * widget of choice if you develop a KGame application as you don't have to
- * do anything but providing a KGame object.
+ * do anything but providing a KGame object. If you want to change the kind of
+ * elements displayed (using pixmaps for example), then you will also have to
+ * derive the KChatBaseModel and KChatBaseItemDelegate classes.
  *
  * @author Andreas Beckermann <b_mann@gmx.de>
+ * @author Gael de Chalendar (aka Kleag) <kleag@free.fr> for the port to Model/View
+ * 
  **/
-class KChatBase : public QFrame
+class KDEGAMES_EXPORT KChatBase : public QFrame
 {
 	Q_OBJECT
 public:
 	/**
 	 * @param parent The parent widget for this widget.
+         * @param model
+         * @param delegate
 	 * @param noComboBox If true then the combo box where the player can
 	 * choose where to send messages to (either globally or just to some
 	 * players) will not be added.
 	 **/
-	KChatBase(QWidget* parent, bool noComboBox = false);
+	explicit KChatBase(QWidget* parent, KChatBaseModel* model=0, 
+                           KChatBaseItemDelegate* delegate=0,
+                           bool noComboBox = false);
 
 	/**
 	 * Destruct the KChatBase object
@@ -209,7 +98,7 @@ public:
 	 * string that was set by setFromName or the name of the player
 	 * that was set by setFromPlayer
 	 **/
-	virtual const QString& fromName() const = 0;
+	virtual QString fromName() const = 0;
 
 	/**
 	 * Adds a new entry in the combo box. The default is "send to all
@@ -332,47 +221,47 @@ public:
 	/**
 	 * This font should be used for the name (the "from: " part) of a
 	 * message. layoutMessage uses this to set the font using
-	 * KChatBaseText::setNameFont but if you want to overwrite 
+	 * KChatBaseItemDelegate::setNameFont but if you want to overwrite 
 	 * layoutMessage you should do this yourself.
 	 * @return The font that is used for the name part of the message.
 	 **/
-	const QFont& nameFont() const;
+	QFont nameFont() const;
 
 	/**
 	 * This font should be used for a message. layoutMessage sets the
-	 * font of a message using KChatBaseText::setMessageFont but if ypu
+	 * font of a message using KChatBaseItemDelegate::setMessageFont but if ypu
 	 * replace layoutMessage with your own function you should use
 	 * messageFont() yourself.
 	 * @return The font that is used for a message
 	 **/
-	const QFont& messageFont() const;
+	QFont messageFont() const;
 
 	/**
 	 * Same as systemNameFont but applies only to system messages.
 	 * @see layoutSystemMessage
 	 **/
-	const QFont& systemNameFont() const;
+	QFont systemNameFont() const;
 
 	/**
 	 * Same as systemMessageFont but applies only to system messages.
 	 * @see layoutSystemMessage
 	 **/
-	const QFont& systemMessageFont() const;
+	QFont systemMessageFont() const;
 
 	/**
 	 * Save the configuration of the dialog to a KConfig object. If
-	 * the supplied KConfig pointer is NULL then kapp->config() is used
+	 * the supplied KConfig pointer is NULL then KGlobal::config() is used
 	 * instead (and the group is changed to "KChatBase") butr the current
 	 * group is restored at the end.
 	 * @param conf A pointer to the KConfig object to save the config
-	 * to. If you use 0 then kapp->config() is used and the group is changed
+	 * to. If you use 0 then KGlobal::config() is used and the group is changed
 	 * to "KChatBase" (the current group is restored at the end).
 	 **/
 	virtual void saveConfig(KConfig* conf = 0);
 
 	/**
 	 * Read the configuration from a KConfig object. If the pointer is
-	 * NULL kapp->config() is used and the group is changed to "KChatBase".
+	 * NULL KGlobal::config() is used and the group is changed to "KChatBase".
 	 * The current KConfig::group is restored after this call.
 	 **/
 	virtual void readConfig(KConfig* conf = 0);
@@ -397,8 +286,10 @@ public:
 	 **/
 	int maxItems() const;
 
+	 KChatBaseModel* model();
+	 void setModel(KChatBaseModel* m);
 
-public slots:
+public Q_SLOTS:
 	/**
 	 * Add a text in the listbox. See also signalSendMessage()
 	 *
@@ -422,19 +313,6 @@ public slots:
 	virtual void addSystemMessage(const QString& fromName, const QString& text);
 
 	/**
-	 * This member function is mainly internally used to add a message. It
-	 * is called by addMessage which creates a single text from a
-	 * player name and a text. You will hardly ever use this - but if you
-	 * need it it will be here ;-)
-	 *
-	 * But you may want to replace this in a derived class to create a
-	 * non-default (maybe nicer ;-) ) behaviour
-	 * @param item The QListBoxItem that is being added
-	 **/
-	virtual void addItem(const QListBoxItem* item);
-
-
-	/**
 	 * This clears all messages in the view. Note that only the messages are
 	 * cleared, not the sender names in the combo box!
 	 **/
@@ -446,13 +324,6 @@ public slots:
 	 **/
 	void setAcceptMessage(bool a);
 	
-signals:
-	/**
-	 * Emitted when the user right-clicks on a list item. 
-	 * @see QListBox::rightButtonClicked
-	 **/
-	void rightButtonClicked(QListBoxItem*, const QPoint&);
-
 protected:
 	/**
 	 * This is called whenever the user pushed return ie wants to send a
@@ -468,7 +339,7 @@ protected:
 	virtual void returnPressed(const QString& text) = 0;
 
 	/**
-	 * Replace to customise the combo box.
+	 * Replace to customize the combo box.
 	 *
 	 * Default: i18n("Send to %1).arg(name)
 	 * @param name The name of the player
@@ -476,24 +347,7 @@ protected:
 	 **/
 	virtual QString comboBoxItem(const QString& name) const;
 
-	/**
-	 * Create a QListBoxItem for this message. This function is not yet
-	 * written usefully - currently just a QListBoxTex object is
-	 * created which shows the message in this format: "fromName: text".
-	 * This should fit most peoples needs but needs further improvements.
-	 **/
-	virtual QListBoxItem* layoutMessage(const QString& fromName, const QString& text);
-
-	/**
-	 * Create a QListBoxItem for this message. This does the same as
-	 * layoutMessage but generates a system message. You might want to
-	 * use such a message to display e.g. status information from your game.
-	 *
-	 * The default implementation just prepends "--- ".
-	 **/
-	virtual QListBoxItem* layoutSystemMessage(const QString& fromName, const QString& text);
-
-private slots:
+private Q_SLOTS:
 	/**
 	 * Check if a text was entered and if acceptMessage returns true. 
 	 * Then add the message to the KCompletion object of the KLineEdit
@@ -502,7 +356,6 @@ private slots:
 	void slotReturnPressed(const QString&);
 
 private:
-	void init(bool noComboBox);
 
 	KChatBasePrivate* d;
 };

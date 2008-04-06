@@ -23,6 +23,11 @@
 
 #include "../bomath.h"
 #include <bogl.h>
+//Added by qt3to4:
+#include <QPaintEvent>
+#include <QMouseEvent>
+#include <Q3PtrList>
+#include <QPixmap>
 
 class Player;
 class PlayerIO;
@@ -40,8 +45,8 @@ class QPixmap;
 class QPainter;
 class QPaintEvent;
 class QMouseEvent;
-template<class T> class QPtrVector;
-template<class T> class QPtrList;
+template<class T> class Q3PtrVector;
+template<class T> class Q3PtrList;
 
 
 class BosonGLMiniMapViewPrivate;

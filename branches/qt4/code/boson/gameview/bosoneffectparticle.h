@@ -23,7 +23,9 @@
 
 #include "bosoneffect.h"
 
-#include <qptrlist.h>
+#include <q3ptrlist.h>
+//Added by qt3to4:
+#include <Q3PtrCollection>
 
 #include "bo3dtools.h"
 
@@ -682,13 +684,13 @@ class BosonEffectParticleEnvironmental : public BosonEffectParticle
  * @see BosonEffectParticle
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
-class BoParticleList : public QPtrList<BosonParticle>
+class BoParticleList : public Q3PtrList<BosonParticle>
 {
   public:
     /**
      * Compares two particles by distance using @ref BosonParticle::distance
      */
-    virtual int compareItems(QPtrCollection::Item item1, QPtrCollection::Item item2);
+    virtual int compareItems(Q3PtrCollection::Item item1, Q3PtrCollection::Item item2);
 };
 
 

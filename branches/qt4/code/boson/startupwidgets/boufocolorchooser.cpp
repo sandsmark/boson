@@ -24,9 +24,13 @@
 #include <bodebug.h>
 #include <bogl.h>
 
-#include <qptrlist.h>
-#include <qvaluevector.h>
+#include <q3ptrlist.h>
+#include <q3valuevector.h>
 #include <qcolor.h>
+//Added by qt3to4:
+#include <QEvent>
+#include <QMouseEvent>
+#include <Q3ValueList>
 
 class BoColorDrawable : public BoUfoDrawable
 {
@@ -113,10 +117,10 @@ public:
 	{
 	}
 
-	QPtrList<BoUfoWidget> mButtons;
-	QPtrList<BoColorDrawable> mButtonDrawable;
-	QValueVector<QColor> mColors;
-	QValueVector<bool> mTaken;
+	Q3PtrList<BoUfoWidget> mButtons;
+	Q3PtrList<BoColorDrawable> mButtonDrawable;
+	Q3ValueVector<QColor> mColors;
+	Q3ValueVector<bool> mTaken;
 };
 
 
@@ -149,7 +153,7 @@ BoUfoColorChooser::BoUfoColorChooser()
 			this, SLOT(slotMouseButtonReleased(QMouseEvent*)));
  }
 
- QValueVector<QColor> colors(count);
+ Q3ValueVector<QColor> colors(count);
  colors[0] = QColor(0, 0, 255);
  colors[1] = QColor(0, 255, 0);
  colors[2] = QColor(255, 0, 0);
@@ -269,7 +273,7 @@ int BoUfoColorChooser::indexOfColor(const QColor& c) const
  return -1;
 }
 
-void BoUfoColorChooser::setColors(const QValueVector<QColor>& colors)
+void BoUfoColorChooser::setColors(const Q3ValueVector<QColor>& colors)
 {
  if (colors.count() < d->mButtons.count()) {
 	boError() << k_funcinfo << "must provide at least " << d->mButtons.count() << " colors" << endl;
@@ -280,9 +284,9 @@ void BoUfoColorChooser::setColors(const QValueVector<QColor>& colors)
  applyColors();
 }
 
-void BoUfoColorChooser::setColors(const QValueList<QColor>& colors)
+void BoUfoColorChooser::setColors(const Q3ValueList<QColor>& colors)
 {
- QValueVector<QColor> v(colors.count());
+ Q3ValueVector<QColor> v(colors.count());
  for (unsigned int i = 0; i < colors.count(); i++) {
 	v[i] = colors[i];
  }

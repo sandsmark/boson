@@ -27,11 +27,14 @@
 #include "bodebug.h"
 
 #include <klocale.h>
-#include <klistview.h>
+#include <k3listview.h>
 
-#include <qptrdict.h>
+#include <q3ptrdict.h>
 #include <qlayout.h>
 #include <qpushbutton.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <Q3VBoxLayout>
 
 class KGameCellDebug::KGameCellDebugPrivate
 {
@@ -42,7 +45,7 @@ public:
 	}
 
 	BosonMap* mMap;
-	KListView* mCellList;
+	K3ListView* mCellList;
 	int mCellXId;
 	int mCellYId;
 	int mCellGroundTypeId;
@@ -50,21 +53,21 @@ public:
 	int mCellTileId;
 	int mCellUnitCountId;
 
-	KListView* mCellView;
+	K3ListView* mCellView;
 
-	QPtrDict<QListViewItem> mCells;
+	Q3PtrDict<Q3ListViewItem> mCells;
 };
 
 KGameCellDebug::KGameCellDebug(QWidget* parent) : QWidget(parent)
 {
  d = new KGameCellDebugPrivate;
- QVBoxLayout* topLayout = new QVBoxLayout(this);
+ Q3VBoxLayout* topLayout = new Q3VBoxLayout(this);
 
- QHBoxLayout* mainLayout = new QHBoxLayout(topLayout);
+ Q3HBoxLayout* mainLayout = new Q3HBoxLayout(topLayout);
 
- d->mCellList = new KListView(this);
+ d->mCellList = new K3ListView(this);
  mainLayout->addWidget(d->mCellList);
- connect(d->mCellList, SIGNAL(selectionChanged(QListViewItem*)), this, SLOT(slotUpdateCell(QListViewItem*)));
+ connect(d->mCellList, SIGNAL(selectionChanged(Q3ListViewItem*)), this, SLOT(slotUpdateCell(Q3ListViewItem*)));
  d->mCellXId = d->mCellList->addColumn(i18n("X"));
  d->mCellYId = d->mCellList->addColumn(i18n("Y"));
  d->mCellGroundTypeId = d->mCellList->addColumn(i18n("Ground"));
@@ -72,7 +75,7 @@ KGameCellDebug::KGameCellDebug(QWidget* parent) : QWidget(parent)
  d->mCellTileId = d->mCellList->addColumn(i18n("Tile"));
  d->mCellUnitCountId = d->mCellList->addColumn(i18n("Units"));
 
- d->mCellView = new KListView(this);
+ d->mCellView = new K3ListView(this);
  mainLayout->addWidget(d->mCellView);
  d->mCellView->addColumn(i18n("Unit Id"));
 
@@ -100,7 +103,7 @@ void KGameCellDebug::setMap(BosonMap* m)
 			boError() << k_funcinfo << "NULL cell" << endl;
 			continue;
 		}
-		QListViewItem* item = new QListViewItem(d->mCellList);
+		Q3ListViewItem* item = new Q3ListViewItem(d->mCellList);
 		item->setText(d->mCellXId, QString::number(i));
 		item->setText(d->mCellYId, QString::number(j));
 #if 0
@@ -130,7 +133,7 @@ void KGameCellDebug::slotUpdate()
 			boError() << k_funcinfo << "NULL cell" << endl;
 			continue;
 		}
-		QListViewItem* item = d->mCells[c];
+		Q3ListViewItem* item = d->mCells[c];
 		if (!item) {
 			boError() << k_funcinfo << "NULL list item" << endl;
 			return;
@@ -142,7 +145,7 @@ void KGameCellDebug::slotUpdate()
  slotUpdateCell(d->mCellList->selectedItem());
 }
 
-void KGameCellDebug::slotUpdateCell(QListViewItem* item)
+void KGameCellDebug::slotUpdateCell(Q3ListViewItem* item)
 {
  d->mCellView->clear();
  if (!item) {
@@ -150,7 +153,7 @@ void KGameCellDebug::slotUpdateCell(QListViewItem* item)
  }
  Cell* c = 0;
  {
-	QPtrDictIterator<QListViewItem> it(d->mCells);
+	Q3PtrDictIterator<Q3ListViewItem> it(d->mCells);
 	while (it.current() && !c) {
 		if (it.current() == item) {
 			c = (Cell*)it.currentKey();
@@ -165,7 +168,7 @@ void KGameCellDebug::slotUpdateCell(QListViewItem* item)
  const BoItemList* list = c->items();
  BoItemList::ConstIterator it = list->begin();
  for (; it != list->end(); ++it) {
-	QListViewItem* i = new QListViewItem(d->mCellView);
+	Q3ListViewItem* i = new Q3ListViewItem(d->mCellView);
 	if (RTTI::isUnit((*it)->rtti())) {
 		i->setText(0, QString::number(((Unit*)*it)->id()));
 	} else {

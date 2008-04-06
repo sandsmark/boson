@@ -25,7 +25,6 @@ set(boson_SRCS
 	main.cpp
 	../bosongameviewpluginbase.cpp
 )
-kde3_automoc(${boson_SRCS})
 boson_add_executable(boson
 	${boson_SRCS}
 )
@@ -41,7 +40,6 @@ set(bosonNoGUI_SRCS
 	mainnogui.cpp
 	mainnoguimain.cpp
 )
-kde3_automoc(${bosonNoGUI_SRCS})
 boson_add_executable(boson-no-gui ${bosonNoGUI_SRCS})
 boson_target_link_libraries(boson-no-gui
 	gameengine
@@ -57,11 +55,10 @@ set(bounit_SRCS
 	bosonsearchpathswidget.cpp
 	bouniteditor.cpp
 )
-kde3_add_ui_files(bounit_SRCS
+kde4_add_ui_files(bounit_SRCS
 	bosonsearchpathswidgetbase.ui
 	bouniteditorbase.ui
 )
-kde3_automoc(${bounit_SRCS})
 boson_add_executable(bounit ${bounit_SRCS})
 boson_target_link_libraries(bounit
 	gameengine
@@ -88,7 +85,6 @@ set(borender_SRCS
 boson_add_boui_files(borender_SRCS
 	borendergui.boui
 )
-kde3_automoc(${borender_SRCS})
 boson_add_executable(borender ${borender_SRCS})
 boson_target_link_libraries(borender
 	bosonmainlib
@@ -107,7 +103,6 @@ set(bocursor_SRCS
 	bocursormain.cpp
 	bosoncursoreditor.cpp
 )
-kde3_automoc(${bocursor_SRCS})
 boson_add_executable(bocursor ${bocursor_SRCS})
 boson_target_link_libraries(bocursor
 	common
@@ -123,10 +118,9 @@ set(bomodelpixmaps_SRCS
 	borenderrendermodel.cpp
 	../bopixmaprenderer.cpp
 )
-kde3_add_ui_files(bomodelpixmaps_SRCS
+kde4_add_ui_files(bomodelpixmaps_SRCS
 	bomodelpixmapsgui.ui
 )
-kde3_automoc(${bomodelpixmaps_SRCS})
 boson_add_executable(bomodelpixmaps ${bomodelpixmaps_SRCS})
 boson_target_link_libraries(bomodelpixmaps
 	bosonmainlib
@@ -141,7 +135,6 @@ set(boinfo_SRCS
 	../bosonglwidget.cpp
 	boinfomain.cpp
 )
-kde3_automoc(${boinfo_SRCS})
 boson_add_executable(boinfo ${boinfo_SRCS})
 boson_target_link_libraries(boinfo
 	bosoninfo
@@ -158,7 +151,6 @@ set(bo3dsdebug_SRCS
 
 	bo3dsdebugmain.cpp
 )
-kde3_automoc(${bo3dsdebug_SRCS})
 boson_add_executable(bo3dsdebug ${bo3dsdebug_SRCS})
 boson_target_link_libraries(bo3dsdebug
 	common
@@ -173,7 +165,6 @@ set(boconditioneditor_SRCS
 	../boconditionwidget.cpp
 	boconditioneditormain.cpp
 )
-kde3_automoc(${boconditioneditor_SRCS})
 boson_add_executable(boconditioneditor ${boconditioneditor_SRCS})
 boson_target_link_libraries(boconditioneditor
 	gameengine
@@ -188,10 +179,9 @@ set(boprofiling_SRCS
 	../bosonprofilingdialog.cpp
 	boprofilingmain.cpp
 )
-kde3_add_ui_files(boprofiling_SRCS
+kde4_add_ui_files(boprofiling_SRCS
 	../bosonprofilingdialoggui.ui
 )
-kde3_automoc(${boprofiling_SRCS})
 boson_add_executable(boprofiling ${boprofiling_SRCS})
 boson_target_link_libraries(boprofiling
 	common
@@ -206,7 +196,6 @@ set(bocommandframetester_SRCS
 	bocommandframetestermain.cpp
 	mainnogui.cpp
 )
-kde3_automoc(${bocommandframetester_SRCS})
 #boson_add_executable(bocommandframetester
 #	${bocommandframetester_SRCS}
 #)
@@ -233,7 +222,6 @@ install_targets(/bin
 set(bofileconverter_SRCS
 	bofileconvertermain.cpp
 )
-kde3_automoc(${bofileconverter_SRCS})
 boson_add_executable(bofileconverter ${bofileconverter_SRCS})
 boson_target_link_libraries(bofileconverter
 	gameengine
@@ -246,7 +234,6 @@ boson_target_link_libraries(bofileconverter
 set(bocreatepreview_SRCS
 	bocreatepreviewmain.cpp
 )
-kde3_automoc(${bocreatepreview_SRCS})
 boson_add_executable(bocreatepreview ${bocreatepreview_SRCS})
 boson_target_link_libraries(bocreatepreview
 	gameengine

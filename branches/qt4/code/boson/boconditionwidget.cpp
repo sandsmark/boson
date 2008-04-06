@@ -31,16 +31,21 @@
 #include <qlabel.h>
 #include <qlineedit.h>
 #include <qcombobox.h>
-#include <qvbox.h>
-#include <qhbox.h>
+#include <q3vbox.h>
+#include <q3hbox.h>
 #include <qpushbutton.h>
-#include <qvgroupbox.h>
+#include <q3vgroupbox.h>
 #include <qcheckbox.h>
 #include <qdom.h>
 #include <qtooltip.h>
-#include <qwidgetstack.h>
+#include <q3widgetstack.h>
+//Added by qt3to4:
+#include <Q3HBoxLayout>
+#include <Q3CString>
+#include <Q3GridLayout>
+#include <Q3VBoxLayout>
 
-#include <klistbox.h>
+#include <k3listbox.h>
 #include <klocale.h>
 #include <knuminput.h>
 #include <kmessagebox.h>
@@ -48,16 +53,16 @@
 BoConditionOverviewWidget::BoConditionOverviewWidget(QWidget* parent)
 	: QWidget(parent)
 {
- QVBoxLayout* topLayout = new QVBoxLayout(this);
+ Q3VBoxLayout* topLayout = new Q3VBoxLayout(this);
 
- QVBoxLayout* vlayout = new QVBoxLayout(topLayout);
+ Q3VBoxLayout* vlayout = new Q3VBoxLayout(topLayout);
  QLabel* conditionLabel = new QLabel(i18n("Conditions:"), this);
  vlayout->addWidget(conditionLabel);
- mConditions = new QListBox(this);
+ mConditions = new Q3ListBox(this);
  vlayout->addWidget(mConditions);
  connect(mConditions, SIGNAL(highlighted(int)), this, SIGNAL(signalSelectCondition(int)));
 
- QHBoxLayout* hlayout = new QHBoxLayout(topLayout);
+ Q3HBoxLayout* hlayout = new Q3HBoxLayout(topLayout);
  mEvents = new QPushButton(i18n("Events"), this);
  mStatusConditions = new QPushButton(i18n("Status Conditions"), this);
  mAction = new QPushButton(i18n("Action"), this);
@@ -68,7 +73,7 @@ BoConditionOverviewWidget::BoConditionOverviewWidget(QWidget* parent)
  connect(mStatusConditions, SIGNAL(clicked()), this, SIGNAL(signalShowStatusConditions()));
  connect(mAction, SIGNAL(clicked()), this, SIGNAL(signalShowAction()));
 
- hlayout = new QHBoxLayout(topLayout);
+ hlayout = new Q3HBoxLayout(topLayout);
  mAddCondition = new QPushButton(i18n("New Condition"), this);
  mDeleteCondition = new QPushButton(i18n("Delete Condition"), this);
  hlayout->addWidget(mAddCondition);
@@ -92,7 +97,7 @@ void BoConditionOverviewWidget::reset()
 
 void BoConditionOverviewWidget::addCondition(const QString& name)
 {
- new QListBoxText(mConditions, name);
+ new Q3ListBoxText(mConditions, name);
  mEvents->setEnabled(true);
 // mStatusConditions->setEnabled(true);
  mAction->setEnabled(true);
@@ -141,7 +146,7 @@ public:
 	}
 
 	BoConditionOverviewWidget* mOverview;
-	QWidgetStack* mConditionAspect;
+	Q3WidgetStack* mConditionAspect;
 	BoConditionEventsWidget* mConditionEvents;
 //	Foobar* mConditionStatusConditions;
 	BoConditionActionWidget* mConditionAction;
@@ -157,7 +162,7 @@ BoConditionWidget::BoConditionWidget(QWidget* parent) : QWidget(parent)
  d->mCurrentCondition = -1;
  d->mConditionDocument = new QDomDocument("Conditions");
  d->mConditionDocument->appendChild(d->mConditionDocument->createElement("Conditions"));
- QHBoxLayout* topLayout = new QHBoxLayout(this, 5, 5);
+ Q3HBoxLayout* topLayout = new Q3HBoxLayout(this, 5, 5);
  d->mOverview = new BoConditionOverviewWidget(this);
  connect(d->mOverview, SIGNAL(signalSelectCondition(int)),
 		this, SLOT(slotShowCondition(int)));
@@ -173,7 +178,7 @@ BoConditionWidget::BoConditionWidget(QWidget* parent) : QWidget(parent)
 		this, SLOT(slotDeleteCondition(int)));
  topLayout->addWidget(d->mOverview);
 
- d->mConditionAspect = new QWidgetStack(this);
+ d->mConditionAspect = new Q3WidgetStack(this);
  topLayout->addWidget(d->mConditionAspect);
  d->mConditionEvents = new BoConditionEventsWidget(d->mConditionAspect);
  d->mConditionAspect->addWidget(d->mConditionEvents);
@@ -379,7 +384,7 @@ bool BoConditionWidget::loadConditions(const QDomElement& root)
 
 BoConditionActionWidget::BoConditionActionWidget(QWidget* parent) : QWidget(parent)
 {
- QHBoxLayout* layout = new QHBoxLayout(this);
+ Q3HBoxLayout* layout = new Q3HBoxLayout(this);
 
  // atm we will always emit "CustomStringEvent" with one parameter
  // LABEL: Action (parameter to event)
@@ -432,18 +437,18 @@ bool BoConditionActionWidget::loadCondition(const QDomElement& condition)
 
 BoConditionEventsWidget::BoConditionEventsWidget(QWidget* parent) : QWidget(parent)
 {
- QVBoxLayout* topLayout = new QVBoxLayout(this);
- QHBoxLayout* layout = new QHBoxLayout(topLayout);
+ Q3VBoxLayout* topLayout = new Q3VBoxLayout(this);
+ Q3HBoxLayout* layout = new Q3HBoxLayout(topLayout);
 
  mConditionDocument = new QDomDocument("Condition");
  clearXML();
 
- mEventMatchings = new KListBox(this);
+ mEventMatchings = new K3ListBox(this);
  connect(mEventMatchings, SIGNAL(highlighted(int)),
 		this, SLOT(slotSelectedEventMatching(int)));
  QToolTip::add(mEventMatchings, i18n("A list of events that need to be matched before the action fires.\nALL of these events have to matched."));
 
- QVBox* eventMatchingButtonsBox = new QVBox(this);
+ Q3VBox* eventMatchingButtonsBox = new Q3VBox(this);
  mAddMatching = new QPushButton(i18n("Add Event"), eventMatchingButtonsBox);
  mRemoveMatching = new QPushButton(i18n("Remove Event"), eventMatchingButtonsBox);
  connect(mAddMatching, SIGNAL(clicked()),
@@ -527,7 +532,7 @@ void BoConditionEventsWidget::reloadEventMatchings()
 	QDomElement e = list.item(i).toElement();
 	BoEventMatching* matching = new BoEventMatching();
 	bool success = matching->loadFromXML(e);
-	QListBoxItem* item = 0;
+	Q3ListBoxItem* item = 0;
 	if (matching->event()) {
 		item = createEventMatchingItem(matching);
 	} else {
@@ -594,12 +599,12 @@ QDomDocument BoConditionEventsWidget::eventsDocument()
  return doc;
 }
 
-QListBoxItem* BoConditionEventsWidget::createEventMatchingItem(const BoEventMatching* m)
+Q3ListBoxItem* BoConditionEventsWidget::createEventMatchingItem(const BoEventMatching* m)
 {
  if (!m || !m->event()) {
-	return new QListBoxText("");
+	return new Q3ListBoxText("");
  }
- return new QListBoxText(m->event()->name());
+ return new Q3ListBoxText(m->event()->name());
 }
 
 void BoConditionEventsWidget::slotSelectedEventMatching(int index)
@@ -740,7 +745,7 @@ BoEventMatchingWidget::BoEventMatchingWidget(QWidget* parent, bool eventMatching
 {
  mIsEventMatching = eventMatching;
 
- QGridLayout* layout = new QGridLayout(this, 3, 5);
+ Q3GridLayout* layout = new Q3GridLayout(this, 3, 5);
 
  QLabel* label;
  label = new QLabel(i18n("Event name"), this);
@@ -918,7 +923,7 @@ QDomElement BoEventMatchingWidget::eventMatching() const
 
  QDomElement event = doc.createElement("Event");
  root.appendChild(event);
- BoEvent* saveEvent = new BoEvent(QCString(mName->text()), mData1->text(), mData2->text());
+ BoEvent* saveEvent = new BoEvent(Q3CString(mName->text()), mData1->text(), mData2->text());
  saveEvent->setUnitId(mUnitId->value()); // even if mIgnoreUnitId is checked!
  if (!mIgnorePlayerId->isChecked() && mPlayerId->value() != 0) {
 	// note that 0 is an invalid ID!

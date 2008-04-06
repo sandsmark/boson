@@ -1,6 +1,6 @@
 /*
     This file is part of the KDE games library
-    Copyright (C) 2001 Martin Heni (martin@heni-online.de)
+    Copyright (C) 2001 Martin Heni (kde at heni-online.de)
     Copyright (C) 2001 Andreas Beckermann (b_mann@gmx.de)
 
     This library is free software; you can redistribute it and/or
@@ -17,18 +17,20 @@
     the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
     Boston, MA 02110-1301, USA.
 */
+
 #ifndef __KGAMEPROCESS_H_
 #define __KGAMEPROCESS_H_
 
-#include <qstring.h>
-#include <qobject.h>
-#include <qfile.h>
+#include <QtCore/QObject>
 
 #include "kgameproperty.h"
-#include <krandomsequence.h>
+#include <libkdegames_export.h>
+
+class KRandomSequence;
 
 class KPlayer;
 class KMessageFilePipe;
+class KGameProcessPrivate;
 
 /**
  * This is the process class used on the computer player
@@ -36,7 +38,7 @@ class KMessageFilePipe;
  * Using these two classes will give fully transparent communication
  * via QDataStreams.
  */
-class KGameProcess:  public QObject
+class KDEGAMES_EXPORT KGameProcess:  public QObject
 {
   Q_OBJECT
 
@@ -104,7 +106,7 @@ class KGameProcess:  public QObject
      * @param msgid the message id for the message
      * @param receiver unused
      */
-    void sendMessage(QDataStream &stream,int msgid,Q_UINT32 receiver=0);
+    void sendMessage(QDataStream &stream,int msgid,quint32 receiver=0);
 
     /**
      * Sends a system message to the corresonding KGameIO device.
@@ -115,7 +117,7 @@ class KGameProcess:  public QObject
      * Exmaple for a query:
      * \code
      *  QByteArray buffer;
-     *  QDataStream out(buffer,IO_WriteOnly);
+     *  QDataStream out(buffer,QIODevice::WriteOnly);
      *  int msgid=KGameMessage::IdProcessQuery;
      *  out << (int)1;
      *  proc.sendSystemMessage(out,msgid,0);
@@ -125,7 +127,7 @@ class KGameProcess:  public QObject
      * @param msgid the message id for the message
      * @param receiver unused
      */
-    void sendSystemMessage(QDataStream &stream,int msgid,Q_UINT32 receiver=0);
+    void sendSystemMessage(QDataStream &stream,int msgid,quint32 receiver=0);
 
     /**
      * Returns a pointer to a KRandomSequence. You can generate
@@ -136,7 +138,7 @@ class KGameProcess:  public QObject
      * 
      * @return KRandomSequence pointer
      */
-    KRandomSequence *random() {return mRandom;}
+    KRandomSequence *random();
 
   protected:
     /**
@@ -145,14 +147,14 @@ class KGameProcess:  public QObject
      */
     void processArgs(int argc, char *argv[]);
 
-  protected slots:
+  protected Q_SLOTS:
     /**
      * A message is received via the interprocess connection. The
      * appropriate signals are called.
      */
       void receivedMessage(const QByteArray& receiveBuffer);
 
-  signals:
+  Q_SIGNALS:
     /**
      * The generic communication signal. You have to connect to this
      * signal to generate a valid computer response onto arbitrary messages.
@@ -161,7 +163,7 @@ class KGameProcess:  public QObject
      * \code
      * void Computer::slotCommand(int &msgid,QDataStream &in,QDataStream &out)
      * {
-     *   Q_INT32 data,move;
+     *   qint32 data,move;
      *   in >> data;
      *   // compute move ...
      *   move=data*2;
@@ -192,12 +194,12 @@ class KGameProcess:  public QObject
       *   int id;
       *   int recv;
       *   QByteArray buffer;
-      *   QDataStream out(buffer,IO_WriteOnly);
+      *   QDataStream out(buffer,QIODevice::WriteOnly);
       *   if (turn)
       *   {
       *     // Create a move - the format is yours to decide
       *     // It arrives exactly as this in the kgame inputMove function!!
-      *     Q_INT8 x1,y1,pl;
+      *     qint8 x1,y1,pl;
       *     pl=-1;
       *     x1=proc.random()->getLong(8);
       *     y1=proc.random()->getLong(8);
@@ -232,8 +234,9 @@ class KGameProcess:  public QObject
     bool mTerminate;
     KMessageFilePipe *mMessageIO;
   private:
-    QFile rFile;
-    QFile wFile;
-    KRandomSequence* mRandom;
+    friend class KGameProcessPrivate;
+    KGameProcessPrivate *const d;
+
+    Q_DISABLE_COPY(KGameProcess)
 };
 #endif

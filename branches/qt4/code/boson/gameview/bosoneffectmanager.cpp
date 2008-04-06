@@ -26,7 +26,9 @@
 #include "../gameengine/unitproperties.h"
 #include "../gameengine/bosonweapon.h"
 
-#include <qptrlist.h>
+#include <q3ptrlist.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 // effects that are stored per-unittype.
 class UnitPropertiesEffects
@@ -47,28 +49,28 @@ public:
 		return true;
 	}
 
-	const QPtrList<BosonEffectProperties>* destroyedEffectProperties() const
+	const Q3PtrList<BosonEffectProperties>* destroyedEffectProperties() const
 	{
 		return &mDestroyedEffectProperties;
 	}
-	const QPtrList<BosonEffectProperties>* constructedEffectProperties() const
+	const Q3PtrList<BosonEffectProperties>* constructedEffectProperties() const
 	{
 		return &mConstructedEffectProperties;
 	}
-	const QPtrList<BosonEffectProperties>* explodingFragmentFlyEffects() const
+	const Q3PtrList<BosonEffectProperties>* explodingFragmentFlyEffects() const
 	{
 		return &mExplodingFragmentFlyEffects;
 	}
-	const QPtrList<BosonEffectProperties>* explodingFragmentHitEffects() const
+	const Q3PtrList<BosonEffectProperties>* explodingFragmentHitEffects() const
 	{
 		return &mExplodingFragmentHitEffects;
 	}
 
 private:
-	QPtrList<BosonEffectProperties> mDestroyedEffectProperties;
-	QPtrList<BosonEffectProperties> mConstructedEffectProperties;
-	QPtrList<BosonEffectProperties> mExplodingFragmentFlyEffects;
-	QPtrList<BosonEffectProperties> mExplodingFragmentHitEffects;
+	Q3PtrList<BosonEffectProperties> mDestroyedEffectProperties;
+	Q3PtrList<BosonEffectProperties> mConstructedEffectProperties;
+	Q3PtrList<BosonEffectProperties> mExplodingFragmentFlyEffects;
+	Q3PtrList<BosonEffectProperties> mExplodingFragmentHitEffects;
 };
 
 class WeaponPropertiesEffects
@@ -88,23 +90,23 @@ public:
 		return true;
 	}
 
-	const QPtrList<BosonEffectProperties>* shootEffectProperties() const
+	const Q3PtrList<BosonEffectProperties>* shootEffectProperties() const
 	{
 		return &mShootEffectProperties;
 	}
-	const QPtrList<BosonEffectProperties>* flyEffectProperties() const
+	const Q3PtrList<BosonEffectProperties>* flyEffectProperties() const
 	{
 		return &mFlyEffectProperties;
 	}
-	const QPtrList<BosonEffectProperties>* hitEffectProperties() const
+	const Q3PtrList<BosonEffectProperties>* hitEffectProperties() const
 	{
 		return &mHitEffectProperties;
 	}
 
 private:
-	QPtrList<BosonEffectProperties> mShootEffectProperties;
-	QPtrList<BosonEffectProperties> mFlyEffectProperties;
-	QPtrList<BosonEffectProperties> mHitEffectProperties;
+	Q3PtrList<BosonEffectProperties> mShootEffectProperties;
+	Q3PtrList<BosonEffectProperties> mFlyEffectProperties;
+	Q3PtrList<BosonEffectProperties> mHitEffectProperties;
 };
 
 
@@ -114,7 +116,7 @@ public:
 	BosonEffectManagerPrivate()
 	{
 	}
-	QIntDict<UnitPropertiesEffects> mUnitPropertiesEffects;
+	Q3IntDict<UnitPropertiesEffects> mUnitPropertiesEffects;
 	QMap<const BosonWeaponProperties*, WeaponPropertiesEffects*> mWeaponPropertiesEffects;
 };
 
@@ -177,61 +179,61 @@ bool BosonEffectManager::loadWeaponType(const BosonWeaponProperties* prop)
  return true;
 }
 
-QPtrList<BosonEffect> BosonEffectManager::newEffects(unsigned int id, const BoVector3Fixed& pos, bofixed zrot) const
+Q3PtrList<BosonEffect> BosonEffectManager::newEffects(unsigned int id, const BoVector3Fixed& pos, bofixed zrot) const
 {
- QValueList<unsigned long int> ids;
+ Q3ValueList<unsigned long int> ids;
  ids.append(id);
- QPtrList<BosonEffectProperties> effectProperties = BosonEffectProperties::loadEffectProperties(ids);
+ Q3PtrList<BosonEffectProperties> effectProperties = BosonEffectProperties::loadEffectProperties(ids);
  return BosonEffectProperties::newEffects(&effectProperties, pos, BoVector3Fixed(0, 0, zrot));
 }
 
-QPtrList<BosonEffect> BosonEffectManager::newDestroyedEffects(const UnitProperties* prop, float x, float y, float z) const
+Q3PtrList<BosonEffect> BosonEffectManager::newDestroyedEffects(const UnitProperties* prop, float x, float y, float z) const
 {
  if (!prop) {
 	BO_NULL_ERROR(prop);
-	return QPtrList<BosonEffect>();
+	return Q3PtrList<BosonEffect>();
  }
  if (!d->mUnitPropertiesEffects[prop->typeId()]) {
-	return QPtrList<BosonEffect>();
+	return Q3PtrList<BosonEffect>();
  }
  const UnitPropertiesEffects* e = d->mUnitPropertiesEffects[prop->typeId()];
  return BosonEffectProperties::newEffects(e->destroyedEffectProperties(), BoVector3Fixed(x, y, z));
 }
 
-QPtrList<BosonEffect> BosonEffectManager::newConstructedEffects(const UnitProperties* prop, float x, float y, float z) const
+Q3PtrList<BosonEffect> BosonEffectManager::newConstructedEffects(const UnitProperties* prop, float x, float y, float z) const
 {
  if (!prop) {
 	BO_NULL_ERROR(prop);
-	return QPtrList<BosonEffect>();
+	return Q3PtrList<BosonEffect>();
  }
  if (!d->mUnitPropertiesEffects[prop->typeId()]) {
-	return QPtrList<BosonEffect>();
+	return Q3PtrList<BosonEffect>();
  }
  const UnitPropertiesEffects* e = d->mUnitPropertiesEffects[prop->typeId()];
  return BosonEffectProperties::newEffects(e->constructedEffectProperties(), BoVector3Fixed(x, y, z));
 }
 
-QPtrList<BosonEffect> BosonEffectManager::newExplodingFragmentFlyEffects(const UnitProperties* prop, const BoVector3Fixed& pos) const
+Q3PtrList<BosonEffect> BosonEffectManager::newExplodingFragmentFlyEffects(const UnitProperties* prop, const BoVector3Fixed& pos) const
 {
  if (!prop) {
 	BO_NULL_ERROR(prop);
-	return QPtrList<BosonEffect>();
+	return Q3PtrList<BosonEffect>();
  }
  if (!d->mUnitPropertiesEffects[prop->typeId()]) {
-	return QPtrList<BosonEffect>();
+	return Q3PtrList<BosonEffect>();
  }
  const UnitPropertiesEffects* e = d->mUnitPropertiesEffects[prop->typeId()];
  return BosonEffectProperties::newEffects(e->explodingFragmentFlyEffects(), pos);
 }
 
-QPtrList<BosonEffect> BosonEffectManager::newExplodingFragmentHitEffects(const UnitProperties* prop, const BoVector3Fixed& pos) const
+Q3PtrList<BosonEffect> BosonEffectManager::newExplodingFragmentHitEffects(const UnitProperties* prop, const BoVector3Fixed& pos) const
 {
  if (!prop) {
 	BO_NULL_ERROR(prop);
-	return QPtrList<BosonEffect>();
+	return Q3PtrList<BosonEffect>();
  }
  if (!d->mUnitPropertiesEffects[prop->typeId()]) {
-	return QPtrList<BosonEffect>();
+	return Q3PtrList<BosonEffect>();
  }
  const UnitPropertiesEffects* e = d->mUnitPropertiesEffects[prop->typeId()];
  return BosonEffectProperties::newEffects(e->explodingFragmentHitEffects(), pos);
@@ -240,40 +242,40 @@ QPtrList<BosonEffect> BosonEffectManager::newExplodingFragmentHitEffects(const U
 
 
 // topLeftPos.x() == leftEdge(), topLeftPos.y() == topEdge(), topEdge.z() == z()
-QPtrList<BosonEffect> BosonEffectManager::newShootEffects(const BosonWeaponProperties* prop, const BoVector3Fixed& topLeftPos, bofixed rotation) const
+Q3PtrList<BosonEffect> BosonEffectManager::newShootEffects(const BosonWeaponProperties* prop, const BoVector3Fixed& topLeftPos, bofixed rotation) const
 {
  if (!prop) {
 	BO_NULL_ERROR(prop);
-	return QPtrList<BosonEffect>();
+	return Q3PtrList<BosonEffect>();
  }
  if (!d->mWeaponPropertiesEffects.contains(prop)) {
-	return QPtrList<BosonEffect>();
+	return Q3PtrList<BosonEffect>();
  }
  const WeaponPropertiesEffects* e = d->mWeaponPropertiesEffects[prop];
  return BosonEffectProperties::newEffects(e->shootEffectProperties(), topLeftPos, BoVector3Fixed(0, 0, rotation));
 }
 
-QPtrList<BosonEffect> BosonEffectManager::newFlyEffects(const BosonWeaponProperties* prop, const BoVector3Fixed& pos, bofixed rotation) const
+Q3PtrList<BosonEffect> BosonEffectManager::newFlyEffects(const BosonWeaponProperties* prop, const BoVector3Fixed& pos, bofixed rotation) const
 {
  if (!prop) {
 	BO_NULL_ERROR(prop);
-	return QPtrList<BosonEffect>();
+	return Q3PtrList<BosonEffect>();
  }
  if (!d->mWeaponPropertiesEffects.contains(prop)) {
-	return QPtrList<BosonEffect>();
+	return Q3PtrList<BosonEffect>();
  }
  const WeaponPropertiesEffects* e = d->mWeaponPropertiesEffects[prop];
  return BosonEffectProperties::newEffects(e->flyEffectProperties(), pos, BoVector3Fixed(0, 0, rotation));
 }
 
-QPtrList<BosonEffect> BosonEffectManager::newHitEffects(const BosonWeaponProperties* prop, const BoVector3Fixed& pos) const
+Q3PtrList<BosonEffect> BosonEffectManager::newHitEffects(const BosonWeaponProperties* prop, const BoVector3Fixed& pos) const
 {
  if (!prop) {
 	BO_NULL_ERROR(prop);
-	return QPtrList<BosonEffect>();
+	return Q3PtrList<BosonEffect>();
  }
  if (!d->mWeaponPropertiesEffects.contains(prop)) {
-	return QPtrList<BosonEffect>();
+	return Q3PtrList<BosonEffect>();
  }
  const WeaponPropertiesEffects* e = d->mWeaponPropertiesEffects[prop];
  return BosonEffectProperties::newEffects(e->hitEffectProperties(), pos);

@@ -26,6 +26,9 @@
 #include "../global.h"
 #include "../bomath.h"
 #include "../../math/bovector.h"
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 class BoSpecificAction;
 class Unit;
@@ -35,8 +38,8 @@ class ResourceMinePlugin;
 class BoEventListener;
 class QPoint;
 
-template<class T> class QPtrList;
-template<class T> class QValueList;
+template<class T> class Q3PtrList;
+template<class T> class Q3ValueList;
 template<class T1, class T2> class QPair;
 
 
@@ -72,22 +75,22 @@ class BosonLocalPlayerInput : public KGameIO
     virtual void produceAction(const BoSpecificAction& action);
 
 
-    void stopUnits(const QPtrList<Unit>& units);
+    void stopUnits(const Q3PtrList<Unit>& units);
     void layMine(const BoSpecificAction& action);
     void harvest(const HarvesterPlugin* harvester, const ResourceMinePlugin* mine);
-    void moveWithoutAttack(const QPtrList<Unit>& units, bofixed x, bofixed y);
-    void moveWithAttack(const QPtrList<Unit>& units, bofixed x, bofixed y);
+    void moveWithoutAttack(const Q3PtrList<Unit>& units, bofixed x, bofixed y);
+    void moveWithAttack(const Q3PtrList<Unit>& units, bofixed x, bofixed y);
     void build(ProductionType type, Unit* factory, bofixed x, bofixed y);
-    void attack(const QPtrList<Unit>& units, Unit* target);
+    void attack(const Q3PtrList<Unit>& units, Unit* target);
     void dropBomb(Unit* u, int weapon, bofixed x, bofixed y);
-    void repair(const QPtrList<Unit>& units, Unit* repairyard);
-    void refine(const QPtrList<Unit>& units, Unit* refinery);
-    void follow(const QPtrList<Unit>& units, Unit* target);
-    void enterUnit(const QPtrList<Unit>& units, Unit* target);
+    void repair(const Q3PtrList<Unit>& units, Unit* repairyard);
+    void refine(const Q3PtrList<Unit>& units, Unit* refinery);
+    void follow(const Q3PtrList<Unit>& units, Unit* target);
+    void enterUnit(const Q3PtrList<Unit>& units, Unit* target);
 
     void placeUnit(Player* owner, unsigned long int unitType, bofixed x, bofixed y);
     void changeHeight(int x, int y, bofixed height);
-    void changeHeight(const QValueList< QPair<QPoint, bofixed> >& heights);
+    void changeHeight(const Q3ValueList< QPair<QPoint, bofixed> >& heights);
 
   signals:
     /**
@@ -97,7 +100,7 @@ class BosonLocalPlayerInput : public KGameIO
      * only. The units won't move before that message is received from network
      * again.
      **/
-    void signalMoveUnitsTo(const QPtrList<Unit>& units, const BoVector2Fixed& pos, bool withAttack);
+    void signalMoveUnitsTo(const Q3PtrList<Unit>& units, const BoVector2Fixed& pos, bool withAttack);
 
     /**
      * Emitted when @p units have been ordered to attack @p target
@@ -106,7 +109,7 @@ class BosonLocalPlayerInput : public KGameIO
      * only. The units won't start before that message is received from network
      * again.
      **/
-    void signalAttackUnit(const QPtrList<Unit>& units, const Unit* target);
+    void signalAttackUnit(const Q3PtrList<Unit>& units, const Unit* target);
 
   protected slots:
     virtual void slotAction(const BoSpecificAction& action);

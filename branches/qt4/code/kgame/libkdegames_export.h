@@ -1,5 +1,5 @@
-/*  This file is part of the Boson game.
-    Copyright (C) 2002 Andreas Beckermann (b_mann@gmx.de)
+/*  This file is part of the KDE project
+    Copyright (C) 2007 David Faure <faure@kde.org>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -17,20 +17,24 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include "bodebugdcopiface.h"
+#ifndef LIBKDEGAMES_EXPORT_H
+#define LIBKDEGAMES_EXPORT_H
 
-#include "bodebug.h"
+/* needed for KDE_EXPORT and KDE_IMPORT macros */
+#include <kdemacros.h>
 
-BoDebugDCOPIface::BoDebugDCOPIface() : DCOPObject("BoDebug-Interface")
-{
-}
+#ifndef KDEGAMES_EXPORT
+# if defined(MAKE_KDEGAMES_LIB)
+   /* We are building this library */ 
+#  define KDEGAMES_EXPORT KDE_EXPORT
+# else
+   /* We are using this library */ 
+#  define KDEGAMES_EXPORT KDE_IMPORT
+# endif
+#endif
 
-BoDebugDCOPIface::~BoDebugDCOPIface()
-{
-}
+# ifndef KDEGAMES_EXPORT_DEPRECATED
+#  define KDEGAMES_EXPORT_DEPRECATED KDE_DEPRECATED KDEGAMES_EXPORT
+# endif
 
-void BoDebugDCOPIface::notifyBoDebugConfigChanged()
-{
- boClearDebugConfig();
-}
-
+#endif

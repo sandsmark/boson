@@ -17,16 +17,17 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include <bodebug.h>
+#include "kmessageclient.h"
+
+#include <kdebug.h>
 #include <stdio.h>
 
 #include <qbuffer.h>
-#include <qtimer.h>
-
+#include <QTimer>
+#include <QList>
+#include <QDataStream>
 #include "kmessageio.h"
 #include "kmessageserver.h"
-
-#include "kmessageclient.h"
 
 class KMessageClientPrivate
 {
@@ -40,18 +41,18 @@ public:
     delete connection;
   }
 
-  Q_UINT32 adminID;
-  QValueList <Q_UINT32> clientList;
+  quint32 adminID;
+  QList <quint32> clientList;
   KMessageIO *connection;
 
   bool isLocked;
-  QValueList <QByteArray> delayedMessages;
+  QList <QByteArray> delayedMessages;
 };
 
-KMessageClient::KMessageClient (QObject *parent, const char *name)
-  : QObject (parent, name)
+KMessageClient::KMessageClient (QObject *parent)
+    : QObject (parent),
+      d( new KMessageClientPrivate )
 {
-  d = new KMessageClientPrivate ();
   d->isLocked = false;
 }
 
@@ -63,7 +64,7 @@ KMessageClient::~KMessageClient ()
 
 // -- setServer stuff
 
-void KMessageClient::setServer (const QString &host, Q_UINT16 port)
+void KMessageClient::setServer (const QString &host, quint16 port)
 {
   setServer (new KMessageSocket (host, port));
 }
@@ -80,7 +81,7 @@ void KMessageClient::setServer (KMessageIO *connection)
   if (d->connection)
   {
     delete d->connection;
-    boDebug (11001) << k_funcinfo << ": We are changing the server!" << endl;
+    kDebug (11001) << ": We are changing the server!";
   }
 
   d->connection = connection;
@@ -95,7 +96,7 @@ void KMessageClient::setServer (KMessageIO *connection)
 
 // -- id stuff
 
-Q_UINT32 KMessageClient::id () const
+quint32 KMessageClient::id () const
 {
   return (d->connection) ? d->connection->id () : 0;
 }
@@ -105,12 +106,12 @@ bool KMessageClient::isAdmin () const
   return id() != 0 && id() == adminId();
 }
 
-Q_UINT32 KMessageClient::adminId () const
+quint32 KMessageClient::adminId () const
 {
   return d->adminID;
 }
 
-const QValueList <Q_UINT32> &KMessageClient::clientList() const
+QList <quint32> KMessageClient::clientList() const
 {
   return d->clientList;
 }
@@ -125,7 +126,7 @@ bool KMessageClient::isNetwork () const
   return isConnected() ? d->connection->isNetwork() : false;
 }
 
-Q_UINT16 KMessageClient::peerPort () const
+quint16 KMessageClient::peerPort () const
 {
  return d->connection ? d->connection->peerPort() : 0;
 }
@@ -141,7 +142,7 @@ void KMessageClient::sendServerMessage (const QByteArray &msg)
 {
   if (!d->connection)
   {
-    boWarning (11001) << k_funcinfo << ": We have no connection yet!" << endl;
+    kWarning (11001) << ": We have no connection yet!";
     return;
   }
   d->connection->send (msg);
@@ -150,30 +151,30 @@ void KMessageClient::sendServerMessage (const QByteArray &msg)
 void KMessageClient::sendBroadcast (const QByteArray &msg)
 {
   QByteArray sendBuffer;
-  QBuffer buffer (sendBuffer);
-  buffer.open (IO_WriteOnly);
+  QBuffer buffer (&sendBuffer);
+  buffer.open (QIODevice::WriteOnly);
   QDataStream stream (&buffer);
 
-  stream << static_cast<Q_UINT32> ( KMessageServer::REQ_BROADCAST );
-  buffer.QIODevice::writeBlock (msg);
+  stream << static_cast<quint32> ( KMessageServer::REQ_BROADCAST );
+  buffer.QIODevice::write (msg);
   sendServerMessage (sendBuffer);
 }
 
-void KMessageClient::sendForward (const QByteArray &msg, const QValueList <Q_UINT32> &clients)
+void KMessageClient::sendForward (const QByteArray &msg, const QList <quint32> &clients)
 {
   QByteArray sendBuffer;
-  QBuffer buffer (sendBuffer);
-  buffer.open (IO_WriteOnly);
+  QBuffer buffer (&sendBuffer);
+  buffer.open (QIODevice::WriteOnly);
   QDataStream stream (&buffer);
 
-  stream << static_cast<Q_UINT32>( KMessageServer::REQ_FORWARD ) << clients;
-  buffer.QIODevice::writeBlock (msg);
+  stream << static_cast<quint32>( KMessageServer::REQ_FORWARD ) << clients;
+  buffer.QIODevice::write (msg);
   sendServerMessage (sendBuffer);
 }
 
-void KMessageClient::sendForward (const QByteArray &msg, Q_UINT32 client)
+void KMessageClient::sendForward (const QByteArray &msg, quint32 client)
 {
-  sendForward (msg, QValueList <Q_UINT32> () << client);
+  sendForward (msg, QList <quint32> () << client);
 }
 
 
@@ -206,20 +207,21 @@ void KMessageClient::processMessage (const QByteArray &msg)
     d->delayedMessages.append(msg);
     return;
   }
-  QBuffer in_buffer (msg);
-  in_buffer.open (IO_ReadOnly);
+  QBuffer in_buffer;
+  in_buffer.setData(msg);
+  in_buffer.open (QIODevice::ReadOnly);
   QDataStream in_stream (&in_buffer);
 
 
   bool unknown = false;
 
-  Q_UINT32 messageID;
+  quint32 messageID;
   in_stream >> messageID;
   switch (messageID)
   {
     case KMessageServer::MSG_BROADCAST:
       {
-        Q_UINT32 clientID;
+        quint32 clientID;
         in_stream >> clientID;
         emit broadcastReceived (in_buffer.readAll(), clientID);
       }
@@ -227,8 +229,8 @@ void KMessageClient::processMessage (const QByteArray &msg)
 
     case KMessageServer::MSG_FORWARD:
       {
-        Q_UINT32 clientID;
-        QValueList <Q_UINT32> receivers;
+        quint32 clientID;
+        QList <quint32> receivers;
         in_stream >> clientID >> receivers;
         emit forwardReceived (in_buffer.readAll(), clientID, receivers);
       }
@@ -237,7 +239,7 @@ void KMessageClient::processMessage (const QByteArray &msg)
     case KMessageServer::ANS_CLIENT_ID:
       {
         bool old_admin = isAdmin();
-        Q_UINT32 clientID;
+        quint32 clientID;
         in_stream >> clientID;
         d->connection->setId (clientID);
         if (old_admin != isAdmin())
@@ -262,11 +264,11 @@ void KMessageClient::processMessage (const QByteArray &msg)
 
     case KMessageServer::EVNT_CLIENT_CONNECTED:
       {
-        Q_UINT32 id;
+        quint32 id;
         in_stream >> id;
 
         if (d->clientList.contains (id))
-          boWarning (11001) << k_funcinfo << ": Adding a client that already existed!" << endl;
+          kWarning (11001) << ": Adding a client that already existed!";
         else
           d->clientList.append (id);
 
@@ -276,14 +278,14 @@ void KMessageClient::processMessage (const QByteArray &msg)
 
     case KMessageServer::EVNT_CLIENT_DISCONNECTED:
       {
-        Q_UINT32 id;
-        Q_INT8 broken;
+        quint32 id;
+        qint8 broken;
         in_stream >> id >> broken;
 
         if (!d->clientList.contains (id))
-          boWarning (11001) << k_funcinfo << ": Removing a client that doesn't exist!" << endl;
+          kWarning (11001) << ": Removing a client that doesn't exist!";
         else
-          d->clientList.remove (id);
+          d->clientList.removeAll (id);
 
         emit eventClientDisconnected (id, bool (broken));
       }
@@ -294,12 +296,12 @@ void KMessageClient::processMessage (const QByteArray &msg)
   }
 
   if (!unknown && !in_buffer.atEnd())
-    boWarning (11001) << k_funcinfo << ": Extra data received for message ID " << messageID << endl;
+    kWarning (11001) << ": Extra data received for message ID" << messageID;
 
   emit serverMessageReceived (msg, unknown);
 
   if (unknown)
-    boWarning (11001) << k_funcinfo << ": received unknown message ID " << messageID << endl;
+    kWarning (11001) << ": received unknown message ID" << messageID;
 }
 
 void KMessageClient::processFirstMessage()
@@ -310,7 +312,7 @@ void KMessageClient::processFirstMessage()
   }
   if (d->delayedMessages.count() == 0)
   {
-    boDebug(11001) << k_funcinfo << ": no messages delayed" << endl;
+    kDebug(11001) << ": no messages delayed";
     return;
   }
   QByteArray first = d->delayedMessages.front();
@@ -320,7 +322,7 @@ void KMessageClient::processFirstMessage()
 
 void KMessageClient::removeBrokenConnection ()
 {
-  boDebug (11001) << k_funcinfo << ": timer single shot for removeBrokenConnection"<<this << endl;
+  kDebug (11001) << ": timer single shot for removeBrokenConnection"<<this;
   // MH We cannot directly delete the socket. otherwise QSocket crashes
   QTimer::singleShot( 0, this, SLOT(removeBrokenConnection2()) );
   return;
@@ -329,26 +331,26 @@ void KMessageClient::removeBrokenConnection ()
 
 void KMessageClient::removeBrokenConnection2 ()
 {
-  boDebug (11001) << k_funcinfo << ": Broken:Deleting the connection object"<<this << endl;
+  kDebug (11001) << ": Broken:Deleting the connection object"<<this;
 
   emit aboutToDisconnect(id());
   delete d->connection;
   d->connection = 0;
   d->adminID = 0;
   emit connectionBroken();
-  boDebug (11001) << k_funcinfo << ": Broken:Deleting the connection object DONE" << endl;
+  kDebug (11001) << ": Broken:Deleting the connection object DONE";
 }
 
 void KMessageClient::disconnect ()
 {
-  boDebug (11001) << k_funcinfo << ": Disconnect:Deleting the connection object" << endl;
+  kDebug (11001) << ": Disconnect:Deleting the connection object";
 
   emit aboutToDisconnect(id());
   delete d->connection;
   d->connection = 0;
   d->adminID = 0;
   emit connectionBroken();
-  boDebug (11001) << k_funcinfo << ": Disconnect:Deleting the connection object DONE" << endl;
+  kDebug (11001) << ": Disconnect:Deleting the connection object DONE";
 }
 
 void KMessageClient::lock ()
@@ -359,7 +361,7 @@ void KMessageClient::lock ()
 void KMessageClient::unlock ()
 {
   d->isLocked = false;
-  for (unsigned int i = 0; i < d->delayedMessages.count(); i++)
+  for (int i = 0; i < d->delayedMessages.count(); i++)
   {
     QTimer::singleShot(0, this, SLOT(processFirstMessage()));
   }

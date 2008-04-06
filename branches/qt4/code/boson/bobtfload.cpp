@@ -24,7 +24,7 @@
 
 #include <kglobal.h>
 #include <kstandarddirs.h>
-#include <kmdcodec.h>
+#include <kcodecs.h>
 
 #include <qfile.h>
 #include <qdatastream.h>
@@ -90,7 +90,7 @@ bool BoBTFLoad::loadTexture()
 	return false;
  }
  QFile f(btf);
- if (!f.open(IO_ReadOnly)) {
+ if (!f.open(QIODevice::ReadOnly)) {
 	boError() << k_funcinfo << "can't open " << btf << endl;
 	return false;
  }
@@ -104,7 +104,7 @@ bool BoBTFLoad::loadTexture()
 	return false;
  }
 
- Q_UINT32 versionCode;
+ quint32 versionCode;
  stream >> versionCode;
  if (versionCode < BTF_MAKE_VERSION(0, 0, 1)) {
 	boError() << k_funcinfo << "Unsupported BMF version 0x"
@@ -116,7 +116,7 @@ bool BoBTFLoad::loadTexture()
 	return false;
  }
 
- Q_UINT32 magic;
+ quint32 magic;
  stream >> magic;
  if (magic != BTF_MAGIC_TEXTURE) {
 	boError() << k_funcinfo << "Loading failed (invalid texture magic)!" << endl;
@@ -154,16 +154,16 @@ bool BoBTFLoad::loadTexture()
 
 bool BoBTFLoad::loadInfo(QDataStream& stream)
 {
- Q_UINT32 magic;
+ quint32 magic;
  stream >> magic;
  if (magic != BTF_MAGIC_TEXTURE_INFO) {
 	boError() << k_funcinfo << "Loading failed (no info section)!" << endl;
 	return false;
  }
 
- Q_UINT32 w;
- Q_UINT32 h;
- Q_UINT32 levels;
+ quint32 w;
+ quint32 h;
+ quint32 levels;
 
  // width/height of unscaled image
  stream >> w;
@@ -179,7 +179,7 @@ bool BoBTFLoad::loadInfo(QDataStream& stream)
  // this is kinda redundant, as we can retrieve it from w and h
  stream >> levels;
 
- unsigned int maxLevels = log2(QMAX(w, h)) + 2; // +2 to catch rounding errors
+ unsigned int maxLevels = log2(qMax(w, h)) + 2; // +2 to catch rounding errors
  if (levels > maxLevels) {
 	boError() << k_funcinfo << "broken file: tried to allocate " << levels << " mipmap levels for a original size of width=" << w << " height=" << h << endl;
 	return false;
@@ -214,7 +214,7 @@ bool BoBTFLoad::loadInfo(QDataStream& stream)
 
 bool BoBTFLoad::loadTextureLevel(QDataStream& stream)
 {
- Q_UINT32 magic;
+ quint32 magic;
  stream >> magic;
  if (magic != BTF_MAGIC_TEXTURE_LEVEL) {
 	boError() << k_funcinfo << "Loading failed (expected texture level section)! " << magic << endl;
@@ -226,9 +226,9 @@ bool BoBTFLoad::loadTextureLevel(QDataStream& stream)
 	boError() << k_funcinfo << "Loading failed (expected texture level info)!" << endl;
 	return false;
  }
- Q_UINT32 w;
- Q_UINT32 h;
- Q_UINT32 level;
+ quint32 w;
+ quint32 h;
+ quint32 level;
  stream >> w;
  stream >> h;
  stream >> level;
@@ -270,7 +270,7 @@ bool BoBTFLoad::loadTextureLevel(QDataStream& stream)
 QString BoBTFLoad::createBTFFile()
 {
  QFile textureFile(file());
- if (!textureFile.open(IO_ReadOnly)) {
+ if (!textureFile.open(QIODevice::ReadOnly)) {
 	boError() << k_funcinfo << "cannot open " << file() << " for reading" << endl;
 	return QString::null;
  }
@@ -300,7 +300,7 @@ QString BoBTFLoad::createBTFFile()
  cacheFileName += QString("texture-%1.btf").arg(mMD5);
 
  QFile cacheFile(cacheFileName);
- if (!cacheFile.open(IO_WriteOnly)) {
+ if (!cacheFile.open(QIODevice::WriteOnly)) {
 	boError() << k_funcinfo << "Could not open " << cacheFileName << " for writing" << endl;
 	return QString::null;
  }
@@ -330,14 +330,14 @@ QString BoBTFLoad::createBTFFile()
 bool BoBTFLoad::createBTFFile(const QImage& img, QDataStream& stream) const
 {
  stream.writeRawBytes(BTF_FILE_ID, BTF_FILE_ID_LEN);
- stream << (Q_UINT32)BTF_CURRENT_VERSION;
- stream << (Q_UINT32)BTF_MAGIC_TEXTURE;
+ stream << (quint32)BTF_CURRENT_VERSION;
+ stream << (quint32)BTF_MAGIC_TEXTURE;
 
  // Save Info
- stream << (Q_UINT32)BTF_MAGIC_TEXTURE_INFO;
- stream << (Q_UINT32)img.width();
- stream << (Q_UINT32)img.height();
- Q_UINT32 levels = 1;
+ stream << (quint32)BTF_MAGIC_TEXTURE_INFO;
+ stream << (quint32)img.width();
+ stream << (quint32)img.height();
+ quint32 levels = 1;
  int w = img.width();
  int h = img.height();
  while (w > 1 || h > 1) {
@@ -349,8 +349,8 @@ bool BoBTFLoad::createBTFFile(const QImage& img, QDataStream& stream) const
 	}
 	levels++;
  }
- stream << (Q_UINT32)levels;
- stream << (Q_UINT32)BTF_MAGIC_TEXTURE_INFO_END;
+ stream << (quint32)levels;
+ stream << (quint32)BTF_MAGIC_TEXTURE_INFO_END;
 
  w = 0;
  h = 0;
@@ -383,8 +383,8 @@ bool BoBTFLoad::createBTFFile(const QImage& img, QDataStream& stream) const
  }
 
 
- stream << (Q_UINT32)BTF_MAGIC_TEXTURE_END;
- stream << (Q_UINT32)BTF_MAGIC_END;
+ stream << (quint32)BTF_MAGIC_TEXTURE_END;
+ stream << (quint32)BTF_MAGIC_END;
 
  return true;
 }
@@ -397,17 +397,17 @@ bool BoBTFLoad::saveTextureLevel(unsigned int level, const QImage& img, QDataStr
 	return false;
  }
 
- stream << (Q_UINT32)BTF_MAGIC_TEXTURE_LEVEL;
+ stream << (quint32)BTF_MAGIC_TEXTURE_LEVEL;
 
- stream << (Q_UINT32)BTF_MAGIC_TEXTURE_LEVEL_INFO;
- stream << (Q_UINT32)gl.width();
- stream << (Q_UINT32)gl.height();
- stream << (Q_UINT32)level;
+ stream << (quint32)BTF_MAGIC_TEXTURE_LEVEL_INFO;
+ stream << (quint32)gl.width();
+ stream << (quint32)gl.height();
+ stream << (quint32)level;
 
- stream << (Q_UINT32)BTF_MAGIC_TEXTURE_LEVEL_DATA;
+ stream << (quint32)BTF_MAGIC_TEXTURE_LEVEL_DATA;
  stream.writeBytes((char*)gl.bits(), gl.numBytes());
 
- stream << (Q_UINT32)BTF_MAGIC_TEXTURE_LEVEL_END;
+ stream << (quint32)BTF_MAGIC_TEXTURE_LEVEL_END;
 
  return true;
 }

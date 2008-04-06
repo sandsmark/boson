@@ -38,9 +38,12 @@
 
 #include <qdom.h>
 #include <qdatastream.h>
-#include <qptrqueue.h>
-#include <qvaluelist.h>
+#include <q3ptrqueue.h>
+#include <q3valuelist.h>
 #include <qregexp.h>
+//Added by qt3to4:
+#include <Q3CString>
+#include <Q3PtrList>
 
 class BosonSaveLoadPrivate
 {
@@ -346,7 +349,7 @@ bool BosonSaveLoad::saveToFile(const QMap<QString, QByteArray>& files, const QSt
  return true;
 }
 
-QCString BosonSaveLoad::saveKGameAsXML()
+Q3CString BosonSaveLoad::saveKGameAsXML()
 {
  PROFILE_METHOD
  QDomDocument doc(QString::fromLatin1("Boson"));
@@ -359,7 +362,7 @@ QCString BosonSaveLoad::saveKGameAsXML()
  QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
  if (!propertyXML.saveAsXML(handler, d->mBoson->dataHandler())) { // AB: we should exclude gameStatus from this! we should stay in KGame::Init! -> add a BosonPropertyXML::remove() or so
 	boError() << k_funcinfo << "unable to save KGame data handler" << endl;
-	return QCString();
+	return Q3CString();
  }
  // IdGameStatus must _not_ be saved. it must remain in Init state when loading,
  // until loading is completed.
@@ -377,7 +380,7 @@ QCString BosonSaveLoad::saveKGameAsXML()
  return doc.toCString();
 }
 
-QCString BosonSaveLoad::savePlayersAsXML()
+Q3CString BosonSaveLoad::savePlayersAsXML()
 {
  PROFILE_METHOD
  QDomDocument doc(QString::fromLatin1("Players"));
@@ -386,10 +389,10 @@ QCString BosonSaveLoad::savePlayersAsXML()
 
  if (!d->mBoson) {
 	BO_NULL_ERROR(d->mBoson);
-	return QCString();
+	return Q3CString();
  }
 
- QPtrList<Player> list = d->mBoson->gamePlayerList();
+ Q3PtrList<Player> list = d->mBoson->gamePlayerList();
  boDebug() << k_funcinfo << "saving " << list.count() << " players" << endl;
  for (Player* p = list.first(); p; p = list.next()) {
 	// KGame also stored ID, RTTI and KPlayer::calcIOValue() here.
@@ -398,7 +401,7 @@ QCString BosonSaveLoad::savePlayersAsXML()
 	QDomElement element = doc.createElement(QString::fromLatin1("Player"));
 	if (!p->saveAsXML(element)) {
 		boError() << k_funcinfo << "Unable to save player " << p->bosonId() << endl;
-		return QCString();
+		return Q3CString();
 	}
 	root.appendChild(element);
  }
@@ -406,7 +409,7 @@ QCString BosonSaveLoad::savePlayersAsXML()
  return doc.toCString();
 }
 
-QCString BosonSaveLoad::saveCanvasAsXML()
+Q3CString BosonSaveLoad::saveCanvasAsXML()
 {
  PROFILE_METHOD
 
@@ -424,10 +427,10 @@ QCString BosonSaveLoad::saveCanvasAsXML()
 	return doc.toCString();
  }
 
- return QCString();
+ return Q3CString();
 }
 
-QCString BosonSaveLoad::saveExternalAsXML()
+Q3CString BosonSaveLoad::saveExternalAsXML()
 {
  PROFILE_METHOD
  QDomDocument doc(QString::fromLatin1("External"));
@@ -496,7 +499,7 @@ bool BosonSaveLoad::loadPlayersFromXML(const QMap<QString, QByteArray>& files)
 	boError(270) << k_funcinfo << "no Player tags in file" << endl;
 	return false;
  }
- QPtrList<Player> gamePlayerList = d->mBoson->gamePlayerList();
+ Q3PtrList<Player> gamePlayerList = d->mBoson->gamePlayerList();
  for (unsigned int i = 0; i < gamePlayerList.count(); i++) {
 	Player* p = gamePlayerList.at(i);
 	QDomElement player;

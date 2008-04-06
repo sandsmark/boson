@@ -24,18 +24,20 @@
 #include "lod.h"
 #include "mesh.h"
 
-#include <qvaluelist.h>
-#include <qptrvector.h>
+#include <q3valuelist.h>
+#include <q3ptrvector.h>
+//Added by qt3to4:
+#include <Q3PtrCollection>
 
 
-class VertexOptimizer::VertexPtrVector : public QPtrVector<Vertex>
+class VertexOptimizer::VertexPtrVector : public Q3PtrVector<Vertex>
 {
   public:
-    VertexPtrVector(int size) : QPtrVector<Vertex>(size)  {}
+    VertexPtrVector(int size) : Q3PtrVector<Vertex>(size)  {}
 
 
   protected:
-    virtual int compareItems(QPtrCollection::Item d1, QPtrCollection::Item d2)
+    virtual int compareItems(Q3PtrCollection::Item d1, Q3PtrCollection::Item d2)
     {
       return compareItems((Vertex*)d1, (Vertex*)d2);
     }
@@ -126,7 +128,7 @@ bool VertexOptimizer::processMesh(Mesh* mesh)
   unsigned int validcount = 0;
   unsigned int removedcount = 0;
 
-  QValueList<unsigned int> removed;
+  Q3ValueList<unsigned int> removed;
 
   // Create temporary sorted list of vertices.
   // This speeds up duplicates search process a _lot_
@@ -190,7 +192,7 @@ bool VertexOptimizer::processMesh(Mesh* mesh)
   // Copy valid vertices to the new list and update their id, delete other
   //  (invalid) vertices
   int newpos = 0;
-  QValueList<unsigned int>::Iterator it = removed.begin();
+  Q3ValueList<unsigned int>::Iterator it = removed.begin();
   for(unsigned int i = 0; i < vertices.count(); i++)
   {
     Vertex* v = vertices[i];
@@ -244,7 +246,7 @@ bool VertexOptimizer::processMesh(Mesh* mesh)
         ": pos: (" << v->pos.x() << "; " << v->pos.y() << "; " << v->pos.z() <<
         "); normal: (" << v->normal.x() << "; " << v->normal.y() << "; " << v->normal.z() <<
         "); tex: (" << v->tex.x() << "; " << v->tex.y() << ")" << endl;*/
-    QValueList<int> duplicates;
+    Q3ValueList<int> duplicates;
     for(int j = i + 1; j < mesh->vertexCount(); j++)
     {
       if(*v == *mesh->vertex(j))
@@ -257,7 +259,7 @@ bool VertexOptimizer::processMesh(Mesh* mesh)
     if(!duplicates.isEmpty())
     {
       // Replace all duplicates with this vertex
-      for(QValueList<int>::Iterator it = duplicates.begin(); it != duplicates.end(); ++it)
+      for(Q3ValueList<int>::Iterator it = duplicates.begin(); it != duplicates.end(); ++it)
       {
         replaceVertex(mesh, mesh->vertex(*it), v);
         removed.append(*it);

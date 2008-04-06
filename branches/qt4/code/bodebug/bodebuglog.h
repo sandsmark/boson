@@ -20,7 +20,7 @@
 #define BODEBUGLOG_H
 
 #include <qstring.h>
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 #include <qobject.h>
 
 /**
@@ -149,7 +149,7 @@ public:
 	 * @param level Which type (debug/warn/error) of messages you want. Use
 	 * -1 to ignore the level (uses a separate list)
 	 **/
-	const QPtrList<BoDebugMessage>* messageLogLevel(int level) const;
+	const Q3PtrList<BoDebugMessage>* messageLogLevel(int level) const;
 
 	static BoDebugLog* debugLog()
 	{
@@ -208,12 +208,12 @@ private:
 private:
 	int mLists;
 
-	QPtrList<BoDebugMessage>* mMessages;
+	Q3PtrList<BoDebugMessage>* mMessages;
 	unsigned int* mMaxCount;
 	bool* mPopAtFront;
 	bool* mEmitSignal;
 
-	QPtrList<BoDebugMessage> mAllMessages;
+	Q3PtrList<BoDebugMessage> mAllMessages;
 	unsigned int mAllMaxCount;
 	bool mAllPopAtFront;
 	bool mAllEmitSignal;

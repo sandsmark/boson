@@ -10,11 +10,11 @@ set(bouic_SRCS
 	bouic.cpp
 )
 
-kde3_automoc(${bouic_SRCS})
-
 boson_add_executable(bouic ${bouic_SRCS})
 boson_target_link_libraries(bouic
-	${QT_LIBRARIES}
+	${QT_QT3SUPPORT_LIBRARY}
+	${QT_QTXML_LIBRARY}
+	${QT_QTCORE_LIBRARY}
 )
 
 

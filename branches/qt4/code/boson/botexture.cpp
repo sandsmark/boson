@@ -22,6 +22,8 @@
 #include <qstring.h>
 #include <qimage.h>
 #include <qgl.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 #include "../bomemory/bodummymemory.h"
 #include "bodebug.h"
@@ -428,13 +430,13 @@ unsigned char* BoTexture::ensureCorrectSize(unsigned char* data, int &width, int
   int newW, newH;
   if((mOptions & EnableNPOT) && boTextureManager->supportsNPOTTextures())
   {
-    newW = QMIN(width, maxSize);
-    newH = QMIN(height, maxSize);
+    newW = qMin(width, maxSize);
+    newH = qMin(height, maxSize);
   }
   else
   {
-    newW = QMIN(nextPower2(width), maxSize);
-    newH = QMIN(nextPower2(height), maxSize);
+    newW = qMin(nextPower2(width), maxSize);
+    newH = qMin(nextPower2(height), maxSize);
   }
 
   if(!data)
@@ -762,11 +764,11 @@ BoTextureArray::BoTextureArray(const QStringList& files, int options, BoTexture:
   }
 }
 
-BoTextureArray::BoTextureArray(const QPtrList<BoTexture>& textures)
+BoTextureArray::BoTextureArray(const Q3PtrList<BoTexture>& textures)
 {
   mAutoDelete = false;
   mTextures.reserve(textures.count());
-  QPtrListIterator<BoTexture> it(textures);
+  Q3PtrListIterator<BoTexture> it(textures);
   while(it.current())
   {
     mTextures.append(it.current());
@@ -1054,7 +1056,7 @@ void BoTextureManager::unregisterTexture(BoTexture* tex)
 {
   if(tex->loaded())
   {
-    mUsedTextureMemory = QMAX(0, mUsedTextureMemory - tex->memoryUsed());
+    mUsedTextureMemory = qMax(0, mUsedTextureMemory - tex->memoryUsed());
   }
 
   mTextures.remove(tex);
@@ -1083,7 +1085,7 @@ void BoTextureManager::clearStatistics()
 void BoTextureManager::textureFilterChanged()
 {
   // Go through all the textures and change their filters.
-  QPtrListIterator<BoTexture> it(mTextures);
+  Q3PtrListIterator<BoTexture> it(mTextures);
   while(it.current())
   {
     it.current()->applyOptions();
@@ -1094,7 +1096,7 @@ void BoTextureManager::textureFilterChanged()
 void BoTextureManager::reloadTextures()
 {
   // Go through all the textures and change their filters.
-  QPtrListIterator<BoTexture> it(mTextures);
+  Q3PtrListIterator<BoTexture> it(mTextures);
   int total = 0;
   int reloaded = 0;
   while(it.current())

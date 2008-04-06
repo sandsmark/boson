@@ -23,7 +23,7 @@
 
 #include "loader.h"
 
-#include <qptrdict.h>
+#include <q3ptrdict.h>
 
 #include <lib3ds/types.h>
 
@@ -66,7 +66,7 @@ class Loader3DS : public Loader
 
   private:
     Lib3dsFile* m3ds;
-    QPtrDict<Mesh> mMesh2Mesh; // Lib3dsMesh to Mesh
+    Q3PtrDict<Mesh> mMesh2Mesh; // Lib3dsMesh to Mesh
 };
 
 #endif //LOADER-3DS_H

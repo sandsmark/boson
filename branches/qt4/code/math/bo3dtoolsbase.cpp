@@ -30,8 +30,8 @@
 
 bofixed Bo3dToolsBase::rotationToPoint(bofixed x, bofixed y)
 {
-  bofixed add = 0;
-  bofixed arg = 0;
+  bofixed add = bofixed(0);
+  bofixed arg = bofixed(0);
   if(x > 0)
   {
     if(y < 0)
@@ -59,7 +59,7 @@ bofixed Bo3dToolsBase::rotationToPoint(bofixed x, bofixed y)
     }
     else
     {
-      return 0;
+      return bofixed(0);
     }
   }
 

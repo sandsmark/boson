@@ -20,9 +20,11 @@
 #define BOSONVIEWDATA_H
 
 #include <qobject.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 template <class T1, class T2> class QMap;
-template <class T> class QPtrList;
+template <class T> class Q3PtrList;
 class BosonItem;
 class BosonItemEffects;
 class BosonItemRenderer;
@@ -155,7 +157,7 @@ public:
 	SpeciesData* speciesData(const SpeciesTheme* theme) const;
 
 	BosonItemContainer* itemContainer(BosonItem* item);
-	const QPtrList<BosonItemContainer>& allItemContainers() const;
+	const Q3PtrList<BosonItemContainer>& allItemContainers() const;
 
 	void addGroundTheme(const BosonGroundTheme* theme);
 	void removeGroundTheme(const BosonGroundTheme* theme);

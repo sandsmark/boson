@@ -23,7 +23,7 @@
 
 #include "bosoneffectproperties.h"
 
-#include <qdict.h>
+#include <q3dict.h>
 
 #include "bosoneffect.h"
 #include "bo3dtools.h"
@@ -62,7 +62,7 @@ class BosonEffectPropertiesParticle : public BosonEffectProperties
   protected:
     static const BoTextureArray* getTextures(const QString& name);
 
-    static QDict<BoTextureArray> mTextureArrays;
+    static Q3Dict<BoTextureArray> mTextureArrays;
     static QString mTexturePath;
     static BoVector3Float mWind;
 };

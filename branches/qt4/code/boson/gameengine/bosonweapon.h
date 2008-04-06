@@ -25,15 +25,17 @@
 #include "unitplugins/unitplugin.h"
 #include "../bo3dtools.h"
 
-#include <qptrlist.h>
-#include <qintdict.h>
+#include <q3ptrlist.h>
+#include <q3intdict.h>
 #include <qmap.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 class KSimpleConfig;
 class SpeciesTheme;
 class Unit;
 class QString;
-template<class T> class QIntDict;
+template<class T> class Q3IntDict;
 template<class T1, class T2> class QMap;
 
 class BosonWeaponTurretProperties;
@@ -189,9 +191,9 @@ class BosonWeaponProperties : public PluginProperties
     BosonShot* newShotAtTopLeftPos(Unit* attacker, const BosonWeapon* weapon, BoVector3Fixed pos, BoVector3Fixed target) const;
     BosonShot* newShotAtTopLeftPos(Unit* attacker, const BosonWeapon* weapon, BoVector3Fixed pos, Unit* target) const;
 
-    QValueList<unsigned long int> shootEffectIds() const  { return mShootEffectIds; }
-    QValueList<unsigned long int> flyEffectIds() const  { return mFlyEffectIds; }
-    QValueList<unsigned long int> hitEffectIds() const  { return mHitEffectIds; }
+    Q3ValueList<unsigned long int> shootEffectIds() const  { return mShootEffectIds; }
+    Q3ValueList<unsigned long int> flyEffectIds() const  { return mFlyEffectIds; }
+    Q3ValueList<unsigned long int> hitEffectIds() const  { return mHitEffectIds; }
 
     virtual QString name() const;
     virtual bool loadPlugin(KSimpleConfig* config);
@@ -247,9 +249,9 @@ class BosonWeaponProperties : public PluginProperties
     BosonShot::Type mShotType;
     QString mModelFileName;
     QString mName;
-    QValueList<unsigned long int> mShootEffectIds;
-    QValueList<unsigned long int> mFlyEffectIds;
-    QValueList<unsigned long int> mHitEffectIds;
+    Q3ValueList<unsigned long int> mShootEffectIds;
+    Q3ValueList<unsigned long int> mFlyEffectIds;
+    Q3ValueList<unsigned long int> mHitEffectIds;
     BoVector3Fixed mOffset;
     QMap<int, QString> mSounds;
     QMap<int, QString> mActionStrings;
@@ -419,8 +421,8 @@ class BosonWeapon : public UnitPlugin
 
   private:
     const BosonWeaponProperties* mProp;
-    KGameProperty<Q_INT32> mReloadCounter;
-    KGameProperty<Q_UINT32> mAmmunition;
+    KGameProperty<qint32> mReloadCounter;
+    KGameProperty<quint32> mAmmunition;
 
     BoUpgradeableProperty<unsigned long int> mRange;
     BoUpgradeableProperty<long int> mDamage;

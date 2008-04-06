@@ -30,6 +30,8 @@
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
 #include <klocale.h>
+//Added by qt3to4:
+#include <Q3CString>
 
 static void postBosonConfigInit();
 
@@ -60,7 +62,7 @@ int main(int argc, char **argv)
 
  BosonConfig::setPostInitFunction(&postBosonConfigInit);
 
- QCString argv0(argv[0]);
+ Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
  BoApplication app(argv0);

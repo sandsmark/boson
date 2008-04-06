@@ -29,6 +29,8 @@
 #include <qfileinfo.h>
 #include <qstringlist.h>
 #include <qmap.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 #include "bodebug.h"
 #include "../../bo3dtools.h"
@@ -254,13 +256,13 @@ bool PythonScript::loadScript(QString file)
 
   if(!fi.exists())
   {
-    boError(700) << k_funcinfo << "No such file: '" << fi.absFilePath() << "'. Aborting." << endl;
+    boError(700) << k_funcinfo << "No such file: '" << fi.absoluteFilePath() << "'. Aborting." << endl;
     return false;
   }
   QString filePath = fi.dirPath(true);
 
   QFile f(file);
-  if(!f.open(IO_ReadOnly))
+  if(!f.open(QIODevice::ReadOnly))
   {
     boError(700) << k_funcinfo << "Can't open file '" << file << "' for reading. Aborting." << endl;
     return false;
@@ -346,7 +348,7 @@ void PythonScript::callFunction(const QString& function, PyObject* args)
   if((callscount % 10) == 0)
   {
     QFile f(QString("boscript-%1.save").arg(callscount));
-    f.open(IO_WriteOnly);
+    f.open(QIODevice::WriteOnly);
     QDataStream stream(&f);
     if(!save(stream))
     {
@@ -903,7 +905,7 @@ PyObject* PythonScript::py_isEnemy(PyObject*, PyObject* args)
 PyObject* PythonScript::py_allGamePlayers(PyObject*, PyObject*)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  QValueList<int> players = currentScript()->allGamePlayers();
+  Q3ValueList<int> players = currentScript()->allGamePlayers();
 
   return QValueListToPyList(&players);
 }
@@ -1046,12 +1048,12 @@ PyObject* PythonScript::py_nearestMineralLocations(PyObject*, PyObject* args)
     return 0;
   }
 
-  QValueList<BoVector2Fixed> locations = currentScript()->nearestMineralLocations(x, y, n, radius);
+  Q3ValueList<BoVector2Fixed> locations = currentScript()->nearestMineralLocations(x, y, n, radius);
 
   PyObject* pylist = PyList_New(locations.count());
 
   int i = 0;
-  QValueList<BoVector2Fixed>::Iterator it;
+  Q3ValueList<BoVector2Fixed>::Iterator it;
   for(it = locations.begin(); it != locations.end(); ++it)
   {
     // We use tuples for positions
@@ -1074,12 +1076,12 @@ PyObject* PythonScript::py_nearestOilLocations(PyObject*, PyObject* args)
     return 0;
   }
 
-  QValueList<BoVector2Fixed> locations = currentScript()->nearestOilLocations(x, y, n, radius);
+  Q3ValueList<BoVector2Fixed> locations = currentScript()->nearestOilLocations(x, y, n, radius);
 
   PyObject* pylist = PyList_New(locations.count());
 
   int i = 0;
-  QValueList<BoVector2Fixed>::Iterator it;
+  Q3ValueList<BoVector2Fixed>::Iterator it;
   for(it = locations.begin(); it != locations.end(); ++it)
   {
     // We use tuples for positions
@@ -1292,7 +1294,7 @@ PyObject* PythonScript::py_unitsOnCell(PyObject*, PyObject* args)
     return 0;
   }
 
-  QValueList<int> units = currentScript()->unitsOnCell(x, y);
+  Q3ValueList<int> units = currentScript()->unitsOnCell(x, y);
 
   return QValueListToPyList(&units);
 }
@@ -1306,7 +1308,7 @@ PyObject* PythonScript::py_unitsInRect(PyObject*, PyObject* args)
     return 0;
   }
 
-  QValueList<int> units = currentScript()->unitsInRect(x1, y1, x2, y2);
+  Q3ValueList<int> units = currentScript()->unitsInRect(x1, y1, x2, y2);
 
   return QValueListToPyList(&units);
 }
@@ -1552,7 +1554,7 @@ PyObject* PythonScript::py_productionTypes(PyObject*, PyObject* args)
     return 0;
   }
 
-  QValueList<int> list = currentScript()->productionTypes(id);
+  Q3ValueList<int> list = currentScript()->productionTypes(id);
 
   return QValueListToPyList(&list);
 }
@@ -1582,7 +1584,7 @@ PyObject* PythonScript::py_allPlayerUnits(PyObject*, PyObject* args)
     return 0;
   }
 
-  QValueList<int> units = currentScript()->allPlayerUnits(id);
+  Q3ValueList<int> units = currentScript()->allPlayerUnits(id);
 
   return QValueListToPyList(&units);
 }
@@ -1607,7 +1609,7 @@ PyObject* PythonScript::py_playerUnitsOfType(PyObject*, PyObject* args)
     return 0;
   }
 
-  QValueList<int> units = currentScript()->playerUnitsOfType(id, type);
+  Q3ValueList<int> units = currentScript()->playerUnitsOfType(id, type);
 
   return QValueListToPyList(&units);
 }
@@ -1637,7 +1639,7 @@ PyObject* PythonScript::py_allUnitsVisibleFor(PyObject*, PyObject* args)
     return 0;
   }
 
-  QValueList<int> units = currentScript()->allUnitsVisibleFor(id);
+  Q3ValueList<int> units = currentScript()->allUnitsVisibleFor(id);
 
   return QValueListToPyList(&units);
 }
@@ -1655,7 +1657,7 @@ PyObject* PythonScript::py_allEnemyUnitsVisibleFor(PyObject*, PyObject* args)
     return 0;
   }
 
-  QValueList<int> units = currentScript()->allEnemyUnitsVisibleFor(id);
+  Q3ValueList<int> units = currentScript()->allEnemyUnitsVisibleFor(id);
 
   return QValueListToPyList(&units);
 }
@@ -2306,12 +2308,12 @@ PyObject* PythonScript::py_mapHeight(PyObject* self, PyObject* args)
 
 /*****  Non-script functions  *****/
 
-PyObject* PythonScript::QValueListToPyList(QValueList<int>* list)
+PyObject* PythonScript::QValueListToPyList(Q3ValueList<int>* list)
 {
   PyObject* pylist = PyList_New(list->count());
 
   int i = 0;
-  QValueList<int>::Iterator it;
+  Q3ValueList<int>::Iterator it;
   for(it = list->begin(); it != list->end(); ++it)
   {
     PyList_SetItem(pylist, i, PyInt_FromLong(*it));

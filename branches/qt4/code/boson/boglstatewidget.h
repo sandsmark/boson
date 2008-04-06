@@ -20,7 +20,7 @@
 #define BOGLSTATEWIDGET_H
 
 class QStringList;
-class QListView;
+class Q3ListView;
 
 #include <qwidget.h>
 
@@ -32,7 +32,7 @@ class BoGLStateWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	BoGLStateWidget(QWidget* parent = 0, const char* name = 0, WFlags f = 0);
+	BoGLStateWidget(QWidget* parent = 0, const char* name = 0, Qt::WFlags f = 0);
 	virtual ~BoGLStateWidget();
 
 #if 0
@@ -47,8 +47,8 @@ public:
 	 * @param _l2 See @p _l1
 	 **/
 	static QStringList getDifferences(const QStringList& _l1, const QStringList& _l2);
-	static bool showDifferences(QListView* listview, const QStringList& _l1, const QStringList& _l2);
-	static bool showList(QListView* listview, const QStringList& list);
+	static bool showDifferences(Q3ListView* listview, const QStringList& _l1, const QStringList& _l2);
+	static bool showList(Q3ListView* listview, const QStringList& list);
 #endif
 
 protected slots:
@@ -56,7 +56,7 @@ protected slots:
 	void slotChangeStates(int);
 
 protected:
-	void makeList(QListView* l, const QStringList& items);
+	void makeList(Q3ListView* l, const QStringList& items);
 
 private:
 	void initStateSelections();

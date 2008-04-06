@@ -23,9 +23,11 @@
 #include "boquadtreenode.h"
 #include "bodebug.h"
 
-#include <kstaticdeleter.h>
+#include <k3staticdeleter.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
-static KStaticDeleter<BoQuadTreeCollectionManager> sd;
+static K3StaticDeleter<BoQuadTreeCollectionManager> sd;
 BoQuadTreeCollectionManager* BoQuadTreeCollectionManager::mManager = 0;
 
 class BoQuadTreeCollectionPrivate
@@ -34,7 +36,7 @@ public:
 	BoQuadTreeCollectionPrivate()
 	{
 	}
-	QPtrList<BoQuadTreeNode> mTrees;
+	Q3PtrList<BoQuadTreeNode> mTrees;
 };
 
 BoQuadTreeCollection::BoQuadTreeCollection(QObject* parent)
@@ -73,7 +75,7 @@ void BoQuadTreeCollection::unregisterTree(BoQuadTreeNode* node)
  d->mTrees.removeRef(node);
 }
 
-const QPtrList<BoQuadTreeNode>& BoQuadTreeCollection::trees() const
+const Q3PtrList<BoQuadTreeNode>& BoQuadTreeCollection::trees() const
 {
  return d->mTrees;
 }
@@ -82,7 +84,7 @@ const QPtrList<BoQuadTreeNode>& BoQuadTreeCollection::trees() const
 class BoQuadTreeCollectionManagerPrivate
 {
 public:
-	QPtrList<BoQuadTreeCollection> mCollections;
+	Q3PtrList<BoQuadTreeCollection> mCollections;
 };
 
 BoQuadTreeCollectionManager::BoQuadTreeCollectionManager()
@@ -121,7 +123,7 @@ void BoQuadTreeCollectionManager::unregisterTree(BoQuadTreeNode* root)
  if (!root) {
 	return;
  }
- for (QPtrListIterator<BoQuadTreeCollection> it(d->mCollections); it.current(); ++it) {
+ for (Q3PtrListIterator<BoQuadTreeCollection> it(d->mCollections); it.current(); ++it) {
 	it.current()->unregisterTree(root);
  }
 }

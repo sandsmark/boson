@@ -30,6 +30,8 @@
 
 #include <qmap.h>
 #include <qregexp.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 class BoUfoFontSelectionWidgetPrivate
 {
@@ -50,7 +52,7 @@ BoUfoFontSelectionWidget::BoUfoFontSelectionWidget(BoUfoManager* manager)
  d->mUfoManager = manager;
 
  QStringList families;
- QValueList<BoUfoFontInfo> allFonts = d->mUfoManager->listFonts();
+ Q3ValueList<BoUfoFontInfo> allFonts = d->mUfoManager->listFonts();
  for (unsigned int i = 0; i < allFonts.count(); i++) {
 	QString font = QString("%1: %2").arg(allFonts[i].fontPlugin()).arg(allFonts[i].family());
 	if (!families.contains(font)) {
@@ -168,8 +170,8 @@ void BoUfoFontSelectionWidget::updateFont()
 int BoUfoFontSelectionWidget::selectedStyles() const
 {
  int styles = 0;
- QValueList<unsigned int> list = mStyles->selectedItems();
- QValueList<unsigned int>::iterator it;
+ Q3ValueList<unsigned int> list = mStyles->selectedItems();
+ Q3ValueList<unsigned int>::iterator it;
  for (it = list.begin(); it != list.end(); ++it) {
 	if (d->mIndex2Style.contains(*it)) {
 		styles |= d->mIndex2Style[*it];

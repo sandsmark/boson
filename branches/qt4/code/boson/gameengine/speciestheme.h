@@ -25,6 +25,10 @@
 #include "../global.h"
 #include <qstring.h>
 #include <qcolor.h>
+//Added by qt3to4:
+#include <QPixmap>
+#include <Q3CString>
+#include <Q3ValueList>
 
 class BosonTextureArray;
 class BosonModel;
@@ -39,8 +43,8 @@ class QDomElement;
 class QPixmap;
 class QStringList;
 class QColor;
-template<class T> class QValueList;
-template<class T> class QIntDict;
+template<class T> class Q3ValueList;
+template<class T> class Q3IntDict;
 
 class SpeciesThemePrivate;
 /**
@@ -125,7 +129,7 @@ public:
 	 * @return Concatenation of all @ref UnitProperties::md5 sums in this
 	 * theme, separated by "\n"s
 	 **/
-	QCString unitPropertiesMD5() const;
+	Q3CString unitPropertiesMD5() const;
 
 	/**
 	 * Reads the default entries from the config file of the specified unit
@@ -168,20 +172,20 @@ public:
 	 * @return The typeIds of all facilities in this theme. See also @ref
 	 * UnitProperties::typeId
 	 **/
-	QValueList<unsigned long int> allFacilities() const;
+	Q3ValueList<unsigned long int> allFacilities() const;
 
 	/**
 	 * @return The typeIds of all mobile units in this theme. See also @ref
 	 * UnitProperties::typeId
 	 **/
-	QValueList<unsigned long int> allMobiles() const;
+	Q3ValueList<unsigned long int> allMobiles() const;
 
 	/**
 	 * @return A list of all unit properties in this theme
 	 **/
-	QValueList<const UnitProperties*> allUnits() const;
+	Q3ValueList<const UnitProperties*> allUnits() const;
 
-	const QIntDict<UnitProperties>* allUnitsNonConst() const;
+	const Q3IntDict<UnitProperties>* allUnitsNonConst() const;
 
 	/**
 	 * @return The names of all objects of this theme, as they could
@@ -195,13 +199,13 @@ public:
 	 * @return A list of all units that have a @ref UnitProperties::producer
 	 * specified in producerList.
 	 **/
-	QValueList<unsigned long int> productions(const QValueList<unsigned long int>& producerList) const;
+	Q3ValueList<unsigned long int> productions(const Q3ValueList<unsigned long int>& producerList) const;
 
 	/**
 	 * @return A list of all technologies that have a producer specified in
 	 * producerList.
 	 **/
-	QValueList<unsigned long int> technologies(const QValueList<unsigned long int>& producerList) const;
+	Q3ValueList<unsigned long int> technologies(const Q3ValueList<unsigned long int>& producerList) const;
 
 	/**
 	 * Reset this theme. Delete all pixmaps, unitProperties, ...
@@ -227,7 +231,7 @@ public:
 	 **/
 	QString identifier() const;
 
-	static QValueList<QColor> defaultColors();
+	static Q3ValueList<QColor> defaultColors();
 
 	/**
 	 * Save the game data to XML. The "game data" is all data that depends

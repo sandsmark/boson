@@ -30,6 +30,7 @@
 #include <qtimer.h>
 
 #include <qstringlist.h>
+#include <krandom.h>
 
 #define TICKER_VALUE 500 // same as in kaboodle
 
@@ -140,7 +141,7 @@ bool BosonMusic::loadMusic(const QString& file)
 void BosonMusic::startMusicLoop()
 {
  d->mLoop = true;
- int pos = kapp->random() % d->mFiles.count();
+ int pos = KRandom::random() % d->mFiles.count();
  if (!loadMusic(d->mFiles[pos])) {
 	d->mFiles.remove(d->mFiles.at(pos));
  }

@@ -22,6 +22,8 @@
 
 #include "../bomath.h"
 #include <qstring.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 class Player;
 class UnitProperties;
@@ -34,7 +36,7 @@ class SpeciesTheme;
 class QString;
 class KSimpleConfig;
 
-template<class T> class QValueList;
+template<class T> class Q3ValueList;
 
 
 class UpgradePropertiesPrivate;
@@ -136,12 +138,12 @@ class UpgradeProperties
     /**
      * @return List of units required by this upgrade
      **/
-    QValueList<unsigned long int> requiredUnits() const;
+    Q3ValueList<unsigned long int> requiredUnits() const;
 
     /**
      * @return List of technologies required by this upgrade
      **/
-    QValueList<unsigned long int> requiredTechnologies() const;
+    Q3ValueList<unsigned long int> requiredTechnologies() const;
 
     const QString& produceActionString() const { return mProduceActionString; }
 
@@ -173,7 +175,7 @@ class UpgradeProperties
      * @return A list of unit types the upgrade applies to. This can be a fixed
      * list of units or all mobiles/all facilities.
      **/
-    QValueList<unsigned long int> appliesToTypes(const Player* player) const;
+    Q3ValueList<unsigned long int> appliesToTypes(const Player* player) const;
 
   private:
     /**

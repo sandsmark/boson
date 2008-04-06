@@ -46,13 +46,16 @@
 
 #include <klocale.h>
 
-#include <qlistview.h>
+#include <q3listview.h>
 #include <qlayout.h>
 #include <qlabel.h>
 #include <qsplitter.h>
-#include <qobjectlist.h>
+#include <qobject.h>
 #include <qcheckbox.h>
-#include <qscrollview.h>
+#include <q3scrollview.h>
+//Added by qt3to4:
+#include <Q3GridLayout>
+#include <Q3VBoxLayout>
 
 #include <math.h>
 
@@ -73,13 +76,13 @@ public:
 	QLabel* mToolkitLabel;
 	QLabel* mDisplayLabel;
 	QLabel* mContextLabel;
-	QListView* mListView;
+	Q3ListView* mListView;
 	BoUfoDebugSingleWidget* mDetailedWidgetView;
 
 	BoUfoManager* mManager;
 
 	QMap<ufo::UWidget*, BoUfoWidget*> mUfoWidget2BoUfoWidget;
-	QMap<QListViewItem*, ufo::UWidget*> mItem2Widget;
+	QMap<Q3ListViewItem*, ufo::UWidget*> mItem2Widget;
 };
 
 BoUfoDebugWidget::BoUfoDebugWidget(QWidget* parent)
@@ -87,7 +90,7 @@ BoUfoDebugWidget::BoUfoDebugWidget(QWidget* parent)
 {
  d = new BoUfoDebugWidgetPrivate;
 
- QVBoxLayout* layout = new QVBoxLayout(this);
+ Q3VBoxLayout* layout = new Q3VBoxLayout(this);
 
  d->mToolkitLabel = new QLabel(this);
  layout->addWidget(d->mToolkitLabel);
@@ -101,13 +104,13 @@ BoUfoDebugWidget::BoUfoDebugWidget(QWidget* parent)
  QSplitter* vSplitter = new QSplitter(Vertical, this);
  layout->addWidget(vSplitter);
 
- d->mListView = new QListView(vSplitter);
+ d->mListView = new Q3ListView(vSplitter);
  d->mListView->setRootIsDecorated(true);
  d->mListView->setAllColumnsShowFocus(true);
- connect(d->mListView, SIGNAL(currentChanged(QListViewItem*)),
-		this, SLOT(slotWidgetChanged(QListViewItem*)));
- QScrollView* scroll = new QScrollView(vSplitter);
- scroll->setResizePolicy(QScrollView::AutoOneFit);
+ connect(d->mListView, SIGNAL(currentChanged(Q3ListViewItem*)),
+		this, SLOT(slotWidgetChanged(Q3ListViewItem*)));
+ Q3ScrollView* scroll = new Q3ScrollView(vSplitter);
+ scroll->setResizePolicy(Q3ScrollView::AutoOneFit);
  d->mDetailedWidgetView = new BoUfoDebugSingleWidget(scroll);
  scroll->addChild(d->mDetailedWidgetView);
 
@@ -160,11 +163,11 @@ void BoUfoDebugWidget::setBoUfoManager(BoUfoManager* manager)
  }
 
  BO_CHECK_NULL_RET(d->mManager->rootPane());
- addWidget(d->mManager->rootPane(), new QListViewItem(d->mListView));
+ addWidget(d->mManager->rootPane(), new Q3ListViewItem(d->mListView));
 }
 
 
-void BoUfoDebugWidget::addWidget(ufo::UWidget* ufoWidget, QListViewItem* item)
+void BoUfoDebugWidget::addWidget(ufo::UWidget* ufoWidget, Q3ListViewItem* item)
 {
  BoUfoWidget* boufoWidget = d->mUfoWidget2BoUfoWidget[ufoWidget];
  d->mItem2Widget.insert(item, ufoWidget);
@@ -197,11 +200,11 @@ void BoUfoDebugWidget::addWidget(ufo::UWidget* ufoWidget, QListViewItem* item)
 
  std::vector<ufo::UWidget*> children = ufoWidget->getWidgets();
  for (std::vector<ufo::UWidget*>::iterator it = children.begin(); it != children.end(); ++it) {
-	addWidget(*it, new QListViewItem(item));
+	addWidget(*it, new Q3ListViewItem(item));
  }
 }
 
-void BoUfoDebugWidget::slotWidgetChanged(QListViewItem* item)
+void BoUfoDebugWidget::slotWidgetChanged(Q3ListViewItem* item)
 {
  ufo::UWidget* w = 0;
  if (item) {
@@ -264,9 +267,9 @@ BoUfoDebugSingleWidget::BoUfoDebugSingleWidget(QWidget* parent)
 	: QWidget(parent)
 {
  d = new BoUfoDebugSingleWidgetPrivate();
- QGridLayout* grid = new QGridLayout(this, -1, 2);
- QVBoxLayout* vlayout1 = new QVBoxLayout(grid);
- QVBoxLayout* vlayout2 = new QVBoxLayout(grid);
+ Q3GridLayout* grid = new Q3GridLayout(this, -1, 2);
+ Q3VBoxLayout* vlayout1 = new Q3VBoxLayout(grid);
+ Q3VBoxLayout* vlayout2 = new Q3VBoxLayout(grid);
 
  d->mUfoWidget = new QLabel(this);
  vlayout1->addWidget(d->mUfoWidget);

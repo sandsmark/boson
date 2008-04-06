@@ -46,7 +46,10 @@
 
 #include <qbitarray.h>
 #include <qdom.h>
-#include <qtextstream.h>
+#include <q3textstream.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 #include "player.moc"
 
@@ -65,7 +68,7 @@ public:
 		mPlayerIO = 0;
 	}
 
-	QPtrList<Unit> mUnits;
+	Q3PtrList<Unit> mUnits;
 
 	BosonMap* mMap; // just a pointer
 	int mUnitPropID; // used for KGamePropertyHandler
@@ -86,11 +89,11 @@ public:
 
 	PlayerIO* mPlayerIO;
 
-	QValueList<unsigned long int> mResearchedUpgrades;
+	Q3ValueList<unsigned long int> mResearchedUpgrades;
 
 	BoUpgradesCollection mUpgradesCollection;
 
-	QValueList<const Unit*> mRadarUnits;
+	Q3ValueList<const Unit*> mRadarUnits;
 };
 
 Player::Player(bool isNeutralPlayer) : KPlayer()
@@ -101,8 +104,8 @@ Player::Player(bool isNeutralPlayer) : KPlayer()
  d->mUnfoggedCount = 0;
  mPowerChargeForCurrentAdvanceCall = 0;
  setAsyncInput(true);
- connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)),
-		this, SLOT(slotNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)));
+ connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, quint32, KPlayer*)),
+		this, SLOT(slotNetworkData(int, const QByteArray&, quint32, KPlayer*)));
 
  KGamePropertyBase* propName = dataHandler()->find(KGamePropertyBase::IdName);
  if (propName) {
@@ -206,18 +209,18 @@ void Player::quitGame(bool destruct)
  }
 }
 
-void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sender, KPlayer*)
+void Player::slotNetworkData(int msgid, const QByteArray& buffer, quint32 sender, KPlayer*)
 {
  // there are only very few messages handled here. Only those that have
  // PolicyClean or PolicyDirty. All others are in slotUnitPropertiesChanged()
 
- QDataStream stream(buffer, IO_ReadOnly);
+ QDataStream stream(buffer, QIODevice::ReadOnly);
  bool issender = true;
  if (game()) {
 	issender = sender == game()->gameId();
  }
 // first check if the message is a property of a unit
- QPtrListIterator<Unit> it(d->mUnits);
+ Q3PtrListIterator<Unit> it(d->mUnits);
  while (it.current() && !it.current()->dataHandler()->processMessage(stream, msgid + KGamePropertyBase::IdUser, issender)) {
 	++it;
  }
@@ -348,7 +351,7 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 
 Unit* Player::findUnit(unsigned long int unitId) const
 {
- QPtrListIterator<Unit> it(d->mUnits);
+ Q3PtrListIterator<Unit> it(d->mUnits);
  while (it.current()) {
 	if (it.current()->id() == unitId) {
 		return it.current();
@@ -377,7 +380,7 @@ bool Player::save(QDataStream& stream)
  }
 
  // Save unitpropID
- Q_UINT32 unitPropId = d->mUnitPropID;
+ quint32 unitPropId = d->mUnitPropID;
  stream << unitPropId;
 
 
@@ -415,7 +418,7 @@ bool Player::load(QDataStream& stream)
  }
 
  // Load unitpropID
- Q_UINT32 unitPropId;
+ quint32 unitPropId;
  stream >> unitPropId;
  d->mUnitPropID = unitPropId;
 
@@ -434,7 +437,7 @@ bool Player::load(QDataStream& stream)
  return true;
 }
 
-QPtrList<Unit>* Player::allUnits() const
+Q3PtrList<Unit>* Player::allUnits() const
 {
  return &(d->mUnits);
 }
@@ -721,7 +724,7 @@ unsigned long int Player::requestAmmunition(const QString& type, unsigned long i
  boDebug(610) << k_funcinfo << "searching for ammo in AmmunitionStoragePlugins" << endl;
  // not enough ammo of this type in the global pool - search for globally
  // accessible ammo in ammunition storages
- for (QPtrListIterator<Unit> it(*allUnits()); it.current(); ++it) {
+ for (Q3PtrListIterator<Unit> it(*allUnits()); it.current(); ++it) {
 	if (it.current()->isDestroyed()) {
 		continue;
 	}
@@ -762,7 +765,7 @@ bool Player::hasMiniMap() const
  if (powerGenerated < powerConsumed) {
 	return false;
  }
- QPtrListIterator<Unit> it(d->mUnits);
+ Q3PtrListIterator<Unit> it(d->mUnits);
  while (it.current()) {
 	if (it.current()->unitProperties()->supportMiniMap()) {
 		if (!it.current()->isFacility()) {
@@ -782,7 +785,7 @@ bool Player::hasMiniMap() const
 void Player::unchargeUnitsForAdvance()
 {
  BosonProfiler prof("unchargeUnitsForAdvance");
- for (QPtrListIterator<Unit> it(d->mUnits); it.current(); ++it) {
+ for (Q3PtrListIterator<Unit> it(d->mUnits); it.current(); ++it) {
 	it.current()->unchargePowerForAdvance();
  }
 }
@@ -835,7 +838,7 @@ void Player::calculatePower(unsigned long int* _powerGenerated, unsigned long in
  //       generate/consume power may do so later
  unsigned int powerGenerated = 0;
  unsigned int powerConsumed = 0;
- for (QPtrListIterator<Unit> it(d->mUnits); it.current(); ++it) {
+ for (Q3PtrListIterator<Unit> it(d->mUnits); it.current(); ++it) {
 	powerConsumed += it.current()->powerConsumedByUnit();
 	if (!includeUnconstructedFacilities) {
 		if (it.current()->isFacility()) {
@@ -950,11 +953,11 @@ int Player::facilitiesCount()
 
 bool Player::canBuild(unsigned long int unitType) const
 {
- QValueList<unsigned long int> neededTypes = speciesTheme()->unitProperties(unitType)->requirements();
+ Q3ValueList<unsigned long int> neededTypes = speciesTheme()->unitProperties(unitType)->requirements();
  if (neededTypes.isEmpty()) {
 	return true;
  }
- QValueList<unsigned long int>::Iterator it;
+ Q3ValueList<unsigned long int>::Iterator it;
  for (it = neededTypes.begin(); it != neededTypes.end(); ++it) {
 	// FIXME: this is SLOW. Cache values and refresh them when new unit is
 	//  created or destroyed
@@ -968,9 +971,9 @@ bool Player::canBuild(unsigned long int unitType) const
 bool Player::canResearchTech(unsigned long int id) const
 {
  // Check for technologies
- QValueList<unsigned long int> neededTechs = speciesTheme()->technology(id)->requiredTechnologies();
+ Q3ValueList<unsigned long int> neededTechs = speciesTheme()->technology(id)->requiredTechnologies();
  if (!neededTechs.isEmpty()) {
-	QValueList<unsigned long int>::Iterator it;
+	Q3ValueList<unsigned long int>::Iterator it;
 	for (it = neededTechs.begin(); it != neededTechs.end(); ++it) {
 		if (!hasTechnology(*it)) {
 			return false;
@@ -979,9 +982,9 @@ bool Player::canResearchTech(unsigned long int id) const
  }
 
  // Check for units
- QValueList<unsigned long int> neededUnits = speciesTheme()->technology(id)->requiredUnits();
+ Q3ValueList<unsigned long int> neededUnits = speciesTheme()->technology(id)->requiredUnits();
  if (!neededUnits.isEmpty()) {
-	QValueList<unsigned long int>::Iterator it;
+	Q3ValueList<unsigned long int>::Iterator it;
 	for (it = neededUnits.begin(); it != neededUnits.end(); ++it) {
 		if (!hasUnitWithType(*it)) {
 			return false;
@@ -994,7 +997,7 @@ bool Player::canResearchTech(unsigned long int id) const
 
 bool Player::hasUnitWithType(unsigned long int type) const
 {
- QPtrListIterator<Unit> it(d->mUnits);
+ Q3PtrListIterator<Unit> it(d->mUnits);
  while (it.current()) {
 	if (it.current()->type() == type) {
 		if (it.current()->isMobile()) {
@@ -1310,13 +1313,13 @@ bool Player::loadAmmunition(const QDomElement& root)
  return true;
 }
 
-void Player::writeGameLog(QTextStream& log)
+void Player::writeGameLog(Q3TextStream& log)
 {
  log << "Player: " << bosonId() << endl;
  log << minerals() << " " << oil() << " " << ammunition("Generic") << endl;
  log << mobilesCount() << " " << facilitiesCount() << endl;
 
- QPtrListIterator<Unit> it(d->mUnits);
+ Q3PtrListIterator<Unit> it(d->mUnits);
  Unit* u;
  while (it.current()) {
 	u = it.current();
@@ -1347,14 +1350,14 @@ void Player::addUpgrade(const UpgradeProperties* upgrade)
  BO_CHECK_NULL_RET(upgrade);
  d->mUpgradesCollection.addUpgrade(upgrade);
 
- for (QPtrListIterator<Unit> it(d->mUnits); it.current(); ++it) {
+ for (Q3PtrListIterator<Unit> it(d->mUnits); it.current(); ++it) {
 	if (upgrade->appliesTo(it.current())) {
 		it.current()->addUpgrade(upgrade);
 	}
  }
 
- const QIntDict<UnitProperties>* units = speciesTheme()->allUnitsNonConst();
- for (QIntDictIterator<UnitProperties> it(*units); it.current(); ++it) {
+ const Q3IntDict<UnitProperties>* units = speciesTheme()->allUnitsNonConst();
+ for (Q3IntDictIterator<UnitProperties> it(*units); it.current(); ++it) {
 	if (upgrade->appliesTo(it.current())) {
 		it.current()->addUpgrade(upgrade);
 	}
@@ -1370,22 +1373,22 @@ void Player::removeUpgrade(const UpgradeProperties* upgrade)
 {
  d->mUpgradesCollection.removeUpgrade(upgrade);
 
- for (QPtrListIterator<Unit> it(d->mUnits); it.current(); ++it) {
+ for (Q3PtrListIterator<Unit> it(d->mUnits); it.current(); ++it) {
 	it.current()->removeUpgrade(upgrade);
  }
 
- const QIntDict<UnitProperties>* units = speciesTheme()->allUnitsNonConst();
- for (QIntDictIterator<UnitProperties> it(*units); it.current(); ++it) {
+ const Q3IntDict<UnitProperties>* units = speciesTheme()->allUnitsNonConst();
+ for (Q3IntDictIterator<UnitProperties> it(*units); it.current(); ++it) {
 	it.current()->removeUpgrade(upgrade);
  }
 }
 
-const QValueList<const UpgradeProperties*>* Player::upgrades() const
+const Q3ValueList<const UpgradeProperties*>* Player::upgrades() const
 {
  return d->mUpgradesCollection.upgrades();
 }
 
-const QValueList<const Unit*>* Player::radarUnits() const
+const Q3ValueList<const Unit*>* Player::radarUnits() const
 {
  return &d->mRadarUnits;
 }
@@ -1400,7 +1403,7 @@ void Player::removeRadar(Unit* u)
  d->mRadarUnits.remove(u);
 }
 
-void Player::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 sender)
+void Player::networkTransmission(QDataStream& stream, int msgid, quint32 sender)
 {
  // TODO: maybe do this in KPlayer ?
  if (sender == 0) {

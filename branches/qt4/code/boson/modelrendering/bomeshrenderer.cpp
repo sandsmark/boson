@@ -27,6 +27,8 @@
 #include <bodebug.h>
 
 #include <klocale.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 #define MAX_STATISTICS 300
 #define MAX_STATISTICS_SHORT 20
@@ -42,8 +44,8 @@ public:
 	BoMeshRendererStatisticsCollectionPrivate()
 	{
 	}
-	QPtrList<BoMeshRendererStatistics> mStatistics;
-	QPtrList<BoMeshRendererStatistics> mDelayedStatistics;
+	Q3PtrList<BoMeshRendererStatistics> mStatistics;
+	Q3PtrList<BoMeshRendererStatistics> mDelayedStatistics;
 
 };
 
@@ -79,7 +81,7 @@ void BoMeshRendererStatisticsCollection::add(BoMeshRendererStatistics* stat)
  }
  d->mDelayedStatistics.append(stat);
  if (d->mDelayedStatistics.count() > MAX_STATISTICS_DELAYED) {
-	QPtrListIterator<BoMeshRendererStatistics> it(d->mDelayedStatistics);
+	Q3PtrListIterator<BoMeshRendererStatistics> it(d->mDelayedStatistics);
 	while (it.current()) {
 		d->mStatistics.append(it.current());
 		addStatistics(it.current());

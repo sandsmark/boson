@@ -21,8 +21,8 @@
 
 #include <qwidget.h>
 
-class QListBox;
-class QListBoxItem;
+class Q3ListBox;
+class Q3ListBoxItem;
 
 // displays a list of widgets that can be placed
 class BoWidgetList : public QWidget
@@ -39,11 +39,11 @@ signals:
 	void signalWidgetSelected(const QString&);
 
 private slots:
-	void slotWidgetHighlighted(QListBoxItem*);
+	void slotWidgetHighlighted(Q3ListBoxItem*);
 	void slotWidgetSelectionChanged();
 
 private:
-	QListBox* mListBox;
+	Q3ListBox* mListBox;
 };
 
 #endif

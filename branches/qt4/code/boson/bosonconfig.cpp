@@ -26,14 +26,17 @@
 #include "bo3dtools.h"
 #include <bogl.h>
 
-#include <qptrlist.h>
-#include <qdict.h>
+#include <q3ptrlist.h>
+#include <q3dict.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 #include <kconfig.h>
 #include <kapplication.h>
 #include <klocale.h>
 
 #include <stdlib.h>
+#include <kglobal.h>
 
 class BoGlobalConfigObject : public BoGlobalObject<BosonConfig>
 {
@@ -184,7 +187,7 @@ void BoConfigStringEntry::load(KConfig* conf)
 class BoConfigIntListEntry : public BoConfigEntry
 {
 public:
-	BoConfigIntListEntry(BosonConfig* parent, const QString& key, QValueList<int> defaultValue, bool saveConfig = true)
+	BoConfigIntListEntry(BosonConfig* parent, const QString& key, Q3ValueList<int> defaultValue, bool saveConfig = true)
 		: BoConfigEntry(parent, key, saveConfig)
 	{
 		mDefaultValue = defaultValue;
@@ -205,9 +208,9 @@ public:
 
 	virtual int type() const { return IntList; }
 
-	void setValue(QValueList<int> list) { mValue = list; }
-	QValueList<int> value() const { return mValue; }
-	QValueList<int> defaultValue() const { return mDefaultValue; }
+	void setValue(Q3ValueList<int> list) { mValue = list; }
+	Q3ValueList<int> value() const { return mValue; }
+	Q3ValueList<int> defaultValue() const { return mDefaultValue; }
 
 	void append(int e)
 	{
@@ -219,8 +222,8 @@ public:
 	bool contains(int e) { return mValue.contains(e); }
 
 private:
-	QValueList<int> mValue;
-	QValueList<int> mDefaultValue;
+	Q3ValueList<int> mValue;
+	Q3ValueList<int> mDefaultValue;
 };
 
 BoConfigColorEntry::BoConfigColorEntry(BosonConfig* parent, const QString& key, const QColor& defaultValue, bool saveConfig)
@@ -266,7 +269,7 @@ public:
 	{
 	}
 
-	QPtrList<BoConfigEntry> mEntries;
+	Q3PtrList<BoConfigEntry> mEntries;
 };
 
 BosonConfigScript::BosonConfigScript(const QString& name)
@@ -278,7 +281,7 @@ BosonConfigScript::BosonConfigScript(const QString& name)
 BosonConfigScript::~BosonConfigScript()
 {
  d->mEntries.setAutoDelete(false);
- for (QPtrListIterator<BoConfigEntry> it(d->mEntries); it.current(); ++it) {
+ for (Q3PtrListIterator<BoConfigEntry> it(d->mEntries); it.current(); ++it) {
 	delete it.current();
 	++it;
  }
@@ -288,7 +291,7 @@ BosonConfigScript::~BosonConfigScript()
 
 void BosonConfigScript::copyScript(const BosonConfigScript& script)
 {
- for (QPtrListIterator<BoConfigEntry> it(script.d->mEntries); it.current(); ++it) {
+ for (Q3PtrListIterator<BoConfigEntry> it(script.d->mEntries); it.current(); ++it) {
 	BoConfigEntry* s = it.current();
 	switch ((BoConfigEntry::Type)s->type()) {
 
@@ -317,7 +320,7 @@ void BosonConfigScript::copyScript(const BosonConfigScript& script)
 void BosonConfigScript::execute(BosonConfig* config) const
 {
  BO_CHECK_NULL_RET(config);
- for (QPtrListIterator<BoConfigEntry> it(d->mEntries); it.current(); ++it) {
+ for (Q3PtrListIterator<BoConfigEntry> it(d->mEntries); it.current(); ++it) {
 	QString key = it.current()->key();
 	BoConfigEntry* myValue = it.current();
 	BoConfigEntry* value = config->value(key);
@@ -331,7 +334,7 @@ void BosonConfigScript::execute(BosonConfig* config) const
 
 const BoConfigEntry* BosonConfigScript::valueForKey(const QString& key) const
 {
- for (QPtrListIterator<BoConfigEntry> it(d->mEntries); it.current(); ++it) {
+ for (Q3PtrListIterator<BoConfigEntry> it(d->mEntries); it.current(); ++it) {
 	if (it.current()->key() == key) {
 		return it.current();
 	}
@@ -590,7 +593,7 @@ void BosonConfigScript::addStringValue(const QString& key, const QString& v)
  addValue(new BoConfigStringEntry(0, key, v, false));
 }
 
-void BosonConfigScript::addIntListValue(const QString& key, const QValueList<int>& v)
+void BosonConfigScript::addIntListValue(const QString& key, const Q3ValueList<int>& v)
 {
  addValue(new BoConfigIntListEntry(0, key, v, false));
 }
@@ -608,13 +611,13 @@ class BosonConfig::BosonConfigPrivate
 {
 public:
 	BosonConfigPrivate()
-		: mDynamicEntries(QDict<BoConfigEntry>(101))
+		: mDynamicEntries(Q3Dict<BoConfigEntry>(101))
 	{
 	}
 
-	QPtrList<BoConfigEntry> mConfigEntries;
-	QDict<BoConfigEntry> mDynamicEntries; // added dynamically.
-	QPtrList<BosonConfigScript> mConfigScripts;
+	Q3PtrList<BoConfigEntry> mConfigEntries;
+	Q3Dict<BoConfigEntry> mDynamicEntries; // added dynamically.
+	Q3PtrList<BosonConfigScript> mConfigScripts;
 };
 
 BosonConfig::BosonConfig(KConfig* conf)
@@ -655,7 +658,7 @@ void BosonConfig::setPostInitFunction(void (*func)())
 
 BoVector3Float BosonConfig::readBoVector3FloatEntry(const KConfig* cfg, const QString& key, const BoVector3Float& aDefault)
 {
- QValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
+ Q3ValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
  if (list.count() != 3) {
 	if (list.count() != 0) {
 		boError() << k_funcinfo
@@ -674,7 +677,7 @@ BoVector3Float BosonConfig::readBoVector3FloatEntry(const KConfig* cfg, const QS
 
 BoVector3Fixed BosonConfig::readBoVector3FixedEntry(const KConfig* cfg, const QString& key, const BoVector3Fixed& aDefault)
 {
- QValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
+ Q3ValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
  if (list.count() != 3) {
 	if (list.count() != 0) {
 		boError() << k_funcinfo
@@ -698,7 +701,7 @@ BoVector4Float BosonConfig::readBoVector4FloatEntry(const KConfig* cfg, const QS
 
 BoVector4Float BosonConfig::readBoVector4FloatEntry(const KConfig* cfg, const QString& key, const BoVector4Float& aDefault)
 {
- QValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
+ Q3ValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
  if (list.count() != 4) {
 	if (list.count() != 0) {
 		boError() << k_funcinfo
@@ -717,7 +720,7 @@ BoVector4Fixed BosonConfig::readBoVector4FixedEntry(const KConfig* cfg, const QS
 
 BoVector4Fixed BosonConfig::readBoVector4FixedEntry(const KConfig* cfg, const QString& key, const BoVector4Fixed& aDefault)
 {
- QValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
+ Q3ValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
  if (list.count() != 4) {
 	if (list.count() != 0) {
 		boError() << k_funcinfo
@@ -731,7 +734,7 @@ BoVector4Fixed BosonConfig::readBoVector4FixedEntry(const KConfig* cfg, const QS
 
 void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector3Float& value)
 {
-  QValueList<float> list;
+  Q3ValueList<float> list;
   list.append(value[0]);
   list.append(value[1]);
   list.append(value[2]);
@@ -740,7 +743,7 @@ void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector3Fl
 
 void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector3Fixed& value)
 {
-  QValueList<float> list;
+  Q3ValueList<float> list;
   list.append(value[0]);
   list.append(value[1]);
   list.append(value[2]);
@@ -749,7 +752,7 @@ void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector3Fi
 
 void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector4Float& value)
 {
-  QValueList<float> list;
+  Q3ValueList<float> list;
   list.append(value[0]);
   list.append(value[1]);
   list.append(value[2]);
@@ -759,7 +762,7 @@ void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector4Fl
 
 void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector4Fixed& value)
 {
-  QValueList<float> list;
+  Q3ValueList<float> list;
   list.append(value[0]);
   list.append(value[1]);
   list.append(value[2]);
@@ -781,7 +784,7 @@ QString BosonConfig::readLocalPlayerName(KConfig* conf)
 	if (!kapp) {
 		return getenv("LOGNAME");
 	}
-	conf = kapp->config();
+	conf = KGlobal::config();
  }
  QString oldGroup = conf->group();
  conf->setGroup("Boson");
@@ -796,7 +799,7 @@ void BosonConfig::saveLocalPlayerName(const QString& name, KConfig* conf)
 	if (!kapp) {
 		return;
 	}
-	conf = kapp->config();
+	conf = KGlobal::config();
  }
  QString oldGroup = conf->group();
  conf->setGroup("Boson");
@@ -810,7 +813,7 @@ QString BosonConfig::readComputerPlayerName(KConfig* conf)
 	if (!kapp) {
 		return "Computer";
 	}
-	conf = kapp->config();
+	conf = KGlobal::config();
  }
  QString oldGroup = conf->group();
  conf->setGroup("Boson");
@@ -825,7 +828,7 @@ void BosonConfig::saveComputerPlayerName(const QString& name, KConfig* conf)
 	if (!kapp) {
 		return;
 	}
-	conf = kapp->config();
+	conf = KGlobal::config();
  }
  QString oldGroup = conf->group();
  conf->setGroup("Boson");
@@ -839,7 +842,7 @@ QColor BosonConfig::readLocalPlayerColor(KConfig* conf)
 	if (!kapp) {
 		return Qt::red;
 	}
-	conf = kapp->config();
+	conf = KGlobal::config();
  }
  QString oldGroup = conf->group();
  conf->setGroup("Boson");
@@ -854,7 +857,7 @@ void BosonConfig::saveLocalPlayerColor(const QColor& color, KConfig* conf)
 	if (!kapp) {
 		return;
 	}
-	conf = kapp->config();
+	conf = KGlobal::config();
  }
  QString oldGroup = conf->group();
  conf->setGroup("Boson");
@@ -868,7 +871,7 @@ QString BosonConfig::readLocalPlayerMap(KConfig* conf)
 	if (!kapp) {
 		return QString::null;
 	}
-	conf = kapp->config();
+	conf = KGlobal::config();
  }
  QString oldGroup = conf->group();
  conf->setGroup("Boson");
@@ -883,7 +886,7 @@ void BosonConfig::saveLocalPlayerMap(const QString& id, KConfig* conf)
 	if (!kapp) {
 		return;
 	}
-	conf = kapp->config();
+	conf = KGlobal::config();
  }
  QString oldGroup = conf->group();
  conf->setGroup("Boson");
@@ -897,7 +900,7 @@ QString BosonConfig::readEditorMap(KConfig* conf)
 	if (!kapp) {
 		return QString::null;
 	}
-	conf = kapp->config();
+	conf = KGlobal::config();
  }
  QString oldGroup = conf->group();
  conf->setGroup("Editor");
@@ -912,7 +915,7 @@ void BosonConfig::saveEditorMap(const QString& id, KConfig* conf)
 	if (!kapp) {
 		return;
 	}
-	conf = kapp->config();
+	conf = KGlobal::config();
  }
  QString oldGroup = conf->group();
  conf->setGroup("Editor");
@@ -926,7 +929,7 @@ bool BosonConfig::readEditorCreateNewMap(KConfig* conf)
 	if (!kapp) {
 		return true;
 	}
-	conf = kapp->config();
+	conf = KGlobal::config();
  }
  QString oldGroup = conf->group();
  conf->setGroup("Editor");
@@ -941,7 +944,7 @@ void BosonConfig::saveEditorCreateNewMap(bool createnew, KConfig* conf)
 	if (!kapp) {
 		return;
 	}
-	conf = kapp->config();
+	conf = KGlobal::config();
  }
  QString oldGroup = conf->group();
  conf->setGroup("Editor");
@@ -955,12 +958,12 @@ void BosonConfig::reset(KConfig* conf)
 	if (!kapp) {
 		return;
 	}
-	conf = kapp->config();
+	conf = KGlobal::config();
  }
  QString oldGroup = conf->group();
  // the old group is already stored here so we don't have to re-set it in every
  // read function
- QPtrListIterator<BoConfigEntry> it(d->mConfigEntries);
+ Q3PtrListIterator<BoConfigEntry> it(d->mConfigEntries);
  for (; it.current(); ++it) {
 	if (it.current()->saveConfig()) {
 		it.current()->load(conf);
@@ -976,12 +979,12 @@ void BosonConfig::save(bool /*editor*/, KConfig* conf)
 	if (!kapp) {
 		return;
 	}
-	conf = kapp->config();
+	conf = KGlobal::config();
  }
  QString oldGroup = conf->group();
  // the old group is already stored here so we don't have to re-set it in every
  // save function
- QPtrListIterator<BoConfigEntry> it(d->mConfigEntries);
+ Q3PtrListIterator<BoConfigEntry> it(d->mConfigEntries);
  for (; it.current(); ++it) {
 	if (it.current()->saveConfig()) {
 		it.current()->save(conf);
@@ -993,7 +996,7 @@ void BosonConfig::save(bool /*editor*/, KConfig* conf)
 
 void BosonConfig::setUnitSoundActivated(UnitSoundEvent e, bool activated)
 {
- QValueList<int> l = intListValue("DeactivateUnitSounds");
+ Q3ValueList<int> l = intListValue("DeactivateUnitSounds");
  if (activated) {
 	l.remove((int)e);
  } else {
@@ -1007,42 +1010,42 @@ bool BosonConfig::unitSoundActivated(UnitSoundEvent e) const
  return !intListValue("DeactivateUnitSounds").contains((int)e);
 }
 
-QValueList<unsigned long int> BosonConfig::readUnsignedLongNumList(const KConfig* cfg, const QString key)
+Q3ValueList<unsigned long int> BosonConfig::readUnsignedLongNumList(const KConfig* cfg, const QString key)
 {
- QValueList<unsigned long int> list;
- QValueList<int> tmplist = cfg->readIntListEntry(key);
- QValueList<int>::Iterator it;
+ Q3ValueList<unsigned long int> list;
+ Q3ValueList<int> tmplist = cfg->readIntListEntry(key);
+ Q3ValueList<int>::Iterator it;
  for (it = tmplist.begin(); it != tmplist.end(); it++) {
 	list.append((unsigned long int)(*it));
  }
  return list;
 }
 
-void BosonConfig::writeUnsignedLongNumList(KConfig* cfg, const QString key, QValueList<unsigned long int> list)
+void BosonConfig::writeUnsignedLongNumList(KConfig* cfg, const QString key, Q3ValueList<unsigned long int> list)
 {
- QValueList<int> tmplist;
- QValueList<unsigned long int>::Iterator it;
+ Q3ValueList<int> tmplist;
+ Q3ValueList<unsigned long int>::Iterator it;
  for (it = list.begin(); it != list.end(); it++) {
 	tmplist.append((int)(*it));
  }
 	cfg->writeEntry(key, tmplist);
 }
 
-QValueList<float> BosonConfig::readFloatNumList(const KConfig* cfg, const QString key)
+Q3ValueList<float> BosonConfig::readFloatNumList(const KConfig* cfg, const QString key)
 {
  QStringList strlist = cfg->readListEntry(key);
- QValueList<float> list;
+ Q3ValueList<float> list;
  for (QStringList::Iterator it = strlist.begin(); it != strlist.end(); it++) {
 	list.append((*it).toFloat());
  }
  return list;
 }
 
-void BosonConfig::writeFloatNumList(QValueList<float> list, KConfig* cfg, const QString key)
+void BosonConfig::writeFloatNumList(Q3ValueList<float> list, KConfig* cfg, const QString key)
 {
  QStringList strlist;
  QString str;
- for (QValueList<float>::Iterator it = list.begin(); it != list.end(); it++) {
+ for (Q3ValueList<float>::Iterator it = list.begin(); it != list.end(); it++) {
 	strlist.append(str.setNum(*it));
  }
  cfg->writeEntry(key, strlist);
@@ -1066,7 +1069,7 @@ void BosonConfig::addDynamicEntry(BoConfigEntry* entry, KConfig* conf)
 	if (!kapp) {
 		return;
 	}
-	conf = kapp->config();
+	conf = KGlobal::config();
  }
  entry->load(conf);
 }
@@ -1113,7 +1116,7 @@ BoConfigColorEntry* BosonConfig::addDynamicEntryColor(const QString& configKey, 
  return e;
 }
 
-BoConfigIntListEntry* BosonConfig::addDynamicEntryIntList(const QString& configKey, const QValueList<int>& defaultValue, bool saveConfig)
+BoConfigIntListEntry* BosonConfig::addDynamicEntryIntList(const QString& configKey, const Q3ValueList<int>& defaultValue, bool saveConfig)
 {
  BoConfigIntListEntry* e = new BoConfigIntListEntry(this, configKey, defaultValue, saveConfig);
  addDynamicEntry(e);
@@ -1196,7 +1199,7 @@ void BosonConfig::setColorValue(const QString& key, const QColor& v)
  ((BoConfigColorEntry*)entry)->setValue(v);
 }
 
-void BosonConfig::setIntListValue(const QString& key, const QValueList<int>& v)
+void BosonConfig::setIntListValue(const QString& key, const Q3ValueList<int>& v)
 {
  BoConfigEntry* entry = value(key);
  BO_CHECK_NULL_RET(entry);
@@ -1296,12 +1299,12 @@ QColor BosonConfig::colorValue(const QString& key, const QColor& _default) const
  return ((BoConfigColorEntry*)entry)->value();
 }
 
-QValueList<int> BosonConfig::intListValue(const QString& key) const
+Q3ValueList<int> BosonConfig::intListValue(const QString& key) const
 {
- return intListValue(key, QValueList<int>());
+ return intListValue(key, Q3ValueList<int>());
 }
 
-QValueList<int> BosonConfig::intListValue(const QString& key, const QValueList<int>& _default) const
+Q3ValueList<int> BosonConfig::intListValue(const QString& key, const Q3ValueList<int>& _default) const
 {
  BoConfigEntry* entry = value(key);
  if (!entry) {
@@ -1404,12 +1407,12 @@ QColor BosonConfig::colorDefaultValue(const QString& key, const QColor& _default
  return ((BoConfigColorEntry*)entry)->defaultValue();
 }
 
-QValueList<int> BosonConfig::intListDefaultValue(const QString& key) const
+Q3ValueList<int> BosonConfig::intListDefaultValue(const QString& key) const
 {
- return intListDefaultValue(key, QValueList<int>());
+ return intListDefaultValue(key, Q3ValueList<int>());
 }
 
-QValueList<int> BosonConfig::intListDefaultValue(const QString& key, const QValueList<int>& _default) const
+Q3ValueList<int> BosonConfig::intListDefaultValue(const QString& key, const Q3ValueList<int>& _default) const
 {
  BoConfigEntry* entry = value(key);
  if (!entry) {
@@ -1441,7 +1444,7 @@ void BosonConfig::addConfigScript(BosonConfigScript* script)
 
 const BosonConfigScript* BosonConfig::configScript(const QString& name) const
 {
- for (QPtrListIterator<BosonConfigScript> it(d->mConfigScripts); it.current(); ++it) {
+ for (Q3PtrListIterator<BosonConfigScript> it(d->mConfigScripts); it.current(); ++it) {
 	if (it.current()->name() == name) {
 		return it.current();
 	}

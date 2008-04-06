@@ -31,8 +31,10 @@
 #include <kgame/kgamepropertyhandler.h>
 
 #include <qdom.h>
-#include <qintdict.h>
-#include <qpointarray.h>
+#include <q3intdict.h>
+#include <q3pointarray.h>
+//Added by qt3to4:
+#include <Q3TextStream>
 
 BosonPropertyXML::BosonPropertyXML(QObject* parent) : QObject(parent)
 {
@@ -60,10 +62,10 @@ QString BosonPropertyXML::propertyValue(KGamePropertyBase* prop)
 	value = QString::number(((KGameProperty<bofixed>*)prop)->value());
  } else if (*t == typeid(QString)) {
 	value = ((KGameProperty<QString>*)prop)->value();
- } else if (*t == typeid(Q_INT8)) {
-	value = QString::number(((KGameProperty<Q_INT8>*)prop)->value());
- } else if (*t == typeid(Q_UINT8)) {
-	value = QString::number(((KGameProperty<Q_UINT8>*)prop)->value());
+ } else if (*t == typeid(qint8)) {
+	value = QString::number(((KGameProperty<qint8>*)prop)->value());
+ } else if (*t == typeid(quint8)) {
+	value = QString::number(((KGameProperty<quint8>*)prop)->value());
  }
  if (value.isNull()) {
 	emit signalRequestValue(prop, value);
@@ -101,8 +103,8 @@ void BosonPropertyXML::propertySetValue(KGamePropertyBase* prop, const QString& 
 	((KGameProperty<bofixed>*)prop)->setValue(value.toFloat(&ok));
  } else if (*t == typeid(QString)) {
 	((KGameProperty<QString>*)prop)->setValue(value);
- } else if (*t == typeid(Q_INT8)) {
-	Q_INT8 v = 0;
+ } else if (*t == typeid(qint8)) {
+	qint8 v = 0;
 	if (value == QString::fromLatin1("True")) {
 		v = 1;
 	} else if (value == QString::fromLatin1("False")) {
@@ -115,11 +117,11 @@ void BosonPropertyXML::propertySetValue(KGamePropertyBase* prop, const QString& 
 		if (!ok) {
 			s = 0;
 		}
-		v = (Q_INT8)s;
+		v = (qint8)s;
 	}
-	((KGameProperty<Q_INT8>*)prop)->setValue(v);
- } else if (*t == typeid(Q_UINT8)) {
-	Q_UINT8 v = 0;
+	((KGameProperty<qint8>*)prop)->setValue(v);
+ } else if (*t == typeid(quint8)) {
+	quint8 v = 0;
 	unsigned short s = value.toUShort(&ok);
 	if (s > 255) {
 		ok = false;
@@ -127,8 +129,8 @@ void BosonPropertyXML::propertySetValue(KGamePropertyBase* prop, const QString& 
 	if (!ok) {
 		s = 0;
 	}
-	v = (Q_UINT8)s;
-	((KGameProperty<Q_UINT8>*)prop)->setValue(v);
+	v = (quint8)s;
+	((KGameProperty<quint8>*)prop)->setValue(v);
  } else {
 	emit signalRequestSetValue(prop, value);
  }
@@ -144,8 +146,8 @@ bool BosonPropertyXML::saveAsXML(QDomElement& root, const KGamePropertyHandler* 
 	return QString::null;
  }
  QDomDocument doc = root.ownerDocument();
- QIntDict<KGamePropertyBase>& dict = dataHandler->dict();
- QIntDictIterator<KGamePropertyBase> it(dict);
+ Q3IntDict<KGamePropertyBase>& dict = dataHandler->dict();
+ Q3IntDictIterator<KGamePropertyBase> it(dict);
  for (; it.current(); ++it) {
 	QString value = propertyValue(it.current());
 	if (value.isNull()) {
@@ -197,7 +199,7 @@ bool BosonPropertyXML::loadFromXML(const QDomElement& root, KGamePropertyHandler
 }
 
 
-QTextStream& operator<<(QTextStream& s, const QPoint& p)
+Q3TextStream& operator<<(Q3TextStream& s, const QPoint& p)
 {
  // inefficient but easy to code and read.
  // just stream x coordinate, followed by y coordinate, separated by
@@ -208,7 +210,7 @@ QTextStream& operator<<(QTextStream& s, const QPoint& p)
  return s;
 }
 
-QTextStream& operator>>(QTextStream& s, QPoint& p)
+Q3TextStream& operator>>(Q3TextStream& s, QPoint& p)
 {
  int x, y;
  QChar c;
@@ -220,7 +222,7 @@ QTextStream& operator>>(QTextStream& s, QPoint& p)
  return s;
 }
 
-QTextStream& operator<<(QTextStream& s, const BoVector2Fixed& v)
+Q3TextStream& operator<<(Q3TextStream& s, const BoVector2Fixed& v)
 {
  // inefficient but easy to code and read.
  // just stream x coordinate, followed by y coordinate, separated by
@@ -231,7 +233,7 @@ QTextStream& operator<<(QTextStream& s, const BoVector2Fixed& v)
  return s;
 }
 
-QTextStream& operator>>(QTextStream& s, BoVector2Fixed& v)
+Q3TextStream& operator>>(Q3TextStream& s, BoVector2Fixed& v)
 {
  float x, y;
  QChar c;
@@ -257,7 +259,7 @@ void BosonCustomPropertyXML::slotRequestValue(KGamePropertyBase* prop, QString& 
  const type_info* t = prop->typeinfo();
  if (*t == typeid(QPoint)) {
 	KGameProperty<QPoint>* p = (KGameProperty<QPoint>*)prop;
-	QTextStream s(&value, IO_WriteOnly);
+	Q3TextStream s(&value, QIODevice::WriteOnly);
 	s << p->value();
  } else if (*t == typeid(BoVector2Fixed)) {
 	KGameProperty<BoVector2Fixed>* p = (KGameProperty<BoVector2Fixed>*)prop;
@@ -305,7 +307,7 @@ void BosonCustomPropertyXML::slotRequestValue(KGamePropertyBase* prop, QString& 
 		// inefficient but easy to code and read.
 		// first we stream the length of the array and then every point.
 		// each separated by a space.
-		QTextStream s(&value, IO_WriteOnly);
+		Q3TextStream s(&value, QIODevice::WriteOnly);
 		s << QString::number(list->count());
 		KGamePropertyList<QPoint>::Iterator it;
 		for (it = list->begin(); it != list->end(); ++it) {
@@ -317,41 +319,41 @@ void BosonCustomPropertyXML::slotRequestValue(KGamePropertyBase* prop, QString& 
 		// inefficient but easy to code and read.
 		// first we stream the length of the array and then every vector.
 		// each separated by a space.
-		QTextStream s(&value, IO_WriteOnly);
+		Q3TextStream s(&value, QIODevice::WriteOnly);
 		s << QString::number(list->count());
 		KGamePropertyList<BoVector2Fixed>::Iterator it;
 		for (it = list->begin(); it != list->end(); ++it) {
 			s << ' ';
 			s << *it;
 		}
-	} else if (typeid(*prop) == typeid(KGamePropertyList<Q_INT32>)) {
-		KGamePropertyList<Q_INT32>* list = (KGamePropertyList<Q_INT32>*)prop;
-		QTextStream s(&value, IO_WriteOnly);
+	} else if (typeid(*prop) == typeid(KGamePropertyList<qint32>)) {
+		KGamePropertyList<qint32>* list = (KGamePropertyList<qint32>*)prop;
+		Q3TextStream s(&value, QIODevice::WriteOnly);
 		s << QString::number(list->count());
-		KGamePropertyList<Q_INT32>::Iterator it;
+		KGamePropertyList<qint32>::Iterator it;
 		for (it = list->begin(); it != list->end(); ++it) {
 			s << ' ';
 			s << *it;
 		}
-	} else if (typeid(*prop) == typeid(KGamePropertyList<Q_UINT32>)) {
-		KGamePropertyList<Q_UINT32>* list = (KGamePropertyList<Q_UINT32>*)prop;
-		QTextStream s(&value, IO_WriteOnly);
+	} else if (typeid(*prop) == typeid(KGamePropertyList<quint32>)) {
+		KGamePropertyList<quint32>* list = (KGamePropertyList<quint32>*)prop;
+		Q3TextStream s(&value, QIODevice::WriteOnly);
 		s << QString::number(list->count());
-		KGamePropertyList<Q_UINT32>::Iterator it;
+		KGamePropertyList<quint32>::Iterator it;
 		for (it = list->begin(); it != list->end(); ++it) {
 			s << ' ';
 			s << *it;
 		}
-	} else if (typeid(*prop) == typeid(KGamePropertyArray<Q_INT32>)) {
-		KGamePropertyArray<Q_INT32>* array = (KGamePropertyArray<Q_INT32>*)prop;
-		QTextStream s(&value, IO_WriteOnly);
+	} else if (typeid(*prop) == typeid(KGamePropertyArray<qint32>)) {
+		KGamePropertyArray<qint32>* array = (KGamePropertyArray<qint32>*)prop;
+		Q3TextStream s(&value, QIODevice::WriteOnly);
 		for (unsigned int i = 0; i < array->size(); i++) {
 			s << (*array)[i];
 			s << ' ';
 		}
-	} else if (typeid(*prop) == typeid(KGamePropertyArray<Q_UINT32>)) {
-		KGamePropertyArray<Q_UINT32>* array = (KGamePropertyArray<Q_UINT32>*)prop;
-		QTextStream s(&value, IO_WriteOnly);
+	} else if (typeid(*prop) == typeid(KGamePropertyArray<quint32>)) {
+		KGamePropertyArray<quint32>* array = (KGamePropertyArray<quint32>*)prop;
+		Q3TextStream s(&value, QIODevice::WriteOnly);
 		for (unsigned int i = 0; i < array->size(); i++) {
 			s << (*array)[i];
 			s << ' ';
@@ -366,7 +368,7 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
  BO_CHECK_NULL_RET(prop);
  const type_info* t = prop->typeinfo();
  if (*t == typeid(QPoint)) {
-	QTextStream s((QString*)&value, IO_WriteOnly);
+	Q3TextStream s((QString*)&value, QIODevice::WriteOnly);
 	KGameProperty<QPoint>* p = (KGameProperty<QPoint>*)prop;
 	QPoint point;
 	s >> point;
@@ -486,7 +488,7 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 		unsigned int count = 0;
 		QChar c;
 		QPoint point;
-		QTextStream s((QString*)&value, IO_ReadOnly);
+		Q3TextStream s((QString*)&value, QIODevice::ReadOnly);
 		s >> count;
 		for (unsigned int i = 0; i < count; i++) {
 			s >> c;
@@ -499,54 +501,54 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 		unsigned int count = 0;
 		QChar c;
 		BoVector2Fixed point;
-		QTextStream s((QString*)&value, IO_ReadOnly);
+		Q3TextStream s((QString*)&value, QIODevice::ReadOnly);
 		s >> count;
 		for (unsigned int i = 0; i < count; i++) {
 			s >> c;
 			s >> point;
 			list->append(point);
 		}
-	} else if (typeid(*prop) == typeid(KGamePropertyList<Q_UINT32>)) {
-		KGamePropertyList<Q_UINT32>* list = (KGamePropertyList<Q_UINT32>*)prop;
+	} else if (typeid(*prop) == typeid(KGamePropertyList<quint32>)) {
+		KGamePropertyList<quint32>* list = (KGamePropertyList<quint32>*)prop;
 		list->clear();
 		unsigned int count = 0;
 		QChar c;
-		Q_UINT32 v;
-		QTextStream s((QString*)&value, IO_ReadOnly);
+		quint32 v;
+		Q3TextStream s((QString*)&value, QIODevice::ReadOnly);
 		s >> count;
 		for (unsigned int i = 0; i < count; i++) {
 			s >> c; // space
 			s >> v;
 			list->append(v);
 		}
-	} else if (typeid(*prop) == typeid(KGamePropertyList<Q_INT32>)) {
-		KGamePropertyList<Q_INT32>* list = (KGamePropertyList<Q_INT32>*)prop;
+	} else if (typeid(*prop) == typeid(KGamePropertyList<qint32>)) {
+		KGamePropertyList<qint32>* list = (KGamePropertyList<qint32>*)prop;
 		list->clear();
 		unsigned int count = 0;
 		QChar c;
-		Q_INT32 v;
-		QTextStream s((QString*)&value, IO_ReadOnly);
+		qint32 v;
+		Q3TextStream s((QString*)&value, QIODevice::ReadOnly);
 		s >> count;
 		for (unsigned int i = 0; i < count; i++) {
 			s >> c; // space
 			s >> v;
 			list->append(v);
 		}
-	} else if (typeid(*prop) == typeid(KGamePropertyArray<Q_INT32>)) {
-		KGamePropertyArray<Q_INT32>* array = (KGamePropertyArray<Q_INT32>*)prop;
+	} else if (typeid(*prop) == typeid(KGamePropertyArray<qint32>)) {
+		KGamePropertyArray<qint32>* array = (KGamePropertyArray<qint32>*)prop;
 		QChar c;
-		Q_INT32 v;
-		QTextStream s((QString*)&value, IO_ReadOnly);
+		qint32 v;
+		Q3TextStream s((QString*)&value, QIODevice::ReadOnly);
 		for (unsigned int i = 0; i < array->size(); i++) {
 			s >> v;
 			s >> c; // space
 			(*array)[i] = v;
 		}
-	} else if (typeid(*prop) == typeid(KGamePropertyArray<Q_UINT32>)) {
-		KGamePropertyArray<Q_UINT32>* array = (KGamePropertyArray<Q_UINT32>*)prop;
+	} else if (typeid(*prop) == typeid(KGamePropertyArray<quint32>)) {
+		KGamePropertyArray<quint32>* array = (KGamePropertyArray<quint32>*)prop;
 		QChar c;
-		Q_UINT32 v;
-		QTextStream s((QString*)&value, IO_ReadOnly);
+		quint32 v;
+		Q3TextStream s((QString*)&value, QIODevice::ReadOnly);
 		for (unsigned int i = 0; i < array->size(); i++) {
 			s >> v;
 			s >> c; // space

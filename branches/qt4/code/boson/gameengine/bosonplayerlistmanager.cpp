@@ -21,6 +21,8 @@
 #include "bosonplayerlistmanager.moc"
 
 #include "player.h"
+//Added by qt3to4:
+#include <Q3PtrList>
 
 BosonPlayerListManager::BosonPlayerListManager(QObject* parent)
 	: QObject(parent)
@@ -31,18 +33,18 @@ BosonPlayerListManager::~BosonPlayerListManager()
 {
 }
 
-const QPtrList<Player>& BosonPlayerListManager::allPlayerList() const
+const Q3PtrList<Player>& BosonPlayerListManager::allPlayerList() const
 {
  return mAllPlayerList;
 }
 
 
-const QPtrList<Player>& BosonPlayerListManager::gamePlayerList() const
+const Q3PtrList<Player>& BosonPlayerListManager::gamePlayerList() const
 {
  return mGamePlayerList;
 }
 
-const QPtrList<Player>& BosonPlayerListManager::activeGamePlayerList() const
+const Q3PtrList<Player>& BosonPlayerListManager::activeGamePlayerList() const
 {
  return mActiveGamePlayerList;
 }
@@ -62,17 +64,17 @@ unsigned int BosonPlayerListManager::activeGamePlayerCount() const
  return mActiveGamePlayerList.count();
 }
 
-void BosonPlayerListManager::recalculatePlayerLists(const QPtrList<KPlayer>& playerList)
+void BosonPlayerListManager::recalculatePlayerLists(const Q3PtrList<KPlayer>& playerList)
 {
  recalculatePlayerListsWithPlayerRemoved(playerList, 0);
 }
 
-void BosonPlayerListManager::recalculatePlayerListsWithPlayerRemoved(const QPtrList<KPlayer>& playerList, KPlayer* removedPlayer)
+void BosonPlayerListManager::recalculatePlayerListsWithPlayerRemoved(const Q3PtrList<KPlayer>& playerList, KPlayer* removedPlayer)
 {
  mAllPlayerList.clear();
  mGamePlayerList.clear();
  mActiveGamePlayerList.clear();
- for (QPtrListIterator<KPlayer> it(playerList); it.current(); ++it) {
+ for (Q3PtrListIterator<KPlayer> it(playerList); it.current(); ++it) {
 	if (it.current() == removedPlayer) {
 		continue;
 	}
@@ -93,7 +95,7 @@ void BosonPlayerListManager::recalculatePlayerListsWithPlayerRemoved(const QPtrL
 // difference.
 Player* BosonPlayerListManager::findPlayerByUserId(int id) const
 {
- for (QPtrListIterator<Player> it(allPlayerList()); it.current(); ++it)
+ for (Q3PtrListIterator<Player> it(allPlayerList()); it.current(); ++it)
  {
    if (it.current()->userId() == id)
    {

@@ -44,7 +44,7 @@ protected slots:
 	virtual void slotStartNetwork();
 
 	void slotConnectionBroken();
-	void slotClientJoinedGame(Q_UINT32 clientId, KGame* client);
+	void slotClientJoinedGame(quint32 clientId, KGame* client);
 	void slotCancel();
 
 private:

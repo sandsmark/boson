@@ -34,11 +34,13 @@
 
 #include <klocale.h>
 
-#include <qintdict.h>
-#include <qvaluelist.h>
-#include <qptrlist.h>
+#include <q3intdict.h>
+#include <q3valuelist.h>
+#include <q3ptrlist.h>
 #include <qstring.h>
 #include <qtimer.h>
+//Added by qt3to4:
+#include <QMouseEvent>
 
 
 class BosonOrderWidgetPrivate
@@ -51,7 +53,7 @@ public:
 		mCommandFrame = 0;
 	}
 
-	QIntDict<BosonOrderButton> mOrderButton;
+	Q3IntDict<BosonOrderButton> mOrderButton;
 
 	BosonGroundTheme* mGroundTheme;
 	BosonCommandFrame* mCommandFrame;
@@ -104,17 +106,17 @@ void BosonOrderWidget::ensureButtons(unsigned int number)
 		connect(b, SIGNAL(signalMouseEntered()),
 				this, SLOT(slotMouseEnteredButton()));
 		connect(b, SIGNAL(signalMouseLeft()),
-				this, SLOT(slotMouseLeftButton()));
+				this, SLOT(slotMouseQt::LeftButton()));
 	}
  }
 }
 
-void BosonOrderWidget::setOrderButtons(const QValueList<BoSpecificAction>& actions)
+void BosonOrderWidget::setOrderButtons(const Q3ValueList<BoSpecificAction>& actions)
 {
- setOrderButtons(actions, QValueList<int>());
+ setOrderButtons(actions, Q3ValueList<int>());
 }
 
-void BosonOrderWidget::setOrderButtons(const QValueList<BoSpecificAction>& actions, const QValueList<int>& unavailableActions)
+void BosonOrderWidget::setOrderButtons(const Q3ValueList<BoSpecificAction>& actions, const Q3ValueList<int>& unavailableActions)
 {
  boDebug(220) << k_funcinfo << actions.count() << " actions" << endl;
 
@@ -162,7 +164,7 @@ void BosonOrderWidget::setOrderButtons(const QValueList<BoSpecificAction>& actio
 	}
  }
 
- for (QValueList<int>::const_iterator it = unavailableActions.begin(); it != unavailableActions.end(); ++it) {
+ for (Q3ValueList<int>::const_iterator it = unavailableActions.begin(); it != unavailableActions.end(); ++it) {
 	int index = *it;
 	if (index < 0 || (unsigned int)index >= actions.count()) {
 		boError() << k_funcinfo << "invalid unavailableActions index " << index << endl;
@@ -176,7 +178,7 @@ void BosonOrderWidget::setOrderButtons(const QValueList<BoSpecificAction>& actio
 
 void BosonOrderWidget::hideOrderButtons()
 {
- QIntDictIterator<BosonOrderButton> it(d->mOrderButton);
+ Q3IntDictIterator<BosonOrderButton> it(d->mOrderButton);
  while (it.current()) {
 	it.current()->setUnit(0);
 	++it;
@@ -204,7 +206,7 @@ void BosonOrderWidget::showCellConfigWidgets()
  // we should show widgets for groundtexture mixing here (if they are created)
 }
 
-void BosonOrderWidget::showUnits(const QPtrList<Unit>& units)
+void BosonOrderWidget::showUnits(const Q3PtrList<Unit>& units)
 {
  ensureButtons(units.count());
  unsigned int i;
@@ -214,7 +216,7 @@ void BosonOrderWidget::showUnits(const QPtrList<Unit>& units)
 	}
  }
  i = 0;
- QPtrListIterator<Unit> it(units);
+ Q3PtrListIterator<Unit> it(units);
  for (; it.current(); ++it, i++) {
 	if ((d->mOrderButton[i]->type() == BosonOrderButton::ShowUnit) && (d->mOrderButton[i]->unit() == it.current())) {
 		boDebug(220) << "unit already displayed - update..." << endl;
@@ -299,7 +301,7 @@ void BosonOrderWidget::slotMouseEnteredButton()
  }
 }
 
-void BosonOrderWidget::slotMouseLeftButton()
+void BosonOrderWidget::slotMouseQt::LeftButton()
 {
  BosonOrderButton* button = (BosonOrderButton*)sender();
  boDebug() << k_funcinfo << "button: " << button << endl;

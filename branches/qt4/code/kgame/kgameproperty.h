@@ -1,7 +1,7 @@
 /*
     This file is part of the KDE games library
     Copyright (C) 2001 Andreas Beckermann (b_mann@gmx.de)
-    Copyright (C) 2001 Martin Heni (martin@heni-online.de)
+    Copyright (C) 2001 Martin Heni (kde at heni-online.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -21,9 +21,11 @@
 #ifndef __KGAMEPROPERTY_H_
 #define __KGAMEPROPERTY_H_
 
-#include <qdatastream.h>
+#include <QtCore/QDataStream>
 
+#include <kdebug.h>
 #include <typeinfo>
+#include <libkdegames_export.h>
 
 class KGame;
 class KPlayer;
@@ -38,7 +40,7 @@ using namespace std;
  * 
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class KGamePropertyBase
+class KDEGAMES_EXPORT KGamePropertyBase
 {
 public:
 	enum PropertyDataIds  { // these belong to KPlayer/KGame!
@@ -65,7 +67,7 @@ public:
 	};
 
 	/**
-	 * Commands for advanced properties (Q_INT8)
+	 * Commands for advanced properties (qint8)
 	 **/
 	enum PropertyCommandIds 
 	{
@@ -150,8 +152,8 @@ public:
 
 	/**
 	 * Sets this property to emit a signal on value changed.
-	 * As the proerties do not inehrit QObject for optimisation
-	 * this signal is emited via the KPlayer or KGame object
+	 * As the properties do not inherit QObject for optimization
+	 * this signal is emitted via the KPlayer or KGame object
 	 **/
 	void setEmittingSignal(bool p)	{ mFlags.bits.emitsignal=p; }
 
@@ -260,25 +262,25 @@ public:
 	 * @param name if not 0 you can assign a name to this property
 	 *
 	 **/
-	int registerData(int id, KGamePropertyHandler* owner,PropertyPolicy p, QString name=0);
+	int registerData(int id, KGamePropertyHandler* owner,PropertyPolicy p, const QString& name=0);
 
 	/** 
 	 * This is an overloaded member function, provided for convenience.
 	 * It differs from the above function only in what argument(s) it accepts.
 	 **/
-	int registerData(int id, KGamePropertyHandler* owner, QString name=0);
+	int registerData(int id, KGamePropertyHandler* owner, const QString& name=0);
 
 	/** 
 	 * This is an overloaded member function, provided for convenience.
 	 * It differs from the above function only in what argument(s) it accepts.
 	 **/
-	int registerData(int id, KGame* owner, QString name=0);
+        int registerData(int id, KGame* owner, const QString& name=0);
 
 	/** 
 	 * This is an overloaded member function, provided for convenience.
 	 * It differs from the above function only in what argument(s) it accepts.
 	 **/
-	int registerData(int id, KPlayer* owner, QString name=0);
+        int registerData(int id, KPlayer* owner, const QString& name=0);
 
 	/** 
 	 * This is an overloaded member function, provided for convenience.
@@ -286,7 +288,7 @@ public:
 	 * In particular you can use this function to create properties which
 	 * will have an automatic id assigned. The new id is returned.
 	 **/
-	int registerData(KGamePropertyHandler* owner,PropertyPolicy p=PolicyUndefined, QString name=0);
+        int registerData(KGamePropertyHandler* owner,PropertyPolicy p=PolicyUndefined, const QString& name=0);
 
 	void unregisterData();
 
@@ -545,16 +547,16 @@ private:
  * };
  * QDataStream& operator<<(QDataStream& stream, Card& card)
  * {
- * Q_INT16 type = card.type;
- * Q_INT16 suite = card.suite;
+ * qint16 type = card.type;
+ * qint16 suite = card.suite;
  * s << type;
  * s << suite;
  * return s;
  * }
  * QDataStream& operator>>(QDataStream& stream, Card& card)
  * {
- * Q_INT16 type;
- * Q_INT16 suite;
+ * qint16 type;
+ * qint16 suite;
  * s >> type;
  * s >> suite;
  * card.type = (int)type;
@@ -624,6 +626,7 @@ public:
 				setLocal(v);
 				break;
 			default: // NEVER!
+				kError(11001) << "Undefined Policy in property" << id();
 				return;
 		}
 	}
@@ -674,7 +677,7 @@ public:
 			return false;
 		}
 		QByteArray b;
-		QDataStream stream(b, IO_WriteOnly);
+		QDataStream stream(&b, QIODevice::WriteOnly);
 		stream << v;
 		if (!sendProperty(b)) {
 			setLocal(v);
@@ -841,6 +844,6 @@ private:
 typedef KGameProperty<int>   KGamePropertyInt;
 typedef KGameProperty<unsigned int>   KGamePropertyUInt;
 typedef KGameProperty<QString>   KGamePropertyQString;
-typedef KGameProperty<Q_INT8>   KGamePropertyBool;
+typedef KGameProperty<qint8>   KGamePropertyBool;
 
 #endif

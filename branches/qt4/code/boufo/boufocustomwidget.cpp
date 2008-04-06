@@ -144,20 +144,20 @@ protected:
 	{
 		QSize s(dim.w, dim.h);
 		if (dim.w == ufo::UDimension::maxDimension.w) {
-			s.setWidth(QCOORD_MAX);
+			s.setWidth(2147483647); // AB: was QCOORD_MAX in Qt3
 		}
 		if (dim.h == ufo::UDimension::maxDimension.h) {
-			s.setHeight(QCOORD_MAX);
+			s.setHeight(2147483647); // AB: was QCOORD_MAX in Qt3
 		}
 		return s;
 	}
 	ufo::UDimension sizeToDimension(const QSize& s) const
 	{
 		ufo::UDimension dim(s.width(), s.height());
-		if (s.width() == QCOORD_MAX) {
+		if (s.width() == 2147483647) { // AB: was QCOORD_MAX in Qt3
 			dim.w = ufo::UDimension::maxDimension.w;
 		}
-		if (s.height() == QCOORD_MAX) {
+		if (s.height() == 2147483647) { // AB: was QCOORD_MAX in Qt3
 			dim.h = ufo::UDimension::maxDimension.h;
 		}
 		return dim;

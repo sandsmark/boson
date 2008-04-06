@@ -33,6 +33,9 @@
 #include <qstringlist.h>
 #include <qtimer.h>
 #include <qmap.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 class BosonUfoChatPrivate
 {
@@ -49,7 +52,7 @@ public:
 	}
 
 	QStringList mMessages;
-	QPtrList<unsigned int> mTimes; // how long the messages in mMessages are here already
+	Q3PtrList<unsigned int> mTimes; // how long the messages in mMessages are here already
 	QTimer mRemoveTimer;
 
 	BoUfoLabel* mLabel;
@@ -61,7 +64,7 @@ public:
 	int mMessageId;
 	KPlayer* mFromPlayer;
 
-	QValueList<int> mSendingEntryIds;
+	Q3ValueList<int> mSendingEntryIds;
 
 	// specialized IDs
 	int mSendToAllId;
@@ -153,14 +156,14 @@ void BosonUfoChat::setKGame(KGame* g, int msgid)
 	return;
  }
  connect(game(), SIGNAL(destroyed()), this, SLOT(slotUnsetKGame()));
- connect(game(), SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, Q_UINT32)),
-		this, SLOT(slotReceiveMessage(int, const QByteArray&, Q_UINT32, Q_UINT32)));
+ connect(game(), SIGNAL(signalNetworkData(int, const QByteArray&, quint32, quint32)),
+		this, SLOT(slotReceiveMessage(int, const QByteArray&, quint32, quint32)));
  connect(game(), SIGNAL(signalPlayerJoinedGame(KPlayer*)),
 		this, SLOT(slotAddPlayer(KPlayer*)));
  connect(game(), SIGNAL(signalPlayerLeftGame(KPlayer*)),
 		this, SLOT(slotRemovePlayer(KPlayer*)));
- QPtrList<KPlayer> playerList = *game()->playerList();
- for (QPtrListIterator<KPlayer> it(playerList); it.current(); ++it) {
+ Q3PtrList<KPlayer> playerList = *game()->playerList();
+ for (Q3PtrListIterator<KPlayer> it(playerList); it.current(); ++it) {
 	slotAddPlayer(it.current());
  }
 }
@@ -179,7 +182,7 @@ void BosonUfoChat::slotUnsetKGame()
  d->mGame = 0;
 }
 
-void BosonUfoChat::slotReceivePrivateMessage(int msgid, const QByteArray& buffer, Q_UINT32 sender, KPlayer* me)
+void BosonUfoChat::slotReceivePrivateMessage(int msgid, const QByteArray& buffer, quint32 sender, KPlayer* me)
 {
  if (!me || me != fromPlayer()) {
 	return;
@@ -187,7 +190,7 @@ void BosonUfoChat::slotReceivePrivateMessage(int msgid, const QByteArray& buffer
  slotReceiveMessage(msgid, buffer, me->kgameId(), sender);
 }
 
-void BosonUfoChat::slotReceiveMessage(int msgid, const QByteArray& buffer, Q_UINT32, Q_UINT32 sender)
+void BosonUfoChat::slotReceiveMessage(int msgid, const QByteArray& buffer, quint32, quint32 sender)
 {
  if (!game()) {
 	boError() << k_funcinfo << "Set a KGame first" << endl;
@@ -196,7 +199,7 @@ void BosonUfoChat::slotReceiveMessage(int msgid, const QByteArray& buffer, Q_UIN
  if (msgid != messageId()) {
 	return;
  }
- QDataStream msg(buffer, IO_ReadOnly);
+ QDataStream msg(buffer, QIODevice::ReadOnly);
  QString text;
  msg >> text;
 
@@ -261,7 +264,7 @@ const QStringList& BosonUfoChat::messages() const
 void BosonUfoChat::slotTimeout()
 {
  if (boConfig->uintValue("ChatScreenRemoveTime") > 0) {
-	QPtrListIterator<unsigned int> it(d->mTimes);
+	Q3PtrListIterator<unsigned int> it(d->mTimes);
 	for (; it.current(); ++it) {
 		(*it.current())++;
 	}
@@ -427,8 +430,8 @@ void BosonUfoChat::slotAddPlayer(KPlayer* p)
 
  connect(p, SIGNAL(signalPropertyChanged(KGamePropertyBase*, KPlayer*)),
 		this, SLOT(slotPropertyChanged(KGamePropertyBase*, KPlayer*)));
- connect(p, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)),
-		this, SLOT(slotReceivePrivateMessage(int, const QByteArray&, Q_UINT32, KPlayer*)));
+ connect(p, SIGNAL(signalNetworkData(int, const QByteArray&, quint32, KPlayer*)),
+		this, SLOT(slotReceivePrivateMessage(int, const QByteArray&, quint32, KPlayer*)));
 
  int id = insertPlayerSendingEntry(p->name(), -1, -1);
  d->mSendingEntryId2PlayerId.insert(id, p->kgameId());

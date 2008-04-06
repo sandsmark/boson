@@ -26,7 +26,7 @@
 
 #include <ksimpleconfig.h>
 #include <qstring.h>
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 
 
 /***  BoAction  ***/
@@ -57,7 +57,7 @@ BoAction::BoAction(const QString& name, BoUfoImage* image, const QString& text/*
 
 BoSpecificAction::BoSpecificAction(const BoAction* action)
 {
-  mAllUnits = new QPtrList<Unit>();
+  mAllUnits = new Q3PtrList<Unit>();
   reset();
   mAction = action;
   mOk = true;
@@ -65,14 +65,14 @@ BoSpecificAction::BoSpecificAction(const BoAction* action)
 
 BoSpecificAction::BoSpecificAction(const BoSpecificAction& action)
 {
-  mAllUnits = new QPtrList<Unit>();
+  mAllUnits = new Q3PtrList<Unit>();
   reset();
   *this = action;
 }
 
 BoSpecificAction::BoSpecificAction()
 {
-  mAllUnits = new QPtrList<Unit>();
+  mAllUnits = new Q3PtrList<Unit>();
   reset();
 }
 
@@ -119,13 +119,13 @@ void BoSpecificAction::setUnit(Unit* u)
   // Don't reset owner if unit is 0 (needed for editor)
 }
 
-void BoSpecificAction::setAllUnits(const QPtrList<Unit>& units, Unit* leader)
+void BoSpecificAction::setAllUnits(const Q3PtrList<Unit>& units, Unit* leader)
 {
   *mAllUnits = units;
   setUnit(leader);
 }
 
-const QPtrList<Unit>& BoSpecificAction::allUnits() const
+const Q3PtrList<Unit>& BoSpecificAction::allUnits() const
 {
   return *mAllUnits;
 }

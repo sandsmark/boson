@@ -46,8 +46,11 @@
 #include <klocale.h>
 
 #include <qtimer.h>
-#include <qptrdict.h>
+#include <q3ptrdict.h>
 #include <qcolor.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 #define UPDATE_TIMEOUT 200
 
@@ -101,7 +104,7 @@ public:
 
 private:
 	QMap<const void*, const BoAction*> mProduceActions;
-	QPtrList<BoAction> mNewProduceActions;
+	Q3PtrList<BoAction> mNewProduceActions;
 };
 
 
@@ -392,8 +395,8 @@ void BosonInfoWidget::showUnit(const PlayerIO* player, const UnitProperties* pro
 			.arg(prop->mineralCost()).arg(prop->oilCost());
 	// Check if the unit can be built
 	QString missingRequirements;
-	QValueList<unsigned long int> requirements = prop->requirements();
-	for (QValueList<unsigned long int>::Iterator it = requirements.begin(); it != requirements.end(); ++it) {
+	Q3ValueList<unsigned long int> requirements = prop->requirements();
+	for (Q3ValueList<unsigned long int>::Iterator it = requirements.begin(); it != requirements.end(); ++it) {
 		if (!player->hasUnitWithType(*it)) {
 			missingRequirements.append("  " + player->unitProperties(*it)->name() + "\n");
 		}
@@ -494,7 +497,7 @@ public:
 	QTimer mUpdateTimer;
 	const QPoint* mCursorRootPos;
 
-	QPtrList<BoUnitDisplayBase> mUnitDisplayWidgets;
+	Q3PtrList<BoUnitDisplayBase> mUnitDisplayWidgets;
 
 	BoUfoWidget* mUnitViewWidget;
 	BosonUnitView* mUnitView;
@@ -816,7 +819,7 @@ void BosonCommandFrame::setGameMode(bool game)
 		d->mPlacementWidget, SIGNAL(signalPlaceGround(unsigned int, unsigned char*)),
 		this, SLOT(slotPlaceGround(unsigned int, unsigned char*)));
 
- for (QPtrListIterator<BoUnitDisplayBase> it(d->mUnitDisplayWidgets); it.current(); ++it) {
+ for (Q3PtrListIterator<BoUnitDisplayBase> it(d->mUnitDisplayWidgets); it.current(); ++it) {
 	it.current()->setGameMode(game);
  }
 }
@@ -869,13 +872,13 @@ void BosonCommandFrame::setProduction(Unit* unit)
 	d->mSelectionWidget->hideOrderButtons();
 	return;
  }
- QValueList<BoSpecificAction> actions;
+ Q3ValueList<BoSpecificAction> actions;
 
- QValueList<int> grayOutActions;
+ Q3ValueList<int> grayOutActions;
 
- QValueList<unsigned long int> grayedOutUnits;
- QValueList<unsigned long int> unitsList = production->allUnitProductions(0, &grayedOutUnits);
- for (QValueList<unsigned long int>::iterator it = unitsList.begin(); it != unitsList.end(); ++it) {
+ Q3ValueList<unsigned long int> grayedOutUnits;
+ Q3ValueList<unsigned long int> unitsList = production->allUnitProductions(0, &grayedOutUnits);
+ for (Q3ValueList<unsigned long int>::iterator it = unitsList.begin(); it != unitsList.end(); ++it) {
 	BoSpecificAction a(d->mProduceActions->produceActionFor(speciesTheme->unitProperties(*it)));
 	a.setType(ActionProduceUnit);
 	a.setProductionId(*it);
@@ -886,9 +889,9 @@ void BosonCommandFrame::setProduction(Unit* unit)
 	}
  }
 
- QValueList<unsigned long int> grayedOutTechs;
- QValueList<unsigned long int> techList = production->allTechnologyProductions(0, &grayedOutTechs);
- for (QValueList<unsigned long int>::iterator it = techList.begin(); it != techList.end(); it++) {
+ Q3ValueList<unsigned long int> grayedOutTechs;
+ Q3ValueList<unsigned long int> techList = production->allTechnologyProductions(0, &grayedOutTechs);
+ for (Q3ValueList<unsigned long int>::iterator it = techList.begin(); it != techList.end(); it++) {
 	BoSpecificAction a(d->mProduceActions->produceActionFor(speciesTheme->technology(*it), production->speciesTheme()));
 	a.setType(ActionProduceTech);
 	a.setProductionId(*it);
@@ -908,7 +911,7 @@ void BosonCommandFrame::setProduction(Unit* unit)
 
 void BosonCommandFrame::hidePluginWidgets()
 {
- QPtrListIterator<BoUnitDisplayBase> it(d->mUnitDisplayWidgets);
+ Q3PtrListIterator<BoUnitDisplayBase> it(d->mUnitDisplayWidgets);
  while (it.current()) {
 	it.current()->hide();
 	++it;
@@ -923,7 +926,7 @@ void BosonCommandFrame::showPluginWidgetsForUnit(Unit* unit)
  }
  BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(unit->owner());
- QPtrListIterator<BoUnitDisplayBase> it(d->mUnitDisplayWidgets);
+ Q3PtrListIterator<BoUnitDisplayBase> it(d->mUnitDisplayWidgets);
  for (; it.current(); ++it) {
 	// In editor mode, we ignore friendly/unfriendly settings
 	// In game mode:
@@ -952,7 +955,7 @@ bool BosonCommandFrame::checkUpdateTimer() const
  if (!selectedUnit()) {
 	return false;
  }
- QPtrListIterator<BoUnitDisplayBase> it(d->mUnitDisplayWidgets);
+ Q3PtrListIterator<BoUnitDisplayBase> it(d->mUnitDisplayWidgets);
  bool use = false;
  for (; it.current() && !use; ++it) {
 	use = it.current()->updateTimer();
@@ -996,7 +999,7 @@ void BosonCommandFrame::showUnitActions(Unit* unit)
  if (selection()) {
 	d->mUnitActions->showUnitActions(unit, selection()->allUnits());
  } else {
-	d->mUnitActions->showUnitActions(unit, QPtrList<Unit>());
+	d->mUnitActions->showUnitActions(unit, Q3PtrList<Unit>());
  }
  d->mUnitActions->show();
 }
@@ -1100,9 +1103,9 @@ void BosonCommandFrame::placeMobiles(PlayerIO* io)
 	boError(220) << k_funcinfo << "NULL speciestheme" << endl;
 	return;
  }
- QValueList<long unsigned int> units = theme->allMobiles();
- QValueList<long unsigned int>::iterator it;
- QValueList<BoSpecificAction> actions;
+ Q3ValueList<long unsigned int> units = theme->allMobiles();
+ Q3ValueList<long unsigned int>::iterator it;
+ Q3ValueList<BoSpecificAction> actions;
  for (it = units.begin(); it != units.end(); ++it) {
 	BoSpecificAction a(d->mProduceActions->produceActionFor(theme->unitProperties(*it)));
 	a.setType(ActionPlacementPreview);
@@ -1125,9 +1128,9 @@ void BosonCommandFrame::placeFacilities(PlayerIO* io)
 	boError(220) << k_funcinfo << "NULL speciestheme" << endl;
 	return;
  }
- QValueList<long unsigned int> units = theme->allFacilities();
- QValueList<long unsigned int>::iterator it;
- QValueList<BoSpecificAction> actions;
+ Q3ValueList<long unsigned int> units = theme->allFacilities();
+ Q3ValueList<long unsigned int>::iterator it;
+ Q3ValueList<BoSpecificAction> actions;
  for (it = units.begin(); it != units.end(); ++it) {
 	BoSpecificAction a(d->mProduceActions->produceActionFor(theme->unitProperties(*it)));
 	a.setType(ActionPlacementPreview);

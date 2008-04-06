@@ -24,7 +24,10 @@
 #include "unitbase.h"
 #include "../global.h"
 
-#include <qvaluevector.h>
+#include <q3valuevector.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 class Player;
 class BosonCanvas;
@@ -50,8 +53,8 @@ template<class T> class BoRect2;
 typedef BoVector2<bofixed> BoVector2Fixed;
 typedef BoVector3<bofixed> BoVector3Fixed;
 typedef BoRect2<bofixed> BoRect2Fixed;
-template<class T> class QValueList;
-template<class T> class QPtrList;
+template<class T> class Q3ValueList;
+template<class T> class Q3PtrList;
 class QDomElement;
 
 class KGameUnitDebug;
@@ -351,7 +354,7 @@ public:
 	/**
 	 * @return List of path-points
 	 **/
-	const QValueList<BoVector2Fixed>& pathPointList() const;
+	const Q3ValueList<BoVector2Fixed>& pathPointList() const;
 
 
 	/**
@@ -571,7 +574,7 @@ protected:
 	 * @return a list of interesting collisions, i.e. no non-units, no
 	 * destryed units, ...
 	 **/
-	QValueList<Unit*> unitCollisions(bool exact = false);
+	Q3ValueList<Unit*> unitCollisions(bool exact = false);
 
 	/**
 	 * Helper method to @ref advanceIdle.
@@ -750,7 +753,7 @@ public:
 
 private:
 	Unit* mFacility;
-	KGameProperty<Q_UINT32> mConstructionStep;
+	KGameProperty<quint32> mConstructionStep;
 };
 
 

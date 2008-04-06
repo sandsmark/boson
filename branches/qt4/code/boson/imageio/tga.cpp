@@ -232,19 +232,19 @@ void kimgio_tga_write( QImageIO *io )
         s << targaMagic[i];
 
     // write header
-    s << Q_UINT16( img.width() ); // width
-    s << Q_UINT16( img.height() ); // height
-    s << Q_UINT8( hasAlpha ? 32 : 24 ); // depth (24 bit RGB + 8 bit alpha)
-    s << Q_UINT8( hasAlpha ? 0x24 : 0x20 ); // top left image (0x20) + 8 bit alpha (0x4)
+    s << quint16( img.width() ); // width
+    s << quint16( img.height() ); // height
+    s << quint8( hasAlpha ? 32 : 24 ); // depth (24 bit RGB + 8 bit alpha)
+    s << quint8( hasAlpha ? 0x24 : 0x20 ); // top left image (0x20) + 8 bit alpha (0x4)
 
     for( int y = 0; y < img.height(); y++ )
         for( int x = 0; x < img.width(); x++ ) {
             const QRgb color = img.pixel( x, y );
-            s << Q_UINT8( qBlue( color ) );
-            s << Q_UINT8( qGreen( color ) );
-            s << Q_UINT8( qRed( color ) );
+            s << quint8( qBlue( color ) );
+            s << quint8( qGreen( color ) );
+            s << quint8( qRed( color ) );
             if( hasAlpha )
-                s << Q_UINT8( qAlpha( color ) );
+                s << quint8( qAlpha( color ) );
         }
 
     io->setStatus( 0 );

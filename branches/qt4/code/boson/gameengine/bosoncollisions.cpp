@@ -29,7 +29,9 @@
 #include "defines.h"
 #include "bosonprofiling.h"
 
-#include <qptrvector.h>
+#include <q3ptrvector.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 #include <math.h>
 
@@ -108,13 +110,13 @@ Unit* BosonCollisions::findUnitAt(const BoVector3Fixed& pos) const
  return findUnitAtCell((int)(pos.x()), (int)(pos.y()), pos.z());
 }
 
-QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const BoVector2Fixed& pos, bofixed radius) const
+Q3ValueList<Unit*> BosonCollisions::unitCollisionsInRange(const BoVector2Fixed& pos, bofixed radius) const
 {
  PROFILE_METHOD
- BoItemList* l = collisions(BoRect2Fixed(QMAX(pos.x() - radius, bofixed(0)), QMAX(pos.y() - radius, bofixed(0)),
+ BoItemList* l = collisions(BoRect2Fixed(qMax(pos.x() - radius, bofixed(0)), qMax(pos.y() - radius, bofixed(0)),
 		pos.x() + radius, pos.y() + radius));
 
- QValueList<Unit*> list;
+ Q3ValueList<Unit*> list;
  BoItemList::Iterator it;
  for (it = l->begin(); it != l->end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
@@ -136,15 +138,15 @@ QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const BoVector2Fixed& p
  return list;
 }
 
-QValueList<Unit*> BosonCollisions::unitCollisionsInSphere(const BoVector3Fixed& pos, bofixed radius) const
+Q3ValueList<Unit*> BosonCollisions::unitCollisionsInSphere(const BoVector3Fixed& pos, bofixed radius) const
 {
  PROFILE_METHOD
  // FIXME: code duplicated from unitCollisionsInRange
  boDebug(310) << k_funcinfo << endl;
- BoItemList* l = collisions(BoRect2Fixed(QMAX(pos.x() - radius, bofixed(0)), QMAX(pos.y() - radius, bofixed(0)),
+ BoItemList* l = collisions(BoRect2Fixed(qMax(pos.x() - radius, bofixed(0)), qMax(pos.y() - radius, bofixed(0)),
 		pos.x() + radius, pos.y() + radius));
 
- QValueList<Unit*> list;
+ Q3ValueList<Unit*> list;
  BoItemList::Iterator it;
  for (it = l->begin(); it != l->end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
@@ -201,7 +203,7 @@ bool BosonCollisions::cellsOccupied(const BoRect2Fixed& rect) const
 }
 
 // this is an extremely time-critical function!
-BoItemList* BosonCollisions::collisionsAtCells(const QPtrVector<Cell>* cells, const BosonItem* item, bool exact) const
+BoItemList* BosonCollisions::collisionsAtCells(const Q3PtrVector<Cell>* cells, const BosonItem* item, bool exact) const
 {
  PROFILE_METHOD
  // FIXME: if exact is true we assume that cells == item->cells() !!
@@ -249,15 +251,15 @@ BoItemList* BosonCollisions::collisionsAtCells(const BoRect2Fixed& rect, const B
 	return new BoItemList();
  }
  int left, right, top, bottom;
- left = QMAX((int)rect.left(), 0);
- right = QMIN((int)ceil(rect.right()), (int)map()->width());
- top = QMAX((int)rect.top(), 0);
- bottom = QMIN((int)ceil(rect.bottom()), (int)map()->height());
+ left = qMax((int)rect.left(), 0);
+ right = qMin((int)ceil(rect.right()), (int)map()->width());
+ top = qMax((int)rect.top(), 0);
+ bottom = qMin((int)ceil(rect.bottom()), (int)map()->height());
  int size = (right - left + 1) * (bottom - top + 1);
  if (size <= 0) {
 	return new BoItemList();
  }
- QPtrVector<Cell> cells(size);
+ Q3PtrVector<Cell> cells(size);
  int n = 0;
  Cell* allCells = map()->cells();
  for (int i = left; i < right; i++) {
@@ -280,7 +282,7 @@ BoItemList* BosonCollisions::collisionsAtCells(const BoRect2Fixed& rect, const B
 
 BoItemList* BosonCollisions::collisionsAtCell(int x, int y) const
 {
- QPtrVector<Cell> cells(1);
+ Q3PtrVector<Cell> cells(1);
  Cell* c = cell(x, y);
  if (!c) {
 	boWarning(310) << k_funcinfo << "NULL cell: " << x << "," << y << endl;
@@ -296,12 +298,12 @@ BoItemList* BosonCollisions::collisions(const BoVector2Fixed& pos) const
  return collisionsAtCell((int)pos.x(), (int)pos.y());
 }
 
-QValueList<Unit*> BosonCollisions::collisionsInBox(const BoVector3Fixed& v1, const BoVector3Fixed& v2, BosonItem* exclude) const
+Q3ValueList<Unit*> BosonCollisions::collisionsInBox(const BoVector3Fixed& v1, const BoVector3Fixed& v2, BosonItem* exclude) const
 {
  PROFILE_METHOD
 // boDebug() << k_funcinfo << "v1: (" << v1.x() << "; " << v1.y() << "; " << v1.z() <<
 //		");  v2: (" << v2.x() << "; " << v2.y() << "; " << v2.z() << ")" << endl;
- QValueList<Unit*> units;
+ Q3ValueList<Unit*> units;
  if (!map()) {
 	BO_NULL_ERROR(map());
 	return units;
@@ -309,10 +311,10 @@ QValueList<Unit*> BosonCollisions::collisionsInBox(const BoVector3Fixed& v1, con
 
  // Calculate rect in cell coordinates
  int left, right, top, bottom;
- left = QMAX((int)v1.x(), 0);
- right = QMIN((int)ceil(v2.x()), (int)map()->width());
- top = QMAX((int)v1.y(), 0);
- bottom = QMIN((int)ceil(v2.y()), (int)map()->height());
+ left = qMax((int)v1.x(), 0);
+ right = qMin((int)ceil(v2.x()), (int)map()->width());
+ top = qMax((int)v1.y(), 0);
+ bottom = qMin((int)ceil(v2.y()), (int)map()->height());
  //boDebug() << k_funcinfo << "Cell rect: (" << left << ";" << top << ")-(" << right << ";" << bottom <<
 //		")" << endl;
 
@@ -321,7 +323,7 @@ QValueList<Unit*> BosonCollisions::collisionsInBox(const BoVector3Fixed& v1, con
  if (size <= 0) {
 	return units;
  }
- QPtrVector<Cell> cells(size);
+ Q3PtrVector<Cell> cells(size);
  int n = 0;
  Cell* allCells = map()->cells();
  for (int i = left; i < right; i++) {

@@ -20,6 +20,8 @@
 #define BOCURSORMAIN_H
 
 #include "bosonglwidget.h"
+//Added by qt3to4:
+#include <QMouseEvent>
 
 class BosonCursor;
 class BoDebugDCOPIface;

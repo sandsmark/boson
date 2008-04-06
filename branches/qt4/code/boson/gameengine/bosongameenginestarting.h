@@ -21,6 +21,8 @@
 #define BOSONGAMEENGINESTARTING_H
 
 #include "bosonstarting.h"
+//Added by qt3to4:
+#include <Q3PtrList>
 
 class BosonPlayField;
 class Player;
@@ -28,7 +30,7 @@ class Boson;
 class BosonCanvas;
 class BosonGameView;
 class QDomElement;
-template<class T> class QPtrList;
+template<class T> class Q3PtrList;
 template<class T1, class T2> class QMap;
 class BosonStartingTask;
 
@@ -41,7 +43,7 @@ public:
 	virtual void setFiles(QMap<QString, QByteArray>* files);
 	virtual QString creatorName() const;
 
-	virtual bool createTasks(QPtrList<BosonStartingTask>* tasks);
+	virtual bool createTasks(Q3PtrList<BosonStartingTask>* tasks);
 
 private:
 	BosonStarting* mStarting;

@@ -33,11 +33,13 @@
 #include "playerio.h"
 #include "bosonplayerlistmanager.h"
 
-#include <qptrqueue.h>
+#include <q3ptrqueue.h>
 #include <qdom.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
-#include <kstaticdeleter.h>
-#include <kmdcodec.h>
+#include <k3staticdeleter.h>
+#include <kcodecs.h>
 
 
 // If this is defined, BoLineVisualization will be used to show found paths
@@ -48,7 +50,7 @@
 
 BosonPathVisualization* BosonPathVisualization::mPathVisualization = 0;
 
-static KStaticDeleter<BosonPathVisualization> sd;
+static K3StaticDeleter<BosonPathVisualization> sd;
 
 
 const int xoffsets[] = {  0,  1,  1,  1,  0, -1, -1, -1};
@@ -442,7 +444,7 @@ void BosonPath::findPath(BosonPathInfo* info)
       info->range = findClosestFreeGoalCell(info);
     }
 
-    int dist = (int)QMAX(QABS(info->dest.x() - info->start.x()), QABS(info->dest.y() - info->start.y()));
+    int dist = (int)qMax(qAbs(info->dest.x() - info->start.x()), qAbs(info->dest.y() - info->start.y()));
     // Select the pathfinder according to the distance
     if(dist <= MAXDIST_LOW)
     {
@@ -495,10 +497,10 @@ bool BosonPath::goalPassable(BosonPathInfo* info)
     return true;
   }
 
-  int left = QMAX((int)info->dest.x() - info->range, info->movedata->edgedist1);
-  int top = QMAX((int)info->dest.y() - info->range, info->movedata->edgedist1);
-  int right = QMAX((int)info->dest.x() + info->range, (int)mMap->width() - 1 - info->movedata->edgedist2);
-  int bottom = QMAX((int)info->dest.y() + info->range, (int)mMap->height() - 1 - info->movedata->edgedist2);
+  int left = qMax((int)info->dest.x() - info->range, info->movedata->edgedist1);
+  int top = qMax((int)info->dest.y() - info->range, info->movedata->edgedist1);
+  int right = qMax((int)info->dest.x() + info->range, (int)mMap->width() - 1 - info->movedata->edgedist2);
+  int bottom = qMax((int)info->dest.y() + info->range, (int)mMap->height() - 1 - info->movedata->edgedist2);
 
   for(int y = top; y <= bottom; y++)
   {
@@ -570,7 +572,7 @@ void BosonPath::getPartialLowLevelPath(BosonPathInfo* info)
   }
   else
   {
-    lasthlstep = QMIN(3, (int)info->hlpath.count() - 1);
+    lasthlstep = qMin(3, (int)info->hlpath.count() - 1);
     info->dest = info->hlpath[lasthlstep];
     // Getting near the hlpath's point should be enough
     info->range = 4;
@@ -622,10 +624,10 @@ BosonPath::Result BosonPath::getLowLevelPath(BosonPathInfo* info)
   n.h = lowLevelDistToGoal(data, n.x, n.y);
 
   // Calculate area boundaries
-  data->areax1 = QMAX(n.x - LOW_MAX_RANGE, 0);
-  data->areay1 = QMAX(n.y - LOW_MAX_RANGE, 0);
-  data->areax2 = QMIN(n.x + LOW_MAX_RANGE, (int)mMap->width() - 1);
-  data->areay2 = QMIN(n.y + LOW_MAX_RANGE, (int)mMap->height() - 1);
+  data->areax1 = qMax(n.x - LOW_MAX_RANGE, 0);
+  data->areay1 = qMax(n.y - LOW_MAX_RANGE, 0);
+  data->areax2 = qMin(n.x + LOW_MAX_RANGE, (int)mMap->width() - 1);
+  data->areay2 = qMin(n.y + LOW_MAX_RANGE, (int)mMap->height() - 1);
 
   // We can't use the whole area because of the unit's size. We need to keep a
   //  border of cells which won't be used for nodes but which will be taken
@@ -637,7 +639,7 @@ BosonPath::Result BosonPath::getLowLevelPath(BosonPathInfo* info)
   data->areax2 -= data->info->movedata->edgedist2;
   data->areay2 -= data->info->movedata->edgedist2;
 
-  data->maxdepth = LOW_MAX_RANGE - QMAX(data->info->movedata->edgedist1, data->info->movedata->edgedist2);
+  data->maxdepth = LOW_MAX_RANGE - qMax(data->info->movedata->edgedist1, data->info->movedata->edgedist2);
 
   // Set starting cell's flags
   mCellStatus[n.pos].flags = STATUS_OPEN | STATUS_START;
@@ -696,7 +698,7 @@ BosonPath::Result BosonPath::lowLevelDoSearch(BosonPathLowLevelData* data)
       break;
     }
     else if((mCellStatus[n.pos].flags & STATUS_GOAL) ||
-        (QMAX(QABS(n.x - data->destx), QABS(n.y - data->desty)) <= data->info->range))
+        (qMax(qAbs(n.x - data->destx), qAbs(n.y - data->desty)) <= data->info->range))
     {
       data->goalnode = n;
       pathfound = true;
@@ -922,7 +924,7 @@ void BosonPath::lowLevelFinishSearch(BosonPathLowLevelData* data)
 
   bofixed add = (((data->info->movedata->size % 2) == 1) ? 0.5 : 0);
 
-  QValueList<BoVector2Fixed> temp;
+  Q3ValueList<BoVector2Fixed> temp;
   // Coordinate of the last node in the path (destination)
   int x = data->goalnode.x;
   int y = data->goalnode.y;
@@ -960,7 +962,7 @@ void BosonPath::lowLevelFinishSearch(BosonPathLowLevelData* data)
   // Copy temp path to real path vector
   data->info->llpath.clear();
   data->info->llpath.reserve(temp.count());
-  QValueList<BoVector2Fixed>::iterator it;
+  Q3ValueList<BoVector2Fixed>::iterator it;
   for(it = temp.begin(); it != temp.end(); ++it)
   {
     data->info->llpath.append(*it);
@@ -979,11 +981,11 @@ bofixed BosonPath::lowLevelDistToGoal(BosonPathLowLevelData* data, int x, int y)
   {
     cross = -cross;
   }
-  dx1 = QABS(dx1);
-  dy1 = QABS(dy1);
+  dx1 = qAbs(dx1);
+  dy1 = qAbs(dy1);
 
   // Estimate of the true straight-line distance
-  return (bofixed(cross) / LOW_CROSS_DIVIDER) + (QMAX(dx1, dy1) + QMIN(dx1, dy1) * 0.4) * LOW_DIST_MULTIPLIER;
+  return (bofixed(cross) / LOW_CROSS_DIVIDER) + (qMax(dx1, dy1) + qMin(dx1, dy1) * 0.4) * LOW_DIST_MULTIPLIER;
 }
 
 void BosonPath::calculateCellStatus(BosonPathInfo* info, int x, int y)
@@ -1137,11 +1139,11 @@ void BosonPath::markTargetGoal(BosonPathInfo* info)
 {
   // Mark the target and 1-cell border around it as goal
   BosonItem* target = info->target;
-  int left = QMAX((int)target->leftEdge() - 1 - info->range - info->movedata->edgedist2, 0);
-  int top = QMAX((int)target->topEdge() - 1 - info->range - info->movedata->edgedist2, 0);
-  int right = QMIN((int)ceilf(target->rightEdge()) + info->range
+  int left = qMax((int)target->leftEdge() - 1 - info->range - info->movedata->edgedist2, 0);
+  int top = qMax((int)target->topEdge() - 1 - info->range - info->movedata->edgedist2, 0);
+  int right = qMin((int)ceilf(target->rightEdge()) + info->range
       + info->movedata->edgedist1, (int)mMap->width() - 1);
-  int bottom = QMIN((int)ceilf(target->bottomEdge()) + info->range
+  int bottom = qMin((int)ceilf(target->bottomEdge()) + info->range
       + info->movedata->edgedist1, (int)mMap->height() - 1);
 
   for(int x = left; x <= right; x++)
@@ -1274,7 +1276,7 @@ BosonPath::Result BosonPath::highLevelDoSearch(BosonPathHighLevelData* data)
 
     // Check if we're in goal range
     // TODO: support range!
-    if(QMAX(QABS(n.x - data->destblockx), QABS(n.y - data->destblocky)) == 0)
+    if(qMax(qAbs(n.x - data->destblockx), qAbs(n.y - data->destblocky)) == 0)
     {
       data->goalnode = n;
       pathfound = true;
@@ -1444,7 +1446,7 @@ void BosonPath::highLevelFinishSearch(BosonPathHighLevelData* data)
 
   bofixed add = (((data->info->movedata->size % 2) == 1) ? 0.5 : 0);
 
-  QValueList<BoVector2Fixed> temp;
+  Q3ValueList<BoVector2Fixed> temp;
   // Coordinate of the last node in the path (destination)
   int x = data->goalnode.x;
   int y = data->goalnode.y;
@@ -1485,14 +1487,14 @@ void BosonPath::highLevelFinishSearch(BosonPathHighLevelData* data)
   // Copy temp path to real path vector
   data->info->hlpath.clear();
   data->info->hlpath.reserve(temp.count());
-  QValueList<BoVector2Fixed>::iterator it;
+  Q3ValueList<BoVector2Fixed>::iterator it;
   for(it = temp.begin(); it != temp.end(); ++it)
   {
     data->info->hlpath.append(*it);
   }
 #ifdef VISUALIZE_PATHS
   {
-    QValueList<BoVector3Fixed> points;
+    Q3ValueList<BoVector3Fixed> points;
     for(unsigned int point = 0; point < data->info->hlpath.count(); point++)
     {
       bofixed x = data->info->hlpath[point].x();
@@ -1513,10 +1515,10 @@ bofixed BosonPath::highLevelDistToGoal(BosonPathHighLevelData* data, const Boson
 {
   BlockInfo* dest = &mBlocks[data->destblocky * mBlocksCountX + data->destblockx];
   BlockInfo* current = &mBlocks[n.y * mBlocksCountX + n.x];
-  int dx = QABS(current->centerx[data->movedataid] - dest->centerx[data->movedataid]);
-  int dy = QABS(current->centery[data->movedataid] - dest->centery[data->movedataid]);
+  int dx = qAbs(current->centerx[data->movedataid] - dest->centerx[data->movedataid]);
+  int dy = qAbs(current->centery[data->movedataid] - dest->centery[data->movedataid]);
 
-  return (QMAX(dx, dy) + QMIN(dx, dy) * 0.4) * HIGH_DIST_MULTIPLIER;
+  return (qMax(dx, dy) + qMin(dx, dy) * 0.4) * HIGH_DIST_MULTIPLIER;
 }
 
 void BosonPath::resetDirtyBlockStatuses()
@@ -1538,7 +1540,7 @@ void BosonPath::findFlyingUnitPath(BosonPathInfo* info)
   PROFILE_METHOD;
   // List of open nodes
   BosonPathPointerHeap<BosonPathFlyingNode> open;
-  QValueList<BosonPathFlyingNode*> closed;
+  Q3ValueList<BosonPathFlyingNode*> closed;
 
   // Create the first node
   BosonPathFlyingNode* n;
@@ -1591,7 +1593,7 @@ void BosonPath::findFlyingUnitPath(BosonPathInfo* info)
     }
 
     // Check if it's the goal
-    bofixed dist = QMAX(QABS(n->x - info->dest.x()), QABS(n->y - info->dest.y()));
+    bofixed dist = qMax(qAbs(n->x - info->dest.x()), qAbs(n->y - info->dest.y()));
     if(info->range >= 0)
     {
       if(dist <= info->range)
@@ -1654,7 +1656,7 @@ void BosonPath::findFlyingUnitPath(BosonPathInfo* info)
       // Calculate costs
       n2->g = n->g + flyingCost(n2->x, n2->y, n2->rot, info);
       // Small penalty for turning
-      n2->g += FLYING_TURNING_PENALTY * QABS(n2->rot - n->rot);
+      n2->g += FLYING_TURNING_PENALTY * qAbs(n2->rot - n->rot);
       n2->h = flyingDistToGoal(n2->x, n2->y, n2->rot, info);
 
       /*boDebug(500) << "  " << "Node " << n2 << ": pos: (" << n2->x << "; " << n2->y << ")" <<
@@ -1692,7 +1694,7 @@ void BosonPath::findFlyingUnitPath(BosonPathInfo* info)
       n = nearest;
     }
 
-    QValueList<BoVector2Fixed> temp;
+    Q3ValueList<BoVector2Fixed> temp;
     // Coordinate of the last node in the path (destination)
     // TODO: do we need to add 0.5 to those coords???
     temp.prepend(BoVector2Fixed(n->x, n->y));
@@ -1722,7 +1724,7 @@ void BosonPath::findFlyingUnitPath(BosonPathInfo* info)
     // Copy temp path to real path vector
     info->llpath.clear();
     info->llpath.reserve(temp.count());
-    QValueList<BoVector2Fixed>::iterator it;
+    Q3ValueList<BoVector2Fixed>::iterator it;
     for(it = temp.begin(); it != temp.end(); ++it)
     {
       info->llpath.append(*it);
@@ -1734,7 +1736,7 @@ void BosonPath::findFlyingUnitPath(BosonPathInfo* info)
     {
     PROFILE_METHOD_2(vizprofiler, "Vizualizations");
     {
-      QValueList<BoVector3Fixed> points;
+      Q3ValueList<BoVector3Fixed> points;
       for(unsigned int point = 0; point < info->llpath.count(); point++)
       {
         bofixed x = info->llpath[point].x();
@@ -1754,7 +1756,7 @@ void BosonPath::findFlyingUnitPath(BosonPathInfo* info)
       const bofixed zOffset = 0.4f;
       const BoVector4Float opencolor(1.0f, 0.7f, 0.6f, 0.5f);
       int i = 0;
-      QValueList<BosonPathFlyingNode*>::Iterator it;
+      Q3ValueList<BosonPathFlyingNode*>::Iterator it;
       for(it = open.begin(); it != open.end(); ++it, i++)
       {
         BosonPathFlyingNode* node = *it;
@@ -1762,7 +1764,7 @@ void BosonPath::findFlyingUnitPath(BosonPathInfo* info)
         {
           continue;
         }
-        QValueList<BoVector3Fixed> points;
+        Q3ValueList<BoVector3Fixed> points;
         points.append(BoVector3Fixed(node->x, -node->y, 0.0f));
         points.append(BoVector3Fixed(node->parent->x, -node->parent->y, 0.0f));
         BosonPathVisualization::pathVisualization()->addLineVisualization(points, opencolor, pointSize, timeout, zOffset);
@@ -1775,7 +1777,7 @@ void BosonPath::findFlyingUnitPath(BosonPathInfo* info)
         {
           continue;
         }
-        QValueList<BoVector3Fixed> points;
+        Q3ValueList<BoVector3Fixed> points;
         points.append(BoVector3Fixed(node->x, -node->y, 0.0f));
         points.append(BoVector3Fixed(node->parent->x, -node->parent->y, 0.0f));
         BosonPathVisualization::pathVisualization()->addLineVisualization(points, closedcolor, pointSize, timeout, zOffset);
@@ -1786,7 +1788,7 @@ void BosonPath::findFlyingUnitPath(BosonPathInfo* info)
   }
 
   // Delete the nodes in open and closed
-  QValueList<BosonPathFlyingNode*>::Iterator it;
+  Q3ValueList<BosonPathFlyingNode*>::Iterator it;
   for(it = open.begin(); it != open.end(); ++it)
   {
     delete *it;
@@ -1821,9 +1823,9 @@ bofixed BosonPath::flyingDistToGoal(bofixed x, bofixed y, bofixed rot, BosonPath
 
   /*boDebug(500) << "    " << "turncost = " << extradist << "*" << FLYING_TURNDIST_MULTPLIER <<
       " = " << extradist * FLYING_TURNDIST_MULTPLIER <<
-      "; distcost = " << QMAX(QABS(todest.x()), QABS(todest.y())) << "*" << FLYING_DIST_MULTPLIER <<
-      " = " << QMAX(QABS(todest.x()), QABS(todest.y())) * FLYING_DIST_MULTPLIER << endl;*/
-  return extradist * FLYING_TURNDIST_MULTPLIER + QMAX(QABS(todest.x()), QABS(todest.y())) * FLYING_DIST_MULTPLIER;
+      "; distcost = " << qMax(qAbs(todest.x()), qAbs(todest.y())) << "*" << FLYING_DIST_MULTPLIER <<
+      " = " << qMax(qAbs(todest.x()), qAbs(todest.y())) * FLYING_DIST_MULTPLIER << endl;*/
+  return extradist * FLYING_TURNDIST_MULTPLIER + qMax(qAbs(todest.x()), qAbs(todest.y())) * FLYING_DIST_MULTPLIER;
 }
 
 bofixed BosonPath::flyingCost(bofixed x, bofixed y, bofixed rot, BosonPathInfo* info)
@@ -1850,14 +1852,14 @@ void BosonPath::initMoveDatas(BosonCanvas* canvas, BosonPlayerListManager* playe
   canvas->clearMoveDatas();
 
   // Go through all units and create all possible movedatas
-  QPtrListIterator<Player> playerit(playerListManager->gamePlayerList());
+  Q3PtrListIterator<Player> playerit(playerListManager->gamePlayerList());
   while(playerit.current())
   {
     Player* p = playerit.current();
     SpeciesTheme* theme = p->speciesTheme();
 
-    QValueList<unsigned long int> unitpropids = theme->allMobiles();
-    QValueList<unsigned long int>::Iterator it;
+    Q3ValueList<unsigned long int> unitpropids = theme->allMobiles();
+    Q3ValueList<unsigned long int>::Iterator it;
     for(it = unitpropids.begin(); it != unitpropids.end(); ++it)
     {
       const UnitProperties* prop = theme->unitProperties(*it);
@@ -1868,7 +1870,7 @@ void BosonPath::initMoveDatas(BosonCanvas* canvas, BosonPlayerListManager* playe
       }
 
       BosonMoveData::Type type = (prop->isLand() ? BosonMoveData::Land : BosonMoveData::Water);
-      int size = (int)ceilf(QMAX(prop->unitWidth(), prop->unitHeight()));
+      int size = (int)ceilf(qMax(prop->unitWidth(), prop->unitHeight()));
       // Other parameters aren't used yet
 
       BosonMoveData* data = 0;
@@ -2035,10 +2037,10 @@ void BosonPath::findBlockCenter(int blockpos, BosonMoveData* movedata)
   //  would be cellPassable values for all cells in this block AND'ed
   //  together). Would make updating the blocks faster.
   PROFILE_METHOD;
-  int left = QMAX((blockpos % mBlocksCountX) * mBlockSize, movedata->edgedist1);
-  int top  = QMAX((blockpos / mBlocksCountX) * mBlockSize, movedata->edgedist1);
-  int right = QMIN(left + mBlockSize, (int)(mMap->width()) - 1 - movedata->edgedist2);
-  int bottom = QMIN(top + mBlockSize, (int)(mMap->height()) - 1 - movedata->edgedist2);
+  int left = qMax((blockpos % mBlocksCountX) * mBlockSize, movedata->edgedist1);
+  int top  = qMax((blockpos / mBlocksCountX) * mBlockSize, movedata->edgedist1);
+  int right = qMin(left + mBlockSize, (int)(mMap->width()) - 1 - movedata->edgedist2);
+  int bottom = qMin(top + mBlockSize, (int)(mMap->height()) - 1 - movedata->edgedist2);
 
   int centerx = (left + right) / 2;
   int centery = (top + bottom) / 2;
@@ -2063,7 +2065,7 @@ void BosonPath::findBlockCenter(int blockpos, BosonMoveData* movedata)
       }
 
       // Add small penalty for being off the center of the block
-      cost += QMAX(QABS(centerx - x), QABS(centery - y)) * BLOCK_COST_DIST_MULTIPLIER;
+      cost += qMax(qAbs(centerx - x), qAbs(centery - y)) * BLOCK_COST_DIST_MULTIPLIER;
 
       if(cost < bestcost)
       {
@@ -2132,10 +2134,10 @@ void BosonPath::calculateBlockConnection(int blockpos, BosonMoveData* movedata, 
   info.dest.setY(mBlocks[otherblockpos].centery[movedata->id]);
 
   // Set area boundaries
-  int left = QMIN(blockx, otherblockx) * mBlockSize;
-  int top = QMIN(blocky, otherblocky) * mBlockSize;
-  int right = QMIN(left + 2 * mBlockSize - 1, (int)(mMap->width()) - 1);
-  int bottom = QMIN(top + 2 * mBlockSize - 1, (int)(mMap->height()) - 1);
+  int left = qMin(blockx, otherblockx) * mBlockSize;
+  int top = qMin(blocky, otherblocky) * mBlockSize;
+  int right = qMin(left + 2 * mBlockSize - 1, (int)(mMap->width()) - 1);
+  int bottom = qMin(top + 2 * mBlockSize - 1, (int)(mMap->height()) - 1);
   lowLevelSetAreaBoundary(left, top, right, bottom);
 
   // Try to find a path from start (this block) to destination (the other block)
@@ -2188,8 +2190,8 @@ void BosonPath::createBlockColormap(BosonMoveData* movedata)
       // Block's edge coordinates (inclusive)
       int left = blockx * mBlockSize;
       int top = blocky * mBlockSize;
-      int right = QMIN(left + mBlockSize - 1, (int)(mMap->width()) - 1);
-      int bottom = QMIN(top + mBlockSize - 1, (int)(mMap->height()) - 1);
+      int right = qMin(left + mBlockSize - 1, (int)(mMap->width()) - 1);
+      int bottom = qMin(top + mBlockSize - 1, (int)(mMap->height()) - 1);
 
       bool passable = (mBlocks[blockpos].centerx[movedata->id] != -1);
 
@@ -2264,8 +2266,8 @@ bofixed* BosonPath::calculateSlopemap()
       {
         for(unsigned int j = y; j <= y + 1; j++)
         {
-          minh = QMIN(minh, bofixed(mMap->heightAtCorner(i, j)));
-          maxh = QMAX(maxh, bofixed(mMap->heightAtCorner(i, j)));
+          minh = qMin(minh, bofixed(mMap->heightAtCorner(i, j)));
+          maxh = qMax(maxh, bofixed(mMap->heightAtCorner(i, j)));
         }
       }
       // Calculate slope between min and max height.
@@ -2347,7 +2349,7 @@ bofixed* BosonPath::calculateForestmap()
           {
             continue;
           }
-          bofixed f = factors[QABS(xdelta)] * factors[QABS(ydelta)];
+          bofixed f = factors[qAbs(xdelta)] * factors[qAbs(ydelta)];
           blurredmap[y * mMap->width() + x] += itemmap[newy * mMap->width() + newx] * f;
         }
       }
@@ -2395,7 +2397,7 @@ void BosonPath::unitMovingStatusChanges(Unit* u, int oldstatus, int newstatus)
     int x1, x2, y1, y2;  // Rect in which cells changed
     x1 = y1 = 1000000;
     x2 = y2 = -1000000;
-    const QPtrVector<Cell>* cells = u->cells();
+    const Q3PtrVector<Cell>* cells = u->cells();
     for(unsigned int i = 0; i < cells->count(); i++)
     {
       Cell* c = cells->at(i);
@@ -2611,11 +2613,11 @@ QString BosonPath::debugText(bofixed x, bofixed y)
   return info;
 }
 
-QValueList<BoVector2Fixed> BosonPath::findLocations(Player* player, int x, int y, int n, int radius, ResourceType type)
+Q3ValueList<BoVector2Fixed> BosonPath::findLocations(Player* player, int x, int y, int n, int radius, ResourceType type)
 {
-  QValueList<BoVector2Fixed> locations;
+  Q3ValueList<BoVector2Fixed> locations;
 
-  QValueList<BosonPathNode> open;
+  Q3ValueList<BosonPathNode> open;
   BosonPathNode node, n2;
   int diameterplusone = 2 * radius + 1;
   bool* visited = new bool[diameterplusone * diameterplusone];
@@ -2648,7 +2650,7 @@ QValueList<BoVector2Fixed> BosonPath::findLocations(Player* player, int x, int y
       n2.y = node.y + mYOffset[dir];
 
       // Check if new node is within given radius
-      int dist = QMAX(QABS(x - n2.x), QABS(y - n2.y));
+      int dist = qMax(qAbs(x - n2.x), qAbs(y - n2.y));
       if(dist > radius)
       {
         continue;
@@ -2851,12 +2853,12 @@ BosonPathVisualization* BosonPathVisualization::pathVisualization()
   return mPathVisualization;
 }
 
-void BosonPathVisualization::addLineVisualization(const QValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize, int timeout, bofixed zOffset)
+void BosonPathVisualization::addLineVisualization(const Q3ValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize, int timeout, bofixed zOffset)
 {
   emit signalAddLineVisualization(points, color, pointSize, timeout, zOffset);
 }
 
-void BosonPathVisualization::addLineVisualization(const QValueList<BoVector3Fixed>& points, bofixed pointSize, int timeout, bofixed zOffset)
+void BosonPathVisualization::addLineVisualization(const Q3ValueList<BoVector3Fixed>& points, bofixed pointSize, int timeout, bofixed zOffset)
 {
   addLineVisualization(points, BoVector4Float(1.0f, 1.0f, 1.0f, 1.0f), pointSize, timeout, zOffset);
 }

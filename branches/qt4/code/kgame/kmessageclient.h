@@ -20,10 +20,10 @@
 #ifndef __KMESSAGECLIENT_H__
 #define __KMESSAGECLIENT_H__
 
-#include <qobject.h>
-#include <qstring.h>
-#include <qvaluelist.h>
+#include <QtCore/QObject>
+#include <QtCore/QString>
 
+#include <libkdegames_export.h>
 class KMessageIO;
 class KMessageServer;
 class KMessageClientPrivate;
@@ -35,7 +35,7 @@ class KMessageClientPrivate;
   It can be used to exchange messages between clients.
 
   Usually you will connect the signals broadcastReceived and forwardReceived to
-  some specific slots. In these slot methods you can analyse the messages that are
+  some specific slots. In these slot methods you can analyze the messages that are
   sent to you from other clients.
 
   To send messages to other clients, use the methods sendBroadcast() (to send to all
@@ -47,7 +47,7 @@ class KMessageClientPrivate;
   In that case the messages must be of the format specified in KMessageServer.
   @author Burkhard Lehner <Burkhard.Lehner@gmx.de>
 */
-class KMessageClient : public QObject
+class KDEGAMES_EXPORT KMessageClient : public QObject
 {
   Q_OBJECT
 
@@ -58,7 +58,7 @@ public:
     Creates an unconnected KMessageClient object. Use setServer() later to connect to a
     KMessageServer object.
   */
-  KMessageClient (QObject *parent = 0, const char *name = 0);
+  KMessageClient (QObject *parent = 0);
 
   /**
     Destructor.
@@ -73,7 +73,7 @@ public:
     NOTE: As long as the object is not yet connected to the server, and as long as the server
     hasn't sent the client ID, this method returns 0.
   */
-  Q_UINT32 id () const;
+  quint32 id () const;
 
   /**
     @return Whether or not this client is the server admin.
@@ -90,12 +90,12 @@ public:
   /**
     @return The ID of the admin client on the message server.
   */
-  Q_UINT32 adminId() const;
+  quint32 adminId() const;
 
   /**
     @return The list of the IDs of all the message clients connected to the message server.
   */
-  const QValueList <Q_UINT32> &clientList() const;
+  QList <quint32> clientList() const;
 
   /**
     Connects the client to (another) server.
@@ -108,7 +108,7 @@ public:
     be resolved to an IP or just an IP
     @param port The port to connect to
   */
-  void setServer (const QString &host, Q_UINT16 port);
+  void setServer (const QString &host, quint16 port);
 
   /**
     Connects the client to (another) server.
@@ -166,12 +166,10 @@ public:
   /**
     @return 0 if isConnected() is FALSE, otherwise the port number this client is
     connected to. See also KMessageIO::peerPort and QSocket::peerPort.
-    @since 3.2
   */
-  Q_UINT16 peerPort () const;
+  quint16 peerPort () const;
 
   /**
-    @since 3.2
     @return "localhost" if isConnected() is FALSE, otherwise the hostname this client is
     connected to. See also KMessageIO::peerName() and QSocket::peerName().
   */
@@ -218,11 +216,11 @@ public:
     @param clients A list of clients the message should be sent to
   */
   //AB: processForward doesn't exist!! is processIncomingMessage meant?
-  void sendForward (const QByteArray &msg, const QValueList <Q_UINT32> &clients);
+  void sendForward (const QByteArray &msg, const QList <quint32> &clients);
 
   /**
     Sends a message to a single client. This is a convenieance method. It calls
-    sendForward (const QByteArray &msg, const QValueList &ltQ_UINT32> &clients)
+    sendForward (const QByteArray &msg, const QValueList &ltquint32> &clients)
     with a list containing only one client ID.
 
     To send a message to the admin of the  KMessageServer, you can use 0 as clientID,
@@ -230,7 +228,7 @@ public:
     @param msg The message to be sent to the client
     @param client The id of the client the message shall be sent to
   */
-  void sendForward (const QByteArray &msg, Q_UINT32 client);
+  void sendForward (const QByteArray &msg, quint32 client);
 
   /**
     Once this function is called no message will be received anymore.
@@ -252,10 +250,10 @@ public:
    */
   unsigned int delayedMessageCount() const;
 
-signals:
+Q_SIGNALS:
   /**
     This signal is emitted when the client receives a broadcast message from the
-    KMessageServer, sent by another client. Connect to this signal to analyse the
+    KMessageServer, sent by another client. Connect to this signal to analyze the
     received message and do the right reaction.
 
     senderID contains the ID of the client that sent the broadcast message. You can
@@ -263,7 +261,7 @@ signals:
     to ignore broadcast messages that were sent by yourself:
 
     \code
-      void myObject::myBroadcastSlot (const QByteArray &msg, Q_UINT32 senderID)
+      void myObject::myBroadcastSlot (const QByteArray &msg, quint32 senderID)
       {
         if (senderID == ((KMessageClient *)sender())->id())
           return;
@@ -273,11 +271,11 @@ signals:
     @param msg The message that has been sent to us
     @param senderID The ID of the client which sent the message
   */
-  void broadcastReceived (const QByteArray &msg, Q_UINT32 senderID);
+  void broadcastReceived (const QByteArray &msg, quint32 senderID);
 
   /**
     This signal is emitted when the client receives a forward message from the
-    KMessageServer, sent by another client. Connect to this signal to analyse the
+    KMessageServer, sent by another client. Connect to this signal to analyze the
     received message and do the right reaction.
 
     senderID contains the ID of the client that sent the broadcast message. You can
@@ -294,8 +292,8 @@ signals:
 
     \code
       KMessageClient *client = new KMessageClient ();
-      connect (client, SIGNAL (forwardReceived (const QByteArray &, Q_UINT32, const QValueList <Q_UINT32>&)),
-               client, SIGNAL (broadcastReceived (const QByteArray &, Q_UINT32)));
+      connect (client, SIGNAL (forwardReceived (const QByteArray &, quint32, const QValueList <quint32>&)),
+               client, SIGNAL (broadcastReceived (const QByteArray &, quint32)));
     \endcode
 
     Then connect the broadcast signal to your slot that analyzes the message.
@@ -303,7 +301,7 @@ signals:
     @param senderID The ID of the client which sent the message
     @param receivers All clients which receive this message
   */
-  void forwardReceived (const QByteArray &msg, Q_UINT32 senderID, const QValueList <Q_UINT32> &receivers);
+  void forwardReceived (const QByteArray &msg, quint32 senderID, const QList <quint32> &receivers);
 
   /**
     This signal is emitted when the connection to the KMessageServer is broken.
@@ -320,7 +318,7 @@ signals:
     This signal is emitted right before the client disconnects. It can be used
     to this store the id of the client which is about to be lost.
   */
-  void aboutToDisconnect(Q_UINT32 id);
+  void aboutToDisconnect(quint32 id);
 
   /**
     This signal is emitted when this client becomes the admin client or when it loses
@@ -336,7 +334,7 @@ signals:
     This should usually only be done in one client, e.g. the admin client.
     @param clientID The ID of the client that has newly connectd.
   */
-  void eventClientConnected (Q_UINT32 clientID);
+  void eventClientConnected (quint32 clientID);
 
   /**
     This signal is emitted when the server has lost the
@@ -345,7 +343,7 @@ signals:
     @param clientID The ID of the client that has disconnected
     @param broken true if it was disconnected because of a network error
   */
-  void eventClientDisconnected (Q_UINT32 clientID, bool broken);
+  void eventClientDisconnected (quint32 clientID, bool broken);
 
   /**
     This signal is emitted on every message that came from the server. You can connect to this
@@ -354,7 +352,7 @@ signals:
     @param msg The message that has been sent to us
     @param unknown True when KMessageClient didn't recognize the message, i.e. it contained an unknown
     message ID. If you want to add additional message types to the client, connect to this signal,
-    and if unknown is true, analyse the message by yourself. If you recognized the message,
+    and if unknown is true, analyze the message by yourself. If you recognized the message,
     set unknown to false (Otherwise a debug message will be printed).
   */
   //AB: maybe add a setNoEmit() so that the other signals can be deactivated?
@@ -368,7 +366,7 @@ protected:
     processFirstMessage, depending on whether the client is locked or a delayed
     message is still here (see lock)
 
-    It processes the message and analyses it. If it is a broadcast or a forward message from
+    It processes the message and analyzes it. If it is a broadcast or a forward message from
     another client, it emits the signal processBroadcast or processForward accordingly.
 
     If you want to treat additional server messages, you can overwrite this method. Don't
@@ -382,12 +380,12 @@ protected:
 
   virtual void processMessage (const QByteArray& msg);
 
-protected slots:
+protected Q_SLOTS:
   /**
     This slot is called from the signal KMessageIO::received whenever a message from the
     KMessageServer arrives.
 
-    It processes the message and analyses it. If it is a broadcast or a forward message from
+    It processes the message and analyzes it. If it is a broadcast or a forward message from
     another client, it emits the signal processBroadcast or processForward accordingly.
 
     If you want to treat additional server messages, you can overwrite this method. Don't
@@ -416,7 +414,7 @@ protected slots:
   void removeBrokenConnection2 ();
 
 private:
-  KMessageClientPrivate *d;
+  KMessageClientPrivate * const d;
 };
 
 #endif

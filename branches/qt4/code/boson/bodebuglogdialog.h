@@ -20,9 +20,11 @@
 #define BODEBUGLOGDIALOG_H
 
 #include <kdialogbase.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 class BoDebugMessage;
-template<class T> class QPtrList;
+template<class T> class Q3PtrList;
 
 class BoDebugLogWidgetPrivate;
 class BoDebugLogWidget : public QWidget
@@ -32,10 +34,10 @@ public:
 	BoDebugLogWidget(QWidget* parent, const char* name = 0);
 	~BoDebugLogWidget();
 
-	void setMessages(const QPtrList<BoDebugMessage>& m);
+	void setMessages(const Q3PtrList<BoDebugMessage>& m);
 
 protected slots:
-	void slotMessageSelected(QListViewItem*);
+	void slotMessageSelected(Q3ListViewItem*);
 
 private:
 	BoDebugLogWidgetPrivate* d;

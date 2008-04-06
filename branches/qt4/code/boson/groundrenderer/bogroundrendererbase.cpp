@@ -41,6 +41,9 @@
 #include "../gameengine/boson.h"
 
 #include <math.h>
+//Added by qt3to4:
+#include <Q3PtrList>
+#include <Q3MemArray>
 
 #define FIX_EDGES 1
 
@@ -254,7 +257,7 @@ protected:
 	 * that all cells in @p node are visible and adds the nodes according to
 	 * the LOD settings only.
 	 **/
-	void addVisibleNodes(QPtrList<const BoGroundRendererQuadTreeNode>* nodes, const BoGroundRendererQuadTreeNode* node, bool allVisible = false);
+	void addVisibleNodes(Q3PtrList<const BoGroundRendererQuadTreeNode>* nodes, const BoGroundRendererQuadTreeNode* node, bool allVisible = false);
 
 	/**
 	 * @return Whether the cells in the rect of the node are visible.
@@ -284,7 +287,7 @@ private:
 	float mMinDistance;
 	float mMaxDistance;
 
-	QMemArray< QPtrList<const BoGroundRendererQuadTreeNode>* > mLeafs;
+	Q3MemArray< Q3PtrList<const BoGroundRendererQuadTreeNode>* > mLeafs;
 };
 
 void CellListBuilder::copyHeightMap(float* vertexArray, float* heightMap, const BosonMap* map)
@@ -321,11 +324,11 @@ void CellListBuilderTree::copyCustomHeightMap(float* vertexArray, float* heightM
 	return;
  }
  for (int i = (int)mLeafs.size() - 1; i >= 0; i--) {
-	QPtrList<const BoGroundRendererQuadTreeNode>* list = mLeafs[i];
+	Q3PtrList<const BoGroundRendererQuadTreeNode>* list = mLeafs[i];
 	if (!list || list->isEmpty()) {
 		continue;
 	}
-	QPtrListIterator<const BoGroundRendererQuadTreeNode> it(*list);
+	Q3PtrListIterator<const BoGroundRendererQuadTreeNode> it(*list);
 	while (it.current()) {
 		const BoGroundRendererQuadTreeNode* node = it.current();
 		++it;
@@ -406,7 +409,7 @@ int* CellListBuilderTree::generateCellList(const BosonMap* map, int* origRenderC
  mCount = 0;
 
  for (int i = 0; i < (int)mLeafs.size(); i++) {
-	QPtrList<const BoGroundRendererQuadTreeNode>* list = mLeafs[i];
+	Q3PtrList<const BoGroundRendererQuadTreeNode>* list = mLeafs[i];
 if (list) {
 		list->clear();
 	}
@@ -418,10 +421,10 @@ if (list) {
 // mMap = 0;
  mCount = 0;
  if (minDist) {
-	*minDist = QMAX(0, mMinDistance);
+	*minDist = qMax(0, mMinDistance);
  }
  if (maxDist) {
-	*maxDist = QMAX(0, mMaxDistance);
+	*maxDist = qMax(0, mMaxDistance);
  }
  return renderCells;
 }
@@ -440,9 +443,9 @@ const BoGroundRendererQuadTreeNode* CellListBuilderTree::findVisibleNodeAt(int x
  int y1 = y;
  int y2 = y;
 
- QPtrList<const BoGroundRendererQuadTreeNode> nodes;
+ Q3PtrList<const BoGroundRendererQuadTreeNode> nodes;
  addVisibleNodes(&nodes, mRoot);
- for (QPtrListIterator<const BoGroundRendererQuadTreeNode> it(nodes); it.current(); ++it) {
+ for (Q3PtrListIterator<const BoGroundRendererQuadTreeNode> it(nodes); it.current(); ++it) {
 	if (it.current()->intersects(x1, y1, x2, y2)) {
 		return it.current();
 	}
@@ -465,7 +468,7 @@ void CellListBuilderTree::addCells(int* cells, const BoGroundRendererQuadTreeNod
 	int s = mLeafs.size();
 	mLeafs.resize(node->depth() + 1);
 	for (int i = s; i < (int)mLeafs.size(); i++) {
-		mLeafs[i] = new QPtrList<const BoGroundRendererQuadTreeNode>();
+		mLeafs[i] = new Q3PtrList<const BoGroundRendererQuadTreeNode>();
 	}
  }
  mLeafs[node->depth()]->append(node);
@@ -518,9 +521,9 @@ bool CellListBuilderTree::cellsVisible(const BoGroundRendererQuadTreeNode* node,
  float r4 = BoVector3Float(hmid - (float)x,
 		vmid - ((float)y + (float)h), z - bottomLeftZ).dotProduct();
 
- float radius = QMAX(r1, r2);
- radius = QMAX(radius, r3);
- radius = QMAX(radius, r4);
+ float radius = qMax(r1, r2);
+ radius = qMax(radius, r3);
+ radius = qMax(radius, r4);
  radius = sqrtf(radius); // turn dotProduct() into length()
  BoVector3Float center(hmid, -vmid, z);
 
@@ -532,8 +535,8 @@ bool CellListBuilderTree::cellsVisible(const BoGroundRendererQuadTreeNode* node,
  }
  if (ret == 2 || (w == 1 && h == 1) || w * h <= 4) {
 	*partially = false;
-	mMinDistance = QMIN(mMinDistance, dist - 2*radius);
-	mMaxDistance = QMAX(mMaxDistance, dist);
+	mMinDistance = qMin(mMinDistance, dist - 2*radius);
+	mMaxDistance = qMax(mMaxDistance, dist);
  } else {
 	*partially = true;
  }
@@ -544,14 +547,14 @@ void CellListBuilderTree::addVisibleCells(int* cells, const BoGroundRendererQuad
 {
  BO_CHECK_NULL_RET(cells);
  BO_CHECK_NULL_RET(root);
- QPtrList<const BoGroundRendererQuadTreeNode> nodes;
+ Q3PtrList<const BoGroundRendererQuadTreeNode> nodes;
  addVisibleNodes(&nodes, root);
- for (QPtrListIterator<const BoGroundRendererQuadTreeNode> it(nodes); it.current(); ++it) {
+ for (Q3PtrListIterator<const BoGroundRendererQuadTreeNode> it(nodes); it.current(); ++it) {
 	addCells(cells, it.current());
  }
 }
 
-void CellListBuilderTree::addVisibleNodes(QPtrList<const BoGroundRendererQuadTreeNode>* ret, const BoGroundRendererQuadTreeNode* node, bool allVisible)
+void CellListBuilderTree::addVisibleNodes(Q3PtrList<const BoGroundRendererQuadTreeNode>* ret, const BoGroundRendererQuadTreeNode* node, bool allVisible)
 {
  BO_CHECK_NULL_RET(ret);
  if (!node) {
@@ -692,9 +695,9 @@ float BoGroundRendererCellListLOD::distanceFromPlane(const BoPlane& plane, const
  const float d2 = plane.distance(BoVector3Float(x2, y, zTopRight));
  const float d3 = plane.distance(BoVector3Float(x, y2, zBottomLeft));
  const float d4 = plane.distance(BoVector3Float(x2, y2, zBottomRight));
- float d = QMAX(d1, d2);
- d = QMAX(d, d3);
- d = QMAX(d, d4);
+ float d = qMax(d1, d2);
+ d = qMax(d, d3);
+ d = qMax(d, d4);
  return d;
 }
 
@@ -863,10 +866,10 @@ void FogTexture::cellChanged(int x1, int y1, int x2, int y2)
  if (!mFogTextureData) {
 	return;
  }
- x1 = QMAX(x1, 1);
- y1 = QMAX(y1, 1);
- x2 = QMIN(x2, (int)mLastMapWidth - 2);
- y2 = QMIN(y2, (int)mLastMapHeight - 2);
+ x1 = qMax(x1, 1);
+ y1 = qMax(y1, 1);
+ x2 = qMin(x2, (int)mLastMapWidth - 2);
+ y2 = qMin(y2, (int)mLastMapHeight - 2);
  if(x2 < x1 || y2 < y1) {
 	return;
  }
@@ -894,10 +897,10 @@ void FogTexture::cellChanged(int x1, int y1, int x2, int y2)
  mFogTextureDirty = true;
 
  // Update dirty area
- mFogTextureDirtyAreaX1 = QMIN(mFogTextureDirtyAreaX1, x1);
- mFogTextureDirtyAreaY1 = QMIN(mFogTextureDirtyAreaY1, y1);
- mFogTextureDirtyAreaX2 = QMAX(mFogTextureDirtyAreaX2, x2);
- mFogTextureDirtyAreaY2 = QMAX(mFogTextureDirtyAreaY2, y2);
+ mFogTextureDirtyAreaX1 = qMin(mFogTextureDirtyAreaX1, x1);
+ mFogTextureDirtyAreaY1 = qMin(mFogTextureDirtyAreaY1, y1);
+ mFogTextureDirtyAreaX2 = qMax(mFogTextureDirtyAreaX2, x2);
+ mFogTextureDirtyAreaY2 = qMax(mFogTextureDirtyAreaY2, y2);
 }
 
 
@@ -1246,7 +1249,7 @@ void BoGroundRendererBase::getRoughnessInRect(const BosonMap* map, float* _rough
 		roughness += (1.0f - BoVector3Float::dotProduct(avgNormal, BoVector3Float(map->normalMap() + 3 * pos)));
 		for (unsigned int t = 0; t < textureCount; t++) {
 			float texvalue = map->texMapAlpha(t, x, y) / 255.0f;
-			textureRoughness[t] += QABS(texvalue - avgTexWeight[t]);
+			textureRoughness[t] += qAbs(texvalue - avgTexWeight[t]);
 		}
 	}
  }

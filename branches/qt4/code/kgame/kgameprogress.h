@@ -1,5 +1,5 @@
 /* This file is part of the KDE libraries
-   Copyright (C) 1996 Martynas Kunigelis
+   Copyright (C) 1996 Martynas Kunigelis martynas.kunigelis@vm.ktu.lt
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Library General Public
@@ -21,11 +21,11 @@
 *                                                                            *
 *****************************************************************************/
 
-#ifndef _KPROGRES_H
-#define _KPROGRES_H
+#ifndef _KGAMEPROGRESS_H
+#define _KGAMEPROGRESS_H
 
-#include <qframe.h>
-#include <qrangecontrol.h>
+#include <QtGui/QFrame>
+#include <libkdegames_export.h>
 
 /**
  * @short A progress indicator widget.
@@ -46,15 +46,17 @@
  *
  * @author Martynas Kunigelis
  */
-class KGameProgress : public QFrame, public QRangeControl
+class KDEGAMES_EXPORT KGameProgress : public QFrame
 {
   Q_OBJECT
   Q_ENUMS( BarStyle )
   Q_PROPERTY( int value READ value WRITE setValue)
+  Q_PROPERTY( int mininum READ minimum WRITE setMinimum)
+  Q_PROPERTY( int maximum READ maximum WRITE setMaximum)
   Q_PROPERTY( BarStyle barStyle READ barStyle WRITE setBarStyle )
   Q_PROPERTY( QColor barColor READ barColor WRITE setBarColor )
   Q_PROPERTY( QPixmap barPixmap READ barPixmap WRITE setBarPixmap )
-  Q_PROPERTY( Orientation orientation READ orientation WRITE setOrientation )
+  Q_PROPERTY( Qt::Orientation orientation READ orientation WRITE setOrientation )
   Q_PROPERTY( bool textEnabled READ textEnabled WRITE setTextEnabled )
 
 public:
@@ -69,18 +71,12 @@ public:
   /**
    * Construct a horizontal progress bar.
    */
-  KGameProgress(QWidget *parent=0, const char *name=0);
+  explicit KGameProgress(QWidget *parent=0);
 
   /**
    * Construct a progress bar with orientation @p orient.
    */
-  KGameProgress(Orientation orient, QWidget *parent=0, const char *name=0);
-
-  /**
-   * Construct a progress bar with minimum, maximum and initial values.
-   */
-  KGameProgress(int minValue, int maxValue, int value, Orientation,
-                QWidget *parent=0, const char *name=0);
+  explicit KGameProgress(Qt::Orientation orient, QWidget *parent=0);
 
   /**
    * Destruct the progress bar.
@@ -109,7 +105,7 @@ public:
    *
    * Allowed values are @p Horizontal and @p Vertical.
    */
-  void setOrientation(Orientation);
+  void setOrientation(Qt::Orientation);
 
   /**
    * If this is set to @p true, the progress text will be displayed.
@@ -128,7 +124,7 @@ public:
    * Retrieve the bar color.
    * @see setBarColor()
    */
-  const QColor &barColor() const;
+  QColor barColor() const;
 
   /**
    * Retrieve the bar pixmap.
@@ -142,13 +138,28 @@ public:
    *
    * @see setValue()
    */
-  int value() const { return QRangeControl::value(); }
+  int value() const;
+
+  /**
+   * Retrieve the minimum value
+   *
+   * @see setMinimum()
+   */
+  int minimum() const;
+
+  /**
+   * Retrieve the maximum value
+   *
+   * @see setMaximum()
+   */
+  int maximum() const;
+
   /**
    * Retrive the orientation of the progress bar.
    *
    * @see setOrientation()
    */
-  Orientation orientation() const;
+  Qt::Orientation orientation() const;
 
   /**
    * Returns @p true if progress text will be displayed,
@@ -176,7 +187,7 @@ public:
    */
   QString format() const;
 
-public slots:
+public Q_SLOTS:
 
   /**
    * Set the format of the text to use to display status.
@@ -196,6 +207,20 @@ public slots:
   void setValue(int value);
 
   /**
+   * Set the minimum value of the progress bar to @p value.
+   *
+   * The maximum value may be changed to keep the range valid.
+   */
+  void setMinimum(int value);
+
+  /**
+   * Set the maximum value of the progress bar to @p value.
+   *
+   * The minimum value may be changed to keep the range valid.
+   */
+  void setMaximum(int value);
+
+  /**
    * Advance the progress bar by @p prog.
    *
    * This method is
@@ -204,7 +229,11 @@ public slots:
    */
   void advance(int prog);
 
-signals:
+  /**
+   */
+  void valueChange(int newValue);
+
+Q_SIGNALS:
   /**
    * Emitted when the state of the progress bar changes.
    */
@@ -213,41 +242,20 @@ signals:
 protected:
   /**
    */
-  void valueChange();
-  /**
-   */
-  void rangeChange();
-  /**
-   */
   void styleChange( QStyle& );
   /**
    */
   void paletteChange( const QPalette & );
   /**
    */
-  void drawContents( QPainter * );
+  void paintEvent( QPaintEvent *e );
 
-private slots:
+private Q_SLOTS:
   void paletteChange();
 
 private:
-  QPixmap  *bar_pixmap;
-  bool      use_supplied_bar_color;
-  QColor    bar_color;
-  QColor    bar_text_color;
-  QColor    text_color;
-  QRect     fr;
-  BarStyle  bar_style;
-  Orientation orient;
-  bool      text_enabled;
-  QString   format_;
-  void      initialize();
-  int       recalcValue(int);
-  void      drawText(QPainter *);
-  void      adjustStyle();
-
   class KGameProgressPrivate;
-  KGameProgressPrivate *d;
+  KGameProgressPrivate * const d;
 };
 
 

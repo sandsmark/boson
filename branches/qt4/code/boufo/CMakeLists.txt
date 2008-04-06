@@ -1,8 +1,8 @@
 project(boufo)
 
 add_subdirectory(bouic)
-add_subdirectory(designer)
-add_subdirectory(test)
+#add_subdirectory(designer)
+#add_subdirectory(test)
 
 include_directories(
   ${CMAKE_SOURCE_DIR}/bodebug
@@ -56,15 +56,13 @@ set(boufo_SRCS
 	boufomanager.cpp
 	boufofactory.cpp
 	boufoaction.cpp
-	boufodebugwidget.cpp
+	#boufodebugwidget.cpp
 	boufostandalonefont.cpp
 	boufoprofiling.cpp
 	boufozoomscrollviewporthandler.cpp
 	${ufoext_SRCS}
 	${bosonfont_SRCS}
 )
-
-kde3_automoc(${boufo_SRCS})
 
 boson_add_library(boufo STATIC ${boufo_SRCS})
 

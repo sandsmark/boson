@@ -30,6 +30,8 @@
 #include "bodebug.h"
 
 #include <qdom.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 EnterUnitPlugin::EnterUnitPlugin(Unit* owner)
 	: UnitPlugin(owner)
@@ -776,7 +778,7 @@ bool EnterUnitPlugin::requestEnterPath()
 
  BoVector2Fixed point1;
  BoVector2Fixed point2;
- QValueList<BoVector2Fixed> path;
+ Q3ValueList<BoVector2Fixed> path;
  unsigned int pathIndex = 0;
  bool ok = mUnitStoragePlugin->getEnterPathFor(unit(), &point1, &point2, &path, &pathIndex);
  if (!ok) {
@@ -786,7 +788,7 @@ bool EnterUnitPlugin::requestEnterPath()
  mPathIndex = pathIndex;
  mEnterPoint1 = point1;
  mEnterPoint2 = point2;
- for (QValueList<BoVector2Fixed>::iterator it = path.begin(); it != path.end(); ++it) {
+ for (Q3ValueList<BoVector2Fixed>::iterator it = path.begin(); it != path.end(); ++it) {
 	mRemainingInsidePath.append(*it);
  }
 
@@ -810,13 +812,13 @@ bool EnterUnitPlugin::requestLeavePath()
  //     it doesn't harm to clear it, since the unit is still _standing_ inside!
  mRemainingInsidePath.clear();
 
- QValueList<BoVector2Fixed> path;
+ Q3ValueList<BoVector2Fixed> path;
  bool ok = mUnitStoragePlugin->getLeavePathFor(unit(), &path);
  if (!ok) {
 	boDebug() << k_funcinfo << "no leave path received" << endl;
 	return false;
  }
- for (QValueList<BoVector2Fixed>::iterator it = path.begin(); it != path.end(); ++it) {
+ for (Q3ValueList<BoVector2Fixed>::iterator it = path.begin(); it != path.end(); ++it) {
 	mRemainingInsidePath.append(*it);
  }
 
@@ -845,7 +847,7 @@ bool EnterUnitPlugin::isAtEnterPoint2() const
  return r.contains(mEnterPoint2.value());
 }
 
-QValueList<BoVector2Fixed> EnterUnitPlugin::remainingInsidePath() const
+Q3ValueList<BoVector2Fixed> EnterUnitPlugin::remainingInsidePath() const
 {
  return mRemainingInsidePath;
 }

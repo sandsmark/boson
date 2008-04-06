@@ -38,6 +38,9 @@
 #include <klocale.h>
 
 #include <qdom.h>
+//Added by qt3to4:
+#include <Q3CString>
+#include <Q3ValueList>
 
 #include <math.h>
 
@@ -162,7 +165,7 @@ void ProductionPlugin::addProduction(ProductionType type, unsigned long int id)
 	unit()->setPluginWork(pluginType());
  }
 
- QCString eventName;
+ Q3CString eventName;
  if (type == ProduceUnit) {
 	eventName = "StartProductionOfUnitWithType";
  } else if (type == ProduceTech) {
@@ -192,7 +195,7 @@ void ProductionPlugin::pauseProduction()
 
  unit()->setAdvanceWork(Unit::WorkIdle);
 
- QCString eventName;
+ Q3CString eventName;
  if (currentProductionType() == ProduceUnit) {
 	eventName = "PauseProductionOfUnitWithType";
  } else if (currentProductionType() == ProduceTech) {
@@ -224,7 +227,7 @@ void ProductionPlugin::unpauseProduction()
  unit()->setPluginWork(UnitPlugin::Production);
 
 
- QCString eventName;
+ Q3CString eventName;
  if (currentProductionType() == ProduceUnit) {
 	eventName = "ContinueProductionOfUnitWithType";
  } else if (currentProductionType() == ProduceTech) {
@@ -249,7 +252,7 @@ void ProductionPlugin::abortProduction(ProductionType type, unsigned long int id
  }
 
  QString eventTypeParameter = QString::number(id);
- QCString eventName;
+ Q3CString eventName;
  if (type == ProduceUnit) {
 	eventName = "StopProductionOfUnitWithType";
  } else if (type == ProduceTech) {
@@ -482,8 +485,8 @@ void ProductionPlugin::productionCompleted()
 
 void ProductionPlugin::unitDestroyed(Unit* destroyedUnit)
 {
- QValueList< QPair<ProductionType, unsigned long int> > abort;
- QValueList<unsigned long int> abortTechs;
+ Q3ValueList< QPair<ProductionType, unsigned long int> > abort;
+ Q3ValueList<unsigned long int> abortTechs;
  for (unsigned int i = 0; i < mProductions.count(); i++) {
 	unsigned long int id = mProductions[i].second;
 	if (mProductions[i].first == ProduceUnit) {
@@ -584,9 +587,9 @@ bool ProductionPlugin::contains(ProductionType type, unsigned long int id)
  return productionList().contains(pair);
 }
 
-QValueList<unsigned long int> ProductionPlugin::allUnitProductions(QValueList<unsigned long int>* producible, QValueList<unsigned long int>* notYetProducible) const
+Q3ValueList<unsigned long int> ProductionPlugin::allUnitProductions(Q3ValueList<unsigned long int>* producible, Q3ValueList<unsigned long int>* notYetProducible) const
 {
- QValueList<unsigned long int> ret;
+ Q3ValueList<unsigned long int> ret;
  ProductionProperties* pp = (ProductionProperties*)properties(PluginProperties::Production);
  if (!pp) {
 	// Must not happen when the unit has a ProductionPlugin
@@ -598,7 +601,7 @@ QValueList<unsigned long int> ProductionPlugin::allUnitProductions(QValueList<un
 	return ret;
  }
 
- QValueList<unsigned long int> allProductions = speciesTheme()->productions(pp->producerList());
+ Q3ValueList<unsigned long int> allProductions = speciesTheme()->productions(pp->producerList());
 
  if (producible) {
 	producible->clear();
@@ -607,7 +610,7 @@ QValueList<unsigned long int> ProductionPlugin::allUnitProductions(QValueList<un
 	notYetProducible->clear();
  }
 
- for (QValueList<unsigned long int>::Iterator it = allProductions.begin(); it != allProductions.end(); ++it) {
+ for (Q3ValueList<unsigned long int>::Iterator it = allProductions.begin(); it != allProductions.end(); ++it) {
 	if (player()->canBuild(*it)) {
 		if (producible) {
 			producible->append(*it);
@@ -622,9 +625,9 @@ QValueList<unsigned long int> ProductionPlugin::allUnitProductions(QValueList<un
  return allProductions;
 }
 
-QValueList<unsigned long int> ProductionPlugin::allTechnologyProductions(QValueList<unsigned long int>* producible, QValueList<unsigned long int>* notYetProducible) const
+Q3ValueList<unsigned long int> ProductionPlugin::allTechnologyProductions(Q3ValueList<unsigned long int>* producible, Q3ValueList<unsigned long int>* notYetProducible) const
 {
- QValueList<unsigned long int> ret;
+ Q3ValueList<unsigned long int> ret;
  ProductionProperties* pp = (ProductionProperties*)properties(PluginProperties::Production);
  if (!pp) {
 	// Must not happen when the unit has a ProductionPlugin
@@ -636,7 +639,7 @@ QValueList<unsigned long int> ProductionPlugin::allTechnologyProductions(QValueL
 	return ret;
  }
 
- QValueList<unsigned long int> allTechs = speciesTheme()->technologies(pp->producerList());
+ Q3ValueList<unsigned long int> allTechs = speciesTheme()->technologies(pp->producerList());
 
  if (producible) {
 	producible->clear();
@@ -645,13 +648,13 @@ QValueList<unsigned long int> ProductionPlugin::allTechnologyProductions(QValueL
 	notYetProducible->clear();
  }
 
- QValueList<unsigned long int> allUnresearchedTechs;
- for (QValueList<unsigned long int>::Iterator it = allTechs.begin(); it != allTechs.end(); it++) {
+ Q3ValueList<unsigned long int> allUnresearchedTechs;
+ for (Q3ValueList<unsigned long int>::Iterator it = allTechs.begin(); it != allTechs.end(); it++) {
 	if (!player()->hasTechnology(*it)) {
 		allUnresearchedTechs.append(*it);
 	}
  }
- for (QValueList<unsigned long int>::Iterator it = allUnresearchedTechs.begin(); it != allUnresearchedTechs.end(); it++) {
+ for (Q3ValueList<unsigned long int>::Iterator it = allUnresearchedTechs.begin(); it != allUnresearchedTechs.end(); it++) {
 	if (player()->canResearchTech(*it)) {
 		if (producible) {
 			producible->append(*it);
@@ -684,7 +687,7 @@ bool ProductionPlugin::canCurrentlyProduce(ProductionType p, unsigned long int t
 
 bool ProductionPlugin::canCurrentlyProduceUnit(unsigned long int type) const
 {
- QValueList<unsigned long int> producible;
+ Q3ValueList<unsigned long int> producible;
  allUnitProductions(&producible, 0);
  if (producible.contains(type)) {
 	return true;
@@ -694,7 +697,7 @@ bool ProductionPlugin::canCurrentlyProduceUnit(unsigned long int type) const
 
 bool ProductionPlugin::canCurrentlyProduceTechnology(unsigned long int type) const
 {
- QValueList<unsigned long int> producible;
+ Q3ValueList<unsigned long int> producible;
  allTechnologyProductions(&producible, 0);
  if (producible.contains(type)) {
 	return true;

@@ -1,6 +1,6 @@
 /*
     This file is part of the KDE games library
-    Copyright (C) 2001 Martin Heni (martin@heni-online.de)
+    Copyright (C) 2001 Martin Heni (kde at heni-online.de)
     Copyright (C) 2001 Andreas Beckermann (b_mann@gmx.de)
 
     This library is free software; you can redistribute it and/or
@@ -27,8 +27,8 @@
 #include <krandomsequence.h>
 
 #include <qbuffer.h>
-#include <qdatastream.h>
-#include <qcstring.h>
+#include <QDataStream>
+#include <QtCore/QFile>
 
 #include <assert.h>
 #include <stdio.h>
@@ -38,35 +38,45 @@
 
 #define READ_BUFFER_SIZE  1024
 
+class KGameProcessPrivate
+{
+public:
+    QFile rFile;
+    QFile wFile;
+    KRandomSequence* mRandom;
+};
+
 // ----------------------- Process Child ---------------------------
 
-KGameProcess::KGameProcess() : QObject(0,0)
+KGameProcess::KGameProcess()
+    : QObject(), d(new KGameProcessPrivate)
 {
   mTerminate=false;
   // Check whether a player is set. If not create one!
-  rFile.open(IO_ReadOnly|IO_Raw,stdin);
-  wFile.open(IO_WriteOnly|IO_Raw,stdout);
-  mMessageIO=new KMessageFilePipe(this,&rFile,&wFile);
+  d->rFile.open(stdin, QIODevice::ReadOnly|QIODevice::Unbuffered);
+  d->wFile.open(stdout, QIODevice::WriteOnly|QIODevice::Unbuffered);
+  mMessageIO = new KMessageFilePipe(this, &d->rFile, &d->wFile);
 //  mMessageClient=new KMessageClient(this);
 //  mMessageClient->setServer(mMessageIO);
-//  connect (mMessageClient, SIGNAL(broadcastReceived(const QByteArray&, Q_UINT32)),
-//          this, SLOT(receivedMessage(const QByteArray&, Q_UINT32)));
+//  connect (mMessageClient, SIGNAL(broadcastReceived(const QByteArray&, quint32)),
+//          this, SLOT(receivedMessage(const QByteArray&, quint32)));
   connect (mMessageIO, SIGNAL(received(const QByteArray&)),
           this, SLOT(receivedMessage(const QByteArray&)));
-  fprintf(stderr,"KGameProcess::constructor %p %p\n",&rFile,&wFile);
  
-  mRandom = new KRandomSequence;
-  mRandom->setSeed(0);
+  d->mRandom = new KRandomSequence;
+  d->mRandom->setSeed(0);
 }
 KGameProcess::~KGameProcess() 
 {
-  delete mRandom;
+  delete d->mRandom;
   //delete mMessageClient;
   //delete mMessageServer;
-  delete mMessageIO;
-  rFile.close();
-  wFile.close();
   fprintf(stderr,"KGameProcess::destructor\n");
+  fflush(stderr);
+  delete mMessageIO;
+  d->rFile.close();
+  d->wFile.close();
+  delete d;
 }
 
 
@@ -83,28 +93,26 @@ bool KGameProcess::exec(int argc, char *argv[])
 
 //    You have to do this to create a message 
 //    QByteArray buffer;
-//    QDataStream wstream(buffer,IO_WriteOnly);
+//    QDataStream wstream(buffer,QIODevice::WriteOnly);
 //    then stream data into the stream and call this function
-void KGameProcess::sendSystemMessage(QDataStream &stream,int msgid,Q_UINT32 receiver)
+void KGameProcess::sendSystemMessage(QDataStream &stream,int msgid,quint32 receiver)
 {
-  fprintf(stderr,"KGameProcess::sendMessage id=%d recv=%d",msgid,receiver);
+  fprintf(stderr,"KGameProcess::sendSystemMessage to parent id=%d recv=%ld\n",msgid,(unsigned long)receiver);
   QByteArray a;
-  QDataStream outstream(a,IO_WriteOnly);
+  QDataStream outstream(&a,QIODevice::WriteOnly);
 
   QBuffer *device=(QBuffer *)stream.device();
-  QByteArray data=device->buffer();;
+  QByteArray data=device->buffer();
 
   KGameMessage::createHeader(outstream,0,receiver,msgid);
-  outstream.writeRawBytes(data.data(),data.size());
+  outstream.writeRawData(data.data(),data.size());
 
-  //if (mMessageClient) mMessageClient->sendBroadcast(a);
-  // TODO: The fixed received 2 will cause problems. But how to address the
-  // proper one?
-//  if (mMessageClient) mMessageClient->sendForward(a,2);
+  //  if (mMessageClient) mMessageClient->sendForward(a,2);
   if (mMessageIO) mMessageIO->send(a);
+  else fprintf(stderr,"KGameProcess::sendSystemMessage:: NO IO DEVICE ... WILL FAIL\n");
 }
 
-void KGameProcess::sendMessage(QDataStream &stream,int msgid,Q_UINT32 receiver)
+void KGameProcess::sendMessage(QDataStream &stream,int msgid,quint32 receiver)
 {
   sendSystemMessage(stream,msgid+KGameMessage::IdUser,receiver);
 }
@@ -115,34 +123,35 @@ void KGameProcess::processArgs(int argc, char *argv[])
   if (argc>2)
   {
     v=atoi(argv[2]);
-    //boDebug(11001) << "cookie (unused) " << v << endl;
+    //kDebug(11001) << "cookie (unused) " << v;
   }
   if (argc>1)
   {
     v=atoi(argv[1]);
-    //boDebug(11001) << "id (unused) " << v << endl;
+    //kDebug(11001) << "id (unused) " << v;
   }
-  fprintf(stderr,"processArgs \n");
+  fprintf(stderr,"KGameProcess::processArgs \n");
   fflush(stderr);
 }
 
 void KGameProcess::receivedMessage(const QByteArray& receiveBuffer)
 {
- QDataStream stream(receiveBuffer, IO_ReadOnly);
+ QDataStream stream(receiveBuffer);
  int msgid;
- Q_UINT32 sender; 
- Q_UINT32 receiver; 
+ quint32 sender; 
+ quint32 receiver; 
  KGameMessage::extractHeader(stream, sender, receiver, msgid);
- fprintf(stderr,"------ receiveNetworkTransmission(): id=%d sender=%d,recv=%d\n",msgid,sender,receiver);
+ fprintf(stderr,"--- KGameProcess::receivedMessage(): id=%d sender=%ld,recv=%ld\n",
+         msgid,(unsigned long)sender,(unsigned long)receiver);
  switch(msgid)
  {
    case KGameMessage::IdTurn:
-     Q_INT8 b;
+     qint8 b;
      stream >> b;
      emit signalTurn(stream,(bool)b);
    break;
    case KGameMessage::IdIOAdded:
-     Q_INT16 id;
+     qint16 id;
      stream >> id;
      emit signalInit(stream,(int)id);
    break;
@@ -151,5 +160,11 @@ void KGameProcess::receivedMessage(const QByteArray& receiveBuffer)
    break;
  }
 }
+
+KRandomSequence* KGameProcess::random()
+{
+  return d->mRandom;
+}
+
 
 #include "kgameprocess.moc"

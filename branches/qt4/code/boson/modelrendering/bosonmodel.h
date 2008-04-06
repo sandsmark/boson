@@ -23,21 +23,24 @@
 #include "../global.h"
 
 #include <bogl.h>
+//Added by qt3to4:
+#include <Q3CString>
+#include <Q3PtrList>
 
 class KSimpleConfig;
 class QColor;
 class QString;
-class QCString;
+class Q3CString;
 class QStringList;
 class BoMatrix;
 class BoMesh;
 class BoMaterial;
 template<class T> class BoVector3;
 typedef BoVector3<float> BoVector3Float;
-template<class T> class QPtrList;
-template<class T> class QValueVector;
+template<class T> class Q3PtrList;
+template<class T> class Q3ValueVector;
 template<class T, class T2> class QMap;
-template<class T> class QIntDict;
+template<class T> class Q3IntDict;
 class BoMeshRendererModelData;
 
 /**
@@ -142,7 +145,7 @@ public:
 	/**
 	 * @param lod See @ref BoMesh::renderMesh
 	 **/
-	void renderFrame(const QValueVector<const BoMatrix*>& itemMatrices, const QColor* teamColor, bool transparentmeshes = false, RenderFlags flags = Default, int mode = GL_RENDER);
+	void renderFrame(const Q3ValueVector<const BoMatrix*>& itemMatrices, const QColor* teamColor, bool transparentmeshes = false, RenderFlags flags = Default, int mode = GL_RENDER);
 
 private:
 	void init();

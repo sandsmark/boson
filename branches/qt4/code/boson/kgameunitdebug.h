@@ -21,8 +21,8 @@
 
 #include <qwidget.h>
 
-class QListViewItem;
-class KListView;
+class Q3ListViewItem;
+class K3ListView;
 
 class KGamePropertyBase;
 class KGamePropertyHandler;
@@ -52,8 +52,8 @@ protected:
 	void update(BosonItem*);
 
 protected slots:
-	void slotSelected(QListViewItem*);
-	void slotItemListMenu(QListViewItem*, const QPoint&, int);
+	void slotSelected(Q3ListViewItem*);
+	void slotItemListMenu(Q3ListViewItem*, const QPoint&, int);
 	void slotItemListToggleShowColumn(int);
 	void slotItemPropertyChanged(KGamePropertyBase*);
 
@@ -73,7 +73,7 @@ public:
 	void displayDataHandler(KGamePropertyHandler* dataHandler);
 
 private:
-	KListView* mProperties;
+	K3ListView* mProperties;
 };
 
 

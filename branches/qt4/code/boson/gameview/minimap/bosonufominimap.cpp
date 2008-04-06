@@ -38,7 +38,7 @@
 
 #include <qgl.h>
 #include <qimage.h>
-#include <qpointarray.h>
+#include <q3pointarray.h>
 #include <qfileinfo.h>
 
 #define ZOOM_STEP 0.5
@@ -53,7 +53,7 @@ public:
 	}
 	QString mImageTheme;
 
-	QPointArray mSelectionRect;
+	Q3PointArray mSelectionRect;
 
 	QImage mLogo;
 	QImage mZoomIn;
@@ -208,15 +208,15 @@ void BosonUfoMiniMap::setImageTheme(const QString& theme)
 void BosonUfoMiniMap::setZoomImages(const QImage& in_, const QImage& out_, const QImage& defaultZoom_)
 {
  int w = in_.width();
- w = QMAX(w, out_.width());
- w = QMAX(w, defaultZoom_.width());
+ w = qMax(w, out_.width());
+ w = qMax(w, defaultZoom_.width());
  int h = in_.height();
- h = QMAX(h, out_.height());
- h = QMAX(h, defaultZoom_.height());
+ h = qMax(h, out_.height());
+ h = qMax(h, defaultZoom_.height());
  QImage in, out, defaultZoom;
- in = in_.smoothScale(w, h, QImage::ScaleMin);
- out = out_.smoothScale(w, h, QImage::ScaleMin);
- defaultZoom = defaultZoom_.smoothScale(w, h, QImage::ScaleMin);
+ in = in_.smoothScale(w, h, Qt::ScaleMin);
+ out = out_.smoothScale(w, h, Qt::ScaleMin);
+ defaultZoom = defaultZoom_.smoothScale(w, h, Qt::ScaleMin);
 #if 0
  // AB: we could use plib/pui here...
  // maybe we should link to plib? after all we already use fnt in boson and

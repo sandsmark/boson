@@ -1,3 +1,5 @@
+//Added by qt3to4:
+#include <QMouseEvent>
 /*
     This file is part of the Boson game
     Copyright (C) 2002-2005 Andreas Beckermann (b_mann@gmx.de)
@@ -132,7 +134,7 @@ public:
 	 * pressed.
 	 *
 	 * An example use of this is the selection rect - you will call
-	 * start(QMouseEvent::LeftButton) to start the selection rect and should
+	 * start(Qt::LeftButton) to start the selection rect and should
 	 * continue to paint it until @ref isStopped is TRUE again.
 	 *
 	 * Note that the behaviour of @ref dx and @ref dy is not influenced by

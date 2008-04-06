@@ -23,10 +23,12 @@
 #include "global.h"
 
 #include <qstring.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 class QImage;
 class KSimpleConfig;
-template<class T> class QPtrList;
+template<class T> class Q3PtrList;
 
 class PlayerIO;
 class Unit;
@@ -86,8 +88,8 @@ class BoSpecificAction
      * multiple units (e.g. when producing something). It is equivalent to
      * calling @ref setUnit(leader) after setAllUnits.
      **/
-    void setAllUnits(const QPtrList<Unit>& units, Unit* leader = 0);
-    const QPtrList<Unit>& allUnits() const;
+    void setAllUnits(const Q3PtrList<Unit>& units, Unit* leader = 0);
+    const Q3PtrList<Unit>& allUnits() const;
 
     BosonWeaponProperties* weapon() const  { return mWeapon; }
     void setWeapon(BosonWeaponProperties* w)  { mWeapon = w; }
@@ -154,7 +156,7 @@ class BoSpecificAction
     long unsigned int mProductionId;
     UnitAction mType;
     Unit* mUnit;
-    QPtrList<Unit>* mAllUnits;
+    Q3PtrList<Unit>* mAllUnits;
     PlayerIO* mProductionOwner;
     BosonWeaponProperties* mWeapon;
     bool mOk;

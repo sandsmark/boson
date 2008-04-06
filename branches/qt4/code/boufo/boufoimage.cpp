@@ -34,6 +34,8 @@
 
 #include <qimage.h>
 #include <qgl.h>
+//Added by qt3to4:
+#include <QPixmap>
 
 
 BoUfoImageIO::BoUfoImageIO()
@@ -71,7 +73,7 @@ void BoUfoImageIO::setPixmap(const QPixmap& p)
 	boError() << k_funcinfo << "data is already set" << endl;
 	return;
  }
- QImage img = p.convertToImage();
+ QImage img = p.toImage();
  setImage(img);
 }
 
@@ -82,7 +84,7 @@ void BoUfoImageIO::setImage(const QImage& _img)
 	return;
  }
  // AB: atm UImage uses a format with y-coordinates flipped
- QImage img = QGLWidget::convertToGLFormat(_img.mirror(false, true));
+ QImage img = QGLWidget::convertToGLFormat(_img.mirrored(false, true));
  mImageIO = new ufo::UImageIO(img.bits(), img.width(), img.height(), 4);
  mImageIO->reference();
 }

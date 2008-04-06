@@ -22,7 +22,9 @@
 #include <bogl.h>
 
 #include <qstring.h>
-#include <qvaluevector.h>
+#include <q3valuevector.h>
+//Added by qt3to4:
+#include <Q3CString>
 
 class KSimpleConfig;
 class QString;
@@ -79,8 +81,8 @@ class BoBMFLoad
     **/
     const QString& baseDirectory() const;
 
-    static QCString calculateHash(const QString& modelfile, const QString& configfile);
-    static Q_UINT32 getVersion(const QString& modelfile);
+    static Q3CString calculateHash(const QString& modelfile, const QString& configfile);
+    static quint32 getVersion(const QString& modelfile);
 
     /**
      * Converts array from little-endian to big-endian.
@@ -95,7 +97,7 @@ class BoBMFLoad
   private:
     QString mFile;
     BosonModel* mModel;
-    QValueVector<QString> mTextureNames;
+    Q3ValueVector<QString> mTextureNames;
     bool* mTextureTransparent;
 };
 

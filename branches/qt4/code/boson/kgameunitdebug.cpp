@@ -33,23 +33,26 @@
 #include "gameengine/bosonpropertyxml.h"
 #include "gameengine/bosonpath.h"
 #include "qlistviewitemnumber.h"
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3VBoxLayout>
 
-#include <klistview.h>
-#include <klistbox.h>
+#include <k3listview.h>
+#include <k3listbox.h>
 #include <klocale.h>
 #include <kgame/kgamepropertyhandler.h>
 
 #include <qlayout.h>
 #include <qpushbutton.h>
-#include <qintdict.h>
+#include <q3intdict.h>
 #include <qlabel.h>
-#include <qvgroupbox.h>
-#include <qvbox.h>
-#include <qpointarray.h>
-#include <qptrdict.h>
-#include <qptrvector.h>
+#include <q3vgroupbox.h>
+#include <q3vbox.h>
+#include <q3pointarray.h>
+#include <q3ptrdict.h>
+#include <q3ptrvector.h>
 #include <qsplitter.h>
-#include <qpopupmenu.h>
+#include <q3popupmenu.h>
 #include <qcursor.h>
 #include <qtabwidget.h>
 
@@ -60,7 +63,7 @@ public:
 	{
 		mItemList = 0;
 	}
-	KListView* mItemList;
+	K3ListView* mItemList;
 	int mIndexId;
 	int mIndexOwner;
 	int mIndexRTTI;
@@ -69,24 +72,24 @@ public:
 	int mIndexY;
 	int mIndexZ;
 
-	QMap<BosonItem*, QListViewItem*> mGameItem2ListItem;
-	QMap<QListViewItem*, BosonItem*> mListItem2GameItem;
+	QMap<BosonItem*, Q3ListViewItem*> mGameItem2ListItem;
+	QMap<Q3ListViewItem*, BosonItem*> mListItem2GameItem;
 };
 
 KGameUnitDebugItemList::KGameUnitDebugItemList(QWidget* parent)
 	: QWidget(parent)
 {
  d = new KGameUnitDebugItemListPrivate;
- QVBoxLayout* layout = new QVBoxLayout(this);
- d->mItemList = new KListView(this);
+ Q3VBoxLayout* layout = new Q3VBoxLayout(this);
+ d->mItemList = new K3ListView(this);
  layout->addWidget(d->mItemList);
 
 // connect(d->mItemList, SIGNAL(executed(QListBoxItem*)),
 //		this, SLOT(slotSelectUnit(QListBoxItem*)));
- connect(d->mItemList, SIGNAL(selectionChanged(QListViewItem*)),
-		this, SLOT(slotSelected(QListViewItem*)));
- connect(d->mItemList, SIGNAL(contextMenuRequested(QListViewItem*, const QPoint&, int)),
-		this, SLOT(slotItemListMenu(QListViewItem*, const QPoint&, int)));
+ connect(d->mItemList, SIGNAL(selectionChanged(Q3ListViewItem*)),
+		this, SLOT(slotSelected(Q3ListViewItem*)));
+ connect(d->mItemList, SIGNAL(contextMenuRequested(Q3ListViewItem*, const QPoint&, int)),
+		this, SLOT(slotItemListMenu(Q3ListViewItem*, const QPoint&, int)));
 
 
  d->mItemList->setAllColumnsShowFocus(true);
@@ -100,12 +103,12 @@ KGameUnitDebugItemList::KGameUnitDebugItemList(QWidget* parent)
  d->mIndexZ = d->mItemList->addColumn(i18n("Z"));
 
  // hide some columns by defaul
- QValueList<int> hidden;
+ Q3ValueList<int> hidden;
  hidden.append(d->mIndexX);
  hidden.append(d->mIndexY);
  hidden.append(d->mIndexZ);
- for (QValueList<int>::iterator it = hidden.begin(); it != hidden.end(); ++it) {
-	d->mItemList->setColumnWidthMode(*it, QListView::Manual);
+ for (Q3ValueList<int>::iterator it = hidden.begin(); it != hidden.end(); ++it) {
+	d->mItemList->setColumnWidthMode(*it, Q3ListView::Manual);
 	d->mItemList->hideColumn(*it);
  }
 }
@@ -116,10 +119,10 @@ KGameUnitDebugItemList::~KGameUnitDebugItemList()
  delete d;
 }
 
-void KGameUnitDebugItemList::slotItemListMenu(QListViewItem*, const QPoint&, int)
+void KGameUnitDebugItemList::slotItemListMenu(Q3ListViewItem*, const QPoint&, int)
 {
- QPopupMenu menu(this);
- QPopupMenu columns(this);
+ Q3PopupMenu menu(this);
+ Q3PopupMenu columns(this);
  columns.setCheckable(true);
 
  for (int i = 0; i < d->mItemList->columns(); i++) {
@@ -145,10 +148,10 @@ void KGameUnitDebugItemList::slotItemListToggleShowColumn(int index)
  }
  bool hidden = (d->mItemList->columnWidth(index) == 0);
  if (hidden) {
-	d->mItemList->setColumnWidthMode(index, QListView::Maximum);
+	d->mItemList->setColumnWidthMode(index, Q3ListView::Maximum);
 	d->mItemList->adjustColumn(index);
  } else {
-	d->mItemList->setColumnWidthMode(index, QListView::Manual);
+	d->mItemList->setColumnWidthMode(index, Q3ListView::Manual);
 	d->mItemList->hideColumn(index);
  }
 }
@@ -162,7 +165,7 @@ void KGameUnitDebugItemList::clear()
 
 void KGameUnitDebugItemList::addItem(BosonItem* gameItem)
 {
- QListViewItem* listItem = new QListViewItemNumber(d->mItemList);
+ Q3ListViewItem* listItem = new QListViewItemNumber(d->mItemList);
  d->mGameItem2ListItem.insert(gameItem, listItem);
  d->mListItem2GameItem.insert(listItem, gameItem);
 
@@ -176,7 +179,7 @@ void KGameUnitDebugItemList::addItem(BosonItem* gameItem)
 
 void KGameUnitDebugItemList::update(BosonItem* gameItem)
 {
- QListViewItem* listItem = d->mGameItem2ListItem[gameItem];
+ Q3ListViewItem* listItem = d->mGameItem2ListItem[gameItem];
  BO_CHECK_NULL_RET(listItem);
 
  listItem->setText(d->mIndexId, QString::number(gameItem->id()));
@@ -218,7 +221,7 @@ void KGameUnitDebugItemList::updateProperty(BosonItem* item, KGamePropertyBase* 
  update(item);
 }
 
-void KGameUnitDebugItemList::slotSelected(QListViewItem* item)
+void KGameUnitDebugItemList::slotSelected(Q3ListViewItem* item)
 {
  if (!item) {
 	return;
@@ -250,13 +253,13 @@ void KGameUnitDebugItemList::slotItemPropertyChanged(KGamePropertyBase* prop)
 KGameUnitDebugDataHandlerDisplay::KGameUnitDebugDataHandlerDisplay(QWidget* parent)
 	: QWidget(parent)
 {
- mProperties = new KListView(this);
+ mProperties = new K3ListView(this);
  mProperties->setAllColumnsShowFocus(true);
  mProperties->addColumn(i18n("Property"));
  mProperties->addColumn(i18n("Id"));
  mProperties->addColumn(i18n("Value"));
 
- QVBoxLayout* layout = new QVBoxLayout(this);
+ Q3VBoxLayout* layout = new Q3VBoxLayout(this);
  layout->addWidget(mProperties);
 }
 
@@ -277,8 +280,8 @@ void KGameUnitDebugDataHandlerDisplay::displayDataHandler(KGamePropertyHandler* 
 	return;
  }
  BosonCustomPropertyXML propertyXML;
- QIntDict<KGamePropertyBase>& dict = dataHandler->dict();
- for (QIntDictIterator<KGamePropertyBase> it(dict); it.current(); ++it) {
+ Q3IntDict<KGamePropertyBase>& dict = dataHandler->dict();
+ for (Q3IntDictIterator<KGamePropertyBase> it(dict); it.current(); ++it) {
 	QString name = dataHandler->propertyName(it.current()->id());
 	QString id = QString::number(it.current()->id());
 	QString value = propertyXML.propertyValue(it.current());
@@ -315,16 +318,16 @@ public:
 	KGameUnitDebugItemList* mItemList;
 	KGameUnitDebugDataHandlerDisplay* mItemProperties;
 	KGameUnitDebugDataHandlerDisplay* mUnitWeaponProperties;
-	KListView* mProduction;
-	KListView* mUnitCollisions;
-	KListView* mCells;
-	KListView* mPathInfo;
+	K3ListView* mProduction;
+	K3ListView* mUnitCollisions;
+	K3ListView* mCells;
+	K3ListView* mPathInfo;
 };
 
 KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
 {
  d = new KGameUnitDebugPrivate;
- QVBoxLayout* topLayout = new QVBoxLayout(this);
+ Q3VBoxLayout* topLayout = new Q3VBoxLayout(this);
  QSplitter* splitter = new QSplitter(this);
  topLayout->addWidget(splitter);
 
@@ -360,14 +363,14 @@ void KGameUnitDebug::addPropertiesPage()
 {
  QSplitter* propertiesSplitter = new QSplitter(Vertical, d->mTabWidget);
  QWidget* propertiesBox = new QWidget(propertiesSplitter);
- QVBoxLayout* propertiesLayout = new QVBoxLayout(propertiesBox);
+ Q3VBoxLayout* propertiesLayout = new Q3VBoxLayout(propertiesBox);
  QLabel* propertiesTitle = new QLabel(i18n("Properties"), propertiesBox);
  propertiesLayout->addWidget(propertiesTitle, 0);
  d->mItemProperties = new KGameUnitDebugDataHandlerDisplay(propertiesBox);
  propertiesLayout->addWidget(d->mItemProperties, 1);
 
  QWidget* weaponPropertiesBox = new QWidget(propertiesSplitter);
- QVBoxLayout* weaponPropertiesLayout = new QVBoxLayout(weaponPropertiesBox);
+ Q3VBoxLayout* weaponPropertiesLayout = new Q3VBoxLayout(weaponPropertiesBox);
  QLabel* weaponPropertiesTitle = new QLabel(i18n("Weapon Properties"), weaponPropertiesBox);
  weaponPropertiesLayout->addWidget(weaponPropertiesTitle, 0);
  d->mUnitWeaponProperties = new KGameUnitDebugDataHandlerDisplay(weaponPropertiesBox);
@@ -377,7 +380,7 @@ void KGameUnitDebug::addPropertiesPage()
 
 void KGameUnitDebug::addProductionsPage()
 {
- d->mProduction = new KListView(d->mTabWidget);
+ d->mProduction = new K3ListView(d->mTabWidget);
  d->mProduction->setAllColumnsShowFocus(true);
  d->mProduction->addColumn(i18n("Number"));
  d->mProduction->addColumn(i18n("TypeId"));
@@ -388,10 +391,10 @@ void KGameUnitDebug::addProductionsPage()
 
 void KGameUnitDebug::addCollisionsPage()
 {
- QVBox* collisionsBox = new QVBox(d->mTabWidget);
- QVBox* unitCollisionsWidget = new QVBox(collisionsBox);
+ Q3VBox* collisionsBox = new Q3VBox(d->mTabWidget);
+ Q3VBox* unitCollisionsWidget = new Q3VBox(collisionsBox);
  (void)new QLabel(i18n("UnitCollisions:"), unitCollisionsWidget);
- d->mUnitCollisions = new KListView(unitCollisionsWidget);
+ d->mUnitCollisions = new K3ListView(unitCollisionsWidget);
  d->mUnitCollisions->setAllColumnsShowFocus(true);
  d->mUnitCollisions->addColumn(i18n("ID"));
  d->mUnitCollisions->addColumn(i18n("Exact"));
@@ -401,10 +404,10 @@ void KGameUnitDebug::addCollisionsPage()
 void KGameUnitDebug::addCellsPage()
 {
  QWidget* cellsBox = new QWidget(d->mTabWidget);
- QVBoxLayout* cellsLayout = new QVBoxLayout(cellsBox);
+ Q3VBoxLayout* cellsLayout = new Q3VBoxLayout(cellsBox);
  QLabel* cellsTitle = new QLabel(i18n("Cells"), cellsBox);
  cellsLayout->addWidget(cellsTitle, 0);
- d->mCells = new KListView(cellsBox);
+ d->mCells = new K3ListView(cellsBox);
  d->mCells->setAllColumnsShowFocus(true);
  d->mCells->addColumn(i18n("X"));
  d->mCells->addColumn(i18n("Y"));
@@ -414,7 +417,7 @@ void KGameUnitDebug::addCellsPage()
 
 void KGameUnitDebug::addPathInfoPage()
 {
- d->mPathInfo = new KListView(d->mTabWidget);
+ d->mPathInfo = new K3ListView(d->mTabWidget);
  d->mPathInfo->setAllColumnsShowFocus(true);
  d->mPathInfo->addColumn(i18n("Name"));
  d->mPathInfo->addColumn(i18n("Value"));
@@ -497,9 +500,9 @@ void KGameUnitDebug::updateProduction(BosonItem* item)
  Unit* unit = (Unit*)item;
  ProductionPlugin* production = (ProductionPlugin*)unit->plugin(UnitPlugin::Production);
  if (production) {
-	QValueList<QPair<ProductionType, unsigned long int> > productions = production->productionList();
+	Q3ValueList<QPair<ProductionType, unsigned long int> > productions = production->productionList();
 	for (unsigned int i = 0; i < productions.count(); i++) {
-		QListViewItem* item = new QListViewItem(d->mProduction);
+		Q3ListViewItem* item = new Q3ListViewItem(d->mProduction);
 		item->setText(0, QString::number(i+1));
 		item->setText(1, QString::number(productions[i].second));
 		item->setText(2, i18n("Ready")); // currently always ready
@@ -516,17 +519,17 @@ void KGameUnitDebug::updateUnitCollisions(BosonItem* item)
 	return;
  }
  Unit* unit = (Unit*)item;
- QValueList<Unit*> collisionsFalse = unit->unitCollisions(false);
- QValueList<Unit*> collisionsTrue = unit->unitCollisions(false);
+ Q3ValueList<Unit*> collisionsFalse = unit->unitCollisions(false);
+ Q3ValueList<Unit*> collisionsTrue = unit->unitCollisions(false);
  if (collisionsFalse.count() == 0) {
-	QListViewItem* item = new QListViewItem(d->mUnitCollisions);
+	Q3ListViewItem* item = new Q3ListViewItem(d->mUnitCollisions);
 	item->setText(0, i18n("No unit collisions for %1").arg(unit->id()));
  }
 
- QValueList<Unit*>::Iterator it = collisionsFalse.begin();
+ Q3ValueList<Unit*>::Iterator it = collisionsFalse.begin();
  for (; it != collisionsFalse.end(); ++it) {
 	Unit* u = (Unit*)*it;
-	QListViewItem* item = new QListViewItem(d->mUnitCollisions);
+	Q3ListViewItem* item = new Q3ListViewItem(d->mUnitCollisions);
 	item->setText(0, QString::number(u->id()));
 	if (collisionsTrue.contains(*it)) {
 		item->setText(1, i18n("True"));
@@ -542,13 +545,13 @@ void KGameUnitDebug::updateCells(BosonItem* item)
  if (!item) {
 	return;
  }
- const QPtrVector<Cell>* cells = item->cells();
+ const Q3PtrVector<Cell>* cells = item->cells();
  for (unsigned int i = 0; i < cells->count(); i++) {
 	Cell* c = cells->at(i);
 	if (!c) {
 		boError() << k_funcinfo << "invalid cell at " << i << endl;
 	}
-	QListViewItem* item = new QListViewItem(d->mCells);
+	Q3ListViewItem* item = new Q3ListViewItem(d->mCells);
 	item->setText(0, QString::number(c->x()));
 	item->setText(1, QString::number(c->y()));
  }
@@ -567,18 +570,18 @@ void KGameUnitDebug::updatePathInfo(BosonItem* item)
 	return;
  }
 
- QListViewItem* start = new QListViewItem(d->mPathInfo, i18n("Start"));
+ Q3ListViewItem* start = new Q3ListViewItem(d->mPathInfo, i18n("Start"));
  start->setText(1, i18n("(%1;%2)").arg(info->start.x()).arg(info->start.y()));
- QListViewItem* dest = new QListViewItem(d->mPathInfo, i18n("Dest"));
+ Q3ListViewItem* dest = new Q3ListViewItem(d->mPathInfo, i18n("Dest"));
  dest->setText(1, i18n("(%1;%2)").arg(info->dest.x()).arg(info->dest.y()));
- new QListViewItem(d->mPathInfo, i18n("Range"), QString::number(info->range));
- QListViewItem* target = new QListViewItem(d->mPathInfo, i18n("Target"));
+ new Q3ListViewItem(d->mPathInfo, i18n("Range"), QString::number(info->range));
+ Q3ListViewItem* target = new Q3ListViewItem(d->mPathInfo, i18n("Target"));
  if (info->target) {
 	target->setText(1, QString::number(info->target->id()));
  }
 
- new QListViewItem(d->mPathInfo, i18n("Waiting"), QString::number(info->waiting));
- new QListViewItem(d->mPathInfo, i18n("PathRecalced"), QString::number(info->pathrecalced));
+ new Q3ListViewItem(d->mPathInfo, i18n("Waiting"), QString::number(info->waiting));
+ new Q3ListViewItem(d->mPathInfo, i18n("PathRecalced"), QString::number(info->pathrecalced));
 
 }
 

@@ -44,8 +44,10 @@
 #include <klocale.h>
 
 #include <qtimer.h>
-#include <qvaluelist.h>
-#include <qvaluevector.h>
+#include <q3valuelist.h>
+#include <q3valuevector.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 
 class PlacementPreview
@@ -347,7 +349,7 @@ void BosonUfoPlacementPreviewWidget::renderPlacementPreview()
  // This is _center_ pos of the unit
  bofixed x;
  bofixed y;
-#warning FIXME: Rivo: is useCollisionDetection (replacement for d->mControlButton) correct here?
+#warning FIXME: Rivo: is useCollisionDetection (replacement for d->mQt::ControlModifier) correct here?
  if (!d->mPlacementPreview.useCollisionDetection() && !boGame->gameMode()) {
 	x = pos.x() + w / 2;
 	y = pos.y() + h / 2;
@@ -377,7 +379,7 @@ void BosonUfoPlacementPreviewWidget::renderPlacementPreview()
 	BoFrame* f = d->mPlacementPreview.model()->lod(0)->frame(0);
 	BosonModel::startModelRendering();
 	d->mPlacementPreview.model()->prepareRendering();
-	QValueVector<const BoMatrix*> itemMatrices(f->nodeCount());
+	Q3ValueVector<const BoMatrix*> itemMatrices(f->nodeCount());
 	f->renderFrame(itemMatrices, &localPlayerIO()->teamColor());
 	BosonModel::stopModelRendering();
  } else if (groundPreview) {
@@ -488,7 +490,7 @@ public:
 		mCanvas = 0;
 	}
 	const BoGLMatrices* mGameGLMatrices;
-	QValueList<BoLineVisualization> mLineVisualizationList;
+	Q3ValueList<BoLineVisualization> mLineVisualizationList;
 	const BosonCanvas* mCanvas;
 };
 
@@ -499,9 +501,9 @@ BosonUfoLineVisualizationWidget::BosonUfoLineVisualizationWidget()
  d = new BosonUfoLineVisualizationWidgetPrivate();
 
  connect(BosonPathVisualization::pathVisualization(),
-		SIGNAL(signalAddLineVisualization( const QValueList<BoVector3Fixed>&, const BoVector4Float&, bofixed, int, bofixed)),
+		SIGNAL(signalAddLineVisualization( const Q3ValueList<BoVector3Fixed>&, const BoVector4Float&, bofixed, int, bofixed)),
 		this,
-		SLOT(slotAddLineVisualization(const QValueList<BoVector3Fixed>&, const BoVector4Float&, bofixed, int, bofixed)));
+		SLOT(slotAddLineVisualization(const Q3ValueList<BoVector3Fixed>&, const BoVector4Float&, bofixed, int, bofixed)));
 }
 
 BosonUfoLineVisualizationWidget::~BosonUfoLineVisualizationWidget()
@@ -548,12 +550,12 @@ void BosonUfoLineVisualizationWidget::paintWidget()
  glDisable(GL_LIGHTING);
  glDisable(GL_NORMALIZE);
  boTextureManager->disableTexturing();
- QValueList<BoLineVisualization>::iterator it;
+ Q3ValueList<BoLineVisualization>::iterator it;
  for (it = d->mLineVisualizationList.begin(); it != d->mLineVisualizationList.end(); ++it) {
 	glColor4fv((*it).color.data());
 	glPointSize((*it).pointsize);
 	glBegin(GL_LINE_STRIP);
-	QValueList<BoVector3Fixed>::iterator pit;
+	Q3ValueList<BoVector3Fixed>::iterator pit;
 	for (pit = (*it).points.begin(); pit != (*it).points.end(); ++pit) {
 		glVertex3fv((*pit).toFloat().data());
 	}	glEnd();
@@ -575,7 +577,7 @@ void BosonUfoLineVisualizationWidget::addLineVisualization(BoLineVisualization v
  d->mLineVisualizationList.append(v);
 }
 
-void BosonUfoLineVisualizationWidget::slotAddLineVisualization(const QValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize, int timeout, bofixed zOffset)
+void BosonUfoLineVisualizationWidget::slotAddLineVisualization(const Q3ValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize, int timeout, bofixed zOffset)
 {
  if (!canvas()) {
 	return;
@@ -585,7 +587,7 @@ void BosonUfoLineVisualizationWidget::slotAddLineVisualization(const QValueList<
  viz.timeout = timeout;
  viz.color = color;
  viz.points = points;
- QValueList<BoVector3Fixed>::Iterator it;
+ Q3ValueList<BoVector3Fixed>::Iterator it;
  for (it = viz.points.begin(); it != viz.points.end(); ++it) {
 	(*it).setZ(canvas()->heightAtPoint((*it).x(), -(*it).y()) + zOffset);
  }
@@ -599,7 +601,7 @@ void BosonUfoLineVisualizationWidget::slotAdvance(unsigned int, bool)
 
 void BosonUfoLineVisualizationWidget::advanceLineVisualization()
 {
- QValueList<BoLineVisualization>::iterator it;
+ Q3ValueList<BoLineVisualization>::iterator it;
  for (it = d->mLineVisualizationList.begin(); it != d->mLineVisualizationList.end(); ++it) {
 	(*it).timeout--;
 	if ((*it).timeout == 0) {
@@ -828,7 +830,7 @@ public:
 
 	float mMin;
 	float mMax;
-	QValueList<float> mData;
+	Q3ValueList<float> mData;
 	float mDataWidth;
 	QColor mColor;
 };
@@ -955,7 +957,7 @@ void BosonUfoFPSGraphWidget::paintFPS(const FPSGraphData& data)
 
  float x = 0.0f;
  glBegin(GL_LINE_STRIP);
-	for (QValueList<float>::const_iterator it = data.mData.begin(); it != data.mData.end(); ++it) {
+	for (Q3ValueList<float>::const_iterator it = data.mData.begin(); it != data.mData.end(); ++it) {
 		float factor = ((*it) - data.mMin) / data.mMax;
 		float y = factor * widgetHeight;
 		glVertex2f(x, y);
@@ -1028,16 +1030,16 @@ public:
 		mOneLinePerType = 0;
 	}
 	const BoGLMatrices* mGameGLMatrices;
-	QPtrList<ProfilingGraphItem> mItems;
+	Q3PtrList<ProfilingGraphItem> mItems;
 	QMap<QString, ProfilingGraphType*> mProfilingTypes;
 
 	QTimer* mUpdateTimer;
 
-	QValueList<QColor> mAvailableColors;
+	Q3ValueList<QColor> mAvailableColors;
 
 	BoUfoLayeredPane* mLayeredPane;
 	BoUfoWidget* mLabelsWidget;
-	QPtrList<BoUfoLabel> mLabels;
+	Q3PtrList<BoUfoLabel> mLabels;
 	BoUfoCheckBox* mEnableUpdates;
 	BoUfoSlider* mUpdateInterval;
 	BoUfoLabel* mUpdateIntervalLabel;
@@ -1161,7 +1163,7 @@ void BosonUfoProfilingGraphWidget::resetProfilingTypes()
  }
  d->mProfilingTypes.clear();
 
- for (QPtrListIterator<BoUfoLabel> it(d->mLabels); it.current(); ++it) {
+ for (Q3PtrListIterator<BoUfoLabel> it(d->mLabels); it.current(); ++it) {
 	it.current()->hide();
  }
 }
@@ -1216,7 +1218,7 @@ void BosonUfoProfilingGraphWidget::paintWidget()
  }
 
  glBegin(GL_LINES);
- QPtrListIterator<ProfilingGraphItem> it(d->mItems);
+ Q3PtrListIterator<ProfilingGraphItem> it(d->mItems);
  for (; it.current(); ++it) {
 	const ProfilingGraphType* type = it.current()->mType;
 	int x = (int)(width() * it.current()->mStart);
@@ -1229,7 +1231,7 @@ void BosonUfoProfilingGraphWidget::paintWidget()
  glEnd();
 
 
- QPtrListIterator<BoUfoLabel> labelIt(d->mLabels);
+ Q3PtrListIterator<BoUfoLabel> labelIt(d->mLabels);
  QMap<QString, ProfilingGraphType*>::iterator typeIt = d->mProfilingTypes.begin();
  while (typeIt != d->mProfilingTypes.end()) {
 	// AB: warning: libufo uses a different coordinate system (y flipped)
@@ -1273,7 +1275,7 @@ void BosonUfoProfilingGraphWidget::slotUpdateData()
  d->mItems.clear();
  resetProfilingTypes();
 
- QPtrList<const BosonProfilingItem> itemList;
+ Q3PtrList<const BosonProfilingItem> itemList;
  boProfiling->getItemsSinceSorted(&itemList, since);
 
  bool oneLinePerType = d->mOneLinePerType->checked();
@@ -1281,7 +1283,7 @@ void BosonUfoProfilingGraphWidget::slotUpdateData()
  QMap<ProfilingGraphType*, unsigned long int> elapsedSumOfType;
  unsigned long int displayTime = compareTimes(since, now);
  double fdisplayTime = (double)displayTime;
- for (QPtrListIterator<const BosonProfilingItem> it(itemList); it.current(); ++it) {
+ for (Q3PtrListIterator<const BosonProfilingItem> it(itemList); it.current(); ++it) {
 	const BosonProfilingItem* profilingItem = it.current();
 	ProfilingGraphType* type = 0;
 	if (d->mProfilingTypes.contains(profilingItem->name())) {
@@ -1325,8 +1327,8 @@ void BosonUfoProfilingGraphWidget::slotUpdateData()
  }
 
  ensureLabels(d->mProfilingTypes.count());
- QPtrListIterator<BoUfoLabel> labelIt(d->mLabels);
- QValueList<QColor>::iterator colorIt = d->mAvailableColors.begin();
+ Q3PtrListIterator<BoUfoLabel> labelIt(d->mLabels);
+ Q3ValueList<QColor>::iterator colorIt = d->mAvailableColors.begin();
  QMap<QString, ProfilingGraphType*>::iterator typeIt = d->mProfilingTypes.begin();
  while (typeIt != d->mProfilingTypes.end()) {
 //	(*typeIt)->mColor = *colorIt;

@@ -225,11 +225,11 @@ void Mesh::createArrays(float* vertices, unsigned char* indices,
         Vertex* v = f->vertex(j);
         if(indextype == BMF_DATATYPE_UNSIGNED_SHORT)
         {
-          ((Q_UINT16*)indices)[mIndexArrayOffset + pos] = (Q_UINT16)(mVertexArrayOffset + v->id);
+          ((quint16*)indices)[mIndexArrayOffset + pos] = (quint16)(mVertexArrayOffset + v->id);
         }
         else
         {
-          ((Q_UINT32*)indices)[mIndexArrayOffset + pos] = (Q_UINT32)(mVertexArrayOffset + v->id);
+          ((quint32*)indices)[mIndexArrayOffset + pos] = (quint32)(mVertexArrayOffset + v->id);
         }
       }
     }
@@ -287,7 +287,7 @@ void Mesh::calculateVertexNormals()
     // Normal of this vertex will be average of normals of all faces that have
     //  this vertex
     BoVector3Float normal;
-    for(unsigned int j = 0; j < v->faces.count(); j++)
+    for(int j = 0; j < v->faces.count(); j++)
     {
       normal += v->faces[j]->normal;
     }
@@ -356,12 +356,12 @@ void Mesh::updateBoundingBox()
   for(unsigned int i = 0; i < vertexCount(); i++)
   {
     Vertex* v = vertex(i);
-    mMinCoord.setX(QMIN(mMinCoord.x(), v->pos.x()));
-    mMinCoord.setY(QMIN(mMinCoord.y(), v->pos.y()));
-    mMinCoord.setZ(QMIN(mMinCoord.z(), v->pos.z()));
-    mMaxCoord.setX(QMAX(mMaxCoord.x(), v->pos.x()));
-    mMaxCoord.setY(QMAX(mMaxCoord.y(), v->pos.y()));
-    mMaxCoord.setZ(QMAX(mMaxCoord.z(), v->pos.z()));
+    mMinCoord.setX(qMin(mMinCoord.x(), v->pos.x()));
+    mMinCoord.setY(qMin(mMinCoord.y(), v->pos.y()));
+    mMinCoord.setZ(qMin(mMinCoord.z(), v->pos.z()));
+    mMaxCoord.setX(qMax(mMaxCoord.x(), v->pos.x()));
+    mMaxCoord.setY(qMax(mMaxCoord.y(), v->pos.y()));
+    mMaxCoord.setZ(qMax(mMaxCoord.z(), v->pos.z()));
   }
 }
 

@@ -22,6 +22,8 @@
 #define BOUFOPUSHBUTTON_H
 
 #include "boufowidget.h"
+//Added by qt3to4:
+#include <QMouseEvent>
 
 class BoUfoPushButton : public BoUfoWidget
 {

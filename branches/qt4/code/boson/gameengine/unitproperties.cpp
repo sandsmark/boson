@@ -33,9 +33,13 @@
 
 #include <ksimpleconfig.h>
 #include <klocale.h>
-#include <kmdcodec.h>
+#include <kcodecs.h>
 
 #include <qfile.h>
+//Added by qt3to4:
+#include <Q3CString>
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 UnitProperties::UnitProperties(SpeciesTheme* theme)
 	: BoBaseValueCollection(),
@@ -73,7 +77,7 @@ bool UnitProperties::loadUnitType(const QString& fileName)
 {
  bool isFacility;
  QFile file(fileName);
- if (!file.open(IO_ReadOnly)) {
+ if (!file.open(QIODevice::ReadOnly)) {
 	boError() << k_funcinfo << "could not open " << fileName << endl;
 	return false;
  }
@@ -391,7 +395,7 @@ bool UnitProperties::loadActions(KSimpleConfig* conf)
  return true;
 }
 
-const QCString& UnitProperties::md5() const
+const Q3CString& UnitProperties::md5() const
 {
  return d->mMD5;
 }
@@ -411,7 +415,7 @@ const QString& UnitProperties::unitPath() const
  return d->mUnitPath;
 }
 
-const QPtrList<PluginProperties>* UnitProperties::plugins() const
+const Q3PtrList<PluginProperties>* UnitProperties::plugins() const
 {
  return &d->mPlugins;
 }
@@ -421,7 +425,7 @@ QMap<QString, QString> UnitProperties::longTextureNames() const
  return d->mTextureNames;
 }
 
-QValueList<unsigned long int> UnitProperties::requirements() const
+Q3ValueList<unsigned long int> UnitProperties::requirements() const
 {
  return d->mRequirements;
 }
@@ -520,7 +524,7 @@ unsigned int UnitProperties::constructionSteps() const
 
 const PluginProperties* UnitProperties::properties(int pluginType) const
 {
- QPtrListIterator<PluginProperties> it(d->mPlugins);
+ Q3PtrListIterator<PluginProperties> it(d->mPlugins);
  for (; it.current(); ++it) {
 	if (it.current()->pluginType() == pluginType) {
 		return it.current();
@@ -529,22 +533,22 @@ const PluginProperties* UnitProperties::properties(int pluginType) const
  return 0;
 }
 
-const QValueList<unsigned long int>& UnitProperties::destroyedEffectIds() const
+const Q3ValueList<unsigned long int>& UnitProperties::destroyedEffectIds() const
 {
  return d->mDestroyedEffectIds;
 }
 
-const QValueList<unsigned long int>& UnitProperties::constructedEffectIds() const
+const Q3ValueList<unsigned long int>& UnitProperties::constructedEffectIds() const
 {
  return d->mConstructedEffectIds;
 }
 
-const QValueList<unsigned long int>& UnitProperties::explodingFragmentFlyEffectIds() const
+const Q3ValueList<unsigned long int>& UnitProperties::explodingFragmentFlyEffectIds() const
 {
  return d->mExplodingFragmentFlyEffectIds;
 }
 
-const QValueList<unsigned long int>& UnitProperties::explodingFragmentHitEffectIds() const
+const Q3ValueList<unsigned long int>& UnitProperties::explodingFragmentHitEffectIds() const
 {
  return d->mExplodingFragmentHitEffectIds;
 }
@@ -556,7 +560,7 @@ const BoVector3Fixed& UnitProperties::hitPoint() const
 
 BosonWeaponProperties* UnitProperties::nonConstWeaponProperties(unsigned long int id) const
 {
- QPtrListIterator<PluginProperties> it(d->mPlugins);
+ Q3PtrListIterator<PluginProperties> it(d->mPlugins);
  while (it.current()) {
 	if (it.current()->pluginType() == PluginProperties::Weapon) {
 		if (((BosonWeaponProperties*)it.current())->id() == id) {

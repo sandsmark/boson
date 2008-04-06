@@ -14,7 +14,6 @@ set(meshrenderer_SRCS
 	bomeshrenderervertexarray.cpp
 	bomeshrenderervbo.cpp
 )
-kde3_automoc(${meshrenderer_SRCS})
 if(BOSON_USE_DEBUG_PLUGINS)
   boson_add_library(bomeshrendererplugin MODULE ${meshrenderer_SRCS})
   install_targets(${BOSON_PLUGIN_INSTALL_DIR} bomeshrendererplugin)

@@ -25,13 +25,15 @@
 #include <bodebug.h>
 
 #include <klocale.h>
-#include <klistview.h>
+#include <k3listview.h>
 
 #include <qlabel.h>
 #include <qlayout.h>
-#include <qptrdict.h>
-#include <qptrlist.h>
-#include <qdict.h>
+#include <q3ptrdict.h>
+#include <q3ptrlist.h>
+#include <q3dict.h>
+//Added by qt3to4:
+#include <Q3VBoxLayout>
 
 class MyMemNode {
 public:
@@ -115,7 +117,7 @@ public:
 	}
 	QLabel* mNodeCount;
 	QLabel* mMemory;
-	KListView* mList;
+	K3ListView* mList;
 };
 
 BoMemoryDialog::BoMemoryDialog(QWidget* parent, bool modal)
@@ -123,12 +125,12 @@ BoMemoryDialog::BoMemoryDialog(QWidget* parent, bool modal)
 		Ok, parent, "bomemorydialog", modal, true)
 {
  d = new BoMemoryDialogPrivate;
- QVBoxLayout* layout = new QVBoxLayout(plainPage());
+ Q3VBoxLayout* layout = new Q3VBoxLayout(plainPage());
  d->mNodeCount = new QLabel(plainPage());
  layout->addWidget(d->mNodeCount);
  d->mMemory = new QLabel(plainPage());
  layout->addWidget(d->mMemory);
- d->mList = new KListView(plainPage());
+ d->mList = new K3ListView(plainPage());
  d->mList->setAllColumnsShowFocus(true);
  d->mList->setRootIsDecorated(true);
  layout->addWidget(d->mList);
@@ -161,16 +163,16 @@ void BoMemoryDialog::slotUpdate()
  MemoryManager::manager()->disable(); // do not manage the ptrdict
  unsigned int nodeCount = MemoryManager::manager()->allNodes().count();
  unsigned int totalMemory = MemoryManager::manager()->memoryInUse();
- QPtrDict<MemNode>* _allNodes = new QPtrDict<MemNode>(MemoryManager::manager()->allNodes());
+ Q3PtrDict<MemNode>* _allNodes = new Q3PtrDict<MemNode>(MemoryManager::manager()->allNodes());
  MemoryManager::manager()->enable();
 
  // make sure all nodes are valid and they _stay_ valid (we can't know if Qt
  // or something else will delete anything while we are still working on these
  // data)
- QPtrDict<MyMemNode> allNodes(_allNodes->size());
+ Q3PtrDict<MyMemNode> allNodes(_allNodes->size());
  allNodes.setAutoDelete(true);
  { // start a new scope to make sure _allNodesIt gets destructed
-	QPtrDictIterator<MemNode> _allNodesIt(*_allNodes);
+	Q3PtrDictIterator<MemNode> _allNodesIt(*_allNodes);
 	while (_allNodesIt.current()) {
 		MemNode* n = _allNodesIt.current();
 		void* key = _allNodesIt.currentKey();
@@ -203,8 +205,8 @@ void BoMemoryDialog::slotUpdate()
  unsigned long int mmemory = 0;
  unsigned long int nmemory = 0;
  // AB: a ptr dict is pretty useless to us, we need something else
- QPtrDictIterator<MyMemNode> dictIt(allNodes);
- QDict<QPtrList<MyMemNode> > file2NodeList;
+ Q3PtrDictIterator<MyMemNode> dictIt(allNodes);
+ Q3Dict<Q3PtrList<MyMemNode> > file2NodeList;
  file2NodeList.setAutoDelete(true);
  while (dictIt.current()) {
 	MyMemNode* node = dictIt.current();
@@ -234,9 +236,9 @@ void BoMemoryDialog::slotUpdate()
 		continue;
 	}
 	QString file = QString(node->mFile);
-	QPtrList<MyMemNode>* list = file2NodeList[file];
+	Q3PtrList<MyMemNode>* list = file2NodeList[file];
 	if (!list) {
-		list = new QPtrList<MyMemNode>;
+		list = new Q3PtrList<MyMemNode>;
 		file2NodeList.insert(file, list);
 	}
 	list->append(node);
@@ -245,13 +247,13 @@ void BoMemoryDialog::slotUpdate()
  boWarning() << k_funcinfo << "new'ed memory: " << nmemory << endl;
 
  unsigned long int size = 0;
- QDictIterator<QPtrList<MyMemNode> > nodeIt(file2NodeList);
+ Q3DictIterator<Q3PtrList<MyMemNode> > nodeIt(file2NodeList);
  while (nodeIt.current()) {
 	QString fileName = nodeIt.currentKey();
-	QPtrList<MyMemNode>* list = nodeIt.current();
+	Q3PtrList<MyMemNode>* list = nodeIt.current();
 	++nodeIt;
 
-	QListViewItem* file = createFileItem(fileName);
+	Q3ListViewItem* file = createFileItem(fileName);
 
 //	boDebug() << k_funcinfo << "creating items for file " << fileName << endl;
 	size += createFileList(file, list);
@@ -260,27 +262,27 @@ void BoMemoryDialog::slotUpdate()
  allNodes.clear();
 }
 
-QListViewItem* BoMemoryDialog::createFileItem(const QString& file) const
+Q3ListViewItem* BoMemoryDialog::createFileItem(const QString& file) const
 {
- QListViewItem* item = new QListViewItem(d->mList, file);
+ Q3ListViewItem* item = new Q3ListViewItem(d->mList, file);
  item->setOpen(false);
  return item;
 }
 
-QListViewItem* BoMemoryDialog::createFunctionItem(QListViewItem* parent, const QString& function) const
+Q3ListViewItem* BoMemoryDialog::createFunctionItem(Q3ListViewItem* parent, const QString& function) const
 {
- QListViewItem* item = new QListViewItem(parent, "", function);
+ Q3ListViewItem* item = new Q3ListViewItem(parent, "", function);
  item->setOpen(false);
  return item;
 }
 
-QListViewItem* BoMemoryDialog::createMemoryItem(QListViewItem* parent, const MyMemNode* node) const
+Q3ListViewItem* BoMemoryDialog::createMemoryItem(Q3ListViewItem* parent, const MyMemNode* node) const
 {
  if (!node) {
 	return 0;
  }
  QString line = QString::number(node->mLine);
- QListViewItem* item = new QListViewItem(parent, node->mFile, node->mFunction, line);
+ Q3ListViewItem* item = new Q3ListViewItem(parent, node->mFile, node->mFunction, line);
  setSize(item, node->mSize);
  unsigned int mallocCalls = node->mIsMalloc? 1 : 0;
  unsigned int newCalls = node->mIsMalloc? 0 : 1;
@@ -290,7 +292,7 @@ QListViewItem* BoMemoryDialog::createMemoryItem(QListViewItem* parent, const MyM
  return item;
 }
 
-void BoMemoryDialog::setSize(QListViewItem* item, unsigned long int size_) const
+void BoMemoryDialog::setSize(Q3ListViewItem* item, unsigned long int size_) const
 {
  QString size;
  QString sizeK;
@@ -305,12 +307,12 @@ void BoMemoryDialog::setSize(QListViewItem* item, unsigned long int size_) const
 }
 
 
-unsigned long int BoMemoryDialog::createFileList(QListViewItem* file, const QPtrList<MyMemNode>* list_)
+unsigned long int BoMemoryDialog::createFileList(Q3ListViewItem* file, const Q3PtrList<MyMemNode>* list_)
 {
  if (!list_ || !file) {
 	return 0;
  }
- QPtrList<MyMemNode> list = *list_;
+ Q3PtrList<MyMemNode> list = *list_;
 // boDebug() << k_funcinfo << list.count() << endl;
  list.sort();
  unsigned long int size = 0;
@@ -321,10 +323,10 @@ unsigned long int BoMemoryDialog::createFileList(QListViewItem* file, const QPtr
 	const char* function = node->mFunction;
 //	boDebug() << k_funcinfo << "left: " << list.count() << endl;
 
-	QPtrList<MyMemNode> sameFunction;
-	QPtrList<MyMemNode> otherFunction;
+	Q3PtrList<MyMemNode> sameFunction;
+	Q3PtrList<MyMemNode> otherFunction;
 	sameFunction.append(node);
-	QPtrListIterator<MyMemNode> listIt(list);
+	Q3PtrListIterator<MyMemNode> listIt(list);
 	while (listIt.current()) {
 		MyMemNode* n = listIt.current();
 		++listIt;
@@ -337,7 +339,7 @@ unsigned long int BoMemoryDialog::createFileList(QListViewItem* file, const QPtr
 	}
 	list = otherFunction;
 
-	QListViewItem* item = createFunctionItem(file, QString(function));
+	Q3ListViewItem* item = createFunctionItem(file, QString(function));
 	size += createFunctionList(item, &sameFunction);
  }
 // boDebug() << k_funcinfo << "done" << endl;
@@ -345,7 +347,7 @@ unsigned long int BoMemoryDialog::createFileList(QListViewItem* file, const QPtr
  return size;
 }
 
-unsigned long int BoMemoryDialog::createFunctionList(QListViewItem* function, const QPtrList<MyMemNode>* list)
+unsigned long int BoMemoryDialog::createFunctionList(Q3ListViewItem* function, const Q3PtrList<MyMemNode>* list)
 {
  if (!function || !list) {
 	return 0;
@@ -354,7 +356,7 @@ unsigned long int BoMemoryDialog::createFunctionList(QListViewItem* function, co
  unsigned int mallocCalls = 0;
  unsigned int newCalls = 0;
 
- QPtrListIterator<MyMemNode> it(*list);
+ Q3PtrListIterator<MyMemNode> it(*list);
  while (it.current()) {
 	MyMemNode* node = it.current();
 	++it;

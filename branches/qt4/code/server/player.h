@@ -21,7 +21,7 @@
 #define PLAYER_H
 
 
-#include <qcstring.h>
+#include <q3cstring.h>
 
 #include <kgame/kplayer.h>
 #include <kgame/kgameproperty.h>
@@ -53,15 +53,15 @@ class Player : public KPlayer
     void setUnitCount(unsigned int c)  { mUnitCount = c; }
 
   public slots:
-    void slotNetworkData(int msgid, const QByteArray& msg, Q_UINT32 sender, KPlayer*);
+    void slotNetworkData(int msgid, const QByteArray& msg, quint32 sender, KPlayer*);
 
   private:
     KGameProperty<unsigned long int> mMinerals;
     KGameProperty<unsigned long int> mOil;
     KGamePropertyBool mIsNeutralPlayer;
-    KGameProperty<Q_UINT8> mOutOfGame;
-    KGameProperty<Q_UINT8> mHasLost;
-    KGameProperty<Q_UINT8> mHasWon;
+    KGameProperty<quint8> mOutOfGame;
+    KGameProperty<quint8> mHasLost;
+    KGameProperty<quint8> mHasWon;
 
     unsigned int mUnitCount;
 };

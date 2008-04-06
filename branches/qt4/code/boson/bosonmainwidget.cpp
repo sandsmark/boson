@@ -75,11 +75,15 @@
 #include <qimage.h>
 #include <qdir.h>
 #include <qdom.h>
-#include <qvaluevector.h>
-#include <qguardedptr.h>
+#include <q3valuevector.h>
+#include <qpointer.h>
 #include <qlayout.h>
 #include <qapplication.h>
 #include <qdesktopwidget.h>
+//Added by qt3to4:
+#include <Q3PtrList>
+#include <QPixmap>
+#include <Q3VBoxLayout>
 
 
 #include <config.h>
@@ -127,7 +131,7 @@ public:
 
 	BosonStarting* mStarting;
 
-	QGuardedPtr<Player> mLocalPlayer;
+	QPointer<Player> mLocalPlayer;
 };
 
 BosonMainWidget::BosonMainWidget(QWidget* parent, bool wantDirect)
@@ -533,7 +537,7 @@ QByteArray BosonMainWidget::grabMovieFrame()
 
  QByteArray ba;
  QBuffer b(ba);
- b.open(IO_WriteOnly);
+ b.open(QIODevice::WriteOnly);
  QImageIO io(&b, "JPEG");
  io.setImage(shot.convertToImage());
  io.setQuality(90);
@@ -570,7 +574,7 @@ void BosonMainWidget::grabMovieFrameAndSave()
 	}
  }
  file.sprintf("%s-%04d.%s", "boson-movie", frame++, "jpg");
- file = QFileInfo(file).absFilePath();
+ file = QFileInfo(file).absoluteFilePath();
 
  //boDebug() << k_funcinfo << "Saving movie frame to " << file << endl;
  bool ok = QPixmap(shot).save(file, "JPEG", 90);
@@ -588,8 +592,8 @@ void BosonMainWidget::initBoson()
  if (!d->mStarting) {
 	BO_NULL_ERROR(d->mStarting);
  }
- connect(boGame, SIGNAL(signalStartingCompletedReceived(const QByteArray&, Q_UINT32)),
-		d->mStarting, SLOT(slotStartingCompletedReceived(const QByteArray&, Q_UINT32)));
+ connect(boGame, SIGNAL(signalStartingCompletedReceived(const QByteArray&, quint32)),
+		d->mStarting, SLOT(slotStartingCompletedReceived(const QByteArray&, quint32)));
  connect(boGame, SIGNAL(signalSetNewGameData(const QByteArray&, bool*)),
 		d->mStarting, SLOT(slotSetNewGameData(const QByteArray&, bool*)));
 
@@ -754,10 +758,10 @@ void BosonMainWidget::slotEndGame()
  int answer;
  if (boGame->gameMode()) {
 	answer = KMessageBox::warningYesNo(this, i18n("Are you sure you want to end this game?"),
-		i18n("Are you sure?"), KStdGuiItem::yes(), KStdGuiItem::no(), "ConfirmEndGame");
+		i18n("Are you sure?"), KStandardGuiItem::yes(), KStandardGuiItem::no(), "ConfirmEndGame");
  } else {
 	answer = KMessageBox::warningYesNo(this, i18n("Are you sure you want to end this editor session?"),
-		i18n("Are you sure?"), KStdGuiItem::yes(), KStdGuiItem::no(), "ConfirmEndGame");
+		i18n("Are you sure?"), KStandardGuiItem::yes(), KStandardGuiItem::no(), "ConfirmEndGame");
  }
  if (answer != KMessageBox::Yes) {
 	return;
@@ -900,7 +904,7 @@ void BosonMainWidget::slotStartNewGame()
 
  d->mStartup->showLoadingWidget();
 
- setFocusPolicy(StrongFocus);
+ setFocusPolicy(Qt::StrongFocus);
 
  // this will take care of all data loading, like models, textures and so. this
  // also initializes the map and will send IdStartScenario - in short this will
@@ -924,7 +928,7 @@ void BosonMainWidget::slotGameStarted()
 
  boDebug(270) << k_funcinfo << "init player" << endl;
  Player* localPlayer = 0;
- QPtrList<Player> allPlayerList = boGame->allPlayerList();
+ Q3PtrList<Player> allPlayerList = boGame->allPlayerList();
  for (unsigned int i = 0; i < allPlayerList.count(); i++) {
 	Player* p = allPlayerList.at(i);
 	disconnect(p, SIGNAL(signalPropertyChanged(KGamePropertyBase*,KPlayer*)),
@@ -1030,8 +1034,8 @@ bool BosonMainWidget::queryClose()
  }
  if (boGame->gameStatus() != KGame::Init) {
 	int answer = KMessageBox::warningYesNo(this, i18n("Are you sure you want to quit Boson?\n"
-			"This will end current game."), i18n("Are you sure?"), KStdGuiItem::yes(),
-			KStdGuiItem::no(), "ConfirmQuitWhenGameRunning");
+			"This will end current game."), i18n("Are you sure?"), KStandardGuiItem::yes(),
+			KStandardGuiItem::no(), "ConfirmQuitWhenGameRunning");
 	if (answer == KMessageBox::Yes) {
 		return true;
 	}
@@ -1167,7 +1171,7 @@ void BosonMainWidget::slotDebugUfoWidgets()
 		"debugufowidgets", false, true);
  connect(dialog, SIGNAL(finished()), dialog, SLOT(delayedDestruct()));
  BoUfoDebugWidget* debug = new BoUfoDebugWidget(dialog->plainPage());
- QVBoxLayout* l = new QVBoxLayout(dialog->plainPage());
+ Q3VBoxLayout* l = new Q3VBoxLayout(dialog->plainPage());
  l->addWidget(debug);
 
  debug->setBoUfoManager(ufoManager());
@@ -1203,16 +1207,16 @@ void BosonMainWidget::slotStartupPreferredSizeChanged()
  // make sure we don't exceed the maximum desktop size
  QDesktopWidget* desktop = QApplication::desktop();
  QRect r = desktop->availableGeometry(this);
- w = QMIN(w, r.width());
- h = QMIN(h, r.height());
+ w = qMin(w, r.width());
+ h = qMin(h, r.height());
 
  if (width() >= w && height() >= h) {
 	return;
  }
- w = QMAX(w, width());
- h = QMAX(h, height());
- w = QMIN(w, r.width());
- h = QMIN(h, r.height());
+ w = qMax(w, width());
+ h = qMax(h, height());
+ w = qMin(w, r.width());
+ h = qMin(h, r.height());
  resize(w, h);
 }
 

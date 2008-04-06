@@ -30,7 +30,7 @@
 
 #include <klocale.h>
 
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 #include <qpair.h>
 
 static void cut_line_segment_at_plane(const BoPlane& plane, BoVector3Float& linePoint1, BoVector3Float& linePoint2);
@@ -52,8 +52,8 @@ public:
 	BoVector3Float TRN; // top-right-near
 	BoVector3Float TLN; // top-left-near
 
-	QValueList< QPair<BoVector3Float*, BoVector3Float*> > mAllLines;
-	QValueList<BoVector3Float*> mAllPoints;
+	Q3ValueList< QPair<BoVector3Float*, BoVector3Float*> > mAllLines;
+	Q3ValueList<BoVector3Float*> mAllPoints;
 
 	/**
 	 * Estimated (!!) center of the view frustum on the z=0 plane. In cell
@@ -210,7 +210,7 @@ void CameraLines::calculateCenterCell()
  float y = 0.0f;
  float z = 0.0f;
  float count = 0.0f;
- for (QValueList<BoVector3Float*>::iterator it = mAllPoints.begin(); it != mAllPoints.end(); ++it) {
+ for (Q3ValueList<BoVector3Float*>::iterator it = mAllPoints.begin(); it != mAllPoints.end(); ++it) {
 	if (fabsf((*it)->z()) > 2.0f) {
 		// in theory all points should be at z=0.0f
 		// this one is too far away from that, so we won't use it

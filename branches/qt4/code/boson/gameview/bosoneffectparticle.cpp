@@ -28,8 +28,10 @@
 #include <math.h>
 
 #include <qdom.h>
+//Added by qt3to4:
+#include <Q3PtrCollection>
 
-#include <kmdcodec.h>
+#include <kcodecs.h>
 
 
 /*****  BosonEffectParticle  *****/
@@ -350,7 +352,7 @@ void BosonEffectParticleGeneric::initParticle(BosonGenericParticle* particle)
   {
     ((BosonEffectPropertiesParticleGeneric*)properties())->initParticle(this, particle);
   }
-  mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (particle->pos - positionFloat()).dotProduct());
+  mBoundingSphereRadius = qMax(mBoundingSphereRadius, (particle->pos - positionFloat()).dotProduct());
 }
 
 void BosonEffectParticleGeneric::updateParticle(BosonGenericParticle* particle, float elapsed)
@@ -361,7 +363,7 @@ void BosonEffectParticleGeneric::updateParticle(BosonGenericParticle* particle, 
   if(properties())
   {
     ((BosonEffectPropertiesParticleGeneric*)properties())->updateParticle(this, particle, elapsed);
-    mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (particle->pos - positionFloat()).dotProduct());
+    mBoundingSphereRadius = qMax(mBoundingSphereRadius, (particle->pos - positionFloat()).dotProduct());
   }
 }
 
@@ -383,7 +385,7 @@ bool BosonEffectParticleGeneric::saveAsXML(QDomElement& root) const
 
   // Init byte array and data stream
   QByteArray ba;
-  QDataStream stream(ba, IO_WriteOnly);
+  QDataStream stream(ba, QIODevice::WriteOnly);
 
   // Save matrix
   for(int i = 0; i < 4; i++)
@@ -501,7 +503,7 @@ bool BosonEffectParticleGeneric::loadFromXML(const QDomElement& root)
   KCodecs::base64Decode(base64data.utf8(), ba);  // Is utf8() safe to use here?
 
   // Init data stream
-  QDataStream stream(ba, IO_ReadOnly);
+  QDataStream stream(ba, QIODevice::ReadOnly);
 
   // Load matrix
   for(int i = 0; i < 4; i++)
@@ -698,7 +700,7 @@ void BosonEffectParticleTrail::initParticle(BosonGenericParticle* particle, cons
   {
     ((BosonEffectPropertiesParticleTrail*)properties())->initParticle(this, particle);
   }
-  mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (particle->pos - positionFloat()).dotProduct());
+  mBoundingSphereRadius = qMax(mBoundingSphereRadius, (particle->pos - positionFloat()).dotProduct());
 }
 
 void BosonEffectParticleTrail::updateParticle(BosonGenericParticle* particle, float elapsed)
@@ -710,7 +712,7 @@ void BosonEffectParticleTrail::updateParticle(BosonGenericParticle* particle, fl
   {
     ((BosonEffectPropertiesParticleTrail*)properties())->updateParticle(this, particle, elapsed);
   }
-  mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (particle->pos - positionFloat()).dotProduct());
+  mBoundingSphereRadius = qMax(mBoundingSphereRadius, (particle->pos - positionFloat()).dotProduct());
 }
 
 bool BosonEffectParticleTrail::saveAsXML(QDomElement& root) const
@@ -732,7 +734,7 @@ bool BosonEffectParticleTrail::saveAsXML(QDomElement& root) const
 
   // Init byte array and data stream
   QByteArray ba;
-  QDataStream stream(ba, IO_WriteOnly);
+  QDataStream stream(ba, QIODevice::WriteOnly);
 
   // Save matrix
   for(int i = 0; i < 4; i++)
@@ -846,7 +848,7 @@ bool BosonEffectParticleTrail::loadFromXML(const QDomElement& root)
   KCodecs::base64Decode(base64data.utf8(), ba);  // Is utf8() safe to use here?
 
   // Init data stream
-  QDataStream stream(ba, IO_ReadOnly);
+  QDataStream stream(ba, QIODevice::ReadOnly);
 
   // Load matrix
   for(int i = 0; i < 4; i++)
@@ -964,9 +966,9 @@ void BosonEffectParticleEnvironmental::update(float elapsed)
       updateParticle(&mParticles[i], elapsed);
       // Calculate dist between particle and particle system's center.
       float dist = 0.0f;
-      dist = QMAX(dist, QABS(pos.x() - mParticles[i].pos.x()));
-      dist = QMAX(dist, QABS(pos.y() - mParticles[i].pos.y()));
-      dist = QMAX(dist, QABS(pos.z() - mParticles[i].pos.z()));
+      dist = qMax(dist, qAbs(pos.x() - mParticles[i].pos.x()));
+      dist = qMax(dist, qAbs(pos.y() - mParticles[i].pos.y()));
+      dist = qMax(dist, qAbs(pos.z() - mParticles[i].pos.z()));
       if(dist > mRange)
       {
         // Particle is too far away, mark it as dead
@@ -1003,9 +1005,9 @@ void BosonEffectParticleEnvironmental::setPosition(const BoVector3Fixed& _pos)
     {
       // Calculate dist between particle and particle system's center.
       float dist = 0;
-      dist = QMAX(dist, QABS(pos.x() - mParticles[i].pos.x()));
-      dist = QMAX(dist, QABS(pos.y() - mParticles[i].pos.y()));
-      dist = QMAX(dist, QABS(pos.z() - mParticles[i].pos.z()));
+      dist = qMax(dist, qAbs(pos.x() - mParticles[i].pos.x()));
+      dist = qMax(dist, qAbs(pos.y() - mParticles[i].pos.y()));
+      dist = qMax(dist, qAbs(pos.z() - mParticles[i].pos.z()));
       if(dist > mRange)
       {
         // Particle is too far away, mark it as dead
@@ -1049,10 +1051,10 @@ void BosonEffectParticleEnvironmental::particleBoxMoved(const BoVector3Float& ol
 
   // Transform oldbox, so that it's completely inside newbox. That will make
   //  some things easier.
-  oldbox.min.set(QMAX(oldbox.min.x(), newbox.min.x()), QMAX(oldbox.min.y(), newbox.min.y()),
-      QMAX(oldbox.min.z(), newbox.min.z()));
-  oldbox.max.set(QMIN(oldbox.max.x(), newbox.max.x()), QMIN(oldbox.max.y(), newbox.max.y()),
-      QMIN(oldbox.max.z(), newbox.max.z()));
+  oldbox.min.set(qMax(oldbox.min.x(), newbox.min.x()), qMax(oldbox.min.y(), newbox.min.y()),
+      qMax(oldbox.min.z(), newbox.min.z()));
+  oldbox.max.set(qMin(oldbox.max.x(), newbox.max.x()), qMin(oldbox.max.y(), newbox.max.y()),
+      qMin(oldbox.max.z(), newbox.max.z()));
 
 
   // Calculate z-difference
@@ -1200,7 +1202,7 @@ bool BosonEffectParticleEnvironmental::saveAsXML(QDomElement& root) const
 
   // Init byte array and data stream
   QByteArray ba;
-  QDataStream stream(ba, IO_WriteOnly);
+  QDataStream stream(ba, QIODevice::WriteOnly);
 
   // Save particles
   int particlessaved = 0;
@@ -1292,7 +1294,7 @@ bool BosonEffectParticleEnvironmental::loadFromXML(const QDomElement& root)
   KCodecs::base64Decode(base64data.utf8(), ba);  // Is utf8() safe to use here?
 
   // Init data stream
-  QDataStream stream(ba, IO_ReadOnly);
+  QDataStream stream(ba, QIODevice::ReadOnly);
 
   // Load particles
   for(int i = 0; i < mNum; i++)
@@ -1318,7 +1320,7 @@ bool BosonEffectParticleEnvironmental::loadFromXML(const QDomElement& root)
 
 /*****  BoParticleList  *****/
 
-int BoParticleList::compareItems(QPtrCollection::Item item1, QPtrCollection::Item item2)
+int BoParticleList::compareItems(Q3PtrCollection::Item item1, Q3PtrCollection::Item item2)
 {
   float d1, d2;
   d1 = ((BosonParticle*)item1)->distance;

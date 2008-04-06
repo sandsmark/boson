@@ -21,6 +21,9 @@
 #define BOSONPLAYERINPUTHANDLER_H
 
 #include <qobject.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 class QDataStream;
 class Player;
@@ -36,10 +39,10 @@ template<class T> class BoRect2;
 typedef BoVector2<bofixed> BoVector2Fixed;
 typedef BoRect2<bofixed> BoRect2Fixed;
 
-template<class T> class QPtrStack;
-template<class T> class QPtrList;
-template<class T> class QValueList;
-template<class T> class QValueVector;
+template<class T> class Q3PtrStack;
+template<class T> class Q3PtrList;
+template<class T> class Q3ValueList;
+template<class T> class Q3ValueVector;
 
 /**
  * @short Helper class for @ref Boson
@@ -83,22 +86,22 @@ protected:
 	 * WARNING: return value differs from @ref playerInput!
 	 * @return TRUE if the message was processed in here, otherwise FALSE
 	 **/
-	bool gamePlayerInput(Q_UINT32 msgid, QDataStream& stream, Player* player);
+	bool gamePlayerInput(quint32 msgid, QDataStream& stream, Player* player);
 
 	/**
 	 * WARNING: return value differs from @ref playerInput!
 	 * @return TRUE if the message was processed in here, otherwise FALSE
 	 **/
-	bool editorPlayerInput(Q_UINT32 msgid, QDataStream& stream, Player* player);
+	bool editorPlayerInput(quint32 msgid, QDataStream& stream, Player* player);
 
-	void editorDeleteItems(const QValueList<Q_ULONG>& items);
-	Unit* editorPlaceUnitAtTopLeftPos(Q_UINT32 owner, Q_UINT32 unitType, const BoVector2Fixed& pos, const bofixed& rotation);
+	void editorDeleteItems(const Q3ValueList<Q_ULONG>& items);
+	Unit* editorPlaceUnitAtTopLeftPos(quint32 owner, quint32 unitType, const BoVector2Fixed& pos, const bofixed& rotation);
 
-	void editorChangeHeight(const QValueVector<Q_UINT32>& cornersX, const QValueVector<Q_UINT32>& cornersY, const QValueVector<bofixed>& heights);
+	void editorChangeHeight(const Q3ValueVector<quint32>& cornersX, const Q3ValueVector<quint32>& cornersY, const Q3ValueVector<bofixed>& heights);
 
 	BosonMessageEditorMove* createNewUndoDeleteItemsMessage(const BosonMessageEditorMoveDeleteItems&) const;
 
-	void giveOrder(const QPtrList<Unit>& units, const UnitOrder& order, bool replace = true);
+	void giveOrder(const Q3PtrList<Unit>& units, const UnitOrder& order, bool replace = true);
 	void giveOrder(Unit* unit, const UnitOrder& order, bool replace = true);
 
 signals:

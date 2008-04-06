@@ -46,7 +46,7 @@ void BoUfoSlider::init(Qt::Orientation o)
  mStep = 1.0f;
  setLayoutClass(UHBoxLayout);
 
- if (o == Horizontal) {
+ if (o == Qt::Horizontal) {
 	mSlider = new ufo::USlider(ufo::Horizontal);
  } else {
 	mSlider = new ufo::USlider(ufo::Vertical);

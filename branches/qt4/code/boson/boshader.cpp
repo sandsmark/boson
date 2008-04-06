@@ -27,7 +27,7 @@
 #include "bosonprofiling.h"
 
 #include <qstring.h>
-#include <qdict.h>
+#include <q3dict.h>
 #include <qfile.h>
 #include <qregexp.h>
 
@@ -62,7 +62,7 @@ void BoShaderManager::reloadShaders()
 {
   shaderSuffixesChanged();
   // Reload all shaders
-  QPtrListIterator<BoShader> it(mShaders);
+  Q3PtrListIterator<BoShader> it(mShaders);
   while(it.current())
   {
     it.current()->reload();
@@ -192,7 +192,7 @@ bool BoShader::load(const QString& name)
   BosonProfiler profiler("BoShader::load(name)");
   QString filename = boShaderManager->getFullFilename(name);
   QFile f(filename);
-  if(!f.open(IO_ReadOnly))
+  if(!f.open(QIODevice::ReadOnly))
   {
     boError(130) << k_funcinfo << "Couldn't open " << filename << " for reading!" << endl;
     return false;
@@ -345,7 +345,7 @@ bool BoShader::load(const QString& vertexsrc, const QString& fragmentsrc)
   delete[] log;
 
   delete mUniformLocations;
-  mUniformLocations = new QDict<int>(17);
+  mUniformLocations = new Q3Dict<int>(17);
   mUniformLocations->setAutoDelete(true);
 
   // Init texture samplers for the shader
@@ -408,7 +408,7 @@ QString BoShader::preprocessSource(const QString& source, FilterType filter, int
       // Get the full filename
       QString filename = boShaderManager->getFullFilename(includedname);
       QFile f(filename);
-      if(!f.open(IO_ReadOnly))
+      if(!f.open(QIODevice::ReadOnly))
       {
         boError(130) << k_funcinfo << "Couldn't open " << filename << " for reading!" << endl;
         // Keep going

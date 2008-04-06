@@ -22,13 +22,17 @@
 #define BODEBUGUFOWIDGET_H
 
 #include <qwidget.h>
+//Added by qt3to4:
+#include <QMouseEvent>
+#include <QKeyEvent>
+#include <QWheelEvent>
 
 class QMouseEvent;
 class QWheelEvent;
 class QKeyEvent;
 template<class T1, class T2> class QMap;
 class QDomElement;
-class QListViewItem;
+class Q3ListViewItem;
 
 class BoUfoImage;
 class BoUfoDrawable;
@@ -68,10 +72,10 @@ public:
 	void setBoUfoManager(BoUfoManager* m);
 
 protected:
-	void addWidget(ufo::UWidget* w, QListViewItem* item);
+	void addWidget(ufo::UWidget* w, Q3ListViewItem* item);
 
 protected slots:
-	void slotWidgetChanged(QListViewItem* item);
+	void slotWidgetChanged(Q3ListViewItem* item);
 
 private:
 	BoUfoDebugWidgetPrivate* d;

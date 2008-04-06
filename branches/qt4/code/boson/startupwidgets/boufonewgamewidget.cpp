@@ -45,9 +45,12 @@
 #include <ksimpleconfig.h>
 #include <kmessagebox.h>
 
-#include <qguardedptr.h>
+#include <qpointer.h>
 #include <qtimer.h>
 #include <qimage.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 #warning TODO: implement!
 #define HAVE_CHAT_WIDGET 0
@@ -100,12 +103,12 @@ public:
     int campaign = mSelectCampaign->selectedItem();
     int playField = mSelectPlayField->selectedItem();
 
-    campaign = QMAX(campaign, 0);
-    campaign = QMIN(campaign, (int)(mIndex2Campaign.count() - 1));
+    campaign = qMax(campaign, 0);
+    campaign = qMin(campaign, (int)(mIndex2Campaign.count() - 1));
     setCurrentCampaignWithIndex(campaign);
 
-    playField = QMAX(playField, 0);
-    playField = QMIN(playField, (int)(mIndex2PlayFieldIdentifier.count() - 1));
+    playField = qMax(playField, 0);
+    playField = qMin(playField, (int)(mIndex2PlayFieldIdentifier.count() - 1));
     setCurrentPlayFieldWithIndex(playField);
   }
 
@@ -280,7 +283,7 @@ public:
 
     QMap<int, int> mSideIndex2Side; // index in combobox -> Player::bosonId() of the side
 
-    QGuardedPtr<Player> mLocalPlayer;
+    QPointer<Player> mLocalPlayer;
 
     BoUfoMapPreview* mMapPreview;
     BoUfoColorChooser* mPlayerColor;
@@ -315,8 +318,8 @@ BoUfoNewGameWidget::BoUfoNewGameWidget(BosonStartupNetwork* interface)
  d->mMapPreview = new BoUfoMapPreview();
  mMapPreviewContainer->setLayoutClass(BoUfoWidget::UHBoxLayout);
  mMapPreviewContainer->addWidget(d->mMapPreview);
-// d->mMapPreview->setVerticalAlignment(BoUfoWidget::AlignVCenter);
-// d->mMapPreview->setHorizontalAlignment(BoUfoWidget::AlignHCenter);
+// d->mMapPreview->setVerticalAlignment(BoUfoWidget::Qt::AlignVCenter);
+// d->mMapPreview->setHorizontalAlignment(BoUfoWidget::Qt::AlignHCenter);
 
  initPlayFields();
  d->mPlayFieldSelection->setCurrentCampaignWithIndex(0);
@@ -487,7 +490,7 @@ void BoUfoNewGameWidget::updateColors()
     p = localPlayer();
  }
 
- QValueList<QColor> availableColors = boGame->availableTeamColors();
+ Q3ValueList<QColor> availableColors = boGame->availableTeamColors();
  availableColors.prepend(p->teamColor());
 
  // first set all taken, then make those available, that are still available
@@ -538,7 +541,7 @@ void BoUfoNewGameWidget::slotNetStart()
     // All good
     //slotPlayerNameChanged();
     // Check if each player has unique team color
-    QPtrList<Player> gamePlayerList = boGame->gamePlayerList();
+    Q3PtrList<Player> gamePlayerList = boGame->gamePlayerList();
     for (unsigned int i = 0; i < gamePlayerList.count() - 1; i++) {
         Player* p = gamePlayerList.at(i);
         if (!p) {
@@ -637,7 +640,7 @@ void BoUfoNewGameWidget::slotNetPlayerJoinedGame(KPlayer* p)
             boGame->slotAddChatSystemMessage("Boson", i18n("%1 added AI player %2 to the game").arg(mainPlayer->name()).arg(p->name()));
         }
     }
-    QPtrList<Player> gamePlayerList = boGame->gamePlayerList();
+    Q3PtrList<Player> gamePlayerList = boGame->gamePlayerList();
     for (int i = 0; i < (int)gamePlayerList.count() - 1; i++) {
         Player* p2 = gamePlayerList.at(i);
         if (p2 == (Player*)p) {
@@ -1082,8 +1085,8 @@ void BoUfoNewGameWidget::possibleSidesChanged()
 #warning TODO: read available sides from map
  // TODO: insert possible sides of the map
  unsigned int maxPlayers = BOSON_MAX_PLAYERS;
- maxPlayers = QMIN(maxPlayers, mMaxPlayers);
- maxPlayers = QMAX(maxPlayers, mMinPlayers);
+ maxPlayers = qMin(maxPlayers, mMaxPlayers);
+ maxPlayers = qMax(maxPlayers, mMinPlayers);
  for (unsigned int i = 0; i < maxPlayers; i++) {
    int id = 128 + i;
    Player* p = (Player*)boGame->findPlayerByUserId(id);
@@ -1100,7 +1103,7 @@ void BoUfoNewGameWidget::possibleSidesChanged()
    watchId = 1;
    do {
      isTaken = false;
-     QPtrListIterator<Player> it(boGame->allPlayerList());
+     Q3PtrListIterator<Player> it(boGame->allPlayerList());
      for (; it.current(); ++it) {
        Player* p = it.current();
        if (p->bosonId() == watchId && p != mSelectedPlayer) {

@@ -22,10 +22,10 @@
 
 // AB: i am sure we can avoid lots of these
 #include <qobject.h>
-#include <qptrvector.h>
-#include <qvaluevector.h>
-#include <qptrlist.h>
-#include <qvaluelist.h>
+#include <q3ptrvector.h>
+#include <q3valuevector.h>
+#include <q3ptrlist.h>
+#include <q3valuelist.h>
 
 #include "../bomath.h"
 #include "../bo3dtools.h"
@@ -125,7 +125,7 @@ class BosonPath
      **/
     QString debugText(bofixed x, bofixed y);
 
-    QValueList<BoVector2Fixed> findLocations(Player* player, int x, int y, int n, int radius, ResourceType type);
+    Q3ValueList<BoVector2Fixed> findLocations(Player* player, int x, int y, int n, int radius, ResourceType type);
 
 
 
@@ -238,7 +238,7 @@ class BosonPath
     BoColorMap* mSlopeColormap;
     BoColorMap* mForestColormap;
 
-    QValueVector<BosonMoveData*> mMoveDatas;
+    Q3ValueVector<BosonMoveData*> mMoveDatas;
 
     int mXOffset[9];
     int mYOffset[9];
@@ -257,9 +257,9 @@ class BosonPath
     bofixed* mBlockConnections;
     int mBlockConnectionsCount;
     bool* mBlockConnectionsDirty;
-    QValueList<int> mChangedBlocks;
-    QValueList<int> mDirtyConnections;
-    QValueList<int> mBlockStatusDirty;
+    Q3ValueList<int> mChangedBlocks;
+    Q3ValueList<int> mDirtyConnections;
+    Q3ValueList<int> mBlockStatusDirty;
 
     friend class BoPathSyncCheckMessage;
 };
@@ -319,12 +319,12 @@ class BosonPathFlyingNode
 };
 
 
-template<class T> class BosonPathPointerHeap : public QValueList<T*>
+template<class T> class BosonPathPointerHeap : public Q3ValueList<T*>
 {
   public:
     inline void add(T*& x)
     {
-      QValueListIterator<T*> it;
+      Q3ValueListIterator<T*> it;
       for(it = this->begin(); it != this->end(); ++it)
       {
         if((x->g + x->h) <= ((*it)->g + (*it)->h))
@@ -390,9 +390,9 @@ class BosonPathInfo
     BosonPath::Result result;
 
     // Low-level path, containing waypoints
-    QValueVector<BoVector2Fixed> llpath;
+    Q3ValueVector<BoVector2Fixed> llpath;
 
-    QValueVector<BoVector2Fixed> hlpath;
+    Q3ValueVector<BoVector2Fixed> hlpath;
 
     // Start and destination point
     BoVector2Fixed start;
@@ -456,16 +456,16 @@ class BosonPathVisualization : public QObject
      * @param points The points of the line visualization. Note that the z
      * coordinates are overwritten later, you do not have to specify them!
      **/
-    void addLineVisualization(const QValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize = 1.0f, int timeout = 60, bofixed zOffset = 0.5f);
+    void addLineVisualization(const Q3ValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize = 1.0f, int timeout = 60, bofixed zOffset = 0.5f);
 
     /**
      * @overload
      * Just like above, but with a default color
      **/
-    void addLineVisualization(const QValueList<BoVector3Fixed>& points, bofixed pointSize = 1.0f, int timeout = 60, bofixed zOffset = 0.5f);
+    void addLineVisualization(const Q3ValueList<BoVector3Fixed>& points, bofixed pointSize = 1.0f, int timeout = 60, bofixed zOffset = 0.5f);
 
   signals:
-    void signalAddLineVisualization(const QValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize, int timeout, bofixed zOffset);
+    void signalAddLineVisualization(const Q3ValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize, int timeout, bofixed zOffset);
 
   private:
     BosonPathVisualization(QObject* parent);

@@ -149,8 +149,8 @@ void BoQuickGroundRenderer::generateCellList(const BosonMap* map)
     c->render = true;
     // Choose lod level for the chunk
     c->useLOD = chooseLOD(c, dist);
-    mindist = QMIN(mindist, dist - 2 * c->radius);
-    maxdist = QMAX(maxdist, dist);
+    mindist = qMin(mindist, dist - 2 * c->radius);
+    maxdist = qMax(maxdist, dist);
   }
 
   // Second pass
@@ -211,8 +211,8 @@ void BoQuickGroundRenderer::generateCellList(const BosonMap* map)
 
   mCellListDirty = false;
 
-  statistics()->setMinDistance(QMAX(0, mindist));
-  statistics()->setMaxDistance(QMAX(0, maxdist));
+  statistics()->setMinDistance(qMax(0, mindist));
+  statistics()->setMaxDistance(qMax(0, maxdist));
 }
 
 void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMap* map, RenderFlags flags)
@@ -450,13 +450,13 @@ int BoQuickGroundRenderer::renderChunk(BoQuickGroundRenderer::TerrainChunk* c, u
   for(unsigned int y = c->minRenderY; y < c->maxRenderY; y += step)
   {
     unsigned int indexcount = 0;
-    unsigned int ystep = QMIN((int)step, (int)c->maxRenderY - (int)y);
+    unsigned int ystep = qMin((int)step, (int)c->maxRenderY - (int)y);
 
     indices[indexcount++] = y * mMapCW + c->minRenderX;
     indices[indexcount++] = (y + ystep) * mMapCW + c->minRenderX;
     for(unsigned int x = c->minRenderX; x < c->maxRenderX; x += step)
     {
-      unsigned int xstep = QMIN((int)step, (int)c->maxRenderX - (int)x);
+      unsigned int xstep = qMin((int)step, (int)c->maxRenderX - (int)x);
       indices[indexcount++] = y * mMapCW + (x + xstep);
       indices[indexcount++] = (y + ystep) * mMapCW + (x + xstep);
     }
@@ -512,7 +512,7 @@ void BoQuickGroundRenderer::glueToLeft(BoQuickGroundRenderer::TerrainChunk* c, B
   for(unsigned int i = n->minY; i < n->maxY; i += maxStep)
   {
     // Next vertex on neighbor's edge
-    unsigned int nexti = QMIN(i + maxStep, c->maxY);
+    unsigned int nexti = qMin(i + maxStep, c->maxY);
 
     // Pos of neighbor's current vertex in the vbo
     unsigned int ipos = i * mMapCW + n->maxRenderX;
@@ -521,7 +521,7 @@ void BoQuickGroundRenderer::glueToLeft(BoQuickGroundRenderer::TerrainChunk* c, B
     //  vertex.
     for(; j0 < nexti && j0 < bedge; j1 += minStep)
     {
-      j1 = QMIN(j1, bedge);
+      j1 = qMin(j1, bedge);
       indices[indexcount++] = ipos;
       indices[indexcount++] = j0 * mMapCW + c->minRenderX;
       indices[indexcount++] = j1 * mMapCW + c->minRenderX;
@@ -566,7 +566,7 @@ void BoQuickGroundRenderer::glueToTop(BoQuickGroundRenderer::TerrainChunk* c, Bo
   for(unsigned int i = n->minX; i < n->maxX; i += maxStep)
   {
     // Next vertex on neighbor's edge
-    unsigned int nexti = QMIN(i + maxStep, c->maxX);
+    unsigned int nexti = qMin(i + maxStep, c->maxX);
 
     // Pos of neighbor's current vertex in the vbo
     unsigned int ipos = n->maxRenderY * mMapCW + i;
@@ -576,7 +576,7 @@ void BoQuickGroundRenderer::glueToTop(BoQuickGroundRenderer::TerrainChunk* c, Bo
     for(; j0 < nexti && j0 < redge; j1 += minStep)
     {
       // Make sure j1 is not over the edge
-      j1 = QMIN(j1, redge);
+      j1 = qMin(j1, redge);
       // Create next triangle
       indices[indexcount++] = ipos;
       indices[indexcount++] = c->minRenderY * mMapCW + j0;
@@ -622,7 +622,7 @@ void BoQuickGroundRenderer::glueToRight(BoQuickGroundRenderer::TerrainChunk* c, 
   for(unsigned int i = n->minY; i < n->maxY; i += maxStep)
   {
     // Next vertex on neighbor's edge
-    unsigned int nexti = QMIN(i + maxStep, c->maxY);
+    unsigned int nexti = qMin(i + maxStep, c->maxY);
 
     // Pos of neighbor's current vertex in the vbo
     unsigned int ipos = i * mMapCW + n->minRenderX;
@@ -631,7 +631,7 @@ void BoQuickGroundRenderer::glueToRight(BoQuickGroundRenderer::TerrainChunk* c, 
     //  vertex.
     for(; j0 < nexti && j0 < bedge; j1 += minStep)
     {
-      j1 = QMIN(j1, bedge);
+      j1 = qMin(j1, bedge);
       indices[indexcount++] = ipos;
       indices[indexcount++] = j0 * mMapCW + c->maxRenderX;
       indices[indexcount++] = j1 * mMapCW + c->maxRenderX;
@@ -676,7 +676,7 @@ void BoQuickGroundRenderer::glueToBottom(BoQuickGroundRenderer::TerrainChunk* c,
   for(unsigned int i = n->minX; i < n->maxX; i += maxStep)
   {
     // Next vertex on neighbor's edge
-    unsigned int nexti = QMIN(i + maxStep, c->maxX);
+    unsigned int nexti = qMin(i + maxStep, c->maxX);
 
     // Pos of neighbor's current vertex in the vbo
     unsigned int ipos = n->minRenderY * mMapCW + i;
@@ -685,7 +685,7 @@ void BoQuickGroundRenderer::glueToBottom(BoQuickGroundRenderer::TerrainChunk* c,
     //  vertex.
     for(; j0 < nexti && j0 < redge; j1 += minStep)
     {
-      j1 = QMIN(j1, redge);
+      j1 = qMin(j1, redge);
       indices[indexcount++] = c->maxRenderY * mMapCW + j1;
       indices[indexcount++] = c->maxRenderY * mMapCW + j0;
       indices[indexcount++] = ipos;
@@ -790,10 +790,10 @@ void BoQuickGroundRenderer::initMap(const BosonMap* map)
   unsigned int chunki = 0;
   for(unsigned int chunky = 0; chunky < mMapH; chunky += mChunkSize)
   {
-    unsigned int chunkh = QMIN(mChunkSize, mMapH - chunky);
+    unsigned int chunkh = qMin(mChunkSize, mMapH - chunky);
     for(unsigned int chunkx = 0; chunkx < mMapW; chunkx += mChunkSize)
     {
-      unsigned int chunkw = QMIN(mChunkSize, mMapW - chunkx);
+      unsigned int chunkw = qMin(mChunkSize, mMapW - chunkx);
 
       TerrainChunk* chunk = &mChunks[chunki++];
 
@@ -844,8 +844,8 @@ void BoQuickGroundRenderer::initMap(const BosonMap* map)
         for(unsigned int x = chunk->minX; x <= chunk->maxX; x++)
         {
           int pos = map->cornerArrayPos(x, y);
-          chunk->minZ = QMIN(chunk->minZ, heightmap[pos]);
-          chunk->maxZ = QMAX(chunk->maxZ, heightmap[pos]);
+          chunk->minZ = qMin(chunk->minZ, heightmap[pos]);
+          chunk->maxZ = qMax(chunk->maxZ, heightmap[pos]);
           for(unsigned int t = 0; t < mTextureCount; t++)
           {
             if(texmap[(t * mMapCW * mMapCH) + pos] > 0)
@@ -890,7 +890,7 @@ unsigned int BoQuickGroundRenderer::chooseLOD(BoQuickGroundRenderer::TerrainChun
   // So the total roughness of an average chunk might be aruond 4
 
   dist -= chunk->radius;
-  dist = QMAX(dist, 1.0f);
+  dist = qMax(dist, 1.0f);
 
   float e = (chunk->roughness + chunk->textureRoughnessTotal) * ROUGHNESS_MULTIPLIER / dist;
 
@@ -952,10 +952,10 @@ void BoQuickGroundRenderer::cellExploredChanged(int x1, int y1, int x2, int y2)
 void BoQuickGroundRenderer::cellHeightChanged(int x1, int y1, int x2, int y2)
 {
   // Normals have to be recalculated for adjacent corners as well
-  x1 = QMAX(x1 - 1, 0);
-  y1 = QMAX(y1 - 1, 0);
-  x2 = QMIN(x2 + 1, (int)mMapW);
-  y2 = QMIN(y2 + 1, (int)mMapH);
+  x1 = qMax(x1 - 1, 0);
+  y1 = qMax(y1 - 1, 0);
+  x2 = qMin(x2 + 1, (int)mMapW);
+  y2 = qMin(y2 + 1, (int)mMapH);
 
   const float* heightmap = mMap->heightMap();
   const float* normalmap = mMap->normalMap();

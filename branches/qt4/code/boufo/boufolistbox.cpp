@@ -31,6 +31,9 @@
 #include "boufolistbox.moc"
 
 #include <bodebug.h>
+#include <QStringList>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 BoUfoListBox::BoUfoListBox() : BoUfoWidget()
 {
@@ -154,9 +157,9 @@ QString BoUfoListBox::selectedText() const
  return items()[i];
 }
 
-QValueList<unsigned int> BoUfoListBox::selectedItems() const
+Q3ValueList<unsigned int> BoUfoListBox::selectedItems() const
 {
- QValueList<unsigned int> ret;
+ Q3ValueList<unsigned int> ret;
  std::vector<unsigned int> sel = mListBox->getSelectedIndices();
  for (unsigned int i = 0; i < sel.size(); i++) {
 	ret.append(sel[i]);
@@ -171,8 +174,8 @@ QStringList BoUfoListBox::selectedItemsText() const
  // this doesnt matter since we don't have large lists in boson currently
  QStringList ret;
  QStringList allItems = items();
- QValueList<unsigned int> sel = selectedItems();
- for (QValueList<unsigned int>::iterator it = sel.begin(); it != sel.end(); ++it) {
+ Q3ValueList<unsigned int> sel = selectedItems();
+ for (Q3ValueList<unsigned int>::iterator it = sel.begin(); it != sel.end(); ++it) {
 	ret.append(allItems[*it]);
  }
  return ret;
@@ -192,7 +195,8 @@ void BoUfoListBox::setItems(const QStringList& items)
 {
  clear();
  for (QStringList::const_iterator it = items.begin(); it != items.end(); ++it) {
-	mListBox->addItem((*it).latin1());
+	QByteArray tmp = (*it).toAscii();
+	mListBox->addItem(std::string(tmp.constData(), tmp.length()));
  }
 }
 
@@ -228,7 +232,7 @@ void BoUfoListBox::insertItem(const QString& text, int index)
  if (index < 0) {
 	index = list.count();
  }
- list.insert(list.at(index), text);
+ list.insert(index, text);
  setItems(list);
 }
 
@@ -243,7 +247,7 @@ void BoUfoListBox::removeItem(int index)
  if (index >= (int)list.count()) {
 	return;
  }
- list.remove(list.at(index));
+ list.removeAll(list.at(index));
  setItems(list);
 }
 

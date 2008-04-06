@@ -44,6 +44,8 @@
 #include "../bosonviewdata.h"
 
 #include <klocale.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 /**
  * Helper class for @ref actionClicked. This class helps at the case that one or
@@ -118,8 +120,8 @@ public:
 			return false;
 		}
 
-		QPtrList<Unit> allUnits = selection()->allUnits();
-		for (QPtrListIterator<Unit> it(allUnits); it.current(); ++it) {
+		Q3PtrList<Unit> allUnits = selection()->allUnits();
+		for (Q3PtrListIterator<Unit> it(allUnits); it.current(); ++it) {
 			if (storage->canStore(it.current())) {
 				return true;
 			}
@@ -337,8 +339,8 @@ bool BosonGameViewInput::actionHarvest(Unit* resourceUnit)
  boDebug() << k_funcinfo << "clicked on a resource mine" << endl;
 
  bool taken = false;
- QPtrList<Unit> units = selection()->allUnits();
- QPtrListIterator<Unit> it(units);
+ Q3PtrList<Unit> units = selection()->allUnits();
+ Q3PtrListIterator<Unit> it(units);
  while (it.current()) {
 	Unit* u = it.current();
 	++it;
@@ -529,9 +531,9 @@ bool BosonGameViewInput::actionRepair(Unit* unit)
 	BO_NULL_ERROR(localPlayerInput());
 	return false;
  }
- QPtrList<Unit> allUnits = selection()->allUnits();
- QPtrList<Unit> list;
- QPtrListIterator<Unit> it(allUnits);
+ Q3PtrList<Unit> allUnits = selection()->allUnits();
+ Q3PtrList<Unit> list;
+ Q3PtrListIterator<Unit> it(allUnits);
  while (it.current()) {
 	if (it.current()->health() < it.current()->maxHealth()) {
 		boDebug() << k_funcinfo << "repair " << it.current()->id() << endl;
@@ -564,9 +566,9 @@ bool BosonGameViewInput::actionRefine(Unit* unit)
  if (!prop) {
 	boError() << k_funcinfo << unit->id() << "cannot refine" << endl;
  }
- QPtrList<Unit> allUnits = selection()->allUnits();
- QPtrList<Unit> list;
- QPtrListIterator<Unit> unitsIt(allUnits);
+ Q3PtrList<Unit> allUnits = selection()->allUnits();
+ Q3PtrList<Unit> list;
+ Q3PtrListIterator<Unit> unitsIt(allUnits);
  while (unitsIt.current()) {
 	HarvesterProperties* hprop = (HarvesterProperties*)unitsIt.current()->properties(PluginProperties::Harvester);
 	if (prop) {
@@ -642,9 +644,9 @@ bool BosonGameViewInput::actionEnterUnit(Unit* unit)
 	return false;
  }
 
- QPtrList<Unit> allUnits = selection()->allUnits();
- QPtrList<Unit> list;
- for (QPtrListIterator<Unit> it(allUnits); it.current(); ++it) {
+ Q3PtrList<Unit> allUnits = selection()->allUnits();
+ Q3PtrList<Unit> list;
+ for (Q3PtrListIterator<Unit> it(allUnits); it.current(); ++it) {
 	if (!it.current()->isMobile()) {
 		continue;
 	}
@@ -814,9 +816,9 @@ bool BosonGameViewInput::selectAll(const UnitProperties* prop, bool replace)
 	// double-clicked. it makes no sense for facilities
 	return false;
  }
- QPtrList<Unit> allUnits = *(localPlayerIO()->allMyUnits());
- QPtrList<Unit> list;
- QPtrListIterator<Unit> it(allUnits);
+ Q3PtrList<Unit> allUnits = *(localPlayerIO()->allMyUnits());
+ Q3PtrList<Unit> list;
+ Q3PtrListIterator<Unit> it(allUnits);
  while (it.current()) {
 	if (it.current()->unitProperties() == prop) {
 		if (canSelect(it.current()) == CanSelectMultipleOk) {

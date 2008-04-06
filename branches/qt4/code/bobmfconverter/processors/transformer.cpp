@@ -26,7 +26,7 @@
 #include "frame.h"
 #include "bo3dtools.h"
 
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 
 
 Transformer::Transformer() : Processor()
@@ -91,11 +91,11 @@ bool Transformer::applyTransformations(LOD* lod, Mesh* mesh)
   // Find all frame nodes that have this mesh
 
   // All matrices (in all frames) corresponding to that mesh
-  QValueList<BoMatrix*> matrices;
+  Q3ValueList<BoMatrix*> matrices;
   // All matrices _in base frame_ corresponding to that mesh. These are used
   //  to calculate size for the mesh and to transform it.
-  QValueList<BoMatrix*> baseframematrices;
-  QValueList<unsigned int> baseframenodes;
+  Q3ValueList<BoMatrix*> baseframematrices;
+  Q3ValueList<unsigned int> baseframenodes;
 
   for(unsigned int i = 0; i < lod->frameCount(); i++)
   {
@@ -154,17 +154,17 @@ bool Transformer::applyTransformations(LOD* lod, Mesh* mesh)
     for(unsigned int i = 1; i < mesh->vertexCount(); i++)
     {
       const BoVector3Float& pos = mesh->vertex(i)->pos;
-      min.setX(QMIN(min.x(), pos.x()));
-      min.setY(QMIN(min.y(), pos.y()));
-      min.setZ(QMIN(min.z(), pos.z()));
-      max.setX(QMAX(max.x(), pos.x()));
-      max.setY(QMAX(max.y(), pos.y()));
-      max.setZ(QMAX(max.z(), pos.z()));
+      min.setX(qMin(min.x(), pos.x()));
+      min.setY(qMin(min.y(), pos.y()));
+      min.setZ(qMin(min.z(), pos.z()));
+      max.setX(qMax(max.x(), pos.x()));
+      max.setY(qMax(max.y(), pos.y()));
+      max.setZ(qMax(max.z(), pos.z()));
     }
 
     float maxvolume = -1.0;
     unsigned int maxi = 0;
-    QValueList<BoMatrix*>::Iterator it = baseframematrices.begin();
+    Q3ValueList<BoMatrix*>::Iterator it = baseframematrices.begin();
     for(unsigned int i = 0; it != baseframematrices.end(); ++it, i++)
     {
       float vol = transformedBBoxVolume(min, max, *it);
@@ -221,7 +221,7 @@ bool Transformer::applyTransformations(LOD* lod, Mesh* mesh)
     return false;
   }
 
-  for(QValueList<BoMatrix*>::Iterator it = matrices.begin(); it != matrices.end(); ++it)
+  for(Q3ValueList<BoMatrix*>::Iterator it = matrices.begin(); it != matrices.end(); ++it)
   {
     (*it)->multiply(&imatrix);
   }
@@ -236,7 +236,7 @@ bool Transformer::applyTransformations(LOD* lod, Mesh* mesh)
 float Transformer::transformedBBoxVolume(const BoVector3Float& origmin, const BoVector3Float& origmax, BoMatrix* matrix)
 {
   // Create 8 vertices of the bounding box
-  QValueList<BoVector3Float> vertices;
+  Q3ValueList<BoVector3Float> vertices;
   vertices.append(BoVector3Float(origmin.x(), origmin.y(), origmin.z()));
   vertices.append(BoVector3Float(origmin.x(), origmin.y(), origmax.z()));
   vertices.append(BoVector3Float(origmin.x(), origmax.y(), origmin.z()));
@@ -252,17 +252,17 @@ float Transformer::transformedBBoxVolume(const BoVector3Float& origmin, const Bo
   max = min;
 
   // Tranform the vertices and find new min/max coords
-  QValueList<BoVector3Float>::Iterator it = vertices.begin();
+  Q3ValueList<BoVector3Float>::Iterator it = vertices.begin();
   for(; it != vertices.end(); ++it)
   {
     BoVector3Float v;
     matrix->transform(&v, &(*it));
-    min.setX(QMIN(min.x(), v.x()));
-    min.setY(QMIN(min.y(), v.y()));
-    min.setZ(QMIN(min.z(), v.z()));
-    max.setX(QMAX(max.x(), v.x()));
-    max.setY(QMAX(max.y(), v.y()));
-    max.setZ(QMAX(max.z(), v.z()));
+    min.setX(qMin(min.x(), v.x()));
+    min.setY(qMin(min.y(), v.y()));
+    min.setZ(qMin(min.z(), v.z()));
+    max.setX(qMax(max.x(), v.x()));
+    max.setY(qMax(max.y(), v.y()));
+    max.setZ(qMax(max.z(), v.z()));
   }
 
   float ret = fabsf((max.x() - min.x()) * (max.y() - min.y()) * (max.z() - min.z()));
@@ -292,12 +292,12 @@ bool Transformer::resizeModel()
       BoVector3Float pos;
       matrix->transform(&pos, &mesh->vertex(j)->pos);
 
-      min.setX(QMIN(min.x(), pos.x()));
-      min.setY(QMIN(min.y(), pos.y()));
-      min.setZ(QMIN(min.z(), pos.z()));
-      max.setX(QMAX(max.x(), pos.x()));
-      max.setY(QMAX(max.y(), pos.y()));
-      max.setZ(QMAX(max.z(), pos.z()));
+      min.setX(qMin(min.x(), pos.x()));
+      min.setY(qMin(min.y(), pos.y()));
+      min.setZ(qMin(min.z(), pos.z()));
+      max.setX(qMax(max.x(), pos.x()));
+      max.setY(qMax(max.y(), pos.y()));
+      max.setZ(qMax(max.z(), pos.z()));
     }
   }
 
@@ -358,12 +358,12 @@ bool Transformer::resizeModel()
       BoVector3Float pos;
       matrix->transform(&pos, &mesh->vertex(j)->pos);
 
-      min.setX(QMIN(min.x(), pos.x()));
-      min.setY(QMIN(min.y(), pos.y()));
-      min.setZ(QMIN(min.z(), pos.z()));
-      max.setX(QMAX(max.x(), pos.x()));
-      max.setY(QMAX(max.y(), pos.y()));
-      max.setZ(QMAX(max.z(), pos.z()));
+      min.setX(qMin(min.x(), pos.x()));
+      min.setY(qMin(min.y(), pos.y()));
+      min.setZ(qMin(min.z(), pos.z()));
+      max.setX(qMax(max.x(), pos.x()));
+      max.setY(qMax(max.y(), pos.y()));
+      max.setZ(qMax(max.z(), pos.z()));
     }
   }
 

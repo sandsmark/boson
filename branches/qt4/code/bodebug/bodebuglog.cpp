@@ -22,18 +22,20 @@
 
 #include "bodebug.h"
 
-#include <kstaticdeleter.h>
+#include <k3staticdeleter.h>
+//Added by qt3to4:
+#include <Q3PtrList>
 
 static const int maxLevels = 4; // see BoDebug::DebugLevels
 
-static KStaticDeleter<BoDebugLog> sd;
+static K3StaticDeleter<BoDebugLog> sd;
 BoDebugLog* BoDebugLog::mDebugLog = 0;
 
 BoDebugLog::BoDebugLog()
 {
  mLists = maxLevels;
  mAllMessages.setAutoDelete(true);
- mMessages = new QPtrList<BoDebugMessage>[mLists];
+ mMessages = new Q3PtrList<BoDebugMessage>[mLists];
  mMaxCount = new unsigned int[mLists];
  mPopAtFront = new bool[mLists];
  mEmitSignal = new bool[mLists];
@@ -190,7 +192,7 @@ void BoDebugLog::setEmitSignal(int level, bool e)
  }
 }
 
-const QPtrList<BoDebugMessage>* BoDebugLog::messageLogLevel(int level) const
+const Q3PtrList<BoDebugMessage>* BoDebugLog::messageLogLevel(int level) const
 {
  if (level >= mLists) {
 	return 0;

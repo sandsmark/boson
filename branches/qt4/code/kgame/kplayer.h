@@ -1,6 +1,6 @@
 /*
     This file is part of the KDE games library
-    Copyright (C) 2001 Martin Heni (martin@heni-online.de)
+    Copyright (C) 2001 Martin Heni (kde at heni-online.de)
     Copyright (C) 2001 Andreas Beckermann (b_mann@gmx.de)
 
     This library is free software; you can redistribute it and/or
@@ -21,14 +21,15 @@
 #ifndef __KPLAYER_H_
 #define __KPLAYER_H_
 
-#include <qstring.h>
-#include <qobject.h>
+#include <QtCore/QObject>
+#include <QtCore/QList>
+
+#include <libkdegames_export.h>
 
 class KGame;
 class KGameIO;
 class KGamePropertyBase;
 class KGamePropertyHandler;
-template <class T> class QPtrList;
 
 class KPlayerPrivate;
 
@@ -63,26 +64,19 @@ class KPlayerPrivate;
  * functions which are shared by all of your KGameIOs.
  *
  */
-class KPlayer : public QObject
+class KDEGAMES_EXPORT KPlayer : public QObject
 {
   Q_OBJECT
 
 public:
-      typedef QPtrList<KGameIO> KGameIOList;
+      typedef QList<KGameIO*> KGameIOList;
 
       // KPlayer(KGame *,KGameIO * input=0);
       /**
        * Create a new player object. It will be automatically
        * deleted if the game it belongs to is deleted.
        */
-      KPlayer();
-
-      /**
-       * Create a new player object. It will be automatically
-       * deleted if the game it belongs to is deleted. This constructor
-       * automatically adds the player to the game using KGame::addPlayer()
-       */
-      KPlayer(KGame* game);
+      explicit KPlayer();
 
       virtual ~KPlayer();
 
@@ -92,7 +86,7 @@ public:
       *
       * @return 0 for default KPlayer.
       */
-      virtual int rtti() const {return 0;}
+      virtual int rtti() const;
 
       /**
       * Gives debug output of the game status
@@ -105,7 +99,7 @@ public:
        *
        * @return list of devices
        */
-      KGameIOList* ioList();
+      KGameIOList *ioList();
 
       /**
        * sets the game the player belongs to. This
@@ -114,14 +108,14 @@ public:
        *
        * @param game the game
        */
-      void setGame(KGame* game) {mGame=game;}
+      void setGame(KGame *game);
 
       /**
        * Query to which game the player belongs to
        *
        * @return the game
        */
-      KGame* game() const {return mGame;}
+      KGame *game() const;
 
       /**
        * Set whether this player can make turns/input
@@ -167,30 +161,28 @@ public:
        *
        * @return true/false
        */
-      bool isActive() const {return mActive;}
+      bool isActive() const;
 
       /**
        * Set an player as active (true) or inactive (false)
        *
        * @param v true=active, false=inactive
        */
-      void setActive(bool v) {mActive=v;}
+      void setActive(bool v);
 
       /**
-       * Returns the internal id of the player
+       * Returns the id of the player
        *
-       * @return the internal player id
+       * @return the player id
        */
-      Q_UINT32 kgameId() const; 
+      quint32 id() const; 
 
-      /**
-       * @internal
-       * Set the internal players id. This is done automatically by
+      /* Set the players id. This is done automatically by
        * the game object when adding a new player!
        *
        * @param i the player id
        */
-      void setKGameId(Q_UINT32 i);
+      void setId(quint32 i);
 
       /**
        * Returns the user defined id of the player
@@ -246,12 +238,12 @@ public:
        * this player to be set up via network. Mostly internal
        * function
        */
-      KPlayer* networkPlayer() const;
+      KPlayer *networkPlayer() const;
 
       /**
        * Sets this network player replacement. Internal stuff 
        */
-      void setNetworkPlayer(KPlayer* p);
+      void setNetworkPlayer(KPlayer *p);
 
       // A name and group the player belongs to
       /**
@@ -287,7 +279,7 @@ public:
        * @param input the inut device
        * @return true if ok
        */
-      bool addGameIO(KGameIO* input);
+      bool addGameIO(KGameIO *input);
 
       /**
        * remove (and delete) a game IO device
@@ -299,7 +291,7 @@ public:
        * @param deleteit true (default) to delete the device otherwisse just remove it
        * @return true on ok
        */
-      bool removeGameIO(KGameIO* input = 0, bool deleteit = true);
+      bool removeGameIO(KGameIO *input=0,bool deleteit=true);
 
       /**
        * Finds the KGameIO devies with the given rtti code.
@@ -308,7 +300,7 @@ public:
        * @param rtti the rtti code to be searched for
        * @return the KGameIO device
        */
-      KGameIO* findRttiIO(int rtti) const;
+      KGameIO *findRttiIO(int rtti) const;
 
       /**
        * Checks whether this player has a IO device of the
@@ -317,7 +309,7 @@ public:
        * @param rtti the rtti typed to be checked for
        * @return true if it exists
        */
-      bool hasRtti(int rtti) const  {return findRttiIO(rtti)!=0;}
+      bool hasRtti(int rtti) const;
 
       // Message exchange
       /**
@@ -332,12 +324,12 @@ public:
        * KGame::playerInput() (if player=false, ie the message *was* sent through
        * KGame::sendPlayerInput).
        */
-      virtual bool forwardInput(QDataStream& msg, bool transmit = true, Q_UINT32 sender = 0);
+      virtual bool forwardInput(QDataStream &msg,bool transmit=true, quint32 sender=0);
 
       /**
        * Forwards Message to the game object..internal use only
        */
-      virtual bool forwardMessage(QDataStream& msg, int msgid, Q_UINT32 receiver = 0, Q_UINT32 sender = 0);
+      virtual bool forwardMessage(QDataStream &msg,int msgid,quint32 receiver=0,quint32 sender=0);
 
       // Game logic
       /**
@@ -356,7 +348,7 @@ public:
        * @param exclusive true (default)/ false
        * @return should be void
        */
-      bool setTurn(bool b, bool exclusive = true);
+      bool setTurn(bool b,bool exclusive=true);
 
 
       // load/save
@@ -371,7 +363,7 @@ public:
       *
       * @return true?
       */
-      virtual bool load(QDataStream& stream);
+      virtual bool load(QDataStream &stream);
 
      /**
       * Save a player to a file OR to network. See also load
@@ -380,7 +372,7 @@ public:
       *
       * @return true?
       */
-      virtual bool save(QDataStream& stream);
+      virtual bool save(QDataStream &stream);
 
       /**
        * Receives a message
@@ -389,7 +381,7 @@ public:
        * @param stream The message itself
        * @param sender 
        **/
-      virtual void networkTransmission(QDataStream& stream, int msgid, Q_UINT32 sender);
+      void networkTransmission(QDataStream &stream,int msgid,quint32 sender);
 
       /**
        * Searches for a property of the player given its id. 
@@ -422,14 +414,14 @@ public:
         */
        KGamePropertyHandler* dataHandler();
 
-signals:
+Q_SIGNALS:
       /**
        *  The player object got a message which was targeted
        *  at it but has no default method to process it. This
        *  means probably a user message. Connecting to this signal
        *  allowed to process it.
        */
-       void signalNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sender, KPlayer* me);
+       void signalNetworkData(int msgid, const QByteArray& buffer, quint32 sender, KPlayer *me);
 
        /**
         * This signal is emmited if a player property changes its value and
@@ -437,9 +429,9 @@ signals:
         * important signal as you should base the actions on a reaction
         * to this property changes.
         */
-       void signalPropertyChanged(KGamePropertyBase* property, KPlayer* me);
+       void signalPropertyChanged(KGamePropertyBase *property,KPlayer *me);
 
-protected slots:
+protected Q_SLOTS:
       /**
        * Called by KGameProperty only! Internal function!
        **/
@@ -447,17 +439,17 @@ protected slots:
       /**
        * Called by KGameProperty only! Internal function!
        **/
-      void emitSignal(KGamePropertyBase* me);
+      void emitSignal(KGamePropertyBase *me);
 
 
 private:
       void init();
 
 private:
-      KGame* mGame;
-      bool mActive;      // active player
+      friend class KPlayerPrivate;
+      KPlayerPrivate *const d;
 
-      KPlayerPrivate* d;
+      Q_DISABLE_COPY(KPlayer)
 };
 
 #endif

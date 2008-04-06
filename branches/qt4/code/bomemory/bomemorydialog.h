@@ -20,10 +20,13 @@
 #define BOMEMORYDIALOG_H
 
 #include <kdialogbase.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
-class QListViewItem;
+class Q3ListViewItem;
 class MyMemNode;
-template<class T> class QValueList;
+template<class T> class Q3ValueList;
 
 class BoMemoryDialogPrivate;
 /**
@@ -40,9 +43,9 @@ public slots:
 	void slotUpdate();
 
 protected:
-	QListViewItem* createFileItem(const QString& file) const;
-	QListViewItem* createFunctionItem(QListViewItem* parent, const QString& function) const;
-	QListViewItem* createMemoryItem(QListViewItem* parent, const MyMemNode* node) const;
+	Q3ListViewItem* createFileItem(const QString& file) const;
+	Q3ListViewItem* createFunctionItem(Q3ListViewItem* parent, const QString& function) const;
+	Q3ListViewItem* createMemoryItem(Q3ListViewItem* parent, const MyMemNode* node) const;
 
 	/**
 	 * Create the QListViewItem list of @p file, for all items in @p list.
@@ -50,10 +53,10 @@ protected:
 	 * @p file.
 	 * @return The number of bytes that are in this file
 	 **/
-	unsigned long int createFileList(QListViewItem* file, const QPtrList<MyMemNode>* list);
-	unsigned long int createFunctionList(QListViewItem* line, const QPtrList<MyMemNode>* list);
+	unsigned long int createFileList(Q3ListViewItem* file, const Q3PtrList<MyMemNode>* list);
+	unsigned long int createFunctionList(Q3ListViewItem* line, const Q3PtrList<MyMemNode>* list);
 
-	void setSize(QListViewItem* item, unsigned long int bytes) const;
+	void setSize(Q3ListViewItem* item, unsigned long int bytes) const;
 
 private:
 	BoMemoryDialogPrivate* d;

@@ -35,7 +35,7 @@ Texture::Texture(const QString& filename)
   mImage = 0;
   mHasTransparency = false;
 
-  if(filename.lower().endsWith(".png"))
+  if(filename.toLower().endsWith(".png"))
   {
 #warning this leads to wrong results with -noloadtex
     mHasTransparency = true;
@@ -86,9 +86,9 @@ bool Texture::load()
   if(mImage->depth() != 32)
   {
     boWarning() << k_funcinfo << "Depth of '" << filepath << "' is " << mImage->depth() << endl;
-    mHasTransparency = mImage->hasAlphaBuffer();
+    mHasTransparency = mImage->hasAlphaChannel();
   }
-  else if(mImage->hasAlphaBuffer())
+  else if(mImage->hasAlphaChannel())
   {
     // The alpha buffer might be unused, we need to check for it
     for(int y = 0; y < mImage->height(); y++)
@@ -129,16 +129,16 @@ bool Texture::checkTexturePath(const QString& path, QString& filepath)
     filepath = path + mFilename;
     return true;
   }
-  fi.setFile(path + mFilename.lower());
+  fi.setFile(path + mFilename.toLower());
   if(fi.exists())
   {
-    filepath = path + mFilename.lower();
+    filepath = path + mFilename.toLower();
     return true;
   }
-  fi.setFile(path + mFilename.upper());
+  fi.setFile(path + mFilename.toUpper());
   if(fi.exists())
   {
-    filepath = path + mFilename.upper();
+    filepath = path + mFilename.toUpper();
     return true;
   }
 

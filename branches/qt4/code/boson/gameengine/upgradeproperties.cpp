@@ -34,7 +34,7 @@
 #include <klocale.h>
 
 #include <qstring.h>
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 
 class UpgradeApplyer
 {
@@ -81,9 +81,9 @@ public:
   {
   }
 
-  QValueList<unsigned long int> mRequireUnits;
-  QValueList<unsigned long int> mRequireTechnologies;
-  QValueList<unsigned long int> mApplyToTypes;
+  Q3ValueList<unsigned long int> mRequireUnits;
+  Q3ValueList<unsigned long int> mRequireTechnologies;
+  Q3ValueList<unsigned long int> mApplyToTypes;
 
   QMap<QString, QString> mEntryList;
 };
@@ -208,20 +208,20 @@ bool UpgradeProperties::load(KSimpleConfig* cfg, const QString& group)
 
 
 
-QValueList<unsigned long int> UpgradeProperties::requiredUnits() const
+Q3ValueList<unsigned long int> UpgradeProperties::requiredUnits() const
 {
   return d->mRequireUnits;
 }
 
 
-QValueList<unsigned long int> UpgradeProperties::requiredTechnologies() const
+Q3ValueList<unsigned long int> UpgradeProperties::requiredTechnologies() const
 {
   return d->mRequireTechnologies;
 }
 
-QValueList<unsigned long int> UpgradeProperties::appliesToTypes(const Player* player) const
+Q3ValueList<unsigned long int> UpgradeProperties::appliesToTypes(const Player* player) const
 {
-  QValueList<unsigned long int> tmp = d->mApplyToTypes;
+  Q3ValueList<unsigned long int> tmp = d->mApplyToTypes;
   if(mApplyToFacilities)
   {
     tmp += player->speciesTheme()->allFacilities();
@@ -232,8 +232,8 @@ QValueList<unsigned long int> UpgradeProperties::appliesToTypes(const Player* pl
   }
 
   // make sure that every type is at most once in the list
-  QValueList<unsigned long int> list;
-  QValueList<unsigned long int>::Iterator it;
+  Q3ValueList<unsigned long int> list;
+  Q3ValueList<unsigned long int>::Iterator it;
   for(it = tmp.begin(); it != tmp.end(); ++it)
   {
     if(!list.contains(*it))

@@ -23,6 +23,9 @@
 #include "global.h"
 #include <qstring.h>
 #include <qcolor.h>
+//Added by qt3to4:
+#include <QPixmap>
+#include <Q3PtrList>
 
 class BosonModel;
 class BosonSound;
@@ -36,7 +39,7 @@ class BoUfoImage;
 class QPixmap;
 class QStringList;
 class QColor;
-template<class T> class QDict;
+template<class T> class Q3Dict;
 
 /**
  * Here we store all un-modifyable data, such as images or unit models for a
@@ -176,8 +179,8 @@ public:
 	bool loadGeneralSounds();
 	bool loadUnitSounds(const UnitProperties* prop);
 
-	QPtrList<BosonModel> allLoadedModels() const;
-	static QPtrList<BosonModel> allLoadedModelsInAllSpecies();
+	Q3PtrList<BosonModel> allLoadedModels() const;
+	static Q3PtrList<BosonModel> allLoadedModelsInAllSpecies();
 
 protected:
 
@@ -203,7 +206,7 @@ private:
 	TeamColorData* teamColorData(const QColor& color) const;
 
 private:
-	static QDict<SpeciesData>* mSpeciesData;
+	static Q3Dict<SpeciesData>* mSpeciesData;
 
 private:
 	class SpeciesDataPrivate;

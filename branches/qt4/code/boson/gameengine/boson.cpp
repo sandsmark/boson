@@ -60,12 +60,15 @@
 
 #include <qtimer.h>
 #include <qdatetime.h>
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 #include <qdatastream.h>
-#include <qtextstream.h>
-#include <qcstring.h>
+#include <q3textstream.h>
+#include <q3cstring.h>
 #include <qfile.h>
 #include <qapplication.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <QEvent>
 
 #include <stdlib.h>
 #include <sys/time.h>
@@ -213,7 +216,7 @@ public:
 	 **/
 	void receiveAdvanceCall();
 
-	const QPtrList<BoAdvanceMessageTimes>& advanceMessageTimes() const
+	const Q3PtrList<BoAdvanceMessageTimes>& advanceMessageTimes() const
 	{
 		return mAdvanceMessageTimes;
 	}
@@ -221,7 +224,7 @@ public:
 private:
 	Boson* mBoson;
 
-	QPtrList<BoAdvanceMessageTimes> mAdvanceMessageTimes;
+	Q3PtrList<BoAdvanceMessageTimes> mAdvanceMessageTimes;
 	BoAdvanceMessageTimes* mCurrentAdvanceMessageTimes;
 
 	KGamePropertyInt mAdvanceFlag;
@@ -295,8 +298,8 @@ public:
 	KGamePropertyInt mGameSpeed;
 	KGamePropertyBool mGamePaused;
 
-	QValueList<QByteArray> mGameLogs;
-	QValueList<QByteArray> mUnitLogs;
+	Q3ValueList<QByteArray> mGameLogs;
+	Q3ValueList<QByteArray> mUnitLogs;
 	BoMessageLogger mMessageLogger;
 
 	BoAdvance* mAdvance;
@@ -385,7 +388,7 @@ bool BoGameLogSaver::saveMessageLog()
  // this one can be used to reproduce a game.
  // therefore we start with this one, if everything else fails we still have it.
  QFile messageLog(mPrefix + ".messagelog");
- if (!messageLog.open(IO_WriteOnly)) {
+ if (!messageLog.open(QIODevice::WriteOnly)) {
 	boError() << k_funcinfo << "Can't open output file '" << mPrefix << ".messagelog' for writing!" << endl;
 	return false;
  }
@@ -401,11 +404,11 @@ bool BoGameLogSaver::saveMessageLog()
 bool BoGameLogSaver::saveGameLog()
 {
  QFile gameLog(mPrefix + ".gamelog");
- if (!gameLog.open(IO_WriteOnly)) {
+ if (!gameLog.open(QIODevice::WriteOnly)) {
 	boError() << k_funcinfo << "Can't open output file '" << gameLog.name() << "' for writing gamelog!" << endl;
 	return false;
  }
- QValueList<QByteArray>::iterator it;
+ Q3ValueList<QByteArray>::iterator it;
  for (it = d->mGameLogs.begin(); it != d->mGameLogs.end(); it++) {
 	gameLog.writeBlock(qUncompress(*it));
  }
@@ -416,11 +419,11 @@ bool BoGameLogSaver::saveGameLog()
 bool BoGameLogSaver::saveUnitLog()
 {
  QFile unitLog(mPrefix + ".unitlog");
- if (!unitLog.open(IO_WriteOnly)) {
+ if (!unitLog.open(QIODevice::WriteOnly)) {
 	boError() << k_funcinfo << "Can't open output file '" << unitLog.name() << "' for writing unitlog!" << endl;
 	return false;
  }
- QValueList<QByteArray>::iterator uit;
+ Q3ValueList<QByteArray>::iterator uit;
  for (uit = d->mUnitLogs.begin(); uit != d->mUnitLogs.end(); uit++) {
 	unitLog.writeBlock(qUncompress(*uit));
  }
@@ -431,7 +434,7 @@ bool BoGameLogSaver::saveUnitLog()
 bool BoGameLogSaver::saveNetworkLog()
 {
  QFile netLog(mPrefix + ".netlog");
- if (!netLog.open(IO_WriteOnly)) {
+ if (!netLog.open(QIODevice::WriteOnly)) {
 	boError() << k_funcinfo << "Can't open output file '" << netLog.name() << "' for writing!" << endl;
 	return false;
  }
@@ -450,18 +453,18 @@ bool BoGameLogSaver::saveBoDebugLog()
 	BO_NULL_ERROR(debugLog);
 	return false;
  }
- const QPtrList<BoDebugMessage>* messages = debugLog->messageLogLevel(-1);
+ const Q3PtrList<BoDebugMessage>* messages = debugLog->messageLogLevel(-1);
  if (!messages) {
 	BO_NULL_ERROR(messages);
 	return false;
  }
  QFile log(mPrefix + ".bodebuglog");
- if (!log.open(IO_WriteOnly)) {
+ if (!log.open(QIODevice::WriteOnly)) {
 	boError() << k_funcinfo << "Can't open output file '" << log.name() << "' for writing!" << endl;
 	return false;
  }
- QTextStream stream(&log);
- for (QPtrListIterator<BoDebugMessage> it(*messages); it.current(); ++it) {
+ Q3TextStream stream(&log);
+ for (Q3PtrListIterator<BoDebugMessage> it(*messages); it.current(); ++it) {
 	QString level;
 	switch (it.current()->level()) {
 		case BoDebug::KDEBUG_INFO:
@@ -493,11 +496,11 @@ bool BoGameLogSaver::saveBoDebugLog()
 bool BoGameLogSaver::saveBacktrace()
 {
  QFile log(mPrefix + ".backtrace");
- if (!log.open(IO_WriteOnly)) {
+ if (!log.open(QIODevice::WriteOnly)) {
 	boError() << k_funcinfo << "Can't open output file '" << log.name() << "' for writing!" << endl;
 	return false;
  }
- QTextStream stream(&log);
+ Q3TextStream stream(&log);
  QString bt = boBacktrace();
  if (bt.isEmpty()) {
 	stream << "No backtrace could be generated on this system. Use gdb to create a backtrace instead\n";
@@ -543,8 +546,8 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
  d->mGameIsOver = false;
  d->mLoadFromLogMode = false;
 
- connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, Q_UINT32)),
-		this, SLOT(slotNetworkData(int, const QByteArray&, Q_UINT32, Q_UINT32)));
+ connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, quint32, quint32)),
+		this, SLOT(slotNetworkData(int, const QByteArray&, quint32, quint32)));
  connect(this, SIGNAL(signalReplacePlayerIO(KPlayer*, bool*)),
 		this, SLOT(slotReplacePlayerIO(KPlayer*, bool*)));
  connect(this, SIGNAL(signalPlayerJoinedGame(KPlayer*)),
@@ -687,7 +690,7 @@ BosonPlayField* Boson::playField() const
  return d->mPlayField;
 }
 
-PlayerIO* Boson::findPlayerIO(Q_UINT32 id) const
+PlayerIO* Boson::findPlayerIO(quint32 id) const
 {
  Player* p = (Player*)findPlayerByKGameId(id);
  if (p) {
@@ -699,7 +702,7 @@ PlayerIO* Boson::findPlayerIO(Q_UINT32 id) const
 PlayerIO* Boson::playerIOAtAllIndex(unsigned int index) const
 {
  unsigned int i = 0;
- for (QPtrListIterator<Player> it(allPlayerList()); it.current(); ++it) {
+ for (Q3PtrListIterator<Player> it(allPlayerList()); it.current(); ++it) {
 	if (index == i) {
 		return it.current()->playerIO();
 	}
@@ -711,7 +714,7 @@ PlayerIO* Boson::playerIOAtAllIndex(unsigned int index) const
 PlayerIO* Boson::playerIOAtGameIndex(unsigned int index) const
 {
  unsigned int i = 0;
- for (QPtrListIterator<Player> it(gamePlayerList()); it.current(); ++it) {
+ for (Q3PtrListIterator<Player> it(gamePlayerList()); it.current(); ++it) {
 	if (index == i) {
 		return it.current()->playerIO();
 	}
@@ -723,7 +726,7 @@ PlayerIO* Boson::playerIOAtGameIndex(unsigned int index) const
 PlayerIO* Boson::playerIOAtActiveGameIndex(unsigned int index) const
 {
  unsigned int i = 0;
- for (QPtrListIterator<Player> it(activeGamePlayerList()); it.current(); ++it) {
+ for (Q3PtrListIterator<Player> it(activeGamePlayerList()); it.current(); ++it) {
 	if (index == i) {
 		return it.current()->playerIO();
 	}
@@ -732,17 +735,17 @@ PlayerIO* Boson::playerIOAtActiveGameIndex(unsigned int index) const
  return 0;
 }
 
-const QPtrList<Player>& Boson::allPlayerList() const
+const Q3PtrList<Player>& Boson::allPlayerList() const
 {
  return d->mPlayerListManager->allPlayerList();
 }
 
-const QPtrList<Player>& Boson::gamePlayerList() const
+const Q3PtrList<Player>& Boson::gamePlayerList() const
 {
  return d->mPlayerListManager->gamePlayerList();
 }
 
-const QPtrList<Player>& Boson::activeGamePlayerList() const
+const Q3PtrList<Player>& Boson::activeGamePlayerList() const
 {
  return d->mPlayerListManager->activeGamePlayerList();
 }
@@ -785,7 +788,7 @@ void Boson::quitGame()
 
 void Boson::removeAllPlayers()
 {
- QPtrList<Player> list = allPlayerList();
+ Q3PtrList<Player> list = allPlayerList();
  for (unsigned int i = 0; i < list.count(); i++) {
 	removePlayer(list.at(i)); // might not be necessary - sends remove over network
 	systemRemovePlayer(list.at(i), true); // remove immediately, even before network removing is received.
@@ -835,9 +838,9 @@ void Boson::systemRemovePlayer(KPlayer* p, bool deleteIt)
  KGame::systemRemovePlayer(p, deleteIt);
 }
 
-void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UINT32 sender)
+void Boson::slotNetworkData(int msgid, const QByteArray& buffer, quint32 , quint32 sender)
 {
- QDataStream stream(buffer, IO_ReadOnly);
+ QDataStream stream(buffer, QIODevice::ReadOnly);
  switch (msgid) {
 	case BosonMessageIds::AdvanceN:
 	{
@@ -859,7 +862,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			boError() << k_funcinfo << "received IdNewGame, but game is already running" << endl;
 			return;
 		}
-		Q_INT8 gameMode; // game/editor mode
+		qint8 gameMode; // game/editor mode
 		stream >> gameMode;
 		if (gameMode == 1) {
 			setGameMode(true);
@@ -916,9 +919,9 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	}
 	case BosonMessageIds::ChangeSpecies:
 	{
-		Q_UINT32 id;
+		quint32 id;
 		QString species;
-		Q_UINT32 color;
+		quint32 color;
 		stream >> id;
 		stream >> species;
 		stream >> color;
@@ -933,8 +936,8 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	}
 	case BosonMessageIds::ChangeSide:
 	{
-		Q_UINT32 id;
-		Q_UINT32 newId;
+		quint32 id;
+		quint32 newId;
 		stream >> id;
 		stream >> newId;
 		Player* p = (Player*)findPlayerByUserId(id);
@@ -963,8 +966,8 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	}
 	case BosonMessageIds::ChangeTeamColor:
 	{
-		Q_UINT32 id;
-		Q_UINT32 color;
+		quint32 id;
+		quint32 color;
 		stream >> id;
 		stream >> color;
 		Player* p = (Player*)findPlayerByUserId(id);
@@ -998,7 +1001,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	{
 		BO_CHECK_NULL_RET(canvas());
 		Player* p = 0;
-		Q_UINT32 id = 0;
+		quint32 id = 0;
 		stream >> id;
 		p = (Player*)findPlayerByUserId(id);
 		BO_CHECK_NULL_RET(p);
@@ -1011,13 +1014,13 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	{
 		BO_CHECK_NULL_RET(canvas());
 		Player* p = 0;
-		Q_INT32 change = 0;
-		Q_UINT32 id = 0;
+		qint32 change = 0;
+		quint32 id = 0;
 		stream >> id;
 		stream >> change;
 		p = (Player*)findPlayerByUserId(id);
 		BO_CHECK_NULL_RET(p);
-		if ((Q_INT32)p->minerals() + change < 0) {
+		if ((qint32)p->minerals() + change < 0) {
 		}
 		p->setMinerals(p->minerals() + change);
 		break;
@@ -1026,13 +1029,13 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	{
 		BO_CHECK_NULL_RET(canvas());
 		Player* p = 0;
-		Q_INT32 change = 0;
-		Q_UINT32 id = 0;
+		qint32 change = 0;
+		quint32 id = 0;
 		stream >> id;
 		stream >> change;
 		p = (Player*)findPlayerByUserId(id);
 		BO_CHECK_NULL_RET(p);
-		if ((Q_INT32)p->oil() + change < 0) {
+		if ((qint32)p->oil() + change < 0) {
 			p->setOil(0);
 		} else {
 			p->setOil(p->oil() + change);
@@ -1142,7 +1145,7 @@ Unit* Boson::findUnit(unsigned long int id, Player* searchIn) const
  if (searchIn) {
 	return searchIn->findUnit(id);
  }
- QPtrListIterator<Player> it(gamePlayerList());
+ Q3PtrListIterator<Player> it(gamePlayerList());
  while (it.current()) {
 	Unit* unit = it.current()->findUnit(id);
 	if (unit) {
@@ -1349,10 +1352,10 @@ void Boson::slotPlayerLeftGame(KPlayer* p)
  slotAddChatSystemMessage(i18n("Player %1 - %2 left the game").arg(((Player*)p)->bosonId()).arg(p->name()));
 }
 
-QValueList<QColor> Boson::availableTeamColors() const
+Q3ValueList<QColor> Boson::availableTeamColors() const
 {
- QValueList<QColor> colors = SpeciesTheme::defaultColors();
- QPtrListIterator<Player> it(gamePlayerList());
+ Q3ValueList<QColor> colors = SpeciesTheme::defaultColors();
+ Q3PtrListIterator<Player> it(gamePlayerList());
  while (it.current()) {
 	if (it.current()->speciesTheme()) {
 		colors.remove(it.current()->speciesTheme()->teamColor());
@@ -1384,7 +1387,7 @@ void Boson::setLoadFromLogComplete()
  d->mLoadFromLogMode = false;
 }
 
-void Boson::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 r, Q_UINT32 s, Q_UINT32 clientId)
+void Boson::networkTransmission(QDataStream& stream, int msgid, quint32 r, quint32 s, quint32 clientId)
 {
  if (d->mLoadFromLogMode) {
 	// ignoring any network messages while loading from log.
@@ -1415,13 +1418,13 @@ void Boson::networkTransmission(BoMessage* m)
  m->setDelivered();
  m->deliveredOnAdvanceCallsCount = advanceCallsCount();
  d->mMessageLogger.append(m);
- QDataStream s(m->byteArray, IO_ReadOnly);
+ QDataStream s(m->byteArray, QIODevice::ReadOnly);
  if (m->msgid == KGameMessage::IdSetupGame) {
 	// AB: this (IdSetupGame) is the first step of KGame network initialization.
 	//     this message is received by the client (non-ADMIN) only.
 
 
-	QPtrList<Player> allPlayers = allPlayerList();
+	Q3PtrList<Player> allPlayers = allPlayerList();
 	for (unsigned int i = 0; i < allPlayers.count(); i++) {
 		// AB: all client players will be added again by the KGame
 		//     initialization:
@@ -1557,12 +1560,12 @@ bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
 
  // First write some magic data
  // For filetype detection
- stream << (Q_UINT8)128;
- stream << (Q_UINT8)'B' << (Q_UINT8)'S' << (Q_UINT8)'G';  // BSG = Boson SaveGame
+ stream << (quint8)128;
+ stream << (quint8)'B' << (quint8)'S' << (quint8)'G';  // BSG = Boson SaveGame
  // Magic cookie
- stream << (Q_INT32)cookie();
+ stream << (qint32)cookie();
  // Version information (for future format changes and backwards compatibility)
- stream << (Q_UINT32)BosonSaveLoad::latestSavegameVersion();
+ stream << (quint32)BosonSaveLoad::latestSavegameVersion();
 
  // Save KGame stuff
  if (!KGame::savegame(stream, network, saveplayers)) {
@@ -1571,7 +1574,7 @@ bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
  }
 
  // Save end cookie
- stream << (Q_UINT32)BOSON_SAVEGAME_END_COOKIE;
+ stream << (quint32)BOSON_SAVEGAME_END_COOKIE;
 
 
  boDebug() << k_funcinfo << " done" << endl;
@@ -1598,9 +1601,9 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  boDebug() << k_funcinfo << endl;
 
  // Load magic data
- Q_UINT8 a, b1, b2, b3;
- Q_INT32 c;
- Q_UINT32 v;
+ quint8 a, b1, b2, b3;
+ qint32 c;
+ quint32 v;
  stream >> a >> b1 >> b2 >> b3;
  if ((a != 128) || (b1 != 'B' || b2 != 'S' || b3 != 'G')) {
 	// Error - not Boson SaveGame
@@ -1637,15 +1640,15 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  {
 	// set gameStatus to Init. Will be set to Run later
 	QByteArray b;
-	QDataStream s(b, IO_WriteOnly);
+	QDataStream s(b, QIODevice::WriteOnly);
 	KGameMessage::createPropertyHeader(s, KGamePropertyBase::IdGameStatus);
 	s << (int)KGame::Init;
-	QDataStream readStream(b, IO_ReadOnly);
+	QDataStream readStream(b, QIODevice::ReadOnly);
 	dataHandler()->processMessage(readStream, dataHandler()->id(), false);
  }
 
  // Check end cookie
- Q_UINT32 endcookie;
+ quint32 endcookie;
  stream >> endcookie;
  if (endcookie != BOSON_SAVEGAME_END_COOKIE) {
 	boError() << k_funcinfo << "Invalid end cookie!" << endl;
@@ -1682,7 +1685,7 @@ unsigned int Boson::delayedAdvanceMessageCount() const
  return d->mMessageDelayer->delayedAdvanceMessageCount();
 }
 
-Q_UINT16 Boson::bosonPort()
+quint16 Boson::bosonPort()
 {
  return KGame::port();
 }
@@ -1713,7 +1716,7 @@ void Boson::makeGameLog()
 {
  PROFILE_METHOD;
  QByteArray log;
- QTextStream ts(log, IO_WriteOnly);
+ Q3TextStream ts(log, QIODevice::WriteOnly);
  writeGameLog(ts);
 // boDebug() << k_funcinfo << "Log size: " << log.size() << endl;
  boProfiling->push("compress log");
@@ -1727,13 +1730,13 @@ void Boson::makeGameLog()
 void Boson::makeUnitLog()
 {
  QByteArray log;
- QTextStream ts(log, IO_WriteOnly);
+ Q3TextStream ts(log, QIODevice::WriteOnly);
 
  ts << "CYCLE " << advanceCallsCount() << ":" << endl;
- QPtrListIterator<Player> it(gamePlayerList());
+ Q3PtrListIterator<Player> it(gamePlayerList());
  while (it.current()) {
 	ts << "Player " << it.current()->bosonId() << endl;
-	QPtrListIterator<Unit> uit(*it.current()->allUnits());
+	Q3PtrListIterator<Unit> uit(*it.current()->allUnits());
 	while (uit.current()) {
 		Unit* u = uit.current();
 		BosonPathInfo* path = u->pathInfo();
@@ -1748,7 +1751,7 @@ void Boson::makeUnitLog()
 		ts << endl;
 		// Pathpoints
 		ts << "        " << u->pathPointList().count() << " pathpoints:";
-		for (QValueList<BoVector2Fixed>::const_iterator pit = u->pathPointList().begin(); pit != u->pathPointList().end(); pit++) {
+		for (Q3ValueList<BoVector2Fixed>::const_iterator pit = u->pathPointList().begin(); pit != u->pathPointList().end(); pit++) {
 			ts << " (" << (*pit).x() << "; " << (*pit).y() << ")";
 		}
 		ts << endl;
@@ -1775,12 +1778,12 @@ void Boson::makeUnitLog()
  d->mUnitLogs.append(comp);
 }
 
-void Boson::writeGameLog(QTextStream& log)
+void Boson::writeGameLog(Q3TextStream& log)
 {
  PROFILE_METHOD;
 
  log << "Advance calls count: " << advanceCallsCount() << endl;
- QPtrListIterator<Player> it(gamePlayerList());
+ Q3PtrListIterator<Player> it(gamePlayerList());
  while (it.current()) {
 	it.current()->writeGameLog(log);
 	++it;
@@ -1810,7 +1813,7 @@ unsigned int Boson::advanceCallsCount() const
 
 Player* Boson::addNeutralPlayer()
 {
- QPtrListIterator<Player> it(gamePlayerList());
+ Q3PtrListIterator<Player> it(gamePlayerList());
  while (it.current()) {
 	if (it.current()->isNeutralPlayer()) {
 		boWarning() << k_funcinfo << "already have a neutral player. removing." << endl;
@@ -1823,7 +1826,7 @@ Player* Boson::addNeutralPlayer()
  }
 
 #warning TODO: use a fixed color for neutral player (that cant be selected by other players)
- QValueList<QColor> colors = availableTeamColors();
+ Q3ValueList<QColor> colors = availableTeamColors();
  if (colors.count() == 0) {
 	boError() << k_funcinfo << "no color for neutral player available. not enough colors." << endl;
 	return 0;
@@ -1886,15 +1889,15 @@ bool Boson::loadFromLogFile(const QString& file)
 	return false;
  }
  QFile f(file);
- if (!f.open(IO_ReadOnly)) {
+ if (!f.open(QIODevice::ReadOnly)) {
 	boError() << k_funcinfo << "could not open " << file << " for reading" << endl;
 	return false;
  }
- QPtrList<BoMessage> messages;
+ Q3PtrList<BoMessage> messages;
  messages.setAutoDelete(true);
  BoMessageLogger::loadMessageLog(&f, &messages);
  BoMessage* start = 0;
- QPtrListIterator<BoMessage> it(messages);
+ Q3PtrListIterator<BoMessage> it(messages);
  while (it.current()) {
 	if (it.current()->msgid == KGameMessage::IdUser + BosonMessageIds::IdGameIsStarted) {
 		start = it.current();
@@ -1918,7 +1921,7 @@ bool Boson::loadFromLogFile(const QString& file)
  return loadFromLog(&messages);
 }
 
-bool Boson::loadFromLog(QPtrList<BoMessage>* messages)
+bool Boson::loadFromLog(Q3PtrList<BoMessage>* messages)
 {
  if (!messages) {
 	return false;
@@ -1962,7 +1965,7 @@ const BosonNetworkTraffic* Boson::networkTraffic() const
  return d->mNetworkTraffic;
 }
 
-const QPtrList<BoAdvanceMessageTimes>& Boson::advanceMessageTimes() const
+const Q3PtrList<BoAdvanceMessageTimes>& Boson::advanceMessageTimes() const
 {
  return d->mAdvance->advanceMessageTimes();
 }

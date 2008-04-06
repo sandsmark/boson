@@ -1,3 +1,5 @@
+//Added by qt3to4:
+#include <Q3CString>
 /*
     This file is part of the Boson game
     Copyright (C) 2004 Andreas Beckermann (b_mann@gmx.de)
@@ -21,7 +23,7 @@
 
 class Boson;
 class BoEvent;
-class QCString;
+class Q3CString;
 class QDomElement;
 template<class T1, class T2> class QMap;
 

@@ -31,11 +31,14 @@
 #include <qfile.h>
 #include <qdatastream.h>
 #include <qapplication.h>
+//Added by qt3to4:
+#include <Q3CString>
+#include <Q3ValueList>
 
-#include <kmdcodec.h>
+#include <kcodecs.h>
 #include <kglobal.h>
 #include <kstandarddirs.h>
-#include <kprocess.h>
+#include <k3process.h>
 
 
 #define MIN_SUPPORTED_VERSION BMF_MAKE_VERSION_CODE(0, 1, 1)
@@ -80,7 +83,7 @@ bool BoBMFLoad::loadModel()
   }
 
   QFile f(file());
-  if(!f.open(IO_ReadOnly))
+  if(!f.open(QIODevice::ReadOnly))
   {
     boError() << k_funcinfo << "can't open " << file() << endl;;
     return false;
@@ -96,7 +99,7 @@ bool BoBMFLoad::loadModel()
     return false;
   }
 
-  Q_UINT32 versioncode;
+  quint32 versioncode;
   stream >> versioncode;
   if(versioncode < MIN_SUPPORTED_VERSION)
   {
@@ -109,7 +112,7 @@ bool BoBMFLoad::loadModel()
     return false;
   }
 
-  Q_UINT32 magic;
+  quint32 magic;
   stream >> magic;
   if(magic != BMF_MAGIC_MODEL)
   {
@@ -168,7 +171,7 @@ bool BoBMFLoad::loadModel()
 
 bool BoBMFLoad::loadInfo(QDataStream& stream)
 {
-  Q_UINT32 magic;
+  quint32 magic;
   stream >> magic;
   if(magic != BMF_MAGIC_MODEL_INFO)
   {
@@ -227,7 +230,7 @@ bool BoBMFLoad::loadInfo(QDataStream& stream)
 bool BoBMFLoad::loadArrays(QDataStream& stream)
 {
   BosonProfiler profiler("BoBMFLoad::loadArrays()");
-  Q_UINT32 magic;
+  quint32 magic;
   // Load vertex and index arrays
   stream >> magic;
   if(magic != BMF_MAGIC_ARRAYS)
@@ -236,7 +239,7 @@ bool BoBMFLoad::loadArrays(QDataStream& stream)
     return false;
   }
 
-  Q_UINT32 points, indices, indextype;
+  quint32 points, indices, indextype;
   stream >> points;
   stream >> indices;
   stream >> indextype;
@@ -252,11 +255,11 @@ bool BoBMFLoad::loadArrays(QDataStream& stream)
   BosonProfiler profilerReadRawBytesIndexArray("BoBMFLoad::loadArrays(): readRawBytes() for indexArray");
   if(indextype == BMF_DATATYPE_UNSIGNED_SHORT)
   {
-    stream.readRawBytes((char*)mModel->indexArray(), indices * sizeof(Q_UINT16));
+    stream.readRawBytes((char*)mModel->indexArray(), indices * sizeof(quint16));
   }
   else
   {
-    stream.readRawBytes((char*)mModel->indexArray(), indices * sizeof(Q_UINT32));
+    stream.readRawBytes((char*)mModel->indexArray(), indices * sizeof(quint32));
   }
   profilerReadRawBytesIndexArray.pop();
 
@@ -270,11 +273,11 @@ bool BoBMFLoad::loadArrays(QDataStream& stream)
     convertToBigEndian((char*)mModel->pointArray(), points * 8, sizeof(float));
     if(indextype == BMF_DATATYPE_UNSIGNED_SHORT)
     {
-      convertToBigEndian((char*)mModel->indexArray(), indices, sizeof(Q_UINT16));
+      convertToBigEndian((char*)mModel->indexArray(), indices, sizeof(quint16));
     }
     else
     {
-      convertToBigEndian((char*)mModel->indexArray(), indices, sizeof(Q_UINT32));
+      convertToBigEndian((char*)mModel->indexArray(), indices, sizeof(quint32));
     }
   }
 
@@ -283,7 +286,7 @@ bool BoBMFLoad::loadArrays(QDataStream& stream)
 
 bool BoBMFLoad::loadTextures(QDataStream& stream)
 {
-  Q_UINT32 magic;
+  quint32 magic;
   stream >> magic;
   if(magic != BMF_MAGIC_TEXTURES)
   {
@@ -291,9 +294,9 @@ bool BoBMFLoad::loadTextures(QDataStream& stream)
     return false;
   }
 
-  Q_UINT32 count;
+  quint32 count;
   char* name;
-  Q_UINT8 hastransparency;
+  quint8 hastransparency;
   stream >> count;
   if(count > 500)
   {
@@ -317,7 +320,7 @@ bool BoBMFLoad::loadTextures(QDataStream& stream)
 
 bool BoBMFLoad::loadMaterials(QDataStream& stream)
 {
-  Q_UINT32 magic;
+  quint32 magic;
   stream >> magic;
   if(magic != BMF_MAGIC_MATERIALS)
   {
@@ -331,7 +334,7 @@ bool BoBMFLoad::loadMaterials(QDataStream& stream)
     return false;
   }
 
-  Q_UINT32 count;
+  quint32 count;
   stream >> count;
   // Allocate necessary amount of materials
   mModel->allocateMaterials(count);
@@ -360,7 +363,7 @@ bool BoBMFLoad::loadMaterials(QDataStream& stream)
     stream >> shininess;
     mat->setShininess(shininess);
     // Texture
-    Q_INT32 textureid;
+    qint32 textureid;
     stream >> textureid;
     mat->setTextureName(mTextureNames[textureid]);
     mat->setIsTransparent(mTextureTransparent[textureid]);
@@ -372,7 +375,7 @@ bool BoBMFLoad::loadMaterials(QDataStream& stream)
 
 bool BoBMFLoad::loadLODs(QDataStream& stream)
 {
-  Q_UINT32 magic;
+  quint32 magic;
   stream >> magic;
   if(magic != BMF_MAGIC_LODS)
   {
@@ -380,7 +383,7 @@ bool BoBMFLoad::loadLODs(QDataStream& stream)
     return false;
   }
 
-  Q_UINT32 count;
+  quint32 count;
   stream >> count;
   // Allocate lods...
   mModel->allocateLODs(count);
@@ -399,7 +402,7 @@ bool BoBMFLoad::loadLODs(QDataStream& stream)
 bool BoBMFLoad::loadLOD(QDataStream& stream, int lod)
 {
   BosonProfiler profiler("BoBMFLoad::loadLOD()");
-  Q_UINT32 magic;
+  quint32 magic;
   stream >> magic;
   if(magic != BMF_MAGIC_LOD)
   {
@@ -425,7 +428,7 @@ bool BoBMFLoad::loadLOD(QDataStream& stream, int lod)
 
 bool BoBMFLoad::loadMeshes(QDataStream& stream, int lod)
 {
-  Q_UINT32 magic;
+  quint32 magic;
   stream >> magic;
   if(magic != BMF_MAGIC_MESHES)
   {
@@ -436,7 +439,7 @@ bool BoBMFLoad::loadMeshes(QDataStream& stream, int lod)
 
   BoLOD* l = mModel->lod(lod);
 
-  Q_UINT32 count;
+  quint32 count;
   stream >> count;
   l->allocateMeshes(count);
   bool hastransparentmeshes = false;
@@ -467,10 +470,10 @@ bool BoBMFLoad::loadMeshes(QDataStream& stream, int lod)
       return false;
     }
 
-    Q_UINT8 useindices;
-    Q_UINT32 rendermode;
-    Q_UINT32 pointoffset;
-    Q_UINT32 pointcount;
+    quint8 useindices;
+    quint32 rendermode;
+    quint32 pointoffset;
+    quint32 pointcount;
     stream >> useindices;
     stream >> rendermode;
     stream >> pointoffset;
@@ -483,8 +486,8 @@ bool BoBMFLoad::loadMeshes(QDataStream& stream, int lod)
 
     if(useindices)
     {
-      Q_UINT32 indexoffset;
-      Q_UINT32 indexcount;
+      quint32 indexoffset;
+      quint32 indexcount;
       stream >> indexoffset;
       stream >> indexcount;
 
@@ -507,14 +510,14 @@ bool BoBMFLoad::loadMeshes(QDataStream& stream, int lod)
           i << " in lod " << lod << ")!" << endl;
       return false;
     }
-    Q_INT32 materialid;
+    qint32 materialid;
     stream >> materialid;
     mesh->setMaterial(mModel->material(materialid));
     if(mesh->material()->isTransparent())
     {
       hastransparentmeshes = true;
     }
-    Q_UINT8 isteamcolor;
+    quint8 isteamcolor;
     stream >> isteamcolor;
     mesh->setIsTeamColor((bool)(isteamcolor));
   }
@@ -527,7 +530,7 @@ bool BoBMFLoad::loadMeshes(QDataStream& stream, int lod)
 bool BoBMFLoad::loadFrames(QDataStream& stream, int lod)
 {
   BosonProfiler profiler("BoBMFLoad::loadFrames()");
-  Q_UINT32 magic;
+  quint32 magic;
   stream >> magic;
   if(magic != BMF_MAGIC_FRAMES)
   {
@@ -538,7 +541,7 @@ bool BoBMFLoad::loadFrames(QDataStream& stream, int lod)
 
   BoLOD* l = mModel->lod(lod);
 
-  Q_UINT32 count;
+  quint32 count;
   stream >> count;
   l->allocateFrames(count);
   for(unsigned int i = 0; i < count; i++)
@@ -550,13 +553,13 @@ bool BoBMFLoad::loadFrames(QDataStream& stream, int lod)
       return false;
     }
 
-    Q_UINT32 nodecount;
+    quint32 nodecount;
     stream >> nodecount;
     frame->allocNodes(nodecount);
 
     for(unsigned int j = 0; j < nodecount; j++)
     {
-      Q_INT32 meshid;
+      qint32 meshid;
       stream >> meshid;
       float matrix[16];
       for(unsigned int k = 0; k < 16; k++)
@@ -574,12 +577,12 @@ bool BoBMFLoad::loadFrames(QDataStream& stream, int lod)
 
 QString BoBMFLoad::cachedModelFilename(const QString& modelfile, const QString& configfile)
 {
-  QCString hash = calculateHash(modelfile, configfile);
+  Q3CString hash = calculateHash(modelfile, configfile);
   QString cachedmodel = KGlobal::dirs()->findResource("data", QString("%1/model-%2.bmf").arg("boson/modelcache").arg(hash));
 
   if(!cachedmodel.isEmpty())
   {
-    Q_UINT32 versioncode = getVersion(cachedmodel);
+    quint32 versioncode = getVersion(cachedmodel);
     if(versioncode >= MIN_SUPPORTED_VERSION)
     {
       // File exists and is up-to-date
@@ -597,7 +600,7 @@ QString BoBMFLoad::cachedModelFilename(const QString& modelfile, const QString& 
 
 QString BoBMFLoad::convertModel(const QString& modelfile, const QString& configfile)
 {
-  QCString hash = calculateHash(modelfile, configfile);
+  Q3CString hash = calculateHash(modelfile, configfile);
 
   // Get the path where the cached model can be saved
   QString cachedmodel = KGlobal::dirs()->saveLocation("data", "boson/modelcache/");
@@ -625,8 +628,8 @@ QString BoBMFLoad::convertModel(const QString& modelfile, const QString& configf
       return QString::null;
     }
   }
-  // Create KProcess object
-  KProcess proc;
+  // Create K3Process object
+  K3Process proc;
   proc << converter;
   // Add default cmdline args
   proc << "-texnametolower" <<  "-useboth" << "-resetmaterials";
@@ -640,8 +643,8 @@ QString BoBMFLoad::convertModel(const QString& modelfile, const QString& configf
   proc << modelfile;
   proc << "-comment" << QString("Automatically converted from file '%1'").arg(modelfile);
 
-  // FIXME: KProcess:Block ain't pretty here...
-  if(!proc.start(KProcess::Block))
+  // FIXME: K3Process:Block ain't pretty here...
+  if(!proc.start(K3Process::Block))
   {
     boError() << k_funcinfo << "Error while trying to convert the model" << endl;
     return QString::null;
@@ -653,8 +656,8 @@ QString BoBMFLoad::convertModel(const QString& modelfile, const QString& configf
   {
     QString args;
     // AB: apparently this includes arg 0, i.e. the command that is called
-    QValueList<QCString> argList = proc.args();
-    for (QValueList<QCString>::iterator it = argList.begin(); it != argList.end(); ++it)
+    Q3ValueList<Q3CString> argList = proc.args();
+    for (Q3ValueList<Q3CString>::iterator it = argList.begin(); it != argList.end(); ++it)
     {
       args += QString(" %1").arg(*it);
     }
@@ -669,28 +672,28 @@ QString BoBMFLoad::convertModel(const QString& modelfile, const QString& configf
   return cachedmodel;
 }
 
-QCString BoBMFLoad::calculateHash(const QString& modelfilename, const QString& configfilename)
+Q3CString BoBMFLoad::calculateHash(const QString& modelfilename, const QString& configfilename)
 {
   QFile modelfile(modelfilename);
-  if(!modelfile.open(IO_ReadOnly))
+  if(!modelfile.open(QIODevice::ReadOnly))
   {
     boError() << k_funcinfo << "could not open model file " << modelfilename << endl;
-    return QCString();
+    return Q3CString();
   }
 
   KMD5 md5(modelfile.readAll());
   QFile configfile(configfilename);
-  if(configfile.open(IO_ReadOnly))
+  if(configfile.open(QIODevice::ReadOnly))
   {
     md5.update(configfile.readAll());
   }
   return md5.hexDigest();
 }
 
-Q_UINT32 BoBMFLoad::getVersion(const QString& modelfile)
+quint32 BoBMFLoad::getVersion(const QString& modelfile)
 {
   QFile f(modelfile);
-  if(!f.open(IO_ReadOnly))
+  if(!f.open(QIODevice::ReadOnly))
   {
     boError() << k_funcinfo << "can't open " << modelfile << endl;;
     return 0;
@@ -706,7 +709,7 @@ Q_UINT32 BoBMFLoad::getVersion(const QString& modelfile)
     return 0;
   }
 
-  Q_UINT32 versioncode;
+  quint32 versioncode;
   stream >> versioncode;
 
   f.close();

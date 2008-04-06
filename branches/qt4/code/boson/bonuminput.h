@@ -22,9 +22,12 @@
 #define BONUMINPUT_H
 
 #include <qwidget.h>
+//Added by qt3to4:
+#include <Q3VBoxLayout>
+#include <Q3HBoxLayout>
 
-class QHBoxLayout;
-class QVBoxLayout;
+class Q3HBoxLayout;
+class Q3VBoxLayout;
 
 class BoNumInputPrivate;
 class BoNumInput : public QWidget
@@ -34,7 +37,7 @@ public:
 	BoNumInput(QWidget* parent = 0, const char* name = 0);
 	~BoNumInput();
 
-	void setLabel(const QString& label, int a = AlignLeft | AlignTop);
+	void setLabel(const QString& label, int a = Qt::AlignLeft | Qt::AlignTop);
 	QString label() const;
 
 	void setSteps(int minor, int major);
@@ -46,20 +49,20 @@ protected:
 	 * @return The main layout, containing the spinbox and (if existing)
 	 * the slider.
 	 **/
-	QHBoxLayout* mainLayout() const;
+	Q3HBoxLayout* mainLayout() const;
 
 	/**
 	 * @return The layout containing the @ref QSlider, if existing.
 	 * Otherwise the layout is empty.
 	 **/
-	QHBoxLayout* sliderLayout() const;
+	Q3HBoxLayout* sliderLayout() const;
 
 	/**
 	 * @return The top layout. Inside it you'll find the @ref mainLayout.
 	 * The label (see @ref setLabel) can be at top of this layout, at it's
 	 * bottom or in @ref mainLayout, depending on the alignment flags.
 	 **/
-	QVBoxLayout* topLayout() const;
+	Q3VBoxLayout* topLayout() const;
 
 private:
 	void init();

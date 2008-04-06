@@ -19,23 +19,23 @@
 
 #include "boaudiocommand.h"
 
-#include <qdeepcopy.h>
+#include <q3deepcopy.h>
 
 BoAudioCommand::BoAudioCommand(int command, int dataInt, const QString& dataString1, const QString& dataString2)
 {
  mCommand = command;
  mDataInt = dataInt;
- mDataString1 = QDeepCopy<QString>(dataString1);
- mDataString2 = QDeepCopy<QString>(dataString2);
+ mDataString1 = Q3DeepCopy<QString>(dataString1);
+ mDataString2 = Q3DeepCopy<QString>(dataString2);
 }
 
 BoAudioCommand::BoAudioCommand(int command, const QString& species, int dataInt, const QString& dataString1, const QString& dataString2)
 {
  mCommand = command;
  mDataInt = dataInt;
- mDataString1 = QDeepCopy<QString>(dataString1);
- mDataString2 = QDeepCopy<QString>(dataString2);
- mSpecies = QDeepCopy<QString>(species);
+ mDataString1 = Q3DeepCopy<QString>(dataString1);
+ mDataString2 = Q3DeepCopy<QString>(dataString2);
+ mSpecies = Q3DeepCopy<QString>(species);
 }
 
 

@@ -26,6 +26,8 @@
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
 #include <klocale.h>
+//Added by qt3to4:
+#include <Q3CString>
 
 static const char *description =
     I18N_NOOP("Profiling Data reader for Boson");
@@ -50,7 +52,7 @@ int main(int argc, char **argv)
 		"http://boson.eu.org");
  about.addAuthor( "Andreas Beckermann", I18N_NOOP("Coding & Current Maintainer"), "b_mann@gmx.de" );
 
- QCString argv0(argv[0]);
+ Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
  BoApplication app(argv0);
@@ -69,7 +71,7 @@ int main(int argc, char **argv)
 	for (int i = 0; i < args->count(); i++) {
 		BosonProfilingDialog* dlg = new BosonProfilingDialog(0);
 		QObject::connect(dlg, SIGNAL(finished()), dlg, SLOT(close()));
-		KURL url = args->url(i);
+		KUrl url = args->url(i);
 		dlg->loadFromFile(url.directory(false) + url.fileName());
 		dlg->show();
 	}

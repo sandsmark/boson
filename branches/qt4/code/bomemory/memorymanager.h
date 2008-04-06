@@ -22,7 +22,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 
-template<class T> class QPtrDict;
+template<class T> class Q3PtrDict;
 class MemNode;
 
 class MemoryManagerPrivate;
@@ -58,7 +58,7 @@ public:
 
 	void bofree(void* p, bool isFree = false);
 
-	const QPtrDict<MemNode>& allNodes() const;
+	const Q3PtrDict<MemNode>& allNodes() const;
 
 	unsigned long int memoryInUse() const;
 

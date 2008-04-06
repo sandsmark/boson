@@ -21,19 +21,23 @@
 
 #include "bodebugdcopiface.h"
 
-#include <qmainwindow.h>
+#include <q3mainwindow.h>
 #include <qdom.h>
+//Added by qt3to4:
+#include <Q3VBoxLayout>
+#include <QLabel>
+#include <QCloseEvent>
 
-class QListBox;
-class QListBoxItem;
-class QListView;
-class QListViewItem;
+class Q3ListBox;
+class Q3ListBoxItem;
+class Q3ListView;
+class Q3ListViewItem;
 class QLabel;
 class QPushButton;
 class QComboBox;
 class QLineEdit;
-class QWidgetStack;
-class QVBoxLayout;
+class Q3WidgetStack;
+class Q3VBoxLayout;
 class BoUfoWidget;
 class OptionsDialog;
 class FormPreview;
@@ -45,7 +49,7 @@ class BoUfoDesignerMainPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BoUfoDesignerMain : public QMainWindow
+class BoUfoDesignerMain : public Q3MainWindow
 {
 	Q_OBJECT
 public:

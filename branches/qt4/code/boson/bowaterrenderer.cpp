@@ -35,8 +35,8 @@
 
 #include <qrect.h>
 #include <qpoint.h>
-#include <qptrlist.h>
-#include <qvaluelist.h>
+#include <q3ptrlist.h>
+#include <q3valuelist.h>
 #include <qstringlist.h>
 #include <qdom.h>
 #include <qdir.h>
@@ -91,8 +91,8 @@ void BoLakeGL::init(BoLake* l, const BosonMap* map)
       WaterChunk* chunk = new WaterChunk;
       chunk->minx = cx;
       chunk->miny = cy;
-      chunk->maxx = QMIN(lake->maxx, cx + CHUNK_SIZE);
-      chunk->maxy = QMIN(lake->maxy, cy + CHUNK_SIZE);
+      chunk->maxx = qMin(lake->maxx, cx + CHUNK_SIZE);
+      chunk->maxy = qMin(lake->maxy, cy + CHUNK_SIZE);
       chunk->center = BoVector3Float((chunk->minx + chunk->maxx) / 2.0f, -(chunk->miny + chunk->maxy) / 2.0f, lake->level);
       chunk->lastdetail = -1.0f;
 //      boDebug() << "        " << k_funcinfo << "Create chunk, coords: ("
@@ -102,8 +102,8 @@ void BoLakeGL::init(BoLake* l, const BosonMap* map)
   }
 
   // Find min/max ground heights, real sizes and number of corners for chunks
-  QPtrList<WaterChunk> invalidchunks;
-  for(QPtrListIterator<WaterChunk> it(chunks); it.current(); ++it)
+  Q3PtrList<WaterChunk> invalidchunks;
+  for(Q3PtrListIterator<WaterChunk> it(chunks); it.current(); ++it)
   {
     WaterChunk* chunk = it.current();
     chunk->mingroundheight = 1000000;
@@ -121,13 +121,13 @@ void BoLakeGL::init(BoLake* l, const BosonMap* map)
         if(lake->hasCorner(x, y))
         {
           float h = map->heightAtCorner(x, y);
-          chunk->mingroundheight = QMIN(chunk->mingroundheight, h);
-          chunk->maxgroundheight = QMAX(chunk->maxgroundheight, h);
+          chunk->mingroundheight = qMin(chunk->mingroundheight, h);
+          chunk->maxgroundheight = qMax(chunk->maxgroundheight, h);
 
-          cminx = QMIN(cminx, x);
-          cminy = QMIN(cminy, y);
-          cmaxx = QMAX(cmaxx, x);
-          cmaxy = QMAX(cmaxy, y);
+          cminx = qMin(cminx, x);
+          cminy = qMin(cminy, y);
+          cmaxx = qMax(cmaxx, x);
+          cmaxy = qMax(cmaxy, y);
           chunk->corners++;
         }
       }
@@ -375,10 +375,10 @@ void BoWaterRenderer::reloadConfiguration()
     // We need to delete all data buffers in all chunks and set chunks' last
     //  detail level to -1.0, so that _needed_ data buffers will be reallocated
     //  next time we render them.
-    QPtrListIterator<BoLakeGL> it(mLakes);
+    Q3PtrListIterator<BoLakeGL> it(mLakes);
     for(; it.current(); ++it)
     {
-      QPtrListIterator<BoLakeGL::WaterChunk> cit(it.current()->chunks);
+      Q3PtrListIterator<BoLakeGL::WaterChunk> cit(it.current()->chunks);
       for(; cit.current(); ++cit)
       {
         BoLakeGL::WaterChunk* chunk = cit.current();
@@ -447,7 +447,7 @@ void BoWaterRenderer::setMap(const BosonMap* map)
   mMap = map;
   mLakes.setAutoDelete(true);
   mLakes.clear();
-  QPtrListIterator<BoLake> it(*map->lakes());
+  Q3PtrListIterator<BoLake> it(*map->lakes());
   while(it.current())
   {
     BoLakeGL* l = new BoLakeGL(it.current(), mMap);
@@ -462,7 +462,7 @@ float BoWaterRenderer::waterAlphaAt(BoLakeGL* lake, float x, float y)
   {
     return 1.0f;
   }
-  return QMIN(1.0, ((lake->lake->level - mMap->heightAtCorner((int)x, (int)y)) * lake->alphaMultiplier + lake->alphaBase)/* * mWaterDiffuseColor*/);
+  return qMin(1.0, ((lake->lake->level - mMap->heightAtCorner((int)x, (int)y)) * lake->alphaMultiplier + lake->alphaBase)/* * mWaterDiffuseColor*/);
 }
 
 void BoWaterRenderer::cellExploredChanged(int x1, int x2, int y1, int y2)
@@ -535,10 +535,10 @@ void BoWaterRenderer::setDirty(bool d)
   if(d == true)
   {
     // Set dirty flags of _all_ chunks to true.
-    QPtrListIterator<BoLakeGL> it(mLakes);
+    Q3PtrListIterator<BoLakeGL> it(mLakes);
     for(; it.current(); ++it)
     {
-      QPtrListIterator<BoLakeGL::WaterChunk> cit(it.current()->chunks);
+      Q3PtrListIterator<BoLakeGL::WaterChunk> cit(it.current()->chunks);
       for(; cit.current(); ++cit)
       {
         cit.current()->dirty = true;
@@ -570,7 +570,7 @@ void BoWaterRenderer::render()
   mRenderEnvironmentSetUp = false;
 
   // Render all the lakes (in case they're visible).
-  QPtrListIterator<BoLakeGL> it(mLakes);
+  Q3PtrListIterator<BoLakeGL> it(mLakes);
   while(it.current())
   {
     renderLake(it.current());
@@ -631,7 +631,7 @@ void BoWaterRenderer::renderLake(BoLakeGL* lake)
   }
 
   // Lake is visible. Go through all it's chunks.
-  QPtrListIterator<BoLakeGL::WaterChunk> it(lake->chunks);
+  Q3PtrListIterator<BoLakeGL::WaterChunk> it(lake->chunks);
   for(; it.current(); ++it)
   {
     BoLakeGL::WaterChunk* chunk = it.current();
@@ -658,7 +658,7 @@ void BoWaterRenderer::renderLake(BoLakeGL* lake)
       // Modify chunk's water detail
       if(distance > 50)
       {
-        chunk_detail = water_detail * QMIN(((distance - 50) / 75 + 1), 4);
+        chunk_detail = water_detail * qMin(((distance - 50) / 75 + 1), 4);
       }
     }
     renderChunk(lake, chunk, chunk_detail);
@@ -1067,8 +1067,8 @@ void BoWaterRenderer::calculatePerCornerStuff(RenderInfo* info)
     for(int y = 0; y < info->chunkcornerh; y++)
     {
       // Position of current corner, in cell coordinates
-      float posx = QMIN(info->chunk->minx + x * info->detail, info->chunk->maxx);
-      float posy = QMIN(info->chunk->miny + y * info->detail, info->chunk->maxy);
+      float posx = qMin(info->chunk->minx + x * info->detail, info->chunk->maxx);
+      float posy = qMin(info->chunk->miny + y * info->detail, info->chunk->maxy);
 
 //      if(!info->lake->hasAnyCorner(posx, posy, posx + info->detail, posy + info->detail))
       // hasAnyCorner() does automatic limits checking, so no need to worry about
@@ -1219,8 +1219,8 @@ void BoWaterRenderer::calculateIndices(RenderInfo* info)
       {
         continue;
       }
-      int posx2 = QMIN((int)(x + info->detail), info->chunk->maxx);
-      int posy2 = QMIN((int)(y + info->detail), info->chunk->maxy);
+      int posx2 = qMin((int)(x + info->detail), info->chunk->maxx);
+      int posy2 = qMin((int)(y + info->detail), info->chunk->maxy);
       // Check if lake has all corners of the cell
       /*if(!info->lake->hasCorner(posx, posy) ||
           !info->lake->hasCorner(posx2, posy) ||

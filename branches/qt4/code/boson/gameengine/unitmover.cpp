@@ -31,6 +31,8 @@
 #include "unitplugins/enterunitplugin.h"
 
 #include <qdom.h>
+//Added by qt3to4:
+#include <Q3ValueList>
 
 
 // If defined, units will search and fire at enemy units only when they are at
@@ -39,7 +41,7 @@
 //#define CHECK_ENEMIES_ONLY_AT_WAYPOINT
 
 
-QValueVector<BoVector2Fixed> UnitMover::mCellIntersectionTable[11][11];
+Q3ValueVector<BoVector2Fixed> UnitMover::mCellIntersectionTable[11][11];
 
 
 UnitMover::UnitMover(Unit* u)
@@ -177,8 +179,8 @@ void UnitMover::initCellIntersectionTable()
 					xp += (yn + 0.0001) * dx;
 					yp += (yn + 0.0001) * dy;
 				}
-				keepgoing = (QABS(xp - start.x()) < QABS(to.x() - start.x())) &&
-						(QABS(yp - start.y()) < QABS(to.y() - start.y()));
+				keepgoing = (qAbs(xp - start.x()) < qAbs(to.x() - start.x())) &&
+						(qAbs(yp - start.y()) < qAbs(to.y() - start.y()));
 
 				mCellIntersectionTable[x][y].push_back(BoVector2Fixed(floor(xp), floor(yp)));
 			}
@@ -295,7 +297,7 @@ void UnitMover::advanceFollow(unsigned int advanceCallsCount)
 	return;
  }
 
- if (QMAX(QABS(unit()->centerX() - target->centerX()), QABS(unit()->centerY() - target->centerY())) > followorder->distance()+1) {
+ if (qMax(qAbs(unit()->centerX() - target->centerX()), qAbs(unit()->centerY() - target->centerY())) > followorder->distance()+1) {
 	// We're too far from the followed unit
 	// AB: warning - this does a lookup on all items and therefore is slow!
 	// --> but we need it as a simple test on the pointer causes trouble if
@@ -336,7 +338,7 @@ bool UnitMover::turnTo()
 	return unit()->turnTo(180);
  } else if ((xspeed < 0) && (yspeed == 0)) { // West
 	return unit()->turnTo(270);
- } else if (QABS(xspeed) == QABS(yspeed)) {
+ } else if (qAbs(xspeed) == qAbs(yspeed)) {
 	if ((xspeed > 0) && (yspeed < 0)) { // NE
 		return unit()->turnTo(45);
 	} else if ((xspeed > 0) && (yspeed > 0)) { // SE
@@ -713,7 +715,7 @@ void UnitMoverLand::advanceMoveInternal4(unsigned int advanceCallsCount)
 				// Enough of waiting (30 secs). Give up.
 				stopMoving(false);
 				return;
-			} else if (pathInfo()->waiting % (20 + QMIN(pathInfo()->pathrecalced * 20, 80)) == 0) {
+			} else if (pathInfo()->waiting % (20 + qMin(pathInfo()->pathrecalced * 20, 80)) == 0) {
 				// First wait 20 adv. calls (1 sec) before recalculating path, then 40
 				//  calls, then 60 etc, but never more than 100 calls.
 				boDebug(401) << k_funcinfo << "unit " << id() << ": Recalcing path, waiting: " << pathInfo()->waiting <<
@@ -751,11 +753,11 @@ void UnitMoverLand::advanceMoveDoCrushing(unsigned int)
 #define CRUSHING 0
 #if CRUSHING
  bool wait = false;
- QValueList<Unit*> collisions;
+ Q3ValueList<Unit*> collisions;
  collisions = canvas()->collisionsInBox(BoVector3Fixed(unit()->x() + unit()->xVelocity(), unit()->y() + unit()->yVelocity(), unit()->z()),
 		BoVector3Fixed(unit()->x() + unit()->xVelocity() + unit()->width(), unit()->y() + unit()->yVelocity() + unit()->height(), unit()->z() + unit()->depth()), unit());
  if (!collisions.isEmpty()) {
-	for (QValueList<Unit*>::Iterator it = collisions.begin(); it != collisions.end(); it++) {
+	for (Q3ValueList<Unit*>::Iterator it = collisions.begin(); it != collisions.end(); it++) {
 		Unit* u = *it;
 		if (unit() == u) {
 			continue;
@@ -936,7 +938,7 @@ int UnitMoverLand::selectNextPathPoint(int xpos, int ypos)
  while (cango && (skipped < 6) && (unit()->pathPointCount() > 1)) {
 	int newCellX = (int)unit()->pathPointList()[1].x();
 	int newCellY = (int)unit()->pathPointList()[1].y();
-	if ((QABS(newCellX - xpos) >= 6) || (QABS(newCellY - ypos) >= 6)) {
+	if ((qAbs(newCellX - xpos) >= 6) || (qAbs(newCellY - ypos) >= 6)) {
 		// We're too far
 		break;
 	}
@@ -1010,7 +1012,7 @@ void UnitMoverLand::avoidance()
 		// Distance between the units on the axis perpendicular to this unit's rotation
 		// TODO: maybe use toUnitSoon instead?
 		bofixed sideDistance = toUnit.dotProduct(toRight);
-		if (QABS(sideDistance) < unitSizesSum) {
+		if (qAbs(sideDistance) < unitSizesSum) {
 			// We'll crash with this unit if we don't act
 			// Calculate how much we'll try to avoid this unit
 			bofixed factor = 1;  // Positive = turn right
@@ -1019,7 +1021,7 @@ void UnitMoverLand::avoidance()
 				factor *= -1;
 			}
 			// The more int front of us the unit is, the bigger the factor
-			factor *= unitSizesSum * 1.5 - QABS(sideDistance);
+			factor *= unitSizesSum * 1.5 - qAbs(sideDistance);
 			// The farther from us the unit is, the smaller the factor
 			factor *= 2 - (distToUnitSoon - unitSizesSum);
 			//factor /= distToUnit;
@@ -1057,7 +1059,7 @@ bool UnitMoverLand::canGoToCurrentPathPoint(int xpos, int ypos)
  }
  int ppx = (int)unit()->currentPathPoint().x();
  int ppy = (int)unit()->currentPathPoint().y();
- if ((QABS(ppx - xpos) >= 6) || (QABS(ppy - ypos) >= 6)) {
+ if ((qAbs(ppx - xpos) >= 6) || (qAbs(ppy - ypos) >= 6)) {
 	// We're too far
 	return false;
  }
@@ -1136,12 +1138,12 @@ bool UnitMoverLand::calculateNewPath()
  //            have much more precise movements. useful for moving inside units.
  //            would that be ok?
  //        AB: even better: what about using unit()->boundingRect().contains() ?
- if (QMAX(QABS(pathInfo()->dest.x() - pathInfo()->start.x()), QABS(pathInfo()->dest.x() - pathInfo()->start.x()))
+ if (qMax(qAbs(pathInfo()->dest.x() - pathInfo()->start.x()), qAbs(pathInfo()->dest.x() - pathInfo()->start.x()))
 		< 1.0f) {
 	return false;
  }
 
- QValueVector<BoVector2Fixed> pathPoints;
+ Q3ValueVector<BoVector2Fixed> pathPoints;
  if (!calculateNewPathPathPoints(&pathPoints)) {
 	// Stop moving
 	return false;
@@ -1163,7 +1165,7 @@ bool UnitMoverLand::calculateNewPath()
  return true;
 }
 
-bool UnitMoverLand::calculateNewPathPathPoints(QValueVector<BoVector2Fixed>* pathPoints)
+bool UnitMoverLand::calculateNewPathPathPoints(Q3ValueVector<BoVector2Fixed>* pathPoints)
 {
  pathPoints->clear();
  if (!pathInfo()) {
@@ -1275,10 +1277,10 @@ void UnitMoverFlying::flyInCircle()
 		unit()->rightEdge() > bofixed(canvas()->mapWidth()) - 0.5 || unit()->bottomEdge() > bofixed(canvas()->mapHeight()) - 0.5) {
 	bofixed x = unit()->centerX();
 	bofixed y = unit()->centerY();
-	x = QMAX(x, bofixed(1 + unit()->width()/2.0));
-	y = QMAX(y, bofixed(1 + unit()->height()/2.0));
-	x = QMIN(x, bofixed(canvas()->mapWidth()) - unit()->width()/2.0 - 1);
-	y = QMIN(y, bofixed(canvas()->mapHeight()) - unit()->height()/2.0 - 1);
+	x = qMax(x, bofixed(1 + unit()->width()/2.0));
+	y = qMax(y, bofixed(1 + unit()->height()/2.0));
+	x = qMin(x, bofixed(canvas()->mapWidth()) - unit()->width()/2.0 - 1);
+	y = qMin(y, bofixed(canvas()->mapHeight()) - unit()->height()/2.0 - 1);
 	unit()->moveCenterTo(x, y, unit()->z());
  }
 
@@ -1299,9 +1301,9 @@ void UnitMoverFlying::flyInCircle()
  const bofixed maxrollincrease = 2;
  bofixed delta = wantedroll - mRoll;
  if (delta > 0) {
-	mRoll += QMIN(delta, maxrollincrease);
+	mRoll += qMin(delta, maxrollincrease);
  } else if (delta < 0) {
-	mRoll -= QMIN(QABS(delta), maxrollincrease);
+	mRoll -= qMin(qAbs(delta), maxrollincrease);
  }
 
  unit()->setYRotation(mRoll);
@@ -1405,7 +1407,7 @@ if (pathInfo()->moveAttacking) {
 
  // Find out direction of turning and huw much is left to turn
  if (rotationdelta < 0) {
-	rotationdelta = QABS(rotationdelta);
+	rotationdelta = qAbs(rotationdelta);
 	turncw = true;
  }
  if (rotationdelta > 180) {
@@ -1472,14 +1474,14 @@ if (pathInfo()->moveAttacking) {
  }
 
  // Calculate roll
- /*bofixed wantedroll = QMIN(difflen / turnspeed, bofixed(1)) * 45;
+ /*bofixed wantedroll = qMin(difflen / turnspeed, bofixed(1)) * 45;
  if (totarget.crossProduct(velo).z() < 0) {
 	// Turning left
 	wantedroll = -wantedroll;
  } else {
 	// Turning right
  }*/
- bofixed wantedroll = QMIN(rotationdelta / maxturningspeed, bofixed(1)) * 45;
+ bofixed wantedroll = qMin(rotationdelta / maxturningspeed, bofixed(1)) * 45;
  if (!turncw) {
 	// Turning left
 	wantedroll = -wantedroll;
@@ -1488,9 +1490,9 @@ if (pathInfo()->moveAttacking) {
  const bofixed maxrollincrease = 2;
  bofixed delta = wantedroll - mRoll;
  if (delta > 0) {
-	mRoll += QMIN(delta, maxrollincrease);
+	mRoll += qMin(delta, maxrollincrease);
  } else if (delta < 0) {
-	mRoll -= QMIN(QABS(delta), maxrollincrease);
+	mRoll -= qMin(qAbs(delta), maxrollincrease);
  }
 
  unit()->setVelocity(velo.x(), velo.y(), velo.z());
@@ -1511,7 +1513,7 @@ UnitMoverInsideUnit::~UnitMoverInsideUnit()
 {
 }
 
-bool UnitMoverInsideUnit::calculateNewPathPathPoints(QValueVector<BoVector2Fixed>* pathPoints)
+bool UnitMoverInsideUnit::calculateNewPathPathPoints(Q3ValueVector<BoVector2Fixed>* pathPoints)
 {
  pathPoints->clear();
  if (!pathInfo()) {
@@ -1552,10 +1554,10 @@ bool UnitMoverInsideUnit::calculateNewPathPathPoints(QValueVector<BoVector2Fixed
 		}
 		BoVector2Fixed add(add_, add_);
 
-		QValueList<BoVector2Fixed> path = enterUnit->remainingInsidePath();
+		Q3ValueList<BoVector2Fixed> path = enterUnit->remainingInsidePath();
 		pathPoints->clear();
 		pathPoints->reserve(path.count());
-		for (QValueList<BoVector2Fixed>::iterator it = path.begin(); it != path.end(); ++it) {
+		for (Q3ValueList<BoVector2Fixed>::iterator it = path.begin(); it != path.end(); ++it) {
 			pathPoints->append(*it + add);
 		}
 
@@ -1755,7 +1757,7 @@ void UnitMoverInsideUnit::advanceMoveInternalLanding(unsigned int advanceCallsCo
 
  // Find out direction of turning and huw much is left to turn
  if (rotationdelta < 0) {
-	rotationdelta = QABS(rotationdelta);
+	rotationdelta = qAbs(rotationdelta);
 	turncw = true;
  }
  if (rotationdelta > 180) {
@@ -1785,7 +1787,7 @@ void UnitMoverInsideUnit::advanceMoveInternalLanding(unsigned int advanceCallsCo
 	velo.setZ(groundz - z + unitProperties()->preferredAltitude() + 1);
  }
 
- bofixed wantedroll = QMIN(rotationdelta / unitProperties()->rotationSpeed(), bofixed(1)) * 45;
+ bofixed wantedroll = qMin(rotationdelta / unitProperties()->rotationSpeed(), bofixed(1)) * 45;
  if (!turncw) {
 	// Turning left
 	wantedroll = -wantedroll;
@@ -1795,9 +1797,9 @@ void UnitMoverInsideUnit::advanceMoveInternalLanding(unsigned int advanceCallsCo
  float mRoll = unit()->yRotation();
  bofixed delta = wantedroll - mRoll;
  if (delta > 0) {
-	mRoll += QMIN(delta, maxrollincrease);
+	mRoll += qMin(delta, maxrollincrease);
  } else if (delta < 0) {
-	mRoll -= QMIN(QABS(delta), maxrollincrease);
+	mRoll -= qMin(qAbs(delta), maxrollincrease);
  }
 
  unit()->setVelocity(velo.x(), velo.y(), velo.z());
@@ -1893,7 +1895,7 @@ void UnitMoverInsideUnit::advanceMoveInternalTakingOff(unsigned int advanceCalls
 
  // Find out direction of turning and huw much is left to turn
  if (rotationdelta < 0) {
-	rotationdelta = QABS(rotationdelta);
+	rotationdelta = qAbs(rotationdelta);
 	turncw = true;
  }
  if (rotationdelta > 180) {
@@ -1923,7 +1925,7 @@ void UnitMoverInsideUnit::advanceMoveInternalTakingOff(unsigned int advanceCalls
 	velo.setZ(groundz - z + unitProperties()->preferredAltitude() + 1);
  }
 
- bofixed wantedroll = QMIN(rotationdelta / unitProperties()->rotationSpeed(), bofixed(1)) * 45;
+ bofixed wantedroll = qMin(rotationdelta / unitProperties()->rotationSpeed(), bofixed(1)) * 45;
  if (!turncw) {
 	// Turning left
 	wantedroll = -wantedroll;
@@ -1933,9 +1935,9 @@ void UnitMoverInsideUnit::advanceMoveInternalTakingOff(unsigned int advanceCalls
  float mRoll = unit()->yRotation();
  bofixed delta = wantedroll - mRoll;
  if (delta > 0) {
-	mRoll += QMIN(delta, maxrollincrease);
+	mRoll += qMin(delta, maxrollincrease);
  } else if (delta < 0) {
-	mRoll -= QMIN(QABS(delta), maxrollincrease);
+	mRoll -= qMin(qAbs(delta), maxrollincrease);
  }
 
  unit()->setVelocity(velo.x(), velo.y(), velo.z());

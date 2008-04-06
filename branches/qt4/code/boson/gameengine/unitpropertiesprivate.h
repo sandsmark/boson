@@ -23,9 +23,11 @@
 #include "../bo3dtools.h"
 
 #include <qstring.h>
-#include <qvaluelist.h>
+#include <q3valuelist.h>
 #include <qmap.h>
-#include <qptrlist.h>
+#include <q3ptrlist.h>
+//Added by qt3to4:
+#include <Q3CString>
 
 class UnitPropertiesPrivate
 {
@@ -34,23 +36,23 @@ public:
 	{
 	}
 
-	QCString mMD5;
+	Q3CString mMD5;
 	QString mName;
 	QString mDescription;
 	QString mUnitPath; // the path to the unit files
-	QValueList<unsigned long int> mRequirements;
+	Q3ValueList<unsigned long int> mRequirements;
 
-	QPtrList<PluginProperties> mPlugins;
+	Q3PtrList<PluginProperties> mPlugins;
 
 	QMap<QString, QString> mTextureNames;
 	QMap<int, QString> mSounds;
 
 	QMap<int, QString> mActionStrings;
 
-	QValueList<unsigned long int> mDestroyedEffectIds;
-	QValueList<unsigned long int> mConstructedEffectIds;
-	QValueList<unsigned long int> mExplodingFragmentFlyEffectIds;
-	QValueList<unsigned long int> mExplodingFragmentHitEffectIds;
+	Q3ValueList<unsigned long int> mDestroyedEffectIds;
+	Q3ValueList<unsigned long int> mConstructedEffectIds;
+	Q3ValueList<unsigned long int> mExplodingFragmentFlyEffectIds;
+	Q3ValueList<unsigned long int> mExplodingFragmentHitEffectIds;
 	BoVector3Fixed mHitPoint;  // FIXME: better name
 
 	BoUpgradesCollection mUpgradesCollection;

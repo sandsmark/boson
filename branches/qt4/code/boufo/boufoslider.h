@@ -34,7 +34,7 @@ class BoUfoSlider : public BoUfoWidget
 public:
 	// AB: we must not use a QObject parent here. otherwise garbage
 	// collection of libufo and Qt may confuse each other.
-	BoUfoSlider(Qt::Orientation = Horizontal);
+	BoUfoSlider(Qt::Orientation = Qt::Horizontal);
 
 	ufo::USlider* slider() const
 	{

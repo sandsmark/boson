@@ -20,6 +20,8 @@
 #define BOAPPLICATION_H
 
 #include <kapplication.h>
+//Added by qt3to4:
+#include <Q3CString>
 
 /**
  * A slightly extended @ref KApplication. This class should be used for all
@@ -35,7 +37,7 @@ public:
 	 * before KCmdLineArgs::init() is called in your main() function,
 	 * because that one modifies argv[0].
 	 **/
-	BoApplication(const QCString& argv0, bool allowStyles = true, bool enableGUI = true);
+	BoApplication(const Q3CString& argv0, bool allowStyles = true, bool enableGUI = true);
 	virtual ~BoApplication();
 };
 

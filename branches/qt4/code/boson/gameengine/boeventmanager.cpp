@@ -34,8 +34,11 @@
 #include <kgame/kgamepropertyhandler.h>
 
 #include <qdom.h>
-#include <qvaluevector.h>
+#include <q3valuevector.h>
 #include <qmap.h>
+//Added by qt3to4:
+#include <Q3CString>
+#include <Q3PtrList>
 
 #include <stdlib.h>
 
@@ -49,10 +52,10 @@ public:
 	KGamePropertyHandler* mProperties;
 	KGameProperty<unsigned long int> mNextEventId;
 
-	QPtrList<BoEvent> mEvents;
-	QPtrList<BoEventListener> mEventListeners;
+	Q3PtrList<BoEvent> mEvents;
+	Q3PtrList<BoEventListener> mEventListeners;
 
-	QValueVector<QCString> mEventNames;
+	Q3ValueVector<Q3CString> mEventNames;
 
 	QMap<QString, QByteArray> mAvailableScripts;
 	QMap<QString, QByteArray> mEventListenerXML;
@@ -80,7 +83,7 @@ BoEventManager::~BoEventManager()
 
 void BoEventManager::declareEvents()
 {
-#define BO_DECLARE_EVENT(name) d->mEventNames.append(QCString(#name));
+#define BO_DECLARE_EVENT(name) d->mEventNames.append(Q3CString(#name));
  BO_DECLARE_EVENT(UnitWithTypeProduced);
  BO_DECLARE_EVENT(FacilityWithTypeConstructed);
  BO_DECLARE_EVENT(UnitWithTypeDestroyed);
@@ -116,7 +119,7 @@ void BoEventManager::declareEvents()
  BO_DECLARE_EVENT(CustomEvent);
  BO_DECLARE_EVENT(CustomStringEvent);
 #undef BO_DECLARE_EVENT
- qHeapSort(d->mEventNames);
+ qSort(d->mEventNames);
 }
 
 bool BoEventManager::saveAsXML(QDomElement& root) const
@@ -133,7 +136,7 @@ bool BoEventManager::saveAsXML(QDomElement& root) const
  QDomElement events = doc.createElement(QString::fromLatin1("EventQueue"));
  root.appendChild(events);
 
- QPtrListIterator<BoEvent> it(d->mEvents);
+ Q3PtrListIterator<BoEvent> it(d->mEvents);
  while (it.current()) {
 	QDomElement e = doc.createElement(QString::fromLatin1("Event"));
 	if (!it.current()->saveAsXML(e)) {
@@ -203,7 +206,7 @@ bool BoEventManager::saveAllEventListenerScripts(QMap<QString, QByteArray>* scri
  }
 
  // save the current data of all currently used scripts
- QPtrListIterator<BoEventListener> it(d->mEventListeners);
+ Q3PtrListIterator<BoEventListener> it(d->mEventListeners);
  for (; it.current(); ++it) {
 	QString name = it.current()->scriptFileName();
 	if (name.isEmpty()) {
@@ -240,7 +243,7 @@ bool BoEventManager::saveAllEventListenersXML(QMap<QString, QByteArray>* files) 
  }
 
  // replace the xml files with recent data
- for (QPtrListIterator<BoEventListener> it(d->mEventListeners); it.current(); ++it) {
+ for (Q3PtrListIterator<BoEventListener> it(d->mEventListeners); it.current(); ++it) {
 	QString name = it.current()->xmlFileName();
 	if (name.isEmpty()) {
 		boError() << k_funcinfo << "listener did not return an XML filename" << endl;
@@ -330,7 +333,7 @@ QByteArray BoEventManager::createEmptyEventListenerXML()
 bool BoEventManager::loadAllEventListenerScripts()
 {
  PROFILE_METHOD
- QPtrListIterator<BoEventListener> it(d->mEventListeners);
+ Q3PtrListIterator<BoEventListener> it(d->mEventListeners);
  for (; it.current(); ++it) {
 	QString name = it.current()->scriptFileName();
 	QString fullScriptName = QString::fromLatin1("scripts/eventlistener/") + name;
@@ -348,7 +351,7 @@ bool BoEventManager::loadAllEventListenerScripts()
 
 bool BoEventManager::loadAllEventListenersXML()
 {
- for (QPtrListIterator<BoEventListener> it(d->mEventListeners); it.current(); ++it) {
+ for (Q3PtrListIterator<BoEventListener> it(d->mEventListeners); it.current(); ++it) {
 	QString name = it.current()->xmlFileName();
 	if (name.isEmpty()) {
 		boDebug() << k_funcinfo << "eventlistener requested no XML to be loaded" << endl;
@@ -439,7 +442,7 @@ void BoEventManager::deliverEvent(BoEvent* event)
  PROFILE_METHOD
  const BoEvent* e = event;
  boDebug(360) << k_funcinfo << e->name() << endl;
- QPtrListIterator<BoEventListener> it(d->mEventListeners);
+ Q3PtrListIterator<BoEventListener> it(d->mEventListeners);
  while (it.current()) {
 	if (e->hasLocation()) {
 		if (!it.current()->canSee(e)) {
@@ -456,7 +459,7 @@ void BoEventManager::deliverEvent(BoEvent* event)
 void BoEventManager::advance(unsigned int advanceCallsCount)
 {
  PROFILE_METHOD
- QPtrList<BoEvent> remainingEvents;
+ Q3PtrList<BoEvent> remainingEvents;
  while (!d->mEvents.isEmpty()) {
 	BoEvent* e = d->mEvents.take(0);
 	if (e->delayedDelivery() == 0) {
@@ -481,19 +484,19 @@ void BoEventManager::removeEventListener(BoEventListener* l)
 
 static int compare_cstrings(const void* s1, const void* s2)
 {
- const QCString* string1 = (const QCString*)s1;
- const QCString* string2 = (const QCString*)s2;
+ const Q3CString* string1 = (const Q3CString*)s1;
+ const Q3CString* string2 = (const Q3CString*)s2;
  return qstrcmp(*string1, *string2);
 }
 
-bool BoEventManager::knowEventName(const QCString& name) const
+bool BoEventManager::knowEventName(const Q3CString& name) const
 {
  if (d->mEventNames.isEmpty()) {
 	return false;
  }
  // d->mEventNames is a sorted array. we make a binary search on it.
  void* e = ::bsearch(&name, d->mEventNames.begin(), d->mEventNames.count(),
-		sizeof(QCString), compare_cstrings);
+		sizeof(Q3CString), compare_cstrings);
  if (!e) {
 	return false;
  }

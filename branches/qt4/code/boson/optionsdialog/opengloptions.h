@@ -20,15 +20,15 @@
 #ifndef OPENGLOPTIONS_H
 #define OPENGLOPTIONS_H
 
-#include <qvbox.h>
-#include <qvaluelist.h>
+#include <q3vbox.h>
+#include <q3valuelist.h>
 
 #include "optionswidgets.h"
 #include "global.h"
 
 class AdvancedGLOptions;
 
-class OpenGLOptions : public QVBox, public OptionsWidget
+class OpenGLOptions : public Q3VBox, public OptionsWidget
 {
 	Q_OBJECT
 public:
@@ -77,7 +77,7 @@ private:
 	ConfigOptionWidgetUInt* mUpdateInterval;
 };
 
-class AdvancedGLOptions : public QVBox
+class AdvancedGLOptions : public Q3VBox
 {
 	Q_OBJECT
 public:
@@ -140,7 +140,7 @@ private:
 	QComboBox* mMeshRenderer;
 };
 
-class WaterOptions : public QVBox, public OptionsWidget
+class WaterOptions : public Q3VBox, public OptionsWidget
 {
 	Q_OBJECT
 public:

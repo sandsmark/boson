@@ -47,7 +47,7 @@
 #include <qlabel.h>
 #include <qcombobox.h>
 #include <qcheckbox.h>
-#include <qvbox.h>
+#include <q3vbox.h>
 #include <qtooltip.h>
 #include <qpushbutton.h>
 #include <qlineedit.h>
@@ -55,9 +55,9 @@
 
 
 OpenGLOptions::OpenGLOptions(QWidget* parent)
-	: QVBox(parent), OptionsWidget()
+	: Q3VBox(parent), OptionsWidget()
 {
- QHBox* hbox = new QHBox(this);
+ Q3HBox* hbox = new Q3HBox(this);
 
  if (!boConfig->hasKey("RenderingSpeed")) {
 	boConfig->addDynamicEntry(new BoConfigIntEntry(boConfig, "RenderingSpeed", (int)Defaults));
@@ -73,7 +73,7 @@ OpenGLOptions::OpenGLOptions(QWidget* parent)
  mAlignSelectBoxes->setLabel(i18n("Align unit selection boxes to camera"));
  addConfigOptionWidget(mAlignSelectBoxes);
 
- QHBox* resolutionBox = new QHBox(this);
+ Q3HBox* resolutionBox = new Q3HBox(this);
  (void)new QLabel(i18n("Resolution:"), resolutionBox);
  mResolution = new QComboBox(resolutionBox);
  mResolution->insertItem(i18n("Keep unchanged"));
@@ -205,16 +205,16 @@ void OpenGLOptions::slotShowDetails(bool show)
 
 
 AdvancedGLOptions::AdvancedGLOptions(OpenGLOptions* parent)
-	: QVBox(parent)
+	: Q3VBox(parent)
 {
  mOpenGLOptions = parent;
  QTabWidget* tabWidget = new QTabWidget(this);
 
- QHBox* hbox;
+ Q3HBox* hbox;
 
- QVBox* texturePage = new QVBox(tabWidget);
+ Q3VBox* texturePage = new Q3VBox(tabWidget);
  tabWidget->addTab(texturePage, i18n("Textures"));
- hbox = new QHBox(texturePage);
+ hbox = new Q3HBox(texturePage);
  (void)new QLabel(i18n("Texture Filter"), hbox);
  mTextureFilter = new QComboBox(hbox);
  //mTextureFilter->insertItem(i18n("Use GL_NEAREST (fastest)"));
@@ -250,7 +250,7 @@ AdvancedGLOptions::AdvancedGLOptions(OpenGLOptions* parent)
 
 
 
- QVBox* miscPage = new QVBox(tabWidget);
+ Q3VBox* miscPage = new Q3VBox(tabWidget);
  tabWidget->addTab(miscPage, i18n("Misc"));
  mUseLight = new ConfigOptionWidgetBool("UseLight", miscPage);
  mUseLight->setLabel(i18n("Enable light"));
@@ -261,7 +261,7 @@ AdvancedGLOptions::AdvancedGLOptions(OpenGLOptions* parent)
  QToolTip::add(mUseMaterials, i18n("Materials influence the way in which models (like units) are lighted. You can disable them to gain some performance."));
  addConfigOptionWidget(mUseMaterials);
 
- hbox = new QHBox(miscPage);
+ hbox = new Q3HBox(miscPage);
  (void)new QLabel(i18n("Ground render:"), hbox);
  mGroundRenderer = new QComboBox(hbox);
 
@@ -269,7 +269,7 @@ AdvancedGLOptions::AdvancedGLOptions(OpenGLOptions* parent)
  mUseLOD->setLabel(i18n("Use level of detail"));
  addConfigOptionWidget(mUseLOD);
 
- hbox = new QHBox(miscPage);
+ hbox = new Q3HBox(miscPage);
  (void)new QLabel(i18n("Default level of detail:"), hbox);
  mDefaultLOD = new QComboBox(hbox);
  mDefaultLOD->insertItem(i18n("All details (default)"));
@@ -280,11 +280,11 @@ AdvancedGLOptions::AdvancedGLOptions(OpenGLOptions* parent)
  mSmoothShading->setLabel(i18n("Smooth shade model"));
  addConfigOptionWidget(mSmoothShading);
 
- hbox = new QHBox(miscPage);
+ hbox = new Q3HBox(miscPage);
  (void)new QLabel(i18n("Mesh renderer:"), hbox);
  mMeshRenderer = new QComboBox(hbox);
 
- QVBox* shadersPage = new QVBox(tabWidget);
+ Q3VBox* shadersPage = new Q3VBox(tabWidget);
  tabWidget->addTab(shadersPage, i18n("Shaders"));
  mUseGroundShaders = new ConfigOptionWidgetBool("UseGroundShaders", shadersPage);
  mUseGroundShaders->setLabel(i18n("Use ground shaders (and shadows)"));
@@ -295,7 +295,7 @@ AdvancedGLOptions::AdvancedGLOptions(OpenGLOptions* parent)
  mUseUnitShaders->setEnabled(BosonGroundThemeData::shadersSupported());
  addConfigOptionWidget(mUseUnitShaders);
 
- hbox = new QHBox(shadersPage);
+ hbox = new Q3HBox(shadersPage);
  (void)new QLabel(i18n("Shader quality:"), hbox);
  mShaderQuality = new QComboBox(hbox);
  mShaderQuality->setEnabled(BosonGroundThemeData::shadersSupported());
@@ -304,7 +304,7 @@ AdvancedGLOptions::AdvancedGLOptions(OpenGLOptions* parent)
  mShaderQuality->insertItem(i18n("Medium"));
  mShaderQuality->insertItem(i18n("Low"));
  mShaderQuality->setCurrentItem(2);
- hbox = new QHBox(shadersPage);
+ hbox = new Q3HBox(shadersPage);
  (void)new QLabel(i18n("Shadow quality:"), hbox);
  mShadowQuality = new QComboBox(hbox);
  mShadowQuality->insertItem(i18n("High"));
@@ -655,7 +655,7 @@ void AdvancedGLOptions::setCurrentGroundRenderer(const QString& renderer)
 
 
 
-WaterOptions::WaterOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
+WaterOptions::WaterOptions(QWidget* parent) : Q3VBox(parent), OptionsWidget()
 {
  mShaders = new ConfigOptionWidgetBool("WaterShaders", this);
  mShaders->setLabel(i18n("Enable shaders"));

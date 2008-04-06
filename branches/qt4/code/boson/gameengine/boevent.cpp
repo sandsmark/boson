@@ -24,10 +24,12 @@
 #include "boeventmatching.h"
 
 #include <qdom.h>
-#include <qptrlist.h>
+#include <q3ptrlist.h>
 #include <qmap.h>
+//Added by qt3to4:
+#include <Q3CString>
 
-BoEvent::BoEvent(const QCString& name, const QString& data1, const QString& data2)
+BoEvent::BoEvent(const Q3CString& name, const QString& data1, const QString& data2)
 {
  init(name);
  mData1 = data1;
@@ -36,10 +38,10 @@ BoEvent::BoEvent(const QCString& name, const QString& data1, const QString& data
 
 BoEvent::BoEvent()
 {
- init(QCString());
+ init(Q3CString());
 }
 
-void BoEvent::init(const QCString& name)
+void BoEvent::init(const Q3CString& name)
 {
  mName = name;
  mId = 0;

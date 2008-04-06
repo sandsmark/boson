@@ -48,6 +48,9 @@
 #include <klocale.h>
 
 #include <qmap.h>
+//Added by qt3to4:
+#include <Q3ValueList>
+#include <Q3PtrList>
 
 BosonGUIStarting::BosonGUIStarting(BosonStarting* starting, QObject* parent)
 	: BosonStartingTaskCreator(parent)
@@ -70,7 +73,7 @@ void BosonGUIStarting::setFiles(QMap<QString, QByteArray>* files)
  mFiles = files;
 }
 
-bool BosonGUIStarting::createTasks(QPtrList<BosonStartingTask>* tasks)
+bool BosonGUIStarting::createTasks(Q3PtrList<BosonStartingTask>* tasks)
 {
  if (!mStarting) {
 	BO_NULL_ERROR(mStarting);
@@ -96,8 +99,8 @@ bool BosonGUIStarting::createTasks(QPtrList<BosonStartingTask>* tasks)
  BosonStartingLoadEffects* effects = new BosonStartingLoadEffects(i18n("Load Effects"));
  tasks->append(effects);
 
- QPtrList<Player> gamePlayerList = boGame->gamePlayerList();
- for (QPtrListIterator<Player> it(gamePlayerList); it.current(); ++it) {
+ Q3PtrList<Player> gamePlayerList = boGame->gamePlayerList();
+ for (Q3PtrListIterator<Player> it(gamePlayerList); it.current(); ++it) {
 	Player* p = (Player*)it.current();
 	QString text;
 	unsigned int index = gamePlayerList.find(it.current());
@@ -301,10 +304,10 @@ bool BosonStartingLoadPlayerGUIData::loadUnitDatas()
  SpeciesData* speciesData = boViewData->speciesData(player()->speciesTheme());
 
  // First get all id's of units
- QValueList<unsigned long int> unitIds;
+ Q3ValueList<unsigned long int> unitIds;
  unitIds += player()->speciesTheme()->allFacilities();
  unitIds += player()->speciesTheme()->allMobiles();
- QValueList<unsigned long int>::iterator it;
+ Q3ValueList<unsigned long int>::iterator it;
  int currentUnit = 0;
  float factor = 0.0f;
  for (it = unitIds.begin(); it != unitIds.end(); ++it, currentUnit++) {
@@ -408,7 +411,7 @@ bool BosonStartingCheckIOs::startTask()
 	BO_NULL_ERROR(boGame);
 	return false;
  }
- QPtrList<Player> allPlayerList = boGame->allPlayerList();
+ Q3PtrList<Player> allPlayerList = boGame->allPlayerList();
  for (unsigned int i = 0; i < boGame->allPlayerList().count(); i++) {
 	boDebug(270) << "init IO for player " << i << endl;
 	Player* p = allPlayerList.at(i);

@@ -109,7 +109,7 @@ void BombingPlugin::advance(unsigned int advanceCalls)
  // Unit's center point
  BoVector2Fixed totarget(mTargetX - unit()->centerX(), mTargetY - unit()->centerY());
  bofixed dist = totarget.length();
- bofixed distfromdroppoint = QABS(dist - mDropDist);
+ bofixed distfromdroppoint = qAbs(dist - mDropDist);
 
  if ((distfromdroppoint < 3) && (distfromdroppoint > mLastDistFromDropPoint)) {
 	// We're at drop point. Drop the bomb
@@ -136,8 +136,8 @@ void BombingPlugin::advance(unsigned int advanceCalls)
 	// Make sure coords are valid
 	// TODO: if current getaway point is off the canvas (or too close to the
 	//  edge), rotate a bit and select new getaway point.
-	newx = QMAX(unit()->width() / 2, QMIN(newx, (canvas()->mapWidth() - 1) - unit()->width() / 2));
-	newy = QMAX(unit()->height() / 2, QMIN(newy, (canvas()->mapHeight() - 1) - unit()->height() / 2));
+	newx = qMax(unit()->width() / 2, qMin(newx, (canvas()->mapWidth() - 1) - unit()->width() / 2));
+	newy = qMax(unit()->height() / 2, qMin(newy, (canvas()->mapHeight() - 1) - unit()->height() / 2));
 
 	// FIXME: hackish
 	unit()->currentSuborderDone(true);

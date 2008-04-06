@@ -16,8 +16,6 @@ set(info_SRCS
 	boglquerystates.cpp
 )
 
-kde3_automoc(${info_SRCS})
-
 boson_add_library(bosoninfo STATIC ${info_SRCS})
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config-info.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-info.h )

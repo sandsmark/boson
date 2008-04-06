@@ -21,7 +21,7 @@
 
 #include <qregexp.h>
 
-int QListViewItemNumber::compare(QListViewItem* i, int col, bool ascending) const
+int QListViewItemNumber::compare(Q3ListViewItem* i, int col, bool ascending) const
 {
  bool ok = true;
  bool ok2 = true;
@@ -43,7 +43,7 @@ int QListViewItemNumber::compare(QListViewItem* i, int col, bool ascending) cons
 	// this is not a number, i is. i comes first.
 	return 1;
  } else {
-	return QListViewItem::compare(i, col, ascending);
+	return Q3ListViewItem::compare(i, col, ascending);
  }
 }
 

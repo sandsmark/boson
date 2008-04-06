@@ -30,7 +30,7 @@
 #include <qwidget.h>
 #include <qbitmap.h>
 #include <qtimer.h>
-#include <qintdict.h>
+#include <q3intdict.h>
 #include <qimage.h>
 
 #include "bosoncursor.moc"
@@ -128,7 +128,7 @@ void BosonKDECursor::setWidgetCursor(QWidget* w)
 
 QCursor BosonKDECursor::cursor() const
 {
- return KCursor::arrowCursor();
+ return Qt::ArrowCursor;
 }
 
 bool BosonKDECursor::insertMode(int , QString , QString )
@@ -181,7 +181,7 @@ public:
 	int mCurrentFrame;
 	int mCurrentRotate;
 
-	QIntDict<BosonOpenGLCursorData> mCursors;
+	Q3IntDict<BosonOpenGLCursorData> mCursors;
 };
 
 BosonOpenGLCursor::BosonOpenGLCursor() : BosonCursor()
@@ -260,7 +260,7 @@ void BosonOpenGLCursor::slotAdvance()
  if (d->mCurrentFrame >= (int)mCurrentData->mTextureCount) {
 	d->mCurrentFrame = 0;
 	d->mCurrentRotate += mCurrentData->mRotateDegree;
-	if (QABS(d->mCurrentRotate) >= 360) {
+	if (qAbs(d->mCurrentRotate) >= 360) {
 		d->mCurrentRotate = 0;
 	}
  }

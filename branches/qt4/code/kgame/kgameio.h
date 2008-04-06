@@ -1,6 +1,6 @@
 /*
     This file is part of the KDE games library
-    Copyright (C) 2001 Martin Heni (martin@heni-online.de)
+    Copyright (C) 2001 Martin Heni (kde at heni-online.de)
     Copyright (C) 2001 Andreas Beckermann (b_mann@gmx.de)
 
     This library is free software; you can redistribute it and/or
@@ -17,15 +17,26 @@
     the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
     Boston, MA 02110-1301, USA.
 */
+
 #ifndef __KGAMEIO_H__
 #define __KGAMEIO_H__
 
-#include <qstring.h>
-#include <qobject.h>
+#include <QtCore/QString>
+#include <QtCore/QObject>
 
+#include <libkdegames_export.h>
+
+class QEvent;
+class QGraphicsScene;
+class QKeyEvent;
+class QMouseEvent;
 class KPlayer;
 class KGame;
-class KProcess;
+class KGameIOPrivate;
+class KGameKeyIOPrivate;
+class KGameMouseIOPrivate;
+class KGameProcessIOPrivate;
+class KGameComputerIOPrivate;
 
 /**
  *  \short Base class for IO devices for games
@@ -47,9 +58,9 @@ class KProcess;
  *  To achieve this you have to make all of your player inputs through a
  *  KGameIO. You will usually call KGameIO::sendInput to do so. 
  *
- *  @author Martin Heni <martin@heni-online.de>
+ *  @author Martin Heni <kde at heni-online.de>
  */
-class KGameIO : public QObject
+class KDEGAMES_EXPORT KGameIO : public QObject
 {
   Q_OBJECT
 
@@ -83,7 +94,7 @@ public:
     *
     * @return the player this IO device is plugged into
     */
-   KPlayer *player() const {return mPlayer;}
+   KPlayer *player() const;
 
    /**
     * Equivalent to player()->game()
@@ -98,7 +109,7 @@ public:
     *
     * @param p the player
     */
-   void setPlayer(KPlayer *p) {mPlayer=p;}
+   void setPlayer(KPlayer *p);
 
    /**
     * Init this device by setting the player and e.g. sending an
@@ -125,9 +136,9 @@ public:
     /**
      * Send an input message using @ref KPlayer::forwardInput
      **/
-    bool sendInput(QDataStream& stream, bool transmit = true, Q_UINT32 sender = 0);
+    bool sendInput(QDataStream& stream, bool transmit = true, quint32 sender = 0);
 
-signals:
+Q_SIGNALS:
     /**
      * Signal generated when @ref KPlayer::myTurn changes. This can either be
      * when you get the turn status or when you lose it.
@@ -163,15 +174,18 @@ signals:
 
 
 private:
-   KPlayer *mPlayer;
+    friend class KGameIOPrivate;
+    KGameIOPrivate *const d;
+
+    Q_DISABLE_COPY(KGameIO)
 };
 
 /**
  *  The KGameKeyIO class. It is used to process keyboard input
  *  from a widget and create moves for the player it belongs to.
- *  @author Martin Heni <martin@heni-online.de>
+ *  @author Martin Heni <kde at heni-online.de>
  */
-class KGameKeyIO : public KGameIO
+class KDEGAMES_EXPORT KGameKeyIO : public KGameIO
 {
   Q_OBJECT
 
@@ -206,7 +220,7 @@ public:
      */
     virtual int rtti() const;
 
-signals:
+Q_SIGNALS:
       /**
        * Signal handler for keyboard events. This function is called
        * on every keyboard event. If appropriate it can generate a
@@ -218,7 +232,7 @@ signals:
        * Example:
        * \code
        * KPlayer *player=input->player(); // Get the player
-       * Q_INT32 key=e->key();
+       * qint32 key=e->key();
        * stream << key;
        * eatevent=true;
        * \endcode
@@ -235,14 +249,20 @@ protected:
        * Internal method to process the events
        */
        bool eventFilter( QObject *o, QEvent *e );
+
+private:
+    friend class KGameKeyIOPrivate;
+    KGameKeyIOPrivate *const d;
+
+    Q_DISABLE_COPY(KGameKeyIO)
 };
 
 /**
  *  The KGameMouseIO class. It is used to process mouse input
  *  from a widget and create moves for the player it belongs to.
- *  @author Martin Heni <martin@heni-online.de>
+ *  @author Martin Heni <kde at heni-online.de>
  */
-class KGameMouseIO : public KGameIO
+class KDEGAMES_EXPORT KGameMouseIO : public KGameIO
 {
   Q_OBJECT
     
@@ -262,7 +282,8 @@ public:
      * @param parent The widget whose events should be captured
      * @param trackmouse enables mouse tracking (gives mouse move events)
      */
-    KGameMouseIO(QWidget *parent,bool trackmouse=false);
+    explicit KGameMouseIO(QWidget *parent,bool trackmouse=false);
+    explicit KGameMouseIO(QGraphicsScene *parent,bool trackmouse=false);
     virtual ~KGameMouseIO();
     
     /**
@@ -278,7 +299,7 @@ public:
      */
     virtual int rtti() const; 
 
-signals:
+Q_SIGNALS:
       /**
        * Signal handler for mouse events. This function is called
        * on every mouse event. If appropriate it can generate a
@@ -288,7 +309,7 @@ signals:
        * Example:
        * \code
        * KPlayer *player=input->player(); // Get the player
-       * Q_INT32 button=e->button();
+       * qint32 button=e->button();
        * stream << button;
        * eatevent=true;
        * \endcode
@@ -306,6 +327,11 @@ protected:
       */
       bool eventFilter( QObject *o, QEvent *e );
 
+private:
+    friend class KGameMouseIOPrivate;
+    KGameMouseIOPrivate *const d;
+
+    Q_DISABLE_COPY(KGameMouseIO)
 };
 
 
@@ -315,9 +341,8 @@ protected:
  *  Its counterpart is the @ref KGameProcess class which needs
  *  to be used by the computer player. See its documentation
  *  for the definition of the computer player.
- *  @author Martin Heni <martin@heni-online.de>
  */
-class KGameProcessIO : public KGameIO
+class KDEGAMES_EXPORT KGameProcessIO : public KGameIO
 {
   Q_OBJECT
     
@@ -361,7 +386,7 @@ public:
      * @param receiver - not used
      * @param sender - who send the message
      */
-    void sendMessage(QDataStream &stream,int msgid, Q_UINT32 receiver, Q_UINT32 sender);
+    void sendMessage(QDataStream &stream,int msgid, quint32 receiver, quint32 sender);
 
     /**
      * Send a system message to the process. This is analogous to the sendMessage
@@ -373,7 +398,7 @@ public:
      * @param receiver - not used
      * @param sender - who send the message
      */
-    void sendSystemMessage(QDataStream &stream, int msgid, Q_UINT32 receiver, Q_UINT32 sender);
+    void sendSystemMessage(QDataStream &stream, int msgid, quint32 receiver, quint32 sender);
 
     /** 
      * Init this device by setting the player and e.g. sending an
@@ -400,16 +425,16 @@ public:
     /**
      * Internal ~ombined function for all message handling 
      **/
-    void sendAllMessages(QDataStream &stream,int msgid, Q_UINT32 receiver, Q_UINT32 sender, bool usermsg);
+    void sendAllMessages(QDataStream &stream,int msgid, quint32 receiver, quint32 sender, bool usermsg);
 
-  protected slots:
+  protected Q_SLOTS:
   /**
   * Internal message handler to receive data from the process
   */
     void receivedMessage(const QByteArray& receiveBuffer);
 
   
-signals:
+Q_SIGNALS:
   /**
    * A computer query message is received. This is a 'dummy'
    * message sent by the process if it needs to communicate
@@ -427,7 +452,7 @@ signals:
    *    if (no==1)     // but YOU have to do this in the process player
    *    {
    *      QByteArray buffer;
-   *      QDataStream out(buffer,IO_WriteOnly);
+   *      QDataStream out(buffer,QIODevice::WriteOnly);
    *      reply->sendSystemMessage(out,4242,0,0);  // lets reply something...
    *    }
    *  }
@@ -447,12 +472,16 @@ signals:
   */
   void signalIOAdded(KGameIO *game,QDataStream &stream,KPlayer *p,bool *send);
 
-
-protected:
+  /** Text is received by the process on STDERR. This is usually a debug string.
+    * @param msg The text
+    */
+  void signalReceivedStderr(QString msg);
 
 private:
-  class KGameProcessIOPrivate;
-  KGameProcessIOPrivate* d;
+    friend class KGameProcessIOPrivate;
+    KGameProcessIOPrivate *const d;
+
+    Q_DISABLE_COPY(KGameProcessIO)
 };
 
 /**
@@ -471,7 +500,7 @@ private:
  *
  *  @author  <b_mann@gmx.de>
  */
-class KGameComputerIO : public KGameIO
+class KDEGAMES_EXPORT KGameComputerIO : public KGameIO
 {
   Q_OBJECT
     
@@ -520,7 +549,7 @@ public:
      **/
     void unpause();
     
-public slots:
+public Q_SLOTS:
     /**
      * Works kind of similar to QCanvas::advance. Increase the internal
      * advance counter. If @p reactionPeriod is reached the counter is set back to
@@ -538,7 +567,7 @@ public slots:
      **/
     virtual void advance();
   
-signals:
+Q_SIGNALS:
     /**
      * This signal is emitted when your computer player is meant to do
      * something, or better is meant to be allowed to do something.
@@ -552,11 +581,10 @@ protected:
     virtual void reaction();
 
 private:
-    void init();
- 
-private:
-    class KGameComputerIOPrivate;
-    KGameComputerIOPrivate* d;
+    friend class KGameComputerIOPrivate;
+    KGameComputerIOPrivate *const d;
+
+    Q_DISABLE_COPY(KGameComputerIO)
 };
 
 

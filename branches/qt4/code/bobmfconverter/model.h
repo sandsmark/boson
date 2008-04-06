@@ -24,8 +24,8 @@
 #include "bo3dtools.h"
 
 #include <qstring.h>
-#include <qvaluevector.h>
-#include <qdict.h>
+#include <q3valuevector.h>
+#include <q3dict.h>
 
 class LOD;
 class Material;
@@ -79,7 +79,7 @@ class Model
     Material* material(unsigned int i) const  { return mMaterials[i]; }
     unsigned int addMaterial(Material* m);
     unsigned int materialCount() const  { return mMaterials.count(); }
-    void setMaterials(const QValueVector<Material*>& materials);
+    void setMaterials(const Q3ValueVector<Material*>& materials);
 
     void updateBoundingBox(unsigned int baseframe);
     void removeEmptyMeshes();
@@ -93,8 +93,8 @@ class Model
      **/
     Texture* getTexture(const QString& filename);
     void addTexture(Texture* t);
-    QDict<Texture>* texturesDict()  { return &mTextures; }
-    void setTextures(const QDict<Texture>& textures);
+    Q3Dict<Texture>* texturesDict()  { return &mTextures; }
+    void setTextures(const Q3Dict<Texture>& textures);
     bool loadTextures();
 
 
@@ -137,9 +137,9 @@ class Model
     bool checkLoadedModel() const;
 
   private:
-    QValueVector<LOD*> mLODs;
-    QValueVector<Material*> mMaterials;
-    QDict<Texture> mTextures;
+    Q3ValueVector<LOD*> mLODs;
+    Q3ValueVector<Material*> mMaterials;
+    Q3Dict<Texture> mTextures;
 
     QString mName;
     QString mComment;
