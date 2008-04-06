@@ -174,7 +174,8 @@ public:
      * @param id Player id
      * @return player object
      */
-    KPlayer *findPlayer(quint32 id) const;
+    KPlayer *findPlayerByKGameId(quint32 id) const;
+    KPlayer *findPlayerByUserId(int id) const;
 
     /**
      * Set a new @ref KGameSequence to control player management. By default
