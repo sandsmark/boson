@@ -16,10 +16,12 @@
 
 # AB: I used cmake 2.3 to write this, so let's require this. probably would work
 # with lower versions too
-CMAKE_MINIMUM_REQUIRED(VERSION 2.3)
+#CMAKE_MINIMUM_REQUIRED(VERSION 2.3)
+# AB: port to Qt4 was made using cmake 2.4.8, so we require that now.
+CMAKE_MINIMUM_REQUIRED(VERSION 2.4.8)
 
-SET(QT_MT_REQUIRED TRUE)
-#SET(QT_MIN_VERSION "3.0.0")
+#SET(QT_MT_REQUIRED TRUE)
+##SET(QT_MIN_VERSION "3.0.0")
 
 FIND_LIBRARY(X11_XMU_LIB Xmu ${X11_LIB_SEARCH_PATH})
 FIND_LIBRARY(X11_XRANDR_LIB Xrandr ${X11_LIB_SEARCH_PATH})
@@ -302,18 +304,11 @@ ENDMACRO(BOSON_MAKE_MESSAGES_POT)
 
 
 MACRO(BOSON_ADD_LIBRARY target)
-   ADD_LIBRARY(${target} ${ARGN})
-
-   SET(_sources ${ARGN})
-   IF ("${ARGV1}" MATCHES "(STATIC)|(SHARED)|(MODULE)")
-      LIST(REMOVE_AT _sources 0)
-   ENDIF ("${ARGV1}" MATCHES "(STATIC)|(SHARED)|(MODULE)")
-
-   BOSON_MAKE_MESSAGES_POT(${target} ${_sources})
+   kde4_add_library(${target} ${ARGN})
 ENDMACRO(BOSON_ADD_LIBRARY)
 
 MACRO(BOSON_ADD_EXECUTABLE target)
-   KDE3_ADD_EXECUTABLE(${target} ${ARGN})
+   kde4_add_executable(${target} ${ARGN})
 
    BOSON_MAKE_MESSAGES_POT(${target} ${ARGN})
 ENDMACRO(BOSON_ADD_EXECUTABLE)
