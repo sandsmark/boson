@@ -19,10 +19,11 @@
 #ifndef BODEBUGLOGDIALOG_H
 #define BODEBUGLOGDIALOG_H
 
-#include <kdialogbase.h>
+#include <KPageDialog>
 //Added by qt3to4:
 #include <Q3PtrList>
 
+class Q3ListViewItem;
 class BoDebugMessage;
 template<class T> class Q3PtrList;
 
@@ -44,7 +45,7 @@ private:
 };
 
 class BoDebugLogDialogPrivate;
-class BoDebugLogDialog : public KDialogBase
+class BoDebugLogDialog : public KPageDialog
 {
 	Q_OBJECT
 public:

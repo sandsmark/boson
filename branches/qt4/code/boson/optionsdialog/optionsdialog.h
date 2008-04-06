@@ -19,7 +19,7 @@
 #ifndef OPTIONSDIALOG_H
 #define OPTIONSDIALOG_H
 
-#include <kdialogbase.h>
+#include <KPageDialog>
 
 class OptionsWidget;
 class BoFontInfo;
@@ -28,7 +28,7 @@ class OptionsDialogPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class OptionsDialog : public KDialogBase
+class OptionsDialog : public KPageDialog
 {
 	Q_OBJECT
 public:

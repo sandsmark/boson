@@ -27,7 +27,7 @@
 #include <Q3CString>
 #include <Q3PtrList>
 
-class KSimpleConfig;
+class KConfigGroup;
 class QColor;
 class QString;
 class Q3CString;
@@ -292,7 +292,7 @@ public:
 	 * @param name The name of the mode as it is used in the config file
 	 * (e.g. "Idle" for entries like "Animation-Idle-Start")
 	 **/
-	void loadAnimationMode(int mode, KSimpleConfig* config, const QString& name);
+	void loadAnimationMode(int mode, KConfigGroup* config, const QString& name);
 
 	/**
 	 * @return The animation assigned to @p mode. See @ref

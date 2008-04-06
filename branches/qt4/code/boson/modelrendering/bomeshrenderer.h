@@ -30,6 +30,7 @@ class BoMeshRendererModelData;
 class BoMeshRendererMeshData;
 class BoMeshRendererMeshLODData;
 class BoMeshRendererStatistics;
+class QColor;
 
 class BoMeshRendererStatisticsCollectionPrivate;
 class BoMeshRendererStatisticsCollection

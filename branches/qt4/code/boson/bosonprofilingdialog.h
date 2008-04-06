@@ -19,7 +19,7 @@
 #ifndef BOSONPROFILINGDIALOG_H
 #define BOSONPROFILINGDIALOG_H
 
-#include <kdialogbase.h>
+#include <KDialog>
 
 #include "global.h"
 
@@ -32,7 +32,7 @@ class BosonProfilingDialogPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonProfilingDialog : public KDialogBase
+class BosonProfilingDialog : public KDialog
 {
 	Q_OBJECT
 public:

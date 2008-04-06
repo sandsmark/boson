@@ -19,10 +19,12 @@
 #ifndef BOSONDEBUGMODELS_H
 #define BOSONDEBUGMODELS_H
 
-#include "bosondebugmodelsbase.h"
+#include "ui_bosondebugmodelsbase.h"
+
+#include <QWidget>
 
 class BosonDebugModelsPrivate;
-class BosonDebugModels : public BosonDebugModelsBase
+class BosonDebugModels : public QWidget, Ui::BosonDebugModelsBase
 {
 	Q_OBJECT
 public:

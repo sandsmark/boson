@@ -99,7 +99,7 @@ BoTexture* BosonModelTextures::insert(BosonModel* model, const QString& textureN
 	BosonProfiler prof("BosonModelTextures::insert: load texture");
 	QString textureAbsPath = d->mAdditionalTexturePath + textureName;
 	if (d->mAdditionalTexturePath.isEmpty() || !QFile::exists(textureAbsPath)) {
-		textureAbsPath = locate("data", "boson/themes/textures/" + textureName);
+		textureAbsPath = KStandardDirs::locate("data", "boson/themes/textures/" + textureName);
 	}
 	tex = new BoTexture(textureAbsPath, BoTexture::Model);
 	d->mName2Texture.insert(textureName, tex);
@@ -128,7 +128,7 @@ void BosonModelTextures::removeModel(BosonModel* model)
 		remove.append(it.key());
 	}
  }
- for (unsigned int i = 0; i < remove.count(); i++) {
+ for (int i = 0; i < remove.count(); i++) {
 	removeTexture(remove[i]);
  }
 

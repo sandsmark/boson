@@ -145,7 +145,7 @@ public:
 };
 
 BoDebugLogDialog::BoDebugLogDialog(QWidget* parent, const char* name)
-	: KDialogBase(Tabbed, i18n("BoDebug messages"), Ok, Ok, parent, name, false, true)
+	: KPageDialog(Tabbed, i18n("BoDebug messages"), Ok, Ok, parent, name, false, true)
 {
  d = new BoDebugLogDialogPrivate;
 

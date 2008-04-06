@@ -43,7 +43,7 @@ public:
 };
 
 BosonDebugModels::BosonDebugModels(QWidget* parent)
-	: BosonDebugModelsBase(parent, 0, Qt::WDestructiveClose)
+	: QWidget(parent)
 {
  d = new BosonDebugModelsPrivate();
 }

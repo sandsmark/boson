@@ -41,7 +41,7 @@ public:
 };
 
 BosonDebugTextures::BosonDebugTextures(QWidget* parent)
-	: BosonDebugTexturesBase(parent, 0, Qt::WDestructiveClose)
+	: QWidget(parent)
 {
  d = new BosonDebugTexturesPrivate();
 }

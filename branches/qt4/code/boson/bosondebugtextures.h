@@ -19,10 +19,12 @@
 #ifndef BOSONDEBUGTEXTURES_H
 #define BOSONDEBUGTEXTURES_H
 
-#include "bosondebugtexturesbase.h"
+#include "ui_bosondebugtexturesbase.h"
+
+#include <QWidget>
 
 class BosonDebugTexturesPrivate;
-class BosonDebugTextures : public BosonDebugTexturesBase
+class BosonDebugTextures : public QWidget, Ui::BosonDebugTexturesBase
 {
 	Q_OBJECT
 public:
