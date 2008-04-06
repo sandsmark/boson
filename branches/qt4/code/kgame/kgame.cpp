@@ -379,7 +379,7 @@ KPlayer *KGame::loadPlayer(QDataStream& stream,bool isvirtual)
 
 // ----------------- Player handling -----------------------
 
-KPlayer * KGame::findPlayer(quint32 id) const
+KPlayer * KGame::findPlayerByKGameId(quint32 id) const
 {
   for ( KGamePlayerList::iterator it = d->mPlayerList.begin(); it!=d->mPlayerList.end();it++ )
  {
@@ -391,6 +391,25 @@ KPlayer * KGame::findPlayer(quint32 id) const
  for ( KGamePlayerList::iterator it = d->mInactivePlayerList.begin(); it!=d->mInactivePlayerList.end();it++ )
  {
    if ((*it)->id() == id)
+   {
+     return *it;
+   }
+ }
+ return 0;
+}
+
+KPlayer * KGame::findPlayerByUserId(int id) const
+{
+  for ( KGamePlayerList::iterator it = d->mPlayerList.begin(); it!=d->mPlayerList.end();it++ )
+ {
+   if ((*it)->userId() == id)
+   {
+     return *it;
+   }
+ }
+ for ( KGamePlayerList::iterator it = d->mInactivePlayerList.begin(); it!=d->mInactivePlayerList.end();it++ )
+ {
+   if ((*it)->userId() == id)
    {
      return *it;
    }
