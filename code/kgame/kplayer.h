@@ -175,14 +175,14 @@ public:
        *
        * @return the player id
        */
-      quint32 id() const; 
+      quint32 kgameId() const; 
 
       /* Set the players id. This is done automatically by
        * the game object when adding a new player!
        *
        * @param i the player id
        */
-      void setId(quint32 i);
+      void setKGameId(quint32 i);
 
       /**
        * Returns the user defined id of the player
