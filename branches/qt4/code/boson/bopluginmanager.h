@@ -23,7 +23,7 @@
 #include <config.h> // USE_BO_PLUGINS
 
 class BoPluginManagerPrivate;
-class KLibFactory;
+class KPluginFactory;
 
 /**
  * @internal
@@ -38,13 +38,13 @@ class KLibFactory;
  **/
 #if USE_BO_PLUGINS
 #define BOPLUGIN_MANAGER_INITWITHOUTLIBRARY(className, libName) \
-	KLibFactory* className::initWithoutLibrary() { return 0; }
+	KPluginFactory* className::initWithoutLibrary() { return 0; }
 #else
 #define BOPLUGIN_MANAGER_INITWITHOUTLIBRARY(className, libName) \
 	extern "C" { void* init_##libName(); }  \
-	KLibFactory* className::initWithoutLibrary() \
+	KPluginFactory* className::initWithoutLibrary() \
 		{ \
-			return (KLibFactory*)init_##libName(); \
+			return (KPluginFactory*)init_##libName(); \
 		}
 #endif
 
@@ -68,7 +68,7 @@ class KLibFactory;
  * interface to the plugin.
  * <li>init_libname() where "libname" is the name of the library, without the
  *     .la (but including the "lib"). This function must return a pointer to the
- *     factory of the plugin, which must be derived from @ref KLibFactory.
+ *     factory of the plugin, which must be derived from @ref KPluginFactory.
  * <li>version_libname() where "libname" is equal to the one above. This returns
  *     simply BOSON_VERSION from boversion.h. This function is used by the plugin
  *     loader to find out whether the plugin can be used.
@@ -92,7 +92,7 @@ class KLibFactory;
  * If you want to create a new class in a plugin, for example a new
  * groundrenderer or a new meshrenderer:
  * @li Write the class in the plugin directory (e.g. boson/meshrenderer/) and
- *     add it to the Makefile.am
+ *     add it to the CMakeLists.txt
  * @li Add it to the factory class of that plugin (e.g.
  *     boson/meshrenderer/bomeshrendererfactory.cpp)
  * @li Make sure that your new class derives from the base class that every
@@ -111,8 +111,8 @@ class KLibFactory;
  * @li Create a manager class (such as @ref BoMeshRendererManager) deriving from
  *     @ref BoPluginManager and implement the required methods. Add the
  *     BOPLUGIN_MANAGER macro to the .cpp file.
- * @li Create a new directory and add it to the Makefile.am.
- * @li Create a a factory class deriving from @ref KLibFactory. Add the
+ * @li Create a new directory and add it to the CMakeLists.txt.
+ * @li Create a a factory class deriving from @ref KPluginFactory. Add the
  *     BO_EXPORT_PLUGIN_FACTORY macro to the .cpp file.
  * @li AB: note sure here: create a class deriving from @ref BoPluginInformation
  *     and name it BoPluginInformation_libname, where libname is the name of
@@ -199,7 +199,7 @@ protected:
 	 * This method is a no-op if the program is compiled with plugin
 	 * support.
 	 **/
-	virtual KLibFactory* initWithoutLibrary() = 0;
+	virtual KPluginFactory* initWithoutLibrary() = 0;
 
 	virtual void initializePlugin() = 0;
 	virtual void deinitializePlugin() = 0;

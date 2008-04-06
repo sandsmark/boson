@@ -67,12 +67,12 @@ public:
 
 	/**
 	 * Set the current group.
-	 * By default just conf->setGroup("Boson")
+	 * By default just conf->group("Boson")
 	 *
 	 * Replace this to create config entries e.g. for the editor only which
 	 * go to a separate group.
 	 **/
-	virtual void activate(KConfig* conf);
+	virtual KConfigGroup retrieveGroup(KConfig* conf);
 
 	virtual void save(KConfig* conf) = 0;
 	virtual void load(KConfig* conf) = 0;
@@ -292,23 +292,23 @@ public:
 	static void writeEntry(KConfigGroup* cfg, const QString& key, const BoVector4Fixed& value);
 
 
-	static QString readLocalPlayerName(KConfigGroup* conf = 0);
-	static void saveLocalPlayerName(const QString& name, KConfigGroup* conf = 0);
+	static QString readLocalPlayerName(KConfig* conf = 0);
+	static void saveLocalPlayerName(const QString& name, KConfig* conf = 0);
 
-	static QString readComputerPlayerName(KConfigGroup* conf = 0);
-	static void saveComputerPlayerName(const QString& name, KConfigGroup* conf = 0);
+	static QString readComputerPlayerName(KConfig* conf = 0);
+	static void saveComputerPlayerName(const QString& name, KConfig* conf = 0);
 
-	static QColor readLocalPlayerColor(KConfigGroup* conf = 0);
-	static void saveLocalPlayerColor(const QColor& color, KConfigGroup* conf = 0);
+	static QColor readLocalPlayerColor(KConfig* conf = 0);
+	static void saveLocalPlayerColor(const QColor& color, KConfig* conf = 0);
 
-	static QString readLocalPlayerMap(KConfigGroup* conf = 0);
-	static void saveLocalPlayerMap(const QString& id, KConfigGroup* conf = 0);
+	static QString readLocalPlayerMap(KConfig* conf = 0);
+	static void saveLocalPlayerMap(const QString& id, KConfig* conf = 0);
 
-	static QString readEditorMap(KConfigGroup* conf = 0);
-	static void saveEditorMap(const QString& id, KConfigGroup* conf = 0);
+	static QString readEditorMap(KConfig* conf = 0);
+	static void saveEditorMap(const QString& id, KConfig* conf = 0);
 
-	static bool readEditorCreateNewMap(KConfigGroup* conf = 0);
-	static void saveEditorCreateNewMap(bool createnew, KConfigGroup* conf = 0);
+	static bool readEditorCreateNewMap(KConfig* conf = 0);
+	static void saveEditorCreateNewMap(bool createnew, KConfig* conf = 0);
 
 // below we have config options that are stored in this class (and saved in
 // save())
@@ -481,18 +481,15 @@ public:
 
 	void addConfigEntry(BoConfigEntry*);
 
-	/**
-	 * Loads list of quint32's from KConfig (which only supports loading
-	 * list of _int's_)
-	 **/
-	static Q3ValueList<quint32> readUnsignedLongNumList(const KConfigGroup* cfg, const QString key);
-	static void writeUnsignedLongNumList(KConfigGroup* cfg, const QString key, Q3ValueList<quint32> list);
+	// obsolete. Use KConfigGroup::readEntry(),writeEntry() directly!
+	static QList<quint32> readUnsignedLongNumList(const KConfigGroup* cfg, const QString key);
+	static void writeUnsignedLongNumList(KConfigGroup* cfg, const QString key, QList<quint32> list);
 
 	/**
 	 * Loads list of float's from KConfig
 	 **/
-	static Q3ValueList<float> readFloatNumList(const KConfigGroup* cfg, const QString key);
-	static void writeFloatNumList(Q3ValueList<float> list, KConfigGroup* cfg, const QString key);
+	static QList<float> readFloatNumList(const KConfigGroup* cfg, const QString key);
+	static void writeFloatNumList(QList<float> list, KConfigGroup* cfg, const QString key);
 
 	/**
 	 * Adds @p script to the internal list of available config scripts.

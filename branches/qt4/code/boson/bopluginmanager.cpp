@@ -53,7 +53,7 @@ public:
 	}
 
 	QLibrary* mLibrary;
-	KLibFactory* mLibraryFactory;
+	KPluginFactory* mLibraryFactory;
 	QStringList mLibraryPlugins; // availablePlugins()
 };
 
@@ -120,7 +120,7 @@ QStringList BoPluginManager::availablePlugins()
 	return d->mLibraryPlugins;
  }
 
- BoPluginInformation* info = (BoPluginInformation*)d->mLibraryFactory->create(0, 0, "BoPluginInformation");
+ BoPluginInformation* info = (BoPluginInformation*)d->mLibraryFactory->create<BoPluginInformation>();
  if (!info) {
 	// should never happen, as we check for it at loading
 	boError(800) << k_funcinfo << "no information object?!" << endl;
@@ -138,7 +138,7 @@ QString BoPluginManager::currentPluginName() const
  if (!currentPlugin()) {
 	return QString::null;
  }
- return currentPlugin()->className();
+ return currentPlugin()->metaObject()->className();
 }
 
 QObject* BoPluginManager::createPlugin(const QString& name)
@@ -148,7 +148,7 @@ QObject* BoPluginManager::createPlugin(const QString& name)
 	return 0;
  }
  BO_CHECK_NULL_RET0(d->mLibraryFactory);
- return d->mLibraryFactory->create(0, 0, name);
+ return d->mLibraryFactory->create<QObject>(name);
 }
 
 bool BoPluginManager::loadLibrary()
@@ -169,7 +169,7 @@ bool BoPluginManager::loadLibrary()
 
  QString error;
  bool ret = true;
- typedef KLibFactory* (*init_function)();
+ typedef KPluginFactory* (*init_function)();
  typedef int (*version_function)();
 
 #if USE_BO_PLUGINS
@@ -198,8 +198,8 @@ bool BoPluginManager::loadLibrary()
 	boDebug(800) << k_funcinfo << "library " << lib << " loaded. resolving symbols" << endl;
 
 	if (ret) {
-		Q3CString init_name = Q3CString("init_") + lib.latin1();
-		init_func = (init_function)d->mLibrary->resolve(init_name);
+		QString init_name = QString("init_") + lib;
+		init_func = (init_function)d->mLibrary->resolve(init_name.toLatin1());
 		if (!init_func) {
 			ret = false;
 			error = i18n("Could not resolve %1").arg(init_name);
@@ -208,8 +208,8 @@ bool BoPluginManager::loadLibrary()
 	}
 	if (ret) {
 		typedef void (*FunctionType)();
-		Q3CString version_name = Q3CString("version_") + lib.latin1();
-		version_func = (version_function)d->mLibrary->resolve(version_name);
+		QString version_name = QString("version_") + lib;
+		version_func = (version_function)d->mLibrary->resolve(version_name.toLatin1());
 		if (!version_func) {
 			ret = false;
 			error = i18n("Could not resolve %1").arg(version_name);
@@ -245,10 +245,9 @@ bool BoPluginManager::loadLibrary()
  }
  if (ret) {
 	boDebug(800) << k_funcinfo << "searching for information object" << endl;
-	Q3CString info_name = Q3CString("BoPluginInformation");
-	QObject* info = d->mLibraryFactory->create(0, 0, info_name);
+	QObject* info = d->mLibraryFactory->create<BoPluginInformation>();
 	if (!info) {
-		error = i18n("Could not find the information object. searched for: %1").arg(info_name);
+		error = i18n("Could not find the BoPluginInformation object.");
 		boError(800) << k_funcinfo << error << endl;
 		ret = false;
 	} else {
