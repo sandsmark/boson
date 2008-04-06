@@ -1,587 +1,401 @@
-<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
-<class>BosonProfilingDialogGUI</class>
-<widget class="QWidget">
-    <property name="name">
-        <cstring>BosonProfilingDialogGUI</cstring>
-    </property>
-    <property name="geometry">
-        <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>760</width>
-            <height>775</height>
-        </rect>
-    </property>
-    <property name="caption">
-        <string>Form1</string>
-    </property>
-    <vbox>
-        <property name="name">
-            <cstring>unnamed</cstring>
-        </property>
-        <property name="margin">
-            <number>0</number>
-        </property>
-        <widget class="QTabWidget">
-            <property name="name">
-                <cstring>tabWidget2</cstring>
-            </property>
-            <widget class="QWidget">
-                <property name="name">
-                    <cstring>tab</cstring>
+<ui version="4.0" >
+ <class>BosonProfilingDialogGUI</class>
+ <widget class="QWidget" name="BosonProfilingDialogGUI" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>760</width>
+    <height>775</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Form1</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <property name="leftMargin" >
+    <number>0</number>
+   </property>
+   <property name="topMargin" >
+    <number>0</number>
+   </property>
+   <property name="rightMargin" >
+    <number>0</number>
+   </property>
+   <property name="bottomMargin" >
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QTabWidget" name="tabWidget2" >
+     <widget class="QWidget" name="tab" >
+      <attribute name="title" >
+       <string>&amp;Tree</string>
+      </attribute>
+      <layout class="QVBoxLayout" >
+       <item>
+        <widget class="QSplitter" name="splitter1" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <widget class="Q3ListView" name="mEvents" >
+          <property name="allColumnsShowFocus" >
+           <bool>true</bool>
+          </property>
+          <property name="rootIsDecorated" >
+           <bool>true</bool>
+          </property>
+          <column>
+           <property name="text" >
+            <string>Event</string>
+           </property>
+          </column>
+          <column>
+           <property name="text" >
+            <string>%</string>
+           </property>
+          </column>
+          <column>
+           <property name="text" >
+            <string>Sum (us)</string>
+           </property>
+          </column>
+          <column>
+           <property name="text" >
+            <string>Sum (ms)</string>
+           </property>
+          </column>
+          <column>
+           <property name="text" >
+            <string>Sum (s)</string>
+           </property>
+          </column>
+          <column>
+           <property name="text" >
+            <string>Average (us)</string>
+           </property>
+          </column>
+          <column>
+           <property name="text" >
+            <string>Average (ms)</string>
+           </property>
+          </column>
+          <column>
+           <property name="text" >
+            <string>Average (s)</string>
+           </property>
+          </column>
+          <column>
+           <property name="text" >
+            <string>Calls</string>
+           </property>
+          </column>
+         </widget>
+         <widget class="Q3Frame" name="frame3" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="MinimumExpanding" hsizetype="Preferred" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="frameShape" >
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow" >
+           <enum>QFrame::Plain</enum>
+          </property>
+          <layout class="QVBoxLayout" >
+           <item>
+            <layout class="QHBoxLayout" >
+             <item>
+              <widget class="QLabel" name="textLabel9" >
+               <property name="text" >
+                <string>Name:</string>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="mSelectedEventName" >
+               <property name="text" >
+                <string>(no event selected)</string>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" >
+             <item>
+              <widget class="QLabel" name="textLabel3" >
+               <property name="text" >
+                <string>Calls:</string>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="mSelectedEventCalls" >
+               <property name="text" >
+                <string>0</string>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" >
+             <item>
+              <widget class="QLabel" name="textLabel4" >
+               <property name="text" >
+                <string>Sum (us/ms/s):</string>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="mSelectedEventSum" >
+               <property name="text" >
+                <string>0/0/0</string>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" >
+             <item>
+              <widget class="QLabel" name="textLabel7" >
+               <property name="text" >
+                <string>Average (us/ms/s):</string>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="mSelectedEventAverage" >
+               <property name="text" >
+                <string>0/0/0</string>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" >
+             <item>
+              <widget class="QLabel" name="textLabel10" >
+               <property name="text" >
+                <string>Called by:</string>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="Q3ListView" name="mSelectedEventCalledBy" >
+               <property name="allColumnsShowFocus" >
+                <bool>true</bool>
+               </property>
+               <column>
+                <property name="text" >
+                 <string>Event</string>
                 </property>
-                <attribute name="title">
-                    <string>&amp;Tree</string>
-                </attribute>
-                <vbox>
-                    <property name="name">
-                        <cstring>unnamed</cstring>
-                    </property>
-                    <widget class="QSplitter">
-                        <property name="name">
-                            <cstring>splitter1</cstring>
-                        </property>
-                        <property name="orientation">
-                            <enum>Vertical</enum>
-                        </property>
-                        <widget class="QListView">
-                            <column>
-                                <property name="text">
-                                    <string>Event</string>
-                                </property>
-                                <property name="clickable">
-                                    <bool>true</bool>
-                                </property>
-                                <property name="resizable">
-                                    <bool>true</bool>
-                                </property>
-                            </column>
-                            <column>
-                                <property name="text">
-                                    <string>%</string>
-                                </property>
-                                <property name="clickable">
-                                    <bool>true</bool>
-                                </property>
-                                <property name="resizable">
-                                    <bool>true</bool>
-                                </property>
-                            </column>
-                            <column>
-                                <property name="text">
-                                    <string>Sum (us)</string>
-                                </property>
-                                <property name="clickable">
-                                    <bool>true</bool>
-                                </property>
-                                <property name="resizable">
-                                    <bool>true</bool>
-                                </property>
-                            </column>
-                            <column>
-                                <property name="text">
-                                    <string>Sum (ms)</string>
-                                </property>
-                                <property name="clickable">
-                                    <bool>true</bool>
-                                </property>
-                                <property name="resizable">
-                                    <bool>true</bool>
-                                </property>
-                            </column>
-                            <column>
-                                <property name="text">
-                                    <string>Sum (s)</string>
-                                </property>
-                                <property name="clickable">
-                                    <bool>true</bool>
-                                </property>
-                                <property name="resizable">
-                                    <bool>true</bool>
-                                </property>
-                            </column>
-                            <column>
-                                <property name="text">
-                                    <string>Average (us)</string>
-                                </property>
-                                <property name="clickable">
-                                    <bool>true</bool>
-                                </property>
-                                <property name="resizable">
-                                    <bool>true</bool>
-                                </property>
-                            </column>
-                            <column>
-                                <property name="text">
-                                    <string>Average (ms)</string>
-                                </property>
-                                <property name="clickable">
-                                    <bool>true</bool>
-                                </property>
-                                <property name="resizable">
-                                    <bool>true</bool>
-                                </property>
-                            </column>
-                            <column>
-                                <property name="text">
-                                    <string>Average (s)</string>
-                                </property>
-                                <property name="clickable">
-                                    <bool>true</bool>
-                                </property>
-                                <property name="resizable">
-                                    <bool>true</bool>
-                                </property>
-                            </column>
-                            <column>
-                                <property name="text">
-                                    <string>Calls</string>
-                                </property>
-                                <property name="clickable">
-                                    <bool>true</bool>
-                                </property>
-                                <property name="resizable">
-                                    <bool>true</bool>
-                                </property>
-                            </column>
-                            <property name="name">
-                                <cstring>mEvents</cstring>
-                            </property>
-                            <property name="allColumnsShowFocus">
-                                <bool>true</bool>
-                            </property>
-                            <property name="rootIsDecorated">
-                                <bool>true</bool>
-                            </property>
-                        </widget>
-                        <widget class="QFrame">
-                            <property name="name">
-                                <cstring>frame3</cstring>
-                            </property>
-                            <property name="sizePolicy">
-                                <sizepolicy>
-                                    <hsizetype>5</hsizetype>
-                                    <vsizetype>3</vsizetype>
-                                    <horstretch>0</horstretch>
-                                    <verstretch>0</verstretch>
-                                </sizepolicy>
-                            </property>
-                            <property name="frameShape">
-                                <enum>StyledPanel</enum>
-                            </property>
-                            <property name="frameShadow">
-                                <enum>Raised</enum>
-                            </property>
-                            <vbox>
-                                <property name="name">
-                                    <cstring>unnamed</cstring>
-                                </property>
-                                <widget class="QLayoutWidget">
-                                    <property name="name">
-                                        <cstring>layout6</cstring>
-                                    </property>
-                                    <hbox>
-                                        <property name="name">
-                                            <cstring>unnamed</cstring>
-                                        </property>
-                                        <widget class="QLabel">
-                                            <property name="name">
-                                                <cstring>textLabel9</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Name:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLabel">
-                                            <property name="name">
-                                                <cstring>mSelectedEventName</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>(no event selected)</string>
-                                            </property>
-                                        </widget>
-                                    </hbox>
-                                </widget>
-                                <widget class="QLayoutWidget">
-                                    <property name="name">
-                                        <cstring>layout3</cstring>
-                                    </property>
-                                    <hbox>
-                                        <property name="name">
-                                            <cstring>unnamed</cstring>
-                                        </property>
-                                        <widget class="QLabel">
-                                            <property name="name">
-                                                <cstring>textLabel3</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Calls:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLabel">
-                                            <property name="name">
-                                                <cstring>mSelectedEventCalls</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>0</string>
-                                            </property>
-                                        </widget>
-                                    </hbox>
-                                </widget>
-                                <widget class="QLayoutWidget">
-                                    <property name="name">
-                                        <cstring>layout4</cstring>
-                                    </property>
-                                    <hbox>
-                                        <property name="name">
-                                            <cstring>unnamed</cstring>
-                                        </property>
-                                        <widget class="QLabel">
-                                            <property name="name">
-                                                <cstring>textLabel4</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Sum (us/ms/s):</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLabel">
-                                            <property name="name">
-                                                <cstring>mSelectedEventSum</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>0/0/0</string>
-                                            </property>
-                                        </widget>
-                                    </hbox>
-                                </widget>
-                                <widget class="QLayoutWidget">
-                                    <property name="name">
-                                        <cstring>layout5</cstring>
-                                    </property>
-                                    <hbox>
-                                        <property name="name">
-                                            <cstring>unnamed</cstring>
-                                        </property>
-                                        <widget class="QLabel">
-                                            <property name="name">
-                                                <cstring>textLabel7</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Average (us/ms/s):</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLabel">
-                                            <property name="name">
-                                                <cstring>mSelectedEventAverage</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>0/0/0</string>
-                                            </property>
-                                        </widget>
-                                    </hbox>
-                                </widget>
-                                <widget class="QLayoutWidget">
-                                    <property name="name">
-                                        <cstring>layout7</cstring>
-                                    </property>
-                                    <vbox>
-                                        <property name="name">
-                                            <cstring>unnamed</cstring>
-                                        </property>
-                                        <widget class="QLabel">
-                                            <property name="name">
-                                                <cstring>textLabel10</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Called by:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QListView">
-                                            <column>
-                                                <property name="text">
-                                                    <string>Event</string>
-                                                </property>
-                                                <property name="clickable">
-                                                    <bool>true</bool>
-                                                </property>
-                                                <property name="resizable">
-                                                    <bool>true</bool>
-                                                </property>
-                                            </column>
-                                            <column>
-                                                <property name="text">
-                                                    <string>Calls</string>
-                                                </property>
-                                                <property name="clickable">
-                                                    <bool>true</bool>
-                                                </property>
-                                                <property name="resizable">
-                                                    <bool>true</bool>
-                                                </property>
-                                            </column>
-                                            <property name="name">
-                                                <cstring>mSelectedEventCalledBy</cstring>
-                                            </property>
-                                            <property name="allColumnsShowFocus">
-                                                <bool>true</bool>
-                                            </property>
-                                        </widget>
-                                    </vbox>
-                                </widget>
-                            </vbox>
-                        </widget>
-                    </widget>
-                </vbox>
-            </widget>
-            <widget class="QWidget">
-                <property name="name">
-                    <cstring>TabPage</cstring>
+               </column>
+               <column>
+                <property name="text" >
+                 <string>Calls</string>
                 </property>
-                <attribute name="title">
-                    <string>Leafs</string>
-                </attribute>
-                <vbox>
-                    <property name="name">
-                        <cstring>unnamed</cstring>
-                    </property>
-                    <widget class="QListView">
-                        <column>
-                            <property name="text">
-                                <string>Event</string>
-                            </property>
-                            <property name="clickable">
-                                <bool>true</bool>
-                            </property>
-                            <property name="resizable">
-                                <bool>true</bool>
-                            </property>
-                        </column>
-                        <column>
-                            <property name="text">
-                                <string>Sum (us)</string>
-                            </property>
-                            <property name="clickable">
-                                <bool>true</bool>
-                            </property>
-                            <property name="resizable">
-                                <bool>true</bool>
-                            </property>
-                        </column>
-                        <column>
-                            <property name="text">
-                                <string>Sum (ms)</string>
-                            </property>
-                            <property name="clickable">
-                                <bool>true</bool>
-                            </property>
-                            <property name="resizable">
-                                <bool>true</bool>
-                            </property>
-                        </column>
-                        <column>
-                            <property name="text">
-                                <string>Sum (s)</string>
-                            </property>
-                            <property name="clickable">
-                                <bool>true</bool>
-                            </property>
-                            <property name="resizable">
-                                <bool>true</bool>
-                            </property>
-                        </column>
-                        <column>
-                            <property name="text">
-                                <string>Average (us)</string>
-                            </property>
-                            <property name="clickable">
-                                <bool>true</bool>
-                            </property>
-                            <property name="resizable">
-                                <bool>true</bool>
-                            </property>
-                        </column>
-                        <column>
-                            <property name="text">
-                                <string>Average (ms)</string>
-                            </property>
-                            <property name="clickable">
-                                <bool>true</bool>
-                            </property>
-                            <property name="resizable">
-                                <bool>true</bool>
-                            </property>
-                        </column>
-                        <column>
-                            <property name="text">
-                                <string>Average (s)</string>
-                            </property>
-                            <property name="clickable">
-                                <bool>true</bool>
-                            </property>
-                            <property name="resizable">
-                                <bool>true</bool>
-                            </property>
-                        </column>
-                        <column>
-                            <property name="text">
-                                <string>Calls</string>
-                            </property>
-                            <property name="clickable">
-                                <bool>true</bool>
-                            </property>
-                            <property name="resizable">
-                                <bool>true</bool>
-                            </property>
-                        </column>
-                        <property name="name">
-                            <cstring>mEventLeafs</cstring>
-                        </property>
-                        <property name="allColumnsShowFocus">
-                            <bool>true</bool>
-                        </property>
-                        <property name="rootIsDecorated">
-                            <bool>true</bool>
-                        </property>
-                    </widget>
-                </vbox>
-            </widget>
-            <widget class="QWidget">
-                <property name="name">
-                    <cstring>tab</cstring>
-                </property>
-                <attribute name="title">
-                    <string>&amp;Raw Tree</string>
-                </attribute>
-                <vbox>
-                    <property name="name">
-                        <cstring>unnamed</cstring>
-                    </property>
-                    <widget class="QListView">
-                        <column>
-                            <property name="text">
-                                <string>Event</string>
-                            </property>
-                            <property name="clickable">
-                                <bool>true</bool>
-                            </property>
-                            <property name="resizable">
-                                <bool>true</bool>
-                            </property>
-                        </column>
-                        <column>
-                            <property name="text">
-                                <string>%</string>
-                            </property>
-                            <property name="clickable">
-                                <bool>true</bool>
-                            </property>
-                            <property name="resizable">
-                                <bool>true</bool>
-                            </property>
-                        </column>
-                        <column>
-                            <property name="text">
-                                <string>Time (us)</string>
-                            </property>
-                            <property name="clickable">
-                                <bool>true</bool>
-                            </property>
-                            <property name="resizable">
-                                <bool>true</bool>
-                            </property>
-                        </column>
-                        <column>
-                            <property name="text">
-                                <string>Time (ms)</string>
-                            </property>
-                            <property name="clickable">
-                                <bool>true</bool>
-                            </property>
-                            <property name="resizable">
-                                <bool>true</bool>
-                            </property>
-                        </column>
-                        <column>
-                            <property name="text">
-                                <string>Time (s)</string>
-                            </property>
-                            <property name="clickable">
-                                <bool>true</bool>
-                            </property>
-                            <property name="resizable">
-                                <bool>true</bool>
-                            </property>
-                        </column>
-                        <property name="name">
-                            <cstring>mRawTree</cstring>
-                        </property>
-                        <property name="allColumnsShowFocus">
-                            <bool>true</bool>
-                        </property>
-                        <property name="rootIsDecorated">
-                            <bool>true</bool>
-                        </property>
-                    </widget>
-                </vbox>
-            </widget>
-            <widget class="QWidget">
-                <property name="name">
-                    <cstring>TabPage</cstring>
-                </property>
-                <attribute name="title">
-                    <string>&amp;Files</string>
-                </attribute>
-                <vbox>
-                    <property name="name">
-                        <cstring>unnamed</cstring>
-                    </property>
-                    <widget class="QLayoutWidget">
-                        <property name="name">
-                            <cstring>layout1</cstring>
-                        </property>
-                        <hbox>
-                            <property name="name">
-                                <cstring>unnamed</cstring>
-                            </property>
-                            <widget class="QPushButton">
-                                <property name="name">
-                                    <cstring>mLoadFromFile</cstring>
-                                </property>
-                                <property name="text">
-                                    <string>&amp;Load From File</string>
-                                </property>
-                                <property name="accel">
-                                    <string>Alt+L</string>
-                                </property>
-                            </widget>
-                            <widget class="QPushButton">
-                                <property name="name">
-                                    <cstring>mSaveToFile</cstring>
-                                </property>
-                                <property name="text">
-                                    <string>&amp;Save To File</string>
-                                </property>
-                                <property name="accel">
-                                    <string>Alt+S</string>
-                                </property>
-                            </widget>
-                        </hbox>
-                    </widget>
-                    <widget class="QPushButton">
-                        <property name="name">
-                            <cstring>mUpdateProfilingData</cstring>
-                        </property>
-                        <property name="text">
-                            <string>&amp;Update Profiling Data (inaccurate because the profiling dialog is on top of the GL screen!)</string>
-                        </property>
-                        <property name="accel">
-                            <string>Alt+U</string>
-                        </property>
-                    </widget>
-                </vbox>
-            </widget>
+               </column>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
         </widget>
-    </vbox>
-</widget>
-<layoutdefaults spacing="6" margin="11"/>
-</UI>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="TabPage" >
+      <attribute name="title" >
+       <string>Leafs</string>
+      </attribute>
+      <layout class="QVBoxLayout" >
+       <item>
+        <widget class="Q3ListView" name="mEventLeafs" >
+         <property name="allColumnsShowFocus" >
+          <bool>true</bool>
+         </property>
+         <property name="rootIsDecorated" >
+          <bool>true</bool>
+         </property>
+         <column>
+          <property name="text" >
+           <string>Event</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>Sum (us)</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>Sum (ms)</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>Sum (s)</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>Average (us)</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>Average (ms)</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>Average (s)</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>Calls</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab" >
+      <attribute name="title" >
+       <string>&amp;Raw Tree</string>
+      </attribute>
+      <layout class="QVBoxLayout" >
+       <item>
+        <widget class="Q3ListView" name="mRawTree" >
+         <property name="allColumnsShowFocus" >
+          <bool>true</bool>
+         </property>
+         <property name="rootIsDecorated" >
+          <bool>true</bool>
+         </property>
+         <column>
+          <property name="text" >
+           <string>Event</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>%</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>Time (us)</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>Time (ms)</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>Time (s)</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="TabPage" >
+      <attribute name="title" >
+       <string>&amp;Files</string>
+      </attribute>
+      <layout class="QVBoxLayout" >
+       <item>
+        <layout class="QHBoxLayout" >
+         <item>
+          <widget class="QPushButton" name="mLoadFromFile" >
+           <property name="text" >
+            <string>&amp;Load From File</string>
+           </property>
+           <property name="shortcut" >
+            <string>Alt+L</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="mSaveToFile" >
+           <property name="text" >
+            <string>&amp;Save To File</string>
+           </property>
+           <property name="shortcut" >
+            <string>Alt+S</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="mUpdateProfilingData" >
+         <property name="text" >
+          <string>&amp;Update Profiling Data (inaccurate because the profiling dialog is on top of the GL screen!)</string>
+         </property>
+         <property name="shortcut" >
+          <string>Alt+U</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11" />
+ <pixmapfunction>qPixmapFromMimeSource</pixmapfunction>
+ <customwidgets>
+  <customwidget>
+   <class>Q3Frame</class>
+   <extends>QFrame</extends>
+   <header>Qt3Support/Q3Frame</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Q3ListView</class>
+   <extends>Q3Frame</extends>
+   <header>q3listview.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
